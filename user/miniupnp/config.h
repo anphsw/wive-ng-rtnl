@@ -7,7 +7,7 @@
 
 #include <inttypes.h>
 
-#define MINIUPNPD_VERSION "1.5"
+#define MINIUPNPD_VERSION "1.6"
 
 #define UPNP_VERSION	"20100125"
 #define USE_NETFILTER 1
@@ -61,7 +61,7 @@
 /*#define ENABLE_IPV6*/
 
 /* Enable the support of IGD v2 specification */
-#define IGD_V2
+#undef IGD_V2
 
 #ifdef IGD_V2
 /* Enable DeviceProtection service (IGDv2) */
