@@ -26,7 +26,9 @@ start() {
     /bin/hostname $HostName
     echo "127.0.0.1	localhost $HostName.lo" > /etc/hosts
     echo "$lan_ip	$HostName.lo" >> /etc/hosts
-    echo "$wan_ip	$HostName.lo" >> /etc/hosts
+    if ["$wan_ip" != "" ]; then
+	echo "$wan_ip	$HostName.lo" >> /etc/hosts
+    fi
     #read for all write by root
     chmod 644 /etc/hosts > /dev/null 2>&1
 

@@ -38,7 +38,7 @@ get_param() {
     dnsPEnabled=`nvram_get 2860 dnsPEnabled`
     cname="/etc/dnsmasq.conf"
     fname="/etc/resolv.conf"
-    fname="/etc/hosts"
+    hname="/etc/hosts"
     # read for all write by root
     chmod 644 "$cname" > /dev/null 2>&1
     chmod 644 "$fname" > /dev/null 2>&1

@@ -524,6 +524,11 @@
 79) Usbctl fix device detect.<br>
 80) pppd: pptp plugin some bugfixes.<br>
 
+<br>         
+<b>1.9.x</b><br>
+1) Fix use /etc/hosts dnsmasq<br>
+2) Fix /etc/hosts generate if wan_ip=""<br>
+
 <br><br>
 <b>For support see:</b><br>
 <a href="http://acorp.ru">acorp.ru - Acorp Electronics Inc.</a><br>
