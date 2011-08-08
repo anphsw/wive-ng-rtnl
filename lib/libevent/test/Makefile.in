@@ -43,18 +43,14 @@ noinst_PROGRAMS = test-init$(EXEEXT) test-eof$(EXEEXT) \
 @BUILD_REGRESS_TRUE@am__append_1 = regress
 EXTRA_PROGRAMS = regress$(EXEEXT)
 @BUILD_REGRESS_TRUE@am__append_2 = regress.gen.c regress.gen.h
-@PTHREADS_TRUE@am__append_3 = ../libevent_pthreads.la
-@BUILD_WIN32_TRUE@am__append_4 = regress_iocp.c
-@OPENSSL_TRUE@am__append_5 = regress_ssl.c
-@OPENSSL_TRUE@am__append_6 = ../libevent_openssl.la -lcrypto -lssl
+@BUILD_WIN32_TRUE@am__append_3 = regress_iocp.c
+@OPENSSL_TRUE@am__append_4 = regress_ssl.c
+@OPENSSL_TRUE@am__append_5 = ../libevent_openssl.la -lcrypto -lssl
 subdir = test
 DIST_COMMON = $(noinst_HEADERS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/m4/acx_pthread.m4 \
-	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
-	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
-	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/configure.in
+am__aclocal_m4_deps = $(top_srcdir)/configure.in
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -101,11 +97,9 @@ am_regress_OBJECTS = regress-regress.$(OBJEXT) \
 	regress-regress_minheap.$(OBJEXT) $(am__objects_1) \
 	$(am__objects_2) $(am__objects_3) $(am__objects_4)
 regress_OBJECTS = $(am_regress_OBJECTS)
-am__DEPENDENCIES_2 = $(am__append_3)
-@OPENSSL_TRUE@am__DEPENDENCIES_3 = ../libevent_openssl.la
+@OPENSSL_TRUE@am__DEPENDENCIES_2 = ../libevent_openssl.la
 regress_DEPENDENCIES = $(am__DEPENDENCIES_1) ../libevent.la \
-	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_3)
+	$(PTHREAD_LIBS) $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
 regress_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(regress_LDFLAGS) \
 	$(LDFLAGS) -o $@
@@ -216,9 +210,6 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
-PTHREAD_CC = @PTHREAD_CC@
-PTHREAD_CFLAGS = @PTHREAD_CFLAGS@
-PTHREAD_LIBS = @PTHREAD_LIBS@ $(am__append_3)
 RANLIB = @RANLIB@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
@@ -233,7 +224,6 @@ abs_top_srcdir = @abs_top_srcdir@
 ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_DUMPBIN = @ac_ct_DUMPBIN@
-acx_pthread_config = @acx_pthread_config@
 am__include = @am__include@
 am__leading_dot = @am__leading_dot@
 am__quote = @am__quote@
@@ -303,12 +293,13 @@ regress_SOURCES = regress.c regress_buffer.c regress_http.c \
 	regress_bufferevent.c regress_listener.c regress_util.c \
 	tinytest.c regress_main.c regress_minheap.c \
 	$(regress_thread_SOURCES) $(regress_zlib_SOURCES) \
-	$(am__append_4) $(am__append_5)
+	$(am__append_3) $(am__append_4)
 @BUILD_WIN32_TRUE@regress_thread_SOURCES = regress_thread.c
 @PTHREADS_TRUE@regress_thread_SOURCES = regress_thread.c
+@PTHREADS_TRUE@PTHREAD_LIBS = ../libevent_pthreads.la
 @ZLIB_REGRESS_TRUE@regress_zlib_SOURCES = regress_zlib.c
 regress_LDADD = $(LIBEVENT_GC_SECTIONS) ../libevent.la $(PTHREAD_LIBS) \
-	$(ZLIB_LIBS) $(am__append_6)
+	$(ZLIB_LIBS) $(am__append_5)
 regress_CPPFLAGS = -I$(top_srcdir) -I$(top_srcdir)/compat \
 	-I$(top_srcdir)/include -I../include $(PTHREAD_CFLAGS) $(ZLIB_CFLAGS)
 
