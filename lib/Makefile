@@ -88,7 +88,7 @@ ifeq ($(CONFIG_LIB_CURL),y)
 endif
 ifeq ($(strip $(HAVE_DOT_CONFIG)),y)
 
-all: headers pregen config subdirs shared finished
+all: headers pregen configure subdirs shared finished
 
 # In this section, we need .config
 -include .config.cmd
@@ -174,7 +174,7 @@ include/bits/uClibc_config.h: .config
 	$(INSTALL) -d include/bits
 	@./extra/config/conf -o extra/Configs/Config.in
 
-config:
+configure:
 	for i in $(DIRS) ; do \
 	    if [ -f "$$i/DoConfigure.sh" ]; then ( cd $$i; ./DoConfigure.sh; cd .. ) fi \
 	done
