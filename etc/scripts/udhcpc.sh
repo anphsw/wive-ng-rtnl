@@ -197,7 +197,7 @@ case "$1" in
 	if [ "$vpnEnabled" = "on" ]; then
     	    if [ "$OLD_IP" != "$CUR_IP" ]; then
 		PPPD=`pidof pppd`
-		XL2TPD=`pidof pppd`
+		XL2TPD=`pidof xl2tpd`
 		service vpnhelper stop
 		#wait ip-down script work
 		if [ "$PPPD" != "" ] || [ "$XL2TPD" != "" ]; then
