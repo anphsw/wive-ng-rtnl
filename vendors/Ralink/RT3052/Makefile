@@ -19,6 +19,10 @@ ROMFS_DIRS = dev dev/pts sys proc tmp bin home mnt var etc web usr lib xml \
 	media \
 	share
 
+ifdef CONFIG_USB_STORAGE
+ROMFS_DIRS += opt
+endif
+
 clean:
 	rm -f mkimage
 

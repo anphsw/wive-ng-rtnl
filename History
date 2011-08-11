@@ -537,6 +537,7 @@
 9) Backport some fixes (ipv6/igmp) from upstream.<br>
 10) Disable IGDv2 for miniupnpd (this is not stable option).<br>
 11) usb_modeswitch: add new devices support.<br>
+12) For devices supported usb storage add /opt dir. Need for optware support.<br>
 
 <br><br>
 <b>For support see:</b><br>
