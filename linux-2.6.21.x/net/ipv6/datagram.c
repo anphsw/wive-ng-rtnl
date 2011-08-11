@@ -325,7 +325,7 @@ int ipv6_recv_error(struct sock *sk, struct msghdr *msg, int len)
 			if (ipv6_addr_type(&sin->sin6_addr) & IPV6_ADDR_LINKLOCAL)
 				sin->sin6_scope_id = IP6CB(skb)->iif;
 		} else {
-			ipv6_addr_set_v4mapped(*(__be32 *)(skb->nh.iph->saddr + serr->addr_offset),
+			ipv6_addr_set_v4mapped(*(__be32 *)(skb->nh.raw + serr->addr_offset),
 						&sin->sin6_addr);
 		}
 	}
