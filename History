@@ -538,6 +538,7 @@
 10) Disable IGDv2 for miniupnpd (this is not stable option).<br>
 11) usb_modeswitch: add new devices support.<br>
 12) For devices supported usb storage add /opt dir. Need for optware support.<br>
+13) busybox up to 1.19.0 version.<br>
 
 <br><br>
 <b>For support see:</b><br>
