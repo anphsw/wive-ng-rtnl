@@ -30,10 +30,10 @@ start() {
 	wan_ipaddr=`LC_ALL=C /sbin/ifconfig $wan_upnp_if 2>&1 | grep 'inet addr' | awk '{print $2}' | sed -e 's/.*://'`
         if [ "$wan_ipaddr" != "" ]; then
 	  $LOG "Start upnp at $wan_ipaddr"
-	    ip route replace 239.0.0.0/8 dev $lan_if
+	    ip route replace 239.0.0.0/8 dev "$lan_if"
 	    cat /etc/miniupnpd.conf.template > /etc/miniupnpd.conf 
 	    cat /etc/miniupnpd.conf.uuid >> /etc/miniupnpd.conf 
-            miniupnpd -f /etc/miniupnpd.conf -i $wan_upnp_if -o $wan_ipaddr -a $lan_ipaddr &
+            miniupnpd -f /etc/miniupnpd.conf -i "$wan_upnp_if" -o "$wan_ipaddr" -a "$lan_ipaddr/$lan_netmask" &
 	fi
     fi
 }
@@ -47,6 +47,7 @@ stop() {
 
 get_param() {
     lan_ipaddr=`nvram_get 2860 lan_ipaddr`
+    lan_netmask=`nvram_get 2860 lan_netmask`
     upnpEnabled=`nvram_get 2860 upnpEnabled`
 }
 
