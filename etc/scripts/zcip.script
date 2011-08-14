@@ -18,8 +18,8 @@ config)
 		exit 0
 	fi
 	# remember $ip for $interface, to use on restart
-	if [ "x$IP" != x -a -w "$IP.$interface" ]; then
-		echo $ip > "$IP.$interface"
+	if [ "x$ip" != x -a -w "$ip.$interface" ]; then
+		echo $ip > "$ip.$interface"
 	fi
 	echo 1 > "/proc/sys/net/ipv4/conf/$interface/forwarding"
 	exec ip address add dev $interface scope link local "$ip/16" broadcast + > /dev/null 2>&1
