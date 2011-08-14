@@ -539,6 +539,11 @@
 11) usb_modeswitch: add new devices support.<br>
 12) For devices supported usb storage add /opt dir. Need for optware support.<br>
 13) busybox up to 1.19.0 version.<br>
+14) miniupnpd disable USE_IFNAME_IN_RULES by default.<br>
+15) miniupnpd fix start script.<br>
+16) zcip.script: fix environment variable.<br>
+17) Reconfigure busybox for some memory save.<br>
+18) udhcpd set FEATURE_UDHCPD_BASE_IP_ON_MAC per default.<br>
 
 <br><br>
 <b>For support see:</b><br>
