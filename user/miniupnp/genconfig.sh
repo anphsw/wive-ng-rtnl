@@ -315,7 +315,7 @@ echo "#define ENABLE_EVENTS" >> ${CONFIGFILE}
 echo "" >> ${CONFIGFILE}
 
 echo "/* include interface name in pf and ipf rules */" >> ${CONFIGFILE}
-echo "#define USE_IFNAME_IN_RULES" >> ${CONFIGFILE}
+echo "/* #define USE_IFNAME_IN_RULES */" >> ${CONFIGFILE}
 echo "" >> ${CONFIGFILE}
 
 echo "/* Experimental NFQUEUE support. */" >> ${CONFIGFILE}
