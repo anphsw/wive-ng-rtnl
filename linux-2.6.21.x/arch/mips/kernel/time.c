@@ -246,14 +246,13 @@ irqreturn_t timer_interrupt(int irq, void *dev_id)
 	return IRQ_HANDLED;
 }
 
-int null_perf_irq(void)
+static int null_perf_irq(void)
 {
 	return 0;
 }
 
 int (*perf_irq)(void) = null_perf_irq;
 
-EXPORT_SYMBOL(null_perf_irq);
 EXPORT_SYMBOL(perf_irq);
 
 asmlinkage void ll_timer_interrupt(int irq)
