@@ -55,6 +55,11 @@
 /* Protects conntrack->proto.tcp */
 static DEFINE_RWLOCK(tcp_lock);
 
+#ifdef CONFIG_IPTABLES_SPEEDUP
+/* Do not check the TCP window for incoming packets  */
+static int nf_ct_tcp_no_window_check __read_mostly = 1;
+#endif
+
 /* "Be conservative in what you do,
     be liberal in what you accept from others."
     If it's non-zero, we mark only out of window RST segments as INVALID. */
@@ -549,6 +554,10 @@ static int tcp_in_window(struct nf_conn *ct,
 #endif
 	int res;
 
+#ifdef CONFIG_IPTABLES_SPEEDUP
+	if (nf_ct_tcp_no_window_check)
+		return 1;
+#endif
 	/*
 	 * Get the required data from the packet.
 	 */
@@ -1216,6 +1225,15 @@ static struct ctl_table tcp_sysctl_table[] = {
 		.mode		= 0644,
 		.proc_handler	= &proc_dointvec,
 	},
+#ifdef CONFIG_IPTABLES_SPEEDUP
+	{
+		.procname       = "nf_conntrack_tcp_no_window_check",
+		.data           = &nf_ct_tcp_no_window_check,
+		.maxlen         = sizeof(unsigned int),
+		.mode           = 0644,
+		.proc_handler   = proc_dointvec,
+	},
+#endif
 	{
 		.ctl_name	= NET_NF_CONNTRACK_TCP_BE_LIBERAL,
 		.procname       = "nf_conntrack_tcp_be_liberal",

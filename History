@@ -544,6 +544,7 @@
 16) zcip.script: fix environment variable.<br>
 17) Reconfigure busybox for some memory save.<br>
 18) udhcpd set FEATURE_UDHCPD_BASE_IP_ON_MAC per default.<br>
+19) iptables/netfilter speedup.<br>
 
 <br><br>
 <b>For support see:</b><br>

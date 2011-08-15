@@ -97,10 +97,23 @@ ip_packet_match(const struct iphdr *ip,
 
 #define FWINV(bool,invflg) ((bool) ^ !!(ipinfo->invflags & invflg))
 
+#ifdef CONFIG_IPTABLES_SPEEDUP
+	if (ipinfo->flags & IPT_F_NO_DEF_MATCH)
+		return true;
+
+	if (FWINV(ipinfo->smsk.s_addr &&
+		  (ip->saddr&ipinfo->smsk.s_addr) != ipinfo->src.s_addr,
+		  IPT_INV_SRCIP) ||
+	    FWINV(ipinfo->dmsk.s_addr &&
+		  (ip->daddr&ipinfo->dmsk.s_addr) != ipinfo->dst.s_addr,
+		  IPT_INV_DSTIP)) {
+
+#else
 	if (FWINV((ip->saddr&ipinfo->smsk.s_addr) != ipinfo->src.s_addr,
 		  IPT_INV_SRCIP)
 	    || FWINV((ip->daddr&ipinfo->dmsk.s_addr) != ipinfo->dst.s_addr,
 		     IPT_INV_DSTIP)) {
+#endif
 		dprintf("Source or dest mismatch.\n");
 
 		dprintf("SRC: %u.%u.%u.%u. Mask: %u.%u.%u.%u. Target: %u.%u.%u.%u.%s\n",
@@ -153,6 +166,31 @@ ip_packet_match(const struct iphdr *ip,
 
 	return 1;
 }
+
+#ifdef CONFIG_IPTABLES_SPEEDUP
+static void
+ip_checkdefault(struct ipt_ip *ip)
+{
+	static const char iface_mask[IFNAMSIZ] = {};
+
+	if (ip->invflags || ip->flags & IPT_F_FRAG)
+		return;
+
+	if (memcmp(ip->iniface_mask, iface_mask, IFNAMSIZ) != 0)
+		return;
+
+	if (memcmp(ip->outiface_mask, iface_mask, IFNAMSIZ) != 0)
+		return;
+
+	if (ip->smsk.s_addr || ip->dmsk.s_addr)
+		return;
+
+	if (ip->proto)
+		return;
+
+	ip->flags |= IPT_F_NO_DEF_MATCH;
+}
+#endif
 
 static inline int
 ip_checkentry(const struct ipt_ip *ip)
@@ -312,6 +350,35 @@ static void trace_packet(struct sk_buff *skb,
 }
 #endif
 
+#ifdef CONFIG_IPTABLES_SPEEDUP
+static bool
+ipt_handle_default_rule(struct ipt_entry *e, unsigned int *verdict)
+{
+	struct xt_entry_target *t;
+	struct xt_standard_target *st;
+
+	if (e->target_offset != sizeof(struct ipt_entry))
+		return false;
+
+	if (!(e->ip.flags & IPT_F_NO_DEF_MATCH))
+		return false;
+
+	t = ipt_get_target(e);
+	if (t->u.kernel.target->target)
+		return false;
+
+	st = (struct xt_standard_target *) t;
+	if (st->verdict == XT_RETURN)
+		return false;
+
+	if (st->verdict >= 0)
+		return false;
+
+	*verdict = (unsigned)(-st->verdict) - 1;
+	return true;
+}
+#endif
+
 /* Returns one of the generic firewall policies, like NF_ACCEPT. */
 unsigned int
 ipt_do_table(struct sk_buff **pskb,
@@ -335,6 +402,7 @@ ipt_do_table(struct sk_buff **pskb,
 	ip = (*pskb)->nh.iph;
 	indev = in ? in->name : nulldevname;
 	outdev = out ? out->name : nulldevname;
+#ifndef CONFIG_IPTABLES_SPEEDUP
 	/* We handle fragments by dealing with the first fragment as
 	 * if it was a normal packet.  All other fragments are treated
 	 * normally, except that they will NEVER match rules that ask
@@ -342,14 +410,28 @@ ipt_do_table(struct sk_buff **pskb,
 	 * rule is also a fragment-specific rule, non-fragments won't
 	 * match it. */
 	offset = ntohs(ip->frag_off) & IP_OFFSET;
-
+#endif    
 	IP_NF_ASSERT(table->valid_hooks & (1 << hook));
 	xt_info_rdlock_bh();
 	private = table->private;
 	table_base = private->entries[smp_processor_id()];
 
 	e = get_entry(table_base, private->hook_entry[hook]);
+#ifdef CONFIG_IPTABLES_SPEEDUP
+	if (ipt_handle_default_rule(e, &verdict)) {
+		ADD_COUNTER(e->counters, (*pskb)->len, 1);
+		xt_info_rdunlock_bh();
+		return verdict;
+	}
 
+	/* We handle fragments by dealing with the first fragment as
+	 * if it was a normal packet.  All other fragments are treated
+	 * normally, except that they will NEVER match rules that ask
+	 * things we don't know, ie. tcp syn flag or ports).  If the
+	 * rule is also a fragment-specific rule, non-fragments won't
+	 * match it. */
+	offset = ntohs(ip->frag_off) & IP_OFFSET;
+#endif
 	/* For return from builtin chain */
 	back = get_entry(table_base, private->underflow[hook]);
 
@@ -587,6 +669,10 @@ check_entry(struct ipt_entry *e, const char *name)
 		duprintf("ip_tables: ip check failed %p %s.\n", e, name);
 		return -EINVAL;
 	}
+
+#ifdef CONFIG_IPTABLES_SPEEDUP
+	ip_checkdefault(&e->ip);
+#endif
 
 	if (e->target_offset + sizeof(struct ipt_entry_target) > e->next_offset)
 		return -EINVAL;
@@ -949,7 +1035,9 @@ copy_entries_to_user(unsigned int total_size,
 	struct xt_table_info *private = table->private;
 	int ret = 0;
 	void *loc_cpu_entry;
-
+#ifdef CONFIG_IPTABLES_SPEEDUP
+	u8 flags;
+#endif
 	counters = alloc_counters(table);
 	if (IS_ERR(counters))
 		return PTR_ERR(counters);
@@ -980,6 +1068,16 @@ copy_entries_to_user(unsigned int total_size,
 			ret = -EFAULT;
 			goto free_counters;
 		}
+
+#ifdef CONFIG_IPTABLES_SPEEDUP
+		flags = e->ip.flags & IPT_F_MASK;
+		if (copy_to_user(userptr + off
+				 + offsetof(struct ipt_entry, ip.flags),
+				 &flags, sizeof(flags)) != 0) {
+			ret = -EFAULT;
+			goto free_counters;
+		}
+#endif
 
 		for (i = sizeof(struct ipt_entry);
 		     i < e->target_offset;
