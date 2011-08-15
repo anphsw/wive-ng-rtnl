@@ -533,7 +533,7 @@
 5) Update miniupnp and libnatpmp to 30072011 version.<br>
 6) Merge ipv6 stable patches from upstream.<br>
 7) Remove pppd_dead workaround (no more need).<br>
-8) McastPhyMode set to 3 (HTMIX) by default (0:Disable 1:CCK, 2:OFDM, 3:HTMIX need add in webui).
+8) McastPhyMode set to 3 (HTMIX) by default (0:Disable 1:CCK, 2:OFDM, 3:HTMIX need add in webui).<br>
 9) Backport some fixes (ipv6/igmp) from upstream.<br>
 10) Disable IGDv2 for miniupnpd (this is not stable option).<br>
 11) usb_modeswitch: add new devices support.<br>
