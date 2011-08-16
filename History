@@ -545,6 +545,7 @@
 17) Reconfigure busybox for some memory save.<br>
 18) udhcpd set FEATURE_UDHCPD_BASE_IP_ON_MAC per default.<br>
 19) iptables/netfilter speedup.<br>
+20) usb_modeswitch update to 1.1.9 version.<br>
 
 <br><br>
 <b>For support see:</b><br>
