@@ -547,6 +547,7 @@
 19) iptables/netfilter speedup.<br>
 20) usb_modeswitch update to 1.1.9 version.<br>
 21) Fix usb autodetect scripts.<br>
+22) Apply post 1.19.0 busybox patches.<br>
 
 <br><br>
 <b>For support see:</b><br>
