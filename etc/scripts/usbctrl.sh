@@ -34,6 +34,7 @@ case $TYPE in
     7/*)
 	$LOG "${ACTION} ${idVendor}:${idProduct} may be printer"
 	modprobe -q usblp
+	;;
     8/6/*)
 	if [ -f "/usr/share/usb_modeswitch/${idVendor}:${idProduct}" ]; then
 	    $LOG "${ACTION} ${idVendor}:${idProduct} may be 3G modem in zero CD mode"
