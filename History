@@ -548,6 +548,7 @@
 20) usb_modeswitch update to 1.1.9 version.<br>
 21) Fix usb autodetect scripts.<br>
 22) Apply post 1.19.0 busybox patches.<br>
+23) Fix CONFIG_NLS_DEFAULT in config (utf->utf8).<br>
 
 <br><br>
 <b>For support see:</b><br>
