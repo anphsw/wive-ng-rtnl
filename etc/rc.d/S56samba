@@ -26,11 +26,11 @@ if [ "$SmbEnabled" = "1" ]; then
     else
 	echo "    socket options = SO_BROADCAST SO_RCVBUF=1024 SO_SNDBUF=1024" >> $CONFIG
     fi
+    echo "    interfaces = $lan_if" >> $CONFIG
     echo "    workgroup = $WorkGroup" >> $CONFIG
     echo "    netbios name = $SmbNetBIOS" >> $CONFIG
     echo "    server string = $SmbString" >> $CONFIG
     echo "    os level = $SmbOsLevel" >> $CONFIG
-    echo "    interfaces = $lan_if" >> $CONFIG
     echo "    force user = $Login" >> $CONFIG
     echo "    coding system = utf8" >> $CONFIG
     echo "    client code page = 866" >> $CONFIG
