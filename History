@@ -550,6 +550,7 @@
 22) Apply post 1.19.0 busybox patches.<br>
 23) Fix CONFIG_NLS_DEFAULT in config (utf->utf8).<br>
 24) Update kernel nls subsystem.<br>
+25) automount.sh first try mount with utf8 codepage.<br>
 
 <br><br>
 <b>For support see:</b><br>
