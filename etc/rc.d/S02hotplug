@@ -45,7 +45,7 @@ start() {
 stop() {
  $LOG "Stop mdev generate..."
     killall -q mdev
-    killall -q -9 mdev
+    killall -q -SIGKILL mdev
 }
 
 case "$1" in

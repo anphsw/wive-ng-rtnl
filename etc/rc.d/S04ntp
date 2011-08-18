@@ -43,7 +43,7 @@ start() {
 stop() {
  $LOG "Stopping NTPD"
     killall -q ntpd
-    killall -q -9 ntpd
+    killall -q -SIGKILL ntpd
 }
 
 case "$1" in

@@ -27,7 +27,7 @@ start() {
     	    $LOG "Wait for adress get..."
 	    sleep 20
 	    killall -q igmpproxy
-	    killall -q -9 igmpproxy
+	    killall -q -SIGKILL igmpproxy
 	fi
 	printf "quickleave\nphyint $wan_if upstream  ratelimit 0  threshold 1\naltnet 0.0.0.0/0\nphyint $lan_if downstream  ratelimit 0  threshold 1\nphyint ppp0 disabled\n" > /etc/igmpproxy.conf
 	echo 1 > "/proc/sys/net/ipv4/conf/$wan_if/forwarding"
@@ -48,7 +48,7 @@ start() {
 stop() {
  $LOG "Stopping IGMPPROXY"
     killall -q igmpproxy
-    killall -q -9 igmpproxy
+    killall -q -SIGKILL igmpproxy
     echo 0 > /proc/sys/net/ipv4/conf/all/mc_forwarding
     echo 0 > /proc/sys/net/ipv4/conf/default/mc_forwarding
     ip route del 224.0.0.0/4 dev $wan_if > /dev/null 2>&1

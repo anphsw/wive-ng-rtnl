@@ -106,7 +106,7 @@ case "$1" in
   "-r")
  
     killall -q udhcpd
-    killall -q -9 udhcpd
+    killall -q -SIGKILL udhcpd
     rm -f $pidfile
     touch $leases
     touch $fname

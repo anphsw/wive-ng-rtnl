@@ -14,7 +14,7 @@ start() {
 stop() {
  $LOG "Stop goahead"
     killall -q goahead
-    killall -q -9 goahead
+    killall -q -SIGKILL goahead
 }
 
 case "$1" in

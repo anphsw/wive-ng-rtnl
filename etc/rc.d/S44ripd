@@ -29,7 +29,7 @@ start() {
 stop() {
  $LOG "Stopping RIPD"
     killall -q ripd
-    killall -q -9 ripd
+    killall -q -SIGKILL ripd
 }
 
 case "$1" in

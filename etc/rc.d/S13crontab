@@ -18,7 +18,7 @@ start() {
 stop() {
     $LOG "Stopping crontab"
     killall -q crond
-    killall -q -9 crond
+    killall -q -SIGKILL crond
 }
 
 case "$1" in

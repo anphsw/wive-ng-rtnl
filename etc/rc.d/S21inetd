@@ -34,7 +34,7 @@ start() {
 stop() {
  $LOG "Stopping inetd"
  killall -q inetd
- killall -q -9 inetd
+ killall -q -SIGKILL inetd
 }
 
 get_param() {

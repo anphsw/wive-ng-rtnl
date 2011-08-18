@@ -29,7 +29,7 @@ stop() {
 	#workaround for not clean kill dnsmasq
 	killall -q dnsmasq
 	sleep 1
-	killall -q -9 dnsmasq
+	killall -q -SIGKILL dnsmasq
 	rm -rf /var/run/dnsmasq.pid > /dev/null 2>&1
     fi
 }

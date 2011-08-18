@@ -29,7 +29,7 @@ start() {
 stop() {
  $LOG "Stopping pppoe-relay"
     killall -q pppoe-relay
-    killall -q -9 pppoe-relay
+    killall -q -SIGKILL pppoe-relay
 }
 
 case "$1" in

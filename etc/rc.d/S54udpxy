@@ -25,7 +25,7 @@ start() {
 stop() {
     $LOG "UDPXY stop"
     killall -q udpxy
-    killall -q -9 udpxy
+    killall -q -SIGKILL udpxy
 }
 
 case "$1" in

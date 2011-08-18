@@ -60,10 +60,10 @@ stop() {
     killall -q config-l2tp.sh
     killall -q config-pptp.sh
     killall -q config-lanauth.sh
-    killall -q -9 config-pppoe.sh
-    killall -q -9 config-l2tp.sh
-    killall -q -9 config-pptp.sh
-    killall -q -9 config-lanauth.sh
+    killall -q -SIGKILL config-pppoe.sh
+    killall -q -SIGKILL config-l2tp.sh
+    killall -q -SIGKILL config-pptp.sh
+    killall -q -SIGKILL config-lanauth.sh
 
     #send hup signal to pppd for correct link down
     killall -q -SIGHUP pppd
@@ -71,9 +71,9 @@ stop() {
 
     #Kill daemons
     killall -q xl2tpd
-    killall -q -9 xl2tpd
+    killall -q -SIGKILL xl2tpd
     killall -q pppd
-    killall -q -9 pppd
+    killall -q -SIGKILL pppd
 
     #Kill lanauth only if vpn disable
     if [ "$vpnEnabled" = "off" ] || [ "$vpnType" != "6" ]; then

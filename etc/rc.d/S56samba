@@ -38,8 +38,8 @@ if [ "$SmbEnabled" = "1" ]; then
 	$LOG "Already started... Stop WINS/SMB SERVER."
 	killall -q smbd
 	killall -q nmbd
-	killall -q -9 smbd
-	killall -q -9 nmbd
+	killall -q -SIGKILL smbd
+	killall -q -SIGKILL nmbd
     fi
     $LOG "Starting WINS/SMB SERVER."
     echo > /var/log/samba.log
@@ -55,8 +55,8 @@ stop() {
      $LOG "Stop WINS/SMB SERVER."
       killall -q nmbd > /dev/null
       killall -q smbd > /dev/null
-      killall -q -9 nmbd > /dev/null
-      killall -q -9 smbd > /dev/null
+      killall -q -SIGKILL nmbd > /dev/null
+      killall -q -SIGKILL smbd > /dev/null
       rm -f /var/lock/*mbd.pid
     fi
 }

@@ -33,7 +33,7 @@ stop() {
     echo 0 > "/proc/sys/net/ipv4/conf/$wan_if/proxy_arp"
     echo 0 > "/proc/sys/net/ipv4/conf/$lan_if/proxy_arp"
     killall -q parprouted
-    killall -q -9 parprouted
+    killall -q -SIGKILL parprouted
 }
 
 case "$1" in

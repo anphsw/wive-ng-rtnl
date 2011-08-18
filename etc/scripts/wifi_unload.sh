@@ -90,7 +90,7 @@ unload_apps()
     echo "Kill aplications..." #second step terminate and kill application
     for apps in $kill_apps
     do
-	(killall -q $apps && usleep 20000 && killall -q -9 $apps) > /dev/null 2>&1
+	(killall -q $apps && usleep 20000 && killall -q -SIGKILL $apps) > /dev/null 2>&1
     done
 }
 

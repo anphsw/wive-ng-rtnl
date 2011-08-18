@@ -83,7 +83,7 @@ burnrf(){
 
 cleanall(){
     killall -q goahead
-    killall -q -9 goahead
+    killall -q -SIGKILL goahead
     service modules stop
     echo "Write zero in $MTDRWFS,$MTD2CFG,$MTD2FAC mtd particions." 
     dd if=/dev/zero of=$MTDRWFS conv=sync > /dev/null 2>&1

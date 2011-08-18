@@ -13,7 +13,7 @@ start() {
 stop() {
  $LOG "Stop watchdog"
     killall -q watchdog
-    killall -q -9 watchdog
+    killall -q -SIGKILL watchdog
 }
 
 case "$1" in

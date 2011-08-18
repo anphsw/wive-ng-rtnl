@@ -17,7 +17,7 @@ start() {
 
     #stop dhcp client
     killall -q udhcpc
-    killall -q -9 udhcpc
+    killall -q -SIGKILL udhcpc
 
     #Flush conntrack table and route cache
     echo 1 > /proc/sys/net/nf_conntrack_flush

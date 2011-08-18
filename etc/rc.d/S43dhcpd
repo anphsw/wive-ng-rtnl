@@ -75,8 +75,8 @@ stop() {
 	$LOG "Stop dhcpserver "
 	killall -q udhcpd
 	killall -q dhcprelay
-	killall -q -9 udhcpd
-	killall -q -9 dhcprelay
+	killall -q -SIGKILL udhcpd
+	killall -q -SIGKILL dhcprelay
 }
 
 get_param() {

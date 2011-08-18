@@ -43,7 +43,7 @@ start() {
 stop() {
     $LOG "Stopping ChilliSpot"
     killall -q chilli
-    killall -q -9 chilli
+    killall -q -SIGKILL chilli
 }
 
 case "$1" in
