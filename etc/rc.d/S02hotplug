@@ -26,7 +26,7 @@ start() {
     fi
 
     #set mdev as kernel hotplug helper
-    echo "/sbin/mdev" > /proc/sys/kernel/hotplug
+    echo "/bin/mdev" > /proc/sys/kernel/hotplug
 
     if [ -d /proc/bus/usb ]; then
 	#enable drivers autoprobe for all usb devices

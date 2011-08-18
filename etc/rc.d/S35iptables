@@ -352,7 +352,7 @@ get_param() {
     use_snat=`nvram_get 2860 use_snat`
     wan_ipaddr=`nvram_get 2860 wan_ipaddr`
     if [ "$wanmode" != "STATIC" ] || [ "$wan_ipaddr" = "" ]; then
-	wan_ipaddr=`LC_ALL=C /sbin/ifconfig $wan_if 2>&1 | grep 'inet addr' | awk '{print $2}' | sed -e 's/.*://'`
+	wan_ipaddr=`LC_ALL=C /bin/ifconfig $wan_if 2>&1 | grep 'inet addr' | awk '{print $2}' | sed -e 's/.*://'`
     fi
     #if wan ip not get
     if [ "$wan_ipaddr" = "" ]; then

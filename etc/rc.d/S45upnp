@@ -27,7 +27,7 @@ start() {
 	if [ ! -f /var/upnp_leases ]; then
 	    touch /var/upnp_leases
 	fi
-	wan_ipaddr=`LC_ALL=C /sbin/ifconfig $wan_upnp_if 2>&1 | grep 'inet addr' | awk '{print $2}' | sed -e 's/.*://'`
+	wan_ipaddr=`LC_ALL=C /bin/ifconfig $wan_upnp_if 2>&1 | grep 'inet addr' | awk '{print $2}' | sed -e 's/.*://'`
         if [ "$wan_ipaddr" != "" ]; then
 	  $LOG "Start upnp at $wan_ipaddr"
 	    ip route replace 239.0.0.0/8 dev "$lan_if"

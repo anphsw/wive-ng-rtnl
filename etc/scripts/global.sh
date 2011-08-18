@@ -134,7 +134,7 @@ udhcpc_opts()
 	fi
 	HostName=`nvram_get 2860 HostName`
 	UDHCPCOPTS="-i $wan_if -H $HostName $REQIP -S -R -T 5 -a \
-		    -s /sbin/udhcpc.sh -p /var/run/udhcpc.pid \
+		    -s /bin/udhcpc.sh -p /var/run/udhcpc.pid \
 		    -O routes -O staticroutes -O msstaticroutes $GETMTU -f &"
 }
 
