@@ -2,7 +2,6 @@
     lock dir = /var/lock
     syslog = 1
     syslog only = yes
-    interfaces = br0
     max log size = 10
     max open files = 50
     security = share
