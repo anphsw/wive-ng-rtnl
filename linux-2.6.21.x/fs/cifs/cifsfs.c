@@ -148,8 +148,7 @@ out_no_root:
 
 out_mount_failed:
 	if(cifs_sb) {
-		if(cifs_sb->local_nls)
-			unload_nls(cifs_sb->local_nls);	
+		unload_nls(cifs_sb->local_nls);
 		kfree(cifs_sb);
 	}
 	return rc;

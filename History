@@ -549,6 +549,7 @@
 21) Fix usb autodetect scripts.<br>
 22) Apply post 1.19.0 busybox patches.<br>
 23) Fix CONFIG_NLS_DEFAULT in config (utf->utf8).<br>
+24) Update kernel nls subsystem.<br>
 
 <br><br>
 <b>For support see:</b><br>

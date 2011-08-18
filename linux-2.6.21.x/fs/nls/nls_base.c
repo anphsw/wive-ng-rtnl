@@ -13,9 +13,7 @@
 #include <linux/nls.h>
 #include <linux/kernel.h>
 #include <linux/errno.h>
-#ifdef CONFIG_KMOD
 #include <linux/kmod.h>
-#endif
 #include <linux/spinlock.h>
 
 static struct nls_table default_table;
@@ -34,7 +32,7 @@ struct utf8_table {
 	long    lval;
 };
 
-static struct utf8_table utf8_table[] =
+static const struct utf8_table utf8_table[] =
 {
     {0x80,  0x00,   0*6,    0x7F,           0,         /* 1 byte sequence */},
     {0xE0,  0xC0,   1*6,    0x7FF,          0x80,      /* 2 byte sequence */},
@@ -50,7 +48,7 @@ utf8_mbtowc(wchar_t *p, const __u8 *s, int n)
 {
 	long l;
 	int c0, c, nc;
-	struct utf8_table *t;
+	const struct utf8_table *t;
   
 	nc = 0;
 	c0 = *s;
@@ -109,7 +107,7 @@ utf8_wctomb(__u8 *s, wchar_t wc, int maxlen)
 {
 	long l;
 	int c, nc;
-	struct utf8_table *t;
+	const struct utf8_table *t;
   
 	if (!s)
 		return 0;
@@ -146,13 +144,13 @@ utf8_wcstombs(__u8 *s, const wchar_t *pwcs, int maxlen)
 			size = utf8_wctomb(op, *ip, maxlen);
 			if (size == -1) {
 				/* Ignore character and move on */
-				maxlen--;
 			} else {
 				op += size;
 				maxlen -= size;
 			}
 		} else {
 			*op++ = (__u8) *ip;
+			maxlen--;
 		}
 		ip++;
 	}
@@ -215,32 +213,16 @@ static struct nls_table *find_nls(char *charset)
 
 struct nls_table *load_nls(char *charset)
 {
-	struct nls_table *nls;
-#ifdef CONFIG_KMOD
-	int ret;
-#endif
-
-	nls = find_nls(charset);
-	if (nls)
-		return nls;
-
-#ifdef CONFIG_KMOD
-	ret = request_module("nls_%s", charset);
-	if (ret != 0) {
-		printk("Unable to load NLS charset %s\n", charset);
-		return NULL;
-	}
-	nls = find_nls(charset);
-#endif
-	return nls;
+	return try_then_request_module(find_nls(charset), "nls_%s", charset);
 }
 
 void unload_nls(struct nls_table *nls)
 {
-	module_put(nls->owner);
+	if (nls)
+		module_put(nls->owner);
 }
 
-static wchar_t charset2uni[256] = {
+static const wchar_t charset2uni[256] = {
 	/* 0x00*/
 	0x0000, 0x0001, 0x0002, 0x0003,
 	0x0004, 0x0005, 0x0006, 0x0007,
@@ -323,7 +305,7 @@ static wchar_t charset2uni[256] = {
 	0x00fc, 0x00fd, 0x00fe, 0x00ff,
 };
 
-static unsigned char page00[256] = {
+static const unsigned char page00[256] = {
 	0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, /* 0x00-0x07 */
 	0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, /* 0x08-0x0f */
 	0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, /* 0x10-0x17 */
@@ -359,11 +341,11 @@ static unsigned char page00[256] = {
 	0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff, /* 0xf8-0xff */
 };
 
-static unsigned char *page_uni2charset[256] = {
+static const unsigned char *const page_uni2charset[256] = {
 	page00
 };
 
-static unsigned char charset2lower[256] = {
+static const unsigned char charset2lower[256] = {
 	0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, /* 0x00-0x07 */
 	0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, /* 0x08-0x0f */
 	0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, /* 0x10-0x17 */
@@ -399,7 +381,7 @@ static unsigned char charset2lower[256] = {
 	0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff, /* 0xf8-0xff */
 };
 
-static unsigned char charset2upper[256] = {
+static const unsigned char charset2upper[256] = {
 	0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, /* 0x00-0x07 */
 	0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, /* 0x08-0x0f */
 	0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, /* 0x10-0x17 */
@@ -438,7 +420,7 @@ static unsigned char charset2upper[256] = {
 
 static int uni2char(wchar_t uni, unsigned char *out, int boundlen)
 {
-	unsigned char *uni2charset;
+	const unsigned char *uni2charset;
 	unsigned char cl = uni & 0x00ff;
 	unsigned char ch = (uni & 0xff00) >> 8;
 
