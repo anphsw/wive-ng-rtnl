@@ -556,6 +556,7 @@
 28) More use ROMFSINST instead direct copy.<br>
 29) Do not strip at romfs inst. Need for correct strip.sh (sstrip) work.<br>
 30) Some configs install to /etc (rwfs) only if needed apps configured. Save flash.<br>
+31) Tar autodetect compressed tarballs enabled per default.<br>
 
 <br><br>
 <b>For support see:</b><br>
