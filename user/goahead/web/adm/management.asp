@@ -119,7 +119,7 @@ function onImportSettings(form)
 <h1>System Management</h1>
 <div id="staticText">
 <p>You can select language and set administrator login and password here.</p>
-<p>You can also upgrade the WR-NL firmware to obtain new functionality.
+<p>You can also upgrade the Wive-NG-RTNL firmware to obtain new functionality.
 It takes about 1 minute to upload firmware &amp; upgrade flash. Please be patient.</p>
 <p style="color: #ff0000;">Caution! A corrupted image will hang up the system.</p>
 </div>
