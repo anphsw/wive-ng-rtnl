@@ -27,10 +27,12 @@ if [ "$ACTION" = "add" ] ; then
 		exit 1
 	    fi
 	fi
-	if ! mount "$MOUNT_SRC" "$MOUNT_DST"; then
-	    if ! ntfs-3g "$MOUNT_SRC" "$MOUNT_DST" -o force; then
-		if ! rm -r "$MOUNT_DST"; then
-		    exit 1
+	if ! mount -o utf8 "$MOUNT_SRC" "$MOUNT_DST"; then
+	    if ! mount "$MOUNT_SRC" "$MOUNT_DST"; then
+		if ! ntfs-3g "$MOUNT_SRC" "$MOUNT_DST" -o force; then
+		    if ! rm -r "$MOUNT_DST"; then
+			exit 1
+		    fi
 		fi
 	    fi
 	fi
