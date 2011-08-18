@@ -34,7 +34,25 @@ if [ "$SmbEnabled" = "1" ]; then
     echo "    force user = $Login" >> $CONFIG
     echo "    coding system = utf8" >> $CONFIG
     echo "    client code page = 866" >> $CONFIG
+
+    #add template to config
     cat /etc/smb.conf.template >> $CONFIG
+
+    #share /media
+    if [ -d /proc/bus/usb ]; then
+	mounted=`df -h | grep "/dev/sd" | grep "media" -c`
+	if [ $mounted != 0 ]; then
+	    echo "[public]" >> $CONFIG
+	    echo "    comment = pub" >> $CONFIG
+	    echo "    path = /media" >> $CONFIG
+	    echo "    public = yes" >> $CONFIG
+	    echo "    browseable = yes" >> $CONFIG
+	    echo "    guest ok = yes" >> $CONFIG
+	    echo "    guest only = yes" >> $CONFIG
+	    echo "    writable = yes" >> $CONFIG
+	    echo "" >> $CONFIG
+	fi
+    fi
 
     if [ -f /var/lock/smbd.pid ] || [ -f /var/lock/nmbd.pid ]; then
 	$LOG "Already started... Stop WINS/SMB SERVER."
