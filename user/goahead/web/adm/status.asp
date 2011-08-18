@@ -178,7 +178,7 @@ function reloadPage()
 
 function setWanPort(form)
 {
-	if (confirm('Port configuration changes need to reboot you router. Do you want to proceed?'))
+	if (confirm('The device must be restarted to apply port configuration changes. Do you want to proceed?'))
 	{
 		clearTimeout(timer);
 		ajaxPostForm(null, form, 'setwanReloader', '/messages/rebooting.asp');
@@ -201,10 +201,10 @@ function setWanPort(form)
 <form name="setWanForm" method="POST" action="/goform/setWanPort">
 <table width="95%" border="1" cellpadding="2" cellspacing="1">
 <tr>
-	<td class="title" colspan="2">Port management</td>
+	<td class="title" colspan="2">Port Management</td>
 </tr>
 <tr>
-	<td class="head">Wan port</td>
+	<td class="head">WAN port</td>
 	<td>
 		<select name="wan_port" onchange="showPortStatus();" class="short">
 			<option value="0">1</option>

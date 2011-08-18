@@ -298,7 +298,7 @@ function CheckValue()
 		}
 		if (all_wds_list == "")
 		{
-			alert("WDS remote AP MAC Address are empty !!!");
+			alert("No remote AP MAC addresses specified!");
 			document.wireless_wds.wds_1.focus();
 			document.wireless_wds.wds_1.select(); 
 			return false;
@@ -322,14 +322,14 @@ function CheckValue()
 <body onLoad="initValue()">
 <table class="body"><tr><td>
 
-<h1>Wireless Distribution System</h1>
+<h1>Wireless Distribution System (WDS)</h1>
 <p>Wireless Distribution System Settings</p>
 <hr />
 
 <form method=post name=wireless_wds action="/goform/wirelessWds" onSubmit="return CheckValue()">
 <table width="90%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
   <tr>
-    <td class="title" id="basicWDSTitle" colspan="2">Wireless Distribution System(WDS)</td>
+    <td class="title" id="basicWDSTitle" colspan="2">Wireless Distribution System (WDS)</td>
   </tr>
   <tr>
     <td class="head" id="basicWDSMode">WDS Mode</td>
@@ -368,7 +368,7 @@ function CheckValue()
     </td>
   </tr>
   <tr id="div_wds_encryp_key0" name="div_wds_encryp_key0">
-    <td class="head" id="basicWDSEncrypKey">Encryp Key</td>
+    <td class="head" id="basicWDSEncrypKey">EncrypKey</td>
     <td><input type=text name=wds_encryp_key0 size=28 maxlength=64 value=""></td>
   </tr>
 
@@ -384,7 +384,7 @@ function CheckValue()
     <td>
   </tr>
   <tr id="div_wds_encryp_key1" name="div_wds_encryp_key1">
-    <td class="head" id="basicWDSEncrypKey">Encryp Key</td>
+    <td class="head" id="basicWDSEncrypKey">EncrypKey</td>
     <td><input type=text name=wds_encryp_key1 size=28 maxlength=64 value=""></td>
   </tr>
 
@@ -400,7 +400,7 @@ function CheckValue()
     <td>
   </tr>
   <tr id="div_wds_encryp_key2" name="div_wds_encryp_key2">
-    <td class="head" id="basicWDSEncrypKey">Encryp Key</td>
+    <td class="head" id="basicWDSEncrypKey">EncrypKey</td>
     <td><input type=text name=wds_encryp_key2 size=28 maxlength=64 value=""></td>
   </tr>
 
@@ -416,7 +416,7 @@ function CheckValue()
     <td>
   </tr>
   <tr id="div_wds_encryp_key3" name="div_wds_encryp_key3">
-    <td class="head" id="basicWDSEncrypKey">Encryp Key</td>
+    <td class="head" id="basicWDSEncrypKey">EncrypKey</td>
     <td><input type=text name=wds_encryp_key3 size=28 maxlength=64 value=""></td>
   </tr>
   <input type="hidden" name="wds_encryp_type" value="">

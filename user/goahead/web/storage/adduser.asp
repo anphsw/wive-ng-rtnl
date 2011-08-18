@@ -207,7 +207,7 @@ function submit_apply()
     </td>
   </tr>
   <tr>
-    <td class="head" id="adduserMaxLogins">Max. Login</td>
+    <td class="head" id="adduserMaxLogins">Max. Logins</td>
     <td>
       <input type=text name=adduser_maxlogins size=1 maxlength=1 value="3">
     </td>

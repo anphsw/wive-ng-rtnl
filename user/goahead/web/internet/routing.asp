@@ -268,7 +268,7 @@ function formRoutingTable(form)
 	</td>
 </tr>
 <tr id="routingNetmaskRow">
-	<td class="head" id="routingNetmask">Sub Netmask</td>
+	<td class="head" id="routingNetmask">Subnet Mask</td>
 	<td><input class="mid" name="netmask" type="text"></td>
 </tr>
 <tr>

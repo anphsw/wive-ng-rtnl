@@ -8,7 +8,7 @@
 	<td><% getSdkVersion(); %></td>
 </tr>
 <tr>
-	<td class="head" id="statusSysUpTime">System Time</td>
+	<td class="head" id="statusSysUpTime">System Uptime</td>
 	<td><% getSysUptime(); %></td>
 </tr>
 <tr>
@@ -24,10 +24,10 @@
 </tr>
 <!-- ================= Internet Configurations ================= -->
 <tr>
-	<td class="title" colspan="2" id="statusInternetConfig">Internet Configurations</td>
+	<td class="title" colspan="2" id="statusInternetConfig">Internet Configuration</td>
 </tr>
 <tr>
-	<td class="head" id="statusConnectedType">Connected Type</td>
+	<td class="head" id="statusConnectedType">Connection Mode</td>
 	<td><% getCfgGeneral(1, "wanConnectionMode"); %> </td>
 </tr>
 <tr>
@@ -73,7 +73,7 @@
 <!-- ================= Other Information ================= -->
 <tr>
 	<td class="head">
-		Port status
+		Port Status
 		<input type="hidden" id="inpWanPort" value="<% getPortStatus(); %>">
 	</td>
 	<td id="portStatusRow">

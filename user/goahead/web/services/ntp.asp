@@ -85,8 +85,8 @@ function ntpChange(form)
 </head>
 <body onload="initValue()">
 <table class="body"><tr><td>
-<h1 id="manTitle">System Management</h1>
-<p id="manIntroduction">You may configure administrator account and password, NTP settings, and Dynamic DNS settings here.</p>
+<h1 id="manTitle">NTP Management</h1>
+<p id="manIntroduction">Here you can configure time synchronization.</p>
 <hr />
 
 <!-- ================= NTP Settings ================= -->

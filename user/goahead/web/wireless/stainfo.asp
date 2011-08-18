@@ -37,7 +37,7 @@ function PageInit()
 <table class="body"><tr><td>
 
 <h1 id="stalistTitle">Station List</h1>
-<p id="stalistIntroduction"> You could monitor stations which associated to this AP here. </p>
+<p id="stalistIntroduction"> Here you can monitor stations associated with this AP. </p>
 <hr />
 
 <table width="90%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">

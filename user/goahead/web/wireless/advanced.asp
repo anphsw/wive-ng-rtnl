@@ -428,7 +428,7 @@ function wmm_capable_enable_switch()
 
 
 <h1 id="advTitle">Advanced Wireless Settings </h1>
-<p id="advIntroduction">Use the Advanced Setup page to make detailed settings for the Wireless. Advanced Setup includes items that are not available from the Basic Setup page, such as Beacon Interval, Control Tx Rates and Basic Data Rates. </p>
+<p id="advIntroduction">Here you can change advanced wireless settings, such as Beacon Interval, Control Tx Rates and Basic Data Rates. </p>
 <hr>
 
 

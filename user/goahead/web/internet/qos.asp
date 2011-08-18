@@ -219,11 +219,11 @@ function QoSSetupCheck()
 		}
 		if(document.QoSSetup.DownloadBandwidth.value == "custom"){
 			if(document.QoSSetup.DownloadBandwidth_Custom.value == ""){
-				alert("Please fill the down bandwidth.");
+				alert("Please specify the downstream bandwidth.");
 				return false;
 			}
 			if(!checkNum(document.QoSSetup.DownloadBandwidth_Custom.value)){
-				alert("The download bandwidth format is wrong. (ex. \"10k\" \"20M\")");
+				alert("The download bandwidth format is invalid. (e.g. \"10k\" \"20M\")");
 				return false;
 			}
 
@@ -429,7 +429,7 @@ function checkNum(str)
 <body onload="onInit()">
 <table class="body"><tbody><tr><td>
 <h1 id="QoSTitleStr">Quality of Service Settings </h1>
-<p id="QoSIntroStr"> You may setup rules to provide Quality of Service guarantees for specific applications.</p>
+<p id="QoSIntroStr"> Here you can setup rules to provide desired Quality of Service for specific applications.</p>
 <hr>
 
 <form method=post name="trans" action="">
@@ -498,7 +498,7 @@ function checkNum(str)
 	</td>
 	<td>
 		<select name="DownloadBandwidth" id="DownloadBandwidth" size="1" onChange="DownloadBWChange()">
-		<option value="custom" id="QoSBWCustomStr2">User defined</option>
+		<option value="custom" id="QoSBWCustomStr2">User-defined</option>
 		<option value="64k">64k</option>
 		<option value="96k">96k</option>
 		<option value="128k">128k</option>

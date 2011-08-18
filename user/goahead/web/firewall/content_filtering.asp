@@ -139,18 +139,18 @@ function submitForm(form)
 <!--     body      -->
 <body onload="initValues();">
 <table class="body"><tr><td>
-<h1 id="ContentFilterTitle">Content Filter  Settings </h1>
+<h1 id="ContentFilterTitle">Content Filter Settings </h1>
 
 <% checkIfUnderBridgeModeASP(); %>
 
-<p id="ContentFilterIntrodution">You can set up Content Filter to restrict access to unwanted content.</p>
+<p id="ContentFilterIntrodution">Here you can setup Content Filter to restrict access to unwanted content.</p>
 
 <form action="/goform/webContentFilterSetup" method="POST" name="websContentFilterSetup" onsubmit="return submitForm(this);">
 
 <!-- New content filtering -->
 <table width="500" border="1" cellpadding="2" cellspacing="1">
 <tr>
-	<td class="title" colspan="2" id="WebsContentFilter">Webs Content Filter Setup</td>
+	<td class="title" colspan="2" id="WebsContentFilter">Web Content Filter Setup</td>
 </tr>
 <tr>
 	<td class="head" id="WebsContentFilterFilter">

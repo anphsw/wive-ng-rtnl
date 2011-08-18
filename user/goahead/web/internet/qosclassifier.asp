@@ -279,32 +279,32 @@ function checkIpAddr(str)
 function checkForm()
 {
 	if(document.classifier.comment.value == ""){
-		alert("Please input a name.");
+		alert("Please specify a name.");
 		return false;
 	}
 
 	if(!checkInjection(document.classifier.comment.value)){
-		alert("There is a illegal character in the name.");
+		alert("There is an illegal character in the name.");
 		return false;
 	}
 
 	if(document.classifier.mac_address.value != ""){
 		if(!checkMac(document.classifier.mac_address.value)){
-			alert("The MAC address format is invalid.");
+			alert("Invalid MAC address format.");
 			return false;
 		}
 	}
 
 	if(document.classifier.dip_address.value != ""){
 		if(! checkIpAddr(document.classifier.dip_address.value) ){
-			alert("The destination ip address format is invalid.");
+			alert("Invalid destination IP address format.");
 			return false;
 		}
 	}
 
 	if(document.classifier.sip_address.value != ""){
 		if(! checkIpAddr(document.classifier.sip_address.value) ){
-			alert("The source ip address format is invalid.");
+			alert("Invalid source IP address format.");
 			return false;
 		}
 	}
@@ -312,22 +312,22 @@ function checkForm()
 	// packet length
 	if(	(document.classifier.pktlenfrom.value != "" && document.classifier.pktlento.value == "" ) || 
 		(document.classifier.pktlento.value != "" && document.classifier.pktlenfrom.value == "" ) ){
-		alert("Please input a range for packet length. (ex: 0-128 64-1024)");
+		alert("Please specify packet length range. (e.g. 0-128 or 64-1024)");
 		return false;
 	}
 	if( document.classifier.pktlenfrom.value != "" ){
 		pktlenfrom = parseInt(document.classifier.pktlenfrom.value);
 		pktlento = parseInt(document.classifier.pktlento.value);
 		if(pktlenfrom > 2048 ||  pktlento > 2048){
-			alert("The packet length is too big.");
+			alert("Packet length is too big.");
 			return false;
 		}
 		if(pktlenfrom < 0 ||  pktlento < 0){
-			alert("The packet length is too small.");
+			alert("Packet length is too small.");
 			return false;
 		}
 		if(pktlento < pktlenfrom){
-			alert("The packet length range is invalid.");
+			alert("Invalid packet length range.");
 			return false;
 		}
 	}
@@ -341,13 +341,13 @@ function checkForm()
 		document.classifier.dscp.value == "" && 
 		document.classifier.protocol.value == "" &&
 		document.classifier.layer7.value == ""){
-		alert("Please input the classifications.");
+		alert("Please specify classification parameters.");
 		return false;
 	}
 
 	if(document.classifier.procotol.value == "TCP" || document.classifier.procotol.value == "UDP"){
 		if(document.classifier.dFromPort.value == "" && document.classifier.sFromPort.value == ""){
-			alert("Please fill the port number");
+			alert("Please specify port number");
 			return false;
 		}
 
@@ -355,29 +355,19 @@ function checkForm()
 		var dToPort = parseInt(document.classifier.dToPort.value);
 		var sFromPort = parseInt(document.classifier.sFromPort.value);
 		var sToPort = parseInt(document.classifier.sToPort.value);
-		if(document.classifier.dFromPort.value != "" && !checkPortNum(dFromPort) ){
-			alert("The destination port range is invalid.");
-			return false;
-		}
-		if(document.classifier.dToPort.value != "" && !checkPortNum(dToPort) ){
-			alert("The destination port range is invalid.");
-			return false;
-		}
-		if(document.classifier.sFromPort.value != "" && !checkPortNum(sFromPort) ){
-			alert("The source port range is invalid.");
-			return false;
-		}
-		if(document.classifier.sToPort.value != "" && !checkPortNum(sToPort) ){
-			alert("The source port range is invalid.");
-			return false;
-		}
 
-		if(dToPort && (dToPort <= dFromPort)){
-			alert("The destination port range is invalid.");
+		if( document.classifier.dFromPort.value != "" && !checkPortNum(dFromPort) ||
+			document.classifier.dToPort.value != "" && !checkPortNum(dToPort) ||
+			dToPort && (dToPort <= dFromPort) )
+		{
+			alert("Destination port range is invalid.");
 			return false;
 		}
-		if(sToPort && (sToPort <= sFromPort)){
-			alert("The source port range is invalid.");
+		if( document.classifier.sFromPort.value != "" && !checkPortNum(sFromPort) ||
+			document.classifier.sToPort.value != "" && !checkPortNum(sToPort) ||
+			sToPort && (sToPort <= sFromPort) )
+		{
+			alert("Source port range is invalid.");
 			return false;
 		}
 	}
@@ -457,7 +447,7 @@ function checkForm()
 
 <tr>
 	<td class="head" colspan="2" id="QoSClassifierDIPStr">
-		Dest IP Address
+		Dest. IP Address
 	</td>
 	<td colspan="2">
 		<input type="text" size="16" name="dip_address" id="dip_address">
@@ -486,7 +476,7 @@ function checkForm()
 	<td colspan="2">
   		<input type="text" size="4" name="pktlenfrom" id="pktlenfrom"> -
 		<input type="text" size="4" name="pktlento" id="pktlento">
-		<font color="#808080" id="">(ex: 0-128 for small packets)</font>
+		<font color="#808080" id="">(e.g. 0-128 for small packets)</font>
 	</td>
 </tr>
 

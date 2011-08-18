@@ -1132,7 +1132,7 @@ function doRadioStatusChange(form)
 <table class="body"><tr><td>
 
 <h1 id="basicTitle">Basic Wireless Settings </h1>
-<p id="basicIntroduction"> You could configure the minimum number of Wireless settings for communication, such as Network Name (SSID) and Channel. The Access Point can be set simply with only the minimum setting items. </p>
+<p id="basicIntroduction"> Here you can configure the most basic settings of Wireless communication, such as Network Name (SSID) and Channel. These settings are sufficient to have a working Access Point. </p>
 <hr>
 
 <form method="POST" name="wireless_basic" action="/goform/wirelessBasic" onSubmit="return CheckValue();">
@@ -1177,7 +1177,7 @@ function doRadioStatusChange(form)
 <input type="hidden" name="bssid_num" value="1">
 
 <tr> 
-	<td class="head" id="basicSSID">Network Name(SSID)</td>
+	<td class="head" id="basicSSID">Network Name (SSID)</td>
 	<td>
 		<input class="normal" type="text" name="ssid" maxlength="32" value="<% getCfgGeneral(1, "SSID1"); %>">
 		<font id="basicHSSID0">Hidden</font><input type="checkbox" name="hssid" value="0">&nbsp;
@@ -1385,7 +1385,7 @@ function doRadioStatusChange(form)
 	</td>
 </tr>
 <tr>
-	<td class="head" id="basicHTAMSDU">Aggregation MSDU(A-MSDU)</td>
+	<td class="head" id="basicHTAMSDU">Aggregation MSDU (A-MSDU)</td>
 	<td>
 		<input type="radio" name="n_amsdu" value="0" checked><font id="basicHTAMSDUDisable">Disable&nbsp;</font>
 		<input type="radio" name="n_amsdu" value="1"><font id="basicHTAMSDUEnable">Enable</font>

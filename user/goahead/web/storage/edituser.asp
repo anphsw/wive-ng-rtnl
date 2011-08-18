@@ -193,7 +193,7 @@ function submit_apply()
     </td>
   </tr>
   <tr>
-    <td class="head" id="edituserMaxLogins">Max. Login</td>
+    <td class="head" id="edituserMaxLogins">Max. Logins</td>
     <td>
       <input type=text name=edituser_maxlogins size=1 maxlength=1 value="3">
     </td>

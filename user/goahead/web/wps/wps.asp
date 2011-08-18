@@ -283,7 +283,7 @@ function onPINPBCRadioClick(value)
 <body onload="pageInit()">
 <table class="body"><tr><td>
 <h1 id="wpsTitle_text">Wi-Fi Protected Setup</h1>
-<p id="wpsIntroduction_text"> You could setup security easily by choosing PIN or PBC method to do Wi-Fi Protected Setup.</p>
+<p id="wpsIntroduction_text"> Here you can setup security easily by choosing PIN or PBC method to have Wi-Fi Protected Setup.</p>
 
 <table border="1" cellpadding="2" cellspacing="1" width="95%">
 <form method="post" name ="WPSConfig" action="/goform/WPSSetup">
@@ -341,7 +341,7 @@ function onPINPBCRadioClick(value)
 </tr>
 
 <tr>
-  <td class="head" id="wpsEncrypType_text">WPS Encryp Type: </td>
+  <td class="head" id="wpsEncrypType_text">WPS Encryption Type: </td>
   <td> <span id="WPSEncryptype"> </span> </td> 
 </tr>
 

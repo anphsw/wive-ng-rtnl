@@ -7,7 +7,7 @@
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script type="text/javascript" src="/js/share.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
-<title>System Management</title>
+<title>Dynamic DNS</title>
 
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("admin");
@@ -32,7 +32,7 @@ function DDNSFormCheck()
 		 document.DDNS.Password.value == "" ||
 		 document.DDNS.DDNS.value == ""))
 	{
-		alert("Please specify account, password, and DDNS.");
+		alert("Please specify login, password, and desired dynamic name.");
 		return false;
 	}
 
@@ -123,7 +123,7 @@ function initValue()
 <body onload="initValue()">
 <table class="body"><tr><td>
 <h1 id="manTitle">DDNS Settings</h1>
-<p id="manIntroduction">You may configure Dynamic DNS settings here.</p>
+<p id="manIntroduction">Here you can configure Dynamic DNS settings.</p>
 <hr>
 
 <!-- ================= DDNS  ================= -->
@@ -138,7 +138,7 @@ function initValue()
 	<td>
 		<select onChange="DDNSupdateState()" name="DDNSProvider">
 			<option value="none" id="manDdnsNone"> None </option>
-			<option value="dyndns.org"> Dyndns.org </option>
+			<option value="dyndns.org"> dyndns.org </option>
 			<option value="freedns.afraid.org"> freedns.afraid.org </option>
 			<option value="zoneedit.com"> www.zoneedit.com </option>
 			<option value="no-ip.com"> www.no-ip.com </option>
@@ -146,7 +146,7 @@ function initValue()
 	</td>
 </tr>
 <tr>
-	<td class="head" id="manDdnsAccount">Account</td>
+	<td class="head" id="manDdnsAccount">Login</td>
 	<td><input size="16" name="Account" value="<% getCfgGeneral(1, "DDNSAccount"); %>" type="text"> </td>
 </tr>
 <tr>
@@ -154,7 +154,7 @@ function initValue()
 	<td><input size="16" name="Password" value="<% getCfgGeneral(1, "DDNSPassword"); %>" type="password"> </td>
 </tr>
 <tr>
-	<td class="head" id="manDdns">DDNS</td>
+	<td class="head" id="manDdns">Dynamic Name</td>
 	<td><input size="32" name="DDNS" value="<% getCfgGeneral(1, "DDNS"); %>" type="text"> </td>
 </tr>
 </tbody>

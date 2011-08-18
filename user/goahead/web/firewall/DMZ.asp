@@ -54,7 +54,7 @@ function atoi(str, num)
 function checkIPAddr(field)
 {
     if(field.value == ""){
-        alert("Error. IP address is empty.");
+        alert("IP address cannot empty.");
         field.value = field.defaultValue;
         field.focus();
         return false;
@@ -71,7 +71,7 @@ function checkIPAddr(field)
         (!checkRange(field.value,2,0,255)) ||
         (!checkRange(field.value,3,0,255)) ||
         (!checkRange(field.value,4,1,254)) ){
-        alert('IP format error.');
+        alert('Invalid IP address.');
         field.value = field.defaultValue;
         field.focus();
         return false;
@@ -88,14 +88,7 @@ function formCheck()
 		return true;
 	}
 
-	if(document.DMZ.DMZIPAddress.value == ""){
-		alert("Not set a ip address.");
-		document.DMZ.DMZIPAddress.focus();
-		return false;
-	}
-
-	if(! checkIPAddr(document.DMZ.DMZIPAddress) ){
-		alert("IP address format error.");
+	if ( !checkIPAddr(document.DMZ.DMZIPAddress) ) {
 		document.DMZ.DMZIPAddress.focus();
 		return false;
 	}
@@ -174,7 +167,7 @@ function updateState()
 <table class="body"><tr><td>
 <h1 id="dmzTitle"> DMZ Settings </h1>
 <% checkIfUnderBridgeModeASP(); %>
-<p id="dmzIntroduction"> You may setup a De-militarized Zone(DMZ) to separate internal network and Internet.</p>
+<p id="dmzIntroduction"> Here you can setup the De-Militarized Zone (DMZ) to separate your external services from the rest of LAN.</p>
 <hr />
 
 <form method=post name="DMZ" action=/goform/DMZ>

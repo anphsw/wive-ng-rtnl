@@ -138,7 +138,7 @@ function pageInit(){
 </script></head><body onLoad="pageInit()">
 <table class="body"><tbody><tr><td>
 <h1 id="AntennaDiversityIntroStr">Antenna Diversity</h1>
-<p><font id="AntennaDiversityIntro2Str">Configure the Antenna Diversity setting to increase the performance. </font></p>
+<p><font id="AntennaDiversityIntro2Str">Here you can configure Antenna Diversity setting to increase wireless performance. </font></p>
 
 <form method="post" name="AntennaDiversity" action="/goform/AntennaDiversity">
 <table border="1" cellpadding="2" cellspacing="1" width="95%">
@@ -150,7 +150,7 @@ function pageInit(){
 	<td>
 		<select id="ADSelect" name="ADSelect">
 			<option value="Disable">Disable</option>
-			<option value="Enable_Algorithm1">Enable Algorithm1(BBP)</option>
+			<option value="Enable_Algorithm1">Enable Algorithm1 (BBP)</option>
 			<option value="Antenna0">fixed at Ant0</option>
 			<option value="Antenna2">fixed at Ant2</option>
 		</select>

@@ -169,7 +169,7 @@ function CheckWep()
 	var defaultid = 1*document.wireless_apcli.apcli_default_key.value;
 	if (document.wireless_apcli.apcli_enc.value == "WEP") {
 		if (eval("document.wireless_apcli.apcli_key"+defaultid).value.length == 0) {
-			alert('Please input wep key'+defaultid+'!');
+			alert('Please specify WEP key'+defaultid+'!');
 			eval("document.wireless_apcli.apcli_key"+defaultid).focus();
 			return false;
 		}
@@ -179,7 +179,7 @@ function CheckWep()
 		for (var i = 1; i < 5; i++) {
 			var mykey = eval("document.wireless_apcli.apcli_key"+i);
 			if (mykey.value.length != 0 && mykey.value.length != 5 && mykey.value.length != 13) {
-				alert('Please input 5 or 13 characters of wep key'+i);
+				alert('Please specify 5 or 13 characters of WEP key'+i);
 				mykey.focus();
 				return false;
 			}
@@ -194,7 +194,7 @@ function CheckWep()
 		for (var i = 1; i < 5; i++) {
 			var mykey = eval("document.wireless_apcli.apcli_key"+i);
 			if (mykey.value.length != 0 && mykey.value.length != 10 && mykey.value.length != 26) {
-				alert('Please input 10 or 26 characters of wep key'+i);
+				alert('Please specify 10 or 26 characters of WEP key'+i);
 				mykey.focus();
 				return false;
 			}
@@ -260,7 +260,7 @@ function CheckValue()
 <table class="body"><tr><td>
 
 <h1>AP Client Feature</h1>
-<p>You could configure AP Client parameters here.</p>
+<p>Here you can configure AP Client parameters.</p>
 <hr />
 
 <form method=post name=wireless_apcli action="/goform/wirelessApcli" onSubmit="return CheckValue()">

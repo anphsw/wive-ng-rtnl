@@ -232,7 +232,8 @@ function pageInit(){
 </head>
 <body onload="pageInit()">
 <table class="body"><tr><td>
-<h1>Wi-Fi Protected Setup</h1><p> You could setup security easily by choosing PIN or PBC method to do Wi-Fi Protected Setup.</p>
+<h1>Wi-Fi Protected Setup</h1>
+<p> Here you can setup security easily by choosing PIN or PBC method to have Wi-Fi Protected Setup.</p>
 <table border="1" cellpadding="2" cellspacing="1" width="95%">
 
 <!-- =================  WPS Status  ================= -->
@@ -263,7 +264,7 @@ function pageInit(){
 </tr>
 
 <tr>
-  <td class="head" >WPS Encryp Type: </td>
+  <td class="head" >WPS Encryption Type: </td>
   <td> <span id="WPSEncryptype"> </span> </td> 
 </tr>
 

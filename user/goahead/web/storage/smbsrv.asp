@@ -99,7 +99,7 @@ function CheckValue()
 		}
 		else if (document.storage_smb.smb_workgroup.value.indexOf(" ") >= 0)
 		{
-			alert('Don\'t enter Blank Space in this feild');
+			alert('Blank spaces are not allowed in this field');
 			document.storage_smb.smb_workgroup.focus();
 			document.storage_smb.smb_workgroup.select();
 			return false;
@@ -114,7 +114,7 @@ function CheckValue()
 		}
 		else if (document.storage_smb.smb_netbios.value.indexOf(" ") >= 0)
 		{
-			alert('Don\'t enter Blank Space in this feild');
+			alert('Blank spaces are not allowed in this field');
 			document.storage_smb.smb_netbios.focus();
 			document.storage_smb.smb_netbios.select();
 			return false;

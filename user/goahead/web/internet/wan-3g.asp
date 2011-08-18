@@ -247,7 +247,7 @@ function checkIpAddr(field, ismask)
 	}
 
 	if (isAllNum(field.value) == 0) {
-		alert('It should be a [0-9] number.');
+		alert('Not a numeric value: ' + field.value);
 		field.value = field.defaultValue;
 		field.focus();
 		return false;
@@ -677,7 +677,7 @@ function initValue()
   <td><b id="wConnectionType"></b>&nbsp;&nbsp;&nbsp;&nbsp;</td>
   <td>
     <select name="connectionType" size="1" onChange="connectionTypeSwitch();">
-      <option value="STATIC" id="wConnTypeStatic">Static Mode (fixed IP)</option>
+      <option value="STATIC" id="wConnTypeStatic">Static Mode (Fixed IP)</option>
       <option value="DHCP" id="wConnTypeDhcp">DHCP (Auto Config)</option>
       <option value="PPPOE" id="wConnTypePppoe">PPPOE (ADSL)</option>
       <option value="L2TP" id="wConnTypeL2tp">L2TP</option>
@@ -762,9 +762,9 @@ function initValue()
   <td>
     Keep Alive Mode: Redial Period
     <input type="text" name="pppoeRedialPeriod" maxlength="5" size="3" value="60">
-    senconds
+    seconds
     <br />
-    On demand Mode:  Idle Time
+    On-demand Mode:  Idle Time
     <input type="text" name="pppoeIdleTime" maxlength="3" size="2" value="5">
     minutes
   </td>
@@ -828,9 +828,9 @@ function initValue()
 </tr>
 <tr>
   <td>
-    Keep Alive Mode: Redial Period
+    Keep-Alive Mode: Redial Period
     <input type="text" name="l2tpRedialPeriod" maxlength="5" size="3" value="60">
-    senconds
+    seconds
     <!--
     <br />
     On demand Mode:  Idle Time
@@ -888,7 +888,7 @@ function initValue()
   <td class="head" rowspan="3" id="wPptpOPMode">Operation Mode</td>
   <td>
     <select name="pptpOPMode" size="1" onChange="pptpOPModeSwitch()">
-      <option value="KeepAlive" id="wPptpKeepAlive">Keep Alive</option>
+      <option value="KeepAlive" id="wPptpKeepAlive">Keep-Alive</option>
       <!--
       <option value="OnDemand" id="wPptpOnDemand">On Demand</option>
       -->
@@ -898,9 +898,9 @@ function initValue()
 </tr>
 <tr>
   <td>
-    Keep Alive Mode: Redial Period
+    Keep-Alive Mode: Redial Period
     <input type="text" name="pptpRedialPeriod" maxlength="5" size="3" value="60">
-    senconds
+    seconds
     <!--
     <br />
     On demand Mode:  Idle Time
@@ -917,7 +917,7 @@ function initValue()
   <td class="title" colspan="2" id="w3GMode">3G Mode</td>
 </tr>
 <tr>
-  <td class="head" rowspan="3" id="w3GDev">USB 3G modem</td>
+  <td class="head" rowspan="3" id="w3GDev">USB 3G Modem</td>
   <td>
     <select name="Dev3G" size="1">
       <option value="MU-Q101" id="MU-Q101">NU MU-Q101</option>

@@ -64,8 +64,8 @@ function checkForm(form)
 <body onLoad="initValue(document.formSamba);">
 <table class="body"><tr><td>
 
-<h1>Samba/CIFS setup</h1>
-<p>This page contains Samba/CIFS service configuration setup.</p>
+<h1>Samba/CIFS Setup</h1>
+<p>Here you can configure Samba/CIFS service.</p>
 <hr>
 
 <form action="/goform/formSamba" method="POST" name="formSamba" onsubmit="return checkForm(this);" >

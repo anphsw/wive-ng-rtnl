@@ -272,7 +272,7 @@ function checkComment(com)
 	var comment = com.value;
 	if (comment.length > 32)
 	{
-		alert("Too long comment: " + comment);
+		alert("Comment too long: " + comment);
 		com.focus();
 		return null;
 	}
@@ -503,7 +503,7 @@ function genTableData(rules, form)
 <!-- Port forwarding -->
 <h1>Port Forwarding Settings</h1>
 <% checkIfUnderBridgeModeASP(); %>
-	<p>You may setup port forwarding to provide services on Internet.</p>
+<p>Here you can setup port forwarding to provide services to the Internet.</p>
 <hr>
 
 <form method="POST" name="portForward" action="/goform/portForward" onsubmit="return submitForwardForm(this);">
@@ -542,7 +542,7 @@ function genTableData(rules, form)
 <!-- MAC / IP / Port Filtering -->
 <h1>MAC/IP/Port Filtering Settings</h1>
 <% checkIfUnderBridgeModeASP(); %>
-	<p>You may setup firewall rules to protect your network from virus,worm and malicious activity on the Internet.</p>
+<p>Here you can setup firewall rules to protect your network from malware and other security threats from the Internet.</p>
 <hr>
 
 <form method="POST" name="portFiltering" action="/goform/portFiltering" onsubmit="return submitFilterForm(this);">

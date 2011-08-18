@@ -5,7 +5,8 @@
 <meta http-equiv="Pragma" content="no-cache">
 
 <script type="text/javascript" src="/lang/b28n.js"></script>
-<link rel="stylesheet" href="/style/normal_ws.css" type="text/css"><title>Ralink Wireless Security Settings</title>
+<link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
+<title>Wireless Security Settings</title>
 
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("wireless");
@@ -1006,7 +1007,7 @@ function onPreAuthenticationClick(type)
 <table class="body"><tbody><tr><td>
 
 <h1 id="securityTitle">Wireless Security/Encryption Settings </h1>
-<p id="securityIntroduction">Setup the wireless security and encryption to prevent from unauthorized access and monitoring.</p>
+<p id="securityIntroduction">Here you can configure wireless security and encryption to prevent unauthorized access to the router.</p>
 <hr />
 
 
@@ -1057,7 +1058,7 @@ function onPreAuthenticationClick(type)
 <!-- WEP -->
 <table id="div_wep" name="div_wep" border="1" bordercolor="#9babbd" cellpadding="3" cellspacing="1" hspace="2" vspace="2" width="90%" style="visibility: hidden;">
 <tr>
-	<td class="title" colspan="4" id="secureWEP">Wire Equivalence Protection (WEP)</td>
+	<td class="title" colspan="4" id="secureWEP">Wired Equivalent Privacy (WEP)</td>
 </tr>
 <tr> 
 	<td class="head" colspan="2" id="secureWEPDefaultKey">Default Key</td>

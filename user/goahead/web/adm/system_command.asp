@@ -49,7 +49,7 @@ function setFocus()
 <body onload="setFocus()">
 <table class="body"><tr><td>
 <h1 id="syscommandTitle">System Command</h1>
-<p id="syscommandIntroduction"> Run a system command as root: </p>
+<p id="syscommandIntroduction"> Run system command as root: </p>
 
 <!-- ================= System command ================= -->
 <form method="post" name="SystemCommand" action="/goform/SystemCommand">

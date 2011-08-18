@@ -27,7 +27,7 @@ function AdmFormCheck(form)
 	var re_login = /^[a-zA-Z0-9_]+$/;
 	if (!re_login.test(form.admuser.value))
 	{
-		alert("Please specify correct administrator account (a-z, A-Z, 0-9, _).");
+		alert("Please specify correct administrator login (a-z, A-Z, 0-9, _).");
 		form.admuser.focus();
 		return false;
 	}
@@ -35,7 +35,7 @@ function AdmFormCheck(form)
 	var re_pass = /^[a-zA-Z0-9_\{\}\[\];:\'\"\,\.\/\?<>\-\=\+\\\!\~\`\|\@\#\%^\&\*\(\~`)]+$/;
 	if (!re_pass.test(form.admpass.value))
 	{
-		alert("Please specify correct administrator password (spaces and dollar sign are disallowed).");
+		alert("Please specify correct administrator password (spaces and dollar symbol are disallowed).");
 		form.admpass.focus();
 		return false;
 	}
@@ -91,8 +91,8 @@ function onUploadFirmwareSubmit(form)
 {
 	if (checkFilePresent(form.filename))
 		ajaxPostForm(
-			'Do not turn off power while upgrading firmware! ' + 
-			'That can cause situation that device will not work. ' + 
+			'Do not power off the device while upgrading firmware! ' + 
+			'Doing so can result in permanent damage to the device. ' + 
 			'Do you really want to proceed?',
 			form,
 			'firmwareReloader',
@@ -118,14 +118,14 @@ function onImportSettings(form)
 <table class="body" style="width:600px;"><tr><td>
 <h1>System Management</h1>
 <div id="staticText">
-<p>You may select language and configure administrator account and password here.</p>
-<p>You may also upgrade the WR-NL firmware to obtain new functionality.
-It takes about 1 minute to upload &amp; upgrade flash and be patient please.</p>
+<p>You can select language and set administrator login and password here.</p>
+<p>You can also upgrade the WR-NL firmware to obtain new functionality.
+It takes about 1 minute to upload firmware &amp; upgrade flash. Please be patient.</p>
 <p style="color: #ff0000;">Caution! A corrupted image will hang up the system.</p>
 </div>
 
 <p id="loading" style="display: none; color: #ff0000; font-size: 16px;">
-	Uploading firmware <br><br> Please be patient and don't remove usb device if it presented...
+	Uploading firmware <br><br> Please be patient and don't remove USB device if present...
 </p>
 
 <div id="staticControls">
@@ -152,7 +152,7 @@ It takes about 1 minute to upload &amp; upgrade flash and be patient please.</p>
 <form method="POST" name="Adm" action="/goform/setSysAdm" onsubmit="return AdmFormCheck(this);">
 <table width="100%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
 <tr>
-	<td class="title" colspan="2" id="manAdmSet">Adminstrator Settings</td>
+	<td class="title" colspan="2" id="manAdmSet">Administrator Settings</td>
 </tr>
 <tr>
 	<td class="head">Login</td>

@@ -349,12 +349,12 @@ function PINStart()
 		}
 
 		if(need_submit_registrar_setting_flag){
-			alert("This is the first time you running WPS registrar mode and \n the registrar settings need to be submitted.");
+			alert("This is the first time you are running WPS registrar mode and \n the registrar settings need to be submitted.");
 			return;
 		}
 		
 		if(document.getElementById("submitButton").disabled == false){
-			ret = confirm("You have changed the registrar settings but did NOT submit them.\nDo you really want running WPS without these settings?");
+			ret = confirm("You have changed the registrar settings but did NOT submit them.\nDo you really want to run WPS without these settings?");
 			if(!ret)
 				return;
 		}
@@ -586,7 +586,7 @@ function RefreshClick()
 <body onload="Init()">
 <table class="body"><tbody><tr><td>
 <h1 id="stawpsTitle">Wi-Fi Protected Setup (STA)</h1>
-<p id="stawpsIntroduction"> You could setup security easily by choosing PIN or PBC method to do Wi-Fi Protected Setup.</p>
+<p id="stawpsIntroduction"> Here you can setup security easily by choosing PIN or PBC method to have Wi-Fi Protected Setup.</p>
 
 <form method="post" name="wpssta_form">
 <table border="1" width="100%" border="1" cellpadding="2" cellspacing="1">

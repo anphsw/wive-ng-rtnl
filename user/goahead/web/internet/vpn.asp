@@ -1,5 +1,5 @@
 <html><head>
-<title>PPTP tunnel setup</title>
+<title>PPTP Tunnel Setup</title>
 
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0">
@@ -38,7 +38,7 @@ function showHint(key)
 	else if (form.vpn_enabled.checked)
 	{
 		if (key=='vpn_user')
-			text += 'Specify user name given by your network provider.';
+			text += 'Specify username given by your network provider.';
 		else if (key=='vpn_password')
 			text += 'Specify password given by your network provider.';
 		else if (key=='vpn_auth_type')
@@ -46,27 +46,27 @@ function showHint(key)
 		else if (key=='vpn_pppoe_iface')
 			text += 'Select available interface for PPPoE.';
 		else if (key=='vpn_pppoe_service')
-			text += 'Some internet providers need to set up special PPPoE service name. You can specify it here.';
+			text += 'Service name is optional but may be required by some Internet Service Providers.';
 		else if (key=='vpn_server')
 		{
 			if (form.vpn_type.value == '0') // PPPoE
-				text += 'Specify Access Concentrator name for PPPoE connection. If no Access Concentrator name is set system will try to connect to first available Access Concentrator.';
+				text += 'Specify Access Concentrator name for PPPoE connection. If no Access Concentrator name is set system will try to connect to the first available one.';
 			else if ((form.vpn_type.value == '1') || (form.vpn_type.value == '2')) // PPTP client, L2TP client
 				text += 'Specify host address (IP address or domain name) of VPN server.';
 			else if (form.vpn_type.value == '3') // L2TP server
 				text += 'Use the following IP as VPN server own IP address in your VPN network.';
 			else if ((form.vpn_type.value == '4') || (form.vpn_type.value == '5')) // GSM/CDMA
-				text += 'Specify Access Point Name given by network provider. If no Access Point Name is specified it will be taken from modem default settings.';
+				text += 'Specify Access Point Name (APN) given by your network provider. If no APN is specified it will be taken from modem's default settings.';
 		}
 		else if (key=='vpn_range')
-			text += 'Specify range of IP addresses given to clients by VPN server in <b>L2TP server</b> mode.';
+			text += 'Specify a range of IP addresses that VPN server will assign to clients in <b>L2TP server</b> mode.';
 		else if (key=='vpn_mtu')
 			text += 'Specify Maximum Transfer Unit/Maximum Recieve Unit size in octets.';
 		else if (key=='vpn_mppe')
-			text += 'Enable automatic Microsoft Point-to-Point Encryption (MPPE) mode. Need set authentication method to mschap.';
+			text += 'Enable automatic Microsoft Point-to-Point Encryption (MPPE) mode. This requires MS-CHAP authentication method.';
 		else if (key=='vpn_dgw')
 		{
-			text += 'Manage default gateway replacing in routing table.</p><p class="val">';
+			text += 'Manage replacement of default gateway in routing table.</p><p class="val">';
 			if (form.vpn_dgw.value == '0')
 				text += '<b>Disabled</b> means that no default gateway will be written to routing table.';
 			else if (form.vpn_dgw.value == '1')
@@ -86,40 +86,40 @@ function showHint(key)
 		else if (key=='vpn_pure_pppoe')
 			text += 'Enable pure WAN+PPPoE mode.';
 		else if (key=='vpn_cpu_limit')
-			text += 'This option prevents full CPU load by ppp_generic module. Minimum value is 1000, maximum value is 4000. Zero value disables this option.';
+			text += 'This option prevents <i>ppp_generic</i> module from taking up 100% CPU. Minimum value is 1000, maximum value is 4000. Zero value disables this option.';
 		else if (key=='vpn_lcp_errors')
-			text += 'If this option is given, pppd will presume the peer to be dead if n LCP ' +
+			text += 'If this option is used, pppd will presume a peer to be dead if <i>n</i> LCP ' +
 				'echo-requests are sent without receiving a valid LCP echo-reply. If this happens, ' +
 				'pppd will terminate the connection. Use of this option requires a non-zero value ' +
 				'for the <b>LCP echo interval</b> parameter. This option can be used to enable ' +
 				'pppd to terminate after the physical connection has been broken (e.g., the ' +
 				'modem has hung up) in situations where no hardware modem control lines are available.';
 		else if (key=='vpn_lcp_interval')
-			text += 'If this option is given, pppd will send an LCP echo-request frame to the peer every ' +
-				'specified value of seconds. Normally the peer should respond to the echo-request by ' +
+			text += 'If this option is used, pppd will send LCP echo-request frame to its peer every ' +
+				'specified value of seconds. Normally a peer should respond to the echo-request by ' +
 				'sending an echo-reply. This option can be used with the <b>LCP echo failure</b> option ' +
-				'to detect that the peer is no longer connected.';
+				'to detect that a peer is no longer connected.';
 		else if (key=='vpn_type')
 		{
 			text += 'Specify VPN access mode.<p class="val">';
 			
 			if (form.vpn_type.value == "0")
-				text += '<b>PPPoE</b> (see RFC #2516) means encapsulating Point-to-Point Protocol (PPP) frames ' +
+				text += '<b>PPPoE</b> (see RFC #2516) is a protocol for encapsulating Point-to-Point Protocol (PPP) frames ' +
 					'inside Ethernet frames. It is used mainly with DSL services where individual ' +
 					'users connect to the DSL modem over Ethernet and in plain Metro Ethernet networks.';
 			else if (form.vpn_type.value == "1")
-				text += '<b>PPTP</b> (see RFC #2637) means a method for implementing virtual private networks. ' +
+				text += '<b>PPTP</b> (see RFC #2637) is a method for implementing virtual private networks. ' +
 					'PPTP uses a control channel over TCP and a GRE tunnel operating to encapsulate ' +
 					'PPP packets.';
 			else if ((form.vpn_type.value == "2") || (form.vpn_type.value == "3"))
 			{
-				text += '<b>L2TP</b> (see RFC #2661) means a tunneling protocol used to support virtual private networks. ' +
+				text += '<b>L2TP</b> (see RFC #2661) is a tunneling protocol used to support virtual private networks. ' +
 					'It does not provide any encryption or confidentiality by itself; it relies on an ' +
 					'encryption protocol that it passes within the tunnel to provide privacy.</p><p class="val">';
 				if (form.vpn_type.value == "2")
-					text += '<b>L2TP client</b> means a connection to remote L2TP server.';
+					text += '<b>L2TP client</b> means that this router will connect to a remote L2TP server.';
 				else
-				text += '<b>L2TP server</b> means a connection from remote machines to L2TP server on this router.';
+				text += '<b>L2TP server</b> means that L2TP server on this router will accept connections from remote hosts.';
 			}
 			else if (form.vpn_type.value == "4")
 				text += '<b>Modem GPRS</b> means connection to Internet via GPRS/EDGE in GSM mobile networks.';
@@ -269,7 +269,7 @@ function submitClick(form)
 {
 	if (form.vpn_pass.value.match(/[\s\$]/))
 	{
-		alert("Password can not contain spaces or dollar ('$') sign!");
+		alert("Password can not contain spaces or dollar ('$') symbol!");
 		form.vpn_pass.focus();
 		return false;
 	}
@@ -278,7 +278,7 @@ function submitClick(form)
 	{
 		if (form.vpn_user.value.match(/[\s\$]/))
 		{
-			alert("User name can not contain spaces or dollar ('$') sign!");
+			alert("Username can not contain spaces or dollar ('$') symbol!");
 			form.vpn_user.focus();
 			return false;
 		}
@@ -363,7 +363,7 @@ function formCheck(form)
 <body onload="bodyOnLoad(document.formVPNSetup);">
 <table class="body">
 <tr><td>
-<h1>Virtual Private Network setup</h1>
+<h1>Virtual Private Network Setup</h1>
 <p>
 This page is used to configure the <acronym title="Virtual Private Network">VPN</acronym>
 tunnel on your Router.

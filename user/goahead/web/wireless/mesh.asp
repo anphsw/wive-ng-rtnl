@@ -9,7 +9,7 @@
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script type="text/javascript" src="/js/controls.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
-<title>Basic Wireless Settings</title>
+<title>Wireless Mesh Settings</title>
 
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("wireless");
@@ -350,7 +350,7 @@ function check_wep()
 
 	if (keylength == 0)
 	{
-		alert('Please input wep key!');
+		alert('Please specify WEP key!');
 		return false;
 	}
 	if (keylength != 0)
@@ -359,12 +359,12 @@ function check_wep()
 		{
 			if (keylength != 5 && keylength != 13) 
 			{
-				alert('Please input 5 or 13 characters of wep key!');
+				alert('Please specify 5 or 13 characters of WEP key!');
 				return false;
 			}
 			if (checkInjection(document.wireless_mesh.wep_key.value) == false)
 			{
-				alert('Wep key contains invalid characters.');
+				alert('WEP key contains invalid characters.');
 				return false;
 			}
 		}
@@ -372,12 +372,12 @@ function check_wep()
 		{
 			if(keylength != 10 && keylength != 26) 
 			{
-				alert('Please input 10 or 26 characters of wep key!');
+				alert('Please specify 10 or 26 characters of WEP key!');
 				return false;
 			}
 			if(checkHex(document.wireless_mesh.wep_key.value) == false)
 			{
-				alert('Invalid Wep key format!');
+				alert('Invalid WEP key format!');
 				return false;
 			}
 		}
@@ -393,18 +393,18 @@ function check_wpa()
 	if (document.wireless_mesh.wpa_cipher[0].checked != true && 
 	    document.wireless_mesh.wpa_cipher[1].checked != true)
 	{
-		alert('Please choose a WPA Algorithms.');
+		alert('Please choose a WPA Algorithm.');
 		return false;
 	}
 	if (keyvalue.length == 0)
 	{
-		alert('Please input wpapsk key!');
+		alert('Please specify WPA-PSK key!');
 		return false;
 	}
 
 	if (keyvalue.length < 8)
 	{
-		alert('Please input at least 8 character of wpapsk key!');
+		alert('Please specify at least 8 character of WPA-PSK key!');
 		return false;
 	}
 
@@ -423,7 +423,7 @@ function checkData()
 		
 	if (document.mesh_manual_link.mpmac.value.length == 0)
 	{
-		alert('Please input Mesh Point MAC Address!');
+		alert('Please specify Mesh Point MAC Address!');
 		document.mesh_manual_link.mpmac.focus();
 		document.mesh_manual_link.mpmac.select();
 
@@ -431,7 +431,7 @@ function checkData()
 	}
 	if (reg.test(document.mesh_manual_link.mpmac.value) == false)
 	{
-		alert("Please fill Mesh Point MAC Address in correct format! (XX:XX:XX:XX:XX:XX)");
+		alert("Please specify Mesh Point MAC Address in correct format! (XX:XX:XX:XX:XX:XX)");
 		document.mesh_manual_link.mpmac.focus();
 		document.mesh_manual_link.mpmac.select();
 
@@ -536,7 +536,7 @@ frames among the network members.</p>
 </table>
 <table id="div_wep" name="div_wep" border="1" bordercolor="#9babbd" cellpadding="3" cellspacing="1" hspace="2" vspace="2" width="90%">
   <tr> 
-    <td class="title" colspan="3" id="meshSecureWEP">Wire Equivalence Protection (WEP)</td>
+    <td class="title" colspan="3" id="meshSecureWEP">Wired Equivalent Privacy (WEP)</td>
   </tr>
   <tr> 
     <td class="head" id="meshSecureWEPKey">WEP Key:</td>
@@ -602,7 +602,7 @@ frames among the network members.</p>
   </tr>
   <tr align="center">
     <td class="head">&nbsp;&nbsp;</td>
-    <td class="head" id="meshNbrMacAddr">Neighbor MAC Address</td>
+    <td class="head" id="meshNbrMacAddr">Neighbour MAC Address</td>
     <td class="head" id="meshNbrRSSI">RSSI</td>
     <td class="head" id="meshNbrMID">Mesh ID</td>
     <td class="head" id="meshNbrHostName">Host Name</td>

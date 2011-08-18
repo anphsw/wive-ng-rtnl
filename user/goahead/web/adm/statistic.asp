@@ -87,7 +87,7 @@ function loadStatistics()
 <body onload="PageInit()">
 <table class="body"><tr><td>
 
-<h1 id="statisticTitle">Statistic</h1>
+<h1 id="statisticTitle">Statistics</h1>
 <p id="statisticIntroduction"> Take a look at the CPE statistics </p>
 
 <div style="display:none;" id="fastpath_warning">

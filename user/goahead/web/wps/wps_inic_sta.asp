@@ -11,7 +11,8 @@
 
 <body>
 <table class="body"><tr><td>
-<h1>Wi-Fi Protected Setup (iNIC STA)</h1><p> You could setup security easily by choosing PIN or PBC method to do Wi-Fi Protected Setup.</p>
+<h1>Wi-Fi Protected Setup (iNIC STA)</h1>
+<p> Here you can setup security easily by choosing PIN or PBC method to have Wi-Fi Protected Setup.</p>
 
 
 <h1> WPS AP site survey </h1>

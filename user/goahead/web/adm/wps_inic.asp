@@ -8,9 +8,10 @@
 
 <body>
 <table class="body"><tr><td>
-<h1>Wi-Fi Protected Setup (iNIC)</h1><p> You could setup security easily by choosing PIN or PBC method to do Wi-Fi Protected Setup.</p>
+<h1>Wi-Fi Protected Setup (iNIC)</h1>
+<p> Here you can setup security easily by choosing PIN or PBC method to do Wi-Fi Protected Setup.</p>
 
-<h1> Still under construct. </h1>
+<h1> Still under construction. </h1>
 
 </td></tr></table>
 </body></html>

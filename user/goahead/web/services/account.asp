@@ -36,7 +36,7 @@ function initValue()
 <table class="body"><tr><td>
 
 <h1>Accounting</h1>
-<p>This page contains accounting control management</p>
+<p>Here you can configure Accounting Control.</p>
 <hr>
 
 <!-- IP Accounting -->
@@ -44,12 +44,12 @@ function initValue()
 
 <div style="display:none;" id="fastpath_warning">
 <p><span style="color: #ff0000;"><b>CAUTION!&nbsp;</b></span>
-NAT fastpath option is turned on.</p>
-<p>For some technical and software reasons there is no ability to gather correct statistics for NAT fastpath mode now.</p>
+<b>NAT Fastpath</b> option is turned on.</p>
+<p>Due to some technical reasons it's not possible to gather correct statistics for NAT Fastpath mode now.</p>
 <p>That's why IPT accounting configuration ability is now locked.</p>
-<p>To get correct statistics you need to shut down <b>NAT fastpath</b> option on
+<p>To get correct statistics you need to shut down <b>NAT Fastpath</b> option on the
 <a href="/services/misc.asp#nat_fastpath_ref">MISC&nbsp;Services</a> configuration page.</p>
-<p>Please remember that turned off option <b>NAT Fastpath</b> will grow CPU load up to 50%.</p>
+<p>Please note that turning off <b>NAT Fastpath</b> will increase CPU usage up to 50%.</p>
 <p style="color: #000080; margin-top: 20px;"><a href="http://www.metallica.com/" target="_blank">Sad&nbsp;but&nbsp;true...</a></p>
 </div>
 

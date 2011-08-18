@@ -44,8 +44,9 @@ function checkForm()
 {
 	if(	document.afattr.af_name.value == "" ||
 		document.afattr.af_rate.value == "" || 
-		document.afattr.af_ceil.value == "" ){
-		alert("Please fill the every field.");
+		document.afattr.af_ceil.value == "" )
+	{
+		alert("You must specify values for every field.");
 		return false;
 	}
 
