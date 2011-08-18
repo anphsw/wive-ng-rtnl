@@ -33,7 +33,6 @@ if [ "$SmbEnabled" = "1" ]; then
     echo "    interfaces = $lan_if" >> $CONFIG
     echo "    force user = $Login" >> $CONFIG
     echo "    coding system = utf8" >> $CONFIG
-    echo "    character set = utf8" >> $CONFIG
     echo "    client code page = 866" >> $CONFIG
     cat /etc/smb.conf.template >> $CONFIG
 
