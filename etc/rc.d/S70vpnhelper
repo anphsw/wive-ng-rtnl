@@ -65,6 +65,10 @@ stop() {
     killall -q -9 config-pptp.sh
     killall -q -9 config-lanauth.sh
 
+    #send hup signal to pppd for correct link down
+    killall -q -SIGHUP pppd
+    sleep 1
+
     #Kill daemons
     killall -q xl2tpd
     killall -q -9 xl2tpd

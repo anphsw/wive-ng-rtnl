@@ -551,6 +551,7 @@
 23) Fix CONFIG_NLS_DEFAULT in config (utf->utf8).<br>
 24) Update kernel nls subsystem.<br>
 25) automount.sh first try mount with utf8 codepage.<br>
+26) Send hup signal to pppd before kill daemos for correct link down.<br>
 
 <br><br>
 <b>For support see:</b><br>

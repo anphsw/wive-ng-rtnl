@@ -7,6 +7,11 @@
 #include global
 . /etc/scripts/global.sh
 
+#send hup signal to pppd for correct link down
+killall -q -SIGHUP pppd
+sleep 1
+
+#Kill daemons
 killall -q pppd
 killall -q xl2tpd
 
