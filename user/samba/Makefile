@@ -8,8 +8,7 @@ all:
 
 romfs:
 	for i in $(DIRS) ; do make -C $$i romfs || exit $? ; done
+	$(ROMFSINST) smb.conf.template /etc/smb.conf.template
 
 clean:
 	-for i in $(DIRS) ; do make -C $$i clean ; done
-
-

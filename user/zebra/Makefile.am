@@ -14,3 +14,7 @@ dist-hook:
 	mkdir $(distdir)/init/redhat
 	cp -p $(srcdir)/init/redhat/*.init $(distdir)/init/redhat
 	cp -p $(srcdir)/init/redhat/zebra.* $(distdir)/init/redhat
+
+romfs: install
+	$(ROMFSINST) -S filesystem/sbin/zebra /bin/zebra
+	$(ROMFSINST) -S filesystem/sbin/ripd /bin/ripd

@@ -22,4 +22,4 @@ clean:
 	
 
 romfs:
-	$(ROMFSINST) /bin/$(TARGET_ntfs)
+	$(ROMFSINST) -S /bin/$(TARGET_ntfs)

@@ -16,8 +16,7 @@ igmpproxy: build.h $(IGMP_PROXY_OBJ)
 	$(CC) $(LDFLAGS) -o $@ $(IGMP_PROXY_OBJ)
 
 romfs:
-	$(ROMFSINST) /bin/$(EXEC)
-	$(ROMFSINST) /bin/igmpproxy.sh
+	$(ROMFSINST) -S /bin/$(EXEC)
 
 clean:
 	rm -f *.o *.asm build.h $(EXEC)  

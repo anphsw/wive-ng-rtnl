@@ -26,7 +26,7 @@ clean:
 	rm -f *.o nvram_daemon ralink_init
 
 romfs:
-	for i in $(EXEC) ; do $(ROMFSINST) /bin/$$i ; done
+	for i in $(EXEC) ; do $(ROMFSINST) -S /bin/$$i ; done
 	ln -sf ralink_init nvram_get
 	ln -sf ralink_init nvram_set
 	ln -sf ralink_init nvram_show

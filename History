@@ -552,6 +552,10 @@
 24) Update kernel nls subsystem.<br>
 25) automount.sh first try mount with utf8 codepage.<br>
 26) Send hup signal to pppd before kill daemos for correct link down.<br>
+27) Fix zebra build and enabled per default for 8Mb flash devices.<br>
+28) More use ROMFSINST instead direct copy.<br>
+29) Do not strip at romfs inst. Need for correct strip.sh (sstrip) work.<br>
+30) Some configs install to /etc (rwfs) only if needed apps configured. Save flash.<br>
 
 <br><br>
 <b>For support see:</b><br>

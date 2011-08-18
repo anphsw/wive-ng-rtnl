@@ -12,4 +12,4 @@ dist-hook:
 	cp $(top_srcdir)/ethtool.spec $(distdir)
 
 romfs: install
-	cp -fv ./filesystem/sbin/* $(ROOTDIR)/romfs/bin
+	$(ROMFSINST) -S filesystem/sbin/ethtool /bin/ethtool

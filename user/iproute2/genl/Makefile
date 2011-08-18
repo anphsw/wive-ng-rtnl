@@ -17,7 +17,7 @@ all: genl
 genl: $(GENLOBJ) $(LIBNETLINK) $(LIBUTIL) $(GENLLIB)
 
 romfs: all
-	$(ROMFSINST) /bin/genl
+	$(ROMFSINST) -S /bin/genl
 
 clean:
 	rm -f $(GENLOBJ) $(GENLLIB) genl

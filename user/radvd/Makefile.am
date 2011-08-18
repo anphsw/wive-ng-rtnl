@@ -135,3 +135,4 @@ scanner.o: gram.h
 
 romfs:
 	$(ROMFSINST) /bin/radvd
+	$(ROMFSINST) radvd.conf /etc/radvd.conf

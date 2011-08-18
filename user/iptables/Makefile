@@ -132,13 +132,13 @@ endif
 default: print-extensions all
 
 romfs:
-	$(ROMFSINST) /bin/iptables
+	$(ROMFSINST) -S /bin/iptables
 ifeq ($(CONFIG_USER_IPTABLES_SAVE_RESTORE), 1)
-	$(ROMFSINST) /bin/iptables-save
-	$(ROMFSINST) /bin/iptables-restore
+	$(ROMFSINST) -S /bin/iptables-save
+	$(ROMFSINST) -S /bin/iptables-restore
 endif
 ifeq ($(DO_IPV6), 1)
-	$(ROMFSINST) /bin/ip6tables
+	$(ROMFSINST) -S /bin/ip6tables
 endif
 
 .PHONY: print-extensions

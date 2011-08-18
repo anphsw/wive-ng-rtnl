@@ -20,7 +20,7 @@ $(EXEC): $(OBJS)
 	$(CC) $(LDFLAGS) -o $@ $(OBJS)
 
 romfs:
-	$(ROMFSINST) /bin/$(EXEC)
+	$(ROMFSINST) -S /bin/$(EXEC)
 
 clean:
 	rm -f core *.o $(EXEC)

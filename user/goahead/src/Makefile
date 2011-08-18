@@ -81,7 +81,7 @@ $(NAME): clean_inet $(DEPEND_FILES)
 	$(CC) -o $@ $(DEPEND_FILES) $(LDFLAGS) $(EXTRALIBS) $(LDLIBS)
 
 romfs:
-	$(ROMFSINST) /bin/$(NAME)
+	$(ROMFSINST) -S /bin/$(NAME)
 ifeq ("$(CONFIG_USER_GOAHEAD_SSL)", "y")
 	$(ROMFSINST) /etc/serverkey.pem
 	$(ROMFSINST) /etc/servercert.pem

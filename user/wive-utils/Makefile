@@ -24,4 +24,4 @@ romfs:
 	mkdir filesystem
 	mkdir filesystem/bin
 	@set -e; 
-	for i in $(UTILSLIST); do cp -fv $$i $(ROMFSDIR)/bin/$$i; done
+	for i in $(UTILSLIST); do $(ROMFSINST) -S $$i /bin/$$i; done

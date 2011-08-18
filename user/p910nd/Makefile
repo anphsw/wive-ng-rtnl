@@ -47,4 +47,4 @@ clean:
 	rm -f *.o $(PROG)
 
 romfs:                                                                                                                       
-	$(ROMFSINST) /bin/p910nd
+	$(ROMFSINST) -S /bin/p910nd

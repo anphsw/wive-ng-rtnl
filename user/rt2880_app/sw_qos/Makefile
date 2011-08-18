@@ -1,4 +1,4 @@
 all:	qos_run
 
 romfs:
-	$(ROMFSINST) /bin/qos_run
+	$(ROMFSINST) -S /bin/qos_run

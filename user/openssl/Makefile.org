@@ -617,10 +617,10 @@ dist_pem_h:
 	(cd crypto/pem; $(MAKE) -e $(BUILDENV) pem.h; $(MAKE) clean)
 
 romfs:
-	$(ROMFSINST) -e CONFIG_USER_OPENSSL libssl.so.$(SHLIB_VERSION_NUMBER) /lib/libssl.so.$(SHLIB_VERSION_NUMBER)
-	$(ROMFSINST) -e CONFIG_USER_OPENSSL libcrypto.so.$(SHLIB_VERSION_NUMBER) /lib/libcrypto.so.$(SHLIB_VERSION_NUMBER)
-	$(ROMFSINST) -e CONFIG_USER_OPENSSL -s libssl.so.$(SHLIB_VERSION_NUMBER) /lib/libssl.so
-	$(ROMFSINST) -e CONFIG_USER_OPENSSL -s libcrypto.so.$(SHLIB_VERSION_NUMBER) /lib/libcrypto.so
+	$(ROMFSINST) -S -e CONFIG_USER_OPENSSL libssl.so.$(SHLIB_VERSION_NUMBER) /lib/libssl.so.$(SHLIB_VERSION_NUMBER)
+	$(ROMFSINST) -S -e CONFIG_USER_OPENSSL libcrypto.so.$(SHLIB_VERSION_NUMBER) /lib/libcrypto.so.$(SHLIB_VERSION_NUMBER)
+	$(ROMFSINST) -S -e CONFIG_USER_OPENSSL -s libssl.so.$(SHLIB_VERSION_NUMBER) /lib/libssl.so
+	$(ROMFSINST) -S -e CONFIG_USER_OPENSSL -s libcrypto.so.$(SHLIB_VERSION_NUMBER) /lib/libcrypto.so
 
 install: all install_sw
 

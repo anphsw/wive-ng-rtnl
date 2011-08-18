@@ -734,6 +734,10 @@ AUTHORS: ChangeLog
 	( echo "Authors and contributors, in alphabetical order: "; echo; \
 	sed -r "s/^Author: (.*)/\1/;t;d" $< | sort -u ) > $@
 
+romfs:
+	for i in $(DIRS) ; do make -C $$i $@ ; done
+	$(ROMFSINST) igmpproxy.conf /etc/igmpproxy.conf
+
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

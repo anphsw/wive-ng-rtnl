@@ -76,6 +76,6 @@ cleanall: clean
 	rm -f libupnp-1.3.1/Makefile
 
 romfs:
-	$(ROMFSINST) wscd /bin/wscd
-	$(ROMFSINST) xml/WFADeviceDesc.xml /xml/WFADeviceDesc.xml
-	$(ROMFSINST) xml/WFAWLANConfigSCPD.xml /xml/WFAWLANConfigSCPD.xml
+	$(ROMFSINST) -S wscd /bin/wscd
+	$(ROMFSINST) -S xml/WFADeviceDesc.xml /xml/WFADeviceDesc.xml
+	$(ROMFSINST) -S xml/WFAWLANConfigSCPD.xml /xml/WFAWLANConfigSCPD.xml

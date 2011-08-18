@@ -27,11 +27,11 @@ ssfilter.c: ssfilter.y
 lnstat: $(LNSTATOBJ)
 
 romfs: all
-	$(ROMFSINST) -e CONFIG_USER_IPROUTE2_SS /bin/ss
-	$(ROMFSINST) -e CONFIG_USER_IPROUTE2_NSTAT /bin/nstat
-	$(ROMFSINST) -e CONFIG_USER_IPROUTE2_IFSTAT /bin/ifstat
-	$(ROMFSINST) -e CONFIG_USER_IPROUTE2_RTACCT /bin/rtacct
-	$(ROMFSINST) -e CONFIG_USER_IPROUTE2_LNSTAT /bin/lnstat
+	$(ROMFSINST) -S -e CONFIG_USER_IPROUTE2_SS /bin/ss
+	$(ROMFSINST) -S -e CONFIG_USER_IPROUTE2_NSTAT /bin/nstat
+	$(ROMFSINST) -S -e CONFIG_USER_IPROUTE2_IFSTAT /bin/ifstat
+	$(ROMFSINST) -S -e CONFIG_USER_IPROUTE2_RTACCT /bin/rtacct
+	$(ROMFSINST) -S -e CONFIG_USER_IPROUTE2_LNSTAT /bin/lnstat
 
 clean:
 	rm -f *.o $(TARGETS) ssfilter.c

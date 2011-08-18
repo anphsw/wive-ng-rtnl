@@ -13,5 +13,4 @@ all:
 		 make && make DESTDIR=`pwd`/../staging install)
 
 romfs:
-	-$(STRIP) -s --remove-section=.note --remove-section=.comment staging/usr/sbin/*
-	cp -fv staging/usr/sbin/chilli $(ROOTDIR)/romfs/bin
+	$(ROMFSINST) -S staging/usr/sbin/chilli /bin/chilli

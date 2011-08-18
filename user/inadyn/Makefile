@@ -68,4 +68,4 @@ cleanall: clean
 
 #romfs section added by YYHuang 07/03/07
 romfs:
-	$(ROMFSINST)  bin/linux/inadyn /bin/inadyn
+	$(ROMFSINST) -S bin/linux/inadyn /bin/inadyn

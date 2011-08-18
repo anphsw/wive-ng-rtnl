@@ -10,9 +10,8 @@ mtdc_wt: mtdc_wt.o
 	$(CC) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
 romfs:
-	$(ROMFSINST) /bin/mtdc_rd
-	$(ROMFSINST) /bin/mtdc_wt
+	$(ROMFSINST) -S /bin/mtdc_rd
+	$(ROMFSINST) -S /bin/mtdc_wt
 
 clean:
 	-rm -f $(EXEC) *.elf *.gdb *.o
-

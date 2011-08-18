@@ -5,7 +5,7 @@ LIBS = -lpthread
 all: parprouted
 
 romfs: all
-	$(ROMFSINST) parprouted /sbin/parprouted
+	$(ROMFSINST) -S parprouted /sbin/parprouted
 
 clean:
 	rm -f $(OBJS) parprouted core

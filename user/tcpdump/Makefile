@@ -136,7 +136,7 @@ version.c: $(srcdir)/VERSION
 install:
 
 romfs:
-	$(ROMFSINST) /bin/$(PROG)
+	$(ROMFSINST) -S /bin/$(PROG)
 
 uninstall:
 	rm -f $(DESTDIR)$(sbindir)/$(PROG)

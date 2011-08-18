@@ -37,7 +37,7 @@ EXTRA_DIST = \
   Transmission.xcodeproj/project.pbxproj
 
 romfs: install
-	cp -rfv filesystem/bin/transmission-daemon $(ROMFSDIR)/bin/transmission-daemon                                                      
+	$(ROMFSINST) -S filesystem/bin/transmission-daemon /bin/transmission-daemon
 	cp -rfv filesystem/share/* $(ROMFSDIR)/share/
 
 dist-hook:

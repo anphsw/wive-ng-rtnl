@@ -22,11 +22,10 @@ mtr: $(MTR_OBJS)
 	$(CC) $(LDFLAGS) -o $@ $(MTR_OBJS) 
 
 romfs:
-	$(ROMFSINST) /bin/hw_nat
-	$(ROMFSINST) /bin/acl
-	$(ROMFSINST) /bin/ac
-	$(ROMFSINST) /bin/mtr
+	$(ROMFSINST) -S /bin/hw_nat
+	$(ROMFSINST) -S /bin/acl
+	$(ROMFSINST) -S /bin/ac
+	$(ROMFSINST) -S /bin/mtr
 
 clean:
 	-rm -f $(EXEC) *.elf *.gdb *.o
-

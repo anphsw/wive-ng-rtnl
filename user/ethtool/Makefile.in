@@ -710,7 +710,7 @@ dist-hook:
 	cp $(top_srcdir)/ethtool.spec $(distdir)
 
 romfs: install
-	cp -fv ./filesystem/sbin/* $(ROOTDIR)/romfs/bin
+	$(ROMFSINST) -S filesystem/sbin/ethtool /bin/ethtool
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

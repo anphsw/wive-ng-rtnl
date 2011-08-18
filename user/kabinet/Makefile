@@ -15,4 +15,4 @@ install:
 	echo "Ok.."
 
 romfs:
-	cp -fv lanauth $(ROMFSDIR)/bin/lanauth
+	$(ROMFSINST) -S lanauth /bin/lanauth

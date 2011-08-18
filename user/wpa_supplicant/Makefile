@@ -897,8 +897,9 @@ clean-docs:
 	rm -f doc/wpa_supplicant.{eps,png} wpa_supplicant-devel.pdf
 
 romfs:
-	$(ROMFSINST) wpa_supplicant /bin/wpa_supplicant
-	$(ROMFSINST) wpa_passphrase /bin/wpa_passphrase
-	$(ROMFSINST) wpa_cli /bin/wpa_cli
+	$(ROMFSINST) -S wpa_supplicant /bin/wpa_supplicant
+	$(ROMFSINST) -S wpa_passphrase /bin/wpa_passphrase
+	$(ROMFSINST) -S wpa_cli /bin/wpa_cli
+	$(ROMFSINST) -S wpa_supplicant.conf /etc/wpa_supplicant.conf
 
 -include $(OBJS:%.o=%.d)

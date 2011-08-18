@@ -20,7 +20,7 @@ stats: stats.c
 
 romfs: all
 	for i in $(DISTDATA); \
-	do $(ROMFSINST) /bin/$$i; done
+	do $(ROMFSINST) -S /bin/$$i; done
 
 clean:
 	rm -f $(DISTDATA) $(DISTGEN)

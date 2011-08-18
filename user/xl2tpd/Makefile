@@ -141,7 +141,7 @@ install: ${EXEC}
 #	mkfifo /var/run/l2tp-control
 
 romfs:
-	$(ROMFSINST) /bin/$(EXEC)
+	$(ROMFSINST) -S /bin/$(EXEC)
 
 TAGS:	${SRCS}
 	etags ${SRCS}

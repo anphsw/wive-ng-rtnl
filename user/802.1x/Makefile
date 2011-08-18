@@ -46,7 +46,7 @@ clean:
 #
 # add by YYHuang@Ralink
 romfs:
-	$(ROMFSINST) rt2860apd /bin/rt2860apd
+	$(ROMFSINST) -S rt2860apd /bin/rt2860apd
 	ln -sf rt2860apd $(ROMFSDIR)/bin/rtinicapd
 
 -include $(OBJS:%.o=%.d)

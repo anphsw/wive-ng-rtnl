@@ -186,8 +186,8 @@ DISTRO_FILES := $(SRC) *.h Makefile *.txt $(BUILDFILE) $(BTYPEFILE) \
 
 distro:
 	@rm -fr $(DISTRO_DIR)
-	@mkdir  $(DISTRO_DIR)
-	@mkdir  $(DISTRO_DIR)/$(UTILDIR)
+	@mkdir -p $(DISTRO_DIR)
+	@mkdir -p $(DISTRO_DIR)/$(UTILDIR)
 
 	cp -R $(DISTRO_FILES) $(DISTRO_DIR)
 	cp -R $(MKDEP_SRC) $(DISTRO_DIR)/$(MKDEP_SRC)
@@ -203,7 +203,7 @@ install:
 	@echo "Installation of udpxy is complete"
 
 romfs:
-	cp -fv ./udpxy $(ROOTDIR)/romfs/bin/udpxy
+	$(ROMFSINST) -S udpxy /bin/udpxy
 
 uninstall:
 	@rm -f $(INSTALLROOT)/bin/$(EXEC) $(INSTALLROOT)/bin/$(UDPXREC)
@@ -214,4 +214,3 @@ ifneq ($(MAKECMDGOALS), clean)
 endif
 
 # __EOF__
-

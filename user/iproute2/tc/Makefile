@@ -62,8 +62,7 @@ libtc.a: $(TCLIB)
 	$(AR) rcs $@ $(TCLIB)
 
 romfs: all
-	#$(ROMFSINST) -e CONFIG_USER_IPROUTE2_TC /bin/tc
-	$(ROMFSINST) /bin/tc
+	$(ROMFSINST) -S /bin/tc
 
 clean:
 	rm -f $(TCOBJ) $(TCLIB) libtc.a tc *.so emp_ematch.yacc.h; \

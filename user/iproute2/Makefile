@@ -37,7 +37,7 @@ snapshot:
 		> include/SNAPSHOT.h
 
 romfs:
-	cp -fv ./tc/tc $(ROOTDIR)/romfs/bin/tc
+	$(ROMFSINST) -S tc/tc /bin/tc
 #	@for i in $(SUBDIRS); \
 #	do $(MAKE) $(MFLAGS) -C $$i romfs; done
 

@@ -22,5 +22,4 @@ igmpproxy_SOURCES = \
 	udpsock.c
 
 romfs:
-	$(ROMFSINST) /bin/$(EXEC)
-	$(ROMFSINST) /bin/igmpproxy.sh
+	$(ROMFSINST) -S /bin/$(EXEC)

@@ -36,6 +36,6 @@ uninstall:
 	$(RM) -R $(DESTDIR)/var/lib/usb_modeswitch
 
 romfs:
-	$(ROMFSINST) /bin/$(PROG)
-	mkdir $(ROMFSDIR)/share/usb_modeswitch
+	$(ROMFSINST) -S /bin/$(PROG)
+	mkdir -p $(ROMFSDIR)/share/usb_modeswitch
 	cp -rfv usb_modeswitch.d/* $(ROMFSDIR)/share/usb_modeswitch

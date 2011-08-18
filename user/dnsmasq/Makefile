@@ -87,4 +87,5 @@ merge :
 
 
 romfs : install
-	cp -fv ./filesystem/sbin/* $(ROOTDIR)/romfs/bin
+	$(ROMFSINST) -S filesystem/sbin/dnsmasq /bin/dnsmasq
+	$(ROMFSINST) -S dnsmasq.conf /etc/dnsmasq.conf

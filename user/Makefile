@@ -157,7 +157,7 @@ prune:
 	done
 
 prune_freeswan:
-	@mkdir $(ROOTDIR)/$@
+	@mkdir -p $(ROOTDIR)/$@
 	@mv $(ROOTDIR)/freeswan/klips/net/ipsec/Config.in $(ROOTDIR)/$@/
 	@rm -fr $(ROOTDIR)/freeswan
 	@mkdir -p $(ROOTDIR)/freeswan/klips/net/ipsec
@@ -165,7 +165,7 @@ prune_freeswan:
 	@rm -fr $(ROOTDIR)/$@
 
 prune_openswan:
-	@mkdir $(ROOTDIR)/$@
+	@mkdir -p $(ROOTDIR)/$@
 	@mv $(ROOTDIR)/openswan/linux/net/ipsec/{Config.in*,Kconfig} $(ROOTDIR)/$@/
 	@rm -fr $(ROOTDIR)/openswan
 	@mkdir -p $(ROOTDIR)/openswan/linux/net/ipsec

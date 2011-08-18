@@ -283,12 +283,12 @@ PICOBJS32 = $(SMBWRAPPER_OBJ:.o=.a32)
 all : CHECK $(SPROGS) $(PROGS) 
 
 romfs:
-	$(ROMFSINST)  bin/nmbd /bin/nmbd
-	$(ROMFSINST)  bin/smbd /bin/smbd
+	$(ROMFSINST) -S bin/nmbd /bin/nmbd
+	$(ROMFSINST) -S bin/smbd /bin/smbd
 	cp -rvf  codepages/* ../../../romfs/$(CODEPAGEDIR)
-	$(ROMFSINST) -e CONFIG_USER_SAMBA_SMBMOUNT bin/smbmnt /bin/smbmnt
-	$(ROMFSINST) -e CONFIG_USER_SAMBA_SMBMOUNT bin/smbmount /bin/smbmount
-	$(ROMFSINST) -e CONFIG_USER_SAMBA_SMBUMOUNT bin/smbumount /bin/smbumount
+	$(ROMFSINST) -S -e CONFIG_USER_SAMBA_SMBMOUNT bin/smbmnt /bin/smbmnt
+	$(ROMFSINST) -S -e CONFIG_USER_SAMBA_SMBMOUNT bin/smbmount /bin/smbmount
+	$(ROMFSINST) -S -e CONFIG_USER_SAMBA_SMBUMOUNT bin/smbumount /bin/smbumount
 
 smbwrapper : CHECK bin/smbsh bin/smbwrapper.so 
 

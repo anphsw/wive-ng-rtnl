@@ -26,4 +26,3 @@ all romfs:
 
 clean:
 	for i in $(SUBDIRS_APP) ; do make -C $$i clean ; done
-

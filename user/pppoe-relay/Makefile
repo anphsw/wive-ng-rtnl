@@ -53,8 +53,7 @@ pppoe-relay: relay.o debug.o if.o common.o
 #	$(STRIP) $(INSTALLDIR)/usr/sbin/pppoe-relay
 
 romfs: all
-	$(STRIP) pppoe-relay
-	$(ROMFSINST) /usr/sbin/pppoe-relay
+	$(ROMFSINST) -S /usr/sbin/pppoe-relay /bin/pppoe-relay
 
 clean:
 	rm -f *.o pppoe-relay

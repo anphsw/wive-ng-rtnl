@@ -7,8 +7,7 @@ $(EXEC): $(EXEC).c
 
 romfs:
 	$(STRIP) $(EXEC)
-	$(ROMFSINST) /bin/$(EXEC)
+	$(ROMFSINST) -S /bin/$(EXEC)
 
 clean:
 	rm -f $(EXEC) *.elf *.gdb *.o
-

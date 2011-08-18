@@ -5,6 +5,7 @@ all:
 
 romfs:
 	for i in $(DIRS) ; do make -C $$i $@ ; done
+	$(ROMFSINST) igmpproxy.conf /etc/igmpproxy.conf
 
 clean:
 	for i in $(DIRS) ; do make -C $$i clean ; done

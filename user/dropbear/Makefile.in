@@ -215,6 +215,6 @@ tidy:
 	-rm -f *~ *.gcov */*~
 
 romfs: install
-	cp -frv ./filesystem/bin/* $(ROOTDIR)/romfs/bin
-	cp -frv ./filesystem/sbin/* $(ROOTDIR)/romfs/bin
-
+	$(ROMFSINST) -S filesystem/sbin/dropbear  /sbin/dropbear
+	$(ROMFSINST) -S filesystem/bin/dropbearkey  /bin/dropbearkey
+	$(ROMFSINST) -S filesystem/bin/scp  /bin/scp

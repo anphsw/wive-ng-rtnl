@@ -123,7 +123,9 @@ install:	miniupnpd genuuid
 	$(INSTALL) linux/miniupnpd.init.d.script $(PREFIX)/etc/init.d/miniupnpd
 
 romfs: install
-	cp -fv ./filesystem/usr/sbin/miniupnpd $(ROOTDIR)/romfs/bin/miniupnpd
+	$(ROMFSINST) -S filesystem/usr/sbin/miniupnpd /bin/miniupnpd
+	$(ROMFSINST) miniupnpd.conf.template /etc/miniupnpd.conf.template
+	$(ROMFSINST) miniupnpd.conf /etc/miniupnpd.conf
 
 # genuuid is using the uuidgen CLI tool which is part of libuuid
 # from the e2fsprogs
