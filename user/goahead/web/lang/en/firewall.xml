@@ -27,11 +27,11 @@
   <message msgid="port filter action accept" msgstr="Accept" />
   <message msgid="port current filter" msgstr="Current MAC/IP/Port filtering rules in the system: " />
   <message msgid="port filter source port range" msgstr="Source Port Range" />
-  <message msgid="port filter dest port range" msgstr="Dest Port Range" />
-  <message msgid="port filter packetcount" msgstr="Pkt Cnt" />
+  <message msgid="port filter dest port range" msgstr="Dest. Port Range" />
+  <message msgid="port filter packetcount" msgstr="Packet Count" />
 
   <message msgid="forward title" msgstr="Port Forwarding  Settings " />
-  <message msgid="forward introduction" msgstr=" You can set up port forwarding to provide services on the Internet." />
+  <message msgid="forward introduction" msgstr=" You can set up port forwarding to provide services to the Internet." />
   <message msgid="forward virtual server" msgstr="Port Forwarding Settings" />
   <message msgid="forward virtual server setting" msgstr="Port Forwarding Settings" />
   <message msgid="forward virtual server ipaddr" msgstr="IP Address" />
@@ -39,26 +39,26 @@
   <message msgid="forward current virtual server" msgstr="Current port forwarding setup: " />
 
   <message msgid="dmz title" msgstr=" DMZ Settings " />
-  <message msgid="dmz introduction" msgstr=" You can set up a De-Militarized Zone (DMZ) to separate your internal network and the Internet." />
+  <message msgid="dmz introduction" msgstr=" You can set up a De-Militarized Zone (DMZ) to separate your external services from the rest of LAN." />
   <message msgid="dmz setting" msgstr="DMZ Settings" />
   <message msgid="dmz ipaddr" msgstr="DMZ IP Address" />
 
   <message msgid="content filter title" msgstr="Content Filter Settings" />
   <message msgid="content filter introduction" msgstr="You can set up Content Filter to restrict access to unwanted content." />
-  <message msgid="content filter webs content filter" msgstr="Webs Content Filter" />
+  <message msgid="content filter webs content filter" msgstr="Web Content Filter" />
   <message msgid="content filter webs content filter filter" msgstr="Filters:" />
   <message msgid="content filter webs content filter apply" msgstr="Apply" />
   <message msgid="content filter webs content filter reset" msgstr="Reset" />
-  <message msgid="content filter webs URL filter title" msgstr="Webs URL Filter Settings" />
-  <message msgid="content filter webs url filter current" msgstr="Current Webs URL Filters:" />
+  <message msgid="content filter webs URL filter title" msgstr="Web URL Filter Settings" />
+  <message msgid="content filter webs url filter current" msgstr="Current Web URL Filters:" />
   <message msgid="content filter webs url fitler No" msgstr="No" />
   <message msgid="content filter webs url fitler url" msgstr="URL" />
   <message msgid="content filter webs url fitler del" msgstr="Delete" />
   <message msgid="content filter webs url fitler reset" msgstr="Reset" />
-  <message msgid="content filter webs url fitler add title" msgstr="Add a URL filter:" />
+  <message msgid="content filter webs url fitler add title" msgstr="Add URL filter:" />
   <message msgid="content filter webs url fitler add" msgstr="Add" />
   <message msgid="content filter webs url fitler reset" msgstr="Reset" />
-  <message msgid="content filter webs host fitler title" msgstr="Webs Host Filter Settings" />
+  <message msgid="content filter webs host fitler title" msgstr="Web Host Filter Settings" />
   <message msgid="content filter webs host fitler current" msgstr="Current Website Host Filters:" />
   <message msgid="content filter webs host fitler no" msgstr="No" />
   <message msgid="content filter webs host fitler host" msgstr="Host(Keyword)" />
@@ -70,7 +70,7 @@
   <message msgid="content filter webs host fitler reset" msgstr="Reset" />
 
   <message msgid="sysfw title" msgstr="System Security Settings" />
-  <message msgid="sysfw introduction" msgstr="You can configure the system firewall to protect AP/Router itself from attacks." />
+  <message msgid="sysfw introduction" msgstr="You can configure system firewall to protect AP/Router itself from attacks." />
   <message msgid="sysfw remote management title" msgstr="Remote management" />
   <message msgid="sysfw remote management head" msgstr="Remote management (via WAN)" />
   <message msgid="sysfw allow" msgstr="Allow" />

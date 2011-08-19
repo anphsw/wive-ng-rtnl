@@ -20,16 +20,16 @@
   <message msgid="inet hostname" msgstr="Hostname" />
 
   <message msgid="wan title" msgstr="Wide Area Network (WAN) Settings" />
-  <message msgid="wan introduction" msgstr="You can choose different connection type suitable for your environment. Besides, you can also configure parameters according to the selected connection type." />
+  <message msgid="wan introduction" msgstr="You can choose connection type suitable for your environment. Also, you can configure parameters according to the selected connection type." />
   <message msgid="wan connection type" msgstr="WAN Connection Type:" />
-  <message msgid="wan connection type static" msgstr="STATIC (fixed IP)" />
-  <message msgid="wan connection type dhcp" msgstr="DHCP (Auto config)" />
+  <message msgid="wan connection type static" msgstr="STATIC (Fixed IP)" />
+  <message msgid="wan connection type dhcp" msgstr="DHCP (Auto Config)" />
   <message msgid="wan connection type pppoe" msgstr="PPPoE (ADSL)" />
   <message msgid="wan connection type l2tp" msgstr="L2TP" />
   <message msgid="wan connection type pptp" msgstr="PPTP" />
   <message msgid="wan protocol opmode" msgstr="Operation Mode" />
-  <message msgid="wan protocol opmode keepalive" msgstr="Keep Alive" />
-  <message msgid="wan protocol opmode ondemand" msgstr="On Demand" />
+  <message msgid="wan protocol opmode keepalive" msgstr="Keep-Alive" />
+  <message msgid="wan protocol opmode ondemand" msgstr="On-Demand" />
   <message msgid="wan protocol opmode manual" msgstr="Manual" />
 
   <message msgid="wan static mode" msgstr="Static Mode" />
@@ -46,7 +46,7 @@
   <message msgid="wan mac clone" msgstr="MAC Clone" />
 
   <message msgid="lan title" msgstr="Local Area Network (LAN) Settings" />
-  <message msgid="lan introduction" msgstr="You can enable/disable networking functions and configure their parameters as you wish." />
+  <message msgid="lan introduction" msgstr="You can configure different network services here." />
   <message msgid="lan setup" msgstr="LAN Setup" />
   <message msgid="lan dhcp type" msgstr="DHCP Type" />
   <message msgid="lan dhcp type server" msgstr="Server" />
@@ -87,7 +87,7 @@
   <message msgid="routing submit" msgstr="Apply" />
   <message msgid="routing reset" msgstr="Reset" />
   <message msgid="routing Number" msgstr="No." />
-  <message msgid="routing del title" msgstr="Current Routing table in the system:" />
+  <message msgid="routing del title" msgstr="Current Routing table:" />
   <message msgid="routing del dest" msgstr="Destination" />
   <message msgid="routing del netmask" msgstr="Netmask" />
   <message msgid="routing del gateway" msgstr="Gateway" />
@@ -112,14 +112,14 @@
   <message msgid="routing dynamic rip reset" msgstr="Reset" />
 
   <message msgid="qos title" msgstr="Quality of Service Settings" />
-  <message msgid="qos intro" msgstr="You can set up rules to provide Quality of Service guarantees for specific applications." />
+  <message msgid="qos intro" msgstr="You can set up rules to provide desired Quality of Service for specific applications." />
   <message msgid="qos setup" msgstr="QoS Setup" />
   <message msgid="qos str" msgstr="Quality of Service" />
   <message msgid="qos disable" msgstr="Disable" />
   <message msgid="qos enable" msgstr="Enable" />
   <message msgid="qos dscpmarkeronly" msgstr="mark DSCP only" />
   <message msgid="qos upload bandwidth" msgstr="Upload Bandwidth:" />
-  <message msgid="qos bandwidth custom" msgstr="User defined" />
+  <message msgid="qos bandwidth custom" msgstr="User-defined" />
   <message msgid="qos download bandwidth" msgstr="Download Bandwidth:" />
   <message msgid="qos setup submit" msgstr="Submit" />
   <message msgid="qos setup reset" msgstr="Reset" />

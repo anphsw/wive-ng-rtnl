@@ -7,12 +7,12 @@
   <message msgid="admin scan" msgstr="Scan" />
 
   <message msgid="man title" msgstr="System Management" />
-  <message msgid="man introduction" msgstr="Here you can configure your administrator account and password." />
+  <message msgid="man introduction" msgstr="Here you can configure your administrator login and password." />
 
   <message msgid="man language setting" msgstr="Language Settings" />
   <message msgid="man select language" msgstr="Select Language" />
-  <message msgid="man admin setting" msgstr="Adminstrator Settings" />
-  <message msgid="man admin account" msgstr="Account" />
+  <message msgid="man admin setting" msgstr="Administrator Settings" />
+  <message msgid="man admin account" msgstr="Login" />
   <message msgid="man admin passwd" msgstr="Password" />
 
   <message msgid="man ntp setting" msgstr="NTP Settings" />
@@ -68,13 +68,13 @@
   <message msgid="man ddns setting" msgstr="Dynamic DNS" />
   <message msgid="man ddns provider" msgstr="Dynamic DNS Provider" />
   <message msgid="man ddns none" msgstr="None" />
-  <message msgid="man ddns account" msgstr="Account" />
+  <message msgid="man ddns account" msgstr="Login" />
   <message msgid="man ddns passwd" msgstr="Password" />
   <message msgid="man ddns" msgstr="Dynamic DNS" />
 
   <message msgid="upload title" msgstr="Upgrade Firmware" />
-  <message msgid="upload introduction1" msgstr="Upgrade the Wive-NG-RTNL firmware to obtain new functionality. " />
-  <message msgid="upload introduction2" msgstr="It takes about 1 minute to upload &#160; upgrade flash and be patient please. Caution! A corrupted image will hang the system." />
+  <message msgid="upload introduction1" msgstr="Upgrade Wive-NG-RTNL firmware to obtain new functionality. " />
+  <message msgid="upload introduction2" msgstr="It takes about 1 minute to upload firmware &amp; upgrade flash.Please be patient. Caution! A corrupted image will hang up the system." />
   <message msgid="upload firmware" msgstr="Update Firmware" />
   <message msgid="upload firmware location" msgstr="Location:" />
   <message msgid="upload bootloader" msgstr="Update Bootloader" />
@@ -132,7 +132,7 @@
   <message msgid="statistic all interface" msgstr="All interfaces" />
 
   <message msgid="syscommand title" msgstr="System Command" />
-  <message msgid="syscommand introduction" msgstr=" Run a system command as root: " />
+  <message msgid="syscommand introduction" msgstr=" Run system command as root: " />
   <message msgid="syscommand system command" msgstr="System command " />
   <message msgid="syscommand command" msgstr="Command:" />
 

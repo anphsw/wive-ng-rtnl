@@ -26,7 +26,7 @@
   <message msgid="station network type" msgstr="Network Type" />
 
   <message msgid="basic title" msgstr="Basic Wireless Settings " />
-  <message msgid="basic introduction" msgstr="You can configure the minimum number of Wireless settings for communication, such as Network Name (SSID) and Channel number. The Access Point can be set up simply with only the minimum setting items. " />
+  <message msgid="basic introduction" msgstr="You can configure the most basic settings of Wireless communication, such as Network Name (SSID) and Channel. These settings are sufficient to have a working Access Point. " />
   <message msgid="basic wireless network" msgstr="Wireless Network" />
   <message msgid="basic radio button" msgstr="Radio On/Off" />
   <message msgid="basic network mode" msgstr="Network Mode" />
@@ -41,7 +41,7 @@
   <message msgid="basic frequency" msgstr="Frequency (Channel)" />
   <message msgid="basic frequency auto" msgstr="AutoSelect" />
   <message msgid="basic rate" msgstr="Rate" />
-  <message msgid="basic wds title" msgstr="Wireless Distribution System(WDS)" />
+  <message msgid="basic wds title" msgstr="Wireless Distribution System (WDS)" />
   <message msgid="basic wds mode" msgstr="WDS Mode" />
   <message msgid="basic wds phy mode" msgstr="Phy Mode" />
   <message msgid="basic wds encryp type" msgstr="EncrypType" />
@@ -52,9 +52,9 @@
   <message msgid="basic ht op mixed" msgstr="Mixed Mode" />
   <message msgid="basic ht channel bandwidth" msgstr="Channel BandWidth" />
   <message msgid="basic ht guard interval" msgstr="Guard Interval" />
-  <message msgid="basic ht rdg" msgstr="Reverse Direction Grant(RDG)" />
+  <message msgid="basic ht rdg" msgstr="Reverse Direction Grant (RDG)" />
   <message msgid="basic ht extension channel" msgstr="Extension Channel" />
-  <message msgid="basic ht amsdu" msgstr="Aggregation MSDU(A-MSDU)" />
+  <message msgid="basic ht amsdu" msgstr="Aggregation MSDU (A-MSDU)" />
   <message msgid="basic ht addba" msgstr="Auto Block ACK" />
   <message msgid="basic ht delba" msgstr="Decline BA Request" />
   <message msgid="basic other" msgstr="Other" />
@@ -62,7 +62,7 @@
   <message msgid="basic ht rxstream" msgstr="HT RxStream" />
 
   <message msgid="adv title" msgstr="Advanced Wireless Settings" />
-  <message msgid="adv introduction" msgstr="Use the Advanced Setup page for more detailed settings of the Wireless part. Advanced Setup includes items that are not available from the Basic Setup page, such as Beacon Interval, Control Tx Rates and Basic Data Rates." />
+  <message msgid="adv introduction" msgstr="You can change advanced wireless settings, such as Beacon Interval, Control TX Rates and Basic Data Rates." />
   <message msgid="adv wireless" msgstr="Advanced Wireless" />
   <message msgid="adv bgpro" msgstr="BG Protection Mode" />
   <message msgid="adv basic data rate" msgstr="Basic Data Rates" />
@@ -107,12 +107,12 @@
 
   <message msgid="secure select ssid" msgstr="Select SSID" />
   <message msgid="secure ssid title" msgstr="Wireless Security/Encryption Settings" />
-  <message msgid="secure ssid introduction" msgstr="Set up the wireless security and encryption to prevent unauthorized access and monitoring." />
+  <message msgid="secure ssid introduction" msgstr="You can configure wireless security and encryption to prevent unauthorized access to the router." />
   <message msgid="secure ssid choice" msgstr="SSID choice" />
   <message msgid="secure security policy" msgstr="Security Policy -- " />
   <message msgid="secure security mode" msgstr="Security Mode" />
   <message msgid="secure encryp type" msgstr="Encrypt Type" />
-  <message msgid="secure wep" msgstr="Wire Equivalence Protection (WEP)" />
+  <message msgid="secure wep" msgstr="Wired Equivalent Privacy (WEP)" />
   <message msgid="secure wep default key" msgstr="Default Key" />
   <message msgid="secure wep default key1" msgstr="Key 1" />
   <message msgid="secure wep default key2" msgstr="Key 2" />
@@ -143,15 +143,15 @@
   <message msgid="secure access policy del" msgstr="Del" />
 
   <message msgid="wps title" msgstr="Wi-Fi Protected Setup" />
-  <message msgid="wps introduction" msgstr="You can set up security easily by choosing PIN or PBC method to do Wi-Fi Protected Setup." />
+  <message msgid="wps introduction" msgstr="You can set up security easily by choosing PIN or PBC method to have Wi-Fi Protected Setup." />
   <message msgid="wps config" msgstr="WPS Config" />
   <message msgid="wps wps" msgstr="WPS: " />
   <message msgid="wps summary" msgstr="WPS Summary" />
   <message msgid="wps current status" msgstr="WPS Current Status: " />
   <message msgid="wps configured" msgstr="WPS Configured: " />
   <message msgid="wps ssid" msgstr="WPS SSID: " />
-  <message msgid="wps auth mode" msgstr="WPS Auth Mode: " />
-  <message msgid="wps encryp type" msgstr="WPS Encryp Type: " />
+  <message msgid="wps auth mode" msgstr="WPS Auth. Mode: " />
+  <message msgid="wps encryp type" msgstr="WPS Encryp. Type: " />
   <message msgid="wps default key index" msgstr="WPS Default Key Index: " />
   <message msgid="wps ap pin" msgstr="AP PIN: " />
   <message msgid="wps reset oob" msgstr="Reset OOB" />
@@ -244,7 +244,7 @@
   <message msgid="qos second" msgstr=" sec" />
   <message msgid="qos dls status" msgstr="DLS Status" />
   <message msgid="qos dls timeout" msgstr="Timeout" />
-  <message msgid="qos teardown" msgstr="Tear Down" />
+  <message msgid="qos teardown" msgstr="Teardown" />
 
   <message msgid="11n title" msgstr="Station 11n Configurations" />
   <message msgid="11n introduction" msgstr="The Status page shows settings and current operation status of the Station." />
@@ -259,7 +259,7 @@
   <message msgid="about driver version" msgstr="Driver Version" />
 
   <message msgid="stawps title" msgstr="Wi-Fi Protected Setup (STA)" />
-  <message msgid="stawps introduction" msgstr=" You can set up security easily by choosing PIN or PBC method to do Wi-Fi Protected Setup." />
+  <message msgid="stawps introduction" msgstr=" You can set up security easily by choosing PIN or PBC method to have Wi-Fi Protected Setup." />
   <message msgid="stawps scan" msgstr=" WPS AP site survey " />
   <message msgid="stawps refresh" msgstr="Refresh" />
   <message msgid="stawps mode" msgstr="Mode" />

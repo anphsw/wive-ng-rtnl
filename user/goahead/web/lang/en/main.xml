@@ -7,7 +7,7 @@
   <message msgid="overview introduction" msgstr="." />
   <message msgid="overview select language" msgstr="Select Language" />
   <message msgid="overview status link" msgstr="Status" />
-  <message msgid="overview statistic link" msgstr="Statistic" />
+  <message msgid="overview statistic link" msgstr="Statistics" />
   <message msgid="overview management link" msgstr="Management" />
   <message msgid="treeapp openall" msgstr="open all" />
   <message msgid="treeapp closeall" msgstr="close all" />
@@ -19,7 +19,7 @@
   <message msgid="treeapp lan" msgstr="LAN setup" />
   <message msgid="treeapp vpn" msgstr="VPN setup" />
   <message msgid="treeapp routing" msgstr="Routing" />
-  <message msgid="treeapp dhcp clients" msgstr="DHCP clients" />
+  <message msgid="treeapp dhcp clients" msgstr="DHCP Clients" />
   <message msgid="treeapp samba" msgstr="Samba/WINS" />
   <message msgid="treeapp accounting" msgstr="IP Accounting" />
   <message msgid="treeapp wireless settings" msgstr="Wireless Settings" />
@@ -78,15 +78,15 @@
   <message msgid="opmode title" msgstr="Operation Mode Configuration" />
   <message msgid="opmode introduction" msgstr="You can configure the operation mode suitable for your environment." />
   <message msgid="opmode mode b" msgstr="Bridge:" />
-  <message msgid="opmode mode b intro" msgstr="All ethernet and wireless interfaces are bridged into a single bridge interface." />
+  <message msgid="opmode mode b intro" msgstr="All Ethernet and Wireless interfaces are combined into a single bridge interface." />
   <message msgid="opmode mode g" msgstr="Gateway:" />
-  <message msgid="opmode mode g intro" msgstr="The first ethernet port is treated as WAN port. The other ethernet ports and the wireless interface are bridged together and are treated as LAN ports." />
+  <message msgid="opmode mode g intro" msgstr="The first Ethernet port is treated as WAN port. All other Ethernet ports and the Wireless interface are bridged together and treated as LAN ports." />
   <message msgid="opmode mode e" msgstr="Ethernet Converter:" />
-  <message msgid="opmode mode e intro" msgstr="The wireless interface is treated as WAN port, and the ethernet ports are LAN ports." />
+  <message msgid="opmode mode e intro" msgstr="The Wireless interface is treated as WAN port, and Ethernet ports are used as LAN ports." />
   <message msgid="opmode mode a" msgstr="AP Client:" />
-  <message msgid="opmode mode a intro" msgstr="The wireless apcli interface is treated as WAN port, and the wireless ap interface and the ethernet ports are LAN ports." />
+  <message msgid="opmode mode a intro" msgstr="The Wireless APCli interface is treated as WAN port, and the Wireless AP interface and Ethernet ports are used as LAN ports." />
   <message msgid="opmode mode s" msgstr="Hotspot:" />
-  <message msgid="opmode mode s intro" msgstr="The first ethernet port is treated as WAN port. The other ethernet ports and the wireless interface are bridged together and are treated as hotspot ports. NAT acceleration will be disabled in this mode!" />
+  <message msgid="opmode mode s intro" msgstr="The first Ethernet port is treated as WAN port. Other Ethernet ports and the Wireless interface are bridged together and are treated as hotspot ports. NAT acceleration will be disabled in this mode!" />
   <message msgid="opmode nat" msgstr="NAT Enabled" />
   <message msgid="opmode eth conv" msgstr="Ethernet Converter Enabled" />
 </po>
