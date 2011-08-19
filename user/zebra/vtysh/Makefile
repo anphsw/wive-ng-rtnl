@@ -99,10 +99,10 @@ AUTOHEADER = ${SHELL} /opt/Wive-RTNL/user/zebra/missing --run autoheader
 AUTOMAKE = ${SHELL} /opt/Wive-RTNL/user/zebra/missing --run automake-1.11
 AWK = gawk
 BGPD = 
-CC = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc 
+CC = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc
 CCDEPMODE = depmode=none
-CFLAGS = -Os -pipe  -mips32r2 -mtune=24kec -Os -pipe  -mips32r2 -mtune=24kec -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL -Os -pipe  -mips32r2 -mtune=24kec -fno-caller-saves -Wall -Wno-trigraphs -Wno-long-long -Wno-pointer-sign
-CPP = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc  -E
+CFLAGS = -Os -pipe -mips32r2 -mtune=24kec -Os -pipe -mips32r2 -mtune=24kec -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL -Os -pipe -mips32r2 -mtune=24kec -fno-caller-saves -Wall -Wno-trigraphs -Wno-long-long -Wno-pointer-sign
+CPP = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc -E
 CPPFLAGS = 
 CURSES = 
 CYGPATH_W = echo
@@ -124,7 +124,7 @@ INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
 IPFORWARD = ipforward_proc.o
 KERNEL_METHOD = 
-LDFLAGS = -Wl,--fatal-warnings -L/opt/Wive-RTNL/lib/lib
+LDFLAGS = -Wl,--fatal-warnings -L/opt/Wive-RTNL/lib/lib -Wl,--fatal-warnings -L/opt/Wive-RTNL/lib/lib
 LIBOBJS = 
 LIBPAM = 
 LIBS = -lm -lcrypt   

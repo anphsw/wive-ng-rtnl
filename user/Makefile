@@ -3,32 +3,34 @@
 #
 
 .EXPORT_ALL_VARIABLES:
-.PHONY: config all romfs clean prune
+.PHONY: config all romfs clean
 
 #
 # Include architecture specific build rules.
 #
 
--include ../config.arch
+UCLINUX_BUILD_USER=1
+
+-include $(ARCH_CONFIG)
 -include $(LINUX_CONFIG)
+-include $(CONFIG_CONFIG)
+-include $(MODULES_CONFIG)
+
+ifdef CONFIG_RALINK_RT3052
+-include ../vendors/Ralink/RT3052/config.arch
+endif
 
 ifndef ROOTDIR
 ROOTDIR=..
 endif
 
+VEND=$(ROOTDIR)/vendors
+
 ifndef CONFIG_IPV6
-CFLAGS += DNO_IPV6
+CFLAGS += -DNO_IPV6
 endif
 
 export $(CFLAGS)
-
-UCLINUX_BUILD_USER=1
--include $(LINUX_CONFIG)
--include $(CONFIG_CONFIG)
--include $(ARCH_CONFIG)
--include $(MODULES_CONFIG)
-
-VEND=$(ROOTDIR)/vendors
 
 #for all cleanap
 SUBDIRS_APP =  goahead iptables miniupnp  rt2880_app wpa_supplicant ethtool
@@ -94,15 +96,21 @@ dir_$(CONFIG_USER_BUSYBOX_BUSYBOX)          += busybox
 dir_$(CONFIG_USER_GOAHEAD_HTTPD)	    += goahead
 
 all: config
-	CC=$(ROOTDIR)/toolchain/bin/mipsel-linux-uclibc-gcc ; \
-	AR=$(ROOTDIR)/toolchain/bin/mipsel-linux-uclibc-ar ; \
-	LD=$(ROOTDIR)/toolchain/bin/mipsel-linux-uclibc-ld ; \
-	RANLIB=$(ROOTDIR)/toolchain/bin/mipsel-linux-uclibc-ranlib ; \
-	# ">>>>>>>>>>>>>>>> CONFIGURE NEEDED  <<<<<<<<<<<<<<<<<<<<<<"
+	CC=$(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-gcc ; \
+	GCC=$(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-gcc ; \
+	CXX=$(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-g++ ; \
+	AR=$(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-ar ; \
+	AS=$(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-as ; \
+	LD=$(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-ld ; \
+	NM=$(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-nm ; \
+	RANLIB=$(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-ranlib ; \
+	STRIP=$(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-strip ;
 ifeq ($(CONFIG_USER_OPENSSL),y)
+	# ">>>>>>>>>>>>>>>> CONFIGURE SSL NEEDED  <<<<<<<<<<<<<<<<<<<<<<"
 	cd openssl ; ./Configure RT2880 no-ripemd; $(MAKE) ; \
 	cd ..
 endif
+	# ">>>>>>>>>>>>>>>> CONFIGURE ALL NEEDED  <<<<<<<<<<<<<<<<<<<<<<"
 	for i in $(dir_y) ; do \
 	    if [ -f "$$i/DoConfigure.sh" ]; then ( cd $$i; ./DoConfigure.sh; cd .. ) fi \
 	done
@@ -141,37 +149,6 @@ clean:
 	-for i in $(sort $(dir_y) $(dir_n) $(dir_)) ; do [ ! -d $$i ] || $(MAKE) -C $$i dist-clean; done
 	-for i in $(sort $(dir_y) $(dir_n) $(dir_)) ; do [ ! -d $$i ] || $(MAKE) -C $$i distclean; done
 	-@set -e; for i in $(SUBDIRS_APP); do $(MAKE) -C $$i clean; rm -rf $$i/filesystem/*; done
-
-prune:
-	-for i in $(sort $(dir_n) $(dir_)) ; do \
-		found=0; \
-		for j in $(sort $(dir_y)) ; do \
-			if [ $$i == $$j ]; then \
-				found=1; \
-			fi; \
-		done; \
-		if [ $$found == 0 ]; then \
-			[ "$$i" = "freeswan" ] && $(MAKE) prune_freeswan; \
-			[ "$$i" = "openswan" ] && $(MAKE) prune_openswan; \
-			rm -fr $$i; \
-		fi; \
-	done
-
-prune_freeswan:
-	@mkdir -p $(ROOTDIR)/$@
-	@mv $(ROOTDIR)/freeswan/klips/net/ipsec/Config.in $(ROOTDIR)/$@/
-	@rm -fr $(ROOTDIR)/freeswan
-	@mkdir -p $(ROOTDIR)/freeswan/klips/net/ipsec
-	@mv $(ROOTDIR)/$@/* $(ROOTDIR)/freeswan/klips/net/ipsec/
-	@rm -fr $(ROOTDIR)/$@
-
-prune_openswan:
-	@mkdir -p $(ROOTDIR)/$@
-	@mv $(ROOTDIR)/openswan/linux/net/ipsec/{Config.in*,Kconfig} $(ROOTDIR)/$@/
-	@rm -fr $(ROOTDIR)/openswan
-	@mkdir -p $(ROOTDIR)/openswan/linux/net/ipsec
-	@mv $(ROOTDIR)/$@/* $(ROOTDIR)/openswan/linux/net/ipsec/
-	@rm -fr $(ROOTDIR)/$@
 
 web:
 	$(MAKE) -C goahead all

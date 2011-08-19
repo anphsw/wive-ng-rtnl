@@ -29,26 +29,36 @@ LINUXINCDIR                = $(FIRMROOT)/linux/include
 CONFIG_CROSS_COMPILER_PATH = $(TOOLCHAINDIR)/bin
 
 ###########################################################################
-OPTS			   = -Os -pipe 
-OPTS			  += -mips32r2 -mtune=24kec
+
+CC	= $(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-gcc
+GCC	= $(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-gcc
+CXX	= $(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-g++
+AR	= $(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-ar
+AS	= $(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-as
+LD	= $(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-ld
+NM	= $(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-nm
+RANLIB	= $(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-ranlib
+STRIP	= $(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-strip
+
+###########################################################################
+OPTS	= -Os -pipe -mips32r2 -mtune=24kec
 
 ############################ BASE FLAGS ###################################
-CFLAGS  += -I$(ROOTDIR)
-CFLAGS  += $(OPTS)
+CFLAGS  += -I$(ROOTDIR) $(OPTS)
 
 ############################ OPTIMIZE #####################################
-# improves compression ratio for generated code                                                                                             
-CFLAGS += -fno-caller-saves
+# improves compression ratio for generated code
+CFLAGS	+= -fno-caller-saves
 
 ############################ WARN/ERROR ###################################
 # base flags for warnings
-CFLAGS += -Wall -Wno-trigraphs -Wno-long-long
+CFLAGS	+= -Wall -Wno-trigraphs -Wno-long-long
 
 # disable pointer signed / unsigned warnings in gcc 4.0
-CFLAGS += -Wno-pointer-sign
+CFLAGS	+= -Wno-pointer-sign
 
 # disable variable unused warnings in gcc 4.6.0
-#CFLAGS += -Wno-unused-but-set-variable
+#CFLAGS	+= -Wno-unused-but-set-variable
 
 ###########################################################################
 
