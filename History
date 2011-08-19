@@ -558,6 +558,7 @@
 30) Some configs install to /etc (rwfs) only if needed apps configured. Save flash.<br>
 31) Tar autodetect compressed tarballs enabled per default.<br>
 32) WebUi spelling/spacing fixes.<br>
+33) Add samba v3.3.16. Use CONFIG_USER_SAMBA3 in config-config*.<br>
 
 <br><br>
 <b>For support see:</b><br>

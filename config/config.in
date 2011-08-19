@@ -73,6 +73,7 @@ bool 'echo server'				CONFIG_USER_ECHO_SERVER
 bool 'storage(enable chmod, fdisk in busybox)'	CONFIG_USER_STORAGE
 
 dep_bool 'samba server'				CONFIG_USER_SAMBA
+dep_bool 'samba server v3'			CONFIG_USER_SAMBA3
 dep_bool 'dlna server'				CONFIG_USER_MINIDLNA
 
 bool 'go-ahead webserver'				CONFIG_USER_GOAHEAD_HTTPD
