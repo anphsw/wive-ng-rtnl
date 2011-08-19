@@ -201,5 +201,5 @@ fi
 # example: http://sadnet.ru/downloads/wan_up.sh - load external routes for www.kvidex.ru ISP
 if [ -f /etc/wan_up.sh ]; then
     chmod 777 /etc/wan_up.sh
-    sh /etc/wan_up.sh
+    sh /etc/wan_up.sh &
 fi
