@@ -196,4 +196,10 @@ if [ "$wanmode" != "DHCP" ] || [ "$vpnPurePPPOE" = "1" ]; then
     (service vpnhelper stop && sleep 2 && service vpnhelper start) &
 fi
 
-exit 0
+# this is hook for exec user script after physycal connection configured
+# may be used for add scripts needed by some provides
+# example: http://sadnet.ru/downloads/wan_up.sh - load external routes for www.kvidex.ru ISP
+if [ -f /etc/wan_up.sh ]; then
+    chmod 777 /etc/wan_up.sh
+    sh /etc/wan_up.sh
+fi
