@@ -11,11 +11,11 @@ PPP_REMOTE="$5"
 PPP_IPPARAM="$6"
 LOG="logger -t pppd"
 
-lan_ip=`nvram_get 2860 lan_ipaddr`                                                                                       
-lan_nm=`nvram_get 2860 lan_netmask`     
-Lan2Enabled=`nvram_get 2860 Lan2Enabled`                                                                                 
-lan2_ipaddr=`nvram_get 2860 lan2_ipaddr`                                                                                 
-lan2_netmask=`nvram_get 2860 lan2_netmask`   
+lan_ip=`nvram_get 2860 lan_ipaddr`
+lan_nm=`nvram_get 2860 lan_netmask`
+Lan2Enabled=`nvram_get 2860 Lan2Enabled`
+lan2_ipaddr=`nvram_get 2860 lan2_ipaddr`
+lan2_netmask=`nvram_get 2860 lan2_netmask`
 upnp=`nvram_get 2860 upnpEnabled`
 NAT=`nvram_get 2860 vpnNAT`
 DGW=`nvram_get 2860 vpnDGW`
@@ -69,7 +69,7 @@ PortForwardEnable=`nvram_get 2860 PortForwardEnable`
 		$LOG "Replace route to $vpnServerIP via $newdgw for ppp remote $PPP_REMOTE Corbina ?...."
 		ip route del $vpnServerIP > /dev/null 2>&1
 		ip route replace $vpnServerIP via $newdgw
-		$LOG "Drop OUTPUT to $vpnServerIP over $PPP_IFACE"                                                               
+		$LOG "Drop OUTPUT to $vpnServerIP over $PPP_IFACE"
                 iptables -I OUTPUT -o $PPP_IFACE -d $vpnServerIP -j DROP
 	    fi
 	fi
@@ -90,7 +90,7 @@ PortForwardEnable=`nvram_get 2860 PortForwardEnable`
 	ip route replace default metric 10 dev $PPP_IFACE
     fi
 
-    #user route add                                                                                                                             
+    #user route add
     if [ -f /etc/routes_ppp_replace ]; then
         $LOG "Add user routes from ip-up for $PPP_IFACE"
         /etc/routes_ppp_replace replace $PPP_IFACE

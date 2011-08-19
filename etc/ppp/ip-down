@@ -11,17 +11,17 @@ PPP_REMOTE="$5"
 PPP_IPPARAM="$6"
 LOG="logger -t pppd"
 
-lan_ip=`nvram_get 2860 lan_ipaddr`                                                                                       
-lan_nm=`nvram_get 2860 lan_netmask`     
-Lan2Enabled=`nvram_get 2860 Lan2Enabled`                                                                                 
-lan2_ipaddr=`nvram_get 2860 lan2_ipaddr`                                                                                 
-lan2_netmask=`nvram_get 2860 lan2_netmask` 
-vpnPeerDNS=`nvram_get 2860 vpnPeerDNS` 
+lan_ip=`nvram_get 2860 lan_ipaddr`
+lan_nm=`nvram_get 2860 lan_netmask`
+Lan2Enabled=`nvram_get 2860 Lan2Enabled`
+lan2_ipaddr=`nvram_get 2860 lan2_ipaddr`
+lan2_netmask=`nvram_get 2860 lan2_netmask`
+vpnPeerDNS=`nvram_get 2860 vpnPeerDNS`
 chilli_net=`nvram_get 2860 chilli_net`
 
     $LOG "Disable forwarding for $PPP_IFACE interface"
     echo 0 > "/proc/sys/net/ipv4/conf/$PPP_IFACE/forwarding"
-    
+
     $LOG "Restore netfilter rules from pppd"
     iptables -D FORWARD -o $PPP_IFACE -j ACCEPT > /dev/null 2>&1
     iptables -t filter -D FORWARD -i $PPP_IFACE -o ! $PPP_IFACE -j MINIUPNPD > /dev/null 2>&1
@@ -39,7 +39,7 @@ chilli_net=`nvram_get 2860 chilli_net`
     fi
 
     if [ "$vpnPeerDNS" != "off" ]; then
-	$LOG "Restore DNS from pppd"                                                                                             
+	$LOG "Restore DNS from pppd"
 	cp -f /var/tmp/resolv.conf.tmp.$PPP_IFACE /etc/resolv.conf
 	# read for all write by root
 	chmod 644 /etc/resolv.conf > /dev/null 2>&1
@@ -49,7 +49,7 @@ chilli_net=`nvram_get 2860 chilli_net`
 	$LOG "Delete user routes"
 	/etc/routes_ppp_replace del $PPP_IFACE > /dev/null 2>&1
     fi
-    
+
     $LOG "Restore default gateway"
     #clear all default route
     if [ -f /tmp/ip-down-route-reload ] || [ -f /tmp/default.gw ]; then
