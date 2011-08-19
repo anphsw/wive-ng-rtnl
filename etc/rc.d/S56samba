@@ -32,8 +32,6 @@ if [ "$SmbEnabled" = "1" ]; then
     echo "    server string = $SmbString" >> $CONFIG
     echo "    os level = $SmbOsLevel" >> $CONFIG
     echo "    force user = $Login" >> $CONFIG
-    echo "    coding system = utf8" >> $CONFIG
-    echo "    client code page = 866" >> $CONFIG
 
     #add template to config
     cat /etc/smb.conf.template >> $CONFIG
