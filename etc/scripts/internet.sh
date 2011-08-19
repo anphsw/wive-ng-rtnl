@@ -81,6 +81,7 @@ addMBSSID()
 		fi
 		ip link set ra$i down > /dev/null 2>&1
 		ifconfig ra$i hw ether "$REALMAC"
+		brctl addif br0 ra$i
     		ip link set ra$i up
 	    done
 	fi
