@@ -22,23 +22,30 @@ for i in $PARAMS; do
 done
 chmod 777 $RO_ROOT/etc/scripts/config.sh
 
-echo --------------------------------STRIP AND SSTRIP-----------------------------
-echo "FIND FILES TO STRIP"
+echo -------------------------------FIND FILES TO STRIP-----------------------------
 NON_STRIPS_BIN=`find $RO_ROOT/bin -type f -print -exec file {} \; | grep -v "modules" | grep -v "icon" | grep -v "start" | grep -v "rc" | grep -v ".sh" | cut -d":" -f1`
 NON_STRIPS_LIB=`find $RO_ROOT/lib -type f -print -exec file {} \; | grep -v "modules" | grep -v ".a" | grep -v ".la" | grep -v ".pc" | cut -d":" -f1`
-echo "STRIP LIB"
+echo -----------------------------------STRIP BIN----------------------------------
+for i in $NON_STRIPS_BIN; do
+    echo $i;
+    $OBJCOPY $i $i
+done
 if [ "$NON_STRIPS_BIN" != "" ]; then
   echo BIN: $NON_STRIPS_BIN
   $STRIP $NON_STRIPS_BIN
   $SSTRIP $NON_STRIPS_BIN
 fi
-echo "STRIP BIN"
+echo -----------------------------------STRIP LIB----------------------------------
+for i in $NON_STRIPS_LIB; do
+    echo $i;
+    $OBJCOPY $i $i
+done
 if [ "$NON_STRIPS_LIB" != "" ]; then
   echo LIB: $NON_STRIPS_LIB
   $STRIP $NON_STRIPS_LIB
   $SSTRIP $NON_STRIPS_LIB
 fi
-echo "STRIP MODULES"
+echo -----------------------------------STRIP MOD----------------------------------
 for i in $MODULES; do
     echo $i;
     $OBJCOPY $i $i
