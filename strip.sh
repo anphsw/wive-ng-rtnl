@@ -31,9 +31,9 @@ for i in $NON_STRIPS_BIN; do
     $OBJCOPY $i $i
 done
 if [ "$NON_STRIPS_BIN" != "" ]; then
-  echo BIN: $NON_STRIPS_BIN
-  $STRIP $NON_STRIPS_BIN
-  $SSTRIP $NON_STRIPS_BIN
+    echo BIN: $NON_STRIPS_BIN
+    $STRIP $NON_STRIPS_BIN
+    $SSTRIP $NON_STRIPS_BIN
 fi
 echo -----------------------------------STRIP LIB----------------------------------
 for i in $NON_STRIPS_LIB; do
@@ -41,9 +41,9 @@ for i in $NON_STRIPS_LIB; do
     $OBJCOPY $i $i
 done
 if [ "$NON_STRIPS_LIB" != "" ]; then
-  echo LIB: $NON_STRIPS_LIB
-  $STRIP $NON_STRIPS_LIB
-  $SSTRIP $NON_STRIPS_LIB
+    echo LIB: $NON_STRIPS_LIB
+    $STRIP $NON_STRIPS_LIB
+    $SSTRIP $NON_STRIPS_LIB
 fi
 echo -----------------------------------STRIP MOD----------------------------------
 for i in $MODULES; do

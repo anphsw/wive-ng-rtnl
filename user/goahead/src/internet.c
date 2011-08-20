@@ -931,7 +931,7 @@ static int getFtpBuilt(int eid, webs_t wp, int argc, char_t **argv)
 
 static int getSmbBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
-#if defined CONFIG_USER_SAMBA
+#if defined(CONFIG_USER_SAMBA) || defined(CONFIG_USER_SAMBA3)
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));

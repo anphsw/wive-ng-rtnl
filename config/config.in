@@ -60,8 +60,8 @@ bool 'Transmission (BitTorrent Client)'		CONFIG_USER_TRANSMISSION
 if [ "$CONFIG_USER_TRANSMISSION" = "y" ]; then
     define_bool CONFIG_LIB_EVENT y
     define_bool CONFIG_LIB_CURL y
-    define_bool CONFIG_USER_OPENSSL y
     define_bool CONFIG_LIB_ZLIB_FORCE y
+    define_bool CONFIG_USER_OPENSSL y
 fi
 
 bool 'dhcp6'					CONFIG_USER_DHCP6
@@ -152,10 +152,6 @@ bool 'wpa-supplicant'				CONFIG_USER_WPA_SUPPLICANT
 if [ "$CONFIG_USER_WPA_SUPPLICANT" = "y" ]; then
 	define_bool CONFIG_USER_OPENSSL y
 fi
-if [ "$CONFIG_USER_WPA_SUPPLICANT" = "n" ]; then
-	define_bool CONFIG_USER_OPENSSL n
-fi
-
 
 comment 'Wireless-tools'
 bool 'wireless_tools support'	CONFIG_USER_WIRELESS_TOOLS

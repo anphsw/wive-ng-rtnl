@@ -1,6 +1,7 @@
 
 SUBDIRS_APP = ated flash i2ccmd mii_mgr nvram reg switch csr_test gpio i2scmd mem_usage mtd pcmcmd spicmd mtd_verifier hw_nat
 
+#ralink specific applications
 ra_dir_$(CONFIG_RT2880_REG_RW)      += reg
 ra_dir_$(CONFIG_RT2880_ATED)        += ated
 ra_dir_$(CONFIG_RT2880_CSR_TEST)    += csr_test
@@ -20,6 +21,9 @@ ra_dir_$(CONFIG_RALINKAPP_I2S)      += i2scmd
 ra_dir_$(CONFIG_RALINKAPP_PCM)      += pcmcmd
 ra_dir_$(CONFIG_RALINKAPP_SWQOS)    += sw_qos
 ra_dir_$(CONFIG_RALINKAPP_CLS)	    += clscmd
+
+#always install radio firmware
+ra_dir_y			    += rt_firmware
 
 all romfs:
 	for i in $(ra_dir_y) ; do make -C $$i $@ || exit $?; done

@@ -44,7 +44,7 @@ void formDefineStorage(void) {
 #if defined CONFIG_FTPD
 	websFormDefine(T("storageFtpSrv"), storageFtpSrv);
 #endif
-#ifdef CONFIG_USER_SAMBA
+#if defined(CONFIG_USER_SAMBA) || defined(CONFIG_USER_SAMBA3)
 	websFormDefine(T("storageSmbSrv"), storageSmbSrv);
 #endif
 }
@@ -230,7 +230,7 @@ static void storageFtpSrv(webs_t wp, char_t *path, char_t *query)
 }
 #endif
 
-#ifdef CONFIG_USER_SAMBA
+#if defined(CONFIG_USER_SAMBA) || defined(CONFIG_USER_SAMBA3)
 /* goform/storageSmbSrv */
 static void storageSmbSrv(webs_t wp, char_t *path, char_t *query)
 {
@@ -271,7 +271,7 @@ int initStorage(void)
 #if defined CONFIG_FTPD
 		doSystem("storage.sh ftp");
 #endif
-#ifdef CONFIG_USER_SAMBA
+#if defined(CONFIG_USER_SAMBA) || defined(CONFIG_USER_SAMBA3)
 		doSystem("storage.sh samba");
 #endif
 
@@ -284,7 +284,7 @@ static int GetNthNullUser()
 	int result = 0, index;
 
 	nvram_init(RT2860_NVRAM);
-	
+
 	for (index = 1; index < 9; index++)
 	{
 		sprintf(feild, "User%d", index);
@@ -295,7 +295,7 @@ static int GetNthNullUser()
 			break;
 		}
 	}
-	
+
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
 

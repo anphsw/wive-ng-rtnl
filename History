@@ -524,7 +524,7 @@
 79) Usbctl fix device detect.<br>
 80) pppd: pptp plugin some bugfixes.<br>
 
-<br>         
+<br>
 <b>1.9.x</b><br>
 1) Fix use /etc/hosts dnsmasq.<br>
 2) Fix /etc/hosts generate if wan_ip="".<br>
@@ -561,6 +561,10 @@
 33) Add samba v3.3.16. Use CONFIG_USER_SAMBA3 in config-config*.<br>
 34) Add /etc/wan_up.sh in internet.sh hook for exec user scripst at physycal connection configured.<br>
 35) Fix Multiple SSID work.<br>
+36) Add make image mode 2T2R-USB-IPV6 and 2T2R-USB (second without ipv6/tcpdump/zebra/wpasupplicant. With SAMBA3).<br>
+37) Some fix build system for more flexible.<br>
+38) Now only needed rw images installed to /etc.<br>
+39) Fix defines in goahead for support SAMBA3.<br>
 
 <br><br>
 <b>For support see:</b><br>

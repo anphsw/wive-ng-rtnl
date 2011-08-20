@@ -16,3 +16,7 @@ cp -f $PWD/images/*.zip $PWD/releases
 ./clear RELEASE
 nice -19 ./compile 2T2R-USB
 cp -f $PWD/images/*.zip $PWD/releases
+
+./clear RELEASE
+nice -19 ./compile 2T2R-USB-IPV6
+cp -f $PWD/images/*.zip $PWD/releases

@@ -69,7 +69,7 @@ endchoice
 endmenu
 
 menu "Nat acell mode"
-choice                                                                                                                                      
+choice
         prompt "Hardware nat mode"
 
 config  RA_NAT_HW

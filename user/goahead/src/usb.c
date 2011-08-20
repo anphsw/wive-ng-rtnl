@@ -32,7 +32,7 @@ static void storageGetFirmwarePath(webs_t wp, char_t *path, char_t *query);
 static int getCount(int eid, webs_t wp, int argc, char_t **argv);
 static void setFirstPart(void);
 static int getMaxVol(int eid, webs_t wp, int argc, char_t **argv);
-#if defined CONFIG_USER_SAMBA
+#if defined(CONFIG_USER_SAMBA) || defined(CONFIG_USER_SAMBA3)
 static int ShowSmbDir(int eid, webs_t wp, int argc, char_t **argv);
 static void storageSmbSrv(webs_t wp, char_t *path, char_t *query);
 static void SmbDirAdd(webs_t wp, char_t *path, char_t *query);
@@ -69,7 +69,7 @@ void formDefineUSB(void) {
 	websAspDefine(T("ShowAllDir"), ShowAllDir);
 	websAspDefine(T("getCount"), getCount);
 	websAspDefine(T("getMaxVol"), getMaxVol);
-#if defined CONFIG_USER_SAMBA
+#if defined(CONFIG_USER_SAMBA) || defined(CONFIG_USER_SAMBA3)
 	websAspDefine(T("ShowSmbDir"), ShowSmbDir);
 #endif
 #if defined CONFIG_USB && defined CONFIG_USER_USHARE
@@ -85,7 +85,7 @@ void formDefineUSB(void) {
 #if defined CONFIG_FTPD
 	websFormDefine(T("storageFtpSrv"), storageFtpSrv);
 #endif
-#if defined CONFIG_USER_SAMBA
+#if defined(CONFIG_USER_SAMBA) || defined(CONFIG_USER_SAMBA3)
 	websFormDefine(T("storageSmbSrv"), storageSmbSrv);
 	websFormDefine(T("SmbDirAdd"), SmbDirAdd);
 	websFormDefine(T("SmbDirEdit"), SmbDirEdit);
@@ -107,7 +107,7 @@ static int part_count;
 static int media_dir_count;
 static char first_part[12];
 
-#if defined CONFIG_USER_SAMBA
+#if defined(CONFIG_USER_SAMBA) || defined(CONFIG_USER_SAMBA3)
 
 #define		DIREXIST(bitmap,index)		bitmap[index/32] & 1<<(index%32)?1:0
 
@@ -328,7 +328,7 @@ static void storageDiskAdm(webs_t wp, char_t *path, char_t *query)
 	{
 		char_t *dir_path = websGetVar(wp, T("dir_path"), T(""));
 
-#if defined CONFIG_USER_SAMBA
+#if defined(CONFIG_USER_SAMBA) || defined(CONFIG_USER_SAMBA3)
 		FILE *fp = NULL; 
 		char smb_config_file[25];
 		int exist, index = 0;
@@ -387,10 +387,10 @@ static void storageDiskAdm(webs_t wp, char_t *path, char_t *query)
 				break;
 		}
 		fclose(fp_mount);
-#if defined CONFIG_USER_SAMBA
+#if defined(CONFIG_USER_SAMBA) || defined(CONFIG_USER_SAMBA3)
 		if (0 == strcmp(path, first_part))
 			memset(&smb_conf, 0, sizeof(struct smb_dir_config));
-#endif	
+#endif
 		doSystem("storage.sh %s %s %s",submit, part, path);
 		websRedirect(wp, "usb/STORAGEdisk_admin.asp");
 	}
@@ -398,7 +398,7 @@ static void storageDiskAdm(webs_t wp, char_t *path, char_t *query)
 	{
 		FILE *fp_mount = NULL;
 		char part[30];
-		
+
 		if (NULL == (fp_mount = fopen("/proc/mounts", "r")))
 		{
 			perror(__FUNCTION__);
@@ -484,7 +484,7 @@ static void storageFtpSrv(webs_t wp, char_t *path, char_t *query)
 }
 #endif
 
-#if defined CONFIG_USER_SAMBA
+#if defined(CONFIG_USER_SAMBA) || defined(CONFIG_USER_SAMBA3)
 /* goform/storageSmbSrv */
 static void storageSmbSrv(webs_t wp, char_t *path, char_t *query)
 {
@@ -962,7 +962,7 @@ int initUSB(void)
 #if defined (CONFIG_FTPD)
 	doSystem("storage.sh ftp");
 #endif
-#if defined (CONFIG_USER_SAMBA)
+#if defined(CONFIG_USER_SAMBA) || defined(CONFIG_USER_SAMBA3)
 	fetchSmbConfig();
 	SetSambaSrv();
 #endif
@@ -1019,7 +1019,7 @@ static int getCount(int eid, webs_t wp, int argc, char_t **argv)
 		sprintf(count, "%d", part_count);
 		// fprintf(stderr,"AllPart: %s\n", count);
 	}
-#if defined CONFIG_USER_SAMBA
+#if defined(CONFIG_USER_SAMBA) || defined(CONFIG_USER_SAMBA3)
 	else if (0 == strcmp(field, "AllSmbDir"))
 	{
 		sprintf(count, "%d", smb_conf.count);
