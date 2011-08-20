@@ -56,11 +56,11 @@ endif
 ifeq ($(CONFIG_LIB_LIBM_FORCE),y)
     DIRS += libm
 endif
-ifeq ($(CONFIG_LIB_ZLIB_FORCE),y)
-    DIRS += zlib
-endif
 ifeq ($(CONFIG_LIB_LIBPTHREAD_FORCE),y)
     DIRS += libpthread
+endif
+ifeq ($(CONFIG_LIB_ZLIB_FORCE),y)
+    DIRS += zlib
 endif
 ifeq ($(CONFIG_LIB_LIBNVRAM_FORCE),y)
     DIRS += libnvram
@@ -103,7 +103,9 @@ ifeq ($(strip $(HAVE_SHARED)),y)
 	$(SECHO)
 	@$(MAKE) -C libc shared
 	@$(MAKE) -C ldso shared
-
+ifeq ($(CONFIG_LIB_FLEX),y)
+	@$(MAKE) -C libflex
+endif
 ifeq ($(CONFIG_LIB_CRYPT_FORCE),y)
 	@$(MAKE) -C libcrypt shared
 endif
@@ -119,12 +121,6 @@ endif
 ifeq ($(CONFIG_LIB_RT_FORCE),y)
 	@$(MAKE) -C librt shared
 endif
-ifeq ($(CONFIG_LIB_LIBNVRAM_FORCE),y)
-	@$(MAKE) -C libnvram shared
-endif
-ifeq ($(CONFIG_LIB_LIBNTFS3G_FORCE),y)
-	@$(MAKE) -C libntfs-3g shared
-endif
 ifeq ($(CONFIG_LIB_LIBGMP_FORCE),y)
 	@$(MAKE) -C libgmp shared
 endif
@@ -137,22 +133,31 @@ endif
 ifeq ($(CONFIG_LIB_LIBPTHREAD_FORCE),y)
 	@$(MAKE) -C libpthread shared
 endif
+ifeq ($(strip $(UCLIBC_HAS_GETTEXT_AWARENESS)),y)
+	@$(MAKE) -C libintl shared
+endif
+ifeq ($(CONFIG_LIB_LIBNVRAM_FORCE),y)
+	@$(MAKE) -C libnvram shared
+endif
+ifeq ($(CONFIG_LIB_LIBNTFS3G_FORCE),y)
+	@$(MAKE) -C libntfs-3g shared
+endif
 ifeq ($(CONFIG_LIB_USB),y)
 	@$(MAKE) -C libusb shared
 endif
 ifeq ($(CONFIG_LIB_NAT),y)
 	@$(MAKE) -C libnatpmp shared
 endif
-ifeq ($(CONFIG_LIB_FLEX),y)
-	@$(MAKE) -C libflex
-endif
 ifeq ($(CONFIG_LIB_ICONV),y)
-	@$(MAKE) -C libiconv
+	@$(MAKE) -C libiconv shared
 endif
-ifeq ($(strip $(UCLIBC_HAS_GETTEXT_AWARENESS)),y)
-	@$(MAKE) -C libintl shared
+ifeq ($(CONFIG_LIB_EVENT),y)
+	@$(MAKE) -C libevent shared
 endif
-ifeq ($(strip $(CONFIG_LIB_PCAP)),y)
+ifeq ($(CONFIG_LIB_CURL),y)
+	@$(MAKE) -C libcurl shared
+endif
+ifeq ($(CONFIG_LIB_PCAP),y)
 	@$(MAKE) -C libpcap shared
 endif
 else
@@ -254,18 +259,7 @@ tags:
 install: install_runtime install_dev finished2
 
 romfs: install_runtime
-ifeq ($(CONFIG_LIB_EVENT),y)
-	make -C libevent romfs
-endif
-ifeq ($(CONFIG_LIB_CURL),y)
-	make -C libcurl romfs
-endif
-ifeq ($(CONFIG_LIB_PCAP),y)
-	make -C libpcap romfs
-endif
-ifeq ($(CONFIG_LIB_ICONV),y)
-	make -C libiconv romfs
-endif
+	#ROMFS OK
 
 RUNTIME_PREFIX_LIB_FROM_DEVEL_PREFIX_LIB=$(shell extra/scripts/relative_path.sh $(DEVEL_PREFIX)lib $(RUNTIME_PREFIX)lib)
 

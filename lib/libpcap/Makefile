@@ -171,8 +171,8 @@ bpf_filter.c: $(srcdir)/bpf/net/bpf_filter.c
 bpf_filter.o: bpf_filter.c
 	$(CC) $(CFLAGS) -c bpf_filter.c
 
-romfs:
-	cp -fvp libpcap.so* $(ROMFSDIR)/lib/
+shared:
+	cp -fvp libpcap.so* ../lib
 
 install: libpcap.a 
 	[ -d $(DESTDIR)$(libdir) ] || \

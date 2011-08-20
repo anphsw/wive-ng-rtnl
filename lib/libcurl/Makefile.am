@@ -117,8 +117,9 @@ rpm:
 	mv $$RPM_TOPDIR/RPMS/i386/$(RPMDIST)-*.rpm . ; \
 	mv $$RPM_TOPDIR/SRPMS/$(RPMDIST)-*.src.rpm .
 
-romfs: install
-	cp -vf ./filesystem/lib/*.* $(ROMFSDIR)/lib
+shared : install
+	cp -vf ./filesystem/lib/*.* ../lib
+
 
 #
 # Build a Solaris pkgadd format file

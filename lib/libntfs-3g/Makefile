@@ -33,9 +33,6 @@ $(LIBNTFS3G) ar-target: $(OBJS)
 	$(RM) $(TOPDIR)lib/$(LIBNTFS3G)
 	$(INSTALL) -m 644 $(LIBNTFS3G) $(TOPDIR)lib
 
-romfs:
-	$(INSTALL) -m 644 $(LIBNTFS3G_SHARED) $(TOPDIR)lib
-
 $(OBJS): Makefile
 
 clean:

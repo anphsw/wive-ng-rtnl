@@ -104,8 +104,9 @@ mostlyclean : force
 	if test -d tests; then cd tests && $(MAKE) mostlyclean; fi
 	rm -rf bin
 
-romfs : install
-	cp -vf ./filesystem/lib/*.* $(ROMFSDIR)/lib
+shared : install
+	cp -vf ./filesystem/lib/*.* ../lib
+
 
 clean : force
 	cd libcharset && $(MAKE) clean

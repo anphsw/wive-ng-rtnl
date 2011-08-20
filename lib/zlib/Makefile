@@ -72,6 +72,7 @@ all: static shared all64
 static: example$(EXE) minigzip$(EXE)
 
 shared: examplesh$(EXE) minigzipsh$(EXE)
+	cp -vf ./libz.so* ../lib
 
 all64: example64$(EXE) minigzip64$(EXE)
 
@@ -185,7 +186,7 @@ install-libs: $(LIBS)
 # The ranlib in install is needed on NeXTSTEP which checks file times
 # ldconfig is for Linux
 
-romfs:                                                                                                                                      
+romfs:
 	if [ -f $(SHAREDLIBV) ] ; then \
 	    $(ROMFSINST) $(SHAREDLIBV) /lib/$(SHAREDLIBV) ; \
 	    $(ROMFSINST) -s $(SHAREDLIBV) /lib/$(SHAREDLIBM) ; \

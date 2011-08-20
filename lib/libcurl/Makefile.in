@@ -732,8 +732,9 @@ distclean: distclean-recursive
 distclean-am: clean-am distclean-generic distclean-libtool \
 	distclean-tags
 
-romfs: install
-	cp -vf ./filesystem/lib/*.* $(ROMFSDIR)/lib
+shared : install
+	cp -vf ./filesystem/lib/*.* ../lib
+
 
 dvi: dvi-recursive
 

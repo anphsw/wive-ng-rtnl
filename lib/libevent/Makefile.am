@@ -232,7 +232,8 @@ doxygen: FORCE
 	doxygen $(srcdir)/Doxyfile
 FORCE:
 
-romfs: install
-	cp -vf ./filesystem/lib/*.* $(ROMFSDIR)/lib
+shared : install
+	cp -vf ./filesystem/lib/*.* ../lib
+
 
 DISTCLEANFILES = *~ libevent.pc ./include/event2/event-config.h
