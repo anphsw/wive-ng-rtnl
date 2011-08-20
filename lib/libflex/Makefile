@@ -5,7 +5,7 @@ all: libfl.a
 
 libfl.a: $(objs-libfl)
 	-rm -f libfl.a
-	$(AR) -rcuv libfl.a $(objs-libfl)	
+	$(AR) -rcuv libfl.a $(objs-libfl)
 	$(RANLIB) libfl.a
 	#$(TMPFSINST) /libflex/libfl.a
 

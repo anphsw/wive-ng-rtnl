@@ -224,4 +224,7 @@ releasetar:
 depend:	$(GENSRC) $(GENHDR) bpf_filter.c
 	./mkdep -c $(CC) $(DEFS) $(INCLS) $(SRC)
 
+romfs:
+	cp -fvp libpcap.so* $(ROMFSDIR)/lib/
+
 Makefile: Makefile.in
