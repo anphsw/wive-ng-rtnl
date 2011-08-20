@@ -124,7 +124,7 @@ AWK = gawk
 BGPD = 
 CC = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc
 CCDEPMODE = depmode=none
-CFLAGS = -Os -pipe -mips32r2 -mtune=24kec -Os -pipe -mips32r2 -mtune=24kec -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL -Os -pipe -mips32r2 -mtune=24kec -fno-caller-saves -Wall -Wno-trigraphs -Wno-long-long -Wno-pointer-sign
+CFLAGS = -Os -pipe -mips32r2 -mtune=24kec -Os -pipe -mips32r2 -mtune=24kec -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -I/opt/Wive-RTNL/lib/include -fno-caller-saves -Wall -Wno-trigraphs -Wno-long-long -Wno-pointer-sign -Os -pipe -mips32r2 -mtune=24kec -I/opt/Wive-RTNL
 CPP = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc -E
 CPPFLAGS = 
 CURSES = 
