@@ -17,3 +17,4 @@
     time server = no
     unix charset = utf8
     dos charset = 866
+    load printers = no
