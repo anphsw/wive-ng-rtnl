@@ -9,9 +9,9 @@ fi
 if [ ! -f $APROOTDIR/Makefile.in ]; then
     automake
 fi
-
 ./configure --host=mipsel-linux --build=i686-pc-linux-gnu \
-	    --prefix=$APROOTDIR/filesystem --disable-gtk \
+	    --prefix=$APROOTDIR/filesystem \
+	    --disable-gtk --disable-cli --disable-mac \
 	    --disable-nls --enable-lightweight --disable-utp \
 	    --enable-libnotify \
 	    --with-zlib=$FIRMROOT/lib/zlib/ \
