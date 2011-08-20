@@ -2542,11 +2542,8 @@ bin/rpc_open_tcp@EXEEXT@: $(BINARY_PREREQS) $(RPC_OPEN_TCP_OBJ) @LIBTALLOC_SHARE
 		$(LIBS) $(LIBTALLOC_LIBS) @LIBTDB_SHARED@ $(WINBIND_LIBS) \
 		$(LDAP_LIBS) $(KRB5LIBS) $(NSCD_LIBS)
 
-install:: installservers installbin @INSTALL_CIFSMOUNT@ @INSTALL_CIFSUPCALL@ installman \
-		installscripts installdat installmodules @SWAT_INSTALL_TARGETS@ \
-		@INSTALL_PAM_MODULES@ installlibs installmo
-
-install-everything:: install installmodules
+install::
+	#DO NOT MAKE INSTALL NEED!!! Run make install may be crashed you system!
 
 # DESTDIR is used here to prevent packagers wasting their time
 # duplicating the Makefile. Remove it and you will have the privelege
