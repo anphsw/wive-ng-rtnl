@@ -99,7 +99,7 @@ echo "==================START-L2TP-CLIENT======================="
 	    get_vpn_ip
             reachable=0;
         fi
-    done    
+    done
 
     #load ppp* modules
     load_modules

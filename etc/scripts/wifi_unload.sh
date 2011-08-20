@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Description: Megakill script.. 
+# Description: Megakill script..
 # Try some methods for free ram before firmware update.
 # Workaround over workaround. Need clean in the future.
 
@@ -122,7 +122,7 @@ if [ -n "$mounted" ]; then
     sleep 2
 fi
 
-#This drop unneded caches to free more ram. 
+#This drop unneded caches to free more ram.
 sysctl -w vm.min_free_kbytes=3192
 drop_disk_caches
 sysctl -w vm.min_free_kbytes=1024

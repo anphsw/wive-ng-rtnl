@@ -62,7 +62,7 @@ start() {
 	    elif [ "$RemoteManagement" = "2" ]; then
     		iptables -A servicelimit $STATE_NEW -p tcp --dport 80 -j ACCEPT
 	    fi
-	else	    
+	else
     	    iptables -A servicelimit $STATE_NEW -p tcp --dport 80 -j DROP
 	fi
 	if [ "$RemoteSSH" != "0" ]; then
@@ -82,7 +82,7 @@ start() {
 	    elif [ "$RemoteSSH" = "2" ]; then
     		iptables -A servicelimit $STATE_NEW -p tcp --dport 22 -j ACCEPT
 	    fi
-	else	    
+	else
     	    iptables -A servicelimit $STATE_NEW -p tcp --dport 22 -j DROP
 	fi
 	if [ "$UDPXY" != "0" ]; then
@@ -101,8 +101,8 @@ start() {
 	     fi
 	    elif [ "$UDPXY" = "2" ]; then
     		iptables -A servicelimit $STATE_NEW -p tcp --dport 81 -j ACCEPT
-	    fi	    
-	else	    
+	    fi
+	else
     	    iptables -A servicelimit $STATE_NEW -p tcp --dport 81 -j DROP
 	fi
 	if [ "$SmbEnabled" = "1" ]; then

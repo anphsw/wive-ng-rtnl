@@ -40,10 +40,10 @@ get_txqlen
 
     #eth2.1 always up
     ip link set eth2.1 up
-    
+
     #flush ip from interfaces
     addr_flush
- 
+
 #-------------------CONFIG--------------------------------
     ip link set $lan_if down
     #-------------------LAN1----------------
