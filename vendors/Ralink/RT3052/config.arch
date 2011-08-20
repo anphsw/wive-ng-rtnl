@@ -43,8 +43,6 @@ STRIP	= $(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-strip
 ###########################################################################
 OPTS	= -Os -pipe -mips32r2 -mtune=24kec
 
-############################ BASE FLAGS ###################################
-CFLAGS  += -I$(ROOTDIR) $(OPTS)
 
 ############################ OPTIMIZE #####################################
 # improves compression ratio for generated code
@@ -59,6 +57,9 @@ CFLAGS	+= -Wno-pointer-sign
 
 # disable variable unused warnings in gcc 4.6.0
 #CFLAGS	+= -Wno-unused-but-set-variable
+
+############################ BASE FLAGS ###################################
+CFLAGS  += $(OPTS) -I$(ROOTDIR)
 
 ###########################################################################
 
