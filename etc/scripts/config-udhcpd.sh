@@ -104,7 +104,7 @@ case "$1" in
   "-t") config "$1" "$2";;
   "-S") config "$1" "$2" "$3";;
   "-r")
- 
+
     killall -q udhcpd
     killall -q -SIGKILL udhcpd
     rm -f $pidfile

@@ -565,6 +565,7 @@
 37) Some fix build system for more flexible.<br>
 38) Now only needed rw images installed to /etc.<br>
 39) Fix defines in goahead for support SAMBA3.<br>
+40) Rewrite auto mount script. Add auto_swap nvram variable to find and mount swap particion on USB drive(auto_swap 1/0).<br>
 
 <br><br>
 <b>For support see:</b><br>
