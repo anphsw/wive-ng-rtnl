@@ -1,6 +1,9 @@
 all:
 	$(MAKE) -C source
 
+install:
+	#DO NOT MAKE INSTALL NEED!!! Run make install may be crashed you system!
+
 romfs: all
 	$(ROMFSINST) -S source/bin/nmbd /sbin/nmbd
 	$(ROMFSINST) -S source/bin/smbd /sbin/smbd
