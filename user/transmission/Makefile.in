@@ -815,7 +815,6 @@ uninstall-am:
 
 romfs: install
 	$(ROMFSINST) -S filesystem/bin/transmission-daemon /bin/transmission-daemon
-	mkdir -p $(ROMFSDIR)/transmission
 	cp -rfv filesystem/share/transmission* $(ROMFSDIR)/share/transmission/
 
 dist-hook:
