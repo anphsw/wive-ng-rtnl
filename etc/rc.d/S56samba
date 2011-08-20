@@ -60,9 +60,9 @@ if [ "$SmbEnabled" = "1" ]; then
 	killall -q -SIGKILL nmbd
     fi
     $LOG "Starting WINS/SMB SERVER."
-    echo > /var/log/samba.log
-    echo > /var/log/nmbd.log
-    rm -f /var/lock/*mbd.pid
+    find /var/log -type f -name "*mbd*" | while read samba_log; do
+	echo > "$samba_log"
+    done
     /bin/nmbd -s /etc/smb.conf -D &
     /bin/smbd -s /etc/smb.conf -D &
 fi
