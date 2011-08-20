@@ -140,3 +140,6 @@ fi
 echo -----------------------------------PACK----------------------------------
 mv -f images/*.bin "images/$DEVNAME-$MODE$SAVE_MEM.$VERSIONPKG.bin"
 zip -r images/$DEVNAME-$MODE$SAVE_MEM.$VERSIONPKG.bin.zip images/*.bin
+
+echo ---------------------------------END BUILD-------------------------------
+
