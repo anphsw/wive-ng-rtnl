@@ -12,5 +12,8 @@ if [ ! -f $APROOTDIR/Makefile.in ]; then
 fi
 
 CONFOPTS="--host=mipsel-linux"
-CONFOPTS="$CONFOPTS --prefix=$APROOTDIR/filesystem --disable-ipv6 --disable-bgpd --disable-ripngd --disable-ospfd --disable-ospf6d --disable-dependency-tracking"
+CONFOPTS="$CONFOPTS --prefix=$APROOTDIR/filesystem --disable-ipv6"
+CONFOPTS="$CONFOPTS --disable-bgpd --disable-ripngd --disable-ospfd"
+CONFOPTS="$CONFOPTS --disable-ospf6d --disable-dependency-tracking"
+
 ./configure $CONFOPTS

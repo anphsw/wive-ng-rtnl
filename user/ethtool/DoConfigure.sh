@@ -11,4 +11,5 @@ if [ ! -f $APROOTDIR/Makefile.in ]; then
 fi
 
 CONFOPTS="--host=mipsel-linux --prefix=$APROOTDIR/filesystem --disable-dependency-tracking"
+
 ./configure $CONFOPTS

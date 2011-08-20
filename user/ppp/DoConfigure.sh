@@ -12,4 +12,5 @@ if [ ! -f $APROOTDIR/Makefile.in ]; then
 fi
 
 CONFOPTS="--host=mipsel-linux --prefix=$APROOTDIR/filesystem"
+
 ./configure $CONFOPTS

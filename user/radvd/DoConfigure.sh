@@ -13,5 +13,7 @@ fi
 
 CONFOPTS="--host=mipsel-linux"
 CONFOPTS="$CONFOPTS --prefix=$APROOTDIR/filesystem --disable-dependency-tracking"
+
 export LDFLAGS=-L../../lib/libflex
+
 ./configure $CONFOPTS
