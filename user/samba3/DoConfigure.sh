@@ -13,8 +13,8 @@ if [ ! -f $APROOTDIR/source/Makefile.in ]; then
 fi
 
 CONFOPTS="--host=mipsel-linux --build=i686-pc-linux-gnu --target=mipsel"
-CONFOPTS="$CONFOPTS --disable-iprint --disable-pie --disable-relro --disable-fam"
-CONFOPTS="$CONFOPTS --disable-dnssd --disable-avahi"
+CONFOPTS="$CONFOPTS --disable-iprint --disable-pie --disable-relro --disable-fam --disable-cups"
+CONFOPTS="$CONFOPTS --disable-dnssd --disable-avahi --disable-swat --disable-dmalloc"
 CONFOPTS="$CONFOPTS --without-ldap --without-ads --without-cifsmount"
 CONFOPTS="$CONFOPTS --without-cifsupcall --with-syslog --without-sys-quotas"
 CONFOPTS="$CONFOPTS --without-utmp --without-cluster-support --without-winbind"
