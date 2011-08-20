@@ -22,6 +22,7 @@ CONFIG_LIB_FLEX=y
 CONFIG_LIB_EVENT=y
 CONFIG_LIB_CURL=y
 CONFIG_LIB_PCAP=y
+# CONFIG_LIB_ICONV is not set
 
 #
 # Force build extra libraries in uClibc

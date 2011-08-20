@@ -68,6 +68,9 @@ endif
 ifeq ($(CONFIG_LIB_FLEX),y)
     DIRS += libflex
 endif
+ifeq ($(CONFIG_LIB_ICONV),y)
+    DIRS += libiconv
+endif
 ifeq ($(CONFIG_LIB_NAT),y)
     DIRS += libnatpmp
 endif
@@ -142,6 +145,9 @@ ifeq ($(CONFIG_LIB_NAT),y)
 endif
 ifeq ($(CONFIG_LIB_FLEX),y)
 	@$(MAKE) -C libflex
+endif
+ifeq ($(CONFIG_LIB_ICONV),y)
+	@$(MAKE) -C libiconv
 endif
 ifeq ($(strip $(UCLIBC_HAS_GETTEXT_AWARENESS)),y)
 	@$(MAKE) -C libintl shared
@@ -256,6 +262,9 @@ ifeq ($(CONFIG_LIB_CURL),y)
 endif
 ifeq ($(CONFIG_LIB_PCAP),y)
 	make -C libpcap romfs
+endif
+ifeq ($(CONFIG_LIB_ICONV),y)
+	make -C libiconv romfs
 endif
 
 RUNTIME_PREFIX_LIB_FROM_DEVEL_PREFIX_LIB=$(shell extra/scripts/relative_path.sh $(DEVEL_PREFIX)lib $(RUNTIME_PREFIX)lib)
@@ -472,6 +481,7 @@ clean:
 	-$(MAKE) -C libpcap clean
 	-$(MAKE) -C libusb clean
 	-$(MAKE) -C libntfs-3g clean
+	-$(MAKE) -C libiconv clean
 	-$(MAKE) -C zlib clean
 ifeq ($(CONFIG_LIB_LIBGMP_FORCE),y)
 	-$(MAKE) -C libgmp clean

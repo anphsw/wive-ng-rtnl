@@ -16,6 +16,7 @@ endif
 ifeq ($(UCLINUX_COMMON_LIB),1)
 	# Static versions of libraries
 	SLIBFLEX	=	-lfl
+	SLIBICONV	=	-liconv
 	SLIBC		=	-lc
 	SLIBM		=	-lm
 	SLIBINTL	=	-lintl
@@ -52,6 +53,7 @@ ifeq ($(UCLINUX_COMMON_LIB),1)
 
 	# Dynamic versions
 	LIBFLEX		=	$(SLIBFLEX)
+	LIBICONV	=	$(SLIBICONV)
 	LIBC		=	$(SLIBC)
 	LIBM		=	$(SLIBM)
 	LIBINTL		=	$(SLIBINTL)

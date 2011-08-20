@@ -13,3 +13,6 @@ romfs: all
 
 clean:
 	$(MAKE) -C source clean
+
+distclean:
+	$(MAKE) -C source clean

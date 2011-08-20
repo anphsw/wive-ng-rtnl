@@ -151,7 +151,7 @@ STATEDIR = @statedir@
 CODEPAGEDIR = @codepagedir@
 
 # the directory where pid files go
-PIDDIR = @piddir@
+PIDDIR = /var/lock
 
 FLAGS1 = $(CFLAGS) @FLAGS1@ @SAMBA_CPPFLAGS@ $(CPPFLAGS)
 FLAGS2 =

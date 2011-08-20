@@ -17,6 +17,7 @@ bool 'Build libflex'		CONFIG_LIB_FLEX
 bool 'Build libevent'		CONFIG_LIB_EVENT
 bool 'Build libcurl'		CONFIG_LIB_CURL
 bool 'Build libpcap'		CONFIG_LIB_PCAP
+bool 'Build libiconv'		CONFIG_LIB_ICONV
 
 comment 'Force build extra libraries in uClibc'
 bool 'Build libcrypt'		CONFIG_LIB_CRYPT_FORCE
@@ -74,6 +75,9 @@ bool 'storage(enable chmod, fdisk in busybox)'	CONFIG_USER_STORAGE
 
 dep_bool 'samba server'				CONFIG_USER_SAMBA
 dep_bool 'samba server v3'			CONFIG_USER_SAMBA3
+if [ "$CONFIG_USER_SAMBA3" = "y" ]; then
+    define_bool CONFIG_LIB_ICONV y
+fi
 dep_bool 'dlna server'				CONFIG_USER_MINIDLNA
 
 bool 'go-ahead webserver'				CONFIG_USER_GOAHEAD_HTTPD

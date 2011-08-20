@@ -2316,24 +2316,24 @@ for i in $ICONV_LOOK_DIRS ; do
 	    fi
 	done
 
-	if test "$default_dos_charset" != "no" -a \
-		"$default_dos_charset" != "cross" -a \
-		"$default_display_charset" != "no" -a \
-		"$default_display_charset" != "cross" -a \
-		"$default_unix_charset" != "no" -a \
-		"$default_unix_charset" != "cross"
-	then
+	#if test "$default_dos_charset" != "no" -a \
+	#	"$default_dos_charset" != "cross" -a \
+	#	"$default_display_charset" != "no" -a \
+	#	"$default_display_charset" != "cross" -a \
+	#	"$default_unix_charset" != "no" -a \
+	#	"$default_unix_charset" != "cross"
+	#then
 		samba_cv_HAVE_NATIVE_ICONV=yes
-	else
-	    if test "$default_dos_charset" = "cross" -o \
-		     "$default_display_charset" = "cross" -o \
-		     "$default_unix_charset" = "cross"
-	    then
-		    samba_cv_HAVE_NATIVE_ICONV=cross
-	    else
-		    samba_cv_HAVE_NATIVE_ICONV=no
-	    fi
-	fi
+	#else
+	#    if test "$default_dos_charset" = "cross" -o \
+	#	     "$default_display_charset" = "cross" -o \
+	#	     "$default_unix_charset" = "cross"
+	#    then
+	#	    samba_cv_HAVE_NATIVE_ICONV=cross
+	#    else
+	#	    samba_cv_HAVE_NATIVE_ICONV=no
+	#    fi
+	#fi
 
 	# At this point, we have a libiconv candidate. We know that
 	# we have the right headers and libraries, but we don't know
