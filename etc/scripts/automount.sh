@@ -14,7 +14,7 @@ fi
 
 swap_on() {
 auto_swap=`nvram_get 2860 auto_swap`
-if [ -f /bin/swapon ] && [ "$auto_swap" = "1" ]; then
+if [ "$auto_swap" = "1" ] && [ -f /bin/swapon ] && [ -f /bin/fdisk ]; then
     SWAPPART=`fdisk -l | grep swap | awk {' print $1 '}`
     if [ "$SWAPPART" != "" ]; then
 	swapon $SWAPPART > /dev/null 2>&1
