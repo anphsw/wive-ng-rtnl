@@ -46,5 +46,5 @@ tests:
 	cd test
 	$(MAKE) /F Makefile.nmake
 
-romfs:
-	cp -fvp ./filesystem/lib/libevent* $(ROMFSDIR)/lib/
+romfs: install
+	cp -vf ./filesystem/lib/*.* $(ROMFSDIR)/lib

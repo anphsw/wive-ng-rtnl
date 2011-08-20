@@ -232,7 +232,7 @@ doxygen: FORCE
 	doxygen $(srcdir)/Doxyfile
 FORCE:
 
-romfs:
-	cp -fvp ./filesystem/lib/libevent* $(ROMFSDIR)/lib/
+romfs: install
+	cp -vf ./filesystem/lib/*.* $(ROMFSDIR)/lib
 
 DISTCLEANFILES = *~ libevent.pc ./include/event2/event-config.h

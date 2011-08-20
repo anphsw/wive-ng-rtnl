@@ -85,7 +85,7 @@ AR_FLAGS="cru"
 LTCC="mips-linux-gcc"
 
 # LTCC compiler flags.
-LTCFLAGS="-g -O2"
+LTCFLAGS="-g -Os"
 
 # A language-specific compiler.
 CC="mips-linux-gcc"
@@ -7329,7 +7329,7 @@ AR_FLAGS="cru"
 LTCC="mips-linux-gcc"
 
 # LTCC compiler flags.
-LTCFLAGS="-g -O2"
+LTCFLAGS="-g -Os"
 
 # A language-specific compiler.
 CC="mips-linux-g++"

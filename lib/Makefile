@@ -148,12 +148,6 @@ ifeq ($(strip $(UCLIBC_HAS_GETTEXT_AWARENESS)),y)
 endif
 ifeq ($(strip $(CONFIG_LIB_PCAP)),y)
 	@$(MAKE) -C libpcap shared
-ifeq ($(strip $(CONFIG_LIB_EVENT)),y)
-	@$(MAKE) -C libevent install
-endif
-ifeq ($(strip $(CONFIG_LIB_CURL)),y)
-	@$(MAKE) -C libcurl install
-endif
 endif
 else
 	$(SECHO)

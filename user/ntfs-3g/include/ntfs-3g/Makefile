@@ -84,13 +84,13 @@ AUTOMAKE = ${SHELL} /home/jasonwang/trunk/skylark/AP/ntfs-3g-1.2531/missing --ru
 AWK = gawk
 CC = mips-linux-gcc
 CCDEPMODE = depmode=gcc3
-CFLAGS = -g -O2 -Wall
+CFLAGS = -g -Os -Wall
 CPP = mips-linux-gcc -E
 CPPFLAGS = 
 CXX = mips-linux-g++
 CXXCPP = mips-linux-g++ -E
 CXXDEPMODE = depmode=gcc3
-CXXFLAGS = -g -O2
+CXXFLAGS = -g -Os
 CYGPATH_W = echo
 DEFS = -DHAVE_CONFIG_H
 DEPDIR = .deps

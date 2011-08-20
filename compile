@@ -10,7 +10,7 @@ export ROOTDIR=$ROOTDIR
 export FIRMROOT=$ROOTDIR
 export LINUXDIR=$ROOTDIR/linux
 
-#----WR-NL---WR-NL(LITE)----#
+#----WR-150N---WR-300N----#
 if [ "$1" = "" ]; then
     MODE=2T2R
     #MODE=2T2R-USB

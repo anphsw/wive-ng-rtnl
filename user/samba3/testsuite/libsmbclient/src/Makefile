@@ -1,5 +1,5 @@
 CC	=	gcc
-CFLAGS	=	-Wall -W -O2 -g -I../../../source/include
+CFLAGS	=	-Wall -W -Os -g -I../../../source/include
 LFLAGS	=	-L../../../source/bin
 
 LIBS=	-L/usr/lib -lsmbclient

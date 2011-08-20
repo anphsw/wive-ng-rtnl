@@ -257,7 +257,7 @@ if test "$enable_shared" = "yes"; then
 			BLDSHARED="true"
 			LDSHFLAGS="-Wl,-bexpall,-bM:SRE,-bnoentry,-berok"
 			DYNEXP="-Wl,-brtl,-bexpall"
-			PICFLAGS="-O2"
+			PICFLAGS="-Os"
 			if test "${GCC}" != "yes"; then
 				## for funky AIX compiler using strncpy()
 				CFLAGS="$CFLAGS -D_LINUX_SOURCE_COMPAT -qmaxmem=32000"

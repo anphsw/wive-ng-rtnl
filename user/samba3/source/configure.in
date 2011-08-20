@@ -119,7 +119,7 @@ AC_SUBST(NSCD_LIBS)
 
 # compile with optimization and without debugging by default, but
 # allow people to set their own preference.
-# do this here since AC_CACHE_CHECK apparently sets the CFLAGS to "-g -O2"
+# do this here since AC_CACHE_CHECK apparently sets the CFLAGS to "-g -Os"
 # if it has no value.  This prevent *very* large debug binaries from occurring
 # by default.
 if test "x$CFLAGS" = x; then
@@ -1653,7 +1653,7 @@ DSO_EXPORTS=""
 			# add rtl to remove /lib/crt0.o warning
 			LDSHFLAGS="-Wl,-G,-bexpfull,-bbigtoc,-brtl"
 			DYNEXP="-Wl,-brtl,-bexpfull,-bbigtoc"
-			PICFLAG="-O2"
+			PICFLAG="-Os"
 			# as AIX code is always position independent...
 			# .po will just create compile warnings, use po.o:
 			if test "${GCC}" != "yes"; then
