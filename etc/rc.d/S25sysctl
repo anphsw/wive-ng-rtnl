@@ -43,6 +43,18 @@ start() {
     echo 1    > /proc/sys/kernel/panic
     echo 1    > /proc/sys/kernel/panic_on_oops
     echo 1    > /proc/sys/vm/panic_on_oom
+
+    SmbEnabled=`nvram_get 2860 SmbEnabled`
+    if [ "$SmbEnabled" = "1" ]; then
+	# banish core dump files to /dev/null
+	ulimit -c 0
+	# increase file descriptors
+	ulimit -n 32768
+	# virtual memory
+	ulimit -v unlimited
+	# max memory size
+	ulimit -m unlimited
+    fi
 }
 
 stop() {

@@ -21,7 +21,7 @@ CONFOPTS="$CONFOPTS --without-cifsupcall --with-syslog --without-sys-quotas"
 CONFOPTS="$CONFOPTS --without-utmp --without-cluster-support --without-winbind"
 CONFOPTS="$CONFOPTS --without-libtalloc --without-libtdb --without-libnetapi"
 CONFOPTS="$CONFOPTS --without-libsmbclient --without-libsmbsharemodes --without-libaddns"
-CONFOPTS="$CONFOPTS --with-logfilebase=/var/log"
+CONFOPTS="$CONFOPTS --with-logfilebase=/var/log --with-lockdir=/var/lock --sysconfdir=/etc"
 CONFOPTS="$CONFOPTS --prefix=$APROOTDIR/filesystem"
 
 ./configure $CONFOPTS
