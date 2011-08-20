@@ -112,7 +112,7 @@ CHARSETLIBDIR = $(MODULESDIR)/charset
 AUTHLIBDIR = $(MODULESDIR)/auth
 CONFIGLIBDIR = $(MODULESDIR)/config
 GPEXTLIBDIR = $(MODULESDIR)/gpext
-CONFIGDIR = @configdir@
+CONFIGDIR = /etc
 VARDIR = @localstatedir@
 MANDIR = @mandir@
 DATADIR = @datadir@
@@ -138,10 +138,10 @@ PRIVATE_DIR = $(PRIVATEDIR)
 SWATDIR = @swatdir@
 
 # This is where locale(mo) files go
-LOCALEDIR= @localedir@
+LOCALEDIR= /share/locale
 
 # the directory where lock files go
-LOCKDIR = @lockdir@
+LOCKDIR = /var/lock
 
 # FHS directories; equal to LOCKDIR if not using --with-fhs
 CACHEDIR = @cachedir@
