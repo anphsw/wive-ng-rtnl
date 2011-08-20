@@ -243,7 +243,7 @@ u-boot:		depend $(SUBDIRS) $(OBJS) $(LIBS) $(LDSCRIPT)
 		$(LD) $(LDFLAGS) $$UNDEF_SYM $(OBJS) \
 			--start-group $(LIBS) --end-group $(PLATFORM_LIBS) \
 			-Map u-boot.map -o u-boot
-			
+
 show_path:
 	echo $(OBJDUMP)
 

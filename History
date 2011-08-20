@@ -381,7 +381,7 @@
 25) Boot speedup and save memory at first stage.<br>
 26) Fix SoftwareFastpath not enable in Complex offload mode. Is regression.<br>
 
-<br>         
+<br>
 <b>1.7.x</b><br>
 1) Add initial RT3662/RT3883 + RT309x support.<br>
 2) Wi-Fi coexistence now disable per default. (variable HT_BSSCoexistence 0/1<br>

@@ -84,7 +84,7 @@ choice 'Port 5 Connect to' "None		P5_MAC_TO_NONE_MODE \
 		            External_CPU(MII_RvMII) P5_MII_TO_MAC_MODE \
 		            External_CPU(RvMII_MII) P5_RMII_TO_MAC_MODE
 		      	   " None
-                       
+
 define_bool MAC_TO_100SW_MODE n
 define_bool MAC_TO_100PHY_MODE n
 define_bool MAC_TO_VITESSE_MODE n
@@ -156,7 +156,7 @@ fi
 if [ "$GE_MII_FORCE_100" = "y" -o \
      "$GE_RVMII_FORCE_100" = "y" ]; then
     define_bool MAC_TO_100SW_MODE y
-fi     
+fi
 
 if [ "$GE_MII_AN" = "y" ]; then
     define_bool MAC_TO_100PHY_MODE y
