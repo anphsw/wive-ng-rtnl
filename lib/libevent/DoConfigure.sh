@@ -10,5 +10,5 @@ if [ ! -f $APROOTDIR/Makefile.in ]; then
     automake
 fi
 
-CONFOPTS="--host=mipsel-linux --prefix=$APROOTDIR/filesystem --disable-debug-mode --disable-dependency-tracking"
+CONFOPTS="--host=mipsel-linux --prefix=$APROOTDIR/filesystem --disable-debug-mode --disable-dependency-tracking --disable-openssl"
 ./configure $CONFOPTS
