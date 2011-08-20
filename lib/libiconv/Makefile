@@ -31,7 +31,6 @@ SHELL = /bin/sh
 
 all : lib/localcharset.h force
 	cd lib && $(MAKE) all
-	cd preload && $(MAKE) all
 	cd srclib && $(MAKE) all
 	cd src && $(MAKE) all
 	cd po && $(MAKE) all
@@ -50,7 +49,6 @@ install-lib : all force
 install : lib/localcharset.h force
 	cd libcharset && $(MAKE) install prefix='$(prefix)' exec_prefix='$(exec_prefix)' libdir='$(libdir)'
 	cd lib && $(MAKE) install prefix='$(prefix)' exec_prefix='$(exec_prefix)' libdir='$(libdir)'
-	cd preload && $(MAKE) install prefix='$(prefix)' exec_prefix='$(exec_prefix)' libdir='$(libdir)'
 	cd srclib && $(MAKE) install prefix='$(prefix)' exec_prefix='$(exec_prefix)' libdir='$(libdir)'
 	cd src && $(MAKE) install prefix='$(prefix)' exec_prefix='$(exec_prefix)' libdir='$(libdir)'
 	if [ ! -d $(DESTDIR)$(includedir) ] ; then $(mkinstalldirs) $(DESTDIR)$(includedir) ; fi
@@ -61,7 +59,6 @@ install : lib/localcharset.h force
 install-strip : lib/localcharset.h force
 	cd libcharset && $(MAKE) install-strip prefix='$(prefix)' exec_prefix='$(exec_prefix)' libdir='$(libdir)'
 	cd lib && $(MAKE) install-strip prefix='$(prefix)' exec_prefix='$(exec_prefix)' libdir='$(libdir)'
-	cd preload && $(MAKE) install-strip prefix='$(prefix)' exec_prefix='$(exec_prefix)' libdir='$(libdir)'
 	cd srclib && $(MAKE) install-strip prefix='$(prefix)' exec_prefix='$(exec_prefix)' libdir='$(libdir)'
 	cd src && $(MAKE) install-strip prefix='$(prefix)' exec_prefix='$(exec_prefix)' libdir='$(libdir)'
 	if [ ! -d $(DESTDIR)$(includedir) ] ; then $(mkinstalldirs) $(DESTDIR)$(includedir) ; fi
@@ -72,7 +69,6 @@ install-strip : lib/localcharset.h force
 installdirs : force
 	cd libcharset && $(MAKE) installdirs prefix='$(prefix)' exec_prefix='$(exec_prefix)' libdir='$(libdir)'
 	cd lib && $(MAKE) installdirs prefix='$(prefix)' exec_prefix='$(exec_prefix)' libdir='$(libdir)'
-	cd preload && $(MAKE) installdirs prefix='$(prefix)' exec_prefix='$(exec_prefix)' libdir='$(libdir)'
 	cd srclib && $(MAKE) installdirs prefix='$(prefix)' exec_prefix='$(exec_prefix)' libdir='$(libdir)'
 	cd src && $(MAKE) installdirs prefix='$(prefix)' exec_prefix='$(exec_prefix)' libdir='$(libdir)'
 	if [ ! -d $(DESTDIR)$(includedir) ] ; then $(mkinstalldirs) $(DESTDIR)$(includedir) ; fi
@@ -82,7 +78,6 @@ installdirs : force
 uninstall : force
 	cd libcharset && $(MAKE) uninstall prefix='$(prefix)' exec_prefix='$(exec_prefix)' libdir='$(libdir)'
 	cd lib && $(MAKE) uninstall prefix='$(prefix)' exec_prefix='$(exec_prefix)' libdir='$(libdir)'
-	cd preload && $(MAKE) uninstall prefix='$(prefix)' exec_prefix='$(exec_prefix)' libdir='$(libdir)'
 	cd srclib && $(MAKE) uninstall prefix='$(prefix)' exec_prefix='$(exec_prefix)' libdir='$(libdir)'
 	cd src && $(MAKE) uninstall prefix='$(prefix)' exec_prefix='$(exec_prefix)' libdir='$(libdir)'
 	$(RM) $(DESTDIR)$(includedir)/iconv.h
@@ -92,7 +87,6 @@ uninstall : force
 check : all force
 	cd libcharset && $(MAKE) check
 	cd lib && $(MAKE) check
-	cd preload && $(MAKE) check
 	cd srclib && $(MAKE) check
 	cd src && $(MAKE) check
 	cd po && $(MAKE) check
@@ -103,7 +97,6 @@ mostlyclean : force
 	cd libcharset && $(MAKE) mostlyclean
 	$(RM) lib/charset.alias lib/libcharset.* lib/localcharset.h
 	cd lib && $(MAKE) mostlyclean
-	cd preload && $(MAKE) mostlyclean
 	cd srclib && $(MAKE) mostlyclean
 	cd src && $(MAKE) mostlyclean
 	cd po && $(MAKE) mostlyclean
@@ -118,7 +111,6 @@ clean : force
 	cd libcharset && $(MAKE) clean
 	$(RM) lib/charset.alias lib/libcharset.* lib/localcharset.h
 	cd lib && $(MAKE) clean
-	cd preload && $(MAKE) clean
 	cd srclib && $(MAKE) clean
 	cd src && $(MAKE) clean
 	cd po && $(MAKE) clean
@@ -130,7 +122,6 @@ distclean : force
 	cd libcharset && if test -f Makefile; then $(MAKE) distclean; fi
 	$(RM) lib/charset.alias lib/libcharset.* lib/localcharset.h
 	cd lib && if test -f Makefile; then $(MAKE) distclean; fi
-	cd preload && if test -f Makefile; then $(MAKE) distclean; fi
 	cd srclib && if test -f Makefile; then $(MAKE) distclean; fi
 	cd src && if test -f Makefile; then $(MAKE) distclean; fi
 	cd po && if test -f Makefile; then $(MAKE) distclean; fi
@@ -145,7 +136,6 @@ maintainer-clean : force
 	cd libcharset && if test -f Makefile; then $(MAKE) maintainer-clean; fi
 	$(RM) lib/charset.alias lib/libcharset.* lib/localcharset.h
 	cd lib && if test -f Makefile; then $(MAKE) maintainer-clean; fi
-	cd preload && if test -f Makefile; then $(MAKE) maintainer-clean; fi
 	cd srclib && if test -f Makefile; then $(MAKE) maintainer-clean; fi
 	cd src && if test -f Makefile; then $(MAKE) maintainer-clean; fi
 	cd po && if test -f Makefile; then $(MAKE) maintainer-clean; fi

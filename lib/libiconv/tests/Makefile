@@ -8,7 +8,7 @@ srcdir = .
 # Programs used by "make":
 CC = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc
 CFLAGS =  -Wall -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing  -mips32r2 -mtune=24kec -fno-stack-protector -fno-builtin -nostdinc -D_LIBC -I./include -I.  -Os -funit-at-a-time  -mno-split-addresses -isystem /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.3/include -DNDEBUG -fPIC -Os -I/opt/Wive-RTNL/linux/include -I/opt/Wive-RTNL/lib/include
-CPPFLAGS = 
+CPPFLAGS = -I/opt/Wive-RTNL/lib/libiconv/filesystem/include
 LDFLAGS = 
 INCLUDES = -I. -I$(srcdir) -I../include -I$(srcdir)/../include -I../srclib -I$(srcdir)/../srclib -I../lib
 LIBTOOL = /bin/sh $(top_builddir)/libtool
