@@ -1,6 +1,5 @@
 EXEC = clscmd
 
-			
 OBJS = clscmd.o 
 
 CFLAGS += -I$(ROOTDIR)/$(LINUXDIR)/net/ra_classifier/

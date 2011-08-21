@@ -573,6 +573,7 @@
 43) All fs now mount with noatime option(speedup).<br>
 44) rwfs now use bz2 instead gzip.<br>
 45) samba3 fix permissions at systems without user named root.<br>
+46) Cleanup some nvram defaults and move to romfs target.<br>
 
 <br><br>
 <b>For support see:</b><br>

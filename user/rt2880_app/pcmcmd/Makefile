@@ -1,6 +1,5 @@
 EXEC = pcmcmd
 
-			
 OBJS = pcmcmd.o
 
 CFLAGS += -I$(ROOTDIR)/$(LINUXDIR)/drivers/char/pcm

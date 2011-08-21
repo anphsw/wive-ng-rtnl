@@ -641,7 +641,7 @@ int nvram_load_default(void)
 
 	//clear flash and load defaults
 	nvram_clear(RT2860_NVRAM);
-	renew_nvram(RT2860_NVRAM, "/etc/default/RT2860_default_novlan");
+	renew_nvram(RT2860_NVRAM, "/etc/default/nvram_default");
 
 	//reinit nvram before commit
 	nvram_init(RT2860_NVRAM);
