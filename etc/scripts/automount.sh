@@ -3,7 +3,7 @@
 try_mount() {
 if ! mount -o utf8, noatime "$MOUNT_SRC" "$MOUNT_DST"; then
     if ! mount -o noatime "$MOUNT_SRC" "$MOUNT_DST"; then
-	if ! ntfs-3g "$MOUNT_SRC" "$MOUNT_DST" -o force; then
+	if ! ntfs-3g "$MOUNT_SRC" "$MOUNT_DST" -o force,noatime; then
 	    if ! rm -r "$MOUNT_DST"; then
 		exit 1
 	    fi
