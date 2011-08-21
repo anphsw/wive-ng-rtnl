@@ -566,10 +566,10 @@
 38) Now only needed rw images installed to /etc.<br>
 39) Fix defines in goahead for support SAMBA3.<br>
 40) Rewrite auto mount script. Add auto_swap nvram variable to find and mount swap particion on USB drive(auto_swap 1/0).<br>
-41) Add locale support.<br>
-42) Add libiconv.<br>
-43) samba3 use libiconv.<br>
-44) busybox and others use native locale support.<br>
+41) Add libiconv(need for samba3 utf8->cp866 filenames conversion).<br>
+42) samba3 use libiconv without locale support(this is hack for save flash size).<br>
+43) Rework lib build system. Fo more easy port new libs.<br>
+44) Support ext2 and udf file systems is temporarily disconnected.<br>
 
 <br><br>
 <b>For support see:</b><br>

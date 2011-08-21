@@ -42,7 +42,7 @@ SUBDIRS_APP += ntfs-3g p910nd transmission openssl minidlna samba samba3
 #
 dir_v = $(VEND)/$(CONFIG_VENDOR)/$(CONFIG_PRODUCT)/.
 
-dir_y = 
+dir_y =
 dir_n =
 dir_  =
 
