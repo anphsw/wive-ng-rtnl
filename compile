@@ -70,8 +70,6 @@ fi
 
 rm -rfv romfs/*
 rm -rfv images/*
-
-mkdir -p etc/Wireless/RT2860
 ln -sf ./linux-2.6.21.x ./linux
 
 echo --------------------------------COPY-CONFIG-----------------------------
