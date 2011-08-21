@@ -162,7 +162,7 @@ CFLAGS =  -Wall -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing  -mips32
 CFLAG_VISIBILITY = -fvisibility=hidden
 CP = cp -p
 CPP = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc -E
-CPPFLAGS = -I/opt/Wive-RTNL/lib/libiconv/filesystem/include
+CPPFLAGS = 
 CYGPATH_W = echo
 DEFS = -DHAVE_CONFIG_H -DEXEEXT=\"\"
 DEPDIR = .deps
@@ -526,7 +526,7 @@ INTLLIBS =
 INTL_MACOSX_LIBS = 
 LD = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-ld
 LDFLAGS = 
-LIBICONV = /opt/Wive-RTNL/lib/libiconv/filesystem/lib/libiconv.so -Wl,-rpath -Wl,/opt/Wive-RTNL/lib/libiconv/filesystem/lib
+LIBICONV = 
 LIBICRT_LIBDEPS = 
 LIBICRT_LTLIBDEPS = 
 LIBINTL = 
@@ -538,7 +538,7 @@ LIBUNISTRING_UNIWIDTH_H = uniwidth.h
 LIPO = 
 LN = ln
 LN_S = ln -s
-LTLIBICONV = -L/opt/Wive-RTNL/lib/libiconv/filesystem/lib -liconv -R/opt/Wive-RTNL/lib/libiconv/filesystem/lib
+LTLIBICONV = 
 LTLIBINTL = 
 LTLIBOBJS = 
 MAKEINFO = ${SHELL} /opt/Wive-RTNL/lib/libiconv/build-aux/missing --run makeinfo
