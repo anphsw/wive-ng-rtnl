@@ -4,6 +4,7 @@ DOS2UNIX=NO
 FULLREBUILD=NO
 VERSIONPKG="1.9.7.RU.`date +%d%m%Y`"
 
+
 #---Set_env_ROOTDIR_to_current_dir---#
 ROOTDIR=`pwd`
 export ROOTDIR=$ROOTDIR
@@ -19,6 +20,7 @@ if [ "$1" = "" ]; then
 else
     MODE=$1
 fi
+
 
 #------------------------------------#
 #WR-N for full and WR-NL for ligth HW
