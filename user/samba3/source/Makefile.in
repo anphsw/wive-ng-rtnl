@@ -131,10 +131,10 @@ CONFIGFILE = $(CONFIGDIR)/smb.conf
 LMHOSTSFILE = $(CONFIGDIR)/lmhosts
 
 # This is where smbpasswd et al go
-PRIVATEDIR = @privatedir@
+PRIVATEDIR = $(CONFIGDIR)
 
-SMB_PASSWD_FILE = $(PRIVATEDIR)/smbpasswd
-PRIVATE_DIR = $(PRIVATEDIR)
+SMB_PASSWD_FILE = /bin/smbpasswd
+PRIVATE_DIR = $(CONFIGDIR)
 
 # This is where SWAT images and help files go
 SWATDIR = @swatdir@
