@@ -26,21 +26,15 @@
 
 */
 
-#if !defined(HAVE_ICONV) && defined(HAVE_ICONV_H)
+#ifndef HAVE_NATIVE_ICONV
+#define HAVE_NATIVE_ICONV
+#endif
+
 #define HAVE_ICONV
-#endif
-
-#if !defined(HAVE_GICONV) && defined(HAVE_GICONV_H)
-#define HAVE_GICONV
-#endif
-
-#if !defined(HAVE_BICONV) && defined(HAVE_BICONV_H)
-#define HAVE_BICONV
-#endif
 
 #ifdef HAVE_NATIVE_ICONV
 #if defined(HAVE_ICONV)
-#include <iconv.h>
+#include <iconv-compat.h>
 #elif defined(HAVE_GICONV)
 #include <giconv.h>
 #elif defined(HAVE_BICONV)

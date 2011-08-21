@@ -20,6 +20,10 @@
 
 #include "includes.h"
 
+#ifndef HAVE_NATIVE_ICONV
+#define HAVE_NATIVE_ICONV
+#endif
+
 /*
  * We have to use strcasecmp here as the character conversions
  * haven't been initialised yet. JRA.

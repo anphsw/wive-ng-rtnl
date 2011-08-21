@@ -19,7 +19,7 @@ datarootdir=@datarootdir@
 selftest_prefix=@selftest_prefix@
 smbtorture4_path=@smbtorture4_path@
 
-LIBS=@LIBS@
+LIBS=@LIBS@ -liconv
 CC?=@CC@
 SHLD=@SHLD@
 LIB_PATH_VAR=@LIB_PATH_VAR@
@@ -37,16 +37,18 @@ MODULE_EXPORTS=@MODULE_EXPORTS@
 # (GCC) warnings. This is done automtically for --enable-developer,
 # --enable-picky-developer and --enable-krb5developer.
 DEVELOPER_CFLAGS=@DEVELOPER_CFLAGS@
-CFLAGS?=@CFLAGS@
+CFLAGS=@CFLAGS@
+CFLAGS+= -I$(ROOTDIR)/lib/libiconv/include
 CPPFLAGS=-DHAVE_CONFIG_H @CPPFLAGS@
+CPPFLAGS+= -I$(ROOTDIR)/lib/libiconv/include
 
 EXEEXT=@EXEEXT@
-AR?=@AR@
+AR=@AR@
 LDSHFLAGS=@LDSHFLAGS@ @RELRO_LDFLAGS@ @LDFLAGS@
 LDFLAGS=@PIE_LDFLAGS@ @RELRO_LDFLAGS@ @LDFLAGS@
 
 WINBIND_NSS_LDSHFLAGS=@WINBIND_NSS_LDSHFLAGS@ @LDFLAGS@
-AWK?=@AWK@
+AWK=@AWK@
 PICFLAG=@PICFLAG@
 DYNEXP=@DYNEXP@
 PERL=@PERL@
@@ -151,7 +153,7 @@ STATEDIR = @statedir@
 CODEPAGEDIR = @codepagedir@
 
 # the directory where pid files go
-PIDDIR = /var/lock
+PIDDIR = @piddir@
 
 FLAGS1 = $(CFLAGS) @FLAGS1@ @SAMBA_CPPFLAGS@ $(CPPFLAGS)
 FLAGS2 =
