@@ -91,7 +91,7 @@ if [ -f /etc/filesystem.ok ] && [ -f /etc/rc.d/rcS ]; then
     $LOG "RW File system is ok - preparing ..."
   else
     $LOG "File system is clear or poor."
-    cp -a /tmp/rootfs/etc/* /etc
+    cp -af /tmp/rootfs/etc/* /etc
     $LOG "Restored. Save after full boot and configure."
     touch /etc/filesystem.ok
 fi
