@@ -34,8 +34,11 @@ start() {
         cp -rpf /web/* /tmp/web
     else
 	$LOG "16M device detected, creating symlink for web pages in tmpfs."
-        ln -s /web /tmp/web
+        ln -sf /web /tmp/web
     fi
+
+    #this may be need for some apps
+    ln -sf /var/lock /var/locks
 }
 
 stop() {
