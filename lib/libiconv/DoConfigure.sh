@@ -12,7 +12,7 @@ fi
 
 CONFOPTS="--host=mipsel-linux --prefix=$APROOTDIR/filesystem --disable-debug-mode --disable-dependency-tracking"
 
-this small workaround
+#this small workaround
 cp -f ./inc/*.h ./lib/
 
 ./configure $CONFOPTS
