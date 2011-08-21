@@ -571,7 +571,7 @@
 43) Rework lib build system. Fo more easy port new libs.<br>
 44) Support ext2 and udf file systems is temporarily disconnected.<br>
 43) All fs now mount with noatime option(speedup).<br>
-
+44) rwfs now use bz2 instead gzip.<br>
 
 <br><br>
 <b>For support see:</b><br>
