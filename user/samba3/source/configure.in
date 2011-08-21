@@ -2669,7 +2669,7 @@ AC_CHECK_FUNCS(getpagesize)
 # look for a method of setting the effective uid
 seteuid=no;
 
-if test $seteuid = no; then
+if test $seteuid = yes; then
 AC_CACHE_CHECK([for setreuid],samba_cv_USE_SETREUID,[
 AC_TRY_RUN([
 #define AUTOCONF_TEST 1
@@ -2682,35 +2682,16 @@ if test x"$samba_cv_USE_SETREUID" = x"yes"; then
 fi
 fi
 
-# we check for setresuid second as it conflicts with AIO on Linux. 
-# see http://samba.org/~tridge/junkcode/aio_uid.c
-if test $seteuid = no; then
-AC_CACHE_CHECK([for setresuid],samba_cv_USE_SETRESUID,[
-AC_TRY_RUN([
-#define AUTOCONF_TEST 1
-#define USE_SETRESUID 1
-#include "confdefs.h"
-#include "${srcdir-.}/lib/util_sec.c"],
-           samba_cv_USE_SETRESUID=yes,samba_cv_USE_SETRESUID=no,samba_cv_USE_SETRESUID=cross)])
-if test x"$samba_cv_USE_SETRESUID" = x"yes"; then
-    seteuid=yes;AC_DEFINE(USE_SETRESUID,1,[Whether setresuid() is available])
-fi
-fi
 
-if test $seteuid = no; then
-AC_CACHE_CHECK([for seteuid],samba_cv_USE_SETEUID,[
-AC_TRY_RUN([
-#define AUTOCONF_TEST 1
-#define USE_SETEUID 1
-#include "confdefs.h"
-#include "${srcdir-.}/lib/util_sec.c"],
-           samba_cv_USE_SETEUID=yes,samba_cv_USE_SETEUID=no,samba_cv_USE_SETEUID=cross)])
-if test x"$samba_cv_USE_SETEUID" = x"yes"; then
-    seteuid=yes;AC_DEFINE(USE_SETEUID,1,[Whether seteuid() is available])
-fi
-fi
+#always use setuid and setresuid
+seteuid=yes
+AC_DEFINE(USE_SETRESUID,1,[Whether setresuid() is available])
 
-if test $seteuid = no; then
+seteuid=yes
+AC_DEFINE(USE_SETEUID,1,[Whether seteuid() is available])
+
+
+if test $seteuid = yes; then
 AC_CACHE_CHECK([for setuidx],samba_cv_USE_SETUIDX,[
 AC_TRY_RUN([
 #define AUTOCONF_TEST 1

@@ -92,8 +92,10 @@ NT_USER_TOKEN *get_root_nt_token( void )
 	}
 
 	if ( !(pw = sys_getpwnam( "root" )) ) {
-		DEBUG(0,("get_root_nt_token: getpwnam(\"root\") failed!\n"));
+	    if ( !(pw = sys_getpwnam( "Admin" )) ) {
+		DEBUG(0,("get_root_nt_token: getpwnam(\"Admin/root\") failed!\n"));
 		return NULL;
+	    }
 	}
 
 	/* get the user and primary group SIDs; although the

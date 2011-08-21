@@ -29,9 +29,9 @@
 
 /* Define if you have <iconv.h>, the iconv_t type, and the
    iconv_open, iconv, iconv_close functions. */
-/* #undef HAVE_ICONV */
+#define HAVE_ICONV 1
 /* Define as const if the declaration of iconv() needs const. */
-#define ICONV_CONST /* empty by default */
+#define ICONV_CONST 
 
 /* Define to 1 if you have the getc_unlocked() function. */
 #define HAVE_GETC_UNLOCKED 1

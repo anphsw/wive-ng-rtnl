@@ -111,6 +111,9 @@ static void assert_gid(gid_t rgid, gid_t egid)
 {
 	if ((egid != (gid_t)-1 && getegid() != egid) ||
 	    (rgid != (gid_t)-1 && getgid() != rgid)) {
+/* Do not terminate samba if not set gid/gudid. Some distribution not use root by default.
+ in wive per default used Admin and this may be selected by user. Not need change gid/guid. */
+#if 0
 		if (!non_root_mode()) {
 			DEBUG(0,("Failed to set gid privileges to (%d,%d) now set to (%d,%d) uid=(%d,%d)\n",
 				 (int)rgid, (int)egid,
@@ -119,6 +122,7 @@ static void assert_gid(gid_t rgid, gid_t egid)
 			smb_panic("failed to set gid\n");
 			exit(1);
 		}
+#endif
 	}
 }
 
