@@ -15,6 +15,8 @@ fulldump
 /etc/Wireless/rf.bin
 /etc/Wireless/RT2860/RT2860.dat
 /lib/.config
+/lib/lib
+/lib/include_shared
 /lib/libcurl/curl-config
 /lib/libcurl/docs/examples/Makefile
 /lib/libcurl/docs/libcurl/Makefile
