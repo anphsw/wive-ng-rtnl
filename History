@@ -570,6 +570,7 @@
 42) samba3 use libiconv without locale support(this is hack for save flash size).<br>
 43) Rework lib build system. Fo more easy port new libs.<br>
 44) Support ext2 and udf file systems is temporarily disconnected.<br>
+43) All fs now mount with noatime option(speedup).<br>
 
 <br><br>
 <b>For support see:</b><br>
