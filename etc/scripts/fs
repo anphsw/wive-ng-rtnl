@@ -42,7 +42,7 @@ usage(){
 load(){
   local dst=/ 
   echo "Loading TGZfs"
-  zcat $MTDRWFS | tar xf - -C $dst>>/dev/null
+  bzcat $MTDRWFS | tar xf - -C $dst>>/dev/null
 }
 
 save(){
@@ -51,7 +51,7 @@ save(){
   date +%Y%m%d%H%M > /etc/compile-date
   echo "Compress config files"
   tmp="/tmp/tgzfs"
-  tar cf - /etc | gzip -9 > $tmp
+  tar cf - /etc | bzip2 -9 > $tmp
   if [ "$(get_size $tmp)" -lt $(($TGZfs_size/1024)) ]; then
     echo "Write configs to flash"
     dd if=$tmp of=$MTDRWFS bs=64k count=$BLOCKS conv=sync > /dev/null 2>&1

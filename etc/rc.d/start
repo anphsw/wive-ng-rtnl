@@ -85,7 +85,7 @@ $LOG "Init DEV particion"
 cp -rpf /tmp/rootfs/dev/* /dev
 
 $LOG "Init RW particion"
-zcat $MTDDEVICE | /bin/tar xf - -C / > /dev/null 2>&1
+bzcat $MTDDEVICE | /bin/tar xf - -C / > /dev/null 2>&1
 
 if [ -f /etc/filesystem.ok ] && [ -f /etc/rc.d/rcS ]; then
     $LOG "RW File system is ok - preparing ..."
