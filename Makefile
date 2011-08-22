@@ -277,15 +277,15 @@ romfs.subdirs:
 romfs.post:
 	date +%Y%m%d%H%M > $(ROOTDIR)/etc/compile-date
 	cd $(ROOTDIR)
-	cp -vfr $(ROOTDIR)/etc/* $(ROMFSDIR)/etc
-	cp -vf  $(ROOTDIR)/etc/rc.d/rcS $(ROMFSDIR)/bin/rcS
-	cp -vf  $(ROOTDIR)/etc/rc.d/start $(ROMFSDIR)/bin/start
+	cp -vfra $(ROOTDIR)/etc/* $(ROMFSDIR)/etc
+	cp -vfa  $(ROOTDIR)/etc/rc.d/rcS $(ROMFSDIR)/bin/rcS
+	cp -vfa  $(ROOTDIR)/etc/rc.d/start $(ROMFSDIR)/bin/start
 	tar -zxvf dev.tgz
-	cp -rfv dev/* $(ROMFSDIR)/dev
+	cp -rfva dev/* $(ROMFSDIR)/dev
 	rm -fr $(ROOTDIR)/dev
 	cd $(ROMFSDIR)/bin && /bin/ln -fvs ../etc/scripts/* . && cd $(ROOTDIR)
-	cp -avf $(ROOTDIR)/toolchain/mipsel-linux-uclibc/lib/libgcc_s* $(ROMFSDIR)/lib/
-	cp -avf $(ROOTDIR)/toolchain/lib/librt* $(ROMFSDIR)/lib/
+	cp -vfa $(ROOTDIR)/toolchain/mipsel-linux-uclibc/lib/libgcc_s* $(ROMFSDIR)/lib/
+	cp -vfa $(ROOTDIR)/toolchain/lib/librt* $(ROMFSDIR)/lib/
 	./strip.sh
 	$(MAKEARCH) -C vendors romfs.post
 	-find $(ROMFSDIR)/. -name CVS | xargs -r rm -rf

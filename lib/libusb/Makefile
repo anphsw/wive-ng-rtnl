@@ -25,7 +25,7 @@ shared: all
 	$(RM) $(TOPDIR)lib/$(LIBUSB_SHARED_FULLNAME)
 	$(INSTALL) -m 644 $(LIBUSB_SHARED_FULLNAME) $(TOPDIR)lib
 	$(LN) -sf $(LIBUSB_SHARED_FULLNAME) $(TOPDIR)lib/$(LIBUSB_SHARED)
-	cp -vf *.h	$(ROOTDIR)/lib/include_shared
+	cp -vfa *.h	$(ROOTDIR)/lib/include_shared
 
 $(LIBUSB) ar-target: $(OBJS)
 	$(AR) $(ARFLAGS) $(LIBUSB) $(OBJS)

@@ -36,8 +36,8 @@ clean:
 	${RM} *~
 
 install: all
-	-cp -f squashfs3.2-r2/squashfs-tools/mksquashfs ../bin/mksquashfs_lzma-3.2
-	-cp -f ${LzmaAlone}/lzma_alone ../bin/lzma_alone
+	-cpa -f squashfs3.2-r2/squashfs-tools/mksquashfs ../bin/mksquashfs_lzma-3.2
+	-cpa -f ${LzmaAlone}/lzma_alone ../bin/lzma_alone
 
 ########################################
 

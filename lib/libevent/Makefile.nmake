@@ -47,6 +47,6 @@ tests:
 	$(MAKE) /F Makefile.nmake
 
 shared : install
-	cp -vf ./filesystem/lib/*.*	$(ROOTDIR)/lib/lib
-	cp -vfr ./filesystem/include/*	$(ROOTDIR)/lib/include_shared
+	cp -vfa ./filesystem/lib/*.*	$(ROOTDIR)/lib/lib
+	cp -vfra ./filesystem/include/*	$(ROOTDIR)/lib/include_shared
 

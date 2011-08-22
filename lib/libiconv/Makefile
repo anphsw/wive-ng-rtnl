@@ -105,8 +105,8 @@ mostlyclean : force
 	rm -rf bin
 
 shared : install
-	cp -vf ./filesystem/lib/*.*	$(ROOTDIR)/lib/lib
-	cp -vfr ./filesystem/include/*	$(ROOTDIR)/lib/include_shared
+	cp -vfa ./filesystem/lib/*.*	$(ROOTDIR)/lib/lib
+	cp -vfra ./filesystem/include/*	$(ROOTDIR)/lib/include_shared
 
 clean : force
 	cd libcharset && $(MAKE) clean

@@ -17,7 +17,7 @@ install:
 	mkdir filesystem
 	mkdir filesystem/bin
 	@set -e; 
-	for i in $(UTILSLIST); do cp -fv $$i ./filesystem/bin/$$i; done
+	for i in $(UTILSLIST); do cp -fva $$i ./filesystem/bin/$$i; done
 
 romfs:
 	rm -rf filesystem

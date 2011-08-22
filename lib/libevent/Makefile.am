@@ -233,8 +233,8 @@ doxygen: FORCE
 FORCE:
 
 shared : install
-	cp -vf ./filesystem/lib/*.*	$(ROOTDIR)/lib/lib
-	cp -vfr ./filesystem/include/*	$(ROOTDIR)/lib/include_shared
+	cp -vfa ./filesystem/lib/*.*	$(ROOTDIR)/lib/lib
+	cp -vfra ./filesystem/include/*	$(ROOTDIR)/lib/include_shared
 
 
 DISTCLEANFILES = *~ libevent.pc ./include/event2/event-config.h

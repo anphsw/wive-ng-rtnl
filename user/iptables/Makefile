@@ -259,17 +259,17 @@ ip6tables.8: ip6tables.8.in extensions/libip6t_matches.man extensions/libip6t_ta
 .PHONY: install-devel-man3
 install-devel-man3: $(DEVEL_MAN3)
 	@[ -d $(DESTDIR)$(MANDIR)/man3 ] || mkdir -p $(DESTDIR)$(MANDIR)/man3
-	@cp -v $(DEVEL_MAN3) $(DESTDIR)$(MANDIR)/man3
+	@cp -va $(DEVEL_MAN3) $(DESTDIR)$(MANDIR)/man3
 
 .PHONY: install-devel-headers
 install-devel-headers: $(DEVEL_HEADERS)
 	@[ -d $(DESTDIR)$(INCDIR) ] || mkdir -p $(DESTDIR)$(INCDIR)
-	@cp -v $(DEVEL_HEADERS) $(DESTDIR)$(INCDIR)
+	@cp -va $(DEVEL_HEADERS) $(DESTDIR)$(INCDIR)
 
 .PHONY: install-devel-libs
 install-devel-libs: $(DEVEL_LIBS)
 	@[ -d $(DESTDIR)$(LIBDIR) ] || mkdir -p $(DESTDIR)$(LIBDIR)
-	@cp -v $(DEVEL_LIBS) $(DESTDIR)$(LIBDIR)
+	@cp -va $(DEVEL_LIBS) $(DESTDIR)$(LIBDIR)
 
 .PHONY: install-devel
 install-devel: all install-devel-man3 install-devel-headers install-devel-libs

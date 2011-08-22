@@ -72,8 +72,8 @@ all: static shared all64
 static: example$(EXE) minigzip$(EXE)
 
 shared: examplesh$(EXE) minigzipsh$(EXE)
-	cp -vf ./libz.so*	$(ROOTDIR)/lib/lib
-	cp -vf *.h		$(ROOTDIR)/lib/include_shared
+	cp -vfa ./libz.so*	$(ROOTDIR)/lib/lib
+	cp -vfa *.h		$(ROOTDIR)/lib/include_shared
 
 all64: example64$(EXE) minigzip64$(EXE)
 
