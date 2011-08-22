@@ -108,6 +108,8 @@ libpcap.a: $(OBJ)
 	$(RANLIB) $@
 
 shared: libpcap.$(DYEXT)
+	cp -vf *.so*	$(ROOTDIR)/lib/lib
+	cp -vf pcap*.h	$(ROOTDIR)/lib/include_shared
 
 #
 # XXX - this works with GNU ld, but won't necessarily work with native
@@ -223,8 +225,5 @@ releasetar:
 
 depend:	$(GENSRC) $(GENHDR) bpf_filter.c
 	./mkdep -c $(CC) $(DEFS) $(INCLS) $(SRC)
-
-shared:
-	cp -fvp libpcap.so* ../lib
 
 Makefile: Makefile.in

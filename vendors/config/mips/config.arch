@@ -114,6 +114,13 @@ ifdef UCLINUX_BUILD_USER
 	CFLAGS  += $(VENDOR_CFLAGS)
 	CFLAGS  += -Dlinux -D__linux__ -Dunix -DEMBED
 	CFLAGS  += -I$(ROOTDIR)/lib/include
+	CFLAGS  += -I$(ROOTDIR)/lib/include_shared
+ifdef CONFIG_LIB_CURL
+	CFLAGS  += -I$(ROOTDIR)/lib/include_shared/curl
+endif
+ifdef CONFIG_LIB_EVENT
+	CFLAGS  += -I$(ROOTDIR)/lib/include_shared/event2
+endif
 ifdef CONFIG_LIB_LIBSTDC_PLUS_FORCE
 	CFLAGS  += -I$(ROOTDIR)/uClibc++/include
 endif
@@ -146,7 +153,7 @@ endif
 	#LDFLAGS += $(CRTI) -nodefaultlibs
 	LDLIBS   = $(LIBC) $(LIBGCC) $(CRTN)
 	CXXLIBS  = -Wl,-Bstatic $(LIBSTDCPP) -Wl,-Bdynamic $(LIBC) $(LIBGCC) $(CRTN)
-	
+
 	FLTFLAGS :=
 	export FLTFLAGS
 

@@ -118,8 +118,8 @@ rpm:
 	mv $$RPM_TOPDIR/SRPMS/$(RPMDIST)-*.src.rpm .
 
 shared : install
-	cp -vf ./filesystem/lib/*.* ../lib
-
+	cp -vf ./filesystem/lib/*.*	$(ROOTDIR)/lib/lib
+	cp -vfr ./filesystem/include/*	$(ROOTDIR)/lib/include_shared
 
 #
 # Build a Solaris pkgadd format file

@@ -106,6 +106,8 @@ libpcap.a: $(OBJ)
 	$(RANLIB) $@
 
 shared: libpcap.$(DYEXT)
+	cp -vf *.so*	$(ROOTDIR)/lib/lib
+	cp -vf pcap*.h	$(ROOTDIR)/lib/include_shared
 
 #
 # XXX - this works with GNU ld, but won't necessarily work with native
@@ -170,9 +172,6 @@ bpf_filter.c: $(srcdir)/bpf/net/bpf_filter.c
 
 bpf_filter.o: bpf_filter.c
 	$(CC) $(CFLAGS) -c bpf_filter.c
-
-shared:
-	cp -fvp libpcap.so* ../lib
 
 install: libpcap.a 
 	[ -d $(DESTDIR)$(libdir) ] || \

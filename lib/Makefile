@@ -167,6 +167,7 @@ else
 endif
 
 finished: shared
+	rm -f $(ROOTDIR)/lib/include_shared/config.h
 	$(SECHO)
 	$(SECHO) Finally finished compiling ...
 	$(SECHO)
@@ -230,6 +231,7 @@ headers: include/bits/uClibc_config.h
 	fi
 	$(MAKE) -C libc/sysdeps/linux/common headers
 	$(MAKE) -C libc/sysdeps/linux/$(TARGET_ARCH) headers
+	mkdir -p $(ROOTDIR)/lib/include_shared
 
 # Command used to download source code
 WGET:=wget --passive-ftp
@@ -247,6 +249,8 @@ ifeq ($(strip $(UCLIBC_PREGENERATED_LOCALE_DATA)),y)
 	(cd extra/locale; zcat $(LOCALE_DATA_FILENAME) | tar -xvf -)
 	$(MAKE) -C extra/locale pregen
 endif
+#first make dir for external libs
+	mkdir -p $(ROOTDIR)/lib/include_shared
 
 
 subdirs: $(patsubst %, _dir_%, $(DIRS))
@@ -335,7 +339,7 @@ endif
 	-find $(PREFIX)$(DEVEL_PREFIX) -name .svn | xargs $(RM) -rf;
 	-chown -R `id | sed 's/^uid=\([0-9]*\).*gid=\([0-9]*\).*$$/\1:\2/'` $(PREFIX)$(DEVEL_PREFIX)
 ifeq ($(strip $(HAVE_SHARED)),y)
-	for i in `find lib/ -type l -name 'lib[a-zA-Z]*.so' | \
+	for i in `find lib/ -type l -name 'lib[a-zA-Z]*.so*' | \
 	sed -e 's/lib\///'` ; do \
 		$(LN) -sf $(RUNTIME_PREFIX_LIB_FROM_DEVEL_PREFIX_LIB)$$i.$(MAJOR_VERSION) \
 		$(PREFIX)$(DEVEL_PREFIX)lib/$$i; \
@@ -375,7 +379,7 @@ ifeq ($(strip $(OPTIMIZED_SHARED)),y)
 	utils/liboptim.sh $(CROSS) ; \
 	if [ -e liboptim/libc.so.0 ]; then cp liboptim/libc.so.0 $(PREFIX)$(RUNTIME_PREFIX)lib/libuClibc-0.9.28.so; fi ; \
 	if [ -e liboptim/libiw.so.29 ]; then cp liboptim/libiw.so.29 $(PREFIX)$(RUNTIME_PREFIX)lib/libiw.so.29; fi ; \
-	for i in `find liboptim/ -name lib[a-zA-Z]*.so.0 | sed -e 's/liboptim\///'` ; do \
+	for i in `find liboptim/ -name lib[a-zA-Z]*.so.* | sed -e 's/liboptim\///'` ; do \
 		if [ "$$i" == libc.so.0 ]; then continue; fi ; \
 		cp liboptim/$$i $(PREFIX)$(RUNTIME_PREFIX)lib/`echo $$i | sed -e 's/.so.0/-0.9.28.so/'` ; \
 	done;
@@ -457,7 +461,7 @@ defconfig: extra/config/conf
 	@./extra/config/conf -d extra/Configs/Config.in
 
 clean:
-	- find . \( -name \*.o -o -name \*.a -o -name \*.so -o -name core -o -name .\#\* \) -exec $(RM) {} \;
+	- find . \( -name \*.o -o -name \*.a -o -name \*.so* -o -name core -o -name .\#\* \) -exec $(RM) {} \;
 	@$(RM) -rf tmp lib include/bits libc/tmp _install lib_optim
 	$(RM) libc/obj.* headers lib_diff
 	-$(MAKE) -C test clean
@@ -480,6 +484,7 @@ clean:
 ifeq ($(CONFIG_LIB_LIBGMP_FORCE),y)
 	-$(MAKE) -C libgmp clean
 endif
+	-rm -rf $(ROOTDIR)/lib/include_shared
 	@set -e; \
 	for i in `(cd $(TOPDIR)/libc/sysdeps/linux/common/sys; ls *.h)` ; do \
 		$(RM) include/sys/$$i; \
