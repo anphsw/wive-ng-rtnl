@@ -474,7 +474,7 @@ static ssize_t read_socket_data(int fd,char *buffer,size_t N)
     }
     if (ret == -1)
     {
-      DEBUG(0,("read_socket_data: recv failure for %d. Error = %s\n", (int)(N - total), strerror(errno) ));
+      DEBUG(10,("read_socket_data: recv failure for %d. Error = %s\n", (int)(N - total), strerror(errno) ));
       smb_read_error = READ_ERROR;
       return -1;
     }
