@@ -133,7 +133,7 @@ LMHOSTSFILE = $(CONFIGDIR)/lmhosts
 # This is where smbpasswd et al go
 PRIVATEDIR = $(CONFIGDIR)
 
-SMB_PASSWD_FILE = /bin/smbpasswd
+SMB_PASSWD_FILE = $(CONFIGDIR)/smbpasswd
 PRIVATE_DIR = $(CONFIGDIR)
 
 # This is where SWAT images and help files go
