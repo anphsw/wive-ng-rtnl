@@ -285,7 +285,7 @@ all : CHECK $(SPROGS) $(PROGS)
 romfs:
 	$(ROMFSINST) -S bin/nmbd /bin/nmbd
 	$(ROMFSINST) -S bin/smbd /bin/smbd
-	cp -rvf  codepages/* ../../../romfs/$(CODEPAGEDIR)
+	cp -rvfa  codepages/* ../../../romfs/$(CODEPAGEDIR)
 	$(ROMFSINST) -S -e CONFIG_USER_SAMBA_SMBMOUNT bin/smbmnt /bin/smbmnt
 	$(ROMFSINST) -S -e CONFIG_USER_SAMBA_SMBMOUNT bin/smbmount /bin/smbmount
 	$(ROMFSINST) -S -e CONFIG_USER_SAMBA_SMBUMOUNT bin/smbumount /bin/smbumount

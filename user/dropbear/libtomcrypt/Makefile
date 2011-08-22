@@ -291,7 +291,7 @@ no_oops: clean
 
 zipup: no_oops docs
 	cd .. ; rm -rf crypt* libtomcrypt-$(VERSION) ; mkdir libtomcrypt-$(VERSION) ; \
-	cp -R ./libtomcrypt/* ./libtomcrypt-$(VERSION)/ ; \
+	cp -Ra ./libtomcrypt/* ./libtomcrypt-$(VERSION)/ ; \
 	cd libtomcrypt-$(VERSION) ; rm -rf `find . -type d | grep CVS | xargs` ; cd .. ; \
 	tar -cjvf crypt-$(VERSION).tar.bz2 libtomcrypt-$(VERSION) ; \
 	zip -9r crypt-$(VERSION).zip libtomcrypt-$(VERSION) ; \

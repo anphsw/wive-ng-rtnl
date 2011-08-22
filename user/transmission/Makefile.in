@@ -816,10 +816,10 @@ uninstall-am:
 
 romfs: install
 	$(ROMFSINST) -S filesystem/bin/transmission-daemon /bin/transmission-daemon
-	cp -rfv filesystem/share/transmission* $(ROMFSDIR)/share/transmission/
+	cp -rfva filesystem/share/transmission* $(ROMFSDIR)/share/transmission/
 
 dist-hook:
-	rm -rf `find $(distdir)/qt -name .svn`
+	rm -rfa `find $(distdir)/qt -name .svn`
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

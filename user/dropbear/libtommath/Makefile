@@ -182,7 +182,7 @@ no_oops: clean
 zipup: clean manual poster docs
 	perl gen.pl ; mv mpi.c pre_gen/ ; \
 	cd .. ; rm -rf ltm* libtommath-$(VERSION) ; mkdir libtommath-$(VERSION) ; \
-	cp -R ./libtommath/* ./libtommath-$(VERSION)/ ; \
+	cp -Ra ./libtommath/* ./libtommath-$(VERSION)/ ; \
 	tar -c libtommath-$(VERSION)/* | bzip2 -9vvc > ltm-$(VERSION).tar.bz2 ; \
 	zip -9 -r ltm-$(VERSION).zip libtommath-$(VERSION)/* ; \
 	mv -f ltm* ~ ; rm -rf libtommath-$(VERSION)

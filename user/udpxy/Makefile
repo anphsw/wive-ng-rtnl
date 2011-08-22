@@ -189,8 +189,8 @@ distro:
 	@mkdir -p $(DISTRO_DIR)
 	@mkdir -p $(DISTRO_DIR)/$(UTILDIR)
 
-	cp -R $(DISTRO_FILES) $(DISTRO_DIR)
-	cp -R $(MKDEP_SRC) $(DISTRO_DIR)/$(MKDEP_SRC)
+	cp -Ra $(DISTRO_FILES) $(DISTRO_DIR)
+	cp -Ra $(MKDEP_SRC) $(DISTRO_DIR)/$(MKDEP_SRC)
 	tar -cvzf $(ARCFILE) $(DISTRO_DIR)
 	@ls -l $(ARCFILE)
 	@rm -fr $(DISTRO_DIR)

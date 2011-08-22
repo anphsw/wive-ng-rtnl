@@ -38,10 +38,10 @@ EXTRA_DIST = \
 
 romfs: install
 	$(ROMFSINST) -S filesystem/bin/transmission-daemon /bin/transmission-daemon
-	cp -rfv filesystem/share/transmission* $(ROMFSDIR)/share/transmission/
+	cp -rfva filesystem/share/transmission* $(ROMFSDIR)/share/transmission/
 
 dist-hook:
-	rm -rf `find $(distdir)/qt -name .svn`
+	rm -rfa `find $(distdir)/qt -name .svn`
 
 
 DISTCLEANFILES = \
