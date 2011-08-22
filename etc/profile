@@ -1,7 +1,12 @@
 #!/bin/sh
 
 #terminal settings
-export TERM=vt102
+export TERM=xterm
+export TERMCAP=/etc/termcap
+export TERMINFO=/etc/xterm
+export CONSOLE=/dev/console
+
+#paths settings
 export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/etc/scripts
 export HOME=$(grep -e "^${USER:-root}:" /etc/passwd | cut -d ":" -f 6)
 export HOME=${HOME:-/}
