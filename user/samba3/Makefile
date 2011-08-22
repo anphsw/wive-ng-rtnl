@@ -12,6 +12,7 @@ romfs: all
 	$(ROMFSINST) -S smb.conf.template	/etc/smb.conf.template
 	$(ROMFSINST) -S passdb.tdb		/etc/passdb.tdb
 	$(ROMFSINST) -S secrets.tdb		/etc/secrets.tdb
+	$(ROMFSINST) -S smbpasswd		/etc/smbpasswd
 
 clean:
 	$(MAKE) -C source clean

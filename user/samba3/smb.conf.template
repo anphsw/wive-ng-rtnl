@@ -25,3 +25,4 @@
     preserve case = yes
     short preserve case = yes
     private dir = /etc
+    smb passwd file = /etc/smbpasswd
