@@ -22,7 +22,7 @@ CONFOPTS="$CONFOPTS --without-ldap --without-ads --without-cifsmount"
 CONFOPTS="$CONFOPTS --without-cifsupcall --with-syslog --without-sys-quotas"
 CONFOPTS="$CONFOPTS --without-utmp --without-cluster-support --without-winbind"
 CONFOPTS="$CONFOPTS --without-libtalloc --without-libtdb --without-libnetapi"
-CONFOPTS="$CONFOPTS --without-libsmbclient --without-libsmbsharemodes --without-libaddns"
+CONFOPTS="$CONFOPTS --without-libsmbclient --without-libsmbsharemodes --without-libaddns --without-sendfile-support"
 CONFOPTS="$CONFOPTS --with-logfilebase=/var/log --with-piddir=/var/lock --with-lockdir=/var/lock --sysconfdir=/etc"
 CONFOPTS="$CONFOPTS --with-libiconv=$FIRMROOT/lib/lib $FIRMROOT/lib/libiconv/include --prefix=/"
 
