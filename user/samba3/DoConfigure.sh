@@ -5,14 +5,9 @@ APROOTDIR=`pwd`
 
 cd $APROOTDIR/source
 
-if [ ! -f $APROOTDIR/source/configure ]; then
-    autogen.sh
+if [ ! -f configure ]; then
+    sh ./autogen.sh
 fi
-if [ ! -f $APROOTDIR/source/Makefile.in ]; then
-    automake
-fi
-
-#$FIRMROOT/lib/libiconv
 
 CONFOPTS="--host=mipsel-linux --build=i686-pc-linux-gnu --target=mipsel"
 CONFOPTS="$CONFOPTS --disable-iprint --disable-pie --disable-relro --disable-fam --disable-cups --disable-debug"
