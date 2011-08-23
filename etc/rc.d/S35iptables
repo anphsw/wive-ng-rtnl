@@ -108,10 +108,10 @@ start() {
 	if [ "$SmbEnabled" = "1" ]; then
 	    $LOG "samba"
 	    iptables -A servicelimit -i $lan_if -p udp --dport 137:138 -j ACCEPT
-	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 139 -j ACCEPT
+	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp -m multiport --dport 139,445 -j ACCEPT
 	else
 	    iptables -A servicelimit -i $lan_if -p udp --dport 137:138 -j DROP
-	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 139 -j DROP
+	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp -m multiport --dport 139,445 -j DROP
 	fi
 	if [ "$dnsPEnabled" = "1" ]; then
 	    $LOG "dnsproxy"
