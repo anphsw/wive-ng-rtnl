@@ -12,6 +12,21 @@ if ! mount -o utf8, noatime "$MOUNT_SRC" "$MOUNT_DST"; then
 fi
 }
 
+try_umount() {
+mount_point=`mount | grep $MDEV | awk '{print $3}'`
+if [ `mount | grep $MDEV | wc -l` -ge 1 ]; then
+    sync
+    if ! umount "/dev/$MDEV"; then
+	if ! umount -l "/dev/$MDEV"; then
+	    exit 1
+	fi
+    fi
+    if ! rm -r "$mount_point"; then
+        exit 1
+    fi
+fi
+}
+
 swap_on() {
 auto_swap=`nvram_get 2860 auto_swap`
 if [ "$auto_swap" = "1" ] && [ -f /bin/swapon ] && [ -f /bin/fdisk ]; then
@@ -67,18 +82,7 @@ if [ "$ACTION" = "add" ] ; then
     fi
 else
     swap_off
-    mount_point=`mount | grep $MDEV | awk '{print $3}'`
-    if [ `mount | grep $MDEV | wc -l` -ge 1 ]; then
-	sync
-	if ! umount "/dev/$MDEV"; then
-	    if ! umount -l "/dev/$MDEV"; then
-		exit 1
-	    fi
-	fi
-	if ! rm -r "$mount_point"; then
-	    exit 1
-	fi
-    fi
+    try_umount
 fi
 
 killall -q -SIGTTIN goahead

@@ -29,6 +29,7 @@ get_param() {
     LCPECHO=`nvram_get 2860 vpnEnableLCP`
     LCPFAIL=`nvram_get 2860 vpnLCPFailure`
     LCPINTR=`nvram_get 2860 vpnLCPInterval`
+    PINGTST=`nvram_get 2860 vpnTestReachable`
     OPTFILE="/etc/ppp/options.pptp"
 }
 
@@ -89,18 +90,20 @@ echo "==================START-PPTP-CLIENT======================="
 	fi
     fi
 
-    while [ $reachable -eq 0 ]; do
-	$LOG "Check for PPTP server $SERVER reachable"
-        ping -q -c 1 $SERVER
-        if [ "$?" -eq 0 ]; then
-            reachable=1
-        else
-            $LOG "Server unreachable wait 30 sec."
-            sleep 30
-	    get_vpn_ip
-            reachable=0;
-        fi
-    done
+    if [ "$vpnTestReachable" = "1" ]; then
+	while [ $reachable -eq 0 ]; do
+	    $LOG "Check for PPTP server $SERVER reachable"
+    	    ping -q -c 1 $SERVER
+    	    if [ "$?" -eq 0 ]; then
+        	reachable=1
+    	    else
+    		$LOG "Server unreachable wait 30 sec."
+        	sleep 30
+		get_vpn_ip
+        	reachable=0;
+    	    fi
+        done
+    fi
 
     #load ppp* modules
     load_modules

@@ -576,9 +576,10 @@
 46) Cleanup some nvram defaults and move to romfs target.<br>
 47) tune samba3 config for more compat with some MS-WIN apps used file based DB.<br>
 48) Try fix regression in ext2 module.<br>
-49) Add SmbTimeserver variable for support time server compatable with WinNT(SmbTimeserver variable 0/1 need add WenUI, default 0).<br>
+49) Add SmbTimeserver variable for support time server compatable with WinNT(SmbTimeserver variable 0/1 need add in WebUI, default 0).<br>
 50) Tune kernel for file services as torrent/samba/etc.<br>
 51) radvd up to 1.8.1 version.<br>
+52) Add vpnTestReachable variable. Is vpnTestReachable=1 test VPN server reachable before connect (default 1, only pptp/l2tp, need add in WebUI).<br>
 
 <br><br>
 <b>For support see:</b><br>
