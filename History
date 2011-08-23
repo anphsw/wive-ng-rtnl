@@ -578,6 +578,7 @@
 48) Try fix regression in ext2 module.<br>
 49) Add SmbTimeserver variable for support time server compatable with WinNT(SmbTimeserver variable 0/1 need add WenUI, default 0).<br>
 50) Tune kernel for file services as torrent/samba/etc.<br>
+51) radvd up to 1.8.1 version.<br>
 
 <br><br>
 <b>For support see:</b><br>
