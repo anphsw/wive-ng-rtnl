@@ -372,8 +372,9 @@ static void setSamba(webs_t wp, char_t *path, char_t *query)
 	nvram_close(RT2860_NVRAM);
 
 	//restart some services instead full reload
+	doSystem("service sysctl restart &");
 	doSystem("service samba restart &");
-	
+
 	char_t *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
 	if (submitUrl != NULL)
 		websRedirect(wp, submitUrl);

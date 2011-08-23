@@ -47,13 +47,13 @@ static void setSysAdm(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "Password", admpass);
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
-	
 
 	/* modify /etc/passwd to new user name and passwd */
 	doSystem("sed -e 's/^%s:/%s:/' /etc/passwd > /etc/newpw", old_user, admuser);
 	doSystem("cp /etc/newpw /etc/passwd");
 	doSystem("rm -f /etc/newpw");
 	doSystem("service pass start &");
+	doSystem("service sysctl restart &");
 	doSystem("service inetd restart &");
 	doSystem("service samba restart &");
 
