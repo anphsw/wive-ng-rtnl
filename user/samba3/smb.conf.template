@@ -1,28 +1,56 @@
+    bind interfaces only = Yes
+    keepalive = 30
+
+    private dir = /etc
+    smb passwd file = /etc/smbpasswd
     lock directory = /var/lock
     lock dir = /var/lock
     syslog = 1
     syslog only = yes
     max log size = 10
+
     security = share
-    name resolve order = lmhosts host wins bcast
     announce version = 4.9
     os level = 200
-    domain master = yes
-    preferred master = yes
-    local master = yes
+    guest account = nobody
+
+    name resolve order = lmhosts host wins bcast
     wins support = yes
     wins proxy = no
     dns proxy = no
-    guest account = nobody
+    domain master = yes
+    preferred master = yes
+    local master = yes
+    enhanced browsing = yes
+    name cache timeout = 660
+
     time server = no
+
     unix charset = UTF-8
     display charset = UTF-8
     dos charset = 866
-    show add printer wizard = no
-    load printers = no
     force directory mode = 0771
     default case = upper
     preserve case = yes
     short preserve case = yes
-    private dir = /etc
-    smb passwd file = /etc/smbpasswd
+    fstype = NTFS
+    block size = 4096
+
+    show add printer wizard = no
+    load printers = no
+    cups server = ""
+
+    wide links= yes
+    unix extensions = no
+    max stat cache size = 1024
+
+    #fix work with file database
+    #need for 1C/Parus and others
+    kernel oplocks = no
+    use sendfile = no
+    locking = yes
+    strict locking = Auto
+    nt acl support = yes
+    map archive = yes
+    inherit permissions  = yes
+    map acl inherit      = yes

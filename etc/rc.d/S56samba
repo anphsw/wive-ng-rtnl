@@ -22,9 +22,9 @@ if [ "$SmbEnabled" = "1" ]; then
     echo "[global]" > $CONFIG
     #for file share mode need increase buffers size
     if [ -d /proc/bus/usb ]; then
-	echo "    socket options = SO_BROADCAST SO_RCVBUF=65536 SO_SNDBUF=65536" >> $CONFIG
+	echo "    socket options = SO_BROADCAST IPTOS_THROUGHPUT TCP_NODELAY SO_RCVBUF=65536 SO_SNDBUF=65536" >> $CONFIG
     else
-	echo "    socket options = SO_BROADCAST SO_RCVBUF=1024 SO_SNDBUF=1024" >> $CONFIG
+	echo "    socket options = SO_BROADCAST IPTOS_THROUGHPUT TCP_NODELAY SO_RCVBUF=1024 SO_SNDBUF=1024" >> $CONFIG
     fi
     echo "    interfaces = $lan_if" >> $CONFIG
     echo "    workgroup = $WorkGroup" >> $CONFIG
