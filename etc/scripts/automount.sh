@@ -69,8 +69,11 @@ else
     swap_off
     mount_point=`mount | grep $MDEV | awk '{print $3}'`
     if [ `mount | grep $MDEV | wc -l` -ge 1 ]; then
+	sync
 	if ! umount "/dev/$MDEV"; then
-	    exit 1
+	    if ! umount -l "/dev/$MDEV"; then
+		exit 1
+	    fi
 	fi
 	if ! rm -r "$mount_point"; then
 	    exit 1
