@@ -489,7 +489,7 @@ ext3_xattr_set_acl(struct inode *inode, int type, const void *value,
 
 	if (!test_opt(inode->i_sb, POSIX_ACL))
 		return -EOPNOTSUPP;
-	if (!is_owner_or_cap(inode))
+	if ((current->fsuid != inode->i_uid) && !capable(CAP_FOWNER))
 		return -EPERM;
 
 	if (value) {

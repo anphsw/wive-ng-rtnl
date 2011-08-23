@@ -60,7 +60,8 @@ xattr_permission(struct inode *inode, const char *name, int mask)
 		if (!S_ISREG(inode->i_mode) && !S_ISDIR(inode->i_mode))
 			return -EPERM;
 		if (S_ISDIR(inode->i_mode) && (inode->i_mode & S_ISVTX) &&
-		    (mask & MAY_WRITE) && !is_owner_or_cap(inode))
+		    (mask & MAY_WRITE) && (current->fsuid != inode->i_uid) &&
+		    !capable(CAP_FOWNER))
 			return -EPERM;
 	}
 

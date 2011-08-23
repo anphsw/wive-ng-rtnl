@@ -726,7 +726,7 @@ static int ext4_splice_branch(handle_t *handle, struct inode *inode,
 
 	/* We are done with atomic stuff, now do the rest of housekeeping */
 
-	inode->i_ctime = ext4_current_time(inode);
+	inode->i_ctime = CURRENT_TIME_SEC;
 	ext4_mark_inode_dirty(handle, inode);
 
 	/* had we spliced it onto indirect block? */
@@ -1769,6 +1769,7 @@ int ext4_block_truncate_page(handle_t *handle, struct page *page,
 	struct inode *inode = mapping->host;
 	struct buffer_head *bh;
 	int err = 0;
+	void *kaddr;
 
 	blocksize = inode->i_sb->s_blocksize;
 	length = blocksize - (offset & (blocksize - 1));
@@ -1780,7 +1781,10 @@ int ext4_block_truncate_page(handle_t *handle, struct page *page,
 	 */
 	if (!page_has_buffers(page) && test_opt(inode->i_sb, NOBH) &&
 	     ext4_should_writeback_data(inode) && PageUptodate(page)) {
-		zero_user_page(page, offset, length, KM_USER0);
+		kaddr = kmap_atomic(page, KM_USER0);
+		memset(kaddr + offset, 0, length);
+		flush_dcache_page(page);
+		kunmap_atomic(kaddr, KM_USER0);
 		set_page_dirty(page);
 		goto unlock;
 	}
@@ -1833,7 +1837,10 @@ int ext4_block_truncate_page(handle_t *handle, struct page *page,
 			goto unlock;
 	}
 
-	zero_user_page(page, offset, length, KM_USER0);
+	kaddr = kmap_atomic(page, KM_USER0);
+	memset(kaddr + offset, 0, length);
+	flush_dcache_page(page);
+	kunmap_atomic(kaddr, KM_USER0);
 
 	BUFFER_TRACE(bh, "zeroed end of block");
 
@@ -2371,7 +2378,7 @@ do_indirects:
 	ext4_discard_reservation(inode);
 
 	mutex_unlock(&ei->truncate_mutex);
-	inode->i_mtime = inode->i_ctime = ext4_current_time(inode);
+	inode->i_mtime = inode->i_ctime = CURRENT_TIME_SEC;
 	ext4_mark_inode_dirty(handle, inode);
 
 	/*
@@ -2579,25 +2586,6 @@ void ext4_set_inode_flags(struct inode *inode)
 		inode->i_flags |= S_DIRSYNC;
 }
 
-/* Propagate flags from i_flags to EXT4_I(inode)->i_flags */
-void ext4_get_inode_flags(struct ext4_inode_info *ei)
-{
-	unsigned int flags = ei->vfs_inode.i_flags;
-
-	ei->i_flags &= ~(EXT4_SYNC_FL|EXT4_APPEND_FL|
-			EXT4_IMMUTABLE_FL|EXT4_NOATIME_FL|EXT4_DIRSYNC_FL);
-	if (flags & S_SYNC)
-		ei->i_flags |= EXT4_SYNC_FL;
-	if (flags & S_APPEND)
-		ei->i_flags |= EXT4_APPEND_FL;
-	if (flags & S_IMMUTABLE)
-		ei->i_flags |= EXT4_IMMUTABLE_FL;
-	if (flags & S_NOATIME)
-		ei->i_flags |= EXT4_NOATIME_FL;
-	if (flags & S_DIRSYNC)
-		ei->i_flags |= EXT4_DIRSYNC_FL;
-}
-
 void ext4_read_inode(struct inode * inode)
 {
 	struct ext4_iloc iloc;
@@ -2625,6 +2613,10 @@ void ext4_read_inode(struct inode * inode)
 	}
 	inode->i_nlink = le16_to_cpu(raw_inode->i_links_count);
 	inode->i_size = le32_to_cpu(raw_inode->i_size);
+	inode->i_atime.tv_sec = le32_to_cpu(raw_inode->i_atime);
+	inode->i_ctime.tv_sec = le32_to_cpu(raw_inode->i_ctime);
+	inode->i_mtime.tv_sec = le32_to_cpu(raw_inode->i_mtime);
+	inode->i_atime.tv_nsec = inode->i_ctime.tv_nsec = inode->i_mtime.tv_nsec = 0;
 
 	ei->i_state = 0;
 	ei->i_dir_start_lookup = 0;
@@ -2684,10 +2676,8 @@ void ext4_read_inode(struct inode * inode)
 		 */
 		ei->i_extra_isize = le16_to_cpu(raw_inode->i_extra_isize);
 		if (EXT4_GOOD_OLD_INODE_SIZE + ei->i_extra_isize >
-		    EXT4_INODE_SIZE(inode->i_sb)) {
-			brelse (bh);
+		    EXT4_INODE_SIZE(inode->i_sb))
 			goto bad_inode;
-		}
 		if (ei->i_extra_isize == 0) {
 			/* The extra space is currently unused. Use it. */
 			ei->i_extra_isize = sizeof(struct ext4_inode) -
@@ -2755,7 +2745,6 @@ static int ext4_do_update_inode(handle_t *handle,
 	if (ei->i_state & EXT4_STATE_NEW)
 		memset(raw_inode, 0, EXT4_SB(inode->i_sb)->s_inode_size);
 
-	ext4_get_inode_flags(ei);
 	raw_inode->i_mode = cpu_to_le16(inode->i_mode);
 	if(!(test_opt(inode->i_sb, NO_UID32))) {
 		raw_inode->i_uid_low = cpu_to_le16(low_16_bits(inode->i_uid));
@@ -2783,7 +2772,9 @@ static int ext4_do_update_inode(handle_t *handle,
 	}
 	raw_inode->i_links_count = cpu_to_le16(inode->i_nlink);
 	raw_inode->i_size = cpu_to_le32(ei->i_disksize);
-
+	raw_inode->i_atime = cpu_to_le32(inode->i_atime.tv_sec);
+	raw_inode->i_ctime = cpu_to_le32(inode->i_ctime.tv_sec);
+	raw_inode->i_mtime = cpu_to_le32(inode->i_mtime.tv_sec);
 	raw_inode->i_blocks = cpu_to_le32(inode->i_blocks);
 	raw_inode->i_dtime = cpu_to_le32(ei->i_dtime);
 	raw_inode->i_flags = cpu_to_le32(ei->i_flags);
@@ -2896,7 +2887,7 @@ int ext4_write_inode(struct inode *inode, int wait)
 		return 0;
 
 	if (ext4_journal_current_handle()) {
-		jbd_debug(1, "called recursively, non-PF_MEMALLOC!\n");
+		jbd_debug(0, "called recursively, non-PF_MEMALLOC!\n");
 		dump_stack();
 		return -EIO;
 	}
@@ -3207,7 +3198,7 @@ int ext4_change_inode_journal_flag(struct inode *inode, int val)
 	 */
 
 	journal = EXT4_JOURNAL(inode);
-	if (is_journal_aborted(journal))
+	if (is_journal_aborted(journal) || IS_RDONLY(inode))
 		return -EROFS;
 
 	jbd2_journal_lock_updates(journal);

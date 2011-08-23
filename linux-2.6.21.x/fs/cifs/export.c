@@ -29,7 +29,6 @@
   */
 
 #include <linux/fs.h>
-#include <linux/exportfs.h>
  
 #ifdef CONFIG_CIFS_EXPERIMENTAL
  

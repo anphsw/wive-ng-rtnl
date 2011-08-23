@@ -2318,7 +2318,7 @@ static int selinux_inode_setxattr(struct dentry *dentry, char *name, void *value
 	if (sbsec->behavior == SECURITY_FS_USE_MNTPOINT)
 		return -EOPNOTSUPP;
 
-	if (!is_owner_or_cap(inode))
+	if ((current->fsuid != inode->i_uid) && !capable(CAP_FOWNER))
 		return -EPERM;
 
 	AVC_AUDIT_DATA_INIT(&ad,FS);

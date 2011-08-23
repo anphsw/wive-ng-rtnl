@@ -574,6 +574,8 @@
 44) rwfs now use bz2 instead gzip.<br>
 45) samba3 fix permissions at systems without user named root.<br>
 46) Cleanup some nvram defaults and move to romfs target.<br>
+47) tune samba3 config for more compat with some MS-WIN apps used file based DB.<br>
+48) Try fix regression in ext2 module.<br>
 
 <br><br>
 <b>For support see:</b><br>

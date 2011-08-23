@@ -51,7 +51,8 @@ int reiserfs_ioctl(struct inode *inode, struct file *filp, unsigned int cmd,
 			if (IS_RDONLY(inode))
 				return -EROFS;
 
-			if (!is_owner_or_cap(inode))
+			if ((current->fsuid != inode->i_uid)
+			    && !capable(CAP_FOWNER))
 				return -EPERM;
 
 			if (get_user(flags, (int __user *)arg))
@@ -80,7 +81,7 @@ int reiserfs_ioctl(struct inode *inode, struct file *filp, unsigned int cmd,
 	case REISERFS_IOC_GETVERSION:
 		return put_user(inode->i_generation, (int __user *)arg);
 	case REISERFS_IOC_SETVERSION:
-		if (!is_owner_or_cap(inode))
+		if ((current->fsuid != inode->i_uid) && !capable(CAP_FOWNER))
 			return -EPERM;
 		if (IS_RDONLY(inode))
 			return -EROFS;

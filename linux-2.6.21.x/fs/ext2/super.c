@@ -25,7 +25,6 @@
 #include <linux/parser.h>
 #include <linux/random.h>
 #include <linux/buffer_head.h>
-#include <linux/exportfs.h>
 #include <linux/smp_lock.h>
 #include <linux/vfs.h>
 #include <linux/seq_file.h>
@@ -162,11 +161,14 @@ static void init_once(void * foo, struct kmem_cache * cachep, unsigned long flag
 {
 	struct ext2_inode_info *ei = (struct ext2_inode_info *) foo;
 
-	rwlock_init(&ei->i_meta_lock);
+	if (flags & SLAB_CTOR_CONSTRUCTOR) {
+		rwlock_init(&ei->i_meta_lock);
 #ifdef CONFIG_EXT2_FS_XATTR
-	init_rwsem(&ei->xattr_sem);
+		init_rwsem(&ei->xattr_sem);
 #endif
-	inode_init_once(&ei->vfs_inode);
+		mutex_init(&ei->truncate_mutex);
+		inode_init_once(&ei->vfs_inode);
+	}
 }
  
 static int init_inodecache(void)
@@ -1113,15 +1115,6 @@ static int ext2_remount (struct super_block * sb, int * flags, char * data)
 
 	sb->s_flags = (sb->s_flags & ~MS_POSIXACL) |
 		((sbi->s_mount_opt & EXT2_MOUNT_POSIX_ACL) ? MS_POSIXACL : 0);
-
-	ext2_xip_verify_sb(sb); /* see if bdev supports xip, unset
-				    EXT2_MOUNT_XIP if not */
-
-	if ((ext2_use_xip(sb)) && (sb->s_blocksize != PAGE_SIZE)) {
-		printk("XIP: Unsupported blocksize\n");
-		err = -EINVAL;
-		goto restore_opts;
-	}
 
 	es = sbi->s_es;
 	if (((sbi->s_mount_opt & EXT2_MOUNT_XIP) !=

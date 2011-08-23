@@ -696,7 +696,7 @@ static int can_set_system_xattr(struct inode *inode, const char *name,
 	struct posix_acl *acl;
 	int rc;
 
-	if (!is_owner_or_cap(inode))
+	if ((current->fsuid != inode->i_uid) && !capable(CAP_FOWNER))
 		return -EPERM;
 
 	/*
