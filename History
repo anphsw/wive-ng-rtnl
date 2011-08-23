@@ -440,7 +440,7 @@
 55) More usb support fixes and optiomizations.<br>
 56) Site Survey Access Point Graphical Diagram.<br>
 
-<br>         
+<br>
 <b>1.8.x</b><br>
 1) Sync from 3.5.0.0 SDK.<br>
 2) Update Uboot code.<br>
@@ -577,6 +577,7 @@
 47) tune samba3 config for more compat with some MS-WIN apps used file based DB.<br>
 48) Try fix regression in ext2 module.<br>
 49) Add SmbTimeserver variable for support time server compatable with WinNT(SmbTimeserver variable 0/1 need add WenUI, default 0).<br>
+50) Tune kernel for file services as torrent/samba/etc.<br>
 
 <br><br>
 <b>For support see:</b><br>
