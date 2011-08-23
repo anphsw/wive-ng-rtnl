@@ -32,7 +32,6 @@
 #include <linux/vmalloc.h>
 #include <linux/smp_lock.h>
 #include <linux/sqlzma.h>
-#include <linux/exportfs.h>
 
 #include "squashfs.h"
 
