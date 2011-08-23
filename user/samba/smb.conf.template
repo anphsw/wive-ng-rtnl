@@ -15,7 +15,6 @@
     wins proxy = no
     dns proxy = no 
     guest account = nobody
-    time server = no
     coding system = utf8
     client code page = 866
     bind interfaces only = Yes

@@ -220,6 +220,7 @@ WatchdogEnabled=0
 CrondEnable=0
 SmbEnabled=0
 SmbOsLevel=255
+SmbTimeserver=0
 WorkGroup=LOCALNET
 SmbNetBIOS=Wive-RTNL
 SmbString=SERVER

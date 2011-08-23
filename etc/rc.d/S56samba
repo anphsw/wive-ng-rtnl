@@ -26,12 +26,20 @@ if [ "$SmbEnabled" = "1" ]; then
     else
 	echo "    socket options = SO_BROADCAST IPTOS_THROUGHPUT TCP_NODELAY SO_RCVBUF=1024 SO_SNDBUF=1024" >> $CONFIG
     fi
+
+    if [ "$SmbTimeserver" = "1" ] && [ "$NTPEnabled" = "on" ] && [ "$NTPServerIP" != "" ]; then
+	ntp_support="yes"
+    else
+	ntp_support="no"
+    fi
+
     echo "    interfaces = $lan_if" >> $CONFIG
     echo "    workgroup = $WorkGroup" >> $CONFIG
     echo "    netbios name = $SmbNetBIOS" >> $CONFIG
     echo "    server string = $SmbString" >> $CONFIG
     echo "    os level = $SmbOsLevel" >> $CONFIG
     echo "    force user = $Login" >> $CONFIG
+    echo "    time server = $ntp_support" >> $CONFIG
 
     #add template to config
     cat /etc/smb.conf.template >> $CONFIG
@@ -84,6 +92,9 @@ get_param() {
     SmbNetBIOS=`nvram_get 2860 SmbNetBIOS`
     SmbString=`nvram_get 2860  SmbString`
     SmbOsLevel=`nvram_get 2860  SmbOsLevel`
+    SmbTimeserver=`nvram_get 2860  SmbTimeserver`
+    NTPEnabled=`nvram_get 2860 NTPEnabled`
+    NTPServerIP=`nvram_get 2860 NTPServerIP`
     Login=`nvram_get 2860 Login`
     CONFIG="/etc/smb.conf"
 }

@@ -24,8 +24,6 @@
     enhanced browsing = yes
     name cache timeout = 660
 
-    time server = no
-
     unix charset = UTF-8
     display charset = UTF-8
     dos charset = 866
