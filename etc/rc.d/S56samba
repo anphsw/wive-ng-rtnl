@@ -19,20 +19,9 @@ SmbEnabled=`nvram_get 2860 SmbEnabled`
 if [ "$SmbEnabled" = "1" ]; then
     get_param
 
-    if [ "$SmbTimeserver" = "1" ] && [ "$NTPEnabled" = "on" ] && [ "$NTPServerIP" != "" ]; then
-	ntp_support="yes"
-    else
-	ntp_support="no"
-    fi
-    if [ -d /proc/bus/usb ]; then
-	socket_options="SO_BROADCAST IPTOS_THROUGHPUT TCP_NODELAY SO_RCVBUF=65536 SO_SNDBUF=65536" >> $CONFIG
-    else
-	socket_options="SO_BROADCAST IPTOS_THROUGHPUT TCP_NODELAY SO_RCVBUF=1024 SO_SNDBUF=1024" >> $CONFIG
-    fi
-
     echo "[global]" > $CONFIG
     #for file share mode need increase buffers size
-    echo "    interfaces = $lan_if" >> $CONFIG
+    echo "    interfaces = $interfaces" >> $CONFIG
     echo "    socket options = $socket_options" >> $CONFIG
     echo "    workgroup = $WorkGroup" >> $CONFIG
     echo "    netbios name = $SmbNetBIOS" >> $CONFIG
@@ -96,7 +85,22 @@ get_param() {
     NTPEnabled=`nvram_get 2860 NTPEnabled`
     NTPServerIP=`nvram_get 2860 NTPServerIP`
     Login=`nvram_get 2860 Login`
+    lan_ipaddr=`nvram_get 2860 lan_ipaddr`
+    lan_netmask=`nvram_get 2860 lan_netmask`
     CONFIG="/etc/smb.conf"
+
+    if [ "$SmbTimeserver" = "1" ] && [ "$NTPEnabled" = "on" ] && [ "$NTPServerIP" != "" ]; then
+	ntp_support="yes"
+    else
+	ntp_support="no"
+    fi
+    if [ -d /proc/bus/usb ]; then
+	socket_options="SO_BROADCAST IPTOS_THROUGHPUT TCP_NODELAY SO_RCVBUF=65536 SO_SNDBUF=65536" >> $CONFIG
+    else
+	socket_options="SO_BROADCAST IPTOS_THROUGHPUT TCP_NODELAY SO_RCVBUF=1024 SO_SNDBUF=1024" >> $CONFIG
+    fi
+
+    interfaces="127.0.0.1/255.0.0.0 $lan_ipaddr/$lan_netmask"
 }
 
 case "$1" in
