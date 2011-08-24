@@ -35,8 +35,8 @@ static int ext4_release_file (struct inode * inode, struct file * filp)
 {
 	/* if we are the last writer on the inode, drop the block reservation */
 	if ((filp->f_mode & FMODE_WRITE) &&
-			(atomic_read(&inode->i_writecount) == 1))
-	{
+			(atomic_read(&inode->i_writecount) == 1) &&
+			EXT4_I(inode)->i_blocks_reserved == 0) {
 		mutex_lock(&EXT4_I(inode)->truncate_mutex);
 		ext4_discard_reservation(inode);
 		mutex_unlock(&EXT4_I(inode)->truncate_mutex);
@@ -134,5 +134,6 @@ const struct inode_operations ext4_file_inode_operations = {
 	.removexattr	= generic_removexattr,
 #endif
 	.permission	= ext4_permission,
+	.fallocate	= ext4_fallocate,
 };
 

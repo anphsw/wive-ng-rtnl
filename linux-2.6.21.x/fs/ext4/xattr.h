@@ -56,7 +56,11 @@ struct ext4_xattr_entry {
 #define EXT4_XATTR_SIZE(size) \
 	(((size) + EXT4_XATTR_ROUND) & ~EXT4_XATTR_ROUND)
 
+
 # ifdef CONFIG_EXT4DEV_FS_XATTR
+
+int ext4_expand_extra_isize(struct inode *inode, int new_extra_isize,
+			    struct ext4_iloc iloc, handle_t *handle);
 
 extern struct xattr_handler ext4_xattr_user_handler;
 extern struct xattr_handler ext4_xattr_trusted_handler;
@@ -73,6 +77,7 @@ extern int ext4_xattr_set_handle(handle_t *, struct inode *, int, const char *, 
 
 extern void ext4_xattr_delete_inode(handle_t *, struct inode *);
 extern void ext4_xattr_put_super(struct super_block *);
+
 
 extern int init_ext4_xattr(void);
 extern void exit_ext4_xattr(void);

@@ -35,6 +35,7 @@
 #include <linux/kthread.h>
 #include <linux/poison.h>
 #include <linux/proc_fs.h>
+#include <linux/seq_file.h>
 
 #include <asm/uaccess.h>
 #include <asm/page.h>
@@ -634,6 +635,300 @@ struct journal_head *jbd2_journal_get_descriptor_buffer(journal_t *journal)
 	return jbd2_journal_add_journal_head(bh);
 }
 
+struct jbd2_stats_proc_session {
+	journal_t *journal;
+	struct transaction_stats_s *stats;
+	int start;
+	int max;
+};
+
+static void *jbd2_history_skip_empty(struct jbd2_stats_proc_session *s,
+					struct transaction_stats_s *ts,
+					int first)
+{
+	if (ts == s->stats + s->max)
+		ts = s->stats;
+	if (!first && ts == s->stats + s->start)
+		return NULL;
+	while (ts->ts_type == 0) {
+		ts++;
+		if (ts == s->stats + s->max)
+			ts = s->stats;
+		if (ts == s->stats + s->start)
+			return NULL;
+	}
+	return ts;
+
+}
+
+static void *jbd2_seq_history_start(struct seq_file *seq, loff_t *pos)
+{
+	struct jbd2_stats_proc_session *s = seq->private;
+	struct transaction_stats_s *ts;
+	int l = *pos;
+
+	if (l == 0)
+		return SEQ_START_TOKEN;
+	ts = jbd2_history_skip_empty(s, s->stats + s->start, 1);
+	if (!ts)
+		return NULL;
+	while (--l && (ts = jbd2_history_skip_empty(s, ++ts, 0)) != NULL);
+	return ts;
+}
+
+static void *jbd2_seq_history_next(struct seq_file *seq, void *v, loff_t *pos)
+{
+	struct jbd2_stats_proc_session *s = seq->private;
+	struct transaction_stats_s *ts = v;
+
+	++*pos;
+	if (v == SEQ_START_TOKEN)
+		return jbd2_history_skip_empty(s, s->stats + s->start, 1);
+	else
+		return jbd2_history_skip_empty(s, ++ts, 0);
+}
+
+static int jbd2_seq_history_show(struct seq_file *seq, void *v)
+{
+	struct transaction_stats_s *ts = v;
+	if (v == SEQ_START_TOKEN) {
+		seq_printf(seq, "%-4s %-5s %-5s %-5s %-5s %-5s %-5s %-6s %-5s "
+				"%-5s %-5s %-5s %-5s %-5s\n", "R/C", "tid",
+				"wait", "run", "lock", "flush", "log", "hndls",
+				"block", "inlog", "ctime", "write", "drop",
+				"close");
+		return 0;
+	}
+	if (ts->ts_type == JBD2_STATS_RUN)
+		seq_printf(seq, "%-4s %-5lu %-5lu %-5lu %-5lu %-5lu %-5lu "
+				"%-6lu %-5lu %-5lu\n", "R", ts->ts_tid,
+				ts->ts_wait, ts->ts_running, ts->ts_locked,
+				ts->ts_flushing, ts->ts_logging,
+				ts->ts_handle_count, ts->ts_blocks,
+				ts->ts_blocks_logged);
+	else if (ts->ts_type == JBD2_STATS_CHECKPOINT)
+		seq_printf(seq, "%-4s %-5lu %48s %-5lu %-5lu %-5lu %-5lu\n",
+				"C", ts->ts_tid, " ", ts->ts_chp_time,
+				ts->ts_written, ts->ts_dropped,
+				ts->ts_forced_to_close);
+	else
+		J_ASSERT(0);
+	return 0;
+}
+
+static void jbd2_seq_history_stop(struct seq_file *seq, void *v)
+{
+}
+
+static struct seq_operations jbd2_seq_history_ops = {
+	.start  = jbd2_seq_history_start,
+	.next   = jbd2_seq_history_next,
+	.stop   = jbd2_seq_history_stop,
+	.show   = jbd2_seq_history_show,
+};
+
+static int jbd2_seq_history_open(struct inode *inode, struct file *file)
+{
+	journal_t *journal = PDE(inode)->data;
+	struct jbd2_stats_proc_session *s;
+	int rc, size;
+
+	s = kmalloc(sizeof(*s), GFP_KERNEL);
+	if (s == NULL)
+		return -EIO;
+	size = sizeof(struct transaction_stats_s) * journal->j_history_max;
+	s->stats = kmalloc(size, GFP_KERNEL);
+	if (s == NULL) {
+		kfree(s);
+		return -EIO;
+	}
+	spin_lock(&journal->j_history_lock);
+	memcpy(s->stats, journal->j_history, size);
+	s->max = journal->j_history_max;
+	s->start = journal->j_history_cur % s->max;
+	spin_unlock(&journal->j_history_lock);
+
+	rc = seq_open(file, &jbd2_seq_history_ops);
+	if (rc == 0) {
+		struct seq_file *m = (struct seq_file *)file->private_data;
+		m->private = s;
+	} else {
+		kfree(s->stats);
+		kfree(s);
+	}
+	return rc;
+
+}
+
+static int jbd2_seq_history_release(struct inode *inode, struct file *file)
+{
+	struct seq_file *seq = (struct seq_file *)file->private_data;
+	struct jbd2_stats_proc_session *s = seq->private;
+	kfree(s->stats);
+	kfree(s);
+	return seq_release(inode, file);
+}
+
+static struct file_operations jbd2_seq_history_fops = {
+	.owner		= THIS_MODULE,
+	.open           = jbd2_seq_history_open,
+	.read           = seq_read,
+	.llseek         = seq_lseek,
+	.release        = jbd2_seq_history_release,
+};
+
+static void *jbd2_seq_info_start(struct seq_file *seq, loff_t *pos)
+{
+	return *pos ? NULL : SEQ_START_TOKEN;
+}
+
+static void *jbd2_seq_info_next(struct seq_file *seq, void *v, loff_t *pos)
+{
+	return NULL;
+}
+
+static int jbd2_seq_info_show(struct seq_file *seq, void *v)
+{
+	struct jbd2_stats_proc_session *s = seq->private;
+	if (v != SEQ_START_TOKEN)
+		return 0;
+	seq_printf(seq, "%lu transaction, each upto %u blocks\n",
+			s->stats->ts_tid,
+			s->journal->j_max_transaction_buffers);
+	if (s->stats->ts_tid == 0)
+		return 0;
+	seq_printf(seq, "average: \n  %lums waiting for transaction\n",
+			s->stats->ts_wait / s->stats->ts_tid);
+	seq_printf(seq, "  %lums running transaction\n",
+			s->stats->ts_running / s->stats->ts_tid);
+	seq_printf(seq, "  %lums transaction was being locked\n",
+			s->stats->ts_locked / s->stats->ts_tid);
+	seq_printf(seq, "  %lums flushing data (in ordered mode)\n",
+			s->stats->ts_flushing / s->stats->ts_tid);
+	seq_printf(seq, "  %lums logging transaction\n",
+			s->stats->ts_logging / s->stats->ts_tid);
+	seq_printf(seq, "  %lu handles per transaction\n",
+			s->stats->ts_handle_count / s->stats->ts_tid);
+	seq_printf(seq, "  %lu blocks per transaction\n",
+			s->stats->ts_blocks / s->stats->ts_tid);
+	seq_printf(seq, "  %lu logged blocks per transaction\n",
+			s->stats->ts_blocks_logged / s->stats->ts_tid);
+	return 0;
+}
+
+static void jbd2_seq_info_stop(struct seq_file *seq, void *v)
+{
+}
+
+static struct seq_operations jbd2_seq_info_ops = {
+	.start  = jbd2_seq_info_start,
+	.next   = jbd2_seq_info_next,
+	.stop   = jbd2_seq_info_stop,
+	.show   = jbd2_seq_info_show,
+};
+
+static int jbd2_seq_info_open(struct inode *inode, struct file *file)
+{
+	journal_t *journal = PDE(inode)->data;
+	struct jbd2_stats_proc_session *s;
+	int rc, size;
+
+	s = kmalloc(sizeof(*s), GFP_KERNEL);
+	if (s == NULL)
+		return -EIO;
+	size = sizeof(struct transaction_stats_s);
+	s->stats = kmalloc(size, GFP_KERNEL);
+	if (s == NULL) {
+		kfree(s);
+		return -EIO;
+	}
+	spin_lock(&journal->j_history_lock);
+	memcpy(s->stats, &journal->j_stats, size);
+	s->journal = journal;
+	spin_unlock(&journal->j_history_lock);
+
+	rc = seq_open(file, &jbd2_seq_info_ops);
+	if (rc == 0) {
+		struct seq_file *m = (struct seq_file *)file->private_data;
+		m->private = s;
+	} else {
+		kfree(s->stats);
+		kfree(s);
+	}
+	return rc;
+
+}
+
+static int jbd2_seq_info_release(struct inode *inode, struct file *file)
+{
+	struct seq_file *seq = (struct seq_file *)file->private_data;
+	struct jbd2_stats_proc_session *s = seq->private;
+	kfree(s->stats);
+	kfree(s);
+	return seq_release(inode, file);
+}
+
+static struct file_operations jbd2_seq_info_fops = {
+	.owner		= THIS_MODULE,
+	.open           = jbd2_seq_info_open,
+	.read           = seq_read,
+	.llseek         = seq_lseek,
+	.release        = jbd2_seq_info_release,
+};
+
+static struct proc_dir_entry *proc_jbd2_stats = NULL;
+
+static void jbd2_stats_proc_init(journal_t *journal)
+{
+	char name[64];
+
+	snprintf(name, sizeof(name) - 1, "%s", bdevname(journal->j_dev, name));
+	journal->j_proc_entry = proc_mkdir(name, proc_jbd2_stats);
+	if (journal->j_proc_entry) {
+		struct proc_dir_entry *p;
+		p = create_proc_entry("history", S_IRUGO,
+				journal->j_proc_entry);
+		if (p) {
+			p->proc_fops = &jbd2_seq_history_fops;
+			p->data = journal;
+			p = create_proc_entry("info", S_IRUGO,
+						journal->j_proc_entry);
+			if (p) {
+				p->proc_fops = &jbd2_seq_info_fops;
+				p->data = journal;
+			}
+		}
+	}
+}
+
+static void jbd2_stats_proc_exit(journal_t *journal)
+{
+	char name[64];
+
+	snprintf(name, sizeof(name) - 1, "%s", bdevname(journal->j_dev, name));
+	remove_proc_entry("info", journal->j_proc_entry);
+	remove_proc_entry("history", journal->j_proc_entry);
+	remove_proc_entry(name, proc_jbd2_stats);
+}
+
+static void journal_init_stats(journal_t *journal)
+{
+	int size;
+
+	if (proc_jbd2_stats == NULL)
+		return;
+
+	journal->j_history_max = 100;
+	size = sizeof(struct transaction_stats_s) * journal->j_history_max;
+	journal->j_history = kmalloc(size, GFP_KERNEL);
+	if (journal->j_history == NULL) {
+		journal->j_history_max = 0;
+		return;
+	}
+	memset(journal->j_history, 0, size);
+	spin_lock_init(&journal->j_history_lock);
+}
+
 /*
  * Management for journal control blocks: functions to create and
  * destroy journal_t structures, and to initialise and read existing
@@ -676,6 +971,9 @@ static journal_t * journal_init_common (void)
 		kfree(journal);
 		goto fail;
 	}
+
+	journal_init_stats(journal);
+
 	return journal;
 fail:
 	return NULL;
@@ -726,6 +1024,7 @@ journal_t * jbd2_journal_init_dev(struct block_device *bdev,
 		journal = NULL;
 		goto out;
 	}
+ 	jbd2_stats_proc_init(journal);
 	journal->j_dev = bdev;
 	journal->j_fs_dev = fs_dev;
 	journal->j_blk_offset = start;
@@ -768,6 +1067,7 @@ journal_t * jbd2_journal_init_inode (struct inode *inode)
 
 	journal->j_maxlen = inode->i_size >> inode->i_sb->s_blocksize_bits;
 	journal->j_blocksize = inode->i_sb->s_blocksize;
+	jbd2_stats_proc_init(journal);
 
 	/* journal descriptor can store up to n blocks -bzzz */
 	n = journal->j_blocksize / sizeof(journal_block_tag_t);
@@ -1156,6 +1456,8 @@ void jbd2_journal_destroy(journal_t *journal)
 		brelse(journal->j_sb_buffer);
 	}
 
+	if (journal->j_proc_entry)
+		jbd2_stats_proc_exit(journal);
 	if (journal->j_inode)
 		iput(journal->j_inode);
 	if (journal->j_revoke)
@@ -2006,6 +2308,28 @@ static void __exit jbd2_remove_jbd_proc_entry(void)
 
 #endif
 
+#if defined(CONFIG_PROC_FS)
+
+#define JBD2_STATS_PROC_NAME "fs/jbd2"
+
+static void __init jbd2_create_jbd_stats_proc_entry(void)
+{
+	proc_jbd2_stats = proc_mkdir(JBD2_STATS_PROC_NAME, NULL);
+}
+
+static void __exit jbd2_remove_jbd_stats_proc_entry(void)
+{
+	if (proc_jbd2_stats)
+		remove_proc_entry(JBD2_STATS_PROC_NAME, NULL);
+}
+
+#else
+
+#define jbd2_create_jbd_stats_proc_entry() do {} while (0)
+#define jbd2_remove_jbd_stats_proc_entry() do {} while (0)
+
+#endif
+
 struct kmem_cache *jbd2_handle_cache;
 
 static int __init journal_init_handle_cache(void)
@@ -2063,6 +2387,7 @@ static int __init journal_init(void)
 	if (ret != 0)
 		jbd2_journal_destroy_caches();
 	create_jbd_proc_entry();
+	jbd2_create_jbd_stats_proc_entry();
 	return ret;
 }
 
@@ -2074,6 +2399,7 @@ static void __exit journal_exit(void)
 		printk(KERN_EMERG "JBD: leaked %d journal_heads!\n", n);
 #endif
 	jbd2_remove_jbd_proc_entry();
+	jbd2_remove_jbd_stats_proc_entry();
 	jbd2_journal_destroy_caches();
 }
 

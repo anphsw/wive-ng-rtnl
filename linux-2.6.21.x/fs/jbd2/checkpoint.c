@@ -232,7 +232,8 @@ __flush_batch(journal_t *journal, struct buffer_head **bhs, int *batch_count)
  * Called under jbd_lock_bh_state(jh2bh(jh)), and drops it
  */
 static int __process_buffer(journal_t *journal, struct journal_head *jh,
-			struct buffer_head **bhs, int *batch_count)
+			struct buffer_head **bhs, int *batch_count,
+			transaction_t *transaction)
 {
 	struct buffer_head *bh = jh2bh(jh);
 	int ret = 0;
@@ -250,6 +251,7 @@ static int __process_buffer(journal_t *journal, struct journal_head *jh,
 		transaction_t *t = jh->b_transaction;
 		tid_t tid = t->t_tid;
 
+		transaction->t_chp_stats.cs_forced_to_close++;
 		spin_unlock(&journal->j_list_lock);
 		jbd_unlock_bh_state(bh);
 		jbd2_log_start_commit(journal, tid);
@@ -279,6 +281,7 @@ static int __process_buffer(journal_t *journal, struct journal_head *jh,
 		bhs[*batch_count] = bh;
 		__buffer_relink_io(jh);
 		jbd_unlock_bh_state(bh);
+		transaction->t_chp_stats.cs_written++;
 		(*batch_count)++;
 		if (*batch_count == NR_BATCH) {
 			spin_unlock(&journal->j_list_lock);
@@ -322,6 +325,8 @@ int jbd2_log_do_checkpoint(journal_t *journal)
 	if (!journal->j_checkpoint_transactions)
 		goto out;
 	transaction = journal->j_checkpoint_transactions;
+	if (transaction->t_chp_stats.cs_chp_time == 0)
+		transaction->t_chp_stats.cs_chp_time = CURRENT_MSECS;
 	this_tid = transaction->t_tid;
 restart:
 	/*
@@ -346,7 +351,8 @@ restart:
 				retry = 1;
 				break;
 			}
-			retry = __process_buffer(journal, jh, bhs,&batch_count);
+			retry = __process_buffer(journal, jh, bhs, &batch_count,
+						 transaction);
 			if (!retry && lock_need_resched(&journal->j_list_lock)){
 				spin_unlock(&journal->j_list_lock);
 				retry = 1;
@@ -668,6 +674,8 @@ void __jbd2_journal_insert_checkpoint(struct journal_head *jh,
 
 void __jbd2_journal_drop_transaction(journal_t *journal, transaction_t *transaction)
 {
+	struct transaction_stats_s stats;
+
 	assert_spin_locked(&journal->j_list_lock);
 	if (transaction->t_cpnext) {
 		transaction->t_cpnext->t_cpprev = transaction->t_cpprev;
@@ -693,5 +701,25 @@ void __jbd2_journal_drop_transaction(journal_t *journal, transaction_t *transact
 	J_ASSERT(journal->j_running_transaction != transaction);
 
 	jbd_debug(1, "Dropping transaction %d, all done\n", transaction->t_tid);
+
+	/*
+	 * File the transaction for history
+	 */
+	if (transaction->t_chp_stats.cs_written != 0 ||
+			transaction->t_chp_stats.cs_chp_time != 0) {
+		stats.ts_type = JBD2_STATS_CHECKPOINT;
+		stats.ts_tid = transaction->t_tid;
+		stats.u.chp = transaction->t_chp_stats;
+		if (stats.ts_chp_time)
+			stats.ts_chp_time =
+				jbd2_time_diff(stats.ts_chp_time, CURRENT_MSECS);
+		spin_lock(&journal->j_history_lock);
+		memcpy(journal->j_history + journal->j_history_cur, &stats,
+				sizeof(stats));
+		if (++journal->j_history_cur == journal->j_history_max)
+			journal->j_history_cur = 0;
+		spin_unlock(&journal->j_history_lock);
+	}
+
 	kfree(transaction);
 }

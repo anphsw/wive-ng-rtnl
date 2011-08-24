@@ -1682,3 +1682,13 @@ compat_sys_utimes_wrapper:
 	llgtr	%r2,%r2			# char *
 	llgtr	%r3,%r3			# struct compat_timeval *
 	jg	compat_sys_utimes
+
+	.globl	s390_fallocate_wrapper
+s390_fallocate_wrapper:
+	lgfr	%r2,%r2			# int
+	sllg	%r3,%r3,32		# get high word of 64bit loff_t
+	or	%r3,%r4			# get low word of 64bit loff_t
+	sllg	%r4,%r5,32		# get high word of 64bit loff_t
+	or	%r4,%r6			# get low word of 64bit loff_t
+	llgf	%r5,164(%r15)		# unsigned int
+	jg	s390_fallocate

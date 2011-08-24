@@ -255,8 +255,8 @@ static int verify_chain(Indirect *from, Indirect *to)
  *	@inode: inode in question (we are only interested in its superblock)
  *	@i_block: block number to be parsed
  *	@offsets: array to store the offsets in
- *      @boundary: set this non-zero if the referred-to block is likely to be
- *             followed (on disk) by an indirect block.
+ *	@boundary: set this non-zero if the referred-to block is likely to be
+ *	       followed (on disk) by an indirect block.
  *
  *	To store the locations of file's data ext4 uses a data structure common
  *	for UNIX filesystems - tree of pointers anchored in the inode, with
@@ -726,7 +726,7 @@ static int ext4_splice_branch(handle_t *handle, struct inode *inode,
 
 	/* We are done with atomic stuff, now do the rest of housekeeping */
 
-	inode->i_ctime = CURRENT_TIME_SEC;
+	inode->i_ctime = ext4_current_time(inode);
 	ext4_mark_inode_dirty(handle, inode);
 
 	/* had we spliced it onto indirect block? */
@@ -942,7 +942,7 @@ out:
 
 #define DIO_CREDITS (EXT4_RESERVE_TRANS_BLOCKS + 32)
 
-static int ext4_get_block(struct inode *inode, sector_t iblock,
+int ext4_get_block(struct inode *inode, sector_t iblock,
 			struct buffer_head *bh_result, int create)
 {
 	handle_t *handle = ext4_journal_current_handle();
@@ -1744,9 +1744,34 @@ static const struct address_space_operations ext4_journalled_aops = {
 	.is_partially_uptodate	= block_is_partially_uptodate,
 };
 
+static int ext4_wb_set_page_dirty(struct page *page)
+{
+	return __set_page_dirty_nobuffers(page);
+}
+
+static struct address_space_operations ext4_writeback_da_aops = {
+	.readpage	= ext4_readpage,
+	.readpages	= ext4_readpages,
+	.writepage	= ext4_wb_writepage,
+	.writepages	= ext4_wb_writepages,
+	.sync_page	= block_sync_page,
+	.prepare_write	= ext4_wb_prepare_write,
+	.commit_write	= ext4_wb_commit_write,
+	.bmap		= ext4_bmap,
+	.invalidatepage	= ext4_wb_invalidatepage,
+	.releasepage	= ext4_wb_releasepage,
+	.set_page_dirty	= ext4_wb_set_page_dirty,
+	.direct_IO	= ext4_direct_IO,
+};
+
 void ext4_set_aops(struct inode *inode)
 {
-	if (ext4_should_order_data(inode))
+	if (S_ISREG(inode->i_mode) &&
+			(EXT4_I(inode)->i_flags & EXT4_EXTENTS_FL) &&
+			test_opt(inode->i_sb, EXTENTS) &&
+			test_opt(inode->i_sb, DELAYED_ALLOC))
+		inode->i_mapping->a_ops = &ext4_writeback_da_aops;
+	else if (ext4_should_order_data(inode))
 		inode->i_mapping->a_ops = &ext4_ordered_aops;
 	else if (ext4_should_writeback_data(inode))
 		inode->i_mapping->a_ops = &ext4_writeback_aops;
@@ -1770,6 +1795,11 @@ int ext4_block_truncate_page(handle_t *handle, struct page *page,
 	struct buffer_head *bh;
 	int err = 0;
 	void *kaddr;
+
+	if ((EXT4_I(inode)->i_flags & EXT4_EXTENTS_FL) &&
+			test_opt(inode->i_sb, EXTENTS) &&
+			test_opt(inode->i_sb, DELAYED_ALLOC))
+		return ext4_wb_block_truncate_page(handle, page, mapping, from);
 
 	blocksize = inode->i_sb->s_blocksize;
 	length = blocksize - (offset & (blocksize - 1));
@@ -2378,7 +2408,7 @@ do_indirects:
 	ext4_discard_reservation(inode);
 
 	mutex_unlock(&ei->truncate_mutex);
-	inode->i_mtime = inode->i_ctime = CURRENT_TIME_SEC;
+	inode->i_mtime = inode->i_ctime = ext4_current_time(inode);
 	ext4_mark_inode_dirty(handle, inode);
 
 	/*
@@ -2586,6 +2616,25 @@ void ext4_set_inode_flags(struct inode *inode)
 		inode->i_flags |= S_DIRSYNC;
 }
 
+/* Propagate flags from i_flags to EXT4_I(inode)->i_flags */
+void ext4_get_inode_flags(struct ext4_inode_info *ei)
+{
+	unsigned int flags = ei->vfs_inode.i_flags;
+
+	ei->i_flags &= ~(EXT4_SYNC_FL|EXT4_APPEND_FL|
+			EXT4_IMMUTABLE_FL|EXT4_NOATIME_FL|EXT4_DIRSYNC_FL);
+	if (flags & S_SYNC)
+		ei->i_flags |= EXT4_SYNC_FL;
+	if (flags & S_APPEND)
+		ei->i_flags |= EXT4_APPEND_FL;
+	if (flags & S_IMMUTABLE)
+		ei->i_flags |= EXT4_IMMUTABLE_FL;
+	if (flags & S_NOATIME)
+		ei->i_flags |= EXT4_NOATIME_FL;
+	if (flags & S_DIRSYNC)
+		ei->i_flags |= EXT4_DIRSYNC_FL;
+}
+
 void ext4_read_inode(struct inode * inode)
 {
 	struct ext4_iloc iloc;
@@ -2613,10 +2662,6 @@ void ext4_read_inode(struct inode * inode)
 	}
 	inode->i_nlink = le16_to_cpu(raw_inode->i_links_count);
 	inode->i_size = le32_to_cpu(raw_inode->i_size);
-	inode->i_atime.tv_sec = le32_to_cpu(raw_inode->i_atime);
-	inode->i_ctime.tv_sec = le32_to_cpu(raw_inode->i_ctime);
-	inode->i_mtime.tv_sec = le32_to_cpu(raw_inode->i_mtime);
-	inode->i_atime.tv_nsec = inode->i_ctime.tv_nsec = inode->i_mtime.tv_nsec = 0;
 
 	ei->i_state = 0;
 	ei->i_dir_start_lookup = 0;
@@ -2692,6 +2737,18 @@ void ext4_read_inode(struct inode * inode)
 	} else
 		ei->i_extra_isize = 0;
 
+	EXT4_INODE_GET_XTIME(i_ctime, inode, raw_inode);
+	EXT4_INODE_GET_XTIME(i_mtime, inode, raw_inode);
+	EXT4_INODE_GET_XTIME(i_atime, inode, raw_inode);
+	EXT4_EINODE_GET_XTIME(i_crtime, ei, raw_inode);
+
+	ei->i_fs_version = le32_to_cpu(raw_inode->i_disk_version);
+	if (EXT4_INODE_SIZE(inode->i_sb) > EXT4_GOOD_OLD_INODE_SIZE) {
+		if (EXT4_FITS_IN_INODE(raw_inode, ei, i_version_hi))
+			ei->i_fs_version |=
+			(__u64)(le32_to_cpu(raw_inode->i_version_hi)) << 32;
+	}
+
 	if (S_ISREG(inode->i_mode)) {
 		inode->i_op = &ext4_file_inode_operations;
 		inode->i_fop = &ext4_file_operations;
@@ -2745,6 +2802,7 @@ static int ext4_do_update_inode(handle_t *handle,
 	if (ei->i_state & EXT4_STATE_NEW)
 		memset(raw_inode, 0, EXT4_SB(inode->i_sb)->s_inode_size);
 
+	ext4_get_inode_flags(ei);
 	raw_inode->i_mode = cpu_to_le16(inode->i_mode);
 	if(!(test_opt(inode->i_sb, NO_UID32))) {
 		raw_inode->i_uid_low = cpu_to_le16(low_16_bits(inode->i_uid));
@@ -2772,9 +2830,12 @@ static int ext4_do_update_inode(handle_t *handle,
 	}
 	raw_inode->i_links_count = cpu_to_le16(inode->i_nlink);
 	raw_inode->i_size = cpu_to_le32(ei->i_disksize);
-	raw_inode->i_atime = cpu_to_le32(inode->i_atime.tv_sec);
-	raw_inode->i_ctime = cpu_to_le32(inode->i_ctime.tv_sec);
-	raw_inode->i_mtime = cpu_to_le32(inode->i_mtime.tv_sec);
+
+	EXT4_INODE_SET_XTIME(i_ctime, inode, raw_inode);
+	EXT4_INODE_SET_XTIME(i_mtime, inode, raw_inode);
+	EXT4_INODE_SET_XTIME(i_atime, inode, raw_inode);
+	EXT4_EINODE_SET_XTIME(i_crtime, ei, raw_inode);
+
 	raw_inode->i_blocks = cpu_to_le32(inode->i_blocks);
 	raw_inode->i_dtime = cpu_to_le32(ei->i_dtime);
 	raw_inode->i_flags = cpu_to_le32(ei->i_flags);
@@ -2831,8 +2892,14 @@ static int ext4_do_update_inode(handle_t *handle,
 	} else for (block = 0; block < EXT4_N_BLOCKS; block++)
 		raw_inode->i_block[block] = ei->i_data[block];
 
-	if (ei->i_extra_isize)
+	raw_inode->i_disk_version = cpu_to_le32(ei->i_fs_version);
+	if (ei->i_extra_isize) {
+		if (EXT4_FITS_IN_INODE(raw_inode, ei, i_version_hi)) {
+			raw_inode->i_version_hi =
+				cpu_to_le32(ei->i_fs_version >> 32);
+		}
 		raw_inode->i_extra_isize = cpu_to_le16(ei->i_extra_isize);
+	}
 
 	BUFFER_TRACE(bh, "call ext4_journal_dirty_metadata");
 	rc = ext4_journal_dirty_metadata(handle, bh);
@@ -3106,10 +3173,34 @@ ext4_reserve_inode_write(handle_t *handle, struct inode *inode,
 int ext4_mark_inode_dirty(handle_t *handle, struct inode *inode)
 {
 	struct ext4_iloc iloc;
-	int err;
+	int err, ret;
+	static int expand_message;
 
 	might_sleep();
 	err = ext4_reserve_inode_write(handle, inode, &iloc);
+# ifdef CONFIG_EXT4DEV_FS_XATTR
+	if (EXT4_I(inode)->i_extra_isize <
+	    EXT4_SB(inode->i_sb)->s_want_extra_isize &&
+	    !(EXT4_I(inode)->i_state & EXT4_STATE_NO_EXPAND)) {
+		/* We need extra buffer credits since we may write into EA block
+		 * with this same handle */
+		if ((jbd2_journal_extend(handle,
+			     EXT4_DATA_TRANS_BLOCKS(inode->i_sb))) == 0) {
+			ret = ext4_expand_extra_isize(inode,
+  					EXT4_SB(inode->i_sb)->s_want_extra_isize,
+					iloc, handle);
+			if (ret) {
+				EXT4_I(inode)->i_state |= EXT4_STATE_NO_EXPAND;
+				if (!expand_message) {
+					ext4_warning(inode->i_sb, __FUNCTION__,
+					"Unable to expand inode %lu. Delete some"
+					" EAs or run e2fsck.", inode->i_ino);
+					expand_message = 1;
+				}
+			}
+		}
+	}
+#endif
 	if (!err)
 		err = ext4_mark_iloc_dirty(handle, inode, &iloc);
 	return err;

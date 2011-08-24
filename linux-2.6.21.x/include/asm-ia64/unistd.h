@@ -293,11 +293,12 @@
 #define __NR_vmsplice			1302
 /* 1303 reserved for move_pages */
 #define __NR_getcpu			1304
+#define __NR_fallocate			1305
 
 #ifdef __KERNEL__
 
 
-#define NR_syscalls			281 /* length of syscall table */
+#define NR_syscalls			282 /* length of syscall table */
 
 #define __ARCH_WANT_SYS_RT_SIGACTION
 

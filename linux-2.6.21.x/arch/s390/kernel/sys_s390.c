@@ -268,6 +268,16 @@ s390_fadvise64_64(struct fadvise64_64_args __user *args)
 }
 
 /*
+ * This is a wrapper to call sys_fallocate(). Since s390 ABI has a problem
+ * with the int, int, loff_t, loff_t ordering of arguments, this wrapper
+ * is required.
+ */
+asmlinkage long s390_fallocate(int fd, loff_t offset, loff_t len, int mode)
+{
+	return sys_fallocate(fd, mode, offset, len);
+}
+
+/*
  * Do a system call from kernel instead of calling sys_execve so we
  * end up with proper pt_regs.
  */

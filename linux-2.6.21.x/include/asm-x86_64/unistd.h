@@ -619,8 +619,10 @@ __SYSCALL(__NR_sync_file_range, sys_sync_file_range)
 __SYSCALL(__NR_vmsplice, sys_vmsplice)
 #define __NR_move_pages		279
 __SYSCALL(__NR_move_pages, sys_move_pages)
+#define __NR_fallocate		280
+__SYSCALL(__NR_fallocate, sys_fallocate)
 
-#define __NR_syscall_max __NR_move_pages
+#define __NR_syscall_max __NR_fallocate
 
 #ifndef __NO_STUBS
 #define __ARCH_WANT_OLD_READDIR

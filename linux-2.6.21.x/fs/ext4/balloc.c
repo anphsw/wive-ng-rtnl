@@ -30,15 +30,15 @@
 void ext4_get_group_no_and_offset(struct super_block *sb, ext4_fsblk_t blocknr,
 		unsigned long *blockgrpp, ext4_grpblk_t *offsetp)
 {
-        struct ext4_super_block *es = EXT4_SB(sb)->s_es;
+	struct ext4_super_block *es = EXT4_SB(sb)->s_es;
 	ext4_grpblk_t offset;
 
-        blocknr = blocknr - le32_to_cpu(es->s_first_data_block);
+	blocknr = blocknr - le32_to_cpu(es->s_first_data_block);
 	offset = do_div(blocknr, EXT4_BLOCKS_PER_GROUP(sb));
 	if (offsetp)
 		*offsetp = offset;
 	if (blockgrpp)
-	        *blockgrpp = blocknr;
+		*blockgrpp = blocknr;
 
 }
 
@@ -630,8 +630,10 @@ void ext4_free_blocks(handle_t *handle, struct inode *inode,
 		return;
 	}
 	ext4_free_blocks_sb(handle, sb, block, count, &dquot_freed_blocks);
-	if (dquot_freed_blocks)
+	if (dquot_freed_blocks) {
+		ext4_release_blocks(sb, dquot_freed_blocks);
 		DQUOT_FREE_BLOCK(inode, dquot_freed_blocks);
+	}
 	return;
 }
 
@@ -1440,7 +1442,7 @@ ext4_fsblk_t ext4_new_blocks(handle_t *handle, struct inode *inode,
 	struct ext4_sb_info *sbi;
 	struct ext4_reserve_window_node *my_rsv = NULL;
 	struct ext4_block_alloc_info *block_i;
-	unsigned short windowsz = 0;
+	unsigned short windowsz = 0, reserved = 0;
 #ifdef EXT4FS_DEBUG
 	static int goal_hits, goal_attempts;
 #endif
@@ -1460,6 +1462,13 @@ ext4_fsblk_t ext4_new_blocks(handle_t *handle, struct inode *inode,
 	if (DQUOT_ALLOC_BLOCK(inode, num)) {
 		*errp = -EDQUOT;
 		return 0;
+	}
+
+	if (!(EXT4_I(inode)->i_state & EXT4_STATE_BLOCKS_RESERVED)) {
+		*errp = ext4_reserve_blocks(sb, num);
+		if (*errp)
+			return 0;
+		reserved = num;
 	}
 
 	sbi = EXT4_SB(sb);
@@ -1674,8 +1683,11 @@ out:
 	/*
 	 * Undo the block allocation
 	 */
-	if (!performed_allocation)
+	if (!performed_allocation) {
 		DQUOT_FREE_BLOCK(inode, *count);
+		if (reserved)
+			ext4_release_blocks(sb, reserved);
+	}
 	brelse(bitmap_bh);
 	return 0;
 }
@@ -1834,3 +1846,161 @@ unsigned long ext4_bg_num_gdb(struct super_block *sb, int group)
 	return ext4_bg_num_gdb_meta(sb,group);
 
 }
+
+/*
+ * reservation.c contains routines to reserve blocks.
+ * we need this for delayed allocation, otherwise we
+ * could meet -ENOSPC at flush time
+ */
+
+/*
+ * as ->commit_write() where we're going to reserve
+ * non-allocated-yet blocks is well known hotpath,
+ * we have to make it scalable and avoid global
+ * data as much as possible
+ *
+ * there is per-sb array
+ */
+
+struct ext4_reservation_slot {
+	__u64		rs_reserved;
+	spinlock_t	rs_lock;
+} ____cacheline_aligned;
+
+
+int ext4_reserve_local(struct super_block *sb, int blocks)
+{
+	struct ext4_sb_info *sbi = EXT4_SB(sb);
+	struct ext4_reservation_slot *rs;
+	int rc = -ENOSPC;
+
+	preempt_disable();
+	rs = sbi->s_reservation_slots + smp_processor_id();
+
+	spin_lock(&rs->rs_lock);
+	if (likely(rs->rs_reserved >= blocks)) {
+		rs->rs_reserved -= blocks;
+		rc = 0;
+	}
+	spin_unlock(&rs->rs_lock);
+
+	preempt_enable();
+	return rc;
+}
+
+
+void ext4_rebalance_reservation(struct ext4_reservation_slot *rs, __u64 free)
+{
+	int i, used_slots = 0;
+	__u64 chunk;
+
+	/* let's know what slots have been used */
+	for (i = 0; i < NR_CPUS; i++)
+		if (rs[i].rs_reserved || i == smp_processor_id())
+			used_slots++;
+
+	/* chunk is a number of block every used
+	 * slot will get. make sure it isn't 0 */
+	chunk = free + used_slots - 1;
+	do_div(chunk, used_slots);
+
+	for (i = 0; i < NR_CPUS; i++) {
+		if (free < chunk)
+			chunk = free;
+		if (rs[i].rs_reserved || i == smp_processor_id()) {
+			rs[i].rs_reserved = chunk;
+			free -= chunk;
+			BUG_ON(free < 0);
+		}
+	}
+	BUG_ON(free);
+}
+
+int ext4_reserve_global(struct super_block *sb, int blocks)
+{
+	struct ext4_sb_info *sbi = EXT4_SB(sb);
+	struct ext4_reservation_slot *rs;
+	int i, rc = -ENOENT;
+	__u64 free = 0;
+
+	rs = sbi->s_reservation_slots;
+
+	/* lock all slots */
+	for (i = 0; i < NR_CPUS; i++) {
+		spin_lock(&rs[i].rs_lock);
+		free += rs[i].rs_reserved;
+	}
+
+	if (free >= blocks) {
+		free -= blocks;
+		ext4_rebalance_reservation(rs, free);
+		rc = 0;
+	}
+
+	for (i = 0; i < NR_CPUS; i++)
+		spin_unlock(&rs[i].rs_lock);
+
+	return rc;
+}
+
+int ext4_reserve_blocks(struct super_block *sb, int blocks)
+{
+	int ret;
+
+	BUG_ON(blocks <= 0);
+
+	ret = ext4_reserve_local(sb, blocks);
+	if (likely(ret == 0))
+		return 0;
+
+	return ext4_reserve_global(sb, blocks);
+}
+
+void ext4_release_blocks(struct super_block *sb, int blocks)
+{
+	struct ext4_sb_info *sbi = EXT4_SB(sb);
+	struct ext4_reservation_slot *rs;
+
+	BUG_ON(blocks <= 0);
+
+	preempt_disable();
+	rs = sbi->s_reservation_slots + smp_processor_id();
+
+	spin_lock(&rs->rs_lock);
+	rs->rs_reserved += blocks;
+	spin_unlock(&rs->rs_lock);
+
+	preempt_enable();
+}
+
+int ext4_reserve_init(struct super_block *sb)
+{
+	struct ext4_sb_info *sbi = EXT4_SB(sb);
+	struct ext4_reservation_slot *rs;
+	int i;
+
+	rs = kmalloc(sizeof(struct ext4_reservation_slot) * NR_CPUS, GFP_KERNEL);
+	if (rs == NULL)
+		return -ENOMEM;
+	sbi->s_reservation_slots = rs;
+
+	for (i = 0; i < NR_CPUS; i++) {
+		spin_lock_init(&rs[i].rs_lock);
+		rs[i].rs_reserved = 0;
+	}
+	rs[0].rs_reserved = percpu_counter_sum(&sbi->s_freeblocks_counter);
+
+	return 0;
+}
+
+void ext4_reserve_release(struct super_block *sb)
+{
+	struct ext4_sb_info *sbi = EXT4_SB(sb);
+	struct ext4_reservation_slot *rs;
+
+	rs = sbi->s_reservation_slots;
+	BUG_ON(sbi->s_reservation_slots == NULL);
+	kfree(sbi->s_reservation_slots);
+	sbi->s_reservation_slots = NULL;
+}
+

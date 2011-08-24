@@ -931,6 +931,7 @@
 *(.text.sys_getitimer)
 *(.text.sys_getgroups)
 *(.text.sys_ftruncate)
+*(.text.sys_fallocate)
 *(.text.sysfs_lookup)
 *(.text.sys_exit_group)
 *(.text.stub_fork)

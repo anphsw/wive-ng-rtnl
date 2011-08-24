@@ -439,6 +439,8 @@ static void ext4_put_super (struct super_block * sb)
 	struct ext4_super_block *es = sbi->s_es;
 	int i;
 
+	ext4_wb_release(sb);
+	ext4_reserve_release(sb);
 	ext4_ext_release(sb);
 	ext4_xattr_put_super(sb);
 	jbd2_journal_destroy(sbi->s_journal);
@@ -505,6 +507,13 @@ static struct inode *ext4_alloc_inode(struct super_block *sb)
 	ei->i_block_alloc_info = NULL;
 	ei->vfs_inode.i_version = 1;
 	memset(&ei->i_cached_extent, 0, sizeof(struct ext4_ext_cache));
+
+	/* FIXME: these wb-related fields could be initialized once */
+	ei->i_blocks_reserved = 0;
+	ei->i_md_reserved = 0;
+	atomic_set(&ei->i_wb_writers, 0);
+	spin_lock_init(&ei->i_wb_reserved_lock);
+
 	return &ei->vfs_inode;
 }
 
@@ -727,7 +736,8 @@ enum {
 	Opt_usrjquota, Opt_grpjquota, Opt_offusrjquota, Opt_offgrpjquota,
 	Opt_jqfmt_vfsold, Opt_jqfmt_vfsv0, Opt_quota, Opt_noquota,
 	Opt_ignore, Opt_barrier, Opt_err, Opt_resize, Opt_usrquota,
-	Opt_grpquota, Opt_extents,
+	Opt_grpquota, Opt_extents, Opt_noextents, Opt_delayed_alloc,
+	Opt_nodelayed_alloc,
 };
 
 static match_table_t tokens = {
@@ -778,6 +788,9 @@ static match_table_t tokens = {
 	{Opt_usrquota, "usrquota"},
 	{Opt_barrier, "barrier=%u"},
 	{Opt_extents, "extents"},
+	{Opt_noextents, "noextents"},
+	{Opt_delayed_alloc, "delalloc"},
+	{Opt_nodelayed_alloc, "nodelalloc"},
 	{Opt_err, NULL},
 	{Opt_resize, "resize"},
 };
@@ -1092,6 +1105,12 @@ clear_qf_name:
 			else
 				clear_opt(sbi->s_mount_opt, BARRIER);
 			break;
+		case Opt_delayed_alloc:
+			set_opt(sbi->s_mount_opt, DELAYED_ALLOC);
+			break;
+		case Opt_nodelayed_alloc:
+			clear_opt(sbi->s_mount_opt, DELAYED_ALLOC);
+			break;
 		case Opt_ignore:
 			break;
 		case Opt_resize:
@@ -1112,6 +1131,9 @@ clear_qf_name:
 			break;
 		case Opt_extents:
 			set_opt (sbi->s_mount_opt, EXTENTS);
+			break;
+		case Opt_noextents:
+			clear_opt (sbi->s_mount_opt, EXTENTS);
 			break;
 		default:
 			printk (KERN_ERR
@@ -1632,6 +1654,8 @@ static int ext4_fill_super (struct super_block *sb, void *data, int silent)
 				sbi->s_inode_size);
 			goto failed_mount;
 		}
+		if (sbi->s_inode_size > EXT4_GOOD_OLD_INODE_SIZE)
+			sb->s_time_gran = 1 << (EXT4_EPOCH_BITS - 2);
 	}
 	sbi->s_frag_size = EXT4_MIN_FRAG_SIZE <<
 				   le32_to_cpu(es->s_log_frag_size);
@@ -1850,6 +1874,32 @@ static int ext4_fill_super (struct super_block *sb, void *data, int silent)
 	}
 
 	ext4_setup_super (sb, es, sb->s_flags & MS_RDONLY);
+
+	/* determine the minimum size of new large inodes, if present */
+	if (sbi->s_inode_size > EXT4_GOOD_OLD_INODE_SIZE) {
+		sbi->s_want_extra_isize = sizeof(struct ext4_inode) -
+						     EXT4_GOOD_OLD_INODE_SIZE;
+		if (EXT4_HAS_RO_COMPAT_FEATURE(sb,
+				       EXT4_FEATURE_RO_COMPAT_EXTRA_ISIZE)) {
+			if (sbi->s_want_extra_isize <
+			    le16_to_cpu(es->s_want_extra_isize))
+				sbi->s_want_extra_isize =
+					le16_to_cpu(es->s_want_extra_isize);
+			if (sbi->s_want_extra_isize <
+			    le16_to_cpu(es->s_min_extra_isize))
+				sbi->s_want_extra_isize =
+					le16_to_cpu(es->s_min_extra_isize);
+		}
+	}
+	/* Check if enough inode space is available */
+	if (EXT4_GOOD_OLD_INODE_SIZE + sbi->s_want_extra_isize >
+							sbi->s_inode_size) {
+		sbi->s_want_extra_isize = sizeof(struct ext4_inode) -
+						       EXT4_GOOD_OLD_INODE_SIZE;
+		printk(KERN_INFO "EXT4-fs: required extra inode space not"
+			"available.\n");
+	}
+
 	/*
 	 * akpm: core read_super() calls in here with the superblock locked.
 	 * That deadlocks, because orphan cleanup needs to lock the superblock
@@ -1870,6 +1920,8 @@ static int ext4_fill_super (struct super_block *sb, void *data, int silent)
 		"writeback");
 
 	ext4_ext_init(sb);
+	ext4_reserve_init(sb);
+	ext4_wb_init(sb);
 
 	lock_kernel();
 	return 0;
@@ -1987,7 +2039,7 @@ static journal_t *ext4_get_dev_journal(struct super_block *sb,
 
 	if (bd_claim(bdev, sb)) {
 		printk(KERN_ERR
-		        "EXT4: failed to claim external journal device.\n");
+			"EXT4: failed to claim external journal device.\n");
 		blkdev_put(bdev);
 		return NULL;
 	}
