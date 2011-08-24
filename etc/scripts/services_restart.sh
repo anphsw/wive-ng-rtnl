@@ -30,7 +30,7 @@ fi
     service iptables restart
     $LOG "Reload shaper rules..."
     service shaper restart
-if [ -d /proc/sys/net/ipv6 ]; then
+if [ -f /bin/radvd ] && [ -d /proc/sys/net/ipv6 ]; then
     service radvd restart
 fi
     service ripd restart
