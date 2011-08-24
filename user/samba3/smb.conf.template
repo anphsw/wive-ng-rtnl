@@ -14,7 +14,7 @@
     os level = 200
     guest account = nobody
 
-    name resolve order = lmhosts host wins bcast
+    name resolve order = lmhosts host bcast
     wins support = yes
     wins proxy = no
     dns proxy = no
