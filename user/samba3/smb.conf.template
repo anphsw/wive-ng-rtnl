@@ -42,6 +42,7 @@
     wide links= yes
     unix extensions = no
     max stat cache size = 1024
+    use mmap = no
 
     #fix work with file database
     #need for 1C/Parus and others
