@@ -337,16 +337,6 @@ case "$host_os" in
 	  AC_MSG_RESULT([disabling const])
 	  CPPFLAGS="$CPPFLAGS -Dconst="
 	  ;;
-	
-#
-# AIX4.x doesn't even admit to having large
-# files *at all* unless the -D_LARGE_FILE or -D_LARGE_FILE_API flags are set.
-#
-    *aix4*)
-	  AC_MSG_RESULT([enabling large file support])
-      CPPFLAGS="$CPPFLAGS -D_LARGE_FILES"
-	  AC_DEFINE(_LARGE_FILES, 1, [Whether to enable large file support])
-      ;;
 #
 # Defines needed for Solaris 2.6/2.7 aka 7.0 to make it admit
 # to the existance of large files..
@@ -436,14 +426,14 @@ exit(1);
         AC_MSG_CHECKING([for LFS support])
         old_CPPFLAGS="$CPPFLAGS"
         CPPFLAGS="-D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE $CPPFLAGS"
-LINUX_LFS_SUPPORT=yes
+	LINUX_LFS_SUPPORT=yes
 	CPPFLAGS="$old_CPPFLAGS"
-	if test x$LINUX_LFS_SUPPORT = xyes ; then
-		CPPFLAGS="-D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE $CPPFLAGS"
-		AC_DEFINE(_LARGEFILE64_SOURCE, 1, [Whether to enable large file support])
-		AC_DEFINE(_FILE_OFFSET_BITS, 64, [File offset bits])
-		AC_DEFINE(_GNU_SOURCE, 1, [Whether to use GNU libc extensions])
-	fi
+	CPPFLAGS="-D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE $CPPFLAGS"
+    	CPPFLAGS="$CPPFLAGS -D_LARGE_FILES"
+	AC_DEFINE(_LARGEFILE64_SOURCE, 1, [Whether to enable large file support])
+	AC_DEFINE(_FILE_OFFSET_BITS, 64, [File offset bits])
+	AC_DEFINE(_GNU_SOURCE, 1, [Whether to use GNU libc extensions])
+	AC_DEFINE(_LARGE_FILES, 1, [Whether to enable large file support])
 	AC_MSG_RESULT([$LINUX_LFS_SUPPORT])
 	;;
 
@@ -5015,20 +5005,7 @@ fi
 # If we don't have all of these then disable large
 # file support.
 #
-AC_MSG_CHECKING([if large file support can be enabled])
-AC_TRY_COMPILE([
-#if defined(HAVE_LONGLONG) && (defined(HAVE_OFF64_T) || (defined(SIZEOF_OFF_T) && (SIZEOF_OFF_T == 8)))
-#include <sys/types.h>
-#else
-__COMPILE_ERROR_
-#endif
-],
-[int i],
-samba_cv_HAVE_EXPLICIT_LARGEFILE_SUPPORT=yes,samba_cv_HAVE_EXPLICIT_LARGEFILE_SUPPORT=no)
-if test x"$samba_cv_HAVE_EXPLICIT_LARGEFILE_SUPPORT" = x"yes"; then
-	AC_DEFINE(HAVE_EXPLICIT_LARGEFILE_SUPPORT,1,[Whether large file support can be enabled])
-fi
-AC_MSG_RESULT([$samba_cv_HAVE_EXPLICIT_LARGEFILE_SUPPORT])
+AC_DEFINE(HAVE_EXPLICIT_LARGEFILE_SUPPORT,1,[Whether large file support can be enabled])
 
 #################################################
 # check for cluster extensions
