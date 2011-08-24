@@ -1,5 +1,4 @@
     bind interfaces only = Yes
-    smb ports = 445
     keepalive = 30
 
     private dir = /etc
