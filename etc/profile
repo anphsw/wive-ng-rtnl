@@ -7,7 +7,11 @@ export TERMINFO=/etc/xterm
 export CONSOLE=/dev/console
 
 #paths settings
-export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/etc/scripts
+if [ -d /opt/etc ]; then
+    export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/etc/scripts:/opt/bin:/opt/sbin
+else
+    export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/etc/scripts
+fi
 export HOME=$(grep -e "^${USER:-root}:" /etc/passwd | cut -d ":" -f 6)
 export HOME=${HOME:-/}
 export TMPDIR=/tmp/

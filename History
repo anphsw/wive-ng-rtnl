@@ -581,6 +581,9 @@
 51) radvd up to 1.8.1 version.<br>
 52) Add vpnTestReachable variable. Is vpnTestReachable=1 test VPN server reachable before connect (default 1, only pptp/l2tp, need add in WebUI).<br>
 53) Fix /proc/cpuinfo SoC type detect. Detect 2880/3052(3050)/3883(3662)/3350/3352/6855 RT chips.<br>
+54) If defined CONFIG_USB_STORAGE install optware-install.sh script to image.<br>
+55) uClibc always use large file mode for fopen.<br>
+56) samba3 always use large file mode.<br>
 
 <br><br>
 <b>For support see:</b><br>
