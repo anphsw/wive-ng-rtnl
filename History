@@ -584,6 +584,7 @@
 54) If defined CONFIG_USB_STORAGE install optware-install.sh script to image.<br>
 55) uClibc always use large file mode for fopen function (8mB usb devices).<br>
 56) samba3 always use large file mode.<br>
+57) SpeedUp generate new mac adresses.<br>
 
 
 <br><br>
