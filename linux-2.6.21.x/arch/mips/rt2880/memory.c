@@ -60,7 +60,7 @@
 #define TEST_OFFSET	63
 #elif defined (CONFIG_RALINK_RT2883) || \
       defined (CONFIG_RALINK_RT3883)
-#define MAX_SDRAM_SIZE  (128*1024*1024)	
+#define MAX_SDRAM_SIZE  (128*1024*1024)
 #define TEST_OFFSET	127
 #else
 #define MAX_SDRAM_SIZE  (64*1024*1024)
@@ -169,7 +169,7 @@ void __init prom_meminit(void)
 		break;
 	 }
 
-       //Calculate ram size	
+       //Calculate ram size
        memsize = memmeg << 20;
        detect_ram_sequence[0] = reg_mem;
        detect_ram_sequence[1] = memsize;
@@ -205,7 +205,7 @@ void __init prom_meminit(void)
 #else
         add_memory_region(0x00000000, RAM_SIZE, BOOT_MEM_RAM);
 #endif
-#endif /* CONFIG_RAM_SIZE_AUTO */	
+#endif /* CONFIG_RAM_SIZE_AUTO */
 
 #ifdef DEBUG
 	p = prom_getmdesc();

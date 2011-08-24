@@ -24,8 +24,6 @@ static int lm_match(struct device *dev, struct device_driver *drv)
 static struct bus_type lm_bustype = {
 	.name		= "logicmodule",
 	.match		= lm_match,
-//	.suspend	= lm_suspend,
-//	.resume		= lm_resume,
 };
 
 static int __init lm_init(void)

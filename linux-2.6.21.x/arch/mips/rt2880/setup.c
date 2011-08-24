@@ -36,7 +36,6 @@
  **************************************************************************
  */
 
-
 #include <linux/init.h>
 #include <linux/sched.h>
 #include <linux/mc146818rtc.h>
@@ -63,13 +62,30 @@ extern void breakpoint(void);
 int remote_debug = 0;
 #endif
 
-//extern struct rtc_ops no_rtc_ops;
-
 extern void mips_reboot_setup(void);
 
 const char *get_system_type(void)
 {
-	return "Ralink SoC";
+    uint8_t Id[10];
+
+    memset(Id, 0, sizeof(Id));
+    strncpy(Id, (char *)RALINK_CHIPID, 8);
+
+    if(strcmp(Id,"RT2880  ")==0) {
+	return "RT2880 Ralink SoC";
+    } else if(strcmp(Id,"RT3052  ")==0) {
+	return "RT3052 Ralink SoC";
+    } else if(strcmp(Id,"RT3883  ")==0) {
+	return "RT3883 Ralink SoC";
+    } else if(strcmp(Id,"RT3350  ")==0) {
+	return "RT3350 Ralink SoC";
+    } else if(strcmp(Id,"RT3352  ")==0) {
+	return "RT3352 Ralink SoC";
+    } else if(strcmp(Id,"RT6855  ")==0) {
+	return "RT6855 Ralink SoC";
+    }
+
+    return "Unknown Ralink SoC";
 }
 
 extern void mips_time_init(void);

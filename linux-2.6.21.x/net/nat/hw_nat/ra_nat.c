@@ -1716,8 +1716,8 @@ static int32_t GetChipInfo(void)
     uint8_t Id[10];
 
     memset(Id, 0, sizeof(Id));
-    strncpy(Id, (char *)CHIPID, 8);
-    ChipVer = RegRead(REVID);
+    strncpy(Id, (char *)RALINK_CHIPID, 8);
+    ChipVer = RegRead(RALINK_REVID);
 
     NAT_PRINT("CHIPID=%s\n", Id);
 

@@ -580,6 +580,7 @@
 50) Tune kernel for file services as torrent/samba/etc.<br>
 51) radvd up to 1.8.1 version.<br>
 52) Add vpnTestReachable variable. Is vpnTestReachable=1 test VPN server reachable before connect (default 1, only pptp/l2tp, need add in WebUI).<br>
+53) Fix /proc/cpuinfo SoC type detect. Detect 2880/3052(3050)/3883(3662)/3350/3352/6855 RT chips.<br>
 
 <br><br>
 <b>For support see:</b><br>

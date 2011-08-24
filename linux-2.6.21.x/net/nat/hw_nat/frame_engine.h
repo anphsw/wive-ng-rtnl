@@ -40,9 +40,6 @@
 #define FE_BASE		    RALINK_FRAME_ENGINE_BASE
 #define SYS_CTRL_BASE       RALINK_SYSCTL_BASE
 
-#define CHIPID		    SYS_CTRL_BASE + 0x00
-#define REVID		    SYS_CTRL_BASE + 0x0C
-
 #define FE_GLO_BASE         FE_BASE
 #define PPE_BASE	    FE_BASE + 0x200
 #define AC_BASE		    FE_BASE + 0x400
