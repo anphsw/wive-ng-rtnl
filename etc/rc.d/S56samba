@@ -100,7 +100,7 @@ get_param() {
 	socket_options="SO_BROADCAST IPTOS_THROUGHPUT TCP_NODELAY SO_RCVBUF=1024 SO_SNDBUF=1024" >> $CONFIG
     fi
 
-    interfaces="127.0.0.1/255.0.0.0 $lan_ipaddr/$lan_netmask"
+    interfaces="lo 127.0.0.1/255.0.0.0 $lan_if $lan_ipaddr/$lan_netmask"
 }
 
 case "$1" in
