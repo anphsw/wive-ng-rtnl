@@ -23,13 +23,13 @@ start() {
  if [ "$upnpEnabled" != "1" ]; then
     exit 0
  fi
-    already_started=`pidof miniupnpd"
-    if [ "$already_started" != "" ]; then
-	sleep 2
-    fi
     if [ "$opmode" != "0" ] || [ "$vpnEnabled" = "on" ]; then
 	if [ ! -f /var/upnp_leases ]; then
 	    touch /var/upnp_leases
+	fi
+	already_started=`pidof miniupnpd"
+	if [ "$already_started" != "" ]; then
+	    sleep 2
 	fi
 	wan_ipaddr=`LC_ALL=C /bin/ifconfig $wan_upnp_if 2>&1 | grep 'inet addr' | awk '{print $2}' | sed -e 's/.*://'`
         if [ "$wan_ipaddr" != "" ]; then
