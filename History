@@ -587,6 +587,7 @@
 57) SpeedUp generate new mac adresses.<br>
 58) Remove upnp support from transmission. Save mem and cpu ticks.<br>
 59) Add RemoteTelnet and RemoteFTP variable for disable/enable FTP/Telnet services (need add in webUI Miscellaneous default disabled).<br>
+60) CONFIG_FDISK_SUPPORT_LARGE_DISKS set by default for USB devices.<br>
 
 
 <br><br>
