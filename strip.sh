@@ -12,7 +12,10 @@ echo --------------------------------GENERATE CONFIG----------------------------
 [ ! -f $RO_ROOT/etc/scripts/config.sh ] || rm -f $RO_ROOT/etc/scripts/config.sh
 touch $RO_ROOT/etc/scripts/config.sh
 echo "Search parameters used"
-PARAMS=`find $RO_ROOT/etc -type f -print -exec cat {} \; | awk -v RS='"' '!(NR%2)' | sed '/$CONFIG_/!d; s///' | sort | uniq`
+PARAMS=`find $RO_ROOT/etc/rc.d -type f -print -exec cat {} \; | awk -v RS='"' '!(NR%2)' | sed '/$CONFIG_/!d; s///' | sort | uniq`
+PARAMS2=`find $RO_ROOT/etc/scripts -type f -print -exec cat {} \; | awk -v RS='"' '!(NR%2)' | sed '/$CONFIG_/!d; s///' | sort | uniq`
+PARAMS="$PARAMS $PARAMS2"
+
 for i in $PARAMS; do
     var=$(eval "echo \$CONFIG_$i")
     if [ $var ]; then
