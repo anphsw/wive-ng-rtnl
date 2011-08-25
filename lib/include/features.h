@@ -339,7 +339,11 @@ uClibc was built without large file support enabled.
 
 /* If we're actually building uClibc with large file support,
  * define __USE_LARGEFILE64 and __USE_LARGEFILE. */
-#elif defined(_LIBC)
+//#elif defined(_LIBC)
+#else
+#ifndef __DO_LARGEFILE
+#define __DO_LARGEFILE 1
+#endif
 #undef _LARGEFILE_SOURCE
 #undef _LARGEFILE64_SOURCE
 #undef _FILE_OFFSET_BITS

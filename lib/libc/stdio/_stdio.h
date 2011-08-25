@@ -224,9 +224,6 @@ extern int __stdio_seek(FILE *stream, register __offmax_t *pos, int whence);
 
 
 #ifdef __UCLIBC_HAS_LFS__
-#ifndef __DO_LARGEFILE
-#define __DO_LARGEFILE 1
-#endif
 #define __STDIO_WHEN_LFS(E) E
 #else
 #define __STDIO_WHEN_LFS(E) ((void)0)
