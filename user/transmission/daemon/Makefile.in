@@ -59,9 +59,7 @@ am_transmission_daemon_OBJECTS = daemon.$(OBJEXT) watch.$(OBJEXT)
 transmission_daemon_OBJECTS = $(am_transmission_daemon_OBJECTS)
 transmission_daemon_LDADD = $(LDADD)
 transmission_daemon_DEPENDENCIES =  \
-	$(top_builddir)/libtransmission/libtransmission.a \
-	$(top_builddir)/third-party/miniupnp/libminiupnp.a \
-	$(top_builddir)/third-party/libnatpmp/libnatpmp.a
+	$(top_builddir)/libtransmission/libtransmission.a
 AM_V_lt = $(am__v_lt_$(V))
 am__v_lt_ = $(am__v_lt_$(AM_DEFAULT_VERBOSITY))
 am__v_lt_0 = --silent
@@ -69,9 +67,7 @@ am_transmission_remote_OBJECTS = remote.$(OBJEXT)
 transmission_remote_OBJECTS = $(am_transmission_remote_OBJECTS)
 transmission_remote_LDADD = $(LDADD)
 transmission_remote_DEPENDENCIES =  \
-	$(top_builddir)/libtransmission/libtransmission.a \
-	$(top_builddir)/third-party/miniupnp/libminiupnp.a \
-	$(top_builddir)/third-party/libnatpmp/libnatpmp.a
+	$(top_builddir)/libtransmission/libtransmission.a
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -333,8 +329,6 @@ dist_man_MANS = \
 
 LDADD = \
     $(top_builddir)/libtransmission/libtransmission.a \
-    $(top_builddir)/third-party/miniupnp/libminiupnp.a \
-    $(top_builddir)/third-party/libnatpmp/libnatpmp.a \
     @DHT_LIBS@ \
     @LIBUTP_LIBS@ \
     @LIBEVENT_LIBS@ \

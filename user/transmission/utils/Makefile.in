@@ -57,18 +57,14 @@ PROGRAMS = $(bin_PROGRAMS)
 am_transmission_create_OBJECTS = create.$(OBJEXT)
 transmission_create_OBJECTS = $(am_transmission_create_OBJECTS)
 transmission_create_DEPENDENCIES =  \
-	$(top_builddir)/libtransmission/libtransmission.a \
-	$(top_builddir)/third-party/miniupnp/libminiupnp.a \
-	$(top_builddir)/third-party/libnatpmp/libnatpmp.a
+	$(top_builddir)/libtransmission/libtransmission.a
 AM_V_lt = $(am__v_lt_$(V))
 am__v_lt_ = $(am__v_lt_$(AM_DEFAULT_VERBOSITY))
 am__v_lt_0 = --silent
 am_transmission_edit_OBJECTS = edit.$(OBJEXT)
 transmission_edit_OBJECTS = $(am_transmission_edit_OBJECTS)
 am__DEPENDENCIES_1 =  \
-	$(top_builddir)/libtransmission/libtransmission.a \
-	$(top_builddir)/third-party/miniupnp/libminiupnp.a \
-	$(top_builddir)/third-party/libnatpmp/libnatpmp.a
+	$(top_builddir)/libtransmission/libtransmission.a
 transmission_edit_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am_transmission_show_OBJECTS = show.$(OBJEXT)
 transmission_show_OBJECTS = $(am_transmission_show_OBJECTS)
@@ -337,8 +333,6 @@ dist_man_MANS = \
 
 transmission_create_LDADD = \
     $(top_builddir)/libtransmission/libtransmission.a \
-    $(top_builddir)/third-party/miniupnp/libminiupnp.a \
-    $(top_builddir)/third-party/libnatpmp/libnatpmp.a \
     @INTLLIBS@ \
     @DHT_LIBS@ \
     @LIBUTP_LIBS@ \

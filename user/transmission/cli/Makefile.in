@@ -56,9 +56,7 @@ PROGRAMS = $(bin_PROGRAMS)
 am_transmission_cli_OBJECTS = cli.$(OBJEXT)
 transmission_cli_OBJECTS = $(am_transmission_cli_OBJECTS)
 transmission_cli_DEPENDENCIES =  \
-	$(top_builddir)/libtransmission/libtransmission.a \
-	$(top_builddir)/third-party/libnatpmp/libnatpmp.a \
-	$(top_builddir)/third-party/miniupnp/libminiupnp.a
+	$(top_builddir)/libtransmission/libtransmission.a
 AM_V_lt = $(am__v_lt_$(V))
 am__v_lt_ = $(am__v_lt_$(AM_DEFAULT_VERBOSITY))
 am__v_lt_0 = --silent
@@ -318,8 +316,6 @@ dist_man_MANS = transmission-cli.1
 transmission_cli_SOURCES = cli.c
 transmission_cli_LDADD = \
     $(top_builddir)/libtransmission/libtransmission.a \
-    $(top_builddir)/third-party/libnatpmp/libnatpmp.a \
-    $(top_builddir)/third-party/miniupnp/libminiupnp.a \
     @DHT_LIBS@ \
     @LIBUTP_LIBS@ \
     @LIBEVENT_LIBS@ \
