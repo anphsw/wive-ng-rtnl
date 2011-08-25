@@ -27,7 +27,7 @@ start() {
 	if [ ! -f /var/upnp_leases ]; then
 	    touch /var/upnp_leases
 	fi
-	already_started=`pidof miniupnpd"
+	already_started=`pidof miniupnpd`
 	if [ "$already_started" != "" ]; then
 	    killall -q miniupnpd
 	    killall -q -SIGKILL miniupnpd
