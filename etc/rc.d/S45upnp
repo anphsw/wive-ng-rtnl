@@ -29,6 +29,8 @@ start() {
 	fi
 	already_started=`pidof miniupnpd"
 	if [ "$already_started" != "" ]; then
+	    killall -q miniupnpd
+	    killall -q -SIGKILL miniupnpd
 	    sleep 2
 	fi
 	wan_ipaddr=`LC_ALL=C /bin/ifconfig $wan_upnp_if 2>&1 | grep 'inet addr' | awk '{print $2}' | sed -e 's/.*://'`
