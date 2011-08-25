@@ -585,6 +585,7 @@
 55) uClibc always use large file mode for fopen function (8mB usb devices).<br>
 56) samba3 always use large file mode.<br>
 57) SpeedUp generate new mac adresses.<br>
+58) Remove upnp support from transmission. Save mem and cpu ticks.<br>
 
 
 <br><br>

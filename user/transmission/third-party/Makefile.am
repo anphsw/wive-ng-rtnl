@@ -4,8 +4,6 @@ endif
 
 SUBDIRS = \
   dht \
-  libnatpmp \
-  miniupnp \
   $(UTP_DIR)
 
 EXTRA_DIST = \

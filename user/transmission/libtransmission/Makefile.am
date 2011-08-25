@@ -39,13 +39,11 @@ libtransmission_a_SOURCES = \
     magnet.c \
     makemeta.c \
     metainfo.c \
-    natpmp.c \
     net.c \
     peer-io.c \
     peer-mgr.c \
     peer-msgs.c \
     platform.c \
-    port-forwarding.c \
     ptrarray.c \
     resume.c \
     rpcimpl.c \
@@ -61,7 +59,6 @@ libtransmission_a_SOURCES = \
     tr-utp.c \
     tr-getopt.c \
     trevent.c \
-    upnp.c \
     utils.c \
     verify.c \
     web.c \
@@ -90,14 +87,12 @@ noinst_HEADERS = \
     magnet.h \
     makemeta.h \
     metainfo.h \
-    natpmp.h \
     net.h \
     peer-common.h \
     peer-io.h \
     peer-mgr.h \
     peer-msgs.h \
     platform.h \
-    port-forwarding.h \
     ptrarray.h \
     resume.h \
     rpcimpl.h \
@@ -113,7 +108,6 @@ noinst_HEADERS = \
     tr-utp.h \
     tr-lpd.h \
     trevent.h \
-    upnp.h \
     utils.h \
     verify.h \
     version.h \
@@ -139,8 +133,6 @@ apps_ldflags = \
 
 apps_ldadd = \
     ./libtransmission.a  \
-    $(top_builddir)/third-party/miniupnp/libminiupnp.a \
-    $(top_builddir)/third-party/libnatpmp/libnatpmp.a \
     @INTLLIBS@ \
     @DHT_LIBS@ \
     @LIBUTP_LIBS@ \
