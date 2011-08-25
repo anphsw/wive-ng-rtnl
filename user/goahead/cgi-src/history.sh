@@ -8,7 +8,7 @@ echo "Content-type: text/html"
 echo ""
 
 # web header
-echo "<html><head><title>Wive-RTNL</title>"
+echo "<html><head><title>Wive-NG-RTNL</title>"
 
 echo '<META HTTP-EQUIV="Pragma" CONTENT="no-cache">'
 echo '<META HTTP-EQUIV="Expires" CONTENT="-1">'

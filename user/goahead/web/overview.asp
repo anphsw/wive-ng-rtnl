@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<TITLE>Wive-RTNL - next generation routers firmware for Acorp WiFi CPE</TITLE>
+<TITLE>Wive-NG-RTNL - next generation routers firmware for Acorp WiFi CPE</TITLE>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0">
 <meta http-equiv="Pragma" content="no-cache">
@@ -68,7 +68,7 @@ function setLanguage()
 <BODY onLoad="initValue()">
 <table class="body"><tr><td>
 
-<H1>Wive-RTNL - firmware for Acorp WiFi CPE</H1>
+<H1>Wive-NG-RTNL - firmware for Acorp WiFi CPE</H1>
 <p id="ovIntroduction" />
 
 <!-- ----------------- Langauge Settings ----------------- -->

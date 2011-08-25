@@ -179,7 +179,7 @@ function smb_enable_switch()
   <tr>
     <td class="head" id="smbSrvNetBIOS">NetBIOS Name</td>
     <td>
-      <input type=text name=smb_netbios size=16 maxlength=16 value="Wive-RTNL">
+      <input type=text name=smb_netbios size=16 maxlength=16 value="Wive-NG-RTNL">
     </td>
   </tr>
   <tr>
