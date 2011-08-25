@@ -336,7 +336,7 @@ uClibc was built without large file support enabled.
 #undef _LARGEFILE64_SOURCE
 #undef __USE_LARGEFILE64
 #endif
-  
+
 /* If we're actually building uClibc with large file support,
  * define __USE_LARGEFILE64 and __USE_LARGEFILE. */
 #elif defined(_LIBC)
@@ -344,11 +344,14 @@ uClibc was built without large file support enabled.
 #undef _LARGEFILE64_SOURCE
 #undef _FILE_OFFSET_BITS
 #undef __USE_LARGEFILE
-#undef __USE_LARGEFILE64 
+#undef __USE_LARGEFILE64
 /*
    NTFS filesystem(>2051MB) not be detected in RT3052 when #undef __USE_FILE_OFFSET64 is defined
    #undef __USE_FILE_OFFSET64
 */
+#ifndef  __USE_FILE_OFFSET64
+#define  __USE_FILE_OFFSET64	1
+#endif
 #define _LARGEFILE_SOURCE       1
 #define _LARGEFILE64_SOURCE     1
 #define __USE_LARGEFILE         1
