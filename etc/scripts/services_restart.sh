@@ -49,6 +49,7 @@ if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then
     service igmp_proxy restart
     service udpxy restart
     service samba restart
+    service upnp restart
     if [ "$MODE" != "misc" ]; then 
 	service dhcpd restart
 	service pppoe-relay restart
@@ -65,7 +66,6 @@ fi
 # 3) if restart mode = all				 #
 ##########################################################
 if [ "$MODE" = "pppd" ] || [ "$MODE" = "all" ] || [ "$vpnEnabled" != "on" ]; then
-    service upnp restart
     service ddns restart
     service ntp restart
 fi
