@@ -126,10 +126,3 @@ fi
 sysctl -w vm.min_free_kbytes=3192
 drop_disk_caches
 sysctl -w vm.min_free_kbytes=1024
-
-echo "Wait 3 seconds."
-sleep 3
-
-echo "Prepare for burn OK..."
-
-exit 0
