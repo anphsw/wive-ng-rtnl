@@ -586,6 +586,7 @@
 56) samba3 always use large file mode.<br>
 57) SpeedUp generate new mac adresses.<br>
 58) Remove upnp support from transmission. Save mem and cpu ticks.<br>
+59) Add RemoteTelnet and RemoteFTP variable for disable/enable FTP/Telnet services (need add in webUI Miscellaneous default disabled).<br>
 
 
 <br><br>

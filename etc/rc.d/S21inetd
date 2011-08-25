@@ -16,11 +16,11 @@ start() {
 	    echo "ssh stream tcp nowait $Login /bin/dropbear /bin/dropbear -i -K60 -I360 -m" >> /etc/inetd.conf
 	    need_start=1
 	fi
-	if [ -f /bin/ftpd ]; then
+	if [ -f /bin/ftpd ] && [ "$RemoteFTP" != "" ] && [ "$RemoteFTP" != "0" ]; then
 	    echo "ftp stream tcp nowait $Login /bin/ftpd ftpd -wS /media" >> /etc/inetd.conf
 	    need_start=1
 	fi
-	if [ -f /bin/telnetd ]; then
+	if [ -f /bin/telnetd ] && [ "$RemoteTelnet" != "" ] && [ "$RemoteTelnet" != "0" ]; then
 	    echo "telnet stream tcp nowait $Login /bin/telnetd telnetd -i" >> /etc/inetd.conf
 	    need_start=1
 	fi
@@ -40,6 +40,8 @@ stop() {
 get_param() {
  Login=`nvram_get 2860 Login`
  RemoteSSH=`nvram_get 2860 RemoteSSH`
+ RemoteFTP=`nvram_get 2860 RemoteFTP`
+ RemoteTelnet=`nvram_get 2860 RemoteTelnet`
 }
 
 case "$1" in

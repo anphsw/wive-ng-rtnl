@@ -85,6 +85,46 @@ start() {
 	else
     	    iptables -A servicelimit $STATE_NEW -p tcp --dport 22 -j DROP
 	fi
+	if [ "$RemoteTelnet" != "0" ]; then
+	    $LOG "telnet limit"
+    	    iptables -A servicelimit $STATE_NEW -p tcp --dport 22 $CONNLIMIT 4 -j REJECT
+	    if [ "$RemoteTelnet" = "1" ]; then
+		if [ "$opmode" != "0" ]; then
+    		    iptables -A servicelimit -i $wan_if $STATE_NEW -p tcp --dport 23 -j DROP
+		    if [ "$vpnEnabled" = "on" ] && [ "$vpnType" != "6" ]; then
+    			iptables -A servicelimit -i ppp+ $STATE_NEW -p tcp --dport 23 -j DROP
+		    fi
+		fi
+    		iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 23 -j ACCEPT
+	     if [ "$Lan2Enabled" = "1" ]; then
+    		iptables -A servicelimit -i $lan2_if $STATE_NEW -p tcp --dport 23 -j ACCEPT
+	     fi
+	    elif [ "$RemoteTelnet" = "2" ]; then
+    		iptables -A servicelimit $STATE_NEW -p tcp --dport 23 -j ACCEPT
+	    fi
+	else
+    	    iptables -A servicelimit $STATE_NEW -p tcp --dport 23 -j DROP
+	fi
+	if [ "$RemoteFTP" != "0" ]; then
+	    $LOG "ftp limit"
+    	    iptables -A servicelimit $STATE_NEW -p tcp --dport 20:21 $CONNLIMIT 4 -j REJECT
+	    if [ "$RemoteFTP" = "1" ]; then
+		if [ "$opmode" != "0" ]; then
+    		    iptables -A servicelimit -i $wan_if $STATE_NEW -p tcp --dport 20:21 -j DROP
+		    if [ "$vpnEnabled" = "on" ] && [ "$vpnType" != "6" ]; then
+    			iptables -A servicelimit -i ppp+ $STATE_NEW -p tcp --dport 20:21 -j DROP
+		    fi
+		fi
+    		iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 20:21 -j ACCEPT
+	     if [ "$Lan2Enabled" = "1" ]; then
+    		iptables -A servicelimit -i $lan2_if $STATE_NEW -p tcp --dport 20:21 -j ACCEPT
+	     fi
+	    elif [ "$RemoteTelnet" = "2" ]; then
+    		iptables -A servicelimit $STATE_NEW -p tcp --dport 20:21 -j ACCEPT
+	    fi
+	else
+    	    iptables -A servicelimit $STATE_NEW -p tcp --dport 20:21 -j DROP
+	fi
 	if [ "$UDPXY" != "0" ]; then
 	    $LOG "udpxy limit"
     	    iptables -A servicelimit $STATE_NEW -p tcp --dport 81 $CONNLIMIT 8 -j REJECT
@@ -377,6 +417,8 @@ get_param() {
     IPPortFilterEnable=`nvram_get 2860 IPPortFilterEnable`
     WANPingFilter=`nvram_get 2860 WANPingFilter`
     RemoteSSH=`nvram_get 2860 RemoteSSH`
+    RemoteFTP=`nvram_get 2860 RemoteFTP`
+    RemoteTelnet=`nvram_get 2860 RemoteTelnet`
     RemoteManagement=`nvram_get 2860 RemoteManagement`
     dnsPEnabled=`nvram_get 2860 dnsPEnabled`
     dhcpEnabled=`nvram_get 2860 dhcpEnabled`
