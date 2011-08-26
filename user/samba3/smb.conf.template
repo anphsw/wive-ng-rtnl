@@ -38,6 +38,7 @@
     show add printer wizard = no
     load printers = no
     cups server = ""
+    disable spoolss = yes
 
     wide links= yes
     unix extensions = no
