@@ -1201,7 +1201,7 @@ final:
 	if (need_commit)
 		updateFlash8021x(RT2860_NVRAM);
 #endif
-	rebot_now();
+	reboot_now();
 }
 
 static void setWanPort(webs_t wp, char_t *path, char_t *query)
@@ -1210,9 +1210,9 @@ static void setWanPort(webs_t wp, char_t *path, char_t *query)
 	char w_name[20];
 	char* w_port = websGetVar(wp, T("wan_port"), T("0"));
 	char* tv_port = websGetVar(wp, T("tv_stbEnabled"), T("off"));
-	
+
 	nvram_init(RT2860_NVRAM);
-	
+
 	// Set-up WAN port
 	if ((w_port != NULL) && (strlen(w_port) == 1))
 	{
