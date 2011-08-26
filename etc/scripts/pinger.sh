@@ -9,7 +9,7 @@ if [ "$ping_check_time" = "" ] || [ "$ping_check_time" = "0" ] || \
 fi
 
 while "true"; do
-    ##################################RADIO###########################################
+    ##################################RADIO################################################################################
     RadioOff=`nvram_get 2860 RadioOff`
     if [ "$RadioOff" != "1" ]; then
 	#Unsolicited ARP mode, update your neighbors
@@ -28,14 +28,16 @@ while "true"; do
 	    arping "$test_ip" -I br0 -f -q -w1
 	done
     fi
-    ###################################UPLINK#############################################
+    ###################################UPLINK##############################################################################
     sleep $ping_check_interval
-
-    DNS=`cat /etc/resolv.conf | grep -v "domain" | awk {' print $2 '}`
-    TGW=`route -n | grep -v "Dest" | grep -v "IP" | grep -v "0\.0\.0\.0" | awk {' print $2 '} | uniq`
-    GOG="8.8.8.8"
-    ALL="$DNS $TGW $GOG"
-    for addr in "$ALL"; do
-        ping -4 -s8 -c1 -w30 -q "$addr" > /dev/null 2>&1
+    cat /etc/resolv.conf | grep -v "domain" | awk {' print $2 '} | while read test_ip; do
+        ping -4 -s8 -c1 -w30 -q "test_ip" > /dev/null 2>&1
     done
+
+    sleep $ping_check_interval
+    route -n | grep -v "Dest" | grep -v "IP" | grep -v "0\.0\.0\.0" | awk {' print $2 '} | uniq | while read test_ip; do
+        ping -4 -s8 -c1 -w30 -q "test_ip" > /dev/null 2>&1
+    done
+    sleep $ping_check_interval
+    ping -4 -s8 -c1 -w30 -q "8.8.8.8" > /dev/null 2>&1
 done
