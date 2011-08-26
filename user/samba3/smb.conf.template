@@ -1,5 +1,6 @@
     bind interfaces only = Yes
-    keepalive = 30
+    keepalive = 180
+    smb ports = 139
 
     private dir = /etc
     smb passwd file = /etc/smbpasswd
