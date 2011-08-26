@@ -1,6 +1,15 @@
 #include "upload.h"
 #include "../options.h"
 
+void reboot_now(void)
+{
+#ifdef CONFIG_USER_STORAGE
+	doSystem("/etc/scripts/wifi_unload.sh && reboot &");
+#else
+	doSystem("sleep 2 && reboot &");
+#endif
+}
+
 void import(char *filename, int offset, int len)
 {
 	char cmd[4096];
@@ -33,7 +42,7 @@ void import(char *filename, int offset, int len)
 
 	fclose(fp);
 	fclose(src);
-	
+
 	system("ralink_init clear 2860");
 	snprintf(cmd, 4096, "ralink_init renew 2860 %s", pname);
 	system(cmd);
