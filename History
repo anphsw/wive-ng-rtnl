@@ -591,6 +591,10 @@
 61) rewrite automount.sh, now correct mount ext*/fat/ntfs and swap particions.<br>
 62) Support auto mount optware by label(for automount particion label need set to optware).<br>
 63) FIx use file offset=64 in uClibc.<br>
+64) Always use PATHs and variables from /etc/profile.<br>
+65) Default inittab use /bin/login instead /bin/sh for correct /etc/profile usadge.<br>
+66) Add nvram variable torrent_home used for home download directory(default /media/sda1).<br>
+67) Add in /etc/profile variables needed for transmissions.<br>
 
 
 <br><br>

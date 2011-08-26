@@ -7,8 +7,6 @@ pre_mount() {
   if [ "$MDEV_LABEL" == "optware" ]; then
     $LOG "optware part"
     MOUNT_DST="/opt"
-    #set new path include optware
-    export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/etc/scripts:/opt/bin:/opt/sbin
   else
     MOUNT_DST="/media/$MDEV"
     if [ -d "$MOUNT_DST" ]; then
@@ -32,6 +30,10 @@ try_mount() {
       mount_err
     fi
 #  fi
+  if [ "$MDEV_LABEL" == "optware" ]; then
+    #re read profile variables
+    . /etc/profile
+  fi
 }
 
 try_ntfs() {

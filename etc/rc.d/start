@@ -10,8 +10,10 @@ ROOTDEVICE=/dev/mtdblock4
 
 LOG="echo INIT"
 
-export PATH=.:$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/etc/scripts
+#include profile variables
+. /etc/profile
 
+#mount tmpfs if present
 tmpfs_av=`grep tmpfs -c < /proc/filesystems`
 if [ "$tmpfs_av" != "0" ]; then
     #mount /tmp /etc in /var
@@ -28,6 +30,7 @@ if [ "$tmpfs_av" != "0" ]; then
     fi
 fi
 
+#autocreate some dev nodes
 if [ -f /bin/mdev ]; then
     mdev -s
 else

@@ -241,5 +241,6 @@ fwAlgSIP=0
 fwAlgTFTP=0
 vlan_double_tag=0
 simple_qos=0
+torrent_home=/media/sda1
 IS_WIVE=YES
 CHECKMAC=YES

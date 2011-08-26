@@ -10,7 +10,8 @@ LOG="echo PRECONFIG"
 start() {
  $LOG "Preconfigure..."
 
-    export PATH=.:$PATH:/bin:/sbin:/usr/bin:/usr/sbin:/etc/scripts
+    #include profile variables
+    . /etc/profile
 
     mount -t devpts /dev/pts /dev/pts
     mount -a
