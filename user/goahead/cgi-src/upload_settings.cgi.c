@@ -4,9 +4,9 @@
 void reboot_now(void)
 {
 #ifdef CONFIG_USER_STORAGE
-	doSystem("/etc/scripts/wifi_unload.sh && reboot &");
+	system("/etc/scripts/wifi_unload.sh && reboot &");
 #else
-	doSystem("sleep 2 && reboot &");
+	system("sleep 2 && reboot &");
 #endif
 }
 
