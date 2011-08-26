@@ -28,8 +28,8 @@ if [ "$opmode" = "2" ]; then
 fi
 
 #########################################ON/OFF param##########################
-radio_off=`nvram_get 2860 RadioOff`
-if [ "$radio_off" = "1" ]; then
+RadioOff=`nvram_get 2860 RadioOff`
+if [ "$RadioOff" = "1" ]; then
     iwpriv ra0 set RadioOn=0
     echo ">>>> WIFI DISABLED <<<<"
     exit 0

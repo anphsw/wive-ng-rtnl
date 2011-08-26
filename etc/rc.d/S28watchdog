@@ -3,10 +3,17 @@
 LOG="logger -t watchdog"
 
 start() {
+    ###############SYSTEM_DOG################################################
     WatchdogEnabled=`nvram_get 2860 WatchdogEnabled`
     if [ "$WatchdogEnabled" = "1" ]; then
 	$LOG "Start watchdog"
 	nice --19 watchdog -T 120 -t 10 -F /dev/watchdog  > /dev/null 2>&1 &
+    fi
+    ###############PINGER_DOG################################################
+    ping_check_on=`nvram_get 2860 ping_check_on`
+    if [ "$ping_check_on" = "1" ]; then
+	$LOG "Start pinger"
+	/etc/scripts/pinger.sh &
     fi
 }
 
@@ -14,6 +21,8 @@ stop() {
  $LOG "Stop watchdog"
     killall -q watchdog
     killall -q -SIGKILL watchdog
+    killall -q pinger.sh
+    killall -q -SIGKILL pinger.sh
 }
 
 case "$1" in
