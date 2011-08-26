@@ -55,6 +55,14 @@ static void ScanUSBFirmware(webs_t wp, char_t *path, char_t *query);
 /*********************************************************************
  * System Utilities
  */
+void reboot_now(void)
+{
+#ifdef CONFIG_USER_STORAGE
+	doSystem("/etc/scripts/wifi_unload.sh && reboot &");
+#else
+	doSystem("sleep 2 && reboot &");
+#endif
+}
 
 void arplookup(char *ip, char *arp)
 {
@@ -1193,8 +1201,7 @@ final:
 	if (need_commit)
 		updateFlash8021x(RT2860_NVRAM);
 #endif
-	// Reboot
-	doSystem("sleep 2 && reboot &");
+	rebot_now();
 }
 
 static void setWanPort(webs_t wp, char_t *path, char_t *query)
@@ -1212,7 +1219,7 @@ static void setWanPort(webs_t wp, char_t *path, char_t *query)
 		if ((w_port[0] >= '0') && (w_port[0] <= '4'))
 			nvram_bufset(RT2860_NVRAM, "wan_port", w_port);
 	}
-	
+
 	// Now test values
 	for (i=1; i<=5; i++)
 	{
@@ -1224,9 +1231,9 @@ static void setWanPort(webs_t wp, char_t *path, char_t *query)
 			nvram_bufset(RT2860_NVRAM, w_name, w_port);
 		}
 	}
-	
+
 	nvram_bufset(RT2860_NVRAM, "tv_port", (strcmp(tv_port, "on")==0) ? "1" : "0");
-	
+
 	// Commit & close NVRAM
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
@@ -1235,8 +1242,7 @@ static void setWanPort(webs_t wp, char_t *path, char_t *query)
 	outputTimerForReload(wp, 50000);
 
 	// Reboot
-	sleep(2);
-	doSystem("sleep 2 && reboot &");
+	reboot_now();
 }
 
 void STFs(int nvram, int index, char *flash_key, char *value)

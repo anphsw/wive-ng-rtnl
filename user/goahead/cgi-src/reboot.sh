@@ -10,4 +10,4 @@ echo '</html>'
 fs backup_nvram
 fs save
 sync
-sleep 2 && reboot &
+/etc/scripts/wifi_unload.sh && reboot &

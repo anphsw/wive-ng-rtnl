@@ -653,7 +653,7 @@ static int set_stable_flag(void)
 		printf("Set Image1 stable flag\n");
 		nvram_set(UBOOT_NVRAM, "Image1Stable", "1");
 	}
-	
+
 	return 0;
 
 }
@@ -662,7 +662,7 @@ static int set_stable_flag(void)
 #if CONFIG_USER_GOAHEAD_HAS_WPSBTN
 static void goaSigReset(int signum)
 {
-	system("reboot");
+	reboot_now();
 }
 #endif
 

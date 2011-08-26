@@ -235,14 +235,14 @@ int main (int argc, char *argv[])
 		html_error("Not a valid firmware.");
 		return -1;
 	}
-	
+
 	// flash write
 	if (mtd_write_firmware(filename, (int)file_begin, (file_end - file_begin)) == -1)
 	{
 		html_error("mtd_write fatal error! The corrupted image has ruined the flash!!");
 		return -1;
 	}
-	
+
 #elif defined (UPLOAD_BOOTLOADER_SUPPORT)
 	mtd_write_bootloader(filename, (int)file_begin, (int)(file_end - file_begin));
 #else

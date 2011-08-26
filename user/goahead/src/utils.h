@@ -42,6 +42,7 @@
 #define PROCREG_GMAC             "/proc/rt2880/gmac"
 #endif
 
+void reboot_now(void);
 void formDefineUtilities(void);
 int checkSemicolon(char *str);
 int doSystem(char_t *fmt, ...);

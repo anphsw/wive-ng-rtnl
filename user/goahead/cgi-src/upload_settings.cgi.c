@@ -134,10 +134,7 @@ int main (int argc, char *argv[])
 	fflush(stdout);
 	fclose(stdout);
 
-	system("sleep 3 && reboot &");
-	//sleep(3);
-	//reboot(LINUX_REBOOT_CMD_RESTART);
-
+	reboot_now();
 err:
 	free(boundary);
 	exit(0);

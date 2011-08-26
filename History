@@ -595,6 +595,7 @@
 65) Default inittab use /bin/login instead /bin/sh for correct /etc/profile usadge.<br>
 66) Add nvram variable torrent_home used for home download directory(default /media/sda1).<br>
 67) Add in /etc/profile variables needed for transmissions.<br>
+68) Umount all filesystem at reboot from goahead if CONFIG_USER_STORAGE is set.<br>
 
 
 <br><br>
