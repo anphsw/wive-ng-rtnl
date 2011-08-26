@@ -1824,16 +1824,7 @@ AC_LIBREPLACE_RUNTIME_LIB_PATH_VAR
 
 ################
 
-AC_CACHE_CHECK([for long long],samba_cv_have_longlong,[
-AC_TRY_RUN([#include <stdio.h>
-main() { long long x = 1000000; x *= x; exit(((x/1000000) == 1000000)? 0: 1); }],
-samba_cv_have_longlong=yes,samba_cv_have_longlong=no,samba_cv_have_longlong=cross)])
-if test x"$samba_cv_have_longlong" = x"yes"; then
-    AC_DEFINE(HAVE_LONGLONG,1,[Whether the host supports long long's])
-    AC_CHECK_TYPE(intptr_t, unsigned long long)
-else
-    AC_CHECK_TYPE(intptr_t, unsigned long)
-fi
+AC_DEFINE(HAVE_LONGLONG,1,[Whether the host supports long long's])
 
 #
 # Check if the compiler supports the LL prefix on long long integers.
@@ -1890,18 +1881,7 @@ if test x"$samba_cv_SIZEOF_INO_T" = x"yes"; then
     AC_DEFINE(SIZEOF_INO_T,8,[The size of the 'ino_t' type])
 fi
 
-AC_CACHE_CHECK([for ino64_t],samba_cv_HAVE_INO64_T,[
-AC_TRY_RUN([
-#if defined(HAVE_UNISTD_H)
-#include <unistd.h>
-#endif
-#include <stdio.h>
-#include <sys/stat.h>
-main() { struct stat64 st; ino64_t s; if (sizeof(ino_t) == sizeof(ino64_t)) exit(1); exit((lstat64("/dev/null", &st)==0)?0:1); }],
-samba_cv_HAVE_INO64_T=yes,samba_cv_HAVE_INO64_T=no,samba_cv_HAVE_INO64_T=cross)])
-if test x"$samba_cv_HAVE_INO64_T" = x"yes"; then
-    AC_DEFINE(HAVE_INO64_T,1,[Whether the 'ino64_t' type is available])
-fi
+AC_DEFINE(HAVE_INO64_T,1,[Whether the 'ino64_t' type is available])
 
 AC_CACHE_CHECK([for 64 bit dev_t],samba_cv_SIZEOF_DEV_T,[
 AC_TRY_RUN([
@@ -2331,7 +2311,7 @@ for i in $ICONV_LOOK_DIRS ; do
 	# match the results we get at runtime anyway.
 	if test x"$samba_cv_HAVE_NATIVE_ICONV" = x"cross" ; then
 	    default_dos_charset="CP850"
-	    default_display_charset="ASCII"
+	    default_display_charset="UTF-8"
 	    default_unix_charset="UTF-8"
 	    samba_cv_HAVE_NATIVE_ICONV=yes
 	    AC_MSG_WARN(assuming the libiconv in $iconv_current_LDFLAGS can convert)
@@ -2380,8 +2360,8 @@ unset libext
 if test x"$ICONV_FOUND" = x"no" -o x"$samba_cv_HAVE_NATIVE_ICONV" != x"yes" ; then
     AC_MSG_WARN([Sufficient support for iconv function was not found.
     Install libiconv from http://freshmeat.net/projects/libiconv/ for better charset compatibility!])
-   AC_DEFINE_UNQUOTED(DEFAULT_DOS_CHARSET,"ASCII",[Default dos charset name])
-   AC_DEFINE_UNQUOTED(DEFAULT_DISPLAY_CHARSET,"ASCII",[Default display charset name])
+   AC_DEFINE_UNQUOTED(DEFAULT_DOS_CHARSET,"866",[Default dos charset name])
+   AC_DEFINE_UNQUOTED(DEFAULT_DISPLAY_CHARSET,"UTF8",[Default display charset name])
    AC_DEFINE_UNQUOTED(DEFAULT_UNIX_CHARSET,"UTF8",[Default unix charset name])
 fi
 

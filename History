@@ -595,6 +595,7 @@
 65) Add nvram variable torrent_home used for home download directory(default /media/sda1).<br>
 66) Add in /etc/profile variables needed for transmissions.<br>
 67) Umount all filesystem at reboot from goahead if CONFIG_USER_STORAGE is set.<br>
+68) Try samba3 fix show free space size.<br>
 
 
 <br><br>
