@@ -70,7 +70,7 @@ void formDefineServices(void)
 	websFormDefine(T("formSamba"), setSamba);
 	websFormDefine(T("setMiscServices"), setMiscServices);
 	websFormDefine(T("formIptAccounting"), formIptAccounting);
-	
+
 	// Define functions
 	websAspDefine(T("getDhcpCliList"), getDhcpCliList);
 	websAspDefine(T("getDhcpStaticList"), getDhcpStaticList);
@@ -89,7 +89,7 @@ static int getDhcpCliList(int eid, webs_t wp, int argc, char_t **argv)
 	int i;
 	struct in_addr addr;
 	int64_t written_at, curr, expired_abs;
-	
+
 	//if DHCP is disabled - just exit
 	char* dhcpEnabled = nvram_get(RT2860_NVRAM, "dhcpEnabled");
 	if (!strncmp(dhcpEnabled, "0", 2))
@@ -108,9 +108,9 @@ static int getDhcpCliList(int eid, webs_t wp, int argc, char_t **argv)
 	curr = time(NULL);
 	if (curr < written_at)
 		written_at = curr; /* lease file from future! :) */
-	
+
 	int rownum = 0;
-	
+
 	/* Output leases file */
 	while (fread(&lease, 1, sizeof(lease), fp) == sizeof(lease))
 	{
@@ -157,13 +157,13 @@ static int getDhcpStaticList(int eid, webs_t wp, int argc, char_t **argv)
 {
 	// Get values
 	FILE *fd = fopen(_PATH_DHCP_ALIAS_FILE, "r");
-	
+
 	if (fd != NULL)
 	{
 		char line[256];
 		char ip[64], mac[64];
 		int args, first = 1;
-		
+
 		while (fgets(line, 255, fd) != NULL)
 		{
 			// Read routing line
@@ -179,13 +179,13 @@ static int getDhcpStaticList(int eid, webs_t wp, int argc, char_t **argv)
 				websWrite(wp, T("\t[ '%s', '%s' ]"), ip, mac );
 			}
 		}
-		
+
 		//close file
 		fclose(fd);
 	}
-	
+
 	websWrite(wp, T("\n"));
-	
+
 	return 0;
 }
 
@@ -193,14 +193,14 @@ void dhcpStoreAliases(const char *dhcp_config)
 {
 	// Open file
 	FILE *fd = fopen(_PATH_DHCP_ALIAS_FILE, "w+");
-	
+
 	if (fd != NULL)
 	{
 		// Output routing table to file
 		fwrite(dhcp_config, strlen(dhcp_config), 1, fd);
 		fclose(fd);
 		sync();
-		
+
 		// Call rwfs to store data
 		system("fs save &");
 	}
@@ -235,7 +235,7 @@ static void setDhcp(webs_t wp, char_t *path, char_t *query)
 			return;
 		}
 		if (inet_addr(dhcp_e) == -1)
-		{	
+		{
 			websError(wp, 200, "invalid DHCP End IP");
 			return;
 		}
@@ -260,10 +260,10 @@ static void setDhcp(webs_t wp, char_t *path, char_t *query)
 	}
 	else if (strncmp(dhcp_tp, "DISABLE", 8)==0)
 		nvram_set(RT2860_NVRAM, "dhcpEnabled", "0");
-	
+
 	// Restart DHCP service
 	doSystem("service dhcpd restart &");
-	
+
 	char_t *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
 	if (submitUrl != NULL)
 		websRedirect(wp, submitUrl);
@@ -309,14 +309,14 @@ static void setMiscServices(webs_t wp, char_t *path, char_t *query)
 	const service_flag_t *p;
 
 	nvram_init(RT2860_NVRAM);
-	
+
 	for (p = service_misc_flags; p->web != NULL; p++)
 	{
 		char_t *var = websGetVar(wp, p->web, p->deflt);
 		if (var != NULL)
 			nvram_bufset(RT2860_NVRAM, p->nvram, var);
 	}
-	
+
 	char_t *nat_fp = nvram_bufget(RT2860_NVRAM, "natFastpath");
 	if ((nat_fp != NULL) && ((strcmp(nat_fp, "2") == 0) || (strcmp(nat_fp, "3") == 0)))
 	{
@@ -324,12 +324,12 @@ static void setMiscServices(webs_t wp, char_t *path, char_t *query)
 		if (nat_th != NULL)
 			nvram_bufset(RT2860_NVRAM, "hw_nat_bind", nat_th);
 	}
-	
+
 	nvram_close(RT2860_NVRAM);
 
 	//restart some services instead full reload
 	doSystem("services_restart.sh misc &");
-	
+
 	char_t *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
 	if (submitUrl != NULL)
 		websRedirect(wp, submitUrl);
@@ -358,7 +358,7 @@ static void setSamba(webs_t wp, char_t *path, char_t *query)
 
 	nvram_init(RT2860_NVRAM);
 	nvram_bufset(RT2860_NVRAM, "SmbEnabled", smb_enabled);
-	
+
 	if (strcmp(smb_enabled, "1")==0)
 	{
 		for (p = service_samba_flags; p->web != NULL; p++)
@@ -368,11 +368,12 @@ static void setSamba(webs_t wp, char_t *path, char_t *query)
 				nvram_bufset(RT2860_NVRAM, p->nvram, var);
 		}
 	}
-	
+
 	nvram_close(RT2860_NVRAM);
 
 	//restart some services instead full reload
 	doSystem("service sysctl restart &");
+	doSystem("service dhcpd restart &");
 	doSystem("service samba restart &");
 
 	char_t *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
@@ -392,7 +393,7 @@ void formIptAccounting(webs_t wp, char_t *path, char_t *query)
 	strValue = websGetVar(wp, T("iptEnable"), T("0"));	//reset stats
 	if ((strValue != NULL) && (strcmp(strValue, "0")==0))
 		reset_ipt = 1;
-	
+
 	nvram_set(RT2860_NVRAM, "ipt_account", strValue);
 
 	strValue = websGetVar(wp, T("reset"), T("0"));	//reset stats
@@ -434,7 +435,7 @@ int iptStatList(int eid, webs_t wp, int argc, char_t **argv)
 	char_t ip[32], line[256];
 	long long b_src[5], p_src[5], b_dst[5], p_dst[5], time;
 	int lines = 0;
-	
+
 	// Do not show anything if nat_fastpath is set
 	char* nat_fp = nvram_get(RT2860_NVRAM, "natFastpath");
 	if (nat_fp != NULL)
@@ -445,7 +446,7 @@ int iptStatList(int eid, webs_t wp, int argc, char_t **argv)
 			return 0;
 		}
 	}
-	
+
 	websWrite(wp, T("<tr><td class=\"title\" colspan=\"%d\">IP Accounting table</td></tr>\n"),
 #ifdef IPT_SHORT_ACCOUNT
 				6
@@ -453,7 +454,7 @@ int iptStatList(int eid, webs_t wp, int argc, char_t **argv)
 				7
 #endif
 	);
-	
+
 	if ((fd = fopen(_PATH_IPT_ACCOUNTING_FILE, "r"))!=NULL)
 	{
 		// Output table header
@@ -478,9 +479,9 @@ int iptStatList(int eid, webs_t wp, int argc, char_t **argv)
 			"<th width=\"13%%\" align=\"center\">Rx pkt</th>\n"
 			"<th width=\"8%%\" align=\"center\">Time</th>\n"
 			"</tr>\n"));
-		
+
 #endif /* IPT_SHORT_ACCOUNT */
-		
+
 		while (fgets(line, 255, fd)!=NULL)
 		{
 			lines++;
@@ -493,15 +494,15 @@ int iptStatList(int eid, webs_t wp, int argc, char_t **argv)
 				"%*s %*s %lld "  // packets_dst
 				"%*s %*s %lld ", // time
 				ip, &b_src[0], &p_src[0], &b_dst[0], &p_dst[0], &time);
-			
+
 			websWrite(wp, T(
 				"<tr class=\"grey\">\n"
 				"<td width=\"30%%\" align=\"center\">%s</td>\n"),
 				ip);
-			
+
 			const char *src_sz = normalizeSize(&b_src[0]);
 			const char *dst_sz = normalizeSize(&b_dst[0]);
-			
+
 			websWrite(wp, T(
 				"<td width=\"15%%\" align=\"center\">%ld %s</td>\n"
 				"<td width=\"15%%\" align=\"center\">%ld</td>\n"
@@ -510,7 +511,7 @@ int iptStatList(int eid, webs_t wp, int argc, char_t **argv)
 				),
 				(long)b_src[0], src_sz, (long)p_src[0], (long)b_dst[0], dst_sz, (long)p_dst[0]
 				);
-			
+
 			websWrite(wp, T(
 				"<td width=\"10%%\" align=\"center\">%ld</td>\n"
 				"</tr>\n"),
@@ -540,7 +541,7 @@ int iptStatList(int eid, webs_t wp, int argc, char_t **argv)
 			{
 				if (i>0)
 					websWrite(wp, T("<tr class=\"grey\">\n"));
-				
+
 				const char *src_sz = normalizeSize(&b_src[i]);
 				const char *dst_sz = normalizeSize(&b_dst[i]);
 				websWrite(wp, T(
@@ -550,7 +551,7 @@ int iptStatList(int eid, webs_t wp, int argc, char_t **argv)
 					"<td width=\"13%%\" align=\"center\">%lld %s</td>\n"
 					"<td width=\"13%%\" align=\"center\">%lld</td>\n"),
 					iptProtocolNames[i], b_src[i], src_sz, p_src[i], b_dst[i], dst_sz, p_dst[i]);
-				
+
 				if (i==0)
 				{
 					websWrite(wp, T(
@@ -561,10 +562,10 @@ int iptStatList(int eid, webs_t wp, int argc, char_t **argv)
 			}
 #endif /* IPT_SHORT_ACCOUNT */
 		}
-		
+
 		fclose(fd);
 	}
-	
+
 	if (lines<=0)
 		websWrite(wp, T("<tr><td align=\"left\" colspan=\"%d\">No statistics available now</td></tr>\n"),
 #ifdef IPT_SHORT_ACCOUNT
@@ -575,7 +576,3 @@ int iptStatList(int eid, webs_t wp, int argc, char_t **argv)
 			);
 	return 0;
 }
-
-
-
-

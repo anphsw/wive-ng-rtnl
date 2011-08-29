@@ -72,7 +72,7 @@ static void setSysAdm(webs_t wp, char_t *path, char_t *query)
 	websWrite(wp, T("adm user: %s<br>\n"), admuser);
 	websWrite(wp, T("adm pass: %s<br>\n"), admpass);
 	websFooter(wp);
-	websDone(wp, 200);        
+	websDone(wp, 200);
 }
 
 /*
@@ -84,7 +84,7 @@ static void setSysLang(webs_t wp, char_t *path, char_t *query)
 
 	lang = websGetVar(wp, T("langSelection"), T(""));
 	nvram_set(RT2860_NVRAM, "Language", lang);
-	
+
 	websHeader(wp);
 	websWrite(wp, T("<h2>Language Selection</h2><br>\n"));
 	websWrite(wp, T("language: %s<br>\n"), lang);
@@ -112,7 +112,7 @@ static void NTP(webs_t wp, char_t *path, char_t *query)
 			nvram_bufset(RT2860_NVRAM, "TZ", tz);
 		}
 	}
-	
+
 	nvram_bufset(RT2860_NVRAM, "NTPEnabled", ntpEnabled);
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
@@ -141,7 +141,7 @@ static void NTPSyncWithHost(webs_t wp, char_t *path, char_t *query)
 		return;
 	if(strchr(query, ';'))
 		return;
-		
+
 	doSystem("date -s %s", query);
 
 	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\n"));
@@ -187,7 +187,7 @@ static void DDNS(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "DDNSPassword", ddns_pass);
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
-	
+
 
 	doSystem("service ddns restart &");
 
@@ -215,7 +215,7 @@ static void SystemCommand(webs_t wp, char_t *path, char_t *query)
 		snprintf(system_command, COMMAND_MAX, "cat /dev/null > %s", SYSTEM_COMMAND_LOG);
 	else
 		snprintf(system_command, COMMAND_MAX, "%s 1>%s 2>&1", command, SYSTEM_COMMAND_LOG);
-	
+
 	if(strlen(system_command))
 		doSystem(system_command);
 
@@ -239,7 +239,7 @@ int showSystemCommandASP(int eid, webs_t wp, int argc, char_t **argv)
 {
 	FILE *fp;
 	char buf[1024];
-	
+
 	fp = fopen(SYSTEM_COMMAND_LOG, "r");
 	if(!fp){
 		websWrite(wp, T(""));
@@ -250,7 +250,7 @@ int showSystemCommandASP(int eid, webs_t wp, int argc, char_t **argv)
 		websWrite(wp, T("%s"), buf);
 	}
 	fclose(fp);
-	
+
 	return 0;
 }
 
@@ -267,7 +267,7 @@ char* getField(char *a_line, char *delim, int count)
 	int i=0;
 	char *tok;
 	tok = strtok(a_line, delim);
-	
+
 	while (tok)
 	{
 		if (i == count)
@@ -275,7 +275,7 @@ char* getField(char *a_line, char *delim, int count)
 		i++;
 		tok = strtok(NULL, delim);
 	}
-	
+
 	if(tok && isdigit(*tok))
 		return tok;
 
@@ -442,7 +442,7 @@ int getWANTxByteASP(int eid, webs_t wp, int argc, char_t **argv)
 {
 	char_t buf[32];
 	long long data = getIfStatistic( getWanIfName(), TXBYTE);
-	snprintf(buf, 32, "%lld", data);	
+	snprintf(buf, 32, "%lld", data);
 	websWrite(wp, T("%s"), buf);
 	return 0;
 }
@@ -451,7 +451,7 @@ int getWANTxPacketASP(int eid, webs_t wp, int argc, char_t **argv)
 {
 	char_t buf[32];
 	long long data = getIfStatistic( getWanIfName(), TXPACKET);
-	snprintf(buf, 32, "%lld", data);	
+	snprintf(buf, 32, "%lld", data);
 	websWrite(wp, T("%s"), buf);
 	return 0;
 }
@@ -460,7 +460,7 @@ int getLANRxByteASP(int eid, webs_t wp, int argc, char_t **argv)
 {
 	char_t buf[32];
 	long long data = getIfStatistic( getLanIfName(), RXBYTE);
-	snprintf(buf, 32, "%lld", data);	
+	snprintf(buf, 32, "%lld", data);
 	websWrite(wp, T("%s"), buf);
 	return 0;
 }
@@ -469,7 +469,7 @@ int getLANRxPacketASP(int eid, webs_t wp, int argc, char_t **argv)
 {
 	char_t buf[32];
 	long long data = getIfStatistic( getLanIfName(), RXPACKET);
-	snprintf(buf, 32, "%lld", data);	
+	snprintf(buf, 32, "%lld", data);
 	websWrite(wp, T("%s"), buf);
 	return 0;
 }
@@ -478,7 +478,7 @@ int getLANTxByteASP(int eid, webs_t wp, int argc, char_t **argv)
 {
 	char_t buf[32];
 	long long data = getIfStatistic( getLanIfName(), TXBYTE);
-	snprintf(buf, 32, "%lld", data);	
+	snprintf(buf, 32, "%lld", data);
 	websWrite(wp, T("%s"), buf);
 	return 0;
 }
@@ -487,7 +487,7 @@ int getLANTxPacketASP(int eid, webs_t wp, int argc, char_t **argv)
 {
 	char_t buf[32];
 	long long data = getIfStatistic( getLanIfName(), TXPACKET);
-	snprintf(buf, 32, "%lld", data);	
+	snprintf(buf, 32, "%lld", data);
 	websWrite(wp, T("%s"),buf);
 	return 0;
 }
@@ -500,14 +500,14 @@ int getAllNICStatisticASP(int eid, webs_t wp, int argc, char_t **argv)
 	const char *field;
 	struct ifreq ifr;
 	int skfd;
-	
+
 	FILE *fp = fopen(PROC_IF_STATISTIC, "r");
 	if (fp == NULL)
 	{
 		printf("no proc?\n");
 		return -1;
 	}
-	
+
 	if ((skfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
 	{
 		printf("open socket failed\n");
@@ -529,11 +529,11 @@ int getAllNICStatisticASP(int eid, webs_t wp, int argc, char_t **argv)
 
 		ifname = buf;
 		ifname = strip_space(ifname);
-		
+
 		// Filter 'lo' interface
 		if (strcmp(ifname, "lo")==0)
 			continue;
-		
+
 		// Check that interface is up
 		strcpy(ifr.ifr_name, ifname);
 		if (ioctl(skfd, SIOCGIFFLAGS, &ifr) < 0)
@@ -541,10 +541,10 @@ int getAllNICStatisticASP(int eid, webs_t wp, int argc, char_t **argv)
 			printf("ioctl() error\n");
 			continue;
 		}
-		
+
 		if ((ifr.ifr_flags & IFF_UP) == 0) // Interface is down?
 			continue;
-		
+
 		// Now output statistics
 		websWrite(wp, T("<tr>"));
 		websWrite(wp, T("<td class=\"head\" colspan=\"2\">%s</td>"), ifname);
@@ -567,7 +567,7 @@ int getAllNICStatisticASP(int eid, webs_t wp, int argc, char_t **argv)
 			(field = getField(tmp, " ", 8)) ? field : "n/a");
 		websWrite(wp, T("</tr>\n"));
 	}
-	
+
 	close(skfd);
 	fclose(fp);
 
@@ -600,7 +600,7 @@ int getMemTotalASP(int eid, webs_t wp, int argc, char_t **argv)
 	}
 	websWrite(wp, T(""));
 	fclose(fp);
-	
+
 	return -1;
 }
 
