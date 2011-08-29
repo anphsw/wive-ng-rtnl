@@ -29,17 +29,19 @@ start() {
 		else
 		    # client direct to dns
 		    if [ "$wan_static_dns" = "on" ]; then
-			if [ "$dhcpPriDns" != "" ] || [ "$dhcpSecDns" != "" ]; then
-			    config-udhcpd.sh -d "$dhcpPriDns" "$dhcpSecDns"
-			else
-			    config-udhcpd.sh -d "8.8.8.8" "8.8.4.4"
-			fi
+			set_dns_direct
 		    else
-			pd=`grep nameserver < /etc/resolv.conf | tail -q -n1 | awk {' print $2 '}`
-                        if [ "$dhcpPriDns" != "" ]; then
-			    config-udhcpd.sh -d "$dhcpPriDns"
-			else
-			    config-udhcpd.sh -d "8.8.8.8" "8.8.4.4"
+			if [ -f /etc/resolv.conf ]; then
+			    count=1;
+			    grep nameserver < /etc/resolv.conf | uniq | tail -q -n2 | awk {' print $2 '} | while read dns_ip; do
+				if [ $count = "1" ]; then
+				    dhcpPriDns="$dns_ip"
+				fi
+				if [ $count = "2" ]; then
+				    dhcpSecDns="$dns_ip"
+				fi
+			    done
+			    set_dns_direct
 			fi
 		    fi
 		fi
@@ -93,6 +95,15 @@ get_param() {
 	SmbEnabled=`nvram_get 2860 SmbEnabled`
 	dnsPEnabled=`nvram_get 2860 dnsPEnabled`
 	wan_static_dns=`nvram_get 2860 wan_static_dns`
+}
+
+set_dns_direct()
+{
+	if [ "$dhcpPriDns" != "" ] || [ "$dhcpSecDns" != "" ]; then
+	    config-udhcpd.sh -d "$dhcpPriDns" "$dhcpSecDns"
+	else
+	    config-udhcpd.sh -d "8.8.8.8" "8.8.4.4"
+	fi
 }
 
 case "$1" in
