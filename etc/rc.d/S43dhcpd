@@ -25,26 +25,24 @@ start() {
 
 		if [ "$dnsPEnabled" = "1" ]; then
 		    # use dnsmasq for relay
-		    config-udhcpd.sh -d "$lan_ipaddr" "$lan_ipaddr"
+		    dhcpPriDns $lan_ipaddr
+		    dhcpSecDns=""
+		    set_dns
 		else
 		    # client direct to dns
-		    if [ "$wan_static_dns" = "on" ]; then
-			set_dns_direct
-		    else
-			if [ -f /etc/resolv.conf ]; then
-			    count=1;
-			    grep nameserver < /etc/resolv.conf | uniq | tail -q -n2 | awk {' print $2 '} | while read dns_ip; do
-				if [ $count = "1" ]; then
-				    dhcpPriDns="$dns_ip"
-				fi
-				if [ $count = "2" ]; then
-				    dhcpSecDns="$dns_ip"
-				fi
-				count=$(($count+1))
-			    done
-			    set_dns_direct
-			fi
+		    if [ "$wan_static_dns" != "on" ] && [ -f /etc/resolv.conf ]; then
+			count=1;
+			grep nameserver < /etc/resolv.conf | uniq | tail -q -n2 | awk {' print $2 '} | while read dns_ip; do
+			    if [ $count = "1" ]; then
+				dhcpPriDns="$dns_ip"
+			    fi
+			    if [ $count = "2" ]; then
+				dhcpSecDns="$dns_ip"
+			    fi
+			    count=$(($count+1))
+			done
 		    fi
+		    set_dns
 		fi
 
 		if [ "$dhcpGateway" != "" ]; then
@@ -98,7 +96,7 @@ get_param() {
 	wan_static_dns=`nvram_get 2860 wan_static_dns`
 }
 
-set_dns_direct()
+set_dns()
 {
 	if [ "$dhcpPriDns" != "" ] || [ "$dhcpSecDns" != "" ]; then
 	    config-udhcpd.sh -d "$dhcpPriDns" "$dhcpSecDns"
