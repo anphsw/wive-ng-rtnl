@@ -354,13 +354,8 @@ char* getWanIfNamePPP(void)
 {
     char *cm = nvram_get(RT2860_NVRAM, "wanConnectionMode");
 
-    if (!strncmp(cm, "PPPOE", 6) || !strncmp(cm, "L2TP", 5) || !strncmp(cm, "PPTP", 5) 
-#ifdef CONFIG_USER_3G
-		|| !strncmp(cm, "3G", 3)
-#endif
-	){
+    if (!strncmp(cm, "PPPOE", 6) || !strncmp(cm, "L2TP", 5) || !strncmp(cm, "PPTP", 5))
         return "ppp0";
-	}
 
     return getWanIfName();
 }
@@ -485,7 +480,7 @@ const parameter_fetch_t lanauth_args[] =
 	{ T("vpn_type"),               "vpnType",              0 },
 	{ T("vpn_pass"),               "vpnPassword",          0 },
 	{ T("lanauth_access"),         "LANAUTH_LVL",          0 },
-	
+
 	{ NULL, 0, 0 } // Terminator
 };
 
@@ -579,7 +574,7 @@ static int vpnShowVPNStatus(int eid, webs_t wp, int argc, char_t **argv)
 	char *vpn_type = nvram_get(RT2860_NVRAM, "vpnType");
 	if ((vpn_enabled==NULL) || (vpn_enabled[0]=='\0'))
 		vpn_enabled = "off";
-	
+
 	// Do not perform other checks if VPN is turned off
 	if (strcmp(vpn_enabled, "on")==0)
 	{
@@ -594,25 +589,25 @@ static int vpnShowVPNStatus(int eid, webs_t wp, int argc, char_t **argv)
 #endif
 			// Status is at least 'offline' now
 			status++;
-			
+
 			// Try to find pppd or xl2tpd
 			int found = procps_count("pppd");
 			if (found==0)
 				found = procps_count("xl2tpd");
-		
+
 			if (found>0)
 			{
 				// Now status is at least 'connecting'
 				status++;
-			
+
 				// Try to search for 'pppXX' device
 				FILE * fd = fopen(_PATH_PROCNET_DEV, "r");
-			
+
 				if (fd != NULL)
 				{
 					int ppp_id;
 					char_t line[256];
-				
+
 					// Read all ifaces and check match
 					while (fgets(line, 255, fd)!=NULL)
 					{
@@ -627,7 +622,7 @@ static int vpnShowVPNStatus(int eid, webs_t wp, int argc, char_t **argv)
 							}
 						}
 					}
-					
+
 					fclose(fd);
 				}
 				else
@@ -645,7 +640,7 @@ static int vpnShowVPNStatus(int eid, webs_t wp, int argc, char_t **argv)
 		}
 #endif
 	}
-	
+
 	// Output connection status
 	const vpn_status_t *st = &st_table[status];
 	websWrite(
@@ -653,7 +648,7 @@ static int vpnShowVPNStatus(int eid, webs_t wp, int argc, char_t **argv)
 		T("<b>Status: <font color=\"#%06x\">%s</font></b>\n"),
 		st->color, st->status
 	);
-	
+
 	return 0;
 }
 
@@ -668,7 +663,7 @@ static int vpnIfaceList(int eid, webs_t wp, int argc, char_t **argv)
 {
 	char_t iface[32];
 	const char **line;
-	
+
 	// Fetch VPN interface
 	char *rrs  = nvram_get(RT2860_NVRAM, "vpnInterface");
 	if (rrs!=NULL)
@@ -677,7 +672,7 @@ static int vpnIfaceList(int eid, webs_t wp, int argc, char_t **argv)
 		iface[0] = '\0';
 	if (strlen(iface)<=0)
 		strcpy(iface, "LAN");
-		
+
 	// Read all ifaces and check match
 	for (line = vpn_ifaces; *line != NULL; line++)
 	{
@@ -688,7 +683,7 @@ static int vpnIfaceList(int eid, webs_t wp, int argc, char_t **argv)
 			*line
 		);
 	}
-	
+
 	return 0;
 }
 
@@ -722,7 +717,7 @@ void formVPNSetup(webs_t wp, char_t *path, char_t *query)
 		printf("vpn_enabled value : %s\n", vpn_enabled);
 
 		setupParameters(wp, fetch, 0);
-		
+
 		// Check if routing table is enabled
 		char *vpn_rt_enabled = websGetVar(wp, T("vpn_routing_enabled"), T("off"));
 		if (vpn_rt_enabled[0] == '\0')
@@ -777,7 +772,7 @@ static int getDns(int eid, webs_t wp, int argc, char_t **argv)
 			continue;
 		if (strcasecmp(ns_str, "nameserver") != 0)
 			continue;
-		
+
 		idx++;
 		if (idx == req) {
 			websWrite(wp, T("%s"), dns);
@@ -789,7 +784,7 @@ static int getDns(int eid, webs_t wp, int argc, char_t **argv)
 }
 
 /*
- * arguments: 
+ * arguments:
  * description: return 1 if hostname is supported
  */
 static int getHostSupp(int eid, webs_t wp, int argc, char_t **argv)
@@ -1207,11 +1202,8 @@ static int getWanNetmask(int eid, webs_t wp, int argc, char_t **argv)
 	char if_net[16];
 	char *cm = nvram_get(RT2860_NVRAM, "wanConnectionMode");
 
-	if (!strncmp(cm, "PPPOE", 6) || !strncmp(cm, "L2TP", 5) || !strncmp(cm, "PPTP", 5) 
-#ifdef CONFIG_USER_3G
-			|| !strncmp(cm, "3G", 3)
-#endif
-	){ //fetch ip from ppp0
+	if (!strncmp(cm, "PPPOE", 6) || !strncmp(cm, "L2TP", 5) || !strncmp(cm, "PPTP", 5)) { 
+		//fetch ip from ppp0
 		if (-1 == getIfNetmask("ppp0", if_net)) {
 			return websWrite(wp, T(""));
 		}
@@ -1311,12 +1303,12 @@ static void removeRoutingRuleNvram(const char *iface, const char *dest, const ch
 	char *old = nvram_get(RT2860_NVRAM, "RoutingRules");
 	if (old == NULL) // Check that NVRAM contains variable
 		return;
-	
+
 	char *head = old;
 	char *tail = strchr(head, ';');
 	if (tail == NULL)
 		tail = head + strlen(head);
-	
+
 	while (tail != head)
 	{
 		do
@@ -1325,7 +1317,7 @@ static void removeRoutingRuleNvram(const char *iface, const char *dest, const ch
 			int count = tail-head;
 			memcpy(rule, head, count);
 			rule[count] = '\0';
-		
+
 			// Get destination
 			if ((getNthValueSafe(0, rule, ',', c_dest, sizeof(c_dest)) == -1))
 				continue;
@@ -1341,7 +1333,7 @@ static void removeRoutingRuleNvram(const char *iface, const char *dest, const ch
 			// Get true interface name
 			if ((getNthValueSafe(4, rule, ',', c_true_if, sizeof(c_true_if)) == -1))
 				continue;
-			
+
 			// Check if rule matches
 			if ((strcmp(iface, c_iface)==0) && (strcmp(dest, c_dest)==0) && (strcmp(netmask, c_netmask)==0) &&
 				(strcmp(gw, c_gw)==0) && (strcmp(true_if, c_true_if)==0))
@@ -1351,14 +1343,14 @@ static void removeRoutingRuleNvram(const char *iface, const char *dest, const ch
 				if (buf == NULL)
 					return;
 				char *p = buf;
-			
+
 				// Remove rule
 				if (old < head)
 				{
 					memcpy(p, old, head-old);
 					p += (head-old);
 				}
-				
+
 				if (tail[0] == ';')
 					tail++;
 				strcpy(p, tail);
@@ -1367,7 +1359,7 @@ static void removeRoutingRuleNvram(const char *iface, const char *dest, const ch
 				return;
 			}
 		} while (0);
-		
+
 		// Move pointer to next entry
 		head = tail;
 		if (head[0] == ';')
@@ -1384,11 +1376,11 @@ static int addRoutingRule(char *buf, const char *dest, const char *netmask, cons
 
 	// action, destination
 	sprintf(cmd, "ip route $1 %s", dest);
-	
+
 	// netmask
 	if (strcmp(netmask, "255.255.255.255")!=0)
 		sprintf(cmd, "%s/%s", cmd, netmask);
-	
+
 	// interface
 	sprintf(cmd, "%s dev %s", cmd, true_if);
 
@@ -1405,11 +1397,11 @@ static int addRoutingRule(char *buf, const char *dest, const char *netmask, cons
 	{
 		strcat(cmd, " 2>&1 ");
 		printf("%s\n", cmd);
-	
+
 		FILE *fp = popen(cmd, "r");
 		if (fp == NULL)
 			return 0;
-	
+
 		fgets(cmd, sizeof(cmd), fp);
 		pclose(fp);
 		return strlen(cmd)==0;
@@ -1425,10 +1417,10 @@ static void addRoutingRuleNvram(
 	char *rrs = nvram_get(RT2860_NVRAM, "RoutingRules");
 	if (rrs == NULL)
 		rrs = "";
-	
+
 	// Create new item
 	sprintf(cmd, "%s,%s,%s,%s,%s,%s,%s", dest, netmask, gw, iface, true_if, cust_if, comment);
-	
+
 	int len = strlen(rrs);
 	char *tmp = (char *)calloc(1, len + strlen(cmd) + sizeof(char)*2);
 	char *p = tmp;
@@ -1442,9 +1434,9 @@ static void addRoutingRuleNvram(
 		p += len;
 		*(p++) = ';';
 	}
-	
+
 	strcpy(p, cmd);
-	
+
 	// Set NVRAM variable
 	nvram_set(RT2860_NVRAM, "RoutingRules", tmp);
 
@@ -1473,9 +1465,9 @@ static void rebuildVPNRoutes(char *src_rrs)
 		printf("open %s failed\n", PATH_PPP_ROUTES);
 		return;
 	}
-	
+
 	fputs("#/bin/sh\n\n", fd);
-	
+
 	while (getNthValueSafe(index++, rrs, ';', one_rule, sizeof(one_rule)) != -1)
 	{
 		// Get & check interface
@@ -1500,7 +1492,7 @@ static void rebuildVPNRoutes(char *src_rrs)
 		fprintf(fd, "%s\n", one_rule);
 		nwritten++;
 	}
-	
+
 	fclose(fd);
 
 	if (nwritten <= 0)
@@ -1529,9 +1521,9 @@ static void rebuildLANWANRoutes(char *src_rrs)
 		printf("open %s failed\n", PATH_LANWAN_ROUTES);
 		return;
 	}
-	
+
 	fputs("#/bin/sh\n\n", fd);
-	
+
 	while (getNthValueSafe(index++, rrs, ';', one_rule, sizeof(one_rule)) != -1)
 	{
 		// Get & check interface
@@ -1559,7 +1551,7 @@ static void rebuildLANWANRoutes(char *src_rrs)
 
 		if ((getNthValueSafe(5, one_rule, ',', custom_iface, sizeof(custom_iface)) == -1))
 			continue;
-		
+
 		// Check interface
 		if (strcmp(iface, "WAN")==0)
 			strcpy(custom_iface, "$3");
@@ -1580,7 +1572,7 @@ static void rebuildLANWANRoutes(char *src_rrs)
 		fprintf(fd, "%s\n", one_rule);
 		nwritten++;
 	}
-	
+
 	fclose(fd);
 
 	if (nwritten <= 0)
@@ -1769,16 +1761,16 @@ static void editRouting(webs_t wp, char_t *path, char_t *query)
 	char rec[256];
 	char true_iface[32], destination[32], gateway[32], netmask[32], iface[32], c_iface[32], comment[64], action[4];
 	int i=0, rebuild_vpn=0, iaction;
-	
+
 	websHeader(wp);
 	websWrite(wp, T("<h3>Edit routing table:</h3><br>\n"));
-	
+
 	while (getNthValueSafe(i++, trans, ';', rec, sizeof(rec)) != -1)
 	{
 		// Check length
 		if (strlen(rec)<=0)
 			break;
-		
+
 		// Get true interface
 		if ((getNthValueSafe(0, rec, ',', c_iface, sizeof(c_iface)) == -1))
 			continue;
@@ -1800,18 +1792,12 @@ static void editRouting(webs_t wp, char_t *path, char_t *query)
 		// Get action
 		if ((getNthValueSafe(12, rec, ',', action, sizeof(action)) == -1))
 			continue;
-		
-		//printf("true_if = %s, dest = %s, gw = %s, netmask = %s, iface = %s, c_iface = %s, action = %s, comment = %s\n",
-		//	true_iface, destination, gateway, netmask, iface, c_iface, action, comment);
-		
-		// First assume that it is not a PPP route
-//		int is_vpn = 0;
 
 		// Check action
 		iaction = atoi(action);
 		if (! ((iaction == 1) || (iaction == 2)))
 			continue;
-		
+
 		// Check interface
 		strcpy(true_iface, c_iface);
 		if (strcmp(iface, "WAN")==0)
@@ -1826,7 +1812,6 @@ static void editRouting(webs_t wp, char_t *path, char_t *query)
 		else if (strcmp(iface, "VPN")==0)
 		{
 			rebuild_vpn = 1;
-//			is_vpn = 1;
 			strcpy(true_iface, "ppp+");
 		}
 		else
@@ -1834,30 +1819,26 @@ static void editRouting(webs_t wp, char_t *path, char_t *query)
 			strcpy(iface, "LAN");
 			strcpy(true_iface, getLanIfName());
 		}
-		
+
 		if (iaction == 1) // Add route
 		{
-//			if (!is_vpn)
-//				addRoutingRule(NULL, destination, netmask, gateway, true_iface);
 			addRoutingRuleNvram(iface, destination, netmask, gateway, true_iface, c_iface, comment);
 			websWrite(wp, T("Add route: %s, %s, %s, %s, %s<br>\n"), iface, destination, netmask, gateway, true_iface);
 		}
 		else if (iaction == 2) // Remove route
 		{
-//			if (!is_vpn)
-//				removeRoutingRule(destination, netmask, gateway, true_iface);
 			removeRoutingRuleNvram(iface, destination, netmask, gateway, true_iface);
 			websWrite(wp, T("Delete route: %s, %s, %s, %s, %s<br>\n"), iface, destination, netmask, gateway, true_iface);
 		}
 	}
-	
+
 	staticRoutingInit();
-	
+
 	// run script to rebuild routing
 	char cmd[80];
 	sprintf(cmd, "%s add %s %s", PATH_LANWAN_ROUTES, getLanIfName(), getWanIfName());
 	doSystem(cmd);
-	
+
 	// Write OK
 	websWrite(wp, T("<script language=\"JavaScript\" type=\"text/javascript\">ajaxReloadDelayedPage(10000, '/internet/routing.asp', true);</script>\n"));
 	websFooter(wp);
@@ -1963,14 +1944,14 @@ static void dynamicRouting(webs_t wp, char_t *path, char_t *query)
 	else if(!gstrcmp(rip, "0") && !strcmp(RIPEnable, "1"))
 	{
 		nvram_set(RT2860_NVRAM, "RIPEnable", rip);
-		
+
 		doSystem("service ripd stop &");
 		doSystem("service zebra stop &");
 	}
 	else if(!gstrcmp(rip, "1") && !strcmp(RIPEnable, "0"))
 	{
 		nvram_set(RT2860_NVRAM, "RIPEnable", rip);
-		
+
 		zebraRestart();
 		ripdRestart();
 	}
@@ -2081,9 +2062,9 @@ static void setLan(webs_t wp, char_t *path, char_t *query)
 			}
 		}
 	}
-	
+
 	nvram_init(RT2860_NVRAM);
-	
+
 	// configure gateway and dns (WAN) at bridge mode
 	if (!strncmp(opmode, "0", 2))
 	{
@@ -2138,9 +2119,7 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 	char_t	*nat_enable;
 	char_t	*vpn_srv, *vpn_mode;
 	char_t	*l2tp_srv, *l2tp_mode;
-#ifdef CONFIG_USER_3G
-	char_t	*usb3g_dev;
-#endif
+
 	char	*opmode = nvram_get(RT2860_NVRAM, "OperationMode");
 	char	*lan_ip = nvram_get(RT2860_NVRAM, "lan_ipaddr");
 	char	*lan2enabled = nvram_get(RT2860_NVRAM, "Lan2Enabled");
@@ -2150,7 +2129,7 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 
 	ctype = websGetVar(wp, T("connectionType"), T("0")); 
 	req_ip = websGetVar(wp, T("dhcpReqIP"), T("")); 
-	
+
 	if (!strncmp(ctype, "STATIC", 7) || !strcmp(opmode, "0"))
 	{
 		//always treat bridge mode having static wan connection
@@ -2201,10 +2180,10 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 			nvram_bufset(RT2860_NVRAM, "lan_netmask", nm);
 		}
 		nvram_bufset(RT2860_NVRAM, "wan_gateway", gw);
-		
+
 		nvram_commit(RT2860_NVRAM);
 		nvram_close(RT2860_NVRAM);
-		
+
 		// Reset /etc/resolv.conf
 		FILE *fd = fopen("/etc/resolv.conf", "w");
 		if (fd != NULL)
@@ -2233,15 +2212,15 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 		websDone(wp, 200);
 		return;
 	}
-	
+
 	// Primary/Seconfary DNS set
 	char_t *st_en = websGetVar(wp, T("wStaticDnsEnable"), T("off"));
 	char_t *pd = websGetVar(wp, T("staticPriDns"), T(""));
 	char_t *sd = websGetVar(wp, T("staticSecDns"), T(""));
-	
+
 	nvram_init(RT2860_NVRAM);
 	nvram_bufset(RT2860_NVRAM, "wan_static_dns", st_en);
-	
+
 	if (strcmp(st_en, "on") == 0)
 	{
 		nvram_bufset(RT2860_NVRAM, "wan_primary_dns", pd);
@@ -2255,11 +2234,11 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 		nat_enable = (strcmp(nat_enable, "on") == 0) ? "1" : "0";
 		nvram_bufset(RT2860_NVRAM, "natEnabled", nat_enable);
 	}
-	
+
 	// MTU for WAN
 	char *wan_mtu = websGetVar(wp, T("wan_mtu"), T("0"));
 	nvram_bufset(RT2860_NVRAM, "wan_manual_mtu", wan_mtu);
-	
+
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
 
@@ -2322,7 +2301,7 @@ const parameter_fetch_t chilli_vars[] =
 static int getSpotIp(int eid, webs_t wp, int argc, char_t **argv)
 {
 	char_t *nvdata = nvram_get(RT2860_NVRAM, "chilli_net");
-	
+
 	char* slashPos = strchr(nvdata, '/');
 	if (slashPos == NULL) {
 		return websWrite(wp, T("172.16.0.0"));
@@ -2339,7 +2318,7 @@ static int getSpotNetmask(int eid, webs_t wp, int argc, char_t **argv)
 	char_t *nvdata = nvram_get(RT2860_NVRAM, "chilli_net");
 	unsigned int imask;
 	struct in_addr mask;
-	
+
 	char* slashPos = strchr(nvdata, '/');
 	if (slashPos == NULL) {
 		return websWrite(wp, T("255.255.255.0"));
@@ -2348,7 +2327,7 @@ static int getSpotNetmask(int eid, webs_t wp, int argc, char_t **argv)
 	if (!imask)
 		imask = 24;
 	mask.s_addr = ntohl(0 - (1 << (32 - imask)));
-	
+
 	return websWrite(wp, T("%s"), inet_ntoa(mask));
 }
 
@@ -2365,7 +2344,7 @@ static void setHotspot(webs_t wp, char_t *path, char_t *query)
 		nvram_init(RT2860_NVRAM);
 		char_t *ip = websGetVar(wp, T("sIp"), T(""));
 		char_t *amask = websGetVar(wp, T("sNetmask"), T(""));
-		
+
 		struct in_addr iip;
 		struct in_addr imask;
 		iip.s_addr = inet_addr(ip);
@@ -2378,14 +2357,14 @@ static void setHotspot(webs_t wp, char_t *path, char_t *query)
 		}
 		if (!i) i = 24;
 		iip.s_addr &= ntohl(0 - (1 << (32 - i)));
-		
+
 		char_t subnet[20];
 		sprintf(subnet, "%s/%d", inet_ntoa(iip), i);
 		if (nvram_bufset(RT2860_NVRAM, "chilli_net", (void *)subnet)!=0) //!!!
 			printf("Set chilli_net nvram error!");
-		
+
 		setupParameters(wp, chilli_vars, 0);
-		
+
 		nvram_commit(RT2860_NVRAM);
 		nvram_close(RT2860_NVRAM);
 		websWrite(wp, T("<h3>Hotspot configuration done.</h3><br>\n"));

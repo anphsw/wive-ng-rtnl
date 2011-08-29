@@ -740,7 +740,7 @@ static int getCfg3General(int eid, webs_t wp, int argc, char_t **argv)
 	int type;
 	char_t *field;
 	char *value;
-	
+
 	if (ejArgs(argc, argv, T("%d %s"), &type, &field) < 2) {
 		return websWrite(wp, T("Insufficient args\n"));
 	}

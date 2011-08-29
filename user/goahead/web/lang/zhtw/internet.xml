@@ -37,8 +37,6 @@
   <message msgid="wan pppoe mode" msgstr="PPPoE 模式" />
   <message msgid="wan l2tp mode" msgstr="L2TP 模式" />
   <message msgid="wan pptp mode" msgstr="PPTP 模式" />
-  <message msgid="wan 3G mode" msgstr="3G 模式" />
-  <message msgid="wan 3G modem" msgstr="USB 3G 數據機" />
   <message msgid="wan address mode" msgstr="IP 位址模式" />
   <message msgid="wan address mode static" msgstr="靜態" />
   <message msgid="wan address mode dynamic" msgstr="動態" />

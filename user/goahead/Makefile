@@ -8,11 +8,6 @@ all:
 
 romfs:
 	$(ROMFSINST) $(ROOT_DIRECTORY)
-ifeq ("$(CONFIG_USER_3G)", "y")
-	mv -f $(ROMFSDIR)$(ROOT_DIRECTORY)/internet/wan-3g.asp $(ROMFSDIR)$(ROOT_DIRECTORY)/internet/wan.asp
-else
-	rm -f $(ROMFSDIR)$(ROOT_DIRECTORY)/internet/wan-3g.asp
-endif
 ifeq ("$(CONFIG_RT2860V2_AP_MESH)", "")
 ifeq ("$(CONFIG_RT2860V2_STA_MESH)", "")
 	rm -f $(ROMFSDIR)$(ROOT_DIRECTORY)/wireless/mesh.asp

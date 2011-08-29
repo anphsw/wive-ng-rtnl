@@ -37,8 +37,6 @@
   <message msgid="wan pppoe mode" msgstr="PPPoE Mode" />
   <message msgid="wan l2tp mode" msgstr="L2TP Mode" />
   <message msgid="wan pptp mode" msgstr="PPTP Mode" />
-  <message msgid="wan 3G mode" msgstr="3G Mode" />
-  <message msgid="wan 3G modem" msgstr="USB 3G modem" />
   <message msgid="wan address mode" msgstr="Address Mode" />
   <message msgid="wan address mode static" msgstr="Static" />
   <message msgid="wan address mode dynamic" msgstr="Dynamic" />
