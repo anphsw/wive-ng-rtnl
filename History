@@ -598,6 +598,7 @@
 68) Try samba3 fix show free space size.<br>
 69) Add pinger (lan/wifi/uplink) for wake up client devices and support uplink connections always on-line(ping_check_on/ping_check_time/
 	ping_check_interval variables on nvram. Need add in watchdog section WebUI).<br>
+70) Fix /media and /opt mount.<br>
 
 
 <br><br>
