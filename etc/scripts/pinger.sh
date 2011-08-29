@@ -27,10 +27,13 @@ while "true"; do
 	sleep $ping_check_interval
 
 	if [ -f /var/udhcpd.leases ]; then
-	    #arping for client wakeup - from dhcp lease table
-	    dumpleases | grep -v "IP" | awk '{ print $2 }' | while read test_ip; do
-		arping "$test_ip" -I br0 -f -q -w1
-	    done
+	    size=`stat /var/udhcpd.leases | grep "Size" | awk {' print $2 '}`
+	    if [ "$size" != "0" ]; then
+		#arping for client wakeup - from dhcp lease table
+		dumpleases | grep -v "IP" | awk '{ print $2 }' | while read test_ip; do
+		    arping "$test_ip" -I br0 -f -q -w1
+		done
+	    fi
 	fi
     fi
     ###################################UPLINK##############################################################################
