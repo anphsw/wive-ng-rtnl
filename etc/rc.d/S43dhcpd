@@ -40,6 +40,7 @@ start() {
 				if [ $count = "2" ]; then
 				    dhcpSecDns="$dns_ip"
 				fi
+				count=$(($count+1))
 			    done
 			    set_dns_direct
 			fi
