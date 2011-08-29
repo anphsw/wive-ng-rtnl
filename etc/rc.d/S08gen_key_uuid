@@ -16,7 +16,7 @@ start() {
         done
         serial=`echo "$outid" | cut -f1 -d-`
         $LOG "UPNP UUID is $outid , serial is $serial"
-        printf "uuid=$outid \n serial=$serial \n" > /etc/miniupnpd.conf.uuid
+	printf "uuid=$outid\nserial=$serial\n" > /etc/miniupnpd.conf.uuid
     else
        $LOG "Use exist UUID file."
     fi

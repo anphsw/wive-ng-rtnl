@@ -25,7 +25,7 @@ start() {
 
 		if [ "$dnsPEnabled" = "1" ]; then
 		    # use dnsmasq for relay
-		    dhcpPriDns $lan_ipaddr
+		    dhcpPriDns="$lan_ipaddr"
 		    dhcpSecDns=""
 		    set_dns
 		else
