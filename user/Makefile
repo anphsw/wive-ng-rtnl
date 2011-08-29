@@ -84,7 +84,7 @@ dir_$(CONFIG_USER_SAMBA)		    += samba
 dir_$(CONFIG_USER_SAMBA3)		    += samba3
 dir_$(CONFIG_USER_MINIDLNA)		    += minidlna
 dir_$(CONFIG_USER_TRANSMISSION)		    += transmission
-dir_$(CONFIG_USER_STORAGE)		    += optware
+dir_$(CONFIG_USER_STORAGE)		    += usb
 
 #wifi simle config
 dir_$(CONFIG_USER_WSC)                	    += wsc_upnp

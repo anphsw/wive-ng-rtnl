@@ -55,15 +55,6 @@ if [ "$CONFIG_RT2860V2_AP_IGMP_SNOOP" != "" ]; then
     fi
 fi
 
-########################################MESH mode param###########################
-if [ "$CONFIG_RT2860V2_STA_MESH" != "" ] || [ "$CONFIG_RT2860V2_AP_MESH" != "" ]; then
-    meshenabled=`nvram_get 2860 MeshEnabled`
-    if [ "$meshenabled" = "1" ]; then
-        meshhostname=`nvram_get 2860 MeshHostName` 
-	iwpriv mesh0 set  MeshHostName="$meshhostname"
-    fi
-fi
-
 ###############################################Others#############################
 AutoChannelSelect=`nvram_get AutoChannelSelect`
 if [ "$AutoChannelSelect" = "0" ]; then

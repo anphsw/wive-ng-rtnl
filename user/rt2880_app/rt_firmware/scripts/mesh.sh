@@ -1,7 +1,17 @@
 #!/bin/sh
 
-case $1 in
+#include kernel config
+. /etc/scripts/config.sh
+
+########################################MESH mode param###########################
+if [ "$CONFIG_RT2860V2_STA_MESH" != "" ] || [ "$CONFIG_RT2860V2_AP_MESH" != "" ]; then
+    case $1 in
 	"init")
+		meshenabled=`nvram_get 2860 MeshEnabled`
+		if [ "$meshenabled" = "1" ]; then
+    		    meshhostname=`nvram_get 2860 MeshHostName` 
+		    iwpriv mesh0 set  MeshHostName="$meshhostname"
+		fi
 		brctl delif br0 mesh0
 		ip link set mesh0 down > /dev/null 2>&1
 		ip link set ra0 down > /dev/null 2>&1
@@ -23,4 +33,5 @@ case $1 in
 		iwpriv mesh0 set MeshDelLink="$2"
 		echo "iwpriv mesh0 set MeshDelLink="$2""
 		;;
-esac
+    esac
+fi

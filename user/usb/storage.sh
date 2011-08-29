@@ -1,8 +1,6 @@
 #!/bin/sh
 
 #
-# $Id: storage.sh,v 1.27.2.1 2008-10-21 09:07:34 steven Exp $
-#
 # usage: storage.sh
 #
 

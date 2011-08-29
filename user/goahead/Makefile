@@ -43,8 +43,6 @@ endif
 ifeq ("$(CONFIG_USER_STORAGE)", "")
 	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/usb/STORAGE*
 	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/storage/
-	rm -f $(ROMFSDIR)/etc/scripts/storage.sh
-	rm -f $(ROMFSDIR)/etc/scripts/automount.sh
 endif
 
 ifeq ("$(CONFIG_RALINKAPP_MPLAYER)", "")

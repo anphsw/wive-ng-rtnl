@@ -65,3 +65,8 @@ ifdef CONFIG_RT2860V2_STA
 	mkdir -p $(ROMFSDIR)/etc/Wireless/RT2860STA
 	$(ROMFSINST) -s /etc/Wireless/RT2860/RT2860.dat /etc/Wireless/RT2860STA/RT2860STA.dat
 endif
+#mesh support
+ifdef CONFIG_RT2860V2_AP_MESH
+	$(ROMFSINST) -S -e CONFIG_RT2860V2_AP_MESH	scripts/mesh.sh			/etc/scripts/mesh.sh
+	$(ROMFSINST) -s /etc/scripts/mesh.sh /bin/mesh.sh
+endif
