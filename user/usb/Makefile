@@ -4,6 +4,7 @@ clean:
 
 romfs:
 	mkdir -p $(ROMFSDIR)/opt
+	mkdir -p $(ROMFSDIR)/etc/scripts
 #install scripts
 	$(ROMFSINST) -S optware-install.sh /etc/scripts/optware-install.sh
 	$(ROMFSINST) -S automount.sh /etc/scripts/automount.sh
