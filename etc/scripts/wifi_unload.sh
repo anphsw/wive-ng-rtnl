@@ -8,7 +8,7 @@
 . /etc/scripts/global.sh
 
 stop_serv="vpnhelper inetd shaper crontab pppoe-relay ddns wscd dhcpd lld2d radvd syslog \
-	    zebra udpxy upnp hotplug igmp_proxy ntp samba dnsserver"
+	    zebra udpxy upnp hotplug igmp_proxy ntp samba dnsserver mdev"
 
 kill_apps="smbd nmbd pppd xl2tpd udhcpd udhcpc crond lld2d igmpproxy inetd syslogd klogd \
 	    ntpclient ntpd zebra ripd inadyn stupid-ftpdated \
@@ -26,6 +26,11 @@ echo 0 > /proc/sys/net/ipv4/conf/default/mc_forwarding
 
 #clear conntrack tables
 echo 1 > /proc/sys/net/nf_conntrack_flush
+
+#disable hotplug
+if [ -f /proc/sys/kernel/hotplug ]; then
+    echo > /proc/sys/kernel/hotplug
+fi
 
 #clear route cache
 ip route flush cache
