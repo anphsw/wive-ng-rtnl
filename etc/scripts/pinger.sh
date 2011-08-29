@@ -9,6 +9,9 @@ if [ "$ping_check_time" = "" ] || [ "$ping_check_time" = "0" ] || \
 fi
 
 while "true"; do
+    #wait before check
+    sleep $ping_check_time
+
     ##################################RADIO################################################################################
     RadioOff=`nvram_get 2860 RadioOff`
     if [ "$RadioOff" != "1" ]; then
