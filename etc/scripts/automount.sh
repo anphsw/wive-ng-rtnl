@@ -3,11 +3,22 @@
 LOG="logger -t automount"
 MDEV_PATH=/dev/$MDEV
 
+check_media() {
+  if [ `mount | grep "media" | wc -l` -ge 1 ]; then
+    $LOG "/media is binding to rw"
+  else
+    $LOG "prepare /media"
+    mkdir -p /var/media
+    mount -o bind /var/media /media
+  fi
+}
+
 pre_mount() {
   if [ "$MDEV_LABEL" == "optware" ]; then
     $LOG "optware part"
     MOUNT_DST="/opt"
   else
+    check_media
     MOUNT_DST="/media/$MDEV"
     if [ -d "$MOUNT_DST" ]; then
       $LOG "dir $MOUNT_DST is exist"
