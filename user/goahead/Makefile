@@ -16,7 +16,6 @@ endif
 ifeq ("$(CONFIG_RT2860V2_AP_MESH)", "")
 ifeq ("$(CONFIG_RT2860V2_STA_MESH)", "")
 	rm -f $(ROMFSDIR)$(ROOT_DIRECTORY)/wireless/mesh.asp
-	rm -f $(ROMFSDIR)/etc/scripts/mesh.sh
 endif
 endif
 ifeq ("$(CONFIG_RT2860V2_AP_WDS)", "")
