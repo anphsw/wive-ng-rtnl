@@ -908,7 +908,7 @@ static int getUSBBuilt(int eid, webs_t wp, int argc, char_t **argv)
 
 static int getStorageBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
-#if defined CONFIG_USB_STORAGE && defined CONFIG_USER_STORAGE
+#ifdef CONFIG_USER_STORAGE
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));

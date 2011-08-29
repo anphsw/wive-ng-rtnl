@@ -503,7 +503,7 @@ void defaultTraceHandler(int level, char_t *buf)
  *	Returns a pointer to an allocated qualified unique temporary file name.
  *	This filename must eventually be deleted with bfree();
  */
-#if defined CONFIG_USB_STORAGE && defined CONFIG_USER_STORAGE
+#ifdef CONFIG_USER_STORAGE
 char_t *websGetCgiCommName(webs_t wp)
 {
 	char *force_mem_upgrade = nvram_get(RT2860_NVRAM, "Force_mem_upgrade");

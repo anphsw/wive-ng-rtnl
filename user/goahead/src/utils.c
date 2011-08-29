@@ -22,7 +22,7 @@
 #include 	"wps.h"
 #endif
 
-#if defined CONFIG_USB_STORAGE && defined CONFIG_USER_STORAGE
+#ifdef CONFIG_USER_STORAGE
 extern void setFirmwarePath(void);
 #endif
 
@@ -48,7 +48,7 @@ static int  isOnePortOnly(int eid, webs_t wp, int argc, char_t **argv);
 static void forceMemUpgrade(webs_t wp, char_t *path, char_t *query);
 static void setOpMode(webs_t wp, char_t *path, char_t *query);
 static void setWanPort(webs_t wp, char_t *path, char_t *query);
-#if defined CONFIG_USB_STORAGE && defined CONFIG_USER_STORAGE
+#ifdef CONFIG_USER_STORAGE
 static void ScanUSBFirmware(webs_t wp, char_t *path, char_t *query);
 #endif
 
@@ -457,7 +457,7 @@ void formDefineUtilities(void)
 	websFormDefine(T("forceMemUpgrade"), forceMemUpgrade);
 	websFormDefine(T("setOpMode"), setOpMode);
 	websFormDefine(T("setWanPort"), setWanPort);
-#if defined CONFIG_USB_STORAGE && defined CONFIG_USER_STORAGE
+#ifdef CONFIG_USER_STORAGE
 	websFormDefine(T("ScanUSBFirmware"), ScanUSBFirmware);
 #endif
 }
@@ -1028,7 +1028,7 @@ static void forceMemUpgrade(webs_t wp, char_t *path, char_t *query)
 		nvram_set(RT2860_NVRAM, "Force_mem_upgrade", "1");
 	else
 		nvram_set(RT2860_NVRAM, "Force_mem_upgrade", "0");
-	
+
 	websHeader(wp);
 	websWrite(wp, T("<h2>force mem upgrade</h2>\n"));
 	websWrite(wp, T("mode: %s<br>\n"), mode);
@@ -1036,7 +1036,7 @@ static void forceMemUpgrade(webs_t wp, char_t *path, char_t *query)
 	websDone(wp, 200);
 }
 
-#if defined CONFIG_USB_STORAGE && defined CONFIG_USER_STORAGE
+#ifdef CONFIG_USER_STORAGE
 static void ScanUSBFirmware(webs_t wp, char_t *path, char_t *query)
 {
 	setFirmwarePath();

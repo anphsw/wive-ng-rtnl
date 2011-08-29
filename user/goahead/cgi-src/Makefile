@@ -17,10 +17,8 @@ UPLOAD_SETTINGS		= upload_settings.cgi
 USB_UPGRADE_CGI		= usb_upgrade.cgi
 
 ALL_EXE = $(UPLOAD_CGI) $(UPLOAD_BOOTLOADER_CGI) $(UPLOAD_SETTINGS)
-ifeq ("$(CONFIG_USB_STORAGE)", "y")
 ifeq ("$(CONFIG_USER_STORAGE)", "y")
 ALL_EXE += $(USB_UPGRADE_CGI)
-endif
 endif
 
 all: $(ALL_EXE)
@@ -50,10 +48,8 @@ romfs:
 	$(ROMFSINST) upload_settings.cgi  $(ROOT_DIRECTORY)/cgi-bin/upload_settings.cgi
 	$(ROMFSINST) history.sh  $(ROOT_DIRECTORY)/cgi-bin/history.sh
 	$(ROMFSINST) $(ROOTDIR)/History  $(ROOT_DIRECTORY)/cgi-bin/History
-ifeq ("$(CONFIG_USB_STORAGE)", "y")
 ifeq ("$(CONFIG_USER_STORAGE)", "y")
 	$(ROMFSINST) usb_upgrade.cgi $(ROOT_DIRECTORY)/cgi-bin/usb_upgrade.cgi
-endif
 endif
 
 #They are not cgi but cgi-related.

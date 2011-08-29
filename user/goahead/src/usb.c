@@ -955,7 +955,7 @@ static void printersrv(webs_t wp, char_t *path, char_t *query)
 
 int initUSB(void)
 {
-#if defined(CONFIG_USB) && defined(CONFIG_USB_STORAGE)
+#ifdef CONFIG_USB_STORAGE
 	setFirstPart();
 	doSystem("storage.sh admin");
 
