@@ -605,6 +605,7 @@
 74) dnsmasq up to 2.58 version.<br>
 75) Last particion mounted to /media set as public for samba.<br>
 76) Last particion mounted to /media set as torrent home dir.<br>
+77) Set announce version=5.1 (WinXP) for samba3(mkre compat with XP and later Windows versions).
 
 <br><br>
 <b>For support see:</b><br>
