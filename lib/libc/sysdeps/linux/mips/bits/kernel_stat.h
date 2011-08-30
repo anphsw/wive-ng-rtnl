@@ -8,6 +8,8 @@
 #if __WORDSIZE == 64
 #define kernel_stat kernel_stat64
 #else
+#endif
+
 struct kernel_stat {
 	__kernel_dev_t	st_dev;
 	long		st_pad1[3];
@@ -30,7 +32,6 @@ struct kernel_stat {
 	long		st_blocks;
 	long		st_pad4[14];
 };
-#endif
 
 struct kernel_stat64 {
 	unsigned long	st_dev;
