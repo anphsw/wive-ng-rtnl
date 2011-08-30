@@ -3,7 +3,7 @@
     syslog = 1
     syslog only = yes
     max log size = 10
-    max open files = 50
+    max disk size = 0
     security = share
     name resolve order = lmhosts host bcast
     announce version = 4.9

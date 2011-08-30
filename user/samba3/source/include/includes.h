@@ -22,6 +22,9 @@
 
 #include "lib/replace/replace.h"
 
+/* replace some options for LFS support. */
+#include "config-lfs.h"
+
 /* make sure we have included the correct config.h */
 #ifndef NO_CONFIG_H /* for some tests */
 #ifndef CONFIG_H_IS_FROM_SAMBA

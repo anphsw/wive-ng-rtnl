@@ -27,6 +27,9 @@
 
 #include "local.h"
 
+/* replace some options for LFS support. */
+#include "config-lfs.h"
+
 #ifdef AIX
 #define DEFAULT_PRINTING PRINT_AIX
 #define PRINTCAP_NAME "/etc/qconfig"

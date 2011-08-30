@@ -33,7 +33,6 @@
     preserve case = yes
     short preserve case = yes
     fstype = NTFS
-    block size = 4096
 
     show add printer wizard = no
     load printers = no
@@ -43,6 +42,7 @@
     wide links= yes
     unix extensions = no
     max stat cache size = 1024
+    max disk size = 0
     use mmap = no
 
     #fix work with file database
