@@ -115,8 +115,8 @@
 /* #undef STAT_STATFS2_FS_DATA */
 /* #undef STAT_STATFS3_OSF1 */
 /* #undef STAT_STATFS4 */
-/*#define STAT_STATVFS 1*/
-/* #undef STAT_STATVFS64 */
+#define STAT_STATVFS 1
+#define STAT_STATVFS64 1
 /* #undef HAVE_IFACE_AIX */
 #define HAVE_IFACE_IFCONF 1
 /* #undef HAVE_IFACE_IFREQ */
@@ -145,7 +145,7 @@
 /* #undef HAVE_STRUCT_FLOCK64 */
 /* #undef SIZEOF_INO_T */
 /* #undef SIZEOF_OFF_T */
-/* #undef STAT_STATVFS64 */
+#define STAT_STATVFS64 1
 /*#define HAVE_LIBREADLINE 1*/
 /* #undef HAVE_KERNEL_OPLOCKS */
 /* #undef HAVE_IRIX_SPECIFIC_CAPABILITIES */
@@ -849,7 +849,7 @@
 /*#define HAVE_SYS_STATFS_H 1*/
 
 /* Define if you have the <sys/statvfs.h> header file.  */
-/*#define HAVE_SYS_STATVFS_H 1*/
+#define HAVE_SYS_STATVFS_H 1
 
 /* Define if you have the <sys/syscall.h> header file.  */
 #define HAVE_SYS_SYSCALL_H 1
