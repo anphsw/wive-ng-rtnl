@@ -78,6 +78,7 @@ fulldump
 /lib/libiconv/lib/config.h
 /lib/libiconv/lib/Makefile
 /lib/libiconv/config.h
+/lib/libiconv/stamp-h1
 /lib/libgmp/stamp-h1
 /user/busybox/*/Config.in
 /user/busybox/docs/busybox.net/BusyBox.html
