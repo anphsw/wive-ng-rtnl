@@ -112,6 +112,12 @@ else
   swap_off
 fi
 
+#send hdd add/remove to goahead
 killall -q -SIGTTIN goahead
+
+if [ "$MDEV_LABEL" != "optware" ] && [ "$MDEV_TYPE" != "swap"]; then
+    #regenerate config and restart samba
+    service samba restart
+fi
 
 exit 0
