@@ -72,6 +72,12 @@ fulldump
 /lib/libevent/sample/Makefile
 /lib/libevent/stamp-h1
 /lib/libevent/test/Makefile
+/lib/libiconv/tests/Makefile
+/lib/libiconv/srclib/Makefile
+/lib/libiconv/src/Makefile
+/lib/libiconv/lib/config.h
+/lib/libiconv/lib/Makefile
+/lib/libiconv/config.h
 /lib/libgmp/stamp-h1
 /user/busybox/*/Config.in
 /user/busybox/docs/busybox.net/BusyBox.html
