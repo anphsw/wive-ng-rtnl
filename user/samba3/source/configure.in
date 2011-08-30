@@ -432,6 +432,9 @@ exit(1);
 	AC_DEFINE(_FILE_OFFSET_BITS, 64, [File offset bits])
 	AC_DEFINE(_GNU_SOURCE, 1, [Whether to use GNU libc extensions])
 	AC_DEFINE(_LARGE_FILES, 1, [Whether to enable large file support])
+	AC_DEFINE(STAT_STATVFS, 1, [Whether to enable large file support])
+	AC_DEFINE(STAT_STATVFS64, 1, [Whether to enable large file support])
+	AC_DEFINE(HAVE_SYS_STATVFS_H, 1, [Whether to enable large file support])
 	AC_MSG_RESULT([$LINUX_LFS_SUPPORT])
 	;;
 

@@ -69,7 +69,7 @@
 #include <sys/dustat.h>
 #endif
 
-#ifdef HAVE_SYS_STATVFS_H          
+#ifdef HAVE_SYS_STATVFS_H
 #include <sys/statvfs.h>
 #endif
 
