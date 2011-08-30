@@ -20,7 +20,7 @@
 
 #define DD printf("%s(),  %d\n", __FUNCTION__, __LINE__);	fflush(stdout);
 #define AP_MODE
-                                        
+
 #define WPS_AP_TIMEOUT_SECS		120000				// 120 seconds
 #define WPS_AP_TIMEOUT_SECS_SEND_M7	120000				// 120 seconds
 #define WPS_AP_CATCH_CONFIGURED_TIMER	100				// 0.1 sec 

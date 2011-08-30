@@ -29,7 +29,7 @@
  *	Variable to support the basicSet and basicGet functions.
  */
 
-static char_t	*basicProdDir = NULL;		
+static char_t	*basicProdDir = NULL;
 static char_t	*basicDefaultDir = T("."); /* Default set to current */
 
 /*
@@ -46,8 +46,8 @@ static char_t	*trim(char_t *str);
 static int		GetColumnIndex(int tid, char_t *colName);
 
 /******************************************************************************/
-/* 
- *	Add a schema to the module-internal schema database 
+/*
+ *	Add a schema to the module-internal schema database
  */
 
 int dbRegisterDBSchema(dbTable_t *pTableRegister)
@@ -57,14 +57,14 @@ int dbRegisterDBSchema(dbTable_t *pTableRegister)
 
 	a_assert(pTableRegister);
 
-	trace(4, T("DB: Registering database table <%s>\n"), 
+	trace(4, T("DB: Registering database table <%s>\n"),
 		pTableRegister->name);
 
 /*
  *	Bump up the size of the table array
  */
-	tid = hAllocEntry((void***) &dbListTables, 
-		&dbMaxTables, sizeof(dbTable_t));	
+	tid = hAllocEntry((void***) &dbListTables,
+		&dbMaxTables, sizeof(dbTable_t));
 
 /*
  *	Copy the table schema to the last spot in schema array
@@ -120,7 +120,7 @@ int dbRegisterDBSchema(dbTable_t *pTableRegister)
 int dbOpen(char_t *tablename, char_t *filename, 
 		   int (*gettime)(int did), int flags)
 {
-	basicProdDir = NULL;		
+	basicProdDir = NULL;
 	basicDefaultDir = T(".");
 	dbMaxTables = 0;
 	dbListTables = NULL;
@@ -253,7 +253,7 @@ int dbSearchStr(int did, char_t *tablename,
 	} else {
 		return DB_ERR_TABLE_NOT_FOUND;
 	}
-	
+
 	nColumns = pTable->nColumns;
 	nRows = pTable->nRows;
 	column = GetColumnIndex(tid, colName);
@@ -388,7 +388,7 @@ int dbDeleteRow(int did, char_t *tablename, int row)
 		trace(3, T("DB: Unable to delete row <%d> from table <%s>\n"), 
 			row, tablename);
 	}
-	
+
 	return -1;
 }
 
@@ -421,7 +421,7 @@ int dbSetTableNrow(int did, char_t *tablename, int nNewRows)
 		nRet = 0;
 
 		if (nRows >= nNewRows) {
-/*		
+/*
  *		If number of rows already allocated exceeds requested number, do nothing
  */
 			trace(4, T("DB: Ignoring row set to <%d> in table <%s>\n"),
@@ -448,7 +448,7 @@ int dbSetTableNrow(int did, char_t *tablename, int nNewRows)
 int dbGetTableNrow(int did, char_t *tablename)
 {
 	int tid;
-	
+
 	a_assert(tablename);
 	tid = dbGetTableId(did, tablename);
 
@@ -468,7 +468,7 @@ int dbReadInt(int did, char_t *table, char_t *column, int row, int *returnValue)
 {
 	int			colIndex, *pRow, tid;
 	dbTable_t	*pTable;
-	
+
 	a_assert(table);
 	a_assert(column);
 	a_assert(returnValue);
@@ -548,7 +548,7 @@ int dbWriteInt(int did, char_t *table, char_t *column, int row, int iData)
 	}
 
 	pTable = dbListTables[tid];
-	
+
 	if (pTable) {
 /*
  *		Make sure that the column exists
@@ -670,7 +670,7 @@ static int dbWriteKeyValue(int fd, char_t *key, char_t *value)
 
 	a_assert(key && *key);
 	a_assert(value);
-	
+
 	fmtAlloc(&pLineOut, BUF_MAX, T("%s=%s\n"), key, value);
 
 	if (pLineOut) {
@@ -743,7 +743,7 @@ int dbSave(int did, char_t *filename, int flags)
 /*
  *				Print the ROW=rowNumber directive to the file
  */
-				fmtAlloc(&tmpNum, 20, T("%d"), row);		
+				fmtAlloc(&tmpNum, 20, T("%d"), row);
 				rc = dbWriteKeyValue(fd, KEYWORD_ROW, tmpNum);
 				bfreeSafe(B_L, tmpNum);
 
@@ -758,7 +758,7 @@ int dbSave(int did, char_t *filename, int flags)
 						rc = dbWriteKeyValue(fd, *colNames, 
 							(char_t *)(pRow[column]));
 					} else {
-						fmtAlloc(&tmpNum, 20, T("%d"), pRow[column]);		
+						fmtAlloc(&tmpNum, 20, T("%d"), pRow[column]);
 						rc = dbWriteKeyValue(fd, *colNames, tmpNum);
 						bfreeSafe(B_L, tmpNum);
 					}
@@ -968,12 +968,12 @@ int dbGetTableId(int did, char_t *tablename)
 			}
 		}
 	}
-	
+
 	return -1;
 }
 
 /******************************************************************************/
-/*	
+/*
  *	Return a pointer to the table name, given its ID
  */
 
@@ -1032,10 +1032,10 @@ void basicSetProductDir(char_t *proddir)
 {
 	int len;
 
-	if (basicProdDir != NULL) {	
+	if (basicProdDir != NULL) {
       bfree(B_L, basicProdDir);
 	}
-    
+
 	basicProdDir = bstrdup(B_L, proddir);
 /*
  *	Make sure that prefix-directory doesn't end with a '/'

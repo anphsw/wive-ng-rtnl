@@ -103,7 +103,6 @@ int websCgiHandler(webs_t wp, char_t *urlPrefix, char_t *webDir, int arg,
 	}
 #endif /* ! VXWORKS */
 
-         
 /*
  *	Get the CWD for resetting after launching the child process CGI
  */
@@ -310,13 +309,13 @@ void websCgiCleanup()
  *				We get here if the CGI process has terminated.  Clean up.
  */
 				nTries = 0;
-/*				
+/*
  *				Make sure we didn't miss something during a task switch.
  *				Maximum wait is 100 times 10 msecs (1 second).
  */
 				while ((cgip->fplacemark == 0) && (nTries < 100)) {
 					websCgiGatherOutput(cgip);
-/*					
+/*
  *					There are some cases when we detect app exit 
  *					before the file is ready. 
  */

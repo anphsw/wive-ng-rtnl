@@ -103,7 +103,6 @@ int websDefaultHandler(webs_t wp, char_t *urlPrefix, char_t *webDir, int arg,
        * 17 Mar 03 BgP -- prevent a cross-site scripting exploit
 		websError(wp, 404, T("Cannot open URL %s"), url);
        */
-      
 		websError(wp, 404, T("Cannot open URL"));
 		return 1;
 	} 
@@ -183,7 +182,7 @@ int websDefaultHandler(webs_t wp, char_t *urlPrefix, char_t *webDir, int arg,
 	if ((flags & WEBS_KEEP_ALIVE) && !(flags & WEBS_ASP)) {
 		websWrite(wp, T("Connection: keep-alive\r\n"));
 	}
-	
+
 	websWrite(wp, WEBS_CACHE_CONTROL_STRING);
 	websWrite(wp, T("\r\n"));
 
@@ -395,13 +394,11 @@ int websValidateUrl(webs_t wp, char_t *path)
     * slashes for backslashes before attempting to validate that there are no
     * unauthorized paths being accessed.
     */
-   token = gstrchr(path, '\\');
-   while (token != NULL)
-   {
-      *token = '/';
-      token = gstrchr(token, '\\');
-   }
-   
+    token = gstrchr(path, '\\');
+    while (token != NULL) {
+	*token = '/';
+	token = gstrchr(token, '\\');
+    }
 	token = gstrtok(path, T("/"));
 
 /*

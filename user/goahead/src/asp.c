@@ -260,7 +260,7 @@ int websAspWrite(int ejid, webs_t wp, int argc, char_t **argv)
 	int		i;
 
 	a_assert(websValid(wp));
-	
+
 	for (i = 0; i < argc; ) {
 		a_assert(argv);
 		if (websWriteBlock(wp, argv[i], gstrlen(argv[i])) < 0) {

@@ -1,4 +1,4 @@
-/* 
+/*
  *	ej.h -- Ejscript(TM) header
  *
  * Copyright (c) GoAhead Software Inc., 1992-2000. All Rights Reserved.
@@ -13,7 +13,7 @@
 
 /******************************** Description *********************************/
 
-/* 
+/*
  *	GoAhead Ejscript(TM) header. This defines the Ejscript API and internal
  *	structures.
  */

@@ -19,7 +19,7 @@
 /********************************* Includes ***********************************/
 
 #include	<signal.h>
-#include	<unistd.h> 
+#include	<unistd.h>
 #include	<sys/types.h>
 #include	<sys/wait.h>
 #include        <sys/ioctl.h>
@@ -30,7 +30,7 @@
 #include	"internet.h"
 #include	"services.h"
 #include	"wireless.h"
-#include	"firewall.h" 
+#include	"firewall.h"
 #include	"management.h"
 #include	"station.h"
 #include	"usb.h"
@@ -126,10 +126,10 @@ int main(int argc, char** argv)
 	/* Set flag goahead run to scripts */
 	if (writeGoPid() < 0)
 		return -1;
-	
+
 #if CONFIG_USER_GOAHEAD_HAS_WPSBTN
 	pid = fork();
-	
+
 	if (pid == -1) {
 		error(E_L, E_LOG, T("goahead.c: cannot fork WPS helper"));
 	} else if (pid == 0) {
@@ -164,7 +164,7 @@ int main(int argc, char** argv)
 #endif
 	//backup nvram setting and save rwfs
 	system("(sleep 20 && fs backup_nvram && fs save) &");
-	
+
 	//Work - Green ON
 	ledAlways(GPIO_LED_WAN_ORANGE, LED_OFF);	//Turn off orange LED
 	ledAlways(GPIO_LED_WAN_GREEN, LED_ON);		//Turn on green LED
@@ -256,7 +256,7 @@ static void goaInitGpio(int helper)
 		//WPS button
 		info.irq = 0;
 	} else {
-		//RT2883, RT3052 use gpio 10 for load-to-default                                                                                    
+		//RT2883, RT3052 use gpio 10 for load-to-default
 #if defined CONFIG_RALINK_I2S || defined CONFIG_RALINK_I2S_MODULE
 		info.irq = 43;
 #else
@@ -293,7 +293,7 @@ ioctl_err:
 static void fs_nvram_reset_handler (int signum)
 {
 	nvram_load_default();
-        //crash rwfs. restore at load                                                                                                       
+        //crash rwfs. restore at load
         system("fs restore"); 
 }
 

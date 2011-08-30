@@ -384,7 +384,7 @@ void bfree(B_ARGS_DEC, void *mp)
 		free(bp);
 		return;
 	}
-		
+
 #ifdef B_VERIFY_CAUSES_SEVERE_OVERHEAD
 	bFillBlock(bp, memSize);
 #endif
@@ -575,7 +575,7 @@ void bstats(int handle, void (*writefn)(int handle, char_t *fmt, ...))
  *
  *	bFreeSize			Initial memory reserved with bopen call
  *	bStatsMemMalloc		memory from calls to system MALLOC
- *	bStatsMemMax		
+ *	bStatsMemMax
  *	bStatsBallocMax		largest amount of memory from balloc calls
  *	bStatsMemInUse
  *	bStatsBallocInUse	present balloced memory being used
@@ -612,7 +612,7 @@ void bstats(int handle, void (*writefn)(int handle, char_t *fmt, ...))
 	}
 	memcpy(files, bStatsFiles, len);
 	qsort(files, bStatsFilesMax, sizeof(bStatsFileType), bStatsFileSort);
-	
+
 	(*writefn)(handle, T("\nMemory Currently Allocated\n"));
 	total = 0;
 	(*writefn)(handle, 
