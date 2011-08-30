@@ -62,16 +62,16 @@ swap_on() {
 }
 
 try_umount() {
-  if [ `mount | grep "$MDEV" | wc -l` -ge 1 ]; then
+  MOUNT_DST=`mount | grep "$MDEV" | awk '{print $3}'`
+  if [ "$MOUNT_DST" ]; then
     $LOG "umount"
     sync
-    if ! umount "$MDEV_PATH"; then
-      if ! umount -l "$MDEV_PATH"; then
+    if ! umount "$MOUNT_DST"; then
+      if ! umount -l "$MOUNT_DST"; then
 	$LOG "can not unmount"
 	exit 1
       fi
     fi
-    MOUNT_DST="/media/$MDEV"
     mount_err
   fi
 }
