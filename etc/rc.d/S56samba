@@ -40,7 +40,7 @@ if [ "$SmbEnabled" = "1" ]; then
 	if [ $public != "" ]; then
 	    echo "[public]" >> $CONFIG
 	    echo "    comment = pub" >> $CONFIG
-	    echo "    path = /media/$public" >> $CONFIG
+	    echo "    path = $public" >> $CONFIG
 	    echo "    public = yes" >> $CONFIG
 	    echo "    browseable = yes" >> $CONFIG
 	    echo "    guest ok = yes" >> $CONFIG
