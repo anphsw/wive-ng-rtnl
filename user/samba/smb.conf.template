@@ -7,7 +7,6 @@
     security = share
     name resolve order = lmhosts host bcast
     announce version = 4.9
-    os level = 200
     domain master = yes 
     preferred master = yes
     local master = yes
