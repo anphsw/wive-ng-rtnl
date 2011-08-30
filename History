@@ -605,6 +605,7 @@
 74) Fix build usb firmware upgrade.<br>
 75) dnsmasq up to 2.58 version.<br>
 76) Last particion mounted to /media set as public for samba.<br>
+77) Last particion mounted to /media set as torrent home dir.<br>
 
 <br><br>
 <b>For support see:</b><br>

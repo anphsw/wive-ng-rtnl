@@ -35,11 +35,12 @@ if [ "$SmbEnabled" = "1" ]; then
 
     #share /media
     if [ -d /proc/bus/usb ]; then
-	mounted=`df -h | grep "/dev/sd" | grep "media" -c`
-	if [ $mounted != 0 ]; then
+	#last particion mounted to /media set as public for samba and torrent home dir
+	public=`df -h | grep "/dev/sd" | grep "media" | awk {' print $6 '} | tail -n1`
+	if [ $public != "" ]; then
 	    echo "[public]" >> $CONFIG
 	    echo "    comment = pub" >> $CONFIG
-	    echo "    path = /media" >> $CONFIG
+	    echo "    path = /media/$public" >> $CONFIG
 	    echo "    public = yes" >> $CONFIG
 	    echo "    browseable = yes" >> $CONFIG
 	    echo "    guest ok = yes" >> $CONFIG
