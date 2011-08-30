@@ -134,18 +134,18 @@ int main (int argc, char *argv[])
 	char err_msg[256];
 	long file_size = 0;
 	long file_begin = 0, file_end = 0;
-	
+
 	// Get multipart file data separator
 	char separator[MAX_SEPARATOR_LEN];
-	
+
 	html_header();
-	
+
 	if (get_content_separator(separator, sizeof(separator), &file_size) < 0)
 	{
 		html_error(RFC_ERROR);
 		return -1;
 	}
-	
+
 	// Get multipart file name
 	char *filename = getenv("UPLOAD_FILENAME");
 	if (filename == NULL)
@@ -153,7 +153,7 @@ int main (int argc, char *argv[])
 		html_error(RFC_ERROR);
 		return -1;
 	}
-	
+
 	// Wait until file is completely uploaded
 	int tries = 0;
 	while (tries>5)
@@ -164,11 +164,11 @@ int main (int argc, char *argv[])
 			if (filestat.st_size >= file_size) // Size ok?
 				break;
 		}
-		
+
 		sleep(1000);
 		tries++;
 	}
-	
+
 	// Open file
 	FILE *fd = fopen(filename, "r");
 	if (fd == NULL)
@@ -176,7 +176,7 @@ int main (int argc, char *argv[])
 		html_error(RFC_ERROR);
 		return -1;
 	}
-	
+
 	// Parse parameters
 	parameter_t *params;
 	if (read_parameters(fd, separator, &params)<0)
@@ -185,9 +185,9 @@ int main (int argc, char *argv[])
 		html_error(RFC_ERROR);
 		return -1;
 	}
-	
+
 	fclose(fd);
-	
+
 	// Find parameter containing NVRAM reset flag
 	parameter_t *find = find_parameter(params, "reset_rwfs");
 	int reset_rwfs = 0;
@@ -224,7 +224,7 @@ int main (int argc, char *argv[])
 	}
 
 	release_parameters(params);
-	
+
 	sync();
 
 	// examination
@@ -264,4 +264,3 @@ int main (int argc, char *argv[])
 	system("sleep 5 && reboot &");
 	return 0;
 }
-

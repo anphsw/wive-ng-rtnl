@@ -2,9 +2,9 @@
  * Codes at here are heavily taken from upload.cgi.c which is for large file uploading , but 
  * in fact "upload_settings" only need few memory(~16k) so it is not necessary to follow 
  * upload.cgi.c at all.
- * 
+ *
  * YYHuang@Ralink TODO: code size.
- *  
+ *
  */
 
 #include <stdio.h>
@@ -76,7 +76,7 @@ int findStrInFile(char *filename, int offset, unsigned char *str, int str_len)
 			pos += MEM_HALF;	// 8
 		else
 			break;
-		
+
 		rewind(fp);
 		fseek(fp, offset+pos, SEEK_SET);
 		rc = fread(mem, 1, MEM_SIZE, fp);
@@ -98,7 +98,7 @@ void *getMemInFile(char *filename, int offset, int len)
 
 	fseek(fp, offset, SEEK_SET);
 	result = malloc(sizeof(unsigned char) * len );
-	
+
 	if(!result)
 		return NULL;
 
@@ -190,7 +190,7 @@ int get_content_separator(char *separator, int limit, long *length)
 	}
 	if ((content_type == NULL) || (content_len == NULL))
 		return -1;
-	
+
 	if (strncasecmp(content_type, "multipart/form-data;", strlen("multipart/form-data;")) != 0)
 		return -1;
 
@@ -198,12 +198,12 @@ int get_content_separator(char *separator, int limit, long *length)
 	content_type = strstr(content_type, "boundary=");
 	if (content_type == NULL)
 		return -1;
-	
+
 	// Find boundary
 	content_type += strlen("boundary=");
 	while ((content_type[0] == '"') && (content_type[0]==' '))
 		content_type++;
-	
+
 	// Get boundary
 	while (1)
 	{
@@ -216,11 +216,11 @@ int get_content_separator(char *separator, int limit, long *length)
 
 		*(separator++) = *(content_type++);
 	}
-	
+
 	// Terminating character
 	*separator = '\0';
 	*length = atol(content_len);
-	
+
 	return 0;
 }
 
@@ -253,7 +253,7 @@ int search_data(FILE *fd, long start, long *found_offset, const void *buffer, in
 
 			offset = 0;
 		}
-		
+
 		// Check if characters match
 		if (data[found] != buf[offset])
 		{
@@ -277,9 +277,9 @@ int search_data(FILE *fd, long start, long *found_offset, const void *buffer, in
 			offset++;
 		}
 	}
-	
+
 	*found_offset = lmatch;
-	
+
 	return 0;
 }
 
@@ -319,16 +319,16 @@ int read_buffer(FILE *fd, long start, size_t count, buffer_t *buf)
 		buf->data = ptr;
 		buf->size = new_size;
 	}
-	
+
 	// Seek to specified position data
 	if (fseek(fd, start, SEEK_SET)<0)
 		return -2;
-	
+
 	// Now read data
 	int read = fread(buf->data, 1, count, fd);
 	if (read < 0)
 		return read;
-	
+
 	// Append buffer with '\0' character
 	buf->data[read] = '\0';
 	return read;
@@ -355,7 +355,7 @@ void release_parameters(parameter_t *list)
 	{
 		parameter_t *data = list;
 		list = list->next;
-		
+
 		// Release data
 		if (data->content_type != NULL)
 			free(data->content_type);
@@ -381,7 +381,7 @@ parameter_t *find_parameter(parameter_t *list, const char *name)
 
 		list = list->next;
 	}
-	
+
 	return NULL;
 }
 
@@ -409,10 +409,10 @@ int check_binary_content_type(const char *content_type)
 		// Check content type validity
 		if (strcasecmp(*ptr, content_type)==0)
 			return 1;
-		
+
 		ptr++;
 	}
-	
+
 	return 0;
 }
 
@@ -447,7 +447,7 @@ int read_parameters(FILE *fd, const char *separator, parameter_t **result_params
 	while (1)
 	{
 		//printf("state = %d\n", state);
-		
+
 		if (state == INIT) // Find start
 		{
 			long start_pos = 0;
@@ -475,7 +475,7 @@ int read_parameters(FILE *fd, const char *separator, parameter_t **result_params
 				release_buffer(&buf);
 				return -2;
 			}
-			
+
 			// Analyze size
 			if (start_pos != position)
 			{
@@ -486,7 +486,7 @@ int read_parameters(FILE *fd, const char *separator, parameter_t **result_params
 					release_buffer(&buf);
 					return -1;
 				}
-				
+
 				result = read_buffer(fd, position, start_pos-position, &buf);
 				if (result < 0)
 				{
@@ -495,7 +495,7 @@ int read_parameters(FILE *fd, const char *separator, parameter_t **result_params
 					release_buffer(&buf);
 					return result;
 				}
-				
+
 				// Now analyze header
 				if (strncasecmp(buf.data, headers[0], strlen(headers[0]))==0) // Content-disposition
 				{
@@ -547,7 +547,7 @@ int read_parameters(FILE *fd, const char *separator, parameter_t **result_params
 						release_buffer(&buf);
 						return -7;
 					}
-					
+
 					// Now extract element name
 					memcpy(param.field_name, ptr, len);
 					param.field_name[len] = '\0';
@@ -563,23 +563,23 @@ int read_parameters(FILE *fd, const char *separator, parameter_t **result_params
 						release_buffer(&buf);
 						return -7;
 					}
-					
+
 					strcpy(param.content_type, ptr);
 				}
-				
+
 				// Move pointer
 				position = start_pos;
 			}
 			else
 				state = READ_CONTENT;
-			
+
 			position += strlen("\r\n");
 		}
 		else if (state == READ_CONTENT)
 		{
 			long start_pos = 0;
 			int final = 0;
-			
+
 			// Search separator or tail
 			int result = search_text(fd, position, &start_pos, middle);
 			//printf("search_text pos=%ld, start_pos=%ld, result = %d\n", position, start_pos, result);
@@ -596,7 +596,7 @@ int read_parameters(FILE *fd, const char *separator, parameter_t **result_params
 				}
 				final = 1;
 			}
-			
+
 			// Found separator position, look content-type
 			if (param.content_type == NULL) // No content type, read param to memory
 			{
@@ -608,7 +608,7 @@ int read_parameters(FILE *fd, const char *separator, parameter_t **result_params
 					release_buffer(&buf);
 					return result;
 				}
-				
+
 				param.value = (char *)malloc(strlen(buf.data)+1);
 				if (param.value == NULL)
 				{
@@ -617,7 +617,7 @@ int read_parameters(FILE *fd, const char *separator, parameter_t **result_params
 					release_buffer(&buf);
 					return -7;
 				}
-				
+
 				strcpy(param.value, buf.data);
 			}
 			else
@@ -625,7 +625,7 @@ int read_parameters(FILE *fd, const char *separator, parameter_t **result_params
 				param.start_pos = position;
 				param.end_pos   = start_pos;
 			}
-			
+
 			// Copy parameter to list
 			parameter_t *p_result = (parameter_t *)malloc(sizeof(parameter_t));
 			if (p_result == NULL)
@@ -635,12 +635,12 @@ int read_parameters(FILE *fd, const char *separator, parameter_t **result_params
 				release_buffer(&buf);
 				return -1;
 			}
-			
+
 			// Store parameter in list
 			memcpy(p_result, &param, sizeof(parameter_t));
 			p_result->next = list;
 			list = p_result;
-			
+
 			if (final)
 			{
 				//printf("final: returning result\n");
@@ -648,7 +648,7 @@ int read_parameters(FILE *fd, const char *separator, parameter_t **result_params
 				*result_params = p_result;
 				return 0;
 			}
-			
+
 			// Reset parameter
 			position = start_pos + strlen(middle);
 			reset_parameter(&param);

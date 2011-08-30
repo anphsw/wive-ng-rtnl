@@ -1,4 +1,4 @@
-#include "upload.h"                                                                                                                         
+#include "upload.h"
 #include "../options.h"
 
 /*
@@ -46,9 +46,9 @@ int check(char *imagefile, int offset, int len, char *err_msg)
 	/*
 	 *  handle Header CRC32
 	 */
-    memcpy (hdr, ptr, sizeof(image_header_t));
+	memcpy (hdr, ptr, sizeof(image_header_t));
 
-    if (ntohl(hdr->ih_magic) != IH_MAGIC) {
+	if (ntohl(hdr->ih_magic) != IH_MAGIC) {
 		munmap(ptr, len);
 		close(ifd);
 		sprintf (err_msg, "Bad Magic Number: \"%s\" is no valid image\n", imagefile);
@@ -57,28 +57,28 @@ int check(char *imagefile, int offset, int len, char *err_msg)
 
 	data = (char *)hdr;
 
-    checksum = ntohl(hdr->ih_hcrc);
-    hdr->ih_hcrc = htonl(0);	/* clear for re-calculation */
+	checksum = ntohl(hdr->ih_hcrc);
+	hdr->ih_hcrc = htonl(0);	/* clear for re-calculation */
 
-    if (crc32 (0, data, sizeof(image_header_t)) != checksum) {
+	if (crc32 (0, data, sizeof(image_header_t)) != checksum) {
 		munmap(ptr, len);
 		close(ifd);
 		sprintf (err_msg, "*** Warning: \"%s\" has bad header checksum!\n", imagefile);
 		return 0;
-    }
+	}
 
 	/*
 	 *  handle Data CRC32
 	 */
-    data = (char *)(ptr + sizeof(image_header_t));
-    data_len  = len - sizeof(image_header_t) ;
+	data = (char *)(ptr + sizeof(image_header_t));
+	data_len  = len - sizeof(image_header_t) ;
 
-    if (crc32 (0, data, data_len) != ntohl(hdr->ih_dcrc)) {
+	if (crc32 (0, data, data_len) != ntohl(hdr->ih_dcrc)) {
 		munmap(ptr, len);
 		close(ifd);
 		sprintf (err_msg, "*** Warning: \"%s\" has corrupted data!\n", imagefile);
 		return 0;
-    }
+	}
 
 	/*
 	 * compare MTD partition size and image size
@@ -91,12 +91,20 @@ int check(char *imagefile, int offset, int len, char *err_msg)
 		return 0;
 	}
 #elif defined (CONFIG_RT2880_ROOTFS_IN_FLASH)
+  #ifdef CONFIG_ROOTFS_IN_FLASH_NO_PADDING
+	if(len > getMTDPartSize("\"Kernel_RootFS\"")){
+		munmap(ptr, len);
+		close(ifd);
+		sprintf(err_msg, "*** Warning: the image file(0x%x) is bigger than Kernel_RootFS MTD partition.\n", len);
+		return 0;
+	}
+  #else
 	if(len < CONFIG_MTD_KERNEL_PART_SIZ){
 		munmap(ptr, len);
 		close(ifd);
 		sprintf(err_msg, "*** Warning: the image file(0x%x) size doesn't make sense.\n", len);
 		return 0;
-    }
+	}
 
 	if((len - CONFIG_MTD_KERNEL_PART_SIZ) > getMTDPartSize("\"RootFS\"")){
 		munmap(ptr, len);
@@ -104,25 +112,14 @@ int check(char *imagefile, int offset, int len, char *err_msg)
 		sprintf(err_msg, "*** Warning: the image file(0x%x) is bigger than RootFS MTD partition.\n", len - CONFIG_MTD_KERNEL_PART_SIZ);
 		return 0;
 	}
+  #endif
 #else
-#error "goahead: no CONFIG_RT2880_ROOTFS defined!");
+#error "goahead: no CONFIG_RT2880_ROOTFS defined!"
 #endif
 	munmap(ptr, len);
 	close(ifd);
 
 	return 1;
-}
-
-void javascriptUpdate(int success)
-{
-	printf("<script language=\"JavaScript\" type=\"text/javascript\">");
-	if(success){
-		printf("function refresh_all(){ top.location.href = \"http://%s\"; } function update() \
-			{ self.setTimeout(\"refresh_all()\", %s); }", getLanIP(), REFRESH_TIMEOUT);
-	}else{
-		printf("function update(){ parent.menu.setUnderFirmwareUpload(0);}");
-	}
-	printf("</script>");
 }
 
 inline void webFoot(void)
@@ -212,33 +209,19 @@ getenv("SERVER_SOFTWARE"));
 	// examination
 	if(!check(filename, 0, stat_buf.st_size, err_msg) ){
 		printf("Not a valid firmware: %s", err_msg);
-		javascriptUpdate(0);
 		goto err;
 	}
-
-	sync();
-
-	/*
-	* write the new image version into flash.
-	*/
-	write_flash_kernel_version(filename, 0);
 
 	sync();
 
 	// flash write
 	if( mtd_write_firmware(filename, 0, stat_buf.st_size) == -1){
 		printf("mtd_write fatal error! The corrupted image has ruined the flash!!");
-		javascriptUpdate(0);
 		goto err;
 	}
 
-	printf("Done...rebooting");
-	// system("sleep 3 && reboot &");
-	sleep(3);
-	reboot(LINUX_REBOOT_CMD_RESTART);
-	javascriptUpdate(1);
+	system("sleep 5 && reboot &");
 err:
 	webFoot();
 	exit(0);
 }
-

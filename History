@@ -602,6 +602,7 @@
 71) Fix client direct to dns mode.<br>
 72) Check size /var/udhcpd.leases in pinger.sh.<br>
 73) Need restart dhcp server at samba apply change.<br>
+74) Fix build usb firmware upgrade.<br>
 
 <br><br>
 <b>For support see:</b><br>
