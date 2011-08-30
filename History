@@ -592,20 +592,19 @@
 62) Support auto mount optware by label(for automount particion label need set to optware).<br>
 63) FIx use file offset=64 in uClibc.<br>
 64) Always use PATHs and variables from /etc/profile.<br>
-65) Add nvram variable torrent_home used for home download directory(default /media/sda1).<br>
-66) Add in /etc/profile variables needed for transmissions.<br>
-67) Umount all filesystem at reboot from goahead if CONFIG_USER_STORAGE is set.<br>
-68) Try samba3 fix show free space size.<br>
-69) Add pinger (lan/wifi/uplink) for wake up client devices and support uplink connections always on-line(ping_check_on/ping_check_time/
+65) Add in /etc/profile variables needed for transmissions.<br>
+66) Umount all filesystem at reboot from goahead if CONFIG_USER_STORAGE is set.<br>
+67) Try samba3 fix show free space size.<br>
+68) Add pinger (lan/wifi/uplink) for wake up client devices and support uplink connections always on-line(ping_check_on/ping_check_time/
 	ping_check_interval variables on nvram. Need add in watchdog section WebUI).<br>
-70) Fix /media and /opt mount.<br>
-71) Fix client direct to dns mode.<br>
-72) Check size /var/udhcpd.leases in pinger.sh.<br>
-73) Need restart dhcp server at samba apply change.<br>
-74) Fix build usb firmware upgrade.<br>
-75) dnsmasq up to 2.58 version.<br>
-76) Last particion mounted to /media set as public for samba.<br>
-77) Last particion mounted to /media set as torrent home dir.<br>
+69) Fix /media and /opt mount.<br>
+70) Fix client direct to dns mode.<br>
+71) Check size /var/udhcpd.leases in pinger.sh.<br>
+72) Need restart dhcp server at samba apply change.<br>
+73) Fix build usb firmware upgrade.<br>
+74) dnsmasq up to 2.58 version.<br>
+75) Last particion mounted to /media set as public for samba.<br>
+76) Last particion mounted to /media set as torrent home dir.<br>
 
 <br><br>
 <b>For support see:</b><br>
