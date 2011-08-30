@@ -274,7 +274,8 @@ static SMB_BIG_UINT disk_free(char *path, BOOL small_query,
 			DEBUG(0,("WARNING: dfree is broken on this system\n"));
 			done=1;
 		}
-		*dsize = 20*1024*1024/(*bsize);
+		/* min dsize = 2GB */
+		*dsize = 2000*1024*1024/(*bsize);
 		*dfree = MAX(1,*dfree);
 	}
 
