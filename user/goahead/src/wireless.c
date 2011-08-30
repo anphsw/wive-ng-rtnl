@@ -1193,7 +1193,7 @@ void restart8021XDaemon(int nvram)
 	num = atoi(num_s);
 
 	doSystem("killall -q rt2860apd");
-	doSystem("killall -q -9 rt2860apd");
+	doSystem("killall -q -SIGKILL rt2860apd");
 
 	/*
 	 * In fact we only support mbssid[0] to use 802.1x radius settings.

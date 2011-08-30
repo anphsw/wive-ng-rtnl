@@ -731,8 +731,8 @@ void formVPNSetup(webs_t wp, char_t *path, char_t *query)
 	printf("Kill helpers\n");
 	system("/bin/killall -q S70vpnhelper");
 	system("/bin/killall -q vpnhelper");
-	system("/bin/killall -q -9 S70vpnhelper");
-	system("/bin/killall -q -9 vpnhelper");
+	system("/bin/killall -q -SIGKILL S70vpnhelper");
+	system("/bin/killall -q -SIGKILL vpnhelper");
 	printf("Calling vpn helper...\n");
 	system("service vpnhelper restart &");
 

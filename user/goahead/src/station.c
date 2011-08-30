@@ -2440,7 +2440,7 @@ static void exec_WPASupplicant(char* ssid, NDIS_802_11_WEP_STATUS encryp, NDIS_8
 
 	system("killall -q wpa_supplicant");
 	sleep(1);
-	system("killall -q -9 wpa_supplicant");
+	system("killall -q -SIGKILL wpa_supplicant");
 	sleep(1);
 
 	//fprintf(stderr, "exec_WPASupplicant()\n");
@@ -2738,7 +2738,7 @@ static void sta_connection(int tmp_networktype, int tmp_auth, int tmp_encry, int
 
 		doSystem("killall -q wpa_supplicant");
 		sleep(1);
-		doSystem("killall -q -9 wpa_supplicant");
+		doSystem("killall -q -SIGKILL wpa_supplicant");
 		sleep(1);
 
 		ret = OidSetInformation(OID_802_11_SET_IEEE8021X, s, "ra0", &ieee8021x_support, sizeof(ieee8021x_support));
