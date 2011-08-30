@@ -136,13 +136,13 @@ SMB_BIG_UINT sys_disk_free(connection_struct *conn, const char *path, bool small
 			return (SMB_BIG_UINT)-1;
 		}
 	}
-
+#if 0
 	if (disk_quotas(path, &bsize_q, &dfree_q, &dsize_q)) {
 		(*bsize) = bsize_q;
 		(*dfree) = MIN(*dfree,dfree_q);
 		(*dsize) = MIN(*dsize,dsize_q);
 	}
-
+#endif
 	/* FIXME : Any reason for this assumption ? */
 	if (*bsize < 256) {
 		DEBUG(5,("disk_free:Warning: bsize == %d < 256 . Changing to assumed correct bsize = 512\n",(int)*bsize));
