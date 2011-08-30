@@ -149,6 +149,8 @@ start() {
 	    $LOG "samba"
 	    iptables -A servicelimit -i $lan_if -p udp --dport 137:138 -j ACCEPT
 	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp -m multiport --dport 139,445 -j ACCEPT
+	    #not safe fix me later
+	    iptables -A servicelimit -i $lan_if -p udp --dport 1024:65535 -j ACCEPT
 	else
 	    iptables -A servicelimit -i $lan_if -p udp --dport 137:138 -j DROP
 	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp -m multiport --dport 139,445 -j DROP
@@ -164,7 +166,7 @@ start() {
 	if [ "$upnp" = "1" ] && [ "$opmode" != "0" ]; then
 	    $LOG "upnp"
 	    #not safe fix me later
-	    iptables -A servicelimit -i $lan_if -p udp -m multiport --dport 1024:65535 -j ACCEPT
+	    iptables -A servicelimit -i $lan_if -p udp --dport 1024:65535 -j ACCEPT
 	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp -m multiport --dport 1024:65535 -j ACCEPT
 	fi
 	if [ "$WANPingFilter" = "0" ]; then
