@@ -8,8 +8,7 @@ check_media() {
     $LOG "/media is binding to rw"
   else
     $LOG "prepare /media"
-    mkdir -p /var/media
-    mount -o bind /var/media /media
+    mount -t tmpfs -o size=4K tmpfs /media
   fi
 }
 
