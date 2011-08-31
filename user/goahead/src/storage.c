@@ -78,7 +78,12 @@ static void storageAdm(webs_t wp, char_t *path, char_t *query)
 	}
 	else if (strcmp(submit, "apply") == 0)
 	{
-		initStorage();
+#ifdef CONFIG_FTPD
+	    doSystem("storage.sh ftp");
+#endif
+#if defined(CONFIG_USER_SAMBA) || defined(CONFIG_USER_SAMBA3)
+    	    doSystem("service samba restart");
+#endif
 	}
 }
 
@@ -264,14 +269,6 @@ static void storageSmbSrv(webs_t wp, char_t *path, char_t *query)
 	websDone(wp, 200);
 }
 #endif
-
-int initStorage(void)
-{
-#ifdef CONFIG_FTPD
-	doSystem("storage.sh ftp");
-#endif
-	return 0;
-}
 
 static int GetNthNullUser()
 {
