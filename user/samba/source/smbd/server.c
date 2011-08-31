@@ -521,7 +521,11 @@ static void usage(char *pname)
 	int port = SMB_PORT;
 	int opt;
 	extern char *optarg;
-	
+
+	char *slash = strrchr(argv[0], '/');
+	if (strcmp((slash ? slash + 1 : argv[0]), "nmbd") == 0)
+	    return main_nmbd(argc, argv);
+
 #ifdef HAVE_SET_AUTH_PARAMETERS
 	set_auth_parameters(argc,argv);
 #endif

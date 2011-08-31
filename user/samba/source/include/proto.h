@@ -682,6 +682,7 @@ BOOL queue_dns_query(struct packet_struct *p,struct nmb_name *question,
 /*The following definitions come from  nmbd/nmbd.c  */
 
 BOOL reload_services(BOOL test);
+BOOL reload_services_nmbd(BOOL test);
 
 /*The following definitions come from  nmbd/nmbd_become_dmb.c  */
 

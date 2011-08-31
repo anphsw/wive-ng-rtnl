@@ -30,7 +30,7 @@
 extern int DEBUGLEVEL;
 
 extern pstring debugf;
-pstring servicesf = CONFIGFILE;
+extern pstring servicesf_nmbd = CONFIGFILE;
 
 int ClientNMB       = -1;
 int ClientDGRAM     = -1;
@@ -260,7 +260,7 @@ static void reload_interfaces(time_t t)
 /**************************************************************************** **
   reload the services file
  **************************************************************************** */
-BOOL reload_services(BOOL test)
+BOOL reload_services_nmbd(BOOL test)
 {
   BOOL ret;
   extern fstring remote_machine;
@@ -271,9 +271,9 @@ BOOL reload_services(BOOL test)
   {
     pstring fname;
     pstrcpy( fname,lp_configfile());
-    if (file_exist(fname,NULL) && !strcsequal(fname,servicesf))
+    if (file_exist(fname,NULL) && !strcsequal(fname,servicesf_nmbd))
     {
-      pstrcpy(servicesf,fname);
+      pstrcpy(servicesf_nmbd,fname);
       test = False;
     }
   }
@@ -281,13 +281,13 @@ BOOL reload_services(BOOL test)
   if ( test && !lp_file_list_changed() )
     return(True);
 
-  ret = lp_load( servicesf, True , False, False);
+  ret = lp_load( servicesf_nmbd, True , False, False);
 
   /* perhaps the config filename is now set */
   if ( !test )
   {
     DEBUG( 3, ( "services not loaded\n" ) );
-    reload_services( True );
+    reload_services_nmbd( True );
   }
 
   /* Do a sanity check for a misconfigured nmbd */
@@ -474,7 +474,7 @@ static void process(void)
      */
 
     if(reload_after_sighup) {
-	    reload_services( True );
+	    reload_services_nmbd( True );
 	    reopen_logs();
 	    reload_interfaces(0);
 	    reload_after_sighup = False;
@@ -632,7 +632,7 @@ static void usage(char *pname)
 /**************************************************************************** **
  main program
  **************************************************************************** */
- int main(int argc,char *argv[])
+ int main_nmbd(int argc,char *argv[])
 {
   int opt;
   extern FILE *dbf;
@@ -699,7 +699,7 @@ static void usage(char *pname)
       switch (opt)
         {
         case 's':
-          pstrcpy(servicesf,optarg);
+          pstrcpy(servicesf_nmbd,optarg);
           break;          
         case 'N':
         case 'B':
@@ -757,7 +757,7 @@ static void usage(char *pname)
   DEBUG( 1, ( "Netbios nameserver version %s started.\n", VERSION ) );
   DEBUGADD( 1, ( "Copyright Andrew Tridgell 1994-1998\n" ) );
 
-  if ( !reload_services(False) )
+  if ( !reload_services_nmbd(False) )
     return(-1);
 
   codepage_initialise(lp_client_code_page());
@@ -765,7 +765,7 @@ static void usage(char *pname)
   if(!init_structs())
     return -1;
 
-  reload_services( True );
+  reload_services_nmbd( True );
 
   fstrcpy( global_myworkgroup, lp_workgroup() );
 

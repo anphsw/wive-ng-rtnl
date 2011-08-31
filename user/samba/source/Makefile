@@ -11,7 +11,6 @@ exec_prefix=${prefix}
 mandir=${prefix}/man
 
 LIBS=$(LIBCRYPT) -lcrypt
-#-lreadline -ldl  -lcrypt
 CPPFLAGS=
 AWK=mawk
 
@@ -42,6 +41,7 @@ CONFIGFILE = /etc/smb.conf
 LMHOSTSFILE = /etc/lmhosts
 DRIVERFILE = /etc/printers.def
 PASSWD_PROGRAM = /bin/passwd
+
 # This is where smbpasswd et al go
 PRIVATEDIR = $(LIBDIR)
 
@@ -179,8 +179,7 @@ NMBD_OBJ1 = nmbd/asyncdns.o nmbd/nmbd.o nmbd/nmbd_become_dmb.o \
             nmbd/nmbd_subnetdb.o nmbd/nmbd_winsproxy.o nmbd/nmbd_winsserver.o \
             nmbd/nmbd_workgroupdb.o nmbd/nmbd_synclists.o
 
-NMBD_OBJ = $(NMBD_OBJ1) $(PARAM_OBJ) $(LIBSMB_OBJ) $(UBIQX_OBJ) \
-           $(LIB_OBJ)
+NMBD_OBJ = $(NMBD_OBJ1)
 
 SWAT_OBJ = web/cgi.o web/diagnose.o web/startstop.o web/statuspage.o \
            web/swat.o $(LIBSMB_OBJ) $(LOCKING_OBJ) \
@@ -371,13 +370,13 @@ bin/.dummy:
 	  dir=bin $(MAKEDIR); fi
 	@: >> $@ || : > $@ # what a fancy emoticon!
 
-bin/smbd: $(SMBD_OBJ) bin/.dummy
+bin/smbd: $(SMBD_OBJ) $(NMBD_OBJ) bin/.dummy
 	@echo Linking $@
-	@$(CC) $(LDFLAGS) $(LFLAGS) -o $@ $(SMBD_OBJ) $(LIBS) $(LDLIBS)
+	@$(CC) $(LDFLAGS) $(LFLAGS) -o $@ $(SMBD_OBJ) $(NMBD_OBJ) $(LIBS) $(LDLIBS)
 
 bin/nmbd: $(NMBD_OBJ) bin/.dummy
-	@echo Linking $@
-	@$(CC) $(LDFLAGS) $(LFLAGS) -o $@ $(NMBD_OBJ) $(LIBS) $(LDLIBS)
+	@echo Symlinking $@
+	ln -sf smbd $@
 
 bin/swat: $(SWAT_OBJ) bin/.dummy
 	@echo Linking $@
@@ -540,9 +539,9 @@ realclean: clean
 	-rm -f config.log $(PROGS) $(SPROGS) bin/.dummy
 	-rmdir bin
 
-distclean: realclean
-	-rm -f include/config.h include/stamp-h Makefile
-	-rm -f config.status config.cache so_locations
+distclean:
+	echo
+	-rm -f config.status config.cache
 	-rm -rf .deps
 
 #
