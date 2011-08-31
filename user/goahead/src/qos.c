@@ -239,7 +239,7 @@ static void qosClassifier(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "QoSRules", rule);
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
-	
+
 
 	QoSRestart();
 
@@ -377,10 +377,10 @@ static void QoSLoadDefaultProfile(webs_t wp, char_t *path, char_t *query)
 		else
 			break;
 	}
-	
+
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
-	
+
 	QoSRestart();
 
 	websHeader(wp);
@@ -436,7 +436,7 @@ static void QoSSetup(webs_t wp, char_t *path, char_t *query)
 		nvram_bufset(RT2860_NVRAM, "QoSUploadBandwidth", upload_bandwidth);
 		nvram_bufset(RT2860_NVRAM, "QoSDownloadBandwidth", download_bandwidth);
 	}
-	
+
 	// Need to switch NAT fastpath mode
 	if (strcmp(qos_enable, "0") != 0)
 	{
@@ -473,4 +473,3 @@ void formDefineQoS()
 	websFormDefine(T("QoSDeleteRules"), QoSDeleteRules);
 	websFormDefine(T("QoSLoadDefaultProfile"), QoSLoadDefaultProfile);
 }
-

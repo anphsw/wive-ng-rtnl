@@ -55,8 +55,6 @@ void formDefineMedia(void) {
 	websAspDefine(T("getMediaMode"), getMediaMode);
 	websAspDefine(T("getMediaOption"), getMediaOption);
 	websAspDefine(T("getMediaTarget"), getMediaTarget);
-//	websAspDefine(T("getMediaVolume"), getMediaVolume);
-//	websAspDefine(T("getMediaMute"), getMediaMute);
 	websAspDefine(T("getMediaConnected"), getMediaConnected);
 	websAspDefine(T("showUnSelectedList"), showUnSelectedList);
 	websAspDefine(T("showSelectedList"), showSelectedList);

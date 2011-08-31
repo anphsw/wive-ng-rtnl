@@ -95,7 +95,7 @@ static void setWan(webs_t wp, char_t *path, char_t *query);
 static void getMyMAC(webs_t wp, char_t *path, char_t *query);
 static void editRouting(webs_t wp, char_t *path, char_t *query);
 
-#if defined CONFIG_USER_ZEBRA
+#ifdef CONFIG_USER_ZEBRA
 static void dynamicRouting(webs_t wp, char_t *path, char_t *query);
 inline void zebraRestart(void);
 void ripdRestart(void);
@@ -146,7 +146,7 @@ void formDefineInternet(void) {
 	websFormDefine(T("setWan"), setWan);
 	websFormDefine(T("getMyMAC"), getMyMAC);
 	websFormDefine(T("editRouting"), editRouting);
-#if defined CONFIG_USER_ZEBRA
+#ifdef CONFIG_USER_ZEBRA
 	websFormDefine(T("dynamicRouting"), dynamicRouting);
 #endif
 	websAspDefine(T("getDynamicRoutingBuilt"), getDynamicRoutingBuilt);
@@ -334,7 +334,7 @@ char* getWanIfName(void)
 		if_name = "br0";
 	else if (!strncmp(mode, "1", 2) || !strncmp(mode, "4", 2)) { 
 	/* for gw and chillispot mode */
-#if defined CONFIG_RAETH_ROUTER || defined CONFIG_MAC_TO_MAC_MODE || defined CONFIG_RT_3052_ESW
+#if defined(CONFIG_RAETH_ROUTER) || defined(CONFIG_MAC_TO_MAC_MODE) || defined(CONFIG_RT_3052_ESW)
 		if_name = "eth2.2";
 #else /* MARVELL & CONFIG_ICPLUS_PHY */
 		if_name = "eth2";
@@ -374,7 +374,7 @@ char* getLanIfName(void)
 	if (!strncmp(mode, "0", 2))
 		if_name = "br0";
 	else if (!strncmp(mode, "1", 2)) {
-#if defined CONFIG_RAETH_ROUTER || defined CONFIG_MAC_TO_MAC_MODE || defined CONFIG_RT_3052_ESW
+#if defined(CONFIG_RAETH_ROUTER) || defined(CONFIG_MAC_TO_MAC_MODE) || defined(CONFIG_RT_3052_ESW)
 		if_name = "br0";
 #elif defined  CONFIG_ICPLUS_PHY && CONFIG_RT2860V2_AP_MBSS
 		char *num_s = nvram_get(RT2860_NVRAM, "BssidNum");
@@ -415,7 +415,7 @@ char *getLanWanNamebyIf(char *ifname)
 	}
 
 	if (!strcmp(mode, "1") || !strcmp(mode, "4")) {	// gateway mode or chillispot
-#if defined CONFIG_RAETH_ROUTER || defined CONFIG_MAC_TO_MAC_MODE || defined CONFIG_RT_3052_ESW
+#if defined(CONFIG_RAETH_ROUTER) || defined(CONFIG_MAC_TO_MAC_MODE) || defined(CONFIG_RT_3052_ESW)
 		if(!strcmp(ifname, "br0"))
 			return "LAN";
 		if(!strcmp(ifname, "eth2.2") || !strcmp(ifname, "ppp0"))
@@ -496,7 +496,7 @@ const vpn_status_t vpn_statuses[] =
 	{ "online",       0x00ff00        }
 };
 
-#if defined CONFIG_USER_KABINET
+#ifdef CONFIG_USER_KABINET
 /*
  * LANAUTH status
  */
@@ -512,7 +512,7 @@ const vpn_status_t lanauth_statuses[] =
 #endif
 
 
-#if defined CONFIG_USER_KABINET
+#ifdef CONFIG_USER_KABINET
 /* returns actual lanauth state+1 or 0 if lanauth process not found
 */
 static int get_LANAUTHState()
@@ -844,8 +844,8 @@ static int getIgmpProxyBuilt(int eid, webs_t wp, int argc, char_t **argv)
 
 static int getVPNBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
-#if defined CONFIG_NF_CONNTRACK_PPTP || defined CONFIG_NF_CONNTRACK_PPTP_MODULE || \
-    defined CONFIG_IP_NF_PPTP        || defined CONFIG_IP_NF_PPTP_MODULE
+#if defined(CONFIG_NF_CONNTRACK_PPTP) || defined(CONFIG_NF_CONNTRACK_PPTP_MODULE) || \
+    defined(CONFIG_IP_NF_PPTP) || defined(CONFIG_IP_NF_PPTP_MODULE)
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));
@@ -854,7 +854,7 @@ static int getVPNBuilt(int eid, webs_t wp, int argc, char_t **argv)
 
 static int getMeshBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
-#if defined CONFIG_RT2860V2_AP_MESH || defined CONFIG_RT2860V2_STA_MESH
+#if defined(CONFIG_RT2860V2_AP_MESH) || defined(CONFIG_RT2860V2_STA_MESH)
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));
@@ -863,7 +863,7 @@ static int getMeshBuilt(int eid, webs_t wp, int argc, char_t **argv)
 
 static int getWDSBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
-#if defined CONFIG_RT2860V2_AP_WDS
+#ifdef CONFIG_RT2860V2_AP_WDS
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));
@@ -872,7 +872,7 @@ static int getWDSBuilt(int eid, webs_t wp, int argc, char_t **argv)
 
 static int getWSCBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
-#if defined CONFIG_RT2860V2_AP_WSC
+#ifdef CONFIG_RT2860V2_AP_WSC
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));
@@ -881,7 +881,7 @@ static int getWSCBuilt(int eid, webs_t wp, int argc, char_t **argv)
 
 static int getSTABuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
-#if defined CONFIG_RT2860V2_STA_WSC
+#ifdef CONFIG_RT2860V2_STA_WSC
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));
@@ -890,7 +890,7 @@ static int getSTABuilt(int eid, webs_t wp, int argc, char_t **argv)
 
 static int getMBSSIDBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
-#if defined CONFIG_RT2860V2_AP_MBSS
+#ifdef CONFIG_RT2860V2_AP_MBSS
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));
@@ -899,7 +899,7 @@ static int getMBSSIDBuilt(int eid, webs_t wp, int argc, char_t **argv)
 
 static int getUSBBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
-#if defined CONFIG_USB
+#ifdef CONFIG_USB
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));
@@ -917,7 +917,7 @@ static int getStorageBuilt(int eid, webs_t wp, int argc, char_t **argv)
 
 static int getFtpBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
-#if defined CONFIG_FTPD
+#ifdef CONFIG_FTPD
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));
@@ -935,7 +935,7 @@ static int getSmbBuilt(int eid, webs_t wp, int argc, char_t **argv)
 
 static int getMediaBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
-#if defined CONFIG_USB && defined CONFIG_USER_USHARE
+#ifdef CONFIG_USER_USHARE
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));
@@ -944,7 +944,7 @@ static int getMediaBuilt(int eid, webs_t wp, int argc, char_t **argv)
 
 static int getWebCamBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
-#if defined CONFIG_USB && defined CONFIG_USER_UVC_STREAM
+#ifdef CONFIG_USER_UVC_STREAM
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));
@@ -953,7 +953,7 @@ static int getWebCamBuilt(int eid, webs_t wp, int argc, char_t **argv)
 
 static int getPrinterSrvBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
-#if defined CONFIG_USB && defined CONFIG_USER_P910ND
+#ifdef CONFIG_USER_P910ND
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));
@@ -962,7 +962,7 @@ static int getPrinterSrvBuilt(int eid, webs_t wp, int argc, char_t **argv)
 
 static int getDynamicRoutingBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
-#if defined CONFIG_USER_ZEBRA
+#ifdef CONFIG_USER_ZEBRA
     return websWrite(wp, T("1"));
 #else
     return websWrite(wp, T("0"));
@@ -971,7 +971,7 @@ static int getDynamicRoutingBuilt(int eid, webs_t wp, int argc, char_t **argv)
 
 static int getSWQoSBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
-#if defined CONFIG_NET_SCHED
+#ifdef CONFIG_NET_SCHED
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));
@@ -980,7 +980,7 @@ static int getSWQoSBuilt(int eid, webs_t wp, int argc, char_t **argv)
 
 static int getDATEBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
-#if defined CONFIG_DATE
+#ifdef CONFIG_DATE
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));
@@ -989,7 +989,7 @@ static int getDATEBuilt(int eid, webs_t wp, int argc, char_t **argv)
 
 static int getDDNSBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
-#if defined CONFIG_USER_INADYN
+#ifdef CONFIG_USER_INADYN
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));
@@ -1016,7 +1016,7 @@ static int getSysLogBuilt(int eid, webs_t wp, int argc, char_t **argv)
 
 static int getETHTOOLBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
-#if defined CONFIG_USER_ETHTOOL
+#ifdef CONFIG_USER_ETHTOOL
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));
@@ -1593,7 +1593,7 @@ void staticRoutingInit(void)
 	rebuildVPNRoutes(rrs);
 }
 
-#if defined CONFIG_USER_ZEBRA
+#ifdef CONFIG_USER_ZEBRA
 void dynamicRoutingInit(void)
 {
 	zebraRestart();
@@ -1604,7 +1604,7 @@ void dynamicRoutingInit(void)
 void RoutingInit(void)
 {
 	staticRoutingInit();
-#if defined CONFIG_USER_ZEBRA
+#ifdef CONFIG_USER_ZEBRA
 	dynamicRoutingInit();
 #endif
 
@@ -1845,7 +1845,7 @@ static void editRouting(webs_t wp, char_t *path, char_t *query)
 	websDone(wp, 200);
 }
 
-#if defined CONFIG_USER_ZEBRA
+#ifdef CONFIG_USER_ZEBRA
 void ripdRestart(void)
 {
 	char lan_ip[16], wan_ip[16], lan_mask[16], wan_mask[16];
@@ -1920,7 +1920,7 @@ out:
 }
 #endif
 
-#if defined CONFIG_USER_ZEBRA
+#ifdef CONFIG_USER_ZEBRA
 static void dynamicRouting(webs_t wp, char_t *path, char_t *query)
 {
 	char_t *rip;
@@ -1974,7 +1974,7 @@ static void dynamicRouting(webs_t wp, char_t *path, char_t *query)
  */
 void initInternet(void)
 {
-#if defined (CONFIG_RT2860V2_STA) || defined (CONFIG_RT2860V2_STA_MODULE)
+#if defined(CONFIG_RT2860V2_STA) || defined(CONFIG_RT2860V2_STA_MODULE)
 	char *opmode;
 #endif
 	//first generate user routes files and fierwall script
@@ -1985,7 +1985,7 @@ void initInternet(void)
 	doSystem("internet.sh");
 
 //automatically connect to AP according to the active profile
-#if defined (CONFIG_RT2860V2_STA) || defined (CONFIG_RT2860V2_STA_MODULE)
+#if defined(CONFIG_RT2860V2_STA) || defined(CONFIG_RT2860V2_STA_MODULE)
 	opmode = nvram_get(RT2860_NVRAM, "OperationMode");
 	if (!strcmp(opmode, "2")) {
 		if (initStaProfile() != -1)
@@ -1998,10 +1998,10 @@ void initInternet(void)
 #ifdef CONFIG_RT2860V2_AP_ANTENNA_DIVERSITY
 	AntennaDiversityInit();
 #endif
-#if defined (CONFIG_RT2860V2_AP_WSC) || defined (CONFIG_RT2860V2_STA_WSC)
+#if defined(CONFIG_RT2860V2_AP_WSC) || defined(CONFIG_RT2860V2_STA_WSC)
 	WPSRestart();
 #endif
-#if defined CONFIG_USER_ZEBRA
+#ifdef CONFIG_USER_ZEBRA
 	//Dynamic Routing and QoS in STA mode need set after connect to STA
 	dynamicRoutingInit();
 #endif

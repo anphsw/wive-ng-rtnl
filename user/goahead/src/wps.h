@@ -97,7 +97,7 @@ typedef struct  _WSC_PROFILE
 #define WSC_ID_PRIMARY_DEVICE_TYPE_LEN	8
 #define WSC_ID_PRIMARY_DEVICE_TYPE_BEACON	0x00000100
 
-#if defined (CONFIG_RTDEV_MII) || defined (CONFIG_RTDEV_USB) || defined (CONFIG_RTDEV_PCI)
+#if defined(CONFIG_RTDEV_MII) || defined(CONFIG_RTDEV_USB) || defined(CONFIG_RTDEV_PCI)
 void formDefineRaixWPS(void);
 unsigned int getAPPIN(char *interface);
 int isSafeForShell(char *str);

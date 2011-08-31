@@ -83,14 +83,14 @@ int check(char *imagefile, int offset, int len, char *err_msg)
 	/*
 	 * compare MTD partition size and image size
 	 */
-#if defined (CONFIG_RT2880_ROOTFS_IN_RAM)
+#if defined(CONFIG_RT2880_ROOTFS_IN_RAM)
 	if(len > getMTDPartSize("\"Kernel\"")){
 		munmap(ptr, len);
 		close(ifd);
 		sprintf(err_msg, "*** Warning: the image file(0x%x) is bigger than Kernel MTD partition.\n", len);
 		return 0;
 	}
-#elif defined (CONFIG_RT2880_ROOTFS_IN_FLASH)
+#elif defined(CONFIG_RT2880_ROOTFS_IN_FLASH)
   #ifdef CONFIG_ROOTFS_IN_FLASH_NO_PADDING
 	if(len > getMTDPartSize("\"Kernel_RootFS\"")){
 		munmap(ptr, len);

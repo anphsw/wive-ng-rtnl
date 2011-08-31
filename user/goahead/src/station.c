@@ -3554,7 +3554,7 @@ static int getStaSNR(int eid, webs_t wp, int argc, char_t **argv)
 		ret = OidQueryInformation(RT_OID_802_11_SNR_0, s, "ra0", &SNR, sizeof(SNR));
 	else if (n == 1)
 		ret = OidQueryInformation(RT_OID_802_11_SNR_1, s, "ra0", &SNR, sizeof(SNR));
-#if defined (CONFIG_RALINK_RT2883) || defined (CONFIG_RALINK_RT3883)
+#if defined(CONFIG_RALINK_RT2883) || defined(CONFIG_RALINK_RT3883)
 	else if (n == 2)
 		ret = OidQueryInformation(RT_OID_802_11_SNR_2, s, "ra0", &SNR, sizeof(SNR));
 #endif
@@ -5547,10 +5547,6 @@ static void setStaConnect(webs_t wp, char_t *path, char_t *query)
 		sta_connection(tmp_networktype, tmp_auth, tmp_encry, tmp_defaultkeyid, &SSID, Bssid, tmp_wpapsk, tmp_key1, tmp_key2, tmp_key3, tmp_key4, tmp_preamtype, 0, tmp_rts, 0, tmp_fragment, tmp_psmode, 0);  //tmp_channel 0 is auto.
 
 	close(s);
-
-#if defined CONFIG_USB
-	initUSB();
-#endif
 }
 
 /*
@@ -5577,9 +5573,9 @@ static void setStaProfile(webs_t wp, char_t *path, char_t *query)
 	PRT_PROFILE_SETTING	previousProfileSetting = NULL;
 	int selectedProfile=0 , i=0;
 	char_t *value;
-	
+
 	printf("setStaProfile()\n");
-	
+
 	if (headerProfileSetting == NULL) {
 		error(E_L, E_LOG, T("headerProfileSetting is NULL"));
 		return;
@@ -5736,7 +5732,7 @@ static void setStaProfile(webs_t wp, char_t *path, char_t *query)
 
 		unsigned char Bssid[6];
 		//activate
-#ifdef WPA_SUPPLICANT_SUPPORT				
+#ifdef WPA_SUPPLICANT_SUPPORT
 		if (selectedProfileSetting->Authentication == Ndis802_11AuthModeWPA ||
 				selectedProfileSetting->Authentication == Ndis802_11AuthModeWPA2 ||
 				selectedProfileSetting->Authentication == Ndis802_11AuthMode8021x )//802.1x
@@ -5757,15 +5753,7 @@ static void setStaProfile(webs_t wp, char_t *path, char_t *query)
 #endif
 			sta_connection(tmp_networktype, tmp_auth, tmp_encry, tmp_defaultkeyid, &SSID, Bssid, tmp_wpapsk, tmp_key1, tmp_key2, tmp_key3, tmp_key4, tmp_preamtype, tmp_rtscheck, tmp_rts, tmp_fragmentcheck, tmp_fragment, tmp_psmode, tmp_channel);
 
-		// Set SSID
-		/*memset(&SSID, 0x00, sizeof(NDIS_802_11_SSID));
-		  SSID.SsidLength = selectedProfileSetting->SsidLen;
-		  memcpy(SSID.Ssid, (const void *)selectedProfileSetting->SSID, selectedProfileSetting->SsidLen);
-		  */
 		Active_flag = 1;
-#if defined CONFIG_USB
-		initUSB();
-#endif
 	}
 	else {
 		error(E_L, E_LOG, T("hiddenButton(%s) is invalid"), value);

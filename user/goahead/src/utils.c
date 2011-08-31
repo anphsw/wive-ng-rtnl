@@ -827,7 +827,7 @@ static int getPlatform(int eid, webs_t wp, int argc, char_t **argv)
 
 static int getStationBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
-#if defined CONFIG_RT2860V2_STA || defined CONFIG_RT2860V2_STA_MODULE
+#if defined(CONFIG_RT2860V2_STA) || defined(CONFIG_RT2860V2_STA_MODULE)
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));
@@ -850,9 +850,9 @@ static int getMemAmount(int eid, webs_t wp, int argc, char_t **argv)
 	char line[256];
 	char key[64];
 	long long value;
-	
+
 	FILE *fd = fopen("/proc/meminfo", "r");
-	
+
 	// Now open /proc/meminfo and output neccessary information
 	if (fd != NULL)
 	{
@@ -864,7 +864,6 @@ static int getMemAmount(int eid, webs_t wp, int argc, char_t **argv)
 					return websWrite(wp, T("%ld"), (long)value);
 			}
 		}
-		
 		fclose(fd);
 	}
 
@@ -899,7 +898,7 @@ static int getSysUptime(int eid, webs_t wp, int argc, char_t **argv)
 
 static int getPortStatus(int eid, webs_t wp, int argc, char_t **argv)
 {
-#if (defined (CONFIG_RAETH_ROUTER) || defined CONFIG_RT_3052_ESW) && defined (CONFIG_USER_ETHTOOL)
+#if (defined(CONFIG_RAETH_ROUTER) || defined(CONFIG_RT_3052_ESW)) && defined(CONFIG_USER_ETHTOOL)
 	int port, rc;
 	FILE *fp;
 	char buf[1024];
@@ -961,9 +960,9 @@ static int getPortStatus(int eid, webs_t wp, int argc, char_t **argv)
 
 static int getOnePortOnly(void)
 {
-#if defined CONFIG_RAETH_ROUTER || defined CONFIG_MAC_TO_MAC_MODE || defined CONFIG_RT_3052_ESW
+#if defined(CONFIG_RAETH_ROUTER) || defined(CONFIG_MAC_TO_MAC_MODE) || defined(CONFIG_RT_3052_ESW)
 	return 0;
-#elif defined CONFIG_ICPLUS_PHY
+#elif defined(CONFIG_ICPLUS_PHY)
 	return 1;
 #else
 	return 0;
@@ -1059,7 +1058,7 @@ static void outputTimerForReload(webs_t wp, long delay)
 		if (lan_if_ip == NULL)
 			lan_if_ip = "192.168.1.1";
 	}
-	
+
 	websHeader(wp);
 	websWrite
 	(

@@ -28,23 +28,6 @@ do
 	fi
 done
 
-setUser()
-{
-	mkdir -p "$PART1/home/"
-	for index in 1 2 3 4 5 6 7 8
-	do
-		user=`nvram_get 2860 "User$index"`
-		base=500
-		id=`expr $base + $index`
-		if [ "$user" ]; then
-			echo "$user::$id:$id:$user:$PART1/home/$user:/bin/sh" >> /etc/passwd
-			echo "$user:x:$id:$user" >> /etc/group
-			mkdir -p "$PART1/home/$user"
-			chmod 777 "$PART1/home/$user"
-		fi
-	done
-}
-
 setFtp()
 {
 	ftpport=`nvram_get 2860 FtpPort`
@@ -111,12 +94,6 @@ setSmb()
 }
 
 case $1 in
-	"admin")
-		service pass start
-		if [ -e "$PART1" ]; then
-			setUser
-		fi
-		;;
 	"adddir")
 		if [ -n "$2" ]; then
 			mkdir -p "$2"

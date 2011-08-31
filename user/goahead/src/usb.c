@@ -15,7 +15,7 @@
 #include	"usb.h"
 #include 	"internet.h"
 
-#if defined CONFIG_RALINKAPP_MPLAYER
+#ifdef CONFIG_RALINKAPP_MPLAYER
 #include	"media.h"
 #endif
 
@@ -30,27 +30,18 @@ static int ShowPartition(int eid, webs_t wp, int argc, char_t **argv);
 static int ShowAllDir(int eid, webs_t wp, int argc, char_t **argv);
 static void storageGetFirmwarePath(webs_t wp, char_t *path, char_t *query);
 static int getCount(int eid, webs_t wp, int argc, char_t **argv);
-static void setFirstPart(void);
 static int getMaxVol(int eid, webs_t wp, int argc, char_t **argv);
-#if defined(CONFIG_USER_SAMBA) || defined(CONFIG_USER_SAMBA3)
-static int ShowSmbDir(int eid, webs_t wp, int argc, char_t **argv);
-static void storageSmbSrv(webs_t wp, char_t *path, char_t *query);
-static void SmbDirAdd(webs_t wp, char_t *path, char_t *query);
-static void SmbDirEdit(webs_t wp, char_t *path, char_t *query);
-static void SetSambaSrv();
-static int fetchSmbConfig(void);
-#endif
-#if defined CONFIG_USB && defined CONFIG_USER_USHARE
+#ifdef CONFIG_USER_USHARE
 static void storageMediaSrv(webs_t wp, char_t *path, char_t *query);
 static void MediaDirAdd(webs_t wp, char_t *path, char_t *query);
 static int ShowMediaDir(int eid, webs_t wp, int argc, char_t **argv);
 static void fetchMediaConfig(void);
 static void RunMediaSrv();
 #endif
-#if defined CONFIG_USB && defined CONFIG_USER_UVC_STREAM
+#ifdef CONFIG_USER_UVC_STREAM
 static void webcamra(webs_t wp, char_t *path, char_t *query);
 #endif
-#if defined CONFIG_USB && defined CONFIG_USER_P910ND
+#ifdef CONFIG_USER_P910ND
 static void printersrv(webs_t wp, char_t *path, char_t *query);
 #endif
 
@@ -69,10 +60,7 @@ void formDefineUSB(void) {
 	websAspDefine(T("ShowAllDir"), ShowAllDir);
 	websAspDefine(T("getCount"), getCount);
 	websAspDefine(T("getMaxVol"), getMaxVol);
-#if defined(CONFIG_USER_SAMBA) || defined(CONFIG_USER_SAMBA3)
-	websAspDefine(T("ShowSmbDir"), ShowSmbDir);
-#endif
-#if defined CONFIG_USB && defined CONFIG_USER_USHARE
+#ifdef CONFIG_USER_USHARE
 	websAspDefine(T("ShowMediaDir"), ShowMediaDir);
 #endif
 
@@ -82,22 +70,17 @@ void formDefineUSB(void) {
 	websFormDefine(T("storageDiskAdm"), storageDiskAdm);
 	websFormDefine(T("storageDiskPart"), storageDiskPart);
 	websFormDefine(T("storageGetFirmwarePath"), storageGetFirmwarePath);
-#if defined CONFIG_FTPD
+#ifdef CONFIG_FTPD
 	websFormDefine(T("storageFtpSrv"), storageFtpSrv);
 #endif
-#if defined(CONFIG_USER_SAMBA) || defined(CONFIG_USER_SAMBA3)
-	websFormDefine(T("storageSmbSrv"), storageSmbSrv);
-	websFormDefine(T("SmbDirAdd"), SmbDirAdd);
-	websFormDefine(T("SmbDirEdit"), SmbDirEdit);
-#endif
-#if defined CONFIG_USB && defined CONFIG_USER_USHARE
+#ifdef CONFIG_USER_USHARE
 	websFormDefine(T("storageMediaSrv"), storageMediaSrv);
 	websFormDefine(T("MediaDirAdd"), MediaDirAdd);
 #endif
-#if defined CONFIG_USB && defined CONFIG_USER_UVC_STREAM
+#ifdef CONFIG_USER_UVC_STREAM
 	websFormDefine(T("webcamra"), webcamra);
 #endif
-#if defined CONFIG_USB && defined CONFIG_USER_P910ND
+#ifdef CONFIG_USER_P910ND
 	websFormDefine(T("printersrv"), printersrv);
 #endif
 }
@@ -106,31 +89,6 @@ static int dir_count;
 static int part_count;
 static int media_dir_count;
 static char first_part[12];
-
-#if defined(CONFIG_USER_SAMBA) || defined(CONFIG_USER_SAMBA3)
-
-#define		DIREXIST(bitmap,index)		bitmap[index/32] & 1<<(index%32)?1:0
-
-struct smb_dir {
-	char path[40];
-	char name[20];
-	char permit[80];
-};
-
-struct smb_dir_config {
-	int count;
-	int bitmap[3];
-	struct smb_dir dir_list[100];
-};
-
-static struct smb_dir_config smb_conf;
-#endif
-
-struct media_config {
-	char path[40];
-};
-
-static struct media_config media_conf[4];
 
 /* goform/storageAdm */
 static void storageAdm(webs_t wp, char_t *path, char_t *query)
@@ -162,7 +120,7 @@ static void storageAdm(webs_t wp, char_t *path, char_t *query)
 		nvram_bufset(RT2860_NVRAM, feild, "");
 		sprintf(feild, "SmbUser%s", user_select);
 		nvram_bufset(RT2860_NVRAM, feild, "");
-		
+
 		nvram_commit(RT2860_NVRAM);
 		nvram_close(RT2860_NVRAM);
 	}
@@ -227,22 +185,22 @@ static void StorageAddUser(webs_t wp, char_t *path, char_t *query)
 	if (0 != index)
 	{
 		nvram_init(RT2860_NVRAM);
-		
+
 		sprintf(feild, "User%d", index);
 		nvram_bufset(RT2860_NVRAM, feild, name);
 		sprintf(feild, "UserPasswd%d", index);
 		nvram_bufset(RT2860_NVRAM, feild, password);
-		
+
 		sprintf(feild, "FtpUser%d", index);
 		nvram_bufset(RT2860_NVRAM, feild, user_ftp_enable);
 		sprintf(feild, "FtpMaxLogins%d", index);
 		nvram_bufset(RT2860_NVRAM, feild, max_logins);
 		sprintf(feild, "FtpMode%d", index);
 		nvram_bufset(RT2860_NVRAM, feild, mode);
-		
+
 		sprintf(feild, "SmbUser%d", index);
 		nvram_bufset(RT2860_NVRAM, feild, user_smb_enable);
-		
+
 		nvram_commit(RT2860_NVRAM);
 		nvram_close(RT2860_NVRAM);
 	}
@@ -295,7 +253,7 @@ static void StorageEditUser(webs_t wp, char_t *path, char_t *query)
 
 	// set to nvram
 	nvram_init(RT2860_NVRAM);
-	
+
 	sprintf(feild, "UserPasswd%s", index);
 	nvram_bufset(RT2860_NVRAM, feild, password);
 	sprintf(feild, "FtpUser%s", index);
@@ -311,10 +269,10 @@ static void StorageEditUser(webs_t wp, char_t *path, char_t *query)
 	sprintf(feild, "SmbUser%s", index);
 	// DEBUG(feild);
 	nvram_bufset(RT2860_NVRAM, feild, user_smb_enable);
-	
+
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
-	
+
 	websRedirect(wp, "usb/STORAGEdisk_admin.asp");
 }
 
@@ -327,36 +285,6 @@ static void storageDiskAdm(webs_t wp, char_t *path, char_t *query)
 	if (0 == strcmp(submit, "delete"))
 	{
 		char_t *dir_path = websGetVar(wp, T("dir_path"), T(""));
-
-#if defined(CONFIG_USER_SAMBA) || defined(CONFIG_USER_SAMBA3)
-		FILE *fp = NULL; 
-		char smb_config_file[25];
-		int exist, index = 0;
-
-		sprintf(smb_config_file, "%s/.smb_config", first_part);
-		if (NULL == (fp = fopen(smb_config_file, "w")))
-		{
-			perror(__FUNCTION__);
-			return;
-		}
-		while(96 > index)
-		{
-			exist = DIREXIST(smb_conf.bitmap, index);
-			if ((exist) && 
-				(0 == strcmp(dir_path, smb_conf.dir_list[index].path)))
-			{
-				// fprintf(stderr, "before set bitmap: %x%x%x\n", smb_conf.bitmap[2], smb_conf.bitmap[1], smb_conf.bitmap[0]);
-				smb_conf.bitmap[index/32] &= ~(1<<(index%32));
-				// fprintf(stderr, "after set bitmap: %x%x%x\n", smb_conf.bitmap[2], smb_conf.bitmap[1], smb_conf.bitmap[0]);
-				smb_conf.count--;
-				// fprintf(stderr, "smb dir count: %d\n", smb_conf.count);
-				break;
-			}
-			index++;
-		}
-		fwrite(&smb_conf, sizeof(struct smb_dir_config), 1, fp);
-		fclose(fp);
-#endif	
 		doSystem("storage.sh deldir \"%s\"", dir_path);
 		websRedirect(wp, "usb/STORAGEdisk_admin.asp");
 	}
@@ -366,9 +294,7 @@ static void storageDiskAdm(webs_t wp, char_t *path, char_t *query)
 
 		dir_name = websGetVar(wp, T("adddir_name"), T(""));
 		disk_part = websGetVar(wp, T("disk_part"), T(""));
-		// DEBUG(dir_name);
-		// DEBUG(disk_part);
-		doSystem("storage.sh adddir \"%s/%s\"", disk_part, dir_name);	
+		doSystem("storage.sh adddir \"%s/%s\"", disk_part, dir_name);
 	}
 	else if (0 == strcmp(submit, "format"))
 	{
@@ -387,10 +313,6 @@ static void storageDiskAdm(webs_t wp, char_t *path, char_t *query)
 				break;
 		}
 		fclose(fp_mount);
-#if defined(CONFIG_USER_SAMBA) || defined(CONFIG_USER_SAMBA3)
-		if (0 == strcmp(path, first_part))
-			memset(&smb_conf, 0, sizeof(struct smb_dir_config));
-#endif
 		doSystem("storage.sh %s %s %s",submit, part, path);
 		websRedirect(wp, "usb/STORAGEdisk_admin.asp");
 	}
@@ -440,7 +362,7 @@ static void storageDiskPart(webs_t wp, char_t *path, char_t *query)
 	fclose(fp_mount);
 }
 
-#if defined CONFIG_FTPD
+#ifdef CONFIG_FTPD
 /* goform/storageFtpSrv */
 static void storageFtpSrv(webs_t wp, char_t *path, char_t *query)
 {
@@ -457,14 +379,14 @@ static void storageFtpSrv(webs_t wp, char_t *path, char_t *query)
 
 	// set to nvram
 	nvram_init(RT2860_NVRAM);
-	
+
 	nvram_bufset(RT2860_NVRAM, "FtpEnabled", ftp);
 	nvram_bufset(RT2860_NVRAM, "FtpAnonymous", anonymous);
 	nvram_bufset(RT2860_NVRAM, "FtpPort", port);
 	nvram_bufset(RT2860_NVRAM, "FtpMaxUsers", max_users);
 	nvram_bufset(RT2860_NVRAM, "FtpLoginTimeout", login_timeout);
 	nvram_bufset(RT2860_NVRAM, "FtpStayTimeout", stay_timeout);
-	
+
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
 
@@ -484,245 +406,7 @@ static void storageFtpSrv(webs_t wp, char_t *path, char_t *query)
 }
 #endif
 
-#if defined(CONFIG_USER_SAMBA) || defined(CONFIG_USER_SAMBA3)
-/* goform/storageSmbSrv */
-static void storageSmbSrv(webs_t wp, char_t *path, char_t *query)
-{
-	char_t *submit;
-
-	submit =  websGetVar(wp, T("hiddenButton"), T(""));
-
-	if (0 == strcmp(submit, "delete"))
-	{
-		int index;
-		FILE *fp;
-		char smb_config_file[25];
-
-		// strcpy(smb_config_file, "/var/.smb_config");
-		sprintf(smb_config_file, "%s/.smb_config", first_part);
-		fp = fopen(smb_config_file, "w");
-
-		if (NULL == fp) {
-			perror(__FUNCTION__);
-			return;
-		}
-
-		index = atoi(websGetVar(wp, T("selectIndex"), T("")));
-		// fprintf(stderr, "before set bitmap: %x%x%x\n", smb_conf.bitmap[2], smb_conf.bitmap[1], smb_conf.bitmap[0]);
-		smb_conf.bitmap[index/32] &= ~(1<<(index%32));
-		// fprintf(stderr, "after set bitmap: %x%x%x\n", smb_conf.bitmap[2], smb_conf.bitmap[1], smb_conf.bitmap[0]);
-		smb_conf.count--;
-		// fprintf(stderr, "smb dir count: %d\n", smb_conf.count);
-		fwrite(&smb_conf, sizeof(struct smb_dir_config), 1, fp);
-		fclose(fp);
-		websRedirect(wp, "usb/STORAGEsmbsrv.asp");
-	} 
-	else if (0 == strcmp(submit, "apply"))
-	{
-		char_t *smb_enable, *wg, *netbios;
-		
-		// fetch from web input
-		smb_enable = websGetVar(wp, T("smb_enabled"), T(""));
-		wg = websGetVar(wp, T("smb_workgroup"), T(""));
-		netbios = websGetVar(wp, T("smb_netbios"), T(""));
-
-		// set to nvram
-		nvram_init(RT2860_NVRAM);
-		nvram_bufset(RT2860_NVRAM, "SmbEnabled", smb_enable);
-		nvram_bufset(RT2860_NVRAM, "HostName", wg);
-		nvram_bufset(RT2860_NVRAM, "SmbNetBIOS", netbios);
-		nvram_commit(RT2860_NVRAM);
-		nvram_close(RT2860_NVRAM);
-
-		// setup device
-		SetSambaSrv();
-
-		// debug print
-		websHeader(wp);
-		websWrite(wp, T("<h2>smb_enabled: %s</h2><br>\n"), smb_enable);
-		websWrite(wp, T("smb_workgroup: %s<br>\n"), wg);
-		websWrite(wp, T("smb_netbios: %s<br>\n"), netbios);
-		websFooter(wp);
-		websDone(wp, 200);
-	}
-}
-
-/* goform/SmbDirAdd */
-static void SmbDirAdd(webs_t wp, char_t *path, char_t *query)
-{
-	char_t *dir_name, *dir_path, *allow_users;
-	FILE *fp;
-	int exist, index = 0;
-	char smb_config_file[25];
-
-	// strcpy(smb_config, "/var/.smb_config");
-	sprintf(smb_config_file, "%s/.smb_config", first_part);
-	fp = fopen(smb_config_file, "w");
-
-	if (NULL == fp) {
-		perror(__FUNCTION__);
-		return;
-	}
-
-	// fetch from web input
-	dir_name = websGetVar(wp, T("dir_name"), T(""));
-	dir_path = websGetVar(wp, T("dir_path"), T(""));
-	allow_users = websGetVar(wp, T("allow_user"), T(""));
-	/*
-	DEBUG(dir_name);
-	DEBUG(dir_path);
-	DEBUG(allow_users);
-	*/
-
-	while(96 > index)
-	{
-		exist = DIREXIST(smb_conf.bitmap, index);
-		if (exist && 0 == strcmp(dir_name, smb_conf.dir_list[index].name))
-		{
-				fprintf(stderr, "Existed Samba Shared Dir: %s\n", dir_name);
-				fwrite(&smb_conf, sizeof(struct smb_dir_config), 1, fp);
-				fclose(fp);
-				return;
-		}
-		index++;
-	}
-	index = 0;
-	// fprintf(stderr, "before set bitmap: %x%x%x\n", smb_conf.bitmap[2], smb_conf.bitmap[1], smb_conf.bitmap[0]);
-	while(96 > index)
-	{
-		exist = DIREXIST(smb_conf.bitmap, index);
-		if (!exist)
-		{
-			strcpy(smb_conf.dir_list[index].path, dir_path);
-			strcpy(smb_conf.dir_list[index].name, dir_name);
-			strcpy(smb_conf.dir_list[index].permit, allow_users);
-			smb_conf.bitmap[index/32] |= 1<<(index%32);
-			smb_conf.count++;
-			break;
-		}
-		index++;
-	}
-	/*
-	fprintf(stderr, "after set bitmap: %x%x%x\n", smb_conf.bitmap[2], smb_conf.bitmap[1], smb_conf.bitmap[0]);
-	DEBUG(smb_conf.dir_list[index].path);
-	DEBUG(smb_conf.dir_list[index].name);
-	DEBUG(smb_conf.dir_list[index].permit);
-	*/
-	fwrite(&smb_conf, sizeof(struct smb_dir_config), 1, fp);
-	fclose(fp);
-}
-
-/* goform/SmbDirEdit */
-static void SmbDirEdit(webs_t wp, char_t *path, char_t *query)
-{
-	char_t *allow_user;
-	int index = 0;
-	FILE *fp;
-	char smb_config_file[25];
-
-	// strcpy(smb_config, "/var/.smb_config");
-	sprintf(smb_config_file, "%s/.smb_config", first_part);
-	fp = fopen(smb_config_file, "w");
-
-	if (NULL == fp) {
-		perror(__FUNCTION__);
-		return;
-	}
-
-	// fetch from web input
-	index = atoi(websGetVar(wp, T("hidden_index"), T("")));
-	allow_user = websGetVar(wp, T("allow_user"), T(""));
-
-	strcpy(smb_conf.dir_list[index].permit, allow_user);
-	fwrite(&smb_conf, sizeof(struct smb_dir_config), 1, fp);
-	fclose(fp);
-}
-
-static int fetchSmbConfig(void)
-{
-	FILE *fp = NULL;
-	char smb_config_file[25];
-
-	memset(&smb_conf, 0, sizeof(struct smb_dir_config));
-	sprintf(smb_config_file, "%s/.smb_config", first_part);
-	if (NULL == (fp = fopen(smb_config_file, "r")))
-	{
-		perror(__FUNCTION__);
-		return -1;
-	}
-	fread(&smb_conf, sizeof(struct smb_dir_config), 1, fp);
-	fclose(fp);
-
-	return 0;
-}
-
-static int ShowSmbDir(int eid, webs_t wp, int argc, char_t **argv)
-{
-	int exist, i = 0, count = 0;
-
-	if (-1 == fetchSmbConfig())
-	{
-		return 0;
-	}
-
-	websWrite(wp, T("<tr align=\"center\">"));
-	websWrite(wp, T("<td>--</td>"));
-	websWrite(wp, T("<td>public</td>"));
-	websWrite(wp, T("<td>%s/%s</td>"), first_part, "public");
-	websWrite(wp, T("<td>All Users</td>"));
-	websWrite(wp, T("</tr>"));
-	while(smb_conf.count > 0 && i < 96)
-	{
-		exist = DIREXIST(smb_conf.bitmap, i);
-		if (exist)
-		{
-			websWrite(wp, T("<tr align=\"center\">"));
-			websWrite(wp, T("<td><input type=\"radio\" name=\"smb_dir\" value=\"%s\"></td>"), 
-					  smb_conf.dir_list[i].name);
-			websWrite(wp, T("<td>%s</td>"), smb_conf.dir_list[i].name);
-			websWrite(wp, T("<input type=\"hidden\" name=\"smb_dir_path\" value=\"%s\">"), 
-					  smb_conf.dir_list[i].path);
-			websWrite(wp, T("<td>%s</td>"), smb_conf.dir_list[i].path);
-			websWrite(wp, T("<input type=\"hidden\" name=\"smb_dir_permit\" value=\"%s\">"), 
-					  smb_conf.dir_list[i].permit);
-			if (0 == strlen(smb_conf.dir_list[i].permit))
-				websWrite(wp, T("<td>%s</td>"), "<br />");
-			else
-				websWrite(wp, T("<td>%s</td>"), smb_conf.dir_list[i].permit);
-			websWrite(wp, T("</tr>"));
-			count++;
-		}
-		i++;
-	}
-	smb_conf.count = count;
-	// fprintf(stderr, "smb_conf.count: %d\n", smb_conf.count);
-
-	return 0;
-}
-
-static void SetSambaSrv()
-{
-	int i;
-	char *admin_id = nvram_get(RT2860_NVRAM, "Login");
-
-	doSystem("storage.sh samba");
-	if (1 == atoi(nvram_get(RT2860_NVRAM, "SmbEnabled")))
-	{
-		for(i=0;i<smb_conf.count;i++)
-		{
-			doSystem("samba_add_dir.sh \"%s\" \"%s\" \"%s\" \"%s\"", 
-					smb_conf.dir_list[i].name, 
-					smb_conf.dir_list[i].path, 
-					admin_id,
-					smb_conf.dir_list[i].permit);
-		}
-		doSystem("nmbd");
-		doSystem("smbd");
-	}
-}
-#endif
-
-#if defined CONFIG_USB && defined CONFIG_USER_USHARE
+#ifdef CONFIG_USER_USHARE
 static void storageMediaSrv(webs_t wp, char_t *path, char_t *query)
 {
 	char_t *submit;
@@ -754,7 +438,7 @@ static void storageMediaSrv(webs_t wp, char_t *path, char_t *query)
 	{
 		char_t *media_enabled, *media_name;
 		int i;
-		
+
 		// fetch from web input
 		media_enabled = websGetVar(wp, T("media_enabled"), T(""));
 		media_name = websGetVar(wp, T("media_name"), T(""));
@@ -886,7 +570,7 @@ static void RunMediaSrv()
 }
 #endif
 
-#if defined CONFIG_USB && defined CONFIG_USER_UVC_STREAM
+#ifdef CONFIG_USER_UVC_STREAM
 /* goform/webcamra */
 static void webcamra(webs_t wp, char_t *path, char_t *query)
 {
@@ -927,7 +611,7 @@ static void webcamra(webs_t wp, char_t *path, char_t *query)
 }
 #endif
 
-#if defined CONFIG_USB && defined CONFIG_USER_P910ND
+#ifdef CONFIG_USER_P910ND
 static void printersrv(webs_t wp, char_t *path, char_t *query)
 {
 	char_t *enable;
@@ -939,6 +623,7 @@ static void printersrv(webs_t wp, char_t *path, char_t *query)
 
 	// setup device
 	doSystem("killall -q p910nd");
+	doSystem("killall -q -SIGKILL p910nd");
 	if (0 == strcmp(enable, "1"))
 	{
 		doSystem("p910nd -b -f /dev/lp0");
@@ -955,23 +640,11 @@ static void printersrv(webs_t wp, char_t *path, char_t *query)
 
 int initUSB(void)
 {
-#ifdef CONFIG_USB_STORAGE
-	setFirstPart();
-	doSystem("storage.sh admin");
-
-#if defined (CONFIG_FTPD)
-	doSystem("storage.sh ftp");
-#endif
-#if defined(CONFIG_USER_SAMBA) || defined(CONFIG_USER_SAMBA3)
-	fetchSmbConfig();
-	SetSambaSrv();
-#endif
-#if defined(CONFIG_USER_USHARE)
+#ifdef CONFIG_USER_USHARE
 	fetchMediaConfig();
 	RunMediaSrv();
 #endif
-#endif
-#if defined CONFIG_USB && defined CONFIG_USER_UVC_STREAM
+#ifdef CONFIG_USER_UVC_STREAM
 	printf("UVC init\n");
 	char *webcamebl = nvram_get(RT2860_NVRAM, "WebCamEnabled");
 	doSystem("killall -q uvc_stream");
@@ -984,10 +657,11 @@ int initUSB(void)
 				  nvram_get(RT2860_NVRAM, "WebCamPort"));
 	}
 #endif
-#if defined(CONFIG_USB) && defined(CONFIG_USB_PRINTER) && defined(CONFIG_USER_P910ND)
+#ifdef CONFIG_USER_P910ND
 	printf("P910ND init\n");
 	char *printersrvebl = nvram_get(RT2860_NVRAM, "PrinterSrvEnabled");
 	doSystem("killall -q p910nd");
+	doSystem("killall -q -SIGKILL p910nd");
 	if (0 == strcmp(printersrvebl, "1"))
 	{
 	printf("P910ND start\n");
@@ -1019,13 +693,6 @@ static int getCount(int eid, webs_t wp, int argc, char_t **argv)
 		sprintf(count, "%d", part_count);
 		// fprintf(stderr,"AllPart: %s\n", count);
 	}
-#if defined(CONFIG_USER_SAMBA) || defined(CONFIG_USER_SAMBA3)
-	else if (0 == strcmp(field, "AllSmbDir"))
-	{
-		sprintf(count, "%d", smb_conf.count);
-		// fprintf(stderr,"AllSmbDir: %s\n", count);
-	}
-#endif
 	else if (0 == strcmp(field, "AllMediaDir"))
 	{
 		sprintf(count, "%d", media_dir_count);
@@ -1042,32 +709,6 @@ static int getCount(int eid, webs_t wp, int argc, char_t **argv)
 	ejSetResult(eid, count);
 
 	return 0;
-}
-
-static void setFirstPart(void)
-{
-	DIR *dp = NULL;
-	char dir[12], c = 'a';
-	int i;
-
-	memset(first_part, 0, sizeof(first_part));
-	do
-	{
-		for (i=1;i<10;i++)
-		{
-			sprintf(dir, "/media/sd%c%d", c, i);
-			if (NULL == (dp = opendir(dir)))
-			{
-				closedir(dp);
-				continue;
-			}
-			fprintf(stderr, "get the first partition: %s\n", dir);
-			strcpy(first_part, dir);
-			closedir(dp);
-			return;
-		}
-		c++;
-	} while(c <= 'z');
 }
 
 static int GetNthFree(char *entry)
@@ -1186,7 +827,7 @@ static int getMaxVol(int eid, webs_t wp, int argc, char_t **argv)
 {
 	FILE *pp = popen("fdisk -l /dev/sda", "r");
 	char maxvol[5], unit[5];
-	double transfer, result;
+	double transfer, result=0;
 
 	fscanf(pp, "%*s %*s %s %s %*s %*s\n", maxvol, unit);
 	transfer = atof(maxvol);
@@ -1377,7 +1018,7 @@ static void storageGetFirmwarePath(webs_t wp, char_t *path, char_t *query)
  */
 void hotPluglerHandler(int signo)
 {
-#if defined CONFIG_RALINKAPP_MPLAYER
+#ifdef CONFIG_RALINKAPP_MPLAYER
 	cleanup_musiclist();
 #endif
 	initUSB();

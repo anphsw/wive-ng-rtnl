@@ -28,15 +28,15 @@
 #define WPS_LED_SESSION_OVERLAP		4
 #define WPS_LED_SUCCESS			5
 
-#if defined (CONFIG_RALINK_RT2880)
+#if defined(CONFIG_RALINK_RT2880)
 #define PROCREG_GMAC		"/proc/rt2880/gmac"
-#elif defined (CONFIG_RALINK_RT3052)
+#elif defined(CONFIG_RALINK_RT3052)
 #define PROCREG_GMAC             "/proc/rt3052/gmac"
-#elif defined (CONFIG_RALINK_RT3352)
+#elif defined(CONFIG_RALINK_RT3352)
 #define PROCREG_GMAC             "/proc/rt3352/gmac"
-#elif defined (CONFIG_RALINK_RT2883)
+#elif defined(CONFIG_RALINK_RT2883)
 #define PROCREG_GMAC             "/proc/rt2883/gmac"
-#elif defined (CONFIG_RALINK_RT3883)
+#elif defined(CONFIG_RALINK_RT3883)
 #define PROCREG_GMAC             "/proc/rt3883/gmac"
 #else
 #define PROCREG_GMAC             "/proc/rt2880/gmac"

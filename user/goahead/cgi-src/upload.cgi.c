@@ -1,7 +1,7 @@
 #include "upload.h"
 #include "../options.h"
 
-#if defined (UPLOAD_FIRMWARE_SUPPORT)
+#ifdef UPLOAD_FIRMWARE_SUPPORT
 
 /*
  *  taken from "mkimage -l" with few modified....
@@ -88,14 +88,14 @@ int check(char *imagefile, int offset, int len, char *err_msg)
 	/*
 	 * compare MTD partition size and image size
 	 */
-#if defined (CONFIG_RT2880_ROOTFS_IN_RAM)
+#if defined(CONFIG_RT2880_ROOTFS_IN_RAM)
 	if(len > getMTDPartSize("\"Kernel\"")){
 		munmap(ptr, len);
 		close(ifd);
 		sprintf(err_msg, "*** Warning: the image file(0x%x) is bigger than Kernel MTD partition.\n", len);
 		return 0;
 	}
-#elif defined (CONFIG_RT2880_ROOTFS_IN_FLASH)
+#elif defined(CONFIG_RT2880_ROOTFS_IN_FLASH)
   #ifdef CONFIG_ROOTFS_IN_FLASH_NO_PADDING
 	if(len > getMTDPartSize("\"Kernel_RootFS\"")){
 		munmap(ptr, len);
@@ -228,7 +228,7 @@ int main (int argc, char *argv[])
 	sync();
 
 	// examination
-#if defined (UPLOAD_FIRMWARE_SUPPORT)
+#if defined(UPLOAD_FIRMWARE_SUPPORT)
 
 	if (!check(filename, (int)file_begin, (int)(file_end - file_begin), err_msg))
 	{
@@ -243,7 +243,7 @@ int main (int argc, char *argv[])
 		return -1;
 	}
 
-#elif defined (UPLOAD_BOOTLOADER_SUPPORT)
+#elif defined(UPLOAD_BOOTLOADER_SUPPORT)
 	mtd_write_bootloader(filename, (int)file_begin, (int)(file_end - file_begin));
 #else
 #error "no upload support defined!"

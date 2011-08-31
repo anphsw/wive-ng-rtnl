@@ -41,7 +41,7 @@ void formDefineStorage(void) {
 	websFormDefine(T("storageAdm"), storageAdm);
 	websFormDefine(T("StorageAddUser"), StorageAddUser);
 	websFormDefine(T("StorageEditUser"), StorageEditUser);
-#if defined CONFIG_FTPD
+#ifdef CONFIG_FTPD
 	websFormDefine(T("storageFtpSrv"), storageFtpSrv);
 #endif
 #if defined(CONFIG_USER_SAMBA) || defined(CONFIG_USER_SAMBA3)
@@ -73,7 +73,7 @@ static void storageAdm(webs_t wp, char_t *path, char_t *query)
 		nvram_bufset(RT2860_NVRAM, feild, "");
 		nvram_commit(RT2860_NVRAM);
 		nvram_close(RT2860_NVRAM);
-		
+
 		websRedirect(wp, "storage/management.asp");
 	}
 	else if (strcmp(submit, "apply") == 0)
@@ -130,7 +130,7 @@ static void StorageAddUser(webs_t wp, char_t *path, char_t *query)
 	if (index != 0)
 	{
 		nvram_init(RT2860_NVRAM);
-		
+
 		sprintf(feild, "User%d", index);
 		nvram_bufset(RT2860_NVRAM, feild, name);
 		sprintf(feild, "Upw%d", index);
@@ -139,7 +139,7 @@ static void StorageAddUser(webs_t wp, char_t *path, char_t *query)
 		nvram_bufset(RT2860_NVRAM, feild, max_logins);
 		sprintf(feild, "Umode%d", index);
 		nvram_bufset(RT2860_NVRAM, feild, mode);
-		
+
 		nvram_commit(RT2860_NVRAM);
 		nvram_close(RT2860_NVRAM);
 	}
@@ -176,19 +176,19 @@ static void StorageEditUser(webs_t wp, char_t *path, char_t *query)
 
 	// set to nvram
 	nvram_init(RT2860_NVRAM);
-	
+
 	sprintf(feild, "Upw%s", index);
 	nvram_bufset(RT2860_NVRAM, feild, password);
 	sprintf(feild, "Umax%s", index);
 	nvram_bufset(RT2860_NVRAM, feild, max_logins);
 	sprintf(feild, "Umode%s", index);
 	nvram_bufset(RT2860_NVRAM, feild, mode);
-	
+
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
 }
 
-#if defined CONFIG_FTPD
+#ifdef CONFIG_FTPD
 /* goform/storageFtpSrv */
 static void storageFtpSrv(webs_t wp, char_t *path, char_t *query)
 {
@@ -251,8 +251,8 @@ static void storageSmbSrv(webs_t wp, char_t *path, char_t *query)
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
 
-	// setup device
-	doSystem("storage.sh samba");
+	// restart samba service
+	doSystem("service samba restart");
 
 	// debug print
 	websHeader(wp);
@@ -267,14 +267,9 @@ static void storageSmbSrv(webs_t wp, char_t *path, char_t *query)
 
 int initStorage(void)
 {
-		doSystem("storage.sh admin");
-#if defined CONFIG_FTPD
-		doSystem("storage.sh ftp");
+#ifdef CONFIG_FTPD
+	doSystem("storage.sh ftp");
 #endif
-#if defined(CONFIG_USER_SAMBA) || defined(CONFIG_USER_SAMBA3)
-		doSystem("storage.sh samba");
-#endif
-
 	return 0;
 }
 

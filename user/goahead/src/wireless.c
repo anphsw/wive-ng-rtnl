@@ -1175,7 +1175,7 @@ static void wirelessWmm(webs_t wp, char_t *path, char_t *query)
 	gen_wifi_config(RT2860_NVRAM);
 	doSystem("ifconfig ra0 up");
 	//after ra0 down&up we must restore WPS status
-#if defined (CONFIG_RT2860V2_AP_WSC) || defined (CONFIG_RT2860V2_STA_WSC)
+#if defined(CONFIG_RT2860V2_AP_WSC) || defined(CONFIG_RT2860V2_STA_WSC)
 	WPSRestart();
 #endif
 }
@@ -1662,7 +1662,7 @@ void Security(int nvram, webs_t wp, char_t *path, char_t *query)
 	websFooter(wp);
 	websDone(wp, 200);	
 
-#if defined (CONFIG_RT2860V2_AP_WSC) || defined (CONFIG_RT2860V2_STA_WSC)
+#if defined(CONFIG_RT2860V2_AP_WSC) || defined(CONFIG_RT2860V2_STA_WSC)
 	WPSRestart();
 #endif
 #ifdef CONFIG_USER_802_1X
@@ -1698,7 +1698,6 @@ void DeleteAccessPolicyList(int nvram, webs_t wp, char_t *path, char_t *query)
 	websWrite(wp, T("\n"));
 	websWrite(wp, T("ok done"));
 	websDone(wp, 200);
-	
 }
 
 static void APDeleteAccessPolicyList(webs_t wp, char_t *path, char_t *query)
@@ -1750,7 +1749,7 @@ static void wirelessMesh(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "MeshWPAKEY", wpakey);
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
-	
+
 	// debug print
 	websHeader(wp);
 	websWrite(wp, T("MeshEnable: %s<br>\n"), meshenable);
@@ -1765,7 +1764,7 @@ static void wirelessMesh(webs_t wp, char_t *path, char_t *query)
 	websWrite(wp, T("passphrase: %s<br>\n"), wpakey);
 	websFooter(wp);
 	websDone(wp, 200);
-	
+
 	// restart wireless network
 	doSystem("internet.sh wifionly &");
 }
@@ -1778,7 +1777,7 @@ static void meshManualLink(webs_t wp, char_t *path, char_t *query)
 	// fetch from web input
 	action = websGetVar(wp, T("link_action"), T(""));
 	mpmac = websGetVar(wp, T("mpmac"), T(""));
-	
+
 	// link action
 	if (0 == strcmp(action, "add"))
 		doSystem("iwpriv mesh0 set MeshAddLink=%s", mpmac);
@@ -1835,7 +1834,7 @@ static int ShowMeshState(int eid, webs_t wp, int argc, char_t **argv)
 		close(socket_id);
 		return -1;
 	}
-	
+
 	for (i=0; i<neighbor->num; i++)
 	{
 		websWrite(wp, T("<tr align=\"center\">"));
@@ -1872,10 +1871,10 @@ static int ShowMeshState(int eid, webs_t wp, int argc, char_t **argv)
 
 static int is3t3r(int eid, webs_t wp, int argc, char_t **argv)
 {
-#if defined (CONFIG_RALINK_RT2883) || defined (CONFIG_RALINK_RT3883)
-		websWrite(wp, T("1"));
+#if defined(CONFIG_RALINK_RT2883) || defined(CONFIG_RALINK_RT3883)
+	websWrite(wp, T("1"));
 #else
-		websWrite(wp, T("0"));	
+	websWrite(wp, T("0"));
 #endif
 	return 0;
 }
@@ -1885,7 +1884,7 @@ static int isWPSConfiguredASP(int eid, webs_t wp, int argc, char_t **argv)
 	if(g_wsc_configured){
 		websWrite(wp, T("1"));
 	}else
-		websWrite(wp, T("0"));	
+		websWrite(wp, T("0"));
 	return 0;
 }
 

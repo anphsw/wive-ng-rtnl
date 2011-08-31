@@ -82,7 +82,7 @@ static void goaSigReset(int signum);
 static void printMemStats(int handle, char_t *fmt, ...);
 static void memLeaks();
 #endif
-#if defined CONFIG_USB
+#ifdef CONFIG_USB
 extern void hotPluglerHandler(int);
 #endif
 #ifdef CONFIG_RT2860V2_STA_WSC
@@ -257,7 +257,7 @@ static void goaInitGpio(int helper)
 		info.irq = 0;
 	} else {
 		//RT2883, RT3052 use gpio 10 for load-to-default
-#if defined CONFIG_RALINK_I2S || defined CONFIG_RALINK_I2S_MODULE
+#if defined(CONFIG_RALINK_I2S) || defined(CONFIG_RALINK_I2S_MODULE)
 		info.irq = 43;
 #else
 		info.irq = 10;
@@ -294,7 +294,7 @@ static void fs_nvram_reset_handler (int signum)
 {
 	nvram_load_default();
         //crash rwfs. restore at load
-        system("fs restore"); 
+        system("fs restore");
 }
 
 
@@ -322,7 +322,7 @@ static void InitSignals(int helper)
 		signal(SIGUSR2, fs_nvram_reset_handler);
 #endif
 
-#if defined CONFIG_USB
+#ifdef CONFIG_USB
 		//registr hotplug signal
 		signal(SIGTTIN, hotPluglerHandler);
 		hotPluglerHandler(SIGTTIN);
@@ -429,17 +429,17 @@ static int initWebs(void)
 	formDefineUtilities();
 	formDefineInternet();
 	formDefineServices();
-#if defined CONFIG_NET_SCHED
+#ifdef CONFIG_NET_SCHED
 	formDefineQoS();
 #endif
-#if defined CONFIG_USB
+#ifdef CONFIG_USB
 	formDefineUSB();
 #endif
-#if defined CONFIG_RALINKAPP_MPLAYER
+#ifdef CONFIG_RALINKAPP_MPLAYER
 	formDefineMedia();
 #endif
 	formDefineWireless();
-#if defined CONFIG_RT2860V2_STA || defined CONFIG_RT2860V2_STA_MODULE
+#if defined(CONFIG_RT2860V2_STA) || defined(CONFIG_RT2860V2_STA_MODULE)
 	formDefineStation();
 #endif
 	formDefineFirewall();
