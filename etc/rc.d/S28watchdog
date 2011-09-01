@@ -13,7 +13,7 @@ start() {
     ping_check_on=`nvram_get 2860 ping_check_on`
     if [ "$ping_check_on" = "1" ]; then
 	$LOG "Start pinger"
-	/etc/scripts/pinger.sh &
+	nice --19 /etc/scripts/pinger.sh &
     fi
 }
 
