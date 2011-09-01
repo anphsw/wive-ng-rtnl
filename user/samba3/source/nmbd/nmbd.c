@@ -734,7 +734,7 @@ static bool open_sockets(bool isdaemon, int port)
  main program
  **************************************************************************** */
 
- int main(int argc, const char *argv[])
+ int main_nmbd(int argc, const char *argv[])
 {
 	static bool is_daemon;
 	static bool opt_interactive;

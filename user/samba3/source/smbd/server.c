@@ -1141,6 +1141,9 @@ extern void build_options(bool screen);
 
  int main(int argc,const char *argv[])
 {
+	char *slash = strrchr(argv[0], '/');
+	if (strcmp((slash ? slash + 1 : argv[0]), "nmbd") == 0)
+		return main_nmbd(argc, argv);
 	/* shall I run as a daemon */
 	static bool is_daemon = False;
 	static bool interactive = False;
