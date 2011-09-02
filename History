@@ -598,25 +598,22 @@
 68) Add pinger (lan/wifi/uplink) for wake up client devices and support uplink connections always on-line(ping_check_on/ping_check_time/
 	ping_check_interval variables on nvram. Need add in watchdog section WebUI).<br>
 69) Fix /media and /opt mount.<br>
-
-<br>
-<b>1.10.x</b><br>
-1) Fix client direct to dns mode.<br>
-2) Dnsmasq up to 2.58 version.<br>
-3) Check size /var/udhcpd.leases in pinger.sh.<br>
-4) Fix build usb firmware upgrade.<br>
-5) Need restart dhcp server at samba apply change.<br>
-6) Last particion mounted to /media set as public for samba.<br>
-7) Last particion mounted to /media set as torrent home dir.<br>
-8) Set announce version=5.1 (WinXP) for samba3(mkre compat with XP and later Windows versions).<br>
-9) Samba allow connections and allow acess only for local network client(more secure).<br>
-10) Samba now correct get disk size and free space from vfs.<br>
-11) Automount.sh restart samba after mount particion.<br>
-12) Miniupnp set port range to 1024-65535 instead 0-65535.<br>
-13) Remove old dead 3G code from goahead.<br>
-14) move some scripts to user/usb. More free space in rwfs.<br>
-15) Disable hotplug before update firmware.<br>
-16) Samba2/3 merge the smbd and nmbd binaries. The binary generated is called "smbd", while "nmbd" becomes a symlink(decrease duplicate code).<br>
+70) Fix client direct to dns mode.<br>
+71) Dnsmasq up to 2.58 version.<br>
+72) Check size /var/udhcpd.leases in pinger.sh.<br>
+73) Fix build usb firmware upgrade.<br>
+74) Need restart dhcp server at samba apply change.<br>
+75) Last particion mounted to /media set as public for samba.<br>
+76) Last particion mounted to /media set as torrent home dir.<br>
+77) Set announce version=5.1 (WinXP) for samba3(mkre compat with XP and later Windows versions).<br>
+78) Samba allow connections and allow acess only for local network client(more secure).<br>
+79) Samba now correct get disk size and free space from vfs.<br>
+80) Automount.sh restart samba after mount particion.<br>
+81) Miniupnp set port range to 1024-65535 instead 0-65535.<br>
+82) Remove old dead 3G code from goahead.<br>
+83) move some scripts to user/usb. More free space in rwfs.<br>
+84) Disable hotplug before update firmware.<br>
+85) Samba2/3 merge the smbd and nmbd binaries. The binary generated is called "smbd", while "nmbd" becomes a symlink(decrease duplicate code).<br>
 
 <br><br>
 <b>For support see:</b><br>
