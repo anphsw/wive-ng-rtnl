@@ -465,7 +465,7 @@ const parameter_fetch_t vpn_args[] =
 	{ T("vpn_debug"),              "vpnDebug",             1 },
 	{ T("vpn_nat"),                "vpnNAT",               1 },
 	{ T("vpn_lcp"),                "vpnEnableLCP",         1 },
-	{ T("vpn_auth_type"),          "vpnAuthProtocol",      1 },
+	{ T("vpn_auth_type"),          "vpnAuthProtocol",      0 },
 	{ T("vpn_pppoe_iface"),        "vpnInterface",         0 },
 	{ T("vpn_pppoe_service"),      "vpnService",           0 },
 	{ T("vpn_pure_pppoe"),         "vpnPurePPPOE",         2 },
