@@ -33,7 +33,7 @@ elif [ "$MODE" = "2T2R" ]; then
 elif [ "$MODE" = "1T1R" ]; then
     DEVNAME="Acorp_WR-150N"
 else
-    echo "Not support mode."
+    echo "Not supported (unknown) mode."
     exit 1
 fi
 
@@ -48,9 +48,9 @@ else
     SAVE_MEM="-savemem"
 fi
 
-echo "______________________________________________________"
-echo "> Build for $PRODUCTID$SAVE_MEM version $KERNEL_VER <"
-echo "______________________________________________________"
+echo "_________________________________________________________"
+echo "> Building for $PRODUCTID$SAVE_MEM version $KERNEL_VER <"
+echo "_________________________________________________________"
 
 
 echo "" > sdk_version.h
@@ -103,7 +103,7 @@ elif [ "$MODE" = "2T2R-USB-IPV6" ] ; then
     cp -fv ./configs/all/config-config-USB-IPV6-8M			./config/.config
     cp -fv ./configs/all/config-lib-USB-IPV6-8M				./lib/.config
 else
-    echo "Configs not found."
+    echo "Config files not found."
     exit 1
 fi
 
