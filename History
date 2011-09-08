@@ -616,6 +616,7 @@
 85) Samba2/3 merge the smbd and nmbd binaries. The binary generated is called "smbd", while "nmbd" becomes a symlink(decrease duplicate code).<br>
 86) Fix auth type select in VPN.<br>
 87) Update busybox to 1.19.2.<br>
+88) Update libevent to 2.0.13 version.<br>
 
 <br><br>
 <b>For support see:</b><br>

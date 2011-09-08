@@ -54,13 +54,12 @@ regress_SOURCES += regress_iocp.c
 endif
 
 regress_LDADD = $(LIBEVENT_GC_SECTIONS) ../libevent.la $(PTHREAD_LIBS) $(ZLIB_LIBS)
-regress_CPPFLAGS = -I$(top_srcdir) -I$(top_srcdir)/compat \
-	-I$(top_srcdir)/include -I../include $(PTHREAD_CFLAGS) $(ZLIB_CFLAGS)
+regress_CPPFLAGS = $(AM_CPPFLAGS) $(PTHREAD_CFLAGS) $(ZLIB_CFLAGS)
 regress_LDFLAGS = $(PTHREAD_CFLAGS)
 
 if OPENSSL
 regress_SOURCES += regress_ssl.c
-regress_LDADD += ../libevent_openssl.la -lcrypto -lssl
+regress_LDADD += ../libevent_openssl.la
 endif
 
 bench_SOURCES = bench.c
@@ -73,7 +72,13 @@ bench_httpclient_SOURCES = bench_httpclient.c
 bench_httpclient_LDADD = $(LIBEVENT_GC_SECTIONS) ../libevent_core.la
 
 regress.gen.c regress.gen.h: regress.rpc $(top_srcdir)/event_rpcgen.py
-	$(top_srcdir)/event_rpcgen.py $(srcdir)/regress.rpc || echo "No Python installed"
+	if $(top_srcdir)/event_rpcgen.py $(srcdir)/regress.rpc ; then \
+	   echo "HI"; \
+	else \
+	   echo "No Python installed; can't test RPC."; \
+	   echo " "> regress.gen.c; \
+	   echo "#define NO_PYTHON_EXISTS" > regress.gen.h; \
+	fi
 
 DISTCLEANFILES = *~
 

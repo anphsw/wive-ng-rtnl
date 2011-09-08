@@ -124,6 +124,8 @@ ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
 EGREP = @EGREP@
+EV_LIB_GDI = @EV_LIB_GDI@
+EV_LIB_WS32 = @EV_LIB_WS32@
 EXEEXT = @EXEEXT@
 FGREP = @FGREP@
 GREP = @GREP@
@@ -221,7 +223,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign no-dependencies
 LDADD = $(LIBEVENT_GC_SECTIONS) ../libevent.la
-AM_CFLAGS = -I$(top_srcdir) -I$(top_srcdir)/compat -I$(top_srcdir)/include -I../include
+AM_CPPFLAGS = -I$(top_srcdir) -I$(top_srcdir)/compat -I$(top_srcdir)/include -I../include
 event_test_sources = event-test.c
 time_test_sources = time-test.c
 signal_test_sources = signal-test.c
@@ -229,7 +231,7 @@ dns_example_sources = dns-example.c
 hello_world_sources = hello-world.c
 http_server_sources = http-server.c
 @OPENSSL_TRUE@le_proxy_sources = le-proxy.c
-@OPENSSL_TRUE@le_proxy_LDADD = $(LDADD) ../libevent_openssl.la -lcrypto -lssl
+@OPENSSL_TRUE@le_proxy_LDADD = $(LDADD) ../libevent_openssl.la
 DISTCLEANFILES = *~
 all: all-am
 

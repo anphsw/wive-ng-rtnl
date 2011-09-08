@@ -45,7 +45,7 @@ EXTRA_PROGRAMS = regress$(EXEEXT)
 @BUILD_REGRESS_TRUE@am__append_2 = regress.gen.c regress.gen.h
 @BUILD_WIN32_TRUE@am__append_3 = regress_iocp.c
 @OPENSSL_TRUE@am__append_4 = regress_ssl.c
-@OPENSSL_TRUE@am__append_5 = ../libevent_openssl.la -lcrypto -lssl
+@OPENSSL_TRUE@am__append_5 = ../libevent_openssl.la
 subdir = test
 DIST_COMMON = $(noinst_HEADERS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
@@ -100,9 +100,8 @@ am_regress_OBJECTS = regress-regress.$(OBJEXT) \
 	regress-regress_minheap.$(OBJEXT) $(am__objects_1) \
 	$(am__objects_2) $(am__objects_3) $(am__objects_4)
 regress_OBJECTS = $(am_regress_OBJECTS)
-@OPENSSL_TRUE@am__DEPENDENCIES_2 = ../libevent_openssl.la
 regress_DEPENDENCIES = $(am__DEPENDENCIES_1) ../libevent.la \
-	$(PTHREAD_LIBS) $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
+	$(PTHREAD_LIBS) $(am__DEPENDENCIES_1) $(am__append_5)
 regress_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(regress_LDFLAGS) \
 	$(LDFLAGS) -o $@
@@ -177,6 +176,8 @@ ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
 EGREP = @EGREP@
+EV_LIB_GDI = @EV_LIB_GDI@
+EV_LIB_WS32 = @EV_LIB_WS32@
 EXEEXT = @EXEEXT@
 FGREP = @FGREP@
 GREP = @GREP@
@@ -303,9 +304,7 @@ regress_SOURCES = regress.c regress_buffer.c regress_http.c \
 @ZLIB_REGRESS_TRUE@regress_zlib_SOURCES = regress_zlib.c
 regress_LDADD = $(LIBEVENT_GC_SECTIONS) ../libevent.la $(PTHREAD_LIBS) \
 	$(ZLIB_LIBS) $(am__append_5)
-regress_CPPFLAGS = -I$(top_srcdir) -I$(top_srcdir)/compat \
-	-I$(top_srcdir)/include -I../include $(PTHREAD_CFLAGS) $(ZLIB_CFLAGS)
-
+regress_CPPFLAGS = $(AM_CPPFLAGS) $(PTHREAD_CFLAGS) $(ZLIB_CFLAGS)
 regress_LDFLAGS = $(PTHREAD_CFLAGS)
 bench_SOURCES = bench.c
 bench_LDADD = $(LIBEVENT_GC_SECTIONS) ../libevent.la
@@ -1005,7 +1004,13 @@ uninstall-am:
 
 
 regress.gen.c regress.gen.h: regress.rpc $(top_srcdir)/event_rpcgen.py
-	$(top_srcdir)/event_rpcgen.py $(srcdir)/regress.rpc || echo "No Python installed"
+	if $(top_srcdir)/event_rpcgen.py $(srcdir)/regress.rpc ; then \
+	   echo "HI"; \
+	else \
+	   echo "No Python installed; can't test RPC."; \
+	   echo " "> regress.gen.c; \
+	   echo "#define NO_PYTHON_EXISTS" > regress.gen.h; \
+	fi
 
 verify: check
 

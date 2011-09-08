@@ -1150,6 +1150,9 @@ request_parse(u8 *packet, int length, struct evdns_server_port *port, struct soc
 	GET16(answers);
 	GET16(authority);
 	GET16(additional);
+	(void)answers;
+	(void)additional;
+	(void)authority;
 
 	if (flags & 0x8000) return -1; /* Must not be an answer. */
 	flags &= 0x0110; /* Only RD and CD get preserved. */
@@ -2393,7 +2396,7 @@ _evdns_nameserver_add_impl(struct evdns_base *base, const struct sockaddr *addre
 
 	evtimer_assign(&ns->timeout_event, ns->base->event_base, nameserver_prod_callback, ns);
 
-	ns->socket = socket(PF_INET, SOCK_DGRAM, 0);
+	ns->socket = socket(address->sa_family, SOCK_DGRAM, 0);
 	if (ns->socket < 0) { err = 1; goto out1; }
 	evutil_make_socket_closeonexec(ns->socket);
 	evutil_make_socket_nonblocking(ns->socket);

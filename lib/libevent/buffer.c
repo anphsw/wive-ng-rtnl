@@ -447,6 +447,11 @@ evbuffer_run_callbacks(struct evbuffer *buffer, int running_deferred)
 static inline void
 evbuffer_invoke_callbacks(struct evbuffer *buffer)
 {
+	if (TAILQ_EMPTY(&buffer->callbacks)) {
+		buffer->n_add_for_cb = buffer->n_del_for_cb = 0;
+		return;
+	}
+
 	if (buffer->deferred_cbs) {
 		if (buffer->deferred.queued)
 			return;
@@ -1249,7 +1254,7 @@ evbuffer_strchr(struct evbuffer_ptr *it, const char chr)
 		if (cp) {
 			it->_internal.chain = chain;
 			it->_internal.pos_in_chain = cp - buffer;
-			it->pos += (cp - buffer);
+			it->pos += (cp - buffer - i);
 			return it->pos;
 		}
 		it->pos += chain->off - i;
