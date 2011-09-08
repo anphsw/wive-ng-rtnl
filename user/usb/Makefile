@@ -10,6 +10,7 @@ romfs:
 	$(ROMFSINST) -S automount.sh /etc/scripts/automount.sh
 	$(ROMFSINST) -S storage.sh /etc/scripts/storage.sh
 	$(ROMFSINST) -S usbctrl.sh /etc/scripts/usbctrl.sh
+	$(ROMFSINST) -S prnctrl.sh /etc/scripts/prnctrl.sh
 #create symlinks
 	$(ROMFSINST) -s /etc/scripts/optware-install.sh /bin/optware-install.sh
 	$(ROMFSINST) -s /etc/scripts/automount.sh /bin/automount.sh
