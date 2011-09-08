@@ -1159,6 +1159,7 @@ void board_init_r (gd_t *id, ulong dest_addr)
 #endif
 #endif
 
+#ifdef RALINK_USB_SUPPORT
 #if defined(RT3052_ASIC_BOARD) || defined(RT2883_ASIC_BOARD)
 	void config_usbotg(void);
 	config_usbotg();
@@ -1166,7 +1167,7 @@ void board_init_r (gd_t *id, ulong dest_addr)
 	void config_usb_ehciohci(void);
 	config_usb_ehciohci();
 #endif
-
+#endif
 	u32 reg = RALINK_REG(RT2880_RSTSTAT_REG);
 	if(reg & RT2880_WDRST ){
 		printf("***********************\n");
@@ -1907,6 +1908,7 @@ void adjust_frequency(void)
 }
 #endif
 
+#ifdef RALINK_USB_SUPPORT
 #if defined(RT3883_ASIC_BOARD) || defined(RT3352_ASIC_BOARD)|| defined(RT5350_ASIC_BOARD)
 /*
  * enter power saving mode
@@ -2092,4 +2094,5 @@ void config_usbotg(void)
 	return;
 }
 
+#endif
 #endif
