@@ -42,6 +42,7 @@ void serial_setbrg (void)
 	u32 reg, cpu_clock = 0;
 #if defined(RT2880_ASIC_BOARD) || defined(RT2883_ASIC_BOARD) || defined(RT3052_ASIC_BOARD) || defined(RT3352_ASIC_BOARD) || defined(RT3883_ASIC_BOARD) || defined (RT5350_ASIC_BOARD)
 	u8	clk_sel;
+	u8	clk_sel2;
 #endif
 	reg = RALINK_REG(RT2880_SYSCFG_REG);
 
@@ -100,15 +101,17 @@ void serial_setbrg (void)
 	mips_bus_feq = (133*1000*1000);
 #elif defined(RT5350_ASIC_BOARD)
 	/* FIXME */
-	clk_sel = (reg>>8) & 0x03;
+	clk_sel = (reg>>8) & 0x01;
+	clk_sel2 = (reg>>10) & 0x01;
+	clk_sel |= (clk_sel2 << 1);
+
 	switch(clk_sel) {
 		case 0:
 			cpu_clock = (360*1000*1000);
 			mips_bus_feq = (120*1000*1000);
 			break;
 		case 1:
-			cpu_clock = (350*1000*1000);
-			mips_bus_feq = (140*1000*1000);
+			//reserved
 			break;
 		case 2:
 			cpu_clock = (320*1000*1000);

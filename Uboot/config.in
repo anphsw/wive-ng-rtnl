@@ -2,13 +2,10 @@ string 'Cross Compiler Path' CONFIG_CROSS_COMPILER_PATH  `pwd`/toolchain/bin
 comment ""
 
 mainmenu_name 'Uboot Configuration'
-choice 'Chip Type' "FPGA FPGA_BOARD \
-                    ASIC ASIC_BOARD 
-                   "
+choice 'Chip Type' "ASIC ASIC_BOARD"
 
 if [ "$FPGA_BOARD" = "y" ]; then
 choice 'Chip ID'	 "RT2880 RT2880_FPGA_BOARD \
-			  RT2883 RT2883_FPGA_BOARD \
                           RT3052 RT3052_FPGA_BOARD \
                           RT3352 RT3352_FPGA_BOARD \
                           RT3883 RT3883_FPGA_BOARD \
@@ -16,7 +13,6 @@ choice 'Chip ID'	 "RT2880 RT2880_FPGA_BOARD \
                          "
 else
 choice 'Chip ID'	" RT2880 RT2880_ASIC_BOARD \
-                          RT2883 RT2883_ASIC_BOARD \
                           RT3350 RT3350_ASIC_BOARD \
                           RT3052 RT3052_ASIC_BOARD \
                           RT3352 RT3352_ASIC_BOARD \
@@ -37,19 +33,6 @@ choice 'GMAC connected to ' "100Switch   MAC_TO_100SW_MODE \
 			     100Phy  MAC_TO_100PHY_MODE \
 			     GigaSW  MAC_TO_VITESSE_MODE \
 			     GigaPhy MAC_TO_GIGAPHY_MODE 
-			    "
-fi
-
-#########
-# RT2883
-#########
-if [ "$RT2883_FPGA_BOARD" = "y" -o \
-     "$RT2883_ASIC_BOARD" = "y" ]; then
-define_bool RT2883_MP y
-choice 'GMAC connected to' "100Switch   MAC_TO_100SW_MODE \
-			    100Phy  MAC_TO_100PHY_MODE \
-			    GigaSW  MAC_TO_VITESSE_MODE \
-			    GigaPhy MAC_TO_GIGAPHY_MODE 
 			    "
 fi
 
@@ -230,8 +213,7 @@ choice 'DRAM Component' "64Mb ON_BOARD_64M_DRAM_COMPONENT \
                          512Mb ON_BOARD_512M_DRAM_COMPONENT 
 		      "
 else
-choice 'DDR Component' "128Mb ON_BOARD_128M_DRAM_COMPONENT \
-                        256Mb ON_BOARD_256M_DRAM_COMPONENT \
+choice 'DDR Component' "256Mb ON_BOARD_256M_DRAM_COMPONENT \
                         512Mb ON_BOARD_512M_DRAM_COMPONENT \
                         1024Mb ON_BOARD_1024M_DRAM_COMPONENT
 		      "
@@ -287,6 +269,13 @@ else
 hex " SYSCFG1(hex)"		DRAM_CFG0	26
 hex " DDR_CFG3_ODT(hex)"	DRAM_CFG1	2
 fi
+fi
+fi
+
+if [ "$RT5350_FPGA_BOARD" = "y" -o "$RT5350_ASIC_BOARD" = "y" ]; then
+bool "CPU PLL adjustment" CPU_PLL_PARAMETERS
+if [ "$CPU_PLL_PARAMETERS" = "y" ]; then
+hex " CPU PLL ADJUSTMENT "	CPUPLLCFG	0
 fi
 fi
 

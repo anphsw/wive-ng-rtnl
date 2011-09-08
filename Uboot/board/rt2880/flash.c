@@ -105,10 +105,13 @@ unsigned long flash_init (void)
 	
 	if(s)
 	kk1 = simple_strtoul (s, NULL, 16);
-
+#if defined(RT3883_ASIC_BOARD) || defined(RT3883_FPGA_BOARD)
+	regvalue = *(volatile u_long *)(RALINK_SYSCTL_BASE + 0x0700);
+#else
 	regvalue = *(volatile u_long *)(RALINK_SYSCTL_BASE + 0x0308);
+#endif
 #ifdef DEBUG
-	printf("\n Default FLASH_CS1_CFG = %08X \n",regvalue);
+	printf("\n Default FLASH_CFG0 = %08X \n",regvalue);
 #endif
     regvalue &= ~(0x3 << 26);
 	regvalue |= (0x1 << 26);
@@ -131,11 +134,19 @@ unsigned long flash_init (void)
 	printf("\n Ready Set Value = 0x%08X\n",regvalue);
 #endif	
 
+#if defined(RT3883_ASIC_BOARD) || defined(RT3883_FPGA_BOARD)
+	*(volatile u_long *)(RALINK_SYSCTL_BASE + 0x0700) = regvalue;
+#else
 	*(volatile u_long *)(RALINK_SYSCTL_BASE + 0x0308) = regvalue;
+#endif
 
+#if defined(RT3883_ASIC_BOARD) || defined(RT3883_FPGA_BOARD)
+	regvalue = *(volatile u_long *)(RALINK_SYSCTL_BASE + 0x0700);
+#else
 	regvalue = *(volatile u_long *)(RALINK_SYSCTL_BASE + 0x0308);
+#endif
 #ifdef DEBUG
-	printf("\n Setup FLASH_CS1_CFG = %08X \n",regvalue);
+	printf("\n Setup FLASH_CFG0 = %08X \n",regvalue);
 #endif
 #endif
 	/* Init: no FLASHes known */
@@ -1093,33 +1104,20 @@ static int write_word_amd(flash_info_t *info, FPWV *dest, FPW data)
 	int res = 0;	/* result, assume success	*/
 	FPWV *base;		/* first address in flash bank	*/
 
-#if defined (RT2880_ASIC_BOARD) || defined (RT2883_ASIC_BOARD) || defined (RT3052_ASIC_BOARD) || defined (RT3352_ASIC_BOARD)
 	start = get_timer(0);
-	
+
 	while(*dest != 0xFFFF)  {
+#ifndef RT3052_FPGA_BOARD
 	if (get_timer(start) > CFG_FLASH_STATE_DISPLAY_TOUT) 
 	{
 		start = get_timer(0);
 		printf("\n dest[0x%08X]=%04X\n",dest,*dest);
 	}
-		
-	//while ((*dest & data) != data) {
-//	printf("\n *dest = %08X\n",*dest);
-#elif defined (RT3052_FPGA_BOARD)
-	/* 
-	   Must writing with this otherwise Flash write will abnormal 
-	   For RT3052 FPGA 40MHz bus clock 
-	*/
-	while(*dest != 0xFFFF)  {
-#else
-	if ((*dest & data) != data) {
 #endif	
 
 #if 1 //defined (RT2880_ASIC_BOARD) || defined (RT3052_ASIC_BOARD)
 #else
 		printf("Not Erase: address 0x%08x(value=0x%08x)\n", (ulong) dest, *dest);
-		//printf(" .");
-		
 		return (2);
 #endif
 	}

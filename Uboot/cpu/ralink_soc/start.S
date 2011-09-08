@@ -524,13 +524,14 @@ reset:
 	nop
 
 #ifdef ON_BOARD_DDR
-	/* DDR initialization: reg SYSCFG1 25:20 -- ODT disabled, LVCMOS=1, half drive
+        /* DDR initialization: reg SYSCFG1[25:16]: 
+	 * ODT disabled, LVCMOS=1, half drive, turn ON RT3662 DDR IO ODT as 150 ohm when read DRAM
 	 */
 	li t1, RALINK_SYSCTL_BASE + 0x14
 	lw t2, 0(t1)
 	nop
-	and t2, ~(0x3F<<20)
-	or t2, (0x26<<20)
+	and t2, ~(0x3FF<<16)
+	or t2, (0x361<<16)
 	sw t2, 0(t1)
 	nop
 
@@ -557,7 +558,11 @@ DDR_READY:
 	li t1, RALINK_MEMCTRL_BASE + 0x4c
 	lw t2, 0(t1)
 #ifdef RT3883_ASIC_BOARD
-	and t2, ~(1<<6)
+	#disable ODT; reference board ok, ev board fail
+	#and t2, ~(1<<6)
+
+	#enable ODT; both ok
+	or t2, (1<<6)
 	and t2, ~(1<<2)
 #endif
 #ifdef RT3883_FPGA_BOARD
@@ -748,30 +753,49 @@ WAIT_SDRAM_INIT_DOWN:
 
 SDRAM_INIT_DOWN:
 #endif
-
-#if 1
-#ifdef RT3352_ASIC_BOARD
-	/* set LDODIG 1.24V */
-
-            li t1, RALINK_SYSCTL_BASE + 0x8c
-	    li t2, 0x9B82
-	    sw t2, 0(t1)
-            nop
-#endif /* RT3352_ASIC_BOARD */
+#if defined(RT3883_FPGA_BOARD) || defined(RT3883_ASIC_BOARD)
+#ifdef ON_BOARD_DDR
+#if (TEXT_BASE != 0xBFC00000) && (TEXT_BASE != 0xBF000000) && (TEXT_BASE != 0xBC000000)
+        /* DDR initialization: reg SYSCFG1[25:16]: 
+	 * ODT disabled, LVCMOS=1, half drive, turn ON RT3662 DDR IO ODT as 150 ohm when read DRAM
+	 */
+        li t1, RALINK_SYSCTL_BASE + 0x14
+	lw t2, 0(t1)
+	nop
+	and t2, ~(0x3FF<<16)
+	or t2, (0x361<<16)
+	sw t2, 0(t1)
+	nop
+#endif
+#endif
 #endif
 
-#if 1
-#ifdef RT3352_ASIC_BOARD
-	/* adjust the SW reg voltage level higher */
 
+#ifdef RT3352_ASIC_BOARD
+
+	/* adjust the SW reg voltage level higher */
             li t1, RALINK_SYSCTL_BASE + 0x88
 	    li t2, 0xECC340
 	    sw t2, 0(t1)
             nop
-#endif /* RT3352_ASIC_BOARD */
+	
+	/* set LDODIG 1.24V */
+            li t1, RALINK_SYSCTL_BASE + 0x8c
+	    li t2, 0x9B82
+	    sw t2, 0(t1)
+            nop
+
+#if 0
+	/* 
+	 * Enable spreading spectrum clock 
+	 * SSC_MODUMAG=7: +/-1.00% for center; -2.00% for down
+	 */
+	    li t1, RALINK_SYSCTL_BASE + 0x54
+	    li t2, 0x71
+	    sw t2, 0(t1)
+	    nop
 #endif
 
-#ifdef RT3352_ASIC_BOARD
 #ifdef ON_BOARD_DDR
 #if 0
 	/* DDR initialization:
@@ -797,21 +821,8 @@ SDRAM_INIT_DOWN:
 	nop
 #endif
 #endif /* ON_BOARD_DDR */
-#endif /* RT3352_ASIC_BOARD */
 
-#if 0 //SSC value is TBD
-/* 
- * Enable spreading spectrum clock 
- * SSC_MODUMAG=15: +/-2.000% for center; -4.00% for down
- */
-#if defined(RT3352_FPGA_BOARD) || defined(RT3352_ASIC_BOARD)
-	li t1, RALINK_SYSCTL_BASE + 0x54
-	li t2, 0xf1
-	nop
-	sw t2, 0(t1)
-	
-#endif
-#endif
+#endif /* RT3352_ASIC_BOARD */
 
 
 #ifdef ON_BOARD_DDR
@@ -906,7 +917,7 @@ tRFCinit:
 #endif
 
 #if defined(RT3352_FPGA_BOARD) || defined(RT3352_ASIC_BOARD)
-#if 0	
+#if defined(RALINK_DDR_POWERSAVE)
 	/* DDR: enable self auto refresh for power saving
 	 * enable it by default for both RAM and ROM version (for CoC)
 	 */
@@ -926,7 +937,9 @@ tRFCinit:
 #endif
 #endif // defined(RT3352_FPGA_BOARD) || defined(RT3352_ASIC_BOARD) //
 #else // SDR //
-#if defined(RT3352_FPGA_BOARD) || defined(RT3352_ASIC_BOARD)
+#if defined(RT3352_FPGA_BOARD) || defined(RT3352_ASIC_BOARD) || \
+    defined (RT5350_FPGA_BOARD) || defined (RT5350_ASIC_BOARD)
+#if defined(RALINK_SDR_POWERSAVE)
 	/* SDR:enable precharge power saving
 	 */
 	li	t0, RALINK_MEMCTRL_BASE + 0x1C
@@ -942,20 +955,29 @@ tRFCinit:
 	or	t1, 0x10000000
 	sw	t1, 0(t0)
 	nop
-
-
+#endif // RALINK_MEMORY_POWER_SAVE  //
 #endif  // defined(RT3352_FPGA_BOARD) || defined (RT3352_ASIC_BOARD)
 #endif // ON_BOARD_DDR //
-#if 0
-#if defined(RT3352_FPGA_BOARD) || defined(RT3352_ASIC_BOARD)
+#if defined(RT3352_FPGA_BOARD) || defined(RT3352_ASIC_BOARD) || \
+    defined (RT5350_FPGA_BOARD) || defined (RT5350_ASIC_BOARD)
+#if defined (RALINK_CPU_AUTOFREQUENCY)
 	/* auto freq adjustment 3352,5350 support
 	 */
 	li	t0, RALINK_SYSCTL_BASE + 0x44
-	li	t1, 0x801f0f33
+	li	t1, 0x1f0112
 	sw	t1, 0(t0)
 	nop
-#endif  // defined(RT3352_FPGA_BOARD) || defined (RT3352_ASIC_BOARD) //
+	li	t0, RALINK_SYSCTL_BASE + 0x3c
+	li	t1, 0x3040101
+	sw	t1, 0(t0)
+	nop
+	li	t0, RALINK_SYSCTL_BASE + 0x40
+	li	t1, 0x80035f41
+	sw	t1, 0(t0)
+	nop
+
 #endif
+#endif  // defined(RT3352_FPGA_BOARD) || defined (RT3352_ASIC_BOARD) //
 	li t5, RALINK_SYSCTL_BASE + 0x0060
 	lw t6, 0(t5)
 	nop
@@ -1066,6 +1088,22 @@ tRFCinit:
         sw t6, 0(t5)
         nop
 #endif
+
+#if defined(RT5350_ASIC_BOARD)
+	// set default LED polarity value for RT5350 REF board
+	// Active status:
+	// EPHY_LED0  H: Light
+	// EPHY_LED1  H: Light
+	// EPHY_LED2  H: Light
+	// EPHY_LED3  L: Light
+	// EPHY_LED4  H: Light
+
+	li t5, RALINK_ETH_SW_BASE + 0x168
+	li t6, 0x17
+	nop
+	sw t6, 0(t5)
+	nop
+#endif		
 
 #if defined(RT2880_ASIC_BOARD)
 	//turn on power LED (GPIO 12)

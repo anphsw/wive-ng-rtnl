@@ -1351,8 +1351,8 @@ void board_init_r (gd_t *id, ulong dest_addr)
 		int _x = ((reg >> 12) & 0x7); 
 
 #if defined(RT3352_FPGA_BOARD) || defined (RT3352_ASIC_BOARD)
-		int dram_size = (_x == 3)? 512 : (_x == 2)? 256 : (_x == 1)? 128 : \
-				(_x == 0)? 64 : 0; 
+		int dram_size = (_x == 4)? 512 : (_x == 3)? 256 : (_x == 2)? 128 : \
+				(_x == 1)? 64 : (_x == 0)? 16 : 0; 
 #elif defined (RT5350_FPGA_BOARD) || defined (RT5350_ASIC_BOARD)
 		int dram_size = (_x == 4)? 512 : (_x == 3)? 256 : (_x == 2)? 128 : \
 				(_x == 1)? 64 : (_x == 0)? 16 : 0; 

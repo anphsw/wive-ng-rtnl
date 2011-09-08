@@ -146,12 +146,12 @@ int spic_init(void)
 	ra_and(RT2880_RSTCTRL_REG, ~RSTCTRL_SPI_RESET);
 
 	// FIXME, clk_div should depend on spi-flash.
-	ra_outl(RT2880_SPICFG_REG, SPICFG_MSBFIRST | SPICFG_TXCLKEDGE_FALLING | SPICFG_SPICLK_DIV4 | SPICFG_SPICLKPOL);
+	ra_outl(RT2880_SPICFG_REG, SPICFG_MSBFIRST | SPICFG_TXCLKEDGE_FALLING | SPICFG_SPICLK_DIV8 | SPICFG_SPICLKPOL);
 								
 	// set idle state
 	ra_outl(RT2880_SPICTL_REG, SPICTL_HIZSDO | SPICTL_SPIENA_HIGH);
 
-	spi_wait_nsec = (8 * 1000 / ((mips_bus_feq / 1000 / 1000 / SPICFG_SPICLK_DIV4) )) >> 1 ;
+	spi_wait_nsec = (8 * 1000 / ((mips_bus_feq / 1000 / 1000 / SPICFG_SPICLK_DIV8) )) >> 1 ;
 
 	printf("spi_wait_nsec: %x \n", spi_wait_nsec);
 	return 0;

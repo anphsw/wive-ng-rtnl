@@ -138,6 +138,11 @@ else
 DRAM_SYSCFG1=$(DRAM_CFG1)
 endif
 
+ifeq ($(CPUPLLCFG),)
+CPU_PLL_CFG=0xFF
+else
+CPU_PLL_CFG=$(CPUPLLCFG)
+endif
 export	CROSS_COMPILE
 
 #########################################################################
