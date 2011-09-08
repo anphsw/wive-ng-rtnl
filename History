@@ -622,6 +622,7 @@
 2) Update libevent to 2.0.13 version.<br>
 3) Add support exec external scripts on wpn button pressed or hold (/etc/scripts/OnPressWPS.button and OnHoldWPS.button scripts. And WPSHlprmode variable).<br>
 4) Update Uboot to 3.5.2.0 sdk version.<br>
+5) Some kernel fixes backport from 3.5.2.0 sdk.<br>
 
 <br><br>
 <b>For support see:</b><br>
