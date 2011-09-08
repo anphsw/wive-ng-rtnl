@@ -149,14 +149,18 @@ int get_ethernet_addr(unsigned char *ethernet_addr)
 static void prom_init_sysclk(void)
 {
 	u32 	reg;
-        u8      clk_sel;
+#ifdef CONFIG_RT5350_ASIC
+	u8      clk_sel, clk_sel2;
+#else
+	u8      clk_sel;
+#endif
 
 #if defined(CONFIG_RT2880_FPGA)
-        mips_cpu_feq = 25000000; 
-#elif defined (CONFIG_RT3052_FPGA) 
-	mips_cpu_feq = 32000000;	
+        mips_cpu_feq = 25000000;
+#elif defined (CONFIG_RT3052_FPGA)
+	mips_cpu_feq = 32000000;
 #elif  defined (CONFIG_RT3352_FPGA) || defined (CONFIG_RT2883_FPGA) || defined (CONFIG_RT3883_FPGA) || defined (CONFIG_RT5350_FPGA)
-        mips_cpu_feq = 40000000; 
+        mips_cpu_feq = 40000000;
 #else
 	//get sysclc from reg
         reg = (*((volatile u32 *)(RALINK_SYSCTL_BASE + 0x10)));
@@ -171,7 +175,7 @@ static void prom_init_sysclk(void)
 #elif defined (CONFIG_RT3352_ASIC) 
 	mips_cpu_feq = (384*1000*1000);
         clk_sel = (reg>>8) & 0x01;
-#elif defined (CONFIG_RT5350_ASIC) 
+#elif defined (CONFIG_RT5350_ASIC)
         clk_sel = (reg>>8) & 0x01;
         clk_sel2 = (reg>>10) & 0x01;
         clk_sel |= (clk_sel2 << 1);
