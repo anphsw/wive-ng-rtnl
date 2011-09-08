@@ -65,6 +65,7 @@ static int		finished;				/* Finished flag */
 
 static int writeGoPid(void);
 static void InitSignals(int helper);
+static void goaSigWPSHold(int signum);
 static void goaSigWPSHlpr(int signum);
 static int initWebs(void);
 static int websHomePageHandler(webs_t wp, char_t *urlPrefix, char_t *webDir, int arg, char_t *url, char_t *path, char_t *query);
@@ -668,6 +669,12 @@ static void goaSigReset(int signum)
 }
 #endif
 
+#ifdef CONFIG_RALINK_GPIO
+static void goaSigWPSHold(int signum)
+{
+       doSystem("/etc/scripts/OnHoldWPS.button");
+}
+
 static void goaSigWPSHlpr(int signum)
 {
 	int ppid;
@@ -682,8 +689,4 @@ static void goaSigWPSHlpr(int signum)
 	if (kill(ppid, SIGHUP))
 		printf("goahead.c: (helper) can't send SIGHUP to parent %d", ppid);
 }
-
-static void goaSigWPSHold(int signum)
-{
-       doSystem("/etc/scripts/OnHoldWPS.button");
-}
+#endif
