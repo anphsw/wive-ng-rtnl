@@ -15,3 +15,4 @@ romfs:
 	$(ROMFSINST) -s /etc/scripts/automount.sh /bin/automount.sh
 	$(ROMFSINST) -s /etc/scripts/storage.sh /bin/storage.sh
 	$(ROMFSINST) -s /etc/scripts/usbctrl.sh /bin/usbctrl.sh
+	$(ROMFSINST) -s /etc/scripts/prnctrl.sh /bin/prnctrl.sh
