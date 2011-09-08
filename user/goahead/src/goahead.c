@@ -77,6 +77,7 @@ extern void formDefineWireless(void);
 
 #if CONFIG_USER_GOAHEAD_HAS_WPSBTN
 static void goaSigReset(int signum);
+static void goaSigWPSHold(int signum);
 #endif
 #ifdef B_STATS
 static void printMemStats(int handle, char_t *fmt, ...);
@@ -309,6 +310,7 @@ static void InitSignals(int helper)
 	if (helper) {
 #ifdef CONFIG_RALINK_GPIO
 		signal(SIGUSR1, goaSigWPSHlpr);
+		signal(SIGUSR2, goaSigWPSHold);
 #endif
 	} else {
 #ifdef CONFIG_RALINK_GPIO
@@ -669,7 +671,19 @@ static void goaSigReset(int signum)
 static void goaSigWPSHlpr(int signum)
 {
 	int ppid;
+#if CONFIG_USER_GOAHEAD_HAS_WPSBTN
+	char *WPSHlprmode = nvram_get(RT2860_NVRAM, "UserWPSHlpr");
+	if (!strcmp(WPSHlprmode, "1")) {
+    	    doSystem("/etc/scripts/OnPressWPS.button");
+	    return;
+	}
+#endif
 	ppid = getppid();
 	if (kill(ppid, SIGHUP))
 		printf("goahead.c: (helper) can't send SIGHUP to parent %d", ppid);
+}
+
+static void goaSigWPSHold(int signum)
+{
+       doSystem("/etc/scripts/OnHoldWPS.button");
 }
