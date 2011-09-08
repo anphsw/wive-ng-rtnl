@@ -1411,7 +1411,7 @@ void ra2880_setup_dev_fptable(struct net_device *dev)
 }
 
 
-#define TX_TIMEOUT (2*HZ/100)
+#define TX_TIMEOUT (2*HZ)
 void ei_tx_timeout(struct net_device *dev)
 {
 	END_DEVICE* ei_local = netdev_priv(dev);
@@ -1554,7 +1554,7 @@ void ei_xmit_housekeeping(unsigned long unused)
 #else
 	tx_desc = ei_local->tx_ring0;
 	skb_free_idx = ei_local->free_idx;
-	if ((ei_local->skb_free[skb_free_idx]) != 0) {
+	if ((ei_local->skb_free[skb_free_idx]) != 0 && tx_desc[skb_free_idx].txd_info2.DDONE_bit==1) {
 		while(tx_desc[skb_free_idx].txd_info2.DDONE_bit==1 && (ei_local->skb_free[skb_free_idx])!=0 ){
 			dev_kfree_skb_irq((ei_local->skb_free[skb_free_idx]));
 			ei_local->skb_free[skb_free_idx]=0;
@@ -1914,6 +1914,9 @@ void rt305x_esw_init(void)
 	int i=0;
 	int phy_val=0, phy_val2;
 
+#if defined (CONFIG_RT5350_ASIC)
+	*(unsigned long *)(0xb0110168) = 0x17;
+#endif
 	/*
 	 * FC_RLS_TH=200, FC_SET_TH=160
 	 * DROP_RLS=120, DROP_SET_TH=80
@@ -1924,7 +1927,7 @@ void rt305x_esw_init(void)
         *(unsigned long *)(0xb0110050) = 0x00002001;
         *(unsigned long *)(0xb0110090) = 0x00007f7f;
         *(unsigned long *)(0xb0110098) = 0x00007f3f; //disable VLAN
-        *(unsigned long *)(0xb01100CC) = 0x00d6500c;
+	*(unsigned long *)(0xb01100CC) = 0x0002500c;
         *(unsigned long *)(0xb011009C) = 0x0008a301; //hashing algorithm=XOR48, aging interval=300sec
         *(unsigned long *)(0xb011008C) = 0x02404040;
 #if defined (CONFIG_RT3052_ASIC) || defined (CONFIG_RT3352_ASIC)
