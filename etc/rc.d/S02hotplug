@@ -19,9 +19,9 @@ start() {
 	if [ -d /proc/bus/usb ]; then
 	    echo "sd[a-z][1-9] 0:0 0660	*/etc/scripts/automount.sh" >> /etc/mdev.conf
 	    echo "1-.*:1.* 0:0 0000 @/etc/scripts/usbctrl.sh" >> /etc/mdev.conf
+	    echo "lp[0-9] 0:0 0660	*/etc/scripts/prnctrl.sh" >> /etc/mdev.conf
 	    #echo "ttyUSB[0-9] 0:0 0660	*/etc/scripts/modem-call.sh $MDEV" >> /etc/mdev.conf
 	    #echo "ttyACM[0-9] 0:0 0660	*/etc/scripts/modem-call.sh $MDEV" >> /etc/mdev.conf
-	    #echo "lp[0-9] 0:0 0660	*/etc/scripts/p910.sh $MDEV" >> /etc/mdev.conf
 	fi
     fi
 
