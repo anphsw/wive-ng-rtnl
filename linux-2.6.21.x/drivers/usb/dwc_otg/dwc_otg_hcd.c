@@ -1,7 +1,7 @@
 /* ==========================================================================
  * $File: //dwh/usb_iip/dev/software/otg/linux/drivers/dwc_otg_hcd.c $
- * $Revision: 1.7 $
- * $Date: 2010-03-22 07:12:28 $
+ * $Revision: 1.8 $
+ * $Date: 2010-12-01 03:26:14 $
  * $Change: 1064940 $
  *
  * Synopsys HS OTG Linux Software Driver and documentation (hereinafter,
@@ -55,6 +55,24 @@
 #include "dwc_otg_driver.h"
 #include "dwc_otg_hcd.h"
 #include "dwc_otg_regs.h"
+
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,35)
+#define USB_PORT_FEAT_CONNECTION        0 
+#define USB_PORT_FEAT_ENABLE            1 
+#define USB_PORT_FEAT_SUSPEND           2 
+#define USB_PORT_FEAT_OVER_CURRENT      3 
+#define USB_PORT_FEAT_RESET             4 
+#define USB_PORT_FEAT_POWER             8 
+#define USB_PORT_FEAT_LOWSPEED          9 
+#define USB_PORT_FEAT_HIGHSPEED         10
+#define USB_PORT_FEAT_C_CONNECTION      16
+#define USB_PORT_FEAT_C_ENABLE          17
+#define USB_PORT_FEAT_C_SUSPEND         18
+#define USB_PORT_FEAT_C_OVER_CURRENT    19
+#define USB_PORT_FEAT_C_RESET           20
+#define USB_PORT_FEAT_TEST              21
+#define USB_PORT_FEAT_INDICATOR         22
+#endif
 
 static const char dwc_otg_hcd_name[] = "dwc_otg_hcd";
 
@@ -448,7 +466,11 @@ int dwc_otg_hcd_init(struct lm_device *lmdev)
 	 * Allocate memory for the base HCD plus the DWC OTG HCD.
 	 * Initialize the base HCD.
 	 */
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,35)
+	hcd = usb_create_hcd(&dwc_otg_hc_driver, &lmdev->dev, dev_name(&lmdev->dev));
+#else
 	hcd = usb_create_hcd(&dwc_otg_hc_driver, &lmdev->dev, lmdev->dev.bus_id);
+#endif
 	if (!hcd) {
 		retval = -ENOMEM;
 		goto error1;
@@ -532,7 +554,11 @@ int dwc_otg_hcd_init(struct lm_device *lmdev)
 	 * allocates the DMA buffer pool, registers the USB bus, requests the
 	 * IRQ line, and calls dwc_otg_hcd_start method.
 	 */
+#if defined(IRQF_SHARED)
+	retval = usb_add_hcd(hcd, lmdev->irq, IRQF_SHARED);
+#else
 	retval = usb_add_hcd(hcd, lmdev->irq, SA_SHIRQ);
+#endif
 	if (retval < 0) {
 		goto error2;
 	}
@@ -561,8 +587,13 @@ int dwc_otg_hcd_init(struct lm_device *lmdev)
 
 	dwc_otg_hcd->otg_dev = otg_dev;
 
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,35)
+	DWC_DEBUGPL(DBG_HCD, "DWC OTG HCD Initialized HCD, bus=%s, usbbus=%d\n",
+		    dev_name(&lmdev->dev), hcd->self.busnum);
+#else
 	DWC_DEBUGPL(DBG_HCD, "DWC OTG HCD Initialized HCD, bus=%s, usbbus=%d\n",
 		    lmdev->dev.bus_id, hcd->self.busnum);
+#endif
 
 	return 0;
 
@@ -924,7 +955,9 @@ static void dump_channel_info(dwc_otg_hcd_t *hcd,
  * (URB). mem_flags indicates the type of memory allocation to use while
  * processing this URB. */
 int dwc_otg_hcd_urb_enqueue(struct usb_hcd *hcd,
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,36)
 			    struct usb_host_endpoint *ep,
+#endif
 			    struct urb *urb,
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,20)
 			    int mem_flags
@@ -969,7 +1002,11 @@ int dwc_otg_hcd_urb_dequeue(struct usb_hcd *hcd,
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,20)
 			    struct usb_host_endpoint *ep,
 #endif
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,36)
 			    struct urb *urb)
+#else
+			    struct urb *urb, int status)
+#endif
 {
 	unsigned long flags;
 	dwc_otg_hcd_t *dwc_otg_hcd;
@@ -1041,7 +1078,7 @@ int dwc_otg_hcd_urb_dequeue(struct usb_hcd *hcd,
 	urb->hcpriv = NULL;
 
 	/* Higher layer software sets URB status. */
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,20)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,20) && LINUX_VERSION_CODE < KERNEL_VERSION(2,6,36)
 	usb_hcd_giveback_urb(hcd, urb);
 #else
 	usb_hcd_giveback_urb(hcd, urb, NULL);
@@ -1955,7 +1992,7 @@ int dwc_otg_hcd_hub_control(struct usb_hcd *hcd,
 			t = (wIndex >> 8); /* MSB wIndex USB */
 			DWC_DEBUGPL(DBG_HCD, "DWC OTG HCD HUB CONTROL - "
 				    "SetPortFeature - USB_PORT_FEAT_TEST %d\n", t);
-			warn("USB_PORT_FEAT_TEST %d\n", t);
+			DWC_WARN("USB_PORT_FEAT_TEST %d\n", t);
 			if (t < 6) {
 				hprt0.d32 = dwc_otg_read_hprt0(core_if);
 				hprt0.b.prttstctl = t;
@@ -2668,7 +2705,7 @@ void dwc_otg_hcd_complete_urb(dwc_otg_hcd_t *hcd, struct urb *urb, int status)
 
 	urb->status = status;
 	urb->hcpriv = NULL;
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,20)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,20) && LINUX_VERSION_CODE < KERNEL_VERSION(2,6,36)
 	usb_hcd_giveback_urb(dwc_otg_hcd_to_hcd(hcd), urb);
 #else
 	usb_hcd_giveback_urb(dwc_otg_hcd_to_hcd(hcd), urb, NULL);
