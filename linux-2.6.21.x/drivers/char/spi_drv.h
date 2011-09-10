@@ -36,10 +36,6 @@
 
 #include <asm/rt2880/rt_mmap.h>
 
-#if defined(CONFIG_RALINK_RT3352)||defined(CONFIG_RALINK_RT3883)
-#define CONFIG_RALINK_MULTISPI	1
-#endif
-
 #define	RT2880_SPI_DUMP_STR		"dump"	/* Dump Content Command Prompt    */
 #define	RT2880_SPI_READ_STR		"read"	/* SPI read operation */
 #define	RT2880_SPI_WRITE_STR		"write"	/* SPI read operation */
@@ -77,16 +73,36 @@ typedef struct spi_vtss_data {
 #define RSTCTRL_SPI_RESET		RALINK_SPI_RST
 
 #define RT2880_SPI_REG_BASE		(RALINK_SPI_BASE)
-#define RT2880_SPISTAT_REG		(RT2880_SPI_REG_BASE+0x00)
-#define RT2880_SPICFG_REG		(RT2880_SPI_REG_BASE+0x10)
-#define RT2880_SPICTL_REG		(RT2880_SPI_REG_BASE+0x14)
-#define RT2880_SPIDATA_REG		(RT2880_SPI_REG_BASE+0x20)
+#define RT2880_SPI0_STAT_REG	(RT2880_SPI_REG_BASE+0x00)
+#define RT2880_SPI0_CFG_REG		(RT2880_SPI_REG_BASE+0x10)
+#define RT2880_SPI0_CTL_REG		(RT2880_SPI_REG_BASE+0x14)
+#define RT2880_SPI0_DATA_REG	(RT2880_SPI_REG_BASE+0x20)
 
-#define RT2880_SPISTAT1_REG		(RT2880_SPI_REG_BASE+0x40)
-#define RT2880_SPICFG1_REG		(RT2880_SPI_REG_BASE+0x50)
-#define RT2880_SPICTL1_REG		(RT2880_SPI_REG_BASE+0x54)
-#define RT2880_SPIDATA1_REG		(RT2880_SPI_REG_BASE+0x60)
-#define RT2880_SPIARB_REG		(RT2880_SPI_REG_BASE+0xF0)
+#define RT2880_SPI1_STAT_REG	(RT2880_SPI_REG_BASE+0x40)
+#define RT2880_SPI1_CFG_REG		(RT2880_SPI_REG_BASE+0x50)
+#define RT2880_SPI1_CTL_REG		(RT2880_SPI_REG_BASE+0x54)
+#define RT2880_SPI1_DATA_REG	(RT2880_SPI_REG_BASE+0x60)
+
+#define RT2880_SPI_ARB_REG		(RT2880_SPI_REG_BASE+0xf0)
+
+#define	SPISTAT		0
+#define SPICFG		1
+#define SPICTL		2
+#define SPIDATA		3	
+
+/* SPIARB register bit field */
+#define SPIARB_ARB_EN			(1<<31)
+	
+#if defined(CONFIG_RALINK_SPI_CS0_HIGH_ACTIVE)
+#define SPIARB_SPI0_ACTIVE_MODE		1
+#else
+#define SPIARB_SPI0_ACTIVE_MODE		0
+#endif
+#if defined(CONFIG_RALINK_SPI_CS1_HIGH_ACTIVE)
+#define SPIARB_SPI1_ACTIVE_MODE		1
+#else
+#define SPIARB_SPI1_ACTIVE_MODE		0
+#endif
 
 /* SPICFG register bit field */
 #define SPICFG_LSBFIRST				(0<<8)
@@ -111,12 +127,10 @@ typedef struct spi_vtss_data {
 #define SPICTL_HIZSDO				(1<<3)
 #define SPICTL_STARTWR				(1<<2)
 #define SPICTL_STARTRD				(1<<1)
-#define SPICTL_SPIENA_ON			(0<<0)		/* #cs low active */
-#define SPICTL_SPIENA_OFF			(1<<0)
+#define SPICTL_SPIENA_NEGATE		(~(1<<0))
+#define SPICTL_SPIENA_ASSERT		(1<<0)
 
-
-#define IS_BUSY		(RT2880_REG(RT2880_SPISTAT_REG) & 0x01)
-#define IS_SPI1_BUSY		(RT2880_REG(RT2880_SPISTAT1_REG) & 0x01)
+#define IS_BUSY				(RT2880_REG(spireg[SPISTAT]) & 0x01)
 
 #define spi_busy_loop 3000
 #define max_ee_busy_loop 500
