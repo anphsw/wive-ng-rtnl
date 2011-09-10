@@ -409,11 +409,6 @@ static inline void ipv6_addr_set_v4mapped(const __be32 addr,
 			addr);
 }
 
-static inline int ipv6_addr_loopback(const struct in6_addr *a)
-{
-	return ((a->s6_addr32[0] | a->s6_addr32[1] | a->s6_addr32[2] | (a->s6_addr32[3] ^ htonl(1))) == 0);
-}
-
 /*
  * find the first different bit between two addresses
  * length of address must be a multiple of 32bits
