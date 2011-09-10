@@ -258,7 +258,7 @@ void surfboard_hw0_irqdispatch(void)
 }
 
 
-#ifndef CONFIG_RALINK_RT3883
+#if !defined(CONFIG_RALINK_RT3883) && !defined(CONFIG_RALINK_RT3052)
 static void enable_rt2880_cp_int(unsigned int IP_X)
 {
 	unsigned long int_status;

@@ -124,9 +124,9 @@ static inline void str2eaddr(unsigned char *ea, unsigned char *str)
 
 static void prom_usbinit(void)
 {
-	u32 reg;
-
-	reg = reg;
+#ifndef defined (CONFIG_RALINK_RT3052)
+	u32 reg=0;
+#endif
 #if defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT6855)
 	reg = *(volatile u32 *)KSEG1ADDR((RALINK_SYSCTL_BASE + 0x34));
 	reg = reg | RALINK_UDEV_RST | RALINK_UHST_RST;
