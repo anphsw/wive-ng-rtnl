@@ -85,11 +85,16 @@ void show_usage(void)
     printf("Ex: hw_nat -K [UP:0~7][AC:0~3]\n\n");
 
     printf("Set HNAT QOS Mode\n");
-#if defined (CONFIG_RALINK_RT3352) 
+#if defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT6855)
     printf("Ex: hw_nat -L [0:WRR, 1:SPQ, 2:Q3>WRR(Q2,Q1,Q0), 3:Q3>Q2>WRR(Q1,Q0)]\n\n");
 #else
     printf("Ex: hw_nat -L [0:WRR, 1:SPQ, 2:Q3>WRR(Q2,Q1,Q0)]\n\n");
 #endif
+
+    printf("Set the weight of GDMA Scheduler\n");
+    printf("hw_nat -M Q3(1/2/4/8) Q2(1/2/4/8) Q1(1/2/4/8) Q0(1/2/4/8)\n\n");
+    printf("hw_nat -M 8 4 2 1\n\n");
+
     printf("Set PPE Cofigurations:\n");
     printf("Set HNAT binding threshold per second (d=30)\n");
     printf("Ex: hw_nat -N [1~65535]\n\n");
@@ -109,19 +114,23 @@ void show_usage(void)
 
     printf("Set HNAT Life time of Binded TCP/UDP/FIN entry(d=5, 5, 5)(unit:1Sec) \n");
     printf("Ex: hw_nat -U [1~65535][1~65535][1~65535]\n\n");
-   
+
+    printf("Only Speed UP (0=Upstream, 1=Downstream, 2=Bi-Direction) flow \n");
+    printf("Ex: hw_nat -Z 1\n\n")
+
 }
 
 int main(int argc, char *argv[])
 {
     int opt;
-    char options[] = "abefg?c:A:B:C:D:E:F:G:H:I:J:K:L:M:R:S:d:h:i:j:k:l:m:n:o:p:q:r:s:t:u:v:w:x:y:z:N:O:P:Q:T:U";
+    char options[] = "abefg?c:A:B:C:D:E:F:G:H:I:J:K:L:M:R:S:d:h:i:j:k:l:m:n:o:p:q:r:s:t:u:v:w:x:y:z:N:O:P:Q:T:U:Z:";
     int fd, method=0;
-    unsigned int entry_num=0, debug=0;
+    unsigned int entry_num=0, debug=0, dir=0;
     struct hwnat_args *args;
     struct hwnat_tuple args2;
     struct hwnat_qos_args args3;
     struct hwnat_config_args args4;
+    int result=0;
 
     fd = open("/dev/"HW_NAT_DEVNAME, O_RDONLY);
     if (fd < 0)
@@ -337,10 +346,10 @@ int main(int argc, char *argv[])
 		break;
 	case 'M':
 		method = HW_NAT_SCH_WEIGHT;
-		args3.weight0 = strtoll(argv[2], NULL, 10);
-		args3.weight1 = strtoll(argv[3], NULL, 10);
-		args3.weight2 = strtoll(argv[4], NULL, 10);
-		args3.weight3 = strtoll(argv[5], NULL, 10);
+		args3.weight3 = strtoll(argv[2], NULL, 10);
+		args3.weight2 = strtoll(argv[3], NULL, 10);
+		args3.weight1 = strtoll(argv[4], NULL, 10);
+		args3.weight0 = strtoll(argv[5], NULL, 10);
 		break;
 	case 'N':
 		method = HW_NAT_BIND_THRESHOLD;
@@ -375,7 +384,10 @@ int main(int argc, char *argv[])
 		args4.foe_udp_dlta = strtoll(argv[3], NULL, 10);
 		args4.foe_fin_dlta = strtoll(argv[4], NULL, 10);
 		break;
-
+	case 'Z':
+		method = HW_NAT_BIND_DIRECTION;
+		dir = strtoll(optarg, NULL, 10);
+		break;
 	case '?':
 		show_usage();
 
@@ -386,96 +398,149 @@ int main(int argc, char *argv[])
     switch(method){
     case HW_NAT_ADD_ENTRY:
 	    HwNatAddEntry(&args2);
-	    if(args2.result==HWNAT_SUCCESS){
-		    printf("Add Entry %d Success\n",args2.hash_index);
-	    }else{
-		    printf("Add Entry Fail!\n");
-	    }
+	    result = args2.result;
 	    break;
     case HW_NAT_DEL_ENTRY:
 	    HwNatDelEntry(&args2);
-	    if(args2.result==HWNAT_SUCCESS){
-		    printf("Del Entry %d Success\n", args2.hash_index);
-	    }else{
-		    printf("Del Entry Fail!\n");
-	    }
+	    result = args2.result;
 	    break;
     case HW_NAT_GET_ALL_ENTRIES:
 	    HwNatGetAllEntries(args);
+
+	    printf("Total Entry Count = %d\n",args->num_of_entries);	
+	    for(i=0;i<args->num_of_entries;i++){
+		if(args->entries[i].fmt==0) { //IPV4_NAPT
+		    printf("%d : %u.%u.%u.%u:%d->%u.%u.%u.%u:%d => %u.%u.%u.%u:%d->%u.%u.%u.%u:%d\n", \
+			    args->entries[i].hash_index, \
+			    NIPQUAD(args->entries[i].sip), \
+			    args->entries[i].sport, \
+			    NIPQUAD(args->entries[i].dip), \
+			    args->entries[i].dport, \
+			    NIPQUAD(args->entries[i].new_sip), \
+		    args->entries[i].new_sport, \
+		    NIPQUAD(args->entries[i].new_dip), \
+		    args->entries[i].new_dport);
+		} else if(args->entries[i].fmt==1) { //IPV4_NAT
+		    printf("%d : %u.%u.%u.%u->%u.%u.%u.%u => %u.%u.%u.%u->%u.%u.%u.%u\n", \
+			    args->entries[i].hash_index, \
+			    NIPQUAD(args->entries[i].sip), \
+			    NIPQUAD(args->entries[i].dip), \
+			    NIPQUAD(args->entries[i].new_sip), \
+			    NIPQUAD(args->entries[i].new_dip)); 
+		} else if(args->entries[i].fmt==2) { //IPV6_ROUTING
+		    printf("IPv6 Entry= %d /SIP: %x:%x:%x:%x:%x:%x:%x:%x/DIP: %x:%x:%x:%x:%x:%x:%x:%x\n", \
+		    args->entries[i].hash_index, \
+		    NIPHALF(args->entries[i].ipv6_dip3), \
+		    NIPHALF(args->entries[i].ipv6_dip2), \
+		    NIPHALF(args->entries[i].ipv6_dip1), \
+		    NIPHALF(args->entries[i].ipv6_dip0));
+		} else{
+		    printf("Wrong entry format!\n");
+		}
+	    }
+	    result = args->result;
 	    break;
     case HW_NAT_DUMP_ENTRY:
-	    HwNatDumpEntry(entry_num);
+	    result = HwNatDumpEntry(entry_num);
 	    break;
     case HW_NAT_BIND_ENTRY:
-	    HwNatBindEntry(entry_num);
+	    result = HwNatBindEntry(entry_num);
 	    break;
     case HW_NAT_UNBIND_ENTRY:
-	    HwNatUnBindEntry(entry_num);
+	    result = HwNatUnBindEntry(entry_num);
 	    break;
     case HW_NAT_INVALID_ENTRY:
-	    HwNatInvalidEntry(entry_num);
+	    result = HwNatInvalidEntry(entry_num);
 	    break;
     case HW_NAT_DEBUG:
-	    HwNatDebug(debug);
+	    result = HwNatDebug(debug);
 	    break;
     case HW_NAT_DSCP_REMARK:
             HwNatDscpRemarkEbl(&args3);
+	    result = args3.result;
 	    break;
     case HW_NAT_VPRI_REMARK:
             HwNatVpriRemarkEbl(&args3);
+	    result = args3.result;
 	    break;
     case HW_NAT_FOE_WEIGHT:
 	    HwNatSetFoeWeight(&args3);
+	    result = args3.result;
 	    break;
     case HW_NAT_ACL_WEIGHT:
 	    HwNatSetAclWeight(&args3);
+	    result = args3.result;
 	    break;
     case HW_NAT_DSCP_WEIGHT:
 	    HwNatSetDscpWeight(&args3);
+	    result = args3.result;
 	    break;
     case HW_NAT_VPRI_WEIGHT:
 	    HwNatSetVpriWeight(&args3);
+	    result = args3.result;
 	    break;
     case HW_NAT_DSCP_UP:
 	    HwNatSetDscp_Up(&args3);
+	    result = args3.result;
 	    break;
     case HW_NAT_UP_IDSCP:
 	    HwNatSetUp_InDscp(&args3);
+	    result = args3.result;
 	    break;
     case HW_NAT_UP_ODSCP:
 	    HwNatSetUp_OutDscp(&args3);
+	    result = args3.result;
 	    break;
     case HW_NAT_UP_VPRI:
 	    HwNatSetUp_Vpri(&args3);
+	    result = args3.result;
 	    break;
     case HW_NAT_UP_AC:
 	    HwNatSetUp_Ac(&args3);
+	    result = args3.result;
 	    break;
     case HW_NAT_SCH_MODE:
 	    HwNatSetSchMode(&args3);
+	    result = args3.result;
 	    break;
     case HW_NAT_SCH_WEIGHT:
 	    HwNatSetSchWeight(&args3);
+	    result = args3.result;
 	    break;
     case HW_NAT_BIND_THRESHOLD:
 	    HwNatSetBindThreshold(&args4);
+	    result = args4.result;
 	    break;
     case HW_NAT_MAX_ENTRY_LMT:
 	    HwNatSetMaxEntryRateLimit(&args4);
+	    result = args4.result;
 	    break;
     case HW_NAT_RULE_SIZE:
 	    HwNatSetRuleSize(&args4);
+	    result = args4.result;
 	    break;
     case HW_NAT_KA_INTERVAL:
 	    HwNatSetKaInterval(&args4);
+	    result = args4.result;
 	    break;
     case HW_NAT_UB_LIFETIME:
 	    HwNatSetUnbindLifeTime(&args4);
+	    result = args4.result;
 	    break;
     case HW_NAT_BIND_LIFETIME:
 	    HwNatSetBindLifeTime(&args4);
+	    result = args4.result;
+	    break;
+    case HW_NAT_BIND_DIRECTION:
+	    result = HwNatSetBindDir(dir);
 	    break;
 
+    }
+
+    if(result==HWNAT_SUCCESS){
+	printf("done\n");
+    }else {
+	printf("fail\n");
     }
 
     free(args);

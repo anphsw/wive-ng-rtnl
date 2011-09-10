@@ -71,6 +71,7 @@ int main(int argc, char *argv[])
     int fd;
     int method=-1;
     struct ac_args args;
+    int result;
 
 
     fd = open("/dev/"AC_DEVNAME, O_RDONLY);
@@ -161,22 +162,14 @@ int main(int argc, char *argv[])
     case AC_ADD_IP_DL_ENTRY:
     case AC_CLEAN_TBL:
 	    SetAcEntry(&args, method);
-	    if(args.result == AC_TBL_FULL) {
-		    printf("Accounting Table Full!!\n");
-	    }else {
-		    printf("Accounting command ok!\n");
-	    }
+	    result = args.result;
 	    break;
     case AC_DEL_MAC_UL_ENTRY:
     case AC_DEL_MAC_DL_ENTRY:
     case AC_DEL_IP_UL_ENTRY:
     case AC_DEL_IP_DL_ENTRY:
 	    SetAcEntry(&args, method);
-	    if(args.result == AC_SUCCESS) {
-		    printf("Delete Entry ok!\n");
-	    }else{
-		    printf("Delete Entry fail!\n");
-	    }
+	    result = args.result;
 	    break;
     case AC_GET_MAC_UL_PKT_CNT:
     case AC_GET_MAC_DL_PKT_CNT: 
@@ -187,8 +180,17 @@ int main(int argc, char *argv[])
     case AC_GET_IP_UL_BYTE_CNT: 
     case AC_GET_IP_DL_BYTE_CNT:  
 	    GetAcEntry(&args, method);
+	    result = args.result;
 	    printf("Count=%d\n",args.cnt);
 	    break;
+    }
+
+    if(result == AC_SUCCESS) {
+	printf("done\n");
+    }else if (result ==  AC_TBL_FULL) {
+	printf("table full\n");
+    } else {
+	printf("fail\n");
     }
 
     return 0;

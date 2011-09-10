@@ -6,17 +6,6 @@
 #include <getopt.h>
 #include "hwnat_ioctl.h"
 
-#define NIPQUAD(addr) \
-	((unsigned char *)&addr)[3], \
-        ((unsigned char *)&addr)[2], \
-        ((unsigned char *)&addr)[1], \
-        ((unsigned char *)&addr)[0]
-#define NIPHALF(addr) \
-        ((unsigned short *)&addr)[1], \
-        ((unsigned short *)&addr)[0]
-
-
-
 
 
 int HwNatDumpEntry(unsigned int entry_num)
@@ -583,10 +572,33 @@ int HwNatSetBindLifeTime(struct hwnat_config_args *opt)
 
 }
 
+int HwNatSetBindDir(unsigned int dir)
+{
+    struct hwnat_args opt;
+    int fd;
+
+    opt.bind_dir=dir;
+
+    fd = open("/dev/"HW_NAT_DEVNAME, O_RDONLY);
+    if (fd < 0)
+    {
+	printf("Open %s pseudo device failed\n","/dev/"HW_NAT_DEVNAME);
+	return HWNAT_FAIL;
+    }
+
+    if(ioctl(fd, HW_NAT_BIND_DIRECTION, &opt)<0) {
+	printf("HW_NAT_API: ioctl error\n");
+	close(fd);
+	return HWNAT_FAIL;
+    }
+
+    close(fd);
+    return HWNAT_SUCCESS;
+}
+
 int HwNatGetAllEntries(struct hwnat_args *opt)
 {
     int fd=0;
-    int i=0;
 
     fd = open("/dev/"HW_NAT_DEVNAME, O_RDONLY);
     if (fd < 0)
@@ -603,38 +615,6 @@ int HwNatGetAllEntries(struct hwnat_args *opt)
 
     close(fd);
     
-    printf("Total Entry Count = %d\n",opt->num_of_entries);	
-    for(i=0;i<opt->num_of_entries;i++){
-	if(opt->entries[i].fmt==0) { //IPV4_NAPT
-	    printf("%d : %u.%u.%u.%u:%d->%u.%u.%u.%u:%d => %u.%u.%u.%u:%d->%u.%u.%u.%u:%d\n", \
-		    opt->entries[i].hash_index, \
-		    NIPQUAD(opt->entries[i].sip), \
-		    opt->entries[i].sport, \
-		    NIPQUAD(opt->entries[i].dip), \
-		    opt->entries[i].dport, \
-		    NIPQUAD(opt->entries[i].new_sip), \
-		    opt->entries[i].new_sport, \
-		    NIPQUAD(opt->entries[i].new_dip), \
-		    opt->entries[i].new_dport);
-	} else if(opt->entries[i].fmt==1) { //IPV4_NAT
-	    printf("%d : %u.%u.%u.%u->%u.%u.%u.%u => %u.%u.%u.%u->%u.%u.%u.%u\n", \
-		    opt->entries[i].hash_index, \
-		    NIPQUAD(opt->entries[i].sip), \
-		    NIPQUAD(opt->entries[i].dip), \
-		    NIPQUAD(opt->entries[i].new_sip), \
-		    NIPQUAD(opt->entries[i].new_dip)); 
-	} else if(opt->entries[i].fmt==2) { //IPV6_ROUTING
-		    printf("IPv6 Entry= %d /%s/DIP: %x:%x:%x:%x:%x:%x:%x:%x\n", \
-		    opt->entries[i].hash_index, \
-		    opt->entries[i].is_udp?"udp":"tcp", \
-		    NIPHALF(opt->entries[i].ipv6_dip3), \
-		    NIPHALF(opt->entries[i].ipv6_dip2), \
-		    NIPHALF(opt->entries[i].ipv6_dip1), \
-		    NIPHALF(opt->entries[i].ipv6_dip0));
-	} else{
-	    printf("Wrong entry format!\n");
-	}
-    }
 
     return HWNAT_SUCCESS;
 
