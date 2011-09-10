@@ -124,7 +124,7 @@ static inline void str2eaddr(unsigned char *ea, unsigned char *str)
 
 static void prom_usbinit(void)
 {
-#ifndef defined (CONFIG_RALINK_RT3052)
+#ifndef CONFIG_RALINK_RT3052
 	u32 reg=0;
 #endif
 #if defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT6855)
