@@ -100,7 +100,7 @@ int ra_check_flash_type(void)
     }else if(strcmp(Id,"RT2880")==0) {
 	boot_from = BOOT_FROM_NOR;
     }else if(strcmp(Id,"RT6855")==0) {
-	boot_from = BOOT_FROM_SPI
+	boot_from = BOOT_FROM_SPI;
     } else {
 	printk("%s: %s is not supported\n",__FUNCTION__, Id);
     }
