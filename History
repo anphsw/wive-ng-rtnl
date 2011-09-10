@@ -625,6 +625,23 @@
 5) Some kernel fixes backport from 3.5.2.0 sdk.<br>
 6) Hotplug now support print server.<br>
 7) Update Ralink Hardware NAT to v0.92 3.6.0.0 sdk.<br>
+8) Add spi workaround from 3.6.0.0 sdk.<br>
+9) Fix boot device detect for RT6855.<br>
+10) Update gdma driver form 3.6.0.0 sdk.<br>
+11) Backport SPI driver from 3.6.0.0. New flash support.<br>
+12) Backport rdm driver from 3.6.0.0 SDK.<br>
+13) Fix RT6855 support in serial drivers.<br>
+14) dwc_otg driver up to 3.6.0.0 sdk version.<br>
+15) usb gadget up to 3.6.0.0 sdk version.<br>
+16) ehci driver up to 3.6.0.0 sdk.<br>
+17) Add mobilepack support to usb option.<br>
+18) gdma and i2c drivers up.<br>
+19) update pcm and i2s drivers up from 3.6.0.0 sdk.<br>
+20) watchdog drivers up to 3.6.0.0 SDK.<br>
+21) 8021q ralink tso support.<br>
+22) Prevent IGMP report packet flooding to all NICs.<br>
+23) Add 6rd support.<br>
+24) Usb suspend at start need for power save.<br>
 
 <br><br>
 <b>For support see:</b><br>
