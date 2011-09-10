@@ -130,7 +130,7 @@ int main(int argc, char *argv[])
     struct hwnat_tuple args2;
     struct hwnat_qos_args args3;
     struct hwnat_config_args args4;
-    int result=0;
+    int i,result=0;
 
     fd = open("/dev/"HW_NAT_DEVNAME, O_RDONLY);
     if (fd < 0)
