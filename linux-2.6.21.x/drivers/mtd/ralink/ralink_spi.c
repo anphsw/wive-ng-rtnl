@@ -529,6 +529,7 @@ static int raspi_write_sr(u8 *val)
 	return 0;
 }
 
+/* not used
 static int raspi_cear_sr()
 {
 	u8 code = OPCODE_CLSR;
@@ -540,6 +541,8 @@ static int raspi_cear_sr()
 #endif
 	return 0;
 }
+
+*/
 
 #ifdef MX_4B_MODE
 static int raspi_4byte_mode(int enable)
@@ -812,7 +815,10 @@ static int ramtd_erase(struct mtd_info *mtd, struct erase_info *instr)
 static int ramtd_read(struct mtd_info *mtd, loff_t from, size_t len,
 	size_t *retlen, u_char *buf)
 {
-	size_t readlen, code;
+	size_t readlen;
+#ifdef COMMAND_MODE
+	size_t code;
+#endif
 
 	/* sanity checks */
 	if (!len)
