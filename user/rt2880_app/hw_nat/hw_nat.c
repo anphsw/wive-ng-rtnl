@@ -116,7 +116,7 @@ void show_usage(void)
     printf("Ex: hw_nat -U [1~65535][1~65535][1~65535]\n\n");
 
     printf("Only Speed UP (0=Upstream, 1=Downstream, 2=Bi-Direction) flow \n");
-    printf("Ex: hw_nat -Z 1\n\n")
+    printf("Ex: hw_nat -Z 1\n\n");
 
 }
 
