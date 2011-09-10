@@ -89,22 +89,21 @@ unsigned long flash_init (void)
 {
 	unsigned long size = 0;
 	int i;
+#if 0
 	u32 regvalue,kk0 = 0xF,kk1 = 0xF ;
 	char *s;
-#if 1
 
 	s = getenv("twe0");
 	//printf("twe0 set to %s\n",s);
 
 	if(s)
-	kk0 = simple_strtoul (s, NULL, 16);
-		
-	
+		kk0 = simple_strtoul (s, NULL, 16);
+
 	s = getenv("toe0");
 	//printf("toe0 set to %s\n",s);
 	
 	if(s)
-	kk1 = simple_strtoul (s, NULL, 16);
+		kk1 = simple_strtoul (s, NULL, 16);
 #if defined(RT3883_ASIC_BOARD) || defined(RT3883_FPGA_BOARD)
 	regvalue = *(volatile u_long *)(RALINK_SYSCTL_BASE + 0x0700);
 #else
@@ -113,7 +112,7 @@ unsigned long flash_init (void)
 #ifdef DEBUG
 	printf("\n Default FLASH_CFG0 = %08X \n",regvalue);
 #endif
-    regvalue &= ~(0x3 << 26);
+	regvalue &= ~(0x3 << 26);
 	regvalue |= (0x1 << 26);
 
 	regvalue |= (0x1 << 24);
@@ -123,7 +122,6 @@ unsigned long flash_init (void)
 
 	regvalue &= ~(0x3 << 16);
 	regvalue |= (0x1 << 16);
-
 
 	regvalue &= ~(0xF << 12);
 	regvalue |= (kk0 << 12);
@@ -141,14 +139,15 @@ unsigned long flash_init (void)
 #endif
 
 #if defined(RT3883_ASIC_BOARD) || defined(RT3883_FPGA_BOARD)
-	regvalue = *(volatile u_long *)(RALINK_SYSCTL_BASE + 0x0700);
+        regvalue = *(volatile u_long *)(RALINK_SYSCTL_BASE + 0x0700);
 #else
-	regvalue = *(volatile u_long *)(RALINK_SYSCTL_BASE + 0x0308);
+        regvalue = *(volatile u_long *)(RALINK_SYSCTL_BASE + 0x0308);
 #endif
 #ifdef DEBUG
 	printf("\n Setup FLASH_CFG0 = %08X \n",regvalue);
 #endif
 #endif
+
 	/* Init: no FLASHes known */
 	for (i=0; i < CFG_MAX_FLASH_BANKS; ++i) {
 		ulong flashbase = PHYS_FLASH_START;
@@ -285,6 +284,15 @@ static void flash_get_offsets(ulong base, flash_info_t *info)
 		}
 		for (i = 8; i < info->sector_count; i++) {
 			info->start[i] = base + ((i - 7) * sect_size);
+		}
+	}
+	else if ((info->flash_id & FLASH_VENDMASK) == FLASH_MAN_MX
+		&& ((info->flash_id & FLASH_TYPEMASK) == MX_ID_29GL128EHT)) {
+		int sect_size;		/* number of bytes/sector */
+
+		sect_size = 0x00020000 * (sizeof(FPW)/2); /* 128K */
+		for (i = 0; i < info->sector_count; i++) {
+		    info->start[i] = base + ( i * sect_size);
 		}
 	}
 	else if ((info->flash_id & FLASH_VENDMASK) == FLASH_MAN_MX
@@ -618,6 +626,12 @@ ulong flash_get_size(FPWV *addr, flash_info_t *info)
 			info->sector_count = 263;
 			info->size = 0x01000000 * (sizeof(FPW)/2);
 			break;
+		
+		case (FPW) MX_ID_29GL128EHT:
+			info->flash_id +=  MX_ID_29GL128EHT;
+			info->sector_count = 128;
+			info->size = 0x01000000 * (sizeof(FPW)/2);
+			break;
 
 #if defined (RT3052_MP2) && defined (ON_BOARD_32M_FLASH_COMPONENT)
 		case (FPW)FLASH_S29GL256N:
@@ -698,6 +712,7 @@ int erase_all_chip(flash_info_t *info, int s_first, int s_last)
 	case FLASH_MXLV160T:
 	case AMD_ID_LV320B:	
 	case EN_ID_29LV640H:	
+	case MX_ID_29GL128EHT:	
 		break;
 	case FLASH_UNKNOWN:
 	default:
@@ -830,6 +845,7 @@ int	flash_erase(flash_info_t *info, int s_first, int s_last)
 #if defined (RT3052_MP2) && defined (ON_BOARD_32M_FLASH_COMPONENT)
 	case FLASH_S29GL256N:
 #endif
+	case MX_ID_29GL128EHT:	
 		break;
 	case FLASH_UNKNOWN:
 	default:
@@ -1108,13 +1124,13 @@ static int write_word_amd(flash_info_t *info, FPWV *dest, FPW data)
 
 	while(*dest != 0xFFFF)  {
 #ifndef RT3052_FPGA_BOARD
-	if (get_timer(start) > CFG_FLASH_STATE_DISPLAY_TOUT) 
-	{
-		start = get_timer(0);
-		printf("\n dest[0x%08X]=%04X\n",dest,*dest);
-	}
-#endif	
-
+		if (get_timer(start) > CFG_FLASH_STATE_DISPLAY_TOUT) 
+		{
+			start = get_timer(0);
+			printf("\n dest[0x%08X]=%04X\n",dest,*dest);
+		}
+#endif
+		
 #if 1 //defined (RT2880_ASIC_BOARD) || defined (RT3052_ASIC_BOARD)
 #else
 		printf("Not Erase: address 0x%08x(value=0x%08x)\n", (ulong) dest, *dest);

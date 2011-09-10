@@ -154,6 +154,12 @@ static void spi_master_init(void)
 	RT2880_REG(RT2880_RSTCTRL_REG) = val;
 	udelay(500);
 
+#if defined(RALINK_VITESSE_SWITCH_CONNECT_SPI_CS1)
+	/* config ARB and set the low or high active correctly according to the device */
+	RT2880_REG(RT2880_SPI_ARB_REG) = SPIARB_ARB_EN | (SPIARB_SPI1_ACTIVE_MODE <<1) | SPIARB_SPI0_ACTIVE_MODE;
+        RT2880_REG(RT2880_SPI0_CTL_REG) = (~SPIARB_SPI0_ACTIVE_MODE)&0x1;     //disable first
+        RT2880_REG(RT2880_SPI1_CTL_REG) = (~SPIARB_SPI1_ACTIVE_MODE)&0x1;     //disable first
+#endif
 	RT2880_REG(RT2880_SPICFG_REG) = SPICFG_MSBFIRST | 
 									SPICFG_RXCLKEDGE_FALLING |
 									SPICFG_TXCLKEDGE_FALLING |
@@ -554,6 +560,15 @@ void vtss_init(void)
 	//HT_WR(SYSTEM, 0, ICPU_CTRL, (1<<8) | (1<<3) | (1<<1) | (1<<0));
 	spi_vtss_write(7, 0, 0x10, (1<<8) | (1<<3) | (1<<1) | (1<<0));
 	printf(" Vitesse uploading binary codes (%d bytes) done.\n", len);
+#if defined(RALINK_VITESSE_SWITCH_CONNECT_SPI_CS1)
+        /* config ARB and set the low or high active correctly according to the device */
+	RT2880_REG(RT2880_SPI_ARB_REG) = SPIARB_ARB_EN | (SPIARB_SPI1_ACTIVE_MODE <<1) | SPIARB_SPI0_ACTIVE_MODE;
+        RT2880_REG(RT2880_SPI0_CTL_REG) = (~SPIARB_SPI0_ACTIVE_MODE)&0x1;     //disable first
+        RT2880_REG(RT2880_SPI1_CTL_REG) = (~SPIARB_SPI1_ACTIVE_MODE)&0x1;     //disable first
+#ifdef CFG_ENV_IS_IN_SPI
+	spic_init();
+#endif
+#endif
 }
 
 void spi_vtss_cmd(cmd_tbl_t *cmdtp, int argc, char *argv[])

@@ -214,6 +214,9 @@ void do_bootm_linux (cmd_tbl_t * cmdtp, int flag, int argc, char *argv[],
 	for (i = 1; i < linux_argc; i++)
 		linux_argv[i] = KSEG0ADDR(linux_argv[i]);
 	linux_argv = KSEG0ADDR(linux_argv);
+	for (i = 0; i < linux_env_idx; i++)
+		linux_env[i] = KSEG0ADDR(linux_env[i]);
+	linux_env = KSEG0ADDR(linux_env);
 
 	/* we assume that the kernel is in place */
 	printf ("\nStarting kernel ...\n\n");

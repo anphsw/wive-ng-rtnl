@@ -191,7 +191,7 @@ extern void flash_read_factory_serial(flash_info_t * info, void * buffer, int of
 #define EN_ID_29LV640H	0x00002228	/* 8 M x 16 T/B */
 #define MX_ID_29LV640DB 0x000022CB	/* 29LV640DBTC (64M, bottom boot sect) */
 #define MX_ID_29LV128DB 0x0000227A	/* 29LV128DBTC (128M, bottom boot sect) */
-
+#define MX_ID_29GL128EHT 0x0000227E	/* MX29GL128EHT */
 
 #define AMD_ID_DL322T	0x22552255	/* 29DL322T ID (32 M, top boot sector)	*/
 #define AMD_ID_DL322B	0x22562256	/* 29DL322B ID (32 M, bottom boot sect) */

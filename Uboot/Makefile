@@ -89,10 +89,13 @@ endif
 endif
 endif
 
-ifeq ($(ON_BOARD_DDR),y)
+ifeq ($(ON_BOARD_DDR1),y)
 DRAM_TYPE=DDR
-else
-DRAM_WIDTH=16  #only support 16bit dram width for SDR
+endif
+ifeq ($(ON_BOARD_DDR2),y)
+DRAM_TYPE=DDR
+endif
+ifeq ($(ON_BOARD_SDR),y)
 DRAM_TYPE=SDR
 endif
 
@@ -113,6 +116,9 @@ ifeq ($(ON_BOARD_1024M_DRAM_COMPONENT),y)
 DRAM_SIZE=128
 endif
 
+# DRAM_WIDTH: SDR(DDR2)
+# 0:16(8)
+# 1:32(16)
 ifeq ($(ON_BOARD_DDR_WIDTH_16),y)
 DRAM_WIDTH=32
 else
@@ -184,9 +190,6 @@ LIBS += common/libcommon.a
 
 # Add GCC lib
 PLATFORM_LIBS += -L $(shell dirname `$(CC) $(CFLAGS)  -print-libgcc-file-name`)
-
-
-KAIKER_LIBS := $(shell dirname `$(CC) $(CFLAGS) -lgcc -print-libgcc-file-name`)
 
 # The "tools" are needed early, so put this first
 # Don't include stuff already done in $(LIBS)
@@ -1697,6 +1700,8 @@ clean:
 	rm -f ./uboot.bin ./uboot.img ./u-boot ./u-boot.*
 	rm -f scripts/lxdialog/lxdialog
 	rm -f a.out
+	rm -f .config*
+	rm -f .menuconfig.log*
 
 clobber:	clean
 	find . -type f \( -name .depend \
@@ -1716,7 +1721,7 @@ backup:
 	F=`basename $(TOPDIR)` ; cd .. ; \
 	gtar --force-local -zcvf `date "+$$F-%Y-%m-%d-%T.tar.gz"` $$F
 
-menuconfig: config.in
+menuconfig: clean config.in
 	$(MAKE) -C scripts/lxdialog all
 	$(CONFIG_SHELL) scripts/Menuconfig config.in
 

@@ -216,7 +216,8 @@ reset:
     defined (RT3052_FPGA_BOARD) || defined (RT3052_ASIC_BOARD) || \
     defined (RT3352_FPGA_BOARD) || defined (RT3352_ASIC_BOARD) || \
     defined (RT5350_FPGA_BOARD) || defined (RT5350_ASIC_BOARD) || \
-    defined (RT3883_FPGA_BOARD) || defined (RT3883_ASIC_BOARD)
+    defined (RT3883_FPGA_BOARD) || defined (RT3883_ASIC_BOARD) || \
+    defined (RT6855_FPGA_BOARD) || defined (RT6855_ASIC_BOARD)
 	# Initialize the register file
 	# should not be required with good software practices
 	or	$1,$0, $0
@@ -523,8 +524,13 @@ reset:
 	bnez t0, 1b
 	nop
 
-#ifdef ON_BOARD_DDR
-        /* DDR initialization: reg SYSCFG1[25:16]: 
+#if defined(ON_BOARD_DDR1)||defined(ON_BOARD_DDR2)
+        
+
+#if defined(RT6855_FPGA_BOARD)||defined(RT6855_ASIC_BOARD)
+	/* Use default SYSCFG1 setting */
+#else
+	/* DDR initialization: reg SYSCFG1[25:16]: 
 	 * ODT disabled, LVCMOS=1, half drive, turn ON RT3662 DDR IO ODT as 150 ohm when read DRAM
 	 */
 	li t1, RALINK_SYSCTL_BASE + 0x14
@@ -534,7 +540,7 @@ reset:
 	or t2, (0x361<<16)
 	sw t2, 0(t1)
 	nop
-
+#endif
 	/* DDR initialization: reset pin to 0
 	 */
 	li t1, RALINK_SYSCTL_BASE + 0x34
@@ -544,7 +550,7 @@ reset:
 	/* DDR initialization: wait til reg DDR_CFG1 bit 21 equal to 1 (ready)
 	 */
 DDR_READY:
-	li t1, RALINK_MEMCTRL_BASE + 0x44
+	li t1, RALINK_MEMCTRL_BASE + 0x44 	//DDR_CFG1
 	lw t0, 0(t1)
 	nop
 	and t2, t0, (1<<21)
@@ -552,20 +558,50 @@ DDR_READY:
 	nop
 
 	/* DDR initialization:
-	 *   fpga: reg DDR_CFG3 -- disable DLL
-	 *   asic: reg DDR_CFG3 -- ODT disabled (bit 6,2)
 	 */
-	li t1, RALINK_MEMCTRL_BASE + 0x4c
+#if defined(RT6855_FPGA_BOARD)||defined(RT6855_ASIC_BOARD)
+	 /*   fpga/asic: reg DDR_CFG2 -- set bit[30]=0 as DDR1 mode when DDR1
+	  *   fpga/asic: reg DDR_CFG2 -- set bit[30]=1 as DDR2 mode when DDR2
+	  *   fpga/asic: reg DDR_CFG2 -- set bit[6:4]=3'b011 when DDR1
+	  *   fpga/asic: reg DDR_CFG2 -- set bit[6:4]=3'b100 when DDR2
+	  */
+	li t1, RALINK_MEMCTRL_BASE + 0x48	//DDR_CFG2
+	lw t0, 0(t1)
+	nop
+	and t0, ~(1<<30)
+#if ON_BOARD_DDR2
+	and t0, ~(7<<4)
+	or t0, (4<<4)
+	or t0, (1<<30)
+#elif ON_BOARD_DDR1
+	and t0, ~(7<<4)
+	or t0, (3<<4)
+#endif
+	sw t0, 0(t1)
+	nop
+#endif /* defined(RT6855_FPGA_BOARD)||defined(RT6855_ASIC_BOARD) */
+
+/* RT3883 and RT6855 will share below setting, RT3352 no boot from NOR */
+	/*
+	 *   fpga: reg DDR_CFG3 -- disable DLL
+	 *   asic: reg DDR_CFG3 -- ODT enable (bit 6,2) = 2'b10 when 6855/3883 DDR2
+	 *   fpga/asic: reg DDR_CFG3 -- ODT enable (bit 6,2) = 2'b00 when 6855 DDR1
+	 *   fpga/asic: reg DDR_CFG3[10][5:3] = 4'b0000 when 6855 DDR1
+	 */
+	li t1, RALINK_MEMCTRL_BASE + 0x4c 	////DDR_CFG3
 	lw t2, 0(t1)
-#ifdef RT3883_ASIC_BOARD
+#ifdef ON_BOARD_DDR2
 	#disable ODT; reference board ok, ev board fail
 	#and t2, ~(1<<6)
 
 	#enable ODT; both ok
 	or t2, (1<<6)
 	and t2, ~(1<<2)
+#elif ON_BOARD_DDR1
+	and t2, ~(1<<10)
+	and t2, ~(7<<3)
 #endif
-#ifdef RT3883_FPGA_BOARD
+#if defined(RT3883_FPGA_BOARD) || defined(RT6855_FPGA_BOARD)
 	or t2, 0x1
 #endif
 	sw t2, 0(t1)
@@ -592,7 +628,7 @@ DDR_READY:
 	sw	t1, 0(t0)
 #endif
 
-#if defined (RT3352_FPGA_BOARD) || defined (RT3883_FPGA_BOARD)
+#if defined (RT3352_FPGA_BOARD) || defined (RT3883_FPGA_BOARD) || defined (RT6855_FPGA_BOARD)
 	/* DDR initialization: DDR_CFG0 bit 12:0 (refresh interval) to 0x64
 	 * Note. this may have a bad affect on efficiency if the clock rate is 40MHz
 	 */
@@ -600,7 +636,11 @@ DDR_READY:
 	lw t2, 0(t1)
 	nop
 	and t2, ~(0xfff)
+#if defined(ON_BOARD_DDR1) && defined(RT6855_FPGA_BOARD)
+	li t2, 0x21086141
+#else
 	or t2, 0x64
+#endif	
 	sw t2, 0(t1)
 	nop
 #endif
@@ -619,6 +659,57 @@ DDR_READY:
 
 	/* DDR initialization: config size and width on reg DDR_CFG1
 	 */
+#if defined(RT6855_ASIC_BOARD)&&defined(ON_BOARD_DDR2)
+#ifdef ON_BOARD_128M_DRAM_COMPONENT
+        li t6, 0x332A3525
+#elif defined (ON_BOARD_256M_DRAM_COMPONENT)
+        li t6, 0x332E3525
+#elif defined (ON_BOARD_512M_DRAM_COMPONENT)
+        li t6, 0x33323525
+#elif defined (ON_BOARD_1024M_DRAM_COMPONENT)
+        li t6, 0x33363525
+#else
+        DRAM Component not defined
+#endif
+#elif defined(RT6855_ASIC_BOARD)&&defined(ON_BOARD_DDR1)
+#ifdef ON_BOARD_128M_DRAM_COMPONENT
+        li t6, 0x332A3525
+#elif defined (ON_BOARD_256M_DRAM_COMPONENT)
+        li t6, 0x332E3525
+#elif defined (ON_BOARD_512M_DRAM_COMPONENT)
+        li t6, 0x33323525
+#elif defined (ON_BOARD_1024M_DRAM_COMPONENT)
+        li t6, 0x33363525
+#else
+        DRAM Component not defined
+#endif
+#elif defined(RT6855_FPGA_BOARD)&&defined(ON_BOARD_DDR2)
+#ifdef ON_BOARD_128M_DRAM_COMPONENT
+        li t6, 0x122A3121
+#elif defined (ON_BOARD_256M_DRAM_COMPONENT)
+        li t6, 0x222e2323	//0x122E3121
+#elif defined (ON_BOARD_512M_DRAM_COMPONENT)
+        li t6, 0x12323121
+#elif defined (ON_BOARD_1024M_DRAM_COMPONENT)
+        li t6, 0x12363121
+#else
+        DRAM Component not defined
+#endif
+#elif defined(RT6855_FPGA_BOARD)&&defined(ON_BOARD_DDR1)
+#ifdef ON_BOARD_128M_DRAM_COMPONENT
+        li t6, 0x122A3111
+#elif defined (ON_BOARD_256M_DRAM_COMPONENT)
+        li t6, 0x222e2113	//0x122E3111
+#elif defined (ON_BOARD_512M_DRAM_COMPONENT)
+        li t6, 0x12323111
+#elif defined (ON_BOARD_1024M_DRAM_COMPONENT)
+        li t6, 0x12363111
+#else
+        DRAM Component not defined
+#endif
+
+
+#else /* RT3883 and RT3352 */
 #ifdef ON_BOARD_128M_DRAM_COMPONENT
 	li t6, 0x222A3323
 #elif defined (ON_BOARD_256M_DRAM_COMPONENT)
@@ -630,6 +721,9 @@ DDR_READY:
 #else
 	DRAM Component not defined
 #endif
+
+#endif /* end of setting DDR_CFG1 */
+
 #ifdef ON_BOARD_DDR_WIDTH_16
 	or t6, (1<<17)
 	and t6, ~(1<<16)
@@ -639,10 +733,12 @@ DDR_READY:
 #else
 	DDR width not defined
 #endif
+	/* CONFIG DDR_CFG1[13:12] about TOTAL WIDTH */
+	and t6, ~(3<<12)
 #ifdef ON_BOARD_32BIT_DRAM_BUS
-	or t6, (1<<12)
+	or t6, (3<<12)
 #elif defined (ON_BOARD_16BIT_DRAM_BUS)
-	and t6, ~(1<<12)
+	or t6, (2<<12)
 #else
 	DRAM bus not defined
 #endif
@@ -652,9 +748,10 @@ DDR_READY:
 
 	j SDRAM_INIT_DOWN
 	nop
-#endif
+#endif /* defined(ON_BOARD_DDR1)||defined(ON_BOARD_DDR2) */
 
 
+#ifdef ON_BOARD_SDR
 SDR_INIT:
 	/* SDR initialization: SDRAM_CFG0
 	 */
@@ -673,6 +770,9 @@ SDR_INIT:
 	or t6, 0x91825282
 	//or t6, 0x91815282
 #endif
+#elif defined(RT6855_FPGA_BOARD)
+	or t6, 0xD1825272
+	//or t6, 0xD1916292
 #else //2883, 3052, 3352, 3883, 5350 fpga
 	nop
 	or t6, 0xD1825272
@@ -680,7 +780,11 @@ SDR_INIT:
 	nop	
 #endif
 #else //ASIC_BOARD
+#if defined(RT6855_ASIC_BOARD)
+        or t6, 0xD1916292
+#else	
 	or t6, 0xD1825272
+#endif
 #endif
 	nop
 	sw t6, 0(t5)
@@ -703,7 +807,7 @@ SDR_INIT:
 	li t6, 0xa1120300
 #elif defined (ON_BOARD_512M_DRAM_COMPONENT)
 	li t6, 0xa1220600
-#elif defined (ON_BOARD_DDR)
+#elif defined(ON_BOARD_DDR1)||defined(ON_BOARD_DDR2)
 #else
 	DRAM Component not defined
 #endif
@@ -715,7 +819,9 @@ SDR_INIT:
 #else
 	DRAM bus not defined
 #endif
-#else
+
+#else /* not ASIC_BOARD */
+
 #ifdef ON_BOARD_64M_DRAM_COMPONENT
 	li t6, 0xa1010096
 #elif defined (ON_BOARD_128M_DRAM_COMPONENT)
@@ -727,6 +833,7 @@ SDR_INIT:
 #else
 	DRAM Component not defined
 #endif
+
 #ifdef ON_BOARD_32BIT_DRAM_BUS
 	and t6, 0xFEFFFFFF
 	or t6, (1<<24)
@@ -751,10 +858,12 @@ WAIT_SDRAM_INIT_DOWN:
 	beqz	t6, WAIT_SDRAM_INIT_DOWN
 	nop
 
+#endif // ON_BOARD_SDR //
+
 SDRAM_INIT_DOWN:
 #endif
 #if defined(RT3883_FPGA_BOARD) || defined(RT3883_ASIC_BOARD)
-#ifdef ON_BOARD_DDR
+#ifdef ON_BOARD_DDR2
 #if (TEXT_BASE != 0xBFC00000) && (TEXT_BASE != 0xBF000000) && (TEXT_BASE != 0xBC000000)
         /* DDR initialization: reg SYSCFG1[25:16]: 
 	 * ODT disabled, LVCMOS=1, half drive, turn ON RT3662 DDR IO ODT as 150 ohm when read DRAM
@@ -785,30 +894,30 @@ SDRAM_INIT_DOWN:
 	    sw t2, 0(t1)
             nop
 
-#if 0
 	/* 
 	 * Enable spreading spectrum clock 
 	 * SSC_MODUMAG=7: +/-1.00% for center; -2.00% for down
 	 */
 	    li t1, RALINK_SYSCTL_BASE + 0x54
 	    li t2, 0x71
-	    sw t2, 0(t1)
 	    nop
-#endif
+	    sw t2, 0(t1)
 
-#ifdef ON_BOARD_DDR
+#ifdef ON_BOARD_DDR2
 #if 0
-	/* DDR initialization:
-	 *   fpga: reg DDR_CFG3 -- disable DLL
-	 *   asic: reg DDR_CFG3 -- ODT disabled (bit 6,2)
-	 */
-	li t1, RALINK_MEMCTRL_BASE + 0x4c
-	lw t2, 0(t1)
-	and t2, ~(1<<6)
+	/* RT3352 EVB board with 32bits DDR shall enable this */
+	/* data output (DQ) delay */
+	li t1, RALINK_MEMCTRL_BASE + 0x60
+	li t2, 0xffffffff
+	sw t2, 0(t1)
+	nop
+	li t1, RALINK_MEMCTRL_BASE + 0x64
+	li t2, 0xffffffff
 	sw t2, 0(t1)
 	nop
 #endif
 #if 0
+	/* RT3352 EVB board with 16/32 bits DDR shall enable this */
 	/*
 	 * DDR_PAD_DRV_1=00 (full drive)
 	 * DDR_PAD_DS=0 (DDR2 differential RX application)
@@ -820,12 +929,12 @@ SDRAM_INIT_DOWN:
 	sw t2, 0(t1)
 	nop
 #endif
-#endif /* ON_BOARD_DDR */
+#endif /* ON_BOARD_DDR2 */
 
 #endif /* RT3352_ASIC_BOARD */
 
 
-#ifdef ON_BOARD_DDR
+#if defined(ON_BOARD_DDR1)||defined(ON_BOARD_DDR2)
 #if defined(RT3883_FPGA_BOARD) || defined(RT3883_ASIC_BOARD)
 	/* get cpu frequency from SYSCFG0 bit 9:8, and adjust tRFC accordingly
 	 */
@@ -907,6 +1016,39 @@ tRFC250:
 #else
 	DRAM Component not defined
 #endif
+
+#elif defined(RT6855_ASIC_BOARD)
+#if defined(ON_BOARD_DDR1)
+/* below 0x2419C640 is base on CLK = 200Mhz setting */	
+	li t4, 0x2419C640
+#endif /* defined(ON_BOARD_DDR1) */
+#if defined(ON_BOARD_DDR2)
+/* below 0x35AEA823 is base on CLK = 266Mhz setting */	
+	li t4, 0x35AEA823
+#endif /* defined(ON_BOARD_DDR2) */
+#elif defined(RT6855_FPGA_BOARD)
+#if defined(ON_BOARD_DDR1)
+/* below 0x21086140 is base on CLK = 40Mhz setting */
+        li t4, 0x21086140
+#endif /* defined(ON_BOARD_DDR1) */
+#if defined(ON_BOARD_DDR2)
+/* below 0x21090138 is base on CLK = 40Mhz setting */
+        li t4, 0x21090138
+#endif /* defined(ON_BOARD_DDR2) */
+/*
+#elif defined(RT6855_FPGA_BOARD) || defined(RT6855_ASIC_BOARD)
+#if defined (ON_BOARD_256M_DRAM_COMPONENT)
+	li t4, 0x2498E400
+#elif defined (ON_BOARD_512M_DRAM_COMPONENT)
+	li t4, 0x24992400
+#elif defined (ON_BOARD_1024M_DRAM_COMPONENT)
+	li t4, 0x24996400
+#elif defined (ON_BOARD_2048M_DRAM_COMPONENT)
+	li t4, 0x249A2400
+#else
+	DRAM Component not defined
+#endif
+*/
 #endif // defined(RT3883_FPGA_BOARD) || defined(RT3883_ASIC_BOARD) //
 
 tRFCinit:
@@ -957,7 +1099,7 @@ tRFCinit:
 	nop
 #endif // RALINK_MEMORY_POWER_SAVE  //
 #endif  // defined(RT3352_FPGA_BOARD) || defined (RT3352_ASIC_BOARD)
-#endif // ON_BOARD_DDR //
+#endif /* defined(ON_BOARD_DDR1)||defined(ON_BOARD_DDR2) */
 #if defined(RT3352_FPGA_BOARD) || defined(RT3352_ASIC_BOARD) || \
     defined (RT5350_FPGA_BOARD) || defined (RT5350_ASIC_BOARD)
 #if defined (RALINK_CPU_AUTOFREQUENCY)
@@ -1000,7 +1142,7 @@ tRFCinit:
 	and t6, ~(0xf<<16)
 #endif
 
-#if defined(RT3052_ASIC_BOARD) || defined(RT3352_ASIC_BOARD)
+#if defined(RT3052_ASIC_BOARD) || defined(RT3352_ASIC_BOARD) || defined(RT6855_ASIC_BOARD)
 #if defined(P5_MAC_TO_PHY_MODE)
 	//set mdio pin to normal mode
 	and t6, ~0x80
@@ -1147,6 +1289,8 @@ tRFCinit:
 #elif defined(RT3352_ASIC_BOARD)
 	//turn on power LED (GPIO ?)
 #elif defined(RT5350_ASIC_BOARD)
+	//turn on power LED (GPIO ?)
+#elif defined(RT6855_ASIC_BOARD)
 	//turn on power LED (GPIO ?)
 #elif defined(RT3883_ASIC_BOARD)
 	//turn on power LED (GPIO ?)

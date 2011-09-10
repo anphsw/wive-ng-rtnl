@@ -31,11 +31,12 @@ static int nfc_chip_reset(void)
 	//ra_dbg("%s:\n", __func__);
 
 	// reset nand flash
-	ra_outl(NFC_CMD1, 0xff);
-	ra_outl(NFC_ADDR, 0xfffffff);
-	ra_outl(NFC_CONF, 0x0141 | (CFG_ADDR_CYCLE << 16));
+	ra_outl(NFC_CMD1, 0x0);
+	ra_outl(NFC_CMD2, 0xff);
+	ra_outl(NFC_ADDR, 0x0);
+	ra_outl(NFC_CONF, 0x0411);
 
-	status = nfc_wait_ready(0);  //erase wait 5us
+	status = nfc_wait_ready(5);  //erase wait 5us
 	if (status & NAND_STATUS_FAIL) {
 		printf("%s: fail\n", __func__);
 		return -1;
@@ -156,11 +157,21 @@ static int nfc_device_ready(void)
 
 unsigned long ranand_init(void)
 {
+#if defined (RT6855_FPGA_BOARD) || defined (RT6855_ASIC_BOARD)
+	//set NAND_SPI_SHARE to 3b'100
+	ra_and(RALINK_SYSCTL_BASE+0x60, ~(0x7<<11));
+	ra_or(RALINK_SYSCTL_BASE+0x60, (0x4<<11));
+
+	//512 bytes per page
+	ra_and(RALINK_NAND_CTRL_BASE+0x2c, ~1);
+#endif
+
 	//maks sure gpio-0 is input
 	ra_outl(RALINK_PIO_BASE+0x24, ra_inl(RALINK_PIO_BASE+0x24) & ~0x01);
 
 	//set WP to high
 	ra_or(NFC_CTRL, 0x01);
+	udelay(100);
 
 	if (nfc_all_reset() != 0)
 		return -1;
@@ -259,11 +270,9 @@ static int _ra_nand_push_data(char *buf, int len)
 			if (tx_size == 4)
 				tx_data = (*p++);
 			else {
-				__u8 *q;
+				__u8 *q = (__u8 *)p;
 				for (iter = 0; iter < tx_size; iter++)
-					tx_data |= (*p++ << (8*iter));
-				q = (__u8 *)p;
-				q -= (4 - tx_size);
+					tx_data |= (*q++ << (8*iter));
 				p = (__u32 *)q;
 			}
 #endif
@@ -314,7 +323,6 @@ static int nfc_wait_ready(int snooze_ms)
 	}
 
 #if !defined (CONFIG_NOT_SUPPORT_RB)
-	//fixme
 	while (!(status = nfc_device_ready()) && retry--) {
 		udelay(1);
 	}
@@ -392,7 +400,7 @@ static inline int nfc_read_raw_data(int cmd1, int bus_addr, int conf, char *buf,
 		return NAND_STATUS_FAIL;
 	}
 
-	ret = nfc_wait_ready(0); //wait ready 
+	ret = nfc_wait_ready(3); //wait ready 
 	if (ret & NAND_STATUS_FAIL) {
 		printf("%s: fail\n", __func__);
 		return NAND_STATUS_FAIL;
@@ -512,7 +520,7 @@ int nfc_ecc_verify(char *buf, int page, int mode)
 	//ra_dbg("%s, page:%x mode:%d\n", __func__, page, mode);
 
 	if (mode == FL_WRITING) {
-		int len = (1<<CONFIG_PAGE_SIZE_BIT) + (1<<CONFIG_OOBSIZE_PER_PAGE_BIT);
+		int len = CFG_PAGESIZE + CFG_PAGE_OOBSIZE;
 		int conf = 0x000141| ((CFG_ADDR_CYCLE)<<16) | (len << 20);
 		char rbbuf[CFG_PAGESIZE+CFG_PAGE_OOBSIZE];
 		conf |= (1<<3); //(ecc_en)
@@ -542,6 +550,14 @@ ecc_check:
 	if (ecc == 0) //clean page.
 		return 0;
 	e = (char*)&ecc;
+	for (i=0; i<CONFIG_ECC_BYTES; i++) {
+		if ((char)*(p +i) != (char)0xff)
+			break;
+		if (i == CONFIG_ECC_BYTES - 1) {
+			//printf("skip ecc for empty flash\n");
+			return 0;
+		}
+	}
 	for (i=0; i<CONFIG_ECC_BYTES; i++) {
 		int eccpos = CONFIG_ECC_OFFSET + i;
 		if (*(p + eccpos) != *(e + i)) {

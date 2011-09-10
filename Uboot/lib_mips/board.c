@@ -69,7 +69,11 @@ int flash_sect_erase (ulong addr_first, ulong addr_last);
 int get_addr_boundary (ulong *addr);
 extern int do_reset(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[]);
 extern void input_value(u8 *str);
+#if defined (RT6855_ASIC_BOARD) || defined (RT6855_FPGA_BOARD)
+extern void rt6855_esw_init(void);
+#else
 extern void rt305x_esw_init(void);
+#endif
 extern void LANWANPartition(void);
 
 extern struct eth_device* 	rt2880_pdev;
@@ -130,6 +134,9 @@ static void Init_System_Mode(void)
 #elif defined (RT3883_FPGA_BOARD)
 	mips_cpu_feq = 40 * 1000 *1000;
 	mips_bus_feq = mips_cpu_feq;
+#elif defined (RT6855_FPGA_BOARD)
+	mips_cpu_feq = 50 * 1000 *1000;
+	mips_bus_feq = mips_cpu_feq/4;
 #elif defined (RT2883_ASIC_BOARD) 
 	clk_sel = (reg>>20) & 0x03;
 	switch(clk_sel) {
@@ -194,6 +201,9 @@ static void Init_System_Mode(void)
 			mips_bus_feq = (100*1000*1000);
 			break;
 	}
+#elif defined(RT6855_ASIC_BOARD)
+	mips_cpu_feq = (400*1000*1000);
+	mips_bus_feq = (133*1000*1000);
 #elif defined (RT3883_ASIC_BOARD) 
 	clk_sel = (reg>>8) & 0x03;
 	switch(clk_sel) {
@@ -258,7 +268,7 @@ static void Init_System_Mode(void)
 			mips_bus_feq = (125*1000*1000);
 			break;
 	}
-#elif defined ON_BOARD_DDR
+#elif defined ON_BOARD_DDR2
 	switch(clk_sel) {
 		case 0:
 			mips_bus_feq = (125*1000*1000);
@@ -379,7 +389,7 @@ static int init_func_ram (void)
 
 /*init dram config*/
 #ifdef RALINK_DDR_OPTIMIZATION
-#ifdef ON_BOARD_DDR
+#ifdef ON_BOARD_DDR2
 /*optimize ddr parameter*/
 {	
 	u32 tDDR;
@@ -393,6 +403,7 @@ static int init_func_ram (void)
 }
 #endif
 #endif
+
 
 	if ((gd->ram_size = initdram (board_type)) > 0) {
 		print_size (gd->ram_size, "\n");
@@ -634,6 +645,12 @@ void board_init_f(ulong bootflag)
 	 */
 #ifdef CONFIG_PURPLE
 	copy_code(addr);
+#endif
+
+#ifdef RT6855_FPGA_BOARD
+	value = le32_to_cpu(*(volatile u_long *)(RALINK_SYSCTL_BASE + 0x0B10));
+	value &= ~(0x7);
+	*(volatile u_long *)(RALINK_SYSCTL_BASE + 0x0B10) = cpu_to_le32(value);	
 #endif
 
 #if defined(CFG_RUN_CODE_IN_RAM)
@@ -1142,7 +1159,7 @@ void board_init_r (gd_t *id, ulong dest_addr)
 
 	Init_System_Mode(); /*  Get CPU rate */
 
-#if defined(RT3052_ASIC_BOARD) || defined(RT3352_ASIC_BOARD) || defined (RT5350_ASIC_BOARD)
+#if defined(RT3052_ASIC_BOARD) || defined(RT3352_ASIC_BOARD) || defined(RT5350_ASIC_BOARD)
 	//turn on all Ethernet LEDs around 0.5sec.
 #if 0
 	RALINK_REG(RALINK_ETH_SW_BASE+0xA4)=0xC;
@@ -1163,7 +1180,7 @@ void board_init_r (gd_t *id, ulong dest_addr)
 #if defined(RT3052_ASIC_BOARD) || defined(RT2883_ASIC_BOARD)
 	void config_usbotg(void);
 	config_usbotg();
-#elif defined(RT3883_ASIC_BOARD) || defined(RT3352_ASIC_BOARD) || defined(RT5350_ASIC_BOARD)
+#elif defined(RT3883_ASIC_BOARD) || defined(RT3352_ASIC_BOARD) || defined(RT5350_ASIC_BOARD) || defined(RT6855_ASIC_BOARD)
 	void config_usb_ehciohci(void);
 	config_usb_ehciohci();
 #endif
@@ -1330,7 +1347,7 @@ void board_init_r (gd_t *id, ulong dest_addr)
 	/* RT2880 Boot Loader Menu */
 #if defined(RT3352_FPGA_BOARD) || defined (RT3352_ASIC_BOARD) || \
     defined(RT3883_FPGA_BOARD) || defined (RT3883_ASIC_BOARD) || \
-    defined(RT5350_FPGA_BOARD) || defined (RT5350_ASIC_BOARD)
+    defined(RT5350_FPGA_BOARD) || defined (RT5350_ASIC_BOARD) 
 
 #if defined(CFG_ENV_IS_IN_SPI) || defined (CFG_ENV_IS_IN_NAND)
 	{
@@ -1352,7 +1369,7 @@ void board_init_r (gd_t *id, ulong dest_addr)
 		int _x = ((reg >> 12) & 0x7); 
 
 #if defined(RT3352_FPGA_BOARD) || defined (RT3352_ASIC_BOARD)
-		int dram_size = (_x == 4)? 512 : (_x == 3)? 256 : (_x == 2)? 128 : \
+		int dram_size = (_x == 6)? 2048 : (_x == 5)? 1024 : (_x == 4)? 512 : (_x == 3)? 256 : (_x == 2)? 128 : \
 				(_x == 1)? 64 : (_x == 0)? 16 : 0; 
 #elif defined (RT5350_FPGA_BOARD) || defined (RT5350_ASIC_BOARD)
 		int dram_size = (_x == 4)? 512 : (_x == 3)? 256 : (_x == 2)? 128 : \
@@ -1398,9 +1415,80 @@ void board_init_r (gd_t *id, ulong dest_addr)
 #else
 	SHOW_VER_STR();
 #endif /* defined(CFG_ENV_IS_IN_SPI) || defined (CFG_ENV_IS_IN_NAND) */
+
+#elif defined (RT6855_ASIC_BOARD) || defined (RT6855_FPGA_BOARD)
+	{
+		unsigned long chip_mode, dram_comp, dram_bus, is_ddr1, is_ddr2, data, cfg0, cfg1, size=0;
+
+		data = RALINK_REG(RALINK_SYSCTL_BASE+0x10);
+
+		chip_mode = (data&0x0F);
+		switch((data>>4)&0x3)
+		{
+			default:
+			case 0:
+			case 3:
+				is_ddr2 = is_ddr1 = 0;
+				break;
+			case 1:
+				is_ddr2 = 0;
+				is_ddr1 = 1;
+				break;
+			case 2:
+				is_ddr2 = 1;
+				is_ddr1 = 0;
+				break;
+		}
+		
+		switch((data>>4)&0x3)
+		{
+			case 0:
+			case 3:
+				cfg0 = RALINK_REG(RALINK_MEMCTRL_BASE+0x0);
+				cfg1 = RALINK_REG(RALINK_MEMCTRL_BASE+0x4);
+				data = cfg1;
+				
+				dram_comp = 1<<(2+(((data>>16)&0x3)+11)+(((data>>20)&0x3)+8)+1+3-20);
+				dram_bus = ((data>>24)&0x1) ? 32 : 16;
+				size = 1<<(2 +(((data>>16)&0x3)+11)+(((data>>20)&0x3)+8)+1-20);       	
+				break;
+			case 1:
+			case 2:
+				cfg0 = RALINK_REG(RALINK_MEMCTRL_BASE+0x40);
+				cfg1 = RALINK_REG(RALINK_MEMCTRL_BASE+0x44);
+				data = cfg1;
+				dram_comp = 1<<(((data>>18)&0x7)+5);
+			    	dram_bus = 1<<(((data>>12)&0x3)+2);	
+				if(((data>>16)&0x3) < ((data>>12)&0x3))
+				{
+					size = 1<<(((data>>18)&0x7) + 22 + 1-20); 
+				}
+				else
+				{
+					size = 1<<(((data>>18)&0x7) + 22-20);
+				}	
+				break;
+		}
+		
+		printf("============================================ \n"); \
+		printf("Ralink UBoot Version: %s\n", RALINK_LOCAL_VERSION); \
+		printf("-------------------------------------------- \n"); \
+		printf("%s %s %s\n",CHIP_TYPE, CHIP_VERSION, GMAC_MODE); \
+		printf("DRAM_CONF_FROM: %s \n", ((RALINK_REG(RALINK_SYSCTL_BASE+0x10)>>7)&0x1) ? "From SPI/NAND": (((chip_mode==2)||(chip_mode==3)			) ? "From Uboot" : "Auto-detection"));
+		printf("DRAM_TYPE: %s \n", is_ddr2 ? "DDR2": (is_ddr1 ? "DDR1" : "SDRAM"));
+		printf("DRAM component: %d Mbits\n", dram_comp); \
+		printf("DRAM bus: %d bit\n", dram_bus); \
+		printf("Total memory: %d MBytes\n", size); \
+		printf("%s\n", FLASH_MSG); \
+		printf("%s\n", "Date:" __DATE__ "  Time:" __TIME__ ); \
+		printf("============================================ \n"); \
+
+	}
 #else
 	SHOW_VER_STR();
 #endif /* defined(RT3352_FPGA_BOARD) || defined (RT3352_ASIC_BOARD) || defined(RT3883_FPGA_BOARD) || defined (RT3883_ASIC_BOARD) */
+
+
 
 #if defined (RT2880_FPGA_BOARD) || defined (RT2880_ASIC_BOARD)
 	value = read_32bit_cp0_register_with_select1(CP0_CONFIG);
@@ -1484,8 +1572,10 @@ void board_init_r (gd_t *id, ulong dest_addr)
 
 #if defined (RT3052_ASIC_BOARD) || defined (RT3052_FPGA_BOARD)  || \
     defined (RT3352_ASIC_BOARD) || defined (RT3352_FPGA_BOARD)  || \
-    defined (RT5350_ASIC_BOARD) || defined (RT5350_FPGA_BOARD) 
+    defined (RT5350_ASIC_BOARD) || defined (RT5350_FPGA_BOARD)  
 	rt305x_esw_init();
+#elif defined (RT6855_ASIC_BOARD) || defined (RT6855_FPGA_BOARD)
+	rt6855_esw_init();
 #endif
 	LANWANPartition();
 
@@ -1909,7 +1999,7 @@ void adjust_frequency(void)
 #endif
 
 #ifdef RALINK_USB_SUPPORT
-#if defined(RT3883_ASIC_BOARD) || defined(RT3352_ASIC_BOARD)|| defined(RT5350_ASIC_BOARD)
+#if defined(RT3883_ASIC_BOARD) || defined(RT3352_ASIC_BOARD) || defined(RT5350_ASIC_BOARD) || defined(RT6855_ASIC_BOARD)
 /*
  * enter power saving mode
  */
@@ -1917,16 +2007,19 @@ void config_usb_ehciohci(void)
 {
 	u32 val;
 	
-	//printf("USB Phy is down.\n");
 	val = RALINK_REG(RT2880_RSTCTRL_REG);    // toggle host & device RST bit
 	val = val | RALINK_UHST_RST | RALINK_UDEV_RST;
 	RALINK_REG(RT2880_RSTCTRL_REG) = val;
-	
-	val = le32_to_cpu(*(volatile u_long *)(0xB0000030));
-	val = val & 0xFFEBFFFF;  // disable USB port0 & port1 PHY. 
-	*(volatile u_long *)(0xB0000030) = cpu_to_le32(val);
+
+	val = RALINK_REG(RT2880_CLKCFG1_REG);
+#if defined(RT5350_ASIC_BOARD)
+	val = val & ~(RALINK_UPHY0_CLK_EN) ;  // disable USB port0 PHY. 
+#else
+	val = val & ~(RALINK_UPHY0_CLK_EN | RALINK_UPHY1_CLK_EN) ;  // disable USB port0 & port1 PHY. 
+#endif
+	RALINK_REG(RT2880_CLKCFG1_REG) = val;
 }
-#endif /* (RT3883_ASIC_BOARD) || defined(RT3352_ASIC_BOARD)|| defined(RT5350_ASIC_BOARD) */
+#endif /* (RT3883_ASIC_BOARD) || defined(RT3352_ASIC_BOARD)|| defined(RT5350_ASIC_BOARD) || defined(RT6855_ASIC_BOARD) */
 
 #if defined(RT3052_ASIC_BOARD) || defined(RT2883_ASIC_BOARD)
 int usbotg_host_suspend(void)
