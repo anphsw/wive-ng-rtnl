@@ -5,7 +5,7 @@
  *   Jukebox    |    |   (  <_> )  \___|    < | \_\ (  <_> > <  <
  *   Firmware   |____|_  /\____/ \___  >__|_ \|___  /\____/__/\_ \
  *                     \/            \/     \/    \/            \/
- * $Id: wm8750.c,v 1.3 2010-02-02 09:04:36 qwert Exp $
+ * $Id: wm8750.c,v 1.6.4.1 2011-07-06 08:16:36 qwert Exp $
  *
  * Driver for WM8751 audio codec
  *
@@ -60,7 +60,7 @@ void audiohw_sel_input(int ain);
 void wmcodec_write(int reg_addr, unsigned long reg_data)
 {
 	wmcodec_reg_data[reg_addr] = reg_data;
-	printk("[WM875X(%02X)=0x%08X]\n",reg_addr,reg_data);
+	printk("[WM875X(%02X)=0x%08X]\n",(unsigned int)reg_addr,(unsigned int)reg_data);
 	i2c_WM8751_write(reg_addr, reg_data);
 	return;
 }
@@ -104,32 +104,29 @@ static int adaptivebass2hw(int value)
 #endif
 
 /* Reset and power up the WM8751 */
-void audiohw_preinit()
+void audiohw_preinit(void)
 {
 	int i;
-    /*
-     * 1. Switch on power supplies.
-     *    By default the WM8751 is in Standby Mode, the DAC is
-     *    digitally muted and the Audio Interface, Line outputs
-     *    and Headphone outputs are all OFF (DACMU = 1 Power
-     *    Management registers 1 and 2 are all zeros).
-     */
-    if(wmcodec_reg_data[RESET]!=0)
-    	return;
-    	
-    memset(wmcodec_reg_data, 0 , sizeof(unsigned long)*48);
-    
-    wmcodec_write(RESET, RESET_RESET);    /*Reset*/
-	 
-	 for(i = 0; i < 1000*HZ; i++);
-
+	/*
+	* 1. Switch on power supplies.
+	*    By default the WM8751 is in Standby Mode, the DAC is
+	*    digitally muted and the Audio Interface, Line outputs
+	*    and Headphone outputs are all OFF (DACMU = 1 Power
+	*    Management registers 1 and 2 are all zeros).
+	*/
+	//if(wmcodec_reg_data[RESET]!=0)
+	//	return;
+	
+	memset(wmcodec_reg_data, 0 , sizeof(unsigned long)*48);
+	
+	wmcodec_write(RESET, RESET_RESET);    /*Reset*/
+	
+	for(i = 0; i < 1000*HZ; i++);
+	
 	wmcodec_reg_data[RESET] = 0xFFFF;
-     /* 2. Enable Vmid and VREF. */
-    wmcodec_write(PWRMGMT1, PWRMGMT1_VREF | PWRMGMT1_VMIDSEL_50K );
-
-   
-
-                
+	/* 2. Enable Vmid and VREF. */
+	wmcodec_write(PWRMGMT1, PWRMGMT1_VREF | PWRMGMT1_VMIDSEL_50K );
+              
 }
 
 /* Enable DACs and audio output after a short delay */
@@ -144,7 +141,7 @@ void audiohw_postinit(int bSlave, int AIn, int AOut)
     /* BCLKINV=0(Dont invert BCLK) MS=1(Enable Master) LRSWAP=0 LRP=0 */
     /* IWL=00(16 bit) FORMAT=10(I2S format) */
     
-    if(bSlave)
+	if(bSlave)
 	{ 
 		MSG("WM8750 slave.....\n");
 		wmcodec_write(AINTFCE, AINTFCE_WL_16 | AINTFCE_FORMAT_I2S);
@@ -152,71 +149,80 @@ void audiohw_postinit(int bSlave, int AIn, int AOut)
 	else
 	{
 		MSG("WM8750 master.....\n");
-  		/* AINTFCE_BCLKINV on or off depend on trying result */
-    	wmcodec_write(AINTFCE, AINTFCE_MS | AINTFCE_WL_16 | AINTFCE_FORMAT_I2S);	
-   	}
+		/* AINTFCE_BCLKINV on or off depend on trying result */
+		wmcodec_write(AINTFCE, AINTFCE_MS | AINTFCE_WL_16 | AINTFCE_FORMAT_I2S);	
+	}
     
-    wmcodec_reg_data[RESET] = 0x5A5A;
-    	
-    /* From app notes: allow Vref to stabilize to reduce clicks */
-    for(i = 0; i < 1000*HZ; i++);
+	wmcodec_reg_data[RESET] = 0x5A5A;
+	
+	/* From app notes: allow Vref to stabilize to reduce clicks */
+	for(i = 0; i < 1000*HZ; i++);
     
-    data = wmcodec_reg_data[PWRMGMT1];
+	data = wmcodec_reg_data[PWRMGMT1];
     
-    if(AIn > 0)
+	if(AIn > 0)
 		wmcodec_write(PWRMGMT1, data | PWRMGMT1_ADCL | PWRMGMT1_ADCR | PWRMGMT1_AINL | PWRMGMT1_AINR |PWRMGMT1_MICB);
-    //wmcodec_write(PWRMGMT1, PWRMGMT1_VREF | PWRMGMT1_VMIDSEL_50K | PWRMGMT1_ADCL | PWRMGMT1_ADCR | PWRMGMT1_AINL | PWRMGMT1_AINR );
-     /* 3. Enable DACs as required. */
-    if(AOut > 0)
-    {
-	    data = PWRMGMT2_DACL | PWRMGMT2_DACR;
-	    switch(AOut)
-	    {
-	    	case 1:
-	    		data |= PWRMGMT2_LOUT1 | PWRMGMT2_ROUT1;
-	    		break;
-	    	case 2:
-	    		data |= PWRMGMT2_LOUT2 | PWRMGMT2_ROUT2;
-	    		break;
-	    	case 3:
-	    		data |= PWRMGMT2_OUT3;
-	    		break;
-	    	default:
-	    		break;	
-	    }	
-	    wmcodec_write(PWRMGMT2,   data);
+		//wmcodec_write(PWRMGMT1, PWRMGMT1_VREF | PWRMGMT1_VMIDSEL_50K | PWRMGMT1_ADCL | PWRMGMT1_ADCR | PWRMGMT1_AINL | PWRMGMT1_AINR );
+		
+	/* 3. Enable DACs as required. */
+	if(AOut > 0)
+	{
+		data = PWRMGMT2_DACL | PWRMGMT2_DACR;
+		switch(AOut)
+		{
+		case 1:
+			data |= PWRMGMT2_LOUT1 | PWRMGMT2_ROUT1;
+			break;
+		case 2:
+			data |= PWRMGMT2_LOUT2 | PWRMGMT2_ROUT2;
+			break;
+		case 3:
+			data |= PWRMGMT2_OUT3;
+			break;
+		default:
+			break;	
+		}	
+		wmcodec_write(PWRMGMT2,   data);
 	}
 	else
+	{
 		wmcodec_write(PWRMGMT2, 0);
+	}
 		 
-     /* 4. Enable line and / or headphone output buffers as required. */
-    wmcodec_write(ADDITIONAL1, ADDITIONAL1_TOEN |
-                    ADDITIONAL1_DMONOMIX_LLRR | ADDITIONAL1_VSEL_DEFAULT);
-	wmcodec_write(ADDITIONAL2, ADDITIONAL2_HPSWEN|ADDITIONAL2_HPSWPOL);
+	/* 4. Enable line and / or headphone output buffers as required. */
+	wmcodec_write(ADDITIONAL1, ADDITIONAL1_TOEN | ADDITIONAL1_DMONOMIX_LLRR | ADDITIONAL1_VSEL_DEFAULT);
+    
+	if(AOut==2) 
+	{               
+		wmcodec_write(ADDITIONAL2, ADDITIONAL2_HPSWEN|ADDITIONAL2_HPSWPOL);
+	}
+	else
+	{
+		wmcodec_write(ADDITIONAL2, ADDITIONAL2_LRCM_ON);
+	}
+	
 	wmcodec_write(ADDITIONAL3, ADDITIONAL3_ADCLRM(0));
 	
-   
-    wmcodec_write(RIGHTMIX1, 0);
-    wmcodec_write(LEFTMIX2, 0);
-    if(AOut > 0)
-    {
-    	wmcodec_write(LEFTMIX1, LEFTMIX1_LD2LO);
-    	wmcodec_write(RIGHTMIX2, RIGHTMIX2_RD2RO);
-    	wmcodec_write(LOUT1, 0x179);
-    	wmcodec_write(ROUT1, 0x179);
-    	wmcodec_write(LEFTGAIN, 0x1FF);
-	    wmcodec_write(RIGHTGAIN, 0x1FF);
-    }
-    else
-    {
-    	wmcodec_write(LEFTMIX1, 0);
-    	wmcodec_write(RIGHTMIX2, 0);
-    	wmcodec_write(LOUT1, 0);
-    	wmcodec_write(ROUT1, 0);
-    	
-    }
-    wmcodec_write(MONOMIX1, 0);
-    wmcodec_write(MONOMIX2, 0);
+	wmcodec_write(RIGHTMIX1, 0);
+	wmcodec_write(LEFTMIX2, 0);
+	if(AOut > 0)
+	{
+		wmcodec_write(LEFTMIX1, LEFTMIX1_LD2LO);
+		wmcodec_write(RIGHTMIX2, RIGHTMIX2_RD2RO);
+		wmcodec_write(LOUT1, 0x179);
+		wmcodec_write(ROUT1, 0x179);
+		wmcodec_write(LEFTGAIN, 0x1FF);
+		wmcodec_write(RIGHTGAIN, 0x1FF);
+	}
+	else
+	{
+		wmcodec_write(LEFTMIX1, 0);
+		wmcodec_write(RIGHTMIX2, 0);
+		wmcodec_write(LOUT1, 0);
+		wmcodec_write(ROUT1, 0);
+	}
+	wmcodec_write(MONOMIX1, 0);
+	wmcodec_write(MONOMIX2, 0);
 	wmcodec_write(ADCCTRL, ADCCTRL_ADCHPD);
 	if(AIn>0)
 	{
@@ -226,12 +232,12 @@ void audiohw_postinit(int bSlave, int AIn, int AOut)
 		//wmcodec_write(RINV, 0x117);
 		wmcodec_write(LINV, 0x100);
 		wmcodec_write(RINV, 0x100);
-	
+		
 		wmcodec_write(ALC1, 0);
 		wmcodec_write(NOISEGATE, 0x03);
 		//wmcodec_write(ALC1, ALC1_ALCL(0x01)|ALC1_SET_MAXGAIN(0x1)|ALC1_ALCSTEREO);
 		//wmcodec_write(NOISEGATE, NOISEGATE_SET_NGTH(0x1F)|NOISEGATE_SET_NGG(0x01)|NOISEGATE_NGAT_ENABLE);
-    
+		
 		audiohw_sel_input(AIn);
 	}
 	else
@@ -243,27 +249,27 @@ void audiohw_postinit(int bSlave, int AIn, int AOut)
 	//wmcodec_write(LEFTGAIN, 0x1FF);
 	//wmcodec_write(RIGHTGAIN, 0x1FF);
 	if(AOut > 0)
-    audiohw_mute(false);
+		audiohw_mute(false);
 	else
 		audiohw_mute(true);
 }
 int audiohw_set_master_vol(int vol_l, int vol_r)
 {
-    /* +6 to -73dB 1dB steps (plus mute == 80levels) 7bits */
-    /* 1111111 ==  +6dB                                    */
-    /* 1111001 ==   0dB                                    */
-    /* 0110000 == -73dB                                    */
-    /* 0101111 == mute (0x2f)                              */
+	/* +6 to -73dB 1dB steps (plus mute == 80levels) 7bits */
+	/* 1111111 ==  +6dB                                    */
+	/* 1111001 ==   0dB                                    */
+	/* 0110000 == -73dB                                    */
+	/* 0101111 == mute (0x2f)                              */
 	MSG("audiohw_set_master_vol\n");
-    wmcodec_write(LOUT1, LOUT1_BITS | LOUT1_LOUT1VOL(vol_l));
-    wmcodec_write(ROUT1, ROUT1_BITS | ROUT1_ROUT1VOL(vol_r));
-    
-    wmcodec_write(LOUT2, LOUT2_BITS | LOUT2_LOUT2VOL(vol_l));
-    wmcodec_write(ROUT2, ROUT2_BITS | ROUT2_ROUT2VOL(vol_r));
-    
-    wmcodec_write(LEFTGAIN, LEFTGAIN_LDVU | LEFTGAIN_LDACVOL(vol_l));
-    wmcodec_write(RIGHTGAIN, RIGHTGAIN_LDVU | RIGHTGAIN_LDACVOL(vol_r));
-    return 0;
+	wmcodec_write(LOUT1, LOUT1_BITS | LOUT1_LOUT1VOL(vol_l));
+	wmcodec_write(ROUT1, ROUT1_BITS | ROUT1_ROUT1VOL(vol_r));
+	
+	wmcodec_write(LOUT2, LOUT2_BITS | LOUT2_LOUT2VOL(vol_l));
+	wmcodec_write(ROUT2, ROUT2_BITS | ROUT2_ROUT2VOL(vol_r));
+	
+	wmcodec_write(LEFTGAIN, LEFTGAIN_LDVU | LEFTGAIN_LDACVOL(vol_l));
+	wmcodec_write(RIGHTGAIN, RIGHTGAIN_LDVU | RIGHTGAIN_LDACVOL(vol_r));
+	return 0;
 }
 
 int audiohw_set_lineout_vol(int Aout, int vol_l, int vol_r)
@@ -296,19 +302,18 @@ int audiohw_set_linein_vol(int vol_l, int vol_r)
 
 void audiohw_set_bass(int value)
 {
-    wmcodec_write(BASSCTRL, BASSCTRL_BITS |
+	wmcodec_write(BASSCTRL, BASSCTRL_BITS |
 
 #ifdef USE_ADAPTIVE_BASS
-        BASSCTRL_BASS(adaptivebass2hw(value)));
+	BASSCTRL_BASS(adaptivebass2hw(value)));
 #else
-        BASSCTRL_BASS(tone_tenthdb2hw(value)));
+	BASSCTRL_BASS(tone_tenthdb2hw(value)));
 #endif
 }
 
 void audiohw_set_treble(int value)
 {
-    wmcodec_write(TREBCTRL, TREBCTRL_BITS |
-        TREBCTRL_TREB(tone_tenthdb2hw(value)));
+    wmcodec_write(TREBCTRL, TREBCTRL_BITS | TREBCTRL_TREB(tone_tenthdb2hw(value)));
 }
 
 void audiohw_mute(bool mute)
@@ -321,19 +326,19 @@ void audiohw_mute(bool mute)
 /* Nice shutdown of WM8751 codec */
 void audiohw_close(void)
 {
-    /* 1. Set DACMU = 1 to soft-mute the audio DACs. */
-    audiohw_mute(true);
-
-	wmcodec_write(LADCVOL, 0);
-    wmcodec_write(RADCVOL, 0);
+	/* 1. Set DACMU = 1 to soft-mute the audio DACs. */
+	audiohw_mute(true);
 	
-    /* 2. Disable all output buffers. */
-    wmcodec_write(PWRMGMT2, 0x0);
-
-    /* 3. Switch off the power supplies. */
-    wmcodec_write(PWRMGMT1, 0x0);
-    
-    memset(wmcodec_reg_data, 0 , sizeof(unsigned long)*48);
+	wmcodec_write(LADCVOL, 0);
+	wmcodec_write(RADCVOL, 0);
+	
+	/* 2. Disable all output buffers. */
+	wmcodec_write(PWRMGMT2, 0x0);
+	
+	/* 3. Switch off the power supplies. */
+	wmcodec_write(PWRMGMT1, 0x0);
+	
+	memset(wmcodec_reg_data, 0 , sizeof(unsigned long)*48);
 }
 
 /* Note: Disable output before calling this function */
@@ -343,41 +348,41 @@ void audiohw_set_frequency(int fsel)
 	//fsel |= 0x0180;	// BCLK = MCLK/16
 	//fsel |= 0x0080;
 	//fsel &= 0xFFFFFFFE;
-    wmcodec_write(CLOCKING, fsel);	
+	wmcodec_write(CLOCKING, fsel);	
 } 
 
 void audiohw_set_MCLK(unsigned int bUsb)
 {
 	if(bUsb)
-    	wmcodec_write(CLOCKING, CLOCKING_SR_USB);
-    else
-    	wmcodec_write(CLOCKING, 0);		
+		wmcodec_write(CLOCKING, CLOCKING_SR_USB);
+	else
+		wmcodec_write(CLOCKING, 0);		
 } 
 
 void audiohw_sel_input(int ain)
 {
 	switch(ain)
 	{
-		case 1:
-			wmcodec_write(ADCLPATH, ADCLPATH_LINSEL_IN1);
-			wmcodec_write(ADCRPATH, ADCRPATH_RINSEL_IN1);
-			//wmcodec_write(ADCINMODE, ADCINMODE_RDCM_EN|ADCINMODE_LDCM_EN);	
-			break;
-		case 2:
-			wmcodec_write(ADCLPATH, ADCLPATH_LINSEL_IN2);
-			wmcodec_write(ADCRPATH, ADCRPATH_RINSEL_IN2);
-			//wmcodec_write(ADCLPATH, ADCLPATH_LINSEL_DS);
-			//wmcodec_write(ADCRPATH, ADCRPATH_RINSEL_DS);
-			//wmcodec_write(ADCINMODE, ADCINMODE_DS_IN2|ADCINMODE_RDCM_EN|ADCINMODE_LDCM_EN);						
-			break;
-		case 3:
-			wmcodec_write(ADCLPATH, ADCLPATH_LINSEL_IN3);
-			wmcodec_write(ADCRPATH, ADCRPATH_RINSEL_IN3);			
-			break;	
-		default:
-			wmcodec_write(ADCLPATH, ADCLPATH_LINSEL_IN1);
-			wmcodec_write(ADCRPATH, ADCRPATH_RINSEL_IN1);			
-			break;		
+	case 1:
+		wmcodec_write(ADCLPATH, ADCLPATH_LINSEL_IN1);
+		wmcodec_write(ADCRPATH, ADCRPATH_RINSEL_IN1);
+		//wmcodec_write(ADCINMODE, ADCINMODE_RDCM_EN|ADCINMODE_LDCM_EN);	
+		break;
+	case 2:
+		wmcodec_write(ADCLPATH, ADCLPATH_LINSEL_IN2);
+		wmcodec_write(ADCRPATH, ADCRPATH_RINSEL_IN2);
+		//wmcodec_write(ADCLPATH, ADCLPATH_LINSEL_DS);
+		//wmcodec_write(ADCRPATH, ADCRPATH_RINSEL_DS);
+		//wmcodec_write(ADCINMODE, ADCINMODE_DS_IN2|ADCINMODE_RDCM_EN|ADCINMODE_LDCM_EN);						
+		break;
+	case 3:
+		wmcodec_write(ADCLPATH, ADCLPATH_LINSEL_IN3);
+		wmcodec_write(ADCRPATH, ADCRPATH_RINSEL_IN3);			
+		break;	
+	default:
+		wmcodec_write(ADCLPATH, ADCLPATH_LINSEL_IN1);
+		wmcodec_write(ADCRPATH, ADCRPATH_RINSEL_IN1);			
+		break;		
 	}
 	return;
 }
@@ -386,42 +391,41 @@ void audiohw_loopback(int fsel)
 {
 	int i;
 	memset(wmcodec_reg_data, 0 , sizeof(unsigned long)*48);
-    
-    wmcodec_write(RESET, 0x000);    /*Reset*/
+	
+	wmcodec_write(RESET, 0x000);    /*Reset*/
 	  
-    for(i = 0; i < 1000*HZ; i++);
-    
-    //wmcodec_write(ADDITIONAL2, 0x0010);
-    //wmcodec_write(PWRMGMT1, 0x0FC );
-    
-
-    wmcodec_write(AINTFCE, AINTFCE_WL_16|AINTFCE_FORMAT_I2S|AINTFCE_MS);
-    wmcodec_write(LINV, 0x117);
+	for(i = 0; i < 1000*HZ; i++);
+	
+	//wmcodec_write(ADDITIONAL2, 0x0010);
+	//wmcodec_write(PWRMGMT1, 0x0FC );
+	
+	
+	wmcodec_write(AINTFCE, AINTFCE_WL_16|AINTFCE_FORMAT_I2S|AINTFCE_MS);
+	wmcodec_write(LINV, 0x117);
 	wmcodec_write(RINV, 0x117);     
-    wmcodec_write(LOUT1, 0x179);
+	wmcodec_write(LOUT1, 0x179);
 	wmcodec_write(ROUT1, 0x179);
 	wmcodec_write(ADCCTRL, 0);
 	wmcodec_write(CLOCKING, fsel);
 	wmcodec_write(LEFTGAIN, 0x01FF);   
 	wmcodec_write(RIGHTGAIN, 0x01FF);   
 	wmcodec_write(PWRMGMT1, 0x0FC );            
-    wmcodec_write(PWRMGMT2, 0x1E0 );
-    wmcodec_write(LEFTMIX1, 0x150 );
-    wmcodec_write(RIGHTMIX2, 0x150 );
+	wmcodec_write(PWRMGMT2, 0x1E0 );
+	wmcodec_write(LEFTMIX1, 0x150 );
+	wmcodec_write(RIGHTMIX2, 0x150 );
 }	
 
-void audiohw_bypass()
+void audiohw_bypass(void)
 {
 	int i;
 	memset(wmcodec_reg_data, 0 , sizeof(unsigned long)*48);
-    
-    wmcodec_write(RESET, 0x000);    /*Reset*/
+	wmcodec_write(RESET, 0x000);    /*Reset*/
 	  
-    for(i = 0; i < 1000*HZ; i++);
-    
-    wmcodec_write(LINV, 0x117);
+	for(i = 0; i < 1000*HZ; i++);
+	
+	wmcodec_write(LINV, 0x117);
 	wmcodec_write(RINV, 0x117);  
-    wmcodec_write(LOUT1, 0x179);
+	wmcodec_write(LOUT1, 0x179);
 	wmcodec_write(ROUT1, 0x179);
 	wmcodec_write(DACCTRL, 0);
 	wmcodec_write(AINTFCE, 0x42);
@@ -429,9 +433,9 @@ void audiohw_bypass()
 	wmcodec_write(LEFTGAIN, 0x1FF);
 	wmcodec_write(RIGHTGAIN, 0x1FF);
 	wmcodec_write(PWRMGMT1, 0x0F0);
-    wmcodec_write(PWRMGMT2, 0x060);
+	wmcodec_write(PWRMGMT2, 0x060);
 	wmcodec_write(LEFTMIX1, 0xA0 );
-    wmcodec_write(RIGHTMIX2, 0xA0 );
+	wmcodec_write(RIGHTMIX2, 0xA0 );
 }	
 
 

@@ -5,7 +5,6 @@
 #define false 0
 #define true 1
 
-#define HZ	3000
 /* volume/balance/treble/bass interdependency */
 #define VOLUME_MIN -730
 #define VOLUME_MAX  60
@@ -297,7 +296,7 @@
 #define RIGHTMIX1_RMIXSEL_DIN		4	
 
 /* codec API */
-void audiohw_preinit();
+void audiohw_preinit(void);
 void audiohw_postinit(int bSlave, int Ain, int Aout);
 void audiohw_close(void);
 void audiohw_set_frequency(int fsel);

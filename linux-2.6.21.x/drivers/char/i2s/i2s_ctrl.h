@@ -6,11 +6,11 @@
 #endif
 
 #define I2S_MAX_DEV			1
-#define MOD_VERSION			"0.1"
+#define I2S_MOD_VERSION			"0.1"
 #define phys_to_bus(a) (a & 0x1FFFFFFF)
 
 #ifndef u32
-#define u32 unsigned long
+#define u32 unsigned int
 #endif
 
 #ifndef u16
@@ -31,20 +31,20 @@
 #define Physical2NonCache(x)            (((int)x) | 0xa0000000)
 #define NonCache2Virtual(x)             (((int)x) & 0xDFFFFFFF)
 
-#define I2S_DEBUG
-#ifdef I2S_DEBUG
+#define I2S_DEBUG_PRN
+#ifdef I2S_DEBUG_PRN
 #define MSG(fmt, args...) printk("I2S: " fmt, ## args)
 #else
 #define MSG(fmt, args...) { }
 #endif
 
-#define i2s_outw(address, value)	do{printk("0x%08X = 0x%08X\n",address,value);*((volatile uint32_t *)(address)) = cpu_to_le32(value);}while(0)
+#define i2s_outw(address, value)	do{printk("0x%08X = 0x%08X\n",(u32)address,(u32)value);*((volatile uint32_t *)(address)) = cpu_to_le32(value);}while(0)
 #define i2s_inw(address)			le32_to_cpu(*(volatile u32 *)(address))
 
 /* HW feature definiations */
 #if defined(CONFIG_RALINK_RT3883)
 #define CONFIG_I2S_TXRX			1
-//#define CONFIG_I2S_IN_MCLK		1
+#define CONFIG_I2S_IN_MCLK		1
 //#define CONFIG_I2S_WS_EDGE		1
 #define CONFIG_I2S_FRAC_DIV		1
 #define CONFIG_I2S_EXTENDCFG	1
@@ -53,13 +53,15 @@
 //#define CONFIG_I2S_MMAP			1
 #endif
 
-#if defined(CONFIG_RALINK_RT3352)
+#if defined(CONFIG_RALINK_RT3352)||defined(CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT6855) \
+	|| defined(CONFIG_RALINK_RT63365)
 #define CONFIG_I2S_TXRX			1
-//#define CONFIG_I2S_IN_MCLK		1
+#define CONFIG_I2S_IN_MCLK		1
 //#define CONFIG_I2S_WS_EDGE		1
 #define CONFIG_I2S_FRAC_DIV		1
 #define CONFIG_I2S_EXTENDCFG	1
 #define CONFIG_I2S_IN_CLK		1
+//#define CONFIG_I2S_MMAP			1
 #endif
 
 #if defined(CONFIG_RALINK_RT3350)
@@ -67,8 +69,13 @@
 #endif
 
 #if defined(CONFIG_RALINK_RT3052)
-//#define CONFIG_I2S_MMAP		1
+//#define CONFIG_I2S_MMAP			1
 #define CONFIG_I2S_MS_MODE		1
+#endif
+
+#if defined(CONFIG_RALINK_RT63365)
+//#define I2S_RX_BYTE_SWAP	1
+//#define I2S_RX_BYTE_SWAP	1
 #endif
 
 /* Register Map, Ref to RT3052 Data Sheet */
@@ -90,6 +97,7 @@
 /* I2SCFG bit field */
 #define I2S_EN				31
 #define I2S_DMA_EN			30
+#define I2S_BYTE_SWAP			28
 #define I2S_CLK_OUT_DIS		8
 #define I2S_FF_THRES		4
 #define I2S_CH_SWAP			3
@@ -145,7 +153,7 @@
 /* Constant definition */
 #define NFF_THRES			4
 #define I2S_PAGE_SIZE		(1*4096)//(1152*2*2*2)
-#define MAX_I2S_PAGE		6
+#define MAX_I2S_PAGE		8
 
 #define MAX_SRATE_HZ			96000
 #define MIN_SRATE_HZ			8000
@@ -285,11 +293,6 @@ typedef struct i2s_config_t
 
 }i2s_config_type;
 
-/* forward declarations for _fops */
-static int i2s_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigned long arg);
-static int i2s_mmap(struct file *file, struct vm_area_struct *vma);
-static int i2s_open(struct inode *inode, struct file *file);
-static int i2s_release(struct inode *inode, struct file *file);
 
 int i2s_reset_tx_config(i2s_config_type* ptri2s_config);
 int i2s_reset_rx_config(i2s_config_type* ptri2s_config);
@@ -306,8 +309,6 @@ int i2s_clock_disable(i2s_config_type* ptri2s_config);
 void i2s_dma_tx_handler(u32 dma_ch);
 void i2s_dma_rx_handler(u32 dma_ch);
 void i2s_unmask_handler(u32 dma_ch);
-
-int audiohw_set_linein_vol(int vol_l, int vol_r);
 
 #if !defined(CONFIG_I2S_TXRX)
 #define GdmaI2sRx	//GdmaI2sRx
