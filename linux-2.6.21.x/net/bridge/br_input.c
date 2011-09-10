@@ -124,10 +124,10 @@ int br_handle_frame_finish(struct sk_buff *skb)
 		skb = NULL;
 	} else 
 #endif
-	if (is_multicast_ether_addr(dest)) { 
+	if (is_multicast_ether_addr(dest)) {
 #ifdef CONFIG_BRIDGE_IGMP_REPORT_NO_FLOODING
 		struct ethhdr *eth = eth_hdr(skb);
-		struct iphdr *ih;
+		struct iphdr *ih_br;
 		struct igmphdr *igmph;
 
 		if(dest[0] != 0x01 || dest[1] != 0x00 || dest[2] != 0x5e || (dest[3] > 0x7f))
@@ -137,11 +137,11 @@ int br_handle_frame_finish(struct sk_buff *skb)
 			if(skb->len < (sizeof(struct iphdr) + sizeof(struct igmphdr)))
 				goto out_igmp;
 
-			ih = (struct iphdr *)skb->h.raw;
-			if(ih->protocol != IPPROTO_IGMP)
+			ih_br = (struct iphdr *)skb->h.raw;
+			if(ih_br->protocol != IPPROTO_IGMP)
 				goto out_igmp;
 
-			igmph = (struct igmphdr *)((unsigned char *)skb->h.raw + (ih->ihl<<2)  );
+			igmph = (struct igmphdr *)((unsigned char *)skb->h.raw + (ih_br->ihl<<2)  );
 			if(	igmph->type == IGMP_HOST_MEMBERSHIP_REPORT ||
 				igmph->type == IGMPV2_HOST_MEMBERSHIP_REPORT ||
 				igmph->type == IGMPV3_HOST_MEMBERSHIP_REPORT){
