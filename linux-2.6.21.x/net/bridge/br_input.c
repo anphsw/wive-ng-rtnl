@@ -5,7 +5,7 @@
  *	Authors:
  *	Lennert Buytenhek		<buytenh@gnu.org>
  *
- *	$Id: br_input.c,v 1.1.1.1 2007-05-25 06:50:00 bruce Exp $
+ *	$Id: br_input.c,v 1.2 2010-11-24 03:40:46 yy Exp $
  *
  *	This program is free software; you can redistribute it and/or
  *	modify it under the terms of the GNU General Public License
@@ -19,7 +19,7 @@
 #include <linux/netfilter_bridge.h>
 #include "br_private.h"
 
-#ifdef CONFIG_BRIDGE_IGMPP_PROCFS
+#if defined(CONFIG_BRIDGE_IGMPP_PROCFS) || defined(CONFIG_BRIDGE_IGMP_REPORT_NO_FLOODING)
 #include <linux/ip.h>
 #include <linux/in.h>
 #include <linux/igmp.h>
@@ -82,6 +82,7 @@ static void snoop_MAC(struct net_bridge *br ,struct sk_buff *skb2)
 }
 #endif
 
+
 /* note: already called with rcu_read_lock (preempt_disabled) */
 int br_handle_frame_finish(struct sk_buff *skb)
 {
@@ -108,11 +109,11 @@ int br_handle_frame_finish(struct sk_buff *skb)
 #endif
 		goto drop;
 
-	/* The packet skb2 goes to the local host (NULL to skip). */                                                                        
+	/* The packet skb2 goes to the local host (NULL to skip). */
 	skb2 = NULL;
 
-	if (br->dev->flags & IFF_PROMISC)                                                                                                   
-		skb2 = skb;                                                                                                                 
+	if (br->dev->flags & IFF_PROMISC)
+		skb2 = skb;
 
 	dst = NULL;
 
@@ -124,6 +125,33 @@ int br_handle_frame_finish(struct sk_buff *skb)
 	} else 
 #endif
 	if (is_multicast_ether_addr(dest)) { 
+#ifdef CONFIG_BRIDGE_IGMP_REPORT_NO_FLOODING
+		struct ethhdr *eth = eth_hdr(skb);
+		struct iphdr *ih;
+		struct igmphdr *igmph;
+
+		if(dest[0] != 0x01 || dest[1] != 0x00 || dest[2] != 0x5e || (dest[3] > 0x7f))
+			goto out_igmp;
+
+		if(eth->h_proto == htons(ETH_P_IP)){
+			if(skb->len < (sizeof(struct iphdr) + sizeof(struct igmphdr)))
+				goto out_igmp;
+
+			ih = (struct iphdr *)skb->h.raw;
+			if(ih->protocol != IPPROTO_IGMP)
+				goto out_igmp;
+
+			igmph = (struct igmphdr *)((unsigned char *)skb->h.raw + (ih->ihl<<2)  );
+			if(	igmph->type == IGMP_HOST_MEMBERSHIP_REPORT ||
+				igmph->type == IGMPV2_HOST_MEMBERSHIP_REPORT ||
+				igmph->type == IGMPV3_HOST_MEMBERSHIP_REPORT){
+				if(!passedup)
+					br_pass_frame_up(br, skb);
+				goto out;
+			}
+		}
+out_igmp:
+#endif
 #ifdef CONFIG_BRIDGE_IGMPP_PROCFS
 		spin_lock_bh(&br->lock); // bridge lock
 
