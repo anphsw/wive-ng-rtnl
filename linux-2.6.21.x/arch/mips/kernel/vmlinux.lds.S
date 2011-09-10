@@ -37,6 +37,7 @@ SECTIONS
   /* read-only */
   _text = .;			/* Text and read-only data */
   .text : {
+    . = . + 0x8000;
     *(.text)
     SCHED_TEXT
     LOCK_TEXT
