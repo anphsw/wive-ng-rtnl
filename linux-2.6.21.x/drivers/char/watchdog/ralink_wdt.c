@@ -1,3 +1,4 @@
+#include <linux/version.h>
 #include <linux/module.h>
 #include <linux/moduleparam.h>
 #include <linux/types.h>
@@ -17,7 +18,7 @@ static int RaWdgAlive;
 static int WdgLoadValue;
 extern u32 get_surfboard_sysclk(void);
 
-#define WATCHDOG_TIMEOUT 120		/* 120 sec default timeout */
+#define WATCHDOG_TIMEOUT 10		/* 10 sec default timeout */
 
 #ifdef CONFIG_WATCHDOG_NOWAYOUT
 static int nowayout = WATCHDOG_NOWAYOUT;
@@ -32,9 +33,17 @@ void SetWdgTimerEbl(unsigned int timer, unsigned int ebl)
     result=sysRegRead(timer);
 
     if(ebl==1){
+#if defined (CONFIG_RALINK_RT63365)
+        result |= (1<<25) | (1<<5);
+#else
         result |= (1<<7);
+#endif
     }else {
+#if defined (CONFIG_RALINK_RT63365)
+        result &= ~((1<<25)|(1<<5));
+#else
         result &= ~(1<<7);
+#endif
     }
 
     sysRegWrite(timer,result);
@@ -80,52 +89,111 @@ void SetWdgTimerEbl(unsigned int timer, unsigned int ebl)
     }
 #elif defined (CONFIG_RALINK_RT3352)
     if(timer==TMR1CTL) {
-        result=sysRegRead(GPIOMODE);
+	//GPIOMODE[22:21]
+	//2'b00:SPI_CS1
+	//2'b01:WDG reset output
+	//2'b10:GPIO mode
+        result=sysRegRead(GPIOMODE); //GPIOMODE[22:21]
+	result &= ~(0x3<<21);
 
         if(ebl==1){
             result |= (0x1<<21); /* SPI_CS1 as watch dog reset */
         }else {
-            result &= ~(0x1<<21);
+            //result |= (0x0<<21); //SPI_CS1
+            result |= (0x2<<21); //GPIO_mode
         }
 
         sysRegWrite(GPIOMODE,result);
     }
 #elif defined (CONFIG_RALINK_RT5350)
     if(timer==TMR1CTL) {
-        result=sysRegRead(GPIOMODE);
+	/*
+	 * GPIOMODE[22:21]
+	 * 2'b00:SPI_CS1
+	 * 2'b01:WDG reset output
+	 * 2'b10:GPIO mode
+	 */
+        result=sysRegRead(GPIOMODE); 
+	result &= ~(0x3<<21);
 
         if(ebl==1){
-            result |= (0x1<<21); /* SPI_CS1 as watch dog reset */
+            result |= (0x1<<21);
         }else {
-            result &= ~(0x1<<21);
-        }
+	    //result |= (0x0<<21); //SPI_CS1
+	    result |= (0x2<<21); //GPIO mode
+	} 
+        
+	sysRegWrite(GPIOMODE,result);
 
+    }
+#elif defined (CONFIG_RALINK_RT6855)
+
+    if(timer==TMR1CTL) {
+        result=sysRegRead(GPIOMODE);
+
+#if 1 //use SPI_CS1 as WDG reset output
+	/*
+	 * GPIOMODE[22:21]
+	 * 2'b00:SPI_CS1
+	 * 2'b01:WDG reset output
+	 * 2'b11:REFCLK0
+	 */
+	result &= ~(0x3<<21);
+
+        if(ebl==1){
+            result |= (0x1<<21);
+        }else {
+	    result |= (0x0<<21); //SPI_CS1
+	    //result |= (0x3<<21); //REFCLK0
+        }
+#else //use PERST as WDG reset output (QFP128 package)
+	/* 
+	 * GPIOMODE[17:16]
+	 * 2'b00:PERST
+	 * 2'b01:WDG reset output
+	 * 2'b10:GPIO mode
+	 * 2'b11:REFCLK0
+	 *
+	 */
+	result &= ~(0x3<<16);
+
+        if(ebl==1){
+            result |= (0x1<<16);
+        }else {
+	    result |= (0x0<<16); //PERST
+	    //result |= (0x2<<16); //GPIO mode
+	    //result |= (0x3<<16); //REFCLK0
+	}
+#endif
         sysRegWrite(GPIOMODE,result);
     }
+
 #endif
 #endif
 }
 
 void SetTimerMode(unsigned int timer, enum timer_mode mode)
 {
+#if !defined (CONFIG_RALINK_RT63365)
     unsigned int result;
 
     result=sysRegRead(timer);
     result &= ~(0x3<<4); //watchdog mode
     result=result | (mode << 4);
     sysRegWrite(timer,result);
-
+#endif
 }
 
 void SetWdgTimerClock(unsigned int timer, enum timer_clock_freq prescale)
 {
+#if !defined (CONFIG_RALINK_RT63365)
     unsigned int result;
 
     result=sysRegRead(timer);
     result &= ~0xF;
     result=result | (prescale&0xF);
     sysRegWrite(timer,result);
-
+#endif
 }
 
 static void RaWdgStart(void)
@@ -145,6 +213,8 @@ static void RaWdgStart(void)
     defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3883) || \
     defined (CONFIG_RALINK_RT5350)
     WdgLoadValue = WATCHDOG_TIMEOUT * (get_surfboard_sysclk()/65536);
+#elif defined (CONFIG_RALINK_RT63365)
+    WdgLoadValue = WATCHDOG_TIMEOUT * (25000000 / 2); //FIXME
 #else
     WdgLoadValue = WATCHDOG_TIMEOUT * (40000000/65536); //fixed at 40Mhz
 #endif
@@ -164,7 +234,12 @@ static void RaWdgStop(void)
 
 void RaWdgReload(void)
 {
+#if defined (CONFIG_RALINK_RT63365)
+	 sysRegWrite(RLDWDOG, 1);
+#else
 	 sysRegWrite(TMR1LOAD, WdgLoadValue);
+#endif
+//	 printk("TMR1LOAD=%x TMR1VAL=%x\n",sysRegRead(TMR1LOAD),sysRegRead(TMR1VAL));
 }
 EXPORT_SYMBOL(RaWdgReload);
 
@@ -216,8 +291,12 @@ static struct watchdog_info ident = {
     .identity		= "Ralink Hardware WatchDog",
 };
 
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,35)
+long ralink_ioctl (struct file *filp, unsigned int cmd, unsigned long arg)
+#else
 static int ralink_ioctl(struct inode *inode, struct file *file,
 	unsigned int cmd, unsigned long arg)
+#endif
 {
 	int options, retval = -EINVAL;
 
@@ -272,7 +351,11 @@ static const struct file_operations ralink_fops = {
 	.owner		= THIS_MODULE,
 	.llseek		= no_llseek,
 	.write		= ralink_write,
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,35)
+	.unlocked_ioctl = ralink_ioctl,
+#else
 	.ioctl		= ralink_ioctl,
+#endif
 	.open		= ralink_open,
 	.release	= ralink_release,
 };

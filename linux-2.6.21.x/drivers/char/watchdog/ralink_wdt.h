@@ -12,12 +12,22 @@
 #define GPIOMODE    RALINK_SYSCTL_BASE + 0x60  
 #define CLKCFG      RALINK_SYSCTL_BASE + 0x30  /* Clock Configuration Register */
 #define TMRSTAT     (RALINK_TIMER_BASE)  /* Timer Status Register */
-#define TMR0LOAD    (TMRSTAT + 0x10)  /* Timer0 Load Value */
-#define TMR0VAL     (TMRSTAT + 0x14)  /* Timer0 Counter Value */
-#define TMR0CTL     (TMRSTAT + 0x18)  /* Timer0 Control */
+
+#if defined (CONFIG_RALINK_RT63365)
+#define TIMERCTLR   (TMRSTAT + 0x0)  /* Timer1 Control */
+#define WDOGTHSLD   (TMRSTAT + 0x34) /* Watch Dog Threshold */
+#define TIMER3LVR   (TMRSTAT + 0x2C) /* Timer 3 Load Value Register */
+#define TIMER3CVR   (TMRSTAT + 0x30) /* Timer 3 Current Value Register */
+#define TMR1CTL     TIMERCTLR
+#define TMR1LOAD    TIMER3LVR
+#define TMR1VAL	    TIMER3CVR
+#define RLDWDOG     (TMRSTAT + 0x38) /* Reload Watchdog */
+
+#else
+#define TMR1CTL     (TMRSTAT + 0x28)  /* Timer1 Control */
 #define TMR1LOAD    (TMRSTAT + 0x20)  /* Timer1 Load Value */
 #define TMR1VAL     (TMRSTAT + 0x24)  /* Timer1 Counter Value */
-#define TMR1CTL     (TMRSTAT + 0x28)  /* Timer1 Control */
+#endif
 
 #define INTENA      (RALINK_INTCL_BASE + 0x34)  /* Interrupt Enable */
 
