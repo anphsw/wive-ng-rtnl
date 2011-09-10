@@ -89,6 +89,29 @@ void init_signals(void)
 
 #endif // SIGNAL
 
+int getIfIsUp(char *ifname)
+{
+	struct ifreq ifr;
+	int skfd;
+
+	skfd = socket(AF_INET, SOCK_DGRAM, 0);
+	if (skfd == -1) {
+		perror("socket");
+		return -1;
+	}
+	strncpy(ifr.ifr_name, ifname, sizeof(ifr.ifr_name));
+	if (ioctl(skfd, SIOCGIFFLAGS, &ifr) < 0) {
+		perror("ioctl");
+		close(skfd);
+		return -1;
+	}
+	close(skfd);
+	if (ifr.ifr_flags & IFF_UP)
+		return 1;
+	else
+		return 0;
+}
+
 void usage()
 {
     fprintf(stderr, "usage: ated [-i] <interface>\n");
@@ -110,7 +133,10 @@ int main(int argc, char *argv[])
 	
     if (argc == 3) {
 	if (!strcmp(argv[1], "-i")) {
-	    strcpy(IF_NAME, argv[2]);
+		if (getIfIsUp(argv[2]) == 1)
+			strcpy(IF_NAME, argv[2]);
+		else
+			return 0;
 	} else {
 	    usage();
 	    return 0;
@@ -156,6 +182,7 @@ static void RaCfg_Agent(void)
 	unsigned short rcv_protocol;
 	struct iwreq pwrq;
 	unsigned short CmdId;
+	unsigned int magic;
 
 	if (OpenRaCfgSocket() != 0)
 	{
@@ -173,6 +200,8 @@ static void RaCfg_Agent(void)
 	bzero(&pwrq, sizeof(pwrq));
 	CmdId = htons(RACFG_CMD_AP_STOP);
 	memcpy(&packet[20], &CmdId, 2);
+	magic = htonl(RACFG_MAGIC_NO);
+	memcpy(&packet[14], &magic, 4);
 	pwrq.u.data.pointer = (caddr_t) &packet[14];
 	pwrq.u.data.length = 8;
 	strncpy(pwrq.ifr_name, IF_NAME, IFNAMSIZ);
@@ -236,6 +265,8 @@ static void RaCfg_Agent(void)
 	bzero(&pwrq, sizeof(pwrq));
 	CmdId = htons(RACFG_CMD_AP_START);
 	memcpy(&packet[20], &CmdId, 2);
+	magic = htonl(RACFG_MAGIC_NO);
+	memcpy(&packet[14], &magic, 4);
 	pwrq.u.data.pointer = (caddr_t) &packet[14];
 	pwrq.u.data.length = 8;
 	strncpy(pwrq.ifr_name, IF_NAME, IFNAMSIZ);
