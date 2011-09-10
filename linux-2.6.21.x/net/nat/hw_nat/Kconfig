@@ -295,8 +295,6 @@ config  RA_HW_NAT_ACL2UP_HELPER
 	help
 	"use ACL rule to get user priority"
 
-endchoice
-
 config  RA_HW_NAT_WIFI
 	depends on RA_HW_NAT
 	bool "Speed up WiFi traffic by HNAT"
