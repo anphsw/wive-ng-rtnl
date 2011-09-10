@@ -624,6 +624,7 @@
 4) Update Uboot to 3.6.0.0 sdk version.<br>
 5) Some kernel fixes backport from 3.5.2.0 sdk.<br>
 6) Hotplug now support print server.<br>
+7) Update Ralink Hardware NAT to v0.92 3.6.0.0 sdk.<br>
 
 <br><br>
 <b>For support see:</b><br>

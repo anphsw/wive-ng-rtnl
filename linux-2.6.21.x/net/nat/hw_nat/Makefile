@@ -8,6 +8,10 @@ hw_nat-objs += ac_policy.o ac_ioctl.o
 hw_nat-objs += mtr_policy.o mtr_ioctl.o
 endif
 
+ifeq ($(CONFIG_RALINK_RT3052),y)
+hw_nat-objs += ra_rfrw.o
+endif
+
 #uncomment this flag if you want to set user autobind mode
 #EXTRA_CFLAGS += -DHWNAT_USER_AUTO
 
