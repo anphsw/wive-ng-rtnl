@@ -15,15 +15,7 @@
 #define RDM_WIRELESS_ADDR    RALINK_11N_MAC_BASE // wireless control
 #define RDM_DEVNAME	    "rdm0"
 static int register_control = RDM_WIRELESS_ADDR;
-int rdm_major =  254;
-
-
-struct file_operations rdm_fops = {
-    ioctl:      rdm_ioctl,
-    open:       rdm_open,
-    release:    rdm_release,
-};
-
+int rdm_major =  253;
 
 int rdm_open(struct inode *inode, struct file *filp)
 {
@@ -37,9 +29,12 @@ int rdm_release(struct inode *inode, struct file *filp)
 	return 0;
 }
 
-
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,35)
+long rdm_ioctl (struct file *filp, unsigned int cmd, unsigned long arg)
+#else
 int rdm_ioctl (struct inode *inode, struct file *filp,
                      unsigned int cmd, unsigned long *arg)
+#endif
 {
 	unsigned int rtvalue, baseaddr, offset;
 	unsigned int addr=0,count=0;
@@ -100,6 +95,16 @@ int rdm_ioctl (struct inode *inode, struct file *filp,
 
 	return 0;
 }
+
+struct file_operations rdm_fops = {
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,35)
+    unlocked_ioctl:      rdm_ioctl,
+#else
+    ioctl:      rdm_ioctl,
+#endif
+    open:       rdm_open,
+    release:    rdm_release,
+};
 
 static int rdm_init(void)
 
