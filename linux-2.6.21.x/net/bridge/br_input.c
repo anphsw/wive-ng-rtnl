@@ -145,8 +145,7 @@ int br_handle_frame_finish(struct sk_buff *skb)
 			if(	igmph->type == IGMP_HOST_MEMBERSHIP_REPORT ||
 				igmph->type == IGMPV2_HOST_MEMBERSHIP_REPORT ||
 				igmph->type == IGMPV3_HOST_MEMBERSHIP_REPORT){
-				if(!passedup)
-					br_pass_frame_up(br, skb);
+				br_pass_frame_up(br, skb);
 				goto out;
 			}
 		}
@@ -212,11 +211,11 @@ out_igmp:
 	if (skb2)
 	    br_pass_frame_up(br, skb2);
 
-	if (skb) {                                                                                                                          
-		if (dst)                                                                                                                    
-			br_forward(dst->dst, skb);                                                                                          
-		else                                                                                                                        
-			 br_flood_forward(br, skb);                                                                                          
+	if (skb) {
+		if (dst)
+			br_forward(dst->dst, skb);
+		else
+			 br_flood_forward(br, skb);
 	}
 
 out:
