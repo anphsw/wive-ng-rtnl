@@ -47,6 +47,14 @@
 
 #include "i2c_drv.h"
 
+#ifdef  CONFIG_DEVFS_FS
+#include <linux/devfs_fs_kernel.h>
+#endif
+
+#ifdef  CONFIG_DEVFS_FS
+static devfs_handle_t devfs_handle;
+#endif
+
 int i2cdrv_major =  218;
 unsigned long i2cdrv_addr = ATMEL_ADDR;
 
@@ -347,37 +355,18 @@ void i2c_read_config(char *data, unsigned int len)
 	i2c_eeprom_read(0, data, len);
 }
 
-typedef unsigned int uint32;
-unsigned char cloneMac[6];
-unsigned int enClone;
-static uint32 addedMacToLUTFlag = 0;
-
-
-//for raether drivers use ,when raether receive mac clone packet user.
-int i2cdrv_addARL()
-{
-		uint32 cloneport;
-		 if(!addedMacToLUTFlag )
-		  {
-			cloneport = searchARLEntry(cloneMac);
-			if(cloneport) {
-				modifyARLPort(cloneMac,cloneport);
-				addedMacToLUTFlag=1;
-				printk("Added %02X:%02X:%02X:%02X:%02X:%02X to ARL, port=%d\n",
-				cloneMac[0],cloneMac[1],cloneMac[2],cloneMac[3],cloneMac[4],cloneMac[5],cloneport);				
-			}	
-		}
-		return 0;
-}
-
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,35)
+int i2cdrv_ioctl(struct file *filp, unsigned int cmd, 
+		unsigned long arg)
+#else
 int i2cdrv_ioctl(struct inode *inode, struct file *filp, \
                      unsigned int cmd, unsigned long arg)
+#endif
 {
 	//unsigned char w_byte[4];
-	unsigned int address, size, cloneport, reg;
+	unsigned int address, size;
 	unsigned long value;
 	I2C_WRITE *i2c_write;
-	I2C_REG_WR *i2c_wr;
 
 	switch (cmd) {
 	case RT2880_I2C_READ:
@@ -385,7 +374,7 @@ int i2cdrv_ioctl(struct inode *inode, struct file *filp, \
 		address = (unsigned int)arg;
 		i2c_master_init();
 		i2c_eeprom_read(address, (unsigned char*)&value, 4);
-		printk("0x%04x : 0x%08x\n", address, value);
+		printk("0x%04x : 0x%08x\n", address, (unsigned int)value);
 		break;
 	case RT2880_I2C_WRITE:
 		i2c_write = (I2C_WRITE*)arg;
@@ -415,41 +404,6 @@ int i2cdrv_ioctl(struct inode *inode, struct file *filp, \
 	case RT2880_I2C_SET_ADDR:
 		i2cdrv_addr = (unsigned long)arg;
 		break;
-	case RT2880_I2C_SETREG:
-		i2c_wr = (I2C_REG_WR*) arg;
-		reg = i2c_wr->reg;
-		value = i2c_wr->value;
-
-		ARL_WRITE(reg, value);
-		break;
-
-	case RT2880_I2C_GETREG:
-		reg = (unsigned int) arg;
-		ARL_READ(reg);
-		break;
-
-	case RT2880_I2C_INIT_RTL_NOCLONE:		    //mac clone disable
-		memcpy(&cloneMac, arg, sizeof(cloneMac));
-		enClone = 0;	
-		if( cloneport = searchARLEntry(cloneMac)){
-			deleteARLEntry(cloneMac);
-			printk("[RT2880_I2C_INIT_RTL_NOCLONE]Delete %02X:%02X:%02X:%02X:%02X:%02X from LUT , port is %d\n",
-				cloneMac[0],cloneMac[1],cloneMac[2],cloneMac[3],cloneMac[4],cloneMac[5],cloneport);								
-			addedMacToLUTFlag = 0;	
-		}	
-		break;
-
-	case RT2880_I2C_INIT_RTL_CLONE:	       //mac eclone enable ,init public variable setting
-		printk("RT2880_I2C_INIT_RTL_CLONE\n");
-		memcpy(&cloneMac,arg,sizeof(cloneMac));
-		modifyARLPort(cloneMac, 1); 
-		addedMacToLUTFlag = 0;
-		enClone = 1;
-		break;
-	case RT2880_I2C_VIEW_ARL_TABLE:
-		 printk("RT2880_I2C_VIEW_ARL_TABLE\n");
-		 displayARLTable();
-		 break;
 	default :
 		printk("i2c_drv: command format error\n");
 	}
@@ -458,15 +412,31 @@ int i2cdrv_ioctl(struct inode *inode, struct file *filp, \
 }
 
 struct file_operations i2cdrv_fops = {
-	ioctl:	i2cdrv_ioctl,
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,35)
+	unlocked_ioctl: i2cdrv_ioctl,
+#else
+	ioctl:  i2cdrv_ioctl,
+#endif
 };
 
 static int i2cdrv_init(void)
 {
+#if !defined (CONFIG_DEVFS_FS)
+	int result=0;
+#endif
+
 	/* configure i2c to normal mode */
 	RT2880_REG(RALINK_SYSCTL_BASE + 0x60) &= ~1;
 
-	int result=0;
+#ifdef  CONFIG_DEVFS_FS
+	if(devfs_register_chrdev(i2cdrv_major, I2C_DEV_NAME , &i2cdrv_fops)) {
+		printk(KERN_WARNING " i2cdrv: can't create device node\n");
+		return -EIO;
+	}
+
+	devfs_handle = devfs_register(NULL, I2C_DEV_NAME, DEVFS_FL_DEFAULT, i2cdrv_major, 0, \
+			S_IFCHR | S_IRUGO | S_IWUGO, &i2cdrv_fops, NULL);
+#else
 	result = register_chrdev(i2cdrv_major, I2C_DEV_NAME, &i2cdrv_fops);
 	if (result < 0) {
 		printk(KERN_WARNING "i2c_drv: can't get major %d\n",i2cdrv_major);
@@ -476,6 +446,8 @@ static int i2cdrv_init(void)
 	if (i2cdrv_major == 0) {
 		i2cdrv_major = result; /* dynamic */
 	}
+#endif
+
 	printk("i2cdrv_major = %d\n", i2cdrv_major);
 	return 0;
 }
@@ -484,7 +456,14 @@ static int i2cdrv_init(void)
 static void i2cdrv_exit(void)
 {
 	printk("i2c_drv exit\n");
+
+#ifdef  CONFIG_DEVFS_FS
+	devfs_unregister_chrdev(i2cdrv_major, I2C_DEV_NAME);
+	devfs_unregister(devfs_handle);
+#else
 	unregister_chrdev(i2cdrv_major, I2C_DEV_NAME);
+#endif
+
 }
 
 #if defined (CONFIG_RALINK_I2S) || defined (CONFIG_RALINK_I2S_MODULE)
