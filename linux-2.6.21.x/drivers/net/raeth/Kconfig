@@ -193,6 +193,7 @@ default y if GE1_MII_AN || GE2_MII_AN
 
 config RAETH_SNMPD
 	bool "Support SNMPD in raeth"
+	depends on RAETH
 	default n
 
 config RAETH_DHCP_TOUCH
@@ -203,6 +204,7 @@ config RAETH_DHCP_TOUCH
 config RAETH_READ_MAC_FROM_MTD
         bool "Read mac adress from mtdflash at boot time"
         depends on RAETH
+	default n
 
 config RAETH_MEMORY_OPTIMIZATION
 	bool "Decrease memory usadge. Need for <32Mb RAM devices. More CPU use."
