@@ -642,6 +642,7 @@
 22) Prevent IGMP report packet flooding to all NICs.<br>
 23) Add 6rd support.<br>
 24) Usb suspend at start need for power save.<br>
+25) Fix build with 3.82 make version.<br>
 
 <br><br>
 <b>For support see:</b><br>

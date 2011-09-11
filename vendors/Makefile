@@ -26,7 +26,22 @@ dir_v := $(VEND)/$(CONFIG_VENDOR)/$(CONFIG_PRODUCT)/.
 
 # Note: the all and clean targets are not normally used,
 # since user/Makefile jumps directory to the product directory
-all image $(CLEAN) romfs romfs.post vendor_%:
+all: 
+	$(MAKE) -C $(dir_v) dir_v=$(dir_v) -f $(VEND)/vendors-common.mak $@
+
+image: 
+	$(MAKE) -C $(dir_v) dir_v=$(dir_v) -f $(VEND)/vendors-common.mak $@
+
+$(CLEAN): 
+	$(MAKE) -C $(dir_v) dir_v=$(dir_v) -f $(VEND)/vendors-common.mak $@
+
+romfs: 
+	$(MAKE) -C $(dir_v) dir_v=$(dir_v) -f $(VEND)/vendors-common.mak $@
+
+romfs.post: 
+	$(MAKE) -C $(dir_v) dir_v=$(dir_v) -f $(VEND)/vendors-common.mak $@
+
+vendor_%: 
 	$(MAKE) -C $(dir_v) dir_v=$(dir_v) -f $(VEND)/vendors-common.mak $@
 
 prune:

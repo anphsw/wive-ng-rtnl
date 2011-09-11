@@ -68,6 +68,15 @@ $(obj)/fore200e_sba_fw.c: $(patsubst "%", %, $(CONFIG_ATM_FORE200E_SBA_FW)) \
 	  -i $(CONFIG_ATM_FORE200E_SBA_FW) -o $@
 
 # deal with the various suffixes of the binary firmware images
-$(obj)/%.bin $(obj)/%.bin1 $(obj)/%.bin2: $(src)/%.data
+
+$(obj)/%.bin: $(src)/%.data
+	objcopy -Iihex $< -Obinary $@.gz
+	gzip -n -df $@.gz
+
+$(obj)/%.bin1: $(src)/%.data
+	objcopy -Iihex $< -Obinary $@.gz
+	gzip -n -df $@.gz
+
+$(obj)/%.bin2: $(src)/%.data
 	objcopy -Iihex $< -Obinary $@.gz
 	gzip -n -df $@.gz

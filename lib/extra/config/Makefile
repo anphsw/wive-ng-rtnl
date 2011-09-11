@@ -82,7 +82,10 @@ lkc_defs.h: lkc_proto.h
 
 ifdef LKC_GENPARSER
 
-%.tab.c %.tab.h: %.y
+%.tab.c: %.y
+	bison -t -d -v -b $* -p $(notdir $*) $<
+
+%.tab.h: %.y
 	bison -t -d -v -b $* -p $(notdir $*) $<
 
 lex.%.c: %.l

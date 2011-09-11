@@ -313,7 +313,21 @@ vendor_%:
 	$(MAKEARCH) -C vendors $@
 
 .PHONY: linux
-linux linux%_only:
+linux: 
+	# Added by Steven@Ralink FIXME!!!
+	# In linux-2.6, it do not support VPATH in Makefile.
+	# But we need to use drivers/net/wireless/rt2860v2 to build ap and sta driver.
+	# Workaround: Don't build ap and sta driver at the same time.
+ifeq ($(CONFIG_VENDOR),Ralink)
+	$(MAKEARCH_KERNEL) -j1 -C $(LINUXDIR) $(LINUXTARGET) || exit 1
+else
+	$(MAKEARCH_KERNEL) -j$(HOST_NCPU) -C $(LINUXDIR) $(LINUXTARGET) || exit 1
+endif
+	if [ -f $(LINUXDIR)/vmlinux ]; then \
+		ln -f $(LINUXDIR)/vmlinux $(LINUXDIR)/linux ; \
+	fi
+
+linux%_only: 
 	# Added by Steven@Ralink FIXME!!!
 	# In linux-2.6, it do not support VPATH in Makefile.
 	# But we need to use drivers/net/wireless/rt2860v2 to build ap and sta driver.
