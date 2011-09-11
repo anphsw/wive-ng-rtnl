@@ -7,7 +7,7 @@ config MTD_RALINK
 config MTD_NOR_RALINK
        bool "Ralink NOR support."
        default y
-       depends on MTD_RALINK && !RALINK_RT3352
+       depends on MTD_RALINK && !RALINK_RT3352 && !RALINK_RT5350 && !RALINK_RT6855
 
 config MTD_SPI_RALINK
        bool "Ralink SPI support."
@@ -17,7 +17,7 @@ config MTD_SPI_RALINK
 config MTD_NAND_RALINK
        bool "Ralink NAND support."
        default y
-       depends on MTD_RALINK && !RALINK_RT3352 && !RALINK_RT2880
+       depends on !RALINK_RT3352 && !RALINK_RT2880 && !RALINK_RT5350 && !RALINK_RT6855
 
 choice
        prompt "Flash Size"

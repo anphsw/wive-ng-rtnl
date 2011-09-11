@@ -59,8 +59,7 @@ config PCIE_PCI_NONE
 endchoice
 
 endif
-
-#---------------------------
+#-----------------------------
 
 if RALINK_RT5350
 
@@ -125,6 +124,10 @@ config LZMARAMFS
 
 config RALINK_TIMER_DFS
         bool "Ralink DFS Timer"
+
+config  KERNEL_NVRAM
+	bool 'Kernel NVRAM'
+	default y
 
 config RT3XXX_EHCI_OHCI
 	bool "Ralink USB EHCI/OHCI controller support"

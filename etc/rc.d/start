@@ -28,6 +28,9 @@ if [ "$tmpfs_av" != "0" ]; then
     fi
 fi
 
+#kernel mode nvram node
+mknod /dev/nvram	c	251	0
+
 #autocreate some dev nodes
 if [ -f /bin/mdev ]; then
     mdev -s

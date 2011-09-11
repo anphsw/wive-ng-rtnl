@@ -207,10 +207,8 @@ enum GdmaDmaReqNum {
 #define DMA_REQMEM 0x08
 #elif defined (CONFIG_RALINK_RT3883)
 #define DMA_REQMEM 0x10
-#elif defined (CONFIG_MTD_ANY_RALINK)
-#define DMA_REQMEM 0x08 //random number
 #else
-#error NAND flash Unsupported
+#define DMA_REQMEM 0x08 //random number
 #endif
 #define TRN_FIX  1
 #define TRN_INC 0

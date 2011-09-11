@@ -145,5 +145,3 @@ $(obj)/%.c: $(src)/%.map
 	loadkeys --mktable $< > $@.tmp
 	sed -e 's/^static *//' $@.tmp > $@
 	rm $@.tmp
-
-endif
