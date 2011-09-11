@@ -216,7 +216,7 @@ int mdio_read(struct net_device *dev, int phy_id, int location)
 	unsigned int result;
 	END_DEVICE *ei_local = dev->priv; 
 	mii_mgr_read( (unsigned int) ei_local->mii_info.phy_id, (unsigned int)location, &result);
-	printk("\n%s mii.o query= phy_id:%d, address:%d retval:%x\n", dev->name, phy_id, location, result);
+	//printk("\n%s mii.o query= phy_id:%d, address:%d retval:%x\n", dev->name, phy_id, location, result);
 	return (int)result;
 }
 
@@ -443,7 +443,7 @@ int mdio_virt_read(struct net_device *dev, int phy_id, int location)
 	unsigned int result;
 	PSEUDO_ADAPTER *pseudo = dev->priv; 
 	mii_mgr_read( (unsigned int) pseudo->mii_info.phy_id, (unsigned int)location, &result);
-	printk("%s mii.o query= phy_id:%d, address:%d retval:%d\n", dev->name, phy_id, location, result);
+	//printk("%s mii.o query= phy_id:%d, address:%d retval:%d\n", dev->name, phy_id, location, result);
 	return (int)result;
 }
 
