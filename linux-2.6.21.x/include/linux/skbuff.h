@@ -308,6 +308,9 @@ struct sk_buff {
 	__be16			protocol;
 
 	void			(*destructor)(struct sk_buff *skb);
+#if defined(CONFIG_RAETH_SKB_RECYCLE_2K)
+	int			(*skb_recycling_callback)(struct sk_buff *skb);
+#endif
 #ifdef CONFIG_NETFILTER
 	struct nf_conntrack	*nfct;
 #if defined(CONFIG_NF_CONNTRACK) || defined(CONFIG_NF_CONNTRACK_MODULE)
@@ -903,6 +906,21 @@ static inline void skb_fill_page_desc(struct sk_buff *skb, int i,
 #define SKB_PAGE_ASSERT(skb) 	BUG_ON(skb_shinfo(skb)->nr_frags)
 #define SKB_FRAG_ASSERT(skb) 	BUG_ON(skb_shinfo(skb)->frag_list)
 #define SKB_LINEAR_ASSERT(skb)  BUG_ON(skb_is_nonlinear(skb))
+
+static inline unsigned char *skb_tail_pointer(const struct sk_buff *skb)
+{
+	return skb->tail;
+}
+
+static inline void skb_reset_tail_pointer(struct sk_buff *skb)
+{
+	skb->tail = skb->data;
+}
+
+static inline void skb_set_tail_pointer(struct sk_buff *skb, const int offset)
+{
+	skb->tail = skb->data + offset;
+}
 
 /*
  *	Add data to an sk_buff
@@ -1634,6 +1652,31 @@ static inline int skb_is_gso(const struct sk_buff *skb)
 {
 	return skb_shinfo(skb)->gso_size;
 }
+
+#if defined(CONFIG_RAETH_SKB_RECYCLE_2K)
+struct sk_buff *skbmgr_alloc_skb2k(void);
+int skbmgr_recycling_callback(struct sk_buff *skb);
+
+static inline struct sk_buff *skbmgr_dev_alloc_skb2k(void)
+{
+	struct sk_buff *skb = skbmgr_alloc_skb2k();
+	if (likely(skb))
+		skb_reserve(skb, NET_SKB_PAD);
+	return skb;
+}
+
+struct sk_buff *skbmgr_alloc_skb4k(void);
+int skbmgr_4k_recycling_callback(struct sk_buff *skb);
+
+static inline struct sk_buff *skbmgr_dev_alloc_skb4k(void)
+{
+	struct sk_buff *skb = skbmgr_alloc_skb4k();
+	if (likely(skb))
+		skb_reserve(skb, NET_SKB_PAD);
+	return skb;
+}
+
+#endif
 
 #endif	/* __KERNEL__ */
 #endif	/* _LINUX_SKBUFF_H */
