@@ -169,7 +169,7 @@ config IPV6_SIT
 
 config IPV6_SIT_6RD
     bool "IPv6: IPv6 Rapid Development (6RD) (EXPERIMENTAL)"
-    depends on IPV6_SIT && EXPERIMENTAL
+    depends on IPV6_SIT
     default n
     ---help---
       IPv6 Rapid Deployment (6rd; draft-ietf-softwire-ipv6-6rd) builds upon

@@ -1,7 +1,6 @@
 #
 # Automatically generated make config: don't edit
 # Linux kernel version: 2.6.21.7
-# Thu Aug 18 07:19:00 2011
 #
 CONFIG_MIPS=y
 
@@ -298,6 +297,7 @@ CONFIG_IPV6_ROUTE_INFO=y
 # CONFIG_INET6_XFRM_MODE_BEET is not set
 # CONFIG_INET6_XFRM_MODE_ROUTEOPTIMIZATION is not set
 CONFIG_IPV6_SIT=y
+CONFIG_IPV6_SIT_6RD=y
 # CONFIG_IPV6_TUNNEL is not set
 # CONFIG_IPV6_MULTIPLE_TABLES is not set
 CONFIG_NET_SFHASH=y

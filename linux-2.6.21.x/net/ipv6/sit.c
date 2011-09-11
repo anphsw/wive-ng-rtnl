@@ -141,9 +141,9 @@ static void ipip6_tunnel_link(struct ip_tunnel *t)
 	write_unlock_bh(&ipip6_lock);
 }
 
+#ifdef CONFIG_IPV6_SIT_6RD
 static void ipip6_tunnel_clone_6rd(struct net_device *dev)
 {
-#ifdef CONFIG_IPV6_SIT_6RD
 	struct ip_tunnel *t = netdev_priv(dev);
 
 	if (t->dev == ipip6_fb_tunnel_dev) {
@@ -155,8 +155,8 @@ static void ipip6_tunnel_clone_6rd(struct net_device *dev)
 		struct ip_tunnel *t0 = netdev_priv(ipip6_fb_tunnel_dev);
 		memcpy(&t->ip6rd, &t0->ip6rd, sizeof(t->ip6rd));
 	}
-#endif
 }
+#endif
 
 
 static struct ip_tunnel * ipip6_tunnel_locate(struct ip_tunnel_parm *parms, int create)
