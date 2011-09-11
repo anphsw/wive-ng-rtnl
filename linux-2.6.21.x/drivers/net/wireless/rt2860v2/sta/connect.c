@@ -180,7 +180,7 @@ VOID MlmeCntlMachinePerformAction(
 #endif // DOT11N_DRAFT3 //
 
 #ifdef WPA_SUPPLICANT_SUPPORT
-				RtmpOSWrielessEventSend(pAd, SIOCGIWSCAN, -1, NULL, NULL, 0);
+				RtmpOSWirelessEventSend(pAd, SIOCGIWSCAN, -1, NULL, NULL, 0);
 #endif // WPA_SUPPLICANT_SUPPORT //
 
 			}
@@ -429,7 +429,7 @@ VOID CntlOidSsidProc(
 
 			pAd->Mlme.CntlMachine.CurrState = CNTL_IDLE;
 #ifdef NATIVE_WPA_SUPPLICANT_SUPPORT
-			RtmpOSWrielessEventSend(pAd, SIOCGIWAP, -1, &pAd->MlmeAux.Bssid[0], NULL, 0);
+			RtmpOSWirelessEventSend(pAd, SIOCGIWAP, -1, &pAd->MlmeAux.Bssid[0], NULL, 0);
 #endif // NATIVE_WPA_SUPPLICANT_SUPPORT //            
 		} 
 	} 
@@ -787,7 +787,7 @@ VOID CntlMlmeRoamingProc(
 		NdisMoveMemory(&pAd->MlmeAux.SsidBssTab, &pAd->MlmeAux.RoamTab, sizeof(pAd->MlmeAux.RoamTab));
 		pAd->MlmeAux.SsidBssTab.BssNr = pAd->MlmeAux.RoamTab.BssNr;
 
-		BssTableSortByRssi(&pAd->MlmeAux.SsidBssTab);
+		BssTableSortByRssi(&pAd->MlmeAux.SsidBssTab, FALSE);
 		pAd->MlmeAux.BssIdx = 0;
 		IterateOnBssTab(pAd);
 	}
@@ -2617,13 +2617,13 @@ VOID LinkDown(
 #ifndef NATIVE_WPA_SUPPLICANT_SUPPORT
 	if (pAd->StaCfg.WpaSupplicantUP) {
 		//send disassociate event to wpa_supplicant
-		RtmpOSWrielessEventSend(pAd, IWEVCUSTOM, RT_DISASSOC_EVENT_FLAG, NULL, NULL, 0);
+		RtmpOSWirelessEventSend(pAd, IWEVCUSTOM, RT_DISASSOC_EVENT_FLAG, NULL, NULL, 0);
 	}
 #endif // NATIVE_WPA_SUPPLICANT_SUPPORT //
 #endif // WPA_SUPPLICANT_SUPPORT //            
 			
 #ifdef NATIVE_WPA_SUPPLICANT_SUPPORT
-	RtmpOSWrielessEventSend(pAd, SIOCGIWAP, -1, NULL, NULL, 0);
+	RtmpOSWirelessEventSend(pAd, SIOCGIWAP, -1, NULL, NULL, 0);
 #endif // NATIVE_WPA_SUPPLICANT_SUPPORT //        
 
 

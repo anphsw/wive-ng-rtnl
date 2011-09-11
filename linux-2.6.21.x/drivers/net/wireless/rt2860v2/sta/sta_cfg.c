@@ -1812,39 +1812,6 @@ INT Set_ForceTxBurst_Proc(
 	return TRUE;
 }
 
-#ifdef ANT_DIVERSITY_SUPPORT
-INT	Set_Antenna_Proc(
-	IN	PRTMP_ADAPTER	pAd, 
-	IN	PSTRING			arg)
-{
-    UCHAR UsedAnt;
-	DBGPRINT(RT_DEBUG_TRACE, ("==> Set_Antenna_Proc *******************\n"));
-
-    if(simple_strtol(arg, 0, 10) <= 3)
-        UsedAnt = simple_strtol(arg, 0, 10);
-
-    pAd->CommonCfg.bRxAntDiversity = UsedAnt; // Auto switch
-    if (UsedAnt == ANT_DIVERSITY_ENABLE)
-    {
-            pAd->RxAnt.EvaluateStableCnt = 0;
-            DBGPRINT(RT_DEBUG_TRACE, ("<== Set_Antenna_Proc(Auto Switch Mode), (%d,%d)\n", pAd->RxAnt.Pair1PrimaryRxAnt, pAd->RxAnt.Pair1SecondaryRxAnt));
-    }
-    /* 2: Fix in the PHY Antenna CON1*/
-    if (UsedAnt == ANT_FIX_ANT1)
-    {
-            AsicSetRxAnt(pAd, 0);
-            DBGPRINT(RT_DEBUG_TRACE, ("<== Set_Antenna_Proc(Fix in Ant CON1), (%d,%d)\n", pAd->RxAnt.Pair1PrimaryRxAnt, pAd->RxAnt.Pair1SecondaryRxAnt));
-    }
-    /* 3: Fix in the PHY Antenna CON2*/
-    if (UsedAnt == ANT_FIX_ANT2)
-    {
-            AsicSetRxAnt(pAd, 1);
-            DBGPRINT(RT_DEBUG_TRACE, ("<== Set_Antenna_Proc(Fix in Ant CON2), (%d,%d)\n", pAd->RxAnt.Pair1PrimaryRxAnt, pAd->RxAnt.Pair1SecondaryRxAnt));
-    }
-
-	return TRUE;
-}
-#endif // ANT_DIVERSITY_SUPPORT //
 
 #ifdef XLINK_SUPPORT
 INT Set_XlinkMode_Proc(

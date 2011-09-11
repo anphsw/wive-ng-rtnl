@@ -111,6 +111,15 @@ char const *pWirelessWscEventText[IW_WSC_EVENT_TYPE_NUM] = {
 	"Not only one candidate found"							/* IW_WSC_MANY_CANDIDATE */
 	};
 #endif // WSC_INCLUDED //
+
+#ifdef APCLI_AUTO_CONNECT_SUPPORT
+/* for ApCliAutoConnect to indicate operation success or not */
+char const *pWirelessApcliEventText[IW_APCLI_AUTO_CONN_TYPE_NUM] = {
+	"Auto-connect success!",								/*IW_APCLI_AUTO_CONN_SUCCESS*/
+	"Auto-connect fail!",									/*IW_APCLI_AUTO_CONN_FAIL*/
+	};
+#endif /* APCLI_AUTO_CONNECT_SUPPORT */
+
 #endif // SYSTEM_LOG_SUPPORT //
 
 /* timeout -- ms */
@@ -355,9 +364,6 @@ VOID	RTMPFreeAdapter(
 	
 	NdisFreeSpinLock(&pAd->irq_lock);
 
-#ifdef SPECIFIC_BCN_BUF_SUPPORT
-	NdisFreeSpinLock(&pAd->ShrMemLock);
-#endif // SPECIFIC_BCN_BUF_SUPPORT //
 
 #ifdef CONFIG_AP_SUPPORT
 #ifdef UAPSD_AP_SUPPORT
@@ -1034,7 +1040,7 @@ VOID RTMPSendWirelessEvent(
 		pBufPtr[pBufPtr - pBuf] = '\0';
 		BufLen = pBufPtr - pBuf;
 		
-		RtmpOSWrielessEventSend(pAd, IWEVCUSTOM, Event_flag, NULL, (PUCHAR)pBuf, BufLen);
+		RtmpOSWirelessEventSend(pAd, IWEVCUSTOM, Event_flag, NULL, (PUCHAR)pBuf, BufLen);
 		//DBGPRINT(RT_DEBUG_TRACE, ("%s : %s\n", __FUNCTION__, pBuf));	
 	
 		kfree(pBuf);
@@ -1623,7 +1629,7 @@ struct net_device *alloc_netdev(
 #endif // LINUX_VERSION_CODE //
 
 
-int RtmpOSWrielessEventSend(
+int RtmpOSWirelessEventSend(
 	IN RTMP_ADAPTER *pAd,
 	IN UINT32		eventType,
 	IN INT			flags,
@@ -2269,7 +2275,7 @@ EXPORT_SYMBOL(RTMP_GetCurrentSystemTime);
 EXPORT_SYMBOL(RTMPSendWirelessEvent);
 #endif // SYSTEM_LOG_SUPPORT //
 EXPORT_SYMBOL(RTMPusecDelay);
-EXPORT_SYMBOL(RtmpOSWrielessEventSend);
+EXPORT_SYMBOL(RtmpOSWirelessEventSend);
 
 #ifdef CONFIG_AP_SUPPORT
 EXPORT_SYMBOL(duplicate_pkt_with_VLAN);

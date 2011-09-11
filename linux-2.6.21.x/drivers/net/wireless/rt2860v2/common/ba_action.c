@@ -554,6 +554,7 @@ VOID BAOriSessionAdd(
 	NDIS_STATUS     NStatus;
 	ULONG           FrameLen;
 	FRAME_BAR       FrameBar;
+	UCHAR			MaxPeerBufSize = 0;
 #ifdef CONFIG_AP_SUPPORT
 	UCHAR			apidx;
 #endif // CONFIG_AP_SUPPORT //
@@ -565,7 +566,15 @@ VOID BAOriSessionAdd(
 	// Start fill in parameters.
 	if ((Idx !=0) && (pBAEntry->TID == TID) && (pBAEntry->ORI_BA_Status == Originator_WaitRes))
 	{
-		pBAEntry->BAWinSize = min(pBAEntry->BAWinSize, ((UCHAR)pFrame->BaParm.BufSize));
+		MaxPeerBufSize = (UCHAR)pFrame->BaParm.BufSize;
+
+		if (MaxPeerBufSize > 0)
+			MaxPeerBufSize -= 1;
+		else
+			MaxPeerBufSize = 0;
+
+		pBAEntry->BAWinSize = min(pBAEntry->BAWinSize, MaxPeerBufSize);
+
 		BA_MaxWinSizeReasign(pAd, pEntry, &pBAEntry->BAWinSize);
 
 		pBAEntry->TimeOutValue = pFrame->TimeOutValue;

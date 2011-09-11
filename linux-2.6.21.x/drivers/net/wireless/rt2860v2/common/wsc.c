@@ -1138,20 +1138,26 @@ VOID WscEAPAction(
 				// bWscTrigger should be set FALSE, otherwise Proxy will send NACK to enrollee.
 				pWscControl->bWscTrigger = FALSE;
 				pWscControl->WscStatus = STATUS_WSC_CONFIGURED;
-					RTMPSendWirelessEvent(pAdapter, IW_WSC_STATUS_SUCCESS, NULL, pWscControl->EntryIfIdx, 0);
-			}
-			else
-			{
-				pWscControl->WscStatus = STATUS_WSC_FAIL;
-					RTMPSendWirelessEvent(pAdapter, IW_WSC_STATUS_FAIL, NULL, pWscControl->EntryIfIdx, 0);
+				pWscControl->WscRejectSamePinFromEnrollee = FALSE;
+				RTMPSendWirelessEvent(pAdapter, IW_WSC_STATUS_SUCCESS, NULL, pWscControl->EntryIfIdx, 0);
 			}
 
-#ifdef CONFIG_AP_SUPPORT
-			IF_DEV_CONFIG_OPMODE_ON_AP(pAdapter)
+			if ((pAdapter->OpMode == OPMODE_AP)
+				|| ((ADHOC_ON(pAdapter)) && (pWscControl->WscConfMode == WSC_REGISTRAR))
+				)
+			{
 				WscSendEapFail(pAdapter, pWscControl, TRUE);
-#endif // CONFIG_AP_SUPPORT //
-			RTMPCancelTimer(&pWscControl->EapolTimer, &Cancelled);
-			pWscControl->WscState = WSC_STATE_FAIL;
+				pWscControl->WscState = WSC_STATE_FAIL;
+			}
+#ifdef CONFIG_STA_SUPPORT
+			else if ((pAdapter->OpMode == OPMODE_STA) && INFRA_ON(pAdapter))
+			{
+				WscEapActionDisabled(pAdapter, pWscControl);
+				pWscControl->WscState = WSC_STATE_WAIT_DISCONN;
+			}
+#endif // CONFIG_STA_SUPPORT //
+
+			RTMPCancelTimer(&pWscControl->EapolTimer, &Cancelled);			
 			
 			pWscControl->RegData.ReComputePke = 1;
 		}
@@ -1531,13 +1537,12 @@ VOID WscEapEnrolleeAction(
 		if ((MsgType == WSC_MSG_M8) && (pWscControl->WscState == WSC_STATE_WAIT_ACK))
 		{
 			UCHAR ii;
-
 			for (ii=0; ii<pWscControl->WscProfile.ProfileCnt; ii++)
 			{
 				PWSC_CREDENTIAL	pCredential = &pWscControl->WscProfile.Profile[ii];
 				pCredential->bFromUPnP = TRUE;
 			}
-			
+				
 			pWscControl->EapMsgRunning = FALSE;
 			//pWscControl->EntryIfIdx = WSC_INIT_ENTRY_APIDX;
 			pWscControl->WscState = WSC_STATE_CONFIGURED;
@@ -1738,7 +1743,7 @@ Done:
 
 					WscBuildBeaconIE(pAdapter, WSC_SCSTATE_CONFIGURED, FALSE, 0, 0, pWscControl->EntryIfIdx);
 					WscBuildProbeRespIE(pAdapter, WSC_MSGTYPE_AP_WLAN_MGR, WSC_SCSTATE_CONFIGURED, FALSE, 0, 0, pWscControl->EntryIfIdx);
- 
+
 #ifndef WIN7PREVIEW_SUPPORT
 					APStop(pAdapter);
 					APStartUp(pAdapter);
@@ -2128,7 +2133,7 @@ VOID WscEapRegistrarAction(
 						pWscControl->WscStatus = STATUS_WSC_CONFIGURED;
 						pWscControl->WscState = WSC_STATE_CONFIGURED;
 						pWscControl->EapMsgRunning = FALSE;
-		 					RTMPSendWirelessEvent(pAdapter, IW_WSC_SEND_NACK, NULL, pWscControl->EntryIfIdx, 0);
+		 				RTMPSendWirelessEvent(pAdapter, IW_WSC_SEND_NACK, NULL, pWscControl->EntryIfIdx, 0);
 					}
 #endif // CONFIG_STA_SUPPORT //
 				}
@@ -4176,7 +4181,7 @@ int WscSendUPnPMessage(
 			}
 						
 			//Send WSC Msg to wscd, msg length = pNLMsgHdr->segLen + sizeof(RTMP_WSC_NLMSG_HDR)
-			RtmpOSWrielessEventSend(pAd, IWEVCUSTOM, RT_WSC_UPNP_EVENT_FLAG, NULL, pBuf, pNLMsgHdr->segLen + sizeof(RTMP_WSC_NLMSG_HDR));
+			RtmpOSWirelessEventSend(pAd, IWEVCUSTOM, RT_WSC_UPNP_EVENT_FLAG, NULL, pBuf, pNLMsgHdr->segLen + sizeof(RTMP_WSC_NLMSG_HDR));
 		}
 		
 		kfree(pBuf);

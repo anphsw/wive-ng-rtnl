@@ -1378,6 +1378,33 @@ VOID PeerPairMsg3Action(
 		pEntry->PortSecured = WPA_802_1X_PORT_SECURED;
 		pEntry->PrivacyFilter = Ndis802_11PrivFilterAcceptAll;	
 
+#ifdef CONFIG_AP_SUPPORT
+	IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
+	{				
+#ifdef APCLI_SUPPORT
+		if (IS_ENTRY_APCLI(pEntry))
+		{
+			UINT				IfIndex = 0;
+
+			IfIndex = pEntry->MatchAPCLITabIdx;
+			if (IfIndex >= MAX_APCLI_NUM)
+				return;	
+			
+#ifdef APCLI_AUTO_CONNECT_SUPPORT
+			if(pAd->ApCfg.ApCliAutoConnectRunning == TRUE)
+				{
+					DBGPRINT(RT_DEBUG_TRACE, ("Apcli auto connected:PeerPairMsg3Action() \n"));
+					/*Clear the Bssid auto-configured during the process */
+					NdisZeroMemory(pAd->ApCfg.ApCliTab[IfIndex].CfgApCliBssid, MAC_ADDR_LENGTH);
+					pAd->ApCfg.ApCliAutoConnectRunning = FALSE;
+					RtmpOSWirelessEventSend(pAd, IWEVCUSTOM, IW_APCLI_AUTO_CONN_SUCCESS, NULL, NULL, 0);			
+				}
+#endif /*APCLI_AUTO_CONNECT_SUPPORT */
+		}
+#endif /* APLCI_SUPPORT */
+	}
+#endif // CONFIG_AP_SUPPORT //
+
 #ifdef CONFIG_STA_SUPPORT
 		STA_PORT_SECURED(pAd);
 #endif // CONFIG_STA_SUPPORT //
@@ -1434,7 +1461,7 @@ VOID PeerPairMsg4Action(
     UINT            	MsgLen;
     BOOLEAN             Cancelled;
 #ifdef CONFIG_AP_SUPPORT
-    UCHAR				group_cipher = Ndis802_11WEPDisabled;
+	UCHAR				group_cipher = Ndis802_11WEPDisabled;
 #endif
 
     DBGPRINT(RT_DEBUG_TRACE, ("===> PeerPairMsg4Action\n"));
@@ -1514,13 +1541,12 @@ VOID PeerPairMsg4Action(
 
 			// send wireless event - for set key done WPA2
 				RTMPSendWirelessEvent(pAd, IW_SET_KEY_DONE_WPA2_EVENT_FLAG, pEntry->Addr, pEntry->apidx, 0); 
-/*	ASUS EXT. noisy...
+	 
 	        DBGPRINT(RT_DEBUG_OFF, ("AP SETKEYS DONE - WPA2, AuthMode(%d)=%s, WepStatus(%d)=%s, GroupWepStatus(%d)=%s\n\n", 
 									pEntry->AuthMode, GetAuthMode(pEntry->AuthMode), 
 									pEntry->WepStatus, GetEncryptType(pEntry->WepStatus), 
 									group_cipher, 
 									GetEncryptType(group_cipher)));
-*/
 		}
 		else
 		{
@@ -1745,6 +1771,33 @@ VOID	PeerGroupMsg1Action(
 	pEntry->PortSecured = WPA_802_1X_PORT_SECURED;
 	pEntry->PrivacyFilter = Ndis802_11PrivFilterAcceptAll;
 
+#ifdef CONFIG_AP_SUPPORT
+	IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
+	{				
+#ifdef APCLI_SUPPORT
+		if (IS_ENTRY_APCLI(pEntry))
+		{
+			UINT				IfIndex = 0;
+
+			IfIndex = pEntry->MatchAPCLITabIdx;
+			if (IfIndex >= MAX_APCLI_NUM)
+				return;	
+			
+#ifdef APCLI_AUTO_CONNECT_SUPPORT
+			if(pAd->ApCfg.ApCliAutoConnectRunning == TRUE)
+				{
+					DBGPRINT(RT_DEBUG_TRACE, ("Apcli auto connected:PeerGroupMsg1Action() \n"));
+					/*Clear the Bssid auto-configured during the process */
+					NdisZeroMemory(pAd->ApCfg.ApCliTab[IfIndex].CfgApCliBssid, MAC_ADDR_LENGTH);
+					pAd->ApCfg.ApCliAutoConnectRunning = FALSE;
+					RtmpOSWirelessEventSend(pAd, IWEVCUSTOM, IW_APCLI_AUTO_CONN_SUCCESS, NULL, NULL, 0);
+				}
+#endif /*APCLI_AUTO_CONNECT_SUPPORT */
+		}
+#endif /* APLCI_SUPPORT */
+	}
+#endif // CONFIG_AP_SUPPORT //
+
 #ifdef CONFIG_STA_SUPPORT
 	STA_PORT_SECURED(pAd);
 #endif // CONFIG_STA_SUPPORT //
@@ -1887,10 +1940,9 @@ VOID PeerGroupMsg2Action(
     UINT            	Len;
     PUCHAR          	pData;
     BOOLEAN         	Cancelled;
-    PEAPOL_PACKET       pMsg2;	
-
+	PEAPOL_PACKET       pMsg2;	
 #ifdef CONFIG_AP_SUPPORT
-	UCHAR				group_cipher = Ndis802_11WEPDisabled;	
+	UCHAR				group_cipher = Ndis802_11WEPDisabled;
 #endif
 
 	DBGPRINT(RT_DEBUG_TRACE, ("===> PeerGroupMsg2Action \n"));
@@ -1939,23 +1991,21 @@ VOID PeerGroupMsg2Action(
 		{
 			// send wireless event - for set key done WPA2
 				RTMPSendWirelessEvent(pAd, IW_SET_KEY_DONE_WPA2_EVENT_FLAG, pEntry->Addr, pEntry->apidx, 0); 
-/*	ASUS EXT. noisy...
+
 			DBGPRINT(RT_DEBUG_OFF, ("AP SETKEYS DONE - WPA2, AuthMode(%d)=%s, WepStatus(%d)=%s, GroupWepStatus(%d)=%s\n\n", 
 										pEntry->AuthMode, GetAuthMode(pEntry->AuthMode), 
 										pEntry->WepStatus, GetEncryptType(pEntry->WepStatus), 
 										group_cipher, GetEncryptType(group_cipher)));
-*/
 		}
 		else
 		{
 			// send wireless event - for set key done WPA
 				RTMPSendWirelessEvent(pAd, IW_SET_KEY_DONE_WPA1_EVENT_FLAG, pEntry->Addr, pEntry->apidx, 0); 
-/*	ASUS EXT. noisy...
+
         	DBGPRINT(RT_DEBUG_OFF, ("AP SETKEYS DONE - WPA1, AuthMode(%d)=%s, WepStatus(%d)=%s, GroupWepStatus(%d)=%s\n\n", 
 										pEntry->AuthMode, GetAuthMode(pEntry->AuthMode), 
 										pEntry->WepStatus, GetEncryptType(pEntry->WepStatus), 
 										group_cipher, GetEncryptType(group_cipher)));
-*/
 		}	
     }while(FALSE);  
 }

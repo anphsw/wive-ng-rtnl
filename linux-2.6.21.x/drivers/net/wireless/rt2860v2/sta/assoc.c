@@ -965,13 +965,13 @@ VOID MlmeDisassocReqAction(
 	if (pAd->StaCfg.WpaSupplicantUP != WPA_SUPPLICANT_DISABLE) 
 	{
 		//send disassociate event to wpa_supplicant
-		RtmpOSWrielessEventSend(pAd, IWEVCUSTOM, RT_DISASSOC_EVENT_FLAG, NULL, NULL, 0);
+		RtmpOSWirelessEventSend(pAd, IWEVCUSTOM, RT_DISASSOC_EVENT_FLAG, NULL, NULL, 0);
 	}
 #endif // NATIVE_WPA_SUPPLICANT_SUPPORT //
 #endif // WPA_SUPPLICANT_SUPPORT //
 
 #ifdef NATIVE_WPA_SUPPLICANT_SUPPORT
-	RtmpOSWrielessEventSend(pAd, SIOCGIWAP, -1, NULL, NULL, 0);
+	RtmpOSWirelessEventSend(pAd, SIOCGIWAP, -1, NULL, NULL, 0);
 #endif // NATIVE_WPA_SUPPLICANT_SUPPORT //        
 
 		RTMPSendWirelessEvent(pAd, IW_DISASSOC_EVENT_FLAG, NULL, BSS0, 0); 
@@ -1131,7 +1131,7 @@ VOID PeerReassocRspAction(
                 if (pAd->StaCfg.WpaSupplicantUP != WPA_SUPPLICANT_DISABLE)
 			{
 				SendAssocIEsToWpaSupplicant(pAd);
-				RtmpOSWrielessEventSend(pAd, IWEVCUSTOM, RT_ASSOC_EVENT_FLAG, NULL, NULL, 0);
+				RtmpOSWirelessEventSend(pAd, IWEVCUSTOM, RT_ASSOC_EVENT_FLAG, NULL, NULL, 0);
 			}
 #endif // NATIVE_WPA_SUPPLICANT_SUPPORT //
 #endif // WPA_SUPPLICANT_SUPPORT //
@@ -1139,7 +1139,7 @@ VOID PeerReassocRspAction(
 #ifdef NATIVE_WPA_SUPPLICANT_SUPPORT
                 {
                     wext_notify_event_assoc(pAd);
-                    RtmpOSWrielessEventSend(pAd, SIOCGIWAP, -1, &pAd->MlmeAux.Bssid[0], NULL, 0);
+                    RtmpOSWirelessEventSend(pAd, SIOCGIWAP, -1, &pAd->MlmeAux.Bssid[0], NULL, 0);
                 }
 #endif // NATIVE_WPA_SUPPLICANT_SUPPORT //
 
@@ -1379,13 +1379,13 @@ VOID PeerDisassocAction(
             if (pAd->StaCfg.WpaSupplicantUP != WPA_SUPPLICANT_DISABLE) 
 			{
 				//send disassociate event to wpa_supplicant
-				RtmpOSWrielessEventSend(pAd, IWEVCUSTOM, RT_DISASSOC_EVENT_FLAG, NULL, NULL, 0);
+				RtmpOSWirelessEventSend(pAd, IWEVCUSTOM, RT_DISASSOC_EVENT_FLAG, NULL, NULL, 0);
 			} 
 #endif // NATIVE_WPA_SUPPLICANT_SUPPORT //
 #endif // WPA_SUPPLICANT_SUPPORT //
 
 #ifdef NATIVE_WPA_SUPPLICANT_SUPPORT
-			RtmpOSWrielessEventSend(pAd, SIOCGIWAP, -1, NULL, NULL, 0);
+			RtmpOSWirelessEventSend(pAd, SIOCGIWAP, -1, NULL, NULL, 0);
 #endif // NATIVE_WPA_SUPPLICANT_SUPPORT //
 		}
 	}
@@ -1554,9 +1554,9 @@ VOID    SendAssocIEsToWpaSupplicant(
 	{
 		sprintf(custom, "ASSOCINFO_ReqIEs=");
 		NdisMoveMemory(custom+17, pAd->StaCfg.ReqVarIEs, pAd->StaCfg.ReqVarIELen);
-		RtmpOSWrielessEventSend(pAd, IWEVCUSTOM, RT_REQIE_EVENT_FLAG, NULL, (PUCHAR)custom, pAd->StaCfg.ReqVarIELen + 17);
+		RtmpOSWirelessEventSend(pAd, IWEVCUSTOM, RT_REQIE_EVENT_FLAG, NULL, (PUCHAR)custom, pAd->StaCfg.ReqVarIELen + 17);
 		
-		RtmpOSWrielessEventSend(pAd, IWEVCUSTOM, RT_ASSOCINFO_EVENT_FLAG, NULL, NULL, 0);
+		RtmpOSWirelessEventSend(pAd, IWEVCUSTOM, RT_ASSOCINFO_EVENT_FLAG, NULL, NULL, 0);
 	}
 	else
 		DBGPRINT(RT_DEBUG_TRACE, ("pAd->StaCfg.ReqVarIELen + 17 > MAX_CUSTOM_LEN\n"));
@@ -1576,7 +1576,7 @@ int wext_notify_event_assoc(
 	if (pAd->StaCfg.ReqVarIELen <= IW_CUSTOM_MAX)
 	{
 		NdisMoveMemory(custom, pAd->StaCfg.ReqVarIEs, pAd->StaCfg.ReqVarIELen);
-		RtmpOSWrielessEventSend(pAd, IWEVASSOCREQIE, -1, NULL, custom, pAd->StaCfg.ReqVarIELen);
+		RtmpOSWirelessEventSend(pAd, IWEVASSOCREQIE, -1, NULL, custom, pAd->StaCfg.ReqVarIELen);
 	}
 	else
 	    DBGPRINT(RT_DEBUG_TRACE, ("pAd->StaCfg.ReqVarIELen > MAX_CUSTOM_LEN\n"));
@@ -1590,7 +1590,7 @@ int wext_notify_event_assoc(
 		sprintf(custom, "ASSOCINFO(ReqIEs=");
 		for (idx=0; idx<pAd->StaCfg.ReqVarIELen; idx++)
 		        sprintf(custom, "%s%02x", custom, pAd->StaCfg.ReqVarIEs[idx]);
-		RtmpOSWrielessEventSend(pAd, IWEVCUSTOM, -1, NULL, custom, len);
+		RtmpOSWirelessEventSend(pAd, IWEVCUSTOM, -1, NULL, custom, len);
 	}
 	else
 		DBGPRINT(RT_DEBUG_TRACE, ("len(%d) > MAX_CUSTOM_LEN\n", len));

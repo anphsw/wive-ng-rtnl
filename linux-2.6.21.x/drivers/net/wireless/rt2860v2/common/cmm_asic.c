@@ -1468,73 +1468,6 @@ VOID AsicLockChannel(
 	
 	==========================================================================
  */
-#ifdef ANT_DIVERSITY_SUPPORT
-VOID	AsicAntennaSelect(
-	IN	PRTMP_ADAPTER	pAd,
-	IN	UCHAR			Channel) 
-{
-#ifdef CONFIG_AP_SUPPORT
-	IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
-		if (pAd->Mlme.OneSecPeriodicRound % 5 == 0)
-#endif // CONFIG_AP_SUPPORT //
-#ifdef CONFIG_STA_SUPPORT
-	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
-	if (pAd->Mlme.OneSecPeriodicRound % 2 == 1)
-#endif // CONFIG_STA_SUPPORT //
-	{
-		// patch for AsicSetRxAnt failed
-		pAd->RxAnt.EvaluatePeriod = 0;
-
-		// check every 2 second. If rcv-beacon less than 5 in the past 2 second, then AvgRSSI is no longer a 
-		// valid indication of the distance between this AP and its clients.
-		if (OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_MEDIA_STATE_CONNECTED)) 
-		{
-			SHORT	realavgrssi1;
-
-			// if no traffic then reset average rssi to trigger evaluation
-#ifdef CONFIG_STA_SUPPORT
-			if (pAd->StaCfg.NumOfAvgRssiSample < 5)
-			{
-				pAd->RxAnt.Pair1LastAvgRssi = (-99);
-				pAd->RxAnt.Pair2LastAvgRssi = (-99);
-				DBGPRINT(RT_DEBUG_TRACE, ("MlmePeriodicExec: no traffic/beacon, reset RSSI\n"));
-			}
-
-			pAd->StaCfg.NumOfAvgRssiSample = 0;
-			realavgrssi1 = (pAd->RxAnt.Pair1AvgRssi[pAd->RxAnt.Pair1PrimaryRxAnt] >> 3);
-#endif // CONFIG_STA_SUPPORT //
-#ifdef CONFIG_AP_SUPPORT
-		    INT	recvPktNum = pAd->RxAnt.RcvPktNum[pAd->RxAnt.Pair1PrimaryRxAnt];
-
-			if (!recvPktNum)
-				return;
-			APAsicAntennaAvg(pAd, pAd->RxAnt.Pair1PrimaryRxAnt, &realavgrssi1);
-#endif // CONFIG_AP_SUPPORT //
-
-			DBGPRINT(RT_DEBUG_TRACE,("Ant-realrssi0(%d), Lastrssi0(%d), EvaluateStableCnt=%d\n", realavgrssi1, pAd->RxAnt.Pair1LastAvgRssi, pAd->RxAnt.EvaluateStableCnt));
-
-			// if the difference between two rssi is larger or less than 5, then evaluate the other antenna
-			if ((pAd->RxAnt.EvaluateStableCnt < 2) || (realavgrssi1 > (pAd->RxAnt.Pair1LastAvgRssi + 5)) || (realavgrssi1 < (pAd->RxAnt.Pair1LastAvgRssi - 5)))
-				AsicEvaluateRxAnt(pAd);
-
-				pAd->RxAnt.Pair1LastAvgRssi = realavgrssi1;
-		}
-		else
-		{
-			// if not connected, always switch antenna to try to connect
-			UCHAR	temp;
-
-			temp = pAd->RxAnt.Pair1PrimaryRxAnt;
-			pAd->RxAnt.Pair1PrimaryRxAnt = pAd->RxAnt.Pair1SecondaryRxAnt;
-			pAd->RxAnt.Pair1SecondaryRxAnt = temp;
-
-			DBGPRINT(RT_DEBUG_TRACE, ("MlmePeriodicExec: no connect, switch to another one to try connection\n"));
-
-			AsicSetRxAnt(pAd, pAd->RxAnt.Pair1PrimaryRxAnt);
-		}
-	}
-}
-#endif // ANT_DIVERSITY_SUPPORT //
 
 #ifdef RTMP_INTERNAL_TX_ALC
 //
@@ -3164,11 +3097,8 @@ VOID AsicEnableIbssSync(
 	UINT i;
 	ULONG beaconBaseLocation = 0;
 #if defined(DBG) || defined(RT_BIG_ENDIAN)
-	USHORT	beaconLen = pAd->BeaconTxWI.MPDUtotalByteCount;
+	USHORT			beaconLen = pAd->BeaconTxWI.MPDUtotalByteCount;
 #endif
-#ifdef SPECIFIC_BCN_BUF_SUPPORT	
-	unsigned long irqFlag;
-#endif // SPECIFIC_BCN_BUF_SUPPORT //
 
 #ifdef RT_BIG_ENDIAN
 	TXWI_STRUC		localTxWI;
@@ -3193,9 +3123,6 @@ VOID AsicEnableIbssSync(
 		beaconBaseLocation = HW_BEACON_BASE0;
 	}
 
-#ifdef SPECIFIC_BCN_BUF_SUPPORT
-	RTMP_MAC_SHR_MSEL_LOCK(pAd, HIGHER_SHRMEM, irqFlag);
-#endif // SPECIFIC_BCN_BUF_SUPPORT //
 
 #ifdef RTMP_MAC_PCI
 	// move BEACON TXD and frame content to on-chip memory
@@ -3222,9 +3149,6 @@ VOID AsicEnableIbssSync(
 		// do nothing
 	}
 
-#ifdef SPECIFIC_BCN_BUF_SUPPORT
-	RTMP_MAC_SHR_MSEL_UNLOCK(pAd, LOWER_SHRMEM, irqFlag);
-#endif // SPECIFIC_BCN_BUF_SUPPORT //
 
 	//
 	// For Wi-Fi faily generated beacons between participating stations. 
@@ -3923,14 +3847,7 @@ VOID AsicAddPairwiseKeyEntry(
 #ifdef DBG
 	UCHAR		CipherAlg = pCipherKey->CipherAlg;
 #endif
-#ifdef SPECIFIC_BCN_BUF_SUPPORT
-	unsigned long irqFlag;
-#endif // SPECIFIC_BCN_BUF_SUPPORT //
 
-#ifdef SPECIFIC_BCN_BUF_SUPPORT
-	RTMP_MAC_SHR_MSEL_LOCK(pAd, LOWER_SHRMEM, irqFlag);
-#endif // SPECIFIC_BCN_BUF_SUPPORT //
-	
 	// EKEY
 	offset = PAIRWISE_KEY_TABLE_BASE + (WCID * HW_KEY_ENTRY_SIZE);
 #ifdef RTMP_MAC_PCI
@@ -3968,9 +3885,6 @@ VOID AsicAddPairwiseKeyEntry(
 #endif // RTMP_MAC_PCI //
 	}
 
-#ifdef SPECIFIC_BCN_BUF_SUPPORT
-	RTMP_MAC_SHR_MSEL_UNLOCK(pAd, LOWER_SHRMEM, irqFlag);
-#endif // SPECIFIC_BCN_BUF_SUPPORT
 
 	DBGPRINT(RT_DEBUG_TRACE,("AsicAddPairwiseKeyEntry: WCID #%d Alg=%s\n",WCID, CipherName[CipherAlg]));
 	DBGPRINT(RT_DEBUG_TRACE,("	Key = %02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x\n",

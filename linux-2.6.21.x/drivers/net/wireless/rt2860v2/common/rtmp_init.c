@@ -77,21 +77,6 @@ REG_PAIR   BBPRegTable[] = {
 // ASIC register initialization sets
 //
 RTMP_REG_PAIR	MACRegTable[] =	{
-#ifdef SPECIFIC_BCN_BUF_SUPPORT
-	/* 	
-		That means all beacon's size are 512 bytes 
-		and their starting address are "0x4000, 0x4200, 0x4400, 0x4600, ....." 
-		in the second(higher) 8KB shared memory . 
-
-		The formula is : 0x4000 + BCNx_OFFSET*64
-			ex : the address of BSS0 = 0x4000 + 0x00 * 64 = 0x4000
-				 the address of BSS1 = 0x4000 + 0x08 * 64 = 0x4200
-	*/
-	{BCN_OFFSET0,			0x18100800}, 
-	{BCN_OFFSET1,			0x38302820}, 
-	{BCN_OFFSET2,			0x58504840}, 
-	{BCN_OFFSET3,			0x78706860},
-#else 
 #if defined(HW_BEACON_OFFSET) && (HW_BEACON_OFFSET == 0x200)
 	{BCN_OFFSET0,			0xf8f0e8e0}, /* 0x3800(e0), 0x3A00(e8), 0x3C00(f0), 0x3E00(f8), 512B for each beacon */
 	{BCN_OFFSET1,			0x6f77d0c8}, /* 0x3200(c8), 0x3400(d0), 0x1DC0(77), 0x1BC0(6f), 512B for each beacon */
@@ -101,7 +86,6 @@ RTMP_REG_PAIR	MACRegTable[] =	{
 #else
     #error You must re-calculate new value for BCN_OFFSET0 & BCN_OFFSET1 in MACRegTable[]!!!
 #endif
-#endif // SPECIFIC_BCN_BUF_SUPPORT //
 
 	{LEGACY_BASIC_RATE,		0x0000013f}, //  Basic rate set bitmap
 	{HT_BASIC_RATE,		0x00008003}, // Basic HT rate set , 20M, MCS=3, MM. Format is the same as in TXWI.
@@ -301,9 +285,6 @@ NDIS_STATUS	RTMPAllocAdapterBlock(
 
 		NdisAllocateSpinLock(&pAd->irq_lock);
 
-#ifdef SPECIFIC_BCN_BUF_SUPPORT
-		NdisAllocateSpinLock(&pAd->ShrMemLock);
-#endif // SPECIFIC_BCN_BUF_SUPPORT //
 
 #ifdef WMM_ACM_SUPPORT
 		NdisAllocateSpinLock(&pAd->AcmTspecSemLock);
@@ -987,14 +968,8 @@ VOID	NICReadEEPROMParameters(
 	}
 
 
-#ifdef DOT11N_PF_DEBUG
-	/* over-write the antenna with stream setting */
-	Antenna.field.TxPath = pAd->CommonCfg.TxStream;
-	Antenna.field.RxPath = pAd->CommonCfg.RxStream;
-#endif // DOT11N_PF_DEBUG //
-
 	/* EEPROM offset 0x36 - NIC Configuration 1 */
-	NicConfig2.word = pAd->EEPROMDefaultValue[1];
+	NicConfig2.word = pAd->EEPROMDefaultValue[EEPROM_NIC_CFG2_OFFSET];
 
 #ifdef WSC_INCLUDED
 	/* WSC hardware push button function 0811 */
@@ -1359,8 +1334,6 @@ VOID	NICInitAsicFromEEPROM(
 
 	NicConfig2.word = pAd->NicConfig2.word;
 
-#ifdef ANT_DIVERSITY_SUPPORT
-#endif // ANT_DIVERSITY_SUPPORT //
 
 #ifdef LED_CONTROL_SUPPORT
 	//
@@ -1599,16 +1572,6 @@ retry:
 		pAd->BeaconOffset[7] = HW_BEACON_BASE7;
 	}
 	
-#ifdef SPECIFIC_BCN_BUF_SUPPORT
-	pAd->BeaconOffset[8] = HW_BEACON_BASE8;
-	pAd->BeaconOffset[9] = HW_BEACON_BASE9;
-	pAd->BeaconOffset[10] = HW_BEACON_BASE10;
-	pAd->BeaconOffset[11] = HW_BEACON_BASE11;
-	pAd->BeaconOffset[12] = HW_BEACON_BASE12;
-	pAd->BeaconOffset[13] = HW_BEACON_BASE13;
-	pAd->BeaconOffset[14] = HW_BEACON_BASE14;
-	pAd->BeaconOffset[15] = HW_BEACON_BASE15;
-#endif // SPECIFIC_BCN_BUF_SUPPORT //
 
 	//
 	// write all shared Ring's base address into ASIC
@@ -2027,17 +1990,8 @@ NDIS_STATUS	NICInitializeAsic(
 	// It isn't necessary to clear this space when not hard reset. 	
 	if (bHardReset == TRUE)
 	{
-#ifdef SPECIFIC_BCN_BUF_SUPPORT
-		unsigned long irqFlag;
-#endif // SPECIFIC_BCN_BUF_SUPPORT //
 	
 		// clear all on-chip BEACON frame space			
-#ifdef SPECIFIC_BCN_BUF_SUPPORT
-		/*
-			Shared memory access selection (higher 8KB shared memory)
-		*/
-		RTMP_MAC_SHR_MSEL_LOCK(pAd, HIGHER_SHRMEM, irqFlag);
-#endif // SPECIFIC_BCN_BUF_SUPPORT //
 
 		for (apidx = 0; apidx < HW_BEACON_MAX_COUNT; apidx++)
 		{
@@ -2047,12 +2001,6 @@ NDIS_STATUS	NICInitializeAsic(
 #endif // CONFIG_AP_SUPPORT //
 		}
 		
-#ifdef SPECIFIC_BCN_BUF_SUPPORT
-		/*
-			Shared memory access selection (lower 16KB shared memory)
-		*/
-		RTMP_MAC_SHR_MSEL_UNLOCK(pAd, LOWER_SHRMEM, irqFlag);	
-#endif // SPECIFIC_BCN_BUF_SUPPORT //
 	}
 	
 
@@ -3442,6 +3390,7 @@ pAd->StaCfg.PSControl.field.rt30xxFollowHostASPM=1;
 			pAd->ApCfg.ApCliTab[j].DesiredTransmitSetting.field.MCS = MCS_AUTO;
 		}
 #endif // APCLI_SUPPORT //
+		pAd->ApCfg.EntryClientCount = 0;
 	}
 #endif // CONFIG_AP_SUPPORT //
 
@@ -3542,31 +3491,16 @@ pAd->StaCfg.PSControl.field.rt30xxFollowHostASPM=1;
 	RTMP_SET_PSFLAG(pAd, fRTMP_PS_CAN_GO_SLEEP);
 #endif // PCIE_PS_SUPPORT //
 #endif // CONFIG_STA_SUPPORT //
-#ifdef ANT_DIVERSITY_SUPPORT
-		if ( pAd->CommonCfg.bRxAntDiversity == ANT_FIX_ANT2)
-		{
-			pAd->RxAnt.Pair1PrimaryRxAnt = 1;
-			pAd->RxAnt.Pair1SecondaryRxAnt = 0;
-		}
-		else // Default
-		{
-			pAd->RxAnt.Pair1PrimaryRxAnt = 0;
-			pAd->RxAnt.Pair1SecondaryRxAnt = 1;
-		}
-		pAd->RxAnt.EvaluatePeriod = 0;
-		pAd->RxAnt.RcvPktNumWhenEvaluate = 0;
-#ifdef CONFIG_STA_SUPPORT
-		pAd->RxAnt.Pair1AvgRssi[0] = pAd->RxAnt.Pair1AvgRssi[1] = 0;
-#endif // CONFIG_STA_SUPPORT //
-#ifdef CONFIG_AP_SUPPORT
-		pAd->RxAnt.Pair1AvgRssiGroup1[0] = pAd->RxAnt.Pair1AvgRssiGroup1[1] = 0;
-		pAd->RxAnt.Pair1AvgRssiGroup2[0] = pAd->RxAnt.Pair1AvgRssiGroup2[1] = 0;
-#endif // CONFIG_AP_SUPPORT //
-#endif // ANT_DIVERSITY_SUPPORT //
 
 #ifdef CONFIG_STA_SUPPORT
 RTMP_SET_PSFLAG(pAd, fRTMP_PS_CAN_GO_SLEEP);
 #endif // CONFIG_STA_SUPPORT //
+
+#ifdef APCLI_SUPPORT
+#ifdef APCLI_AUTO_CONNECT_SUPPORT
+	pAd->ApCfg.ApCliAutoConnectRunning= FALSE;
+#endif /* APCLI_AUTO_CONNECT_SUPPORT */
+#endif /* APCLI_SUPPORT */
 
 #if defined(AP_SCAN_SUPPORT) || defined(CONFIG_STA_SUPPORT)
 	for (i = 0; i < MAX_LEN_OF_BSS_TABLE; i++) 

@@ -4824,10 +4824,6 @@ VOID ATEAsicSwitchChannel(
 #endif // RALINK_QA //
 	Channel = pAd->ate.Channel;
 
-#ifdef ANT_DIVERSITY_SUPPORT
-	// select antenna for RT3090
-	AsicAntennaSelect(pAd, Channel);
-#endif // ANT_DIVERSITY_SUPPORT //
 
 	// fill Tx power value
 	TxPwer = pAd->ate.TxPower0;

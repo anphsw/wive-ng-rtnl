@@ -408,20 +408,8 @@
 #define MAX_MBSSID_NUM				1
 #ifdef MBSS_SUPPORT
 #undef	MAX_MBSSID_NUM
-#ifdef SPECIFIC_BCN_BUF_SUPPORT
-#define HW_BEACON_MAX_COUNT			16
-
-/* 	In 16-MBSS support mode, if AP-Client is enabled, 
-	the last 8-MBSS would be occupied for AP-Client using. */
-#ifdef APCLI_SUPPORT
-#define MAX_MBSSID_NUM				(8 - MAX_MESH_NUM)
-#else
-#define MAX_MBSSID_NUM				(16 - MAX_MESH_NUM)
-#endif // APCLI_SUPPORT //
-#else
 #define HW_BEACON_MAX_COUNT			8
 #define MAX_MBSSID_NUM				(HW_BEACON_MAX_COUNT - MAX_MESH_NUM - MAX_APCLI_NUM)
-#endif // SPECIFIC_BCN_BUF_SUPPORT //
 #else
 #define HW_BEACON_MAX_COUNT			8
 #endif // MBSS_SUPPORT //
@@ -439,13 +427,6 @@
 
 
 #define MAX_BEACON_SIZE				512
-#ifdef SPECIFIC_BCN_BUF_SUPPORT
-#define HW_RESERVED_WCID	255
-// If the MAX_MBSSID_NUM is larger than 6, 
-// it shall reserve some WCID space(wcid 222~253) for beacon frames. 
-// -	these wcid 238~253 are reserved for beacon#6(ra6).
-// -	these wcid 222~237 are reserved for beacon#7(ra7).
-#else
 #if defined(MAX_MBSSID_NUM) && (MAX_MBSSID_NUM == 8)
 #define HW_RESERVED_WCID	222
 #elif defined(MAX_MBSSID_NUM) && (MAX_MBSSID_NUM == 7)
@@ -453,7 +434,6 @@
 #else
 #define HW_RESERVED_WCID	255
 #endif
-#endif // SPECIFIC_BCN_BUF_SUPPORT //
 
 // Then dedicate wcid of DFS and Carrier-Sense.
 #define DFS_CTS_WCID 		(HW_RESERVED_WCID - 1)
@@ -1140,6 +1120,11 @@
 #define APCLI_CTRL_DEASSOC                5
 #define APCLI_CTRL_CONNECTED              6
 #define APCLI_MAX_CTRL_STATE              7
+#ifdef APCLI_AUTO_CONNECT_SUPPORT
+#undef  APCLI_MAX_CTRL_STATE
+#define APCLI_CTRL_SEARCHING		7
+#define APCLI_MAX_CTRL_STATE		8
+#endif /* APCLI_AUTO_CONNECT_SUPPORT */
 
 #define APCLI_CTRL_MACHINE_BASE           0
 #define APCLI_CTRL_JOIN_REQ               0
@@ -1153,6 +1138,11 @@
 #define APCLI_CTRL_AUTH_REQ_TIMEOUT       8
 #define APCLI_CTRL_ASSOC_REQ_TIMEOUT      9
 #define APCLI_MAX_CTRL_MSG                10
+#ifdef APCLI_AUTO_CONNECT_SUPPORT 
+#undef  APCLI_MAX_CTRL_MSG
+#define APCLI_CTRL_SWITCH_CANDIDATE_AP_REQ	10
+#define APCLI_MAX_CTRL_MSG						11
+#endif /* APCLI_AUTO_CONNECT_SUPPORT */
 
 #define APCLI_CTRL_FUNC_SIZE              (APCLI_MAX_CTRL_STATE * APCLI_MAX_CTRL_MSG)
 
@@ -1824,6 +1814,15 @@
 #define	IW_WSC_EVENT_TYPE_NUM						(IW_WSC_EVENT_FLAG_END - IW_WSC_EVENT_FLAG_START + 1)
 // For WSC wireless event - end
 #endif // WSC_INCLUDED //
+
+#ifdef APCLI_AUTO_CONNECT_SUPPORT //may be placed under APCLI_SUPPORT and CONFIG_AP_SUPPORT ?
+#define IW_APCLI_AUTO_CONN_EVENT_FLAG_START		0x0600
+#define IW_APCLI_AUTO_CONN_SUCCESS					0x0601
+#define IW_APCLI_AUTO_CONN_FAIL						0x0602
+#define IW_APCLI_AUTO_CONN_EVENT_FLAG_END			0x0603
+#define IW_APCLI_AUTO_CONN_TYPE_NUM					(IW_APCLI_AUTO_CONN_EVENT_FLAG_END - IW_APCLI_AUTO_CONN_EVENT_FLAG_START + 1)
+#endif /* APCLI_AUTO_CONNECT_SUPPORT */
+
 // End - WIRELESS EVENTS definition
 
 #ifdef CONFIG_STA_SUPPORT
@@ -1868,14 +1867,6 @@
 #define	WPA_SUPPLICANT_ENABLE_WPS			0x80
 
 // definition for Antenna Diversity flag
-#ifdef ANT_DIVERSITY_SUPPORT
-enum ANT_DIVERSITY_TYPE {
-    ANT_DIVERSITY_DISABLE = 0,
-    ANT_DIVERSITY_ENABLE = 1,
-    ANT_FIX_ANT1 = 2,
-    ANT_FIX_ANT2 = 3
-};
-#endif // ANT_DIVERSITY_SUPPORT //
 
 #ifdef RTMP_RBUS_SUPPORT
 #endif // RTMP_RBUS_SUPPORT //

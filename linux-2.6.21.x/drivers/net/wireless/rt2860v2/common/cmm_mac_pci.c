@@ -1311,9 +1311,6 @@ VOID RT28xx_UpdateBeaconToAsic(
 	BOOLEAN			bBcnReq = FALSE;
 	UCHAR			bcn_idx = 0;
 
-#ifdef SPECIFIC_BCN_BUF_SUPPORT	
-	unsigned long irqFlag;
-#endif // SPECIFIC_BCN_BUF_SUPPORT //
 
 #ifdef CONFIG_AP_SUPPORT
 	if (apidx < pAd->ApCfg.BssidNum && pAd->OpMode == OPMODE_AP)
@@ -1337,18 +1334,12 @@ VOID RT28xx_UpdateBeaconToAsic(
 
 	if (bBcnReq == FALSE)
 	{
-#ifdef SPECIFIC_BCN_BUF_SUPPORT
-		RTMP_MAC_SHR_MSEL_LOCK(pAd, HIGHER_SHRMEM, irqFlag);
-#endif // SPECIFIC_BCN_BUF_SUPPORT //	
 
 		/* when the ra interface is down, do not send its beacon frame */
 		/* clear all zero */
 		for(i=0; i<TXWI_SIZE; i+=4)
 			RTMP_IO_WRITE32(pAd, pAd->BeaconOffset[bcn_idx] + i, 0x00);
 
-#ifdef SPECIFIC_BCN_BUF_SUPPORT
-		RTMP_MAC_SHR_MSEL_UNLOCK(pAd, LOWER_SHRMEM, irqFlag);	
-#endif // SPECIFIC_BCN_BUF_SUPPORT //		
 	}
 	else
 	{
@@ -1358,12 +1349,6 @@ VOID RT28xx_UpdateBeaconToAsic(
 #endif
 
 
-#ifdef SPECIFIC_BCN_BUF_SUPPORT
-		/*
-			Shared memory access selection (higher 8KB shared memory)
-		*/
-		RTMP_MAC_SHR_MSEL_LOCK(pAd, HIGHER_SHRMEM, irqFlag);
-#endif // SPECIFIC_BCN_BUF_SUPPORT //
 
 		for (i=0; i<TXWI_SIZE; i+=4)  // 16-byte TXWI field
 		{
@@ -1389,12 +1374,6 @@ VOID RT28xx_UpdateBeaconToAsic(
 		}
 
 
-#ifdef SPECIFIC_BCN_BUF_SUPPORT
-		/*
-			Shared memory access selection (lower 16KB shared memory)
-		*/
-		RTMP_MAC_SHR_MSEL_UNLOCK(pAd, LOWER_SHRMEM, irqFlag);	
-#endif // SPECIFIC_BCN_BUF_SUPPORT //
 	}
 	
 }

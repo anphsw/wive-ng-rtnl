@@ -602,7 +602,7 @@ VOID ScanNextChannel(
 
 				RTMPSendWirelessEvent(pAd, IW_SCAN_COMPLETED_EVENT_FLAG, NULL, BSS0, 0);
 #ifdef WPA_SUPPLICANT_SUPPORT
-				RtmpOSWrielessEventSend(pAd, SIOCGIWSCAN, -1, NULL, NULL, 0);
+				RtmpOSWirelessEventSend(pAd, SIOCGIWSCAN, -1, NULL, NULL, 0);
 #endif // WPA_SUPPLICANT_SUPPORT //
 			}
 
@@ -617,6 +617,17 @@ VOID ScanNextChannel(
 #ifdef CONFIG_AP_SUPPORT
 		IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
 		{
+#ifdef APCLI_SUPPORT
+#ifdef APCLI_AUTO_CONNECT_SUPPORT
+			if (pAd->ApCfg.ApCliAutoConnectRunning == TRUE)
+			{
+				if (!ApCliAutoConnectExec(pAd))
+				{
+					DBGPRINT(RT_DEBUG_ERROR, ("Error in  %s\n", __FUNCTION__));
+				}
+			}			
+#endif /* APCLI_AUTO_CONNECT_SUPPORT */
+#endif /* APCLI_SUPPORT */
 			pAd->Mlme.ApSyncMachine.CurrState = AP_SYNC_IDLE;
 			RTMPResumeMsduTransmission(pAd);
 

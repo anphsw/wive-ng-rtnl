@@ -1254,10 +1254,6 @@ typedef	union	_IFS_SLOT_CFG_STRUC	{
 
 #define BCN_OFFSET0				0x042C
 #define BCN_OFFSET1				0x0430
-#ifdef SPECIFIC_BCN_BUF_SUPPORT
-#define BCN_OFFSET2				0x0444
-#define BCN_OFFSET3				0x0448
-#endif // SPECIFIC_BCN_BUF_SUPPORT //
 
 //
 // BCN_TIME_CFG : Synchronization control register
@@ -2749,27 +2745,6 @@ typedef union _RF_CSR_CFG_EXT_STRUC
    	2. BCN_OFFSETx(0~) must also be changed in MACRegTable(common/rtmp_init.c)
  */
 #define HW_BEACON_OFFSET		0x0200 
-#ifdef SPECIFIC_BCN_BUF_SUPPORT
-/* It's allowed to use the higher(secordary) 8KB shared memory */
-//#define HW_BEACON_MAX_COUNT     16
-#define HW_BEACON_MAX_SIZE	0x2000 /* unit: byte */
-#define HW_BEACON_BASE0		0x4000
-#define HW_BEACON_BASE1		0x4200
-#define HW_BEACON_BASE2		0x4400
-#define HW_BEACON_BASE3		0x4600
-#define HW_BEACON_BASE4		0x4800
-#define HW_BEACON_BASE5		0x4A00
-#define HW_BEACON_BASE6		0x4C00
-#define HW_BEACON_BASE7		0x4E00
-#define HW_BEACON_BASE8		0x5000
-#define HW_BEACON_BASE9		0x5200
-#define HW_BEACON_BASE10	0x5400
-#define HW_BEACON_BASE11	0x5600
-#define HW_BEACON_BASE12	0x5800
-#define HW_BEACON_BASE13	0x5A00
-#define HW_BEACON_BASE14	0x5C00
-#define HW_BEACON_BASE15	0x5E00
-#else
 /* 	In order to support maximum 8 MBSS and its maximum length is 512 for each beacon
 	Three section discontinue memory segments will be used.
 	1. The original region for BCN 0~3
@@ -2787,7 +2762,6 @@ typedef union _RF_CSR_CFG_EXT_STRUC
 #define HW_BEACON_BASE5         0x7400
 #define HW_BEACON_BASE6         0x5DC0
 #define HW_BEACON_BASE7         0x5BC0
-#endif // SPECIFIC_BCN_BUF_SUPPORT //
 
 //
 // Higher 8KB shared memory
@@ -2852,78 +2826,6 @@ typedef union _RF_CSR_CFG_EXT_STRUC
 #define QID_OTHER               15
 
 
-#ifdef SPECIFIC_BCN_BUF_SUPPORT
-#define LOWER_SHRMEM		0
-#define HIGHER_SHRMEM		1
-
-/* Shared memory access selection.
- * 0: address 0x4000 ~ 0x7FFF mapping to lower 16kB of shared memory
- * 1: address 0x4000 ~ 0x5FFF mapping to higher 8kB of shared memory
- */	
-#define	RTMP_HIGH_SHARED_MEM_SET(_pAd)									\
-	do{										\
-		UINT32			regValue;					\
-											\
-		if (_pAd->ShrMSel != HIGHER_SHRMEM)								\
-		{									\
-			_pAd->ShrMSel = HIGHER_SHRMEM;								\
-			RTMP_IO_READ32(_pAd, PBF_SYS_CTRL, &regValue);				\
-			RTMP_IO_WRITE32(_pAd, PBF_SYS_CTRL, regValue | (1 << 19));	\
-		}									\
-	} while(0)
-
-#define	RTMP_LOW_SHARED_MEM_SET(_pAd)									\
-	do{																	\
-		UINT32			regValue;										\
-																		\
-		if (_pAd->ShrMSel != LOWER_SHRMEM)								\
-		{									\
-			_pAd->ShrMSel = LOWER_SHRMEM;								\
-			RTMP_IO_READ32(_pAd, PBF_SYS_CTRL, &regValue);				\
-			RTMP_IO_WRITE32(_pAd, PBF_SYS_CTRL, regValue & ~(1 << 19));	\
-		}									\
-	} while(0)
-	
-/* 	
-	Disable irq to make sure the shared memory status(Mac Reg : 0x0400, bit-19)
-	doesn't been changed.
-	Becasue the PRE-TBTT interrupt would change this status. */	
-#define	RTMP_MAC_SHR_MSEL_LOCK(_pAd, _shr_msel, _irqFlag)					\
-	do{										\
-		UINT32			__regValue;					\
-											\
-		RTMP_INT_LOCK(&_pAd->ShrMemLock, _irqFlag);						\
-		_pAd->ShrMSel = _shr_msel;						\
-		RTMP_IO_READ32(_pAd, PBF_SYS_CTRL, &__regValue);					\
-		if (_shr_msel == HIGHER_SHRMEM)										\
-		{									\
-			RTMP_IO_WRITE32(_pAd, PBF_SYS_CTRL, __regValue | (1 << 19));	\
-		}									\
-		else									\
-		{									\
-			RTMP_IO_WRITE32(_pAd, PBF_SYS_CTRL, __regValue & ~(1 << 19));	\
-		}									\
-	} while(0)
-
-
-#define	RTMP_MAC_SHR_MSEL_UNLOCK(_pAd, _shr_msel, _irqFlag)					\
-	do{										\
-		UINT32			__regValue;					\
-											\
-		_pAd->ShrMSel = _shr_msel;						\
-		RTMP_IO_READ32(_pAd, PBF_SYS_CTRL, &__regValue);					\
-		if (_shr_msel == HIGHER_SHRMEM)										\
-		{									\
-			RTMP_IO_WRITE32(_pAd, PBF_SYS_CTRL, __regValue | (1 << 19));	\
-		}									\
-		else									\
-		{									\
-			RTMP_IO_WRITE32(_pAd, PBF_SYS_CTRL, __regValue & ~(1 << 19));	\
-		}									\
-		RTMP_INT_UNLOCK(&_pAd->ShrMemLock, _irqFlag);						\
-	} while(0)
-
-#endif // SPECIFIC_BCN_BUF_SUPPORT //
 
 #endif // __RTMP_MAC_H__ //
 

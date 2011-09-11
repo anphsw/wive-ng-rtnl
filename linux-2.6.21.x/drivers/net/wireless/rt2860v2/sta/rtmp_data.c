@@ -735,9 +735,6 @@ VOID STAHandleRxMgmtFrame(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	RX_BLK			*pRxBlk)
 {
-#ifdef ANT_DIVERSITY_SUPPORT
-	PRT28XX_RXD_STRUC	pRxD = &(pRxBlk->RxD);
-#endif // ANT_DIVERSITY_SUPPORT //
 	PRXWI_STRUC		pRxWI = pRxBlk->pRxWI;
 	PHEADER_802_11	pHeader = pRxBlk->pHeader;
 	PNDIS_PACKET	pRxPacket = pRxBlk->pRxPacket;

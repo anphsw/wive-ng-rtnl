@@ -644,6 +644,8 @@
 24) Usb suspend at start need for power save.<br>
 25) Fix build with 3.82 make version.<br>
 26) Backport raeth driver from 3.6.0.0SDK (v2.1).<br>
+27) Update sta driver to 2.4.0.4.<br>
+28) Update ap driver to 2.5.0.4.<br>
 
 
 suspended) Add skb reuse support.<br>

@@ -1190,9 +1190,6 @@ VOID MlmePeriodicExec(
 {
 	ULONG			TxTotalCnt;
 	PRTMP_ADAPTER	pAd = (RTMP_ADAPTER *)FunctionContext;
-#ifdef ANT_DIVERSITY_SUPPORT
-	SHORT	realavgrssi;
-#endif // ANT_DIVERSITY_SUPPORT //
 
 #ifdef RTMP_MAC_PCI
 #ifdef CONFIG_STA_SUPPORT
@@ -1457,24 +1454,6 @@ else
 	//		pAd->RalinkCounters.MgmtRingFullCount = 0;
 
 		// The time period for checking antenna is according to traffic
-#ifdef ANT_DIVERSITY_SUPPORT
-		if ((pAd->NicConfig2.field.AntDiversity) && 
-			(pAd->CommonCfg.bRxAntDiversity == ANT_DIVERSITY_ENABLE) && 
-			(!pAd->EepromAccess))
-			AsicAntennaSelect(pAd, pAd->MlmeAux.Channel);
-		else if(pAd->CommonCfg.bRxAntDiversity == ANT_FIX_ANT1 || pAd->CommonCfg.bRxAntDiversity == ANT_FIX_ANT2)
-		{
-#ifdef CONFIG_AP_SUPPORT
-			IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
-				APAsicAntennaAvg(pAd, pAd->RxAnt.Pair1PrimaryRxAnt, &realavgrssi);
-#endif // CONFIG_AP_SUPPORT //
-#ifdef CONFIG_STA_SUPPORT
-			realavgrssi = (pAd->RxAnt.Pair1AvgRssi[pAd->RxAnt.Pair1PrimaryRxAnt] >> 3);
-#endif // CONFIG_STA_SUPPORT //
-			DBGPRINT(RT_DEBUG_TRACE,("Ant-realrssi0(%d), Lastrssi0(%d), EvaluateStableCnt=%d\n", realavgrssi, pAd->RxAnt.Pair1LastAvgRssi, pAd->RxAnt.EvaluateStableCnt));
-		}
-		else
-#endif // ANT_DIVERSITY_SUPPORT //
 		{
 			if (pAd->Mlme.bEnableAutoAntennaCheck)
 			{
@@ -2392,13 +2371,13 @@ VOID STAMlmePeriodicExec(
 			//send disassociate event to wpa_supplicant
 			if (pAd->StaCfg.WpaSupplicantUP) 
 			{
-				RtmpOSWrielessEventSend(pAd, IWEVCUSTOM, RT_DISASSOC_EVENT_FLAG, NULL, NULL, 0);
+				RtmpOSWirelessEventSend(pAd, IWEVCUSTOM, RT_DISASSOC_EVENT_FLAG, NULL, NULL, 0);
 			} 
 #endif // NATIVE_WPA_SUPPLICANT_SUPPORT //
 #endif // WPA_SUPPLICANT_SUPPORT //
 			
 #ifdef NATIVE_WPA_SUPPLICANT_SUPPORT
-		RtmpOSWrielessEventSend(pAd, SIOCGIWAP, -1, NULL, NULL, 0);
+		RtmpOSWirelessEventSend(pAd, SIOCGIWAP, -1, NULL, NULL, 0);
 #endif // NATIVE_WPA_SUPPLICANT_SUPPORT //        
 			
 			// RTMPPatchMacBbpBug(pAd);
@@ -6858,13 +6837,14 @@ VOID BssTableSsidSort(
 			break;
 	}
 
-	BssTableSortByRssi(OutTab);
+	BssTableSortByRssi(OutTab, FALSE);
 }
-
+#endif // CONFIG_STA_SUPPORT //
 
 // IRQL = DISPATCH_LEVEL
 VOID BssTableSortByRssi(
-	IN OUT BSS_TABLE *OutTab) 
+	IN OUT BSS_TABLE *OutTab,
+	IN BOOLEAN isInverseOrder)
 {
 	INT 	  i, j;
 	BSS_ENTRY TmpBss;
@@ -6873,7 +6853,10 @@ VOID BssTableSortByRssi(
 	{
 		for (j = i+1; j < OutTab->BssNr; j++) 
 		{
-			if (OutTab->BssEntry[j].Rssi > OutTab->BssEntry[i].Rssi) 
+			if (OutTab->BssEntry[j].Rssi > OutTab->BssEntry[i].Rssi ?
+				!isInverseOrder : isInverseOrder)
+			{
+				if (OutTab->BssEntry[j].Rssi != OutTab->BssEntry[i].Rssi )
 			{
 				NdisMoveMemory(&TmpBss, &OutTab->BssEntry[j], sizeof(BSS_ENTRY));
 				NdisMoveMemory(&OutTab->BssEntry[j], &OutTab->BssEntry[i], sizeof(BSS_ENTRY));
@@ -6882,7 +6865,8 @@ VOID BssTableSortByRssi(
 		}
 	}
 }
-#endif // CONFIG_STA_SUPPORT //
+}
+
 
 
 VOID BssCipherParse(
@@ -8699,41 +8683,9 @@ VOID AsicEvaluateRxAnt(
 							fRTMP_ADAPTER_NIC_NOT_EXIST		|
 							fRTMP_ADAPTER_BSS_SCAN_IN_PROGRESS) ||
 							OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_DOZE) 
-#ifdef ANT_DIVERSITY_SUPPORT
-							|| (pAd->EepromAccess)
-#endif // ANT_DIVERSITY_SUPPORT //
 							)
 		return;
 	
-#ifdef ANT_DIVERSITY_SUPPORT
-	if ((pAd->NicConfig2.field.AntDiversity) && (pAd->CommonCfg.bRxAntDiversity == ANT_DIVERSITY_ENABLE))
-	{
-		// two antenna selection mechanism- one is antenna diversity, the other is failed antenna remove
-		// one is antenna diversity:there is only one antenna can rx and tx
-		// the other is failed antenna remove:two physical antenna can rx and tx
-			DBGPRINT(RT_DEBUG_TRACE,("AntDiv - before evaluate Pair1-Ant (%d,%d)\n",
-				pAd->RxAnt.Pair1PrimaryRxAnt, pAd->RxAnt.Pair1SecondaryRxAnt));
-
-			AsicSetRxAnt(pAd, pAd->RxAnt.Pair1SecondaryRxAnt);
-				
-			pAd->RxAnt.EvaluatePeriod = 1; // 1:Means switch to SecondaryRxAnt, 0:Means switch to Pair1PrimaryRxAnt
-			pAd->RxAnt.FirstPktArrivedWhenEvaluate = FALSE;
-			pAd->RxAnt.RcvPktNumWhenEvaluate = 0;
-
-			// a one-shot timer to end the evalution
-			// dynamic adjust antenna evaluation period according to the traffic
-			if (OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_MEDIA_STATE_CONNECTED))
-#ifdef CONFIG_AP_SUPPORT
-			IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
-				RTMPSetTimer(&pAd->Mlme.RxAntEvalTimer, 5000);
-#else
-				RTMPSetTimer(&pAd->Mlme.RxAntEvalTimer, 100);
-#endif // CONFIG_AP_SUPPORT //
-			else
-				RTMPSetTimer(&pAd->Mlme.RxAntEvalTimer, 300);
-		}
-		else
-#endif // ANT_DIVERSITY_SUPPORT //
 	{
 #ifdef CONFIG_AP_SUPPORT
 		IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
@@ -8820,13 +8772,6 @@ VOID AsicRxAntEvalTimeout(
 	CHAR			larger = -127, rssi0, rssi1, rssi2;
 #endif // CONFIG_STA_SUPPORT //
 
-#ifdef ANT_DIVERSITY_SUPPORT
-	BOOLEAN			bSwapAnt = FALSE;
-#ifdef CONFIG_AP_SUPPORT
-	SHORT realrssi, last_rssi = pAd->RxAnt.Pair1LastAvgRssi;
-	ULONG recv = pAd->RxAnt.RcvPktNum[pAd->RxAnt.Pair1SecondaryRxAnt];
-#endif // CONFIG_AP_SUPPORT //
-#endif // ANT_DIVERSITY_SUPPORT //
 
 
 #ifdef RALINK_ATE
@@ -8839,69 +8784,9 @@ VOID AsicRxAntEvalTimeout(
 							fRTMP_ADAPTER_RADIO_OFF			|
 							fRTMP_ADAPTER_NIC_NOT_EXIST) ||
 							OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_DOZE) 
-#ifdef ANT_DIVERSITY_SUPPORT
-							|| (pAd->EepromAccess)
-#endif // ANT_DIVERSITY_SUPPORT //
 							)
 		return;
 
-#ifdef ANT_DIVERSITY_SUPPORT
-	if ((pAd->NicConfig2.field.AntDiversity) && (pAd->CommonCfg.bRxAntDiversity == ANT_DIVERSITY_ENABLE))
-	{
-#ifdef CONFIG_AP_SUPPORT
-	IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
-	{
-			APAsicAntennaAvg(pAd, pAd->RxAnt.Pair1SecondaryRxAnt, &realrssi);
-			if ((recv != 0) && (realrssi >= (pAd->RxAnt.Pair1LastAvgRssi + 1)))
-				bSwapAnt = TRUE;
-	}
-#endif // CONFIG_AP_SUPPORT //
-#ifdef CONFIG_STA_SUPPORT
-	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
-			if ((pAd->RxAnt.RcvPktNumWhenEvaluate != 0) && (pAd->RxAnt.Pair1AvgRssi[pAd->RxAnt.Pair1SecondaryRxAnt] >= pAd->RxAnt.Pair1AvgRssi[pAd->RxAnt.Pair1PrimaryRxAnt]))
-				bSwapAnt = TRUE;
-#endif // CONFIG_STA_SUPPORT //
-		if (bSwapAnt == TRUE)	
-			{
-				UCHAR			temp;
-
-				//
-				// select PrimaryRxAntPair
-				//    Role change, Used Pair1SecondaryRxAnt as PrimaryRxAntPair.
-				//    Since Pair1SecondaryRxAnt Quality good than Pair1PrimaryRxAnt
-				//
-				temp = pAd->RxAnt.Pair1PrimaryRxAnt;
-				pAd->RxAnt.Pair1PrimaryRxAnt = pAd->RxAnt.Pair1SecondaryRxAnt;
-				pAd->RxAnt.Pair1SecondaryRxAnt = temp;
-
-#ifdef CONFIG_AP_SUPPORT
-				pAd->RxAnt.Pair1LastAvgRssi = realrssi;
-#endif // CONFIG_AP_SUPPORT //
-#ifdef CONFIG_STA_SUPPORT
-				pAd->RxAnt.Pair1LastAvgRssi = (pAd->RxAnt.Pair1AvgRssi[pAd->RxAnt.Pair1SecondaryRxAnt] >> 3);
-#endif // CONFIG_STA_SUPPORT //
-//				pAd->RxAnt.EvaluateStableCnt = 0;
-			}
-			else
-			{
-				// if the evaluated antenna is not better than original, switch back to original antenna
-				AsicSetRxAnt(pAd, pAd->RxAnt.Pair1PrimaryRxAnt);
-				pAd->RxAnt.EvaluateStableCnt ++;
-			}
-
-			pAd->RxAnt.EvaluatePeriod = 0; // 1:Means switch to SecondaryRxAnt, 0:Means switch to Pair1PrimaryRxAnt
-
-#ifdef CONFIG_AP_SUPPORT
-			DBGPRINT(RT_DEBUG_TRACE,("AsicRxAntEvalAction::After Eval(fix in #%d), <%d, %d>, RcvPktNumWhenEvaluate=%ld\n",
-					pAd->RxAnt.Pair1PrimaryRxAnt, last_rssi, realrssi, recv));
-#endif // CONFIG_AP_SUPPORT //
-#ifdef CONFIG_STA_SUPPORT
-			DBGPRINT(RT_DEBUG_TRACE,("AsicRxAntEvalAction::After Eval(fix in #%d), <%d, %d>, RcvPktNumWhenEvaluate=%ld\n",
-					pAd->RxAnt.Pair1PrimaryRxAnt, (pAd->RxAnt.Pair1AvgRssi[0] >> 3), (pAd->RxAnt.Pair1AvgRssi[1] >> 3), pAd->RxAnt.RcvPktNumWhenEvaluate));
-#endif // CONFIG_STA_SUPPORT //
-		}
-		else
-#endif // ANT_DIVERSITY_SUPPORT //
 	{
 #ifdef CONFIG_AP_SUPPORT
 		IF_DEV_CONFIG_OPMODE_ON_AP(pAd)

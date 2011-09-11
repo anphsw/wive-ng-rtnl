@@ -147,7 +147,7 @@ VOID    WpaSendMicFailureToWpaSupplicant(
 	if(bUnicast)
 		sprintf(custom, "%s unicast", custom);
 
-	RtmpOSWrielessEventSend(pAd, IWEVCUSTOM, -1, NULL, (PUCHAR)custom, strlen(custom));
+	RtmpOSWirelessEventSend(pAd, IWEVCUSTOM, -1, NULL, (PUCHAR)custom, strlen(custom));
 	
 	return;
 }

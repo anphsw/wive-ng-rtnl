@@ -52,11 +52,15 @@
 #include "mat.h"
 #endif // MAT_SUPPORT //
 
+
 #ifdef WAPI_SUPPORT
 #include "wapi_def.h"
 #endif // WAPI_SUPPORT //
 
 #include "rtmp_chip.h"
+
+
+
 
 #ifdef DOT11Z_TDLS_SUPPORT
 #include "tdls_cmm.h"
@@ -65,6 +69,9 @@
 #ifdef CLIENT_WDS
 #include "client_wds_cmm.h"
 #endif // CLIENT_WDS //
+
+
+
 
 typedef struct _RTMP_ADAPTER		RTMP_ADAPTER;
 typedef struct _RTMP_ADAPTER		*PRTMP_ADAPTER;
@@ -994,9 +1001,6 @@ typedef struct _CHANNEL_TX_POWER {
 #endif // DOT11N_DRAFT3 //
 	CHAR       Power;
 	CHAR       Power2;
-#if defined(RT2883) || defined(RT3883)
-	CHAR       Power3;
-#endif
 	UCHAR      MaxTxPwr;
 	UCHAR      DfsReq;
 	UCHAR	   RegulatoryDomain;
@@ -1927,9 +1931,6 @@ typedef struct _COMMON_CONFIG {
 
 	BOOLEAN				NdisRadioStateOff; //For HCT 12.0, set this flag to TRUE instead of called MlmeRadioOff.       
 	ABGBAND_STATE		BandState;		// For setting BBP used on B/G or A mode.
-#ifdef ANT_DIVERSITY_SUPPORT
-	UCHAR				bRxAntDiversity; // 0:disable, 1:enable Software Rx Antenna Diversity.
-#endif // ANT_DIVERSITY_SUPPORT //
 
 	// IEEE802.11H--DFS.
 	RADAR_DETECT_STRUCT	RadarDetect;
@@ -3073,6 +3074,9 @@ typedef struct _APCLI_STRUCT {
 	ULONG                   AssocCurrState;
 	ULONG					WpaPskCurrState;
 
+#ifdef APCLI_AUTO_CONNECT_SUPPORT
+	USHORT			ProbeReqCnt;
+#endif /* APCLI_AUTO_CONNECT_SUPPORT */
 	USHORT                  AuthReqCnt;
 	USHORT                  AssocReqCnt;
 
@@ -3146,7 +3150,11 @@ typedef struct _AP_ADMIN_CONFIG {
 #ifdef APCLI_SUPPORT
 	UCHAR				ApCliInfRunned;				// Number of  ApClient interface which was running. value from 0 to MAX_APCLI_INTERFACE
 	APCLI_STRUCT		ApCliTab[MAX_APCLI_NUM];		//AP-client 
-#endif // APCLI_SUPPORT //
+	RALINK_TIMER_STRUCT	ApCliScanTimer;
+#ifdef APCLI_AUTO_CONNECT_SUPPORT	
+	BOOLEAN					ApCliAutoConnectRunning;
+#endif /* APCLI_AUTO_CONNECT_SUPPORT */
+#endif /* APCLI_SUPPORT */
 
 	// for wpa
 	RALINK_TIMER_STRUCT         CounterMeasureTimer;
@@ -3247,6 +3255,7 @@ typedef struct _AP_ADMIN_CONFIG {
 #endif // GREENAP_SUPPORT //
 
 #endif // DOT11_N_SUPPORT //
+	UCHAR					EntryClientCount;
 } AP_ADMIN_CONFIG, *PAP_ADMIN_CONFIG;
 
 #ifdef IGMP_SNOOP_SUPPORT
@@ -3746,10 +3755,6 @@ struct _RTMP_ADAPTER
 	// ----------------------------
 	// MAC control
 	// ----------------------------
-#ifdef SPECIFIC_BCN_BUF_SUPPORT
-	UCHAR				ShrMSel;
-	NDIS_SPIN_LOCK			ShrMemLock;	
-#endif // SPECIFIC_BCN_BUF_SUPPORT //
 
 /*****************************************************************************************/
 /*      802.11 related parameters                                                        */
@@ -5615,7 +5620,7 @@ VOID BssTableSsidSort(
 	IN  UCHAR SsidLen);
 
 VOID  BssTableSortByRssi(
-	IN OUT BSS_TABLE *OutTab);
+	IN OUT BSS_TABLE *OutTab, IN BOOLEAN isInverseOrder);
 
 VOID BssCipherParse(
 	IN OUT  PBSS_ENTRY  pBss);
@@ -6920,12 +6925,6 @@ VOID CntlChannelWidth(
 VOID APAsicEvaluateRxAnt(
 	IN PRTMP_ADAPTER	pAd);
 
-#ifdef ANT_DIVERSITY_SUPPORT
-VOID	APAsicAntennaAvg(
-	IN	PRTMP_ADAPTER	pAd,
-	IN	UCHAR	              AntSelect,
-	IN	SHORT	              *RssiAvg);
-#endif // ANT_DIVERSITY_SUPPORT //
 
 VOID APAsicRxAntEvalTimeout(
 	IN PRTMP_ADAPTER	pAd);
@@ -8940,7 +8939,7 @@ VOID RTMPUpdateSwCacheCipherInfo(
 	OS Related funciton prototype definitions.
 	TODO: Maybe we need to move these function prototypes to other proper place.
 */
-int RtmpOSWrielessEventSend(
+int RtmpOSWirelessEventSend(
 	IN RTMP_ADAPTER *pAd,
 	IN UINT32		eventType,
 	IN INT			flags,
@@ -9272,11 +9271,6 @@ INT Set_ForceTxBurst_Proc(
     IN  PRTMP_ADAPTER   pAd, 
     IN  PSTRING         arg);
 
-#ifdef ANT_DIVERSITY_SUPPORT
-INT	Set_Antenna_Proc(
-	IN	PRTMP_ADAPTER	pAd, 
-	IN	PSTRING			arg);
-#endif // ANT_DIVERSITY_SUPPORT //
 
 VOID RTMPAddKey(
 	IN	PRTMP_ADAPTER	    pAd, 

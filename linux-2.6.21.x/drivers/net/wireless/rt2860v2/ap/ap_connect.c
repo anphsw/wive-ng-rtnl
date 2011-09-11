@@ -114,9 +114,6 @@ VOID APMakeBssBeacon(
 	UINT32 longValue;
 	HTTRANSMIT_SETTING	BeaconTransmit;   // MGMT frame PHY rate setting when operatin at Ht rate.
 	UCHAR PhyMode, SupRateLen;
-#ifdef SPECIFIC_BCN_BUF_SUPPORT
-	unsigned long irqFlag;
-#endif // SPECIFIC_BCN_BUF_SUPPORT //
 	BOOLEAN		bHasWpsIE = FALSE;
 
 	if(!BeaconTransmitRequired(pAd, apidx, &pAd->ApCfg.MBSSID[apidx]))
@@ -306,12 +303,6 @@ VOID APMakeBssBeacon(
     RTMPWIEndianChange(ptr, TYPE_TXWI);
 #endif
 
-#ifdef SPECIFIC_BCN_BUF_SUPPORT
-	/*
-		Shared memory access selection (higher 8KB shared memory)
-	*/
-	RTMP_MAC_SHR_MSEL_LOCK(pAd, HIGHER_SHRMEM, irqFlag);
-#endif // SPECIFIC_BCN_BUF_SUPPORT //
 
 	for (i=0; i<TXWI_SIZE; i+=4)  // 16-byte TXWI field
 	{
@@ -333,12 +324,6 @@ VOID APMakeBssBeacon(
 		ptr += 4;
 	}
 
-#ifdef SPECIFIC_BCN_BUF_SUPPORT
-	/*
-		Shared memory access selection (lower 16KB shared memory)
-	*/
-	RTMP_MAC_SHR_MSEL_UNLOCK(pAd, LOWER_SHRMEM, irqFlag);	
-#endif // SPECIFIC_BCN_BUF_SUPPORT //
 
 
 	pAd->ApCfg.MBSSID[apidx].TimIELocationInBeacon = (UCHAR)FrameLen; 
@@ -900,9 +885,6 @@ VOID APMakeAllBssBeacon(
 	UINT32	regValue;
 	UCHAR	NumOfMacs;
 	UCHAR	NumOfBcns;
-#ifdef SPECIFIC_BCN_BUF_SUPPORT	
-	unsigned long irqFlag;
-#endif // SPECIFIC_BCN_BUF_SUPPORT //
 
 	// before MakeBssBeacon, clear all beacon TxD's valid bit
     /* Note: can not use MAX_MBSSID_NUM here, or
@@ -917,24 +899,12 @@ VOID APMakeAllBssBeacon(
 
 	for (i=0; i<HW_BEACON_MAX_COUNT; i++)
 	{
-#ifdef SPECIFIC_BCN_BUF_SUPPORT
-		/*
-			Shared memory access selection (higher 8KB shared memory)
-		*/
-		RTMP_MAC_SHR_MSEL_LOCK(pAd, HIGHER_SHRMEM, irqFlag);
-#endif // SPECIFIC_BCN_BUF_SUPPORT //
 
 		for (j=0; j<TXWI_SIZE; j+=4)  // 16-bytes TXWI field
 	    {
 	        RTMP_IO_WRITE32(pAd, pAd->BeaconOffset[i] + j, 0);
 	    }
 
-#ifdef SPECIFIC_BCN_BUF_SUPPORT
-		/*
-			Shared memory access selection (lower 16KB shared memory)
-		*/
-		RTMP_MAC_SHR_MSEL_UNLOCK(pAd, LOWER_SHRMEM, irqFlag);	
-#endif // SPECIFIC_BCN_BUF_SUPPORT //
 
 	}
 
@@ -984,22 +954,10 @@ VOID APMakeAllBssBeacon(
 		regValue |= (3<<16);
 		pAd->ApCfg.MacMask = ~(8-1);
 	}
-#ifdef SPECIFIC_BCN_BUF_SUPPORT
-	else if (NumOfMacs <= 16)
-	{
-		/* Set MULTI_BSSID_MODE_BIT4 in MAC register 0x1014 */
-		regValue |= (1<<22);
-		pAd->ApCfg.MacMask = ~(16-1);
-	}
-#endif // SPECIFIC_BCN_BUF_SUPPORT //
 
 	// set Multiple BSSID Beacon number
 	if (NumOfBcns > 1)
 	{
-#ifdef SPECIFIC_BCN_BUF_SUPPORT	
-		if (NumOfBcns > 8)
-			regValue |= (((NumOfBcns - 1) >> 3) << 23);
-#endif // SPECIFIC_BCN_BUF_SUPPORT //			
 		regValue |= (((NumOfBcns - 1) & 0x7)  << 18);	
 	}
 

@@ -655,7 +655,9 @@ INT Set_ApCli_Key3_Proc(IN PRTMP_ADAPTER pAd, IN PSTRING arg);
 INT Set_ApCli_Key4_Proc(IN PRTMP_ADAPTER pAd, IN PSTRING arg);
 INT Set_ApCli_TxMode_Proc(IN PRTMP_ADAPTER pAd, IN  PSTRING arg);
 INT Set_ApCli_TxMcs_Proc(IN PRTMP_ADAPTER pAd, IN  PSTRING arg);
-
+#ifdef APCLI_AUTO_CONNECT_SUPPORT
+INT Set_ApCli_AutoConnect_Proc(IN PRTMP_ADAPTER pAd,	IN PSTRING arg);
+#endif /* APCLI_AUTO_CONNECT_SUPPORT */
 #ifdef WSC_AP_SUPPORT
 INT Set_AP_WscSsid_Proc(IN PRTMP_ADAPTER	pAd, IN	PSTRING arg);
 #endif // WSC_AP_SUPPORT //
@@ -769,11 +771,6 @@ INT Set_WlanLed_Proc(
 #endif
 #endif // RTMP_RBUS_SUPPORT //
 
-#ifdef ANT_DIVERSITY_SUPPORT
-INT	Set_Antenna_Proc(
-	IN	PRTMP_ADAPTER	pAd, 
-	IN	PUCHAR			arg);
-#endif // ANT_DIVERSITY_SUPPORT //
 
 #ifdef AP_QLOAD_SUPPORT
 INT	Set_QloadClr_Proc(
@@ -1074,6 +1071,9 @@ static struct {
 	{"ApCliKey4",					Set_ApCli_Key4_Proc},
 	{"ApCliTxMode",					Set_ApCli_TxMode_Proc},
 	{"ApCliTxMcs",					Set_ApCli_TxMcs_Proc},	
+#ifdef APCLI_AUTO_CONNECT_SUPPORT	
+	{"ApCliAutoConnect", 			Set_ApCli_AutoConnect_Proc},
+#endif /* APCLI_AUTO_CONNECT_SUPPORT */
 #ifdef WSC_AP_SUPPORT	
 	{"ApCliWscSsid",				Set_AP_WscSsid_Proc},
 #endif // WSC_AP_SUPPORT //
@@ -1822,7 +1822,7 @@ INT RTMPAPSetInformation(
 		case OID_802_11_WAPI_PID:
 			{
 				unsigned long wapi_pid;
-    			if (copy_from_user(&pObj->wapi_pid, wrq->u.data.pointer, wrq->u.data.length))
+    			if (copy_from_user(&wapi_pid, wrq->u.data.pointer, wrq->u.data.length))
 				{
 					Status = -EFAULT; 	
 				}
@@ -8210,7 +8210,7 @@ INT Set_ApCli_Bssid_Proc(
 			return FALSE;  //Invalid
 	}
 
-	DBGPRINT(RT_DEBUG_TRACE, ("Set_ApCli_Bssid_Proc (%2X:%2X:%2X:%2X:%2X:%2X)\n",
+	DBGPRINT(RT_DEBUG_TRACE, ("Set_ApCli_Bssid_Proc (%02X:%02X:%02X:%02X:%02X:%02X)\n",
 		pAd->ApCfg.ApCliTab[ifIndex].CfgApCliBssid[0],
 		pAd->ApCfg.ApCliTab[ifIndex].CfgApCliBssid[1],
 		pAd->ApCfg.ApCliTab[ifIndex].CfgApCliBssid[2],
@@ -8592,6 +8592,69 @@ INT Set_ApCli_TxMcs_Proc(
 
 	return TRUE;
 }
+
+#ifdef APCLI_AUTO_CONNECT_SUPPORT
+/* 
+    ==========================================================================
+    Description:
+        Trigger Apcli Auto connect to find the missed AP.
+    Return:
+        TRUE if all parameters are OK, FALSE otherwise
+    ==========================================================================
+*/
+INT Set_ApCli_AutoConnect_Proc(
+	IN PRTMP_ADAPTER pAd,
+	IN PSTRING arg)
+{
+	POS_COOKIE  		pObj= (POS_COOKIE) pAd->OS_Cookie;
+	UCHAR				ifIndex;
+	PAP_ADMIN_CONFIG	pApCfg;
+	PAPCLI_STRUCT		pApCliEntry;
+
+	if (pObj->ioctl_if_type != INT_APCLI)
+		return FALSE;
+	pApCfg = &pAd->ApCfg;
+	ifIndex = pObj->ioctl_if;
+	pApCliEntry = &pApCfg->ApCliTab[ifIndex];
+
+        if (!APCLI_IF_UP_CHECK(pAd, ifIndex))
+        {
+                DBGPRINT(RT_DEBUG_TRACE, ("apcli%u is down. Process stop.\n", ifIndex));
+                return TRUE;
+        }	
+
+	if (pApCliEntry->CfgApCliBssid[0] |
+		pApCliEntry->CfgApCliBssid[1] |
+		pApCliEntry->CfgApCliBssid[2] |
+		pApCliEntry->CfgApCliBssid[3] |
+		pApCliEntry->CfgApCliBssid[4] |
+		pApCliEntry->CfgApCliBssid[5])
+	{
+		DBGPRINT(RT_DEBUG_WARN, ("Bssid of apcli%u should not be pre-configured (should be zero). Process stop.\n", ifIndex));
+		return TRUE;
+	}
+	
+	if (pApCfg->ApCliAutoConnectRunning == FALSE)
+	{
+		Set_ApCli_Enable_Proc(pAd, "0");
+		pApCfg->ApCliAutoConnectRunning = TRUE;
+	}	
+	else
+	{
+		DBGPRINT(RT_DEBUG_TRACE, ("Set_ApCli_AutoConnect_Proc() is still running\n"));
+		return TRUE;
+	}
+	DBGPRINT(RT_DEBUG_TRACE, ("I/F(apcli%d) Set_ApCli_AutoConnect_Proc::(Len=%d,Ssid=%s)\n",
+			ifIndex, pApCfg->ApCliTab[ifIndex].CfgSsidLen, pApCfg->ApCliTab[ifIndex].CfgSsid));
+	/*
+		use site survey function to trigger auto connecting.
+	*/
+	Set_SiteSurvey_Proc(pAd, "");
+
+	return TRUE;
+}
+#endif  /* APCLI_AUTO_CONNECT_SUPPORT */
+
 
 #ifdef WSC_AP_SUPPORT
 INT Set_AP_WscSsid_Proc(
@@ -10423,39 +10486,6 @@ INT Set_WlanLed_Proc(
 #endif // WLAN_LED //
 #endif // RTMP_RBUS_SUPPORT //
 
-#ifdef ANT_DIVERSITY_SUPPORT
-INT	Set_Antenna_Proc(
-	IN	PRTMP_ADAPTER	pAd, 
-	IN	PSTRING			arg)
-{
-    UCHAR UsedAnt;
-	DBGPRINT(RT_DEBUG_TRACE, ("==> Set_Antenna_Proc *******************\n"));
-
-    if(simple_strtol(arg, 0, 10) <= 3)
-        UsedAnt = simple_strtol(arg, 0, 10);
-
-    pAd->CommonCfg.bRxAntDiversity = UsedAnt; // Auto switch
-    if (UsedAnt == ANT_DIVERSITY_ENABLE)
-    {
-            pAd->RxAnt.EvaluateStableCnt = 0;
-            DBGPRINT(RT_DEBUG_TRACE, ("<== Set_Antenna_Proc(Auto Switch Mode), (%d,%d)\n", pAd->RxAnt.Pair1PrimaryRxAnt, pAd->RxAnt.Pair1SecondaryRxAnt));
-    }
-    /* 2: Fix in the PHY Antenna CON1*/
-    if (UsedAnt == ANT_FIX_ANT1)
-    {
-            AsicSetRxAnt(pAd, 0);
-            DBGPRINT(RT_DEBUG_TRACE, ("<== Set_Antenna_Proc(Fix in Ant CON1), (%d,%d)\n", pAd->RxAnt.Pair1PrimaryRxAnt, pAd->RxAnt.Pair1SecondaryRxAnt));
-    }
-    /* 3: Fix in the PHY Antenna CON2*/
-    if (UsedAnt == ANT_FIX_ANT2)
-    {
-            AsicSetRxAnt(pAd, 1);
-            DBGPRINT(RT_DEBUG_TRACE, ("<== Set_Antenna_Proc(Fix in Ant CON2), (%d,%d)\n", pAd->RxAnt.Pair1PrimaryRxAnt, pAd->RxAnt.Pair1SecondaryRxAnt));
-    }
-
-	return TRUE;
-}
-#endif // ANT_DIVERSITY_SUPPORT //
 
 INT	Set_MemDebug_Proc(
 	IN	PRTMP_ADAPTER	pAd, 

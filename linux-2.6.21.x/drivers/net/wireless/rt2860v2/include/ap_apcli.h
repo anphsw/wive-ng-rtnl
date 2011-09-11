@@ -261,6 +261,18 @@ BOOLEAN APCliInstallSharedKey(
 	IN	UCHAR			DefaultKeyIdx,
 	IN  MAC_TABLE_ENTRY *pEntry);
 
+#ifdef APCLI_AUTO_CONNECT_SUPPORT
+BOOLEAN ApCliAutoConnectExec(
+	IN  PRTMP_ADAPTER   pAd);
+
+BOOLEAN ApcliCompareAuthEncryp(
+	IN PAPCLI_STRUCT 					pApCliEntry,
+	IN NDIS_802_11_AUTHENTICATION_MODE AuthMode,
+	IN NDIS_802_11_AUTHENTICATION_MODE AuthModeAux,
+	IN NDIS_802_11_WEP_STATUS			WEPstatus,
+	IN CIPHER_SUITE 						WPA);
+#endif /* APCLI_AUTO_CONNECT_SUPPORT */
+
 #endif // APCLI_SUPPORT //
 
 #endif /* _AP_APCLI_H_ */

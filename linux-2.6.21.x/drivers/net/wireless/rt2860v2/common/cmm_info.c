@@ -357,14 +357,10 @@ INT	Set_Cmm_WirelessMode_Proc(
 	IN	BOOLEAN			FlgIsDiffMbssModeUsed)
 {
 	INT	success = TRUE;
-
-
 #ifdef CONFIG_AP_SUPPORT
-#ifdef MBSS_SUPPORT
-#ifdef DEBUG
-	POS_COOKIE pObj = (POS_COOKIE) pAd->OS_Cookie;
-#endif
 	UINT32 i;
+#ifdef MBSS_SUPPORT
+	//POS_COOKIE pObj = (POS_COOKIE) pAd->OS_Cookie;
 
 	if (FlgIsDiffMbssModeUsed == 0)
 		success = RT_CfgSetWirelessMode(pAd, arg);
@@ -2105,7 +2101,7 @@ VOID	RTMPSetHT(
 			    RT30xxWriteRFRegister(pAd, RF_R31, 0x2F);
 
 #else //RT3350 // 
-			if (IS_RT3350(pAd))
+//			if (IS_RT3350(pAd))
 			{
 			RT30xxReadRFRegister(pAd, RF_R24, (PUCHAR)&Value);
 #ifdef GREENAP_SUPPORT
@@ -2854,29 +2850,30 @@ VOID	RTMPCommSiteSurveyData(
 	NDIS_802_11_ENCRYPTION_STATUS	ap_cipher = Ndis802_11EncryptionDisabled;
 	NDIS_802_11_AUTHENTICATION_MODE	ap_auth_mode = Ndis802_11AuthModeOpen;
 
-		//Channel
-		sprintf(msg+strlen(msg),"%-4d", pBss->Channel);
+	//Channel
+	sprintf(msg+strlen(msg),"%-4d", pBss->Channel);
 
-		//SSID
+	//SSID
 	NdisZeroMemory(Ssid, (MAX_LEN_OF_SSID +1));
 	if (RTMPCheckStrPrintAble((PCHAR)pBss->Ssid, pBss->SsidLen))
 		NdisMoveMemory(Ssid, pBss->Ssid, pBss->SsidLen);
 	else
 	{
 		INT idx = 0;
-		for (idx = 0; idx < 16; idx++)
-			sprintf(Ssid, "%s%02X", Ssid, pBss->Ssid[idx]);
+		sprintf(Ssid, "0x");
+		for (idx = 0; (idx < 14) && (idx < pBss->SsidLen); idx++)
+			sprintf(Ssid + 2 + (idx*2), "%02X", (UCHAR)pBss->Ssid[idx]);
 	}
-		sprintf(msg+strlen(msg),"%-33s", Ssid);      
+	sprintf(msg+strlen(msg),"%-33s", Ssid);      
 		
-		//BSSID
-		sprintf(msg+strlen(msg),"%02x:%02x:%02x:%02x:%02x:%02x   ", 
-			pBss->Bssid[0], 
-			pBss->Bssid[1],
-			pBss->Bssid[2], 
-			pBss->Bssid[3], 
-			pBss->Bssid[4], 
-			pBss->Bssid[5]);
+	//BSSID
+	sprintf(msg+strlen(msg),"%02x:%02x:%02x:%02x:%02x:%02x   ", 
+		pBss->Bssid[0], 
+		pBss->Bssid[1],
+		pBss->Bssid[2], 
+		pBss->Bssid[3], 
+		pBss->Bssid[4], 
+		pBss->Bssid[5]);
 	
 	//Security
 	if ((Ndis802_11AuthModeWPA <= pBss->AuthMode) &&
@@ -2981,6 +2978,7 @@ VOID	RTMPCommSiteSurveyData(
 		else    // < -84 dbm
 			Rssi_Quality = 0;
 		sprintf(msg+strlen(msg),"%-9d", Rssi_Quality);
+		
 		// Wireless Mode
 		wireless_mode = NetworkTypeInUseSanity(pBss);
 		if (wireless_mode == Ndis802_11FH ||
@@ -3019,6 +3017,8 @@ VOID	RTMPCommSiteSurveyData(
 			sprintf(msg+strlen(msg),"%-3s", " In");
 
         sprintf(msg+strlen(msg),"\n");
+	
+	return;
 }
 
 #if defined (AP_SCAN_SUPPORT) || defined (CONFIG_STA_SUPPORT)
@@ -3062,9 +3062,9 @@ VOID RTMPIoctlGetSiteSurvey(
 	WaitCnt = 0;
 #ifdef CONFIG_STA_SUPPORT
 	pAdapter->StaCfg.bScanReqIsFromWebUI = TRUE;
+#endif // CONFIG_STA_SUPPORT //
 	while ((ScanRunning(pAdapter) == TRUE) && (WaitCnt++ < 200))
 		OS_WAIT(500);	
-#endif // CONFIG_STA_SUPPORT //
 
 	for(i=0; i<pAdapter->ScanTab.BssNr ;i++)
 	{

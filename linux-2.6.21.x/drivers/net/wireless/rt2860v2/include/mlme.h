@@ -63,7 +63,12 @@
 #define JOIN_TIMEOUT                2000        // unit: msec
 #define SHORT_CHANNEL_TIME          90        // unit: msec
 #define MIN_CHANNEL_TIME            110        // unit: msec, for dual band scan
+#ifndef APLCI_AUTO_CONNECT_SUPPORT
 #define MAX_CHANNEL_TIME            140       // unit: msec, for single band scan
+#else
+/* stay longer in each channel to hear more beacons */
+#define MAX_CHANNEL_TIME            300        // unit: msec, for single band scan
+#endif /* APCLI_AUTO_CONNECT_SUPPORT */
 #define	FAST_ACTIVE_SCAN_TIME	    30 		  // Active scan waiting for probe response time
 #define CW_MIN_IN_BITS              4         // actual CwMin = 2^CW_MIN_IN_BITS - 1
 #define AUTO_CHANNEL_SEL_TIMEOUT		400		// uint: msec

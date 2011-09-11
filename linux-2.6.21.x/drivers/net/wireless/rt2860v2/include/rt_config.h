@@ -73,6 +73,7 @@
 #include "rtmp_chip.h"
 #include "rtmp_timer.h"
 
+
 #ifdef LINUX
 #ifdef RT_CFG80211_SUPPORT
 #include "cfg80211extr.h"
@@ -177,11 +178,12 @@
 #endif // RALINK_ATE //
 #endif // RALINK_QA //
 
+
 #ifdef RTMP_RBUS_SUPPORT
 #ifdef RT3XXX_ANTENNA_DIVERSITY_SUPPORT
 #include "ap_diversity.h"
 #endif // RT3XXX_ANTENNA_DIVERSITY_SUPPORT //
-#endif
+#endif // RTMP_RBUS_SUPPORT //
 
 #ifdef WAPI_SUPPORT
 #include "wapi.h"

@@ -1238,6 +1238,15 @@ VOID MacTableMaintenance(
 			&& pAd->ApCfg.bGreenAPEnable == TRUE)
 		{
 #ifdef RTMP_RBUS_SUPPORT
+#ifdef COC_SUPPORT
+			if (pAd->MacTab.Size==0&&pAd->ApCfg.GreenAPLevel!=GREENAP_WITHOUT_ANY_STAS_CONNECT)
+			{
+					EnableAPMIMOPS(pAd,TRUE);
+					pAd->ApCfg.GreenAPLevel = GREENAP_WITHOUT_ANY_STAS_CONNECT;
+				
+			}
+			else
+#endif // COC_SUPPORT //
 #endif // RTMP_RBUS_SUPPORT //
 				if (pAd->ApCfg.GreenAPLevel!=GREENAP_ONLY_11BG_STAS)
 				{
@@ -2302,6 +2311,26 @@ VOID EnableAPMIMOPS(
 
 	CentralChannel = pAd->CommonCfg.CentralChannel;
 #ifdef RTMP_RBUS_SUPPORT
+#ifdef COC_SUPPORT
+#ifdef RT305x
+		
+		if( ReduceCorePower == TRUE)
+		{
+			/* Set Core Power to 1.1V */
+			DBGPRINT(RT_DEBUG_INFO, ("Set core power to 1.1V\n"));
+			RT30xxReadRFRegister(pAd, RF_R26, &RFValue);
+			RFValue &= 0x1F;        //clear bit[7~5]
+			RFValue |= 0xC0;
+			RT30xxWriteRFRegister(pAd, RF_R26, (UCHAR)RFValue);
+		}
+		else
+		{
+			DBGPRINT(RT_DEBUG_INFO, ("Set core power to default value\n"));
+			/* Set Core Power to default value */
+			RT30xxWriteRFRegister(pAd, RF_R26, RT305x_RFRegTable[RF_R26].Value);
+		}
+#endif // RT305x //
+#endif // COC_SUPPORT //
 #endif // RTMP_RBUS_SUPPORT //
 		DBGPRINT(RT_DEBUG_INFO, ("Run with BW_20\n"));
 		pAd->CommonCfg.CentralChannel = pAd->CommonCfg.Channel;
@@ -2379,6 +2408,13 @@ VOID DisableAPMIMOPS(
 	pAd->ApCfg.bGreenAPActive=FALSE;
 
 #ifdef RTMP_RBUS_SUPPORT
+#ifdef COC_SUPPORT
+#ifdef RT305x
+		DBGPRINT(RT_DEBUG_INFO, ("Set core power to default value\n"));
+		/* Set Core Power to default value */
+		RT30xxWriteRFRegister(pAd, RF_R26, RT305x_RFRegTable[RF_R26].Value);
+#endif // RT305x //
+#endif // COC_SUPPORT //
 #endif // RTMP_RBUS_SUPPORT //
 	if ((pAd->CommonCfg.HtCapability.HtCapInfo.ChannelWidth == BW_40) && (pAd->CommonCfg.Channel != 14))
 		{

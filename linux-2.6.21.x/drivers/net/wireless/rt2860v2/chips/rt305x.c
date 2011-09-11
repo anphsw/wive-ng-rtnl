@@ -37,7 +37,7 @@
 #error "You Should Enable compile flag RTMP_RF_RW_SUPPORT for this chip"
 #endif // RTMP_RF_RW_SUPPORT //
 
-#ifdef RT3050
+#if defined(RT3050) || defined(RT3350)
 /* Default EEPROM value for RT3050 */
 UCHAR EeBuffer[EEPROM_SIZE] = {
 	0x50, 0x30, 0x01, 0x01, 0x00, 0x0c, 0x43, 0x30, 0x52, 0x88, 0xff, 0xff, 0xff, 0xff, 
@@ -266,7 +266,9 @@ VOID NICInitRT305xRFRegisters(IN PRTMP_ADAPTER pAd)
 	INT i;
 	// Driver must read EEPROM to get RfIcType before initial RF registers
 	// Initialize RF register to default value
-        if ((pAd->RfIcType == RFIC_3320) || (pAd->RfIcType == RFIC_3020) || (pAd->RfIcType == RFIC_3021) || (pAd->RfIcType == RFIC_3022))
+
+        if ((pAd->RfIcType == RFIC_3320) || (pAd->RfIcType == RFIC_3020) ||
+			(pAd->RfIcType == RFIC_3021) || (pAd->RfIcType == RFIC_3022))
         {
                 // Init RF calibration
                 // Driver should toggle RF R30 bit7 before init RF registers

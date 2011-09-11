@@ -372,6 +372,18 @@ BOOLEAN ApCliLinkUp(
 			else
 				pMacEntry->PortSecured = WPA_802_1X_PORT_SECURED;
 
+#ifdef APCLI_AUTO_CONNECT_SUPPORT
+			if (pAd->ApCfg.ApCliAutoConnectRunning == TRUE && 
+					(pMacEntry->PortSecured == WPA_802_1X_PORT_SECURED))
+			{
+				DBGPRINT(RT_DEBUG_TRACE, ("ApCli auto connected: ApCliLinkUp()\n"));
+				/*Clear the Bssid auto-configured during the process */
+				NdisZeroMemory(pApCliEntry->CfgApCliBssid, MAC_ADDR_LENGTH);
+				RtmpOSWirelessEventSend(pAd, IWEVCUSTOM, IW_APCLI_AUTO_CONN_SUCCESS, NULL, NULL, 0);
+				pAd->ApCfg.ApCliAutoConnectRunning = FALSE;
+			}
+#endif /* APCLI_AUTO_CONNECT_SUPPORT */
+
 			// Store appropriate RSN_IE for WPA SM negotiation later 
 			// If WPAPSK/WPA2SPK mix mode, driver just stores either WPAPSK or WPA2PSK
 			// RSNIE. It depends on the AP-Client's authentication mode to store the corresponding RSNIE.   
@@ -710,11 +722,12 @@ VOID ApCliLinkDown(
 		DBGPRINT(RT_DEBUG_TRACE, ("!!! ERROR : APCLI LINK DOWN - IF(apcli%d)!!!\n", ifIndex));
 		return;
 	}
-    	
+		
 	pApCliEntry = &pAd->ApCfg.ApCliTab[ifIndex];
+	
 	if (pApCliEntry->Valid == FALSE)	
 		return;
-
+	
 	pAd->ApCfg.ApCliInfRunned--;
 	MacTableDeleteEntry(pAd, pApCliEntry->MacTabWCID, APCLI_ROOT_BSSID_GET(pAd, pApCliEntry->MacTabWCID));
 
@@ -1870,5 +1883,161 @@ BOOLEAN APCliInstallSharedKey(
 	return TRUE;
 }
 
+#ifdef APCLI_AUTO_CONNECT_SUPPORT
+
+/* 
+	===================================================
+	
+	Description:
+		Find the AP that is configured in the ApcliTab, and switch to 
+		the channel of that AP
+		
+	Arguments:
+		pAd: pointer to our adapter
+
+	Return Value:
+		TRUE: no error occured 
+		FALSE: otherwise
+
+	Note:
+	===================================================
+*/
+BOOLEAN ApCliAutoConnectExec(
+	IN  PRTMP_ADAPTER   pAd)
+{
+	POS_COOKIE  	pObj = (POS_COOKIE) pAd->OS_Cookie;
+	UCHAR			ifIdx, CfgSsidLen, entryIdx;
+	STRING			*pCfgSsid;
+	BSS_TABLE		*pScanTab, *pSsidBssTab;
+
+	DBGPRINT(RT_DEBUG_TRACE, ("---> ApCliAutoConnectExec()\n"));
+
+	ifIdx = pObj->ioctl_if;
+	CfgSsidLen = pAd->ApCfg.ApCliTab[ifIdx].CfgSsidLen;
+	pCfgSsid = pAd->ApCfg.ApCliTab[ifIdx].CfgSsid;
+	pScanTab = &pAd->ScanTab;
+	pSsidBssTab = &pAd->MlmeAux.SsidBssTab;
+	pSsidBssTab->BssNr = 0;
+	
+	/*
+		Find out APs with the desired SSID.  
+	*/
+	for (entryIdx=0; entryIdx<pScanTab->BssNr;entryIdx++)
+	{
+		PBSS_ENTRY pBssEntry = &pScanTab->BssEntry[entryIdx];
+		
+		if ( pBssEntry->Channel == 0)
+			break;
+
+		if (NdisEqualMemory(pCfgSsid, pBssEntry->Ssid, CfgSsidLen) &&
+							(pBssEntry->SsidLen) &&
+							(pSsidBssTab->BssNr < MAX_LEN_OF_BSS_TABLE))
+		{	
+			if (ApcliCompareAuthEncryp(&pAd->ApCfg.ApCliTab[ifIdx],
+										pBssEntry->AuthMode,
+										pBssEntry->AuthModeAux,
+										pBssEntry->WepStatus,
+										pBssEntry->WPA) ||
+				ApcliCompareAuthEncryp(&pAd->ApCfg.ApCliTab[ifIdx],
+										pBssEntry->AuthMode,
+										pBssEntry->AuthModeAux,
+										pBssEntry->WepStatus,
+										pBssEntry->WPA2))
+			{
+				DBGPRINT(RT_DEBUG_TRACE, 
+						("Found desired ssid in Entry %2d:\n", entryIdx));
+				DBGPRINT(RT_DEBUG_TRACE,
+						("I/F(apcli%d) ApCliAutoConnectExec:(Len=%d,Ssid=%s, Channel=%d, Rssi=%d)\n", 
+						ifIdx, pBssEntry->SsidLen, pBssEntry->Ssid,
+						pBssEntry->Channel, pBssEntry->Rssi));
+				NdisMoveMemory(&pSsidBssTab->BssEntry[pSsidBssTab->BssNr++],
+								pBssEntry, sizeof(BSS_ENTRY));
+			} 
+		}		
+	}
+
+	NdisZeroMemory(&pSsidBssTab->BssEntry[pSsidBssTab->BssNr], sizeof(BSS_ENTRY));
+	
+	/*
+		Sort by Rssi in the increasing order, and connect to
+		the last entry (strongest Rssi)
+	*/
+	BssTableSortByRssi(pSsidBssTab, TRUE);
+	
+	if ((pSsidBssTab->BssNr == 0))
+	{
+		DBGPRINT(RT_DEBUG_TRACE, ("No match entry.\n"));
+		pAd->ApCfg.ApCliAutoConnectRunning = FALSE;
+	}
+	else if (pSsidBssTab->BssNr > 0 &&
+			pSsidBssTab->BssNr <=MAX_LEN_OF_BSS_TABLE)
+	{	
+		/*
+			Switch to the channel of the candidate AP
+		*/
+		if (pAd->CommonCfg.Channel != pSsidBssTab->BssEntry[pSsidBssTab->BssNr -1].Channel)
+		{
+			UCHAR Channel = pSsidBssTab->BssEntry[pSsidBssTab->BssNr -1].Channel;
+			UCHAR msg[4];
+			sprintf(msg, "%d", pSsidBssTab->BssEntry[0].Channel);
+			DBGPRINT(RT_DEBUG_TRACE, ("Switch to channel :%u\n", Channel));
+			pAd->CommonCfg.Channel = Channel;
+			Set_Channel_Proc(pAd, msg);
+		}
+		/* set bssid to candidate AP */
+		NdisMoveMemory(pAd->ApCfg.ApCliTab[ifIdx].CfgApCliBssid,
+						pSsidBssTab->BssEntry[pSsidBssTab->BssNr -1].Bssid
+						, MAC_ADDR_LENGTH);
+	}
+	else 
+	{
+		DBGPRINT(RT_DEBUG_ERROR, ("Error! Out of table range: (BssNr=%d).\n", pSsidBssTab->BssNr) );
+		Set_ApCli_Enable_Proc(pAd, "1");
+		pAd->ApCfg.ApCliAutoConnectRunning = FALSE;
+		DBGPRINT(RT_DEBUG_TRACE, ("<--- ApCliAutoConnectExec()\n"));
+		return FALSE;
+	}	
+	
+	Set_ApCli_Enable_Proc(pAd, "1");
+	DBGPRINT(RT_DEBUG_TRACE, ("<--- ApCliAutoConnectExec()\n"));
+	return TRUE;
+	
+}
+
+
+BOOLEAN ApcliCompareAuthEncryp(
+	IN PAPCLI_STRUCT pApCliEntry,
+	IN NDIS_802_11_AUTHENTICATION_MODE AuthMode,
+	IN NDIS_802_11_AUTHENTICATION_MODE AuthModeAux,
+	IN NDIS_802_11_WEP_STATUS			WEPstatus,
+	IN CIPHER_SUITE WPA)
+{
+	NDIS_802_11_AUTHENTICATION_MODE	tempAuthMode = pApCliEntry->AuthMode;
+	NDIS_802_11_WEP_STATUS				tempWEPstatus = pApCliEntry->WepStatus;
+
+	if (tempAuthMode <= Ndis802_11AuthModeAutoSwitch)
+	{
+		/* 
+			If AuthMode <= Ndis802_11AuthModeAutoSwitch,
+			the AuthMode will be "OPEN mode" in the table.
+			Thus, it just need to compare the WEPstatus.
+		*/
+		return (tempWEPstatus == WEPstatus);
+	}
+	else if (tempAuthMode <= Ndis802_11AuthModeWPA2PSK)
+	{
+		return ((tempAuthMode == AuthMode || 		
+			tempAuthMode == AuthModeAux) &&
+			(tempWEPstatus == WPA.GroupCipher||
+			tempWEPstatus == WPA.PairCipher) );
+	}
+	else
+	{
+		/* not supported cases */
+		return FALSE;
+	}
+
+}
+#endif /* APCLI_AUTO_CONNECT_SUPPORT */
 #endif // APCLI_SUPPORT //
 

@@ -140,7 +140,7 @@ VOID PeerDeauthAction(
 #endif // WAPI_SUPPORT //
 
 #ifdef NATIVE_WPA_SUPPLICANT_SUPPORT
-			RtmpOSWrielessEventSend(pAd, SIOCGIWAP, -1, NULL, NULL, 0);
+			RtmpOSWirelessEventSend(pAd, SIOCGIWAP, -1, NULL, NULL, 0);
 #endif // NATIVE_WPA_SUPPLICANT_SUPPORT //        
             
 

@@ -403,12 +403,7 @@ VOID APMlmeSetTxRate(
 
 	pAd->LastTxRate = (USHORT)(pEntry->HTPhyMode.word);
 
-	
 }
-
-
-#ifdef RTMP_RBUS_SUPPORT
-#endif // RTMP_RBUS_SUPPORT //
 
 
 #ifdef NEW_RATE_ADAPT_SUPPORT
@@ -455,7 +450,7 @@ VOID APMlmeDynamicTxRateSwitchingAdapt(
     // walk through MAC table, see if need to change AP's TX rate toward each entry
     //
     
-	pEntry = &pAd->MacTab.Content[i];//poiont to information of the individual station
+	pEntry = &pAd->MacTab.Content[i];//point to information of the individual station
 
 	APMlmeSelectTxRateTable(pAd, pEntry, &pTable, &TableSize, &InitTxRateIdx);
 
@@ -547,8 +542,7 @@ VOID APMlmeDynamicTxRateSwitchingAdapt(
 						DBGPRINT_RAW(RT_DEBUG_ERROR, ("wrong mcsGroup value\n"));
 					break;
 			}
-//				if (pEntry->mcsGroup == 0 && ((pEntry->TxQuality[pCurrTxRate->upMcs3] > pEntry->TxQuality[pCurrTxRate->upMcs2] && pCurrTxRate->upMcs2 != pCurrTxRate->ItemNo)
-//											|| (pEntry->TxQuality[pCurrTxRate->upMcs3] > pEntry->TxQuality[pCurrTxRate->upMcs1] && pCurrTxRate->upMcs1 != pCurrTxRate->ItemNo))) 
+
 			DBGPRINT_RAW(RT_DEBUG_INFO,("DRS: Before- mcsGroup=%d, TxQuality2[%d]=%d,  TxQuality1[%d]=%d, TxQuality0[%d]=%d\n",
 						pEntry->mcsGroup,
 					pCurrTxRate->upMcs3,
@@ -581,7 +575,7 @@ VOID APMlmeDynamicTxRateSwitchingAdapt(
 						DBGPRINT_RAW(RT_DEBUG_ERROR, ("wrong mcsGroup value %d\n", pEntry->mcsGroup));
 					break;
 			}	
-//				if (pEntry->mcsGroup == 0 && pEntry->TxQuality[pCurrTxRate->upMcs2] > pEntry->TxQuality[pCurrTxRate->upMcs1] && pCurrTxRate->upMcs1 != pCurrTxRate->ItemNo)
+
 			DBGPRINT_RAW(RT_DEBUG_INFO,("DRS: Before- mcsGroup=%d,  TxQuality1[%d]=%d, TxQuality0[%d]=%d\n",
 						pEntry->mcsGroup,
 						pCurrTxRate->upMcs2,
@@ -616,7 +610,6 @@ VOID APMlmeDynamicTxRateSwitchingAdapt(
 	} while (1);
 
 	DownRateIdx = pCurrTxRate->downMcs;
-//UpRateIdx = DownRateIdx = 13;
 
 #ifdef RTMP_RBUS_SUPPORT
 	// Debug Option: Use lower thresholds
@@ -642,9 +635,14 @@ VOID APMlmeDynamicTxRateSwitchingAdapt(
 
 	if (pAd->MacTab.Size == 1)
 	{
-			DBGPRINT_RAW(RT_DEBUG_INFO,("DRS:Aid=%d, TxRetransmit=%ld, TxFailCount=%ld, TxSuccess=%ld, rssi0=%d, rssi1=%d, rssi2=%d \n",
-			pEntry->Aid, TxRetransmit, TxFailCount,	TxSuccess, 
-			(CHAR)pEntry->RssiSample.AvgRssi0, (CHAR)pEntry->RssiSample.AvgRssi1, (CHAR)pEntry->RssiSample.AvgRssi2));
+		DBGPRINT_RAW(RT_DEBUG_INFO,("DRS:Aid=%d, TxRetransmit=%ld, TxFailCount=%ld, TxSuccess=%ld, rssi0=%d, rssi1=%d, rssi2=%d \n",
+					pEntry->Aid,
+					TxRetransmit,
+					TxFailCount,
+					TxSuccess, 
+					(CHAR)pEntry->RssiSample.AvgRssi0,
+					(CHAR)pEntry->RssiSample.AvgRssi1,
+					(CHAR)pEntry->RssiSample.AvgRssi2));
 	}
 	else
 	{
@@ -654,19 +652,8 @@ VOID APMlmeDynamicTxRateSwitchingAdapt(
 				pEntry->OneSecTxFailCount,
 				pEntry->OneSecTxNoRetryOkCount));
 	}
-/*
-	if (pAd->CommonCfg.bAutoTxRateSwitch == FALSE)
-	{
-		DBGPRINT_RAW(RT_DEBUG_INFO,("DRS: Fixed - CurrTxRateIdx=%d, MCS=%d, STBC=%d, ShortGI=%d, Mode=%d, BW=%d, PER=%ld%% \n\n",
-			pEntry->CurrTxRateIndex, pEntry->HTPhyMode.field.MCS, pEntry->HTPhyMode.field.STBC,
-			pEntry->HTPhyMode.field.ShortGI, pEntry->HTPhyMode.field.MODE, pEntry->HTPhyMode.field.BW, TxErrorRatio));
-		return;
-	}
-	else
- */		
-	{
-			DBGPRINT_RAW(RT_DEBUG_INFO,("DRS: Before- CurrTxRateIdx=%d, MCS=%d, STBC=%d, ShortGI=%d, Mode=%d, TrainUp=%d, TrainDown=%d, NextUp=%d, NextDown=%d, CurrMCS=%d, TxBF=%c, mcsGroup=%d, TxQuality=%d,  PER=%ld%%\n",
-//TxRetransmit=%ld, TxFailCount=%ld, TxTotalCnt=%ld,
+
+	DBGPRINT_RAW(RT_DEBUG_INFO,("DRS: Before- CurrTxRateIdx=%d, MCS=%d, STBC=%d, ShortGI=%d, Mode=%d, TrainUp=%d, TrainDown=%d, NextUp=%d, NextDown=%d, CurrMCS=%d, mcsGroup=%d, TxQuality=%d,  PER=%ld%%\n",
 				CurrRateIdx,
 				pCurrTxRate->CurrMCS,
 				pCurrTxRate->STBC,
@@ -677,15 +664,10 @@ VOID APMlmeDynamicTxRateSwitchingAdapt(
 				UpRateIdx,
 				DownRateIdx,
 				pEntry->HTPhyMode.field.MCS,
-				pEntry->HTPhyMode.field.eTxBF? '2': (pEntry->HTPhyMode.field.iTxBF? '1': '0'), 
 				pEntry->mcsGroup,
 				pEntry->TxQuality[UpRateIdx],
-//				TxRetransmit, TxFailCount, TxTotalCnt,				
 				TxErrorRatio));
-	}
-
-		//if (! OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_TX_RATE_SWITCH_ENABLED))
-		//	continue;
+	
 	if (pEntry->fLastChangeAccordingMfb == TRUE)
 	{
 			//with this method mfb result can be applied every 500msec, instead of immediately
@@ -695,8 +677,10 @@ VOID APMlmeDynamicTxRateSwitchingAdapt(
 			NdisReleaseSpinLock(&pEntry->fLastChangeAccordingMfbLock);
 			APMlmeSetTxRate(pAd, pEntry, pEntry->LegalMfbRS);
 		DBGPRINT_RAW(RT_DEBUG_TRACE,("DRS: MCS is according to MFB, and ignore tuning this sec \n"));
-		NdisZeroMemory(pEntry->TxQuality, sizeof(USHORT) * MAX_STEP_OF_TX_RATE_SWITCH);//clear all history, same as train up, purpose???
-//			NdisZeroMemory(pEntry->PER, sizeof(UCHAR) * MAX_STEP_OF_TX_RATE_SWITCH);//not used
+
+		//clear all history, same as train up, purpose???
+		NdisZeroMemory(pEntry->TxQuality, sizeof(USHORT) * MAX_STEP_OF_TX_RATE_SWITCH);
+
 		// reset all OneSecTx counters
 		RESET_ONE_SEC_TX_CNT(pEntry);
 
@@ -994,8 +978,6 @@ VOID APMlmeDynamicTxRateSwitchingAdapt(
 			{
 				pEntry->fewPktsCnt = 0;
 		
-			//if (TxRateIdx != pEntry->CurrTxRateIndex)
-				{
 					pEntry->lastRateIdx = pEntry->CurrTxRateIndex;
 
 				if ((pEntry->HTCapability.MCSSet[2] == 0xff) && (pAd->CommonCfg.TxStream == 3))
@@ -1008,14 +990,14 @@ VOID APMlmeDynamicTxRateSwitchingAdapt(
 					else
 						pEntry->mcsGroup = 1;
 
-			pEntry->CurrTxRateIndex = TxRateIdx;
-			pNextTxRate = (PRTMP_TX_RATE_SWITCH) &pTable[(pEntry->CurrTxRateIndex+1)*10];
+				pEntry->CurrTxRateIndex = TxRateIdx;
+				pNextTxRate = (PRTMP_TX_RATE_SWITCH) &pTable[(pEntry->CurrTxRateIndex+1)*10];
 
-			APMlmeSetTxRate(pAd, pEntry, pNextTxRate);
-					DBGPRINT_RAW(RT_DEBUG_TRACE,("DRS: TxTotalCnt <= 15 for several times, switch to MCS%d according to RSSI (%d), RssiOffset=%d\n", pNextTxRate->CurrMCS, Rssi, RssiOffset));
-					DBGPRINT(RT_DEBUG_WARN, ("c->%d\n", pNextTxRate->CurrMCS));
-		}
+				APMlmeSetTxRate(pAd, pEntry, pNextTxRate);
 
+				DBGPRINT_RAW(RT_DEBUG_TRACE,("DRS: TxTotalCnt <= 15 for several times, switch to MCS%d according to RSSI (%d), RssiOffset=%d\n", pNextTxRate->CurrMCS, Rssi, RssiOffset));
+				DBGPRINT(RT_DEBUG_WARN, ("c->%d\n", pNextTxRate->CurrMCS));
+		
 		NdisZeroMemory(pEntry->TxQuality, sizeof(USHORT) * MAX_STEP_OF_TX_RATE_SWITCH);//clear all history, same as train up, purpose???
 		NdisZeroMemory(pEntry->PER, sizeof(UCHAR) * MAX_STEP_OF_TX_RATE_SWITCH);//clear all history, same as train up, purpose???
 		pEntry->fLastSecAccordingRSSI = TRUE;
@@ -1061,6 +1043,7 @@ VOID APMlmeDynamicTxRateSwitchingAdapt(
 		{
 			bTrainUpDown = TRUE;
 			bUpgradeQuality = TRUE;//redundant
+
 			if (pEntry->TxQuality[CurrRateIdx])
 				pEntry->TxQuality[CurrRateIdx] --;  // quality very good in CurrRate
 
@@ -1074,13 +1057,9 @@ VOID APMlmeDynamicTxRateSwitchingAdapt(
 					pEntry->TxQuality[pCurrTxRate->upMcs2] --;
 				if (pEntry->TxQuality[pCurrTxRate->upMcs1] && pCurrTxRate->upMcs1 != CurrRateIdx)
 					pEntry->TxQuality[pCurrTxRate->upMcs1] --;
-					
-//					if (pEntry->TxQuality[UpRateIdx])
-//						pEntry->TxQuality[UpRateIdx] --;    // may improve next UP rate's quality
 			}
 		}
-		else if (((pAd->CommonCfg.DebugFlags & DBF_LESS_AGG_UP)==0) &&
-					(pEntry->mcsGroup > 0))//even if TxErrorRatio > TrainUp
+		else if (pEntry->mcsGroup > 0)//even if TxErrorRatio > TrainUp
 		{
 			//moderate per but some groups are not tried
 			if (UpRateIdx != 0)
@@ -1091,9 +1070,6 @@ VOID APMlmeDynamicTxRateSwitchingAdapt(
 				if (pEntry->TxQuality[CurrRateIdx])
 					pEntry->TxQuality[CurrRateIdx]--;  // quality very good in CurrRate
 
-	//			if (pEntry->TxRateUpPenalty)//always == 0, always go to else
-	//				pEntry->TxRateUpPenalty --;
-						//else if (pEntry->TxQuality[UpRateIdx])
 				if (pEntry->TxQuality[UpRateIdx])
 					pEntry->TxQuality[UpRateIdx] --;    // may improve next UP rate's quality
 			}
@@ -1130,15 +1106,12 @@ VOID APMlmeDynamicTxRateSwitchingAdapt(
 		pEntry->CurrTxRateStableTime = 0;//redundant
 		pEntry->TxRateUpPenalty = 0;//redundant
 		pEntry->LastSecTxRateChangeAction = 1; // rate UP
+
 		//clean the memory after the new mcs is verified
 		NdisZeroMemory(pEntry->TxQuality, sizeof(USHORT) * MAX_STEP_OF_TX_RATE_SWITCH);
 
-//			pEntry->TxQuality[CurrRateIdx] = 0;//ys
-//			pEntry->TxQuality[pEntry->CurrTxRateIndex] =  0;//ys
 		pNextTxRateIdx = (PRTMP_TX_RATE_SWITCH_3S) &pTable[(pEntry->CurrTxRateIndex+1)*10]; 
-//			pEntry->TxQuality[pNextTxRateIdx->upMcs1] = 0;//ys
-//			pEntry->TxQuality[pNextTxRateIdx->upMcs2] = 0;//ys
-//			pEntry->TxQuality[pNextTxRateIdx->upMcs3] = 0;//ys
+
 		NdisZeroMemory(pEntry->PER, sizeof(UCHAR) * MAX_STEP_OF_TX_RATE_SWITCH);//redundant
 			pEntry->lastRateIdx = CurrRateIdx;
 
@@ -1246,13 +1219,8 @@ VOID APMlmeDynamicTxRateSwitchingAdapt(
 
 	if (bTxRateChanged && pNextTxRate)
 	{
-			//DBGPRINT(RT_DEBUG_WARN, ("-->%d\n", pNextTxRate->CurrMCS));
 		APMlmeSetTxRate(pAd, pEntry, pNextTxRate);
 	}
-
-	//how to activate this feature when adaptive group switching is not employed???
-#ifdef RTMP_RBUS_SUPPORT
-#endif // RTMP_RBUS_SUPPORT //
 }
 #endif // NEW_RATE_ADAPT_SUPPORT //
 
@@ -1432,18 +1400,6 @@ VOID APMlmeDynamicTxRateSwitching(
 		}
 
 		pEntry->LastTimeTxRateChangeAction = pEntry->LastSecTxRateChangeAction;
-/*
-		if (pAd->CommonCfg.bAutoTxRateSwitch == FALSE)
-		{
-			DBGPRINT_RAW(RT_DEBUG_INFO,("DRS: Fixed - CurrTxRateIdx=%d, MCS=%d, STBC=%d, ShortGI=%d, Mode=%d, BW=%d, PER=%ld%% \n\n",
-				pEntry->CurrTxRateIndex, pEntry->HTPhyMode.field.MCS, pEntry->HTPhyMode.field.STBC,
-				pEntry->HTPhyMode.field.ShortGI, pEntry->HTPhyMode.field.MODE, pEntry->HTPhyMode.field.BW, TxErrorRatio));
-			return;
-		}
-		else
- */		
- 		//if (! OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_TX_RATE_SWITCH_ENABLED))
-		//	continue;
 
         if (TxTotalCnt <= 15)
         {
@@ -1612,7 +1568,6 @@ VOID APMlmeDynamicTxRateSwitching(
 			NdisZeroMemory(pEntry->TxQuality, sizeof(USHORT) * MAX_STEP_OF_TX_RATE_SWITCH);
 			NdisZeroMemory(pEntry->PER, sizeof(UCHAR) * MAX_STEP_OF_TX_RATE_SWITCH);
 			pEntry->fLastSecAccordingRSSI = TRUE;
-
 
 			// reset all OneSecTx counters
 			RESET_ONE_SEC_TX_CNT(pEntry);
@@ -1964,11 +1919,10 @@ VOID APQuickResponeForRateUpExecAdapt(//actually for both up and down
 			{
 				pEntry->CurrTxRateIndex = DownRateIdx;
 				pEntry->TxQuality[CurrRateIdx] = DRS_TX_QUALITY_WORST_BOUND;
-				//DBGPRINT_RAW(RT_DEBUG_TRACE,("QuickDRS: (Up) bad tx ok count (L:%ld, C:%d)\n", pEntry->LastTxOkCount, (pEntry->OneSecTxNoRetryOkCount * ratio + (pEntry->OneSecTxNoRetryOkCount >> 1))));
+				DBGPRINT_RAW(RT_DEBUG_TRACE,("   QuickDRS: (Up) bad tx ok count (L:%ld, C:%d)\n", pEntry->LastTxOkCount, (pEntry->OneSecTxNoRetryOkCount * ratio + (pEntry->OneSecTxNoRetryOkCount >> 1))));
 			}
 			else
 			{
-				//DBGPRINT_RAW(RT_DEBUG_TRACE,("QuickDRS: (Up) keep rate-up (L:%ld, C:%d)\n", pEntry->LastTxOkCount, (pEntry->OneSecTxNoRetryOkCount * ratio + (pEntry->OneSecTxNoRetryOkCount >> 1))));
 				DBGPRINT_RAW(RT_DEBUG_TRACE,("   QuickDRS: (Up) keep rate-up (L:%ld, C:%ld)\n", pEntry->LastTxOkCount, OneSecTxNoRetryOKRationCount));
 				NdisZeroMemory(pEntry->TxQuality, sizeof(USHORT) * MAX_STEP_OF_TX_RATE_SWITCH);
 					if (pEntry->mcsGroup == 0)
@@ -1998,7 +1952,6 @@ VOID APQuickResponeForRateUpExecAdapt(//actually for both up and down
 						pEntry->mcsGroup = 1;
 				DBGPRINT_RAW(RT_DEBUG_TRACE,("   QuickDRS: (Down) direct train down (TxErrorRatio >= TrainDown)\n"));
 			}
-				//else if ((pEntry->LastTxOkCount + 2) >= (pEntry->OneSecTxNoRetryOkCount * ratio + (pEntry->OneSecTxNoRetryOkCount >> 1)))
 			else if ((pEntry->LastTxOkCount + 2) >= OneSecTxNoRetryOKRationCount)//this is esentially throughput
 			{
 				pEntry->CurrTxRateIndex = UpRateIdx;//doesn't have to check TxQuality[UpRateIdx]
@@ -2054,7 +2007,6 @@ VOID APQuickResponeForRateUpExecAdapt(//actually for both up and down
 			//DBGPRINT_RAW(RT_DEBUG_TRACE,("              QuickDRS: next mcsGroup =%d \n", pEntry->mcsGroup));
 	}
 	// if rate-up happen, clear all bad history of all TX rates
-//		if (pEntry->CurrTxRateIndex > CurrRateIdx)
 	if (pEntry->CurrTxRateIndex != CurrRateIdx && pEntry->LastSecTxRateChangeAction == 2)
 	{
 		DBGPRINT_RAW(RT_DEBUG_TRACE,("   QuickDRS: ++TX rate from %d to %d \n", CurrRateIdx, pEntry->CurrTxRateIndex));
@@ -2065,7 +2017,6 @@ VOID APQuickResponeForRateUpExecAdapt(//actually for both up and down
 		NdisZeroMemory(pEntry->PER, sizeof(UCHAR) * MAX_STEP_OF_TX_RATE_SWITCH);
 	}
 	// if rate-down happen, only clear DownRate's bad history
-//		else if (pEntry->CurrTxRateIndex < CurrRateIdx)
 	else if (pEntry->CurrTxRateIndex != CurrRateIdx && pEntry->LastSecTxRateChangeAction == 1) 
 	{
 		DBGPRINT_RAW(RT_DEBUG_TRACE,("   QuickDRS: --TX rate from %d to %d \n", CurrRateIdx, pEntry->CurrTxRateIndex));

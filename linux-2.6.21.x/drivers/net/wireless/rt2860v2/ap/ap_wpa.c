@@ -1113,7 +1113,7 @@ VOID RTMPGetTxTscFromAsic(
 	NdisZeroMemory(IvEiv, 8);
 	NdisZeroMemory(pTxTsc, 6);
 	// Get apidx for this BSSID
-	GET_GroupKey_WCID(Wcid, apidx);	
+	GET_GroupKey_WCID(Wcid, apidx);
 	/* When the group rekey action is triggered, a count-down(3 seconds) is started.
 		During the count-down, use the initial PN as TSC.
 		Otherwise, get the IVEIV from ASIC.
@@ -1132,7 +1132,7 @@ VOID RTMPGetTxTscFromAsic(
 		// Read IVEIV from Asic
 		offset = MAC_IVEIV_TABLE_BASE + (Wcid * HW_IVEIV_ENTRY_SIZE);
 		for (i=0 ; i < 8; i++)
-			RTMP_IO_READ8(pAd, offset+i, &IvEiv[i]); 
+			RTMP_IO_READ8(pAd, offset+i, &IvEiv[i]);
 	} 
 
 	// Record current TxTsc	
