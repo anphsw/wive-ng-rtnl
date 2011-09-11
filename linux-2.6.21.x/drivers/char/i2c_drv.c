@@ -47,14 +47,6 @@
 
 #include "i2c_drv.h"
 
-#ifdef  CONFIG_DEVFS_FS
-#include <linux/devfs_fs_kernel.h>
-#endif
-
-#ifdef  CONFIG_DEVFS_FS
-static devfs_handle_t devfs_handle;
-#endif
-
 int i2cdrv_major =  218;
 unsigned long i2cdrv_addr = ATMEL_ADDR;
 
@@ -421,22 +413,11 @@ struct file_operations i2cdrv_fops = {
 
 static int i2cdrv_init(void)
 {
-#if !defined (CONFIG_DEVFS_FS)
 	int result=0;
-#endif
 
 	/* configure i2c to normal mode */
 	RT2880_REG(RALINK_SYSCTL_BASE + 0x60) &= ~1;
 
-#ifdef  CONFIG_DEVFS_FS
-	if(devfs_register_chrdev(i2cdrv_major, I2C_DEV_NAME , &i2cdrv_fops)) {
-		printk(KERN_WARNING " i2cdrv: can't create device node\n");
-		return -EIO;
-	}
-
-	devfs_handle = devfs_register(NULL, I2C_DEV_NAME, DEVFS_FL_DEFAULT, i2cdrv_major, 0, \
-			S_IFCHR | S_IRUGO | S_IWUGO, &i2cdrv_fops, NULL);
-#else
 	result = register_chrdev(i2cdrv_major, I2C_DEV_NAME, &i2cdrv_fops);
 	if (result < 0) {
 		printk(KERN_WARNING "i2c_drv: can't get major %d\n",i2cdrv_major);
@@ -446,7 +427,6 @@ static int i2cdrv_init(void)
 	if (i2cdrv_major == 0) {
 		i2cdrv_major = result; /* dynamic */
 	}
-#endif
 
 	printk("i2cdrv_major = %d\n", i2cdrv_major);
 	return 0;
@@ -456,14 +436,7 @@ static int i2cdrv_init(void)
 static void i2cdrv_exit(void)
 {
 	printk("i2c_drv exit\n");
-
-#ifdef  CONFIG_DEVFS_FS
-	devfs_unregister_chrdev(i2cdrv_major, I2C_DEV_NAME);
-	devfs_unregister(devfs_handle);
-#else
 	unregister_chrdev(i2cdrv_major, I2C_DEV_NAME);
-#endif
-
 }
 
 #if defined (CONFIG_RALINK_I2S) || defined (CONFIG_RALINK_I2S_MODULE)

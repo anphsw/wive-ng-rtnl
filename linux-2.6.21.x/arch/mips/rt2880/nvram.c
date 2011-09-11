@@ -5,12 +5,6 @@
 #include <linux/kernel.h>
 #include <linux/types.h>
 #include <linux/fs.h>
-
-#ifdef  CONFIG_DEVFS_FS
-#include <linux/devfs_fs_kernel.h>
-static  devfs_handle_t devfs_handle;
-#endif
-
 #include "nvram.h"
 
 static unsigned long counter = 0;
@@ -238,20 +232,8 @@ int __init ra_nvram_init(void)
 	unsigned long from;
 	int i, j, len;
 	char *p, *q;
-#ifndef  CONFIG_DEVFS_FS
 	int r = 0;
-#endif
 
-#ifdef  CONFIG_DEVFS_FS
-	if (devfs_register_chrdev(ralink_nvram_major, RALINK_NVRAM_DEVNAME,
-				&ralink_nvram_fops)) {
-		printk(KERN_ERR NAME ": unable to register character device\n");
-		return -EIO;
-	}
-	devfs_handle = devfs_register(NULL, RALINK_NVRAM_DEVNAME,
-			DEVFS_FL_DEFAULT, ralink_nvram_major, 0,
-			S_IFCHR | S_IRUGO | S_IWUGO, &ralink_nvram_fops, NULL);
-#else
 	r = register_chrdev(ralink_nvram_major, RALINK_NVRAM_DEVNAME,
 			&ralink_nvram_fops);
 	if (r < 0) {
@@ -262,7 +244,6 @@ int __init ra_nvram_init(void)
 		ralink_nvram_major = r;
 		printk(KERN_DEBUG "ralink_nvram: got dynamic major %d\n", r);
 	}
-#endif
 
 	for (i = 0; i < FLASH_BLOCK_NUM; i++) {
 		//read crc from flash
@@ -352,13 +333,7 @@ static void ra_nvram_exit(void)
 		fb[index].valid = 0;
 	}
 
-#ifdef  CONFIG_DEVFS_FS
-	devfs_unregister_chrdev(ralink_nvram_major, RALINK_NVRAM_DEVNAME);
-	devfs_unregister(devfs_handle);
-#else
 	unregister_chrdev(ralink_nvram_major, RALINK_NVRAM_DEVNAME);
-#endif
-
 }
 /*
  * return idx (0 ~ iMAX_CACHE_ENTRY)
