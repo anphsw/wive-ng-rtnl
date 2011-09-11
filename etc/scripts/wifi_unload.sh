@@ -8,7 +8,7 @@
 . /etc/scripts/global.sh
 
 stop_serv="vpnhelper inetd shaper crontab pppoe-relay ddns wscd dhcpd lld2d radvd syslog \
-	    zebra udpxy upnp hotplug igmp_proxy ntp samba dnsserver mdev"
+	    zebra udpxy upnp hotplug igmp_proxy ntp samba dnsserver hotplug"
 
 kill_apps="smbd nmbd pppd xl2tpd udhcpd udhcpc crond lld2d igmpproxy inetd syslogd klogd \
 	    ntpclient ntpd zebra ripd inadyn stupid-ftpdated \
