@@ -127,7 +127,7 @@ config RALINK_TIMER_DFS
 
 config  KERNEL_NVRAM
 	bool 'Kernel NVRAM'
-	default y
+	default n
 
 config RT3XXX_EHCI_OHCI
 	bool "Ralink USB EHCI/OHCI controller support"

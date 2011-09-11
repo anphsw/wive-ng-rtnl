@@ -643,7 +643,9 @@
 23) Add 6rd support.<br>
 24) Usb suspend at start need for power save.<br>
 25) Fix build with 3.82 make version.<br>
-26) Nvram move to kernel mode. This fix some memleaks and concurent acess to mtd issue.<br>
+
+
+suspended) Nvram move to kernel mode. This fix some memleaks and concurent acess to mtd issue.<br>
 
 <br><br>
 <b>For support see:</b><br>
