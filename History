@@ -646,6 +646,7 @@
 26) Backport raeth driver from 3.6.0.0SDK (v2.1).<br>
 27) Update sta driver to 2.4.0.4.<br>
 28) Update ap driver to 2.5.0.4.<br>
+29) Add /proc/rt3052/esw_cnt for traffic statistic per switch port.(need add in webui).<br>
 
 
 suspended) Add skb reuse support.<br>
