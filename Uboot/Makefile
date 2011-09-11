@@ -1685,7 +1685,6 @@ clean:
 		-o -name '*.o'  -o -name '*.a'  \) -print \
 		| xargs rm -f
 	find ./ -name '.depend' -print | xargs rm -f
-
 	rm -f examples/hello_world examples/timer \
 	      examples/eepro100_eeprom examples/sched \
 	      examples/mem_to_mem_idma2intr examples/82559_eeprom
@@ -1700,7 +1699,6 @@ clean:
 	rm -f ./uboot.bin ./uboot.img ./u-boot ./u-boot.*
 	rm -f scripts/lxdialog/lxdialog
 	rm -f a.out
-	rm -f .config*
 	rm -f .menuconfig.log*
 
 clobber:	clean
