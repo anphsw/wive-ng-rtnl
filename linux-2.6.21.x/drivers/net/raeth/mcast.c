@@ -10,7 +10,6 @@
 #include <linux/etherdevice.h>
 #include <linux/if_vlan.h>
 #include <linux/if_ether.h>
-#include <asm/semaphore.h>
 
 
 #define MAX_MCAST_ENTRY	    16

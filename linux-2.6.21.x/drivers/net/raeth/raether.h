@@ -55,16 +55,20 @@
 #endif
 
 #define DEV_NAME        "eth2"
-#define RA2882_ENET0	RA2882ETH_BASE
+#define DEV2_NAME       "eth3"
 
 #define GMAC2_OFFSET    0x22
 #define GMAC0_OFFSET    0x28 
 #define GMAC1_OFFSET    0x2E
 
-#define RT2880_IRQ_ENET0	3 	/* hardware interrupt #3, defined in RT2880 Soc Design Spec Rev 0.03, pp43 */
+#if defined(CONFIG_RALINK_RT63365)
+#define IRQ_ENET0	22
+#else
+#define IRQ_ENET0	3 	/* hardware interrupt #3, defined in RT2880 Soc Design Spec Rev 0.03, pp43 */
+#endif
 
-#define RT2880_FE_INT_STATUS_REG (*(volatile unsigned long *)(FE_INT_STATUS))
-#define RT2880_FE_INT_STATUS_CLEAN(reg) (*(volatile unsigned long *)(FE_INT_STATUS)) = reg
+#define FE_INT_STATUS_REG (*(volatile unsigned long *)(FE_INT_STATUS))
+#define FE_INT_STATUS_CLEAN(reg) (*(volatile unsigned long *)(FE_INT_STATUS)) = reg
 
 //#define RAETH_DEBUG
 #ifdef RAETH_DEBUG
@@ -87,4 +91,6 @@ inline void ei_xmit_housekeeping(unsigned long data);
 
 u32 mii_mgr_read(u32 phy_addr, u32 phy_register, u32 *read_data);
 u32 mii_mgr_write(u32 phy_addr, u32 phy_register, u32 write_data);
+void fe_sw_init(void);
+
 #endif

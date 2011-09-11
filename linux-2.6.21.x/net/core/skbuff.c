@@ -340,6 +340,13 @@ static void skb_release_all(struct sk_buff *skb)
 void __kfree_skb(struct sk_buff *skb)
 {
 	skb_release_all(skb);
+#if defined(CONFIG_RAETH_SKB_RECYCLE_2K)
+	if (skb->skb_recycling_callback) {
+		if ((*skb->skb_recycling_callback)(skb))
+			return;
+	} 
+	skb->skb_recycling_callback = NULL;
+#endif
 	kfree_skbmem(skb);
 }
 
@@ -1607,13 +1614,6 @@ void skb_add_mtu(int mtu)
 	kmem_add_cache_size(mtu);
 }
 #endif
-#if defined(CONFIG_RAETH_SKB_RECYCLE_2K)
-	if (skb->skb_recycling_callback) {
-		if ((*skb->skb_recycling_callback)(skb))
-			return;
-	} 
-	skb->skb_recycling_callback = NULL;
-#endif
 
 static inline void skb_split_inside_header(struct sk_buff *skb,
 					   struct sk_buff* skb1,
@@ -2376,12 +2376,13 @@ static int register_proc_skbmgr(void)
 	return 1;
 }
 
+#if 0
 static void unregister_proc_skbmgr(void)
 {
 	remove_proc_entry("skbmgr_hot_list_len", proc_net);
 	remove_proc_entry("skbmgr_info", proc_net);
 }
-
+#endif
 #endif
 
 #endif
