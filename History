@@ -647,6 +647,17 @@
 27) Update sta driver to 2.4.0.4.<br>
 28) Update ap driver to 2.5.0.4.<br>
 29) Add /proc/rt3052/esw_cnt for traffic statistic per switch port.(need add in webui).<br>
+30) Support Ralink RT3883+RT5392 referenece board.<br>
+31) Fix mips 24kec "Wrong EPC on Exceptional J/JAL Targets" issue.<br>
+32) Fix raeth driver: hardware checksum offload only support ipv4 packets.<br>
+34) Update ated: magic number check after wifi driver version 2.5.<br>
+35) Kernel now support IPv6 Ready logo.<br>
+36) Kernel now  support IPv6 MLD multicast proxy/snooping (ECMH).<br>
+37) Raeth re‐initialize frame engine if TX timeout occurred.<br>
+38) Watchdogs supprot user and kernel mode watchdog module.<br>
+
+
+
 
 
 suspended) Add skb reuse support.<br>
