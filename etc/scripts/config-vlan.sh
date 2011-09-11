@@ -34,14 +34,16 @@ usage()
 
 config3052_dt()
 {
-	vlan_double_tag=`nvram_get 2860 vlan_double_tag`
-        if [ "$vlan_double_tag" = "1" ]; then
-	    switch reg w e4 3f
-            sysctl -w net.ipv4.vlan_double_tag=1
-        else
-	    switch reg w e4 0
-            sysctl -w net.ipv4.vlan_double_tag=0
-        fi
+	if [ -f /proc/sys/net/ipv4/vlan_double_tag ]; then
+	    vlan_double_tag=`nvram_get 2860 vlan_double_tag`
+	    if [ "$vlan_double_tag" = "1" ]; then
+		switch reg w e4 3f
+        	sysctl -w net.ipv4.vlan_double_tag=1
+    	    else
+		switch reg w e4 0
+        	sysctl -w net.ipv4.vlan_double_tag=0
+	    fi
+	fi
 }
 
 config3052()
