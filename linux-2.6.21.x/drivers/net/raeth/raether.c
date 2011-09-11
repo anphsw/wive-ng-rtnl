@@ -1513,8 +1513,6 @@ static irqreturn_t esw_interrupt(int irq, void *dev_id)
 
 #else // not RT6855
 	if (reg_int_val & PORT_ST_CHG) {
-		printk("RT305x_ESW: Link Status Changed\n");
-
 		stat_curr = *((volatile u32 *)(RALINK_ETH_SW_BASE+0x80));
 #ifdef CONFIG_RAETH_DHCP_TOUCH
 		/*
@@ -1531,7 +1529,7 @@ static irqreturn_t esw_interrupt(int irq, void *dev_id)
 			    RAETH_PRINT(KERN_INFO "RT305x_ESW: Link Status Changed\n");
 			    goto out;
 		    }
-		  RAETH_PRINT(KERN_INFO "RT305x_ESW: WAN Port Link Status Changed\n");	
+		  RAETH_PRINT(KERN_INFO "RT305x_ESW: WAN Port Link Status Changed\n");
 		}
 
 		//send SIGUSR1 to dhcp client
