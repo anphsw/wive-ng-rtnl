@@ -176,6 +176,10 @@ if [ "$SWITCH_MODE" = "2" ]; then
     ##################################################
     # In gate mode and hotspot mode configure vlans
     ##################################################
+    ##################################################
+    echo '######## clear switch mac table  ########'
+    switch clear
+    ##################################################
     if [ "$opmode" = "1" ] || [ "$opmode" = "4" ]; then
 	wan_port=`nvram_get 2860 wan_port`
 	tv_port=`nvram_get 2860 tv_port`
@@ -197,10 +201,6 @@ if [ "$SWITCH_MODE" = "2" ]; then
 	    fi
 	fi
     fi
-    ##################################################
-    echo '######## clear switch mac table  ########'
-    ##################################################
-    switch clear
 fi
 }
 
