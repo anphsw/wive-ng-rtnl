@@ -155,14 +155,14 @@ int main(int argc, char** argv)
 
 	    //Work - Green ON
 	    ledAlways(GPIO_LED_WAN_ORANGE, LED_OFF);	//Turn off orange LED
-	    ledAlways(GPIO_LED_WAN_GREEN, LED_ON);		//Turn on green LED
+	    ledAlways(GPIO_LED_WAN_GREEN, LED_ON);	//Turn on green LED
 
 	    //Security LED init
 	    auth_mode = nvram_get(RT2860_NVRAM, "AuthMode");
 	    if (!strcmp(auth_mode, "Disable") || !strcmp(auth_mode, "OPEN"))
-		ledAlways(GPIO_LED_SEC_GREEN, LED_OFF);	//turn off security LED
+		ledAlways(GPIO_LED_SEC_GREEN, LED_OFF);	//Turn off security LED
 	    else
-		ledAlways(GPIO_LED_SEC_GREEN, LED_ON);	//turn on security LED
+		ledAlways(GPIO_LED_SEC_GREEN, LED_ON);	//Turn on security LED
 
 	}
 
