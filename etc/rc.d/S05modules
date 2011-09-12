@@ -49,9 +49,6 @@ start() {
 		modprobe -q ipt_account
 	    fi
 	fi
-	#configure switch
-	setLanWan
-	setSwMode
     else
 	#not load module before goahead start
 	. /etc/scripts/web_wait.sh
