@@ -170,14 +170,14 @@ if [ "$SWITCH_MODE" = "2" ]; then
 	# need only start boot
 	##################################################
 	$LOG "Reinit power mode for all switch ports"
-	config-vlan.sh $SWITCH_MODE FFFFF
+	config-vlan.sh $SWITCH_MODE FFFFF > /dev/null 2>&1
     fi
     ##################################################
-    echo '##### config novlan partition (LLLLL) #####'
-    config-vlan.sh $SWITCH_MODE 0
+    echo '######## clear switch partition  ########'
+    config-vlan.sh $SWITCH_MODE 0 > /dev/null 2>&1
     ##################################################
     echo '######## clear switch mac table  ########'
-    switch clear
+    switch clear > /dev/null 2>&1
     ##################################################
     # In gate mode and hotspot mode configure vlans
     ##################################################
