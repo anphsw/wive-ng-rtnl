@@ -234,14 +234,14 @@ static int arp_constructor(struct neighbour *neigh)
 	struct in_device *in_dev;
 	struct neigh_parms *parms;
 
-	neigh->type = inet_addr_type(addr);
-
 	rcu_read_lock();
 	in_dev = __in_dev_get_rcu(dev);
 	if (in_dev == NULL) {
 		rcu_read_unlock();
 		return -EINVAL;
 	}
+
+	neigh->type = inet_addr_type(addr);
 
 	parms = in_dev->arp_parms;
 	__neigh_parms_put(neigh->parms);
