@@ -42,12 +42,6 @@ get_txqlen
 	#eth2.1 always up
 	ip link set eth2.1 up
     fi
-    #configure switch at start
-    if [ ! -f /var/run/goahead.pid ]; then
-	setLanWan
-	setSwMode
-    fi
-
     #flush ip from interfaces
     addr_flush
 
@@ -70,6 +64,13 @@ get_txqlen
 	$LOG "Add LAN2 iface $lan2_if $lan2_ipaddr netmask $lan2_netmask"
         ifconfig "$lan2_if" "$lan2_ipaddr" netmask "$lan2_netmask"
     fi
+
+    #configure switch at start
+    if [ ! -f /var/run/goahead.pid ]; then
+	setLanWan
+	setSwMode
+    fi
+
 }
 
 stop() {
