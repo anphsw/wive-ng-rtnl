@@ -655,6 +655,7 @@
 36) Raeth re‐initialize frame engine if TX timeout occurred.<br>
 37) Watchdogs supprot user and kernel mode watchdog module.<br>
 38) In bridge or ethernet converter mode switch need reconfigure to novlans mode.<br>
+39) Rework switch init code. More correct and speedup.<br>
 
 suspended) Add skb reuse support.<br>
 suspended) Nvram move to kernel mode. This fix some memleaks and concurent acess to mtd issue.<br>
