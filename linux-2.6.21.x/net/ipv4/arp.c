@@ -800,11 +800,8 @@ static int arp_process(struct sk_buff *skb)
  *  cache.
  */
 
-	/*
-	 *  Special case: IPv4 duplicate address detection packet (RFC2131)
-	 *  and Gratuitous ARP/ARP Announce. (RFC3927, Section 2.4)
-	 */
-	if (sip == 0 || tip == sip) {
+	/* Special case: IPv4 duplicate address detection packet (RFC2131) */
+	if (sip == 0) {
 		if (arp->ar_op == htons(ARPOP_REQUEST) &&
 		    inet_addr_type(tip) == RTN_LOCAL &&
 		    !arp_ignore(in_dev,dev,sip,tip))
