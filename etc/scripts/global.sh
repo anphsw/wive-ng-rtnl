@@ -96,7 +96,7 @@ wait_connect()
 	if [ "$connected" = "0" ] || [ ! -f /tmp/sta_connected ]; then
 	    staCur_SSID=""
     	    exit 0
-	fi    
+	fi
 	staCur_SSID=`iwpriv ra0 connStatus | grep ra0 | awk ' { print $3 } ' | cut -f1 -d[`
     fi
 }
@@ -104,7 +104,7 @@ wait_connect()
 udhcpc_opts()
 {
 	CL_SLEEP=1
-	if [ "$opmode" = "2" ]; then
+	if [ "$opmode" = "0" ] || [ "$opmode" = "2" ]; then
 	    CL_SLEEP=5
 	    #disable dhcp renew from driver
 	    sysctl -w net.ipv4.send_sigusr_dhcpc=9
