@@ -14,10 +14,6 @@ start() {
 	    $LOG "Start modules.dep generate..."
 	    depmod -a -n > /etc/modules.dep
 	fi
-	#configure switch
-	setLanWan
-	resetPhy
-	setSwMode
 	#not load nf_nat helpers in bridge mode
 	if [ "$opmode" != "0" ]; then
 	    #load conntrack helpers
@@ -53,6 +49,10 @@ start() {
 		modprobe -q ipt_account
 	    fi
 	fi
+	#configure switch
+	setLanWan
+	resetPhy
+	setSwMode
     else
 	#not load module before goahead start
 	. /etc/scripts/web_wait.sh
