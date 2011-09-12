@@ -153,6 +153,10 @@ int main(int argc, char** argv)
 	    //backup nvram setting and save rwfs
 	    system("(sleep 20 && fs backup_nvram && fs save) &");
 
+	    //Work - Green ON
+	    ledAlways(GPIO_LED_WAN_ORANGE, LED_OFF);	//Turn off orange LED
+	    ledAlways(GPIO_LED_WAN_GREEN, LED_ON);		//Turn on green LED
+
 	    //Security LED init
 	    auth_mode = nvram_get(RT2860_NVRAM, "AuthMode");
 	    if (!strcmp(auth_mode, "Disable") || !strcmp(auth_mode, "OPEN"))
@@ -160,9 +164,6 @@ int main(int argc, char** argv)
 	    else
 		ledAlways(GPIO_LED_SEC_GREEN, LED_ON);	//turn on security LED
 
-	    //Work - Green ON
-	    ledAlways(GPIO_LED_WAN_ORANGE, LED_OFF);	//Turn off orange LED
-	    ledAlways(GPIO_LED_WAN_GREEN, LED_ON);		//Turn on green LED
 	}
 
 /*
