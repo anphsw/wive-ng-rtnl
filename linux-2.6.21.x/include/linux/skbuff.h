@@ -302,14 +302,14 @@ struct sk_buff {
 				nohdr:1,
 				nfctinfo:3;
 	__u8			pkt_type:3,
-				fclone:2,
 #if defined(CONFIG_IP_VS) || defined(CONFIG_IP_VS_MODULE)
 				ipvs_property:1,
 #endif
 #if defined(CONFIG_NETFILTER_XT_TARGET_TRACE) || \
     defined(CONFIG_NETFILTER_XT_TARGET_TRACE_MODULE)
-				nf_trace:1;
+				nf_trace:1,
 #endif
+				fclone:2;
 	__be16			protocol;
 
 	void			(*destructor)(struct sk_buff *skb);

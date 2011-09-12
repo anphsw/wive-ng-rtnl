@@ -659,6 +659,7 @@
 40) Blink sec+wps led at boot before start goahead.<br>
 41) Asinc blink wps/sec led if goahead not found.<br>
 42) Update rw_init bin files for RT3x5x and add images for new chips.<br>
+43) Fix some fields enable/disable in skb.<br>
 
 suspended) Add skb reuse support.<br>
 suspended) Nvram move to kernel mode. This fix some memleaks and concurent acess to mtd issue.<br>
