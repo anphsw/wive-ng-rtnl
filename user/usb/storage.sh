@@ -1,9 +1,43 @@
 #!/bin/sh
 
-##################################################################
-#################THIS IS STUB/DEPRECATED LOGIC####################
-####################REMOVE IN FUTURE##############################
-##################################################################
+addTransmissionConfig() {
+    CONF_DIR="/media/$2/.config/torrent"
+    [ ! -d "$CONF_DIR" ] && mkdir -p "$CONF_DIR"
+    [ ! -d "/media/$2/torrents" ] && mkdir -p "/media/$2/torrents"
+    [ ! -d "/media/$2/downloads" ] && mkdir -p "/media/$2/downloads"
+    CONFIG="$CONF_DIR/settings.json"
+    if [ ! -f "$CONFIG" ]; then
+	echo "{" > $CONFIG
+	echo "\"rpc-enabled\": true," >> $CONFIG
+	echo "\"rpc-whitelist\": \"127.0.0.1,192.168.*.*\"," >> $CONFIG
+	echo "\"download-dir\": \"/media/$2/downloads\"," >> $CONFIG
+	echo "\"incomplite-dir-enabled\": false," >> $CONFIG
+	echo "\"watch-dir\": \"/media/$2/torrents\"," >> $CONFIG
+	echo "\"watch-dir-enabled\": true" >> $CONFIG
+	echo "}" >> $CONFIG
+    else
+	echo "config file exist"
+	exit 2
+    fi
+    TRANSMISSION_HOME="$CONF_DIR"
+    export TRANSMISSION_HOME
+}
+
+case $1 in
+    "addTransConf")
+	if mount | grep -q "/media/$2" ; then
+	    addTransmissionConfig
+	else
+	    echo "not found path /media/$2"
+	    exit 1
+	fi
+	;;
+
+# for old commands
+    *)
+	exit 0
+	;;
+esac
 
 exit 0
 
