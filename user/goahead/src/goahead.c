@@ -116,13 +116,6 @@ int main(int argc, char** argv)
 	ledAlways(GPIO_LED_WAN_ORANGE, LED_ON);		//Turn on orange LED
 	ledAlways(GPIO_LED_WAN_GREEN, LED_OFF);		//Turn off green LED
 
-	//Security LED init
-	auth_mode = nvram_get(RT2860_NVRAM, "AuthMode");
-	if (!strcmp(auth_mode, "Disable") || !strcmp(auth_mode, "OPEN"))
-		ledAlways(GPIO_LED_SEC_GREEN, LED_OFF);	//turn off security LED
-	else
-		ledAlways(GPIO_LED_SEC_GREEN, LED_ON);	//turn on security LED
-
 	/* Set flag goahead run to scripts */
 	if (writeGoPid() < 0)
 		return -1;
@@ -148,22 +141,29 @@ int main(int argc, char** argv)
 	    if (pid > 0)
 		kill(pid, SIGTERM);
 #endif
+		printf("GOAHEAD NOT STARTED. CHECK WEB PAGES EXIST.");
 		return -1;
 	} else {
+#ifdef WEBS_SSL_SUPPORT
+	    websSSLOpen();
+#endif
     	    /* Start needed services */
 	    initInternet();
+
+	    //backup nvram setting and save rwfs
+	    system("(sleep 20 && fs backup_nvram && fs save) &");
+
+	    //Security LED init
+	    auth_mode = nvram_get(RT2860_NVRAM, "AuthMode");
+	    if (!strcmp(auth_mode, "Disable") || !strcmp(auth_mode, "OPEN"))
+		ledAlways(GPIO_LED_SEC_GREEN, LED_OFF);	//turn off security LED
+	    else
+		ledAlways(GPIO_LED_SEC_GREEN, LED_ON);	//turn on security LED
+
+	    //Work - Green ON
+	    ledAlways(GPIO_LED_WAN_ORANGE, LED_OFF);	//Turn off orange LED
+	    ledAlways(GPIO_LED_WAN_GREEN, LED_ON);		//Turn on green LED
 	}
-
-
-#ifdef WEBS_SSL_SUPPORT
-	websSSLOpen();
-#endif
-	//backup nvram setting and save rwfs
-	system("(sleep 20 && fs backup_nvram && fs save) &");
-
-	//Work - Green ON
-	ledAlways(GPIO_LED_WAN_ORANGE, LED_OFF);	//Turn off orange LED
-	ledAlways(GPIO_LED_WAN_GREEN, LED_ON);		//Turn on green LED
 
 /*
  *	Basic event loop. SocketReady returns true when a socket is ready for
