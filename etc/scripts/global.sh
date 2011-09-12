@@ -164,9 +164,11 @@ setLanWan()
 getSwType
 if [ "$SWITCH_MODE" = "2" ]; then
     if [ ! -f /var/run/goahead.pid ]; then
+	##################################################
 	# workaroud for dir-300NRU and some devices
 	# with not correct configured from uboot
 	# need only start boot
+	##################################################
 	$LOG "Reinit power mode for all switch ports"
 	config-vlan.sh $SWITCH_MODE FFFFF
     fi
@@ -174,11 +176,10 @@ if [ "$SWITCH_MODE" = "2" ]; then
     echo '##### config novlan partition (LLLLL) #####'
     config-vlan.sh $SWITCH_MODE 0
     ##################################################
-    # In gate mode and hotspot mode configure vlans
-    ##################################################
-    ##################################################
     echo '######## clear switch mac table  ########'
     switch clear
+    ##################################################
+    # In gate mode and hotspot mode configure vlans
     ##################################################
     if [ "$opmode" = "1" ] || [ "$opmode" = "4" ]; then
 	wan_port=`nvram_get 2860 wan_port`
