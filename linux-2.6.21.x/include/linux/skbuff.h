@@ -303,7 +303,9 @@ struct sk_buff {
 				nfctinfo:3;
 	__u8			pkt_type:3,
 				fclone:2,
+#if defined(CONFIG_IP_VS) || defined(CONFIG_IP_VS_MODULE)
 				ipvs_property:1,
+#endif
 				nf_trace:1;
 	__be16			protocol;
 
