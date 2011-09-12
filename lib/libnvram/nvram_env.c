@@ -155,7 +155,8 @@ void nvram_init(int index)
 	//printf("crc shall be %08lx\n", crc32(0, (unsigned char *)fb[index].env.data, len));
 	if (crc32(0, (unsigned char *)fb[index].env.data, len) != fb[index].env.crc) {
 		LIBNV_PRINT("Bad CRC %x, ignore values in flash.\n", fb[index].env.crc);
-		FREE(fb[index].env.data);
+		if (fb[index].env.data)
+		    FREE(fb[index].env.data);
 		//empty cache
 		fb[index].valid = 1;
 		fb[index].dirty = 0;
@@ -195,7 +196,8 @@ void nvram_init(int index)
 	fb[index].dirty = 0;
 
 out:
-	FREE(fb[index].env.data); //free it to save momery
+	if (fb[index].env.data)
+	    FREE(fb[index].env.data); //free it to save momery
 }
 
 void nvram_close(int index)
@@ -211,7 +213,8 @@ void nvram_close(int index)
 		nvram_commit(index);
 
 	//free env
-	FREE(fb[index].env.data);
+	if (fb[index].env.data)
+	    FREE(fb[index].env.data);
 
 	//free cache
 	for (i = 0; i < MAX_CACHE_ENTRY; i++) {
@@ -470,7 +473,8 @@ int nvram_commit(int index)
 		l = strlen(fb[index].cache[i].name) + strlen(fb[index].cache[i].value) + 2;
 		if (p - fb[index].env.data + 2 >= fb[index].flash_max_len) {
 			LIBNV_ERROR("ENV_BLK_SIZE 0x%x is not enough!", ENV_BLK_SIZE);
-			FREE(fb[index].env.data);
+			if (fb[index].env.data)
+			    FREE(fb[index].env.data);
 			return -1;
 		}
 		snprintf(p, l, "%s=%s", fb[index].cache[i].name, fb[index].cache[i].value);
@@ -491,7 +495,8 @@ int nvram_commit(int index)
 	to = to + len;
 	len = fb[index].flash_max_len - len;
 	flash_write(fb[index].env.data, to, len);
-	FREE(fb[index].env.data);
+	if (fb[index].env.data)
+	    FREE(fb[index].env.data);
 #endif
 
 	fb[index].dirty = 0;
@@ -549,7 +554,8 @@ int nvram_clear(int index)
 	to = to + len;
 	len = fb[index].flash_max_len - len;
 	flash_write(fb[index].env.data, to, len);
-	FREE(fb[index].env.data);
+	if (fb[index].env.data)
+	    FREE(fb[index].env.data);
 	LIBNV_PRINT("clear flash from 0x%x for 0x%x bytes\n", (unsigned int *)to, len);
 #endif
 
