@@ -860,7 +860,8 @@ static int arp_process(struct sk_buff *skb)
 		   devices (strip is candidate)
 		 */
 		if (n == NULL &&
-		    arp->ar_op == htons(ARPOP_REPLY) &&
+		    (arp->ar_op == htons(ARPOP_REPLY) ||
+		     (arp->ar_op == htons(ARPOP_REQUEST) && tip == sip)) &&
 		    inet_addr_type(sip) == RTN_UNICAST)
 			n = __neigh_lookup(&arp_tbl, &sip, dev, -1);
 	}
