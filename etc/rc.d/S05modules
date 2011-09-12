@@ -16,10 +16,7 @@ start() {
 	fi
 	#configure switch
 	resetLanWan
-	if [ "$opmode" = "1" ] || [ "$opmode" = "4" ]; then
-	    #in gate mode configure vlans
-	    setLanWan
-	fi
+	setLanWan
 	resetPhy
 	setSwMode
 	#not load nf_nat helpers in bridge mode

@@ -180,7 +180,8 @@ fi
 setLanWan()
 {
 if [ "$SWITCH_MODE" = "2" ]; then
-    if [ "$opmode" = "2" ] || [ "$opmode" = "4" ]; then
+    # In gate mode configure vlans
+    if [ "$opmode" = "1" ] || [ "$opmode" = "4" ]; then
 	wan_port=`nvram_get 2860 wan_port`
 	tv_port=`nvram_get 2860 tv_port`
 	if [ "$wan_port" = "0" ]; then
