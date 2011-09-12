@@ -163,10 +163,13 @@ setLanWan()
 {
 getSwType
 if [ "$SWITCH_MODE" = "2" ]; then
-    # workaroud for dir-300NRU and some devices
-    # with not correct configured from uboot
-    $LOG "Reinit power mode for all switch ports"
-    config-vlan.sh $SWITCH_MODE FFFFF
+    if [ ! -f /var/run/goahead.pid ]; then
+	# workaroud for dir-300NRU and some devices
+	# with not correct configured from uboot
+	# need only start boot
+	$LOG "Reinit power mode for all switch ports"
+	config-vlan.sh $SWITCH_MODE FFFFF
+    fi
     ##################################################
     echo '##### config novlan partition (LLLLL) #####'
     config-vlan.sh $SWITCH_MODE 0
