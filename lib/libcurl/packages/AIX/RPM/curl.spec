@@ -3,7 +3,7 @@
 %{?nossl:%define SSL 0}
 
 %define name curl
-%define version 7.21.4
+%define version -
 %define release 1%{!?nossl:ssl}
 
 %define curlroot %{_builddir}/%{name}-%{version}

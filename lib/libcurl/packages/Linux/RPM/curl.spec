@@ -1,5 +1,5 @@
 %define name curl
-%define version 7.21.4
+%define version -
 %define release 1
 %define prefix /usr
 
