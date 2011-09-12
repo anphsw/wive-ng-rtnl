@@ -174,7 +174,7 @@ int flash_write(char *buf, off_t to, size_t len)
 			ret = read(fd, bak, info.erasesize);
 			if (ret == -1) {
 				fprintf(stderr, "Reading from mtd failed\n");
-				free(bak);
+				FREE(bak);
 				goto out;
 			}
 
@@ -186,7 +186,7 @@ int flash_write(char *buf, off_t to, size_t len)
 			ei.length = info.erasesize;
 			if (ioctl(fd, MEMERASE, &ei) < 0) {
 				fprintf(stderr, "Erasing mtd failed\n");
-				free(bak);
+				FREE(bak);
 				ret = -1;
 				goto out;
 			}
@@ -195,11 +195,11 @@ int flash_write(char *buf, off_t to, size_t len)
 			ret = write(fd, bak, info.erasesize);
 			if (ret == -1) {
 				fprintf(stderr, "Writing to mtd failed\n");
-				free(bak);
+				FREE(bak);
 				goto out;
 			}
 
-			free(bak);
+			FREE(bak);
 			buf += piece_size;
 			to += piece_size;
 			len -= piece_size;

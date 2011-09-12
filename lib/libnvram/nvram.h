@@ -58,6 +58,8 @@
 #define RALINK_NVRAM_IOCTL_COMMIT	0x04
 #define RALINK_NVRAM_IOCTL_CLEAR	0x05
 
+#define FREE(x) do { if (x != NULL) {free(x); x=NULL;} } while(0)
+
 typedef struct environment_s {
 	unsigned long crc;		//CRC32 over data bytes
 	char *data;
