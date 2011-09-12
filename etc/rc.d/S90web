@@ -4,6 +4,12 @@ LOG="logger -t goahead"
 
 start() {
  $LOG "Start goahead"
+    #blink wps/sec led at boot time
+    #before goahead start
+    if [ -f /bin/gpio ]; then
+	gpio l 13 0 4000 0 0 0
+	gpio l 14 0 4000 0 0 0
+    fi
     if [ -f /bin/goahead ]; then
 	/bin/goahead &
     else

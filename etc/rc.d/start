@@ -112,5 +112,12 @@ else
     touch /tmp/is_16ram_dev
 fi
 
+#blink wps/sec led at boot time
+#before goahead start
+if [ -f /bin/gpio ]; then
+    gpio l 13 1 1 0 0 1000
+    gpio l 14 1 1 0 0 1000
+fi
+
 $LOG "Start init now."
 /bin/sh /etc/rc.d/rcS &
