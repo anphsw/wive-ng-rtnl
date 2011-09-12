@@ -90,9 +90,6 @@ extern void hotPluglerHandler(int);
 #ifdef CONFIG_RT2860V2_STA_WSC
 extern void WPSSTAPBCStartEnr(void);
 #endif
-#ifdef CONFIG_DUAL_IMAGE
-static int set_stable_flag(void);
-#endif
 
 /*********************************** Code *************************************/
 /*
@@ -144,23 +141,19 @@ int main(int argc, char** argv)
 	/* Registr signals */
 	InitSignals(0);
 
-        /* Start needed services */
-	initInternet();
-
 	/* Initialize the web server */
 	if (initWebs() < 0) {
 		//Clean-up and exit
 #if CONFIG_USER_GOAHEAD_HAS_WPSBTN
-		if (pid > 0)
-			kill(pid, SIGTERM);
+	    if (pid > 0)
+		kill(pid, SIGTERM);
 #endif
 		return -1;
+	} else {
+    	    /* Start needed services */
+	    initInternet();
 	}
 
-#ifdef CONFIG_DUAL_IMAGE
-/* Set stable flag after the web server is started */
-	set_stable_flag();
-#endif
 
 #ifdef WEBS_SSL_SUPPORT
 	websSSLOpen();
@@ -637,29 +630,6 @@ static void printMemStats(int handle, char_t *fmt, ...)
 	vsprintf(buf, fmt, args);
 	va_end(args);
 	write(handle, buf, strlen(buf));
-}
-#endif
-
-#ifdef CONFIG_DUAL_IMAGE
-static int set_stable_flag(void)
-{
-	int set = 0;
-	char *wordlist = nvram_get(UBOOT_NVRAM, "Image1Stable");
-
-	if (wordlist) {
-		if (strcmp(wordlist, "1") != 0)
-			set = 1;
-	}
-	else
-		set = 1;
-
-	if (set) {
-		printf("Set Image1 stable flag\n");
-		nvram_set(UBOOT_NVRAM, "Image1Stable", "1");
-	}
-
-	return 0;
-
 }
 #endif
 
