@@ -13,7 +13,14 @@ start() {
     if [ -f /bin/goahead ]; then
 	/bin/goahead &
     else
+	#asinc blink wps/sec led
+	#if goahead not found
+	if [ -f /bin/gpio ]; then
+	    gpio l 13 10 1 0 0 4000
+	    gpio l 14 1 10 0 0 4000
+	fi
 	echo "GOAHEAD NOT FOUND!!! FIX THIS AND REBUILD FIRMWARE."
+	exit 1
     fi
 }
 

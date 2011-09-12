@@ -657,6 +657,7 @@
 38) In bridge or ethernet converter mode switch need reconfigure to novlans mode.<br>
 39) Rework switch init code. More correct and speedup.<br>
 40) Blink sec+wps led at boot before start goahead.<br>
+41) Asinc blink wps/sec led if goahead not found.<br>
 
 suspended) Add skb reuse support.<br>
 suspended) Nvram move to kernel mode. This fix some memleaks and concurent acess to mtd issue.<br>
