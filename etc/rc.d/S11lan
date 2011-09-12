@@ -28,18 +28,20 @@ get_txqlen
 	$LOG "Up vlan root interface"
 	ip link set eth2 up
     fi
-    if [ ! -d /proc/sys/net/ipv4/conf/eth2.1 ] || [ ! -d /proc/sys/net/ipv4/conf/eth2.2 ]; then
-        $LOG "Add vlans and config"
-	vconfig add eth2 1
-	vconfig add eth2 2
-	$LOG "ETH2.1_MACADDR $LANMAC"
-	ifconfig eth2.1 hw ether "$LANMAC"
-	$LOG "ETH2.2_MACADDR $WANMAC"
-	ifconfig eth2.2 hw ether "$WANMAC"
-    fi
+    if [ "$opmode" = "1" ] || [ "$opmode" = "4" ]; then
+	if [ ! -d /proc/sys/net/ipv4/conf/eth2.1 ] || [ ! -d /proc/sys/net/ipv4/conf/eth2.2 ]; then
+    	    $LOG "Add vlans and config"
+	    vconfig add eth2 1
+	    vconfig add eth2 2
+	    $LOG "ETH2.1_MACADDR $LANMAC"
+	    ifconfig eth2.1 hw ether "$LANMAC"
+	    $LOG "ETH2.2_MACADDR $WANMAC"
+	    ifconfig eth2.2 hw ether "$WANMAC"
+	fi
 
-    #eth2.1 always up
-    ip link set eth2.1 up
+	#eth2.1 always up
+	ip link set eth2.1 up
+    fi
 
     #flush ip from interfaces
     addr_flush
