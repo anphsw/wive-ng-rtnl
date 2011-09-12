@@ -10,16 +10,29 @@
 #include <unistd.h>
 #include <sys/ioctl.h>
 
-#define BUFSZ			1024
+/* use nutex only  if kernel
+    nvram support disabled */
+#ifndef CONFIG_KERNEL_NVRAM
+#ifdef CONFIG_LIB_PTHREAD_FORCE
+#define NVRAM_LIB_PTHREAD_FORCE
+#endif
+#else
+#undef NVRAM_LIB_PTHREAD_FORCE
+#endif
 
 #ifdef CONFIG_LIB_LIBNVRAM_SSTRDUP
-#ifdef CONFIG_LIB_PTHREAD_FORCE
-#include <pthread.h>
+#define NVRAM_LIB_LIBNVRAM_SSTRDUP
 #endif
 
+#ifdef NVRAM_LIB_LIBNVRAM_SSTRDUP
+#ifdef NVRAM_LIB_PTHREAD_FORCE
+#include <pthread.h>
+#endif
+#endif
+
+#define BUFSZ			1024
 #define MAX_NV_VALUE_LEN	64
 #define NV_BUFFERS_COUNT	128
-#endif
 
 #ifdef CONFIG_DUAL_IMAGE
 #define UBOOT_NVRAM	0
@@ -88,7 +101,7 @@ void nvram_close(int index);
 
 int nvram_set(int index, char *name, char *value);
 int nvram_bufset(int index, char *name, char *value);
-const char *nvram_get(int index, char *name);
+char *nvram_get(int index, char *name);
 char *nvram_bufget(int index, char *name);
 
 void nvram_buflist(int index);

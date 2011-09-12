@@ -66,10 +66,10 @@ static block_t fb[FLASH_BLOCK_NUM] =
 
 #define FREE(x) do { if (x != NULL) {free(x); x=NULL;} } while(0)
 
-#ifdef CONFIG_LIB_LIBNVRAM_SSTRDUP
+#ifdef NVRAM_LIB_LIBNVRAM_SSTRDUP
 static int bufitem = 0;
 static char buf[NV_BUFFERS_COUNT][MAX_NV_VALUE_LEN];
-#ifdef CONFIG_LIB_PTHREAD_FORCE
+#ifdef NVRAM_LIB_PTHREAD_FORCE
 static pthread_mutex_t mutex1 = PTHREAD_MUTEX_INITIALIZER;
 #endif
 
@@ -77,14 +77,14 @@ char* sstrdup(char* str)
 {
 	char* res;
 	//lock till we'll have pointer to potentially free buffer
-#ifdef CONFIG_LIB_PTHREAD_FORCE
+#ifdef NVRAM_LIB_PTHREAD_FORCE
 	pthread_mutex_lock( &mutex1 );
 #endif
 	bufitem++;
 	if (bufitem >= NV_BUFFERS_COUNT)
 	    bufitem = 0;
 	res = buf[bufitem];
-#ifdef CONFIG_LIB_PTHREAD_FORCE
+#ifdef NVRAM_LIB_PTHREAD_FORCE
 	pthread_mutex_unlock( &mutex1 );
 #endif
 	//work with that buffer
@@ -239,7 +239,7 @@ static int cache_idx(int index, char *name)
 	return -1;
 }
 
-const char *nvram_get(int index, char *name)
+char *nvram_get(int index, char *name)
 {
 	/* Initial value should be NULL */
 	char *recv = NULL;
@@ -324,7 +324,7 @@ char *nvram_bufget(int index, char *name)
 #endif
 			//Tom.Hung 2010-5-7, strdup() will cause memory leakage
 			//but if we return value directly, it will cause many other crash or delete value to nvram error.
-#ifdef CONFIG_LIB_LIBNVRAM_SSTRDUP
+#ifdef NVRAM_LIB_LIBNVRAM_SSTRDUP
 			ret = sstrdup(fb[index].cache[idx].value);
 #else
 			ret = strdup(fb[index].cache[idx].value);

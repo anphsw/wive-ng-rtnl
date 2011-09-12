@@ -96,13 +96,11 @@ int flash_read(char *buf, off_t from, size_t len)
 		return -1;
 	}
 
-#ifndef CONFIG_KERNEL_NVRAM
 	fd = mtd_open("Config", O_RDONLY | O_NONBLOCK);
 	if (fd < 0) {
 		fprintf(stderr, "Could not open mtd device\n");
 		return -1;
 	}
-#endif
 
 	if (ioctl(fd, MEMGETINFO, &info)) {
 		fprintf(stderr, "Could not get mtd device info\n");
