@@ -110,7 +110,7 @@ int main(int argc, char** argv)
 #if CONFIG_USER_GOAHEAD_HAS_WPSBTN
 	int pid;
 #endif
-	char *auth_mode = nvram_get(RT2860_NVRAM, "AuthMode");
+	char *auth_mode;
 
 	bopen(NULL, (60 * 1024), B_USE_MALLOC);
 	signal(SIGPIPE, SIG_IGN);
@@ -120,6 +120,7 @@ int main(int argc, char** argv)
 	ledAlways(GPIO_LED_WAN_GREEN, LED_OFF);		//Turn off green LED
 
 	//Security LED init
+	auth_mode = nvram_get(RT2860_NVRAM, "AuthMode");
 	if (!strcmp(auth_mode, "Disable") || !strcmp(auth_mode, "OPEN"))
 		ledAlways(GPIO_LED_SEC_GREEN, LED_OFF);	//turn off security LED
 	else
