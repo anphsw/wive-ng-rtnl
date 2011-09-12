@@ -60,7 +60,6 @@ case "$1" in
 	if [ "$dhcpSwReset" = "1" ]; then
 	    $LOG "Reinit switch"
 	    # Reset switch
-	    resetLanWan
 	    setLanWan
 	    setSwMode
 	fi

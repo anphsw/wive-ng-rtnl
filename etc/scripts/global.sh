@@ -159,14 +159,6 @@ setSwMode()
     done
 }
 
-resetLanWan()
-{
-if [ "$SWITCH_MODE" = "2" ]; then
-    echo "##### restore to dump switch #####"
-    config-vlan.sh $SWITCH_MODE 0
-fi
-}
-
 resetPhy()
 {
 if [ "$SWITCH_MODE" = "2" ]; then
@@ -180,6 +172,8 @@ fi
 setLanWan()
 {
 if [ "$SWITCH_MODE" = "2" ]; then
+    echo '##### config novlan partition (LLLLL) #####'
+    config-vlan.sh $SWITCH_MODE 0
     # In gate mode configure vlans
     if [ "$opmode" = "1" ] || [ "$opmode" = "4" ]; then
 	wan_port=`nvram_get 2860 wan_port`
@@ -201,9 +195,6 @@ if [ "$SWITCH_MODE" = "2" ]; then
 		config-vlan.sh $SWITCH_MODE LLLLW
 	    fi
 	fi
-    else
-		echo '##### config novlan partition (LLLLL) #####'
-		config-vlan.sh $SWITCH_MODE 0
     fi
     echo '######## clear switch mac table  ########'
     switch clear

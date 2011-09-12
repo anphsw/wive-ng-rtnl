@@ -15,7 +15,6 @@ start() {
 	    depmod -a -n > /etc/modules.dep
 	fi
 	#configure switch
-	resetLanWan
 	setLanWan
 	resetPhy
 	setSwMode
