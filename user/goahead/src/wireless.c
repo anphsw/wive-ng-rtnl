@@ -120,10 +120,10 @@ static int getEEPROMCountryCode(char *eeprom_addr)
 		printf("\nrtuser::error::Open socket error!\n\n");
 		return -1;
 	}
-	
+
 	sprintf(name, "ra0");
 	memset(data, 0x00, sizeof(data));
-	
+
 	//strcpy(data, "39"); // Country region code in eeprom 0x39
 	strcpy(data, eeprom_addr); // Country region code in eeprom 0x39(2.4G), 0x38(5G)
 	strcpy(wrq.ifr_name, name);
@@ -228,7 +228,7 @@ static int getWlan11gChannels(int eid, webs_t wp, int argc, char_t **argv)
     for (idx = 0; idx < 13; idx++)
 	websWrite(wp, T("%s%d %s>%d%s%d%s"), 
 		"<option value=", idx+1, (idx+1 == channel)? "selected" : "", 2412+5*idx, "MHz (Channel ", idx+1, ")</option>");
-	
+
  return websWrite(wp, T("<option value=14 %s>2484MHz (Channel 14)</option>\n"),(14 == channel)? "selected" : "");
 }
 
@@ -565,7 +565,6 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 
 	//SSID, Multiple SSID
 	if (0 == strlen(ssid)) {
-		
 		websError(wp, 403, T("'SSID' should not be empty!"));
 		return;
 	}
@@ -683,7 +682,6 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 	nvram_close(RT2860_NVRAM);
 
 	if (new_bssid_num < 1 || new_bssid_num > 8) {
-		
 		websError(wp, 403, T("'bssid_num' %s is out of range!"), bssid_num);
 		return;
 	}
@@ -697,11 +695,9 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "NoForwardingBTNBSSID", mbssidapisolated);
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
-                    
+
 	//11abg Channel or AutoSelect
-	if ((0 == strlen(sz11aChannel)) && (0 == strlen(sz11bChannel)) &&
-			(0 == strlen(sz11gChannel))) {
-		
+	if ((0 == strlen(sz11aChannel)) && (0 == strlen(sz11bChannel)) && (0 == strlen(sz11gChannel))) {
 		websError(wp, 403, T("'Channel' should not be empty!"));
 		return;
 	}
@@ -909,7 +905,6 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 	if (strcmp(ht_bss_coex, "1") == 0)
 		nvram_bufset(RT2860_NVRAM, "HT_BSSCoexApCntThr", ht_noise_thresh);
 	nvram_bufset(RT2860_NVRAM, "AP2040Rescan", ap2040_rescan);
-	
 #ifdef CONFIG_RT2860V2_AP_IGMP_SNOOP
 	nvram_bufset(RT2860_NVRAM, "igmpEnabled", m2u_enable);
 	nvram_bufset(RT2860_NVRAM, "McastMcs", mcast_mcs);
@@ -1024,7 +1019,7 @@ static void wirelessWds(webs_t wp, char_t *path, char_t *query)
 		}
 	}
 	nvram_commit(RT2860_NVRAM);
-	nvram_close(RT2860_NVRAM);	
+	nvram_close(RT2860_NVRAM);
 
 	//debug print
 	websHeader(wp);
@@ -1106,7 +1101,7 @@ static void wirelessApcli(webs_t wp, char_t *path, char_t *query)
 	websFooter(wp);
 	websDone(wp, 200);
 
-	// restart wireless network                                                                                                         
+	// restart wireless network
         doSystem("internet.sh wifionly &");
 }
 
@@ -1216,7 +1211,7 @@ void restart8021XDaemon(int nvram)
 	}
 
 	if(apd_flag)
-		doSystem("rt2860apd");	
+		doSystem("rt2860apd");
 }
 #endif
 
@@ -1489,7 +1484,7 @@ void confWPAGeneral(int nvram, webs_t wp, int mbssid)
 	}
 	STFs(nvram, mbssid, "DefaultKeyID", "2");	// DefaultKeyID is 2
 	STFs(nvram, mbssid, "RekeyInterval", key_renewal_interval);
-	STFs(nvram, mbssid, "RekeyMethod", "TIME");		
+	STFs(nvram, mbssid, "RekeyMethod", "TIME");
 	STFs(nvram, mbssid, "IEEE8021X", "0");
 out:
 	nvram_commit(RT2860_NVRAM);
@@ -1567,7 +1562,7 @@ void Security(int nvram, webs_t wp, char_t *path, char_t *query)
 		STFs(nvram, mbssid, "AuthMode", security_mode);
 		STFs(nvram, mbssid, "EncrypType", "WEP");
 		STFs(nvram, mbssid, "IEEE8021X", "0");
-	}else if( !strcmp(security_mode, "WPA") ||  
+	}else if( !strcmp(security_mode, "WPA") ||
 				!strcmp(security_mode, "WPA1WPA2") ){	// !------------------		WPA Enterprise Mode ----------------
 #ifdef CONFIG_USER_802_1X
 		conf8021x(nvram, wp, mbssid);				// !------------------		WPA1WPA2 mixed mode
@@ -1660,7 +1655,7 @@ void Security(int nvram, webs_t wp, char_t *path, char_t *query)
 	websHeader(wp);
 	websWrite(wp, T("<h2>MBSSID index: %d, Security Mode: %s Done</h2><br>\n"), mbssid, security_mode);
 	websFooter(wp);
-	websDone(wp, 200);	
+	websDone(wp, 200);
 
 #if defined(CONFIG_RT2860V2_AP_WSC) || defined(CONFIG_RT2860V2_STA_WSC)
 	WPSRestart();
@@ -1921,7 +1916,7 @@ static void AntennaDiversity(webs_t wp, char_t *path, char_t *query)
 	mode = websGetVar(wp, T("ADSelect"), T(""));
 	if(!mode || !strlen(mode))
 		return;
-	
+
 	nvram_set(RT2860_NVRAM, "AntennaDiversity", mode);
 
 	// re-init
@@ -1931,7 +1926,7 @@ static void AntennaDiversity(webs_t wp, char_t *path, char_t *query)
 	websHeader(wp);
 	websWrite(wp, T("mode:%s"), mode);
 	websFooter(wp);
-	websDone(wp, 200);	
+	websDone(wp, 200);
 }
 
 static void getAntenna(webs_t wp, char_t *path, char_t *query)
