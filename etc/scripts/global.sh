@@ -159,7 +159,7 @@ setSwMode()
     done
 }
 
-resetPhy()
+setLanWan()
 {
 getSwType
 if [ "$SWITCH_MODE" = "2" ]; then
@@ -167,16 +167,12 @@ if [ "$SWITCH_MODE" = "2" ]; then
     # with not correct configured from uboot
     $LOG "Reinit power mode for all switch ports"
     config-vlan.sh $SWITCH_MODE FFFFF
-fi
-}
-
-setLanWan()
-{
-getSwType
-if [ "$SWITCH_MODE" = "2" ]; then
+    ##################################################
     echo '##### config novlan partition (LLLLL) #####'
     config-vlan.sh $SWITCH_MODE 0
-    # In gate mode configure vlans
+    ##################################################
+    # In gate mode and hotspot mode configure vlans
+    ##################################################
     if [ "$opmode" = "1" ] || [ "$opmode" = "4" ]; then
 	wan_port=`nvram_get 2860 wan_port`
 	tv_port=`nvram_get 2860 tv_port`
@@ -198,7 +194,9 @@ if [ "$SWITCH_MODE" = "2" ]; then
 	    fi
 	fi
     fi
+    ##################################################
     echo '######## clear switch mac table  ########'
+    ##################################################
     switch clear
 fi
 }

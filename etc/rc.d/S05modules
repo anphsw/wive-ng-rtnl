@@ -51,7 +51,6 @@ start() {
 	fi
 	#configure switch
 	setLanWan
-	resetPhy
 	setSwMode
     else
 	#not load module before goahead start
