@@ -7,6 +7,8 @@
 #include <linux/types.h>
 #include <linux/config.h>
 
+#include "nvram.h"
+
 struct mtd_info_user {
 	u_char type;
 	u_int32_t flags;
