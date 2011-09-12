@@ -42,6 +42,7 @@ get_txqlen
 	#eth2.1 always up
 	ip link set eth2.1 up
     fi
+
     #flush ip from interfaces
     addr_flush
 
@@ -55,7 +56,7 @@ get_txqlen
 	fi
 	ifconfig "$lan_if" "$lan_ipaddr" netmask "$lan_netmask" up
     else
-	ifconfig "$lan_if" 0.0.0.0 up	
+	ifconfig "$lan_if" 0.0.0.0 up
     fi
     $LOG "Mode is $opmode, wan iface $wan_if, lan iface $lan_if, adress $lan_ipaddr"
 

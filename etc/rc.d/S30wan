@@ -46,7 +46,7 @@ start() {
 	    ip addr flush dev $wan_if
     fi
 
-    #if not bridge wan up    
+    #if not bridge wan up
     if [ "$opmode" != "0" ]; then
 	ip link set $wan_if up
 	echo 1 > "/proc/sys/net/ipv4/conf/$wan_if/forwarding"
