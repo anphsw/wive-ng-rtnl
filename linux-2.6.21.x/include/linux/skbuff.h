@@ -306,7 +306,10 @@ struct sk_buff {
 #if defined(CONFIG_IP_VS) || defined(CONFIG_IP_VS_MODULE)
 				ipvs_property:1,
 #endif
+#if defined(CONFIG_NETFILTER_XT_TARGET_TRACE) || \
+    defined(CONFIG_NETFILTER_XT_TARGET_TRACE_MODULE)
 				nf_trace:1;
+#endif
 	__be16			protocol;
 
 	void			(*destructor)(struct sk_buff *skb);
