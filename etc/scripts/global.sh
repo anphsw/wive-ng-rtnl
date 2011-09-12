@@ -73,13 +73,13 @@ getWanIfName()
 #select switch type from config
 getSwType()
 {
-    if [ "$CONFIG_RAETH_ROUTER" = "y" ]; then
+    if [ "$CONFIG_RAETH_ROUTER" != "" ]; then
 	#VIA external switch
 	SWITCH_MODE=0
-    elif [ "$CONFIG_MAC_TO_MAC_MODE" = "y" ]; then
+    elif [ "$CONFIG_MAC_TO_MAC_MODE" != "" ]; then
 	#VTSS external switch
 	SWITCH_MODE=1
-    elif [ "$CONFIG_RT_3052_ESW" = "y" ]; then
+    elif [ "$CONFIG_RT_3052_ESW" != "" ]; then
 	#internal 3052 ESW
 	SWITCH_MODE=2
     else
