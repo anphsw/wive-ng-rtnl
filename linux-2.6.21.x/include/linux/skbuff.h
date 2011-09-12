@@ -1085,18 +1085,18 @@ static inline void skb_reset_mac_header(struct sk_buff *skb)
  * get_rps_cpus() for example only access one 64 bytes aligned block :
  * NET_IP_ALIGN(2) + ethernet_header(14) + IP_header(20/40) + ports(8)
  */
-#ifndef NET_SKB_PAD
-#if defined (CONFIG_RALINK_RT2880) || \
-    defined (CONFIG_RALINK_RT2883) || \
-    defined (CONFIG_RALINK_RT3883) || \
-    defined (CONFIG_RALINK_RT3352) || \
-    defined (CONFIG_RALINK_RT3052) || \
-    defined (CONFIG_RALINK_RT5350)
-#define NET_SKB_PAD	16 /* This is hack need for RalinkSOC wireless driver */
-#else
+//#ifndef NET_SKB_PAD
+//#if defined (CONFIG_RALINK_RT2880) || \
+//    defined (CONFIG_RALINK_RT2883) || \
+//    defined (CONFIG_RALINK_RT3883) || \
+//    defined (CONFIG_RALINK_RT3352) || \
+//    defined (CONFIG_RALINK_RT3052) || \
+//    defined (CONFIG_RALINK_RT5350)
+//#define NET_SKB_PAD	16 /* This is hack need for RalinkSOC wireless driver */
+//#else
 #define NET_SKB_PAD	max(32, L1_CACHE_BYTES)
-#endif
-#endif
+//#endif
+//#endif
 
 extern int ___pskb_trim(struct sk_buff *skb, unsigned int len);
 
@@ -1496,7 +1496,6 @@ static inline void *skb_header_pointer(const struct sk_buff *skb, int offset,
 }
 
 extern void skb_init(void);
-extern void skb_add_mtu(int mtu);
 
 /**
  *	skb_get_timestamp - get timestamp from a skb

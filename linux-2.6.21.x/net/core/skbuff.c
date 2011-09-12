@@ -593,7 +593,7 @@ struct sk_buff *pskb_copy(struct sk_buff *skb, gfp_t gfp_mask)
 	 */
 	struct sk_buff *n;
 
-        n = alloc_skb(skb->end - skb->head, gfp_mask);                                                                                      
+        n = alloc_skb(skb->end - skb->head, gfp_mask);
 
 	if (!n)
 		goto out;
@@ -1601,19 +1601,6 @@ void skb_insert(struct sk_buff *old, struct sk_buff *newsk, struct sk_buff_head 
 	__skb_insert(newsk, old->prev, old, list);
 	spin_unlock_irqrestore(&list->lock, flags);
 }
-
-#if 0
-/*
- * 	Tune the memory allocator for a new MTU size.
- */
-void skb_add_mtu(int mtu)
-{
-	/* Must match allocation in alloc_skb */
-	mtu = SKB_DATA_ALIGN(mtu) + sizeof(struct skb_shared_info);
-
-	kmem_add_cache_size(mtu);
-}
-#endif
 
 static inline void skb_split_inside_header(struct sk_buff *skb,
 					   struct sk_buff* skb1,
