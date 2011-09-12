@@ -161,6 +161,7 @@ setSwMode()
 
 resetPhy()
 {
+getSwType
 if [ "$SWITCH_MODE" = "2" ]; then
     # workaroud for dir-300NRU and some devices
     # with not correct configured from uboot
@@ -171,6 +172,7 @@ fi
 
 setLanWan()
 {
+getSwType
 if [ "$SWITCH_MODE" = "2" ]; then
     echo '##### config novlan partition (LLLLL) #####'
     config-vlan.sh $SWITCH_MODE 0
