@@ -74,14 +74,16 @@ extern void rt3052_fini(void);
 *   Program main method. Is invoked when the program is started
 *   on commandline. The number of commandline arguments, and a
 *   pointer to the arguments are recieved on the line...
-*/    
+*/
 int main( int ArgCn, char *ArgVc[] ) {
 
     int c, sw = 0;
+    int force_snooping = -1;
     WanPort = 0x1;
+    def_lanport[] = {1,2,3,4};
 
     // Parse the commandline options and setup basic settings..
-    for (c; (c = getopt(ArgCn, ArgVc, "vdswh")) != -1;) {
+    for (c; (c = getopt(ArgCn, ArgVc, "vdswhf")) != -1;) {
         switch (c) {
         case 'd':
             Log2Stderr = true;
@@ -91,6 +93,7 @@ int main( int ArgCn, char *ArgVc[] ) {
             break;
         case 'w':
 	    WanPort = 0x10;
+	    def_lanport[] = {0,1,2,3};
             break;
         case 'v':
             LogLevel++;
@@ -99,6 +102,14 @@ int main( int ArgCn, char *ArgVc[] ) {
             fputs(Usage, stderr);
             exit(0);
             break;
+        case 'f':
+	    if (i + 1 < ArgCn && ArgVc[i+1][0] != '-') {
+		force_snooping = atoi(ArgVc[i+1]);
+		i++;
+	    } else {
+		my_log(LOG_ERR, 0, "Missing config file path after -f option.");
+	    }
+                break;
         default:
             exit(1);
             break;
@@ -137,8 +148,14 @@ int main( int ArgCn, char *ArgVc[] ) {
         }
 
 #ifdef RT3052_SUPPORT
-	if (sw)
-    	    rt3052_init();
+	if (sw) {
+	    if(force_snooping == -1)
+		rt3052_init(0);		/* automatic (default) */
+	    else if(force_snooping == 0)
+		rt3052_init(1024);	/* disable snooping */
+	    else
+		rt3052_init(1);		/* enable snooping */
+	}
 #endif
 
 	if ( !Log2Stderr ) {
@@ -293,6 +310,15 @@ void igmpProxyRun() {
             if (sighandled & GOT_SIGINT) {
                 sighandled &= ~GOT_SIGINT;
                 my_log(LOG_NOTICE, 0, "Got a interupt signal. Exiting.");
+                break;
+
+            case 'f':
+		if (i + 1 < ArgCn && ArgVc[i+1][0] != '-') {
+			force_snooping = atoi(ArgVc[i+1]);
+			i++;
+		} else{
+                    log(LOG_ERR, 0, "Missing config file path after -f option.");
+		}
                 break;
             }
         }

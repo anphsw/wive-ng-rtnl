@@ -70,7 +70,7 @@
 
 #define MAX_MC_VIFS    32     // !!! check this const in the specific includes
 
-// Useful macros..          
+// Useful macros..
 #define VCMC( Vc )  (sizeof( Vc ) / sizeof( (Vc)[ 0 ] ))
 #define VCEP( Vc )  (&(Vc)[ VCMC( Vc ) ])
 
@@ -104,6 +104,7 @@ extern char		s4[];
 //#################################################################################
 
 extern uint32_t WanPort;              // Wan port number
+extern unsigned char def_lanport[];   //Lan ports range
 
 /* syslog.c
  */
