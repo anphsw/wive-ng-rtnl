@@ -34,10 +34,13 @@ start() {
 	echo 1 > /proc/sys/net/ipv4/conf/all/mc_forwarding
 	echo 1 > /proc/sys/net/ipv4/conf/default/mc_forwarding
 	ip route replace 224.0.0.0/4 dev $wan_if
+	if [ "$igmpSnoopMode" != "f" ] && [ "$igmpSnoopMode" != "n" ]; then
+	    igmpSnoopMode=""
+	fi
 	if [ "$wan_port" = "4" ]; then
-    	    igmpproxy -s /etc/igmpproxy.conf &
+    	    igmpproxy -s$igmpSnoopMode /etc/igmpproxy.conf &
 	else
-    	    igmpproxy -sw /etc/igmpproxy.conf &
+    	    igmpproxy -sw$igmpSnoopMode /etc/igmpproxy.conf &
 	fi
     else
 	echo 0 > /proc/sys/net/ipv4/conf/all/mc_forwarding
@@ -56,6 +59,7 @@ stop() {
 
 get_param() {
     igmpEnabled=`nvram_get 2860 igmpEnabled`
+    igmpSnoopMode=`nvram_get 2860 igmpSnoopMode`
     wan_port=`nvram_get 2860 wan_port`
 }
 
