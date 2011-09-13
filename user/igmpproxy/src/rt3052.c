@@ -93,6 +93,7 @@
 
 /* wan port select */
 uint32_t WanPort = 0x1;
+static int arpLookUp(char *ip, char *arp);
 
 typedef struct rt3052_esw_reg {
 	unsigned int off;

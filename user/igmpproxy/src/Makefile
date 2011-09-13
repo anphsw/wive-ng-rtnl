@@ -25,8 +25,8 @@ IGMP_PROXY_OBJ+= rt3052.o rt3052_reg.o
 CFLAGS= -I$(ROOTDIR)/$(LINUXDIR)/include -DRT3052_SUPPORT
 endif
 
-#CFLAGS+= -DWIFI_IGMPSNOOP_SUPPORT
-#CFLAGS+= -DSEARCH_CLIENT_IN_WIFI_MACTABLE
+CFLAGS+= -DWIFI_IGMPSNOOP_SUPPORT
+CFLAGS+= -DSEARCH_CLIENT_IN_WIFI_MACTABLE
 
 all: $(EXEC)
 
@@ -39,5 +39,5 @@ romfs:
 clean:
 	rm -f *.o *.asm build.h $(EXEC)  
 
-build.h	:  
+build.h	:
 	echo '#define BUILD "' `date +%y%m%d` '"' >build.h
