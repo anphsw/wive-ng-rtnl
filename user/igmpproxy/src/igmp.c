@@ -133,11 +133,11 @@ void acceptIgmp(int recvlen) {
         }
         else {
             struct IfDesc *checkVIF;
-            
+
             // Check if the source address matches a valid address on upstream vif.
             checkVIF = getIfByIx( upStreamVif );
             if(checkVIF == 0) {
-                my_log(LOG_ERR, 0, "Upstream VIF was null.");
+                my_log(LOG_WARNING, 0, "Upstream VIF was null.");
                 return;
             } 
             else if(src == checkVIF->InAdr.s_addr) {
@@ -150,12 +150,12 @@ void acceptIgmp(int recvlen) {
                     inetFmt(src, s1), inetFmt(dst, s2));
                 return;
             }
-            
+
             // Activate the route.
             my_log(LOG_DEBUG, 0, "Route activate request from %s to %s",
 		    inetFmt(src,s1), inetFmt(dst,s2));
             activateRoute(dst, src);
-            
+
 
         }
         return;

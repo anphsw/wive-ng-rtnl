@@ -183,7 +183,7 @@ void igmpCreateVIFs() {
     upStreamVif = -1;
 
     my_log(LOG_DEBUG, 0, "Create VIFs for all interfaces");
-    
+
     for ( Ix = 0; (Dp = getIfByIx(Ix)); Ix++ ) {
 	my_log(LOG_DEBUG, 0, "getIf by Ix[%d]\n", Ix);
     	    if ( Dp->InAdr.s_addr && ! (Dp->Flags & IFF_LOOPBACK) && Dp->state != IF_STATE_DISABLED ){
@@ -199,7 +199,7 @@ void igmpCreateVIFs() {
      }
     // If there is only one VIF, or no defined upstream VIF, we send an error.
     if(vifcount < 2 || upStreamVif < 0)
-	my_log(LOG_ERR, 0, "There must be at least 2 Vif's where one is upstream.");
+	log(LOG_WARNING, 0, "Warning, No upstream interface assigned.");
 }
 
 /**
