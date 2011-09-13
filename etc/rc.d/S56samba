@@ -31,18 +31,15 @@ if [ "$SmbEnabled" = "1" ]; then
     echo "    time server = $ntp_support" >> $CONFIG
 
     #check samba version
-    is_smb_v3=`cat /etc/smb.conf.template | grep -c "NTFS"`
     if [ "$is_smb_v3" != "0" ]; then
 	echo "    hosts allow = $lan_ipaddr/$lan_netmask" >> $CONFIG
     fi
 
     #add template to config
-    cat /etc/smb.conf.template >> $CONFIG
+    cat $TEMPLATE >> $CONFIG
 
     #share /media
     if [ -d /proc/bus/usb ]; then
-	#last particion mounted to /media set as public for samba and torrent home dir
-	public=`df -h | grep "/dev/sd" | grep "media" | awk {' print $6 '} | tail -n1`
 	if [ $public != "" ]; then
 	    echo "[public]" >> $CONFIG
 	    echo "    comment = pub" >> $CONFIG
@@ -95,6 +92,7 @@ get_param() {
     lan_ipaddr=`nvram_get 2860 lan_ipaddr`
     lan_netmask=`nvram_get 2860 lan_netmask`
     CONFIG="/etc/smb.conf"
+    TEMPLATE="/etc/smb.conf.template"
 
     if [ "$SmbTimeserver" = "1" ] && [ "$NTPEnabled" = "on" ] && [ "$NTPServerIP" != "" ]; then
 	ntp_support="yes"
@@ -103,11 +101,15 @@ get_param() {
     fi
     if [ -d /proc/bus/usb ]; then
 	socket_options="SO_BROADCAST IPTOS_THROUGHPUT TCP_NODELAY SO_RCVBUF=65536 SO_SNDBUF=65536" >> $CONFIG
+	#last particion mounted to /media set as public for samba and torrent home dir
+	public=`df -h | grep "/dev/sd" | grep "media" | awk {' print $6 '} | tail -n1`
     else
 	socket_options="SO_BROADCAST IPTOS_THROUGHPUT TCP_NODELAY SO_RCVBUF=1024 SO_SNDBUF=1024" >> $CONFIG
     fi
 
     interfaces="lo 127.0.0.1/255.0.0.0 $lan_if $lan_ipaddr/$lan_netmask"
+
+    is_smb_v3=`cat $TEMPLATE | grep -c "NTFS"`
 }
 
 case "$1" in
