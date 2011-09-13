@@ -199,7 +199,7 @@ void igmpCreateVIFs() {
      }
     // If there is only one VIF, or no defined upstream VIF, we send an error.
     if(vifcount < 2 || upStreamVif < 0)
-	log(LOG_WARNING, 0, "Warning, No upstream interface assigned.");
+	my_log(LOG_WARNING, 0, "Warning, No upstream interface assigned.");
 }
 
 /**
