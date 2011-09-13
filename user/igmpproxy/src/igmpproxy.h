@@ -104,7 +104,6 @@ extern char		s4[];
 //#################################################################################
 
 extern uint32_t WanPort;              // Wan port number
-extern unsigned char def_lanport[];   //Lan ports range
 
 /* syslog.c
  */

@@ -80,7 +80,6 @@ int main( int ArgCn, char *ArgVc[] ) {
     int i, c, sw = 0;
     int force_snooping = -1;
     WanPort = 0x1;
-    def_lanport = {1,2,3,4};
 
     // Parse the commandline options and setup basic settings..
     for (c; (c = getopt(ArgCn, ArgVc, "vdswhf")) != -1;) {
@@ -93,7 +92,6 @@ int main( int ArgCn, char *ArgVc[] ) {
             break;
         case 'w':
 	    WanPort = 0x10;
-	    def_lanport = {0,1,2,3};
             break;
         case 'v':
             LogLevel++;
@@ -109,13 +107,13 @@ int main( int ArgCn, char *ArgVc[] ) {
 	    } else {
 		my_log(LOG_ERR, 0, "Missing config file path after -f option.");
 	    }
-                break;
+            break;
         default:
             exit(1);
             break;
         }
     }
-    
+
     if (optind != ArgCn - 1) {
 	fputs("You must specify the configuration file.\n", stderr);
 	exit(1);
@@ -311,16 +309,7 @@ void igmpProxyRun() {
                 sighandled &= ~GOT_SIGINT;
                 my_log(LOG_NOTICE, 0, "Got a interupt signal. Exiting.");
                 break;
-
-            case 'f':
-		if (i + 1 < ArgCn && ArgVc[i+1][0] != '-') {
-			force_snooping = atoi(ArgVc[i+1]);
-			i++;
-		} else{
-                    my_log(LOG_ERR, 0, "Missing config file path after -f option.");
-		}
-                break;
-            }
+	    }
         }
 
         // Prepare timeout...
@@ -411,11 +400,9 @@ static void signalHandler(int sig) {
         case SIGHUP:
             sighandled |= GOT_SIGHUP;
             break;
-    
         case SIGUSR1:
             sighandled |= GOT_SIGUSR1;
             break;
-    
         case SIGUSR2:
             sighandled |= GOT_SIGUSR2;
             break;

@@ -71,6 +71,9 @@
 #define IP_MULTICAST_A1(a0, a1)		(((a0 & 0x1) << 7) | a1)
 #define HOOK_CHECK					if(!(hook_value & 0x3FF)) return;
 
+#define LANPORT_RANGE_P0           {1,2,3,4}
+#define LANPORT_RANGE_P4           {0,1,2,3}
+
 #define OTHER_INTERFACE				7		/* port 7  (wifi)  */
 
 /* delay mac table deletion */
@@ -90,7 +93,6 @@
 
 /* wan port select */
 uint32_t WanPort = 0x1;
-unsigned char def_lanport[] = {1,2,3,4};
 
 typedef struct rt3052_esw_reg {
 	unsigned int off;
@@ -853,7 +855,8 @@ static inline wait_switch_done(void)
 
 static void ZeroEntriesBarrier(struct group *entry, int mode)
 {
-	unsigned char lanport[] = def_lanport;
+	unsigned char lanport4[]=LANPORT_RANGE_P4;
+	unsigned char lanport0[]=LANPORT_RANGE_P0;
 
 	int i, value;
 	char wholestr[13];
@@ -871,13 +874,24 @@ static void ZeroEntriesBarrier(struct group *entry, int mode)
 	value = strtoul(tmpstr, NULL, 16);
 	reg_write(REG_ESW_WT_MAC_AD1, value);
 
-	for(i=0; i < sizeof(lanport)/sizeof(unsigned char); i++){
+	if (WanPort = 0x1) {
+	    for(i=0; i < sizeof(lanport0)/sizeof(unsigned char); i++){
 		value = 0x1;			//w_mac_cmd
 		if(mode == ADDENTRY)
 			value |= (7 << 4);	//w_age_field
-		value |= (lanport[i] << 7);	//w_index
+		value |= (lanport0[i] << 7);	//w_index
 		reg_write(REG_ESW_WT_MAC_AD0, value);
 		wait_switch_done();
+	    }
+	} else {
+	    for(i=0; i < sizeof(lanport4)/sizeof(unsigned char); i++){
+		value = 0x1;			//w_mac_cmd
+		if(mode == ADDENTRY)
+			value |= (7 << 4);	//w_age_field
+		value |= (lanport4[i] << 7);	//w_index
+		reg_write(REG_ESW_WT_MAC_AD0, value);
+		wait_switch_done();
+	    }
 	}
 }
 
@@ -913,22 +927,41 @@ static void ZeroEntry(struct group *entry, int port, int mode)
 static void updateMacTable_specialtag(struct group *entry, unsigned char new_portmap, int delay_delete)
 {
 	int i;
-	unsigned char lanport[] = def_lanport;
+	unsigned char lanport4[]=LANPORT_RANGE_P4;
+	unsigned char lanport0[]=LANPORT_RANGE_P0;
 
-	for(i=0; i < sizeof(lanport)/sizeof(unsigned char); i++){
+	if (WanPort = 0x1) {
+	    for(i=0; i < sizeof(lanport0)/sizeof(unsigned char); i++){
 		unsigned char old_bit, new_bit;
 
-		old_bit = entry->port_map & (0x1 << lanport[i]);
-		new_bit = new_portmap  & (0x1 << lanport[i]);
+		old_bit = entry->port_map & (0x1 << lanport0[i]);
+		new_bit = new_portmap  & (0x1 << lanport0[i]);
 
 		if(old_bit == new_bit)
 			continue;
-		
+
 		if(old_bit == 0 /* new_bit == 0x1 */){
-			ZeroEntry(entry, lanport[i], DELENTRY);
+			ZeroEntry(entry, lanport0[i], DELENTRY);
 		}else{
-			ZeroEntry(entry, lanport[i], ADDENTRY);
+			ZeroEntry(entry, lanport0[i], ADDENTRY);
 		}
+	    }
+	} else {
+	    for(i=0; i < sizeof(lanport4)/sizeof(unsigned char); i++){
+		unsigned char old_bit, new_bit;
+
+		old_bit = entry->port_map & (0x1 << lanport4[i]);
+		new_bit = new_portmap  & (0x1 << lanport4[i]);
+
+		if(old_bit == new_bit)
+			continue;
+
+		if(old_bit == 0 /* new_bit == 0x1 */){
+			ZeroEntry(entry, lanport4[i], DELENTRY);
+		}else{
+			ZeroEntry(entry, lanport4[i], ADDENTRY);
+		}
+	    }
 	}
 }
 
