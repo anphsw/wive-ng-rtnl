@@ -32,7 +32,7 @@ if [ "$SmbEnabled" = "1" ]; then
 
     #check samba version
     is_smb_v3=`cat /etc/smb.conf.template | grep -c "NTFS"`
-    if [ "$is_smb_v3" ]; then
+    if [ "$is_smb_v3" != "0" ]; then
 	echo "    hosts allow = $lan_ipaddr/$lan_netmask" >> $CONFIG
     fi
 
