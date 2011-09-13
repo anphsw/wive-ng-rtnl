@@ -96,7 +96,7 @@ char* sstrdup(char* str)
  * 2. parse entries
  * 3. save the entries to cache
  */
-void nvram_init(int index)
+int nvram_init(int index)
 {
 	unsigned long from;
 	int i, len;
@@ -110,7 +110,7 @@ void nvram_init(int index)
 	LIBNV_CHECK_INDEX();
 
 	if (fb[index].valid)
-		return;
+		return 0;
 
 #ifdef CONFIG_KERNEL_NVRAM
 	/*
@@ -119,19 +119,32 @@ void nvram_init(int index)
 	 */
 	from = fb[index].flash_offset + sizeof(fb[index].env.crc);
 	len = fb[index].flash_max_len - sizeof(fb[index].env.crc);
+
 	fb[index].env.data = (char *)malloc(len);
+	if ( !fb[index].env.data )
+	{
+		perror("malloc");
+		return -1;
+	}
+
 	nvr.index = index;
 	nvr.value = fb[index].env.data;
+
 	fd = open(NV_DEV, O_RDONLY);
-	if (fd < 0) {
+	if ( fd < 0 )
+	{
 		perror(NV_DEV);
-		goto out;
+		free(fb[index].env.data);
+		return -1;
 	}
-	if (ioctl(fd, RALINK_NVRAM_IOCTL_GETALL, &nvr) < 0) {
+	if ( ioctl(fd, RALINK_NVRAM_IOCTL_GETALL, &nvr) < 0 )
+	{
 		perror("ioctl");
 		close(fd);
-		goto out;
+		free(fb[index].env.data);
+		return -1;
 	}
+
 	close(fd);
 #else
 	//read crc from flash
@@ -143,28 +156,34 @@ void nvram_init(int index)
 	from = from + len;
 	len = fb[index].flash_max_len - len;
 	fb[index].env.data = (char *)malloc(len);
-	if (fb[index].env.data == NULL) {
+	if ( fb[index].env.data == NULL )
+	{
 		LIBNV_ERROR("nvram_init(%d): not enough memory!", index);
-		return;
+		return -1;
 	}
+
 	flash_read(fb[index].env.data, from, len);
 
 	//check crc
 	//printf("crc shall be %08lx\n", crc32(0, (unsigned char *)fb[index].env.data, len));
-	if (crc32(0, (unsigned char *)fb[index].env.data, len) != fb[index].env.crc) {
+	if ( crc32(0, (unsigned char *)fb[index].env.data, len) != fb[index].env.crc )
+	{
 		LIBNV_PRINT("Bad CRC %x, ignore values in flash.\n", fb[index].env.crc);
 		FREE(fb[index].env.data);
 		//empty cache
 		fb[index].valid = 1;
 		fb[index].dirty = 0;
-		return;
+		return -1;
 	}
 #endif
 
 	//parse env to cache
 	p = fb[index].env.data;
-	for (i = 0; i < MAX_CACHE_ENTRY; i++) {
-		if (NULL == (q = strchr(p, '='))) {
+	for ( i = 0; i < MAX_CACHE_ENTRY; i++ )
+	{
+		/* Store var name */
+		if ( NULL == (q = strchr(p, '=')) )
+		{
 			LIBNV_PRINT("parsed failed - cannot find '='\n");
 			break;
 		}
@@ -172,9 +191,12 @@ void nvram_init(int index)
 		fb[index].cache[i].name = strdup(p);
 		//printf("  %d '%s'->", i, p);
 
+		/* Store var value */
 		p = q + 1; //value
-		if (NULL == (q = strchr(p, '\0'))) {
+		if ( NULL == (q = strchr(p, '\0')) )
+		{
 			LIBNV_PRINT("parsed failed - cannot find '\\0'\n");
+			FREE(fb[index].cache[i].name);
 			break;
 		}
 		fb[index].cache[i].value = strdup(p);
@@ -192,8 +214,7 @@ void nvram_init(int index)
 	fb[index].valid = 1;
 	fb[index].dirty = 0;
 
-out:
-	FREE(fb[index].env.data); //free it to save momery
+	return 0;
 }
 
 void nvram_close(int index)
@@ -242,12 +263,15 @@ char *nvram_get(int index, char *name)
 	/* Initial value should be NULL */
 	char *recv = NULL;
 
+#ifndef CONFIG_KERNEL_NVRAM
 	/* Get the fresh value from Kernel NVRAM moduel,
 	 * so there is no need to do nvram_close() and nvram_init() again
 	 */
-#ifndef CONFIG_KERNEL_NVRAM
 	//LIBNV_PRINT("--> nvram_get\n");
-	nvram_init(index);
+	if ( nvram_init(index) == -1 )
+	{
+		return "";
+	}
 #endif
 	recv = nvram_bufget(index, name);
 
@@ -266,15 +290,15 @@ char *nvram_get(int index, char *name)
 int nvram_set(int index, char *name, char *value)
 {
 	int rc;
-	//LIBNV_PRINT("--> nvram_set\n");
-	nvram_init(index);
+
+	if ( nvram_init(index) == -1 )
+		return -1;
+
 	if (nvram_bufset(index, name, value) == -1 ) 
-	{
 		rc = -1;
-		goto out;
-	}
+	else
 	rc = nvram_commit(index);
-out:
+
     nvram_close(index);
     return rc;
 }
@@ -297,13 +321,23 @@ char *nvram_bufget(int index, char *name)
 	nvr.index = index;
 	nvr.name = name;
 	nvr.value = malloc(MAX_VALUE_LEN);
-	fd = open(NV_DEV, O_RDONLY);
-	if (fd < 0) {
-		perror(NV_DEV);
+	if ( !nvr.value )
+	{
+		perror("malloc");
 		return "";
 	}
-	if (ioctl(fd, RALINK_NVRAM_IOCTL_GET, &nvr) < 0) {
+
+	fd = open(NV_DEV, O_RDONLY);
+	if ( fd < 0 )
+	{
+		perror(NV_DEV);
+		free(nvr.value);
+		return "";
+	}
+	if ( ioctl(fd, RALINK_NVRAM_IOCTL_GET, &nvr) < 0 )
+	{
 		perror("ioctl");
+		free(nvr.value);
 		close(fd);
 		return "";
 	}
@@ -630,32 +664,44 @@ int renew_nvram(int mode, char *fname)
 	int found = 0, need_commit = 0;
 
 	fp = fopen(fname, "ro");
-	if (!fp) {
+	if ( !fp )
+	{
 		perror("fopen");
 		return -1;
 	}
 
 	//find "Default" first
-	while (fgets(buf, BUFSZ, fp)) {
+	while ( fgets(buf, BUFSZ, fp) )
+	{
 		if (buf[0] == '\n' || buf[0] == '#')
 			continue;
-		if (!strncmp(buf, "Default\n", 8)) {
+		if ( !strncmp(buf, "Default\n", 8) )
+		{
 			found = 1;
 			break;
 		}
 	}
-	if (!found) {
+	if ( !found )
+	{
 		printf("file format error!\n");
 		fclose(fp);
 		return -1;
 	}
 
-	nvram_init(mode);
-	while (fgets(buf, BUFSZ, fp)) {
+	if ( nvram_init(mode) == -1 )
+	{
+		fclose(fp);
+		return -1;
+	}
+
+	while ( fgets(buf, BUFSZ, fp) )
+	{
 		if (buf[0] == '\n' || buf[0] == '#')
 			continue;
-		if (!(p = strchr(buf, '='))) {
-			if (need_commit) {
+		if ( !(p = strchr(buf, '=')) )
+		{
+			if ( need_commit )
+			{
 				nvram_commit(mode);
 				need_commit = 0;
 			}
@@ -683,22 +729,27 @@ int nvram_show(int mode)
 	int crc;
 	unsigned int len = 0x4000;
 
-	nvram_init(mode);
+	if ( nvram_init(mode) == -1 )
+	{
+		return -1;
+	}
 	len = getNvramBlockSize(mode);
 	buffer = malloc(len);
-	if (!buffer) {
+	if ( !buffer )
+	{
 		fprintf(stderr, "nvram_show: Can not allocate memory!\n");
 		return -1;
 	}
+
 	flash_read(buffer, getNvramOffset(mode), len);
 	memcpy(&crc, buffer, 4);
 
 	fprintf(stderr, "crc = %x\n", crc);
-	p = buffer + 4;
-	while (*p != '\0') {
+	for ( p = buffer + 4; *p; p += strlen(p) + 1 )
+	{
 		printf("%s\n", p);
-		p += strlen(p) + 1;
 	}
+
 	FREE(buffer);
 	nvram_close(mode);
 	return 0;
@@ -710,7 +761,8 @@ int isMacValid(char *str)
 	if(len != 17)
 		return 0;
 
-	for(i=0; i<5; i++){
+	for ( i = 0; i < 5; i++ )
+	{
 		if( (!isxdigit( str[i*3])) || (!isxdigit( str[i*3+1])) || (str[i*3+2] != ':') )
 			return 0;
 	}
@@ -733,7 +785,8 @@ int nvram_load_default(void)
 	renew_nvram(RT2860_NVRAM, "/etc/default/nvram_default");
 
 	//reinit nvram before commit
-	nvram_init(RT2860_NVRAM);
+	if ( nvram_init(RT2860_NVRAM) == -1 )
+		return -1;
 
 	//set default chip type
 #if defined(CONFIG_RALINK_RT3050_1T1R)
@@ -760,10 +813,13 @@ int nvram_load_default(void)
 	    mac_ok=0;
 
 	//all restore ok ?
-	if (mac_ok == 1) {
+	if ( mac_ok == 1 )
+	{
 	    LIBNV_PRINT("Restore checkmac atribute.");
     	    nvram_bufset(RT2860_NVRAM, "CHECKMAC", CHECKMAC);
-	} else {
+	}
+	else
+	{
 	    LIBNV_PRINT("Set checkmac atribute.");
     	    nvram_bufset(RT2860_NVRAM, "CHECKMAC", "YES");
 	}
@@ -784,11 +840,13 @@ int gen_wifi_config(int mode)
 	char temp[2], buf[4];
 
 
-	if (mode == RT2860_NVRAM) {
+	if ( mode == RT2860_NVRAM )
+	{
 	    //Read radio config
 	    flash_read_NicConf(buf);
 
-	    nvram_init(mode);
+		if ( nvram_init(mode) == -1 )
+			return -1;
 
 	    //chiptype
 	    sprintf(temp, "%x", buf[1]);
@@ -813,12 +871,15 @@ int gen_wifi_config(int mode)
 	    nvram_close(mode);
 	}
 
-	nvram_init(mode);
+	if ( nvram_init(mode) == -1 )
+		return -1;
 
 	system("mkdir -p /etc/Wireless/RT2860");
-	if (mode == RT2860_NVRAM) {
+	if ( mode == RT2860_NVRAM )
+	{
 		fp = fopen("/etc/Wireless/RT2860/RT2860.dat", "w+");
-	} else
+	}
+	else
 		return 0;
 
 	fprintf(fp, "#The word of \"Default\" must not be removed\n");

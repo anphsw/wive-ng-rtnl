@@ -98,7 +98,7 @@ typedef struct nvram_ioctl_s {
 #define FLASH_BLOCK_NUM	4
 #endif
 
-void nvram_init(int index);
+int nvram_init(int index);
 void nvram_close(int index);
 
 int nvram_set(int index, char *name, char *value);
