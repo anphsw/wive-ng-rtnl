@@ -38,13 +38,17 @@
 
 #include "igmpproxy.h"
 
-static const char Usage[] = 
+static const char Usage[] =
 "Usage: igmpproxy [-h] [-d] [-v [-v]] <configfile>\n"
-"\n" 
+"\n"
 "   -h   Display this help screen\n"
 "   -d   Run in debug mode. Output all messages on stderr\n"
 "   -s   Eanble managment switch mode RT305x for multicast\n"
+"   --------------igmp_snooping_config------------------\n"
 "   -w   Wan at port 0/4. Only in switch management mode\n"
+"   -f	 Force igmp_snooping enable (default auto)	\n"
+"   -n	 Force igmp_snooping disable (default auto)	\n"
+"   ----------------------------------------------------\n"
 "   -v   Be verbose. Give twice to see even debug messages.\n"
 "\n"
 PACKAGE_STRING "\n"
@@ -77,12 +81,12 @@ extern void rt3052_fini(void);
 */
 int main( int ArgCn, char *ArgVc[] ) {
 
-    int i, c, sw = 0;
+    int c, sw = 0;
     int force_snooping = -1;
     WanPort = 0x1;
 
     // Parse the commandline options and setup basic settings..
-    for (c; (c = getopt(ArgCn, ArgVc, "vdswhf")) != -1;) {
+    for (c; (c = getopt(ArgCn, ArgVc, "vdswhfn")) != -1;) {
         switch (c) {
         case 'd':
             Log2Stderr = true;
@@ -101,12 +105,10 @@ int main( int ArgCn, char *ArgVc[] ) {
             exit(0);
             break;
         case 'f':
-	    if (i + 1 < ArgCn && ArgVc[i+1][0] != '-') {
-		force_snooping = atoi(ArgVc[i+1]);
-		i++;
-	    } else {
-		my_log(LOG_ERR, 0, "Missing config file path after -f option.");
-	    }
+	    force_snooping = 1;
+            break;
+        case 'n':
+	    force_snooping = 0;
             break;
         default:
             exit(1);
@@ -138,24 +140,26 @@ int main( int ArgCn, char *ArgVc[] ) {
             my_log(LOG_ERR, 0, "Unable to load config file...");
             break;
         }
-    
+
         // Initializes the deamon.
         if ( !igmpProxyInit() ) {
             my_log(LOG_ERR, 0, "Unable to initialize IGMPproxy.");
             break;
         }
-
 #ifdef RT3052_SUPPORT
 	if (sw) {
-	    if(force_snooping == -1)
-		rt3052_init(0);		/* automatic (default) */
-	    else if(force_snooping == 0)
+	    if(force_snooping == 0) {
+        	my_log(LOG_INFO, 0, "Disable igmp_snooping.");
 		rt3052_init(1024);	/* disable snooping */
-	    else
+	    } else if(force_snooping == 1) {
+        	my_log(LOG_INFO, 0, "Force igmp_snooping enabled.");
 		rt3052_init(1);		/* enable snooping */
+	    } else {
+        	my_log(LOG_INFO, 0, "Enable automatic igmp_snooping.");
+		rt3052_init(0);		/* automatic (default) */
+	    }
 	}
 #endif
-
 	if ( !Log2Stderr ) {
 
 	    // Only daemon goes past this line...
