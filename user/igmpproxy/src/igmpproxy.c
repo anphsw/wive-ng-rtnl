@@ -317,7 +317,7 @@ void igmpProxyRun() {
 			force_snooping = atoi(ArgVc[i+1]);
 			i++;
 		} else{
-                    log(LOG_ERR, 0, "Missing config file path after -f option.");
+                    my_log(LOG_ERR, 0, "Missing config file path after -f option.");
 		}
                 break;
             }
