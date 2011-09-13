@@ -28,8 +28,13 @@ if [ "$SmbEnabled" = "1" ]; then
     echo "    server string = $SmbString" >> $CONFIG
     echo "    os level = $SmbOsLevel" >> $CONFIG
     echo "    force user = $Login" >> $CONFIG
-    echo "    hosts allow = $lan_ipaddr/$lan_netmask" >> $CONFIG
     echo "    time server = $ntp_support" >> $CONFIG
+
+    #check samba version
+    is_smb_v3=`cat /etc/smb.conf.template | grep -c "NTFS"`
+    if [ "$is_smb_v3" ]; then
+	echo "    hosts allow = $lan_ipaddr/$lan_netmask" >> $CONFIG
+    fi
 
     #add template to config
     cat /etc/smb.conf.template >> $CONFIG
