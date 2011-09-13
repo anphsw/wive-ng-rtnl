@@ -67,7 +67,7 @@ static int sighandled = 0;
 unsigned         upStreamVif;
 
 #ifdef RT3052_SUPPORT
-extern void rt3052_init(void);
+extern void rt3052_init(int sn);
 extern void rt3052_fini(void);
 #endif
 /**
@@ -77,10 +77,10 @@ extern void rt3052_fini(void);
 */
 int main( int ArgCn, char *ArgVc[] ) {
 
-    int c, sw = 0;
+    int i, c, sw = 0;
     int force_snooping = -1;
     WanPort = 0x1;
-    def_lanport[] = {1,2,3,4};
+    def_lanport = {1,2,3,4};
 
     // Parse the commandline options and setup basic settings..
     for (c; (c = getopt(ArgCn, ArgVc, "vdswhf")) != -1;) {
@@ -93,7 +93,7 @@ int main( int ArgCn, char *ArgVc[] ) {
             break;
         case 'w':
 	    WanPort = 0x10;
-	    def_lanport[] = {0,1,2,3};
+	    def_lanport = {0,1,2,3};
             break;
         case 'v':
             LogLevel++;
