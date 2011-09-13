@@ -10,6 +10,26 @@ IGMP_PROXY_OBJ+= rt3052.o rt3052_reg.o
 CFLAGS+= -DRT3052_SUPPORT
 endif
 
+ifeq ("$(CONFIG_PRODUCT)", "RT3052")
+IGMP_PROXY_OBJ+= rt3052.o rt3052_reg.o
+CFLAGS= -I$(ROOTDIR)/$(LINUXDIR)/include -DRT3052_SUPPORT
+endif
+
+ifeq ("$(CONFIG_PRODUCT)", "RT3352")
+IGMP_PROXY_OBJ+= rt3052.o rt3052_reg.o
+CFLAGS= -I$(ROOTDIR)/$(LINUXDIR)/include -DRT3052_SUPPORT
+endif
+
+ifeq ("$(CONFIG_PRODUCT)", "RT5350")
+IGMP_PROXY_OBJ+= rt3052.o rt3052_reg.o
+CFLAGS= -I$(ROOTDIR)/$(LINUXDIR)/include -DRT3052_SUPPORT
+endif
+
+ifeq ("$(CONFIG_PRODUCT)", "RT6855")
+IGMP_PROXY_OBJ+= rt3052.o rt3052_reg.o
+CFLAGS= -I$(ROOTDIR)/$(LINUXDIR)/include -DRT3052_SUPPORT
+endif
+
 all: $(EXEC)
 
 igmpproxy: build.h $(IGMP_PROXY_OBJ)
