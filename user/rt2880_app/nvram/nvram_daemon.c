@@ -48,8 +48,8 @@ int initGpio(void)
 
 	info.pid = getpid();
 
-	//RT2883, RT3052 use gpio 10 for load-to-default
-#if defined CONFIG_RALINK_I2S || defined CONFIG_RALINK_I2S_MODULE	
+	//RT2883, RT3052, RT3352, RT6855 use gpio 10 for load-to-default
+#if defined CONFIG_RALINK_I2S || defined CONFIG_RALINK_I2S_MODULE
 	info.irq = 43;
 #else
 	info.irq = 10;

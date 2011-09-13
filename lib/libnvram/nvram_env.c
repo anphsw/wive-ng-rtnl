@@ -783,31 +783,36 @@ int gen_wifi_config(int mode)
 	char tx_rate[16], wmm_enable[16];
 	char temp[2], buf[4];
 
-	//Read radio config
-	flash_read_NicConf(buf);
 
-	nvram_init(mode);
-	//chiptype
-	sprintf(temp, "%x", buf[1]);
-	if (!atoi(temp))
-	    sprintf(temp, "%x", "5");
-	nvram_bufset(mode, "RFICType", temp);
+	if (mode == RT2860_NVRAM) {
+	    //Read radio config
+	    flash_read_NicConf(buf);
 
-	//TxStream for select HT mode
-	sprintf(temp, "%x", buf[0]&0xf0>>4);
-	if (atoi(temp) < atoi(nvram_bufget(mode, "HT_TxStream")))
+	    nvram_init(mode);
+
+	    //chiptype
+	    sprintf(temp, "%x", buf[1]);
+	    if (!atoi(temp))
+		sprintf(temp, "%x", "5");
+	    nvram_bufset(mode, "RFICType", temp);
+
+	    //TxStream for select HT mode
+	    sprintf(temp, "%x", buf[0]&0xf0>>4);
+	    if (atoi(temp) < atoi(nvram_bufget(mode, "HT_TxStream")))
 		nvram_bufset(mode, "HT_TxStream", temp);
 
-	//RxStream for select HT mode
-	nvram_bufset(mode, "TXPath", temp);
-	sprintf(temp, "%x", buf[0]&0x0f);
-	if (atoi(temp) < atoi(nvram_bufget(mode, "HT_RxStream")))
+	    //RxStream for select HT mode
+	    nvram_bufset(mode, "TXPath", temp);
+	    sprintf(temp, "%x", buf[0]&0x0f);
+	    if (atoi(temp) < atoi(nvram_bufget(mode, "HT_RxStream")))
 		nvram_bufset(mode, "HT_RxStream", temp);
-	nvram_bufset(mode, "RXPath", temp);
-	nvram_commit(mode);
+	    nvram_bufset(mode, "RXPath", temp);
+	    nvram_commit(mode);
 
-	//reinit nvram
-	nvram_close(mode);
+	    //reinit nvram
+	    nvram_close(mode);
+	}
+
 	nvram_init(mode);
 
 	system("mkdir -p /etc/Wireless/RT2860");
@@ -843,7 +848,7 @@ int gen_wifi_config(int mode)
 		FPRINT_STR(SSID6);
 		FPRINT_STR(SSID7);
 		FPRINT_STR(SSID8);
-#if (defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT3883)) && defined (CONFIG_16MBSSID_MODE)
+#if (defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT6855)) && defined (CONFIG_16MBSSID_MODE)
 		FPRINT_STR(SSID9);
 		FPRINT_STR(SSID10);
 		FPRINT_STR(SSID11);
@@ -978,7 +983,7 @@ int gen_wifi_config(int mode)
 		FPRINT_STR(WapiPsk6);
 		FPRINT_STR(WapiPsk7);
 		FPRINT_STR(WapiPsk8);
-#if (defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT3883)) && defined (CONFIG_16MBSSID_MODE)
+#if (defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT6855)) && defined (CONFIG_16MBSSID_MODE)
 		FPRINT_STR(WapiPsk9);
 		FPRINT_STR(WapiPsk10);
 		FPRINT_STR(WapiPsk11);
@@ -1015,7 +1020,7 @@ int gen_wifi_config(int mode)
 		FPRINT_STR(WPAPSK6);
 		FPRINT_STR(WPAPSK7);
 		FPRINT_STR(WPAPSK8);
-#if (defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT3883)) && defined (CONFIG_16MBSSID_MODE)
+#if (defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT6855)) && defined (CONFIG_16MBSSID_MODE)
 		FPRINT_STR(WPAPSK9);
 		FPRINT_STR(WPAPSK10);
 		FPRINT_STR(WPAPSK11);
@@ -1037,7 +1042,7 @@ int gen_wifi_config(int mode)
 		FPRINT_STR(Key1Str6);
 		FPRINT_STR(Key1Str7);
 		FPRINT_STR(Key1Str8);
-#if (defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT3883)) && defined (CONFIG_16MBSSID_MODE)
+#if (defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT6855)) && defined (CONFIG_16MBSSID_MODE)
 		FPRINT_STR(Key1Str9);
 		FPRINT_STR(Key1Str10);
 		FPRINT_STR(Key1Str11);
@@ -1057,7 +1062,7 @@ int gen_wifi_config(int mode)
 		FPRINT_STR(Key2Str6);
 		FPRINT_STR(Key2Str7);
 		FPRINT_STR(Key2Str8);
-#if (defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT3883)) && defined (CONFIG_16MBSSID_MODE)
+#if (defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT6855)) && defined (CONFIG_16MBSSID_MODE)
 		FPRINT_STR(Key2Str9);
 		FPRINT_STR(Key2Str10);
 		FPRINT_STR(Key2Str11);
@@ -1076,7 +1081,7 @@ int gen_wifi_config(int mode)
 		FPRINT_STR(Key3Str6);
 		FPRINT_STR(Key3Str7);
 		FPRINT_STR(Key3Str8);
-#if (defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT3883)) && defined (CONFIG_16MBSSID_MODE)
+#if (defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT6855)) && defined (CONFIG_16MBSSID_MODE)
 		FPRINT_STR(Key3Str9);
 		FPRINT_STR(Key3Str10);
 		FPRINT_STR(Key3Str11);
@@ -1095,7 +1100,7 @@ int gen_wifi_config(int mode)
 		FPRINT_STR(Key4Str6);
 		FPRINT_STR(Key4Str7);
 		FPRINT_STR(Key4Str8);
-#if (defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT3883)) && defined (CONFIG_16MBSSID_MODE)
+#if (defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT6855)) && defined (CONFIG_16MBSSID_MODE)
 		FPRINT_STR(Key4Str9);
 		FPRINT_STR(Key4Str10);
 		FPRINT_STR(Key4Str11);
@@ -1160,7 +1165,7 @@ int gen_wifi_config(int mode)
 		FPRINT_STR(AccessControlList6);
 		FPRINT_NUM(AccessPolicy7);
 		FPRINT_STR(AccessControlList7);
-#if (defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT3883)) && defined (CONFIG_16MBSSID_MODE)
+#if (defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT6855)) && defined (CONFIG_16MBSSID_MODE)
 		FPRINT_NUM(AccessPolicy8);
 		FPRINT_STR(AccessControlList8);
 		FPRINT_NUM(AccessPolicy9);
@@ -1200,7 +1205,7 @@ int gen_wifi_config(int mode)
 		FPRINT_STR(RADIUS_Key6);
 		FPRINT_STR(RADIUS_Key7);
 		FPRINT_STR(RADIUS_Key8);
-#if (defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT3883)) && defined (CONFIG_16MBSSID_MODE)
+#if (defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT6855)) && defined (CONFIG_16MBSSID_MODE)
 		FPRINT_STR(RADIUS_Key9);
 		FPRINT_STR(RADIUS_Key10);
 		FPRINT_STR(RADIUS_Key11);

@@ -663,6 +663,7 @@
 44) Add init script for transmission daemon.<br>
 45) Libcurl update to 7.21.7 version.<br>
 46) Small kernel code arp fixups.<br>
+47) Update ralink apps.<br>
 
 suspended) Add skb reuse support.<br>
 suspended) Nvram move to kernel mode. This fix some memleaks and concurent acess to mtd issue.<br>
