@@ -726,9 +726,10 @@ void rt3052_fini(void)
 	if(esw_fd >= 0)
 		close(esw_fd);
 
-#ifdef WIFI_IGMPSNOOP_SUPPORT
-	system("iwpriv ra0 set IgmpSnEnable=0");
-#endif
+//no need disable wifi snoop
+//#ifdef WIFI_IGMPSNOOP_SUPPORT
+//	system("iwpriv ra0 set IgmpSnEnable=0");
+//#endif
 
 }
 
