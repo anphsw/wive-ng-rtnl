@@ -49,9 +49,9 @@ if [ "$CONFIG_RT2860V2_AP_IGMP_SNOOP" != "" ]; then
     	    iwpriv ra0 set  McastMcs="$McastMcs"
 	fi
     fi
-    m2uenabled=`nvram_get 2860 M2UEnabled`
-    if [ "$m2uenabled" != "" ]; then
-	iwpriv ra0 set IgmpSnEnable="$m2uenabled"
+    M2UEnabled=`nvram_get 2860 M2UEnabled`
+    if [ "$M2UEnabled" != "" ]; then
+	iwpriv ra0 set IgmpSnEnable="$M2UEnabled"
     fi
 fi
 

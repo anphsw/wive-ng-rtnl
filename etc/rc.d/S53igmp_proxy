@@ -35,7 +35,12 @@ start() {
 	echo 1 > /proc/sys/net/ipv4/conf/default/mc_forwarding
 	ip route replace 224.0.0.0/4 dev $wan_if
 	if [ "$igmpSnoopMode" != "f" ] && [ "$igmpSnoopMode" != "n" ]; then
+	    #if snoop mode unknown = auto
 	    igmpSnoopMode=""
+	fi
+	if [ "$M2UEnabled" = "1" ]; then
+	    #if wifi snoop enabled = force
+	    igmpSnoopMode="f"
 	fi
 	if [ "$wan_port" = "4" ]; then
     	    igmpproxy -s$igmpSnoopMode /etc/igmpproxy.conf &
@@ -60,6 +65,7 @@ stop() {
 get_param() {
     igmpEnabled=`nvram_get 2860 igmpEnabled`
     igmpSnoopMode=`nvram_get 2860 igmpSnoopMode`
+    M2UEnabled=`nvram_get 2860 M2UEnabled`
     wan_port=`nvram_get 2860 wan_port`
 }
 
