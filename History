@@ -667,6 +667,7 @@
 48) Support new igmp snooping version in igmpproxy.<br>
 49) Add variable igmpSnoopMode. Values=n/f or NULL (default NULL=auto, n=none/disabled,f=force enabled. Need add webui).<br>
 50) Fix some leasks and more safe libnvram.<br>
+51) Igmpproxy code sync with upstream git.<br>
 
 suspended) Add skb reuse support.<br>
 suspended) Nvram move to kernel mode. This fix some memleaks and concurent acess to mtd issue.<br>

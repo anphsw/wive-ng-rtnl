@@ -213,8 +213,10 @@ void igmpCreateVIFs() {
                     } else  my_log(LOG_DEBUG, 0, "Vif #%d was already upstream. Cannot set VIF #%d as upstream as well.", upStreamVif, Ix);
                 }
     	     }
-        addVIF( Dp );
-        vifcount++;
+	if (Dp->state != IF_STATE_DISABLED) {
+    	    addVIF( Dp );
+    	    vifcount++;
+	}
      }
     // If there is only one VIF, or no defined upstream VIF, we send an error.
     if(vifcount < 2 || upStreamVif < 0)
