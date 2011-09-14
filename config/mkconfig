@@ -47,7 +47,7 @@ echo "           8M/32M(AP+STA+NAS)       CONFIG_DEFSETTING_8M32M "
 echo "	  \"" 
 echo "fi"
 echo "endmenu"
-echo "define_string CONFIG_VENDOR=Ralink"
+echo "define_string CONFIG_VENDOR \"Ralink\""
 
 #############################################################################
 
