@@ -53,14 +53,14 @@ echo "> Building for $PRODUCTID$SAVE_MEM version $KERNEL_VER <"
 echo "_________________________________________________________"
 
 
-echo "" > sdk_version.h
-echo "#define RT288X_SDK_VERSION \"$DEVNAME-$VERSIONPKG\"" >> sdk_version.h
-echo "" >> sdk_version.h
-echo "" > version
-echo "RT288X_SDK_VERSION = \"$VERSIONPKG\"" >> version
-echo "DEVNAME = \"$DEVNAME\"" >> version
-echo "VERSIONPKG = \"$VERSIONPKG\"" >> version
-echo "" >> version
+echo ""								>  $ROOTDIR/sdk_version.h
+echo "#define RT288X_SDK_VERSION \"$DEVNAME-$VERSIONPKG\""	>> $ROOTDIR/sdk_version.h
+echo ""								>> $ROOTDIR/sdk_version.h
+echo ""								>  $ROOTDIR/version
+echo "RT288X_SDK_VERSION = \"$VERSIONPKG\""			>> $ROOTDIR/version
+echo "DEVNAME = \"$DEVNAME\""					>> $ROOTDIR/version
+echo "VERSIONPKG = \"$VERSIONPKG\""				>> $ROOTDIR/version
+echo ""								>> $ROOTDIR/version
 
 #for clear all binary
 if [ "$FULLREBUILD" = "YES" ] ; then
@@ -68,40 +68,40 @@ echo -------------------------------FULL-CLEAR-------------------------------
     ./clear
 fi
 
-rm -rfv romfs/*
-rm -rfv images/*
-ln -sf ./linux-2.6.21.x ./linux
+rm -rfv $ROOTDIR/romfs/*
+rm -rfv $ROOTDIR/images/*
+ln -sf  $ROOTDIR/linux-2.6.21.x $ROOTDIR/linux
 
 echo --------------------------------COPY-CONFIG-----------------------------
 ##############################FOR-ALL-DEVICES#########################
-cp -fv ./configs/all/config-cpp		./uClibc++/.config
-cp -fv ./configs/all/config-all		.config
+cp -fv $ROOTDIR/configs/all/config-cpp		$ROOTDIR/uClibc++/.config
+cp -fv $ROOTDIR/configs/all/config-all		$ROOTDIR/.config
 #######################################################################
-ln -fs vendors/Ralink/RT3052/config.arch config.arch
-ln -fs config/autoconf.h		 autoconf.h
+ln -fs $ROOTDIR/vendors/Ralink/RT3052/config.arch config.arch
+ln -fs $ROOTDIR/config/autoconf.h		$ROOTDIR/autoconf.h
 #######################################################################
 
 #################################PER-DEVICES###########################
 if [ "$MODE" = "1T1R" ] ; then
-    cp -fv ./configs/kernel/config-kernel-1t1r$SAVE_MEM			./linux/.config
-    cp -fv ./configs/all/config-config					./config/.config
-    cp -fv ./configs/all/config-busybox					./user/busybox/.config
-    cp -fv ./configs/all/config-lib					./lib/.config
+    cp -fv $ROOTDIR/configs/kernel/config-kernel-1t1r$SAVE_MEM		$ROOTDIR/linux/.config
+    cp -fv $ROOTDIR/configs/all/config-config				$ROOTDIR/configs/.config
+    cp -fv $ROOTDIR/configs/all/config-busybox				$ROOTDIR/user/busybox/.config
+    cp -fv $ROOTDIR/configs/all/config-lib				$ROOTDIR/lib/.config
 elif [ "$MODE" = "2T2R" ] ; then
-    cp -fv ./configs/kernel/config-kernel-2t2r$SAVE_MEM			./linux/.config
-    cp -fv ./configs/all/config-busybox					./user/busybox/.config
-    cp -fv ./configs/all/config-config					./config/.config
-    cp -fv ./configs/all/config-lib					./lib/.config
+    cp -fv $ROOTDIR/configs/kernel/config-kernel-2t2r$SAVE_MEM		$ROOTDIR/linux/.config
+    cp -fv $ROOTDIR/configs/all/config-busybox				$ROOTDIR/user/busybox/.config
+    cp -fv $ROOTDIR/configs/all/config-config				$ROOTDIR/configs/.config
+    cp -fv $ROOTDIR/configs/all/config-lib				$ROOTDIR/lib/.config
 elif [ "$MODE" = "2T2R-USB" ] ; then
-    cp -fv ./configs/kernel/config-kernel-2t2r-USB-8M			./linux/.config
-    cp -fv ./configs/all/config-busybox-USB-8M				./user/busybox/.config
-    cp -fv ./configs/all/config-config-USB-8M				./config/.config
-    cp -fv ./configs/all/config-lib-USB-8M				./lib/.config
+    cp -fv $ROOTDIR/configs/kernel/config-kernel-2t2r-USB-8M		$ROOTDIR/linux/.config
+    cp -fv $ROOTDIR/configs/all/config-busybox-USB-8M			$ROOTDIR/user/busybox/.config
+    cp -fv $ROOTDIR/configs/all/config-config-USB-8M			$ROOTDIR/configs/.config
+    cp -fv $ROOTDIR/configs/all/config-lib-USB-8M			$ROOTDIR/lib/.config
 elif [ "$MODE" = "2T2R-USB-IPV6" ] ; then
-    cp -fv ./configs/kernel/config-kernel-2t2r-USB-IPV6-8M		./linux/.config
-    cp -fv ./configs/all/config-busybox-USB-IPV6-8M			./user/busybox/.config
-    cp -fv ./configs/all/config-config-USB-IPV6-8M			./config/.config
-    cp -fv ./configs/all/config-lib-USB-IPV6-8M				./lib/.config
+    cp -fv $ROOTDIR/configs/kernel/config-kernel-2t2r-USB-IPV6-8M	$ROOTDIR/linux/.config
+    cp -fv $ROOTDIR/configs/all/config-busybox-USB-IPV6-8M		$ROOTDIR/user/busybox/.config
+    cp -fv $ROOTDIR/configs/all/config-config-USB-IPV6-8M		$ROOTDIR/configs/.config
+    cp -fv $ROOTDIR/configs/all/config-lib-USB-IPV6-8M			$ROOTDIR/lib/.config
 else
     echo "Config files not found."
     exit 1
