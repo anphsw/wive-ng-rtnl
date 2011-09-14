@@ -9,6 +9,7 @@ rm -rf $ROOTDIR/images
 if [ "$1" != "RELEASE" ]; then
     rm -rf $ROOTDIR/releases
 fi
+touch $ROOTDIR/config/autoconf.h
 make clean
 echo "--------------MRPROPER---------------"
 make mrproper

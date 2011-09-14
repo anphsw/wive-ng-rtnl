@@ -84,23 +84,23 @@ ln -fs $ROOTDIR/config/autoconf.h		$ROOTDIR/autoconf.h
 #################################PER-DEVICES###########################
 if [ "$MODE" = "1T1R" ] ; then
     cp -fv $ROOTDIR/configs/kernel/config-kernel-1t1r$SAVE_MEM		$ROOTDIR/linux/.config
-    cp -fv $ROOTDIR/configs/all/config-config				$ROOTDIR/configs/.config
+    cp -fv $ROOTDIR/configs/all/config-config				$ROOTDIR/config/.config
     cp -fv $ROOTDIR/configs/all/config-busybox				$ROOTDIR/user/busybox/.config
     cp -fv $ROOTDIR/configs/all/config-lib				$ROOTDIR/lib/.config
 elif [ "$MODE" = "2T2R" ] ; then
     cp -fv $ROOTDIR/configs/kernel/config-kernel-2t2r$SAVE_MEM		$ROOTDIR/linux/.config
     cp -fv $ROOTDIR/configs/all/config-busybox				$ROOTDIR/user/busybox/.config
-    cp -fv $ROOTDIR/configs/all/config-config				$ROOTDIR/configs/.config
+    cp -fv $ROOTDIR/configs/all/config-config				$ROOTDIR/config/.config
     cp -fv $ROOTDIR/configs/all/config-lib				$ROOTDIR/lib/.config
 elif [ "$MODE" = "2T2R-USB" ] ; then
     cp -fv $ROOTDIR/configs/kernel/config-kernel-2t2r-USB-8M		$ROOTDIR/linux/.config
     cp -fv $ROOTDIR/configs/all/config-busybox-USB-8M			$ROOTDIR/user/busybox/.config
-    cp -fv $ROOTDIR/configs/all/config-config-USB-8M			$ROOTDIR/configs/.config
+    cp -fv $ROOTDIR/configs/all/config-config-USB-8M			$ROOTDIR/config/.config
     cp -fv $ROOTDIR/configs/all/config-lib-USB-8M			$ROOTDIR/lib/.config
 elif [ "$MODE" = "2T2R-USB-IPV6" ] ; then
     cp -fv $ROOTDIR/configs/kernel/config-kernel-2t2r-USB-IPV6-8M	$ROOTDIR/linux/.config
     cp -fv $ROOTDIR/configs/all/config-busybox-USB-IPV6-8M		$ROOTDIR/user/busybox/.config
-    cp -fv $ROOTDIR/configs/all/config-config-USB-IPV6-8M		$ROOTDIR/configs/.config
+    cp -fv $ROOTDIR/configs/all/config-config-USB-IPV6-8M		$ROOTDIR/config/.config
     cp -fv $ROOTDIR/configs/all/config-lib-USB-IPV6-8M			$ROOTDIR/lib/.config
 else
     echo "Config files not found."
