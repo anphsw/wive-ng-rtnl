@@ -55,6 +55,9 @@ PACKAGE_STRING "\n"
 ;
 
 // Local function Prototypes
+#ifdef RT3052_SUPPORT
+void sigUSR1Handler(int signo);
+#endif
 static void signalHandler(int);
 int     igmpProxyInit();
 void    igmpProxyCleanUp();
@@ -238,8 +241,6 @@ int igmpProxyInit() {
     sigaction(SIGINT, &sa, NULL);
 
 #ifdef RT3052_SUPPORT
-int sigUSR1Handler(int signo);
-
     sa.sa_handler = sigUSR1Handler;
     sa.sa_flags = 0;    /* Interrupt system calls */
     sigemptyset(&sa.sa_mask);
