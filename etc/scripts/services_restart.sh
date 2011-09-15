@@ -46,8 +46,6 @@ fi
 if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then 
     service parprouted restart
     service lld2d restart
-    service igmp_proxy restart
-    service udpxy restart
     service samba restart
     if [ "$MODE" != "misc" ]; then 
 	service dhcpd restart
@@ -56,6 +54,8 @@ if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then
     fi
     $LOG "Fastpath, passthrouth, stp and othes mode set..."
     service kext start
+    service udpxy restart
+    service igmp_proxy restart
 fi
 
 ##########################################################
