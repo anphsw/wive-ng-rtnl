@@ -44,6 +44,7 @@ fi
 # 2) if call not from dhcp script			 #
 ##########################################################
 if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then 
+    service kext start
     service parprouted restart
     service lld2d restart
     service samba restart
@@ -52,8 +53,6 @@ if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then
 	service pppoe-relay restart
 	service chillispot restart
     fi
-    $LOG "Fastpath, passthrouth, stp and othes mode set..."
-    service kext start
     service udpxy restart
     service igmp_proxy restart
 fi
