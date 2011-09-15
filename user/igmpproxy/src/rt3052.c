@@ -43,7 +43,9 @@
 
 #include "defs.h"
 
+#if defined(WIFI_IGMPSNOOP_SUPPORT) || defined(SEARCH_CLIENT_IN_WIFI_MACTABLE)
 #include <linux/wireless.h>
+#endif
 
 #define MAX_MULTICASTS_GROUP		256
 #define INTERNAL_SYNC_TIMEOUT		10		// secs
