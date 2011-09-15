@@ -1103,6 +1103,7 @@ typedef struct _RT_802_11_MAC_ENTRY {
 #endif
 } RT_802_11_MAC_ENTRY;
 
+#ifdef SEARCH_CLIENT_IN_WIFI_MACTABLE 
 #ifdef CONFIG_RT2860V2_AP_WAPI
 #define MAX_NUMBER_OF_MAC               96
 #else
@@ -1154,6 +1155,7 @@ int WiFiSTALookUPByMac(unsigned int mac1, unsigned int mac2)
 	}
 	return 0;
 }
+#endif
 
 static int portLookUpByMac(char *mac)
 {
