@@ -86,7 +86,7 @@ static int getDhcpCliList(int eid, webs_t wp, int argc, char_t **argv)
 	FILE *fp;
 	struct dyn_lease lease;
 
-	int i;
+	int i, rownum = 0;
 	struct in_addr addr;
 	int64_t written_at, curr, expired_abs;
 
@@ -104,12 +104,11 @@ static int getDhcpCliList(int eid, webs_t wp, int argc, char_t **argv)
 	/* Read header of dhcpleases */
 	if (fread(&written_at, 1, sizeof(written_at), fp) != sizeof(written_at))
 		return 0;
+
 	written_at = ntoh64(written_at);
 	curr = time(NULL);
 	if (curr < written_at)
 		written_at = curr; /* lease file from future! :) */
-
-	int rownum = 0;
 
 	/* Output leases file */
 	while (fread(&lease, 1, sizeof(lease), fp) == sizeof(lease))
