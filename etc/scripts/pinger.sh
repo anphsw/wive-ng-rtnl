@@ -38,7 +38,7 @@ while "true"; do
     fi
     ###################################UPLINK##############################################################################
     sleep $ping_check_interval
-    cat /etc/resolv.conf | grep -v "domain" | awk {' print $2 '} | uniq | while read test_ip; do
+    grep -v "domain" < /etc/resolv.conf | awk {' print $2 '} | uniq | while read test_ip; do
         ping -4 -s8 -c1 -w30 -q "$test_ip" > /dev/null 2>&1
     done
 

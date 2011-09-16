@@ -109,7 +109,7 @@ get_param() {
 
     interfaces="lo 127.0.0.1/255.0.0.0 $lan_if $lan_ipaddr/$lan_netmask"
 
-    is_smb_v3=`cat $TEMPLATE | grep -c "NTFS"`
+    is_smb_v3=`grep -c "NTFS" < $TEMPLATE`
 }
 
 case "$1" in

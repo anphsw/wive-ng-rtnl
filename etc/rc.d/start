@@ -104,7 +104,7 @@ $LOG "Umount /tmp/rootfs"
 umount /tmp/rootfs
 rm -rf /tmp/rootfs
 
-if [ `cat /proc/meminfo | awk '/MemTotal:/ {print ($2>16384)}'` -eq 1 ]; then
+if [ `awk '/MemTotal:/ {print ($2>16384)}' < /proc/meminfo` -eq 1 ]; then
 #>16mb
     touch /tmp/is_32ram_dev
 else
