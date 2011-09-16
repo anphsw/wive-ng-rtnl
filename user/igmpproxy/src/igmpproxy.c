@@ -44,7 +44,6 @@ static const char Usage[] =
 "   -h   Display this help screen\n"
 "   -d   Run in debug mode. Output all messages on stderr\n"
 "   --------------igmp_snooping_config------------------\n"
-"   -s   Eanble managment switch mode RT305x for multicast\n"
 "   -w   Wan at port 0/4. Only in switch management mode\n"
 "   -f	 Force igmp_snooping enable (default auto)	\n"
 "   -n	 Force igmp_snooping disable (default auto)	\n"
@@ -91,13 +90,10 @@ int main( int ArgCn, char *ArgVc[] ) {
     WanPort = 0x1;
 
     // Parse the commandline options and setup basic settings..
-    for (c; (c = getopt(ArgCn, ArgVc, "dswfnvh")) != -1;) {
+    for (c; (c = getopt(ArgCn, ArgVc, "dwfnvh")) != -1;) {
         switch (c) {
         case 'd':
             Log2Stderr = true;
-            break;
-        case 's':
-	    sw = 1;
             break;
         case 'w':
 	    sw = 1;

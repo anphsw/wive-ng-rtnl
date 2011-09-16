@@ -48,11 +48,17 @@ start() {
 	    igmpSnoopMode="f"
 	fi
 	#start igmpproxy in switch managment mode
-	if [ "$wan_port" = "4" ]; then
-    	    igmpproxy -s$igmpSnoopMode /etc/igmpproxy.conf &
-	else
-    	    igmpproxy -sw$igmpSnoopMode /etc/igmpproxy.conf &
+	if [ "$wan_port" = "0" ]; then
+	    $igmpPort="w"
 	fi
+	if [ "$igmpPort" != "" ] || [ "$igmpSnoopMode" != "" ]; then
+	    OPTS="-$igmpPort$igmpSnoopMode"
+	else
+	    OPTS=""
+	fi
+
+	#start igmpproxy in switch managment mode
+    	igmpproxy $OPTS /etc/igmpproxy.conf &
     else
 	echo 0 > /proc/sys/net/ipv4/conf/all/mc_forwarding
 	echo 0 > /proc/sys/net/ipv4/conf/default/mc_forwarding
