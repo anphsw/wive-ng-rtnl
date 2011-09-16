@@ -95,9 +95,8 @@
 #define LANPORT_RANGE_P4        {0,1,2,3}
 #define OTHER_INTERFACE		7		/* port 7  (wifi)  */
 
+extern uint32_t WanPort;
 
-/* wan port select */
-uint32_t WanPort = 0x1;
 static int arpLookUp(char *ip, char *arp);
 
 typedef struct rt3052_esw_reg {
@@ -881,7 +880,7 @@ static void ZeroEntriesBarrier(struct group *entry, int mode)
 	value = strtoul(tmpstr, NULL, 16);
 	reg_write(REG_ESW_WT_MAC_AD1, value);
 
-	if (WanPort = 0x1) {
+	if (WanPort == 0x1) {
 	    for(i=0; i < sizeof(lanport0)/sizeof(unsigned char); i++){
 		value = 0x1;			//w_mac_cmd
 		if(mode == ADDENTRY)
@@ -937,7 +936,7 @@ static void updateMacTable_specialtag(struct group *entry, unsigned char new_por
 	unsigned char lanport4[]=LANPORT_RANGE_P4;
 	unsigned char lanport0[]=LANPORT_RANGE_P0;
 
-	if (WanPort = 0x1) {
+	if (WanPort == 0x1) {
 	    for(i=0; i < sizeof(lanport0)/sizeof(unsigned char); i++){
 		unsigned char old_bit, new_bit;
 

@@ -76,6 +76,8 @@ unsigned         upStreamVif;
 #ifdef RT3052_SUPPORT
 extern void rt3052_init(int sn);
 extern void rt3052_fini(void);
+/* wan port select */
+uint32_t WanPort = 0x1;
 #endif
 /**
 *   Program main method. Is invoked when the program is started
