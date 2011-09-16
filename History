@@ -640,35 +640,34 @@
 20) watchdog drivers up to 3.6.0.0 SDK.<br>
 21) 8021q ralink tso support.<br>
 22) Prevent IGMP report packet flooding to all NICs.<br>
-23) Add 6rd support.<br>
-24) Usb suspend at start need for power save.<br>
-25) Fix build with 3.82 make version.<br>
-26) Backport raeth driver from 3.6.0.0SDK (v2.1).<br>
-27) Update sta driver to 2.4.0.4.<br>
-28) Update ap driver to 2.5.0.4.<br>
-29) Add /proc/rt3052/esw_cnt for traffic statistic per switch port.(need add in webui).<br>
-30) Support Ralink RT3883+RT5392 referenece board.<br>
-31) Fix mips 24kec "Wrong EPC on Exceptional J/JAL Targets" issue.<br>
-32) Fix raeth driver: hardware checksum offload only support ipv4 packets.<br>
-34) Update ated: magic number check after wifi driver version 2.5.<br>
-35) Kernel now support IPv6 Ready logo.<br>
-36) Raeth re‐initialize frame engine if TX timeout occurred.<br>
-37) Watchdogs supprot user and kernel mode watchdog module.<br>
-38) In bridge or ethernet converter mode switch need reconfigure to novlans mode.<br>
-39) Rework switch init code. More correct and speedup.<br>
-40) Blink sec+wps led at boot before start goahead.<br>
-41) Asinc blink wps/sec led if goahead not found.<br>
-42) Update rw_init bin files for RT3x5x and add images for new chips.<br>
-43) Fix some fields enable/disable in skb.<br>
-44) Add init script for transmission daemon.<br>
-45) Libcurl update to 7.21.7 version.<br>
-46) Small kernel code arp fixups.<br>
-47) Update ralink apps.<br>
-48) Support new igmp snooping version in igmpproxy.<br>
-49) Add variable igmpSnoopMode. Values=n/f or NULL (default NULL=auto, n=none/disabled,f=force enabled. Need add webui).<br>
-50) Fix some leasks and more safe libnvram.<br>
-51) Igmpproxy code sync with upstream git.<br>
-52) Fix build at some distro.<br>
+23) Usb suspend at start need for power save.<br>
+24) Fix build with 3.82 make version.<br>
+25) Backport raeth driver from 3.6.0.0SDK (v2.1).<br>
+26) Update sta driver to 2.4.0.4.<br>
+27) Update ap driver to 2.5.0.4.<br>
+28) Add /proc/rt3052/esw_cnt for traffic statistic per switch port.(need add in webui).<br>
+29) Support Ralink RT3883+RT5392 referenece board.<br>
+30) Fix mips 24kec "Wrong EPC on Exceptional J/JAL Targets" issue.<br>
+31) Fix raeth driver: hardware checksum offload only support ipv4 packets.<br>
+32) Update ated: magic number check after wifi driver version 2.5.<br>
+33) Kernel now support IPv6 Ready logo.<br>
+34) Raeth re‐initialize frame engine if TX timeout occurred.<br>
+35) Watchdogs supprot user and kernel mode watchdog module.<br>
+36) In bridge or ethernet converter mode switch need reconfigure to novlans mode.<br>
+37) Rework switch init code. More correct and speedup.<br>
+38) Blink sec+wps led at boot before start goahead.<br>
+39) Asinc blink wps/sec led if goahead not found.<br>
+40) Update rw_init bin files for RT3x5x and add images for new chips.<br>
+41) Fix some fields enable/disable in skb.<br>
+42) Add init script for transmission daemon.<br>
+43) Libcurl update to 7.21.7 version.<br>
+44) Small kernel code arp fixups.<br>
+45) Update ralink apps.<br>
+46) Support new igmp snooping version in igmpproxy.<br>
+47) Add variable igmpSnoopMode. Values=n/f or NULL (default NULL=auto, n=none/disabled,f=force enabled. Need add webui).<br>
+48) Fix some leasks and more safe libnvram.<br>
+49) Igmpproxy code sync with upstream git.<br>
+50) Fix build at some distro.<br>
 
 suspended) Add skb reuse support.<br>
 suspended) Nvram move to kernel mode. This fix some memleaks and concurent acess to mtd issue.<br>
