@@ -139,13 +139,6 @@ static int ip6_output2(struct sk_buff *skb)
 
 int ip6_output(struct sk_buff *skb)
 {
-	struct inet6_dev *idev = ip6_dst_idev(skb->dst);
-	if (unlikely(idev->cnf.disable_ipv6)) {
-		IP6_INC_STATS(idev, IPSTATS_MIB_OUTDISCARDS);
-		kfree_skb(skb);
-		return 0;
-	}
-
 	if ((skb->len > dst_mtu(skb->dst) && !skb_is_gso(skb)) ||
 				dst_allfrag(skb->dst))
 		return ip6_fragment(skb, ip6_output2);

@@ -178,14 +178,6 @@ struct ipv6_devconf {
 #endif
 	__s32		proxy_ndp;
 	__s32		accept_source_route;
-/*
-#ifdef CONFIG_IPV6_MROUTE
-	__s32		mc_forwarding;
-#endif
-*/
-	__s32           disable_ipv6;
-	__s32           accept_dad;
-
 	void		*sysctl;
 };
 
@@ -216,9 +208,6 @@ enum {
 	DEVCONF_PROXY_NDP,
 	__DEVCONF_OPTIMISTIC_DAD,
 	DEVCONF_ACCEPT_SOURCE_ROUTE,
-	DEVCONF_MC_FORWARDING,
-	DEVCONF_DISABLE_IPV6,
-	DEVCONF_ACCEPT_DAD,
 	DEVCONF_MAX
 };
 
@@ -250,7 +239,6 @@ struct inet6_skb_parm {
 #endif
 
 #define IP6SKB_XFRM_TRANSFORMED	1
-#define IP6SKB_FORWARDED	2
 };
 
 #define IP6CB(skb)	((struct inet6_skb_parm*)((skb)->cb))

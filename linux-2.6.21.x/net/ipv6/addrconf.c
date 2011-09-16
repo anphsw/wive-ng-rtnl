@@ -6,7 +6,7 @@
  *	Pedro Roque		<roque@di.fc.ul.pt>
  *	Alexey Kuznetsov	<kuznet@ms2.inr.ac.ru>
  *
- *	$Id: addrconf.c,v 1.2 2011-03-30 02:39:26 yy Exp $
+ *	$Id: addrconf.c,v 1.1.1.1 2007-05-25 06:49:59 bruce Exp $
  *
  *	This program is free software; you can redistribute it and/or
  *      modify it under the terms of the GNU General Public License
@@ -139,7 +139,6 @@ static void ipv6_ifa_notify(int event, struct inet6_ifaddr *ifa);
 static void inet6_prefix_notify(int event, struct inet6_dev *idev,
 				struct prefix_info *pinfo);
 static int ipv6_chk_same_addr(const struct in6_addr *addr, struct net_device *dev);
-static int ipv6_generate_eui64(u8 *eui, struct net_device *dev);
 
 static ATOMIC_NOTIFIER_HEAD(inet6addr_chain);
 
@@ -174,8 +173,6 @@ struct ipv6_devconf ipv6_devconf __read_mostly = {
 #endif
 	.proxy_ndp		= 0,
 	.accept_source_route	= 0,	/* we do not accept RH0 by default. */
-	.disable_ipv6           = 0,
-	.accept_dad             = 2,
 };
 
 static struct ipv6_devconf ipv6_devconf_dflt __read_mostly = {
@@ -208,8 +205,6 @@ static struct ipv6_devconf ipv6_devconf_dflt __read_mostly = {
 #endif
 	.proxy_ndp		= 0,
 	.accept_source_route	= 0,	/* we do not accept RH0 by default. */
-	.disable_ipv6           = 0,
-	.accept_dad             = 2,
 };
 
 /* IPv6 Wildcard Address and Loopback Address defined by RFC2553 */
@@ -331,9 +326,6 @@ static struct inet6_dev * ipv6_add_dev(struct net_device *dev)
 	 */
 	in6_dev_hold(ndev);
 
-	if (dev->flags & (IFF_NOARP | IFF_LOOPBACK))
-		ndev->cnf.accept_dad = -1;
-
 #ifdef CONFIG_IPV6_PRIVACY
 	setup_timer(&ndev->regen_timer, ipv6_regen_rndid, (unsigned long)ndev);
 	if ((dev->flags&IFF_LOOPBACK) ||
@@ -374,7 +366,7 @@ static struct inet6_dev * ipv6_add_dev(struct net_device *dev)
 	return ndev;
 }
 
-struct inet6_dev * ipv6_find_idev(struct net_device *dev)
+static struct inet6_dev * ipv6_find_idev(struct net_device *dev)
 {
 	struct inet6_dev *idev;
 
@@ -1279,20 +1271,6 @@ static void addrconf_dad_stop(struct inet6_ifaddr *ifp)
 
 void addrconf_dad_failure(struct inet6_ifaddr *ifp)
 {
-	struct inet6_dev *idev = ifp->idev;
-	if (idev->cnf.accept_dad > 1 && !idev->cnf.disable_ipv6) {
-		struct in6_addr addr;
-
-		addr.s6_addr32[0] = htonl(0xfe800000);
-		addr.s6_addr32[1] = 0;
-		if (!ipv6_generate_eui64(addr.s6_addr + 8, idev->dev) &&
-			ipv6_addr_equal(&ifp->addr, &addr)) {
-			/* DAD failed for link-local based on MAC address */
-			idev->cnf.disable_ipv6 = 1;
-			printk("dad_failure:duplicate detected, disable ipv6 support\n");
-		}
-	}
-
 	if (net_ratelimit())
 		printk(KERN_INFO "%s: duplicate address detected!\n", ifp->idev->dev->name);
 	addrconf_dad_stop(ifp);
@@ -2551,7 +2529,6 @@ static void addrconf_dad_start(struct inet6_ifaddr *ifp, u32 flags)
 	spin_lock_bh(&ifp->lock);
 
 	if (dev->flags&(IFF_NOARP|IFF_LOOPBACK) ||
-	    idev->cnf.accept_dad < 1 ||
 	    !(ifp->flags&IFA_F_TENTATIVE) ||
 	    ifp->flags & IFA_F_NODAD) {
 		ifp->flags &= ~IFA_F_TENTATIVE;
@@ -2592,13 +2569,6 @@ static void addrconf_dad_timer(unsigned long data)
 		read_unlock_bh(&idev->lock);
 		goto out;
 	}
-
-	if (idev->cnf.accept_dad > 1 && idev->cnf.disable_ipv6) {
-		read_unlock_bh(&idev->lock);
-		addrconf_dad_failure(ifp);
-		return;
-	}
-
 	spin_lock_bh(&ifp->lock);
 	if (ifp->probes == 0) {
 		/*
@@ -3433,13 +3403,6 @@ static inline void ipv6_store_devconf(struct ipv6_devconf *cnf,
 #endif
 	array[DEVCONF_PROXY_NDP] = cnf->proxy_ndp;
 	array[DEVCONF_ACCEPT_SOURCE_ROUTE] = cnf->accept_source_route;
-/*
-#ifdef CONFIG_IPV6_MROUTE
-	array[DEVCONF_MC_FORWARDING] = cnf->mc_forwarding;
-#endif
-*/
-	array[DEVCONF_DISABLE_IPV6] = cnf->disable_ipv6;
-	array[DEVCONF_ACCEPT_DAD] = cnf->accept_dad;
 }
 
 static inline size_t inet6_if_nlmsg_size(void)
@@ -3974,34 +3937,6 @@ static struct addrconf_sysctl_table
 			.maxlen		=	sizeof(int),
 			.mode		=	0644,
 			.proc_handler	=	&proc_dointvec,
-		},
-/*
-#ifdef CONFIG_IPV6_MROUTE
-		{
-			.ctl_name       =       CTL_UNNUMBERED,
-			.procname       =       "mc_forwarding",
-			.data           =       &ipv6_devconf.mc_forwarding,
-			.maxlen         =       sizeof(int),
-			.mode           =       0644,
-			.proc_handler   =       &proc_dointvec,
-		},
-#endif
-*/
-		{
-			.ctl_name       =       CTL_UNNUMBERED,
-			.procname       =       "disable_ipv6",
-			.data           =       &ipv6_devconf.disable_ipv6,
-			.maxlen         =       sizeof(int),
-			.mode           =       0644,
-			.proc_handler   =       &proc_dointvec,
-		},
-		{
-			.ctl_name       =       CTL_UNNUMBERED,
-			.procname       =       "accept_dad",
-			.data           =       &ipv6_devconf.accept_dad,
-			.maxlen         =       sizeof(int),
-			.mode           =       0644,
-			.proc_handler   =       &proc_dointvec,
 		},
 		{
 			.ctl_name	=	0,	/* sentinel */
