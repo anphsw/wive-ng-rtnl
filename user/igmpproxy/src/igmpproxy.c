@@ -89,7 +89,7 @@ int main( int ArgCn, char *ArgVc[] ) {
     WanPort = 0x1;
 
     // Parse the commandline options and setup basic settings..
-    for (c; (c = getopt(ArgCn, ArgVc, "vdswhfn")) != -1;) {
+    for (c; (c = getopt(ArgCn, ArgVc, "dswfnvh")) != -1;) {
         switch (c) {
         case 'd':
             Log2Stderr = true;
@@ -98,7 +98,16 @@ int main( int ArgCn, char *ArgVc[] ) {
 	    sw = 1;
             break;
         case 'w':
+	    sw = 1;
 	    WanPort = 0x10;
+            break;
+        case 'f':
+	    sw = 1;
+	    force_snooping = 1;
+            break;
+        case 'n':
+	    sw = 1;
+	    force_snooping = 0;
             break;
         case 'v':
             LogLevel++;
@@ -106,12 +115,6 @@ int main( int ArgCn, char *ArgVc[] ) {
         case 'h':
             fputs(Usage, stderr);
             exit(0);
-            break;
-        case 'f':
-	    force_snooping = 1;
-            break;
-        case 'n':
-	    force_snooping = 0;
             break;
         default:
             exit(1);

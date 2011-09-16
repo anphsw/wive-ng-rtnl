@@ -68,15 +68,10 @@
 #define REG_ESW_WT_MAC_AD2			0x3C
 #define REG_ESW_MAX					0xFC
 
-#define IP_GET_LOST_MAPPING(mip)    ((mip & 0x0F800000) >> 23) 
+#define IP_GET_LOST_MAPPING(mip)    ((mip & 0x0F800000) >> 23)
 #define IP_MULTICAST_A0(a0)			((a0 >> 1) | 0xE0)
 #define IP_MULTICAST_A1(a0, a1)		(((a0 & 0x1) << 7) | a1)
 #define HOOK_CHECK					if(!(hook_value & 0x3FF)) return;
-
-#define LANPORT_RANGE_P0           {1,2,3,4}
-#define LANPORT_RANGE_P4           {0,1,2,3}
-
-#define OTHER_INTERFACE				7		/* port 7  (wifi)  */
 
 /* delay mac table deletion */
 #define DELETED			1
@@ -85,13 +80,21 @@
 #define ADDENTRY		1
 #define DELENTRY		2
 
-#ifdef CONFIG_RAETH_SPECIAL_TAG
+#if defined(CONFIG_RA_NAT_HW) && !defined(CONFIG_RAETH_SPECIAL_TAG)
+#define LAN_VLAN_IDX              (CONFIG_RA_HW_NAT_LAN_VLANID-1)
+#define WAN_VLAN_IDX              (CONFIG_RA_HW_NAT_WAN_VLANID-1)
+#elif defined(CONFIG_RAETH_SPECIAL_TAG)
 #define LAN_VLAN_IDX              6
 #define WAN_VLAN_IDX              7
 #else
 #define LAN_VLAN_IDX              0
 #define WAN_VLAN_IDX              1
 #endif
+
+#define LANPORT_RANGE_P0        {1,2,3,4}
+#define LANPORT_RANGE_P4        {0,1,2,3}
+#define OTHER_INTERFACE		7		/* port 7  (wifi)  */
+
 
 /* wan port select */
 uint32_t WanPort = 0x1;
@@ -235,7 +238,7 @@ static struct group *build_entry(uint32 m_ip_addr, uint32 u_ip_addr)
 		return NULL;
 	}
 	printf("%s, %s\n", __FUNCTION__,  inetFmt(htonl(m_ip_addr), s1));
-	
+
 	/* set up address */
 	new_entry->a1 = a1;
 	new_entry->a2 = a2;
