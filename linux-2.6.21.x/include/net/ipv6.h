@@ -4,7 +4,7 @@
  *	Authors:
  *	Pedro Roque		<roque@di.fc.ul.pt>
  *
- *	$Id: ipv6.h,v 1.2 2011-02-23 12:01:31 yy Exp $
+ *	$Id: ipv6.h,v 1.1.1.1 2007-05-25 06:50:11 bruce Exp $
  *
  *	This program is free software; you can redistribute it and/or
  *      modify it under the terms of the GNU General Public License
