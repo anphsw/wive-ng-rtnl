@@ -213,6 +213,7 @@ function lan2_enable_switch(form)
   <td>
     <input type="submit" class="normal" value="Apply" id="lApply" onClick="TimeoutReload(20);">&nbsp;&nbsp;
     <input type="reset"  class="normal" value="Cancel" id="lCancel" onClick="window.location.reload();">
+    <input type="hidden" value="/internet/lan.asp" name="submit-url" >
   </td>
 </tr>
 </table>

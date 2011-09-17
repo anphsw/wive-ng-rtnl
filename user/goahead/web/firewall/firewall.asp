@@ -536,6 +536,7 @@ function genTableData(rules, form)
 <p>
 	<input type="hidden" name="portForwardRules" value="">
 	<input type="submit" class="half" value="Apply">
+	<input type="hidden" name="submit-url" value="/firewall/firewall.asp" >
 </p>
 </form>
 
@@ -574,6 +575,7 @@ function genTableData(rules, form)
 	<input type="hidden" name="portFilteringRules" value="">
 	<input type="hidden" name="defaultFirewallPolicy" value="">
 	<input type="submit" class="half" value="Apply">
+	<input type="hidden" name="submit-url" value="/firewall/firewall.asp" >
 </p>
 </form>
 

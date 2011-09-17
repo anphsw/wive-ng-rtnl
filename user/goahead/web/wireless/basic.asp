@@ -1414,6 +1414,7 @@ function doRadioStatusChange(form)
 	<td>
 		<input type="submit" class="half" value="Apply" id="basicApply">&nbsp;&nbsp;
 		<input type="button" class="half" value="Cancel" id="basicCancel" onClick="window.location.reload();">
+		<input type="hidden" name="submit-url" value="/wireless/basic.asp">
 	</td>
 </tr>
 </table>

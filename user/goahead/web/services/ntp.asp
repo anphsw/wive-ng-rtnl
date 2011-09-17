@@ -190,7 +190,7 @@ function ntpChange(form)
 <table width="90%" border="0" cellpadding="2" cellspacing="1">
 <tr align="center">
 	<td>
-		<input type="hidden" value="shit" name="stub_shit">
+		<input type="hidden" value="/services/ntp.asp" name="submit-url">
 		<input type="submit" style="{width:120px;}" value="Apply"  id="manNTPApply"> &nbsp;&nbsp;
 		<input type="reset"  style="{width:120px;}" value="Cancel" id="manNTPCancel" onclick="window.location.reload();">
 	</td>

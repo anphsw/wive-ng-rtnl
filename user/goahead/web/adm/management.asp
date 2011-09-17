@@ -142,6 +142,7 @@ It takes about 1 minute to upload firmware &amp; upgrade flash. Please be patien
 			<select name="langSelection" id="langSelection">
 			<!-- added by initValue -->
 			</select>
+			<input type="hidden" name="submit-url" value="/adm/management.asp" >
 			<input type="submit" class="half" value="Apply" id="manLangApply" onClick="return setLanguage();"> &nbsp; &nbsp;
 		</form>
 	</td>
@@ -164,7 +165,10 @@ It takes about 1 minute to upload firmware &amp; upgrade flash. Please be patien
 </tr>
 <tr>
 	<td class="head">Apply new login/password</td>
-	<td><input type="submit" class="half" value="Apply" id="manAdmApply"></td>
+	<td>
+		<input type="hidden" name="submit-url" value="/adm/management.asp" >
+		<input type="submit" class="half" value="Apply" id="manAdmApply">
+	</td>
 </tr>
 </table>
 </form>

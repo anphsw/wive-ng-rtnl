@@ -1286,10 +1286,16 @@ static void portForward(webs_t wp, char_t *path, char_t *query)
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
 
-	websHeader(wp);
-	websWrite(wp, T("portForwardEnabled: %s<br>\n"), pfe);
-	websFooter(wp);
-	websDone(wp, 200);
+	char *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
+	if (! submitUrl[0])
+	{
+		websHeader(wp);
+		websWrite(wp, T("portForwardEnabled: %s<br>\n"), pfe);
+		websFooter(wp);
+		websDone(wp, 200);
+	}
+	else
+		websRedirect(wp, submitUrl);
 
 	// call iptables
 	firewall_rebuild();
@@ -1318,11 +1324,17 @@ static void portFiltering(webs_t wp, char_t *path, char_t *query)
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
 
-	websHeader(wp);
-	websWrite(wp, T("portFilteringEnabled: %s<br>\n"), firewall_enable);
-	websWrite(wp, T("default_policy: %s<br>\n"), default_policy);
-	websFooter(wp);
-	websDone(wp, 200);
+	char *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
+	if (! submitUrl[0])
+	{
+		websHeader(wp);
+		websWrite(wp, T("portFilteringEnabled: %s<br>\n"), firewall_enable);
+		websWrite(wp, T("default_policy: %s<br>\n"), default_policy);
+		websFooter(wp);
+		websDone(wp, 200);
+	}
+	else
+		websRedirect(wp, submitUrl);
 
 	// Call iptables
 	firewall_rebuild();
@@ -1355,12 +1367,17 @@ static void DMZ(webs_t wp, char_t *path, char_t *query)
 		nvram_close(RT2860_NVRAM);
 	}
 
-
-	websHeader(wp);
-	websWrite(wp, T("DMZEnabled: %s<br>\n"), dmzE);
-	websWrite(wp, T("ip_address: %s<br>\n"), ip_address);
-	websFooter(wp);
-	websDone(wp, 200);
+	char *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
+	if (! submitUrl[0])
+	{
+		websHeader(wp);
+		websWrite(wp, T("DMZEnabled: %s<br>\n"), dmzE);
+		websWrite(wp, T("ip_address: %s<br>\n"), ip_address);
+		websFooter(wp);
+		websDone(wp, 200);
+	}
+	else
+		websRedirect(wp, submitUrl);
 
 	// Call iptables
 	firewall_rebuild();

@@ -689,7 +689,7 @@ static int vpnIfaceList(int eid, webs_t wp, int argc, char_t **argv)
 
 void formVPNSetup(webs_t wp, char_t *path, char_t *query)
 {
-	char_t  *vpn_enabled, *submitUrl;
+	char_t  *vpn_enabled;
 
 	vpn_enabled = websGetVar(wp, T("vpn_enabled"), T(""));
 	if (vpn_enabled[0] == '\0')
@@ -736,7 +736,7 @@ void formVPNSetup(webs_t wp, char_t *path, char_t *query)
 	printf("Calling vpn helper...\n");
 	system("service vpnhelper restart &");
 
-	submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
+	char *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
 	if (submitUrl[0])
 		websRedirect(wp, submitUrl);
 	else
@@ -1762,6 +1762,7 @@ static void editRouting(webs_t wp, char_t *path, char_t *query)
 	char true_iface[32], destination[32], gateway[32], netmask[32], iface[32], c_iface[32], comment[64], action[4];
 	int i=0, rebuild_vpn=0, iaction;
 
+	char *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
 	websHeader(wp);
 	websWrite(wp, T("<h3>Edit routing table:</h3><br>\n"));
 
@@ -1842,7 +1843,11 @@ static void editRouting(webs_t wp, char_t *path, char_t *query)
 	// Write OK
 	websWrite(wp, T("<script language=\"JavaScript\" type=\"text/javascript\">ajaxReloadDelayedPage(10000, '/internet/routing.asp', true);</script>\n"));
 	websFooter(wp);
-	websDone(wp, 200);
+	
+	if (submitUrl[0])
+		websRedirect(wp, submitUrl);
+	else
+		websDone(wp, 200);
 }
 
 #ifdef CONFIG_USER_ZEBRA
@@ -2086,26 +2091,32 @@ static void setLan(webs_t wp, char_t *path, char_t *query)
 #endif
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
-
-	//debug print
-	websHeader(wp);
-	websWrite(wp, T("<h3>LAN Interface Setup</h3><br>\n"));
-#ifdef GA_HOSTNAME_SUPPORT
-	websWrite(wp, T("Hostname: %s<br>\n"), host);
-#endif
-	websWrite(wp, T("IP: %s<br>\n"), ip);
-	websWrite(wp, T("Netmask: %s<br>\n"), nm);
-	websWrite(wp, T("LAN2 Enabled: %s<br>\n"), lan2enabled);
-	websWrite(wp, T("LAN2 IP: %s<br>\n"), lan2_ip);
-	websWrite(wp, T("LAN2 Netmask: %s<br>\n"), lan2_nm);
-	if (!strncmp(opmode, "0", 2))
+	
+	char *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
+	if (! submitUrl[0])
 	{
-		websWrite(wp, T("Gateway: %s<br>\n"), gw);
-		websWrite(wp, T("PriDns: %s<br>\n"), pd);
-		websWrite(wp, T("SecDns: %s<br>\n"), sd);
+		//debug print
+		websHeader(wp);
+		websWrite(wp, T("<h3>LAN Interface Setup</h3><br>\n"));
+#ifdef GA_HOSTNAME_SUPPORT
+		websWrite(wp, T("Hostname: %s<br>\n"), host);
+#endif
+		websWrite(wp, T("IP: %s<br>\n"), ip);
+		websWrite(wp, T("Netmask: %s<br>\n"), nm);
+		websWrite(wp, T("LAN2 Enabled: %s<br>\n"), lan2enabled);
+		websWrite(wp, T("LAN2 IP: %s<br>\n"), lan2_ip);
+		websWrite(wp, T("LAN2 Netmask: %s<br>\n"), lan2_nm);
+		if (!strncmp(opmode, "0", 2))
+		{
+			websWrite(wp, T("Gateway: %s<br>\n"), gw);
+			websWrite(wp, T("PriDns: %s<br>\n"), pd);
+			websWrite(wp, T("SecDns: %s<br>\n"), sd);
+		}
+		websFooter(wp);
+		websDone(wp, 200);
 	}
-	websFooter(wp);
-	websDone(wp, 200);
+	else
+		websRedirect(wp, submitUrl);
 
 	doSystem("internet.sh");
 }
@@ -2243,7 +2254,7 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 	nvram_close(RT2860_NVRAM);
 
 	char *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
-	if (submitUrl == NULL)
+	if (! submitUrl[0])
 	{
 		// debug print
 		websHeader(wp);

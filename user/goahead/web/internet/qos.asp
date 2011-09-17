@@ -526,9 +526,8 @@ function checkNum(str)
 
 </table>
 <input value="Apply" id="QoSSetupSubmitStr" name="QoSSetupSubmitStr" onclick="return QoSSetupCheck()" type="submit"> &nbsp;&nbsp;
-<!--
-<input value="Reset" id="QoSSetupResetStr" name="QoSSetupResetStr" type="reset">
--->
+<input type="hidden" name="submit-url" value="/internet/qos.asp">
+
 </form>
 
 <br>
@@ -626,14 +625,16 @@ function checkNum(str)
 	PrintRules();
 </script>
 </table>
-<input type="button" id="QoSRuleAddStr" name="add_rule" value=add onClick="AddRule();">
-<input type="submit" id="QoSRuleDelStr" name="del_rule" value=delete>
+	<input type="button" id="QoSRuleAddStr" name="add_rule" value=add onClick="AddRule();">
+	<input type="submit" id="QoSRuleDelStr" name="del_rule" value=delete>
+	<input type="hidden" name="submit-url" value="/internet/qos.asp">
 </form>
 
 <table id="div_qos_loaddefault">
-<form method="post" name="QoSLoadDefault" action="/goform/QoSLoadDefaultProfile">
+<form method="POST" name="QoSLoadDefault" action="/goform/QoSLoadDefaultProfile">
 <tr><td>
 	<input type="submit" name="QoSLoadProfileStr" id="QoSLoadProfileStr" value="Load Default">
+	<input type="hidden" name="submit-url" value="/internet/qos.asp">
 </td></tr>
 </form>
 </table>

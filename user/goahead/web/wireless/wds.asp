@@ -443,8 +443,9 @@ function CheckValue()
 <table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
   <tr align="center">
     <td>
-      <input type=submit style="{width:120px;}" value="Apply"> &nbsp; &nbsp;
-      <input type=reset  style="{width:120px;}" value="Cancel" onClick="window.location.reload()">
+      <input type="submit" style="{width:120px;}" value="Apply"> &nbsp; &nbsp;
+      <input type="reset"  style="{width:120px;}" value="Cancel" onClick="window.location.reload()">
+      <input type="hidden" name="submit-url" value="/wireless/wds.asp">
     </td>
   </tr>
 </table>

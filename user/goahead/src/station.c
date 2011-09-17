@@ -3742,9 +3742,11 @@ static int getStaSuppAMode(int eid, webs_t wp, int argc, char_t **argv)
  */
 static int getStaWirelessMode(int eid, webs_t wp, int argc, char_t **argv)
 {
+	const char *opmode = nvram_get(RT2860_NVRAM, "OperationMode");
 	const char *mode_s = nvram_get(RT2860_NVRAM, "WirelessMode");
 	int mode;
 	int bSuppA = myGetSuppAMode();
+	int StaOn = (strcmp(opmode, "2") == 0);
 
 	mode = (NULL == mode_s)? 0 : atoi(mode_s);
 	websWrite(wp, "<option value=\"0\" %s>802.11 B/G mixed mode</option>", (mode == 0)? "selected" : "");
@@ -3755,12 +3757,14 @@ static int getStaWirelessMode(int eid, webs_t wp, int argc, char_t **argv)
 	}
 	websWrite(wp, "<option value=\"4\" %s>802.11 G Only</option>", (mode == 4)? "selected" : "");
 	websWrite(wp, "<option value=\"6\" %s>802.11 N Only</option>", (mode == 6)? "selected" : "");
-	websWrite(wp, "<option value=\"7\" %s>802.11 GN mixed mode</option>", (mode == 7)? "selected" : "");
+	if (!StaOn)
+		websWrite(wp, "<option value=\"7\" %s>802.11 GN mixed mode</option>", (mode == 7)? "selected" : "");
 	if (bSuppA) {
 		websWrite(wp, "<option value=\"8\" %s>802.11 AN mixed mode</option>", (mode == 8)? "selected" : "");
 	}
-	websWrite(wp, "<option value=\"9\" %s>802.11 B/G/N mixed mode</option>", (mode == 9)? "selected" : "");
-	if (bSuppA) {
+	if (!StaOn)
+		websWrite(wp, "<option value=\"9\" %s>802.11 B/G/N mixed mode</option>", (mode == 9)? "selected" : "");
+	if (bSuppA && (!StaOn)) {
 		websWrite(wp, "<option value=\"10\" %s>802.11 A/G/N mixed mode</option>", (mode == 10)? "selected" : "");
 		websWrite(wp, "<option value=\"5\" %s>802.11 A/B/G/N mixed mode</option>", (mode == 5)? "selected" : "");
 	}
@@ -5974,7 +5978,9 @@ static void setStaQoS(webs_t wp, char_t *path, char_t *query)
 	close(s);
 	sleep(1);
 	
-	websRedirect(wp, "station/qos.asp");
+	char *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
+	if (submitUrl[0])
+		websRedirect(wp, submitUrl);
 }
 
 /*

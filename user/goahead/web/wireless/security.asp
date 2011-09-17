@@ -1250,6 +1250,7 @@ for (aptable = 0; aptable < MBSSID_MAX; aptable++)
 	<td>
 		<input style="width: 120px;" value="Apply" id="secureApply" type="submit"> &nbsp; &nbsp;
 		<input style="width: 120px;" value="Cancel" id="secureCancel" type="reset" onClick="window.location.reload();" >
+		<input type="hidden" name="submit-url" value="/wireless/security.asp" >
 	</td>
 </tr>
 </table>

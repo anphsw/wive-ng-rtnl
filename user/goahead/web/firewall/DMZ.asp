@@ -170,7 +170,7 @@ function updateState()
 <p id="dmzIntroduction"> Here you can setup the De-Militarized Zone (DMZ) to separate your external services from the rest of LAN.</p>
 <hr />
 
-<form method=post name="DMZ" action=/goform/DMZ>
+<form method="POST" name="DMZ" action="/goform/DMZ">
 <table width="400" border="1" cellpadding="2" cellspacing="1">
 <tr>
   <td class="title" colspan="2" id="dmzSetting">DMZ Settings</td>
@@ -200,6 +200,7 @@ function updateState()
 <p>
 	<input type="submit" value="Apply" id="dmzApply" name="addDMZ" onClick="return formCheck()"> &nbsp;&nbsp;
 	<input type="reset" value="Reset" id="dmzReset" name="reset">
+	<input type="hidden" name="submit-url" value="/firewall/DMZ.asp" >
 </p>
 </form>
 

@@ -205,6 +205,7 @@ function PageInit()
 </table>
 
 <input type="hidden" name="button_type" value="">
+<input type="hidden" name="submit-url" value="/station/qos.asp" >
 </form>
 
 </td></tr></table>

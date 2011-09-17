@@ -455,13 +455,18 @@ static void QoSSetup(webs_t wp, char_t *path, char_t *query)
 
 	QoSRestart();
 
-	websHeader(wp);
-
-	websWrite(wp, T("qos_enable: %s<br>\n"), qos_enable);
-	websWrite(wp, T("upload bandwidth: %s<br>\n"), upload_bandwidth);
-	websWrite(wp, T("download bandwidth: %s<br>\n"), download_bandwidth);
-	websFooter(wp);
-	websDone(wp, 200);
+	char *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
+	if (! submitUrl[0])
+	{
+		websHeader(wp);
+		websWrite(wp, T("qos_enable: %s<br>\n"), qos_enable);
+		websWrite(wp, T("upload bandwidth: %s<br>\n"), upload_bandwidth);
+		websWrite(wp, T("download bandwidth: %s<br>\n"), download_bandwidth);
+		websFooter(wp);
+		websDone(wp, 200);
+	}
+	else
+		websRedirect(wp, submitUrl);
 }
 
 void formDefineQoS()

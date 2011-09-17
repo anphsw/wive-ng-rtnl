@@ -651,6 +651,7 @@ function wmm_capable_enable_switch()
 	<td>
 		<input type="submit" class="half" value="Apply" id="advApply">&nbsp;&nbsp;
 		<input type="reset"  class="half" value="Cancel" id="advCancel" onClick="window.location.reload()">
+		<input type="hidden" name="submit-url" value="/wireless/advanced.asp" >
 	</td>
 </tr>
 </table>

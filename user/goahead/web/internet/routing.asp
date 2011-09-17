@@ -324,6 +324,7 @@ function formRoutingTable(form)
 <p>
 	<input type="submit" value="Apply" id="dynamicRoutingApply" name="dynamicRoutingApply">
 	<input type="reset" value="Reset" id="dynamicRoutingReset" name="dynamicRoutingReset">
+	<input type="hidden" value="/internet/routing.asp" name="submit-url">
 </p>
 </form>
 </div>

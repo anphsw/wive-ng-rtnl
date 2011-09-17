@@ -163,8 +163,9 @@ function initValue()
 <table id="div_ddns_submit" width="90%" border="0" cellpadding="2" cellspacing="1">
 <tr align="center">
 	<td>
-		<input type=submit style="{width:120px;}" value="Apply" id="manDdnsApply" onClick="return DDNSFormCheck()"> &nbsp; &nbsp;
-		<input type=reset  style="{width:120px;}" value="Cancel" id="manDdnsCancel" onClick="window.location.reload()">
+		<input type="hidden" name="submit-url" value="/services/ddns.asp" >
+		<input type="submit" style="{width:120px;}" value="Apply" id="manDdnsApply" onClick="return DDNSFormCheck()"> &nbsp; &nbsp;
+		<input type="reset" style="{width:120px;}" value="Cancel" id="manDdnsCancel" onClick="window.location.reload()">
 	</td>
 </tr>
 </table>

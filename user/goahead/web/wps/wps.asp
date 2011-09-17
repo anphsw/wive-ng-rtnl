@@ -282,7 +282,7 @@ function onPINPBCRadioClick(value)
 </head>
 <body onload="pageInit()">
 <table class="body"><tr><td>
-<h1 id="wpsTitle_text">Wi-Fi Protected Setup</h1>
+<h1 id="wpsTitle_text">Wi-Fi Protection Setup</h1>
 <p id="wpsIntroduction_text"> Here you can setup security easily by choosing PIN or PBC method to have Wi-Fi Protected Setup.</p>
 
 <table border="1" cellpadding="2" cellspacing="1" width="95%">
