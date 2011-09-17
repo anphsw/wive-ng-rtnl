@@ -14,18 +14,24 @@ LOG="logger -t reconfig"
 
 ifRaxWdsxDown()
 {
+    #down all wireless interfaces and remove from bridge
     for i in `seq 0 7`; do
 	ip link set ra$i down > /dev/null 2>&1
+	brctl delif br0 ra$i > /dev/null 2>&1
     done
     for i in `seq 0 3`; do
         ip link set wds$i down > /dev/null 2>&1
+	brctl delif br0 wds$i > /dev/null 2>&1
     done
     if [ "$CONFIG_RT2860V2_AP_APCLI" != "" ]; then
 	ip link set apcli0 down > /dev/null 2>&1
+	brctl delif br0 apcli0 > /dev/null 2>&1
     fi
     if [ "$CONFIG_RT2860V2_STA_MESH" != "" ] || [ "$CONFIG_RT2860V2_AP_MESH" != "" ]; then
 	ip link set mesh0 down > /dev/null 2>&1
+	brctl delif br0 mesh0 > /dev/null 2>&1
     fi
+    brctl delif br0 ra0 > /dev/null 2>&1
 }
 
 addMesh2Br0()
