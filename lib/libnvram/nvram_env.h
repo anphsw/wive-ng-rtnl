@@ -1,10 +1,3 @@
-
-#define ENV_BLK_SIZE 0x1000
-
-#ifdef CONFIG_DUAL_IMAGE
-#define ENV_UBOOT_SIZE 0x1000
-#endif
-
 extern		void  nvram_printenv(int index, int argc, char *argv[]);
 extern unsigned char *nvram_getenv  (int index, unsigned char *name);
 extern		int   nvram_setenv  (int index, int argc, char *argv[]);

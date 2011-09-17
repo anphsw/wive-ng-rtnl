@@ -18,6 +18,7 @@
 #endif
 #else
 #undef NVRAM_LIB_PTHREAD_FORCE
+#define NV_DEV "/dev/nvram"
 #endif
 
 #ifdef CONFIG_LIB_LIBNVRAM_SSTRDUP
@@ -33,8 +34,11 @@
 #define BUFSZ			1024
 #define MAX_NV_VALUE_LEN	64
 #define NV_BUFFERS_COUNT	128
+#define ENV_BLK_SIZE		0x1000
 
 #ifdef CONFIG_DUAL_IMAGE
+#define ENV_UBOOT_SIZE 0x1000
+#define FLASH_BLOCK_NUM	5
 #define UBOOT_NVRAM	0
 #define RT2860_NVRAM    1
 #define RTDEV_NVRAM    	2
@@ -43,6 +47,7 @@
 #define RTINIC_NVRAM    1
 #define RT2561_NVRAM    2
 #else
+#define FLASH_BLOCK_NUM	4
 #define RT2860_NVRAM    0
 #define RTDEV_NVRAM    	1
 #define CERT_NVRAM    	2
@@ -51,7 +56,6 @@
 #define RT2561_NVRAM    2
 #endif
 
-#define NV_DEV "/dev/nvram"
 #define RALINK_NVRAM_IOCTL_GET		0x01
 #define RALINK_NVRAM_IOCTL_GETALL	0x02
 #define RALINK_NVRAM_IOCTL_SET		0x03
@@ -91,12 +95,6 @@ typedef struct nvram_ioctl_s {
 	char *value;
 } nvram_ioctl_t;
 
-
-#ifdef CONFIG_DUAL_IMAGE
-#define FLASH_BLOCK_NUM	5
-#else
-#define FLASH_BLOCK_NUM	4
-#endif
 
 int nvram_init(int index);
 void nvram_close(int index);

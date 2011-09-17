@@ -277,7 +277,7 @@ int ra_mtd_write_nm(char *name, loff_t to, size_t len, const u_char *buf)
 	struct mtd_info *mtd;
 	struct erase_info ei;
 	u_char *bak = NULL;
-        DECLARE_WAITQUEUE(wait, current);                                                                                                   
+        DECLARE_WAITQUEUE(wait, current);
         wait_queue_head_t wait_q;
 
 	mtd = get_mtd_device_nm(name);
@@ -311,8 +311,8 @@ int ra_mtd_write_nm(char *name, loff_t to, size_t len, const u_char *buf)
 		goto free_out;
 	}
 
-        schedule();  /* Wait for write to finish. */                                                                                
-        remove_wait_queue(&wait_q, &wait);                                                                                          
+        schedule();  /* Wait for write to finish. */
+        remove_wait_queue(&wait_q, &wait);
 
 	if (rdlen != mtd->erasesize)
 		printk("warning: ra_mtd_write: rdlen is not equal to erasesize\n");
@@ -335,10 +335,10 @@ int ra_mtd_write_nm(char *name, loff_t to, size_t len, const u_char *buf)
 
 	ret = mtd->write(mtd, 0, mtd->erasesize, &wrlen, bak);
 
-        schedule();  /* Wait for write to finish. */                                                                                
-        remove_wait_queue(&wait_q, &wait);                                                                                          
+        schedule();  /* Wait for write to finish. */
+        remove_wait_queue(&wait_q, &wait);
 
-	udelay(1000); //add 1ms delay after write
+	udelay(500); //add 0.5s delay after write
 
 	put_mtd_device(mtd);
 
@@ -362,7 +362,7 @@ int ra_mtd_read_nm(char *name, loff_t from, size_t len, u_char *buf)
 	if (rdlen != len)
 		printk("warning: ra_mtd_read_nm: rdlen is not equal to len\n");
 
-	udelay(100); //add 0.1ms delay after read
+	udelay(50); //add 0.05s delay after read
 
 	put_mtd_device(mtd);
 	return ret;

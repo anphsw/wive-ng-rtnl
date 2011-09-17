@@ -19,7 +19,7 @@ int nvram_commit(int index);
 int nvram_clear(int index);
 
 static int ralink_nvram_major = 251;
-char ra_nvram_debug = 0;
+char ra_nvram_debug = 1;
 
 static DECLARE_MUTEX(nvram_sem);
 
@@ -176,7 +176,7 @@ int ralink_nvram_ioctl(struct inode *inode, struct file *file, unsigned int req,
 	case RALINK_NVRAM_IOCTL_GET:
 		nvr = (nvram_ioctl_t __user *)arg;
 		p = nvram_get(nvr->index, nvr->name);
-		
+
 		if (copy_to_user(nvr->value, p, strlen(p) + 1))
 			return -EFAULT;
 		break;
@@ -191,20 +191,19 @@ int ralink_nvram_ioctl(struct inode *inode, struct file *file, unsigned int req,
 		}
 		break;
 	case RALINK_NVRAM_IOCTL_SET:
-		nvr = (nvram_ioctl_t *)arg;		
-		value = (char *)kmalloc(MAX_VALUE_LEN, GFP_KERNEL);
+		nvr = (nvram_ioctl_t *)arg;
+		value = (char *)kzalloc(MAX_VALUE_LEN, GFP_KERNEL);
 		if (!value)
 			return -ENOMEM;
 
 		if (copy_from_user(value, nvr->value, strlen(nvr->value) + 1)) {
-			kfree(value);
+			KFREE(value);
 			return -EFAULT;
 		}
 
 		nvram_set(nvr->index, nvr->name, value);
-		kfree(value);
+		KFREE(value);
 		break;
-
 	case RALINK_NVRAM_IOCTL_COMMIT:
 		nvr = (nvram_ioctl_t __user *)arg;
 		nvram_commit(nvr->index);
@@ -254,7 +253,7 @@ int __init ra_nvram_init(void)
 		//read data from flash
 		from = from + len;
 		len = fb[i].flash_max_len - len;
-		fb[i].env.data = (char *)kmalloc(len, GFP_KERNEL);
+		fb[i].env.data = (char *)kzalloc(len, GFP_KERNEL);
 		if (!fb[i].env.data)
 			return -ENOMEM;
 
@@ -263,7 +262,7 @@ int __init ra_nvram_init(void)
 		//check crc
 		if (nv_crc32(0, fb[i].env.data, len) != fb[i].env.crc) {
 			RANV_PRINT("Bad CRC %x, ignore values in flash.\n", (unsigned int)fb[i].env.crc);
-			kfree(fb[i].env.data);
+			KFREE(fb[i].env.data);
 			fb[i].valid = 0;
 			fb[i].dirty = 0;
 			return -1;
@@ -279,7 +278,7 @@ int __init ra_nvram_init(void)
 			*q = '\0'; //strip '='
 			fb[i].cache[j].name = kstrdup(p, GFP_KERNEL);
 			//printk("  %d '%s'->", i, p);
-	
+
 			p = q + 1; //value
 			if (NULL == (q = strchr(p, '\0'))) {
 				RANV_PRINT("parsed failed - cannot find '\\0'\n");
@@ -322,12 +321,12 @@ static void ra_nvram_exit(void)
 			nvram_commit(index);
 
 		//free env
-		kfree(fb[index].env.data);
+		KFREE(fb[index].env.data);
 
 		//free cache
 		for (i = 0; i < MAX_CACHE_ENTRY; i++) {
-			kfree(fb[index].cache[i].name);
-			kfree(fb[index].cache[i].value);
+			KFREE(fb[index].cache[i].name);
+			KFREE(fb[index].cache[i].value);
 		}
 
 		fb[index].valid = 0;
@@ -465,7 +464,6 @@ int nvram_set(int index, char *name, char *value)
 	idx = cache_idx(index, name);
 
 	if (-1 == idx) {
-
 		//find the first empty room
 		for (idx = 0; idx < MAX_CACHE_ENTRY; idx++) {
 			if (!fb[index].cache[idx].name) {
@@ -483,7 +481,7 @@ int nvram_set(int index, char *name, char *value)
 	}
 	else {
 		//abandon the previous value
-		kfree(fb[index].cache[idx].value);
+		KFREE(fb[index].cache[idx].value);
 		fb[index].cache[idx].value = kstrdup(value, GFP_KERNEL);
 	}
 

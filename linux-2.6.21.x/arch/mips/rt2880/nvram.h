@@ -27,6 +27,8 @@
 #define RANV_PRINT(x, ...) do { if (ra_nvram_debug) printk("%s %d: " x, __FILE__, __LINE__, ## __VA_ARGS__); } while(0)
 #define RANV_ERROR(x, ...) do { printk("%s %d: ERROR! " x, __FILE__, __LINE__, ## __VA_ARGS__); } while(0)
 
+#define KFREE(x) do { if (x != NULL) {kfree(x); x=NULL;} } while(0)
+
 //x is the value returned if the check failed
 #define RANV_CHECK_INDEX(x) do { \
         if (index < 0 || index >= FLASH_BLOCK_NUM) { \
