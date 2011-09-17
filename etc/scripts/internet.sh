@@ -93,14 +93,9 @@ addMBSSID()
     fi
 }
 
-retune_wifi() {
-	#preconfigure wifi and 40Mhz workaround
-	/etc/scripts/wifi.sh
-}
-
 bridge_config() {
 	$LOG "Bridge OperationMode: $opmode"
-	#flush eth2 ip. workaround for change mode to bridge from ethernet converter
+	#flush eth2 ip and remove from bridge
         ip addr flush dev eth2 > /dev/null 2>&1
 	brctl delif br0 eth2 > /dev/null 2>&1
 	#in bridge mode add only eth2 NOT ADD eth2.1 o eth2.2
@@ -114,7 +109,7 @@ bridge_config() {
 
 gate_config() {
 	$LOG "Gateway OperationMode: $opmode"
-	#flush eth2 ip. workaround for change mode to gateway from ethernet converter
+	#flush eth2.1 ip and remove from bridge
         ip addr flush dev eth2.1 > /dev/null 2>&1
 	brctl delif br0 eth2.1 > /dev/null 2>&1
 	#add lan interface
@@ -132,7 +127,7 @@ ethcv_config() {
 
 apcli_config() {
 	$LOG "ApClient OperationMode: $opmode"
-	#flush eth2 ip. workaround for change mode to apcli from ethernet converter
+	#flush eth2 ip and remove from bridge
         ip addr flush dev eth2 > /dev/null 2>&1
 	brctl delif br0 eth2 > /dev/null 2>&1
 	#in apcli mode add only eth2 NOT ADD eth2.1 o eth2.2
@@ -144,7 +139,7 @@ apcli_config() {
 
 spot_config() {
 	$LOG "HotSpot OperationMode: $opmode"
-	#flush eth2 ip. workaround for change mode to spot from ethernet converter
+	#flush eth2.1 ip and remove from bridge
         ip addr flush dev eth2.1 > /dev/null 2>&1
 	brctl delif br0 eth2.1 > /dev/null 2>&1
 	#add lan interface
@@ -156,6 +151,10 @@ spot_config() {
 	addMesh2Br0
 }
 
+retune_wifi() {
+	#preconfigure wifi and 40Mhz workaround
+	/etc/scripts/wifi.sh
+}
 
 #All WDS interfaces down and reload wifi modules
 if [ "$MODE" != "connect_sta" ]; then
