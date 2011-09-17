@@ -75,7 +75,7 @@ addMBSSID()
 	    for i in `seq 1 $bssrealnum`; do
     		ip addr flush dev ra$i > /dev/null 2>&1
 		if [ -d /proc/sys/net/ipv6 ]; then
-    		    ip -6 addr flush dev ra$i
+    		    ip -6 addr flush dev ra$i /dev/null 2>&1
 		fi
 		#workaround for apcli mode
 		getMacIf
