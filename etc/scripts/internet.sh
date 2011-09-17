@@ -31,7 +31,6 @@ ifRaxWdsxDown()
 	ip link set mesh0 down > /dev/null 2>&1
 	brctl delif br0 mesh0 > /dev/null 2>&1
     fi
-    brctl delif br0 ra0 > /dev/null 2>&1
 }
 
 addMesh2Br0()
@@ -74,7 +73,7 @@ addMBSSID()
 	if [ "$bssidnum" != "0" ] && [ "$bssidnum" != "1" ]; then
 	    let "bssrealnum=$bssidnum-1"
 	    for i in `seq 1 $bssrealnum`; do
-    		ip addr flush dev ra$i
+    		ip addr flush dev ra$i > /dev/null 2>&1
 		if [ -d /proc/sys/net/ipv6 ]; then
     		    ip -6 addr flush dev ra$i
 		fi
@@ -102,11 +101,11 @@ retune_wifi() {
 bridge_config() {
 	$LOG "Bridge OperationMode: $opmode"
 	#flush eth2 ip. workaround for change mode to bridge from ethernet converter
-        ip addr flush dev eth2
-	#add wifi interface
-	brctl addif br0 ra0
+        ip addr flush dev eth2 > /dev/null 2>&1
 	#in bridge mode add only eth2 NOT ADD eth2.1 o eth2.2
 	brctl addif br0 eth2
+	#add wifi interface
+	brctl addif br0 ra0
 	addMBSSID
         addWds2Br0
         addMesh2Br0
@@ -114,10 +113,12 @@ bridge_config() {
 
 gate_config() {
 	$LOG "Gateway OperationMode: $opmode"
-	#add wifi interface
-	brctl addif br0 ra0
+	#flush eth2 ip. workaround for change mode to gateway from ethernet converter
+        ip addr flush dev eth2.1 > /dev/null 2>&1
 	#add lan interface
 	brctl addif br0 eth2.1
+	#add wifi interface
+	brctl addif br0 ra0
 	addMBSSID
 	addWds2Br0
 	addMesh2Br0
@@ -129,19 +130,23 @@ ethcv_config() {
 
 apcli_config() {
 	$LOG "ApClient OperationMode: $opmode"
-	#add wifi interface
-	brctl addif br0 ra0
+	#flush eth2 ip. workaround for change mode to apcli from ethernet converter
+        ip addr flush dev eth2 > /dev/null 2>&1
 	#in apcli mode add only eth2 NOT ADD eth2.1 o eth2.2
 	brctl addif br0 eth2
+	#add wifi interface
+	brctl addif br0 ra0
 	addMBSSID
 }
 
 spot_config() {
 	$LOG "HotSpot OperationMode: $opmode"
-	#add wifi interface
-	brctl addif br0 ra0
+	#flush eth2 ip. workaround for change mode to spot from ethernet converter
+        ip addr flush dev eth2.1 > /dev/null 2>&1
 	#add lan interface
 	brctl addif br0 eth2.1
+	#add wifi interface
+	brctl addif br0 ra0
 	addMBSSID
 	addWds2Br0
 	addMesh2Br0
