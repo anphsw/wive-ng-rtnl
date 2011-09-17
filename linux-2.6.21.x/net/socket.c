@@ -549,7 +549,8 @@ static inline int __sock_sendmsg(struct kiocb *iocb, struct socket *sock,
 	if (err)
 		return err;
 
-	return sock->ops->sendmsg(iocb, sock, msg, size);
+	err = sock->ops->sendmsg(iocb, sock, msg, size);
+	return err;
 }
 
 int sock_sendmsg(struct socket *sock, struct msghdr *msg, size_t size)
@@ -600,7 +601,8 @@ static inline int __sock_recvmsg(struct kiocb *iocb, struct socket *sock,
 	if (err)
 		return err;
 
-	return sock->ops->recvmsg(iocb, sock, msg, size, flags);
+	err = sock->ops->recvmsg(iocb, sock, msg, size, flags);
+	return err;
 }
 
 int sock_recvmsg(struct socket *sock, struct msghdr *msg,
