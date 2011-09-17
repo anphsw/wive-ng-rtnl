@@ -257,4 +257,3 @@ drop_disk_caches(){
 # get params
 getLanIfName
 getWanIfName
-getSwType
