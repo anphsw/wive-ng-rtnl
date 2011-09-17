@@ -670,6 +670,10 @@
 50) Fix build at some distro.<br>
 51) Fix dirty inode set in fs subsystem.<br>
 52) Add support volume_id for vfat filesystem.<br>
+53) Hide 802G/N mode for ethernet converter(STA driver not support this mode correct).<br>
+54) Remove some debug messages from web and set auto redirect at apply push.<br>
+55) Rework wifi/wan/lan reinit in internet.sh. More correct for MBSSID mode.<br>
+
 
 suspended) Add skb reuse support.<br>
 suspended) Nvram move to kernel mode. This fix some memleaks and concurent acess to mtd issue.<br>

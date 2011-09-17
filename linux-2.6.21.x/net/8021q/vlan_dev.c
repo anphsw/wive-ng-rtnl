@@ -98,7 +98,7 @@ static inline struct sk_buff *vlan_check_reorder_header(struct sk_buff *skb)
 static inline void vlan_set_encap_proto(struct sk_buff *skb,
 		struct vlan_hdr *vhdr)
 {
-	__be16 proto;                                                                                                                       
+	__be16 proto;
 	unsigned char *rawp;
 
 	/*
