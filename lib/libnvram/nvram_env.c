@@ -57,10 +57,14 @@ static block_t fb[FLASH_BLOCK_NUM] =
 	} \
 } while (0)
 
-#define LIBNV_CHECK_VALID() do { \
+#define LIBNV_CHECK_VALID(x) do { \
 	if (!fb[index].valid) { \
 		LIBNV_PRINT("fb[%d] invalid, init again\n", index); \
 		nvram_init(index); \
+		if (!fb[index].valid) { \
+		    LIBNV_PRINT("fb[%d] invalid, reinit not correct. return.\n", index); \
+		    return x; \
+		} \
 	} \
 } while (0)
 
@@ -104,15 +108,7 @@ int nvram_init(int index)
 #ifdef CONFIG_KERNEL_NVRAM
 	int fd;
 	nvram_ioctl_t nvr;
-#endif
 
-	LIBNV_PRINT("--> nvram_init %d\n", index);
-	LIBNV_CHECK_INDEX();
-
-	if (fb[index].valid)
-		return 0;
-
-#ifdef CONFIG_KERNEL_NVRAM
 	/*
 	 * read data from flash
 	 * skip crc checking which is done by Kernel NVRAM module 
@@ -140,13 +136,21 @@ int nvram_init(int index)
 	if ( ioctl(fd, RALINK_NVRAM_IOCTL_GETALL, &nvr) < 0 )
 	{
 		perror("ioctl");
-		close(fd);
+    		if(fd)
+		    close(fd);
 		free(fb[index].env.data);
 		return -1;
 	}
-
-	close(fd);
+        if(fd)
+	    close(fd);
 #else
+	//LIBNV_PRINT("--> nvram_init %d\n", index);
+	LIBNV_CHECK_INDEX(0);
+
+	//if reinit filed return...
+	if (fb[index].valid)
+		return 0;
+
 	//read crc from flash
 	from = fb[index].flash_offset;
 	len = sizeof(fb[index].env.crc);
@@ -221,11 +225,12 @@ void nvram_close(int index)
 {
 	int i;
 
-	LIBNV_PRINT("--> nvram_close %d\n", index);
+	//LIBNV_PRINT("--> nvram_close %d\n", index);
 	LIBNV_CHECK_INDEX();
 
 	if (!fb[index].valid)
 		return;
+
 	if (fb[index].dirty)
 		nvram_commit(index);
 
@@ -291,16 +296,22 @@ int nvram_set(int index, char *name, char *value)
 {
 	int rc;
 
+#ifndef CONFIG_KERNEL_NVRAM
+	/* Get the fresh value from Kernel NVRAM moduel,
+	 * so there is no need to do nvram_close() and nvram_init() again
+	 */
 	if ( nvram_init(index) == -1 )
 		return -1;
-
+#endif
 	if (nvram_bufset(index, name, value) == -1 ) 
 		rc = -1;
 	else
 	rc = nvram_commit(index);
-
-    nvram_close(index);
-    return rc;
+#ifndef CONFIG_KERNEL_NVRAM
+	//Always need close nvram
+	nvram_close(index);
+#endif
+	return rc;
 }
 
 char *nvram_bufget(int index, char *name)
@@ -312,10 +323,9 @@ char *nvram_bufget(int index, char *name)
 	int fd;
 	nvram_ioctl_t nvr;
 #endif
-
 	//LIBNV_PRINT("--> nvram_bufget %d\n", index);
 	LIBNV_CHECK_INDEX("");
-	LIBNV_CHECK_VALID();
+	LIBNV_CHECK_VALID("");
 
 #ifdef CONFIG_KERNEL_NVRAM
 	nvr.index = index;
@@ -385,16 +395,15 @@ int nvram_bufset(int index, char *name, char *value)
 	int fd;
 	nvram_ioctl_t nvr;
 #endif
-
 	//LIBNV_PRINT("--> nvram_bufset\n");
-
 	LIBNV_CHECK_INDEX(-1);
-	LIBNV_CHECK_VALID();
+	LIBNV_CHECK_VALID(-1);
 
 #ifdef CONFIG_KERNEL_NVRAM
 	nvr.index = index;
 	nvr.name = name;
 	nvr.value = value;
+
 	fd = open(NV_DEV, O_RDONLY);
 	if (fd < 0) {
 		perror(NV_DEV);
@@ -407,7 +416,6 @@ int nvram_bufset(int index, char *name, char *value)
 	}
 	close(fd);
 #endif
-
 	idx = cache_idx(index, name);
 
 	if (-1 == idx) {
@@ -457,17 +465,10 @@ int nvram_commit(int index)
 #ifdef CONFIG_KERNEL_NVRAM
 	int fd;
 	nvram_ioctl_t nvr;
-#else
-	unsigned long to;
-	int i, len;
-	char *p;
-#endif
 
-	//LIBNV_PRINT("--> nvram_commit %d\n", index);
-	LIBNV_CHECK_INDEX(-1);
-	LIBNV_CHECK_VALID();
+	if(!index)
+	    return -1;
 
-#ifdef CONFIG_KERNEL_NVRAM
 	nvr.index = index;
 	fd = open(NV_DEV, O_RDONLY);
 	if (fd < 0) {
@@ -481,6 +482,14 @@ int nvram_commit(int index)
 	}
 	close(fd);
 #else
+	unsigned long to;
+	int i, len;
+	char *p;
+
+	//LIBNV_PRINT("--> nvram_commit %d\n", index);
+	LIBNV_CHECK_INDEX(-1);
+	LIBNV_CHECK_VALID(-1);
+
 	if (!fb[index].dirty) {
 		LIBNV_PRINT("nothing to be committed\n");
 		return 0;
@@ -525,9 +534,7 @@ int nvram_commit(int index)
 	flash_write(fb[index].env.data, to, len);
 	FREE(fb[index].env.data);
 #endif
-
 	fb[index].dirty = 0;
-
 	return 0;
 }
 
@@ -539,16 +546,6 @@ int nvram_clear(int index)
 #ifdef CONFIG_KERNEL_NVRAM
 	int fd;
 	nvram_ioctl_t nvr;
-#else
-	unsigned long to;
-	int len;
-#endif
-
-	LIBNV_PRINT("--> nvram_clear %d\n", index);
-	LIBNV_CHECK_INDEX(-1);
-	nvram_close(index);
-
-#ifdef CONFIG_KERNEL_NVRAM
 	nvr.index = index;
 	fd = open(NV_DEV, O_RDONLY);
 	if (fd < 0) {
@@ -562,6 +559,13 @@ int nvram_clear(int index)
 	}
 	close(fd);
 #else
+	unsigned long to;
+	int len;
+
+	///LIBNV_PRINT("--> nvram_clear %d\n", index);
+	LIBNV_CHECK_INDEX(-1);
+	nvram_close(index);
+
 	//construct all 1s env block
 	len = fb[index].flash_max_len - sizeof(fb[index].env.crc);
 	fb[index].env.data = (char *)malloc(len);
@@ -584,7 +588,6 @@ int nvram_clear(int index)
 	FREE(fb[index].env.data);
 	LIBNV_PRINT("clear flash from 0x%x for 0x%x bytes\n", (unsigned int *)to, len);
 #endif
-
 	fb[index].dirty = 0;
 	return 0;
 }
@@ -595,7 +598,7 @@ int nvram_erase(int index)
 {
 	int s, e;
 
-	LIBNV_PRINT("--> nvram_erase %d\n", index);
+	///LIBNV_PRINT("--> nvram_erase %d\n", index);
 	LIBNV_CHECK_INDEX(-1);
 	nvram_close(index);
 
@@ -839,7 +842,6 @@ int gen_wifi_config(int mode)
 	char tx_rate[16], wmm_enable[16];
 	char temp[2], buf[4];
 
-
 	if ( mode == RT2860_NVRAM )
 	{
 	    //Read radio config
@@ -870,7 +872,6 @@ int gen_wifi_config(int mode)
 	    //reinit nvram
 	    nvram_close(mode);
 	}
-
 	if ( nvram_init(mode) == -1 )
 		return -1;
 
@@ -1053,7 +1054,7 @@ int gen_wifi_config(int mode)
 		FPRINT_STR(WapiPsk14);
 		FPRINT_STR(WapiPsk15);
 		FPRINT_STR(WapiPsk16);
-#endif 
+#endif
 #endif
 		FPRINT_STR(WapiPskType);
 		FPRINT_STR(Wapiifname);
