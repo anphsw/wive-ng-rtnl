@@ -78,7 +78,7 @@ burnrf(){
     echo "Configure part at wifi factory."
     /bin/mtdc_wt
     echo "Flash RF defaults."
-    dd if=$RWCONFIGS of=$MTD2FAC
+    dd if=$RWCONFIGS of=$MTD2FAC conv=sync > /dev/null 2>&1
 }
 
 cleanall(){
