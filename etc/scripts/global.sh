@@ -70,24 +70,6 @@ getWanIfName()
     fi
 }
 
-#select switch type from config
-getSwType()
-{
-    if [ "$CONFIG_RAETH_ROUTER" != "" ]; then
-	#VIA external switch
-	SWITCH_MODE=0
-    elif [ "$CONFIG_MAC_TO_MAC_MODE" != "" ]; then
-	#VTSS external switch
-	SWITCH_MODE=1
-    elif [ "$CONFIG_RT_3052_ESW" != "" ]; then
-	#internal 3052 ESW
-	SWITCH_MODE=2
-    else
-	#default internal switch
-	SWITCH_MODE=2
-    fi
-}
-
 wait_connect()
 #wait connect to ap
 {
@@ -138,8 +120,27 @@ udhcpc_opts()
 		    -O routes -O staticroutes -O msstaticroutes $GETMTU -f &"
 }
 
+#select switch type from config
+getSwType()
+{
+    if [ "$CONFIG_RAETH_ROUTER" != "" ]; then
+	#VIA external switch
+	SWITCH_MODE=0
+    elif [ "$CONFIG_MAC_TO_MAC_MODE" != "" ]; then
+	#VTSS external switch
+	SWITCH_MODE=1
+    elif [ "$CONFIG_RT_3052_ESW" != "" ]; then
+	#internal 3052 ESW
+	SWITCH_MODE=2
+    else
+	#default internal switch
+	SWITCH_MODE=2
+    fi
+}
+
 setSwMode()
 {
+    #set speed and duplex modes per port
     phys_portN=4
     for i in `seq 1 5`; do
 	port_swmode=`nvram_get 2860 port"$i"_swmode`
@@ -169,7 +170,7 @@ if [ "$SWITCH_MODE" = "2" ]; then
 	# with not correct configured from uboot
 	# need only start boot
 	##################################################
-	$LOG "Reinit power mode for all switch ports"
+	echo "Reinit power mode for all switch ports"
 	config-vlan.sh $SWITCH_MODE FFFFF > /dev/null 2>&1
     fi
     ##################################################
