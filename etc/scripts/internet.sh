@@ -94,14 +94,15 @@ addMBSSID()
 }
 
 retune_wifi() {
-    #preconfigure wifi and 40Mhz workaround
-    /etc/scripts/wifi.sh
+	#preconfigure wifi and 40Mhz workaround
+	/etc/scripts/wifi.sh
 }
 
 bridge_config() {
 	$LOG "Bridge OperationMode: $opmode"
 	#flush eth2 ip. workaround for change mode to bridge from ethernet converter
         ip addr flush dev eth2 > /dev/null 2>&1
+	brctl delif br0 eth2 > /dev/null 2>&1
 	#in bridge mode add only eth2 NOT ADD eth2.1 o eth2.2
 	brctl addif br0 eth2
 	#add wifi interface
@@ -115,6 +116,7 @@ gate_config() {
 	$LOG "Gateway OperationMode: $opmode"
 	#flush eth2 ip. workaround for change mode to gateway from ethernet converter
         ip addr flush dev eth2.1 > /dev/null 2>&1
+	brctl delif br0 eth2.1 > /dev/null 2>&1
 	#add lan interface
 	brctl addif br0 eth2.1
 	#add wifi interface
@@ -132,6 +134,7 @@ apcli_config() {
 	$LOG "ApClient OperationMode: $opmode"
 	#flush eth2 ip. workaround for change mode to apcli from ethernet converter
         ip addr flush dev eth2 > /dev/null 2>&1
+	brctl delif br0 eth2 > /dev/null 2>&1
 	#in apcli mode add only eth2 NOT ADD eth2.1 o eth2.2
 	brctl addif br0 eth2
 	#add wifi interface
@@ -143,6 +146,7 @@ spot_config() {
 	$LOG "HotSpot OperationMode: $opmode"
 	#flush eth2 ip. workaround for change mode to spot from ethernet converter
         ip addr flush dev eth2.1 > /dev/null 2>&1
+	brctl delif br0 eth2.1 > /dev/null 2>&1
 	#add lan interface
 	brctl addif br0 eth2.1
 	#add wifi interface
