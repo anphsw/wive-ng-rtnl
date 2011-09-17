@@ -7,10 +7,10 @@
 #include global
 . /etc/scripts/global.sh
 
-stop_serv="vpnhelper inetd shaper crontab pppoe-relay ddns wscd dhcpd lld2d radvd syslog \
+stop_serv="transmission vpnhelper inetd shaper crontab pppoe-relay ddns wscd dhcpd lld2d radvd syslog \
 	    zebra udpxy upnp hotplug igmp_proxy ntp samba dnsserver hotplug"
 
-kill_apps="smbd nmbd pppd xl2tpd udhcpd udhcpc crond lld2d igmpproxy inetd syslogd klogd \
+kill_apps="transmission-daemon smbd nmbd pppd xl2tpd udhcpd udhcpc crond lld2d igmpproxy inetd syslogd klogd \
 	    ntpclient ntpd zebra ripd inadyn stupid-ftpdated \
 	    iwevent telnetd wscd rt2860apd rt61apd dnsmasq"
 
@@ -88,7 +88,7 @@ unload_apps()
     echo "Stop services..." #first step stop services
     for serv in $stop_serv
     do
-	service $serv stop
+	service $serv stop > /dev/null 2>&1
     done
     echo "Wait 3 seconds."
     sleep 3
