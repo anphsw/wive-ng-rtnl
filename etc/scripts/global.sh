@@ -202,6 +202,8 @@ if [ "$SWITCH_MODE" = "2" ]; then
 	    fi
 	fi
     fi
+    #port managment
+    setSwMode
 fi
 }
 

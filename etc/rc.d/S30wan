@@ -54,7 +54,6 @@ start() {
 	echo 1 > "/proc/sys/net/ipv4/conf/$wan_if/forwarding"
 	#reinit switch fix 2.1 driver issue
 	setLanWan
-        setSwMode
     fi
 
     if [ "$wanmode" = "STATIC" ] || [ "$opmode" = "0" ]; then

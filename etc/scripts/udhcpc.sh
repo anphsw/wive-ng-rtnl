@@ -61,7 +61,6 @@ case "$1" in
 	    $LOG "Reinit switch"
 	    # Reset switch
 	    setLanWan
-	    setSwMode
 	fi
     fi
     ;;

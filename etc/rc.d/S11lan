@@ -69,7 +69,6 @@ get_txqlen
     #configure switch at start
     if [ ! -f /var/run/goahead.pid ]; then
 	setLanWan
-	setSwMode
     fi
 
 }
