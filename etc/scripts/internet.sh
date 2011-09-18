@@ -190,7 +190,7 @@ elif [ "$opmode" = "2" ] && [ "$CONFIG_RT2860V2_STA" != "" ]; then
     ethcv_config
 elif [ "$opmode" = "3" ] && [ "$CONFIG_RT2860V2_AP_APCLI" != "" ]; then
     apcli_config
-elif [ "$opmode" = "4" ]; then
+elif [ "$opmode" = "4" ] && [ -f /bin/chilli ]; then
     spot_config
 else
     $LOG "unknown OperationMode use gate_config: $opmode"
