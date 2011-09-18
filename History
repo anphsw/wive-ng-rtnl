@@ -676,7 +676,7 @@
 56) Fix wds reconfigure and operationMode adjustment.<br>
 57) Video turbine MSC extended mode enabled for wifi.(AP/STA mode. variable VideoTurbine 0/1 default 1. need add in webUI)<br>
 58) Carrier Sense Multi-Access/Collision Detection support now enabled for WiFi.(AP/STA mode. variable CarrierDetect 0/1 default1. need add WebUI)<br>
-58) Support dynamic freqrency selection enabled for wifi. (only AP mode. Auto enable)<br>
+59) Support dynamic freqrency selection enabled for wifi. (only AP mode. Auto enable)<br>
 
 suspended) Add skb reuse support.<br>
 suspended) Nvram move to kernel mode. This fix some memleaks and concurent acess to mtd issue.<br>

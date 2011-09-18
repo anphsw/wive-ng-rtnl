@@ -3,10 +3,10 @@
 echo "==================CONFIGURE-LIBUPNP============================"
 APROOTDIR=`pwd`
 
-if [ ! -f $APROOTDIR/configure ]; then
-    cp -f configure.3052 configure
-    touch configure.ac
-fi
+#always replace configure this is build workaround
+cp -f configure.3052 configure
+touch configure.ac
+
 if [ ! -f $APROOTDIR/Makefile.in ]; then
     automake
 fi
