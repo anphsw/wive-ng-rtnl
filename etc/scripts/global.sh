@@ -7,7 +7,7 @@
 #include kernel config
 . /etc/scripts/config.sh
 
-# set default variables
+#set default variables
 wan_if="eth2.2"
 wan_upnp_if="eth2.2"
 lan_if="br0"
@@ -29,7 +29,7 @@ getMacIf()
     LANMAC=`nvram_get 2860 LAN_MAC_ADDR`
 }
 
-# LAN interface name -> $lan_if
+#LAN interface name -> $lan_if
 getLanIfName()
 {
     if [ "$opmode" = "2" ]; then
@@ -41,7 +41,7 @@ getLanIfName()
     fi
 }
 
-# WAN interface name -> $wan_if
+#WAN interface name -> $wan_if
 getWanIfName()
 {
     #real wan name
@@ -70,6 +70,26 @@ getWanIfName()
     fi
 }
 
+#for memory save 16m device uses txqueuelen=100
+get_txqlen()
+{
+    if [ -f /tmp/is_16ram_dev ]; then
+	txqueuelen="100"
+    else
+	txqueuelen="1000"
+    fi
+}
+
+
+#free memory
+drop_disk_caches(){
+    echo "Drop caches"
+    for i in `seq 3 0`; do
+        echo $i > /proc/sys/vm/drop_caches
+    done
+    sync
+}
+
 #wait connect to AP
 wait_connect()
 {
@@ -80,6 +100,20 @@ wait_connect()
     	    exit 0
 	fi
 	staCur_SSID=`iwpriv ra0 connStatus | grep ra0 | awk ' { print $3 } ' | cut -f1 -d[`
+    fi
+}
+
+#L2TP and PPTP kernel dead-loop fix
+vpn_deadloop_fix()
+{
+    if [ "$vpnEnabled" = "on" ]; then
+	if [ "$vpnType" != "0" ] || [ "$opmode" = "2" ]; then
+	    # First vpn stop.. 
+	    # Auto start later renew/bound
+	    service vpnhelper stop > /dev/null 2>&1
+	    ip route flush cache > /dev/null 2>&1
+	    echo 1 > /proc/sys/net/nf_conntrack_flush
+	fi
     fi
 }
 
@@ -121,47 +155,47 @@ udhcpc_opts()
 		-O routes -O staticroutes -O msstaticroutes $GETMTU -f &"
 }
 
-#select switch type from config
-getSwType()
+#configure and start zeroconf daemon
+zero_conf()
 {
-    if [ "$CONFIG_RAETH_ROUTER" != "" ]; then
-	#VIA external switch
-	SWITCH_MODE=0
-    elif [ "$CONFIG_MAC_TO_MAC_MODE" != "" ]; then
-	#VTSS external switch
-	SWITCH_MODE=1
-    elif [ "$CONFIG_RT_3052_ESW" != "" ]; then
-	#internal 3052 ESW
-	SWITCH_MODE=2
-    else
-	#default internal switch
-	SWITCH_MODE=2
+    vpnPurePPPOE=`nvram_get 2860 vpnPurePPPOE`
+    wan_is_not_null=`ip -4 addr show $wan_if | grep inet -c`
+    if [ "$wan_is_not_null" = "0" ]; then
+	$LOG "Call zeroconf for get wan ip address."
+	killall -q zcip
+	killall -q -SIGKILL zcip
+	zcip $wan_if /etc/scripts/zcip.script > /dev/null 2>&1
+	$LOG "Wait zeroconf for get wan ip address."
+	sleep 10
     fi
 }
 
-#configure LAN/WAN switch particion
+#configure LAN/WAN switch particion and mode per port
 setLanWan()
 {
-getSwType
-if [ "$SWITCH_MODE" = "2" ]; then
+##############################################################################
+# Internal 3052 ESW
+##############################################################################
+if [ "$CONFIG_RT_3052_ESW" != "" ]; then
+    SWITCH_MODE=2
     if [ ! -f /var/run/goahead.pid ]; then
-	##################################################
+	######################################################################
 	# workaroud for dir-300NRU and some devices
 	# with not correct configured from uboot
 	# need only start boot
-	##################################################
+	######################################################################
 	echo "Reinit power mode for all switch ports"
 	config-vlan.sh $SWITCH_MODE FFFFF > /dev/null 2>&1
     fi
-    ##################################################
+    ##########################################################################
     echo '######## clear switch partition  ########'
     config-vlan.sh $SWITCH_MODE 0 > /dev/null 2>&1
-    ##################################################
+    ##########################################################################
     echo '######## clear switch mac table  ########'
     switch clear > /dev/null 2>&1
-    ##################################################
+    ##########################################################################
     # In gate mode and hotspot mode configure vlans
-    ##################################################
+    ##########################################################################
     if [ "$opmode" = "1" ] || [ "$opmode" = "4" ]; then
 	wan_port=`nvram_get 2860 wan_port`
 	tv_port=`nvram_get 2860 tv_port`
@@ -183,73 +217,39 @@ if [ "$SWITCH_MODE" = "2" ]; then
 	    fi
 	fi
     fi
-    ##################################################
+    ##########################################################################
     # Set speed and duplex modes per port
-    ##################################################
-    phys_portN=4
-    for i in `seq 1 5`; do
-	port_swmode=`nvram_get 2860 port"$i"_swmode`
-	if [ "$port_swmode" != "auto" ] && [ "$port_swmode" != "" ]; then
-	    echo ">>> Port $phys_portN set mode $port_swmode <<<"
-	    if [ "$port_swmode" = "100f" ]; then
-		mii_mgr -s -p$phys_portN -r0 -v 0x2100
-	    elif [ "$port_swmode" = "100h" ]; then
-		mii_mgr -s -p$phys_portN -r0 -v 0x2000
-	    elif [ "$port_swmode" = "10f" ]; then
-		mii_mgr -s -p$phys_portN -r0 -v 0x0100
-	    elif [ "$port_swmode" = "10h" ]; then
-		mii_mgr -s -p$phys_portN -r0 -v 0x0000
+    ##########################################################################
+    if [ -f /bin/mii_mgr ]; then
+	phys_portN=4
+	for i in `seq 1 5`; do
+	    port_swmode=`nvram_get 2860 port"$i"_swmode`
+	    if [ "$port_swmode" != "auto" ] && [ "$port_swmode" != "" ]; then
+		echo ">>> Port $phys_portN set mode $port_swmode <<<"
+		if [ "$port_swmode" = "100f" ]; then
+		    mii_mgr -s -p$phys_portN -r0 -v 0x2100
+		elif [ "$port_swmode" = "100h" ]; then
+		    mii_mgr -s -p$phys_portN -r0 -v 0x2000
+		elif [ "$port_swmode" = "10f" ]; then
+		    mii_mgr -s -p$phys_portN -r0 -v 0x0100
+		elif [ "$port_swmode" = "10h" ]; then
+		    mii_mgr -s -p$phys_portN -r0 -v 0x0000
+		fi
 	    fi
-	fi
-	let "phys_portN=$phys_portN-1"
-    done
+	    let "phys_portN=$phys_portN-1"
+	done
+    fi
+##############################################################################
+# VIA external switch
+##############################################################################
+elif [ "$CONFIG_RAETH_ROUTER" != "" ]; then
+    SWITCH_MODE=0
+##############################################################################
+# VTSS external switch
+##############################################################################
+elif [ "$CONFIG_MAC_TO_MAC_MODE" != "" ]; then
+    SWITCH_MODE=1
 fi
-}
-
-vpn_deadloop_fix()
-{
-    #L2TP and PPTP kernel dead-loop fix
-    if [ "$vpnEnabled" = "on" ]; then
-	if [ "$vpnType" != "0" ] || [ "$opmode" = "2" ]; then
-	    # First vpn stop.. 
-	    # Auto start later renew/bound
-	    service vpnhelper stop > /dev/null 2>&1
-	    ip route flush cache > /dev/null 2>&1
-	    echo 1 > /proc/sys/net/nf_conntrack_flush
-	fi
-    fi
-}
-
-get_txqlen()
-{
-    #for memory save 16m device uses txqueuelen=100
-    if [ -f /tmp/is_16ram_dev ]; then
-	txqueuelen="100"
-    else
-	txqueuelen="1000"
-    fi
-}
-
-zero_conf()
-{
-    vpnPurePPPOE=`nvram_get 2860 vpnPurePPPOE`
-    wan_is_not_null=`ip -4 addr show $wan_if | grep inet -c`
-    if [ "$wan_is_not_null" = "0" ]; then
-	$LOG "Call zeroconf for get wan ip address."
-	killall -q zcip
-	killall -q -SIGKILL zcip
-	zcip $wan_if /etc/scripts/zcip.script > /dev/null 2>&1
-	$LOG "Wait zeroconf for get wan ip address."
-	sleep 10
-    fi
-}
-
-drop_disk_caches(){
-    echo "Drop caches"
-    for i in `seq 3 0`; do
-        echo $i > /proc/sys/vm/drop_caches
-    done
-    sync
 }
 
 # get params
