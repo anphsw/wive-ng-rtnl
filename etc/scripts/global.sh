@@ -70,8 +70,8 @@ getWanIfName()
     fi
 }
 
+#wait connect to AP
 wait_connect()
-#wait connect to ap
 {
     if [ "$opmode" = "2" ]; then
 	connected=`iwpriv ra0 connStatus | grep Connected -c`
@@ -83,41 +83,42 @@ wait_connect()
     fi
 }
 
+#configure and start dhcp client
 udhcpc_opts()
 {
-	CL_SLEEP=1
-	if [ "$opmode" = "0" ] || [ "$opmode" = "2" ]; then
-	    CL_SLEEP=5
+    CL_SLEEP=1
+    if [ "$opmode" = "0" ] || [ "$opmode" = "2" ]; then
+	CL_SLEEP=5
+	#disable dhcp renew from driver
+	sysctl -w net.ipv4.send_sigusr_dhcpc=9
+    else
+	ForceRenewDHCP=`nvram_get 2860 ForceRenewDHCP`
+	wan_port=`nvram_get 2860 wan_port`
+	if [ "$ForceRenewDHCP" != "0" ] && [ "$wan_port" != "" ]; then
+	    #configure event wait port
+	    sysctl -w net.ipv4.send_sigusr_dhcpc=$wan_port
+	else
 	    #disable dhcp renew from driver
 	    sysctl -w net.ipv4.send_sigusr_dhcpc=9
-	else
-	    ForceRenewDHCP=`nvram_get 2860 ForceRenewDHCP`
-	    wan_port=`nvram_get 2860 wan_port`
-	    if [ "$ForceRenewDHCP" != "0" ] && [ "$wan_port" != "" ]; then
-		#configure event wait port
-		sysctl -w net.ipv4.send_sigusr_dhcpc=$wan_port
-	    else
-		#disable dhcp renew from driver
-		sysctl -w net.ipv4.send_sigusr_dhcpc=9
-	    fi
+	fi
 
-	fi
-	dhcpRequestIP=`nvram_get 2860 dhcpRequestIP`
-	if [ "$dhcpRequestIP" != "" ]; then
-	    REQIP="-r $dhcpRequestIP"
-	else
-	    REQIP=""
-	fi
-	wan_manual_mtu=`nvram_get 2860 wan_manual_mtu`
-	if [ "$wan_manual_mtu" = "0" ]; then
-	    GETMTU="-O mtu"
-	else
-	    GETMTU=""
-	fi
-	HostName=`nvram_get 2860 HostName`
-	UDHCPCOPTS="-i $wan_if -H $HostName $REQIP -S -R -T 5 -a \
-		    -s /bin/udhcpc.sh -p /var/run/udhcpc.pid \
-		    -O routes -O staticroutes -O msstaticroutes $GETMTU -f &"
+    fi
+    dhcpRequestIP=`nvram_get 2860 dhcpRequestIP`
+    if [ "$dhcpRequestIP" != "" ]; then
+	REQIP="-r $dhcpRequestIP"
+    else
+	REQIP=""
+    fi
+    wan_manual_mtu=`nvram_get 2860 wan_manual_mtu`
+    if [ "$wan_manual_mtu" = "0" ]; then
+	GETMTU="-O mtu"
+    else
+	GETMTU=""
+    fi
+    HostName=`nvram_get 2860 HostName`
+    UDHCPCOPTS="-i $wan_if -H $HostName $REQIP -S -R -T 5 -a \
+		-s /bin/udhcpc.sh -p /var/run/udhcpc.pid \
+		-O routes -O staticroutes -O msstaticroutes $GETMTU -f &"
 }
 
 #select switch type from config
@@ -138,28 +139,7 @@ getSwType()
     fi
 }
 
-setSwMode()
-{
-    #set speed and duplex modes per port
-    phys_portN=4
-    for i in `seq 1 5`; do
-	port_swmode=`nvram_get 2860 port"$i"_swmode`
-	if [ "$port_swmode" != "auto" ] && [ "$port_swmode" != "" ]; then
-	    echo ">>> Port $phys_portN set mode $port_swmode <<<"
-	    if [ "$port_swmode" = "100f" ]; then
-		mii_mgr -s -p$phys_portN -r0 -v 0x2100
-	    elif [ "$port_swmode" = "100h" ]; then
-		mii_mgr -s -p$phys_portN -r0 -v 0x2000
-	    elif [ "$port_swmode" = "10f" ]; then
-		mii_mgr -s -p$phys_portN -r0 -v 0x0100
-	    elif [ "$port_swmode" = "10h" ]; then
-		mii_mgr -s -p$phys_portN -r0 -v 0x0000
-	    fi
-	fi
-	let "phys_portN=$phys_portN-1"
-    done
-}
-
+#configure LAN/WAN switch particion
 setLanWan()
 {
 getSwType
@@ -203,8 +183,26 @@ if [ "$SWITCH_MODE" = "2" ]; then
 	    fi
 	fi
     fi
-    #port managment
-    setSwMode
+    ##################################################
+    # Set speed and duplex modes per port
+    ##################################################
+    phys_portN=4
+    for i in `seq 1 5`; do
+	port_swmode=`nvram_get 2860 port"$i"_swmode`
+	if [ "$port_swmode" != "auto" ] && [ "$port_swmode" != "" ]; then
+	    echo ">>> Port $phys_portN set mode $port_swmode <<<"
+	    if [ "$port_swmode" = "100f" ]; then
+		mii_mgr -s -p$phys_portN -r0 -v 0x2100
+	    elif [ "$port_swmode" = "100h" ]; then
+		mii_mgr -s -p$phys_portN -r0 -v 0x2000
+	    elif [ "$port_swmode" = "10f" ]; then
+		mii_mgr -s -p$phys_portN -r0 -v 0x0100
+	    elif [ "$port_swmode" = "10h" ]; then
+		mii_mgr -s -p$phys_portN -r0 -v 0x0000
+	    fi
+	fi
+	let "phys_portN=$phys_portN-1"
+    done
 fi
 }
 
