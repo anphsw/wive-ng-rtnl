@@ -29,7 +29,6 @@
 #include	"wsIntrn.h"
 #include	"internet.h"
 #include	"services.h"
-#include	"wireless.h"
 #include	"firewall.h"
 #include	"management.h"
 #include	"station.h"

@@ -111,8 +111,7 @@ static int getEEPROMCountryCode(char *eeprom_addr)
 {
 	int socket_id, ret;
 	struct iwreq wrq;
-	char name[25];
-	char data[4096];
+	char data[4096] = "";
 	int addr, value, p1, p2;
 	
 	socket_id = socket(AF_INET, SOCK_DGRAM, 0);
@@ -120,13 +119,10 @@ static int getEEPROMCountryCode(char *eeprom_addr)
 		printf("\nrtuser::error::Open socket error!\n\n");
 		return -1;
 	}
-
-	sprintf(name, "ra0");
-	memset(data, 0x00, sizeof(data));
-
+	
 	//strcpy(data, "39"); // Country region code in eeprom 0x39
 	strcpy(data, eeprom_addr); // Country region code in eeprom 0x39(2.4G), 0x38(5G)
-	strcpy(wrq.ifr_name, name);
+	strcpy(wrq.ifr_name, "ra0");
 	wrq.u.data.length = strlen(data)+1;
 	wrq.u.data.pointer = data;
 	wrq.u.data.flags = 0;
@@ -501,6 +497,7 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 	char_t	*radio;
 	char	hidden_ssid[16], noforwarding[16];
 	int i = 0, is_n = 0, new_bssid_num, old_bssid_num = 1;
+	char *submitUrl;
 
 	radio = websGetVar(wp, T("radiohiddenButton"), T("2"));
 	if (!strncmp(radio, "0", 2)) {
@@ -794,7 +791,7 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
 
-	char *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
+	submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
 	if (! submitUrl[0])
 	{
 		//debug print
@@ -833,9 +830,8 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 	else
 		websRedirect(wp, submitUrl);
 
-
 	// restart wireless network
-        doSystem("internet.sh wifionly &");
+    doSystem("internet.sh wifionly &");
 }
 
 /* goform/wirelessAdvanced */
@@ -847,6 +843,7 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 	char_t	*rd_region, *carrier_detect, *lna_gain, *ht_noise_thresh, *ap2040_rescan, *ht_bss_coex;
 	int		i, ssid_num, wlan_mode;
 	char	wmm_enable[16];
+	char *submitUrl;
 
 #ifdef CONFIG_RT2860V2_AP_IGMP_SNOOP
 	char_t	*m2u_enable, *mcast_mcs;
@@ -911,6 +908,7 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 	if (strcmp(ht_bss_coex, "1") == 0)
 		nvram_bufset(RT2860_NVRAM, "HT_BSSCoexApCntThr", ht_noise_thresh);
 	nvram_bufset(RT2860_NVRAM, "AP2040Rescan", ap2040_rescan);
+
 #ifdef CONFIG_RT2860V2_AP_IGMP_SNOOP
 	nvram_bufset(RT2860_NVRAM, "igmpEnabled", m2u_enable);
 	nvram_bufset(RT2860_NVRAM, "McastMcs", mcast_mcs);
@@ -965,7 +963,7 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
 
-	char *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
+	submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
 	if (! submitUrl[0])
 	{
 		//debug print
@@ -997,8 +995,8 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 	else
 		websRedirect(wp, submitUrl);
 
-	// restart wireless network
-	doSystem("internet.sh wifionly &");
+    // restart wireless network
+    doSystem("internet.sh wifionly &");
 }
 
 /* goform/wirelessWds */
@@ -1006,6 +1004,7 @@ static void wirelessWds(webs_t wp, char_t *path, char_t *query)
 {
 	char_t	*wds_mode, *wds_phy_mode, *wds_encryp_type, *wds_encryp_key0,
 			*wds_encryp_key1,*wds_encryp_key2, *wds_encryp_key3, *wds_list;
+	char *submitUrl;
 
 	wds_mode = websGetVar(wp, T("wds_mode"), T("0"));
 	wds_phy_mode = websGetVar(wp, T("wds_phy_mode"), T(""));
@@ -1033,7 +1032,7 @@ static void wirelessWds(webs_t wp, char_t *path, char_t *query)
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
 
-	char *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
+	submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
 	if (! submitUrl[0])
 	{
 		//debug print
@@ -1053,7 +1052,7 @@ static void wirelessWds(webs_t wp, char_t *path, char_t *query)
 		websRedirect(wp, submitUrl);
 
 	// restart wireless network
-        doSystem("internet.sh wifionly &");
+	doSystem("internet.sh wifionly &");
 }
 
 /* goform/wirelessApcli */
@@ -1120,7 +1119,7 @@ static void wirelessApcli(webs_t wp, char_t *path, char_t *query)
 	websDone(wp, 200);
 
 	// restart wireless network
-        doSystem("internet.sh wifionly &");
+	doSystem("internet.sh wifionly &");
 }
 
 /* goform/wirelessWmm */
@@ -1533,6 +1532,7 @@ void Security(int nvram, webs_t wp, char_t *path, char_t *query)
 	char_t *SSID;
 	int mbssid, mbssid_num, i;
 	char_t *security_mode;
+	char *submitUrl;
 
 	LFW(SSID, ssidIndex);
 	if(!gstrlen(SSID))
@@ -1669,7 +1669,7 @@ void Security(int nvram, webs_t wp, char_t *path, char_t *query)
 		doSystem("ifconfig ra%d up", i);
 	}
 
-	char *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
+	submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
 	if (! submitUrl[0])
 	{
 		//debug print

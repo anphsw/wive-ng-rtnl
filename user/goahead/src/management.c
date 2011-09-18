@@ -28,6 +28,7 @@ static void setSysAdm(webs_t wp, char_t *path, char_t *query)
 {
 	char_t *admuser, *admpass;
 	char *old_user;
+	char *submitUrl;
 
 	old_user = nvram_get(RT2860_NVRAM, "Login");
 	admuser = websGetVar(wp, T("admuser"), T(""));
@@ -67,7 +68,7 @@ static void setSysAdm(webs_t wp, char_t *path, char_t *query)
 	umAddUser(admuser, admpass, T("adm"), FALSE, FALSE);
 #endif
 
-	char *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
+	submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
 	if (! submitUrl[0])
 	{
 		websHeader(wp);
@@ -87,11 +88,12 @@ static void setSysAdm(webs_t wp, char_t *path, char_t *query)
 static void setSysLang(webs_t wp, char_t *path, char_t *query)
 {
 	char_t *lang;
+	char *submitUrl;
 
 	lang = websGetVar(wp, T("langSelection"), T(""));
 	nvram_set(RT2860_NVRAM, "Language", lang);
 
-	char *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
+	submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
 	if (! submitUrl[0])
 	{
 		websHeader(wp);
@@ -110,6 +112,7 @@ static void setSysLang(webs_t wp, char_t *path, char_t *query)
 static void NTP(webs_t wp, char_t *path, char_t *query)
 {
 	char *tz, *ntpServer, *ntpEnabled;
+	char *submitUrl;
 
 	tz = websGetVar(wp, T("time_zone"), T(""));
 	ntpServer = websGetVar(wp, T("NTPServerIP"), T(""));
@@ -134,7 +137,7 @@ static void NTP(webs_t wp, char_t *path, char_t *query)
 	else
 		doSystem("service ntp stop &");
 
-	char *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
+	submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
 	if (! submitUrl[0])
 	{
 		websHeader(wp);
@@ -179,6 +182,7 @@ static void DDNS(webs_t wp, char_t *path, char_t *query)
 {
 	char *ddns_provider, *ddns, *ddns_acc, *ddns_pass;
 	char empty_char = '\0';
+	char *submitUrl;
 
 	ddns_provider = websGetVar(wp, T("DDNSProvider"), T("none"));
 	ddns = websGetVar(wp, T("DDNS"), T(""));
@@ -209,7 +213,7 @@ static void DDNS(webs_t wp, char_t *path, char_t *query)
 
 	doSystem("service ddns restart &");
 
-	char *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
+	submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
 	if (! submitUrl[0])
 	{
 		websHeader(wp);
@@ -391,6 +395,7 @@ int getIfStatisticASP(int eid, webs_t wp, int argc, char_t **argv)
 	if (ejArgs(argc, argv, T("%s %s"), &interface, &type) != 2)
 	{
 		websWrite(wp, T("Wrong argument.\n"));
+		fclose(fp);
 		return -1;
 	}
 

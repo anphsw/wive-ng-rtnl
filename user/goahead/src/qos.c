@@ -393,6 +393,8 @@ static void QoSSetup(webs_t wp, char_t *path, char_t *query)
 {
 	char_t *qos_enable, *upload_bandwidth, *download_bandwidth,
 		*upload_bandwidth_custom, *download_bandwidth_custom, *simple_qos;
+	char *submitUrl;	
+		
 	qos_enable = websGetVar(wp, T("QoSSelect"), T(""));
 	upload_bandwidth = websGetVar(wp, T("UploadBandwidth"), T(""));
 	download_bandwidth = websGetVar(wp, T("DownloadBandwidth"), T(""));
@@ -419,7 +421,7 @@ static void QoSSetup(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "QoSEnable", qos_enable);
 
 	// Simple qos
-	simple_qos = ((simple_qos == NULL) || (strcmp(simple_qos, "on") != NULL)) ? "0" : "1";
+	simple_qos = ( (simple_qos == NULL) || (strcmp(simple_qos, "on")) ) ? "0" : "1";
 	nvram_bufset(RT2860_NVRAM, "simple_qos", simple_qos);
 
 	if(!strcmp(qos_enable, "1") /*|| !strcmp(qos_enable, "2")*/)
@@ -455,7 +457,7 @@ static void QoSSetup(webs_t wp, char_t *path, char_t *query)
 
 	QoSRestart();
 
-	char *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
+	submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
 	if (! submitUrl[0])
 	{
 		websHeader(wp);

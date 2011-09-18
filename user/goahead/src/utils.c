@@ -845,30 +845,49 @@ static int getSdkVersion(int eid, webs_t wp, int argc, char_t **argv)
 /*
  * description: check ram size
  */
+#if 1
 static int getMemAmount(int eid, webs_t wp, int argc, char_t **argv)
 {
 	char line[256];
 	char key[64];
 	long long value;
 
-	FILE *fd = fopen("/proc/meminfo", "r");
+	FILE *fp = fopen("/proc/meminfo", "r");
 
 	// Now open /proc/meminfo and output neccessary information
-	if (fd != NULL)
+	if (fp != NULL)
 	{
-		while (fgets(line, 255, fd) != NULL)
+		while ( fgets(line, sizeof(line), fp) )
 		{
-			if (sscanf(line, "%s %lld", &key, &value) == 2)
+			if (sscanf(line, "%s %lld", key, &value) == 2)
 			{
 				if (strcmp(key, "MemTotal:") == 0)
+				{
+					fclose(fp);
 					return websWrite(wp, T("%ld"), (long)value);
+				}
 			}
 		}
-		fclose(fd);
+		
+		fclose(fp);
 	}
 
 	return websWrite(wp, T("0"), RT288X_SDK_VERSION);
 }
+#else
+
+#include <sys/sysinfo.h>
+
+static int getMemAmount(int eid, webs_t wp, int argc, char_t **argv)
+{
+	struct sysinfo si;
+	
+	if ( sysinfo(&si) == -1 )
+		return websWrite(wp, T("0"), RT288X_SDK_VERSION);
+	
+	return websWrite(wp, T("%lu"), si.totalram / 1024);
+}
+#endif
 
 /*
  * description: write System Uptime

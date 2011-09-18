@@ -26,6 +26,10 @@
 #include	"wireless.h"
 #include	"helpers.h"
 
+#ifndef IF_NAMESIZE
+#define IF_NAMESIZE IFNAMSIZ 
+#endif
+
 #ifdef CONFIG_USER_802_1X
 #include	"wps.h"
 #endif
@@ -318,7 +322,7 @@ int getIfNetmask(char *ifname, char *if_net)
 	close(skfd);
 	return 0;
 }
-
+ 
 /*
  * description: return WAN interface name
  *              0 = bridge, 1 = gateway, 2 = wirelss isp
@@ -689,7 +693,7 @@ static int vpnIfaceList(int eid, webs_t wp, int argc, char_t **argv)
 
 void formVPNSetup(webs_t wp, char_t *path, char_t *query)
 {
-	char_t  *vpn_enabled;
+	char_t  *vpn_enabled, *submitUrl;
 
 	vpn_enabled = websGetVar(wp, T("vpn_enabled"), T(""));
 	if (vpn_enabled[0] == '\0')
@@ -736,7 +740,7 @@ void formVPNSetup(webs_t wp, char_t *path, char_t *query)
 	printf("Calling vpn helper...\n");
 	system("service vpnhelper restart &");
 
-	char *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
+	submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
 	if (submitUrl[0])
 		websRedirect(wp, submitUrl);
 	else
@@ -1395,16 +1399,18 @@ static int addRoutingRule(char *buf, const char *dest, const char *netmask, cons
 	}
 	else
 	{
+		FILE *fp;
 		strcat(cmd, " 2>&1 ");
 		printf("%s\n", cmd);
 
-		FILE *fp = popen(cmd, "r");
-		if (fp == NULL)
+		fp = popen(cmd, "r");
+		if (!fp)
 			return 0;
 
 		fgets(cmd, sizeof(cmd), fp);
+		
 		pclose(fp);
-		return strlen(cmd)==0;
+		return strlen(cmd) == 0;
 	}
 }
 
@@ -1613,12 +1619,14 @@ void RoutingInit(void)
 static inline int getNums(char *value, char delimit)
 {
     char *pos = value;
-    int count=1;
-    if(!pos || !strlen(pos))
+    int count = 1;
+    if ( !pos || !(*pos) )
         return 0;
-    while( (pos = strchr(pos, delimit))){
-        pos = pos+1;
-        count++;
+		
+    while( (pos = strchr(pos, delimit)) )
+	{
+        ++pos;
+        ++count;
     }
     return count;
 }
@@ -1657,7 +1665,10 @@ static int getRoutingTable(int eid, webs_t wp, int argc, char_t **argv)
 	{
 		running_rules = calloc(1, sizeof(int) * rule_count);
 		if (!running_rules)
+		{
+			fclose(fp);
 			return -1;
+		}
 	}
 
 	// true_interface[0], destination[1], gateway[2], netmask[3], flags[4], ref[5], use[6],
@@ -1762,7 +1773,8 @@ static void editRouting(webs_t wp, char_t *path, char_t *query)
 	char true_iface[32], destination[32], gateway[32], netmask[32], iface[32], c_iface[32], comment[64], action[4];
 	int i=0, rebuild_vpn=0, iaction;
 
-	char *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
+	char_t *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
+	
 	websHeader(wp);
 	websWrite(wp, T("<h3>Edit routing table:</h3><br>\n"));
 
@@ -2030,13 +2042,14 @@ static void setLan(webs_t wp, char_t *path, char_t *query)
 	char_t	*ip, *nm;
 	char_t	*gw = NULL, *pd = NULL, *sd = NULL;
 	char_t *lan2enabled, *lan2_ip, *lan2_nm;
+	char_t *submitUrl;
 #ifdef GA_HOSTNAME_SUPPORT
 	char_t	*host;
 #endif
 	char	*opmode = nvram_get(RT2860_NVRAM, "OperationMode");
 	char	*wan_ip = nvram_get(RT2860_NVRAM, "wan_ipaddr");
 	char	*ctype = nvram_get(RT2860_NVRAM, "connectionType");
-
+	
 	ip = websGetVar(wp, T("lanIp"), T(""));
 	nm = websGetVar(wp, T("lanNetmask"), T(""));
 	lan2enabled = websGetVar(wp, T("lan2enabled"), T(""));
@@ -2091,8 +2104,8 @@ static void setLan(webs_t wp, char_t *path, char_t *query)
 #endif
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
-	
-	char *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
+
+	submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
 	if (! submitUrl[0])
 	{
 		//debug print
@@ -2117,7 +2130,7 @@ static void setLan(webs_t wp, char_t *path, char_t *query)
 	}
 	else
 		websRedirect(wp, submitUrl);
-
+		
 	doSystem("internet.sh");
 }
 
@@ -2131,6 +2144,10 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 	char_t	*vpn_srv, *vpn_mode;
 	char_t	*l2tp_srv, *l2tp_mode;
 
+	char_t *wan_mtu;
+	char_t *submitUrl;
+	char_t *st_en, *pd, *sd;
+	
 	char	*opmode = nvram_get(RT2860_NVRAM, "OperationMode");
 	char	*lan_ip = nvram_get(RT2860_NVRAM, "lan_ipaddr");
 	char	*lan2enabled = nvram_get(RT2860_NVRAM, "Lan2Enabled");
@@ -2143,6 +2160,8 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 
 	if (!strncmp(ctype, "STATIC", 7) || !strcmp(opmode, "0"))
 	{
+		FILE *fd;
+		
 		//always treat bridge mode having static wan connection
 		ip = websGetVar(wp, T("staticIp"), T(""));
 		nm = websGetVar(wp, T("staticNetmask"), T("0"));
@@ -2196,7 +2215,7 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 		nvram_close(RT2860_NVRAM);
 
 		// Reset /etc/resolv.conf
-		FILE *fd = fopen("/etc/resolv.conf", "w");
+		fd = fopen("/etc/resolv.conf", "w");
 		if (fd != NULL)
 			fclose(fd);
 	}
@@ -2225,9 +2244,9 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 	}
 
 	// Primary/Seconfary DNS set
-	char_t *st_en = websGetVar(wp, T("wStaticDnsEnable"), T("off"));
-	char_t *pd = websGetVar(wp, T("staticPriDns"), T(""));
-	char_t *sd = websGetVar(wp, T("staticSecDns"), T(""));
+	st_en = websGetVar(wp, T("wStaticDnsEnable"), T("off"));
+	pd = websGetVar(wp, T("staticPriDns"), T(""));
+	sd = websGetVar(wp, T("staticSecDns"), T(""));
 
 	nvram_init(RT2860_NVRAM);
 	nvram_bufset(RT2860_NVRAM, "wan_static_dns", st_en);
@@ -2247,14 +2266,14 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 	}
 
 	// MTU for WAN
-	char *wan_mtu = websGetVar(wp, T("wan_mtu"), T("0"));
+	wan_mtu = websGetVar(wp, T("wan_mtu"), T("0"));
 	nvram_bufset(RT2860_NVRAM, "wan_manual_mtu", wan_mtu);
 
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
 
-	char *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
-	if (! submitUrl[0])
+	submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
+	if ( !submitUrl[0] )
 	{
 		// debug print
 		websHeader(wp);
@@ -2276,7 +2295,7 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 		websRedirect(wp, submitUrl);
 
 	/* Prevent deadloop at WAN apply change if VPN started */
-	doSystem("(ip route flush cache &&  service vpnhelper stop) > /dev/null 2>&1");
+	doSystem("(ip route flush cache && service vpnhelper stop) &>/dev/null");
 	initInternet();
 }
 

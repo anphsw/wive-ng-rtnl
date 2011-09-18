@@ -427,13 +427,14 @@ static void socketAccept(socket_t *sp)
  */
 	nid = socketAlloc(sp->host, sp->port, sp->accept, sp->flags);
 	nsp = socketList[nid];
+	
 	a_assert(nsp);
+	if (nsp == NULL)
+		return;
+	
 	nsp->sock = newSock;
 	nsp->flags &= ~SOCKET_LISTENING;
 
-	if (nsp == NULL) {
-		return;
-	}
 /*
  *	Set the blocking mode before calling the accept callback.
  */

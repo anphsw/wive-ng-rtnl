@@ -830,6 +830,8 @@ static int getMaxVol(int eid, webs_t wp, int argc, char_t **argv)
 	double transfer, result=0;
 
 	fscanf(pp, "%*s %*s %s %s %*s %*s\n", maxvol, unit);
+	pclose(pp);
+	
 	transfer = atof(maxvol);
 	if (0 == strcmp(unit, "GB,"))
 	{

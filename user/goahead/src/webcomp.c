@@ -179,8 +179,6 @@ static int compile(char_t *fileList, char_t *prefix)
 	fprintf(stdout, "    { 0, 0, 0 },\n");
 	fprintf(stdout, "};\n");
 	fprintf(stdout, "#endif /* WEBS_PAGE_ROM */\n");
-
-	fclose(lp);
 	fflush(stdout);
 	return 0;
 }

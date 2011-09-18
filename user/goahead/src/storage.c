@@ -53,24 +53,23 @@ void formDefineStorage(void) {
 static void storageAdm(webs_t wp, char_t *path, char_t *query)
 {
 	char_t *user_select, *submit;
-	char feild[20];
+	char field[32] = "";
 
-	feild[0] = '\0';
 	user_select = websGetVar(wp, T("storage_user_select"), T(""));
 	submit = websGetVar(wp, T("hiddenButton"), T(""));
 
 	if (strcmp(submit, "delete") == 0)
 	{
 		nvram_init(RT2860_NVRAM);
-		sprintf(feild, "User%s", user_select);
-		doSystem("storage.sh del \"%s\"", nvram_bufget(RT2860_NVRAM, feild));
-		nvram_bufset(RT2860_NVRAM, feild, "");
-		sprintf(feild, "Upw%s", user_select);
-		nvram_bufset(RT2860_NVRAM, feild, "");
-		sprintf(feild, "Umax%s", user_select);
-		nvram_bufset(RT2860_NVRAM, feild, "");
-		sprintf(feild, "Umode%s", user_select);
-		nvram_bufset(RT2860_NVRAM, feild, "");
+		sprintf(field, "User%s", user_select);
+		doSystem("storage.sh del \"%s\"", nvram_bufget(RT2860_NVRAM, field));
+		nvram_bufset(RT2860_NVRAM, field, "");
+		sprintf(field, "Upw%s", user_select);
+		nvram_bufset(RT2860_NVRAM, field, "");
+		sprintf(field, "Umax%s", user_select);
+		nvram_bufset(RT2860_NVRAM, field, "");
+		sprintf(field, "Umode%s", user_select);
+		nvram_bufset(RT2860_NVRAM, field, "");
 		nvram_commit(RT2860_NVRAM);
 		nvram_close(RT2860_NVRAM);
 
@@ -92,11 +91,10 @@ static void StorageAddUser(webs_t wp, char_t *path, char_t *query)
 {
 	char_t *name, *password, *mul_logins, *max_logins,
 		   *download, *upload, *overwrite, *erase;
-	char mode[6], feild[20];
+	char mode[6] = "";
+	char field[20] = "";
 	int index; 
 
-	mode[0] = '\0';
-	feild[0] = '\0';
 	// fetch from web input
 	name = websGetVar(wp, T("adduser_name"), T(""));
 	password = websGetVar(wp, T("adduser_pw"), T(""));
@@ -127,7 +125,7 @@ static void StorageAddUser(webs_t wp, char_t *path, char_t *query)
 	if (strcmp(erase, "1") == 0)
 		sprintf(mode, "%sE", mode);
 	// DEBUG(mode);
-	// get null user feild form nvram
+	// get null user field form nvram
 	index = GetNthNullUser();
 	// fprintf(stderr, "index: %d\n", index);
 
@@ -136,14 +134,14 @@ static void StorageAddUser(webs_t wp, char_t *path, char_t *query)
 	{
 		nvram_init(RT2860_NVRAM);
 
-		sprintf(feild, "User%d", index);
-		nvram_bufset(RT2860_NVRAM, feild, name);
-		sprintf(feild, "Upw%d", index);
-		nvram_bufset(RT2860_NVRAM, feild, password);
-		sprintf(feild, "Umax%d", index);
-		nvram_bufset(RT2860_NVRAM, feild, max_logins);
-		sprintf(feild, "Umode%d", index);
-		nvram_bufset(RT2860_NVRAM, feild, mode);
+		sprintf(field, "User%d", index);
+		nvram_bufset(RT2860_NVRAM, field, name);
+		sprintf(field, "Upw%d", index);
+		nvram_bufset(RT2860_NVRAM, field, password);
+		sprintf(field, "Umax%d", index);
+		nvram_bufset(RT2860_NVRAM, field, max_logins);
+		sprintf(field, "Umode%d", index);
+		nvram_bufset(RT2860_NVRAM, field, mode);
 
 		nvram_commit(RT2860_NVRAM);
 		nvram_close(RT2860_NVRAM);
@@ -155,10 +153,9 @@ static void StorageEditUser(webs_t wp, char_t *path, char_t *query)
 {
 	char_t *index, *password, *mul_logins, *max_logins,
 		   *download, *upload, *overwrite, *erase;
-	char mode[6], feild[20];
+	char mode[6] = "";
+	char field[20] = "";
 
-	mode[0] = '\0';
-	feild[0] = '\0';
 	// fetch from web input
 	index = websGetVar(wp, T("hiddenIndex"), T(""));
 	password = websGetVar(wp, T("edituser_pw"), T(""));
@@ -182,12 +179,12 @@ static void StorageEditUser(webs_t wp, char_t *path, char_t *query)
 	// set to nvram
 	nvram_init(RT2860_NVRAM);
 
-	sprintf(feild, "Upw%s", index);
-	nvram_bufset(RT2860_NVRAM, feild, password);
-	sprintf(feild, "Umax%s", index);
-	nvram_bufset(RT2860_NVRAM, feild, max_logins);
-	sprintf(feild, "Umode%s", index);
-	nvram_bufset(RT2860_NVRAM, feild, mode);
+	sprintf(field, "Upw%s", index);
+	nvram_bufset(RT2860_NVRAM, field, password);
+	sprintf(field, "Umax%s", index);
+	nvram_bufset(RT2860_NVRAM, field, max_logins);
+	sprintf(field, "Umode%s", index);
+	nvram_bufset(RT2860_NVRAM, field, mode);
 
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
@@ -272,16 +269,17 @@ static void storageSmbSrv(webs_t wp, char_t *path, char_t *query)
 
 static int GetNthNullUser()
 {
-	char *feild, *user_name;
+	char *user_name;
+	char field[16];
 	int result = 0, index;
 
 	nvram_init(RT2860_NVRAM);
 
 	for (index = 1; index < 9; index++)
 	{
-		sprintf(feild, "User%d", index);
-		user_name = nvram_bufget(RT2860_NVRAM, feild);
-		if (strlen(user_name) == 0)
+		sprintf(field, "User%d", index);
+		user_name = nvram_bufget(RT2860_NVRAM, field);
+		if ( !strlen(user_name) )
 		{
 			result = index;
 			break;

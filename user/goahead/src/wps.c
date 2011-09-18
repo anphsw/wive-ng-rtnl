@@ -1095,7 +1095,7 @@ static int getStaWPSBSSIDListASP(int eid, webs_t wp, int argc, char_t **argv)
 					wsc_state = 0;
 					ap_setup_lock = 0xff;
 					selected_registrar = 0xff;
-					memset(uuid_e, 16, 0);
+					memset( uuid_e, 0, sizeof(uuid_e) );
 					rf_band = 0xff;
 					device_password_id = 0xffff;
 					selected_registrar_config_method = 0xffff;

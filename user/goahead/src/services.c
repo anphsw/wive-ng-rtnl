@@ -98,13 +98,16 @@ static int getDhcpCliList(int eid, webs_t wp, int argc, char_t **argv)
 	doSystem("killall -q -USR1 udhcpd");
 
 	fp = fopen("/var/udhcpd.leases", "r");
-	if (NULL == fp)
+	if (!fp)
 		return websWrite(wp, T(""));
 
 	/* Read header of dhcpleases */
-	if (fread(&written_at, 1, sizeof(written_at), fp) != sizeof(written_at))
+	if ( fread(&written_at, 1, sizeof(written_at), fp) != sizeof(written_at) )
+	{
+		fclose(fp);
 		return 0;
-
+	}
+		
 	written_at = ntoh64(written_at);
 	curr = time(NULL);
 	if (curr < written_at)
