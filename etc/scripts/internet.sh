@@ -40,10 +40,14 @@ addMesh2Br0()
         meshenabled=`nvram_get 2860 MeshEnabled`
 	if [ "$meshenabled" = "1" ]; then
 	    getMacIf
+	    ip addr flush dev mesh0 > /dev/null 2>&1
+	    if [ -d /proc/sys/net/ipv6 ]; then
+		ip -6 addr flush dev mesh0 /dev/null 2>&1
+	    fi
 	    ip link set mesh0 down > /dev/null 2>&1
 	    ifconfig mesh0 hw ether $WMAC
-    	    ip link set mesh0 up
     	    brctl addif br0 mesh0
+    	    ip link set mesh0 up
 	fi
     fi
 }
@@ -56,10 +60,14 @@ addWds2Br0()
 	if [ "$wds_en" != "0" ]; then
 	    getMacIf
     	    for i in `seq 0 3`; do
+    		ip addr flush dev wds$i > /dev/null 2>&1
+		if [ -d /proc/sys/net/ipv6 ]; then
+    		    ip -6 addr flush dev wds$i /dev/null 2>&1
+		fi
 		ip link set wds$i down > /dev/null 2>&1
 		ifconfig wds$i hw ether $WMAC
-    		ip link set wds$i up
 		brctl addif br0 wds$i
+    		ip link set wds$i up
     	    done
 	fi
     fi
@@ -71,21 +79,15 @@ addMBSSID()
     if [ "$CONFIG_RT2860V2_AP_MBSS" != "" ]; then
 	bssidnum=`nvram_get 2860 BssidNum`
 	if [ "$bssidnum" != "0" ] && [ "$bssidnum" != "1" ]; then
+	    getMacIf
 	    let "bssrealnum=$bssidnum-1"
 	    for i in `seq 1 $bssrealnum`; do
     		ip addr flush dev ra$i > /dev/null 2>&1
 		if [ -d /proc/sys/net/ipv6 ]; then
     		    ip -6 addr flush dev ra$i /dev/null 2>&1
 		fi
-		#workaround for apcli mode
-		getMacIf
-		if [ "$opmode" = "3" ]; then
-		    REALMAC="$WANMAC"
-		else
-		    REALMAC="$WMAC"
-		fi
 		ip link set ra$i down > /dev/null 2>&1
-		ifconfig ra$i hw ether "$REALMAC"
+		ifconfig ra$i hw ether "$WMAC"
 		brctl addif br0 ra$i
     		ip link set ra$i up
 	    done
