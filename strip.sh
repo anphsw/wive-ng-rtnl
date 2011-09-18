@@ -15,12 +15,14 @@ SCONFIG_SH=$RO_ROOT/etc/scripts/config.sh
 
 echo "Search for parameters used"
 PARAMS=
-tmp= 
+tmp=
 for dir in $RO_ROOT/etc/rc.d $RO_ROOT/etc/scripts
 do
-	tmp=$( grep -r -o "\$CONFIG_[^ \t\"]\+" "$dir"/* | sed 's/^.*$CONFIG_\(.\+\)$/\1/' | sort | uniq )
+	tmp="$( grep -r -o "\$CONFIG_[^ \t\"]\+" "$dir"/* | sed 's/^.*$CONFIG_\(.\+\)$/\1/' | sort | uniq )"
 	PARAMS="$PARAMS $tmp"
 done
+
+echo "Need variables: $PARAMS"
 
 for i in $PARAMS; do
     var=$( eval "echo \$CONFIG_$i" )
