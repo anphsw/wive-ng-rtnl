@@ -71,7 +71,7 @@ stop() {
     killall -q -SIGKILL igmpproxy
     echo 0 > /proc/sys/net/ipv4/conf/all/mc_forwarding
     echo 0 > /proc/sys/net/ipv4/conf/default/mc_forwarding
-    ip route del 224.0.0.0/4 dev $wan_if > /dev/null 2>&1
+    ip route del 224.0.0.0/4 dev "$wan_if" > /dev/null 2>&1
 }
 
 get_param() {

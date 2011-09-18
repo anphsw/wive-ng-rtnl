@@ -35,7 +35,7 @@ start() {
 	fi
 	wan_ipaddr=`LC_ALL=C /bin/ifconfig $wan_upnp_if 2>&1 | grep 'inet addr' | awk '{print $2}' | sed -e 's/.*://'`
         if [ "$wan_ipaddr" != "" ]; then
-	  $LOG "Start upnp at $wan_ipaddr"
+	    $LOG "Start upnp at $wan_ipaddr"
 	    ip route replace 239.0.0.0/8 dev "$lan_if" metric 100
 	    cat /etc/miniupnpd.conf.template > /etc/miniupnpd.conf
 	    cat /etc/miniupnpd.conf.uuid >> /etc/miniupnpd.conf
@@ -48,7 +48,7 @@ stop() {
  $LOG "Stop upnp "
     killall -q miniupnpd
     killall -q -SIGKILL miniupnpd
-    ip route del 239.0.0.0/8 dev $lan_if > /dev/null 2>&1
+    ip route del 239.0.0.0/8 dev "$lan_if" > /dev/null 2>&1
 }
 
 get_param() {

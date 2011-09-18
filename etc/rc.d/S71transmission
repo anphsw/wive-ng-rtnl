@@ -29,8 +29,8 @@ fi
 stop() {
     if [ "`pidof transmission-daemon`" ]; then
 	$LOG "Stop Transmission."
-	killall -q transmission-daemon > /dev/null
-	killall -q -SIGKILL transmission-daemon > /dev/null
+	killall -q transmission-daemon
+	killall -q -SIGKILL transmission-daemon
     fi
 }
 

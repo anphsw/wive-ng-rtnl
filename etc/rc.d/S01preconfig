@@ -26,7 +26,7 @@ start() {
     $LOG "Create some folders in var and etc."
     ndirs="/var/run /var/lock /var/lock/subsys /var/log /var/tmp /var/run/xl2tpd /etc/ppp/ip-up.d /etc/ppp/ip-down.d"
     for dir in $ndirs ; do
-	mkdir -p "$dir" 2> /dev/null
+	mkdir -p "$dir" > /dev/null 2>&1
     done
 
     if [ -f /tmp/is_32ram_dev ]; then
