@@ -175,7 +175,7 @@ if [ "$MODE" != "connect_sta" ]; then
     fi
 fi
 
-#
+# OperationMode adjustment:
 # init ip address to all interfaces for different OperationMode:
 #   0 = Bridge Mode
 #   1 = Gateway Mode
@@ -186,9 +186,9 @@ if [ "$opmode" = "0" ]; then
     bridge_config
 elif [ "$opmode" = "1" ]; then
     gate_config
-elif [ "$opmode" = "2" ]; then
+elif [ "$opmode" = "2" ] && [ "$CONFIG_RT2860V2_STA" != "" ]; then
     ethcv_config
-elif [ "$opmode" = "3" ]; then
+elif [ "$opmode" = "3" ] && [ "$CONFIG_RT2860V2_AP_APCLI" != "" ]; then
     apcli_config
 elif [ "$opmode" = "4" ]; then
     spot_config
