@@ -12,17 +12,19 @@ MODE=$1
 
 LOG="logger -t reconfig"
 
-ifRaxWdsxDown()
+WlanDownAll()
 {
     #down all wireless interfaces and remove from bridge
     for i in `seq 0 7`; do
 	ip link set ra$i down > /dev/null 2>&1
 	brctl delif br0 ra$i > /dev/null 2>&1
     done
-    for i in `seq 0 3`; do
-        ip link set wds$i down > /dev/null 2>&1
-	brctl delif br0 wds$i > /dev/null 2>&1
-    done
+    if [ "$CONFIG_RT2860V2_AP_WDS" != "" ]; then
+	for i in `seq 0 3`; do
+    	    ip link set wds$i down > /dev/null 2>&1
+	    brctl delif br0 wds$i > /dev/null 2>&1
+	done
+    fi
     if [ "$CONFIG_RT2860V2_AP_APCLI" != "" ]; then
 	ip link set apcli0 down > /dev/null 2>&1
 	brctl delif br0 apcli0 > /dev/null 2>&1
@@ -33,7 +35,7 @@ ifRaxWdsxDown()
     fi
 }
 
-addMesh2Br0()
+addMesh()
 {
     #if kernel build without MESH support - exit
     if [ "$CONFIG_RT2860V2_STA_MESH" != "" ] || [ "$CONFIG_RT2860V2_AP_MESH" != "" ]; then
@@ -52,7 +54,7 @@ addMesh2Br0()
     fi
 }
 
-addWds2Br0()
+addWds()
 {
     #if kernel build without WDS support - exit
     if [ "$CONFIG_RT2860V2_AP_WDS" != "" ]; then
@@ -105,8 +107,8 @@ bridge_config() {
 	#add wifi interface
 	brctl addif br0 ra0
 	addMBSSID
-        addWds2Br0
-        addMesh2Br0
+        addWds
+        addMesh
 }
 
 gate_config() {
@@ -119,8 +121,8 @@ gate_config() {
 	#add wifi interface
 	brctl addif br0 ra0
 	addMBSSID
-	addWds2Br0
-	addMesh2Br0
+	addWds
+	addMesh
 }
 
 ethcv_config() {
@@ -149,8 +151,8 @@ spot_config() {
 	#add wifi interface
 	brctl addif br0 ra0
 	addMBSSID
-	addWds2Br0
-	addMesh2Br0
+	addWds
+	addMesh
 }
 
 retune_wifi() {
@@ -164,7 +166,7 @@ if [ "$MODE" != "connect_sta" ]; then
 	vpn_deadloop_fix
     fi
     $LOG "Shutdown wireless interfaces."
-    ifRaxWdsxDown
+    WlanDownAll
     $LOG "Reload modules drivers for current mode."
     service modules restart
     $LOG "Tune wifi modules."
