@@ -673,6 +673,7 @@
 53) Hide 802G/N mode for ethernet converter(STA driver not support this mode correct).<br>
 54) Remove some debug messages from web and set auto redirect at apply push.<br>
 55) Rework wifi/wan/lan reinit in internet.sh. More correct for MBSSID mode.<br>
+56) Fix wds reconfigure and operationMode adjustment.<br>
 
 
 suspended) Add skb reuse support.<br>
