@@ -7,6 +7,9 @@
 #include kernel config
 . /etc/scripts/config.sh
 
+#include profile variables
+. /etc/profile
+
 #set default variables
 wan_if="eth2.2"
 real_wan_if="eth2.2"

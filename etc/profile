@@ -34,10 +34,14 @@ export LC_MEASUREMENT=ru_RU.UTF-8
 export LC_IDENTIFICATION=ru_RU.UTF-8
 export LC_ALL=
 
+#last particion mounted to /media set as public for samba and torrent home dir
+public=`df -h | grep "/dev/sd" | grep "media" | awk {' print $6 '} | tail -n1`
+
+#aliases
+[ -x /usr/bin/vim ] && alias vi=vim || alias vim=vi
+
 #variables for transmissions
-if [ -f /bin/transmission-daemon ]; then
-    #last particion mounted to /media set as public for samba and torrent home dir
-    public=`df -h | grep "/dev/sd" | grep "media" | awk {' print $6 '} | tail -n1`
+if [ -f /bin/transmission-daemon ] && [ "$public" != "" ]; then
     if [ "$public" != "" ]; then
 	export TRANSMISSION_HOME="$public"
 	export TRANSMISSION_WEB_HOME=/share/transmission/web
@@ -45,6 +49,3 @@ if [ -f /bin/transmission-daemon ]; then
 	export XDG_DATA_DIRS=/share/transmission/web
     fi
 fi
-
-#aliases
-[ -x /usr/bin/vim ] && alias vi=vim || alias vim=vi

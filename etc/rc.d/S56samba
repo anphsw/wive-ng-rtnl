@@ -101,8 +101,6 @@ get_param() {
     fi
     if [ -d /proc/bus/usb ]; then
 	socket_options="SO_BROADCAST IPTOS_THROUGHPUT TCP_NODELAY SO_RCVBUF=65536 SO_SNDBUF=65536" >> $CONFIG
-	#last particion mounted to /media set as public for samba and torrent home dir
-	public=`df -h | grep "/dev/sd" | grep "media" | awk {' print $6 '} | tail -n1`
     else
 	socket_options="SO_BROADCAST IPTOS_THROUGHPUT TCP_NODELAY SO_RCVBUF=1024 SO_SNDBUF=1024" >> $CONFIG
     fi
