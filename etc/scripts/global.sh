@@ -9,7 +9,7 @@
 
 #set default variables
 wan_if="eth2.2"
-wan_upnp_if="eth2.2"
+real_wan_if="eth2.2"
 lan_if="br0"
 lan2_if="br0:9"
 
@@ -64,9 +64,14 @@ getWanIfName()
 
     #upnp wan name
     if [ "$vpnEnabled" = "on" ]; then
-        wan_upnp_if="ppp0"
+	get_wan_if=`ls /proc/sys/net/ipv4/conf/ | grep ppp | tail -n1`
+	if [ "$get_ppp_wan_if" != "" ]; then
+    	    real_wan_if="$get_ppp_wan_if"
+	else
+    	    real_wan_if="ppp0"
+	fi
     else
-        wan_upnp_if=$wan_if
+        real_wan_if=$wan_if
     fi
 }
 

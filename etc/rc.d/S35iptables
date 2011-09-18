@@ -322,7 +322,7 @@ start() {
 		$LOG "Add base upnp rules"
     		iptables -t nat -N MINIUPNPD
     		iptables -t nat -F MINIUPNPD
-    		iptables -t nat -A PREROUTING -i $wan_upnp_if -d ! $lan_nm -j MINIUPNPD
+    		iptables -t nat -A PREROUTING -i $real_wan_if -d ! $lan_nm -j MINIUPNPD
     		iptables -t filter -N MINIUPNPD
     		iptables -t filter -F MINIUPNPD
     		iptables -t filter -I FORWARD -j MINIUPNPD
@@ -354,30 +354,31 @@ start() {
 
 
 stop() {
-	iptables -F > /dev/null 2>&1
-	iptables -t nat -F > /dev/null 2>&1
-        iptables -t filter -F > /dev/null 2>&1
-        iptables -t mangle -F > /dev/null 2>&1
-        iptables -X > /dev/null 2>&1
-        iptables -t nat -X > /dev/null 2>&1
-        iptables -t filter -X > /dev/null 2>&1
-        iptables -t mangle -X > /dev/null 2>&1
+    #drop all rules
+    iptables -F > /dev/null 2>&1
+    iptables -t nat -F > /dev/null 2>&1
+    iptables -t filter -F > /dev/null 2>&1
+    iptables -t mangle -F > /dev/null 2>&1
+    iptables -X > /dev/null 2>&1
+    iptables -t nat -X > /dev/null 2>&1
+    iptables -t filter -X > /dev/null 2>&1
+    iptables -t mangle -X > /dev/null 2>&1
 
-        iptables -t mangle -F PREROUTING > /dev/null 2>&1
-        iptables -t mangle -F FORWARD > /dev/null 2>&1
-        iptables -t mangle -F INPUT > /dev/null 2>&1
-        iptables -t mangle -F OUTPUT > /dev/null 2>&1
-        iptables -t mangle -F POSTROUTING > /dev/null 2>&1
+    iptables -t mangle -F PREROUTING > /dev/null 2>&1
+    iptables -t mangle -F FORWARD > /dev/null 2>&1
+    iptables -t mangle -F INPUT > /dev/null 2>&1
+    iptables -t mangle -F OUTPUT > /dev/null 2>&1
+    iptables -t mangle -F POSTROUTING > /dev/null 2>&1
 
-        iptables -t nat -Z > /dev/null 2>&1
-        iptables -t filter -Z > /dev/null 2>&1
-        iptables -t mangle -Z > /dev/null 2>&1
-	iptables -Z > /dev/null 2>&1
+    iptables -t nat -Z > /dev/null 2>&1
+    iptables -t filter -Z > /dev/null 2>&1
+    iptables -t mangle -Z > /dev/null 2>&1
+    iptables -Z > /dev/null 2>&1
 
-	#default actions
-	iptables -P FORWARD DROP > /dev/null 2>&1
-	iptables -P INPUT   DROP > /dev/null 2>&1
-	iptables -P OUTPUT ACCEPT > /dev/null 2>&1
+    #default actions
+    iptables -P FORWARD DROP > /dev/null 2>&1
+    iptables -P INPUT   DROP > /dev/null 2>&1
+    iptables -P OUTPUT ACCEPT > /dev/null 2>&1
 }
 
 get_param() {

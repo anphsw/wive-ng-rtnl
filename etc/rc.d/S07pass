@@ -28,6 +28,7 @@ get_param() {
     Login=`nvram_get 2860 Login`
     Password=`nvram_get 2860 Password`
 }
+
 case "$1" in
 	start)
 	    start

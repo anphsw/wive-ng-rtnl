@@ -67,7 +67,7 @@ start() {
 }
 
 stop() {
- $LOG "Stopping sysctl"
+    echo "" > /dev/null
 }
 
 case "$1" in

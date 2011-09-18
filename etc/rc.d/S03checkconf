@@ -3,31 +3,7 @@
 LOG="echo CHECKCONF"
 
 start() {
-    get_param
-    check_nvram
-}
-
-stop() {
-    echo "" > /dev/null
-}
-
-get_param() {
-    IS_WIVE=`nvram_get 2860 IS_WIVE`
-    Login=`nvram_get 2860 Login`
-    Password=`nvram_get 2860 Password`
-    opmode=`nvram_get 2860 OperationMode`
-    WorkGroup=`nvram_get 2860  WorkGroup`
-    SmbNetBIOS=`nvram_get 2860 SmbNetBIOS`
-    SmbString=`nvram_get 2860  SmbString`
-    HostName=`nvram_get 2860 HostName`
-    MAC_TEST=`nvram_get 2860 WAN_MAC_ADDR | grep 00:0B:2B -c`
-    WMAC_TEST=`nvram_get 2860 WLAN_MAC_ADDR | grep 00:0B:2B -c`
-    LANMAC_TEST=`nvram_get 2860 LAN_MAC_ADDR | grep 00:0B:2B -c`
-    CHECKMAC=`nvram_get 2860 CHECKMAC`
-}
-
-check_nvram()
-{
+ get_param
  if [ ! -f /tmp/nvram_checked ]; then
     #include kernel config
     . /etc/scripts/config.sh
@@ -107,6 +83,25 @@ check_nvram()
  touch /tmp/nvram_checked
 }
 
+stop() {
+    echo "" > /dev/null
+}
+
+get_param() {
+    IS_WIVE=`nvram_get 2860 IS_WIVE`
+    Login=`nvram_get 2860 Login`
+    Password=`nvram_get 2860 Password`
+    opmode=`nvram_get 2860 OperationMode`
+    WorkGroup=`nvram_get 2860  WorkGroup`
+    SmbNetBIOS=`nvram_get 2860 SmbNetBIOS`
+    SmbString=`nvram_get 2860  SmbString`
+    HostName=`nvram_get 2860 HostName`
+    MAC_TEST=`nvram_get 2860 WAN_MAC_ADDR | grep 00:0B:2B -c`
+    WMAC_TEST=`nvram_get 2860 WLAN_MAC_ADDR | grep 00:0B:2B -c`
+    LANMAC_TEST=`nvram_get 2860 LAN_MAC_ADDR | grep 00:0B:2B -c`
+    CHECKMAC=`nvram_get 2860 CHECKMAC`
+}
+
 case "$1" in
 	start)
 	    start
@@ -120,7 +115,6 @@ case "$1" in
 	    stop
 	    start
 	    ;;
-
 	*)
 	    echo $"Usage: $0 {start|stop|restart}"
 	    exit 1

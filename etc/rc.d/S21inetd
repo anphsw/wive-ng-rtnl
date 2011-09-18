@@ -33,15 +33,15 @@ start() {
 
 stop() {
  $LOG "Stopping inetd"
- killall -q inetd
- killall -q -SIGKILL inetd
+    killall -q inetd
+    killall -q -SIGKILL inetd
 }
 
 get_param() {
- Login=`nvram_get 2860 Login`
- RemoteSSH=`nvram_get 2860 RemoteSSH`
- RemoteFTP=`nvram_get 2860 RemoteFTP`
- RemoteTelnet=`nvram_get 2860 RemoteTelnet`
+    Login=`nvram_get 2860 Login`
+    RemoteSSH=`nvram_get 2860 RemoteSSH`
+    RemoteFTP=`nvram_get 2860 RemoteFTP`
+    RemoteTelnet=`nvram_get 2860 RemoteTelnet`
 }
 
 case "$1" in

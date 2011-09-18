@@ -74,7 +74,7 @@ get_txqlen
 }
 
 stop() {
-$LOG "Stop network interfaces..."
+  $LOG "Stop network interfaces..."
     #first down bridge
     ip link set br0 down > /dev/null 2>&1
     dev=`grep eth < /proc/net/vlan/config | cut -d' ' -f 1`

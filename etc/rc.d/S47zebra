@@ -27,9 +27,9 @@ start() {
 }
 
 stop() {
- $LOG "Stopping ZEBRA"
-  killall -q zebra
-  killall -q -SIGKILL zebra
+  $LOG "Stopping ZEBRA"
+    killall -q zebra
+    killall -q -SIGKILL zebra
 }
 
 case "$1" in

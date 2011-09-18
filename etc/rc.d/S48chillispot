@@ -19,18 +19,6 @@ PARAMS="net dns1 dns2 domain radiuslisten radiusserver1 radiusserver2 \
     uamallowed macallowed"
 BOOLPARAMS="coanoipcheck uamanydns"
 
-get_params() {
-    PARLINE="--dhcpif br0"
-    for i in $PARAMS; do
-	val=`nvram_get 2860 chilli_$i`
-	[ -n "$val" ] && PARLINE="$PARLINE --$i $val"
-    done
-    for i in $BOOLPARAMS; do
-	val=`nvram_get 2860 chilli_$i`
-	[ "$val" = "on" ] && PARLINE="$PARLINE --$i"
-    done
-}
-
 start() {
     if [ "$opmode" = "4" ] && [ -f /etc/chilli.conf ]; then
 	$LOG "Starting ChilliSpot"
@@ -41,9 +29,21 @@ start() {
 }
 
 stop() {
-    $LOG "Stopping ChilliSpot"
+  $LOG "Stopping ChilliSpot"
     killall -q chilli
     killall -q -SIGKILL chilli
+}
+
+get_params() {
+    PARLINE="--dhcpif br0"
+    for i in $PARAMS; do
+	val=`nvram_get 2860 chilli_$i`
+	[ -n "$val" ] && PARLINE="$PARLINE --$i $val"
+    done
+    for i in $BOOLPARAMS; do
+	val=`nvram_get 2860 chilli_$i`
+	[ "$val" = "on" ] && PARLINE="$PARLINE --$i"
+    done
 }
 
 case "$1" in

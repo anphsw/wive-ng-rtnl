@@ -34,20 +34,20 @@ start() {
       #call to vpn
       if [ "$vpnType" = "0" ]; then
 	$LOG "PPPOE calling..."
-	(sleep $SLEEP && /etc/scripts/config-pppoe.sh) &
+	(sleep 8 && /etc/scripts/config-pppoe.sh) &
       elif [ "$vpnType" = "1" ]; then
 	$LOG "PPTP calling..."
-	(sleep $SLEEP && /etc/scripts/config-pptp.sh) &
+	(sleep 8 && /etc/scripts/config-pptp.sh) &
       elif [ "$vpnType" = "2" ]; then
 	$LOG "L2TP calling..."
-	(sleep $SLEEP && /etc/scripts/config-l2tp.sh) &
+	(sleep 8 && /etc/scripts/config-l2tp.sh) &
       elif [ "$vpnType" = "6" ]; then
 	if [ "$lanauthpid" != "" ]; then
 	    $LOG "LANAUTH call reload..."
 	    /etc/scripts/config-lanauth.sh reload &
 	else
 	    $LOG "LANAUTH calling..."
-	    (sleep $SLEEP && /etc/scripts/config-lanauth.sh start) &
+	    (sleep 8 && /etc/scripts/config-lanauth.sh start) &
 	fi
       fi
     fi
@@ -97,11 +97,6 @@ get_param() {
     vpnPassword=`nvram_get 2860 vpnPassword`
     lanauthpid=`pidof lanauth`
     ppp=/etc/ppp
-    if [ "$opmode" = "2" ]; then
-	SLEEP=10
-    else
-	SLEEP=5
-    fi
 }
 
 case "$1" in

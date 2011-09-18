@@ -8,21 +8,21 @@ fi
 LOG="logger -t dnsserver"
 
 start() {
-    get_param
-    if [ "$dnsPEnabled" = "1" ] && [ -f /etc/dnsmasq.conf ]; then
+  get_param
+    if [ "$dnsPEnabled" = "1" ] && [ -f $cname ]; then
 	if [ -f /tmp/is_32ram_dev ]; then
 	    EXT_OPT="-c 128 --dns-forward-max=32"
 	else
 	    EXT_OPT="-c 32 --dns-forward-max=16"
 	fi
 	$LOG "Starting DNSMASQ"
-    	/bin/dnsmasq -N $EXT_OPT --all-servers --clear-on-reload --leasefile-ro \
+	/bin/dnsmasq -N $EXT_OPT --all-servers --clear-on-reload --leasefile-ro \
 	    -u nobody -g nobody -C "$cname" -r "$fname" -H "$hname" -f &
     fi
 }
 
 stop() {
-    $LOG "Stopping DNSMASQ"
+  $LOG "Stopping DNSMASQ"
     killall -q dnsmasq
     dnsmasqpid=`pidof dnsmasq`
     if [ "$dnsmasqpid" != "" ]; then
