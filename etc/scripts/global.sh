@@ -201,18 +201,18 @@ if [ "$CONFIG_RT_3052_ESW" != "" ]; then
 	tv_port=`nvram_get 2860 tv_port`
 	if [ "$wan_port" = "0" ]; then
 	    if [ "$tv_port" = "1" ]; then
-		echo '##### config vlan partition (WWLLL) #####'
+		echo '##### ESW config vlan partition (WWLLL) #####'
 		config-vlan.sh $SWITCH_MODE WWLLL > /dev/null 2>&1
 	    else
-		echo '##### config vlan partition (WLLLL) #####'
+		echo '##### ESW config vlan partition (WLLLL) #####'
 		config-vlan.sh $SWITCH_MODE WLLLL > /dev/null 2>&1
 	    fi
 	else
 	    if [ "$tv_port" = "1" ]; then
-		echo '##### config vlan partition (LLLWW) #####'
+		echo '##### ESW config vlan partition (LLLWW) #####'
 		config-vlan.sh $SWITCH_MODE LLLWW > /dev/null 2>&1
 	    else
-		echo '##### config vlan partition (LLLLW) #####'
+		echo '##### ESW config vlan partition (LLLLW) #####'
 		config-vlan.sh $SWITCH_MODE LLLLW > /dev/null 2>&1
 	    fi
 	fi
@@ -240,15 +240,36 @@ if [ "$CONFIG_RT_3052_ESW" != "" ]; then
 	done
     fi
 ##############################################################################
-# VIA external switch
-##############################################################################
-elif [ "$CONFIG_RAETH_ROUTER" != "" ]; then
-    SWITCH_MODE=0
-##############################################################################
 # VTSS external switch
 ##############################################################################
 elif [ "$CONFIG_MAC_TO_MAC_MODE" != "" ]; then
     SWITCH_MODE=1
+    ##########################################################################
+    echo '######## clear switch partition  ########'
+    config-vlan.sh $SWITCH_MODE 0 > /dev/null 2>&1
+    echo '##### config vlan partition (VTSS) #####'
+    config-vlan.sh $SWITCH_MODE 1 > /dev/null 2>&1
+##############################################################################
+# IC+ external switch
+##############################################################################
+elif [ "$CONFIG_RAETH_ROUTER" != "" ]; then
+    SWITCH_MODE=0
+    ##########################################################################
+    echo '######## clear switch partition  ########'
+    config-vlan.sh $SWITCH_MODE 0 > /dev/null 2>&1
+    ##########################################################################
+    # In gate mode and hotspot mode configure vlans
+    ##########################################################################
+    if [ "$opmode" = "1" ] || [ "$opmode" = "4" ]; then
+	wan_port=`nvram_get 2860 wan_port`
+	if [ "$wan_port" = "0" ]; then
+	    echo '##### IC+ config vlan partition (WLLLL) #####'
+	    config-vlan.sh $SWITCH_MODE WLLLL > /dev/null 2>&1
+	else
+	    echo '##### IC+ config vlan partition (LLLLW) #####'
+	    config-vlan.sh $SWITCH_MODE LLLLW > /dev/null 2>&1
+	fi
+    fi
 fi
 }
 
