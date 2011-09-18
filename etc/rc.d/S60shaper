@@ -136,7 +136,7 @@ stop() {
     #Drop all QoS rules
     get_param
     set_def
-    INTERFACES=`ls /proc/sys/net/ipv4/conf/ | grep -vE "lo|all|default"` > /dev/null 2>&1
+    INTERFACES=`ls /proc/sys/net/ipv4/conf/ | grep -vE "lo|all|default"`
     for i in $INTERFACES; do
         echo $i;
 	tc qdisc del dev $i root > /dev/null 2>&1
