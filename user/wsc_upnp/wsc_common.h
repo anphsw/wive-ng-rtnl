@@ -1,19 +1,3 @@
-/*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
 #ifndef __WSC_COMMON_H__
 #define __WSC_COMMON_H__
 
@@ -81,7 +65,7 @@ extern unsigned char HostMacAddr[MAC_ADDR_LEN];	// Used to save the MAC address 
 #define DEFAULT_PID_FILE_PATH		"/var/run/wscd.pid"
 
 #define USE_XML_TEMPLATE
-#define DEFAULT_WEB_ROOT_DIR	"/xml/"
+#define DEFAULT_WEB_ROOT_DIR	"/etc_ro/xml/"
 #define DEFAULT_DESC_FILE_NAME	"WFADeviceDesc.xml"
 
 
@@ -89,10 +73,10 @@ extern unsigned char HostMacAddr[MAC_ADDR_LEN];	// Used to save the MAC address 
 #define WSC_SYS_SUCCESS 0
 
 typedef enum{
-	UPNP_OPMODE_DISABLE = 0,
-	UPNP_OPMODE_DEV = 1,
-	UPNP_OPMODE_CP = 2,
-	UPNP_OPMODE_BOTH = 3
+	WSC_UPNP_OPMODE_DISABLE = 0,
+	WSC_UPNP_OPMODE_DEV = 1,
+	WSC_UPNP_OPMODE_CP = 2,
+	WSC_UPNP_OPMODE_BOTH = 3
 }WSC_UPNP_OPMODE;
 
 
@@ -100,7 +84,8 @@ typedef enum{
 	RT_DBG_OFF		= 0,
 	RT_DBG_ERROR	= 1,
 	RT_DBG_PKT		= 2,
-	RT_DBG_INFO		= 3,
+	RT_DBG_INFO	= 3,
+	RT_DBG_LOUD	= 4,
 	RT_DBG_ALL
 }WSC_DEBUG_LEVEL;
 
@@ -141,7 +126,7 @@ typedef	struct PACKED _EAP_FRAME{
 
 #define RTMP_WSC_NLMSG_HDR_LEN		30		//signature(8) + envID(4) + ackID(4) + msgLen(4) + Flag(2) + segLen(2) + devAddr(6)
 typedef struct PACKED _RTMP_WSC_NLMSG_HDR{
-	char	signature[8];	/* Signature used to identify that this's a Ralink specific NETLINK message. 
+	uint8	signature[8];	/* Signature used to identify that this's a Ralink specific NETLINK message. 
 								MUST be "RAWSCMSG" currently.
 							*/
 	uint32	envID;			// Unique event Identification assigned by sender.
@@ -153,9 +138,7 @@ typedef struct PACKED _RTMP_WSC_NLMSG_HDR{
 								need to do fragement for our msg. If one message was fragemented as serveral pieces, the 
 								user space receiver need to re-assemble it.
 							 */
-#ifdef MULTIPLE_CARD_SUPPORT
-	unsigned char devAddr[MAC_ADDR_LEN];		// MAC address who send this netlink msg.
-#endif // MULTIPLE_CARD_SUPPORT //
+	uint8	devAddr[MAC_ADDR_LEN];		// MAC address of the net device which send this netlink msg.
 }RTMP_WSC_NLMSG_HDR;
 
 #define RTMP_WSC_MSG_HDR_LEN		12	//msgType(2) + msgSubType(2) + ipAddr(4) + len(4)
@@ -179,7 +162,7 @@ typedef	struct PACKED _WSC_U2KMSG_HDR{
 	uint32				envID;					//Event ID.
 	char				Addr1[MAC_ADDR_LEN];	//RA, should be the MAC address of the AP.
 	char				Addr2[MAC_ADDR_LEN];	//TA, should be the ipAddress of remote UPnP Device/CotrnolPoint.
-	char				Addr3[MAC_ADDR_LEN];	//DA, Not used now.
+	char				Addr3[MAC_ADDR_LEN];	//DA, the MAC addr of dest STA.
 	char				rsvWLHdr[2];			//Reserved space for remained 802.11 hdr content.
 	char				rsv1HHdr[LENGTH_802_1_H];//Reserved space for 802.1h header
 	IEEE8021X_FRAME 	IEEE8021XHdr;			//802.1X header

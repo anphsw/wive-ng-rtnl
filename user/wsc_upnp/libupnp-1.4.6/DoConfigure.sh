@@ -3,7 +3,6 @@
 echo "==================CONFIGURE-LIBUPNP============================"
 APROOTDIR=`pwd`
 
-#always replace configure this is build workaround
 cp -f configure.3052 configure
 touch configure.ac
 
