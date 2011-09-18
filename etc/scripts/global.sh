@@ -202,18 +202,18 @@ if [ "$CONFIG_RT_3052_ESW" != "" ]; then
 	if [ "$wan_port" = "0" ]; then
 	    if [ "$tv_port" = "1" ]; then
 		echo '##### config vlan partition (WWLLL) #####'
-		config-vlan.sh $SWITCH_MODE WWLLL
+		config-vlan.sh $SWITCH_MODE WWLLL > /dev/null 2>&1
 	    else
 		echo '##### config vlan partition (WLLLL) #####'
-		config-vlan.sh $SWITCH_MODE WLLLL
+		config-vlan.sh $SWITCH_MODE WLLLL > /dev/null 2>&1
 	    fi
 	else
 	    if [ "$tv_port" = "1" ]; then
 		echo '##### config vlan partition (LLLWW) #####'
-		config-vlan.sh $SWITCH_MODE LLLWW
+		config-vlan.sh $SWITCH_MODE LLLWW > /dev/null 2>&1
 	    else
 		echo '##### config vlan partition (LLLLW) #####'
-		config-vlan.sh $SWITCH_MODE LLLLW
+		config-vlan.sh $SWITCH_MODE LLLLW > /dev/null 2>&1
 	    fi
 	fi
     fi
@@ -227,13 +227,13 @@ if [ "$CONFIG_RT_3052_ESW" != "" ]; then
 	    if [ "$port_swmode" != "auto" ] && [ "$port_swmode" != "" ]; then
 		echo ">>> Port $phys_portN set mode $port_swmode <<<"
 		if [ "$port_swmode" = "100f" ]; then
-		    mii_mgr -s -p$phys_portN -r0 -v 0x2100
+		    mii_mgr -s -p$phys_portN -r0 -v 0x2100 > /dev/null 2>&1
 		elif [ "$port_swmode" = "100h" ]; then
-		    mii_mgr -s -p$phys_portN -r0 -v 0x2000
+		    mii_mgr -s -p$phys_portN -r0 -v 0x2000 > /dev/null 2>&1
 		elif [ "$port_swmode" = "10f" ]; then
-		    mii_mgr -s -p$phys_portN -r0 -v 0x0100
+		    mii_mgr -s -p$phys_portN -r0 -v 0x0100 > /dev/null 2>&1
 		elif [ "$port_swmode" = "10h" ]; then
-		    mii_mgr -s -p$phys_portN -r0 -v 0x0000
+		    mii_mgr -s -p$phys_portN -r0 -v 0x0000 > /dev/null 2>&1
 		fi
 	    fi
 	    let "phys_portN=$phys_portN-1"
