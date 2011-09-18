@@ -2077,7 +2077,7 @@ VOID NewRadarDetectionStart(
 	}
 #endif // RTMP_RBUS_SUPPORT //
 #endif // DFS_HWTIMER_SUPPORT //
-	
+
 }
 
 

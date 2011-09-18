@@ -238,7 +238,7 @@ void refresh_wdg_timer(unsigned long unused)
 }
 
 
-int32_t __init timer_init_module(void)
+int32_t __init wdt_timer_init_module(void)
 {
     printk("Load Timer Module(Wdg/Soft)\n");
 
@@ -270,7 +270,7 @@ int32_t __init timer_init_module(void)
     return 0;
 }
 
-void __exit timer_cleanup_module(void)
+void __exit wdt_timer_cleanup_module(void)
 {
     printk("Unload Timer Module(Wdg/Soft)\n");
 
@@ -279,8 +279,8 @@ void __exit timer_cleanup_module(void)
 
 }
 
-module_init(timer_init_module);
-module_exit(timer_cleanup_module);
+module_init(wdt_timer_init_module);
+module_exit(wdt_timer_cleanup_module);
 
 MODULE_DESCRIPTION("Ralink Timer Module(Wdg/Soft)");
 MODULE_AUTHOR("Steven Liu");

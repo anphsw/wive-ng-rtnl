@@ -3546,10 +3546,10 @@ INT	Set_RadarShow_Proc(
 	IN	PRTMP_ADAPTER	pAd, 
 	IN	PSTRING			arg)
 {
-	int i;
 
 #ifdef DFS_SUPPORT
 #ifdef DFS_HARDWARE_SUPPORT
+	int i;
 	if (pAd->CommonCfg.dfs_func >= HARDWARE_DFS_V1)
 	{
 		printk("DFSUseTasklet = %d\n", pAd->CommonCfg.use_tasklet);

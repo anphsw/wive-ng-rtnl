@@ -27,6 +27,8 @@ config  RT2860V2_STA_CARRIER
 	depends on RT2860V2_STA
 	select RALINK_TIMER
 	select RALINK_TIMER_DFS
+	help
+	Carrier Sense Multi-Access/Collision Detection.
 
 config  RT2860V2_STA_DLS
 	bool "DLS ((Direct-Link Setup) Support"

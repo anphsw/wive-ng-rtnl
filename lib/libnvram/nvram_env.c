@@ -955,7 +955,7 @@ int gen_wifi_config(int mode)
 		fprintf(fp, "TurboRate=0\n");
 
 #if defined (CONFIG_RT2860V2_AP_VIDEO_TURBINE) || defined (CONFIG_RT2860V2_STA_VIDEO_TURBINE)
-			FPRINT_NUM(VideoTurbine);
+		FPRINT_NUM(VideoTurbine);
 #endif
 
 		//WmmCapable
@@ -992,9 +992,11 @@ int gen_wifi_config(int mode)
 
 		FPRINT_STR(IEEE8021X);
 		FPRINT_NUM(IEEE80211H);
-		FPRINT_NUM(CarrierDetect);
 		FPRINT_NUM(DebugFlags);
 		FPRINT_NUM(CSPeriod);
+#if defined (CONFIG_RT2860V2_AP_CARRIER) || defined (CONFIG_RT2860V2_STA_CARRIER)
+		FPRINT_NUM(CarrierDetect);
+#endif
 		FPRINT_STR(RDRegion);
 		FPRINT_NUM(StationKeepAlive);
 

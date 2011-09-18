@@ -102,15 +102,12 @@ extern int (*ra_sw_nat_hook_tx)(struct sk_buff *skb);
 extern int (*ra_sw_nat_hook_rx)(struct sk_buff *skb);
 #endif
 
-#ifdef DFS_SUPPORT
-// TODO: Check these functions.
+#ifdef DFS_HWTIMER_SUPPORT
 #ifdef RTMP_RBUS_SUPPORT
 extern void unregister_tmr_service(void);
 extern void request_tmr_service(int, void *, void *);
 #endif // RTMP_RBUS_SUPPORT //
-
-#endif // DFS_SUPPORT //
-
+#endif
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24)
 #ifndef SA_SHIRQ

@@ -2067,9 +2067,7 @@ typedef struct _COMMON_CONFIG {
 	ULONG CN;
 #endif // RTMP_RBUS_SUPPORT //
 
-#ifdef DFS_SUPPORT
-#if defined(RTMP_RBUS_SUPPORT) || defined(DFS_INTERRUPT_SUPPORT)
-
+#if defined(RTMP_RBUS_SUPPORT) || defined(DFS_INTERRUPT_SUPPORT) || defined(CARRIER_DETECTION_SUPPORT)
 	// Radar and carrier detection in 2880-SW-MCU
 	UCHAR McuRadarCmd; // RADAR_DETECTION==1 or CARRIER_DETECTION==2, use bit map
 	UCHAR McuRadarEvent; // signal between Driver and 2880-SW-MCU
@@ -2088,7 +2086,7 @@ typedef struct _COMMON_CONFIG {
 	UCHAR R66;
 	UCHAR DFS_R66;
 #endif // defined(RTMP_RBUS_SUPPORT) || defined(DFS_INTERRUPT_SUPPORT) //
-	
+#ifdef DFS_SUPPORT
 #ifdef DFS_HARDWARE_SUPPORT
 	ULONG MCURadarRegion;
 	UCHAR DeltaDelay;

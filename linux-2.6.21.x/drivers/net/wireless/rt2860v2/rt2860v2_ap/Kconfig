@@ -54,12 +54,16 @@ config  RT2860V2_AP_DFS
 	depends on RT2860V2_AP
 	select RALINK_TIMER
 	select RALINK_TIMER_DFS
+	help
+	Support dynamic freqrency selection
 
 config  RT2860V2_AP_CARRIER
 	bool "Carrier Detect"
 	depends on RT2860V2_AP
 	select RALINK_TIMER
 	select RALINK_TIMER_DFS
+	help
+	Carrier Sense Multi-Access/Collision Detection.
 
 config  RT2860V2_AP_DLS
 	bool "DLS ((Direct-Link Setup) Support"

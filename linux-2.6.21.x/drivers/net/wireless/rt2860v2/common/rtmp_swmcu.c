@@ -158,12 +158,14 @@ int RtmpAsicSendCommandToSwMcu(
 				if (pAd->CommonCfg.McuRadarCmd == DETECTION_STOP)
 				{
 					DBGPRINT(RT_DEBUG_TRACE, ("AsicSendCommandToMcu 0x60 ==> stop detection\n"));
+#ifdef DFS_HWTIMER_SUPPORT
 #ifdef RTMP_RBUS_SUPPORT
 					unregister_tmr_service();
 #else
 	BOOLEAN Cancelled;
 	RTMPCancelTimer(&pAd->CommonCfg.CSWatchDogTimer, &Cancelled);
-#endif // RTMP_RBUS_SUPPORT //					
+#endif // RTMP_RBUS_SUPPORT //
+#endif
 					RTMP_IO_READ32(pAd, MAC_SYS_CTRL, &Value);
 					Value |= 0x04;
 					RTMP_IO_WRITE32(pAd, MAC_SYS_CTRL, Value);
@@ -186,21 +188,25 @@ int RtmpAsicSendCommandToSwMcu(
 					{
 						pAd->CommonCfg.McuRadarCmd |= RADAR_DETECTION;
 						pAd->CommonCfg.McuRadarProtection = 0;
+#ifdef DFS_HWTIMER_SUPPORT
 #ifdef RTMP_RBUS_SUPPORT
 						request_tmr_service(1, &TimerCB, pAd);
 #else
 						RTMPInitTimer(pAd, &pAd->CommonCfg.CSWatchDogTimer, GET_TIMER_FUNCTION(TimerCB), pAd,  TRUE); 
 						RTMPSetTimer(&pAd->CommonCfg.DFSWatchDogTimer, NEW_DFS_WATCH_DOG_TIME);
 #endif // DFS_ARCH_TEAM //
+#endif
 					}
 					else
 						pAd->CommonCfg.McuRadarCmd |= RADAR_DETECTION;
+#ifdef DFS_HWTIMER_SUPPORT
 #ifdef RTMP_RBUS_SUPPORT
 					request_tmr_service(1, &TimerCB, pAd);
 #else
 					RTMPInitTimer(pAd, &pAd->CommonCfg.CSWatchDogTimer, GET_TIMER_FUNCTION(TimerCB), pAd,  TRUE); 
 					RTMPSetTimer(&pAd->CommonCfg.DFSWatchDogTimer, NEW_DFS_WATCH_DOG_TIME);
 #endif // DFS_ARCH_TEAM //
+#endif
 				}
 				else
 				{
@@ -225,12 +231,14 @@ int RtmpAsicSendCommandToSwMcu(
 				{
 					ULONG Value;
 					DBGPRINT(RT_DEBUG_TRACE, ("AsicSendCommandToMcu 0x60 ==> stop detection\n"));
+#ifdef DFS_HWTIMER_SUPPORT
 #ifdef RTMP_RBUS_SUPPORT
 					unregister_tmr_service();
 #else
 	BOOLEAN Cancelled;
 	RTMPCancelTimer(&pAd->CommonCfg.CSWatchDogTimer, &Cancelled);
 #endif // RTMP_RBUS_SUPPORT //
+#endif
 					RTMP_IO_READ32(pAd, MAC_SYS_CTRL, &Value);
 					Value |= 0x04;
 					RTMP_IO_WRITE32(pAd, MAC_SYS_CTRL, Value);
@@ -255,21 +263,25 @@ int RtmpAsicSendCommandToSwMcu(
 					{
 						pAd->CommonCfg.McuRadarCmd |= CARRIER_DETECTION;
 						pAd->CommonCfg.McuRadarProtection = 0;
+#ifdef DFS_HWTIMER_SUPPORT
 #ifdef RTMP_RBUS_SUPPORT
 						request_tmr_service(1, &TimerCB, pAd);
 #else
 					RTMPInitTimer(pAd, &pAd->CommonCfg.CSWatchDogTimer, GET_TIMER_FUNCTION(TimerCB), pAd,  TRUE); 
 					RTMPSetTimer(&pAd->CommonCfg.DFSWatchDogTimer, NEW_DFS_WATCH_DOG_TIME);
 #endif // DFS_ARCH_TEAM //
+#endif
 					}
 					else
 						pAd->CommonCfg.McuRadarCmd |= CARRIER_DETECTION;
+#ifdef DFS_HWTIMER_SUPPORT
 #ifdef RTMP_RBUS_SUPPORT
 					request_tmr_service(1, &TimerCB, pAd);
 #else
 					RTMPInitTimer(pAd, &pAd->CommonCfg.CSWatchDogTimer, GET_TIMER_FUNCTION(TimerCB), pAd,  TRUE); 
 					RTMPSetTimer(&pAd->CommonCfg.CSWatchDogTimer, NEW_DFS_WATCH_DOG_TIME);
 #endif // DFS_ARCH_TEAM //
+#endif
 				}
 				else
 				{

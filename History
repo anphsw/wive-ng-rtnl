@@ -104,7 +104,7 @@
 22) Get staticroutes and msstatic routes from dhcp server work now.<br>
 23) WebUI Add watchdog enable/disable function.<br>
 24) Fix reboot at apply change in ethernet converter mode.<br>
-25) Fix lldt control in webui.<br>
+25) Fix lldt control in WebUI.<br>
 26) Add interface select for macip filter and port forward in WebUI.<br>
 27) Add 802.11g/n mixed mode and set default.<br>
 28) Add samba for smb and wins services.<br>
@@ -274,11 +274,11 @@
 85) Correct mac/ip filters in NAT mode.<br>
 86) Use extra interrupt in CPU.<br>
 87) Rewrite init scripts for lanauth.<br>
-88) Add chillispot code in sourcetree and modify webui.<br>
-89) Add samba/wins webui.<br>
+88) Add chillispot code in sourcetree and modify WebUI.<br>
+89) Add samba/wins WebUI.<br>
 90) Add dhcp domain oprion support.<br>
 91) Update dropbear to 0.53 version.<br>
-92) Fix ipt_account webui.<br>
+92) Fix ipt_account WebUI.<br>
 93) Some pppd fixes.<br>
 <br>
 <b>1.4.x</b><br>
@@ -289,7 +289,7 @@
 5) More fixes for memory subsystem.<br>
 6) Small patch for more preempt and speedup.<br>
 7) Fix subchannel and country code change.<br>
-8) Fix wins webui.<br>
+8) Fix wins WebUI.<br>
 9) Prevent watchdog reset device at serial in/out (poll timer from serial driver).<br>
 10) Prevent watchdog reset device at lan rx (poll timer from raeth driver).<br>
 11) Update bropbear to 0.53.1 version.<br>
@@ -311,7 +311,7 @@
 28) Consolidate fastnat code.<br>
 29) Fix for full disable fastnat mode if need.<br>
 30) Fix Cone NAT implementation.<br>
-31) Fix syslog in webui without CONFIG_LOGREAD in busybox.<br>
+31) Fix syslog in WebUI without CONFIG_LOGREAD in busybox.<br>
 <br>
 <b>1.5.x</b><br>
 1) Fix EAP in bridge/mbssid mode.<br>
@@ -371,7 +371,7 @@
 15) pppoe: drop PPPOX_ZOMBIEs in pppoe_flush_dev.<br>
 16) ip: ip_options_compile() resilient to NULL skb route.<br>
 17) Fix replace pppoe dgw on lease renew.<br>
-18) Some webui fixes for Fastnat mode set and QoS.<br>
+18) Some WebUI fixes for Fastnat mode set and QoS.<br>
 19) Fix show gateway in wan config after VPN up.<br>
 20) Add AP2040Rescan variable allows to scan forcedly a state of an ether after a configuration of radio of the unit in AP mode.<br>
 21) Dnsmasq start as nobody for more secure and fix some buggy situation.<br>
@@ -428,7 +428,7 @@
 43) Optimize cache page alloc.<br>
 44) Some fixes for igmp.<br>
 45) HTB and sys_signal upstream fixes backport.<br>
-46) Rewrite routes webui for full support VPN and others.<br>
+46) Rewrite routes WebUI for full support VPN and others.<br>
 47) Sync to busybox current tree.<br>
 48) Decrease HW_NAT foe table size for 3050F devices of 16Mb. Try fix ooom at RT3050F <32Mb RAM devices.<br>
 49) Some workarounds for save memory at 16Mb devives in init scripts.<br>
@@ -533,7 +533,7 @@
 5) Update miniupnp and libnatpmp to 30072011 version.<br>
 6) Merge ipv6 stable patches from upstream.<br>
 7) Remove pppd_dead workaround (no more need).<br>
-8) McastPhyMode set to 3 (HTMIX) by default (0:Disable 1:CCK, 2:OFDM, 3:HTMIX need add in webui).<br>
+8) McastPhyMode set to 3 (HTMIX) by default (0:Disable 1:CCK, 2:OFDM, 3:HTMIX need add in WebUI).<br>
 9) Backport some fixes (ipv6/igmp) from upstream.<br>
 10) Disable IGDv2 for miniupnpd (this is not stable option).<br>
 11) Usb_modeswitch: add new devices support.<br>
@@ -645,7 +645,7 @@
 25) Backport raeth driver from 3.6.0.0SDK (v2.1).<br>
 26) Update sta driver to 2.4.0.4.<br>
 27) Update ap driver to 2.5.0.4.<br>
-28) Add /proc/rt3052/esw_cnt for traffic statistic per switch port.(need add in webui).<br>
+28) Add /proc/rt3052/esw_cnt for traffic statistic per switch port.(need add in WebUI).<br>
 29) Support Ralink RT3883+RT5392 referenece board.<br>
 30) Fix mips 24kec "Wrong EPC on Exceptional J/JAL Targets" issue.<br>
 31) Fix raeth driver: hardware checksum offload only support ipv4 packets.<br>
@@ -664,7 +664,7 @@
 44) Small kernel code arp fixups.<br>
 45) Update ralink apps.<br>
 46) Support new igmp snooping version in igmpproxy.<br>
-47) Add variable igmpSnoopMode. Values=n/f or NULL (default NULL=auto, n=none/disabled,f=force enabled. Need add webui).<br>
+47) Add variable igmpSnoopMode. Values=n/f or NULL (default NULL=auto, n=none/disabled,f=force enabled. Need add WebUI).<br>
 48) Fix some leasks and more safe libnvram.<br>
 49) Igmpproxy code sync with upstream git.<br>
 50) Fix build at some distro.<br>
@@ -674,7 +674,9 @@
 54) Remove some debug messages from web and set auto redirect at apply push.<br>
 55) Rework wifi/wan/lan reinit in internet.sh. More correct for MBSSID mode.<br>
 56) Fix wds reconfigure and operationMode adjustment.<br>
-
+57) Video turbine MSC extended mode enabled for wifi.(AP/STA mode. variable VideoTurbine 0/1 default 1. need add in webUI)<br>
+58) Carrier Sense Multi-Access/Collision Detection support now enabled for WiFi.(AP/STA mode. variable CarrierDetect 0/1 default1. need add WebUI)<br>
+58) Support dynamic freqrency selection enabled for wifi. (only AP mode. Auto enable)<br>
 
 suspended) Add skb reuse support.<br>
 suspended) Nvram move to kernel mode. This fix some memleaks and concurent acess to mtd issue.<br>
