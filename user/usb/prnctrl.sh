@@ -1,11 +1,15 @@
 #!/bin/sh
 
+#include global config
+. /etc/scripts/global.sh
+
 LOG="logger -t prnctrl"
 port=${MDEV##*lp}
 
 if [ "$ACTION" = "add" ]; then
+
     if [ -z "$(iptables -L | grep "jetdirect")" ]; then
-	iptables -A servicelimit -i br0 -p tcp --dport 9100 -j ACCEPT
+	iptables -A servicelimit -i $lan_if -p tcp --dport 9100 -j ACCEPT
 	$LOG "Add p910nd firewall rules"
     fi
     # For GDI printers put printers firmware file in /etc, rename to prnfw.dl
@@ -21,7 +25,7 @@ else
 	killall p910nd
 	$LOG "Stop p910nd daemon on port 910${port}"
     fi
-    iptables -D servicelimit -i br0 -p tcp --dport 9100 -j ACCEPT
+    iptables -D servicelimit -i $lan_if -p tcp --dport 9100 -j ACCEPT
     rmmod usblp
     $LOG "Delete p910nd firewall rules and remove USBLP kernel module"
 fi
