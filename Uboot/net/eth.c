@@ -251,8 +251,7 @@ int eth_initialize(bd_t *bis)
 			raspi_read(rt2880_gmac1_mac, 
 				CFG_FACTORY_ADDR - CFG_FLASH_BASE + GMAC0_OFFSET, 6);
 #else //CFG_ENV_IS_IN_FLASH
-			memmove(rt2880_gmac1_mac, 
-				CFG_FACTORY_ADDR + GMAC0_OFFSET, 6);
+			memmove(rt2880_gmac1_mac, CFG_FACTORY_ADDR + GMAC0_OFFSET, 6);
 #endif
 
 			//if flash is empty, use default mac address

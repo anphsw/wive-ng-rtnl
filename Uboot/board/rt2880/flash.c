@@ -326,7 +326,7 @@ static void flash_get_offsets(ulong base, flash_info_t *info)
 		/* set up sector start address table (uniform sector type) */
 		for ( i = 0; i < info->sector_count; i++ )
 			info->start[i] = base + (i * sect_size);
-		
+
 		printf("\n Set info->start[0]=%08X\n",info->start[0]);
 	}
 }
@@ -530,8 +530,8 @@ ulong flash_get_size(FPWV *addr, flash_info_t *info)
 		info->sector_count = 0;
 		info->size = 0;
 		printf("\n FLASH_UNKNOWN \n");
-		*/
 		break;
+		*/
 	}
 
 	/* Check 16 bits or 32 bits of ID so work on 32 or 16 bit bus. */
@@ -664,8 +664,8 @@ ulong flash_get_size(FPWV *addr, flash_info_t *info)
 			info->sector_count = 0;
 			info->size = 0;
 			return (0);			/* => no or unknown flash */
-			#endif
 			break;
+			#endif
 		}
 
 	flash_get_offsets((ulong)addr, info);

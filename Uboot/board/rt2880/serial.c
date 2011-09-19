@@ -42,7 +42,9 @@ void serial_setbrg (void)
 	u32 reg, cpu_clock = 0;
 #if defined(RT2880_ASIC_BOARD) || defined(RT2883_ASIC_BOARD) || defined(RT3052_ASIC_BOARD) || defined(RT3352_ASIC_BOARD) || defined(RT3883_ASIC_BOARD) || defined (RT5350_ASIC_BOARD) || defined(RT6855_ASIC_BOARD)
 	u8	clk_sel;
+#ifdef RT5350_ASIC_BOARD
 	u8	clk_sel2;
+#endif
 #endif
 	reg = RALINK_REG(RT2880_SYSCFG_REG);
 

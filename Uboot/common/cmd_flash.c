@@ -543,7 +543,6 @@ int flash_sect_protect (int p, ulong addr_first, ulong addr_last)
 
 /**************************************************/
 #ifdef RT2880_U_BOOT_CMD_OPEN
-
 U_BOOT_CMD(
 	flinfo,    2,    1,    do_flinfo,
 	"flinfo  - print FLASH memory information\n",
@@ -551,6 +550,7 @@ U_BOOT_CMD(
 	"flinfo N\n    - print information for FLASH memory bank # N\n"
 );
 #endif
+#ifdef RALINK_ERASE_SUPPORT
 U_BOOT_CMD(
 	erase,   3,   1,  do_flerase,
 	"erase   - erase FLASH memory\n",
@@ -561,7 +561,7 @@ U_BOOT_CMD(
 	"erase all\n    - erase all FLASH banks\n"
 	"erase linux\n    - erase linux kernel block\n"
 );
-
+#endif
 U_BOOT_CMD(
 	protect,  4,  1,   do_protect,
 	"protect - enable or disable FLASH write protection\n",

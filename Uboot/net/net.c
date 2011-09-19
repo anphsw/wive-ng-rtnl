@@ -195,6 +195,7 @@ int		NetArpWaitTry;
 extern VALID_BUFFER_STRUCT  rt2880_free_buf_list;
 //kaiker
 extern BUFFER_ELEM *rt2880_free_buf_entry_dequeue(VALID_BUFFER_STRUCT *hdr);
+extern void TftpSend (void);
 
 
 

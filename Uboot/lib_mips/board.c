@@ -118,7 +118,10 @@ static void Init_System_Mode(void)
 {
 	u32 reg;
 #ifdef ASIC_BOARD
-	u8	clk_sel, clk_sel2;
+	u8	clk_sel;
+#ifdef RT5350_ASIC_BOARD
+	u8	clk_sel2;
+#endif
 #endif
 	reg = RALINK_REG(RT2880_SYSCFG_REG);
 		
@@ -1104,8 +1107,9 @@ int check_image_validation(void)
  ************************************************************************
  */
 
+extern int do_load_serial_bin (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[]);
 gd_t gd_data;
- 
+
 void board_init_r (gd_t *id, ulong dest_addr)
 {
 	cmd_tbl_t *cmdtp;
@@ -1572,7 +1576,7 @@ void board_init_r (gd_t *id, ulong dest_addr)
 
 #if defined (RT3052_ASIC_BOARD) || defined (RT3052_FPGA_BOARD)  || \
     defined (RT3352_ASIC_BOARD) || defined (RT3352_FPGA_BOARD)  || \
-    defined (RT5350_ASIC_BOARD) || defined (RT5350_FPGA_BOARD)  
+    defined (RT5350_ASIC_BOARD) || defined (RT5350_FPGA_BOARD)
 	rt305x_esw_init();
 #elif defined (RT6855_ASIC_BOARD) || defined (RT6855_FPGA_BOARD)
 	rt6855_esw_init();
@@ -1590,7 +1594,7 @@ void board_init_r (gd_t *id, ulong dest_addr)
 	}
 
 
-	OperationSelect();   
+	OperationSelect();
 
 	while (timer1 > 0) {
 		--timer1;
@@ -1631,7 +1635,7 @@ void board_init_r (gd_t *id, ulong dest_addr)
 		switch(BootType) {
 		case '1':
 			printf("   \n%d: System Load Linux to SDRAM via TFTP. \n", SEL_LOAD_LINUX_SDRAM);
-			tftp_config(SEL_LOAD_LINUX_SDRAM, argv);           
+			tftp_config(SEL_LOAD_LINUX_SDRAM, argv);
 			argc= 3;
 			setenv("autostart", "yes");
 			do_tftpb(cmdtp, 0, argc, argv);
@@ -1715,7 +1719,7 @@ void board_init_r (gd_t *id, ulong dest_addr)
 			argc= 2;
 			sprintf(addr_str, "0x%X", CFG_KERN_ADDR);
 			argv[1] = &addr_str[0];
-			do_bootm(cmdtp, 0, argc, argv);            
+			do_bootm(cmdtp, 0, argc, argv);
 			break;
 
 #if 0
@@ -1747,7 +1751,7 @@ void board_init_r (gd_t *id, ulong dest_addr)
 			//bootm bf030000
 			argc= 2;
 			argv[1]= "0xbf030000";
-			do_bootm(cmdtp, 0, argc, argv);            
+			do_bootm(cmdtp, 0, argc, argv);
 			break;
 #endif
 
@@ -1755,7 +1759,7 @@ void board_init_r (gd_t *id, ulong dest_addr)
 			printf("   \n%d: System Enter Boot Command Line Interface.\n", SEL_ENTER_CLI);
 			printf ("\n%s\n", version_string);
 			/* main_loop() can return to retry autoboot, if so just run it again. */
-			for (;;) {					
+			for (;;) {
 				main_loop ();
 			}
 			break;
@@ -1796,17 +1800,17 @@ void board_init_r (gd_t *id, ulong dest_addr)
 				printf("From 0x%X To 0x%X\n", CFG_FLASH_BASE, CFG_FLASH_BASE+CFG_BOOTLOADER_SIZE-1);
 				flash_sect_erase(CFG_FLASH_BASE, CFG_FLASH_BASE+CFG_BOOTLOADER_SIZE-1);
 
-				//cp.uboot            
+				//cp.uboot
 				argc = 4;
 				argv[0]= "cp.uboot";
-				do_mem_cp(cmdtp, 0, argc, argv);                       
+				do_mem_cp(cmdtp, 0, argc, argv);
 
 				//protect on uboot
 				flash_sect_protect(1, CFG_FLASH_BASE, CFG_FLASH_BASE+CFG_BOOTLOADER_SIZE-1);
 			}
 #endif //CFG_ENV_IS_IN_FLASH
 
-			//reset            
+			//reset
 			do_reset(cmdtp, 0, argc, argv);
 			break;
 
@@ -1854,25 +1858,25 @@ void board_init_r (gd_t *id, ulong dest_addr)
 				printf("From 0x%X To 0x%X\n", CFG_FLASH_BASE, CFG_FLASH_BASE+CFG_BOOTLOADER_SIZE-1);
 				flash_sect_erase(CFG_FLASH_BASE, CFG_FLASH_BASE+CFG_BOOTLOADER_SIZE-1);
 
-				//cp.uboot            
+				//cp.uboot
 				argc = 4;
 				argv[0]= "cp.uboot";
-				do_mem_cp(cmdtp, 0, argc, argv);                       
+				do_mem_cp(cmdtp, 0, argc, argv);
 
 				//protect on uboot
 				flash_sect_protect(1, CFG_FLASH_BASE, CFG_FLASH_BASE+CFG_BOOTLOADER_SIZE-1);
 			}
 #endif //CFG_ENV_IS_IN_FLASH
 
-			//reset            
+			//reset
 			do_reset(cmdtp, 0, argc, argv);
 			break;
 
 		default:
 			printf("   \nSystem Boot Linux via Flash.\n");
 			do_bootm(cmdtp, 0, 1, argv);
-			break;            
-		} /* end of switch */   
+			break;
+		} /* end of switch */
 
 		do_reset(cmdtp, 0, argc, argv);
 

@@ -523,5 +523,6 @@ define_hex TEXT_BASE  0x80200000
 fi
 
 bool "USB support enable" RALINK_USB_SUPPORT
+bool "ERASE command support enable" RALINK_ERASE_SUPPORT
 
 ##################################################################################################
