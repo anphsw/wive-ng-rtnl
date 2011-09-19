@@ -325,8 +325,7 @@ static struct net_bridge_fdb_entry *fdb_create(struct hlist_head *head,
 	struct net_bridge_fdb_entry *fdb;
 
 #if defined(CONFIG_BRIDGE_2WAYS_FDB)
-#define MAX_FDB_ENTRY	2
-
+#define MAX_FDB_ENTRY	4
 	struct hlist_node *h;
 	int mac_count=0;
 
