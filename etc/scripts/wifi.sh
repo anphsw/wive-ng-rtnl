@@ -61,18 +61,19 @@ if [ "$CarrierDetect" = "1" ]; then
     iwpriv ra0 set CarrierDetect=1
     iwpriv ra0 set RadarStart=1
 else
-    iwpriv ra0 set CarrierDetect=0
     iwpriv ra0 set RadarStop=1
+    iwpriv ra0 set CarrierDetect=0
 fi
 ###############################################Channel select#######################
 AutoChannelSelect=`nvram_get AutoChannelSelect`
 if [ "$AutoChannelSelect" = "1" ]; then
     #rescan and select optimal channel
-    iwpriv ra0 set SiteSurvey=1
     iwpriv ra0 set AutoChannelSel=1
+    iwpriv ra0 set SiteSurvey=1
 else
-    #set channel manual
     Channel=`nvram_get Channel`
+    #set channel manual
+    iwpriv ra0 set AutoChannelSel=0
     iwpriv ra0 set Channel=$Channel
 fi
 
