@@ -55,15 +55,6 @@ if [ "$CONFIG_RT2860V2_AP_IGMP_SNOOP" != "" ]; then
     fi
 fi
 
-###############################################Radar,DFS,CD########################
-CarrierDetect=`nvram_get CarrierDetect`
-if [ "$CarrierDetect" = "1" ]; then
-    iwpriv ra0 set CarrierDetect=1
-    iwpriv ra0 set RadarStart=1
-else
-    iwpriv ra0 set RadarStop=1
-    iwpriv ra0 set CarrierDetect=0
-fi
 ###############################################Channel select#######################
 AutoChannelSelect=`nvram_get AutoChannelSelect`
 if [ "$AutoChannelSelect" = "1" ]; then

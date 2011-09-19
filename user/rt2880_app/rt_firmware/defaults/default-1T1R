@@ -114,7 +114,6 @@ WscNewKey=scaptest
 IEEE8021X=0
 IEEE80211H=0
 CSPeriod=6
-CarrierDetect=1
 PreAuth=0
 AuthMode=OPEN
 EncrypType=NONE

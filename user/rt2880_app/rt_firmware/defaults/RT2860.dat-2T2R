@@ -57,7 +57,6 @@ HideSSID=0
 ShortSlot=1
 IEEE8021X=0
 IEEE80211H=0
-CarrierDetect=1
 CSPeriod=6
 RDRegion=
 StationKeepAlive=0
