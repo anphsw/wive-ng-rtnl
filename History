@@ -679,9 +679,6 @@
 59) Support dynamic freqrency selection enabled for wifi. (only AP mode. Auto enable)<br>
 60) Update wsc_upnp to 0.2.2 version from 3.6.0.0 SDK.<br>
 
-suspended) Add skb reuse support.<br>
-suspended) Nvram move to kernel mode. This fix some memleaks and concurent acess to mtd issue.<br>
-
 <br><br>
 <b>For support see:</b><br>
 <a href="http://acorp.ru">acorp.ru - Acorp Electronics Inc.</a><br>
