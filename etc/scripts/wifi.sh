@@ -73,7 +73,6 @@ if [ "$AutoChannelSelect" = "1" ]; then
 else
     Channel=`nvram_get Channel`
     #set channel manual
-    iwpriv ra0 set AutoChannelSel=0
     iwpriv ra0 set Channel=$Channel
 fi
 
