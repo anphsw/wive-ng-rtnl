@@ -68,7 +68,7 @@ static void uapsd_eosp_sent_tasklet(unsigned long data);
 #define RT2860_INT_AC3_DMA_DONE			(1<<6)		// bit 6
 #define RT2860_INT_HCCA_DMA_DONE		(1<<7)		// bit 7
 #define RT2860_INT_MGMT_DONE			(1<<8)		// bit 8
-#if defined(TONE_RADAR_DETECT_SUPPORT) || defined(DFS_INTERRUPT_SUPPORT)
+#if defined(TONE_RADAR_DETECT_SUPPORT) || defined(DFS_INTERRUPT_SUPPORT) || defined(DFS_SUPPORT)
 #define RT2860_INT_TONE_RADAR			(1<<20)		// bit 20
 #endif // defined(TONE_RADAR_DETECT_SUPPORT) || defined(DFS_INTERRUPT_SUPPORT) //
 
@@ -80,7 +80,7 @@ static void uapsd_eosp_sent_tasklet(unsigned long data);
 #define INT_AC3_DLY		(RT2860_INT_AC3_DMA_DONE) //| RT2860_INT_TX_DLY)
 #define INT_HCCA_DLY 	(RT2860_INT_HCCA_DMA_DONE) //| RT2860_INT_TX_DLY)
 #define INT_MGMT_DLY	RT2860_INT_MGMT_DONE
-#if defined(TONE_RADAR_DETECT_SUPPORT) || defined(DFS_INTERRUPT_SUPPORT)
+#if defined(TONE_RADAR_DETECT_SUPPORT) || defined(DFS_INTERRUPT_SUPPORT) || defined(DFS_SUPPORT)
 #define INT_TONE_RADAR	(RT2860_INT_TONE_RADAR)
 #endif // defined(TONE_RADAR_DETECT_SUPPORT) || defined(DFS_INTERRUPT_SUPPORT) //
 
