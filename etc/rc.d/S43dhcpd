@@ -82,10 +82,20 @@ stop() {
 
 set_dns()
 {
-    if [ "$dhcpPriDns" != "" ] || [ "$dhcpSecDns" != "" ]; then
-	config-udhcpd.sh -d "$dhcpPriDns" "$dhcpSecDns"
+    if [ "$wan_static_dns" = "on" ] && [ "$dnsPEnabled" != "1" ]; then
+	#in dns static and relay disabled
+	wan_static_dns=`nvram_get 2860 wan_static_dns`
+	wan_primary_dns=`nvram_get 2860 wan_primary_dns`
+	if [ "$wan_primary_dns" != "" ] || [ "$wan_secondary_dns" != "" ]; then
+	    config-udhcpd.sh -d "$wan_primary_dns" "$wan_secondary_dns"
+	fi
     else
-	config-udhcpd.sh -d "8.8.8.8" "8.8.4.4"
+	#normal mode
+	if [ "$dhcpPriDns" != "" ] || [ "$dhcpSecDns" != "" ]; then
+	    config-udhcpd.sh -d "$dhcpPriDns" "$dhcpSecDns"
+	else
+	    config-udhcpd.sh -d "8.8.8.8" "8.8.4.4"
+	fi
     fi
 }
 
@@ -102,7 +112,6 @@ get_param() {
     lan_ipaddr=`nvram_get 2860 lan_ipaddr`
     SmbEnabled=`nvram_get 2860 SmbEnabled`
     dnsPEnabled=`nvram_get 2860 dnsPEnabled`
-    wan_static_dns=`nvram_get 2860 wan_static_dns`
 }
 
 case "$1" in

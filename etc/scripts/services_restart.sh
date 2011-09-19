@@ -11,14 +11,9 @@ MODE=$1
 $LOG "Restart needed services and scripts. Mode $MODE"
 
 ##########################################################
-# Regenerate resolv only if !ppp                         #
+# Regenerate resolv only if !ppp or wan_static_dns on    #
 ##########################################################
-if [ "$vpnEnabled" = "on" ]; then
-    vpnPeerDNS=`nvram_get 2860 vpnPeerDNS`
-else
-    vpnPeerDNS=
-fi
-if [ "$vpnPeerDNS" != "on" ] || [ "$MODE" != "pppd" ]; then 
+if [ "$vpnEnabled" != "on" ] || [ "$MODE" != "pppd" ] || [ "$wan_static_dns" = "on" ]; then
     $LOG "Resolv config generate..."
     service resolv start
 fi

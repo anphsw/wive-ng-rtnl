@@ -10,7 +10,6 @@
 LOG="logger -t udhcpc"
 RESOLV_CONF="/etc/resolv.conf"
 
-wan_static_dns=`nvram_get 2860 wan_static_dns`
 wan_manual_mtu=`nvram_get 2860 wan_manual_mtu`
 
 # Full route list
@@ -162,22 +161,26 @@ case "$1" in
 
         if [ "$OLD_IP" != "$CUR_IP" ]; then
 	    #Get DNS servers
-	    if [ "$wan_static_dns" != "on" ] && [ "$dns" ]; then
-		$LOG "Renew DNS from dhcp"
-		rm -f $RESOLV_CONF
-        	#get domain name
-    		[ -n "$domain" ] && echo domain $domain >> $RESOLV_CONF
-		#parce dnsservers
-		for i in $dns ; do
-	    	    $LOG "DNS= $i"
-	    	    echo nameserver $i >> $RESOLV_CONF
-		    ROUTE_NS=`ip route get "$i" | grep dev | cut -f -3 -d " "`
-		    if [ "$ROUTE_NS" != "" ] && [ "$i" != "$first_dgw" ]; then
-			$LOG "Add static route to DNS $ROUTE_NS dev $interface"
-			REPLACE="ip route replace $ROUTE_NS dev $interface"
-			$REPLACE
-		    fi
-		done
+	    if [ "$wan_static_dns" != "on" ]; then
+		if [ "$dns" ]; then
+		    $LOG "Renew DNS from dhcp"
+		    rm -f $RESOLV_CONF
+        	    #get domain name
+    		    [ -n "$domain" ] && echo domain $domain >> $RESOLV_CONF
+		    #parce dnsservers
+		    for i in $dns ; do
+	    		$LOG "DNS= $i"
+	    		echo nameserver $i >> $RESOLV_CONF
+			ROUTE_NS=`ip route get "$i" | grep dev | cut -f -3 -d " "`
+			if [ "$ROUTE_NS" != "" ] && [ "$i" != "$first_dgw" ]; then
+			    $LOG "Add static route to DNS $ROUTE_NS dev $interface"
+			    REPLACE="ip route replace $ROUTE_NS dev $interface"
+			    $REPLACE
+			fi
+		    done
+		else
+		    $LOG "Server not send DNS. Please manual set DNS in wan config."
+		fi
 	    else
 		$LOG "Use static DNS."
 	    fi
