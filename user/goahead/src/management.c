@@ -53,10 +53,10 @@ static void setSysAdm(webs_t wp, char_t *path, char_t *query)
 	doSystem("sed -e 's/^%s:/%s:/' /etc/passwd > /etc/newpw", old_user, admuser);
 	doSystem("cp /etc/newpw /etc/passwd");
 	doSystem("rm -f /etc/newpw");
-	doSystem("service pass start &");
-	doSystem("service sysctl restart &");
-	doSystem("service inetd restart &");
-	doSystem("service samba restart &");
+	doSystem("service pass start");
+	doSystem("service sysctl restart");
+	doSystem("service inetd restart");
+	doSystem("service samba restart");
 
 #ifdef USER_MANAGEMENT_SUPPORT
 	if (umGroupExists(T("adm")) == FALSE)
@@ -133,9 +133,9 @@ static void NTP(webs_t wp, char_t *path, char_t *query)
 	nvram_close(RT2860_NVRAM);
 
 	if (strcmp(ntpEnabled, "on")==0)
-		doSystem("service ntp restart &");
+		doSystem("service ntp restart");
 	else
-		doSystem("service ntp stop &");
+		doSystem("service ntp stop");
 
 	submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
 	if (! submitUrl[0])
@@ -211,7 +211,7 @@ static void DDNS(webs_t wp, char_t *path, char_t *query)
 	nvram_close(RT2860_NVRAM);
 
 
-	doSystem("service ddns restart &");
+	doSystem("service ddns restart");
 
 	submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
 	if (! submitUrl[0])
@@ -685,7 +685,7 @@ static void LoadDefaultSettings(webs_t wp, char_t *path, char_t *query)
 #ifdef CONFIG_SYSLOGD
 static void clearlog(webs_t wp, char_t *path, char_t *query)
 {
-	doSystem("service syslog restart &");
+	doSystem("service syslog restart");
 	websRedirect(wp, "adm/syslog.asp");
 }
 

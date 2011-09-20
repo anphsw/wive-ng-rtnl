@@ -1907,7 +1907,7 @@ void ripdRestart(void)
 	doSystem("echo \"version 2\" >> /etc/ripd.conf");
 	doSystem("echo \"log syslog\" >> /etc/ripd.conf");
 out:
-	doSystem("service ripd restart &");
+	doSystem("service ripd restart");
 }
 
 inline void zebraRestart(void)
@@ -1933,7 +1933,7 @@ inline void zebraRestart(void)
 	doSystem("echo \"enable password Admin\" >> /etc/zebra.conf ");
 	doSystem("echo \"log syslog\" >> /etc/zebra.conf ");
 out:
-	doSystem("service zebra restart &");
+	doSystem("service zebra restart");
 }
 #endif
 
@@ -1962,8 +1962,8 @@ static void dynamicRouting(webs_t wp, char_t *path, char_t *query)
 	{
 		nvram_set(RT2860_NVRAM, "RIPEnable", rip);
 
-		doSystem("service ripd stop &");
-		doSystem("service zebra stop &");
+		doSystem("service ripd stop");
+		doSystem("service zebra stop");
 	}
 	else if(!gstrcmp(rip, "1") && !strcmp(RIPEnable, "0"))
 	{
