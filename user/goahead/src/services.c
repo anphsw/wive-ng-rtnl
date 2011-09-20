@@ -107,7 +107,7 @@ static int getDhcpCliList(int eid, webs_t wp, int argc, char_t **argv)
 		fclose(fp);
 		return 0;
 	}
-		
+
 	written_at = ntoh64(written_at);
 	curr = time(NULL);
 	if (curr < written_at)
