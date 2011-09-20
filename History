@@ -677,7 +677,7 @@
 57) Video turbine MSC extended mode enabled for wifi.(AP/STA mode. variable VideoTurbine 0/1 default 1. need add in webUI)<br>
 58) Update wsc_upnp to 0.2.2 version from 3.6.0.0 SDK.<br>
 59) Fix dns static and relay disabled mode.<br>
-60) Small fix double wlan tag.<br>
+60) Small fix double vlan tag.<br>
 61) Uboot add disable/enable erase command to menuconfig.<br>
 
 <br><br>
