@@ -84,7 +84,7 @@ config3052()
 	j=0
 
 	# Calculating bitmasks
-	for i 
+	for i
 		do
 		if [ $i -lt 5 ]; then
 			r70=$(($r70|(1<<(j+8*($i-1)))))
@@ -203,7 +203,7 @@ reset_all_phys()
 		start=0
 		end=3
 	    else
-		start=1	
+		start=1
 		end=4
 	    fi
 	else
