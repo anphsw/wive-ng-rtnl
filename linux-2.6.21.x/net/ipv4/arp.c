@@ -863,7 +863,7 @@ static int arp_process(struct sk_buff *skb)
 		    (arp->ar_op == htons(ARPOP_REPLY) ||
 		     (arp->ar_op == htons(ARPOP_REQUEST) && tip == sip)) &&
 		    inet_addr_type(sip) == RTN_UNICAST)
-			n = __neigh_lookup(&arp_tbl, &sip, dev, -1);
+			n = __neigh_lookup(&arp_tbl, &sip, dev, 1);
 	}
 
 	if (n) {
@@ -1306,7 +1306,9 @@ static void arp_format_neigh_entry(struct seq_file *seq,
 		hbuffer[k++] = hexbuf[n->ha[j] & 15];
 		hbuffer[k++] = ':';
 	}
-	hbuffer[--k] = 0;
+	if (k != 0)
+		--k;
+	hbuffer[k] = 0;
 #if defined(CONFIG_AX25) || defined(CONFIG_AX25_MODULE)
 	}
 #endif
