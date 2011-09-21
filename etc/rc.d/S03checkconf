@@ -53,9 +53,9 @@ start() {
     if [ "$CHECKMAC" != "NO" ] && [ ! -f /var/run/goahead.pid ]; then
  	if [ $MAC_TEST = "0" ] || [ $WMAC_TEST = "0" ] || [ $LANMAC_TEST = "0" ]; then
 	    $LOG "First start MAC generate"
-	    mac_wan=`cat /dev/urandom | hexdump | head -n1 | cut -f 2- -d " " | sed ':BEGIN;s/^\([^ ]\{0,29\}\) /\1/;tBEGIN' | sed 's/\(..\)/\1:/g; s/.$//' | tail -c 9`
-	    mac_lan=`cat /dev/urandom | hexdump | head -n1 | cut -f 2- -d " " | sed ':BEGIN;s/^\([^ ]\{0,29\}\) /\1/;tBEGIN' | sed 's/\(..\)/\1:/g; s/.$//' | tail -c 9`
-	    mac_wlan=`cat /dev/urandom | hexdump | head -n1 | cut -f 2- -d " " | sed ':BEGIN;s/^\([^ ]\{0,29\}\) /\1/;tBEGIN' | sed 's/\(..\)/\1:/g; s/.$//' | tail -c 9`
+	    mac_wan=`cat /dev/urandom | hexdump | head -n1 | cut -f 2- -d " " | sed ':BEGIN;s/^\([^ ]\{0,29\}\) /\1/;tBEGIN' | sed 's/\(..\)/\1:/g; s/.$//' | tail -q -c 9`
+	    mac_lan=`cat /dev/urandom | hexdump | head -n1 | cut -f 2- -d " " | sed ':BEGIN;s/^\([^ ]\{0,29\}\) /\1/;tBEGIN' | sed 's/\(..\)/\1:/g; s/.$//' | tail -q -c 9`
+	    mac_wlan=`cat /dev/urandom | hexdump | head -n1 | cut -f 2- -d " " | sed ':BEGIN;s/^\([^ ]\{0,29\}\) /\1/;tBEGIN' | sed 's/\(..\)/\1:/g; s/.$//' | tail -q -c 9`
 	    echo "Set new mac!"
 	    MAC="00:0B:2B:$mac_wan"
 	    LANMAC="00:0B:2B:$mac_lan"

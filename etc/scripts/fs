@@ -93,9 +93,9 @@ cleanall(){
     burnrf
     nvramreset
     echo "First start MAC generate"
-    mac_wan=`cat /dev/urandom | hexdump | head -n1 | cut -f 2- -d " " | sed ':BEGIN;s/^\([^ ]\{0,29\}\) /\1/;tBEGIN' | sed 's/\(..\)/\1:/g; s/.$//' | tail -c 9`
-    mac_lan=`cat /dev/urandom | hexdump | head -n1 | cut -f 2- -d " " | sed ':BEGIN;s/^\([^ ]\{0,29\}\) /\1/;tBEGIN' | sed 's/\(..\)/\1:/g; s/.$//' | tail -c 9`
-    mac_wlan=`cat /dev/urandom | hexdump | head -n1 | cut -f 2- -d " " | sed ':BEGIN;s/^\([^ ]\{0,29\}\) /\1/;tBEGIN' | sed 's/\(..\)/\1:/g; s/.$//' | tail -c 9`
+    mac_wan=`cat /dev/urandom | hexdump | head -n1 | cut -f 2- -d " " | sed ':BEGIN;s/^\([^ ]\{0,29\}\) /\1/;tBEGIN' | sed 's/\(..\)/\1:/g; s/.$//' | tail -q -c 9`
+    mac_lan=`cat /dev/urandom | hexdump | head -n1 | cut -f 2- -d " " | sed ':BEGIN;s/^\([^ ]\{0,29\}\) /\1/;tBEGIN' | sed 's/\(..\)/\1:/g; s/.$//' | tail -q -c 9`
+    mac_wlan=`cat /dev/urandom | hexdump | head -n1 | cut -f 2- -d " " | sed ':BEGIN;s/^\([^ ]\{0,29\}\) /\1/;tBEGIN' | sed 's/\(..\)/\1:/g; s/.$//' | tail -q -c 9`
     WAN_MACADDR="00:0B:2B:$mac_wan"
     LAN_MACADDR="00:0B:2B:$mac_lan"
     WLAN_MACADDR="00:0B:2B:$mac_wlan"

@@ -70,7 +70,7 @@ getWanIfName()
 
     #upnp wan name
     if [ "$vpnEnabled" = "on" ]; then
-	get_wan_if=`ls /proc/sys/net/ipv4/conf/ | grep ppp | tail -n1`
+	get_wan_if=`ls /proc/sys/net/ipv4/conf/ | grep ppp | tail -q -n1`
 	if [ "$get_ppp_wan_if" != "" ]; then
     	    real_wan_if="$get_ppp_wan_if"
 	else

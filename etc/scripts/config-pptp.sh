@@ -42,7 +42,7 @@ check_param() {
 
 get_vpn_ip() {
     $LOG "Get vpn server $SERVERNM ip adress"
-    NS=`ipget $SERVERNM | tail -n1`
+    NS=`ipget $SERVERNM | tail -q -n1`
     if [ "$NS" != "" ]; then
         SERVER=$NS
         $LOG "Server adress is $SERVER"
