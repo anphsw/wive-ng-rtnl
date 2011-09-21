@@ -679,7 +679,8 @@
 59) Fix dns static and relay disabled mode.<br>
 60) Small fix double vlan tag.<br>
 61) Uboot add disable/enable erase command to menuconfig.<br>
-
+62) More checks data in dhcpd configure script.<br>
+63) Goahead: fix some services restart.<br>
 
 <br><br>
 <b>For support see:</b><br>
