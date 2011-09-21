@@ -5,7 +5,6 @@ LOG="logger -t resolv"
 start() {
 get_param
 if [ ! -f /var/run/goahead.pid ] || [ "$wan_static_dns" = "on" ]; then
-
     # backup file without nameserver part
     sed -e '/nameserver/d' $fname > $fbak
 

@@ -423,7 +423,6 @@ get_param() {
     RemoteFTP=`nvram_get 2860 RemoteFTP`
     RemoteTelnet=`nvram_get 2860 RemoteTelnet`
     RemoteManagement=`nvram_get 2860 RemoteManagement`
-    dnsPEnabled=`nvram_get 2860 dnsPEnabled`
     dhcpEnabled=`nvram_get 2860 dhcpEnabled`
     #ipt_acount info
     ipt_account=`nvram_get 2860 ipt_account`

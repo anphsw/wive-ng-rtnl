@@ -20,7 +20,8 @@ lan2_if="br0:9"
 opmode=`nvram_get 2860 OperationMode`
 wanmode=`nvram_get 2860 wanConnectionMode`
 
-#get dns mode
+#get dns mode and relay mode
+dnsPEnabled=`nvram_get 2860 dnsPEnabled`
 wan_static_dns=`nvram_get 2860 wan_static_dns`
 
 #get vpn mode and type

@@ -42,7 +42,10 @@ if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then
     service kext start
     service parprouted restart
     service lld2d restart
-    service dhcpd restart
+    #if dnsmasq enabled or static dns
+    if [ "$dnsPEnabled" = "1" ] || [ "$wan_static_dns" = "on" ]; then
+	service dhcpd restart
+    fi
     service samba restart
     if [ "$MODE" != "misc" ]; then 
 	service pppoe-relay restart
@@ -62,4 +65,11 @@ if [ "$MODE" = "pppd" ] || [ "$MODE" = "all" ] || [ "$vpnEnabled" != "on" ]; the
     service ddns restart
     service ntp restart
     service upnp restart
+fi
+
+# if dnsmasq disabled need update udhcpd.conf always
+if [ "$dnsPEnabled" != "1" ] && [ "$wan_static_dns" != "on" ]; then
+    if [ "$MODE" = "pppd" ] || [ "$MODE" = "dhcp" ]; then 
+	service dhcpd restart
+    fi
 fi
