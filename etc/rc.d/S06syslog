@@ -7,7 +7,7 @@ start() {
     klogd &
 
  $LOG "Start syslogd"
-    #log to /var/log/messages
+    # log to /var/log/messages
     syslogd -b0 -s20 -l7 -S -D &
 }
 

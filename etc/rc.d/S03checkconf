@@ -5,7 +5,7 @@ LOG="echo CHECKCONF"
 start() {
  get_param
  if [ ! -f /tmp/nvram_checked ]; then
-    #include kernel config
+    # include kernel config
     . /etc/scripts/config.sh
 
     echo "Check firmware update or clean boot."
@@ -30,17 +30,17 @@ start() {
 	get_param
 	$LOG "Reset OK... boot..."
     fi
-    #user and password need set
+    # user and password need set
     if [ "$Login" = "" ] || [ "$Password" = "" ]; then
         nvram_set 2860 Login "Admin"
         nvram_set 2860 Password "Admin"
     fi
-    #need hostname
+    # need hostname
     if [ "$HostName" = "" ]; then
 	HostName="Wive-RTNL"
 	nvram_set 2860 HostName "$HostName"
     fi
-    #samba configs to
+    # samba configs to
     if [ "$WorkGroup" = "" ] || [ "$SmbNetBIOS" = "" ] || [ "$SmbString" = "" ]; then
 	WorkGroup="LOCALNET"
 	SmbNetBIOS="$HostName"
@@ -49,7 +49,7 @@ start() {
 	nvram_set 2860 SmbNetBIOS "$SmbNetBIOS"
 	nvram_set 2860 SmbString "$SmbString"
     fi
-    #if check mac in nvram set to not NO and web not start
+    # if check mac in nvram set to not NO and web not start
     if [ "$CHECKMAC" != "NO" ] && [ ! -f /var/run/goahead.pid ]; then
  	if [ $MAC_TEST = "0" ] || [ $WMAC_TEST = "0" ] || [ $LANMAC_TEST = "0" ]; then
 	    $LOG "First start MAC generate"

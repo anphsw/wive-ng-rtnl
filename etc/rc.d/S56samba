@@ -5,11 +5,11 @@ if [ ! -f /bin/smbd ] || [ ! -f /bin/nmbd ]; then
     exit 0
 fi
 
-#wait to start web and run from goahead code
+# wait to start web and run from goahead code
 . /etc/scripts/web_wait.sh
 web_wait
 
-#get params
+# get params
 . /etc/scripts/global.sh
 
 LOG="logger -t samba"
@@ -20,7 +20,7 @@ if [ "$SmbEnabled" = "1" ]; then
     get_param
 
     echo "[global]" > $CONFIG
-    #for file share mode need increase buffers size
+    # for file share mode need increase buffers size
     echo "    interfaces = $interfaces" >> $CONFIG
     echo "    socket options = $socket_options" >> $CONFIG
     echo "    workgroup = $WorkGroup" >> $CONFIG
@@ -30,15 +30,15 @@ if [ "$SmbEnabled" = "1" ]; then
     echo "    force user = $Login" >> $CONFIG
     echo "    time server = $ntp_support" >> $CONFIG
 
-    #check samba version
+    # check samba version
     if [ "$is_smb_v3" != "0" ]; then
 	echo "    hosts allow = $lan_ipaddr/$lan_netmask" >> $CONFIG
     fi
 
-    #add template to config
+    # add template to config
     cat $TEMPLATE >> $CONFIG
 
-    #share /media
+    # share /media
     if [ -d /proc/bus/usb ]; then
 	if [ $public != "" ]; then
 	    echo "[public]" >> $CONFIG

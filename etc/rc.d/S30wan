@@ -1,10 +1,10 @@
 #!/bin/sh
 
-#wait to start web and run from goahead code
+# wait to start web and run from goahead code
 . /etc/scripts/web_wait.sh
 web_wait
 
-#get params
+# get params
 . /etc/scripts/global.sh
 
 LOG="logger -t wan"
@@ -15,11 +15,11 @@ start() {
     get_param
     $LOG "Configure WAN."
 
-    #stop dhcp client
+    # stop dhcp client
     killall -q udhcpc
     killall -q -SIGKILL udhcpc
 
-    #Flush conntrack table and route cache
+    # Flush conntrack table and route cache
     echo 1 > /proc/sys/net/nf_conntrack_flush
     ip route flush cache
 
@@ -29,10 +29,10 @@ start() {
     if [ "$wan_ip" != "" ]; then
 	echo "$wan_ip	$HostName.lo" >> /etc/hosts
     fi
-    #read for all write by root
+    # read for all write by root
     chmod 644 /etc/hosts > /dev/null 2>&1
 
-    #set manual mtu to wan 
+    # set manual mtu to wan 
     if [ "$opmode" != "0" ] && [ "$vpnPurePPPOE" != "1" ]; then
 	if [ "$wan_manual_mtu" != "0" ] && [ "$wan_manual_mtu" != "" ]; then
 	    $LOG "Set manual MTU to WAN $wan_manual_mtu"
@@ -40,45 +40,45 @@ start() {
 	fi
     fi
 
-    #drop adress from wan
+    # drop adress from wan
     if [ "$opmode" != "0" ] && [ "$vpnEnabled" = "on" ] && [ "$vpnType" = "0" ] && [ "$vpnPurePPPOE" = "1" ]; then
 	$LOG "PURE PPPOE Mode - NOT start dhcpc or config wan!"
 	ip addr flush dev $wan_if
     fi
 
-    #if not bridge wan up
+    # if not bridge wan up
     if [ "$opmode" != "0" ]; then
-	#enable wan interface
+	# enable wan interface
 	ip link set $wan_if up
-	#enable forward for wan
+	# enable forward for wan
 	echo 1 > "/proc/sys/net/ipv4/conf/$wan_if/forwarding"
-	#reinit switch fix 2.1 driver issue
+	# reinit switch fix 2.1 driver issue
 	setLanWan
     fi
 
     if [ "$wanmode" = "STATIC" ] || [ "$opmode" = "0" ]; then
 	if [ "$opmode" != "0" ]; then
-	    #lan and wan ip should not be the same except in bridge mode
+	    # lan and wan ip should not be the same except in bridge mode
 	    if [ "$wan_ip" = "$lan_ip" ]; then
 		$LOG "wan service: warning: WAN's IP address is set identical to LAN"
 		exit 0
 	    fi
-	    #wan interface up and default gateway
+	    # wan interface up and default gateway
 	    ifconfig "$wan_if" "$wan_ip" netmask "$wan_nm"
-	    #always treat bridge mode having static wan connection
-	    #route mode
+	    # always treat bridge mode having static wan connection
+	    # route mode
 	    if [ "$wan_gateway" != "" ] && [ "$wan_gateway" != "0.0.0.0" ]; then
 		ip route replace default via $wan_gateway
 	    fi
-	    #add routes configured in web
+	    # add routes configured in web
 	    if [ -f /etc/routes_replace ]; then
 		$LOF "Add user routes."
 		/etc/routes_replace replace $lan_if $wan_if
 	    fi
 	else
-	    #wan interface up and default gateway
+	    # wan interface up and default gateway
 	    ifconfig br0 $lan_ip netmask $lan_nm
-	    #if bridge mode dgw on dev br0 set
+	    # if bridge mode dgw on dev br0 set
 	    if [ "$wan_gateway" != "" ] && [ "$wan_gateway" != "0.0.0.0" ]; then
     		ip route replace default dev br0 via $wan_gateway
 	    else
@@ -86,25 +86,25 @@ start() {
 	    fi
         fi
     elif [ "$wanmode" = "DHCP" ] && [ "$vpnPurePPPOE" != "1" ]; then
-	#reload global
+	# reload global
 	. /etc/scripts/global.sh
 
-	#wait sta connected
+	# wait sta connected
 	wait_connect
 
-	#get udhcp param
+	# get udhcp param
 	udhcpc_opts
 
 	$LOG "Start DHCP client."
 	(sleep $CL_SLEEP && udhcpc $UDHCPCOPTS > /dev/null 2>&1) &
     elif [ "$wanmode" = "ZERO" ] || [ "$vpnPurePPPOE" = "1" ]; then
-	#reload global
+	# reload global
 	. /etc/scripts/global.sh
 
-	#wait sta connected
+	# wait sta connected
 	wait_connect
 
-	#start zeroconf
+	# start zeroconf
 	zero_conf
     else
 	$LOG "Unknown mode. Please reset device."
@@ -116,7 +116,7 @@ stop() {
 }
 
 get_param() {
-    #get parametrs
+    # get parametrs
     wan_ip=`nvram_get 2860 wan_ipaddr`
     wan_nm=`nvram_get 2860 wan_netmask`
     wan_gateway=`nvram_get 2860 wan_gateway`

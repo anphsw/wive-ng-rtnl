@@ -1,22 +1,22 @@
 #!/bin/sh
 
-#get params
+# get params
 . /etc/scripts/global.sh
 
 LOG="echo MODULES"
 
 start() {
     get_param
-    #if goahead not started
+    # if goahead not started
     if [ ! -f /var/run/goahead.pid ]; then
-	#generate modules dep
+	# generate modules dep
 	if [ ! -f /etc/modules.dep ]; then
 	    $LOG "Start modules.dep generate..."
 	    depmod -a -n > /etc/modules.dep
 	fi
-	#not load nf_nat helpers in bridge mode
+	# not load nf_nat helpers in bridge mode
 	if [ "$opmode" != "0" ]; then
-	    #load conntrack helpers
+	    # load conntrack helpers
 	    fwAlgTFTP=`nvram_get 2860 fwAlgTFTP`
 	    if [ "$fwAlgTFTP" != "0" ]; then
 		modprobe -q nf_conntrack_tftp
@@ -50,13 +50,13 @@ start() {
 	    fi
 	fi
     else
-	#not load module before goahead start
+	# not load module before goahead start
 	. /etc/scripts/web_wait.sh
 	web_wait
 
-	#this is workaround for small memory devices
-	#and prevent memory fragmentation before load
-	#large ralink wifi drivers
+	# this is workaround for small memory devices
+	# and prevent memory fragmentation before load
+	# large ralink wifi drivers
 	if [ -f /tmp/is_16ram_dev ]; then
 	    echo 1 > /proc/sys/net/nf_conntrack_flush
 	    ip route flush cache
@@ -77,7 +77,7 @@ start() {
 	$LOG "Load wifi module..."
     	if [ "$opmode" = "2" ]; then
     	    modprobe -q rt2860v2_sta "$mac"
-	    #wait module read config from flash
+	    # wait module read config from flash
 	    sleep 2
 	else
     	    modprobe -q rt2860v2_ap  "$mac"
@@ -129,7 +129,7 @@ stop() {
 
 ra0flushadress()
 {
-    #flush adresses
+    # flush adresses
     ip addr flush dev ra0  > /dev/null 2>&1
     if [ "$opmode" = "3" ]; then
 	ip addr flush dev apcli0  > /dev/null 2>&1

@@ -3,7 +3,7 @@
 # if app not exist
 [ -x /bin/transmission-daemon ] || exit 0
 
-#wait to start web and run from goahead code
+# wait to start web and run from goahead code
 . /etc/scripts/web_wait.sh
 web_wait
 

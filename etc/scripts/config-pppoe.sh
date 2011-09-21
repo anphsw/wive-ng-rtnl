@@ -4,14 +4,14 @@
 # config-pppoe.sh - configure PPPOE client helper #
 ###################################################
 
-#include global config
+# include global config
 . /etc/scripts/global.sh
 
-#send hup signal to pppd for correct link down
+# send hup signal to pppd for correct link down
 killall -q -SIGHUP pppd
 sleep 1
 
-#Kill daemons
+# Kill daemons
 killall -q pppd
 killall -q xl2tpd
 

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-#get params
+# get params
 . /etc/scripts/global.sh
 
 LOG="logger -t lan"
@@ -39,11 +39,11 @@ get_txqlen
 	    ifconfig eth2.2 hw ether "$WANMAC"
 	fi
 
-	#eth2.1 always up
+	# eth2.1 always up
 	ip link set eth2.1 up
     fi
 
-    #flush ip from interfaces
+    # flush ip from interfaces
     addr_flush
 
 #-------------------CONFIG--------------------------------
@@ -66,7 +66,7 @@ get_txqlen
         ifconfig "$lan2_if" "$lan2_ipaddr" netmask "$lan2_netmask"
     fi
 
-    #configure switch at start
+    # configure switch at start
     if [ ! -f /var/run/goahead.pid ]; then
 	setLanWan
     fi
@@ -75,7 +75,7 @@ get_txqlen
 
 stop() {
   $LOG "Stop network interfaces..."
-    #first down bridge
+    # first down bridge
     ip link set br0 down > /dev/null 2>&1
     dev=`grep eth < /proc/net/vlan/config | cut -d' ' -f 1`
     for i in $dev; do
@@ -84,7 +84,7 @@ stop() {
     done
     ip link set "$lan_if" down > /dev/null 2>&1
     ip link set "$lan2_if" down > /dev/null 2>&1
-    #last delete bridge interface
+    # last delete bridge interface
     brctl delbr br0 > /dev/null 2>&1
 }
 
@@ -99,7 +99,7 @@ get_param() {
 }
 
 addr_flush() {
-    #drop adresses
+    # drop adresses
     dev=`grep eth < /proc/net/vlan/config | cut -d' ' -f 1`
     for i in $dev; do
 	ip addr flush dev $i > /dev/null 2>&1

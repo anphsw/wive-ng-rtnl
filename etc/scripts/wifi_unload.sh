@@ -4,7 +4,7 @@
 # Try some methods for free ram before firmware update.
 # Workaround over workaround. Need clean in the future.
 
-#include global
+# include global
 . /etc/scripts/global.sh
 
 stop_serv="transmission vpnhelper inetd shaper crontab pppoe-relay ddns wscd dhcpd lld2d radvd syslog \
@@ -19,20 +19,20 @@ rmmod_mod="hw_nat ppp_mppe pppol2tp pptp pppoe pppox ppp_generic imq ipt_TTL ipt
 	    act_gact act_police cls_tcindex em_cmp em_u32 sch_gred sch_red act_ipt cls_fw cls_u32 \
 	    em_nbyte sch_esfq sch_htb sch_sfq ts_fsm ts_kmp ts_bm"
 
-#disable forward
+# disable forward
 sysctl -w net.ipv4.ip_forward=0
 echo 0 > /proc/sys/net/ipv4/conf/all/mc_forwarding
 echo 0 > /proc/sys/net/ipv4/conf/default/mc_forwarding
 
-#clear conntrack tables
+# clear conntrack tables
 echo 1 > /proc/sys/net/nf_conntrack_flush
 
-#disable hotplug
+# disable hotplug
 if [ -f /proc/sys/kernel/hotplug ]; then
     echo > /proc/sys/kernel/hotplug
 fi
 
-#clear route cache
+# clear route cache
 ip route flush cache
 
 unload_ra0()
@@ -49,15 +49,15 @@ unload_ra0br0()
     ra0_mac=`ifconfig ra0 | sed -n '/HWaddr/p' | sed -e 's/.*HWaddr\ \(.*\)/\1/'`
 
     if [ "$ra0_mac" = "$br0_mac" ]; then
-	#destory br0
+	# destory br0
 	ip link set br0 down > /dev/null 2>&1
 	brctl delbr br0 > /dev/null 2>&1
 
-	#disable WAN and WLAN
+	# disable WAN and WLAN
 	unload_ra0
 
 	if [ "$1" != "" ]; then
-	    #mirror br0 to eth2x
+	    # mirror br0 to eth2x
 	    ip link set $1 down > /dev/null 2>&1
 	    ifconfig $1 hw ether $br0_mac
 	    ifconfig $1 $br0_ip netmask $br0_netmask
@@ -78,21 +78,21 @@ unload_modules()
     do
         rmmod $mod > /dev/null 2>&1
     done
-    #unload wifi modules
+    # unload wifi modules
     service modules stop
     rmmod -a
 }
 
 unload_apps()
 {
-    echo "Stop services..." #first step stop services
+    echo "Stop services..." # first step stop services
     for serv in $stop_serv
     do
 	service $serv stop > /dev/null 2>&1
     done
     echo "Wait 3 seconds."
     sleep 3
-    echo "Kill aplications..." #second step terminate and kill application
+    echo "Kill aplications..." # second step terminate and kill application
     for apps in $kill_apps
     do
 	(killall -q $apps && usleep 20000 && killall -q -SIGKILL $apps) > /dev/null 2>&1
@@ -127,7 +127,7 @@ if [ -n "$mounted" ]; then
     sleep 2
 fi
 
-#This drop unneded caches to free more ram.
+# This drop unneded caches to free more ram.
 sysctl -w vm.min_free_kbytes=3192
 drop_disk_caches
 sysctl -w vm.min_free_kbytes=1024

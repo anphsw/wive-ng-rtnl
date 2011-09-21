@@ -5,11 +5,11 @@ if [ ! -f /bin/igmpproxy ]; then
     exit 0
 fi
 
-#wait to start web and run from goahead code
+# wait to start web and run from goahead code
 . /etc/scripts/web_wait.sh
 web_wait
 
-#get params
+# get params
 . /etc/scripts/global.sh
 
 wait_connect
@@ -17,18 +17,18 @@ wait_connect
 LOG="logger -t igmpproxy"
 
 start() {
-  #if igmpproxy enable and mode not full bridge
+  # if igmpproxy enable and mode not full bridge
   get_param
     sysctl -w net.ipv4.igmp_max_memberships=5
     if [ "$igmpEnabled" = "1" ] && [ "$opmode" != "0" ]; then
         $LOG "Starting IGMPPROXY"
-	#generate config
+	# generate config
 	printf "quickleave\nphyint $wan_if upstream  ratelimit 0  threshold 1\naltnet 0.0.0.0/0\nphyint $lan_if downstream  ratelimit 0  threshold 1\nphyint ppp0 disabled\n" > /etc/igmpproxy.conf
-	#enable mc forwarding
+	# enable mc forwarding
 	echo 1 > "/proc/sys/net/ipv4/conf/$wan_if/forwarding"
 	echo 1 > "/proc/sys/net/ipv4/conf/all/mc_forwarding"
 	echo 1 > "/proc/sys/net/ipv4/conf/default/mc_forwarding"
-	#check ip adress set at wan and if need kill igmpproxy
+	# check ip adress set at wan and if need kill igmpproxy
 	wan_is_not_null=`ip -4 addr show $wan_if | grep inet -c`
 	igmp_is_start=`pidof igmpproxy`
 	if [ "$wan_is_not_null" = "0" ] || [ "$igmp_is_start" != "" ]; then
@@ -37,17 +37,17 @@ start() {
 	    killall -q -SIGKILL igmpproxy
 	    sleep 20
 	fi
-	#add route to multicast subnet
+	# add route to multicast subnet
 	ip route replace 224.0.0.0/4 dev $wan_if
 	if [ "$igmpSnoopMode" != "f" ] && [ "$igmpSnoopMode" != "n" ]; then
-	    #if snoop mode unknown = auto
+	    # if snoop mode unknown = auto
 	    igmpSnoopMode=""
 	fi
 	if [ "$M2UEnabled" = "1" ]; then
-	    #if wifi snoop enabled = force
+	    # if wifi snoop enabled = force
 	    igmpSnoopMode="f"
 	fi
-	#start igmpproxy in switch managment mode
+	# start igmpproxy in switch managment mode
 	if [ "$wan_port" = "0" ]; then
 	    $igmpPort="w"
 	fi
@@ -57,7 +57,7 @@ start() {
 	    OPTS=""
 	fi
 
-	#start igmpproxy in switch managment mode
+	# start igmpproxy in switch managment mode
     	igmpproxy $OPTS /etc/igmpproxy.conf &
     else
 	echo 0 > /proc/sys/net/ipv4/conf/all/mc_forwarding

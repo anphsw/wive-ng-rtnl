@@ -39,7 +39,7 @@ start() {
     $LOG "##$CONNTRACK_MAX##$HASHSIZE##$ROUTEMAX##$MINPORT $MAXPORT"
 
     $LOG "Tune with proc"
-    #on kernel crash
+    # on kernel crash
     echo 1    > /proc/sys/kernel/panic
     echo 1    > /proc/sys/kernel/panic_on_oops
     echo 1    > /proc/sys/vm/panic_on_oom
@@ -55,12 +55,12 @@ start() {
 	ulimit -v unlimited
 	# max memory size
 	ulimit -m unlimited
-	#increase memlimits
+	# increase memlimits
         echo "524288" > /proc/sys/net/core/wmem_max
         echo "2097152" > /proc/sys/net/core/rmem_max
-	#more mem reserved
+	# more mem reserved
 	sysctl -w vm.min_free_kbytes=3192
-	#enable overcommit memory
+	# enable overcommit memory
 	sysctl -w vm.overcommit_memory=1
     fi
 ########################################################################################

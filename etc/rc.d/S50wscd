@@ -5,11 +5,11 @@ if [ ! -f /bin/wscd ]; then
     exit 0
 fi
 
-#wait to start web and run from goahead code
+# wait to start web and run from goahead code
 . /etc/scripts/web_wait.sh
 web_wait
 
-#get params
+# get params
 . /etc/scripts/global.sh
 
 LOG="logger -t wscd"

@@ -1,10 +1,10 @@
 #!/bin/sh
 
-#wait to start web and run from goahead code
+# wait to start web and run from goahead code
 . /etc/scripts/web_wait.sh
 web_wait
 
-#get params
+# get params
 . /etc/scripts/global.sh
 
 LOG="logger -t kext"
@@ -12,7 +12,7 @@ LOG="logger -t kext"
 start() {
  get_param
  $LOG "Start kernel extension config"
-    #This is set only if wan or lan in bridge------------------------
+    # This is set only if wan or lan in bridge------------------------
     if [ "$wan_if" = "br0" ] || [ "$lan_if" = "br0" ]; then
 	#----Fastpath for bridge enable------------------------------
 	if [ "$bridgeFastpath" != "0" ]; then
@@ -34,7 +34,7 @@ start() {
     fi
     #----In bridge and chillispot mode not fastnat and passth use---
     if [ "$opmode" != "0" ] && [ "$opmode" != "4" ]; then
-	#select NAT offload mode
+	# select NAT offload mode
 	if [ "$natFastpath" = "1" ]; then
 	    hw_nat=0
 	    sw_nat=1
@@ -52,9 +52,9 @@ start() {
 	    sw_nat=0
 	    $LOG "NAT Offload mode DISABLE"
 	fi
-	#workarounds coex hw/sw nat and qos
-	#mark correct work only if sw_nat=0
-	#htb/esfq/imq correct work  only if hw_nat=0
+	# workarounds coex hw/sw nat and qos
+	# mark correct work only if sw_nat=0
+	# htb/esfq/imq correct work  only if hw_nat=0
 	if [ "$QoSEnable" = "3" ] ; then
 	    hw_nat=0
 	    sw_nat=0
@@ -63,32 +63,32 @@ start() {
 	    hw_nat=0
 	    $LOG "QoS or SimpleQoS enabled - HW_NAT Offload mode DISABLE"
 	fi
-	#configure nat offload
+	# configure nat offload
 	if [ "$hw_nat" = "1" ]; then
 	    modprobe -q hw_nat
-	    #set HW_NAT default QOS Mode to WRR policy
+	    # set HW_NAT default QOS Mode to WRR policy
 	    hw_nat -L 0
 	else
 	    if [ -d /sys/module/hw_nat ]; then
 		rmmod hw_nat > /dev/null 2>&1
 	    fi
 	fi
-	#configure software nat offload
+	# configure software nat offload
 	if [ "$sw_nat" = "1" ]; then
 	    sysctl -w net.ipv4.netfilter.ip_conntrack_fastnat=1
 	else
 	    sysctl -w net.ipv4.netfilter.ip_conntrack_fastnat=0
 	fi
-	#if any QoS/Shaper mode and hw_nat ebables need increase binding threshold
+	# if any QoS/Shaper mode and hw_nat ebables need increase binding threshold
 	if [ "$QoSEnable" != "" ] && [ "$QoSEnable" != "0" ]; then
 	    hw_nat_bind=250
 	fi
-	#set hw_nat binding threshold if user set not default value
+	# set hw_nat binding threshold if user set not default value
 	if [ -d /sys/module/hw_nat ] && [ "$hw_nat" = "1" ] && [ "$hw_nat_bind" != "" ] && [ "$hw_nat_bind" != "30" ]; then
 	    $LOG "Increase HW_NAT binding threshold to $hw_nat_bind."
 	    hw_nat -N $hw_nat_bind > /dev/null 2>&1
 	fi
-	#pppoe and ip_v6 kernel mode relay.
+	# pppoe and ip_v6 kernel mode relay.
 	if [ -d /proc/pthrough ]; then
 	    if [ "$pppoe_pass" = "1" ]; then
 		echo "$lan_if,$wan_if" > /proc/pthrough/pppoe

@@ -4,14 +4,14 @@
 # config-l2tp.sh - configure L2TP client helper #
 #################################################
 
-#include global config
+# include global config
 . /etc/scripts/global.sh
 
-#send hup signal to pppd for correct link down
+# send hup signal to pppd for correct link down
 killall -q -SIGHUP pppd
 sleep 1
 
-#Kill daemons
+# Kill daemons
 killall -q pppd
 killall -q xl2tpd
 
@@ -104,7 +104,7 @@ echo "==================START-L2TP-CLIENT======================="
 	done
     fi
 
-    #load ppp* modules
+    # load ppp* modules
     load_modules
 
     if [ "$PEERDNS" = "on" ]; then
@@ -171,7 +171,7 @@ echo "==================START-L2TP-CLIENT======================="
 	LCPINTR=30
     fi
 
-    #clear all configs
+    # clear all configs
     ppp=/etc/ppp
     echo > $ppp/l2tpd.conf
     echo > $ppp/options.l2tp

@@ -9,17 +9,17 @@ if [ "$ping_check_time" = "" ] || [ "$ping_check_time" = "0" ] || \
 fi
 
 while "true"; do
-    #wait before check
+    # wait before check
     sleep $ping_check_time
 
     ##################################RADIO################################################################################
     RadioOff=`nvram_get 2860 RadioOff`
     if [ "$RadioOff" != "1" ]; then
-	#Unsolicited ARP mode, update your neighbors
+	# Unsolicited ARP mode, update your neighbors
 	arping -U 255.255.255.255 -w1 -Ibr0 -b -c1 -q
 	arping -A 255.255.255.255 -w1 -Ibr0 -b -c1 -q
 
-	#arping for client wakeup - from arp table
+	# arping for client wakeup - from arp table
 	grep -v "IP" < /proc/net/arp | awk '{ print $1 }' | while read test_ip; do
 	    arping "$test_ip" -I br0 -f -q -w1
 	done
@@ -29,7 +29,7 @@ while "true"; do
 	if [ -f /var/udhcpd.leases ]; then
 	    size=`stat /var/udhcpd.leases | grep "Size" | awk {' print $2 '}`
 	    if [ "$size" != "0" ]; then
-		#arping for client wakeup - from dhcp lease table
+		# arping for client wakeup - from dhcp lease table
 		dumpleases | grep -v "IP" | awk '{ print $2 }' | while read test_ip; do
 		    arping "$test_ip" -I br0 -f -q -w1
 		done

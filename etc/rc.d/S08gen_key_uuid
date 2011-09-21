@@ -25,10 +25,10 @@ start() {
 	$LOG "No DSS key found. Generate new host key."
 	mkdir -p /etc/dropbear
 	if [ -f /tmp/is_16ram_dev ]; then
-	    #this is workaround for small memory devices
-	    #move update firmware at 2 sateges mode
-	    #1. generate new host key and reboot
-	    #2. normal boot
+	    # this is workaround for small memory devices
+	    # move update firmware at 2 sateges mode
+	    # 1. generate new host key and reboot
+	    # 2. normal boot
     	    dropbearkey -t dss -f /etc/dropbear/dropbear_dss_host_key && fs backup_nvram && fs save && sleep 3 && reboot
 	else
     	    (dropbearkey -t dss -f /etc/dropbear/dropbear_dss_host_key) &

@@ -4,8 +4,8 @@ LOG="logger -t goahead"
 
 start() {
  $LOG "Start goahead"
-    #blink wps/sec led at boot time
-    #before goahead start
+    # blink wps/sec led at boot time
+    # before goahead start
     if [ -f /bin/gpio ]; then
 	gpio l 13 0 4000 0 0 0
 	gpio l 14 0 4000 0 0 0
@@ -13,8 +13,8 @@ start() {
     if [ -f /bin/goahead ]; then
 	/bin/goahead &
     else
-	#asinc blink wps/sec led
-	#if goahead not found
+	# asinc blink wps/sec led
+	# if goahead not found
 	if [ -f /bin/gpio ]; then
 	    gpio l 13 10 1 0 0 4000
 	    gpio l 14 1 10 0 0 4000

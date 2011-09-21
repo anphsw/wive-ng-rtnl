@@ -4,31 +4,31 @@
 # global.sh - correct enviroment helper for automatization #
 ############################################################
 
-#include kernel config
+# include kernel config
 . /etc/scripts/config.sh
 
-#include profile variables
+# include profile variables
 . /etc/profile
 
-#set default variables
+# set default variables
 wan_if="eth2.2"
 real_wan_if="eth2.2"
 lan_if="br0"
 lan2_if="br0:9"
 
-#first get operation mode and wan mode
+# first get operation mode and wan mode
 opmode=`nvram_get 2860 OperationMode`
 wanmode=`nvram_get 2860 wanConnectionMode`
 
-#get dns mode and relay mode
+# get dns mode and relay mode
 dnsPEnabled=`nvram_get 2860 dnsPEnabled`
 wan_static_dns=`nvram_get 2860 wan_static_dns`
 
-#get vpn mode and type
+# get vpn mode and type
 vpnEnabled=`nvram_get 2860 vpnEnabled`
 vpnType=`nvram_get 2860 vpnType`
 
-#get wireless, wan and lan mac adresses
+# get wireless, wan and lan mac adresses
 getMacIf()
 {
     WMAC=`nvram_get 2860 WLAN_MAC_ADDR`
@@ -36,7 +36,7 @@ getMacIf()
     LANMAC=`nvram_get 2860 LAN_MAC_ADDR`
 }
 
-#LAN interface name -> $lan_if
+# LAN interface name -> $lan_if
 getLanIfName()
 {
     if [ "$opmode" = "2" ]; then
@@ -48,10 +48,10 @@ getLanIfName()
     fi
 }
 
-#WAN interface name -> $wan_if
+# WAN interface name -> $wan_if
 getWanIfName()
 {
-    #real wan name
+    # real wan name
     if [ "$opmode" = "0" ]; then
 	wan_if="br0"
     elif [ "$opmode" = "1" ] || [ "$opmode" = "4" ]; then
@@ -69,7 +69,7 @@ getWanIfName()
 	    wan_if="eth2.2"
     fi
 
-    #upnp wan name
+    # upnp wan name
     if [ "$vpnEnabled" = "on" ]; then
 	get_wan_if=`ls /proc/sys/net/ipv4/conf/ | grep ppp | tail -q -n1`
 	if [ "$get_ppp_wan_if" != "" ]; then
@@ -82,7 +82,7 @@ getWanIfName()
     fi
 }
 
-#for memory save 16m device uses txqueuelen=100
+# for memory save 16m device uses txqueuelen=100
 get_txqlen()
 {
     if [ -f /tmp/is_16ram_dev ]; then
@@ -93,7 +93,7 @@ get_txqlen()
 }
 
 
-#free memory
+# free memory
 drop_disk_caches(){
     echo "Drop caches"
     for i in `seq 3 0`; do
@@ -102,7 +102,7 @@ drop_disk_caches(){
     sync
 }
 
-#wait connect to AP
+# wait connect to AP
 wait_connect()
 {
     if [ "$opmode" = "2" ]; then
@@ -115,7 +115,7 @@ wait_connect()
     fi
 }
 
-#L2TP and PPTP kernel dead-loop fix
+# L2TP and PPTP kernel dead-loop fix
 vpn_deadloop_fix()
 {
     if [ "$vpnEnabled" = "on" ]; then
@@ -129,22 +129,22 @@ vpn_deadloop_fix()
     fi
 }
 
-#configure and start dhcp client
+# configure and start dhcp client
 udhcpc_opts()
 {
     CL_SLEEP=1
     if [ "$opmode" = "0" ] || [ "$opmode" = "2" ]; then
 	CL_SLEEP=5
-	#disable dhcp renew from driver
+	# disable dhcp renew from driver
 	sysctl -w net.ipv4.send_sigusr_dhcpc=9
     else
 	ForceRenewDHCP=`nvram_get 2860 ForceRenewDHCP`
 	wan_port=`nvram_get 2860 wan_port`
 	if [ "$ForceRenewDHCP" != "0" ] && [ "$wan_port" != "" ]; then
-	    #configure event wait port
+	    # configure event wait port
 	    sysctl -w net.ipv4.send_sigusr_dhcpc=$wan_port
 	else
-	    #disable dhcp renew from driver
+	    # disable dhcp renew from driver
 	    sysctl -w net.ipv4.send_sigusr_dhcpc=9
 	fi
 
@@ -167,7 +167,7 @@ udhcpc_opts()
 		-O routes -O staticroutes -O msstaticroutes $GETMTU -f &"
 }
 
-#configure and start zeroconf daemon
+# configure and start zeroconf daemon
 zero_conf()
 {
     vpnPurePPPOE=`nvram_get 2860 vpnPurePPPOE`
@@ -182,7 +182,7 @@ zero_conf()
     fi
 }
 
-#configure LAN/WAN switch particion and mode per port
+# configure LAN/WAN switch particion and mode per port
 setLanWan()
 {
 ##############################################################################

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-#include global config
+# include global config
 . /etc/scripts/global.sh
 
 echo ">>>>> RECONFIGURE WIFI <<<<<<<<<<"
@@ -8,11 +8,11 @@ echo ">>>>> RECONFIGURE WIFI <<<<<<<<<<"
 ########################################ALLMODE param##########################
 HiPower=`nvram_get 2860 HiPower`
 if [ "$HiPower" = "1" ]; then
-#Disable MIMO PowerSave and increase LNA gain
+# Disable MIMO PowerSave and increase LNA gain
     iwpriv ra0 set HiPower=1
     iwpriv ra0 set HtMimoPs=0
 else
-#Enable MIMO PowerSave and set LNA gain to default
+# Enable MIMO PowerSave and set LNA gain to default
     iwpriv ra0 set HiPower=0
     iwpriv ra0 set HtMimoPs=1
 fi
@@ -23,7 +23,7 @@ if [ "$opmode" = "2" ]; then
     if [ "$AutoConnect" = "1" ]; then
 	iwpriv ra0 set AutoReconnect=1
     fi
-  #in sta mode exit
+  # in sta mode exit
   exit 0
 fi
 
@@ -58,12 +58,12 @@ fi
 ###############################################Channel select#######################
 AutoChannelSelect=`nvram_get AutoChannelSelect`
 if [ "$AutoChannelSelect" = "1" ]; then
-    #rescan and select optimal channel
+    # rescan and select optimal channel
     iwpriv ra0 set AutoChannelSel=1
     iwpriv ra0 set SiteSurvey=1
 else
     Channel=`nvram_get Channel`
-    #set channel manual
+    # set channel manual
     iwpriv ra0 set Channel=$Channel
 fi
 

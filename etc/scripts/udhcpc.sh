@@ -2,7 +2,7 @@
 
 # Wive-NG  udhcpc script
 
-#include global config
+# include global config
 . /etc/scripts/global.sh
 
 [ -z "$1" ] && echo "Error: should be called from udhcpc" && exit 1
@@ -21,7 +21,7 @@ ROUTELIST_FGW=""
 
 # Get VPN DGW mode
 vpnDGW=`nvram_get 2860 vpnDGW`
-#If pppoe mode and dgw in pppoe no need replace default gw
+# If pppoe mode and dgw in pppoe no need replace default gw
 replace_dgw=1
 if [ "$vpnEnabled" = "on" ] && [ "$vpnDGW" = "1" ] && [ "$vpnType" = "0" ]; then
     replace_dgw=0
@@ -70,14 +70,14 @@ case "$1" in
     ifconfig $interface $ip $BROADCAST $NETMASK
     CUR_IP=`ip -4 addr show dev $interface | awk '/inet / {print $2}'`
 
-	#Get MTU from dhcp server
+	# Get MTU from dhcp server
 	if [ "$mtu" ] && [ "$wan_manual_mtu" = "0" ]; then
 	    $LOG "Set MTU to $mtu bytes from dhcp server"
 	    ip link set mtu $mtu dev $interface
 	fi
-	#Get default gateway
+	# Get default gateway
 	if [ -n "$router" ]; then
-	    #default route with metric 0 is through $iface?
+	    # default route with metric 0 is through $iface?
 	    dgw_otherif=`ip route | grep "default" | grep -v "dev $interface " | sed 's,.*dev \([^ ]*\) .*,\1,g'`
 	    if [ -z "$dgw_otherif" ]; then
 		if [ "$replace_dgw" = "1" ]; then
@@ -94,7 +94,7 @@ case "$1" in
 		    if [ "$replace_dgw" = "1" ]; then
 			ROUTELIST_DGW="$ROUTELIST_DGW default:$i:$interface:$metric"
 		    fi
-		    #save first dgw with metric=1 to use in corbina hack
+		    # save first dgw with metric=1 to use in corbina hack
 		    if [ "$metric" = "0" ]; then
 			echo $i > /tmp/default.gw
 			first_dgw="$i"
@@ -104,7 +104,7 @@ case "$1" in
 	    fi
 	fi
 
-	#classful routes
+	# classful routes
 	if [ -n "$routes" ]; then
 	    for i in $routes; do
 		NW=`echo $i | sed 's,/.*,,'`
@@ -122,7 +122,7 @@ case "$1" in
 	    done
 	fi
 
-	#MSSTATIC ROUTES AND STATIC ROUTES (rfc3442)
+	# MSSTATIC ROUTES AND STATIC ROUTES (rfc3442)
 	ROUTES="$staticroutes $msstaticroutes"
 
 	if [ "$ROUTES" != " " ]; then
@@ -139,8 +139,8 @@ case "$1" in
 	    done
 	fi
 
-	#first add stub for routesm next add static routes and
-	#default gateways need replace/add at end route parces
+	# first add stub for routesm next add static routes and
+	# default gateways need replace/add at end route parces
 	if [ "$replace_dgw" = "1" ]; then
 	    ROUTELIST="$ROUTELIST_FGW $ROUTELIST $ROUTELIST_DGW"
 	else
@@ -153,21 +153,21 @@ case "$1" in
 		ip route replace $IPCMD
 	done
 
-	#add routes configured in web
+	# add routes configured in web
 	if [ -f /etc/routes_replace ]; then
 	    $LOF "Add user routes."
 	    /etc/routes_replace replace $lan_if $wan_if
 	fi
 
         if [ "$OLD_IP" != "$CUR_IP" ]; then
-	    #Get DNS servers
+	    # Get DNS servers
 	    if [ "$wan_static_dns" != "on" ]; then
 		if [ "$dns" ]; then
 		    $LOG "Renew DNS from dhcp"
 		    rm -f $RESOLV_CONF
-        	    #get domain name
+        	    # get domain name
     		    [ -n "$domain" ] && echo domain $domain >> $RESOLV_CONF
-		    #parce dnsservers
+		    # parce dnsservers
 		    for i in $dns ; do
 	    		$LOG "DNS= $i"
 	    		echo nameserver $i >> $RESOLV_CONF
@@ -190,14 +190,14 @@ case "$1" in
 		services_restart.sh dhcp
 	fi
 
-	#if dhcp disables restart must from internet.sh
-	#this is restart vpn and others if need
+	# if dhcp disables restart must from internet.sh
+	# this is restart vpn and others if need
 	if [ "$vpnEnabled" = "on" ]; then
     	    if [ "$OLD_IP" != "$CUR_IP" ]; then
 		PPPD=`pidof pppd`
 		XL2TPD=`pidof xl2tpd`
 		service vpnhelper stop
-		#wait ip-down script work
+		# wait ip-down script work
 		if [ "$PPPD" != "" ] || [ "$XL2TPD" != "" ]; then
 		    sleep 10
 		fi

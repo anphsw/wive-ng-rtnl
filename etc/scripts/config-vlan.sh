@@ -48,7 +48,7 @@ config3052_dt()
 
 config3052()
 {
-	#preinit
+	# preinit
 	switch reg w 14 405555
 	switch reg w 50 2001
 	switch reg w 98 7f3f
@@ -133,7 +133,7 @@ enable3052()
     done
 }
 
-#  arg1:  phy address.
+# arg1:  phy address.
 link_down()
 {
 	# get original register value
@@ -197,7 +197,7 @@ reset_all_phys()
 	echo "Reset all phy port"
         opmode=`nvram_get 2860 OperationMode`
 	if [ "$opmode" = "1" ]; then
-	    #Ports down skip WAN port
+	    # Ports down skip WAN port
 	    wan_port=`nvram_get 2860 wan_port`
 	    if [ "$wan_portN" = "0" ]; then
 		start=0
@@ -207,22 +207,22 @@ reset_all_phys()
 		end=4
 	    fi
 	else
-	    #All ports down
+	    # All ports down
 	    start=0
 	    end=4
 	fi
 
-	#disable ports
+	# disable ports
 	for i in `seq $start $end`; do
     	    link_down $i
 	done
 
 	if [ "$opmode" = "1" ]; then
-	  #force Windows clients to renew IP and update DNS server
+	  # force Windows clients to renew IP and update DNS server
 	  sleep 2
 	fi
 
-	#enable ports
+	# enable ports
 	for i in `seq $start $end`; do
     	    link_up $i
 	done
@@ -342,7 +342,7 @@ restoreVtss()
 
 if [ "$1" = "0" ]; then
 	SWITCH_MODE=0
-	#isc is used to distinguish between 175C and 175D
+	# isc is used to distinguish between 175C and 175D
 	isc=`mii_mgr -g -p 29 -r 31`
 	if [ "$2" = "0" ]; then
 		if [ "$isc" = "Get: phy[29].reg[31] = 175c" ]; then

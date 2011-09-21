@@ -1,10 +1,10 @@
 #!/bin/sh
 
-#wait to start web and run from goahead code
+# wait to start web and run from goahead code
 . /etc/scripts/web_wait.sh
 web_wait
 
-#get params
+# get params
 . /etc/scripts/global.sh
 
 LOG="logger -t dhcpd"
@@ -55,7 +55,7 @@ start() {
 		echo ""
 	    else
 		if [ -f /etc/resolv.conf ]; then
-		    #parse resolv.conf file
+		    # parse resolv.conf file
 		    servers=`grep nameserver < /etc/resolv.conf | uniq | tail -q -n2 | awk {' print $2 '}`
 		    dhcpPriDns=""
 		    dhcpSecDns=""
@@ -121,7 +121,7 @@ set_dns()
 }
 
 get_param() {
-    #dhcpd params
+    # dhcpd params
     dhcpDomain=`nvram_get 2860 dhcpDomain`
     dhcpStart=`nvram_get 2860 dhcpStart`
     dhcpEnd=`nvram_get 2860 dhcpEnd`
@@ -131,7 +131,7 @@ get_param() {
     dhcpGateway=`nvram_get 2860 dhcpGateway`
     dhcpLease=`nvram_get 2860 dhcpLease`
     dhcpStatic1=`nvram_get 2860 dhcpStatic1`
-    #others for replace if dhcp configure fail
+    # others for replace if dhcp configure fail
     SmbEnabled=`nvram_get 2860 SmbEnabled`
     dnsPEnabled=`nvram_get 2860 dnsPEnabled`
     lan_ipaddr=`nvram_get 2860 lan_ipaddr`

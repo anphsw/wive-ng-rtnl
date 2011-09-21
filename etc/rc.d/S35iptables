@@ -14,21 +14,21 @@ start() {
  get_param
  stop
 #########################################DEFAULTRULES###################################
-	#default filters
+	# default filters
 	$LOG "Set default filters"
 	iptables -I INPUT -i lo -j ACCEPT
 	iptables -A INPUT $STATE_EST -j ACCEPT
 ###########################################IGMP-RULES#######################################
-	#only WAN interface recived multicast
+	# only WAN interface recived multicast
 	if [ "$opmode" != "0" ]; then    
-	    #INPUT needed by unpxy and igmpproxy
+	    # INPUT needed by unpxy and igmpproxy
 	    if [ "$igmpen" != "0" ] || [ "$UDPXY" != "0" ]; then
 		$LOG "Set igmp input rules"
 		iptables -A INPUT -p igmp -i $lan_if -j ACCEPT
 	        iptables -A INPUT -d 224.0.0.0/4 -i $wan_if -j ACCEPT
 		iptables -A INPUT -s 224.0.0.0/4 -i $wan_if -j ACCEPT
 	    fi
-	    #FORWARD rules needed only for igmpproxy.
+	    # FORWARD rules needed only for igmpproxy.
 	    if [ "$igmpen" != "0" ]; then
 		$LOG "Set igmp forward rules"
 		iptables -A FORWARD -d 224.0.0.0/4 -o $lan_if -j ACCEPT
@@ -38,7 +38,7 @@ start() {
 
 ###########################################SERVICES#######################################
 	$LOG "Service limit set"
-        #add limit connection rules for local services
+        # add limit connection rules for local services
 	iptables -N servicelimit > /dev/null 2>&1
         iptables -F servicelimit > /dev/null 2>&1
         iptables -A INPUT -j servicelimit > /dev/null 2>&1
@@ -149,7 +149,7 @@ start() {
 	    $LOG "samba"
 	    iptables -A servicelimit -i $lan_if -p udp --dport 137:138 -j ACCEPT
 	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp -m multiport --dport 139,445 -j ACCEPT
-	    #not safe fix me later
+	    # not safe fix me later
 	    iptables -A servicelimit -i $lan_if -p udp --dport 1024:65535 -j ACCEPT
 	else
 	    iptables -A servicelimit -i $lan_if -p udp --dport 137:138 -j DROP
@@ -165,7 +165,7 @@ start() {
 	fi
 	if [ "$upnp" = "1" ] && [ "$opmode" != "0" ]; then
 	    $LOG "upnp"
-	    #not safe fix me later
+	    # not safe fix me later
 	    iptables -A servicelimit -i $lan_if -p udp --dport 1024:65535 -j ACCEPT
 	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp -m multiport --dport 1024:65535 -j ACCEPT
 	fi
@@ -202,11 +202,11 @@ start() {
 ###########################################FORWARD#######################################
 	if [ "$opmode" != "0" ]; then
 	    $LOG "Set forward rules"
-            #enable forward for LAN/WAN interfaces
+            # enable forward for LAN/WAN interfaces
 	    echo 1 > "/proc/sys/net/ipv4/conf/$wan_if/forwarding"
 	    echo 1 > "/proc/sys/net/ipv4/conf/$lan_if/forwarding"
 
-	    #ipt_account need first rules in FORWARD
+	    # ipt_account need first rules in FORWARD
 	    if [ "$ipt_account" = "1" ]; then
 		$LOG "Start ipt_accounting"
 		iptables -N ipaccount
@@ -219,7 +219,7 @@ start() {
 		echo "reset-on-read=no" > /proc/net/ipt_account/mynetwork
 	    fi
 
-	    #tune mss size for tranzit packets
+	    # tune mss size for tranzit packets
 	    iptables -t mangle -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
 
 	    if [ -f /etc/websfilter ]; then
@@ -242,7 +242,7 @@ start() {
 	    fi
 
 	    if [ "$parproutedEnabled" != "1" ]; then
-		#enable forward only from local network to wan/ppp
+		# enable forward only from local network to wan/ppp
 		iptables -A FORWARD -i $lan_if -s $lan_ip/$lan_nm -j ACCEPT
 		iptables -A FORWARD -o $wan_if -s $lan_ip/$lan_nm -j ACCEPT
 		iptables -A FORWARD -o ! $lan_if -s $lan_ip/$lan_nm -j ACCEPT
@@ -250,15 +250,15 @@ start() {
 		    iptables -A FORWARD -o $wan_if -s $chilli_net -j ACCEPT
 		fi
 		if [ "$opmode" = "4" ]; then
-		    #for ISP localnet alya dualacess
+		    # for ISP localnet alya dualacess
 		    iptables -t nat -A POSTROUTING -o eth2.2  -s $chilli_net -j MASQUERADE
 		fi
-		#second lan
+		# second lan
 		if [ "$Lan2Enabled" = "1" ]; then
     		    iptables -A FORWARD -o ! $lan_if -s $lan2_ipaddr/$lan2_netmask -j ACCEPT
 		fi
 	    else
-		#in proxy arp mode need all forward packets to acepted
+		# in proxy arp mode need all forward packets to acepted
 		iptables -I FORWARD -j ACCEPT
 	    fi
 	fi
@@ -284,14 +284,14 @@ start() {
 	    if [ "$opmode" != "0" ] && [ "$natEnabled" = "1" ]; then
 		if [ "$vpnPurePPPOE" != "1" ]; then
 		    if [ "$opmode" != "4" ]; then
-			#lan gw/wireless client/apcli mode NAT
+			# lan gw/wireless client/apcli mode NAT
 			if  [ "$use_snat" = "1" ]; then
 			    iptables -t nat -A POSTROUTING -o $wan_if -s $lan_ip/$lan_nm -j SNAT --to-source $wan_ipaddr
 			else
 			    iptables -t nat -A POSTROUTING -o $wan_if -s $lan_ip/$lan_nm -j MASQUERADE
 			fi
 			if [ "$Lan2Enabled" = "1" ]; then
-			    #lan gw/wireless client/apcli mode NAT for second lan
+			    # lan gw/wireless client/apcli mode NAT for second lan
 			    if  [ "$use_snat" = "1" ]; then
 				iptables -t nat -A POSTROUTING -o $wan_if -s $lan2_ip/$lan2_nm -j SNAT --to-source $wan_ipaddr
 			    else
@@ -299,7 +299,7 @@ start() {
 			    fi
 			fi
 		    else
-			#chillispot NAT
+			# chillispot NAT
 			if  [ "$use_snat" = "1" ]; then
 			    iptables -t nat -A POSTROUTING -o $wan_if -s $chilli_net -j SNAT --to-source $wan_ipaddr
 			else
@@ -335,11 +335,11 @@ start() {
     	    $LOG "DMZ enabled for $DMZIPAddress"
     	    if [ "$vpnEnabled" = "on" ]; then
         	if [ "$vpnType" = "1" ]; then
-		    #pptp
+		    # pptp
 	    	    iptables -t nat -A DMZ -p tcp -d $DMZIPAddress --dport 1723 -j RETURN
 		    iptables -t nat -A DMZ -p gre -d $DMZIPAddress -j RETURN
 		elif [ "$vpnType" = "2" ]; then
-	    	    #l2tp
+	    	    # l2tp
 	    	    iptables -t nat -A DMZ -p udp -d $DMZIPAddress --dport 1701 -j RETURN
 		fi
 	    fi
@@ -354,7 +354,7 @@ start() {
 
 
 stop() {
-    #drop all rules
+    # drop all rules
     iptables -F > /dev/null 2>&1
     iptables -t nat -F > /dev/null 2>&1
     iptables -t filter -F > /dev/null 2>&1
@@ -375,44 +375,44 @@ stop() {
     iptables -t mangle -Z > /dev/null 2>&1
     iptables -Z > /dev/null 2>&1
 
-    #default actions
+    # default actions
     iptables -P FORWARD DROP > /dev/null 2>&1
     iptables -P INPUT   DROP > /dev/null 2>&1
     iptables -P OUTPUT ACCEPT > /dev/null 2>&1
 }
 
 get_param() {
-    #network config
-    #first lan ip
+    # network config
+    # first lan ip
     lan_ip=`nvram_get 2860 lan_ipaddr`
     lan_nm=`nvram_get 2860 lan_netmask`
-    #second lan ip
+    #s econd lan ip
     Lan2Enabled=`nvram_get 2860 Lan2Enabled`
     lan2_ipaddr=`nvram_get 2860 lan2_ipaddr`
     lan2_netmask=`nvram_get 2860 lan2_netmask`
 
-    #get wan_ip for use SNAT
+    # get wan_ip for use SNAT
     use_snat=`nvram_get 2860 use_snat`
     wan_ipaddr=`nvram_get 2860 wan_ipaddr`
     if [ "$wanmode" != "STATIC" ] || [ "$wan_ipaddr" = "" ]; then
 	wan_ipaddr=`LC_ALL=C /bin/ifconfig $wan_if 2>&1 | grep 'inet addr' | awk '{print $2}' | sed -e 's/.*://'`
     fi
-    #if wan ip not get
+    # if wan ip not get
     if [ "$wan_ipaddr" = "" ]; then
 	use_snat=0
     fi
 
-    #vpn configs
+    # vpn configs
     vpnType=`nvram_get 2860 vpnType`
     vpnNAT=`nvram_get 2860 vpnNAT`
     vpnPurePPPOE=`nvram_get 2860 vpnPurePPPOE`
     if [ "$vpnPurePPPOE" != "1" ]; then
 	natEnabled=`nvram_get 2860 natEnabled`
     else
-	#In pppoe pure mode no need add MASQ rules to localnet
+	# In pppoe pure mode no need add MASQ rules to localnet
 	natEnabled=0
     fi
-    #netfilter conf
+    # netfilter conf
     PortForwardEnable=`nvram_get 2860 PortForwardEnable`
     DMZEnable=`nvram_get 2860 DMZEnable`
     DMZIPAddress=`nvram_get 2860 DMZIPAddress`
@@ -424,7 +424,7 @@ get_param() {
     RemoteTelnet=`nvram_get 2860 RemoteTelnet`
     RemoteManagement=`nvram_get 2860 RemoteManagement`
     dhcpEnabled=`nvram_get 2860 dhcpEnabled`
-    #ipt_acount info
+    # ipt_acount info
     ipt_account=`nvram_get 2860 ipt_account`
     if [ "$ipt_account" = "1" ]; then
 	lan_ip_acc=`ipcalc "$lan_ip" "$lan_nm" -n -s | cut -f 2- -d =`
@@ -434,7 +434,7 @@ get_param() {
 	    lan2_ip_prf=`ipcalc "$lan2_ipaddr" "$lan2_netmask" -p -s | cut -f 2- -d =`
 	fi
     fi
-    #all needed variable
+    # all needed variable
     upnp=`nvram_get 2860 upnpEnabled`
     igmpen=`nvram_get 2860 igmpEnabled`
     UDPXY=`nvram_get 2860 UDPXYMode`
@@ -442,7 +442,7 @@ get_param() {
     chilli_net=`nvram_get 2860 chilli_net`
     simple_qos=`nvram_get 2860 simple_qos`
     parproutedEnabled=`nvram_get 2860 parproutedEnabled`
-    #macros
+    # macros
     STATE_NEW="-m state --state NEW"
     STATE_EST="-m state --state ESTABLISHED,RELATED"
     CONNLIMIT="-m connlimit --connlimit-above"

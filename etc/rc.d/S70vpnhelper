@@ -1,10 +1,10 @@
 #!/bin/sh
 
-#wait to start web and run from goahead code
+# wait to start web and run from goahead code
 . /etc/scripts/web_wait.sh
 web_wait
 
-#get params
+# get params
 . /etc/scripts/global.sh
 
 LOG="logger -t vpnhelper"
@@ -13,8 +13,8 @@ start() {
     if [ "$vpnEnabled" = "on" ]; then
       get_param
 
-      #wait connetc to ap in sta mode
-      #if VPN=PPPOE and vpnInterface=LAN no need wait
+      # wait connetc to ap in sta mode
+      # if VPN=PPPOE and vpnInterface=LAN no need wait
       if [ "$vpnType" != "0" ]; then
         wait_connect
       else
@@ -24,14 +24,14 @@ start() {
       fi
 
       $LOG "Start vpnhelper"
-      #clear all configs and generate new
+      # clear all configs and generate new
       echo > $ppp/chap-secrets
       echo > $ppp/pap-secrets
       echo > $ppp/connect-errors
       echo "$vpnUser * $vpnPassword *" > $ppp/chap-secrets
       echo "$vpnUser * $vpnPassword *" > $ppp/pap-secrets
 
-      #call to vpn
+      # call to vpn
       if [ "$vpnType" = "0" ]; then
 	$LOG "PPPOE calling..."
 	(sleep 8 && /etc/scripts/config-pppoe.sh) &
@@ -55,7 +55,7 @@ start() {
 
 stop() {
  $LOG "Stop vpnhelper"
-    #Kill helpers
+    # Kill helpers
     killall -q config-pppoe.sh
     killall -q config-l2tp.sh
     killall -q config-pptp.sh
@@ -65,7 +65,7 @@ stop() {
     killall -q -SIGKILL config-pptp.sh
     killall -q -SIGKILL config-lanauth.sh
 
-    #send hup signal to pppd for correct link down
+    # send hup signal to pppd for correct link down
     killall -q -SIGHUP pppd
     sleep 1
 
@@ -75,19 +75,19 @@ stop() {
     killall -q pppd
     killall -q -SIGKILL pppd
 
-    #Kill lanauth only if vpn disable
+    # Kill lanauth only if vpn disable
     if [ "$vpnEnabled" = "off" ] || [ "$vpnType" != "6" ]; then
 	    /etc/scripts/config-lanauth.sh stop
     fi
 
-    #Remove modules
+    # Remove modules
     mod="ppp_mppe blkcipher cryptomgr crypto_algapi pppol2tp pptp ppp_generic"
     for module in $mod
     do
 	rmmod $module > /dev/null 2>&1
     done
 
-    #Remove VPN server IP file
+    # Remove VPN server IP file
     rm -f /tmp/vpnip
 }
 

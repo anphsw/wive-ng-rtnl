@@ -4,17 +4,17 @@
 # internet.sh - reconfigure network helper for goahead #
 ########################################################
 
-#include global config
+# include global config
 . /etc/scripts/global.sh
 
-#restart mode
+# restart mode
 MODE=$1
 
 LOG="logger -t reconfig"
 
 WlanDownAll()
 {
-    #down all wireless interfaces and remove from bridge
+    # down all wireless interfaces and remove from bridge
     for i in `seq 0 7`; do
 	ip link set ra$i down > /dev/null 2>&1
 	brctl delif br0 ra$i > /dev/null 2>&1
@@ -37,7 +37,7 @@ WlanDownAll()
 
 addMesh()
 {
-    #if kernel build without MESH support - exit
+    # if kernel build without MESH support - exit
     if [ "$CONFIG_RT2860V2_STA_MESH" != "" ] || [ "$CONFIG_RT2860V2_AP_MESH" != "" ]; then
         meshenabled=`nvram_get 2860 MeshEnabled`
 	if [ "$meshenabled" = "1" ]; then
@@ -56,7 +56,7 @@ addMesh()
 
 addWds()
 {
-    #if kernel build without WDS support - exit
+    # if kernel build without WDS support - exit
     if [ "$CONFIG_RT2860V2_AP_WDS" != "" ]; then
 	wds_en=`nvram_get 2860 WdsEnable`
 	if [ "$wds_en" != "0" ]; then
@@ -77,7 +77,7 @@ addWds()
 
 addMBSSID()
 {
-    #if kernel build without Multiple SSID support - exit
+    # if kernel build without Multiple SSID support - exit
     if [ "$CONFIG_RT2860V2_AP_MBSS" != "" ]; then
 	bssidnum=`nvram_get 2860 BssidNum`
 	if [ "$bssidnum" != "0" ] && [ "$bssidnum" != "1" ]; then
@@ -99,12 +99,12 @@ addMBSSID()
 
 bridge_config() {
 	$LOG "Bridge OperationMode: $opmode"
-	#flush eth2 ip and remove from bridge
+	# flush eth2 ip and remove from bridge
         ip addr flush dev eth2 > /dev/null 2>&1
 	brctl delif br0 eth2 > /dev/null 2>&1
-	#in bridge mode add only eth2 NOT ADD eth2.1 o eth2.2
+	# in bridge mode add only eth2 NOT ADD eth2.1 o eth2.2
 	brctl addif br0 eth2
-	#add wifi interface
+	# add wifi interface
 	brctl addif br0 ra0
 	addMBSSID
         addWds
@@ -113,12 +113,12 @@ bridge_config() {
 
 gate_config() {
 	$LOG "Gateway OperationMode: $opmode"
-	#flush eth2.1 ip and remove from bridge
+	# flush eth2.1 ip and remove from bridge
         ip addr flush dev eth2.1 > /dev/null 2>&1
 	brctl delif br0 eth2.1 > /dev/null 2>&1
-	#add lan interface
+	# add lan interface
 	brctl addif br0 eth2.1
-	#add wifi interface
+	# add wifi interface
 	brctl addif br0 ra0
 	addMBSSID
 	addWds
@@ -131,24 +131,24 @@ ethcv_config() {
 
 apcli_config() {
 	$LOG "ApClient OperationMode: $opmode"
-	#flush eth2 ip and remove from bridge
+	# flush eth2 ip and remove from bridge
         ip addr flush dev eth2 > /dev/null 2>&1
 	brctl delif br0 eth2 > /dev/null 2>&1
-	#in apcli mode add only eth2 NOT ADD eth2.1 o eth2.2
+	# in apcli mode add only eth2 NOT ADD eth2.1 o eth2.2
 	brctl addif br0 eth2
-	#add wifi interface
+	# add wifi interface
 	brctl addif br0 ra0
 	addMBSSID
 }
 
 spot_config() {
 	$LOG "HotSpot OperationMode: $opmode"
-	#flush eth2.1 ip and remove from bridge
+	# flush eth2.1 ip and remove from bridge
         ip addr flush dev eth2.1 > /dev/null 2>&1
 	brctl delif br0 eth2.1 > /dev/null 2>&1
-	#add lan interface
+	# add lan interface
 	brctl addif br0 eth2.1
-	#add wifi interface
+	# add wifi interface
 	brctl addif br0 ra0
 	addMBSSID
 	addWds
@@ -156,11 +156,11 @@ spot_config() {
 }
 
 retune_wifi() {
-	#preconfigure wifi and 40Mhz workaround
+	# preconfigure wifi and 40Mhz workaround
 	/etc/scripts/wifi.sh
 }
 
-#All WDS interfaces down and reload wifi modules
+# All WDS interfaces down and reload wifi modules
 if [ "$MODE" != "connect_sta" ]; then
     if [ "$MODE" != "wifionly" ] || [ "$opmode" = "2" ]; then
 	vpn_deadloop_fix
@@ -205,7 +205,7 @@ if [ "$MODE" != "wifionly" ] || [ "$opmode" = "2" ]; then
     service wan restart
 fi
 
-#some daemons need restart
+# some daemons need restart
 services_restart.sh all
 
 # in dhcp client mode restart from dhcp script

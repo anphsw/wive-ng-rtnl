@@ -4,14 +4,14 @@
 # config-pptp.sh - configure PPTP client helper #
 #################################################
 
-#include global
+# include global
 . /etc/scripts/global.sh
 
-#send hup signal to pppd for correct link down
+# send hup signal to pppd for correct link down
 killall -q -SIGHUP pppd
 sleep 1
 
-#Kill daemons
+# Kill daemons
 killall -q pppd
 killall -q xl2tpd
 
@@ -105,7 +105,7 @@ echo "==================START-PPTP-CLIENT======================="
         done
     fi
 
-    #load ppp* modules
+    # load ppp* modules
     load_modules
 
     if [ "$PEERDNS" = "on" ]; then

@@ -2,7 +2,7 @@
 
 # This scipt restart needed services
 
-#include global config
+# include global config
 . /etc/scripts/global.sh
 
 LOG="logger -t services"
@@ -42,7 +42,7 @@ if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then
     service kext start
     service parprouted restart
     service lld2d restart
-    #if dnsmasq enabled or static dns
+    # if dnsmasq enabled or static dns
     if [ "$dnsPEnabled" = "1" ] || [ "$wan_static_dns" = "on" ]; then
 	service dhcpd restart
     fi
