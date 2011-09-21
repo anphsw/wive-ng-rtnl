@@ -42,9 +42,9 @@ if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then
     service kext start
     service parprouted restart
     service lld2d restart
+    service dhcpd restart
     service samba restart
     if [ "$MODE" != "misc" ]; then 
-	service dhcpd restart
 	service pppoe-relay restart
 	service chillispot restart
     fi
