@@ -71,5 +71,10 @@ fi
 if [ "$dnsPEnabled" != "1" ] && [ "$wan_static_dns" != "on" ]; then
     if [ "$MODE" = "pppd" ] || [ "$MODE" = "dhcp" ]; then 
 	service dhcpd restart
+	if [ "$CONFIG_RT_3052_ESW" != "" ]; then
+	    # need reinit LAN port at switch
+	    # for dhcp renew at clients
+	    config-vlan.sh 2 RRRR > /dev/null 2>&1
+	fi
     fi
 fi
