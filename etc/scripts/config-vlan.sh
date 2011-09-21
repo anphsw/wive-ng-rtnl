@@ -8,6 +8,9 @@
 #   vlan_type: 0=no_vlan, 1=vlan, LLLLW=wan_4, WLLLL=wan_0 #
 ############################################################
 
+# include kernel config
+. /etc/scripts/config.sh
+
 usage()
 {
 	echo "Usage:"

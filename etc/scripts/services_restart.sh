@@ -42,10 +42,6 @@ if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then
     service kext start
     service parprouted restart
     service lld2d restart
-    # if dnsmasq enabled or static dns
-    if [ "$dnsPEnabled" = "1" ] || [ "$wan_static_dns" = "on" ]; then
-	service dhcpd restart
-    fi
     service samba restart
     if [ "$MODE" != "misc" ]; then 
 	service pppoe-relay restart
@@ -67,14 +63,12 @@ if [ "$MODE" = "pppd" ] || [ "$MODE" = "all" ] || [ "$vpnEnabled" != "on" ]; the
     service upnp restart
 fi
 
-# if dnsmasq disabled need update udhcpd.conf always
-if [ "$dnsPEnabled" != "1" ] && [ "$wan_static_dns" != "on" ]; then
-    if [ "$MODE" = "pppd" ] || [ "$MODE" = "dhcp" ]; then 
+# renew /etc/udhcpd.conf and restart dhcp server
+if [ "$dnsPEnabled" = "1" -o "$wan_static_dns" = "on" ] && [ "$MODE" != "pppd" -a "$MODE" != "dhcp" ]; then 
+	# if dnsmasq or static dns enabled and mode=!pppd/!dhcp (aplly at web)
 	service dhcpd restart
-	if [ "$CONFIG_RT_3052_ESW" != "" ]; then
-	    # need reinit LAN ports at switch
-	    # for dhcp renew at clients
-	    config-vlan.sh 2 RRRR > /dev/null 2>&1
-	fi
-    fi
+elif [ "$dnsPEnabled" != "1" -a "$wan_static_dns" != "on" ] && [ "$MODE" = "pppd" -o "$MODE" = "dhcp" ]; then
+	# if dnsmasq or static dns disabled and mode=pppd/dhcp (renew/reconnect ISP)
+	sleep 3
+	service dhcpd restart
 fi

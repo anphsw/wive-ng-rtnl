@@ -101,6 +101,14 @@ start() {
 	$LOG "Start dhcprelay"
 	dhcprelay $lan_if $wan_if &
     fi
+
+    # if dnsmasq disabled need reset LAN ports for clients renew params
+    if [ "$dnsPEnabled" != "1" -a "$wan_static_dns" != "on" ] || [ "$dhcpEnabled" = "2" ]; then
+	    if [ "$CONFIG_RT_3052_ESW" != "" ]; then
+		config-vlan.sh 2 RRRR > /dev/null 2>&1
+	    fi
+    fi
+
 }
 
 stop() {
