@@ -8,9 +8,6 @@
 #   vlan_type: 0=no_vlan, 1=vlan, LLLLW=wan_4, WLLLL=wan_0 #
 ############################################################
 
-# include kernel config
-. /etc/scripts/config.sh
-
 usage()
 {
 	echo "Usage:"
@@ -220,7 +217,7 @@ reset_all_phys()
     	    link_down $i
 	done
 
-	if [ "$opmode" = "1" ]; then
+	if [ "$opmode" != "0" ]; then
 	  # force Windows clients to renew IP and update DNS server
 	  sleep 2
 	fi
@@ -234,7 +231,7 @@ reset_all_phys()
 reinit_all_phys()
 {
 	disable3052
-	enable3052 
+	enable3052
 	reset_all_phys
 }
 
