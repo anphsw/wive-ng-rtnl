@@ -49,7 +49,7 @@ PortForwardEnable=`nvram_get 2860 PortForwardEnable`
 	#clear all default route
 	while ip route del default ; do
     	    :
-	done 
+	done
     else
 	$LOG "No dgw stored."
 	RESTORESTRING=""

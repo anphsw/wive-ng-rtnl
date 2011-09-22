@@ -45,6 +45,7 @@ chilli_net=`nvram_get 2860 chilli_net`
 	chmod 644 /etc/resolv.conf > /dev/null 2>&1
 	rm -f /etc/ppp/resolv.conf > /dev/null 2>&1
 	rm -f /var/tmp/resolv.conf.tmp.$PPP_IFACE > /dev/null 2>&1
+	rm -f /var/tmp/resolv.$PPP_IFACE > /dev/null 2>&1
     fi
 
     if [ -f /etc/routes_ppp_replace ]; then
