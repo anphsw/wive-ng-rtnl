@@ -683,6 +683,7 @@
 63) Goahead: fix some services restart.<br>
 64) Add reinit LAN ports in direct dns relay mode, need for renew params at clients (if disable dnsmasq and emable dhcp server).<br>
 65) init.d fix screen bug in some scripts.<br>
+66) Fix configure dns in vpn mode if uplink not send dns servers in pppd session.<br>
 
 <br><br>
 <b>For support see:</b><br>

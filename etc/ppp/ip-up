@@ -75,15 +75,6 @@ PortForwardEnable=`nvram_get 2860 PortForwardEnable`
 	fi
     fi
 
-    if [ "$vpnPeerDNS" != "off" ]; then
-	$LOG "Replace DNS from pppd"
-	cp -f /etc/resolv.conf /var/tmp/resolv.conf.tmp.$PPP_IFACE
-	cat /etc/ppp/resolv.conf /etc/resolv.conf  > /var/tmp/resolv.$PPP_IFACE
-	cp -f /var/tmp/resolv.$PPP_IFACE /etc/resolv.conf
-	# read for all write by root
-	chmod 644 /etc/resolv.conf > /dev/null 2>&1
-    fi
-
     #Replace default route to ppp tunnel
     if [ "$DGW" = "1" ]; then
 	$LOG "Replace default route to $PPP_IFACE"
@@ -94,6 +85,15 @@ PortForwardEnable=`nvram_get 2860 PortForwardEnable`
     if [ -f /etc/routes_ppp_replace ]; then
         $LOG "Add user routes from ip-up for $PPP_IFACE"
         /etc/routes_ppp_replace replace $PPP_IFACE
+    fi
+
+    if [ "$vpnPeerDNS" != "off" ] && [ -f /etc/ppp/resolv.conf ]; then
+	$LOG "Replace DNS from pppd"
+	cp -f /etc/resolv.conf /var/tmp/resolv.conf.tmp.$PPP_IFACE
+	cat /etc/ppp/resolv.conf /etc/resolv.conf  > /var/tmp/resolv.$PPP_IFACE
+	cp -f /var/tmp/resolv.$PPP_IFACE /etc/resolv.conf
+	# read for all write by root
+	chmod 644 /etc/resolv.conf > /dev/null 2>&1
     fi
 
     #########################GENERATE VPN NETFILTER SCRIPT########################################################################
