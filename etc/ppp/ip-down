@@ -34,10 +34,7 @@ chilli_net=`nvram_get 2860 chilli_net`
     iptables -t nat -D POSTROUTING -o $PPP_IFACE -s $chilli_net -j SNAT --to-source $PPP_LOCAL > /dev/null 2>&1
     iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $lan2_ipaddr/$lan2_netmask -j SNAT --to-source $PPP_LOCAL > /dev/null 2>&1
 
-    if [ -f /etc/portforward_vpn ]; then
-	/etc/portforward_vpn "D" "$PPP_IFACE" "$PPP_LOCAL" > /dev/null 2>&1
-    fi
-
+    #replace dns to default
     if [ "$vpnPeerDNS" != "off" ] && [ -f /etc/ppp/resolv.conf ] && [ -f /var/tmp/resolv.conf.tmp.$PPP_IFACE ]; then
 	$LOG "Restore DNS from pppd"
 	cp -f /var/tmp/resolv.conf.tmp.$PPP_IFACE /etc/resolv.conf
@@ -48,6 +45,12 @@ chilli_net=`nvram_get 2860 chilli_net`
 	rm -f /var/tmp/resolv.$PPP_IFACE > /dev/null 2>&1
     fi
 
+    #remove portforward rules
+    if [ -f /etc/portforward_vpn ]; then
+	/etc/portforward_vpn "D" "$PPP_IFACE" "$PPP_LOCAL" > /dev/null 2>&1
+    fi
+
+    #remove route rules
     if [ -f /etc/routes_ppp_replace ]; then
 	$LOG "Delete user routes"
 	/etc/routes_ppp_replace del $PPP_IFACE > /dev/null 2>&1
@@ -60,6 +63,8 @@ chilli_net=`nvram_get 2860 chilli_net`
     	    :
 	done 
     fi
+
+    #restore default gateway
     if [ -f /tmp/default.gw ]; then
 	#resote old dgw
 	olddgw=`tail -qn1 /tmp/default.gw`

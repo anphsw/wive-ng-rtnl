@@ -87,6 +87,7 @@ PortForwardEnable=`nvram_get 2860 PortForwardEnable`
         /etc/routes_ppp_replace replace $PPP_IFACE
     fi
 
+    #replace dns from pppd
     if [ "$vpnPeerDNS" != "off" ] && [ -f /etc/ppp/resolv.conf ]; then
 	$LOG "Replace DNS from pppd"
 	cp -f /etc/resolv.conf /var/tmp/resolv.conf.tmp.$PPP_IFACE
