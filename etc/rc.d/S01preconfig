@@ -13,6 +13,9 @@ start() {
     #include profile variables
     . /etc/profile
 
+    #create fstab if not exist
+    touch /etc/fstab
+
     mount -t devpts /dev/pts /dev/pts
     mount -a
     chmod 777 /tmp
