@@ -18,7 +18,7 @@ start() {
     chmod 777 /tmp
 
     $LOG "Delete old configs."
-    rm_conf="zebra.conf ripd.conf macipfilter websfilter portforward ppp_firewall routes_ppp_replace resolv_conf.bak"
+    rm_conf="zebra.conf ripd.conf macipfilter websfilter portforward ppp_firewall routes_ppp_replace resolv_conf.bak ppp/resolv.conf"
     for file in $rm_conf ; do
 	rm -f /etc/$file
     done
