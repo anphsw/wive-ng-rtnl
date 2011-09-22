@@ -58,10 +58,10 @@ unload_ra0br0()
 
 	if [ "$1" != "" ]; then
 	    # mirror br0 to eth2x
-	    ip link set $1 down > /dev/null 2>&1
-	    ifconfig $1 hw ether $br0_mac
-	    ifconfig $1 $br0_ip netmask $br0_netmask
-	    ip link set $1 up
+	    ip link set "$1" down > /dev/null 2>&1
+	    ifconfig "$1" hw ether $br0_mac
+	    ifconfig "$1" $br0_ip netmask $br0_netmask
+	    ip link set "$1" up
 	fi
     else
 	unload_ra0

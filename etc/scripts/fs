@@ -18,7 +18,7 @@ BACKUPCGF=/etc/backup/nvram_backup.dat
 RWCONFIGS=/etc/Wireless/rf.bin
 
 get_size(){
-  ls -sk $1 | sed -e "s/ \+/ /g" | cut -d" " -f2
+  ls -sk "$1" | sed -e "s/ \+/ /g" | cut -d" " -f2
 }
 
 usage(){

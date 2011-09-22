@@ -128,8 +128,8 @@ case "$1" in
 	if [ "$ROUTES" != " " ]; then
 	    set $ROUTES
 	    while [ -n "$1" ]; do
-		NW=$1
-		GW=$2
+		NW="$1"
+		GW="$2"
 		shift 2
 		if [ "$GW" = "0.0.0.0" ] || [ -z "$GW" ]; then
 		    ip route replace $NW dev $interface

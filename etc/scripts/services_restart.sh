@@ -6,7 +6,7 @@
 . /etc/scripts/global.sh
 
 LOG="logger -t services"
-MODE=$1
+MODE="$1"
 
 $LOG "Restart needed services and scripts. Mode $MODE"
 
@@ -38,7 +38,7 @@ fi
 # 1) if call not from ip-up				 #
 # 2) if call not from dhcp script			 #
 ##########################################################
-if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then 
+if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then
     service kext start
     service parprouted restart
     service lld2d restart
@@ -64,7 +64,7 @@ if [ "$MODE" = "pppd" ] || [ "$MODE" = "all" ] || [ "$vpnEnabled" != "on" ]; the
 fi
 
 # renew /etc/udhcpd.conf and restart dhcp server
-if [ "$dnsPEnabled" = "1" -o "$wan_static_dns" = "on" ] && [ "$MODE" != "pppd" -a "$MODE" != "dhcp" ]; then 
+if [ "$dnsPEnabled" = "1" -o "$wan_static_dns" = "on" ] && [ "$MODE" != "pppd" -a "$MODE" != "dhcp" ]; then
 	# if dnsmasq or static dns enabled and mode=!pppd/!dhcp (aplly at web)
 	service dhcpd restart
 elif [ "$dnsPEnabled" != "1" -a "$wan_static_dns" != "on" ] && [ "$MODE" = "pppd" -o "$MODE" = "dhcp" ]; then

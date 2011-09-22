@@ -158,13 +158,13 @@ link_down()
 	esac
 	new=$pre$rep$post
 	# power down
-	mii_mgr -s -p $1 -r 0 -v $new
+	mii_mgr -s -p "$1" -r 0 -v $new
 }
 
 link_up()
 {
 	# get original register value
-	get_mii=`mii_mgr -g -p $1 -r 0`
+	get_mii=`mii_mgr -g -p "$1" -r 0`
 	orig=`echo $get_mii | sed 's/^.....................//'`
 
 	# stupid hex value calculation.
@@ -185,7 +185,7 @@ link_up()
 	esac
 	new=$pre$rep$post
 	# power up
-	mii_mgr -s -p $1 -r 0 -v $new
+	mii_mgr -s -p "$1" -r 0 -v $new
 }
 
 reset_all_phys()
@@ -364,7 +364,7 @@ if [ "$1" = "0" ]; then
 		fi
 	else
 		echo ">>> unknown vlan type $2 <<<"
-		usage $0
+		usage "$0"
 	fi
 elif [ "$1" = "1" ]; then
 	SWITCH_MODE=1
@@ -374,7 +374,7 @@ elif [ "$1" = "1" ]; then
 		configVtss
 	else
 		echo ">>> unknown vlan type $2 <<<"
-		usage $0
+		usage "$0"
 	fi
 elif [ "$1" = "2" ]; then
 	SWITCH_MODE=2
@@ -423,5 +423,5 @@ elif [ "$1" = "2" ]; then
 else
 	echo "unknown swith type $1"
 	echo ""
-	usage $0
+	usage "$0"
 fi

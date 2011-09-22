@@ -8,7 +8,7 @@
 . /etc/scripts/global.sh
 
 # restart mode
-MODE=$1
+MODE="$1"
 
 LOG="logger -t reconfig"
 
