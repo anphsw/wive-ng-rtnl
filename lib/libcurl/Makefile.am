@@ -117,7 +117,7 @@ rpm:
 	mv $$RPM_TOPDIR/RPMS/i386/$(RPMDIST)-*.rpm . ; \
 	mv $$RPM_TOPDIR/SRPMS/$(RPMDIST)-*.src.rpm .
 
-shared : install
+shared: install
 	cp -vfa ./filesystem/lib/*.*	$(ROOTDIR)/lib/lib
 	cp -vfra ./filesystem/include/*	$(ROOTDIR)/lib/include_shared
 

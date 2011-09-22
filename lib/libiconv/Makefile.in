@@ -104,7 +104,7 @@ mostlyclean : force
 	if test -d tests; then cd tests && $(MAKE) mostlyclean; fi
 	rm -rf bin
 
-shared : install
+shared: install
 	cp -vfa ./filesystem/lib/*.*	$(ROOTDIR)/lib/lib
 	cp -vfra ./filesystem/include/*	$(ROOTDIR)/lib/include_shared
 

@@ -46,7 +46,7 @@ tests:
 	cd test
 	$(MAKE) /F Makefile.nmake
 
-shared : install
+shared: install
 	cp -vfa ./filesystem/lib/*.*	$(ROOTDIR)/lib/lib
 	cp -vfra ./filesystem/include/*	$(ROOTDIR)/lib/include_shared
 

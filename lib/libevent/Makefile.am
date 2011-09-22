@@ -238,7 +238,7 @@ doxygen: FORCE
 	doxygen $(srcdir)/Doxyfile
 FORCE:
 
-shared : install
+shared: install
 	cp -vfa ./filesystem/lib/*.*	$(ROOTDIR)/lib/lib
 	cp -vfra ./filesystem/include/*	$(ROOTDIR)/lib/include_shared
 
