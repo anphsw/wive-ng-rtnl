@@ -37,7 +37,19 @@ SECTIONS
   /* read-only */
   _text = .;			/* Text and read-only data */
   .text : {
+/* workaround for SPI flash boot */
+#if defined (CONFIG_RALINK_RT2880) || \
+    defined (CONFIG_RALINK_RT2883) || \
+    defined (CONFIG_RALINK_RT3883) || \
+    defined (CONFIG_RALINK_RT3352) || \
+    defined (CONFIG_RALINK_RT3052) || \
+    defined (CONFIG_RALINK_RT6855) || \
+    defined (CONFIG_RALINK_RT5350)
+#ifdef CONFIG_MTD_SPI_RALINK
+    /* move some sections up (memory hole for spi IO) */
     . = . + 0x8000;
+#endif
+#endif
     *(.text)
     SCHED_TEXT
     LOCK_TEXT
@@ -103,11 +115,19 @@ SECTIONS
   /* will be freed after init */
   . = ALIGN(_PAGE_SIZE);		/* Init code and data */
   __init_begin = .;
-#ifdef CONFIG_RALINK_RT3052
+/* workaround for SPI flash boot */
+#if defined (CONFIG_RALINK_RT2880) || \
+    defined (CONFIG_RALINK_RT2883) || \
+    defined (CONFIG_RALINK_RT3883) || \
+    defined (CONFIG_RALINK_RT3352) || \
+    defined (CONFIG_RALINK_RT3052) || \
+    defined (CONFIG_RALINK_RT6855) || \
+    defined (CONFIG_RALINK_RT5350)
 #ifdef CONFIG_MTD_SPI_RALINK
 #ifdef CONFIG_RT2880_FLASH_4M
   /* This hack need for SPI devices work only */
   /* init need start > 0x80220000 */
+  /* (memory hole for spi IO) */
   . = 0x80220000;
 #endif
 #endif
@@ -162,7 +182,7 @@ SECTIONS
     *(.cod1)
     *(.dec0)
     *(.dec1)
-    . = (ALIGN(_PAGE_SIZE) - .) < 8 ? ALIGN(_PAGE_SIZE) + 4 : .        ;                                                                   
+    . = (ALIGN(_PAGE_SIZE) - .) < 8 ? ALIGN(_PAGE_SIZE) + 4 : .        ;
   }
   __bss_stop = .;
 
