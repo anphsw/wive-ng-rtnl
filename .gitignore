@@ -2,6 +2,7 @@
 *.deps
 *.pc
 .sgbuilt_user
+.libs
 romfs
 autom4te.cache
 config.h.in~
