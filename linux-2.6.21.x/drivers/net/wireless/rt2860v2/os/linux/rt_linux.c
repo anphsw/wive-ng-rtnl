@@ -862,7 +862,7 @@ void announce_802_3_packet(
 	if(ra_sw_nat_hook_rx!= NULL)
 	{
 		unsigned int flags;
-		
+
 		pRxPkt->protocol = eth_type_trans(pRxPkt, pRxPkt->dev);
 		RTMP_IRQ_LOCK(&pAd->page_lock, flags);
 
@@ -878,7 +878,7 @@ void announce_802_3_packet(
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 		FOE_AI(pRxPkt)=UN_HIT;
 #endif // defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE) //
-#endif // !defined(CONFIG_RA_NAT_NONE) // 
+#endif // !defined(CONFIG_RA_NAT_NONE) //
  #endif // RTMP_RBUS_SUPPORT //
 	{
 #ifdef CONFIG_AP_SUPPORT

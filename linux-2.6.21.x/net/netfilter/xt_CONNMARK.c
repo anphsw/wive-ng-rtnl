@@ -32,6 +32,11 @@ MODULE_ALIAS("ipt_CONNMARK");
 #include <linux/netfilter/xt_CONNMARK.h>
 #include <net/netfilter/nf_conntrack_ecache.h>
 
+#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+#include "../nat/hw_nat/ra_nat.h"
+#include "../nat/hw_nat/frame_engine.h"
+#endif
+
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 #include <linux/netfilter.h>
 #include <linux/netfilter/nf_conntrack_common.h>
@@ -70,6 +75,9 @@ target(struct sk_buff **pskb,
 				    if(nat)
 					nat->info.nat_type |= NF_FAST_NAT_DENY;
 				}
+#endif
+#if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+	    			FOE_AI(*pskb) = UN_HIT;
 #endif
 				nf_conntrack_event_cache(IPCT_MARK, *pskb);
 			}

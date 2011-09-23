@@ -22,7 +22,7 @@ ROMFS_DIRS = dev dev/pts sys proc tmp bin home mnt var etc web usr lib xml \
 clean:
 	rm -f mkimage
 
-romfs: 
+romfs:
 	[ -d $(ROMFSDIR)/$$i ] || mkdir -p $(ROMFSDIR)
 	for i in $(ROMFS_DIRS); do \
 		[ -d $(ROMFSDIR)/$$i ] || mkdir -p $(ROMFSDIR)/$$i; \
@@ -32,6 +32,7 @@ romfs:
 	$(ROMFSINST) -s ../bin /usr/sbin
 	$(ROMFSINST) -s ../lib /usr/lib
 	$(ROMFSINST) -s ../share /usr/share
+	$(ROMFSINST) -s ../etc/scripts/config.sh /bin/config.sh
 
 romfs.post:: 
 	[ -d $(IMAGEDIR) ] || mkdir -p $(IMAGEDIR)

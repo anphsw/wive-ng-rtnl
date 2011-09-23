@@ -159,7 +159,7 @@ int ip_build_and_send_pkt(struct sk_buff *skb, struct sock *sk,
 	skb->priority = sk->sk_priority;
 
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-	        FOE_AI(skb) = UN_HIT;
+        FOE_AI(skb) = UN_HIT;
 #endif
 
 	/* Send it out. */
@@ -376,8 +376,9 @@ packet_routed:
 	ip_send_check(iph);
 
 	skb->priority = sk->sk_priority;
+
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-	        FOE_AI(skb) = UN_HIT;
+	FOE_AI(skb) = UN_HIT;
 #endif
 
 	return NF_HOOK(PF_INET, NF_IP_LOCAL_OUT, skb, NULL, rt->u.dst.dev,
@@ -1287,8 +1288,9 @@ int ip_push_pending_frames(struct sock *sk)
 
 	skb->priority = sk->sk_priority;
 	skb->dst = dst_clone(&rt->u.dst);
+
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-	        FOE_AI(skb) = UN_HIT;
+        FOE_AI(skb) = UN_HIT;
 #endif
 
 	/* Netfilter gets whole the not fragmented skb. */
