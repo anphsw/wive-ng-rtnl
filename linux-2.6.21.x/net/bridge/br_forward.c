@@ -191,7 +191,7 @@ static void br_flood(struct net_bridge *br, struct sk_buff *skb,
 					groupIdx = search_group_IP( &p->port_igmpp_table, skb->nh.iph->daddr);
 					if (groupIdx >=0){
 						/* skb_copy for each host*/
-						for(i=0; i<HOSTLIST_NUMBER; i++){	
+						for(i=0; i<HOSTLIST_NUMBER; i++){
 							if (p->port_igmpp_table.group_list[groupIdx].host_list[i].used ==1){
 								if ((skb2 = skb_copy(skb, GFP_ATOMIC)) == NULL) {
 									br->statistics.tx_dropped++;

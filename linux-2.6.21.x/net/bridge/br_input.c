@@ -91,6 +91,11 @@ int br_handle_frame_finish(struct sk_buff *skb)
 	struct net_bridge *br;
 	struct net_bridge_fdb_entry *dst;
         struct sk_buff *skb2;
+#ifdef CONFIG_BRIDGE_IGMP_REPORT_NO_FLOODING
+	struct ethhdr *eth;
+	struct iphdr *ih_br;
+	struct igmphdr *igmph;
+#endif
 #ifdef CONFIG_BRIDGE_IGMPP_PROCFS
 	struct igmphdr *ih;
 #endif
@@ -126,12 +131,10 @@ int br_handle_frame_finish(struct sk_buff *skb)
 #endif
 	if (is_multicast_ether_addr(dest)) {
 #ifdef CONFIG_BRIDGE_IGMP_REPORT_NO_FLOODING
-		struct ethhdr *eth = eth_hdr(skb);
-		struct iphdr *ih_br;
-		struct igmphdr *igmph;
-
 		if(dest[0] != 0x01 || dest[1] != 0x00 || dest[2] != 0x5e || (dest[3] > 0x7f))
 			goto out_igmp;
+
+		eth = (struct ethhdr *)eth_hdr(skb);
 
 		if(eth->h_proto == htons(ETH_P_IP)){
 			if(skb->len < (sizeof(struct iphdr) + sizeof(struct igmphdr)))
@@ -145,8 +148,10 @@ int br_handle_frame_finish(struct sk_buff *skb)
 			if(	igmph->type == IGMP_HOST_MEMBERSHIP_REPORT ||
 				igmph->type == IGMPV2_HOST_MEMBERSHIP_REPORT ||
 				igmph->type == IGMPV3_HOST_MEMBERSHIP_REPORT){
-				br_pass_frame_up(br, skb);
-				goto out;
+				if (skb) {
+				    br_pass_frame_up(br, skb);
+				    goto out;
+				}
 			}
 		}
 out_igmp:
@@ -187,14 +192,14 @@ out_igmp:
 	if (skb2 == skb)
 	    skb2 = skb_clone(skb, GFP_ATOMIC);
 
-#ifdef CONFIG_BRIDGE_FORWARD_CTRL 
+#ifdef CONFIG_BRIDGE_FORWARD_CTRL
 	if (dst != NULL && !atomic_read(&br->br_forward)) {
 		kfree_skb(skb);
 		br_fdb_put(dst);
 		goto out;
 	}
 #endif
-#ifdef CONFIG_BRIDGE_PORT_FORWARD 
+#ifdef CONFIG_BRIDGE_PORT_FORWARD
 	if (dst != NULL && !p->port_forwarding) {
 		kfree_skb(skb);
 		br_fdb_put(dst);
@@ -264,9 +269,9 @@ struct sk_buff *br_handle_frame(struct net_bridge_port *p, struct sk_buff *skb)
         if (skb->protocol == htons(ETH_P_PAUSE))
                     goto drop;
 
-	/* If STP is turned off, then forward */                                                                                    
-	if ((!p->br->stp_enabled) && dest[5] == 0)                                                                        
-                    goto forward;               
+	/* If STP is turned off, then forward */
+	if ((!p->br->stp_enabled) && dest[5] == 0)
+                    goto forward;
 
 	skb->pkt_type = PACKET_HOST;
 	return (NF_HOOK(PF_BRIDGE, NF_BR_LOCAL_IN, skb, skb->dev,
