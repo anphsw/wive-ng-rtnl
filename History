@@ -685,6 +685,7 @@
 65) init.d fix screen bug in some scripts.<br>
 66) Fix configure dns in vpn mode if uplink not send dns servers in pppd session.<br>
 67) Tune miniupnpd defaults.<br>
+68) Printserver p910nd use bidirection mode by default.<br>
 
 <br><br>
 <b>For support see:</b><br>
