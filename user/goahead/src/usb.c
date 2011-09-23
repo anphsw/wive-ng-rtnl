@@ -621,14 +621,6 @@ static void printersrv(webs_t wp, char_t *path, char_t *query)
 	// set to nvram
 	nvram_set(RT2860_NVRAM, "PrinterSrvEnabled", enable);
 
-	// setup device
-	doSystem("killall -q p910nd");
-	doSystem("killall -q -SIGKILL p910nd");
-	if (0 == strcmp(enable, "1"))
-	{
-		doSystem("p910nd -b -f /dev/lp0");
-	}
-
 	// debug print
 	websHeader(wp);
 	websWrite(wp, T("<h2>Printer Server Settings</h2><br>\n"));

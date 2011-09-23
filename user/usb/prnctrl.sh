@@ -7,7 +7,6 @@ LOG="logger -t prnctrl"
 port=${MDEV##*lp}
 
 if [ "$ACTION" = "add" ]; then
-
     if [ -z "$(iptables -L | grep "jetdirect")" ]; then
 	iptables -A servicelimit -i $lan_if -p tcp --dport 9100 -j ACCEPT
 	$LOG "Add p910nd firewall rules"
@@ -17,13 +16,14 @@ if [ "$ACTION" = "add" ]; then
 	cat prnfw.dl > /dev/usb/$MDEV
     fi
     if [ -z "`pidof p910nd`" ]; then
-	/bin/p910nd -f /dev/usb/$MDEV $port
 	$LOG "Start p910nd daemon on port 910${port}"
+	/bin/p910nd -f -b /dev/usb/$MDEV $port
     fi
 else
     if [ ! -z "`pidof p910nd`" ]; then
-	killall p910nd
 	$LOG "Stop p910nd daemon on port 910${port}"
+	killall -q p910nd
+	killall -q -9 p910nd
     fi
     iptables -D servicelimit -i $lan_if -p tcp --dport 9100 -j ACCEPT
     rmmod usblp
