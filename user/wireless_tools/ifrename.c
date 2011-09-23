@@ -448,8 +448,11 @@ int	print_newname = 0;
 char *	new_name = NULL;
 
 /* Takeover support */
-int	force_takeover = 0;	/* Takeover name from other interface */
+int	force_takeover = 0;	/* Takeover name from other interfaces */
 int	num_takeover = 0;	/* Number of takeover done */
+
+/* Number of mapping matched */
+int	num_mapping_match = 0;
 
 /* Dry-run support */
 int	dry_run = 0;		/* Just print new name, don't rename */
@@ -2329,7 +2332,7 @@ mapping_find(struct if_mapping *	target)
  * Probe interfaces based on our list of mappings.
  * This is the default, but usually not the best way to do it.
  */
-static void
+static inline void
 probe_mappings(int		skfd)
 {
   struct if_mapping *	ifnode;
@@ -2339,11 +2342,11 @@ probe_mappings(int		skfd)
   for(ifnode = mapping_list; ifnode != NULL; ifnode = ifnode->next)
     {
       /* Can't load wildcards interface name :-( */
-      if(strchr(ifnode->ifname, '%') != NULL)
+      if(strchr(ifnode->ifname, '*') != NULL)
 	continue;
 
       if(verbose)
-	fprintf(stderr, "Probing : Trying to load interface [%s]\n",
+	fprintf(stderr, "Probing : Trying to load/probe interface [%s]\n",
 		ifnode->ifname);
 
       /* Trick the kernel into loading the interface.
@@ -2364,7 +2367,7 @@ probe_mappings(int		skfd)
  * all built-in interfaces that should remain unconfigured won't
  * be probed (and can have mappings).
  */
-static void
+static inline void
 probe_debian(int		skfd)
 {
   FILE *		stream;
@@ -2547,6 +2550,9 @@ process_ifname(int	skfd,
 	}
     }
 
+  /* This one matched */
+  num_mapping_match++;
+
   /* Check if called with an explicit interface name */
   if(print_newname)
     {
@@ -2583,27 +2589,27 @@ process_ifname(int	skfd,
 /*
  * Process all network interface present on the system.
  */
-static inline int
+static int
 process_iflist(int	skfd,
 	       char *	args[],
-	       int	count)
+	       int	count,
+	       int	use_probe,
+	       int	is_debian)
 {
   num_takeover = 0;
+  num_mapping_match = 0;
+
+  /* Load all the necesary modules */
+  if(use_probe)
+    {
+      if(is_debian)
+	probe_debian(skfd);
+      else
+	probe_mappings(skfd);
+    }
 
   /* Just do it */
   iw_enum_devices(skfd, &process_ifname, args, count);
-
-  /* If we do any takeover, the interface list grabbed with
-   * iw_enum_devices() may get out of sync with the real interfaces,
-   * and we may miss the victim interface. So, let's go through the
-   * list again.
-   * On the other hand, we may have ping pong between two interfaces,
-   * each claiming the same name, so let's not do it forever...
-   * Two time should be enough for most configs...
-   * Jean II */
-  if(force_takeover && num_takeover)
-    /* Play it again, Sam... */
-    iw_enum_devices(skfd, &process_ifname, args, count);
 
   /* Done */
   return(0);
@@ -2632,15 +2638,16 @@ main(int	argc,
 {
   const char *	conf_file = DEFAULT_CONF;
   char *	ifname = NULL;
-  int		use_probe = 0;
-  int		is_debian = 0;
+  int		use_probe = 0;		/* Probe for modules */
+  int		is_debian = 0;		/* Debian quirks (probing) */
+  int		print_num_match = 0;	/* Print/Return num of matches */
   int		skfd;
   int		ret;
 
   /* Loop over all command line options */
   while(1)
     {
-      int c = getopt_long(argc, argv, "c:dDi:n:ptuvV", long_opt, NULL);
+      int c = getopt_long(argc, argv, "c:CdDi:n:ptuvV", long_opt, NULL);
       if(c == -1)
 	break;
 
@@ -2651,6 +2658,9 @@ main(int	argc,
 	  usage(); 
 	case 'c':
 	  conf_file = optarg;
+	  break;
+	case 'C':
+	  print_num_match = 1;
 	  break;
 	case 'd':
 	  is_debian = 1;
@@ -2682,10 +2692,6 @@ main(int	argc,
 	}
     }
 
-  /* Read the specified/default config file, or stdin. */
-  if(mapping_readfile(conf_file) < 0)
-    return(-1);
-
   /* Create a channel to the NET kernel. */
   if((skfd = iw_sockets_open()) < 0)
     {
@@ -2704,6 +2710,10 @@ main(int	argc,
 	}
       else
 	{
+	  /* Read the specified/default config file, or stdin. */
+	  if(mapping_readfile(conf_file) < 0)
+	    return(-1);
+
 	  /* Rename only this interface based on mappings
 	   * Mostly used for HotPlug processing (from /etc/hotplug/net.agent)
 	   * or udev processing (from a udev IMPORT rule).
@@ -2716,19 +2726,38 @@ main(int	argc,
     }
   else
     {
-      /* Load all the necesary modules */
-      if(use_probe)
-	{
-	  if(is_debian)
-	    probe_debian(skfd);
-	  else
-	    probe_mappings(skfd);
-	}
+      /* Read the specified/default config file, or stdin. */
+      if(mapping_readfile(conf_file) < 0)
+	return(-1);
 
       /* Rename all system interfaces
        * Mostly used for boot time processing (from init scripts).
        */
-      ret = process_iflist(skfd, NULL, 0);
+      ret = process_iflist(skfd, NULL, 0, use_probe, is_debian);
+
+      /* If we do any takeover, the interface list grabbed with
+       * iw_enum_devices() may get out of sync with the real interfaces,
+       * and we may miss the victim interface. So, let's go through the
+       * list again.
+       * On the other hand, we may have ping pong between two interfaces,
+       * each claiming the same name, so let's not do it forever...
+       * Two time should be enough for most configs...
+       * Note also that takeover is usually done with eth0, and many time
+       * we fail to probe eth0 because an unrenamed interface was using it,
+       * so we redo everything also when probing...
+       * Jean II */
+      if(force_takeover && (num_takeover || use_probe))
+	{
+	  /* Play it again, Sam... */
+	  ret = process_iflist(skfd, NULL, 0, use_probe, is_debian);
+	}
+
+      /* Print number of mapping that matched */
+      if(print_num_match)
+	{
+	  fprintf(stderr, "Setting : %d mapping matched.\n", num_mapping_match);
+	  ret = num_mapping_match;
+	}
     }
 
   /* Cleanup */

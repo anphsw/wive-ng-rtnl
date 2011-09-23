@@ -27,7 +27,7 @@
  *     Copyright (c) 1997-2007 Jean Tourrilhes <jt@hpl.hp.com>
  */
 
-#include "iwlib.h"		/* Header */
+#include "iwlib-private.h"		/* Private header */
 
 /************************** DOCUMENTATION **************************/
 

@@ -766,38 +766,10 @@ static int ioctl_standard_call(struct net_device *	dev,
 		int	extra_size;
 		int	user_length = 0;
 		int	err;
-		int	essid_compat = 0;
 
 		/* Calculate space needed by arguments. Always allocate
 		 * for max space. Easier, and won't last long... */
 		extra_size = descr->max_tokens * descr->token_size;
-
-		/* Check need for ESSID compatibility for WE < 21 */
-		switch (cmd) {
-		case SIOCSIWESSID:
-		case SIOCGIWESSID:
-		case SIOCSIWNICKN:
-		case SIOCGIWNICKN:
-			if (iwr->u.data.length == descr->max_tokens + 1)
-				essid_compat = 1;
-			else if (IW_IS_SET(cmd) && (iwr->u.data.length != 0)) {
-				char essid[IW_ESSID_MAX_SIZE + 1];
-
-				err = copy_from_user(essid, iwr->u.data.pointer,
-						     iwr->u.data.length *
-						     descr->token_size);
-				if (err)
-					return -EFAULT;
-
-				if (essid[iwr->u.data.length - 1] == '\0')
-					essid_compat = 1;
-			}
-			break;
-		default:
-			break;
-		}
-
-		iwr->u.data.length -= essid_compat;
 
 		/* Check what user space is giving us */
 		if(IW_IS_SET(cmd)) {
@@ -841,7 +813,6 @@ static int ioctl_standard_call(struct net_device *	dev,
 #endif	/* WE_IOCTL_DEBUG */
 
 		/* Create the kernel buffer */
-		/*    kzalloc ensures NULL-termination for essid_compat */
 		extra = kzalloc(extra_size, GFP_KERNEL);
 		if (extra == NULL) {
 			return -ENOMEM;
@@ -865,8 +836,6 @@ static int ioctl_standard_call(struct net_device *	dev,
 
 		/* Call the handler */
 		ret = handler(dev, &info, &(iwr->u), extra);
-
-		iwr->u.data.length += essid_compat;
 
 		/* If we have something to return to the user */
 		if (!ret && IW_IS_GET(cmd)) {

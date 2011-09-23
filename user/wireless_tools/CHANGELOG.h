@@ -756,6 +756,60 @@
  *	---
  *		(Bug reported by Florent Daignière)
  *	o Don't look for "fixed" out of array in set_txpower_info() [iwconfig]
+ *
+ * wireless 30 :
+ * -----------
+ *		(Suggested by Johannes Berg <johannes@sipsolutions.net>)
+ *	o Display non-ASCII char in ESSID using escape sequence [iwlib]
+ *	o Allow input of non-ASCII char in ESSID using escape sequence [iwlib]
+ *	---
+ *	o Fix probing to not probe wildcards (left over '%d'->'*') [ifrename]
+ *	o Output number of mapping matched (display + exit status) [ifrename]
+ *		(Bug reported by Ben Hutchings)
+ *	o Don't load mapping file if using options '-n' + '-i' [ifrename]
+ *	---
+ *	o When using takeover, redo probing in case eth0 was in use [ifrename]
+ *	o Update Hotplug documentation, add uDev bits [HOTPLUG-UDEV.txt]
+ *	o Add ESSID bug patches and documentation [ESSID-BUG.txt]
+ *	o Make wireless.21.h LGPL as promised a long time ago [wireless.21.h]
+ *	---
+ *		(Bug reported by Shaddy Baddah)
+ *	o Fix unaligned access on SPARC in the 64->32 bit workaround [iwlib.c]
+ *	---
+ *		(From Maxime Charpenne <maxime.charpenne@free.fr>)
+ *	o Mise à jour de la traduction en francais des pages manuel [fr/*]
+ *	---
+ *	o Use wireless.22.h, make it LGPL [iwlib.h/wireless.22.h]
+ *	o Show Scanning Capabilities in "iwlist event" [iwlist]
+ *		(Bug reported by Nikita Zhernosenko)
+ *	o Fix parsing of retry/power when modifier is used [iwconfig]
+ *		(Bug reported by Alexis Phoenix)
+ *	o Remove trailing '/' in INSTALL_* that fooled checkinstall [Makefile]
+ *		(From Dan Williams <dcbw@redhat.com>)
+ *	o Scan capabilities in struct iw_range [wireless.h]
+ *		(From Guus Sliepen <guus@debian.org>)
+ *	o Install localised man page [Makefile]
+ *	---
+ *	o Fix #define that broke 32->64 bit workaround [wireless.22.h]
+ *	o Workaround kernel bug when getting ESSID [iwlib/iwconfig/iwgetid]
+ *		(From Gerald Pfeifer  <gerald@pfeifer.com>)
+ *	o Fix gramar in man page, add about hidden networks [iwlist.8]
+ *	---
+ *		(From Reinette Chatre <reinette.chatre@intel.com>)
+ *	o Enable scan buffer to grow up to 65535 instead of 32768 [iwlist]
+ *	o Return a proper error if scan result exceed buffer max [iwlist]
+ *		(From Jean Tourrilhes)
+ *	o Do above two fixes for the simple scan API [iwlib]
+ *		(From Claudio Ferronato <claiudio@libero.it>)
+ *	o Spelling and typos in [iwconfig.8]
+ *	---
+ *	o Create iwlib-private.h to minimise namespace pollution [iwlib]
+ *	o More fix to the 64->32bit band-aid for encode [iwlib]
+ *	o Update udev rule to remove a warning [19-udev-ifrename.rules]
+ *		(from Ritesh Raj Sarraf <rrs@researchut.com> and Guus Sliepen)
+ *	o Propagate error codes out of main for get [iwconfig/iwlist/iwspy]
+ *		(From Guus Sliepen <guus@debian.org>)
+ *	o Remove spurious commands from Czech iwconfig manpage.
  */
 
 /* ----------------------------- TODO ----------------------------- */
@@ -766,7 +820,6 @@
  * --------
  *	Make disable a per encryption key modifier if some hardware
  *	requires it.
- *	IW_QUAL_RCPI
  *
  * iwspy :
  * -----
@@ -780,6 +833,7 @@
  * ifrename :
  * --------
  *	Link Type should use readable form instead of numeric value
+ *	When using -p with -n, only the new name should be probed.
  *
  * Doc & man pages :
  * ---------------

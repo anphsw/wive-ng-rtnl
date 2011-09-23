@@ -26,7 +26,7 @@
  *     Copyright (c) 1997-2004 Jean Tourrilhes <jt@hpl.hp.com>
  */
 
-#include "iwlib.h"		/* Header */
+#include "iwlib-private.h"		/* Private header */
 
 /************************* DISPLAY ROUTINES **************************/
 
@@ -373,7 +373,7 @@ main(int	argc,
 	/* The device name must be the first argument */
 	/* Name only : show spy list for that device only */
 	if(argc == 2)
-	  print_spy_info(skfd, argv[1], NULL, 0);
+	  goterr = print_spy_info(skfd, argv[1], NULL, 0);
 	else
 	  /* Special commands */
 	  if(!strcmp(argv[2], "setthr"))

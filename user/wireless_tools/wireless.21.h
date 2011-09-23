@@ -21,6 +21,12 @@
  *
  * Authors :	Jean Tourrilhes - HPL - <jt@hpl.hp.com>
  * Copyright (c) 1997-2005 Jean Tourrilhes, All Rights Reserved.
+ *
+ * This file, and only this file, is licensed under the terms of the LGPL.
+ * You can redistribute it and/or modify it under the terms of the GNU
+ * Lesser General Public License as published by the Free Software
+ * Foundation; either version 2.1 of the License, or (at your option)
+ * any later version.
  */
 
 #ifndef _LINUX_WIRELESS_H

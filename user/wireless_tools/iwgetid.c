@@ -25,7 +25,7 @@
  *     Copyright (c) 1997-2004 Jean Tourrilhes <jt@hpl.hp.com>
  */
 
-#include "iwlib.h"		/* Header */
+#include "iwlib-private.h"		/* Private header */
 
 #include <getopt.h>
 
@@ -100,8 +100,8 @@ print_essid(int			skfd,
 	    int			format)
 {
   struct iwreq		wrq;
-  char			essid[IW_ESSID_MAX_SIZE + 1];	/* ESSID */
-  char			pessid[IW_ESSID_MAX_SIZE + 1];	/* Pcmcia format */
+  char			essid[IW_ESSID_MAX_SIZE + 2];	/* ESSID */
+  char			pessid[4 * IW_ESSID_MAX_SIZE + 1];	/* Printable format */
   unsigned int		i;
   unsigned int		j;
 
@@ -110,7 +110,7 @@ print_essid(int			skfd,
 
   /* Get ESSID */
   wrq.u.essid.pointer = (caddr_t) essid;
-  wrq.u.essid.length = IW_ESSID_MAX_SIZE + 1;
+  wrq.u.essid.length = IW_ESSID_MAX_SIZE + 2;
   wrq.u.essid.flags = 0;
   if(iw_get_ext(skfd, ifname, SIOCGIWESSID, &wrq) < 0)
     return(-1);
@@ -120,7 +120,7 @@ print_essid(int			skfd,
     case FORMAT_SCHEME:
       /* Strip all white space and stuff */
       j = 0;
-      for(i = 0; i < strlen(essid); i++)
+      for(i = 0; i < wrq.u.essid.length; i++)
 	if(isalnum(essid[i]))
 	  pessid[j++] = essid[i];
       pessid[j] = '\0';
@@ -132,7 +132,8 @@ print_essid(int			skfd,
       printf("%s\n", essid);
       break;
     default:
-      printf("%-8.16s  ESSID:\"%s\"\n", ifname, essid);
+      iw_essid_escape(pessid, essid, wrq.u.essid.length);
+      printf("%-8.16s  ESSID:\"%s\"\n", ifname, pessid);
       break;
     }
 

@@ -11,7 +11,7 @@
  *     Copyright (c) 1997-2007 Jean Tourrilhes <jt@hpl.hp.com>
  */
 
-#include "iwlib.h"		/* Header */
+#include "iwlib-private.h"		/* Private header */
 
 /**************************** CONSTANTS ****************************/
 
@@ -100,7 +100,7 @@ get_info(int			skfd,
 #ifndef WE_ESSENTIAL
   /* Get NickName */
   wrq.u.essid.pointer = (caddr_t) info->nickname;
-  wrq.u.essid.length = IW_ESSID_MAX_SIZE + 1;
+  wrq.u.essid.length = IW_ESSID_MAX_SIZE + 2;
   wrq.u.essid.flags = 0;
   if(iw_get_ext(skfd, ifname, SIOCGIWNICKN, &wrq) >= 0)
     if(wrq.u.data.length > 1)
@@ -160,7 +160,7 @@ static void
 display_info(struct wireless_info *	info,
 	     char *			ifname)
 {
-  char		buffer[128];	/* Temporary buffer */
+  char		buffer[256];	/* Temporary buffer */
 
   /* One token is more of less 5 characters, 14 tokens per line */
   int	tokens = 3;	/* For name */
@@ -173,12 +173,14 @@ display_info(struct wireless_info *	info,
     {
       if(info->b.essid_on)
 	{
+	  /* Escape the non-printable characters */
+	  iw_essid_escape(buffer, info->b.essid, info->b.essid_len);
 	  /* Does it have an ESSID index ? */
 	  if((info->b.essid_on & IW_ENCODE_INDEX) > 1)
-	    printf("ESSID:\"%s\" [%d]  ", info->b.essid,
+	    printf("ESSID:\"%s\" [%d]  ", buffer,
 		   (info->b.essid_on & IW_ENCODE_INDEX));
 	  else
-	    printf("ESSID:\"%s\"  ", info->b.essid);
+	    printf("ESSID:\"%s\"  ", buffer);
 	}
       else
 	printf("ESSID:off/any  ");
@@ -619,7 +621,9 @@ set_essid_info(int		skfd,
 {
   struct iwreq		wrq;
   int			i = 1;
-  char			essid[IW_ESSID_MAX_SIZE + 1];
+  char			essid[4*IW_ESSID_MAX_SIZE + 1];
+  int			essid_len;
+  int			essid_index;
   int			we_kernel_version;
 
   if((!strcasecmp(args[0], "off")) ||
@@ -627,6 +631,7 @@ set_essid_info(int		skfd,
     {
       wrq.u.essid.flags = 0;
       essid[0] = '\0';
+      essid_len = 0;
     }
   else
     if(!strcasecmp(args[0], "on"))
@@ -634,11 +639,12 @@ set_essid_info(int		skfd,
 	/* Get old essid */
 	memset(essid, '\0', sizeof(essid));
 	wrq.u.essid.pointer = (caddr_t) essid;
-	wrq.u.essid.length = IW_ESSID_MAX_SIZE + 1;
+	wrq.u.essid.length = IW_ESSID_MAX_SIZE + 2;
 	wrq.u.essid.flags = 0;
 	if(iw_get_ext(skfd, ifname, SIOCGIWESSID, &wrq) < 0)
 	  return(IWERR_GET_EXT);
 	wrq.u.essid.flags = 1;
+	essid_len = wrq.u.essid.length;
       }
     else
       {
@@ -651,31 +657,37 @@ set_essid_info(int		skfd,
 	  {
 	    if(++i >= count)
 	      return(IWERR_ARG_NUM);
+	    essid_len = strlen(args[i]);
 	  }
 
-	/* Check the size of what the user passed us to avoid
-	 * buffer overflows */
-	if(strlen(args[i]) > IW_ESSID_MAX_SIZE)
+	/* First size check : check if ot fits in our internal buffer.
+	 * We do a two pass size check because of unescaping */
+	if(strlen(args[i]) > (4*IW_ESSID_MAX_SIZE))
 	  {
 	    errmax = IW_ESSID_MAX_SIZE;
 	    return(IWERR_ARG_SIZE);
 	  }
-	else
+
+	/* Unescape the ESSID to allow the user to enter weird chars */
+	essid_len = iw_essid_unescape(essid, args[i]);
+
+	/* Check the size to see if it fits the API. */
+	if(essid_len > IW_ESSID_MAX_SIZE)
 	  {
-	    int		temp;
+	    errmax = IW_ESSID_MAX_SIZE;
+	    return(IWERR_ARG_SIZE);
+	  }
 
-	    wrq.u.essid.flags = 1;
-	    strcpy(essid, args[i]);	/* Size checked, all clear */
-	    i++;
+	wrq.u.essid.flags = 1;
+	i++;
 
-	    /* Check for ESSID index */
-	    if((i < count) &&
-	       (sscanf(args[i], "[%i]", &temp) == 1) &&
-	       (temp > 0) && (temp < IW_ENCODE_INDEX))
-	      {
-		wrq.u.essid.flags = temp;
-		++i;
-	      }
+	/* Check for ESSID index */
+	if((i < count) &&
+	   (sscanf(args[i], "[%i]", &essid_index) == 1) &&
+	   (essid_index > 0) && (essid_index < IW_ENCODE_INDEX))
+	  {
+	    wrq.u.essid.flags = essid_index;
+	    ++i;
 	  }
       }
 
@@ -684,7 +696,7 @@ set_essid_info(int		skfd,
 
   /* Finally set the ESSID value */
   wrq.u.essid.pointer = (caddr_t) essid;
-  wrq.u.essid.length = strlen(essid);
+  wrq.u.essid.length = essid_len;
   if(we_kernel_version < 21)
     wrq.u.essid.length++;
 
@@ -1420,8 +1432,8 @@ set_retry_info(int		skfd,
   wrq.u.retry.disabled = 0;
 
   /* Is there any value to grab ? */
-  value = strtod(args[0], &unit);
-  if(unit == args[0])
+  value = strtod(args[i], &unit);
+  if(unit == args[i])
     {
       errarg = i;
       return(IWERR_ARG_TYPE);
@@ -1941,7 +1953,7 @@ main(int	argc,
 
 	  /* The device name must be the first argument */
 	  if(argc == 2)
-	    print_info(skfd, argv[1], NULL, 0);
+	    goterr = print_info(skfd, argv[1], NULL, 0);
 	  else
 	    /* The other args on the line specify options to be set... */
 	    goterr = set_info(skfd, argv + 2, argc - 2, argv[1]);

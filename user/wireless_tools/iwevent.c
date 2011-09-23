@@ -33,7 +33,7 @@
 
 /***************************** INCLUDES *****************************/
 
-#include "iwlib.h"		/* Header */
+#include "iwlib-private.h"		/* Private header */
 
 #include <linux/netlink.h>
 #include <linux/rtnetlink.h>
@@ -357,10 +357,11 @@ print_event_token(struct iw_event *	event,		/* Extracted token */
     case SIOCSIWESSID:
     case SIOCGIWESSID:
       {
-	char essid[IW_ESSID_MAX_SIZE+1];
+	char essid[4*IW_ESSID_MAX_SIZE + 1];
 	memset(essid, '\0', sizeof(essid));
 	if((event->u.essid.pointer) && (event->u.essid.length))
-	  memcpy(essid, event->u.essid.pointer, event->u.essid.length);
+	  iw_essid_escape(essid,
+			  event->u.essid.pointer, event->u.essid.length);
 	if(event->u.essid.flags)
 	  {
 	    /* Does it have an ESSID index ? */
@@ -381,7 +382,7 @@ print_event_token(struct iw_event *	event,		/* Extracted token */
 	  memcpy(key, event->u.data.pointer, event->u.data.length);
 	else
 	  event->u.data.flags |= IW_ENCODE_NOKEY;
-	printf("Set Encryption key:");
+	printf("Set Encryption key:{%X}", event->u.data.flags);
 	if(event->u.data.flags & IW_ENCODE_DISABLED)
 	  printf("off\n");
 	else

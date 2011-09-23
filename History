@@ -687,6 +687,7 @@
 67) Tune miniupnpd defaults.<br>
 68) Printserver p910nd use bidirection mode by default.<br>
 69) More optimize for small/save memory builds.<br>
+70) Update wireless tools to v30-rc7 (need for support UTF-8 SSID in console tools).<br>
 
 <br><br>
 <b>For support see:</b><br>

@@ -17,17 +17,17 @@
 /*
  *	Wireless Tools
  *
- *		Jean II - HPLB 97->99 - HPL 99->07
+ *		Jean II - HPLB 97->99 - HPL 99->09
  *
  * Common subroutines to all the wireless tools...
  *
  * This file is released under the GPL license.
- *     Copyright (c) 1997-2007 Jean Tourrilhes <jt@hpl.hp.com>
+ *     Copyright (c) 1997-2009 Jean Tourrilhes <jt@hpl.hp.com>
  */
 
 /***************************** INCLUDES *****************************/
 
-#include "iwlib.h"		/* Header */
+#include "iwlib-private.h"		/* Private header */
 
 /************************ CONSTANTS & MACROS ************************/
 
@@ -105,6 +105,15 @@ union	iw_range_raw
 			  (char *) NULL)
 #define iwr_off(f)	( ((char *) &(((struct iw_range *) NULL)->f)) - \
 			  (char *) NULL)
+
+/*
+ * Union to perform unaligned access when working around alignement issues
+ */
+union	iw_align_u16
+{
+	__u16		value;
+	unsigned char	byte[2];
+};
 
 /**************************** VARIABLES ****************************/
 
@@ -725,12 +734,13 @@ iw_get_basic_config(int			skfd,
 
   /* Get ESSID */
   wrq.u.essid.pointer = (caddr_t) info->essid;
-  wrq.u.essid.length = IW_ESSID_MAX_SIZE + 1;
+  wrq.u.essid.length = IW_ESSID_MAX_SIZE + 2;
   wrq.u.essid.flags = 0;
   if(iw_get_ext(skfd, ifname, SIOCGIWESSID, &wrq) >= 0)
     {
       info->has_essid = 1;
       info->essid_on = wrq.u.data.flags;
+      info->essid_len = wrq.u.essid.length;
     }
 
   /* Get operation mode */
@@ -939,6 +949,132 @@ iw_protocol_compare(const char *	protocol1,
     }
   /* Not compatible */
   return(0);
+}
+
+/************************ ESSID SUBROUTINES ************************/
+/*
+ * The ESSID identify 802.11 networks, and is an array if 32 bytes.
+ * Most people use it as an ASCII string, and are happy with it.
+ * However, any byte is valid, including the NUL character. Characters
+ * beyond the ASCII range are interpreted according to the locale and
+ * the OS, which is somethign we don't control (network of other
+ * people).
+ * Routines in here try to deal with that in asafe way.
+ */
+
+/*------------------------------------------------------------------*/
+/*
+ * Escape non-ASCII characters from ESSID.
+ * This allow us to display those weirds characters to the user.
+ *
+ * Source is 32 bytes max.
+ * Destination buffer needs to be at least 129 bytes, will be NUL
+ * terminated.
+ */
+void
+iw_essid_escape(char *		dest,
+		const char *	src,
+		const int	slen)
+{
+  const unsigned char *	s = (const unsigned char *) src;
+  const unsigned char *	e = s + slen;
+  char *		d = dest;
+
+  /* Look every character of the string */
+  while(s < e)
+    {
+      int	isescape;
+
+      /* Escape the escape to avoid ambiguity.
+       * We do a fast path test for performance reason. Compiler will
+       * optimise all that ;-) */
+      if(*s == '\\')
+	{
+	  /* Check if we would confuse it with an escape sequence */
+	  if((e-s) > 4 && (s[1] == 'x')
+	     && (isxdigit(s[2])) && (isxdigit(s[3])))
+	    {
+	      isescape = 1;
+	    }
+	  else
+	    isescape = 0;
+	}
+      else
+	isescape = 0;
+      
+
+      /* Is it a non-ASCII character ??? */
+      if(isescape || !isascii(*s) || iscntrl(*s))
+	{
+	  /* Escape */
+	  sprintf(d, "\\x%02X", *s);
+	  d += 4;
+	}
+      else
+	{
+	  /* Plain ASCII, just copy */
+	  *d = *s;
+	  d++;
+	}
+      s++;
+    }
+
+  /* NUL terminate destination */
+  *d = '\0';
+}
+
+/* ---------------------------------------------------------------- */
+/*
+ * Un-Escape non-ASCII characters from ESSID
+ * This allow the user to specify weird characters in ESSID.
+ *
+ * The source is a NUL terminated string.
+ * Destination buffer is at least the size of source (ESSID will shrink)
+ * Destination may contains NUL, therefore we return the length.
+ * This function still works is src and dest are the same ;-)
+ */
+int
+iw_essid_unescape(char *	dest,
+		  const char *	src)
+{
+  const char *	s = src;
+  char *	d = dest;
+  char *	p;
+  int		len;
+
+  /* Look-up the next '\' sequence, stop when no more */
+  while((p = strchr(s, '\\')) != NULL)
+    {
+      /* Copy block of unescaped chars before the '\' */
+      len = p - s;
+      memcpy(d, s, len);
+      d += len;
+      s += len;		/* Identical to 's = p' */
+
+      /* Check if it is really an escape sequence. We do also check for NUL */
+      if((s[1] == 'x') && (isxdigit(s[2])) && (isxdigit(s[3])))
+	{
+	  unsigned int	temp;
+	  /* Valid Escape sequence, un-escape it */
+	  sscanf(s + 2, "%2X", &temp);
+	  *d = temp;
+	  d++;
+	  s+=4;
+	}
+      else
+	{
+	  /* Not valid, don't un-escape it */
+	  *d = *s;
+	  d++;
+	  s++;
+	}
+    }
+
+  /* Copy remaining of the string */
+  len = strlen(s);
+  memcpy(d, s, len + 1);
+  /* Return length */
+  return((d - dest) + len);
 }
 
 /********************** FREQUENCY SUBROUTINES ***********************/
@@ -2005,54 +2141,6 @@ iw_check_if_addr_type(int		skfd,
   return(0);
 }
 
-#if 0
-/*------------------------------------------------------------------*/
-/*
- * Check if interface support the right address types...
- */
-int
-iw_check_addr_type(int		skfd,
-		   char *	ifname)
-{
-  /* Check the interface address type */
-  if(iw_check_if_addr_type(skfd, ifname) < 0)
-    return(-1);
-
-  /* Check the interface address type */
-  if(iw_check_mac_addr_type(skfd, ifname) < 0)
-    return(-1);
-
-  return(0);
-}
-#endif
-
-#if 0
-/*------------------------------------------------------------------*/
-/*
- * Ask the kernel for the MAC address of an interface.
- */
-int
-iw_get_mac_addr(int			skfd,
-		const char *		ifname,
-		struct ether_addr *	eth,
-		unsigned short *	ptype)
-{
-  struct ifreq	ifr;
-  int		ret;
-
-  /* Prepare request */
-  bzero(&ifr, sizeof(struct ifreq));
-  strncpy(ifr.ifr_name, ifname, IFNAMSIZ);
-
-  /* Do it */
-  ret = ioctl(skfd, SIOCGIFHWADDR, &ifr);
-
-  memcpy(eth->ether_addr_octet, ifr.ifr_hwaddr.sa_data, 6); 
-  *ptype = ifr.ifr_hwaddr.sa_family;
-  return(ret);
-}
-#endif
-
 /*------------------------------------------------------------------*/
 /*
  * Display an arbitrary length MAC address in readable format.
@@ -2575,13 +2663,17 @@ static const struct iw_ioctl_description standard_ioctl_descr[] = {
 	},
 	[SIOCSIWENCODE	- SIOCIWFIRST] = {
 		.header_type	= IW_HEADER_TYPE_POINT,
-		.token_size	= 1,
+		/* Hack : this never returns any payload in event.
+		 * Fix the 64->32 bit hack... */
+		.token_size	= 0,
 		.max_tokens	= IW_ENCODING_TOKEN_MAX,
 		.flags		= IW_DESCR_FLAG_EVENT | IW_DESCR_FLAG_RESTRICT,
 	},
 	[SIOCGIWENCODE	- SIOCIWFIRST] = {
 		.header_type	= IW_HEADER_TYPE_POINT,
-		.token_size	= 1,
+		/* Hack : this never returns any payload in event.
+		 * Fix the 64->32 bit hack... */
+		.token_size	= 0,
 		.max_tokens	= IW_ENCODING_TOKEN_MAX,
 		.flags		= IW_DESCR_FLAG_DUMP | IW_DESCR_FLAG_RESTRICT,
 	},
@@ -2845,13 +2937,21 @@ iw_extract_event_stream(struct stream_descr *	stream,	/* Stream of events */
 	       * Fixing that in the kernel would break 64 bits userspace. */
 	      if((token_len != extra_len) && (extra_len >= 4))
 		{
-		  __u16		alt_dlen = *((__u16 *) pointer);
-		  unsigned int	alt_token_len = alt_dlen * descr->token_size;
+		  union iw_align_u16	alt_dlen;
+		  unsigned int		alt_token_len;
+		  /* Usespace seems to not always like unaligned access,
+		   * so be careful and make sure to align value.
+		   * I hope gcc won't play any of its aliasing tricks... */
+		  alt_dlen.byte[0] = *(pointer);
+		  alt_dlen.byte[1] = *(pointer + 1);
+		  alt_token_len = alt_dlen.value * descr->token_size;
+#ifdef DEBUG
+		  printf("DBG - alt_token_len = %d\n", alt_token_len);
+#endif
+		  /* Verify that data is consistent if assuming 64 bit
+		   * alignement... */
 		  if((alt_token_len + 8) == extra_len)
 		    {
-#ifdef DEBUG
-		      printf("DBG - alt_token_len = %d\n", alt_token_len);
-#endif
 		      /* Ok, let's redo everything */
 		      pointer -= event_len;
 		      pointer += 4;
@@ -2859,8 +2959,12 @@ iw_extract_event_stream(struct stream_descr *	stream,	/* Stream of events */
 		      memcpy((char *) iwe + IW_EV_LCP_LEN + IW_EV_POINT_OFF,
 			     pointer, event_len);
 		      pointer += event_len + 4;
-		      iwe->u.data.pointer = pointer;
 		      token_len = alt_token_len;
+		      /* We may have no payload */
+		      if(alt_token_len)
+			iwe->u.data.pointer = pointer;
+		      else
+			iwe->u.data.pointer = NULL;
 		    }
 		}
 
@@ -3001,7 +3105,7 @@ iw_process_scanning_token(struct iw_event *		event,
     case SIOCGIWESSID:
       wscan->b.has_essid = 1;
       wscan->b.essid_on = event->u.data.flags;
-      memset(wscan->b.essid, '\0', IW_ESSID_MAX_SIZE+1);
+      memset(wscan->b.essid, '\0', IW_ESSID_MAX_SIZE + 1);
       if((event->u.essid.pointer) && (event->u.essid.length))
 	memcpy(wscan->b.essid, event->u.essid.pointer, event->u.essid.length);
       break;
@@ -3100,7 +3204,7 @@ iw_process_scan(int			skfd,
   if(iw_get_ext(skfd, ifname, SIOCGIWSCAN, &wrq) < 0)
     {
       /* Check if buffer was too small (WE-17 only) */
-      if((errno == E2BIG) && (we_version > 16))
+      if((errno == E2BIG) && (we_version > 16) && (buflen < 0xFFFF))
 	{
 	  /* Some driver may return very large scan results, either
 	   * because there are many cells, or because they have many
@@ -3115,6 +3219,10 @@ iw_process_scan(int			skfd,
 	    buflen = wrq.u.data.length;
 	  else
 	    buflen *= 2;
+
+	  /* wrq.u.data.length is 16 bits so max size is 65535 */
+	  if(buflen > 0xFFFF)
+	    buflen = 0xFFFF;
 
 	  /* Try again */
 	  goto realloc;

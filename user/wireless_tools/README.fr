@@ -65,7 +65,7 @@ localement avec la commande :
 		nroff -man xxx.8 | less
 (NDT : ou plus simplement avec « man ./xxx.8 »)
 
-pages man localisées (fr/*)
+pages man localisées (fr.ISO8859-1/* ; fr.UTF-8/* ; cs/*)
 --------------------
 	Les pages de man localisées ne sont pas écrites par moi (NDT\ : ainsi
 que ce document), par conséquent les seules disponibles sont celles qui me sont

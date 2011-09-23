@@ -6,18 +6,22 @@
 .\" 1ère traduction        : version 26
 .\" Manuel identique pour la version 27-pre9 (beta)
 .\" Manuel identique pour la version 27-pre11 (alpha)
+.\" Manuel identique pour la version 27-pre11 (alpha)
+.\" Mise à jour 2007/09    : version 29-pre21
+.\" Mise à jour 2007/10    : version 30-pre1
+.\" Mise à jour 2007/10/29 : version 30-pre3
 .\"
 .TH IWSPY 8 "31 octobre 1996" "net-tools" "Manuel du Programmeur Linux"
 .\"
 .\" NAME part
 .\"
 .SH NOM
-iwspy \- Obtenir des statistiques wireless depuis des n½uds donnés
+iwspy \- Obtenir des statistiques wireless depuis des noeuds donnés
 .\"
 .\" SYNOPSIS part
 .\"
 .SH SYNOPSIS
-.BI "iwspy " interface
+.BI "iwspy [" interface ]
 .br
 .BI "iwspy " interface " [+] " DNSNAME " | " IPADDR " | " HWADDR " [...]"
 .br
@@ -31,17 +35,22 @@ iwspy \- Obtenir des statistiques wireless depuis des n½uds donnés
 .\"
 .SH DESCRIPTION
 .B Iwspy
-est utilisé pour fixer une liste d'adresses sur une interface réseau sans fil,
-et obtenir des informations sur la qualité du lien pour chacune d'elles. Ces
-informations sont les mêmes que celles disponibles dans
+est utilisé pour fixer une liste d'adresses à surveiller sur une interface
+réseau sans fil, et obtenir des informations sur la qualité du lien pour
+chacune d'elles. Ces informations sont les mêmes que celles disponibles dans
 .IR /proc/net/wireless "\ :"
 qualité du lien, force du signal et niveau du bruit.
 .PP
 Ces informations sont mises à jour à chaque fois qu'un nouveau paquet est reçu,
 donc chaque adresse de la liste ajoute quelques précisions en plus.
 .PP
-Remarquez que cette fonctionnalité ne marche que pour les n½uds faisant partie
-des cellules sans fil courantes.
+Remarquez que cette fonctionnalité ne marche que pour les noeuds faisant partie
+de la cellule sans fil courante, vous ne pouvez pas surveiller un Point d'Accès
+avec lequel vous n'êtes pas associé (utiliser Scanning pour ça), ni les noeuds
+dans d'autres cellules. En mode Managed, les paquets sont souvent relayés par
+le Point d'Accès et, dans ce cas, vous obtiendrez la force du signal du Point
+d'Accès. Pour ces raisons cette fonctionnalité est surtout utile pour les
+modes Ad-Hoc et Master.
 .\"
 .\" PARAMETER part
 .\"
@@ -50,7 +59,7 @@ Vous pouvez fixer jusqu'à 8 adresses.
 .TP
 .BR DNSNAME " | " IPADDR
 Paramètre une adresse IP, ou dans certains cas un nom DNS (en utilisant le
-Â«\ resolver\ Â» de nom). Comme le matériel fonctionne avec des adresses
+«\ resolver\ » de nom). Comme le matériel fonctionne avec des adresses
 matérielles,
 .B iwspy
 traduira les adresses IP grâce à
@@ -62,8 +71,8 @@ Dans certains cas, cette adresse peut ne pas être dans le cache ARP et
 vers ces noms/adresses et réessayer.
 .TP
 .B HWADDR
-Paramètre une adresse matérielle (MAC) (cette adresse n'est pas traduite et
-vérifer comme le sont les adresses IP). L'adresse doit contenir deux-points
+Paramètre une adresse matérielle (MAC) (cette adresse n'est pas traduite ni
+vérifée comme le sont les adresses IP). L'adresse doit contenir deux-points
 .RB ( : )
 pour être reconnue comme une adresse matérielle.
 .TP
@@ -74,7 +83,7 @@ utilisateur devrait utiliser cette option pour éviter les conflits.
 .TP
 .B off
 Enlève la liste d'adresses courante et désactive la fonctionnalité de
-scrutation.
+surveillance.
 .TP
 .B setthr
 Fixe les seuils de force de signal

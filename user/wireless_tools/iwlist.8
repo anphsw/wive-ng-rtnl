@@ -69,12 +69,13 @@ only) and normal users can only read left-over scan results. By
 default, the way scanning is done (the scope of the scan) is dependant
 on the card and card settings.
 .br
-This command take optional arguments, however most drivers will ignore
+This command takes optional arguments, however most drivers will ignore
 those. The option
 .B essid
-is used to specify a scan on a specific ESSID. The option
+is used to specify a scan on a specific ESSID. With some card/driver,
+this enables to see hidden networks. The option
 .B last
-do not trigger a scan and read left-over scan results.
+does not trigger a scan and read left-over scan results.
 .TP
 .BR freq [uency]/ channel
 Give the list of available frequencies in the device and the number of

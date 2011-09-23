@@ -17,7 +17,9 @@ endif
 ## Uncomment this to build tools using static version of the library.
 ## Mostly useful for embedded platforms without ldd, or to create
 ## a local version (non-root).
-# BUILD_STATIC = y
+## Standard distros should comment that option to save space and to
+## build libiw.so used by third parties...
+BUILD_STATIC = y
 
 ## Uncomment this to build without using libm (less efficient).
 ## This is mostly useful for embedded platforms without maths.
@@ -71,10 +73,10 @@ endif
 DYNAMIC_LINK= libiw.so
 
 # Install directories
-INSTALL_DIR= $(PREFIX)/sbin/
-INSTALL_LIB= $(PREFIX)/lib/
-INSTALL_INC= $(PREFIX)/include/
-INSTALL_MAN= $(PREFIX)/man/
+INSTALL_DIR= $(PREFIX)/sbin
+INSTALL_LIB= $(PREFIX)/lib
+INSTALL_INC= $(PREFIX)/include
+INSTALL_MAN= $(PREFIX)/man
 
 # Various commands
 RM = rm -f
@@ -193,12 +195,14 @@ install-hdr:: wireless.h
 
 # How could you live without those manapages ?
 install-man::
-	install -m 755 -d $(INSTALL_MAN)/man8/
-	install -m 644 $(MANPAGES8) $(INSTALL_MAN)/man8/
-	install -m 755 -d $(INSTALL_MAN)/man7/
-	install -m 644 $(MANPAGES7) $(INSTALL_MAN)/man7/
-	install -m 755 -d $(INSTALL_MAN)/man5/
-	install -m 644 $(MANPAGES5) $(INSTALL_MAN)/man5/
+	for lang in . cs fr.*; do \
+	    install -m 755 -d $(INSTALL_MAN)/$$lang/man8/; \
+	    install -m 644 $$lang/$(MANPAGES8) $(INSTALL_MAN)/$$lang/man8/; \
+	    install -m 755 -d $(INSTALL_MAN)/$$lang/man7/; \
+	    install -m 644 $$lang/$(MANPAGES7) $(INSTALL_MAN)/$$lang/man7/; \
+	    install -m 755 -d $(INSTALL_MAN)/$$lang/man5/; \
+	    install -m 644 $$lang/$(MANPAGES5) $(INSTALL_MAN)/$$lang/man5/; \
+	done
 
 install-iwmulticall:: iwmulticall
 	install -m 755 -d $(INSTALL_DIR)
@@ -226,14 +230,16 @@ uninstall::
 	$(RM) $(INSTALL_LIB)/$(DYNAMIC_LINK)
 	$(RM) $(INSTALL_INC)/iwlib.h
 	$(RM) $(INSTALL_INC)/wireless.h
-	for f in $(MANPAGES8); do \
-	  $(RM) $(INSTALL_MAN)/man8/$$f; \
-	done
-	for f in $(MANPAGES7); do \
-	  $(RM) $(INSTALL_MAN)/man7/$$f; \
-	done
-	for f in $(MANPAGES5); do \
-	  $(RM) $(INSTALL_MAN)/man5/$$f; \
+	for lang in . cs fr.*; do \
+	    for f in $(MANPAGES8); do \
+		$(RM) $(INSTALL_MAN)/$$lang/man8/$$f; \
+	    done; \
+	    for f in $(MANPAGES7); do \
+		$(RM) $(INSTALL_MAN)/$$lang/man7/$$f; \
+	    done; \
+	    for f in $(MANPAGES5); do \
+		$(RM) $(INSTALL_MAN)/$$lang/man5/$$f; \
+	    done; \
 	done
 
 # Include dependancies

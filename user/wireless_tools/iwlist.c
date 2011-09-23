@@ -11,7 +11,7 @@
  *     Copyright (c) 1997-2007 Jean Tourrilhes <jt@hpl.hp.com>
  */
 
-#include "iwlib.h"		/* Header */
+#include "iwlib-private.h"		/* Private header */
 #include <sys/time.h>
 
 /****************************** TYPES ******************************/
@@ -496,10 +496,11 @@ print_scanning_token(struct stream_descr *	stream,	/* Stream of events */
       break;
     case SIOCGIWESSID:
       {
-	char essid[IW_ESSID_MAX_SIZE+1];
+	char essid[4*IW_ESSID_MAX_SIZE+1];
 	memset(essid, '\0', sizeof(essid));
 	if((event->u.essid.pointer) && (event->u.essid.length))
-	  memcpy(essid, event->u.essid.pointer, event->u.essid.length);
+	  iw_essid_escape(essid,
+			  event->u.essid.pointer, event->u.essid.length);
 	if(event->u.essid.flags)
 	  {
 	    /* Does it have an ESSID index ? */
@@ -801,7 +802,8 @@ print_scanning_info(int		skfd,
 	  if(iw_get_ext(skfd, ifname, SIOCGIWSCAN, &wrq) < 0)
 	    {
 	      /* Check if buffer was too small (WE-17 only) */
-	      if((errno == E2BIG) && (range.we_version_compiled > 16))
+	      if((errno == E2BIG) && (range.we_version_compiled > 16)
+		 && (buflen < 0xFFFF))
 		{
 		  /* Some driver may return very large scan results, either
 		   * because there are many cells, or because they have many
@@ -816,6 +818,10 @@ print_scanning_info(int		skfd,
 		    buflen = wrq.u.data.length;
 		  else
 		    buflen *= 2;
+
+		  /* wrq.u.data.length is 16 bits so max size is 65535 */
+		  if(buflen > 0xFFFF)
+		    buflen = 0xFFFF;
 
 		  /* Try again */
 		  goto realloc;
@@ -1690,6 +1696,17 @@ static const char *	event_capa_evt[] =
   [IWEVEXPIRED	- IWEVFIRST] = "Expired node",
 };
 
+static const struct iwmask_name iw_scan_capa_name[] = {
+  { IW_SCAN_CAPA_ESSID,		"ESSID" },
+  { IW_SCAN_CAPA_BSSID,		"BSSID" },
+  { IW_SCAN_CAPA_CHANNEL,	"Channel" },
+  { IW_SCAN_CAPA_MODE,		"Mode" },
+  { IW_SCAN_CAPA_RATE,		"Rate" },
+  { IW_SCAN_CAPA_TYPE,		"Type" },
+  { IW_SCAN_CAPA_TIME,		"Time" },
+};
+#define	IW_SCAN_CAPA_NUM	IW_ARRAY_LEN(iw_scan_capa_name)
+
 /*------------------------------------------------------------------*/
 /*
  * Print the event capability for the device
@@ -1742,6 +1759,16 @@ print_event_capa_info(int		skfd,
 		   cmd, event_capa_evt[cmd - IWEVFIRST]);
 	}
       printf("\n");
+
+      /* Add Scanning Capacity as a bonus, if available */
+      if(range.scan_capa != 0)
+	{
+	  printf("%-8.16s  Scanning capabilities :", ifname);
+	  iw_print_mask_name(range.scan_capa,
+			     iw_scan_capa_name, IW_SCAN_CAPA_NUM,
+			     "\n\t\t- ");
+	  printf("\n\n");
+	}
     }
   return(0);
 }
@@ -2161,6 +2188,7 @@ main(int	argc,
   char **args;			/* Command arguments */
   int count;			/* Number of arguments */
   const iwlist_cmd *iwcmd;
+  int goterr = 0;
 
   if(argc < 2)
     iw_usage(1);
@@ -2208,12 +2236,12 @@ main(int	argc,
 
   /* do the actual work */
   if (dev)
-    (*iwcmd->fn)(skfd, dev, args, count);
+    goterr = (*iwcmd->fn)(skfd, dev, args, count);
   else
     iw_enum_devices(skfd, iwcmd->fn, args, count);
 
   /* Close the socket. */
   iw_sockets_close(skfd);
 
-  return 0;
+  return goterr;
 }
