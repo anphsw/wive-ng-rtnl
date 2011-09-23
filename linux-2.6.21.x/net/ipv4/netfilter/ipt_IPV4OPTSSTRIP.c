@@ -29,7 +29,7 @@ target(struct sk_buff **pskb,
 	struct ip_options *opt;
 	unsigned char *optiph;
 	int l;
-	 
+
 	skb = (*pskb);
 	iph = (*pskb)->nh.iph;
 	optiph = skb->nh.raw;
