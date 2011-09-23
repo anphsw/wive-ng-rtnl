@@ -80,6 +80,7 @@ fulldump
 /lib/libiconv/config.h
 /lib/libiconv/configure
 /lib/libiconv/stamp-h1
+/lib/libiconv/Makefile
 /lib/libgmp/stamp-h1
 /user/busybox/*/Config.in
 /user/busybox/docs/busybox.net/BusyBox.html
