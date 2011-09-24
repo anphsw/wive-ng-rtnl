@@ -778,7 +778,7 @@ nfsd_get_raparms(dev_t dev, ino_t ino)
 			frap = rap;
 	}
 	depth = nfsdstats.ra_size*11/10;
-	if (!frap) {	
+	if (!frap) {
 		spin_unlock(&rab->pb_lock);
 		return NULL;
 	}

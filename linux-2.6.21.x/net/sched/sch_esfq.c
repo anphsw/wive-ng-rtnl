@@ -146,7 +146,7 @@ static unsigned esfq_hash(struct esfq_sched_data *q, struct sk_buff *skb)
 	struct esfq_packet_info info;
 	enum ip_conntrack_info ctinfo;
 	struct nf_conn *ct = nf_ct_get(skb, &ctinfo);
-	
+
 	switch (skb->protocol) {
 	case __constant_htons(ETH_P_IP):
 	{
