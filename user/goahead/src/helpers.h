@@ -6,6 +6,16 @@
 
 #define HTML_BUFFER_QUANTITY    1024
 
+//----------------------------------------------
+// Optimizer macros
+#define CHK_IF_DIGIT(var, val)  \
+	((var != NULL) && (var[0] == (val + '0')) && (var[1] == '\0'))
+
+#define CHK_IF_SET(var) \
+	((var != NULL) && (var[0]))
+
+//----------------------------------------------
+
 /* Special functions */
 typedef struct replacement_t
 {
@@ -31,6 +41,7 @@ typedef struct parameter_fetch_t
 	const char *web_param;
 	const char *nvram_param;
 	int is_switch;
+	const char *dfl_param;
 } parameter_fetch_t;
 
 extern const char *replaceWords(const char *key, const replacement_t *table);

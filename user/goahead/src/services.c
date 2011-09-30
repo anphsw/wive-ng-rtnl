@@ -210,52 +210,47 @@ void dhcpStoreAliases(const char *dhcp_config)
 		printf("Failed to open file %s\n", _PATH_DHCP_ALIAS_FILE);
 }
 
+const parameter_fetch_t dhcp_args[] =
+{
+	{ T("dhcpStart"),               "dhcpStart",            0,       T("") },
+	{ T("dhcpEnd"),                 "dhcpEnd",              0,       T("") },
+	{ T("dhcpMask"),                "dhcpMask",             0,       T("") },
+	{ T("dhcpGateway"),             "dhcpGateway",          0,       T("") },
+	{ T("dhcpLease"),               "dhcpLease",            0,       T("86400") },
+	{ T("dhcpDomain"),              "dhcpDomain",           0,       T("localdomain") },
+	{ NULL, NULL, 0, NULL }
+};
+
+const parameter_fetch_t dhcp_args_dns[] =
+{
+	{ T("dhcpPriDns"),              "dhcpPriDns",           0,       T("") },
+	{ T("dhcpSecDns"),              "dhcpSecDns",           0,       T("") },
+	{ NULL, NULL, 0, NULL }
+};
+
 /* goform/setDhcp */
 static void setDhcp(webs_t wp, char_t *path, char_t *query)
 {
-	char_t	*dhcp_tp;
-	char_t	*dhcp_s, *dhcp_e, *dhcp_m, *dhcp_pd, *dhcp_sd, *dhcp_g, *dhcp_l, *dhcp_domain;
-	char_t	*static_leases;
+	char_t	*dhcp_tp, *static_leases;
 
 	dhcp_tp = websGetVar(wp, T("lanDhcpType"), T("DISABLE"));
-	dhcp_s = websGetVar(wp, T("dhcpStart"), T(""));
-	dhcp_e = websGetVar(wp, T("dhcpEnd"), T(""));
-	dhcp_m = websGetVar(wp, T("dhcpMask"), T(""));
-	dhcp_pd = websGetVar(wp, T("dhcpPriDns"), T(""));
-	dhcp_sd = websGetVar(wp, T("dhcpSecDns"), T(""));
-	dhcp_g = websGetVar(wp, T("dhcpGateway"), T(""));
-	dhcp_l = websGetVar(wp, T("dhcpLease"), T("86400"));
-	dhcp_domain = websGetVar(wp, T("dhcpDomain"), T("localdomain"));
 	static_leases = websGetVar(wp, T("dhcpAssignIP"), T(""));
 
 	// configure gateway and dns (WAN) at bridge mode
 	if (strncmp(dhcp_tp, "SERVER", 7)==0)
 	{
-		if (inet_addr(dhcp_s) == -1)
-		{
-			websError(wp, 200, "invalid DHCP Start IP");
-			return;
-		}
-		if (inet_addr(dhcp_e) == -1)
-		{
-			websError(wp, 200, "invalid DHCP End IP");
-			return;
-		}
-		if (inet_addr(dhcp_m) == -1)
-		{
-			websError(wp, 200, "invalid DHCP Subnet Mask");
-			return;
-		}
 		nvram_init(RT2860_NVRAM);
-		nvram_bufset(RT2860_NVRAM, "dhcpStart", dhcp_s);
-		nvram_bufset(RT2860_NVRAM, "dhcpEnd", dhcp_e);
-		nvram_bufset(RT2860_NVRAM, "dhcpMask", dhcp_m);
-		nvram_bufset(RT2860_NVRAM, "dhcpEnabled", "1");
-		nvram_bufset(RT2860_NVRAM, "dhcpPriDns", dhcp_pd);
-		nvram_bufset(RT2860_NVRAM, "dhcpSecDns", dhcp_sd);
-		nvram_bufset(RT2860_NVRAM, "dhcpGateway", dhcp_g);
-		nvram_bufset(RT2860_NVRAM, "dhcpLease", dhcp_l);
-		nvram_bufset(RT2860_NVRAM, "dhcpDomain", dhcp_domain);
+		setupParameters(wp, dhcp_args, 0);
+		
+		char *dns_proxy = nvram_bufget(RT2860_NVRAM, "dnsPEnabled");
+		if (CHK_IF_DIGIT(dns_proxy, 1))
+		{
+			nvram_bufset(RT2860_NVRAM, "dhcpPriDns", "");
+			nvram_bufset(RT2860_NVRAM, "dhcpSecDns", "");
+		}
+		else
+			setupParameters(wp, dhcp_args_dns, 0);
+		
 		nvram_commit(RT2860_NVRAM);
 		nvram_close(RT2860_NVRAM);
 	}
@@ -279,58 +274,51 @@ static void setDhcp(webs_t wp, char_t *path, char_t *query)
 		websDone(wp, 200);
 }
 
-typedef struct service_flag_t
+const parameter_fetch_t service_misc_flags[] =
 {
-	char_t *web;
-	char   *nvram;
-	char_t *deflt;
-} service_flag_t;
-
-const service_flag_t service_misc_flags[] =
-{
-	{ T("stpEnbl"), "stpEnabled", T("0") },
-	{ T("lltdEnbl"), "lltdEnabled", T("0") },
-	{ T("igmpEnbl"), "igmpEnabled", T("0") },
-	{ T("upnpEnbl"), "upnpEnabled", T("0") },
-	{ T("radvdEnbl"), "radvdEnabled", T("0") },
-	{ T("pppoeREnbl"), "pppoeREnabled", T("0") },
-	{ T("dnspEnbl"), "dnsPEnabled", T("0") },
-	{ T("rmtHTTP"), "RemoteManagement", T("0") },
-	{ T("rmtSSH"), "RemoteSSH", T("0") },
-	{ T("udpxyMode"), "UDPXYMode", T("0") },
-	{ T("watchdogEnable"), "WatchdogEnabled", T("0") },
-	{ T("pingWANEnbl"), "WANPingFilter", T("0") },
-	{ T("krnlPppoePass"), "pppoe_pass", T("0") },
-	{ T("krnlIpv6Pass"), "ipv6_pass", T("0") },
-	{ T("dhcpSwReset"), "dhcpSwReset", T("0") },
-	{ T("natFastpath"), "natFastpath", T("0") },
-	{ T("bridgeFastpath"), "bridgeFastpath", T("1") },
-	{ T("CrondEnable"), "CrondEnable", T("0") },
-	{ T("ForceRenewDHCP"), "ForceRenewDHCP", T("1") },
-	{ T("arpPT"), "parproutedEnabled", T("0") },
-	{ NULL, NULL, NULL } // Terminator
+	{ T("stpEnbl"), "stpEnabled", 0, T("0") },
+	{ T("lltdEnbl"), "lltdEnabled", 0, T("0") },
+	{ T("igmpEnbl"), "igmpEnabled", 0, T("0") },
+	{ T("upnpEnbl"), "upnpEnabled", 0, T("0") },
+	{ T("radvdEnbl"), "radvdEnabled", 0, T("0") },
+	{ T("pppoeREnbl"), "pppoeREnabled", 0, T("0") },
+	{ T("dnspEnbl"), "dnsPEnabled", 0, T("0") },
+	{ T("rmtHTTP"), "RemoteManagement", 0, T("0") },
+	{ T("rmtSSH"), "RemoteSSH", 0, T("0") },
+	{ T("udpxyMode"), "UDPXYMode", 0, T("0") },
+	{ T("watchdogEnable"), "WatchdogEnabled", 0, T("0") },
+	{ T("pingWANEnbl"), "WANPingFilter", 0, T("0") },
+	{ T("krnlPppoePass"), "pppoe_pass", 0, T("0") },
+	{ T("krnlIpv6Pass"), "ipv6_pass", 0, T("0") },
+	{ T("dhcpSwReset"), "dhcpSwReset", 0, T("0") },
+	{ T("natFastpath"), "natFastpath", 0, T("0") },
+	{ T("bridgeFastpath"), "bridgeFastpath", 0, T("1") },
+	{ T("CrondEnable"), "CrondEnable", 0, T("0") },
+	{ T("ForceRenewDHCP"), "ForceRenewDHCP", 0, T("1") },
+	{ T("arpPT"), "parproutedEnabled", 0, T("0") },
+	{ NULL, NULL, 0, NULL } // Terminator
 };
 
 /* goform/setMiscServices */
 static void setMiscServices(webs_t wp, char_t *path, char_t *query)
 {
-	const service_flag_t *p;
-
 	nvram_init(RT2860_NVRAM);
 
-	for (p = service_misc_flags; p->web != NULL; p++)
-	{
-		char_t *var = websGetVar(wp, p->web, p->deflt);
-		if (var != NULL)
-			nvram_bufset(RT2860_NVRAM, p->nvram, var);
-	}
+	setupParameters(wp, service_misc_flags, 0);
 
 	char_t *nat_fp = nvram_bufget(RT2860_NVRAM, "natFastpath");
-	if ((nat_fp != NULL) && ((strcmp(nat_fp, "2") == 0) || (strcmp(nat_fp, "3") == 0)))
+	if (CHK_IF_DIGIT(nat_fp, 2) || CHK_IF_DIGIT(nat_fp, 3))
 	{
 		char_t *nat_th = websGetVar(wp, "hwnatThreshold", "30");
 		if (nat_th != NULL)
 			nvram_bufset(RT2860_NVRAM, "hw_nat_bind", nat_th);
+	}
+	
+	char_t *dns_proxy = nvram_bufget(RT2860_NVRAM, "natFastpath");
+	if (CHK_IF_DIGIT(dns_proxy, 1))
+	{
+		nvram_bufset(RT2860_NVRAM, "dhcpPriDns", "");
+		nvram_bufset(RT2860_NVRAM, "dhcpSecDns", "");
 	}
 
 	nvram_close(RT2860_NVRAM);
@@ -347,18 +335,18 @@ static void setMiscServices(webs_t wp, char_t *path, char_t *query)
 
 //------------------------------------------------------------------------------
 // Samba/CIFS setup
-const service_flag_t service_samba_flags[] =
+const parameter_fetch_t service_samba_flags[] =
 {
-	{ T("WorkGroup"), "WorkGroup", T("") },
-	{ T("SmbNetBIOS"), "SmbNetBIOS", T("") },
-	{ T("SmbString"), "SmbString", T("") },
-	{ T("SmbOsLevel"), "SmbOsLevel", T("") },
-	{ NULL, NULL, NULL } // Terminator
+	{ T("WorkGroup"), "WorkGroup", 0, T("") },
+	{ T("SmbNetBIOS"), "SmbNetBIOS", 0, T("") },
+	{ T("SmbString"), "SmbString", 0, T("") },
+	{ T("SmbOsLevel"), "SmbOsLevel", 0, T("") },
+	{ NULL, NULL, 0, NULL } // Terminator
 };
 
 static void setSamba(webs_t wp, char_t *path, char_t *query)
 {
-	const service_flag_t *p;
+//	const service_flag_t *p;
 
 	char_t *smb_enabled = websGetVar(wp, T("SmbEnabled"), T("0"));
 	if (smb_enabled == NULL)
@@ -367,15 +355,8 @@ static void setSamba(webs_t wp, char_t *path, char_t *query)
 	nvram_init(RT2860_NVRAM);
 	nvram_bufset(RT2860_NVRAM, "SmbEnabled", smb_enabled);
 
-	if (strcmp(smb_enabled, "1")==0)
-	{
-		for (p = service_samba_flags; p->web != NULL; p++)
-		{
-			char_t *var = websGetVar(wp, p->web, p->deflt);
-			if (var != NULL)
-				nvram_bufset(RT2860_NVRAM, p->nvram, var);
-		}
-	}
+	if (CHK_IF_DIGIT(smb_enabled, 1))
+		setupParameters(wp, service_samba_flags, 0);
 
 	nvram_close(RT2860_NVRAM);
 

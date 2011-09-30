@@ -163,7 +163,7 @@ void setupParameters(webs_t wp, const parameter_fetch_t *fetch, int transaction)
 	while (fetch->web_param != NULL)
 	{
 		// Get variable
-		char_t *str = websGetVar(wp, (char_t *)fetch->web_param, T(""));
+		char_t *str = websGetVar(wp, (char_t *)fetch->web_param, (char_t *)fetch->dfl_param);
 		if (fetch->is_switch) // Check if need update a switch
 		{
 			if (strcmp(str, "on") != 0)

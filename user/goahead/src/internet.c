@@ -457,35 +457,35 @@ char *getLanWanNamebyIf(char *ifname)
 
 const parameter_fetch_t vpn_args[] =
 {
-	{ T("vpn_server"),             "vpnServer",            0 },
-	{ T("vpn_range"),              "vpnRange",             0 },
-	{ T("vpn_user"),               "vpnUser",              0 },
-	{ T("vpn_pass"),               "vpnPassword",          0 },
-	{ T("vpn_mtu"),                "vpnMTU",               0 },
-	{ T("vpn_type"),               "vpnType",              0 },
-	{ T("vpn_mppe"),               "vpnMPPE",              1 },
-	{ T("vpn_dgw"),                "vpnDGW",               0 },
-	{ T("vpn_peerdns"),            "vpnPeerDNS",           1 },
-	{ T("vpn_debug"),              "vpnDebug",             1 },
-	{ T("vpn_nat"),                "vpnNAT",               1 },
-	{ T("vpn_lcp"),                "vpnEnableLCP",         1 },
-	{ T("vpn_auth_type"),          "vpnAuthProtocol",      0 },
-	{ T("vpn_pppoe_iface"),        "vpnInterface",         0 },
-	{ T("vpn_pppoe_service"),      "vpnService",           0 },
-	{ T("vpn_pure_pppoe"),         "vpnPurePPPOE",         2 },
-	{ T("vpn_cpu_limit"),          "vpnCpuLimit",          0 },
-	{ T("vpn_lcp_errors"),         "vpnLCPFailure",        0 },
-	{ T("vpn_lcp_interval"),       "vpnLCPInterval",       0 },
-	{ NULL, 0, 0 } // Terminator
+	{ T("vpn_server"),             "vpnServer",            0,       T("") },
+	{ T("vpn_range"),              "vpnRange",             0,       T("") },
+	{ T("vpn_user"),               "vpnUser",              0,       T("") },
+	{ T("vpn_pass"),               "vpnPassword",          0,       T("") },
+	{ T("vpn_mtu"),                "vpnMTU",               0,       T("") },
+	{ T("vpn_type"),               "vpnType",              0,       T("") },
+	{ T("vpn_mppe"),               "vpnMPPE",              1,       T("") },
+	{ T("vpn_dgw"),                "vpnDGW",               0,       T("") },
+	{ T("vpn_peerdns"),            "vpnPeerDNS",           1,       T("") },
+	{ T("vpn_debug"),              "vpnDebug",             1,       T("") },
+	{ T("vpn_nat"),                "vpnNAT",               1,       T("") },
+	{ T("vpn_lcp"),                "vpnEnableLCP",         1,       T("") },
+	{ T("vpn_auth_type"),          "vpnAuthProtocol",      0,       T("") },
+	{ T("vpn_pppoe_iface"),        "vpnInterface",         0,       T("") },
+	{ T("vpn_pppoe_service"),      "vpnService",           0,       T("") },
+	{ T("vpn_pure_pppoe"),         "vpnPurePPPOE",         2,       T("") },
+	{ T("vpn_cpu_limit"),          "vpnCpuLimit",          0,       T("") },
+	{ T("vpn_lcp_errors"),         "vpnLCPFailure",        0,       T("") },
+	{ T("vpn_lcp_interval"),       "vpnLCPInterval",       0,       T("") },
+	{ NULL, NULL, 0, NULL } // Terminator
 };
 
 const parameter_fetch_t lanauth_args[] =
 {
-	{ T("vpn_type"),               "vpnType",              0 },
-	{ T("vpn_pass"),               "vpnPassword",          0 },
-	{ T("lanauth_access"),         "LANAUTH_LVL",          0 },
+	{ T("vpn_type"),               "vpnType",              0,       T("") },
+	{ T("vpn_pass"),               "vpnPassword",          0,       T("") },
+	{ T("lanauth_access"),         "LANAUTH_LVL",          0,       T("") },
 
-	{ NULL, 0, 0 } // Terminator
+	{ NULL, NULL, 0, NULL } // Terminator
 };
 
 /*
@@ -2303,25 +2303,25 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 // ChilliSpot variables
 const parameter_fetch_t chilli_vars[] =
 {
-	{ T("sPriDns"),			"chilli_dns1",			0 },
-	{ T("sSecDns"),			"chilli_dns2",			0 },
-	{ T("sDomain"),			"chilli_domain",		0 },
-	{ T("sLease"),			"chilli_lease",			0 },
-	{ T("sRadServer1"),		"chilli_radiusserver1",		0 },
-	{ T("sRadServer2"),		"chilli_radiusserver2",		0 },
-	{ T("sRadSecret"),		"chilli_radiussecret",		0 },
-	{ T("sNasId"),			"chilli_radiusnasid",		0 },
-	{ T("sRadLocationId"),		"chilli_radiuslocationid",	0 },
-	{ T("sRadLocationName"),	"chilli_radiuslocationname",	0 },
-	{ T("sRadCoaPort"),		"chilli_coaport",		0 },
-	{ T("sRadCoaNoIpCheck"),	"chilli_coanoipcheck",		1 },
-	{ T("sUamServer"),		"chilli_uamserver",		0 },
-	{ T("sUamHomepage"),		"chilli_uamhomepage",		0 },
-	{ T("sUamSecret"),		"chilli_uamsecret",		0 },
-	{ T("sUamAllowed"),		"chilli_uamallowed",		0 },
-	{ T("sUamAnyDns"),		"chilli_uamanydns",		1 },
-	{ T("sMacAllowed"),		"chilli_macallowed",		0 },
-	{ NULL, 0, 0 } // Terminator
+	{ T("sPriDns"),			"chilli_dns1",			0,       T("") },
+	{ T("sSecDns"),			"chilli_dns2",			0,       T("") },
+	{ T("sDomain"),			"chilli_domain",		0,       T("") },
+	{ T("sLease"),			"chilli_lease",			0,       T("") },
+	{ T("sRadServer1"),		"chilli_radiusserver1",		0,       T("") },
+	{ T("sRadServer2"),		"chilli_radiusserver2",		0,       T("") },
+	{ T("sRadSecret"),		"chilli_radiussecret",		0,       T("") },
+	{ T("sNasId"),			"chilli_radiusnasid",		0,       T("") },
+	{ T("sRadLocationId"),		"chilli_radiuslocationid",	0,       T("") },
+	{ T("sRadLocationName"),	"chilli_radiuslocationname",	0,       T("") },
+	{ T("sRadCoaPort"),		"chilli_coaport",		0,       T("") },
+	{ T("sRadCoaNoIpCheck"),	"chilli_coanoipcheck",		1,       T("") },
+	{ T("sUamServer"),		"chilli_uamserver",		0,       T("") },
+	{ T("sUamHomepage"),		"chilli_uamhomepage",		0,       T("") },
+	{ T("sUamSecret"),		"chilli_uamsecret",		0,       T("") },
+	{ T("sUamAllowed"),		"chilli_uamallowed",		0,       T("") },
+	{ T("sUamAnyDns"),		"chilli_uamanydns",		1,       T("") },
+	{ T("sMacAllowed"),		"chilli_macallowed",		0,       T("") },
+	{ NULL, NULL, 0, 0 } // Terminator
 };
 
 

@@ -91,15 +91,7 @@ function initValue()
 	lan2_enable_switch(form);
 
 	//gateway, dns only allow to configure at bridge mode
-	if (opmode != "0")
-	{
-		document.getElementById("brGateway").style.visibility = "hidden";
-		document.getElementById("brGateway").style.display = "none";
-		document.getElementById("brPriDns").style.visibility = "hidden";
-		document.getElementById("brPriDns").style.display = "none";
-		document.getElementById("brSecDns").style.visibility = "hidden";
-		document.getElementById("brSecDns").style.display = "none";
-	}
+	displayElement( [ 'brGateway', 'brPriDns', 'brSecDns' ], opmode != "0" );
 }
 
 function CheckValue()
@@ -153,68 +145,64 @@ function lan2_enable_switch(form)
 
 <h1 id="lTitle"></h1>
 <p id="lIntroduction"></p>
-<hr />
+<hr>
 
 <form method="POST" name="lanCfg" action="/goform/setLan" onSubmit="return CheckValue();">
 <table width="95%" border="1" cellpadding="2" cellspacing="1">
 <tr>
-  <td class="title" colspan="2" id="lSetup">LAN Interface Setup</td>
+	<td class="title" colspan="2" id="lSetup">LAN Interface Setup</td>
 </tr>
 <tr <% var hashost = getHostSupp();
-      if (hashost != "1") write("style=\"visibility:hidden;display:none\""); %>>
-  <td class="head" id="lHostname">Hostname</td>
-  <td><input name="hostname" maxlength="16" value="<% getCfgGeneral(1, "HostName"); %>"></td>
+	if (hashost != "1") write("style=\"visibility:hidden;display:none\""); %>>
+	<td class="head" id="lHostname">Hostname</td>
+	<td><input name="hostname" maxlength="16" value="<% getCfgGeneral(1, "HostName"); %>"></td>
 </tr>
 <tr>
-  <td class="head" id="lIp">IP Address</td>
-  <td><input name="lanIp" maxlength="15" value="<% getLanIp(); %>" ></td>
+	<td class="head" id="lIp">IP Address</td>
+	<td><input name="lanIp" maxlength="15" value="<% getLanIp(); %>" ></td>
 </tr>
 <tr>
-  <td class="head" id="lNetmask">Subnet Mask</td>
-  <td><input name="lanNetmask" maxlength="15" value="<% getLanNetmask(); %>"></td>
+	<td class="head" id="lNetmask">Subnet Mask</td>
+	<td><input name="lanNetmask" maxlength="15" value="<% getLanNetmask(); %>"></td>
 </tr>
 <tr>
-  <td class="head" id="lLan2">LAN2</td>
-  <td>
-	<select name="lan2enabled" onchange="lan2_enable_switch(this.form);" class="half">
-		<option value="1">Enabled</option>
-		<option value="0">Disabled</option>
-	</select>
-  </td>
+	<td class="head" id="lLan2">LAN2</td>
+	<td>
+		<select name="lan2enabled" onchange="lan2_enable_switch(this.form);" class="half">
+			<option value="1">Enabled</option>
+			<option value="0">Disabled</option>
+		</select>
+	</td>
 </tr>
 <tr>
-  <td class="head" id="lLan2Ip">LAN2 IP Address</td>
-  <td><input name="lan2Ip" maxlength="15" value=""></td>
+	<td class="head" id="lLan2Ip">LAN2 IP Address</td>
+	<td><input name="lan2Ip" maxlength="15" value=""></td>
 </tr>
 <tr>
-  <td class="head" id="lLan2Netmask">LAN2 Subnet Mask</td>
-  <td><input name="lan2Netmask" maxlength="15" value=""></td>
+	<td class="head" id="lLan2Netmask">LAN2 Subnet Mask</td>
+	<td><input name="lan2Netmask" maxlength="15" value=""></td>
 </tr>
 <tr id="brGateway">
-  <td class="head" id="lGateway">Default Gateway</td>
-  <td><input name="lanGateway" maxlength="15" value="<% getCfgGeneral(1, "wan_gateway"); %>"></td>
+	<td class="head" id="lGateway">Default Gateway</td>
+	<td><input name="lanGateway" maxlength="15" value="<% getCfgGeneral(1, "wan_gateway"); %>"></td>
 </tr>
 <tr id="brPriDns">
-  <td class="head" id="lPriDns">Primary DNS Server</td>
-  <td><input name="lanPriDns" maxlength="15" value="<% getDns(1); %>"></td>
+	<td class="head" id="lPriDns">Primary DNS Server</td>
+	<td><input name="lanPriDns" maxlength="15" value="<% getDns(1); %>"></td>
 </tr>
 <tr id="brSecDns">
-  <td class="head" id="lSecDns">Secondary DNS Server</td>
-  <td><input name="lanSecDns" maxlength="15" value="<% getDns(2); %>"></td>
-</tr>
-<tr>
-  <td class="head" id="lMac">MAC Address</td>
-  <td><% getLanMac(); %></td>
+	<td class="head" id="lSecDns">Secondary DNS Server</td>
+	<td><input name="lanSecDns" maxlength="15" value="<% getDns(2); %>"></td>
 </tr>
 </table>
 
 <table width="95%" cellpadding="2" cellspacing="1">
 <tr align="center">
-  <td>
-    <input type="submit" class="normal" value="Apply" id="lApply" onClick="TimeoutReload(20);">&nbsp;&nbsp;
-    <input type="reset"  class="normal" value="Cancel" id="lCancel" onClick="window.location.reload();">
-    <input type="hidden" value="/internet/lan.asp" name="submit-url" >
-  </td>
+	<td>
+		<input type="submit" class="normal" value="Apply" id="lApply" onClick="TimeoutReload(20);">&nbsp;&nbsp;
+		<input type="reset"  class="normal" value="Cancel" id="lCancel" onClick="window.location.reload();">
+		<input type="hidden" value="/internet/lan.asp" name="submit-url" >
+	</td>
 </tr>
 </table>
 </form>

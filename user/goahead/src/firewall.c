@@ -1506,14 +1506,14 @@ void iptablesWebsFilterRun(void)
 
 const parameter_fetch_t content_filtering_args[] =
 {
-	{ T("urlFiltering"),           "websURLFilters",       0 },
-	{ T("hostFiltering"),          "websHostFilters",      0 },
-	{ T("websFilterProxy"),        "websFilterProxy",      2 },
-	{ T("websFilterJava"),         "websFilterJava",       2 },
-	{ T("websFilterActivex"),      "websFilterActivex",    2 },
-	{ T("websFilterCookies"),      "websFilterCookies",    2 },
+	{ T("urlFiltering"),           "websURLFilters",       0,   T("") },
+	{ T("hostFiltering"),          "websHostFilters",      0,   T("") },
+	{ T("websFilterProxy"),        "websFilterProxy",      2,   T("") },
+	{ T("websFilterJava"),         "websFilterJava",       2,   T("") },
+	{ T("websFilterActivex"),      "websFilterActivex",    2,   T("") },
+	{ T("websFilterCookies"),      "websFilterCookies",    2,   T("") },
 
-	{ NULL, 0, 0 } // Terminator
+	{ NULL, NULL, 0, NULL } // Terminator
 };
 
 static void webContentFilterSetup(webs_t wp, char_t *path, char_t *query)
@@ -1535,13 +1535,13 @@ static void webContentFilterSetup(webs_t wp, char_t *path, char_t *query)
 /* goform/setFirewallAlg */
 const parameter_fetch_t alg_params[] =
 {
-	{ "alg_ftp",		T("fwAlgFTP"),			2 },
-	{ "alg_gre",		T("fwAlgGRE"),			2 },
-	{ "alg_h323",		T("fwAlgH323"),			2 },
-	{ "alg_pptp",		T("fwAlgPPTP"),			2 },
-	{ "alg_sip",		T("fwAlgSIP"),			2 },
-	{ "alg_tftp",		T("fwAlgTFTP"),			2 },
-	{ NULL, 0, 0 } // Terminator
+	{ "alg_ftp",		T("fwAlgFTP"),			2,   T("") },
+	{ "alg_gre",		T("fwAlgGRE"),			2,   T("") },
+	{ "alg_h323",		T("fwAlgH323"),			2,   T("") },
+	{ "alg_pptp",		T("fwAlgPPTP"),			2,   T("") },
+	{ "alg_sip",		T("fwAlgSIP"),			2,   T("") },
+	{ "alg_tftp",		T("fwAlgTFTP"),			2,   T("") },
+	{ NULL, NULL, 0, NULL } // Terminator
 };
 
 static void setFirewallAlg(webs_t wp, char_t *path, char_t *query)

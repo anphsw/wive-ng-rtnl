@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="/style/controls.css" type="text/css">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script type="text/javascript" src="/js/validation.js"></script>
+<script type="text/javascript" src="/js/controls.js"></script>
 <script type="text/javascript" src="/js/ajax.js"></script>
 <script language="JavaScript" type="text/javascript">
 
@@ -109,18 +110,14 @@ function TimeoutReload(timeout)
 function dhcpTypeSwitch()
 {
 	var form = document.dhcpCfg;
-	var dhcp_off = form.lanDhcpType.options.selectedIndex != 1;
+	var dnsproxy = <% getCfgZero(1, "dnsPEnabled"); %> * 1;
+	var dhcp_on = form.lanDhcpType.options.selectedIndex == 1;
 	
-	form.dhcpDomain.disabled = dhcp_off;
-	form.dhcpStart.disabled = dhcp_off;
-	form.dhcpEnd.disabled = dhcp_off;
-	form.dhcpMask.disabled = dhcp_off;
-	form.dhcpPriDns.disabled = dhcp_off;
-	form.dhcpSecDns.disabled = dhcp_off;
-	form.dhcpGateway.disabled = dhcp_off;
-	form.dhcpLease.disabled = dhcp_off;
+	enableElements( [ form.dhcpDomain, form.dhcpStart, form.dhcpEnd, form.dhcpMask, form.dhcpGateway, form.dhcpLease ], dhcp_on);
+	enableElements( [ form.dhcpPriDns, form.dhcpSecDns ], dhcp_on && (!dnsproxy) );
+	displayElement( [ 'pridns', 'secdns' ], !dnsproxy);
 	
-	genTable(dhcp_off);
+	genTable(!dhcp_on);
 }
 
 function initTranslation()
@@ -157,10 +154,8 @@ function initValue()
 	loadDhcpClientsList();
 }
 
-function CheckValue()
+function CheckValue(form)
 {
-	var form = document.dhcpCfg;
-	
 	if (form.lanDhcpType.options.selectedIndex == 1)
 	{
 		if (!validateIP(form.dhcpStart, true))
@@ -314,7 +309,7 @@ function toggleDhcpTable(check)
 <div id="dhcpClientsTable">
 </div>
 
-<form method="POST" name="dhcpCfg" action="/goform/setDhcp" onSubmit="return CheckValue()">
+<form method="POST" name="dhcpCfg" action="/goform/setDhcp" onSubmit="return CheckValue(this);">
 
 <table width="95%" border="1" cellpadding="2" cellspacing="1">
 <tr>
