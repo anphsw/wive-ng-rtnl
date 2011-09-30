@@ -241,7 +241,7 @@ static void setDhcp(webs_t wp, char_t *path, char_t *query)
 	{
 		nvram_init(RT2860_NVRAM);
 		setupParameters(wp, dhcp_args, 0);
-		
+
 		char *dns_proxy = nvram_bufget(RT2860_NVRAM, "dnsPEnabled");
 		if (CHK_IF_DIGIT(dns_proxy, 1))
 		{
@@ -250,7 +250,7 @@ static void setDhcp(webs_t wp, char_t *path, char_t *query)
 		}
 		else
 			setupParameters(wp, dhcp_args_dns, 0);
-		
+
 		nvram_commit(RT2860_NVRAM);
 		nvram_close(RT2860_NVRAM);
 	}
@@ -313,8 +313,8 @@ static void setMiscServices(webs_t wp, char_t *path, char_t *query)
 		if (nat_th != NULL)
 			nvram_bufset(RT2860_NVRAM, "hw_nat_bind", nat_th);
 	}
-	
-	char_t *dns_proxy = nvram_bufget(RT2860_NVRAM, "natFastpath");
+
+	char_t *dns_proxy = nvram_bufget(RT2860_NVRAM, "dnsPEnabled");
 	if (CHK_IF_DIGIT(dns_proxy, 1))
 	{
 		nvram_bufset(RT2860_NVRAM, "dhcpPriDns", "");
