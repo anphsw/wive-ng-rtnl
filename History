@@ -688,6 +688,8 @@
 68) Printserver p910nd use bidirection mode by default.<br>
 69) More optimize for small/save memory builds.<br>
 70) Update wireless tools to v30-rc7 (need for support UTF-8 SSID in console tools).<br>
+71) Goahead fix proc gmac path for new chips.
+72) Fix dhcp setup webui and small corrections defaults.<br>
 
 <br><br>
 <b>For support see:</b><br>
