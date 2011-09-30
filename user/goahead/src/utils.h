@@ -29,17 +29,23 @@
 #define WPS_LED_SUCCESS			5
 
 #if defined(CONFIG_RALINK_RT2880)
-#define PROCREG_GMAC		"/proc/rt2880/gmac"
+#define PROCREG_GMAC	"/proc/rt2880/gmac"
 #elif defined(CONFIG_RALINK_RT3052)
-#define PROCREG_GMAC             "/proc/rt3052/gmac"
+#define PROCREG_GMAC	"/proc/rt3052/gmac"
 #elif defined(CONFIG_RALINK_RT3352)
-#define PROCREG_GMAC             "/proc/rt3352/gmac"
+#define PROCREG_GMAC	"/proc/rt3352/gmac"
+#elif defined (CONFIG_RALINK_RT5350)
+#define PROCREG_GMAC	"/proc/rt5350/gmac"
 #elif defined(CONFIG_RALINK_RT2883)
-#define PROCREG_GMAC             "/proc/rt2883/gmac"
+#define PROCREG_GMAC	"/proc/rt2883/gmac"
 #elif defined(CONFIG_RALINK_RT3883)
-#define PROCREG_GMAC             "/proc/rt3883/gmac"
+#define PROCREG_GMAC	"/proc/rt3883/gmac"
+#elif defined (CONFIG_RALINK_RT6855)
+#define PROCREG_GMAC	"/proc/rt6855/gmac"
+#elif defined (CONFIG_RALINK_RT63365)
+#define PROCREG_GMAC	"/proc/rt63365/gmac"
 #else
-#define PROCREG_GMAC             "/proc/rt2880/gmac"
+#define PROCREG_GMAC	"/proc/rt2880/gmac"
 #endif
 
 void reboot_now(void);
