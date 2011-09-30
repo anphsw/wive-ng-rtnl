@@ -27,7 +27,7 @@ fi
 if [ "$MODE" = "2T2R-USB" ]; then
     DEVNAME="Acorp_WR-300NU"
 elif [ "$MODE" = "2T2R-USB-IPV6" ]; then
-    DEVNAME="Acorp_WR-300NU-IPV6"
+    DEVNAME="Acorp_WR-300NU"
 elif [ "$MODE" = "2T2R" ]; then
     DEVNAME="Acorp_WR-300N"
 elif [ "$MODE" = "1T1R" ]; then
