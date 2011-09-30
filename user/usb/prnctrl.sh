@@ -27,9 +27,9 @@ else
 	killall -q p910nd
 	killall -q -9 p910nd
     fi
+    $LOG "Delete p910nd firewall rules and remove USBLP kernel module"
     iptables -D servicelimit -i $lan_if -p tcp --dport 9100 -j ACCEPT > /dev/null 2>&1
     rmmod usblp > /dev/null 2>&1
-    $LOG "Delete p910nd firewall rules and remove USBLP kernel module"
 fi
 
 exit 0
