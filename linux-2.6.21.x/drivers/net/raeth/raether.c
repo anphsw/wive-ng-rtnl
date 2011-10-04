@@ -114,7 +114,7 @@ int ra_mtd_read_nm(char *name, loff_t from, size_t len, u_char *buf);
 #else
 #define	MAX_RX_LENGTH	1600
 #endif
-#define DEFAULT_MTU 1500
+#define DEFAULT_MTU	1500
 
 struct net_device		*dev_raether;
 
@@ -296,9 +296,9 @@ void set_fe_pdma_glo_cfg(void)
 #endif
 }
 
-int forward_config(struct net_device *dev)
+void forward_config(struct net_device *dev)
 {
-	
+
 #if defined (CONFIG_RALINK_RT5350)
 
 	/* RT5350: No GDMA, PSE, CDMA, PPE */
@@ -449,7 +449,13 @@ int forward_config(struct net_device *dev)
 #else
 	sysRegWrite(PSE_FQ_CFG, cpu_to_le32(INIT_VALUE_OF_PSE_FQFC_CFG));
 #endif
-
+#if defined(CONFIG_RT_3052_ESW) && defined(CONFIG_VLAN_8021Q_DOUBLE_TAG)
+	/* Enable double vlan support */
+	if(vlan_double_tag)
+	    sysRegWrite(RALINK_ETH_SW_BASE + 0xe4, 0x3f);
+	else
+	    sysRegWrite(RALINK_ETH_SW_BASE + 0xe4, 0);
+#endif
 	/*
 	 *FE_RST_GLO register definition -
 	 *Bit 0: PSE Rest
@@ -469,7 +475,6 @@ int forward_config(struct net_device *dev)
 	printk("GDMA2_FWD_CFG = %0X\n",regVal);
 #endif
 #endif
-	return 1;
 }
 
 static int fe_pdma_init(struct net_device *dev)
@@ -1965,22 +1970,15 @@ static int ei_change_mtu(struct net_device *dev, int new_mtu)
 		return -ENXIO;
 	}
 
-	spin_lock_irqsave(&ei_local->page_lock, flags);
-
-	if ( (new_mtu > 4096) || (new_mtu < 64)) {
-		spin_unlock_irqrestore(&ei_local->page_lock, flags);
-		return -EINVAL;
-	}
-
-#ifndef CONFIG_RAETH_JUMBOFRAME
-	if ( new_mtu > DEFAULT_MTU ) {
-		spin_unlock_irqrestore(&ei_local->page_lock, flags);
-		return -EINVAL;
-	}
+#ifdef CONFIG_RAETH_JUMBOFRAME
+	if ((new_mtu > MAX_RX_LENGTH) || (new_mtu < 64)) {
+#else
+	if ((new_mtu > DEFAULT_MTU)   || (new_mtu < 64)) {
 #endif
-
+		return -EINVAL;
+	}
+	spin_lock_irqsave(&ei_local->page_lock, flags);
 	dev->mtu = new_mtu;
-
 	spin_unlock_irqrestore(&ei_local->page_lock, flags);
 	return 0;
 }
@@ -2025,9 +2023,9 @@ void ra2880_setup_dev_fptable(struct net_device *dev)
 	dev->tx_timeout		= ei_tx_timeout;
 
 #ifdef CONFIG_RAETH_NAPI
-        dev->poll = &raeth_clean;
+	dev->poll = &raeth_clean;
 #ifdef CONFIG_BRIDGE_FASTPATH
-       dev->weight = 64;
+	dev->weight = 64;
 #else
 #if defined (CONFIG_RAETH_ROUTER)
 	dev->weight = 32;
@@ -2580,13 +2578,6 @@ int ei_open(struct net_device *dev)
 
 	VirtualIF_open(ei_local->PseudoDev);
 #endif
-#if defined(CONFIG_RT_3052_ESW) && defined(CONFIG_VLAN_8021Q_DOUBLE_TAG)
-	/* Enable double vlan support */
-	if(vlan_double_tag)
-	    sysRegWrite(RALINK_ETH_SW_BASE + 0xe4, 0x3f);
-	else
-	    sysRegWrite(RALINK_ETH_SW_BASE + 0xe4, 0);
-#endif
 	forward_config(dev);
 	return 0;
 }
@@ -3131,22 +3122,6 @@ int __init ra2882eth_init(void)
 #else
 	dev->init =  rather_probe;
 #endif
-
-///////////////WORKAROUD INIT////////////
-	dev->mtu  = DEFAULT_MTU;
-#ifdef CONFIG_BRIDGE_FASTPATH
-	dev->weight = 64;
-#else
-#if defined (CONFIG_RAETH_ROUTER)
-	dev->weight = 32;
-#elif defined (CONFIG_RT_3052_ESW)
-	dev->weight = 32;
-#else
-	dev->weight = 128;
-#endif
-#endif
-//////////////////////////////////////////
-
 	ra2880_setup_dev_fptable(dev);
 
 	/* net_device structure Init */
