@@ -68,7 +68,7 @@ CFLAGS	+= -I$(ROOTDIR)/lib/libnvram -I$(ROOTDIR)/$(LINUXDIR)/include
 LDFLAGS	+= $(SSLLIB) $(IFMODLIB)
 LDLIBS	+= -lnvram
 
-CONF_H	= $(ROOTDIR)/$(LINUXDIR)/include/linux/autoconf.h
+CONF_H	= $(ROOTDIR)/$(LINUXDIR)/include/linux/config.h
 UCONF_H	= $(ROOTDIR)/config/autoconf.h
 BUSYCONF_H = $(ROOTDIR)/user/busybox/include/autoconf.h
 

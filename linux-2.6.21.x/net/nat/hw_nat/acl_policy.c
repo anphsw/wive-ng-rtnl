@@ -466,8 +466,8 @@ void inline PpeInsAclEntry(void *Rule)
 	uint32_t *p=(uint32_t *)Rule;
 
 	Index = PpeGetPreAclEnd();
-        if(DebugLevel==1) 
-	{    
+        if(DebugLevel==1)
+	{
 		printk("Policy Table Base=%08X Offset=%d\n",POLICY_TBL_BASE, Index*8);
 		printk("%08X: %08X\n",POLICY_TBL_BASE + Index*8, *p);
 		printk("%08X: %08X\n",POLICY_TBL_BASE + Index*8+4, *(p+1));
@@ -475,7 +475,7 @@ void inline PpeInsAclEntry(void *Rule)
 	RegWrite(POLICY_TBL_BASE + Index*8, *p); /* Low bytes */
 	RegWrite(POLICY_TBL_BASE + Index*8 + 4, *(p+1)); /* High bytes */
 
-	/* Update PRE_ACL_END */    
+	/* Update PRE_ACL_END */
 	RegModifyBits(PPE_PRE_ACL, Index+1, 16, 9);
 }
 

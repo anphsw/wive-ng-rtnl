@@ -1,4 +1,4 @@
-mainmenu_name "Ralink SDK Embedded Linux Application Configuration"
+mainmenu_name "Wive-NG-RTNL SDK Embedded Linux Application Configuration"
 
 mainmenu_option next_comment
 comment 'Library Configuration'
@@ -31,54 +31,7 @@ endmenu
 #############################################################################
 
 mainmenu_option next_comment
-
-comment 'MTD utils'
-bool 'mtd-utils'		CONFIG_USER_MTDUTILS
-dep_bool '  erase'        CONFIG_USER_MTDUTILS_ERASE $CONFIG_USER_MTDUTILS
-dep_bool '  eraseall'     CONFIG_USER_MTDUTILS_ERASEALL $CONFIG_USER_MTDUTILS
-dep_bool '  ftl_check'    CONFIG_USER_MTDUTILS_FTL_CHECK $CONFIG_USER_MTDUTILS
-dep_bool '  ftl_format'   CONFIG_USER_MTDUTILS_FTL_FORMAT $CONFIG_USER_MTDUTILS
-dep_bool '  mkfs.jffs'    CONFIG_USER_MTDUTILS_MKFSJFFS $CONFIG_USER_MTDUTILS
-dep_bool '  mkfs.jff2'    CONFIG_USER_MTDUTILS_MKFSJFFS2 $CONFIG_USER_MTDUTILS
-dep_bool '  nftldump'     CONFIG_USER_MTDUTILS_NFTLDUMP $CONFIG_USER_MTDUTILS
-dep_bool '  nftl_format'  CONFIG_USER_MTDUTILS_NFTL_FORMAT $CONFIG_USER_MTDUTILS
-dep_bool '  nanddump'     CONFIG_USER_MTDUTILS_NANDDUMP $CONFIG_USER_MTDUTILS
-dep_bool '  nandtest'     CONFIG_USER_MTDUTILS_NANDTEST $CONFIG_USER_MTDUTILS
-dep_bool '  nandwrite'    CONFIG_USER_MTDUTILS_NANDWRITE $CONFIG_USER_MTDUTILS
-dep_bool '  doc_loadbios' CONFIG_USER_MTDUTILS_DOC_LOADBIOS $CONFIG_USER_MTDUTILS
-dep_bool '  doc_loadipl'  CONFIG_USER_MTDUTILS_DOC_LOADIPL $CONFIG_USER_MTDUTILS
-define_bool CONFIG_LIB_ZLIB_FORCE $CONFIG_USER_MTDUTILS
-
-endmenu
-
-#############################################################################
-
-mainmenu_option next_comment
 comment 'Network Applications'
-
-bool 'bigpond'					CONFIG_USER_BIGPOND
-bool 'Transmission (BitTorrent Client)'		CONFIG_USER_TRANSMISSION
-if [ "$CONFIG_USER_TRANSMISSION" = "y" ]; then
-    define_bool CONFIG_LIB_EVENT y
-    define_bool CONFIG_LIB_CURL y
-    define_bool CONFIG_LIB_ZLIB_FORCE y
-    define_bool CONFIG_USER_OPENSSL y
-fi
-
-bool 'dhcp6'					CONFIG_USER_DHCP6
-dep_bool '  dhcp6 server'			CONFIG_USER_DHCP6_SERVER $CONFIG_USER_DHCP6
-dep_bool '  dhcp6 client'			CONFIG_USER_DHCP6_CLIENT $CONFIG_USER_DHCP6
-bool 'dnsmasq (DNS forwarder, DHCP server)'	CONFIG_USER_DNSMASQ
-bool 'disktype(detect format of a disk)'	CONFIG_USER_DISKTYPE
-bool 'echo server'				CONFIG_USER_ECHO_SERVER
-bool 'storage(enable chmod, fdisk in busybox)'	CONFIG_USER_STORAGE
-
-dep_bool 'samba server'				CONFIG_USER_SAMBA
-dep_bool 'samba server v3'			CONFIG_USER_SAMBA3
-if [ "$CONFIG_USER_SAMBA3" = "y" ]; then
-    define_bool CONFIG_LIB_ICONV y
-fi
-dep_bool 'dlna server'				CONFIG_USER_MINIDLNA
 
 bool 'go-ahead webserver'				CONFIG_USER_GOAHEAD_HTTPD
 dep_bool '  enable IPv6 support'			CONFIG_USER_GOAHEAD_IPV6 $CONFIG_USER_GOAHEAD_HTTPD
@@ -103,7 +56,27 @@ if [ "$CONFIG_USER_GOAHEAD_LANG_EN" = "n" -a "$CONFIG_USER_GOAHEAD_LANG_ZHTW" = 
 	define_bool CONFIG_USER_GOAHEAD_LANG_EN y
 fi
 
+bool 'dhcp6'					CONFIG_USER_DHCP6
+dep_bool '  dhcp6 server'			CONFIG_USER_DHCP6_SERVER $CONFIG_USER_DHCP6
+dep_bool '  dhcp6 client'			CONFIG_USER_DHCP6_CLIENT $CONFIG_USER_DHCP6
 
+bool 'dnsmasq (DNS forwarder, DHCP server)'	CONFIG_USER_DNSMASQ
+bool 'samba server'				CONFIG_USER_SAMBA
+bool 'samba server v3'				CONFIG_USER_SAMBA3
+if [ "$CONFIG_USER_SAMBA3" = "y" ]; then
+    define_bool CONFIG_LIB_ICONV y
+fi
+bool 'Transmission (BitTorrent Client)'		CONFIG_USER_TRANSMISSION
+if [ "$CONFIG_USER_TRANSMISSION" = "y" ]; then
+    define_bool CONFIG_LIB_EVENT y
+    define_bool CONFIG_LIB_CURL y
+    define_bool CONFIG_LIB_ZLIB_FORCE y
+    define_bool CONFIG_USER_OPENSSL y
+fi
+if [ "$CONFIG_USER_SAMBA" = "y" ] || [ "$CONFIG_USER_SAMBA3" = "y" ] || [ "$CONFIG_USER_TRANSMISSION" = "y" ]; then
+    bool 'storage apps, scripts and goahead conf' CONFIG_USER_STORAGE
+fi
+bool 'dlna server'				CONFIG_USER_MINIDLNA
 bool 'igmp proxy (RFC4605)'			CONFIG_USER_IGMP_PROXY
 bool 'udpxy'					CONFIG_USER_UDPXY
 bool 'wive-utils'				CONFIG_USER_WIVE
@@ -113,10 +86,18 @@ bool 'iptables'					CONFIG_USER_IPTABLES_IPTABLES
 bool 'iptables-tools'				CONFIG_USER_IPTABLES_SAVE_RESTORE
 bool 'ip6tables'				CONFIG_USER_IPTABLES_IP6TABLES
 bool 'tc'                               	CONFIG_USER_TC
-
-bool 'matrixssl'				CONFIG_USER_MATRIXSSL
-
+bool 'dropbear (sshd daemon)'            	CONFIG_USER_DROPBEAR
+bool 'p910nd (small printer daemon)'            CONFIG_USER_P910ND
+bool 'portmap'					CONFIG_USER_PORTMAP
+bool 'pppd'                             	CONFIG_USER_PPPD
+bool 'xl2tp'                                  	CONFIG_USER_XL2TPD
+bool 'pppoe relay'                              CONFIG_USER_PPPPOE_RELAY
+bool 'Proxy ARP daemon'				CONFIG_USER_PARPROUTED
+bool 'ripd-zebra (RIP)' 			CONFIG_USER_ZEBRA
 bool 'miniupnpd'				CONFIG_USER_MINIUPNPD
+bool 'radvd (Router Advertisement Daemon)'	CONFIG_USER_RADVD
+bool 'Link Layer Topology Discovery Protocol'	CONFIG_USER_LLTD
+bool 'rt2860apd (802.1x Authenticator)'		CONFIG_USER_802_1X
 bool 'wscd (WSC/WPS)'				CONFIG_USER_WSC
 if [ "$CONFIG_USER_WSC" = "y" ]; then
 	define_bool CONFIG_LIB_LIBPTHREAD_FORCE y
@@ -137,21 +118,6 @@ if [ "$CONFIG_USER_OPENSWAN" = "y" ]; then
 fi
 define_bool CONFIG_LIB_LIBGMP_FORCE $CONFIG_USER_OPENSWAN
 
-bool 'dropbear (sshd daemon)'            	CONFIG_USER_DROPBEAR
-bool 'p910nd (small printer daemon)'            CONFIG_USER_P910ND
-bool 'portmap'					CONFIG_USER_PORTMAP
-bool 'pppd'                             	CONFIG_USER_PPPD
-bool 'xl2tp'                                  	CONFIG_USER_XL2TPD
-bool 'pppoe relay'                              CONFIG_USER_PPPPOE_RELAY
-bool 'Proxy ARP daemon'				CONFIG_USER_PARPROUTED
-bool 'ripd-zebra (RIP)' 			CONFIG_USER_ZEBRA
-
-bool 'radvd (Router Advertisement Daemon)'	CONFIG_USER_RADVD
-dep_bool '  radvd dump'			        CONFIG_USER_RADVD_DUMP $CONFIG_USER_RADVD
-bool 'rt2860apd (802.1x Authenticator)'		CONFIG_USER_802_1X
-bool 'rt61apd (Legacy 802.1x Authenticator)'	CONFIG_USER_RT2561_802_1X
-
-bool 'totd (DNS proxy)'				CONFIG_USER_TOTD
 bool 'wpa-supplicant'				CONFIG_USER_WPA_SUPPLICANT
 if [ "$CONFIG_USER_WPA_SUPPLICANT" = "y" ]; then
 	define_bool CONFIG_USER_OPENSSL y
@@ -181,7 +147,6 @@ bool 'bonnie++'			CONFIG_USER_BONNIE
 bool 'ethtool-6.0'		CONFIG_USER_ETHTOOL
 bool 'gdbreplay'		CONFIG_USER_GDB_GDBREPLAY
 bool 'gdbserver'		CONFIG_USER_GDB_GDBSERVER
-bool 'netcat'                   CONFIG_USER_NETCAT
 bool 'netstat-nat'              CONFIG_USER_NETSTAT_NAT
 bool 'ntfs-3g'			CONFIG_USER_NTFS3G
 bool 'ntfsprogs'		CONFIG_USER_NTFSPROGS
@@ -251,11 +216,6 @@ fi
 endmenu
 
 ##############################################################################
-
-mainmenu_option next_comment
-comment 'Windows Rally Program'
-bool 'Link Layer Topology Discovery Protocol'		CONFIG_USER_LLTD
-endmenu
 
 mainmenu_option next_comment
 comment '3G support'

@@ -618,7 +618,7 @@ static ssize_t mem_write(struct file * file, const char __user *buf,
 		copied += retval;
 		buf += retval;
 		dst += retval;
-		count -= retval;			
+		count -= retval;
 	}
 	*ppos = dst;
 	free_page((unsigned long) page);
@@ -701,8 +701,6 @@ static struct file_operations proc_oom_ranking_operations = {
 	.write		= oom_ranking_write,
 };
 #endif
- 
- 
 
 static ssize_t oom_adjust_read(struct file *file, char __user *buf,
 				size_t count, loff_t *ppos)

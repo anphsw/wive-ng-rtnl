@@ -59,7 +59,7 @@
 #include <sys/reboot.h>
 #include <linux/reboot.h>
 
-#include "linux/autoconf.h"
+#include "linux/config.h"
 #include "mtd.h"
 #include "led.h"
 

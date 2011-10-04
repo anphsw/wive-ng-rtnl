@@ -1698,10 +1698,10 @@ static void tcp_mark_head_lost(struct sock *sk,
 	int cnt, oldcnt;
 	int err;
 	unsigned int mss;
-                                                                                                                             
-        //backport from 2.6.33.2 A packet is marked as lost in case packets == 0, although nothing should be done.           
-        if (packets == 0)                                                                                                    
-            return;                
+
+	//backport from 2.6.33.2 A packet is marked as lost in case packets == 0, although nothing should be done.
+	if (packets == 0)
+	    return;
 
 	WARN_ON(packets > tp->packets_out);
 	if (tp->lost_skb_hint) {

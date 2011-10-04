@@ -16,7 +16,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#include "linux/autoconf.h"
+#include "linux/config.h"
 #include "linux/ralink_gpio.h"			//gpio config
 
 #define LED_ON				1

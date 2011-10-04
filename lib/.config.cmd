@@ -22,6 +22,6 @@ deps_config := \
 	extra/Configs/Config.alpha \
 	extra/Configs/Config.in
 
-.config include/linux/autoconf.h: $(deps_config)
+.config include/linux/config.h: $(deps_config)
 
 $(deps_config):

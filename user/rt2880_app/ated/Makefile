@@ -9,7 +9,7 @@ SRCS = ated.c
 
 all: $(EXEC)
 
-$(EXEC): $(SRCS) $(ROOTDIR)/$(LINUXDIR)/include/linux/autoconf.h
+$(EXEC): $(SRCS) $(ROOTDIR)/$(LINUXDIR)/include/linux/config.h
 	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) $(LDFLAGS) -o $@ $@.c $(LDLIBS)
 
 romfs:

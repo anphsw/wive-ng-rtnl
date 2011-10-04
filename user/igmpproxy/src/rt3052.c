@@ -39,7 +39,7 @@
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 
-#include "linux/autoconf.h"
+#include "linux/config.h"
 
 #include "defs.h"
 

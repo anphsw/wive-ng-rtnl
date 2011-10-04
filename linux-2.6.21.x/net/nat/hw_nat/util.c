@@ -61,6 +61,7 @@ void MacReverse(uint8_t *Mac)
     }
 }
 
+#ifdef HWNAT_DEBUG
 int GetNext(char *src, int separator, char *  dest)
 {
         char *  c;
@@ -90,13 +91,13 @@ static inline int atoi(char *s)
         return i;
 }
 
-/* Convert IP address from Hex to string */                                   
+/* Convert IP address from Hex to string */
 uint8_t *Ip2Str(IN uint32_t Ip) 
-{      
+{
     static uint8_t Buf[32];
     uint8_t *ptr = (char *)&Ip;
     uint8_t  c[4];
-    
+
     c[0] = *(ptr);
     c[1] = *(ptr+1);
     c[2] = *(ptr+2);
@@ -111,7 +112,7 @@ unsigned int Str2Ip(IN char *str)
     char *          ptr = str;
     char            buf[128];
     unsigned char   c[4];
-    int             i;                                                                                            
+    int             i;
     for (i = 0; i < 3; ++i) {
 	if ((len = GetNext(ptr, '.', buf)) == -1) {
 	    return 1; /* parsing error */
@@ -122,6 +123,7 @@ unsigned int Str2Ip(IN char *str)
     c[3] = atoi(ptr);
     return ((c[0]<<24) + (c[1]<<16) + (c[2]<<8) + c[3]);
 }
+#endif
 
 /* calculate ip address range */
 /* start_ip <= x < end_ip */
@@ -146,6 +148,7 @@ void CalIpRange(uint32_t StartIp, uint32_t EndIp, uint8_t *M, uint8_t *E)
 
 }
 
+#if 0
 /* update mss field in tcp header to avoid packet fragmentation */
 void ChangeTcpMssOpt(INOUT struct sk_buff *skb,
 	IN uint16_t mss, INOUT struct tcphdr *th)
@@ -207,6 +210,7 @@ void ChangeTcpMssOpt(INOUT struct sk_buff *skb,
     }
 
 }
+#endif
 
 void RegModifyBits ( uint32_t Addr, uint32_t Data, 
 		     uint32_t  Offset, uint32_t Len)

@@ -264,6 +264,7 @@ static uint8_t *ShowCpuReason(struct sk_buff *skb)
 }
 
 
+#ifdef HWNAT_DEBUG
 uint32_t FoeDumpPkt(struct sk_buff *skb)
 {
 //dump related info from packet
@@ -400,6 +401,7 @@ uint32_t FoeDumpPkt(struct sk_buff *skb)
 
 }
 #endif
+#endif
 
 int32_t PpeRxHandler(struct sk_buff * skb)
 {
@@ -423,11 +425,13 @@ int32_t PpeRxHandler(struct sk_buff * skb)
     foe_entry=&PpeFoeBase[FOE_ENTRY_NUM(skb)];
     eth_type=ntohs(skb->protocol);
 
+#ifdef HWNAT_DEBUG
     if(DebugLevel==1) {
        FoeDumpPkt(skb);
     }
+#endif
 
-    if( ((FOE_MAGIC_TAG(skb) == FOE_MAGIC_PCI) || (FOE_MAGIC_TAG(skb) == FOE_MAGIC_WLAN))){ 
+    if( ((FOE_MAGIC_TAG(skb) == FOE_MAGIC_PCI) || (FOE_MAGIC_TAG(skb) == FOE_MAGIC_WLAN))){
 #if defined  (CONFIG_RA_HW_NAT_WIFI)
 
 	    /* PPE only can handle IPv4/VLAN/IPv6/PPP packets */

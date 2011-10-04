@@ -8,7 +8,7 @@
 #
 
 CONF	= $(ROOTDIR)/$(LINUXDIR)
-CONF_H  = $(CONF)/include/linux/autoconf.h
+CONF_H  = $(CONF)/include/linux/config.h
 CRC_L	= $(ROOTDIR)/lib/libnvram/crc32.o
 
 UPLOAD_CGI 		= upload.cgi 

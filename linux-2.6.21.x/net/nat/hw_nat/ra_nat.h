@@ -187,12 +187,6 @@ typedef struct
 				    (FOE_MAGIC_TAG(skb) == FOE_MAGIC_GE)   || \
 				    (FOE_MAGIC_TAG(skb) == FOE_MAGIC_WLAN))
 #endif
-/* 
- * HW_NAT module will modify mss field in tcp option header 
- * to avoid fragmentation in WAN port.
- */
-#define MAX_TCP_MSS		    1448
-	
 
 /*
  * EXPORT FUNCTION

@@ -543,7 +543,7 @@ CFLAGS += $(call cc-option,-funit-at-a-time,)
 CFLAGS += $(call cc-option,-membedded-data,)
 CFLAGS += $(call cc-option,-muninit-const-in-rodata,)
 
-# crazy optimizations                                                                                                                       
+# crazy optimizations
 CFLAGS += $(call cc-option,-ffast-math,)
 CFLAGS += $(call cc-option,-fforce-addr,)
 

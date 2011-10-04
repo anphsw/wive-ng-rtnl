@@ -26,7 +26,7 @@
 #include <sys/select.h>
 #include <linux/wireless.h>
 #include "ated.h"
-#include "linux/autoconf.h"
+#include "linux/config.h"
 #include "nvram.h"
 
 #define SIGNAL
