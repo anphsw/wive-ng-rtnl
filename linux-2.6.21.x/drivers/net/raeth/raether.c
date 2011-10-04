@@ -1038,7 +1038,7 @@ static int rt2880_eth_recv(struct net_device* dev)
 #if defined (CONFIG_RAETH_SKB_RECYCLE_2K)
                 skb = skbmgr_dev_alloc_skb2k();
 #else
-		skb = __dev_alloc_skb(MAX_RX_LENGTH + NET_IP_ALIGN, GFP_DMA | GFP_ATOMIC);
+		skb = __netdev_alloc_skb(dev, MAX_RX_LENGTH + NET_IP_ALIGN, GFP_DMA | GFP_ATOMIC);
 #endif
 
 		if (unlikely(skb == NULL))
@@ -1056,7 +1056,6 @@ static int rt2880_eth_recv(struct net_device* dev)
                         bReschedule = 1;
 			break;
 		}
-		skb_reserve(skb, NET_IP_ALIGN);
 
 #if defined (CONFIG_RAETH_SPECIAL_TAG)
 		// port0: 0x8100 => 0x8100 0001
@@ -2496,26 +2495,21 @@ int ei_open(struct net_device *dev)
 #if defined (CONFIG_RAETH_SKB_RECYCLE_2K)
                 ei_local->netrx0_skbuf[i] = skbmgr_dev_alloc_skb2k();
 #else
-                ei_local->netrx0_skbuf[i] = dev_alloc_skb(MAX_RX_LENGTH + NET_IP_ALIGN);
+                ei_local->netrx0_skbuf[i] = netdev_alloc_skb(dev, MAX_RX_LENGTH + NET_IP_ALIGN);
 #endif
                 if (ei_local->netrx0_skbuf[i] == NULL )
                         printk("rx skbuff buffer allocation failed!");
-		else
-		    skb_reserve(ei_local->netrx0_skbuf[i], NET_IP_ALIGN);
-		
 
 #if defined (CONFIG_RAETH_MULTIPLE_RX_RING) 
-		ei_local->netrx1_skbuf[i] = dev_alloc_skb(MAX_RX_LENGTH + NET_IP_ALIGN);
+		ei_local->netrx1_skbuf[i] = netdev_alloc_skb(dev, MAX_RX_LENGTH + NET_IP_ALIGN);
                 if (ei_local->netrx1_skbuf[i] == NULL )
                         printk("rx1 skbuff buffer allocation failed!");
-		else
-		    skb_reserve(ei_local->netrx1_skbuf[i], NET_IP_ALIGN);
 #endif
         }
 
 	spin_lock_irqsave(&(ei_local->page_lock), flags);
 	err = request_irq( dev->irq, ei_interrupt, IRQF_DISABLED, dev->name, dev);	// try to fix irq in open
-	
+
 	if (err)
 	    return err;
 
