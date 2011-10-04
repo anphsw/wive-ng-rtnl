@@ -1989,6 +1989,10 @@ struct sk_buff *skb_segment(struct sk_buff *skb, int features)
 		copy_skb_header(nskb, skb);
 		nskb->mac_len = skb->mac_len;
 
+		/* nskb and skb might have different headroom */
+		if (nskb->ip_summed == CHECKSUM_PARTIAL)
+			nskb->csum_start += skb_headroom(nskb) - headroom;
+
 		skb_reserve(nskb, headroom);
 		skb_reset_mac_header(nskb);
 		nskb->nh.raw = nskb->data + skb->mac_len;
