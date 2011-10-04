@@ -202,7 +202,7 @@ static void FoeAllocTbl(uint32_t NumOfEntry)
     memset(PpeFoeBase, 0, FoeTblSize);
 }
 
-#if !defined (CONFIG_RA_HW_NAT_MANUAL_BIND)
+#if !defined (CONFIG_RA_HW_NAT_MANUAL_BIND) && defined (HWNAT_DEBUG)
 static uint8_t *ShowCpuReason(struct sk_buff *skb)
 {
     static uint8_t Buf[32];
