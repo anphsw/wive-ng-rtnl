@@ -21,7 +21,7 @@ LOG_MINIUPNPD="LOG_DAEMON"
 # detecting the OS name and version
 OS_NAME=Wifi-Router
 OS_VERSION=WIVE-RTN
-OS_URL=http://sadnet.ru/
+OS_URL=http://wive-ng.sf.net/
 
 # pfSense special case
 if [ -f /etc/platform ]; then
@@ -217,7 +217,7 @@ case $OS_NAME in
 		FW=netfilter
 		OS_NAME=Wifi-Router
 		OS_VERSION=WIVE-RTN
-		OS_URL=http://sadnet.ru
+		OS_URL=http://wive-ng.sf.net
 		;;
 	*)
 		echo "Unknown OS : $OS_NAME"

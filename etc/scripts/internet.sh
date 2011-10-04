@@ -217,7 +217,7 @@ fi
 
 # this is hook for exec user script after physycal connection configured
 # may be used for add scripts needed by some provides
-# example: http://sadnet.ru/downloads/wan_up.sh - load external routes for www.kvidex.ru ISP
+# example: http://wive-ng.sf.net/downloads/wan_up.sh - load external routes for www.kvidex.ru ISP
 if [ -f /etc/wan_up.sh ]; then
     chmod 777 /etc/wan_up.sh
     $LOG "Call user /etc/wan_up.sh script."

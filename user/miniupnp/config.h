@@ -15,7 +15,7 @@
 
 #define OS_NAME		"Wifi-Router"
 #define OS_VERSION	"Wifi-Router/WIVE-RTN"
-#define OS_URL		"http://sadnet.ru"
+#define OS_URL		"http://wive-ng.sf.net"
 
 /* syslog facility to be used by miniupnpd */
 #define LOG_MINIUPNPD		 LOG_DAEMON

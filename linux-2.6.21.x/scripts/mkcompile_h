@@ -65,7 +65,7 @@ UTS_TRUNCATE="cut -b -$UTS_LEN"
 
   echo \#define LINUX_COMPILE_TIME \"`date +%T`\"
   echo \#define LINUX_COMPILE_BY \"sfstudio_at_mail.ru\"
-  echo \#define LINUX_COMPILE_HOST \"wive-ng.sf.net or sadnet.ru\"
+  echo \#define LINUX_COMPILE_HOST \"wive-ng.sf.net\"
 
   domain=`dnsdomainname 2> /dev/null`
   if [ -z "$domain" ]; then
