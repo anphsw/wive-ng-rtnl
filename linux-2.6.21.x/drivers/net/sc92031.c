@@ -803,8 +803,6 @@ static void _sc92031_rx_tasklet(struct net_device *dev)
 			goto next;
 		}
 
-		skb_reserve(skb, NET_IP_ALIGN);
-
 		if ((rx_ring_offset + pkt_size) > RX_BUF_LEN) {
 			memcpy(skb_put(skb, RX_BUF_LEN - rx_ring_offset),
 				rx_ring + rx_ring_offset, RX_BUF_LEN - rx_ring_offset);

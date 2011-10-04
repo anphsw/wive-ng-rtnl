@@ -1963,9 +1963,8 @@ static struct sk_buff *receive_copy(struct sky2_port *sky2,
 {
 	struct sk_buff *skb;
 
-	skb = netdev_alloc_skb(sky2->netdev, length + 2);
+	skb = netdev_alloc_skb_ip_align(sky2->netdev, length);
 	if (likely(skb)) {
-		skb_reserve(skb, 2);
 		pci_dma_sync_single_for_cpu(sky2->hw->pdev, re->data_addr,
 					    length, PCI_DMA_FROMDEVICE);
 		memcpy(skb->data, re->skb->data, length);

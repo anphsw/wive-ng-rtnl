@@ -2099,19 +2099,12 @@ ixgb_alloc_rx_buffers(struct ixgb_adapter *adapter)
 			goto map_skb;
 		}
 
-		skb = netdev_alloc_skb(netdev, adapter->rx_buffer_len
-			               + NET_IP_ALIGN);
+		skb = netdev_alloc_skb_ip_align(netdev, adapter->rx_buffer_len);
 		if (unlikely(!skb)) {
 			/* Better luck next round */
 			adapter->alloc_rx_buff_failed++;
 			break;
 		}
-
-		/* Make buffer alignment 2 beyond a 16 byte boundary
-		 * this will result in a 16 byte aligned IP header after
-		 * the 14 byte MAC header is removed
-		 */
-		skb_reserve(skb, NET_IP_ALIGN);
 
 		buffer_info->skb = skb;
 		buffer_info->length = adapter->rx_buffer_len;

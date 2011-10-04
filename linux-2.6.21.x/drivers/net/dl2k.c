@@ -504,8 +504,6 @@ rio_timer (unsigned long data)
 					break;
 				}
 				np->rx_skbuff[entry] = skb;
-				/* 16 byte align the IP header */
-				skb_reserve (skb, 2);
 				np->rx_ring[entry].fraginfo =
 				    cpu_to_le64 (pci_map_single
 					 (np->pdev, skb->data, np->rx_buf_sz,
@@ -574,7 +572,6 @@ alloc_list (struct net_device *dev)
 				dev->name);
 			break;
 		}
-		skb_reserve (skb, 2);	/* 16 byte align the IP header. */
 		/* Rubicon now supports 40 bits of addressing space. */
 		np->rx_ring[i].fraginfo =
 		    cpu_to_le64 ( pci_map_single (
@@ -907,8 +904,6 @@ receive_packet (struct net_device *dev)
 				break;
 			}
 			np->rx_skbuff[entry] = skb;
-			/* 16 byte align the IP header */
-			skb_reserve (skb, 2);
 			np->rx_ring[entry].fraginfo =
 			    cpu_to_le64 (pci_map_single
 					 (np->pdev, skb->data, np->rx_buf_sz,
