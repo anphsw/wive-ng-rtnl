@@ -109,13 +109,6 @@ int ra_mtd_read_nm(char *name, loff_t from, size_t len, u_char *buf);
 //#define CONFIG_UNH_TEST
 /* end of config */
 
-#ifdef CONFIG_RAETH_JUMBOFRAME
-#define	MAX_RX_LENGTH	4096
-#else
-#define	MAX_RX_LENGTH	1600
-#endif
-#define DEFAULT_MTU	1500
-
 struct net_device		*dev_raether;
 
 static int rx_dma_owner_idx; 
@@ -980,6 +973,15 @@ static int rt2880_eth_recv(struct net_device* dev)
 		rx_skb->len 	= length;
 		rx_skb->tail 	= rx_skb->data + length;
 
+		/* check oversized packets */
+		if (rx_skb->len > MAX_PACKET_SIZE) {
+		    if (net_ratelimit())
+			ei_local->stat.rx_dropped++;
+			printk("ERROR: frame is BIG !!!\n");
+                        bReschedule = 1;
+			break;
+		}
+
 #ifdef CONFIG_PSEUDO_SUPPORT
 		if(rx_ring[rx_dma_owner_idx].rxd_info4.SP == 2) {
 		    if(ei_local->PseudoDev!=NULL) {
@@ -1016,9 +1018,9 @@ static int rt2880_eth_recv(struct net_device* dev)
 		{
 #if defined(CONFIG_RALINK_EXTERNAL_TIMER)
 			ra_classifier_hook_rx(rx_skb, (*((volatile u32 *)(0xB0000D08))&0x0FFFF));
-#else			
+#else
 			ra_classifier_hook_rx(rx_skb, read_c0_count());
-#endif			
+#endif
 		}
 #endif /* CONFIG_RA_CLASSIFIER */
 
@@ -1970,9 +1972,9 @@ static int ei_change_mtu(struct net_device *dev, int new_mtu)
 	}
 
 #ifdef CONFIG_RAETH_JUMBOFRAME
-	if ((new_mtu > MAX_RX_LENGTH) || (new_mtu < 64)) {
+	if ((new_mtu > MAX_RX_LENGTH) || (new_mtu < MIN_PACKET_SIZE)) {
 #else
-	if ((new_mtu > DEFAULT_MTU)   || (new_mtu < 64)) {
+	if ((new_mtu > DEFAULT_MTU)   || (new_mtu < MIN_PACKET_SIZE)) {
 #endif
 		return -EINVAL;
 	}

@@ -1,6 +1,18 @@
 #ifndef RA2882ETHEND_H
 #define RA2882ETHEND_H
 
+/* mtu and rx sizes */
+#ifdef CONFIG_RAETH_JUMBOFRAME
+#define	MAX_RX_LENGTH	4096
+#else
+#define	MAX_RX_LENGTH	1600
+#endif
+#define DEFAULT_MTU	1500
+
+/* hardware minimum and maximum for a single frame's data payload */
+#define MAX_PACKET_SIZE	1518
+#define	MIN_PACKET_SIZE 64
+
 #ifdef DSP_VIA_NONCACHEABLE
 #define ESRAM_BASE	0xa0800000	/* 0x0080-0000  ~ 0x00807FFF */
 #else

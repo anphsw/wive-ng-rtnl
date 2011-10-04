@@ -14,9 +14,6 @@
 #include <linux/workqueue.h>
 #endif // WORKQUEUE_BH //
 
-#define MAX_PACKET_SIZE	1514
-#define	MIN_PACKET_SIZE 60
-
 #define phys_to_bus(a) (a & 0x1FFFFFFF)
 
 #ifndef BIT
