@@ -1057,6 +1057,8 @@ static int rt2880_eth_recv(struct net_device* dev)
 			break;
 		}
 
+		skb_reserve(skb, NET_IP_ALIGN);
+
 #if defined (CONFIG_RAETH_SPECIAL_TAG)
 		// port0: 0x8100 => 0x8100 0001
 		// port1: 0x8101 => 0x8100 0002
@@ -2499,11 +2501,15 @@ int ei_open(struct net_device *dev)
 #endif
                 if (ei_local->netrx0_skbuf[i] == NULL )
                         printk("rx skbuff buffer allocation failed!");
+		else
+			skb_reserve(ei_local->netrx0_skbuf[i], NET_IP_ALIGN);
 
-#if defined (CONFIG_RAETH_MULTIPLE_RX_RING) 
+#if defined (CONFIG_RAETH_MULTIPLE_RX_RING)
 		ei_local->netrx1_skbuf[i] = netdev_alloc_skb(dev, MAX_RX_LENGTH + NET_IP_ALIGN);
                 if (ei_local->netrx1_skbuf[i] == NULL )
                         printk("rx1 skbuff buffer allocation failed!");
+		else
+			skb_reserve(ei_local->netrx1_skbuf[i], NET_IP_ALIGN);
 #endif
         }
 
