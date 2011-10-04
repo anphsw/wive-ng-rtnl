@@ -259,7 +259,7 @@ static inline int ip_local_deliver_finish(struct sk_buff *skb)
 /*
  * 	Deliver IP Packets to the higher protocol layers.
  */
-int ip_local_deliver(struct sk_buff *skb)
+inline int ip_local_deliver(struct sk_buff *skb)
 {
 	/*
 	 *	Reassemble IP fragments.
