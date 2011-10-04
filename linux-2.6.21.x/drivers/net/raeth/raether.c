@@ -1595,9 +1595,9 @@ static int ei_start_xmit(struct sk_buff* skb, struct net_device *dev, int gmac_n
 		{
 #if defined(CONFIG_RALINK_EXTERNAL_TIMER)
 			ra_classifier_hook_tx(skb, (*((volatile u32 *)(0xB0000D08))&0x0FFFF));
-#else			
+#else
 			ra_classifier_hook_tx(skb, read_c0_count());
-#endif			
+#endif
 		}
 #endif /* CONFIG_RA_CLASSIFIER */
 
@@ -1605,13 +1605,12 @@ static int ei_start_xmit(struct sk_buff* skb, struct net_device *dev, int gmac_n
 	mcast_tx(skb);
 #endif
 
-#define MIN_PKT_LEN  64
-	 if (skb->len < MIN_PKT_LEN) {
-	     if (skb_padto(skb, MIN_PKT_LEN)) {
+	 if (skb->len < MIN_PACKET_SIZE) {
+	     if (skb_padto(skb, MIN_PACKET_SIZE)) {
 		 printk("raeth: skb_padto failed\n");
 		 return 0;
 	     }
-	     skb_put(skb, MIN_PKT_LEN - skb->len);
+	     skb_put(skb, MIN_PACKET_SIZE - skb->len);
 	 }
 
 	dev->trans_start = jiffies;	/* save the timestamp */
