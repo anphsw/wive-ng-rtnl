@@ -1,6 +1,8 @@
 *.dep
 *.deps
 *.pc
+*.orig
+*.rej
 .sgbuilt_user
 .libs
 romfs
