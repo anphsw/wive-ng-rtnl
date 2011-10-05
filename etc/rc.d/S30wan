@@ -23,15 +23,6 @@ start() {
     echo 1 > /proc/sys/net/nf_conntrack_flush
     ip route flush cache
 
-    /bin/hostname $HostName
-    echo "127.0.0.1	localhost $HostName.lo" > /etc/hosts
-    echo "$lan_ip	$HostName.lo" >> /etc/hosts
-    if [ "$wan_ip" != "" ]; then
-	echo "$wan_ip	$HostName.lo" >> /etc/hosts
-    fi
-    # read for all write by root
-    chmod 644 /etc/hosts > /dev/null 2>&1
-
     # set manual mtu to wan 
     if [ "$opmode" != "0" ] && [ "$vpnPurePPPOE" != "1" ]; then
 	if [ "$wan_manual_mtu" != "0" ] && [ "$wan_manual_mtu" != "" ]; then

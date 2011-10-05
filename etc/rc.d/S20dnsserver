@@ -9,6 +9,7 @@ LOG="logger -t dnsserver"
 
 start() {
   get_param
+  gen_hosts
     if [ "$dnsPEnabled" = "1" ] && [ -f $cname ]; then
 	if [ -f /tmp/is_32ram_dev ]; then
 	    EXT_OPT="-c 128 --dns-forward-max=32"
@@ -34,8 +35,27 @@ stop() {
     fi
 }
 
+gen_hosts() {
+  $LOG "Generate /etc/hosts file."
+    /bin/hostname $HostName
+    echo "127.0.0.1	localhost $HostName.lo" > /etc/hosts
+    echo "$lan_ip	$HostName.lo" >> /etc/hosts
+    if [ "$wan_ip" != "" ]; then
+	echo "$wan_ip	$HostName.lo" >> /etc/hosts
+    fi
+    if [ -d /proc/sys/net/ipv6 ]; then
+	echo "::1	localhost ipv6.$HostName.lo" > /etc/hosts
+    fi
+
+    # read for all write by root
+    chmod 644 /etc/hosts > /dev/null 2>&1
+}
+
 get_param() {
     dnsPEnabled=`nvram_get 2860 dnsPEnabled`
+    HostName=`nvram_get 2860 HostName`
+    lan_ip=`nvram_get 2860 lan_ipaddr`
+    wan_ip=`nvram_get 2860 wan_ipaddr`
     cname="/etc/dnsmasq.conf"
     fname="/etc/resolv.conf"
     hname="/etc/hosts"
