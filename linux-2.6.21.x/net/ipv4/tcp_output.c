@@ -1357,7 +1357,8 @@ static int tcp_mtu_probe(struct sock *sk)
  * Returns 1, if no segments are in flight and we have queued segments, but
  * cannot send anything now because of SWS or another problem.
  */
-static int tcp_write_xmit(struct sock *sk, unsigned int mss_now, int nonagle)
+static int tcp_write_xmit(struct sock *sk, unsigned int mss_now, int nonagle,
+			  int push_one, gfp_t gfp)
 {
 	struct tcp_sock *tp = tcp_sk(sk);
 	struct sk_buff *skb;
@@ -1374,11 +1375,14 @@ static int tcp_write_xmit(struct sock *sk, unsigned int mss_now, int nonagle)
 
 	sent_pkts = 0;
 
-	/* Do MTU probing. */
-	if ((result = tcp_mtu_probe(sk)) == 0) {
-		return 0;
-	} else if (result > 0) {
-		sent_pkts = 1;
+	if (!push_one) {
+		/* Do MTU probing. */
+		result = tcp_mtu_probe(sk);
+		if (!result) {
+			return 0;
+		} else if (result > 0) {
+			sent_pkts = 1;
+		}
 	}
 
 	while ((skb = sk->sk_send_head)) {
@@ -1400,7 +1404,7 @@ static int tcp_write_xmit(struct sock *sk, unsigned int mss_now, int nonagle)
 						      nonagle : TCP_NAGLE_PUSH))))
 				break;
 		} else {
-			if (tcp_tso_should_defer(sk, skb))
+			if (!push_one && tcp_tso_should_defer(sk, skb))
 				break;
 		}
 
@@ -1423,7 +1427,7 @@ static int tcp_write_xmit(struct sock *sk, unsigned int mss_now, int nonagle)
 
 		TCP_SKB_CB(skb)->when = tcp_time_stamp;
 
-		if (unlikely(tcp_transmit_skb(sk, skb, 1, GFP_ATOMIC)))
+		if (unlikely(tcp_transmit_skb(sk, skb, 1, gfp)))
 			break;
 
 		/* Advance the send_head.  This one is sent out.
@@ -1433,6 +1437,9 @@ static int tcp_write_xmit(struct sock *sk, unsigned int mss_now, int nonagle)
 
 		tcp_minshall_update(tp, mss_now, skb);
 		sent_pkts++;
+
+		if (push_one)
+			break;
 	}
 
 	if (likely(sent_pkts)) {
@@ -1452,7 +1459,7 @@ void __tcp_push_pending_frames(struct sock *sk, unsigned int cur_mss,
 	struct sk_buff *skb = sk->sk_send_head;
 
 	if (skb) {
-		if (tcp_write_xmit(sk, cur_mss, nonagle))
+		if (tcp_write_xmit(sk, cur_mss, nonagle, 0, GFP_ATOMIC))
 			tcp_check_probe_timer(sk);
 	}
 }
@@ -1462,46 +1469,11 @@ void __tcp_push_pending_frames(struct sock *sk, unsigned int cur_mss,
  */
 void tcp_push_one(struct sock *sk, unsigned int mss_now)
 {
-	struct tcp_sock *tp = tcp_sk(sk);
 	struct sk_buff *skb = sk->sk_send_head;
-	unsigned int tso_segs, cwnd_quota;
 
 	BUG_ON(!skb || skb->len < mss_now);
 
-	tso_segs = tcp_init_tso_segs(sk, skb, mss_now);
-	cwnd_quota = tcp_snd_test(sk, skb, mss_now, TCP_NAGLE_PUSH);
-
-	if (likely(cwnd_quota)) {
-		unsigned int limit;
-
-		BUG_ON(!tso_segs);
-
-		limit = mss_now;
-		if (tso_segs > 1) {
-			limit = tcp_window_allows(tp, skb,
-						  mss_now, cwnd_quota);
-
-			if (skb->len < limit) {
-				unsigned int trim = skb->len % mss_now;
-
-				if (trim)
-					limit = skb->len - trim;
-			}
-		}
-
-		if (skb->len > limit &&
-		    unlikely(tso_fragment(sk, skb, limit, mss_now)))
-			return;
-
-		/* Send it out now. */
-		TCP_SKB_CB(skb)->when = tcp_time_stamp;
-
-		if (likely(!tcp_transmit_skb(sk, skb, 1, sk->sk_allocation))) {
-			update_send_head(sk, skb);
-			tcp_cwnd_validate(sk);
-			return;
-		}
-	}
+	tcp_write_xmit(sk, mss_now, TCP_NAGLE_PUSH, 1, sk->sk_allocation);
 }
 
 /* This function returns the amount that we can raise the
