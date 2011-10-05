@@ -275,7 +275,7 @@ hardcode_into_libs=yes
 sys_lib_search_path_spec="/opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.3 /opt/Wive-RTNL/toolchain/mipsel-linux-uclibc/lib /opt/Wive-RTNL/toolchain/lib "
 
 # Run-time system search path for libraries.
-sys_lib_dlsearch_path_spec="/lib /usr/lib /usr/lib/gtk-2.0/2.10.0/engines /usr/lib/gtk-2.0/2.10.0/immodules /usr/lib/gtk-2.0/2.10.0/printbackends /usr/lib/gtk-2.0/bin /usr/lib/gtk-2.0/immodules /usr/lib/gtk-2.0/modules /usr/lib/qt3/lib "
+sys_lib_dlsearch_path_spec="/lib /usr/lib /usr/lib/gtk-2.0/2.10.0/engines /usr/lib/gtk-2.0/2.10.0/immodules /usr/lib/gtk-2.0/2.10.0/printbackends /usr/lib/gtk-2.0/bin /usr/lib/gtk-2.0/immodules /usr/lib/gtk-2.0/modules /opt/kde3/lib /opt/kde3/lib /usr/lib/qt3/lib "
 
 # Whether dlopen is supported.
 dlopen_support=unknown
