@@ -10,9 +10,6 @@ LOG="echo PRECONFIG"
 start() {
  $LOG "Preconfigure..."
 
-    #include profile variables
-    . /etc/profile
-
     #create fstab if not exist
     touch /etc/fstab
 

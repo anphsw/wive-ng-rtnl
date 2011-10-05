@@ -1,5 +1,12 @@
 #!/bin/sh
 
+# include kernel config
+. /etc/scripts/config.sh
+
+# include profile variables
+. /etc/profile
+
+# path to scripts for sind service
 INITDIR="/etc/init.d"
 RC_DIR="/etc/rc.d"
 
