@@ -45,6 +45,13 @@ enum nf_br_hook_priorities {
 #define BRNF_BRIDGED			0x08
 #define BRNF_NF_BRIDGE_PREROUTING	0x10
 
+static inline unsigned int nf_bridge_mtu_reduction(const struct sk_buff *skb)
+{
+	if (unlikely(skb->nf_bridge->mask & BRNF_PPPoE))
+		return PPPOE_SES_HLEN;
+	return 0;
+}
+
 /* This is called by the IP fragmenting code and it ensures there is
  * enough room for the encapsulating header (if there is one). */
 static inline int nf_bridge_pad(const struct sk_buff *skb)

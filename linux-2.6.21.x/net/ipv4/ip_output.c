@@ -432,9 +432,6 @@ int ip_fragment(struct sk_buff *skb, int (*output)(struct sk_buff*))
 	int ptr;
 	struct sk_buff *skb2;
 	unsigned int mtu, hlen, left, len, ll_rs;
-#ifdef CONFIG_BRIDGE_NETFILTER
-	unsigned int pad;
-#endif
 	int offset;
 	__be16 not_last_frag;
 	struct rtable *rt = (struct rtable*)skb->dst;
@@ -460,6 +457,10 @@ int ip_fragment(struct sk_buff *skb, int (*output)(struct sk_buff*))
 
 	hlen = iph->ihl * 4;
 	mtu = dst_mtu(&rt->u.dst) - hlen;	/* Size of data space */
+#ifdef CONFIG_BRIDGE_NETFILTER
+	if (skb->nf_bridge)
+		mtu -= nf_bridge_mtu_reduction(skb);
+#endif
 	IPCB(skb)->flags |= IPSKB_FRAG_COMPLETE;
 
 	/* When frag_list is given, use it. First, check its validity:
@@ -574,9 +575,7 @@ slow_path:
 	 * we need to make room for the encapsulating header
 	 */
 #ifdef CONFIG_BRIDGE_NETFILTER
-	pad = nf_bridge_pad(skb);
-	ll_rs = LL_RESERVED_SPACE_EXTRA(rt->u.dst.dev, pad);
-	mtu -= pad;
+	ll_rs = LL_RESERVED_SPACE_EXTRA(rt->u.dst.dev, nf_bridge_pad(skb));
 #else
 	ll_rs = LL_RESERVED_SPACE_EXTRA(rt->u.dst.dev, 0);
 #endif
