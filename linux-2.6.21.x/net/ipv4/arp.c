@@ -224,7 +224,23 @@ int arp_mc_map(__be32 addr, u8 *haddr, struct net_device *dev, int dir)
 
 static u32 arp_hash(const void *pkey, const struct net_device *dev)
 {
+#ifdef CONFIG_ARP_HASH_FASTPATH
+	u32 hash_val;
+#endif
+	if (!dev)
+		return -EINVAL;
+
+#ifdef CONFIG_ARP_HASH_FASTPATH
+	hash_val = *(u32*)pkey;
+	hash_val ^= (hash_val>>16);
+	hash_val ^= hash_val>>8;
+	hash_val ^= hash_val>>3;
+	hash_val = (hash_val^dev->ifindex)&NEIGH_HASHMASK;
+
+	return hash_val;
+#else
 	return jhash_2words(*(u32 *)pkey, dev->ifindex, arp_tbl.hash_rnd);
+#endif
 }
 
 static int arp_constructor(struct neighbour *neigh)
