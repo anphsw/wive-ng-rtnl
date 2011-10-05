@@ -694,6 +694,7 @@
 74) Small fix skb_alloc in raeth.<br>
 75) Small fix packet padding in raeth.<br>
 76) Rework raeth config procedure in driver.<br>
+77) PPP fix multilink fragment MTU calculation.<br>
 
 <br><br>
 <b>For support see:</b><br>

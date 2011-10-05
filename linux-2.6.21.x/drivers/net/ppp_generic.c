@@ -1393,7 +1393,13 @@ static int ppp_mp_explode(struct ppp *ppp, struct sk_buff *skb)
 		if (fragsize > len)
 			fragsize = len;
 		flen = fragsize;
-		mtu = pch->chan->mtu + 2 - hdrlen;
+
+		/*
+		 * hdrlen includes the 2-byte PPP protocol field, but the
+		 * MTU counts only the payload excluding the protocol field.
+		 * (RFC1661 Section 2)
+		 */
+		mtu = pch->chan->mtu - (hdrlen - 2);
 		if (mtu < 4)
 			mtu = 4;
 		if (flen > mtu)
