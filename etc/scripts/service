@@ -1,11 +1,5 @@
 #!/bin/sh
 
-# include kernel config
-. /etc/scripts/config.sh
-
-# include profile variables
-. /etc/profile
-
 # path to scripts for sind service
 INITDIR="/etc/init.d"
 RC_DIR="/etc/rc.d"
@@ -23,6 +17,12 @@ if [ "$1" = "list" ]; then
 fi
 
 if [ -x "$INITDIR/$1" ]; then
+    # include kernel config
+    . /etc/scripts/config.sh
+
+    # include profile variables
+    . /etc/profile
+
     ($RC_DIR/*"$1" "$2" 2>&1)
 else
     echo "No such Service: $1 in $INITDIR";
