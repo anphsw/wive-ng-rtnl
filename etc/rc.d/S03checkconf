@@ -12,73 +12,80 @@ start() {
     if [ "$IS_WIVE" = "YES" ]; then
 	$LOG ">>>> NORMAL BOOT <<<<"
     else
+	$LOG "Burn RF template to flash"
+	fs burnrf
 	$LOG ">>>> RESTORE NVRAM <<<<"
-    if [ -f /etc/backup/nvram_backup.dat ]; then
-	    $LOG ">>>> BACKUP MODE <<<<"
-	    $LOG "Burn RF template to flash"
-	    fs burnrf
-	    $LOG "Load backuped setting to nvram."
-    	    fs load_nvram
-	else
-	    $LOG ">>>> CLEAN MODE <<<<"
-	    $LOG "Burn RF template to flash"
-	    fs burnrf
-	    $LOG "Clear and load defaults to nvram !!!"
-    	    fs nvramreset
+	if [ -f /etc/backup/nvram_backup.dat ]; then
+		$LOG "Load backuped setting to nvram."
+    		fs load_nvram
+	    else
+		$LOG "Clear and load defaults to nvram."
+    		fs nvramreset
+	    fi
+	    get_param
+	    $LOG "Reset OK... Continue boot..."
 	fi
-	$LOG "Get new variables..."
-	get_param
-	$LOG "Reset OK... boot..."
-    fi
-    # user and password need set
-    if [ "$Login" = "" ] || [ "$Password" = "" ]; then
-        nvram_set 2860 Login "Admin"
-        nvram_set 2860 Password "Admin"
-    fi
-    # need hostname
-    if [ "$HostName" = "" ]; then
-	HostName="Wive-RTNL"
-	nvram_set 2860 HostName "$HostName"
-    fi
-    # samba configs to
-    if [ "$WorkGroup" = "" ] || [ "$SmbNetBIOS" = "" ] || [ "$SmbString" = "" ]; then
-	WorkGroup="LOCALNET"
-	SmbNetBIOS="$HostName"
-	SmbString="$HostName-SERVER"
-	nvram_set 2860 WorkGroup LOCALNET
-	nvram_set 2860 SmbNetBIOS "$SmbNetBIOS"
-	nvram_set 2860 SmbString "$SmbString"
-    fi
-    # if check mac in nvram set to not NO and web not start
-    if [ "$CHECKMAC" != "NO" ] && [ ! -f /var/run/goahead.pid ]; then
- 	if [ $MAC_TEST = "0" ] || [ $WMAC_TEST = "0" ] || [ $LANMAC_TEST = "0" ]; then
-	    $LOG "First start MAC generate"
-	    mac_wan=`cat /dev/urandom | hexdump | head -n1 | cut -f 2- -d " " | sed ':BEGIN;s/^\([^ ]\{0,29\}\) /\1/;tBEGIN' | sed 's/\(..\)/\1:/g; s/.$//' | tail -q -c 9`
-	    mac_lan=`cat /dev/urandom | hexdump | head -n1 | cut -f 2- -d " " | sed ':BEGIN;s/^\([^ ]\{0,29\}\) /\1/;tBEGIN' | sed 's/\(..\)/\1:/g; s/.$//' | tail -q -c 9`
-	    mac_wlan=`cat /dev/urandom | hexdump | head -n1 | cut -f 2- -d " " | sed ':BEGIN;s/^\([^ ]\{0,29\}\) /\1/;tBEGIN' | sed 's/\(..\)/\1:/g; s/.$//' | tail -q -c 9`
-	    echo "Set new mac!"
-	    MAC="00:0B:2B:$mac_wan"
-	    LANMAC="00:0B:2B:$mac_lan"
-	    WMAC="00:0B:2B:$mac_wlan"
-    	    nvram_set 2860 WAN_MAC_ADDR  "$MAC"
-    	    nvram_set 2860 LAN_MAC_ADDR  "$LANMAC"
-    	    nvram_set 2860 WLAN_MAC_ADDR "$WMAC"
+	#
+	# user and password need set
+	#
+	if [ "$Login" = "" ] || [ "$Password" = "" ]; then
+    	    nvram_set 2860 Login "Admin"
+    	    nvram_set 2860 Password "Admin"
 	fi
-    fi
-    # OperationMode adjustment:
-    #   if AP client was not compiled and operation mode was set "3" -> set $opmode "1"
-    #   if Station was not compiled and operation mode was set "2" -> set $opmode "1"
-    #   if opmode = "4" and chilli spot daemon not exist -> set $opmode "1"
-    if   [ "$opmode" = "3" ] && [ "$CONFIG_RT2860V2_AP_APCLI" == "" ]; then
-	nvram_set 2860 OperationMode 1
-	opmode="1"
-    elif [ "$opmode" = "2" ] && [ "$CONFIG_RT2860V2_STA" == "" ]; then
-	nvram_set 2860 OperationMode 1
-	opmode="1"
-    elif [ "$opmode" = "4" ] && [ ! -f /bin/chilli ]; then
-	nvram_set 2860 OperationMode 1
-	opmode="1"
-    fi
+	#
+	# if check mac in nvram set to not NO and web not start
+	#
+	if [ "$CHECKMAC" != "NO" ] && [ ! -f /var/run/goahead.pid ]; then
+ 	    if [ $MAC_TEST = "0" ] || [ $WMAC_TEST = "0" ] || [ $LANMAC_TEST = "0" ]; then
+		$LOG "First start MAC generate"
+		mac_wan=`cat /dev/urandom | hexdump | head -n1 | cut -f 2- -d " " | sed ':BEGIN;s/^\([^ ]\{0,29\}\) /\1/;tBEGIN' | sed 's/\(..\)/\1:/g; s/.$//' | tail -q -c 9`
+		mac_lan=`cat /dev/urandom | hexdump | head -n1 | cut -f 2- -d " " | sed ':BEGIN;s/^\([^ ]\{0,29\}\) /\1/;tBEGIN' | sed 's/\(..\)/\1:/g; s/.$//' | tail -q -c 9`
+		mac_wlan=`cat /dev/urandom | hexdump | head -n1 | cut -f 2- -d " " | sed ':BEGIN;s/^\([^ ]\{0,29\}\) /\1/;tBEGIN' | sed 's/\(..\)/\1:/g; s/.$//' | tail -q -c 9`
+		echo "Set new mac!"
+		MAC="00:0B:2B:$mac_wan"
+		LANMAC="00:0B:2B:$mac_lan"
+		WMAC="00:0B:2B:$mac_wlan"
+    		nvram_set 2860 WAN_MAC_ADDR  "$MAC"
+    		nvram_set 2860 LAN_MAC_ADDR  "$LANMAC"
+    		nvram_set 2860 WLAN_MAC_ADDR "$WMAC"
+	    fi
+	fi
+	#
+	# OperationMode adjustment:
+	#   if AP client was not compiled and operation mode was set "3" -> set $opmode "1"
+	#   if Station was not compiled and operation mode was set "2" -> set $opmode "1"
+	#   if opmode = "4" and chilli spot daemon not exist -> set $opmode "1"
+	if   [ "$opmode" = "3" ] && [ "$CONFIG_RT2860V2_AP_APCLI" == "" ]; then
+	    nvram_set 2860 OperationMode 1
+	    opmode="1"
+	elif [ "$opmode" = "2" ] && [ "$CONFIG_RT2860V2_STA" == "" ]; then
+	    nvram_set 2860 OperationMode 1
+	    opmode="1"
+	elif [ "$opmode" = "4" ] && [ ! -f /bin/chilli ]; then
+	    nvram_set 2860 OperationMode 1
+	    opmode="1"
+	fi
+	#
+	# need hostname
+	#
+	if [ "$HostName" = "" ]; then
+	    HostName="Wive-RTNL"
+	    nvram_set 2860 HostName "$HostName"
+	fi
+	/bin/hostname $HostName
+	#
+	# samba configs to
+	#
+	if [ -f /bin/smbd ] || [ -f /bin/nmbd ]; then
+	    if [ "$WorkGroup" = "" ] || [ "$SmbNetBIOS" = "" ] || [ "$SmbString" = "" ]; then
+		WorkGroup="LOCALNET"
+		SmbNetBIOS="$HostName"
+		SmbString="$HostName-SERVER"
+		nvram_set 2860 WorkGroup LOCALNET
+		nvram_set 2860 SmbNetBIOS "$SmbNetBIOS"
+		nvram_set 2860 SmbString "$SmbString"
+	    fi
+	fi
  fi
  touch /tmp/nvram_checked
 }
