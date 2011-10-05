@@ -5,6 +5,7 @@
 *.rej
 .sgbuilt_user
 .libs
+libtool
 romfs
 autom4te.cache
 config.h.in~
@@ -84,6 +85,9 @@ fulldump
 /lib/libiconv/configure
 /lib/libiconv/stamp-h1
 /lib/libiconv/Makefile
+/lib/libiconv/libcharset/libtool
+/lib/libiconv/libtool
+/lib/libiconv/preload/libtool
 /lib/libgmp/stamp-h1
 /user/busybox/*/Config.in
 /user/busybox/docs/busybox.net/BusyBox.html
