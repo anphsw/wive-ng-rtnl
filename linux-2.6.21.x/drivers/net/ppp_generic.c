@@ -1974,7 +1974,6 @@ ppp_mp_reconstruct(struct ppp *ppp)
 	tail = NULL;
 	skb_queue_walk_safe(list, p, tmp) {
 	again:
-		next = p->next;
 		if (seq_before(p->sequence, seq)) {
 			/* this can't happen, anyway ignore the skb */
 			printk(KERN_ERR "ppp_mp_reconstruct bad seq %u < %u\n",
@@ -2018,15 +2017,6 @@ ppp_mp_reconstruct(struct ppp *ppp)
 				++ppp->stats.rx_length_errors;
 				printk(KERN_DEBUG "PPP: reconstructed packet"
 				       " is too long (%d)\n", len);
-			} else if (p == head) {
-				/* fragment is complete packet - reuse skb */
-				tail = p;
-				skb = skb_get(p);
-				break;
-			} else if ((skb = dev_alloc_skb(len)) == NULL) {
-				++ppp->stats.rx_missed_errors;
-				printk(KERN_DEBUG "PPP: no memory for "
-				       "reconstructed packet");
 			} else {
 				tail = p;
 				break;
@@ -2039,7 +2029,7 @@ ppp_mp_reconstruct(struct ppp *ppp)
 		 * and we haven't found a complete valid packet yet,
 		 * we can discard up to and including this fragment.
 		 */
-		if (p->BEbits & E)
+		if (p->BEbits & E) {
 			struct sk_buff *tmp2;
 
 			skb_queue_reverse_walk_from_safe(list, p, tmp2) {
@@ -2066,10 +2056,28 @@ ppp_mp_reconstruct(struct ppp *ppp)
 			ppp_receive_error(ppp);
 		}
 
-		if (head != tail)
-			/* copy to a single skb */
-			for (p = head; p != tail->next; p = p->next)
-				skb_copy_bits(p, 0, skb_put(skb, p->len), p->len);
+		skb = head;
+		if (head != tail) {
+			struct sk_buff **fragpp = &skb_shinfo(skb)->frag_list;
+			p = skb_queue_next(list, head);
+			__skb_unlink(skb, list);
+			skb_queue_walk_from_safe(list, p, tmp) {
+				__skb_unlink(p, list);
+				*fragpp = p;
+				p->next = NULL;
+				fragpp = &p->next;
+
+				skb->len += p->len;
+				skb->data_len += p->len;
+				skb->truesize += p->len;
+
+				if (p == tail)
+					break;
+			}
+		} else {
+			__skb_unlink(skb, list);
+		}
+
 		ppp->nextseq = tail->sequence + 1;
 		head = tail->next;
 	}
