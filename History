@@ -690,13 +690,16 @@
 70) Update wireless tools to v30-rc7 (need for support UTF-8 SSID in console tools).<br>
 71) Goahead fix proc gmac path for new chips.
 72) Fix dhcp setup webui and small corrections defaults.<br>
-73) Add check oversized packets in rx path.<br>
-74) Small fix skb_alloc in raeth.<br>
-75) Small fix packet padding in raeth.<br>
-76) Rework raeth config procedure in driver.<br>
-77) PPP fix multilink fragment MTU calculation and build fix.<br>
-78) Use faster hash funcrtion instead jhash2 for arp subsystem.<br>
-79) Fix "Fragment Reassembly Timeout" send (RFC792).<br>
+
+<br>
+<b>1.11.x</b><br>
+1) Add check oversized packets in rx path.<br>
+2) Small fix skb_alloc in raeth.<br>
+3) Small fix packet padding in raeth.<br>
+4) Rework raeth config procedure in driver.<br>
+5) PPP fix multilink fragment MTU calculation and build fix.<br>
+6) Use faster hash funcrtion instead jhash2 for arp subsystem.<br>
+7) Fix "Fragment Reassembly Timeout" send (RFC792).<br>
 
 <br><br>
 <b>For support see:</b><br>
