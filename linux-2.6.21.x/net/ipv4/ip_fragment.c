@@ -38,6 +38,8 @@
 #include <linux/jhash.h>
 #endif
 #include <linux/random.h>
+#include <net/route.h>
+#include <net/dst.h>
 #include <net/sock.h>
 #include <net/ip.h>
 #include <net/icmp.h>
@@ -300,12 +302,37 @@ static void ip_expire(unsigned long arg)
 	IP_INC_STATS_BH(IPSTATS_MIB_REASMFAILS);
 
 	if ((qp->last_in&FIRST_IN) && qp->fragments != NULL) {
-		struct sk_buff *head = qp->fragments;
-		/* Send an ICMP "Fragment Reassembly Timeout" message. */
-		if ((head->dev = dev_get_by_index(qp->iif)) != NULL) {
-			icmp_send(head, ICMP_TIME_EXCEEDED, ICMP_EXC_FRAGTIME, 0);
-			dev_put(head->dev);
-		}
+	    struct sk_buff *head = qp->fragments;
+
+	    rcu_read_lock();
+	    head->dev = dev_get_by_index(qp->iif);
+	    if (!head->dev)
+		goto out_rcu_unlock;
+
+	    /*
+	    * Only search router table for the head fragment,
+	    * when defraging timeout at PRE_ROUTING HOOK.
+	    */
+	    if (qp->user == IP_DEFRAG_CONNTRACK_IN && !head->dst) {
+		const struct iphdr *iph = ip_hdr(head);
+		int err = ip_route_input(head, iph->daddr, iph->saddr,
+					 iph->tos, head->dev);
+		if (unlikely(err))
+			goto out_rcu_unlock;
+
+		/*
+		 * Only an end host needs to send an ICMP
+		 * "Fragment Reassembly Timeout" message, per RFC792.
+		 */
+		if (((struct rtable *)head->dst)->rt_type != RTN_LOCAL)
+			goto out_rcu_unlock;
+	    }
+
+	    /* Send an ICMP "Fragment Reassembly Timeout" message. */
+	    icmp_send(head, ICMP_TIME_EXCEEDED, ICMP_EXC_FRAGTIME, 0);
+
+out_rcu_unlock:
+	    rcu_read_unlock();
 	}
 out:
 	spin_unlock(&qp->lock);

@@ -696,6 +696,7 @@
 76) Rework raeth config procedure in driver.<br>
 77) PPP fix multilink fragment MTU calculation and build fix.<br>
 78) Use faster hash funcrtion instead jhash2 for arp subsystem.<br>
+79) Fix "Fragment Reassembly Timeout" send (RFC792).<br>
 
 <br><br>
 <b>For support see:</b><br>
