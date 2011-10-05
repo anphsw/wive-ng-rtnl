@@ -6,6 +6,7 @@
 
 #include <linux/netfilter.h>
 #include <linux/if_ether.h>
+#include <linux/if_pppox.h>
 #include <linux/if_vlan.h>
 
 /* Bridge Hooks */
@@ -44,6 +45,7 @@ enum nf_br_hook_priorities {
 #define BRNF_DONT_TAKE_PARENT		0x04
 #define BRNF_BRIDGED			0x08
 #define BRNF_NF_BRIDGE_PREROUTING	0x10
+#define BRNF_PPPoE                      0x20
 
 static inline unsigned int nf_bridge_mtu_reduction(const struct sk_buff *skb)
 {
