@@ -293,7 +293,7 @@ romfs.post:
 	$(MAKEARCH) -C vendors romfs.post
 	######################CLEANAP##########################
 	-find $(ROMFSDIR)/. -name CVS | xargs -r rm -rf
-	rm -fr $(ROOTDIR)/dev
+	-rm -fr $(ROOTDIR)/dev
 	date +%Y%m%d%H%M > $(ROMFSDIR)/etc/compile-date
 	###################APPS-INSTALLED######################
 
