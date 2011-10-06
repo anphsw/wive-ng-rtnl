@@ -52,13 +52,10 @@
 #include "chip/rt305x.h"
 #endif // RT305x //
 
-
-
-
-#define IS_RT3090A(_pAd)				((((_pAd)->MACVersion & 0xffff0000) == 0x30900000))
+#define IS_RT3090A(_pAd)	((((_pAd)->MACVersion & 0xffff0000) == 0x30900000))
 
 // We will have a cost down version which mac version is 0x3090xxxx
-#define IS_RT3090(_pAd)				((((_pAd)->MACVersion & 0xffff0000) == 0x30710000) || (IS_RT3090A(_pAd)))
+#define IS_RT3090(_pAd)		((((_pAd)->MACVersion & 0xffff0000) == 0x30710000) || (IS_RT3090A(_pAd)))
 
 #define IS_RT3070(_pAd)		(((_pAd)->MACVersion & 0xffff0000) == 0x30700000)
 #define IS_RT3071(_pAd)		(((_pAd)->MACVersion & 0xffff0000) == 0x30710000)
