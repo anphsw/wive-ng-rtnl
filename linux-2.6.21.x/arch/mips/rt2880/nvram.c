@@ -11,13 +11,27 @@
 extern int ra_mtd_write_nm(char *name, loff_t to, size_t len, const u_char *buf);
 extern int ra_mtd_read_nm(char *name, loff_t from, size_t len, u_char *buf);
 
+/* Config part in nvram */
+static block_t fb[FLASH_BLOCK_NUM] = {
+	{
+		.flash_offset =  0x2000,
+		.flash_max_len = ENV_BLK_SIZE * 4,
+		.valid = 0
+	}
+};
+
+
+/* Prototypes */
 char const *nvram_get(int index, char *name);
-int nvram_getall(int index, char *buf);
+int const nvram_getall(int index, char *buf);
+
 int nvram_set(int index, char *name, char *value);
 int nvram_commit(int index);
 int nvram_clear(int index);
 
+/* /dev/nvram major number */
 static int ralink_nvram_major = 251;
+/* eneable debug */
 char ra_nvram_debug = 1;
 
 static DECLARE_MUTEX(nvram_sem);
@@ -482,13 +496,13 @@ char const *nvram_get(int index, char *name)
 	return "";
 }
 
-int nvram_getall(int index, char *buf) 
+int const nvram_getall(int index, char *buf) 
 {
 	int i, len;
 	char *p;
 
-	RANV_CHECK_INDEX("");
-	RANV_CHECK_VALID("");
+	RANV_CHECK_INDEX_ALL("");
+	RANV_CHECK_VALID_ALL("");
 
 	down(&nvram_sem);
 

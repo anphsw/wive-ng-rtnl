@@ -3,22 +3,12 @@
 
 #include <linux/config.h>
 
-#define ENV_BLK_SIZE 0x1000
 
 /* nvram parse blocks */
 #define FLASH_BLOCK_NUM	1
+#define ENV_BLK_SIZE 0x1000
 #define RALINK_NVRAM_DEVNAME "nvram"
 #define RALINK_NVRAM_MTDNAME "Config"
-
-/* Config part in nvram */
-static block_t fb[FLASH_BLOCK_NUM] =
-{
-	{
-		.flash_offset =  0x2000,
-		.flash_max_len = ENV_BLK_SIZE * 4,
-		.valid = 0
-	}
-};
 
 #define RANV_PRINT(x, ...) do { if (ra_nvram_debug) printk("%s %d: " x, __FILE__, __LINE__, ## __VA_ARGS__); } while(0)
 #define RANV_ERROR(x, ...) do { printk("%s %d: ERROR! " x, __FILE__, __LINE__, ## __VA_ARGS__); } while(0)
@@ -29,7 +19,7 @@ static block_t fb[FLASH_BLOCK_NUM] =
 #define RANV_CHECK_INDEX(x) do { \
         if (index < 0 || index >= FLASH_BLOCK_NUM) { \
                 RANV_PRINT("index(%d) is out of range\n", index); \
-                return x; \
+            	    return x; \
         } \
 } while (0)
 
@@ -37,6 +27,21 @@ static block_t fb[FLASH_BLOCK_NUM] =
         if (!fb[index].valid) { \
                 RANV_PRINT("fb[%d] invalid\n", index); \
                 return x; \
+        } \
+} while (0)
+
+//x is the value returned if the check failed
+#define RANV_CHECK_INDEX_ALL(x) do { \
+        if (index < 0 || index >= FLASH_BLOCK_NUM) { \
+                RANV_PRINT("index(%d) is out of range\n", index); \
+            	    return 1; \
+        } \
+} while (0)
+
+#define RANV_CHECK_VALID_ALL(x) do { \
+        if (!fb[index].valid) { \
+                RANV_PRINT("fb[%d] invalid\n", index); \
+                return 1; \
         } \
 } while (0)
 
