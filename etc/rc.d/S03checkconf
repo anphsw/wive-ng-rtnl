@@ -3,8 +3,10 @@
 LOG="echo CHECKCONF"
 
 start() {
- get_param
  if [ ! -f /tmp/nvram_checked ]; then
+    # get variables
+     get_param
+
     # include kernel config
     . /etc/scripts/config.sh
 
