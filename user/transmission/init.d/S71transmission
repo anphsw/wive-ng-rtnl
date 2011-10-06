@@ -1,44 +1,39 @@
 #!/bin/sh
 
 # if app not exist
-[ -x /bin/transmission-daemon ] || exit 0
+if [ ! -f /bin/transmission-daemon ]; then
+    exit 0
+fi
 
 # wait to start web and run from goahead code
 . /etc/scripts/web_wait.sh
 web_wait
 
-
 LOG="logger -t transmission"
 
 start() {
-[ -d /media ] || exit 0
-[ "`pidof transmission-daemon`" ] && exit 1
-ServiceEnabled=`nvram_get 2860 TransmissionEnabled`
-if [ "$ServiceEnabled" = "1" ]; then
     get_param
-
-    [ -n $TRANSMISSION_HOME ] || exit 1
-
-    export TRANSMISSION_HOME
-    /bin/transmission-daemon
-    $LOG "Started Transmission."
-
-fi
+    if [ "$ServiceEnabled" = "1" ] && [ -d $TRANSMISSION_HOME ] && [ ! "`pidof transmission-daemon`" ]; then
+	$LOG "Start transmission daemon."
+	/bin/transmission-daemon
+    fi
 }
 
 stop() {
     if [ "`pidof transmission-daemon`" ]; then
-	$LOG "Stop Transmission."
+	$LOG "Stop transmission daemon."
 	killall -q transmission-daemon
+	#wait before filesave and connections stop
+	sleep 5
+	#kill if not stopped
 	killall -q -SIGKILL transmission-daemon
     fi
 }
 
 get_param() {
-    mounted=`df -h | grep "/dev/sd" | grep "media" | awk {' print $6 '}`
-    for point in $mounted; do
-	[ -f "$point/.config/torrent/settings.json" ] && TRANSMISSION_HOME="$point/.config/torrent"
-    done
+    ServiceEnabled=`nvram_get 2860 TransmissionEnabled`
+    #include profile variables
+    . /etc/profile
 }
 
 case "$1" in
