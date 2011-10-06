@@ -161,7 +161,7 @@ static void disable_rt2880_irq(unsigned int irq)
 #define	startup_rt2880_irq	enable_rt2880_irq
 #define	shutdown_rt2880_irq	disable_rt2880_irq
 #else
-#define	startup_rt2880_irq 	rt2880_irq_handler	
+#define	startup_rt2880_irq 	rt2880_irq_handler
 #define	shutdown_rt2880_irq	rt2880_irq_handler
 #endif
 
@@ -258,7 +258,7 @@ void surfboard_hw0_irqdispatch(void)
 }
 
 
-#if !defined(CONFIG_RALINK_RT3883) && !defined(CONFIG_RALINK_RT3052)
+#if !defined(CONFIG_RALINK_RT3883) && !defined(CONFIG_RALINK_RT3052) && !defined(CONFIG_RALINK_RT3352) && !defined(CONFIG_RALINK_RT5350)
 static void enable_rt2880_cp_int(unsigned int IP_X)
 {
 	unsigned long int_status;
@@ -285,15 +285,13 @@ void __init arch_init_irq(void)
 	 * Mask out all interrupt by writing "1" to all bit position in
 	 * the interrupt reset reg.
 	 */
-#if 1
 	int mips_cp0_cause, mips_cp0_status;
         mips_cp0_cause = read_32bit_cp0_register(CP0_CAUSE);
         mips_cp0_status = read_32bit_cp0_register(CP0_STATUS);
         printk("cause = %x, status = %x\n", mips_cp0_cause, mips_cp0_status);
         mips_cp0_status= mips_cp0_status& ~(CAUSEF_IP0|CAUSEF_IP1|CAUSEF_IP2|CAUSEF_IP3|CAUSEF_IP4|CAUSEF_IP5|CAUSEF_IP6|CAUSEF_IP7);
         write_32bit_cp0_register(CP0_STATUS, mips_cp0_status);
-#endif
-	
+
 	memset(irq_desc, 0, sizeof(irq_desc));
 
 	for (i = 0; i <= SURFBOARDINT_END; i++) {
@@ -430,7 +428,7 @@ void rt2880_irqdispatch(void)
 		irq--;
 		irq_x <<= 1;
 	}
-	
+
 	return;
 }
 asmlinkage void plat_irq_dispatch(void)

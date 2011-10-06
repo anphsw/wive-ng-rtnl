@@ -17,7 +17,7 @@
 
 /* this is mapping flash definition */
 #if defined (CONFIG_RT2880_FLASH_32M)
-static struct mtd_partition rt2880_partitions[] = {
+static struct mtd_partition rt2880_partitions[] __maybe_unused = {
         {
                 name:           "Bootloader",  /* mtdblock0 */
                 size:           MTD_BOOT_PART_SIZE,  /* 192K */
@@ -60,11 +60,11 @@ static struct mtd_partition rt2880_partitions[] = {
                 size:           MTD_ROOTFS2_PART_SIZE,
                 offset:         MTD_KERN2_PART_OFFSET,
 #endif
-#endif 
+#endif
 	}
 };
 #else /* not 32M flash */
-static struct mtd_partition rt2880_partitions[] = {
+static struct mtd_partition rt2880_partitions[] __maybe_unused = {
         {
                 name:           "Bootloader",	/* mtdblock0 */
                 size:           MTD_BOOT_PART_SIZE,	/* 192K */

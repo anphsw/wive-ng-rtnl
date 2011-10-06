@@ -27,7 +27,7 @@
 #include <asm/rt2880/rt_mmap.h>
 #include "ralink-flash-map.h"
 
-#ifndef CONFIG_RT2880_FLASH_32M 
+#ifndef CONFIG_RT2880_FLASH_32M
 #define WINDOW_ADDR		CPHYSADDR(CONFIG_MTD_PHYSMAP_START)
 #define WINDOW_SIZE		CONFIG_MTD_PHYSMAP_LEN
 #define NUM_FLASH_BANKS		1
@@ -106,14 +106,12 @@ int ra_check_flash_type(void)
     }
 
     return boot_from;
-
-
 }
 #endif
 
 #ifdef CONFIG_MTD_NOR_RALINK
 static struct mtd_info *ralink_mtd[NUM_FLASH_BANKS];
-#ifndef CONFIG_RT2880_FLASH_32M 
+#ifndef CONFIG_RT2880_FLASH_32M
 static struct map_info ralink_map[] = {
 	{
 	.name = "Ralink SoC physically mapped flash",

@@ -92,6 +92,7 @@ config RALINK_RT5350
 	select BOOT_ELF32
 	select SYS_SUPPORTS_32BIT_KERNEL
 	select CPU_MIPSR2_IRQ_EI
+	select MTD_SPI_RALINK
 	select RALINK_RT5350_MP
 	help
 	 Ralink evaluation board based on RT5350

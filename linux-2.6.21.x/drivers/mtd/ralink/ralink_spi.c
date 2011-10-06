@@ -105,12 +105,12 @@ int ranfc_debug = 1;
 #define _ra_outl(addr, value)  (*(volatile unsigned int *)(addr) = (value))
 
 u32 ra_inl(u32 addr)
-{	
+{
 	u32 retval = _ra_inl(addr);
-	
+
 	printk("%s(%x) => %x \n", __func__, addr, retval);
 
-	return retval;	
+	return retval;
 }
 
 u32 ra_outl(u32 addr, u32 val)
@@ -119,7 +119,7 @@ u32 ra_outl(u32 addr, u32 val)
 
 	printk("%s(%x, %x) \n", __func__, addr, val);
 
-	return val;	
+	return val;
 }
 
 #endif // SPI_DEBUG
@@ -161,7 +161,7 @@ static int spic_transfer(const u8 *cmd, int n_cmd, u8 *buf, int n_buf, int flag)
 	int retval = -1;
 
 	//spic_init();
-	
+
 	ra_dbg("cmd(%x): %x %x %x %x , buf:%x len:%x, flag:%s \n",
 			n_cmd, cmd[0], cmd[1], cmd[2], cmd[3],
 			(buf)? (*buf) : 0, n_buf,
@@ -174,10 +174,10 @@ static int spic_transfer(const u8 *cmd, int n_cmd, u8 *buf, int n_buf, int flag)
 	ra_and(RT2880_SPI1_CTL_REG, (~SPIARB_SPI1_ACTIVE_MODE));
 #else
 	ra_or(RT2880_SPI1_CTL_REG, (~SPIARB_SPI1_ACTIVE_MODE)&0x01);
-#endif	
-#endif	
+#endif
+#endif
 	ra_outl(RT2880_SPICFG_REG, SPICFG_MSBFIRST | SPICFG_TXCLKEDGE_FALLING | CFG_CLK_DIV | SPICFG_SPICLKPOL );
-	
+
 	// assert CS and we are already CLK normal high
 	ra_and(RT2880_SPICTL_REG, ~(SPICTL_SPIENA_HIGH));
 
@@ -237,11 +237,11 @@ int spic_init(void)
 	udelay(1);
 	ra_and(RT2880_RSTCTRL_REG, ~RSTCTRL_SPI_RESET);
 
-#if defined(CONFIG_RALINK_VITESSE_SWITCH_CONNECT_SPI_CS1)||defined(CONFIG_RALINK_SLIC_CONNECT_SPI_CS1)	
+#if defined(CONFIG_RALINK_VITESSE_SWITCH_CONNECT_SPI_CS1)||defined(CONFIG_RALINK_SLIC_CONNECT_SPI_CS1)
 	/* config ARB and set the low or high active correctly according to the device */
 	ra_outl(RT2880_SPI_ARB_REG, SPIARB_ARB_EN|(SPIARB_SPI1_ACTIVE_MODE<<1)| SPIARB_SPI0_ACTIVE_MODE);
 	ra_outl(RT2880_SPI1_CTL_REG, (~SPIARB_SPI1_ACTIVE_MODE)&0x1);
-#endif	
+#endif
 	ra_outl(RT2880_SPI0_CTL_REG, (~SPIARB_SPI0_ACTIVE_MODE)&0x1);
 
 	// FIXME, clk_div should depend on spi-flash. 
@@ -328,7 +328,7 @@ static int raspi_cmd(const u8 cmd, const u32 addr, const u8 mode, u8 *buf, const
 	int retval = 0;
 
 	//printk("code = %x, addr = %x, mode = %x, buf = %x, size = %d, user = %d, flag = %x\n", cmd, addr, mode, buf, n_buf, user, flag);
-		
+
 	ra_or(RT2880_SPICFG_REG, (SPICFG_SPIENMODE | SPICFG_RXENVDIS));	
 	ra_outl(RT2880_SPIDATA_REG, cmd);
 	ra_outl(RT2880_SPIMODE_REG, (mode << 24));
@@ -351,9 +351,9 @@ static int raspi_cmd(const u8 cmd, const u32 addr, const u8 mode, u8 *buf, const
 	}
 	else
 		ra_outl(RT2880_SPIUSER_REG, 0);
-	
+
 	ra_outl(RT2880_SPICTL_REG, SPICTL_START);
-	
+
 
 	if (flag & SPIC_READ_BYTES)
 	{
@@ -369,12 +369,12 @@ static int raspi_cmd(const u8 cmd, const u32 addr, const u8 mode, u8 *buf, const
 			do {
 				reg = (u32) (ra_inl(RT2880_SPIFIFOSTAT_REG) & 0xff);
 			} while (reg == 0);
-			
+
 			for (count = reg; count > 0; count--)
 			{
 				buf[retval++] = (u8) ra_inl(RT2880_SPIRXFIFO_REG);
 			}
-			
+
 		}
 
 	}
@@ -394,7 +394,7 @@ static int raspi_cmd(const u8 cmd, const u32 addr, const u8 mode, u8 *buf, const
 			{
 				ra_outl(RT2880_SPITXFIFO_REG, buf[retval++]);
 			}
-			
+
 			do {
 				reg = (u32) ((ra_inl(RT2880_SPIFIFOSTAT_REG ) & 0xff00) >> 8);
 			} while (reg >= SPI_FIFO_SIZE);
@@ -404,13 +404,12 @@ static int raspi_cmd(const u8 cmd, const u32 addr, const u8 mode, u8 *buf, const
 				count = n_buf - retval;
 		}
 	}
-	
+
 	if (spic_busy_wait())
 	{
 		retval = -1;
 	}
 	ra_and(RT2880_SPICFG_REG, ~(SPICFG_SPIENMODE | SPICFG_RXENVDIS));
-	
 
 	return retval;
 }
@@ -462,7 +461,7 @@ static int raspi_set_quad()
 			//raspi_write_enable();
 			retval = raspi_cmd(OPCODE_WRSR, 0, 0, sr, 2, 0, SPIC_WRITE_BYTES);
 		}
-	}	
+	}
 
 err_end:
 	if (retval == -1)
@@ -567,7 +566,7 @@ static int raspi_4byte_mode(int enable)
 #ifdef COMMAND_MODE
 	{
 		u32 user;
-		
+
 		user = SPIUSR_SINGLE | (SPIUSR_SINGLE << 3) | (SPIUSR_SINGLE << 6) | (SPIUSR_SINGLE << 9) | (SPIUSR_NO_DATA << 12) | (SPIUSR_NO_DUMMY << 14) | (SPIUSR_NO_MODE << 16) | (SPIUSR_NO_ADDR << 17) | (SPIUSR_ONE_INSTRU << 20) | (1 << 21);
 		retval = raspi_cmd(code, 0, 0, 0, 0, user, SPIC_USER_MODE);
 
@@ -684,7 +683,6 @@ static int raspi_erase_sector(u32 offset)
 	}
 	else
 		raspi_cmd(OPCODE_SE, offset, 0, 0, 0, 0, 0);
-	
 
 	if (flash->chip->addr4b)
 	{
@@ -733,20 +731,20 @@ int raspi_set_lock (struct mtd_info *mtd, loff_t to, size_t len, int set)
 		flash->command[3] = to;
 
 		raspi_wait_ready(1);
-			
+
 		raspi_write_enable();
 
 #ifdef COMMAND_MODE
 		{
 			u32 user;
-		
+
 			user = SPIUSR_SINGLE | (SPIUSR_SINGLE << 3) | (SPIUSR_SINGLE << 6) | (SPIUSR_SINGLE << 9) | (SPIUSR_NO_DATA << 12) | (SPIUSR_NO_DUMMY << 14) | (SPIUSR_NO_MODE << 16) | (SPIUSR_THREE_BYTE_ADDR << 17) | (SPIUSR_ONE_INSTRU << 20) | (1 << 21);
 			retval = raspi_cmd(flash->command[0], to, 0, 0, 0, user, SPIC_USER_MODE);
 		}
 #else
 		retval = spic_write(flash->command, 4, 0, 0);
 #endif
-			
+
 		if (retval < 0) {
 			return -EIO;
 		}
@@ -756,7 +754,7 @@ int raspi_set_lock (struct mtd_info *mtd, loff_t to, size_t len, int set)
 	}
 
 	return 0;
-	
+
 }
 
 
@@ -851,7 +849,7 @@ static int ramtd_read(struct mtd_info *mtd, loff_t from, size_t len,
 #ifdef RD_MODE_QIOR
 		code = OPCODE_QIOR;
 #endif
-		raspi_set_quad();		
+		raspi_set_quad();
 
 	}
 #elif defined (RD_MODE_DOR)
@@ -1028,13 +1026,13 @@ static int ramtd_write(struct mtd_info *mtd, loff_t to, size_t len,
 
 		//{
 		//	u32 user;
-			
+
 		//	user = SPIUSR_QUAD | (SPIUSR_SINGLE << 3) | (SPIUSR_SINGLE << 6) | (SPIUSR_SINGLE << 9) | (SPIUSR_WRITE_DATA << 12) | (SPIUSR_NO_DUMMY << 14) | (SPIUSR_NO_MODE << 16) | (SPIUSR_THREE_BYTE_ADDR << 17) | (SPIUSR_ONE_INSTRU << 20) | (1 << 21);
 		//	rc = raspi_cmd(OPCODE_QPP, to, 0, buf, page_size, user, (SPIC_WRITE_BYTES | SPIC_USER_MODE));
-			
+
 		//}
 		//printk("rc = %d\n", rc);
-		
+
 #else // COMMAND_MODE
 #ifdef MX_4B_MODE
 		if (flash->chip->addr4b)
@@ -1050,7 +1048,7 @@ static int ramtd_write(struct mtd_info *mtd, loff_t to, size_t len,
 		if (retval > 0) {
 			if (retlen)
 				*retlen += retval;
-				
+
 			if (retval < page_size) {
 				up(&flash->lock);
 				printk("%s: retval:%x return:%x page_size:%x \n", 
@@ -1095,7 +1093,7 @@ struct chip_info *chip_prob(void)
 	jedec = (u32)((u32)(buf[1] << 24) | ((u32)buf[2] << 16) | ((u32)buf[3] <<8) | (u32)buf[4]);
 
 	printk("deice id : %x %x %x %x %x (%x)\n", buf[0], buf[1], buf[2], buf[3], buf[4], jedec);
-	
+
 	// FIXME, assign default as AT25D
 	weight = 0xffffffff;
 	match = &chips_data[0];
@@ -1113,7 +1111,7 @@ struct chip_info *chip_prob(void)
 		}
 	}
 	printk("Warning: un-recognized chip ID, please update SPI driver!\n");
-	spi_chip_detected=0;        
+	spi_chip_detected=0;
 	return match;
 }
 
@@ -1145,7 +1143,7 @@ static int __devinit raspi_prob(void)
         }
 #endif
 	chip = chip_prob();
-	
+
 	flash = kzalloc(sizeof *flash, GFP_KERNEL);
 	if (!flash)
 		return -ENOMEM;
@@ -1212,7 +1210,7 @@ static void __devexit raspi_remove(void)
 	del_mtd_partitions(&flash->mtd);
 
 	kfree(flash);
-	
+
 	flash = NULL;
 }
 

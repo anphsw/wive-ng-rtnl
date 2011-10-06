@@ -1805,7 +1805,7 @@ int ei_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
         esw_rate ratelimit;
 #endif
 	unsigned int offset = 0;
-#if !defined (CONFIG_RALINK_RT3052) && !defined (CONFIG_RALINK_RT3352)
+#if !defined (CONFIG_RALINK_RT3052)
 	unsigned int value = 0;
 #endif
 	ra_mii_ioctl_data mii;
