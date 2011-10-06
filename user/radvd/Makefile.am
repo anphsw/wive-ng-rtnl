@@ -134,5 +134,7 @@ dist-hook:
 scanner.o: gram.h
 
 romfs:
+	$(ROMFSINST) -S init.d/S46radvd /etc/rc.d/S46radvd
+	$(ROMFSINST) -s /etc/rc.d/S46radvd /etc/init.d/radvd
 	$(ROMFSINST) /bin/radvd
 	$(ROMFSINST) radvd.conf /etc/radvd.conf
