@@ -43,9 +43,13 @@ if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then
     service parprouted restart
     service lld2d restart
     service samba restart
-    if [ "$MODE" != "misc" ]; then 
-	service pppoe-relay restart
-	service chillispot restart
+    if [ "$MODE" != "misc" ]; then
+	if [ -f /bin/pppoe-relay ]; then
+	    service pppoe-relay restart
+	fi
+	if [ -f /bin/chilli ]; then
+	    service chillispot restart
+	fi
     fi
     service udpxy restart
     service igmp_proxy restart
