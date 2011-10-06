@@ -188,6 +188,13 @@ cflags-$(CONFIG_RALINK_RT3352)	+= -mtune=24kec -D__MIPSEL__
 load-$(CONFIG_RALINK_RT3352)	+= 0x80000000
 
 #
+# Ralink RT5350 board
+#
+core-$(CONFIG_RALINK_RT5350)	+= arch/mips/rt2880/
+cflags-$(CONFIG_RALINK_RT5350)	+= -Iinclude/asm-mips/rt2880
+load-$(CONFIG_RALINK_RT5350)	+= 0x80000000
+
+#
 # Ralink RT3883 board
 #
 core-$(CONFIG_RALINK_RT3883)	+= arch/mips/rt2880/
@@ -651,7 +658,7 @@ drivers-$(CONFIG_PCI)		+= arch/mips/pci/
 
 AFLAGS		+= $(cflags-y)
 CFLAGS		+= $(cflags-y)
-CPPFLAGS	+= -D"VMLINUX_LOAD_ADDRESS=$(load-y)"                                                                                      
+CPPFLAGS	+= -D"VMLINUX_LOAD_ADDRESS=$(load-y)"
 CPPFLAGS	+= -D"DATAOFFSET=$(if $(dataoffset-y),$(dataoffset-y),0)"
 
 LDFLAGS			+= -m $(ld-emul)
