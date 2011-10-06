@@ -290,7 +290,7 @@ romfs.post:
 	cp -vfa $(ROOTDIR)/toolchain/mipsel-linux-uclibc/lib/libgcc_s* $(ROMFSDIR)/lib/
 	cp -vfa $(ROOTDIR)/toolchain/lib/librt* $(ROMFSDIR)/lib/
 	./strip.sh
-	######################CLEANAP##########################
+	######################CLEANUP##########################
 	-find $(ROMFSDIR)/. -name CVS | xargs -r rm -rf
 	-rm -fr $(ROOTDIR)/dev
 	date +%Y%m%d%H%M > $(ROMFSDIR)/etc/compile-date
