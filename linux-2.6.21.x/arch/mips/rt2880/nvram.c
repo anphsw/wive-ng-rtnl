@@ -249,7 +249,7 @@ int __init ra_nvram_init(void)
 		for (j = 0; j < MAX_CACHE_ENTRY; j++) {
 			if (NULL == (q = strchr(p, '='))) {
 				RANV_PRINT("parsed failed - cannot find '='\n");
-				KFREE(fb[index].env.data);
+				KFREE(fb[i].env.data);
 				break;
 			}
 			*q = '\0'; //strip '='
