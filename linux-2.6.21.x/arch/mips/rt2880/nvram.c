@@ -238,7 +238,6 @@ int __init ra_nvram_init(void)
 		//check crc
 		if (nv_crc32(0, fb[i].env.data, len) != fb[i].env.crc) {
 			RANV_PRINT("Bad CRC %x, ignore values in flash.\n", (unsigned int)fb[i].env.crc);
-			KFREE(fb[i].env.data);
 			fb[i].valid = 0;
 			fb[i].dirty = 0;
 			return -1;
@@ -249,7 +248,6 @@ int __init ra_nvram_init(void)
 		for (j = 0; j < MAX_CACHE_ENTRY; j++) {
 			if (NULL == (q = strchr(p, '='))) {
 				RANV_PRINT("parsed failed - cannot find '='\n");
-				KFREE(fb[i].env.data);
 				break;
 			}
 			*q = '\0'; //strip '='
@@ -360,7 +358,6 @@ int nvram_clear(int index)
 	ra_mtd_write_nm(RALINK_NVRAM_MTDNAME, to, len, (unsigned char *)fb[index].env.data);
 
 	RANV_PRINT("clear flash from 0x%x for 0x%x bytes\n", (unsigned int)to, len);
-	KFREE(fb[index].env.data);
 	fb[index].dirty = 0;
 
 	up(&nvram_sem);
@@ -397,7 +394,6 @@ int nvram_commit(int index)
 		l = strlen(fb[index].cache[i].name) + strlen(fb[index].cache[i].value) + 2;
 		if (p - fb[index].env.data + 2 >= fb[index].flash_max_len) {
 			RANV_ERROR("ENV_BLK_SIZE 0x%x is not enough!", ENV_BLK_SIZE);
-			KFREE(fb[index].env.data);
 			up(&nvram_sem);
 			return -1;
 		}
@@ -420,7 +416,6 @@ int nvram_commit(int index)
 	len = fb[index].flash_max_len - len;
 	ra_mtd_write_nm(RALINK_NVRAM_MTDNAME, to, len, (unsigned char *)fb[index].env.data);
 
-	KFREE(fb[index].env.data);
 	fb[index].dirty = 0;
 
 	up(&nvram_sem);
