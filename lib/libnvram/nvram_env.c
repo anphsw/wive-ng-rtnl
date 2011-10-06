@@ -3,7 +3,7 @@
 #include "nvram_env.h"
 #include "flash_api.h"
 
-#define DEBUG
+//#define DEBUG
 
 #ifdef DEBUG
 static char libnvram_debug = 1;

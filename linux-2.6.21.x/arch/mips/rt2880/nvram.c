@@ -30,7 +30,7 @@ int nvram_clear(int index);
 /* /dev/nvram major number */
 static int ralink_nvram_major = 251;
 /* eneable debug */
-char ra_nvram_debug = 1;
+char ra_nvram_debug = 0;
 
 static DECLARE_MUTEX(nvram_sem);
 

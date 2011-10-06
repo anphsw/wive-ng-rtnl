@@ -700,6 +700,7 @@
 5) PPP fix multilink fragment MTU calculation and build fix.<br>
 6) Use faster hash funcrtion instead jhash2 for arp subsystem.<br>
 7) Fix "Fragment Reassembly Timeout" send (RFC792).<br>
+8) Kernel nvram now work and set by default.<br>
 
 <br><br>
 <b>For support see:</b><br>
