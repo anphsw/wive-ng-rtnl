@@ -1001,6 +1001,9 @@ typedef struct _CHANNEL_TX_POWER {
 #endif // DOT11N_DRAFT3 //
 	CHAR       Power;
 	CHAR       Power2;
+#if defined(RT2883) || defined(RT3883)
+	CHAR       Power3;
+#endif
 	UCHAR      MaxTxPwr;
 	UCHAR      DfsReq;
 	UCHAR	   RegulatoryDomain;

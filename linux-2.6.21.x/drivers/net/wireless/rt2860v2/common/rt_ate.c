@@ -4802,7 +4802,10 @@ VOID ATEAsicSwitchChannel(
 	UINT32 R2 = 0, R3 = DEFAULT_RF_TX_POWER, R4 = 0;
 	RTMP_RF_REGS *RFRegTable = NULL;
 #endif
-	UCHAR index = 0, BbpValue = 0, R66 = 0x30, Channel = 0;
+#if !defined(RT2883) || !defined(RT3883)
+	UCHAR index = 0;
+#endif
+	UCHAR BbpValue = 0, R66 = 0x30, Channel = 0;
 	CHAR TxPwer = 0, TxPwer2 = 0;
 #ifdef RT305x
 	/* added to prevent RF register reading error */

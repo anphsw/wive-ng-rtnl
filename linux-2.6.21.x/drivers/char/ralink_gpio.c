@@ -864,9 +864,10 @@ static void ralink_gpio_led_do_timer(unsigned long unused)
 		}
 	}
 #endif
+#ifndef CONFIG_RALINK_RT3883
 	//always turn the power LED on
 	__LED_ON(GPIO_POWER_LED);
-
+#endif
 #if RALINK_GPIO_LED_LOW_ACT
 	*(volatile u32 *)(RALINK_REG_PIORESET) = ra_gpio_led_clr;
 	*(volatile u32 *)(RALINK_REG_PIOSET) = ra_gpio_led_set;
