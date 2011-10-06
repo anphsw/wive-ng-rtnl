@@ -5,7 +5,6 @@
 #include <linux/kernel.h>
 #include <linux/types.h>
 #include <linux/fs.h>
-#include <linux/crc32.h>
 #include "nvram.h"
 
 extern int ra_mtd_write_nm(char *name, loff_t to, size_t len, const u_char *buf);
@@ -19,7 +18,6 @@ static block_t fb[FLASH_BLOCK_NUM] = {
 		.valid = 0
 	}
 };
-
 
 /* Prototypes */
 char const *nvram_get(int index, char *name);
@@ -210,6 +208,7 @@ int __init ra_nvram_init(void)
 	char *p, *q;
 	int r = 0;
 
+	printk("NVRAM: Kernel NVRAM start init.\n");
 	r = register_chrdev(ralink_nvram_major, RALINK_NVRAM_DEVNAME,
 			&ralink_nvram_fops);
 	if (r < 0) {
@@ -270,21 +269,21 @@ int __init ra_nvram_init(void)
 				break;
 			}
 			if (*p == '\0') {
-				//end of env 
+				//end of env
 				break;
 			}
 		}
 		if (j == MAX_CACHE_ENTRY)
 			RANV_PRINT("run out of env cache, please increase MAX_CACHE_ENTRY\n");
 
-		RANV_PRINT("Block %x CRC %x OK.\n", i, (unsigned int)fb[i].env.crc);
+		printk("NVRAM: Particion %x CRC %x OK.\n", i, (unsigned int)fb[i].env.crc);
 		fb[i].valid = 1;
 		fb[i].dirty = 0;
 	}
 
 	init_MUTEX(&nvram_sem);
 
-	printk("Ralink Kernel NVRAM initialized\n");
+	printk("NVRAM: initialized\n");
 	return 0;
 }
 
