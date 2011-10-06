@@ -43,18 +43,16 @@ else
     export MEM=16
 fi
 
-#last particion mounted to /media set as public for samba and torrent home dir
-public=`df -h | grep "/dev/sd" | grep "media" | awk {' print $6 '} | tail -q -n1`
-
 #aliases
 [ -x /usr/bin/vim ] && alias vi=vim || alias vim=vi
 
+#last particion mounted to /media set as public for samba and torrent home dir
+public=`df -h | grep "/dev/sd" | grep "media" | awk {' print $6 '} | tail -q -n1`
+
 #variables for transmissions
 if [ -f /bin/transmission-daemon ] && [ "$public" != "" ]; then
-    if [ "$public" != "" ]; then
-	export TRANSMISSION_HOME="$public"
-	export TRANSMISSION_WEB_HOME=/share/transmission/web
-	export XDG_DATA_HOME=/share/transmission/web
-	export XDG_DATA_DIRS=/share/transmission/web
-    fi
+    export TRANSMISSION_HOME="$public"
+    export TRANSMISSION_WEB_HOME=/share/transmission/web
+    export XDG_DATA_HOME=/share/transmission/web
+    export XDG_DATA_DIRS=/share/transmission/web
 fi
