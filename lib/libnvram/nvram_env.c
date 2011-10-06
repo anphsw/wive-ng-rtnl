@@ -1,8 +1,9 @@
+#include <linux/config.h>
 #include "nvram.h"
 #include "nvram_env.h"
 #include "flash_api.h"
 
-//#define DEBUG
+#define DEBUG
 
 #ifdef DEBUG
 static char libnvram_debug = 1;
@@ -462,12 +463,12 @@ void nvram_buflist(int index)
  */
 int nvram_commit(int index)
 {
+
 #ifdef CONFIG_KERNEL_NVRAM
 	int fd;
 	nvram_ioctl_t nvr;
 
-	if(!index)
-	    return -1;
+	LIBNV_PRINT("--> nvram_commit %d\n", index);
 
 	nvr.index = index;
 	fd = open(NV_DEV, O_RDONLY);
