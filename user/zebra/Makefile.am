@@ -16,5 +16,7 @@ dist-hook:
 	cp -p $(srcdir)/init/redhat/zebra.* $(distdir)/init/redhat
 
 romfs: install
+	$(ROMFSINST) -S init.d/S47zebra /etc/rc.d/S47zebra
+	$(ROMFSINST) -s /etc/rc.d/S47zebra /etc/init.d/zebra
 	$(ROMFSINST) -S filesystem/sbin/zebra /bin/zebra
 	$(ROMFSINST) -S filesystem/sbin/ripd /bin/ripd

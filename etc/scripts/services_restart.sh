@@ -28,8 +28,10 @@ fi
 if [ -f /bin/radvd ] && [ -d /proc/sys/net/ipv6 ]; then
     service radvd restart
 fi
+if [ -f /bin/zebra ]; then
     service ripd restart
     service zebra restart
+fi
     service inetd restart
     service dnsserver restart
 
