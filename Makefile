@@ -271,24 +271,31 @@ romfs: romfs.subdirs modules_install romfs.post
 
 .PHONY: romfs.subdirs
 romfs.subdirs:
-	for dir in vendors $(DIRS) ; do [ ! -d $$dir ] || $(MAKEARCH) -C $$dir romfs || exit 1 ; done
-
-.PHONY: romfs.post
-romfs.post:
-	date +%Y%m%d%H%M > $(ROOTDIR)/etc/compile-date
+	####################PREPARE-ROMFS####################
+	$(MAKEARCH) -C vendors romfs
 	cd $(ROOTDIR)
 	cp -vfra $(ROOTDIR)/etc/* $(ROMFSDIR)/etc
 	cp -vfa  $(ROOTDIR)/etc/rc.d/rcS $(ROMFSDIR)/bin/rcS
 	cp -vfa  $(ROOTDIR)/etc/rc.d/start $(ROMFSDIR)/bin/start
 	tar -zxvf dev.tgz
 	cp -rfva dev/* $(ROMFSDIR)/dev
-	rm -fr $(ROOTDIR)/dev
 	cd $(ROMFSDIR)/bin && /bin/ln -fvs ../etc/scripts/* . && cd $(ROOTDIR)
+	cd $(ROOTDIR)
+	for dir in $(DIRS) ; do [ ! -d $$dir ] || $(MAKEARCH) -C $$dir romfs || exit 1 ; done
+	#################INSTALL-APPS-ROMFS###################
+
+.PHONY: romfs.post
+romfs.post:
+	#################STRIP-APPS-LIB-ROMFS##################
 	cp -vfa $(ROOTDIR)/toolchain/mipsel-linux-uclibc/lib/libgcc_s* $(ROMFSDIR)/lib/
 	cp -vfa $(ROOTDIR)/toolchain/lib/librt* $(ROMFSDIR)/lib/
 	./strip.sh
 	$(MAKEARCH) -C vendors romfs.post
+	######################CLEANAP##########################
 	-find $(ROMFSDIR)/. -name CVS | xargs -r rm -rf
+	rm -fr $(ROOTDIR)/dev
+	date +%Y%m%d%H%M > $(ROMFSDIR)/etc/compile-date
+	###################APPS-INSTALLED######################
 
 .PHONY: image
 image:
