@@ -5,24 +5,20 @@
 
 #define ENV_BLK_SIZE 0x1000
 
-#ifdef CONFIG_DUAL_IMAGE
-#define ENV_UBOOT_SIZE 0x1000
-#define FLASH_BLOCK_NUM	5
-#define UBOOT_NVRAM	0
-#define RT2860_NVRAM    1
-#define RTDEV_NVRAM    	2
-#define CERT_NVRAM    	3
-#define WAPI_NVRAM    	4
-#else
-#define FLASH_BLOCK_NUM	4
-#define RT2860_NVRAM    0
-#define RTDEV_NVRAM    	1
-#define CERT_NVRAM    	2
-#define WAPI_NVRAM    	3
-#endif
-
+/* nvram parse blocks */
+#define FLASH_BLOCK_NUM	1
 #define RALINK_NVRAM_DEVNAME "nvram"
 #define RALINK_NVRAM_MTDNAME "Config"
+
+/* Config part in nvram */
+static block_t fb[FLASH_BLOCK_NUM] =
+{
+	{
+		.flash_offset =  0x2000,
+		.flash_max_len = ENV_BLK_SIZE * 4,
+		.valid = 0
+	}
+};
 
 #define RANV_PRINT(x, ...) do { if (ra_nvram_debug) printk("%s %d: " x, __FILE__, __LINE__, ## __VA_ARGS__); } while(0)
 #define RANV_ERROR(x, ...) do { printk("%s %d: ERROR! " x, __FILE__, __LINE__, ## __VA_ARGS__); } while(0)

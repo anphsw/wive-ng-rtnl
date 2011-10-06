@@ -5,9 +5,8 @@
 #include <linux/kernel.h>
 #include <linux/types.h>
 #include <linux/fs.h>
+#include <linux/crc32.h>
 #include "nvram.h"
-
-static unsigned long counter = 0;
 
 extern int ra_mtd_write_nm(char *name, loff_t to, size_t len, const u_char *buf);
 extern int ra_mtd_read_nm(char *name, loff_t from, size_t len, u_char *buf);
@@ -22,42 +21,6 @@ static int ralink_nvram_major = 251;
 char ra_nvram_debug = 1;
 
 static DECLARE_MUTEX(nvram_sem);
-
-static block_t fb[FLASH_BLOCK_NUM] =
-{
-#ifdef CONFIG_DUAL_IMAGE
-	{
-		.name = "uboot",
-		.flash_offset =  0x0,
-		.flash_max_len = ENV_UBOOT_SIZE,
-		.valid = 0
-	},
-#endif
-	{
-		.name = "2860",
-		.flash_offset =  0x2000,
-		.flash_max_len = ENV_BLK_SIZE * 4,
-		.valid = 0
-	},
-	{
-		.name = "rtdev",
-		.flash_offset = 0x6000,
-		.flash_max_len = ENV_BLK_SIZE * 2,
-		.valid = 0
-	},
-	{
-		.name = "cert",
-		.flash_offset = 0x8000,
-		.flash_max_len = ENV_BLK_SIZE * 2,
-		.valid = 0
-	},
-	{
-		.name = "wapi",
-		.flash_offset = 0xa000,
-		.flash_max_len = ENV_BLK_SIZE * 5,
-		.valid = 0
-	}
-};
 
 /* ========================================================================
  * Table of CRC-32's of all single-byte values (made by make_crc_table)
@@ -401,7 +364,6 @@ int nvram_commit(int index)
 	RANV_CHECK_VALID(-1);
 
 	down(&nvram_sem);
-	counter++;
 
 	if (!fb[index].dirty) {
 		RANV_PRINT("nothing to be committed\n");
@@ -459,7 +421,6 @@ int nvram_set(int index, char *name, char *value)
 	RANV_CHECK_VALID(-1);
 
 	down(&nvram_sem);
-	counter++;
 
 	idx = cache_idx(index, name);
 
@@ -500,7 +461,6 @@ char const *nvram_get(int index, char *name)
 	RANV_CHECK_VALID("");
 
 	down(&nvram_sem);
-	counter++;
 
 	idx = cache_idx(index, name);
 	if (-1 != idx) {
