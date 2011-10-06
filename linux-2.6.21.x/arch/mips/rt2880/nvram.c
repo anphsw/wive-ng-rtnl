@@ -238,6 +238,7 @@ int __init ra_nvram_init(void)
 		//check crc
 		if (nv_crc32(0, fb[i].env.data, len) != fb[i].env.crc) {
 			RANV_PRINT("Bad CRC %x, ignore values in flash.\n", (unsigned int)fb[i].env.crc);
+			KFREE(fb[i].env.data);
 			fb[i].valid = 0;
 			fb[i].dirty = 0;
 			return -1;
@@ -523,8 +524,6 @@ int const nvram_getall(int index, char *buf)
 	*p = '\0'; //ending null
 
 	up(&nvram_sem);
-
-	KFREE(fb[index].env.data);
 
 	return 0;
 }
