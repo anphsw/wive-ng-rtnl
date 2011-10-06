@@ -117,7 +117,7 @@ endif
 ifdef USE_SRP
 CFLAGS	+= -DUSE_SRP
 TARGETS	+= srp-entry
-EXTRAINSTALL = $(INSTALL) -m 555 srp-entry $(BINDIR)/srp-entry
+EXTRAINSTALL = $(INSTALL) -m 755 srp-entry $(BINDIR)/srp-entry
 MANPAGES += srp-entry.8
 EXTRACLEAN += srp-entry.o
 NEEDDES=y
@@ -243,10 +243,10 @@ all: $(TARGETS)
 install: pppd
 	mkdir -p $(BINDIR) $(MANDIR)
 	$(EXTRAINSTALL)
-	$(INSTALL) -m 555 pppd $(BINDIR)/pppd
+	$(INSTALL) -m 755 pppd $(BINDIR)/pppd
 	if chgrp pppusers $(BINDIR)/pppd 2>/dev/null; then \
 	  chmod o-rx,u+s $(BINDIR)/pppd; fi
-	$(INSTALL) -m 444 pppd.8 $(MANDIR)
+	$(INSTALL) -m 644 pppd.8 $(MANDIR)
 
 pppd: $(PPPDOBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o pppd $(PPPDOBJS) $(LIBS)
