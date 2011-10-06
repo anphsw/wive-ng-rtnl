@@ -290,12 +290,12 @@ romfs.post:
 	cp -vfa $(ROOTDIR)/toolchain/mipsel-linux-uclibc/lib/libgcc_s* $(ROMFSDIR)/lib/
 	cp -vfa $(ROOTDIR)/toolchain/lib/librt* $(ROMFSDIR)/lib/
 	./strip.sh
-	$(MAKEARCH) -C vendors romfs.post
 	######################CLEANAP##########################
 	-find $(ROMFSDIR)/. -name CVS | xargs -r rm -rf
 	-rm -fr $(ROOTDIR)/dev
 	date +%Y%m%d%H%M > $(ROMFSDIR)/etc/compile-date
 	###################APPS-INSTALLED######################
+	$(MAKEARCH) -C vendors romfs.post
 
 .PHONY: image
 image:

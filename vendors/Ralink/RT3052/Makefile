@@ -34,10 +34,10 @@ romfs:
 	$(ROMFSINST) -s ../share /usr/share
 	$(ROMFSINST) -s ../etc/scripts/config.sh /bin/config.sh
 
-romfs.post:: 
+romfs.post::
 	[ -d $(IMAGEDIR) ] || mkdir -p $(IMAGEDIR)
 	#Squash File System
-	 rm -f $(RAMDISK)  
+	rm -f $(RAMDISK)
 	#linux2.6.x support squashfs with lzma
 ifeq	($(CONFIG_RT2880_ROOTFS_IN_FLASH),y)
 	$(ROOTDIR)/tools/bin/mksquashfs_lzma-3.2 $(ROMFSDIR) $(RAMDISK) -le -all-root -no-exports

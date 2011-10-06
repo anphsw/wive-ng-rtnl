@@ -46,5 +46,5 @@ install: $(PROG) $(CONFIG) $(INITSCRIPT) $(MANPAGE)
 clean:
 	rm -f *.o $(PROG)
 
-romfs:                                                                                                                       
+romfs:
 	$(ROMFSINST) -S /bin/p910nd
