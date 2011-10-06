@@ -277,6 +277,7 @@ int __init ra_nvram_init(void)
 		if (j == MAX_CACHE_ENTRY)
 			RANV_PRINT("run out of env cache, please increase MAX_CACHE_ENTRY\n");
 
+		RANV_PRINT("Block %x CRC %x OK.\n", i, (unsigned int)fb[i].env.crc);
 		fb[i].valid = 1;
 		fb[i].dirty = 0;
 	}
