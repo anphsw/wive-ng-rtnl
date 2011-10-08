@@ -2162,7 +2162,7 @@ int __init rather_probe(struct net_device *dev)
 
 	//If reading mtd failed or mac0 is empty, generate a mac address
 	if (i < 0 || (memcmp(addr.sa_data, zero, 6) == 0)) {
-		unsigned char mac_addr01234[5] = {0x00, 0x0C, 0x43, 0x28, 0x80};
+		unsigned char mac_addr01234[5] = {0x00, 0x0B, 0x2B, 0x28, 0x80};
 		net_srandom(jiffies);
 		memcpy(addr.sa_data, mac_addr01234, 5);
 		addr.sa_data[5] = net_random()&0xFF;
