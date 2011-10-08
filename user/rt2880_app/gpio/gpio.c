@@ -34,7 +34,7 @@
  * $Id: gpio.c,v 1.11 2008-07-14 06:40:46 winfred Exp $
  */
 
-#include <stdio.h>             
+#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
@@ -318,8 +318,6 @@ void gpio_test_write(void)
 
 void gpio_test_write2()
 {
-        int i = 0;
-
         gpio_set_dir(RALINK_GPIO_DIR_ALLOUT);
 
         gpio_write_int(RALINK_GPIO_DATA_MASK);
@@ -431,8 +429,7 @@ void signal_handler(int signum)
 	else if (signum == SIGUSR2)
 		printf("SIGUSR2");
 	else
-		printf("%d", signum);
-	printf(" received\n", signum);
+	     printf(" received %d\n", signum);
 }
 
 void gpio_test_intr(int gpio_num)
