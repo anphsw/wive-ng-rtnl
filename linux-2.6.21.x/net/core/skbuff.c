@@ -2100,15 +2100,11 @@ struct sk_buff *skbmgr_alloc_skb2k(void)
 		skb->data = data;
 		skb_reset_tail_pointer(skb);
 		skb->end = skb->tail + size;
+		skb->vlan_tci = 0;
 		/* make sure we initialize shinfo sequentially */
 		shinfo = skb_shinfo(skb);
+		memset(shinfo, 0, offsetof(struct skb_shared_info, frags));
 		atomic_set(&shinfo->dataref, 1);
-		shinfo->nr_frags  = 0;
-		shinfo->gso_size = 0;
-		shinfo->gso_segs = 0;
-		shinfo->gso_type = 0;
-		shinfo->ip6_frag_id = 0;
-		shinfo->frag_list = NULL;
 
 		skb->skb_recycling_callback = skbmgr_recycling_callback;
 
@@ -2117,7 +2113,7 @@ struct sk_buff *skbmgr_alloc_skb2k(void)
 
 try_normal:
 	skb = alloc_skb(SKBMGR_RX_BUF_LEN, GFP_ATOMIC|__GFP_NOWARN);
-	if (likely(skb)) 
+	if (likely(skb))
 		skb->skb_recycling_callback = skbmgr_recycling_callback;
 	return skb;
 }
@@ -2160,15 +2156,11 @@ struct sk_buff *skbmgr_alloc_skb4k(void)
 		skb->data = data;
 		skb_reset_tail_pointer(skb);
 		skb->end = skb->tail + size;
+		skb->vlan_tci = 0;
 		/* make sure we initialize shinfo sequentially */
 		shinfo = skb_shinfo(skb);
+		memset(shinfo, 0, offsetof(struct skb_shared_info, frags));
 		atomic_set(&shinfo->dataref, 1);
-		shinfo->nr_frags  = 0;
-		shinfo->gso_size = 0;
-		shinfo->gso_segs = 0;
-		shinfo->gso_type = 0;
-		shinfo->ip6_frag_id = 0;
-		shinfo->frag_list = NULL;
 
 		skb->skb_recycling_callback = skbmgr_4k_recycling_callback;
 
