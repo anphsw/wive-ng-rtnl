@@ -701,6 +701,9 @@
 6) Use faster hash funcrtion instead jhash2 for arp subsystem.<br>
 7) Fix "Fragment Reassembly Timeout" send (RFC792).<br>
 8) Kernel nvram now work and set by default.<br>
+9) Fix work some usb2serial converter and 3G modems (very low speed).<br>
+10) Fix udppath need for correct l2tp kernel mode driver.<br>
+11) Leave carrier on for empty bridge.<br>
 
 <br><br>
 <b>For support see:</b><br>
