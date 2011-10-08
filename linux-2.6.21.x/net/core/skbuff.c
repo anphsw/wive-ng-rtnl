@@ -2087,6 +2087,7 @@ struct sk_buff *skbmgr_alloc_skb2k(void)
 		if (unlikely(skb == NULL))
 			goto try_normal;
 
+		prefetchw(skb);
 		size = skb->truesize - sizeof(struct sk_buff);
 		size = SKB_DATA_ALIGN(size);
 		data = skb->head;
@@ -2144,6 +2145,7 @@ struct sk_buff *skbmgr_alloc_skb4k(void)
 		if (unlikely(skb == NULL))
 			goto try_normal;
 
+		prefetchw(skb);
 		size = skb->truesize - sizeof(struct sk_buff);
 		size = SKB_DATA_ALIGN(size);
 		data = skb->head;
