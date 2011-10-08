@@ -2088,6 +2088,7 @@ struct sk_buff *skbmgr_alloc_skb2k(void)
 			goto try_normal;
 
 		size = skb->truesize - sizeof(struct sk_buff);
+		size = SKB_DATA_ALIGN(size);
 		data = skb->head;
 
 		/*
@@ -2144,6 +2145,7 @@ struct sk_buff *skbmgr_alloc_skb4k(void)
 			goto try_normal;
 
 		size = skb->truesize - sizeof(struct sk_buff);
+		size = SKB_DATA_ALIGN(size);
 		data = skb->head;
 
 		/*
