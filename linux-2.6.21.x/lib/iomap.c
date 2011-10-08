@@ -31,7 +31,7 @@
  * need to just take things for granted.
  */
 #define PIO_OFFSET	0x10000UL
-#define PIO_MASK	0x0ffffUL
+#define PIO_MASK	0xffffffffUL
 #define PIO_RESERVED	0x40000UL
 #endif
 
