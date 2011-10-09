@@ -280,6 +280,7 @@ romfs.subdirs:
 	cp -vfa  $(ROOTDIR)/etc/rc.d/start $(ROMFSDIR)/bin/start
 	tar -zxvf dev.tgz
 	cp -rfva dev/* $(ROMFSDIR)/dev
+	cp $(ROOTDIR)/version $(ROMFSDIR)/etc/version
 	cd $(ROMFSDIR)/bin && /bin/ln -fvs ../etc/scripts/* . && cd $(ROOTDIR)
 	cd $(ROOTDIR)
 	for dir in $(DIRS) ; do [ ! -d $$dir ] || $(MAKEARCH) -C $$dir romfs || exit 1 ; done

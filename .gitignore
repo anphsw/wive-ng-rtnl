@@ -89,6 +89,10 @@ fulldump
 /lib/libiconv/libtool
 /lib/libiconv/preload/libtool
 /lib/libgmp/stamp-h1
+/lib/libnet/Makefile
+/lib/libnet/Makefile.in
+/lib/libnet/configure
+/lib/libnet/config.log
 /user/busybox/*/Config.in
 /user/busybox/docs/busybox.net/BusyBox.html
 /user/busybox/include/bbconfigopts_bz2.h

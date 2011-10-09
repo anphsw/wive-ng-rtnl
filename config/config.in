@@ -18,6 +18,7 @@ bool 'Build libevent'		CONFIG_LIB_EVENT
 bool 'Build libcurl'		CONFIG_LIB_CURL
 bool 'Build libpcap'		CONFIG_LIB_PCAP
 bool 'Build libiconv'		CONFIG_LIB_ICONV
+bool 'Build libnet'		CONFIG_LIB_NET
 
 comment 'Force build extra libraries in uClibc'
 bool 'Build libcrypt'		CONFIG_LIB_CRYPT_FORCE
@@ -96,6 +97,7 @@ bool 'Proxy ARP daemon'				CONFIG_USER_PARPROUTED
 bool 'ripd-zebra (RIP)' 			CONFIG_USER_ZEBRA
 bool 'miniupnpd'				CONFIG_USER_MINIUPNPD
 bool 'radvd (Router Advertisement Daemon)'	CONFIG_USER_RADVD
+bool 'Cisco Discovery Protocol'			CONFIG_USER_CDP
 bool 'Link Layer Topology Discovery Protocol'	CONFIG_USER_LLTD
 bool 'rt2860apd (802.1x Authenticator)'		CONFIG_USER_802_1X
 bool 'wscd (WSC/WPS)'				CONFIG_USER_WSC

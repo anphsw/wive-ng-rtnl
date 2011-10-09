@@ -28,6 +28,10 @@ config)
 	    $LOF "Add user routes."
 	    /etc/routes_replace replace $lan_if $wan_if
 	fi
+	# send Cisco Discovery request
+	if [ -f /bin/cdp-send ] && [ -f /etc/scripts/config-cdp.sh ]; then
+	    config-cdp.sh &
+	fi
 	exit 0
 	;;
 deconfig)

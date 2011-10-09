@@ -38,7 +38,7 @@ export $(CFLAGS)
 SUBDIRS_APP =  goahead iptables miniupnp  rt2880_app wpa_supplicant ethtool
 SUBDIRS_APP += igmpproxy lldt ppp strace wsc_upnp busybox inadyn pppoe-relay udpxy xl2tpd
 SUBDIRS_APP += 802.1x dnsmasq gdbserver iproute2 wive-utils kabinet radvd wireless_tools zebra dropbear
-SUBDIRS_APP += ntfs-3g p910nd transmission openssl minidlna samba samba3
+SUBDIRS_APP += ntfs-3g p910nd transmission openssl minidlna samba samba3 cdp-tools
 #
 # must run the vendor build first
 #
@@ -55,6 +55,7 @@ dir_$(CONFIG_USER_STRACE_STRACE)            += strace
 dir_$(CONFIG_USER_WIRELESS_TOOLS)           += wireless_tools
 dir_$(CONFIG_USER_IPTABLES_IPTABLES)        += iptables
 dir_$(CONFIG_USER_IPTABLES_IP6TABLES)       += iptables
+dir_$(CONFIG_USER_CDP)			    += cdp-tools
 dir_$(CONFIG_USER_LLTD)			    += lldt
 dir_$(CONFIG_USER_INADYN)                   += inadyn
 dir_$(CONFIG_USER_OPENSSL)	   	    += openssl

@@ -192,8 +192,13 @@ case "$1" in
 
 	# if dhcp disables restart must from internet.sh
 	# this is restart vpn and others if need
-	if [ "$vpnEnabled" = "on" ]; then
-    	    if [ "$OLD_IP" != "$CUR_IP" ]; then
+    	if [ "$OLD_IP" != "$CUR_IP" ]; then
+	    # send Cisco Discovery request
+	    if [ -f /bin/cdp-send ] && [ -f /etc/scripts/config-cdp.sh ]; then
+		config-cdp.sh &
+	    fi
+	    # restart vpn if ip changed
+	    if [ "$vpnEnabled" = "on" ]; then
 		PPPD=`pidof pppd`
 		XL2TPD=`pidof xl2tpd`
 		service vpnhelper stop

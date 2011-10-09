@@ -8,11 +8,11 @@
 . /etc/scripts/global.sh
 
 stop_serv="transmission vpnhelper inetd shaper crontab pppoe-relay ddns wscd dhcpd lld2d radvd syslog \
-	    zebra udpxy upnp hotplug igmp_proxy ntp samba dnsserver hotplug"
+	    zebra udpxy upnp hotplug igmp_proxy ntp samba dnsserver hotplug cdp"
 
 kill_apps="transmission-daemon smbd nmbd pppd xl2tpd udhcpd udhcpc crond lld2d igmpproxy inetd syslogd klogd \
 	    ntpclient ntpd zebra ripd inadyn stupid-ftpdated \
-	    iwevent telnetd wscd rt2860apd rt61apd dnsmasq"
+	    iwevent telnetd wscd rt2860apd rt61apd dnsmasq cdp"
 
 rmmod_mod="hw_nat ppp_mppe pppol2tp pptp pppoe pppox ppp_generic imq ipt_TTL ipt_IMQ ipt_tos \
 	    ipt_REDIRECT ipt_ttl ipt_TOS xt_string xt_webstr xt_connmark xt_CONNMARK xt_conntrack \

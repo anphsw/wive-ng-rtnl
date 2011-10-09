@@ -24,6 +24,7 @@ ifeq ($(UCLINUX_COMMON_LIB),1)
 	SLIBDES		=	-ldes
 	SLIBNETOLD		=	-lnetold
 	SLIBPCAP	=	-lpcap
+	SLIBNET		=	-lnet
 	ifdef DISABLE_SHARED_SSL
 		SLIBSSL		=	-Wl,-Bstatic -lssl -Wl,-Bdynamic
 		SLIBCRYPTO	=	-Wl,-Bstatic -lcrypto -Wl,-Bdynamic
@@ -61,6 +62,7 @@ ifeq ($(UCLINUX_COMMON_LIB),1)
 	LIBDES		=	$(SLIBDES)
 	LIBNETOLD	=	$(SLIBNETOLD)
 	LIBPCAP		=	$(SLIBPCAP)
+	LIBNET		=	$(SLIBNET)
 	LIBSSL		=	$(SLIBSSL)
 	LIBCRYPTO	=	$(SLIBCRYPTO)
 	LIBATM		=	$(SLIBATM)

@@ -89,6 +89,9 @@ endif
 ifeq ($(CONFIG_LIB_CURL),y)
     DIRS += libcurl
 endif
+ifeq ($(CONFIG_LIB_NET),y)
+    DIRS += libnet
+endif
 ifeq ($(strip $(HAVE_DOT_CONFIG)),y)
 
 all: headers pregen configure subdirs shared finished
@@ -159,6 +162,9 @@ ifeq ($(CONFIG_LIB_CURL),y)
 endif
 ifeq ($(CONFIG_LIB_PCAP),y)
 	@$(MAKE) -C libpcap shared
+endif
+ifeq ($(CONFIG_LIB_NET),y)
+	@$(MAKE) -C libnet shared
 endif
 else
 	$(SECHO)
@@ -477,6 +483,7 @@ clean:
 	-$(MAKE) -C libevent clean
 	-$(MAKE) -C libcurl clean
 	-$(MAKE) -C libpcap clean
+	-$(MAKE) -C libnet clean
 	-$(MAKE) -C libusb clean
 	-$(MAKE) -C libntfs-3g clean
 	-$(MAKE) -C libiconv clean
