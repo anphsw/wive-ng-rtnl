@@ -425,6 +425,11 @@ int inet_bind(struct socket *sock, struct sockaddr *uaddr, int addr_len)
 	if (addr_len < sizeof(struct sockaddr_in))
 		goto out;
 
+	if (addr->sin_family != AF_INET) {
+		err = -EAFNOSUPPORT;
+		goto out;
+	}
+
 	chk_addr_ret = inet_addr_type(addr->sin_addr.s_addr);
 
 	/* Not specified by any standard per-se, however it breaks too
