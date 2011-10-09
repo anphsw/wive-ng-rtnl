@@ -11,6 +11,9 @@
 #define CHK_IF_DIGIT(var, val)  \
 	((var != NULL) && (var[0] == (val + '0')) && (var[1] == '\0'))
 
+#define CHK_GET_DIGIT(var) \
+	((var[1] == '\0') ? (var[0] - '0') : -1)
+
 #define CHK_IF_SET(var) \
 	((var != NULL) && (var[0]))
 
@@ -50,6 +53,7 @@ extern long readUnsigned(const char *str);
 
 // HTML content encoding routines
 extern int initHTMLBuffer(html_buffer_t *buf);
+extern void resetHTMLBuffer(html_buffer_t *buf);
 extern int encodeHTMLContent(const char *data, html_buffer_t *buf);
 extern int freeHTMLBuffer(html_buffer_t *buf);
 
@@ -57,6 +61,10 @@ extern int checkFileExists(const char *argv);
 
 // Set-up parameters in NVRAM
 extern void setupParameters(webs_t wp, const parameter_fetch_t *fetch, int transaction);
+extern char *catIndex(char *buf, const char *ptr, int index);
+
+// Get parameter index
+extern void fetchIndexedParam(const char *buf, int index, char *retbuf);
 
 #endif /* HELPERS_H_ */
 

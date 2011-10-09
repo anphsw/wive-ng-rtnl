@@ -21,6 +21,7 @@
 #include	"oid.h"
 #include	"stapriv.h"
 #include 	"wps.h"
+#include 	"helpers.h"
 
 #define AP_MODE
 #define RTPRIV_IOCTL_E2P (SIOCIWFIRSTPRIV + 0x07) 
@@ -59,6 +60,8 @@ int deleteNthValueMulti(int index[], int count, char *value, char delimit);		/* 
 static void APDeleteAccessPolicyList(webs_t wp, char_t *path, char_t *query);
 void DeleteAccessPolicyList(int nvram, webs_t wp, char_t *path, char_t *query);
 static int  isAntennaDiversityBuilt(int eid, webs_t wp, int argc, char_t **argv);
+static int dumpBSS(int eid, webs_t wp, int argc, char_t **argv);
+static int dumpBSSKeys(int eid, webs_t wp, int argc, char_t **argv);
 #if defined(CONFIG_RT2860V2_RT3XXX_AP_ANTENNA_DIVERSITY) || defined(CONFIG_RT2860V2_RT3XXX_STA_ANTENNA_DIVERSITY)
 static void AntennaDiversity(webs_t wp, char_t *path, char_t *query);
 static void getAntenna(webs_t wp, char_t *path, char_t *query);
@@ -79,6 +82,8 @@ void formDefineWireless(void) {
 	websAspDefine(T("getWlanStaInfo"), getWlanStaInfo);
 	websAspDefine(T("getDLSBuilt"), getDLSBuilt);
 	websAspDefine(T("getDFSBuilt"), getDFSBuilt);
+	websAspDefine(T("dumpBSS"), dumpBSS);
+	websAspDefine(T("dumpBSSKeys"), dumpBSSKeys);
 	websAspDefine(T("getCarrierBuilt"), getCarrierBuilt);
 	websAspDefine(T("getWlanM2UBuilt"), getWlanM2UBuilt);
 	websAspDefine(T("is3t3r"), is3t3r);
@@ -341,8 +346,13 @@ static int getWlanM2UBuilt(int eid, webs_t wp, int argc, char_t **argv)
 #endif
 }
 
-static void revise_mbss_value(int old_num, int new_num)
+typedef struct mbss_param_t
 {
+	char *name;
+	int is_comp;
+} mbss_param_t;
+
+//------------------------------------------------------------------------------
 	/* {{{ The parameters that support multiple BSSID is listed as followed,
 	   1.) SSID,                 char SSID[33];
 	   2.) AuthMode,             char AuthMode[14];
@@ -370,6 +380,152 @@ static void revise_mbss_value(int old_num, int new_num)
 	                             int  VlanId;
 	                             int  VlanPriority;
 	}}} */
+//------------------------------------------------------------------------------
+
+const mbss_param_t mbss_params[] =
+{
+	{ "AuthMode", 1 },
+	{ "EncryptType", 1 },
+	{ "WPAPSK", 0 },
+	{ "DefaultKeyID", 1 },
+	{ "Key1Type", 1 },
+	{ "Key1Str", 0 },
+	{ "Key2Type", 1 },
+	{ "Key2Str", 0 },
+	{ "Key3Type", 1 },
+	{ "Key3Str", 0 },
+	{ "Key4Type", 1 },
+	{ "Key4Str", 0 },
+	{ "AccessPolicy", 1 },
+	{ "AccessControlList", 1},
+//	{ "NoForwarding", 1 }, // Is set up by MBSS logic
+	{ "IEEE8021X", 1 },
+	{ "TxRate", 1 },
+//	{ "HideSSID", 1 }, // Is set by MBSS logic
+	{ "PreAuth", 1 },
+	{ "WmmCapable", 1 },
+	{ "RekeyInterval", 1 },
+	{ "RekeyMethod", 1 },
+	{ NULL, 0 }
+};
+
+static int dumpBSSKeys(int eid, webs_t wp, int argc, char_t **argv)
+{
+	int count = 0;
+	
+	const mbss_param_t *parm = mbss_params;
+	while ((parm->name) != NULL)
+	{
+		if ((count++) > 0)
+			websWrite(wp, ", ");
+		websWrite(wp, "'%s'", parm->name);
+		parm++;
+	}
+	return 0;
+}
+
+static int dumpBSS(int eid, webs_t wp, int argc, char_t **argv)
+{
+	if (argc < 1)
+		return 0;
+	int bssnum = (argv[0][0] - '0') + 1;
+	if ((bssnum < 1) || (bssnum > 8))
+		return 0;
+	
+	html_buffer_t buf;
+	char tempbuf[32], tmpvalue[128];
+	
+	initHTMLBuffer(&buf);
+	
+	// Write begin
+	websWrite(wp, "\t\t<div style=\"display: none;\" id=\"MBSSHidden%d\">\n", bssnum);
+	nvram_init(RT2860_NVRAM);
+	
+	const mbss_param_t *parm = mbss_params;
+	while ((parm->name) != NULL)
+	{
+		catIndex(tempbuf, parm->name, bssnum);
+		if (parm->is_comp)
+		{
+			char *value = nvram_bufget(RT2860_NVRAM, parm->name);
+			if (value == NULL)
+				value = "";
+			
+			// Fetch parameter
+			fetchIndexedParam(value, bssnum-1, tmpvalue);
+			encodeHTMLContent(tmpvalue, &buf);
+		}
+		else
+		{
+			char *value = nvram_bufget(RT2860_NVRAM, tempbuf);
+			if (value == NULL)
+				value = "";
+			encodeHTMLContent(value, &buf);
+		}
+
+		websWrite(wp, "\t\t\t<input name=\"%s\" value=\"%s\">\n", tempbuf, buf.data);
+		resetHTMLBuffer(&buf);
+		parm++;
+	}
+
+	nvram_close(RT2860_NVRAM);
+	websWrite(wp, "\t\t</div>\n");
+	// Write end
+	
+	freeHTMLBuffer(&buf);
+	
+	return 0;
+}
+
+static void revise_mbss_updated_values(webs_t wp, int bssnum)
+{
+	const mbss_param_t *parm = mbss_params;
+	char tempbuf[32], tmpvalue[128];
+	int i;
+
+	nvram_init(RT2860_NVRAM);
+
+	while (parm->name != NULL)
+	{
+		if (parm->is_comp)
+		{
+			tmpvalue[0] = '\0';
+			for (i=0; i<bssnum; i++) // Build string from parameters
+			{
+				catIndex(tempbuf, parm->name, (i+1));
+				char *v = websGetVar(wp, tempbuf, T(""));
+				if (v == NULL)
+					v = "";
+//				printf("web.%s = %s\n", tempbuf, v);
+				sprintf(tmpvalue, "%s%s;", tmpvalue, v);
+			}
+			printf("%s = %s\n", parm->name, tmpvalue);
+			nvram_bufset(RT2860_NVRAM, parm->name, tmpvalue);
+		}
+		else
+		{
+			for (i=0; i<bssnum; i++) // set-up parameter by parameter
+			{
+				catIndex(tempbuf, parm->name, (i+1));
+				char *v = websGetVar(wp, tempbuf, T(""));
+				if (v == NULL)
+					v = "";
+//				printf("web.%s = %s\n", tempbuf, v);
+				printf("%s = %s\n", tempbuf, v);
+				nvram_bufset(RT2860_NVRAM, tempbuf, v);
+			}
+		}
+		parm++;
+	}
+	
+	nvram_commit(RT2860_NVRAM);
+	nvram_close(RT2860_NVRAM);
+}
+
+/*
+static void revise_mbss_value(int old_num, int new_num)
+{
+
 	char new_value[264], *old_value, *p;
 	int i;
 
@@ -483,20 +639,53 @@ static void revise_mbss_value(int old_num, int new_num)
 		nvram_close(RT2860_NVRAM);
 	}
 }
+*/
+
+static void setupSecurityLed(void)
+{
+	int i, bss_num, led_on;
+	char buf[32];
+	
+	nvram_init(RT2860_NVRAM);
+
+	char *BssNum = nvram_bufget(RT2860_NVRAM, "BssidNum");
+	char *AuthMode = nvram_bufget(RT2860_NVRAM, "AuthMode");
+	
+	if (CHK_IF_SET(BssNum))
+	{
+		bss_num = CHK_GET_DIGIT(BssNum);
+		if ((bss_num >= 1) && (bss_num <= 8) && (CHK_IF_SET(AuthMode)))
+		{
+			led_on = LED_OFF;
+			for (i=0; i<bss_num; i++)
+			{
+				fetchIndexedParam(AuthMode, i, buf);
+				if ((buf[0] != '\0') && (strcmp(buf, "OPEN") != 0))
+				{
+					led_on = LED_ON;
+					break;
+				}
+			}
+			
+			ledAlways(GPIO_LED_SEC_GREEN, led_on); // turn on/off security LED
+		}
+	}
+	
+	nvram_close(RT2860_NVRAM);
+}
 
 /* goform/wirelessBasic */
 static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 {
 	char_t	*wirelessmode;
-	char_t	*ssid, *mssid_1, *mssid_2, *mssid_3, *mssid_4, *mssid_5, *mssid_6,
-			*mssid_7, *bssid_num, *hssid, *isolated_ssid, *mbssidapisolated;
+	char_t  *bssid_num, *hssid, *isolated_ssid, *mbssidapisolated;
 	char_t	*sz11aChannel, *sz11bChannel, *sz11gChannel, *abg_rate;
 	char_t	*n_mode, *n_bandwidth, *n_gi, *n_mcs, *n_rdg, *n_extcha, *n_amsdu;
 	char_t	*n_autoba, *n_badecline;
 	char_t	*tx_stream, *rx_stream;
 	char_t	*radio;
-	char	hidden_ssid[16], noforwarding[16];
-	int i = 0, is_n = 0, new_bssid_num, old_bssid_num = 1;
+	char	hidden_ssid[16] = "", noforwarding[16] = "";
+	int     is_n = 0, new_bssid_num, old_bssid_num = 1;
 	char *submitUrl;
 
 	radio = websGetVar(wp, T("radiohiddenButton"), T("2"));
@@ -513,16 +702,8 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 		return;
 	}
 
-	//fetch from web input
+	// fetch from web input
 	wirelessmode = websGetVar(wp, T("wirelessmode"), T("9")); //9: bgn mode
-	ssid = websGetVar(wp, T("ssid"), T("")); 
-	mssid_1 = websGetVar(wp, T("mssid_1"), T("")); 
-	mssid_2 = websGetVar(wp, T("mssid_2"), T("")); 
-	mssid_3 = websGetVar(wp, T("mssid_3"), T("")); 
-	mssid_4 = websGetVar(wp, T("mssid_4"), T("")); 
-	mssid_5 = websGetVar(wp, T("mssid_5"), T("")); 
-	mssid_6 = websGetVar(wp, T("mssid_6"), T("")); 
-	mssid_7 = websGetVar(wp, T("mssid_7"), T("")); 
 	bssid_num = websGetVar(wp, T("bssid_num"), T("1"));
 	hssid = websGetVar(wp, T("hssid"), T("")); 
 	isolated_ssid = websGetVar(wp, T("isolated_ssid"), T(""));
@@ -557,124 +738,56 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
 
-        if (atoi(wirelessmode) >= 6)
-                is_n = 1;
-
-	//SSID, Multiple SSID
-	if (0 == strlen(ssid)) {
-		websError(wp, 403, T("'SSID' should not be empty!"));
-		return;
-	}
+	if (atoi(wirelessmode) >= 6)
+		is_n = 1;
 
 	nvram_init(RT2860_NVRAM);
-	nvram_bufset(RT2860_NVRAM, "SSID1", ssid);
-	if (strchr(hssid, '0') != NULL)
-		sprintf(hidden_ssid, "%s", "1");
-	else
-		sprintf(hidden_ssid, "%s", "0");
-	if (strchr(isolated_ssid, '0') != NULL)
-		sprintf(noforwarding, "%s", "1");
-	else
-		sprintf(noforwarding, "%s", "0");
-
 //#WPS
 	char *wordlist= nvram_bufget(RT2860_NVRAM, "WscModeOption");
-	if(wordlist){
+	if (wordlist)
+	{
 		if (strcmp(wordlist, "0"))
-		    doSystem("iwpriv ra0 set WscConfStatus=1");
-		    nvram_bufset(RT2860_NVRAM, "WscConfigured", "1");
-		    g_wsc_configured = 1;
+			doSystem("iwpriv ra0 set WscConfStatus=1");
+		nvram_bufset(RT2860_NVRAM, "WscConfigured", "1");
+		g_wsc_configured = 1;
 	}
 
 	default_shown_mbssid[RT2860_NVRAM] = 0;
 
-	i = 2;
-	if (0 != strlen(mssid_1)) {
-		nvram_bufset(RT2860_NVRAM, racat("SSID", i), mssid_1);
-		if (strchr(hssid, '1') != NULL)
-			sprintf(hidden_ssid, "%s%s", hidden_ssid, ";1");
-		else
-			sprintf(hidden_ssid, "%s%s", hidden_ssid, ";0");
-		if (strchr(isolated_ssid, '1') != NULL)
-			sprintf(noforwarding, "%s%s", noforwarding, ";1");
-		else
-			sprintf(noforwarding, "%s%s", noforwarding, ";0");
-		i++;
-	}
-	if (0 != strlen(mssid_2)) {
-		nvram_bufset(RT2860_NVRAM, racat("SSID", i), mssid_2);
-		if (strchr(hssid, '2') != NULL)
-			sprintf(hidden_ssid, "%s%s", hidden_ssid, ";1");
-		else
-			sprintf(hidden_ssid, "%s%s", hidden_ssid, ";0");
-		if (strchr(isolated_ssid, '2') != NULL)
-			sprintf(noforwarding, "%s%s", noforwarding, ";1");
-		else
-			sprintf(noforwarding, "%s%s", noforwarding, ";0");
-		i++;
-	}
-	if (0 != strlen(mssid_3)) {
-		nvram_bufset(RT2860_NVRAM, racat("SSID", i), mssid_3);
-		if (strchr(hssid, '3') != NULL)
-			sprintf(hidden_ssid, "%s%s", hidden_ssid, ";1");
-		else
-			sprintf(hidden_ssid, "%s%s", hidden_ssid, ";0");
-		if (strchr(isolated_ssid, '3') != NULL)
-			sprintf(noforwarding, "%s%s", noforwarding, ";1");
-		else
-			sprintf(noforwarding, "%s%s", noforwarding, ";0");
-		i++;
-	}
-	if (0 != strlen(mssid_4)) {
-		nvram_bufset(RT2860_NVRAM, racat("SSID", i), mssid_4);
-		if (strchr(hssid, '4') != NULL)
-			sprintf(hidden_ssid, "%s%s", hidden_ssid, ";1");
-		else
-			sprintf(hidden_ssid, "%s%s", hidden_ssid, ";0");
-		if (strchr(isolated_ssid, '4') != NULL)
-			sprintf(noforwarding, "%s%s", noforwarding, ";1");
-		else
-			sprintf(noforwarding, "%s%s", noforwarding, ";0");
-		i++;
-	}
-	if (0 != strlen(mssid_5)) {
-		nvram_bufset(RT2860_NVRAM, racat("SSID", i), mssid_5);
-		if (strchr(hssid, '5') != NULL)
-			sprintf(hidden_ssid, "%s%s", hidden_ssid, ";1");
-		else
-			sprintf(hidden_ssid, "%s%s", hidden_ssid, ";0");
-		if (strchr(isolated_ssid, '5') != NULL)
-			sprintf(noforwarding, "%s%s", noforwarding, ";1");
-		else
-			sprintf(noforwarding, "%s%s", noforwarding, ";0");
-		i++;
-	}
-	if (0 != strlen(mssid_6)) {
-		nvram_bufset(RT2860_NVRAM, racat("SSID", i), mssid_6);
-		if (strchr(hssid, '6') != NULL)
-			sprintf(hidden_ssid, "%s%s", hidden_ssid, ";1");
-		else
-			sprintf(hidden_ssid, "%s%s", hidden_ssid, ";0");
-		if (strchr(isolated_ssid, '6') != NULL)
-			sprintf(noforwarding, "%s%s", noforwarding, ";1");
-		else
-			sprintf(noforwarding, "%s%s", noforwarding, ";0");
-		i++;
-	}
-	if (0 != strlen(mssid_7)) {
-		nvram_bufset(RT2860_NVRAM, racat("SSID", i), mssid_7);
-		if (strchr(hssid, '7') != NULL)
-			sprintf(hidden_ssid, "%s%s", hidden_ssid, ";1");
-		else
-			sprintf(hidden_ssid, "%s%s", hidden_ssid, ";0");
-		if (strchr(isolated_ssid, '7') != NULL)
-			sprintf(noforwarding, "%s%s", noforwarding, ";1");
-		else
-			sprintf(noforwarding, "%s%s", noforwarding, ";0");
-		i++;
+	// Fill-in SSID
+	int i = 1, ssid = 0;
+	char ssid_web_var[8] = "mssid_\0";
+	char ssid_nvram_var[8] = "SSID\0\0\0";
+
+	for (ssid=0; ssid<8; ssid++)
+	{
+		ssid_web_var[6] = ssid  + '1';
+		ssid_nvram_var[4] = i  + '0';
+		
+		char_t *mssid = websGetVar(wp, ssid_web_var, T(""));
+		printf("web: %s = %s\n", ssid_web_var, mssid);
+		if (CHK_IF_SET(mssid))
+		{
+			nvram_bufset(RT2860_NVRAM, ssid_nvram_var, mssid);
+			printf("nvram: %s = %s\n", ssid_nvram_var, mssid);
+			
+			if (strchr(hssid, ssid + '0') != NULL)
+				sprintf(hidden_ssid, "%s%s", hidden_ssid, "1;");
+			else
+				sprintf(hidden_ssid, "%s%s", hidden_ssid, "0;");
+			
+			if (strchr(isolated_ssid, ssid + '0') != NULL)
+				sprintf(noforwarding, "%s%s", noforwarding, "1;");
+			else
+				sprintf(noforwarding, "%s%s", noforwarding, "0;");
+			i++;
+		}
 	}
 
 	nvram_bufset(RT2860_NVRAM, "BssidNum", bssid_num);
+	nvram_bufset(RT2860_NVRAM, "HideSSID", hidden_ssid);
+	nvram_bufset(RT2860_NVRAM, "NoForwarding", noforwarding);
+	nvram_bufset(RT2860_NVRAM, "NoForwardingBTNBSSID", mbssidapisolated);
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
 
@@ -682,19 +795,13 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 		websError(wp, 403, T("'bssid_num' %s is out of range!"), bssid_num);
 		return;
 	}
-	revise_mbss_value(old_bssid_num, new_bssid_num);
-
-	nvram_init(RT2860_NVRAM);
-	//Broadcast SSID
-	nvram_bufset(RT2860_NVRAM, "HideSSID", hidden_ssid);
-	// NoForwarding and NoForwardingBTNBSSID
-	nvram_bufset(RT2860_NVRAM, "NoForwarding", noforwarding);
-	nvram_bufset(RT2860_NVRAM, "NoForwardingBTNBSSID", mbssidapisolated);
-	nvram_commit(RT2860_NVRAM);
-	nvram_close(RT2860_NVRAM);
+	//revise_mbss_value(old_bssid_num, new_bssid_num);
+	revise_mbss_updated_values(wp, new_bssid_num);
+	setupSecurityLed();
 
 	//11abg Channel or AutoSelect
-	if ((0 == strlen(sz11aChannel)) && (0 == strlen(sz11bChannel)) && (0 == strlen(sz11gChannel))) {
+	if ((0 == strlen(sz11aChannel)) && (0 == strlen(sz11bChannel)) && (0 == strlen(sz11gChannel)))
+	{
 		websError(wp, 403, T("'Channel' should not be empty!"));
 		return;
 	}
@@ -702,27 +809,31 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 	nvram_init(RT2860_NVRAM);
 	if (!strncmp(sz11aChannel, "0", 2) && !strncmp(sz11bChannel, "0", 2) && !strncmp(sz11gChannel, "0", 2))
 	{
-	    nvram_bufset(RT2860_NVRAM, "AutoChannelSelect", "1");
-	} else {
-	    nvram_bufset(RT2860_NVRAM, "AutoChannelSelect", "0");
-	    if (0 != strlen(sz11aChannel))
-	    {
-		nvram_bufset(RT2860_NVRAM, "Channel", sz11aChannel);
-		doSystem("iwpriv ra0 set Channel=%s", sz11aChannel);
-	    }
-	    if (0 != strlen(sz11bChannel))
-	    {
-		nvram_bufset(RT2860_NVRAM, "Channel", sz11bChannel);
-		doSystem("iwpriv ra0 set Channel=%s", sz11bChannel);
-	    }
-	    if (0 != strlen(sz11gChannel))
-	    {
-		nvram_bufset(RT2860_NVRAM, "Channel", sz11gChannel);
-		doSystem("iwpriv ra0 set Channel=%s", sz11gChannel);
-	    }
+		nvram_bufset(RT2860_NVRAM, "AutoChannelSelect", "1");
 	}
+	else
+	{
+		nvram_bufset(RT2860_NVRAM, "AutoChannelSelect", "0");
+		if (CHK_IF_SET(sz11aChannel))
+		{
+			nvram_bufset(RT2860_NVRAM, "Channel", sz11aChannel);
+			doSystem("iwpriv ra0 set Channel=%s", sz11aChannel);
+		}
+		if (CHK_IF_SET(sz11bChannel))
+		{
+			nvram_bufset(RT2860_NVRAM, "Channel", sz11bChannel);
+			doSystem("iwpriv ra0 set Channel=%s", sz11bChannel);
+		}
+		if (CHK_IF_SET(sz11gChannel))
+		{
+			nvram_bufset(RT2860_NVRAM, "Channel", sz11gChannel);
+			doSystem("iwpriv ra0 set Channel=%s", sz11gChannel);
+		}
+	}
+
 	//Rate for a, b, g
-	if (strncmp(abg_rate, "", 1)) {
+	if (strncmp(abg_rate, "", 1))
+	{
 		int rate = atoi(abg_rate);
 		if (!strncmp(wirelessmode, "0", 2) || !strncmp(wirelessmode, "2", 2) || !strncmp(wirelessmode, "4", 2)) {
 			if (rate == 1 || rate == 2 || rate == 5 || rate == 11)
@@ -775,7 +886,8 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 		nvram_bufset(RT2860_NVRAM, "FixedTxMode", "HT");
 
 	//HT_OpMode, HT_BW, HT_GI, HT_MCS, HT_RDG, HT_EXTCHA, HT_AMSDU, HT_TxStream, HT_RxStream
-	if (is_n) {
+	if (is_n)
+	{
 		nvram_bufset(RT2860_NVRAM, "HT_OpMode", n_mode);
 		nvram_bufset(RT2860_NVRAM, "HT_BW", n_bandwidth);
 		nvram_bufset(RT2860_NVRAM, "HT_GI", n_gi);
@@ -786,7 +898,7 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 		nvram_bufset(RT2860_NVRAM, "HT_AutoBA", n_autoba);
 		nvram_bufset(RT2860_NVRAM, "HT_BADecline", n_badecline);
 		nvram_bufset(RT2860_NVRAM, "HT_TxStream", tx_stream);
-    		nvram_bufset(RT2860_NVRAM, "HT_RxStream", rx_stream);
+		nvram_bufset(RT2860_NVRAM, "HT_RxStream", rx_stream);
 	}
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
@@ -798,10 +910,10 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 		websHeader(wp);
 		websWrite(wp, T("<h2>mode: %s</h2><br>\n"), wirelessmode);
 		websWrite(wp, T("ssid: %s, bssid_num: %s<br>\n"), ssid, bssid_num);
-		websWrite(wp, T("mssid_1: %s, mssid_2: %s, mssid_3: %s<br>\n"),
+/*		websWrite(wp, T("mssid_1: %s, mssid_2: %s, mssid_3: %s<br>\n"),
 				mssid_1, mssid_2, mssid_3);
 		websWrite(wp, T("mssid_4: %s, mssid_5: %s, mssid_6: %s, mssid_7: %s<br>\n"),
-				mssid_4, mssid_5, mssid_6, mssid_7);
+				mssid_4, mssid_5, mssid_6, mssid_7);*/
 		websWrite(wp, T("hssid: %s<br>\n"), hssid);
 		websWrite(wp, T("isolated_ssid: %s<br>\n"), isolated_ssid);
 		websWrite(wp, T("mbssidapisolated: %s<br>\n"), mbssidapisolated);
@@ -1535,7 +1647,7 @@ void Security(int nvram, webs_t wp, char_t *path, char_t *query)
 	char *submitUrl;
 
 	LFW(SSID, ssidIndex);
-	if(!gstrlen(SSID))
+	if (!CHK_IF_SET(SSID))
 		return;
 
 	mbssid = atoi(SSID);
@@ -1544,16 +1656,18 @@ void Security(int nvram, webs_t wp, char_t *path, char_t *query)
 
 	LFW(security_mode, security_mode);
 
-	if (!strcmp(security_mode, "Disable") || !strcmp(security_mode, "OPEN"))
+/*	if (!strcmp(security_mode, "Disable") || !strcmp(security_mode, "OPEN"))
 		ledAlways(GPIO_LED_SEC_GREEN, LED_OFF); //turn off security LED
 	else
 		ledAlways(GPIO_LED_SEC_GREEN, LED_ON); //turn on security LED
+*/
 
 	//clear Radius settings
 	clearRadiusSetting(nvram, mbssid);
 
 	nvram_init(RT2860_NVRAM);
-	if( !strcmp(security_mode, "Disable")){			// !------------------       Disable Mode --------------
+	if ( !strcmp(security_mode, "Disable")) // !------------------       Disable Mode --------------
+	{
 		STFs(nvram, mbssid, "AuthMode", "OPEN");
 		STFs(nvram, mbssid, "EncrypType", "NONE");
 		STFs(nvram, mbssid, "IEEE8021X", "0");
@@ -1645,6 +1759,8 @@ void Security(int nvram, webs_t wp, char_t *path, char_t *query)
 	}
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
+	
+	setupSecurityLed();
 
 //# Access Policy
 	if(AccessPolicyHandle(nvram, wp, mbssid) == -1)
@@ -1661,13 +1777,11 @@ void Security(int nvram, webs_t wp, char_t *path, char_t *query)
 	}
 
 	mbssid_num = atoi(nvram_get(nvram, "BssidNum"));
-	for(i=0; i<mbssid_num; i++){
+	for (i=0; i<mbssid_num; i++)
 		doSystem("ifconfig ra%d down", i);
-	}
 	gen_wifi_config(RT2860_NVRAM);
-	for(i=0; i<mbssid_num; i++){
+	for (i=0; i<mbssid_num; i++)
 		doSystem("ifconfig ra%d up", i);
-	}
 
 	submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
 	if (! submitUrl[0])

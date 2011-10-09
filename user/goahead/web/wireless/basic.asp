@@ -37,6 +37,11 @@ var rx_stream_idx = '<% getCfgZero(1, "HT_RxStream"); %>';
 var is3t3r = '<% is3t3r(); %>';
 var mssidb      = "<% getMBSSIDBuilt(); %>";
 
+var mbss_params =
+[
+	<% dumpBSSKeys(); %>
+];
+
 var ChannelList_24G = 
 [
 	"2412MHz (Channel 1)",
@@ -55,31 +60,33 @@ var ChannelList_24G =
 	"2484MHz (Channel 14)"
 ];
 
-var ChannelList_5G = new Array(33);
-ChannelList_5G[0] = "5180MHz (Channel 36)";
-ChannelList_5G[1] = "5200MHz (Channel 40)";
-ChannelList_5G[2] = "5220MHz (Channel 44)";
-ChannelList_5G[3] = "5240MHz (Channel 48)";
-ChannelList_5G[4] = "5260MHz (Channel 52)";
-ChannelList_5G[5] = "5280MHz (Channel 56)";
-ChannelList_5G[6] = "5300MHz (Channel 60)";
-ChannelList_5G[7] = "5320MHz (Channel 64)";
-ChannelList_5G[16] = "5500MHz (Channel 100)";
-ChannelList_5G[17] = "5520MHz (Channel 104)";
-ChannelList_5G[18] = "5540MHz (Channel 108)";
-ChannelList_5G[19] = "5560MHz (Channel 112)";
-ChannelList_5G[20] = "5580MHz (Channel 116)";
-ChannelList_5G[21] = "5600MHz (Channel 120)";
-ChannelList_5G[22] = "5620MHz (Channel 124)";
-ChannelList_5G[23] = "5640MHz (Channel 128)";
-ChannelList_5G[24] = "5660MHz (Channel 132)";
-ChannelList_5G[25] = "5680MHz (Channel 136)";
-ChannelList_5G[26] = "5700MHz (Channel 140)";
-ChannelList_5G[28] = "5745MHz (Channel 149)";
-ChannelList_5G[29] = "5765MHz (Channel 153)";
-ChannelList_5G[30] = "5785MHz (Channel 157)";
-ChannelList_5G[31] = "5805MHz (Channel 161)";
-ChannelList_5G[32] = "5825MHz (Channel 165)";
+var ChannelList_5G =
+[
+	"5180MHz (Channel 36)",
+	"5200MHz (Channel 40)",
+	"5220MHz (Channel 44)",
+	"5240MHz (Channel 48)",
+	"5260MHz (Channel 52)",
+	"5280MHz (Channel 56)",
+	"5300MHz (Channel 60)",
+	"5320MHz (Channel 64)",
+	"5500MHz (Channel 100)",
+	"5520MHz (Channel 104)",
+	"5540MHz (Channel 108)",
+	"5560MHz (Channel 112)",
+	"5580MHz (Channel 116)",
+	"5600MHz (Channel 120)",
+	"5620MHz (Channel 124)",
+	"5640MHz (Channel 128)",
+	"5660MHz (Channel 132)",
+	"5680MHz (Channel 136)",
+	"5700MHz (Channel 140)",
+	"5745MHz (Channel 149)",
+	"5765MHz (Channel 153)",
+	"5785MHz (Channel 157)",
+	"5805MHz (Channel 161)",
+	"5825MHz (Channel 165)"
+];
 
 var HT5GExtCh = new Array(22);
 HT5GExtCh[0] = new Array(1, "5200MHz (Channel 40)"); // channel 36's extension channel
@@ -412,6 +419,13 @@ function ssidAdd(form)
 		showElement('div_hssid' + count);
 		enableElements(form.addBSSIDbtn, ((++count) < 8));
 		form.bssid_num.value = count;
+		form.elements['mssid_' + count].value = '';
+		form.hssid[count-1].checked = false;
+		form.isolated_ssid[count-1].checked = false;
+		
+		// Clear values
+		for (var p=0; p<mbss_params.length; p++)
+			form.elements[mbss_params[p] + count].value = '';
 	}
 }
 
@@ -425,22 +439,28 @@ function ssidRemove(form, index)
 		// Move values
 		for (var i=index; i < count; i++)
 		{
-			form.elements['mssid_' + i].value = form.elements['mssid_' + (i+1)].value;
+			form.elements['mssid_' + (i+1)].value = form.elements['mssid_' + (i+2)].value;
 			form.hssid[i].checked = form.hssid[i+1].checked;
 			form.isolated_ssid[i].checked = form.isolated_ssid[i+1].checked;
+			
+			for (var p=0; p<mbss_params.length; p++)
+				form.elements[mbss_params[p] + (i + 1)].value = 
+					form.elements[mbss_params[p] + (i + 2)].value;
 		}
 	}
 	
 	// Clear values
-	form.elements['mssid_' + count].value = '';
+	form.elements['mssid_' + (count+1)].value = '';
 	form.hssid[count].checked = false;
 	form.isolated_ssid[count].checked = false;
+	for (var p=0; p<mbss_params.length; p++)
+		form.elements[mbss_params[p] + (count + 1)].value = '';
 	
 	hideElement('div_hssid' + count);
 	form.bssid_num.value = count;
 	
 	// Enable controls
-	EnableElements(form.addBSSIDbtn, (count < 8));
+	enableElements(form.addBSSIDbtn, (count < 8));
 }
 
 function initTranslation()
@@ -658,25 +678,6 @@ function initValue()
 		showElementEx("div_11a_channel", style_display_on());
 	}
 	
-	/*
-	for (i=1; i<8; i++)
-	{
-		hideElement("div_hssid" + i);
-		form.elements["mssid_" + i].disabled = true;
-		form.hssid[i].disabled = true;
-	}
-	
-	var mssidb      = "<% getMBSSIDBuilt(); %>";
-	if (mssidb == "1")
-	{
-		for (i=1; i<8; i++)
-		{
-			showElementEx("div_hssid" + i, style_display_on());
-			form.elements["mssid_" + i].disabled = false;
-			form.hssid[i].disabled = false;
-		}
-	}
-	*/
 	ssidDisplay(form);
 	
 	// Initialize bssid
@@ -918,9 +919,6 @@ function initValue()
 	form.n_autoba[ (ht_autoba == "0") ? 0 : 1 ].checked = true;
 	form.n_badecline[ (ht_badecline == "0") ? 0 : 1].checked = true;
 
-	if (apcli_include == "1")
-		form.mssid_7.disabled = true;
-
 	if (is3t3r == "1")
 	{
 		form.rx_stream.options[2] = new Option("3", "3");
@@ -1133,16 +1131,8 @@ function CheckValue(form)
 	var wireless_mode;
 	var channel_11a_index;
 
-	if (form.ssid.value == "")
-	{
-		alert("Please enter SSID!");
-		form.ssid.focus();
-		form.ssid.select();
-		return false;
-	}
-
 	var count = form.bssid_num.value * 1;
-	for (i = 1; i < count; i++)
+	for (i = 1; i <= count; i++)
 	{
 		var control = form.elements["mssid_" + i];
 		if (control.value == "")
@@ -1228,73 +1218,81 @@ function doRadioStatusChange(form)
 <tr> 
 	<td class="head" id="basicSSID">Network Name (SSID)</td>
 	<td>
-		<input class="normal" type="text" name="ssid" maxlength="32" value="<% getCfgGeneral(1, "SSID1"); %>">
+		<input class="normal" type="text" name="mssid_1" maxlength="32" value="<% getCfgGeneral(1, "SSID1"); %>">
 		<font id="basicHSSID0">Hidden</font><input type="checkbox" name="hssid" value="0">&nbsp;
 		<font id="basicIsolatedSSID0">Isolated</font><input type="checkbox" name="isolated_ssid" value="0">
 		<input type="button" onclick="ssidAdd(this.form);" name="addBSSIDbtn" value="Add BSSID">
+		<% dumpBSS(0); %>
 	</td>
 </tr>
 <tr id="div_hssid1" style="display:none;">
 	<td class="head">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font id="basicMSSID1">Multiple SSID</font>1</td>
 	<td>
-		<input class="normal" name="mssid_1" maxlength="32" value="<% getCfgGeneral(1, "SSID2"); %>">
+		<input class="normal" name="mssid_2" maxlength="32" value="<% getCfgGeneral(1, "SSID2"); %>">
 		<font id="basicHSSID1">Hidden</font><input type=checkbox name=hssid value="1">&nbsp;
 		<font id="basicIsolatedSSID1">Isolated</font><input type="checkbox" name="isolated_ssid" value="1">
 		<input type="button" onclick="ssidRemove(this.form, 1);" value="Remove">
+		<% dumpBSS(1); %>
 	</td>
 </tr>
 <tr id="div_hssid2" style="display:none;">
 	<td class="head">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font id="basicMSSID2">Multiple SSID</font>2</td>
 	<td>
-		<input class="normal" type="text" name="mssid_2" maxlength="32" value="<% getCfgGeneral(1, "SSID3"); %>">
+		<input class="normal" type="text" name="mssid_3" maxlength="32" value="<% getCfgGeneral(1, "SSID3"); %>">
 		<font id="basicHSSID2">Hidden</font><input type="checkbox" name="hssid" value="2">&nbsp;
 		<font id="basicIsolatedSSID2">Isolated</font><input type="checkbox" name="isolated_ssid" value="2">
 		<input type="button" onclick="ssidRemove(this.form, 2);" value="Remove">
+		<% dumpBSS(2); %>
 	</td>
 </tr>
 <tr id="div_hssid3" style="display:none;">
 	<td class="head">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font id="basicMSSID3">Multiple SSID</font>3</td>
 	<td>
-		<input class="normal" type="text" name="mssid_3" maxlength="32" value="<% getCfgGeneral(1, "SSID4"); %>">
+		<input class="normal" type="text" name="mssid_4" maxlength="32" value="<% getCfgGeneral(1, "SSID4"); %>">
 		<font id="basicHSSID3">Hidden</font><input type="checkbox" name="hssid" value="3">&nbsp;
 		<font id="basicIsolatedSSID3">Isolated</font><input type="checkbox" name="isolated_ssid" value="3">
 		<input type="button" onclick="ssidRemove(this.form, 3);" value="Remove">
+		<% dumpBSS(3); %>
 	</td>
 </tr>
 <tr id="div_hssid4" style="display:none;">
 	<td class="head">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font id="basicMSSID4">Multiple SSID</font>4</td>
 	<td>
-		<input class="normal" type="text" name="mssid_4" maxlength="32" value="<% getCfgGeneral(1, "SSID5"); %>">
+		<input class="normal" type="text" name="mssid_5" maxlength="32" value="<% getCfgGeneral(1, "SSID5"); %>">
 		<font id="basicHSSID4">Hidden</font><input type="checkbox" name="hssid" value="4">&nbsp;
 		<font id="basicIsolatedSSID4">Isolated</font><input type="checkbox" name="isolated_ssid" value="4">
 		<input type="button" onclick="ssidRemove(this.form, 4);" value="Remove">
+		<% dumpBSS(4); %>
 	</td>
 </tr>
 <tr id="div_hssid5" style="display:none;">
 	<td class="head">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font id="basicMSSID5">Multiple SSID</font>5</td>
 	<td>
-		<input class="normal" type="text" name="mssid_5" maxlength="32" value="<% getCfgGeneral(1, "SSID6"); %>">
+		<input class="normal" type="text" name="mssid_6" maxlength="32" value="<% getCfgGeneral(1, "SSID6"); %>">
 		<font id="basicHSSID5">Hidden</font><input type="checkbox" name="hssid" value="5">&nbsp;
 		<font id="basicIsolatedSSID5">Isolated</font><input type="checkbox" name="isolated_ssid" value="5">
 		<input type="button" onclick="ssidRemove(this.form, 5);" value="Remove">
+		<% dumpBSS(5); %>
 	</td>
 </tr>
 <tr id="div_hssid6" style="display:none;">
 	<td class="head">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font id="basicMSSID6">Multiple SSID</font>6</td>
 	<td>
-		<input class="normal" type="text" name="mssid_6" maxlength="32" value="<% getCfgGeneral(1, "SSID7"); %>">
+		<input class="normal" type="text" name="mssid_7" maxlength="32" value="<% getCfgGeneral(1, "SSID7"); %>">
 		<font id="basicHSSID6">Hidden</font><input type="checkbox" name="hssid" value="6">&nbsp;
-		<font id="basicIsolatedSSID6">Isolated</font><input type=checkbox name=isolated_ssid value="6">
+		<font id="basicIsolatedSSID6">Isolated</font><input type="checkbox" name="isolated_ssid" value="6">
 		<input type="button" onclick="ssidRemove(this.form, 6);" value="Remove">
+		<% dumpBSS(6); %>
 	</td>
 </tr>
 <tr id="div_hssid7" style="display:none;">
 	<td class="head">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font id="basicMSSID7">Multiple SSID</font>7</td>
 	<td>
-		<input class="normal" type="text" name="mssid_7" maxlength="32" value="<% getCfgGeneral(1, "SSID8"); %>">
+		<input class="normal" type="text" name="mssid_8" maxlength="32" value="<% getCfgGeneral(1, "SSID8"); %>">
 		<font id="basicHSSID7">Hidden</font><input type="checkbox" name="hssid" value="7">&nbsp;
 		<font id="basicIsolatedSSID7">Isolated</font><input type="checkbox" name="isolated_ssid" value="7">
 		<input type="button" onclick="ssidRemove(this.form, 7);" value="Remove">
+		<% dumpBSS(7); %>
 	</td>
 </tr>
 <tr> 

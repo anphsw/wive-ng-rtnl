@@ -75,8 +75,15 @@ long readUnsigned(const char *str)
 int initHTMLBuffer(html_buffer_t *buf)
 {
 	buf->size = HTML_BUFFER_QUANTITY;
+	buf->c_pos = 0;
 	buf->data = (char *)malloc(HTML_BUFFER_QUANTITY);
-	return (buf!=NULL) ? 0 : -errno;
+	return (buf->data != NULL) ? 0 : -errno;
+}
+
+void resetHTMLBuffer(html_buffer_t *buf)
+{
+	buf->c_pos = 0;
+	buf->data[0] = '\0';
 }
 
 static const char *html_find_match(char ch)
@@ -114,7 +121,7 @@ int encodeHTMLContent(const char *data, html_buffer_t *buf)
 	{
 		const char *rep = html_find_match(*data);
 		
-		if (rep==NULL) //Append character to buffer
+		if (rep == NULL) //Append character to buffer
 		{
 			int ret = append_html_buffer(buf, *data);
 			if (ret<0) // Error happened?
@@ -143,7 +150,7 @@ int freeHTMLBuffer(html_buffer_t *buf)
 {
 	if (buf->data!=NULL)
 		free(buf->data);
-    return 0;
+	return 0;
 }
 
 int checkFileExists(const char *fname)
@@ -184,4 +191,45 @@ void setupParameters(webs_t wp, const parameter_fetch_t *fetch, int transaction)
 		nvram_commit(RT2860_NVRAM);
 		nvram_close(RT2860_NVRAM);
 	}
+}
+
+char *catIndex(char *buf, const char *ptr, int index)
+{
+	char *p = buf;
+	while ((*ptr) != '\0')
+		*(p++) = *(ptr++);
+	*(p++) = (char)(index + '0');
+	*p = '\0';
+	
+	return buf;
+}
+
+void fetchIndexedParam(const char *buf, int index, char *retbuf)
+{
+	const char *p = buf;
+	const char *start = p;
+	int i;
+	
+	// Search start
+	for (i=0; i<index; i++)
+	{
+		while (((*p) != '\0') && ((*p) != ';'))
+			p++;
+		if ((*p) == 0)
+		{
+			*retbuf = '\0';
+			return;
+		}
+		else
+			start = ++p;
+	}
+	
+	// Search end
+	while (((*p) != '\0') && ((*p) != ';'))
+		p++;
+	
+	// Copy data
+	while (start < p)
+		*(retbuf++) = *(start++);
+	*retbuf = '\0';
 }

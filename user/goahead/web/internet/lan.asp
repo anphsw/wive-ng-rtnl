@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="/style/controls.css" type="text/css">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script type="text/javascript" src="/js/validation.js"></script>
+<script type="text/javascript" src="/js/controls.js"></script>
 
 <script language="JavaScript" type="text/javascript">
 
