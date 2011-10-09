@@ -340,7 +340,11 @@ start() {
 	    	    iptables -t nat -A DMZ -p udp -d $DMZIPAddress --dport 1701 -j RETURN
 		fi
 	    fi
+	    #direct
 	    iptables -t nat -A DMZ -j DNAT -i ! $lan_if -s ! $lan_ip/$lan_nm --to $DMZIPAddress
+	    #loopback
+	    iptables -t nat -A POSTROUTING -s $lan_ip/$lan_nm -d $DMZIPAddress -j SNAT -p tcp --to-source $lan_ip
+	    #allow forward
 	    iptables -A FORWARD -i ! $lan_if -d $DMZIPAddress -j ACCEPT
 	fi
 #########################################ACCEPT_ESTABLISHED################################

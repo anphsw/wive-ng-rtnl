@@ -704,6 +704,7 @@
 9) Fix work some usb2serial converter and 3G modems (very low speed).<br>
 10) Fix udppath need for correct l2tp kernel mode driver.<br>
 11) Leave carrier on for empty bridge.<br>
+12) Add nat loopback support for DMZ.<br>
 
 <br><br>
 <b>For support see:</b><br>
