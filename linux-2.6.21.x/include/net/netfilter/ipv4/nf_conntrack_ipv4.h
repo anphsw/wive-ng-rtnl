@@ -16,7 +16,9 @@
 /* per conntrack: nat application helper private data */
 union nf_conntrack_nat_help {
         /* insert nat helper private data here */
+#if defined(CONFIG_NF_NAT_PPTP) || defined(CONFIG_NF_NAT_PPTP_MODULE)
 	struct nf_nat_pptp nat_pptp_info;
+#endif
 };
 
 struct nf_conn_nat {
