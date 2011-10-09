@@ -709,6 +709,7 @@
 14) Add libnet (need for cdp).<br>
 15) Add Cisco Discovery deamon support (cdpEnabled variable. Need add in WebUI).<br>
 16) Fix configure security mode for MBSSID.<br>
+17) Update udpxy to PATCH120.<br>
 
 <br><br>
 <b>For support see:</b><br>
