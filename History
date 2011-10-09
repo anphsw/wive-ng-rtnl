@@ -705,6 +705,7 @@
 10) Fix udppath need for correct l2tp kernel mode driver.<br>
 11) Leave carrier on for empty bridge.<br>
 12) Add nat loopback support for DMZ.<br>
+13) Add UDPXYPort variable to change default udpxy port.<br>
 
 <br><br>
 <b>For support see:</b><br>

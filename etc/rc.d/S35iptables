@@ -20,7 +20,7 @@ start() {
 	iptables -A INPUT $STATE_EST -j ACCEPT
 ###########################################IGMP-RULES#######################################
 	# only WAN interface recived multicast
-	if [ "$opmode" != "0" ]; then    
+	if [ "$opmode" != "0" ]; then
 	    # INPUT needed by unpxy and igmpproxy
 	    if [ "$igmpen" != "0" ] || [ "$UDPXY" != "0" ]; then
 		$LOG "Set igmp input rules"
@@ -127,23 +127,23 @@ start() {
 	fi
 	if [ "$UDPXY" != "0" ]; then
 	    $LOG "udpxy limit"
-    	    iptables -A servicelimit $STATE_NEW -p tcp --dport 81 $CONNLIMIT 8 -j REJECT
+    	    iptables -A servicelimit $STATE_NEW -p tcp --dport $UDPXYPort $CONNLIMIT 8 -j REJECT
 	    if [ "$UDPXY" = "1" ]; then
 		if [ "$opmode" != "0" ]; then
-    		    iptables -A servicelimit -i $wan_if $STATE_NEW -p tcp --dport 81 -j DROP
+    		    iptables -A servicelimit -i $wan_if $STATE_NEW -p tcp --dport $UDPXYPort -j DROP
 		    if [ "$vpnEnabled" = "on" ] && [ "$vpnType" != "6" ]; then
-    			iptables -A servicelimit -i ppp+ $STATE_NEW -p tcp --dport 81 -j DROP
+    			iptables -A servicelimit -i ppp+ $STATE_NEW -p tcp --dport $UDPXYPort -j DROP
 		    fi
 		fi
-    		iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 81 -j ACCEPT
+    		iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport $UDPXYPort -j ACCEPT
 	     if [ "$Lan2Enabled" = "1" ]; then
-    		iptables -A servicelimit -i $lan2_if $STATE_NEW -p tcp --dport 81 -j ACCEPT
+    		iptables -A servicelimit -i $lan2_if $STATE_NEW -p tcp --dport $UDPXYPort -j ACCEPT
 	     fi
 	    elif [ "$UDPXY" = "2" ]; then
-    		iptables -A servicelimit $STATE_NEW -p tcp --dport 81 -j ACCEPT
+    		iptables -A servicelimit $STATE_NEW -p tcp --dport $UDPXYPort -j ACCEPT
 	    fi
 	else
-    	    iptables -A servicelimit $STATE_NEW -p tcp --dport 81 -j DROP
+    	    iptables -A servicelimit $STATE_NEW -p tcp --dport $UDPXYPort -j DROP
 	fi
 	if [ "$SmbEnabled" = "1" ]; then
 	    $LOG "samba"
@@ -439,6 +439,7 @@ get_param() {
     upnp=`nvram_get 2860 upnpEnabled`
     igmpen=`nvram_get 2860 igmpEnabled`
     UDPXY=`nvram_get 2860 UDPXYMode`
+    UDPXYPort=`nvram_get 2860 UDPXYPort`
     SmbEnabled=`nvram_get 2860 SmbEnabled`
     chilli_net=`nvram_get 2860 chilli_net`
     simple_qos=`nvram_get 2860 simple_qos`

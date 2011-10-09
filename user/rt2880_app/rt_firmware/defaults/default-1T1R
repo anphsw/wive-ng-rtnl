@@ -201,6 +201,7 @@ RemoteSSH=1
 RemoteFTP=0
 RemoteTelnet=0
 UDPXYMode=0
+UDPXYPort=81
 vpnEnabled=off
 vpnType=0
 vpnMPPE=off
