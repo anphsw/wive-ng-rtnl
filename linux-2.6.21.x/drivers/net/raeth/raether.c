@@ -2051,6 +2051,8 @@ void ra2880_setup_dev_fptable(struct net_device *dev)
 #endif
 #endif
 #endif
+#else
+	dev->weight = NUM_RX_DESC / 4;
 #endif
 #if defined (CONFIG_ETHTOOL)
 	dev->ethtool_ops	= &ra_ethtool_ops;

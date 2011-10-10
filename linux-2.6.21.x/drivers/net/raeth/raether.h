@@ -29,32 +29,16 @@
 #endif
 
 #ifdef CONFIG_RAETH_MEMORY_OPTIMIZATION
-#ifdef CONFIG_RAETH_ROUTER
-#define NUM_RX_DESC     128
-#define NUM_TX_DESC    	128
-#elif CONFIG_RT_3052_ESW
-#define NUM_RX_DESC     64
-#define NUM_TX_DESC     64
-#else
 #define NUM_RX_DESC     128
 #define NUM_TX_DESC     128
-#endif
 #else
 #ifdef CONFIG_BRIDGE_FASTPATH
 // To avoid driver tx ring full
 #define NUM_RX_DESC     512
 #define NUM_TX_DESC    	512
 #else
-#if defined (CONFIG_RAETH_ROUTER)
-#define NUM_RX_DESC     256
-#define NUM_TX_DESC    	256
-#elif defined (CONFIG_RT_3052_ESW)
 #define NUM_RX_DESC     256
 #define NUM_TX_DESC     256
-#else
-#define NUM_RX_DESC     256
-#define NUM_TX_DESC     256
-#endif
 #endif
 #endif
 
