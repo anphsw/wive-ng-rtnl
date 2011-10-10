@@ -404,10 +404,10 @@ void forward_config(struct net_device *dev)
 #endif
 
 /*
-* By default, RalinkSwitch it will drop packets that size over 1514 bytes.
+* By default, Ralink cpu it will drop packets that size over 1514 bytes.
 * So, some packets will be drop if after insert tag or size over 1514 bytes.
 * How to solve it? Setup register to receive jumbo frame.
-* This is need for support not standarte external tagging and some switches.
+* This is need for support not standart external tagging and some switches compat.
 */
 #if defined(CONFIG_RAETH_JUMBOFRAME) || defined(CONFIG_RAETH_HAS_PORT5) || defined(CONFIG_RAETH_ACCEPT_OVERSIZED)
 	// enable jumbo frame
