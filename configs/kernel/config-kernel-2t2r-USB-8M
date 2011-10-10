@@ -1443,7 +1443,6 @@ CONFIG_RA_HW_NAT_FIN_DLTA=5
 # CONFIG_RA_HW_NAT_ACL2UP_HELPER is not set
 # CONFIG_RA_HW_NAT_WIFI is not set
 # CONFIG_RA_HW_NAT_MINIMAL is not set
-# CONFIG_RA_HW_NAT_SAFE is not set
 
 #
 # AP MODE Ralink RT3xx/RT28xx wireless driver.
