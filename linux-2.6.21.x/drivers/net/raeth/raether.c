@@ -1241,9 +1241,9 @@ void kill_sig_workq(struct work_struct *work)
 
 #ifndef CONFIG_RAETH_NAPI
 #ifdef WORKQUEUE_BH
-inline void ei_receive_workq(struct work_struct *work)
+void ei_receive_workq(struct work_struct *work)
 #else
-inline void ei_receive(unsigned long unused)  // device structure
+void ei_receive(unsigned long unused)  // device structure
 #endif // WORKQUEUE_BH //
 {
 	struct net_device *dev = dev_raether;
@@ -1347,9 +1347,9 @@ raeth_clean(struct net_device *netdev, int *budget)
  * RETURNS: N/A.
  */
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,21)
-static inline irqreturn_t ei_interrupt(int irq, void *dev_id)
+static irqreturn_t ei_interrupt(int irq, void *dev_id)
 #else
-static inline irqreturn_t ei_interrupt(int irq, void *dev_id, struct pt_regs * regs)
+static irqreturn_t ei_interrupt(int irq, void *dev_id, struct pt_regs * regs)
 #endif
 {
 #if !defined(CONFIG_RAETH_NAPI)
