@@ -2038,7 +2038,7 @@ void ra2880_setup_dev_fptable(struct net_device *dev)
 #ifdef CONFIG_RAETH_NAPI
 	dev->poll = &raeth_clean;
 #ifdef CONFIG_BRIDGE_FASTPATH
-	dev->weight = NUM_RX_DESC / 4;
+	dev->weight = 64;
 #else
 #if defined (CONFIG_RAETH_ROUTER) || defined (CONFIG_RT_3052_ESW)
 	dev->weight = 32;
@@ -2052,9 +2052,7 @@ void ra2880_setup_dev_fptable(struct net_device *dev)
 #if defined (CONFIG_ETHTOOL)
 	dev->ethtool_ops	= &ra_ethtool_ops;
 #endif
-#define TX_TIMEOUT (2*HZ)
-	dev->watchdog_timeo = TX_TIMEOUT;
-
+	dev->watchdog_timeo	= TX_TIMEOUT;
 }
 
 /* reset frame engine */
@@ -2067,7 +2065,7 @@ void fe_reset(void)
 #else
 	val = sysRegRead(RSTCTRL);
 
-// RT5350 need to reset ESW and FE at the same to avoid PDMA panic //	
+// RT5350 need to reset ESW and FE at the same to avoid PDMA panic //
 #if defined (CONFIG_RALINK_RT5350)
 	val = val | RALINK_FE_RST | RALINK_ESW_RST ;
 #else
