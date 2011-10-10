@@ -210,3 +210,8 @@ config RAETH_MEMORY_OPTIMIZATION
 	bool "Decrease memory usadge. Need for <32Mb RAM devices. More CPU use."
 	depends on RAETH
 	default n
+
+config RAETH_ACCEPT_OVERSIZED
+	bool "Accept all oversized packets."
+	depends on RAETH
+	default y
