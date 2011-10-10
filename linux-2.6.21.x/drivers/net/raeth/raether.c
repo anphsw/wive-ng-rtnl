@@ -2037,6 +2037,7 @@ void ra2880_setup_dev_fptable(struct net_device *dev)
 
 #ifdef CONFIG_RAETH_NAPI
 	dev->poll = &raeth_clean;
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,21)
 #ifdef CONFIG_BRIDGE_FASTPATH
 	dev->weight = 64;
 #else
@@ -2046,6 +2047,7 @@ void ra2880_setup_dev_fptable(struct net_device *dev)
 	dev->weight = 32;
 #else
 	dev->weight = 128;
+#endif
 #endif
 #endif
 #endif
