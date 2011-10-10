@@ -1558,8 +1558,8 @@ out:
   =======================================================================*/
 
 int netdev_max_backlog = 1000;
-int netdev_budget = 300;
-int weight_p = 64;            /* old backlog weight */
+int netdev_budget = 500;
+int weight_p = 128;            /* old backlog weight */
 
 DEFINE_PER_CPU(struct netif_rx_stats, netdev_rx_stat) = { 0, };
 
