@@ -93,10 +93,12 @@ int32_t mcast_rx(struct sk_buff * skb);
 int32_t mcast_tx(struct sk_buff * skb);
 #endif
 
+#ifdef CONFIG_RAETH_READ_MAC_FROM_MTD
 #ifdef RA_MTD_RW_BY_NUM
 int ra_mtd_read(int num, loff_t from, size_t len, u_char *buf);
 #else
 int ra_mtd_read_nm(char *name, loff_t from, size_t len, u_char *buf);
+#endif
 #endif
 
 /* gmac driver feature set config */
