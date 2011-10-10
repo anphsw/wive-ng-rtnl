@@ -121,6 +121,7 @@ config SERIAL_8250_CS
 config SERIAL_8250_NR_UARTS
 	int "Maximum number of 8250/16550 serial ports"
 	depends on SERIAL_8250
+	default "2" if RALINK_RT3052 || RALINK_RT3352 || RALINK_RT5350 || RALINK_RT3883
 	default "4"
 	help
 	  Set this to the number of serial ports you want the driver
@@ -132,6 +133,7 @@ config SERIAL_8250_RUNTIME_UARTS
 	int "Number of 8250/16550 serial ports to register at runtime"
 	depends on SERIAL_8250
 	range 0 SERIAL_8250_NR_UARTS
+	default "2" if RALINK_RT3052 || RALINK_RT3352 || RALINK_RT5350 || RALINK_RT3883
 	default "4"
 	help
 	  Set this to the maximum number of serial ports you want
