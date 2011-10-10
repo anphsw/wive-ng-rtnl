@@ -92,7 +92,7 @@ config  RA_HW_NAT_TBL_8K
 config  RA_HW_NAT_TBL_16K
         bool "16K"
 	depends on RA_HW_NAT
-	
+
 endchoice
 
 
@@ -100,7 +100,7 @@ choice
 	prompt "Hash Algorithm"
 	depends on RA_HW_NAT
 	default RA_HW_NAT_HASH1
-	
+
 config  RA_HW_NAT_HASH0
         bool "Hash0-Simple"
 	depends on RA_HW_NAT
@@ -281,7 +281,7 @@ config  RA_HW_NAT_FIN_DLTA
 	default 5
 	help
 	Set ageout time for FIN entry
-	
+
 config  RA_HW_NAT_IPV6
         bool "IPv6 Routing"
 	depends on RA_HW_NAT && !(RALINK_RT2880 || RALINK_RT3052)
@@ -302,9 +302,3 @@ config  RA_HW_NAT_WIFI
 config  RA_HW_NAT_MINIMAL
 	depends on RA_HW_NAT
 	bool "Only minimal hw_nat code support. No ACL/AC/MTR"
-
-config  RA_HW_NAT_SAFE
-	depends on RA_HW_NAT
-	bool "Safe mode hw_nat. No send multicast and broadcast to PPE."
-	help 
-	"This is more correct and more cpu load..."

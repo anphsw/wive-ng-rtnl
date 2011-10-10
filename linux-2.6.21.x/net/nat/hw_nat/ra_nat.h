@@ -176,17 +176,9 @@ typedef struct
 #define FOE_AIS(skb)		    ((PdmaRxDescInfo4 *)(&(skb)->cb[40]))->AIS
 #endif
 
-#ifdef CONFIG_RA_HW_NAT_SAFE
-#define IS_MAGIC_TAG_VALID(skb)	    ((FOE_MAGIC_TAG(skb) == FOE_MAGIC_PCI) || \
-				    (FOE_MAGIC_TAG(skb) == FOE_MAGIC_GE)   || \
-				    (FOE_MAGIC_TAG(skb) == FOE_MAGIC_WLAN)) && \
-				    (is_valid_ether_addr(eth_hdr(skb)->h_dest)) && \
-				    (!is_broadcast_ether_addr(eth_hdr(skb)->h_dest))
-#else
 #define IS_MAGIC_TAG_VALID(skb)	    ((FOE_MAGIC_TAG(skb) == FOE_MAGIC_PCI) || \
 				    (FOE_MAGIC_TAG(skb) == FOE_MAGIC_GE)   || \
 				    (FOE_MAGIC_TAG(skb) == FOE_MAGIC_WLAN))
-#endif
 
 /*
  * EXPORT FUNCTION

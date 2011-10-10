@@ -1557,9 +1557,15 @@ out:
 			Receiver routines
   =======================================================================*/
 
+#ifndef CONFIG_RAETH_MEMORY_OPTIMIZATION
 int netdev_max_backlog = 1000;
 int netdev_budget = 500;
 int weight_p = 128;            /* old backlog weight */
+#else
+int netdev_max_backlog = 500;
+int netdev_budget = 300;
+int weight_p = 64;            /* old backlog weight */
+#endif
 
 DEFINE_PER_CPU(struct netif_rx_stats, netdev_rx_stat) = { 0, };
 
