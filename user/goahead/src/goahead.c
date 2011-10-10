@@ -149,8 +149,14 @@ int main(int argc, char** argv)
     	    /* Start needed services */
 	    initInternet();
 
-	    //backup nvram setting and save rwfs
+	    /* Backup nvram setting and save rwfs */
+#ifndef CONFIG_KERNEL_NVRAM
+	    /* if usermode nvram need backup always boot */
 	    system("(sleep 20 && fs backup_nvram && fs save) &");
+#else
+	    /* if kernel need backup nvram only first boot and "SaveAndReboot" menu click */
+	    system("[ ! -f /etc/backup/nvram_backup.dat ] && (sleep 20 && fs backup_nvram && fs save) &");
+#endif
 
 	    //Work - Green ON
 	    ledAlways(GPIO_LED_WAN_ORANGE, LED_OFF);	//Turn off orange LED
