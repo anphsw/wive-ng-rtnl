@@ -1061,7 +1061,7 @@ static int rt2880_eth_recv(struct net_device* dev)
 			} else
 #endif
 				ei_local->stat.rx_dropped++;
-			//Fix realloc alloc skb buff.
+			//Fix realloc skb buff.
 			rx_ring[rx_dma_owner_idx0].rxd_info2.DDONE_bit = 0;
 			sysRegWrite(RX_CALC_IDX0, rx_dma_owner_idx0);
                         bReschedule = 1;
@@ -2039,17 +2039,15 @@ void ra2880_setup_dev_fptable(struct net_device *dev)
 
 #ifdef CONFIG_RAETH_NAPI
 	dev->poll = &raeth_clean;
-#ifdef CONFIG_BRIDGE_FASTPATH
+#if defined(CONFIG_BRIDGE_FASTPATH)
 	dev->weight = 64;
-#else
-#if defined (CONFIG_RAETH_ROUTER) || defined (CONFIG_RT_3052_ESW)
+#elif defined (CONFIG_RAETH_ROUTER) || defined (CONFIG_RT_3052_ESW)
 	dev->weight = 32;
 #else
 	dev->weight = 128;
 #endif
-#endif /* CONFIG_BRIDGE_FASTPATH */
-#endif  /* CONFIG_RAETH_NAPI */
-#endif  /* KERNEL_VERSION */
+#endif
+#endif
 
 #if defined (CONFIG_ETHTOOL)
 	dev->ethtool_ops	= &ra_ethtool_ops;
