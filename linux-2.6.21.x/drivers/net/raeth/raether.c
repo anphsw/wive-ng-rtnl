@@ -1059,6 +1059,9 @@ static int rt2880_eth_recv(struct net_device* dev)
 			} else
 #endif
 				ei_local->stat.rx_dropped++;
+			//Fix realloc alloc skb buff.
+			rx_ring[rx_dma_owner_idx0].rxd_info2.DDONE_bit = 0;
+			sysRegWrite(RX_CALC_IDX0, rx_dma_owner_idx0);
                         bReschedule = 1;
 			break;
 		}

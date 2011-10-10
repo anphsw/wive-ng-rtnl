@@ -711,6 +711,7 @@
 16) Fix configure security mode for MBSSID.<br>
 17) Update udpxy to PATCH120.<br>
 18) Workaround for accept frames > 1514 bytes.<br>
+19) Need drop done bit and touch LAN hardware at not allock new skb. Fix realloc.<br>
 
 <br><br>
 <b>For support see:</b><br>
