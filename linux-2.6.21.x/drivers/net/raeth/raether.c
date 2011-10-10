@@ -1241,9 +1241,9 @@ void kill_sig_workq(struct work_struct *work)
 
 #ifndef CONFIG_RAETH_NAPI
 #ifdef WORKQUEUE_BH
-void ei_receive_workq(struct work_struct *work)
+inline void ei_receive_workq(struct work_struct *work)
 #else
-void ei_receive(unsigned long unused)  // device structure
+inline void ei_receive(unsigned long unused)  // device structure
 #endif // WORKQUEUE_BH //
 {
 	struct net_device *dev = dev_raether;
@@ -1347,9 +1347,9 @@ raeth_clean(struct net_device *netdev, int *budget)
  * RETURNS: N/A.
  */
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,21)
-static irqreturn_t ei_interrupt(int irq, void *dev_id)
+static inline irqreturn_t ei_interrupt(int irq, void *dev_id)
 #else
-static irqreturn_t ei_interrupt(int irq, void *dev_id, struct pt_regs * regs)
+static inline irqreturn_t ei_interrupt(int irq, void *dev_id, struct pt_regs * regs)
 #endif
 {
 #if !defined(CONFIG_RAETH_NAPI)
@@ -1398,7 +1398,7 @@ static irqreturn_t ei_interrupt(int irq, void *dev_id, struct pt_regs * regs)
 #if defined (DELAY_INT)
 	if((reg_int_val & RX_DLY_INT))
 		recv = 1;
-	
+
 	if (reg_int_val & TX_DLY_INT)
 		transmit = 1;
 #else
@@ -2543,7 +2543,7 @@ int ei_open(struct net_device *dev)
 	*((volatile u32 *)(ESW_IMR)) &= ~(ESW_INT_ALL);
 	INIT_WORK(&ei_local->kill_sig_wq, kill_sig_workq);
 	err = request_irq(SURFBOARDINT_ESW, esw_interrupt, IRQF_DISABLED, "Ralink_ESW", dev);
-	
+
 	if (err)
 	    return err;
 #endif // CONFIG_RT_3052_ESW //
@@ -2631,7 +2631,7 @@ int ei_close(struct net_device *dev)
 #endif // WORKQUEUE_BH //
 
 	free_irq(dev->irq, dev);
- 
+
 #if defined (CONFIG_RT_3052_ESW)
 	free_irq(SURFBOARDINT_ESW, dev);
 #endif
