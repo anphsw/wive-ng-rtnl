@@ -137,6 +137,7 @@ config SPLIT_PTLOCK_CPUS
 	int
 	default "4096" if ARM && !CPU_CACHE_VIPT
 	default "4096" if PARISC && !PA20
+	default "2" if RALINK_RT3052 || RALINK_RT3352 || RALINK_RT5350 || RALINK_RT3883
 	default "4"
 
 #
