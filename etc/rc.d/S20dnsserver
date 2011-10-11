@@ -39,11 +39,11 @@ gen_hosts() {
   $LOG "Generate /etc/hosts file."
     /bin/hostname $HostName
     echo "127.0.0.1	localhost $HostName.lo" > /etc/hosts
-    echo "$lan_ip	$HostName.lo" >> /etc/hosts
-    if [ "$wan_ip" != "" ]; then
-	echo "$wan_ip	wan.$HostName.lo" >> /etc/hosts
+    echo "$lan_ipaddr	$HostName.lo" >> /etc/hosts
+    if [ "$wan_ipaddr" != "" ]; then
+	echo "$wan_ipaddr	wan.$HostName.lo" >> /etc/hosts
 	if [ "$DDNS" != "" ]; then
-	    echo "$wan_ip	$DDNS" >> /etc/hosts
+	    echo "$wan_ipaddr	$DDNS" >> /etc/hosts
 	fi
     fi
     if [ -d /proc/sys/net/ipv6 ]; then
@@ -57,8 +57,11 @@ gen_hosts() {
 get_param() {
     dnsPEnabled=`nvram_get 2860 dnsPEnabled`
     HostName=`nvram_get 2860 HostName`
-    lan_ip=`nvram_get 2860 lan_ipaddr`
-    wan_ip=`nvram_get 2860 wan_ipaddr`
+    lan_ipaddr=`nvram_get 2860 lan_ipaddr`
+    wan_ipaddr=`LC_ALL=C /bin/ifconfig $real_wan_if 2>&1 | grep 'inet addr' | awk '{print $2}' | sed -e 's/.*://'`
+    if [ "$wan_ipaddr" = "" ]; then
+	wan_ipaddr=`nvram_get 2860 wan_ipaddr`
+    fi
     DDNS=`nvram_get 2860 DDNS`
     cname="/etc/dnsmasq.conf"
     fname="/etc/resolv.conf"
