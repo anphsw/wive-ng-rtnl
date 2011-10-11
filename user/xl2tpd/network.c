@@ -79,7 +79,7 @@ int init_network (void)
     arg=1;
     if(setsockopt(server_socket, IPPROTO_IP, gconfig.sarefnum,
 		  &arg, sizeof(arg)) != 0) {
-	    l2tp_log(LOG_CRIT, "setsockopt recvref[%d]: %s\n", gconfig.sarefnum, strerror(errno));
+	    //l2tp_log(LOG_CRIT, "setsockopt recvref[%d]: %s\n", gconfig.sarefnum, strerror(errno));
 
 	    gconfig.ipsecsaref=0;
     }
