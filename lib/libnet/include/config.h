@@ -56,7 +56,7 @@
 /* #undef HAVE_NET_RAW_H */
 
 /* Define if we're running on a Linux system with PF_PACKET sockets. */
-/* #undef HAVE_PACKET_SOCKET */
+#define HAVE_PACKET_SOCKET 1
 
 /* Define if the sockaddr structure includes a sa_len member. */
 /* #undef HAVE_SOCKADDR_SA_LEN */

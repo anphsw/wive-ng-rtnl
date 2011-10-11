@@ -45,7 +45,7 @@ AC_DEFUN([AC_LIBNET_CHECK_PF_PACKET],
         [case "$target_os" in
 
         linux*)
-                libnet_cv_have_packet_socket=no
+                libnet_cv_have_packet_socket=yes
 		AC_MSG_RESULT(no)
                 ;;
         *)
@@ -113,10 +113,7 @@ EOF
     ;;
     esac])
 
-    if test $libnet_cv_have_packet_socket = yes -o $libnet_cv_have_packet_socket = probably; then
-        AC_DEFINE(HAVE_PACKET_SOCKET, 1,
-          [Define if we're running on a Linux system with PF_PACKET sockets.])
-    fi
+    AC_DEFINE(HAVE_PACKET_SOCKET, 1, [Define if we're running on a Linux system with PF_PACKET sockets.])
 ])
 
 dnl

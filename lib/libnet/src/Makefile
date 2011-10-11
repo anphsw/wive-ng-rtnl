@@ -137,7 +137,7 @@ AUTOMAKE = ${SHELL} /opt/Wive-RTNL/lib/libnet/missing --run automake-1.11
 AWK = gawk
 CC = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc
 CCDEPMODE = depmode=none
-CFLAGS = -D__linux__
+CFLAGS = -D__linux__ -DHAVE_PACKET_SOCKET
 CPP = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc -E
 CPPFLAGS = 
 CYGPATH_W = echo

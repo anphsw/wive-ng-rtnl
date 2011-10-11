@@ -53,7 +53,7 @@ AC_SUBST(LTLIBOBJS)
 dnl
 dnl Set the root install directory
 dnl
-AC_PREFIX_DEFAULT(/usr/local)
+AC_PREFIX_DEFAULT(/usr)
 dnl if test "$prefix" = "NONE"; then
 dnl     prefix="/usr"
 dnl fi

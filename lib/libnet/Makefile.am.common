@@ -11,5 +11,7 @@ DISTCLEANFILES = *~ ./filesystem/*
 
 ACLOCAL_AMFLAGS=-I m4
 
+CFLAGS+=-DHAVE_PACKET_SOCKET
+
 INCLUDES = -I$(top_srcdir)/include
 
