@@ -983,11 +983,11 @@ static int rt2880_eth_recv(struct net_device* dev)
 
 		/* check oversized packets */
 		if (rx_skb->len > MAX_PACKET_SIZE) {
+		    ei_local->stat.rx_dropped++;
+                    bReschedule = 1;
 		    if (net_ratelimit())
-			ei_local->stat.rx_dropped++;
 			printk("ERROR: frame is BIG !!!\n");
-                        bReschedule = 1;
-			break;
+		    break;
 		}
 
 #ifdef CONFIG_PSEUDO_SUPPORT
