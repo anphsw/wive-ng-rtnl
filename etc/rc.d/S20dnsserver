@@ -42,9 +42,9 @@ gen_hosts() {
     echo "$lan_ip	$HostName.lo" >> /etc/hosts
     if [ "$wan_ip" != "" ]; then
 	echo "$wan_ip	wan.$HostName.lo" >> /etc/hosts
-    fi
-    if [ "$DDNS" != "" ]; then
-	echo "$wan_ip	$DDNS" >> /etc/hosts
+	if [ "$DDNS" != "" ]; then
+	    echo "$wan_ip	$DDNS" >> /etc/hosts
+	fi
     fi
     if [ -d /proc/sys/net/ipv6 ]; then
 	echo "::1	localhost ipv6.$HostName.lo" > /etc/hosts
