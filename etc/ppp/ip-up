@@ -23,6 +23,9 @@ vpnPeerDNS=`nvram_get 2860 vpnPeerDNS`
 chilli_net=`nvram_get 2860 chilli_net`
 use_snat=`nvram_get 2860 use_snat`
 PortForwardEnable=`nvram_get 2860 PortForwardEnable`
+DMZEnable=`nvram_get 2860 DMZEnable`
+DMZIPAddress=`nvram_get 2860 DMZIPAddress`
+DMZNATLoopback=`nvram_get 2860 DMZNATLoopback`
 
     #if wan ip not get
     if [ "$PPP_LOCAL" = "" ]; then
@@ -123,14 +126,11 @@ PortForwardEnable=`nvram_get 2860 PortForwardEnable`
         fi
 	#rules for upnp
 	if [ "$upnp" = "1" ] && [ "$opmode" != "0" ]; then
-    	    echo "iptables -t nat -N MINIUPNPD > /dev/null 2>&1" >> /etc/ppp_firewall
-    	    echo "iptables -t nat -F MINIUPNPD > /dev/null 2>&1" >> /etc/ppp_firewall
     	    echo "iptables -t nat -A PREROUTING -i $PPP_IFACE -d ! $lan_nm -j MINIUPNPD > /dev/null 2>&1" >> /etc/ppp_firewall
-	    echo "iptables -t nat -A PREROUTING -i $real_wan_if -d ! $lan_nm -j MINIUPNPD > /dev/null 2>&1" >> /etc/ppp_firewall
-    	    echo "iptables -t filter -N MINIUPNPD > /dev/null 2>&1" >> /etc/ppp_firewall
-    	    echo "iptables -t filter -F MINIUPNPD > /dev/null 2>&1" >> /etc/ppp_firewall
-    	    echo "iptables -t filter -I FORWARD -j MINIUPNPD > /dev/null 2>&1" >> /etc/ppp_firewall
     	fi
+	if [ "$DMZEnable" = "1" ] && [ "$DMZIPAddress" != "" ] && [ "$DMZNATLoopback" = "1" ] && [ "$PPP_LOCAL" != "" ]; then
+	    iptables -t nat -A DMZ -i $PPP_IFACE -d $PPP_LOCAL -j DNAT --to-destination $DMZIPAddress >> /etc/ppp_firewall
+	fi
     fi
     chmod 777 /etc/ppp_firewall
 

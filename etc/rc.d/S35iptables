@@ -309,19 +309,14 @@ start() {
 	    fi
 	    ###########################################################
 	fi
-############################################VPNRULES#######################################
-	if [ -f /etc/ppp_firewall ] && [ "$vpnEnabled" = "on" ]; then
-	    $LOG "Call to add VPN netfilter rules."
-	    /etc/ppp_firewall
-	fi
 ############################################OTHERS########################################
 	if [ "$natEnabled" = "1" ] || [ "$vpnNAT" != "off" ]; then
 	    ################################UPNPRULES######################################
-	    if [ "$upnp" = "1" ] && [ "$opmode" != "0" ] && [ "$vpnEnabled" != "on" ]; then
+	    if [ "$upnp" = "1" ] && [ "$opmode" != "0" ]; then
 		$LOG "Add base upnp rules"
     		iptables -t nat -N MINIUPNPD
     		iptables -t nat -F MINIUPNPD
-    		iptables -t nat -A PREROUTING -i $real_wan_if -d ! $lan_nm -j MINIUPNPD
+    		iptables -t nat -A PREROUTING -i $wan_if -d ! $lan_nm -j MINIUPNPD
     		iptables -t filter -N MINIUPNPD
     		iptables -t filter -F MINIUPNPD
     		iptables -t filter -I FORWARD -j MINIUPNPD
@@ -330,6 +325,7 @@ start() {
 ############################################DMZ#########################################
 	if [ "$DMZEnable" = "1" ] && [ "$DMZIPAddress" != "" ]; then
     	    iptables -t nat -N DMZ
+    	    iptables -t nat -F DMZ
     	    iptables -t nat -A PREROUTING -j DMZ
     	    $LOG "DMZ enabled for $DMZIPAddress"
     	    if [ "$vpnEnabled" = "on" ]; then
@@ -346,11 +342,16 @@ start() {
 	    iptables -t nat -A DMZ -i ! $lan_if -s ! $lan_ip/$lan_nm -j DNAT --to $DMZIPAddress
 	    #loopback
 	    if [ "$DMZNATLoopback" = "1" ] && [ "$wan_ipaddr" != "" ]; then
-		iptables -t nat -A DMZ -i $lan_if -d $wan_ipaddr-p tcp -j DNAT --to-destination $DMZIPAddress
-		iptables -t nat -A POSTROUTING -s $lan_ip/$lan_nm -d $DMZIPAddress -p tcp -j SNAT --to-source $lan_ip
+		iptables -t nat -A DMZ -i $lan_if -d $wan_ipaddr -j DNAT --to-destination $DMZIPAddress
+		iptables -t nat -A POSTROUTING -s $lan_ip/$lan_nm -d $DMZIPAddress -j SNAT --to-source $lan_ip
 	    fi
 	    #allow forward to dmz host
 	    iptables -A FORWARD -i ! $lan_if -d $DMZIPAddress -j ACCEPT
+	fi
+############################################VPNRULES#######################################
+	if [ -f /etc/ppp_firewall ] && [ "$vpnEnabled" = "on" ]; then
+	    $LOG "Call to add VPN netfilter rules."
+	    /etc/ppp_firewall
 	fi
 #########################################ACCEPT_ESTABLISHED################################
     iptables -A FORWARD $STATE_EST -j ACCEPT
@@ -399,9 +400,9 @@ get_param() {
 
     # get wan_ip for use SNAT
     use_snat=`nvram_get 2860 use_snat`
-    wan_ipaddr=`LC_ALL=C /bin/ifconfig $real_wan_if 2>&1 | grep 'inet addr' | awk '{print $2}' | sed -e 's/.*://'`
-    if [ "$wanmode" = "STATIC" ] || [ "$wan_ipaddr" = "" ]; then
-	wan_ipaddr=`nvram_get 2860 wan_ipaddr`
+    wan_ipaddr=`nvram_get 2860 wan_ipaddr`
+    if [ "$wanmode" != "STATIC" ] || [ "$wan_ipaddr" = "" ]; then
+	wan_ipaddr=`LC_ALL=C /bin/ifconfig $wan_if 2>&1 | grep 'inet addr' | awk '{print $2}' | sed -e 's/.*://'`
     fi
     # if wan ip not get
     if [ "$wan_ipaddr" = "" ]; then
