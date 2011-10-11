@@ -277,6 +277,7 @@ static void setDhcp(webs_t wp, char_t *path, char_t *query)
 const parameter_fetch_t service_misc_flags[] =
 {
 	{ T("stpEnbl"), "stpEnabled", 0, T("0") },
+	{ T("cdpEnbl"), "cdpEnabled", 0, T("0") },
 	{ T("lltdEnbl"), "lltdEnabled", 0, T("0") },
 	{ T("igmpEnbl"), "igmpEnabled", 0, T("0") },
 	{ T("upnpEnbl"), "upnpEnabled", 0, T("0") },

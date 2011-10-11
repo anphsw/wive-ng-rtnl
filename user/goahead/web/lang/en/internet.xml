@@ -53,6 +53,7 @@
   <message msgid="lan dhcp lease" msgstr="Lease Time" />
   <message msgid="lan dhcp static" msgstr="Statically Assigned" />
   <message msgid="lan stp" msgstr="802.1d Spanning Tree" />
+  <message msgid="lan cdp" msgstr="CDP" />
   <message msgid="lan lltd" msgstr="LLTD" />
   <message msgid="lan igmpp" msgstr="IGMP Proxy" />
   <message msgid="lan upnp" msgstr="UPNP" />

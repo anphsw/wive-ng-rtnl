@@ -65,6 +65,7 @@ static int getIgmpProxyBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getVPNBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getDnsmasqBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getGWBuilt(int eid, webs_t wp, int argc, char_t **argv);
+static int getCdpBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getLltdBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getPppoeRelayBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getUpnpBuilt(int eid, webs_t wp, int argc, char_t **argv);
@@ -124,6 +125,7 @@ void formDefineInternet(void) {
 	websAspDefine(T("getLanNetmask"), getLanNetmask);
 	websAspDefine(T("getDnsmasqBuilt"), getDnsmasqBuilt);
 	websAspDefine(T("getGWBuilt"), getGWBuilt);
+	websAspDefine(T("getCdpBuilt"), getCdpBuilt);
 	websAspDefine(T("getLltdBuilt"), getLltdBuilt);
 	websAspDefine(T("getPppoeRelayBuilt"), getPppoeRelayBuilt);
 	websAspDefine(T("getUpnpBuilt"), getUpnpBuilt);
@@ -1101,6 +1103,16 @@ static int getDnsmasqBuilt(int eid, webs_t wp, int argc, char_t **argv)
 	return websWrite(wp, T("0"));
 #endif
 }
+
+static int getCdpBuilt(int eid, webs_t wp, int argc, char_t **argv)
+{
+#ifdef CONFIG_USER_CDP
+	return websWrite(wp, T("1"));
+#else
+	return websWrite(wp, T("0"));
+#endif
+}
+
 
 static int getLltdBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {

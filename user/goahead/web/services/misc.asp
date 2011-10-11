@@ -55,6 +55,10 @@ function initTranslation()
 	_TR("lStpD", "inet disable");
 	_TR("lStpE", "inet enable");
 
+	_TR("lCdp", "lan cdp");
+	_TR("lCdpD", "inet disable");
+	_TR("lCdpE", "inet enable");
+
 	_TR("lLltd", "lan lltd");
 	_TR("lLltdD", "inet disable");
 	_TR("lLltdE", "inet enable");
@@ -93,9 +97,11 @@ function initValue()
 	var pppoe = <% getCfgZero(1, "pppoeREnabled"); %>;
 	var dns = <% getCfgZero(1, "dnsPEnabled"); %>;
 	var wan = "<% getCfgZero(1, "wanConnectionMode"); %>";
+	var cdp = "<% getCfgZero(1, "cdpEnabled"); %>";
 	var lltd = "<% getCfgZero(1, "lltdEnabled"); %>";
 	var wpf = "<% getCfgGeneral(1, "WANPingFilter"); %>";
 	var arp_pt = "<% getCfgGeneral(1, "parproutedEnabled"); %>";
+	var cdpb = "<% getCdpBuilt(); %>";
 	var lltdb = "<% getLltdBuilt(); %>";
 	var igmpb = "<% getIgmpProxyBuilt(); %>";
 	var upnpb = "<% getUpnpBuilt(); %>";
@@ -115,6 +121,7 @@ function initValue()
 	form.radvdEnbl.options.selectedIndex = 1*radvd;
 	form.pppoeREnbl.options.selectedIndex = 1*pppoe;
 	form.dnspEnbl.options.selectedIndex = 1*dns;
+	form.cdpEnbl.options.selectedIndex = 1*cdp;
 	form.lltdEnbl.options.selectedIndex = 1*lltd;
 	form.krnlPppoePass.options.selectedIndex = 1*krnl_pppoe;
 	form.krnlIpv6Pass.options.selectedIndex = 1*krnl_ipv6;
@@ -131,6 +138,11 @@ function initValue()
 	form.CrondEnable.value = defaultNumber("<% getCfgGeneral(1, "CrondEnable"); %>", "0");
 	form.ForceRenewDHCP.value = defaultNumber("<% getCfgGeneral(1, "ForceRenewDHCP"); %>", "1");
 
+	if (cdpb == "0")
+	{
+		hideElement("cdp");
+		form.cdpEnbl.options.selectedIndex = 0;
+	}
 	if (lltdb == "0")
 	{
 		hideElement("lltd");
@@ -309,6 +321,15 @@ function natFastpathSelect(form)
 
 <tr>
 	<td class="title" colspan="2">Services</td>
+</tr>
+<tr id="cdp">
+<td class="head" id="lCdp">CDP daemon</td>
+<td>
+	<select name="cdpEnbl" class="half">
+		<option value="0" id="lCdpD">Disable</option>
+		<option value="1" id="lCdpE">Enable</option>
+	</select>
+</td>
 </tr>
 <tr id="lltd">
 <td class="head" id="lLltd">LLTD daemon</td>
