@@ -341,12 +341,6 @@ int nvram_clear(int index)
 
 	down(&nvram_sem);
 
-	//clear cache values
-	for (i = 0; i < MAX_CACHE_ENTRY; i++) {
-	    fb[index].cache[i].name="";
-	    fb[index].cache[i].value="";
-	}
-
 	//construct all 1s env block
 	len = fb[index].flash_max_len - sizeof(fb[index].env.crc);
 	memset(fb[index].env.data, 0xFF, len);
@@ -365,8 +359,6 @@ int nvram_clear(int index)
 	ra_mtd_write_nm(RALINK_NVRAM_MTDNAME, to, len, (unsigned char *)fb[index].env.data);
 
 	RANV_PRINT("clear flash from 0x%x for 0x%x bytes\n", (unsigned int)to, len);
-
-	printk("clear flash from 0x%x for 0x%x bytes\n", (unsigned int)to, len);
 
 	fb[index].dirty = 0;
 	fb[index].valid = 1;
