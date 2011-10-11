@@ -41,7 +41,10 @@ gen_hosts() {
     echo "127.0.0.1	localhost $HostName.lo" > /etc/hosts
     echo "$lan_ip	$HostName.lo" >> /etc/hosts
     if [ "$wan_ip" != "" ]; then
-	echo "$wan_ip	$HostName.lo" >> /etc/hosts
+	echo "$wan_ip	wan.$HostName.lo" >> /etc/hosts
+    fi
+    if [ "$DDNS" != "" ]; then
+	echo "$wan_ip	$DDNS" >> /etc/hosts
     fi
     if [ -d /proc/sys/net/ipv6 ]; then
 	echo "::1	localhost ipv6.$HostName.lo" > /etc/hosts
@@ -56,6 +59,7 @@ get_param() {
     HostName=`nvram_get 2860 HostName`
     lan_ip=`nvram_get 2860 lan_ipaddr`
     wan_ip=`nvram_get 2860 wan_ipaddr`
+    DDNS=`nvram_get 2860 DDNS`
     cname="/etc/dnsmasq.conf"
     fname="/etc/resolv.conf"
     hname="/etc/hosts"

@@ -716,6 +716,7 @@
 21) If kernel nvram module enabled need backup nvram only first boot and "SaveAndReboot" menu click.<br>
 22) Add DMZNATLoopback variable. Enable disable NAT loopback for DMZ host (default disabled).<br>
 23) Transmission up to 2.41 version.<br>
+24) If DDNS is select need add ddns alias to /etc/hosts with wanip.<br>
 
 <br><br>
 <b>For support see:</b><br>
