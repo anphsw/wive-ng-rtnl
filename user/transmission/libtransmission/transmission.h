@@ -612,8 +612,6 @@ void               tr_sessionSetEncryption( tr_session * session,
 void  tr_sessionSetPortForwardingEnabled( tr_session  * session,
                                           bool          enabled );
 
-bool tr_sessionIsPortForwardingEnabled( const tr_session  * session );
-
 void  tr_sessionSetPeerPort( tr_session  * session,
                              tr_port       port);
 

@@ -234,8 +234,12 @@ AC_ARG_ENABLE([gtk],
               AS_HELP_STRING([--enable-gtk],[build gtk client]),
               [want_gtk=${enableval}],
               [want_gtk=${have_gtk}])
+use_gio=no
 build_gtk=no
 use_libappindicator=no
+use_libnotify=no
+use_dbus_glib=no
+use_canberra=no
 if test "x$want_gtk" = "xyes" ; then
     if test "x$have_gtk" = "xyes"; then
       build_gtk=yes

@@ -399,7 +399,6 @@ tr_sessionGetSettings( tr_session * s, struct tr_benc * d )
     tr_bencDictAddStr ( d, TR_PREFS_KEY_PEER_SOCKET_TOS,                  format_tos(s->peerSocketTOS) );
     tr_bencDictAddStr ( d, TR_PREFS_KEY_PEER_CONGESTION_ALGORITHM,        s->peer_congestion_algorithm );
     tr_bencDictAddBool( d, TR_PREFS_KEY_PEX_ENABLED,                      s->isPexEnabled );
-    tr_bencDictAddBool( d, TR_PREFS_KEY_PORT_FORWARDING,                  tr_sessionIsPortForwardingEnabled( s ) );
     tr_bencDictAddInt ( d, TR_PREFS_KEY_PREALLOCATION,                    s->preallocationMode );
     tr_bencDictAddInt ( d, TR_PREFS_KEY_PREFETCH_ENABLED,                 s->isPrefetchEnabled );
     tr_bencDictAddBool( d, TR_PREFS_KEY_QUEUE_STALLED_ENABLED,            tr_sessionGetQueueStalledEnabled( s ) );
