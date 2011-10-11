@@ -344,11 +344,9 @@ start() {
 	    fi
 	    #direct
 	    iptables -t nat -A DMZ -i ! $lan_if -s ! $lan_ip/$lan_nm -j DNAT --to $DMZIPAddress
-	    if [ "$DMZNATLoopback" = "1" ]; then
-		#loopback
-		if  [ "$wan_ipaddr" != "" ]; then
-		    iptables -t nat -A DMZ -i $lan_if -d $wan_ipaddr-p tcp -j DNAT --to-destination $DMZIPAddress
-		fi
+	    #loopback
+	    if [ "$DMZNATLoopback" = "1" ] && [ "$wan_ipaddr" != "" ]; then
+		iptables -t nat -A DMZ -i $lan_if -d $wan_ipaddr-p tcp -j DNAT --to-destination $DMZIPAddress
 		iptables -t nat -A POSTROUTING -s $lan_ip/$lan_nm -d $DMZIPAddress -p tcp -j SNAT --to-source $lan_ip
 	    fi
 	    #allow forward to dmz host
