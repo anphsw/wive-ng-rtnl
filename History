@@ -707,7 +707,7 @@
 12) Add nat loopback support for DMZ.<br>
 13) Add UDPXYPort variable to change default udpxy port.<br>
 14) Add libnet (need for cdp).<br>
-15) Add Cisco Discovery deamon support (cdpEnabled variable. Need add in WebUI).<br>
+15) Add Cisco Discovery deamon support.<br>
 16) Fix configure security mode for MBSSID.<br>
 17) Update udpxy to PATCH120.<br>
 18) Workaround for accept frames > 1514 bytes.<br>
