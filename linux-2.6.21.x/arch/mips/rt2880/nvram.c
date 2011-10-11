@@ -201,7 +201,7 @@ struct file_operations ralink_nvram_fops =
 	release:	ralink_nvram_release,
 };
 
-int __init ra_nvram_init(void)
+int ra_nvram_init(void)
 {
 	unsigned long from;
 	int i, j, len;
@@ -334,12 +334,18 @@ static int cache_idx(int index, char *name)
 int nvram_clear(int index)
 {
 	unsigned long to;
-	int len;
+	int i, len;
 
 	RANV_PRINT("--> nvram_clear %d\n", index);
 	RANV_CHECK_INDEX(-1);
 
 	down(&nvram_sem);
+
+	//clear cache values
+	for (i = 0; i < MAX_CACHE_ENTRY; i++) {
+	    fb[index].cache[i].name="";
+	    fb[index].cache[i].value="";
+	}
 
 	//construct all 1s env block
 	len = fb[index].flash_max_len - sizeof(fb[index].env.crc);
@@ -359,7 +365,11 @@ int nvram_clear(int index)
 	ra_mtd_write_nm(RALINK_NVRAM_MTDNAME, to, len, (unsigned char *)fb[index].env.data);
 
 	RANV_PRINT("clear flash from 0x%x for 0x%x bytes\n", (unsigned int)to, len);
+
+	printk("clear flash from 0x%x for 0x%x bytes\n", (unsigned int)to, len);
+
 	fb[index].dirty = 0;
+	fb[index].valid = 1;
 
 	up(&nvram_sem);
 
