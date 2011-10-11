@@ -344,11 +344,13 @@ start() {
 	    fi
 	    #direct
 	    iptables -t nat -A DMZ -i ! $lan_if -s ! $lan_ip/$lan_nm -j DNAT --to $DMZIPAddress
-	    #loopback
-	    if  [ "$wan_ipaddr" != "" ]; then
-		iptables -t nat -A DMZ -i $lan_if -d $wan_ipaddr-p tcp -j DNAT --to-destination $DMZIPAddress
+	    if [ "$DMZNATLoopback" = "1" ]; then
+		#loopback
+		if  [ "$wan_ipaddr" != "" ]; then
+		    iptables -t nat -A DMZ -i $lan_if -d $wan_ipaddr-p tcp -j DNAT --to-destination $DMZIPAddress
+		fi
+		iptables -t nat -A POSTROUTING -s $lan_ip/$lan_nm -d $DMZIPAddress -p tcp -j SNAT --to-source $lan_ip
 	    fi
-	    iptables -t nat -A POSTROUTING -s $lan_ip/$lan_nm -d $DMZIPAddress -p tcp -j SNAT --to-source $lan_ip
 	    #allow forward to dmz host
 	    iptables -A FORWARD -i ! $lan_if -d $DMZIPAddress -j ACCEPT
 	fi
@@ -422,6 +424,7 @@ get_param() {
     PortForwardEnable=`nvram_get 2860 PortForwardEnable`
     DMZEnable=`nvram_get 2860 DMZEnable`
     DMZIPAddress=`nvram_get 2860 DMZIPAddress`
+    DMZNATLoopback=`nvram_get 2860 DMZNATLoopback`
     DefaultFirewallPolicy=`nvram_get 2860 DefaultFirewallPolicy`
     IPPortFilterEnable=`nvram_get 2860 IPPortFilterEnable`
     WANPingFilter=`nvram_get 2860 WANPingFilter`

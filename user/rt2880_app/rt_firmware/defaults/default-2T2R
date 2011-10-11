@@ -43,6 +43,7 @@ MacFilterEnable=0
 MacFilterRules=
 DefaultFirewallPolicy=1
 DMZEnable=0
+DMZNATLoopback=0
 DMZIPAddress=
 TZ=MSK-3MSD-4
 NTPEnabled=off

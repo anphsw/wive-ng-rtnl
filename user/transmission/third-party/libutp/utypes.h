@@ -7,7 +7,7 @@ typedef unsigned char uint8;
 typedef signed char int8;
 typedef unsigned short uint16;
 typedef signed short int16;
-//typedef unsigned int uint;
+typedef unsigned int uint;
 typedef unsigned int uint32;
 typedef signed int int32;
 
@@ -36,7 +36,7 @@ typedef const char * cstr;
 typedef char * str;
 
 #ifndef __cplusplus
-#include <stdbool.h>
+typedef uint8 bool;
 #endif
 
 #endif //__UTYPES_H__
