@@ -346,10 +346,10 @@ start() {
 	    iptables -t nat -A DMZ -j DNAT -i ! $lan_if -s ! $lan_ip/$lan_nm --to $DMZIPAddress
 	    #loopback
 	    if  [ "$wan_ipaddr" != "" ]; then
-		iptables -t nat -A PREROUTING -i $lan_if -d $wan_ipaddr -j DNAT -p tcp --to-destination $DMZIPAddress
+		iptables -t nat -A DMZ -i $lan_if -d $wan_ipaddr -j DNAT -p tcp --to-destination $DMZIPAddress
 	    fi
 	    iptables -t nat -A POSTROUTING -s $lan_ip/$lan_nm -d $DMZIPAddress -j SNAT -p tcp --to-source $lan_ip
-	    #allow forward
+	    #allow forward to dmz host
 	    iptables -A FORWARD -i ! $lan_if -d $DMZIPAddress -j ACCEPT
 	fi
 #########################################ACCEPT_ESTABLISHED################################
