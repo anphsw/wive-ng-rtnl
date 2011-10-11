@@ -12,7 +12,11 @@
 #define DEFAULT_MTU	1500
 
 /* hardware minimum and maximum for a single frame's data payload */
-#define MAX_PACKET_SIZE	1518
+#ifdef CONFIG_VLAN_8021Q_DOUBLE_TAG
+#define MAX_PACKET_SIZE	1526
+#else
+#define MAX_PACKET_SIZE	1522
+#endif
 #define	MIN_PACKET_SIZE 64
 
 #ifdef DSP_VIA_NONCACHEABLE
