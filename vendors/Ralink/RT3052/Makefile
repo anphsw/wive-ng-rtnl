@@ -33,6 +33,7 @@ romfs:
 	$(ROMFSINST) -s ../lib /usr/lib
 	$(ROMFSINST) -s ../share /usr/share
 	$(ROMFSINST) -s ../etc/scripts/config.sh /bin/config.sh
+	$(ROMFSINST) -s /proc/self/mounts /etc/mtab
 
 romfs.post::
 	[ -d $(IMAGEDIR) ] || mkdir -p $(IMAGEDIR)
