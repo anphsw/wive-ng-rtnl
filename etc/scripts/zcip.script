@@ -5,6 +5,11 @@ if [ "x$interface" = x ]; then
 	exit 0
 fi
 
+LOG="logger -t zcip"
+
+# include global
+. /etc/scripts/global.sh
+
 # zcip should start on boot/resume and various media changes
 case "$1" in
 init)
@@ -21,15 +26,20 @@ config)
 	if [ "x$ip" != x -a -w "$ip.$interface" ]; then
 		echo $ip > "$ip.$interface"
 	fi
-	echo 1 > "/proc/sys/net/ipv4/conf/$interface/forwarding"
-	exec ip address add dev $interface scope link local "$ip/16" broadcast + > /dev/null 2>&1
+	$LOG "Add ip adress $ip to interface $interface and link up."
+	ip address add dev $interface scope link local "$ip/16" broadcast +
+	ip link set $interface up
 	# add routes configured in web
 	if [ -f /etc/routes_replace ]; then
-	    $LOF "Add user routes."
+	    $LOG "Add user routes for $lan_if $wan_if interfaces."
 	    /etc/routes_replace replace $lan_if $wan_if
 	fi
-	# send Cisco Discovery request
+	if [ -f /proc/sys/net/ipv4/conf/$interface/forwarding ]; then
+	    $LOG "Enable forward for $interface interface."
+	    echo 1 > "/proc/sys/net/ipv4/conf/$interface/forwarding"
+	fi
 	if [ -f /bin/cdp-send ] && [ -f /etc/scripts/config-cdp.sh ]; then
+	    $LOG "Send Cisco Discovery request from $interface interface."
 	    config-cdp.sh &
 	fi
 	exit 0

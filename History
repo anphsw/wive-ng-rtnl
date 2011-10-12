@@ -717,6 +717,8 @@
 22) Add DMZNATLoopback variable. Enable disable NAT loopback for DMZ host (default disabled).<br>
 23) Transmission up to 2.41 version.<br>
 24) If DDNS is select need add ddns alias to /etc/hosts with wanip.<br>
+25) Fix zcip script and zeroconf now work OK.<br>
+26) Rework iptables logic for DMZ work in VPN mode.<br>
 
 <br><br>
 <b>For support see:</b><br>
