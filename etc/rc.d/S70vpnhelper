@@ -80,12 +80,14 @@ stop() {
 	    /etc/scripts/config-lanauth.sh stop
     fi
 
-    # Remove modules
-    mod="ppp_mppe blkcipher cryptomgr crypto_algapi pppol2tp pptp ppp_generic"
-    for module in $mod
-    do
-	rmmod $module > /dev/null 2>&1
-    done
+    if [ -f /tmp/is_16ram_dev ]; then
+	# At 16Mb devices remove modules for savemem.
+	mod="ppp_mppe blkcipher cryptomgr crypto_algapi pppoe pppol2tp pptp pppox ppp_generic"
+	for module in $mod
+	do
+	    rmmod $module > /dev/null 2>&1
+	done
+    fi
 
     # Remove VPN server IP file
     rm -f /tmp/vpnip

@@ -53,11 +53,13 @@ get_vpn_ip() {
 }
 
 load_modules() {
-    mod="ppp_generic pppox pppol2tp"
-    for module in $mod
-    do
-        modprobe -q $module
-    done
+    if [ ! -d /sys/module/pppol2tp ]; then
+	mod="ppp_generic pppox pppol2tp"
+	for module in $mod
+	do
+    	    modprobe -q $module
+	done
+    fi
 }
 
 echo "==================START-L2TP-CLIENT======================="

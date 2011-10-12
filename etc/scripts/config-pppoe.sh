@@ -42,11 +42,13 @@ check_param() {
 }
 
 load_modules() {
-    mod="ppp_generic pppox pppoe"
-    for module in $mod
-    do
-        modprobe -q $module
-    done
+    if [ ! -d /sys/module/pppoe ]; then
+	mod="ppp_generic pppox pppoe"
+	for module in $mod
+	do
+    	    modprobe -q $module
+	done
+    fi
 }
 
 echo "==================START-PPPOE-CLIENT======================="

@@ -54,11 +54,13 @@ get_vpn_ip() {
 }
 
 load_modules() {
-    mod="ppp_generic pppox pptp"
-    for module in $mod
-    do
-	modprobe -q $module
-    done
+    if [ ! -d /sys/module/pptp ]; then
+	mod="ppp_generic pppox pptp"
+	for module in $mod
+	do
+	    modprobe -q $module
+	done
+    fi
 }
 
 echo "==================START-PPTP-CLIENT======================="
