@@ -615,9 +615,6 @@
 84) Disable hotplug before update firmware.<br>
 85) Samba2/3 merge the smbd and nmbd binaries. The binary generated is called "smbd", while "nmbd" becomes a symlink(decrease duplicate code).<br>
 86) Fix auth type select in VPN.<br>
-87) More correct reload ppp modules for 16Mb devices (Try fix PPE issue).<br>
-88) No nedd remove ppp modules for 32Mb devices (Try fix PPE issue).<br>
-89) If vlan_double_tag=0 use hardware vlan offload (after change variable need restart).<br>
 
 <br>
 <b>1.10.x</b><br>
@@ -723,6 +720,10 @@
 25) Fix zcip script and zeroconf now work OK.<br>
 26) Rework iptables logic for DMZ work in VPN mode.<br>
 27) Net core, mm and fs subsystems some optimize.<br>
+28) More correct reload ppp modules for 16Mb devices (Try fix PPE issue).<br>
+29) No nedd remove ppp modules for 32Mb devices (Try fix PPE issue).<br>
+30) Vpnhelper rework pppd down procedure (Try fix PPE issue).
+31) If vlan_double_tag=0 use hardware vlan offload. Save ~10% cpu (after change variable need restart).<br>
 
 <br><br>
 <b>For support see:</b><br>
