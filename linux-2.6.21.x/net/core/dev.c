@@ -1059,6 +1059,15 @@ static inline void net_timestamp(struct sk_buff *skb)
 		skb->tstamp.tv64 = 0;
 }
 
+static inline int deliver_skb(struct sk_buff *skb,
+			      struct packet_type *pt_prev,
+			      struct net_device *orig_dev)
+{
+	atomic_inc(&skb->users);
+	return pt_prev->func(skb, skb->dev, pt_prev, orig_dev);
+}
+
+
 /*
  *	Support routine. Sends outgoing frames to any network
  *	taps currently in use.
@@ -1733,14 +1742,6 @@ static void net_tx_action(struct softirq_action *h)
 			}
 		}
 	}
-}
-
-static inline int deliver_skb(struct sk_buff *skb,
-			      struct packet_type *pt_prev,
-			      struct net_device *orig_dev)
-{
-	atomic_inc(&skb->users);
-	return pt_prev->func(skb, skb->dev, pt_prev, orig_dev);
 }
 
 #if defined(CONFIG_BRIDGE) || defined (CONFIG_BRIDGE_MODULE)
