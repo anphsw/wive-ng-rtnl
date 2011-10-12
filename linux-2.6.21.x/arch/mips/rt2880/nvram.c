@@ -334,7 +334,7 @@ static int cache_idx(int index, char *name)
 int nvram_clear(int index)
 {
 	unsigned long to;
-	int i, len;
+	int len;
 
 	RANV_PRINT("--> nvram_clear %d\n", index);
 	RANV_CHECK_INDEX(-1);
