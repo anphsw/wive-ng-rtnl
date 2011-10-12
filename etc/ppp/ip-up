@@ -129,7 +129,7 @@ DMZNATLoopback=`nvram_get 2860 DMZNATLoopback`
     	    echo "iptables -t nat -I PREROUTING -i $PPP_IFACE -d ! $lan_nm -j MINIUPNPD > /dev/null 2>&1" >> /etc/ppp_firewall
     	fi
 	if [ "$DMZEnable" = "1" ] && [ "$DMZIPAddress" != "" ] && [ "$DMZNATLoopback" = "1" ] && [ "$PPP_LOCAL" != "" ]; then
-	    echo "iptables -t nat -A DMZ -i $PPP_IFACE -d $PPP_LOCAL -j DNAT --to-destination $DMZIPAddress > /dev/null 2>&1" >> /etc/ppp_firewall
+	    echo "iptables -t nat -I DMZ -i $PPP_IFACE -d $PPP_LOCAL -j DNAT --to-destination $DMZIPAddress > /dev/null 2>&1" >> /etc/ppp_firewall
 	fi
     fi
     chmod 777 /etc/ppp_firewall

@@ -331,11 +331,13 @@ start() {
     	    if [ "$vpnEnabled" = "on" ]; then
         	if [ "$vpnType" = "1" ]; then
 		    # pptp
-	    	    iptables -t nat -A DMZ -p tcp -d $DMZIPAddress --dport 1723 -j RETURN
-		    iptables -t nat -A DMZ -p gre -d $DMZIPAddress -j RETURN
+	    	    iptables -t nat -A DMZ -p tcp --dport 1723 -j RETURN
+	    	    iptables -t nat -A DMZ -p tcp --sport 1723 -j RETURN
+		    iptables -t nat -A DMZ -p gre -j RETURN
 		elif [ "$vpnType" = "2" ]; then
 	    	    # l2tp
-	    	    iptables -t nat -A DMZ -p udp -d $DMZIPAddress --dport 1701 -j RETURN
+	    	    iptables -t nat -A DMZ -p udp --dport 1701 -j RETURN
+	    	    iptables -t nat -A DMZ -p udp --sport 1701 -j RETURN
 		fi
 	    fi
 	    #direct
