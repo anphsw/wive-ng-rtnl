@@ -5,6 +5,9 @@ if [ ! -f /bin/dnsmasq ]; then
     exit 0
 fi
 
+# get params
+. /etc/scripts/global.sh
+
 LOG="logger -t dnsserver"
 
 start() {
