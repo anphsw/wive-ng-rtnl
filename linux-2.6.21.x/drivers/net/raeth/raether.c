@@ -320,21 +320,27 @@ void forward_config(struct net_device *dev)
 #endif
 
 #ifdef CONFIG_RAETH_HW_VLAN_TX
-	/* 
+	/*
 	 * VLAN_IDX 0 = VLAN_ID 0
 	 * .........
 	 * VLAN_IDX 15 = VLAN ID 15
 	 *
 	 */
-	/* frame engine will push VLAN tag regarding to VIDX feild in Tx desc. */
-	*(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0xa8) = 0x00010000;
-	*(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0xac) = 0x00030002;
-	*(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0xb0) = 0x00050004;
-	*(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0xb4) = 0x00070006;
-	*(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0xb8) = 0x00090008;
-	*(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0xbc) = 0x000b000a;
-	*(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0xc0) = 0x000d000c;
-	*(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0xc4) = 0x000f000e;
+#ifdef CONFIG_VLAN_8021Q_DOUBLE_TAG
+	if(!vlan_double_tag)
+#endif
+	{
+    	    RAETH_PRINT("raeth: vlan hardware offload enabled\n");
+	    /* frame engine will push VLAN tag regarding to VIDX feild in Tx desc. */
+	    *(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0xa8) = 0x00010000;
+	    *(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0xac) = 0x00030002;
+	    *(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0xb0) = 0x00050004;
+	    *(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0xb4) = 0x00070006;
+	    *(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0xb8) = 0x00090008;
+	    *(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0xbc) = 0x000b000a;
+	    *(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0xc0) = 0x000d000c;
+	    *(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0xc4) = 0x000f000e;
+	}
 #endif
 
 	regVal = sysRegRead(GDMA1_FWD_CFG);
@@ -354,7 +360,10 @@ void forward_config(struct net_device *dev)
 
 
 #ifdef CONFIG_RAETH_HW_VLAN_TX
-	dev->features |= NETIF_F_HW_VLAN_TX;
+#ifdef CONFIG_VLAN_8021Q_DOUBLE_TAG
+	if(!vlan_double_tag)
+#endif
+	    dev->features |= NETIF_F_HW_VLAN_TX;
 #endif
 
 #ifdef CONFIG_RAETH_CHECKSUM_OFFLOAD
@@ -452,8 +461,10 @@ void forward_config(struct net_device *dev)
 #endif
 #if defined(CONFIG_RT_3052_ESW) && defined(CONFIG_VLAN_8021Q_DOUBLE_TAG)
 	/* Enable double vlan support */
-	if(vlan_double_tag)
+	if(vlan_double_tag) {
+    	    RAETH_PRINT("raeth: vlan double tag support enabled\n");
 	    sysRegWrite(RALINK_ETH_SW_BASE + 0xe4, 0x3f);
+	}
 	else
 	    sysRegWrite(RALINK_ETH_SW_BASE + 0xe4, 0);
 #endif
@@ -689,12 +700,17 @@ static inline int rt2880_eth_send(struct net_device* dev, struct sk_buff *skb, i
 #endif
 
 #ifdef CONFIG_RAETH_HW_VLAN_TX
-	if(vlan_tx_tag_present(skb)) {
-	    ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.VIDX = (vlan_tx_tag_get(skb) & 0xFFF);
-	    ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.VPRI = (vlan_tx_tag_get(skb) >> 13)& 0x7;
-	    ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.INSV = 1;
-	}else {
-	    ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.INSV = 0;
+#ifdef CONFIG_VLAN_8021Q_DOUBLE_TAG
+	if(!vlan_double_tag)
+#endif
+	{
+	    if(vlan_tx_tag_present(skb)) {
+		ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.VIDX = (vlan_tx_tag_get(skb) & 0xFFF);
+		ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.VPRI = (vlan_tx_tag_get(skb) >> 13)& 0x7;
+		ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.INSV = 1;
+	    }else {
+		ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.INSV = 0;
+	    }
 	}
 #endif
 
@@ -719,12 +735,17 @@ static inline int rt2880_eth_send(struct net_device* dev, struct sk_buff *skb, i
 #endif
 
 #ifdef CONFIG_RAETH_HW_VLAN_TX
-	if(vlan_tx_tag_present(skb)) {
-	    ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.VIDX = (vlan_tx_tag_get(skb) & 0xFFF);
-	    ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.VPRI = (vlan_tx_tag_get(skb) >> 13)& 0x7;
-	    ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.INSV = 1;
-	}else {
-	    ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.INSV = 0;
+#ifdef CONFIG_VLAN_8021Q_DOUBLE_TAG
+	if(!vlan_double_tag)
+#endif
+	{
+	    if(vlan_tx_tag_present(skb)) {
+		ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.VIDX = (vlan_tx_tag_get(skb) & 0xFFF);
+		ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.VPRI = (vlan_tx_tag_get(skb) >> 13)& 0x7;
+		ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.INSV = 1;
+	    }else {
+		ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.INSV = 0;
+	    }
 	}
 #endif
 
@@ -2534,7 +2555,7 @@ int ei_open(struct net_device *dev)
 	    ra2880MacAddressSet((void *)(dev->dev_addr));
 	} else {
 	    printk("dev->dev_addr is empty !\n");
-	} 
+	}
 
 #if defined (CONFIG_RT_3052_ESW)
 	*((volatile u32 *)(RALINK_INTCL_BASE + 0x34)) = (1<<17);

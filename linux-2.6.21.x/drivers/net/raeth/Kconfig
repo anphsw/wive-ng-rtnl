@@ -48,11 +48,11 @@ config RAETH_CHECKSUM_OFFLOAD
 #	default n
 #	depends on RAETH && (RALINK_RT6855 || RALINK_RT63365)
 
-#config RAETH_HW_VLAN_TX
-#        bool "Transmit VLAN HW (DoubleVLAN is not supported)"
-#        depends on RAETH
-#        ---help---
-#          Please disable HW_VLAN_TX if you need double vlan
+config RAETH_HW_VLAN_TX
+        bool "Transmit VLAN HW"
+        depends on RAETH
+        ---help---
+          Please set net.ipv4.vlan_double_tag=0 for enable vlan hw offload before eth2 up.
 
 #config RAETH_QOS
 #        bool "QoS Feature"

@@ -617,6 +617,7 @@
 86) Fix auth type select in VPN.<br>
 87) More correct reload ppp modules for 16Mb devices (Try fix PPE issue).<br>
 88) No nedd remove ppp modules for 32Mb devices (Try fix PPE issue).<br>
+89) If vlan_double_tag=0 use hardware vlan offload (after change variable need restart).<br>
 
 <br>
 <b>1.10.x</b><br>

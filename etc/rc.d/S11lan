@@ -10,6 +10,7 @@ $LOG "Start network interfaces..."
 get_param
 getMacIf
 get_txqlen
+conf_double_tag
 #-------------------PRECONFIG-----------------------------
     if [ "$brisup" = "0" ]; then
 	if [ ! -d /proc/sys/net/ipv4/conf/br0 ]; then
@@ -107,6 +108,19 @@ addr_flush() {
 	    ip -6 addr flush dev $i > /dev/null 2>&1
 	fi
     done
+}
+
+conf_double_tag() {
+    if [ -f /proc/sys/net/ipv4/vlan_double_tag ]; then
+	# raeth double tag enabled before eth2 up
+	vlan_double_tag=`nvram_get 2860 vlan_double_tag`
+	if [ "$vlan_double_tag" = "1" ]; then
+    	    sysctl -w net.ipv4.vlan_double_tag=1
+    	else
+    	    sysctl -w net.ipv4.vlan_double_tag=0
+	fi
+    fi
+
 }
 
 case "$1" in

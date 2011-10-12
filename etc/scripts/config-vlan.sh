@@ -35,13 +35,12 @@ usage()
 config3052_dt()
 {
 	if [ -f /proc/sys/net/ipv4/vlan_double_tag ]; then
+	    # switch double tag enabled after eth2 up
 	    vlan_double_tag=`nvram_get 2860 vlan_double_tag`
 	    if [ "$vlan_double_tag" = "1" ]; then
 		switch reg w e4 3f
-        	sysctl -w net.ipv4.vlan_double_tag=1
     	    else
 		switch reg w e4 0
-        	sysctl -w net.ipv4.vlan_double_tag=0
 	    fi
 	fi
 }
