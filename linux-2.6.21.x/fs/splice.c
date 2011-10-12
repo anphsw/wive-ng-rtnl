@@ -1152,8 +1152,6 @@ static int get_iovec_page_array(const struct iovec __user *iov,
 	 * It's ok to take the mmap_sem for reading, even
 	 * across a "get_user()".
 	 */
-	down_read(&current->mm->mmap_sem);
-
 	while (nr_vecs) {
 		unsigned long off, npages;
 		void __user *base;
@@ -1200,9 +1198,8 @@ static int get_iovec_page_array(const struct iovec __user *iov,
 		if (npages > PIPE_BUFFERS - buffers)
 			npages = PIPE_BUFFERS - buffers;
 
-		error = get_user_pages(current, current->mm,
-				       (unsigned long) base, npages, 0, 0,
-				       &pages[buffers], NULL);
+		error = get_user_pages_fast((unsigned long)base, npages,
+					0, &pages[buffers]);
 
 		if (unlikely(error <= 0))
 			break;
@@ -1240,8 +1237,6 @@ static int get_iovec_page_array(const struct iovec __user *iov,
 		nr_vecs--;
 		iov++;
 	}
-
-	up_read(&current->mm->mmap_sem);
 
 	if (buffers)
 		return buffers;
