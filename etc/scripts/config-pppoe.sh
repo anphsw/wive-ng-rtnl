@@ -7,13 +7,18 @@
 # include global config
 . /etc/scripts/global.sh
 
-# send hup signal to pppd for correct link down
-killall -q -SIGHUP pppd
-sleep 1
-
-# Kill daemons
-killall -q pppd
-killall -q xl2tpd
+if [ "`pidof xl2tpd`" ] || [ "`pidof pppd`" ]; then
+    #shutdown xl2tpd
+    killall -q xl2tpd
+    killall -q -SIGKILL xl2tpd
+    sleep 1
+    # send hup signal to pppd for correct link down
+    killall -q -SIGHUP pppd
+    sleep 3
+    # Kill daemons
+    killall -q pppd
+    killall -q -SIGKILL pppd
+fi
 
 LOG="logger -t vpnhelper-pppoe"
 
