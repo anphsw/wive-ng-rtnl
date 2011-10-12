@@ -65,20 +65,34 @@ stop() {
     killall -q -SIGKILL config-pptp.sh
     killall -q -SIGKILL config-lanauth.sh
 
-    # send hup signal to pppd for correct link down
-    killall -q -SIGHUP pppd
-    sleep 1
-
-    #Kill daemons
-    killall -q xl2tpd
-    killall -q -SIGKILL xl2tpd
-    killall -q pppd
-    killall -q -SIGKILL pppd
-
     # Kill lanauth only if vpn disable
     if [ "$vpnEnabled" = "off" ] || [ "$vpnType" != "6" ]; then
 	    /etc/scripts/config-lanauth.sh stop
     fi
+
+    #Kill daemons
+    killall -q xl2tpd
+    killall -q -SIGKILL xl2tpd
+
+    # send hup signal to pppd for correct link down
+    # first send HUP for terminate connections and try some times
+    # second send TERM for exit pppd process
+    # if process not terminated send KILL
+    count=0
+    while killall -q -SIGHUP pppd; do
+	if [ "$count" = "3" ]; then
+	    killall -q pppd
+	    sleep 2
+	    count=0
+	fi
+	if [ "$count" = "5" ]; then
+	    killall -q -SIGKILL pppd
+	    sleep 3
+	    count=0
+	fi
+	sleep 2
+	count="$(($count+1))"
+    done
 
     if [ -f /tmp/is_16ram_dev ]; then
 	# At 16Mb devices remove modules for savemem.
