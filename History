@@ -719,6 +719,7 @@
 24) If DDNS is select need add ddns alias to /etc/hosts with wanip.<br>
 25) Fix zcip script and zeroconf now work OK.<br>
 26) Rework iptables logic for DMZ work in VPN mode.<br>
+27) Net core, mm and fs subsystems some optimize.<br>
 
 <br><br>
 <b>For support see:</b><br>
