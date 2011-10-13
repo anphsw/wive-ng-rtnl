@@ -70,11 +70,14 @@ stop() {
 	    /etc/scripts/config-lanauth.sh stop
     fi
 
-    #Kill daemons
-    killall -q xl2tpd
-    killall -q -SIGKILL xl2tpd
+    #correct terminate xl2tpd daemon
+    if [ "`pidof xl2tpd`" ]; then
+	#Kill daemons
+	killall -q xl2tpd
+	sleep 2
+	killall -q -SIGKILL xl2tpd
+    fi
 
-    # send hup signal to pppd for correct link down
     # first send HUP for terminate connections and try some times
     # second send TERM for exit pppd process
     # if process not terminated send KILL

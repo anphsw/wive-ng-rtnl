@@ -10,11 +10,14 @@
 # static interface name
 IFNAME="ppp0"
 
-if [ "`pidof xl2tpd`" ] || [ "`pidof pppd`" ]; then
-    #shutdown xl2tpd
+#correct terminate xl2tpd daemon
+if [ "`pidof xl2tpd`" ]; then
+    #Kill daemons
     killall -q xl2tpd
+    sleep 2
     killall -q -SIGKILL xl2tpd
-    sleep 1
+fi
+if [ "`pidof pppd`" ]; then
     # send hup signal to pppd for correct link down
     killall -q -SIGHUP pppd
     sleep 3
