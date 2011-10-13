@@ -1311,8 +1311,8 @@ filter:
 		    goto skip_sw;
 
 		/* Try send selected pakets to bcm_nat */
-		if ((ctinfo == IP_CT_ESTABLISHED || ctinfo == IP_CT_IS_REPLY)
-		    && (hooknum == NF_IP_PRE_ROUTING) && 
+		if ((ctinfo == IP_CT_ESTABLISHED || ctinfo == IP_CT_ESTABLISHED + IP_CT_IS_REPLY) &&
+		    && (hooknum == NF_IP_PRE_ROUTING) &&
 		    (protonum == IPPROTO_TCP || protonum == IPPROTO_UDP)) {
 
 		    struct nf_conntrack_tuple *t1, *t2;
