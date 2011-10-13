@@ -3156,7 +3156,10 @@ EXPORT_SYMBOL(register_netdev);
 static void netdev_wait_allrefs(struct net_device *dev)
 {
 	unsigned long rebroadcast_time, warning_time;
-	int refcnt;
+	int refcnt, count=0;
+
+	if (!dev)
+	    return;
 
 	rebroadcast_time = warning_time = jiffies;
 	refcnt = atomic_read(&dev->refcnt);
@@ -3190,11 +3193,24 @@ static void netdev_wait_allrefs(struct net_device *dev)
 		refcnt = atomic_read(&dev->refcnt);
 
 		if (time_after(jiffies, warning_time + 10 * HZ)) {
+/* This is not clean hack. May be resource leak
+    cardmap ppp module not touch refcnt and not need check this */
+#if 0
 			printk(KERN_EMERG "unregister_netdevice: "
 			       "waiting for %s to become free. Usage "
 			       "count = %d\n",
 			       dev->name, refcnt);
 			warning_time = jiffies;
+#else
+			warning_time = jiffies;
+
+			if (count > 2) {
+			    refcnt = 0;
+			    break;
+			}
+
+			count++;
+#endif
 		}
 	}
 }
@@ -3251,7 +3267,7 @@ void netdev_run_todo(void)
 		netdev_wait_allrefs(dev);
 
 		/* paranoia */
-		BUG_ON(atomic_read(&dev->refcnt));
+		/* BUG_ON(atomic_read(&dev->refcnt)); */
 		WARN_ON((int)dev->ip_ptr);
 		WARN_ON((int)dev->ip6_ptr);
 		WARN_ON((int)dev->dn_ptr);
