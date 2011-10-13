@@ -70,6 +70,7 @@ stop() {
 	    /etc/scripts/config-lanauth.sh stop
     fi
 
+    # stop all pppd/xl2tpd daemons
     killall_vpn
 
     if [ -f /tmp/is_16ram_dev ]; then
