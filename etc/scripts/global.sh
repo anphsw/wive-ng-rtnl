@@ -285,6 +285,39 @@ elif [ "$CONFIG_RAETH_ROUTER" != "" ]; then
 fi
 }
 
+killall_vpn()
+{
+    #correct terminate xl2tpd daemon
+    if [ "`pidof xl2tpd`" ]; then
+	#Kill daemons
+	killall -q xl2tpd
+	sleep 2
+	killall -q -SIGKILL xl2tpd
+    fi
+
+    # first send HUP for terminate connections and try some times
+    # second send TERM for exit pppd process
+    # if process not terminated send KILL
+    count=0
+    while killall -q -SIGHUP pppd; do
+	if [ "$count" = "3" ]; then
+	    killall -q pppd
+	    sleep 2
+	    count=0
+	fi
+	if [ "$count" = "5" ]; then
+	    killall -q -SIGKILL pppd
+	    sleep 3
+	    count=0
+	fi
+	sleep 2
+	count="$(($count+1))"
+    done
+
+    # Remove VPN server IP file
+    rm -f /tmp/vpnip
+}
+
 # get params
 getLanIfName
 getWanIfName

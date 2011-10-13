@@ -10,21 +10,8 @@
 # static interface name
 IFNAME="ppp0"
 
-#correct terminate xl2tpd daemon
-if [ "`pidof xl2tpd`" ]; then
-    #Kill daemons
-    killall -q xl2tpd
-    sleep 2
-    killall -q -SIGKILL xl2tpd
-fi
-if [ "`pidof pppd`" ]; then
-    # send hup signal to pppd for correct link down
-    killall -q -SIGHUP pppd
-    sleep 3
-    # Kill daemons
-    killall -q pppd
-    killall -q -SIGKILL pppd
-fi
+# stop all pppd/xl2tpd daemons
+killall_vpn
 
 LOG="logger -t vpnhelper-pptp"
 
