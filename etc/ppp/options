@@ -3,3 +3,6 @@ lock
 noauth
 noipdefault
 nolog
+
+#minimum autoincrement pppX name
+minunit 1
