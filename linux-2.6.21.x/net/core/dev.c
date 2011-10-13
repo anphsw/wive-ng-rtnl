@@ -3246,7 +3246,7 @@ void netdev_run_todo(void)
 
 		dev->reg_state = NETREG_UNREGISTERED;
 
-		on_each_cpu(flush_backlog, dev, 1);
+		on_each_cpu(flush_backlog, dev, 1, 1);
 
 		netdev_wait_allrefs(dev);
 
