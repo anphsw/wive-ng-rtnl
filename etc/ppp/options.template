@@ -1,6 +1,9 @@
 noauth
 noktune
 
+#minimum autoincrement pppX name
+minunit 1
+
 #Options for redial
 idle 0
 maxfail 0

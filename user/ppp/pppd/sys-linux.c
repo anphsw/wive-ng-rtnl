@@ -652,10 +652,18 @@ static int make_ppp_unit()
 		} else break;
 	} while (ifunit < MAXUNIT);
 
-	if (x < 0)
+	if (x < 0) {
 		error("Couldn't create new ppp unit: %m");
+		goto out;
+	}
 
 	if (use_ifname[0] != 0) {
+		/* if new name = old name is normal not error */
+		slprintf(ifr.ifr_name, sizeof(ifr.ifr_name), "%s%d", PPP_DRV_NAME, ifunit);
+		slprintf(ifr.ifr_newname, sizeof(ifr.ifr_newname), "%s", use_ifname);
+		if(strcmp(ifr.ifr_name, ifr.ifr_newname)==0)
+		    goto out;
+
 		s = socket(PF_INET, SOCK_DGRAM, 0);
 		if (s < 0)
 			s = socket(PF_PACKET, SOCK_DGRAM, 0);
@@ -664,8 +672,6 @@ static int make_ppp_unit()
 		if (s < 0)
 			s = socket(PF_UNIX, SOCK_DGRAM, 0);
 		if (s >= 0) {
-			slprintf(ifr.ifr_name, sizeof(ifr.ifr_name), "%s%d", PPP_DRV_NAME, ifunit);
-			slprintf(ifr.ifr_newname, sizeof(ifr.ifr_newname), "%s", use_ifname);
 			x = ioctl(s, SIOCSIFNAME, &ifr);
 			close(s);
 		} else {
@@ -677,7 +683,7 @@ static int make_ppp_unit()
 			ppp_dev_fd = -1;
 		}
 	}
-
+out:
 	return x;
 }
 

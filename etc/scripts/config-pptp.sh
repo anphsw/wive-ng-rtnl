@@ -7,6 +7,9 @@
 # include global
 . /etc/scripts/global.sh
 
+# static interface name
+IFNAME="ppp0"
+
 if [ "`pidof xl2tpd`" ] || [ "`pidof pppd`" ]; then
     #shutdown xl2tpd
     killall -q xl2tpd
@@ -183,7 +186,7 @@ echo "==================START-PPTP-CLIENT======================="
 
     $LOG "PPTP connect to $SERVER ....."
     $LOG "Start pppd"
-    PPPDOPT="file $OPTFILE -detach $DEBUG $MTU $MRU $MPPE plugin"
+    PPPDOPT="file $OPTFILE ifname $IFNAME -detach $DEBUG $MTU $MRU $MPPE plugin"
     PLUGOPT="/lib/pptp.so pptp_server $SERVER call pptp persist $PEERDNS user $USER password $PASSWORD"
     FULLOPT="$PPPDOPT $PLUGOPT"
     pppd $FULLOPT &

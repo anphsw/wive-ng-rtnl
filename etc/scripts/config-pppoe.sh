@@ -7,6 +7,9 @@
 # include global config
 . /etc/scripts/global.sh
 
+# static interface name
+IFNAME="ppp0"
+
 if [ "`pidof xl2tpd`" ] || [ "`pidof pppd`" ]; then
     #shutdown xl2tpd
     killall -q xl2tpd
@@ -155,7 +158,7 @@ $CHAP
 " >> $OPTFILE
 
 # Standard PPP options we always use
-PPP_STD_OPTIONS="noipdefault noauth persist $PEERDNS -detach $DEBUG"
+PPP_STD_OPTIONS="noipdefault noauth persist $PEERDNS ifname $IFNAME -detach $DEBUG"
 # PPPoE invocation
 PPPOE_CMD="$IFACE $SERVER $SERVICE user $USER password $PASSWORD"
 

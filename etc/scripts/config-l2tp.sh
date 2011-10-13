@@ -7,6 +7,9 @@
 # include global config
 . /etc/scripts/global.sh
 
+# static interface name
+IFNAME="ppp0"
+
 if [ "`pidof xl2tpd`" ] || [ "`pidof pppd`" ]; then
     #shutdown xl2tpd
     killall -q xl2tpd
@@ -218,6 +221,7 @@ echo "==================START-L2TP-CLIENT======================="
     lcp-echo-failure  $LCPFAIL
     lcp-echo-interval $LCPINTR
     $LCPECHO
+    ifname $IFNAME
     " >> $ppp/options.l2tp
 
     printf "$USER * $PASSWORD" >> $ppp/chap-secrets
