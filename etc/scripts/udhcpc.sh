@@ -80,11 +80,15 @@ case "$1" in
 	    # default route with metric 0 is through $iface?
 	    dgw_otherif=`ip route | grep "default" | grep -v "dev $interface " | sed 's,.*dev \([^ ]*\) .*,\1,g'`
 	    if [ -z "$dgw_otherif" ]; then
-		if [ "$replace_dgw" = "1" ]; then
-		    $LOG "Deleting default route"
-		    while ip route del default dev $interface ; do
-			:
-		    done
+		# if ip not changed not need delete old default route
+		# this is workaroud for ppp used tunnels up over not default routes
+    		if [ "$OLD_IP" != "$CUR_IP" ]; then
+		    if [ "$replace_dgw" = "1" ]; then
+			$LOG "Deleting default route"
+			while ip route del default dev $interface ; do
+			    :
+			done
+		    fi
 		fi
 
 		metric=0
