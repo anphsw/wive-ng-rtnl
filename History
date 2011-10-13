@@ -722,8 +722,8 @@
 27) Net core, mm and fs subsystems some optimize.<br>
 28) More correct reload ppp modules for 16Mb devices (Try fix PPE issue).<br>
 29) No nedd remove ppp modules for 32Mb devices (Try fix PPE issue).<br>
-30) Vpnhelper rework pppd down procedure (Try fix PPE issue).
-31) Net core dev hack for fix unregister ppp driver based to cardmap (Try fix PPE issue).
+30) Vpnhelper rework pppd down procedure (Try fix PPE issue).<br>
+31) Net core dev hack for fix unregister ppp driver based to cardmap (Try fix PPE issue).<br>
 32) If vlan_double_tag=0 use hardware vlan offload. Save ~10% cpu (after change variable need restart).<br>
 33) Always use for pppoe/pptp/l2tp ifname=ppp0. Others ifaces must be start from ppp1.<br>
 34) Fix work vpn at some ISP with small dhcp lease time.<br>
