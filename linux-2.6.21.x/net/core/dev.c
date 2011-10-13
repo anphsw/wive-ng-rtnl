@@ -3147,9 +3147,12 @@ EXPORT_SYMBOL(register_netdev);
 static void netdev_wait_allrefs(struct net_device *dev)
 {
 	unsigned long rebroadcast_time, warning_time;
+	int refcnt;
 
 	rebroadcast_time = warning_time = jiffies;
-	while (atomic_read(&dev->refcnt) != 0) {
+	refcnt = atomic_read(&dev->refcnt);
+
+	while (refcnt != 0) {
 		if (time_after(jiffies, rebroadcast_time + 1 * HZ)) {
 			rtnl_lock();
 
@@ -3175,11 +3178,13 @@ static void netdev_wait_allrefs(struct net_device *dev)
 
 		msleep(250);
 
+		refcnt = atomic_read(&dev->refcnt);
+
 		if (time_after(jiffies, warning_time + 10 * HZ)) {
 			printk(KERN_EMERG "unregister_netdevice: "
 			       "waiting for %s to become free. Usage "
 			       "count = %d\n",
-			       dev->name, atomic_read(&dev->refcnt));
+			       dev->name, refcnt);
 			warning_time = jiffies;
 		}
 	}
