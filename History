@@ -727,6 +727,9 @@
 32) If vlan_double_tag=0 use hardware vlan offload. Save ~10% cpu (after change variable need restart).<br>
 33) Always use for pppoe/pptp/l2tp ifname=ppp0. Others ifaces must be start from ppp1.<br>
 34) Fix work vpn at some ISP with small dhcp lease time.<br>
+35) Kernel code cleanup.<br>
+36) Add more values to enum ip_conntrack_info.<br>
+37) Small fix in Software Fastnat.<br>
 
 <br><br>
 <b>For support see:</b><br>
