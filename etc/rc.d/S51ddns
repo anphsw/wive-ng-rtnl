@@ -17,7 +17,7 @@ LOG="logger -t dyndns"
 start() {
     get_param
     if  [ "$DDNS" != "" ] && [ "$DDNSProvider" != "" ] && [ "$DDNSProvider" != "none" ] && [ "$DDNSAccount" != "" ] && [ "$DDNSPassword" != "" ]; then
-	    $LOG "Starting DynDNS"
+	$LOG "Starting DynDNS"
 	if [ "$DDNSProvider" = "dyndns.org" ]; then
 	    inadyn -u $DDNSAccount -p $DDNSPassword -a $DDNS --dyndns_system dyndns@$DDNSProvider --update_period_sec $update_period --background --syslog
 	elif [ "$DDNSProvider" = "freedns.afraid.org" ] || [ "$DDNSProvider" = "zoneedit.com" ] || [ "$DDNSProvider" = "no-ip.com" ]; then

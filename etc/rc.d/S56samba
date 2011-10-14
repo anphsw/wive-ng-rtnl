@@ -54,7 +54,6 @@ if [ "$SmbEnabled" = "1" ]; then
     fi
 
     if [ -f /var/lock/smbd.pid ] || [ -f /var/lock/nmbd.pid ]; then
-	$LOG "Already started... Stop WINS/SMB SERVER."
 	killall -q smbd
 	killall -q nmbd
 	killall -q -SIGKILL smbd

@@ -99,7 +99,7 @@ start() {
 	# wait sta connected
 	wait_connect
 
-	# start zeroconf
+	$LOG "Call zeroconf for get wan ip address."
 	zero_conf
     else
 	$LOG "Unknown mode. Please reset device."

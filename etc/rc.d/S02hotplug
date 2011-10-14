@@ -8,8 +8,8 @@ fi
 LOG="echo HOTPLUG"
 
 start() {
-    $LOG "Start mdev for support HOTPLUG"
     if [ ! -f /etc/mdev.conf ]; then
+	$LOG "Generate config file."
 	printf "
 	    # <device regex> <uid>:<gid> <octal permissions> [<@|$|*> <command>]
 	    # The special characters have the meaning:
@@ -31,7 +31,7 @@ start() {
 	fi
     fi
 
-    # set mdev as kernel hotplug helper
+    $LOG "Set mdev as kernel hotplug helper and enable device autoprobe."
     echo "/bin/mdev" > /proc/sys/kernel/hotplug
 
     if [ -d /proc/bus/usb ]; then

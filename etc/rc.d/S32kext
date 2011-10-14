@@ -65,7 +65,9 @@ start() {
 	fi
 	# configure nat offload
 	if [ "$hw_nat" = "1" ]; then
-	    modprobe -q hw_nat
+	    if [ ! -d /sys/module/hw_nat ]; then
+		modprobe -q hw_nat
+	    fi
 	    # set HW_NAT default QOS Mode to WRR policy
 	    hw_nat -L 0
 	else

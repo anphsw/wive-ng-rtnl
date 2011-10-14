@@ -10,9 +10,9 @@ web_wait
 LOG="logger -t iptables"
 
 start() {
- $LOG "Starting IPTABLES"
- get_param
- stop
+  $LOG "Starting IPTABLES"
+    get_param
+    stop
 #########################################DEFAULTRULES###################################
 	# default filters
 	$LOG "Set default filters"
@@ -202,10 +202,6 @@ start() {
 ###########################################FORWARD#######################################
 	if [ "$opmode" != "0" ]; then
 	    $LOG "Set forward rules"
-            # enable forward for LAN/WAN interfaces
-	    echo 1 > "/proc/sys/net/ipv4/conf/$wan_if/forwarding"
-	    echo 1 > "/proc/sys/net/ipv4/conf/$lan_if/forwarding"
-
 	    # ipt_account need first rules in FORWARD
 	    if [ "$ipt_account" = "1" ]; then
 		$LOG "Start ipt_accounting"
@@ -357,8 +353,14 @@ start() {
 	fi
 #########################################ACCEPT_ESTABLISHED################################
     iptables -A FORWARD $STATE_EST -j ACCEPT
+################################Enable forward for LAN/WAN interfaces######################
+    if [ "$opmode" != "0" ]; then
+	# only not bridge mode enable forward
+	echo 1 > "/proc/sys/net/ipv4/conf/$wan_if/forwarding"
+	echo 1 > "/proc/sys/net/ipv4/conf/$lan_if/forwarding"
+    fi
 ############################################ENDRULES#######################################
-    $LOG "Iptables rules add OK..."
+    $LOG "Configure netfilter OK..."
 }
 
 
@@ -461,7 +463,7 @@ get_param() {
 
 qos()
 {
-    $LOG "Simple QoS Enable"
+  $LOG "Simple QoS Enable"
     modprobe -q ipt_TOS
 
     iptables -N simple_qos -t mangle > /dev/null 2>&1

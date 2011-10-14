@@ -6,11 +6,11 @@
 LOG="logger -t lan"
 
 start() {
-$LOG "Start network interfaces..."
-get_param
-getMacIf
-get_txqlen
-conf_double_tag
+  $LOG "Start network interfaces..."
+    get_param
+    getMacIf
+    get_txqlen
+    conf_double_tag
 #-------------------PRECONFIG-----------------------------
     if [ "$brisup" = "0" ]; then
 	if [ ! -d /proc/sys/net/ipv4/conf/br0 ]; then
