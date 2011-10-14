@@ -79,7 +79,6 @@ EXPORT_SYMBOL_GPL(web_str_loaded);
 #define DEBUGP(format, args...)
 #endif
 
-#include <linux/netfilter_ipv4/lockhelp.h>
 DECLARE_RWLOCK(nf_conntrack_lock);
 EXPORT_SYMBOL_GPL(nf_conntrack_lock);
 

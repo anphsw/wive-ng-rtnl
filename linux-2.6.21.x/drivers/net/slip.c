@@ -79,7 +79,9 @@
 #ifdef CONFIG_INET
 #include <linux/ip.h>
 #include <linux/tcp.h>
+#ifdef CONFIG_SLHC
 #include <net/slhc_vj.h>
+#endif
 #endif
 
 #define SLIP_VERSION	"0.8.4-NET3.019-NEWTTY"
@@ -188,8 +190,10 @@ sl_alloc_bufs(struct slip *sl, int mtu)
 err_exit:
 #ifdef SL_INCLUDE_CSLIP
 	kfree(cbuff);
+#ifdef CONFIG_SLHC
 	if (slcomp)
 		slhc_free(slcomp);
+#endif
 #endif
 	kfree(xbuff);
 	kfree(rbuff);
@@ -205,7 +209,9 @@ sl_free_bufs(struct slip *sl)
 	kfree(xchg(&sl->xbuff, NULL));
 #ifdef SL_INCLUDE_CSLIP
 	kfree(xchg(&sl->cbuff, NULL));
+#ifdef CONFIG_SLHC
 	slhc_free(xchg(&sl->slcomp, NULL));
+#endif
 #endif
 }
 
@@ -324,6 +330,7 @@ sl_bump(struct slip *sl)
 	count = sl->rcount;
 #ifdef SL_INCLUDE_CSLIP
 	if (sl->mode & (SL_MODE_ADAPTIVE | SL_MODE_CSLIP)) {
+#ifdef CONFIG_SLHC
 		unsigned char c;
 		if ((c = sl->rbuff[0]) & SL_TYPE_COMPRESSED_TCP) {
 			/* ignore compressed packets when CSLIP is off */
@@ -352,6 +359,7 @@ sl_bump(struct slip *sl)
 				return;
 			}
 		}
+#endif
 	}
 #endif  /* SL_INCLUDE_CSLIP */
 
@@ -387,10 +395,12 @@ sl_encaps(struct slip *sl, unsigned char *icp, int len)
 	}
 
 	p = icp;
+#ifdef CONFIG_SLHC
 #ifdef SL_INCLUDE_CSLIP
 	if (sl->mode & SL_MODE_CSLIP)  {
 		len = slhc_compress(sl->slcomp, p, len, sl->cbuff, &p, 1);
 	}
+#endif
 #endif
 #ifdef CONFIG_SLIP_MODE_SLIP6
 	if(sl->mode & SL_MODE_SLIP6)
@@ -587,12 +597,14 @@ sl_get_stats(struct net_device *dev)
 	stats.tx_fifo_errors = sl->tx_compressed;
 	stats.collisions     = sl->tx_misses;
 	comp = sl->slcomp;
+#ifdef CONFIG_SLHC
 	if (comp) {
 		stats.rx_fifo_errors += comp->sls_i_compressed;
 		stats.rx_dropped     += comp->sls_i_tossed;
 		stats.tx_fifo_errors += comp->sls_o_compressed;
 		stats.collisions     += comp->sls_o_misses;
 	}
+#endif
 #endif /* CONFIG_INET */
 	return (&stats);
 }

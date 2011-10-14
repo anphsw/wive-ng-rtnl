@@ -115,9 +115,6 @@ static void tarpit_tcp(struct sk_buff *oskb,struct rtable *ort,int local)
 	/* This packet will not be the same as the other: clear nf fields */
 	nf_conntrack_put(nskb->nfct);
 	nskb->nfct = NULL;
-#ifdef CONFIG_NETFILTER_DEBUG
-	nskb->nf_debug = 0;
-#endif
 
 	ntcph = (struct tcphdr *)((u_int32_t*)nskb->nh.iph + nskb->nh.iph->ihl);
 

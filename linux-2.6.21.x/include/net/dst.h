@@ -71,7 +71,7 @@ struct dst_entry
 #endif
 
 	struct  dst_ops	        *ops;
-		
+
 	unsigned long		lastuse;
 	atomic_t		__refcnt;	/* client references	*/
 	int			__use;
@@ -113,11 +113,11 @@ dst_metric(const struct dst_entry *dst, int metric)
 	return dst->metrics[metric-1];
 }
 
-static inline u32                                                                                                                          
-dst_feature(const struct dst_entry *dst, u32 feature)                                                                                      
-{                                                                                                                                          
-       return dst_metric(dst, RTAX_FEATURES) & feature;                                                                                    
-}                                                                                                                                          
+static inline u32
+dst_feature(const struct dst_entry *dst, u32 feature)
+{
+       return dst_metric(dst, RTAX_FEATURES) & feature;
+}
 
 static inline u32 dst_mtu(const struct dst_entry *dst)
 {
@@ -160,7 +160,9 @@ static inline void dst_hold(struct dst_entry * dst)
          * If your kernel compilation stops here, please check
          * __pad_to_align_refcnt declaration in struct dst_entry
          */
+#if 0
         BUILD_BUG_ON(offsetof(struct dst_entry, __refcnt) & 63);
+#endif
 	atomic_inc(&dst->__refcnt);
 }
 

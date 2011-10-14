@@ -16,6 +16,7 @@
 #include <net/netfilter/nf_conntrack_l3proto.h>
 #include <net/netfilter/nf_conntrack_l4proto.h>
 #include <net/netfilter/nf_conntrack_ecache.h>
+#include <linux/netfilter_ipv4/lockhelp.h>
 
 /* This header is used to share core functionality between the
    standalone connection tracking module, and the compatibility layer's use
@@ -80,7 +81,8 @@ print_tuple(struct seq_file *s, const struct nf_conntrack_tuple *tuple,
 
 extern struct list_head *nf_conntrack_hash;
 extern struct list_head nf_conntrack_expect_list;
-extern rwlock_t nf_conntrack_lock ;
+//extern rwlock_t nf_conntrack_lock;
+DECLARE_RWLOCK_EXTERN(nf_conntrack_lock);
 extern struct list_head unconfirmed;
 
 #endif /* _NF_CONNTRACK_CORE_H */
