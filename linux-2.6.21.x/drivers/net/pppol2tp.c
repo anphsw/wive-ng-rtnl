@@ -1548,7 +1548,7 @@ static int pppol2tp_xmit(struct ppp_channel *chan, struct sk_buff *skb)
 	init_sync_kiocb(&iocb, NULL);
         iocb.private = &siocb;
 
-        error = pppol2tp_udp_sock_send(&iocb, session, tunnel, msg, skb->len + hdr_len + sizeof(ppph));                                                                 
+        error = pppol2tp_udp_sock_send(&iocb, session, tunnel, msg, skb->len + hdr_len + sizeof(ppph));
         kfree_skb(skb);
 #endif
 end:
