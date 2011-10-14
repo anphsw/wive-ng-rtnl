@@ -528,7 +528,7 @@ ctnetlink_parse_tuple_proto(struct nfattr *attr,
 
 static inline int
 ctnetlink_parse_tuple(struct nfattr *cda[], struct nf_conntrack_tuple *tuple,
-		      enum ctattr_tuple type, u_int8_t l3num)
+		      enum ctattr_type type, u_int8_t l3num)
 {
 	struct nfattr *tb[CTA_TUPLE_MAX];
 	int err;
@@ -1036,9 +1036,9 @@ ctnetlink_new_conntrack(struct sock *ctnl, struct sk_buff *skb,
 
 	write_lock_bh(&nf_conntrack_lock);
 	if (cda[CTA_TUPLE_ORIG-1])
-		h = __nf_conntrack_find(&otuple);
+		h = __nf_conntrack_find(&otuple, NULL);
 	else if (cda[CTA_TUPLE_REPLY-1])
-		h = __nf_conntrack_find(&rtuple);
+		h = __nf_conntrack_find(&rtuple, NULL);
 
 	if (h == NULL) {
 		write_unlock_bh(&nf_conntrack_lock);
