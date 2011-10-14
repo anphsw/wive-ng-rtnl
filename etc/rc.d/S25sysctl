@@ -3,10 +3,9 @@
 LOG="logger -t sysctl"
 
 start() {
-    $LOG "Tune with sysctl"
+    $LOG "Tune kernel with sysctl."
     sysctl -w -p /etc/sysctl.conf > /dev/null 2>&1
 
-    $LOG "Tune network stack and memory usadge fo small memory devices"
     MINPORT=3072
     if [ -f /tmp/is_32ram_dev ]; then
         CONNTRACK_MAX=4096
@@ -35,10 +34,10 @@ start() {
     sysctl -w net.ipv4.route.max_size=$ROUTEMAX
     sysctl -w net.ipv4.ip_local_port_range="$MINPORT $MAXPORT"
 
-    $LOG "##conntrack max:##hashsize:##route max:##route max:##portrange:"
-    $LOG "##$CONNTRACK_MAX##$HASHSIZE##$ROUTEMAX##$MINPORT $MAXPORT"
+    $LOG "##conntrack table max:$CONNTRACK_MAX##hashsize:$HASHSIZE##"
+    $LOG "##route table max:$ROUTEMAX##portrange:$MINPORT $MAXPORT##"
 
-    $LOG "Tune with proc"
+    $LOG "Tune with proc proc"
     # on kernel crash
     echo 1    > /proc/sys/kernel/panic
     echo 1    > /proc/sys/kernel/panic_on_oops

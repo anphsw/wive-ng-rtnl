@@ -115,8 +115,10 @@ conf_double_tag() {
 	# raeth double tag enabled before eth2 up
 	vlan_double_tag=`nvram_get 2860 vlan_double_tag`
 	if [ "$vlan_double_tag" = "1" ]; then
+	    $LOG "Double vlan tag enabled. HW_VLAN offload disabled."
     	    sysctl -w net.ipv4.vlan_double_tag=1
     	else
+	    $LOG "Double vlan tag disabled. HW_VLAN offload enabled."
     	    sysctl -w net.ipv4.vlan_double_tag=0
 	fi
     fi
