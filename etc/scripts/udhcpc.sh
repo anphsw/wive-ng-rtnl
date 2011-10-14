@@ -84,7 +84,7 @@ case "$1" in
 		# this is workaroud for ppp used tunnels up over not default routes
     		if [ "$OLD_IP" != "$CUR_IP" ]; then
 		    if [ "$replace_dgw" = "1" ]; then
-			$LOG "Deleting default route"
+			$LOG "Deleting default route dev $interface"
 			while ip route del default dev $interface ; do
 			    :
 			done
@@ -167,13 +167,12 @@ case "$1" in
 	    # Get DNS servers
 	    if [ "$wan_static_dns" != "on" ]; then
 		if [ "$dns" ]; then
-		    $LOG "Renew DNS from dhcp"
+		    $LOG "Renew DNS from dhcp $dns $domain"
 		    rm -f $RESOLV_CONF
         	    # get domain name
     		    [ -n "$domain" ] && echo domain $domain >> $RESOLV_CONF
 		    # parce dnsservers
 		    for i in $dns ; do
-	    		$LOG "DNS= $i"
 	    		echo nameserver $i >> $RESOLV_CONF
 			ROUTE_NS=`ip route get "$i" | grep dev | cut -f -3 -d " "`
 			if [ "$ROUTE_NS" != "" ] && [ "$i" != "$first_dgw" ]; then
