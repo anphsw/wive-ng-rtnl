@@ -673,7 +673,11 @@ static int change_phyid(struct file *file, const char *buffer, unsigned long cou
 	else
 		phy_id = simple_strtol(buf, 0, 10);
 
+#ifndef for_each_netdev
 	for(cur_dev_p=dev_base; cur_dev_p!=NULL; cur_dev_p=cur_dev_p->next){
+#else
+	for_each_netdev(cur_dev_p) {
+#endif
 		if (strncmp(cur_dev_p->name, if_name, 4) == 0)
 			break;
 	}
@@ -702,7 +706,7 @@ int debug_proc_init(void)
 {
     if (procRegDir == NULL)
 	procRegDir = proc_mkdir(PROCREG_DIR, NULL);
-   
+
     if ((procGmac = create_proc_entry(PROCREG_GMAC, 0, procRegDir))){
 	 procGmac->read_proc = (read_proc_t*)&RegReadMain;
 #if defined (CONFIG_ETHTOOL)

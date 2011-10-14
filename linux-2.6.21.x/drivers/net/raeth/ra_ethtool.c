@@ -32,7 +32,12 @@ unsigned char get_current_phy_address(void)
 {
 	struct net_device *cur_dev_p;
 	END_DEVICE *ei_local;
+
+#ifndef for_each_netdev
 	for(cur_dev_p=dev_base; cur_dev_p!=NULL; cur_dev_p=cur_dev_p->next){
+#else
+	for_each_netdev(cur_dev_p) {
+#endif
 		if (strncmp(cur_dev_p->name, DEV_NAME /* "eth2" usually */, 4) == 0)
 			break;
 	}

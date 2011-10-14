@@ -1526,8 +1526,13 @@ PNET_DEV RtmpOSNetDevGetByName(PNET_DEV pNetDev, PSTRING pDevName)
 
 	devNameLen = strlen(pDevName);
 	ASSERT((devNameLen <= IFNAMSIZ));
-	
+
+#ifndef for_each_netdev
 	for(pTargetNetDev=dev_base; pTargetNetDev!=NULL; pTargetNetDev=pTargetNetDev->next)
+#else
+        for_each_netdev(pTargetNetDev) {
+#endif
+
 	{
 		if (strncmp(pTargetNetDev->name, pDevName, devNameLen) == 0)
 			break;
