@@ -409,6 +409,8 @@ clean: modules_clean
 	find $(ROOTDIR) -type f -name  '.sgbuilt_user' | xargs rm -f
 	find $(ROOTDIR)/user -type f -name '*.o' | xargs rm -f
 	find $(ROOTDIR)/user -type f -name '*.so' | xargs rm -f
+	find $(ROOTDIR)/user -type f -name '*.lo' | xargs rm -f
+	find $(ROOTDIR)/user -type f -name '*.la' | xargs rm -f
 	find $(ROOTDIR)/lib -type f -name '*.o' | xargs rm -f
 	find $(ROOTDIR)/lib -type f -name '*.so' | xargs rm -f
 	find $(ROOTDIR) -type f -name '*.ko' | xargs rm -f

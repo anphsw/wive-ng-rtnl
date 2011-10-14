@@ -3,6 +3,7 @@
 *.pc
 *.orig
 *.rej
+*.lo
 .sgbuilt_user
 .libs
 libtool
