@@ -1092,6 +1092,12 @@ extern int ext4_wb_block_truncate_page(handle_t *, struct page *, struct address
 extern void ext4_wb_init(struct super_block *);
 extern void ext4_wb_release(struct super_block *);
 
+static inline spinlock_t *
+sb_bgl_lock(struct ext4_sb_info *sbi, unsigned int block_group)
+{
+	return bgl_lock_ptr(&sbi->s_blockgroup_lock, block_group);
+}
+
 #endif	/* __KERNEL__ */
 
 #endif	/* _LINUX_EXT4_FS_H */

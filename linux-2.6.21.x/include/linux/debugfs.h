@@ -51,7 +51,7 @@ struct dentry *debugfs_create_u32(const char *name, mode_t mode,
 struct dentry *debugfs_create_bool(const char *name, mode_t mode,
 				  struct dentry *parent, u32 *value);
 struct dentry *debugfs_create_size_t(const char *name, mode_t mode,
-+                                    struct dentry *parent, size_t *value);
+                                    struct dentry *parent, size_t *value);
 struct dentry *debugfs_create_blob(const char *name, mode_t mode,
 				  struct dentry *parent,
 				  struct debugfs_blob_wrapper *blob);

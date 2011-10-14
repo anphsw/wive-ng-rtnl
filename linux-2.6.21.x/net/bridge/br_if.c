@@ -438,6 +438,9 @@ static void table_add(	struct net_bridge_port *p,	struct port_igmpp_table_t *pt,
 {
 	/* search group IP */
 	int groupIdx,ipIdx;
+	#ifdef CONFIG_BRIDGE_IGMPP_PROCFS_DEBUG
+	uint8_t *ip8_addr;
+	#endif
 	groupIdx = search_group_IP(pt, ip32_addr);
 	if(groupIdx >= 0){ /* group existed */
 
@@ -480,7 +483,6 @@ static void table_add(	struct net_bridge_port *p,	struct port_igmpp_table_t *pt,
 			/* add group and host */
 			add_GROUP(pt, groupPoolIdx, ip32_addr); // add group 
 			#ifdef CONFIG_BRIDGE_IGMPP_PROCFS_DEBUG
-			uint8_t *ip8_addr;
 			trans_32to8(&ip32_addr, &ip8_addr);
 			printk(KERN_INFO "[BR_IGMPP_PROC]-> Group IP: %u.%u.%u.%u add !!\n",
 					*ip8_addr, *(ip8_addr+1), *(ip8_addr+2), *(ip8_addr+3));

@@ -3457,16 +3457,12 @@ static inline bool DAC960_ProcessCompletedRequest(DAC960_Command_T *Command,
 	pci_unmap_sg(Command->Controller->PCIDevice, Command->cmd_sglist,
 		Command->SegmentCount, Command->DmaDirection);
 
-	 if (!end_that_request_first(Request, UpToDate, Command->BlockCount)) {
-		add_disk_randomness(Request->rq_disk);
- 	 	end_that_request_last(Request, UpToDate);
-
 		if (Command->Completion) {
 			complete(Command->Completion);
 			Command->Completion = NULL;
 		}
 		return true;
-	}
+
 	return false;
 }
 

@@ -737,7 +737,6 @@ static unsigned short SixteenBit (unsigned char hi, unsigned char lo)
 }
 void spi_si3220_master_init(int ch)
 {
-	int i;
 	u32* spireg;
 #if defined(CONFIG_RALINK_SLIC_CONNECT_SPI_CS1)
 	spich = 1;

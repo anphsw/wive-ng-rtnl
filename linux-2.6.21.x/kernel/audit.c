@@ -969,9 +969,11 @@ struct audit_buffer *audit_log_start(struct audit_context *ctx, gfp_t gfp_mask,
 {
 	struct audit_buffer	*ab	= NULL;
 	struct timespec		t;
-	unsigned int		serial;
+	unsigned int		serial	= 0;
 	int reserve;
 	unsigned long timeout_start = jiffies;
+
+	memset(&t, 0, sizeof(struct timespec));
 
 	if (!audit_initialized)
 		return NULL;

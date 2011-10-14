@@ -147,6 +147,12 @@ static void __NS8390_init(struct net_device *dev, int startp);
 
 
 
+#if !defined (CONFIG_RALINK_RT2880) && \
+    !defined (CONFIG_RALINK_RT2883) && \
+    !defined (CONFIG_RALINK_RT3883) && \
+    !defined (CONFIG_RALINK_RT3352) && \
+    !defined (CONFIG_RALINK_RT3052) && \
+    !defined (CONFIG_RALINK_RT5350)
 /**
  * ei_open - Open/initialize the board.
  * @dev: network device to initialize
@@ -203,6 +209,7 @@ static int __ei_close(struct net_device *dev)
 	netif_stop_queue(dev);
 	return 0;
 }
+#endif
 
 /**
  * ei_tx_timeout - handle transmit time out condition

@@ -2,6 +2,7 @@ menu "OCF Configuration"
 
 config OCF_OCF
 	tristate "OCF (Open Cryptograhic Framework)"
+	depends on !MIPS
 	help
 	  A linux port of the OpenBSD/FreeBSD crypto framework.
 

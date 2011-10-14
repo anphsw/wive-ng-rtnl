@@ -321,10 +321,6 @@ static void wakeup_readers(struct work_struct *work)
 	struct rchan_buf *buf =
 		container_of(work, struct rchan_buf, wake_readers.work);
 	wake_up_interruptible(&buf->read_wait);
-	/*
-	 * Stupid polling for now:
-	 */
-	mod_timer(&buf->timer, jiffies + 1);
 }
 
 /**

@@ -361,7 +361,7 @@ unsigned long thread_saved_pc(struct task_struct *tsk)
 
 #ifdef CONFIG_KALLSYMS
 /* generic stack unwinding function */
-unsigned long notrace unwind_stack_by_address(unsigned long stack_page,
+unsigned long unwind_stack_by_address(unsigned long stack_page,
 					      unsigned long *sp,
 					      unsigned long pc,
 					      unsigned long *ra)

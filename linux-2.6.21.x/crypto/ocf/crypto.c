@@ -1556,9 +1556,9 @@ crypto_init(void)
 	spin_lock_init(&crypto_ret_q_lock);
 
 	cryptop_zone = kmem_cache_create("cryptop", sizeof(struct cryptop),
-				       0, SLAB_HWCACHE_ALIGN, NULL);
+				       0, SLAB_HWCACHE_ALIGN, NULL, NULL);
 	cryptodesc_zone = kmem_cache_create("cryptodesc", sizeof(struct cryptodesc),
-				       0, SLAB_HWCACHE_ALIGN, NULL);
+				       0, SLAB_HWCACHE_ALIGN, NULL, NULL);
 	if (cryptodesc_zone == NULL || cryptop_zone == NULL) {
 		printk("crypto: crypto_init cannot setup crypto zones\n");
 		error = ENOMEM;

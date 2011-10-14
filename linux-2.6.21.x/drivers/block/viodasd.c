@@ -276,8 +276,6 @@ static struct block_device_operations viodasd_fops = {
 static void viodasd_end_request(struct request *req, int uptodate,
 		int num_sectors)
 {
-	if (end_that_request_first(req, uptodate, num_sectors))
-		return;
 	add_disk_randomness(req->rq_disk);
 	end_that_request_last(req, uptodate);
 }

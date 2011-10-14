@@ -776,8 +776,8 @@ static int yam_seq_show(struct seq_file *seq, void *v)
 	seq_printf(seq, "  TxTail   %u\n", yp->txtail);
 	seq_printf(seq, "  SlotTime %u\n", yp->slot);
 	seq_printf(seq, "  Persist  %u\n", yp->pers);
-	seq_printf(seq, "  TxFrames %lu\n", yp->stats.tx_packets);
-	seq_printf(seq, "  RxFrames %lu\n", yp->stats.rx_packets);
+	seq_printf(seq, "  TxFrames %llu\n", yp->stats.tx_packets);
+	seq_printf(seq, "  RxFrames %llu\n", yp->stats.rx_packets);
 	seq_printf(seq, "  TxInt    %u\n", yp->nb_mdint);
 	seq_printf(seq, "  RxInt    %u\n", yp->nb_rxint);
 	seq_printf(seq, "  RxOver   %lu\n", yp->stats.rx_fifo_errors);

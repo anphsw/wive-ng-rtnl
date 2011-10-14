@@ -625,7 +625,7 @@ cryptodev_ioctl(
 	struct crypt_kop kop;
 	struct crypt_find_op fop;
 	u_int64_t sid;
-	u_int32_t ses;
+	u_int32_t ses=0;
 	int feat, fd, error = 0, crid;
 	mm_segment_t fs;
 
@@ -998,7 +998,7 @@ static struct file_operations cryptodev_fops = {
 };
 
 static struct miscdevice cryptodev = {
-	.minor = CRYPTODEV_MINOR,
+	.minor = 1,
 	.name = "crypto",
 	.fops = &cryptodev_fops,
 };
