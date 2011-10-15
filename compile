@@ -23,9 +23,7 @@ fi
 
 #------------------------------------#
 #WR-N for full and WR-NL for ligth HW
-if [ "$MODE" = "2T2R-USB" ]; then
-    DEVNAME="Acorp_WR-300NU"
-elif [ "$MODE" = "2T2R-USB-IPV6" ]; then
+if [ "$MODE" = "2T2R-USB-IPV6" ]; then
     DEVNAME="Acorp_WR-300NU"
 elif [ "$MODE" = "2T2R" ]; then
     DEVNAME="Acorp_WR-300N"
@@ -41,7 +39,7 @@ export PRODUCTID="$DEVNAME"
 export MODEL_NAME="$DEVNAME"
 export KERNEL_VER="$VERSIONPKG"
 
-if [ "$2" = "" ] || [ "$MODE" = "2T2R-USB" ] || [ "$MODE" = "2T2R-USB-IPV6" ]; then
+if [ "$2" = "" ] || [ "$MODE" = "2T2R-USB-IPV6" ]; then
     SAVE_MEM=""
 else
     SAVE_MEM="-savemem"
@@ -91,11 +89,6 @@ elif [ "$MODE" = "2T2R" ] ; then
     cp -fv $ROOTDIR/configs/all/config-busybox				$ROOTDIR/user/busybox/.config
     cp -fv $ROOTDIR/configs/all/config-config				$ROOTDIR/config/.config
     cp -fv $ROOTDIR/configs/all/config-lib				$ROOTDIR/lib/.config
-elif [ "$MODE" = "2T2R-USB" ] ; then
-    cp -fv $ROOTDIR/configs/kernel/config-kernel-2t2r-USB-8M		$ROOTDIR/linux/.config
-    cp -fv $ROOTDIR/configs/all/config-busybox-USB-8M			$ROOTDIR/user/busybox/.config
-    cp -fv $ROOTDIR/configs/all/config-config-USB-8M			$ROOTDIR/config/.config
-    cp -fv $ROOTDIR/configs/all/config-lib-USB-8M			$ROOTDIR/lib/.config
 elif [ "$MODE" = "2T2R-USB-IPV6" ] ; then
     cp -fv $ROOTDIR/configs/kernel/config-kernel-2t2r-USB-IPV6-8M	$ROOTDIR/linux/.config
     cp -fv $ROOTDIR/configs/all/config-busybox-USB-IPV6-8M		$ROOTDIR/user/busybox/.config

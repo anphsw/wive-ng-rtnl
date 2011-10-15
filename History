@@ -733,6 +733,8 @@
 38) libupnp move to /lib dir from wscd.<br>
 39) libupnp Update to 1.6.13 version.<br>
 40) wscd now use new libupnp.<br>
+41) USB-IPV6 images now use samba3.<br>
+42) Remove USB without IPv6 images.<br>
 
 <br><br>
 <b>For support see:</b><br>
