@@ -763,19 +763,19 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 	{
 		ssid_web_var[6] = ssid  + '1';
 		ssid_nvram_var[4] = i  + '0';
-		
+
 		char_t *mssid = websGetVar(wp, ssid_web_var, T(""));
 		printf("web: %s = %s\n", ssid_web_var, mssid);
 		if (CHK_IF_SET(mssid))
 		{
 			nvram_bufset(RT2860_NVRAM, ssid_nvram_var, mssid);
 			printf("nvram: %s = %s\n", ssid_nvram_var, mssid);
-			
+
 			if (strchr(hssid, ssid + '0') != NULL)
 				sprintf(hidden_ssid, "%s%s", hidden_ssid, "1;");
 			else
 				sprintf(hidden_ssid, "%s%s", hidden_ssid, "0;");
-			
+
 			if (strchr(isolated_ssid, ssid + '0') != NULL)
 				sprintf(noforwarding, "%s%s", noforwarding, "1;");
 			else
