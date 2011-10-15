@@ -343,7 +343,7 @@ start() {
 		else
 		    iptables -t nat -A DMZ -i $lan_if -d $wan_ipaddr -j DNAT --to-destination $DMZIPAddress
 		fi
-		iptables -t nat -A POSTROUTING -i $lan_if -s $lan_ip/$lan_nm -d $DMZIPAddress -j SNAT --to-source $lan_ip
+		iptables -t nat -A POSTROUTING -s $lan_ip/$lan_nm -d $DMZIPAddress -j SNAT --to-source $lan_ip
 	    fi
 	    #direct
 	    iptables -t nat -A DMZ -i ! $lan_if -s ! $lan_ip/$lan_nm -j DNAT --to $DMZIPAddress
