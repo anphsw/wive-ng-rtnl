@@ -82,7 +82,7 @@ getWanIfName()
     fi
 }
 
-get_wan_ipaddr()
+getWanIpaddr()
 {
     # always return physical wan ip
     wan_ipaddr=`nvram_get 2860 wan_ipaddr`
@@ -335,4 +335,4 @@ killall_vpn()
 # get params
 getLanIfName
 getWanIfName
-get_wan_ipaddr
+getWanIpaddr
