@@ -16,7 +16,7 @@ LOG="logger -t wscd"
 
 start() {
     get_param
-    if [ "$WscModeOption" = "1" ]; then
+    if [ "$WscModeOption" != "" ] || [ "$WscModeOption" != "0" ]; then
       $LOG "Starting WPS"
 	if [ "$opmode" = "0" ]; then
 	    wscd -m 1 -a $lan_ipaddr -i ra0 -D &
