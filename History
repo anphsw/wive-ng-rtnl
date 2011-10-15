@@ -730,6 +730,9 @@
 35) Kernel code cleanup.<br>
 36) Add more values to enum ip_conntrack_info.<br>
 37) Small fix in Software Fastnat.<br>
+38) libupnp move to /lib dir from wscd.<br>
+39) libupnp Update to 1.6.13 version.<br>
+40) wscd now use new libupnp.<br>
 
 <br><br>
 <b>For support see:</b><br>

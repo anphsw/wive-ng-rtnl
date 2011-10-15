@@ -22,7 +22,7 @@ ifeq ($(UCLINUX_COMMON_LIB),1)
 	SLIBINTL	=	-lintl
 	SLIBAES		=	-laes
 	SLIBDES		=	-ldes
-	SLIBNETOLD		=	-lnetold
+	SLIBNETOLD	=	-lnetold
 	SLIBPCAP	=	-lpcap
 	SLIBNET		=	-lnet
 	ifdef DISABLE_SHARED_SSL
@@ -53,6 +53,13 @@ ifeq ($(UCLINUX_COMMON_LIB),1)
 	SLIBZ		=	-lz
 
 	# Dynamic versions
+	LIBDL		=	-ldl
+	LIBEXPAT	=	-lexpat
+	LIBGCC		=	-lgcc
+	LIBIBERTY	=	-liberty
+	LIBIO		=	-lio
+	LIBIOSTREAM	=	-liostream
+	LIBTCL		=	-ltcl
 	LIBFLEX		=	$(SLIBFLEX)
 	LIBICONV	=	$(SLIBICONV)
 	LIBC		=	$(SLIBC)
@@ -71,17 +78,10 @@ ifeq ($(UCLINUX_COMMON_LIB),1)
 	else
 		LIBCRYPT	=	-lcrypt
 	endif
-	LIBDL		=	-ldl
-	LIBEXPAT	=	-lexpat
-	LIBGCC		=	-lgcc
-	LIBIBERTY	?=	-liberty
-	LIBIO		=	-lio
-	LIBIOSTREAM	=	-liostream
 	LIBIXML		=	$(SLIBIXML)
 	LIBJPEG		=	$(SLIBJPEG)
 	LIBPNG		=	$(SLIBPNG)
 	LIBSTDCPP	=	$(SLIBSTDCPP)
-	LIBTCL		=	-ltcl
 	LIBTHREADUTIL	=	$(SLIBTHREADUTIL)
 	LIBPTHREAD	=	$(SLIBPTHREAD)
 	LIBEVENT	=	$(SLIBEVENT)

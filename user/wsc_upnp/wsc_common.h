@@ -8,7 +8,6 @@
 #include <unistd.h>
 #include <pthread.h>
 
-
 #define WSC_VERSION   "0.1.1"
 
 
@@ -21,6 +20,11 @@ typedef signed int		int32;
 
 #ifndef PACKED
 #define PACKED  __attribute__ ((packed))
+#endif
+
+#ifndef IFNAMSIZ
+#undef IFNAMSIZ
+#define	IFNAMSIZ	16
 #endif
 
 #ifndef IFLA_IFNAME
@@ -43,11 +47,6 @@ typedef signed int		int32;
 #else
 //void DBGPRINTF(int level, char *fmt, ...) __attribute__ ((format (printf, 2, 3)));
 void DBGPRINTF(int level, char *fmt, ...);
-#endif
-
-
-#ifndef IFNAMSIZ
-#define	IFNAMSIZ	16
 #endif
 
 #define MAC_ADDR_LEN 			6

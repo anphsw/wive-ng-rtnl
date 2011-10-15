@@ -268,11 +268,13 @@ int WscUPnPCPAddDevice(
 
 	pthread_mutex_lock(&wscDevListMutex);
 
-	if(d_event->DestAddr != NULL)
+	ipAddr = (*(struct sockaddr_in*)&d_event->DestAddr).sin_addr.s_addr;
+	port =   (*(struct sockaddr_in*)&d_event->DestAddr).sin_port;
+	*outIPAddr = ipAddr;
+
+	if(!ipAddr && !port)
 	{
-		ipAddr = (unsigned int)d_event->DestAddr->sin_addr.s_addr;
-		port = (unsigned short)d_event->DestAddr->sin_port;
-		*outIPAddr = ipAddr;
+	    return -1;
 	}
 	
 	printf("%s():outIPAddr=0x%x!\n", __FUNCTION__, *outIPAddr);

@@ -1165,9 +1165,9 @@ WscDevHandleActionReq(IN struct Upnp_Action_Request *ca_event)
 							"----\n", 
 							ca_event->ActionName, inet_ntoa(ca_event->CtrlPtIPAddr), 
 							ca_event->Socket, ca_event->ServiceID, ca_event->DevUDN);
-	
+
 }
-	/* 
+	/*
 		Find and call appropriate procedure based on action name. Each action name has an 
 		associated procedure stored in the service table. These are set at initialization.
 	*/
@@ -1175,8 +1175,9 @@ WscDevHandleActionReq(IN struct Upnp_Action_Request *ca_event)
 	{
 		if (strcmp(ca_event->ActionName, wscDevActTable.actionNames[i]) == 0)
 		{
-			retCode = wscDevActTable.actionFuncs[i](ca_event->ActionRequest, ca_event->CtrlPtIPAddr.s_addr,
-														&ca_event->ActionResult, &errorString);
+			retCode = wscDevActTable.actionFuncs[i](ca_event->ActionRequest,
+			    (*(struct sockaddr_in*)&ca_event->CtrlPtIPAddr).sin_addr.s_addr,
+			    				&ca_event->ActionResult, &errorString);
 			action_found = 1;
 			break;
 		}
@@ -1267,7 +1268,8 @@ WscDevCPNodeInsert(
 	
 	if ((uriInfo = sub->DeliveryURLs.parsedURLs))
 	{
-		ipAddr = uriInfo->hostport.IPv4address.sin_addr.s_addr;
+		//ipAddr = uriInfo->hostport.IPv4address.sin_addr.s_addr;
+		ipAddr = (*(struct sockaddr_in*)&uriInfo->hostport.IPaddress).sin_addr.s_addr;
 		if(ipAddr == HostIPAddr)
 		{
 			DBGPRINTF(RT_DBG_INFO, "Control Point from the same host with our Device! Ignore it(ipAddr=0x%08x)\n", ipAddr);

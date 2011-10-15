@@ -19,6 +19,7 @@ bool 'Build libcurl'		CONFIG_LIB_CURL
 bool 'Build libpcap'		CONFIG_LIB_PCAP
 bool 'Build libiconv'		CONFIG_LIB_ICONV
 bool 'Build libnet'		CONFIG_LIB_NET
+bool 'Build libupnp'		CONFIG_LIB_UPNP
 
 comment 'Force build extra libraries in uClibc'
 bool 'Build libcrypt'		CONFIG_LIB_CRYPT_FORCE
@@ -103,6 +104,7 @@ bool 'rt2860apd (802.1x Authenticator)'		CONFIG_USER_802_1X
 bool 'wscd (WSC/WPS)'				CONFIG_USER_WSC
 if [ "$CONFIG_USER_WSC" = "y" ]; then
 	define_bool CONFIG_LIB_LIBPTHREAD_FORCE y
+	define_bool CONFIG_LIB_UPNP y
 fi
 
 bool 'openssl'					CONFIG_USER_OPENSSL
