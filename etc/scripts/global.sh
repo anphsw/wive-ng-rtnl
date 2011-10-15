@@ -82,6 +82,22 @@ getWanIfName()
     fi
 }
 
+get_wan_ipaddr()
+{
+    # always return physical wan ip
+    wan_ipaddr=`nvram_get 2860 wan_ipaddr`
+    if [ "$wanmode" != "STATIC" ] || [ "$wan_ipaddr" = "" ]; then
+	wan_ipaddr=`LC_ALL=C /bin/ifconfig $wan_if 2>&1 | grep 'inet addr' | awk '{print $2}' | sed -e 's/.*://'`
+    fi
+
+    # return vpn or physical wan ip
+    real_wan_ipaddr=`LC_ALL=C /bin/ifconfig $real_wan_if 2>&1 | grep 'inet addr' | awk '{print $2}' | sed -e 's/.*://'`
+    if [ "$wan_ipaddr" = "" ] && [ "$wanmode" = "STATIC" ]; then
+	wan_ipaddr=`nvram_get 2860 wan_ipaddr`
+    fi
+
+}
+
 # for memory save 16m device uses txqueuelen=100
 get_txqlen()
 {
@@ -319,3 +335,4 @@ killall_vpn()
 # get params
 getLanIfName
 getWanIfName
+get_wan_ipaddr

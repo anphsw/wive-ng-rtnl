@@ -33,13 +33,12 @@ start() {
 	    killall -q -SIGKILL miniupnpd
 	    sleep 2
 	fi
-	wan_ipaddr=`LC_ALL=C /bin/ifconfig $real_wan_if 2>&1 | grep 'inet addr' | awk '{print $2}' | sed -e 's/.*://'`
-        if [ "$wan_ipaddr" != "" ]; then
-	    $LOG "Start upnp at $wan_ipaddr"
+        if [ "$real_wan_ipaddr" != "" ]; then
+	    $LOG "Start upnp at $real_wan_ipaddr"
 	    ip route replace 239.0.0.0/8 dev $lan_if
 	    cat /etc/miniupnpd.conf.template > /etc/miniupnpd.conf
 	    cat /etc/miniupnpd.conf.uuid >> /etc/miniupnpd.conf
-            miniupnpd -f /etc/miniupnpd.conf -i "$real_wan_if" -o "$wan_ipaddr" -a "$lan_ipaddr/$lan_netmask" &
+            miniupnpd -f /etc/miniupnpd.conf -i "$real_wan_if" -o "$real_wan_ipaddr" -a "$lan_ipaddr/$lan_netmask" &
 	fi
     fi
 }

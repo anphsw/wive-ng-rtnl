@@ -336,13 +336,17 @@ start() {
 	    	    iptables -t nat -A DMZ -p udp --sport 1701 -j RETURN
 		fi
 	    fi
-	    #direct
-	    iptables -t nat -A DMZ -i ! $lan_if -s ! $lan_ip/$lan_nm -j DNAT --to $DMZIPAddress
 	    #loopback
 	    if [ "$DMZNATLoopback" = "1" ] && [ "$wan_ipaddr" != "" ]; then
-		iptables -t nat -A DMZ -i $lan_if -d $wan_ipaddr -j DNAT --to-destination $DMZIPAddress
-		iptables -t nat -A POSTROUTING -s $lan_ip/$lan_nm -d $DMZIPAddress -j SNAT --to-source $lan_ip
+		if [ "$vpnNAT" != "off" ] && [ "$real_wan_ipaddr" != "" ]; then
+		    iptables -t nat -A DMZ -i $lan_if -d $real_wan_ipaddr -j DNAT --to-destination $DMZIPAddress
+		else
+		    iptables -t nat -A DMZ -i $lan_if -d $wan_ipaddr -j DNAT --to-destination $DMZIPAddress
+		fi
+		iptables -t nat -A POSTROUTING -i $lan_if -s $lan_ip/$lan_nm -d $DMZIPAddress -j SNAT --to-source $lan_ip
 	    fi
+	    #direct
+	    iptables -t nat -A DMZ -i ! $lan_if -s ! $lan_ip/$lan_nm -j DNAT --to $DMZIPAddress
 	    #allow forward to dmz host
 	    iptables -A FORWARD -i ! $lan_if -d $DMZIPAddress -j ACCEPT
 	fi
@@ -404,10 +408,6 @@ get_param() {
 
     # get wan_ip for use SNAT
     use_snat=`nvram_get 2860 use_snat`
-    wan_ipaddr=`nvram_get 2860 wan_ipaddr`
-    if [ "$wanmode" != "STATIC" ] || [ "$wan_ipaddr" = "" ]; then
-	wan_ipaddr=`LC_ALL=C /bin/ifconfig $wan_if 2>&1 | grep 'inet addr' | awk '{print $2}' | sed -e 's/.*://'`
-    fi
     # if wan ip not get
     if [ "$wan_ipaddr" = "" ]; then
 	use_snat=0
