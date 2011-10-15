@@ -312,9 +312,9 @@ start() {
 		$LOG "Add base upnp rules"
     		iptables -t nat -N MINIUPNPD
     		iptables -t nat -F MINIUPNPD
-    		iptables -t nat -A PREROUTING -i $wan_if -d ! $lan_nm -j MINIUPNPD
     		iptables -t filter -N MINIUPNPD
     		iptables -t filter -F MINIUPNPD
+    		iptables -t nat -A PREROUTING -i $wan_if -j MINIUPNPD
     		iptables -t filter -I FORWARD -j MINIUPNPD
     	    fi
 	fi
