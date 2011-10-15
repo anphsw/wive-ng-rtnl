@@ -92,8 +92,8 @@ get_wan_ipaddr()
 
     # return vpn or physical wan ip
     real_wan_ipaddr=`LC_ALL=C /bin/ifconfig $real_wan_if 2>&1 | grep 'inet addr' | awk '{print $2}' | sed -e 's/.*://'`
-    if [ "$wan_ipaddr" = "" ] && [ "$wanmode" = "STATIC" ]; then
-	wan_ipaddr=`nvram_get 2860 wan_ipaddr`
+    if [ "$real_wan_ipaddr" = "" ]; then
+	real_wan_ipaddr=wan_ipaddr
     fi
 
 }
