@@ -338,6 +338,7 @@ start() {
 	    fi
 	    # multicast no need redirected to DMZ adress
 	    if [ "$igmpen" != "0" ] || [ "$UDPXY" != "0" ]; then
+		iptables -t nat -I DMZ -i $wan_if -p igmp -j RETURN
 		iptables -t nat -I DMZ -i $wan_if -p udp -d 224.0.0.0/4 -j RETURN
 	    fi
 	    # loopback
