@@ -336,7 +336,11 @@ start() {
 	    	    iptables -t nat -A DMZ -p udp --sport 1701 -j RETURN
 		fi
 	    fi
-	    #loopback
+	    # multicast no need redirected to DMZ adress
+	    if [ "$igmpen" != "0" ] || [ "$UDPXY" != "0" ]; then
+		iptables -t nat -I DMZ -i $wan_if -p udp -d 224.0.0.0/4 -j RETURN
+	    fi
+	    # loopback
 	    if [ "$DMZNATLoopback" = "1" ] && [ "$wan_ipaddr" != "" ]; then
 		if [ "$vpnNAT" != "off" ] && [ "$real_wan_ipaddr" != "" ]; then
 		    iptables -t nat -A DMZ -i $lan_if -d $real_wan_ipaddr -j DNAT --to-destination $DMZIPAddress
@@ -345,9 +349,9 @@ start() {
 		fi
 		iptables -t nat -A POSTROUTING -s $lan_ip/$lan_nm -d $DMZIPAddress -j SNAT --to-source $lan_ip
 	    fi
-	    #direct
+	    # direct
 	    iptables -t nat -A DMZ -i ! $lan_if -s ! $lan_ip/$lan_nm -j DNAT --to $DMZIPAddress
-	    #allow forward to dmz host
+	    # allow forward to dmz host
 	    iptables -A FORWARD -i ! $lan_if -d $DMZIPAddress -j ACCEPT
 	fi
 ############################################VPNRULES#######################################

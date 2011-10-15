@@ -735,6 +735,7 @@
 40) wscd now use new libupnp.<br>
 41) USB-IPV6 images now use samba3.<br>
 42) Remove USB without IPv6 images.<br>
+43) Fix work iptv with DMZ enabled.<br>
 
 <br><br>
 <b>For support see:</b><br>
