@@ -212,12 +212,12 @@ int ra_nvram_init(void)
 	r = register_chrdev(ralink_nvram_major, RALINK_NVRAM_DEVNAME,
 			&ralink_nvram_fops);
 	if (r < 0) {
-		printk(KERN_ERR "ralink_nvram: unable to register character device\n");
+		printk(KERN_ERR "NVRAM: unable to register character device\n");
 		return r;
 	}
 	if (ralink_nvram_major == 0) {
 		ralink_nvram_major = r;
-		printk(KERN_DEBUG "ralink_nvram: got dynamic major %d\n", r);
+		printk(KERN_DEBUG "NVRAM: got dynamic major %d\n", r);
 	}
 
 	for (i = 0; i < FLASH_BLOCK_NUM; i++) {
@@ -237,18 +237,18 @@ int ra_nvram_init(void)
 
 		//check crc
 		if (nv_crc32(0, fb[i].env.data, len) != fb[i].env.crc) {
-			RANV_PRINT("Bad CRC %x, ignore values in flash.\n", (unsigned int)fb[i].env.crc);
-			KFREE(fb[i].env.data);
+			RANV_PRINT("NVRAM: Particion %x Bad CRC %x, need cleanup.", i, (unsigned int)fb[i].env.crc);
 			fb[i].valid = 0;
 			fb[i].dirty = 0;
-			return -1;
+			/* try flash cleanup */
+			nvram_clear(i);
 		}
 
 		//parse env to cache
 		p = fb[i].env.data;
 		for (j = 0; j < MAX_CACHE_ENTRY; j++) {
 			if (NULL == (q = strchr(p, '='))) {
-				RANV_PRINT("parsed failed - cannot find '='\n");
+				RANV_PRINT("NVRAM: Parsed failed - cannot find '='\n");
 				break;
 			}
 			*q = '\0'; //strip '='
@@ -257,7 +257,7 @@ int ra_nvram_init(void)
 
 			p = q + 1; //value
 			if (NULL == (q = strchr(p, '\0'))) {
-				RANV_PRINT("parsed failed - cannot find '\\0'\n");
+				RANV_PRINT("NVRAM: Parsed failed - cannot find '\\0'\n");
 				break;
 			}
 			fb[i].cache[j].value = kstrdup(p, GFP_KERNEL);
@@ -274,7 +274,7 @@ int ra_nvram_init(void)
 			}
 		}
 		if (j == MAX_CACHE_ENTRY)
-			RANV_PRINT("run out of env cache, please increase MAX_CACHE_ENTRY\n");
+			RANV_PRINT("NVRAM: Run out of env cache, please increase MAX_CACHE_ENTRY\n");
 
 		printk("NVRAM: Particion %x CRC %x OK.\n", i, (unsigned int)fb[i].env.crc);
 		fb[i].valid = 1;

@@ -3,7 +3,6 @@
 
 #include <linux/config.h>
 
-
 /* nvram parse blocks */
 #define FLASH_BLOCK_NUM	1
 #define ENV_BLK_SIZE 0x1000

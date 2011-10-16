@@ -778,16 +778,18 @@ int nvram_load_default(void)
 	//default macs is OK
 	int mac_ok=1;
 
-	//store macs
+	LIBNV_PRINT("Store macs...");
 	char *WLAN_MAC_ADDR	= nvram_get(RT2860_NVRAM, "WLAN_MAC_ADDR");
         char *WAN_MAC_ADDR	= nvram_get(RT2860_NVRAM, "WAN_MAC_ADDR");
         char *LAN_MAC_ADDR	= nvram_get(RT2860_NVRAM, "LAN_MAC_ADDR");
         char *CHECKMAC		= nvram_get(RT2860_NVRAM, "CHECKMAC");
 
-	//clear flash and load defaults
+	LIBNV_PRINT("Clear nvram...");
 	nvram_clear(RT2860_NVRAM);
+	LIBNV_PRINT("Load defaults nvram...");
 	renew_nvram(RT2860_NVRAM, "/etc/default/nvram_default");
 
+	LIBNV_PRINT("Renew nvram...");
 	//reinit nvram before commit
 	if ( nvram_init(RT2860_NVRAM) == -1 )
 		return -1;
