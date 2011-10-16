@@ -31,7 +31,7 @@
  */
 void (*cpu_wait)(void) = NULL;
 
-#ifndef CONFIG_RALINK_RT3052_MP2
+#if !defined(CONFIG_RALINK_RT3052) && !defined(CONFIG_RALINK_RT3052_MP2)
 static void r3081_wait(void)
 {
 	unsigned long cfg = read_c0_conf();
@@ -67,7 +67,7 @@ static void r4k_wait(void)
  * interrupt is requested" restriction in the MIPS32/MIPS64 architecture makes
  * using this version a gamble.
  */
-#ifndef CONFIG_RALINK_RT3052
+#if !defined(CONFIG_RALINK_RT3052) && !defined(CONFIG_RALINK_RT3052_MP2)
 static void r4k_wait_irqoff(void)
 {
 	local_irq_disable();
@@ -110,7 +110,7 @@ static void rm7k_wait_irqoff(void)
 
 /* The Au1xxx wait is available only if using 32khz counter or
  * external timer source, but specifically not CP0 Counter. */
-#ifndef CONFIG_RALINK_RT3052
+#if !defined(CONFIG_RALINK_RT3052) && !defined(CONFIG_RALINK_RT3052_MP2)
 int allow_au1k_wait;
 
 static void au1k_wait(void)
@@ -150,7 +150,7 @@ static inline void check_wait(void)
 		printk("Wait instruction disabled.\n");
 		return;
 	}
-#ifdef CONFIG_RALINK_RT3052_MP2
+#if defined(CONFIG_RALINK_RT3052) || defined(CONFIG_RALINK_RT3052_MP2)
         switch (c->cputype) {
         case CPU_24K:
                 cpu_wait = r4k_wait;
@@ -845,7 +845,7 @@ __init void cpu_probe(void)
 	c->processor_id	= PRID_IMP_UNKNOWN;
 	c->fpu_id	= FPIR_IMP_NONE;
 	c->cputype	= CPU_UNKNOWN;
-        
+
 	c->processor_id = read_c0_prid();
 
         switch (c->processor_id & 0xff0000) {
@@ -861,7 +861,7 @@ __init void cpu_probe(void)
                 break;
         default:
                 c->cputype = CPU_UNKNOWN;
-#else        
+#else
 	case PRID_COMP_LEGACY:
 		cpu_probe_legacy(c);
 		break;
