@@ -237,7 +237,7 @@ int ra_nvram_init(void)
 
 		//check crc
 		if (nv_crc32(0, fb[i].env.data, len) != fb[i].env.crc) {
-			RANV_PRINT("NVRAM: Particion %x Bad CRC %x, need cleanup.", i, (unsigned int)fb[i].env.crc);
+			prinkt("NVRAM: Particion %x Bad CRC %x, start cleanup.", i, (unsigned int)fb[i].env.crc);
 			fb[i].valid = 0;
 			fb[i].dirty = 0;
 			/* try flash cleanup */
