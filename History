@@ -736,7 +736,7 @@
 41) USB-IPV6 images now use samba3.<br>
 42) Remove USB without IPv6 images.<br>
 43) Fix work iptv with DMZ enabled.<br>
-44) Dysctl fix tune kernel for 16Mb, torrent enable or samba mode.<br>
+44) Sysctl fix tune kernel for 16Mb, torrent enable or samba mode.<br>
 
 <br><br>
 <b>For support see:</b><br>

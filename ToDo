@@ -4,4 +4,3 @@ iwpriv ra0 set DisConnectAllSta=1
 
 #need fix
 suspended) Add skb reuse support.
-suspended) Nvram move to kernel mode. This fix some memleaks and concurent acess to mtd issue.
