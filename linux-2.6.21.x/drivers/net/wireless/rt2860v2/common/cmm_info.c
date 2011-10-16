@@ -441,7 +441,6 @@ INT	Set_Cmm_WirelessMode_Proc(
 #ifdef RT3350
 		if(pAd->CommonCfg.PhyMode == PHY_11B)
 		{
-			USHORT i;
 		        USHORT value;
 			UCHAR  rf_offset;
 			UCHAR  rf_value;
@@ -480,8 +479,7 @@ INT	Set_Cmm_WirelessMode_Proc(
 		}
 		else
 		{
-			USHORT i;
-		    USHORT value;
+			USHORT value;
 			UCHAR  rf_offset;
 			UCHAR  rf_value;
 

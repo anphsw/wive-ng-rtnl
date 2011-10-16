@@ -4169,7 +4169,6 @@ INT	Set_ATE_TX_MODE_Proc(
 #ifdef RT3350
 	if (pAd->ate.TxWI.PHYMODE == MODE_CCK)
 	{
-		USHORT i;
 		USHORT value;
 		UCHAR  rf_offset;
 		UCHAR  rf_value;
@@ -4210,7 +4209,6 @@ INT	Set_ATE_TX_MODE_Proc(
 	}
 	else
 	{
-		USHORT i;
 		USHORT value;
 		UCHAR  rf_offset;
 		UCHAR  rf_value;

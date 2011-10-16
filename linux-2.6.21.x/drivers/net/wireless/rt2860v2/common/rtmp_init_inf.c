@@ -531,7 +531,6 @@ int rt28xx_init(
 #ifdef RT3350
 	if(1)
 	{
-		USHORT i;
 	        USHORT value;
 		UCHAR  rf_offset;
 		UCHAR  rf_value;
@@ -561,7 +560,6 @@ int rt28xx_init(
 
 	if(pAd->CommonCfg.PhyMode == PHY_11B)
 	{
-		USHORT i;
 	        USHORT value;
 		UCHAR  rf_offset;
 		UCHAR  rf_value;
@@ -602,7 +600,6 @@ int rt28xx_init(
 	}
 	else
 	{
-		USHORT i;
 	        USHORT value;
 		UCHAR  rf_offset;
 		UCHAR  rf_value;
