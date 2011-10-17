@@ -738,6 +738,7 @@
 43) Fix work iptv with DMZ enabled.<br>
 44) Sysctl fix tune kernel for 16Mb, torrent enable or samba mode.<br>
 45) Kernel nvram fix rebuild config part if crc is bad.<br>
+46) Some critical netfilter fixes backported.<br>
 
 <br><br>
 <b>For support see:</b><br>
