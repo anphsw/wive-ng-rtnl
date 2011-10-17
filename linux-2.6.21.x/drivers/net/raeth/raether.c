@@ -74,10 +74,17 @@ static int rt2880_eth_recv(struct net_device* dev);
 #endif
 
 #if !defined(CONFIG_RA_NAT_NONE)
-/* bruce+
- */
+#ifdef CONFIG_RAETH_MODULE
 extern int (*ra_sw_nat_hook_rx)(struct sk_buff *skb);
 extern int (*ra_sw_nat_hook_tx)(struct sk_buff *skb, int gmac_no);
+#else
+/* if raeth build in static mode - move hw_nat hook to driver ode from external stub */
+int (*ra_sw_nat_hook_rx) (struct sk_buff * skb) = NULL;
+int (*ra_sw_nat_hook_tx) (struct sk_buff * skb, int gmac_no) = NULL;
+
+EXPORT_SYMBOL(ra_sw_nat_hook_rx);
+EXPORT_SYMBOL(ra_sw_nat_hook_tx);
+#endif
 #endif
 
 #if defined(CONFIG_RA_CLASSIFIER)||defined(CONFIG_RA_CLASSIFIER_MODULE)

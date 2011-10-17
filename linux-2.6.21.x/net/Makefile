@@ -53,7 +53,10 @@ ifeq ($(CONFIG_NET),y)
 obj-$(CONFIG_SYSCTL)		+= sysctl_net.o
 endif
 ifneq ($(CONFIG_RA_NAT_NONE),y)
+# if raeth not module build move hook to raether.c
+ifneq ($(CONFIG_RAETH),y)
 obj-y                           += nat/foe_hook/
+endif
 endif
 
 obj-$(CONFIG_RA_NAT_HW)         += nat/hw_nat/
