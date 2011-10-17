@@ -130,7 +130,7 @@ extern unsigned int nf_ct_log_invalid;
 	 && net_ratelimit())
 #endif
 #else
-#define LOG_INVALID(proto) 0
+static inline int LOG_INVALID(struct net *net, int proto) { return 0; }
 #endif /* CONFIG_SYSCTL */
 
 #endif /*_NF_CONNTRACK_PROTOCOL_H*/
