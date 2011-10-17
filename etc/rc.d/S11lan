@@ -115,7 +115,7 @@ conf_double_tag() {
 	vlan_double_tag=`nvram_get 2860 vlan_double_tag`
 	natFastpath=`nvram_get 2860 natFastpath`
 	if [ "$vlan_double_tag" = "1" ] || [ "$natFastpath" = "2" ] || [ "$natFastpath" = "3" ]; then
-	    if [ "$natFastpath" = "2" ] || [ "$natFastpath" = "3" ]
+	    if [ "$natFastpath" = "2" ] || [ "$natFastpath" = "3" ]; then
 		$LOG "Double vlan tag and HW_NAT enabled. HW_VLAN offload disabled."
 	    else
 		$LOG "Double vlan tag enabled. HW_VLAN and HW_NAT offload disabled."
