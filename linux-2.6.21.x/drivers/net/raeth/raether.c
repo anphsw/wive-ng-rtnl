@@ -2210,9 +2210,9 @@ int __init rather_probe(struct net_device *dev)
 
 	ei_set_mac_addr(dev, &addr);
 #endif
-	spin_lock_init(&ei_local->page_lock);
 	ether_setup(dev);
 
+	spin_lock_init(&ei_local->page_lock);
 
 	setup_statistics(ei_local);
 
