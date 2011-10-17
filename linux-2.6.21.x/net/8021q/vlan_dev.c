@@ -666,13 +666,17 @@ int vlan_dev_set_mac_address(struct net_device *dev, void *addr_struct_p)
 
 			/* Make PROMISC visible to the user. */
 			flgs |= IFF_PROMISC;
+#ifdef VLAN_DEBUG
 			printk("VLAN (%s):  Setting underlying device (%s) to promiscious mode.\n",
 			       dev->name, VLAN_DEV_INFO(dev)->real_dev->name);
+#endif
 			dev_change_flags(VLAN_DEV_INFO(dev)->real_dev, flgs);
 		}
+#ifdef VLAN_DEBUG
 	} else {
 		printk("VLAN (%s):  Underlying device (%s) has same MAC, not checking promiscious mode.\n",
 		       dev->name, VLAN_DEV_INFO(dev)->real_dev->name);
+#endif
 	}
 
 	return 0;
