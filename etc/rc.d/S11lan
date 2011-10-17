@@ -112,17 +112,21 @@ addr_flush() {
 
 conf_double_tag() {
     if [ -f /proc/sys/net/ipv4/vlan_double_tag ]; then
-	# raeth double tag enabled before eth2 up
 	vlan_double_tag=`nvram_get 2860 vlan_double_tag`
-	if [ "$vlan_double_tag" = "1" ]; then
-	    $LOG "Double vlan tag enabled. HW_VLAN offload disabled."
-    	    sysctl -w net.ipv4.vlan_double_tag=1
-    	else
-	    $LOG "Double vlan tag disabled. HW_VLAN offload enabled."
-    	    sysctl -w net.ipv4.vlan_double_tag=0
+	natFastpath=`nvram_get 2860 natFastpath`
+	if [ "$vlan_double_tag" = "1" ] || [ "$natFastpath" = "2" ] || [ "$natFastpath" = "3" ]; then
+	    DOUBLE_TAG=1
+	    if [ "$natFastpath" = "2" ] || [ "$natFastpath" = "3" ]
+		$LOG "Double vlan tag and HW_NAT enabled. HW_VLAN offload disabled."
+	    else
+		$LOG "Double vlan tag enabled. HW_VLAN offload disabled."
+	    fi
+	else
+	    DOUBLE_TAG=0
+	    $LOG "Double vlan tag and HW_NAT disabled. HW_VLAN offload enabled."
 	fi
+	sysctl -w net.ipv4.vlan_double_tag="$DOUBLE_TAG"
     fi
-
 }
 
 case "$1" in

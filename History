@@ -740,7 +740,7 @@
 45) Kernel nvram fix rebuild config part if crc is bad.<br>
 46) Some critical netfilter fixes backported.<br>
 47) Fix auto kernel network tune with hw_nat enabled.<br>
-
+48) Hardware vlan offload must be enabled only if hw_nat and double tag disabled.<br>
 
 <br><br>
 <b>For support see:</b><br>
