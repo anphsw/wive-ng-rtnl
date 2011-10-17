@@ -22,13 +22,13 @@ start() {
 	else
     	    CONNTRACK_MAX=4096
 	fi
+	ROUTEMAX=2048
         let "HASHSIZE=$CONNTRACK_MAX/2"
-        let "ROUTEMAX=$CONNTRACK_MAX*4"
 	sysctl -w vm.min_free_kbytes=2304
     else
         CONNTRACK_MAX=1024
         let "HASHSIZE=$CONNTRACK_MAX/4"
-        let "ROUTEMAX=$CONNTRACK_MAX"
+        let "ROUTEMAX=$CONNTRACK_MAX/2"
 	sysctl -w vm.min_free_kbytes=896
     fi
     let "MAXPORT=$MINPORT+$CONNTRACK_MAX*2"
