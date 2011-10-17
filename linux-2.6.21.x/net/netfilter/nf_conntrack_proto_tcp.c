@@ -107,7 +107,8 @@ static unsigned int nf_ct_tcp_timeout_close __read_mostly =        10 SECS;
 /* RFC1122 says the R2 limit should be at least 100 seconds.
    Linux uses 15 packets as limit, which corresponds
    to ~13-30min depending on RTO. */
-static unsigned int nf_ct_tcp_timeout_max_retrans __read_mostly =   5 MINS;
+static unsigned int nf_ct_tcp_timeout_max_retrans __read_mostly    =   5 MINS;
+static unsigned int nf_ct_tcp_timeout_unacknowledged __read_mostly =   5 MINS;
 
 static unsigned int * tcp_timeouts[] = {
     NULL,                              /* TCP_CONNTRACK_NONE */
@@ -650,6 +651,8 @@ static int tcp_in_window(struct nf_conn *ct,
 		 */
 		ack = sack = receiver->td_end;
 	}
+		if (ack == receiver->td_end)
+			receiver->flags &= ~IP_CT_TCP_FLAG_DATA_UNACKNOWLEDGED;
 
 	if (seq == end
 	    && (!tcph->rst
@@ -698,8 +701,10 @@ static int tcp_in_window(struct nf_conn *ct,
 		swin = win + (sack - ack);
 		if (sender->td_maxwin < swin)
 			sender->td_maxwin = swin;
-		if (after(end, sender->td_end))
+		if (after(end, sender->td_end)) {
 			sender->td_end = end;
+			sender->flags |= IP_CT_TCP_FLAG_DATA_UNACKNOWLEDGED;
+		}
 		/*
 		 * Update receiver data.
 		 */
@@ -966,9 +971,15 @@ in_window:
 	    && (new_state == TCP_CONNTRACK_FIN_WAIT
 		|| new_state == TCP_CONNTRACK_CLOSE))
 		conntrack->proto.tcp.seen[dir].flags |= IP_CT_TCP_FLAG_CLOSE_INIT;
-	timeout = conntrack->proto.tcp.retrans >= nf_ct_tcp_max_retrans
-		  && *tcp_timeouts[new_state] > nf_ct_tcp_timeout_max_retrans
-		  ? nf_ct_tcp_timeout_max_retrans : *tcp_timeouts[new_state];
+	if (conntrack->proto.tcp.retrans >= nf_ct_tcp_max_retrans &&
+	    *tcp_timeouts[new_state] > nf_ct_tcp_timeout_max_retrans)
+		timeout = nf_ct_tcp_timeout_max_retrans;
+	else if ((conntrack->proto.tcp.seen[0].flags | conntrack->proto.tcp.seen[1].flags) &
+		 IP_CT_TCP_FLAG_DATA_UNACKNOWLEDGED &&
+		 *tcp_timeouts[new_state] > nf_ct_tcp_timeout_unacknowledged)
+		timeout = nf_ct_tcp_timeout_unacknowledged;
+	else
+		timeout = *tcp_timeouts[new_state];
 	write_unlock_bh(&tcp_lock);
 
 	nf_conntrack_event_cache(IPCT_PROTOINFO_VOLATILE, skb);
@@ -1213,6 +1224,13 @@ static struct ctl_table tcp_sysctl_table[] = {
 		.ctl_name	= NET_NF_CONNTRACK_TCP_TIMEOUT_MAX_RETRANS,
 		.procname	= "nf_conntrack_tcp_timeout_max_retrans",
 		.data		= &nf_ct_tcp_timeout_max_retrans,
+		.maxlen		= sizeof(unsigned int),
+		.mode		= 0644,
+		.proc_handler	= &proc_dointvec_jiffies,
+	},
+	{
+		.procname	= "nf_conntrack_tcp_timeout_unacknowledged",
+		.data		= &nf_ct_tcp_timeout_unacknowledged,
 		.maxlen		= sizeof(unsigned int),
 		.mode		= 0644,
 		.proc_handler	= &proc_dointvec_jiffies,
