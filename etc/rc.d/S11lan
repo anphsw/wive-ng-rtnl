@@ -115,15 +115,15 @@ conf_double_tag() {
 	vlan_double_tag=`nvram_get 2860 vlan_double_tag`
 	natFastpath=`nvram_get 2860 natFastpath`
 	if [ "$vlan_double_tag" = "1" ] || [ "$natFastpath" = "2" ] || [ "$natFastpath" = "3" ]; then
-	    DOUBLE_TAG=1
 	    if [ "$natFastpath" = "2" ] || [ "$natFastpath" = "3" ]
 		$LOG "Double vlan tag and HW_NAT enabled. HW_VLAN offload disabled."
 	    else
-		$LOG "Double vlan tag enabled. HW_VLAN offload disabled."
+		$LOG "Double vlan tag enabled. HW_VLAN and HW_NAT offload disabled."
 	    fi
+	    DOUBLE_TAG=1
 	else
-	    DOUBLE_TAG=0
 	    $LOG "Double vlan tag and HW_NAT disabled. HW_VLAN offload enabled."
+	    DOUBLE_TAG=0
 	fi
 	sysctl -w net.ipv4.vlan_double_tag="$DOUBLE_TAG"
     fi
