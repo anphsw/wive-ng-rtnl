@@ -898,25 +898,54 @@ static int tcp_packet(struct nf_conn *conntrack,
 			/* This SYN/ACK acknowledges a SYN that we earlier
 			 * ignored as invalid. This means that the client and
 			 * the server are both in sync, while the firewall is
-			 * not. We kill this session and block the SYN/ACK so
-			 * that the client cannot but retransmit its SYN and
-			 * thus initiate a clean new session.
+			 * not. We get in sync from the previously annotated
+			 * values.
 			 */
-			write_unlock_bh(&tcp_lock);
-			if (LOG_INVALID(IPPROTO_TCP))
-				nf_log_packet(pf, 0, skb, NULL, NULL, NULL,
-					  "nf_ct_tcp: killing out of sync session ");
-			if (del_timer(&conntrack->timeout))
-				conntrack->timeout.function((unsigned long)
-							    conntrack);
-			return -NF_DROP;
+			old_state = TCP_CONNTRACK_SYN_SENT;
+			new_state = TCP_CONNTRACK_SYN_RECV;
+			conntrack->proto.tcp.seen[conntrack->proto.tcp.last_dir].td_end =
+				conntrack->proto.tcp.last_end;
+			conntrack->proto.tcp.seen[conntrack->proto.tcp.last_dir].td_maxend =
+				conntrack->proto.tcp.last_end;
+			conntrack->proto.tcp.seen[conntrack->proto.tcp.last_dir].td_maxwin =
+				conntrack->proto.tcp.last_win == 0 ?
+					1 : conntrack->proto.tcp.last_win;
+			conntrack->proto.tcp.seen[conntrack->proto.tcp.last_dir].td_scale =
+				conntrack->proto.tcp.last_wscale;
+			conntrack->proto.tcp.seen[conntrack->proto.tcp.last_dir].flags =
+				conntrack->proto.tcp.last_flags;
+			memset(&conntrack->proto.tcp.seen[dir], 0,
+			       sizeof(struct ip_ct_tcp_state));
+			break;
 		}
 		conntrack->proto.tcp.last_index = index;
 		conntrack->proto.tcp.last_dir = dir;
 		conntrack->proto.tcp.last_seq = ntohl(th->seq);
 		conntrack->proto.tcp.last_end =
 		    segment_seq_plus_len(ntohl(th->seq), skb->len, dataoff, th);
+		conntrack->proto.tcp.last_win = ntohs(th->window);
 
+		/* a) This is a SYN in ORIGINAL. The client and the server
+		 * may be in sync but we are not. In that case, we annotate
+		 * the TCP options and let the packet go through. If it is a
+		 * valid SYN packet, the server will reply with a SYN/ACK, and
+		 * then we'll get in sync. Otherwise, the server ignores it. */
+		if (index == TCP_SYN_SET && dir == IP_CT_DIR_ORIGINAL) {
+			struct ip_ct_tcp_state seen = {};
+
+			conntrack->proto.tcp.last_flags =
+			conntrack->proto.tcp.last_wscale = 0;
+			tcp_options(skb, dataoff, th, &seen);
+			if (seen.flags & IP_CT_TCP_FLAG_WINDOW_SCALE) {
+				conntrack->proto.tcp.last_flags |=
+					IP_CT_TCP_FLAG_WINDOW_SCALE;
+				conntrack->proto.tcp.last_wscale = seen.td_scale;
+			}
+			if (seen.flags & IP_CT_TCP_FLAG_SACK_PERM) {
+				conntrack->proto.tcp.last_flags |=
+					IP_CT_TCP_FLAG_SACK_PERM;
+			}
+		}
 		write_unlock_bh(&tcp_lock);
 		if (LOG_INVALID(IPPROTO_TCP))
 			nf_log_packet(pf, 0, skb, NULL, NULL, NULL,
