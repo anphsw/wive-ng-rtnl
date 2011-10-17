@@ -20,7 +20,6 @@ else
     MODE=$1
 fi
 
-
 #------------------------------------#
 #WR-N for full and WR-NL for ligth HW
 if [ "$MODE" = "2T2R-USB-IPV6" ]; then
@@ -39,6 +38,7 @@ export PRODUCTID="$DEVNAME"
 export MODEL_NAME="$DEVNAME"
 export KERNEL_VER="$VERSIONPKG"
 
+#correct modes
 if [ "$2" = "" ] || [ "$MODE" = "2T2R-USB-IPV6" ]; then
     SAVE_MEM=""
 else
