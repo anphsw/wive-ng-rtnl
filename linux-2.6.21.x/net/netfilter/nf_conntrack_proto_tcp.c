@@ -617,8 +617,16 @@ static int tcp_in_window(struct nf_conn *ct,
 			 * Let's try to use the data from the packet.
 			 */
 			sender->td_end = end;
+			win <<= sender->td_scale;
 			sender->td_maxwin = (win == 0 ? 1 : win);
 			sender->td_maxend = end + sender->td_maxwin;
+			/*
+			 * We haven't seen traffic in the other direction yet
+			 * but we have to tweak window tracking to pass III
+			 * and IV until that happens.
+			 */
+			if (receiver->td_maxwin == 0)
+				receiver->td_end = receiver->td_maxend = sack;
 		}
 	} else if (((state->state == TCP_CONNTRACK_SYN_SENT
 		     && dir == IP_CT_DIR_ORIGINAL)
@@ -716,7 +724,7 @@ static int tcp_in_window(struct nf_conn *ct,
 		/*
 		 * Update receiver data.
 		 */
-		if (after(end, sender->td_maxend))
+		if (receiver->td_maxwin != 0 && after(end, sender->td_maxend))
 			receiver->td_maxwin += end - sender->td_maxend;
 		if (after(sack + win, receiver->td_maxend - 1)) {
 			receiver->td_maxend = sack + win;
