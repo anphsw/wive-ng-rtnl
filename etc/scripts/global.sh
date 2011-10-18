@@ -214,6 +214,28 @@ if [ "$CONFIG_RT_3052_ESW" != "" ]; then
 	config-vlan.sh $SWITCH_MODE FFFFF > /dev/null 2>&1
     fi
     ##########################################################################
+    # Set speed and duplex modes per port
+    ##########################################################################
+    if [ -f /bin/mii_mgr ]; then
+	phys_portN=4
+	for i in `seq 1 5`; do
+	    port_swmode=`nvram_get 2860 port"$i"_swmode`
+	    if [ "$port_swmode" != "auto" ] && [ "$port_swmode" != "" ]; then
+		echo ">>> Port $phys_portN set mode $port_swmode <<<"
+		if [ "$port_swmode" = "100f" ]; then
+		    mii_mgr -s -p$phys_portN -r0 -v 0x2100 > /dev/null 2>&1
+		elif [ "$port_swmode" = "100h" ]; then
+		    mii_mgr -s -p$phys_portN -r0 -v 0x2000 > /dev/null 2>&1
+		elif [ "$port_swmode" = "10f" ]; then
+		    mii_mgr -s -p$phys_portN -r0 -v 0x0100 > /dev/null 2>&1
+		elif [ "$port_swmode" = "10h" ]; then
+		    mii_mgr -s -p$phys_portN -r0 -v 0x0000 > /dev/null 2>&1
+		fi
+	    fi
+	    let "phys_portN=$phys_portN-1"
+	done
+    fi
+    ##########################################################################
     echo '######## clear switch partition  ########'
     config-vlan.sh $SWITCH_MODE 0 > /dev/null 2>&1
     ##########################################################################
@@ -242,28 +264,6 @@ if [ "$CONFIG_RT_3052_ESW" != "" ]; then
 		config-vlan.sh $SWITCH_MODE LLLLW > /dev/null 2>&1
 	    fi
 	fi
-    fi
-    ##########################################################################
-    # Set speed and duplex modes per port
-    ##########################################################################
-    if [ -f /bin/mii_mgr ]; then
-	phys_portN=4
-	for i in `seq 1 5`; do
-	    port_swmode=`nvram_get 2860 port"$i"_swmode`
-	    if [ "$port_swmode" != "auto" ] && [ "$port_swmode" != "" ]; then
-		echo ">>> Port $phys_portN set mode $port_swmode <<<"
-		if [ "$port_swmode" = "100f" ]; then
-		    mii_mgr -s -p$phys_portN -r0 -v 0x2100 > /dev/null 2>&1
-		elif [ "$port_swmode" = "100h" ]; then
-		    mii_mgr -s -p$phys_portN -r0 -v 0x2000 > /dev/null 2>&1
-		elif [ "$port_swmode" = "10f" ]; then
-		    mii_mgr -s -p$phys_portN -r0 -v 0x0100 > /dev/null 2>&1
-		elif [ "$port_swmode" = "10h" ]; then
-		    mii_mgr -s -p$phys_portN -r0 -v 0x0000 > /dev/null 2>&1
-		fi
-	    fi
-	    let "phys_portN=$phys_portN-1"
-	done
     fi
 ##############################################################################
 # VTSS external switch
