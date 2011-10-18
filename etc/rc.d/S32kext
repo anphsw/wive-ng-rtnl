@@ -11,7 +11,7 @@ LOG="logger -t kext"
 
 start() {
     get_param
-    hw_nat
+    hw_nat_en
     pthrough
     # This is set only if wan or lan in bridge
     if [ "$wan_if" = "br0" ] || [ "$lan_if" = "br0" ]; then
@@ -24,7 +24,7 @@ start() {
     fi
 }
 
-hw_nat() {
+hw_nat_en() {
     # In bridge and chillispot mode not fastnat use
     if [ "$opmode" != "0" ] && [ "$opmode" != "4" ]; then
 	simple_qos=`nvram_get 2860 simple_qos`
