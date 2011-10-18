@@ -10,7 +10,6 @@ web_wait
 LOG="logger -t kext"
 
 start() {
-    get_param
     hw_nat_en
     pthrough
     # This is set only if wan or lan in bridge
