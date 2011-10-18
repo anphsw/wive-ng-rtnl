@@ -538,13 +538,13 @@ static int fe_pdma_init(struct net_device *dev)
 	fe_tx_desc_init(dev, 0, 3, 1);
 	if (ei_local->tx_ring0 == NULL) {
 		printk("RAETH: tx ring0 allocation failed\n");
-		return 0;
+		return 1;
 	}
 
 	fe_tx_desc_init(dev, 1, 3, 1);
 	if (ei_local->tx_ring1 == NULL) {
 		printk("RAETH: tx ring1 allocation failed\n");
-		return 0;
+		return 1;
 	}
 
 	printk("\nphy_tx_ring0 = %08x, tx_ring0 = %p, size: %d bytes\n", ei_local->phy_tx_ring0, ei_local->tx_ring0, sizeof(struct PDMA_txdesc));
@@ -555,13 +555,13 @@ static int fe_pdma_init(struct net_device *dev)
 	fe_tx_desc_init(dev, 2, 3, 1);
 	if (ei_local->tx_ring2 == NULL) {
 		printk("RAETH: tx ring2 allocation failed\n");
-		return 0;
+		return 1;
 	}
 
 	fe_tx_desc_init(dev, 3, 3, 1);
 	if (ei_local->tx_ring3 == NULL) {
 		printk("RAETH: tx ring3 allocation failed\n");
-		return 0;
+		return 1;
 	}
 
 	printk("\nphy_tx_ring2 = %08x, tx_ring2 = %p, size: %d bytes\n", ei_local->phy_tx_ring2, ei_local->tx_ring2, sizeof(struct PDMA_txdesc));
@@ -650,7 +650,7 @@ static int fe_pdma_init(struct net_device *dev)
 #endif
 	set_fe_pdma_glo_cfg();
 
-	return 1;
+	return 0;
 }
 
 #if! defined (CONFIG_RAETH_QOS)
@@ -2555,7 +2555,15 @@ int ei_open(struct net_device *dev)
 	if (err)
 	    return err;
 
-	fe_pdma_init(dev);
+	err = fe_pdma_init(dev);
+
+	if (err) {
+	    printk("fe DMA init error !!!");
+	    free_irq(dev->irq, dev);
+	    return err;
+	}
+
+
 	fe_sw_init(); //initialize fe and switch register
 
 	if ( dev->dev_addr != NULL) {
