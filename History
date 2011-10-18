@@ -742,6 +742,7 @@
 47) Fix auto kernel network tune with hw_nat enabled.<br>
 48) Hardware vlan offload must be enabled only if hw_nat and double tag disabled.<br>
 49) If raeth build in static mode - move hw_nat hook to driver ode from external stub.<br>
+50) Raeth: spin_lock_init must be after ether_setup. This may be crash system at reinit raeth.<br>
 
 <br><br>
 <b>For support see:</b><br>
