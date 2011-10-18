@@ -9,6 +9,7 @@
 # get need variables
 wan_port=`nvram_get 2860 wan_port`
 opmode=`nvram_get 2860 OperationMode`
+tv_port=`nvram_get 2860 tv_port`
 
 ##############################################################################
 # Internal 3052 ESW
@@ -77,8 +78,6 @@ if [ "$CONFIG_RT_3052_ESW" != "" ]; then
     # In gate mode and hotspot mode configure vlans
     ##########################################################################
     if [ "$opmode" = "1" ] || [ "$opmode" = "4" ]; then
-	wan_port=`nvram_get 2860 wan_port`
-	tv_port=`nvram_get 2860 tv_port`
 	if [ "$wan_port" = "0" ]; then
 	    if [ "$tv_port" = "1" ]; then
 		echo '##### ESW config vlan partition (WWLLL) #####'
@@ -122,7 +121,6 @@ elif [ "$CONFIG_RAETH_ROUTER" != "" ]; then
     # In gate mode and hotspot mode configure vlans
     ##########################################################################
     if [ "$opmode" = "1" ] || [ "$opmode" = "4" ]; then
-	wan_port=`nvram_get 2860 wan_port`
 	if [ "$wan_port" = "0" ]; then
 	    echo '##### IC+ config vlan partition (WLLLL) #####'
 	    config-vlan.sh $SWITCH_MODE WLLLL > /dev/null 2>&1
