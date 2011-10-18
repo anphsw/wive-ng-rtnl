@@ -10,30 +10,27 @@ web_wait
 LOG="logger -t kext"
 
 start() {
- get_param
- $LOG "Start kernel extension config"
-    # This is set only if wan or lan in bridge------------------------
+    get_param
+    hw_nat
+    pthrough
+    # This is set only if wan or lan in bridge
     if [ "$wan_if" = "br0" ] || [ "$lan_if" = "br0" ]; then
-	#----Fastpath for bridge enable------------------------------
-	if [ "$bridgeFastpath" != "0" ]; then
-	    sysctl -w net.ipv4.bridge_fastpath=1
-	else
-	    sysctl -w net.ipv4.bridge_fastpath=0
-	fi
-	#----Bridge STP----------------------------------------------
-        stpEnabled=`nvram_get 2860 stpEnabled`
-        if [ "$stpEnabled" = "1" ]; then
-                brctl setfd br0 15
-                brctl stp br0 1
-        else
-                brctl setfd br0 1
-                brctl stp br0 0
-        fi
-    else
-	    sysctl -w net.ipv4.bridge_fastpath=0
+	bridge_stp
+	bridge_fastpath
     fi
-    #----In bridge and chillispot mode not fastnat and passth use---
+    # Only if VPN enabled
+    if [ "$vpnEnabled" = "on" ]; then
+	vpn_limit
+    fi
+}
+
+hw_nat() {
+    # In bridge and chillispot mode not fastnat use
     if [ "$opmode" != "0" ] && [ "$opmode" != "4" ]; then
+	simple_qos=`nvram_get 2860 simple_qos`
+	QoSEnable=`nvram_get 2860 QoSEnable`
+	hw_nat_bind=`nvram_get 2860 hw_nat_bind`
+	natFastpath=`nvram_get 2860 natFastpath`
 	# select NAT offload mode
 	if [ "$natFastpath" = "1" ]; then
 	    hw_nat=0
@@ -90,51 +87,79 @@ start() {
 	    $LOG "Increase HW_NAT binding threshold to $hw_nat_bind."
 	    hw_nat -N $hw_nat_bind > /dev/null 2>&1
 	fi
+    else
+	$LOG "NAT Offload mode DISABLE"
+	sysctl -w net.ipv4.netfilter.ip_conntrack_fastnat=0
+	if [ -d /sys/module/hw_nat ]; then
+	    rmmod hw_nat > /dev/null 2>&1
+	fi
+    fi
+}
+
+pthrough() {
+    # In bridge and chillispot mode not passth use
+    if [ "$opmode" != "0" ] && [ "$opmode" != "4" ]; then
+	pppoe_pass=`nvram_get 2860 pppoe_pass`
+	ipv6_pass=`nvram_get 2860 ipv6_pass`
 	# pppoe and ip_v6 kernel mode relay.
 	if [ -d /proc/pthrough ]; then
 	    if [ "$pppoe_pass" = "1" ]; then
+		$LOG "PPPOE Pass Through enable for $lan_if and $wan_if interfaces."
 		echo "$lan_if,$wan_if" > /proc/pthrough/pppoe
 	    else
 		echo "null,null" > /proc/pthrough/pppoe
 	    fi
 	    if [ "$ipv6_pass" = "1" ]; then
+		$LOG "IPv6 Pass Through enable for $lan_if and $wan_if interfaces."
 		echo "$lan_if,$wan_if" > /proc/pthrough/ipv6
 	    else
 		echo "null,null" > /proc/pthrough/ipv6
 	    fi
 	fi
     else
-	    $LOG "NAT Offload mode DISABLE"
-	    sysctl -w net.ipv4.netfilter.ip_conntrack_fastnat=0
-	    if [ -d /sys/module/hw_nat ]; then
-		rmmod hw_nat > /dev/null 2>&1
-	    fi
-	    if [ -d /proc/pthrough ]; then
-		echo "null,null" > /proc/pthrough/pppoe
-		echo "null,null" > /proc/pthrough/ipv6
-	    fi
+	if [ -d /proc/pthrough ]; then
+	    echo "null,null" > /proc/pthrough/pppoe
+	    echo "null,null" > /proc/pthrough/ipv6
+	fi
     fi
+}
+
+vpn_limit() {
+    vpnCpuLimit=`nvram_get 2860 vpnCpuLimit`
     if [ "$vpnCpuLimit" != "" ] && [ "$vpnCpuLimit" != "0" ]; then
-	    $LOG "Limit cpu load for PPP to $vpnCpuLimit ticks"
-	    sysctl -w net.ipv4.ppp_cpu_load_limit=$vpnCpuLimit
+	$LOG "Limit cpu load for PPP to $vpnCpuLimit ticks"
+	sysctl -w net.ipv4.ppp_cpu_load_limit=$vpnCpuLimit
     else
-	    sysctl -w net.ipv4.ppp_cpu_load_limit=0
+	sysctl -w net.ipv4.ppp_cpu_load_limit=0
+    fi
+}
+
+bridge_fastpath() {
+    #----Fastpath for bridge enable------------------------------
+    bridgeFastpath=`nvram_get 2860 bridgeFastpath`
+    if [ "$bridgeFastpath" != "0" ]; then
+	$LOG "Bridge fastpath enabled."
+	sysctl -w net.ipv4.bridge_fastpath=1
+    else
+	sysctl -w net.ipv4.bridge_fastpath=0
+    fi
+}
+
+bridge_stp() {
+    #----Bridge STP----------------------------------------------
+    stpEnabled=`nvram_get 2860 stpEnabled`
+    if [ "$stpEnabled" = "1" ]; then
+	$LOG "Bridge STP enabled."
+	brctl setfd br0 15
+	brctl stp br0 1
+    else
+	brctl setfd br0 1
+	brctl stp br0 0
     fi
 }
 
 stop() {
     echo "" > /dev/null
-}
-
-get_param() {
-    pppoe_pass=`nvram_get 2860 pppoe_pass`
-    ipv6_pass=`nvram_get 2860 ipv6_pass`
-    natFastpath=`nvram_get 2860 natFastpath`
-    bridgeFastpath=`nvram_get 2860 bridgeFastpath`
-    simple_qos=`nvram_get 2860 simple_qos`
-    QoSEnable=`nvram_get 2860 QoSEnable`
-    hw_nat_bind=`nvram_get 2860 hw_nat_bind`
-    vpnCpuLimit=`nvram_get 2860 vpnCpuLimit`
 }
 
 case "$1" in
