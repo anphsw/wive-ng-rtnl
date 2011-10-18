@@ -745,6 +745,7 @@
 50) Raeth: spin_lock_init must be after ether_setup. This may be crash system at reinit raeth.<br>
 51) Now use ethtool for configure port speed and duplex (more portable and safe).<br>
 
+
 <br><br>
 <b>For support see:</b><br>
 <a href="http://acorp.ru">acorp.ru - Acorp Electronics Inc.</a><br>
