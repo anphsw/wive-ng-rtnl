@@ -101,20 +101,15 @@ if [ "$CONFIG_RT_3052_ESW" != "" ]; then
     ##########################################################################
     # Configure double vlan tag and eneble forward
     ##########################################################################
-    if [ "$CONFIG_RAETH_SPECIAL_TAG" != "y" ]; then
-	if [ -f /proc/sys/net/ipv4/vlan_double_tag ]; then
-	    if [ "$vlan_double_tag" = "1" ] || [ "$natFastpath" = "2" ] || [ "$natFastpath" = "3" ]; then
-		DOUBLE_TAG=3f
-	    else
-		DOUBLE_TAG=0
-	    fi
+    if [ -f /proc/sys/net/ipv4/vlan_double_tag ]; then
+	if [ "$vlan_double_tag" = "1" ] || [ "$natFastpath" = "2" ] || [ "$natFastpath" = "3" ]; then
+	    DOUBLE_TAG=3f
+	else
+	    DOUBLE_TAG=0
 	fi
-	# double vlan tag support enable/disable
-	switch reg w e4 $DOUBLE_TAG
-    else
-	# special tag enabled
-	switch reg w e4 40043f
     fi
+    # double vlan tag support enable/disable
+    switch reg w e4 $DOUBLE_TAG
     ##########################################################################
     echo '######### Clear switch mac table  ###########'
     switch clear > /dev/null 2>&1

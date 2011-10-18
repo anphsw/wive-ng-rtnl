@@ -29,9 +29,9 @@ config RAETH_SKB_RECYCLE_2K
         bool "SKB Recycle_2K(Proprietary)"
         depends on !RALINK_RT63365
 
-config RAETH_SPECIAL_TAG
-        bool "Ralink Special Tag (0x810x)"
-        depends on (RALINK_RT3052 || RALINK_RT3352 || RALINK_RT5350 || RALINK_RT6855 || RALINK_RT63365)
+#config RAETH_SPECIAL_TAG
+#        bool "Ralink Special Tag (0x810x)"
+#        depends on (RALINK_RT3052 || RALINK_RT3352 || RALINK_RT5350 || RALINK_RT6855 || RALINK_RT63365)
 
 config RAETH_JUMBOFRAME
         bool "Jumbo Frame up to 4K bytes"
