@@ -214,58 +214,53 @@ if [ "$CONFIG_RT_3052_ESW" != "" ]; then
 	config-vlan.sh $SWITCH_MODE FFFFF > /dev/null 2>&1
     fi
     ##########################################################################
-    echo '######## clear switch partition  ########'
+    echo '######### Clear switch partition  ###########'
     config-vlan.sh $SWITCH_MODE 0 > /dev/null 2>&1
     ##########################################################################
     # Set speed and duplex modes per port
     ##########################################################################
-    if [ -f /bin/ethtool ]; then
-	##################################
-	# mode detect for some chips
-	##################################
-	if [ -f /proc/rt2880/gmac ]; then
-	    PROC="/proc/rt2880/gmac"
-	elif [ -f /proc/rt3052/gmac ]; then
-	    PROC="/proc/rt3052/gmac"
-	elif [ -f /proc/rt3352/gmac ]; then
-	    PROC="/proc/rt3352/gmac"
-	elif [ -f /proc/rt5350/gmac ]; then
-	    PROC="/proc/rt5350/gmac"
-	elif [ -f /proc/rt2883/gmac ]; then
-	    PROC="/proc/rt2883/gmac"
-	elif [ -f /proc/rt3883/gmac ]; then
-	    PROC="/proc/rt23883/gmac"
-	elif [ -f /proc/rt6855/gmac ]; then
-	    PROC="/proc/rt6855/gmac"
-	elif [ -f /proc/rt63365/gmac ]; then
-	    PROC="/proc/rt63365/gmac"
-	else
-	    echo "No swith in system!!!"
-	    PROC=
-	fi
+    if [ -f /proc/rt2880/gmac ]; then
+	PROC="/proc/rt2880/gmac"
+    elif [ -f /proc/rt3052/gmac ]; then
+	PROC="/proc/rt3052/gmac"
+    elif [ -f /proc/rt3352/gmac ]; then
+	PROC="/proc/rt3352/gmac"
+    elif [ -f /proc/rt5350/gmac ]; then
+	PROC="/proc/rt5350/gmac"
+    elif [ -f /proc/rt2883/gmac ]; then
+	PROC="/proc/rt2883/gmac"
+    elif [ -f /proc/rt3883/gmac ]; then
+	PROC="/proc/rt23883/gmac"
+    elif [ -f /proc/rt6855/gmac ]; then
+	PROC="/proc/rt6855/gmac"
+    elif [ -f /proc/rt63365/gmac ]; then
+	PROC="/proc/rt63365/gmac"
+    else
+	echo "No swith in system!!!"
+	PROC=
+    fi
+    if [ -f /bin/ethtool ] && [ "$PROC" != "" ]; then
 	##################################
 	# start configure by ethtool
 	##################################
-	if [ "$PROC" != "" ]; then
-	    phys_portN=4
-	    for i in `seq 1 5`; do
-		port_swmode=`nvram_get 2860 port"$i"_swmode`
-		if [ "$port_swmode" != "auto" ] && [ "$port_swmode" != "" ]; then
-		    echo ">>> Port $phys_portN set mode $port_swmode <<<"
-		    echo "$phys_portN" > $PROC
-		    if [ "$port_swmode" = "100f" ]; then
-			ethtool -s eth2 autoneg off speed 100 duplex full	> /dev/null 2>&1
-		    elif [ "$port_swmode" = "100h" ]; then
-			ethtool -s eth2 autoneg off speed 100 duplex half	> /dev/null 2>&1
-		    elif [ "$port_swmode" = "10f" ]; then
-			ethtool -s eth2 autoneg off speed 10 duplex full	> /dev/null 2>&1
-		    elif [ "$port_swmode" = "10h" ]; then
-			ethtool -s eth2 autoneg off speed 10 duplex half	> /dev/null 2>&1
-		    fi
+	phys_portN=4
+	for i in `seq 1 5`; do
+	    port_swmode=`nvram_get 2860 port"$i"_swmode`
+	    if [ "$port_swmode" != "auto" ] && [ "$port_swmode" != "" ]; then
+		echo ">>> Port $phys_portN set mode $port_swmode <<<"
+		echo "$phys_portN" > $PROC
+		if [ "$port_swmode" = "100f" ]; then
+		    ethtool -s eth2 autoneg off speed 100 duplex full	> /dev/null 2>&1
+		elif [ "$port_swmode" = "100h" ]; then
+		    ethtool -s eth2 autoneg off speed 100 duplex half	> /dev/null 2>&1
+		elif [ "$port_swmode" = "10f" ]; then
+		    ethtool -s eth2 autoneg off speed 10 duplex full	> /dev/null 2>&1
+		elif [ "$port_swmode" = "10h" ]; then
+		    ethtool -s eth2 autoneg off speed 10 duplex half	> /dev/null 2>&1
 		fi
-	    let "phys_portN=$phys_portN-1"
-	    done
-	fi
+	    fi
+	let "phys_portN=$phys_portN-1"
+	done
     fi
     ##########################################################################
     # In gate mode and hotspot mode configure vlans
@@ -292,7 +287,7 @@ if [ "$CONFIG_RT_3052_ESW" != "" ]; then
 	fi
     fi
     ##########################################################################
-    echo '######## clear switch mac table  ########'
+    echo '######### Clear switch mac table  ############'
     switch clear > /dev/null 2>&1
 ##############################################################################
 # VTSS external switch
