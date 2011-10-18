@@ -214,6 +214,9 @@ if [ "$CONFIG_RT_3052_ESW" != "" ]; then
 	config-vlan.sh $SWITCH_MODE FFFFF > /dev/null 2>&1
     fi
     ##########################################################################
+    echo '######## clear switch partition  ########'
+    config-vlan.sh $SWITCH_MODE 0 > /dev/null 2>&1
+    ##########################################################################
     # Set speed and duplex modes per port
     ##########################################################################
     if [ -f /bin/mii_mgr ]; then
@@ -235,9 +238,6 @@ if [ "$CONFIG_RT_3052_ESW" != "" ]; then
 	    let "phys_portN=$phys_portN-1"
 	done
     fi
-    ##########################################################################
-    echo '######## clear switch mac table  ########'
-    switch clear > /dev/null 2>&1
     ##########################################################################
     # In gate mode and hotspot mode configure vlans
     ##########################################################################
@@ -263,8 +263,8 @@ if [ "$CONFIG_RT_3052_ESW" != "" ]; then
 	fi
     fi
     ##########################################################################
-    echo '######## clear switch partition  ########'
-    config-vlan.sh $SWITCH_MODE 0 > /dev/null 2>&1
+    echo '######## clear switch mac table  ########'
+    switch clear > /dev/null 2>&1
 ##############################################################################
 # VTSS external switch
 ##############################################################################

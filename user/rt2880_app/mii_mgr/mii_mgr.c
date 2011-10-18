@@ -17,6 +17,7 @@
 #include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -41,20 +42,14 @@ int main(int argc, char *argv[])
 {
 	int sk, opt, ret;
 	char options[] = "gsp:r:v:?t";
-	int method = RAETH_MII_READ;
+	int method = 0;
 	struct ifreq ifr;
 	ra_mii_ioctl_data mii;
 
-	if (argc < 6) {
-		show_usage();
-		return 0;
-	}
-
-	sk = socket(AF_INET, SOCK_DGRAM, 0);
-	if (sk < 0) {
-		printf("Open socket failed\n");
-		return -1;
-	}
+        if (argc < 4) {
+                show_usage();
+                return 0;
+        }
 
 	strncpy(ifr.ifr_name, "eth2", 5);
 	ifr.ifr_data = &mii;
@@ -66,6 +61,10 @@ int main(int argc, char *argv[])
 				break;
 			case 's':
 				method = RAETH_MII_WRITE;
+				if (argc < 6) {
+				    show_usage();
+				    return 0;
+				}
 				break;
 			case 'p':
 				mii.phy_id = (__u16)atoi(optarg);
@@ -82,12 +81,17 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	ret = ioctl(sk, method, &ifr);
-	if (ret < 0) {
-		printf("mii_mgr: ioctl error\n");
+	sk = socket(AF_INET, SOCK_DGRAM, 0);
+	if (sk < 0) {
+		printf("Open socket failed\n");
+		return -1;
 	}
+
+	ret = ioctl(sk, method, &ifr);
+	if (ret < 0)
+	    printf("mii_mgr: ioctl error\n");
 	else
-	switch (method) {
+	    switch (method) {
 		case RAETH_MII_READ:
 			printf("Get: phy[%d].reg[%d] = %04x\n",
 					mii.phy_id, mii.reg_num, mii.val_out);
@@ -96,7 +100,7 @@ int main(int argc, char *argv[])
 			printf("Set: phy[%d].reg[%d] = %04x\n",
 					mii.phy_id, mii.reg_num, mii.val_in);
 			break;
-	}
+	    }
 
 	close(sk);
 	return ret;
