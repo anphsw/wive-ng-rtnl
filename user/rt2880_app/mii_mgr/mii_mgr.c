@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
 {
 	int sk, opt, ret;
 	char options[] = "gsp:r:v:?t";
-	int method = 0;
+	int method = RAETH_MII_READ;
 	struct ifreq ifr;
 	ra_mii_ioctl_data mii;
 
