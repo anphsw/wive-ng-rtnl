@@ -1650,7 +1650,7 @@ static struct list_head *alloc_hashtable(int size, int *vmalloced)
 	unsigned int i;
 
 	*vmalloced = 0;
-	hash = (void*)__get_free_pages(GFP_KERNEL,
+	hash = (void*)__get_free_pages(GFP_KERNEL|__GFP_NOWARN,
 				       get_order(sizeof(struct list_head)
 						 * size));
 	if (!hash) {
