@@ -746,7 +746,6 @@
 51) Now use ethtool for configure port speed and duplex (more portable and safe).<br>
 52) Remove fs cleanall. Use fs fullreset instead. For details enter fs without param.<br>
 53) Move high level switch configure to independed helper script config-switch.sh.<br>
-54) Configure double vlan tag now configured by driver code. No need userspace.<br>
 
 <br><br>
 <b>For support see:</b><br>

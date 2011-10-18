@@ -10,6 +10,8 @@
 wan_port=`nvram_get 2860 wan_port`
 opmode=`nvram_get 2860 OperationMode`
 tv_port=`nvram_get 2860 tv_port`
+vlan_double_tag=`nvram_get 2860 vlan_double_tag`
+natFastpath=`nvram_get 2860 natFastpath`
 
 ##############################################################################
 # Internal 3052 ESW
@@ -23,11 +25,11 @@ if [ "$CONFIG_RT_3052_ESW" != "" ]; then
 	# need only start boot
 	######################################################################
 	echo "Reinit power mode for all switch ports"
-	config-vlan.sh $SWITCH_MODE FFFFF > /dev/null 2>&1
+	/etc/scripts/config-vlan.sh $SWITCH_MODE FFFFF > /dev/null 2>&1
     fi
     ##########################################################################
     echo '######### Clear switch partition  ###########'
-    config-vlan.sh $SWITCH_MODE 0 > /dev/null 2>&1
+    /etc/scripts/config-vlan.sh $SWITCH_MODE 0 > /dev/null 2>&1
     ##########################################################################
     # Set speed and duplex modes per port
     ##########################################################################
@@ -81,23 +83,40 @@ if [ "$CONFIG_RT_3052_ESW" != "" ]; then
 	if [ "$wan_port" = "0" ]; then
 	    if [ "$tv_port" = "1" ]; then
 		echo '##### ESW config vlan partition (WWLLL) #####'
-		config-vlan.sh $SWITCH_MODE WWLLL > /dev/null 2>&1
+		/etc/scripts/config-vlan.sh $SWITCH_MODE WWLLL > /dev/null 2>&1
 	    else
 		echo '##### ESW config vlan partition (WLLLL) #####'
-		config-vlan.sh $SWITCH_MODE WLLLL > /dev/null 2>&1
+		/etc/scripts/config-vlan.sh $SWITCH_MODE WLLLL > /dev/null 2>&1
 	    fi
 	else
 	    if [ "$tv_port" = "1" ]; then
 		echo '##### ESW config vlan partition (LLLWW) #####'
-		config-vlan.sh $SWITCH_MODE LLLWW > /dev/null 2>&1
+		/etc/scripts/config-vlan.sh $SWITCH_MODE LLLWW > /dev/null 2>&1
 	    else
 		echo '##### ESW config vlan partition (LLLLW) #####'
-		config-vlan.sh $SWITCH_MODE LLLLW > /dev/null 2>&1
+		/etc/scripts/config-vlan.sh $SWITCH_MODE LLLLW > /dev/null 2>&1
 	    fi
 	fi
     fi
     ##########################################################################
-    echo '######### Clear switch mac table  ############'
+    # Configure double vlan tag and eneble forward
+    ##########################################################################
+    if [ "$CONFIG_RAETH_SPECIAL_TAG" != "y" ]; then
+	if [ -f /proc/sys/net/ipv4/vlan_double_tag ]; then
+	    if [ "$vlan_double_tag" = "1" ] || [ "$natFastpath" = "2" ] || [ "$natFastpath" = "3" ]; then
+		DOUBLE_TAG=3f
+	    else
+		DOUBLE_TAG=0
+	    fi
+	fi
+	# double vlan tag support enable/disable
+	switch reg w e4 $DOUBLE_TAG
+    else
+	# special tag enabled
+	switch reg w e4 40043f
+    fi
+    ##########################################################################
+    echo '######### Clear switch mac table  ###########'
     switch clear > /dev/null 2>&1
 ##############################################################################
 # VTSS external switch
@@ -106,9 +125,9 @@ elif [ "$CONFIG_MAC_TO_MAC_MODE" != "" ]; then
     SWITCH_MODE=1
     ##########################################################################
     echo '######## clear switch partition  ########'
-    config-vlan.sh $SWITCH_MODE 0 > /dev/null 2>&1
+    /etc/scripts/config-vlan.sh $SWITCH_MODE 0 > /dev/null 2>&1
     echo '##### config vlan partition (VTSS) #####'
-    config-vlan.sh $SWITCH_MODE 1 > /dev/null 2>&1
+    /etc/scripts/config-vlan.sh $SWITCH_MODE 1 > /dev/null 2>&1
 ##############################################################################
 # IC+ external switch
 ##############################################################################
@@ -116,17 +135,17 @@ elif [ "$CONFIG_RAETH_ROUTER" != "" ]; then
     SWITCH_MODE=0
     ##########################################################################
     echo '######## clear switch partition  ########'
-    config-vlan.sh $SWITCH_MODE 0 > /dev/null 2>&1
+    /etc/scripts/config-vlan.sh $SWITCH_MODE 0 > /dev/null 2>&1
     ##########################################################################
     # In gate mode and hotspot mode configure vlans
     ##########################################################################
     if [ "$opmode" = "1" ] || [ "$opmode" = "4" ]; then
 	if [ "$wan_port" = "0" ]; then
 	    echo '##### IC+ config vlan partition (WLLLL) #####'
-	    config-vlan.sh $SWITCH_MODE WLLLL > /dev/null 2>&1
+	    /etc/scripts/config-vlan.sh $SWITCH_MODE WLLLL > /dev/null 2>&1
 	else
 	    echo '##### IC+ config vlan partition (LLLLW) #####'
-	    config-vlan.sh $SWITCH_MODE LLLLW > /dev/null 2>&1
+	    /etc/scripts/config-vlan.sh $SWITCH_MODE LLLLW > /dev/null 2>&1
 	fi
     fi
 fi

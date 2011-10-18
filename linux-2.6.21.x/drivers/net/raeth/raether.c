@@ -2848,14 +2848,7 @@ void rt305x_esw_init(void)
 	 * DROP_RLS=120, DROP_SET_TH=80
 	 */
         *(unsigned long *)(RALINK_ETH_SW_BASE+0x0008) = 0xC8A07850;
-#if defined(CONFIG_RT_3052_ESW) && defined(CONFIG_VLAN_8021Q_DOUBLE_TAG)
-	/* Enable double vlan support */
-	if(vlan_double_tag) {
-    	    RAETH_PRINT("raeth: vlan double tag support enabled\n");
-    	*(unsigned long *)(RALINK_ETH_SW_BASE+0x00E4) = 0x0000003f;
-	} else
-#endif
-        *(unsigned long *)(RALINK_ETH_SW_BASE+0x00E4) = 0x00000000;
+        *(unsigned long *)(RALINK_ETH_SW_BASE+0x00E4) = 0x00000000; //disable double VLAN
         *(unsigned long *)(RALINK_ETH_SW_BASE+0x0014) = 0x00405555;
         *(unsigned long *)(RALINK_ETH_SW_BASE+0x0050) = 0x00002001;
         *(unsigned long *)(RALINK_ETH_SW_BASE+0x0090) = 0x00007f7f;

@@ -95,6 +95,9 @@ restoreEsw()
         switch reg w 70 ffffffff
         switch reg w 98 7f7f
         switch reg w e4 7f
+
+        #clear mac table if vlan configuration changed
+        switch clear
 }
 
 disableEsw()
