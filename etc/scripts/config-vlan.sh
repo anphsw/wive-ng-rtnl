@@ -50,7 +50,8 @@ config3052()
 	# preinit
 	switch reg w 14 405555
 	switch reg w 50 2001
-	switch reg w 98 7f3f
+	switch reg w 90 7f7f
+	switch reg w 98 7f3f #disable VLAN
 
 	# doble wlan tag config
 	config3052_dt
