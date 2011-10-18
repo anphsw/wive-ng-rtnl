@@ -22,7 +22,7 @@ get_size(){
 }
 
 usage(){
-  echo "Usage: $0 | save | load | restore | nvramreset | fullreset | cleanall" >&2
+  echo "Usage: $0 | save | load | restore | nvramreset | fullreset |" >&2
   echo "____________________________________________________________________________" >&2
   echo " " >&2
   echo "save - Save rwfs to mtd." >&2
@@ -30,11 +30,12 @@ usage(){
   echo "load - Load rwfs from mtd." >&2
   echo "restore - Crash $MTDRWFS and reboot for restore clean rwfs." >&2
   echo "nvramreset - Nvarm clean and load default config." >&2
-  echo "fullreset - Full reset include rwfs, nvram and mac adress settings." >&2
-  echo "cleanall - 1. Full zero write in config,factory and rwfs particions." >&2
-  echo "	   2. Write temlate for RF config (Factory) to flash." >&2
-  echo "	   3. Load and write default setting (Config) to flash." >&2
-  echo "	   4. Generate new mac and flash it." >&2
+  echo "fullreset - 1. Full zero write in config,factory and rwfs particions." >&2
+  echo "	    2. Reboot device." >&2
+  echo "	    3. Write temlate for RF config (Factory) to flash." >&2
+  echo "	    4. Load and write default setting (Config) to flash." >&2
+  echo "	    5. Generate new macs, keys and others." >&2
+  echo "	    6. Generate new mac and flash it." >&2
   echo "____________________________________________________________________________" >&2
  exit 1
 }
@@ -66,7 +67,7 @@ save(){
 
 restore(){
     echo "Clear rwfs and reboot. Please go smoke..."
-    echo "1234567890" > $MTDRWFS
+    dd if=/dev/zero of=$MTDRWFS conv=sync > /dev/null 2>&1
     reboot
 }
 
@@ -83,7 +84,7 @@ burnrf(){
     sync
 }
 
-cleanall(){
+fullreset(){
     echo "Stop services and unload modules..."
     killall -q goahead
     killall -q -SIGKILL goahead
@@ -93,28 +94,7 @@ cleanall(){
     dd if=/dev/zero of=$MTD2CFG conv=sync bs=1024 seek=8 count=8 > /dev/null 2>&1
     dd if=/dev/zero of=$MTD2FAC conv=sync > /dev/null 2>&1
     sync
-    burnrf
-    nvramreset
-    echo "First start MAC generate"
-    mac_wan=`cat /dev/urandom | hexdump | head -n1 | cut -f 2- -d " " | sed ':BEGIN;s/^\([^ ]\{0,29\}\) /\1/;tBEGIN' | sed 's/\(..\)/\1:/g; s/.$//' | tail -q -c 9`
-    mac_lan=`cat /dev/urandom | hexdump | head -n1 | cut -f 2- -d " " | sed ':BEGIN;s/^\([^ ]\{0,29\}\) /\1/;tBEGIN' | sed 's/\(..\)/\1:/g; s/.$//' | tail -q -c 9`
-    mac_wlan=`cat /dev/urandom | hexdump | head -n1 | cut -f 2- -d " " | sed ':BEGIN;s/^\([^ ]\{0,29\}\) /\1/;tBEGIN' | sed 's/\(..\)/\1:/g; s/.$//' | tail -q -c 9`
-    WAN_MACADDR="00:0B:2B:$mac_wan"
-    LAN_MACADDR="00:0B:2B:$mac_lan"
-    WLAN_MACADDR="00:0B:2B:$mac_wlan"
-    echo "Set new macs WAN=$WAN_MACADDR LAN=$LAN_MACADDR WLAN=$WLAN_MACADDR"
-    nvram_set 2860 WAN_MAC_ADDR "$WAN_MACADDR"
-    nvram_set 2860 LAN_MAC_ADDR "$LAN_MACADDR"
-    nvram_set 2860 WLAN_MAC_ADDR "$WLAN_MACADDR"
-    sync
     reboot
-}
-
-fullreset(){
-    service modules stop
-    echo "Reset rwfs and nvram...."
-    nvramreset
-    restore
 }
 
 backup_nvram(){
@@ -152,9 +132,6 @@ main(){
       ;;
     fullreset)
       fullreset $@
-      ;;
-    cleanall)
-      cleanall $@
       ;;
     backup_nvram)
       backup_nvram $@
