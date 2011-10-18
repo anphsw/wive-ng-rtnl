@@ -212,7 +212,7 @@ int AclRegIoctlHandler(void)
     int result=0;
     result = register_chrdev(acl_major, ACL_DEVNAME, &acl_fops);
     if (result < 0) {
-	NAT_PRINT(KERN_WARNING "acl: can't get major %d\n",acl_major);
+	NAT_PRINT("acl: can't get major %d\n",acl_major);
         return result;
     }
 

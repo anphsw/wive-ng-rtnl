@@ -169,7 +169,7 @@ int PpeRegIoctlHandler(void)
     int result=0;
     result = register_chrdev(hw_nat_major, HW_NAT_DEVNAME, &hw_nat_fops);
     if (result < 0) {
-	NAT_PRINT(KERN_WARNING "hw_nat: can't get major %d\n",hw_nat_major);
+	NAT_PRINT("hw_nat: can't get major %d\n",hw_nat_major);
         return result;
     }
 

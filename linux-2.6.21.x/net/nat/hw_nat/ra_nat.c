@@ -1788,8 +1788,6 @@ static uint32_t SetGdmaFwd(uint32_t Ebl)
 static int32_t PpeInitMod(void)
 {
 
-    NAT_PRINT("Ralink HW NAT Module Enabled\n");
-
     //Get net_device structure of Dest Port
     PpeSetDstPort(1);
 
@@ -1814,13 +1812,13 @@ static int32_t PpeInitMod(void)
     /* Set GMAC fowrards packet to PPE */
     SetGdmaFwd(1);
 
+    NAT_PRINT("Ralink HW NAT Module Load\n");
+
     return 0;
 }
 
 static void PpeCleanupMod(void)
 {
-    NAT_PRINT("Ralink HW NAT Module Disabled\n");
-
     /* Set GMAC fowrards packet to CPU */
     SetGdmaFwd(0);
 
@@ -1843,6 +1841,8 @@ static void PpeCleanupMod(void)
 
     //Release net_device structure of Dest Port
     PpeSetDstPort(0);
+
+    NAT_PRINT("Ralink HW NAT Module Unload\n");
 }
 
 /*HNAT QOS*/
