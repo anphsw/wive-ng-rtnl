@@ -32,29 +32,13 @@ usage()
 	exit 0
 }
 
-config3052_dt()
-{
-	if [ -f /proc/sys/net/ipv4/vlan_double_tag ]; then
-	    # switch double tag enabled after eth2 up
-	    vlan_double_tag=`nvram_get 2860 vlan_double_tag`
-	    if [ "$vlan_double_tag" = "1" ]; then
-		switch reg w e4 3f
-    	    else
-		switch reg w e4 0
-	    fi
-	fi
-}
-
-config3052()
+configEsw()
 {
 	# preinit
 	switch reg w 14 405555
 	switch reg w 50 2001
 	switch reg w 90 7f7f
 	switch reg w 98 7f3f #disable VLAN
-
-	# doble wlan tag config
-	config3052_dt
 
 	# Calculating PVID on ports 1 and 0
 	r40=`printf "%x" $((($2<<12)|$1))`
@@ -75,14 +59,11 @@ config3052()
 	switch reg w 48 $r48
 
 	# Calculating accessory of every port to different vlan
-
 	# Each Vlan contains P6 (system port)
 	r70=$(((1<<6)|(1<<14)|(1<<22)|(1<<30)))
 	r74=$r70
 
-
 	j=0
-
 	# Calculating bitmasks
 	for i
 		do
@@ -103,7 +84,7 @@ config3052()
 	switch reg w 74 $r74
 }
 
-restore3052()
+restoreEsw()
 {
         switch reg w 14 5555
         switch reg w 40 1001
@@ -114,19 +95,16 @@ restore3052()
         switch reg w 70 ffffffff
         switch reg w 98 7f7f
         switch reg w e4 7f
-
-	# doble wlan tag config
-	config3052_dt
 }
 
-disable3052()
+disableEsw()
 {
     for i in `seq 0 4`; do
 	mii_mgr -s -p $i -r 0 -v 0x0800
     done
 }
 
-enable3052()
+enableEsw()
 {
     for i in `seq 0 4`; do
 	mii_mgr -s -p $i -r 0 -v 0x9000
@@ -230,8 +208,8 @@ reset_all_phys()
 
 reinit_all_phys()
 {
-	disable3052
-	enable3052
+	disableEsw
+	enableEsw
 	reset_all_phys
 }
 
@@ -379,38 +357,38 @@ elif [ "$1" = "1" ]; then
 elif [ "$1" = "2" ]; then
 	SWITCH_MODE=2
 	if [ "$2" = "0" ]; then
-		restore3052
+		restoreEsw
 	elif [ "$2" = "EEEEE" ]; then
-		enable3052 
+		enableEsw 
 	elif [ "$2" = "DDDDD" ]; then
-		disable3052
+		disableEsw
 	elif [ "$2" = "RRRRR" ]; then
 		reset_all_phys
 	elif [ "$2" = "FFFFF" ]; then
 		reinit_all_phys
 	elif [ "$2" = "LLLLW" ]; then
 		wan_portN=4
-		config3052 2 1 1 1 1 1
+		configEsw 2 1 1 1 1 1
 	elif [ "$2" = "WLLLL" ]; then
 		wan_portN=0
-		config3052 1 1 1 1 2 1
+		configEsw 1 1 1 1 2 1
 	elif [ "$2" = "LLLWW" ]; then
 		wan_portN=4
-		config3052 2 2 1 1 1 1
+		configEsw 2 2 1 1 1 1
 	elif [ "$2" = "WWLLL" ]; then
 		wan_portN=0
-		config3052 1 1 1 2 2 1
+		configEsw 1 1 1 2 2 1
         elif [ "$2" = "W1234" ]; then
 		wan_portN=0
-                config3052 5 1 2 3 4
+                configEsw 5 1 2 3 4
         elif [ "$2" = "12345" ]; then
 		wan_portN=5
-                config3052 1 2 3 4 5
+                configEsw 1 2 3 4 5
 	elif [ "$2" = "GW" ]; then
 		wan_portN=5
-		config3052 1 1 1 1 1 2
+		configEsw 1 1 1 1 1 2
 	elif [ "$2" = "GS" ]; then
-		restore3052
+		restoreEsw
 		switch reg w e4 3f
 	else
 		a1=`echo $2| sed 's/^//'| sed 's/....$//'`
@@ -418,7 +396,7 @@ elif [ "$1" = "2" ]; then
 		a3=`echo $2| sed 's/^..//'| sed 's/..$//'`
 		a4=`echo $2| sed 's/^...//'| sed 's/.$//'`
 		a5=`echo $2| sed 's/^....//'| sed 's/$//'`
-		config3052 $a1 $a2 $a3 $a4 $a5 1
+		configEsw $a1 $a2 $a3 $a4 $a5 1
 	fi
 else
 	echo "unknown swith type $1"

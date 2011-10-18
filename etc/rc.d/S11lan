@@ -69,7 +69,7 @@ start() {
 
     # configure switch at start
     if [ ! -f /var/run/goahead.pid ]; then
-	setLanWan
+	/etc/scripts/config-switch.sh
     fi
 
 }

@@ -59,7 +59,7 @@ case "$1" in
 	if [ "$dhcpSwReset" = "1" ]; then
 	    $LOG "Reinit switch"
 	    # Reset switch
-	    setLanWan
+	    /etc/scripts/config-switch.sh
 	fi
     fi
     ;;
