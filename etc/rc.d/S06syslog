@@ -3,6 +3,7 @@
 LOG="echo SYSLOG"
 
 start() {
+    get_param
     if [ "$KLogd" != "0" ] && [ "$KLogd" != "" ]; then
 	$LOG "Start klogd"
 	klogd &
