@@ -106,15 +106,15 @@ static int cdp_capset;
 
 struct cdp_header { 
 /* ethernet 802.3 header */
-	unsigned char dst_addr[6] __attribute__ ((packed));
-	unsigned char src_addr[6] __attribute__ ((packed));
+	unsigned char dst_addr[6];
+	unsigned char src_addr[6];
 	u_int16_t length __attribute__ ((packed));
 /* LLC */
-	u_int8_t dsap __attribute__ ((packed));
-	u_int8_t ssap __attribute__ ((packed));
+	u_int8_t dsap;
+	u_int8_t ssap;
 /* llc control */
-	u_int8_t control __attribute__ ((packed));
-	u_int8_t orgcode[3] __attribute__ ((packed));
+	u_int8_t control;
+	u_int8_t orgcode[3];
 	u_int16_t protocolId __attribute__ ((packed));
 };
 
