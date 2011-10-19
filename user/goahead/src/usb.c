@@ -956,37 +956,6 @@ static int isSpaceEnough(char *part)
 	return 1;
 }
 
-/*
- *  choose a suitable usb disk partition for the firmware upload.
- *  return NULL if not found.
- */
-char *isStorageOK(void)
-{
-    char buf[256];
-	char device_path[256];
-	static char mount_path[256];
-    FILE *fp = fopen(MOUNT_INFO, "r");
-    if(!fp){
-        perror(__FUNCTION__);
-        return 0;
-    }
-
-    while(fgets(buf, sizeof(buf), fp)){
-		sscanf(buf, "%s %s", device_path, mount_path);
-		if(strstr(mount_path, USB_STORAGE_SIGN)){
-			if(!isSpaceEnough(mount_path))
-				continue;
-			fclose(fp);
-			fprintf(stderr, __FILE__":choose USB %s for firmrware space.\n", mount_path);
-			return mount_path;
-		}
-    }
-
-    fclose(fp);
-	fprintf(stderr, "No suitable usb disk partition found \n.");
-    return NULL;
-}
-
 void setFirmwarePath(void)
 {
 	firmware_path[0] = '\0';

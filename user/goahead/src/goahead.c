@@ -506,31 +506,6 @@ void defaultTraceHandler(int level, char_t *buf)
  *	Returns a pointer to an allocated qualified unique temporary file name.
  *	This filename must eventually be deleted with bfree();
  */
-#ifdef CONFIG_USER_STORAGE
-char_t *websGetCgiCommName(webs_t wp)
-{
-	char *force_mem_upgrade = nvram_get(RT2860_NVRAM, "Force_mem_upgrade");
-	char_t	*pname1 = NULL, *pname2 = NULL;
-	char *part;
-
-	if(!strcmp(force_mem_upgrade, "1")){
-		pname1 = (char_t *)tempnam(T("/var"), T("cgi"));
-	}else if(wp && (wp->flags & WEBS_CGI_FIRMWARE_UPLOAD) ){
-		// see if usb disk is present and available space is enough?
-		if( (part = isStorageOK()) )
-			pname1 = (char_t *)tempnam(part, T("cgi"));
-		else
-			pname1 = (char_t *)tempnam(T("/var"), T("cgi"));
-	}else{
-		pname1 = (char_t *)tempnam(T("/var"), T("cgi"));
-	}
-
-	pname2 = bstrdup(B_L, pname1);
-	free(pname1);
-
-	return pname2;
-}
-#else
 char_t *websGetCgiCommName(webs_t wp)
 {
 	char_t	*pname1, *pname2;
@@ -541,7 +516,7 @@ char_t *websGetCgiCommName(webs_t wp)
 
 	return pname2;
 }
-#endif
+
 /******************************************************************************/
 /*
  *	Launch the CGI process and return a handle to it.

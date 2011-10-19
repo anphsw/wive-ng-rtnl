@@ -45,7 +45,6 @@ static int  getSysUptime(int eid, webs_t wp, int argc, char_t **argv);
 static int  getPortStatus(int eid, webs_t wp, int argc, char_t **argv);
 static int  getOnePortOnly(void);
 static int  isOnePortOnly(int eid, webs_t wp, int argc, char_t **argv);
-static void forceMemUpgrade(webs_t wp, char_t *path, char_t *query);
 static void setOpMode(webs_t wp, char_t *path, char_t *query);
 static void setWanPort(webs_t wp, char_t *path, char_t *query);
 #ifdef CONFIG_USER_STORAGE
@@ -454,7 +453,6 @@ void formDefineUtilities(void)
 	websAspDefine(T("getSysUptime"), getSysUptime);
 	websAspDefine(T("getPortStatus"), getPortStatus);
 	websAspDefine(T("isOnePortOnly"), isOnePortOnly);
-	websFormDefine(T("forceMemUpgrade"), forceMemUpgrade);
 	websFormDefine(T("setOpMode"), setOpMode);
 	websFormDefine(T("setWanPort"), setWanPort);
 #ifdef CONFIG_USER_STORAGE
@@ -1038,22 +1036,6 @@ int netmask_aton(const char *ip)
 		break;
 	}
 	return result;
-}
-static void forceMemUpgrade(webs_t wp, char_t *path, char_t *query)
-{
-	char_t *mode  = websGetVar(wp, T("ForceMemUpgradeSelect"), T("0"));
-	if(!mode)
-		return;
-	if(!strcmp(mode, "1"))
-		nvram_set(RT2860_NVRAM, "Force_mem_upgrade", "1");
-	else
-		nvram_set(RT2860_NVRAM, "Force_mem_upgrade", "0");
-
-	websHeader(wp);
-	websWrite(wp, T("<h2>force mem upgrade</h2>\n"));
-	websWrite(wp, T("mode: %s<br>\n"), mode);
-	websFooter(wp);
-	websDone(wp, 200);
 }
 
 #ifdef CONFIG_USER_STORAGE

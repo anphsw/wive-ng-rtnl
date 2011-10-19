@@ -8,4 +8,3 @@
 
 void formDefineUSB(void);
 int initUSB(void);
-char *isStorageOK(void);
