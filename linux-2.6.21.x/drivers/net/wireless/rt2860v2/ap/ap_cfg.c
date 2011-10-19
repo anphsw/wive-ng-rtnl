@@ -2426,7 +2426,6 @@ INT RTMPAPQueryInformation(
 
 #ifdef SNMP_SUPPORT	
 	//for snmp, kathy
-	ULONG ulInfo;
 	DefaultKeyIdxValue			*pKeyIdxValue;
 	INT							valueLen;
 	TX_RTY_CFG_STRUC			tx_rty_cfg;
@@ -2782,7 +2781,7 @@ INT RTMPAPQueryInformation(
 #ifdef RTMP_MAC_PCI
 			{
 			
-				USHORT  device_id;
+				USHORT  device_id=0;
 				if (((POS_COOKIE)pAd->OS_Cookie)->pci_dev != NULL)
 			    	pci_read_config_word(((POS_COOKIE)pAd->OS_Cookie)->pci_dev, PCI_DEVICE_ID, &device_id);
 				else 

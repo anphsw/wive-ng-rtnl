@@ -750,6 +750,9 @@
 55) Add snmpd daemon (Need add in webui in misc page. Variable snmpd 0/1).<br>
 56) Add KLogd, SysLogd and  RemoteSysLogIP variables (Need add in webui).<br>
 57) Dnsmasq update to 2.59 version.<br>
+58) Enable snmp wifi drivers options.<br>
+59) More clean updates.<br>
+60) Fix update firmware with usb storage configured.<br>
 
 <br><br>
 <b>For support see:</b><br>

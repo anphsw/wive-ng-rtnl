@@ -62,9 +62,9 @@ config  RT2860V2_80211N_DRAFT3
 #        bool "Extension Channel List"
 #        depends on RT2860V2_STA
 
-#config  RT2860V2_SNMP
-#	bool "Net-SNMP Support"
-#	depends on RT2860V2_STA
+config  RT2860V2_SNMP
+	bool "Net-SNMP Support"
+	depends on RT2860V2_STA
 
 config RALINK_RT2880_STA_DBG
         bool "Debug support for STA mode"

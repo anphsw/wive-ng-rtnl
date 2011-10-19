@@ -1,6 +1,6 @@
-#include <stdlib.h>             
-#include <stdio.h>             
-#include <string.h>           
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <getopt.h>
@@ -20,37 +20,37 @@ void show_usage(void)
     printf("Ex: hw_nat -a -h 00:11:22:33:44:55 -i 11:22:33:44:55:66 -j 10.10.10.3 -k 10.10.20.3\n");
     printf("           -l 30 -m 40 -n 10.10.20.254 -o 10.10.20.3 -p 40 -q 50 -r Ins -s 2 -t No \n");
     printf("           -u 0 -v Tcp -w GE1\n\n");
-    
+
     printf("Del Static Entry\n");
-    printf("hw_nat -b -j [Sip] -k [Dip] -l [Sp] -m [Dp] -v [Tcp/Udp] \n"); 
-    printf("Ex: hw_nat -b  -j 10.10.10.3 -k 10.10.20.3 -l 30 -m 40 -v Tcp\n\n"); 
+    printf("hw_nat -b -j [Sip] -k [Dip] -l [Sp] -m [Dp] -v [Tcp/Udp] \n");
+    printf("Ex: hw_nat -b  -j 10.10.10.3 -k 10.10.20.3 -l 30 -m 40 -v Tcp\n\n");
 
     printf("Show Foe Entry\n");
     printf("hw_nat -c [entry_num]\n");
     printf("Ex: hw_nat -c 1234\n\n");
-    
+
     printf("Set Debug Level (0:disable) \n");
     printf("hw_nat -d [0/1]\n");
     printf("Ex: hw_nat -d \n\n");
-    
+
     printf("Show All Foe Invalid Entry\n");
     printf("Ex: hw_nat -e\n\n");
-    
+
     printf("Show All Foe Unbinded Entry\n");
     printf("Ex: hw_nat -f\n\n");
-    
+
     printf("Show All Foe Binded Entry\n");
     printf("Ex: hw_nat -g\n\n");
 
     printf("Bind Entry (for semi-binding mode)\n");
     printf("Ex: hw_nat -x [entry_num]\n\n");
-    
+
     printf("UnBind Entry (for semi-binding mode)\n");
     printf("Ex: hw_nat -y [entry_num]\n\n");
-    
+
     printf("Invalid Entry\n");
     printf("Ex: hw_nat -z [entry_num]\n\n");
- 
+
     printf("Enable DSCP Remark\n");
     printf("Ex: hw_nat -A [0/1]\n\n");
 
@@ -407,7 +407,7 @@ int main(int argc, char *argv[])
     case HW_NAT_GET_ALL_ENTRIES:
 	    HwNatGetAllEntries(args);
 
-	    printf("Total Entry Count = %d\n",args->num_of_entries);	
+	    printf("Total Entry Count = %d\n",args->num_of_entries);
 	    for(i=0;i<args->num_of_entries;i++){
 		if(args->entries[i].fmt==0) { //IPV4_NAPT
 		    printf("%d : %u.%u.%u.%u:%d->%u.%u.%u.%u:%d => %u.%u.%u.%u:%d->%u.%u.%u.%u:%d\n", \

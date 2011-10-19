@@ -6438,7 +6438,7 @@ ACM_BANDWIDTH_INFO BwInfo, *pInfo;
 #ifdef RTMP_MAC_PCI
 			{
 			
-				USHORT  device_id;
+				USHORT  device_id=0;
 				if (((POS_COOKIE)pAd->OS_Cookie)->pci_dev != NULL)
 			    	pci_read_config_word(((POS_COOKIE)pAd->OS_Cookie)->pci_dev, PCI_DEVICE_ID, &device_id);
 				else 
