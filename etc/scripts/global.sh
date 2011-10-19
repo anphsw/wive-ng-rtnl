@@ -131,20 +131,6 @@ wait_connect()
     fi
 }
 
-# L2TP and PPTP kernel dead-loop fix
-vpn_deadloop_fix()
-{
-    if [ "$vpnEnabled" = "on" ]; then
-	if [ "$vpnType" != "0" ] || [ "$opmode" = "2" ]; then
-	    # First vpn stop.. 
-	    # Auto start later renew/bound
-	    service vpnhelper stop > /dev/null 2>&1
-	    ip route flush cache > /dev/null 2>&1
-	    echo 1 > /proc/sys/net/nf_conntrack_flush
-	fi
-    fi
-}
-
 # configure and start dhcp client
 udhcpc_opts()
 {
@@ -193,6 +179,20 @@ zero_conf()
 	killall -q -SIGKILL zcip
 	zcip $wan_if /etc/scripts/zcip.script > /dev/null 2>&1
 	sleep 10
+    fi
+}
+
+# L2TP and PPTP kernel dead-loop fix
+vpn_deadloop_fix()
+{
+    if [ "$vpnEnabled" = "on" ]; then
+	if [ "$vpnType" != "0" ] || [ "$opmode" = "2" ]; then
+	    # First vpn stop.. 
+	    # Auto start later renew/bound
+	    service vpnhelper stop > /dev/null 2>&1
+	    ip route flush cache > /dev/null 2>&1
+	    echo 1 > /proc/sys/net/nf_conntrack_flush
+	fi
     fi
 }
 
