@@ -169,6 +169,11 @@ start() {
 	    iptables -A servicelimit -i $lan_if -p udp --dport 1024:65535 -j ACCEPT
 	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp -m multiport --dport 1024:65535 -j ACCEPT
 	fi
+	if [ "$snmpd" = "1" ]; then
+	    $LOG "snmpd"
+	    # not safe fix me later
+	    iptables -A servicelimit -i $lan_if -p udp --dport 161 -j ACCEPT
+	fi
 	if [ "$WANPingFilter" = "0" ]; then
 	    if [ "$opmode" != "0" ]; then
     		$LOG "icmp limit Drop ping from wan $wan_if"
@@ -457,6 +462,7 @@ get_param() {
     UDPXY=`nvram_get 2860 UDPXYMode`
     UDPXYPort=`nvram_get 2860 UDPXYPort`
     SmbEnabled=`nvram_get 2860 SmbEnabled`
+    snmpd=`nvram_get 2860 snmpd`
     chilli_net=`nvram_get 2860 chilli_net`
     simple_qos=`nvram_get 2860 simple_qos`
     parproutedEnabled=`nvram_get 2860 parproutedEnabled`

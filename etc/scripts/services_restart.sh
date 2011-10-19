@@ -34,6 +34,7 @@ if [ -f /bin/zebra ]; then
 fi
     service inetd restart
     service dnsserver restart
+    service snmpd restart
 
 ##########################################################
 # Need restart this servieces only:			 #

@@ -76,6 +76,7 @@ dir_$(CONFIG_USER_KABINET)		    += kabinet
 dir_$(CONFIG_USER_MINIUPNPD)                += miniupnp
 dir_$(CONFIG_USER_RADVD)               	    += radvd
 dir_$(CONFIG_USER_ZEBRA)		    += zebra
+dir_$(CONFIG_USER_SNMPD)                    += snmpd
 dir_$(CONFIG_USER_CHILLISPOT)               += chillispot
 dir_$(CONFIG_USER_TCPDUMP)		    += tcpdump
 
@@ -98,7 +99,6 @@ dir_$(CONFIG_RT2880_APP)		    += rt2880_app
 #need last busybox and goahead
 dir_$(CONFIG_USER_BUSYBOX_BUSYBOX)          += busybox
 dir_$(CONFIG_USER_GOAHEAD_HTTPD)	    += goahead
-
 
 all: config
 	CC=$(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-gcc ; \
