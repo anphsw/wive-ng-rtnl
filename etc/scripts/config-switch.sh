@@ -59,11 +59,13 @@ if [ "$CONFIG_RT_3052_ESW" != "" ]; then
 	##################################
 	phys_portN=4
 	for i in `seq 1 5`; do
+	    # select switch port for tune
+	    echo "$phys_portN" > $PROC
+	    # get mode for current port
 	    port_swmode=`nvram_get 2860 port"$i"_swmode`
 	    if [ "$port_swmode" != "auto" ] && [ "$port_swmode" != "" ]; then
 		echo ">>> Port $phys_portN set mode $port_swmode <<<"
-		echo "$phys_portN" > $PROC
-		#first disable autoneg
+		# first disable autoneg
 		ethtool -s eth2 autoneg off > /dev/null 2>&1
 		if [ "$port_swmode" = "100f" ]; then
 		    #set 100Mbit full duplex and start negotinate
@@ -78,6 +80,9 @@ if [ "$CONFIG_RT_3052_ESW" != "" ]; then
 		    #set 10Mbit half duplex and start negotinate
 		    ethtool -s eth2 autoneg on speed 10 duplex half	> /dev/null 2>&1
 		fi
+	    elif [ "$port_swmode" = "auto" ]; then
+		# enable autoneg
+		ethtool -s eth2 autoneg on > /dev/null 2>&1
 	    fi
 	let "phys_portN=$phys_portN-1"
 	done
