@@ -81,7 +81,6 @@ struct iw_priv_args ap_privtab[] = {
   "stat"}
 };
 
-
 #ifdef CONFIG_APSTA_MIXED_SUPPORT
 const struct iw_handler_def rt28xx_ap_iw_handler_def =
 {
@@ -93,7 +92,6 @@ const struct iw_handler_def rt28xx_ap_iw_handler_def =
 #endif 
 };
 #endif // CONFIG_APSTA_MIXED_SUPPORT //
-
 
 INT rt28xx_ap_ioctl(
 	IN	struct net_device	*net_dev, 

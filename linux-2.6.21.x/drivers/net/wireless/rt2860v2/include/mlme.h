@@ -75,6 +75,7 @@
 #define LINK_DOWN_TIMEOUT           20000      // unit: msec
 #define AUTO_WAKEUP_TIMEOUT			70			//unit: msec
 
+#ifndef CONFIG_APSTA_MIXED_SUPPORT
 #ifdef CONFIG_AP_SUPPORT 
 #ifndef CONFIG_STA_SUPPORT
 #define CW_MAX_IN_BITS              6        // actual CwMax = 2^CW_MAX_IN_BITS - 1
@@ -86,8 +87,7 @@
 #define CW_MAX_IN_BITS              10        // actual CwMax = 2^CW_MAX_IN_BITS - 1
 #endif
 #endif // CONFIG_STA_SUPPORT //
-
-#ifdef CONFIG_APSTA_MIXED_SUPPORT
+#else
 extern UINT32 CW_MAX_IN_BITS;
 #endif // CONFIG_APSTA_MIXED_SUPPORT //
 
