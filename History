@@ -747,7 +747,8 @@
 52) Remove fs cleanall. Use fs fullreset instead. For details enter fs without param.<br>
 53) Move high level switch configure to independed helper script config-switch.sh.<br>
 54) Workaround for non correct port speed select in new SDK driver.<br>
-55) Add snmpd daemon (need add in webui in misc page. Variable snmpd 0/1).<br>
+55) Add snmpd daemon (Need add in webui in misc page. Variable snmpd 0/1).<br>
+56) Add KLogd, SysLogd and  RemoteSysLogIP variables (Need add in webui).<br>
 
 <br><br>
 <b>For support see:</b><br>

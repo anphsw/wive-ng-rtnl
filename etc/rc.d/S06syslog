@@ -3,12 +3,20 @@
 LOG="echo SYSLOG"
 
 start() {
- $LOG "Start klogd"
-    klogd &
+    if [ "$KLogd" != "0" ] && [ "$KLogd" != "" ]; then
+	$LOG "Start klogd"
+	klogd &
+    fi
 
- $LOG "Start syslogd"
-    # log to /var/log/messages
-    syslogd -b0 -s20 -l7 -S -D &
+    if [ "$SysLogd" != "0" ] && [ "$SysLogd" != "" ]; then
+	if [ "$RemoteSysLogIP" = "0.0.0.0" ] && [ "$SysLogd" = "" ]; then
+	    $LOG "Start syslogd local"
+	    syslogd -b0 -s20 -l7 -S -D &
+	else
+	    $LOG "Start syslogd remote mode. Host $RemoteSysLogIP"
+	    syslogd -b0 -s20 -l7 -R $RemoteSysLogIP -D &
+	fi
+    fi
 }
 
 stop() {
@@ -18,6 +26,12 @@ stop() {
     killall -q syslogd
     killall -q -SIGKILL syslogd
     rm -f /var/log/messages > /dev/null 2>&1
+}
+
+get_param() {
+    KLogd=`nvram_get 2860 KLogd`
+    SysLogd=`nvram_get 2860 SysLogd`
+    RemoteSysLogIP=`nvram_get 2860 RemoteSysLogIP`
 }
 
 case "$1" in
