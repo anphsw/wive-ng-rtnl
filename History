@@ -749,6 +749,7 @@
 54) Workaround for non correct port speed select in new SDK driver.<br>
 55) Add snmpd daemon (Need add in webui in misc page. Variable snmpd 0/1).<br>
 56) Add KLogd, SysLogd and  RemoteSysLogIP variables (Need add in webui).<br>
+57) Dnsmasq update to 2.59 version.<br>
 
 <br><br>
 <b>For support see:</b><br>
