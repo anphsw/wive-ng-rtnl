@@ -1,6 +1,9 @@
-#add disconnect select STA in AP mode (WebUI)
+1) add disconnect select STA in AP mode (WebUI)
 iwpriv ra0 set DisConnectSta=MAC
 iwpriv ra0 set DisConnectAllSta=1
+
+2) add portselect for goahead
+3) goahead need bind only lan_if if managment in only lan mode
 
 #need fix
 suspended) Add skb reuse support.
