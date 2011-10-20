@@ -32,9 +32,7 @@ if [ -f /bin/zebra ]; then
     service ripd restart
     service zebra restart
 fi
-    service inetd restart
     service dnsserver restart
-    service snmpd restart
 
 ##########################################################
 # Need restart this servieces only:			 #
@@ -56,6 +54,8 @@ if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then
     fi
     service udpxy restart
     service igmp_proxy restart
+    service inetd restart
+    service snmpd restart
 fi
 
 ##########################################################
