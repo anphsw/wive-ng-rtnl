@@ -21,10 +21,6 @@ fi
 ##########################################################
 # This is services restart always                        #
 ##########################################################
-    $LOG "Reload iptables rules..."
-    service iptables restart
-    $LOG "Reload shaper rules..."
-    service shaper restart
 if [ -f /bin/radvd ] && [ -d /proc/sys/net/ipv6 ]; then
     service radvd restart
 fi
@@ -33,6 +29,12 @@ if [ -f /bin/zebra ]; then
     service zebra restart
 fi
     service dnsserver restart
+
+##########################################################
+# Always reload shaper and netfilter rules		 #
+##########################################################
+    service iptables restart
+    service shaper restart
 
 ##########################################################
 # Need restart this servieces only:			 #
