@@ -142,6 +142,7 @@ install: ${EXEC}
 
 romfs:
 	$(ROMFSINST) -S /bin/$(EXEC)
+	$(ROMFSINST) -s /bin/$(EXEC) /bin/$(EXEC)-srv
 
 TAGS:	${SRCS}
 	etags ${SRCS}

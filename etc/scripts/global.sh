@@ -199,32 +199,43 @@ vpn_deadloop_fix()
 killall_vpn()
 {
     #correct terminate xl2tpd daemon
-    if [ "`pidof xl2tpd`" ]; then
-	#Kill daemons
-	killall -q xl2tpd
+    if [ -f /var/run/xl2tpd/l2tp-control ]; then
+	echo "d default" > /var/run/xl2tpd/l2tp-control
 	sleep 2
-	killall -q -SIGKILL xl2tpd
+    fi
+    if [ -f /var/run/xl2tpd/l2tp.pid ]; then
+	pid=`cat /var/run/xl2tpd/l2tp.pid`
+	if [ "$pid" != "" ]; then
+	    #Kill daemons
+	    kill $pid > /dev/null 2>&1
+	    sleep 2
+	    kill -SIGKILL $pid > /dev/null 2>&1
+	fi
     fi
 
     # first send HUP for terminate connections and try some times
     # second send TERM for exit pppd process
     # if process not terminated send KILL
-    count=0
-    while killall -q -SIGHUP pppd; do
-	if [ "$count" = "3" ]; then
-	    killall -q pppd
+    # vpn client always use ppp0
+    if [ -f /var/run/ppp0.pid ]; then
+	count=0
+	pid=`cat /var/run/ppp0.pid`
+	while kill -SIGHUP $pid > /dev/null 2>&1; do
+	    if [ "$count" = "3" ]; then
+		kill $pid > /dev/null 2>&1
+		sleep 2
+		count=0
+	    fi
+	    if [ "$count" = "5" ]; then
+		kill -SIGKILL $pid  > /dev/null 2>&1
+		sleep 3
+		count=0
+	    fi
 	    sleep 2
-	    count=0
-	fi
-	if [ "$count" = "5" ]; then
-	    killall -q -SIGKILL pppd
-	    sleep 3
-	    count=0
-	fi
-	sleep 2
-	count="$(($count+1))"
-    done
-
+	    count="$(($count+1))"
+	done
+	rm -f /var/run/ppp0.pid
+    fi
     # Remove VPN server IP file
     rm -f /tmp/vpnip
 }

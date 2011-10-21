@@ -1,0 +1,25 @@
+#!/bin/sh
+
+#include global config
+. /etc/scripts/global.sh
+
+PPP_IFACE="$1"
+PPP_TTY="$2"
+PPP_SPEED="$3"
+PPP_LOCAL="$4"
+PPP_REMOTE="$5"
+PPP_IPPARAM="$6"
+PPP_NUM=`echo $PPP_IFACE | sed 's/[^0-65535]//g'`
+
+# disable forward
+echo 0 > "/proc/sys/net/ipv4/conf/$PPP_IFACE/forwarding"
+
+# del rules
+iptables -D l2tpsrvfwd -i $PPP_IFACE -j ACCEPT > /dev/null 2>&1
+iptables -D l2tpsrvfwd -o $PPP_IFACE -j ACCEPT > /dev/null 2>&1
+iptables -D POSTROUTING -t nat -o ! $PPP_IFACE -j MASQUERADE > /dev/null 2>&1
+
+# add low prio route to client network
+ip route replace default dev $PPP_IFACE metric 100$PPP_NUM via $PPP_REMOTE > /dev/null 2>&1
+
+export PPP_IFACE PPP_TTY PPP_SPEED PPP_LOCAL PPP_REMOTE PPP_IPPARAM

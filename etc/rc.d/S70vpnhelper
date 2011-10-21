@@ -34,20 +34,20 @@ start() {
       # call to vpn
       if [ "$vpnType" = "0" ]; then
 	$LOG "PPPOE calling..."
-	(sleep 8 && /etc/scripts/config-pppoe.sh) &
+	(sleep 5 && /etc/scripts/config-pppoe.sh) &
       elif [ "$vpnType" = "1" ]; then
 	$LOG "PPTP calling..."
-	(sleep 8 && /etc/scripts/config-pptp.sh) &
+	(sleep 5 && /etc/scripts/config-pptp.sh) &
       elif [ "$vpnType" = "2" ]; then
 	$LOG "L2TP calling..."
-	(sleep 8 && /etc/scripts/config-l2tp.sh) &
+	(sleep 5 && /etc/scripts/config-l2tp.sh) &
       elif [ "$vpnType" = "6" ]; then
 	if [ "$lanauthpid" != "" ]; then
 	    $LOG "LANAUTH call reload..."
 	    /etc/scripts/config-lanauth.sh reload &
 	else
 	    $LOG "LANAUTH calling..."
-	    (sleep 8 && /etc/scripts/config-lanauth.sh start) &
+	    (sleep 5 && /etc/scripts/config-lanauth.sh start) &
 	fi
       fi
     fi
@@ -73,7 +73,7 @@ stop() {
     # stop all pppd/xl2tpd daemons
     killall_vpn
 
-    if [ -f /tmp/is_16ram_dev ]; then
+    if [ -f /tmp/is_16ram_dev ] && [ "$l2tp_srv_enabled" != "1" ]; then
 	# At 16Mb devices remove modules for savemem.
 	mod="ppp_mppe blkcipher cryptomgr crypto_algapi pppoe pppol2tp pptp pppox ppp_generic"
 	for module in $mod
@@ -88,6 +88,7 @@ get_param() {
     vpnUser=`nvram_get 2860 vpnUser`
     vpnPassword=`nvram_get 2860 vpnPassword`
     lanauthpid=`pidof lanauth`
+    l2tp_srv_enabled=`nvram_get 2860 l2tp_srv_enabled`
     ppp=/etc/ppp
 }
 

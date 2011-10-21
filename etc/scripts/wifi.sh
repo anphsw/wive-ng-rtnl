@@ -69,6 +69,6 @@ fi
 
 ###########################################ALWAYS END#############################
 AP2040Rescan=`nvram_get AP2040Rescan`
-if [ "$AP2040Rescan" != "0" ]; then
+if [ "$AP2040Rescan" = "1" ]; then
     iwpriv ra0 set AP2040Rescan=1
 fi

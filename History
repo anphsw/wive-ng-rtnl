@@ -754,6 +754,12 @@
 59) More clean updates.<br>
 60) Fix update firmware with usb storage configured.<br>
 
+<br>
+<b>1.12.x</b><br>
+1) Add l2tp vpn server init logic (need write webui. Variables l2tp_srv_enabled, l2tp_srv_ip_range,
+    l2tp_srv_ip_local, l2tp_srv_user, l2tp_srv_pass, l2tp_srv_lcp_adapt, l2tp_srv_mtu_size, l2tp_srv_mru_size,
+    l2tp_srv_debug).
+
 <br><br>
 <b>For support see:</b><br>
 <a href="http://acorp.ru">acorp.ru - Acorp Electronics Inc.</a><br>

@@ -1,0 +1,33 @@
+#!/bin/sh
+
+PPP_IFACE="$1"
+PPP_TTY="$2"
+PPP_SPEED="$3"
+PPP_LOCAL="$4"
+PPP_REMOTE="$5"
+PPP_IPPARAM="$6"
+PPP_NUM=`echo $PPP_IFACE | sed 's/[^0-65535]//g'`
+LOG="logger -t L2TP server"
+
+# get some variables
+l2tp_srv_nat_enabled=`nvram_get 2860 l2tp_srv_enabled`
+
+#del rules
+iptables -D l2tpsrvfwd -i $PPP_IFACE -j ACCEPT > /dev/null 2>&1
+iptables -D l2tpsrvfwd -o $PPP_IFACE -j ACCEPT > /dev/null 2>&1
+iptables -D POSTROUTING -t nat -o ! $PPP_IFACE -j MASQUERADE > /dev/null 2>&1
+if [ "$l2tp_srv_nat_enabled" != "" ] && [ "$l2tp_srv_nat_enabled" != "0" ]; then
+    $LOG "Add masqrade for client $PPP_REMOTE"
+    #add rules
+    iptables -I l2tpsrvfwd -i $PPP_IFACE -j ACCEPT > /dev/null 2>&1
+    iptables -I l2tpsrvfwd -o $PPP_IFACE -j ACCEPT > /dev/null 2>&1
+    iptables -I POSTROUTING -t nat -o ! $PPP_IFACE -j MASQUERADE > /dev/null 2>&1
+fi
+
+$LOG "Add low prio route to client $PPP_REMOTE network metric 100$PPP_NUM."
+ip route replace default dev $PPP_IFACE metric 100$PPP_NUM via $PPP_REMOTE > /dev/null 2>&1
+
+$LOG "Enable forwarding for $PPP_IFACE interface"
+echo 1 > "/proc/sys/net/ipv4/conf/$PPP_IFACE/forwarding"
+
+export PPP_IFACE PPP_TTY PPP_SPEED PPP_LOCAL PPP_REMOTE PPP_IPPARAM

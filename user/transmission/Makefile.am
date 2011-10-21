@@ -37,8 +37,8 @@ EXTRA_DIST = \
   Transmission.xcodeproj/project.pbxproj
 
 romfs: install
-	$(ROMFSINST) -S init.d/S71transmission /etc/rc.d/S71transmission
-	$(ROMFSINST) -s /etc/rc.d/S71transmission /etc/init.d/transmission
+	$(ROMFSINST) -S init.d/S79transmission /etc/rc.d/S79transmission
+	$(ROMFSINST) -s /etc/rc.d/S79transmission /etc/init.d/transmission
 	$(ROMFSINST) -S filesystem/bin/transmission-daemon /bin/transmission-daemon
 	cp -rfva filesystem/share/transmission* $(ROMFSDIR)/share/transmission/
 

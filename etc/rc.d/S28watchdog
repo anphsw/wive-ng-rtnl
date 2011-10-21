@@ -7,7 +7,7 @@ start() {
     WatchdogEnabled=`nvram_get 2860 WatchdogEnabled`
     if [ "$WatchdogEnabled" = "1" ]; then
 	$LOG "Start watchdog"
-	nice --19 watchdog -T 120 -t 10 -F /dev/watchdog  > /dev/null 2>&1 &
+	nice --19 watchdog -T 120 -t 10 -F /dev/watchdog > /dev/null 2>&1 &
     fi
     ###############PINGER_DOG################################################
     ping_check_on=`nvram_get 2860 ping_check_on`

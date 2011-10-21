@@ -171,8 +171,13 @@ start() {
 	fi
 	if [ "$snmpd" = "1" ]; then
 	    $LOG "snmpd"
-	    # not safe fix me later
 	    iptables -A servicelimit -i $lan_if -p udp --dport 161 -j ACCEPT
+	fi
+	if [ "$l2tp_srv_enabled" = "1" ]; then
+	    $LOG "vpn l2tp server"
+	    iptables -A servicelimit -i $lan_if -p udp --dport 1701 -j ACCEPT
+	    iptables -A servicelimit -i $wan_if -p udp --dport 1701 -j ACCEPT
+	    iptables -A servicelimit -i $real_wan_if -p udp --dport 1701 -j ACCEPT
 	fi
 	if [ "$WANPingFilter" = "0" ]; then
 	    if [ "$opmode" != "0" ]; then
@@ -258,6 +263,11 @@ start() {
 	    else
 		# in proxy arp mode need all forward packets to acepted
 		iptables -I FORWARD -j ACCEPT
+	    fi
+	    # add forward chain for vpn server
+	    if [ "$l2tp_srv_enabled" = "1" ]; then
+		iptables -N l2tpsrvfwd
+		iptables -A FORWARD -j l2tpsrvfwd
 	    fi
 	fi
 ###########################################QOS-SIMPLE######################################
@@ -466,6 +476,7 @@ get_param() {
     chilli_net=`nvram_get 2860 chilli_net`
     simple_qos=`nvram_get 2860 simple_qos`
     parproutedEnabled=`nvram_get 2860 parproutedEnabled`
+    l2tp_srv_enabled=`nvram_get 2860 l2tp_srv_enabled`
     # macros
     STATE_NEW="-m state --state NEW"
     STATE_EST="-m state --state ESTABLISHED,RELATED"

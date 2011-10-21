@@ -58,6 +58,7 @@ if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then
     service igmp_proxy restart
     service inetd restart
     service snmpd restart
+    service vpnserver restart
 fi
 
 ##########################################################
