@@ -294,6 +294,7 @@ static int getWlanStaInfo(int eid, webs_t wp, int argc, char_t **argv)
 #ifndef CONFIG_RT2860V2_AP_V24_DATA_STRUCTURE
 	if (ioctl(s, RTPRIV_IOCTL_GET_MAC_TABLE, &iwr) < 0) {
 		websError(wp, 500, "ioctl -> RTPRIV_IOCTL_GET_MAC_TABLE failed!");
+		close(s);
 		return -1;
 	}
 
@@ -340,6 +341,7 @@ static int getWlanStaInfo(int eid, webs_t wp, int argc, char_t **argv)
 #else
 	if (ioctl(s, RTPRIV_IOCTL_GET_MAC_TABLE_STRUCT, &iwr) < 0) {
 		websError(wp, 500, "ioctl -> RTPRIV_IOCTL_GET_MAC_TABLE_STRUCT failed!");
+		close(s);
 		return -1;
 	}
 
