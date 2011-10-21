@@ -533,7 +533,7 @@
 5) Update miniupnp and libnatpmp to 30072011 version.<br>
 6) Merge ipv6 stable patches from upstream.<br>
 7) Remove pppd_dead workaround (no more need).<br>
-8) McastPhyMode set to 3 (HTMIX) by default (0:Disable 1:CCK, 2:OFDM, 3:HTMIX need add in WebUI).<br>
+8) McastPhyMode set to 3 (HTMIX) by default (0:Disable 1:CCK, 2:OFDM, 3:HTMIX).<br>
 9) Backport some fixes (ipv6/igmp) from upstream.<br>
 10) Disable IGDv2 for miniupnpd (this is not stable option).<br>
 11) Usb_modeswitch: add new devices support.<br>
@@ -576,17 +576,17 @@
 46) Cleanup some nvram defaults and move to romfs target.<br>
 47) Tune samba3 config for more compat with some MS-WIN apps used file based DB.<br>
 48) Try fix regression in ext2 module.<br>
-49) Add SmbTimeserver variable for support time server compatable with WinNT(SmbTimeserver variable 0/1 need add in WebUI, default 0).<br>
+49) Add SmbTimeserver variable for support time server compatable with WinNT.<br>
 50) Tune kernel for file services as torrent/samba/etc.<br>
 51) Radvd up to 1.8.1 version.<br>
-52) Add vpnTestReachable variable. Is vpnTestReachable=1 test VPN server reachable before connect (default 1, only pptp/l2tp, need add in WebUI).<br>
+52) Add vpnTestReachable variable. Is vpnTestReachable=1 test VPN server reachable before connect.<br>
 53) Fix /proc/cpuinfo SoC type detect. Detect 2880/3052(3050)/3883(3662)/3350/3352/6855 RT chips.<br>
 54) If defined CONFIG_USB_STORAGE install optware-install.sh script to image.<br>
 55) UClibc always use large file mode for fopen function (8mB usb devices).<br>
 56) Samba3 always use large file mode.<br>
 57) SpeedUp generate new mac adresses.<br>
 58) Remove upnp support from transmission. Save mem and cpu ticks.<br>
-59) Add RemoteTelnet and RemoteFTP variable for disable/enable FTP/Telnet services (need add in webUI Miscellaneous default disabled).<br>
+59) Add RemoteTelnet and RemoteFTP variable for disable/enable FTP/Telnet services.<br>
 60) CONFIG_FDISK_SUPPORT_LARGE_DISKS set by default for USB devices.<br>
 61) Rewrite automount.sh, now correct mount ext*/fat/ntfs and swap particions.<br>
 62) Support auto mount optware by label(for automount particion label need set to optware).<br>
@@ -595,8 +595,7 @@
 65) Add in /etc/profile variables needed for transmissions.<br>
 66) Umount all filesystem at reboot from goahead if CONFIG_USER_STORAGE is set.<br>
 67) Try samba3 fix show free space size.<br>
-68) Add pinger (lan/wifi/uplink) for wake up client devices and support uplink connections always on-line(ping_check_on/ping_check_time/
-	ping_check_interval variables on nvram. Need add in watchdog section WebUI).<br>
+68) Add pinger (lan/wifi/uplink) for wake up client devices and support uplink connections always on-line.<br>
 69) Fix /media and /opt mount.<br>
 70) Fix client direct to dns mode.<br>
 71) Dnsmasq up to 2.58 version.<br>
@@ -645,7 +644,7 @@
 25) Backport raeth driver from 3.6.0.0SDK (v2.1).<br>
 26) Update sta driver to 2.4.0.4.<br>
 27) Update ap driver to 2.5.0.4.<br>
-28) Add /proc/rt3052/esw_cnt for traffic statistic per switch port.(need add in WebUI).<br>
+28) Add /proc/rt3052/esw_cnt for traffic statistic per switch port.<br>
 29) Support Ralink RT3883+RT5392 referenece board.<br>
 30) Fix mips 24kec "Wrong EPC on Exceptional J/JAL Targets" issue.<br>
 31) Fix raeth driver: hardware checksum offload only support ipv4 packets.<br>
@@ -664,7 +663,7 @@
 44) Small kernel code arp fixups.<br>
 45) Update ralink apps.<br>
 46) Support new igmp snooping version in igmpproxy.<br>
-47) Add variable igmpSnoopMode. Values=n/f or NULL (default NULL=auto, n=none/disabled,f=force enabled. Need add WebUI).<br>
+47) Add variable igmpSnoopMode. Values=n/f or NULL.<br>
 48) Fix some leasks and more safe libnvram.<br>
 49) Igmpproxy code sync with upstream git.<br>
 50) Fix build at some distro.<br>
@@ -674,7 +673,7 @@
 54) Remove some debug messages from web and set auto redirect at apply push.<br>
 55) Rework wifi/wan/lan reinit in internet.sh. More correct for MBSSID mode.<br>
 56) Fix wds reconfigure and operationMode adjustment.<br>
-57) Video turbine MSC extended mode enabled for wifi.(AP/STA mode. variable VideoTurbine 0/1 default 1. need add in webUI)<br>
+57) Video turbine MSC extended mode enabled for wifi.<br>
 58) Update wsc_upnp to 0.2.2 version from 3.6.0.0 SDK.<br>
 59) Fix dns static and relay disabled mode.<br>
 60) Small fix double vlan tag.<br>
@@ -747,8 +746,8 @@
 52) Remove fs cleanall. Use fs fullreset instead. For details enter fs without param.<br>
 53) Move high level switch configure to independed helper script config-switch.sh.<br>
 54) Workaround for non correct port speed select in new SDK driver.<br>
-55) Add snmpd daemon (Need add in webui in misc page. Variable snmpd 0/1).<br>
-56) Add KLogd, SysLogd and  RemoteSysLogIP variables (Need add in webui).<br>
+55) Add snmpd daemon.<br>
+56) Add KLogd, SysLogd and  RemoteSysLogIP variables.<br>
 57) Dnsmasq update to 2.59 version.<br>
 58) Enable snmp wifi drivers options.<br>
 59) More clean updates.<br>
