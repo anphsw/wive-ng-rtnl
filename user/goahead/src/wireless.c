@@ -278,6 +278,9 @@ static int getWlanStaInfo(int eid, webs_t wp, int argc, char_t **argv)
 	int i, s;
 	struct iwreq iwr;
 	RT_802_11_MAC_TABLE table = {0};
+#ifndef CONFIG_RT2860V2_AP_V24_DATA_STRUCTURE
+	char tmpBuff[32];
+#endif
 
 	s = socket(AF_INET, SOCK_DGRAM, 0);
 	strncpy(iwr.ifr_name, "ra0", IFNAMSIZ);
@@ -288,9 +291,55 @@ static int getWlanStaInfo(int eid, webs_t wp, int argc, char_t **argv)
 		return -1;
 	}
 
+#ifndef CONFIG_RT2860V2_AP_V24_DATA_STRUCTURE
 	if (ioctl(s, RTPRIV_IOCTL_GET_MAC_TABLE, &iwr) < 0) {
 		websError(wp, 500, "ioctl -> RTPRIV_IOCTL_GET_MAC_TABLE failed!");
-		close(s);
+		return -1;
+	}
+
+	for (i = 0; i < table.Num; i++) {
+	    RT_802_11_MAC_ENTRY *pe = &(table.Entry[i]);
+
+	    // MAC Address
+	    websWrite(wp, T("<tr><td>%02X:%02X:%02X:%02X:%02X:%02X</td>"),
+			pe->Addr[0], pe->Addr[1], pe->Addr[2], pe->Addr[3], pe->Addr[4], pe->Addr[5]);
+
+	    // AID, Power Save mode, MIMO Power Save
+	    websWrite(wp, T("<td>%d</td><td>%d</td><td>%d</td>"), pe->Aid, pe->Psm, pe->MimoPs);
+
+	    // TX Rate
+	    websWrite(wp, T("<td>%d</td><td>%s</td><td>%d</td><td>%d</td>"),
+			pe->TxRate.field.MCS, (pe->TxRate.field.BW == 0)? "20M":"40M", pe->TxRate.field.ShortGI, pe->TxRate.field.STBC);
+	    // RSSI
+#if defined(CONFIG_RALINK_RT3050_1T1R)
+	    websWrite(wp, T("<td>%d</td>"), (int)(pe->AvgRssi0));
+#elif defined(CONFIG_RALINK_RT3051_1T2R) || defined(CONFIG_RALINK_RT3052_2T2R) || defined(CONFIG_RALINK_RT3352_2T2R)
+	    websWrite(wp, T("<td>%d,%d</td>"), (int)(pe->AvgRssi0), (int)(pe->AvgRssi1));
+#else
+	    websWrite(wp, T("<td>%d,%d,%d</td>"), (int)(pe->AvgRssi0), (int)(pe->AvgRssi1), (int)(pe->AvgRssi2));
+#endif
+
+	    // Per Stream SNR
+#if defined(CONFIG_RALINK_RT3050_1T1R)
+	    snprintf(tmpBuff, sizeof(tmpBuff), "%0.1f", pe->StreamSnr[0]*0.25);
+	    websWrite(wp, T("<td>%s</td></tr>"), tmpBuff);
+#elif defined(CONFIG_RALINK_RT3051_1T2R) || defined(CONFIG_RALINK_RT3052_2T2R) || defined(CONFIG_RALINK_RT3352_2T2R)
+	    snprintf(tmpBuff, sizeof(tmpBuff), "%0.1f", pe->StreamSnr[0]*0.25);
+	    websWrite(wp, T("<td>%s"), tmpBuff);
+	    snprintf(tmpBuff, sizeof(tmpBuff), "%0.1f", pe->StreamSnr[1]*0.25); //mcs>7? pe->StreamSnr[1]*0.25: 0.0);
+	    websWrite(wp, T(",%s</td></tr>"), tmpBuff);
+#else
+	    snprintf(tmpBuff, sizeof(tmpBuff), "%0.1f", pe->StreamSnr[0]*0.25);
+	    websWrite(wp, T("<td>%s"), tmpBuff);
+	    snprintf(tmpBuff, sizeof(tmpBuff), "%0.1f", pe->StreamSnr[1]*0.25); //mcs>7? pe->StreamSnr[1]*0.25: 0.0);
+	    websWrite(wp, T(",%s"), tmpBuff);
+	    snprintf(tmpBuff, sizeof(tmpBuff), "%0.1f", pe->StreamSnr[2]*0.25); //mcs>15? pe->StreamSnr[2]*0.25: 0.0);
+	    websWrite(wp, T(",%s</td></tr>"), tmpBuff);
+#endif
+	}
+#else
+	if (ioctl(s, RTPRIV_IOCTL_GET_MAC_TABLE_STRUCT, &iwr) < 0) {
+		websError(wp, 500, "ioctl -> RTPRIV_IOCTL_GET_MAC_TABLE_STRUCT failed!");
 		return -1;
 	}
 
@@ -306,6 +355,7 @@ static int getWlanStaInfo(int eid, webs_t wp, int argc, char_t **argv)
 				(table.Entry[i].TxRate.field.BW == 0)? "20M":"40M",
 				table.Entry[i].TxRate.field.ShortGI, table.Entry[i].TxRate.field.STBC);
 	}
+#endif
 	close(s);
 	return 0;
 }

@@ -42,7 +42,7 @@ function PageInit()
 
 <table width="90%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
   <tr> 
-    <td class="title" colspan="8" id="stalistWirelessNet">Wireless Network</td>
+    <td class="title" colspan="10" id="stalistWirelessNet">Wireless Network</td>
   </tr>
   <tr>
     <td bgcolor=#E8F8FF id="stalistMacAddr">MAC Address</td>
@@ -53,6 +53,8 @@ function PageInit()
     <td bgcolor=#E8F8FF>BW</td>
     <td bgcolor=#E8F8FF>SGI</td>
     <td bgcolor=#E8F8FF>STBC</td>
+    <td bgcolor=#E8F8FF>RSSI</td>
+    <td bgcolor=#E8F8FF>SSNR</td>
   </tr>
   <% getWlanStaInfo(); %>
 </table>

@@ -5,7 +5,7 @@ config RT2860V2_AP
 config RT2860V2_AP_V24_DATA_STRUCTURE
 	bool
 	depends on RT2860V2_AP
-	default y
+	default n
 
 config  RT2860V2_AP_LED
 	bool "LED Support"
