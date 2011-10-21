@@ -319,24 +319,7 @@ static int getWlanStaInfo(int eid, webs_t wp, int argc, char_t **argv)
 #else
 	    websWrite(wp, T("<td>%d,%d,%d</td>"), (int)(pe->AvgRssi0), (int)(pe->AvgRssi1), (int)(pe->AvgRssi2));
 #endif
-
-	    // Per Stream SNR
-#if defined(CONFIG_RALINK_RT3050_1T1R)
-	    snprintf(tmpBuff, sizeof(tmpBuff), "%0.1f", pe->StreamSnr[0]*0.25);
-	    websWrite(wp, T("<td>%s</td></tr>"), tmpBuff);
-#elif defined(CONFIG_RALINK_RT3051_1T2R) || defined(CONFIG_RALINK_RT3052_2T2R) || defined(CONFIG_RALINK_RT3352_2T2R)
-	    snprintf(tmpBuff, sizeof(tmpBuff), "%0.1f", pe->StreamSnr[0]*0.25);
-	    websWrite(wp, T("<td>%s"), tmpBuff);
-	    snprintf(tmpBuff, sizeof(tmpBuff), "%0.1f", pe->StreamSnr[1]*0.25); //mcs>7? pe->StreamSnr[1]*0.25: 0.0);
-	    websWrite(wp, T(",%s</td></tr>"), tmpBuff);
-#else
-	    snprintf(tmpBuff, sizeof(tmpBuff), "%0.1f", pe->StreamSnr[0]*0.25);
-	    websWrite(wp, T("<td>%s"), tmpBuff);
-	    snprintf(tmpBuff, sizeof(tmpBuff), "%0.1f", pe->StreamSnr[1]*0.25); //mcs>7? pe->StreamSnr[1]*0.25: 0.0);
-	    websWrite(wp, T(",%s"), tmpBuff);
-	    snprintf(tmpBuff, sizeof(tmpBuff), "%0.1f", pe->StreamSnr[2]*0.25); //mcs>15? pe->StreamSnr[2]*0.25: 0.0);
-	    websWrite(wp, T(",%s</td></tr>"), tmpBuff);
-#endif
+	    websWrite(wp, T("</tr>"));
 	}
 #else
 	if (ioctl(s, RTPRIV_IOCTL_GET_MAC_TABLE_STRUCT, &iwr) < 0) {

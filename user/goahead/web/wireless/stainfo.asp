@@ -54,7 +54,6 @@ function PageInit()
     <td bgcolor=#E8F8FF>SGI</td>
     <td bgcolor=#E8F8FF>STBC</td>
     <td bgcolor=#E8F8FF>RSSI</td>
-    <td bgcolor=#E8F8FF>SSNR</td>
   </tr>
   <% getWlanStaInfo(); %>
 </table>
