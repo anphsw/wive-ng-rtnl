@@ -27,7 +27,7 @@
 #include	"helpers.h"
 
 #ifndef IF_NAMESIZE
-#define IF_NAMESIZE IFNAMSIZ 
+#define IF_NAMESIZE IFNAMSIZ
 #endif
 
 #ifdef CONFIG_USER_802_1X
@@ -1401,7 +1401,7 @@ static int addRoutingRule(char *buf, const char *dest, const char *netmask, cons
 	sprintf(cmd, "%s dev %s", cmd, true_if);
 
 	// gateway
-	if (strcmp(gw, "0.0.0.0") != 0)
+	if (strlen(gw) && strcmp(gw, "0.0.0.0") != 0)
 		sprintf(cmd, "%s via %s", cmd, gw);
 
 	if (buf != NULL)
@@ -1420,7 +1420,7 @@ static int addRoutingRule(char *buf, const char *dest, const char *netmask, cons
 			return 0;
 
 		fgets(cmd, sizeof(cmd), fp);
-		
+
 		pclose(fp);
 		return strlen(cmd) == 0;
 	}
@@ -1634,7 +1634,7 @@ static inline int getNums(char *value, char delimit)
     int count = 1;
     if ( !pos || !(*pos) )
         return 0;
-		
+
     while( (pos = strchr(pos, delimit)) )
 	{
         ++pos;
@@ -1692,6 +1692,7 @@ static int getRoutingTable(int eid, webs_t wp, int argc, char_t **argv)
 			if (sscanf(buff, "%s%lx%lx%X%d%d%d%lx", ifname, &d, &g, &flgs, &ref, &use, &metric, &m) != 8)
 			{
 				printf("format error\n");
+				free(running_rules);
 				fclose(fp);
 				return 0;
 			}
