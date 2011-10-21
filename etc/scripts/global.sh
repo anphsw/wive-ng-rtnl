@@ -223,12 +223,11 @@ killall_vpn()
 	while kill -SIGHUP $pid > /dev/null 2>&1; do
 	    if [ "$count" = "3" ]; then
 		kill $pid > /dev/null 2>&1
-		sleep 2
-		count=0
+		sleep 1
 	    fi
-	    if [ "$count" = "5" ]; then
+	    if [ "$count" = "4" ]; then
 		kill -SIGKILL $pid  > /dev/null 2>&1
-		sleep 3
+		sleep 1
 		count=0
 	    fi
 	    sleep 2
