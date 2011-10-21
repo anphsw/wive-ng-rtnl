@@ -1957,7 +1957,7 @@ static void meshManualLink(webs_t wp, char_t *path, char_t *query)
 
 typedef struct _MESH_NEIGHBOR_ENTRY_INFO {
 	char			Rssi;
-	unsigned char	HostName[32 + 1];
+	unsigned char	HostName[64 + 1];
 	unsigned char	MacAddr[6];
 	unsigned char	MeshId[32 + 1];
 	unsigned char	Channel;
@@ -1986,6 +1986,7 @@ static int ShowMeshState(int eid, webs_t wp, int argc, char_t **argv)
 
 	if ((socket_id = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
 	{
+		free(neighbor);
 		fprintf(stderr, "ShowMeshState: open socket error !\n");
 		websError(wp, 500, "ioctl sockey failed !");
 		return -1;
@@ -1997,6 +1998,7 @@ static int ShowMeshState(int eid, webs_t wp, int argc, char_t **argv)
 	wrq.u.data.flags = OID_802_11_MESH_LIST;
 	if ((ret = ioctl(socket_id, RT_PRIV_IOCTL, &wrq)) < 0)
 	{
+		free(neighbor);
 		fprintf(stderr, "ShowMeshState: ioctl -> OID_802_11_MESH_LIST error !\n");
 		websError(wp, 500, "ioctl -> OID_802_11_MESH_LIST failed!");
 		close(socket_id);
@@ -2031,6 +2033,7 @@ static int ShowMeshState(int eid, webs_t wp, int argc, char_t **argv)
 			websWrite(wp, T("<td>%s</td>"), "OPEN-NONE");
 		websWrite(wp, T("</tr>"));
 	}
+	free(neighbor);
 	close(socket_id);
 
 	return 0;
