@@ -220,7 +220,7 @@ struct RouteTable *findRoute(uint32_t group) {
 *   If the route already exists, the existing route 
 *   is updated...
 */
-int insertRoute(uint32_t group, vifi_t ifx) {
+int insertRoute(uint32_t group, int ifx) {
     
     struct Config *conf = getCommonConfig();
     struct RouteTable*  croute;

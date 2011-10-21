@@ -149,7 +149,7 @@ struct IfDesc {
     struct in_addr      InAdr;          /* == 0 for non IP interfaces */
     short               Flags;
     short               state;
-    vifi_t              index;
+    short               index;
     uint8_t             robustness;
     uint8_t             threshold;   /* ttl limit */
     unsigned int        ratelimit;
@@ -173,7 +173,7 @@ struct Config {
 };
 
 // Defines the Index of the upstream VIF...
-extern unsigned upStreamVif;
+extern int upStreamVif;
 
 /* ifvc.c
  */
@@ -249,7 +249,7 @@ int leaveMcGroup( int UdpSock, struct IfDesc *IfDp, uint32_t mcastaddr );
  */
 void initRouteTable();
 void clearAllRoutes();
-int insertRoute(uint32_t group, vifi_t ifx);
+int insertRoute(uint32_t group, int ifx);
 int activateRoute(uint32_t group, uint32_t originAddr);
 void ageActiveRoutes();
 void setRouteLastMemberMode(uint32_t group);

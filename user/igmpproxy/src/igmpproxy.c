@@ -70,7 +70,7 @@ static int sighandled = 0;
 #define	GOT_SIGUSR2	0x08
 
 // The upstream VIF index
-unsigned         upStreamVif;
+int         upStreamVif;   
 
 #ifdef RT3052_SUPPORT
 extern void rt3052_init(int sn);
