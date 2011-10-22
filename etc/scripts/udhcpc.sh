@@ -66,7 +66,7 @@ case "$1" in
 
     renew|bound)
     OLD_IP=`ip -4 addr show dev $interface | awk '/inet / {print $2}'`
-    CUR_IP=$ip
+    CUR_IP="$ip"
 
 	# MTU is default for all session time.
 	if [ "$OLD_IP" != "$CUR_IP" ]; then
