@@ -65,8 +65,14 @@ case "$1" in
     ;;
 
     renew|bound)
-    OLD_IP=`ip -4 addr show dev $interface | awk '/inet / {print $2}'`
-    NEW_IP="$ip"
+	NEW_IP="$ip"
+	OLD_IP=`ip -4 addr show dev $interface | awk '/inet / {print $2}'`
+
+	# Small check
+	if [ "$NEW_IP" = "" ]; then
+	    $LOG "ERROR: DHCP not send IP.... Exit..."
+	    exit 1
+	fi
 
 	# MTU is default for all session time.
 	if [ "$OLD_IP" != "$NEW_IP" ]; then
