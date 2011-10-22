@@ -317,14 +317,17 @@ TftpTimeout (void)
 	}
 }
 
-
+extern unsigned char BootType;
 void
 TftpStart (void)
 {
 	TftpStarted=1;
 
 	if (BootFile[0] == '\0') {
-	    sprintf(default_filename, "%s","test.bin");
+	    if (BootType == 9)
+		sprintf(default_filename, "%s","uboot.bin");
+	    else
+		sprintf(default_filename, "%s","image.bin");
 	    tftp_filename = default_filename;
 
 		printf ("*** Warning: no boot file name; using '%s'\n",

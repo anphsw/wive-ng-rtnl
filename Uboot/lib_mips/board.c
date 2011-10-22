@@ -39,6 +39,7 @@ DECLARE_GLOBAL_DATA_PTR;
 #define SDRAM_CFG1_REG RALINK_SYSCTL_BASE + 0x0304
 
 int modifies= 0;
+unsigned char BootType='3';
 
 #ifdef DEBUG
    #define DATE      "05/25/2006"
@@ -1122,7 +1123,7 @@ void board_init_r (gd_t *id, ulong dest_addr)
 	bd_t *bd;
 	int i;
 	int timer1= CONFIG_BOOTDELAY;
-	unsigned char BootType='3', confirm=0;
+	unsigned char confirm=0;
 	int my_tmp;
 	char addr_str[11];
 #if defined (CFG_ENV_IS_IN_FLASH)
