@@ -291,30 +291,28 @@ start() {
 		fi
 	    fi
 	    #######################NAT##################################
-	    if [ "$opmode" != "0" ] && [ "$natEnabled" = "1" ]; then
-		if [ "$vpnPurePPPOE" != "1" ]; then
-		    if [ "$opmode" != "4" ]; then
-			# lan gw/wireless client/apcli mode NAT
-			if  [ "$use_snat" = "1" ]; then
-			    iptables -t nat -A POSTROUTING -o $wan_if -s $lan_ip/$lan_nm -j SNAT --to-source $wan_ipaddr
-			else
-			    iptables -t nat -A POSTROUTING -o $wan_if -s $lan_ip/$lan_nm -j MASQUERADE
-			fi
-			if [ "$Lan2Enabled" = "1" ]; then
-			    # lan gw/wireless client/apcli mode NAT for second lan
-			    if  [ "$use_snat" = "1" ]; then
-				iptables -t nat -A POSTROUTING -o $wan_if -s $lan2_ip/$lan2_nm -j SNAT --to-source $wan_ipaddr
-			    else
-				iptables -t nat -A POSTROUTING -o $wan_if -s $lan2_ip/$lan2_nm -j MASQUERADE
-			    fi
-			fi
+	    if [ "$opmode" != "0" ] && [ "$natEnabled" = "1" ] && [ "$vpnPurePPPOE" != "1" ]; then
+		if [ "$opmode" != "4" ]; then
+		    # lan gw/wireless client/apcli mode NAT
+		    if  [ "$use_snat" = "1" ]; then
+		        iptables -t nat -A POSTROUTING -o $wan_if -s $lan_ip/$lan_nm -j SNAT --to-source $wan_ipaddr
 		    else
-			# chillispot NAT
-			if  [ "$use_snat" = "1" ]; then
-			    iptables -t nat -A POSTROUTING -o $wan_if -s $chilli_net -j SNAT --to-source $wan_ipaddr
+		        iptables -t nat -A POSTROUTING -o $wan_if -s $lan_ip/$lan_nm -j MASQUERADE
+		    fi
+		    if [ "$Lan2Enabled" = "1" ]; then
+		        # lan gw/wireless client/apcli mode NAT for second lan
+		        if  [ "$use_snat" = "1" ]; then
+			    iptables -t nat -A POSTROUTING -o $wan_if -s $lan2_ip/$lan2_nm -j SNAT --to-source $wan_ipaddr
 			else
-			    iptables -t nat -A POSTROUTING -o $wan_if -s $chilli_net -j MASQUERADE
+			    iptables -t nat -A POSTROUTING -o $wan_if -s $lan2_ip/$lan2_nm -j MASQUERADE
 			fi
+		    fi
+		else
+		    # chillispot NAT
+		    if  [ "$use_snat" = "1" ]; then
+		        iptables -t nat -A POSTROUTING -o $wan_if -s $chilli_net -j SNAT --to-source $wan_ipaddr
+		    else
+			iptables -t nat -A POSTROUTING -o $wan_if -s $chilli_net -j MASQUERADE
 		    fi
 		fi
 	    fi

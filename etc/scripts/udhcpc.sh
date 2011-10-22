@@ -10,14 +10,15 @@
 LOG="logger -t udhcpc"
 RESOLV_CONF="/etc/resolv.conf"
 
-wan_manual_mtu=`nvram_get 2860 wan_manual_mtu`
-
 # Full route list
 ROUTELIST=""
 # Default gateway list
 ROUTELIST_DGW=""
 # Stub for first hop`s dgw
 ROUTELIST_FGW=""
+
+# Get MTU config
+wan_manual_mtu=`nvram_get 2860 wan_manual_mtu`
 
 # Get VPN DGW mode
 vpnDGW=`nvram_get 2860 vpnDGW`
@@ -32,36 +33,36 @@ fi
 
 case "$1" in
     deconfig)
-    vpn_deadloop_fix
-    ip addr flush dev $interface
-    if [ -d /proc/sys/net/ipv6 ]; then
-	ip -6 addr flush dev $interface
-    fi
-    ip link set $interface up
+	vpn_deadloop_fix
+	ip addr flush dev $interface
+	if [ -d /proc/sys/net/ipv6 ]; then
+	    ip -6 addr flush dev $interface
+	fi
+	ip link set $interface up
     ;;
 
     leasefail)
-    # Try reconnect at lease failed
-    # Workaround for infinite OFFER wait
-    vpn_deadloop_fix
-    if [ "$opmode" = "2" ]; then
-	# Wait connect and get SSID
-	wait_connect
-	if [ "$staCur_SSID" != "" ]; then
-	    # Reconnect
-	    $LOG "Reconnect to STA $staCur_SSID"
-	    iwconfig ra0 essid "$staCur_SSID"
+	# Try reconnect at lease failed
+	# Workaround for infinite OFFER wait
+	vpn_deadloop_fix
+	if [ "$opmode" = "2" ]; then
+	    # Wait connect and get SSID
+	    wait_connect
+	    if [ "$staCur_SSID" != "" ]; then
+		# Reconnect
+		$LOG "Reconnect to STA $staCur_SSID"
+		iwconfig ra0 essid "$staCur_SSID"
+	    fi
+	    # Full reinit network and services
+	    internet.sh
+	else
+	    dhcpSwReset=`nvram_get 2860 dhcpSwReset`
+	    if [ "$dhcpSwReset" = "1" ]; then
+		$LOG "Reinit switch"
+		# Reset switch
+		/etc/scripts/config-switch.sh
+	    fi
 	fi
-	# Full reinit network and services
-	internet.sh
-    else
-	dhcpSwReset=`nvram_get 2860 dhcpSwReset`
-	if [ "$dhcpSwReset" = "1" ]; then
-	    $LOG "Reinit switch"
-	    # Reset switch
-	    /etc/scripts/config-switch.sh
-	fi
-    fi
     ;;
 
     renew|bound)

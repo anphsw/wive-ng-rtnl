@@ -23,22 +23,18 @@ start() {
     echo 1 > /proc/sys/net/nf_conntrack_flush
     ip route flush cache
 
-    # set manual mtu to wan 
-    if [ "$opmode" != "0" ] && [ "$vpnPurePPPOE" != "1" ]; then
+    # if not bridge wan up
+    if [ "$opmode" != "0" ]; then
+	# drop adress from wan if pure pppoe enabled
+	if [ "$vpnEnabled" = "on" ] && [ "$vpnType" = "0" ] && [ "$vpnPurePPPOE" = "1" ]; then
+	    $LOG "PURE PPPOE Mode - NOT start dhcpc or config wan!"
+	    ip addr flush dev $wan_if
+	fi
+	# set manual mtu to wan if set
 	if [ "$wan_manual_mtu" != "0" ] && [ "$wan_manual_mtu" != "" ]; then
 	    $LOG "Set manual MTU to WAN $wan_manual_mtu"
 	    ip link set mtu $wan_manual_mtu dev $wan_if
 	fi
-    fi
-
-    # drop adress from wan
-    if [ "$opmode" != "0" ] && [ "$vpnEnabled" = "on" ] && [ "$vpnType" = "0" ] && [ "$vpnPurePPPOE" = "1" ]; then
-	$LOG "PURE PPPOE Mode - NOT start dhcpc or config wan!"
-	ip addr flush dev $wan_if
-    fi
-
-    # if not bridge wan up
-    if [ "$opmode" != "0" ]; then
 	# enable wan interface
 	ip link set $wan_if up
 	# enable forward for wan

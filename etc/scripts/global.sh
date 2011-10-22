@@ -172,7 +172,6 @@ udhcpc_opts()
 # configure and start zeroconf daemon
 zero_conf()
 {
-    vpnPurePPPOE=`nvram_get 2860 vpnPurePPPOE`
     wan_is_not_null=`ip -4 addr show $wan_if | grep inet -c`
     if [ "$wan_is_not_null" = "0" ]; then
 	killall -q zcip
