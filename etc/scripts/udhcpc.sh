@@ -68,6 +68,10 @@ case "$1" in
 	NEW_IP="$ip"
 	OLD_IP=`ip -4 addr show dev $interface | awk '/inet / {print $2}'`
 
+    ########################################################################################################
+    # IP/NETMASK/MTU
+    ########################################################################################################
+
 	# Small check
 	if [ "$NEW_IP" = "" ]; then
 	    $LOG "ERROR: DHCP not send IP.... Exit..."
@@ -84,6 +88,10 @@ case "$1" in
 		ip link set mtu $mtu dev $interface
 	    fi
 	fi
+
+    ########################################################################################################
+    # DGW/MSROUTES/STATICROUTES/CLASSFULLROUTES/USERROUTES
+    ########################################################################################################
 
 	# Get default gateway
 	if [ -n "$router" ]; then
@@ -173,6 +181,10 @@ case "$1" in
 	    /etc/routes_replace replace $lan_if $wan_if
 	fi
 
+    ########################################################################################################
+    # DNS
+    ########################################################################################################
+
         if [ "$OLD_IP" != "$NEW_IP" ]; then
 	    # Get DNS servers
 	    if [ "$wan_static_dns" != "on" ]; then
@@ -203,23 +215,26 @@ case "$1" in
 		services_restart.sh dhcp
 	fi
 
+    ########################################################################################################
+    # VPN Logic and workarounds
+    ########################################################################################################
+
 	# if dhcp disables restart must from internet.sh
 	# this is restart vpn and others if need
     	if [ "$OLD_IP" != "$NEW_IP" ]; then
 	    # send Cisco Discovery request
 	    if [ -f /bin/cdp-send ] && [ -f /etc/scripts/config-cdp.sh ]; then
-		config-cdp.sh &
+		/etc/scripts/config-cdp.sh &
 	    fi
 	    # restart vpn if ip changed
 	    if [ "$vpnEnabled" = "on" ]; then
-		PPPD=`pidof pppd`
-		XL2TPD=`pidof xl2tpd`
-		service vpnhelper stop
-		# wait ip-down script work
-		if [ "$PPPD" != "" ] || [ "$XL2TPD" != "" ]; then
-		    sleep 10
-		fi
 		$LOG "Restart vpnhelper.."
+		# vpn client always use ppp0
+		if [ -f /var/run/ppp0.pid ] || [ -f /var/run/xl2tpd/l2tp.pid ]; then
+		    service vpnhelper stop
+		    # wait ip-down script work
+		    sleep 8
+		fi
 		service vpnhelper start
 	    fi
 	fi
