@@ -66,12 +66,12 @@ case "$1" in
 
     renew|bound)
     OLD_IP=`ip -4 addr show dev $interface | awk '/inet / {print $2}'`
-    CUR_IP="$ip"
+    NEW_IP="$ip"
 
 	# MTU is default for all session time.
-	if [ "$OLD_IP" != "$CUR_IP" ]; then
-	    $LOG "Renew ip adress $ip and $NETMASK for $interface from dhcp"
-	    ifconfig $interface $CUR_IP $BROADCAST $NETMASK
+	if [ "$OLD_IP" != "$NEW_IP" ]; then
+	    $LOG "Renew ip adress $NEW_IP and $NETMASK for $interface from dhcp"
+	    ifconfig $interface $NEW_IP $BROADCAST $NETMASK
 	    # Get MTU from dhcp server
 	    if [ "$mtu" ] && [ "$wan_manual_mtu" = "0" ]; then
 		$LOG "Set MTU to $mtu bytes from dhcp server"
@@ -86,7 +86,7 @@ case "$1" in
 	    if [ -z "$dgw_otherif" ]; then
 		# if ip not changed not need delete old default route
 		# this is workaroud for ppp used tunnels up over not default routes
-    		if [ "$OLD_IP" != "$CUR_IP" ]; then
+    		if [ "$OLD_IP" != "$NEW_IP" ]; then
 		    if [ "$replace_dgw" = "1" ]; then
 			$LOG "Deleting default route dev $interface"
 			while ip route del default dev $interface ; do
@@ -167,7 +167,7 @@ case "$1" in
 	    /etc/routes_replace replace $lan_if $wan_if
 	fi
 
-        if [ "$OLD_IP" != "$CUR_IP" ]; then
+        if [ "$OLD_IP" != "$NEW_IP" ]; then
 	    # Get DNS servers
 	    if [ "$wan_static_dns" != "on" ]; then
 		if [ "$dns" ]; then
@@ -199,7 +199,7 @@ case "$1" in
 
 	# if dhcp disables restart must from internet.sh
 	# this is restart vpn and others if need
-    	if [ "$OLD_IP" != "$CUR_IP" ]; then
+    	if [ "$OLD_IP" != "$NEW_IP" ]; then
 	    # send Cisco Discovery request
 	    if [ -f /bin/cdp-send ] && [ -f /etc/scripts/config-cdp.sh ]; then
 		config-cdp.sh &
@@ -218,7 +218,7 @@ case "$1" in
 	    fi
 	fi
 	echo 1 > "/proc/sys/net/ipv4/conf/$interface/forwarding"
-	if [ "$OLD_IP" != "$CUR_IP" ]; then
+	if [ "$OLD_IP" != "$NEW_IP" ]; then
 	    $LOG "End renew procedure..."
 	fi
     ;;
