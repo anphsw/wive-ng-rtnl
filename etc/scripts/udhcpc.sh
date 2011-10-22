@@ -66,12 +66,12 @@ case "$1" in
 
     renew|bound)
     OLD_IP=`ip -4 addr show dev $interface | awk '/inet / {print $2}'`
-    ifconfig $interface $ip $BROADCAST $NETMASK
-    CUR_IP=`ip -4 addr show dev $interface | awk '/inet / {print $2}'`
+    CUR_IP=$ip
 
 	# MTU is default for all session time.
 	if [ "$OLD_IP" != "$CUR_IP" ]; then
 	    $LOG "Renew ip adress $ip and $NETMASK for $interface from dhcp"
+	    ifconfig $interface $CUR_IP $BROADCAST $NETMASK
 	    # Get MTU from dhcp server
 	    if [ "$mtu" ] && [ "$wan_manual_mtu" = "0" ]; then
 		$LOG "Set MTU to $mtu bytes from dhcp server"
