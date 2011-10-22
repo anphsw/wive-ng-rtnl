@@ -65,16 +65,20 @@ case "$1" in
     ;;
 
     renew|bound)
-    $LOG "Renew ip adress $ip and $NETMASK for $interface from dhcp"
     OLD_IP=`ip -4 addr show dev $interface | awk '/inet / {print $2}'`
     ifconfig $interface $ip $BROADCAST $NETMASK
     CUR_IP=`ip -4 addr show dev $interface | awk '/inet / {print $2}'`
 
-	# Get MTU from dhcp server
-	if [ "$mtu" ] && [ "$wan_manual_mtu" = "0" ]; then
-	    $LOG "Set MTU to $mtu bytes from dhcp server"
-	    ip link set mtu $mtu dev $interface
+	# MTU is default for all session time.
+	if [ "$OLD_IP" != "$CUR_IP" ]; then
+	    $LOG "Renew ip adress $ip and $NETMASK for $interface from dhcp"
+	    # Get MTU from dhcp server
+	    if [ "$mtu" ] && [ "$wan_manual_mtu" = "0" ]; then
+		$LOG "Set MTU to $mtu bytes from dhcp server"
+		ip link set mtu $mtu dev $interface
+	    fi
 	fi
+
 	# Get default gateway
 	if [ -n "$router" ]; then
 	    # default route with metric 0 is through $iface?
@@ -214,6 +218,8 @@ case "$1" in
 	    fi
 	fi
 	echo 1 > "/proc/sys/net/ipv4/conf/$interface/forwarding"
-	$LOG "End renew procedure..."
+	if [ "$OLD_IP" != "$CUR_IP" ]; then
+	    $LOG "End renew procedure..."
+	fi
     ;;
 esac
