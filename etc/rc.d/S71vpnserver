@@ -21,8 +21,8 @@ start() {
  get_param
 
  if [ "$l2tp_srv_enabled" = "1" ] && [ "$l2tp_srv_ip_range" != "" ] && \
-    [ "$l2tp_srv_ip_local" != "" ] && [ "$l2tp_srv_user" != "" ] && \
-    [ "$l2tp_srv_pass" != "" ] && [ ! "`pidof xl2tpd-srv`" ]; then
+    [ "$l2tp_srv_ip_local" != "" ] && [ "$configured" = "1" ] && \
+    [ ! "`pidof xl2tpd-srv`" ]; then
 
     $LOG "Start l2tp vpn server"
 
@@ -65,9 +65,25 @@ load_modules() {
 }
 
 gen_configs() {
-printf "$l2tp_srv_user * $l2tp_srv_pass\n" > $ppp/pap-secrets
-printf "$l2tp_srv_user * $l2tp_srv_pass\n" > $ppp/chap-secrets
 
+# Generate passord files. Support 10 users
+configured=0
+echo > $ppp/pap-secrets
+echo > $ppp/chap-secrets
+for i in `seq 0 9`; do
+    l2tp_srv_user=`nvram_get 2860 l2tp_srv_user"$i"`
+    l2tp_srv_pass=`nvram_get 2860 l2tp_srv_pass"$i"`
+    if [ "$l2tp_srv_user" != "" ] && [ "$l2tp_srv_pass" != "" ]; then
+	printf "$l2tp_srv_user * $l2tp_srv_pass\n" >> $ppp/pap-secrets
+	printf "$l2tp_srv_user * $l2tp_srv_pass\n" >> $ppp/chap-secrets
+	configured=1
+    fi
+done
+
+#  Generate l2tp nad pppd config
+if [ "$configured" = "0" ]; then
+    $LOG "One or more users need be configured. Stop..."
+else
 printf "
 [global]
 listen-addr = 0.0.0.0
@@ -103,6 +119,7 @@ $l2tp_srv_lcp_adapt
 $l2tp_srv_mtu_size
 $l2tp_srv_mru_size\n
 " > $ppp/options.l2tp
+fi
 }
 
 get_param() {

@@ -10,8 +10,8 @@
 ) Video turbine MSC extended mode enabled for wifi.(AP/STA mode. variable VideoTurbine 0/1 default 1. need add in webUI)
 ) Add snmpd daemon (Need add in webui in misc page. Variable snmpd 0/1).
 ) Add KLogd, SysLogd and  RemoteSysLogIP variables (Need add in webui).
-) Add l2tp vpn server init logic (need write webui. Variables l2tp_srv_enabled, l2tp_srv_ip_range,
-    l2tp_srv_ip_local, l2tp_srv_user, l2tp_srv_pass, l2tp_srv_lcp_adapt, l2tp_srv_mtu_size, l2tp_srv_mru_size,
+) Add l2tp vpn server init logic. 10 users dupport. (need write webui. Variables l2tp_srv_enabled, l2tp_srv_ip_range,
+    l2tp_srv_ip_local, l2tp_srv_user0-9, l2tp_srv_pass0-9, l2tp_srv_lcp_adapt, l2tp_srv_mtu_size, l2tp_srv_mru_size,
     l2tp_srv_debug).
 
 ) Need add disconnect select STA in AP mode (WebUI)
