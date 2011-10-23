@@ -4,11 +4,11 @@ echo "=====================CONFIGURE-LIBNET===================="
 APROOTDIR=`pwd`
 
 if [ ! -f $APROOTDIR/configure ]; then
+    libtoolize --force
+    aclocal
     autoconf
 fi
 if [ ! -f $APROOTDIR/Makefile.in ]; then
-    libtoolize
-    aclocal
     automake
 fi
 
