@@ -758,6 +758,7 @@
 1) Add l2tp vpn server init logic.
 2) Add detailed link statistic in wireless AP mode.
 3) Fix table size and webui.
+4) Small fixes in network init, dhcpc, iptables logic.
 
 <br><br>
 <b>For support see:</b><br>
