@@ -67,7 +67,7 @@ case "$1" in
 
     renew|bound)
 	NEW_IP="$ip"
-	OLD_IP=`ip -4 addr show dev $interface | awk '/inet / {print $2}'`
+	OLD_IP=`ip -4 addr show dev $interface | awk '/inet / {print $2}' | cut -f1 -d"/"`
 
     ########################################################################################################
     # IP/NETMASK/MTU
