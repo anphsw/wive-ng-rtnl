@@ -1696,8 +1696,6 @@ static inline int __mkroute_input(struct sk_buff *skb,
 	if (err < 0) {
 		ip_handle_martian_source(in_dev->dev, in_dev, skb, daddr,
 					 saddr);
-
-		err = -EINVAL;
 		goto cleanup;
 	}
 
