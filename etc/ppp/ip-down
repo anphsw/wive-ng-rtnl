@@ -78,9 +78,6 @@ chilli_net=`nvram_get 2860 chilli_net`
 	fi
     fi
 
-    $LOG "Cleanup conntrack table"
-    echo 1 > /proc/sys/net/nf_conntrack_flush
-
     $LOG "Flush route cache"
     ip route flush cache
 

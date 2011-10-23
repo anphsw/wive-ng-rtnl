@@ -186,7 +186,7 @@ vpn_deadloop_fix()
 {
     if [ "$vpnEnabled" = "on" ]; then
 	if [ "$vpnType" != "0" ] || [ "$opmode" = "2" ]; then
-	    # First vpn stop.. 
+	    # First vpn stop...
 	    # Auto start later renew/bound
 	    service vpnhelper stop > /dev/null 2>&1
 	    ip route flush cache > /dev/null 2>&1
