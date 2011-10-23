@@ -755,10 +755,9 @@
 
 <br>
 <b>1.12.x</b><br>
-1) Add l2tp vpn server init logic (need write webui. Variables l2tp_srv_enabled, l2tp_srv_ip_range,
-    l2tp_srv_ip_local, l2tp_srv_user, l2tp_srv_pass, l2tp_srv_lcp_adapt, l2tp_srv_mtu_size, l2tp_srv_mru_size,
-    l2tp_srv_debug).
+1) Add l2tp vpn server init logic.
 2) Add detailed link statistic in wireless AP mode.
+3) Fix table size and webui.
 
 <br><br>
 <b>For support see:</b><br>
