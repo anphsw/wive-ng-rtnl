@@ -2039,14 +2039,17 @@ ip_route_input_cached(struct sk_buff *skb, __be32 daddr, __be32 saddr,
 		struct in_device *in_dev = __in_dev_get_rcu(dev);
 
 		    if (in_dev != NULL) {
-			int our = ip_check_mc(in_dev, daddr, saddr,
-				skb->nh.iph->protocol);
-#ifdef CONFIG_IP_MROUTE                                                                                                                     
+			int our=0;
+#ifdef CONFIG_IP_MROUTE
                         /*patch from linux 2.4 sfstudio, for IGMPPROXY */
                         extern struct sock *mroute_socket;
                         if(mroute_socket)
-                                our = 1;
-#endif              
+                            our = 1;
+			else
+
+#endif
+			    our = ip_check_mc(in_dev, daddr, saddr, skb->nh.iph->protocol);
+
 			if (our
 #ifdef CONFIG_IP_MROUTE
 			    || (!ipv4_is_local_multicast(daddr) && IN_DEV_MFORWARD(in_dev))
