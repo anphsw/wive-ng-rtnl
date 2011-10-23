@@ -87,11 +87,11 @@ getWanIpaddr()
     # always return physical wan ip
     wan_ipaddr=`nvram_get 2860 wan_ipaddr`
     if [ "$wanmode" != "STATIC" ] || [ "$wan_ipaddr" = "" ]; then
-	wan_ipaddr=`LC_ALL=C /bin/ifconfig $wan_if 2>&1 | grep 'inet addr' | awk '{print $2}' | sed -e 's/.*://'`
+	wan_ipaddr=`ip -4 addr show dev $wan_if | awk '/inet / {print $2}' | cut -f1 -d"/"`
     fi
 
     # return vpn or physical wan ip
-    real_wan_ipaddr=`LC_ALL=C /bin/ifconfig $real_wan_if 2>&1 | grep 'inet addr' | awk '{print $2}' | sed -e 's/.*://'`
+    real_wan_ipaddr=`ip -4 addr show dev $real_wan_if | awk '/inet / {print $2}' | cut -f1 -d"/`
     if [ "$real_wan_ipaddr" = "" ]; then
 	real_wan_ipaddr=wan_ipaddr
     fi
