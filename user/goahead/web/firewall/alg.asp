@@ -6,6 +6,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
+<link rel="stylesheet" href="/style/controls.css" type="text/css">
 
 <script type="text/javascript" src="/js/controls.js"></script>
 
@@ -38,7 +39,7 @@ function updateState()
 <hr>
 
 <form method="post" name="alg" action="/goform/setFirewallAlg">
-<table width="400" border="1" cellpadding="2" cellspacing="1">
+<table class="form">
 <tr>
 	<td class="title" colspan="2">ALG Settings</td>
 </tr>
@@ -69,13 +70,14 @@ function updateState()
 
 </table>
 
-<p>
+<table class="buttons">
+<tr></td>
 	<input type="hidden" name="submit-url" value="/firewall/alg.asp">
-	<input type="submit" value="Apply"> &nbsp;&nbsp;
-</p>
+	<input type="submit" class="normal" value="Apply"> &nbsp;&nbsp;
+</td></tr>
 </form>
 
-<br><br>
+<div class="whitespace">&nbsp;</div>
 
 </td></tr></table>
 </body>

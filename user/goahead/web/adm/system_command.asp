@@ -53,7 +53,7 @@ function setFocus()
 
 <!-- ================= System command ================= -->
 <form method="post" name="SystemCommand" action="/goform/SystemCommand">
-<table border="1" cellpadding="2" cellspacing="1" width="95%">
+<table class="form">
 <tbody><tr>
   <td class="title" colspan="2" id="syscommandSysCommand">System command: </td>
 </tr>
@@ -76,7 +76,7 @@ function setFocus()
 <input value="Repeat Last Command" id="repeatLastCommand" name="repeatLastCommand" type="submit"> &nbsp;&nbsp;
 </form>
 
+<div class="whitespace">&nbsp;</div>
 
-<br>
 </td></tr></table>
 </body></html>

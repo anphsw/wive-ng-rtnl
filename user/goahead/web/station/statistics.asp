@@ -43,8 +43,8 @@ function PageInit()
 <p id="statisticIntroduction">The Status page shows the settings and current operation status of the Station.</p>
 <hr />
 
-<form method=post name="sta_statistics" action="/goform/resetStaCounters">
-<table width="90%" border="1" cellpadding="2" cellspacing="1">
+<form method="post" name="sta_statistics" action="/goform/resetStaCounters">
+<table class="form">
   <tr>
     <td class="title" colspan="2" id="statisticTx">Transmit Statistics</td>
   </tr>
@@ -60,31 +60,31 @@ function PageInit()
   -->
 
   <tr>
-    <td width="65%" bgcolor="#E8F8FF" >Frames Received With CRC Error </td>
+    <td class="head">Frames Received With CRC Error </td>
     <td><% getStaStatsRxCRCErr(); %></td>
   </tr>
 
   <tr>
-    <td width="65%" bgcolor="#E8F8FF" >Frames Dropped Due To Out-of-Resource</td>
+    <td class="head">Frames Dropped Due To Out-of-Resource</td>
     <td><% getStaStatsRxNoBuf(); %></td>
   </tr>
 
   <tr>
-    <td width="65%" bgcolor="#E8F8FF" >Duplicate Frames Received </td>
+    <td class="head">Duplicate Frames Received </td>
     <td><% getStaStatsRxDup(); %></td>
   </tr>
 </table>
 <input type=hidden name=dummyData value="1">
 <br />
 
-<table width="90%" border="0" cellpadding="2" cellspacing="1">
-  <tr align="center">
-    <td>	
-      <input type="submit" style="{width:120px;}" value="Reset Counters" id="statisticResetCounter">
-    </td>
-  </tr>
+<table class="buttons">
+<tr><td>
+	<input type="submit" style="{width:120px;}" value="Reset Counters" id="statisticResetCounter">
+</td></tr>
 </table>
 </form>
+
+<div class="whitespace">&nbsp;</div>
 
 </td></tr></table>
 </body>

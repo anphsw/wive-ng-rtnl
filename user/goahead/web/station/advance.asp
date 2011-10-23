@@ -92,20 +92,6 @@ function wirelessModeChange()
 	displayElement('CountryRegionRowA', (prot) && (amode == '1'));
 }
 
-function RadioStatusChange(rs)
-{
-	if (rs == 1)
-	{
-		document.sta_advance.radioButton.value = "RADIO OFF";
-		document.sta_advance.radiohiddenButton.value = 0;
-	}
-	else
-	{
-		document.sta_advance.radioButton.value = "RADIO ON";
-		document.sta_advance.radiohiddenButton.value = 1;
-	}
-}
-
 function initTranslation()
 {
 	_TR("staadvTitle", "staadv title");
@@ -155,6 +141,7 @@ function initValue()
 	var staFC = '<% getCfgZero(1, "FastConnect"); %>';
 	var lnaGain = '<% getCfgZero(1, "HiPower"); %>';
 	var txPower = '<% getCfgZero(1, "TxPower"); %>';
+	var radio_off   = "<% getCfgZero(1, "RadioOff"); %>";
 	
 	var form = document.sta_advance;
 
@@ -182,6 +169,7 @@ function initValue()
 	form.staAutoConnect.checked = (staAC == '1');
 	form.staFastConnect.checked = (staFC == '1');
 	form.lnaGainEnable.checked  = (lnaGain == '1');
+	form.radioWirelessEnabled.checked = (radio_off == "0");
 	
 	// Set-up TX power combo
 	for (var i=0; i<form.tx_power.options.length; i++)
@@ -258,9 +246,15 @@ function init11NValues()
 <hr>
 
 <form method="POST" name="sta_advance" action="/goform/setStaAdvance">
-<table width="90%" border="1" cellpadding="2" cellspacing="1">
+<table class="form">
 <tr>
 	<td class="title" colspan="6" id="staadvConfig">Advance Configuration</td>
+</tr>
+<tr>
+	<td class="head">Wireless enable</td>
+	<td>
+		<input type="checkbox" name="radioWirelessEnabled">&nbsp;enabled
+	</td>
 </tr>
 <tr>
 	<td class="head" id="wMacAddressClone">MAC Clone</td>
@@ -400,7 +394,7 @@ function init11NValues()
 </table>
 <br>
 
-<table id="div_ht_phy_mode" name="div_ht_phy_mode" width="90%" border="1" cellpadding="2" cellspacing="1" <%
+<table id="div_ht_phy_mode" name="div_ht_phy_mode" width="90%" class="form" <%
 	if (wm == "0" || wm == "1" || wm == "2" || wm == "3")
 	write("style=\"display:none;\""); %>>
 <tr>
@@ -487,22 +481,17 @@ function init11NValues()
 </tr>
 </table>
 
-<br>
-
-<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
+<table class="buttons">
 <tr align="center">
 	<td>
-		<input type="button" name="radioButton" style="{width:120px;}" value=<%
-			var radio = getStaRadioStatus();
-			if (radio == "1") write("\"RADIO OFF\"");
-			else write("\"RADIO ON\""); %>
-			onClick="if (this.value.indexOf('OFF') >= 0) RadioStatusChange(1); else RadioStatusChange(0); document.sta_advance.submit();"> &nbsp; &nbsp;
 		<input type="submit" style="{width:120px;}" value="Apply" id="staadvApply">
 	</td>
 </tr>
 </table>
 <input type=hidden name=radiohiddenButton value="2">
 </form>
+
+<div class="whitespace">&nbsp;</div>
 
 </td></tr></table>
 </body>

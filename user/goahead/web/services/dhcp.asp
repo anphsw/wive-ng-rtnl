@@ -29,7 +29,9 @@ function genTable(disabled)
 {
 	disabled = (disabled) ? ' disabled="disabled"' : '';
 
-	var table = '<table class="small" style="width: 100%"><tr><th style="text-align: left;">MAC address</th><th style="text-align: left;">IP address</th><th>Action</th></tr>';
+	var table = '<table class="form" style="width: 100%">';
+	table += '<tr><td class="title" colspan="3">Static IP address assignment table:</td></tr>';
+	table += '<tr><th style="text-align: left;">MAC address</th><th style="text-align: left;">IP address</th><th>Action</th></tr>';
 	for (var i=0; i<dhcpList.length; i++)
 	{
 		var row = dhcpList[i];
@@ -37,9 +39,9 @@ function genTable(disabled)
 		table += '<td>' + row[1] + '</td>';
 		table += '<td style="text-align: center;"><a style="color: #ff0000;" title="Delete record" href="javascript:deleteIPItem(' + i + ');"' + disabled + '><b>[x]</b></a></td></tr>';
 	}
-	table += '<tr><td><input class="normal" value="" name="dhcpStaticMAC"' + disabled + '></td>';
-	table += '<td><input class="normal" value="" name="dhcpStaticIP"' + disabled + '></td>';
-	table += '<td style="text-align: center;"><input type="button" class="short" title="Add record" value="Add" onclick="addIPItem(this.form);"' + disabled + '></td></tr>';
+	table += '<tr><td><input class="mid" value="" name="dhcpStaticMAC"' + disabled + '></td>';
+	table += '<td><input class="mid" value="" name="dhcpStaticIP"' + disabled + '></td>';
+	table += '<td style="text-align: center;"><input type="button" class="normal" title="Add record" value="Add" onclick="addIPItem(this.form);"' + disabled + '></td></tr>';
 	table += '</table>';
 	
 	var elem = document.getElementById("dhcpStaticIPList");
@@ -311,7 +313,7 @@ function toggleDhcpTable(check)
 
 <form method="POST" name="dhcpCfg" action="/goform/setDhcp" onSubmit="return CheckValue(this);">
 
-<table width="95%" border="1" cellpadding="2" cellspacing="1">
+<table class="form">
 <tr>
 	<td class="title" colspan="2" id="lSetup">DHCP Server Setup</td>
 </tr>
@@ -357,25 +359,24 @@ function toggleDhcpTable(check)
 	<td class="head" id="lDhcpLease">DHCP Lease Time (in seconds)</td>
 	<td><input name="dhcpLease" class="mid" value="<% getCfgGeneral(1, "dhcpLease"); %>"></td>
 </tr>
-<tr>
-	<td class="title" colspan="2">Static IP address assignment table:</td>
-</tr>
-<tr>
-	<td colspan="2" id="dhcpStaticIPList"></td>
-</tr>
 </table>
 
-<table width="95%" cellpadding="2" cellspacing="1">
-<tr align="center">
+<div id="dhcpStaticIPList">
+</div>
+
+<table class="buttons">
+<tr>
 <td>
 	<input type="hidden" name="dhcpAssignIP" value="">
-	<input type="submit" class="half" value="Apply" id="lApply" onClick="TimeoutReload(20);">&nbsp;&nbsp;
-	<input type="reset"  class="half" value="Cancel" id="lCancel" onClick="window.location.reload();">
+	<input type="submit" class="normal" value="Apply" id="lApply" onClick="TimeoutReload(20);">&nbsp;&nbsp;
+	<input type="reset"  class="normal" value="Cancel" id="lCancel" onClick="window.location.reload();">
 	<input type="hidden" value="/services/dhcp.asp" name="submit-url">
 </td>
 </tr>
 </table>
 </form>
+
+<div class="whitespace">&nbsp;</div>
 
 </td></tr></table>
 </body>

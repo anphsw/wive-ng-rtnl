@@ -132,7 +132,7 @@ It takes about 1 minute to upload firmware &amp; upgrade flash. Please be patien
 <hr>
 
 <!-- ================= Langauge Settings ================= -->
-<table width="100%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
+<table class="form">
 <tr>
 	<td class="title" colspan="2" id="manLangSet">Language Settings</td>
 </tr>
@@ -151,7 +151,7 @@ It takes about 1 minute to upload firmware &amp; upgrade flash. Please be patien
 
 <!-- ================= Adm Settings ================= -->
 <form method="POST" name="Adm" action="/goform/setSysAdm" onsubmit="return AdmFormCheck(this);">
-<table width="100%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
+<table class="form">
 <tr>
 	<td class="title" colspan="2" id="manAdmSet">Administrator Settings</td>
 </tr>
@@ -174,7 +174,7 @@ It takes about 1 minute to upload firmware &amp; upgrade flash. Please be patien
 </form>
 
 <!-- ================= Firmware ================= -->
-<table width="100%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
+<table class="form">
 <tr>
 	<td colspan="2" class="title">Firmware update</td>
 </tr>
@@ -194,7 +194,7 @@ It takes about 1 minute to upload firmware &amp; upgrade flash. Please be patien
 </table>
 
 <!-- ----------------- Settings management ----------------- -->
-<table width="100%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
+<table class="form">
 <tr>
 	<td class="title" colspan="2">Router Settings Management</td>
 </tr>
@@ -229,6 +229,8 @@ It takes about 1 minute to upload firmware &amp; upgrade flash. Please be patien
 </tr>
 </table>
 <div>
+
+<div class="whitespace">&nbsp;</div>
 
 </td></tr></table>
 </body></html>

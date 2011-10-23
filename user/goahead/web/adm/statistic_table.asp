@@ -1,4 +1,4 @@
-<table border="1" cellpadding="2" cellspacing="1" width="95%">
+<table class="form">
 <tbody>
 
 <tr id="wirelessAbout" style="display:none;">

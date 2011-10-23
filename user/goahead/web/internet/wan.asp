@@ -190,11 +190,15 @@ function wanMtuChange(form)
 <hr>
 
 <form method="POST" name="wanCfg" action="/goform/setWan" onSubmit="return CheckValue(this);">
-<table width="95%" cellpadding="2" cellspacing="1">
-<tr align="center">
-	<td><b id="wConnectionType"></b>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+
+<table class="form">
+<tr>
+	<td class="title" colspan="2">WAN connection type</td>
+</tr>
+<tr>
+	<td class="head"><b id="wConnectionType">Connection type</b></td>
 	<td>
-		<select name="connectionType" onChange="connectionTypeSwitch(this.form);">
+		<select name="connectionType" class="mid" onChange="connectionTypeSwitch(this.form);">
 			<option value="STATIC" id="wConnTypeStatic" selected="selected">Static Mode (fixed IP)</option>
 			<option value="DHCP" id="wConnTypeDhcp">DHCP (Auto Config)</option>
 			<option value="ZERO" id="wConnTypeDhcp">Zeroconf</option>
@@ -204,28 +208,27 @@ function wanMtuChange(form)
 </table>
 
 <!-- ================= STATIC Mode ================= -->
-<table id="staticDHCP" width="90%" border="1" cellpadding="2" cellspacing="1">
+<table id="staticDHCP" class="form">
 <tr>
 	<td class="title" colspan="2" id="wStaticMode">Static Mode</td>
 </tr>
 <tr>
 	<td class="head" id="wStaticIp">IP Address</td>
-	<td><input name="staticIp" maxlength="15" value="<% getCfgZero(1, "wan_ipaddr"); %>"></td>
+	<td><input name="staticIp" class="mid" value="<% getCfgZero(1, "wan_ipaddr"); %>"></td>
 </tr>
 <tr>
 	<td class="head" id="wStaticNetmask">Subnet Mask</td>
-	<td><input name="staticNetmask" maxlength="15" value="<% getCfgZero(1, "wan_netmask"); %>">
+	<td><input name="staticNetmask" class="mid" value="<% getCfgZero(1, "wan_netmask"); %>">
 </td>
 </tr>
 <tr>
 	<td class="head" id="wStaticGateway">Default Gateway</td>
-	<td><input name="staticGateway" maxlength="15" value="<% getCfgZero(1, "wan_gateway"); %>">
+	<td><input name="staticGateway" class="mid" value="<% getCfgZero(1, "wan_gateway"); %>">
 </td>
 </tr>
 </table>
-<br>
 
-<table width="90%" border="1" cellpadding="2" cellspacing="1">
+<table class="form">
 <tr>
 	<td class="title" colspan="2">Additional Options</td>
 </tr>
@@ -270,16 +273,18 @@ function wanMtuChange(form)
 </table>
 <br>
 
-<table width="90%" cellpadding="2" cellspacing="1">
-<tr align="center">
+<table class="buttons">
+<tr>
 	<td>
-		<input type="submit" class="half" value="Apply" id="wApply">&nbsp;&nbsp;
-		<input type="reset" class="half" value="Cancel" id="wCancel" onClick="window.location.reload();">
+		<input type="submit" class="normal" value="Apply" id="wApply">&nbsp;&nbsp;
+		<input type="reset" class="normal" value="Cancel" id="wCancel" onClick="window.location.reload();">
 		<input type="hidden" value="/internet/wan.asp" name="submit-url">
 	</td>
 </tr>
 </table>
 </form>
+
+<div class="whitespace">&nbsp;</div>
 
 </td></tr></table>
 </body>

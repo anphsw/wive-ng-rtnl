@@ -69,7 +69,7 @@ function checkForm(form)
 <hr>
 
 <form action="/goform/formSamba" method="POST" name="formSamba" onsubmit="return checkForm(this);" >
-<table width="95%" border="1" cellspacing="1" cellpadding="2">
+<table class="form">
 <tr>
 	<td class="title" colspan="2">Samba/CIFS Settings</td>
 </tr>
@@ -105,6 +105,8 @@ function checkForm(form)
 <input type="submit" value="Apply">
 <br><br>
 </form>
+
+<div class="whitespace">&nbsp;</div>
 
 </td></tr></table>
 </body>

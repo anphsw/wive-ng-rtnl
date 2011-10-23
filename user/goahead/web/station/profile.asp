@@ -7,6 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
+<link rel="stylesheet" href="/style/controls.css" type="text/css">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <title>Station Profile</title>
 <script language="JavaScript" type="text/javascript">
@@ -84,18 +85,18 @@ function PageInit()
 <hr>
 
 <form method="post" name="sta_profile" action="/goform/setStaProfile">
-<table width="90%" border="1" cellpadding="2" cellspacing="1">
+<table class="form">
   <tr> 
     <td class="title" colspan="7" id="profList">Pofile List</td>
   </tr>
   <tr>
-    <td bgcolor="#E8F8FF" width=15px id="profSelect">&nbsp;</td>
-    <td bgcolor="#E8F8FF" id="profProfile">Profile</td>
-    <td bgcolor="#E8F8FF" id="profSSID">SSID</td>
-    <td bgcolor="#E8F8FF" id="profChannel">Channel</td>
-    <td bgcolor="#E8F8FF" id="profAuth">Authentication</td>
-    <td bgcolor="#E8F8FF" id="staproEncryp">Encryption</td>
-    <td bgcolor="#E8F8FF" id="staproNetType">Network Type</td>
+    <th width=15px id="profSelect">&nbsp;</th>
+    <th id="profProfile">Profile</th>
+    <th id="profSSID">SSID</th>
+    <th id="profChannel">Channel</th>
+    <th id="profAuth">Authentication</th>
+    <th id="staproEncryp">Encryption</th>
+    <th id="staproNetType">Network Type</th>
   </tr>
   <% getStaProfile(); %>
 </table>
@@ -104,16 +105,17 @@ function PageInit()
 <table width="90%" cellpadding="2" cellspacing="1">
 <tr align="center">
   <td>
-    <input type="button" name="addProfileButton" id="profAdd" style="{width:120px;}" value="Add" onClick="open_profile_page()"> &nbsp; &nbsp;
-    <input type="button" name="deleteProfileButton" id="profDel" style="{width:120px;}" value="Delete" disabled onClick="submit_apply('delete')"> &nbsp; &nbsp;
-    <input type="button" name="editProfileButton" id="profEdit" style="{width:120px;}" value="Edit" disabled onClick="edit_profile_page()"> &nbsp; &nbsp;
-    <input type="button" name="activateProfileButton" id="profActive" style="{width:120px;}" value="Activate" disabled onClick="submit_apply('activate')"> &nbsp; &nbsp;
+    <input type="button" name="addProfileButton" id="profAdd" class="normal" value="Add" onClick="open_profile_page()"> &nbsp; &nbsp;
+    <input type="button" name="deleteProfileButton" id="profDel" class="normal" value="Delete" disabled onClick="submit_apply('delete')"> &nbsp; &nbsp;
+    <input type="button" name="editProfileButton" id="profEdit" class="normal" value="Edit" disabled onClick="edit_profile_page()"> &nbsp; &nbsp;
+    <input type="button" name="activateProfileButton" id="profActive" class="normal" value="Activate" disabled onClick="submit_apply('activate')"> &nbsp; &nbsp;
   </td>
 </tr>
 </table>
 <input type=hidden name=hiddenButton value="">
 </form>
 
+<div class="whitespace">&nbsp;</div>
 
 </td></tr></table>
 </body>

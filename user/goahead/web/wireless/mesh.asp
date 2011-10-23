@@ -9,6 +9,7 @@
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script type="text/javascript" src="/js/controls.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
+<link rel="stylesheet" href="/style/controls.css" type="text/css">
 <title>Wireless Mesh Settings</title>
 
 <script language="JavaScript" type="text/javascript">

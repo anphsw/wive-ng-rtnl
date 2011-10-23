@@ -6,6 +6,7 @@
 
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
+<link rel="stylesheet" href="/style/controls.css" type="text/css">
 <title>Wireless Security Settings</title>
 
 <script language="JavaScript" type="text/javascript">
@@ -160,16 +161,6 @@ function checkAllNum(str)
         return false;
     }
     return true;
-}
-
-function style_display_on()
-{
-	if (window.ActiveXObject) { // IE
-		return "block";
-	}
-	else if (window.XMLHttpRequest) { // Mozilla, Safari,...
-		return "table-row";
-	}
 }
 
 var http_request = false;
@@ -479,7 +470,7 @@ function securityMode(c_f)
 		}
 
 		document.getElementById("div_wpa_algorithms").style.visibility = "visible";
-		document.getElementById("div_wpa_algorithms").style.display = style_display_on();
+		document.getElementById("div_wpa_algorithms").style.display = '';
 		document.security_form.cipher[0].disabled = false;
 		document.security_form.cipher[1].disabled = false;
 
@@ -488,11 +479,11 @@ function securityMode(c_f)
 			document.security_form.cipher[2].disabled = false;
 
 		document.getElementById("wpa_passphrase").style.visibility = "visible";
-		document.getElementById("wpa_passphrase").style.display = style_display_on();
+		document.getElementById("wpa_passphrase").style.display = '';
 		document.security_form.passphrase.disabled = false;
 
 		document.getElementById("wpa_key_renewal_interval").style.visibility = "visible";
-		document.getElementById("wpa_key_renewal_interval").style.display = style_display_on();
+		document.getElementById("wpa_key_renewal_interval").style.display = '';
 		document.security_form.keyRenewalInterval.disabled = false;
 	}else if (security_mode == "WPA" || security_mode == "WPA2" || security_mode == "WPA1WPA2") //wpa enterprise
 	{
@@ -504,16 +495,16 @@ function securityMode(c_f)
 		}
 
 		document.getElementById("div_wpa_algorithms").style.visibility = "visible";
-		document.getElementById("div_wpa_algorithms").style.display = style_display_on();
+		document.getElementById("div_wpa_algorithms").style.display = '';
 		document.security_form.cipher[0].disabled = false;
 		document.security_form.cipher[1].disabled = false;
 		document.getElementById("wpa_key_renewal_interval").style.visibility = "visible";
-		document.getElementById("wpa_key_renewal_interval").style.display = style_display_on();
+		document.getElementById("wpa_key_renewal_interval").style.display = '';
 		document.security_form.keyRenewalInterval.disabled = false;
 	
 		<!-- 802.1x -->
 		document.getElementById("div_radius_server").style.visibility = "visible";
-		document.getElementById("div_radius_server").style.display = style_display_on();
+		document.getElementById("div_radius_server").style.display = '';
 		document.security_form.RadiusServerIP.disable = false;
 		document.security_form.RadiusServerPort.disable = false;
 		document.security_form.RadiusServerSecret.disable = false;	
@@ -526,10 +517,10 @@ function securityMode(c_f)
 		if(security_mode == "WPA2"){
 			document.security_form.cipher[2].disabled = false;
 			document.getElementById("wpa_preAuthentication").style.visibility = "visible";
-			document.getElementById("wpa_preAuthentication").style.display = style_display_on();
+			document.getElementById("wpa_preAuthentication").style.display = '';
 			document.security_form.PreAuthentication.disabled = false;
 			document.getElementById("wpa_PMK_Cache_Period").style.visibility = "visible";
-			document.getElementById("wpa_PMK_Cache_Period").style.display = style_display_on();
+			document.getElementById("wpa_PMK_Cache_Period").style.display = '';
 			document.security_form.PMKCachePeriod.disabled = false;
 		}
 
@@ -539,10 +530,10 @@ function securityMode(c_f)
 
 	}else if (security_mode == "IEEE8021X"){ // 802.1X-WEP
 		document.getElementById("div_8021x_wep").style.visibility = "visible";
-		document.getElementById("div_8021x_wep").style.display = style_display_on();
+		document.getElementById("div_8021x_wep").style.display = '';
 
 		document.getElementById("div_radius_server").style.visibility = "visible";
-		document.getElementById("div_radius_server").style.display = style_display_on();
+		document.getElementById("div_radius_server").style.display = '';
 		document.security_form.ieee8021x_wep.disable = false;
 		document.security_form.RadiusServerIP.disable = false;
 		document.security_form.RadiusServerPort.disable = false;
@@ -572,7 +563,7 @@ function showWep(mode)
 
 	if(mode == "SHARED"){
 		document.getElementById("div_security_shared_mode").style.visibility = "visible";
-		document.getElementById("div_security_shared_mode").style.display = style_display_on();
+		document.getElementById("div_security_shared_mode").style.display = '';
 	}
 	//document.security_form.wep_auth_type.disabled = false;
 }
@@ -1014,30 +1005,28 @@ function onPreAuthenticationClick(type)
 <form method="post" name="security_form" action="/goform/APSecurity" onsubmit="return submit_apply();">
 
 <!-- ---------------------  MBSSID Selection  --------------------- -->
-<table border="1" cellpadding="2" cellspacing="1" width="90%">
+<table class="form">
 <tr>
 	<td class="title" colspan="2" id="secureSelectSSID">Select SSID</td>
 </tr>
 <tr>
 	<td class="head" id="secureSSIDChoice">SSID choice</td>
 	<td>
-		<select name="ssidIndex" size="1" onchange="selectMBSSIDChanged();">
+		<select name="ssidIndex" class="mid" onchange="selectMBSSIDChanged();">
 			<!-- ....Javascript will update options.... -->
 		</select>
 	</td>
 </tr>
 </table>
 
-<hr>
-
-<table border="1" bordercolor="#9babbd" cellpadding="3" cellspacing="1" hspace="2" vspace="2" width="90%">
+<table class="form">
 <tr>
 	<td class="title" colspan="2"> <span id="sp_title">Security Policy </span></td>
 </tr>
 <tr id="div_security_infra_mode" name="div_security_infra_mode"> 
 	<td class="head" id="secureSecureMode">Security Mode</td>
 	<td>
-		<select name="security_mode" id="security_mode" size="1" onchange="securityMode(1)">
+		<select name="security_mode" id="security_mode" class="mid" onchange="securityMode(1)">
 			<!-- ....Javascript will update options.... -->
 		</select>
 	</td>
@@ -1045,7 +1034,7 @@ function onPreAuthenticationClick(type)
 <tr id="div_security_shared_mode" name="div_security_shared_mode" style="visibility: hidden;"> 
 	<td class="head" id="secureEncrypType">Encrypt Type</td>
 	<td>
-		<select name="security_shared_mode" id="security_shared_mode" size="1" onchange="securityMode(1)">
+		<select name="security_shared_mode" id="security_shared_mode" class="mid" onchange="securityMode(1)">
 			<option value=WEP>WEP</option>
 			<option value=None id="secureEncrypTypeNone">None</option>
 		</select>
@@ -1053,17 +1042,15 @@ function onPreAuthenticationClick(type)
 </tr>
 </table>
 
-<br>
-
 <!-- WEP -->
-<table id="div_wep" name="div_wep" border="1" bordercolor="#9babbd" cellpadding="3" cellspacing="1" hspace="2" vspace="2" width="90%" style="visibility: hidden;">
+<table id="div_wep" name="div_wep" class="form" style="visibility: hidden;">
 <tr>
 	<td class="title" colspan="4" id="secureWEP">Wired Equivalent Privacy (WEP)</td>
 </tr>
 <tr> 
 	<td class="head" colspan="2" id="secureWEPDefaultKey">Default Key</td>
 	<td colspan="2">
-		<select name="wep_default_key" id="wep_default_key" size="1" onchange="setChange(1)">
+		<select name="wep_default_key" id="wep_default_key" class="half" onchange="setChange(1)">
 			<option value="1" id="secureWEPDefaultKey1">Key 1</option>
 			<option value="2" id="secureWEPDefaultKey2">Key 2</option>
 			<option value="3" id="secureWEPDefaultKey3">Key 3</option>
@@ -1076,7 +1063,7 @@ function onPreAuthenticationClick(type)
 	<td class="head2" id="secureWEPKey1">WEP Key 1 :</td>
 	<td><input name="wep_key_1" id="WEP1" maxlength="26" value="" onKeyUp="setChange(1)"></td>
 	<td>
-		<select id="WEP1Select" name="WEP1Select" onchange="setChange(1)">
+		<select id="WEP1Select" class="half" name="WEP1Select" onchange="setChange(1)">
 			<option value="1">ASCII</option>
 			<option value="0">Hex</option>
 		</select>
@@ -1086,7 +1073,7 @@ function onPreAuthenticationClick(type)
 	<td class="head2" id="secureWEPKey2">WEP Key 2 : </td>
 	<td><input name="wep_key_2" id="WEP2" maxlength="26" value="" onKeyUp="setChange(1)"></td>
 	<td>
-		<select id="WEP2Select" name="WEP2Select" onchange="setChange(1)">
+		<select id="WEP2Select" name="WEP2Select" class="half" onchange="setChange(1)">
 			<option value="1">ASCII</option>
 			<option value="0">Hex</option>
 		</select>
@@ -1096,7 +1083,7 @@ function onPreAuthenticationClick(type)
 	<td class="head2" id="secureWEPKey3">WEP Key 3 : </td>
 	<td><input name="wep_key_3" id="WEP3" maxlength="26" value="" onKeyUp="setChange(1)"></td>
 	<td>
-		<select id="WEP3Select" name="WEP3Select" onchange="setChange(1)">
+		<select id="WEP3Select" name="WEP3Select" class="half" onchange="setChange(1)">
 			<option value="1">ASCII</option>
 			<option value="0">Hex</option>
 		</select>
@@ -1106,7 +1093,7 @@ function onPreAuthenticationClick(type)
 	<td class="head2" id="secureWEPKey4">WEP Key 4 : </td>
 	<td><input name="wep_key_4" id="WEP4" maxlength="26" value="" onKeyUp="setChange(1)"></td>
 	<td>
-		<select id="WEP4Select" name="WEP4Select" onchange="setChange(1)">
+		<select id="WEP4Select" name="WEP4Select" class="half" onchange="setChange(1)">
 			<option value="1">ASCII</option>
 			<option value="0">Hex</option>
 		</select>
@@ -1117,7 +1104,7 @@ function onPreAuthenticationClick(type)
 <!-- <br> -->
 
 <!-- WPA -->
-<table id="div_wpa" name="div_wpa" border="1" bordercolor="#9babbd" cellpadding="3" cellspacing="1" hspace="2" vspace="2" width="90%" style="visibility: hidden;">
+<table id="div_wpa" name="div_wpa" class="form" style="visibility: hidden;">
 <tr>
 	<td class="title" colspan="2" id="secreWPA">WPA</td>
 </tr>
@@ -1158,7 +1145,7 @@ function onPreAuthenticationClick(type)
 
 <!-- 802.1x -->
 <!-- WEP  -->
-<table id="div_8021x_wep" name="div_8021x_wep" border="1" bordercolor="#9babbd" cellpadding="3" cellspacing="1" hspace="2" vspace="2" width="90%" style="visibility: hidden;">
+<table id="div_8021x_wep" name="div_8021x_wep" class="form" style="visibility: hidden;">
 <tr>
 	<td class="title" colspan="2" id="secure8021XWEP">802.1x WEP</td>
 </tr>
@@ -1171,8 +1158,7 @@ function onPreAuthenticationClick(type)
 </tr>
 </table>
 
-<br>
-<table id="div_radius_server" name="div_radius_server" border="1" bordercolor="#9babbd" cellpadding="3" cellspacing="1" hspace="2" vspace="2" width="90%" style="visibility: hidden;">
+<table id="div_radius_server" name="div_radius_server" class="form" style="visibility: hidden;">
 <tr>
 	<td class="title" colspan="2" id="secureRadius">Radius Server</td>
 </tr>
@@ -1208,10 +1194,10 @@ var aptable;
 
 for (aptable = 0; aptable < MBSSID_MAX; aptable++)
 {
-	document.write(" <table id=\"AccessPolicy_"+ aptable +"\" border=\"1\" bordercolor=\"#9babbd\" cellpadding=3 cellspacing=1 hspace=2 vspace=2 width=540>");
+	document.write(" <table id=\"AccessPolicy_"+ aptable +"\" border=\"1\" class=\"form\">");
 	document.write(" <tbody> <tr> <td class=title colspan=2 >"+_("secure access policy")+"</td></tr>");
 	document.write(" <tr> <td bgcolor=#E8F8FF class=head >"+_("secure access policy capable")+"</td>");
-	document.write(" <td> <select name=apselect_"+ aptable + " id=apselect_"+aptable+" size=1 onchange=\"setChange(1)\">");
+	document.write(" <td> <select name=apselect_"+ aptable + " id=apselect_"+aptable+" class=\"mid\" onchange=\"setChange(1)\">");
 	document.write(" 			<option value=0 >"+_("wireless disable")+"</option> <option value=1 >"+_("wireless allow")+"</option><option value=2 >"+_("wireless reject")+"</option></select> </td></tr>");
 
 	for(i=0; i< ACCESSPOLICYLIST_MAX/2; i++){
@@ -1256,6 +1242,8 @@ for (aptable = 0; aptable < MBSSID_MAX; aptable++)
 </table>
 
 </form>
+
+<div class="whitespace">&nbsp;</div>
 
 </td></tr></tbody></table>
 </body></html>

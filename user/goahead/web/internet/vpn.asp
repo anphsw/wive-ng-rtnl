@@ -18,6 +18,8 @@ var pptpType     = '<% getCfgGeneral(1, "vpnType"); %>';
 var pptpServerIP = (pptpType != '0') ? '<% getCfgGeneral(1, "vpnServer"); %>' : '';
 var pptpACName   = (pptpType == '0') ? '<% getCfgGeneral(1, "vpnServer"); %>' : '';
 
+var table_vpn_params= [ 'table_vpn_params01', 'table_vpn_params02', 'table_vpn_params03', 'table_vpn_params04' ];
+
 function hideHint(ctl)
 {
 	var row = document.getElementById('vpn_hint_row');
@@ -235,7 +237,7 @@ function selectType(form)
 
 	// Display mode-dependent elements
 	displayElement([ 'vpn_pure_pppoe_cell', 'vpn_pppoe_service_row', 'vpn_pppoe_row' ], pppoe_on);
-	displayElement([ 'vpn_pppoe_iface_row', 'vpn_server_row', 'vpn_auth_type_row', 'vpn_user_row', 'vpn_mtu_row', 'vpn_dgw_row', 'table_vpn_params'], !kabinet_on);
+	displayElement([ 'vpn_pppoe_iface_row', 'vpn_server_row', 'vpn_auth_type_row', 'vpn_user_row', 'vpn_mtu_row', 'vpn_dgw_row', table_vpn_params], !kabinet_on);
 	displayElement('vpn_lanauth_lvl_row', kabinet_on);
 	displayElement('vpn_mppe_row', !l2tp_server_on);
 	displayElement('vpn_l2tp_range', l2tp_server_on);
@@ -368,25 +370,25 @@ function formCheck(form)
 This page is used to configure the <acronym title="Virtual Private Network">VPN</acronym>
 tunnel on your Router.
 </p>
+<hr>
 
 <form action="/goform/formVPNSetup" method="POST" name="formVPNSetup" onsubmit="return formCheck(this);">
-<table width="500" border="0" cellpadding="0" cellspacing="4">
+<table class="form">
 	<tr>
-		<td colspan="2"><hr></td>
+		<td class="title" colspan="2">VPN configuration</td>
 	</tr>
 	<tr>
-		<td onMouseOver="showHint('vpn_enabled')" onMouseOut="hideHint('vpn_enabled')" >
+		<td class="head" onMouseOver="showHint('vpn_enabled')" onMouseOut="hideHint('vpn_enabled')" >
 			<input name="vpn_enabled" onclick="vpnSwitchClick(this.form)" type="checkbox">
 			<b>Enable <acronym title="Virtual Private Network">VPN</acronym></b>
 		</td>
-		<td onMouseOver="showHint('vpn_vpn_status')" onMouseOut="hideHint('vpn_vpn_status')" id="vpn_status_col">
-		</td>
+		<td onMouseOver="showHint('vpn_vpn_status')" onMouseOut="hideHint('vpn_vpn_status')" id="vpn_status_col">&nbsp;</td>
 	</tr>
 	<tr onMouseOver="showHint('vpn_type')" onMouseOut="hideHint('vpn_type')" >
-		<td width="50%">
+		<td class="head">
 			<b><acronym title="Virtual Private Network">VPN</acronym> Mode:</b>
 		</td>
-		<td width="50%">
+		<td>
 			<select disabled="disabled" name="vpn_type" onChange="selectType(this.form);" class="mid" >
 				<option value="0" selected="selected">PPPoE client</option>
 				<option value="1">PPTP  client</option>
@@ -397,30 +399,30 @@ tunnel on your Router.
 		</td>
 	</tr>
 	<tr id="vpn_pppoe_row" style="display: none;" onMouseOver="showHint('vpn_pppoe_iface')" onMouseOut="hideHint('vpn_pppoe_iface')">
-		<td width="50%"><b>PPPoE interface:</b></td>
-		<td width="50%">
+		<td class="head"><b>PPPoE interface:</b></td>
+		<td>
 			<select disabled="disabled" name="vpn_pppoe_iface" class="mid" >
 				<% vpnIfaceList(); %>
 			</select>
 		</td>
 	</tr>
 	<tr id="vpn_server_row" onMouseOver="showHint('vpn_server')" onMouseOut="hideHint('vpn_server')">
-		<td width="50%" id="vpn_server_col">
+		<td class="head" id="vpn_server_col">
 			<b>Host, <acronym title="Internet Protocol">IP</acronym>, <acronym title="Access Concentrator">AC</acronym> or <acronym title="Access Point Name">APN</acronym> name:</b>
 		</td>
-		<td width="50%"><input name="vpn_server" class="mid" value="<% getCfgGeneral(1, "vpnServer"); %>" disabled="disabled" type="text"></td>
+		<td><input name="vpn_server" class="mid" value="<% getCfgGeneral(1, "vpnServer"); %>" disabled="disabled" type="text"></td>
 	</tr>
 	<tr id="vpn_pppoe_service_row" onMouseOver="showHint('vpn_pppoe_service')" onMouseOut="hideHint('vpn_pppoe_service')">
-		<td width="50%"><b>Service name:</b></td>
-		<td width="50%"><input name="vpn_pppoe_service" class="mid" value="<% getCfgGeneral(1, "vpnService"); %>" disabled="disabled" type="text"></td>
+		<td class="head"><b>Service name:</b></td>
+		<td><input name="vpn_pppoe_service" class="mid" value="<% getCfgGeneral(1, "vpnService"); %>" disabled="disabled" type="text"></td>
 	</tr>
 	<tr id="vpn_l2tp_range" onMouseOver="showHint('vpn_range')" onMouseOut="hideHint('vpn_range')" style="display: none;" >
-		<td width="50%"><b><acronym title="Virtual Private Network">VPN</acronym> range <acronym title="Internet Protocol">IP</acronym> adresses:</b></td>
-		<td width="50%"><input name="vpn_range" class="mid" size="25" maxlength="60" value="<% getCfgGeneral(1, "vpnRange"); %>" disabled="disabled" type="text"></td>
+		<td class="head"><b><acronym title="Virtual Private Network">VPN</acronym> range <acronym title="Internet Protocol">IP</acronym> adresses:</b></td>
+		<td><input name="vpn_range" class="mid" size="25" maxlength="60" value="<% getCfgGeneral(1, "vpnRange"); %>" disabled="disabled" type="text"></td>
 	</tr>
 	<tr id="vpn_auth_type_row" onMouseOver="showHint('vpn_auth_type')" onMouseOut="hideHint('vpn_auth_type')" >
-		<td width="50%"><b>Authentication method:</b></td>
-		<td width="50%">
+		<td class="head"><b>Authentication method:</b></td>
+		<td>
 			<select id="vpn_auth_type_select" disabled="disabled" name="vpn_auth_type" class="mid">
 				<option value="0" selected="selected">AUTO</option>
 				<option value="1">PAP</option>
@@ -430,8 +432,8 @@ tunnel on your Router.
 		</td>
 	</tr>
 	<tr id="vpn_lanauth_lvl_row" onMouseOver="showHint('vpn_lanauth_access')" onMouseOut="hideHint('vpn_lanauth_access')">
-		<td width="50%"><b>KABINET access level:</b></td>
-		<td width="50%">
+		<td class="head"><b>KABINET access level:</b></td>
+		<td>
 			<select name="lanauth_access" class="mid" disabled="disabled">
 				<option value="0">offline</option>
 				<option value="1">kabinet</option>
@@ -440,16 +442,16 @@ tunnel on your Router.
 		</td>
 	</tr>
 	<tr id="vpn_user_row" onMouseOver="showHint('vpn_user')" onMouseOut="hideHint('vpn_user')" >
-		<td width="50%"><b>User name:</b></td>
-		<td width="50%"><input name="vpn_user" class="mid" size="25" maxlength="60" value="<% getCfgGeneral(1, "vpnUser"); %>" disabled="disabled" type="text"></td>
+		<td class="head"><b>User name:</b></td>
+		<td><input name="vpn_user" class="mid" size="25" maxlength="60" value="<% getCfgGeneral(1, "vpnUser"); %>" disabled="disabled" type="text"></td>
 	</tr>
 	<tr onMouseOver="showHint('vpn_password')" onMouseOut="hideHint('vpn_password')" >
-		<td width="50%"><b>Password:</b></td>
-		<td width="50%"><input name="vpn_pass" class="mid" size="25" maxlength="60" value="<% getCfgGeneral(1, "vpnPassword"); %>" disabled="disabled" type="password"></td>
+		<td class="head"><b>Password:</b></td>
+		<td><input name="vpn_pass" class="mid" size="25" maxlength="60" value="<% getCfgGeneral(1, "vpnPassword"); %>" disabled="disabled" type="password"></td>
 	</tr>
 	<tr id="vpn_mtu_row" onMouseOver="showHint('vpn_mtu')" onMouseOut="hideHint('vpn_mtu')" >
-		<td width="50%"><b><acronym title="Maximum Transfer Unit">MTU</acronym>/<acronym title="Maximum Recieve Unit">MRU:</acronym></b></td>
-		<td width="50%">
+		<td class="head"><b><acronym title="Maximum Transfer Unit">MTU</acronym>/<acronym title="Maximum Recieve Unit">MRU:</acronym></b></td>
+		<td>
 			<input id="vpn_mtu_field" name="vpn_mtu" maxlength="4" disabled="disabled" type="text" class="half" style="display:none; " value="<% getCfgGeneral(1, "vpnMTU"); %>" >
 			<select id="vpn_mtu_select" disabled="disabled" name="vpn_mtu_type" onChange="mtuChange(this.form);" class="mid" >
 				<option value="AUTO">AUTO</option>
@@ -466,24 +468,23 @@ tunnel on your Router.
 		</td>
 	</tr>
 	<tr id="vpn_dgw_row" onMouseOver="showHint('vpn_dgw')" onMouseOut="hideHint('vpn_dgw')" >
-		<td width="50%">
+		<td class="head">
 			<b>Default gateway:</b>
 		</td>
-		<td width="50%">
+		<td>
 			<select disabled="disabled" name="vpn_dgw" class="mid" class="mid" >
 				<option value="0" selected="selected">Disabled</option>
 				<option value="1">Enabled</option>
 			</select>
 		</td>
 	</tr>
-</table>
 
-<table id="table_vpn_params" width="500" border="0" cellpadding="0" cellspacing="4" style="display: none;">
-	<tr onMouseOver="showHint('vpn_cpu_limit')" onMouseOut="hideHint('vpn_cpu_limit')">
-		<td width="50%">
+	<!-- VPN params -->
+	<tr id="table_vpn_params01" onMouseOver="showHint('vpn_cpu_limit')" onMouseOut="hideHint('vpn_cpu_limit')">
+		<td class="head">
 			<b>CPU limitation:</b>
 		</td>
-		<td width="50%">
+		<td>
 			<input id="vpn_cpu_limit_field" name="vpn_cpu_limit" disabled="disabled"
 				type="text" class="half" style="display: none;"
 				value="<% getCfgGeneral(1, "vpnCpuLimit"); %>" >
@@ -524,11 +525,11 @@ tunnel on your Router.
 			</select>
 		</td>
 	</tr>
-	<tr onMouseOver="showHint('vpn_lcp_interval')" onMouseOut="hideHint('vpn_lcp_interval')">
-		<td width="50%">
+	<tr id="table_vpn_params02" onMouseOver="showHint('vpn_lcp_interval')" onMouseOut="hideHint('vpn_lcp_interval')">
+		<td class="head">
 			<b>LCP echo interval:</b>
 		</td>
-		<td width="50%">
+		<td>
 			<select id="vpn_lcp_interval_select" disabled="disabled" name="vpn_lcp_interval" class="mid">
 				<option value="5">5</option>
 				<option value="10">10</option>
@@ -553,11 +554,11 @@ tunnel on your Router.
 			</select>
 		</td>
 	</tr>
-	<tr onMouseOver="showHint('vpn_lcp_errors')" onMouseOut="hideHint('vpn_lcp_errors')">
-		<td width="50%">
+	<tr id="table_vpn_params03" onMouseOver="showHint('vpn_lcp_errors')" onMouseOut="hideHint('vpn_lcp_errors')">
+		<td class="head">
 			<b>LCP echo failure:</b>
 		</td>
-		<td width="50%">
+		<td>
 			<select id="vpn_lcp_errors_select" disabled="disabled" name="vpn_lcp_errors" class="mid">
 				<option value="5" selected="selected">5</option>
 				<option value="10">10</option>
@@ -581,6 +582,12 @@ tunnel on your Router.
 				<option value="100">100</option>
 			</select>
 		</td>
+	</tr>
+</table>
+
+<table class="form" id="table_vpn_params04">
+	<tr>
+		<td colspan="2" class="title">Additional options</td>
 	</tr>
 	<tr id="vpn_mppe_row">
 		<td width="50%" onMouseOver="showHint('vpn_mppe')" onMouseOut="hideHint('vpn_mppe')" >
@@ -616,21 +623,21 @@ tunnel on your Router.
 	</tr>
 </table>
 
-<table width="500" border="0" cellpadding="0" cellspacing="4">
-	<tr height="32px"><td colspan="2"></td></tr>
+<table class="buttons">
 	<tr>
-		<td colspan="2">
+		<td>
 			<input name="lanauth_pass_changed" type="hidden">
 			<input value="/internet/vpn.asp" name="submit-url" type="hidden">
-			<input style="none" value="Apply and connect" name="save" type="submit" onclick="return submitClick(this.form);" >&nbsp;&nbsp;
-			<input style="none" value="Reset" name="reset_button" onclick="resetClick(this.form);" type="button">
+			<input class="normal" value="Apply and connect" name="save" type="submit" onclick="return submitClick(this.form);" >&nbsp;&nbsp;
+			<input class="normal" value="Reset" name="reset_button" onclick="resetClick(this.form);" type="button">
 		</td>
 	</tr>
 </table>
 </form>
 
-<div id="vpn_hint_row">
-</div>
+<div id="vpn_hint_row">&nbsp;</div>
+
+<div class="whitespace">&nbsp;</div>
 
 </td>
 </tr>

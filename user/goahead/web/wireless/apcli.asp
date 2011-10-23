@@ -7,6 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
+<link rel="stylesheet" href="/style/controls.css" type="text/css">
 <title>AP Client Feature</title>
 
 <script language="JavaScript" type="text/javascript">

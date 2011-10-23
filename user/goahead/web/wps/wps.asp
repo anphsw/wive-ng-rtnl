@@ -4,6 +4,7 @@
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0">
 <meta http-equiv="Pragma" content="no-cache">
 
+<link rel="stylesheet" href="/style/controls.css" type="text/css">
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script type="text/javascript" src="/adm/wps_timer.js"></script>
@@ -285,34 +286,33 @@ function onPINPBCRadioClick(value)
 <h1 id="wpsTitle_text">Wi-Fi Protection Setup</h1>
 <p id="wpsIntroduction_text"> Here you can setup security easily by choosing PIN or PBC method to have Wi-Fi Protected Setup.</p>
 
-<table border="1" cellpadding="2" cellspacing="1" width="95%">
 <form method="post" name ="WPSConfig" action="/goform/WPSSetup">
-<tbody>
+
+<table class="form">
 <!-- ==================  WPS Config  ================== -->
 <tr>
-  <td class="title" colspan="2" id="wpsConfig_text">WPS Config</td>
+	<td class="title" colspan="2" id="wpsConfig_text">WPS Config</td>
 </tr>
 
 <tr>
-  <td class="head" id="wpsWPS_text">WPS: </td>
-  <td>	<select id="WPSEnable" name="WPSEnable" size="1">
+	<td class="head" id="wpsWPS_text">WPS: </td>
+	<td>
+		<select id="WPSEnable" name="WPSEnable" size="1">
 			<option value=0 id="wpsDisable_text">Disable</option>
 			<option value=1 id="wpsEnable_text">Enable</option>
 		</select>
-  </td>
+	</td>
 </tr>
-
-<tr>
-<td colspan="2"> <input type="submit" value="Apply" id="wpsConfigApply_text" name="submitWPSEnable" align="left"> </td>
-</tr>
-
-</form>
 </table>
 
-<br>
+<table class="buttons">
+<tr><td>
+	<td colspan="2"> <input type="submit" value="Apply" id="wpsConfigApply_text" name="submitWPSEnable" align="left"> </td>
+</td></tr>
+</table>
+</form>
 
-<table id="div_wps_status" name=="div_wps_status" border="1" cellpadding="2" cellspacing="1" width="95%" style="visibility: hidden;">
-<tbody>
+<table id="div_wps_status" name=="div_wps_status" class="form" style="visibility: hidden;">
 
 <!-- =================  WPS Summary  ================= -->
 <tr>
@@ -323,7 +323,6 @@ function onPINPBCRadioClick(value)
   <td class="head" id="wpsCurrentStatus_text">WPS Current Status: </td>
   <td> <span id="WPSCurrentStatus"> </span> </td>
 </tr>
-
 
 <tr>
   <td class="head" id="wpsConfigured_text">WPS Configured: </td>
@@ -355,13 +354,15 @@ function onPINPBCRadioClick(value)
   <td> <span id="WPSWPAKey"> </span> </td>
 </tr>
 
-<form method="post" name="SubmitGenPIN" action="/goform/GenPIN">
 <tr>
   <td class="head" id="wpsAPPIN_text">AP PIN:
   </td>
-  <td> <% getPINASP(); %> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type=submit value="Generate" name="GenPIN"></td>
+  <td>
+    <form method="post" name="SubmitGenPIN" action="/goform/GenPIN">
+	<% getPINASP(); %> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type=submit value="Generate" name="GenPIN">
+    </form>
+  </td>
 </tr>
-</form>
 
 <tr>
   <td colspan="2">
@@ -370,14 +371,13 @@ function onPINPBCRadioClick(value)
 	</form>
   <td>
 </tr>
-</tbody>
 </table>
 
 <br>
 
 <!-- ============================    WPS    ============================ -->
 <form method="post" name ="WPS" action="/goform/WPS">
-<table id="div_wps" name="div_wps"  border="1" cellpadding="2" cellspacing="1" width="95%" style="visibility: hidden;">
+<table id="div_wps" name="div_wps" class="form" style="visibility: hidden;">
 <tbody>
 <tr>
   <td class="title" colspan="2" id="wpsProgress_text">WPS Progress</td>
@@ -410,7 +410,7 @@ function onPINPBCRadioClick(value)
 <br>
 
 <!-- =======================  WPS Info Bar  ======================= -->
-<table id="div_wps_info" name="div_wps_info" border="1" cellpadding="1" cellspacing="1" width="100%" style="visibility: hidden;">
+<table id="div_wps_info" name="div_wps_info" class="form" style="visibility: hidden;">
 <tbody><tr><td class="title" id="wpsStatus_text">WPS Status</td></tr>
 <tr><td> 
 <textarea style=font-size:8pt name="WPSInfo" id="WPSInfo" cols="63" rows="2" wrap="off" readonly="1"></textarea>

@@ -718,25 +718,17 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 	char_t	*n_mode, *n_bandwidth, *n_gi, *n_mcs, *n_rdg, *n_extcha, *n_amsdu;
 	char_t	*n_autoba, *n_badecline;
 	char_t	*tx_stream, *rx_stream;
-	char_t	*radio;
 	char	hidden_ssid[16] = "", noforwarding[16] = "";
 	int     is_n = 0, new_bssid_num, old_bssid_num = 1;
 	char *submitUrl;
 
-	radio = websGetVar(wp, T("radiohiddenButton"), T("2"));
-	if (!strncmp(radio, "0", 2)) {
-		doSystem("iwpriv ra0 set RadioOn=0");
-		nvram_set(RT2860_NVRAM, "RadioOff", "1");
-		websRedirect(wp, "wireless/basic.asp");
-		return;
-	}
-	else if (!strncmp(radio, "1", 2)) {
-		doSystem("iwpriv ra0 set RadioOn=1");
-		nvram_set(RT2860_NVRAM, "RadioOff", "0");
-		websRedirect(wp, "wireless/basic.asp");
-		return;
-	}
-
+	// Get current mode & new mode
+	char *radio = websGetVar(wp, T("radioWirelessEnabled"), T("off"));
+	int web_radio_on = CHK_IF_CHECKED(radio);
+	
+	char *radioOff = nvram_get(RT2860_NVRAM, "RadioOff");
+	int nvram_radio_on = CHK_IF_DIGIT(radioOff, 1) ? 0 : 1;
+	
 	// fetch from web input
 	wirelessmode = websGetVar(wp, T("wirelessmode"), T("9")); //9: bgn mode
 	bssid_num = websGetVar(wp, T("bssid_num"), T("1"));
@@ -935,6 +927,9 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 		nvram_bufset(RT2860_NVRAM, "HT_TxStream", tx_stream);
 		nvram_bufset(RT2860_NVRAM, "HT_RxStream", rx_stream);
 	}
+	
+	nvram_bufset(RT2860_NVRAM, "RadioOff", (web_radio_on) ? "0" : "1");
+	
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
 
@@ -977,8 +972,18 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 	else
 		websRedirect(wp, submitUrl);
 
-	// restart wireless network
-    doSystem("internet.sh wifionly &");
+	// Restart wireless network & enable/disable if needed
+	if ((web_radio_on && nvram_radio_on) || ((!web_radio_on) && (!nvram_radio_on)))
+	{
+		doSystem("internet.sh wifionly &");
+	}
+	else
+	{
+		if (web_radio_on)
+			doSystem("internet.sh wifionly && iwpriv ra0 set RadioOn=1 &");
+		else
+			doSystem("internet.sh wifionly && iwpriv ra0 set RadioOn=0 &");
+	}
 }
 
 /* goform/wirelessAdvanced */

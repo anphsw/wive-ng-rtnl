@@ -129,12 +129,12 @@ function PageInit()
 <body onload="PageInit();">
 <table class="body"><tr><td>
 
-<h1 id="qosTitle">Station Advanced Configurations</h1>
+<h1 id="qosTitle">Station QoS Configurations</h1>
 <p id="qosIntroduction">The Status page shows the settings and current operation status of the Station.</p>
 <hr />
 
 <form method="post" name="sta_qos" action="/goform/setStaQoS">
-<table width="90%" border="1" cellpadding="2" cellspacing="1">
+<table class="form">
 <tr>
 	<td class="title" colspan="2" id="qosConfig">Qos Configuration</td>
 </tr>
@@ -180,14 +180,13 @@ function PageInit()
 </tr>
 </table>
 
-<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
-<tr align="center">
+<table class="buttons">
+<tr>
 	<td><input type="button" name="DlsSetupButton" style="{width:120px;}" value="DLS Apply" id="qosDLSAppy" onClick="submit_apply(this.form, 1)"></td>
 </tr>
 </table>
-<br />
 
-<table div="wmm_dls_status" width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table div="wmm_dls_status" class="form">
 <tr>
 	<td class="title" colspan="2" id="qosDLSStaus">DLS Status</td>
 </tr>
@@ -198,15 +197,17 @@ function PageInit()
 <% getStaDLSList(); %>
 </table>
 
-<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
-<tr align="center">
-	<td><input type="button" name="DlsStatusButton" style="{width:120px;}" value="Tear Down" id="qosTearDown" onClick="submit_apply(this.form, 3)"></td>
+<table class="buttons">
+<tr>
+	<td><input type="button" name="DlsStatusButton" class="normal" value="Tear Down" id="qosTearDown" onClick="submit_apply(this.form, 3)"></td>
 </tr>
 </table>
 
 <input type="hidden" name="button_type" value="">
 <input type="hidden" name="submit-url" value="/station/qos.asp" >
 </form>
+
+<div class="whitespace">&nbsp;</div>
 
 </td></tr></table>
 </body>

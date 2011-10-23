@@ -57,6 +57,9 @@ function PageInit()
 
 
 </td></tr></table>
+
+<div class="whitespace">&nbsp;</div>
+
 </body>
 </html>
 

@@ -108,7 +108,7 @@ function refreshlogclick()
 </form>
 
 <!-- ================= System log ================= -->
-<table border="1" cellpadding="2" cellspacing="1" width="95%">
+<table class="form">
 <tbody>
 <tr>
 	<td class="title"colspan="2" id="syslogSysLog">System Log: </td>
@@ -120,7 +120,7 @@ function refreshlogclick()
 </tr>
 </table>
 
+<div class="whitespace">&nbsp;</div>
 
-<br>
 </td></tr></table>
 </body></html>

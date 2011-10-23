@@ -1,4 +1,4 @@
-<table width="95%" border="1" cellpadding="2" cellspacing="1" >
+<table class="form" >
 <!-- ================= System Info ================= -->
 <tr>
 	<td class="title" colspan="2" id="statusSysInfo">System Info</td>

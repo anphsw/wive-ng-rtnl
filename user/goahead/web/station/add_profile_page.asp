@@ -912,7 +912,7 @@ function applyForm()
 
 <form method="POST" name="profile_page" action="/goform/addStaProfile">
 
-<table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table class="form">
 <tr>
 	<td class="title" colspan="2" id="addprofSysConf">System Configuration</td>
 </tr>
@@ -976,7 +976,7 @@ function applyForm()
 
 <hr width="90%" align="left">
 
-<table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table class="form">
 <tr>
 	<td class="title" colspan="2" id="addprofSecurePolicy">Security Policy</td>
 </tr>
@@ -1009,7 +1009,7 @@ function applyForm()
 <br>
 
 <!-- WEP -->
-<table id="div_wep" name="div_wep" width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table id="div_wep" name="div_wep" class="form">
 <tr>
 	<td class="title" colspan="3" id="addprofWEP">Wire Equivalence Protection (WEP)</td>
 </tr>
@@ -1063,7 +1063,7 @@ function applyForm()
 <br>
 
 <!-- WPA -->
-<table id="div_wpa" width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table id="div_wpa" class="form">
 <tr>
 	<td class="title" colspan="2" id="addprofWPA">WPA</td>
 </tr>
@@ -1085,7 +1085,7 @@ function applyForm()
 <br>
 
 <!-- 802.1x -->
-<table id="div_8021x" width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table id="div_8021x" class="form">
 <tr>
 	<td class="title" colspan="2" >802.1x</td>
 </tr>
@@ -1180,11 +1180,11 @@ function applyForm()
 
 <br>
 
-<table width="90%" border="0" cellpadding="2" cellspacing="1">
-<tr align="center">
+<table class="buttons">
+<tr>
 	<td>
-		<input type="button" name="applyButton" style="{width:120px;}" value="Apply" id="addprofApply" onClick="applyForm();"> &nbsp; &nbsp;
-		<input type="button" name="resetButton" style="{width:120px;}" value="Cancel" id="addprofCancel" onClick="window.close();">
+		<input type="button" name="applyButton" class="normal" value="Apply" id="addprofApply" onClick="applyForm();"> &nbsp; &nbsp;
+		<input type="button" name="resetButton" class="normal" value="Cancel" id="addprofCancel" onClick="window.close();">
 	</td>
 </tr>
 </table>

@@ -6,6 +6,8 @@
 <meta http-equiv="Pragma" content="no-cache">
 
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
+<link rel="stylesheet" href="/style/controls.css" type="text/css">
+
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("firewall");
@@ -171,20 +173,20 @@ function updateState()
 <hr />
 
 <form method="POST" name="DMZ" action="/goform/DMZ">
-<table width="400" border="1" cellpadding="2" cellspacing="1">
+<table class="form">
 <tr>
-  <td class="title" colspan="2" id="dmzSetting">DMZ Settings</td>
+	<td class="title" colspan="2" id="dmzSetting">DMZ Settings</td>
 </tr>
 <tr>
 	<td class="head" id="dmzSet">
 		DMZ Settings
 	</td>
 	<td>
-	<select onChange="updateState()" name="DMZEnabled" size="1">
-	<option value=0 <% getDMZEnableASP(0); %> id="dmzDisable">Disable</option>
-    <option value=1 <% getDMZEnableASP(1); %> id="dmzEnable">Enable</option>
-    </select>
-    </td>
+	<select onChange="updateState()" name="DMZEnabled" class="half">
+		<option value=0 <% getDMZEnableASP(0); %> id="dmzDisable">Disable</option>
+		<option value=1 <% getDMZEnableASP(1); %> id="dmzEnable">Enable</option>
+	</select>
+	</td>
 </tr>
 
 <tr>
@@ -197,15 +199,17 @@ function updateState()
 </tr>
 </table>
 
-<p>
+<table class="buttons">
+<tr><td>
 	<input type="submit" value="Apply" id="dmzApply" name="addDMZ" onClick="return formCheck()"> &nbsp;&nbsp;
 	<input type="reset" value="Reset" id="dmzReset" name="reset">
 	<input type="hidden" name="submit-url" value="/firewall/DMZ.asp" >
-</p>
+</td></tr>
+</table>
+
 </form>
 
-<br>
-<hr />
+<div class="whitespace">&nbsp;</div>
 
 </td></tr></table>
 </body>

@@ -10,6 +10,7 @@
 <script type="text/javascript" src="/js/controls.js"></script>
 
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
+<link rel="stylesheet" href="/style/controls.css" type="text/css">
 
 <title>Wireless Station Site Survey</title>
 <script language="JavaScript" type="text/javascript">
@@ -45,7 +46,7 @@ function open_profile_page()
 
 function genStaTable()
 {
-	var html = '<table border="1" cellpadding="2" cellspacing="1" width="600">';
+	var html = '<table class="form" style="min-width: 600px; width: 600px;">';
 	
 	html += '<tr><td class="title" colspan="8" id="scanSiteSurvey">Site Survey</td></tr>'; // Header
 	html += '<tr><th>Sel</th>' +
@@ -406,7 +407,7 @@ function showProfileSsid()
 <div id="ajxCtxStaTable"></div>
 <div id="ajxCtxStaGraph"></div>
 
-<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
+<table class="buttons">
 <tr>
 	<td>
 		<input type=text name="connectedssid" size=28 value="<% getStaConnectionSSID(); %>" disabled>
@@ -414,14 +415,16 @@ function showProfileSsid()
 </tr>
 <tr>
 	<td>
-		<input type="button" style="{width:100px;}" name="connectionButton" value="Connect" id="scanConnect" onClick="open_connection_page();">&nbsp;
-		<input type="button" style="{width:100px;}" value="Rescan" id="scanRescan" onClick="location.href=location.href;">&nbsp;
-		<input type="button" style="{width:100px;}" name="addProfileButton" value="Add Profile" id="scanAddProfile" onClick="open_profile_page();">
+		<input type="button" class="normal" name="connectionButton" value="Connect" id="scanConnect" onClick="open_connection_page();">&nbsp;
+		<input type="button" class="normal" value="Rescan" id="scanRescan" onClick="location.href=location.href;">&nbsp;
+		<input type="button" class="normal" name="addProfileButton" value="Add Profile" id="scanAddProfile" onClick="open_profile_page();">
 	</td>
 </tr>
 </table>
 
 </form>
+
+<div class="whitespace">&nbsp;</div>
 
 </td></tr></table>
 </body>

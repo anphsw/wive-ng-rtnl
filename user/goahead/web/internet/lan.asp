@@ -92,7 +92,7 @@ function initValue()
 	lan2_enable_switch(form);
 
 	//gateway, dns only allow to configure at bridge mode
-	displayElement( [ 'brGateway', 'brPriDns', 'brSecDns' ], opmode != "0" );
+	displayElement( [ 'brGateway', 'brPriDns', 'brSecDns' ], opmode == "0" );
 }
 
 function CheckValue()
@@ -149,22 +149,22 @@ function lan2_enable_switch(form)
 <hr>
 
 <form method="POST" name="lanCfg" action="/goform/setLan" onSubmit="return CheckValue();">
-<table width="95%" border="1" cellpadding="2" cellspacing="1">
+<table class="form">
 <tr>
 	<td class="title" colspan="2" id="lSetup">LAN Interface Setup</td>
 </tr>
 <tr <% var hashost = getHostSupp();
 	if (hashost != "1") write("style=\"visibility:hidden;display:none\""); %>>
 	<td class="head" id="lHostname">Hostname</td>
-	<td><input name="hostname" maxlength="16" value="<% getCfgGeneral(1, "HostName"); %>"></td>
+	<td><input name="hostname" class="mid" value="<% getCfgGeneral(1, "HostName"); %>"></td>
 </tr>
 <tr>
 	<td class="head" id="lIp">IP Address</td>
-	<td><input name="lanIp" maxlength="15" value="<% getLanIp(); %>" ></td>
+	<td><input name="lanIp" class="mid" value="<% getLanIp(); %>" ></td>
 </tr>
 <tr>
 	<td class="head" id="lNetmask">Subnet Mask</td>
-	<td><input name="lanNetmask" maxlength="15" value="<% getLanNetmask(); %>"></td>
+	<td><input name="lanNetmask" class="mid" value="<% getLanNetmask(); %>"></td>
 </tr>
 <tr>
 	<td class="head" id="lLan2">LAN2</td>
@@ -177,28 +177,28 @@ function lan2_enable_switch(form)
 </tr>
 <tr>
 	<td class="head" id="lLan2Ip">LAN2 IP Address</td>
-	<td><input name="lan2Ip" maxlength="15" value=""></td>
+	<td><input name="lan2Ip" class="mid" value=""></td>
 </tr>
 <tr>
 	<td class="head" id="lLan2Netmask">LAN2 Subnet Mask</td>
-	<td><input name="lan2Netmask" maxlength="15" value=""></td>
+	<td><input name="lan2Netmask" class="mid" value=""></td>
 </tr>
 <tr id="brGateway">
 	<td class="head" id="lGateway">Default Gateway</td>
-	<td><input name="lanGateway" maxlength="15" value="<% getCfgGeneral(1, "wan_gateway"); %>"></td>
+	<td><input name="lanGateway" class="mid" value="<% getCfgGeneral(1, "wan_gateway"); %>"></td>
 </tr>
 <tr id="brPriDns">
 	<td class="head" id="lPriDns">Primary DNS Server</td>
-	<td><input name="lanPriDns" maxlength="15" value="<% getDns(1); %>"></td>
+	<td><input name="lanPriDns" class="mid" value="<% getDns(1); %>"></td>
 </tr>
 <tr id="brSecDns">
 	<td class="head" id="lSecDns">Secondary DNS Server</td>
-	<td><input name="lanSecDns" maxlength="15" value="<% getDns(2); %>"></td>
+	<td><input name="lanSecDns" class="mid" value="<% getDns(2); %>"></td>
 </tr>
 </table>
 
-<table width="95%" cellpadding="2" cellspacing="1">
-<tr align="center">
+<table class="buttons">
+<tr>
 	<td>
 		<input type="submit" class="normal" value="Apply" id="lApply" onClick="TimeoutReload(20);">&nbsp;&nbsp;
 		<input type="reset"  class="normal" value="Cancel" id="lCancel" onClick="window.location.reload();">
@@ -207,6 +207,8 @@ function lan2_enable_switch(form)
 </tr>
 </table>
 </form>
+
+<div class="whitespace">&nbsp;</div>
 
 </td></tr></table>
 </body>

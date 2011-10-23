@@ -12,7 +12,10 @@
 	((var != NULL) && (var[0] == (val + '0')) && (var[1] == '\0'))
 
 #define CHK_GET_DIGIT(var) \
-	((var[1] == '\0') ? (var[0] - '0') : -1)
+	(((var[0] >= '0') && (var[1] <= '9') && (var[1] == '\0')) ? (var[0] - '0') : -1)
+
+#define CHK_IF_CHECKED(var)  \
+	(((var != NULL) && ((var[0] == 'o') || (var[0] == 'O')) && ((var[1] == 'n') || (var[1] == 'N')) && (var[2] == '\0')) ? 1 : 0)
 
 #define CHK_IF_SET(var) \
 	((var != NULL) && (var[0]))

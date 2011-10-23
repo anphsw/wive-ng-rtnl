@@ -102,6 +102,8 @@ interfaces in '<b>Hardware NAT Fastpath</b>' mode is correct now.</p>
 <div id="statistics_table" >
 </div>
 
+<div class="whitespace">&nbsp;</div> 
+
 </td></tr></table>
 </body></html>
 

@@ -99,7 +99,7 @@ function showPortStatus()
 		content = content + '<td class="port_status" style="background-image: url(\'/graphics/' + image + '.gif\'); "><b>' + text + '</b></td>';
 	}
 	
-	ajaxModifyElementHTML('portStatusRow', '<table><td>' + content + '</td></table>');
+	ajaxModifyElementHTML('portStatusRow', '<table class="small"><td>' + content + '</td></table>');
 }
 
 function initTranslation()
@@ -194,12 +194,12 @@ function setWanPort(form)
 <P id="statusIntroduction">Let's take a look at the status. </P>
 
 <div id="sysinfoTable">
-<table width="95%" border="1" cellpadding="2" cellspacing="1">
+<table class="form">
 </table>
 </div>
 
 <form name="setWanForm" method="POST" action="/goform/setWanPort">
-<table width="95%" border="1" cellpadding="2" cellspacing="1">
+<table class="form">
 <tr>
 	<td class="title" colspan="2">Port Management</td>
 </tr>
@@ -283,6 +283,8 @@ function setWanPort(form)
 </table>
 <input type="button" class="mid" value="Change port configuration" onclick="setWanPort(this.form);" />
 </form>
+
+<div class="whitespace">&nbsp;</div>
 
 </td></tr></table>
 </body>

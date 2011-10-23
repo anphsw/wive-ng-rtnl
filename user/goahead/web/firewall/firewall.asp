@@ -85,7 +85,7 @@ function genRulesTable()
 			'<td>' + row[4] + '</td>' + // Destination IP
 			'<td>' + showPortRange(row[5], row[6]) + '</td>' + // Destination port range
 			'<td><input type="checkbox"' + ((row[7] != 0) ? ' checked="true">' : '>') + // Destination port range
-			'<td>' + row[8] + '</td>' + // Comment
+			'<td>' + row[8] + '&nbsp;</td>' + // Comment
 			'<td style="text-align: center;"><a style="color: #ff0000;" title="Delete record" href="javascript:deleteRuleItem(' + i + ');"' + disabled + '><b>[x]</b></a></td>' +
 			'</tr>';
 	}
@@ -152,7 +152,7 @@ function genFilteringTable()
 			'<td>' + showValue(row[7]) + '</td>' + // Destination IP
 			'<td rowspan="2">' + showPortRange(row[9], row[10]) + '</td>' + // Destination port range
 			showPolicy(row[11]) + // Policy
-			'<td rowspan="2">' + row[12] + '</td>' + // Comment
+			'<td rowspan="2">' + row[12] + '&nbsp;</td>' + // Comment
 			'<td rowspan="2" style="text-align: center;"><a style="color: #ff0000;" title="Delete record" href="javascript:deleteForwardingItem(' + i + ');"' + disabled + '><b>[x]</b></a></td>' +
 			'</tr><tr>' +
 			'<td>' + showValue(row[4]) + '</td>' + // Source IP Mask
@@ -507,7 +507,7 @@ function genTableData(rules, form)
 <hr>
 
 <form method="POST" name="portForward" action="/goform/portForward" onsubmit="return submitForwardForm(this);">
-<table width="600" border="1" cellpadding="2" cellspacing="1">
+<table class="form">
 <tr>
 	<td class="title" colspan="2" id="forwardVirtualSrv">Port Forwarding Settings</td>
 </tr>
@@ -522,22 +522,20 @@ function genTableData(rules, form)
 		</select>
 	</td>
 </tr>
-
-<!-- Port forwarding rules -->
 <tr id="portForwardingRow">
-	<td id="portForwardingTable" colspan="2">
-	</td>
-</tr>
-
-</td>
+	<td colspan="2" id="portForwardingTable"></td>
 </tr>
 </table>
 
-<p>
+<!-- Port forwarding rules -->
+<table class="buttons">
+<tr><td>
 	<input type="hidden" name="portForwardRules" value="">
 	<input type="submit" class="half" value="Apply">
 	<input type="hidden" name="submit-url" value="/firewall/firewall.asp" >
-</p>
+</td></tr>
+</table>
+
 </form>
 
 <!-- MAC / IP / Port Filtering -->
@@ -547,7 +545,7 @@ function genTableData(rules, form)
 <hr>
 
 <form method="POST" name="portFiltering" action="/goform/portFiltering" onsubmit="return submitFilterForm(this);">
-<table width="600" border="1" cellpadding="2" cellspacing="1">
+<table class="form">
 <tr>
 	<td class="title" colspan="2" id="portBasicSet">Basic Settings</td>
 </tr>
@@ -562,21 +560,21 @@ function genTableData(rules, form)
 		</select>
 	</td>
 </tr>
-
-<!-- MAC / IP / Port filtering rules -->
 <tr id="portFilteringRow">
 	<td id="portFilteringTable" colspan="2">
 	</td>
 </tr>
-
 </table>
 
-<p>
+<!-- MAC / IP / Port filtering rules -->
+<table class="buttons">
+<tr><td>
 	<input type="hidden" name="portFilteringRules" value="">
 	<input type="hidden" name="defaultFirewallPolicy" value="">
-	<input type="submit" class="half" value="Apply">
+	<input type="submit" class="normal" value="Apply">
 	<input type="hidden" name="submit-url" value="/firewall/firewall.asp" >
-</p>
+</td></tr>
+</table>
 </form>
 
 </td>

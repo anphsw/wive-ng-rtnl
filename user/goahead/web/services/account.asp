@@ -54,7 +54,7 @@ function initValue()
 </div>
 
 <form action="/goform/formIptAccounting" method="POST" name="formIptAccounting" id="fastpath_form">
-<table width="95%" border="1" cellspacing="1" cellpadding="2">
+<table class="form">
 <tr>
 	<td class="title" colspan="2">IP Accounting Settings</td>
 </tr>
@@ -74,16 +74,18 @@ function initValue()
 </tr>
 </table>
 
-<table width="95%" border="1" cellspacing="1" cellpadding="2">
+<table class="form">
 	<% iptStatList(); %>
 </table>
 
 <br>
 <input type="hidden" value="/services/account.asp" name="submit-url">
-<input type="button" value="Refresh" onClick="window.location.reload();">
+<input type="button" class="normal" value="Refresh" onClick="window.location.reload();">
 <input type="hidden" value="0" name="reset">
-<input type="button" onClick="resetClick(this.form);" value="Reset Statistics">
+<input type="button" class="normal" onClick="resetClick(this.form);" value="Reset Statistics">
 </form>
+
+<div class="whitespace">&nbsp;</div>
 
 </td></tr></table>
 </body>

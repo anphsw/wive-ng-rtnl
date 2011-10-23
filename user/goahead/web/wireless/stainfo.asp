@@ -8,6 +8,7 @@
 
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
+<link rel="stylesheet" href="/style/controls.css" type="text/css">
 <title>Station List</title>
 
 <script language="JavaScript" type="text/javascript">
@@ -40,20 +41,19 @@ function PageInit()
 <p id="stalistIntroduction"> Here you can monitor stations associated with this AP. </p>
 <hr />
 
-<table width="90%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
+<table class="form">
   <tr> 
-    <td class="title" colspan="9" id="stalistWirelessNet">Wireless Network</td>
+    <td class="title" colspan="8" id="stalistWirelessNet">Wireless Network</td>
   </tr>
   <tr>
-    <td bgcolor=#E8F8FF id="stalistMacAddr">MAC Address</td>
-    <td bgcolor=#E8F8FF>Aid</td>
-    <td bgcolor=#E8F8FF>PSM</td>
-    <td bgcolor=#E8F8FF>MimoPS</td>
-    <td bgcolor=#E8F8FF>MCS</td>
-    <td bgcolor=#E8F8FF>BW</td>
-    <td bgcolor=#E8F8FF>SGI</td>
-    <td bgcolor=#E8F8FF>STBC</td>
-    <td bgcolor=#E8F8FF>RSSI</td>
+    <th id="stalistMacAddr">MAC Address</th>
+    <th>Aid</th>
+    <th>PSM</th>
+    <th>MimoPS</th>
+    <th>MCS</th>
+    <th>BW</th>
+    <th>SGI</th>
+    <th>STBC</th>
   </tr>
   <% getWlanStaInfo(); %>
 </table>

@@ -5,6 +5,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
+<link rel="stylesheet" href="/style/controls.css" type="text/css">
 
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script language="JavaScript" type="text/javascript">
@@ -442,14 +443,14 @@ function checkNum(str)
 
 
 <form method="post" name="QoSSetup" action="/goform/QoSSetup">
-<table border=1 bordercolor=#9BABBD width="90%">
+<table class="form">
 <tr>
 	<td class="title" colspan="2" id="QoSSetupStr">QoS Setup </td>
 </tr>
 <tr>
 	<td class="head" id="QoSStr">Type of QoS</td>
 	<td>
-	<select name="QoSSelect" onChange="QoSSelectChange();">
+	<select name="QoSSelect" onChange="QoSSelectChange();" class="mid">
 		<option value="0">Disable</option>
 		<option value="1">Ralink</option>
 		<option value="2">Priority-based</option>
@@ -466,7 +467,7 @@ function checkNum(str)
 		Upload Bandwidth:
 	</td>
 	<td>
-		<select name="UploadBandwidth" id="UploadBandwidth" size="1" onChange="UploadBWChange()">
+		<select name="UploadBandwidth" id="UploadBandwidth" size="1" onChange="UploadBWChange()" class="half">
 		<option value="custom" id="QoSBWCustomStr">User defined</option>
 		<option value="64k">64k</option>
 		<option value="96k">96k</option>
@@ -489,7 +490,7 @@ function checkNum(str)
 		<option value="60M">60M</option>
 		</select>
 
-		<input type=text name=UploadBandwidth_Custom size=6 maxlength=8 style="display:none"> Bits/sec
+		<input type="text" name=UploadBandwidth_Custom class="half" style="display:none"> Bits/sec
 	</td>
 </tr>
 <tr>
@@ -497,7 +498,7 @@ function checkNum(str)
 		Download Bandwidth:
 	</td>
 	<td>
-		<select name="DownloadBandwidth" id="DownloadBandwidth" size="1" onChange="DownloadBWChange()">
+		<select name="DownloadBandwidth" id="DownloadBandwidth" size="1" onChange="DownloadBWChange()" class="half">
 		<option value="custom" id="QoSBWCustomStr2">User-defined</option>
 		<option value="64k">64k</option>
 		<option value="96k">96k</option>
@@ -520,18 +521,22 @@ function checkNum(str)
 		<option value="60M">60M</option>
 		</select>
 
-		<input type=text name=DownloadBandwidth_Custom size=6 maxlength=8 style="display:none"> Bits/sec
+		<input type="text" name=DownloadBandwidth_Custom class="half" style="display:none"> Bits/sec
 	</td>
 </tr>
 
 </table>
-<input value="Apply" id="QoSSetupSubmitStr" name="QoSSetupSubmitStr" onclick="return QoSSetupCheck()" type="submit"> &nbsp;&nbsp;
+
+<table class="buttons">
+<tr><td>
+<input value="Apply" class="normal" id="QoSSetupSubmitStr" name="QoSSetupSubmitStr" onclick="return QoSSetupCheck()" type="submit"> &nbsp;&nbsp;
 <input type="hidden" name="submit-url" value="/internet/qos.asp">
+</td></tr>
+</table>
 
 </form>
 
-<br>
-<table id="div_qos_group" border=1 bordercolor=#9BABBD width="90%" style="visibility: hidden;">
+<table id="div_qos_group" class="form" style="visibility: hidden;">
 <tr>
 	<td class="title" id="QoSGroupStr"> Group </td>
 	<td class="title" id="QoSGroupAttrStr"> Attribute</td>
@@ -613,31 +618,33 @@ function checkNum(str)
 <br>
 
 <form method="post" name="QoSDeleteRules" action="/goform/QoSDeleteRules">
-<table id="div_qos_rules" name="div_qos_rules" border=1 bordercolor=#9BABBD width="600" style="visibility: hidden;">
+<table id="div_qos_rules" name="div_qos_rules" class="form" style="visibility: hidden;">
 <tr>
-	<td class="title" id="QoSRuleNoStr">  No. </td>
-	<td class="title" id="QoSRuleNameStr">  Name. </td>
-	<td class="title" id="QoSRulePrioStr">  Prio. </td>
-	<td class="title" id="QoSRuleInfoStr">  Info. </td>
+	<td class="title" id="QoSRuleNoStr">No.</td>
+	<td class="title" id="QoSRuleNameStr">Name.</td>
+	<td class="title" id="QoSRulePrioStr">Prio.</td>
+	<td class="title" id="QoSRuleInfoStr">Info.</td>
 </tr>
 
 <script language="JavaScript" type="text/javascript">
 	PrintRules();
 </script>
 </table>
-	<input type="button" id="QoSRuleAddStr" name="add_rule" value=add onClick="AddRule();">
-	<input type="submit" id="QoSRuleDelStr" name="del_rule" value=delete>
+	<input type="button" class="normal" id="QoSRuleAddStr" name="add_rule" value=add onClick="AddRule();">
+	<input type="submit" class="normal" id="QoSRuleDelStr" name="del_rule" value=delete>
 	<input type="hidden" name="submit-url" value="/internet/qos.asp">
 </form>
 
-<table id="div_qos_loaddefault">
-<form method="POST" name="QoSLoadDefault" action="/goform/QoSLoadDefaultProfile">
+<form method="POST" name="QoSLoadDefault" action="/goform/QoSLoadDefaultProfile" id="div_qos_loaddefault">
+<table class="buttons">
 <tr><td>
-	<input type="submit" name="QoSLoadProfileStr" id="QoSLoadProfileStr" value="Load Default">
+	<input type="submit" class="normal" name="QoSLoadProfileStr" id="QoSLoadProfileStr" value="Load Default">
 	<input type="hidden" name="submit-url" value="/internet/qos.asp">
 </td></tr>
-</form>
 </table>
+</form>
+
+<div class="whitespace">&nbsp;</div>
 
 </td></tr></tbody></table>
 </body></html>

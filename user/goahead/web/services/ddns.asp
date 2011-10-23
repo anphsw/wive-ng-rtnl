@@ -7,23 +7,12 @@
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script type="text/javascript" src="/js/share.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
+<link rel="stylesheet" href="/style/controls.css" type="text/css">
 <title>Dynamic DNS</title>
 
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("admin");
 Butterlate.setTextDomain("services");
-
-function style_display_on()
-{
-	if (window.ActiveXObject)
-	{ // IE
-		return "block";
-	}
-	else if (window.XMLHttpRequest)
-	{ // Mozilla, Safari,...
-		return "table-row";
-	}
-}
 
 function DDNSFormCheck()
 {
@@ -83,9 +72,9 @@ function initValue()
 		var ddns_provider = "<% getCfgGeneral(1, "DDNSProvider"); %>";
 
 		document.getElementById("div_ddns").style.visibility = "visible";
-		document.getElementById("div_ddns").style.display = style_display_on();
+		document.getElementById("div_ddns").style.display = '';
 		document.getElementById("div_ddns_submit").style.visibility = "visible";
-		document.getElementById("div_ddns_submit").style.display = style_display_on();
+		document.getElementById("div_ddns_submit").style.display = '';
 
 		form.Account.disabled = false;
 		form.Password.disabled = false;
@@ -128,8 +117,7 @@ function initValue()
 
 <!-- ================= DDNS  ================= -->
 <form method="post" name="DDNS" action="/goform/DDNS">
-<table id="div_ddns" width="90%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
-<tbody>
+<table id="div_ddns" class="form">
 <tr>
 	<td class="title" colspan="2" id="manDdnsSet">DDNS Settings</td>
 </tr>
@@ -157,20 +145,21 @@ function initValue()
 	<td class="head" id="manDdns">Dynamic Name</td>
 	<td><input size="32" name="DDNS" value="<% getCfgGeneral(1, "DDNS"); %>" type="text"> </td>
 </tr>
-</tbody>
 </table>
 
-<table id="div_ddns_submit" width="90%" border="0" cellpadding="2" cellspacing="1">
-<tr align="center">
+<table id="div_ddns_submit" class="buttons">
+<tr>
 	<td>
 		<input type="hidden" name="submit-url" value="/services/ddns.asp" >
-		<input type="submit" style="{width:120px;}" value="Apply" id="manDdnsApply" onClick="return DDNSFormCheck()"> &nbsp; &nbsp;
-		<input type="reset" style="{width:120px;}" value="Cancel" id="manDdnsCancel" onClick="window.location.reload()">
+		<input type="submit" class="normal" value="Apply" id="manDdnsApply" onClick="return DDNSFormCheck()"> &nbsp; &nbsp;
+		<input type="reset" class="normal" value="Cancel" id="manDdnsCancel" onClick="window.location.reload()">
 	</td>
 </tr>
 </table>
 
 </form>
+
+<div class="whitespace">&nbsp;</div>
 
 </td></tr></table>
 </body></html>

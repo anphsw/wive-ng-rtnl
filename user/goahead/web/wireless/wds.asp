@@ -8,6 +8,7 @@
 
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
+<link rel="stylesheet" href="/style/controls.css" type="text/css">
 <title>Wireless Distribution System</title>
 
 <script language="JavaScript" type="text/javascript">
@@ -326,15 +327,15 @@ function CheckValue()
 <p>Wireless Distribution System Settings</p>
 <hr />
 
-<form method=post name=wireless_wds action="/goform/wirelessWds" onSubmit="return CheckValue()">
-<table width="90%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
+<form method="post" name="wireless_wds" action="/goform/wirelessWds" onSubmit="return CheckValue()">
+<table class="form">
   <tr>
     <td class="title" id="basicWDSTitle" colspan="2">Wireless Distribution System (WDS)</td>
   </tr>
   <tr>
     <td class="head" id="basicWDSMode">WDS Mode</td>
     <td>
-      <select name="wds_mode" id="wds_mode" size="1" onchange="WdsModeOnChange()">
+      <select name="wds_mode" id="wds_mode" class="mid" onchange="WdsModeOnChange()">
 	<option value=0 id="basicWDSDisable">Disable</option>
 	<option value=4>Lazy Mode</option>
 	<option value=2>Bridge Mode</option>
@@ -345,7 +346,7 @@ function CheckValue()
   <tr id="div_wds_phy_mode" name="div_wds_phy_mode"> 
     <td class="head" id="basicWDSPhyMode">Phy Mode</td>
     <td>
-      <select name="wds_phy_mode" id="wds_phy_mode" size="1">
+      <select name="wds_phy_mode" id="wds_phy_mode" class="half">
 	<option value="CCK;CCK;CCK;CCK">CCK</option>
 	<option value="OFDM;OFDM;OFDM;OFDM">OFDM</option>
 	<option value="HTMIX;HTMIX;HTMIX;HTMIX">HTMIX</option>
@@ -355,11 +356,10 @@ function CheckValue()
       </select>
     </td>
   </tr>
-
   <tr id="div_wds_encryp_type0" name="div_wds_encryp_type0">
     <td class="head" id="basicWDSEncrypType">EncrypType</td>
     <td>
-      <select name="wds_encryp_type0" id="wds_encryp_type0" size="1" onchange="WdsSecurityOnChange(0)">
+      <select name="wds_encryp_type0" id="wds_encryp_type0" class="half" onchange="WdsSecurityOnChange(0)">
 	<option value="NONE">NONE</option>
 	<option value="WEP">WEP</option>
 	<option value="TKIP">TKIP</option>
@@ -369,13 +369,12 @@ function CheckValue()
   </tr>
   <tr id="div_wds_encryp_key0" name="div_wds_encryp_key0">
     <td class="head" id="basicWDSEncrypKey">EncrypKey</td>
-    <td><input type=text name=wds_encryp_key0 size=28 maxlength=64 value=""></td>
+    <td><input type="text" name="wds_encryp_key0" class="wide" value=""></td>
   </tr>
-
   <tr id="div_wds_encryp_type1" name="div_wds_encryp_type1">
     <td class="head" id="basicWDSEncrypType">EncrypType</td>
     <td>
-      <select name="wds_encryp_type1" id="wds_encryp_type1" size="1" onchange="WdsSecurityOnChange(1)">
+      <select name="wds_encryp_type1" id="wds_encryp_type1" class="half" onchange="WdsSecurityOnChange(1)">
 	<option value="NONE">NONE</option>
 	<option value="WEP">WEP</option>
 	<option value="TKIP">TKIP</option>
@@ -385,13 +384,12 @@ function CheckValue()
   </tr>
   <tr id="div_wds_encryp_key1" name="div_wds_encryp_key1">
     <td class="head" id="basicWDSEncrypKey">EncrypKey</td>
-    <td><input type=text name=wds_encryp_key1 size=28 maxlength=64 value=""></td>
+    <td><input type="text" name="wds_encryp_key1" class="wide" value=""></td>
   </tr>
-
   <tr id="div_wds_encryp_type2" name="div_wds_encryp_type2">
     <td class="head" id="basicWDSEncrypType">EncrypType</td>
     <td>
-      <select name="wds_encryp_type2" id="wds_encryp_type2" size="1" onchange="WdsSecurityOnChange(2)">
+      <select name="wds_encryp_type2" id="wds_encryp_type2" class="half" onchange="WdsSecurityOnChange(2)">
 	<option value="NONE">NONE</option>
 	<option value="WEP">WEP</option>
 	<option value="TKIP">TKIP</option>
@@ -401,13 +399,12 @@ function CheckValue()
   </tr>
   <tr id="div_wds_encryp_key2" name="div_wds_encryp_key2">
     <td class="head" id="basicWDSEncrypKey">EncrypKey</td>
-    <td><input type=text name=wds_encryp_key2 size=28 maxlength=64 value=""></td>
+    <td><input type="text" name="wds_encryp_key2" class="wide" value=""></td>
   </tr>
-
   <tr id="div_wds_encryp_type3" name="div_wds_encryp_type3">
     <td class="head" id="basicWDSEncrypType">EncrypType</td>
     <td>
-      <select name="wds_encryp_type3" id="wds_encryp_type3" size="1" onchange="WdsSecurityOnChange(3)">
+      <select name="wds_encryp_type3" id="wds_encryp_type3" class="half" onchange="WdsSecurityOnChange(3)">
 	<option value="NONE">NONE</option>
 	<option value="WEP">WEP</option>
 	<option value="TKIP">TKIP</option>
@@ -417,37 +414,37 @@ function CheckValue()
   </tr>
   <tr id="div_wds_encryp_key3" name="div_wds_encryp_key3">
     <td class="head" id="basicWDSEncrypKey">EncrypKey</td>
-    <td><input type=text name=wds_encryp_key3 size=28 maxlength=64 value=""></td>
+    <td><input type="text" name="wds_encryp_key3" class="wide" value=""></td>
   </tr>
-  <input type="hidden" name="wds_encryp_type" value="">
-
   <tr id="wds_mac_list_1" name="wds_mac_list_1">
     <td class="head" id="basicWDSAPMacAddr">AP MAC Address</td>
-    <td><input type=text name=wds_1 size=20 maxlength=17 value=""></td>
+    <td><input type="text" name="wds_1" class="mid" value=""></td>
   </tr>
   <tr id="wds_mac_list_2" name="wds_mac_list_2">
     <td class="head" id="basicWDSAPMacAddr">AP MAC Address</td>
-    <td><input type=text name=wds_2 size=20 maxlength=17 value=""></td>
+    <td><input type="text" name="wds_2" class="mid" value=""></td>
   </tr>
   <tr id="wds_mac_list_3" name="wds_mac_list_3">
     <td class="head" id="basicWDSAPMacAddr">AP MAC Address</td>
-    <td><input type=text name=wds_3 size=20 maxlength=17 value=""></td>
+    <td><input type="text" name="wds_3" class="mid" value=""></td>
   </tr>
   <tr id="wds_mac_list_4" name="wds_mac_list_4">
     <td class="head" id="basicWDSAPMacAddr">AP MAC Address</td>
-    <td><input type=text name=wds_4 size=20 maxlength=17 value=""></td>
+    <td><input type="text" name="wds_4" class="mid" value=""></td>
   </tr>
-  <input type="hidden" name="wds_list" value="">
 </table>
 
-<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
-  <tr align="center">
-    <td>
-      <input type="submit" style="{width:120px;}" value="Apply"> &nbsp; &nbsp;
-      <input type="reset"  style="{width:120px;}" value="Cancel" onClick="window.location.reload()">
-      <input type="hidden" name="submit-url" value="/wireless/wds.asp">
-    </td>
-  </tr>
+<table class="buttons">
+<tr>
+	<td>
+		<input type="hidden" name="wds_list" value="">
+		<input type="hidden" name="wds_encryp_type" value="">
+		
+		<input type="submit" class="normal" value="Apply"> &nbsp; &nbsp;
+		<input type="reset"  class="normal" value="Cancel" onClick="window.location.reload()">
+		<input type="hidden" name="submit-url" value="/wireless/wds.asp">
+	</td>
+</tr>
 </table>
 </form>
 

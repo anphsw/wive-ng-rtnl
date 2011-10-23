@@ -17,6 +17,7 @@
 #include	"oid.h"
 #include	"stapriv.h"
 #include	"internet.h"
+#include	"helpers.h"
 
 #define Ndis802_11AuthMode8021x 20
 
@@ -1081,14 +1082,14 @@ static int getStaHT(int eid, webs_t wp, int argc, char_t **argv)
 {
 	int s;
 	HTTRANSMIT_SETTING HTSetting;
-	char tmp[8], tmpBW[72], tmpGI[72], tmpSTBC[72], tmpMCS[72];
+	char tmp[8], tmpBW[88], tmpGI[88], tmpSTBC[88], tmpMCS[88];
 
 	if (G_ConnectStatus == NdisMediaStateDisconnected)
 	{
-		sprintf((char *)tmpBW, "<tr><td width=\"35%%\" bgcolor=\"#E8F8FF\" >BW</td><td >n/a</td></tr>");
-		sprintf((char *)tmpGI, "<tr><td width=\"35%%\" bgcolor=\"#E8F8FF\" >GI</td><td >n/a</td></tr>");
-		sprintf((char *)tmpSTBC,"<tr><td width=\"35%%\" bgcolor=\"#E8F8FF\" >STBC</td><td >n/a</td></tr>");
-		sprintf((char *)tmpMCS, "<tr><td width=\"35%%\" bgcolor=\"#E8F8FF\" >MCS</td><td >n/a</td></tr>");
+		sprintf((char *)tmpBW, "<tr><td class=\"head\" bgcolor=\"#E8F8FF\" >BW</td><td >n/a</td></tr>");
+		sprintf((char *)tmpGI, "<tr><td class=\"head\" bgcolor=\"#E8F8FF\" >GI</td><td >n/a</td></tr>");
+		sprintf((char *)tmpSTBC,"<tr><td class=\"head\" bgcolor=\"#E8F8FF\" >STBC</td><td >n/a</td></tr>");
+		sprintf((char *)tmpMCS, "<tr><td class=\"head\" bgcolor=\"#E8F8FF\" >MCS</td><td >n/a</td></tr>");
 		return websWrite(wp,"%s %s %s %s", tmpBW, tmpGI, tmpSTBC, tmpMCS);
 	}
 
@@ -1103,26 +1104,26 @@ static int getStaHT(int eid, webs_t wp, int argc, char_t **argv)
 			strcpy(tmp, "20");
 		else
 			strcpy(tmp, "40");
-		snprintf(tmpBW, 72, "<tr><td width=\"35%%\" bgcolor=\"#E8F8FF\" >BW</td><td >%s</td></tr>", tmp);
+		snprintf(tmpBW, 72, "<tr><td class=\"head\" bgcolor=\"#E8F8FF\" >BW</td><td >%s</td></tr>", tmp);
 
 		if (HTSetting.field.ShortGI == 0)
 			strcpy(tmp, "long");
 		else
 			strcpy(tmp, "short");
-		snprintf(tmpGI, 72, "<tr><td width=\"35%%\" bgcolor=\"#E8F8FF\" >GI</td><td >%s</td></tr>", tmp);
+		snprintf(tmpGI, 72, "<tr><td class=\"head\" bgcolor=\"#E8F8FF\" >GI</td><td >%s</td></tr>", tmp);
 
 		if (HTSetting.field.STBC == 0)
 			strcpy(tmp, "none");
 		else
 			strcpy(tmp, "used");
-		snprintf(tmpSTBC, 72, "<tr><td width=\"35%%\" bgcolor=\"#E8F8FF\" >STBC</td><td >%s</td></tr>", tmp);
+		snprintf(tmpSTBC, 72, "<tr><td class=\"head\" bgcolor=\"#E8F8FF\" >STBC</td><td >%s</td></tr>", tmp);
 
-		snprintf(tmpMCS, 72, "<tr><td width=\"35%%\" bgcolor=\"#E8F8FF\" >MCS</td><td >%d</td></tr>", HTSetting.field.MCS);
+		snprintf(tmpMCS, 72, "<tr><td class=\"head\" bgcolor=\"#E8F8FF\" >MCS</td><td >%d</td></tr>", HTSetting.field.MCS);
 	} else {
-		sprintf((char *)tmpBW, "<tr><td width=\"35%%\" bgcolor=\"#E8F8FF\" >BW</td><td >n/a</td></tr>");
-		sprintf((char *)tmpGI, "<tr><td width=\"35%%\" bgcolor=\"#E8F8FF\" >GI</td><td >n/a</td></tr>");
-		sprintf((char *)tmpSTBC,"<tr><td width=\"35%%\" bgcolor=\"#E8F8FF\" >STBC</td><td >n/a</td></tr>");
-		sprintf((char *)tmpMCS, "<tr><td width=\"35%%\" bgcolor=\"#E8F8FF\" >MCS</td><td >n/a</td></tr>");
+		sprintf((char *)tmpBW, "<tr><td class=\"head\" bgcolor=\"#E8F8FF\" >BW</td><td >n/a</td></tr>");
+		sprintf((char *)tmpGI, "<tr><td class=\"head\" bgcolor=\"#E8F8FF\" >GI</td><td >n/a</td></tr>");
+		sprintf((char *)tmpSTBC,"<tr><td class=\"head\" bgcolor=\"#E8F8FF\" >STBC</td><td >n/a</td></tr>");
+		sprintf((char *)tmpMCS, "<tr><td class=\"head\" bgcolor=\"#E8F8FF\" >MCS</td><td >n/a</td></tr>");
 	}
 
 	return websWrite(wp,"%s %s %s %s", tmpBW, tmpGI, tmpSTBC, tmpMCS);
@@ -5081,7 +5082,7 @@ static void setSta11nCfg(webs_t wp, char_t *path, char_t *query)
 static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 {
 	char_t *w_mode, *cr_bg, *cr_a, *bg_prot, *rate, *burst;
-	char_t *ht, *bw, *gi, *mcs, *rf, *tx_power, *sta_ar, *sta_ac, *sta_fc, *lna_gain;
+	char_t *ht, *bw, *gi, *mcs, *tx_power, *sta_ar, *sta_ac, *sta_fc, *lna_gain;
 
 	int s, ret, country_region_a=0, country_region_bg=0;
 	int tx_burst=0, short_slot_time=0, wireless_mode=0, tx_rate=0;
@@ -5102,7 +5103,6 @@ static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 	bw = websGetVar(wp, T("n_bandwidth"), T("0"));
 	gi = websGetVar(wp, T("n_gi"), T("0"));
 	mcs = websGetVar(wp, T("n_mcs"), T("0"));
-	rf = websGetVar(wp, T("radiohiddenButton"), T("2"));
 	tx_power = websGetVar(wp, T("tx_power"), T("100"));
 	sta_ar = websGetVar(wp, T("staAutoRoaming"), T("off"));
 	sta_ac = websGetVar(wp, T("staAutoConnect"), T("off"));
@@ -5113,6 +5113,14 @@ static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 	char_t *clone_en = websGetVar(wp, T("macCloneEnbl"), T("0"));
 	char_t *clone_mac = websGetVar(wp, T("macCloneMac"), T(""));
 
+	// Get current mode & new mode
+	char *radio = websGetVar(wp, T("radioWirelessEnabled"), T("off"));
+	int web_radio_on = CHK_IF_CHECKED(radio);
+	
+	char *radioOff = nvram_get(RT2860_NVRAM, "RadioOff");
+	int nvram_radio_on = CHK_IF_DIGIT(radioOff, 1) ? 0 : 1;
+
+	// make main logic
 	nvram_init(RT2860_NVRAM);
 
 	nvram_bufset(RT2860_NVRAM, "macCloneEnabled", clone_en);
@@ -5136,28 +5144,28 @@ static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 	// Some other stuff
 	s = socket(AF_INET, SOCK_DGRAM, 0);
 
-	radio_status = atoi(rf);
-	if (radio_status < 2)
+	if ((web_radio_on && nvram_radio_on) || ((!web_radio_on) && (!nvram_radio_on)))
 	{
 		OidSetInformation(RT_OID_802_11_RADIO, s, "ra0", &radio_status, sizeof(radio_status));
-		if (radio_status == 1)
+		if (web_radio_on)
 		{
 			ret = OidSetInformation(OID_802_11_BSSID_LIST_SCAN, s, "ra0", 0, 0);
 			if (ret < 0)
 				error(E_L, E_LOG, T("Set OID_802_11_BSSID_LIST_SCAN error = %d"), ret);
 			Sleep(3);
-			if (G_SSID.SsidLength > 0) {
+			if (G_SSID.SsidLength > 0)
+			{
 				ret = OidSetInformation(OID_802_11_SSID, s, "ra0", &G_SSID, sizeof(NDIS_802_11_SSID));
 				if (ret < 0)
 					error(E_L, E_LOG, T("Set OID_802_11_SSID error = %d"), ret);
-			} 
+			}
 		}
-		websRedirect(wp, "station/advance.asp");
+		
 		close(s);
-		return;
 	}
 	
 	nvram_init(RT2860_NVRAM);
+	nvram_bufset(RT2860_NVRAM, "RadioOff", (web_radio_on) ? "0" : "1");
 	nvram_bufset(RT2860_NVRAM, "WirelessMode", w_mode);
 	nvram_bufset(RT2860_NVRAM, "CountryRegion", cr_bg);
 	nvram_bufset(RT2860_NVRAM, "CountryRegionABand", cr_a);

@@ -433,14 +433,14 @@ function wmm_capable_enable_switch()
 
 
 <form method="post" name="wireless_advanced" action="/goform/wirelessAdvanced" onSubmit="return CheckValue(this)">
-<table width="600" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table class="form">
 <tr>
 	<td class="title" colspan="2" id="advWireless">Advanced Wireless</td>
 </tr>
 <tr>
 	<td class="head" id="advBGProtect">BG Protection Mode</td>
 	<td>
-		<select name="bg_protection" size="1">
+		<select name="bg_protection" size="1" class="half">
 			<option value="0" selected id="advBGProAuto">Auto</option>
 			<option value="1" id="advBGProOn">On</option>
 			<option value="2" id="advBGProOff">Off</option>
@@ -487,7 +487,7 @@ function wmm_capable_enable_switch()
 <tr>
 	<td class="head" id="advTxPW">TX Power</td>
 	<td>
-		<select name="tx_power">
+		<select name="tx_power" class="half">
 			<option value="5">5%</option>
 			<option value="10">10%</option>
 			<option value="20">20%</option>
@@ -547,9 +547,9 @@ function wmm_capable_enable_switch()
 	</td>
 </tr>
 <tr> 
-	<td class="head" id="advCountryCode">Country Code</td>
+	<td class="head" class="mid" id="advCountryCode">Country Code</td>
 	<td>
-		<select name="country_code">
+		<select name="country_code" class="mid">
 			<option value="US" id="advCountryCodeUS">US (United States)</option>
 			<option value="JP" id="advCountryCodeJP">JP (Japan)</option>
 			<option value="RU" id="advCountryCodeRU">RU (Japan)</option>
@@ -571,9 +571,7 @@ function wmm_capable_enable_switch()
 
 </table>
 
-<hr>
-
-<table width="600" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table class="form">
 <tr> 
 	<td class="title" colspan="2" id="advWiFiMM">Wi-Fi Multimedia</td>
 </tr>
@@ -601,14 +599,14 @@ function wmm_capable_enable_switch()
 <tr> 
 	<td class="head" id="advWMMParameter">WMM Parameters</td>
 	<td>
-		<input type="button" name="wmm_list" value="WMM Configuration" id="advWMMConf" onClick="open_wmm_window()">
+		<input type="button" name="wmm_list" class="normal" value="WMM Configuration" id="advWMMConf" onClick="open_wmm_window()">
 	</td>
 </tr>
 
 <input type="hidden" name="rebootAP" value="0">
 </table>
 
-<table id="div_m2u" name="div_m2u" width="600" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table id="div_m2u" name="div_m2u" class="form">
 <tr>
 	<td class="title" colspan="2" id="advMul2UniConver">Multicast-to-Unicast Converter (IGMP Snooping)</td>
 </tr>
@@ -646,17 +644,20 @@ function wmm_capable_enable_switch()
 
 <br>
 
-<table width = "600" border = "0" cellpadding = "2" cellspacing = "1">
+<table class="buttons">
 <tr align="center">
 	<td>
-		<input type="submit" class="half" value="Apply" id="advApply">&nbsp;&nbsp;
-		<input type="reset"  class="half" value="Cancel" id="advCancel" onClick="window.location.reload()">
+		<input type="submit" class="normal" value="Apply" id="advApply">&nbsp;&nbsp;
+		<input type="reset"  class="normal" value="Cancel" id="advCancel" onClick="window.location.reload()">
 		<input type="hidden" name="submit-url" value="/wireless/advanced.asp" >
 	</td>
 </tr>
 </table>
 
 </form>
+
+<div class="whitespace">&nbsp;</div>
+
 </td></tr></table>
 </body>
 </html>

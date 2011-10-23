@@ -234,7 +234,7 @@ function pageInit(){
 <table class="body"><tr><td>
 <h1>Wi-Fi Protected Setup</h1>
 <p> Here you can setup security easily by choosing PIN or PBC method to have Wi-Fi Protected Setup.</p>
-<table border="1" cellpadding="2" cellspacing="1" width="95%">
+<table class="form">
 
 <!-- =================  WPS Status  ================= -->
 <tr>
@@ -292,7 +292,7 @@ function pageInit(){
 <!-- =================  WPS UPNP Daemon ================= -->
 <!-- 
 <form method="post" name="WPSUPNP" action="/goform/WPSUPNP">
-<table border="1" cellpadding="2" cellspacing="1" width="95%">
+<table class="form">
 
 <tr>
   <td class="title" colspan="2">WPS UPnP(Registrar on Ethernet support)</td>
@@ -321,7 +321,7 @@ function pageInit(){
 
 <form method="post" name="WPSBegin" action="/goform/WPSBegin">
 
-<table border="1" cellpadding="2" cellspacing="1" width="95%">
+<table class="form">
 <!-- =================  PIN & PBC  ================= -->
 <tr>
   <td class="title" colspan="2">WPS Setup</td>

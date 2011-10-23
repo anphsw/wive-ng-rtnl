@@ -12,6 +12,7 @@
 <script type="text/javascript" src="/js/sprintf.js"></script>
 
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
+<link rel="stylesheet" href="/style/controls.css" type="text/css">
 <title>System Management</title>
 
 <script language="JavaScript" type="text/javascript">
@@ -91,7 +92,7 @@ function ntpChange(form)
 
 <!-- ================= NTP Settings ================= -->
 <form method="POST" name="NTP" action="/goform/NTP" >
-<table width="90%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
+<table class="form">
 <tbody><tr>
 	<td class="title" colspan="2" id="manNTPSet">NTP Settings</td>
 </tr>
@@ -104,14 +105,14 @@ function ntpChange(form)
 <tr id="div_date">
 	<td class="head" id="manNTPCurrentTime">Current Time</td>
 	<td>
-		<input size="24" name="ntpcurrenttime" value="<% getCurrentTimeASP(); %>" type="text" readonly="1">
-		<input type="button" value="Sync with host" id="manNTPSyncWithHost" name="manNTPSyncWithHost" onClick="syncWithHost()">
+		<input class="wide" name="ntpcurrenttime" value="<% getCurrentTimeASP(); %>" type="text" readonly="1">
+		<input type="button" class="normal" value="Sync with host" id="manNTPSyncWithHost" name="manNTPSyncWithHost" onClick="syncWithHost()">
 	</td>
 </tr>
 <tr>
 	<td class="head" id="manNTPTimeZone">Time Zone:</td>
 	<td>
-		<select name="time_zone">
+		<select name="time_zone" class="wide">
 			<option value="UCT_-11" id="manNTPMidIsland">(UTC-11:00) Midway Island, Samoa</option>
 			<option value="UCT_-10" id="manNTPHawaii">(UTC-10:00) Hawaii</option>
 			<option value="NAS_-09" id="manNTPAlaska">(UTC-09:00) Alaska</option>
@@ -178,7 +179,7 @@ function ntpChange(form)
 <tr>
 	<td class="head" id="manNTPServer">NTP Server</td>
 	<td>
-		<input size="32" maxlength="64" name="NTPServerIP" value="<% getCfgGeneral(1, "NTPServerIP"); %>" type="text">
+		<input class="wide" name="NTPServerIP" value="<% getCfgGeneral(1, "NTPServerIP"); %>" type="text">
 		<br>&nbsp;&nbsp;<font color="#808080">ex:&nbsp;time.nist.gov</font>
 		<br>&nbsp;&nbsp;<font color="#808080">&nbsp;&nbsp;&nbsp;&nbsp;ntp0.broad.mit.edu</font>
 		<br>&nbsp;&nbsp;<font color="#808080">&nbsp;&nbsp;&nbsp;&nbsp;time.stdtime.gov.tw</font>
@@ -187,16 +188,18 @@ function ntpChange(form)
 </tbody>
 </table>
 
-<table width="90%" border="0" cellpadding="2" cellspacing="1">
-<tr align="center">
+<table class="buttons">
+<tr>
 	<td>
 		<input type="hidden" value="/services/ntp.asp" name="submit-url">
-		<input type="submit" style="{width:120px;}" value="Apply"  id="manNTPApply"> &nbsp;&nbsp;
-		<input type="reset"  style="{width:120px;}" value="Cancel" id="manNTPCancel" onclick="window.location.reload();">
+		<input type="submit" class="normal" value="Apply"  id="manNTPApply"> &nbsp;&nbsp;
+		<input type="reset"  class="normal" value="Cancel" id="manNTPCancel" onclick="window.location.reload();">
 	</td>
 </tr>
 </table>
 </form>
+
+<div class="whitespace">&nbsp;</div>
 
 </td></tr></table>
 </body></html>

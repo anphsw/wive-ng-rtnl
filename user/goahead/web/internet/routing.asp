@@ -103,7 +103,7 @@ function wrapDel(str, idle)
 
 function genRoutingTable()
 {
-	var html = '<table border="1" cellpadding="2" cellspacing="1" width="500">';
+	var html = '<table class="form">';
 	
 	html += '<tr><td class="title" colspan="11" id="routingCurrentRoutingTableRules">Current Routing table in the system:</td></tr>'; // Header
 	html += '<tr><th id="routingNo">ID</th>' +
@@ -250,7 +250,7 @@ function formRoutingTable(form)
 <form action="/goform/editRouting" method="post" name="editRouting" onsubmit="return formRoutingTable(this);">
 
 <!-- Rule adding -->
-<table border="1" cellpadding="2" cellspacing="1" width="400">
+<table class="form">
 <tr>
 	<td class="title" colspan="2" id="routingAddRule">Add a routing rule</td>
 </tr>
@@ -287,26 +287,29 @@ function formRoutingTable(form)
 	<td class="head" id="routingComment">Comment</td>
 	<td><input name="comment" class="mid" type="text"></td>
 </tr>
+	<td class="head" id="routingComment">Add rule</td>
+	<td><input value="Add" class="normal" onclick="addRoutingRule(this.form);" type="button"></td>
+<tr>
+</tr>
 </table>
-
-<p>
-	<input value="Add" onclick="addRoutingRule(this.form);" type="button">
-</p>
 
 <!--  delete rules -->
 
 <div id="ajxCtxRoutingTable"></div>
 
-<p>
+<table class="buttons">
+<tr>
+<td>
 	<input type="hidden" name="routingTableDiff" >
-	<input value="Apply" type="submit">
-</p>
+	<input value="Apply" class="normal" type="submit">
+</td>
+</tr>
 </form>
 
 <div id="dynamicRoutingDiv" style="display:none;">
 <h1 id="dynamicRoutingTitle">Dynamic Routing Settings</h1>
 <form method="post" name="dynamicRouting" action="/goform/dynamicRouting">
-<table width="400" border="1" cellpadding="2" cellspacing="1">
+<table class="form">
 <tr>
 	<td class="title" colspan="2" id="dynamicRoutingTitle2">Dynamic routing</td>
 </tr>
@@ -321,14 +324,19 @@ function formRoutingTable(form)
 </tr>
 </table>
 
-<p>
-	<input type="submit" value="Apply" id="dynamicRoutingApply" name="dynamicRoutingApply">
-	<input type="reset" value="Reset" id="dynamicRoutingReset" name="dynamicRoutingReset">
-	<input type="hidden" value="/internet/routing.asp" name="submit-url">
-</p>
+<table class="buttons">
+<tr>
+	<td>
+		<input type="submit" class="normal" value="Apply" id="dynamicRoutingApply" name="dynamicRoutingApply">
+		<input type="reset" class="normal" value="Reset" id="dynamicRoutingReset" name="dynamicRoutingReset">
+		<input type="hidden" value="/internet/routing.asp" name="submit-url">
+	</td>
+</tr>
+</table>
 </form>
 </div>
 
+<div class="whitespace">&nbsp;</div>
 
 </td></tr></tbody></table>
 </body></html>

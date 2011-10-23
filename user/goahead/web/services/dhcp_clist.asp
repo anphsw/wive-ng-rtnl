@@ -1,4 +1,4 @@
-<table width="95%" border="1" cellspacing="1" cellpadding="2">
+<table class="form">
 <tr>
 	<td class="title" colspan="5" id="dClients">DHCP Clients</td>
 </tr>

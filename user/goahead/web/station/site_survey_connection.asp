@@ -994,6 +994,7 @@ function submit_apply()
 </table>
 </form>
 
+<div class="whitespace">&nbsp;</div>
 
 </td></tr></table>
 </body>

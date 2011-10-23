@@ -223,6 +223,16 @@ function natFastpathSelect(form)
 	displayElement('hwnat_threshold_row', (thresh == '2') || (thresh == '3'))
 }
 
+function dmzLoopbackWarning(element)
+{
+	if (element.value == '1')
+	{
+		if (!confirm("You have switched option 'DMZ NAT Loopback' on. After applying this configuration you will never enter this configuration web interface or connect to router by SSH protocol. Do you really want to proceed to set this option?"))
+			element.value='0';
+	}
+
+}
+
 </script>
 </head>
 
@@ -233,8 +243,8 @@ function natFastpathSelect(form)
 <p id="lIntroduction"></p>
 <hr>
 
-<form method=post name="miscServiceCfg" action="/goform/setMiscServices" onSubmit="return CheckValue(this);">
-<table width="95%" border="1" cellpadding="2" cellspacing="1">
+<form method="POST" name="miscServiceCfg" action="/goform/setMiscServices" onSubmit="return CheckValue(this);">
+<table class="form">
 <tr>
 	<td class="title" colspan="2">Offload engine</td>
 </tr>
@@ -349,6 +359,15 @@ function natFastpathSelect(form)
 	</select>
 </td>
 </tr>
+<tr id="dmzLoopback">
+<td class="head" id="ldmzLoopback">DMZ NAT loopback</td>
+<td>
+	<select name="dmzLoopback" class="half" onchange="dmzLoopbackWarning(this);">
+		<option value="0">Disable</option>
+		<option value="1">Enable</option>
+	</select>
+</td>
+</tr>
 <tr id="upnp">
 <td class="head" id="lUpnp">UPNP support</td>
 <td>
@@ -456,8 +475,8 @@ function natFastpathSelect(form)
 
 </table>
 
-<table width="95%" cellpadding="2" cellspacing="1">
-<tr align="center">
+<table class="buttons">
+<tr>
 <td>
 	<input type="submit" class="normal" value="Apply"  id="lApply"  onClick="TimeoutReload(20)">&nbsp;
 	<input type="reset"  class="normal" value="Cancel" id="lCancel" onClick="window.location.reload()">
@@ -466,6 +485,8 @@ function natFastpathSelect(form)
 </tr>
 </table>
 </form>
+
+<div class="whitespace">&nbsp;</div>
 
 </td></tr></table>
 </body>

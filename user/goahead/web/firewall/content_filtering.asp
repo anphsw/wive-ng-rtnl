@@ -148,7 +148,7 @@ function submitForm(form)
 <form action="/goform/webContentFilterSetup" method="POST" name="websContentFilterSetup" onsubmit="return submitForm(this);">
 
 <!-- New content filtering -->
-<table width="500" border="1" cellpadding="2" cellspacing="1">
+<table class="form">
 <tr>
 	<td class="title" colspan="2" id="WebsContentFilter">Web Content Filter Setup</td>
 </tr>
@@ -170,12 +170,18 @@ function submitForm(form)
 </tr>
 </table>
 
-<input type="hidden" name="urlFiltering" />
-<input type="hidden" name="hostFiltering" />
-<input type="hidden" name="submit-url" value="/firewall/content_filtering.asp" />
-<input type="submit" value="Apply">
+<table class="buttons">
+<tr><td>
+	<input type="hidden" name="urlFiltering" />
+	<input type="hidden" name="hostFiltering" />
+	<input type="hidden" name="submit-url" value="/firewall/content_filtering.asp" />
+	<input type="submit" value="Apply">
+</td></tr>
+</table>
 
 </form>
+
+<div class="whitespace">&nbsp;</div>
 
 </td></tr></table>
 </body>
