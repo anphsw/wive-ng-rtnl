@@ -515,7 +515,7 @@ void icmp_send(struct sk_buff *skb_in, int type, int code, __be32 info)
 	if (!(rt->rt_flags & RTCF_LOCAL)) {
 		struct net_device *dev = NULL;
 
-		if (rt->fl.iif && sysctl_icmp_errors_use_inbound_ifaddr)
+		if (rt_is_input_route(rt) && sysctl_icmp_errors_use_inbound_ifaddr)
 			dev = dev_get_by_index(rt->fl.iif);
 
 		if (dev) {

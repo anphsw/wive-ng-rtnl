@@ -1260,7 +1260,7 @@ static int ip_mr_forward(struct sk_buff *skb, struct mfc_cache *cache, int local
 	if (vif_table[vif].dev != skb->dev) {
 		int true_vifi;
 
-		if (((struct rtable*)skb->dst)->fl.iif == 0) {
+		if (rt_is_output_route((struct rtable*)skb->dst)) {
 			/* It is our own packet, looped back.
 			   Very complicated situation...
 

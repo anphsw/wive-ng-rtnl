@@ -1173,7 +1173,7 @@ static int __dn_route_output_key(struct dst_entry **pprt, const struct flowi *fl
 			if ((flp->fld_dst == rt->fl.fld_dst) &&
 			    (flp->fld_src == rt->fl.fld_src) &&
 			    (flp->mark == rt->fl.mark) &&
-			    (rt->fl.iif == 0) &&
+			    dn_is_output_route(rt) &&
 			    (rt->fl.oif == flp->oif)) {
 				rt->u.dst.lastuse = jiffies;
 				dst_hold(&rt->u.dst);
@@ -1506,7 +1506,7 @@ static int dn_rt_fill_info(struct sk_buff *skb, u32 pid, u32 seq,
 	if (rtnl_put_cacheinfo(skb, &rt->u.dst, 0, 0, 0, expires,
 			       rt->u.dst.error) < 0)
 		goto rtattr_failure;
-	if (rt->fl.iif)
+	if (dn_is_input_route(rt))
 		RTA_PUT(skb, RTA_IIF, sizeof(int), &rt->fl.iif);
 
 	nlh->nlmsg_len = skb->tail - b;
