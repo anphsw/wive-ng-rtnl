@@ -43,7 +43,7 @@ function PageInit()
 
 <table class="form">
   <tr> 
-    <td class="title" colspan="8" id="stalistWirelessNet">Wireless Network</td>
+    <td class="title" colspan="9" id="stalistWirelessNet">Wireless Network</td>
   </tr>
   <tr>
     <th id="stalistMacAddr">MAC Address</th>
@@ -54,6 +54,7 @@ function PageInit()
     <th>BW</th>
     <th>SGI</th>
     <th>STBC</th>
+    <th>SNR</th>
   </tr>
   <% getWlanStaInfo(); %>
 </table>
