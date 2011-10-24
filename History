@@ -759,6 +759,7 @@
 2) Add detailed link statistic in wireless AP mode.<br>
 3) Fix table size and webui.<br>
 4) Small fixes in network init, dhcpc, iptables logic.<br>
+5) Update usb-modeswitch to 1.2.0 version.<br>
 
 <br><br>
 <b>For support see:</b><br>

@@ -2,6 +2,17 @@
 History of USB_ModeSwitch
 =========================
 
+Version 1.2.0, 2011/10/23
+    Added QisdaMode for Qisda H21 (thanks to Chi-Hang Long for the code);
+    dispatcher can now be installed with an embedded interpreter, so that
+    Tcl is no longer required; added command line options for binary program
+    to accept configuration data via stdin or as a long string parameter -
+    this fixes the bug with non-writable temporary file during boot;
+    reversed skipping of pre-switching delay, which has caused problems;
+    fixed potential buffer overflow (thanks to Rafael Silva for the find);
+    get first interface right even on some broken devices (thanks to
+    Alexander Gordeev for the patch); increased post-switch delay before
+    driver binding to avoid conflict with usb-storage
 Version 1.1.9, 2011/08/05
     Added CiscoMode for Valet device; additional checking for CDC ACM device
     to prevent erroneous driver loading after switching; no more post-switch

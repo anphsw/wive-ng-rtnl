@@ -9,22 +9,30 @@
 # the mode switching program with the matching parameter
 # file from /usr/share/usb_modeswitch
 #
-# Part of usb-modeswitch-1.1.9 package
+# Part of usb-modeswitch-1.2.0 package
 # (C) Josua Dietze 2009, 2010, 2011
 
 
-# Setting of the these switches is done in the global config
+# Setting of these switches is done in the global config
 # file (/etc/usb_modeswitch.conf) if available
+
+set arg0 [lindex $argv 0]
+if [regexp {\.tcl$} $arg0] {
+	if [file exists $arg0] {
+		set argv [lrange $argv 1 end]
+		source $arg0
+		exit
+	}
+}
 
 set logging 0
 set noswitching 0
-
 
 set env(PATH) "/bin:/usr/bin"
 
 # Execution starts at file bottom
 
-proc {Main} {argc argv} {
+proc {Main} {argv argc} {
 
 global scsi usb config match wc device logging noswitching settings
 
@@ -238,10 +246,10 @@ if $scsiNeeded {
 		}
 		Log "----------------"
 	}
-	Log "Waiting 3 secs. after SCSI device was added"
-	after 3000
+	Log "Waiting 2 secs. after SCSI device was added"
+	after 2000
 } else {
-#	after 500
+	after 500
 }
 
 # If SCSI tree in sysfs was not identified, try and get the values
@@ -278,7 +286,8 @@ foreach configuration $configList {
 
 	Log "checking config: $configuration"
 	if [MatchDevice $configuration] {
-		ParseDeviceConfig [ConfigGet conffile $configuration]
+		set configBuffer [ConfigGet conffile $configuration]
+		ParseDeviceConfig $configBuffer
 		set devList1 [ListSerialDevs]
 		if {$config(waitBefore) == ""} {
 			Log "! matched, now switching"
@@ -291,10 +300,10 @@ foreach configuration $configList {
 
 		# Now we are actually switching
 		if $logging {
-			Log " (running command: $bindir/usb_modeswitch -I -W -c $settings(tmpConfig))"
-			set report [exec $bindir/usb_modeswitch -I -W -D -c $settings(tmpConfig) $configParam 2>@ stdout]
+			Log " (running command: $bindir/usb_modeswitch -I -W -D $configParam -f \$configBuffer)"
+			set report [exec $bindir/usb_modeswitch -I -W -D $configParam -f "$configBuffer" 2>@ stdout]
 		} else {
-			set report [exec $bindir/usb_modeswitch -I -Q -D -c $settings(tmpConfig) $configParam 2>/dev/null]
+			exec $bindir/usb_modeswitch -I -Q -D $configParam -f "$configBuffer" 2>/dev/null]
 		}
 		Log "\nVerbose debug output of usb_modeswitch and libusb follows"
 		Log "(Note that some USB errors are expected in the process)"
@@ -302,9 +311,6 @@ foreach configuration $configList {
 		Log $report
 		Log "--------------------------------"
 		Log "(end of usb_modeswitch output)\n"
-		if [regexp {/var/lib/usb_modeswitch} $settings(tmpConfig)] {
-			file delete $settings(tmpConfig)
-		}
 		break
 	} else {
 		Log "* no match, not switching with this config"
@@ -321,10 +327,7 @@ if {![file isdirectory $devdir]} {
 	Log "Device directory in sysfs is gone! Something went wrong, aborting"
 	SafeExit
 }
-	# Give the device annother second if it's not fully back yet
-	if {![file exists $devdir/idProduct]} {
-		after 1000
-	}
+# Give the device another second if it's not fully back yet
 if {![file exists $devdir/idProduct]} {
 	after 1000
 }
@@ -366,8 +369,8 @@ if [regexp -nocase {ok:[0-9a-f]{4}:[0-9a-f]{4}|ok:no_data} $report] {
 	}
 	Log "Driver module is \"$config(driverModule)\", ID path is $config(driverIDPath)\n"
 
-	# some settling time in ms
-	after 500
+	# wait for any drivers to bind automatically
+	after 1000
 
 	Log "Now checking for newly created serial devices ..."
 	set devList2 [ListSerialDevs]
@@ -545,15 +548,13 @@ return "Using global config file: $configFile"
 # end of proc {ParseGlobalConfig}
 
 
-proc ParseDeviceConfig {configFile} {
+proc ParseDeviceConfig {configContent} {
 
 global config
 set config(driverModule) ""
 set config(driverIDPath) ""
 set config(waitBefore) ""
-set rc [open $configFile r]
-set lineList [split [read $rc] \n]
-close $rc
+set lineList [split $configContent \n]
 foreach line $lineList {
 	if [regexp {^DriverModule[[:blank:]]*=[[:blank:]]*"?(\w+)"?} [string trim $line] d config(driverModule)] {
 		Log "config: DriverModule set to $config(driverModule)"
@@ -600,11 +601,12 @@ switch $command {
 	conffile {
 		if [regexp {^pack/} $config] {
 			set config [regsub {pack/} $config {}]
-			set settings(tmpConfig) /var/lib/usb_modeswitch/current_cfg
+#			set settings(tmpConfig) /var/lib/usb_modeswitch/current_cfg
 			Log "Extracting config $config from collection $settings(dbdir)/configPack.tar.gz"
-			set wc [open $settings(tmpConfig) w]
-			puts -nonewline $wc [exec tar -xzOf $settings(dbdir)/configPack.tar.gz $config 2>/dev/null]
-			close $wc
+			set configContent [exec tar -xzOf $settings(dbdir)/configPack.tar.gz $config 2>/dev/null]
+#			set wc [open $settings(tmpConfig) w]
+#			puts -nonewline $wc [exec tar -xzOf $settings(dbdir)/configPack.tar.gz $config 2>/dev/null]
+#			close $wc
 		} else {
 			if [regexp [list $settings(dbdir_etc)] $config] {
 				Log "Using config file from override folder $settings(dbdir_etc)"
@@ -613,9 +615,11 @@ switch $command {
 				set syslog_text "usb_modeswitch: please report any new or corrected settings; otherwise, check for outdated files"
 				catch {exec logger -p syslog.notice $syslog_text 2>/dev/null}
 			}
-			set settings(tmpConfig) $config
+			set rc [open $config r]
+			set configContent [read $rc]
+			close $rc
 		}
-		return $settings(tmpConfig)
+		return $configContent
 	}
 }
 
@@ -626,10 +630,15 @@ proc {Log} {msg} {
 
 global wc logging device
 if {$logging == 0} {return}
+
 if {![info exists wc]} {
 	if [catch {set wc [open /var/log/usb_modeswitch_$device w]} err] {
-		set wc "error"
-		return
+		if [catch {set wc [open /dev/console w]} err] {
+			set wc "error"
+			return
+		} else {
+			puts $wc "Error opening log file ($err), redirect to console"
+		}
 	}
 	puts $wc "\n\nUSB_ModeSwitch log from [clock format [clock seconds]]\n"
 }
@@ -742,7 +751,7 @@ if [hasInterrupt $ifDir] {
 
 # Unfortunately, there are devices with more than one interrupt
 # port. The assumption so far is that the lowest of these is
-# right. Check all lower interfaces for annother one (if interface)
+# right. Check all lower interfaces for another one (if interface)
 # is bigger than 0). If found, don't return any name.
 
 if { $rightPort && ($myIf > 0) } {
@@ -821,7 +830,7 @@ if {$i < 50} {
 	Log "Trying to add ID to driver \"$config(driverModule)\""
 	catch {exec logger -p syslog.notice "usb_modeswitch: adding device ID $vid:$pid to driver \"$config(driverModule)\"" 2>/dev/null}
 	catch {exec logger -p syslog.notice "usb_modeswitch: please report the device ID to the Linux USB developers!" 2>/dev/null}
-	if [catch {exec echo "$vid $pid" >$idfile} err] {
+	if [catch {exec echo "$vid $pid ff" >$idfile} err] {
 		Log "Error adding ID to driver: $err"
 	} else {
 		Log " ID added to driver; check for new devices in /dev"
@@ -943,4 +952,4 @@ return $devList
 
 
 # The actual entry point
-Main $argc $argv
+Main $argv $argc
