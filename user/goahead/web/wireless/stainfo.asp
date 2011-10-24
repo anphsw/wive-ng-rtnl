@@ -54,7 +54,7 @@ function PageInit()
     <th>BW</th>
     <th>SGI</th>
     <th>STBC</th>
-    <th>SNR</th>
+    <th>RSSI</th>
   </tr>
   <% getWlanStaInfo(); %>
 </table>
