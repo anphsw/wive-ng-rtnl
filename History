@@ -754,7 +754,7 @@
 60) Fix update firmware with usb storage configured.<br>
 
 <br>
-<b>1.2.x</b><br>
+<b>1.12.x</b><br>
 1) Add l2tp vpn server init logic.<br>
 2) Add detailed link statistic in wireless AP mode.<br>
 3) Fix table size and webui.<br>
