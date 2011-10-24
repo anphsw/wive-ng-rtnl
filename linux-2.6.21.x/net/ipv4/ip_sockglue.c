@@ -34,6 +34,7 @@
 #include <linux/netfilter.h>
 #include <linux/route.h>
 #include <linux/mroute.h>
+#include <net/inet_ecn.h>
 #include <net/route.h>
 #include <net/xfrm.h>
 #if defined(CONFIG_IPV6) || defined(CONFIG_IPV6_MODULE)
@@ -508,8 +509,8 @@ static int do_ip_setsockopt(struct sock *sk, int level,
 			break;
 		case IP_TOS:	/* This sets both TOS and Precedence */
 			if (sk->sk_type == SOCK_STREAM) {
-				val &= ~3;
-				val |= inet->tos & 3;
+				val &= ~INET_ECN_MASK;
+				val |= inet->tos & INET_ECN_MASK;
 			}
 			if (IPTOS_PREC(val) >= IPTOS_PREC_CRITIC_ECP &&
 			    !capable(CAP_NET_ADMIN)) {
