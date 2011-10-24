@@ -2072,7 +2072,7 @@ static void tcp_mtup_probe_success(struct sock *sk, struct sk_buff *skb)
 		       icsk->icsk_mtup.probe_size;
 	tp->snd_cwnd_cnt = 0;
 	tp->snd_cwnd_stamp = tcp_time_stamp;
-	tp->rcv_ssthresh = tcp_current_ssthresh(sk);
+	tp->snd_ssthresh = tcp_current_ssthresh(sk);
 
 	icsk->icsk_mtup.search_low = icsk->icsk_mtup.probe_size;
 	icsk->icsk_mtup.probe_size = 0;
