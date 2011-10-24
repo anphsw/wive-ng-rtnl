@@ -1342,30 +1342,30 @@ static void portFiltering(webs_t wp, char_t *path, char_t *query)
 
 static void DMZ(webs_t wp, char_t *path, char_t *query)
 {
-	char *dmzE, *ip_address;
+	char *dmzE, *ip_address, *dmzLoopback;
 
 	dmzE = websGetVar(wp, T("DMZEnabled"), T(""));
 	ip_address = websGetVar(wp, T("DMZIPAddress"), T(""));
+	dmzLoopback = websGetVar(wp, T("dmzLoopback"), T("off"));
 
-	// someone use malform page.....
-	if(!dmzE && !strlen(dmzE))
-		return;
-
-	// we dont trust user input, check all things before doing changes
-	if(atoi(dmzE) && !isIpValid(ip_address))	// enable && invalid mac address
-		return;
-
-	if(atoi(dmzE) == 0){		// disable
+	if (CHK_IF_DIGIT(dmzE, 0)) // disable
+	{
 		nvram_set(RT2860_NVRAM, "DMZEnable", "0");
-	}else{					// enable
+	}
+	else if (CHK_IF_DIGIT(dmzE, 1)) // enable
+	{
+		if (!isIpValid(ip_address))
+			return;
+		
 		nvram_init(RT2860_NVRAM);
 		nvram_bufset(RT2860_NVRAM, "DMZEnable", "1");
-		if(strlen(ip_address)){
-			nvram_bufset(RT2860_NVRAM, "DMZIPAddress", ip_address);
-		}
+		nvram_bufset(RT2860_NVRAM, "DMZIPAddress", ip_address);
+		nvram_bufset(RT2860_NVRAM, "DMZNATLoopback", CHK_IF_DIGIT(dmzLoopback, 1) ? "1" : "0");
 		nvram_commit(RT2860_NVRAM);
 		nvram_close(RT2860_NVRAM);
 	}
+	else
+		return;
 
 	char *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
 	if (! submitUrl[0])

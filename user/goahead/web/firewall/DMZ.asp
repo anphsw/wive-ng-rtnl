@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="/style/controls.css" type="text/css">
 
 <script type="text/javascript" src="/lang/b28n.js"></script>
+<script type="text/javascript" src="/js/controls.js"></script>
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("firewall");
 
@@ -129,34 +130,39 @@ function enableTextField (field)
 
 function initTranslation()
 {
-	var e = document.getElementById("dmzTitle");
-	e.innerHTML = _("dmz title");
-	e = document.getElementById("dmzIntroduction");
-	e.innerHTML = _("dmz introduction");
-
-	e = document.getElementById("dmzSetting");
-	e.innerHTML = _("dmz setting");
-	e = document.getElementById("dmzSet");
-	e.innerHTML = _("dmz setting");
-	e = document.getElementById("dmzDisable");
-	e.innerHTML = _("firewall disable");
-	e = document.getElementById("dmzEnable");
-	e.innerHTML = _("firewall enable");
-	e = document.getElementById("dmzIPAddr");
-	e.innerHTML = _("dmz ipaddr");
-	e = document.getElementById("dmzApply");
-	e.value = _("firewall apply");
-	e = document.getElementById("dmzReset");
-	e.value = _("firewall reset");
+	_TR("dmzTitle", "dmz title");
+	_TR("dmzIntroduction", "dmz introduction");
+	_TR("dmzSetting", "dmz setting");
+	_TR("dmzSet", "dmz setting");
+	_TR("dmzDisable", "firewall disable");
+	_TR("dmzEnable", "firewall enable");
+	_TR("dmzIPAddr", "dmz ipaddr");
+	_TRV("dmzApply", "firewall apply");
+	_TRV("dmzReset", "firewall reset");
 }
 
-function updateState()
+function pageInit()
 {
+	var form = document.DMZ;
+
 	initTranslation();
-	if(document.DMZ.DMZEnabled.options.selectedIndex == 1){
-		enableTextField(document.DMZ.DMZIPAddress);
-	}else{
-		disableTextField(document.DMZ.DMZIPAddress);
+	var dmz_loopback = "<% getCfgZero(1, "DMZNATLoopback"); %>";
+	
+	form.dmzLoopback.value = dmz_loopback;
+	dmzEnableSwitch(form);
+}
+
+function dmzEnableSwitch(form)
+{
+	enableElements([form.DMZIPAddress, form.dmzLoopback], form.DMZEnabled.value == '1');
+}
+
+function dmzLoopbackWarning(element)
+{
+	if (element.value == '1')
+	{
+		if (!confirm("You have switched option 'DMZ NAT Loopback' on. After applying this configuration you will never enter this configuration web interface or connect to router by SSH protocol. Do you really want to proceed to set this option?"))
+			element.value='0';
 	}
 }
 
@@ -165,7 +171,7 @@ function updateState()
 
 
 <!--     body      -->
-<body onload="updateState()">
+<body onload="pageInit()">
 <table class="body"><tr><td>
 <h1 id="dmzTitle"> DMZ Settings </h1>
 <% checkIfUnderBridgeModeASP(); %>
@@ -182,27 +188,36 @@ function updateState()
 		DMZ Settings
 	</td>
 	<td>
-	<select onChange="updateState()" name="DMZEnabled" class="half">
-		<option value=0 <% getDMZEnableASP(0); %> id="dmzDisable">Disable</option>
-		<option value=1 <% getDMZEnableASP(1); %> id="dmzEnable">Enable</option>
+	<select onChange="dmzEnableSwitch(this.form);" name="DMZEnabled" class="mid">
+		<option value="0" <% getDMZEnableASP(0); %> id="dmzDisable">Disable</option>
+		<option value="1" <% getDMZEnableASP(1); %> id="dmzEnable">Enable</option>
 	</select>
 	</td>
 </tr>
-
 <tr>
 	<td class="head" id="dmzIPAddr">
 		DMZ IP Address
 	</td>
 	<td>
-  		<input type="text" size="24" name="DMZIPAddress" value=<% showDMZIPAddressASP(); %> >
+		<input type="text" class="mid" name="DMZIPAddress" value=<% showDMZIPAddressASP(); %> >
 	</td>
 </tr>
+<tr id="dmzLoopback">
+<td class="head" id="ldmzLoopback">DMZ NAT loopback</td>
+<td>
+	<select name="dmzLoopback" class="mid" onchange="dmzLoopbackWarning(this);">
+		<option value="0">Disable</option>
+		<option value="1">Enable</option>
+	</select>
+</td>
+</tr>
+
 </table>
 
 <table class="buttons">
 <tr><td>
-	<input type="submit" value="Apply" id="dmzApply" name="addDMZ" onClick="return formCheck()"> &nbsp;&nbsp;
-	<input type="reset" value="Reset" id="dmzReset" name="reset">
+	<input type="submit" class="normal" value="Apply" id="dmzApply" name="addDMZ" onClick="return formCheck()"> &nbsp;&nbsp;
+	<input type="reset" class="normal" value="Reset" id="dmzReset" name="reset">
 	<input type="hidden" name="submit-url" value="/firewall/DMZ.asp" >
 </td></tr>
 </table>

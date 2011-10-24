@@ -223,16 +223,6 @@ function natFastpathSelect(form)
 	displayElement('hwnat_threshold_row', (thresh == '2') || (thresh == '3'))
 }
 
-function dmzLoopbackWarning(element)
-{
-	if (element.value == '1')
-	{
-		if (!confirm("You have switched option 'DMZ NAT Loopback' on. After applying this configuration you will never enter this configuration web interface or connect to router by SSH protocol. Do you really want to proceed to set this option?"))
-			element.value='0';
-	}
-
-}
-
 </script>
 </head>
 
@@ -356,15 +346,6 @@ function dmzLoopbackWarning(element)
 	<select name="igmpEnbl" class="half">
 		<option value="0" id="lIgmppD">Disable</option>
 		<option value="1" id="lIgmppE">Enable</option>
-	</select>
-</td>
-</tr>
-<tr id="dmzLoopback">
-<td class="head" id="ldmzLoopback">DMZ NAT loopback</td>
-<td>
-	<select name="dmzLoopback" class="half" onchange="dmzLoopbackWarning(this);">
-		<option value="0">Disable</option>
-		<option value="1">Enable</option>
 	</select>
 </td>
 </tr>
