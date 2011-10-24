@@ -102,6 +102,9 @@ enum {
 #define TCPI_OPT_WSCALE		4
 #define TCPI_OPT_ECN		8
 
+/* Offer an initial receive window of 10 mss. */
+#define TCP_DEFAULT_INIT_RCVWND 10
+
 enum tcp_ca_state
 {
 	TCP_CA_Open = 0,
