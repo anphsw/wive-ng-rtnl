@@ -21,10 +21,6 @@ lan2_if="br0:9"
 # vpn mode and type
 eval `nvram_buf_get 2860 OperationMode wanConnectionMode dnsPEnabled wan_static_dns vpnEnabled vpnType`
 
-# for compat
-opmode="$OperationMode"
-wanmode="$wanConnectionMode"
-
 # get wireless, wan and lan mac adresses
 getMacIf()
 {
@@ -34,7 +30,7 @@ getMacIf()
 # LAN interface name -> $lan_if
 getLanIfName()
 {
-    if [ "$opmode" = "2" ]; then
+    if [ "$OperationMode" = "2" ]; then
 	lan_if="eth2"
 	lan2_if="eth2:9"
     else
@@ -47,20 +43,20 @@ getLanIfName()
 getWanIfName()
 {
     # real wan name
-    if [ "$opmode" = "0" ]; then
+    if [ "$OperationMode" = "0" ]; then
 	wan_if="br0"
-    elif [ "$opmode" = "1" ] || [ "$opmode" = "4" ]; then
+    elif [ "$OperationMode" = "1" ] || [ "$OperationMode" = "4" ]; then
 	wan_if="eth2.2"
-    elif [ "$opmode" = "2" ]; then
+    elif [ "$OperationMode" = "2" ]; then
 	wan_if="ra0"
-    elif [ "$opmode" = "3" ]; then
+    elif [ "$OperationMode" = "3" ]; then
 	if [ "$CONFIG_RT2860V2_AP_APCLI" != "" ]; then
 	    wan_if="apcli0"
 	else
 	    echo "Driver not support APCLI mode."
 	    wan_if="eth2.2"
 	fi
-    elif [ "$opmode" = "4" ]; then
+    elif [ "$OperationMode" = "4" ]; then
 	    wan_if="eth2.2"
     fi
 
@@ -81,7 +77,7 @@ getWanIpaddr()
 {
     # always return physical wan ip
     wan_ipaddr=`nvram_get 2860 wan_ipaddr`
-    if [ "$wanmode" != "STATIC" ] || [ "$wan_ipaddr" = "" ]; then
+    if [ "$wanConnectionMode" != "STATIC" ] || [ "$wan_ipaddr" = "" ]; then
 	wan_ipaddr=`ip -4 addr show dev $wan_if | awk '/inet / {print $2}' | cut -f1 -d"/"` > /dev/null 2>&1
     fi
 
@@ -116,7 +112,7 @@ drop_disk_caches(){
 # wait connect to AP
 wait_connect()
 {
-    if [ "$opmode" = "2" ]; then
+    if [ "$OperationMode" = "2" ]; then
 	connected=`iwpriv ra0 connStatus | grep Connected -c`
 	if [ "$connected" = "0" ] || [ ! -f /tmp/sta_connected ]; then
 	    staCur_SSID=""
@@ -130,7 +126,7 @@ wait_connect()
 udhcpc_opts()
 {
     CL_SLEEP=1
-    if [ "$opmode" = "0" ] || [ "$opmode" = "2" ]; then
+    if [ "$OperationMode" = "0" ] || [ "$OperationMode" = "2" ]; then
 	CL_SLEEP=5
 	# disable dhcp renew from driver
 	sysctl -w net.ipv4.send_sigusr_dhcpc=9
@@ -177,7 +173,7 @@ zero_conf()
 vpn_deadloop_fix()
 {
     if [ "$vpnEnabled" = "on" ]; then
-	if [ "$vpnType" != "0" ] || [ "$opmode" = "2" ]; then
+	if [ "$vpnType" != "0" ] || [ "$OperationMode" = "2" ]; then
 	    # First vpn stop...
 	    # Auto start later renew/bound
 	    service vpnhelper stop > /dev/null 2>&1

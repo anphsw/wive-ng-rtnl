@@ -20,7 +20,7 @@ start() {
   # if igmpproxy enable and mode not full bridge
   get_param
     sysctl -w net.ipv4.igmp_max_memberships=5
-    if [ "$igmpEnabled" = "1" ] && [ "$opmode" != "0" ]; then
+    if [ "$igmpEnabled" = "1" ] && [ "$OperationMode" != "0" ]; then
         $LOG "Starting IGMPPROXY"
 	# generate config
 	printf "quickleave\nphyint $wan_if upstream  ratelimit 0  threshold 1\naltnet 0.0.0.0/0\nphyint $lan_if downstream  ratelimit 0  threshold 1\nphyint ppp0 disabled\n" > /etc/igmpproxy.conf

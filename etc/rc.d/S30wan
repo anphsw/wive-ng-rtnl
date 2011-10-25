@@ -24,7 +24,7 @@ start() {
     ip route flush cache
 
     # if not bridge wan up
-    if [ "$opmode" != "0" ]; then
+    if [ "$OperationMode" != "0" ]; then
 	# drop adress from wan if pure pppoe enabled
 	if [ "$vpnEnabled" = "on" ] && [ "$vpnType" = "0" ] && [ "$vpnPurePPPOE" = "1" ]; then
 	    $LOG "PURE PPPOE Mode - NOT start dhcpc or config wan!"
@@ -43,8 +43,8 @@ start() {
 	/etc/scripts/config-switch.sh
     fi
 
-    if [ "$wanmode" = "STATIC" ] || [ "$opmode" = "0" ]; then
-	if [ "$opmode" != "0" ]; then
+    if [ "$wanConnectionMode" = "STATIC" ] || [ "$OperationMode" = "0" ]; then
+	if [ "$OperationMode" != "0" ]; then
 	    # lan and wan ip should not be the same except in bridge mode
 	    if [ "$wan_ipaddr" = "$lan_ipaddr" ]; then
 		$LOG "wan service: warning: WAN's IP address is set identical to LAN"
@@ -76,7 +76,7 @@ start() {
     		ip route replace default dev br0
 	    fi
         fi
-    elif [ "$wanmode" = "DHCP" ] && [ "$vpnPurePPPOE" != "1" ]; then
+    elif [ "$wanConnectionMode" = "DHCP" ] && [ "$vpnPurePPPOE" != "1" ]; then
 	# reload global
 	. /etc/scripts/global.sh
 
@@ -88,7 +88,7 @@ start() {
 
 	$LOG "Start DHCP client."
 	(sleep $CL_SLEEP && udhcpc $UDHCPCOPTS > /dev/null 2>&1) &
-    elif [ "$wanmode" = "ZERO" ] || [ "$vpnPurePPPOE" = "1" ]; then
+    elif [ "$wanConnectionMode" = "ZERO" ] || [ "$vpnPurePPPOE" = "1" ]; then
 	# reload global
 	. /etc/scripts/global.sh
 

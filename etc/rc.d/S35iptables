@@ -20,7 +20,7 @@ start() {
 	iptables -A INPUT $STATE_EST -j ACCEPT
 ###########################################IGMP-RULES#######################################
 	# only WAN interface recived multicast
-	if [ "$opmode" != "0" ]; then
+	if [ "$OperationMode" != "0" ]; then
 	    # INPUT needed by unpxy and igmpproxy
 	    if [ "$igmpEnabled" != "0" ] || [ "$UDPXYMode" != "0" ]; then
 		$LOG "Set igmp input rules"
@@ -49,7 +49,7 @@ start() {
 	    $LOG "web limit"
     	    iptables -A servicelimit -p tcp --dport 80 $CONNLIMIT 16 -j REJECT
 	    if [ "$RemoteManagement" = "1" ]; then
-		if [ "$opmode" != "0" ]; then
+		if [ "$OperationMode" != "0" ]; then
     		    iptables -A servicelimit -i $wan_if $STATE_NEW -p tcp --dport 80 -j DROP
 		    if [ "$vpnEnabled" = "on" ] && [ "$vpnType" != "6" ]; then
     			iptables -A servicelimit -i ppp+ $STATE_NEW -p tcp --dport 80 -j DROP
@@ -69,7 +69,7 @@ start() {
 	    $LOG "ssh limit"
     	    iptables -A servicelimit $STATE_NEW -p tcp --dport 22 $CONNLIMIT 4 -j REJECT
 	    if [ "$RemoteSSH" = "1" ]; then
-		if [ "$opmode" != "0" ]; then
+		if [ "$OperationMode" != "0" ]; then
     		    iptables -A servicelimit -i $wan_if $STATE_NEW -p tcp --dport 22 -j DROP
 		    if [ "$vpnEnabled" = "on" ] && [ "$vpnType" != "6" ]; then
     			iptables -A servicelimit -i ppp+ $STATE_NEW -p tcp --dport 22 -j DROP
@@ -89,7 +89,7 @@ start() {
 	    $LOG "telnet limit"
     	    iptables -A servicelimit $STATE_NEW -p tcp --dport 22 $CONNLIMIT 4 -j REJECT
 	    if [ "$RemoteTelnet" = "1" ]; then
-		if [ "$opmode" != "0" ]; then
+		if [ "$OperationMode" != "0" ]; then
     		    iptables -A servicelimit -i $wan_if $STATE_NEW -p tcp --dport 23 -j DROP
 		    if [ "$vpnEnabled" = "on" ] && [ "$vpnType" != "6" ]; then
     			iptables -A servicelimit -i ppp+ $STATE_NEW -p tcp --dport 23 -j DROP
@@ -109,7 +109,7 @@ start() {
 	    $LOG "ftp limit"
     	    iptables -A servicelimit $STATE_NEW -p tcp --dport 20:21 $CONNLIMIT 4 -j REJECT
 	    if [ "$RemoteFTP" = "1" ]; then
-		if [ "$opmode" != "0" ]; then
+		if [ "$OperationMode" != "0" ]; then
     		    iptables -A servicelimit -i $wan_if $STATE_NEW -p tcp --dport 20:21 -j DROP
 		    if [ "$vpnEnabled" = "on" ] && [ "$vpnType" != "6" ]; then
     			iptables -A servicelimit -i ppp+ $STATE_NEW -p tcp --dport 20:21 -j DROP
@@ -129,7 +129,7 @@ start() {
 	    $LOG "udpxy limit"
     	    iptables -A servicelimit $STATE_NEW -p tcp --dport $UDPXYPort $CONNLIMIT 8 -j REJECT
 	    if [ "$UDPXYMode" = "1" ]; then
-		if [ "$opmode" != "0" ]; then
+		if [ "$OperationMode" != "0" ]; then
     		    iptables -A servicelimit -i $wan_if $STATE_NEW -p tcp --dport $UDPXYPort -j DROP
 		    if [ "$vpnEnabled" = "on" ] && [ "$vpnType" != "6" ]; then
     			iptables -A servicelimit -i ppp+ $STATE_NEW -p tcp --dport $UDPXYPort -j DROP
@@ -163,7 +163,7 @@ start() {
 	    iptables -A servicelimit -i $lan_if -p udp --dport 53 -j DROP
 	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 53 -j DROP
 	fi
-	if [ "$upnpEnabled" = "1" ] && [ "$opmode" != "0" ]; then
+	if [ "$upnpEnabled" = "1" ] && [ "$OperationMode" != "0" ]; then
 	    $LOG "upnp"
 	    # not safe fix me later
 	    iptables -A servicelimit -i $lan_if -p udp --dport 1024:65535 -j ACCEPT
@@ -180,7 +180,7 @@ start() {
 	    iptables -A servicelimit -i $real_wan_if -p udp --dport 1701 -j ACCEPT
 	fi
 	if [ "$WANPingFilter" = "0" ]; then
-	    if [ "$opmode" != "0" ]; then
+	    if [ "$OperationMode" != "0" ]; then
     		$LOG "icmp limit Drop ping from wan $wan_if"
     		iptables -A servicelimit -i $wan_if -p icmp --icmp-type echo-request -j DROP
     		iptables -A servicelimit -i $wan_if -p icmp --icmp-type echo-reply -j DROP
@@ -210,7 +210,7 @@ start() {
 	    fi
 	fi
 ###########################################FORWARD#######################################
-	if [ "$opmode" != "0" ]; then
+	if [ "$OperationMode" != "0" ]; then
 	    $LOG "Set forward rules"
 	    # ipt_account need first rules in FORWARD
 	    if [ "$ipt_account" = "1" ]; then
@@ -252,7 +252,7 @@ start() {
 		iptables -A FORWARD -i $lan_if -s $lan_ipaddr/$lan_netmask -j ACCEPT
 		iptables -A FORWARD -o $wan_if -s $lan_ipaddr/$lan_netmask -j ACCEPT
 		iptables -A FORWARD -o ! $lan_if -s $lan_ipaddr/$lan_netmask -j ACCEPT
-		if [ "$opmode" = "4" ]; then
+		if [ "$OperationMode" = "4" ]; then
 		    iptables -A FORWARD -o $wan_if -s $chilli_net -j ACCEPT
 		    iptables -t nat -A POSTROUTING -o eth2.2  -s $chilli_net -j MASQUERADE
 		fi
@@ -271,7 +271,7 @@ start() {
 	    fi
 	fi
 ###########################################QOS-SIMPLE######################################
-	if [ "$simple_qos" = "1" ] && [ "$opmode" != "0" ]; then
+	if [ "$simple_qos" = "1" ] && [ "$OperationMode" != "0" ]; then
 	    qos
 	fi
 ###########################################NAT-NAPTM#######################################
@@ -291,8 +291,8 @@ start() {
 		fi
 	    fi
 	    #######################NAT##################################
-	    if [ "$opmode" != "0" ] && [ "$natEnabled" = "1" ] && [ "$vpnPurePPPOE" != "1" ]; then
-		if [ "$opmode" != "4" ]; then
+	    if [ "$OperationMode" != "0" ] && [ "$natEnabled" = "1" ] && [ "$vpnPurePPPOE" != "1" ]; then
+		if [ "$OperationMode" != "4" ]; then
 		    # lan gw/wireless client/apcli mode NAT
 		    if  [ "$use_snat" = "1" ]; then
 		        iptables -t nat -A POSTROUTING -o $wan_if -s $lan_ipaddr/$lan_netmask -j SNAT --to-source $wan_ipaddr
@@ -321,7 +321,7 @@ start() {
 ############################################OTHERS########################################
 	if [ "$natEnabled" = "1" ] || [ "$vpnNAT" != "off" ]; then
 	    ################################UPNPRULES######################################
-	    if [ "$upnpEnabled" = "1" ] && [ "$opmode" != "0" ]; then
+	    if [ "$upnpEnabled" = "1" ] && [ "$OperationMode" != "0" ]; then
 		$LOG "Add base upnp rules"
     		iptables -t nat -N MINIUPNPD
     		iptables -t nat -F MINIUPNPD
@@ -376,7 +376,7 @@ start() {
 #########################################ACCEPT_ESTABLISHED################################
     iptables -A FORWARD $STATE_EST -j ACCEPT
 ################################Enable forward for LAN/WAN interfaces######################
-    if [ "$opmode" != "0" ]; then
+    if [ "$OperationMode" != "0" ]; then
 	# only not bridge mode enable forward
 	echo 1 > "/proc/sys/net/ipv4/conf/$wan_if/forwarding"
 	echo 1 > "/proc/sys/net/ipv4/conf/$lan_if/forwarding"

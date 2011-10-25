@@ -89,10 +89,10 @@ eval `nvram_buf_get 2860 lan_ipaddr lan_netmask Lan2Enabled lan2_ipaddr lan2_net
     #########################GENERATE VPN NETFILTER SCRIPT########################################################################
     echo "iptables -A FORWARD -o $PPP_IFACE -j ACCEPT" > /etc/ppp_firewall
     #NAT in vpn
-    if [ "$vpnNAT" = "on" ] && [ "$opmode" != "0" ]; then
+    if [ "$vpnNAT" = "on" ] && [ "$OperationMode" != "0" ]; then
 	if  [ "$use_snat" = "1" ] && [ "$PPP_LOCAL" != "" ] ; then
 	    echo "iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $lan_ipaddr/$lan_netmask -j SNAT --to-source $PPP_LOCAL" >> /etc/ppp_firewall
-	    if [ "$opmode" = 4 ]; then
+	    if [ "$OperationMode" = 4 ]; then
 		echo "iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $chilli_net -j SNAT --to-source $PPP_LOCAL" >> /etc/ppp_firewall
 	    fi
 	    if [ "$Lan2Enabled" = "1" ]; then
@@ -100,7 +100,7 @@ eval `nvram_buf_get 2860 lan_ipaddr lan_netmask Lan2Enabled lan2_ipaddr lan2_net
 	    fi
 	else
 	    echo "iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $lan_ipaddr/$lan_netmask -j MASQUERADE" >> /etc/ppp_firewall
-	    if [ "$opmode" = 4 ]; then
+	    if [ "$OperationMode" = 4 ]; then
 		echo "iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $chilli_net -j MASQUERADE" >> /etc/ppp_firewall
 	    fi
 	    if [ "$Lan2Enabled" = "1" ]; then
@@ -111,7 +111,7 @@ eval `nvram_buf_get 2860 lan_ipaddr lan_netmask Lan2Enabled lan2_ipaddr lan2_net
 	    echo "/etc/portforward_vpn A $PPP_IFACE $PPP_LOCAL" >> /etc/ppp_firewall
         fi
 	#rules for upnp
-	if [ "$upnpEnabled" = "1" ] && [ "$opmode" != "0" ]; then
+	if [ "$upnpEnabled" = "1" ] && [ "$OperationMode" != "0" ]; then
     	    echo "iptables -t nat -I PREROUTING -i $PPP_IFACE  -j MINIUPNPD > /dev/null 2>&1" >> /etc/ppp_firewall
     	fi
 	if [ "$DMZEnable" = "1" ] && [ "$DMZIPAddress" != "" ] && [ "$DMZNATLoopback" = "1" ] && [ "$PPP_LOCAL" != "" ]; then

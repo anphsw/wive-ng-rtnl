@@ -29,7 +29,7 @@ start() {
 	$LOG "Up vlan root interface"
 	ip link set eth2 up
     fi
-    if [ "$opmode" = "1" ] || [ "$opmode" = "4" ]; then
+    if [ "$OperationMode" = "1" ] || [ "$OperationMode" = "4" ]; then
 	if [ ! -d /proc/sys/net/ipv4/conf/eth2.1 ] || [ ! -d /proc/sys/net/ipv4/conf/eth2.2 ]; then
     	    $LOG "Add vlans and config"
 	    vconfig add eth2 1
@@ -59,7 +59,7 @@ start() {
     else
 	ifconfig "$lan_if" 0.0.0.0 up
     fi
-    $LOG "Mode is $opmode, wan iface $wan_if, lan iface $lan_if, adress $lan_ipaddr"
+    $LOG "Mode is $OperationMode, wan iface $wan_if, lan iface $lan_if, adress $lan_ipaddr"
 
      #-------------------LAN2----------------
     if [ "$Lan2Enabled" = "1" ]; then

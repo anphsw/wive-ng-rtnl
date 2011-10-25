@@ -98,7 +98,7 @@ addMBSSID()
 }
 
 bridge_config() {
-	$LOG "Bridge OperationMode: $opmode"
+	$LOG "Bridge OperationMode: $OperationMode"
 	# flush eth2 ip and remove from bridge
         ip addr flush dev eth2 > /dev/null 2>&1
 	brctl delif br0 eth2 > /dev/null 2>&1
@@ -112,7 +112,7 @@ bridge_config() {
 }
 
 gate_config() {
-	$LOG "Gateway OperationMode: $opmode"
+	$LOG "Gateway OperationMode: $OperationMode"
 	# flush eth2.1 ip and remove from bridge
         ip addr flush dev eth2.1 > /dev/null 2>&1
 	brctl delif br0 eth2.1 > /dev/null 2>&1
@@ -126,11 +126,11 @@ gate_config() {
 }
 
 ethcv_config() {
-	$LOG "Ethernet Converter OperationMode: $opmode"
+	$LOG "Ethernet Converter OperationMode: $OperationMode"
 }
 
 apcli_config() {
-	$LOG "ApClient OperationMode: $opmode"
+	$LOG "ApClient OperationMode: $OperationMode"
 	# flush eth2 ip and remove from bridge
         ip addr flush dev eth2 > /dev/null 2>&1
 	brctl delif br0 eth2 > /dev/null 2>&1
@@ -142,7 +142,7 @@ apcli_config() {
 }
 
 spot_config() {
-	$LOG "HotSpot OperationMode: $opmode"
+	$LOG "HotSpot OperationMode: $OperationMode"
 	# flush eth2.1 ip and remove from bridge
         ip addr flush dev eth2.1 > /dev/null 2>&1
 	brctl delif br0 eth2.1 > /dev/null 2>&1
@@ -162,7 +162,7 @@ retune_wifi() {
 
 # All WDS interfaces down and reload wifi modules
 if [ "$MODE" != "connect_sta" ]; then
-    if [ "$MODE" != "wifionly" ] || [ "$opmode" = "2" ]; then
+    if [ "$MODE" != "wifionly" ] || [ "$OperationMode" = "2" ]; then
 	vpn_deadloop_fix
     fi
     $LOG "Shutdown wireless interfaces."
@@ -184,23 +184,23 @@ fi
 #   2 = Ethernet Converter Mode
 #   3 = AP Client
 #
-if [ "$opmode" = "0" ]; then
+if [ "$OperationMode" = "0" ]; then
     bridge_config
-elif [ "$opmode" = "1" ]; then
+elif [ "$OperationMode" = "1" ]; then
     gate_config
-elif [ "$opmode" = "2" ] && [ "$CONFIG_RT2860V2_STA" != "" ]; then
+elif [ "$OperationMode" = "2" ] && [ "$CONFIG_RT2860V2_STA" != "" ]; then
     ethcv_config
-elif [ "$opmode" = "3" ] && [ "$CONFIG_RT2860V2_AP_APCLI" != "" ]; then
+elif [ "$OperationMode" = "3" ] && [ "$CONFIG_RT2860V2_AP_APCLI" != "" ]; then
     apcli_config
-elif [ "$opmode" = "4" ] && [ -f /bin/chilli ]; then
+elif [ "$OperationMode" = "4" ] && [ -f /bin/chilli ]; then
     spot_config
 else
-    $LOG "unknown OperationMode use gate_config: $opmode"
-    opmode=1
+    $LOG "unknown OperationMode use gate_config: $OperationMode"
+    OperationMode=1
     gate_config
 fi
 
-if [ "$MODE" != "wifionly" ] || [ "$opmode" = "2" ]; then
+if [ "$MODE" != "wifionly" ] || [ "$OperationMode" = "2" ]; then
     $LOG "Reconfigure wan..."
     service wan restart
 fi
@@ -211,7 +211,7 @@ services_restart.sh all
 # in dhcp client mode restart from dhcp script
 # in static/zeroconf or pure pppoe mode need restart anyway
 vpnPurePPPOE=`nvram_get 2860 vpnPurePPPOE`
-if [ "$wanmode" != "DHCP" ] || [ "$vpnPurePPPOE" = "1" ]; then
+if [ "$wanConnectionMode" != "DHCP" ] || [ "$vpnPurePPPOE" = "1" ]; then
     (service vpnhelper stop && sleep 2 && service vpnhelper start) &
 fi
 

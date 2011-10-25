@@ -15,7 +15,7 @@ start() {
 	    depmod -a -n > /etc/modules.dep
 	fi
 	# not load nf_nat helpers in bridge mode
-	if [ "$opmode" != "0" ]; then
+	if [ "$OperationMode" != "0" ]; then
 	    # load conntrack helpers
 	    eval `nvram_buf_get 2860 fwAlgTFTP fwAlgSIP fwAlgGRE fwAlgPPTP fwAlgH323 fwAlgFTP`
 	    if [ "$fwAlgTFTP" != "0" ]; then
@@ -61,7 +61,7 @@ start() {
 	$LOG "Prepare wifi config..."
 	gen_wifi_config
 	getMacIf
-	if [ "$opmode" = "2" ] && [ "$macCloneEnabled" = "1" ] && [ "$macCloneMac" != "" ]; then
+	if [ "$OperationMode" = "2" ] && [ "$macCloneEnabled" = "1" ] && [ "$macCloneMac" != "" ]; then
 	    WLAN_MAC_ADDR="$macCloneMac"
 	    $LOG "STA Macclone mode. MAC: $WLAN_MAC_ADDR"
 	else
@@ -70,7 +70,7 @@ start() {
 	mac="mac=$WLAN_MAC_ADDR"
 
 	$LOG "Load wifi module..."
-    	if [ "$opmode" = "2" ]; then
+    	if [ "$OperationMode" = "2" ]; then
     	    modprobe -q rt2860v2_sta "$mac"
 	    # wait module read config from flash
 	    sleep 2
@@ -80,7 +80,7 @@ start() {
 
 	$LOG "Link wifi up..."
 	get_txqlen
-	if [ "$opmode" != "3" ]; then
+	if [ "$OperationMode" != "3" ]; then
 	    ifconfig ra0 hw ether	"$WLAN_MAC_ADDR"
 	    ifconfig ra0 txqueuelen	"$txqueuelen"
 	    ip link set ra0 up
@@ -103,7 +103,7 @@ stop() {
 	$LOG "link wifi down first"
 	ra0flushadress
 	ip link set ra0 down > /dev/null 2>&1
-	if [ "$opmode" = "3" ]; then
+	if [ "$OperationMode" = "3" ]; then
 	    ip link set apcli0 down > /dev/null 2>&1
 	fi
 	if [ -d /sys/module/hw_nat ]; then
@@ -126,12 +126,12 @@ ra0flushadress()
 {
     # flush adresses
     ip addr flush dev ra0  > /dev/null 2>&1
-    if [ "$opmode" = "3" ]; then
+    if [ "$OperationMode" = "3" ]; then
 	ip addr flush dev apcli0  > /dev/null 2>&1
     fi
     if [ -d /proc/sys/net/ipv6 ]; then
         ip -6 addr flush dev ra0 > /dev/null 2>&1
-	if [ "$opmode" = "3" ]; then
+	if [ "$OperationMode" = "3" ]; then
 	    ip -6 addr flush dev apcli0  > /dev/null 2>&1
 	fi
     fi
