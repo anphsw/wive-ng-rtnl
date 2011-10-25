@@ -762,6 +762,7 @@
 5) Update usb-modeswitch to 1.2.0 version.<br>
 6) Add and use nvram_buf_get commad for fast get group nvram variable.<br>
 7) libevent update to 2.0.15 stable version.<br>
+8) Update 802.1x daemon from 3.6.0.0 SDK.<br>
 
 <br><br>
 <b>For support see:</b><br>

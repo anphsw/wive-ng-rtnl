@@ -1,5 +1,5 @@
-#ifndef RT2860APD_H
-#define RT2860APD_H
+#ifndef RTDOT1XD_H
+#define RTDOT1XD_H
 
 #include "common.h"
 #include "ap.h"
@@ -20,6 +20,11 @@
 #endif
 
 #include "config.h"
+
+/* It shall be the same with wireless driver */
+#define dot1x_version	"2.6.0.0"
+
+#define NIC_DBG_STRING      ("[DOT1X] ")
 
 #define RT_DEBUG_OFF		0
 #define RT_DEBUG_ERROR		1
@@ -83,6 +88,7 @@ extern u32 	RTDebugLevel;
 {                                   \
     if (Level <= RTDebugLevel)      \
     {                               \
+        printf(NIC_DBG_STRING);   \
 		printf( fmt, ## args);			\
     }                               \
 }
@@ -136,4 +142,4 @@ void dot1x_set_IdleTimeoutAction(
 		struct sta_info *sta,
 		u32		idle_timeout);
 
-#endif // RT2860APD_H
+#endif // RTDOT1XD_H //
