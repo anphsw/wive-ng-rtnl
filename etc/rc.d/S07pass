@@ -25,8 +25,7 @@ stop() {
 }
 
 get_param() {
-    Login=`nvram_get 2860 Login`
-    Password=`nvram_get 2860 Password`
+    eval `nvram_buf_get 2860 Login Password`
 }
 
 case "$1" in

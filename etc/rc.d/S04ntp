@@ -32,8 +32,7 @@ start() {
     . /etc/scripts/web_wait.sh
     web_wait
 
-    NTPEnabled=`nvram_get 2860 NTPEnabled`
-    NTPServerIP=`nvram_get 2860 NTPServerIP`
+    eval `nvram_buf_get 2860 NTPEnabled NTPServerIP`
     if [ "$NTPEnabled" = "on" ] && [ "$NTPServerIP" != "" ]; then
 	$LOG "Starting NTPD"
 	ntpd -d -p "$NTPServerIP" &

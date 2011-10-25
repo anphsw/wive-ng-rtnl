@@ -71,8 +71,7 @@ configured=0
 echo > $ppp/pap-secrets
 echo > $ppp/chap-secrets
 for i in `seq 0 9`; do
-    l2tp_srv_user=`nvram_get 2860 l2tp_srv_user"$i"`
-    l2tp_srv_pass=`nvram_get 2860 l2tp_srv_pass"$i"`
+    eval `nvram_buf_get 2860 l2tp_srv_user"$i" l2tp_srv_pass"$i"`
     if [ "$l2tp_srv_user" != "" ] && [ "$l2tp_srv_pass" != "" ]; then
 	printf "$l2tp_srv_user * $l2tp_srv_pass\n" >> $ppp/pap-secrets
 	printf "$l2tp_srv_user * $l2tp_srv_pass\n" >> $ppp/chap-secrets
@@ -126,19 +125,7 @@ get_param() {
     ###########################################################################
     # get some variables
     ###########################################################################
-    l2tp_srv_enabled=`nvram_get 2860 l2tp_srv_enabled`
-    l2tp_srv_ip_range=`nvram_get 2860 l2tp_srv_ip_range`
-    l2tp_srv_ip_local=`nvram_get 2860 l2tp_srv_ip_local`
-    l2tp_srv_user=`nvram_get 2860 l2tp_srv_user`
-    l2tp_srv_pass=`nvram_get 2860 l2tp_srv_pass`
-    l2tp_srv_lcp_adapt=`nvram_get 2860 l2tp_srv_lcp_adapt`
-    l2tp_srv_mtu_size=`nvram_get 2860 l2tp_srv_mtu_size`
-    l2tp_srv_mru_size=`nvram_get 2860 l2tp_srv_mru_size`
-    l2tp_srv_debug=`nvram_get 2860 l2tp_srv_debug`
-    ###########################################################################
-    dnsPEnabled=`nvram_get 2860 dnsPEnabled`
-    SmbEnabled=`nvram_get 2860 SmbEnabled`
-    lan_ipaddr=`nvram_get 2860 lan_ipaddr`
+    eval `nvram_buf_get 2860 l2tp_srv_enabled l2tp_srv_ip_range l2tp_srv_ip_local l2tp_srv_user l2tp_srv_pass l2tp_srv_lcp_adapt l2tp_srv_mtu_size l2tp_srv_mru_size l2tp_srv_debug dnsPEnabled SmbEnabled lan_ipaddr`
     ###########################################################################
     # replace param for direct use
     ###########################################################################

@@ -60,8 +60,7 @@ start() {
     echo 1    > /proc/sys/vm/panic_on_oom
 
 ###################### SECTION FOR SAMBA AND TRANSMISION KERNEL TUNE ###################
-    SmbEnabled=`nvram_get 2860 SmbEnabled`
-    TransmissionEnabled=`nvram_get 2860 TransmissionEnabled`
+    eval `nvram_buf_get 2860 SmbEnabled TransmissionEnabled`
     if [ "$SmbEnabled" = "1" ] || [ "$TransmissionEnabled" = "1" ]; then
 	# banish core dump files to /dev/null
 	ulimit -c 0

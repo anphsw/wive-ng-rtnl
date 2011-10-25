@@ -22,14 +22,14 @@ start() {
 	# only WAN interface recived multicast
 	if [ "$opmode" != "0" ]; then
 	    # INPUT needed by unpxy and igmpproxy
-	    if [ "$igmpen" != "0" ] || [ "$UDPXY" != "0" ]; then
+	    if [ "$igmpEnabled" != "0" ] || [ "$UDPXYMode" != "0" ]; then
 		$LOG "Set igmp input rules"
 		iptables -A INPUT -p igmp -i $lan_if -j ACCEPT
 	        iptables -A INPUT -d 224.0.0.0/4 -i $wan_if -j ACCEPT
 		iptables -A INPUT -s 224.0.0.0/4 -i $wan_if -j ACCEPT
 	    fi
 	    # FORWARD rules needed only for igmpproxy.
-	    if [ "$igmpen" != "0" ]; then
+	    if [ "$igmpEnabled" != "0" ]; then
 		$LOG "Set igmp forward rules"
 		iptables -A FORWARD -d 224.0.0.0/4 -o $lan_if -j ACCEPT
 		iptables -A FORWARD -s 224.0.0.0/4 -i $lan_if -j ACCEPT
@@ -125,10 +125,10 @@ start() {
 	else
     	    iptables -A servicelimit $STATE_NEW -p tcp --dport 20:21 -j DROP
 	fi
-	if [ "$UDPXY" != "0" ]; then
+	if [ "$UDPXYMode" != "0" ]; then
 	    $LOG "udpxy limit"
     	    iptables -A servicelimit $STATE_NEW -p tcp --dport $UDPXYPort $CONNLIMIT 8 -j REJECT
-	    if [ "$UDPXY" = "1" ]; then
+	    if [ "$UDPXYMode" = "1" ]; then
 		if [ "$opmode" != "0" ]; then
     		    iptables -A servicelimit -i $wan_if $STATE_NEW -p tcp --dport $UDPXYPort -j DROP
 		    if [ "$vpnEnabled" = "on" ] && [ "$vpnType" != "6" ]; then
@@ -139,7 +139,7 @@ start() {
 	     if [ "$Lan2Enabled" = "1" ]; then
     		iptables -A servicelimit -i $lan2_if $STATE_NEW -p tcp --dport $UDPXYPort -j ACCEPT
 	     fi
-	    elif [ "$UDPXY" = "2" ]; then
+	    elif [ "$UDPXYMode" = "2" ]; then
     		iptables -A servicelimit $STATE_NEW -p tcp --dport $UDPXYPort -j ACCEPT
 	    fi
 	else
@@ -163,7 +163,7 @@ start() {
 	    iptables -A servicelimit -i $lan_if -p udp --dport 53 -j DROP
 	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 53 -j DROP
 	fi
-	if [ "$upnp" = "1" ] && [ "$opmode" != "0" ]; then
+	if [ "$upnpEnabled" = "1" ] && [ "$opmode" != "0" ]; then
 	    $LOG "upnp"
 	    # not safe fix me later
 	    iptables -A servicelimit -i $lan_if -p udp --dport 1024:65535 -j ACCEPT
@@ -249,9 +249,9 @@ start() {
 
 	    if [ "$parproutedEnabled" != "1" ]; then
 		# enable forward only from local network to wan/ppp
-		iptables -A FORWARD -i $lan_if -s $lan_ip/$lan_nm -j ACCEPT
-		iptables -A FORWARD -o $wan_if -s $lan_ip/$lan_nm -j ACCEPT
-		iptables -A FORWARD -o ! $lan_if -s $lan_ip/$lan_nm -j ACCEPT
+		iptables -A FORWARD -i $lan_if -s $lan_ipaddr/$lan_netmask -j ACCEPT
+		iptables -A FORWARD -o $wan_if -s $lan_ipaddr/$lan_netmask -j ACCEPT
+		iptables -A FORWARD -o ! $lan_if -s $lan_ipaddr/$lan_netmask -j ACCEPT
 		if [ "$opmode" = "4" ]; then
 		    iptables -A FORWARD -o $wan_if -s $chilli_net -j ACCEPT
 		    iptables -t nat -A POSTROUTING -o eth2.2  -s $chilli_net -j MASQUERADE
@@ -280,9 +280,9 @@ start() {
 	    ####################PORTFORWARD#############################
 	    if [ -f /etc/portforward ] && [ "$PortForwardEnable" = "1" ]; then
 		if [ "$IPPortFilterEnable" != "1" ] && [ ! -f /etc/macipfilter ]; then
-		    iptables -A FORWARD -i $wan_if -o $lan_if -d $lan_ip/$lan_nm -j ACCEPT
+		    iptables -A FORWARD -i $wan_if -o $lan_if -d $lan_ipaddr/$lan_netmask -j ACCEPT
 		    if [ "$vpnEnabled" = "on" ] && [ "$vpnNAT" != "off" ] && [ "$vpnType" != "6" ]; then
-			iptables -A FORWARD -i ppp+ -o $lan_if -d $lan_ip/$lan_nm -j ACCEPT
+			iptables -A FORWARD -i ppp+ -o $lan_if -d $lan_ipaddr/$lan_netmask -j ACCEPT
 		    fi
 		fi
 		if  [ "$wan_ipaddr" != "" ]; then
@@ -295,9 +295,9 @@ start() {
 		if [ "$opmode" != "4" ]; then
 		    # lan gw/wireless client/apcli mode NAT
 		    if  [ "$use_snat" = "1" ]; then
-		        iptables -t nat -A POSTROUTING -o $wan_if -s $lan_ip/$lan_nm -j SNAT --to-source $wan_ipaddr
+		        iptables -t nat -A POSTROUTING -o $wan_if -s $lan_ipaddr/$lan_netmask -j SNAT --to-source $wan_ipaddr
 		    else
-		        iptables -t nat -A POSTROUTING -o $wan_if -s $lan_ip/$lan_nm -j MASQUERADE
+		        iptables -t nat -A POSTROUTING -o $wan_if -s $lan_ipaddr/$lan_netmask -j MASQUERADE
 		    fi
 		    if [ "$Lan2Enabled" = "1" ]; then
 		        # lan gw/wireless client/apcli mode NAT for second lan
@@ -321,7 +321,7 @@ start() {
 ############################################OTHERS########################################
 	if [ "$natEnabled" = "1" ] || [ "$vpnNAT" != "off" ]; then
 	    ################################UPNPRULES######################################
-	    if [ "$upnp" = "1" ] && [ "$opmode" != "0" ]; then
+	    if [ "$upnpEnabled" = "1" ] && [ "$opmode" != "0" ]; then
 		$LOG "Add base upnp rules"
     		iptables -t nat -N MINIUPNPD
     		iptables -t nat -F MINIUPNPD
@@ -350,7 +350,7 @@ start() {
 		fi
 	    fi
 	    # multicast no need redirected to DMZ adress
-	    if [ "$igmpen" != "0" ] || [ "$UDPXY" != "0" ]; then
+	    if [ "$igmpEnabled" != "0" ] || [ "$UDPXYMode" != "0" ]; then
 		iptables -t nat -I DMZ -i $wan_if -p igmp -j RETURN
 		iptables -t nat -I DMZ -i $wan_if -p udp -d 224.0.0.0/4 -j RETURN
 	    fi
@@ -361,10 +361,10 @@ start() {
 		else
 		    iptables -t nat -A DMZ -i $lan_if -d $wan_ipaddr -j DNAT --to-destination $DMZIPAddress
 		fi
-		iptables -t nat -A POSTROUTING -s $lan_ip/$lan_nm -d $DMZIPAddress -j SNAT --to-source $lan_ip
+		iptables -t nat -A POSTROUTING -s $lan_ipaddr/$lan_netmask -d $DMZIPAddress -j SNAT --to-source $lan_ipaddr
 	    fi
 	    # direct
-	    iptables -t nat -A DMZ -i ! $lan_if -s ! $lan_ip/$lan_nm -j DNAT --to $DMZIPAddress
+	    iptables -t nat -A DMZ -i ! $lan_if -s ! $lan_ipaddr/$lan_netmask -j DNAT --to $DMZIPAddress
 	    # allow forward to dmz host
 	    iptables -A FORWARD -i ! $lan_if -d $DMZIPAddress -j ACCEPT
 	fi
@@ -416,65 +416,37 @@ stop() {
 
 get_param() {
     # network config
-    # first lan ip
-    lan_ip=`nvram_get 2860 lan_ipaddr`
-    lan_nm=`nvram_get 2860 lan_netmask`
-    #s econd lan ip
-    Lan2Enabled=`nvram_get 2860 Lan2Enabled`
-    lan2_ipaddr=`nvram_get 2860 lan2_ipaddr`
-    lan2_netmask=`nvram_get 2860 lan2_netmask`
+    eval `nvram_buf_get 2860 lan_ipaddr lan_netmask Lan2Enabled lan2_ipaddr lan2_netmask use_snat`
 
-    # get wan_ip for use SNAT
-    use_snat=`nvram_get 2860 use_snat`
     # if wan ip not get
     if [ "$wan_ipaddr" = "" ]; then
 	use_snat=0
     fi
 
     # vpn configs
-    vpnType=`nvram_get 2860 vpnType`
-    vpnNAT=`nvram_get 2860 vpnNAT`
-    vpnPurePPPOE=`nvram_get 2860 vpnPurePPPOE`
-    if [ "$vpnPurePPPOE" != "1" ]; then
-	natEnabled=`nvram_get 2860 natEnabled`
-    else
+    eval `nvram_buf_get 2860 vpnType vpnNAT vpnPurePPPOE natEnabled`
+    if [ "$vpnPurePPPOE" = "1" ]; then
 	# In pppoe pure mode no need add MASQ rules to localnet
 	natEnabled=0
     fi
+
     # netfilter conf
-    PortForwardEnable=`nvram_get 2860 PortForwardEnable`
-    DMZEnable=`nvram_get 2860 DMZEnable`
-    DMZIPAddress=`nvram_get 2860 DMZIPAddress`
-    DMZNATLoopback=`nvram_get 2860 DMZNATLoopback`
-    DefaultFirewallPolicy=`nvram_get 2860 DefaultFirewallPolicy`
-    IPPortFilterEnable=`nvram_get 2860 IPPortFilterEnable`
-    WANPingFilter=`nvram_get 2860 WANPingFilter`
-    RemoteSSH=`nvram_get 2860 RemoteSSH`
-    RemoteFTP=`nvram_get 2860 RemoteFTP`
-    RemoteTelnet=`nvram_get 2860 RemoteTelnet`
-    RemoteManagement=`nvram_get 2860 RemoteManagement`
-    dhcpEnabled=`nvram_get 2860 dhcpEnabled`
+    eval `nvram_buf_get 2860 PortForwardEnable DMZEnable DMZIPAddress DMZNATLoopback DefaultFirewallPolicy IPPortFilterEnable WANPingFilter RemoteSSH RemoteFTP RemoteTelnet RemoteManagement dhcpEnabled`
+
     # ipt_acount info
     ipt_account=`nvram_get 2860 ipt_account`
     if [ "$ipt_account" = "1" ]; then
-	lan_ip_acc=`ipcalc "$lan_ip" "$lan_nm" -n -s | cut -f 2- -d =`
-	lan_ip_prf=`ipcalc "$lan_ip" "$lan_nm" -p -s | cut -f 2- -d =`
+	lan_ip_acc=`ipcalc "$lan_ipaddr" "$lan_netmask" -n -s | cut -f 2- -d =`
+	lan_ip_prf=`ipcalc "$lan_ipaddr" "$lan_netmask" -p -s | cut -f 2- -d =`
 	if [ "$Lan2Enabled" = "1" ]; then
 	    lan2_ip_acc=`ipcalc "$lan2_ipaddr" "$lan2_netmask" -n -s | cut -f 2- -d =`
 	    lan2_ip_prf=`ipcalc "$lan2_ipaddr" "$lan2_netmask" -p -s | cut -f 2- -d =`
 	fi
     fi
-    # all needed variable
-    upnp=`nvram_get 2860 upnpEnabled`
-    igmpen=`nvram_get 2860 igmpEnabled`
-    UDPXY=`nvram_get 2860 UDPXYMode`
-    UDPXYPort=`nvram_get 2860 UDPXYPort`
-    SmbEnabled=`nvram_get 2860 SmbEnabled`
-    snmpd=`nvram_get 2860 snmpd`
-    chilli_net=`nvram_get 2860 chilli_net`
-    simple_qos=`nvram_get 2860 simple_qos`
-    parproutedEnabled=`nvram_get 2860 parproutedEnabled`
-    l2tp_srv_enabled=`nvram_get 2860 l2tp_srv_enabled`
+
+    # others needed variable
+    eval `nvram_buf_get 2860 upnpEnabled igmpEnabled UDPXYMode UDPXYPort SmbEnabled snmpd chilli_net simple_qos parproutedEnabled l2tp_srv_enabled`
+
     # macros
     STATE_NEW="-m state --state NEW"
     STATE_EST="-m state --state ESTABLISHED,RELATED"

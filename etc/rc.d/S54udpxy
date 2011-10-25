@@ -29,8 +29,7 @@ stop() {
 }
 
 get_param() {
-    UDPXYMode=`nvram_get 2860 UDPXYMode`
-    UDPXYPort=`nvram_get 2860 UDPXYPort`
+    eval `nvram_buf_get 2860 UDPXYMode UDPXYPort`
 }
 
 case "$1" in

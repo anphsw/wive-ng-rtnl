@@ -760,6 +760,7 @@
 3) Fix table size and webui.<br>
 4) Small fixes in network init, dhcpc, iptables logic.<br>
 5) Update usb-modeswitch to 1.2.0 version.<br>
+6) Add and use nvram_buf_get commad for fast get group nvram variable.<br>
 
 <br><br>
 <b>For support see:</b><br>

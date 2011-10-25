@@ -1,7 +1,6 @@
 #!/bin/sh
 
-ping_check_time=`nvram_get 2860 ping_check_time`
-ping_check_interval=`nvram_get 2860 ping_check_interval`
+eval `nvram_buf_get 2860 ping_check_time ping_check_interval RadioOff`
 
 if [ "$ping_check_time" = "" ] || [ "$ping_check_time" = "0" ] || \
    [ "$ping_check_interval" = "" ] || [ "$ping_check_interval" = "0" ]; then
@@ -13,7 +12,6 @@ while "true"; do
     sleep $ping_check_time
 
     ##################################RADIO################################################################################
-    RadioOff=`nvram_get 2860 RadioOff`
     if [ "$RadioOff" != "1" ]; then
 	# Unsolicited ARP mode, update your neighbors
 	arping -U 255.255.255.255 -w1 -Ibr0 -b -c1 -q

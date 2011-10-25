@@ -30,10 +30,7 @@ start() {
 }
 
 get_param() {
-    DDNS=`nvram_get 2860 DDNS`
-    DDNSProvider=`nvram_get 2860 DDNSProvider`
-    DDNSAccount=`nvram_get 2860 DDNSAccount`
-    DDNSPassword=`nvram_get 2860 DDNSPassword`
+    eval `nvram_buf_get 2860 DDNS DDNSProvider DDNSAccount DDNSPassword`
     update_period="43200"
 }
 

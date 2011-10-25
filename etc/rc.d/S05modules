@@ -17,31 +17,26 @@ start() {
 	# not load nf_nat helpers in bridge mode
 	if [ "$opmode" != "0" ]; then
 	    # load conntrack helpers
-	    fwAlgTFTP=`nvram_get 2860 fwAlgTFTP`
+	    eval `nvram_buf_get 2860 fwAlgTFTP fwAlgSIP fwAlgGRE fwAlgPPTP fwAlgH323 fwAlgFTP`
 	    if [ "$fwAlgTFTP" != "0" ]; then
 		modprobe -q nf_conntrack_tftp
 	    fi
-	    fwAlgSIP=`nvram_get 2860 fwAlgSIP`
 	    if [ "$fwAlgSIP" != "0" ]; then
 		modprobe -q nf_conntrack_sip
 		modprobe -q nf_nat_sip
 	    fi
-	    fwAlgGRE=`nvram_get 2860 fwAlgGRE`
 	    if [ "$fwAlgGRE" != "0" ]; then
 		modprobe -q nf_conntrack_gre
 		modprobe -q nf_nat_proto_gre
 	    fi
-	    fwAlgPPTP=`nvram_get 2860 fwAlgPPTP`
 	    if [ "$fwAlgPPTP" != "0" ]; then
 		modprobe -q nf_conntrack_pptp
 	        modprobe -q nf_nat_pptp
 	    fi
-	    fwAlgH323=`nvram_get 2860 fwAlgH323`
 	    if [ "$fwAlgH323" != "0" ]; then
 		modprobe -q nf_conntrack_h323
 		modprobe -q nf_nat_h323
 	    fi
-	    fwAlgFTP=`nvram_get 2860 fwAlgFTP`
 	    if [ "$fwAlgFTP" != "0" ]; then
 		modprobe -q nf_nat_ftp
 	    fi
@@ -67,12 +62,12 @@ start() {
 	gen_wifi_config
 	getMacIf
 	if [ "$opmode" = "2" ] && [ "$macCloneEnabled" = "1" ] && [ "$macCloneMac" != "" ]; then
-	    WMAC="$macCloneMac"
-	    $LOG "STA Macclone mode. MAC: $WMAC"
+	    WLAN_MAC_ADDR="$macCloneMac"
+	    $LOG "STA Macclone mode. MAC: $WLAN_MAC_ADDR"
 	else
-	    $LOG "AP/STA Normal mode. MAC: $WMAC"
+	    $LOG "AP/STA Normal mode. MAC: $WLAN_MAC_ADDR"
 	fi
-	mac="mac=$WMAC"
+	mac="mac=$WLAN_MAC_ADDR"
 
 	$LOG "Load wifi module..."
     	if [ "$opmode" = "2" ]; then
@@ -86,14 +81,14 @@ start() {
 	$LOG "Link wifi up..."
 	get_txqlen
 	if [ "$opmode" != "3" ]; then
-	    ifconfig ra0 hw ether	"$WMAC"
+	    ifconfig ra0 hw ether	"$WLAN_MAC_ADDR"
 	    ifconfig ra0 txqueuelen	"$txqueuelen"
 	    ip link set ra0 up
 	else
-	    ifconfig ra0 hw ether	"$WANMAC"
+	    ifconfig ra0 hw ether	"$WAN_MAC_ADDR"
 	    ifconfig ra0 txqueuelen	"$txqueuelen"
 	    ip link set ra0 up
-	    ifconfig apcli0 hw ether	"$WMAC"
+	    ifconfig apcli0 hw ether	"$WLAN_MAC_ADDR"
 	    ifconfig apcli0 txqueuelen	"$txqueuelen"
 	    ip link set apcli0 up
 	fi
@@ -143,9 +138,7 @@ ra0flushadress()
 }
 
 get_param() {
-    macCloneEnabled=`nvram_get 2860 macCloneEnabled`
-    macCloneMac=`nvram_get 2860 macCloneMac`
-    ipt_account=`nvram_get 2860 ipt_account`
+    eval `nvram_buf_get 2860 macCloneEnabled macCloneMac ipt_account`
 }
 
 gen_wifi_config()

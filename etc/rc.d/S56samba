@@ -80,16 +80,7 @@ stop() {
 }
 
 get_param() {
-    WorkGroup=`nvram_get 2860  WorkGroup`
-    SmbNetBIOS=`nvram_get 2860 SmbNetBIOS`
-    SmbString=`nvram_get 2860  SmbString`
-    SmbOsLevel=`nvram_get 2860  SmbOsLevel`
-    SmbTimeserver=`nvram_get 2860  SmbTimeserver`
-    NTPEnabled=`nvram_get 2860 NTPEnabled`
-    NTPServerIP=`nvram_get 2860 NTPServerIP`
-    Login=`nvram_get 2860 Login`
-    lan_ipaddr=`nvram_get 2860 lan_ipaddr`
-    lan_netmask=`nvram_get 2860 lan_netmask`
+    eval `nvram_buf_get 2860 WorkGroup SmbNetBIOS SmbString SmbOsLevel SmbTimeserver NTPEnabled NTPServerIP Login lan_ipaddr lan_netmask`
     CONFIG="/etc/smb.conf"
     TEMPLATE="/etc/smb.conf.template"
 

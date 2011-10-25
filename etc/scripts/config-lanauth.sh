@@ -17,25 +17,24 @@ stop() {
 
 reload() {
     get_param
-    if  [ "$pwd"  != "" ] && [ "$lvl" != "" ]; then
+    if  [ "$vpnPassword"  != "" ] && [ "$LANAUTH_LVL" != "" ]; then
 	if [ "$pid" != "" ]; then
-	    if [ "$lvl" = "1" ]; then
+	    if [ "$LANAUTH_LVL" = "1" ]; then
 		killall -q -USR1 lanauth
-	    elif [ "$lvl" = "2" ]; then
+	    elif [ "$LANAUTH_LVL" = "2" ]; then
 		killall -q -USR2 lanauth
 	    else
 		stop
 	    fi
 	else
-    	    $LOG "Starting lanauth mode $lvl"
-    	    lanauth -v 2 -l $lvl -p $pwd -A 0 &
+    	    $LOG "Starting lanauth mode $LANAUTH_LVL"
+    	    lanauth -v 2 -l $LANAUTH_LVL -p $vpnPassword -A 0 &
 	fi
     fi
 }
 
 get_param() {
-    pwd=`nvram_get 2860 vpnPassword`
-    lvl=`nvram_get 2860 LANAUTH_LVL`
+    eval `nvram_buf_get 2860 vpnPassword LANAUTH_LVL`
     pid=`pidof lanauth`
 }
 

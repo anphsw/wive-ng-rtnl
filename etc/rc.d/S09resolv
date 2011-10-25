@@ -41,10 +41,7 @@ stop() {
 }
 
 get_param() {
-    wan_static_dns=`nvram_get 2860 wan_static_dns`
-    wan_primary_dns=`nvram_get 2860 wan_primary_dns`
-    wan_secondary_dns=`nvram_get 2860 wan_secondary_dns`
-    dnsPEnabled=`nvram_get 2860 dnsPEnabled`
+    eval `nvram_buf_get 2860 wan_static_dns wan_primary_dns wan_secondary_dns dnsPEnabled`
     fname="/etc/resolv.conf"
     fbak="/etc/resolv_conf.bak"
 

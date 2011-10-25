@@ -84,11 +84,8 @@ stop() {
 }
 
 get_param() {
-    vpnInterface=`nvram_get 2860 vpnInterface`
-    vpnUser=`nvram_get 2860 vpnUser`
-    vpnPassword=`nvram_get 2860 vpnPassword`
+    eval `nvram_buf_get 2860 vpnInterface vpnUser vpnPassword l2tp_srv_enabled`
     lanauthpid=`pidof lanauth`
-    l2tp_srv_enabled=`nvram_get 2860 l2tp_srv_enabled`
     ppp=/etc/ppp
 }
 

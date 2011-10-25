@@ -11,13 +11,7 @@ PPP_REMOTE="$5"
 PPP_IPPARAM="$6"
 LOG="logger -t pppd"
 
-lan_ip=`nvram_get 2860 lan_ipaddr`
-lan_nm=`nvram_get 2860 lan_netmask`
-Lan2Enabled=`nvram_get 2860 Lan2Enabled`
-lan2_ipaddr=`nvram_get 2860 lan2_ipaddr`
-lan2_netmask=`nvram_get 2860 lan2_netmask`
-vpnPeerDNS=`nvram_get 2860 vpnPeerDNS`
-chilli_net=`nvram_get 2860 chilli_net`
+eval `nvram_buf_get 2860 lan_ipaddr lan_netmask Lan2Enabled lan2_ipaddr lan2_netmask vpnPeerDNS chilli_net`
 
     $LOG "Disable forwarding for $PPP_IFACE interface"
     echo 0 > "/proc/sys/net/ipv4/conf/$PPP_IFACE/forwarding"
@@ -26,11 +20,11 @@ chilli_net=`nvram_get 2860 chilli_net`
     iptables -D FORWARD -o $PPP_IFACE -j ACCEPT > /dev/null 2>&1
     iptables -t filter -D FORWARD -i $PPP_IFACE -o ! $PPP_IFACE -j MINIUPNPD > /dev/null 2>&1
 
-    iptables -t nat -D POSTROUTING -o $PPP_IFACE -s $lan_ip/$lan_nm -j MASQUERADE > /dev/null 2>&1
+    iptables -t nat -D POSTROUTING -o $PPP_IFACE -s $lan_ipaddr/$lan_netmask -j MASQUERADE > /dev/null 2>&1
     iptables -t nat -D POSTROUTING -o $PPP_IFACE -s $chilli_net -j MASQUERADE > /dev/null 2>&1
     iptables -t nat -D POSTROUTING -o $PPP_IFACE -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE > /dev/null 2>&1
     iptables -t nat -D PREROUTING -i $PPP_IFACE -j MINIUPNPD > /dev/null 2>&1
-    iptables -t nat -D POSTROUTING -o $PPP_IFACE -s $lan_ip/$lan_nm -j SNAT --to-source $PPP_LOCAL > /dev/null 2>&1
+    iptables -t nat -D POSTROUTING -o $PPP_IFACE -s $lan_ipaddr/$lan_netmask -j SNAT --to-source $PPP_LOCAL > /dev/null 2>&1
     iptables -t nat -D POSTROUTING -o $PPP_IFACE -s $chilli_net -j SNAT --to-source $PPP_LOCAL > /dev/null 2>&1
     iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $lan2_ipaddr/$lan2_netmask -j SNAT --to-source $PPP_LOCAL > /dev/null 2>&1
 

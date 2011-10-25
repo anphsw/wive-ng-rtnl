@@ -11,21 +11,7 @@ PPP_REMOTE="$5"
 PPP_IPPARAM="$6"
 LOG="logger -t pppd"
 
-lan_ip=`nvram_get 2860 lan_ipaddr`
-lan_nm=`nvram_get 2860 lan_netmask`
-Lan2Enabled=`nvram_get 2860 Lan2Enabled`
-lan2_ipaddr=`nvram_get 2860 lan2_ipaddr`
-lan2_netmask=`nvram_get 2860 lan2_netmask`
-upnp=`nvram_get 2860 upnpEnabled`
-NAT=`nvram_get 2860 vpnNAT`
-DGW=`nvram_get 2860 vpnDGW`
-vpnPeerDNS=`nvram_get 2860 vpnPeerDNS`
-chilli_net=`nvram_get 2860 chilli_net`
-use_snat=`nvram_get 2860 use_snat`
-PortForwardEnable=`nvram_get 2860 PortForwardEnable`
-DMZEnable=`nvram_get 2860 DMZEnable`
-DMZIPAddress=`nvram_get 2860 DMZIPAddress`
-DMZNATLoopback=`nvram_get 2860 DMZNATLoopback`
+eval `nvram_buf_get 2860 lan_ipaddr lan_netmask Lan2Enabled lan2_ipaddr lan2_netmask upnpEnabled vpnNAT vpnDGW vpnPeerDNS chilli_net use_snat PortForwardEnable DMZEnable DMZIPAddress DMZNATLoopback`
 
     #if wan ip not get
     if [ "$PPP_LOCAL" = "" ]; then
@@ -38,7 +24,7 @@ DMZNATLoopback=`nvram_get 2860 DMZNATLoopback`
 
     #Get current dgw
     GWSTRING=`ip route | grep ^default`
-    if [ "$GWSTRING" != "" ] && [ "$DGW" = "1" ]; then
+    if [ "$GWSTRING" != "" ] && [ "$vpnDGW" = "1" ]; then
         RESTORESTRING="ip route replace $GWSTRING"
         $LOG "Store old default route to file. $GWSTRING "
         rm -f /tmp/ip-down-route-reload
@@ -48,7 +34,7 @@ DMZNATLoopback=`nvram_get 2860 DMZNATLoopback`
 	    echo "$RESTORESTRING"
 	) > /tmp/ip-down-route-reload
 	chmod 777 /tmp/ip-down-route-reload
-	$LOG "Remove DGW"
+	$LOG "Remove vpnDGW"
 	#clear all default route
 	while ip route del default ; do
     	    :
@@ -79,7 +65,7 @@ DMZNATLoopback=`nvram_get 2860 DMZNATLoopback`
     fi
 
     #Replace default route to ppp tunnel
-    if [ "$DGW" = "1" ]; then
+    if [ "$vpnDGW" = "1" ]; then
 	$LOG "Replace default route to $PPP_IFACE"
 	ip route replace default metric 10 dev $PPP_IFACE
     fi
@@ -103,9 +89,9 @@ DMZNATLoopback=`nvram_get 2860 DMZNATLoopback`
     #########################GENERATE VPN NETFILTER SCRIPT########################################################################
     echo "iptables -A FORWARD -o $PPP_IFACE -j ACCEPT" > /etc/ppp_firewall
     #NAT in vpn
-    if [ "$NAT" = "on" ] && [ "$opmode" != "0" ]; then
+    if [ "$vpnNAT" = "on" ] && [ "$opmode" != "0" ]; then
 	if  [ "$use_snat" = "1" ] && [ "$PPP_LOCAL" != "" ] ; then
-	    echo "iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $lan_ip/$lan_nm -j SNAT --to-source $PPP_LOCAL" >> /etc/ppp_firewall
+	    echo "iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $lan_ipaddr/$lan_netmask -j SNAT --to-source $PPP_LOCAL" >> /etc/ppp_firewall
 	    if [ "$opmode" = 4 ]; then
 		echo "iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $chilli_net -j SNAT --to-source $PPP_LOCAL" >> /etc/ppp_firewall
 	    fi
@@ -113,7 +99,7 @@ DMZNATLoopback=`nvram_get 2860 DMZNATLoopback`
 		echo "iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $lan2_ipaddr/$lan2_netmask -j SNAT --to-source $PPP_LOCAL" >> /etc/ppp_firewall
 	    fi
 	else
-	    echo "iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $lan_ip/$lan_nm -j MASQUERADE" >> /etc/ppp_firewall
+	    echo "iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $lan_ipaddr/$lan_netmask -j MASQUERADE" >> /etc/ppp_firewall
 	    if [ "$opmode" = 4 ]; then
 		echo "iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $chilli_net -j MASQUERADE" >> /etc/ppp_firewall
 	    fi
@@ -125,7 +111,7 @@ DMZNATLoopback=`nvram_get 2860 DMZNATLoopback`
 	    echo "/etc/portforward_vpn A $PPP_IFACE $PPP_LOCAL" >> /etc/ppp_firewall
         fi
 	#rules for upnp
-	if [ "$upnp" = "1" ] && [ "$opmode" != "0" ]; then
+	if [ "$upnpEnabled" = "1" ] && [ "$opmode" != "0" ]; then
     	    echo "iptables -t nat -I PREROUTING -i $PPP_IFACE  -j MINIUPNPD > /dev/null 2>&1" >> /etc/ppp_firewall
     	fi
 	if [ "$DMZEnable" = "1" ] && [ "$DMZIPAddress" != "" ] && [ "$DMZNATLoopback" = "1" ] && [ "$PPP_LOCAL" != "" ]; then

@@ -16,36 +16,25 @@ killall_vpn
 LOG="logger -t vpnhelper-l2tp"
 
 get_param() {
-    SERVERNM=`nvram_get 2860 vpnServer`
-    USER=`nvram_get 2860 vpnUser`
-    PASSWORD=`nvram_get 2860 vpnPassword`
-    MTU=`nvram_get 2860 vpnMTU`
-    MPPE=`nvram_get 2860 vpnMPPE`
-    PEERDNS=`nvram_get 2860 vpnPeerDNS`
-    DEBUG=`nvram_get 2860 vpnDebug`
-    AUTHMODE=`nvram_get 2860 vpnAuthProtocol`
-    LCPECHO=`nvram_get 2860 vpnEnableLCP`
-    LCPFAIL=`nvram_get 2860 vpnLCPFailure`
-    LCPINTR=`nvram_get 2860 vpnLCPInterval`
-    PINGTST=`nvram_get 2860 vpnTestReachable`
+    eval `nvram_buf_get 2860 vpnServer vpnUser vpnPassword vpnMTU vpnMPPE vpnPeerDNS vpnDebug vpnAuthProtocol vpnEnableLCP vpnLCPFailure vpnLCPInterval vpnTestReachable`
 }
 
 check_param() {
-    if [ "$SERVERNM" = "" ] || [ "$USER" = "" ] || [ "$PASSWORD" = "" ]; then
+    if [ "$vpnServer" = "" ] || [ "$vpnUser" = "" ] || [ "$vpnPassword" = "" ]; then
 	$LOG "Server adress, username or password not set. Exit..."
 	exit 1
     fi
 }
 
 get_vpn_ip() {
-    $LOG "Get vpn server $SERVERNM ip adress"
-    NS=`ipget $SERVERNM | tail -q -n1`
+    $LOG "Get vpn server $vpnServer ip adress"
+    NS=`ipget $vpnServer | tail -q -n1`
     if [ "$NS" != "" ]; then
         SERVER=$NS
         $LOG "Server adress is $SERVER"
 	echo "$SERVER" > /tmp/vpnip
     else
-        SERVER=$SERVERNM
+        SERVER=$vpnServer
         $LOG "Not resolve adress for $SERVER"
     fi
 }
@@ -107,48 +96,48 @@ echo "==================START-L2TP-CLIENT======================="
     # load ppp* modules
     load_modules
 
-    if [ "$PEERDNS" = "on" ]; then
-	PEERDNS=usepeerdns
+    if [ "$vpnPeerDNS" = "on" ]; then
+	vpnPeerDNS=usepeerdns
     else
-	PEERDNS=
+	vpnPeerDNS=
     fi
 
-    if [ "$MPPE" = "on" ]; then
+    if [ "$vpnMPPE" = "on" ]; then
 	mod="crypto_algapi cryptomgr blkcipher ppp_mppe"
 	for module in $mod
 	do
 	    modprobe -q $module
 	done
-        MPPE=allow-mppe-128
+        vpnMPPE=allow-mppe-128
     else
-        MPPE=
+        vpnMPPE=
     fi
 
-    if [ "$DEBUG" = "on" ]; then
-        DEBUG="-D"
+    if [ "$vpnDebug" = "on" ]; then
+        vpnDebug="-D"
     else
-        DEBUG=""
+        vpnDebug=""
     fi
 
-    if [ "$MTU" = "" ] || [ "$MTU" = "AUTO" ]; then
-        MTU=""
-        MRU=""
+    if [ "$vpnMTU" = "" ] || [ "$vpnMTU" = "AUTO" ]; then
+        vpnMTU=""
+        vpnMRU=""
         else
-        MRU="mru $MTU"
-        MTU="mtu $MTU"
+        vpnMRU="mru $vpnMTU"
+        vpnMTU="mtu $vpnMTU"
     fi
 
-    if [ "$AUTHMODE" = "1" ]; then
+    if [ "$vpnAuthProtol" = "1" ]; then
 	L2TPPAP="require pap = yes"
 	L2TPCHAP="require chap = no"
 	PAP="require-pap"
 	CHAP="refuse-chap"
-    elif [ "$AUTHMODE" = "2" ]; then
+    elif [ "$vpnAuthProtol" = "2" ]; then
 	L2TPPAP="require pap = no"
 	L2TPCHAP="require chap = yes"
 	PAP="refuse-pap"
 	CHAP="require-chap"
-    elif [ "$AUTHMODE" = "3" ]; then
+    elif [ "$vpnAuthProtol" = "3" ]; then
 	L2TPPAP="require pap = no"
 	L2TPCHAP="require chap = yes"
 	PAP="refuse-pap"
@@ -160,15 +149,15 @@ echo "==================START-L2TP-CLIENT======================="
 	CHAP=""
     fi
 
-    if [ "$LCPECHO" = "on" ]; then
-        LCPECHO="lcp-echo-adaptive"
+    if [ "$vpnEnableLCP" = "on" ]; then
+        vpnEnableLCP="lcp-echo-adaptive"
     else
-	LCPECHO=""
+	vpnEnableLCP=""
     fi
 
-    if [ "$LCPFAIL" = "" ] || [ "$LCPINTR" = "" ]; then
-	LCPFAIL=5
-	LCPINTR=30
+    if [ "$vpnLCPFailure" = "" ] || [ "$vpnLCPInterval" = "" ]; then
+	vpnLCPFailure=5
+	vpnLCPInterval=30
     fi
 
     # clear all configs
@@ -186,7 +175,7 @@ echo "==================START-L2TP-CLIENT======================="
     $L2TPCHAP
     require authentication = no
     lns = $SERVER
-    name = $USER
+    name = $vpnUser
     autodial = yes
     tx bps = 100000000
     rx bps = 100000000
@@ -204,20 +193,20 @@ echo "==================START-L2TP-CLIENT======================="
     noipx
     nomp
     noproxyarp
-    $MTU
-    $MRU
-    $MPPE
-    $PEERDNS
-    lcp-echo-failure  $LCPFAIL
-    lcp-echo-interval $LCPINTR
-    $LCPECHO
+    $vpnMTU
+    $vpnMRU
+    $vpnMPPE
+    $vpnPeerDNS
+    lcp-echo-failure  $vpnLCPFailure
+    lcp-echo-interval $vpnLCPInterval
+    $vpnEnableLCP
     ifname $IFNAME
     " >> $ppp/options.l2tp
 
-    printf "$USER * $PASSWORD" >> $ppp/chap-secrets
-    printf "$USER * $PASSWORD" >> $ppp/pap-secrets
+    printf "$vpnUser * $vpnPassword" >> $ppp/chap-secrets
+    printf "$vpnUser * $vpnPassword" >> $ppp/pap-secrets
 
     $LOG "Starting VPN network l2tp..."
     $LOG "Start xl2tpd"
-    FULLOPTS="$DEBUG -c /etc/ppp/l2tpd.conf -s /etc/ppp/chap-secrets -p /var/lock/l2tpd.pid"
+    FULLOPTS="$vpnDebug -c /etc/ppp/l2tpd.conf -s /etc/ppp/chap-secrets -p /var/lock/l2tpd.pid"
     xl2tpd $FULLOPTS &

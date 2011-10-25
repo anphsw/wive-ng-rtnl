@@ -16,24 +16,12 @@ killall_vpn
 LOG="logger -t vpnhelper-pppoe"
 
 get_param() {
-    SERVER=`nvram_get 2860 vpnServer`
-    SERVICE=`nvram_get 2860 vpnService`
-    USER=`nvram_get 2860 vpnUser`
-    PASSWORD=`nvram_get 2860 vpnPassword`
-    MTU=`nvram_get 2860 vpnMTU`
-    MPPE=`nvram_get 2860 vpnMPPE`
-    PEERDNS=`nvram_get 2860 vpnPeerDNS`
-    DEBUG=`nvram_get 2860 vpnDebug`
-    IFACE=`nvram_get 2860 vpnInterface`
-    AUTHMODE=`nvram_get 2860 vpnAuthProtocol`
-    LCPECHO=`nvram_get 2860 vpnEnableLCP`
-    LCPFAIL=`nvram_get 2860 vpnLCPFailure`
-    LCPINTR=`nvram_get 2860 vpnLCPInterval`
+    eval `nvram_buf_get 2860 vpnServer vpnService vpnUser vpnPassword vpnMTU vpnMPPE vpnPeerDNS vpnDebug vpnInterface vpnAuthProtocol vpnEnableLCPnLCPFailure vpnLCPFailure vpnLCPInterval`
     OPTFILE="/etc/ppp/options.pppoe"
 }
 
 check_param() {
-    if [ "$USER" = "" ] || [ "$PASSWORD" = "" ]; then
+    if [ "$vpnUser" = "" ] || [ "$vpnPassword" = "" ]; then
 	$LOG "Username or password not set. Exit..."
 	exit 1
     fi
@@ -54,70 +42,70 @@ get_param
 check_param
 load_modules
 
-if [ "$IFACE" = "WAN" ]; then
-    IFACE=$wan_if
-elif [ "$IFACE" = "LAN" ]; then
-    IFACE=$lan_if
+if [ "$vpnInterface" = "WAN" ]; then
+    vpnInterface=$wan_if
+elif [ "$vpnInterface" = "LAN" ]; then
+    vpnInterface=$lan_if
 else
-    IFACE=br0
+    vpnInterface=br0
 fi
 
-IN_BR=`brctl show | grep $IFACE -c`
-if [ "$IFACE" != "br0" ] && [ "$IN_BR" = "1" ]; then
-    PPPOE_IFACE="br0"
-    $LOG "$PPPOE_IFACE in bridge. Set pppoe interface to br0"
+IN_BR=`brctl show | grep $vpnInterface -c`
+if [ "$vpnInterface" != "br0" ] && [ "$IN_BR" = "1" ]; then
+    PPPOE_vpnInterface="br0"
+    $LOG "$PPPOE_vpnInterface in bridge. Set pppoe interface to br0"
 fi
 
-if [ "$SERVER" != "" ]; then
-    SERVER="rp_pppoe_ac $SERVER"
+if [ "$vpnServer" != "" ]; then
+    vpnServer="rp_pppoe_ac $vpnServer"
 else
-    SERVER=""
+    vpnServer=""
 fi
 
-if [ "$SERVICE" != "" ]; then
-    SERVICE="rp_pppoe_service $SERVICE"
+if [ "$vpnService" != "" ]; then
+    vpnService="rp_pppoe_service $vpnService"
 else
-    SERVICE=""
+    vpnService=""
 fi
 
-if [ "$PEERDNS" = "on" ]; then
-    PEERDNS=usepeerdns
+if [ "$vpnPeerDNS" = "on" ]; then
+    vpnPeerDNS=usepeerdns
 else
-    PEERDNS=
+    vpnPeerDNS=
 fi
 
-if [ "$MPPE" = "on" ]; then
+if [ "$vpnMPPE" = "on" ]; then
     mod="crypto_algapi cryptomgr blkcipher ppp_mppe"
     for module in $mod
     do
 	modprobe -q $module
     done
-    MPPE=allow-mppe-128
+    vpnMPPE=allow-mppe-128
 else
-    MPPE=
+    vpnMPPE=
 fi 
 
-if [ "$MTU" = "" ] || [ "$MTU" = "AUTO" ]; then
-    MTU=""
-    MRU=""
+if [ "$vpnMTU" = "" ] || [ "$vpnMTU" = "AUTO" ]; then
+    vpnMTU=""
+    vpnMRU=""
 else
-    MRU="mru $MTU"
-    MTU="mtu $MTU"
+    vpnMRU="mru $vpnMTU"
+    vpnMTU="mtu $vpnMTU"
 fi
 
-if [ "$DEBUG" = "on" ]; then
-    DEBUG="debug"
+if [ "$vpnDebug" = "on" ]; then
+    vpnDebug="debug"
 else
-    DEBUG=""
+    vpnDebug=""
 fi
 
-if [ "$AUTHMODE" = "1" ]; then
+if [ "$vpnAuthProtocol" = "1" ]; then
     PAP="require-pap"
     CHAP="refuse-chap"
-elif [ "$AUTHMODE" = "2" ]; then
+elif [ "$vpnAuthProtocol" = "2" ]; then
     PAP="refuse-pap"
     CHAP="require-chap"
-elif [ "$AUTHMODE" = "3" ]; then
+elif [ "$vpnAuthProtocol" = "3" ]; then
     PAP="refuse-pap"
     CHAP="refuse-chap"
 else
@@ -125,33 +113,33 @@ else
     CHAP=""
 fi
 
-if [ "$LCPECHO" = "on" ]; then
-    LCPECHO="lcp-echo-adaptive"
+if [ "$vpnEnableLCP" = "on" ]; then
+    vpnEnableLCP="lcp-echo-adaptive"
 else
-    LCPECHO=""
+    vpnEnableLCP=""
 fi
 
-if [ "$LCPFAIL" = "" ] || [ "$LCPINTR" = "" ]; then
-    LCPFAIL=5
-    LCPINTR=30
+if [ "$vpnLCPFailure" = "" ] || [ "$vpnLCPInterval" = "" ]; then
+    vpnLCPFailure=5
+    vpnLCPInterval=30
 fi
 
 cp -f /etc/ppp/options.template $OPTFILE
 printf "
 lock
 nomp
-lcp-echo-failure  $LCPFAIL
-lcp-echo-interval $LCPINTR
-$LCPECHO
+lcp-echo-failure  $vpnLCPFailure
+lcp-echo-interval $vpnLCPInterval
+$vpnEnableLCP
 $PAP
 $CHAP
 " >> $OPTFILE
 
 # Standard PPP options we always use
-PPP_STD_OPTIONS="noipdefault noauth persist $PEERDNS ifname $IFNAME -detach $DEBUG"
+PPP_STD_OPTIONS="noipdefault noauth persist $vpnPeerDNS ifname $IFNAME -detach $vpnDebug"
 # PPPoE invocation
-PPPOE_CMD="$IFACE $SERVER $SERVICE user $USER password $PASSWORD"
+PPPOE_CMD="$vpnInterface $vpnServer $vpnService user $vpnUser password $vpnPassword"
 
-$LOG "Start pppd at $IFACE to $SERVER $SERVICE mode PPPOE"
-FULLOPT="file $OPTFILE $MTU $MRU $MPPE $PPP_STD_OPTIONS plugin /lib/rp-pppoe.so $PPPOE_CMD"
+$LOG "Start pppd at $vpnInterface to $vpnServer $vpnService mode PPPOE"
+FULLOPT="file $OPTFILE $vpnMTU $vpnMRU $vpnMPPE $PPP_STD_OPTIONS plugin /lib/rp-pppoe.so $PPPOE_CMD"
 pppd $FULLOPT &

@@ -76,10 +76,7 @@ stop() {
 }
 
 get_param() {
-    igmpEnabled=`nvram_get 2860 igmpEnabled`
-    igmpSnoopMode=`nvram_get 2860 igmpSnoopMode`
-    M2UEnabled=`nvram_get 2860 M2UEnabled`
-    wan_port=`nvram_get 2860 wan_port`
+    eval `nvram_buf_get 2860 igmpEnabled igmpSnoopMode M2UEnabled wan_port`
 }
 
 case "$1" in

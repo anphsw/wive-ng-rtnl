@@ -30,9 +30,7 @@ stop() {
 }
 
 get_param() {
-    KLogd=`nvram_get 2860 KLogd`
-    SysLogd=`nvram_get 2860 SysLogd`
-    RemoteSysLogIP=`nvram_get 2860 RemoteSysLogIP`
+    eval `nvram_buf_get 2860 KLogd SysLogd RemoteSysLogIP`
 }
 
 case "$1" in

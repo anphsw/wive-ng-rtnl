@@ -51,9 +51,7 @@ stop() {
 }
 
 get_param() {
-    lan_ipaddr=`nvram_get 2860 lan_ipaddr`
-    lan_netmask=`nvram_get 2860 lan_netmask`
-    upnpEnabled=`nvram_get 2860 upnpEnabled`
+    eval `nvram_buf_get 2860 lan_ipaddr lan_netmask upnpEnabled`
 }
 
 

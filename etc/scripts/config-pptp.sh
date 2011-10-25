@@ -16,37 +16,26 @@ killall_vpn
 LOG="logger -t vpnhelper-pptp"
 
 get_param() {
-    SERVERNM=`nvram_get 2860 vpnServer`
-    USER=`nvram_get 2860 vpnUser`
-    PASSWORD=`nvram_get 2860 vpnPassword`
-    MTU=`nvram_get 2860 vpnMTU`
-    MPPE=`nvram_get 2860 vpnMPPE`
-    PEERDNS=`nvram_get 2860 vpnPeerDNS`
-    DEBUG=`nvram_get 2860 vpnDebug`
-    AUTHMODE=`nvram_get 2860 vpnAuthProtocol`
-    LCPECHO=`nvram_get 2860 vpnEnableLCP`
-    LCPFAIL=`nvram_get 2860 vpnLCPFailure`
-    LCPINTR=`nvram_get 2860 vpnLCPInterval`
-    PINGTST=`nvram_get 2860 vpnTestReachable`
+    eval `nvram_buf_get 2860 vpnServer vpnUser vpnPassword vpnMTU vpnMPPE vpnPeerDNS vpnDebug vpnAuthProtocol vpnEnableLCP vpnLCPFailure vpnLCPInterval vpnTestReachable`
     OPTFILE="/etc/ppp/options.pptp"
 }
 
 check_param() {
-    if [ "$SERVERNM" = "" ] || [ "$USER" = "" ] || [ "$PASSWORD" = "" ]; then
+    if [ "$vpnServer" = "" ] || [ "$vpnUser" = "" ] || [ "$vpnPassword" = "" ]; then
 	$LOG "Server adress, username or password not set. Exit..."
 	exit 1
     fi
 }
 
 get_vpn_ip() {
-    $LOG "Get vpn server $SERVERNM ip adress"
-    NS=`ipget $SERVERNM | tail -q -n1`
+    $LOG "Get vpn server $vpnServer ip adress"
+    NS=`ipget $vpnServer | tail -q -n1`
     if [ "$NS" != "" ]; then
         SERVER=$NS
         $LOG "Server adress is $SERVER"
 	echo "$SERVER" > /tmp/vpnip
     else
-        SERVER=$SERVERNM
+        SERVER=$vpnServer
         $LOG "Not resolve adress for $SERVER"
     fi
 }
@@ -108,44 +97,44 @@ echo "==================START-PPTP-CLIENT======================="
     # load ppp* modules
     load_modules
 
-    if [ "$PEERDNS" = "on" ]; then
-	PEERDNS=usepeerdns
+    if [ "$vpnPeerDNS" = "on" ]; then
+	vpnPeerDNS=usepeerdns
     else
-	PEERDNS=
+	vpnPeerDNS=
     fi
 
-    if [ "$MPPE" = "on" ]; then
+    if [ "$vpnMPPE" = "on" ]; then
 	mod="crypto_algapi cryptomgr blkcipher ppp_mppe"
 	for module in $mod
 	do
 	    modprobe -q $module
 	done
-        MPPE=allow-mppe-128
+        vpnMPPE=allow-mppe-128
     else
-        MPPE=
+        vpnMPPE=
     fi
 
-    if [ "$MTU" = "" ] || [ "$MTU" = "AUTO" ]; then
-        MTU=""
-        MRU=""
+    if [ "$vpnMTU" = "" ] || [ "$vpnMTU" = "AUTO" ]; then
+        vpnMTU=""
+        vpnMRU=""
     else
-        MRU="mru $MTU"
-        MTU="mtu $MTU"
+        vpnMRU="mru $vpnMTU"
+        vpnMTU="mtu $vpnMTU"
     fi
 
-    if [ "$DEBUG" = "on" ]; then
-        DEBUG="debug"
+    if [ "$vpnDebug" = "on" ]; then
+        vpnDebug="debug"
     else
-	DEBUG=""
+	vpnDebug=""
     fi
 
-    if [ "$AUTHMODE" = "1" ]; then
+    if [ "$vpnAuthProtol" = "1" ]; then
 	PAP="require-pap"
 	CHAP="refuse-chap"
-    elif [ "$AUTHMODE" = "2" ]; then
+    elif [ "$vpnAuthProtol" = "2" ]; then
 	PAP="refuse-pap"
 	CHAP="require-chap"
-    elif [ "$AUTHMODE" = "3" ]; then
+    elif [ "$vpnAuthProtol" = "3" ]; then
 	PAP="refuse-pap"
 	CHAP="refuse-chap"
     else
@@ -153,30 +142,30 @@ echo "==================START-PPTP-CLIENT======================="
 	CHAP=""
     fi
 
-    if [ "$LCPECHO" = "on" ]; then
-        LCPECHO="lcp-echo-adaptive"
+    if [ "$vpnEnableLCP" = "on" ]; then
+        vpnEnableLCP="lcp-echo-adaptive"
     else
-	LCPECHO=""
+	vpnEnableLCP=""
     fi
 
-    if [ "$LCPFAIL" = "" ] || [ "$LCPINTR" = "" ]; then
-	LCPFAIL=5
-	LCPINTR=30
+    if [ "$vpnLCPFailure" = "" ] || [ "$vpnLCPInterval" = "" ]; then
+	vpnLCPFailure=5
+	vpnLCPInterval=30
     fi
 
     cp -f /etc/ppp/options.template $OPTFILE
     printf "
     nomp
-    lcp-echo-failure  $LCPFAIL
-    lcp-echo-interval $LCPINTR
-    $LCPECHO
+    lcp-echo-failure  $vpnLCPFailure
+    lcp-echo-interval $vpnLCPInterval
+    $vpnEnableLCP
     $PAP
     $CHAP
     " >> $OPTFILE
 
     $LOG "PPTP connect to $SERVER ....."
     $LOG "Start pppd"
-    PPPDOPT="file $OPTFILE ifname $IFNAME -detach $DEBUG $MTU $MRU $MPPE plugin"
-    PLUGOPT="/lib/pptp.so pptp_server $SERVER call pptp persist $PEERDNS user $USER password $PASSWORD"
+    PPPDOPT="file $OPTFILE ifname $IFNAME -detach $vpnDebug $vpnMTU $vpnMRU $vpnMPPE plugin"
+    PLUGOPT="/lib/pptp.so pptp_server $SERVER call pptp persist $vpnPeerDNS user $vpnUser password $vpnPassword"
     FULLOPT="$PPPDOPT $PLUGOPT"
     pppd $FULLOPT &

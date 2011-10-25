@@ -58,10 +58,7 @@ gen_hosts() {
 }
 
 get_param() {
-    dnsPEnabled=`nvram_get 2860 dnsPEnabled`
-    HostName=`nvram_get 2860 HostName`
-    lan_ipaddr=`nvram_get 2860 lan_ipaddr`
-    DDNS=`nvram_get 2860 DDNS`
+    eval `nvram_buf_get 2860 dnsPEnabled HostName lan_ipaddr DDNS`
     cname="/etc/dnsmasq.conf"
     fname="/etc/resolv.conf"
     hname="/etc/hosts"

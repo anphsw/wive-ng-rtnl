@@ -37,6 +37,20 @@ int get_usage(char *aout)
 	return -1;
 }
 
+int buf_get_usage(char *aout)
+{
+#ifndef CONFIG_RT2860V2_USER_MEMORY_OPTIMIZATION
+	int i;
+
+	printf("Usage: \n");
+	for (i = 0; i < getNvramNum(); i++){
+		printf("\t%s %s ", aout, getNvramName(i));
+		printf("lan_ipaddr wan_ipaddr ...\n");
+	}
+#endif
+	return -1;
+}
+
 int ra_nv_set(int argc,char **argv)
 {
 	int index, rc;
@@ -104,6 +118,46 @@ int ra_nv_get(int argc, char *argv[])
     return (ret);
 }
 
+int ra_nv_buf_get(int argc, char *argv[])
+{
+	char *fz, *key, *rc;
+	int i, index, ret=0;
+
+	if (argc < 3)
+		return buf_get_usage(argv[0]);
+
+	fz = argv[1];
+	key = argv[2];
+
+	if ((index = getNvramIndex(fz)) == -1) {
+		fprintf(stderr,"%s: Error: \"%s\" flash zone not existed\n", argv[0], fz);
+		return get_usage(argv[0]);
+	}
+
+#ifndef CONFIG_KERNEL_NVRAM
+	if ( nvram_init(index) == -1 )
+	{
+		return "";
+	}
+#endif
+	for (i = 2; i < argc; i++) {
+	    rc = nvram_bufget(index, argv[i]);
+	    if (rc) {
+		printf("%s=%s\n",argv[i], rc);
+	    } else {
+		fprintf(stderr, "nvram_buf_get return error or not return data!\n");
+		ret = -1;
+		break;
+	    }
+	}
+
+#ifndef CONFIG_KERNEL_NVRAM
+	//Always need close nvram
+	nvram_close(index);
+#endif
+    return (ret);
+}
+
 void usage(char *cmd)
 {
 #ifndef CONFIG_RT2860V2_USER_MEMORY_OPTIMIZATION
@@ -146,11 +200,13 @@ int main(int argc, char *argv[])
 
 	if (!strncmp(cmd, "nvram_get", 10))
 		return ra_nv_get(argc, argv);
+	if (!strncmp(cmd, "nvram_buf_get", 14))
+		return ra_nv_buf_get(argc, argv);
 	else if (!strncmp(cmd, "nvram_set", 10))
 		return ra_nv_set(argc, argv);
-	else if (!strncmp(cmd, "nvram_show", 10))
+	else if (!strncmp(cmd, "nvram_show", 11))
 		return nvram_show(RT2860_NVRAM);
-	else if (!strncmp(cmd, "nvram_default", 10))
+	else if (!strncmp(cmd, "nvram_default", 14))
 		return nvram_load_default();
 
 	if (argc == 2) {

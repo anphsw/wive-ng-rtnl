@@ -108,14 +108,7 @@ stop() {
 
 get_param() {
     # get parametrs
-    wan_ipaddr=`nvram_get 2860 wan_ipaddr`
-    wan_netmask=`nvram_get 2860 wan_netmask`
-    wan_gateway=`nvram_get 2860 wan_gateway`
-    wan_manual_mtu=`nvram_get 2860 wan_manual_mtu`
-    lan_ipaddr=`nvram_get 2860 lan_ipaddr`
-    lan_netmask=`nvram_get 2860 lan_netmask`
-    HostName=`nvram_get 2860 HostName`
-    vpnPurePPPOE=`nvram_get 2860 vpnPurePPPOE`
+    eval `nvram_buf_get 2860 wan_ipaddr wan_netmask wan_gateway wan_manual_mtu lan_ipaddr lan_netmask HostName vpnPurePPPOE`
 }
 
 case "$1" in

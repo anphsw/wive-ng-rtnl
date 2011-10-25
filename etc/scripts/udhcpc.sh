@@ -17,11 +17,9 @@ ROUTELIST_DGW=""
 # Stub for first hop`s dgw
 ROUTELIST_FGW=""
 
-# Get MTU config
-wan_manual_mtu=`nvram_get 2860 wan_manual_mtu`
+# Get MTU config and VPN DGW mode
+eval `nvram_buf_get 2860 wan_manual_mtu vpnDGW dhcpSwReset`
 
-# Get VPN DGW mode
-vpnDGW=`nvram_get 2860 vpnDGW`
 # If pppoe mode and dgw in pppoe no need replace default gw
 replace_dgw=1
 if [ "$vpnEnabled" = "on" ] && [ "$vpnDGW" = "1" ] && [ "$vpnType" = "0" ]; then
@@ -56,7 +54,6 @@ case "$1" in
 	    # Full reinit network and services
 	    internet.sh
 	else
-	    dhcpSwReset=`nvram_get 2860 dhcpSwReset`
 	    if [ "$dhcpSwReset" = "1" ]; then
 		$LOG "Reinit switch"
 		# Reset switch

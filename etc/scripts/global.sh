@@ -17,23 +17,15 @@ lan_if="br0"
 lan2_if="br0:9"
 
 # first get operation mode and wan mode
-opmode=`nvram_get 2860 OperationMode`
-wanmode=`nvram_get 2860 wanConnectionMode`
-
-# get dns mode and relay mode
-dnsPEnabled=`nvram_get 2860 dnsPEnabled`
-wan_static_dns=`nvram_get 2860 wan_static_dns`
-
-# get vpn mode and type
-vpnEnabled=`nvram_get 2860 vpnEnabled`
-vpnType=`nvram_get 2860 vpnType`
+# dns mode and relay mode
+# vpn mode and type
+eval `nvram_buf_get 2860 OperationMode wanConnectionMode dnsPEnabled wan_static_dns vpnEnabled vpnType`
+opmode="$OperationMode"
 
 # get wireless, wan and lan mac adresses
 getMacIf()
 {
-    WMAC=`nvram_get 2860 WLAN_MAC_ADDR`
-    WANMAC=`nvram_get 2860 WAN_MAC_ADDR`
-    LANMAC=`nvram_get 2860 LAN_MAC_ADDR`
+    eval `nvram_buf_get 2860 WLAN_MAC_ADDR WAN_MAC_ADDR LAN_MAC_ADDR`
 }
 
 # LAN interface name -> $lan_if
@@ -140,8 +132,7 @@ udhcpc_opts()
 	# disable dhcp renew from driver
 	sysctl -w net.ipv4.send_sigusr_dhcpc=9
     else
-	ForceRenewDHCP=`nvram_get 2860 ForceRenewDHCP`
-	wan_port=`nvram_get 2860 wan_port`
+	eval `nvram_buf_get 2860 ForceRenewDHCP wan_port`
 	if [ "$ForceRenewDHCP" != "0" ] && [ "$wan_port" != "" ]; then
 	    # configure event wait port
 	    sysctl -w net.ipv4.send_sigusr_dhcpc=$wan_port
@@ -151,19 +142,17 @@ udhcpc_opts()
 	fi
 
     fi
-    dhcpRequestIP=`nvram_get 2860 dhcpRequestIP`
+    eval `nvram_buf_get 2860 dhcpRequestIP wan_manual_mtu HostName`
     if [ "$dhcpRequestIP" != "" ]; then
 	REQIP="-r $dhcpRequestIP"
     else
 	REQIP=""
     fi
-    wan_manual_mtu=`nvram_get 2860 wan_manual_mtu`
     if [ "$wan_manual_mtu" = "0" ]; then
 	GETMTU="-O mtu"
     else
 	GETMTU=""
     fi
-    HostName=`nvram_get 2860 HostName`
     UDHCPCOPTS="-i $wan_if -H $HostName $REQIP -S -R -T 5 -a \
 		-s /bin/udhcpc.sh -p /var/run/udhcpc.pid \
 		-O routes -O staticroutes -O msstaticroutes $GETMTU -f &"
