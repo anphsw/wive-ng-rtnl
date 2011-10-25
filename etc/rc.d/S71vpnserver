@@ -71,7 +71,8 @@ configured=0
 echo > $ppp/pap-secrets
 echo > $ppp/chap-secrets
 for i in `seq 0 9`; do
-    eval `nvram_buf_get 2860 l2tp_srv_user"$i" l2tp_srv_pass"$i"`
+    l2tp_srv_user=`nvram_get 2860 l2tp_srv_user"$i"`
+    l2tp_srv_pass=`nvram_get 2860 l2tp_srv_pass"$i"`
     if [ "$l2tp_srv_user" != "" ] && [ "$l2tp_srv_pass" != "" ]; then
 	printf "$l2tp_srv_user * $l2tp_srv_pass\n" >> $ppp/pap-secrets
 	printf "$l2tp_srv_user * $l2tp_srv_pass\n" >> $ppp/chap-secrets
