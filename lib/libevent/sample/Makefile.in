@@ -53,34 +53,35 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 @OPENSSL_TRUE@am__EXEEXT_1 = le-proxy$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
-dns_example_SOURCES = dns-example.c
-dns_example_OBJECTS = dns-example.$(OBJEXT)
+am_dns_example_OBJECTS = dns-example.$(OBJEXT)
+dns_example_OBJECTS = $(am_dns_example_OBJECTS)
 dns_example_LDADD = $(LDADD)
 am__DEPENDENCIES_1 =
 dns_example_DEPENDENCIES = $(am__DEPENDENCIES_1) ../libevent.la
-event_test_SOURCES = event-test.c
-event_test_OBJECTS = event-test.$(OBJEXT)
+am_event_test_OBJECTS = event-test.$(OBJEXT)
+event_test_OBJECTS = $(am_event_test_OBJECTS)
 event_test_LDADD = $(LDADD)
 event_test_DEPENDENCIES = $(am__DEPENDENCIES_1) ../libevent.la
-hello_world_SOURCES = hello-world.c
-hello_world_OBJECTS = hello-world.$(OBJEXT)
+am_hello_world_OBJECTS = hello-world.$(OBJEXT)
+hello_world_OBJECTS = $(am_hello_world_OBJECTS)
 hello_world_LDADD = $(LDADD)
 hello_world_DEPENDENCIES = $(am__DEPENDENCIES_1) ../libevent.la
-http_server_SOURCES = http-server.c
-http_server_OBJECTS = http-server.$(OBJEXT)
+am_http_server_OBJECTS = http-server.$(OBJEXT)
+http_server_OBJECTS = $(am_http_server_OBJECTS)
 http_server_LDADD = $(LDADD)
 http_server_DEPENDENCIES = $(am__DEPENDENCIES_1) ../libevent.la
-le_proxy_SOURCES = le-proxy.c
-le_proxy_OBJECTS = le-proxy.$(OBJEXT)
+am__le_proxy_SOURCES_DIST = le-proxy.c
+@OPENSSL_TRUE@am_le_proxy_OBJECTS = le-proxy.$(OBJEXT)
+le_proxy_OBJECTS = $(am_le_proxy_OBJECTS)
 am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1) ../libevent.la
 @OPENSSL_TRUE@le_proxy_DEPENDENCIES = $(am__DEPENDENCIES_2) \
 @OPENSSL_TRUE@	../libevent_openssl.la
-signal_test_SOURCES = signal-test.c
-signal_test_OBJECTS = signal-test.$(OBJEXT)
+am_signal_test_OBJECTS = signal-test.$(OBJEXT)
+signal_test_OBJECTS = $(am_signal_test_OBJECTS)
 signal_test_LDADD = $(LDADD)
 signal_test_DEPENDENCIES = $(am__DEPENDENCIES_1) ../libevent.la
-time_test_SOURCES = time-test.c
-time_test_OBJECTS = time-test.$(OBJEXT)
+am_time_test_OBJECTS = time-test.$(OBJEXT)
+time_test_OBJECTS = $(am_time_test_OBJECTS)
 time_test_LDADD = $(LDADD)
 time_test_DEPENDENCIES = $(am__DEPENDENCIES_1) ../libevent.la
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
@@ -95,10 +96,14 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = dns-example.c event-test.c hello-world.c http-server.c \
-	le-proxy.c signal-test.c time-test.c
-DIST_SOURCES = dns-example.c event-test.c hello-world.c http-server.c \
-	le-proxy.c signal-test.c time-test.c
+SOURCES = $(dns_example_SOURCES) $(event_test_SOURCES) \
+	$(hello_world_SOURCES) $(http_server_SOURCES) \
+	$(le_proxy_SOURCES) $(signal_test_SOURCES) \
+	$(time_test_SOURCES)
+DIST_SOURCES = $(dns_example_SOURCES) $(event_test_SOURCES) \
+	$(hello_world_SOURCES) $(http_server_SOURCES) \
+	$(am__le_proxy_SOURCES_DIST) $(signal_test_SOURCES) \
+	$(time_test_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -224,14 +229,14 @@ top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign no-dependencies
 LDADD = $(LIBEVENT_GC_SECTIONS) ../libevent.la
 AM_CPPFLAGS = -I$(top_srcdir) -I$(top_srcdir)/compat -I$(top_srcdir)/include -I../include
-event_test_sources = event-test.c
-time_test_sources = time-test.c
-signal_test_sources = signal-test.c
-dns_example_sources = dns-example.c
-hello_world_sources = hello-world.c
-http_server_sources = http-server.c
-@OPENSSL_TRUE@le_proxy_sources = le-proxy.c
-@OPENSSL_TRUE@le_proxy_LDADD = $(LDADD) ../libevent_openssl.la
+event_test_SOURCES = event-test.c
+time_test_SOURCES = time-test.c
+signal_test_SOURCES = signal-test.c
+dns_example_SOURCES = dns-example.c
+hello_world_SOURCES = hello-world.c
+http_server_SOURCES = http-server.c
+@OPENSSL_TRUE@le_proxy_SOURCES = le-proxy.c
+@OPENSSL_TRUE@le_proxy_LDADD = $(LDADD) ../libevent_openssl.la -lssl -lcrypto
 DISTCLEANFILES = *~
 all: all-am
 

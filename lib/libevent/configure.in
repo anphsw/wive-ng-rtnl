@@ -5,9 +5,9 @@ AC_INIT(event.c)
 
 AC_CONFIG_MACRO_DIR([m4])
 
-AM_INIT_AUTOMAKE(libevent,2.0.13-stable)
+AM_INIT_AUTOMAKE(libevent,2.0.15-stable)
 AM_CONFIG_HEADER(config.h)
-AC_DEFINE(NUMERIC_VERSION, 0x02000d00, [Numeric representation of the version])
+AC_DEFINE(NUMERIC_VERSION, 0x02000f00, [Numeric representation of the version])
 
 dnl Initialize prefix.
 if test "$prefix" = "NONE"; then
@@ -42,6 +42,15 @@ if test "$GCC" = "yes" ; then
 	# our sockaddr-handling code in strange ways.
 	CFLAGS="$CFLAGS -fno-strict-aliasing"
 fi
+
+# OS X Lion started deprecating the system openssl. Let's just disable
+# all deprecation warnings on OS X.
+case "$host_os" in
+
+ darwin*)
+    CFLAGS="$CFLAGS -Wno-deprecated-declarations"
+    ;;
+esac
 
 AC_ARG_ENABLE(gcc-warnings,
      AS_HELP_STRING(--enable-gcc-warnings, enable verbose warnings with GCC))

@@ -327,6 +327,24 @@ evbuffer_new(void)
 	return (buffer);
 }
 
+int
+evbuffer_set_flags(struct evbuffer *buf, ev_uint64_t flags)
+{
+	EVBUFFER_LOCK(buf);
+	buf->flags |= (ev_uint32_t)flags;
+	EVBUFFER_UNLOCK(buf);
+	return 0;
+}
+
+int
+evbuffer_clear_flags(struct evbuffer *buf, ev_uint64_t flags)
+{
+	EVBUFFER_LOCK(buf);
+	buf->flags &= ~(ev_uint32_t)flags;
+	EVBUFFER_UNLOCK(buf);
+	return 0;
+}
+
 void
 _evbuffer_incref(struct evbuffer *buf)
 {
@@ -444,7 +462,7 @@ evbuffer_run_callbacks(struct evbuffer *buffer, int running_deferred)
 	}
 }
 
-static inline void
+void
 evbuffer_invoke_callbacks(struct evbuffer *buffer)
 {
 	if (TAILQ_EMPTY(&buffer->callbacks)) {
@@ -1557,6 +1575,7 @@ evbuffer_add(struct evbuffer *buf, const void *data_in, size_t datlen)
 	memcpy(tmp->buffer, data, datlen);
 	tmp->off = datlen;
 	evbuffer_chain_insert(buf, tmp);
+	buf->n_add_for_cb += datlen;
 
 out:
 	evbuffer_invoke_callbacks(buf);
@@ -2267,12 +2286,18 @@ evbuffer_write_sendfile(struct evbuffer *buffer, evutil_socket_t fd,
 	}
 	return (res);
 #elif defined(SENDFILE_IS_SOLARIS)
-	res = sendfile(fd, info->fd, &offset, chain->off);
-	if (res == -1 && EVUTIL_ERR_RW_RETRIABLE(errno)) {
-		/* if this is EAGAIN or EINTR return 0; otherwise, -1 */
-		return (0);
+	{
+		const off_t offset_orig = offset;
+		res = sendfile(fd, info->fd, &offset, chain->off);
+		if (res == -1 && EVUTIL_ERR_RW_RETRIABLE(errno)) {
+			if (offset - offset_orig)
+				return offset - offset_orig;
+			/* if this is EAGAIN or EINTR and no bytes were
+			 * written, return 0 */
+			return (0);
+		}
+		return (res);
 	}
-	return (res);
 #endif
 }
 #endif
@@ -2674,10 +2699,19 @@ evbuffer_add_file(struct evbuffer *outbuf, int fd,
 	struct evbuffer_chain *chain;
 	struct evbuffer_chain_fd *info;
 #endif
+#if defined(USE_SENDFILE)
+	int sendfile_okay = 1;
+#endif
 	int ok = 1;
 
 #if defined(USE_SENDFILE)
 	if (use_sendfile) {
+		EVBUFFER_LOCK(outbuf);
+		sendfile_okay = outbuf->flags & EVBUFFER_FLAG_DRAINS_TO_FD;
+		EVBUFFER_UNLOCK(outbuf);
+	}
+
+	if (use_sendfile && sendfile_okay) {
 		chain = evbuffer_chain_new(sizeof(struct evbuffer_chain_fd));
 		if (chain == NULL) {
 			event_warn("%s: out of memory", __func__);

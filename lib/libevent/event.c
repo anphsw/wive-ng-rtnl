@@ -1024,6 +1024,7 @@ static inline void
 event_signal_closure(struct event_base *base, struct event *ev)
 {
 	short ncalls;
+	int should_break;
 
 	/* Allows deletes to work */
 	ncalls = ev->ev_ncalls;
@@ -1035,11 +1036,13 @@ event_signal_closure(struct event_base *base, struct event *ev)
 		if (ncalls == 0)
 			ev->ev_pncalls = NULL;
 		(*ev->ev_callback)((int)ev->ev_fd, ev->ev_res, ev->ev_arg);
-#if 0
-		/* XXXX we can't do this without a lock on the base. */
-		if (base->event_break)
+
+		EVBASE_ACQUIRE_LOCK(base, th_base_lock);
+		should_break = base->event_break;
+		EVBASE_RELEASE_LOCK(base, th_base_lock);
+
+		if (should_break)
 			return;
-#endif
 	}
 }
 
@@ -1057,7 +1060,7 @@ event_signal_closure(struct event_base *base, struct event *ev)
  * of index into the event_base's aray of common timeouts.
  */
 
-#define MICROSECONDS_MASK       0x000fffff
+#define MICROSECONDS_MASK       COMMON_TIMEOUT_MICROSECONDS_MASK
 #define COMMON_TIMEOUT_IDX_MASK 0x0ff00000
 #define COMMON_TIMEOUT_IDX_SHIFT 20
 #define COMMON_TIMEOUT_MASK     0xf0000000

@@ -1,3 +1,54 @@
+Changes in version 2.0.15-stable (12 Oct 2011)
+BUGFIXES (DNS):
+ o DNS: add ttl for negative answers using RFC 2308 idea. (f72e8f6 Leonid Evdokimov)
+ o Add DNS_ERR_NODATA error code to handle empty replies. (94fba5b Leonid Evdokimov)
+
+BUFGIXES (bufferevents and evbuffers):
+ o Make evbuffer callbacks get the right n_added value after evbuffer_add (1ef1f68 Alex)
+ o Prefer mmap to sendfile unless a DRAINS_TO_FD flag is set. Allows add_file to work with SSL. (0ba0af9)
+
+BUGFIXES (event loop):
+ o When a signal callback is activated to run multiple times, allow event_base_loopbreak to work even before they all have run. (4e8eb6a)
+
+DOCUMENTATION FIXES:
+ o Fix docstring in dns.h (2b6eae5 Leonid Evdokimov)
+ o refer to non-deprecated evdns functions in comments (ba5c27d Greg Hazel)
+
+BUILD AND TESTING FIXES:
+ o le-proxy and regress depend on openssl directly (9ae061a Sergey Avseyev)
+ o Use _SOURCES, not _sources, in sample/Makefile.am (7f82382)
+ o Fixed compiler warnings for unchecked read/write calls. (c3b62fd Mark Ellzey)
+ o Make write-checking fixes use tt_fail_perror (2b76847)
+ o Fix some "value never used" warnings with gcc 4.6.1 (39c0cf7)
+
+
+
+Changes in version 2.0.14-stable (31 Aug 2011)
+BUGFIXES (bufferevents and evbuffers):
+ o Propagate errors on the underlying bufferevent to the user. (4a34394 Joachim Bauch)
+ o Ignore OpenSSL deprecation warnings on OS X (5d1b255 Sebastian Hahn)
+ o Fix handling of group rate limits under 64 bytes of burst (6d5440e)
+ o Solaris sendfile: correctly detect amount of data sent (643922e Michael Herf)
+ o Make rate limiting work with common_timeout logic (5b18f13)
+ o clear read watermark on underlying bufferevent when creating filtering bev to fix potentially failing fragmented ssl handshakes (54f7e61 Joachim Bauch)
+
+BUGFIXES (IOCP):
+ o IOCP: don't launch reads or writes on an unconnected socket (495c227)
+ o Make IOCP rate-limiting group support stricter and less surprising. (a98da7b)
+ o Have test-ratelim.c support IOCP (0ff2c5a)
+ o Make overlapped reads result in evbuffer callbacks getting invoked (6acfbdd)
+ o Correctly terminate IO on an async bufferevent on bufferevent_free (e6af35d)
+
+BUGFIXES (other):
+ o Fix evsig_dealloc memory leak with debugging turned on. (9b724b2 Leonid Evdokimov)
+ o Fix request_finished memory leak with debugging turned on. (aff6ba1 Leonid Evdokimov)
+
+BUILD AND TESTING FIXES:
+ o Allow OS-neutral builds for platforms where some versions have arc4random_buf (b442302 Mitchell Livingston)
+ o Try to fix 'make distcheck' errors when building out-of-tree (04656ea Dave Hart)
+ o Clean up some problems identified by Coverity. (7c11e51 Harlan Stenn)
+
+
 Changes in version 2.0.13-stable (18 Jul 2011)
 BUGFIXES
  o Avoid race-condition when initializing global locks (b683cae)
