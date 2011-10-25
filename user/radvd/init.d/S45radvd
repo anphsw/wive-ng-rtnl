@@ -12,14 +12,14 @@ web_wait
 #get params
 . /etc/scripts/global.sh
 
-if [ "$opmode" = "0" ]; then
+if [ "$OperationMode" = "0" ]; then
     exit 0
 fi
 
 LOG="logger -t radvd"
 
 start() {
- if [ "$opmode" = "2" ]; then
+ if [ "$OperationMode" = "2" ]; then
     lan_if="eth2"
  fi
     radvdEnabled=`nvram_get 2860 radvdEnabled`
