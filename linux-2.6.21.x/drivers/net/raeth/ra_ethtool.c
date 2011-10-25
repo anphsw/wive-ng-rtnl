@@ -231,7 +231,9 @@ int mdio_read(struct net_device *dev, int phy_id, int location)
 void mdio_write(struct net_device *dev, int phy_id, int location, int value)
 {
 	END_DEVICE *ei_local = dev->priv;
+#ifdef RAETH_DEBUG
 	printk("mii.o write= phy_id:%d, address:%d value:%x\n", phy_id, location, value);
+#endif
 	mii_mgr_write( (unsigned int) ei_local->mii_info.phy_id, (unsigned int)location, (unsigned int)value);
 	return;
 }
@@ -455,7 +457,9 @@ int mdio_virt_read(struct net_device *dev, int phy_id, int location)
 void mdio_virt_write(struct net_device *dev, int phy_id, int location, int value)
 {
 	PSEUDO_ADAPTER *pseudo = dev->priv;
+#ifdef RAETH_DEBUG
 	printk("mii.o write= phy_id:%d, address:%d value:%d\n", phy_id, location, value);
+#endif
 	mii_mgr_write( (unsigned int) pseudo->mii_info.phy_id, (unsigned int)location, (unsigned int)value);
 	return;
 }
