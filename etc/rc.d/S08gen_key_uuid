@@ -17,8 +17,6 @@ start() {
         serial=`echo "$outid" | cut -f1 -d-`
         $LOG "UPNP UUID is $outid , serial is $serial"
 	printf "uuid=$outid\nserial=$serial\n" > /etc/miniupnpd.conf.uuid
-    else
-       $LOG "Use exist UUID file."
     fi
 
     if [ ! -f /etc/dropbear/dropbear_dss_host_key ] && [ -f /bin/dropbear ]; then
@@ -33,8 +31,6 @@ start() {
 	else
     	    (dropbearkey -t dss -f /etc/dropbear/dropbear_dss_host_key) &
 	fi
-    else
-	$LOG "DSS file exist."
     fi
 
 }
