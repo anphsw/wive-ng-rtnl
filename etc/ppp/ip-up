@@ -11,7 +11,8 @@ PPP_REMOTE="$5"
 PPP_IPPARAM="$6"
 LOG="logger -t pppd"
 
-eval `nvram_buf_get 2860 lan_ipaddr lan_netmask Lan2Enabled lan2_ipaddr lan2_netmask upnpEnabled vpnNAT vpnDGW vpnPeerDNS chilli_net use_snat PortForwardEnable DMZEnable DMZIPAddress DMZNATLoopback`
+eval `nvram_buf_get 2860 lan_ipaddr lan_netmask Lan2Enabled lan2_ipaddr lan2_netmask upnpEnabled vpnNAT vpnDGW vpnPeerDNS \
+	chilli_net use_snat PortForwardEnable DMZEnable DMZIPAddress DMZNATLoopback`
 
     #if wan ip not get
     if [ "$PPP_LOCAL" = "" ]; then

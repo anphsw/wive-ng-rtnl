@@ -415,26 +415,21 @@ stop() {
 }
 
 get_param() {
-    # network config
-    eval `nvram_buf_get 2860 lan_ipaddr lan_netmask Lan2Enabled lan2_ipaddr lan2_netmask use_snat`
+    # get network, vpn, netfiletrs and others config variables
+    eval `nvram_buf_get 2860 lan_ipaddr lan_netmask Lan2Enabled lan2_ipaddr lan2_netmask use_snat \
+	    vpnType vpnNAT vpnPurePPPOE natEnabled PortForwardEnable DMZEnable DMZIPAddress DMZNATLoopback \
+	    DefaultFirewallPolicy IPPortFilterEnable WANPingFilter RemoteSSH RemoteFTP RemoteTelnet RemoteManagement dhcpEnabled \
+	    ipt_account upnpEnabled igmpEnabled UDPXYMode UDPXYPort SmbEnabled snmpd chilli_net simple_qos parproutedEnabled \
+	    l2tp_srv_enabled`
 
     # if wan ip not get
     if [ "$wan_ipaddr" = "" ]; then
 	use_snat=0
     fi
-
-    # vpn configs
-    eval `nvram_buf_get 2860 vpnType vpnNAT vpnPurePPPOE natEnabled`
+    # In pppoe pure mode no need add MASQ rules to localnet
     if [ "$vpnPurePPPOE" = "1" ]; then
-	# In pppoe pure mode no need add MASQ rules to localnet
 	natEnabled=0
     fi
-
-    # netfilter conf
-    eval `nvram_buf_get 2860 PortForwardEnable DMZEnable DMZIPAddress DMZNATLoopback DefaultFirewallPolicy IPPortFilterEnable WANPingFilter RemoteSSH RemoteFTP RemoteTelnet RemoteManagement dhcpEnabled`
-
-    # ipt_acount info
-    ipt_account=`nvram_get 2860 ipt_account`
     if [ "$ipt_account" = "1" ]; then
 	lan_ip_acc=`ipcalc "$lan_ipaddr" "$lan_netmask" -n -s | cut -f 2- -d =`
 	lan_ip_prf=`ipcalc "$lan_ipaddr" "$lan_netmask" -p -s | cut -f 2- -d =`
@@ -443,10 +438,6 @@ get_param() {
 	    lan2_ip_prf=`ipcalc "$lan2_ipaddr" "$lan2_netmask" -p -s | cut -f 2- -d =`
 	fi
     fi
-
-    # others needed variable
-    eval `nvram_buf_get 2860 upnpEnabled igmpEnabled UDPXYMode UDPXYPort SmbEnabled snmpd chilli_net simple_qos parproutedEnabled l2tp_srv_enabled`
-
     # macros
     STATE_NEW="-m state --state NEW"
     STATE_EST="-m state --state ESTABLISHED,RELATED"

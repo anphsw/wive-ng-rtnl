@@ -131,9 +131,8 @@ set_dns()
 
 get_param() {
     # dhcpd params
-    eval `nvram_buf_get 2860 dhcpDomain dhcpStart dhcpEnd dhcpMask dhcpPriDns dhcpSecDns dhcpGateway dhcpLease dhcpStatic1`
-    # others for replace if dhcp configure fail
-    eval `nvram_buf_get 2860 SmbEnabled dnsPEnabled lan_ipaddr lan_netmask HostName`
+    eval `nvram_buf_get 2860 dhcpDomain dhcpStart dhcpEnd dhcpMask dhcpPriDns dhcpSecDns dhcpGateway dhcpLease dhcpStatic1 \
+	    nvram_buf_get 2860 SmbEnabled dnsPEnabled lan_ipaddr lan_netmask HostName`
 }
 
 case "$1" in

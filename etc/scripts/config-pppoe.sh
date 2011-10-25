@@ -16,7 +16,8 @@ killall_vpn
 LOG="logger -t vpnhelper-pppoe"
 
 get_param() {
-    eval `nvram_buf_get 2860 vpnServer vpnService vpnUser vpnPassword vpnMTU vpnMPPE vpnPeerDNS vpnDebug vpnInterface vpnAuthProtocol vpnEnableLCPnLCPFailure vpnLCPFailure vpnLCPInterval`
+    eval `nvram_buf_get 2860 vpnServer vpnService vpnUser vpnPassword vpnMTU vpnMPPE vpnPeerDNS vpnDebug vpnInterface \
+	    vpnAuthProtocol vpnEnableLCPnLCPFailure vpnLCPFailure vpnLCPInterval`
     OPTFILE="/etc/ppp/options.pppoe"
 }
 

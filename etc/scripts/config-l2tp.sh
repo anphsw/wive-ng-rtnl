@@ -16,7 +16,8 @@ killall_vpn
 LOG="logger -t vpnhelper-l2tp"
 
 get_param() {
-    eval `nvram_buf_get 2860 vpnServer vpnUser vpnPassword vpnMTU vpnMPPE vpnPeerDNS vpnDebug vpnAuthProtocol vpnEnableLCP vpnLCPFailure vpnLCPInterval vpnTestReachable`
+    eval `nvram_buf_get 2860 vpnServer vpnUser vpnPassword vpnMTU vpnMPPE vpnPeerDNS vpnDebug vpnAuthProtocol vpnEnableLCP \
+	    vpnLCPFailure vpnLCPInterval vpnTestReachable`
 }
 
 check_param() {

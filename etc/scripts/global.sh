@@ -16,9 +16,7 @@ real_wan_if="eth2.2"
 lan_if="br0"
 lan2_if="br0:9"
 
-# first get operation mode and wan mode
-# dns mode and relay mode
-# vpn mode and type
+# first get operation mode and wan mode  dns mode and relay mode vpn mode and type
 eval `nvram_buf_get 2860 OperationMode wanConnectionMode dnsPEnabled wan_static_dns vpnEnabled vpnType`
 
 # get wireless, wan and lan mac adresses
