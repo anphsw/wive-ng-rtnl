@@ -278,9 +278,6 @@ static int getWlanStaInfo(int eid, webs_t wp, int argc, char_t **argv)
 	int i, s;
 	struct iwreq iwr;
 	RT_802_11_MAC_TABLE table = {0};
-#ifndef CONFIG_RT2860V2_AP_V24_DATA_STRUCTURE
-	char tmpBuff[32];
-#endif
 
 	s = socket(AF_INET, SOCK_DGRAM, 0);
 	strncpy(iwr.ifr_name, "ra0", IFNAMSIZ);
