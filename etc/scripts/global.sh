@@ -20,7 +20,10 @@ lan2_if="br0:9"
 # dns mode and relay mode
 # vpn mode and type
 eval `nvram_buf_get 2860 OperationMode wanConnectionMode dnsPEnabled wan_static_dns vpnEnabled vpnType`
+
+# for compat
 opmode="$OperationMode"
+wanmode="$wanConnectionMode"
 
 # get wireless, wan and lan mac adresses
 getMacIf()
@@ -144,18 +147,18 @@ udhcpc_opts()
     fi
     eval `nvram_buf_get 2860 dhcpRequestIP wan_manual_mtu HostName`
     if [ "$dhcpRequestIP" != "" ]; then
-	REQIP="-r $dhcpRequestIP"
+	dhcpRequestIP="-r $dhcpRequestIP"
     else
-	REQIP=""
+	dhcpRequestIP=""
     fi
     if [ "$wan_manual_mtu" = "0" ]; then
-	GETMTU="-O mtu"
+	wan_manual_mtu="-O mtu"
     else
-	GETMTU=""
+	wan_manual_mtu=""
     fi
-    UDHCPCOPTS="-i $wan_if -H $HostName $REQIP -S -R -T 5 -a \
+    UDHCPCOPTS="-i $wan_if -H $HostName $dhcpRequestIP -S -R -T 5 -a \
 		-s /bin/udhcpc.sh -p /var/run/udhcpc.pid \
-		-O routes -O staticroutes -O msstaticroutes $GETMTU -f &"
+		-O routes -O staticroutes -O msstaticroutes $wan_manual_mtu -f &"
 }
 
 # configure and start zeroconf daemon
