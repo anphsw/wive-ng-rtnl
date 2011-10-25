@@ -24,7 +24,7 @@ function StartTheTimer()
 {
 	if (secs==0)
 	{
-		TimeoutReload(5);
+		TimeoutReload(10);
 		//window.location.reload();
 		window.location.href=window.location.href;	//reload page
 	}
