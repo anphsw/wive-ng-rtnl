@@ -386,6 +386,7 @@ static struct pci_driver ehci_pci_driver = {
 	.name =		(char *) hcd_name,
 	.id_table =	pci_ids,
 
+#ifdef CONFIG_PCI
 	.probe =	usb_hcd_pci_probe,
 	.remove =	usb_hcd_pci_remove,
 
@@ -394,4 +395,5 @@ static struct pci_driver ehci_pci_driver = {
 	.resume =	usb_hcd_pci_resume,
 #endif
 	.shutdown = 	usb_hcd_pci_shutdown,
+#endif
 };

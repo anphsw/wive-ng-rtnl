@@ -27,6 +27,8 @@
 #include <linux/notifier.h>
 #include <linux/signal.h>
 
+extern void emergency_restart(void);
+
 int sysctl_panic_on_oom;
 int sysctl_oom_kill_allocating_task;
 #ifdef CONFIG_OOM_EMBEDDED

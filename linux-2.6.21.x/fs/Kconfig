@@ -1375,6 +1375,7 @@ config CRAMFS
 
 config SQUASHFS
 	tristate "SquashFS 3.2 - Squashed file system support"
+	depends on BLOCK
 	select ZLIB_INFLATE
 	help
 	  Saying Y here includes support for SquashFS 3.2 (a Compressed Read-Only File

@@ -947,6 +947,7 @@ static inline void sk_filter_charge(struct sock *sk, struct sk_filter *fp)
 
 #define sk_filter(a, b) (0)
 #define sk_filter_release(a, fp)
+#define sk_filter_uncharge(a, b)
 #define sk_filter_charge(a, b)
 
 #endif

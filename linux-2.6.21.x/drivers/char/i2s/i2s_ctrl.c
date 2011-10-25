@@ -17,8 +17,7 @@
 #include <linux/mm.h>
 #include <asm/rt2880/surfboardint.h>
 #include <linux/pci.h>
-#include "../ralink_gdma.h"
-//#include "../ralink_gpio.h"
+#include <linux/ralink_gdma.h>
 
 #include "i2s_ctrl.h"
 #if defined(CONFIG_I2S_WM8750)

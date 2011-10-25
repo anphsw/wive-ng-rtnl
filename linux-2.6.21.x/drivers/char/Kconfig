@@ -15,6 +15,7 @@ config RALINK_GPIO_LED
 
 config RALINK_GDMA
 	tristate "Ralink GDMA Support"
+	depends on RALINK_RT3883 || RALINK_RT3352 || RALINK_RT5350 || RALINK_RT6855
 	default n
 choice
         prompt "GDMA Channel Allocation Mode"
@@ -69,10 +70,12 @@ config RALINK_SLIC_CONNECT_SPI_CS1
 
 config RALINK_I2C
 	tristate "Ralink RT2880 I2C Support"
+	depends on RALINK_RT3883 || RALINK_RT3352 || RALINK_RT5350 || RALINK_RT6855
 	default n
 
 config RALINK_PCM
 	tristate "Ralink PCM Support"
+        depends on RALINK_RT3352 || RALINK_RT5350 || RALINK_RT6855
 	default n
 
 config RALINK_PCM_SPICH
@@ -157,6 +160,7 @@ choice
 endchoice
 config RALINK_I2S
 	tristate "Ralink I2S Support"
+        depends on RALINK_RT3352 || RALINK_RT5350 || RALINK_RT6855
 	select RALINK_I2C
 	select RALINK_GDMA
 	default n
@@ -169,7 +173,6 @@ config I2S_IN_CLK
 config I2S_MS_MODE
         bool "Ralink SoC as I2S Master Device"
 	depends on RALINK_I2S
-        depends on RALINK_RT3352 || RALINK_RT5350 || RALINK_RT6855
 	default n
 choice
         prompt "Audio Codec MCLK Setting"

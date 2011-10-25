@@ -127,6 +127,7 @@ config RALINK_TIMER_DFS
 
 config  KERNEL_NVRAM
 	bool 'Kernel NVRAM'
+	depends on MTD_RALINK
 	default y
 
 config RT3XXX_EHCI_OHCI

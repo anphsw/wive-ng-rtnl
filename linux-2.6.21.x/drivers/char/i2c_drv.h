@@ -124,8 +124,8 @@ typedef struct i2c_wr_reg {
  *	-- address : 8-bits
  * AT24C512 (512K)
  *  -- address : two 8-bits
- */    
-#if (CONFIG_EEPROM_ADDRESS_BYTES == 2)
+ */
+#if defined(CONFIG_EEPROM_ADDRESS_BYTES) && (CONFIG_EEPROM_ADDRESS_BYTES == 2)
 #define ADDRESS_BYTES	2
 #else
 #define ADDRESS_BYTES	1

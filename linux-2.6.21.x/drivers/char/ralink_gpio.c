@@ -864,7 +864,7 @@ static void ralink_gpio_led_do_timer(unsigned long unused)
 		}
 	}
 #endif
-#ifndef CONFIG_RALINK_RT3883
+#if !defined (CONFIG_RALINK_RT3883) && !defined (CONFIG_RALINK_RT2880)
 	//always turn the power LED on
 	__LED_ON(GPIO_POWER_LED);
 #endif
@@ -991,8 +991,8 @@ int __init ralink_gpio_init(void)
 	gpiomode = le32_to_cpu(*(volatile u32 *)(RALINK_REG_GPIOMODE));
 #if !defined (CONFIG_RALINK_RT2880)
 	gpiomode &= ~0x1C;  //clear bit[2:4]UARTF_SHARE_MODE
-#endif
 	gpiomode |= RALINK_GPIOMODE_DFT;
+#endif
 	//printk("====== GPIO Mode: 0x%0X ======\n", gpiomode);
 	*(volatile u32 *)(RALINK_REG_GPIOMODE) = cpu_to_le32(gpiomode);
 
@@ -1014,8 +1014,10 @@ int __init ralink_gpio_init(void)
 void __exit ralink_gpio_exit(void)
 {
 	unregister_chrdev(ralink_gpio_major, RALINK_GPIO_DEVNAME);
+#if !defined (CONFIG_RALINK_RT2880)
 	//config these pins to normal mode
 	*(volatile u32 *)(RALINK_REG_GPIOMODE) &= ~RALINK_GPIOMODE_DFT;
+#endif
 	//disable gpio interrupt
 	*(volatile u32 *)(RALINK_REG_INTDIS) = cpu_to_le32(RALINK_INTCTL_PIO);
 #ifdef CONFIG_RALINK_GPIO_LED

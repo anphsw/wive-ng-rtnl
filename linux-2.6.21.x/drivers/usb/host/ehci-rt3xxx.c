@@ -37,8 +37,10 @@ static int rt_set_host(void)
 {
 	u32 val = rt_readl(SYSCFG1);
 	// host mode
-	val |= USB0_HOST_MODE;		
+	val |= USB0_HOST_MODE;
 	rt_writel(val, SYSCFG1);
+
+	return 0;
 }
 
 static int rt_usbhost_reset(void)
@@ -49,6 +51,8 @@ static int rt_usbhost_reset(void)
 	val &= ~(UHST_RST);
 	rt_writel(val, RSTCTRL);
 	mdelay (100);
+
+	return 0;
 }
 
 static int rt3xxx_ehci_init(struct usb_hcd *hcd)

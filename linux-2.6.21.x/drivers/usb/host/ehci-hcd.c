@@ -921,7 +921,6 @@ MODULE_DESCRIPTION (DRIVER_INFO);
 MODULE_AUTHOR (DRIVER_AUTHOR);
 MODULE_LICENSE ("GPL");
 
-#define CONFIG_PCI 	y	// ham 1210
 #ifdef CONFIG_PCI
 #include "ehci-pci.c"
 #define	PCI_DRIVER		ehci_pci_driver

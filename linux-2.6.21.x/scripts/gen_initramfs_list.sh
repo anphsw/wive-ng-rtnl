@@ -9,6 +9,10 @@
 # The script may also be used to generate the inputfile used for gen_init_cpio
 # This script assumes that gen_init_cpio is located in usr/ directory
 
+if [ ! -f ../romfs ]; then
+    mkdir -p ../romfs
+fi
+
 # error out on errors
 set -e
 

@@ -916,6 +916,7 @@ static struct pci_driver uhci_pci_driver = {
 	.name =		(char *)hcd_name,
 	.id_table =	uhci_pci_ids,
 
+#ifdef CONFIG_PCI
 	.probe =	usb_hcd_pci_probe,
 	.remove =	usb_hcd_pci_remove,
 	.shutdown =	uhci_shutdown,
@@ -924,6 +925,7 @@ static struct pci_driver uhci_pci_driver = {
 	.suspend =	usb_hcd_pci_suspend,
 	.resume =	usb_hcd_pci_resume,
 #endif	/* PM */
+#endif
 };
  
 static int __init uhci_hcd_init(void)
