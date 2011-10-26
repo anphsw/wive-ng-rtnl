@@ -59,8 +59,8 @@ if [ "$SmbEnabled" = "1" ]; then
     find /var/log -type f -name "*mbd*" | while read samba_log; do
 	echo > "$samba_log"
     done
-    /bin/nmbd -s /etc/smb.conf -D &
-    /bin/smbd -s /etc/smb.conf -D &
+    /bin/nmbd -s /etc/smb.conf -d0 -D &
+    /bin/smbd -s /etc/smb.conf -d0 -D &
 fi
 }
 

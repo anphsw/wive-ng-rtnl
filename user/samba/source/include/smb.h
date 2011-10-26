@@ -123,7 +123,7 @@ BOOL dbgtext();
  *                 DEBUGADD( 2, ("Some additional text.\n") );
  */
 #define DEBUGLVL( level ) \
-  ( (DEBUGLEVEL >= (level)) \
+  ( (DEBUGLEVEL > (level)) \
    && dbghdr( level, FILE_MACRO, FUNCTION_MACRO, (__LINE__) ) )
 
 #if 0
