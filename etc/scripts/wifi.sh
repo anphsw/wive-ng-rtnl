@@ -6,7 +6,7 @@
 echo ">>>>> RECONFIGURE WIFI <<<<<<<<<<"
 
 ########################################ALLMODE param##########################
-eval `nvram_buf_get 2860 HiPower AutoConnect OperationMode`
+eval `nvram_buf_get 2860 HiPower AutoConnect ApCliAutoConnect OperationMode`
 ########################################LNA param##############################
 if [ "$HiPower" = "1" ]; then
 # Disable MIMO PowerSave and increase LNA gain
@@ -24,6 +24,12 @@ if [ "$OperationMode" = "2" ]; then
     fi
   # in sta mode exit
   exit 0
+fi
+#######################################APCLIMODE param ########################
+if [ "$OperationMode" = "3" ]; then
+    if [ "$ApCliAutoConnect" = "1" ]; then
+	iwpriv apcli0 set ApCliAutoConnect=1
+    fi
 fi
 ########################################APMODE param###########################
 eval `nvram_buf_get 2860 AutoChannelSelect Channel AP2040Rescan RadioOff`

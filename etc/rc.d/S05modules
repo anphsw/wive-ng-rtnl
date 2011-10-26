@@ -80,17 +80,20 @@ start() {
 
 	$LOG "Link wifi up..."
 	get_txqlen
-	if [ "$OperationMode" != "3" ]; then
+	if [ "$OperationMode" = "3" ]; then
+	    # apcli mode ap interface
 	    ifconfig ra0 hw ether	"$WLAN_MAC_ADDR"
 	    ifconfig ra0 txqueuelen	"$txqueuelen"
 	    ip link set ra0 up
-	else
-	    ifconfig ra0 hw ether	"$WAN_MAC_ADDR"
-	    ifconfig ra0 txqueuelen	"$txqueuelen"
-	    ip link set ra0 up
-	    ifconfig apcli0 hw ether	"$WLAN_MAC_ADDR"
+	    # apcli mode sta interface
+	    ifconfig apcli0 hw ether	"$WAN_MAC_ADDR"
 	    ifconfig apcli0 txqueuelen	"$txqueuelen"
 	    ip link set apcli0 up
+	else
+	    # others modes
+	    ifconfig ra0 hw ether	"$WLAN_MAC_ADDR"
+	    ifconfig ra0 txqueuelen	"$txqueuelen"
+	    ip link set ra0 up
 	fi
     fi
 }
