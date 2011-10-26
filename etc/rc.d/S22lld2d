@@ -1,0 +1,49 @@
+#!/bin/sh
+
+# if app not exist
+if [ ! -f /bin/lld2d ]; then
+    exit 0
+fi
+
+# get params
+. /etc/scripts/global.sh
+
+LOG="logger -t lld2d"
+
+start() {
+    get_param
+    if [ "$lltdEnabled" = "1" ]; then
+	$LOG "Starting LLD2D"
+	lld2d $lan_if
+    fi
+}
+
+stop() {
+  $LOG "Stopping LLD2D"
+    killall -q lld2d
+    killall -q -SIGKILL lld2d
+    rm -rf /var/run/lld2d-* > /dev/null 2>&1
+}
+
+get_param() {
+    lltdEnabled=`nvram_get 2860 lltdEnabled`
+}
+
+case "$1" in
+        start)
+            start
+            ;;
+
+        stop)
+            stop
+            ;;
+
+        restart)
+            stop
+            start
+            ;;
+
+        *)
+            echo $"Usage: $0 {start|stop|restart}"
+            exit 1
+esac
