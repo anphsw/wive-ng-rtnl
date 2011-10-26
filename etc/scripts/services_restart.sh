@@ -43,22 +43,24 @@ fi
 ##########################################################
 if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then
     service kext start
-    if [ "$MODE" != "misc" ]; then
+    if [ "$MODE" = "misc" ]; then
+	# only misc reply
+	service lld2d restart
+	service snmpd restart
+	service inetd restart
+    else
+	# exclude musc reply
 	if [ -f /bin/pppoe-relay ]; then
 	    service pppoe-relay restart
 	fi
 	if [ -f /bin/chilli ]; then
 	    service chillispot restart
 	fi
-	service samba restart
 	service vpnserver restart
     fi
     service parprouted restart
-    service lld2d restart
     service udpxy restart
     service igmp_proxy restart
-    service inetd restart
-    service snmpd restart
 fi
 
 ##########################################################

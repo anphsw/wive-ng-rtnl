@@ -2062,7 +2062,7 @@ static void setLan(webs_t wp, char_t *path, char_t *query)
 	char	*opmode = nvram_get(RT2860_NVRAM, "OperationMode");
 	char	*wan_ip = nvram_get(RT2860_NVRAM, "wan_ipaddr");
 	char	*ctype = nvram_get(RT2860_NVRAM, "connectionType");
-	
+
 	ip = websGetVar(wp, T("lanIp"), T(""));
 	nm = websGetVar(wp, T("lanNetmask"), T(""));
 	lan2enabled = websGetVar(wp, T("lan2enabled"), T(""));
@@ -2143,8 +2143,11 @@ static void setLan(webs_t wp, char_t *path, char_t *query)
 	}
 	else
 		websRedirect(wp, submitUrl);
-		
+
 	doSystem("internet.sh");
+#if defined(CONFIG_USER_SAMBA) || defined(CONFIG_USER_SAMBA3)
+	doSystem("service samba restart");
+#endif
 }
 
 /* goform/setWan */
@@ -2160,7 +2163,7 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 	char_t *wan_mtu;
 	char_t *submitUrl;
 	char_t *st_en, *pd, *sd;
-	
+
 	char	*opmode = nvram_get(RT2860_NVRAM, "OperationMode");
 	char	*lan_ip = nvram_get(RT2860_NVRAM, "lan_ipaddr");
 	char	*lan2enabled = nvram_get(RT2860_NVRAM, "Lan2Enabled");
@@ -2174,7 +2177,7 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 	if (!strncmp(ctype, "STATIC", 7) || !strcmp(opmode, "0"))
 	{
 		FILE *fd;
-		
+
 		//always treat bridge mode having static wan connection
 		ip = websGetVar(wp, T("staticIp"), T(""));
 		nm = websGetVar(wp, T("staticNetmask"), T("0"));
