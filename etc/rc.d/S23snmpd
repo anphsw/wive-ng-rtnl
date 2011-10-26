@@ -9,7 +9,7 @@ LOG="logger -t snmpd"
 
 start() {
     get_param
-    if [ "$snmpd" != "" ] || [ "$snmpd" != "0" ]; then
+    if [ "$snmpd" != "" ] && [ "$snmpd" != "0" ]; then
 	$LOG "Starting SNMPD"
 	snmpd -h "$lan_ipaddr" -c "$HostName" &
     fi
