@@ -48,8 +48,6 @@ if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then
 	service lld2d restart
 	service snmpd restart
 	service inetd restart
-	service udpxy restart
-	service igmp_proxy restart
     else
 	# exclude musc reply
 	if [ -f /bin/pppoe-relay ]; then
@@ -60,6 +58,8 @@ if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then
 	fi
     fi
     service parprouted restart
+    service udpxy restart
+    service igmp_proxy restart
 fi
 
 ##########################################################

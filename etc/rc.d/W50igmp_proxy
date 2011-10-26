@@ -5,6 +5,10 @@ if [ ! -f /bin/igmpproxy ]; then
     exit 0
 fi
 
+# wait to start web and run from goahead code
+. /etc/scripts/web_wait.sh
+web_wait
+
 # get params
 . /etc/scripts/global.sh
 
