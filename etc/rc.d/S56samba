@@ -92,7 +92,7 @@ get_param() {
     if [ -d /proc/bus/usb ]; then
 	socket_options="SO_BROADCAST IPTOS_THROUGHPUT TCP_NODELAY SO_RCVBUF=65536 SO_SNDBUF=65536" >> $CONFIG
     else
-	socket_options="SO_BROADCAST IPTOS_THROUGHPUT TCP_NODELAY SO_RCVBUF=1024 SO_SNDBUF=1024" >> $CONFIG
+	socket_options="SO_BROADCAST IPTOS_THROUGHPUT TCP_NODELAY SO_RCVBUF=4096 SO_SNDBUF=4096" >> $CONFIG
     fi
 
     interfaces="lo 127.0.0.1/255.0.0.0 $lan_if $lan_ipaddr/$lan_netmask"

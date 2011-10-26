@@ -17,7 +17,7 @@ LOG="logger -t vpnhelper-pptp"
 
 get_param() {
     eval `nvram_buf_get 2860 vpnServer vpnUser vpnPassword vpnMTU vpnMPPE vpnPeerDNS vpnDebug vpnAuthProtocol vpnEnableLCP \
-	    vpnLCPFailure vpnLCPInterval vpnTestReachable`
+	    vpnLCPFailure vpnLCPInterval vpnTestReachable wan_gateway`
     OPTFILE="/etc/ppp/options.pptp"
 }
 
@@ -65,8 +65,8 @@ echo "==================START-PPTP-CLIENT======================="
 	    newdgw=""
 	fi
     else
-	newdgw=`nvram_get 2860 wan_gateway`
-	if [ $newdgw = "0.0.0.0" ]; then
+	newdgw="$wan_gateway"
+	if [ "$newdgw" = "0.0.0.0" ]; then
 	    newdgw=""
 	fi
     fi

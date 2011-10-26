@@ -17,7 +17,7 @@ lan_if="br0"
 lan2_if="br0:9"
 
 # first get operation mode and wan mode  dns mode and relay mode vpn mode and type
-eval `nvram_buf_get 2860 OperationMode wanConnectionMode dnsPEnabled wan_static_dns vpnEnabled vpnType`
+eval `nvram_buf_get 2860 OperationMode wanConnectionMode dnsPEnabled wan_ipaddr wan_static_dns vpnEnabled vpnType`
 
 # get wireless, wan and lan mac adresses
 getMacIf()
@@ -74,7 +74,6 @@ getWanIfName()
 getWanIpaddr()
 {
     # always return physical wan ip
-    wan_ipaddr=`nvram_get 2860 wan_ipaddr`
     if [ "$wanConnectionMode" != "STATIC" ] || [ "$wan_ipaddr" = "" ]; then
 	wan_ipaddr=`ip -4 addr show dev $wan_if | awk '/inet / {print $2}' | cut -f1 -d"/"` > /dev/null 2>&1
     fi
