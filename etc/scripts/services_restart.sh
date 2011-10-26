@@ -56,7 +56,6 @@ if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then
 	if [ -f /bin/chilli ]; then
 	    service chillispot restart
 	fi
-	service vpnserver restart
     fi
     service parprouted restart
     service udpxy restart

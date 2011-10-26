@@ -764,6 +764,7 @@
 7) libevent update to 2.0.15 stable version.<br>
 8) Update 802.1x daemon from 3.6.0.0 SDK.<br>
 9) Init scripts optimize for decrease restart overhead and speedup.<br>
+10) Add new runlevel W* for exclude  web_wait services from boot init thread.<br>
 
 <br><br>
 <b>For support see:</b><br>

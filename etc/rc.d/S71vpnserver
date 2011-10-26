@@ -7,10 +7,6 @@
 # include global config
 . /etc/scripts/global.sh
 
-# wait to start web and run from goahead code
-. /etc/scripts/web_wait.sh
-web_wait
-
 # default variables
 LOG="logger -t vpn-server"
 ppp="/etc/ppp-l2tpsrv"
