@@ -177,7 +177,7 @@ start() {
 	    $LOG "transmission"
 	    # RPC
 	    iptables -A servicelimit -i $lan_if -p tcp --dport 9091 -j ACCEPT
-	    # Incomint peers
+	    # Incoming peers
 	    iptables -A servicelimit -p tcp --dport 51413 -j ACCEPT
 	fi
 	if [ "$l2tp_srv_enabled" = "1" ]; then

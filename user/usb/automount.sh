@@ -117,7 +117,7 @@ killall -q -SIGTTIN goahead
 if [ "$MDEV_LABEL" != "optware" ] && [ "$MDEV_TYPE" != "swap"]; then
     #regenerate config and restart samba
     service samba restart
-    service transmision restart
+    service transmission restart
 fi
 
 exit 0
