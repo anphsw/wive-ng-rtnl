@@ -43,9 +43,6 @@ fi
 ##########################################################
 if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then
     service kext start
-    service parprouted restart
-    service lld2d restart
-    service samba restart
     if [ "$MODE" != "misc" ]; then
 	if [ -f /bin/pppoe-relay ]; then
 	    service pppoe-relay restart
@@ -53,12 +50,15 @@ if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then
 	if [ -f /bin/chilli ]; then
 	    service chillispot restart
 	fi
+	service samba restart
+	service vpnserver restart
     fi
+    service parprouted restart
+    service lld2d restart
     service udpxy restart
     service igmp_proxy restart
     service inetd restart
     service snmpd restart
-    service vpnserver restart
 fi
 
 ##########################################################
