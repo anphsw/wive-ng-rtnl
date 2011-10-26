@@ -173,6 +173,13 @@ start() {
 	    $LOG "snmpd"
 	    iptables -A servicelimit -i $lan_if -p udp --dport 161 -j ACCEPT
 	fi
+	if [ "$TransmissionEnabled" = "1" ]; then
+	    $LOG "transmission"
+	    # RPC
+	    iptables -A servicelimit -i $lan_if -p tcp --dport 9091 -j ACCEPT
+	    # Incomint peers
+	    iptables -A servicelimit -p tcp --dport 51413 -j ACCEPT
+	fi
 	if [ "$l2tp_srv_enabled" = "1" ]; then
 	    $LOG "vpn l2tp server"
 	    iptables -A servicelimit -i $lan_if -p udp --dport 1701 -j ACCEPT
@@ -419,8 +426,8 @@ get_param() {
     eval `nvram_buf_get 2860 lan_ipaddr lan_netmask Lan2Enabled lan2_ipaddr lan2_netmask use_snat \
 	    vpnType vpnNAT vpnPurePPPOE natEnabled PortForwardEnable DMZEnable DMZIPAddress DMZNATLoopback \
 	    DefaultFirewallPolicy IPPortFilterEnable WANPingFilter RemoteSSH RemoteFTP RemoteTelnet RemoteManagement dhcpEnabled \
-	    ipt_account upnpEnabled igmpEnabled UDPXYMode UDPXYPort SmbEnabled snmpd chilli_net simple_qos parproutedEnabled \
-	    l2tp_srv_enabled`
+	    ipt_account upnpEnabled igmpEnabled UDPXYMode UDPXYPort SmbEnabled TransmissionEnabled snmpd chilli_net simple_qos \
+	    parproutedEnabled l2tp_srv_enabled`
 
     # if wan ip not get
     if [ "$wan_ipaddr" = "" ]; then

@@ -765,6 +765,8 @@
 8) Update 802.1x daemon from 3.6.0.0 SDK.<br>
 9) Init scripts optimize for decrease restart overhead and speedup.<br>
 10) Add new runlevel W* for exclude  web_wait services from boot init thread.<br>
+11) Fix restart transmission at new disk mount.<br>
+12) Add iptables rules for transmission.<br>
 
 <br><br>
 <b>For support see:</b><br>
