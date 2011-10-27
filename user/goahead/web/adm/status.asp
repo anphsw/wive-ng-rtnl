@@ -96,10 +96,10 @@ function showPortStatus()
 		else if (i == stb_port)
 			text = '<span style="color: #800000;">TV</span>';
 
-		content = content + '<td class="port_status" style="background-image: url(\'/graphics/' + image + '.gif\'); "><b>' + text + '</b></td>';
+		content = content + '<td class="port_status" style="background-color: #ffffff; border: 0px; background-image: url(\'/graphics/' + image + '.gif\'); "><b>' + text + '</b></td>';
 	}
 	
-	ajaxModifyElementHTML('portStatusRow', '<table class="form" style="border: 0px;"><td>' + content + '</td></table>');
+	ajaxModifyElementHTML('portStatusRow', '<table class="small" style="border: 0px;">' + content + '</table>');
 }
 
 function initTranslation()

@@ -56,7 +56,7 @@ var security_modes_list =
 	[ "WPA2", "WPA2", 1, 0 ],
 	[ "WPA2-PSK", "WPA2PSK", 0, 0 ],
 	[ "WPA1/2-PSK", "WPAPSKWPA2PSK", 0, 0 ],
-	[ "WPA1/2", "WPA1WPA2", 0, 0 ],
+	[ "WPA1/2", "WPA1WPA2", 1, 0 ],
 	[ "802.1X", "IEEE8021X", 1, 1 ]
 ];
 
