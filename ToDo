@@ -20,9 +20,9 @@ iwpriv ra0 set DisConnectAllSta=1
 
 ) Add /proc/rt3052/esw_cnt for traffic statistic per switch port.(need add in WebUI).
 
-) add portselect for goahead
-) goahead need bind only lan_if if managment in only lan mode
 
 # For me
+) add portselect for goahead
+) goahead need bind only lan_if if managment in only lan mode
 #need fix
 ) Add skb reuse support.
