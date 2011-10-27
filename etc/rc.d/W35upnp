@@ -20,33 +20,27 @@ LOG="logger -t upnpd"
 
 start() {
  get_param
- if [ "$upnpEnabled" != "1" ]; then
-    exit 0
- fi
-    if [ "$OperationMode" != "0" ] || [ "$vpnEnabled" = "on" ]; then
+    if [ "$upnpEnabled" = "1" -a "$real_wan_ipaddr" != "" ] && [ "$OperationMode" != "0" -o "$vpnEnabled" = "on" ]; then
+	$LOG "Start upnp at $real_wan_ipaddr"
 	if [ ! -f /var/upnp_leases ]; then
 	    touch /var/upnp_leases
 	fi
-	already_started=`pidof miniupnpd`
-	if [ "$already_started" != "" ]; then
-	    killall -q miniupnpd
-	    killall -q -SIGKILL miniupnpd
-	    sleep 2
-	fi
-        if [ "$real_wan_ipaddr" != "" ]; then
-	    $LOG "Start upnp at $real_wan_ipaddr"
-	    ip route replace 239.0.0.0/8 dev $lan_if
-	    cat /etc/miniupnpd.conf.template > /etc/miniupnpd.conf
-	    cat /etc/miniupnpd.conf.uuid >> /etc/miniupnpd.conf
-            miniupnpd -f /etc/miniupnpd.conf -i "$real_wan_if" -o "$real_wan_ipaddr" -a "$lan_ipaddr/$lan_netmask" &
-	fi
+	ip route replace 239.0.0.0/8 dev $lan_if
+	cat /etc/miniupnpd.conf.template > /etc/miniupnpd.conf
+	cat /etc/miniupnpd.conf.uuid >> /etc/miniupnpd.conf
+        miniupnpd -f /etc/miniupnpd.conf -i "$real_wan_if" -o "$real_wan_ipaddr" -a "$lan_ipaddr/$lan_netmask" &
     fi
 }
 
 stop() {
  $LOG "Stop upnp "
-    killall -q miniupnpd
-    killall -q -SIGKILL miniupnpd
+    count=0
+    while killall -q miniupnpd ; do
+	if [ "$count" = "3" ]; then
+	    killall -q -SIGKILL miniupnpd
+	fi
+	sleep 2
+    done
     ip route del 239.0.0.0/8 dev "$lan_if" > /dev/null 2>&1
 }
 
