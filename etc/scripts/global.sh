@@ -202,20 +202,21 @@ killall_vpn()
     # if process not terminated send KILL
     # vpn client always use ppp0
     if [ -f /var/run/ppp0.pid ]; then
-	count=0
 	pid=`cat /var/run/ppp0.pid`
-	while kill -SIGHUP $pid > /dev/null 2>&1; do
-	    if [ "$count" = "3" ]; then
-		kill $pid > /dev/null 2>&1
-		sleep 1
-	    fi
-	    if [ "$count" = "4" ]; then
+	if [ "$pid" != "" ]; then
+	    # close connection
+	    kill -SIGHUP $pid
+	fi
+	# terminate pppd
+	count=0
+	while kill $pid > /dev/null 2>&1; do
+	    if [ "$count" = "2" ]; then
 		kill -SIGKILL $pid  > /dev/null 2>&1
-		sleep 1
 		count=0
+		sleep 2
 	    fi
-	    sleep 2
 	    count="$(($count+1))"
+	    sleep 2
 	done
 	rm -f /var/run/ppp0.pid
     fi
