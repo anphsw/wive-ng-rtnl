@@ -5,6 +5,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 
 <script type="text/javascript" src="/lang/b28n.js"></script>
+<script type="text/javascript" src="/js/controls.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <link rel="stylesheet" href="/style/controls.css" type="text/css">
 <title>Wireless Security Settings</title>
@@ -43,6 +44,21 @@ var RADIUS_Key = new Array();
 var session_timeout_interval = new Array();
 var AccessPolicy = new Array();
 var AccessControlList = new Array();
+
+var security_modes_list =
+[
+	[ "Disable", "Disable", 0, 0 ],
+	[ "OPEN", "OPEN", 0, 0 ],
+	[ "SHARED", "SHARED", 0, 0 ],
+	[ "WEP", "WEPAUTO", 0, 0 ],
+	[ "WPA", "WPA", 1, 0 ],
+	[ "WPA-PSK", "WPAPSK", 0, 0],
+	[ "WPA2", "WPA2", 1, 0 ],
+	[ "WPA2-PSK", "WPA2PSK", 0, 0 ],
+	[ "WPA1/2-PSK", "WPAPSKWPA2PSK", 0, 0 ],
+	[ "WPA1/2", "WPA1WPA2", 0, 0 ],
+	[ "802.1X", "IEEE8021X", 1, 1 ]
+];
 
 function checkMac(str){
 	var len = str.length;
@@ -340,9 +356,8 @@ function checkData()
 	}
 
 	// check Access Policy
-	for(i=0; i<MBSSID_MAX; i++){
-
-
+	for(i=0; i<MBSSID_MAX; i++)
+	{
 		if( document.getElementById("newap_text_" + i).value != ""){
 			if(!checkMac(document.getElementById("newap_text_" + i).value)){
 				alert("The mac address in Access Policy form is invalid.\n");
@@ -421,20 +436,12 @@ function securityMode(c_f)
 
 	hideWep();
 
-	document.getElementById("div_security_shared_mode").style.visibility = "hidden";
-	document.getElementById("div_security_shared_mode").style.display = "none";
-	document.getElementById("div_wpa").style.visibility = "hidden";
-	document.getElementById("div_wpa").style.display = "none";
-	document.getElementById("div_wpa_algorithms").style.visibility = "hidden";
-	document.getElementById("div_wpa_algorithms").style.display = "none";
-	document.getElementById("wpa_passphrase").style.visibility = "hidden";
-	document.getElementById("wpa_passphrase").style.display = "none";
-	document.getElementById("wpa_key_renewal_interval").style.visibility = "hidden";
-	document.getElementById("wpa_key_renewal_interval").style.display = "none";
-	document.getElementById("wpa_PMK_Cache_Period").style.visibility = "hidden";
-	document.getElementById("wpa_PMK_Cache_Period").style.display = "none";
-	document.getElementById("wpa_preAuthentication").style.visibility = "hidden";
-	document.getElementById("wpa_preAuthentication").style.display = "none";
+	displayElement( [
+		'div_security_shared_mode', 'div_wpa', 'div_wpa_algorithms', 'wpa_passphrase',
+		'wpa_key_renewal_interval', 'wpa_PMK_Cache_Period', 'wpa_preAuthentication',
+		'div_radius_server', 'div_8021x_wep' // 802.1x
+		], false);
+
 	document.security_form.cipher[0].disabled = true;
 	document.security_form.cipher[1].disabled = true;
 	document.security_form.cipher[2].disabled = true;
@@ -444,14 +451,10 @@ function securityMode(c_f)
 	document.security_form.PreAuthentication.disabled = true;
 
 	// 802.1x
-	document.getElementById("div_radius_server").style.visibility = "hidden";
-	document.getElementById("div_radius_server").style.display = "none";
-	document.getElementById("div_8021x_wep").style.visibility = "hidden";
-	document.getElementById("div_8021x_wep").style.display = "none";
 	document.security_form.ieee8021x_wep.disable = true;
 	document.security_form.RadiusServerIP.disable = true;
 	document.security_form.RadiusServerPort.disable = true;
-	document.security_form.RadiusServerSecret.disable = true;	
+	document.security_form.RadiusServerSecret.disable = true;
 	document.security_form.RadiusServerSessionTimeout.disable = true;
 	document.security_form.RadiusServerIdleTimeout.disable = true;
 
@@ -700,27 +703,24 @@ function submit_apply()
 function LoadFields(MBSSID)
 {
 	var result;
-	// Security Policy
-	sp_select = document.getElementById("security_mode");
 
+	// Security Policy
+	var b8021x = '<% get802_1XBuilt(); %>';
+	var sp_select = document.getElementById("security_mode");
 	sp_select.options.length = 0;
 
-	sp_select.options.add(new Option("Disable", "Disable"));
-	sp_select.options.add(new Option("OPEN", "OPEN"));
-	sp_select.options.add(new Option("SHARED", "SHARED"));
-	sp_select.options.add(new Option("WEPAUTO", "WEPAUTO"));
-	sp_select.options.add(new Option("WPA", "WPA"));
-	sp_select.options.add(new Option("WPA-PSK", "WPAPSK"));
-	sp_select.options.add(new Option("WPA2", "WPA2"));
-	sp_select.options.add(new Option("WPA2-PSK", "WPA2PSK"));
-	sp_select.options.add(new Option("WPAPSKWPA2PSK", "WPAPSKWPA2PSK"));
-	sp_select.options.add(new Option("WPA1WPA2", "WPA1WPA2"));
-
-	/* 
-	 * until now we only support 8021X WEP for MBSSID[0]
-	 */
-	if(MBSSID == 0)
-		sp_select.options.add(new Option("802.1X", "IEEE8021X"));
+	for (var i=0; i<security_modes_list.length; i++)
+	{
+		var mode = security_modes_list[i];
+		var setup = true;
+		if ((mode[3] > 0) && (MBSSID == 0)) // 802.1x support only for MBSSID 0
+			setup = false;
+		if ((mode[2] > 0) && (b8021x == '0'))
+			setup = false;
+		
+		if (setup)
+			sp_select.options.add(new Option(mode[0], mode[1]));
+	}
 
 	for (var i=0; i<sp_select.options.length; i++)
 		if (sp_select.options[i].value == AuthMode[MBSSID])
@@ -1104,7 +1104,7 @@ function onPreAuthenticationClick(type)
 <!-- <br> -->
 
 <!-- WPA -->
-<table id="div_wpa" name="div_wpa" class="form" style="visibility: hidden;">
+<table id="div_wpa" name="div_wpa" class="form" style="visibility: hidden; display: none;">
 <tr>
 	<td class="title" colspan="2" id="secreWPA">WPA</td>
 </tr>
@@ -1145,7 +1145,7 @@ function onPreAuthenticationClick(type)
 
 <!-- 802.1x -->
 <!-- WEP  -->
-<table id="div_8021x_wep" name="div_8021x_wep" class="form" style="visibility: hidden;">
+<table id="div_8021x_wep" name="div_8021x_wep" class="form" style="visibility: hidden; display: none;">
 <tr>
 	<td class="title" colspan="2" id="secure8021XWEP">802.1x WEP</td>
 </tr>
@@ -1158,7 +1158,7 @@ function onPreAuthenticationClick(type)
 </tr>
 </table>
 
-<table id="div_radius_server" name="div_radius_server" class="form" style="visibility: hidden;">
+<table id="div_radius_server" name="div_radius_server" class="form" style="visibility: hidden; display: none;">
 <tr>
 	<td class="title" colspan="2" id="secureRadius">Radius Server</td>
 </tr>

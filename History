@@ -769,6 +769,7 @@
 12) Add iptables rules for transmission.<br>
 13) Disable NAND Flash support per default. Not used NAND Flash in real routers devices. Use only in STB.<br>
 14) WiFi drivers disable ATE mode support, disable some debug messages, disable IAPP support(need external daemon for support).<br>
+15) Fix wireless security page.<br>
 
 <br><br>
 <b>For support see:</b><br>

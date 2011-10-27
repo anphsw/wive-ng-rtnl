@@ -99,7 +99,7 @@ function showPortStatus()
 		content = content + '<td class="port_status" style="background-image: url(\'/graphics/' + image + '.gif\'); "><b>' + text + '</b></td>';
 	}
 	
-	ajaxModifyElementHTML('portStatusRow', '<table class="small"><td>' + content + '</td></table>');
+	ajaxModifyElementHTML('portStatusRow', '<table class="form" style="border: 0px;"><td>' + content + '</td></table>');
 }
 
 function initTranslation()

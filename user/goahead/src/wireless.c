@@ -61,6 +61,7 @@ static void APDeleteAccessPolicyList(webs_t wp, char_t *path, char_t *query);
 void DeleteAccessPolicyList(int nvram, webs_t wp, char_t *path, char_t *query);
 static int  isAntennaDiversityBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int dumpBSS(int eid, webs_t wp, int argc, char_t **argv);
+static int get802_1XBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int dumpBSSKeys(int eid, webs_t wp, int argc, char_t **argv);
 #if defined(CONFIG_RT2860V2_RT3XXX_AP_ANTENNA_DIVERSITY) || defined(CONFIG_RT2860V2_RT3XXX_STA_ANTENNA_DIVERSITY)
 static void AntennaDiversity(webs_t wp, char_t *path, char_t *query);
@@ -83,6 +84,7 @@ void formDefineWireless(void) {
 	websAspDefine(T("getDLSBuilt"), getDLSBuilt);
 	websAspDefine(T("getDFSBuilt"), getDFSBuilt);
 	websAspDefine(T("dumpBSS"), dumpBSS);
+	websAspDefine(T("get802_1XBuilt"), get802_1XBuilt);
 	websAspDefine(T("dumpBSSKeys"), dumpBSSKeys);
 	websAspDefine(T("getCarrierBuilt"), getCarrierBuilt);
 	websAspDefine(T("getWlanM2UBuilt"), getWlanM2UBuilt);
@@ -2136,3 +2138,12 @@ static int isAntennaDiversityBuilt(int eid, webs_t wp, int argc, char_t **argv)
 	return 0;
 }
 #endif
+
+static int get802_1XBuilt(int eid, webs_t wp, int argc, char_t **argv)
+{
+#ifdef CONFIG_USER_802_1X
+	websWrite(wp, T("1"));
+#else
+	websWrite(wp, T("0"));
+#endif /* CONFIG_USER_802_1X */
+}
