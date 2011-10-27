@@ -61,7 +61,6 @@ rt2860v2_ap-objs += ../os/linux/ap_ioctl.o
 rt2860v2_ap-objs += ../os/linux/rt_pci_rbus.o
 rt2860v2_ap-objs += ../os/linux/rt_rbus_pci_util.o
 rt2860v2_ap-objs += ../os/linux/rbus_main_dev.o
-rt2860v2_ap-objs += ../common/rt_ate.o
 
 ifeq ($(CONFIG_RT2860V2_AP_WMM_ACM),y)
 rt2860v2_ap-objs += ../common/acm_edca.o
@@ -99,6 +98,7 @@ rt2860v2_ap-objs += ../ap/apcli_auth.o
 rt2860v2_ap-objs += ../ap/apcli_ctrl.o
 rt2860v2_ap-objs += ../ap/apcli_sync.o
 endif
+
 rt2860v2_ap-objs += ../common/cmm_mat.o
 rt2860v2_ap-objs += ../common/cmm_mat_iparp.o
 rt2860v2_ap-objs += ../common/cmm_mat_pppoe.o
@@ -162,22 +162,28 @@ endif
 ###################
 #  CFLAGS
 ##################
-EXTRA_CFLAGS += -DAGGREGATION_SUPPORT -DPIGGYBACK_SUPPORT -DWMM_SUPPORT  -DLINUX \
-               -Wall -Wstrict-prototypes -Wno-trigraphs
-
-EXTRA_CFLAGS += -DCONFIG_AP_SUPPORT -DAP_SCAN_SUPPORT -DUAPSD_AP_SUPPORT -DRTMP_RBUS_SUPPORT -DRTMP_MAC_PCI -DDOT11_N_SUPPORT -DRELASE_EXCLUDE -DIAPP_SUPPORT -DDOT1X_SUPPORT
-EXTRA_CFLAGS += -DRALINK_ATE -DRALINK_28xx_QA -DCONFIG_RT2880_ATE_CMD_NEW -DNEW_TXCON
-EXTRA_CFLAGS += -DSTATS_COUNT_SUPPORT
-EXTRA_CFLAGS += -DAPCLI_AUTO_CONNECT_SUPPORT
-EXTRA_CFLAGS += -DRESOURCE_PRE_ALLOC
+EXTRA_CFLAGS += -DAGGREGATION_SUPPORT -DPIGGYBACK_SUPPORT -DWMM_SUPPORT -DLINUX
+EXTRA_CFLAGS += -DCONFIG_AP_SUPPORT -DAP_SCAN_SUPPORT -DUAPSD_AP_SUPPORT -DRTMP_RBUS_SUPPORT
+EXTRA_CFLAGS += -DRTMP_MAC_PCI -DDOT11_N_SUPPORT -DDOT1X_SUPPORT
+EXTRA_CFLAGS += -DSTATS_COUNT_SUPPORT -DRESOURCE_PRE_ALLOC
 EXTRA_CFLAGS += -DMAT_SUPPORT
 
-#provide busy time statistics for every TBTT */
-#EXTRA_CFLAGS += -DQLOAD_FUNC_BUSY_TIME_STATS 
+#provide ATE testmode
+#EXTRA_CFLAGS += -DRALINK_ATE -DRALINK_28xx_QA -DCONFIG_RT2880_ATE_CMD_NEW -DNEW_TXCON
 
-# provide busy time alarm mechanism 
-# use the function to avoid to locate in some noise environments 
+#provide some debug messages and iapp roaming daemon support
+#EXTRA_CFLAGS += -DRELASE_EXCLUDE -DIAPP_SUPPORT
+
+#provide busy time statistics for every TBTT
+#EXTRA_CFLAGS += -DQLOAD_FUNC_BUSY_TIME_STATS
+
+# provide busy time alarm mechanism
+# use the function to avoid to locate in some noise environments
 #EXTRA_CFLAGS += -DQLOAD_FUNC_BUSY_TIME_ALARM
+
+ifdef RALINK_ATE
+rt2860v2_ap-objs += ../common/rt_ate.o
+endif
 
 ifeq ($(CONFIG_RALINK_RT2880),y)
 EXTRA_CFLAGS += -DRT2880
@@ -278,6 +284,7 @@ endif
 
 ifeq ($(CONFIG_RT2860V2_AP_APCLI),y)
 EXTRA_CFLAGS += -DAPCLI_SUPPORT
+EXTRA_CFLAGS += -DAPCLI_AUTO_CONNECT_SUPPORT
 endif
 
 ifeq ($(CONFIG_RT2860V2_AP_IGMP_SNOOP),y)

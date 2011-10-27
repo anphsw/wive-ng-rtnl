@@ -51,7 +51,6 @@ rt2860v2_sta-y +=  ../os/linux/rt_linux.o
 rt2860v2_sta-y +=  ../os/linux/rt_profile.o
 rt2860v2_sta-y +=  ../os/linux/rt_main_dev.o
 rt2860v2_sta-y +=  ../os/linux/sta_ioctl.o
-rt2860v2_sta-y += ../common/rt_ate.o
 
 
 rt2860v2_sta-y +=  ../os/linux/rbus_main_dev.o
@@ -124,13 +123,20 @@ rt2860v2_sta-y += ../common/cmm_mat_ipv6.o
 ###################
 #  CFLAGS
 ##################
-EXTRA_CFLAGS += -DAGGREGATION_SUPPORT -DPIGGYBACK_SUPPORT -DWMM_SUPPORT  -DLINUX \
-	       -Wall -Wstrict-prototypes -Wno-trigraphs 
-
-EXTRA_CFLAGS += -DCONFIG_STA_SUPPORT  -DRTMP_RBUS_SUPPORT -DRTMP_MAC_PCI -DDOT11_N_SUPPORT -DRELASE_EXCLUDE
-EXTRA_CFLAGS += -DSTATS_COUNT_SUPPORT -DCONFIG_RT2880_ATE_CMD_NEW -DNEW_TXCONT
-EXTRA_CFLAGS += -DRESOURCE_PRE_ALLOC -DRALINK_ATE -DRALINK_28xx_QA
+EXTRA_CFLAGS += -DAGGREGATION_SUPPORT -DPIGGYBACK_SUPPORT -DWMM_SUPPORT -DLINUX
+EXTRA_CFLAGS += -DCONFIG_STA_SUPPORT -DRTMP_RBUS_SUPPORT -DRTMP_MAC_PCI -DDOT11_N_SUPPORT
+EXTRA_CFLAGS += -DSTATS_COUNT_SUPPORT -DRESOURCE_PRE_ALLOC
 EXTRA_CFLAGS += -DMAT_SUPPORT
+
+#provide ATE testmode support
+#EXTRA_CFLAGS += -DRALINK_ATE -DRALINK_28xx_QA -DCONFIG_RT2880_ATE_CMD_NEW -DNEW_TXCONT
+
+#provide some debug messages
+#EXTRA_CFLAGS += -DRELASE_EXCLUDE
+
+ifdef RALINK_ATE
+rt2860v2_sta-y += ../common/rt_ate.o
+endif
 
 ifeq ($(CONFIG_RALINK_RT2880_STA_DBG),y)
 EXTRA_CFLAGS += -DDBG
