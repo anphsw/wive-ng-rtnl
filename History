@@ -767,7 +767,7 @@
 10) Add new runlevel W* for exclude  web_wait services from boot init thread.<br>
 11) Fix restart transmission at new disk mount.<br>
 12) Add iptables rules for transmission.<br>
-13) Disable NAND Flash support per default. Not used NAN Flash in real routers devices. Use only in STB.<br>
+13) Disable NAND Flash support per default. Not used NAND Flash in real routers devices. Use only in STB.<br>
 
 <br><br>
 <b>For support see:</b><br>
