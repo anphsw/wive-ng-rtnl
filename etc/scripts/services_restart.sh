@@ -45,7 +45,6 @@ if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then
     service kext start
     if [ "$MODE" = "misc" ]; then
 	# only misc reply
-	service lld2d restart
 	service snmpd restart
 	service inetd restart
     else
@@ -57,6 +56,7 @@ if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then
 	    service chillispot restart
 	fi
     fi
+    service lld2d restart
     service parprouted restart
     service udpxy restart
     service igmp_proxy restart
