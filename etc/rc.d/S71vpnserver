@@ -64,14 +64,12 @@ gen_configs() {
 
 # Generate passord files. Support 10 users
 configured=0
-echo > $ppp/pap-secrets
 echo > $ppp/chap-secrets
 for i in `seq 0 9`; do
     l2tp_srv_user=`nvram_get 2860 l2tp_srv_user"$i"`
     l2tp_srv_pass=`nvram_get 2860 l2tp_srv_pass"$i"`
     if [ "$l2tp_srv_user" != "" ] && [ "$l2tp_srv_pass" != "" ]; then
-	printf "$l2tp_srv_user * $l2tp_srv_pass\n" >> $ppp/pap-secrets
-	printf "$l2tp_srv_user * $l2tp_srv_pass\n" >> $ppp/chap-secrets
+	printf "$l2tp_srv_user * $l2tp_srv_pass *\n" >> $ppp/chap-secrets
 	configured=1
     fi
 done
@@ -88,7 +86,7 @@ auth file = $ppp/chap-secrets\n
 [lns default]\n
 ip range = $l2tp_srv_ip_range
 local ip = $l2tp_srv_ip_local
-exclusive = no
+exclusive = yes
 refuse authentication = no
 require authentication = yes
 require chap = yes
@@ -107,6 +105,7 @@ refuse-pap
 refuse-eap
 lock
 minunit 1
+external_chap_sec
 ip-up-script $ppp/ip-up
 ip-down-script $ppp/ip-down
 $l2tp_srv_ms_dns

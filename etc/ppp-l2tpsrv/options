@@ -5,4 +5,4 @@ noipdefault
 nolog
 
 #minimum autoincrement pppX name
-minunit 1
+minunit 10
