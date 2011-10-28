@@ -112,11 +112,12 @@ else
     touch /tmp/is_16ram_dev
 fi
 
-#blink wps/sec led at boot time
-#before goahead start
+#blink wps/sec led at boot time before goahead start
 if [ -f /bin/gpio ]; then
-    gpio l 13 1 1 0 0 1000
-    gpio l 14 1 1 0 0 1000
+    boot_leds_blink=`nvram_get 2860 boot_leds_blink`
+    for i in $boot_leds_blink; do
+	gpio l $i 1 1 0 0 1000
+    done
 fi
 
 $LOG "Start init now."

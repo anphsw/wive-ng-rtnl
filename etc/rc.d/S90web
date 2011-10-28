@@ -4,11 +4,12 @@ LOG="logger -t goahead"
 
 start() {
  $LOG "Start goahead"
-    # blink wps/sec led at boot time
-    # before goahead start
+    #blink wps/sec led at boot time before goahead start
     if [ -f /bin/gpio ]; then
-	gpio l 13 0 4000 0 0 0
-	gpio l 14 0 4000 0 0 0
+	boot_leds_blink=`nvram_get 2860 boot_leds_blink`
+	for i in $boot_leds_blink; do
+	    gpio l $i 0 4000 0 0 0
+	done
     fi
     if [ -f /bin/goahead ]; then
 	/bin/goahead &
