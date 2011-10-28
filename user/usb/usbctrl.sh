@@ -33,7 +33,9 @@ fi
 case $TYPE in
     7/*)
 	$LOG "${ACTION} ${idVendor}:${idProduct} may be printer"
-	modprobe -q usblp
+	if [ ! -d /sys/module/usblp ]; then
+	    modprobe -q usblp
+	fi
 	;;
     8/6/*)
 	if [ -f "/usr/share/usb_modeswitch/${idVendor}:${idProduct}" ]; then
@@ -41,16 +43,22 @@ case $TYPE in
 	    usb_modeswitch -c /usr/share/usb_modeswitch/${idVendor}:${idProduct} && exit 0
 	else
 	    $LOG "${ACTION} ${idVendor}:${idProduct} may be storage"
-	    modprobe -q usb-storage
+	    if [ ! -d /sys/module/usb-storage ]; then
+		modprobe -q usb-storage
+	    fi
 	fi
         ;;
     255/255/255)
 	if [ -f "/usr/share/usb_modeswitch/${idVendor}:${idProduct}" ]; then
 	    $LOG "${ACTION} ${idVendor}:${idProduct} may be 3G modem"
 	    if [ "${idVendor}" != "0af0" ]; then
-		modprobe -q usbserial vendor=0x${idVendor} product=0x${idProduct}
+		if [ ! -d /sys/module/usbserial ]; then
+		    modprobe -q usbserial vendor=0x${idVendor} product=0x${idProduct}
+		fi
 	    else
-		modprobe -q hso
+		if [ ! -d /sys/module/hso ]; then
+		    modprobe -q hso
+		fi
 	    fi
 	else
 	    $LOG "${ACTION} ${idVendor}:${idProduct} unknow device"

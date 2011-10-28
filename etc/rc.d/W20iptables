@@ -173,6 +173,10 @@ start() {
 	    $LOG "snmpd"
 	    iptables -A servicelimit -i $lan_if -p udp --dport 161 -j ACCEPT
 	fi
+	if [ "$PrinterSrvEnabled" = "1" ]; then
+	    $LOG "Printer Server"
+	    iptables -A servicelimit -i $lan_if -p tcp --dport 9100 -j ACCEPT
+	fi
 	if [ "$TransmissionEnabled" = "1" ]; then
 	    $LOG "transmission"
 	    # RPC
@@ -427,7 +431,7 @@ get_param() {
 	    vpnType vpnNAT vpnPurePPPOE natEnabled PortForwardEnable DMZEnable DMZIPAddress DMZNATLoopback \
 	    DefaultFirewallPolicy IPPortFilterEnable WANPingFilter RemoteSSH RemoteFTP RemoteTelnet RemoteManagement dhcpEnabled \
 	    ipt_account upnpEnabled igmpEnabled UDPXYMode UDPXYPort SmbEnabled TransmissionEnabled snmpd chilli_net simple_qos \
-	    parproutedEnabled l2tp_srv_enabled`
+	    parproutedEnabled l2tp_srv_enabled PrinterSrvEnabled`
 
     # if wan ip not get
     if [ "$wan_ipaddr" = "" ]; then

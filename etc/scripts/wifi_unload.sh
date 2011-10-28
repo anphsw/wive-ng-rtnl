@@ -17,7 +17,8 @@ kill_apps="transmission-daemon smbd nmbd pppd xl2tpd udhcpd udhcpc crond lld2d i
 rmmod_mod="hw_nat ppp_mppe pppol2tp pptp pppoe pppox ppp_generic imq ipt_TTL ipt_IMQ ipt_tos \
 	    ipt_REDIRECT ipt_ttl ipt_TOS xt_string xt_webstr xt_connmark xt_CONNMARK xt_conntrack \
 	    act_gact act_police cls_tcindex em_cmp em_u32 sch_gred sch_red act_ipt cls_fw cls_u32 \
-	    em_nbyte sch_esfq sch_htb sch_sfq ts_fsm ts_kmp ts_bm"
+	    em_nbyte sch_esfq sch_htb sch_sfq ts_fsm ts_kmp ts_bm \
+	    usblp usb-storage usbserial hso ext2 ext3 cifs"
 
 # disable forward
 sysctl -w net.ipv4.ip_forward=0
@@ -111,8 +112,6 @@ elif [ "$is_eth21_in_br0" != "" ]; then
     unload_ra0br0 eth2.1
 fi
 
-unload_modules
-
 if [ -f /bin/swapoff ]; then
     echo "Disable swaps."
     swapoff -a
@@ -126,6 +125,9 @@ if [ -n "$mounted" ]; then
 	done
     sleep 2
 fi
+
+# unload all modules this is need after unmont
+unload_modules
 
 # This drop unneded caches to free more ram.
 sysctl -w vm.min_free_kbytes=3192

@@ -21,20 +21,17 @@ if [ "$ACTION" = "add" ]; then
 	else
 	    /bin/p910nd -f /dev/usb/$MDEV $port
 	fi
-	if [ -z "`iptables -L servicelimit -n | grep dpt:9100`" ]; then
-	    $LOG "Add p910nd firewall rules"
-	    iptables -A servicelimit -i $lan_if -p tcp --dport 9100 -j ACCEPT > /dev/null 2>&1
-	fi
     fi
 else
     if [ ! -z "`pidof p910nd`" ]; then
 	$LOG "Stop p910nd daemon on port 910${port}"
 	killall -q p910nd
 	killall -q -9 p910nd
+	# svae mem in 16Mb devices
+	if [ -f /tmp/is_16ram_dev ]; then
+	    rmmod usblp > /dev/null 2>&1
+	fi
     fi
-    $LOG "Delete p910nd firewall rules and remove USBLP kernel module"
-    iptables -D servicelimit -i $lan_if -p tcp --dport 9100 -j ACCEPT > /dev/null 2>&1
-    rmmod usblp > /dev/null 2>&1
 fi
 
 exit 0
