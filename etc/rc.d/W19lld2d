@@ -18,7 +18,11 @@ start() {
     get_param
     if [ "$lltdEnabled" = "1" ]; then
 	$LOG "Starting LLD2D"
-	lld2d $lan_if
+	if [ "$RadioOff" = "1" ]; then
+	    lld2d $lan_if
+	else
+	    lld2d $lan_if ra0
+	fi
     fi
 }
 
@@ -30,7 +34,7 @@ stop() {
 }
 
 get_param() {
-    lltdEnabled=`nvram_get 2860 lltdEnabled`
+    eval `nvram_buf_get 2860 lltdEnabled RadioOff`
 }
 
 case "$1" in

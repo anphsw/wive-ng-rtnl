@@ -775,6 +775,7 @@
 18) PPPD add external_chap_sec options for use /etc/ppp-l2tpsrv/chap-secrets instad /etc/ppp/chap-secrets in server mode.<br>
 19) Fix l2tp server autentification.<br>
 20) Set minunit for l2tp server mode to 10 (need hole).<br>
+21) Fix lld2d wireless parametrs get for ralink and no need always open /proc/net/dev.<br>
 
 <br><br>
 <b>For support see:</b><br>

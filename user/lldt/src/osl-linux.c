@@ -17,6 +17,7 @@
  * This software is provided with NO WARRANTY.
  */
 
+#include <linux/config.h>
 #include <stdio.h>
 #include <ctype.h>
 #include <sys/socket.h>
@@ -769,8 +770,13 @@ get_link_speed(void *data)
      * Since this is a bridged pair of interfaces (br0 = vlan0 + eth1), I am returning the
      * wireless speed (eth1), which is the lowest of the upper limits on the two interfaces... */
 
-    speed = htonl(540000);  // 54Mbit wireless... (540k x 100 = 54Mbs)
-
+#if defined(CONFIG_RALINK_RT3050_1T1R) || defined(CONFIG_RALINK_RT3051_1T2R)
+    speed = htonl(1500000);	// 150Mbit wireless...
+#elif defined(CONFIG_RALINK_RT3052_2T2R) || defined(CONFIG_RALINK_RT3352_2T2R)
+    speed = htonl(3000000);	// 300Mbit wireless...
+#else
+    speed = htonl(540000);	// 54Mbit wireless... (540k x 100 = 54Mbs)
+#endif
     memcpy(data, &speed, 4);
 
     return TLV_GET_SUCCEEDED;

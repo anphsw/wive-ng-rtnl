@@ -22,8 +22,7 @@
 #include <stdio.h>
 
 //#define __DEBUG__
-#define CAN_FOPEN_IN_SELECT_LOOP 1
-#define USING_UNAME
+//#define CAN_FOPEN_IN_SELECT_LOOP 1
 
 #include <inttypes.h>   /* for uint8_t, uint16_t etc */
 #include <sys/time.h>	/* for timeval */

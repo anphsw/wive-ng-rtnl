@@ -19,6 +19,8 @@
 
 //#define CHECKING_PACKING 1
 
+#include <linux/config.h>
+
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
@@ -183,8 +185,18 @@ main(int argc, char **argv)
     {
         if (optind >= argc)
         {
+#if defined (CONFIG_RALINK_RT2880) || \
+    defined (CONFIG_RALINK_RT2883) || \
+    defined (CONFIG_RALINK_RT3883) || \
+    defined (CONFIG_RALINK_RT3352) || \
+    defined (CONFIG_RALINK_RT3052) || \
+    defined (CONFIG_RALINK_RT5350)
+            g_interface = "br0";
+            g_wl_interface = "ra0";
+#else
             g_interface = strstr(g_Progname,"x86") != NULL ? "eth0" : "br0";
             g_wl_interface = strstr(g_Progname,"x86") != NULL ? "eth0" : "eth1";
+#endif
             printf("%s: no interface-name argument; '%s' assumed.\n", g_Progname, g_interface);
         } else {
             g_interface = strdup(argv[optind]);
