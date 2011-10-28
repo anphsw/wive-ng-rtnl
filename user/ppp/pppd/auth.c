@@ -237,6 +237,7 @@ bool allow_any_ip = 0;		/* Allow peer to use any IP address */
 bool explicit_remote = 0;	/* User specified explicit remote name */
 bool explicit_user = 0;		/* Set if "user" option supplied */
 bool explicit_passwd = 0;	/* Set if "password" option supplied */
+bool external_chap_sec = 0;
 char remote_name[MAXNAMELEN];	/* Peer's name for authentication */
 
 static char *uafname;		/* name of most recent +ua file */
@@ -374,6 +375,9 @@ option_t auth_options[] = {
       "Password for authenticating us to the peer",
       OPT_PRIO | OPT_STATIC | OPT_HIDE,
       &explicit_passwd, MAXSECRETLEN },
+
+    { "external_chap_sec", o_bool, &external_chap_sec,
+      "Use diffirent chap-secrets", 1 },
 
     { "usehostname", o_bool, &usehostname,
       "Must use hostname for authentication", 1 },
@@ -1655,7 +1659,12 @@ have_chap_secret(client, server, need_ip, lacks_ipp)
 	}
     }
 
-    filename = _PATH_CHAPFILE;
+    /* this is for use diffirent chap-secrets for xl2tp server/client modes */
+    if (!external_chap_sec)
+	filename = _PATH_CHAPFILE;
+    else
+	filename = _PATH_CHAPFILE_SRV;
+
     f = fopen(filename, "r");
     if (f == NULL)
 	return 0;
@@ -1667,6 +1676,7 @@ have_chap_secret(client, server, need_ip, lacks_ipp)
 
     ret = scan_authfile(f, client, server, NULL, &addrs, NULL, filename, 0);
     fclose(f);
+
     if (ret >= 0 && need_ip && !some_ip_ok(addrs)) {
 	if (lacks_ipp != 0)
 	    *lacks_ipp = 1;
@@ -1750,7 +1760,12 @@ get_secret(unit, client, server, secret, secret_len, am_server)
 	    return 0;
 	}
     } else {
-	filename = _PATH_CHAPFILE;
+	/* this is for use diffirent chap-secrets for xl2tp server/client modes */
+	if (!external_chap_sec)
+	    filename = _PATH_CHAPFILE;
+	else
+	    filename = _PATH_CHAPFILE_SRV;
+
 	addrs = NULL;
 	secbuf[0] = 0;
 
