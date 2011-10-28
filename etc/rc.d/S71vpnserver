@@ -104,7 +104,7 @@ noproxyarp
 refuse-pap
 refuse-eap
 lock
-minunit 1
+minunit 10
 external_chap_sec
 ip-up-script $ppp/ip-up
 ip-down-script $ppp/ip-down

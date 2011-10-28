@@ -1,8 +1,0 @@
-#for all pppd sessions options
-lock
-auth
-noipdefault
-nolog
-
-#minimum autoincrement pppX name
-minunit 10
