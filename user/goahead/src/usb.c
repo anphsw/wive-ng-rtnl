@@ -649,18 +649,6 @@ int initUSB(void)
 				  nvram_get(RT2860_NVRAM, "WebCamPort"));
 	}
 #endif
-#ifdef CONFIG_USER_P910ND
-	printf("P910ND init\n");
-	char *printersrvebl = nvram_get(RT2860_NVRAM, "PrinterSrvEnabled");
-	doSystem("killall -q p910nd");
-	doSystem("killall -q -SIGKILL p910nd");
-	if (0 == strcmp(printersrvebl, "1"))
-	{
-	printf("P910ND start\n");
-		doSystem("p910nd -b -f /dev/lp0");
-	}
-#endif
-
 	return 0;
 }
 
