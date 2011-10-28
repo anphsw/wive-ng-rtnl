@@ -15,7 +15,7 @@ start() {
     get_param
     if [ "$TransmissionEnabled" = "1" ] && [ -d $TRANSMISSION_HOME ] && [ ! "`pidof transmission-daemon`" ]; then
 	$LOG "Start transmission daemon."
-	/bin/transmission-daemon
+	nice -15 /bin/transmission-daemon
     fi
 }
 

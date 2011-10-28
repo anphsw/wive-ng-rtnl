@@ -771,6 +771,7 @@
 14) WiFi drivers disable ATE mode support, disable some debug messages, disable IAPP support(need external daemon for support).<br>
 15) Fix wireless security page.<br>
 16) Add PrinterSrvEnabled PrinterSrvBidir variables for configure print server.<br>
+17) Set low prio for samba and transmission.<br>
 
 <br><br>
 <b>For support see:</b><br>

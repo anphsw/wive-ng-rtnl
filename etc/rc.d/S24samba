@@ -60,7 +60,7 @@ if [ "$SmbEnabled" = "1" ]; then
 	echo > "$samba_log"
     done
     /bin/nmbd -s /etc/smb.conf -d0 -D &
-    /bin/smbd -s /etc/smb.conf -d0 -D &
+    nice -10 /bin/smbd -s /etc/smb.conf -d0 -D &
 fi
 }
 
