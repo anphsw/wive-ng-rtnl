@@ -7,7 +7,7 @@ LOG="logger -t prnctrl"
 port=${MDEV##*lp}
 
 if [ "$ACTION" = "add" ]; then
-    PrinterSrvEnabled=`nvram_get 2860 PrinterSrvEnabled PrinterSrvBidir`
+    eval `nvram_buf_get 2860 PrinterSrvEnabled PrinterSrvBidir`
     if [ "$PrinterSrvEnabled" = "1" ] && [ -z "`pidof p910nd`" ]; then
 	# For GDI printers put printers firmware
 	# file in /etc, rename to prnfw.dl
