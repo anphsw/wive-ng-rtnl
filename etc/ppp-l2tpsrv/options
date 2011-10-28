@@ -1,6 +1,6 @@
 #for all pppd sessions options
 lock
-noauth
+auth
 noipdefault
 nolog
 

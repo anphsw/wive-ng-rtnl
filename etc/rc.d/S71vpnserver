@@ -96,7 +96,7 @@ pppoptfile = $ppp/options.l2tp\n
 " > $ppp/l2tpd.conf
 
 printf "
-noauth
+auth
 lcp-echo-interval 3
 lcp-echo-failure 8
 nodeflate
