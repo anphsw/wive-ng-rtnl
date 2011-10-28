@@ -21,7 +21,7 @@ if [ "$ACTION" = "add" ]; then
 	else
 	    /bin/p910nd -f /dev/usb/$MDEV $port
 	fi
-	if [ -z "$(iptables -L servicelimit -n | grep dpt:9100)" ]; then
+	if [ -z "`iptables -L servicelimit -n | grep dpt:9100`" ]; then
 	    $LOG "Add p910nd firewall rules"
 	    iptables -A servicelimit -i $lan_if -p tcp --dport 9100 -j ACCEPT > /dev/null 2>&1
 	fi
