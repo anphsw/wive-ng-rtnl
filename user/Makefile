@@ -110,11 +110,11 @@ all: config
 	NM=$(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-nm ; \
 	RANLIB=$(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-ranlib ; \
 	STRIP=$(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-strip ;
-#ifeq ($(CONFIG_USER_OPENSSL),y)
-#	# ">>>>>>>>>>>>>>>> CONFIGURE SSL NEEDED  <<<<<<<<<<<<<<<<<<<<<<"
-#	cd openssl ; ./Configure RT2880 no-ripemd; $(MAKE) ; \
-#	cd ..
-#endif
+ifeq ($(CONFIG_USER_OPENSSL),y)
+	# ">>>>>>>>>>>>>>>> CONFIGURE SSL NEEDED  <<<<<<<<<<<<<<<<<<<<<<"
+	cd openssl ; ./Configure RT2880 no-ripemd; $(MAKE) ; \
+	cd ..
+endif
 	# ">>>>>>>>>>>>>>>> CONFIGURE ALL NEEDED  <<<<<<<<<<<<<<<<<<<<<<"
 	for i in $(dir_y) ; do \
 	    if [ -f "$$i/DoConfigure.sh" ]; then ( cd $$i; ./DoConfigure.sh; cd .. ) fi \
