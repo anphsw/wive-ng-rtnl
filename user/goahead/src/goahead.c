@@ -33,7 +33,6 @@
 #include	"management.h"
 #include	"station.h"
 #include	"usb.h"
-#include	"media.h"
 
 #ifdef CONFIG_NET_SCHED
 #include      "qos.h"
@@ -324,12 +323,6 @@ static void InitSignals(int helper)
 #endif
 		signal(SIGUSR2, fs_nvram_reset_handler);
 #endif
-
-#ifdef CONFIG_USB
-		//registr hotplug signal
-		signal(SIGTTIN, hotPluglerHandler);
-		hotPluglerHandler(SIGTTIN);
-#endif
 		//regist WPS button
 		signal(SIGXFSZ, WPSSingleTriggerHandler);
 	}
@@ -437,9 +430,6 @@ static int initWebs(void)
 #endif
 #ifdef CONFIG_USB
 	formDefineUSB();
-#endif
-#ifdef CONFIG_RALINKAPP_MPLAYER
-	formDefineMedia();
 #endif
 	formDefineWireless();
 #if defined(CONFIG_RT2860V2_STA) || defined(CONFIG_RT2860V2_STA_MODULE)

@@ -777,6 +777,7 @@
 20) Set minunit for l2tp server mode to 10 (need hole).<br>
 21) Fix lld2d wireless parametrs get for ralink and no need always open /proc/net/dev.<br>
 22) Add boot_leds_blink variable for configure boot time led indicators gpio (default 13 14).<br>
+23) Goahead code cleanup and If-Modified-Support enabled.<br>
 
 <br><br>
 <b>For support see:</b><br>

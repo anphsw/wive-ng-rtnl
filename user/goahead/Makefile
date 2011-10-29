@@ -38,10 +38,6 @@ ifeq ("$(CONFIG_USER_STORAGE)", "")
 	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/usb/STORAGE*
 	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/storage/
 endif
-
-ifeq ("$(CONFIG_RALINKAPP_MPLAYER)", "")
-	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/media
-endif
 ifneq ("$(CONFIG_USER_GOAHEAD_LANG_ZHTW)", "y")
 	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/lang/zhtw
 endif

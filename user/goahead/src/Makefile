@@ -25,8 +25,8 @@ SSLSW = -DWEBS_SSL_SUPPORT -DMATRIX_SSL -I$(SSLINC)
 endif
 
 # If-Modified-Support switches (requires math library, libm.a)
-# IFMODSW = -DWEBS_IF_MODIFIED_SUPPORT
-# IFMODLIB = /usr/lib/libm.a
+IFMODSW = -DWEBS_IF_MODIFIED_SUPPORT
+IFMODLIB = $(ROOTDIR)/lib/lib/libm.a
 
 # Dependencies
 DEPEND_FILES	= asp.o balloc.o base64.o cgi.o default.o  \
@@ -54,9 +54,6 @@ CFLAGS += -DGA_HOSTNAME_SUPPORT
 endif
 ifneq ("$(CONFIG_USB)", "")
 DEPEND_FILES += usb.o
-endif
-ifeq ("$(CONFIG_RALINKAPP_MPLAYER)", "y")
-DEPEND_FILES += media.o
 endif
 ifeq ("$(CONFIG_NET_SCHED)", "y")
 DEPEND_FILES += qos.o
@@ -135,8 +132,6 @@ management.o: management.c management.h webs.h $(CONF_H) $(UCONF_H)
 matrix_ssl.o: matrix_ssl.c wsIntrn.h webs.h websSSL.h sslSocket.h
 
 md5c.o:  md5.h wsIntrn.h uemf.h
-
-media.o: media.c media.h webs.h
 
 mime.o:  mime.c webs.h wsIntrn.h ej.h ejIntrn.h uemf.h
 

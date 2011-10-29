@@ -15,10 +15,6 @@
 #include	"usb.h"
 #include 	"internet.h"
 
-#ifdef CONFIG_RALINKAPP_MPLAYER
-#include	"media.h"
-#endif
-
 static void storageAdm(webs_t wp, char_t *path, char_t *query);
 static void StorageAddUser(webs_t wp, char_t *path, char_t *query);
 static void StorageEditUser(webs_t wp, char_t *path, char_t *query);
@@ -28,7 +24,6 @@ static void storageFtpSrv(webs_t wp, char_t *path, char_t *query);
 static int GetNthFree(char *entry);
 static int ShowPartition(int eid, webs_t wp, int argc, char_t **argv);
 static int ShowAllDir(int eid, webs_t wp, int argc, char_t **argv);
-static void storageGetFirmwarePath(webs_t wp, char_t *path, char_t *query);
 static int getCount(int eid, webs_t wp, int argc, char_t **argv);
 static int getMaxVol(int eid, webs_t wp, int argc, char_t **argv);
 #ifdef CONFIG_USER_USHARE
@@ -53,8 +48,6 @@ static void printersrv(webs_t wp, char_t *path, char_t *query);
 
 #define DEBUG(x) do{fprintf(stderr, #x); fprintf(stderr, ": %s\n", x); }while(0)
 
-char firmware_path[1024] = {0};
-
 void formDefineUSB(void) {
 	websAspDefine(T("ShowPartition"), ShowPartition);
 	websAspDefine(T("ShowAllDir"), ShowAllDir);
@@ -69,7 +62,6 @@ void formDefineUSB(void) {
 	websFormDefine(T("StorageEditUser"), StorageEditUser);
 	websFormDefine(T("storageDiskAdm"), storageDiskAdm);
 	websFormDefine(T("storageDiskPart"), storageDiskPart);
-	websFormDefine(T("storageGetFirmwarePath"), storageGetFirmwarePath);
 #ifdef CONFIG_FTPD
 	websFormDefine(T("storageFtpSrv"), storageFtpSrv);
 #endif
@@ -729,7 +721,6 @@ static int ShowAllDir(int eid, webs_t wp, int argc, char_t **argv)
 		struct dirent *dirp;
 		struct stat statbuf;
 
-		// if (strncmp(path, "/var", 4) != 0)
 		if (0 != strncmp(path, "/media/sd", 9))
 		{
 			continue;
@@ -811,7 +802,7 @@ static int getMaxVol(int eid, webs_t wp, int argc, char_t **argv)
 
 	fscanf(pp, "%*s %*s %s %s %*s %*s\n", maxvol, unit);
 	pclose(pp);
-	
+
 	transfer = atof(maxvol);
 	if (0 == strcmp(unit, "GB,"))
 	{
@@ -845,133 +836,3 @@ static int isStorageExist(void)
 	printf("no usb disk found\n.");
 	return 0;
 }
-
-/*
- *  taken from "mkimage -l" with few modified....
- */
-int checkIfFirmware(char *imagefile)
-{
-	unsigned int magic;
-	FILE *fp = fopen(imagefile, "r");
-	if(!fp){
-		perror(imagefile);
-		return 0;
-	}
-	if( fread(&magic, sizeof(magic), 1, fp) != 1){
-		perror(imagefile);
-		fclose(fp);
-		return 0;
-	}
-
-	fclose(fp);
-
-	if(magic == ntohl(IH_MAGIC))
-		return 1;
-	else
-		return 0;
-}
-
-
-/*
- *  find the firmware recursively in usb disk.
- */
-static void lookupFirmware(char *dir_path)
-{
-	struct dirent *dir;
-	struct stat stat_buf;
-	char whole_path[1024];
-
-	DIR *d = opendir(dir_path);
-	if(!d){
-		perror(dir_path);
-		return;			// give up to open the directory
-	}
-
-	while((dir = readdir(d))){
-		if(!strcmp(dir->d_name, ".") || !strcmp(dir->d_name, ".."))
-			continue;
-
-		snprintf(whole_path, 1024, "%s/%s", dir_path, dir->d_name);
-		if(stat( whole_path, &stat_buf) == -1){
-			perror(dir_path);
-			continue;
-		}
-
-		if( S_ISDIR( stat_buf.st_mode)){
-			lookupFirmware(whole_path);	//recursive
-			continue;
-		}
-
-		if(stat_buf.st_size < MIN_FIRMWARE_SIZE)
-			continue;
-
-		if(checkIfFirmware(whole_path)){
-			if(!strlen(firmware_path))
-				snprintf(firmware_path, sizeof(firmware_path), "%s", whole_path);
-			else
-				snprintf(firmware_path, sizeof(firmware_path), "%s\n%s", firmware_path, whole_path);
-		}
-	}
-	closedir(d);
-	return;
-}
-
-static int isSpaceEnough(char *part)
-{
-	// Write a big file to test the partition
-	// TODO: I'm lazy to use fstatfs() to do the same thing.
-	int count;
-	char path[1024];
-	snprintf(path, 1024, "%s/.delete_me", part);
-	FILE *fp = fopen(path, "w");
-
-	if(!fp){
-        perror(__FUNCTION__);
-		return 0;
-	}
-	for(count =0; count <MIN_SPACE_FOR_FIRMWARE; count += sizeof(path)){
-		if( fwrite(path, sizeof(path), 1, fp) != 1){
-			fclose(fp);
-			unlink(path);
-			sync();
-			fprintf(stderr, __FILE__":no enough space left in %s.\n", part);
-			return 0;
-		}
-	}
-	fclose(fp);
-	unlink(path);
-	sync();
-	return 1;
-}
-
-void setFirmwarePath(void)
-{
-	firmware_path[0] = '\0';
-	if(!isStorageExist())
-		return;
-
-	lookupFirmware(USB_STORAGE_PATH);
-	sync();
-	printf("firmware found: %s\n", firmware_path);
-}
-
-static void storageGetFirmwarePath(webs_t wp, char_t *path, char_t *query)
-{
-	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/plain\n"));
-	websWrite(wp, WEBS_CACHE_CONTROL_STRING);
-	websWrite(wp, T("\n"));
-	websWrite(wp, "%s", firmware_path);
-	websDone(wp, 200);
-}
-
-/*
- *  Hotpluger signal handler
- */
-void hotPluglerHandler(int signo)
-{
-#ifdef CONFIG_RALINKAPP_MPLAYER
-	cleanup_musiclist();
-#endif
-	initUSB();
-}
-

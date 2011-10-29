@@ -2146,4 +2146,5 @@ static int get802_1XBuilt(int eid, webs_t wp, int argc, char_t **argv)
 #else
 	websWrite(wp, T("0"));
 #endif /* CONFIG_USER_802_1X */
+    return 0;
 }

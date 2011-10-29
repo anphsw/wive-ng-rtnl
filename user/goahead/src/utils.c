@@ -22,10 +22,6 @@
 #include 	"wps.h"
 #endif
 
-#ifdef CONFIG_USER_STORAGE
-extern void setFirmwarePath(void);
-#endif
-
 static int  getCfgGeneral(int eid, webs_t wp, int argc, char_t **argv);
 static int  getCfgNthGeneral(int eid, webs_t wp, int argc, char_t **argv);
 static int  getCfgZero(int eid, webs_t wp, int argc, char_t **argv);
@@ -47,9 +43,6 @@ static int  getOnePortOnly(void);
 static int  isOnePortOnly(int eid, webs_t wp, int argc, char_t **argv);
 static void setOpMode(webs_t wp, char_t *path, char_t *query);
 static void setWanPort(webs_t wp, char_t *path, char_t *query);
-#ifdef CONFIG_USER_STORAGE
-static void ScanUSBFirmware(webs_t wp, char_t *path, char_t *query);
-#endif
 
 /*********************************************************************
  * System Utilities
@@ -455,9 +448,6 @@ void formDefineUtilities(void)
 	websAspDefine(T("isOnePortOnly"), isOnePortOnly);
 	websFormDefine(T("setOpMode"), setOpMode);
 	websFormDefine(T("setWanPort"), setWanPort);
-#ifdef CONFIG_USER_STORAGE
-	websFormDefine(T("ScanUSBFirmware"), ScanUSBFirmware);
-#endif
 }
 
 
@@ -1037,16 +1027,6 @@ int netmask_aton(const char *ip)
 	}
 	return result;
 }
-
-#ifdef CONFIG_USER_STORAGE
-static void ScanUSBFirmware(webs_t wp, char_t *path, char_t *query)
-{
-	setFirmwarePath();
-	printf("%s enter\n", __FUNCTION__);
-
-	websRedirect(wp, "adm/upload_firmware.asp");
-}
-#endif
 
 static void outputTimerForReload(webs_t wp, long delay)
 {
