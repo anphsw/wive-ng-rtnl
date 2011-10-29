@@ -111,7 +111,7 @@ else
   swap_off
 fi
 
-if [ "$MDEV_LABEL" != "optware" ] && [ "$MDEV_TYPE" != "swap"]; then
+if [ "$MDEV_LABEL" != "optware" ] && [ "$MDEV_TYPE" != "swap" ]; then
     #regenerate config and restart samba
     service samba restart
     service transmission restart
