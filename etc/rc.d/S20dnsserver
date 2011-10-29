@@ -50,7 +50,7 @@ gen_hosts() {
 	fi
     fi
     if [ -d /proc/sys/net/ipv6 ]; then
-	echo "::1	localhost ipv6.$HostName.lo"	> /etc/hosts
+	echo "::1	localhost ipv6.$HostName.lo"	>> /etc/hosts
     fi
 
     # read for all write by root
