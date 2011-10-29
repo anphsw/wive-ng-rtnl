@@ -242,9 +242,6 @@ int main (int argc, char *argv[])
 		html_error("mtd_write fatal error! The corrupted image has ruined the flash!!");
 		return -1;
 	}
-
-#elif defined(UPLOAD_BOOTLOADER_SUPPORT)
-	mtd_write_bootloader(filename, (int)file_begin, (int)(file_end - file_begin));
 #else
 #error "no upload support defined!"
 #endif
