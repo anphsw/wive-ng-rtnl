@@ -11,10 +11,9 @@ MODE="$1"
 $LOG "Restart needed services and scripts. Mode $MODE"
 
 ##########################################################
-# Regenerate resolv only if !ppp or wan_static_dns on    #
+# Regenerate resolv only if wan_static_dns on		 #
 ##########################################################
-if [ "$vpnEnabled" != "on" ] || [ "$MODE" != "pppd" ] || [ "$wan_static_dns" = "on" ]; then
-    $LOG "Resolv config generate..."
+if [ "$wan_static_dns" = "on" ]; then
     service resolv start
 fi
 
