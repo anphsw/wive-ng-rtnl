@@ -3,6 +3,7 @@
 # Description: Megakill script..
 # Try some methods for free ram before firmware update.
 # Workaround over workaround. Need clean in the future.
+# In 16Mb devices also reconfigure network and unload wifi modules for memsave.
 
 # include global
 . /etc/scripts/global.sh
@@ -81,13 +82,20 @@ unload_modules()
     do
         rmmod $mod > /dev/null 2>&1
     done
-    # unload wifi modules
-    service modules stop
+    if [ -f /tmp/is_16ram_dev ]; then 
+	# unload wifi modules
+	service modules stop
+    fi
     # unload full
     rmmod_mod=`lsmod | awk {' print $1'}`
     for mod in $rmmod_mod
     do
-        rmmod $mod > /dev/null 2>&1
+	if [ -f /tmp/is_32ram_dev ] && [ "$mod" != "rt2860v2_ap" -o "$mod" != "rt2860v2_sta" ]; then
+	    mod=
+	fi
+	if [ "$mod" != "" ]; then
+    	    rmmod $mod > /dev/null 2>&1
+	fi
     done
     rmmod -a
 }
@@ -110,14 +118,17 @@ unload_apps()
 
 unload_apps
 
-is_ra0_in_br0=`brctl show | sed -n '/ra0/p'`
-is_eth21_in_br0=`brctl show | sed -n '/eth2\.1/p'`
+if [ -f /tmp/is_16ram_dev ]; then
+    # check in bridge
+    is_ra0_in_br0=`brctl show | sed -n '/ra0/p'`
+    is_eth21_in_br0=`brctl show | sed -n '/eth2\.1/p'`
 
-# unload wifi driver
-if [ "$is_ra0_in_br0" == "" ]; then
-    unload_ra0
-elif [ "$is_eth21_in_br0" != "" ]; then
-    unload_ra0br0 eth2.1
+    # unload wifi driver
+    if [ "$is_ra0_in_br0" == "" ]; then
+	unload_ra0
+    elif [ "$is_eth21_in_br0" != "" ]; then
+	unload_ra0br0 eth2.1
+    fi
 fi
 
 if [ -f /bin/swapoff ]; then
