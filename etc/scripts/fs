@@ -91,9 +91,8 @@ fullreset(){
     wifi_unload.sh
     echo "Write zero in $MTDRWFS,$MTD2CFG,$MTD2FAC mtd particions." 
     dd if=/dev/zero of=$MTDRWFS conv=sync bs=64k count=$BLOCKS > /dev/null 2>&1
-    dd if=/dev/zero of=$MTD2FAC conv=sync bs=64k count=1 > /dev/null 2>&1
     dd if=/dev/zero of=$MTD2CFG conv=sync bs=8k seek=1 count=7 > /dev/null 2>&1
-    sync
+    burnrf
     reboot
 }
 
