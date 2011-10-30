@@ -478,6 +478,7 @@ const parameter_fetch_t vpn_args[] =
 	{ T("vpn_cpu_limit"),          "vpnCpuLimit",          0,       T("") },
 	{ T("vpn_lcp_errors"),         "vpnLCPFailure",        0,       T("") },
 	{ T("vpn_lcp_interval"),       "vpnLCPInterval",       0,       T("") },
+	{ T("vpn_test_reachable"),     "vpnTestReachable",     2,       T("") },
 	{ NULL, NULL, 0, NULL } // Terminator
 };
 

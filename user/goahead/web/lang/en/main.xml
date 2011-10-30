@@ -43,6 +43,7 @@
   <message msgid="treeapp station list" msgstr="Station List" />
   <message msgid="treeapp mesh settings" msgstr="Mesh Settings" />
   <message msgid="treeapp dhcp server" msgstr="DHCP Server" />
+  <message msgid="treeapp l2tp server" msgstr="L2TP Server" />
   <message msgid="treeapp ntp settings" msgstr="Network Time" />
   <message msgid="treeapp ddns settings" msgstr="Dynamic DNS" />
   <message msgid="treeapp miscellaneous" msgstr="Miscellaneous" />

@@ -177,6 +177,8 @@ function initValue()
 		document.wireless_wds.wds_phy_mode.options.selectedIndex = 1;
 	else if (wdsPhyMode.indexOf("HTMIX") >= 0 || wdsPhyMode.indexOf("htmix") >= 0)
 		document.wireless_wds.wds_phy_mode.options.selectedIndex = 2;
+	else
+		document.wireless_wds.wds_phy_mode.options.selectedIndex = 2; // Default as HTMIX
 	/*
 	else if (wdsPhyMode.indexOf("GREENFIELD") >= 0 || wdsPhyMode.indexOf("greenfield") >= 0)
 		document.wireless_wds.wds_phy_mode.options.selectedIndex = 3;

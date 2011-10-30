@@ -79,6 +79,8 @@ function showHint(key)
 		}
 		else if (key=='vpn_peerdns')
 			text += 'Allow to get DNS adress from VPN server and write to /etv/ppp/resolv.conf.';
+		else if (key=='vpn_test_reachable')
+			text += 'Check that VPN server is reachable before initiation of VPN connection.';
 		else if (key=='vpn_debug')
 			text += 'Allow debug mode for VPN connections.';
 		else if (key=='vpn_nat')
@@ -154,7 +156,7 @@ function vpnSwitchClick(form)
 		form.vpn_peerdns, form.vpn_debug, form.vpn_nat, form.vpn_dgw,
 		form.vpn_mtu_type, form.vpn_pppoe_iface, form.vpn_type,
 		form.vpn_lcp, form.lanauth_access, form.vpn_pure_pppoe,
-		form.vpn_pppoe_service,
+		form.vpn_pppoe_service, form.vpn_test_reachable,
 		form.vpn_cpu_limit, form.vpn_lcp_errors, form.vpn_lcp_interval,
 		form.vpn_cpu_limit_type
 		], form.vpn_enabled.checked );
@@ -232,12 +234,15 @@ function selectType(form)
 	var vpn_server_col = document.getElementById("vpn_server_col");
 
 	var pppoe_on = form.vpn_type.value == '0';
+	var pptp_on = form.vpn_type.value == '1';
+	var l2tp_on = form.vpn_type.value == '2';
 	var l2tp_server_on = form.vpn_type.value == '3';
 	var kabinet_on = form.vpn_type.value == '6';
 
 	// Display mode-dependent elements
 	displayElement([ 'vpn_pure_pppoe_cell', 'vpn_pppoe_service_row', 'vpn_pppoe_row' ], pppoe_on);
 	displayElement([ 'vpn_pppoe_iface_row', 'vpn_server_row', 'vpn_auth_type_row', 'vpn_user_row', 'vpn_mtu_row', 'vpn_dgw_row', table_vpn_params], !kabinet_on);
+	displayElement('vpn_test_reachable', pptp_on || l2tp_on);
 	displayElement('vpn_lanauth_lvl_row', kabinet_on);
 	displayElement('vpn_mppe_row', !l2tp_server_on);
 	displayElement('vpn_l2tp_range', l2tp_server_on);
@@ -310,6 +315,7 @@ function initializeForm(form)
 	var pure_pppoe = '<% getCfgGeneral(1, "vpnPurePPPOE"); %>';
 	var lcp_errors = '<% getCfgGeneral(1, "vpnLCPFailure"); %>';
 	var lcp_int    = '<% getCfgGeneral(1, "vpnLCPInterval"); %>';
+	var vpn_test   = '<% getCfgGeneral(1, "vpnTestReachable"); %>';
 
 	var kabinet_built = '<% getLANAUTHBuilt(); %>';
 
@@ -331,6 +337,7 @@ function initializeForm(form)
 	form.vpn_dgw.value       = dgw;
 	form.vpn_lcp.checked     = (lcp == 'on');
 	form.vpn_pure_pppoe.checked = (pure_pppoe == '1');
+	form.vpn_test_reachable.checked = (vpn_test == '1');
 	form.vpn_auth_type.value = vpn_auth;
 	form.vpn_lcp_errors.value= lcp_errors;
 	form.vpn_lcp_interval.value = lcp_int;
@@ -614,11 +621,13 @@ tunnel on your Router.
 			<input disabled="disabled" name="vpn_lcp" type="checkbox">
 			<b>Adaptive LCP</b>
 		</td>
-		<td width="50%" onMouseOver="showHint('vpn_pure_pppoe')" onMouseOut="hideHint('vpn_pure_pppoe')" >
-			<div id="vpn_pure_pppoe_cell">
-				<input disabled="disabled" name="vpn_pure_pppoe" type="checkbox">
-				<b>Pure PPPoE</b>
-			</div>
+		<td width="50%" onMouseOver="showHint('vpn_pure_pppoe')" onMouseOut="hideHint('vpn_pure_pppoe')" id="vpn_pure_pppoe_cell">
+			<input disabled="disabled" name="vpn_pure_pppoe" type="checkbox">
+			<b>Pure PPPoE</b>
+		</td>
+		<td width="50%" id="vpn_test_reachable" onMouseOver="showHint('vpn_test_reachable')" onMouseOut="hideHint('vpn_test_reachable')" >
+			<input disabled="disabled" name="vpn_test_reachable" type="checkbox">
+			<b>Test server reachable</b>
 		</td>
 	</tr>
 </table>

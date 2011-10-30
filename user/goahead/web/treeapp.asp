@@ -159,10 +159,11 @@ else
 a.add(500, 0,   _("treeapp services"),          "javascript:a.oo(500);");
 if (opmode != '4')
 	a.add(501, 500, _("treeapp dhcp server"),       "javascript:go('services/dhcp.asp');");
-a.add(502, 500, _("treeapp ntp settings"),      "javascript:go('services/ntp.asp');");
-a.add(503, 500, _("treeapp ddns settings"),     "javascript:go('services/ddns.asp');");
-a.add(504, 500, _("treeapp samba"),             "javascript:go('services/samba.asp');");
-a.add(505, 500, _("treeapp accounting"),        "javascript:go('services/account.asp');");
+a.add(502, 500, _("treeapp l2tp server"),       "javascript:go('services/l2tp.asp');");
+a.add(503, 500, _("treeapp ntp settings"),      "javascript:go('services/ntp.asp');");
+a.add(504, 500, _("treeapp ddns settings"),     "javascript:go('services/ddns.asp');");
+a.add(505, 500, _("treeapp samba"),             "javascript:go('services/samba.asp');");
+a.add(506, 500, _("treeapp accounting"),        "javascript:go('services/account.asp');");
 a.add(510, 500, _("treeapp miscellaneous"),     "javascript:go('services/misc.asp');");
 
 

@@ -1,19 +1,4 @@
 # For sadko
-) McastPhyMode set to 3 (HTMIX) by default (0:Disable 1:CCK, 2:OFDM, 3:HTMIX need add in WebUI).
-) Add SmbTimeserver variable for support time server compatable with WinNT(SmbTimeserver variable 0/1 need add in WebUI, default 0).
-) Add vpnTestReachable variable. Is vpnTestReachable=1 test VPN server reachable before connect (default 1, only pptp/l2tp, need add 
-    in WebUI).
-) Add RemoteTelnet and RemoteFTP variable for disable/enable FTP/Telnet services (need add in webUI Miscellaneous default disabled).
-) Add pinger (lan/wifi/uplink) for wake up client devices and support uplink connections always on-line
-    (ping_check_on/ping_check_time/ping_check_interval variables on nvram. Need add in watchdog section WebUI).
-) Add variable igmpSnoopMode. Values=n/f or NULL (default NULL=auto, n=none/disabled,f=force enabled. Need add WebUI).
-) Video turbine MSC extended mode enabled for wifi.(AP/STA mode. variable VideoTurbine 0/1 default 1. need add in webUI)
-) Add snmpd daemon (Need add in webui in misc page. Variable snmpd 0/1).
-) Add KLogd, SysLogd and  RemoteSysLogIP variables (Need add in webui).
-) Add l2tp vpn server init logic. 10 users dupport. (need write webui. Variables l2tp_srv_enabled, l2tp_srv_ip_range,
-    l2tp_srv_ip_local, l2tp_srv_user0-9, l2tp_srv_pass0-9, l2tp_srv_lcp_adapt, l2tp_srv_mtu_size, l2tp_srv_mru_size,
-    l2tp_srv_debug).
-
 ) Need add disconnect select STA in AP mode (WebUI)
 iwpriv ra0 set DisConnectSta=MAC
 iwpriv ra0 set DisConnectAllSta=1

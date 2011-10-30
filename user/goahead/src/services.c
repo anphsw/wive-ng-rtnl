@@ -63,6 +63,9 @@ static void formIptAccounting(webs_t wp, char_t *path, char_t *query);
 static int getDhcpStaticList(int eid, webs_t wp, int argc, char_t **argv);
 static int iptStatList(int eid, webs_t wp, int argc, char_t **argv);
 
+static void l2tpConfig(webs_t wp, char_t *path, char_t *query);
+static int getL2TPUserList(int eid, webs_t wp, int argc, char_t **argv);
+
 void formDefineServices(void)
 {
 	// Define forms
@@ -70,8 +73,10 @@ void formDefineServices(void)
 	websFormDefine(T("formSamba"), setSamba);
 	websFormDefine(T("setMiscServices"), setMiscServices);
 	websFormDefine(T("formIptAccounting"), formIptAccounting);
+	websFormDefine(T("l2tpConfig"), l2tpConfig);
 
 	// Define functions
+	websAspDefine(T("getL2TPUserList"), getL2TPUserList);
 	websAspDefine(T("getDhcpCliList"), getDhcpCliList);
 	websAspDefine(T("getDhcpStaticList"), getDhcpStaticList);
 	websAspDefine(T("iptStatList"), iptStatList);
@@ -280,12 +285,15 @@ const parameter_fetch_t service_misc_flags[] =
 	{ T("cdpEnbl"), "cdpEnabled", 0, T("0") },
 	{ T("lltdEnbl"), "lltdEnabled", 0, T("0") },
 	{ T("igmpEnbl"), "igmpEnabled", 0, T("0") },
+	{ T("igmpSnoop"), "igmpSnoopMode", 0, T("NULL") },
 	{ T("upnpEnbl"), "upnpEnabled", 0, T("0") },
 	{ T("radvdEnbl"), "radvdEnabled", 0, T("0") },
 	{ T("pppoeREnbl"), "pppoeREnabled", 0, T("0") },
 	{ T("dnspEnbl"), "dnsPEnabled", 0, T("0") },
 	{ T("rmtHTTP"), "RemoteManagement", 0, T("0") },
 	{ T("rmtSSH"), "RemoteSSH", 0, T("0") },
+	{ T("rmtTelnet"), "RemoteTelnet", 0, T("0") },
+	{ T("rmtFTP"), "RemoteFTP", 0, T("0") },
 	{ T("udpxyMode"), "UDPXYMode", 0, T("0") },
 	{ T("watchdogEnable"), "WatchdogEnabled", 0, T("0") },
 	{ T("pingWANEnbl"), "WANPingFilter", 0, T("0") },
@@ -297,6 +305,10 @@ const parameter_fetch_t service_misc_flags[] =
 	{ T("CrondEnable"), "CrondEnable", 0, T("0") },
 	{ T("ForceRenewDHCP"), "ForceRenewDHCP", 0, T("1") },
 	{ T("arpPT"), "parproutedEnabled", 0, T("0") },
+	{ T("pingerEnable"), "pinger_check_on", 0, T("0") },
+	{ T("ping_check_time"), "ping_check_time", 0, T("0") },
+	{ T("ping_check_interval"), "ping_check_interval", 0, T("0") },
+	{ T("SnmpdEnabled"), "snmpd", 0, T("0") },
 	{ NULL, NULL, 0, NULL } // Terminator
 };
 
@@ -342,13 +354,12 @@ const parameter_fetch_t service_samba_flags[] =
 	{ T("SmbNetBIOS"), "SmbNetBIOS", 0, T("") },
 	{ T("SmbString"), "SmbString", 0, T("") },
 	{ T("SmbOsLevel"), "SmbOsLevel", 0, T("") },
+	{ T("SmbTimeserver"), "SmbTimeserver", 0, T("0") },
 	{ NULL, NULL, 0, NULL } // Terminator
 };
 
 static void setSamba(webs_t wp, char_t *path, char_t *query)
 {
-//	const service_flag_t *p;
-
 	char_t *smb_enabled = websGetVar(wp, T("SmbEnabled"), T("0"));
 	if (smb_enabled == NULL)
 		smb_enabled = "0";
@@ -566,3 +577,87 @@ int iptStatList(int eid, webs_t wp, int argc, char_t **argv)
 			);
 	return 0;
 }
+
+const parameter_fetch_t service_l2tp_flags[] =
+{
+	{ T("l2tp_srv_ip_range"), "l2tp_srv_ip_range", 0, T("") },
+	{ T("l2tp_srv_ip_local"), "l2tp_srv_ip_local", 0, T("") },
+	{ T("l2tp_srv_lcp_adapt"), "l2tp_srv_lcp_adapt", 2, T("") },
+	{ T("l2tp_srv_debug"), "l2tp_srv_debug", 2, T("") },
+	{ T("l2tp_srv_mtu_size"), "l2tp_srv_mtu_size", 0, T("1500") },
+	{ T("l2tp_srv_mru_size"), "l2tp_srv_mru_size", 0, T("1500") },
+	{ NULL, NULL, 0, NULL } // Terminator
+};
+
+static void l2tpConfig(webs_t wp, char_t *path, char_t *query)
+{
+	char user_var[16] = "l2tp_srv_user0";
+	char pass_var[16] = "l2tp_srv_pass0";
+	int i=0;
+	
+	nvram_init(RT2860_NVRAM);
+	
+	char_t *l2tp_enabled = websGetVar(wp, T("l2tp_srv_enabled"), T("off"));
+	if (CHK_IF_CHECKED(l2tp_enabled))
+	{
+		nvram_bufset(RT2860_NVRAM, "l2tp_srv_enabled", "1");
+		setupParameters(wp, service_l2tp_flags, 0);
+		
+		// Set-up logins
+		for (; i < 10; i++)
+		{
+			char_t *user = websGetVar(wp, user_var, "");
+			char_t *pass = websGetVar(wp, pass_var, "");
+			
+			if (!(CHK_IF_SET(user) || CHK_IF_SET(pass)))
+			{
+				user = "";
+				pass = "";
+			}
+			
+			nvram_bufset(RT2860_NVRAM, user_var, user);
+			nvram_bufset(RT2860_NVRAM, pass_var, pass);
+
+			user_var[13]++;
+			pass_var[13]++;
+		}
+	}
+	else
+		nvram_bufset(RT2860_NVRAM, "l2tp_srv_enabled", "0");
+	
+	nvram_commit(RT2860_NVRAM);
+	nvram_close(RT2860_NVRAM);
+	
+	doSystem("service l2tp restart");
+	
+	// Redirect if possible
+	char_t *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
+	if (submitUrl != NULL)
+		websRedirect(wp, submitUrl);
+	else
+		websDone(wp, 200);
+}
+
+static int getL2TPUserList(int eid, webs_t wp, int argc, char_t **argv)
+{
+	//                   01234567890123
+	char user_var[16] = "l2tp_srv_user0";
+	char pass_var[16] = "l2tp_srv_pass0";
+	int i = 0, output = 0;
+	
+	nvram_init(RT2860_NVRAM);
+	for (; i < 10; i++)
+	{
+		char *user = nvram_bufget(RT2860_NVRAM, user_var);
+		char *pass = nvram_bufget(RT2860_NVRAM, pass_var);
+		
+		if (CHK_IF_SET(user) || CHK_IF_SET(pass))
+			websWrite(wp, T("%s[ '%s', '%s' ]"), ((output++) > 0) ? ",\n\t" : "\t", user, pass);
+		user_var[13]++;
+		pass_var[13]++;
+	}
+	nvram_close(RT2860_NVRAM);
+
+	return 0;
+}
+

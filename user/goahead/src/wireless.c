@@ -990,7 +990,8 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 {
 	char_t	*bg_protection, /**basic_rate,*/ *beacon, *dtim, *fragment, *rts,
 			*tx_power, *short_preamble, *short_slot, *tx_burst, *pkt_aggregate,
-			*wmm_capable, *apsd_capable, *dls_capable, *countrycode;
+			*wmm_capable, *apsd_capable, *dls_capable, *countrycode,
+			*video_turbine;
 	char_t	*rd_region, *carrier_detect, *lna_gain, *ht_noise_thresh, *ap2040_rescan, *ht_bss_coex;
 	int		i, ssid_num, wlan_mode;
 	char	wmm_enable[16];
@@ -1026,6 +1027,7 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 #ifdef CONFIG_RT2860V2_AP_IGMP_SNOOP
 	m2u_enable = websGetVar(wp, T("m2u_enable"), T("0"));
 	mcast_mcs = websGetVar(wp, T("McastMcs"), T("0"));
+	video_turbine = websGetVar(wp, T("video_turbine"), T("0"));
 #endif
 
 	if (NULL != nvram_get(RT2860_NVRAM, "BssidNum"))
@@ -1063,6 +1065,7 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 #ifdef CONFIG_RT2860V2_AP_IGMP_SNOOP
 	nvram_bufset(RT2860_NVRAM, "igmpEnabled", m2u_enable);
 	nvram_bufset(RT2860_NVRAM, "McastMcs", mcast_mcs);
+	nvram_bufset(RT2860_NVRAM, "VideoTurbine", video_turbine);
 #endif
 
 	bzero(wmm_enable, sizeof(char)*16);

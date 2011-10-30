@@ -779,6 +779,8 @@
 22) Add boot_leds_blink variable for configure boot time led indicators gpio (default 13 14).<br>
 23) Goahead code cleanup and If-Modified-Support enabled.<br>
 24) Busybox bump version to 1.19.3.<br>
+25) Add l2tp server WebUI.<br>
+26) Add some params in WebUI and rework some options.<br>
 
 <br><br>
 <b>For support see:</b><br>

@@ -92,6 +92,7 @@ function initValue()
 	var opmode = "<% getCfgZero(1, "OperationMode"); %>";
 	var stp = <% getCfgZero(1, "stpEnabled"); %>;
 	var igmp = <% getCfgZero(1, "igmpEnabled"); %>;
+	var igmp_snoop = '<% getCfgGeneral(1, "igmpSnoopMode"); %>';
 	var upnp = <% getCfgZero(1, "upnpEnabled"); %>;
 	var radvd = <% getCfgZero(1, "radvdEnabled"); %>;
 	var pppoe = <% getCfgZero(1, "pppoeREnabled"); %>;
@@ -110,13 +111,15 @@ function initValue()
 	var dnsp = "<% getDnsmasqBuilt(); %>";
 	var krnl_pppoe = "<% getCfgZero(1, "pppoe_pass"); %>";
 	var krnl_ipv6 = "<% getCfgZero(1, "ipv6_pass"); %>";
+	var pinger = "<% getCfgZero(1, "ping_check_on"); %>";
 
 	initTranslation();
 
 	var form = document.miscServiceCfg;
 
 	form.stpEnbl.options.selectedIndex = 1*stp;
-	form.igmpEnbl.options.selectedIndex = 1*igmp;
+	form.igmpEnbl.options.selectedIndex = (igmpb == '1') ? 1*igmp : 0;
+	form.igmpSnoop.value = igmp_snoop;
 	form.upnpEnbl.options.selectedIndex = 1*upnp;
 	form.radvdEnbl.options.selectedIndex = 1*radvd;
 	form.pppoeREnbl.options.selectedIndex = 1*pppoe;
@@ -125,11 +128,14 @@ function initValue()
 	form.lltdEnbl.options.selectedIndex = 1*lltd;
 	form.krnlPppoePass.options.selectedIndex = 1*krnl_pppoe;
 	form.krnlIpv6Pass.options.selectedIndex = 1*krnl_ipv6;
-	form.pingWANEnbl.options.selectedIndex = (wpf == "1") ? 1 : 0;
-	form.arpPT.options.selectedIndex = (arp_pt == "1") ? 1 : 0;
+	form.pingWANEnbl.options.selectedIndex = (wpf == '1') ? 1 : 0;
+	form.arpPT.options.selectedIndex = (arp_pt == '1') ? 1 : 0;
+	form.pingerEnable.options.selectedIndex = (pinger == '1') ? 1 : 0
 
 	form.rmtHTTP.value = defaultNumber("<% getCfgGeneral(1, "RemoteManagement"); %>", "1");
 	form.rmtSSH.value = defaultNumber("<% getCfgGeneral(1, "RemoteSSH"); %>", "1");
+	form.rmtTelnet.value = defaultNumber("<% getCfgGeneral(1, "RemoteTelnet"); %>", "0");
+	form.rmtFTP.value = defaultNumber("<% getCfgGeneral(1, "RemoteFTP"); %>", "0");
 	form.udpxyMode.value = defaultNumber("<% getCfgGeneral(1, "UDPXYMode"); %>", "0");
 	form.watchdogEnable.value = defaultNumber("<% getCfgGeneral(1, "WatchdogEnabled"); %>", "0");
 	form.dhcpSwReset.value = defaultNumber("<% getCfgGeneral(1, "dhcpSwReset"); %>", "0");
@@ -137,6 +143,7 @@ function initValue()
 	form.bridgeFastpath.value = defaultNumber("<% getCfgGeneral(1, "bridgeFastpath"); %>", "1");
 	form.CrondEnable.value = defaultNumber("<% getCfgGeneral(1, "CrondEnable"); %>", "0");
 	form.ForceRenewDHCP.value = defaultNumber("<% getCfgGeneral(1, "ForceRenewDHCP"); %>", "1");
+	form.SnmpdEnabled.value = defaultNumber("<% getCfgGeneral(1, "snmpd"); %>", "0");
 
 	if (cdpb == "0")
 	{
@@ -148,11 +155,7 @@ function initValue()
 		hideElement("lltd");
 		form.lltdEnbl.options.selectedIndex = 0;
 	}
-	if (igmpb == "0")
-	{
-		hideElement("igmpProxy");
-		form.igmpEnbl.options.selectedIndex = 0;
-	}
+	displayElement( 'igmpProxy', igmpb == '1');
 	if (upnpb == "0")
 	{
 		hideElement("upnp");
@@ -191,6 +194,8 @@ function initValue()
 		form.natFastpath.value = defaultNumber("<% getCfgGeneral(1, "natFastpath"); %>", "1");
 
 	natFastpathSelect(form);
+	igmpSelect(form);
+	pingerSelect(form);
 }
 
 function CheckValue(form)
@@ -221,6 +226,16 @@ function natFastpathSelect(form)
 {
 	var thresh = form.natFastpath.value;
 	displayElement('hwnat_threshold_row', (thresh == '2') || (thresh == '3'))
+}
+
+function pingerSelect(form)
+{
+	displayElement( [ 'pinger_row1', 'pinger_row2' ] , form.pingerEnable.value == '1');
+}
+
+function igmpSelect(form)
+{
+	displayElement( 'igmpSnoop', form.igmpEnbl.value == '1');
 }
 
 </script>
@@ -287,6 +302,24 @@ function natFastpathSelect(form)
 	</select>
 </td>
 </tr>
+<tr>
+<td class="head">Remote Telnet</td>
+<td>
+	<select name="rmtTelnet" class="half">
+		<option value="0">Disable</option>
+		<option value="1">Enable</option>
+	</select>
+</td>
+</tr>
+<tr>
+<td class="head">Remote FTP</td>
+<td>
+	<select name="rmtFTP" class="half">
+		<option value="0">Disable</option>
+		<option value="1">Enable</option>
+	</select>
+</td>
+</tr>
 
 <tr>
 	<td class="title" colspan="2">Pass Through</td>
@@ -340,12 +373,31 @@ function natFastpathSelect(form)
 	</select>
 </td>
 </tr>
+<tr>
+<td class="head">SNMP daemon</td>
+<td>
+	<select name="SnmpdEnabled" class="half">
+		<option value="0">Disable</option>
+		<option value="1">Enable</option>
+	</select>
+</td>
+</tr>
 <tr id="igmpProxy">
 <td class="head" id="lIgmpp">IGMP proxy</td>
 <td>
-	<select name="igmpEnbl" class="half">
+	<select name="igmpEnbl" class="half" onchange="igmpSelect(this.form);">
 		<option value="0" id="lIgmppD">Disable</option>
 		<option value="1" id="lIgmppE">Enable</option>
+	</select>
+</td>
+</tr>
+<tr id="igmpSnoop">
+<td class="head" id="lIgmpp">IGMP snooping</td>
+<td>
+	<select name="igmpSnoop" class="half">
+		<option value="NULL">auto</option>
+		<option value="n">none/disable</option>
+		<option value="f">force enabled</option>
 	</select>
 </td>
 </tr>
@@ -395,15 +447,7 @@ function natFastpathSelect(form)
 	</select>
 </td>
 </tr>
-<tr>
-<td class="head">Watchdog</td>
-<td>
-	<select name="watchdogEnable" class="half">
-		<option value="0">Disable</option>
-		<option value="1">Enable</option>
-	</select>
-</td>
-</tr>
+
 <tr>
 <td class="head">Cron daemon</td>
 <td>
@@ -414,6 +458,42 @@ function natFastpathSelect(form)
 </td>
 </tr>
 
+<!-- Watchers -->
+<tr>
+	<td class="title" colspan="2">Watchers</td>
+</tr>
+<tr>
+<td class="head">Watchdog service</td>
+<td>
+	<select name="watchdogEnable" class="half">
+		<option value="0">Disable</option>
+		<option value="1">Enable</option>
+	</select>
+</td>
+</tr>
+<tr>
+<td class="head">Pinger service</td>
+<td>
+	<select name="pingerEnable" class="half" onchange="pingerSelect(this.form);">
+		<option value="0">Disable</option>
+		<option value="1">Enable</option>
+	</select>
+</td>
+</tr>
+<tr id="pinger_row1">
+<td class="head">Ping check time</td>
+<td>
+	<input name="ping_check_time" class="half" value="<% getCfgGeneral(1, "ping_check_time"); %>">
+</td>
+</tr>
+<tr id="pinger_row2">
+<td class="head">Ping check interval</td>
+<td>
+	<input name="ping_check_interval" class="half" value="<% getCfgGeneral(1, "ping_check_interval"); %>">
+</td>
+</tr>
+
+<!-- Others -->
 <tr>
 	<td class="title" colspan="2">Others</td>
 </tr>

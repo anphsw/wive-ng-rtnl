@@ -709,7 +709,7 @@ static void WPSAPTimerHandler(int signo)
 void WPSAPPBCStartAll(void)
 {
 	char *wsc_enable = nvram_get(RT2860_NVRAM, "WscModeOption");
-	
+
 	// It is possible user press PBC button when WPS is disabled.
 	if(!strcmp(wsc_enable, "0"))
 	{
@@ -759,7 +759,6 @@ static void WPS(webs_t wp, char_t *path, char_t *query)
 		}
 
 		g_isEnrollee = pin_code ? 0 : 1;
-//		
 
 		doSystem("iwpriv ra0 set WscPinCode=%d", atoi(wsc_pin_code_w));
 		doSystem("iwpriv ra0 set WscGetConf=1");

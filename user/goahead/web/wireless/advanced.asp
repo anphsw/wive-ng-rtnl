@@ -31,6 +31,7 @@ var m2uEnabled = '<% getCfgZero(1, "igmpEnabled"); %>';
 var carrierib = '<% getCarrierBuilt(); %>';
 var txPower = '<% getCfgZero(1, "TxPower"); %>';
 var mcastMcs = defaultNumber('<% getCfgZero(1, "McastMcs"); %>', '0');
+var video_turbine = '<% getCfgZero(1, "VideoTurbine"); %>';
 var lnaGain = '<% getCfgZero(1, "HiPower"); %>';
 var htNoiseThresh = '<% getCfgZero(1, "HT_BSSCoexApCntThr"); %>';
 var htNoiseCoex = '<% getCfgZero(1, "HT_BSSCoexistence"); %>';
@@ -222,18 +223,9 @@ function initValue()
 	{
 		showElement('div_m2u');
 
-		if (m2uEnabled == '1')
-		{
-			form.m2u_enable[0].checked = true;
-			form.m2u_enable[1].checked = false;
-		}
-		else
-		{
-			form.m2u_enable[0].checked = false;
-			form.m2u_enable[1].checked = true;
-		}
-		
 		form.McastMcs.value = mcastMcs;
+		form.m2u_enable[(m2uEnabled == '1') ? 0 : 1 ].checked = true;
+		form.video_turbine[(video_turbine == '1') ? 0 : 1].checked = true;
 	}
 	
 	// Set-up TX power combo
@@ -640,6 +632,14 @@ function wmm_capable_enable_switch()
 		</select>
 	</td>
 </tr>
+<tr>
+	<td class="head">Video turbine MSC mode</td>
+	<td>
+		<input type="radio" name="video_turbine" value="1">Enable&nbsp;
+		<input type="radio" name="video_turbine" value="0">Disable
+	</td>
+</tr>
+
 </table>
 
 <br>

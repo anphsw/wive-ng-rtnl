@@ -15,14 +15,16 @@
 function initValue(form)
 {
 	var smbEnabled = defaultNumber("<% getCfgZero(1, "SmbEnabled"); %>", '0');
+	var smbTimeserver = defaultNumber("<% getCfgZero(1, "SmbTimeserver"); %>", '0');
 	
 	form.SmbEnabled.value = (smbEnabled != '1') ? '0' : '1';
+	form.SmbTimeserver.value = (smbTimeserver != '1') ? '0' : '1';
 	smbEnabledSwitch(form);
 }
 
 function smbEnabledSwitch(form)
 {
-	disableElement( [ form.WorkGroup, form.SmbNetBIOS, form.SmbString, form.SmbOsLevel  ] , form.SmbEnabled.value != '1');
+	disableElement( [ form.WorkGroup, form.SmbNetBIOS, form.SmbString, form.SmbOsLevel, form.SmbTimeserver  ] , form.SmbEnabled.value != '1');
 }
 
 function checkForm(form)
@@ -97,6 +99,15 @@ function checkForm(form)
 <tr>
 	<td class="head">OS level</td>
 	<td><input name="SmbOsLevel" class="half" value="<% getCfgGeneral(1, "SmbOsLevel"); %>" ></td>
+</tr>
+<tr>
+	<td class="head">Enable compatable with WinNT time server</td>
+	<td>
+		<select name="SmbTimeserver" class="half">
+			<option value="0">Disable</option>
+			<option value="1">Enable</option>
+		</select>
+	</td>
 </tr>
 </table>
 
