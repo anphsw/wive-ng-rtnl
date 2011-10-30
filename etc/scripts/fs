@@ -22,14 +22,15 @@ get_size(){
 }
 
 usage(){
-  echo "Usage: $0 | save | load | restore | nvramreset | fullreset |" >&2
+  echo "Usage: $0 | save | load | restore | backup_nvram | nvramreset | burnrf | fullreset |" >&2
   echo "____________________________________________________________________________" >&2
   echo " " >&2
   echo "save - Save rwfs to mtd." >&2
-  echo "backup_nvram - Save nvram snapshot to rwfs." >&2
   echo "load - Load rwfs from mtd." >&2
   echo "restore - Crash $MTDRWFS and reboot for restore clean rwfs." >&2
+  echo "backup_nvram - Save nvram snapshot to rwfs in $BACKUPCGF" >&2
   echo "nvramreset - Nvarm clean and load default config." >&2
+  echo "burnrf - Burn RF config template to $MTD2FAC." >&2
   echo "fullreset - 1. Full zero write in config,factory and rwfs particions." >&2
   echo "	    2. Reboot device." >&2
   echo "	    3. Write temlate for RF config (Factory) to flash." >&2
