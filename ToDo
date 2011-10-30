@@ -1,5 +1,8 @@
 # For sadko
-) Need add disconnect select STA in AP mode (WebUI)
+) McastPhyMode set to 3 (HTMIX) by default (0:Disable 1:CCK, 2:OFDM, 3:HTMIX need add in WebUI).
+) Need defines for FTP/Telnet/VideoTurbine (CONFIG_FTPD/CONFIG_TELNETD/CONFIG_RT2860V2_AP_VIDEO_TURBINE || CONFIG_RT2860V2_STA_VIDEO_TURBINE)
+
+) Need add disconnect selected STA in AP mode (WebUI)
 iwpriv ra0 set DisConnectSta=MAC
 iwpriv ra0 set DisConnectAllSta=1
 

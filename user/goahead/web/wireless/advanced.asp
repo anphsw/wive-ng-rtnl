@@ -633,7 +633,7 @@ function wmm_capable_enable_switch()
 	</td>
 </tr>
 <tr>
-	<td class="head">Video turbine MSC mode</td>
+	<td class="head">Video turbine</td>
 	<td>
 		<input type="radio" name="video_turbine" value="1">Enable&nbsp;
 		<input type="radio" name="video_turbine" value="0">Disable
