@@ -90,7 +90,7 @@ unload_modules()
     rmmod_mod=`lsmod | awk {' print $1'}`
     for mod in $rmmod_mod
     do
-	if [ -f /tmp/is_32ram_dev ] && [ "$mod" != "rt2860v2_ap" -o "$mod" != "rt2860v2_sta" ]; then
+	if [ -f /tmp/is_32ram_dev ] && [ "$mod" = "rt2860v2_ap" -o "$mod" = "rt2860v2_sta" ]; then
 	    mod=
 	fi
 	if [ "$mod" != "" ]; then
