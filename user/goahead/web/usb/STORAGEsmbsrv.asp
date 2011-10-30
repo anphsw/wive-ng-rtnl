@@ -281,7 +281,6 @@ function submit_apply(parm)
     <td align="center" bgcolor="#E8F8FF" width=150px id="smbDirPath">Directory Path</td>
     <td align="center" bgcolor="#E8F8FF" id="smbDirAllowUsers">Allowes Users</td>
   </tr>
-  <% ShowSmbDir(); %>
 <script language="JavaScript" type="text/javascript">
 dir_count = parseInt('<% getCount(1, "AllSmbDir"); %>');
 </script>
