@@ -120,6 +120,12 @@ Add a default route to the system routing tables, using the peer as
 the gateway, when IPCP negotiation is successfully completed.
 This entry is removed when the PPP connection is broken.  This option
 is privileged if the \fInodefaultroute\fR option has been specified.
+.B multipledefaultroutes
+This option is a flag to the defaultroute option. If defaultroute is
+set and this flag is also set, pppd will add the new default route
+even if there is already a default route, allowing multiple default
+routes.
+.TP
 .TP
 .B replacedefaultroute
 This option is a flag to the defaultroute option. If defaultroute is

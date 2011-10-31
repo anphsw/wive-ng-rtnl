@@ -1686,27 +1686,29 @@ int sifdefaultroute (int unit, u_int32_t ouraddr, u_int32_t gateway, bool replac
 	   - this is normally only the case the doing demand: */
 	if (defaultroute_exists(&tmp_rt))
 	    del_rt = &tmp_rt;
-    } else if (defaultroute_exists(&old_def_rt) &&
-	       strcmp(old_def_rt.rt_dev, ifname) != 0) {
-	/* We did not yet replace an existing default route, let's
-	   check if we should save and replace a default route: */
-	if (old_def_rt.rt_flags & RTF_GATEWAY) {
-	    if (!replace) {
-		error("not replacing existing default route via %I",
-		      SIN_ADDR(old_def_rt.rt_gateway));
-		return 0;
-	    } else {
-		/* we need to copy rt_dev because we need it permanent too: */
-		char *tmp_dev = malloc(strlen(old_def_rt.rt_dev) + 1);
-		strcpy(tmp_dev, old_def_rt.rt_dev);
-		old_def_rt.rt_dev = tmp_dev;
 
-		notice("replacing old default route to %s [%I]",
-			old_def_rt.rt_dev, SIN_ADDR(old_def_rt.rt_gateway));
-		default_rt_repl_rest = 1;
-		del_rt = &old_def_rt;
-	    }
-	} else
+    } else if (!ipcp_wantoptions[0].multiple_def_routes &&
+		defaultroute_exists(&rt) &&
+		strcmp(rt.rt_dev, ifname) != 0) {
+		/* We did not yet replace an existing default route, let's
+		    check if we should save and replace a default route: */
+		if (old_def_rt.rt_flags & RTF_GATEWAY) {
+		    if (!replace) {
+			error("not replacing existing default route via %I",
+			SIN_ADDR(old_def_rt.rt_gateway));
+		    return 0;
+		} else {
+		    /* we need to copy rt_dev because we need it permanent too: */
+		    char *tmp_dev = malloc(strlen(old_def_rt.rt_dev) + 1);
+		    strcpy(tmp_dev, old_def_rt.rt_dev);
+		    old_def_rt.rt_dev = tmp_dev;
+
+		    notice("replacing old default route to %s [%I]",
+		    old_def_rt.rt_dev, SIN_ADDR(old_def_rt.rt_gateway));
+		    default_rt_repl_rest = 1;
+		    del_rt = &old_def_rt;
+		}
+    } else
 	    error("not replacing existing default route through %s",
 		  old_def_rt.rt_dev);
     }

@@ -197,6 +197,8 @@ static option_t ipcp_option_list[] = {
     { "-defaultroute", o_bool, &ipcp_allowoptions[0].default_route,
       "disable defaultroute option", OPT_ALIAS | OPT_A2CLR,
       &ipcp_wantoptions[0].default_route },
+    { "multipledefaultroutes", o_bool, &ipcp_wantoptions[0].multiple_def_routes,
+      "Add default route even if one already exists", 1 },
 
     { "replacedefaultroute", o_bool,
 				&ipcp_wantoptions[0].replace_default_route,
