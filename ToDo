@@ -1,4 +1,5 @@
 # For sadko
+) Add KLogd, SysLogd and  RemoteSysLogIP variables (Need add in webui).
 ) Need add disconnect selected STA in AP mode (WebUI)
 iwpriv ra0 set DisConnectSta=MAC
 iwpriv ra0 set DisConnectAllSta=1
