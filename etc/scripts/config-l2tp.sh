@@ -7,9 +7,6 @@
 # include global config
 . /etc/scripts/global.sh
 
-# static interface name
-IFNAME="ppp0"
-
 # stop all pppd/xl2tpd daemons
 killall_vpn
 
@@ -201,7 +198,7 @@ echo "==================START-L2TP-CLIENT======================="
     lcp-echo-failure  $vpnLCPFailure
     lcp-echo-interval $vpnLCPInterval
     $vpnEnableLCP
-    ifname $IFNAME
+    ifname $vpn_if
     " >> $ppp/options.l2tp
 
     printf "$vpnUser * $vpnPassword" >> $ppp/chap-secrets

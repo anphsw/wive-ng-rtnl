@@ -23,7 +23,7 @@ start() {
     if [ "$igmpEnabled" = "1" ] && [ "$OperationMode" != "0" ]; then
         $LOG "Starting IGMPPROXY"
 	# generate config
-	printf "quickleave\nphyint $wan_if upstream  ratelimit 0  threshold 1\naltnet 0.0.0.0/0\nphyint $lan_if downstream  ratelimit 0  threshold 1\nphyint ppp0 disabled\n" > /etc/igmpproxy.conf
+	printf "quickleave\nphyint $wan_if upstream  ratelimit 0  threshold 1\naltnet 0.0.0.0/0\nphyint $lan_if downstream  ratelimit 0  threshold 1\nphyint $vpn_if disabled\n" > /etc/igmpproxy.conf
 	# check ip adress set at wan and if need kill igmpproxy
 	wan_is_not_null=`ip -4 addr show $wan_if | grep inet -c`
 	igmp_is_start=`pidof igmpproxy`

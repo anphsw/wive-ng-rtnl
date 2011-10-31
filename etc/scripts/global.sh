@@ -15,6 +15,7 @@ wan_if="eth2.2"
 real_wan_if="eth2.2"
 lan_if="br0"
 lan2_if="br0:9"
+vpn_if="ppp0"
 
 # first get operation mode and wan mode  dns mode and relay mode vpn mode and type
 eval `nvram_buf_get 2860 OperationMode wanConnectionMode dnsPEnabled wan_ipaddr wan_static_dns vpnEnabled vpnType`
@@ -64,7 +65,7 @@ getWanIfName()
 	if [ "$get_ppp_wan_if" != "" ]; then
     	    real_wan_if="$get_ppp_wan_if"
 	else
-    	    real_wan_if="ppp0"
+    	    real_wan_if="$vpn_if"
 	fi
     else
         real_wan_if=$wan_if
@@ -200,9 +201,9 @@ killall_vpn()
     # first send HUP for terminate connections and try some times
     # second send TERM for exit pppd process
     # if process not terminated send KILL
-    # vpn client always use ppp0
-    if [ -f /var/run/ppp0.pid ]; then
-	pid=`cat /var/run/ppp0.pid`
+    # vpn client always use $vpn_if
+    if [ -f /var/run/$vpn_if.pid ]; then
+	pid=`cat /var/run/$vpn_if.pid`
 	if [ "$pid" != "" ]; then
 	    # close connection
 	    kill -SIGHUP $pid
@@ -218,7 +219,7 @@ killall_vpn()
 	    count="$(($count+1))"
 	    sleep 2
 	done
-	rm -f /var/run/ppp0.pid
+	rm -f /var/run/$vpn_if.pid
     fi
     # Remove VPN server IP file
     rm -f /tmp/vpnip

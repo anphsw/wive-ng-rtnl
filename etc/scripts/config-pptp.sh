@@ -7,9 +7,6 @@
 # include global
 . /etc/scripts/global.sh
 
-# static interface name
-IFNAME="ppp0"
-
 # stop all pppd/xl2tpd daemons
 killall_vpn
 
@@ -166,7 +163,7 @@ echo "==================START-PPTP-CLIENT======================="
 
     $LOG "PPTP connect to $SERVER ....."
     $LOG "Start pppd"
-    PPPDOPT="file $OPTFILE ifname $IFNAME -detach $vpnDebug $vpnMTU $vpnMRU $vpnMPPE plugin"
+    PPPDOPT="file $OPTFILE ifname $vpn_if -detach $vpnDebug $vpnMTU $vpnMRU $vpnMPPE plugin"
     PLUGOPT="/lib/pptp.so pptp_server $SERVER call pptp persist $vpnPeerDNS user $vpnUser password $vpnPassword"
     FULLOPT="$PPPDOPT $PLUGOPT"
     pppd $FULLOPT &
