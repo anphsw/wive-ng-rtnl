@@ -83,7 +83,8 @@ function l2tpEnableSwitch(form)
 			form.l2tp_srv_lcp_adapt, form.l2tp_srv_debug,
 			form.l2tp_srv_mtu_sel, form.l2tp_srv_mtu_size,
 			form.l2tp_srv_mru_sel, form.l2tp_srv_mru_size,
-			form.l2tp_srv_ip_local, form.l2tp_srv_ip_range
+			form.l2tp_srv_ip_local, form.l2tp_srv_ip_range,
+			form.l2tp_srv_nat_enabled
 		],
 		form.l2tp_srv_enabled.checked);
 	genTable(form);
@@ -95,11 +96,13 @@ function initValue()
 	var l2tp_on = '<% getCfgZero(1, "l2tp_srv_enabled"); %>';
 	var adaptive_lcp = '<% getCfgZero(1, "l2tp_srv_lcp_adapt"); %>';
 	var debug_on = '<% getCfgZero(1, "l2tp_srv_debug"); %>';
+	var nat_on = '<% getCfgZero(1, "l2tp_srv_nat_enabled"); %>';
 	var mtu_size = '';
 
 	form.l2tp_srv_enabled.checked = l2tp_on == '1';
 	form.l2tp_srv_lcp_adapt.checked = adaptive_lcp == '1';
 	form.l2tp_srv_debug.checked = debug_on == '1';
+	form.l2tp_srv_nat_enabled.checked = nat_on == '1';
 	
 	// Set-up MTU & MRU
 	for (var i=0; i < form.l2tp_srv_mtu_sel.options.length; i++)
@@ -188,10 +191,8 @@ function mruChange(form)
 </tr>
 
 <tr>
-	<td class="head">L2TP server</td>
-	<td>
-		<input type="checkbox" name="l2tp_srv_enabled" onchange="l2tpEnableSwitch(this.form);">&nbsp;enable
-	</td>
+	<td class="head"><input type="checkbox" name="l2tp_srv_enabled" onchange="l2tpEnableSwitch(this.form);">&nbsp;L2TP server</td>
+	<td>&nbsp;</td>
 </tr>
 <tr>
 	<td class="head">L2TP local IP</td>
@@ -237,13 +238,19 @@ function mruChange(form)
 		</select>
 	</td>
 </tr>
+</table>
+
+<table class="form">
 <tr>
-	<td class="head">Adaptive LCP</td>
-	<td><input name="l2tp_srv_lcp_adapt" type="checkbox">&nbsp;enable</td>
+	<td class="title" colspan="2">Additional options</td>
 </tr>
 <tr>
-	<td class="head">L2TP debugging</td>
-	<td><input name="l2tp_srv_debug" type="checkbox">&nbsp;enable</td>
+	<td style="width: 50%;"><input name="l2tp_srv_lcp_adapt" type="checkbox">&nbsp;<b>Adaptive LCP</b></td>
+	<td style="width: 50%;"><input name="l2tp_srv_debug" type="checkbox">&nbsp;<b>L2TP debugging</b></td>
+</tr>
+<tr>
+	<td style="width: 50%;"><input name="l2tp_srv_nat_enabled" type="checkbox">&nbsp;<b>Enable NAT</b></td>
+	<td>&nbsp;</td>
 </tr>
 </table>
 

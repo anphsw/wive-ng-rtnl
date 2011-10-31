@@ -611,8 +611,9 @@ const parameter_fetch_t service_l2tp_flags[] =
 {
 	{ T("l2tp_srv_ip_range"), "l2tp_srv_ip_range", 0, T("") },
 	{ T("l2tp_srv_ip_local"), "l2tp_srv_ip_local", 0, T("") },
-	{ T("l2tp_srv_lcp_adapt"), "l2tp_srv_lcp_adapt", 2, T("") },
-	{ T("l2tp_srv_debug"), "l2tp_srv_debug", 2, T("") },
+	{ T("l2tp_srv_lcp_adapt"), "l2tp_srv_lcp_adapt", 2, T("off") },
+	{ T("l2tp_srv_debug"), "l2tp_srv_debug", 2, T("off") },
+	{ T("l2tp_srv_nat_enabled"), "l2tp_srv_nat_enabled", 2, T("off") },
 	{ T("l2tp_srv_mtu_size"), "l2tp_srv_mtu_size", 0, T("1500") },
 	{ T("l2tp_srv_mru_size"), "l2tp_srv_mru_size", 0, T("1500") },
 	{ NULL, NULL, 0, NULL } // Terminator
