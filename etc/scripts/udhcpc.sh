@@ -225,7 +225,8 @@ case "$1" in
 		/etc/scripts/config-cdp.sh &
 	    fi
 	    # restart vpn if ip changed and vpn != pppoe
-	    if [ "$vpnEnabled" = "on" ] && [ "$vpnType" != "0" ]; then
+	    # or vpn anabled and not started
+	    if [ "$vpnEnabled" = "on" ] && [ "$vpnType" != "0" -o ! -f /var/run/ppp0.pid ]; then
 		$LOG "Restart vpnhelper.."
 		# vpn client always use ppp0
 		if [ -f /var/run/ppp0.pid ] || [ -f /var/run/xl2tpd/l2tp.pid ]; then
