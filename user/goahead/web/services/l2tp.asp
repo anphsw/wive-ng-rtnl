@@ -191,19 +191,19 @@ function mruChange(form)
 </tr>
 
 <tr>
-	<td class="head"><input type="checkbox" name="l2tp_srv_enabled" onchange="l2tpEnableSwitch(this.form);">&nbsp;L2TP server</td>
+	<td class="head"><input type="checkbox" name="l2tp_srv_enabled" onchange="l2tpEnableSwitch(this.form);">&nbsp;Enable L2TP server</td>
 	<td>&nbsp;</td>
 </tr>
 <tr>
-	<td class="head">L2TP local IP</td>
+	<td class="head">Our local IP to use</td>
 	<td><input name="l2tp_srv_ip_local" class="mid" value="<% getCfgGeneral(1, "l2tp_srv_ip_local"); %>"></td>
 </tr>
 <tr>
-	<td class="head">IP address range</td>
+	<td class="head">Allocate from this IP range</td>
 	<td><input name="l2tp_srv_ip_range" class="mid" value="<% getCfgGeneral(1, "l2tp_srv_ip_range"); %>"></td>
 </tr>
 <tr>
-	<td class="head"><acronym title="Maximum Transfer Unit">MTU</acronym>:</td>
+	<td class="head"><acronym title="Maximum Transfer Unit">Tunnel MTU</acronym>:</td>
 	<td>
 		<input name="l2tp_srv_mtu_size" type="text" class="half" style="display:none;" value="<% getCfgGeneral(1, "l2tp_srv_mtu_size"); %>" >
 		<select name="l2tp_srv_mtu_sel" onChange="mtuChange(this.form);" class="mid" >
@@ -221,7 +221,7 @@ function mruChange(form)
 	</td>
 </tr>
 <tr>
-	<td class="head"><acronym title="Maximum Receive Unit">MRU</acronym>:</td>
+	<td class="head"><acronym title="Maximum Receive Unit">Tunnel MRU</acronym>:</td>
 	<td>
 		<input name="l2tp_srv_mru_size" type="text" class="half" style="display:none;" value="<% getCfgGeneral(1, "l2tp_srv_mru_size"); %>" >
 		<select name="l2tp_srv_mru_sel" onChange="mruChange(this.form);" class="mid" >
