@@ -239,11 +239,11 @@ function mruChange(form)
 </tr>
 <tr>
 	<td class="head">Adaptive LCP</td>
-	<td><input name="l2tp_srv_lcp_adapt" class="mid" type="checkbox">&nbsp;enable</td>
+	<td><input name="l2tp_srv_lcp_adapt" type="checkbox">&nbsp;enable</td>
 </tr>
 <tr>
 	<td class="head">L2TP debugging</td>
-	<td><input name="l2tp_srv_debug" class="mid" type="checkbox">&nbsp;enable</td>
+	<td><input name="l2tp_srv_debug" type="checkbox">&nbsp;enable</td>
 </tr>
 </table>
 

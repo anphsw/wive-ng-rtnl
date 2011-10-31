@@ -73,7 +73,10 @@ static void meshManualLink(webs_t wp, char_t *path, char_t *query);
 static int ShowMeshState(int eid, webs_t wp, int argc, char_t **argv);
 #endif
 
+static int getVideoTurbineBuilt(int eid, webs_t wp, int argc, char_t **argv);
+
 void formDefineWireless(void) {
+	websAspDefine(T("getVideoTurbineBuilt"), getVideoTurbineBuilt);
 	websAspDefine(T("getWlan11aChannels"), getWlan11aChannels);
 	websAspDefine(T("getWlan11bChannels"), getWlan11bChannels);
 	websAspDefine(T("getWlan11gChannels"), getWlan11gChannels);
@@ -985,13 +988,26 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 	}
 }
 
+static int getVideoTurbineBuilt(int eid, webs_t wp, int argc, char_t **argv)
+{
+#ifdef CONFIG_RT2860V2_AP_IGMP_SNOOP
+	#if defined(CONFIG_RT2860V2_AP_VIDEO_TURBINE) || defined(CONFIG_RT2860V2_STA_VIDEO_TURBINE)
+		websWrite(wp, T("1"));
+	#else
+		websWrite(wp, T("0"));
+	#endif
+#else
+	websWrite(wp, T("0"));
+#endif
+	return 0;
+}
+
 /* goform/wirelessAdvanced */
 static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 {
 	char_t	*bg_protection, /**basic_rate,*/ *beacon, *dtim, *fragment, *rts,
 			*tx_power, *short_preamble, *short_slot, *tx_burst, *pkt_aggregate,
-			*wmm_capable, *apsd_capable, *dls_capable, *countrycode,
-			*video_turbine;
+			*wmm_capable, *apsd_capable, *dls_capable, *countrycode;
 	char_t	*rd_region, *carrier_detect, *lna_gain, *ht_noise_thresh, *ap2040_rescan, *ht_bss_coex;
 	int		i, ssid_num, wlan_mode;
 	char	wmm_enable[16];
@@ -999,6 +1015,9 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 
 #ifdef CONFIG_RT2860V2_AP_IGMP_SNOOP
 	char_t	*m2u_enable, *mcast_mcs;
+#if defined(CONFIG_RT2860V2_AP_VIDEO_TURBINE) || defined(CONFIG_RT2860V2_STA_VIDEO_TURBINE)
+	char_t *video_turbine;
+#endif
 #endif
 
 	//fetch from web input
@@ -1027,7 +1046,10 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 #ifdef CONFIG_RT2860V2_AP_IGMP_SNOOP
 	m2u_enable = websGetVar(wp, T("m2u_enable"), T("0"));
 	mcast_mcs = websGetVar(wp, T("McastMcs"), T("0"));
+
+#if defined(CONFIG_RT2860V2_AP_VIDEO_TURBINE) || defined(CONFIG_RT2860V2_STA_VIDEO_TURBINE)
 	video_turbine = websGetVar(wp, T("video_turbine"), T("0"));
+#endif
 #endif
 
 	if (NULL != nvram_get(RT2860_NVRAM, "BssidNum"))
@@ -1065,7 +1087,9 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 #ifdef CONFIG_RT2860V2_AP_IGMP_SNOOP
 	nvram_bufset(RT2860_NVRAM, "igmpEnabled", m2u_enable);
 	nvram_bufset(RT2860_NVRAM, "McastMcs", mcast_mcs);
+#if defined(CONFIG_RT2860V2_AP_VIDEO_TURBINE) || defined(CONFIG_RT2860V2_STA_VIDEO_TURBINE)
 	nvram_bufset(RT2860_NVRAM, "VideoTurbine", video_turbine);
+#endif
 #endif
 
 	bzero(wmm_enable, sizeof(char)*16);

@@ -112,6 +112,8 @@ function initValue()
 	var krnl_pppoe = "<% getCfgZero(1, "pppoe_pass"); %>";
 	var krnl_ipv6 = "<% getCfgZero(1, "ipv6_pass"); %>";
 	var pinger = "<% getCfgZero(1, "ping_check_on"); %>";
+	var telnetd_built = "<% getTelnetdBuilt(); %>";
+	var ftpd_built = "<% getFTPDBuilt(); %>";
 
 	initTranslation();
 
@@ -134,8 +136,16 @@ function initValue()
 
 	form.rmtHTTP.value = defaultNumber("<% getCfgGeneral(1, "RemoteManagement"); %>", "1");
 	form.rmtSSH.value = defaultNumber("<% getCfgGeneral(1, "RemoteSSH"); %>", "1");
-	form.rmtTelnet.value = defaultNumber("<% getCfgGeneral(1, "RemoteTelnet"); %>", "0");
-	form.rmtFTP.value = defaultNumber("<% getCfgGeneral(1, "RemoteFTP"); %>", "0");
+
+	if (telnetd_built == '1')
+		form.rmtTelnet.value = defaultNumber("<% getCfgGeneral(1, "RemoteTelnet"); %>", "0");
+	else
+		displayElement('rmt_telnetd', false);
+	if (ftpd_built == '1')
+		form.rmtFTP.value = defaultNumber("<% getCfgGeneral(1, "RemoteFTP"); %>", "0");
+	else
+		displayElement('rmt_ftpd', false);
+
 	form.udpxyMode.value = defaultNumber("<% getCfgGeneral(1, "UDPXYMode"); %>", "0");
 	form.watchdogEnable.value = defaultNumber("<% getCfgGeneral(1, "WatchdogEnabled"); %>", "0");
 	form.dhcpSwReset.value = defaultNumber("<% getCfgGeneral(1, "dhcpSwReset"); %>", "0");
@@ -302,7 +312,7 @@ function igmpSelect(form)
 	</select>
 </td>
 </tr>
-<tr>
+<tr id="rmt_telnetd">
 <td class="head">Remote Telnet</td>
 <td>
 	<select name="rmtTelnet" class="half">
@@ -311,7 +321,7 @@ function igmpSelect(form)
 	</select>
 </td>
 </tr>
-<tr>
+<tr id="rmt_ftpd">
 <td class="head">Remote FTP</td>
 <td>
 	<select name="rmtFTP" class="half">

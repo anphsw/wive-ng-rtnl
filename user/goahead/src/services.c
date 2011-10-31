@@ -66,6 +66,9 @@ static int iptStatList(int eid, webs_t wp, int argc, char_t **argv);
 static void l2tpConfig(webs_t wp, char_t *path, char_t *query);
 static int getL2TPUserList(int eid, webs_t wp, int argc, char_t **argv);
 
+static int getFTPDBuilt(int eid, webs_t wp, int argc, char_t **argv);
+static int getTelnetdBuilt(int eid, webs_t wp, int argc, char_t **argv);
+
 void formDefineServices(void)
 {
 	// Define forms
@@ -80,6 +83,8 @@ void formDefineServices(void)
 	websAspDefine(T("getDhcpCliList"), getDhcpCliList);
 	websAspDefine(T("getDhcpStaticList"), getDhcpStaticList);
 	websAspDefine(T("iptStatList"), iptStatList);
+	websAspDefine(T("getFTPDBuilt"), getFTPDBuilt);
+	websAspDefine(T("getTelnetdBuilt"), getTelnetdBuilt);
 }
 
 
@@ -279,6 +284,26 @@ static void setDhcp(webs_t wp, char_t *path, char_t *query)
 		websDone(wp, 200);
 }
 
+static int getFTPDBuilt(int eid, webs_t wp, int argc, char_t **argv)
+{
+#ifdef CONFIG_FTPD
+	websWrite(wp, T("1"));
+#else
+	websWrite(wp, T("0"));
+#endif
+	return 0;
+}
+
+static int getTelnetdBuilt(int eid, webs_t wp, int argc, char_t **argv)
+{
+#ifdef CONFIG_TELNETD
+	websWrite(wp, T("1"));
+#else
+	websWrite(wp, T("0"));
+#endif
+	return 0;
+}
+
 const parameter_fetch_t service_misc_flags[] =
 {
 	{ T("stpEnbl"), "stpEnabled", 0, T("0") },
@@ -292,8 +317,12 @@ const parameter_fetch_t service_misc_flags[] =
 	{ T("dnspEnbl"), "dnsPEnabled", 0, T("0") },
 	{ T("rmtHTTP"), "RemoteManagement", 0, T("0") },
 	{ T("rmtSSH"), "RemoteSSH", 0, T("0") },
+#ifdef CONFIG_TELNETD
 	{ T("rmtTelnet"), "RemoteTelnet", 0, T("0") },
+#endif
+#ifdef CONFIG_FTPD
 	{ T("rmtFTP"), "RemoteFTP", 0, T("0") },
+#endif
 	{ T("udpxyMode"), "UDPXYMode", 0, T("0") },
 	{ T("watchdogEnable"), "WatchdogEnabled", 0, T("0") },
 	{ T("pingWANEnbl"), "WANPingFilter", 0, T("0") },
