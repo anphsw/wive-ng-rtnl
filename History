@@ -781,6 +781,7 @@
 24) Busybox bump version to 1.19.3.<br>
 25) Add l2tp server WebUI.<br>
 26) Add some params in WebUI and rework some options.<br>
+27) Fix pppoe+dhcp start regression.<br>
 
 <br><br>
 <b>For support see:</b><br>
