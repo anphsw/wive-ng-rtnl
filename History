@@ -782,6 +782,9 @@
 25) Add l2tp server WebUI.<br>
 26) Add some params in WebUI and rework some options.<br>
 27) Fix pppoe+dhcp start regression.<br>
+28) Add code for more correct mount usb disks procedure.<br>
+29) Small rewrites in start logic.<br>
+30) If optware mount search apps first in /opt/(s)bin.<br>
 
 <br><br>
 <b>For support see:</b><br>

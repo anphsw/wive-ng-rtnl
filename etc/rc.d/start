@@ -10,7 +10,7 @@ ROOTDEVICE=/dev/mtdblock4
 
 LOG="echo INIT"
 
-# make symlinks for startdart i/o
+# make symlinks for standart i/o
 if [ -d /proc/self/fd ]; then
     ln -sf /proc/self/fd /dev/fd
     ln -sf /proc/self/fd/0 /dev/stdin
