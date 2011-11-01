@@ -310,6 +310,7 @@ void __init mount_block_root(char *name, int flags)
 {
 	char *fs_names = __getname();
 	char *p;
+	unsigned rootfs_mount_timount_cnt = 0;
 #ifdef CONFIG_BLOCK
 	char b[BDEVNAME_SIZE];
 #else
@@ -327,7 +328,13 @@ retry:
 				flags |= MS_RDONLY;
 				goto retry;
 			case -EINVAL:
+			case -EIO:
 				continue;
+			/* wait device init completely 300 means 3s */
+			case -ENXIO:
+				msleep(10);
+				if((++rootfs_mount_timount_cnt) < 300)
+					goto retry;
 		}
 	        /*
 		 * Allow the user to distinguish between failed sys_open
