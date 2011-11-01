@@ -750,7 +750,7 @@ void build_console(void)
 {
         #define mknoddev(m,s) (m<<8|s)
         printk(KERN_WARNING "Build the dev/console in kernel mode.\n");
-        sys_mknod("/dev/console",0660 | S_IFCHR,mknoddev(5,1));
+        sys_mknod("/dev/console", 0662 | S_IFCHR, mknoddev(5,1));
 }
 #endif
 
