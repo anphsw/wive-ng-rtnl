@@ -746,7 +746,7 @@ static void run_init_process(char *init_filename)
 }
 
 #if defined(CONFIG_TMPFS) || defined(CONFIG_RAMFS)
-void build_console(void)
+static void build_console(void)
 {
         #define mknoddev(m,s) (m<<8|s)
         printk(KERN_INFO "Build the dev/console in kernel mode.\n");
