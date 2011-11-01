@@ -745,13 +745,15 @@ static void run_init_process(char *init_filename)
 	kernel_execve(init_filename, argv_init, envp_init);
 }
 
+#ifdef CONFIG_INIT_MAKE_CONSOLE
 #if defined(CONFIG_TMPFS) || defined(CONFIG_RAMFS)
 static void build_console(void)
 {
         #define mknoddev(m,s) (m<<8|s)
-        printk(KERN_INFO "Build the dev/console in kernel mode.\n");
+        printk(KERN_INFO "Build the /dev/console node.\n");
         sys_mknod("/dev/console", 0662 | S_IFCHR, mknoddev(5,1));
 }
+#endif
 #endif
 
 /* This is a non __init function. Force it to be noinline otherwise gcc
@@ -760,15 +762,6 @@ static void build_console(void)
 static int noinline init_post(void)
 {
 	unsigned long flags;
-
-	free_initmem();
-	unlock_kernel();
-	mark_rodata_ro();
-	system_state = SYSTEM_RUNNING;
-	numa_default_policy();
-
-	(void) sys_dup(0);
-	(void) sys_dup(0);
 
 	flags=MS_MGC_VAL;
 	flags&=~MS_NOSUID;
@@ -822,13 +815,24 @@ static int noinline init_post(void)
             else
             printk("mount /etc file system ok!\n");
 #endif
-	if (sys_open((const char __user *) "/dev/console", O_RDWR|O_NONBLOCK, 0) < 0) {
-	    printk(KERN_INFO "Please be patient, while Wive-RTNL loads ...\n");
+
+	free_initmem();
+	unlock_kernel();
+	mark_rodata_ro();
+	system_state = SYSTEM_RUNNING;
+	numa_default_policy();
+
+#ifdef CONFIG_INIT_MAKE_CONSOLE
 #if defined(CONFIG_TMPFS) || defined(CONFIG_RAMFS)
-	    /* build console node in /dev */
-	    build_console();
+	/* build console node in /dev */
+	build_console();
 #endif
-	}
+	if (sys_open((const char __user *) "/dev/console", O_RDWR|O_NONBLOCK, 0) < 0)
+	    printk(KERN_INFO "Please be patient, while Wive-RTNL loads ...\n");
+#endif
+
+	(void) sys_dup(0);
+	(void) sys_dup(0);
 
 	if (ramdisk_execute_command) {
 		run_init_process(ramdisk_execute_command);

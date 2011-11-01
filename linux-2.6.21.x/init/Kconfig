@@ -441,6 +441,11 @@ config PRINTK
 	  This makes it possible to have fine-grained control over
 	  which printk messages to include in the kernel.
 
+config INIT_MAKE_CONSOLE
+	default y
+	bool "Create /dev/console node at kernel load" if EMBEDDED
+	depends on TMPFS || RAMFS
+
 config BUG
 	bool "BUG() support" if EMBEDDED
 	default y
