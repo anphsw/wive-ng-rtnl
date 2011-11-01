@@ -970,6 +970,11 @@ MRPROPER_FILES += .config .config.old include/asm .version .old_version \
 		  include/usage_compressed.h \
 		  include/applet_tables.h \
 		  include/applets.h \
+		  docs/busybox.1 \
+		  docs/BusyBox.html \
+		  docs/busybox.net/BusyBox.html \
+		  docs/busybox.pod \
+		  docs/BusyBox.txt \
 		  include/usage.h \
 		  applets/usage \
 		  .kernelrelease Module.symvers tags TAGS cscope* \
