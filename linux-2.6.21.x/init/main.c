@@ -822,12 +822,13 @@ static int noinline init_post(void)
             else
             printk("mount /etc file system ok!\n");
 #endif
+	if (sys_open((const char __user *) "/dev/console", O_RDWR|O_NONBLOCK, 0) < 0) {
+	    printk(KERN_WARNING "Please be patient, while Wive-RTNL loads ...\n");
 #if defined(CONFIG_TMPFS) || defined(CONFIG_RAMFS)
-	/* build console node in /dev */
-	build_console();
+	    /* build console node in /dev */
+	    build_console();
 #endif
-	if (sys_open((const char __user *) "/dev/console", O_RDWR|O_NONBLOCK, 0) < 0)
-		printk(KERN_WARNING "Please be patient, while Wive-RTNL loads ...\n"); 
+	}
 
 	if (ramdisk_execute_command) {
 		run_init_process(ramdisk_execute_command);
