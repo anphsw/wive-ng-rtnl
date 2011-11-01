@@ -749,7 +749,7 @@ static void run_init_process(char *init_filename)
 void build_console(void)
 {
         #define mknoddev(m,s) (m<<8|s)
-        printk(KERN_WARNING "Build the dev/console in kernel mode.\n");
+        printk(KERN_INFO "Build the dev/console in kernel mode.\n");
         sys_mknod("/dev/console", 0662 | S_IFCHR, mknoddev(5,1));
 }
 #endif
@@ -823,7 +823,7 @@ static int noinline init_post(void)
             printk("mount /etc file system ok!\n");
 #endif
 	if (sys_open((const char __user *) "/dev/console", O_RDWR|O_NONBLOCK, 0) < 0) {
-	    printk(KERN_WARNING "Please be patient, while Wive-RTNL loads ...\n");
+	    printk(KERN_INFO "Please be patient, while Wive-RTNL loads ...\n");
 #if defined(CONFIG_TMPFS) || defined(CONFIG_RAMFS)
 	    /* build console node in /dev */
 	    build_console();
