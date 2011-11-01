@@ -90,6 +90,20 @@ mount_err() {
 }
 
 if [ "$ACTION" = "add" ]; then
+  # wait for disc appear, max 15 sec
+  i=0
+  while [ -z "$(ls /sys/class/scsi_disk/)" -a -z "$(ls /sys/bus/ide/devices/ 2>/dev/null)" ]; do
+    sleep 1
+    i=$((i + 1))
+    if [ $i = "1" ]; then
+	$LOG "Wait for disc appear, max 15 sec"
+    fi
+    if [ $i -gt 15 ]; then
+	break
+    fi
+  done
+
+  # start prepare and mounts procedure
   eval "$(blkid $MDEV_PATH | sed 's/^[^ ]* //;s/\([^ ]*=\)/MDEV_\1/g')"
   $LOG "add $MDEV_PATH with $MDEV_TYPE"
   case "$MDEV_TYPE" in

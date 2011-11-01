@@ -44,11 +44,12 @@ case $TYPE in
 	else
 	    $LOG "${ACTION} ${idVendor}:${idProduct} may be storage"
 	    if [ ! -d /sys/module/usb-storage ]; then
+		$LOG "Load modeulr usb-storage and wait initialization to complete"
 		modprobe -q usb-storage
-		# wait for initialization to complete
 		while [ ! -d /sys/module/usb_storage ]; do
 		    sleep 1
 		done
+		$LOG "usb_storage init complete"
 	    fi
 	fi
         ;;
