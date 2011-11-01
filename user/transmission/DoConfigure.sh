@@ -15,6 +15,7 @@ fi
 	    --disable-gtk --disable-cli --disable-mac \
 	    --disable-nls --enable-lightweight --disable-utp \
 	    --enable-libnotify \
+	    --without-gtk \
 	    --with-zlib=$FIRMROOT/lib/lib/ \
 	    --with-zlib-includes=$FIRMROOT/lib/zlib/ \
 	    OPENSSL_CFLAGS="-I$FIRMROOT/user/openssl/include" \

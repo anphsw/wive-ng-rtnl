@@ -787,6 +787,7 @@
 30) If optware mount search apps first in /opt/(s)bin.<br>
 31) Create /dev/console move in kernel mode.<br>
 32) More kernel info write to log at boot time.<br>
+33) Transmission update to 2.42 version.<br>
 
 <br><br>
 <b>For support see:</b><br>
