@@ -788,6 +788,7 @@
 31) Create /dev/console move in kernel mode.<br>
 32) More kernel info write to log at boot time.<br>
 33) Transmission update to 2.42 version.<br>
+34) Samba2 fix LFS support in client and mount.<br>
 
 <br><br>
 <b>For support see:</b><br>
