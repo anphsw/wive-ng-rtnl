@@ -10,28 +10,36 @@ ROOTDEVICE=/dev/mtdblock4
 
 LOG="echo INIT"
 
-#include profile variables
-. /etc/profile
+# make symlinks for startdart i/o
+if [ -d /proc/self/fd ]; then
+    ln -sf /proc/self/fd /dev/fd
+    ln -sf /proc/self/fd/0 /dev/stdin
+    ln -sf /proc/self/fd/1 /dev/stdout
+    ln -sf /proc/self/fd/2 /dev/stderr
+fi
 
-#mount tmpfs if present
+# mount tmpfs if present
 tmpfs_av=`grep tmpfs -c < /proc/filesystems`
 if [ "$tmpfs_av" != "0" ]; then
-    #mount /tmp /etc in /var
+    # mount /tmp /etc in /var
     mkdir -p /var/tmpfs
     mount -o bind /var/tmpfs /tmp
-    #make dir for rwfs and bind it
+    # make dir for rwfs and bind it
     mkdir -p /var/rwfs
     mount -o bind /var/rwfs /etc
-    #need mount usbfs for usb support
+    # need mount usbfs for usb support
     if [ -d /proc/bus/usb ]; then
 	mount -t usbfs none /proc/bus/usb
     fi
 fi
 
-#kernel mode nvram node
+# kernel mode nvram node need before profile included
 mknod /dev/nvram	c	251	0
 
-#autocreate some dev nodes
+# include profile variables
+. /etc/profile
+
+# autocreate some dev nodes
 if [ -f /bin/mdev ]; then
     mdev -s
 else
@@ -56,7 +64,7 @@ mknod /dev/tts/1	c	4	65
 mknod /dev/cua/0	c	5	64
 mknod /dev/misc/rtc	c	10	135
 
-#ralink depended
+# ralink depended
 mknod /dev/hwnat0	c	220	0
 mknod /dev/swnat0	c	210	0
 mknod /dev/rdm0	c	254	0
@@ -105,14 +113,14 @@ umount /tmp/rootfs
 rm -rf /tmp/rootfs
 
 if [ `awk '/MemTotal:/ {print ($2>16384)}' < /proc/meminfo` -eq 1 ]; then
-#>16mb
+# >16mb
     touch /tmp/is_32ram_dev
 else
-#<=16mb
+# <=16mb
     touch /tmp/is_16ram_dev
 fi
 
-#blink wps/sec led at boot time before goahead start
+# blink wps/sec led at boot time before goahead start
 if [ -f /bin/gpio ]; then
     boot_leds_blink=`nvram_get 2860 boot_leds_blink`
     for i in $boot_leds_blink; do
