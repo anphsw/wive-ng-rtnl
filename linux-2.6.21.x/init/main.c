@@ -745,6 +745,15 @@ static void run_init_process(char *init_filename)
 	kernel_execve(init_filename, argv_init, envp_init);
 }
 
+#if defined(CONFIG_TMPFS) || defined(CONFIG_RAMFS)
+void build_console(void)
+{
+        #define mknoddev(m,s) (m<<8|s)
+        printk(KERN_WARNING "Build the dev/console in kernel mode.\n");
+        sys_mknod("/dev/console",0660 | S_IFCHR,mknoddev(5,1));
+}
+#endif
+
 /* This is a non __init function. Force it to be noinline otherwise gcc
  * makes it inline to init() and it becomes part of init.text section
  */
@@ -757,9 +766,6 @@ static int noinline init_post(void)
 	mark_rodata_ro();
 	system_state = SYSTEM_RUNNING;
 	numa_default_policy();
-
-	if (sys_open((const char __user *) "/dev/console", O_RDWR|O_NONBLOCK, 0) < 0)
-		printk(KERN_WARNING "Please be patient, while Wive-RTNL loads ...\n"); 
 
 	(void) sys_dup(0);
 	(void) sys_dup(0);
@@ -787,7 +793,7 @@ static int noinline init_post(void)
             printk("mount /sys file system ok!\n");
 #endif
 #ifdef CONFIG_TMPFS
-        if (sys_mount("tmpfs", "/dev", "tmpfs", flags, "size=32k") < 0)
+        if (sys_mount("tmpfs", "/dev", "tmpfs", flags, "size=8k") < 0)
             printk("mount /dev file system fail!\n");
             else
             printk("mount /dev file system ok!\n");
@@ -816,6 +822,13 @@ static int noinline init_post(void)
             else
             printk("mount /etc file system ok!\n");
 #endif
+#if defined(CONFIG_TMPFS) || defined(CONFIG_RAMFS)
+	/* build console node in /dev */
+	build_console();
+#endif
+	if (sys_open((const char __user *) "/dev/console", O_RDWR|O_NONBLOCK, 0) < 0)
+		printk(KERN_WARNING "Please be patient, while Wive-RTNL loads ...\n"); 
+
 	if (ramdisk_execute_command) {
 		run_init_process(ramdisk_execute_command);
 		printk(KERN_WARNING "Failed to execute %s\n",
