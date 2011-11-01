@@ -36,9 +36,6 @@ fi
 # kernel mode nvram node need before profile included
 mknod /dev/nvram	c	251	0
 
-# include profile variables
-. /etc/profile
-
 # autocreate some dev nodes
 if [ -f /bin/mdev ]; then
     mdev -s
@@ -119,6 +116,9 @@ else
 # <=16mb
     touch /tmp/is_16ram_dev
 fi
+
+# include profile variables
+. /etc/profile
 
 # blink wps/sec led at boot time before goahead start
 if [ -f /bin/gpio ]; then
