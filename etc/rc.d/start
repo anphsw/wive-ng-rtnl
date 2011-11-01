@@ -18,6 +18,11 @@ if [ -d /proc/self/fd ]; then
     ln -sf /proc/self/fd/2 /dev/stderr
 fi
 
+# make symlink for kcore
+if [ -f /proc/kcore ]; then
+    ln -sf /proc/kcore /dev/core
+fi
+
 # mount tmpfs if present
 tmpfs_av=`grep tmpfs -c < /proc/filesystems`
 if [ "$tmpfs_av" != "0" ]; then
