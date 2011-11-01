@@ -785,6 +785,8 @@
 28) Add code for more correct mount usb disks procedure.<br>
 29) Small rewrites in start logic.<br>
 30) If optware mount search apps first in /opt/(s)bin.<br>
+31) Create /dev/console move in kernel mode.<br>
+32) More kernel info write to log at boot time.<br>
 
 <br><br>
 <b>For support see:</b><br>
