@@ -98,26 +98,26 @@ case "$1" in
 	    if [ -z "$dgw_otherif" ]; then
 		# if ip not changed not need delete old default route
 		# this is workaroud for ppp used tunnels up over not default routes
-    		if [ "$OLD_IP" != "$NEW_IP" ]; then
-		    if [ "$replace_dgw" = "1" ]; then
-			$LOG "Deleting default route dev $interface"
-			while ip route del default dev $interface ; do
-			    :
-			done
-		    fi
+		if [ "$OLD_IP" != "$NEW_IP" ] && [ "$replace_dgw" = "1" ]; then
+		    $LOG "Deleting default route dev $interface"
+		    while ip route del default dev $interface ; do
+			:
+		    done
 		fi
 
+		# always parse router varisble
 		metric=0
 		for i in $router ; do
 		    $LOG "Add default route $i dev $interface metric $metric"
 		    ROUTELIST_FGW="$ROUTELIST_FGW $i/32:0.0.0.0:$interface:"
 		    if [ "$replace_dgw" = "1" ]; then
+			# add gw to route dgw list
 			ROUTELIST_DGW="$ROUTELIST_DGW default:$i:$interface:$metric"
-		    fi
-		    # save first dgw with metric=1 to use in corbina hack
-		    if [ "$metric" = "0" ]; then
-			echo $i > /tmp/default.gw
-			first_dgw="$i"
+			# save first dgw with metric=0 to use in corbina hack
+			if [ "$metric" = "0" ]; then
+			    echo $i > /tmp/default.gw
+			    first_dgw="$i"
+			fi
 		    fi
     		    metric=`expr $metric + 1`
 		done
