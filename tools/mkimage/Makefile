@@ -40,7 +40,7 @@ mkimage:mkimage.o crc32.o
 	$(CC) $(CFLAGS) $(HOST_LDFLAGS) -o $@ $^
 	$(STRIP) $@
 
-crc32.o: crc32.c	
+crc32.o: crc32.c
 	$(CC) $(CFLAGS) -c $<
 
 mkimage.o: mkimage.c
