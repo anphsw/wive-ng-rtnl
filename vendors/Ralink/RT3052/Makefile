@@ -34,7 +34,7 @@ romfs:
 
 romfs.post::
 ifeq	($(CONFIG_RT2880_ROOTFS_IN_FLASH),y)
-	#############COMPRESS IMAGE################
+	#############COMPRESS ROMFS################
 	$(ROOTDIR)/tools/bin/mksquashfs_lzma-3.2 $(ROMFSDIR) $(RAMDISK) -le -all-root -no-exports
 endif
 
