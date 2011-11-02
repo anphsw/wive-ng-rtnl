@@ -35,8 +35,8 @@
 #ifndef _IF_PPP_H_
 #define _IF_PPP_H_
 
-#include <linux/compiler.h>
 #ifdef __KERNEL__
+#include <linux/compiler.h>
 #include <linux/config.h>
 #endif
 /*
