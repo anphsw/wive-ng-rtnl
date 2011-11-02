@@ -434,12 +434,6 @@ fsm_rconfreq(f, id, inp, len)
 	fsm_sconfreq(f, 0);		/* Send initial Configure-Request */
 	f->state = REQSENT;
 	break;
-
-//    case STOPPED:
-//	/* Negotiation started by our peer */
-//	fsm_sconfreq(f, 0);		/* Send initial Configure-Request */
-//	f->state = REQSENT;
-//	break;
     }
 
     /*
