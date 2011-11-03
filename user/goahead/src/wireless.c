@@ -929,9 +929,9 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 		nvram_bufset(RT2860_NVRAM, "HT_TxStream", tx_stream);
 		nvram_bufset(RT2860_NVRAM, "HT_RxStream", rx_stream);
 	}
-	
+
 	nvram_bufset(RT2860_NVRAM, "RadioOff", (web_radio_on) ? "0" : "1");
-	
+
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
 
@@ -974,18 +974,7 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 	else
 		websRedirect(wp, submitUrl);
 
-	// Restart wireless network & enable/disable if needed
-	if ((web_radio_on && nvram_radio_on) || ((!web_radio_on) && (!nvram_radio_on)))
-	{
-		doSystem("internet.sh wifionly &");
-	}
-	else
-	{
-		if (web_radio_on)
-			doSystem("internet.sh wifionly && iwpriv ra0 set RadioOn=1 &");
-		else
-			doSystem("internet.sh wifionly && iwpriv ra0 set RadioOn=0 &");
-	}
+	doSystem("internet.sh wifionly");
 }
 
 static int getVideoTurbineBuilt(int eid, webs_t wp, int argc, char_t **argv)
@@ -1174,7 +1163,7 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 		websRedirect(wp, submitUrl);
 
     // restart wireless network
-    doSystem("internet.sh wifionly &");
+    doSystem("internet.sh wifionly");
 }
 
 /* goform/wirelessWds */
@@ -1230,7 +1219,7 @@ static void wirelessWds(webs_t wp, char_t *path, char_t *query)
 		websRedirect(wp, submitUrl);
 
 	// restart wireless network
-	doSystem("internet.sh wifionly &");
+	doSystem("internet.sh wifionly");
 }
 
 /* goform/wirelessApcli */
@@ -1297,7 +1286,7 @@ static void wirelessApcli(webs_t wp, char_t *path, char_t *query)
 	websDone(wp, 200);
 
 	// restart wireless network
-	doSystem("internet.sh wifionly &");
+	doSystem("internet.sh wifionly");
 }
 
 /* goform/wirelessWmm */
@@ -1825,7 +1814,7 @@ void Security(int nvram, webs_t wp, char_t *path, char_t *query)
 	}
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
-	
+
 	setupSecurityLed();
 
 //# Access Policy
@@ -1965,7 +1954,7 @@ static void wirelessMesh(webs_t wp, char_t *path, char_t *query)
 	websDone(wp, 200);
 
 	// restart wireless network
-	doSystem("internet.sh wifionly &");
+	doSystem("internet.sh wifionly");
 }
 
 /* goform/meshManualLink */

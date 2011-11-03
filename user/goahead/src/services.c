@@ -366,7 +366,7 @@ static void setMiscServices(webs_t wp, char_t *path, char_t *query)
 	nvram_close(RT2860_NVRAM);
 
 	//restart some services instead full reload
-	doSystem("services_restart.sh misc &");
+	doSystem("services_restart.sh misc");
 
 	char_t *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
 	if (submitUrl != NULL)
@@ -624,27 +624,27 @@ static void l2tpConfig(webs_t wp, char_t *path, char_t *query)
 	char user_var[16] = "l2tp_srv_user0";
 	char pass_var[16] = "l2tp_srv_pass0";
 	int i=0;
-	
+
 	nvram_init(RT2860_NVRAM);
-	
+
 	char_t *l2tp_enabled = websGetVar(wp, T("l2tp_srv_enabled"), T("off"));
 	if (CHK_IF_CHECKED(l2tp_enabled))
 	{
 		nvram_bufset(RT2860_NVRAM, "l2tp_srv_enabled", "1");
 		setupParameters(wp, service_l2tp_flags, 0);
-		
+
 		// Set-up logins
 		for (; i < 10; i++)
 		{
 			char_t *user = websGetVar(wp, user_var, "");
 			char_t *pass = websGetVar(wp, pass_var, "");
-			
+
 			if (!(CHK_IF_SET(user) || CHK_IF_SET(pass)))
 			{
 				user = "";
 				pass = "";
 			}
-			
+
 			nvram_bufset(RT2860_NVRAM, user_var, user);
 			nvram_bufset(RT2860_NVRAM, pass_var, pass);
 
@@ -654,12 +654,12 @@ static void l2tpConfig(webs_t wp, char_t *path, char_t *query)
 	}
 	else
 		nvram_bufset(RT2860_NVRAM, "l2tp_srv_enabled", "0");
-	
+
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
-	
-	doSystem("service l2tp restart");
-	
+
+	doSystem("service vpnserver restart");
+
 	// Redirect if possible
 	char_t *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
 	if (submitUrl != NULL)
@@ -674,13 +674,13 @@ static int getL2TPUserList(int eid, webs_t wp, int argc, char_t **argv)
 	char user_var[16] = "l2tp_srv_user0";
 	char pass_var[16] = "l2tp_srv_pass0";
 	int i = 0, output = 0;
-	
+
 	nvram_init(RT2860_NVRAM);
 	for (; i < 10; i++)
 	{
 		char *user = nvram_bufget(RT2860_NVRAM, user_var);
 		char *pass = nvram_bufget(RT2860_NVRAM, pass_var);
-		
+
 		if (CHK_IF_SET(user) || CHK_IF_SET(pass))
 			websWrite(wp, T("%s[ '%s', '%s' ]"), ((output++) > 0) ? ",\n\t" : "\t", user, pass);
 		user_var[13]++;

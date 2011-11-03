@@ -2312,7 +2312,7 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 		websRedirect(wp, submitUrl);
 
 	/* Prevent deadloop at WAN apply change if VPN started */
-	doSystem("(ip route flush cache && service vpnhelper stop) &>/dev/null");
+	doSystem("(ip route flush cache && service vpnhelper stop) /dev/null 2>&1");
 	initInternet();
 }
 
