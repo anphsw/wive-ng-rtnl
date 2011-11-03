@@ -26,16 +26,26 @@ check_param() {
 }
 
 get_vpn_ip() {
+    ##########TRY RESOLV SERVER IP############
     $LOG "Get vpn server $vpnServer ip adress"
-    NS=`ipget $vpnServer | tail -q -n1`
-    if [ "$NS" != "" ]; then
-        SERVER=$NS
-        $LOG "Server adress is $SERVER"
-	echo "$SERVER" > /tmp/vpnip
-    else
-        SERVER=$vpnServer
-        $LOG "Not resolve adress for $SERVER"
-    fi
+    count=0
+    resolved=0
+    while [ $resolved -eq 0 ]; do
+	NS=`ipget $vpnServer | tail -q -n1`
+	if [ "$NS" != "" ]; then
+    	    $LOG "Server adress is $SERVER"
+	    resolved=1
+    	    SERVER=$NS
+	    echo "$SERVER" > /tmp/vpnip
+	fi
+	if [ $count = "3" ]; then
+	    resolved=1
+    	    SERVER=$vpnServer
+    	    $LOG "Not resolve adress for $SERVER"
+	fi
+	sleep 5
+	count="$(($count+1))"
+    done
 }
 
 load_modules() {
@@ -52,7 +62,7 @@ echo "==================START-PPTP-CLIENT======================="
     get_param
     check_param
     get_vpn_ip
-    reachable=0;
+    reachable=0
 
     $LOG "Set route to vpn server."
     if [ "$wanConnectionMode" != "STATIC" ]; then
@@ -87,7 +97,7 @@ echo "==================START-PPTP-CLIENT======================="
     		$LOG "Server unreachable wait 30 sec."
         	sleep 30
 		get_vpn_ip
-        	reachable=0;
+        	reachable=0
     	    fi
         done
     fi

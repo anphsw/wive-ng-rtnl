@@ -788,6 +788,7 @@
 31) Transmission update to 2.42 version.<br>
 32) Samba2 fix LFS support in client and mount.<br>
 33) Create /dev/console move in kernel mode.<br>
+34) PPTP/L2TP clients try resolv server IP some times.<br>
 
 <br><br>
 <b>For support see:</b><br>
