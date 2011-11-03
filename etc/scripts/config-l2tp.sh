@@ -32,10 +32,9 @@ get_vpn_ip() {
     while [ $resolved -eq 0 ]; do
 	NS=`ipget $vpnServer | tail -q -n1`
 	if [ "$NS" != "" ]; then
-    	    $LOG "Server adress is $SERVER"
 	    resolved=1
     	    SERVER=$NS
-	    echo "$SERVER" > /tmp/vpnip
+    	    $LOG "Server adress is $SERVER"
 	fi
 	if [ $count = "3" ]; then
 	    resolved=1
@@ -45,6 +44,10 @@ get_vpn_ip() {
 	sleep 5
 	count="$(($count+1))"
     done
+
+    # always create /tmp/vpnip
+    # fix if server string = IP
+    echo "$SERVER" > /tmp/vpnip
 }
 
 load_modules() {
