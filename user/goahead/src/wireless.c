@@ -213,7 +213,7 @@ static int getWlan11bChannels(int eid, webs_t wp, int argc, char_t **argv)
     int idx = 0, channel;
     char *channel_s = nvram_get(RT2860_NVRAM, "Channel");
 
-    channel = (channel_s == NULL)? 0 : atoi(channel_s);	
+    channel = (channel_s == NULL)? 0 : atoi(channel_s);
     for (idx = 0; idx < 13; idx++)
 	websWrite(wp, T("%s%d %s>%d%s%d%s"),
 		 "<option value=", idx+1, (idx+1 == channel)? "selected" : "", 2412+5*idx, "MHz (Channel ", idx+1, ")</option>");

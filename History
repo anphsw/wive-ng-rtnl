@@ -792,6 +792,7 @@
 35) Always create /tmp/vpnip. Fix if server string = IP (centrlan and others buggy ISP).<br>
 36) Fix build mksquash_lzma in some ditributions.<br>
 37) Before update firmware umount ALL external FS include cifs/nfs and others.<br>
+38) Add RemoteManagementPort variable for set goahead port(default 80).
 
 <br><br>
 <b>For support see:</b><br>

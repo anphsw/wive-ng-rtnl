@@ -427,11 +427,11 @@ static void socketAccept(socket_t *sp)
  */
 	nid = socketAlloc(sp->host, sp->port, sp->accept, sp->flags);
 	nsp = socketList[nid];
-	
+
 	a_assert(nsp);
 	if (nsp == NULL)
 		return;
-	
+
 	nsp->sock = newSock;
 	nsp->flags &= ~SOCKET_LISTENING;
 
@@ -499,7 +499,7 @@ int socketGetInput(int sid, char *buf, int toRead, int *errCode)
 	} else {
 		bytesRead = recv(sp->sock, buf, toRead, 0);
 	}
-   
+
    /*
     * BUG 01865 -- CPU utilization hangs on Windows. The original code used 
     * the 'errno' global variable, which is not set by the winsock functions
@@ -821,7 +821,7 @@ int socketSelect(int sid, int timeout)
  */
 		index = sp->sock / (NBBY * sizeof(fd_mask));
 		bit = 1 << (sp->sock % (NBBY * sizeof(fd_mask)));
-		
+
 /*
  * 		Set the appropriate bit in the ready masks for the sp->sock.
  */
@@ -1089,5 +1089,3 @@ int socketSockBuffered(int sock)
 #endif /* (!WIN) | LITTLEFOOT | WEBS */
 
 /******************************************************************************/
-
-

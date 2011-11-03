@@ -136,7 +136,7 @@ int websOpenServer(int port, int retries)
 		0666);
 	a_assert(websLogFd >= 0);
 #endif
-	
+
 	return websOpenListen(port, retries);
 }
 
@@ -1085,7 +1085,7 @@ static void websParseRequest(webs_t wp)
          wp->clen = gatoi(value);
          if (wp->clen > 0)
          {
-			   wp->flags |= WEBS_CLEN;			
+			   wp->flags |= WEBS_CLEN;
 			   websSetVar(wp, T("CONTENT_LENGTH"), value);
          }
          else

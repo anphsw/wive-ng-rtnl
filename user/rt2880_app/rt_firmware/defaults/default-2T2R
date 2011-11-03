@@ -220,6 +220,7 @@ dnsPEnabled=1
 M2UEnabled=1
 macCloneEnabled=0
 RemoteManagement=1
+RemoteManagementPort=80
 RemoteSSH=1
 RemoteFTP=0
 RemoteTelnet=0

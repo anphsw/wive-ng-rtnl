@@ -94,6 +94,12 @@ start() {
     if [ -f /bin/udpxy ] && [ "$UDPXYPort" = "" ]; then
 	nvram_set 2860 UDPXYPort 81
     fi
+    #
+    # WebUI default port
+    #
+    if [ "$RemoteManagementPort" = "" ]; then
+	nvram_set 2860 RemoteManagementPort 80
+    fi
  fi
  touch /tmp/nvram_checked
 }
@@ -103,7 +109,8 @@ stop() {
 }
 
 get_param() {
-    eval `nvram_buf_get 2860 IS_WIVE CHECKMAC Login Password OperationMode WorkGroup SmbNetBIOS SmbString HostName UDPXYPort`
+    eval `nvram_buf_get 2860 IS_WIVE CHECKMAC Login Password OperationMode \
+	    WorkGroup SmbNetBIOS SmbString HostName UDPXYPort RemoteManagementPort`
     MAC_TEST=`nvram_get 2860 WAN_MAC_ADDR | grep 00:0B:2B -c`
     WMAC_TEST=`nvram_get 2860 WLAN_MAC_ADDR | grep 00:0B:2B -c`
     LANMAC_TEST=`nvram_get 2860 LAN_MAC_ADDR | grep 00:0B:2B -c`

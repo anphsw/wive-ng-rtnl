@@ -344,6 +344,7 @@ static int initWebs(void)
 	char			webdir[128];
 	char			*cp;
 	char_t			wbuf[128];
+	int			web_port=80;
 
 /*
  *	Initialize the socket subsystem
@@ -407,6 +408,10 @@ static int initWebs(void)
  *	Open the web server on the given port. If that port is taken, try
  *	the next sequential port for up to "retries" attempts.
  */
+	web_port = atoi(nvram_get(RT2860_NVRAM, "RemoteManagementPort"));
+	if ((web_port) && (web_port != 80))
+	    port=web_port;
+
 	websOpenServer(port, retries);
 
 /*
