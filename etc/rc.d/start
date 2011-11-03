@@ -103,7 +103,7 @@ if [ -f /etc/filesystem.ok ] && [ -f /etc/rc.d/rcS ]; then
 fi
 
 $LOG "Umount /tmp/rootfs"
-umount /tmp/rootfs
+umount -fl /tmp/rootfs
 rm -rf /tmp/rootfs
 
 if [ `awk '/MemTotal:/ {print ($2>16384)}' < /proc/meminfo` -eq 1 ]; then

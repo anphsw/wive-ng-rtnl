@@ -791,6 +791,7 @@
 34) PPTP/L2TP clients try resolv server IP some times.<br>
 35) Always create /tmp/vpnip. Fix if server string = IP (centrlan and others buggy ISP).<br>
 36) Fix build mksquash_lzma in some ditributions.<br>
+37) Before update firmware umount ALL external FS include cifs/nfs and others.<br>
 
 <br><br>
 <b>For support see:</b><br>

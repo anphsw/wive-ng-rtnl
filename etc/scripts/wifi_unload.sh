@@ -136,11 +136,12 @@ if [ -f /bin/swapoff ]; then
     swapoff -a
 fi
 
-mounted=`mount | grep "/dev/sd" | cut -f1 -d" " | cut -f3 -d "/"`
+# umount all exclude base system fs
+mounted=`mount | grep -vE "tmpfs|ramfs|squashfs|proc|sysfs|root|pts" | cut -f1 -d" " | cut -f3 -d "/"`
 if [ -n "$mounted" ]; then
 	for disk in $mounted; do
 	    echo "Umount external drive /dev/$disk."
-	    (sync && umount -l /dev/$disk ) &
+	    (sync && umount -fl /dev/$disk && sync) &
 	done
     sleep 2
 fi
@@ -149,6 +150,6 @@ fi
 unload_modules
 
 # This drop unneded caches to free more ram.
-sysctl -w vm.min_free_kbytes=3192
+sysctl -w vm.min_free_kbytes=2048
 drop_disk_caches
 sysctl -w vm.min_free_kbytes=1024
