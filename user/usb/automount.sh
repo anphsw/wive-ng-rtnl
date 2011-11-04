@@ -7,7 +7,7 @@ LOG="logger -t automount"
 MDEV_PATH=/dev/$MDEV
 
 check_media() {
-  if [ `mount | grep -c "media"` -ge 1 ]; then
+  if [ `mount | grep -c "media"` != "0" ]; then
     $LOG "/media is binding to rw"
   else
     $LOG "prepare /media"
@@ -58,8 +58,10 @@ try_ntfs() {
 
 swap_on() {
   if  [ -f /proc/swaps ] && [ -f /bin/swapon ]; then
-    $LOG "Swap on dev $MDEV_PATH"
-    swapon "$MDEV_PATH" > /dev/null 2>&1
+    if [ `grep -c "$MDEV" < /proc/swaps` = "0" ]; then
+	$LOG "Swap on dev $MDEV_PATH"
+	swapon "$MDEV_PATH" > /dev/null 2>&1
+    fi
   fi
 }
 
@@ -80,7 +82,7 @@ try_umount() {
 
 swap_off() {
   if [ -f /proc/swaps ] && [ -f /bin/swapoff ]; then
-    if [ `grep -c "$MDEV" < /proc/swaps` -ge 1 ]; then
+    if [ `grep -c "$MDEV" < /proc/swaps` != "0" ]; then
 	$LOG "swap off dev $MDEV_PATH"
 	swapoff "$MDEV_PATH"
     fi
