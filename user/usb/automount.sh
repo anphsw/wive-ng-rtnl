@@ -71,6 +71,7 @@ try_umount() {
     $LOG "umount"
     sync
     if ! umount "$MOUNT_DST"; then
+      sleep 3
       if ! umount -fl "$MOUNT_DST"; then
 	$LOG "can not unmount"
 	exit 1
@@ -86,6 +87,7 @@ swap_off() {
     if [ "$is_on" != "0" ]; then
 	$LOG "swap off dev $MDEV_PATH"
 	swapoff "$MDEV_PATH"
+        sleep 3
     fi
   fi
 }
