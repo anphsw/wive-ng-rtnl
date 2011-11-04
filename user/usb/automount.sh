@@ -58,7 +58,7 @@ try_ntfs() {
 
 swap_on() {
   auto_swap=`nvram_get 2860 auto_swap`
-  if [ "$auto_swap" = "1" ] && [ -f /bin/swapon ]; then
+  if  [ -f /proc/swaps ] && [ -f /bin/swapon ] && [ "$auto_swap" = "1" ]; then
     $LOG "Swap on dev $MDEV_PATH"
     swapon "$MDEV_PATH" > /dev/null 2>&1
   fi
@@ -80,9 +80,11 @@ try_umount() {
 }
 
 swap_off() {
-  if [ `cat /proc/swaps | grep "$MDEV" | wc -l` -ge 1 ]; then
-    $LOG "swap off dev $MDEV_PATH"
-    swapoff "$MDEV_PATH"
+  if [ -f /proc/swaps ]; then
+    if [ `grep "$MDEV" < /proc/swaps | wc -l` -ge 1 ]; then
+	$LOG "swap off dev $MDEV_PATH"
+	swapoff "$MDEV_PATH"
+    fi
   fi
 }
 
