@@ -24,10 +24,6 @@ if [ "$tmpfs_av" != "0" ]; then
     # make dir for rwfs and bind it
     mkdir -p /var/rwfs
     mount -o bind /var/rwfs /etc
-    # need mount usbfs for usb support
-    if [ -d /proc/bus/usb ]; then
-	mount -t usbfs none /proc/bus/usb
-    fi
 fi
 
 # kernel mode nvram node need before profile included
