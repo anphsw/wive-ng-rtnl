@@ -661,8 +661,8 @@ int pskb_expand_head(struct sk_buff *skb, int nhead, int ntail,
 		BUG();
 
 	size = SKB_DATA_ALIGN(size);
-
-	data = kmalloc(size + sizeof(struct skb_shared_info), gfp_mask);
+	size += SKB_DATA_ALIGN(sizeof(struct skb_shared_info));
+	data = kmalloc(size, gfp_mask);
 	if (!data)
 		goto nodata;
 
