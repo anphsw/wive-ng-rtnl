@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# include global config
+. /etc/scripts/global.sh
+
 LOG="logger -t automount"
 MDEV_PATH=/dev/$MDEV
 
@@ -89,6 +92,8 @@ mount_err() {
   fi
 }
 
+drop_disk_caches
+
 if [ "$ACTION" = "add" ]; then
   # wait for disc appear, max 15 sec
   i=0
@@ -124,6 +129,8 @@ else
   try_umount
   swap_off
 fi
+
+drop_disk_caches
 
 if [ "$MDEV_LABEL" != "optware" ] && [ "$MDEV_TYPE" != "swap" ]; then
     #regenerate config and restart samba
