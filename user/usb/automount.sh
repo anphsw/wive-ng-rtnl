@@ -7,7 +7,8 @@ LOG="logger -t automount"
 MDEV_PATH=/dev/$MDEV
 
 check_media() {
-  if [ `mount | grep -c "media"` != "0" ]; then
+  is_mounted=`mount | grep -c "media"`
+  if [ "$is_mounted"  != "0" ]; then
     $LOG "/media is binding to rw"
   else
     $LOG "prepare /media"
@@ -36,13 +37,11 @@ pre_mount() {
 
 try_mount() {
   modprobe -q "$MDEV_TYPE"
-# mount -o utf8 not worked need external mount, busybox not support this
-#  if ! mount -o utf8,noatime -t "$MDEV_TYPE" "$MDEV_PATH" "$MOUNT_DST"; then
-    if ! mount -o noatime -t "$MDEV_TYPE" "$MDEV_PATH" "$MOUNT_DST"; then
-      $LOG "can not mount"
-      mount_err
-    fi
-#  fi
+  # mount with default nls configured in kernel
+  if ! mount -o noatime -t "$MDEV_TYPE" "$MDEV_PATH" "$MOUNT_DST"; then
+    $LOG "can not mount"
+    mount_err
+  fi
   if [ "$MDEV_LABEL" == "optware" ]; then
     #re read profile variables
     . /etc/profile
@@ -58,7 +57,8 @@ try_ntfs() {
 
 swap_on() {
   if  [ -f /proc/swaps ] && [ -f /bin/swapon ]; then
-    if [ `grep -c "$MDEV" < /proc/swaps` = "0" ]; then
+    is_on=`grep -c "$MDEV" < /proc/swaps`
+    if [ "$is_on" = "0" ]; then
 	$LOG "Swap on dev $MDEV_PATH"
 	swapon "$MDEV_PATH" > /dev/null 2>&1
     fi
@@ -82,7 +82,8 @@ try_umount() {
 
 swap_off() {
   if [ -f /proc/swaps ] && [ -f /bin/swapoff ]; then
-    if [ `grep -c "$MDEV" < /proc/swaps` != "0" ]; then
+    is_on=`grep -c "$MDEV" < /proc/swaps`
+    if [ "$is_on" != "0" ]; then
 	$LOG "swap off dev $MDEV_PATH"
 	swapoff "$MDEV_PATH"
     fi
