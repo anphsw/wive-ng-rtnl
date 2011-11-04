@@ -72,6 +72,22 @@ unload_ra0br0()
     fi
 }
 
+disable_net()
+{
+    if [ -f /tmp/is_16ram_dev ]; then
+	# check in bridge
+	is_ra0_in_br0=`brctl show | sed -n '/ra0/p'`
+	is_eth21_in_br0=`brctl show | sed -n '/eth2\.1/p'`
+
+	# unload wifi driver
+	if [ "$is_ra0_in_br0" == "" ]; then
+	    unload_ra0
+	elif [ "$is_eth21_in_br0" != "" ]; then
+	    unload_ra0br0 eth2.1
+	fi
+    fi
+}
+
 unload_modules()
 {
     echo "Unload modules"
@@ -116,40 +132,44 @@ unload_apps()
     done
 }
 
-unload_apps
-
-if [ -f /tmp/is_16ram_dev ]; then
-    # check in bridge
-    is_ra0_in_br0=`brctl show | sed -n '/ra0/p'`
-    is_eth21_in_br0=`brctl show | sed -n '/eth2\.1/p'`
-
-    # unload wifi driver
-    if [ "$is_ra0_in_br0" == "" ]; then
-	unload_ra0
-    elif [ "$is_eth21_in_br0" != "" ]; then
-	unload_ra0br0 eth2.1
-    fi
-fi
-
-if [ -f /bin/swapoff ]; then
-    echo "Disable swaps."
-    swapoff -a
-fi
-
-# umount all exclude base system fs
-mounted=`mount | grep -vE "tmpfs|ramfs|squashfs|proc|sysfs|root|pts" | cut -f1 -d" " | cut -f3 -d "/"`
-if [ -n "$mounted" ]; then
+umount_all()
+{
+    # umount all exclude base system fs
+    mounted=`mount | grep -vE "tmpfs|ramfs|squashfs|proc|sysfs|root|pts" | cut -f1 -d" " | cut -f3 -d "/"`
+    if [ -n "$mounted" ]; then
 	for disk in $mounted; do
 	    echo "Umount external drive /dev/$disk."
 	    (sync && umount -fl /dev/$disk && sync) &
 	done
-    sleep 2
-fi
+	sleep 2
+    fi
+
+    # disable swaps
+    if [ -f /bin/swapoff ]; then
+	echo "Disable swaps."
+	swapoff -a
+    fi
+
+}
+
+free_mem_cahce()
+{
+    sysctl -w vm.min_free_kbytes=2048
+    drop_disk_caches
+    sysctl -w vm.min_free_kbytes=1024
+}
+
+# unload all applications
+unload_apps
+
+# disable wan/wlan if mem=16Mb
+disable_net
+
+# umount all particions and disable swap
+umount_all
 
 # unload all modules this is need after unmont
 unload_modules
 
 # This drop unneded caches to free more ram.
-sysctl -w vm.min_free_kbytes=2048
-drop_disk_caches
-sysctl -w vm.min_free_kbytes=1024
+free_mem_cahce
