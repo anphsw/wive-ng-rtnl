@@ -8,7 +8,7 @@ MDEV_PATH=/dev/$MDEV
 
 check_media() {
   is_mounted=`mount | grep -c "media"`
-  if [ "$is_mounted"  != "0" ]; then
+  if [ "$is_mounted" != "0" ]; then
     $LOG "/media is binding to rw"
   else
     $LOG "prepare /media"
@@ -18,7 +18,7 @@ check_media() {
 
 pre_mount() {
   if [ "$MDEV_LABEL" == "optware" ]; then
-    $LOG "optware part"
+    $LOG "detect optware part on $MDEV"
     MOUNT_DST="/opt"
   else
     check_media
@@ -39,7 +39,7 @@ try_mount() {
   modprobe -q "$MDEV_TYPE"
   # mount with default nls configured in kernel
   if ! mount -o noatime -t "$MDEV_TYPE" "$MDEV_PATH" "$MOUNT_DST"; then
-    $LOG "can not mount"
+    $LOG "can not mount $MDEV_TYPE $MDEV_PATH $MOUNT_DST"
     mount_err
   fi
   if [ "$MDEV_LABEL" == "optware" ]; then
@@ -50,13 +50,13 @@ try_mount() {
 
 try_ntfs() {
   if ! ntfs-3g "$MDEV_PATH" "$MOUNT_DST" -o force,noatime; then
-    $LOG "can not mount NTFS"
+    $LOG "can not mount NTFS $MDEV_PATH $MOUNT_DST"
     mount_err
   fi
 }
 
 swap_on() {
-  if  [ -f /proc/swaps ] && [ -f /bin/swapon ]; then
+  if [ -f /proc/swaps ] && [ -f /bin/swapon ]; then
     is_on=`grep -c "$MDEV" < /proc/swaps`
     if [ "$is_on" = "0" ]; then
 	$LOG "Swap on dev $MDEV_PATH"
@@ -68,12 +68,11 @@ swap_on() {
 try_umount() {
   MOUNT_DST=`mount | grep "$MDEV" | awk '{print $3}'`
   if [ "$MOUNT_DST" ]; then
-    $LOG "umount"
-    sync
+    $LOG "umount $MOUNT_DST"
     if ! umount "$MOUNT_DST"; then
       sleep 3
       if ! umount -fl "$MOUNT_DST"; then
-	$LOG "can not unmount"
+	$LOG "can not unmount $MOUNT_DST"
 	exit 1
       fi
     fi
@@ -108,7 +107,7 @@ if [ "$ACTION" = "add" ]; then
     sleep 1
     i=$((i + 1))
     if [ $i = "1" ]; then
-	$LOG "Wait for disc appear, max 15 sec"
+	$LOG "Wait $MDEV for disc appear, max 15 sec"
     fi
     if [ $i -gt 15 ]; then
 	break
