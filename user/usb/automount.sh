@@ -57,8 +57,9 @@ try_ntfs() {
 }
 
 swap_on() {
-  if [ "$(nvram_get 2860 auto_swap)" = "1" ] && [ -f /bin/swapon ]; then
-    $LOG "Swap on"
+  auto_swap=`nvram_get 2860 auto_swap`
+  if [ "$auto_swap" = "1" ] && [ -f /bin/swapon ]; then
+    $LOG "Swap on dev $MDEV_PATH"
     swapon "$MDEV_PATH" > /dev/null 2>&1
   fi
 }
@@ -69,7 +70,7 @@ try_umount() {
     $LOG "umount"
     sync
     if ! umount "$MOUNT_DST"; then
-      if ! umount -l "$MOUNT_DST"; then
+      if ! umount -fl "$MOUNT_DST"; then
 	$LOG "can not unmount"
 	exit 1
       fi
@@ -80,7 +81,7 @@ try_umount() {
 
 swap_off() {
   if [ `cat /proc/swaps | grep "$MDEV" | wc -l` -ge 1 ]; then
-    $LOG "swap off"
+    $LOG "swap off dev $MDEV_PATH"
     swapoff "$MDEV_PATH"
   fi
 }
