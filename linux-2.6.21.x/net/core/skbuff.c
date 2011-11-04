@@ -155,8 +155,7 @@ struct sk_buff *__alloc_skb(unsigned int size, gfp_t gfp_mask,
 
 	/* Get the DATA. Size must match skb_add_mtu(). */
 	size = SKB_DATA_ALIGN(size);
-	size += SKB_DATA_ALIGN(sizeof(struct skb_shared_info));
-	data = kmalloc_node_track_caller(size, gfp_mask, node);
+	data = kmalloc_node_track_caller(size + sizeof(struct skb_shared_info), gfp_mask, node);
 	if (!data)
 		goto nodata;
 	prefetchw(data + size);
@@ -661,8 +660,8 @@ int pskb_expand_head(struct sk_buff *skb, int nhead, int ntail,
 		BUG();
 
 	size = SKB_DATA_ALIGN(size);
-	size += SKB_DATA_ALIGN(sizeof(struct skb_shared_info));
-	data = kmalloc(size, gfp_mask);
+
+	data = kmalloc(size + sizeof(struct skb_shared_info), gfp_mask);
 	if (!data)
 		goto nodata;
 
