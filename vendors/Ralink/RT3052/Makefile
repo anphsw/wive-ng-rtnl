@@ -21,7 +21,7 @@ romfs:
 	[ -d $(ROMFSDIR) ] || mkdir -p $(ROMFSDIR)
 	[ -d $(ROMFSDIR)/$$i ] || mkdir -p $(ROMFSDIR)
 	for i in $(ROMFS_DIRS); do \
-		[ -d $(ROMFSDIR)/$$i ] || mkdir -p $(ROMFSDIR)/$$i; \
+	    [ -d $(ROMFSDIR)/$$i ] || mkdir -p $(ROMFSDIR)/$$i; \
 	done
 	##########CREATE NEEDED SYMLINKS#########
 	$(ROMFSINST) -s ./bin /sbin
@@ -33,6 +33,10 @@ romfs:
 	$(ROMFSINST) -s /proc/self/mounts /etc/mtab
 
 romfs.post::
+	############CLEANUP IMAGES################
+	rm -f $(IMAGE)
+	rm -f $(RAMDISK)
+	rm -f $(KERNELZ).lzma
 ifeq	($(CONFIG_RT2880_ROOTFS_IN_FLASH),y)
 	#############COMPRESS ROMFS################
 	$(ROOTDIR)/tools/bin/mksquashfs_lzma-3.2 $(ROMFSDIR) $(RAMDISK) -le -all-root -no-exports
