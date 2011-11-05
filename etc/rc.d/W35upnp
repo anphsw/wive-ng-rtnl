@@ -25,9 +25,8 @@ start() {
 	if [ ! -f /var/upnp_leases ]; then
 	    touch /var/upnp_leases
 	fi
+	gen_config
 	ip route replace 239.0.0.0/8 dev $lan_if
-	cat /etc/miniupnpd.conf.template > /etc/miniupnpd.conf
-	cat /etc/miniupnpd.conf.uuid >> /etc/miniupnpd.conf
         miniupnpd -f /etc/miniupnpd.conf -i "$real_wan_if" -o "$real_wan_ipaddr" -a "$lan_ipaddr/$lan_netmask" &
     fi
 }
@@ -42,6 +41,28 @@ stop() {
 	sleep 2
     done
     ip route del 239.0.0.0/8 dev "$lan_if" > /dev/null 2>&1
+}
+
+gen_config() {
+####################generate config###########################
+printf"
+minissdpdsocket=/var/run/minissdpd.sock
+lease_file=/var/upnp_leases
+enable_natpmp=yes
+enable_upnp=yes
+bitrate_up=3500000
+bitrate_down=24000000
+secure_mode=no
+system_uptime=yes
+notify_interval=60
+clean_ruleset_threshold=20
+clean_ruleset_interval=600
+allow 1024-65535 $lan_ipaddr/$lan_netmask 1024-65535
+deny 0-65535 0.0.0.0/0 0-65535
+model_number=1" > /etc/miniupnpd.conf
+###############################################################
+cat /etc/miniupnpd.conf.uuid >> /etc/miniupnpd.conf
+###############################################################
 }
 
 get_param() {

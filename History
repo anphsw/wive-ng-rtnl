@@ -795,6 +795,7 @@
 38) Add RemoteManagementPort variable for set goahead port(default 80).<br>
 39) Remove auto_swap variable. Always try find and ON swap particion.<br>
 40) In PurePPPOE mode zcip use /32 netmask instead /16 for prevent create route to localnet.<br>
+41) Generate more correct and secure config for upnp/igmpproxy.<br>
 
 <br><br>
 <b>For support see:</b><br>

@@ -22,8 +22,6 @@ start() {
     sysctl -w net.ipv4.igmp_max_memberships=5
     if [ "$igmpEnabled" = "1" ] && [ "$OperationMode" != "0" ]; then
         $LOG "Starting IGMPPROXY"
-	# generate config
-	printf "quickleave\nphyint $wan_if upstream  ratelimit 0  threshold 1\naltnet 0.0.0.0/0\nphyint $lan_if downstream  ratelimit 0  threshold 1\nphyint $vpn_if disabled\n" > /etc/igmpproxy.conf
 	# check ip adress set at wan and if need kill igmpproxy
 	wan_is_not_null=`ip -4 addr show $wan_if | grep inet -c`
 	igmp_is_start=`pidof igmpproxy`
@@ -53,6 +51,9 @@ start() {
 	    OPTS=""
 	fi
 
+	#generate config file
+	gen_config
+
 	# start igmpproxy in switch managment mode
     	igmpproxy $OPTS /etc/igmpproxy.conf &
 
@@ -73,6 +74,18 @@ stop() {
     echo 0 > /proc/sys/net/ipv4/conf/all/mc_forwarding
     echo 0 > /proc/sys/net/ipv4/conf/default/mc_forwarding
     ip route del 224.0.0.0/4 dev "$wan_if" > /dev/null 2>&1
+}
+
+gen_config() {
+####################generate config###########################
+printf"
+quickleave
+altnet 0.0.0.0/0
+phyint $wan_if upstream ratelimit 0 threshold 1
+phyint $lan_if downstream ratelimit 0 threshold 1
+phyint $vpn_if disabled
+" > /etc/igmpproxy.conf
+##############################################################
 }
 
 get_param() {

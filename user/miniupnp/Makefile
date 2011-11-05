@@ -83,7 +83,6 @@ install:	miniupnpd #genuuid
 
 romfs: install
 	$(ROMFSINST) -S filesystem/usr/sbin/miniupnpd /bin/miniupnpd
-	$(ROMFSINST) miniupnpd.conf.template /etc/miniupnpd.conf.template
 	$(ROMFSINST) miniupnpd.conf /etc/miniupnpd.conf
 
 
