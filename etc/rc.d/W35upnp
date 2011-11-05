@@ -45,7 +45,7 @@ stop() {
 
 gen_config() {
 ####################generate config###########################
-printf"
+print "
 minissdpdsocket=/var/run/minissdpd.sock
 lease_file=/var/upnp_leases
 enable_natpmp=yes

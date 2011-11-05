@@ -78,7 +78,7 @@ stop() {
 
 gen_config() {
 ####################generate config###########################
-printf"
+printf "
 quickleave
 altnet 0.0.0.0/0
 phyint $wan_if upstream ratelimit 0 threshold 1
