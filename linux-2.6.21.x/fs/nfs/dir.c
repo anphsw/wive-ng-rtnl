@@ -322,8 +322,6 @@ int find_dirent_page(nfs_readdir_descriptor_t *desc)
 		status = PTR_ERR(page);
 		goto out;
 	}
-	if (!PageUptodate(page))
-		goto read_error;
 
 	/* NOTE: Someone else may have changed the READDIRPLUS flag */
 	desc->page = page;
@@ -337,9 +335,6 @@ int find_dirent_page(nfs_readdir_descriptor_t *desc)
  out:
 	dfprintk(DIRCACHE, "NFS: %s: returns %d\n", __FUNCTION__, status);
 	return status;
- read_error:
-	page_cache_release(page);
-	return -EIO;
 }
 
 /*
