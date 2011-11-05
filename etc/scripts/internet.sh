@@ -210,7 +210,6 @@ services_restart.sh all
 
 # in dhcp client mode restart from dhcp script
 # in static/zeroconf or pure pppoe mode need restart anyway
-vpnPurePPPOE=`nvram_get 2860 vpnPurePPPOE`
 if [ "$wanConnectionMode" != "DHCP" ] || [ "$vpnPurePPPOE" = "1" ]; then
     (service vpnhelper stop && sleep 2 && service vpnhelper start) &
 fi

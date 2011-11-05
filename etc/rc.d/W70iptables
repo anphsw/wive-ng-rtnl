@@ -431,7 +431,7 @@ get_param() {
 	    natEnabled use_snat PortForwardEnable DMZEnable DMZIPAddress DMZNATLoopback DefaultFirewallPolicy \
 	    IPPortFilterEnable WANPingFilter RemoteSSH RemoteFTP RemoteTelnet RemoteManagement RemoteManagementPort \
 	    dhcpEnabled ipt_account upnpEnabled igmpEnabled UDPXYMode UDPXYPort SmbEnabled TransmissionEnabled snmpd \
-	    parproutedEnabled PrinterSrvEnabled chilli_net simple_qos vpnType vpnNAT vpnPurePPPOE l2tp_srv_enabled `
+	    parproutedEnabled PrinterSrvEnabled chilli_net simple_qos vpnType vpnNAT l2tp_srv_enabled `
 
     # if wan ip not get
     if [ "$wan_ipaddr" = "" ]; then

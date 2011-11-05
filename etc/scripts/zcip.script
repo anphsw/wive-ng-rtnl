@@ -10,6 +10,13 @@ LOG="logger -t zcip"
 # include global
 . /etc/scripts/global.sh
 
+# in pure pppoe mode no need routing to from lan 2 wan
+if [ "$vpnEnabled" = "on" ] && [ "$vpnType" = "0" ] && [ "$vpnPurePPPOE" = "1" ]; then
+    netmask=32
+else
+    netmask=16
+fi
+
 # zcip should start on boot/resume and various media changes
 case "$1" in
 init)
@@ -26,8 +33,8 @@ config)
 	if [ "x$ip" != x -a -w "$ip.$interface" ]; then
 		echo $ip > "$ip.$interface"
 	fi
-	$LOG "Add ip adress $ip to interface $interface and link up."
-	ip address add dev $interface scope link local "$ip/16" broadcast +
+	$LOG "Add ip adress $ip/$mask to interface $interface and link up."
+	ip address add dev $interface scope link local "$ip/$netmask" broadcast +
 	ip link set $interface up
 	# add routes configured in web
 	if [ -f /etc/routes_replace ]; then
