@@ -18,7 +18,7 @@ lan2_if="br0:9"
 vpn_if="ppp0"
 
 # first get operation mode and wan mode  dns mode and relay mode vpn mode and type
-eval `nvram_buf_get 2860 OperationMode wanConnectionMode dnsPEnabled wan_ipaddr wan_static_dns vpnEnabled vpnType`
+eval `nvram_buf_get 2860 OperationMode wanConnectionMode dnsPEnabled wan_ipaddr wan_static_dns vpnEnabled vpnPurePPPOE vpnType`
 
 # get wireless, wan and lan mac adresses
 getMacIf()
