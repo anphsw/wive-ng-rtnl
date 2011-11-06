@@ -1367,9 +1367,6 @@ unsigned short ip_rt_frag_needed(struct iphdr *iph, unsigned short new_mtu)
 	__be32  daddr = iph->daddr;
 	unsigned short est_mtu = 0;
 
-	if (ipv4_config.no_pmtu_disc)
-		return 0;
-
 	for (i = 0; i < 2; i++) {
 		unsigned hash = rt_hash(daddr, skeys[i], 0);
 
