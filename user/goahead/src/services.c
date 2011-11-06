@@ -659,6 +659,7 @@ static void l2tpConfig(webs_t wp, char_t *path, char_t *query)
 	nvram_close(RT2860_NVRAM);
 
 	doSystem("service vpnserver restart");
+	doSystem("service iptables restart");
 
 	// Redirect if possible
 	char_t *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
