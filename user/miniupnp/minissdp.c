@@ -475,7 +475,7 @@ ProcessSSDPData(int s, const char *bufr, int n,
 				}
 				if (lan_addr == NULL)
 				{
-					syslog(LOG_ERR, "Can't find in which sub network the client is");
+					syslog(LOG_DEBUG, "Can't find in which sub network the client is");
 					return;
 				}
 				announced_host = lan_addr->str;
