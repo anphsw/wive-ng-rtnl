@@ -226,7 +226,7 @@ int check_allrouters_membership(struct Interface *iface)
 
 	if (!allrouters_ok) {
 		flog(LOG_WARNING, "resetting ipv6-allrouters membership on %s", iface->Name);
-		setup_allrouters_membership(iface);
+		return setup_allrouters_membership(iface);
 	}
 
 	return(0);
@@ -241,6 +241,10 @@ set_interface_var(const char *iface,
 	FILE *fp;
 	char spath[64+IFNAMSIZ];	/* XXX: magic constant */
 	if (snprintf(spath, sizeof(spath), var, iface) >= sizeof(spath))
+		return -1;
+
+	/* No path traversal */
+	if (!iface[0] || !strcmp(iface, ".") || !strcmp(iface, "..") || strchr(iface, '/'))
 		return -1;
 
 	if (access(spath, F_OK) != 0)

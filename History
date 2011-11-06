@@ -796,6 +796,7 @@
 39) Remove auto_swap variable. Always try find and ON swap particion.<br>
 40) In PurePPPOE mode zcip use /32 netmask instead /16 for prevent create route to localnet.<br>
 41) Generate more correct and secure config for upnp/igmpproxy.<br>
+42) Radvd up to 1.8.3 version.<br>
 
 <br><br>
 <b>For support see:</b><br>
