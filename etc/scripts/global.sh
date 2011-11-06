@@ -150,9 +150,10 @@ udhcpc_opts()
     else
 	wan_manual_mtu=""
     fi
-    UDHCPCOPTS="-i $wan_if -H $HostName $dhcpRequestIP -S -R -T 5 -a \
+    UDHCPCOPTS="-i $wan_if $dhcpRequestIP -S -R -T 5 -a \
 		-s /bin/udhcpc.sh -p /var/run/udhcpc.pid \
-		-O routes -O staticroutes -O msstaticroutes $wan_manual_mtu -f &"
+		-O routes -O staticroutes -O msstaticroutes \
+		$wan_manual_mtu -x hostname:$HostName -f &"
 }
 
 # configure and start zeroconf daemon
