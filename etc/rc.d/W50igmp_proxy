@@ -88,7 +88,7 @@ get_param() {
 	####################################
 	# correct mode for igmpsnooping
 	####################################
-	if [ "$tv_port" = "1" ]; then
+	if [ "$tv_port" = "1" ] || [ "$igmpSnoopMode" = "n" ]; then
 	    # if  tvport enabled = force disable snooping
 	    igmpSnoopMode="n"
 	elif [ "$tv_port" != "1" -a "$M2UEnabled" = "1" ] || [ "$igmpSnoopMode" = "f" ]; then

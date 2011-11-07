@@ -758,7 +758,7 @@ void rt3052_init(int sn)
 		hook_value = value2 && 0x0000FFFF;
 	}
 	rareg(WRITE, 0x1000000c, hook_value);
-	if(sn)
+	if (sn > 1)
 		hook_value = sn;
 	HOOK_CHECK;
 
