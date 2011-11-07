@@ -97,8 +97,10 @@ int main( int ArgCn, char *ArgVc[] ) {
     FILE *fp = fopen(PROCREG_GMAC, "r");
     if(!fp)
 	sw=0;
-    else
+    else {
 	sw=1;
+	fclose(fp);
+    }
 
     // set default wan port position
     WanPort = 0x1;
