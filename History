@@ -803,6 +803,7 @@
 46) Disable igmpproxy use igmpsnooping for lan if tv_port enabled (prevent switch reconfigure).<br>
 47) Fix igmpsnooping force enable/disable fix.<br>
 48) Igmpproxy automatic check esw exist.<br>
+49) Rework boot SPI hack.<br>
 
 <br><br>
 <b>For support see:</b><br>
