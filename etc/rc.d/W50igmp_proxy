@@ -41,6 +41,10 @@ start() {
 	    # if wifi snoop enabled = force
 	    igmpSnoopMode="f"
 	fi
+	if [ "$tv_port" = "1" ]
+	    # if wifi snoop disabled = force
+	    igmpSnoopMode="n"
+	fi
 	# start igmpproxy in switch managment mode
 	if [ "$wan_port" = "0" ]; then
 	    $igmpPort="w"
@@ -89,7 +93,7 @@ phyint $vpn_if disabled
 }
 
 get_param() {
-    eval `nvram_buf_get 2860 igmpEnabled igmpSnoopMode M2UEnabled wan_port`
+    eval `nvram_buf_get 2860 igmpEnabled igmpSnoopMode M2UEnabled wan_port tv_port`
 }
 
 case "$1" in

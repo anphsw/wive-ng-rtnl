@@ -799,7 +799,8 @@
 42) Radvd up to 1.8.3 version.<br>
 43) Fix iptables rules for compat with new iptables syntaxis.<br>
 44) Consolidate some hardcoded networks to two constant.<br>
-45) Prevent send pkts drom mcast net to miniupnp/dmz rules if igmpproxy/udpxy enabled (decrease cpu utilization).<br>
+45) Prevent send pkts from mcast net to miniupnp/dmz rules if igmpproxy/udpxy enabled (decrease cpu utilization).<br>
+46) Disable igmpproxy use igmpsnooping for lan if tv_port enabled (prevent switch reconfigure).<br>
 
 <br><br>
 <b>For support see:</b><br>
