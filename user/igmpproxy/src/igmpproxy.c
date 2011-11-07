@@ -85,16 +85,16 @@ uint32_t WanPort = 0x1;
 */
 int main( int ArgCn, char *ArgVc[] ) {
 
-    int c, sw = 0;
+    int c, sw;
     int force_snooping = -1;
 
 #ifdef RALINK_ESW_SUPPORT
     /* check esw exist */
-    FILE *fp = fopen("PROCREG_GMAC", "r");
-    if(fp){
+    FILE *fp = fopen(PROCREG_GMAC, "r");
+    if(!fp)
+	sw=0;
+    else
 	sw=1;
-	fclose(fp);
-    }
 #endif
 
     // set default wan port position
