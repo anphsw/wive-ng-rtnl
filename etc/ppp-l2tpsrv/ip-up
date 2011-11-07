@@ -15,7 +15,7 @@ l2tp_srv_nat_enabled=`nvram_get 2860 l2tp_srv_enabled`
 #del rules
 iptables -D l2tpsrvfwd -i $PPP_IFACE -j ACCEPT > /dev/null 2>&1
 iptables -D l2tpsrvfwd -o $PPP_IFACE -j ACCEPT > /dev/null 2>&1
-iptables -D POSTROUTING -t nat -o ! $PPP_IFACE -j MASQUERADE > /dev/null 2>&1
+iptables -D POSTROUTING -t nat ! -o $PPP_IFACE -j MASQUERADE > /dev/null 2>&1
 if [ "$l2tp_srv_nat_enabled" != "" ] && [ "$l2tp_srv_nat_enabled" != "0" ]; then
     $LOG "Add masqrade for client $PPP_REMOTE"
     #add rules

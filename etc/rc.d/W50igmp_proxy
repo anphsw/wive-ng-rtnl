@@ -32,7 +32,7 @@ start() {
 	    sleep 20
 	fi
 	# add route to multicast subnet
-	ip route replace 224.0.0.0/4 dev $wan_if
+	ip route replace "$mcast_net" dev $wan_if
 	if [ "$igmpSnoopMode" != "f" ] && [ "$igmpSnoopMode" != "n" ]; then
 	    # if snoop mode unknown = auto
 	    igmpSnoopMode=""
@@ -73,7 +73,7 @@ stop() {
     killall -q -SIGKILL igmpproxy
     echo 0 > /proc/sys/net/ipv4/conf/all/mc_forwarding
     echo 0 > /proc/sys/net/ipv4/conf/default/mc_forwarding
-    ip route del 224.0.0.0/4 dev "$wan_if" > /dev/null 2>&1
+    ip route del "$mcast_net" dev "$wan_if" > /dev/null 2>&1
 }
 
 gen_config() {

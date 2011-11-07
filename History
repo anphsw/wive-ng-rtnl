@@ -797,6 +797,9 @@
 40) In PurePPPOE mode zcip use /32 netmask instead /16 for prevent create route to localnet.<br>
 41) Generate more correct and secure config for upnp/igmpproxy.<br>
 42) Radvd up to 1.8.3 version.<br>
+43) Fix iptables rules for compat with new iptables syntaxis.<br>
+44) Consolidate some hardcoded networks to two constant.<br>
+45) Prevent send pkts drom mcast net to miniupnp/dmz rules if igmpproxy/udpxy enabled (decrease cpu utilization).<br>
 
 <br><br>
 <b>For support see:</b><br>

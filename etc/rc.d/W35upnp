@@ -26,7 +26,7 @@ start() {
 	    touch /var/upnp_leases
 	fi
 	gen_config
-	ip route replace 239.0.0.0/8 dev $lan_if
+	ip route replace $upmpm_net dev $lan_if
         miniupnpd -f /etc/miniupnpd.conf -i "$real_wan_if" -o "$real_wan_ipaddr" -a "$lan_ipaddr/$lan_netmask" &
     fi
 }
@@ -40,7 +40,7 @@ stop() {
 	fi
 	sleep 2
     done
-    ip route del 239.0.0.0/8 dev "$lan_if" > /dev/null 2>&1
+    ip route del $upmpm_net dev "$lan_if" > /dev/null 2>&1
 }
 
 gen_config() {
