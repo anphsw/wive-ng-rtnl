@@ -79,7 +79,7 @@ function ajaxPerformRequest(uri, handler)
 	xmlHttp.send(null);
 }
 
-function ajaxPostRequest(uri, content, refresh)
+function ajaxPostRequest(uri, content, refresh, handler)
 {
 	var xmlHttp = createXMLHttp();
 	if (xmlHttp == null)
@@ -90,8 +90,16 @@ function ajaxPostRequest(uri, content, refresh)
 		if (xmlHttp.readyState == 4)
 		{
 			// Free resources
+			if (handler != null)
+			{
+				handler(xmlHttp.responseText);
+				handler = null;
+			}
+			
 			if (refresh)
 				window.location.reload();
+			
+			// Free resources
 			xmlHttp.onreadystatechange = null;
 			xmlHttp = null;
 		}

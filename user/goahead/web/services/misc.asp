@@ -205,6 +205,7 @@ function initValue()
 
 	natFastpathSelect(form);
 	igmpSelect(form);
+	httpRmtSelect(form);
 	pingerSelect(form);
 }
 
@@ -246,6 +247,11 @@ function pingerSelect(form)
 function igmpSelect(form)
 {
 	displayElement( 'igmpSnoop', form.igmpEnbl.value == '1');
+}
+
+function httpRmtSelect(form)
+{
+	displayElement( 'http_rmt_port', form.rmtHTTP.value != '0');
 }
 
 </script>
@@ -295,12 +301,16 @@ function igmpSelect(form)
 <tr>
 <td class="head">HTTP Remote Management</td>
 <td>
-	<select name="rmtHTTP" class="half">
+	<select name="rmtHTTP" class="half" onchange="httpRmtSelect(this.form);">
 		<option value="0">Disable</option>
 		<option value="1">LAN</option>
 		<option value="2">LAN &amp; WAN</option>
 	</select>
 </td>
+</tr>
+<tr id="http_rmt_port" style="display: none;">
+	<td class="head">Remote HTTP port</td>
+	<td><input class="half" value="<% getCfgZero(1, "RemoteManagementPort"); %>"</td>
 </tr>
 <tr>
 <td class="head">SSH Remote Management</td>

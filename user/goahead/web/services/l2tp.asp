@@ -14,7 +14,6 @@
 
 <script language="JavaScript" type="text/javascript">
 
-
 Butterlate.setTextDomain("internet");
 Butterlate.setTextDomain("services");
 
@@ -26,6 +25,45 @@ var userList=
 [
 	<% getL2TPUserList(); %>
 ];
+
+function hideHint(ctl)
+{
+	var row = document.getElementById('l2tp_hint_row');
+	row.innerHTML = '';
+}
+
+function showHint(key)
+{
+	var row = document.getElementById('l2tp_hint_row');
+	var form = document.l2tpConfig;
+	var text = '<div class="hint"><font color="#0000ff"><b>HINT:</b></font>&nbsp;';
+	var show = true;
+	
+	if (key=='l2tp_enable')
+		text += 'Enable L2TP server.';
+	else if (key=='l2tp_ip')
+		text += 'Use the following IP as VPN server own IP address in your VPN network.';
+	else if (key=='l2tp_ip_list')
+		text += 'Specify range of IP addresses given to clients by VPN server in L2TP server.'
+	else if (key=='l2tp_mtu')
+		text += 'Specify Maximum Transfer Unit size in octets.';
+	else if (key=='l2tp_mru')
+		text += 'Specify Maximum Recieve Unit size in octets.';
+	else if (key=='l2tp_nat')
+		text += 'Allow Network Address Translation to L2TP server.';
+	else if (key=='l2tp_debug')
+		text += 'Allow debug mode for L2TP server connections.';
+	else if (key=='l2tp_lcp')
+		text += 'Enable adaptive LCP echo interval.';
+	else
+		show = false;
+	
+	if (show)
+	{
+		text += '</div>';
+		row.innerHTML = text;
+	}
+}
 
 function genTable(form)
 {
@@ -191,18 +229,20 @@ function mruChange(form)
 </tr>
 
 <tr>
-	<td class="head"><input type="checkbox" name="l2tp_srv_enabled" onchange="l2tpEnableSwitch(this.form);">&nbsp;Enable L2TP server</td>
+	<td class="head" onmouseover="showHint('l2tp_enable')" onmouseout="hideHint('l2tp_enable')">
+		<input type="checkbox" name="l2tp_srv_enabled" onchange="l2tpEnableSwitch(this.form);">&nbsp;Enable L2TP server
+	</td>
 	<td>&nbsp;</td>
 </tr>
-<tr>
+<tr onmouseover="showHint('l2tp_ip')" onmouseout="hideHint('l2tp_ip')">
 	<td class="head">Our local IP to use</td>
 	<td><input name="l2tp_srv_ip_local" class="mid" value="<% getCfgGeneral(1, "l2tp_srv_ip_local"); %>"></td>
 </tr>
-<tr>
+<tr onmouseover="showHint('l2tp_ip_list')" onmouseout="hideHint('l2tp_ip_list')">
 	<td class="head">Allocate from this IP range</td>
 	<td><input name="l2tp_srv_ip_range" class="mid" value="<% getCfgGeneral(1, "l2tp_srv_ip_range"); %>"></td>
 </tr>
-<tr>
+<tr onmouseover="showHint('l2tp_mtu')" onmouseout="hideHint('l2tp_mtu')">
 	<td class="head"><acronym title="Maximum Transfer Unit">Tunnel MTU</acronym>:</td>
 	<td>
 		<input name="l2tp_srv_mtu_size" type="text" class="half" style="display:none;" value="<% getCfgGeneral(1, "l2tp_srv_mtu_size"); %>" >
@@ -220,7 +260,7 @@ function mruChange(form)
 		</select>
 	</td>
 </tr>
-<tr>
+<tr onmouseover="showHint('l2tp_mru')" onmouseout="hideHint('l2tp_mru')">
 	<td class="head"><acronym title="Maximum Receive Unit">Tunnel MRU</acronym>:</td>
 	<td>
 		<input name="l2tp_srv_mru_size" type="text" class="half" style="display:none;" value="<% getCfgGeneral(1, "l2tp_srv_mru_size"); %>" >
@@ -245,11 +285,16 @@ function mruChange(form)
 	<td class="title" colspan="2">Additional options</td>
 </tr>
 <tr>
-	<td style="width: 50%;"><input name="l2tp_srv_lcp_adapt" type="checkbox">&nbsp;<b>Adaptive LCP</b></td>
-	<td style="width: 50%;"><input name="l2tp_srv_debug" type="checkbox">&nbsp;<b>L2TP debugging</b></td>
+	<td style="width: 50%;" onmouseover="showHint('l2tp_lcp')" onmouseout="hideHint('l2tp_lcp')">
+		<input name="l2tp_srv_lcp_adapt" type="checkbox">&nbsp;<b>Adaptive LCP</b>
+	</td>
+	<td style="width: 50%;" onmouseover="showHint('l2tp_debug')" onmouseout="hideHint('l2tp_debug')">
+		<input name="l2tp_srv_debug" type="checkbox">&nbsp;<b>L2TP debugging</b>
+	</td>
 </tr>
 <tr>
-	<td style="width: 50%;"><input name="l2tp_srv_nat_enabled" type="checkbox">&nbsp;<b>Enable NAT</b></td>
+	<td style="width: 50%;" onmouseover="showHint('l2tp_nat')" onmouseout="hideHint('l2tp_nat')">
+		<input name="l2tp_srv_nat_enabled" type="checkbox">&nbsp;<b>Enable NAT</b></td>
 	<td>&nbsp;</td>
 </tr>
 </table>
@@ -266,6 +311,8 @@ function mruChange(form)
 </tr>
 </table>
 </form>
+
+<div id="l2tp_hint_row">&nbsp;</div>
 
 <div class="whitespace">&nbsp;</div>
 

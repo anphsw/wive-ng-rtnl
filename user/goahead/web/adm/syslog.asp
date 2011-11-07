@@ -7,85 +7,56 @@
 <meta http-equiv="Pragma" content="no-cache">
 
 <script type="text/javascript" src="/lang/b28n.js"></script>
+<script type="text/javascript" src="/js/ajax.js"></script>
+<script type="text/javascript" src="/js/controls.js"></script>
+<script type="text/javascript" src="/js/validation.js"></script>
+
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("admin");
 
-
-var http_request = false;
-function makeRequest(url, content) {
-    http_request = false;
-    if (window.XMLHttpRequest) { // Mozilla, Safari,...
-        http_request = new XMLHttpRequest();
-        if (http_request.overrideMimeType) {
-            http_request.overrideMimeType('text/xml');
-        }
-    } else if (window.ActiveXObject) { // IE
-        try {
-            http_request = new ActiveXObject("Msxml2.XMLHTTP");
-        } catch (e) {
-            try {
-            http_request = new ActiveXObject("Microsoft.XMLHTTP");
-            } catch (e) {}
-        }
-    }
-    if (!http_request) {
-        alert('Giving up :( Cannot create an XMLHTTP instance');
-        return false;
-    }
-    http_request.onreadystatechange = alertContents;
-    http_request.open('POST', url, true);
-    http_request.send(content);
-}
-
-function alertContents() {
-    if (http_request.readyState == 4) {
-        if (http_request.status == 200) {
-			uploadLogField(http_request.responseText);
-        } else {
-            alert('There was a problem with the request.');
-        }
-    }
-}
-
 function uploadLogField(str)
 {
-	if(str == "-1"){
+	if (str == "-1")
+	{
 		document.getElementById("syslog").value =
 		"Not support.\n(Busybox->\n  System Logging Utilitie ->\n    syslogd\n    Circular Buffer\n    logread"
-	}else
+	}
+	else
 		document.getElementById("syslog").value = str;
 }
 
 function updateLog()
 {
-	makeRequest("/goform/syslog", "n/a", false);
+	ajaxPerformRequest("/goform/syslog", uploadLogField);
 }
 
 function initTranslation()
 {
-	var e = document.getElementById("syslogTitle");
-	e.innerHTML = _("syslog title");
-	e = document.getElementById("syslogIntroduction");
-	e.innerHTML = _("syslog introduction");
+	_TR("syslogTitle", "syslog title");
 
-	e = document.getElementById("syslogSysLog");
-	e.innerHTML = _("syslog system log");
-	e = document.getElementById("syslogSysLogClear");
-	e.value = _("syslog clear");
-	e = document.getElementById("syslogSysLogRefresh");
-	e.value = _("syslog refresh");
+	_TR("syslogSysLog", "syslog system log");
+	_TRV("syslogSysLogClear", "syslog clear");
+	_TRV("syslogSysLogRefresh", "syslog refresh");
 }
 
 function pageInit()
 {
 	initTranslation();
+	
+	var form = document.LogdSetup;
+	var klogd = '<% getCfgZero(1, "KLogd");%>';
+	var syslogd = '<% getCfgZero(1, "SysLogd");%>';
+	
+	form.KLogd.value = (klogd == '1') ? '1' : '0';
+	form.SysLogd.value = (klogd == '1') ? '1' : '0';
+	
+	syslogdSelect(form);
 	updateLog();
 }
 
 function clearlogclick()
 {
-	document.getElementById("syslog").value = "";
-	return ture;
+	ajaxPostRequest("/goform/clearlog", 'stub=value', false, refreshlogclick);
 }
 
 function refreshlogclick()
@@ -94,28 +65,100 @@ function refreshlogclick()
 	return true;
 }
 
+function checkSetupForm(form)
+{
+	if (form.RemoteSysLogIP.value != '')
+	{
+		if (!validateIP(form.RemoteSysLogIP))
+		{
+			alert("Invalid Remote system log IP address");
+			form.RemoteSysLogIP.focus();
+		}
+	}
+	
+	return true;
+}
+
+function syslogdSelect(form)
+{
+	displayElement('rmtSysLogIP', form.SysLogd.value == '1');
+}
+
 </script>
 
 </head>
 <body onload="pageInit()">
 <table class="body"><tr><td>
 <h1 id="syslogTitle">System Log</h1>
-<p id="syslogIntroduction"> Syslog: </p>
+<p>Here you can configure system logging</p>
 
-<form method="post" name ="SubmitClearLog" action="/goform/clearlog">
-	<input type="button" value="Refresh" id="syslogSysLogRefresh" name="refreshlog" onclick="refreshlogclick();">
-	<input type="submit" value="Clear" id="syslogSysLogClear" name="clearlog" onclick="clearlogclick();">
+<!-- ================= System log setup ================= -->
+<form method="post" name="LogdSetup" action="/goform/setuplog" onsubmit="checkSetupForm(this);">
+<table class="form">
+<tr>
+	<td class="title"colspan="2" id="syslogSysLog">System Log Setup:</td>
+</tr>
+<tr>
+	<td class="head">Kernel logging daemon:</td>
+	<td>
+		<select name="KLogd">
+			<option value="0">Disable</option>
+			<option value="1">Enable</option>
+		</select>
+	</td>
+</tr>
+<tr>
+	<td class="head">System logging deamon:</td>
+	<td>
+		<select name="SysLogd" onchange="syslogdSelect(this.form);">
+			<option value="0">Disable</option>
+			<option value="1">Enable</option>
+		</select>
+	</td>
+</tr>
+<tr id="rmtSysLogIP" style="display: none;">
+	<td class="head">Remote system log IP:</td>
+	<td>
+		<input name="RemoteSysLogIP" value="<% getCfgGeneral(1, "RemoteSysLogIP"); %>">
+	</td>
+</tr>
+</table>
+
+<table class="buttons">
+<tr>
+	<td>
+		<input type="submit" value="Apply">
+		<input type="hidden" name="submit-url" value="/adm/syslog.asp" >
+	</td>
+</tr>
+</table>
 </form>
 
 <!-- ================= System log ================= -->
 <table class="form">
-<tbody>
 <tr>
 	<td class="title"colspan="2" id="syslogSysLog">System Log: </td>
 </tr>
-<tr><td>
-		<textarea style=font-size:8pt name="syslog" id="syslog" cols="80" rows="50" wrap="off" readonly="1">
+<tr>
+	<td colspan="2">
+		<form method="post" name="SubmitClearLog1" action="/goform/clearlog">
+			<input type="button" value="Refresh" id="syslogSysLogRefresh" name="refreshlog" onclick="refreshlogclick();">
+			<input type="button" value="Clear" id="syslogSysLogClear" name="clearlog" onclick="clearlogclick();">
+		</form>
+	</td>
+</tr>
+<tr>
+	<td>
+		<textarea style="font-size: 8pt; width: 680px; height: 480px; border: 1px solid;" name="syslog" id="syslog" wrap="off" readonly="1">
 		</textarea>
+	</td>
+</tr>
+<tr>
+	<td colspan="2">
+		<form method="post" name="SubmitClearLog2" action="/goform/clearlog">
+			<input type="button" value="Refresh" id="syslogSysLogRefresh" name="refreshlog" onclick="refreshlogclick();">
+			<input type="button" value="Clear" id="syslogSysLogClear" name="clearlog" onclick="clearlogclick();">
+		</form>
 	</td>
 </tr>
 </table>

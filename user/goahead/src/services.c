@@ -316,6 +316,7 @@ const parameter_fetch_t service_misc_flags[] =
 	{ T("pppoeREnbl"), "pppoeREnabled", 0, T("0") },
 	{ T("dnspEnbl"), "dnsPEnabled", 0, T("0") },
 	{ T("rmtHTTP"), "RemoteManagement", 0, T("0") },
+	{ T("RemoteManagementPort"), "RemoteManagementPort", 0, T("80") },
 	{ T("rmtSSH"), "RemoteSSH", 0, T("0") },
 #ifdef CONFIG_TELNETD
 	{ T("rmtTelnet"), "RemoteTelnet", 0, T("0") },

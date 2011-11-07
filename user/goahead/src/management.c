@@ -9,12 +9,15 @@
 #include <errno.h>
 
 #include "utils.h"
+#include "helpers.h"
+
 #ifdef USER_MANAGEMENT_SUPPORT
 #include "um.h"
 #endif
 #include "internet.h"
 #include "wireless.h"
 #include "management.h"
+
 #include "wps.h"
 
 #define COMMAND_MAX	1024
@@ -685,10 +688,37 @@ static void LoadDefaultSettings(webs_t wp, char_t *path, char_t *query)
 }
 
 #ifdef CONFIG_SYSLOGD
+const parameter_fetch_t service_syslog_flags[] =
+{
+	{ T("KLogd"), "KLogd", 0, T("0") },
+	{ T("SysLogd"), "SysLogd", 0, T("0") },
+	{ T("RemoteSysLogIP"), "RemoteSysLogIP", 0, T("") },
+	{ NULL, NULL, 0, NULL } // Terminator
+};
+
 static void clearlog(webs_t wp, char_t *path, char_t *query)
 {
+	printf("Clear system log\n");
 	doSystem("service syslog restart");
-	websRedirect(wp, "adm/syslog.asp");
+
+	truncate("/var/log/messages", 0);
+	websDone(wp, 200);
+}
+
+static void setuplog(webs_t wp, char_t *path, char_t *query)
+{
+	// Set-up parameters
+	setupParameters(wp, service_syslog_flags, 1);
+	
+	// Restart syslog
+	doSystem("service syslog restart");
+	
+	// Redirect if possible
+	char_t *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
+	if (submitUrl != NULL)
+		websRedirect(wp, submitUrl);
+	else
+		websDone(wp, 200);
 }
 
 #define LOG_MAX 32768
@@ -767,6 +797,7 @@ void formDefineManagement(void)
 #ifdef CONFIG_SYSLOGD
 	websFormDefine(T("syslog"), syslog);
 	websFormDefine(T("clearlog"), clearlog);
+	websFormDefine(T("setuplog"), setuplog);
 #endif
 	formDefineWPS();
 }
