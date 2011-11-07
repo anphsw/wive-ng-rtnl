@@ -60,6 +60,31 @@
 #include "os.h"
 #include "config.h"
 
+/* IGMP SNOOPING CHECK */
+#ifdef RALINK_ESW_SUPPORT
+#include <linux/config.h>
+
+#if defined(CONFIG_RALINK_RT2880)
+#define PROCREG_GMAC	"/proc/rt2880/gmac"
+#elif defined(CONFIG_RALINK_RT3052)
+#define PROCREG_GMAC	"/proc/rt3052/gmac"
+#elif defined(CONFIG_RALINK_RT3352)
+#define PROCREG_GMAC	"/proc/rt3352/gmac"
+#elif defined (CONFIG_RALINK_RT5350)
+#define PROCREG_GMAC	"/proc/rt5350/gmac"
+#elif defined(CONFIG_RALINK_RT2883)
+#define PROCREG_GMAC	"/proc/rt2883/gmac"
+#elif defined(CONFIG_RALINK_RT3883)
+#define PROCREG_GMAC	"/proc/rt3883/gmac"
+#elif defined (CONFIG_RALINK_RT6855)
+#define PROCREG_GMAC	"/proc/rt6855/gmac"
+#elif defined (CONFIG_RALINK_RT63365)
+#define PROCREG_GMAC	"/proc/rt63365/gmac"
+#else
+#define PROCREG_GMAC	"/proc/rt2880/gmac"
+#endif
+#endif
+
 /*
  * Limit on length of route data
  */
@@ -282,7 +307,7 @@ void closeConfigFile();
 char* nextConfigToken();
 char* getCurrentConfigToken();
 
-#ifdef RT3052_SUPPORT
+#ifdef RALINK_ESW_SUPPORT
 typedef u_int8_t   uint8;
 typedef u_int16_t  uint16;
 typedef u_int32_t  uint32;

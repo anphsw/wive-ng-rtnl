@@ -38,7 +38,7 @@
 */
 
 #include "igmpproxy.h"
-    
+
 /**
 *   Routing table structure definition. Double linked list...
 */
@@ -54,11 +54,10 @@ struct RouteTable {
 
     // These parameters contain aging details.
     uint32_t              ageVifBits;     // Bits representing aging VIFs.
-    int                 ageValue;       // Downcounter for death.          
+    int                 ageValue;       // Downcounter for death.
     int                 ageActivity;    // Records any acitivity that notes there are still listeners.
 };
 
-                 
 // Keeper for the routing table...
 static struct RouteTable   *routing_table;
 
@@ -97,8 +96,7 @@ void initRouteTable() {
         if( Dp->InAdr.s_addr && ! (Dp->Flags & IFF_LOOPBACK) && Dp->state == IF_STATE_DOWNSTREAM) {
             my_log(LOG_DEBUG, 0, "Joining all-routers group %s on vif %s",
                          inetFmt(allrouters_group,s1),inetFmt(Dp->InAdr.s_addr,s2));
-            
-            //k_join(allrouters_group, Dp->InAdr.s_addr);
+
             joinMcGroup( getMcGroupSock(), Dp, allrouters_group );
         }
     }
@@ -110,7 +108,7 @@ void initRouteTable() {
 */
 void sendJoinLeaveUpstream(struct RouteTable* route, int join) {
     struct IfDesc*      upstrIf;
-    
+
     // Get the upstream VIF...
     upstrIf = getIfByIx( upStreamVif );
     if(upstrIf == NULL) {
@@ -158,7 +156,7 @@ void sendJoinLeaveUpstream(struct RouteTable* route, int join) {
             my_log(LOG_DEBUG, 0, "Leaving group %s upstream on IF address %s",
                          inetFmt(route->group, s1), 
                          inetFmt(upstrIf->InAdr.s_addr, s2));
-            
+
             //k_leave(route->group, upstrIf->InAdr.s_addr);
             leaveMcGroup( getMcGroupSock(), upstrIf, route->group );
 
@@ -198,7 +196,7 @@ void clearAllRoutes() {
     // Send a notice that the routing table is empty...
     my_log(LOG_NOTICE, 0, "All routes removed. Routing table is empty.");
 }
-                 
+
 /**
 *   Private access function to find a route from a given 
 *   Route Descriptor.
@@ -221,7 +219,7 @@ struct RouteTable *findRoute(uint32_t group) {
 *   is updated...
 */
 int insertRoute(uint32_t group, int ifx) {
-    
+
     struct Config *conf = getCommonConfig();
     struct RouteTable*  croute;
 
@@ -262,7 +260,7 @@ int insertRoute(uint32_t group, int ifx) {
         // The route is not active yet, so the age is unimportant.
         newroute->ageValue    = conf->robustnessValue;
         newroute->ageActivity = 0;
-        
+
         BIT_ZERO(newroute->ageVifBits);     // Initially we assume no listeners.
 
         // Set the listener flag...
@@ -305,7 +303,7 @@ int insertRoute(uint32_t group, int ifx) {
                 }
 
                 my_log(LOG_DEBUG, 0, "Inserting after route %s",inetFmt(croute->group,s1));
-                
+
                 // Insert after current...
                 newroute->nextroute = croute->nextroute;
                 newroute->prevroute = croute;
@@ -327,7 +325,7 @@ int insertRoute(uint32_t group, int ifx) {
 
         // The route exists already, so just update it.
         BIT_SET(croute->vifBits, ifx);
-        
+
         // Register the VIF activity for the aging routine
         BIT_SET(croute->ageVifBits, ifx);
 
@@ -401,7 +399,7 @@ int activateRoute(uint32_t group, uint32_t originAddr) {
     return result;
 }
 
-#ifdef RT3052_SUPPORT
+#ifdef RALINK_ESW_SUPPORT
 extern void sweap_no_report_members(void);
 extern void remove_multicast_ip(uint32 m_ip_addr);
 #endif
@@ -415,13 +413,13 @@ void ageActiveRoutes() {
     
     my_log(LOG_DEBUG, 0, "Aging routes in table.");
 
-#ifdef RT3052_SUPPORT
+#ifdef RALINK_ESW_SUPPORT
         sweap_no_report_members();
 #endif
 
     // Scan all routes...
     for( croute = routing_table; croute != NULL; croute = nroute ) {
-        
+
         // Keep the next route (since current route may be removed)...
         nroute = croute->nextroute;
 
@@ -573,13 +571,13 @@ int internAgeRoute(struct RouteTable*  croute) {
     if(croute->ageValue == 0) {
         // Check for activity in the aging process,
         if(croute->ageActivity>0) {
-            
+
             my_log(LOG_DEBUG, 0, "Updating route after aging : %s",
                          inetFmt(croute->group,s1));
-            
+
             // Just update the routing settings in kernel...
             internUpdateKernelRoute(croute, 1);
-    
+
             // We append the activity counter to the age, and continue...
             croute->ageValue = croute->ageActivity;
             croute->ageActivity = 0;
@@ -590,7 +588,7 @@ int internAgeRoute(struct RouteTable*  croute) {
 
             // No activity was registered within the timelimit, so remove the route.
             removeRoute(croute);
-#ifdef RT3052_SUPPORT
+#ifdef RALINK_ESW_SUPPORT
                        /*
                         *  Avoid to remove a "pre-allocate" routing rule created by igmpproxy.
                         *  "vifBits == 0" means the dest IF is still unknown.
@@ -617,17 +615,17 @@ int internUpdateKernelRoute(struct RouteTable *route, int activate) {
     struct   MRouteDesc     mrDesc;
     struct   IfDesc         *Dp;
     unsigned                Ix;
-    
+
     if(route->originAddr>0) {
 
         // Build route descriptor from table entry...
         // Set the source address and group address...
         mrDesc.McAdr.s_addr     = route->group;
         mrDesc.OriginAdr.s_addr = route->originAddr;
-    
+
         // clear output interfaces 
         memset( mrDesc.TtlVc, 0, sizeof( mrDesc.TtlVc ) );
-    
+
         my_log(LOG_DEBUG, 0, "Vif bits : 0x%08x", route->vifBits);
 
         // Set the TTL's for the route descriptor...
@@ -640,14 +638,14 @@ int internUpdateKernelRoute(struct RouteTable *route, int activate) {
                 mrDesc.TtlVc[ Dp->index ] = Dp->threshold;
             }
         }
-    
+
         // Do the actual Kernel route update...
         if(activate) {
             // Add route in kernel...
             addMRoute( &mrDesc );
-    
+
         } else {
-        
+
             // Delete the route from Kernel...
             delMRoute( &mrDesc );
         }
@@ -666,7 +664,7 @@ int internUpdateKernelRoute(struct RouteTable *route, int activate) {
 void logRouteTable(char *header) {
         struct RouteTable*  croute = routing_table;
         unsigned            rcount = 0;
-    
+
         my_log(LOG_DEBUG, 0, "");
         my_log(LOG_DEBUG, 0, "Current routing table (%s):", header);
         my_log(LOG_DEBUG, 0, "-----------------------------------------------------");
@@ -684,12 +682,12 @@ void logRouteTable(char *header) {
                     rcount, inetFmt(croute->originAddr, s1), inetFmt(croute->group, s2),
                     croute->ageValue,(croute->originAddr>0?"A":"I"),
                     croute->vifBits);
-                  
+
                 croute = croute->nextroute; 
-        
+
                 rcount++;
             } while ( croute != NULL );
         }
-    
-        my_log(LOG_DEBUG, 0, "-----------------------------------------------------");
+
+	my_log(LOG_DEBUG, 0, "-----------------------------------------------------");
 }

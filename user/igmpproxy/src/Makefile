@@ -2,27 +2,26 @@ EXEC=igmpproxy
 IGMP_PROXY_OBJ= igmpproxy.o config.o confread.o request.o udpsock.o mcgroup.o rttable.o \
 		igmp.o ifvc.o callout.o kern.o syslog.o lib.o mroute-api.o
 
-CFLAGS += -I$(ROOTDIR)/$(LINUXDIR)/drivers/net/raeth
 CFLAGS += -I$(ROOTDIR)/$(LINUXDIR)/include
 
 ifeq ("$(CONFIG_PRODUCT)", "RT3052")
 IGMP_PROXY_OBJ+= rt3052.o rt3052_reg.o
-CFLAGS= -I$(ROOTDIR)/$(LINUXDIR)/include -DRT3052_SUPPORT
+CFLAGS += -I$(ROOTDIR)/$(LINUXDIR)/drivers/net/raeth -DRALINK_ESW_SUPPORT
 endif
 
 ifeq ("$(CONFIG_PRODUCT)", "RT3352")
 IGMP_PROXY_OBJ+= rt3052.o rt3052_reg.o
-CFLAGS= -I$(ROOTDIR)/$(LINUXDIR)/include -DRT3052_SUPPORT
+CFLAGS += -I$(ROOTDIR)/$(LINUXDIR)/drivers/net/raeth -DRALINK_ESW_SUPPORT
 endif
 
 ifeq ("$(CONFIG_PRODUCT)", "RT5350")
 IGMP_PROXY_OBJ+= rt3052.o rt3052_reg.o
-CFLAGS= -I$(ROOTDIR)/$(LINUXDIR)/include -DRT3052_SUPPORT
+CFLAGS += -I$(ROOTDIR)/$(LINUXDIR)/drivers/net/raeth -DRALINK_ESW_SUPPORT
 endif
 
 ifeq ("$(CONFIG_PRODUCT)", "RT6855")
 IGMP_PROXY_OBJ+= rt3052.o rt3052_reg.o
-CFLAGS= -I$(ROOTDIR)/$(LINUXDIR)/include -DRT3052_SUPPORT
+CFLAGS += -I$(ROOTDIR)/$(LINUXDIR)/drivers/net/raeth -DRALINK_ESW_SUPPORT
 endif
 
 #CFLAGS+= -DWIFI_IGMPSNOOP_SUPPORT

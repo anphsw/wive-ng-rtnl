@@ -24,14 +24,14 @@
 **
 **  smcroute 0.92 - Copyright (C) 2001 Carsten Schill <carsten@cschill.de>
 **  - Licensed under the GNU General Public License, version 2
-**  
+**
 **  mrouted 3.9-beta3 - COPYRIGHT 1989 by The Board of Trustees of 
 **  Leland Stanford Junior University.
 **  - Original license can be found in the Stanford.txt file.
 **
 */
 /**
-*   request.c 
+*   request.c
 *
 *   Functions for recieveing and processing IGMP requests.
 *
@@ -63,7 +63,7 @@ void acceptGroupReport(uint32_t src, uint32_t group, uint8_t type) {
         return;
     }
 
-#ifdef RT3052_SUPPORT
+#ifdef RALINK_ESW_SUPPORT
         remove_member(ntohl(group), ntohl(src));
 #endif
 
@@ -97,7 +97,7 @@ void acceptGroupReport(uint32_t src, uint32_t group, uint8_t type) {
 	for(sn = sourceVif->allowedgroups; sn != NULL; sn = sn->next)
 	    if((group & sn->subnet_mask) == sn->subnet_addr)
 	    {
-#ifdef RT3052_SUPPORT
+#ifdef RALINK_ESW_SUPPORT
                 insert_multicast_ip(ntohl(group), ntohl(src));
 #endif
         	// The membership report was OK... Insert it into the route table..
@@ -203,7 +203,7 @@ void sendGeneralMembershipQuery() {
     struct  IfDesc  *Dp;
     unsigned        Ix;
 
-#ifdef RT3052_SUPPORT
+#ifdef RALINK_ESW_SUPPORT
     clear_all_entries_report();
 #endif
 
@@ -212,10 +212,9 @@ void sendGeneralMembershipQuery() {
         if ( Dp->InAdr.s_addr && ! (Dp->Flags & IFF_LOOPBACK) ) {
             if(Dp->state == IF_STATE_DOWNSTREAM) {
                 // Send the membership query...
-                sendIgmp(Dp->InAdr.s_addr, allhosts_group, 
+                sendIgmp(Dp->InAdr.s_addr, allhosts_group,
                          IGMP_MEMBERSHIP_QUERY,
                          conf->queryResponseInterval * IGMP_TIMER_SCALE, 0, 0);
-                
                 my_log(LOG_DEBUG, 0,
 			"Sent membership query from %s to %s. Delay: %d",
 			inetFmt(Dp->InAdr.s_addr,s1),
@@ -242,4 +241,3 @@ void sendGeneralMembershipQuery() {
 
 
 }
- 

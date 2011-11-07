@@ -54,7 +54,7 @@ PACKAGE_STRING "\n"
 ;
 
 // Local function Prototypes
-#ifdef RT3052_SUPPORT
+#ifdef RALINK_ESW_SUPPORT
 void sigUSR1Handler(int signo);
 #endif
 static void signalHandler(int);
@@ -70,9 +70,9 @@ static int sighandled = 0;
 #define	GOT_SIGUSR2	0x08
 
 // The upstream VIF index
-int         upStreamVif;   
+int         upStreamVif;
 
-#ifdef RT3052_SUPPORT
+#ifdef RALINK_ESW_SUPPORT
 extern void rt3052_init(int sn);
 extern void rt3052_fini(void);
 /* wan port select */
@@ -87,6 +87,17 @@ int main( int ArgCn, char *ArgVc[] ) {
 
     int c, sw = 0;
     int force_snooping = -1;
+
+#ifdef RALINK_ESW_SUPPORT
+    /* check esw exist */
+    FILE *fp = fopen("PROCREG_GMAC", "r");
+    if(fp){
+	sw=1;
+	fclose(fp);
+    }
+#endif
+
+    // set default wan port position
     WanPort = 0x1;
 
     // Parse the commandline options and setup basic settings..
@@ -104,7 +115,6 @@ int main( int ArgCn, char *ArgVc[] ) {
 	    force_snooping = 1;
             break;
         case 'n':
-	    sw = 1;
 	    force_snooping = 0;
             break;
         case 'v':
@@ -150,7 +160,7 @@ int main( int ArgCn, char *ArgVc[] ) {
             my_log(LOG_ERR, 0, "Unable to initialize IGMPproxy.");
             break;
         }
-#ifdef RT3052_SUPPORT
+#ifdef RALINK_ESW_SUPPORT
 	if (sw) {
 	    if(force_snooping == 0) {
         	my_log(LOG_INFO, 0, "Disable igmp_snooping.");
@@ -180,13 +190,13 @@ int main( int ArgCn, char *ArgVc[] ) {
 
         // Go to the main loop.
         igmpProxyRun();
-    
+
         // Clean up
         igmpProxyCleanUp();
 
     } while ( false );
 
-#ifdef RT3052_SUPPORT
+#ifdef RALINK_ESW_SUPPORT
 	if (sw)
     	    rt3052_fini();
 #endif
@@ -241,7 +251,7 @@ int igmpProxyInit() {
     sigaction(SIGTERM, &sa, NULL);
     sigaction(SIGINT, &sa, NULL);
 
-#ifdef RT3052_SUPPORT
+#ifdef RALINK_ESW_SUPPORT
     sa.sa_handler = sigUSR1Handler;
     sa.sa_flags = 0;    /* Interrupt system calls */
     sigemptyset(&sa.sa_mask);
@@ -249,8 +259,8 @@ int igmpProxyInit() {
 #endif
 
     // Loads configuration for Physical interfaces...
-    buildIfVc();    
-    
+    buildIfVc();
+
     // Configures IF states and settings
     configureVifs();
 
@@ -278,7 +288,7 @@ int igmpProxyInit() {
 void igmpProxyCleanUp() {
 
     my_log( LOG_DEBUG, 0, "clean handler called" );
-    
+
     free_all_callouts();    // No more timeouts.
     clearAllRoutes();       // Remove all routes.
     disableMRouter();       // Disable the multirout API
@@ -354,7 +364,6 @@ void igmpProxyRun() {
                     if (errno != EINTR) my_log(LOG_ERR, errno, "recvfrom");
                     continue;
                 }
-                
 
                 acceptIgmp(recvlen);
             }

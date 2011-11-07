@@ -802,6 +802,7 @@
 45) Prevent send pkts from mcast net to miniupnp/dmz rules if igmpproxy/udpxy enabled (decrease cpu utilization).<br>
 46) Disable igmpproxy use igmpsnooping for lan if tv_port enabled (prevent switch reconfigure).<br>
 47) Fix igmpsnooping force enable/disable fix.<br>
+48) Igmpproxy automatic check esw exist.<br>
 
 <br><br>
 <b>For support see:</b><br>
