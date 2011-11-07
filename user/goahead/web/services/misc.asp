@@ -405,7 +405,7 @@ function igmpSelect(form)
 <td class="head" id="lIgmpp">LAN IGMP snooping</td>
 <td>
 	<select name="igmpSnoop" class="half">
-		<option value="NULL">auto</option>
+		<option value="">auto</option>
 		<option value="n">none/disable</option>
 		<option value="f">force enabled</option>
 	</select>
