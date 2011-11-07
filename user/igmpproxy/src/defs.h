@@ -133,7 +133,9 @@ extern char		s4[];
 //  Lib function prototypes.
 //#################################################################################
 
+#ifdef RALINK_ESW_SUPPORT
 extern uint32_t WanPort;		  // Wan port number
+#endif
 
 /* syslog.c
  */

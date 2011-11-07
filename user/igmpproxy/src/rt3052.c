@@ -562,7 +562,7 @@ void remove_all_groups(void)
 		remove_all_members(del);
 		free(del);
 	}
-	group_list =  NULL;	
+	group_list =  NULL;
 }
 
 static void update_group_port_map(struct group *entry)
@@ -1279,7 +1279,7 @@ static int portLookUpByIP(char *ip)
 
 		// send an udp then wait.
 		sendUDP(ip);
-		usleep(20000);	
+		usleep(20000);
 		if(arpLookUp(ip, mac) == -1){
 			my_log(LOG_WARNING, 0, "*** RT3052: Give up for %s", ip);
 			// means flooding.

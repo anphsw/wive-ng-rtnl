@@ -43,11 +43,13 @@ static const char Usage[] =
 "\n"
 "   -h   Display this help screen\n"
 "   -d   Run in debug mode. Output all messages on stderr\n"
+#ifdef RALINK_ESW_SUPPORT
 "   --------------igmp_snooping_config------------------\n"
 "   -w   Wan at port 0/4. Only in switch management mode\n"
 "   -f	 Force igmp_snooping enable (default auto)	\n"
 "   -n	 Force igmp_snooping disable (default auto)	\n"
 "   ----------------------------------------------------\n"
+#endif
 "   -v   Be verbose. Give twice to see even debug messages.\n"
 "\n"
 PACKAGE_STRING "\n"
@@ -85,27 +87,34 @@ uint32_t WanPort = 0x1;
 */
 int main( int ArgCn, char *ArgVc[] ) {
 
-    int c, sw;
-    int force_snooping = -1;
+    int c;
 
 #ifdef RALINK_ESW_SUPPORT
+    int sw;
+    int force_snooping = -1;
+
     /* check esw exist */
     FILE *fp = fopen(PROCREG_GMAC, "r");
     if(!fp)
 	sw=0;
     else
 	sw=1;
-#endif
 
     // set default wan port position
     WanPort = 0x1;
+#endif
 
     // Parse the commandline options and setup basic settings..
+#ifdef RALINK_ESW_SUPPORT
     for (c; (c = getopt(ArgCn, ArgVc, "dwfnvh")) != -1;) {
+#else
+    for (c; (c = getopt(ArgCn, ArgVc, "dvh")) != -1;) {
+#endif
         switch (c) {
         case 'd':
             Log2Stderr = true;
             break;
+#ifdef RALINK_ESW_SUPPORT
         case 'w':
 	    sw = 1;
 	    WanPort = 0x10;
@@ -117,6 +126,7 @@ int main( int ArgCn, char *ArgVc[] ) {
         case 'n':
 	    force_snooping = 0;
             break;
+#endif
         case 'v':
             LogLevel++;
             break;
