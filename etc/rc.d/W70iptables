@@ -205,7 +205,7 @@ start() {
 		$LOG "Add vpnfilter rules for PPTP"
 		iptables -A servicelimit -p gre -j ACCEPT
 		iptables -A servicelimit -p tcp --sport 1723 -j ACCEPT
-	    elif [ "$vpnType" = "2" ] || [ "$l2tp_srv_enabled" = "1" ] ; then
+	    elif [ "$vpnType" = "2" ] || [ "$l2tp_srv_enabled" = "1" ]; then
 		iptables -A servicelimit -p udp --sport 500 -j ACCEPT
 		$LOG "Add vpnfilter rules for L2TP"
 		iptables -A servicelimit -p udp --dport 500 -j ACCEPT
@@ -358,13 +358,13 @@ start() {
 		iptables -t nat -I DMZ -i $wan_if -p igmp -j RETURN
 		iptables -t nat -I DMZ -i $wan_if -p udp -d $mcast_net -j RETURN
 	    fi
-    	    if [ "$vpnEnabled" = "on" ]; then
+    	    if [ "$vpnEnabled" = "on" ] || [ "$l2tp_srv_enabled" = "1" ]; then
         	if [ "$vpnType" = "1" ]; then
 		    # pptp
 	    	    iptables -t nat -A DMZ -p tcp --dport 1723 -j RETURN
 	    	    iptables -t nat -A DMZ -p tcp --sport 1723 -j RETURN
 		    iptables -t nat -A DMZ -p gre -j RETURN
-		elif [ "$vpnType" = "2" ]; then
+		elif [ "$vpnType" = "2" ] || [ "$l2tp_srv_enabled" = "1" ]; then
 	    	    # l2tp
 	    	    iptables -t nat -A DMZ -p udp --dport 1701 -j RETURN
 	    	    iptables -t nat -A DMZ -p udp --sport 1701 -j RETURN
