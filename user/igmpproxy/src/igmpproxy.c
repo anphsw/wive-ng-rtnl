@@ -118,7 +118,6 @@ int main( int ArgCn, char *ArgVc[] ) {
             break;
 #ifdef RALINK_ESW_SUPPORT
         case 'w':
-	    sw = 1;
 	    WanPort = 0x10;
             break;
         case 'f':
