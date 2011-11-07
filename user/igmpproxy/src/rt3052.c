@@ -39,6 +39,8 @@
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 
+//#define DEBUG_RT
+
 #include "linux/config.h"
 
 #include "defs.h"
@@ -96,6 +98,7 @@
 #define OTHER_INTERFACE		7		/* port 7  (wifi)  */
 
 extern uint32_t WanPort;
+extern unsigned int rareg(int mode, unsigned int addr, long long int new_value);
 
 static int arpLookUp(char *ip, char *arp);
 
@@ -133,11 +136,13 @@ struct mac_table{
 // function prototype
 static void update_group_port_map(struct group *entry);
 static void updateMacTable(struct group *entry, int delay_deleted);
-static void updateMacTable_specialtag(struct group *entry, unsigned char new_portmap, int delay_delete);
 static int	portLookUpByIP(char *ip);
 static inline int reg_read(int offset, int *value);
 static inline int reg_write(int offset, int value);
+#ifdef CONFIG_RAETH_SPECIAL_TAG
+static void updateMacTable_specialtag(struct group *entry, unsigned char new_portmap, int delay_delete);
 static void ZeroEntriesBarrier(struct group *entry, int mode);
+#endif
 
 // global variables.
 static struct mac_table internal_mac_table[1024];
@@ -165,6 +170,7 @@ static struct group *find_entry(uint32 ip_addr)
 	return NULL;
 }
 
+#ifdef DEBUG_RT
 static void dump_table(void)
 {
 	int i=0;
@@ -178,6 +184,7 @@ static void dump_table(void)
 		mac1 = internal_mac_table[i].mac1;
 	}
 }
+#endif
 
 static void dump_entry(void)
 {
@@ -214,7 +221,6 @@ static void dump_entry(void)
 static struct group *build_entry(uint32 m_ip_addr, uint32 u_ip_addr)
 {
 	unsigned char 		a1, a2, a3;
-	struct in_addr 		tmp;
 	struct group 		*new_entry;
 
 	static int group_count = 0;
@@ -252,6 +258,7 @@ static struct group *build_entry(uint32 m_ip_addr, uint32 u_ip_addr)
 	return new_entry;
 }
 
+#if 0
 static struct group_member *lookup_ip_group(struct group *entry, uint32 m_ip_addr)
 {
 	struct group_member *pos = entry->members;
@@ -262,7 +269,8 @@ static struct group_member *lookup_ip_group(struct group *entry, uint32 m_ip_add
 		pos = pos->next;
 	}
 	return NULL;
-} 
+}
+#endif
 
 static struct group_member *lookup_member(struct group *entry, uint32 m_ip_addr, uint32 u_ip_addr)
 {
@@ -345,10 +353,8 @@ void remove_member(uint32 m_ip_addr, uint32 u_ip_addr)
  */
 static struct group_member *insert_member(struct group *entry, uint32 m_ip_addr, uint32 u_ip_addr)
 {
-	int rc = 0;
 	struct in_addr 		tmp;
 	struct group_member *new_member;
-	struct group_member *pos = entry->members;
 
 	if(entry->members != NULL){
 		struct group_member *member = lookup_member(entry, m_ip_addr, u_ip_addr);
@@ -590,7 +596,9 @@ static void update_group_port_map(struct group *entry)
 #if 1
 void insert_multicast_ip(uint32 m_ip_addr, uint32 u_ip_addr)
 {
+#ifdef WIFI_IGMPSNOOP_SUPPORT
 	char cmd[128];
+#endif
 	struct group_member *new_member;
 	struct group *entry = find_entry(m_ip_addr);
 
@@ -657,7 +665,7 @@ static void destory_all_hosts_rule()
  */
 static void sync_internal_mac_table(void *argu)
 {
-	unsigned int value, mac1, mac2, i = 0;
+	unsigned int value, mac2, i = 0;
 
 	HOOK_CHECK;
 
@@ -844,7 +852,7 @@ static inline int reg_write(int offset, int value)
     return 0;
 }
 
-static inline wait_switch_done(void)
+static inline void wait_switch_done(void)
 {
 	int i, value;
 	for (i = 0; i < 20; i++) {
@@ -859,6 +867,7 @@ static inline wait_switch_done(void)
 		my_log(LOG_WARNING, 0, "*** RT3052: timeout.");
 }
 
+#ifdef CONFIG_RAETH_SPECIAL_TAG
 static void ZeroEntriesBarrier(struct group *entry, int mode)
 {
 	unsigned char lanport4[]=LANPORT_RANGE_P4;
@@ -900,10 +909,12 @@ static void ZeroEntriesBarrier(struct group *entry, int mode)
 	    }
 	}
 }
+#endif
 
+#ifdef CONFIG_RAETH_SPECIAL_TAG
 static void ZeroEntry(struct group *entry, int port, int mode)
 {
-	int i, value;
+	int value;
 	char wholestr[13];
 	char tmpstr[9];
 
@@ -970,13 +981,14 @@ static void updateMacTable_specialtag(struct group *entry, unsigned char new_por
 	    }
 	}
 }
+#endif
 
 /*
  * ripped from user/rt2880/switch/switch.c
  */
 static void updateMacTable(struct group *entry, int delay_delete)
 {
-	int i, value;
+	int value;
 	char wholestr[13];
 	char tmpstr[9];
 
@@ -1284,7 +1296,9 @@ static int portLookUpByIP(char *ip)
 void sigUSR1Handler(int signo)
 {
 	dump_entry();
-//	dump_table();
+#ifdef DEBUG_RT
+	dump_table();
+#endif
 }
 
 

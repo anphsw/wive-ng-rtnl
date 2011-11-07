@@ -17,11 +17,13 @@
 /*
  * RT2880/RT3052 read/write register utility.
  */
-#include <stdio.h> 
-#include <stdlib.h> 
-#include <math.h> 
-#include <sys/mman.h> 
-#include <fcntl.h> 
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <sys/mman.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <string.h>
 #include <errno.h>
 
 #define PAGE_SIZE	0x1000 	/* 4096 */

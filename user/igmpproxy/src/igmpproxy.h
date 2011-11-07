@@ -62,7 +62,7 @@
 
 /* IGMP SNOOPING CHECK */
 #ifdef RALINK_ESW_SUPPORT
-#include <linux/config.h>
+#include "linux/config.h"
 
 #if defined(CONFIG_RALINK_RT2880)
 #define PROCREG_GMAC	"/proc/rt2880/gmac"
