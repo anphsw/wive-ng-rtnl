@@ -184,12 +184,6 @@ start() {
 	    # Incoming peers
 	    iptables -A servicelimit -p tcp --dport 51413 -j ACCEPT
 	fi
-	if [ "$l2tp_srv_enabled" = "1" ]; then
-	    $LOG "vpn l2tp server"
-	    iptables -A servicelimit -i $lan_if -p udp --dport 1701 -j ACCEPT
-	    iptables -A servicelimit -i $wan_if -p udp --dport 1701 -j ACCEPT
-	    iptables -A servicelimit -i $real_wan_if -p udp --dport 1701 -j ACCEPT
-	fi
 	if [ "$WANPingFilter" = "0" ]; then
 	    if [ "$OperationMode" != "0" ]; then
     		$LOG "icmp limit Drop ping from wan $wan_if"
@@ -206,13 +200,14 @@ start() {
 	iptables -A servicelimit -p icmp --icmp-type echo-request -m limit --limit 10/s -j ACCEPT
 	iptables -A servicelimit -p icmp --icmp-type echo-request -j DROP
 ###########################################VPN-RULES##########################################
-	if [ "$vpnEnabled" = "on" ]; then
-	    $LOG "Add vpnfilter rules"
+	if [ "$vpnEnabled" = "on" ] || [ "$l2tp_srv_enabled" = "1" ]; then
 	    if [ "$vpnType" = "1" ]; then
+		$LOG "Add vpnfilter rules for PPTP"
 		iptables -A servicelimit -p gre -j ACCEPT
 		iptables -A servicelimit -p tcp --sport 1723 -j ACCEPT
-	    elif [ "$vpnType" = "2" ]; then
+	    elif [ "$vpnType" = "2" ] || [ "$l2tp_srv_enabled" = "1" ] ; then
 		iptables -A servicelimit -p udp --sport 500 -j ACCEPT
+		$LOG "Add vpnfilter rules for L2TP"
 		iptables -A servicelimit -p udp --dport 500 -j ACCEPT
 		iptables -A servicelimit -p udp --sport 1701 -j ACCEPT
 		iptables -A servicelimit -p udp --dport 1701 -j ACCEPT
@@ -503,7 +498,7 @@ qos()
 	do
 	    iptables -A simple_qos -t mangle -p tcp --dport $port $MAX_THR
 	done
- }
+}
 
 case "$1" in
         start)
