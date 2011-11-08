@@ -311,7 +311,7 @@ read_kcore(struct file *file, char __user *buffer, size_t buflen, loff_t *fpos)
 	start = kc_offset_to_vaddr(*fpos - elf_buflen);
 	if ((tsz = (PAGE_SIZE - (start & ~PAGE_MASK))) > buflen)
 		tsz = buflen;
-		
+
 	while (buflen) {
 		struct kcore_list *m;
 
@@ -322,7 +322,7 @@ read_kcore(struct file *file, char __user *buffer, size_t buflen, loff_t *fpos)
 		}
 		read_unlock(&kclist_lock);
 
-		if (&m->list == &kclist_head) {
+		if (m == NULL) {
 			if (clear_user(buffer, tsz))
 				return -EFAULT;
 		} else if ((start >= VMALLOC_START) && (start < VMALLOC_END)) {
