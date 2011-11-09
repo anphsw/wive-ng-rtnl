@@ -42,6 +42,7 @@ ifneq ("$(CONFIG_USER_GOAHEAD_LANG_ZHTW)", "y")
 	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/lang/zhtw
 endif
 	for i in $(DIRS) ; do make -C $$i $@ ; done
+	rm -f $(ROMFSDIR)$(ROOT_DIRECTORY)/cgi-bin/.keep_me
 
 clean:
 	for i in $(DIRS) ; do make -C $$i clean ; done
