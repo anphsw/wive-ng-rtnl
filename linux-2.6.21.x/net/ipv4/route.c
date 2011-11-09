@@ -138,11 +138,12 @@ static int ip_rt_secret_interval	= 10 * 60 * HZ;
 static int ip_rt_flush_expected;
 static unsigned long rt_deadline;
 
+static struct delayed_work expires_work;
+static unsigned long expires_ljiffies;
+
 #define RTprint(a...)	printk(KERN_DEBUG a)
 
 static struct timer_list rt_flush_timer;
-static void rt_worker_func(struct work_struct *work);
-static DECLARE_DELAYED_WORK(expires_work, rt_worker_func);
 static struct timer_list rt_secret_timer;
 
 /*
@@ -621,9 +622,12 @@ static void rt_check_expire(void)
 	unsigned int i = rover, goal;
 	struct rtable *rth, **rthp;
 	unsigned long now = jiffies;
+	unsigned long delta;
 	u64 mult;
 
-	mult = ((u64)ip_rt_gc_interval) << rt_hash_log;
+	delta = jiffies - expires_ljiffies;
+	expires_ljiffies = jiffies;
+	mult = ((u64)delta) << rt_hash_log;
 	if (ip_rt_gc_timeout > 1)
 		do_div(mult, ip_rt_gc_timeout);
 	goal = (unsigned int)mult;
@@ -3008,6 +3012,8 @@ int __init ip_rt_init(void)
 	/* All the timers, started at system startup tend
 	   to synchronize. Perturb it a bit.
 	 */
+	INIT_DELAYED_WORK_DEFERRABLE(&expires_work, rt_worker_func);
+	expires_ljiffies = jiffies;
 	schedule_delayed_work(&expires_work,
 		net_random() % ip_rt_gc_interval + ip_rt_gc_interval);
 
