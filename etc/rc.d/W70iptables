@@ -336,17 +336,17 @@ start() {
 		$LOG "Add base upnp rules"
     		iptables -t nat -N MINIUPNPD
     		iptables -t nat -F MINIUPNPD
-    		iptables -t filter -N MINIUPNPD
-    		iptables -t filter -F MINIUPNPD
 		# multicast no need forward to upnp chain
 		if [ "$igmpEnabled" != "0" ] || [ "$UDPXYMode" != "0" ]; then
     		    iptables -t nat -A PREROUTING -i $wan_if ! -s $mcast_net -j MINIUPNPD
 		else
     		    iptables -t nat -A PREROUTING -i $wan_if -j MINIUPNPD
 		fi
-		if [ "$vpnNAT" != "off" ]; then
+		if [ "$vpnNAT" != "off" ] && [ "$real_wan_ipaddr" != "" ]; then
 		    iptables -t nat -A PREROUTING -i $real_wan_ipaddr -j MINIUPNPD
 		fi
+    		iptables -t filter -N MINIUPNPD
+    		iptables -t filter -F MINIUPNPD
     		iptables -t filter -I FORWARD -j MINIUPNPD
     	    fi
 	fi
