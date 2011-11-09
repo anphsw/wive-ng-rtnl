@@ -334,17 +334,21 @@ start() {
 	    ################################UPNPRULES######################################
 	    if [ "$upnpEnabled" = "1" ] && [ "$OperationMode" != "0" ]; then
 		$LOG "Add base upnp rules"
+		# nat rules
     		iptables -t nat -N MINIUPNPD
     		iptables -t nat -F MINIUPNPD
-		# multicast no need forward to upnp chain
 		if [ "$igmpEnabled" != "0" ] || [ "$UDPXYMode" != "0" ]; then
+		    # multicast no need forward to upnp chain
     		    iptables -t nat -A PREROUTING -i $wan_if ! -s $mcast_net -j MINIUPNPD
 		else
+		    # all packets join to UPNP
     		    iptables -t nat -A PREROUTING -i $wan_if -j MINIUPNPD
 		fi
+		# all packets from join redirect to UPNP
 		if [ "$vpnNAT" != "off" ] && [ "$real_wan_ipaddr" != "" ]; then
 		    iptables -t nat -A PREROUTING -i $real_wan_ipaddr -j MINIUPNPD
 		fi
+		# filter rules
     		iptables -t filter -N MINIUPNPD
     		iptables -t filter -F MINIUPNPD
     		iptables -t filter -I FORWARD -j MINIUPNPD
@@ -361,7 +365,7 @@ start() {
 		iptables -t nat -A DMZ -i $wan_if -p udp -d $mcast_net -j RETURN
     		iptables -t nat -A PREROUTING ! -s $mcast_net -j DMZ
 	    else
-		# all packets redirect to DMZ
+		# all packets join to DMZ
     		iptables -t nat -A PREROUTING -j DMZ
 	    fi
     	    if [ "$vpnEnabled" = "on" ] || [ "$l2tp_srv_enabled" = "1" ]; then
