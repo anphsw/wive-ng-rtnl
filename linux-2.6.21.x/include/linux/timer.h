@@ -36,6 +36,7 @@ extern struct tvec_t_base_s boot_tvec_bases;
 	struct timer_list _name =				\
 		TIMER_INITIALIZER(_function, _expires, _data)
 
+void init_timer_deferrable(struct timer_list *timer);
 void init_timer(struct timer_list * timer);
 
 static inline void setup_timer(struct timer_list * timer,
