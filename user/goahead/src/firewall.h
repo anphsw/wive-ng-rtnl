@@ -36,7 +36,7 @@
 #define PORT_FORWARD_POST_CHAIN_VPN	"port_forward_post_vpn" //for reverse nat
 
 
-#define MAGIC_NUM			"IPCHAINS"			
+#define MAGIC_NUM			"IPCHAINS"
 
 #define HTML_NO_FIREWALL_UNDER_BRIDGE_MODE	\
 "<img src=\"/graphics/warning.gif\"><font color=#ff0000>&nbsp; &nbsp;Warning: The current operation mode is \"Bridge mode\" and these settings may not be functional.</font>"

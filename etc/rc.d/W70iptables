@@ -324,6 +324,11 @@ start() {
 	    fi
 	    ###########################################################
 	fi
+############################################VPNRULES#######################################
+	if [ -f /etc/ppp_firewall ] && [ "$vpnEnabled" = "on" ]; then
+	    $LOG "Call to add VPN netfilter rules."
+	    /etc/ppp_firewall
+	fi
 ############################################OTHERS########################################
 	if [ "$natEnabled" = "1" ] || [ "$vpnNAT" != "off" ]; then
 	    ################################UPNPRULES######################################
@@ -339,6 +344,9 @@ start() {
 		else
     		    iptables -t nat -A PREROUTING -i $wan_if -j MINIUPNPD
 		fi
+		if [ "$vpnNAT" != "off" ]; then
+		    iptables -t nat -A PREROUTING -i $real_wan_ipaddr -j MINIUPNPD
+		fi
     		iptables -t filter -I FORWARD -j MINIUPNPD
     	    fi
 	fi
@@ -347,18 +355,17 @@ start() {
     	    $LOG "DMZ enabled for $DMZIPAddress"
     	    iptables -t nat -N DMZ
     	    iptables -t nat -F DMZ
-	    # multicast no need forward to dmz chain
 	    if [ "$igmpEnabled" != "0" ] || [ "$UDPXYMode" != "0" ]; then
+		# multicast no need forward to dmz chain if igmpproxy/udpxy enables
+		iptables -t nat -A DMZ -i $wan_if -p igmp -j RETURN
+		iptables -t nat -A DMZ -i $wan_if -p udp -d $mcast_net -j RETURN
     		iptables -t nat -A PREROUTING ! -s $mcast_net -j DMZ
 	    else
+		# all packets redirect to DMZ
     		iptables -t nat -A PREROUTING -j DMZ
 	    fi
-	    # multicast no need redirected to DMZ adress
-	    if [ "$igmpEnabled" != "0" ] || [ "$UDPXYMode" != "0" ]; then
-		iptables -t nat -I DMZ -i $wan_if -p igmp -j RETURN
-		iptables -t nat -I DMZ -i $wan_if -p udp -d $mcast_net -j RETURN
-	    fi
     	    if [ "$vpnEnabled" = "on" ] || [ "$l2tp_srv_enabled" = "1" ]; then
+		# filter VPN transport packets
         	if [ "$vpnType" = "1" ]; then
 		    # pptp
 	    	    iptables -t nat -A DMZ -p tcp --dport 1723 -j RETURN
@@ -370,24 +377,23 @@ start() {
 	    	    iptables -t nat -A DMZ -p udp --sport 1701 -j RETURN
 		fi
 	    fi
-	    # loopback
-	    if [ "$DMZNATLoopback" = "1" ] && [ "$wan_ipaddr" != "" ]; then
+	    # nat loopback for DMZ
+	    if [ "$DMZNATLoopback" = "1" ] && [ "$wan_ipaddr" != "" -o "$real_wan_ipaddr" != "" ]; then
 		if [ "$vpnNAT" != "off" ] && [ "$real_wan_ipaddr" != "" ]; then
 		    iptables -t nat -A DMZ -i $lan_if -d $real_wan_ipaddr -j DNAT --to-destination $DMZIPAddress
+		    iptables -t nat -A DMZ -i $real_wan_if -d $real_wan_ipaddr -j DNAT --to-destination $DMZIPAddress
 		else
 		    iptables -t nat -A DMZ -i $lan_if -d $wan_ipaddr -j DNAT --to-destination $DMZIPAddress
+		    iptables -t nat -A DMZ -i $wan_if -d $wan_ipaddr -j DNAT --to-destination $DMZIPAddress
 		fi
 		iptables -t nat -A POSTROUTING -s $lan_ipaddr/$lan_netmask -d $DMZIPAddress -j SNAT --to-source $lan_ipaddr
 	    fi
-	    # direct
+
+	    # direct DMZ from all ifaces
 	    iptables -t nat -A DMZ ! -i $lan_if ! -s $lan_ipaddr/$lan_netmask -j DNAT --to $DMZIPAddress
+
 	    # allow forward to dmz host
 	    iptables -A FORWARD ! -i $lan_if -d $DMZIPAddress -j ACCEPT
-	fi
-############################################VPNRULES#######################################
-	if [ -f /etc/ppp_firewall ] && [ "$vpnEnabled" = "on" ]; then
-	    $LOG "Call to add VPN netfilter rules."
-	    /etc/ppp_firewall
 	fi
 #########################################ACCEPT_ESTABLISHED################################
     iptables -A FORWARD $STATE_EST -j ACCEPT

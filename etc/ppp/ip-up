@@ -11,8 +11,8 @@ PPP_REMOTE="$5"
 PPP_IPPARAM="$6"
 LOG="logger -t pppd"
 
-eval `nvram_buf_get 2860 lan_ipaddr lan_netmask Lan2Enabled lan2_ipaddr lan2_netmask upnpEnabled vpnNAT vpnDGW vpnPeerDNS \
-	chilli_net use_snat PortForwardEnable DMZEnable DMZIPAddress DMZNATLoopback`
+eval `nvram_buf_get 2860 lan_ipaddr lan_netmask Lan2Enabled lan2_ipaddr lan2_netmask \
+		vpnNAT vpnDGW vpnPeerDNS use_snat PortForwardEnable upnpEnabled chilli_net`
 
     #if wan ip not get
     if [ "$PPP_LOCAL" = "" ]; then
@@ -111,13 +111,6 @@ eval `nvram_buf_get 2860 lan_ipaddr lan_netmask Lan2Enabled lan2_ipaddr lan2_net
 	if [ -f /etc/portforward_vpn ] && [ "$PortForwardEnable" = "1" ]; then
 	    echo "/etc/portforward_vpn A $PPP_IFACE $PPP_LOCAL" >> /etc/ppp_firewall
         fi
-	#rules for upnp
-	if [ "$upnpEnabled" = "1" ] && [ "$OperationMode" != "0" ]; then
-    	    echo "iptables -t nat -I PREROUTING -i $PPP_IFACE  -j MINIUPNPD > /dev/null 2>&1" >> /etc/ppp_firewall
-    	fi
-	if [ "$DMZEnable" = "1" ] && [ "$DMZIPAddress" != "" ] && [ "$DMZNATLoopback" = "1" ] && [ "$PPP_LOCAL" != "" ]; then
-	    echo "iptables -t nat -I DMZ -i $PPP_IFACE -d $PPP_LOCAL -j DNAT --to-destination $DMZIPAddress > /dev/null 2>&1" >> /etc/ppp_firewall
-	fi
     fi
     chmod 777 /etc/ppp_firewall
 
