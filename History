@@ -805,6 +805,7 @@
 48) Igmpproxy automatic check esw exist.<br>
 49) Rework boot SPI hack.<br>
 50) Some webui fixes (syslog, web server port, l2tp server).<br>
+51) Rework resolv.conf generate in some modes.<br>
 
 <br><br>
 <b>For support see:</b><br>

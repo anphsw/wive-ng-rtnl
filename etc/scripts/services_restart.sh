@@ -11,13 +11,6 @@ MODE="$1"
 $LOG "Restart needed services and scripts. Mode $MODE"
 
 ##########################################################
-# Regenerate resolv only if wan_static_dns on		 #
-##########################################################
-if [ "$wan_static_dns" = "on" ]; then
-    service resolv start
-fi
-
-##########################################################
 # This is services restart always                        #
 ##########################################################
 if [ -f /bin/radvd ] && [ -d /proc/sys/net/ipv6 ]; then

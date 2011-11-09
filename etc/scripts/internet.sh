@@ -205,6 +205,13 @@ if [ "$MODE" != "wifionly" ] || [ "$OperationMode" = "2" ]; then
     service wan restart
 fi
 
+##########################################################
+# Regenerate resolv only if wan_static_dns on		 #
+##########################################################
+if [ "$wan_static_dns" = "on" ]; then
+    service resolv start
+fi
+
 # some daemons need restart
 services_restart.sh all
 

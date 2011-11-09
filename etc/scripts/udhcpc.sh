@@ -206,11 +206,13 @@ case "$1" in
 		fi
 	    else
 		$LOG "Use static DNS."
+		# Regenerate resolv.conf
+		service resolv start
 	    fi
-		# read for all write by root
-		chmod 644 "$RESOLV_CONF" > /dev/null 2>&1
-		$LOG "Restart needed services"
-		services_restart.sh dhcp
+	    # read for all write by root
+	    chmod 644 "$RESOLV_CONF" > /dev/null 2>&1
+	    $LOG "Restart needed services"
+	    services_restart.sh dhcp
 	fi
 
     ########################################################################################################

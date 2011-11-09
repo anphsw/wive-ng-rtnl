@@ -29,7 +29,7 @@ eval `nvram_buf_get 2860 lan_ipaddr lan_netmask Lan2Enabled lan2_ipaddr lan2_net
     iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $lan2_ipaddr/$lan2_netmask -j SNAT --to-source $PPP_LOCAL > /dev/null 2>&1
 
     #replace dns to default
-    if [ "$vpnPeerDNS" != "off" ] && [ -f /etc/ppp/resolv.conf ] && [ -f /var/tmp/resolv.conf.tmp.$PPP_IFACE ]; then
+    if [ "$vpnPeerDNS" = "on" ] && [ -f /etc/ppp/resolv.conf ] && [ -f /var/tmp/resolv.conf.tmp.$PPP_IFACE ]; then
 	$LOG "Restore DNS from pppd"
 	cp -f /var/tmp/resolv.conf.tmp.$PPP_IFACE /etc/resolv.conf
 	# read for all write by root
@@ -37,6 +37,13 @@ eval `nvram_buf_get 2860 lan_ipaddr lan_netmask Lan2Enabled lan2_ipaddr lan2_net
 	rm -f /etc/ppp/resolv.conf > /dev/null 2>&1
 	rm -f /var/tmp/resolv.conf.tmp.$PPP_IFACE > /dev/null 2>&1
 	rm -f /var/tmp/resolv.$PPP_IFACE > /dev/null 2>&1
+    else
+	##########################################################
+	# Regenerate resolv only if wan_static_dns on		 #
+	##########################################################
+	if [ "$wan_static_dns" = "on" ]; then
+	    service resolv start
+	fi
     fi
 
     #remove portforward rules
