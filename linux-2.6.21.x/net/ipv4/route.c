@@ -2532,6 +2532,11 @@ static int rt_fill_info(struct sk_buff *skb, u32 pid, u32 seq, int event,
 
 	error = rt->u.dst.error;
 	expires = rt->u.dst.expires ? rt->u.dst.expires - jiffies : 0;
+
+	/* prevent negative expire time. paranoid */
+	if (expires < 0)
+	    expires=0;
+
 	if (rt->peer) {
 		id = rt->peer->ip_id_count;
 		if (rt->peer->tcp_ts_stamp) {
