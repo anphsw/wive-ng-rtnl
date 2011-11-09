@@ -16,7 +16,7 @@ if [ "$ACTION" = "add" ]; then
 	    cat /etc/prnfw.dl > /dev/usb/$MDEV
 	fi
 	$LOG "Start p910nd daemon on port 910${port}"
-	if "$PrinterSrvBidir" = "1" ]; then
+	if [ "$PrinterSrvBidir" = "1" ]; then
 	    /bin/p910nd -b -f /dev/usb/$MDEV $port
 	else
 	    /bin/p910nd -f /dev/usb/$MDEV $port
