@@ -95,9 +95,32 @@ set_def() {
     ip link set imq1 down > /dev/null 2>&1
 }
 
+show() {
+    echo "############################################"
+    echo "###############QOS-IN-IF####################"
+    echo "############################################"
+    echo "############QDISC $real_wan_if"
+    tc -s -d qdisc show dev $real_wan_if
+    echo "############CLASS $real_wan_if"
+    tc -s -d class show dev $real_wan_if
+    echo "############FILTER $real_wan_if"
+    tc -s -d filter show dev $real_wan_if
+    echo "############################################"
+    echo "###############QOS-OUT-IF###################"
+    echo "############################################"
+    echo "############QDISC $lan_if"
+    tc -s -d qdisc show dev $lan_if
+    echo "############CLASS $lan_if"
+    tc -s -d class show dev $lan_if
+    echo "############FILTER $lan_if"
+    tc -s -d filter show dev $lan_if
+    echo "############################################"
+}
+
 get_param() {
     eval `nvram_buf_get 2860 QoSEnable simple_qos`
 }
+
 
 case "$1" in
         start)
@@ -111,6 +134,10 @@ case "$1" in
         restart)
             stop
             start
+            ;;
+
+        show)
+	    show
             ;;
 
         *)
