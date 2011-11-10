@@ -23,6 +23,12 @@ qos_lm()
     if [ ! -d /sys/modules/sch_sfq ]; then
 	modprobe -q sch_sfq
     fi
+    if [ ! -d /sys/modules/xt_mark ]; then
+	modprobe -q xt_mark
+    fi
+    if [ ! -d /sys/modules/xt_MARK ]; then
+	modprobe -q xt_MARK
+    fi
 }
 
 qos_nf()
