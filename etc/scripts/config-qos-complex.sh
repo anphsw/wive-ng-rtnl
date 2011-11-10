@@ -139,11 +139,15 @@ gos_tc_wan()
     tc filter add dev $real_wan_if parent 1:0 prio 1 protocol ip handle 24 fw flowid 1:24
 }
 
+# tune netdev
 qos_lm
+# create target
+qos_nf
+# add rules for target
+qos_nf_if
+# add netsched rules
 qos_tc_lan
 gos_tc_wan
-qos_nf_if
-qos_nf
 
 # add rules for phys wan to
 if [ "$wan_if" != "$real_wan_if" ]; then
