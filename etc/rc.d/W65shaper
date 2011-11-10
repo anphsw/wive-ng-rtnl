@@ -65,7 +65,7 @@ if [ "$QoSEnable" != "" -a "$QoSEnable" != "0" ] || [ "$simple_qos" = "1" ]; the
     elif [ "$QoSEnable" = "2" ]; then
 	/etc/scripts/config-qos-tc_prio.sh
     elif [ "$QoSEnable" = "3" ]; then
-	/etc/scripts/config-qos-comllex.sh
+	/etc/scripts/config-qos-complex.sh
     fi
 fi
 }
