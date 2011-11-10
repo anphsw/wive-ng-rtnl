@@ -14,6 +14,10 @@ eval `nvram_buf_get 2860 lan_ipaddr QoS_rate_down QoS_rate_limit_down QoS_rate_u
 QoS_high_pp=`nvram_get 2860 QoS_high_pp`
 QoS_low_pp=`nvram_get 2860 QoS_low_pp`
 
+IPTSCR="/etc/qos_firewall"
+INCOMING="iptables -A shaper_pre -t mangle"
+OUTGOING="iptables -A shaper_post -t mangle"
+
 qos_lm()
 {
     # Load modules
@@ -33,10 +37,6 @@ qos_lm()
 
 qos_nf()
 {
-    IPTSCR="/etc/qos_firewall"
-    INCOMING="iptables -A shaper_pre -t mangle"
-    OUTGOING="iptables -A shaper_post -t mangle"
-
     $LOG "Generate $IPTSCR"
     echo "$LOG add qos netfilter rules" >> $IPTSCR
     echo "iptables -N shaper_pre -t mangle > /dev/null 2>&1" >> $IPTSCR
@@ -45,7 +45,10 @@ qos_nf()
     echo "iptables -F shaper_post -t mangle > /dev/null 2>&1" >> $IPTSCR
     echo "iptables -A PREROUTING -t mangle ! -d 224.0.0.0/4 -j shaper_ppre > /dev/null 2>&1" >> $IPTSCR
     echo "iptables -A POSTROUTING -t mangle ! -s 224.0.0.0/4 -j shaper_post > /dev/null 2>&1" >> $IPTSCR
+}
 
+qos_nf_if()
+{
     # first always high prio ports
     echo "$INCOMING -i $real_wan_if -p tcp --dport 0:1024 -j MARK --set-mark 20" >> $IPTSCR
     echo "$INCOMING -i $real_wan_if -p tcp --sport 0:1024 -j MARK --set-mark 20" >> $IPTSCR
@@ -92,7 +95,7 @@ qos_nf()
     echo "$OUTGOING -o $real_wan_if -p udp -m mark --mark 0 -j MARK --set-mark 24" >> $IPTSCR
 }
 
-gos_tc()
+gos_tc_lan()
 {
     #--------------------------------------------INCOMING---------------------------------------------------------------
     $LOG "All incoming $lan_if rate: normal $QoS_rate_limit_down , maximum $QoS_rate_down (kbit/s)"
@@ -117,7 +120,10 @@ gos_tc()
 
     #local connections
     tc filter add dev $lan_if parent 1:0 protocol ip prio 0 u32 match ip src $lan_ipaddr flowid 1:3
+}
 
+gos_tc_wan()
+{
     #---------------------------------------------OUTGOING--------------------------------------------------------------
     $LOG "All outgoing $real_wan_if rate: normal $QoS_rate_limit_up , maximum $QoS_rate_up (kbit/s)"
     tc qdisc add dev $real_wan_if root handle 1: htb default 24
@@ -134,5 +140,14 @@ gos_tc()
 }
 
 qos_lm
+qos_tc_lan
+gos_tc_wan
+qos_nf_if
 qos_nf
-qos_tc
+
+# add rules for phys wan to
+if [ "$wan_if" != "$real_wan_if" ]; then
+    real_wan_if="$wan_if"
+    qos_nf
+    gos_tc_wan
+fi
