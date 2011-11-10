@@ -45,14 +45,7 @@ hw_nat_en() {
 	    sw_nat=0
 	    $LOG "NAT Offload mode DISABLE"
 	fi
-	# workarounds coex hw/sw nat and qos
-	# mark correct work only if sw_nat=0
-	# htb/esfq/imq correct work  only if hw_nat=0
-	if [ "$QoSEnable" = "3" ] ; then
-	    hw_nat=0
-	    sw_nat=0
-	    $LOG "IMQ shaper enabled - HW_NAT/SW_NAT Offload mode must be DISABLE"
-	elif [ "$QoSEnable" = "1" ] || [ "$QoSEnable" = "2" ] || [ "$simple_qos" = "1" ]; then
+	if [ "$QoSEnable" != "" -a "$QoSEnable" != "0" ] || [ "$simple_qos" = "1" ]; then
 	    hw_nat=0
 	    $LOG "QoS or SimpleQoS enabled - HW_NAT Offload mode DISABLE"
 	fi
