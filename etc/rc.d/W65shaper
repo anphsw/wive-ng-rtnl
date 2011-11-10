@@ -96,7 +96,7 @@ set_def() {
 }
 
 get_param() {
-    QoSEnable=`nvram_get 2860 QoSEnable`
+    eval `nvram_buf_get 2860 QoSEnable simple_qos`
 }
 
 case "$1" in
