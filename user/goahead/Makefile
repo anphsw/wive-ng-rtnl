@@ -43,7 +43,12 @@ ifneq ("$(CONFIG_USER_GOAHEAD_LANG_ZHTW)", "y")
 endif
 	for i in $(DIRS) ; do make -C $$i $@ ; done
 	rm -f $(ROMFSDIR)$(ROOT_DIRECTORY)/cgi-bin/.keep_me
+	###create dirs and symlinks for users web pages and cgi scripts#########################
+	mkdir -p $(ROMFSDIR)/etc/web
+	mkdir -p $(ROMFSDIR)/etc/web/user
+	mkdir -p $(ROMFSDIR)/etc/web/cgi-bin/user
+	$(ROMFSINST) -s /etc/web/html $(ROOT_DIRECTORY)/user
+	$(ROMFSINST) -s /etc/web/cgi-bin $(ROOT_DIRECTORY)/cgi-bin/user
 
 clean:
 	for i in $(DIRS) ; do make -C $$i clean ; done
-
