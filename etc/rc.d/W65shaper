@@ -27,7 +27,7 @@ IPTSCR="/etc/qos_firewall"
 
 start() {
 get_param
-if [ "$QoSEnable" != "" ] && [ "$QoSEnable" != "0" ]; then
+if [ "$QoSEnable" != "" -a "$QoSEnable" != "0" ] || [ "$simple_qos" = "1" ]; then
     $LOG "Set default rules."
     set_def
 
