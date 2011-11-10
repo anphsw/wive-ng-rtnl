@@ -95,7 +95,7 @@ qos_nf_if()
     echo "$OUTGOING -o $real_wan_if -p udp -m mark --mark 0 -j MARK --set-mark 24" >> $IPTSCR
 }
 
-gos_tc_lan()
+qos_tc_lan()
 {
     #--------------------------------------------INCOMING---------------------------------------------------------------
     $LOG "All incoming $lan_if rate: normal $QoS_rate_limit_down , maximum $QoS_rate_down (kbit/s)"
