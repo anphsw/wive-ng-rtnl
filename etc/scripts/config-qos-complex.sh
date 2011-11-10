@@ -43,7 +43,7 @@ qos_nf()
     echo "iptables -F shaper_pre -t mangle > /dev/null 2>&1" >> $IPTSCR
     echo "iptables -N shaper_post -t mangle > /dev/null 2>&1" >> $IPTSCR
     echo "iptables -F shaper_post -t mangle > /dev/null 2>&1" >> $IPTSCR
-    echo "iptables -A PREROUTING -t mangle ! -d 224.0.0.0/4 -j shaper_ppre > /dev/null 2>&1" >> $IPTSCR
+    echo "iptables -A PREROUTING -t mangle ! -d 224.0.0.0/4 -j shaper_pre > /dev/null 2>&1" >> $IPTSCR
     echo "iptables -A POSTROUTING -t mangle ! -s 224.0.0.0/4 -j shaper_post > /dev/null 2>&1" >> $IPTSCR
 }
 
