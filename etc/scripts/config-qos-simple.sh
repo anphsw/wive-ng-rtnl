@@ -5,7 +5,7 @@
 # include global
 . /etc/scripts/global.sh
 
-LOG="logger -t User TOS"
+LOG="logger -t QoS TOS"
 IPTSCR="/etc/qos_firewall"
 
     $LOG "Load module."
@@ -17,8 +17,8 @@ IPTSCR="/etc/qos_firewall"
     echo "$LOG add simple_qos netfilter rules" >> $IPTSCR
     echo "iptables -N simple_qos -t mangle > /dev/null 2>&1" >> $IPTSCR
     echo "iptables -F simple_qos -t mangle > /dev/null 2>&1" >> $IPTSCR
-    echo "iptables -A OUTPUT -j simple_qos -t mangle > /dev/null 2>&1" >> $IPTSCR
-    echo "iptables -A PREROUTING -j simple_qos -t mangle > /dev/null 2>&1" >> $IPTSCR
+    echo "iptables -A OUTPUT -t mangle -j simple_qos > /dev/null 2>&1" >> $IPTSCR
+    echo "iptables -A PREROUTING -t mangle ! -d 224.0.0.0/4 -j simple_qos > /dev/null 2>&1" >> $IPTSCR
 
     MIN_DEL="-j TOS --set-tos Minimize-Delay"
     MAX_THR="-j TOS --set-tos Maximize-Throughput"
