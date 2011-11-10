@@ -5321,11 +5321,11 @@ static void sched_domain_debug(struct sched_domain *sd, int cpu)
 			cpus_or(groupmask, groupmask, group->cpumask);
 
 			cpumask_scnprintf(str, NR_CPUS, group->cpumask);
-			printk(" %s", str);
+			printk(KERN_CONT " %s", str);
 
 			group = group->next;
 		} while (group != sd->groups);
-		printk("\n");
+		printk(KERN_CONT "\n");
 
 		if (!cpus_equal(sd->span, groupmask))
 			printk(KERN_ERR "ERROR: groups don't span "
