@@ -148,6 +148,6 @@ qos_nf
 # add rules for phys wan to
 if [ "$wan_if" != "$real_wan_if" ]; then
     real_wan_if="$wan_if"
-    qos_nf
+    qos_nf_if
     gos_tc_wan
 fi
