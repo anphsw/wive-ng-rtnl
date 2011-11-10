@@ -23,6 +23,7 @@ if [ "$wan_up" = "0" ]; then
 fi
 
 LOG="logger -t QoS"
+IPTSCR="/etc/qos_firewall"
 
 start() {
 get_param
@@ -39,7 +40,26 @@ if [ "$QoSEnable" != "" ] && [ "$QoSEnable" != "0" ]; then
 	ifconfig $lan_if txqueuelen 100
     fi
 
+    # create iptables hook
+    printf "#!/bin/sh\n\n" > $IPTSCR
+
+    ######################################
+    # netfilter script generate
+    ######################################
+
+    # tos based simple qos
+    if [ "$simple_qos" = "1" ]; then
+	/etc/scripts/config-qos-simple.sh
+    fi
+
+    # set execute bits for all
+    if [ -f $IPTSCR ]; then
+	chmod 755 $IPTSCR
+    fi
+
+    ######################################
     # call shaper helpers
+    ######################################
     if [ "$QoSEnable" = "1" ]; then
 	/etc/scripts/config-qos-ralink.sh
     elif [ "$QoSEnable" = "2" ]; then
@@ -63,6 +83,7 @@ stop() {
     if [ "$QoSEnable" = "1" ]; then
 	qos_run c > /dev/null 2>&1
     fi
+    rm -f $IPTSCR
 }
 
 set_def() {

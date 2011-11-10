@@ -277,8 +277,8 @@ start() {
 	    fi
 	fi
 ###########################################QOS-SIMPLE######################################
-	if [ "$simple_qos" = "1" ] && [ "$OperationMode" != "0" ]; then
-	    qos
+	if [ -f /etc/qos_firewall ] && [ "$simple_qos" = "1" ] && [ "$OperationMode" != "0" ]; then
+	    /etc/qos_firewall
 	fi
 ###########################################NAT-NAPTM#######################################
 	if [ "$natEnabled" = "1" ] || [ "$vpnNAT" != "off" ]; then
@@ -470,46 +470,6 @@ get_param() {
     CONNLIMIT="-m connlimit --connlimit-above"
 }
 
-qos()
-{
-  $LOG "Simple QoS Enable"
-    modprobe -q ipt_TOS
-
-    iptables -N simple_qos -t mangle > /dev/null 2>&1
-    iptables -F simple_qos -t mangle > /dev/null 2>&1
-    iptables -A OUTPUT -j simple_qos -t mangle > /dev/null 2>&1
-    iptables -A PREROUTING -j simple_qos -t mangle > /dev/null 2>&1
-
-    MIN_DEL="-j TOS --set-tos Minimize-Delay"
-    MAX_THR="-j TOS --set-tos Maximize-Throughput"
-
-    MIN_DEL_UDP_P="53 1720 5060"
-    MIN_DEL_TCP_P="22 23 53 80 110 443 4190 1720 5060 5190:5193 5222:5223 5269:5270 8080"
-    MAX_THR_TCP_P="20 25 21 8010"
-
-	# increase queue length
-	ifconfig $wan_if txqueuelen 1000
-	ifconfig $lan_if txqueuelen 1000
-
-	iptables -A simple_qos -t mangle -p icmp $MIN_DEL
-	iptables -A simple_qos -t mangle -p igmp $MIN_DEL
-
-	for port in $MIN_DEL_UDP_P
-	do
-	    iptables -A simple_qos -t mangle -p udp --dport $port $MIN_DEL
-	done
-
-	for port in $MIN_DEL_TCP_P
-	do
-	    iptables -A simple_qos -t mangle -p tcp --dport $port $MIN_DEL
-	done
-
-	for port in $MAX_THR_TCP_P
-	do
-	    iptables -A simple_qos -t mangle -p tcp --dport $port $MAX_THR
-	done
-}
-
 case "$1" in
         start)
             start
@@ -517,10 +477,6 @@ case "$1" in
 
         stop)
             stop
-            ;;
-
-        qos)
-            qos
             ;;
 
         restart)

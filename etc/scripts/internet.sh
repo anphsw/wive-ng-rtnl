@@ -225,7 +225,7 @@ fi
 # may be used for add scripts needed by some provides
 # example: http://wive-ng.sf.net/downloads/wan_up.sh - load external routes for www.kvidex.ru ISP
 if [ -f /etc/wan_up.sh ]; then
-    chmod 777 /etc/wan_up.sh
+    chmod 755 /etc/wan_up.sh
     $LOG "Call user /etc/wan_up.sh script."
     sh /etc/wan_up.sh &
 fi

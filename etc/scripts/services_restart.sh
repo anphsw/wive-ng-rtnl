@@ -25,8 +25,8 @@ fi
 ##########################################################
 # Always reload shaper and netfilter rules		 #
 ##########################################################
-    service iptables restart
     service shaper restart
+    service iptables restart
 
 ##########################################################
 # Need restart this servieces only:			 #

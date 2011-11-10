@@ -32,7 +32,7 @@ struct entry_s QOS_PROFILE[QOS_PROFILE_ENTRYS_MAX] = {
 
 inline void QoSRestart(void)
 {
-    doSystem("service iptables restart && service shaper restart && service kext restart");
+    doSystem("service shaper restart && service iptables restart && service kext restart");
 }
 
 static void QoSAFAttribute(webs_t wp, char_t *path, char_t *query)

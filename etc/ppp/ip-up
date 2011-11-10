@@ -34,7 +34,7 @@ eval `nvram_buf_get 2860 lan_ipaddr lan_netmask Lan2Enabled lan2_ipaddr lan2_net
 	    echo ''
 	    echo "$RESTORESTRING"
 	) > /tmp/ip-down-route-reload
-	chmod 777 /tmp/ip-down-route-reload
+	chmod 755 /tmp/ip-down-route-reload
 	$LOG "Remove vpnDGW"
 	#clear all default route
 	while ip route del default ; do
@@ -119,7 +119,7 @@ eval `nvram_buf_get 2860 lan_ipaddr lan_netmask Lan2Enabled lan2_ipaddr lan2_net
 	    echo "/etc/portforward_vpn A $PPP_IFACE $PPP_LOCAL" >> /etc/ppp_firewall
         fi
     fi
-    chmod 777 /etc/ppp_firewall
+    chmod 755 /etc/ppp_firewall
 
     #########################CALL SERVICE HELPER##################################################################################
 
@@ -128,7 +128,6 @@ eval `nvram_buf_get 2860 lan_ipaddr lan_netmask Lan2Enabled lan2_ipaddr lan2_net
 
     $LOG "Restart dns server, dyndns, ntp sync and rebuild shaper and iptables rules"
     services_restart.sh pppd
-    service shaper restart
 
     $LOG "Enable forwarding for $PPP_IFACE interface"
     echo 1 > "/proc/sys/net/ipv4/conf/$PPP_IFACE/forwarding"

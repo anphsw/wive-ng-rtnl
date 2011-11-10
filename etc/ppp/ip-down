@@ -81,7 +81,6 @@ eval `nvram_buf_get 2860 lan_ipaddr lan_netmask Lan2Enabled lan2_ipaddr lan2_net
 
     $LOG "Restart need service and rebuild shaper and iptables rules"
     services_restart.sh pppd
-    service shaper restart
 
 #run scrips from /etc/ppp/ip-down.d/
 export PPP_IFACE PPP_TTY PPP_SPEED PPP_LOCAL PPP_REMOTE PPP_IPPARAM
