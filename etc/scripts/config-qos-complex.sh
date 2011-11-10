@@ -8,7 +8,7 @@
 LOG="logger -t Complex QoS"
 
 # get config
-eval `nvram_buf_get 2860 lan_ipaddr QoS_rate_down QoS_rate_limit_down QoS_rate_up QoS_rate_limit_up`
+eval `nvram_buf_get 2860 lan_ipaddr vpnPurePPPOE QoS_rate_down QoS_rate_limit_down QoS_rate_up QoS_rate_limit_up`
 
 # get users prio ports
 QoS_high_pp=`nvram_get 2860 QoS_high_pp`
@@ -150,7 +150,7 @@ qos_tc_lan
 gos_tc_wan
 
 # add rules for phys wan to
-if [ "$wan_if" != "$real_wan_if" ]; then
+if [ "$wan_if" != "$real_wan_if" ] && [ "$vpnPurePPPOE" != "1" ]; then
     real_wan_if="$wan_if"
     qos_nf_if
     gos_tc_wan
