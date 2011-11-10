@@ -8,7 +8,9 @@
 LOG="logger -t Complex QoS"
 
 # get config
-eval `nvram_buf_get 2860 lan_ipaddr vpnPurePPPOE QoS_rate_down QoS_rate_limit_down QoS_rate_up QoS_rate_limit_up`
+eval `nvram_buf_get 2860 lan_ipaddr vpnPurePPPOE \
+    QoS_rate_down QoS_rate_limit_down QoS_rate_up QoS_rate_limit_up \
+    QoS_rate_vpn_down QoS_rate_vpn_limit_down QoS_rate_vpn_up QoS_rate_vpn_limit_up`
 
 # get users prio ports
 QoS_high_pp=`nvram_get 2860 QoS_high_pp`
@@ -50,49 +52,49 @@ qos_nf()
 qos_nf_if()
 {
     # first always high prio ports
-    echo "$INCOMING -i $real_wan_if -p tcp --dport 0:1024 -j MARK --set-mark 20" >> $IPTSCR
-    echo "$INCOMING -i $real_wan_if -p tcp --sport 0:1024 -j MARK --set-mark 20" >> $IPTSCR
-    echo "$INCOMING -i $real_wan_if -p udp --dport 0:1024 -j MARK --set-mark 21" >> $IPTSCR
-    echo "$INCOMING -i $real_wan_if -p udp --sport 0:1024 -j MARK --set-mark 21" >> $IPTSCR
-    echo "$INCOMING -i $real_wan_if -p tcp --syn -j MARK --set-mark 20" >> $IPTSCR
-    echo "$INCOMING -i $real_wan_if -p icmp -m mark --mark 0 -j MARK --set-mark 20" >> $IPTSCR
-    echo "$INCOMING -i $real_wan_if -p tcp -m length --length :64 -j MARK --set-mark 20" >> $IPTSCR
+    echo "$INCOMING -i $wan_if -p tcp --dport 0:1024 -j MARK --set-mark 20" >> $IPTSCR
+    echo "$INCOMING -i $wan_if -p tcp --sport 0:1024 -j MARK --set-mark 20" >> $IPTSCR
+    echo "$INCOMING -i $wan_if -p udp --dport 0:1024 -j MARK --set-mark 21" >> $IPTSCR
+    echo "$INCOMING -i $wan_if -p udp --sport 0:1024 -j MARK --set-mark 21" >> $IPTSCR
+    echo "$INCOMING -i $wan_if -p tcp --syn -j MARK --set-mark 20" >> $IPTSCR
+    echo "$INCOMING -i $wan_if -p icmp -m mark --mark 0 -j MARK --set-mark 20" >> $IPTSCR
+    echo "$INCOMING -i $wan_if -p tcp -m length --length :64 -j MARK --set-mark 20" >> $IPTSCR
 
     # second user high prio ports
     if [ "$QoS_high_pp" != "" ]; then
-	echo "$INCOMING -i $real_wan_if -p tcp -m multiport --dport $QoS_high_pp -j MARK --set-mark 20" >> $IPTSCR
-	echo "$INCOMING -i $real_wan_if -p udp -m multiport --dport $QoS_high_pp -j MARK --set-mark 20" >> $IPTSCR
+	echo "$INCOMING -i $wan_if -p tcp -m multiport --dport $QoS_high_pp -j MARK --set-mark 20" >> $IPTSCR
+	echo "$INCOMING -i $wan_if -p udp -m multiport --dport $QoS_high_pp -j MARK --set-mark 20" >> $IPTSCR
     fi
     if [ "$QoS_low_pp" != "" ]; then
-	echo "$INCOMING -i $real_wan_if -p tcp -m multiport --dport $QoS_low_pp  -j MARK --set-mark 21" >> $IPTSCR
-	echo "$INCOMING -i $real_wan_if -p udp -m multiport --dport $QoS_low_pp  -j MARK --set-mark 21" >> $IPTSCR
+	echo "$INCOMING -i $wan_if -p tcp -m multiport --dport $QoS_low_pp  -j MARK --set-mark 21" >> $IPTSCR
+	echo "$INCOMING -i $wan_if -p udp -m multiport --dport $QoS_low_pp  -j MARK --set-mark 21" >> $IPTSCR
     fi
 
     # all others set as low prio
-    echo "$INCOMING -i $real_wan_if -p tcp -m mark --mark 0 -j MARK --set-mark 22" >> $IPTSCR
-    echo "$INCOMING -i $real_wan_if -p udp -m mark --mark 0 -j MARK --set-mark 22" >> $IPTSCR
+    echo "$INCOMING -i $wan_if -p tcp -m mark --mark 0 -j MARK --set-mark 22" >> $IPTSCR
+    echo "$INCOMING -i $wan_if -p udp -m mark --mark 0 -j MARK --set-mark 22" >> $IPTSCR
 
     # first always high prio ports
-    echo "$OUTGOING -o $real_wan_if -p tcp --dport 0:1024 -j MARK --set-mark 23" >> $IPTSCR
-    echo "$OUTGOING -o $real_wan_if -p udp --dport 0:1024 -j MARK --set-mark 23" >> $IPTSCR
-    echo "$OUTGOING -o $real_wan_if -p tcp --sport 0:1024 -j MARK --set-mark 23" >> $IPTSCR
-    echo "$OUTGOING -o $real_wan_if -p udp --sport 0:1024 -j MARK --set-mark 23" >> $IPTSCR
-    echo "$OUTGOING -o $real_wan_if -p icmp -m mark --mark 0 -j MARK --set-mark 23" >> $IPTSCR
-    echo "$OUTGOING -o $real_wan_if -p tcp -m length --length :64 -j MARK --set-mark 23" >> $IPTSCR
+    echo "$OUTGOING -o $wan_if -p tcp --dport 0:1024 -j MARK --set-mark 23" >> $IPTSCR
+    echo "$OUTGOING -o $wan_if -p udp --dport 0:1024 -j MARK --set-mark 23" >> $IPTSCR
+    echo "$OUTGOING -o $wan_if -p tcp --sport 0:1024 -j MARK --set-mark 23" >> $IPTSCR
+    echo "$OUTGOING -o $wan_if -p udp --sport 0:1024 -j MARK --set-mark 23" >> $IPTSCR
+    echo "$OUTGOING -o $wan_if -p icmp -m mark --mark 0 -j MARK --set-mark 23" >> $IPTSCR
+    echo "$OUTGOING -o $wan_if -p tcp -m length --length :64 -j MARK --set-mark 23" >> $IPTSCR
 
     # second user high prio ports
     if [ "$QoS_high_pp" != "" ]; then
-	echo "$OUTGOING -o $real_wan_if -p tcp -m multiport --dport $QoS_high_pp -j MARK --set-mark 23" >> $IPTSCR
-	echo "$OUTGOING -o $real_wan_if -p udp -m multiport --dport $QoS_high_pp -j MARK --set-mark 23" >> $IPTSCR
+	echo "$OUTGOING -o $wan_if -p tcp -m multiport --dport $QoS_high_pp -j MARK --set-mark 23" >> $IPTSCR
+	echo "$OUTGOING -o $wan_if -p udp -m multiport --dport $QoS_high_pp -j MARK --set-mark 23" >> $IPTSCR
     fi
     if [ "$QoS_low_pp" != "" ]; then
-	echo "$OUTGOING -o $real_wan_if -p tcp -m multiport --dport $QoS_low_pp -j MARK --set-mark 24" >> $IPTSCR
-	echo "$OUTGOING -o $real_wan_if -p udp -m multiport --dport $QoS_low_pp -j MARK --set-mark 24" >> $IPTSCR
+	echo "$OUTGOING -o $wan_if -p tcp -m multiport --dport $QoS_low_pp -j MARK --set-mark 24" >> $IPTSCR
+	echo "$OUTGOING -o $wan_if -p udp -m multiport --dport $QoS_low_pp -j MARK --set-mark 24" >> $IPTSCR
     fi
 
     # all others set as low prio
-    echo "$OUTGOING -o $real_wan_if -p tcp -m mark --mark 0 -j MARK --set-mark 24" >> $IPTSCR
-    echo "$OUTGOING -o $real_wan_if -p udp -m mark --mark 0 -j MARK --set-mark 24" >> $IPTSCR
+    echo "$OUTGOING -o $wan_if -p tcp -m mark --mark 0 -j MARK --set-mark 24" >> $IPTSCR
+    echo "$OUTGOING -o $wan_if -p udp -m mark --mark 0 -j MARK --set-mark 24" >> $IPTSCR
 }
 
 qos_tc_lan()
@@ -125,18 +127,18 @@ qos_tc_lan()
 gos_tc_wan()
 {
     #---------------------------------------------OUTGOING--------------------------------------------------------------
-    $LOG "All outgoing $real_wan_if rate: normal $QoS_rate_limit_up , maximum $QoS_rate_up (kbit/s)"
-    tc qdisc add dev $real_wan_if root handle 1: htb default 24
-    tc class add dev $real_wan_if parent 1:  classid 1:1 htb rate ${QoS_rate_up}kbit quantum 1500 burst 50k
+    $LOG "All outgoing $wan_if rate: normal $QoS_rate_limit_up , maximum $QoS_rate_up (kbit/s)"
+    tc qdisc add dev $wan_if root handle 1: htb default 24
+    tc class add dev $wan_if parent 1:  classid 1:1 htb rate ${QoS_rate_up}kbit quantum 1500 burst 50k
 
-    tc class add dev $real_wan_if parent 1:1 classid 1:23 htb rate ${QoS_rate_limit_up}kbit ceil ${QoS_rate_up}kbit prio 0 quantum 1500
-    tc class add dev $real_wan_if parent 1:1 classid 1:24 htb rate ${QoS_rate_limit_up}kbit ceil ${QoS_rate_up}kbit prio 1 quantum 1500
+    tc class add dev $wan_if parent 1:1 classid 1:23 htb rate ${QoS_rate_limit_up}kbit ceil ${QoS_rate_up}kbit prio 0 quantum 1500
+    tc class add dev $wan_if parent 1:1 classid 1:24 htb rate ${QoS_rate_limit_up}kbit ceil ${QoS_rate_up}kbit prio 1 quantum 1500
 
-    tc qdisc add dev $real_wan_if parent 1:23 handle 23: sfq perturb 10 quantum 1500
-    tc qdisc add dev $real_wan_if parent 1:24 handle 24: sfq perturb 10 quantum 1500
+    tc qdisc add dev $wan_if parent 1:23 handle 23: sfq perturb 10 quantum 1500
+    tc qdisc add dev $wan_if parent 1:24 handle 24: sfq perturb 10 quantum 1500
 
-    tc filter add dev $real_wan_if parent 1:0 prio 0 protocol ip handle 23 fw flowid 1:23
-    tc filter add dev $real_wan_if parent 1:0 prio 1 protocol ip handle 24 fw flowid 1:24
+    tc filter add dev $wan_if parent 1:0 prio 0 protocol ip handle 23 fw flowid 1:23
+    tc filter add dev $wan_if parent 1:0 prio 1 protocol ip handle 24 fw flowid 1:24
 }
 
 # tune netdev
@@ -149,9 +151,13 @@ qos_nf_if
 qos_tc_lan
 gos_tc_wan
 
-# add rules for phys wan to
-if [ "$wan_if" != "$real_wan_if" ] && [ "$vpnPurePPPOE" != "1" ]; then
-    real_wan_if="$wan_if"
+# add rules for vpn wan to
+if [ "$vpnEnabled" = "on" ] && [ "$vpnPurePPPOE" != "1" ] && [ "$wan_if" != "$real_wan_if" ]; then
+    wan_if="$real_wan_if"
+    QoS_rate_down="$QoS_rate_vpn_down"
+    QoS_rate_limit_down="$QoS_rate_vpn_limit_down"
+    QoS_rate_up="$QoS_rate_vpn_up"
+    QoS_rate_limit_up="$QoS_rate_vpn_limit_up"
     qos_nf_if
     gos_tc_wan
 fi
