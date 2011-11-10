@@ -808,8 +808,8 @@
 51) Rework resolv.conf generate in some modes.<br>
 52) Fix some checks in iptables script.<br>
 53) Fix dst.expires in route subsystem.<br>
-54) Add /etc/web/html and /etc/web/cgi-bin for user html pages and cgi-scripts.
-	Accessseble over http://<router-ip>/user and http://<router-ip>/cgi-bin/user.<br>
+54) Copy /etc/web/html and /etc/web/cgi-bin at boot if exist. Need for user html pages and cgi-scripts support.
+	Accessseble over http://<router-ip>/<filename> and http://<router-ip>/cgi-bin/<filename>.<br>
 
 <br><br>
 <b>For support see:</b><br>
