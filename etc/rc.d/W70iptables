@@ -278,6 +278,7 @@ start() {
 	fi
 ###########################################QOS-SIMPLE######################################
 	if [ -f /etc/qos_firewall ] && [ "$simple_qos" = "1" ] && [ "$OperationMode" != "0" ]; then
+	    $LOG "Add QoS rules"
 	    /etc/qos_firewall
 	fi
 ###########################################NAT-NAPTM#######################################
