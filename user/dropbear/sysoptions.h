@@ -1,12 +1,13 @@
 /*******************************************************************
- * You shouldn't edit below here unless you know you need to.
+ * You shouldn't edit this file unless you know you need to. 
+ * This file is only included from options.h
  *******************************************************************/
 
 #ifndef DROPBEAR_VERSION
-#define DROPBEAR_VERSION "0.53.1"
+#define DROPBEAR_VERSION "2011.54"
 #endif
 
-#define LOCAL_IDENT "SSH-2.0-DS_0.5"
+#define LOCAL_IDENT "SSH-2.0-DS" DROPBEAR_VERSION
 #define PROGNAME "ssh"
 
 /* Spec recommends after one hour or 1 gigabyte of data. One hour

@@ -814,6 +814,7 @@
 56) Add udp lite disable network code hack for speedup.<br>
 57) Decrease udp hash table size for speedup and memsave(128->64).<br>
 58) Cdpsend not more use libnet.<br>
+59) Dropbear up to 2011.54 Tuesday 8 November 2011 version.<br>
 
 <br><br>
 <b>For support see:</b><br>

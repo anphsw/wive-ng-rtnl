@@ -672,7 +672,7 @@ next:			if (fd != -1) {
 			}
 			continue;
 		}
-#ifdef PROGRESS_METER
+#if PROGRESS_METER
 		if (showprogress)
 			start_progress_meter(curfile, stb.st_size, &statbytes);
 #endif
@@ -773,7 +773,7 @@ bwlimit(int amount)
 {
 	static struct timeval bwstart, bwend;
 	static int lamt, thresh = 16384;
-	u_int64_t waitlen;
+	uint64_t waitlen;
 	struct timespec ts, rm;
 
 	if (!timerisset(&bwstart)) {
