@@ -7,7 +7,6 @@
 .sgbuilt_user
 .libs
 libtool
-romfs
 aclocal.m4
 autom4te.cache
 config.h.in~
@@ -15,6 +14,14 @@ config.log
 config.status
 filesystem
 fulldump
+romfs
+/romfs
+/romfs/*
+/images/*
+/images
+/images/*
+/dev
+/dev/*
 /etc/compile-date
 /etc/default/RT2860_default_novlan
 /etc/scripts/config.sh

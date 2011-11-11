@@ -273,6 +273,7 @@ romfs: romfs.subdirs modules_install romfs.post
 .PHONY: romfs.subdirs
 romfs.subdirs:
 	####################PREPARE-ROMFS####################
+	[ -d $(IMAGEDIR) ] || mkdir $(IMAGEDIR)
 	$(MAKEARCH) -C vendors romfs
 	cd $(ROOTDIR)
 	cp -vfra $(ROOTDIR)/etc/* $(ROMFSDIR)/etc
@@ -384,8 +385,9 @@ relink:
 
 clean: modules_clean
 	echo "Clean temporary files..."
-	rm -f $(IMAGEDIR)/*
-	rm -rf $(ROMFSDIR)/*
+	rm -rf $(ROOTDIR)/dev
+	rm -rf $(ROOTDIR)/$(IMAGEDIR)
+	rm -rf $(ROOTDIR)/$(ROMFSDIR)
 	rm -f $(LINUXDIR)/linux
 	rm -f $(LINUXDIR)/arch/mips/ramdisk/*.gz
 	rm -f $(ROOTDIR)/etc/compile-date
