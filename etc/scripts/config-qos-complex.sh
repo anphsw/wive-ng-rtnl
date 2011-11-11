@@ -39,6 +39,9 @@ qos_lm()
 
 qos_nf()
 {
+    ##################################################################################################################################
+    # BUILD CHAINS
+    ##################################################################################################################################
     $LOG "Generate $IPTSCR"
     echo "$LOG add qos netfilter rules" >> $IPTSCR
     echo "iptables -N shaper_pre -t mangle > /dev/null 2>&1" >> $IPTSCR
@@ -51,6 +54,9 @@ qos_nf()
 
 qos_nf_if()
 {
+    ##################################################################################################################################
+    # SET MARKERS
+    ##################################################################################################################################
     # first always high prio ports
     echo "$INCOMING -i $wan_if -p tcp --dport 0:1024 -j MARK --set-mark 20" >> $IPTSCR
     echo "$INCOMING -i $wan_if -p tcp --sport 0:1024 -j MARK --set-mark 20" >> $IPTSCR
@@ -99,7 +105,9 @@ qos_nf_if()
 
 qos_tc_lan()
 {
-    #--------------------------------------------INCOMING---------------------------------------------------------------
+    ##################################################################################################################################
+    # FROM UPLINK TO LAN. BIND AT LAN_IF
+    ##################################################################################################################################
     $LOG "All incoming $lan_if rate: normal $QoS_rate_limit_down , maximum $QoS_rate_down (kbit/s)"
     tc qdisc add dev $lan_if root handle 1: htb default 22
     tc class add dev $lan_if parent 1:  classid 1:1 htb rate 90mbit quantum 1500 burst 500k
@@ -120,13 +128,15 @@ qos_tc_lan()
     tc filter add dev $lan_if parent 1:0 prio 2 protocol ip handle 21 fw flowid 1:21
     tc filter add dev $lan_if parent 1:0 prio 3 protocol ip handle 22 fw flowid 1:22
 
-    #local connections
+    #local connections to router must be overheaded
     tc filter add dev $lan_if parent 1:0 protocol ip prio 0 u32 match ip src $lan_ipaddr flowid 1:3
 }
 
 gos_tc_wan()
 {
-    #---------------------------------------------OUTGOING--------------------------------------------------------------
+    ##################################################################################################################################
+    # FROM LAN TO UPLINK. BIND AT WAN_IF
+    ##################################################################################################################################
     $LOG "All outgoing $wan_if rate: normal $QoS_rate_limit_up , maximum $QoS_rate_up (kbit/s)"
     tc qdisc add dev $wan_if root handle 1: htb default 24
     tc class add dev $wan_if parent 1:  classid 1:1 htb rate ${QoS_rate_up}kbit quantum 1500 burst 50k
