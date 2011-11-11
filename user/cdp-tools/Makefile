@@ -1,5 +1,3 @@
-CFLAGS += -D_BSD_SOURCE -D__BSD_SOURCE -D__FAVOR_BSD -DHAVE_NET_ETHERNET_H
-LDLIBS += -lnet
 
 all: cdp-send
 

@@ -813,6 +813,7 @@
 55) Shaper script extract to some helpers config-qos-* in /etc.scrips.<br>
 56) Add udp lite disable network code hack for speedup.<br>
 57) Decrease udp hash table size for speedup and memsave(128->64).<br>
+58) Cdpsend not more use libnet.<br>
 
 <br><br>
 <b>For support see:</b><br>

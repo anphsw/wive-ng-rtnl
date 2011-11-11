@@ -23,7 +23,7 @@ CONFIG_LIB_FLEX=y
 # CONFIG_LIB_CURL is not set
 # CONFIG_LIB_PCAP is not set
 # CONFIG_LIB_ICONV is not set
-CONFIG_LIB_NET=y
+# CONFIG_LIB_NET is not set
 CONFIG_LIB_UPNP=y
 
 #
