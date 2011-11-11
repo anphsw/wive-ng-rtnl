@@ -950,7 +950,7 @@ static int pppol2tp_udp_sendmsg(struct kiocb *iocb, struct sock *sk, struct msgh
 	int free = 0, connected = 0;
 	int err;
 #if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,19) && !defined(UDP_LITE_DISABLE)
-	int is_udplite = up->pcflag;
+	int is_udplite = IS_UDPLITE(sk);
 #endif
 	int corkreq = up->corkflag || msg->msg_flags&MSG_MORE;
 	int (*getfrag)(void *, char *, int, int, int, struct sk_buff *);

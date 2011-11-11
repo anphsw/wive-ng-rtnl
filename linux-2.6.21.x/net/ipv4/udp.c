@@ -511,7 +511,7 @@ int udp_sendmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 	__be32 daddr, faddr, saddr;
 	__be16 dport;
 	u8  tos;
-	int err, is_udplite = up->pcflag;
+	int err, is_udplite = IS_UDPLITE(sk);
 	int corkreq = up->corkflag || msg->msg_flags&MSG_MORE;
 	int (*getfrag)(void *, char *, int, int, int, struct sk_buff *);
 

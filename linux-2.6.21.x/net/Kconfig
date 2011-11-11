@@ -61,6 +61,11 @@ config INET
 
 	  Short answer: say Y.
 
+config UDP_LITE_DISABLE
+        bool "UDP Lite disable hack for speedup"
+	depends on INET
+	default y
+
 if INET
 source "net/ipv4/Kconfig"
 source "net/ipv6/Kconfig"

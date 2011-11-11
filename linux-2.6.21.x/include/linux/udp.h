@@ -78,7 +78,13 @@ static inline struct udp_sock *udp_sk(const struct sock *sk)
 {
 	return (struct udp_sock *)sk;
 }
+
+#ifndef CONFIG_UDP_LITE_DISABLE
 #define IS_UDPLITE(__sk) (udp_sk(__sk)->pcflag)
+#else
+#define IS_UDPLITE(__sk) (0)
+#endif
+
 
 #endif
 

@@ -811,6 +811,7 @@
 54) Copy /etc/web/html and /etc/web/cgi-bin at boot if exist. Need for user html pages and cgi-scripts support.
 	Accessseble over http://<router-ip>/<filename> and http://<router-ip>/cgi-bin/<filename>.<br>
 55) Shaper script extract to some helpers config-qos-* in /etc.scrips.<br>
+56) Add udp lite disable network code hack for speedup.<br>
 
 <br><br>
 <b>For support see:</b><br>

@@ -585,7 +585,7 @@ int udpv6_sendmsg(struct kiocb *iocb, struct sock *sk,
 	int corkreq = up->corkflag || msg->msg_flags&MSG_MORE;
 	int err;
 	int connected = 0;
-	int is_udplite = up->pcflag;
+	int is_udplite = IS_UDPLITE(sk);
 	int (*getfrag)(void *, char *, int, int, int, struct sk_buff *);
 
 	/* destination address check */
