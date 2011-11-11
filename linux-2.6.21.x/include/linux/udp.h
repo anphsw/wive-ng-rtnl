@@ -39,7 +39,9 @@ struct udphdr {
 #include <linux/types.h>
 
 #include <net/inet_sock.h>
-#define UDP_HTABLE_SIZE		128
+
+/* decrease for speedup and memsave. default is 128 */
+#define UDP_HTABLE_SIZE		64
 
 static inline int udp_hashfn(const unsigned num)
 {
