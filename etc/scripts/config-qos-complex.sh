@@ -8,7 +8,7 @@
 LOG="logger -t Complex QoS"
 
 # get config
-eval `nvram_buf_get 2860 lan_ipaddr vpnPurePPPOE \
+eval `nvram_buf_get 2860 lan_ipaddr vpnPurePPPOE igmpEnabled UDPXYMode \
     QoS_rate_down QoS_rate_limit_down QoS_rate_up QoS_rate_limit_up \
     QoS_rate_vpn_up QoS_rate_vpn_limit_up`
 
@@ -123,13 +123,17 @@ qos_tc_lan()
     tc qdisc add dev $lan_if parent 1:21 handle 21: esfq perturb 10 hash dst quantum 1500
     tc qdisc add dev $lan_if parent 1:22 handle 22: esfq perturb 10 hash dst quantum 1500
 
-    #filters for marked in prerouting
+    # filters for marked in prerouting
     tc filter add dev $lan_if parent 1:0 prio 1 protocol ip handle 20 fw flowid 1:20
     tc filter add dev $lan_if parent 1:0 prio 2 protocol ip handle 21 fw flowid 1:21
     tc filter add dev $lan_if parent 1:0 prio 3 protocol ip handle 22 fw flowid 1:22
 
-    #local connections to router must be overheaded
+    # local connections to router must be overheaded
     tc filter add dev $lan_if parent 1:0 protocol ip prio 0 u32 match ip src $lan_ipaddr flowid 1:3
+    if [ "$igmpEnabled" != "0" ] || [ "$UDPXYMode" != "0" ]; then
+	# mcast network to
+	tc filter add dev $lan_if parent 1:0 protocol ip prio 0 u32 match ip src $mcast_net flowid 1:3
+    fi
 }
 
 gos_tc_wan()
