@@ -8,7 +8,7 @@
 LOG="logger -t Complex QoS"
 
 # get config
-eval `nvram_buf_get 2860 lan_ipaddr vpnPurePPPOE igmpEnabled UDPXYMode \
+eval `nvram_buf_get 2860 lan_ipaddr vpnPurePPPOE igmpEnabled \
     QoS_rate_down QoS_rate_limit_down QoS_rate_up QoS_rate_limit_up \
     QoS_rate_vpn_up QoS_rate_vpn_limit_up`
 
@@ -130,7 +130,7 @@ qos_tc_lan()
 
     # local connections to router must be overheaded
     tc filter add dev $lan_if parent 1:0 protocol ip prio 0 u32 match ip src $lan_ipaddr flowid 1:3
-    if [ "$igmpEnabled" != "0" ] || [ "$UDPXYMode" != "0" ]; then
+    if [ "$igmpEnabled" != "0" ]; then
 	# mcast network to
 	tc filter add dev $lan_if parent 1:0 protocol ip prio 0 u32 match ip src $mcast_net flowid 1:3
     fi
