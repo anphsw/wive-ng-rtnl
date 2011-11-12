@@ -114,13 +114,6 @@ int ipv6_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type *pt
 	    ipv6_addr_loopback(&hdr->daddr))
 		goto err;
 
-	/*
-	 * RFC4291 2.5.3
-	 * A packet received on an interface with a destination address
-	 * of loopback must be dropped.
-	 */
-	if (!(dev->flags & IFF_LOOPBACK) && ipv6_addr_loopback(&hdr->daddr))
-                goto err;
 
 	skb->h.raw = (u8 *)(hdr + 1);
 	IP6CB(skb)->nhoff = offsetof(struct ipv6hdr, nexthdr);
