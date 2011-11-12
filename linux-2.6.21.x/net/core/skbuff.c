@@ -432,7 +432,6 @@ struct sk_buff *skb_clone(struct sk_buff *skb, gfp_t gfp_mask)
 	n->destructor = NULL;
 #if defined(CONFIG_RAETH_SKB_RECYCLE_2K)
 	n->skb_recycling_callback = NULL;
-	skb->skb_recycling_callback = NULL;
 #endif
 	C(mark);
 	__nf_copy(n, skb);
