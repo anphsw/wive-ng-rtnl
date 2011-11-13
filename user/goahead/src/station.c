@@ -5132,13 +5132,9 @@ static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 	else
 		nvram_bufset(RT2860_NVRAM, "macCloneMac", "");
 
-	printf("sta_ar =%s\n", sta_ar);
 	nvram_bufset(RT2860_NVRAM, "AutoRoaming", (strcmp(sta_ar, "on")==0) ? "1" : "0");
-	printf("sta_ac =%s\n", sta_ac);
 	nvram_bufset(RT2860_NVRAM, "AutoConnect", (strcmp(sta_ac, "on")==0) ? "1" : "0");
-	printf("sta_fc =%s\n", sta_fc);
 	nvram_bufset(RT2860_NVRAM, "FastConnect", (strcmp(sta_fc, "on")==0) ? "1" : "0");
-	printf("lna_gain =%s\n", lna_gain);
 	nvram_bufset(RT2860_NVRAM, "HiPower", (strcmp(lna_gain, "on")==0) ? "1" : "0");
 
 	nvram_commit(RT2860_NVRAM);
