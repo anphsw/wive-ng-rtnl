@@ -3021,13 +3021,13 @@ static int getStaProfile(int eid, webs_t wp, int argc, char_t **argv)
 	do {
 		int backgroundColor = 0xffffff;
 		int fontColor = 0;
-	
+
 		// check activate function for the profile
 		if (currentProfileSetting->Active)
 		{
 			fontColor = 0xffffff;
 			backgroundColor = 0x800000;
-			
+
 			// get connected SSID
 			s = socket(AF_INET, SOCK_DGRAM, 0);
 
@@ -3044,7 +3044,7 @@ static int getStaProfile(int eid, webs_t wp, int argc, char_t **argv)
 				close(s);
 				return 0;
 			}
-			
+
 			if ((ConnectStatus == 1) && G_bRadio)
 			{
 				OidQueryInformation(OID_802_11_WEP_STATUS, s, "ra0", &Encryp, sizeof(Encryp) );
@@ -3103,40 +3103,11 @@ static int getStaProfile(int eid, webs_t wp, int argc, char_t **argv)
 				strcpy(tmp_key2, (char *)currentProfileSetting->Key2);
 				strcpy(tmp_key3, (char *)currentProfileSetting->Key3);
 				strcpy(tmp_key4, (char *)currentProfileSetting->Key4);
-/*
-				unsigned char Bssid[6];
-#ifdef WPA_SUPPLICANT_SUPPORT
-				if (currentProfileSetting->Authentication == Ndis802_11AuthModeWPA ||
-						currentProfileSetting->Authentication == Ndis802_11AuthModeWPA2 ||
-						currentProfileSetting->Authentication == Ndis802_11AuthModeMax )//802.1x
-				{
-					char tmp_key[27];
-					if (tmp_defaultkeyid == 1) // 1~4
-						strcpy(tmp_key, tmp_key1);
-					else if (tmp_defaultkeyid == 2)
-						strcpy(tmp_key, tmp_key2);
-					else if (tmp_defaultkeyid == 3)
-						strcpy(tmp_key, tmp_key3);
-					else if (tmp_defaultkeyid == 4)
-						strcpy(tmp_key, tmp_key4);
-
-					conf_WPASupplicant((char *)currentProfileSetting->SSID, currentProfileSetting->KeyMgmt, currentProfileSetting->EAP, (char *)currentProfileSetting->Identity, (char *)currentProfileSetting->Password, (char *)currentProfileSetting->CACert, (char *)currentProfileSetting->ClientCert, (char *)currentProfileSetting->PrivateKey, (char *)currentProfileSetting->PrivateKeyPassword, tmp_key, currentProfileSetting->KeyDefaultId-1, currentProfileSetting->Encryption, currentProfileSetting->Tunnel, currentProfileSetting->Authentication);
-				}
-				else
-#endif
-					sta_connection(tmp_networktype, tmp_auth, tmp_encry, tmp_defaultkeyid, &SSID, Bssid, tmp_wpapsk, tmp_key1, tmp_key2, tmp_key3, tmp_key4, tmp_preamtype, tmp_rtscheck, tmp_rts, tmp_fragmentcheck, tmp_fragment, tmp_psmode, tmp_channel);
-*/
-
-				/*NDIS_802_11_SSID SSID;
-				  memset(&SSID, 0x00, sizeof(SSID));
-				  strcpy((char *)SSID.Ssid ,(char *)currentProfileSetting->SSID);
-				  SSID.SsidLength = strlen((char *)currentProfileSetting->SSID);
-				  OidSetInformation(OID_802_11_SSID, s, "ra0", &SSID, sizeof(NDIS_802_11_SSID));*/
 			}
 
 			close(s);
 		}
-		
+
 		// Row begin
 		websWrite(wp, "<tr style=\"background-color: #%06x; color:#%06x;\">", backgroundColor, fontColor);
 
@@ -3156,7 +3127,7 @@ static int getStaProfile(int eid, webs_t wp, int argc, char_t **argv)
 
 		// Auth
 		const char *auth_mode = "unknown";
-		
+
 		switch (currentProfileSetting->Authentication)
 		{
 			case Ndis802_11AuthModeOpen: auth_mode = "OPEN"; break;
@@ -3174,7 +3145,7 @@ static int getStaProfile(int eid, webs_t wp, int argc, char_t **argv)
 		}
 
 		websWrite(wp, "<td style=\"color:#%06x;\">%s</td>", fontColor, auth_mode);
-		
+
 		// Encryption
 		const char *encryption = "unknown";
 		switch (currentProfileSetting->Encryption)
@@ -3185,7 +3156,7 @@ static int getStaProfile(int eid, webs_t wp, int argc, char_t **argv)
 			case Ndis802_11Encryption3Enabled: encryption = "AES"; break;
 			default: encryption="unknown";
 		}
-		
+
 		websWrite(wp, "<td style=\"color:#%06x;\">%s</td>", fontColor, encryption);
 
 		// NetworkType
@@ -3741,10 +3712,10 @@ static void addStaProfile(webs_t wp, char_t *path, char_t *query)
 	char tmp_buffer[512];
 	const char *wordlist = NULL;
 	char_t *value;
-	
+
 	memset(&tmpProfileSetting, 0x00, sizeof(RT_PROFILE_SETTING));
 	tmpProfileSetting.Next = NULL;
-	
+
 	//printf("query=%s\n", query);
 
 	//profile name
@@ -4204,10 +4175,7 @@ static void addStaProfile(webs_t wp, char_t *path, char_t *query)
 	BUFSET("sta8021xCACert", "0");
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
-#endif		
-
-	//write into /etc/rt61sta.ui
-	//writeProfileToFile(&tmpProfileSetting);
+#endif
 	websRedirect(wp, "/form_close.asp");
 
 	tmpProfileSetting.Active = 0;
@@ -5138,8 +5106,13 @@ static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
 
-	gen_wifi_config(RT2860_NVRAM); //push wifi config to config mtd part and config generate
-	initInternet(); //renew dhcp, pppoe etc
+	//refresh station profiles
+	if (initStaProfile() != -1)
+		    initStaConnection();
+	//push wifi config to config mtd part and config generate
+	gen_wifi_config(RT2860_NVRAM);
+	// reconnect to AP and renew dhcp, pppoe etc
+	initInternet();
 	websRedirect(wp,"station/advance.asp");
 	return;
 }
