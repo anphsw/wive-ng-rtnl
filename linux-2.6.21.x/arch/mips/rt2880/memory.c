@@ -213,7 +213,7 @@ void __init prom_meminit(void)
 	psave = p;	/* Save p */
 	while (p->size) {
 		int i = 0;
-		printk("[%d,%p]: base<%08lx> size<%08lx> type<%s>\n",
+		printk("[%d,%p]: base<%08lx> size<%08x> type<%s>\n",
 			    i, p, p->base, p->size, mtypes[p->type]);
 		p++;
 		i++;

@@ -411,7 +411,7 @@ ipt_do_table(struct sk_buff **pskb,
 	 * rule is also a fragment-specific rule, non-fragments won't
 	 * match it. */
 	offset = ntohs(ip->frag_off) & IP_OFFSET;
-#endif    
+#endif
 	IP_NF_ASSERT(table->valid_hooks & (1 << hook));
 	xt_info_rdlock_bh();
 	private = table->private;
@@ -1039,6 +1039,7 @@ copy_entries_to_user(unsigned int total_size,
 #ifdef CONFIG_IPTABLES_SPEEDUP
 	u8 flags;
 #endif
+
 	counters = alloc_counters(table);
 	if (IS_ERR(counters))
 		return PTR_ERR(counters);

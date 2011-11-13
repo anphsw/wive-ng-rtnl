@@ -29,13 +29,13 @@ const char inet_csk_timer_bug_msg[] = "inet_csk BUG: unknown timer value\n";
 EXPORT_SYMBOL(inet_csk_timer_bug_msg);
 #endif
 
-/*                                                                                                                                          
- * This array holds the first and last local port number.                                                                                   
- */                                                                                                                                         
+/*
+ * This array holds the first and last local port number.
+ */
 int sysctl_local_port_range[2] = { 32768, 61000 };
 DEFINE_SEQLOCK(sysctl_port_range_lock);
 
-void inet_get_local_port_range(int *low, int *high)                                                                                         
+void inet_get_local_port_range(int *low, int *high)
 {
         unsigned seq;
         do {

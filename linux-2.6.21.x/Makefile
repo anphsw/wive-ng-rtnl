@@ -12,10 +12,19 @@ MAKEFLAGS     = -rR --no-print-directory
 # Use -O2 for kernel code. Route/NAT speed up ~15-20% more -Os.
 MOREOPTIMIZE  = -O2
 
+# this flags for fast net debug enable
+#802.11
+#MOREOPTIMIZE += -DWE_IOCTL_DEBUG -DWE_EVENT_DEBUG -DWE_SPY_DEBUG
+#netfiler
+#MOREOPTIMIZE += -DCONFIG_NETFILTER_DEBUG -DDEBUG_IP_FIREWALL -DDEBUG_IP_FIREWALL_USER -DDEBUG_ALLOW_ALL -DNF_PRIVILEGE_CONNTRACK_DEBUG
+#network
+#MOREOPTIMIZE += -DVLAN_DEBUG
+#MOREOPTIMIZE += -DCONFIG_NETDEBUG -DUNIX_REFCNT_DEBUG -DBRIDGE_IGMPP_PROCFS_DEBUG -DTCP_DEBUG -DSTATE_TRACE -DINET_CSK_DEBUG
+
 ###########-O2 OPTIONS####################################################
 #MOREOPTIMIZE += -ftree-vect-loop-version -freorder-blocks -freorder-blocks-and-partition
 #          -falign-functions -falign-loops -fipa-sra -fprefetch-loop-arrays
-#          -falign-labels -freorder-blocks -freorder-blocks-and-partition 
+#          -falign-labels -freorder-blocks -freorder-blocks-and-partition
 #          -ftree-vect-loop-version -ftree-builtin-call-dce
 
 ###########-O3 OPTIONS####################################################

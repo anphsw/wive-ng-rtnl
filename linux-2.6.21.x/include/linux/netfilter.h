@@ -107,14 +107,14 @@ struct nf_info
 {
 	/* The ops struct which sent us to userspace. */
 	struct nf_hook_ops *elem;
-	
+
 	/* If we're sent to userspace, this keeps housekeeping info */
 	int pf;
 	unsigned int hook;
 	struct net_device *indev, *outdev;
 	int (*okfn)(struct sk_buff *);
 };
-                                                                                
+
 /* Function to register/unregister hook points. */
 int nf_register_hook(struct nf_hook_ops *reg);
 void nf_unregister_hook(struct nf_hook_ops *reg);
@@ -199,7 +199,7 @@ int nf_hook_slow(int pf, unsigned int hook, struct sk_buff **pskb,
 
 /**
  *	nf_hook_thresh - call a netfilter hook
- *	
+ *
  *	Returns 1 if the hook has allowed the packet to pass.  The function
  *	okfn must be invoked by the caller in this case.  Any other return
  *	value indicates the packet has been consumed by the hook.
@@ -226,7 +226,7 @@ static inline int nf_hook(int pf, unsigned int hook, struct sk_buff **pskb,
 {
 	return nf_hook_thresh(pf, hook, pskb, indev, outdev, okfn, INT_MIN, 1);
 }
-                   
+
 /* Activate hook; either okfn or kfree_skb called, unless a hook
    returns NF_STOLEN (in which case, it's up to the hook to deal with
    the consequences).

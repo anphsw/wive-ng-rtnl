@@ -87,6 +87,7 @@ const char *pptp_msg_name[] = {
 	"SET_LINK_INFO"
 };
 EXPORT_SYMBOL(pptp_msg_name);
+
 #define DEBUGP(format, args...)	printk(KERN_DEBUG "%s:%s: " format, __FILE__, __FUNCTION__, ## args)
 #else
 #define DEBUGP(format, args...)
