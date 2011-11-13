@@ -5216,16 +5216,18 @@ static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 		ret = OidSetInformation(RT_OID_802_11_SET_HT_PHYMODE, s, "ra0", &phymode, sizeof(phymode));
 		if (ret < 0)
 		{
+			websError(wp, 500, "setStaAdvance: Set RT_OID_802_11_SET_HT_PHYMODE error = %d", ret);
 			close(s);
-			return websError(wp, 500, "setStaAdvance: Set RT_OID_802_11_SET_HT_PHYMODE error = %d", ret);
+			return;
 		}
 
 		BACap.AutoBA = TRUE;
 		ret = OidSetInformation(RT_OID_802_11_SET_IMME_BA_CAP, s, "ra0", &BACap, sizeof(BACap));
 		if (ret < 0)
 		{
+			websError(wp, 500, "setStaAdvance: Set RT_OID_802_11_SET_IMME_BA_CAP error = %d", ret);
 			close(s);
-			return websError(wp, 500, "setStaAdvance: Set RT_OID_802_11_SET_IMME_BA_CAP error = %d", ret);
+			return;
 		}
 
 		setSta11nCfg(wp, path, query);
@@ -5244,8 +5246,9 @@ static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 	ret = OidSetInformation(RT_OID_802_11_COUNTRY_REGION, s, "ra0", &country_region, sizeof(country_region));
 	if (ret < 0)
 	{
+		websError(wp, 500, "setStaAdvance: Set RT_OID_802_11_COUNTRY_REGION error = %d", ret);
 		close(s);
-		return websError(wp, 500, "setStaAdvance: Set RT_OID_802_11_COUNTRY_REGION error = %d", ret);
+		return;
 	}
 
 	OidQueryInformation(RT_OID_802_11_STA_CONFIG, s, "ra0", &configStation, sizeof(configStation));
