@@ -963,7 +963,7 @@ static int getStaWPSBSSIDListASP(int eid, webs_t wp, int argc, char_t **argv)
 		return -1;
 	}
 
-	if (ConnectStatus == 1 && G_bRadio) {
+	if (ConnectStatus == NdisMediaStateConnected && G_bRadio) {
 		// for handshake
 		memset(&BssidQuery, 0x00, sizeof(BssidQuery));
 		OidQueryInformation(OID_802_11_BSSID, s, "ra0", &BssidQuery, sizeof(BssidQuery));
