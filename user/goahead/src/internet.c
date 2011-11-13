@@ -2015,19 +2015,20 @@ void initInternet(void)
 	//configure system
 	doSystem("internet.sh");
 
-//automatically connect to AP according to the active profile
+#ifdef CONFIG_RT2860V2_AP_ANTENNA_DIVERSITY
+	//set work antenna n
+	AntennaDiversityInit();
+#endif
 #if defined(CONFIG_RT2860V2_STA) || defined(CONFIG_RT2860V2_STA_MODULE)
+	//automatically connect to AP according to the active profile
 	opmode = nvram_get(RT2860_NVRAM, "OperationMode");
 	if (!strcmp(opmode, "2")) {
 		if (initStaProfile() != -1)
 			    initStaConnection();
 	}
 #endif
-#ifdef CONFIG_USER_802_1X 
+#ifdef CONFIG_USER_802_1X
 	restart8021XDaemon(RT2860_NVRAM);	// in wireless.c
-#endif
-#ifdef CONFIG_RT2860V2_AP_ANTENNA_DIVERSITY
-	AntennaDiversityInit();
 #endif
 #if defined(CONFIG_RT2860V2_AP_WSC) || defined(CONFIG_RT2860V2_STA_WSC)
 	WPSRestart();

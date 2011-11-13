@@ -3692,10 +3692,11 @@ static int getStaWirelessMode(int eid, webs_t wp, int argc, char_t **argv)
 	if (bSuppA) {
 		websWrite(wp, "<option value=\"8\" %s>802.11 AN mixed mode</option>", (mode == 8)? "selected" : "");
 	}
-	if (!StaOn)
-		websWrite(wp, "<option value=\"9\" %s>802.11 B/G/N mixed mode</option>", (mode == 9)? "selected" : "");
-	if (bSuppA && (!StaOn)) {
-		websWrite(wp, "<option value=\"10\" %s>802.11 A/G/N mixed mode</option>", (mode == 10)? "selected" : "");
+
+	websWrite(wp, "<option value=\"9\" %s>802.11 B/G/N mixed mode</option>", (mode == 9)? "selected" : "");
+	if (bSuppA) {
+		if (!StaOn)
+			websWrite(wp, "<option value=\"10\" %s>802.11 A/G/N mixed mode</option>", (mode == 10) ? "selected" : "");
 		websWrite(wp, "<option value=\"5\" %s>802.11 A/B/G/N mixed mode</option>", (mode == 5)? "selected" : "");
 	}
 
@@ -5078,9 +5079,9 @@ static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 					error(E_L, E_LOG, T("Set OID_802_11_SSID error = %d"), ret);
 			}
 		}
-
-		close(s);
 	}
+
+	close(s);
 
 	nvram_init(RT2860_NVRAM);
 	nvram_bufset(RT2860_NVRAM, "RadioOff", (web_radio_on) ? "0" : "1");
@@ -5106,13 +5107,18 @@ static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
 
+	//set-up 11N configuration
+	setSta11nCfg(wp, path, query);
+
 	//refresh station profiles
-	if (initStaProfile() != -1)
-		    initStaConnection();
+	initStaProfile();
+
 	//push wifi config to config mtd part and config generate
 	gen_wifi_config(RT2860_NVRAM);
+
 	// reconnect to AP and renew dhcp, pppoe etc
 	initInternet();
+
 	websRedirect(wp,"station/advance.asp");
 	return;
 }
