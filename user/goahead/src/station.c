@@ -2721,6 +2721,9 @@ static void sta_connection(int tmp_networktype, int tmp_auth, int tmp_encry, int
 		close(s);
 		return;
 	}
+/* This code disable 802.11N for WEP connections. This is terreble practic from WiFi aliance 
+    No need correct  curremt connect mode selected by user! */
+#if 0
 	if(tmp_encry == Ndis802_11Encryption2Enabled || tmp_encry == Ndis802_11WEPEnabled) {
 		if(CurrentWirelessMode > 4) {
 			system("iwpriv ra0 set WirelessMode=3");
@@ -2732,7 +2735,7 @@ static void sta_connection(int tmp_networktype, int tmp_auth, int tmp_encry, int
 			sleep(2);
 		}
 	}
-
+#endif
 	if (WpaSupplicant_flag == TRUE)
 	{
 		int wpa_supplicant_support = 0 ,ieee8021x_support = 0;
@@ -5116,7 +5119,7 @@ static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 	// Get current mode & new mode
 	char *radio = websGetVar(wp, T("radioWirelessEnabled"), T("off"));
 	int web_radio_on = CHK_IF_CHECKED(radio);
-	
+
 	char *radioOff = nvram_get(RT2860_NVRAM, "RadioOff");
 	int nvram_radio_on = CHK_IF_DIGIT(radioOff, 1) ? 0 : 1;
 
@@ -5160,10 +5163,10 @@ static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 					error(E_L, E_LOG, T("Set OID_802_11_SSID error = %d"), ret);
 			}
 		}
-		
+
 		close(s);
 	}
-	
+
 	nvram_init(RT2860_NVRAM);
 	nvram_bufset(RT2860_NVRAM, "RadioOff", (web_radio_on) ? "0" : "1");
 	nvram_bufset(RT2860_NVRAM, "WirelessMode", w_mode);
@@ -5192,8 +5195,9 @@ static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 	ret = OidSetInformation(RT_OID_802_11_PHY_MODE, s, "ra0", &wireless_mode, sizeof(wireless_mode));
 	if (ret < 0)
 	{
+		websError(wp, 500, "setStaAdvance: Set RT_OID_802_11_PHY_MODE error = %d", ret);
 		close(s);
-		return websError(wp, 500, "setStaAdvance: Set RT_OID_802_11_PHY_MODE error = %d", ret);
+		return;
 	}
 
 	//set 11n ht phy mode
@@ -5223,7 +5227,7 @@ static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 			close(s);
 			return websError(wp, 500, "setStaAdvance: Set RT_OID_802_11_SET_IMME_BA_CAP error = %d", ret);
 		}
-		
+
 		setSta11nCfg(wp, path, query);
 	}
 	else
