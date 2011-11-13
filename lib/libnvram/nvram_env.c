@@ -897,7 +897,9 @@ int gen_wifi_config(int mode)
 		FPRINT_NUM(CountryRegion);
 		FPRINT_NUM(CountryRegionABand);
 		FPRINT_STR(CountryCode);
+#ifdef CONFIG_RT2860V2_EXT_CHANNEL_LIST
 		FPRINT_NUM(ChannelGeography);
+#endif
 		FPRINT_NUM(Channel);
 		FPRINT_NUM(AutoChannelSelect);
 
