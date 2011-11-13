@@ -273,7 +273,7 @@ function init11NValues()
 	</td>
 </tr>
 <tr>
-	<td class="head" id="staadvInfra">Wireless Mode(Infra)</td>
+	<td class="head" id="staadvInfra">Wireless Mode</td>
 	<td>
 		<select id="wireless_mode" name="wireless_mode" size="1" onChange="wirelessModeChange()">
 		<% getStaWirelessMode(); %>

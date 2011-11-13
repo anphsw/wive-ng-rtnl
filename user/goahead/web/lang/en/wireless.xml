@@ -226,7 +226,7 @@
   <message msgid="staadv title" msgstr="Station Advanced Configurations" />
   <message msgid="staadv introduction" msgstr="The Status page shows settings and current operation status of the Station." />
   <message msgid="staadv config" msgstr="Advanced Configuration" />
-  <message msgid="staadv infra" msgstr="Wireless Mode(Infra)" />
+  <message msgid="staadv infra" msgstr="Wireless Mode" />
   <message msgid="staadv country" msgstr="Country Region Code" />
   <message msgid="staadv bgprotect" msgstr="B/G Protection" />
   <message msgid="staadv tx rate" msgstr="Tx Rate" />
