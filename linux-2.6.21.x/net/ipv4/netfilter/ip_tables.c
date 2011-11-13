@@ -99,36 +99,8 @@ ip_packet_match(const struct iphdr *ip,
 
 #ifdef CONFIG_IPTABLES_SPEEDUP
 	if (ipinfo->flags & IPT_F_NO_DEF_MATCH)
-		return true;
-
-	if (FWINV(ipinfo->smsk.s_addr &&
-		  (ip->saddr&ipinfo->smsk.s_addr) != ipinfo->src.s_addr,
-		  IPT_INV_SRCIP) ||
-	    FWINV(ipinfo->dmsk.s_addr &&
-		  (ip->daddr&ipinfo->dmsk.s_addr) != ipinfo->dst.s_addr,
-		  IPT_INV_DSTIP)) {
-
-#else
-	if (FWINV((ip->saddr&ipinfo->smsk.s_addr) != ipinfo->src.s_addr,
-		  IPT_INV_SRCIP)
-	    || FWINV((ip->daddr&ipinfo->dmsk.s_addr) != ipinfo->dst.s_addr,
-		     IPT_INV_DSTIP)) {
+		return 1;
 #endif
-		dprintf("Source or dest mismatch.\n");
-
-		dprintf("SRC: %u.%u.%u.%u. Mask: %u.%u.%u.%u. Target: %u.%u.%u.%u.%s\n",
-			NIPQUAD(ip->saddr),
-			NIPQUAD(ipinfo->smsk.s_addr),
-			NIPQUAD(ipinfo->src.s_addr),
-			ipinfo->invflags & IPT_INV_SRCIP ? " (INV)" : "");
-		dprintf("DST: %u.%u.%u.%u Mask: %u.%u.%u.%u Target: %u.%u.%u.%u.%s\n",
-			NIPQUAD(ip->daddr),
-			NIPQUAD(ipinfo->dmsk.s_addr),
-			NIPQUAD(ipinfo->dst.s_addr),
-			ipinfo->invflags & IPT_INV_DSTIP ? " (INV)" : "");
-		return 0;
-	}
-
 	ret = ifname_compare_aligned(indev, ipinfo->iniface, ipinfo->iniface_mask);
 
 	if (FWINV(ret != 0, IPT_INV_VIA_IN)) {
@@ -161,6 +133,35 @@ ip_packet_match(const struct iphdr *ip,
 	if (FWINV((ipinfo->flags&IPT_F_FRAG) && !isfrag, IPT_INV_FRAG)) {
 		dprintf("Fragment rule but not fragment.%s\n",
 			ipinfo->invflags & IPT_INV_FRAG ? " (INV)" : "");
+		return 0;
+	}
+
+#ifdef CONFIG_IPTABLES_SPEEDUP
+	if (FWINV(ipinfo->smsk.s_addr &&
+		  (ip->saddr&ipinfo->smsk.s_addr) != ipinfo->src.s_addr,
+		  IPT_INV_SRCIP) ||
+	    FWINV(ipinfo->dmsk.s_addr &&
+		  (ip->daddr&ipinfo->dmsk.s_addr) != ipinfo->dst.s_addr,
+		  IPT_INV_DSTIP)) {
+
+#else
+	if (FWINV((ip->saddr&ipinfo->smsk.s_addr) != ipinfo->src.s_addr,
+		  IPT_INV_SRCIP)
+	    || FWINV((ip->daddr&ipinfo->dmsk.s_addr) != ipinfo->dst.s_addr,
+		     IPT_INV_DSTIP)) {
+#endif
+		dprintf("Source or dest mismatch.\n");
+
+		dprintf("SRC: %u.%u.%u.%u. Mask: %u.%u.%u.%u. Target: %u.%u.%u.%u.%s\n",
+			NIPQUAD(ip->saddr),
+			NIPQUAD(ipinfo->smsk.s_addr),
+			NIPQUAD(ipinfo->src.s_addr),
+			ipinfo->invflags & IPT_INV_SRCIP ? " (INV)" : "");
+		dprintf("DST: %u.%u.%u.%u Mask: %u.%u.%u.%u Target: %u.%u.%u.%u.%s\n",
+			NIPQUAD(ip->daddr),
+			NIPQUAD(ipinfo->dmsk.s_addr),
+			NIPQUAD(ipinfo->dst.s_addr),
+			ipinfo->invflags & IPT_INV_DSTIP ? " (INV)" : "");
 		return 0;
 	}
 
