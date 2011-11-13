@@ -444,7 +444,6 @@ static int getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv)
 	while (ret < 0)
 	{
 		ret = OidQueryInformation(OID_802_11_BSSID_LIST, s, "ra0", pBssidList, lBufLen);
-#if 1
 		if (errno == EAGAIN)
 		{
 			sleep(1);
@@ -485,36 +484,6 @@ static int getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv)
 			close(s);
 			return -1;
 		}
-#else
-		switch(errno)
-		{
-			case EAGAIN:
-				do {
-					sleep(1);
-					ret = OidQueryInformation(OID_802_11_BSSID_LIST, s, "ra0", pBssidList, lBufLen);
-					retry++;
-				} while((errno == EAGAIN) && (ret < 0) && (retry < 5));
-				break;
-
-			case E2BIG:
-				do {
-					lBufLen = lBufLen + 4096*retry;
-					free(pBssidList);
-					pBssidList = (PNDIS_802_11_BSSID_LIST_EX) malloc(lBufLen);
-					ret = OidQueryInformation(OID_802_11_BSSID_LIST, s, "ra0", pBssidList, lBufLen);
-					t++;
-				} while((errno == E2BIG) && (ret <0) && (retry < 10));
-			default:
-				if (ret < 0) {
-					websError(wp, 500, "Query OID_802_11_BSSID_LIST error! return=%d", ret);
-					free(pBssidList);
-					close(s);
-					return;
-				}
-				else
-					break;
-		}
-#endif
 	}
 	if ( pBssidList->NumberOfItems == 0)
 	{
@@ -2721,21 +2690,7 @@ static void sta_connection(int tmp_networktype, int tmp_auth, int tmp_encry, int
 		close(s);
 		return;
 	}
-/* This code disable 802.11N for WEP connections. This is terreble practic from WiFi aliance 
-    No need correct  curremt connect mode selected by user! */
-#if 0
-	if(tmp_encry == Ndis802_11Encryption2Enabled || tmp_encry == Ndis802_11WEPEnabled) {
-		if(CurrentWirelessMode > 4) {
-			system("iwpriv ra0 set WirelessMode=3");
-			sleep(2);
-		}
-	} else {
-		if(CurrentWirelessMode < 5) {
-			system("iwpriv ra0 set WirelessMode=5");
-			sleep(2);
-		}
-	}
-#endif
+
 	if (WpaSupplicant_flag == TRUE)
 	{
 		int wpa_supplicant_support = 0 ,ieee8021x_support = 0;
@@ -5086,12 +5041,8 @@ static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 {
 	char_t *w_mode, *cr_bg, *cr_a, *bg_prot, *rate, *burst;
 	char_t *ht, *bw, *gi, *mcs, *tx_power, *sta_ar, *sta_ac, *sta_fc, *lna_gain;
+	int s, ret, tx_burst=0, wireless_mode=0, tx_rate=0;
 
-	int s, ret, country_region_a=0, country_region_bg=0;
-	int tx_burst=0, short_slot_time=0, wireless_mode=0, tx_rate=0;
-	unsigned long country_region=0;
-	RT_802_11_STA_CONFIG configStation;
-	NDIS_802_11_RATES	 aryRates;
 	unsigned char radio_status=0;
 
 	w_mode = websGetVar(wp, T("wireless_mode"), T("0"));
@@ -5187,194 +5138,7 @@ static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
 
-/* New driver load param drom config mtd part or config file. No need set direct. */
-#if 0
-	//set wireless mode
-	ret = OidSetInformation(RT_OID_802_11_PHY_MODE, s, "ra0", &wireless_mode, sizeof(wireless_mode));
-	if (ret < 0)
-	{
-		websError(wp, 500, "setStaAdvance: Set RT_OID_802_11_PHY_MODE error = %d", ret);
-		close(s);
-		return;
-	}
-
-	//set 11n ht phy mode
-	if (wireless_mode >= PHY_11ABGN_MIXED)
-	{
-		OID_BACAP_STRUC    BACap;
-		OID_SET_HT_PHYMODE phymode;
-
-		phymode.PhyMode = wireless_mode;
-		phymode.HtMode = atoi(ht);
-		phymode.TransmitNo = 2; //Now always use 2
-		phymode.BW = atoi(bw);
-		phymode.SHORTGI = atoi(gi);
-		phymode.MCS = atoi(mcs);
-
-		ret = OidSetInformation(RT_OID_802_11_SET_HT_PHYMODE, s, "ra0", &phymode, sizeof(phymode));
-		if (ret < 0)
-		{
-			websError(wp, 500, "setStaAdvance: Set RT_OID_802_11_SET_HT_PHYMODE error = %d", ret);
-			close(s);
-			return;
-		}
-
-		BACap.AutoBA = TRUE;
-		ret = OidSetInformation(RT_OID_802_11_SET_IMME_BA_CAP, s, "ra0", &BACap, sizeof(BACap));
-		if (ret < 0)
-		{
-			websError(wp, 500, "setStaAdvance: Set RT_OID_802_11_SET_IMME_BA_CAP error = %d", ret);
-			close(s);
-			return;
-		}
-
-		setSta11nCfg(wp, path, query);
-	}
-	else
-	{
-		OID_BACAP_STRUC	BACap;
-		BACap.AutoBA = FALSE;
-		OidSetInformation(RT_OID_802_11_SET_IMME_BA_CAP, s, "ra0", &BACap, sizeof(BACap));
-	}
-
-	//set country region
-	country_region_bg = atoi(cr_bg);
-	country_region_a = atoi(cr_a);
-	country_region = country_region_bg | (country_region_a << 8);
-	ret = OidSetInformation(RT_OID_802_11_COUNTRY_REGION, s, "ra0", &country_region, sizeof(country_region));
-	if (ret < 0)
-	{
-		websError(wp, 500, "setStaAdvance: Set RT_OID_802_11_COUNTRY_REGION error = %d", ret);
-		close(s);
-		return;
-	}
-
-	OidQueryInformation(RT_OID_802_11_STA_CONFIG, s, "ra0", &configStation, sizeof(configStation));
-
-	configStation.EnableTurboRate = 0; //false
-	configStation.EnableTxBurst = tx_burst;
-	configStation.UseBGProtection = atoi(bg_prot);
-	configStation.UseShortSlotTime = short_slot_time;
-	configStation.AdhocMode = wireless_mode;
-
-	OidSetInformation(RT_OID_802_11_STA_CONFIG, s, "ra0", &configStation, sizeof(configStation));
-
-	// set rate
-	memset(aryRates, 0x00, sizeof(NDIS_802_11_RATES));
-	if (wireless_mode == PHY_11A || wireless_mode == PHY_11G)
-	{
-		switch (tx_rate)
-		{
-			case 0:
-				aryRates[0] = 0x6c; // 54Mbps
-				aryRates[1] = 0x60; // 48Mbps
-				aryRates[2] = 0x48; // 36Mbps
-				aryRates[3] = 0x30; // 24Mbps
-				aryRates[4] = 0x24; // 18M
-				aryRates[5] = 0x18; // 12M
-				aryRates[6] = 0x12; // 9M
-				aryRates[7] = 0x0c; // 6M
-				break;
-			case 1:
-				aryRates[0] = 0x0c; // 6M
-				break;
-			case 2:
-				aryRates[0] = 0x12; // 9M
-				break;
-			case 3:
-				aryRates[0] = 0x18; // 12M
-				break;
-			case 4:
-				aryRates[0] = 0x24; // 18M
-				break;
-			case 5:
-				aryRates[0] = 0x30; // 24M
-				break;
-			case 6:
-				aryRates[0] = 0x48; // 36M
-				break;
-			case 7:
-				aryRates[0] = 0x60; // 48M
-				break;
-			case 8:
-				aryRates[0] = 0x6c; // 54M
-				break;
-		}
-	}
-	else if ((wireless_mode == PHY_11BG_MIXED) || (wireless_mode == PHY_11B) ||
-			(wireless_mode == PHY_11ABG_MIXED))
-	{
-		switch(tx_rate)
-		{
-			case 0:
-				switch(wireless_mode)
-				{
-					case PHY_11BG_MIXED: // B/G Mixed
-					case PHY_11ABG_MIXED: // A/B/G Mixed
-						aryRates[0] = 0x6c; // 54Mbps
-						aryRates[1] = 0x60; // 48Mbps
-						aryRates[2] = 0x48; // 36Mbps
-						aryRates[3] = 0x30; // 24Mbps
-						aryRates[4] = 0x16; // 11Mbps
-						aryRates[5] = 0x0b; // 5.5Mbps
-						aryRates[6] = 0x04; // 2Mbps
-						aryRates[7] = 0x02; // 1Mbps
-						break;
-					case PHY_11B: // B Only
-						aryRates[0] = 0x16; // 11Mbps
-						aryRates[1] = 0x0b; // 5.5Mbps
-						aryRates[2] = 0x04; // 2Mbps
-						aryRates[3] = 0x02; // 1Mbps
-						break;
-					case PHY_11A:
-						break;   //Not be call, for avoid warning.
-				}
-				break;
-			case 1:
-				aryRates[0] = 0x02; // 1M
-				break;
-			case 2:
-				aryRates[0] = 0x04; // 2M
-				break;
-			case 3:
-				aryRates[0] = 0x0b; // 5.5M
-				break;
-			case 4:
-				aryRates[0] = 0x16; // 11M
-				break;
-			case 5:
-				aryRates[0] = 0x0c; // 6M
-				break;
-			case 6:
-				aryRates[0] = 0x12; // 9M
-				break;
-			case 7:
-				aryRates[0] = 0x18; // 12M
-				break;
-			case 8:
-				aryRates[0] = 0x24; // 18M
-				break;
-			case 9:
-				aryRates[0] = 0x30; // 24M
-				break;
-			case 10:
-				aryRates[0] = 0x48; // 36M
-				break;
-			case 11:
-				aryRates[0] = 0x60; // 48M
-				break;
-			case 12:
-				aryRates[0] = 0x6c; // 54M
-				break;
-		}
-	}
-	if (wireless_mode < PHY_11ABGN_MIXED)
-		OidSetInformation(OID_802_11_DESIRED_RATES, s, "ra0", &aryRates, sizeof(NDIS_802_11_RATES));
-
-	OidSetInformation(OID_802_11_BSSID_LIST_SCAN, s, "ra0", 0, 0);
-	close(s);
-#endif
-	gen_wifi_config(RT2860_NVRAM);
+	gen_wifi_config(RT2860_NVRAM); //push wifi config to config mtd part and config generate
 	initInternet(); //renew dhcp, pppoe etc
 	websRedirect(wp,"station/advance.asp");
 	return;
@@ -5538,29 +5302,6 @@ static void setStaConnect(webs_t wp, char_t *path, char_t *query)
 			close(s);
 			return;
 		}
-/* This code disable 802.11N for WEP connections. This is terreble practic from WiFi aliance 
-    No need correct  curremt connect mode selected by user! */
-#if 0
-
-		if(tmp_encry == Ndis802_11Encryption2Enabled || tmp_encry == Ndis802_11WEPEnabled)
-		{
-			if(CurrentWirelessMode > 4)
-			{
-
-				system("iwpriv ra0 set WirelessMode=3");
-				sleep(2);
-			}
-		}
-		else
-		{
-			if(CurrentWirelessMode < 5)
-			{
-
-				system("iwpriv ra0 set WirelessMode=5");
-				sleep(2);
-			}
-		}
-#endif
 		conf_WPASupplicant(tmp_ssid, tmp_keymgmt, tmp_eap, tmp_identity, tmp_password, tmp_cacert, tmp_clientcert, tmp_privatekey, tmp_privatekeypassword, tmp_key, tmp_defaultkeyid, tmp_encry, tmp_tunnel, tmp_auth);
 	}
 	else

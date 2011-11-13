@@ -835,7 +835,6 @@ static int getSdkVersion(int eid, webs_t wp, int argc, char_t **argv)
 /*
  * description: check ram size
  */
-#if 1
 static int getMemAmount(int eid, webs_t wp, int argc, char_t **argv)
 {
 	char line[256];
@@ -858,26 +857,12 @@ static int getMemAmount(int eid, webs_t wp, int argc, char_t **argv)
 				}
 			}
 		}
-		
+
 		fclose(fp);
 	}
 
 	return websWrite(wp, T("0"), RT288X_SDK_VERSION);
 }
-#else
-
-#include <sys/sysinfo.h>
-
-static int getMemAmount(int eid, webs_t wp, int argc, char_t **argv)
-{
-	struct sysinfo si;
-	
-	if ( sysinfo(&si) == -1 )
-		return websWrite(wp, T("0"), RT288X_SDK_VERSION);
-	
-	return websWrite(wp, T("%lu"), si.totalram / 1024);
-}
-#endif
 
 /*
  * description: write System Uptime

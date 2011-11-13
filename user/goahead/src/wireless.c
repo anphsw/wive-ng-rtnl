@@ -727,10 +727,8 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 	// Get current mode & new mode
 	char *radio = websGetVar(wp, T("radioWirelessEnabled"), T("off"));
 	int web_radio_on = CHK_IF_CHECKED(radio);
-	
 	char *radioOff = nvram_get(RT2860_NVRAM, "RadioOff");
-	int nvram_radio_on = CHK_IF_DIGIT(radioOff, 1) ? 0 : 1;
-	
+
 	// fetch from web input
 	wirelessmode = websGetVar(wp, T("wirelessmode"), T("9")); //9: bgn mode
 	bssid_num = websGetVar(wp, T("bssid_num"), T("1"));
