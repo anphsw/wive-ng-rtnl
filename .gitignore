@@ -117,6 +117,9 @@ romfs
 /lib/libnet/src/Makefile
 /lib/libnet/version.h
 /lib/libnet/win32/Makefile
+/uClibc++/.config
+/uClibc++/.config.cmd
+/uClibc++/include/system_configuration.h
 /user/busybox/*/Config.in
 /user/busybox/docs/busybox.net/BusyBox.html
 /user/busybox/include/bbconfigopts_bz2.h
