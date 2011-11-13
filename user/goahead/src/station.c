@@ -5187,6 +5187,8 @@ static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
 
+/* New driver load param drom config mtd part or config file. No need set direct. */
+#if 0
 	//set wireless mode
 	ret = OidSetInformation(RT_OID_802_11_PHY_MODE, s, "ra0", &wireless_mode, sizeof(wireless_mode));
 	if (ret < 0)
@@ -5371,7 +5373,8 @@ static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 
 	OidSetInformation(OID_802_11_BSSID_LIST_SCAN, s, "ra0", 0, 0);
 	close(s);
-
+#endif
+	gen_wifi_config(RT2860_NVRAM);
 	initInternet(); //renew dhcp, pppoe etc
 	websRedirect(wp,"station/advance.asp");
 	return;
