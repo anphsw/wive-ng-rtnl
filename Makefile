@@ -402,6 +402,7 @@ clean: modules_clean
 	touch .config
 	for dir in $(LINUXDIR) $(DIRS); do [ ! -d $$dir ] || $(MAKEARCH) -C $$dir clean ; done
 	make clean -C uClibc++/extra/config
+	make distclean -C uClibc++/extra/config
 	make clean -C Uboot
 	make mrproper -C Uboot
 	make clean -C fulldump

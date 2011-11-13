@@ -4,6 +4,8 @@
 #include <fstream>
 #include <istream>
 
+#include "testframework.h"
+
 //using namespace std;
 
 std::basic_istream<char, std::char_traits<char> > &
@@ -18,6 +20,50 @@ std::basic_ios<char, std::char_traits<char> > &
 {
 	std::cout << "Good status: " << stream.good() << std::endl;
 	return stream;
+}
+
+bool canSeeIosBaseProperties() {
+	std::ios_base::openmode a;
+	a = std::ios_base::app;
+	a = std::ios_base::in;
+	a = std::ios_base::out;
+
+	return true;
+}
+
+void testFieldWidth() {
+	std::streamsize ioswidth_backup = std::cout.width();
+	std::ios_base::fmtflags iosflags_backup = std::cout.flags();
+
+	std::cout.width(10);
+
+	std::cout.setf(std::ios_base::right);
+	std::cout << 5;
+	std::cout << 5.1;
+	std::cout << "5.2";
+	std::cout << std::endl;
+
+	std::cout.setf(std::ios_base::left);
+	std::cout << 6;
+	std::cout << 6.1;
+	std::cout << "6.2";
+	std::cout << std::endl;
+
+	std::cout.setf(std::ios_base::internal);
+	std::cout << 7;
+	std::cout << 7.1;
+	std::cout << "7.2";
+	std::cout << std::endl;
+
+	std::cout.unsetf(std::ios_base::internal | std::ios_base::left | std::ios_base::right);
+	std::cout << 8;
+	std::cout << 8.1;
+	std::cout << "8.2";
+	std::cout << std::endl;
+
+	// Restore flags from backup	
+	std::cout.flags(iosflags_backup);
+	std::cout.width(ioswidth_backup);
 }
 
 int main(){
@@ -67,6 +113,15 @@ int main(){
 	s_r >> myIstreamTestFunction;
 	std::cout << "Test of reading ios into a function: " << std::endl;
 	s_r >> myIosTestFunction;
+
+	testFieldWidth();
+
+
+        TestFramework::AssertReturns<bool>(canSeeIosBaseProperties, true);
+
+        TestFramework::results();
+
+
 
 	return 0;
 }

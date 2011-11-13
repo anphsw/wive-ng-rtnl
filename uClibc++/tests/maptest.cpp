@@ -22,14 +22,120 @@ bool canForwardIterateCorrectly(){
 	int count;
 
 	for(i = a.begin(), count=0; i != a.end() && count < 20; i++, count++){
-		std::cout << "Count: " << count << std::endl;
-		int temp = i->first;
 	}
 
 	if(2 == count){
-		return 2;
+		return true;
 	}
 	return false;
+}
+
+bool canCompareConstNonConstIter() {
+	std::map<long, double> m;
+	m[5] = 2.3;
+	m[6] = 3.3;
+	m[7] = 3.4;
+	std::map<long, double>::const_iterator i = m.begin();
+	std::map<long, double>::iterator j = m.begin();
+	std::map<long, double>::iterator k = m.end();
+
+        if (i == i && i == j && j == i && j == j) {
+                // Do nothing
+        } else {
+                return false;
+        }
+
+        if (i != i || i != j || j != i || j != j) {
+                return false;
+        }
+
+        return true;
+}
+
+
+bool canSwapCorrectly(){
+	std::map<int, int> a, b;
+
+	a[3] = 13;
+	a[5] = 15;
+
+	b[3] = 23;
+	b[9] = 27;
+
+	std::map<int, int>::iterator i;
+
+	i = a.find(3);
+	if (i == a.end()) {
+		return false;
+	}
+	i = a.find(9);
+	if (i != a.end()) {
+		return false;
+	}
+
+	i = b.find(3);
+	if (i == b.end()) {
+		return false;
+	}
+
+	i = b.find(5);
+	if (i != b.end()) {
+		return false;
+	}
+
+	a.swap(b);
+
+	i = a.find(3);
+	if (i == a.end()) {
+		return false;
+	}
+	i = a.find(5);
+	if (i != a.end()) {
+		return false;
+	}
+	i = a.find(9);
+	if (i == a.end()) {
+		return false;
+	}
+
+	i = b.find(3);
+	if (i == b.end()) {
+		return false;
+	}
+	i = b.find(5);
+	if (i == b.end()) {
+		return false;
+	}
+	i = b.find(9);
+	if (i != b.end()) {
+		return false;
+	}
+
+	return true;
+}
+
+class my_type {
+public:
+	my_type() : id(count++) { }
+	void test() { }
+
+	int id;
+	static int count;
+};
+
+int my_type::count = 0;
+
+
+bool canSubscriptWithoutExtraObjectCreation() {
+	std::map<int, my_type> mymap;
+	mymap[1].test();
+	mymap[1].test();
+
+	if (my_type::count != 1) {
+		return false;
+	}
+
+	return true;
 }
 
 
@@ -106,7 +212,6 @@ int main(){
 	std::cout << "Elements in reverse order:\n";
 	ri = test.rbegin();
 	while(ri != test.rend()){
-//		std::cout << ri->first << ": " << ri->second << std::endl;
 		std::cout << (*ri).first << ": " << (*ri).second << std::endl;
 		++ri;
 	}
@@ -229,11 +334,14 @@ int main(){
 	std::cout << "m_2 is now " << m_2->second << std::endl;
 	std::cout << "m_3 is now " << m_3->second << std::endl;
 
-        std::cout << "Begining map test" << std::endl;
+        std::cout << "Beginning map test" << std::endl;
 
         TestFramework::init();
 	
 	TestFramework::AssertReturns<bool>(canForwardIterateCorrectly, true);
+	TestFramework::AssertReturns<bool>(canCompareConstNonConstIter, true);
+	TestFramework::AssertReturns<bool>(canSwapCorrectly, true);
+	TestFramework::AssertReturns<bool>(canSubscriptWithoutExtraObjectCreation, true);
 
 	TestFramework::results();
 

@@ -90,7 +90,7 @@ namespace std{
 				}
 			}
 
-			stream.write(buffer, snprintf(buffer, 20, formatString, n) );
+			stream.printout(buffer, snprintf(buffer, 20, formatString, n) );
 
 			if(stream.flags() & ios_base::unitbuf){
 				stream.flush();
@@ -137,7 +137,7 @@ namespace std{
 				}
 			}
 
-			stream.write(buffer, snprintf(buffer, 20, formatString, n));
+			stream.printout(buffer, snprintf(buffer, 20, formatString, n));
 			if(stream.flags() & ios_base::unitbuf){
 				stream.flush();
 			}
@@ -184,7 +184,7 @@ namespace std{
 				}
 			}
 
-			stream.write(buffer, snprintf(buffer, 27, formatString, n) );
+			stream.printout(buffer, snprintf(buffer, 27, formatString, n) );
 
 			if(stream.flags() & ios_base::unitbuf){
 				stream.flush();
@@ -230,7 +230,7 @@ namespace std{
 				}
 			}
 
-			stream.write(buffer, snprintf(buffer, 27, formatString, n) );
+			stream.printout(buffer, snprintf(buffer, 27, formatString, n) );
 
 			if(stream.flags() & ios_base::unitbuf){
 				stream.flush();
@@ -258,7 +258,7 @@ namespace std{
 			} else {
 				length = snprintf(buffer, 32, "%*.*g",static_cast<int>(stream.width()),static_cast<int>(stream.precision()), f);
 			}
-			stream.write(buffer, length);
+			stream.printout(buffer, length);
 			if(stream.flags() & ios_base::unitbuf){
 				stream.flush();
 			}
@@ -282,7 +282,7 @@ namespace std{
 			} else {
 				length = snprintf(buffer, 32, "%*.*Lg", static_cast<int>(stream.width()), static_cast<int>(stream.precision()), f);
 			}
-			stream.write(buffer, length);
+			stream.printout(buffer, length);
 			if(stream.flags() & ios_base::unitbuf){
 				stream.flush();
 			}
@@ -297,25 +297,25 @@ namespace std{
 		{
 			wchar_t buffer[20];
 			if( stream.flags() & ios_base::dec){
-				stream.write(buffer, swprintf(buffer, 20, L"%ld", n));
+				stream.printout(buffer, swprintf(buffer, 20, L"%ld", n));
 			}else if( stream.flags() & ios_base::oct){
 				if( stream.flags() & ios_base::showbase){
-					stream.write(buffer, swprintf(buffer, 20, L"%#lo", n));
+					stream.printout(buffer, swprintf(buffer, 20, L"%#lo", n));
 				}else{
-					stream.write(buffer, swprintf(buffer, 20, L"%lo", n) );
+					stream.printout(buffer, swprintf(buffer, 20, L"%lo", n) );
 				}
 			}else if (stream.flags() & ios_base::hex){
 				if(stream.flags() & ios_base::showbase){
 					if(stream.flags() & ios_base::uppercase){
-						stream.write(buffer, swprintf(buffer, 20, L"%#lX", n) );
+						stream.printout(buffer, swprintf(buffer, 20, L"%#lX", n) );
 					}else{
-						stream.write(buffer, swprintf(buffer, 20, L"%#lx", n) );
+						stream.printout(buffer, swprintf(buffer, 20, L"%#lx", n) );
 					}
 				}else{
 					if(stream.flags() & ios_base::uppercase){
-						stream.write(buffer, swprintf(buffer, 20, L"%lX", n) );
+						stream.printout(buffer, swprintf(buffer, 20, L"%lX", n) );
 					}else{
-						stream.write(buffer, swprintf(buffer, 20, L"%lx", n) );
+						stream.printout(buffer, swprintf(buffer, 20, L"%lx", n) );
 					}
 				}
 			}
@@ -331,25 +331,25 @@ namespace std{
 		{
 			wchar_t buffer[20];
 			if( stream.flags() & ios_base::dec){
-				stream.write(buffer, swprintf(buffer, 20, L"%lu", n));
+				stream.printout(buffer, swprintf(buffer, 20, L"%lu", n));
 			}else if( stream.flags() & ios_base::oct){
 				if( stream.flags() & ios_base::showbase){
-					stream.write(buffer, swprintf(buffer, 20, L"%#lo", n));
+					stream.printout(buffer, swprintf(buffer, 20, L"%#lo", n));
 				}else{
-					stream.write(buffer, swprintf(buffer, 20, L"%lo", n) );
+					stream.printout(buffer, swprintf(buffer, 20, L"%lo", n) );
 				}
 			}else if (stream.flags() & ios_base::hex){
 				if(stream.flags() & ios_base::showbase){
 					if(stream.flags() & ios_base::uppercase){
-						stream.write(buffer, swprintf(buffer, 20, L"%#lX", n) );
+						stream.printout(buffer, swprintf(buffer, 20, L"%#lX", n) );
 					}else{
-						stream.write(buffer, swprintf(buffer, 20, L"%#lx", n) );
+						stream.printout(buffer, swprintf(buffer, 20, L"%#lx", n) );
 					}
 				}else{
 					if(stream.flags() & ios_base::uppercase){
-						stream.write(buffer, swprintf(buffer, 20, L"%lX", n) );
+						stream.printout(buffer, swprintf(buffer, 20, L"%lX", n) );
 					}else{
-						stream.write(buffer, swprintf(buffer, 20, L"%lx", n) );
+						stream.printout(buffer, swprintf(buffer, 20, L"%lx", n) );
 					}
 				}
 			}
@@ -367,25 +367,25 @@ namespace std{
 		{
 			wchar_t buffer[28];
 			if( stream.flags() & ios_base::dec){
-				stream.write(buffer, swprintf(buffer, 27, L"%lld", n));
+				stream.printout(buffer, swprintf(buffer, 27, L"%lld", n));
 			}else if( stream.flags() & ios_base::oct){
 				if( stream.flags() & ios_base::showbase){
-					stream.write(buffer, swprintf(buffer, 27, L"%#llo", n));
+					stream.printout(buffer, swprintf(buffer, 27, L"%#llo", n));
 				}else{
-					stream.write(buffer, swprintf(buffer, 27, L"%llo", n) );
+					stream.printout(buffer, swprintf(buffer, 27, L"%llo", n) );
 				}
 			}else if (stream.flags() & ios_base::hex){
 				if(stream.flags() & ios_base::showbase){
 					if(stream.flags() & ios_base::uppercase){
-						stream.write(buffer, swprintf(buffer, 27, L"%#llX", n) );
+						stream.printout(buffer, swprintf(buffer, 27, L"%#llX", n) );
 					}else{
-						stream.write(buffer, swprintf(buffer, 27, L"%#llx", n) );
+						stream.printout(buffer, swprintf(buffer, 27, L"%#llx", n) );
 					}
 				}else{
 					if(stream.flags() & ios_base::uppercase){
-						stream.write(buffer, swprintf(buffer, 27, L"%llX", n) );
+						stream.printout(buffer, swprintf(buffer, 27, L"%llX", n) );
 					}else{
-						stream.write(buffer, swprintf(buffer, 27, L"%llx", n) );
+						stream.printout(buffer, swprintf(buffer, 27, L"%llx", n) );
 					}
 				}
 			}
@@ -401,25 +401,25 @@ namespace std{
 		{
 			wchar_t buffer[28];
 			if( stream.flags() & ios_base::dec){
-				stream.write(buffer, swprintf(buffer, 27, L"%llu", n));
+				stream.printout(buffer, swprintf(buffer, 27, L"%llu", n));
 			}else if( stream.flags() & ios_base::oct){
 				if( stream.flags() & ios_base::showbase){
-					stream.write(buffer, swprintf(buffer, 27, L"%#llo", n));
+					stream.printout(buffer, swprintf(buffer, 27, L"%#llo", n));
 				}else{
-					stream.write(buffer, swprintf(buffer, 27, L"%llo", n) );
+					stream.printout(buffer, swprintf(buffer, 27, L"%llo", n) );
 				}
 			}else if (stream.flags() & ios_base::hex){
 				if(stream.flags() & ios_base::showbase){
 					if(stream.flags() & ios_base::uppercase){
-						stream.write(buffer, swprintf(buffer, 27, L"%#llX", n) );
+						stream.printout(buffer, swprintf(buffer, 27, L"%#llX", n) );
 					}else{
-						stream.write(buffer, swprintf(buffer, 27, L"%#llx", n) );
+						stream.printout(buffer, swprintf(buffer, 27, L"%#llx", n) );
 					}
 				}else{
 					if(stream.flags() & ios_base::uppercase){
-						stream.write(buffer, swprintf(buffer, 27, L"%llX", n) );
+						stream.printout(buffer, swprintf(buffer, 27, L"%llX", n) );
 					}else{
-						stream.write(buffer, swprintf(buffer, 27, L"%llx", n) );
+						stream.printout(buffer, swprintf(buffer, 27, L"%llx", n) );
 					}
 				}
 			}
@@ -449,7 +449,7 @@ namespace std{
 			} else {
 				swprintf(format_string, 32, L"%%%u.%ug", static_cast<int>(stream.width()), static_cast<unsigned int>(stream.precision()));
 			}
-			stream.write(buffer, swprintf(buffer, 32, format_string, f) );
+			stream.printout(buffer, swprintf(buffer, 32, format_string, f) );
 			if(stream.flags() & ios_base::unitbuf){
 				stream.flush();
 			}
@@ -473,7 +473,7 @@ namespace std{
 			} else {
 				swprintf(format_string, 32, L"%%%u.%uLg", static_cast<unsigned int>(stream.width()), static_cast<unsigned int>(stream.precision()));
 			}
-			stream.write(buffer, swprintf(buffer, 32, format_string, f) );
+			stream.printout(buffer, swprintf(buffer, 32, format_string, f) );
 			if(stream.flags() & ios_base::unitbuf){
 				stream.flush();
 			}

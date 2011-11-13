@@ -64,6 +64,28 @@ bool canSwapBinary(){
 	return true;
 }
 
+bool canCompareConstNonConstIter() {
+	std::deque<long> d;
+	d.push_back(5);
+	d.push_back(6);
+	d.push_back(7);
+	std::deque<long>::const_iterator i = d.begin();
+	std::deque<long>::iterator j = d.begin();
+	std::deque<long>::iterator k = d.end();
+
+	if (i == i && i == j && j == i && j == j) {
+		// Do nothing
+	} else {
+		return false;
+	}
+
+	if (i != i || i != j || j != i || j != j) {
+		return false;
+	}
+
+	return true;
+}
+
 int main(){
 	std::deque<double> test;
 	std::deque<double>::iterator i,j;
@@ -188,7 +210,7 @@ int main(){
 	}
 	std::cout << std::endl;
 
-	std::cout << "\nErase near begining:" << std::endl;
+	std::cout << "\nErase near beginning:" << std::endl;
 	std::cout << "The following two lines should be identical\n";
 	std::cout << "22 21 20 19 18 17 16 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 12 27 13 14 \n";
 	i = test.begin();
@@ -225,6 +247,7 @@ int main(){
 	
 	TestFramework::AssertReturns<bool>(canSwapUnary, true);
 	TestFramework::AssertReturns<bool>(canSwapBinary, true);
+	TestFramework::AssertReturns<bool>(canCompareConstNonConstIter, true);
 
 	TestFramework::results();
 

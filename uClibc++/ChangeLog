@@ -1,3 +1,12 @@
+0.2.3
+-	Have string use some of the base class insert functions to be more complete
+-	Change map::operator[] to not create unnecessary temp objects.
+-	Ensure that map and mmap swap functions are properly exported
+-	Add support for ostream adjustwidth support
+-	Add support for bool limits support
+-	Misc fstream fixes
+-	Add support for comparison between deque iteractors and deque const_iterators
+
 0.2.2
 -	Fixed default flags for ios
 -	Implemented locale::name() for compatability reasons
