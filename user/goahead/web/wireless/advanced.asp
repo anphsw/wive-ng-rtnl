@@ -24,7 +24,6 @@ var pktAggregate = '<% getCfgZero(1, "PktAggregate"); %>';
 var wmmCapable = '<% getCfgZero(1, "WmmCapable"); %>';
 var APSDCapable = '<% getCfgZero(1, "APSDCapable"); %>';
 var DLSCapable = '<% getCfgZero(1, "DLSCapable"); %>';
-var countrycode = '<% getCfgGeneral(1, "CountryCode"); %>';
 var DLSBuilt = '<% getDLSBuilt(); %>';
 var m2uBuilt = '<% getWlanM2UBuilt(); %>';
 var m2uEnabled = '<% getCfgZero(1, "igmpEnabled"); %>';
@@ -215,8 +214,6 @@ function initValue()
 			form.dls_capable[1].checked = true;
 		}
 	}
-
-	form.country_code.value = countrycode;
 
 	//multicase to unicast converter
 	hideElement('div_m2u');
@@ -542,18 +539,27 @@ function wmm_capable_enable_switch()
 		<input type="radio" name="AP2040Rescan" value="0" checked>Disable
 	</td>
 </tr>
-<tr> 
+<tr>
+	<td class="head" id="staadvCountry">Country Region Code</td>
+	<td>
+		<select id="country_region" name="country_region_bg" class="mid">
+		<option value=0 <% var cr_bg = getCfgZero(0, "CountryRegion");
+			if (cr_bg == "0") write("selected"); %>>0: CH1-11 (FCC)</option>
+		<option value=1 <% if (cr_bg == "1") write("selected"); %>>1: CH1-13 (IC)</option>
+		<option value=2 <% if (cr_bg == "2") write("selected"); %>>2: CH10-11 (ETSI)</option>
+		<option value=3 <% if (cr_bg == "3") write("selected"); %>>3: CH10-13 (SPAIN)</option>
+		<option value=4 <% if (cr_bg == "4") write("selected"); %>>4: CH14 (France)</option>
+		<option value=5 <% if (cr_bg == "5") write("selected"); %>>5: CH1-14 (MKK)</option>
+		<option value=6 <% if (cr_bg == "6") write("selected"); %>>6: CH3-9 (MKK1)</option>
+		<option value=7 <% if (cr_bg == "7") write("selected"); %>>7: CH5-13 (Israel)</option>
+		</select>
+	</td>
+</tr>
+<tr>
 	<td class="head" class="mid" id="advCountryCode">Country Code</td>
 	<td>
 		<select name="country_code" class="mid">
-			<option value="US" id="advCountryCodeUS">US (United States)</option>
-			<option value="JP" id="advCountryCodeJP">JP (Japan)</option>
-			<option value="RU" id="advCountryCodeRU">RU (Japan)</option>
-			<option value="FR" id="advCountryCodeFR">FR (France)</option>
-			<option value="TW" id="advCountryCodeTW">TW (Taiwan)</option>
-			<option value="IE" id="advCountryCodeIE">IE (Ireland)</option>
-			<option value="HK" id="advCountryCodeHK">HK (Hong Kong)</option>
-			<option value="NONE" selected id="advCountryCodeNONE">NONE</option>
+			<% listCountryCodes(); %>
 		</select>
 	</td>
 </tr>

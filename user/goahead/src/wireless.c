@@ -48,6 +48,7 @@ static int  getDFSBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int  getCarrierBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int  getWlanM2UBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int  getGreenAPBuilt(int eid, webs_t wp, int argc, char_t **argv);
+static int  listCountryCodes(int eid, webs_t wp, int argc, char_t **argv);
 static void wirelessBasic(webs_t wp, char_t *path, char_t *query);
 static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query);
 static void wirelessWds(webs_t wp, char_t *path, char_t *query);
@@ -76,6 +77,117 @@ static int ShowMeshState(int eid, webs_t wp, int argc, char_t **argv);
 
 static int getVideoTurbineBuilt(int eid, webs_t wp, int argc, char_t **argv);
 
+typedef struct country_code_t
+{
+	const char *iso;
+	const char *name;
+} country_code_t;
+
+const country_code_t country_codes[] =
+{
+	{ "AL", "ALBANIA" },
+	{ "DZ", "ALGERIA" },
+	{ "AR", "ARGENTINA" },
+	{ "AM", "ARMENIA" },
+	{ "AU", "AUSTRALIA" },
+	{ "AT", "AUSTRIA" },
+	{ "AZ", "AZERBAIJAN" },
+	{ "BH", "BAHRAIN" },
+	{ "BY", "BELARUS" },
+	{ "BE", "BELGIUM" },
+	{ "BZ", "BELIZE" },
+	{ "BO", "BOLIVIA" },
+	{ "BR", "BRAZIL" },
+	{ "BN", "BRUNEI DARUSSALAM" },
+	{ "BG", "BULGARIA" },
+	{ "CA", "CANADA" },
+	{ "CL", "CHILE" },
+	{ "CN", "CHINA" },
+	{ "CO", "COLOMBIA" },
+	{ "CR", "COSTA RICA" },
+	{ "HR", "CROATIA" },
+	{ "CY", "CYPRUS" },
+	{ "CZ", "CZECH REPUBLIC" },
+	{ "DK", "DENMARK" },
+	{ "DO", "DOMINICAN REPUBLIC" },
+	{ "EC", "ECUADOR" },
+	{ "EG", "EGYPT" },
+	{ "SV", "EL SALVADOR" },
+	{ "EE", "ESTONIA" },
+	{ "FI", "FINLAND" },
+	{ "FR", "FRANCE" },
+	{ "GE", "GEORGIA" },
+	{ "DE", "GERMANY" },
+	{ "GR", "GREECE" },
+	{ "GT", "GUATEMALA" },
+	{ "HN", "HONDURAS" },
+	{ "HK", "HONG KONG" },
+	{ "HU", "HUNGARY" },
+	{ "IS", "ICELAND" },
+	{ "IN", "INDIA" },
+	{ "ID", "INDONESIA" },
+	{ "IR", "IRAN" },
+	{ "IE", "IRELAND" },
+	{ "IL", "ISRAEL" },
+	{ "IT", "ITALY" },
+	{ "JP", "JAPAN" },
+	{ "JO", "JORDAN" },
+	{ "KZ", "KAZAKHSTAN" },
+	{ "KP", "KOREA DEMOCRATIC PEOPLE'S REPUBLIC OF" },
+	{ "KR", "KOREA REPUBLIC OF" },
+	{ "KW", "KUWAIT" },
+	{ "LV", "LATVIA" },
+	{ "LB", "LEBANON" },
+	{ "LI", "LIECHTENSTEIN" },
+	{ "LT", "LITHUANIA" },
+	{ "LU", "LUXEMBOURG" },
+	{ "MO", "MACAU" },
+	{ "MK", "MACEDONIA" },
+	{ "MY", "MALAYSIA" },
+	{ "MX", "MEXICO" },
+	{ "MC", "MONACO" },
+	{ "MA", "MOROCCO" },
+	{ "NL", "NETHERLANDS" },
+	{ "NZ", "NEW ZEALAND" },
+	{ "NO", "NORWAY" },
+	{ "OM", "OMAN" },
+	{ "PK", "PAKISTAN" },
+	{ "PA", "PANAMA" },
+	{ "PE", "PERU" },
+	{ "PH", "PHILIPPINES" },
+	{ "PL", "POLAND" },
+	{ "PT", "PORTUGAL" },
+	{ "PR", "PUERTO RICO" },
+	{ "QA", "QATAR" },
+	{ "RO", "ROMANIA" },
+	{ "RU", "RUSSIAN FEDERATION" },
+	{ "SA", "SAUDI ARABIA" },
+	{ "SG", "SINGAPORE" },
+	{ "SK", "SLOVAKIA" },
+	{ "SI", "SLOVENIA" },
+	{ "ZA", "SOUTH AFRICA" },
+	{ "ES", "SPAIN" },
+	{ "SE", "SWEDEN" },
+	{ "CH", "SWITZERLAND" },
+	{ "SY", "SYRIAN ARAB REPUBLIC" },
+	{ "TW", "TAIWAN" },
+	{ "TH", "THAILAND" },
+	{ "TT", "TRINIDAD AND TOBAGO" },
+	{ "TN", "TUNISIA" },
+	{ "TR", "TURKEY" },
+	{ "UA", "UKRAINE" },
+	{ "AE", "UNITED ARAB EMIRATES" },
+	{ "GB", "UNITED KINGDOM" },
+	{ "US", "UNITED STATES" },
+	{ "UY", "URUGUAY" },
+	{ "UZ", "UZBEKISTAN" },
+	{ "VE", "VENEZUELA" },
+	{ "VN", "VIET NAM" },
+	{ "YE", "YEMEN" },
+	{ "ZW", "ZIMBABWE" },
+	{ NULL, NULL }
+};
+
 void formDefineWireless(void) {
 	websAspDefine(T("getVideoTurbineBuilt"), getVideoTurbineBuilt);
 	websAspDefine(T("getWlan11aChannels"), getWlan11aChannels);
@@ -93,6 +205,7 @@ void formDefineWireless(void) {
 	websAspDefine(T("getCarrierBuilt"), getCarrierBuilt);
 	websAspDefine(T("getWlanM2UBuilt"), getWlanM2UBuilt);
 	websAspDefine(T("getGreenAPBuilt"), getGreenAPBuilt);
+	websAspDefine(T("listCountryCodes"), listCountryCodes);
 	websAspDefine(T("is3t3r"), is3t3r);
 	websAspDefine(T("isWPSConfiguredASP"), isWPSConfiguredASP);
 	websAspDefine(T("isAntennaDiversityBuilt"), isAntennaDiversityBuilt);
@@ -115,6 +228,25 @@ void formDefineWireless(void) {
 	websFormDefine(T("wirelessMesh"), wirelessMesh);
 	websFormDefine(T("meshManualLink"), meshManualLink);
 #endif
+}
+
+static int listCountryCodes(int eid, webs_t wp, int argc, char_t **argv)
+{
+	const country_code_t *codes = country_codes;
+	char *c_code = nvram_get(RT2860_NVRAM, "CountryCode");;
+	
+	websWrite(wp, T("\t<option value=\"NONE\">NONE</option>\n"));
+	
+	while (codes->iso != NULL)
+	{
+		websWrite(wp, T("\t<option value=\"%s\"%s>%s (%s)</option>\n"),
+			codes->iso,
+			(strcmp(c_code, codes->iso) == 0) ? " selected" : "",
+			codes->name, codes->iso);
+		codes++;
+	}
+	
+	return 0;
 }
 
 //Jacky.Yang 7-Jan-2007, get Country region code in eeprom 0x39
@@ -1005,7 +1137,7 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 {
 	char_t	*bg_protection, /**basic_rate,*/ *beacon, *dtim, *fragment, *rts,
 			*tx_power, *short_preamble, *short_slot, *tx_burst, *pkt_aggregate,
-			*wmm_capable, *apsd_capable, *dls_capable, *countrycode;
+			*wmm_capable, *apsd_capable, *dls_capable, *countrycode, *country_region;
 	char_t	*rd_region, *carrier_detect, *lna_gain, *ht_noise_thresh, *ap2040_rescan, *ht_bss_coex;
 	int		i, ssid_num, wlan_mode;
 	char	wmm_enable[16];
@@ -1036,6 +1168,7 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 	apsd_capable = websGetVar(wp, T("apsd_capable"), T("0"));
 	dls_capable = websGetVar(wp, T("dls_capable"), T("0"));
 	countrycode = websGetVar(wp, T("country_code"), T("NONE"));
+	country_region = websGetVar(wp, T("country_region"), T("0"));
 	lna_gain = websGetVar(wp, T("lnaGainEnable"), T("0"));
 	ht_noise_thresh = websGetVar(wp, T("HT_BSSCoexApCntThr"), T("0"));
 	ht_bss_coex = websGetVar(wp, T("HT_BSSCoexistence"), T("0"));
@@ -1106,36 +1239,30 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 
 	nvram_bufset(RT2860_NVRAM, "CountryCode", countrycode);
 	if (!strncmp(countrycode, "US", 3)) {
-		nvram_bufset(RT2860_NVRAM, "CountryRegion", "0");
 		nvram_bufset(RT2860_NVRAM, "CountryRegionABand", "0");
 	}
 	else if (!strncmp(countrycode, "JP", 3)) {
-		nvram_bufset(RT2860_NVRAM, "CountryRegion", "5");
 		nvram_bufset(RT2860_NVRAM, "CountryRegionABand", "6");
 	}
 	else if (!strncmp(countrycode, "RU", 3)) {
-		nvram_bufset(RT2860_NVRAM, "CountryRegion", "5");
 		nvram_bufset(RT2860_NVRAM, "CountryRegionABand", "0");
 	}
 	else if (!strncmp(countrycode, "FR", 3)) {
-		nvram_bufset(RT2860_NVRAM, "CountryRegion", "1");
 		nvram_bufset(RT2860_NVRAM, "CountryRegionABand", "2");
 	}
 	else if (!strncmp(countrycode, "TW", 3)) {
-		nvram_bufset(RT2860_NVRAM, "CountryRegion", "1");
 		nvram_bufset(RT2860_NVRAM, "CountryRegionABand", "3");
 	}
 	else if (!strncmp(countrycode, "IE", 3)) {
-		nvram_bufset(RT2860_NVRAM, "CountryRegion", "1");
 		nvram_bufset(RT2860_NVRAM, "CountryRegionABand", "2");
 	}
 	else if (!strncmp(countrycode, "HK", 3)) {
-		nvram_bufset(RT2860_NVRAM, "CountryRegion", "1");
 		nvram_bufset(RT2860_NVRAM, "CountryRegionABand", "0");
 	}
-	else {
-		nvram_bufset(RT2860_NVRAM, "CountryCode", "");
-	}
+
+	// Set-up country region
+	nvram_bufset(RT2860_NVRAM, "CountryRegion", country_region);
+
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
 

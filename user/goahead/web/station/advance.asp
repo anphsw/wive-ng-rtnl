@@ -87,10 +87,10 @@ function wirelessModeChange()
 	
 	// Display b/g protection & country region
 	var amode = '<% getStaSuppAMode(); %>';
-	var c_reg = (nmode != 6); // N only
+	//var c_reg = (nmode != 6); // N only
 	var prot  = (nmode != 1) && (nmode != 4) && (nmode != 6); // B only, G only, N only
 	displayElement('bgProtectionRow', prot);
-	displayElement('CountryRegionRowBG', c_reg);
+	//displayElement('CountryRegionRowBG', c_reg);
 	displayElement('CountryRegionRowA', (prot) && (amode == '1'));
 }
 
