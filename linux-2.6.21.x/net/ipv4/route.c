@@ -130,8 +130,8 @@ static int ip_rt_redirect_load		= HZ / 50;
 static int ip_rt_redirect_silence	= ((HZ / 50) << (9 + 1));
 static int ip_rt_error_cost		= HZ;
 static int ip_rt_error_burst		= 5 * HZ;
-static int ip_rt_gc_elasticity		= 8;
-static int ip_rt_mtu_expires		= 10 * 60 * HZ;
+static int ip_rt_gc_elasticity		= 4;
+static int ip_rt_mtu_expires		= 10 * 30 * HZ;
 static int ip_rt_min_pmtu		= 512 + 20 + 20;
 static int ip_rt_min_advmss		= 256;
 static int ip_rt_secret_interval	= 10 * 60 * HZ;
@@ -264,7 +264,7 @@ static int rt_intern_hash(unsigned hash, struct rtable *rth,
 #ifdef CONFIG_NET_SFHASH
 #define HASH_3WORDS(a,b,c,i)    sfhash_3words(a,b,c,i)
 #else
-#define HASH_3WORDS(a,b,c,i)    jhash_3words(a,b,c,i)                                                                                       
+#define HASH_3WORDS(a,b,c,i)    jhash_3words(a,b,c,i)
 #endif
 
 static inline unsigned int rt_hash(__be32 daddr, __be32 saddr, int idx)
