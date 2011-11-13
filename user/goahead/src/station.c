@@ -5393,6 +5393,7 @@ static void setStaProfile(webs_t wp, char_t *path, char_t *query)
 			nvram_bufset(RT2860_NVRAM, "sta8021xPrivateKeyPassword", "");
 			nvram_bufset(RT2860_NVRAM, "sta8021xPassword", "");
 			nvram_bufset(RT2860_NVRAM, "sta8021xTunnel", "");
+			nvram_bufset(RT2860_NVRAM, "staActive", "");
 			nvram_commit(RT2860_NVRAM);
 			nvram_close(RT2860_NVRAM);
 		}
