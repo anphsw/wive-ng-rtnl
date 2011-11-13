@@ -58,3 +58,9 @@ input.xsmall
 {
 	width: 24px;
 }
+
+span.radio
+{
+	width: 96px;
+	display: inline-block;
+}

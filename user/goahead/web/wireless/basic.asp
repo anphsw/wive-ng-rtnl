@@ -36,6 +36,7 @@ var tx_stream_idx = '<% getCfgZero(1, "HT_TxStream"); %>';
 var rx_stream_idx = '<% getCfgZero(1, "HT_RxStream"); %>';
 var is3t3r = '<% is3t3r(); %>';
 var mssidb      = "<% getMBSSIDBuilt(); %>";
+var green_on = '<% getGreenAPBuilt(); %>' == '1';
 
 var mbss_params =
 [
@@ -601,6 +602,7 @@ function initValue()
 	var current_channel_length;
 	var radio_off   = "<% getCfgZero(1, "RadioOff"); %>";
 
+
 	saveRadioChannels();
 	initTranslation();
 	if (countrycode == '')
@@ -640,6 +642,8 @@ function initValue()
 	if ((wmode*1) >= 6)
 	{
 		showElement("div_11n");
+		displayElement('htOpModeRow', green_on);
+		
 		form.n_mode.disabled = false;
 		form.n_bandwidth.disabled = false;
 		form.n_rdg.disabled = false;
@@ -847,10 +851,15 @@ function initValue()
 
 	insertExtChannelOption();
 
-	if (ht_mode == "1")
-		form.n_mode[1].checked = true;
-	else if (ht_mode == "2")
-		form.n_mode[2].checked = true;
+	if (green_on)
+	{
+		if (ht_mode == "1")
+			form.n_mode[1].checked = true;
+		else if (ht_mode == "2")
+			form.n_mode[2].checked = true;
+		else
+			form.n_mode[0].checked = true;
+	}
 	else
 		form.n_mode[0].checked = true;
 
@@ -1069,6 +1078,7 @@ function wirelessModeChange(form)
 	if ((wmode == "8") || (wmode == "9") || (wmode == "6") || (wmode == "7"))
 	{
 		showElement("div_11n");
+		displayElement('htOpModeRow', green_on);
 		form.n_mode.disabled = false;
 		form.n_bandwidth.disabled = false;
 		form.n_rdg.disabled = false;
@@ -1341,7 +1351,7 @@ function switch_isolated_ssid()
 <tr> 
 	<td class="title" colspan="2" id="basicHTPhyMode">HT Physical Mode</td>
 </tr>
-<tr>
+<tr id="htOpModeRow" style="display: none;">
 	<td class="head" id="basicHTOPMode">Operating Mode</td>
 	<td>
 		<input type="radio" name="n_mode" value="0" checked><font id="basicHTMixed">Mixed Mode&nbsp;</font>

@@ -8,6 +8,7 @@
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script type="text/javascript" src="/js/controls.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
+<link rel="stylesheet" href="/style/controls.css" type="text/css">
 
 <title>Wireless Station Advanced Configurations</title>
 
@@ -86,9 +87,10 @@ function wirelessModeChange()
 	
 	// Display b/g protection & country region
 	var amode = '<% getStaSuppAMode(); %>';
-	var prot  = (nmode != 6); // N only
+	var c_reg = (nmode != 6); // N only
+	var prot  = (nmode != 1) && (nmode != 4) && (nmode != 6); // B only, G only, N only
 	displayElement('bgProtectionRow', prot);
-	displayElement('CountryRegionRowBG', prot);
+	displayElement('CountryRegionRowBG', c_reg);
 	displayElement('CountryRegionRowA', (prot) && (amode == '1'));
 }
 
@@ -259,7 +261,7 @@ function init11NValues()
 <tr>
 	<td class="head" id="wMacAddressClone">MAC Clone</td>
 	<td>
-		<select name="macCloneEnbl" size="1" onChange="macCloneSwitch(form);">
+		<select name="macCloneEnbl" onChange="macCloneSwitch(form);" class="half">
 			<option value="0">Disable</option>
 			<option value="1">Enable</option>
 		</select>
@@ -275,7 +277,7 @@ function init11NValues()
 <tr>
 	<td class="head" id="staadvInfra">Wireless Mode</td>
 	<td>
-		<select id="wireless_mode" name="wireless_mode" size="1" onChange="wirelessModeChange()">
+		<select id="wireless_mode" name="wireless_mode" class="mid" onChange="wirelessModeChange()">
 		<% getStaWirelessMode(); %>
 		</select>
 	</td>
@@ -283,23 +285,23 @@ function init11NValues()
 <tr id="CountryRegionRowBG">
 	<td class="head" id="staadvCountry" <% amode = getStaSuppAMode();
 		if (amode == "1") write("rowspan=2"); %>>Country Region Code</td>
-	<td>11 B/G &nbsp;&nbsp;&nbsp;
-		<select id="country_region_bg" name="country_region_bg" size="1">
+	<td>
+		<select id="country_region_bg" name="country_region_bg" class="mid">
 		<option value=0 <% var cr_bg = getCfgZero(0, "CountryRegion");
-			if (cr_bg == "0") write("selected"); %>>0:CH1-11</option>
-		<option value=1 <% if (cr_bg == "1") write("selected"); %>>1:CH1-13</option>
-		<option value=2 <% if (cr_bg == "2") write("selected"); %>>2:CH10-11</option>
-		<option value=3 <% if (cr_bg == "3") write("selected"); %>>3:CH10-13</option>
-		<option value=4 <% if (cr_bg == "4") write("selected"); %>>4:CH14</option>
-		<option value=5 <% if (cr_bg == "5") write("selected"); %>>5:CH1-14</option>
-		<option value=6 <% if (cr_bg == "6") write("selected"); %>>6:CH3-9</option>
-		<option value=7 <% if (cr_bg == "7") write("selected"); %>>7:CH5-13</option>
+			if (cr_bg == "0") write("selected"); %>>0: CH1-11 (FCC)</option>
+		<option value=1 <% if (cr_bg == "1") write("selected"); %>>1: CH1-13 (IC)</option>
+		<option value=2 <% if (cr_bg == "2") write("selected"); %>>2: CH10-11 (ETSI)</option>
+		<option value=3 <% if (cr_bg == "3") write("selected"); %>>3: CH10-13 (SPAIN)</option>
+		<option value=4 <% if (cr_bg == "4") write("selected"); %>>4: CH14 (France)</option>
+		<option value=5 <% if (cr_bg == "5") write("selected"); %>>5: CH1-14 (MKK)</option>
+		<option value=6 <% if (cr_bg == "6") write("selected"); %>>6: CH3-9 (MKK1)</option>
+		<option value=7 <% if (cr_bg == "7") write("selected"); %>>7: CH5-13 (Israel)</option>
 		</select>
 	</td>
 </tr>
 <tr id="CountryRegionRowA" <% if (amode != "1") write("style=\"visibility:hidden;display:none\""); %>>
 	<td>11 A&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-		<select id="country_region_a" name="country_region_a" size="1">
+		<select id="country_region_a" name="country_region_a" class="mid">
 		<option value="0" <% var cr_a = getCfgZero(0, "CountryRegionABand");
 			if (cr_a == "0") write("selected"); %>>0:CH36,40,44,48,52,56,60,64,149,153,157,161,165</option>
 		<option value="1" <% if (cr_a == "1") write("selected"); %>>1:CH36,40,44,48,52,56,60,64,100,104,108,112,116,120,124,128,132,136,140</option>
@@ -347,7 +349,7 @@ function init11NValues()
 	<td>
 		<!--input type="text" name="tx_power" size="5" maxlength="3" value="<% getCfgZero(1, "TxPower"); %>">
 		<span style="color: #808080;">&nbsp;(range 1 - 100, default 100)</span-->
-		<select name="tx_power">
+		<select name="tx_power" class="half">
 			<option value="5">5%</option>
 			<option value="10">10%</option>
 			<option value="20">20%</option>
@@ -369,7 +371,7 @@ function init11NValues()
 	write("style=\"display:none;\""); %>>
 	<td class="head" id="staadvTxRate">Tx Rate</td>
 	<td>
-		<select name="tx_rate" size="1">
+		<select name="tx_rate" class="half">
 		<option value="0" id="staadvTxRateAuto" <% var rate = getCfgZero(0, "TxRate");
 			if (rate == "0") write("selected"); %>>Auto</option>
 		<option value="1" <% if (rate == "1") write("selected"); %>>1 Mbps</option>
@@ -400,37 +402,44 @@ function init11NValues()
 <tr>
 	<td class="title" colspan="2" id="staadvHTPhyMode">HT Physical Mode</td>
 </tr>
-<tr>
+<tr style="display:none;">
 	<td class="head" id="staadvHT">HT</td>
 	<td>
-		<input type=radio name="n_mode" value="0" <% var n_op = getCfgZero(0, "HT_OpMode");
-			if (n_op == "0") write("checked"); %>>MM&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-		<input type=radio name="n_mode" value="1" <%
-			if (n_op == "1") write("checked"); %>>GF
+		<span class="radio">
+			<input type="radio" name="n_mode" value="0" checked>Mixed
+		</span>
 	</td>
 </tr>
 <tr>
 	<td class="head" id="staadvBW">BW</td>
 	<td>
-		<input type=radio name="n_bandwidth" value="0" <% var n_bw = getCfgZero(0, "HT_BW");
-			if (n_bw == "0") write("checked"); %>>20&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-		<input type=radio name="n_bandwidth" value="1" <%
-			if (n_bw == "1") write("checked"); %>><font id="staadvBWAuto">Auto</font>
+		<span class="radio">
+			<input type=radio name="n_bandwidth" value="0" <% var n_bw = getCfgZero(0, "HT_BW");
+				if (n_bw == "0") write("checked"); %>>20
+		</span>
+		<span class="radio">
+			<input type=radio name="n_bandwidth" value="1" <%
+				if (n_bw == "1") write("checked"); %>><font id="staadvBWAuto">Auto</font>
+		</span>
 	</td>
 </tr>
 <tr>
 	<td class="head" id="staadvGI">GI</td>
 	<td>
-		<input type=radio name="n_gi" value="0" <% var ngi = getCfgZero(0, "HT_GI");
-			if (ngi == "0") write("checked"); %>><font id="staadvGILong">Long</font>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-		<input type=radio name="n_gi" value="1" <%
-			if (ngi != "0") write("checked"); %>><font id="staadvGIAuto">Auto</font>
+		<span class="radio">
+			<input type=radio name="n_gi" value="0" <% var ngi = getCfgZero(0, "HT_GI");
+				if (ngi == "0") write("checked"); %>><font id="staadvGILong">Long</font>
+		</span>
+		<span class="radio">
+			<input type=radio name="n_gi" value="1" <%
+				if (ngi != "0") write("checked"); %>><font id="staadvGIAuto">Auto</font>
+		</span>
 	</td>
 </tr>
 <tr>
 	<td class="head">MCS</td>
 	<td>
-		<select name="n_mcs" size="1">
+		<select name="n_mcs" class="half">
 			<option value="0">0</option>
 			<option value="1">1</option>
 			<option value="2">2</option>
@@ -457,13 +466,17 @@ function init11NValues()
 <tr>
 	<td class="head" id="11nMPDUDensity" rowspan="2">MPDU density</td>
 	<td>
-		<input type="radio" name="autoBA" value="0" checked onClick="Auto_BA_Click(this.form);"><font id="11nAMPDUManual">Manual</font>&nbsp;&nbsp;
-		<input type="radio" name="autoBA" value="1" onClick="Auto_BA_Click(this.form)"><font id="11nAMPDUAuto">Auto</font>
+		<span class="radio">
+			<input type="radio" name="autoBA" value="0" checked onClick="Auto_BA_Click(this.form);"><font id="11nAMPDUManual">Manual</font>
+		</span>
+		<span class="radio">
+			<input type="radio" name="autoBA" value="1" onClick="Auto_BA_Click(this.form)"><font id="11nAMPDUAuto">Auto</font>
+		</span>
 	</td>
 </tr>
 <tr>
 	<td>
-		<select name="mpdu_density" size="1">
+		<select name="mpdu_density" class="half">
 			<option value="0" selected>0</option>
 			<option value="1">1</option>
 			<option value="2">2</option>

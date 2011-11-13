@@ -47,6 +47,7 @@ static int  getDLSBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int  getDFSBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int  getCarrierBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int  getWlanM2UBuilt(int eid, webs_t wp, int argc, char_t **argv);
+static int  getGreenAPBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static void wirelessBasic(webs_t wp, char_t *path, char_t *query);
 static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query);
 static void wirelessWds(webs_t wp, char_t *path, char_t *query);
@@ -91,6 +92,7 @@ void formDefineWireless(void) {
 	websAspDefine(T("dumpBSSKeys"), dumpBSSKeys);
 	websAspDefine(T("getCarrierBuilt"), getCarrierBuilt);
 	websAspDefine(T("getWlanM2UBuilt"), getWlanM2UBuilt);
+	websAspDefine(T("getGreenAPBuilt"), getGreenAPBuilt);
 	websAspDefine(T("is3t3r"), is3t3r);
 	websAspDefine(T("isWPSConfiguredASP"), isWPSConfiguredASP);
 	websAspDefine(T("isAntennaDiversityBuilt"), isAntennaDiversityBuilt);
@@ -377,6 +379,15 @@ static int getCarrierBuilt(int eid, webs_t wp, int argc, char_t **argv)
 static int getWlanM2UBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
 #ifdef CONFIG_RT2860V2_AP_IGMP_SNOOP
+	return websWrite(wp, T("1"));
+#else
+	return websWrite(wp, T("0"));
+#endif
+}
+
+static int getGreenAPBuilt(int eid, webs_t wp, int argc, char_t **argv)
+{
+#ifdef CONFIG_RT2860V2_AP_GREENAP
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));
