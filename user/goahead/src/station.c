@@ -5133,10 +5133,8 @@ static void setStaConnect(webs_t wp, char_t *path, char_t *query)
 #ifdef WPA_SUPPLICANT_SUPPORT
 	int  tmp_keymgmt = Rtwpa_supplicantKeyMgmtNONE, tmp_eap = Rtwpa_supplicantEAPNONE, tmp_tunnel = Rtwpa_supplicantTUNNENONE;
 	char_t *tmp_identity, *tmp_cacert, *tmp_clientcert, *tmp_privatekey, *tmp_privatekeypassword, *tmp_password;
-#endif 
+#endif
 	char_t *value;
-
-	printf("setStaConnect()\n");
 
 	tmp_auth  = Ndis802_11AuthModeOpen;
 	tmp_encry = Ndis802_11WEPDisabled;
@@ -5314,8 +5312,6 @@ static void setStaProfile(webs_t wp, char_t *path, char_t *query)
 	PRT_PROFILE_SETTING	previousProfileSetting = NULL;
 	int selectedProfile=0 , i=0;
 	char_t *value;
-
-	printf("setStaProfile()\n");
 
 	if (headerProfileSetting == NULL) {
 		error(E_L, E_LOG, T("headerProfileSetting is NULL"));
