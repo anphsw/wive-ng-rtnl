@@ -405,8 +405,12 @@ start() {
 ################################Enable forward for LAN/WAN interfaces######################
     if [ "$OperationMode" != "0" ]; then
 	# only not bridge mode enable forward
-	echo 1 > "/proc/sys/net/ipv4/conf/$wan_if/forwarding"
-	echo 1 > "/proc/sys/net/ipv4/conf/$lan_if/forwarding"
+	if [ -f /proc/sys/net/ipv4/conf/$wan_if/forwarding ]; then
+	    echo 1 > "/proc/sys/net/ipv4/conf/$wan_if/forwarding"
+	fi
+	if [ -f /proc/sys/net/ipv4/conf/$lan_if/forwarding ]; then
+	    echo 1 > "/proc/sys/net/ipv4/conf/$lan_if/forwarding"
+	fi
     fi
 ############################################ENDRULES#######################################
     $LOG "Configure netfilter OK..."
