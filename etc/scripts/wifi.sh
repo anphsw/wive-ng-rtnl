@@ -32,7 +32,8 @@ if [ "$OperationMode" = "3" ]; then
     fi
 fi
 ########################################APMODE param###########################
-eval `nvram_buf_get 2860 AutoChannelSelect Channel AP2040Rescan RadioOff`
+eval `nvram_buf_get 2860 AutoChannelSelect Channel AP2040Rescan RadioOff \
+			    GreenAP HT_OpMode`
 #########################################ON/OFF param##########################
 if [ "$RadioOff" = "1" ]; then
     iwpriv ra0 set RadioOn=0
@@ -65,7 +66,14 @@ else
     # set channel manual
     iwpriv ra0 set Channel=$Channel
 fi
-
+########################################GREEN mode#############################
+if [ "$CONFIG_RT2860V2_AP_GREENAP" != "" ]; then
+    if [ "$HT_OpMode" = "1" ] || [ "$GreenAP" = "1" ]; then
+	iwpriv ra0 set GreenAP=1
+    else
+	iwpriv ra0 set GreenAP=0
+    fi
+fi
 ###########################################ALWAYS END##########################
 if [ "$AP2040Rescan" = "1" ]; then
     iwpriv ra0 set AP2040Rescan=1

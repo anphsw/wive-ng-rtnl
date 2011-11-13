@@ -4244,7 +4244,7 @@ static void writeProfileToNvram()
 		strcat(tmp_buffer, tmp_data);
 		currentProfileSetting = currentProfileSetting->Next;
 		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");	
+			strcat(tmp_buffer, ";");
 	} while (currentProfileSetting != NULL);
 	nvram_bufset(RT2860_NVRAM, "staPSMode", tmp_buffer);
 
@@ -4490,7 +4490,7 @@ static void writeProfileToNvram()
 		strcat(tmp_buffer, (char *)currentProfileSetting->Key1);
 		currentProfileSetting = currentProfileSetting->Next;
 		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");	
+			strcat(tmp_buffer, ";");
 	} while (currentProfileSetting != NULL);
 	nvram_bufset(RT2860_NVRAM, "staKey1", tmp_buffer);
 
@@ -4512,7 +4512,7 @@ static void writeProfileToNvram()
 		strcat(tmp_buffer, (char *)currentProfileSetting->Key3);
 		currentProfileSetting = currentProfileSetting->Next;
 		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");	
+			strcat(tmp_buffer, ";");
 	} while (currentProfileSetting != NULL);
 	nvram_bufset(RT2860_NVRAM, "staKey3", tmp_buffer);
 
@@ -4523,7 +4523,7 @@ static void writeProfileToNvram()
 		strcat(tmp_buffer, (char *)currentProfileSetting->Key4);
 		currentProfileSetting = currentProfileSetting->Next;
 		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");	
+			strcat(tmp_buffer, ";");
 	} while (currentProfileSetting != NULL);
 	nvram_bufset(RT2860_NVRAM, "staKey4", tmp_buffer);
 
@@ -4534,7 +4534,7 @@ static void writeProfileToNvram()
 		strcat(tmp_buffer, (char *)currentProfileSetting->WpaPsk);
 		currentProfileSetting = currentProfileSetting->Next;
 		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");	
+			strcat(tmp_buffer, ";");
 	} while (currentProfileSetting != NULL);
 	nvram_bufset(RT2860_NVRAM, "staWpaPsk", tmp_buffer);
 
@@ -4548,7 +4548,7 @@ static void writeProfileToNvram()
 		strcat(tmp_buffer, tmp_data);
 		currentProfileSetting = currentProfileSetting->Next;
 		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");	
+			strcat(tmp_buffer, ";");
 	} while (currentProfileSetting != NULL);
 	nvram_bufset(RT2860_NVRAM, "sta8021xKeyMgmt", tmp_buffer);
 
@@ -4561,7 +4561,7 @@ static void writeProfileToNvram()
 		strcat(tmp_buffer, tmp_data);
 		currentProfileSetting = currentProfileSetting->Next;
 		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");	
+			strcat(tmp_buffer, ";");
 	} while (currentProfileSetting != NULL);
 	nvram_bufset(RT2860_NVRAM, "sta8021xEAP", tmp_buffer);
 
@@ -4574,7 +4574,7 @@ static void writeProfileToNvram()
 		strcat(tmp_buffer, tmp_data);
 		currentProfileSetting = currentProfileSetting->Next;
 		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");	
+			strcat(tmp_buffer, ";");
 	} while (currentProfileSetting != NULL);
 	nvram_bufset(RT2860_NVRAM, "sta8021xTunnel", tmp_buffer);
 
@@ -4585,7 +4585,7 @@ static void writeProfileToNvram()
 		strcat(tmp_buffer, (char *)currentProfileSetting->Identity);
 		currentProfileSetting = currentProfileSetting->Next;
 		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");	
+			strcat(tmp_buffer, ";");
 	} while (currentProfileSetting != NULL);
 	nvram_bufset(RT2860_NVRAM, "sta8021xIdentity", tmp_buffer);
 
@@ -4596,7 +4596,7 @@ static void writeProfileToNvram()
 		strcat(tmp_buffer, (char *)currentProfileSetting->Password);
 		currentProfileSetting = currentProfileSetting->Next;
 		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");	
+			strcat(tmp_buffer, ";");
 	} while (currentProfileSetting != NULL);
 	nvram_bufset(RT2860_NVRAM, "sta8021xPassword", tmp_buffer);
 
@@ -4607,7 +4607,7 @@ static void writeProfileToNvram()
 		strcat(tmp_buffer, (char *)currentProfileSetting->ClientCert);
 		currentProfileSetting = currentProfileSetting->Next;
 		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");	
+			strcat(tmp_buffer, ";");
 	} while (currentProfileSetting != NULL);
 	nvram_bufset(RT2860_NVRAM, "sta8021xClientCert", tmp_buffer);
 
@@ -4618,7 +4618,7 @@ static void writeProfileToNvram()
 		strcat(tmp_buffer, (char *)currentProfileSetting->PrivateKey);
 		currentProfileSetting = currentProfileSetting->Next;
 		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");	
+			strcat(tmp_buffer, ";");
 	} while (currentProfileSetting != NULL);
 	nvram_bufset(RT2860_NVRAM, "sta8021xPrivateKey", tmp_buffer);
 
@@ -4629,7 +4629,7 @@ static void writeProfileToNvram()
 		strcat(tmp_buffer, (char *)currentProfileSetting->PrivateKeyPassword);
 		currentProfileSetting = currentProfileSetting->Next;
 		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");	
+			strcat(tmp_buffer, ";");
 	} while (currentProfileSetting != NULL);
 	nvram_bufset(RT2860_NVRAM, "sta8021xPrivateKeyPassword", tmp_buffer);
 
@@ -4640,7 +4640,7 @@ static void writeProfileToNvram()
 		strcat(tmp_buffer, (char *)currentProfileSetting->CACert);
 		currentProfileSetting = currentProfileSetting->Next;
 		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");	
+			strcat(tmp_buffer, ";");
 	} while (currentProfileSetting != NULL);
 	nvram_bufset(RT2860_NVRAM, "sta8021xCACert", tmp_buffer);
 #else
@@ -4650,7 +4650,7 @@ static void writeProfileToNvram()
 		strcat(tmp_buffer, "7");
 		currentProfileSetting = currentProfileSetting->Next;
 		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");	
+			strcat(tmp_buffer, ";");
 	} while (currentProfileSetting != NULL);
 	nvram_bufset(RT2860_NVRAM, "sta8021xEAP", tmp_buffer);
 
@@ -4660,7 +4660,7 @@ static void writeProfileToNvram()
 		strcat(tmp_buffer, "3");
 		currentProfileSetting = currentProfileSetting->Next;
 		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");	
+			strcat(tmp_buffer, ";");
 	} while (currentProfileSetting != NULL);
 	nvram_bufset(RT2860_NVRAM, "sta8021xTunnel", tmp_buffer);
 	nvram_bufset(RT2860_NVRAM, "sta8021xKeyMgmt", tmp_buffer);
@@ -4671,7 +4671,7 @@ static void writeProfileToNvram()
 		strcat(tmp_buffer, "0");
 		currentProfileSetting = currentProfileSetting->Next;
 		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");	
+			strcat(tmp_buffer, ";");
 	} while (currentProfileSetting != NULL);
 	nvram_bufset(RT2860_NVRAM, "sta8021xIdentity", tmp_buffer);
 	nvram_bufset(RT2860_NVRAM, "sta8021xPassword", tmp_buffer);
@@ -4690,7 +4690,7 @@ static void writeProfileToNvram()
 		strcat(tmp_buffer, tmp_data);
 		currentProfileSetting = currentProfileSetting->Next;
 		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");	
+			strcat(tmp_buffer, ";");
 	} while (currentProfileSetting != NULL);
 	nvram_bufset(RT2860_NVRAM, "staActive", tmp_buffer);
 

@@ -1178,7 +1178,6 @@ int gen_wifi_config(int mode)
 		FPRINT_STR(Key4Str16);
 #endif
 #endif
-
 		//MIMO
 		FPRINT_NUM(HT_HTC);
 		FPRINT_NUM(HT_RDG);
@@ -1197,11 +1196,13 @@ int gen_wifi_config(int mode)
 		FPRINT_NUM(HT_RxStream);
 		FPRINT_NUM(HT_PROTECT);
 		FPRINT_NUM(HT_DisallowTKIP);
-		FPRINT_NUM(GreenAP);
 		FPRINT_NUM(HT_40MHZ_INTOLERANT);
 		FPRINT_NUM(HT_MIMOPSMode);
 		FPRINT_NUM(HT_BSSCoexistence);
 		FPRINT_NUM(HT_BSSCoexApCntThr);
+#ifdef CONFIG_RT2860V2_AP_GREENAP
+		FPRINT_NUM(GreenAP);
+#endif
 
 		FPRINT_NUM(WscConfMode);
 
