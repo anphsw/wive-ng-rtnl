@@ -5535,6 +5535,9 @@ static void setStaConnect(webs_t wp, char_t *path, char_t *query)
 			close(s);
 			return;
 		}
+/* This code disable 802.11N for WEP connections. This is terreble practic from WiFi aliance 
+    No need correct  curremt connect mode selected by user! */
+#if 0
 
 		if(tmp_encry == Ndis802_11Encryption2Enabled || tmp_encry == Ndis802_11WEPEnabled)
 		{
@@ -5554,7 +5557,7 @@ static void setStaConnect(webs_t wp, char_t *path, char_t *query)
 				sleep(2);
 			}
 		}
-
+#endif
 		conf_WPASupplicant(tmp_ssid, tmp_keymgmt, tmp_eap, tmp_identity, tmp_password, tmp_cacert, tmp_clientcert, tmp_privatekey, tmp_privatekeypassword, tmp_key, tmp_defaultkeyid, tmp_encry, tmp_tunnel, tmp_auth);
 	}
 	else
