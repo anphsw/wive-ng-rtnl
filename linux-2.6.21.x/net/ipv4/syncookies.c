@@ -198,7 +198,7 @@ struct sock *cookie_v4_check(struct sock *sk, struct sk_buff *skb,
 	struct rtable *rt;
 	__u8 rcv_wscale;
 
-	if (!sysctl_tcp_syncookies || !skb->h.th->ack)
+	if (!sysctl_tcp_syncookies || !skb->h.th->ack || skb->h.th->rst)
 		goto out;
 
 	if (time_after(jiffies, tp->last_synq_overflow + TCP_TIMEOUT_INIT) ||
