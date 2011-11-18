@@ -818,7 +818,7 @@
 59) Dropbear up to 2011.54 Tuesday 8 November 2011 version.<br>
 60) More iptables match code speedup(~2% cpu at 100 match ruleset save).<br>
 61) Fix regression sta mode driver configure.<br>
-62) Add store_ttl and store_ttl_mcast variable for add netfilter rules for increase input TTL for all/mcast.
+62) Add store_ttl and store_ttl_mcast variable for add netfilter rules for increase input TTL for all/mcast.<br>
 
 <br><br>
 <b>For support see:</b><br>
