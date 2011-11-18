@@ -363,7 +363,7 @@ int sctp_packet_transmit(struct sctp_packet *packet)
 	 * Note: Adler-32 is no longer applicable, as has been replaced
 	 * by CRC32-C as described in <draft-ietf-tsvwg-sctpcsum-02.txt>.
 	 */
-	if (!(dst->dev->features & NETIF_F_NO_CSUM))
+	if (!(dst->dev->features & NETIF_F_HW_CSUM))
 		crc32 = sctp_start_cksum((__u8 *)sh, sizeof(struct sctphdr));
 
 	/**
@@ -416,7 +416,7 @@ int sctp_packet_transmit(struct sctp_packet *packet)
 		if (padding)
 			memset(skb_put(chunk->skb, padding), 0, padding);
 
-		if (dst->dev->features & NETIF_F_NO_CSUM)
+		if (dst->dev->features & NETIF_F_HW_CSUM)
 			memcpy(skb_put(nskb, chunk->skb->len),
 			       chunk->skb->data, chunk->skb->len);
 		else
@@ -446,7 +446,7 @@ int sctp_packet_transmit(struct sctp_packet *packet)
 	}
 
 	/* Perform final transformation on checksum. */
-	if (!(dst->dev->features & NETIF_F_NO_CSUM))
+	if (!(dst->dev->features & NETIF_F_HW_CSUM))
 		crc32 = sctp_end_cksum(crc32);
 
 	/* 3) Put the resultant value into the checksum field in the

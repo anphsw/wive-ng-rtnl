@@ -1337,14 +1337,14 @@ void br_features_recompute(struct net_bridge *br)
 	struct net_bridge_port *p;
 	unsigned long features, checksum;
 
-	checksum = br->feature_mask & NETIF_F_ALL_CSUM ? NETIF_F_NO_CSUM : 0;
+	checksum = br->feature_mask & NETIF_F_ALL_CSUM ? NETIF_F_HW_CSUM : 0;
 	features = br->feature_mask & ~NETIF_F_ALL_CSUM;
 
 	list_for_each_entry(p, &br->port_list, list) {
 		unsigned long feature = p->dev->features;
 
-		if (checksum & NETIF_F_NO_CSUM && !(feature & NETIF_F_NO_CSUM))
-			checksum ^= NETIF_F_NO_CSUM | NETIF_F_HW_CSUM;
+		if (checksum & NETIF_F_HW_CSUM && !(feature & NETIF_F_HW_CSUM))
+			checksum ^= NETIF_F_HW_CSUM | NETIF_F_HW_CSUM;
 		if (checksum & NETIF_F_HW_CSUM && !(feature & NETIF_F_HW_CSUM))
 			checksum ^= NETIF_F_HW_CSUM | NETIF_F_IP_CSUM;
 		if (!(feature & NETIF_F_IP_CSUM))

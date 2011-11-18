@@ -141,7 +141,7 @@ static int br_set_tx_csum(struct net_device *dev, u32 data)
 	struct net_bridge *br = netdev_priv(dev);
 
 	if (data)
-		br->feature_mask |= NETIF_F_NO_CSUM;
+		br->feature_mask |= NETIF_F_HW_CSUM;
 	else
 		br->feature_mask &= ~NETIF_F_ALL_CSUM;
 
@@ -181,5 +181,5 @@ void br_dev_setup(struct net_device *dev)
 	dev->priv_flags = IFF_EBRIDGE;
 
 	dev->features = NETIF_F_SG | NETIF_F_FRAGLIST | NETIF_F_HIGHDMA |
-			NETIF_F_TSO | NETIF_F_NO_CSUM | NETIF_F_GSO_ROBUST;
+			NETIF_F_TSO | NETIF_F_HW_CSUM | NETIF_F_GSO_ROBUST;
 }

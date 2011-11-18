@@ -220,7 +220,7 @@ struct net_device loopback_dev = {
 #ifdef LOOPBACK_TSO
 				  | NETIF_F_TSO
 #endif
-				  | NETIF_F_NO_CSUM | NETIF_F_HIGHDMA
+				  | NETIF_F_HW_CSUM | NETIF_F_HIGHDMA
 				  | NETIF_F_LLTX,
 	.ethtool_ops		= &loopback_ethtool_ops,
 };
