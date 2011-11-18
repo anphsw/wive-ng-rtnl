@@ -819,6 +819,7 @@
 60) More iptables match code speedup(~2% cpu at 100 match ruleset save).<br>
 61) Fix regression sta mode driver configure.<br>
 62) Add store_ttl and store_ttl_mcast variable for add netfilter rules for increase input TTL for all/mcast.<br>
+63) Miniupnpd update to 1.6.20111118 version.<br>
 
 <br><br>
 <b>For support see:</b><br>
