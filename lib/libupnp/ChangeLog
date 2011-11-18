@@ -1,4 +1,41 @@
 *******************************************************************************
+Version 1.6.14
+*******************************************************************************
+
+2011-10-31 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	UPnP Low Power Support.
+
+	Adding two new functions (UpnpSendAdvertisementLowPower and
+	UpnpUnRegisterRootDeviceLowPower) which can be used to specify values
+	for the three SSDP headers defined by UPnP Low Power. Those headers are
+	Powerstate, SleepPeriod and RegistrationState.
+
+2011-10-24 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	Bug fix in IN6_IS_ADDR_GLOBAL.
+
+	Changing IN6_IS_ADDR_GLOBAL to accept all IPv6 addresses which have a
+	2000::/3 prefix.
+
+2011-07-20 Marc Essayan <marc.essayan(at)orange-ftgroup.com>
+
+	Bug Fix on M-SEARCH.
+
+	Do not answer to M-SEARCH using HTTP version 1.0 as specified by the
+	UPnP Device Architecture.
+
+2011-03-18 Iain Denniston <iain.denniston(at)gmail.com>
+
+	Fixes for compilation under Windows (specifically MSVC). Also added
+	MSVC supported "_inline", and fixed some WIN32 specific warnings.
+
+2011-03-08 Iain Denniston <iain.denniston(at)gmail.com>
+
+	Several fixes to correctly use SOCKET (and related) types instead of
+	non-portable variations.
+
+*******************************************************************************
 Version 1.6.13
 *******************************************************************************
 

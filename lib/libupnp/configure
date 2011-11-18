@@ -4474,8 +4474,8 @@ esac
 
 
 
-macro_version='2.2.6'
-macro_revision='1.3012'
+macro_version='2.2.6b'
+macro_revision='1.3018'
 
 
 
@@ -9097,10 +9097,11 @@ if test -z "$aix_libpath"; then aix_libpath="/usr/lib:/lib"; fi
         LDFLAGS="$LDFLAGS -shared ${wl}-exported_symbol ${wl}foo ${wl}-update_registry ${wl}/dev/null"
         cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-int foo(void) {}
+int foo (void) { return 0; }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  archive_expsym_cmds='$CC -shared $libobjs $deplibs $compiler_flags ${wl}-soname ${wl}$soname `test -n "$verstring" && $ECHO "X${wl}-set_version ${wl}$verstring" | $Xsed` ${wl}-update_registry ${wl}${output_objdir}/so_locations ${wl}-exports_file ${wl}$export_symbols -o $lib'
+
+          archive_expsym_cmds='$CC -shared $libobjs $deplibs $compiler_flags ${wl}-soname ${wl}$soname `test -n "$verstring" && $ECHO "X${wl}-set_version ${wl}$verstring" | $Xsed` ${wl}-update_registry ${wl}${output_objdir}/so_locations ${wl}-exports_file ${wl}$export_symbols -o $lib'
 
 fi
 rm -f core conftest.err conftest.$ac_objext \
@@ -10682,7 +10683,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10685 "configure"
+#line 10686 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10778,7 +10779,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10781 "configure"
+#line 10782 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14130,7 +14131,6 @@ $as_echo X"$file" |
 
 # `$ECHO "$ofile" | sed 's%^.*/%%'` - Provide generalized library-building support services.
 # Generated automatically by $as_me ($PACKAGE$TIMESTAMP) $VERSION
-# Libtool was configured on host `(hostname || uname -n) 2>/dev/null | sed 1q`:
 # NOTE: Changes made to this file will be lost: look at ltmain.sh.
 #
 #   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2003, 2004, 2005,

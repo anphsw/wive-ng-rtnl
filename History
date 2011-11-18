@@ -820,6 +820,7 @@
 61) Fix regression sta mode driver configure.<br>
 62) Add store_ttl and store_ttl_mcast variable for add netfilter rules for increase input TTL for all/mcast.<br>
 63) Miniupnpd update to 1.6.20111118 version.<br>
+64) Update libupnp to 1.6.14 version.<br>
 
 <br><br>
 <b>For support see:</b><br>
