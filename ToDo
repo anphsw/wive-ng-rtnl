@@ -1,7 +1,5 @@
 # For sadko
 ) Add store_ttl and store_ttl_mcast variable for add netfilter rules for increase input TTL for all/mcast. (Nedd add in webui in misc? page)
-) Add KLogd, SysLogd and  RemoteSysLogIP variables (Need add in webui system log page).
-) Add RemoteManagementPort variable for set goahead port(default 80)(Need add in webui misc page).
 ) Need add disconnect selected STA in AP mode (WebUI)
 iwpriv ra0 set DisConnectSta=MAC
 iwpriv ra0 set DisConnectAllSta=1
