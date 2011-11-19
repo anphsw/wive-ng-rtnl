@@ -1,5 +1,6 @@
 # For sadko
 ) Add store_ttl and store_ttl_mcast variable for add netfilter rules for increase input TTL for all/mcast. (Nedd add in webui in misc? page)
+) Internet Settings->Dynamic Routing Protocol need show ONLY if CONFIG_USER_ZEBRA defined!!!
 ) Need add disconnect selected STA in AP mode (WebUI)
 iwpriv ra0 set DisConnectSta=MAC
 iwpriv ra0 set DisConnectAllSta=1
