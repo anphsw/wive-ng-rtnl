@@ -122,7 +122,8 @@ static void fib_flush(void)
 
 struct net_device * ip_dev_find(__be32 addr)
 {
-	struct flowi fl = { .nl_u = { .ip4_u = { .daddr = addr } } };
+	struct flowi fl = { .nl_u = { .ip4_u = { .daddr = addr } },
+			    .flags = FLOWI_FLAG_MATCH_ANY_IIF };
 	struct fib_result res;
 	struct net_device *dev = NULL;
 
@@ -130,8 +131,7 @@ struct net_device * ip_dev_find(__be32 addr)
 	res.r = NULL;
 #endif
 
-	if (!ip_fib_local_table ||
-	    ip_fib_local_table->tb_lookup(ip_fib_local_table, &fl, &res))
+	if (fib_lookup(net, &fl, &res))
 		return NULL;
 	if (res.type != RTN_LOCAL)
 		goto out;
