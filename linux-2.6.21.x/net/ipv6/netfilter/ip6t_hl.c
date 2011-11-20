@@ -49,7 +49,7 @@ static int match(const struct sk_buff *skb,
 	return 0;
 }
 
-static struct xt_match hl_match = {
+static struct xt_match hl_match __read_mostly = {
 	.name		= "hl",
 	.family		= AF_INET6,
 	.match		= match,

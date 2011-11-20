@@ -83,7 +83,7 @@ static void statistic_mt_destroy(const struct xt_match *match, void *matchinfo)
 	kfree(info->master);
 }
 
-static struct xt_match xt_statistic_match[] = {
+static struct xt_match xt_statistic_match[] __read_mostly = {
 	{
 		.name		= "statistic",
 		.family		= AF_INET,

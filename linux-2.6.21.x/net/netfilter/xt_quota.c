@@ -71,7 +71,7 @@ static void quota_mt_destroy(const struct xt_match *match, void *matchinfo)
 	kfree(q->master);
 }
 
-static struct xt_match xt_quota_match[] = {
+static struct xt_match xt_quota_match[] __read_mostly = {
 	{
 		.name		= "quota",
 		.family		= AF_INET,

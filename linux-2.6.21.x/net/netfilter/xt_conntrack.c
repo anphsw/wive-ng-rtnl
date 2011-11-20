@@ -135,7 +135,7 @@ static void destroy(const struct xt_match *match, void *matchinfo)
 	nf_ct_l3proto_module_put(match->family);
 }
 
-static struct xt_match conntrack_match = {
+static struct xt_match conntrack_match __read_mostly = {
 	.name		= "conntrack",
 	.match		= match,
 	.checkentry	= checkentry,
