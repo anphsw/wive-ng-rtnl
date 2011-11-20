@@ -41,7 +41,7 @@ MODULE_ALIAS("ipt_CONNMARK");
 #include <linux/netfilter.h>
 #include <linux/netfilter/nf_conntrack_common.h>
 #include <net/netfilter/nf_conntrack.h>
-extern int ipv4_conntrack_fastnat;
+extern int nf_conntrack_fastnat;
 #endif
 
 static unsigned int
@@ -70,7 +70,7 @@ target(struct sk_buff **pskb,
 			if (newmark != ct->mark) {
 				ct->mark = newmark;
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-				if (ipv4_conntrack_fastnat) {
+				if (nf_conntrack_fastnat) {
 				    nat = nfct_nat(ct);
 				    if(nat)
 					nat->info.nat_type |= NF_FAST_NAT_DENY;

@@ -98,9 +98,8 @@ EXPORT_SYMBOL_GPL(nf_conntrack_max);
 
 #ifdef CONFIG_NF_PRIVILEGE_CONNTRACK
 #define CONNTRACK_PORT_ARRAY_SIZE   15
-unsigned int general_traffic_conntrack_max = 1024; // conntrack_max/2
+extern unsigned int general_traffic_conntrack_max;
 static __u16 privilege_conntrack_port[CONNTRACK_PORT_ARRAY_SIZE]={80,23,3128,1863,5190,5222,22,21,25,110,443,53,67,68,69};
-EXPORT_SYMBOL_GPL(general_traffic_conntrack_max);
 #endif
 
 struct list_head *nf_conntrack_hash __read_mostly;
@@ -118,13 +117,13 @@ extern char wan_ppp[IFNAMSIZ];
 
 static int nf_conntrack_vmalloc __read_mostly;
 static unsigned int nf_conntrack_next_id;
-unsigned int nf_conntrack_clear = 0;
+extern unsigned int nf_conntrack_clear;
 
 DEFINE_PER_CPU(struct ip_conntrack_stat, nf_conntrack_stat);
 EXPORT_PER_CPU_SYMBOL(nf_conntrack_stat);
 
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-extern int ipv4_conntrack_fastnat;
+extern int nf_conntrack_fastnat;
 extern struct sk_buff * nf_ct_ipv4_gather_frags(struct sk_buff *skb, u_int32_t user);
 
 typedef int (*bcmNatBindHook)(struct nf_conn *ct,
@@ -1171,7 +1170,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 	}
 
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-	if (ipv4_conntrack_fastnat && pf == PF_INET) {
+	if (nf_conntrack_fastnat && pf == PF_INET) {
 		/* Gather fragments. */
 		if (ip_hdr(*pskb)->frag_off & htons(IP_MF | IP_OFFSET)) {
 			*pskb = nf_ct_ipv4_gather_frags(*pskb,
@@ -1246,11 +1245,11 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 #endif
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 		/* software fastnat support */
-		if (ipv4_conntrack_fastnat && bcm_nat_bind_hook)
+		if (nf_conntrack_fastnat && bcm_nat_bind_hook)
 		    nat_offload_enabled=1; 
 
 		/* filter gre traffic skip all sw_nat and checks */
-		if (ipv4_conntrack_fastnat && protonum == IPPROTO_GRE) {
+		if (nf_conntrack_fastnat && protonum == IPPROTO_GRE) {
 		    nat->info.nat_type |= NF_FAST_NAT_DENY;
 		    goto skip_sw;
 		}
@@ -1290,7 +1289,7 @@ filter:
 		if (need_skip) {
 			/* sw_nat operate only udp/tcp */
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-			if(ipv4_conntrack_fastnat)
+			if(nf_conntrack_fastnat)
 			    nat->info.nat_type |= NF_FAST_NAT_DENY;
 #endif
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
@@ -1304,7 +1303,7 @@ filter:
 /* end skip section */
 
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-        if (ipv4_conntrack_fastnat && bcm_nat_bind_hook && pf == PF_INET) {
+        if (nf_conntrack_fastnat && bcm_nat_bind_hook && pf == PF_INET) {
 		/* if need helper or nat type unknown/fast deny need skip packets */
         	if (is_helper || !nat || (nat->info.nat_type & NF_FAST_NAT_DENY))
 		    goto skip_sw;
@@ -1339,7 +1338,7 @@ skip_hw:
 
 	if (set_reply && !test_and_set_bit(IPS_SEEN_REPLY_BIT, &ct->status)) {
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-		if (ipv4_conntrack_fastnat && pf == PF_INET && nat && hooknum == NF_IP_LOCAL_OUT)
+		if (nf_conntrack_fastnat && pf == PF_INET && nat && hooknum == NF_IP_LOCAL_OUT)
 			nat->info.nat_type |= NF_FAST_NAT_DENY;
 #endif
 		nf_conntrack_event_cache(IPCT_STATUS, *pskb);

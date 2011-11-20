@@ -45,10 +45,18 @@
 MODULE_LICENSE("GPL");
 
 #ifdef CONFIG_NF_FLUSH_CONNTRACK
-extern unsigned int nf_conntrack_clear;
+unsigned int nf_conntrack_clear = 0;
+EXPORT_SYMBOL_GPL(nf_conntrack_clear);
 #endif
+
 #ifdef CONFIG_NF_PRIVILEGE_CONNTRACK
-extern unsigned int general_traffic_conntrack_max;
+unsigned int general_traffic_conntrack_max = 1024;
+EXPORT_SYMBOL_GPL(general_traffic_conntrack_max);
+#endif
+
+#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+int nf_conntrack_fastnat = 0;
+EXPORT_SYMBOL_GPL(nf_conntrack_fastnat);
 #endif
 
 #ifdef CONFIG_PROC_FS
@@ -406,7 +414,7 @@ static ctl_table nf_ct_netfilter_table[] = {
 		.mode		= 0644,
 		.proc_handler	= &proc_dointvec
 	},
-#endif	 
+#endif
 #ifdef CONFIG_NF_FLUSH_CONNTRACK
 	{
 		.ctl_name	= NET_NF_CONNTRACK_FLUSH,
@@ -415,7 +423,17 @@ static ctl_table nf_ct_netfilter_table[] = {
 		.maxlen		= sizeof(int),
 		.mode		= 0644,
 		.proc_handler	= &proc_dointvec,
-	}, 
+	},
+#endif
+#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+	{
+		.ctl_name	= NET_NF_CONNTRACK_FASTNAT,
+		.procname	= "nf_conntrack_fastnat",
+		.data		= &nf_conntrack_fastnat,
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= &proc_dointvec,
+	},
 #endif
 	{ .ctl_name = 0 }
 };
