@@ -33,7 +33,7 @@ config)
 	if [ "x$ip" != x -a -w "$ip.$interface" ]; then
 		echo $ip > "$ip.$interface"
 	fi
-	$LOG "Add ip adress $ip/$mask to interface $interface and link up."
+	$LOG "Add ip adress $ip/$mask to interface $interface and interface up."
 	ip address add dev $interface scope link local "$ip/$netmask" broadcast +
 	ip link set $interface up
 	# add routes configured in web
