@@ -338,6 +338,8 @@ const parameter_fetch_t service_misc_flags[] =
 	{ T("pingerEnable"), "pinger_check_on", 0, T("0") },
 	{ T("ping_check_time"), "ping_check_time", 0, T("0") },
 	{ T("ping_check_interval"), "ping_check_interval", 0, T("0") },
+	{ T("ttlStore"), "store_ttl", 0, T("0") },
+	{ T("ttlMcastStore"), "store_ttl_mcast", 0, T("0") },
 	{ T("SnmpdEnabled"), "snmpd", 0, T("0") },
 	{ NULL, NULL, 0, NULL } // Terminator
 };

@@ -1072,7 +1072,7 @@ function submit_apply()
 
 
 <form method=post name=profile_page action="/goform/editStaProfile">
-<table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table class="form">
   <tr>
     <td class="title" colspan="2" id="editprofSysConf">System Configuration</td>
   </tr>
@@ -1135,7 +1135,7 @@ function submit_apply()
 </table>
 <hr width="90%" align="left">
 
-<table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table class="form">
   <tr>
     <td class="title" colspan="2" id="editprofSecurePolicy">Security Policy</td>
   </tr>
@@ -1167,7 +1167,7 @@ function submit_apply()
 </table>
 <br />
 
-<table id="div_wep" name="div_wep" width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table id="div_wep" name="div_wep" class="form">
   <tr> 
     <td class="title" colspan="3" id="editprofWEP">Wire Equivalence Protection (WEP)</td>
   </tr>
@@ -1219,7 +1219,7 @@ function submit_apply()
   </tr>
 </table>
 
-<table id="div_wpa" name="div_wpa" width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table id="div_wpa" name="div_wpa" class="form">
   <tr>
     <td class="title" colspan="2" id="editprofWPA">WPA</td>
   </tr>
@@ -1240,7 +1240,7 @@ function submit_apply()
 <br/>
 
 <!-- 802.1x -->
-<table id="div_8021x" name="div_8021x" width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table id="div_8021x" name="div_8021x" class="form">
   <tr>
     <td class="title" colspan="2">802.1x</td>
   </tr>
@@ -1334,7 +1334,7 @@ function submit_apply()
 </table>
 <br />
 
-<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
+<table class="buttons">
   <tr align="center">
     <td>
       <input type=button style="{width:120px;}" value="Apply" id="editprofApply" onClick="submit_apply()"> &nbsp; &nbsp;
@@ -1343,6 +1343,8 @@ function submit_apply()
   </tr>
 </table>
   </form>
+
+<div class="whitespace">&nbsp;</div>
 
 
 </td></tr></table>

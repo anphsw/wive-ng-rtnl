@@ -77,6 +77,10 @@ function wirelessModeChange()
 	else if (nmode == 2)
 		form.country_region_bg.disabled = true;
 	
+	var ht_streams = (nmode == 9) || (nmode == 6) || (nmode == 7);
+	displayElement('div_ht_tx_stream', ht_streams);
+	displayElement('div_ht_rx_stream', ht_streams);
+	
 	hideElement("div_tx_rate");
 	hideElement("div_ht_phy_mode");
 
@@ -144,6 +148,8 @@ function initValue()
 	var lnaGain = '<% getCfgZero(1, "HiPower"); %>';
 	var txPower = '<% getCfgZero(1, "TxPower"); %>';
 	var radio_off   = "<% getCfgZero(1, "RadioOff"); %>";
+	var tx_stream_idx = '<% getCfgZero(1, "HT_TxStream"); %>';
+	var rx_stream_idx = '<% getCfgZero(1, "HT_RxStream"); %>';
 	
 	var form = document.sta_advance;
 
@@ -172,6 +178,9 @@ function initValue()
 	form.staFastConnect.checked = (staFC == '1');
 	form.lnaGainEnable.checked  = (lnaGain == '1');
 	form.radioWirelessEnabled.checked = (radio_off == "0");
+	
+	form.tx_stream.value = tx_stream_idx;
+	form.rx_stream.value = rx_stream_idx;
 	
 	// Set-up TX power combo
 	for (var i=0; i<form.tx_power.options.length; i++)
@@ -392,6 +401,24 @@ function init11NValues()
 <tr>
 	<td class="head" id="staadvTxBurst">Tx BURST</td>
 	<td><input type="checkbox" name="tx_burst" <% var burst = getCfgZero(0, "TxBurst"); if (burst == "1") write("checked"); %>>enabled</td>
+</tr>
+<tr id="div_ht_tx_stream">
+	<td class="head" id="basicHTTxStream">HT TxStream</td>
+	<td>
+		<select name="tx_stream" class="half">
+			<option value="1">1</option>
+			<option value="2">2</option>
+		</select>
+	</td>
+</tr>
+<tr id="div_ht_rx_stream">
+	<td class="head" id="basicHTRxStream">HT RxStream</td>
+	<td>
+		<select name="rx_stream" class="half">
+			<option value="1">1</option>
+			<option value="2">2</option>
+		</select>
+	</td>
 </tr>
 </table>
 <br>

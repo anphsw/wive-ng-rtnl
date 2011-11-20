@@ -16,14 +16,16 @@ Butterlate.setTextDomain("wireless");
 
 function initTranslation()
 {
-	var e = document.getElementById("stalistTitle");
-	e.innerHTML = _("stalist title");
-	e = document.getElementById("stalistIntroduction");
-	e.innerHTML = _("stalist introduction");
-	e = document.getElementById("stalistWirelessNet");
-	e.innerHTML = _("stalist wireless network");
-	e = document.getElementById("stalistMacAddr");
-	e.innerHTML = _("stalist macaddr");
+	_TR("stalistTitle", "stalist title");
+	_TR("stalistIntroduction", "stalist introduction");
+	_TR("stalistWirelessNet", "stalist wireless network");
+	_TR("stalistMacAddr", "stalist macaddr");
+}
+
+function doDisconnectSta(form, mac)
+{
+	form.disconnectSta.value = mac;
+	form.submit();
 }
 
 function PageInit()
@@ -41,9 +43,11 @@ function PageInit()
 <p id="stalistIntroduction"> Here you can monitor stations associated with this AP. </p>
 <hr />
 
+<form name="sta" action="/goform/disconnectSta" method="POST">
+
 <table class="form">
   <tr> 
-    <td class="title" colspan="9" id="stalistWirelessNet">Wireless Network</td>
+    <td class="title" colspan="10" id="stalistWirelessNet">Wireless Network</td>
   </tr>
   <tr>
     <th id="stalistMacAddr">MAC Address</th>
@@ -55,9 +59,22 @@ function PageInit()
     <th>SGI</th>
     <th>STBC</th>
     <th>RSSI</th>
+    <th>Actions</th>
   </tr>
   <% getWlanStaInfo(); %>
 </table>
+
+<table class="button">
+<tr>
+	<td>
+		<input type="hidden" name="disconnectSta" value="*" />
+		<input type="submit" value="Disconnect all" class="normal">
+		<input type="hidden" name="submit-url" value="/wireless/stainfo.asp" >
+	</td>
+</tr>
+</table>
+
+</form>
 
 </td></tr></table>
 </body>

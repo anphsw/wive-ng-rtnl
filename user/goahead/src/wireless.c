@@ -50,6 +50,7 @@ static int  getWlanM2UBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int  getGreenAPBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int  listCountryCodes(int eid, webs_t wp, int argc, char_t **argv);
 static void wirelessBasic(webs_t wp, char_t *path, char_t *query);
+static void disconnectSta(webs_t wp, char_t *path, char_t *query);
 static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query);
 static void wirelessWds(webs_t wp, char_t *path, char_t *query);
 static void wirelessApcli(webs_t wp, char_t *path, char_t *query);
@@ -217,6 +218,7 @@ void formDefineWireless(void) {
 	websFormDefine(T("getAntenna"), getAntenna);
 #endif
 	websFormDefine(T("wirelessBasic"), wirelessBasic);
+	websFormDefine(T("disconnectSta"), disconnectSta);
 	websFormDefine(T("wirelessAdvanced"), wirelessAdvanced);
 	websFormDefine(T("wirelessWds"), wirelessWds);
 	websFormDefine(T("wirelessApcli"), wirelessApcli);
@@ -455,6 +457,8 @@ static int getWlanStaInfo(int eid, webs_t wp, int argc, char_t **argv)
 #else
 	    websWrite(wp, T("<td>%d,%d,%d</td>"), (int)(pe->AvgRssi0), (int)(pe->AvgRssi1), (int)(pe->AvgRssi2));
 #endif
+	    websWrite(wp, T("<td><input type=\"button\" value=\"disconnect\" onclick=\"doDisconnectSta(this.form, '%02X:%02X:%02X:%02X:%02X:%02X')\"></td>"),
+			pe->Addr[0], pe->Addr[1], pe->Addr[2], pe->Addr[3], pe->Addr[4], pe->Addr[5]);
 	    websWrite(wp, T("</tr>"));
 	}
 #else
@@ -475,6 +479,10 @@ static int getWlanStaInfo(int eid, webs_t wp, int argc, char_t **argv)
 				table.Entry[i].TxRate.field.MCS,
 				(table.Entry[i].TxRate.field.BW == 0)? "20M":"40M",
 				table.Entry[i].TxRate.field.ShortGI, table.Entry[i].TxRate.field.STBC);
+		websWrite(wp, T("<td><input type=\"button\" value=\"disconnect\" onclick=\"doDisconnectSta(this.form, '%02X:%02X:%02X:%02X:%02X:%02X')\"></td>"),
+				table.Entry[i].Addr[0], table.Entry[i].Addr[1],
+				table.Entry[i].Addr[2], table.Entry[i].Addr[3],
+				table.Entry[i].Addr[4], table.Entry[i].Addr[5]);
 	}
 #endif
 	close(s);
@@ -870,7 +878,6 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 	// Get current mode & new mode
 	char *radio = websGetVar(wp, T("radioWirelessEnabled"), T("off"));
 	int web_radio_on = CHK_IF_CHECKED(radio);
-	char *radioOff = nvram_get(RT2860_NVRAM, "RadioOff");
 
 	// fetch from web input
 	wirelessmode = websGetVar(wp, T("wirelessmode"), T("9")); //9: bgn mode
@@ -2300,3 +2307,27 @@ static int get802_1XBuilt(int eid, webs_t wp, int argc, char_t **argv)
 #endif /* CONFIG_USER_802_1X */
     return 0;
 }
+
+void disconnectSta(webs_t wp, char_t *path, char_t *query)
+{
+	char_t *mac = websGetVar(wp, T("disconnectSta"), "");
+	
+	if ((mac != NULL) && (strlen(mac) > 0))
+	{
+		if (strcmp(mac, "*") == 0)
+			doSystem("iwpriv ra0 set DisConnectAllSta=1 1>/dev/null 2>&1");
+		else if (strlen(mac) == 17)
+		{
+			char cmd[80];
+			sprintf(cmd, "iwpriv ra0 set DisConnectSta=%s 1>/dev/null 2>&1", mac);
+			doSystem(cmd);
+		}
+	}
+	
+	char_t *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
+	if (submitUrl[0])
+		websRedirect(wp, submitUrl);
+	else
+		websDone(wp, 200);
+}
+

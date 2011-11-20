@@ -304,11 +304,12 @@ function formRoutingTable(form)
 	<input value="Apply" class="normal" type="submit">
 </td>
 </tr>
+</table>
 </form>
 
 <div id="dynamicRoutingDiv" style="display:none;">
-<h1 id="dynamicRoutingTitle">Dynamic Routing Settings</h1>
-<form method="post" name="dynamicRouting" action="/goform/dynamicRouting">
+
+<form method="POST" name="dynamicRouting" action="/goform/dynamicRouting">
 <table class="form">
 <tr>
 	<td class="title" colspan="2" id="dynamicRoutingTitle2">Dynamic routing</td>
@@ -334,6 +335,7 @@ function formRoutingTable(form)
 </tr>
 </table>
 </form>
+
 </div>
 
 <div class="whitespace">&nbsp;</div>

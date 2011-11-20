@@ -1271,22 +1271,22 @@ function switch_isolated_ssid()
 <tr> 
 	<td class="head" id="basicBroadcastSSID">Broadcast Network Name (SSID)</td>
 	<td>
-		<input type="radio" name="broadcastssid" value="0" onClick="switch_hidden_ssid()"><font id="basicBroadcastSSIDDisable">Disable&nbsp;</font>
-		<input type="radio" name="broadcastssid" value="1" checked onClick="switch_hidden_ssid()"><font id="basicBroadcastSSIDEnable">Enable</font>
+		<span class="radio"><input type="radio" name="broadcastssid" value="0" onClick="switch_hidden_ssid()"><font id="basicBroadcastSSIDDisable">Disable</font></span>
+		<span class="radio"><input type="radio" name="broadcastssid" value="1" checked onClick="switch_hidden_ssid()"><font id="basicBroadcastSSIDEnable">Enable</font></span>
 	</td>
 </tr>
 <tr> 
 	<td class="head" id="basicApIsolated">AP Isolation</td>
 	<td>
-		<input type="radio" name="apisolated" value="0" checked onClick="switch_isolated_ssid()"><font id="basicApIsolatedDisable">Disable&nbsp;</font>
-		<input type="radio" name="apisolated" value="1" onClick="switch_isolated_ssid()"><font id="basicApIsolatedEnable">Enable</font>
+		<span class="radio"><input type="radio" name="apisolated" value="0" checked onClick="switch_isolated_ssid()"><font id="basicApIsolatedDisable">Disable</font></span>
+		<span class="radio"><input type="radio" name="apisolated" value="1" onClick="switch_isolated_ssid()"><font id="basicApIsolatedEnable">Enable</font></span>
 	</td>
 </tr>
 <tr id="div_mbssidapisolated"> 
 	<td class="head" id="basicMBSSIDApIsolated">MBSSID AP Isolation</td>
 	<td>
-		<input type="radio" name="mbssidapisolated" value="0" checked><font id="basicMBSSIDApIsolatedDisable">Disable&nbsp;</font>
-		<input type="radio" name="mbssidapisolated" value="1"><font id="basicMBSSIDApIsolatedEnable">Enable</font>
+		<span class="radio"><input type="radio" name="mbssidapisolated" value="0" checked><font id="basicMBSSIDApIsolatedDisable">Disable</font></span>
+		<span class="radio"><input type="radio" name="mbssidapisolated" value="1"><font id="basicMBSSIDApIsolatedEnable">Enable</font></span>
 	</td>
 </tr>
 <tr> 
@@ -1354,22 +1354,22 @@ function switch_isolated_ssid()
 <tr id="htOpModeRow" style="display: none;">
 	<td class="head" id="basicHTOPMode">Operating Mode</td>
 	<td>
-		<input type="radio" name="n_mode" value="0" checked><font id="basicHTMixed">Mixed Mode&nbsp;</font>
-		<input type="radio" name="n_mode" value="1">Green Field
+		<span class="radio"><input type="radio" name="n_mode" value="0" checked><font id="basicHTMixed">Mixed Mode</font></span>
+		<span class="radio"><input type="radio" name="n_mode" value="1">Green Field</span>
 	</td>
 </tr>
 <tr>
 	<td class="head" id="basicHTChannelBW">Channel BandWidth</td>
 	<td>
-		<input type="radio" name="n_bandwidth" value="0" onClick="Channel_BandWidth_onClick()" checked>20&nbsp;
-		<input type="radio" name="n_bandwidth" value="1" onClick="Channel_BandWidth_onClick()">20/40
+		<span class="radio"><input type="radio" name="n_bandwidth" value="0" onClick="Channel_BandWidth_onClick()" checked>20</span>
+		<span class="radio"><input type="radio" name="n_bandwidth" value="1" onClick="Channel_BandWidth_onClick()">20/40</span>
 	</td>
 </tr>
 <tr>
 	<td class="head" id="basicHTGI">Guard Interval</td>
 	<td>
-		<input type="radio" name="n_gi" value="0" checked><font id="basicHTLongGI">Long&nbsp;</font>
-		<input type="radio" name="n_gi" value="1"><font id="basicHTAutoGI">Auto</font>
+		<span class="radio"><input type="radio" name="n_gi" value="0" checked><font id="basicHTLongGI">Long</font></span>
+		<span class="radio"><input type="radio" name="n_gi" value="1"><font id="basicHTAutoGI">Auto</font></span>
 	</td>
 </tr>
 <tr>
@@ -1400,8 +1400,8 @@ function switch_isolated_ssid()
 <tr>
 	<td class="head" id="basicHTRDG">Reverse Direction Grant(RDG)</td>
 	<td>
-		<input type="radio" name="n_rdg" value="0" checked><font id="basicHTRDGDisable">Disable&nbsp;</font>
-		<input type="radio" name="n_rdg" value="1"><font id="basicHTRDGEnable">Enable</font>
+		<span class="radio"><input type="radio" name="n_rdg" value="0" checked><font id="basicHTRDGDisable">Disable&nbsp;</font></span>
+		<span class="radio"><input type="radio" name="n_rdg" value="1"><font id="basicHTRDGEnable">Enable</font></span>
 	</td>
 </tr>
 <tr name="extension_channel" id="extension_channel">
@@ -1415,22 +1415,22 @@ function switch_isolated_ssid()
 <tr>
 	<td class="head" id="basicHTAMSDU">Aggregation MSDU (A-MSDU)</td>
 	<td>
-		<input type="radio" name="n_amsdu" value="0" checked><font id="basicHTAMSDUDisable">Disable&nbsp;</font>
-		<input type="radio" name="n_amsdu" value="1"><font id="basicHTAMSDUEnable">Enable</font>
+		<span class="radio"><input type="radio" name="n_amsdu" value="0" checked><font id="basicHTAMSDUDisable">Disable</font></span>
+		<span class="radio"><input type="radio" name="n_amsdu" value="1"><font id="basicHTAMSDUEnable">Enable</font></span>
 	</td>
 </tr>
 <tr>
 	<td class="head" id="basicHTAddBA">Auto Block ACK</td>
 	<td>
-		<input type="radio" name="n_autoba" value="0" checked><font id="basicHTAddBADisable">Disable&nbsp;</font>
-		<input type="radio" name="n_autoba" value="1"><font id="basicHTAddBAEnable">Enable</font>
-	</td>
+		<span class="radio"><input type="radio" name="n_autoba" value="0" checked><font id="basicHTAddBADisable">Disable</font></span>
+		<span class="radio"><input type="radio" name="n_autoba" value="1"><font id="basicHTAddBAEnable">Enable</font></span>
+	</td>>
 </tr>
 <tr>
 	<td class="head" id="basicHTDelBA">Decline BA Request</td>
 	<td>
-		<input type="radio" name="n_badecline" value="0" checked><font id="basicHTDelBADisable">Disable&nbsp;</font>
-		<input type="radio" name="n_badecline" value="1"><font id="basicHTDelBAEnable">Enable</font>
+		<span class="radio"><input type="radio" name="n_badecline" value="0" checked><font id="basicHTDelBADisable">Disable</font></span>
+		<span class="radio"><input type="radio" name="n_badecline" value="1"><font id="basicHTDelBAEnable">Enable</font></span>
 	</td>
 </tr>
 </table>

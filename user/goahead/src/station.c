@@ -5031,6 +5031,8 @@ static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 	sta_ac = websGetVar(wp, T("staAutoConnect"), T("off"));
 	sta_fc = websGetVar(wp, T("staFastConnect"), T("off"));
 	lna_gain = websGetVar(wp, T("lnaGainEnable"), T("off"));
+	char_t *tx_stream = websGetVar(wp, T("tx_stream"), T("1"));
+	char_t *rx_stream = websGetVar(wp, T("rx_stream"), T("1"));
 
         // mac clone && sta roaming atts
 	char_t *clone_en = websGetVar(wp, T("macCloneEnbl"), T("0"));
@@ -5091,6 +5093,8 @@ static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "BGProtection", bg_prot);
 	nvram_bufset(RT2860_NVRAM, "TxRate", rate);
 	nvram_bufset(RT2860_NVRAM, "TxPower", tx_power);
+	nvram_bufset(RT2860_NVRAM, "HT_TxStream", tx_stream);
+	nvram_bufset(RT2860_NVRAM, "HT_RxStream", rx_stream);
 
 	if (!strncmp(burst, "on", 3))
 	{

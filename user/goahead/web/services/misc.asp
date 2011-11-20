@@ -114,6 +114,8 @@ function initValue()
 	var pinger = "<% getCfgZero(1, "ping_check_on"); %>";
 	var telnetd_built = "<% getTelnetdBuilt(); %>";
 	var ftpd_built = "<% getFTPDBuilt(); %>";
+	var store_ttl = '<% getCfgGeneral(1, "store_ttl"); %>';
+	var store_ttl_mcast = '<% getCfgGeneral(1, "store_ttl_mcast"); %>';
 
 	initTranslation();
 
@@ -154,6 +156,8 @@ function initValue()
 	form.CrondEnable.value = defaultNumber("<% getCfgGeneral(1, "CrondEnable"); %>", "0");
 	form.ForceRenewDHCP.value = defaultNumber("<% getCfgGeneral(1, "ForceRenewDHCP"); %>", "1");
 	form.SnmpdEnabled.value = defaultNumber("<% getCfgGeneral(1, "snmpd"); %>", "0");
+	form.ttlStore.value = (store_ttl == '1') ? '1' : '0';
+	form.ttlMcastStore.value = (store_ttl_mcast == '1') ? '1' : '0';
 
 	if (cdpb == "0")
 	{
@@ -246,7 +250,7 @@ function pingerSelect(form)
 
 function igmpSelect(form)
 {
-	displayElement( 'igmpSnoop', form.igmpEnbl.value == '1');
+	displayElement( [ 'igmpSnoop', 'mcast_store_ttl_row' ] , form.igmpEnbl.value == '1');
 }
 
 function httpRmtSelect(form)
@@ -553,6 +557,25 @@ function httpRmtSelect(form)
 	</select>
 </td>
 </tr>
+<tr>
+<td class="head">Do not modify TTL</td>
+<td>
+	<select name="ttlStore" class="half">
+		<option value="0" id="lStpD">Disable</option>
+		<option value="1" id="lStpE">Enable</option>
+	</select>
+</td>
+</tr>
+<tr id="mcast_store_ttl_row">
+<td class="head">Do not modify multicast TTL</td>
+<td>
+	<select name="ttlMcastStore" class="half">
+		<option value="0" id="lStpD">Disable</option>
+		<option value="1" id="lStpE">Enable</option>
+	</select>
+</td>
+</tr>
+
 
 </table>
 
