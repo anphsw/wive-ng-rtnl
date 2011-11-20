@@ -78,7 +78,7 @@ start() {
     	    modprobe -q rt2860v2_ap  "$mac"
 	fi
 
-	$LOG "Link wifi up..."
+	$LOG "WiFi interface up..."
 	get_txqlen
 	if [ "$OperationMode" = "3" ]; then
 	    # apcli mode ap interface
