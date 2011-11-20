@@ -323,7 +323,7 @@ static struct ctl_table icmp_compat_sysctl_table[] = {
 #endif /* CONFIG_NF_CONNTRACK_PROC_COMPAT */
 #endif /* CONFIG_SYSCTL */
 
-struct nf_conntrack_l4proto nf_conntrack_l4proto_icmp =
+struct nf_conntrack_l4proto nf_conntrack_l4proto_icmp __read_mostly =
 {
 	.l3proto		= PF_INET,
 	.l4proto		= IPPROTO_ICMP,
@@ -348,4 +348,3 @@ struct nf_conntrack_l4proto nf_conntrack_l4proto_icmp =
 #endif
 #endif
 };
-EXPORT_SYMBOL_GPL(nf_conntrack_l4proto_icmp);
