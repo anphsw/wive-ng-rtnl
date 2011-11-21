@@ -28,7 +28,7 @@
 /* Bridge group multicast address 802.1d (pg 51). */
 const u8 br_group_address[ETH_ALEN] = { 0x01, 0x80, 0xc2, 0x00, 0x00, 0x00 };
 
-static void br_pass_frame_up(struct net_bridge *br, struct sk_buff *skb)
+static int br_pass_frame_up(struct net_bridge *br, struct sk_buff *skb)
 {
 	struct net_device *indev;
 
@@ -38,7 +38,7 @@ static void br_pass_frame_up(struct net_bridge *br, struct sk_buff *skb)
 	indev = skb->dev;
 	skb->dev = br->dev;
 
-	NF_HOOK(PF_BRIDGE, NF_BR_LOCAL_IN, skb, indev, NULL,
+	return NF_HOOK(PF_BRIDGE, NF_BR_LOCAL_IN, skb, indev, NULL,
 		netif_receive_skb);
 }
 
@@ -96,9 +96,6 @@ int br_handle_frame_finish(struct sk_buff *skb)
 	struct iphdr *ih_br;
 	struct igmphdr *igmph;
 #endif
-#ifdef CONFIG_BRIDGE_IGMPP_PROCFS
-	struct igmphdr *ih;
-#endif
 
 	if (!p || p->state == BR_STATE_DISABLED)
 		goto drop;
@@ -131,54 +128,36 @@ int br_handle_frame_finish(struct sk_buff *skb)
 #endif
 	if (is_multicast_ether_addr(dest)) {
 #ifdef CONFIG_BRIDGE_IGMP_REPORT_NO_FLOODING
-		if(dest[0] != 0x01 || dest[1] != 0x00 || dest[2] != 0x5e || (dest[3] > 0x7f))
-			goto out_igmp;
+		if (dest[0] != 0x01 || dest[1] != 0x00 || dest[2] != 0x5e || (dest[3] > 0x7f))
+			goto no_igmp;
 
 		eth = (struct ethhdr *)eth_hdr(skb);
 
-		if(eth->h_proto == htons(ETH_P_IP)){
-			if(skb->len < (sizeof(struct iphdr) + sizeof(struct igmphdr)))
-				goto out_igmp;
+		if (eth->h_proto == htons(ETH_P_IP)) {
+			if (skb->len < (sizeof(struct iphdr) + sizeof(struct igmphdr)))
+				goto no_igmp;
 
 			ih_br = (struct iphdr *)skb->h.raw;
-			if(ih_br->protocol != IPPROTO_IGMP)
-				goto out_igmp;
+			if (ih_br->protocol != IPPROTO_IGMP)
+				goto no_igmp;
 
-			igmph = (struct igmphdr *)((unsigned char *)skb->h.raw + (ih_br->ihl<<2)  );
-			if(	igmph->type == IGMP_HOST_MEMBERSHIP_REPORT ||
-				igmph->type == IGMPV2_HOST_MEMBERSHIP_REPORT ||
-				igmph->type == IGMPV3_HOST_MEMBERSHIP_REPORT){
-				if (skb) {
-				    br_pass_frame_up(br, skb);
-				    goto out;
+			igmph = (struct igmphdr *)((unsigned char *)skb->h.raw + (ih_br->ihl<<2));
+			if (igmph->type == IGMP_HOST_MEMBERSHIP_REPORT ||
+			    igmph->type == IGMPV2_HOST_MEMBERSHIP_REPORT ||
+			    igmph->type == IGMPV3_HOST_MEMBERSHIP_REPORT) {
+			    if (skb) {
+#ifdef CONFIG_BRIDGE_IGMPP_PROCFS
+				if (atomic_read(&br->br_mac_table_enable) == 1) {
+				    spin_lock_bh(&br->lock);
+				    snoop_MAC(br, skb);
+				    spin_unlock_bh(&br->lock);
 				}
+#endif
+				return br_pass_frame_up(br, skb);
+			    }
 			}
 		}
-out_igmp:
-#endif
-#ifdef CONFIG_BRIDGE_IGMPP_PROCFS
-		spin_lock_bh(&br->lock); // bridge lock
-
-		if (atomic_read(&br->br_mac_table_enable) == 1 )
-			if(skb->nh.iph->protocol == IPPROTO_IGMP) { // IGMP protocol number: 0x02
-				struct sk_buff *skb2;
-				if ((skb2 = skb_clone(skb, GFP_ATOMIC)) != NULL) {
-					skb_pull(skb2, skb2->nh.iph->ihl<<2);
-					ih = (struct igmphdr *) skb2->data;
-					if (ih->type == IGMP_HOST_MEMBERSHIP_REPORT ||		// IGMPv1 REPORT
-						ih->type == IGMPV2_HOST_MEMBERSHIP_REPORT ||	// IGMPv2 REPORT
-						ih->type == IGMPV3_HOST_MEMBERSHIP_REPORT)	// IGMPv3 REPORT
-					    snoop_MAC(br, skb2);
-					// free tmp skb
-					kfree_skb(skb2);
-				#ifdef CONFIG_BRIDGE_IGMPP_PROCFS_DEBUG
-				} else {
-					printk(KERN_INFO "[BR_MAC_PROC]-> alloc new sk_buff fail !!\n");
-				#endif
-				}
-			}
-
-		spin_unlock_bh(&br->lock); // bridge unlock
+no_igmp:
 #endif
 		br->statistics.multicast++;
 		skb2 = skb;
@@ -186,18 +165,23 @@ out_igmp:
 	} else if ((dst = __br_fdb_get(br, dest)) && dst->is_local) {
 #else
 	/* if set disable bridge forward flag process external packets as local */
-	} else if ((dst = __br_fdb_get(br, dest)) && (dst->is_local || !atomic_read(&br->br_forward))) {
+	} else if ((dst = __br_fdb_get(br, dest)) && (dst->is_local || (atomic_read(&br->br_forward) == 0))) {
+		/* if packet not local dst need full drop procedure */
+		if (!dst->is_local) {
+		    //printk(KERN_INFO "BLOCKED BY PROCFS !!!\n");
+		    kfree_skb(skb);
+		    br_fdb_put(dst);
+		    goto out;
+		}
 #endif
 		skb2 = skb;
 		/* Do not forward the packet since it's local. */
 		skb = NULL;
+
 	}
 
 	if (skb2 == skb)
 	    skb2 = skb_clone(skb, GFP_ATOMIC);
-
-	if (skb2)
-	    br_pass_frame_up(br, skb2);
 
 	if (skb) {
 		if (dst)
@@ -205,6 +189,9 @@ out_igmp:
 		else
 			br_flood_forward(br, skb);
 	}
+
+	if (skb2)
+	    return br_pass_frame_up(br, skb2);
 
 out:
 	return 0;
