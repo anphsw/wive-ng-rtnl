@@ -71,11 +71,9 @@ start() {
         echo "524288" > /proc/sys/net/core/wmem_max
         echo "2097152" > /proc/sys/net/core/rmem_max
 	# more mem reserved
-	sysctl -w vm.min_free_kbytes=3192
-    fi
-    if [ -f /tmp/is_16ram_dev ] || [ "$SmbEnabled" = "1" ] || [ "$TransmissionEnabled" = "1" ]; then
-	# enable overcommit memory
-	sysctl -w vm.overcommit_memory=1
+	if [ -f /tmp/is_32ram_dev ]; then
+	    sysctl -w vm.min_free_kbytes=4096
+	fi
     fi
 ########################################################################################
 }
