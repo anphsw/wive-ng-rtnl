@@ -45,13 +45,13 @@
 MODULE_LICENSE("GPL");
 
 #ifdef CONFIG_NF_FLUSH_CONNTRACK
-unsigned int nf_conntrack_clear = 0;
-EXPORT_SYMBOL_GPL(nf_conntrack_clear);
+unsigned int nf_conntrack_table_flush = 0;
+EXPORT_SYMBOL_GPL(nf_conntrack_table_flush);
 #endif
 
 #ifdef CONFIG_NF_PRIVILEGE_CONNTRACK
-unsigned int general_traffic_conntrack_max = 1024;
-EXPORT_SYMBOL_GPL(general_traffic_conntrack_max);
+unsigned int nf_conntrack_max_general = 640;
+EXPORT_SYMBOL_GPL(nf_conntrack_max_general);
 #endif
 
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
@@ -214,7 +214,7 @@ static int ct_seq_show(struct seq_file *s, void *v)
 #endif
 	if (seq_printf(s, "use=%u\n", atomic_read(&conntrack->ct_general.use)))
 		return -ENOSPC;
-	
+
 	return 0;
 }
 
@@ -405,26 +405,6 @@ static ctl_table nf_ct_netfilter_table[] = {
 		.mode		= 0644,
 		.proc_handler	= &proc_dointvec,
 	},
-#ifdef CONFIG_NF_PRIVILEGE_CONNTRACK
-	{
-		.ctl_name	= NET_NF_GENERAL_CONNTRACK,
-		.procname	= "general_conntrack_max",
-		.data		= &general_traffic_conntrack_max,
-		.maxlen		= sizeof(int),
-		.mode		= 0644,
-		.proc_handler	= &proc_dointvec
-	},
-#endif
-#ifdef CONFIG_NF_FLUSH_CONNTRACK
-	{
-		.ctl_name	= NET_NF_CONNTRACK_FLUSH,
-		.procname	= "nf_conntrack_flush",
-		.data		= &nf_conntrack_clear,
-		.maxlen		= sizeof(int),
-		.mode		= 0644,
-		.proc_handler	= &proc_dointvec,
-	},
-#endif
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 	{
 		.ctl_name	= NET_NF_CONNTRACK_FASTNAT,
@@ -433,6 +413,26 @@ static ctl_table nf_ct_netfilter_table[] = {
 		.maxlen		= sizeof(int),
 		.mode		= 0644,
 		.proc_handler	= &proc_dointvec,
+	},
+#endif
+#ifdef CONFIG_NF_FLUSH_CONNTRACK
+	{
+		.ctl_name	= NET_NF_CONNTRACK_TABLE_FLUSH,
+		.procname	= "nf_conntrack_table_flush",
+		.data		= &nf_conntrack_table_flush,
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= &proc_dointvec,
+	},
+#endif
+#ifdef CONFIG_NF_PRIVILEGE_CONNTRACK
+	{
+		.ctl_name	= NET_NF_CONNTRACK_MAX_GENERAL,
+		.procname	= "nf_conntrack_max_general",
+		.data		= &nf_conntrack_max_general,
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= &proc_dointvec
 	},
 #endif
 	{ .ctl_name = 0 }

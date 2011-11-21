@@ -96,12 +96,6 @@ EXPORT_SYMBOL_GPL(nf_conntrack_htable_size);
 unsigned int nf_conntrack_max __read_mostly;
 EXPORT_SYMBOL_GPL(nf_conntrack_max);
 
-#ifdef CONFIG_NF_PRIVILEGE_CONNTRACK
-#define CONNTRACK_PORT_ARRAY_SIZE   15
-extern unsigned int general_traffic_conntrack_max;
-static __u16 privilege_conntrack_port[CONNTRACK_PORT_ARRAY_SIZE]={80,23,3128,1863,5190,5222,22,21,25,110,443,53,67,68,69};
-#endif
-
 struct list_head *nf_conntrack_hash __read_mostly;
 EXPORT_SYMBOL_GPL(nf_conntrack_hash);
 
@@ -110,14 +104,24 @@ EXPORT_SYMBOL_GPL(nf_conntrack_untracked);
 
 unsigned int nf_ct_log_invalid __read_mostly;
 LIST_HEAD(unconfirmed);
+
 #if defined (CONFIG_NAT_FCONE) || defined (CONFIG_NAT_RCONE)
 extern char wan_name[IFNAMSIZ];
 extern char wan_ppp[IFNAMSIZ];
 #endif
 
+#ifdef CONFIG_NF_PRIVILEGE_CONNTRACK
+#define CONNTRACK_PORT_ARRAY_SIZE   15
+extern unsigned int nf_conntrack_max_general;
+static __u16 privilege_conntrack_port[CONNTRACK_PORT_ARRAY_SIZE]={80,23,3128,1863,5190,5222,22,21,25,110,443,53,67,68,69};
+#endif
+
+#ifdef CONFIG_NF_FLUSH_CONNTRACK
+extern unsigned int nf_conntrack_table_flush;
+#endif
+
 static int nf_conntrack_vmalloc __read_mostly;
 static unsigned int nf_conntrack_next_id;
-extern unsigned int nf_conntrack_clear;
 
 DEFINE_PER_CPU(struct ip_conntrack_stat, nf_conntrack_stat);
 EXPORT_PER_CPU_SYMBOL(nf_conntrack_stat);
@@ -522,10 +526,10 @@ __nf_conntrack_find(const struct nf_conntrack_tuple *tuple,
 	unsigned int hash = hash_conntrack(tuple);
 
 #ifdef CONFIG_NF_FLUSH_CONNTRACK
-    	if(nf_conntrack_clear){
-		nf_conntrack_clear=0;
-		nf_conntrack_flush();
-		printk("Clear connection track table\n");
+    	if (nf_conntrack_table_flush) {
+	    nf_conntrack_table_flush=0;
+	    nf_conntrack_flush();
+	    DEBUGP("nf_conntrack_find: clear connection track table\n");
     	}
 #endif
 	list_for_each_entry(h, &nf_conntrack_hash[hash], list) {
@@ -577,7 +581,6 @@ __nf_cone_conntrack_find(const struct nf_conntrack_tuple *tuple,
     }
 
     return NULL;
-	
 }
 
 
@@ -589,10 +592,10 @@ nf_cone_conntrack_find_get(const struct nf_conntrack_tuple *tuple,
     struct nf_conntrack_tuple_hash *h;
 
 #ifdef CONFIG_NF_FLUSH_CONNTRACK
-    if(nf_conntrack_clear){
-    	nf_conntrack_clear=0;
+    if (nf_conntrack_table_flush) {
+    	nf_conntrack_table_flush=0;
 	nf_conntrack_flush();
-	printk("Clear connection track table\n");
+	DEBUGP("nf_cone_conntrack_find_get: clear connection track table\n");
     }
 #endif
 
@@ -916,14 +919,14 @@ init_conntrack(const struct nf_conntrack_tuple *tuple,
 	unsigned short port;
 
 	/* Here we examine by port if the traffic is allowed to pass. */
-	if(general_traffic_conntrack_max && atomic_read(&nf_conntrack_count) >= general_traffic_conntrack_max)
+	if(nf_conntrack_max_general && atomic_read(&nf_conntrack_count) >= nf_conntrack_max_general)
 	{
 		/* check ports */
 		passable = 0;
 		if(tuple->dst.protonum == IPPROTO_TCP || tuple->dst.protonum == IPPROTO_UDP)
 		{
 #ifdef CONFIG_NF_PRIVILEGE_CONNTRACK_DEBUG
-			printk(KERN_WARNING"conn %d exceeds limit %d\n", atomic_read(&nf_conntrack_count), general_traffic_conntrack_max);
+			printk(KERN_WARNING"conn %d exceeds limit %d\n", atomic_read(&nf_conntrack_count), nf_conntrack_max_general);
 #endif
 			/* I dont know why the skb tcp header points to wrong place */
 			port = __swab16(*((unsigned short *)(skb->nh.iph)+11));
@@ -1611,12 +1614,15 @@ void nf_conntrack_cleanup(void)
 	synchronize_net();
 
 	nf_ct_event_cache_flush();
- i_see_dead_people:
+
+i_see_dead_people:
 	nf_conntrack_flush();
+
 	if (atomic_read(&nf_conntrack_count) != 0) {
 		schedule();
 		goto i_see_dead_people;
 	}
+
 	/* wait until all references to nf_conntrack_untracked are dropped */
 	while (atomic_read(&nf_conntrack_untracked.ct_general.use) > 1)
 		schedule();

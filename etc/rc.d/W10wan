@@ -19,9 +19,8 @@ start() {
     killall -q udhcpc
     killall -q -SIGKILL udhcpc
 
-    # Flush conntrack table and route cache
-    echo 1 > /proc/sys/net/nf_conntrack_flush
-    ip route flush cache
+    # clear conntrack and routes tables/caches
+    flush_net_caches
 
     # if not bridge wan up
     if [ "$OperationMode" != "0" ]; then

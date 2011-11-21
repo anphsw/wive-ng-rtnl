@@ -172,6 +172,13 @@ zero_conf()
     fi
 }
 
+# conntrack and route table/caches flush
+flush_net_caches()
+{
+    ip route flush cache > /dev/null 2>&1
+    echo 1 > /proc/sys/net/nf_conntrack_table_flush
+}
+
 # L2TP and PPTP kernel dead-loop fix
 vpn_deadloop_fix()
 {
@@ -180,8 +187,7 @@ vpn_deadloop_fix()
 	    # First vpn stop...
 	    # Auto start later renew/bound
 	    service vpnhelper stop > /dev/null 2>&1
-	    ip route flush cache > /dev/null 2>&1
-	    echo 1 > /proc/sys/net/nf_conntrack_flush
+	    flush_net_caches
 	fi
     fi
 }

@@ -28,16 +28,13 @@ sysctl -w net.ipv4.ip_forward=0
 echo 0 > /proc/sys/net/ipv4/conf/all/mc_forwarding
 echo 0 > /proc/sys/net/ipv4/conf/default/mc_forwarding
 
-# clear conntrack tables
-echo 1 > /proc/sys/net/nf_conntrack_flush
+# clear conntrack and routes tables/caches
+flush_net_caches
 
 # disable hotplug
 if [ -f /proc/sys/kernel/hotplug ]; then
     echo > /proc/sys/kernel/hotplug
 fi
-
-# clear route cache
-ip route flush cache
 
 unload_ra0()
 {

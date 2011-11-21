@@ -826,6 +826,7 @@
 5) Update libupnp to 1.6.14 version.<br>
 6) Drop fastpath dependency to conntrack compat.<br>
 7) Rework network debug code.<br>
+8) Smal fixes in conntrack flush/configure.<br>
 
 <br><br>
 <b>For support see:</b><br>
