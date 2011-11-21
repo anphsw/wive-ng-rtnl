@@ -828,6 +828,8 @@
 7) Rework network debug code.<br>
 8) Smal fixes in conntrack flush/configure.<br>
 9) Fix bridge procfs forward control.<br>
+10) Bridge code cleanup and fix duplicate pkt send.<br>
+11) Fix reserved memory size for large mem devices.<br>
 
 
 <br><br>
