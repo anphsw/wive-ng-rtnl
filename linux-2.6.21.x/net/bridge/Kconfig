@@ -38,24 +38,6 @@ config BRIDGE_IGMP_REPORT_NO_FLOODING
 	---help---
 	  prevent IGMP report packet flooding to all NICs.
 
-config BRIDGE_IGMPP_PROCFS
-	bool "Bridge with IGMPProxy procfs support"
-	depends on BRIDGE_IGMP_REPORT_NO_FLOODING
-	default y
-	---help---
-	  The original kernel bridge module will flooding multicast packet to each 
-	  interface (port list), this kind of phenomenon will cause bandwidth of wireless 
-	  interface(port) has to be fouled at basic rate and make other protocols/applications 
-	  that use basic rate can't work fine.
-
-	  If you say Y here,the bridge will transform multicast packet into unicast packet by
-	  replace multicast MAC address with each member's MAC address.
-
-config BRIDGE_IGMPP_PROCFS_DEBUG
-	bool "Bridge with IGMPProxy procfs debugging"
-	depends on BRIDGE_IGMPP_PROCFS
-	---help---
-
 config BRIDGE_2WAYS_FDB
 	bool "2-Ways Forwarding DataBase"
 	depends on BRIDGE

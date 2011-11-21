@@ -19,7 +19,7 @@
 #include <linux/netfilter_bridge.h>
 #include "br_private.h"
 
-#if defined(CONFIG_BRIDGE_IGMPP_PROCFS) || defined(CONFIG_BRIDGE_IGMP_REPORT_NO_FLOODING)
+#ifdef CONFIG_BRIDGE_IGMP_REPORT_NO_FLOODING
 #include <linux/ip.h>
 #include <linux/in.h>
 #include <linux/igmp.h>
@@ -41,47 +41,6 @@ static int br_pass_frame_up(struct net_bridge *br, struct sk_buff *skb)
 	return NF_HOOK(PF_BRIDGE, NF_BR_LOCAL_IN, skb, indev, NULL,
 		netif_receive_skb);
 }
-
-#ifdef CONFIG_BRIDGE_IGMPP_PROCFS
-/* snoop_MAC() => If IP address that existed in br_mac_table ,replace it,
- * else create a new list entry and add it to list.
- * called under bridge lock */
-static void snoop_MAC(struct net_bridge *br ,struct sk_buff *skb2)
-{
-	uint32_t ip32 =  (uint32_t) skb2->nh.iph->saddr;
-
-	struct br_mac_table_t *tlist;
-	struct ethhdr *src;
-	int find = 0, i = 0;
-
-	list_for_each_entry(tlist,&(br->br_mac_table.list), list){
-		if ( tlist->ip_addr == ip32){
-			find =1;
-			src = eth_hdr(skb2);
-			for (i =0; i<6; i++)
-				tlist->mac_addr[i] = src->h_source[i];
-			break;
-		}
-	}
-	if (find == 0 ){
-		struct br_mac_table_t * new_entry;
-		new_entry = (struct br_mac_table_t *)kmalloc(sizeof(struct br_mac_table_t), GFP_ATOMIC);
-		if (new_entry != NULL){
-			int i;
-			struct ethhdr * src = eth_hdr(skb2);
-			for (i =0; i<6; i++)
-				new_entry->mac_addr[i] = src->h_source[i];
-			new_entry->ip_addr = ip32;
-			list_add(&(new_entry->list), &(br->br_mac_table.list));
-		}else{
-			#ifdef CONFIG_BRIDGE_IGMPP_PROCFS_DEBUG
-			printk(KERN_INFO "[BR_MAC_PROC]-> alloc new br_mac_table_t fail !!\n");
-			#endif
-		}
-	}
-}
-#endif
-
 
 /* note: already called with rcu_read_lock (preempt_disabled) */
 int br_handle_frame_finish(struct sk_buff *skb)
@@ -145,16 +104,8 @@ int br_handle_frame_finish(struct sk_buff *skb)
 			if (igmph->type == IGMP_HOST_MEMBERSHIP_REPORT ||
 			    igmph->type == IGMPV2_HOST_MEMBERSHIP_REPORT ||
 			    igmph->type == IGMPV3_HOST_MEMBERSHIP_REPORT) {
-			    if (skb) {
-#ifdef CONFIG_BRIDGE_IGMPP_PROCFS
-				if (atomic_read(&br->br_mac_table_enable) == 1) {
-				    spin_lock_bh(&br->lock);
-				    snoop_MAC(br, skb);
-				    spin_unlock_bh(&br->lock);
-				}
-#endif
+			    if (skb)
 				return br_pass_frame_up(br, skb);
-			    }
 			}
 		}
 no_igmp:
