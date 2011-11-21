@@ -275,6 +275,7 @@ config ARP_HASH_FASTPATH
 
 config SYN_COOKIES
 	bool "IP: TCP syncookie support (disabled per default)"
+	default n
 	---help---
 	  Normal TCP/IP networking is open to an attack known as "SYN
 	  flooding". This denial-of-service attack prevents legitimate remote

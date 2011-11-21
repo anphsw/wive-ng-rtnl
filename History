@@ -831,7 +831,7 @@
 10) Bridge code cleanup and fix duplicate pkt send.<br>
 11) Fix reserved memory size for large mem devices.<br>
 12) Add mss_use_pmtu variable enable/disable use pmtu discovery for correct tcp header tranzit packets.<br>
-
+13) Disable syn cookies support. This need more backports for enable by default.<br>
 
 <br><br>
 <b>For support see:</b><br>
