@@ -138,7 +138,7 @@ PSTRING rtstrstr(PSTRING s1,const PSTRING s2)
 			return s1;
 		s1++;
 	}
-	
+
 	return NULL;
 }
  

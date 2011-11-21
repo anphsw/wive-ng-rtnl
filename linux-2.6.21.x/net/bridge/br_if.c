@@ -219,12 +219,12 @@ static int search_list_MAC(struct port_igmpp_table_t *pt, int groupIndex, unsign
     int i;
 	for (i=0; i<HOSTLIST_NUMBER; ++i){
 		if (pt->group_list[groupIndex].host_list[i].used==1)
-			if (pt->group_list[groupIndex].host_list[i].mac_addr[0] == *mac_addr				)
-			  if (pt->group_list[groupIndex].host_list[i].mac_addr[1] == *(mac_addr+1)			)
-			    if (pt->group_list[groupIndex].host_list[i].mac_addr[2] == *(mac_addr+2)		)
-			      if (pt->group_list[groupIndex].host_list[i].mac_addr[3] == *(mac_addr+3)		)
-			        if (pt->group_list[groupIndex].host_list[i].mac_addr[4] == *(mac_addr+4)	)
-			         if (pt->group_list[groupIndex].host_list[i].mac_addr[5] == *(mac_addr+5)	)
+			if (pt->group_list[groupIndex].host_list[i].mac_addr[0] == *mac_addr)
+			  if (pt->group_list[groupIndex].host_list[i].mac_addr[1] == *(mac_addr+1))
+			    if (pt->group_list[groupIndex].host_list[i].mac_addr[2] == *(mac_addr+2))
+			      if (pt->group_list[groupIndex].host_list[i].mac_addr[3] == *(mac_addr+3))
+			        if (pt->group_list[groupIndex].host_list[i].mac_addr[4] == *(mac_addr+4))
+			         if (pt->group_list[groupIndex].host_list[i].mac_addr[5] == *(mac_addr+5))
 						return i;
 	}
 	return (-1);
@@ -343,7 +343,7 @@ static int check_GROUP_is_empty_and_remove(struct port_igmpp_table_t *pt, int gI
 		printk(KERN_INFO "[BR_IGMPP_PROC]-> Group IP: %u.%u.%u.%u remove !!\n",
 									*ip8_addr, *(ip8_addr+1), *(ip8_addr+2), *(ip8_addr+3));
 		#endif
-		remove_GROUP_from_pool(pt, gIdx);	
+		remove_GROUP_from_pool(pt, gIdx);
 		return 0;
 	} else 
 		return 0;
@@ -371,7 +371,7 @@ static int proc_read_br_igmpp (char *buf, char **start, off_t offset,
 			if(p->port_igmpp_table.group_list[i].used == 1){
 				uint32_t ip32_addr = p->port_igmpp_table.group_list[i].ip_addr;
 				uint8_t *ip8_addr;
-				trans_32to8(&ip32_addr, &ip8_addr);	
+				trans_32to8(&ip32_addr, &ip8_addr);
 				printk( "* <%d> => group_list[%u]= %u %u %u %u\n", p->port_no, 
 						i, *ip8_addr, *(ip8_addr+1), *(ip8_addr+2), *(ip8_addr+3));
 				for (j=0; j<HOSTLIST_NUMBER; j++){
@@ -405,7 +405,7 @@ static void split_IP(uint32_t *ip32_addr, char * token)
 		ipField_char[i] = strsep(pIP, ipDelim);
 		ipField_int[i] = (uint8_t) simple_strtoul( ipField_char[i], NULL, 10);
 	}
-	trans_32to8(ip32_addr, &ip8_addr);	
+	trans_32to8(ip32_addr, &ip8_addr);
 	for (i =0; i<4; ++i)
 		*(ip8_addr+i) = ipField_int[i];
 	return;
@@ -446,7 +446,7 @@ static void table_add(	struct net_bridge_port *p,	struct port_igmpp_table_t *pt,
 
 		/* search MAC in group*/
 		ipIdx = search_list_MAC(pt, groupIdx, mac_addr);
-		
+
 		if(ipIdx >= 0){ /* MAC existed */
 			#ifdef CONFIG_BRIDGE_IGMPP_PROCFS_DEBUG
 			printk(KERN_INFO "[BR_IGMPP_PROC]-> MAC: %X:%X:%X:%X:%X:%X has been existed !!\n",
@@ -473,7 +473,7 @@ static void table_add(	struct net_bridge_port *p,	struct port_igmpp_table_t *pt,
 									*ip8_addr, *(ip8_addr+1), *(ip8_addr+2), *(ip8_addr+3));
 				#endif
 			}
-		}			
+		}
 	}else{ /* group doesn't existed */
 
 		/* check group pool */
@@ -542,50 +542,7 @@ static void table_remove(struct port_igmpp_table_t *pt,
 
 	return;
 }
-/* For different platform, 
- * kernel API may don't support strcmp() originally, 
- * we copy strcmp() and named strcmp1() for conveniently.
- *
- * strcmp - Compare two strings
- * @cs: One string
- * @ct: Another string
- */
-static int strcmp1(char * cs,char * ct)
-{
-	register signed char __res;
-	while (1) {
-		if ((__res = *cs - *ct++) != 0 || !*cs++)
-			break;
-	}
-	return __res;
-}
 
-/* For different platform, 
- * kernel API may don't  support strspn() originally, 
- * we copy strspn() and named strspn1() for conveniently.
- *
- * strspn1 - Calculate the length of the initial substring of @s which only
- *      contain letters in @accept
- * @s: The string to be searched
- * @accept: The string to search for
- */
-static size_t strspn1(char *s, char *accept)
-{
-	char *p;
-	char *a;
-	size_t count = 0;
-
-	for (p = s; *p != '\0'; ++p) {
-		for (a = accept; *a != '\0'; ++a) {
-			if (*p == *a)
-				break;
-		}
-		if (*a == '\0')
-			return count;
-		++count;
-	}
-	return count;
-}
 /* check_str()
  * type => 0, only accept ".0123456789"
  * type => 1, only accept ":0123456789ABCDEFabcdef"
@@ -595,15 +552,15 @@ static int check_str(char *s, int type)
 	char * accept = NULL;
 	switch (type){
 		case 0:
-			accept = IP_ACCEPT_CHAR;	
+			accept = IP_ACCEPT_CHAR;
 			break;
 		case 1:
 			accept = MAC_ACCEPT_CHAR;
 			break;
 	}
 
-	if (accept != NULL)		
-		if ( strlen(s) == strspn1(s, accept) )
+	if (accept != NULL)
+		if (strlen(s) == strspn(s, accept))
 			return 0;
 	return (-1);
 }
@@ -614,7 +571,7 @@ static struct net_bridge_port * search_device(struct net_bridge * br, char* name
 {
 	struct net_bridge_port *p;
 	list_for_each_entry(p, &br->port_list, list) {
-		if (strcmp1(p->dev->name, name) == 0 ){
+		if (strcmp(p->dev->name, name) == 0 ){
 			return p;
 		}
 	}
@@ -725,10 +682,10 @@ static int proc_write_br_igmpp (struct file *file, const char *buf,
 	len = sizeof(message);
 	message[len-1] = '\0';
 
-	/* split input message that get from user space 
-	 * token[0] => action token --> add or remove 
-	 * token[1] => multicast group IP address 
-	 * token[2] => MAC address of host IP  
+	/* split input message that get from user space
+	 * token[0] => action token --> add or remove
+	 * token[1] => multicast group IP address
+	 * token[2] => MAC address of host IP
 	 */
 	msgDelim = MESSAGE_DELIM;
 	pmesg = message;
@@ -757,7 +714,7 @@ static int proc_write_br_igmpp (struct file *file, const char *buf,
 		table_all_disable(br);
 		#ifdef CONFIG_BRIDGE_IGMPP_PROCFS_DEBUG
 		printk(KERN_INFO "[BR_IGMPP_PROC]->DISABLE %s\n",br->dev->name);
-		#endif 
+		#endif
 		spin_unlock_bh(&br->lock); // bridge unlock for goto proc_write_br_igmpp_out
 		goto proc_write_br_igmpp_out;
 	}
@@ -776,7 +733,7 @@ static int proc_write_br_igmpp (struct file *file, const char *buf,
 		spin_unlock_bh(&br->lock); // bridge unlock for goto proc_write_br_igmpp_out
 		goto proc_write_br_igmpp_out;
 	}
-	
+
 	/* ============================  unset wireless ==========================*/
 	action = ACTION_UNSET_WL;
 	if ( memcmp(action_token, action, sizeof(ACTION_UNSET_WL) )== 0){
@@ -923,7 +880,7 @@ static int proc_write_br_igmpp (struct file *file, const char *buf,
 			#endif
 			goto proc_write_br_igmpp_out;
 		}
-	
+
 		/* Judge address of Host either IP adress or MAC address */
 		spin_lock_bh(&br->lock); // bridge lock
 
@@ -1144,13 +1101,14 @@ static struct net_device *new_bridge_dev(const char *name)
 	br->topology_change_detected = 0;
 	br->ageing_time = 300 * HZ;
 #ifdef CONFIG_BRIDGE_FORWARD_CTRL
-    atomic_set(&br->br_forward, 1);
-    snprintf(proc_name, sizeof(proc_name), "net/br_forward_%s", name);
-    br->br_proc = create_proc_entry(proc_name, 0, 0);
-    if (br->br_proc == NULL) return ERR_PTR(-ENOMEM);
-    br->br_proc->data = (void *)br;
-    br->br_proc->read_proc = proc_read_br_forward;
-    br->br_proc->write_proc = proc_write_br_forward;
+	atomic_set(&br->br_forward, 1);
+	snprintf(proc_name, sizeof(proc_name), "net/br_forward_%s", name);
+	br->br_proc = create_proc_entry(proc_name, 0, 0);
+	if (br->br_proc == NULL)
+		return ERR_PTR(-ENOMEM);
+	br->br_proc->data = (void *)br;
+	br->br_proc->read_proc = proc_read_br_forward;
+	br->br_proc->write_proc = proc_write_br_forward;
 #endif
 #ifdef CONFIG_BRIDGE_IGMPP_PROCFS
 	snprintf(igmpp_proc_name, sizeof(igmpp_proc_name), "net/br_igmpp_%s", name);

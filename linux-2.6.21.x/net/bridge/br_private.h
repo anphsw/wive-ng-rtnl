@@ -39,29 +39,29 @@ typedef __u16 port_id;
 #ifdef CONFIG_BRIDGE_IGMPP_PROCFS
 #define BR_IGMPP_MSG_ERROR		0
 #define BR_IGMPP_MSG_OK			1
-#define BR_IGMPP_MSG_INFO		2	
-#define BR_IGMPP_MSG_WARNING		3	
+#define BR_IGMPP_MSG_INFO		2
+#define BR_IGMPP_MSG_WARNING		3
 
 #define MESSAGE_LENGTH			80
 #define MESSAGE_DELIM			" \t"
 #define MESSAGE_ARGC			3
-#define IP_DELIM				"."
+#define IP_DELIM			"."
 #define IP_ACCEPT_CHAR			".0123456789"
-#define MAC_DELIM				":"
+#define MAC_DELIM			":"
 #define MAC_ACCEPT_CHAR			":0123456789ABCDEFabcdef"
-#define ACTION_ADD				"add"
+#define ACTION_ADD			"add"
 #define ACTION_REMOVE			"remove"
 #define ACTION_SET_WL			"setwl"
 #define ACTION_UNSET_WL			"unsetwl"
 #define ACTION_ENABLE_TABLE		"enable"
-#define ACTION_DISABLE_TABLE	"disable"
+#define ACTION_DISABLE_TABLE		"disable"
 
-#define HOSTLIST_NUMBER			8		
-#define GROUPLIST_NUMBER		8						
+#define HOSTLIST_NUMBER			8
+#define GROUPLIST_NUMBER		8
 
 struct port_igmpp_mac_t {
 	int				used;
-	unsigned char	mac_addr[6];			
+	unsigned char	mac_addr[6];
 };
 
 struct port_igmpp_group_t {
@@ -71,7 +71,7 @@ struct port_igmpp_group_t {
 };
 
 struct port_igmpp_table_t {
-	int				enable;	
+	int				enable;
 	struct port_igmpp_group_t group_list[GROUPLIST_NUMBER];
 };
 
@@ -137,9 +137,9 @@ struct net_bridge_port
 #ifdef CONFIG_BRIDGE_IGMPP_PROCFS
 	struct port_igmpp_table_t port_igmpp_table;	// two-way array
 
-	/* wireless_interface = 1, corresponding device of net_bridge_port is wireless device. 
+	/* wireless_interface = 1, corresponding device of net_bridge_port is wireless device.
 	 * wireless_interface = 0, corresponding device of net_bridge_port is wired device.
-	 * NOTE & TODO: This variable only change by IGMPProxy, should we modify br_add_if() 
+	 * NOTE & TODO: This variable only change by IGMPProxy, should we modify br_add_if()
 	 * 				for initial this variable ?!
 	 */
 	atomic_t				wireless_interface;
@@ -190,8 +190,8 @@ struct net_bridge
 #ifdef CONFIG_BRIDGE_IGMPP_PROCFS
 	atomic_t			br_igmpp_table_enable; // for check each port_igmpp_table conveniently
 	struct proc_dir_entry		*br_igmpp_proc; // port_igmpp_table I/O with user or processes
- 
-	struct br_mac_table_t		br_mac_table; // linking list structure	
+
+	struct br_mac_table_t		br_mac_table; // linking list structure
 	atomic_t					br_mac_table_enable; // for check br_mac_table conveniently
 	struct proc_dir_entry		*br_mac_proc; // br_mac_table I/O with user or processes
 #endif
