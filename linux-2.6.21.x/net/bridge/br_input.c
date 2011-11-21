@@ -64,7 +64,7 @@ int br_handle_frame_finish(struct sk_buff *skb)
 	br_fdb_update(br, p, eth_hdr(skb)->h_source);
 
 #ifdef CONFIG_BRIDGE_EAP
-	if ((p->state == BR_STATE_LEARNING) && skb->protocol != htons(ETH_P_PAE))
+	if ((p->state == BR_STATE_LEARNING) && (skb->protocol != htons(ETH_P_PAE)))
 #else
 	if (p->state == BR_STATE_LEARNING)
 #endif
@@ -72,11 +72,10 @@ int br_handle_frame_finish(struct sk_buff *skb)
 
 	/* The packet skb2 goes to the local host (NULL to skip). */
 	skb2 = NULL;
+	dst  = NULL;
 
 	if (br->dev->flags & IFF_PROMISC)
 		skb2 = skb;
-
-	dst = NULL;
 
 #ifdef CONFIG_BRIDGE_EAP
 	if (skb->protocol == htons(ETH_P_PAE)) {
@@ -128,7 +127,6 @@ no_igmp:
 		skb2 = skb;
 		/* Do not forward the packet since it's local. */
 		skb = NULL;
-
 	}
 
 	if (skb2 == skb)
