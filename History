@@ -827,6 +827,7 @@
 6) Drop fastpath dependency to conntrack compat.<br>
 7) Rework network debug code.<br>
 8) Smal fixes in conntrack flush/configure.<br>
+9) Fix bridge procfs forward control.<br>
 
 
 <br><br>

@@ -127,7 +127,7 @@ int br_handle_frame_finish(struct sk_buff *skb)
 		skb2 = skb;
 		/* Do not forward 802.1x/EAP frames */
 		skb = NULL;
-	} else 
+	} else
 #endif
 	if (is_multicast_ether_addr(dest)) {
 #ifdef CONFIG_BRIDGE_IGMP_REPORT_NO_FLOODING
@@ -160,22 +160,21 @@ out_igmp:
 		spin_lock_bh(&br->lock); // bridge lock
 
 		if (atomic_read(&br->br_mac_table_enable) == 1 )
-			if(skb->nh.iph->protocol == IPPROTO_IGMP){ // IGMP protocol number: 0x02
+			if(skb->nh.iph->protocol == IPPROTO_IGMP) { // IGMP protocol number: 0x02
 				struct sk_buff *skb2;
 				if ((skb2 = skb_clone(skb, GFP_ATOMIC)) != NULL) {
 					skb_pull(skb2, skb2->nh.iph->ihl<<2);
 					ih = (struct igmphdr *) skb2->data;
 					if (ih->type == IGMP_HOST_MEMBERSHIP_REPORT ||		// IGMPv1 REPORT
 						ih->type == IGMPV2_HOST_MEMBERSHIP_REPORT ||	// IGMPv2 REPORT
-						ih->type == IGMPV3_HOST_MEMBERSHIP_REPORT	)	// IGMPv3 REPORT
-					{
-						snoop_MAC(br, skb2);
-					}
+						ih->type == IGMPV3_HOST_MEMBERSHIP_REPORT)	// IGMPv3 REPORT
+					    snoop_MAC(br, skb2);
+					// free tmp skb
 					kfree_skb(skb2);
-				}else{
-					#ifdef CONFIG_BRIDGE_IGMPP_PROCFS_DEBUG
+				#ifdef CONFIG_BRIDGE_IGMPP_PROCFS_DEBUG
+				} else {
 					printk(KERN_INFO "[BR_MAC_PROC]-> alloc new sk_buff fail !!\n");
-					#endif
+				#endif
 				}
 			}
 
@@ -183,7 +182,12 @@ out_igmp:
 #endif
 		br->statistics.multicast++;
 		skb2 = skb;
+#ifndef CONFIG_BRIDGE_FORWARD_CTRL
 	} else if ((dst = __br_fdb_get(br, dest)) && dst->is_local) {
+#else
+	/* if set disable bridge forward flag process external packets as local */
+	} else if ((dst = __br_fdb_get(br, dest)) && (dst->is_local || !atomic_read(&br->br_forward))) {
+#endif
 		skb2 = skb;
 		/* Do not forward the packet since it's local. */
 		skb = NULL;
@@ -192,27 +196,6 @@ out_igmp:
 	if (skb2 == skb)
 	    skb2 = skb_clone(skb, GFP_ATOMIC);
 
-#ifdef CONFIG_BRIDGE_FORWARD_CTRL
-	if (dst != NULL && !atomic_read(&br->br_forward)) {
-		kfree_skb(skb);
-		br_fdb_put(dst);
-		goto out;
-	}
-#endif
-#ifdef CONFIG_BRIDGE_PORT_FORWARD
-	if (dst != NULL && !p->port_forwarding) {
-		kfree_skb(skb);
-		br_fdb_put(dst);
-		goto out;
-	}
-#endif
-#ifdef CONFIG_BRIDGE_PORT_FORWARD
-	if (dst != NULL && !p->port_forwarding) {
-            kfree_skb(skb);
-            br_fdb_put(dst);
-            goto out;
-	}
-#endif
 	if (skb2)
 	    br_pass_frame_up(br, skb2);
 
@@ -220,7 +203,7 @@ out_igmp:
 		if (dst)
 			br_forward(dst->dst, skb);
 		else
-			 br_flood_forward(br, skb);
+			br_flood_forward(br, skb);
 	}
 
 out:

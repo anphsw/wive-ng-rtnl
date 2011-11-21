@@ -131,9 +131,6 @@ struct net_bridge_port
 	struct timer_list		message_age_timer;
 	struct kobject			kobj;
 	struct rcu_head			rcu;
-#ifdef CONFIG_BRIDGE_PORT_FORWARD
-	u8			port_forwarding;
-#endif
 #ifdef CONFIG_BRIDGE_IGMPP_PROCFS
 	struct port_igmpp_table_t port_igmpp_table;	// two-way array
 
@@ -183,16 +180,15 @@ struct net_bridge
 	struct timer_list		gc_timer;
 	struct kobject			ifobj;
 #ifdef CONFIG_BRIDGE_FORWARD_CTRL
-    atomic_t                        br_forward;
-    struct proc_dir_entry           * br_proc;
+	atomic_t                        br_forward;
+	struct proc_dir_entry           * br_proc;
 #endif
-
 #ifdef CONFIG_BRIDGE_IGMPP_PROCFS
 	atomic_t			br_igmpp_table_enable; // for check each port_igmpp_table conveniently
 	struct proc_dir_entry		*br_igmpp_proc; // port_igmpp_table I/O with user or processes
 
 	struct br_mac_table_t		br_mac_table; // linking list structure
-	atomic_t					br_mac_table_enable; // for check br_mac_table conveniently
+	atomic_t			br_mac_table_enable; // for check br_mac_table conveniently
 	struct proc_dir_entry		*br_mac_proc; // br_mac_table I/O with user or processes
 #endif
 };

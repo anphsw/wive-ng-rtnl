@@ -41,6 +41,7 @@ config BRIDGE_2WAYS_FDB
 config BRIDGE_IGMP_REPORT_NO_FLOODING
 	bool "IGMP report packets to CPU only(No flooding)"
 	depends on BRIDGE
+	default y
 	---help---
 	  prevent IGMP report packet flooding to all NICs.
 
@@ -64,12 +65,6 @@ config BRIDGE_MAC_AUTO
         depends on BRIDGE
 	default y
         ---help---
-
-config BRIDGE_PORT_FORWARD
-	bool "Port forwarding Control"
-	depends on BRIDGE
-	default y
-	---help---
 
 config BRIDGE_IGMPP_PROCFS
 	bool "Bridge with IGMPProxy procfs support"

@@ -188,7 +188,7 @@ static void del_br(struct net_bridge *br)
 static int proc_read_br_forward(char * buf, char ** start, off_t offset,
                int len, int * eof, void * data)
 {
-	struct net_bridge * br = (struct net_bridge *)data;
+    struct net_bridge * br = (struct net_bridge *)data;
     char * p = buf;
     p += sprintf(p, "%d\n", atomic_read(&br->br_forward));
     *eof = 1;
@@ -199,11 +199,14 @@ static int proc_write_br_forward(struct file * file, const char * buf,
                unsigned long count, void * data)
 {
     struct net_bridge * br = (struct net_bridge *)data;
-    if (count < 1) return -EINVAL;
+    if (count < 1)
+	return -EINVAL;
+
     atomic_set(&br->br_forward, buf[0] == '0' ? 0 : 1);
     return count;
 }
 #endif
+
 #ifdef CONFIG_BRIDGE_IGMPP_PROCFS
 void trans_32to8(uint32_t *ip, uint8_t **a)
 {
@@ -1066,7 +1069,7 @@ static struct net_device *new_bridge_dev(const char *name)
 	struct net_bridge *br;
 	struct net_device *dev;
 #ifdef CONFIG_BRIDGE_FORWARD_CTRL
-    char proc_name[32];
+	char proc_name[32];
 #endif
 #ifdef CONFIG_BRIDGE_IGMPP_PROCFS
 	char igmpp_proc_name[32];
@@ -1230,7 +1233,7 @@ int br_del_bridge(const char *name)
 	struct net_device *dev;
 	int ret = 0;
 #ifdef CONFIG_BRIDGE_FORWARD_CTRL
-    char proc_name[32];
+	char proc_name[32];
 #endif
 #ifdef CONFIG_BRIDGE_IGMPP_PROCFS
 	char igmpp_proc_name[32];
@@ -1255,7 +1258,7 @@ int br_del_bridge(const char *name)
 
 	rtnl_unlock();
 #ifdef CONFIG_BRIDGE_FORWARD_CTRL
-    snprintf(proc_name, sizeof(proc_name), "net/br_forward_%s", name);
+	snprintf(proc_name, sizeof(proc_name), "net/br_forward_%s", name);
 	remove_proc_entry(proc_name, 0);
 #endif
 #ifdef CONFIG_BRIDGE_IGMPP_PROCFS
