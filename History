@@ -830,6 +830,7 @@
 9) Fix bridge procfs forward control.<br>
 10) Bridge code cleanup and fix duplicate pkt send.<br>
 11) Fix reserved memory size for large mem devices.<br>
+12) Add mss_use_pmtu variable enable/disable use pmtu discovery for correct tcp header tranzit packets.<br>
 
 
 <br><br>

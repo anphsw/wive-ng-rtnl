@@ -237,7 +237,7 @@ start() {
 	    fi
 
 	    # tune mss size for tranzit packets
-	    iptables -t mangle -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
+	    clamp_mss
 
 	    # hack for stupid and greedy ISP
 	    if [ "$store_ttl" = "1" ]; then
@@ -457,7 +457,7 @@ stop() {
 
 get_param() {
     # get network, vpn, netfiletrs and others config variables
-    eval `nvram_buf_get 2860 lan_ipaddr lan_netmask Lan2Enabled lan2_ipaddr lan2_netmask \
+    eval `nvram_buf_get 2860 lan_ipaddr lan_netmask Lan2Enabled lan2_ipaddr lan2_netmask mss_use_pmtu \
 	    natEnabled use_snat PortForwardEnable DMZEnable DMZIPAddress DMZNATLoopback DefaultFirewallPolicy \
 	    IPPortFilterEnable WANPingFilter RemoteSSH RemoteFTP RemoteTelnet RemoteManagement RemoteManagementPort \
 	    dhcpEnabled ipt_account upnpEnabled igmpEnabled UDPXYMode UDPXYPort SmbEnabled TransmissionEnabled snmpd \
@@ -491,6 +491,34 @@ get_param() {
     STATE_NEW="-m state --state NEW"
     STATE_EST="-m state --state ESTABLISHED,RELATED"
     CONNLIMIT="-m connlimit --connlimit-above"
+}
+
+clamp_mss() {
+    if [ "$mss_use_pmtu" != "0" ]; then
+	# automatic correct mss based from pmtu discovery
+	iptables -t mangle -A FORWARD -p tcp ! -o $lan_if --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
+    else
+	# use ceurrent iface mtu for mss calculate (MSS=MTU-40 bytes)
+	# for phys wan
+	cur_mtu=`ip link show $wan_if | grep mtu | awk {' print $5 '}`
+	if [ "$cur_mtu" != "" ]; then
+	    hole_mtu="$(($cur_mtu-40)"
+	else
+	    hole_mtu="1460"
+	fi
+	iptables -t mangle -A FORWARD -p tcp -o $wan_if --tcp-flags SYN,RST SYN -m tcpmss --mss $hole_mtu:65535 -j TCPMSS --set-mss $hole_mtu
+
+	# for vpn
+	if [ "$real_wan_ipaddr" != "$wan_if" ]; then
+	    cur_mtu=`ip link show $real_wan_if | grep mtu | awk {' print $5 '}`
+	    if [ "$cur_mtu" != "" ]; then
+		hole_mtu="$(($cur_mtu-40)"
+	    else
+		hole_mtu="1460"
+	    fi
+	    iptables -t mangle -A FORWARD -p tcp -o $real_wan_if --tcp-flags SYN,RST SYN -m tcpmss --mss $hole_mtu:65535 -j TCPMSS --set-mss $hole_mtu
+	fi
+    fi
 }
 
 case "$1" in

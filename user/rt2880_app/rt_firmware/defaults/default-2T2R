@@ -297,5 +297,6 @@ ping_check_time=300
 ping_check_interval=30
 cdpEnabled=0
 boot_leds_blink=13 14
+mss_use_pmtu=1
 IS_WIVE=YES
 CHECKMAC=YES

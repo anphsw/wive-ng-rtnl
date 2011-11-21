@@ -1,4 +1,6 @@
 # For sadko
+) Add mss_use_pmtu variable enable/disable use pmtu discovery for correct tcp header tranzit packets.
+    (Need add in webui misc others default 1).
 ) Add /proc/rt3052/esw_cnt for traffic statistic per switch port.(need add in WebUI).
 
 # For me
