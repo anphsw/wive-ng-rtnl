@@ -699,9 +699,10 @@ const parameter_fetch_t service_syslog_flags[] =
 static void clearlog(webs_t wp, char_t *path, char_t *query)
 {
 	printf("Clear system log\n");
-	doSystem("service syslog restart");
-
+	doSystem("service syslog stop");
 	truncate("/var/log/messages", 0);
+	doSystem("service syslog start");
+
 	websDone(wp, 200);
 }
 
@@ -709,10 +710,10 @@ static void setuplog(webs_t wp, char_t *path, char_t *query)
 {
 	// Set-up parameters
 	setupParameters(wp, service_syslog_flags, 1);
-	
+
 	// Restart syslog
 	doSystem("service syslog restart");
-	
+
 	// Redirect if possible
 	char_t *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
 	if (submitUrl != NULL)
