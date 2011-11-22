@@ -12,6 +12,7 @@ if [ ! -f $APROOTDIR/configure ]; then
     #workaround for aclocal issue
     cp -fv configure.3052 configure
     cp -fv configure.ac.3052 configure.ac
+    cp -fv aclocal.3052 aclocal.m4
 fi
 if [ ! -f $APROOTDIR/Makefile.in ]; then
     automake
