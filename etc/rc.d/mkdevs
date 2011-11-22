@@ -4,6 +4,7 @@
 # refresh device table and nodes
 ##########################################################
 
+ROOTDEVICE=/dev/mtdblock4
 TMPROOTFSD="/tmp/rootfs"
 
 # create some folders in devfs
@@ -20,6 +21,11 @@ fi
 # make symlink for kcore
 if [ -f /proc/kcore ]; then
     ln -sf /proc/kcore /dev/core
+fi
+
+# make symlink for rootdev
+if [ -f $ROOTDEVICE ]; then
+    ln -sf $ROOTDEVICE /dev/root
 fi
 
 # hw independed
