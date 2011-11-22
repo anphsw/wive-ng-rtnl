@@ -10,6 +10,14 @@ LOG="echo PRECONFIG"
 start() {
  $LOG "Preconfigure..."
 
+    # blink wps/sec led at boot time before goahead start
+    if [ -f /bin/gpio ]; then
+	boot_leds_blink=`nvram_get 2860 boot_leds_blink`
+	for i in $boot_leds_blink; do
+	    gpio l $i 1 1 0 0 1000
+	done
+    fi
+
     #create fstab if not exist
     touch /etc/fstab
 

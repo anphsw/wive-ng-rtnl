@@ -26,65 +26,12 @@ if [ "$tmpfs_av" != "0" ]; then
     mount -o bind /var/rwfs /etc
 fi
 
-# kernel mode nvram node need before profile included
-mknod /dev/nvram	c	251	0
-
-# autocreate some dev nodes
-if [ -f /bin/mdev ]; then
-    mdev -s
-else
-    mknod /dev/tty	c	5	0
-    mknod /dev/ttyS0	c	4	64
-    mknod /dev/ttyS1	c	4	65
-    mknod /dev/ptmx		c	5	2
-    for i in `seq 0 8`; do
-	mknod /dev/mtdblock$i c 31 $i
-    done
-fi
-
-$LOG "Create some folders in dev."
-ndirs="/dev/pty /dev/tts /dev/cua /dev/misc"
-for dir in $ndirs ; do
-    mkdir -p "$dir" 2> /dev/null
-done
-
-$LOG "Create some persistent nodes in dev."
-mknod /dev/tts/0	c	4	64
-mknod /dev/tts/1	c	4	65
-mknod /dev/cua/0	c	5	64
-mknod /dev/misc/rtc	c	10	135
-
-# ralink depended
-mknod /dev/hwnat0	c	220	0
-mknod /dev/swnat0	c	210	0
-mknod /dev/rdm0	c	254	0
-mknod /dev/PCM	c	233	0
-mknod /dev/i2cM0	c	218	0
-mknod /dev/I2S	c	234	0
-mknod /dev/ac0	c	240	0
-mknod /dev/acl0	c	230	0
-mknod /dev/gpio	c	252	0
-mknod /dev/pcm0	c	233	0
-mknod /dev/i2s0	c	234	0
-mknod /dev/cls0	c	235	0
-
-for i in `seq 0 15`; do
-    mknod /dev/pty/m$i c 2 $i
-done
-
-for i in `seq 0 3`; do
-    mknod /dev/aci$i c 254 $i
-done
-for i in `seq 0 1`; do
-    mknod /dev/gpio$i c 252 $i
-done
-
 $LOG "Mount /tmp/rootfs"
 mkdir /tmp/rootfs
 mount $ROOTDEVICE /tmp/rootfs -o ro
 
-$LOG "Init DEV particion"
-cp -rpf /tmp/rootfs/dev/* /dev
+$LOG "Create some persistent nodes in dev."
+/etc/rc.d/mkdevs
 
 $LOG "Init RW particion"
 bzcat $MTDDEVICE | /bin/tar xf - -C / > /dev/null 2>&1
@@ -112,14 +59,6 @@ fi
 
 # include profile variables
 . /etc/profile
-
-# blink wps/sec led at boot time before goahead start
-if [ -f /bin/gpio ]; then
-    boot_leds_blink=`nvram_get 2860 boot_leds_blink`
-    for i in $boot_leds_blink; do
-	gpio l $i 1 1 0 0 1000
-    done
-fi
 
 $LOG "Start init now."
 /bin/sh /etc/rc.d/rcS &
