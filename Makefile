@@ -407,26 +407,28 @@ clean: modules_clean
 	make mrproper -C Uboot
 	make clean -C fulldump
 	make clean -C tools
+	##############REMOVE UNUSED FILES#############################
 	find $(ROOTDIR) -type f -name '*.*~' | xargs rm -f
 	find $(ROOTDIR) -type f -name '*.ko' | xargs rm -f
 	find $(ROOTDIR) -type f -name '*.old' | xargs rm -f
 	find $(ROOTDIR) -type f -name '*.log' | xargs rm -f
-	find $(ROOTDIR) -type f -name cvs -type d | xargs rm -rf
-	find $(ROOTDIR) -type d -name CVS -type d | xargs rm -rf
-	find $(ROOTDIR) -type d -name '.dep' | xargs rm -rf
-	find $(ROOTDIR) -type d -name '.deps' | xargs rm -rf
 	find $(ROOTDIR) -type f -name 'config.log' | xargs rm -f
 	find $(ROOTDIR) -type f -name 'config.status' | xargs rm -f
+	find $(ROOTDIR) -type f -name 'aclocal.m4' | xargs rm -f
 	find $(ROOTDIR) -type f -name '.sgbuilt_user' | xargs rm -f
-	find $(ROOTDIR) -type d -name 'filesystem' | xargs rm -rf
-	find $(ROOTDIR) -type d -name 'aclocal.m4' | xargs rm -rf
-	find $(ROOTDIR) -type d -name 'autom4te.cache' | xargs rm -rf
 	find $(ROOTDIR)/lib -type f -name '*.o' | xargs rm -f
 	find $(ROOTDIR)/lib -type f -name '*.so' | xargs rm -f
 	find $(ROOTDIR)/user -type f -name '*.o' | xargs rm -f
 	find $(ROOTDIR)/user -type f -name '*.so' | xargs rm -f
 	find $(ROOTDIR)/user -type f -name '*.lo' | xargs rm -f
 	find $(ROOTDIR)/user -type f -name '*.la' | xargs rm -f
+	##############REMOVE UNUSED FOLDERS###########################
+	find $(ROOTDIR) -type d -name 'filesystem' | xargs rm -rf
+	find $(ROOTDIR) -type d -name 'autom4te.cache' | xargs rm -rf
+	find $(ROOTDIR) -type d -name 'cvs' | xargs rm -rf
+	find $(ROOTDIR) -type d -name 'CVS' | xargs rm -rf
+	find $(ROOTDIR) -type d -name '.dep' | xargs rm -rf
+	find $(ROOTDIR) -type d -name '.deps' | xargs rm -rf
 
 real_clean mrproper: clean
 	make -C linux mrproper
