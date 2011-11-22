@@ -1,28 +1,25 @@
 #!/bin/sh
 
-# init dev particion
-cp -rpf /tmp/rootfs/dev/* /dev
+##########################################################
+# refresh device table and nodes
+##########################################################
+
+TMPROOTFSD="/tmp/rootfs"
 
 # create some folders in devfs
-ndirs="/dev/pty /dev/tts /dev/cua /dev/misc"
+ndirs="pty tts cua misc"
 for dir in $ndirs ; do
-    mkdir -p "$dir" 2> /dev/null
+    mkdir -p "/dev/$dir" 2> /dev/null
 done
 
-# kernel mode nvram node need before profile included
-mknod /dev/nvram	c	251	0
+# init dev particion
+if [ -d $TMPROOTFSD ]; then
+    cp -rpf $TMPROOTFSD/dev/* /dev
+fi
 
-# autocreate some dev nodes
-if [ -f /bin/mdev ]; then
-    mdev -s
-else
-    mknod /dev/tty	c	5	0
-    mknod /dev/ttyS0	c	4	64
-    mknod /dev/ttyS1	c	4	65
-    mknod /dev/ptmx		c	5	2
-    for i in `seq 0 8`; do
-	mknod /dev/mtdblock$i c 31 $i
-    done
+# make symlink for kcore
+if [ -f /proc/kcore ]; then
+    ln -sf /proc/kcore /dev/core
 fi
 
 # hw independed
@@ -43,6 +40,7 @@ for i in `seq 0 1`; do
 done
 
 # ralink depended
+mknod /dev/nvram	c	251	0
 mknod /dev/hwnat0	c	220	0
 mknod /dev/swnat0	c	210	0
 mknod /dev/rdm0	c	254	0
@@ -55,3 +53,6 @@ mknod /dev/gpio	c	252	0
 mknod /dev/pcm0	c	233	0
 mknod /dev/i2s0	c	234	0
 mknod /dev/cls0	c	235	0
+
+# autocreate/refrash some dev nodes
+mdev -s

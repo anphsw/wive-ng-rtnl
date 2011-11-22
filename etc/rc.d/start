@@ -1,21 +1,21 @@
 #!/bin/sh
 
+##########################################################
 # Start all init scripts in /etc/rc.d
 # executing them in numerical order.
+##########################################################
 
+LOG="echo INIT"
 TGZfs_size=131072
 BLOCKS=2
 MTDDEVICE=/dev/mtdblock5
 ROOTDEVICE=/dev/mtdblock4
+TMPROOTFSD="/tmp/rootfs"
 
-LOG="echo INIT"
-
-# make symlink for kcore
-if [ -f /proc/kcore ]; then
-    ln -sf /proc/kcore /dev/core
-fi
-
-# mount tmpfs if present
+##########################################################
+# prepare filesystems
+# use tmpfs if present
+##########################################################
 tmpfs_av=`grep tmpfs -c < /proc/filesystems`
 if [ "$tmpfs_av" != "0" ]; then
     # mount /tmp /etc in /var
@@ -26,12 +26,24 @@ if [ "$tmpfs_av" != "0" ]; then
     mount -o bind /var/rwfs /etc
 fi
 
-$LOG "Mount /tmp/rootfs"
-mkdir /tmp/rootfs
-mount $ROOTDEVICE /tmp/rootfs -o ro
+##########################################################
+# prepare devices and rwfs
+# autocreate some dev nodes and refresh from mkdevs script
+##########################################################
+$LOG "Touch mdev."
+mdev -s
 
-$LOG "Create some persistent nodes in dev."
-/etc/rc.d/mkdevs
+$LOG "Mount $TMPROOTFSD"
+mkdir $TMPROOTFSD
+mount $ROOTDEVICE $TMPROOTFSD -o ro
+
+if [ -d /dev ]; then
+    $LOG "Create some persistent nodes in dev."
+    $TMPROOTFSD/etc/rc.d/mkdevs
+else
+    $LOG "DEVFS NOT EXIST STOP !!!"
+    exit 1
+fi
 
 $LOG "Init RW particion"
 bzcat $MTDDEVICE | /bin/tar xf - -C / > /dev/null 2>&1
@@ -40,15 +52,18 @@ if [ -f /etc/filesystem.ok ] && [ -f /etc/rc.d/rcS ]; then
     $LOG "RW File system is ok - preparing ..."
   else
     $LOG "File system is clear or poor."
-    cp -af /tmp/rootfs/etc/* /etc
+    cp -af $TMPROOTFSD/etc/* /etc
     $LOG "Restored. Save after full boot and configure."
     touch /etc/filesystem.ok
 fi
 
-$LOG "Umount /tmp/rootfs"
-umount -fl /tmp/rootfs
-rm -rf /tmp/rootfs
+$LOG "Umount $TMPROOTFSD"
+umount -fl $TMPROOTFSD
+rm -rf $TMPROOTFSD
 
+##########################################################
+# set memory markers
+##########################################################
 if [ `awk '/MemTotal:/ {print ($2>16384)}' < /proc/meminfo` -eq 1 ]; then
 # >16mb
     touch /tmp/is_32ram_dev
@@ -57,7 +72,9 @@ else
     touch /tmp/is_16ram_dev
 fi
 
+##########################################################
 # include profile variables
+##########################################################
 . /etc/profile
 
 $LOG "Start init now."
