@@ -7,7 +7,7 @@
 TMPROOTFSD="/tmp/rootfs"
 
 # create some folders in devfs
-ndirs="pty tts cua misc"
+ndirs="pty tts cua misc usb block disk serial"
 for dir in $ndirs ; do
     mkdir -p "/dev/$dir" 2> /dev/null
 done
@@ -40,19 +40,20 @@ for i in `seq 0 1`; do
 done
 
 # ralink depended
-mknod /dev/nvram	c	251	0
-mknod /dev/hwnat0	c	220	0
 mknod /dev/swnat0	c	210	0
-mknod /dev/rdm0	c	254	0
-mknod /dev/PCM	c	233	0
 mknod /dev/i2cM0	c	218	0
-mknod /dev/I2S	c	234	0
-mknod /dev/ac0	c	240	0
-mknod /dev/acl0	c	230	0
-mknod /dev/gpio	c	252	0
-mknod /dev/pcm0	c	233	0
-mknod /dev/i2s0	c	234	0
-mknod /dev/cls0	c	235	0
+mknod /dev/hwnat0	c	220	0
+mknod /dev/acl0		c	230	0
+mknod /dev/PCM		c	233	0
+mknod /dev/pcm0		c	233	0
+mknod /dev/I2S		c	234	0
+mknod /dev/i2s0		c	234	0
+mknod /dev/cls0		c	235	0
+mknod /dev/ac0		c	240	0
+mknod /dev/mrt0		c	250	0
+mknod /dev/nvram	c	251	0
+mknod /dev/gpio		c	252	0
+mknod /dev/rdm0		c	254	0
 
 # autocreate/refrash some dev nodes
 mdev -s
