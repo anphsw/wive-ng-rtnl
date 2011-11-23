@@ -1018,6 +1018,8 @@ copy_entries_to_user(unsigned int total_size,
 		}
 	}
 
+	return counters;
+
  free_counters:
 	vfree(counters);
 	return ret;
