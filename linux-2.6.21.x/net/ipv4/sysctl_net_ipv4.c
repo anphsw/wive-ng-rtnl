@@ -18,6 +18,7 @@
 #include <net/route.h>
 #include <net/tcp.h>
 #include <net/cipso_ipv4.h>
+#include <net/sock.h>
 
 /* From af_inet.c */
 extern int sysctl_ip_nonlocal_bind;
@@ -220,6 +221,17 @@ static int strategy_allowed_congestion_control(ctl_table *table, int __user *nam
 
 }
 
+static int proc_dointvec_fragment(ctl_table *table, int write, struct file *filp,
+		     void __user *buffer, size_t *lenp, loff_t *ppos)
+{
+	int ret;
+	int old_thresh = *(int *)table->data;
+	ret = proc_dointvec(table,write,filp,buffer,lenp,ppos);
+	if (write)
+		skb_reserve_memory(*(int *)table->data - old_thresh);
+	return ret;
+}
+
 ctl_table ipv4_table[] = {
 	{
 		.ctl_name	= NET_IPV4_TCP_TIMESTAMPS,
@@ -325,7 +337,7 @@ ctl_table ipv4_table[] = {
 		.data		= &sysctl_ipfrag_high_thresh,
 		.maxlen		= sizeof(int),
 		.mode		= 0644,
-		.proc_handler	= &proc_dointvec
+		.proc_handler	= &proc_dointvec_fragment
 	},
 	{
 		.ctl_name	= NET_IPV4_IPFRAG_LOW_THRESH,

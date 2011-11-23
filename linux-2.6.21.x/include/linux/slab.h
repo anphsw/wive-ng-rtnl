@@ -53,6 +53,7 @@ void *kmem_cache_alloc(struct kmem_cache *, gfp_t);
 void *kmem_cache_zalloc(struct kmem_cache *, gfp_t);
 void kmem_cache_free(struct kmem_cache *, void *);
 unsigned int kmem_cache_size(struct kmem_cache *);
+unsigned int kmem_cache_objsize(struct kmem_cache *);
 const char *kmem_cache_name(struct kmem_cache *);
 int kmem_ptr_validate(struct kmem_cache *cachep, const void *ptr);
 
@@ -88,6 +89,7 @@ void *__kmalloc(size_t, gfp_t);
 void *__kzalloc(size_t, gfp_t);
 void kfree(const void *);
 unsigned int ksize(const void *);
+unsigned int kobjsize(size_t);
 
 /**
  * kcalloc - allocate memory for an array. The memory is set to zero.

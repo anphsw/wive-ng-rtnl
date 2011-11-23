@@ -112,6 +112,7 @@
 #include <linux/tcp.h>
 #include <linux/init.h>
 #include <linux/highmem.h>
+#include <linux/log2.h>
 
 #include <asm/uaccess.h>
 #include <asm/system.h>
@@ -195,6 +196,158 @@ __u32 sysctl_rmem_default __read_mostly = SK_RMEM_MAX;
 
 /* Maximal space eaten by iovec or ancilliary data plus some space */
 int sysctl_optmem_max __read_mostly = sizeof(unsigned long)*(2*UIO_MAXIOV+512);
+
+static atomic_t rx_emergency_bytes;
+
+static int skb_reserve_bytes;
+static int aux_reserve_pages;
+
+static DEFINE_SPINLOCK(memalloc_lock);
+static int rx_net_reserve;
+atomic_t vmio_socks;
+EXPORT_SYMBOL_GPL(vmio_socks);
+
+/*
+ * is there room for another emergency packet?
+ * we account in power of two units to approx the slab allocator.
+ */
+static int __rx_emergency_get(int bytes, bool overcommit)
+{
+	int size = roundup_pow_of_two(bytes);
+	int nr = atomic_add_return(size, &rx_emergency_bytes);
+	int thresh = 2 * skb_reserve_bytes;
+	if (nr < thresh || overcommit)
+		return 1;
+
+	atomic_dec(&rx_emergency_bytes);
+	return 0;
+}
+
+int rx_emergency_get(int bytes)
+{
+	return __rx_emergency_get(bytes, false);
+}
+
+int rx_emergency_get_overcommit(int bytes)
+{
+	return __rx_emergency_get(bytes, true);
+}
+
+void rx_emergency_put(int bytes)
+{
+	int size = roundup_pow_of_two(bytes);
+	return atomic_sub(size, &rx_emergency_bytes);
+}
+
+/**
+ *	sk_adjust_memalloc - adjust the global memalloc reserve for critical RX
+ *	@socks: number of new %SOCK_VMIO sockets
+ *	@tx_resserve_pages: number of pages to (un)reserve for TX
+ *
+ *	This function adjusts the memalloc reserve based on system demand.
+ *	The RX reserve is a limit, and only added once, not for each socket.
+ *
+ *	NOTE:
+ *	   @tx_reserve_pages is an upper-bound of memory used for TX hence
+ *	   we need not account the pages like we do for RX pages.
+ */
+void sk_adjust_memalloc(int socks, int tx_reserve_pages)
+{
+	unsigned long flags;
+	int reserve = tx_reserve_pages;
+	int nr_socks;
+
+	spin_lock_irqsave(&memalloc_lock, flags);
+	nr_socks = atomic_add_return(socks, &vmio_socks);
+	BUG_ON(nr_socks < 0);
+
+	if (nr_socks) {
+		int skb_reserve_pages =
+			DIV_ROUND_UP(skb_reserve_bytes, PAGE_SIZE);
+		int rx_pages = 2 * skb_reserve_pages + aux_reserve_pages;
+		reserve += rx_pages - rx_net_reserve;
+		rx_net_reserve = rx_pages;
+	} else {
+		reserve -= rx_net_reserve;
+		rx_net_reserve = 0;
+	}
+
+	if (reserve)
+		adjust_memalloc_reserve(reserve);
+	spin_unlock_irqrestore(&memalloc_lock, flags);
+}
+EXPORT_SYMBOL_GPL(sk_adjust_memalloc);
+
+/*
+ * tiny helper functions to track the memory reserves
+ * needed because of modular ipv6
+ */
+void skb_reserve_memory(int bytes)
+{
+	skb_reserve_bytes += bytes;
+	sk_adjust_memalloc(0, 0);
+}
+EXPORT_SYMBOL_GPL(skb_reserve_memory);
+
+void aux_reserve_memory(int pages)
+{
+	aux_reserve_pages += pages;
+	sk_adjust_memalloc(0, 0);
+}
+EXPORT_SYMBOL_GPL(aux_reserve_memory);
+
+/**
+ *	sk_set_vmio - sets %SOCK_VMIO
+ *	@sk: socket to set it on
+ *
+ *	Set %SOCK_VMIO on a socket and increase the memalloc reserve
+ *	accordingly.
+ */
+int sk_set_vmio(struct sock *sk)
+{
+	int set = sock_flag(sk, SOCK_VMIO);
+#ifndef CONFIG_NETVM
+	BUG();
+#endif
+	if (!set) {
+		sk_adjust_memalloc(1, 0);
+		sock_set_flag(sk, SOCK_VMIO);
+		sk->sk_allocation |= __GFP_EMERGENCY;
+	}
+	return !set;
+}
+EXPORT_SYMBOL_GPL(sk_set_vmio);
+
+int sk_clear_vmio(struct sock *sk)
+{
+	int set = sock_flag(sk, SOCK_VMIO);
+	if (set) {
+		sk_adjust_memalloc(-1, 0);
+		sock_reset_flag(sk, SOCK_VMIO);
+		sk->sk_allocation &= ~__GFP_EMERGENCY;
+	}
+	return set;
+}
+EXPORT_SYMBOL_GPL(sk_clear_vmio);
+
+#ifdef CONFIG_NETVM
+int sk_backlog_rcv(struct sock *sk, struct sk_buff *skb)
+{
+	if (skb_emergency(skb)) {
+		int ret;
+		unsigned long pflags = current->flags;
+	       	/* these should have been dropped before queueing */
+		BUG_ON(!sk_has_vmio(sk));
+		current->flags |= PF_MEMALLOC;
+		ret = sk->sk_backlog_rcv(sk, skb);
+		tsk_restore_flags(current, pflags, PF_MEMALLOC);
+		return ret;
+	}
+
+	return sk->sk_backlog_rcv(sk, skb);
+}
+EXPORT_SYMBOL(sk_backlog_rcv);
+#endif
 
 static int sock_set_timeout(long *timeo_p, char __user *optval, int optlen)
 {
@@ -302,7 +455,7 @@ int sk_receive_skb(struct sock *sk, struct sk_buff *skb, const int nested)
 		 */
 		mutex_acquire(&sk->sk_lock.dep_map, 0, 1, _RET_IP_);
 
-		rc = sk->sk_backlog_rcv(sk, skb);
+		rc = sk_backlog_rcv(sk, skb);
 
 		mutex_release(&sk->sk_lock.dep_map, 1, _RET_IP_);
 	} else
@@ -886,6 +1039,7 @@ static void __sk_free(struct sock *sk)
 	struct sk_filter *filter;
 	struct module *owner = sk->sk_prot_creator->owner;
 
+	sk_clear_vmio(sk);
 	if (sk->sk_destruct)
 		sk->sk_destruct(sk);
 
@@ -1289,7 +1443,7 @@ static void __release_sock(struct sock *sk)
 			struct sk_buff *next = skb->next;
 
 			skb->next = NULL;
-			sk->sk_backlog_rcv(sk, skb);
+			sk_backlog_rcv(sk, skb);
 
 			/*
 			 * We are in process context here with softirqs

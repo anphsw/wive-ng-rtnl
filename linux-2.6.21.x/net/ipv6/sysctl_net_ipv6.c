@@ -15,6 +15,17 @@
 
 #ifdef CONFIG_SYSCTL
 
+static int proc_dointvec_fragment(ctl_table *table, int write, struct file *filp,
+		     void __user *buffer, size_t *lenp, loff_t *ppos)
+{
+	int ret;
+	int old_thresh = *(int *)table->data;
+	ret = proc_dointvec(table,write,filp,buffer,lenp,ppos);
+	if (write)
+		skb_reserve_memory(*(int *)table->data - old_thresh);
+	return ret;
+}
+
 static ctl_table ipv6_table[] = {
 	{
 		.ctl_name	= NET_IPV6_ROUTE,
@@ -44,7 +55,7 @@ static ctl_table ipv6_table[] = {
 		.data		= &sysctl_ip6frag_high_thresh,
 		.maxlen		= sizeof(int),
 		.mode		= 0644,
-		.proc_handler	= &proc_dointvec
+		.proc_handler	= &proc_dointvec_fragment
 	},
 	{
 		.ctl_name	= NET_IPV6_IP6FRAG_LOW_THRESH,

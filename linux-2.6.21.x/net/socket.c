@@ -352,7 +352,7 @@ static int sock_alloc_fd(struct file **filep)
 	return fd;
 }
 
-static int sock_attach_fd(struct socket *sock, struct file *file)
+static noinline int sock_attach_fd(struct socket *sock, struct file *file)
 {
 	struct qstr this;
 	char name[32];
@@ -380,6 +380,10 @@ static int sock_attach_fd(struct socket *sock, struct file *file)
 	file->f_op = SOCK_INODE(sock)->i_fop = &socket_file_ops;
 	file->f_mode = FMODE_READ | FMODE_WRITE;
 	file->f_flags = O_RDWR;
+	if (unlikely(sock->sk && sock_flag(sock->sk, SOCK_KERNEL))) {
+		file->f_mode = 0;
+		file->f_flags = 0;
+	}
 	file->f_pos = 0;
 	file->private_data = sock;
 
@@ -804,6 +808,10 @@ static long sock_ioctl(struct file *file, unsigned cmd, unsigned long arg)
 	int pid, err;
 
 	sock = file->private_data;
+
+	if (unlikely(sock_flag(sock->sk, SOCK_KERNEL)))
+		return -EBADF;
+
 	if (cmd >= SIOCDEVPRIVATE && cmd <= (SIOCDEVPRIVATE + 15)) {
 		err = dev_ioctl(cmd, argp);
 	} else
@@ -1779,7 +1787,7 @@ asmlinkage long sys_sendmsg(int fd, struct msghdr __user *msg, unsigned flags)
 	err = -ENOMEM;
 	iov_size = msg_sys.msg_iovlen * sizeof(struct iovec);
 	if (msg_sys.msg_iovlen > UIO_FASTIOV) {
-		iov = sock_kmalloc(sock->sk, iov_size, GFP_KERNEL);
+		iov = sock_kmalloc(sock->sk, iov_size, sock->sk->sk_allocation);
 		if (!iov)
 			goto out_put;
 	}
@@ -1808,7 +1816,7 @@ asmlinkage long sys_sendmsg(int fd, struct msghdr __user *msg, unsigned flags)
 		ctl_len = msg_sys.msg_controllen;
 	} else if (ctl_len) {
 		if (ctl_len > sizeof(ctl)) {
-			ctl_buf = sock_kmalloc(sock->sk, ctl_len, GFP_KERNEL);
+			ctl_buf = sock_kmalloc(sock->sk, ctl_len, sock->sk->sk_allocation);
 			if (ctl_buf == NULL)
 				goto out_freeiov;
 		}
@@ -1884,7 +1892,7 @@ asmlinkage long sys_recvmsg(int fd, struct msghdr __user *msg,
 	err = -ENOMEM;
 	iov_size = msg_sys.msg_iovlen * sizeof(struct iovec);
 	if (msg_sys.msg_iovlen > UIO_FASTIOV) {
-		iov = sock_kmalloc(sock->sk, iov_size, GFP_KERNEL);
+		iov = sock_kmalloc(sock->sk, iov_size, sock->sk->sk_allocation);
 		if (!iov)
 			goto out_put;
 	}

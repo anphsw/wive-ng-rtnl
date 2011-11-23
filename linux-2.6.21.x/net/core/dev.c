@@ -1821,10 +1821,23 @@ int netif_receive_skb(struct sk_buff *skb)
 	struct net_device *orig_dev;
 	int ret = NET_RX_DROP;
 	__be16 type;
+	unsigned long pflags = current->flags;
+
+	/* Emergency skb are special, they should
+	 *  - be delivered to SOCK_VMIO sockets only
+	 *  - stay away from userspace
+	 *  - have bounded memory usage
+	 *
+	 * Use PF_MEMALLOC as a poor mans memory pool - the grouping kind.
+	 * This saves us from propagating the allocation context down to all
+	 * allocation sites.
+	 */
+	if (skb_emergency(skb))
+		current->flags |= PF_MEMALLOC;
 
 	/* if we've gotten here through NAPI, check netpoll */
 	if (skb->dev->poll && netpoll_rx(skb))
-		return NET_RX_DROP;
+		goto out;
 
 	if (!skb->tstamp.tv64)
 		net_timestamp(skb);
@@ -1835,7 +1848,7 @@ int netif_receive_skb(struct sk_buff *skb)
 	orig_dev = skb_bond(skb);
 
 	if (!orig_dev)
-		return NET_RX_DROP;
+		goto out;
 
 	__get_cpu_var(netdev_rx_stat).total++;
 
@@ -1860,6 +1873,9 @@ int netif_receive_skb(struct sk_buff *skb)
 	}
 #endif
 
+	if (skb_emergency(skb))
+		goto skip_taps;
+
 	list_for_each_entry_rcu(ptype, &ptype_all, list) {
 		if (!ptype->dev || ptype->dev == skb->dev) {
 			if (pt_prev)
@@ -1868,6 +1884,7 @@ int netif_receive_skb(struct sk_buff *skb)
 		}
 	}
 
+skip_taps:
 #ifdef CONFIG_NET_CLS_ACT
 	if (pt_prev) {
 		ret = deliver_skb(skb, pt_prev, orig_dev);
@@ -1880,16 +1897,28 @@ int netif_receive_skb(struct sk_buff *skb)
 
 	if (ret == TC_ACT_SHOT || (ret == TC_ACT_STOLEN)) {
 		kfree_skb(skb);
-		goto out;
+		goto unlock;
 	}
 
 	skb->tc_verd = 0;
 ncls:
 #endif
 
+	if (skb_emergency(skb))
+		switch(skb->protocol) {
+			case __constant_htons(ETH_P_ARP):
+			case __constant_htons(ETH_P_IP):
+			case __constant_htons(ETH_P_IPV6):
+			case __constant_htons(ETH_P_8021Q):
+				break;
+
+			default:
+				goto drop;
+		}
+
 	skb = handle_bridge(skb, &pt_prev, &ret, orig_dev);
 	if (!skb)
-		goto out;
+		goto unlock;
 
 	type = skb->protocol;
 	list_for_each_entry_rcu(ptype, &ptype_base[ntohs(type)&15], list) {
@@ -1904,6 +1933,7 @@ ncls:
 	if (pt_prev) {
 		ret = pt_prev->func(skb, skb->dev, pt_prev, orig_dev);
 	} else {
+drop:
 		kfree_skb(skb);
 		/* Jamal, now you will not able to escape explaining
 		 * me how you were going to use this. :-)
@@ -1911,8 +1941,10 @@ ncls:
 		ret = NET_RX_DROP;
 	}
 
-out:
+unlock:
 	rcu_read_unlock();
+out:
+	tsk_restore_flags(current, pflags, PF_MEMALLOC);
 	return ret;
 }
 

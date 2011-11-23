@@ -198,7 +198,7 @@ netlink_unlock_table(void)
 		wake_up(&nl_table_wait);
 }
 
-static __inline__ struct sock *netlink_lookup(int protocol, u32 pid)
+__inline__ struct sock *netlink_lookup(int protocol, u32 pid)
 {
 	struct nl_pid_hash *hash = &nl_table[protocol].hash;
 	struct hlist_head *head;
@@ -1144,7 +1144,7 @@ static int netlink_sendmsg(struct kiocb *kiocb, struct socket *sock,
 	if (len > sk->sk_sndbuf - 32)
 		goto out;
 	err = -ENOBUFS;
-	skb = alloc_skb(len, GFP_KERNEL);
+	skb = __alloc_skb(len, GFP_KERNEL, SKB_ALLOC_RX, -1);
 	if (skb==NULL)
 		goto out;
 
@@ -1173,8 +1173,13 @@ static int netlink_sendmsg(struct kiocb *kiocb, struct socket *sock,
 	}
 
 	if (dst_group) {
+		gfp_t gfp_mask = sk->sk_allocation;
+
+		if (skb_emergency(skb))
+			gfp_mask |= __GFP_EMERGENCY;
+
 		atomic_inc(&skb->users);
-		netlink_broadcast(sk, skb, dst_pid, dst_group, GFP_KERNEL);
+		netlink_broadcast(sk, skb, dst_pid, dst_group, gfp_mask);
 	}
 	err = netlink_unicast(sk, skb, dst_pid, msg->msg_flags&MSG_DONTWAIT);
 
@@ -1814,6 +1819,7 @@ panic:
 
 core_initcall(netlink_proto_init);
 
+EXPORT_SYMBOL(netlink_lookup);
 EXPORT_SYMBOL(netlink_ack);
 EXPORT_SYMBOL(netlink_run_queue);
 EXPORT_SYMBOL(netlink_queue_skip);

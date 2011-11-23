@@ -768,4 +768,5 @@ void __init ipv6_frag_init(void)
 	ip6_frag_secret_timer.function = ip6_frag_secret_rebuild;
 	ip6_frag_secret_timer.expires = jiffies + sysctl_ip6frag_secret_interval;
 	add_timer(&ip6_frag_secret_timer);
+	skb_reserve_memory(sysctl_ip6frag_high_thresh);
 }

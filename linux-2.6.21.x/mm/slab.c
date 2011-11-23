@@ -115,6 +115,7 @@
 #include	<asm/cacheflush.h>
 #include	<asm/tlbflush.h>
 #include	<asm/page.h>
+#include	"internal.h"
 
 /*
  * DEBUG	- 1 for kmem_cache_create() to honour; SLAB_RED_ZONE & SLAB_POISON.
@@ -386,6 +387,7 @@ static void kmem_list3_init(struct kmem_list3 *parent)
 
 struct kmem_cache {
 /* 1) per-cpu data, touched during every alloc/free */
+	int rank;
 	struct array_cache *array[NR_CPUS];
 /* 2) Cache tunables. Protected by cache_chain_mutex */
 	unsigned int batchcount;
@@ -1009,21 +1011,21 @@ static inline int cache_free_alien(struct kmem_cache *cachep, void *objp)
 }
 
 static inline void *alternate_node_alloc(struct kmem_cache *cachep,
-		gfp_t flags)
+		gfp_t flags, int rank)
 {
 	return NULL;
 }
 
 static inline void *____cache_alloc_node(struct kmem_cache *cachep,
-		 gfp_t flags, int nodeid)
+		 gfp_t flags, int nodeid, int rank)
 {
 	return NULL;
 }
 
 #else	/* CONFIG_NUMA */
 
-static void *____cache_alloc_node(struct kmem_cache *, gfp_t, int);
-static void *alternate_node_alloc(struct kmem_cache *, gfp_t);
+static void *____cache_alloc_node(struct kmem_cache *, gfp_t, int, int);
+static void *alternate_node_alloc(struct kmem_cache *, gfp_t, int);
 
 static struct array_cache **alloc_alien_cache(int node, int limit)
 {
@@ -1619,6 +1621,7 @@ static void *kmem_getpages(struct kmem_cache *cachep, gfp_t flags, int nodeid)
 	if (!page)
 		return NULL;
 
+	cachep->rank = page->index;
 	nr_pages = (1 << cachep->gfporder);
 	if (cachep->flags & SLAB_RECLAIM_ACCOUNT)
 		add_zone_page_state(page_zone(page),
@@ -2262,6 +2265,7 @@ kmem_cache_create (const char *name, size_t size, size_t align,
 	}
 #endif
 #endif
+	cachep->rank = MAX_ALLOC_RANK;
 
 	/*
 	 * Determine if the slab management is 'on' or 'off' slab.
@@ -2904,7 +2908,7 @@ bad:
 #define check_slabp(x,y) do { } while(0)
 #endif
 
-static void *cache_alloc_refill(struct kmem_cache *cachep, gfp_t flags)
+static void *cache_alloc_refill(struct kmem_cache *cachep, gfp_t flags, int rank)
 {
 	int batchcount;
 	struct kmem_list3 *l3;
@@ -2916,6 +2920,8 @@ static void *cache_alloc_refill(struct kmem_cache *cachep, gfp_t flags)
 	check_irq_off();
 	ac = cpu_cache_get(cachep);
 retry:
+	if (unlikely(rank > cachep->rank))
+		goto force_grow;
 	batchcount = ac->batchcount;
 	if (!ac->touched && batchcount > BATCHREFILL_LIMIT) {
 		/*
@@ -2971,14 +2977,16 @@ must_grow:
 	l3->free_objects -= ac->avail;
 alloc_done:
 	spin_unlock(&l3->list_lock);
-
 	if (unlikely(!ac->avail)) {
 		int x;
+force_grow:
 		x = cache_grow(cachep, flags | GFP_THISNODE, node, NULL);
 
 		/* cache_grow can reenable interrupts, then ac could change. */
 		ac = cpu_cache_get(cachep);
-		if (!x && ac->avail == 0)	/* no objects in sight? abort */
+
+		/* no objects in sight? abort */
+		if (!x && (ac->avail == 0 || rank > cachep->rank))
 			return NULL;
 
 		if (!ac->avail)		/* objects refilled by interrupt? */
@@ -3129,7 +3137,8 @@ static inline int should_failslab(struct kmem_cache *cachep, gfp_t flags)
 
 #endif /* CONFIG_FAILSLAB */
 
-static inline void *____cache_alloc(struct kmem_cache *cachep, gfp_t flags)
+static inline void *____cache_alloc(struct kmem_cache *cachep,
+		gfp_t flags, int rank)
 {
 	void *objp;
 	struct array_cache *ac;
@@ -3137,16 +3146,28 @@ static inline void *____cache_alloc(struct kmem_cache *cachep, gfp_t flags)
 	check_irq_off();
 
 	ac = cpu_cache_get(cachep);
-	if (likely(ac->avail)) {
+	if (likely(ac->avail && rank <= cachep->rank)) {
 		STATS_INC_ALLOCHIT(cachep);
 		ac->touched = 1;
 		objp = ac->entry[--ac->avail];
 	} else {
 		STATS_INC_ALLOCMISS(cachep);
-		objp = cache_alloc_refill(cachep, flags);
+		objp = cache_alloc_refill(cachep, flags, rank);
 	}
 	return objp;
 }
+
+#ifdef CONFIG_SLAB_FAIR
+static __always_inline int slab_alloc_rank(gfp_t flags)
+{
+	return gfp_to_rank(flags);
+}
+#else
+static __always_inline int slab_alloc_rank(gfp_t flags)
+{
+	return 0;
+}
+#endif
 
 #ifdef CONFIG_NUMA
 /*
@@ -3155,7 +3176,8 @@ static inline void *____cache_alloc(struct kmem_cache *cachep, gfp_t flags)
  * If we are in_interrupt, then process context, including cpusets and
  * mempolicy, may not apply and should not be used for allocation policy.
  */
-static void *alternate_node_alloc(struct kmem_cache *cachep, gfp_t flags)
+static void *alternate_node_alloc(struct kmem_cache *cachep,
+		gfp_t flags, int rank)
 {
 	int nid_alloc, nid_here;
 
@@ -3167,7 +3189,7 @@ static void *alternate_node_alloc(struct kmem_cache *cachep, gfp_t flags)
 	else if (current->mempolicy)
 		nid_alloc = slab_node(current->mempolicy);
 	if (nid_alloc != nid_here)
-		return ____cache_alloc_node(cachep, flags, nid_alloc);
+		return ____cache_alloc_node(cachep, flags, nid_alloc, rank);
 	return NULL;
 }
 
@@ -3179,7 +3201,7 @@ static void *alternate_node_alloc(struct kmem_cache *cachep, gfp_t flags)
  * allocator to do its reclaim / fallback magic. We then insert the
  * slab into the proper nodelist and then allocate from it.
  */
-static void *fallback_alloc(struct kmem_cache *cache, gfp_t flags)
+static void *fallback_alloc(struct kmem_cache *cache, gfp_t flags, int rank)
 {
 	struct zonelist *zonelist;
 	gfp_t local_flags;
@@ -3206,7 +3228,7 @@ retry:
 			cache->nodelists[nid] &&
 			cache->nodelists[nid]->free_objects)
 				obj = ____cache_alloc_node(cache,
-					flags | GFP_THISNODE, nid);
+					flags | GFP_THISNODE, nid, rank);
 	}
 
 	if (!obj && !(flags & __GFP_NO_GROW)) {
@@ -3229,7 +3251,7 @@ retry:
 			nid = page_to_nid(virt_to_page(obj));
 			if (cache_grow(cache, flags, nid, obj)) {
 				obj = ____cache_alloc_node(cache,
-					flags | GFP_THISNODE, nid);
+					flags | GFP_THISNODE, nid, rank);
 				if (!obj)
 					/*
 					 * Another processor may allocate the
@@ -3250,7 +3272,7 @@ retry:
  * A interface to enable slab creation on nodeid
  */
 static void *____cache_alloc_node(struct kmem_cache *cachep, gfp_t flags,
-				int nodeid)
+				int nodeid, int rank)
 {
 	struct list_head *entry;
 	struct slab *slabp;
@@ -3263,6 +3285,8 @@ static void *____cache_alloc_node(struct kmem_cache *cachep, gfp_t flags,
 
 retry:
 	check_irq_off();
+	if (unlikely(rank > cachep->rank))
+		goto force_grow;
 	spin_lock(&l3->list_lock);
 	entry = l3->slabs_partial.next;
 	if (entry == &l3->slabs_partial) {
@@ -3298,11 +3322,12 @@ retry:
 
 must_grow:
 	spin_unlock(&l3->list_lock);
+force_grow:
 	x = cache_grow(cachep, flags | GFP_THISNODE, nodeid, NULL);
 	if (x)
 		goto retry;
 
-	return fallback_alloc(cachep, flags);
+	return fallback_alloc(cachep, flags, rank);
 
 done:
 	return obj;
@@ -3326,6 +3351,7 @@ __cache_alloc_node(struct kmem_cache *cachep, gfp_t flags, int nodeid,
 {
 	unsigned long save_flags;
 	void *ptr;
+	int rank = slab_alloc_rank(flags);
 
 	if (should_failslab(cachep, flags))
 		return NULL;
@@ -3338,7 +3364,7 @@ __cache_alloc_node(struct kmem_cache *cachep, gfp_t flags, int nodeid,
 
 	if (unlikely(!cachep->nodelists[nodeid])) {
 		/* Node not bootstrapped yet */
-		ptr = fallback_alloc(cachep, flags);
+		ptr = fallback_alloc(cachep, flags, rank);
 		goto out;
 	}
 
@@ -3349,12 +3375,12 @@ __cache_alloc_node(struct kmem_cache *cachep, gfp_t flags, int nodeid,
 		 * to other nodes. It may fail while we still have
 		 * objects on other nodes available.
 		 */
-		ptr = ____cache_alloc(cachep, flags);
+		ptr = ____cache_alloc(cachep, flags, rank);
 		if (ptr)
 			goto out;
 	}
 	/* ___cache_alloc_node can fall back to other nodes */
-	ptr = ____cache_alloc_node(cachep, flags, nodeid);
+	ptr = ____cache_alloc_node(cachep, flags, nodeid, rank);
   out:
 	local_irq_restore(save_flags);
 	ptr = cache_alloc_debugcheck_after(cachep, flags, ptr, caller);
@@ -3363,23 +3389,23 @@ __cache_alloc_node(struct kmem_cache *cachep, gfp_t flags, int nodeid,
 }
 
 static __always_inline void *
-__do_cache_alloc(struct kmem_cache *cache, gfp_t flags)
+__do_cache_alloc(struct kmem_cache *cache, gfp_t flags, int rank)
 {
 	void *objp;
 
 	if (unlikely(current->flags & (PF_SPREAD_SLAB | PF_MEMPOLICY))) {
-		objp = alternate_node_alloc(cache, flags);
+		objp = alternate_node_alloc(cache, flags, rank);
 		if (objp)
 			goto out;
 	}
-	objp = ____cache_alloc(cache, flags);
+	objp = ____cache_alloc(cache, flags, rank);
 
 	/*
 	 * We may just have run out of memory on the local node.
 	 * ____cache_alloc_node() knows how to locate memory on other nodes
 	 */
  	if (!objp)
- 		objp = ____cache_alloc_node(cache, flags, numa_node_id());
+ 		objp = ____cache_alloc_node(cache, flags, numa_node_id(), rank);
 
   out:
 	return objp;
@@ -3387,9 +3413,9 @@ __do_cache_alloc(struct kmem_cache *cache, gfp_t flags)
 #else
 
 static __always_inline void *
-__do_cache_alloc(struct kmem_cache *cachep, gfp_t flags)
+__do_cache_alloc(struct kmem_cache *cachep, gfp_t flags, int rank)
 {
-	return ____cache_alloc(cachep, flags);
+	return ____cache_alloc(cachep, flags, rank);
 }
 
 #endif /* CONFIG_NUMA */
@@ -3399,13 +3425,14 @@ __cache_alloc(struct kmem_cache *cachep, gfp_t flags, void *caller)
 {
 	unsigned long save_flags;
 	void *objp;
+	int rank = slab_alloc_rank(flags);
 
 	if (should_failslab(cachep, flags))
 		return NULL;
 
 	cache_alloc_debugcheck_before(cachep, flags);
 	local_irq_save(save_flags);
-	objp = __do_cache_alloc(cachep, flags);
+	objp = __do_cache_alloc(cachep, flags, rank);
 	local_irq_restore(save_flags);
 	objp = cache_alloc_debugcheck_after(cachep, flags, objp, caller);
 	prefetchw(objp);
@@ -3753,6 +3780,12 @@ unsigned int kmem_cache_size(struct kmem_cache *cachep)
 	return obj_size(cachep);
 }
 EXPORT_SYMBOL(kmem_cache_size);
+
+unsigned int kmem_cache_objsize(struct kmem_cache *cachep)
+{
+	return cachep->buffer_size;
+}
+EXPORT_SYMBOL_GPL(kmem_cache_objsize);
 
 const char *kmem_cache_name(struct kmem_cache *cachep)
 {
@@ -4432,3 +4465,9 @@ unsigned int ksize(const void *objp)
 
 	return obj_size(virt_to_cache(objp));
 }
+
+unsigned int kobjsize(size_t size)
+{
+	return kmem_cache_objsize(kmem_find_general_cachep(size, 0));
+}
+EXPORT_SYMBOL_GPL(kobjsize);
