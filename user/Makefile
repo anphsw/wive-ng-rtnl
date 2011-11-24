@@ -29,7 +29,7 @@ VEND=$(ROOTDIR)/vendors
 ifndef CONFIG_IPV6
 CFLAGS += -DNO_IPV6
 else
-CFLAGS += -DIPV6=1
+CFLAGS += -DIPV6=1 -DINET6
 endif
 
 export $(CFLAGS)
