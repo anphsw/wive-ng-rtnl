@@ -835,6 +835,8 @@
 14) Add net memory reservation in network stack.<br>
 15) Protect deadlock in network code.<br>
 16) Slab use rankin for memory allocation line.<br>
+17) Add different optimization for userspace/libs for save mem/flash sizes or speedup apps.<br>
+18) Add fs drop_caches command for drop blockdevices caches and buffers for free memory.<br>
 
 <br><br>
 <b>For support see:</b><br>

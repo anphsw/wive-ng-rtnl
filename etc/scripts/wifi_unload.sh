@@ -152,7 +152,7 @@ umount_all()
 free_mem_cahce()
 {
     sysctl -w vm.min_free_kbytes=2048
-    drop_disk_caches
+    fs drop_caches
     sysctl -w vm.min_free_kbytes=1024
 }
 

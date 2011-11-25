@@ -22,7 +22,7 @@ get_size(){
 }
 
 usage(){
-  echo "Usage: $0 | save | load | restore | backup_nvram | nvramreset | burnrf | fullreset |" >&2
+  echo "Usage: $0 | save | load | restore | backup_nvram | nvramreset | burnrf | fullreset | drop_caches |" >&2
   echo "____________________________________________________________________________" >&2
   echo " " >&2
   echo "save - Save rwfs to mtd." >&2
@@ -31,6 +31,7 @@ usage(){
   echo "backup_nvram - Save nvram snapshot to rwfs in $BACKUPCGF" >&2
   echo "nvramreset - Nvarm clean and load default config." >&2
   echo "burnrf - Burn RF config template to $MTD2FAC." >&2
+  echo "drop_caches - Full drop disck/block devices caches for free memory." >&2
   echo "fullreset - 1. Full zero write in config,factory and rwfs particions." >&2
   echo "	    2. Reboot device." >&2
   echo "	    3. Write temlate for RF config (Factory) to flash." >&2
@@ -57,13 +58,12 @@ save(){
   if [ "$(get_size $tmp)" -lt $(($TGZfs_size/1024)) ]; then
     echo "Write configs to flash"
     dd if=$tmp of=$MTDRWFS bs=64k count=$BLOCKS conv=sync > /dev/null 2>&1
-    sync
     echo "Config saved. OK."
   else
     echo "Error: File $tmp too big: $(get_size $tmp)k"
   fi
   rm -f $tmp
-  sync
+  drop_caches
 }
 
 restore(){
@@ -82,7 +82,6 @@ burnrf(){
     dd if=/dev/zero of=$MTD2FAC conv=sync bs=64k count=1 > /dev/null 2>&1
     echo "Flash RF defaults."
     dd if=$RWCONFIGS of=$MTD2FAC conv=sync > /dev/null 2>&1
-    sync
 }
 
 fullreset(){
@@ -94,6 +93,7 @@ fullreset(){
     dd if=/dev/zero of=$MTDRWFS conv=sync bs=64k count=$BLOCKS > /dev/null 2>&1
     dd if=/dev/zero of=$MTD2CFG conv=sync bs=8k seek=1 count=7 > /dev/null 2>&1
     burnrf
+    drop_caches
     reboot
 }
 
@@ -103,11 +103,21 @@ backup_nvram(){
     echo "#The following line must not be removed." > "$BACKUPCGF"
     echo "Default" >> "$BACKUPCGF"
     ralink_init show 2860 >> "$BACKUPCGF"
+    drop_caches
 }
 
 load_nvram(){
     echo "Load settings from backup file...."
     ralink_init renew 2860 "$BACKUPCGF"
+}
+
+# free memory
+drop_caches(){
+    echo "Drop caches"
+    for i in `seq 3 0`; do
+        echo $i > /proc/sys/vm/drop_caches
+    done
+    sync
 }
 
 main(){
@@ -138,6 +148,9 @@ main(){
       ;;
     load_nvram)
       load_nvram $@
+      ;;
+    drop_caches)
+      drop_caches $@
       ;;
     *) 
       usage $@ 

@@ -101,16 +101,6 @@ get_txqlen()
     fi
 }
 
-
-# free memory
-drop_disk_caches(){
-    echo "Drop caches"
-    for i in `seq 3 0`; do
-        echo $i > /proc/sys/vm/drop_caches
-    done
-    sync
-}
-
 # wait connect to AP
 wait_connect()
 {
