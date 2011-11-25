@@ -98,7 +98,7 @@ mount_err() {
   fi
 }
 
-drop_disk_caches
+fs drop_caches
 
 if [ "$ACTION" = "add" ]; then
   # wait for disc appear, max 15 sec
@@ -136,7 +136,7 @@ else
   swap_off
 fi
 
-drop_disk_caches
+fs drop_caches
 
 if [ "$MDEV_LABEL" != "optware" ] && [ "$MDEV_TYPE" != "swap" ]; then
     #regenerate config and restart samba
