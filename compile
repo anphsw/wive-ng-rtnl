@@ -13,7 +13,6 @@ export LINUXDIR=$ROOTDIR/linux
 #----WR-150N---WR-300N----#
 if [ "$1" = "" ]; then
     MODE=2T2R
-    #MODE=2T2R-USB
     #MODE=2T2R-USB-IPV6
     #MODE=1T1R
 else

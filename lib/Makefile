@@ -25,11 +25,15 @@ noconfig_targets := menuconfig config oldconfig randconfig \
 	defconfig allyesconfig allnoconfig clean distclean \
 	release tags TAGS
 TOPDIR=./
+
 include Rules.mak
+-include $(LINUX_CONFIG)
 -include $(CONFIG_CONFIG)
 
 #Need direct include for easy porting some libs
 CFLAGS += -Os -I$(ROOTDIR)/$(LINUXDIR)/include -I$(ROOTDIR)/lib/include
+
+export $(CFLAGS)
 
 DIRS = ldso libc
 ifeq ($(strip $(UCLIBC_HAS_GETTEXT_AWARENESS)),y)
