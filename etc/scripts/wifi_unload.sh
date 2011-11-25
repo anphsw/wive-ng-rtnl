@@ -12,7 +12,7 @@ stop_serv="transmission vpnhelper inetd shaper crontab pppoe-relay ddns wscd dhc
 	    zebra udpxy upnp hotplug igmp_proxy ntp samba dnsserver snmpd"
 
 kill_apps="transmission-daemon smbd nmbd pppd xl2tpd udhcpd udhcpc crond lld2d igmpproxy inetd syslogd klogd \
-	    ntpclient ntpd zebra ripd inadyn ftpd scp \
+	    ntpclient ntpd zebra ripd inadyn ftpd scp miniupnpd \
 	    iwevent telnetd wscd rt2860apd rt61apd dnsmasq cdp-send snmpd"
 
 rmmod_mod="hw_nat ppp_mppe pppol2tp pptp pppoe pppox ppp_generic imq ipt_account ipt_TTL ipt_IMQ ipt_tos \
