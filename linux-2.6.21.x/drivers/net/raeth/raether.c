@@ -1070,7 +1070,8 @@ static int rt2880_eth_recv(struct net_device* dev)
 
 		if (unlikely(skb == NULL))
 		{
-			printk(KERN_ERR "skb not available...\n");
+			if (net_ratelimit())
+			    printk(KERN_ERR "skb not available...\n");
 #ifdef CONFIG_PSEUDO_SUPPORT
 			if (rx_ring[rx_dma_owner_idx].rxd_info4.SP == 2) {
 				if (ei_local->PseudoDev != NULL) {
