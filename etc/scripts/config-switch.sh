@@ -62,19 +62,19 @@ if [ "$CONFIG_RT_3052_ESW" != "" ]; then
 	    if [ "$port_swmode" != "auto" ] && [ "$port_swmode" != "" ]; then
 		echo ">>> Port $phys_portN set mode $port_swmode <<<"
 		# first disable autoneg
-		ethtool -s eth2 autoneg off > /dev/null 2>&1
+		#ethtool -s eth2 autoneg off > /dev/null 2>&1
 		if [ "$port_swmode" = "100f" ]; then
 		    #set 100Mbit full duplex and start negotinate
-		    ethtool -s eth2 autoneg on speed 100 duplex full	> /dev/null 2>&1
+		    ethtool -s eth2 autoneg off speed 100 duplex full	> /dev/null 2>&1
 		elif [ "$port_swmode" = "100h" ]; then
 		    #set 100Mbit half duplex and start negotinate
-		    ethtool -s eth2 autoneg on speed 100 duplex half	> /dev/null 2>&1
+		    ethtool -s eth2 autoneg off speed 100 duplex half	> /dev/null 2>&1
 		elif [ "$port_swmode" = "10f" ]; then
 		    #set 10Mbit full duplex and start negotinate
-		    ethtool -s eth2 autoneg on speed 10 duplex full	> /dev/null 2>&1
+		    ethtool -s eth2 autoneg off speed 10 duplex full	> /dev/null 2>&1
 		elif [ "$port_swmode" = "10h" ]; then
 		    #set 10Mbit half duplex and start negotinate
-		    ethtool -s eth2 autoneg on speed 10 duplex half	> /dev/null 2>&1
+		    ethtool -s eth2 autoneg off speed 10 duplex half	> /dev/null 2>&1
 		fi
 	    elif [ "$port_swmode" = "auto" ]; then
 		# enable autoneg

@@ -16,6 +16,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <wait.h>
+#include <sys/reboot.h>
 
 /* for CONFIG_MTD_KERNEL_PART_SIZ  */
 #include "linux/config.h"  				/* kernel config		*/

@@ -839,6 +839,7 @@
 18) Add fs drop_caches command for drop blockdevices caches and buffers for free memory.<br>
 19) Remove web pages from tmpfs before firmware burn to flash.<br>
 20) Add more checks update image before write to flash.<br>
+21) Fix reboot after upgrade firmware in some situations.<br>
 
 <br><br>
 <b>For support see:</b><br>

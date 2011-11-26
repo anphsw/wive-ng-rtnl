@@ -124,14 +124,22 @@ static int et_set_pauseparam(struct net_device *dev, struct ethtool_pauseparam *
 
 	// auto-neg pause
 	mii_mgr_read(ei_local->mii_info.phy_id, AUTO_NEGOTIATION_ADVERTISEMENT, &mii_an_reg);
+#if 1
+	mii_an_reg |= AN_PAUSE;
+#else
 	if(epause->autoneg)
 		mii_an_reg |= AN_PAUSE;
 	else
 		mii_an_reg &= ~AN_PAUSE;
+#endif
 	mii_mgr_write(ei_local->mii_info.phy_id, AUTO_NEGOTIATION_ADVERTISEMENT, mii_an_reg);
 
 	// tx/rx pause
 	mdio_cfg_reg = sysRegRead(MDIO_CFG);
+#if 1
+	mdio_cfg_reg |= MDIO_CFG_GP1_FC_TX;
+	mdio_cfg_reg |= MDIO_CFG_GP1_FC_RX;
+#else
 	if(epause->tx_pause)
 		mdio_cfg_reg |= MDIO_CFG_GP1_FC_TX;
 	else
@@ -140,6 +148,7 @@ static int et_set_pauseparam(struct net_device *dev, struct ethtool_pauseparam *
 		mdio_cfg_reg |= MDIO_CFG_GP1_FC_RX;
 	else
 		mdio_cfg_reg &= ~MDIO_CFG_GP1_FC_RX;
+#endif
 	sysRegWrite(MDIO_CFG, mdio_cfg_reg);
 
 	return 0;

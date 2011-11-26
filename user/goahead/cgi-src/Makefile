@@ -11,6 +11,9 @@ CONF	= $(ROOTDIR)/$(LINUXDIR)
 CONF_H  = $(CONF)/include/linux/config.h
 CRC_L	= $(ROOTDIR)/lib/libnvram/crc32.o
 
+# system cgi scripts must be static
+LDFLAGS += -static
+
 UPLOAD_CGI 		= upload.cgi
 UPLOAD_SETTINGS		= upload_settings.cgi
 
