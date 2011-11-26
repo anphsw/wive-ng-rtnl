@@ -232,7 +232,7 @@ case "$1" in
 		$LOG "Restart vpnhelper.."
 		# vpn client always use $vpn_if
 		# prevent start after start
-		if [ -f /var/run/$vpn_if.pid ] || [ -f /var/run/xl2tpd/l2tp.pid ]; then
+		if [ -f /var/run/$vpn_if.pid ] || [ -f /var/run/xl2tpd/l2tpd.pid ]; then
 		    service vpnhelper stop
 		    # wait ip-down script work
 		    sleep 8

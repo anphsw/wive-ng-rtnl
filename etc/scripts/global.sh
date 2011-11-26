@@ -194,8 +194,8 @@ killall_vpn()
 	fi
     fi
     # second terminate
-    if [ -f /var/run/xl2tpd/l2tp.pid ]; then
-	pid=`cat /var/run/xl2tpd/l2tp.pid`
+    if [ -f /var/run/xl2tpd/l2tpd.pid ]; then
+	pid=`cat /var/run/xl2tpd/l2tpd.pid`
 	if [ "$pid" != "" ]; then
 	    #Kill daemons
 	    kill $pid > /dev/null 2>&1
