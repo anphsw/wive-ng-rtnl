@@ -127,8 +127,6 @@ int check(char *imagefile, int offset, int len, char *err_msg)
 	return 1;
 }
 
-#endif /* UPLOAD_FIRMWARE_SUPPORT */
-
 int main (int argc, char *argv[])
 {
 	char err_msg[256];
@@ -225,26 +223,15 @@ int main (int argc, char *argv[])
 
 	release_parameters(params);
 
-	sync();
-
-	// examination
-#if defined(UPLOAD_FIRMWARE_SUPPORT)
+	// check image size
 	if (!check(filename, (int)file_begin, (int)(file_end - file_begin), err_msg))
 	{
 		html_error("Not a valid firmware.");
 		return -1;
 	}
 
-	// flash write
-	if (mtd_write_firmware(filename, (int)file_begin, (file_end - file_begin)) == -1)
-	{
-		html_error("mtd_write fatal error! The corrupted image has ruined the flash!!");
-		return -1;
-	}
-#else
-#error "no upload support defined!"
-#endif
-	// Reset NVRAM if needed
+	// examination, reset NVRAM if needed
+	// start web timer and crash rwfs BEFORE flash destroy
 	if (reset_rwfs)
 	{
 		html_success("100000");
@@ -253,12 +240,23 @@ int main (int argc, char *argv[])
 	}
 	else
 	{
-		html_success("65000");
+		html_success("80000");
 		fflush(stdout);
 	}
 
-	printf("Update find. Reboot...\n");
+	// flash write
+	if (mtd_write_firmware(filename, (int)file_begin, (file_end - file_begin)) == -1)
+	{
+		html_error("mtd_write fatal error! The corrupted image has ruined the flash!!");
+		return -1;
+	}
+
+	printf("Update complite. Reboot...\n");
 	sleep (3);
 	reboot(RB_AUTOBOOT);
 	return 0;
 }
+
+#else
+#error "no upload support defined!"
+#endif

@@ -5,3 +5,5 @@
    (X)  settings_upload.cgi    ( wrong! )
    (O)  settings.upload.cgi    ( correct)
    (O)  upload_settings.cgi    ( correct)
+
+2. All binary must be static linked
