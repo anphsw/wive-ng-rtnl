@@ -36,6 +36,12 @@ case $TYPE in
 	if [ ! -d /sys/module/usblp ]; then
 	    modprobe -q usblp
 	fi
+	# Create dev node. Only one printer support. Fix me later.
+	if [ ! -f /dev/usb/lp0 ]; then
+	    $LOG "Create devs node... for ${idVendor}:${idProduct}"
+	    mknod /dev/usb/lp0 b 6 0
+	    ln -sf /dev/usb/lp0 /dev/usblp0
+	fi
 	;;
     8/6/*)
 	if [ -f "/usr/share/usb_modeswitch/${idVendor}:${idProduct}" ]; then

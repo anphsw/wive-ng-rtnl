@@ -10,12 +10,6 @@ devs="/dev/usb/$MDEV"
 if [ "$ACTION" = "add" ]; then
     eval `nvram_buf_get 2860 PrinterSrvEnabled PrinterSrvBidir`
     if [ "$PrinterSrvEnabled" = "1" ] && [ -z "`pidof p910nd`" ]; then
-	# Create dev node.
-	# Only one printer support.
-	# Fix me later.
-	if [ ! -f $devs ]; then
-	    mknod $devs b 6 0
-	fi
 	# For GDI printers put printers firmware
 	# file in /etc, rename to prnfw.dl
 	if [ -f /etc/prnfw.dl ]; then
