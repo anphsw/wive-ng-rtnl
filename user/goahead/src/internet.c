@@ -24,6 +24,7 @@
 #include	"management.h"
 #include	"station.h"
 #include	"wireless.h"
+#include        "wps.h"
 #include	"helpers.h"
 
 #ifndef IF_NAMESIZE
