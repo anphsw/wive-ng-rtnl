@@ -66,6 +66,8 @@
 #include <linux/string.h>
 #include <linux/list.h>
 #include <asm/uaccess.h>
+#include <asm/byteorder.h>
+#include <asm/atomic.h>
 
 #include <linux/kernel.h>
 #include <linux/mm.h>
@@ -96,18 +98,19 @@
 #ifndef CONFIG_UDP_LITE_DISABLE
 #include <net/udplite.h>
 #endif
+#ifdef CONFIG_XFRM
 #include <net/xfrm.h>
-
-#include <asm/byteorder.h>
-#include <asm/atomic.h>
+#endif
 
 #ifdef CONFIG_PPPOL2TP_FASTPATH
-#define PPPOL2TP_DRV_VERSION	"V0.17.FASTPATH"
-#define DISABLE_WORKQUEUE
+//define PPPOL2TP_NO_LOCK
+//#define DISABLE_WORKQUEUE
 #define DISABLE_GET_FS
-#else
 #define PPPOL2TP_DRV_VERSION	"V0.17"
+#else
 #endif
+
+#define PPPOL2TP_DRV_VERSION	"V0.17"
 
 #ifdef CONFIG_UDP_LITE_DISABLE
 #define UDP_LITE_DISABLE
@@ -454,7 +457,9 @@ static void pppol2tp_recv_dequeue_skb(struct pppol2tp_session *session, struct s
 		 * - reset netfilter information as it doesn't apply
 		 *   to the inner packet either
 		 */
+#ifdef CONFIG_XFRM
 		secpath_reset(skb);
+#endif
 		dst_release(skb->dst);
 		skb->dst = NULL;
 		nf_reset(skb);
@@ -910,7 +915,7 @@ error:
  * Transmit handling
  ***********************************************************************/
 
-#ifdef CONFIG_PPPOL2TP_FASTPATH
+#ifdef PPPOL2TP_NO_LOCK
 /* Push out all pending data as one UDP datagram. Standart method. */
 static int pppol2tp_udp_push_pending_frames(struct sock *sk)
 {
@@ -939,7 +944,11 @@ out:
 	up->pending = 0;
 	if (!err)
 		#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,19)
+		#ifndef UDP_LITE_DISABLE
 		UDP_INC_STATS_USER(UDP_MIB_OUTDATAGRAMS, up->pcflag);
+		#else
+		UDP_INC_STATS_USER(UDP_MIB_OUTDATAGRAMS, 0);
+		#endif
 		#else
 		UDP_INC_STATS_USER(UDP_MIB_OUTDATAGRAMS);
 		#endif
@@ -1210,7 +1219,7 @@ static int pppol2tp_udp_sock_send(struct kiocb *iocb,
 #endif
 
 	/* The actual sendmsg() call... */
-#ifdef CONFIG_PPPOL2TP_FASTPATH
+#ifdef PPPOL2TP_NO_LOCK
 	error = pppol2tp_udp_sendmsg(iocb, session->tunnel_sock, msg, total_len);
 #else
 	error = tunnel->old_proto->sendmsg(iocb, session->tunnel_sock, msg, total_len);
