@@ -5,7 +5,7 @@ CFLAGS += -I$(ROOTDIR)/$(LINUXDIR)
 all: $(EXEC)
 
 $(EXEC): $(OBJS)
-	$(CC) $(LDFLAGS) -o $@ $(OBJS) $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $@ $(OBJS) $(LDLIBS) -static
 
 romfs:
 	$(ROMFSINST) -S /bin/$(EXEC)
