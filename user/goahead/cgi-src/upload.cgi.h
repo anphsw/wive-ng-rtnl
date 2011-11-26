@@ -24,7 +24,7 @@
 
 /* for calculate max image size */
 #include "../../../linux/drivers/mtd/ralink/ralink-flash.h"
-#define MAX_IMG_SIZE (IMAGE1_SIZE - MTD_RWFS_PART_SIZE - MTD_FACTORY_PART_SIZE - MTD_CONFIG_PART_SIZE - MTD_BOOT_PART_SIZE + IH_NMLEN)
+#define MAX_IMG_SIZE (IMAGE1_SIZE - MTD_RWFS_PART_SIZE - MTD_FACTORY_PART_SIZE - MTD_CONFIG_PART_SIZE - MTD_BOOT_PART_SIZE)
 
 #include "../options.h"
 
@@ -59,7 +59,7 @@ inline int mtd_write_firmware(char *filename, int offset, int len)
 #ifdef CONFIG_ROOTFS_IN_FLASH_NO_PADDING
     if(len > MAX_IMG_SIZE ){
 #else
-    if(len > CONFIG_MTD_KERNEL_PART_SIZ ){
+    if(len > MAX_IMG_SIZE || len > CONFIG_MTD_KERNEL_PART_SIZ ){
 #endif
 	fprintf(stderr, "Image in is BIG!!!%d", len);
         return -1;
