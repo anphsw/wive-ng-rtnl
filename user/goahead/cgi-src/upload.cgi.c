@@ -257,6 +257,7 @@ int main (int argc, char *argv[])
 		fflush(stdout);
 	}
 
+	sprintf("Update find. Reboot...");
 	sleep (3);
 	reboot(RB_AUTOBOOT);
 	return 0;
