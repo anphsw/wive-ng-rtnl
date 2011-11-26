@@ -223,5 +223,5 @@ echo "==================START-L2TP-CLIENT======================="
     $LOG "Starting VPN network l2tp..."
     $LOG "Start xl2tpd"
 
-    FULLOPTS="$vpnDebug -c /etc/ppp/l2tpd.conf -s /etc/ppp/chap-secrets -p $var/l2tpd.pid"
+    FULLOPTS="$vpnDebug -c $ppp/l2tpd.conf -s $ppp/chap-secrets -p $var/l2tpd.pid"
     xl2tpd $FULLOPTS &
