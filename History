@@ -838,6 +838,7 @@
 17) Add different optimization for userspace/libs for save mem/flash sizes or speedup apps.<br>
 18) Add fs drop_caches command for drop blockdevices caches and buffers for free memory.<br>
 19) Remove web pages from tmpfs before firmware burn to flash.<br>
+20) Add more checks update image before write to flash.<br>
 
 <br><br>
 <b>For support see:</b><br>

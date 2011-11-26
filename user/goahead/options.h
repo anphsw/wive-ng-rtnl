@@ -6,8 +6,6 @@
 #define MEM_HALF        	512
 
 ///////////////UPDATE OPTIONS/////////////////
-#define IH_MAGIC    		0x27051956
-#define IH_NMLEN    		32 
 #define MIN_SPACE_FOR_FIRMWARE  (1024 * 1024 * 8) // minimum space for firmware upload
 #define MIN_FIRMWARE_SIZE       (1048576) 	  // minium firmware size(1MB)
 

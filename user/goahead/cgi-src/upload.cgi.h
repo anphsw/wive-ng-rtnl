@@ -17,31 +17,16 @@
 #include <unistd.h>
 #include <wait.h>
 
-#include "linux/config.h"  //kernel config
-#include "config/autoconf.h" //user config
-					/* !!! for CONFIG_MTD_KERNEL_PART_SIZ  !!! */
-                                        /*   CONFIG_RT2880_ROOTFS_IN_FLASH */
-                                        /*   CONFIG_RT2880_ROOTFS_IN_RAM   */
-#include "../options.h"
+/* for CONFIG_MTD_KERNEL_PART_SIZ  */
+#include "linux/config.h"  				/* kernel config		*/
+#include "config/autoconf.h"				/* user config			*/
+#include "../../../tools/mkimage/include/image.h"	/* For Uboot image header format */
 
-/*
- *  Uboot image header format
- *  (ripped from mkimage.c/image.h)
- */
-typedef struct image_header {
-    uint32_t    ih_magic;   /* Image Header Magic Number    */
-    uint32_t    ih_hcrc;    /* Image Header CRC Checksum    */
-    uint32_t    ih_time;    /* Image Creation Timestamp */
-    uint32_t    ih_size;    /* Image Data Size      */
-    uint32_t    ih_load;    /* Data  Load  Address      */
-    uint32_t    ih_ep;      /* Entry Point Address      */
-    uint32_t    ih_dcrc;    /* Image Data CRC Checksum  */
-    uint8_t     ih_os;      /* Operating System     */
-    uint8_t     ih_arch;    /* CPU architecture     */
-    uint8_t     ih_type;    /* Image Type           */
-    uint8_t     ih_comp;    /* Compression Type     */
-    uint8_t     ih_name[IH_NMLEN];  /* Image Name       */
-} image_header_t;
+/* for calculate max image size */
+#include "../../../linux/drivers/mtd/ralink/ralink-flash.h"
+#define MAX_IMG_SIZE (IMAGE1_SIZE - MTD_RWFS_PART_SIZE - MTD_FACTORY_PART_SIZE - MTD_CONFIG_PART_SIZE - MTD_BOOT_PART_SIZE + IH_NMLEN)
+
+#include "../options.h"
 
 inline unsigned int getMTDPartSize(char *part)
 {
@@ -63,12 +48,23 @@ inline unsigned int getMTDPartSize(char *part)
 	return result;
 }
 
-
 inline int mtd_write_firmware(char *filename, int offset, int len)
 {
     char cmd[512];
     int status;
     int err=0;
+
+/* check image size before erase flash and write image */
+#ifdef CONFIG_RT2880_ROOTFS_IN_FLASH
+#ifdef CONFIG_ROOTFS_IN_FLASH_NO_PADDING
+    if(len > MAX_IMG_SIZE ){
+#else
+    if(len > CONFIG_MTD_KERNEL_PART_SIZ ){
+#endif
+	fprintf(stderr, "Image in is BIG!!!%d", len);
+        return -1;
+    }
+#endif
 
 #if defined(CONFIG_RT2880_FLASH_8M) || defined(CONFIG_RT2880_FLASH_16M)
 #ifdef CONFIG_RT2880_FLASH_TEST
@@ -96,12 +92,11 @@ inline int mtd_write_firmware(char *filename, int offset, int len)
     status = system(cmd);
     if (!WIFEXITED(status) || WEXITSTATUS(status) != 0)
 	err++;
-    if(len > CONFIG_MTD_KERNEL_PART_SIZ ){
-		snprintf(cmd, sizeof(cmd), "/bin/mtd_write -o %d -l %d write %s RootFS", offset + CONFIG_MTD_KERNEL_PART_SIZ, len - CONFIG_MTD_KERNEL_PART_SIZ, filename);
-		status = system(cmd);
-		if (!WIFEXITED(status) || WEXITSTATUS(status) != 0)
-		    err++;
-    }
+
+    snprintf(cmd, sizeof(cmd), "/bin/mtd_write -o %d -l %d write %s RootFS", offset + CONFIG_MTD_KERNEL_PART_SIZ, len - CONFIG_MTD_KERNEL_PART_SIZ, filename);
+    status = system(cmd);
+    if (!WIFEXITED(status) || WEXITSTATUS(status) != 0)
+	err++;
   #endif
 #else
     fprintf(stderr, "goahead: no CONFIG_RT2880_ROOTFS defined!");

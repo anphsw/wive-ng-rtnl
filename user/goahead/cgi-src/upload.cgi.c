@@ -89,32 +89,32 @@ int check(char *imagefile, int offset, int len, char *err_msg)
 	 * compare MTD partition size and image size
 	 */
 #if defined(CONFIG_RT2880_ROOTFS_IN_RAM)
-	if(len > getMTDPartSize("\"Kernel\"")){
+	if(len > MAX_IMG_SIZE || len > getMTDPartSize("\"Kernel\"")){
 		munmap(ptr, len);
 		close(ifd);
-		sprintf(err_msg, "*** Warning: the image file(0x%x) is bigger than Kernel MTD partition.\n", len);
+		sprintf(err_msg, "*** Error: the image file(0x%x) is bigger than Kernel MTD partition.\n", len);
 		return 0;
 	}
 #elif defined(CONFIG_RT2880_ROOTFS_IN_FLASH)
   #ifdef CONFIG_ROOTFS_IN_FLASH_NO_PADDING
-	if(len > getMTDPartSize("\"Kernel_RootFS\"")){
+	if(len > MAX_IMG_SIZE || len > getMTDPartSize("\"Kernel_RootFS\"")){
 		munmap(ptr, len);
 		close(ifd);
-		sprintf(err_msg, "*** Warning: the image file(0x%x) is bigger than Kernel_RootFS MTD partition.\n", len);
+		sprintf(err_msg, "*** Error: the image file(0x%x) is bigger than Kernel_RootFS MTD partition.\n", len);
 		return 0;
 	}
   #else
-	if(len < CONFIG_MTD_KERNEL_PART_SIZ){
+	if(len > MAX_IMG_SIZE || len < CONFIG_MTD_KERNEL_PART_SIZ){
 		munmap(ptr, len);
 		close(ifd);
-		sprintf(err_msg, "*** Warning: the image file(0x%x) size doesn't make sense.\n", len);
+		sprintf(err_msg, "*** Error: the image file(0x%x) size doesn't make sense.\n", len);
 		return 0;
 	}
 
 	if((len - CONFIG_MTD_KERNEL_PART_SIZ) > getMTDPartSize("\"RootFS\"")){
 		munmap(ptr, len);
 		close(ifd);
-		sprintf(err_msg, "*** Warning: the image file(0x%x) is bigger than RootFS MTD partition.\n", len - CONFIG_MTD_KERNEL_PART_SIZ);
+		sprintf(err_msg, "*** Error: the image file(0x%x) is bigger than RootFS MTD partition.\n", len - CONFIG_MTD_KERNEL_PART_SIZ);
 		return 0;
 	}
   #endif
@@ -229,7 +229,6 @@ int main (int argc, char *argv[])
 
 	// examination
 #if defined(UPLOAD_FIRMWARE_SUPPORT)
-
 	if (!check(filename, (int)file_begin, (int)(file_end - file_begin), err_msg))
 	{
 		html_error("Not a valid firmware.");
