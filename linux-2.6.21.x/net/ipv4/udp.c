@@ -468,10 +468,13 @@ static int udp_push_pending_frames(struct sock *sk)
 	uh->len = htons(up->len);
 	uh->check = 0;
 
+#ifndef CONFIG_UDP_LITE_DISABLE
 	if (up->pcflag)  				 /*     UDP-Lite      */
 		csum  = udplite_csum_outgoing(sk, skb);
+	else
+#endif
 
-	else if (sk->sk_no_check == UDP_CSUM_NOXMIT) {   /* UDP csum disabled */
+	if (sk->sk_no_check == UDP_CSUM_NOXMIT) {   /* UDP csum disabled */
 
 		skb->ip_summed = CHECKSUM_NONE;
 		goto send;
@@ -511,7 +514,10 @@ int udp_sendmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 	__be32 daddr, faddr, saddr;
 	__be16 dport;
 	u8  tos;
-	int err, is_udplite = IS_UDPLITE(sk);
+	int err;
+#ifndef CONFIG_UDP_LITE_DISABLE
+	int is_udplite = IS_UDPLITE(sk);
+#endif
 	int corkreq = up->corkflag || msg->msg_flags&MSG_MORE;
 	int (*getfrag)(void *, char *, int, int, int, struct sk_buff *);
 
@@ -664,7 +670,11 @@ back_from_confirm:
 
 do_append_data:
 	up->len += ulen;
+#ifndef CONFIG_UDP_LITE_DISABLE
 	getfrag  =  is_udplite ?  udplite_getfrag : ip_generic_getfrag;
+#else
+	getfrag  = ip_generic_getfrag;
+#endif
 	err = ip_append_data(sk, getfrag, msg->msg_iov, ulen,
 			sizeof(struct udphdr), &ipc, &rt,
 			corkreq ? msg->msg_flags|MSG_MORE : msg->msg_flags);
@@ -683,7 +693,11 @@ out:
 	if (free)
 		kfree(ipc.opt);
 	if (!err) {
+#ifndef CONFIG_UDP_LITE_DISABLE
 		UDP_INC_STATS_USER(UDP_MIB_OUTDATAGRAMS, is_udplite);
+#else
+		UDP_INC_STATS_USER(UDP_MIB_OUTDATAGRAMS, 0);
+#endif
 		return len;
 	}
 	/*
@@ -694,7 +708,11 @@ out:
 	 * seems like overkill.
 	 */
 	if (err == -ENOBUFS || test_bit(SOCK_NOSPACE, &sk->sk_socket->flags)) {
+#ifndef CONFIG_UDP_LITE_DISABLE
 		UDP_INC_STATS_USER(UDP_MIB_SNDBUFERRORS, is_udplite);
+#else
+		UDP_INC_STATS_USER(UDP_MIB_SNDBUFERRORS, 0);
+#endif
 	}
 	return err;
 
@@ -805,7 +823,10 @@ int udp_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 	struct inet_sock *inet = inet_sk(sk);
 	struct sockaddr_in *sin = (struct sockaddr_in *)msg->msg_name;
 	struct sk_buff *skb;
-	int copied, err, copy_only, is_udplite = IS_UDPLITE(sk);
+	int copied, err, copy_only;
+#ifndef CONFIG_UDP_LITE_DISABLE
+	int is_udplite = IS_UDPLITE(sk);
+#endif
 
 	/*
 	 *	Check any passed addresses
@@ -842,7 +863,11 @@ try_again:
 	 */
 	copy_only = (skb->ip_summed==CHECKSUM_UNNECESSARY);
 
+#ifndef CONFIG_UDP_LITE_DISABLE
 	if (is_udplite  ||  (!copy_only  &&  msg->msg_flags&MSG_TRUNC)) {
+#else
+	if (!copy_only  &&  msg->msg_flags&MSG_TRUNC) {
+#endif
 		if (__udp_lib_checksum_complete(skb))
 			goto csum_copy_err;
 		copy_only = 1;
@@ -884,7 +909,11 @@ out:
 	return err;
 
 csum_copy_err:
+#ifndef CONFIG_UDP_LITE_DISABLE
 	UDP_INC_STATS_BH(UDP_MIB_INERRORS, is_udplite);
+#else
+	UDP_INC_STATS_BH(UDP_MIB_INERRORS, 0);
+#endif
 
 	skb_kill_datagram(sk, skb, flags);
 
@@ -970,6 +999,7 @@ int udp_queue_rcv_skb(struct sock * sk, struct sk_buff *skb)
 		/* FALLTHROUGH -- it's a UDP Packet */
 	}
 udp:
+#ifndef CONFIG_UDP_LITE_DISABLE
 	/*
 	 * 	UDP-Lite specific tests, ignored on UDP sockets
 	 */
@@ -1005,7 +1035,7 @@ udp:
 			goto drop;
 		}
 	}
-
+#endif
 	if (sk->sk_filter && skb->ip_summed != CHECKSUM_UNNECESSARY) {
 		if (__udp_lib_checksum_complete(skb))
 			goto drop;
@@ -1124,19 +1154,20 @@ int __udp4_lib_rcv(struct sk_buff *skb, struct hlist_head udptable[],
 	if (ulen > skb->len)
 		goto short_packet;
 
+#ifndef CONFIG_UDP_LITE_DISABLE
 	if(! is_udplite ) {		/* UDP validates ulen. */
-
+#endif
 		if (ulen < sizeof(*uh) || pskb_trim_rcsum(skb, ulen))
 			goto short_packet;
 		uh = skb->h.uh;
 
 		udp4_csum_init(skb, uh);
-
+#ifndef CONFIG_UDP_LITE_DISABLE
 	} else 	{			/* UDP-Lite validates cscov. */
 		if (udplite4_csum_init(skb, uh))
 			goto csum_error;
 	}
-
+#endif
 	if(rt->rt_flags & (RTCF_BROADCAST|RTCF_MULTICAST))
 		return __udp4_lib_mcast_deliver(skb, uh, saddr, daddr, udptable);
 
@@ -1162,7 +1193,11 @@ int __udp4_lib_rcv(struct sk_buff *skb, struct hlist_head udptable[],
 	if (udp_lib_checksum_complete(skb))
 		goto csum_error;
 
+#ifndef CONFIG_UDP_LITE_DISABLE
 	UDP_INC_STATS_BH(UDP_MIB_NOPORTS, is_udplite);
+#else
+	UDP_INC_STATS_BH(UDP_MIB_NOPORTS, 0);
+#endif
 	icmp_send(skb, ICMP_DEST_UNREACH, ICMP_PORT_UNREACH, 0);
 
 	/*
@@ -1174,7 +1209,11 @@ int __udp4_lib_rcv(struct sk_buff *skb, struct hlist_head udptable[],
 
 short_packet:
 	LIMIT_NETDEBUG(KERN_DEBUG "UDP%s: short packet: From %u.%u.%u.%u:%u %d/%d to %u.%u.%u.%u:%u\n",
+#ifndef CONFIG_UDP_LITE_DISABLE
 		       is_udplite? "-Lite" : "",
+#else
+		       "",
+#endif
 		       NIPQUAD(saddr),
 		       ntohs(uh->source),
 		       ulen,
@@ -1189,14 +1228,22 @@ csum_error:
 	 * the network is concerned, anyway) as per 4.1.3.4 (MUST).
 	 */
 	LIMIT_NETDEBUG(KERN_DEBUG "UDP%s: bad checksum. From %d.%d.%d.%d:%d to %d.%d.%d.%d:%d ulen %d\n",
+#ifndef CONFIG_UDP_LITE_DISABLE
 		       is_udplite? "-Lite" : "",
+#else
+		       "",
+#endif
 		       NIPQUAD(saddr),
 		       ntohs(uh->source),
 		       NIPQUAD(daddr),
 		       ntohs(uh->dest),
 		       ulen);
 drop:
+#ifndef CONFIG_UDP_LITE_DISABLE
 	UDP_INC_STATS_BH(UDP_MIB_INERRORS, is_udplite);
+#else
+	UDP_INC_STATS_BH(UDP_MIB_INERRORS, 0);
+#endif
 	kfree_skb(skb);
 	return(0);
 }
@@ -1259,6 +1306,7 @@ int udp_lib_setsockopt(struct sock *sk, int level, int optname,
 		}
 		break;
 
+#ifndef CONFIG_UDP_LITE_DISABLE
 	/*
 	 * 	UDP-Lite's partial checksum coverage (RFC 3828).
 	 */
@@ -1284,7 +1332,7 @@ int udp_lib_setsockopt(struct sock *sk, int level, int optname,
 		up->pcrlen = val;
 		up->pcflag |= UDPLITE_RECV_CC;
 		break;
-
+#endif
 	default:
 		err = -ENOPROTOOPT;
 		break;
@@ -1296,7 +1344,11 @@ int udp_lib_setsockopt(struct sock *sk, int level, int optname,
 int udp_setsockopt(struct sock *sk, int level, int optname,
 		   char __user *optval, int optlen)
 {
+#ifndef CONFIG_UDP_LITE_DISABLE
 	if (level == SOL_UDP  ||  level == SOL_UDPLITE)
+#else
+	if (level == SOL_UDP)
+#endif
 		return udp_lib_setsockopt(sk, level, optname, optval, optlen,
 					  udp_push_pending_frames);
 	return ip_setsockopt(sk, level, optname, optval, optlen);
@@ -1306,7 +1358,11 @@ int udp_setsockopt(struct sock *sk, int level, int optname,
 int compat_udp_setsockopt(struct sock *sk, int level, int optname,
 			  char __user *optval, int optlen)
 {
+#ifndef CONFIG_UDP_LITE_DISABLE
 	if (level == SOL_UDP  ||  level == SOL_UDPLITE)
+#else
+	if (level == SOL_UDP)
+#endif
 		return udp_lib_setsockopt(sk, level, optname, optval, optlen,
 					  udp_push_pending_frames);
 	return compat_ip_setsockopt(sk, level, optname, optval, optlen);
@@ -1336,6 +1392,7 @@ int udp_lib_getsockopt(struct sock *sk, int level, int optname,
 		val = up->encap_type;
 		break;
 
+#ifndef CONFIG_UDP_LITE_DISABLE
 	/* The following two cannot be changed on UDP sockets, the return is
 	 * always 0 (which corresponds to the full checksum coverage of UDP). */
 	case UDPLITE_SEND_CSCOV:
@@ -1345,7 +1402,7 @@ int udp_lib_getsockopt(struct sock *sk, int level, int optname,
 	case UDPLITE_RECV_CSCOV:
 		val = up->pcrlen;
 		break;
-
+#endif
 	default:
 		return -ENOPROTOOPT;
 	};
@@ -1360,7 +1417,11 @@ int udp_lib_getsockopt(struct sock *sk, int level, int optname,
 int udp_getsockopt(struct sock *sk, int level, int optname,
 		   char __user *optval, int __user *optlen)
 {
+#ifndef CONFIG_UDP_LITE_DISABLE
 	if (level == SOL_UDP  ||  level == SOL_UDPLITE)
+#else
+	if (level == SOL_UDP)
+#endif
 		return udp_lib_getsockopt(sk, level, optname, optval, optlen);
 	return ip_getsockopt(sk, level, optname, optval, optlen);
 }
@@ -1369,7 +1430,11 @@ int udp_getsockopt(struct sock *sk, int level, int optname,
 int compat_udp_getsockopt(struct sock *sk, int level, int optname,
 				 char __user *optval, int __user *optlen)
 {
+#ifndef CONFIG_UDP_LITE_DISABLE
 	if (level == SOL_UDP  ||  level == SOL_UDPLITE)
+#else
+	if (level == SOL_UDP)
+#endif
 		return udp_lib_getsockopt(sk, level, optname, optval, optlen);
 	return compat_ip_getsockopt(sk, level, optname, optval, optlen);
 }
@@ -1391,7 +1456,9 @@ unsigned int udp_poll(struct file *file, struct socket *sock, poll_table *wait)
 {
 	unsigned int mask = datagram_poll(file, sock, wait);
 	struct sock *sk = sock->sk;
+#ifndef CONFIG_UDP_LITE_DISABLE
 	int 	is_lite = IS_UDPLITE(sk);
+#endif
 
 	/* Check for false positives due to checksum errors */
 	if ( (mask & POLLRDNORM) &&
@@ -1403,7 +1470,11 @@ unsigned int udp_poll(struct file *file, struct socket *sock, poll_table *wait)
 		spin_lock_bh(&rcvq->lock);
 		while ((skb = skb_peek(rcvq)) != NULL) {
 			if (udp_lib_checksum_complete(skb)) {
+#ifndef CONFIG_UDP_LITE_DISABLE
 				UDP_INC_STATS_BH(UDP_MIB_INERRORS, is_lite);
+#else
+				UDP_INC_STATS_BH(UDP_MIB_INERRORS, 0);
+#endif
 				__skb_unlink(skb, rcvq);
 				kfree_skb(skb);
 			} else {

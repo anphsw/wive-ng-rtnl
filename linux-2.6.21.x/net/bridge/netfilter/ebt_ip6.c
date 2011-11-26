@@ -108,7 +108,9 @@ static int ebt_ip6_check(const char *tablename, unsigned int hookmask,
 			return -EINVAL;
 		if (info->protocol != IPPROTO_TCP &&
 		    info->protocol != IPPROTO_UDP &&
+#ifndef CONFIG_UDP_LITE_DISABLE
 		    info->protocol != IPPROTO_UDPLITE &&
+#endif
 		    info->protocol != IPPROTO_SCTP &&
 		    info->protocol != IPPROTO_DCCP)
 			 return -EINVAL;

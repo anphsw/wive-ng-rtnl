@@ -162,7 +162,9 @@ check(u_int16_t proto,
 {
 	/* Must specify supported protocol, no unknown flags or bad count */
 	return (proto == IPPROTO_TCP || proto == IPPROTO_UDP
+#ifndef CONFIG_UDP_LITE_DISABLE
 		|| proto == IPPROTO_UDPLITE
+#endif
 		|| proto == IPPROTO_SCTP || proto == IPPROTO_DCCP)
 		&& !(ip_invflags & XT_INV_PROTO)
 		&& (match_flags == XT_MULTIPORT_SOURCE

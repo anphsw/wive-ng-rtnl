@@ -255,7 +255,9 @@ clusterip_hashfn(struct sk_buff *skb, struct clusterip_config *config)
 	switch (iph->protocol) {
 	case IPPROTO_TCP:
 	case IPPROTO_UDP:
+#ifndef CONFIG_UDP_LITE_DISABLE
 	case IPPROTO_UDPLITE:
+#endif
 	case IPPROTO_SCTP:
 	case IPPROTO_DCCP:
 	case IPPROTO_ICMP:

@@ -93,7 +93,9 @@
 #include <net/dst.h>
 #include <net/ip.h>
 #include <net/udp.h>
+#ifndef CONFIG_UDP_LITE_DISABLE
 #include <net/udplite.h>
+#endif
 #include <net/xfrm.h>
 
 #include <asm/byteorder.h>
@@ -101,11 +103,14 @@
 
 #ifdef CONFIG_PPPOL2TP_FASTPATH
 #define PPPOL2TP_DRV_VERSION	"V0.17.FASTPATH"
-#define UDP_LITE_DISABLE
 #define DISABLE_WORKQUEUE
 #define DISABLE_GET_FS
 #else
 #define PPPOL2TP_DRV_VERSION	"V0.17"
+#endif
+
+#ifdef CONFIG_UDP_LITE_DISABLE
+#define UDP_LITE_DISABLE
 #endif
 
 #ifdef CONFIG_PROC_FS

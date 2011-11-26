@@ -840,6 +840,7 @@
 19) Remove web pages from tmpfs before firmware burn to flash.<br>
 20) Add more checks update image before write to flash.<br>
 21) Fix reboot after upgrade firmware in some situations.<br>
+22) Full udplite disable if CONFIG_UDP_LITE_DISABLE defined.<br>
 
 <br><br>
 <b>For support see:</b><br>

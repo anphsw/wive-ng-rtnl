@@ -46,7 +46,9 @@ enum {
 
   IPPROTO_COMP   = 108,                /* Compression Header protocol */
   IPPROTO_SCTP   = 132,		/* Stream Control Transport Protocol	*/
+#ifndef CONFIG_UDP_LITE_DISABLE
   IPPROTO_UDPLITE = 136,	/* UDP-Lite (RFC 3828)			*/
+#endif
 
   IPPROTO_RAW	 = 255,		/* Raw IP packets			*/
   IPPROTO_MAX

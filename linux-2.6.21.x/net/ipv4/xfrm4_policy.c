@@ -214,7 +214,9 @@ _decode_session4(struct sk_buff *skb, struct flowi *fl)
 	if (!(iph->frag_off & htons(IP_MF | IP_OFFSET))) {
 		switch (iph->protocol) {
 		case IPPROTO_UDP:
+#ifndef CONFIG_UDP_LITE_DISABLE
 		case IPPROTO_UDPLITE:
+#endif
 		case IPPROTO_TCP:
 		case IPPROTO_SCTP:
 		case IPPROTO_DCCP:

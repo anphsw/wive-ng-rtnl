@@ -104,7 +104,9 @@
 #include <net/inet_connection_sock.h>
 #include <net/tcp.h>
 #include <net/udp.h>
+#ifndef CONFIG_UDP_LITE_DISABLE
 #include <net/udplite.h>
+#endif
 #include <linux/skbuff.h>
 #include <net/sock.h>
 #include <net/raw.h>
@@ -1252,13 +1254,17 @@ static int __init init_ipv4_mibs(void)
 	tcp_statistics[1] = alloc_percpu(struct tcp_mib);
 	udp_statistics[0] = alloc_percpu(struct udp_mib);
 	udp_statistics[1] = alloc_percpu(struct udp_mib);
+#ifndef CONFIG_UDP_LITE_DISABLE
 	udplite_statistics[0] = alloc_percpu(struct udp_mib);
 	udplite_statistics[1] = alloc_percpu(struct udp_mib);
+#endif
 	if (!
 	    (net_statistics[0] && net_statistics[1] && ip_statistics[0]
 	     && ip_statistics[1] && tcp_statistics[0] && tcp_statistics[1]
-	     && udp_statistics[0] && udp_statistics[1]
-	     && udplite_statistics[0] && udplite_statistics[1]             ) )
+#ifndef CONFIG_UDP_LITE_DISABLE
+	     && udplite_statistics[0] && udplite_statistics[1]
+#endif
+	     && udp_statistics[0] && udp_statistics[1] ) )
 		return -ENOMEM;
 
 	(void) tcp_mib_init();
@@ -1345,8 +1351,10 @@ static int __init inet_init(void)
 	/* Setup TCP slab cache for open requests. */
 	tcp_init();
 
+#ifndef CONFIG_UDP_LITE_DISABLE
 	/* Add UDP-Lite (RFC 3828) */
 	udplite4_register();
+#endif
 
 	/*
 	 *	Set the ICMP layer up

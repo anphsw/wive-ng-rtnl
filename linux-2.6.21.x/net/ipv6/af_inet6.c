@@ -47,7 +47,9 @@
 #include <net/ip.h>
 #include <net/ipv6.h>
 #include <net/udp.h>
+#ifndef CONFIG_UDP_LITE_DISABLE
 #include <net/udplite.h>
+#endif
 #include <net/tcp.h>
 #include <net/ipip.h>
 #include <net/protocol.h>
@@ -746,13 +748,17 @@ static int __init init_ipv6_mibs(void)
 	if (snmp6_mib_init((void **)udp_stats_in6, sizeof (struct udp_mib),
 			   __alignof__(struct udp_mib)) < 0)
 		goto err_udp_mib;
+#ifndef CONFIG_UDP_LITE_DISABLE
 	if (snmp6_mib_init((void **)udplite_stats_in6, sizeof (struct udp_mib),
 			   __alignof__(struct udp_mib)) < 0)
 		goto err_udplite_mib;
+#endif
 	return 0;
 
+#ifndef CONFIG_UDP_LITE_DISABLE
 err_udplite_mib:
 	snmp6_mib_free((void **)udp_stats_in6);
+#endif
 err_udp_mib:
 	snmp6_mib_free((void **)icmpv6_statistics);
 err_icmp_mib:
@@ -767,7 +773,9 @@ static void cleanup_ipv6_mibs(void)
 	snmp6_mib_free((void **)ipv6_statistics);
 	snmp6_mib_free((void **)icmpv6_statistics);
 	snmp6_mib_free((void **)udp_stats_in6);
+#ifndef CONFIG_UDP_LITE_DISABLE
 	snmp6_mib_free((void **)udplite_stats_in6);
+#endif
 }
 
 static int __init inet6_init(void)
@@ -795,10 +803,11 @@ static int __init inet6_init(void)
 	if (err)
 		goto out_unregister_tcp_proto;
 
+#ifndef CONFIG_UDP_LITE_DISABLE
 	err = proto_register(&udplitev6_prot, 1);
 	if (err)
 		goto out_unregister_udp_proto;
-
+#endif
 	err = proto_register(&rawv6_prot, 1);
 	if (err)
 		goto out_unregister_udplite_proto;
@@ -856,8 +865,10 @@ static int __init inet6_init(void)
 		goto proc_tcp6_fail;
 	if (udp6_proc_init())
 		goto proc_udp6_fail;
+#ifndef CONFIG_UDP_LITE_DISABLE
 	if (udplite6_proc_init())
 		goto proc_udplite6_fail;
+#endif
 	if (ipv6_misc_proc_init())
 		goto proc_misc6_fail;
 
@@ -883,7 +894,9 @@ static int __init inet6_init(void)
 
 	/* Init v6 transport protocols. */
 	udpv6_init();
+#ifndef CONFIG_UDP_LITE_DISABLE
 	udplitev6_init();
+#endif
 	tcpv6_init();
 
 	ipv6_packet_init();
@@ -901,8 +914,10 @@ proc_if6_fail:
 proc_anycast6_fail:
 	ipv6_misc_proc_exit();
 proc_misc6_fail:
+#ifndef CONFIG_UDP_LITE_DISABLE
 	udplite6_proc_exit();
 proc_udplite6_fail:
+#endif
 	udp6_proc_exit();
 proc_udp6_fail:
 	tcp6_proc_exit();
@@ -926,9 +941,11 @@ out_unregister_sock:
 	sock_unregister(PF_INET6);
 out_unregister_raw_proto:
 	proto_unregister(&rawv6_prot);
-out_unregister_udplite_proto:
-	proto_unregister(&udplitev6_prot);
+#ifndef CONFIG_UDP_LITE_DISABLE
 out_unregister_udp_proto:
+	proto_unregister(&udplitev6_prot);
+#endif
+out_unregister_udplite_proto:
 	proto_unregister(&udpv6_prot);
 out_unregister_tcp_proto:
 	proto_unregister(&tcpv6_prot);
@@ -955,7 +972,9 @@ static void __exit inet6_exit(void)
 	if6_proc_exit();
 	ac6_proc_exit();
 	ipv6_misc_proc_exit();
+#ifndef CONFIG_UDP_LITE_DISABLE
 	udplite6_proc_exit();
+#endif
 	udp6_proc_exit();
 	tcp6_proc_exit();
 	raw6_proc_exit();
@@ -969,7 +988,9 @@ static void __exit inet6_exit(void)
 #endif
 	cleanup_ipv6_mibs();
 	proto_unregister(&rawv6_prot);
+#ifndef CONFIG_UDP_LITE_DISABLE
 	proto_unregister(&udplitev6_prot);
+#endif
 	proto_unregister(&udpv6_prot);
 	proto_unregister(&tcpv6_prot);
 }

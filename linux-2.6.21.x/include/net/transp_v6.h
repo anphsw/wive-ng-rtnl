@@ -11,7 +11,9 @@
 
 extern struct proto rawv6_prot;
 extern struct proto udpv6_prot;
+#ifndef CONFIG_UDP_LITE_DISABLE
 extern struct proto udplitev6_prot;
+#endif
 extern struct proto tcpv6_prot;
 
 struct flowi;
@@ -25,7 +27,10 @@ extern void				ipv6_destopt_init(void);
 /* transport protocols */
 extern void				rawv6_init(void);
 extern void				udpv6_init(void);
+#ifndef CONFIG_UDP_LITE_DISABLE
 extern void 				udplitev6_init(void);
+#endif
+extern int 				igmp6_init(void);
 extern void				tcpv6_init(void);
 
 extern int				udpv6_connect(struct sock *sk,

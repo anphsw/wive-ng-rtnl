@@ -50,7 +50,9 @@
 #include <net/inet_common.h>
 #include <net/tcp.h>
 #include <net/udp.h>
+#ifndef CONFIG_UDP_LITE_DISABLE
 #include <net/udplite.h>
+#endif
 #include <net/xfrm.h>
 
 #include <asm/uaccess.h>
@@ -239,7 +241,9 @@ static int do_ipv6_setsockopt(struct sock *sk, int level, int optname,
 			struct sk_buff *pktopt;
 
 			if (sk->sk_protocol != IPPROTO_UDP &&
+#ifndef CONFIG_UDP_LITE_DISABLE
 			    sk->sk_protocol != IPPROTO_UDPLITE &&
+#endif
 			    sk->sk_protocol != IPPROTO_TCP)
 				break;
 
@@ -278,9 +282,10 @@ static int do_ipv6_setsockopt(struct sock *sk, int level, int optname,
 				tcp_sync_mss(sk, icsk->icsk_pmtu_cookie);
 			} else {
 				struct proto *prot = &udp_prot;
-
+#ifndef CONFIG_UDP_LITE_DISABLE
 				if (sk->sk_protocol == IPPROTO_UDPLITE)
 					prot = &udplite_prot;
+#endif
 				local_bh_disable();
 				sock_prot_dec_use(sk->sk_prot);
 				sock_prot_inc_use(prot);
@@ -822,7 +827,9 @@ static int do_ipv6_getsockopt(struct sock *sk, int level, int optname,
 	switch (optname) {
 	case IPV6_ADDRFORM:
 		if (sk->sk_protocol != IPPROTO_UDP &&
+#ifndef CONFIG_UDP_LITE_DISABLE
 		    sk->sk_protocol != IPPROTO_UDPLITE &&
+#endif
 		    sk->sk_protocol != IPPROTO_TCP)
 			return -EINVAL;
 		if (sk->sk_state != TCP_ESTABLISHED)

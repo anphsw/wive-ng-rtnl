@@ -172,6 +172,7 @@ static void dump_packet(const struct nf_loginfo *info,
 		break;
 	}
 	case IPPROTO_UDP:
+#ifndef CONFIG_UDP_LITE_DISABLE
 	case IPPROTO_UDPLITE: {
 		struct udphdr _udph, *uh;
 
@@ -199,6 +200,7 @@ static void dump_packet(const struct nf_loginfo *info,
 		       ntohs(uh->len));
 		break;
 	}
+#endif
 	case IPPROTO_ICMP: {
 		struct icmphdr _icmph, *ich;
 		static const size_t required_len[NR_ICMP_TYPES+1]

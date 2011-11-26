@@ -143,7 +143,9 @@ static unsigned sfq_hash(struct sfq_sched_data *q, struct sk_buff *skb)
 		if (!(iph->frag_off&htons(IP_MF|IP_OFFSET)) &&
 		    (iph->protocol == IPPROTO_TCP ||
 		     iph->protocol == IPPROTO_UDP ||
+#ifndef CONFIG_UDP_LITE_DISABLE
 		     iph->protocol == IPPROTO_UDPLITE ||
+#endif
 		     iph->protocol == IPPROTO_SCTP ||
 		     iph->protocol == IPPROTO_DCCP ||
 		     iph->protocol == IPPROTO_ESP))
@@ -157,7 +159,9 @@ static unsigned sfq_hash(struct sfq_sched_data *q, struct sk_buff *skb)
 		h2 = iph->saddr.s6_addr32[3]^iph->nexthdr;
 		if (iph->nexthdr == IPPROTO_TCP ||
 		    iph->nexthdr == IPPROTO_UDP ||
+#ifndef CONFIG_UDP_LITE_DISABLE
 		    iph->nexthdr == IPPROTO_UDPLITE ||
+#endif
 		    iph->nexthdr == IPPROTO_SCTP ||
 		    iph->nexthdr == IPPROTO_DCCP ||
 		    iph->nexthdr == IPPROTO_ESP)

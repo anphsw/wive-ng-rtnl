@@ -136,7 +136,10 @@ int udpv6_recvmsg(struct kiocb *iocb, struct sock *sk,
 	struct inet_sock *inet = inet_sk(sk);
 	struct sk_buff *skb;
 	size_t copied;
-	int err, copy_only, is_udplite = IS_UDPLITE(sk);
+	int err, copy_only;
+#ifndef CONFIG_UDP_LITE_DISABLE
+	int is_udplite = IS_UDPLITE(sk);
+#endif
 
 	if (addr_len)
 		*addr_len=sizeof(struct sockaddr_in6);
@@ -160,7 +163,11 @@ try_again:
 	 */
 	copy_only = (skb->ip_summed==CHECKSUM_UNNECESSARY);
 
+#ifndef CONFIG_UDP_LITE_DISABLE
 	if (is_udplite  ||  (!copy_only  &&  msg->msg_flags&MSG_TRUNC)) {
+#else
+	if (!copy_only  &&  msg->msg_flags&MSG_TRUNC) {
+#endif
 		if (__udp_lib_checksum_complete(skb))
 			goto csum_copy_err;
 		copy_only = 1;
@@ -220,7 +227,11 @@ csum_copy_err:
 	skb_kill_datagram(sk, skb, flags);
 
 	if (flags & MSG_DONTWAIT) {
+#ifndef CONFIG_UDP_LITE_DISABLE
 		UDP6_INC_STATS_USER(UDP_MIB_INERRORS, is_udplite);
+#else
+		UDP6_INC_STATS_USER(UDP_MIB_INERRORS, 0);
+#endif
 		return -EAGAIN;
 	}
 
@@ -275,12 +286,15 @@ static __inline__ void udpv6_err(struct sk_buff *skb,
 
 int udpv6_queue_rcv_skb(struct sock * sk, struct sk_buff *skb)
 {
+#ifndef CONFIG_UDP_LITE_DISABLE
 	struct udp_sock *up = udp_sk(sk);
+#endif
 	int rc;
 
 	if (!xfrm6_policy_check(sk, XFRM_POLICY_IN, skb))
 		goto drop;
 
+#ifndef CONFIG_UDP_LITE_DISABLE
 	/*
 	 * UDP-Lite specific tests, ignored on UDP sockets (see net/ipv4/udp.c).
 	 */
@@ -299,7 +313,7 @@ int udpv6_queue_rcv_skb(struct sock * sk, struct sk_buff *skb)
 			goto drop;
 		}
 	}
-
+#endif
 	if (udp_lib_checksum_complete(skb))
 		goto drop;
 
@@ -432,8 +446,9 @@ int __udp6_lib_rcv(struct sk_buff **pskb, struct hlist_head udptable[],
 	if (ulen > skb->len)
 		goto short_packet;
 
+#ifndef CONFIG_UDP_LITE_DISABLE
 	if(! is_udplite ) {		/* UDP validates ulen. */
-
+#endif
 		/* Check for jumbo payload */
 		if (ulen == 0)
 			ulen = skb->len;
@@ -452,11 +467,12 @@ int __udp6_lib_rcv(struct sk_buff **pskb, struct hlist_head udptable[],
 		if (udp6_csum_init(skb, uh))
 			goto discard;
 
+#ifndef CONFIG_UDP_LITE_DISABLE
 	} else 	{			/* UDP-Lite validates cscov. */
 		if (udplite6_csum_init(skb, uh))
 			goto discard;
 	}
-
+#endif
 	/*
 	 *	Multicast receive code
 	 */
@@ -477,7 +493,11 @@ int __udp6_lib_rcv(struct sk_buff **pskb, struct hlist_head udptable[],
 
 		if (udp_lib_checksum_complete(skb))
 			goto discard;
+#ifndef CONFIG_UDP_LITE_DISABLE
 		UDP6_INC_STATS_BH(UDP_MIB_NOPORTS, is_udplite);
+#else
+		UDP6_INC_STATS_BH(UDP_MIB_NOPORTS, 0);
+#endif
 
 		icmpv6_send(skb, ICMPV6_DEST_UNREACH, ICMPV6_PORT_UNREACH, 0, dev);
 
@@ -493,10 +513,18 @@ int __udp6_lib_rcv(struct sk_buff **pskb, struct hlist_head udptable[],
 
 short_packet:
 	LIMIT_NETDEBUG(KERN_DEBUG "UDP%sv6: short packet: %d/%u\n",
+#ifndef CONFIG_UDP_LITE_DISABLE
 		       is_udplite? "-Lite" : "",  ulen, skb->len);
+#else
+		       "",  ulen, skb->len);
+#endif
 
 discard:
+#ifndef CONFIG_UDP_LITE_DISABLE
 	UDP6_INC_STATS_BH(UDP_MIB_INERRORS, is_udplite);
+#else
+	UDP6_INC_STATS_BH(UDP_MIB_INERRORS, 0);
+#endif
 	kfree_skb(skb);
 	return(0);
 }
@@ -547,9 +575,11 @@ static int udp_v6_push_pending_frames(struct sock *sk)
 	uh->len = htons(up->len);
 	uh->check = 0;
 
+#ifndef CONFIG_UDP_LITE_DISABLE
 	if (up->pcflag)
 		csum = udplite_csum_outgoing(sk, skb);
 	 else
+#endif
 		csum = udp_csum_outgoing(sk, skb);
 
 	/* add protocol-dependent pseudo-header */
@@ -585,7 +615,9 @@ int udpv6_sendmsg(struct kiocb *iocb, struct sock *sk,
 	int corkreq = up->corkflag || msg->msg_flags&MSG_MORE;
 	int err;
 	int connected = 0;
+#ifndef CONFIG_UDP_LITE_DISABLE
 	int is_udplite = IS_UDPLITE(sk);
+#endif
 	int (*getfrag)(void *, char *, int, int, int, struct sk_buff *);
 
 	/* destination address check */
@@ -794,7 +826,11 @@ back_from_confirm:
 
 do_append_data:
 	up->len += ulen;
+#ifndef CONFIG_UDP_LITE_DISABLE
 	getfrag  =  is_udplite ?  udplite_getfrag : ip_generic_getfrag;
+#else
+	getfrag  =  ip_generic_getfrag;
+#endif
 	err = ip6_append_data(sk, getfrag, msg->msg_iov, ulen,
 		sizeof(struct udphdr), hlimit, tclass, opt, &fl,
 		(struct rt6_info*)dst,
@@ -827,7 +863,11 @@ do_append_data:
 out:
 	fl6_sock_release(flowlabel);
 	if (!err) {
+#ifndef CONFIG_UDP_LITE_DISABLE
 		UDP6_INC_STATS_USER(UDP_MIB_OUTDATAGRAMS, is_udplite);
+#else
+		UDP6_INC_STATS_USER(UDP_MIB_OUTDATAGRAMS, 0);
+#endif
 		return len;
 	}
 	/*
@@ -838,7 +878,11 @@ out:
 	 * seems like overkill.
 	 */
 	if (err == -ENOBUFS || test_bit(SOCK_NOSPACE, &sk->sk_socket->flags)) {
+#ifndef CONFIG_UDP_LITE_DISABLE
 		UDP6_INC_STATS_USER(UDP_MIB_SNDBUFERRORS, is_udplite);
+#else
+		UDP6_INC_STATS_USER(UDP_MIB_SNDBUFERRORS, 0);
+#endif
 	}
 	return err;
 
@@ -867,7 +911,11 @@ int udpv6_destroy_sock(struct sock *sk)
 int udpv6_setsockopt(struct sock *sk, int level, int optname,
 		     char __user *optval, int optlen)
 {
+#ifndef CONFIG_UDP_LITE_DISABLE
 	if (level == SOL_UDP  ||  level == SOL_UDPLITE)
+#else
+	if (level == SOL_UDP)
+#endif
 		return udp_lib_setsockopt(sk, level, optname, optval, optlen,
 					  udp_v6_push_pending_frames);
 	return ipv6_setsockopt(sk, level, optname, optval, optlen);
@@ -877,7 +925,11 @@ int udpv6_setsockopt(struct sock *sk, int level, int optname,
 int compat_udpv6_setsockopt(struct sock *sk, int level, int optname,
 			    char __user *optval, int optlen)
 {
+#ifndef CONFIG_UDP_LITE_DISABLE
 	if (level == SOL_UDP  ||  level == SOL_UDPLITE)
+#else
+	if (level == SOL_UDP)
+#endif
 		return udp_lib_setsockopt(sk, level, optname, optval, optlen,
 					  udp_v6_push_pending_frames);
 	return compat_ipv6_setsockopt(sk, level, optname, optval, optlen);
@@ -887,7 +939,11 @@ int compat_udpv6_setsockopt(struct sock *sk, int level, int optname,
 int udpv6_getsockopt(struct sock *sk, int level, int optname,
 		     char __user *optval, int __user *optlen)
 {
+#ifndef CONFIG_UDP_LITE_DISABLE
 	if (level == SOL_UDP  ||  level == SOL_UDPLITE)
+#else
+	if (level == SOL_UDP)
+#endif
 		return udp_lib_getsockopt(sk, level, optname, optval, optlen);
 	return ipv6_getsockopt(sk, level, optname, optval, optlen);
 }
@@ -896,7 +952,11 @@ int udpv6_getsockopt(struct sock *sk, int level, int optname,
 int compat_udpv6_getsockopt(struct sock *sk, int level, int optname,
 			    char __user *optval, int __user *optlen)
 {
+#ifndef CONFIG_UDP_LITE_DISABLE
 	if (level == SOL_UDP  ||  level == SOL_UDPLITE)
+#else
+	if (level == SOL_UDP)
+#endif
 		return udp_lib_getsockopt(sk, level, optname, optval, optlen);
 	return compat_ipv6_getsockopt(sk, level, optname, optval, optlen);
 }

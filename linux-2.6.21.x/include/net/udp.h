@@ -145,12 +145,19 @@ DECLARE_SNMP_STAT(struct udp_mib, udp_statistics);
 /*
  * 	SNMP statistics for UDP and UDP-Lite
  */
+#ifndef CONFIG_UDP_LITE_DISABLE
 #define UDP_INC_STATS_USER(field, is_udplite)			       do {   \
 	if (is_udplite) SNMP_INC_STATS_USER(udplite_statistics, field);       \
 	else		SNMP_INC_STATS_USER(udp_statistics, field);  }  while(0)
 #define UDP_INC_STATS_BH(field, is_udplite) 			       do  {  \
 	if (is_udplite) SNMP_INC_STATS_BH(udplite_statistics, field);         \
 	else		SNMP_INC_STATS_BH(udp_statistics, field);    }  while(0)
+#else
+#define UDP_INC_STATS_USER(field, is_udplite)			       do {   \
+			SNMP_INC_STATS_USER(udp_statistics, field);  }  while(0)
+#define UDP_INC_STATS_BH(field, is_udplite) 			       do  {  \
+			SNMP_INC_STATS_BH(udp_statistics, field);    }  while(0)
+#endif
 
 /* /proc */
 struct udp_seq_afinfo {
