@@ -184,11 +184,16 @@ vpn_deadloop_fix()
 
 killall_vpn()
 {
-    #correct terminate xl2tpd daemon
-    if [ -f /var/run/xl2tpd/l2tp-control ]; then
-	echo "d default" > /var/run/xl2tpd/l2tp-control
-	sleep 2
+    # correct terminate xl2tpd daemon
+    # first disconnect
+    if [ -f /var/run/xl2tpd/l2tp-control ] && [ ! -f /etc/ppp/l2tpd.conf ]; then
+	lac=`cat /etc/ppp/l2tpd.conf | grep lns | cut -f 2- -d =`
+	if [ "$lac" != "" ]; then
+	    echo "d $lac" > /var/run/xl2tpd/l2tp-control
+	    sleep 2
+	fi
     fi
+    # second terminate
     if [ -f /var/run/xl2tpd/l2tp.pid ]; then
 	pid=`cat /var/run/xl2tpd/l2tp.pid`
 	if [ "$pid" != "" ]; then

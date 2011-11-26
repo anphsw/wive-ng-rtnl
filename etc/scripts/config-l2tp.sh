@@ -15,6 +15,10 @@ LOG="logger -t vpnhelper-l2tp"
 get_param() {
     eval `nvram_buf_get 2860 vpnServer vpnUser vpnPassword vpnMTU vpnMPPE vpnPeerDNS vpnDebug vpnAuthProtocol vpnEnableLCP \
 	    vpnLCPFailure vpnLCPInterval vpnTestReachable wan_gateway`
+
+    ppp="/etc/ppp"
+    var="/var/run/xl2tpd"
+    mkdir -p $var
 }
 
 check_param() {
@@ -172,7 +176,6 @@ echo "==================START-L2TP-CLIENT======================="
     fi
 
     # clear all configs
-    ppp=/etc/ppp
     echo > $ppp/l2tpd.conf
     echo > $ppp/options.l2tp
 
@@ -219,5 +222,6 @@ echo "==================START-L2TP-CLIENT======================="
 
     $LOG "Starting VPN network l2tp..."
     $LOG "Start xl2tpd"
-    FULLOPTS="$vpnDebug -c /etc/ppp/l2tpd.conf -s /etc/ppp/chap-secrets -p /var/lock/l2tpd.pid"
+
+    FULLOPTS="$vpnDebug -c /etc/ppp/l2tpd.conf -s /etc/ppp/chap-secrets -p $var/l2tpd.pid"
     xl2tpd $FULLOPTS &
