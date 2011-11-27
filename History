@@ -842,7 +842,7 @@
 21) Fix reboot after upgrade firmware in some situations.<br>
 22) Full udplite disable if CONFIG_UDP_LITE_DISABLE defined.<br>
 23) Fix l2tp client manual restart.<br>
-
+24) More correct conntrack flush table.<br>
 
 <br><br>
 <b>For support see:</b><br>
