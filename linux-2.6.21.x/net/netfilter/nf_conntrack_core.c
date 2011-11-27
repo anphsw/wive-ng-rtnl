@@ -591,14 +591,6 @@ nf_cone_conntrack_find_get(const struct nf_conntrack_tuple *tuple,
 {
     struct nf_conntrack_tuple_hash *h;
 
-#ifdef CONFIG_NF_FLUSH_CONNTRACK
-    if (nf_conntrack_table_flush) {
-    	nf_conntrack_table_flush=0;
-	nf_conntrack_flush();
-	printk("nf_cone_conntrack_find_get: clear connection track table\n");
-    }
-#endif
-
     read_lock_bh(&nf_conntrack_lock);
     h = __nf_cone_conntrack_find(tuple, ignored_conntrack);
     if (h)
