@@ -39,7 +39,7 @@ case $TYPE in
 	# Create dev node. Only one printer support. Fix me later.
 	if [ ! -f /dev/usb/lp0 ]; then
 	    $LOG "Create devs node... for ${idVendor}:${idProduct}"
-	    mknod /dev/usb/lp0 b 6 0
+	    mknod /dev/usb/lp0 c 180 0
 	    ln -sf /dev/usb/lp0 /dev/usblp0
 	fi
 	;;
