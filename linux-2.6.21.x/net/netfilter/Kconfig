@@ -85,7 +85,7 @@ config NF_FLUSH_CONNTRACK
 	depends on NF_PRIVILEGE_CONNTRACK
 	default y
 	help
-	  Ricky CAO: When user set /proc/sys/net/nf_conntrack_flush to , then clear table.
+	  Ricky CAO: When user set /proc/sys/net/nf_conntrack_table_flush to , then clear table.
 
 config NF_CONNTRACK
 	bool

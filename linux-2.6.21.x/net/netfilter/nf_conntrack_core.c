@@ -529,7 +529,7 @@ __nf_conntrack_find(const struct nf_conntrack_tuple *tuple,
     	if (nf_conntrack_table_flush) {
 	    nf_conntrack_table_flush=0;
 	    nf_conntrack_flush();
-	    DEBUGP("nf_conntrack_find: clear connection track table\n");
+	    printk("nf_conntrack_find: clear connection track table\n");
     	}
 #endif
 	list_for_each_entry(h, &nf_conntrack_hash[hash], list) {
@@ -595,7 +595,7 @@ nf_cone_conntrack_find_get(const struct nf_conntrack_tuple *tuple,
     if (nf_conntrack_table_flush) {
     	nf_conntrack_table_flush=0;
 	nf_conntrack_flush();
-	DEBUGP("nf_cone_conntrack_find_get: clear connection track table\n");
+	printk("nf_cone_conntrack_find_get: clear connection track table\n");
     }
 #endif
 
