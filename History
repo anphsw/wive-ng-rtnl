@@ -844,6 +844,7 @@
 23) Fix l2tp client manual restart.<br>
 24) More correct conntrack flush table.<br>
 25) Update libevent to 2.0.16 version.<br>
+26) Update udpxy to 21v by 25.11.2011.<br>
 
 <br><br>
 <b>For support see:</b><br>
