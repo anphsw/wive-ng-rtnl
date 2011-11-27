@@ -843,6 +843,7 @@
 22) Full udplite disable if CONFIG_UDP_LITE_DISABLE defined.<br>
 23) Fix l2tp client manual restart.<br>
 24) More correct conntrack flush table.<br>
+25) Update libevent to 2.0.16 version.<br>
 
 <br><br>
 <b>For support see:</b><br>

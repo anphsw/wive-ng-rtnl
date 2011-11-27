@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2010 Niels Provos, Nick Mathewson
+ * Copyright (c) 2008-2011 Niels Provos, Nick Mathewson
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -424,6 +424,12 @@ int
 _evthreadimpl_is_lock_debugging_enabled(void)
 {
 	return _evthread_lock_debugging_enabled;
+}
+
+int
+_evthreadimpl_locking_enabled(void)
+{
+	return _evthread_lock_fns.lock != NULL;
 }
 #endif
 

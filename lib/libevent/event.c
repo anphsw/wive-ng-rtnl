@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2000-2007 Niels Provos <provos@citi.umich.edu>
- * Copyright (c) 2007-2010 Niels Provos and Nick Mathewson
+ * Copyright (c) 2007-2011 Niels Provos and Nick Mathewson
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -239,8 +239,10 @@ HT_GENERATE(event_debug_map, event_debug_entry, node, hash_debug_entry,
 			dent->added = 1;				\
 		} else {						\
 			event_errx(_EVENT_ERR_ABORT,			\
-			    "%s: noting an add on a non-setup event %p", \
-			    __func__, (ev));				\
+			    "%s: noting an add on a non-setup event %p" \
+			    " (events: 0x%x, fd: %d, flags: 0x%x)",	\
+			    __func__, (ev), (ev)->ev_events,		\
+			    (ev)->ev_fd, (ev)->ev_flags);		\
 		}							\
 		EVLOCK_UNLOCK(_event_debug_map_lock, 0);		\
 	}								\
@@ -257,8 +259,10 @@ HT_GENERATE(event_debug_map, event_debug_entry, node, hash_debug_entry,
 			dent->added = 0;				\
 		} else {						\
 			event_errx(_EVENT_ERR_ABORT,			\
-			    "%s: noting a del on a non-setup event %p", \
-			    __func__, (ev));				\
+			    "%s: noting a del on a non-setup event %p"	\
+			    " (events: 0x%x, fd: %d, flags: 0x%x)",	\
+			    __func__, (ev), (ev)->ev_events,		\
+			    (ev)->ev_fd, (ev)->ev_flags);		\
 		}							\
 		EVLOCK_UNLOCK(_event_debug_map_lock, 0);		\
 	}								\
@@ -273,8 +277,10 @@ HT_GENERATE(event_debug_map, event_debug_entry, node, hash_debug_entry,
 		dent = HT_FIND(event_debug_map, &global_debug_map, &find); \
 		if (!dent) {						\
 			event_errx(_EVENT_ERR_ABORT,			\
-			    "%s called on a non-initialized event %p",	\
-			    __func__, (ev));				\
+			    "%s called on a non-initialized event %p"	\
+			    " (events: 0x%x, fd: %d, flags: 0x%x)",	\
+			    __func__, (ev), (ev)->ev_events,		\
+			    (ev)->ev_fd, (ev)->ev_flags);		\
 		}							\
 		EVLOCK_UNLOCK(_event_debug_map_lock, 0);		\
 	}								\
@@ -289,8 +295,10 @@ HT_GENERATE(event_debug_map, event_debug_entry, node, hash_debug_entry,
 		dent = HT_FIND(event_debug_map, &global_debug_map, &find); \
 		if (dent && dent->added) {				\
 			event_errx(_EVENT_ERR_ABORT,			\
-			    "%s called on an already added event %p",	\
-			    __func__, (ev));				\
+			    "%s called on an already added event %p"	\
+			    " (events: 0x%x, fd: %d, flags: 0x%x)",	\
+			    __func__, (ev), (ev)->ev_events,		\
+			    (ev)->ev_fd, (ev)->ev_flags);		\
 		}							\
 		EVLOCK_UNLOCK(_event_debug_map_lock, 0);		\
 	}								\
@@ -617,7 +625,8 @@ event_base_new_with_config(const struct event_config *cfg)
 	/* prepare for threading */
 
 #ifndef _EVENT_DISABLE_THREAD_SUPPORT
-	if (!cfg || !(cfg->flags & EVENT_BASE_FLAG_NOLOCK)) {
+	if (EVTHREAD_LOCKING_ENABLED() &&
+	    (!cfg || !(cfg->flags & EVENT_BASE_FLAG_NOLOCK))) {
 		int r;
 		EVTHREAD_ALLOC_LOCK(base->th_base_lock,
 		    EVTHREAD_LOCKTYPE_RECURSIVE);
@@ -625,6 +634,7 @@ event_base_new_with_config(const struct event_config *cfg)
 		EVTHREAD_ALLOC_COND(base->current_event_cond);
 		r = evthread_make_base_notifiable(base);
 		if (r<0) {
+			event_warnx("%s: Unable to make base notifiable.", __func__);
 			event_base_free(base);
 			return NULL;
 		}
