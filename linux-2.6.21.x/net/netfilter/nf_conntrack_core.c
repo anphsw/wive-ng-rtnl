@@ -526,10 +526,11 @@ __nf_conntrack_find(const struct nf_conntrack_tuple *tuple,
 	unsigned int hash = hash_conntrack(tuple);
 
 #ifdef CONFIG_NF_FLUSH_CONNTRACK
-    	if (nf_conntrack_table_flush) {
+    	if ((nf_conntrack_table_flush != 0) && (atomic_read(&nf_conntrack_count) != 0)) {
+            schedule();
 	    nf_conntrack_table_flush=0;
-	    nf_conntrack_flush();
 	    printk("nf_conntrack_find: clear connection track table\n");
+	    nf_conntrack_flush();
     	}
 #endif
 	list_for_each_entry(h, &nf_conntrack_hash[hash], list) {
