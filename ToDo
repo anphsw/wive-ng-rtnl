@@ -1,9 +1,4 @@
 # For sadko
-) Need fix update firmware timer (see comments in upload_cgi)
-) Need fix klog/syslog variable set. (klog dependcy by syslog and need used DIFFERENT variables!)
-) Need fix pinger enabled in misc (now always off)
-) Add mss_use_pmtu variable enable/disable use pmtu discovery for correct tcp header tranzit packets.
-    (Need add in webui misc others default 1).
 ) Add /proc/rt3052/esw_cnt for traffic statistic per switch port.(need add in WebUI).
 
 # For me

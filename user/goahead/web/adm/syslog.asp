@@ -48,7 +48,7 @@ function pageInit()
 	var syslogd = '<% getCfgZero(1, "SysLogd");%>';
 	
 	form.KLogd.value = (klogd == '1') ? '1' : '0';
-	form.SysLogd.value = (klogd == '1') ? '1' : '0';
+	form.SysLogd.value = (syslogd == '1') ? '1' : '0';
 	
 	syslogdSelect(form);
 	updateLog();
@@ -81,7 +81,7 @@ function checkSetupForm(form)
 
 function syslogdSelect(form)
 {
-	displayElement('rmtSysLogIP', form.SysLogd.value == '1');
+	displayElement([ 'rmtSysLogIP', 'klogdRow', 'syslog_view' ], form.SysLogd.value == '1');
 }
 
 </script>
@@ -99,18 +99,18 @@ function syslogdSelect(form)
 	<td class="title"colspan="2" id="syslogSysLog">System Log Setup:</td>
 </tr>
 <tr>
-	<td class="head">Kernel logging daemon:</td>
+	<td class="head">System logging deamon:</td>
 	<td>
-		<select name="KLogd">
+		<select name="SysLogd" onchange="syslogdSelect(this.form);">
 			<option value="0">Disable</option>
 			<option value="1">Enable</option>
 		</select>
 	</td>
 </tr>
-<tr>
-	<td class="head">System logging deamon:</td>
+<tr id="klogdRow">
+	<td class="head">Kernel logging daemon:</td>
 	<td>
-		<select name="SysLogd" onchange="syslogdSelect(this.form);">
+		<select name="KLogd">
 			<option value="0">Disable</option>
 			<option value="1">Enable</option>
 		</select>
@@ -135,7 +135,7 @@ function syslogdSelect(form)
 </form>
 
 <!-- ================= System log ================= -->
-<table class="form">
+<table class="form" id="syslog_view" style="display: none;">
 <tr>
 	<td class="title"colspan="2" id="syslogSysLog">System Log: </td>
 </tr>

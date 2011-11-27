@@ -127,20 +127,43 @@ void html_header()
 		"<title>Import Settings</title>\n"
 		"<link rel=\"stylesheet\" href=\"/style/normal_ws.css\" type=\"text/css\">\n"
 		"<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">\n"
-		"<script type=\"text/javascript\" src=\"/js/ajax.js\"></script>\n"
+	);
+	
+	char data[2048];
+	
+	// Copy /js/ajax.js to stdout
+	FILE *fd = fopen("/web/js/ajax.js", "r");
+	if (fd != NULL)
+	{
+		size_t count;
+		printf("<script type=\"text/javascript\">\n");
+		printf("// Here is script copied from file /js/ajax.js\n");
+		
+		while ((count = fread(data, sizeof(char), sizeof(data)/sizeof(char), fd)) > 0)
+			fwrite(data, sizeof(char), count, stdout);
+		
+		fclose(fd);
+	}
+	else
+		printf("<script type=\"text/javascript\" src=\"/js/ajax.js\">\n");
+
+	// Output end of javascript
+	printf
+	(
+		"</script>\n"
 		"</head>\n"
 		"<body>\n"
-		"<h1>Import Settings</h1>\n"
+		"<h1>Update Settings</h1>\n"
 	);
 }
 
-void html_success(const char *timeout)
+void html_success(int timeout)
 {
 	printf
 	(
 		"<p>Done</p>\n"
 		"<script language=\"JavaScript\" type=\"text/javascript\">\n"
-		"ajaxReloadDelayedPage(%s)\n"
+		"ajaxReloadDelayedPage(%d000);\n"
 		"</script>"
 		"</body></html>\n\n",
 		timeout
@@ -154,7 +177,7 @@ void html_error(const char *s)
 		"<p>%s</p>\n"
 		"<script language=\"JavaScript\" type=\"text/javascript\">\n"
 		"alert('%s');\n"
-		"ajaxReloadDelayedPage(0)\n"
+		"ajaxReloadDelayedPage(0);\n"
 		"</script>\n"
 		"</body></html>\n\n",
 		s, s

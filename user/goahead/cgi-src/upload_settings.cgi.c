@@ -140,9 +140,9 @@ int main (int argc, char *argv[])
 	import(filename, file_begin, file_end - file_begin);
 
 #ifdef CONFIG_USER_STORAGE
-	html_success("100000");
+	html_success(100);
 #else
-	html_success("80000");
+	html_success(80);
 #endif
 
 	fflush(stdout);

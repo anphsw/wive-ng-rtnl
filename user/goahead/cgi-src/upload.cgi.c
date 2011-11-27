@@ -234,24 +234,26 @@ int main (int argc, char *argv[])
 	// start web timer and crash rwfs BEFORE flash destroy
 	if (reset_rwfs)
 	{
-		html_success("100000");
-		fflush(stdout);
 		system("echo \"1234567890\" > /dev/mtdblock5");
+		html_success(20*(IMAGE1_SIZE/0x100000) + 55);
 	}
 	else
-	{
-		html_success("80000");
-		fflush(stdout);
-	}
+		html_success(20*(IMAGE1_SIZE/0x100000) + 35);
+	
+	// Output success message
+	fflush(stdout);
+	fclose(stdout);
 
 	// flash write
 	if (mtd_write_firmware(filename, (int)file_begin, (file_end - file_begin)) == -1)
 	{
-		html_error("mtd_write fatal error! The corrupted image has ruined the flash!!");
+//		html_error("mtd_write fatal error! The corrupted image has ruined the flash!!");
+//		fflush(stdout);
+//		fclose(stdout);
 		return -1;
 	}
 
-	printf("Update complite. Reboot...\n");
+	//printf("Update complete. Reboot...\n");
 	sleep (3);
 	reboot(RB_AUTOBOOT);
 	return 0;

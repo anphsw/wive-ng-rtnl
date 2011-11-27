@@ -111,11 +111,12 @@ function initValue()
 	var dnsp = "<% getDnsmasqBuilt(); %>";
 	var krnl_pppoe = "<% getCfgZero(1, "pppoe_pass"); %>";
 	var krnl_ipv6 = "<% getCfgZero(1, "ipv6_pass"); %>";
-	var pinger = "<% getCfgZero(1, "ping_check_on"); %>";
+	var pinger = "<% getCfgZero(1, "pinger_check_on"); %>";
 	var telnetd_built = "<% getTelnetdBuilt(); %>";
 	var ftpd_built = "<% getFTPDBuilt(); %>";
 	var store_ttl = '<% getCfgGeneral(1, "store_ttl"); %>';
 	var store_ttl_mcast = '<% getCfgGeneral(1, "store_ttl_mcast"); %>';
+	var mss_pmtu = '<% getCfgGeneral(1, "mss_use_pmtu"); %>';
 
 	initTranslation();
 
@@ -134,7 +135,8 @@ function initValue()
 	form.krnlIpv6Pass.options.selectedIndex = 1*krnl_ipv6;
 	form.pingWANEnbl.options.selectedIndex = (wpf == '1') ? 1 : 0;
 	form.arpPT.options.selectedIndex = (arp_pt == '1') ? 1 : 0;
-	form.pingerEnable.options.selectedIndex = (pinger == '1') ? 1 : 0
+	form.pingerEnable.value = (pinger == '1') ? '1' : '0';
+	form.mssPmtu.value = (mss_pmtu == '0') ? '0' : '1';
 
 	form.rmtHTTP.value = defaultNumber("<% getCfgGeneral(1, "RemoteManagement"); %>", "1");
 	form.rmtSSH.value = defaultNumber("<% getCfgGeneral(1, "RemoteSSH"); %>", "1");
@@ -575,6 +577,16 @@ function httpRmtSelect(form)
 	</select>
 </td>
 </tr>
+<tr>
+<td class="head">PMTU discovery for TCP packets</td>
+<td>
+	<select name="mssPmtu" class="half">
+		<option value="0">Disable</option>
+		<option value="1">Enable</option>
+	</select>
+</td>
+</tr>
+<tr>
 
 
 </table>

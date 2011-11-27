@@ -231,10 +231,12 @@ function ajaxPopupWindow(popupID, url, onLoadAction)
 
 				var d_width = popup.offsetWidth;
 				var d_height = popup.offsetHeight;
-				var x = Math.round((c_width - d_width)/2);
-				var y = Math.round((c_height - d_height)/2);
-				if (x<0) x = 0;
-				if (y<0) y = 0;
+				var x = Math.round((c_width - d_width)/2.0);
+				var y = Math.round((c_height - d_height)/2.0);
+				if (x < 0)
+					x = 0;
+				if (y < 0)
+					y = 0;
 
 				popup.style.left = x + 'px';
 				popup.style.top  = y + 'px';
