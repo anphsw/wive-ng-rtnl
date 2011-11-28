@@ -62,7 +62,7 @@ CONFIG_FEATURE_SYSLOG=y
 # CONFIG_FEATURE_SHARED_BUSYBOX is not set
 # CONFIG_LFS is not set
 CONFIG_CROSS_COMPILER_PREFIX="../../toolchain/bin/mipsel-linux-uclibc-"
-CONFIG_EXTRA_CFLAGS="-Os"
+CONFIG_EXTRA_CFLAGS="-Os -fno-caller-saves -fno-stack-protector"
 
 #
 # Debugging Options
