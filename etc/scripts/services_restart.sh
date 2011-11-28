@@ -28,6 +28,19 @@ fi
     service shaper restart
     service iptables restart
 
+
+##########################################################
+# Need restart this servieces only:                    	 #
+# 1) if not VPN enable                               	 #
+# 2) if VPN enable and this scripts called from ip-up	 #
+# 3) if restart mode = all				 #
+##########################################################
+if [ "$MODE" = "pppd" ] || [ "$MODE" = "all" ] || [ "$vpnEnabled" != "on" ]; then
+    service ddns restart
+    service ntp restart
+    service upnp restart
+fi
+
 ##########################################################
 # Need restart this servieces only:			 #
 # 1) if call not from ip-up				 #
@@ -50,20 +63,8 @@ if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then
     fi
     service lld2d restart
     service parprouted restart
-    service udpxy restart
     service igmp_proxy restart
-fi
-
-##########################################################
-# Need restart this servieces only:                    	 #
-# 1) if not VPN enable                               	 #
-# 2) if VPN enable and this scripts called from ip-up	 #
-# 3) if restart mode = all				 #
-##########################################################
-if [ "$MODE" = "pppd" ] || [ "$MODE" = "all" ] || [ "$vpnEnabled" != "on" ]; then
-    service ddns restart
-    service ntp restart
-    service upnp restart
+    service udpxy restart
 fi
 
 # renew /etc/udhcpd.conf and restart dhcp server
