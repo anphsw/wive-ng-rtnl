@@ -847,6 +847,11 @@
 26) Update udpxy to 21v by 25.11.2011.<br>
 27) Add pselect and posyx malloc to uClibc(need for new udpxy).<br>
 
+<br>
+<b>1.14.x</b><br>
+1) Update toolchain (sync with uClibc in distro).
+
+
 <br><br>
 <b>For support see:</b><br>
 <a href="http://acorp.ru">acorp.ru - Acorp Electronics Inc.</a><br>
