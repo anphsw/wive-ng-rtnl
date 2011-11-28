@@ -11,6 +11,12 @@ MODE="$1"
 $LOG "Restart needed services and scripts. Mode $MODE"
 
 ##########################################################
+# Always reload shaper and netfilter rules		 #
+##########################################################
+    service shaper restart
+    service iptables restart
+
+##########################################################
 # This is services restart always                        #
 ##########################################################
 if [ -f /bin/radvd ] && [ -d /proc/sys/net/ipv6 ]; then
@@ -21,13 +27,6 @@ if [ -f /bin/zebra ]; then
     service zebra restart
 fi
     service dnsserver restart
-
-##########################################################
-# Always reload shaper and netfilter rules		 #
-##########################################################
-    service shaper restart
-    service iptables restart
-
 
 ##########################################################
 # Need restart this servieces only:                    	 #
