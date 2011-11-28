@@ -638,6 +638,10 @@ int tcp_fragment(struct sock *sk, struct sk_buff *skb, u32 len, unsigned int mss
 	TCP_SKB_CB(buff)->end_seq = TCP_SKB_CB(skb)->end_seq;
 	TCP_SKB_CB(skb)->end_seq = TCP_SKB_CB(buff)->seq;
 
+	if (tcp_is_sack(tp) && tp->sacked_out &&
+	    (TCP_SKB_CB(skb)->seq == tp->highest_sack))
+		tp->highest_sack = TCP_SKB_CB(buff)->seq;
+
 	/* PSH and FIN should only be set in the second packet. */
 	flags = TCP_SKB_CB(skb)->flags;
 	TCP_SKB_CB(skb)->flags = flags & ~(TCPHDR_FIN|TCPHDR_PSH);
@@ -693,7 +697,7 @@ int tcp_fragment(struct sock *sk, struct sk_buff *skb, u32 len, unsigned int mss
 
 		if (diff > 0) {
 			/* Adjust Reno SACK estimate. */
-			if (!tp->rx_opt.sack_ok) {
+			if (tcp_is_reno(tp)) {
 				tp->sacked_out -= diff;
 				if ((int)tp->sacked_out < 0)
 					tp->sacked_out = 0;
@@ -1627,6 +1631,10 @@ static void tcp_retrans_try_collapse(struct sock *sk, struct sk_buff *skb, int m
 		/* changing transmit queue under us so clear hints */
 		clear_all_retrans_hints(tp);
 
+		if (WARN_ON(tcp_is_sack(tp) && tp->sacked_out &&
+		    (TCP_SKB_CB(next_skb)->seq == tp->highest_sack)))
+			return;
+
 		/* Ok.	We will be able to collapse the packet. */
 		__skb_unlink(next_skb, &sk->sk_write_queue);
 
@@ -1656,7 +1664,7 @@ static void tcp_retrans_try_collapse(struct sock *sk, struct sk_buff *skb, int m
 			tp->left_out -= tcp_skb_pcount(next_skb);
 		}
 		/* Reno case is special. Sigh... */
-		if (!tp->rx_opt.sack_ok && tp->sacked_out) {
+		if (tcp_is_reno(tp) && tp->sacked_out) {
 			tcp_dec_pcount_approx(&tp->sacked_out, next_skb);
 			tp->left_out -= tcp_skb_pcount(next_skb);
 		}
@@ -1911,38 +1919,33 @@ void tcp_xmit_retransmit_queue(struct sock *sk)
 		return;
 
 	/* No forward retransmissions in Reno are possible. */
-	if (!tp->rx_opt.sack_ok)
+	if (tcp_is_reno(tp))
 		return;
 
 	/* Yeah, we have to make difficult choice between forward transmission
 	 * and retransmission... Both ways have their merits...
 	 *
 	 * For now we do not retransmit anything, while we have some new
-	 * segments to send.
+	 * segments to send. In the other cases, follow rule 3 for
+	 * NextSeg() specified in RFC3517.
 	 */
 
 	if (tcp_may_send_now(sk))
 		return;
 
-	if (tp->forward_skb_hint) {
+	/* If nothing is SACKed, highest_sack in the loop won't be valid */
+	if (!tp->sacked_out)
+		return;
+
+	if (tp->forward_skb_hint)
 		skb = tp->forward_skb_hint;
-		packet_cnt = tp->forward_cnt_hint;
-	} else{
+	else
 		skb = sk->sk_write_queue.next;
-		packet_cnt = 0;
-	}
 
 	sk_stream_for_retrans_queue_from(skb, sk) {
-		tp->forward_cnt_hint = packet_cnt;
 		tp->forward_skb_hint = skb;
 
-		/* Similar to the retransmit loop above we
-		 * can pretend that the retransmitted SKB
-		 * we send out here will be composed of one
-		 * real MSS sized packet because tcp_retransmit_skb()
-		 * will fragment it if necessary.
-		 */
-		if (++packet_cnt > tp->fackets_out)
+		if (after(TCP_SKB_CB(skb)->seq, tp->highest_sack))
 			break;
 
 		if (tcp_packets_in_flight(tp) >= tp->snd_cwnd)

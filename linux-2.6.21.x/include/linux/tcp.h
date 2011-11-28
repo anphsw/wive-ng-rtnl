@@ -321,6 +321,9 @@ struct tcp_sock {
 
 	struct tcp_sack_block_wire recv_sack_cache[4];
 
+	u32	highest_sack;	/* Start seq of globally highest revd SACK
+				 * (validity guaranteed only if sacked_out > 0) */
+
 	/* from STCP, retrans queue hinting */
 	struct sk_buff* lost_skb_hint;
 
@@ -332,7 +335,6 @@ struct tcp_sock {
 	int     fastpath_cnt_hint;
 	int     lost_cnt_hint;
 	int     retransmit_cnt_hint;
-	int     forward_cnt_hint;
 
 	u16	advmss;		/* Advertised MSS			*/
 	u16	prior_ssthresh; /* ssthresh saved at recovery start	*/
