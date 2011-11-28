@@ -28,8 +28,8 @@ TARGET_mips=y
 HAVE_ELF=y
 ARCH_SUPPORTS_LITTLE_ENDIAN=y
 TARGET_ARCH="mips"
-ARCH_CFLAGS="-mno-split-addresses"
-ARCH_SUPPORTS_BIG_ENDIAN=y
+ARCH_CFLAGS="-ffast-math -fforce-addr -fno-stack-protector"
+# ARCH_SUPPORTS_BIG_ENDIAN is not set
 # CONFIG_MIPS_ISA_1 is not set
 # CONFIG_MIPS_ISA_2 is not set
 # CONFIG_MIPS_ISA_3 is not set
@@ -56,6 +56,7 @@ DOPIC=y
 HAVE_SHARED=y
 # ARCH_HAS_NO_LDSO is not set
 BUILD_UCLIBC_LDSO=y
+# OPTIMIZED_SHARED is not set
 # FORCE_SHAREABLE_TEXT_SEGMENTS is not set
 LDSO_LDD_SUPPORT=y
 # LDSO_CACHE_SUPPORT is not set

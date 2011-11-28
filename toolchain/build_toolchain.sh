@@ -1,12 +1,12 @@
 #!/bin/sh
 
 #need lib`s
-#urpmi -a glibc-
-#urpmi -a libgmpxx-devel --download-all --allow-force
-#urpmi -a libmpc- --download-all --allow-force
-#urpmi -a mpfr- --download-all --allow-force
-#urpmi -a texinfo- --download-all --allow-force
-#urpmi -a gcc-gfortran --download-all --allow-force
+urpmi --auto -a glibc-
+urpmi --auto  -a libgmpxx-devel --download-all --allow-force
+urpmi --auto  -a libmpc- --download-all --allow-force
+urpmi --auto  -a mpfr- --download-all --allow-force
+urpmi --auto  -a gcc-gfortran --download-all --allow-force
+urpmi --auto  -a texinfo- --download-all --allow-force
 
 DIR=`pwd`
 ROOTDIR=$DIR

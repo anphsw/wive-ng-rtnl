@@ -41,10 +41,10 @@
 #define __ARCH_CFLAGS__ "-mno-split-addresses"
 #define __ARCH_SUPPORTS_BIG_ENDIAN__ 1
 #undef __CONFIG_MIPS_ISA_1__
-#undef __CONFIG_MIPS_ISA_2__
+#define __CONFIG_MIPS_ISA_2__ 1
 #undef __CONFIG_MIPS_ISA_3__
 #undef __CONFIG_MIPS_ISA_4__
-#define __CONFIG_MIPS_ISA_MIPS32__ 1
+#undef __CONFIG_MIPS_ISA_MIPS32__
 #undef __CONFIG_MIPS_ISA_MIPS64__
 #define __ARCH_LITTLE_ENDIAN__ 1
 #undef __ARCH_BIG_ENDIAN__
@@ -53,7 +53,7 @@
 #define __UCLIBC_HAS_FLOATS__ 1
 #define __HAS_FPU__ 1
 #define __DO_C99_MATH__ 1
-#define __KERNEL_SOURCE__ "$(ROOTDIR)/tmp/mipsel-linux-uclibc-toolchain"
+#define __KERNEL_SOURCE__ "/home/winfred/RT288x_SDK/toolchain/buildroot/toolchain_build_mipsel/linux"
 #define __C_SYMBOL_PREFIX__ ""
 #define __HAVE_DOT_CONFIG__ 1
 
@@ -68,16 +68,17 @@
 #define __BUILD_UCLIBC_LDSO__ 1
 #undef __FORCE_SHAREABLE_TEXT_SEGMENTS__
 #define __LDSO_LDD_SUPPORT__ 1
-#undef __LDSO_CACHE_SUPPORT__
+#define __LDSO_CACHE_SUPPORT__ 1
 #undef __LDSO_PRELOAD_FILE_SUPPORT__
-#define __LDSO_RUNPATH__ 1
+#define __LDSO_BASE_FILENAME__ "ld.so"
+#undef __LDSO_RUNPATH__
 #undef __DL_FINI_CRT_COMPAT__
 #define __UCLIBC_CTOR_DTOR__ 1
 #undef __HAS_NO_THREADS__
 #define __UCLIBC_HAS_THREADS__ 1
-#undef __PTHREADS_DEBUG_SUPPORT__
+#define __PTHREADS_DEBUG_SUPPORT__ 1
 #define __UCLIBC_HAS_LFS__ 1
-#define __UCLIBC_STATIC_LDCONFIG__ 1
+#undef __UCLIBC_STATIC_LDCONFIG__
 #undef __MALLOC__
 #undef __MALLOC_SIMPLE__
 #define __MALLOC_STANDARD__ 1
@@ -95,7 +96,7 @@
 /*
  * Networking Support
  */
-#undef __UCLIBC_HAS_IPV6__
+#define __UCLIBC_HAS_IPV6__ 1
 #define __UCLIBC_HAS_RPC__ 1
 #define __UCLIBC_HAS_FULL_RPC__ 1
 
@@ -106,21 +107,21 @@
 #define __UCLIBC_HAS_STRING_ARCH_OPT__ 1
 #define __UCLIBC_HAS_CTYPE_TABLES__ 1
 #define __UCLIBC_HAS_CTYPE_SIGNED__ 1
-#define __UCLIBC_HAS_CTYPE_UNSAFE__ 1
-#undef __UCLIBC_HAS_CTYPE_CHECKED__
+#undef __UCLIBC_HAS_CTYPE_UNSAFE__
+#define __UCLIBC_HAS_CTYPE_CHECKED__ 1
 #undef __UCLIBC_HAS_CTYPE_ENFORCED__
 #define __UCLIBC_HAS_WCHAR__ 1
 #undef __UCLIBC_HAS_LOCALE__
-#undef __UCLIBC_HAS_HEXADECIMAL_FLOATS__
-#undef __UCLIBC_HAS_GLIBC_CUSTOM_PRINTF__
+#define __UCLIBC_HAS_HEXADECIMAL_FLOATS__ 1
+#define __UCLIBC_HAS_GLIBC_CUSTOM_PRINTF__ 1
 #define __UCLIBC_PRINTF_SCANF_POSITIONAL_ARGS__ 9
-#undef __UCLIBC_HAS_SCANF_GLIBC_A_FLAG__
+#define __UCLIBC_HAS_SCANF_GLIBC_A_FLAG__ 1
 #undef __UCLIBC_HAS_STDIO_BUFSIZ_NONE__
-#define __UCLIBC_HAS_STDIO_BUFSIZ_256__ 1
+#undef __UCLIBC_HAS_STDIO_BUFSIZ_256__
 #undef __UCLIBC_HAS_STDIO_BUFSIZ_512__
 #undef __UCLIBC_HAS_STDIO_BUFSIZ_1024__
 #undef __UCLIBC_HAS_STDIO_BUFSIZ_2048__
-#undef __UCLIBC_HAS_STDIO_BUFSIZ_4096__
+#define __UCLIBC_HAS_STDIO_BUFSIZ_4096__ 1
 #undef __UCLIBC_HAS_STDIO_BUFSIZ_8192__
 #define __UCLIBC_HAS_STDIO_BUILTIN_BUFFER_NONE__ 1
 #undef __UCLIBC_HAS_STDIO_BUILTIN_BUFFER_4__
@@ -152,7 +153,7 @@
  */
 #define __SHARED_LIB_LOADER_PREFIX__ "/lib"
 #define __RUNTIME_PREFIX__ "/"
-#define __DEVEL_PREFIX__ "/"
+#define __DEVEL_PREFIX__ "/usr/"
 
 /*
  * uClibc security related options
@@ -162,11 +163,11 @@
 /*
  * uClibc development/debugging options
  */
-#define __CROSS_COMPILER_PREFIX__ "$(ROOTDIR)/bin/mipsel-linux-uclibc-"
+#define __CROSS_COMPILER_PREFIX__ "/home/winfred/RT288x_SDK/toolchain/buildroot-gdb/bin/mipsel-linux-uclibc-"
 #undef __DODEBUG__
 #undef __DODEBUG_PT__
 #undef __DOASSERTS__
 #undef __SUPPORT_LD_DEBUG__
 #undef __SUPPORT_LD_DEBUG_EARLY__
 #define __WARNINGS__ "-Wall"
-#define __UCLIBC_MJN3_ONLY__ 1
+#undef __UCLIBC_MJN3_ONLY__
