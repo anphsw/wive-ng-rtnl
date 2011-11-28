@@ -250,6 +250,7 @@ static void setDhcp(webs_t wp, char_t *path, char_t *query)
 	if (strncmp(dhcp_tp, "SERVER", 7)==0)
 	{
 		nvram_init(RT2860_NVRAM);
+		nvram_bufset(RT2860_NVRAM, "dhcpEnabled", "1");
 		setupParameters(wp, dhcp_args, 0);
 
 		char *dns_proxy = nvram_bufget(RT2860_NVRAM, "dnsPEnabled");
