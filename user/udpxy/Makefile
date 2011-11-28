@@ -109,7 +109,7 @@ MKDEP_SRC := $(UTILDIR)/mkdep.c
 MKDEP_TOOL := $(UTILDIR)/mkdep
 
 SRC := udpxy.c rparse.c util.c prbuf.c ifaddr.c ctx.c mkpg.c \
-	  rtp.c uopt.c dpkt.c netop.c extrn.c main.c
+	  rtp.c uopt.c dpkt.c netop.c extrn.c main.c pselect.c
 ifneq (yes,$(NO_UDPXREC))
 SRC := $(SRC) udpxrec.c
 endif
