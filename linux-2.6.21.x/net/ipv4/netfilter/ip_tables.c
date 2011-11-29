@@ -8,6 +8,10 @@
  * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation.
  *
+ *  6 Mar 2002 Robert Olsson <robban@robtex.com>
+ * 17 Apr 2003 Chris  Wilson <chris@netservers.co.uk>
+ *     - mark_source_chains speedup for complex chains
+ *
  * 19 Jan 2002 Harald Welte <laforge@gnumonks.org>
  * 	- increase module usage count as soon as we have rules inside
  * 	  a table
@@ -545,6 +549,9 @@ mark_source_chains(struct xt_table_info *newinfo,
 {
 	unsigned int hook;
 
+	/* keep track of where we have been: */
+	unsigned char *been = vmalloc(newinfo->size);
+
 	/* No recursion; use packet counter to save back ptrs (reset
 	   to 0 as we leave), and comefrom to save source hook bitmask */
 	for (hook = 0; hook < NF_IP_NUMHOOKS; hook++) {
@@ -557,6 +564,7 @@ mark_source_chains(struct xt_table_info *newinfo,
 
 		/* Set initial back pointer. */
 		e->counters.pcnt = pos;
+		memset(been, 0, newinfo->size);
 
 		for (;;) {
 			struct ipt_standard_target *t
@@ -566,6 +574,7 @@ mark_source_chains(struct xt_table_info *newinfo,
 			if (e->comefrom & (1 << NF_IP_NUMHOOKS)) {
 				printk("iptables: loop hook %u pos %u %08X.\n",
 				       hook, pos, e->comefrom);
+				vfree(been);
 				return 0;
 			}
 			e->comefrom
@@ -620,7 +629,9 @@ mark_source_chains(struct xt_table_info *newinfo,
 			} else {
 				int newpos = t->verdict;
 
-				if (strcmp(t->target.u.user.name,
+				if ( (pos < 0 || pos >= newinfo->size
+				      || !been[pos])
+				    && strcmp(t->target.u.user.name,
 					   IPT_STANDARD_TARGET) == 0
 				    && newpos >= 0) {
 					if (newpos > newinfo->size -
@@ -630,6 +641,8 @@ mark_source_chains(struct xt_table_info *newinfo,
 								newpos);
 						return 0;
 					}
+					if (pos >= 0 && pos < newinfo->size)
+						been[pos]++;
 					/* This a jump; chase it. */
 					duprintf("Jump rule %u -> %u\n",
 						 pos, newpos);
@@ -646,6 +659,7 @@ mark_source_chains(struct xt_table_info *newinfo,
 		next:
 		duprintf("Finished chain %u\n", hook);
 	}
+	vfree(been);
 	return 1;
 }
 
