@@ -851,6 +851,7 @@
 <b>1.14.x</b><br>
 1) Update toolchain (sync with uClibc in distro).
 2) Some sack processing fix.<br>
+2) Small netfilter fixup by upstream.<br>
 
 
 <br><br>

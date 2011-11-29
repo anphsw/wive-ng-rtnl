@@ -206,7 +206,7 @@ next_hook:
 			ret = -EPERM;
 	} else if ((verdict & NF_VERDICT_MASK)  == NF_QUEUE) {
 		if (!nf_queue(*pskb, elem, pf, hook, indev, outdev, okfn,
-			      verdict >> NF_VERDICT_QBITS));
+			      verdict >> NF_VERDICT_QBITS))
 			goto next_hook;
 	}
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
