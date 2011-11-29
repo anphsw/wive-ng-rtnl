@@ -339,7 +339,6 @@ void WPSRestart(void)
 	char *wordlist;
 	char *mode = nvram_get(RT2860_NVRAM, "OperationMode");
 
-	doSystem("ip route del 239.255.255.250 1>/dev/null 2>&1");
 	doSystem("service wscd stop");
 
 	if(!strcmp(mode, "0" )){		//bridge 
@@ -367,7 +366,6 @@ void WPSRestart(void)
 		wordlist = nvram_get(RT2860_NVRAM, "WscConfigured");
 		if (strcmp(wordlist, "0") == 0)
         		doSystem("iwpriv ra0 set WscConfStatus=1");
-		doSystem("ip route replace 239.255.255.250 dev br0 1>/dev/null 2>&1");
 		doSystem("service wscd restart");
 	}
 
@@ -428,7 +426,6 @@ static void WPSSetup(webs_t wp, char_t *path, char_t *query)
 
 	if (wsc_enable == 0)
 	{
-		doSystem("route delete 239.255.255.250 1>/dev/null 2>&1");
 		doSystem("service wscd stop");
 		doSystem("iwpriv ra0 set WscConfMode=0 1>/dev/null 2>&1");
 	}
@@ -441,12 +438,11 @@ static void WPSSetup(webs_t wp, char_t *path, char_t *query)
 			return;
 		}
 
-		doSystem("ip route replace 239.255.255.250 dev br0");
 		doSystem("service wscd restart");
 		doSystem("iwpriv ra0 set WscConfMode=%d", 7);
 		printf("wsc_enable:%d\n",  7);
 	}
-	
+
 	websRedirect(wp, "wps/wps.asp");
 	return;
 }
