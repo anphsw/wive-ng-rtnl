@@ -100,7 +100,7 @@ addr_flush() {
     dev=`grep eth < /proc/net/vlan/config | cut -d' ' -f 1`
     for i in $dev; do
 	ip addr flush dev $i > /dev/null 2>&1
-	if [ -d /proc/sys/net/ipv6 ]; then
+	if [ -d /proc/sys/net/ipv6 ] && [ "$IPv6_Enable" = "1" ]; then
 	    ip -6 addr flush dev $i > /dev/null 2>&1
 	fi
     done

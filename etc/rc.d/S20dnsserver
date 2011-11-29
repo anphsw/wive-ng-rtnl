@@ -49,7 +49,7 @@ gen_hosts() {
 	    echo "$real_wan_ipaddr	$DDNS"		>> /etc/hosts
 	fi
     fi
-    if [ -d /proc/sys/net/ipv6 ]; then
+    if [ -d /proc/sys/net/ipv6 ] && [ "$IPv6_Enable" = "1" ]; then
 	echo "::1	localhost ipv6.$HostName.lo"	>> /etc/hosts
     fi
 
