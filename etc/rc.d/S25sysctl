@@ -57,7 +57,7 @@ start() {
     echo 1    > /proc/sys/vm/panic_on_oom
 
 ###################### SECTION FOR SAMBA AND TRANSMISION KERNEL TUNE ###################
-    eval `nvram_buf_get 2860 SmbEnabled TransmissionEnabled`
+    eval `nvram_buf_get 2860 SmbEnabled TransmissionEnabled dhcpDomain`
     if [ "$SmbEnabled" = "1" ] || [ "$TransmissionEnabled" = "1" ]; then
 	# banish core dump files to /dev/null
 	ulimit -c 0
@@ -75,6 +75,13 @@ start() {
 	    sysctl -w vm.min_free_kbytes=4096
 	fi
     fi
+    # set domain name
+    if [ "$dhcpDomain" != "" ]; then
+	krn_domain="$dhcpDomain"
+    else
+	krn_domain="Wive-NG-RTNL"
+    fi
+    sysctl -w kernel.domainname="$krn_domain"
 ########################################################################################
 }
 
