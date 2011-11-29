@@ -853,6 +853,7 @@
 2) Some sack processing fix.<br>
 3) Small netfilter fixup by upstream.<br>
 4) Netfiler mark_source_chains speedup for complex chains.<br>
+5) Add IPv6_Enable nvram variable(default disable).<br>
 
 <br><br>
 <b>For support see:</b><br>

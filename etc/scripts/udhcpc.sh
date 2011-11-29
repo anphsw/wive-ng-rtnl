@@ -33,7 +33,7 @@ case "$1" in
     deconfig)
 	vpn_deadloop_fix
 	ip addr flush dev $interface
-	if [ -d /proc/sys/net/ipv6 ]; then
+	if [ -d /proc/sys/net/ipv6 ] && [ "$IPv6_Enable" = "1" ]; then
 	    ip -6 addr flush dev $interface
 	fi
 	ip link set $interface up

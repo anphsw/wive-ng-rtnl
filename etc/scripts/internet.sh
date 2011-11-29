@@ -43,7 +43,7 @@ addMesh()
 	if [ "$meshenabled" = "1" ]; then
 	    getMacIf
 	    ip addr flush dev mesh0 > /dev/null 2>&1
-	    if [ -d /proc/sys/net/ipv6 ]; then
+	    if [ -d /proc/sys/net/ipv6 ] && [ "$IPv6_Enable" = "1" ]; then
 		ip -6 addr flush dev mesh0 /dev/null 2>&1
 	    fi
 	    ip link set mesh0 down > /dev/null 2>&1
@@ -63,7 +63,7 @@ addWds()
 	    getMacIf
     	    for i in `seq 0 3`; do
     		ip addr flush dev wds$i > /dev/null 2>&1
-		if [ -d /proc/sys/net/ipv6 ]; then
+		if [ -d /proc/sys/net/ipv6 ] && [ "$IPv6_Enable" = "1" ]; then
     		    ip -6 addr flush dev wds$i /dev/null 2>&1
 		fi
 		ip link set wds$i down > /dev/null 2>&1
@@ -85,7 +85,7 @@ addMBSSID()
 	    let "bssrealnum=$bssidnum-1"
 	    for i in `seq 1 $bssrealnum`; do
     		ip addr flush dev ra$i > /dev/null 2>&1
-		if [ -d /proc/sys/net/ipv6 ]; then
+		if [ -d /proc/sys/net/ipv6 ] && [ "$IPv6_Enable" = "1" ]; then
     		    ip -6 addr flush dev ra$i /dev/null 2>&1
 		fi
 		ip link set ra$i down > /dev/null 2>&1

@@ -209,6 +209,7 @@ WLAN_MAC_ADDR=00:0C:43:30:52:65
 WAN_MAC_ADDR=00:0C:43:30:52:66
 LAN_MAC_ADDR=00:0C:43:30:52:67
 upnpEnabled=0
+IPv6_Enable=0
 radvdEnabled=0
 pppoeREnabled=0
 parproutedEnabled=0

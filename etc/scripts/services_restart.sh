@@ -19,7 +19,7 @@ $LOG "Restart needed services and scripts. Mode $MODE"
 ##########################################################
 # This is services restart always                        #
 ##########################################################
-if [ -f /bin/radvd ] && [ -d /proc/sys/net/ipv6 ]; then
+if [ -f /bin/radvd ] && [ -d /proc/sys/net/ipv6 ] && [ "$IPv6_Enable" = "1" ]; then
     service radvd restart
 fi
 if [ -f /bin/zebra ]; then

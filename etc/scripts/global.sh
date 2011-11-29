@@ -22,7 +22,7 @@ mcast_net="224.0.0.0/4"
 upmpm_net="239.0.0.0/8"
 
 # first get operation mode and wan mode  dns mode and relay mode vpn mode and type
-eval `nvram_buf_get 2860 OperationMode wanConnectionMode dnsPEnabled wan_ipaddr wan_static_dns vpnEnabled vpnPurePPPOE vpnType`
+eval `nvram_buf_get 2860 OperationMode wanConnectionMode dnsPEnabled wan_ipaddr wan_static_dns vpnEnabled vpnPurePPPOE vpnType IPv6_Enable`
 
 # get wireless, wan and lan mac adresses
 getMacIf()
