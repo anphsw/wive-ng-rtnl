@@ -680,7 +680,6 @@ ctnetlink_del_conntrack(struct sock *ctnl, struct sk_buff *skb,
 		err = ctnetlink_parse_tuple(cda, &tuple, CTA_TUPLE_REPLY, u3);
 	else {
 		/* Flush the whole table */
-		printk("ctnetlink_del_conntrack: clear connection track table\n");
 		nf_conntrack_flush();
 		return 0;
 	}

@@ -528,7 +528,7 @@ __nf_conntrack_find(const struct nf_conntrack_tuple *tuple,
 #ifdef CONFIG_NF_FLUSH_CONNTRACK
     	if ((nf_conntrack_table_flush != 0) && (atomic_read(&nf_conntrack_count) != 0)) {
 	    nf_conntrack_table_flush=0;
-	    printk("nf_conntrack_find: clear connection track table\n");
+	    DEBUGP("nf_conntrack_find: clear connection track table\n");
 	    nf_conntrack_flush();
     	}
 #endif
