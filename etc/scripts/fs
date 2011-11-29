@@ -63,7 +63,6 @@ save(){
     echo "Error: File $tmp too big: $(get_size $tmp)k"
   fi
   rm -f $tmp
-  drop_caches
 }
 
 restore(){
@@ -93,7 +92,6 @@ fullreset(){
     dd if=/dev/zero of=$MTDRWFS conv=sync bs=64k count=$BLOCKS > /dev/null 2>&1
     dd if=/dev/zero of=$MTD2CFG conv=sync bs=8k seek=1 count=7 > /dev/null 2>&1
     burnrf
-    drop_caches
     reboot
 }
 
@@ -103,7 +101,6 @@ backup_nvram(){
     echo "#The following line must not be removed." > "$BACKUPCGF"
     echo "Default" >> "$BACKUPCGF"
     ralink_init show 2860 >> "$BACKUPCGF"
-    drop_caches
 }
 
 load_nvram(){

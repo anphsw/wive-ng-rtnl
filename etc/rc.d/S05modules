@@ -54,7 +54,6 @@ start() {
 	# large ralink wifi drivers
 	if [ -f /tmp/is_16ram_dev ]; then
 	    flush_net_caches
-	    fs drop_caches
 	fi
 
 	$LOG "Prepare wifi config..."
