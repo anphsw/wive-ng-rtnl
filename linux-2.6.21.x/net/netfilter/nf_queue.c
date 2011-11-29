@@ -266,7 +266,7 @@ void nf_reinject(struct sk_buff *skb, struct nf_info *info,
 	case NF_QUEUE:
 		if (!__nf_queue(skb, elem, info->pf, info->hook,
 				info->indev, info->outdev, info->okfn,
-				verdict >> NF_VERDICT_BITS))
+				verdict >> NF_VERDICT_QBITS))
 			goto next_hook;
 		break;
 	default:

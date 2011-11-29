@@ -199,12 +199,14 @@ next_hook:
 			     outdev, &elem, okfn, hook_thresh);
 	if (verdict == NF_ACCEPT || verdict == NF_STOP) {
 		ret = 1;
-	} else if (verdict == NF_DROP) {
+	} else if ((verdict & NF_VERDICT_MASK) == NF_DROP) {
 		kfree_skb(*pskb);
-		ret = -EPERM;
+		ret = NF_DROP_GETERR(verdict);
+		if (ret == 0)
+			ret = -EPERM;
 	} else if ((verdict & NF_VERDICT_MASK)  == NF_QUEUE) {
 		if (!nf_queue(*pskb, elem, pf, hook, indev, outdev, okfn,
-			      verdict >> NF_VERDICT_BITS))
+			      verdict >> NF_VERDICT_QBITS));
 			goto next_hook;
 	}
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
