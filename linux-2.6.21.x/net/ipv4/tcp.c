@@ -665,7 +665,7 @@ ssize_t tcp_sendpage(struct socket *sock, struct page *page, int offset,
 #define TCP_PAGE(sk)	(sk->sk_sndmsg_page)
 #define TCP_OFF(sk)	(sk->sk_sndmsg_off)
 
-static inline int select_size(struct sock *sk, int sg)
+static inline int select_size(struct sock *sk, bool sg)
 {
 	struct tcp_sock *tp = tcp_sk(sk);
 	int tmp = tp->mss_cache;
@@ -694,9 +694,9 @@ int tcp_sendmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 	struct iovec *iov;
 	struct tcp_sock *tp = tcp_sk(sk);
 	struct sk_buff *skb;
-	int iovlen, flags;
+	int iovlen, flags, err, copied;
 	int mss_now, size_goal;
-	int sg, err, copied;
+	bool sg;
 	long timeo;
 
 	lock_sock(sk);
@@ -725,7 +725,7 @@ int tcp_sendmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 	if (sk->sk_err || (sk->sk_shutdown & SEND_SHUTDOWN))
 		goto do_error;
 
-	sg = sk->sk_route_caps & NETIF_F_SG;
+	sg = !!(sk->sk_route_caps & NETIF_F_SG);
 
 	while (--iovlen >= 0) {
 		int seglen = iov->iov_len;
