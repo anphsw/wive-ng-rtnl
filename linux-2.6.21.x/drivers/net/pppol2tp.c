@@ -106,8 +106,6 @@
 //define PPPOL2TP_NO_LOCK
 //#define DISABLE_WORKQUEUE
 #define DISABLE_GET_FS
-#define PPPOL2TP_DRV_VERSION	"V0.17"
-#else
 #endif
 
 #define PPPOL2TP_DRV_VERSION	"V0.17"
