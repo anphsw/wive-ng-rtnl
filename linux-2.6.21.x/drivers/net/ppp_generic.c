@@ -69,8 +69,10 @@ extern int ppp_cpu_load;
 #define NP_MPLS_MC 5		/* MPLS multicast */
 #define NUM_NP	6		/* Number of NPs. */
 
+#ifdef CONFIG_PPP_MULTILINK
 #define MPHDRLEN	6	/* multilink protocol header length */
 #define MPHDRLEN_SSN	4	/* ditto with short sequence numbers */
+#endif
 
 /*
  * An instance of /dev/ppp can be associated with either a ppp
@@ -148,9 +150,15 @@ struct ppp {
  * Bits in rstate: SC_DECOMP_RUN, SC_DC_ERROR, SC_DC_FERROR.
  * Bits in xstate: SC_COMP_RUN
  */
+#ifdef CONFIG_PPP_MULTILINK
 #define SC_FLAG_BITS	(SC_NO_TCP_CCID|SC_CCP_OPEN|SC_CCP_UP|SC_LOOP_TRAFFIC \
 			 |SC_MULTILINK|SC_MP_SHORTSEQ|SC_MP_XSHORTSEQ \
 			 |SC_COMP_TCP|SC_REJ_COMP_TCP|SC_MUST_COMP)
+#else
+#define SC_FLAG_BITS	(SC_NO_TCP_CCID|SC_CCP_OPEN|SC_CCP_UP|SC_LOOP_TRAFFIC \
+			 |SC_MP_SHORTSEQ|SC_MP_XSHORTSEQ \
+			 |SC_COMP_TCP|SC_REJ_COMP_TCP|SC_MUST_COMP)
+#endif
 
 /*
  * Private data structure for each channel.
@@ -229,6 +237,7 @@ static atomic_t channel_count = ATOMIC_INIT(0);
 /* We limit the length of ppp->file.rq to this (arbitrary) value */
 #define PPP_MAX_RQLEN	32
 
+#ifdef CONFIG_PPP_MULTILINK
 /*
  * Maximum number of multilink fragments queued up.
  * This has to be large enough to cope with the maximum latency of
@@ -244,6 +253,7 @@ static atomic_t channel_count = ATOMIC_INIT(0);
 /* Compare multilink sequence numbers (assumed to be 32 bits wide) */
 #define seq_before(a, b)	((s32)((a) - (b)) < 0)
 #define seq_after(a, b)		((s32)((a) - (b)) > 0)
+#endif
 
 /* Prototypes. */
 void ppp_stat_add(struct ppp_channel *chan, struct sk_buff *skb);
@@ -1224,7 +1234,7 @@ ppp_send_frame(struct ppp *ppp, struct sk_buff *skb)
  * Try to send the frame in xmit_pending.
  * The caller should have the xmit path locked.
  */
-static void
+static inline void
 ppp_push(struct ppp *ppp)
 {
 	struct list_head *list;
@@ -1242,7 +1252,9 @@ ppp_push(struct ppp *ppp)
 		return;
 	}
 
+#ifdef CONFIG_PPP_MULTILINK
 	if ((ppp->flags & SC_MULTILINK) == 0) {
+#endif
 		/* not doing multilink: send it down the first channel */
 		list = list->next;
 		pch = list_entry(list, struct channel, clist);
@@ -1258,9 +1270,9 @@ ppp_push(struct ppp *ppp)
 		}
 		spin_unlock_bh(&pch->downl);
 		return;
+#ifdef CONFIG_PPP_MULTILINK
 	}
 
-#ifdef CONFIG_PPP_MULTILINK
 	/* Multilink: fragment the packet over as many links
 	   as can take the packet at the moment. */
 	if (!ppp_mp_explode(ppp, skb))
