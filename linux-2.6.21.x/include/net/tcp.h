@@ -795,6 +795,14 @@ static inline void tcp_sync_left_out(struct tcp_sock *tp)
 extern void tcp_enter_cwr(struct sock *sk);
 extern __u32 tcp_init_cwnd(struct tcp_sock *tp, struct dst_entry *dst);
 
+/* The maximum number of MSS of available cwnd for which TSO defers
+ * sending if not using sysctl_tcp_tso_win_divisor.
+ */
+static inline __u32 tcp_max_tso_deferred_mss(const struct tcp_sock *tp)
+{
+	return 3;
+}
+
 /* Slow start with delack produces 3 packets of burst, so that
  * it is safe "de facto".  This will be the default - same as
  * the default reordering threshold - but if reordering increases,
@@ -824,7 +832,7 @@ static inline int tcp_is_cwnd_limited(const struct sock *sk, u32 in_flight)
 	if (sysctl_tcp_tso_win_divisor)
 		return left * sysctl_tcp_tso_win_divisor < tp->snd_cwnd;
 	else
-		return left <= tcp_max_burst(tp);
+		return left <= tcp_max_tso_deferred_mss(tp);
 }
 
 static inline void tcp_minshall_update(struct tcp_sock *tp, int mss,
