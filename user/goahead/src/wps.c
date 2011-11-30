@@ -362,7 +362,7 @@ void WPSRestart(void)
 			printf("WPSRestart error, can't get lan ip.\n");
 			return;
 		}
-		doSystem("iwpriv ra0 set WscConfMode=%d", 7);
+		doSystem("iwpriv ra0 set WscConfMode=7 1>/dev/null 2>&1");
 		wordlist = nvram_get(RT2860_NVRAM, "WscConfigured");
 		if (strcmp(wordlist, "0") == 0)
         		doSystem("iwpriv ra0 set WscConfStatus=1");
@@ -439,7 +439,7 @@ static void WPSSetup(webs_t wp, char_t *path, char_t *query)
 		}
 
 		doSystem("service wscd restart");
-		doSystem("iwpriv ra0 set WscConfMode=%d", 7);
+		doSystem("iwpriv ra0 set WscConfMode=7 1>/dev/null 2>&1");
 		printf("wsc_enable:%d\n",  7);
 	}
 
