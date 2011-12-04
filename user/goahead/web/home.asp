@@ -1,5 +1,8 @@
 <HTML>
 <!-- Copyright (c) Go Ahead Software Inc., 1994-2000. All Rights Reserved. -->
+<!-- Copyright (c) Ralink (2004-2010) Tech Inc. All Rights Reserved. -->
+<!-- Copyright (c) Wive project (2010-2011). All Rights Reserved. -->
+<!-- This is firmaware use ONLY in Acorp ralink based routers !!! NOT ANY WARRANTY AND SUPPORT FOR ALL OTHERS VENDORS. -->
 <HEAD>
 <TITLE>Wive-NG-RTNL - next generation router firmware for Acorp Wi-Fi CPE</TITLE>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
