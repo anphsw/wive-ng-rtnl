@@ -1,14 +1,14 @@
 #!/bin/sh
 
 # only clean load start this
-if [ /tmp/is_preconfigured ] || [ -f /var/run/goahead.pid ]; then
+if [ -f /tmp/is_preconfigured ] || [ -f /var/run/goahead.pid ]; then
     exit 0
 fi
 
 LOG="echo PRECONFIG"
 
 start() {
- $LOG "Preconfigure..."
+    $LOG "Preconfigure..."
 
     # blink wps/sec led at boot time before goahead start
     if [ -f /bin/gpio ]; then
