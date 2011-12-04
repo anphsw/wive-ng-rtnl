@@ -1,11 +1,15 @@
 #!/bin/sh
 
+# only clean load start this
+if [ -f /tmp/nvram_checked ] || [ -f /var/run/goahead.pid ]; then
+    exit 0
+fi
+
 LOG="echo CHECKCONF"
 
 start() {
- if [ ! -f /tmp/nvram_checked ]; then
     # get variables
-     get_param
+    get_param
 
     # include kernel config
     . /etc/scripts/config.sh
@@ -100,8 +104,9 @@ start() {
     if [ "$RemoteManagementPort" = "" ]; then
 	nvram_set 2860 RemoteManagementPort 80
     fi
- fi
- touch /tmp/nvram_checked
+
+    # set checked flag
+    touch /tmp/nvram_checked
 }
 
 stop() {
