@@ -1185,11 +1185,11 @@ function switch_isolated_ssid()
 	</td>
 </tr>
 
-<input type="hidden" name="bssid_num" value="<% getCfgGeneral(1, "BssidNum"); %>">
-
-<tr> 
+<tr>
 	<td class="head" id="basicSSID">Network Name (SSID)</td>
 	<td>
+		<input type="hidden" name="bssid_num" value="<% getCfgGeneral(1, "BssidNum"); %>">
+		
 		<input class="mid" type="text" name="mssid_1" maxlength="32" value="<% getCfgGeneral(1, "SSID1"); %>">
 		<font id="basicHSSID0">Hidden</font><input type="checkbox" name="hssid" value="0">&nbsp;
 		<font id="basicIsolatedSSID0">Isolated</font><input type="checkbox" name="isolated_ssid" value="0">
@@ -1288,7 +1288,7 @@ function switch_isolated_ssid()
 		<span class="radio"><input type="radio" name="mbssidapisolated" value="1"><font id="basicMBSSIDApIsolatedEnable">Enable</font></span>
 	</td>
 </tr>
-<tr> 
+<tr>
 	<td class="head" id="basicBSSID">BSSID</td>
 	<td>&nbsp;&nbsp;<% getWlanCurrentMac(); %></td>
 </tr>
@@ -1346,8 +1346,8 @@ function switch_isolated_ssid()
 </tr>
 </table>
 
-<table id="div_11n" name="div_11n" class="form" style="display:none">
-<tr> 
+<table id="div_11n" name="div_11n" class="form" style="display:none;">
+<tr>
 	<td class="title" colspan="2" id="basicHTPhyMode">HT Physical Mode</td>
 </tr>
 <tr id="htOpModeRow" style="display: none;">
@@ -1423,7 +1423,7 @@ function switch_isolated_ssid()
 	<td>
 		<span class="radio"><input type="radio" name="n_autoba" value="0" checked><font id="basicHTAddBADisable">Disable</font></span>
 		<span class="radio"><input type="radio" name="n_autoba" value="1"><font id="basicHTAddBAEnable">Enable</font></span>
-	</td>>
+	</td>
 </tr>
 <tr>
 	<td class="head" id="basicHTDelBA">Decline BA Request</td>

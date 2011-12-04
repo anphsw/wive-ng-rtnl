@@ -3727,10 +3727,12 @@ static void addStaProfile(webs_t wp, char_t *path, char_t *query)
 		websError(wp, 500, T("No profile name given!"));
 		return;
 	}
+
 	nvram_init(RT2860_NVRAM);
+
 	strcpy((char *)tmpProfileSetting.Profile, value);
 	wordlist = nvram_bufget(RT2860_NVRAM, "staProfile");
-	if (wordlist && strcmp(wordlist,"") != 0)
+	if (CHK_IF_SET(wordlist))
 		sprintf(tmp_buffer, "%s;%s", wordlist, value);
 	else
 		sprintf(tmp_buffer, "%s", value);
@@ -3741,7 +3743,7 @@ static void addStaProfile(webs_t wp, char_t *path, char_t *query)
 	strcpy((char *)tmpProfileSetting.SSID, value);
 	tmpProfileSetting.SsidLen = strlen((char *)tmpProfileSetting.SSID);
 	wordlist = nvram_bufget(RT2860_NVRAM, "staSSID");
-	if (wordlist && strcmp(wordlist,"") != 0)
+	if (CHK_IF_SET(wordlist))
 		sprintf(tmp_buffer, "%s;%s", wordlist, value);
 	else
 		sprintf(tmp_buffer, "%s", value);
@@ -3751,7 +3753,7 @@ static void addStaProfile(webs_t wp, char_t *path, char_t *query)
 	value = websGetVar(wp, T("network_type"), T("1"));
 	tmpProfileSetting.NetworkType = atoi(value);
 	wordlist = nvram_bufget(RT2860_NVRAM, "staNetworkType");
-	if (wordlist && strcmp(wordlist, "") != 0)
+	if (CHK_IF_SET(wordlist))
 		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.NetworkType);
 	else
 		sprintf(tmp_buffer, "%d", tmpProfileSetting.NetworkType);
@@ -3763,7 +3765,7 @@ static void addStaProfile(webs_t wp, char_t *path, char_t *query)
 	else
 		tmpProfileSetting.AdhocMode = 1;
 	wordlist = nvram_bufget(RT2860_NVRAM, "staAdhocMode");
-	if (wordlist && strcmp(wordlist, "") != 0)
+	if (CHK_IF_SET(wordlist))
 		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.AdhocMode);
 	else
 		sprintf(tmp_buffer, "%d", tmpProfileSetting.AdhocMode);
@@ -3771,12 +3773,12 @@ static void addStaProfile(webs_t wp, char_t *path, char_t *query)
 
 	//power saving mode
 	value = websGetVar(wp, T("power_saving_mode"), T("0"));
-	if (wordlist && strcmp(value, "0") ==0) //CAM
+	if (CHK_IF_SET(wordlist))
 		tmpProfileSetting.PSmode = Ndis802_11PowerModeCAM;
 	else
 		tmpProfileSetting.PSmode = Ndis802_11PowerModeMAX_PSP;
 	wordlist = nvram_bufget(RT2860_NVRAM, "staPSMode");
-	if (wordlist && strcmp(wordlist, "") != 0)
+	if (CHK_IF_SET(wordlist))
 		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.PSmode);
 	else
 		sprintf(tmp_buffer, "%d", tmpProfileSetting.PSmode);
@@ -3789,7 +3791,7 @@ static void addStaProfile(webs_t wp, char_t *path, char_t *query)
 	else
 		tmpProfileSetting.Channel = 0;
 	wordlist = nvram_bufget(RT2860_NVRAM, "staChannel");
-	if (wordlist && strcmp(wordlist, "") != 0)
+	if (CHK_IF_SET(wordlist))
 		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.Channel);
 	else
 		sprintf(tmp_buffer, "%d", tmpProfileSetting.Channel);
@@ -3797,12 +3799,12 @@ static void addStaProfile(webs_t wp, char_t *path, char_t *query)
 
 	//b preamble type
 	value = websGetVar(wp, T("b_premable_type"), T("0"));
-	if (wordlist && strcmp(value, "0") == 0)
+	if (CHK_IF_DIGIT(value, 0) == 0)
 		tmpProfileSetting.PreamType = Rt802_11PreambleAuto;
 	else
 		tmpProfileSetting.PreamType = Rt802_11PreambleLong;
 	wordlist = nvram_bufget(RT2860_NVRAM, "staPreamType");
-	if (wordlist && strcmp(wordlist, "") != 0)
+	if (CHK_IF_SET(wordlist))
 		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.PreamType);
 	else
 		sprintf(tmp_buffer, "%d", tmpProfileSetting.PreamType);
@@ -3821,14 +3823,14 @@ static void addStaProfile(webs_t wp, char_t *path, char_t *query)
 		tmpProfileSetting.RTS = 2347;
 	}
 	wordlist = nvram_bufget(RT2860_NVRAM, "staRTSCheck");
-	if (wordlist && strcmp(wordlist, "") != 0)
+	if (CHK_IF_SET(wordlist))
 		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.RTSCheck);
 	else
 		sprintf(tmp_buffer, "%d", tmpProfileSetting.RTSCheck);
 	nvram_bufset(RT2860_NVRAM, "staRTSCheck", tmp_buffer);
 
 	wordlist = nvram_bufget(RT2860_NVRAM, "staRTS");
-	if (wordlist && strcmp(wordlist, "") != 0)
+	if (CHK_IF_SET(wordlist))
 		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.RTS);
 	else
 		sprintf(tmp_buffer, "%d", tmpProfileSetting.RTS);
@@ -3845,38 +3847,43 @@ static void addStaProfile(webs_t wp, char_t *path, char_t *query)
 		tmpProfileSetting.Fragment = 2346;
 	}
 	wordlist = nvram_bufget(RT2860_NVRAM, "staFragmentCheck");
-	if (wordlist && strcmp(wordlist, "") != 0)
+	if (CHK_IF_SET(wordlist))
 		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.FragmentCheck);
 	else
 		sprintf(tmp_buffer, "%d", tmpProfileSetting.FragmentCheck);
 	nvram_bufset(RT2860_NVRAM, "staFragmentCheck", tmp_buffer);
 
 	wordlist = nvram_bufget(RT2860_NVRAM, "staFragment");
-	if (wordlist && strcmp(wordlist, "") != 0)
+	if (CHK_IF_SET(wordlist))
 		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.Fragment);
 	else
 		sprintf(tmp_buffer, "%d", tmpProfileSetting.Fragment);
 	nvram_bufset(RT2860_NVRAM, "staFragment", tmp_buffer);
 
 	//security policy (security_infra_mode or security_adhoc_mode)
-	value = websGetVar(wp, T("security_infra_mode"), T(""));
-	if (strcmp(value, "") != 0)
-		securitymode = atoi(value);
-	value = websGetVar(wp, T("security_adhoc_mode"), T(""));
-	if (strcmp(value, "") != 0)
-		securitymode = atoi(value);
+	if (tmpProfileSetting.NetworkType == 1)
+	{
+		value = websGetVar(wp, T("security_infra_mode"), T(""));
+		if (CHK_IF_SET(value))
+			securitymode = atoi(value);
+	}
+	else if (tmpProfileSetting.NetworkType == 0)
+	{
+		value = websGetVar(wp, T("security_adhoc_mode"), T(""));
+		if (CHK_IF_SET(value))
+			securitymode = atoi(value);
+	}
 
 	tmpProfileSetting.Authentication = securitymode;
 	wordlist = nvram_bufget(RT2860_NVRAM, "staAuth");
-	if (wordlist && strcmp(wordlist, "") != 0)
+	if (CHK_IF_SET(wordlist))
 		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.Authentication);
 	else
 		sprintf(tmp_buffer, "%d", tmpProfileSetting.Authentication);
 	nvram_bufset(RT2860_NVRAM, "staAuth", tmp_buffer);
 
 #ifdef WPA_SUPPLICANT_SUPPORT
-	if (tmpProfileSetting.Authentication == Ndis802_11AuthModeWPA
-			|| tmpProfileSetting.Authentication == Ndis802_11AuthModeWPA2)
+	if (tmpProfileSetting.Authentication == Ndis802_11AuthModeWPA || tmpProfileSetting.Authentication == Ndis802_11AuthModeWPA2)
 	{
 		tmpProfileSetting.KeyMgmt = Rtwpa_supplicantKeyMgmtWPAEAP;
 	}
@@ -3886,7 +3893,7 @@ static void addStaProfile(webs_t wp, char_t *path, char_t *query)
 		tmpProfileSetting.KeyMgmt = Rtwpa_supplicantKeyMgmtNONE;
 
 	wordlist = nvram_bufget(RT2860_NVRAM, "sta8021xKeyMgmt");
-	if (wordlist && strcmp(wordlist, "") != 0)
+	if (CHK_IF_SET(wordlist))
 		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.KeyMgmt);
 	else
 		sprintf(tmp_buffer, "%d", tmpProfileSetting.KeyMgmt);
@@ -3895,12 +3902,12 @@ static void addStaProfile(webs_t wp, char_t *path, char_t *query)
 
 	//wep key 1
 	value = websGetVar(wp, T("wep_key_1"), T("0"));
-	if (strcmp(value, "") == 0)
+	if (CHK_IF_SET(value))
 		strcpy((char *)tmpProfileSetting.Key1, "0");
 	else
 		strcpy((char *)tmpProfileSetting.Key1, value);
 	wordlist = nvram_bufget(RT2860_NVRAM, "staKey1");
-	if (wordlist && strcmp(wordlist, "") != 0)
+	if (CHK_IF_SET(wordlist))
 		sprintf(tmp_buffer, "%s;%s", wordlist, tmpProfileSetting.Key1);
 	else
 		sprintf(tmp_buffer, "%s", tmpProfileSetting.Key1);
@@ -3908,12 +3915,12 @@ static void addStaProfile(webs_t wp, char_t *path, char_t *query)
 
 	//wep key 2
 	value = websGetVar(wp, T("wep_key_2"), T("0"));
-	if (strcmp(value, "") == 0)
+	if (CHK_IF_SET(value))
 		strcpy((char *)tmpProfileSetting.Key2, "0");
 	else
 		strcpy((char *)tmpProfileSetting.Key2, value);
 	wordlist = nvram_bufget(RT2860_NVRAM, "staKey2");
-	if (wordlist && strcmp(wordlist, "") != 0)
+	if (CHK_IF_SET(wordlist))
 		sprintf(tmp_buffer, "%s;%s", wordlist, tmpProfileSetting.Key2);
 	else
 		sprintf(tmp_buffer, "%s", tmpProfileSetting.Key2);
@@ -3921,12 +3928,12 @@ static void addStaProfile(webs_t wp, char_t *path, char_t *query)
 
 	//wep key 3
 	value = websGetVar(wp, T("wep_key_3"), T("0"));
-	if (strcmp(value, "") == 0)
+	if (CHK_IF_SET(value))
 		strcpy((char *)tmpProfileSetting.Key3, "0");
 	else
 		strcpy((char *)tmpProfileSetting.Key3, value);
 	wordlist = nvram_bufget(RT2860_NVRAM, "staKey3");
-	if (wordlist && strcmp(wordlist, "") != 0)
+	if (CHK_IF_SET(wordlist))
 		sprintf(tmp_buffer, "%s;%s", wordlist, tmpProfileSetting.Key3);
 	else
 		sprintf(tmp_buffer, "%s", tmpProfileSetting.Key3);
@@ -3934,12 +3941,12 @@ static void addStaProfile(webs_t wp, char_t *path, char_t *query)
 
 	//wep key 4
 	value = websGetVar(wp, T("wep_key_4"), T("0"));
-	if (strcmp(value, "") == 0)
+	if (CHK_IF_SET(value))
 		strcpy((char *)tmpProfileSetting.Key4, "0");
 	else
 		strcpy((char *)tmpProfileSetting.Key4, value);
 	wordlist = nvram_bufget(RT2860_NVRAM, "staKey4");
-	if (wordlist && strcmp(wordlist, "") != 0)
+	if (CHK_IF_SET(wordlist))
 		sprintf(tmp_buffer, "%s;%s", wordlist, tmpProfileSetting.Key4);
 	else
 		sprintf(tmp_buffer, "%s", tmpProfileSetting.Key4);
@@ -3952,28 +3959,28 @@ static void addStaProfile(webs_t wp, char_t *path, char_t *query)
 		atoi(value);
 
 	wordlist = nvram_bufget(RT2860_NVRAM, "staKey1Type");
-	if (wordlist && strcmp(wordlist, "") != 0)
+	if (CHK_IF_SET(wordlist))
 		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.Key1Type);
 	else
 		sprintf(tmp_buffer, "%d", tmpProfileSetting.Key1Type);
 	nvram_bufset(RT2860_NVRAM, "staKey1Type", tmp_buffer);
 
 	wordlist = nvram_bufget(RT2860_NVRAM, "staKey2Type");
-	if (wordlist && strcmp(wordlist, "") != 0)
+	if (CHK_IF_SET(wordlist))
 		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.Key2Type);
 	else
 		sprintf(tmp_buffer, "%d", tmpProfileSetting.Key2Type);
 	nvram_bufset(RT2860_NVRAM, "staKey2Type", tmp_buffer);
 
 	wordlist = nvram_bufget(RT2860_NVRAM, "staKey3Type");
-	if (wordlist && strcmp(wordlist, "") != 0)
+	if (CHK_IF_SET(wordlist))
 		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.Key3Type);
 	else
 		sprintf(tmp_buffer, "%d", tmpProfileSetting.Key3Type);
 	nvram_bufset(RT2860_NVRAM, "staKey3Type", tmp_buffer);
 
 	wordlist = nvram_bufget(RT2860_NVRAM, "staKey4Type");
-	if (wordlist && strcmp(wordlist, "") != 0)
+	if (CHK_IF_SET(wordlist))
 		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.Key4Type);
 	else
 		sprintf(tmp_buffer, "%d", tmpProfileSetting.Key4Type);
@@ -3986,28 +3993,28 @@ static void addStaProfile(webs_t wp, char_t *path, char_t *query)
 		atoi(value);
 
 	wordlist = nvram_bufget(RT2860_NVRAM, "staKey1Length");
-	if (wordlist && strcmp(wordlist, "") != 0)
+	if (CHK_IF_SET(wordlist))
 		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.Key1Length);
 	else
 		sprintf(tmp_buffer, "%d", tmpProfileSetting.Key1Length);
 	nvram_bufset(RT2860_NVRAM, "staKey1Length", tmp_buffer);
 
 	wordlist = nvram_bufget(RT2860_NVRAM, "staKey2Length");
-	if (wordlist && strcmp(wordlist, "") != 0)
+	if (CHK_IF_SET(wordlist))
 		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.Key2Length);
 	else
 		sprintf(tmp_buffer, "%d", tmpProfileSetting.Key2Length);
 	nvram_bufset(RT2860_NVRAM, "staKey2Length", tmp_buffer);
 
 	wordlist = nvram_bufget(RT2860_NVRAM, "staKey3Length");
-	if (wordlist && strcmp(wordlist, "") != 0)
+	if (CHK_IF_SET(wordlist))
 		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.Key3Length);
 	else
 		sprintf(tmp_buffer, "%d", tmpProfileSetting.Key3Length);
 	nvram_bufset(RT2860_NVRAM, "staKey3Length", tmp_buffer);
 
 	wordlist = nvram_bufget(RT2860_NVRAM, "staKey4Length");
-	if (wordlist && strcmp(wordlist, "") != 0)
+	if (CHK_IF_SET(wordlist))
 		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.Key4Length);
 	else
 		sprintf(tmp_buffer, "%d", tmpProfileSetting.Key4Length);
@@ -4017,7 +4024,7 @@ static void addStaProfile(webs_t wp, char_t *path, char_t *query)
 	value = websGetVar(wp, T("wep_default_key"), T("1"));
 	tmpProfileSetting.KeyDefaultId= atoi(value);
 	wordlist = nvram_bufget(RT2860_NVRAM, "staKeyDefaultId");
-	if (wordlist && strcmp(wordlist, "") != 0)
+	if (CHK_IF_SET(wordlist))
 		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.KeyDefaultId);
 	else
 		sprintf(tmp_buffer, "%d", tmpProfileSetting.KeyDefaultId);
@@ -4045,7 +4052,7 @@ static void addStaProfile(webs_t wp, char_t *path, char_t *query)
 			tmpProfileSetting.Encryption = Ndis802_11WEPDisabled;
 	}
 	wordlist = nvram_bufget(RT2860_NVRAM, "staEncrypt");
-	if (wordlist && strcmp(wordlist, "") != 0)
+	if (CHK_IF_SET(wordlist))
 		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.Encryption);
 	else
 		sprintf(tmp_buffer, "%d", tmpProfileSetting.Encryption);
@@ -4055,7 +4062,7 @@ static void addStaProfile(webs_t wp, char_t *path, char_t *query)
 	value = websGetVar(wp, T("passphrase"), T("0"));
 	strcpy((char *)tmpProfileSetting.WpaPsk, value);
 	wordlist = nvram_bufget(RT2860_NVRAM, "staWpaPsk");
-	if (wordlist && strcmp(wordlist, "") != 0)
+	if (CHK_IF_SET(wordlist))
 		sprintf(tmp_buffer, "%s;%s", wordlist, tmpProfileSetting.WpaPsk);
 	else
 		sprintf(tmp_buffer, "%s", tmpProfileSetting.WpaPsk);
@@ -4065,14 +4072,14 @@ static void addStaProfile(webs_t wp, char_t *path, char_t *query)
 	//cert auth from 1x, wpa
 	tmpProfileSetting.EAP = Rtwpa_supplicantEAPNONE;
 	value = websGetVar(wp, T("cert_auth_type_from_1x"), T(""));
-	if (strcmp(value, "") != 0)
+	if (CHK_IF_SET(value))
 		tmpProfileSetting.EAP = (RT_WPA_SUPPLICANT_EAP)atoi(value);
 	value = websGetVar(wp, T("cert_auth_type_from_wpa"), T(""));
-	if (strcmp(value, "") != 0)
+	if (CHK_IF_SET(value))
 		tmpProfileSetting.EAP = (RT_WPA_SUPPLICANT_EAP)atoi(value);
 
 	wordlist = nvram_bufget(RT2860_NVRAM, "sta8021xEAP");
-	if (wordlist && strcmp(wordlist, "") != 0)
+	if (CHK_IF_SET(wordlist))
 		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.EAP);
 	else
 		sprintf(tmp_buffer, "%d", tmpProfileSetting.EAP);
@@ -4081,24 +4088,24 @@ static void addStaProfile(webs_t wp, char_t *path, char_t *query)
 	//cert tunnel auth peap, ttls
 	tmpProfileSetting.Tunnel = Rtwpa_supplicantTUNNENONE;
 	value = websGetVar(wp, T("cert_tunnel_auth_peap"), T(""));
-	if (strcmp(value, "") != 0)
+	if (CHK_IF_SET(value))
 		tmpProfileSetting.Tunnel = (RT_WPA_SUPPLICANT_TUNNEL)atoi(value);
 	value = websGetVar(wp, T("cert_tunnel_auth_ttls"), T(""));
-	if (strcmp(value, "") != 0)
+	if (CHK_IF_SET(value))
 		tmpProfileSetting.Tunnel = (RT_WPA_SUPPLICANT_TUNNEL)atoi(value);
 
 	wordlist = nvram_bufget(RT2860_NVRAM, "sta8021xTunnel");
-	if (wordlist && strcmp(wordlist, "") != 0)
+	if (CHK_IF_SET(wordlist))
 		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.Tunnel);
 	else
 		sprintf(tmp_buffer, "%d", tmpProfileSetting.Tunnel);
-		nvram_bufset(RT2860_NVRAM, "sta8021xTunnel", tmp_buffer);
+	nvram_bufset(RT2860_NVRAM, "sta8021xTunnel", tmp_buffer);
 
 	//certificate identity
 	value = websGetVar(wp, T("cert_id"), T("0"));
 	sprintf((char *)tmpProfileSetting.Identity, "%s", value);
 	wordlist = nvram_bufget(RT2860_NVRAM, "sta8021xIdentity");
-	if (wordlist && strcmp(wordlist, "") != 0)
+	if (CHK_IF_SET(wordlist))
 		sprintf(tmp_buffer, "%s;%s", wordlist, tmpProfileSetting.Identity);
 	else
 		sprintf(tmp_buffer, "%s", tmpProfileSetting.Identity);
@@ -4108,7 +4115,7 @@ static void addStaProfile(webs_t wp, char_t *path, char_t *query)
 	value = websGetVar(wp, T("cert_password"), T("0"));
 	sprintf((char *)tmpProfileSetting.Password, "%s", value);
 	wordlist = nvram_bufget(RT2860_NVRAM, "sta8021xPassword");
-	if (wordlist && strcmp(wordlist, "") != 0)
+	if (CHK_IF_SET(wordlist))
 		sprintf(tmp_buffer, "%s;%s", wordlist, tmpProfileSetting.Password);
 	else
 		sprintf(tmp_buffer, "%s", tmpProfileSetting.Password);
@@ -4118,7 +4125,7 @@ static void addStaProfile(webs_t wp, char_t *path, char_t *query)
 	value = websGetVar(wp, T("cert_client_cert_path"), T("0"));
 	sprintf((char *)tmpProfileSetting.ClientCert, "%s", value);
 	wordlist = nvram_bufget(RT2860_NVRAM, "sta8021xClientCert");
-	if (wordlist && strcmp(wordlist, "") != 0)
+	if (CHK_IF_SET(wordlist))
 		sprintf(tmp_buffer, "%s;%s", wordlist, tmpProfileSetting.ClientCert);
 	else
 		sprintf(tmp_buffer, "%s", tmpProfileSetting.ClientCert);
@@ -4128,7 +4135,7 @@ static void addStaProfile(webs_t wp, char_t *path, char_t *query)
 	value = websGetVar(wp, T("cert_private_key_path"), T("0"));
 	sprintf((char *)tmpProfileSetting.PrivateKey, "%s", value);
 	wordlist = nvram_bufget(RT2860_NVRAM, "sta8021xPrivateKey");
-	if (wordlist && strcmp(wordlist, "") != 0)
+	if (CHK_IF_SET(wordlist))
 		sprintf(tmp_buffer, "%s;%s", wordlist, tmpProfileSetting.PrivateKey);
 	else
 		sprintf(tmp_buffer, "%s", tmpProfileSetting.PrivateKey);
@@ -4138,7 +4145,7 @@ static void addStaProfile(webs_t wp, char_t *path, char_t *query)
 	value = websGetVar(wp, T("cert_private_key_password"), T("0"));
 	sprintf((char *)tmpProfileSetting.PrivateKeyPassword, "%s", value);
 	wordlist = nvram_bufget(RT2860_NVRAM, "sta8021xPrivateKeyPassword");
-	if (wordlist && strcmp(wordlist, "") != 0)
+	if (CHK_IF_SET(wordlist))
 		sprintf(tmp_buffer, "%s;%s", wordlist, tmpProfileSetting.PrivateKeyPassword);
 	else
 		sprintf(tmp_buffer, "%s", tmpProfileSetting.PrivateKeyPassword);
@@ -4148,7 +4155,7 @@ static void addStaProfile(webs_t wp, char_t *path, char_t *query)
 	value = websGetVar(wp, T("cert_ca_cert_path"), T("0"));
 	sprintf((char *)tmpProfileSetting.CACert, "%s", value);
 	wordlist = nvram_bufget(RT2860_NVRAM, "sta8021xCACert");
-	if (wordlist && strcmp(wordlist, "") != 0)
+	if (CHK_IF_SET(wordlist))
 		sprintf(tmp_buffer, "%s;%s", wordlist, tmpProfileSetting.CACert);
 	else
 		sprintf(tmp_buffer, "%s", tmpProfileSetting.CACert);
@@ -4158,7 +4165,7 @@ static void addStaProfile(webs_t wp, char_t *path, char_t *query)
 #else
 #define BUFSET(column, value) \
 	wordlist = nvram_bufget(RT2860_NVRAM, column); \
-	if (wordlist && strcmp(wordlist, "") != 0) \
+	if (CHK_IF_SET(wordlist)) \
 		sprintf(tmp_buffer, "%s;%s", wordlist, value); \
 	else \
 		sprintf(tmp_buffer, "%s", value); \
@@ -4181,7 +4188,7 @@ static void addStaProfile(webs_t wp, char_t *path, char_t *query)
 
 	tmpProfileSetting.Active = 0;
 	wordlist = nvram_get(RT2860_NVRAM, "staActive");
-	if (wordlist && strcmp(wordlist, "") != 0)
+	if (CHK_IF_SET(wordlist))
 		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.Active);
 	else
 		sprintf(tmp_buffer, "%d", tmpProfileSetting.Active);

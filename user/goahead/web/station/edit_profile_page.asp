@@ -945,6 +945,7 @@ function hideWep()
 	document.profile_page.wep_key_4.disabled = true;
 	document.profile_page.wep_default_key.disabled = true;
 }
+
 function showWep()
 {
 	<!-- WEP -->
@@ -1073,10 +1074,10 @@ function submit_apply()
 
 <form method=post name=profile_page action="/goform/editStaProfile">
 <table class="form">
-  <tr>
-    <td class="title" colspan="2" id="editprofSysConf">System Configuration</td>
-  </tr>
-  <tr>
+<tr>
+	<td class="title" colspan="2" id="editprofSysConf">System Configuration</td>
+</tr>
+<tr>
     <td class="head" id="editprofName">Profile Name</td>
     <td><input type=text name="profile_name" maxlength=32></td>
   </tr>
@@ -1172,7 +1173,7 @@ function submit_apply()
     <td class="title" colspan="3" id="editprofWEP">Wire Equivalence Protection (WEP)</td>
   </tr>
   <tr> 
-    <td class="head" id="editprofWEPKeyLength">WEP Key Length</td>
+    <td class="head" id="editprofWEPKeyLength" colspan="2">WEP Key Length</td>
     <td>
       <select name="wep_key_length" size="1" onChange="wep_switch_key_length()">
 	<option value=0 selected>64 bit (10 hex digits/ 5 ascii keys)</option>

@@ -7,10 +7,12 @@
 
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <link rel="stylesheet" href="/style/controls.css" type="text/css">
+<link rel="stylesheet" href="/style/windows.css" type="text/css">
 
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script type="text/javascript" src="/js/validation.js"></script>
 <script type="text/javascript" src="/js/controls.js"></script>
+<script type="text/javascript" src="/js/ajax.js"></script>
 
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("internet");
@@ -19,6 +21,7 @@ Butterlate.setTextDomain("services");
 var secs;
 var timerID = null;
 var timerRunning = false;
+var rmtManagementPort = '<% getCfgZero(1, "RemoteManagementPort"); %>';
 
 function StartTheTimer()
 {
@@ -236,6 +239,20 @@ function CheckValue(form)
 			return false;
 		}
 	}
+	
+	if (form.RemoteManagementPort != rmtManagementPort)
+	{
+		if (!confirm("You have changed remote management port number. This change needs to reboot your router. Do you want to proceed?"))
+			return false;
+		
+		form.rmt_http_port_changed.value = '1';
+		ajaxPostForm(null, form, 'setMiscReloader', '/messages/rebooting.asp', ajaxShowProgress);
+		return false;
+	}
+	
+	// Timeout reload
+	TimeoutReload(20);
+	
 	return true;
 }
 
@@ -316,7 +333,7 @@ function httpRmtSelect(form)
 </tr>
 <tr id="http_rmt_port" style="display: none;">
 	<td class="head">Remote HTTP port</td>
-	<td><input class="half" value="<% getCfgZero(1, "RemoteManagementPort"); %>"</td>
+	<td><input class="half" name="RemoteManagementPort" value="<% getCfgZero(1, "RemoteManagementPort"); %>"</td>
 </tr>
 <tr>
 <td class="head">SSH Remote Management</td>
@@ -594,9 +611,11 @@ function httpRmtSelect(form)
 <table class="buttons">
 <tr>
 <td>
-	<input type="submit" class="normal" value="Apply"  id="lApply"  onClick="TimeoutReload(20)">&nbsp;
+	<input type="submit" class="normal" value="Apply"  id="lApply">&nbsp;
 	<input type="reset"  class="normal" value="Cancel" id="lCancel" onClick="window.location.reload()">
 	<input type="hidden" value="/services/misc.asp" name="submit-url">
+	<input type="hidden" value="0" name="rmt_http_port_changed">
+	<iframe id="setMiscReloader" name="setMiscReloader" src="" style="width:0;height:0;border:0px solid #fff;"></iframe>
 </td>
 </tr>
 </table>

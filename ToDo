@@ -1,4 +1,5 @@
 # For sadko
+) Rewrite profiles managment code in ethernet converter mode. (in progress)
 ) Add /proc/rt3052/esw_cnt for traffic statistic per switch port.(need add in WebUI).
 
 # For me

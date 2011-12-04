@@ -212,6 +212,23 @@ function ajaxPopupWindow(popupID, url, onLoadAction)
 				// Store innerHTML
 				popup.innerHTML = xmlHttp.responseText;
 				
+				// Scroll
+				try
+				{
+					document.body.scrollTo(0, 0);
+				}
+				catch (ex)
+				{
+				}
+				
+				try
+				{
+					window.scrollTo(0, 0);
+				}
+				catch (ex)
+				{
+				}
+				
 				// Show background
 				var b_height = (document.body.innerHeight != null) ? document.body.innerHeight : document.body.clientHeight;
 				var c_width =

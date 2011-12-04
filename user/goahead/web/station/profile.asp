@@ -37,35 +37,22 @@ function submit_apply(parm)
 
 function initTranslation()
 {
-	var e = document.getElementById("profTitle");
-	e.innerHTML = _("prof title");
-	e = document.getElementById("profIntroduction");
-	e.innerHTML = _("prof introduction");
+	_TR("profTitle", "prof title");
+	_TR("profIntroduction", "prof introduction");
 
-	e = document.getElementById("profList");
-	e.innerHTML = _("prof list");
-	e = document.getElementById("profSelect");
-	e.innerHTML = _("station select");
-	e = document.getElementById("profProfile");
-	e.innerHTML = _("prof profile");
-	e = document.getElementById("profSSID");
-	e.innerHTML = _("station ssid");
-	e = document.getElementById("profChannel");
-	e.innerHTML = _("station channel");
-	e = document.getElementById("profAuth");
-	e.innerHTML = _("station auth");
-	e = document.getElementById("staproEncryp");
-	e.innerHTML = _("station encryp");
-	e = document.getElementById("staproNetType");
-	e.innerHTML = _("station network type");
-	e = document.getElementById("profAdd");
-	e.value = _("station add");
-	e = document.getElementById("profDel");
-	e.value = _("station del");
-	e = document.getElementById("profEdit");
-	e.value = _("station edit");
-	e = document.getElementById("profActive");
-	e.value = _("station active");
+	_TR("profList", "prof list");
+	_TR("profSelect", "station select");
+	_TR("profProfile", "prof profile");
+	_TR("profSSID", "station ssid");
+	_TR("profChannel", "station channel");
+	_TR("profAuth", "station auth");
+	_TR("staproEncryp", "station encryp");
+	_TR("staproNetType", "station network type");
+	
+	_TRV("profAdd", "station add");
+	_TRV("profDel", "station del");
+	_TRV("profEdit", "station edit");
+	_TRV("profActive", "station active");
 }
 
 function PageInit()
