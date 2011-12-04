@@ -69,9 +69,7 @@ start() {
 
 stop() {
     get_param
-    if [ ! -f /var/run/goahead.pid ]; then
-        $LOG "Stop modules.dep generate..."
-    else
+    if [ -f /var/run/goahead.pid ]; then
 	$LOG "link wifi down first"
 	ra0flushadress
 	ip link set ra0 down > /dev/null 2>&1
