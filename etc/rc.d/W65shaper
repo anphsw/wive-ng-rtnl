@@ -26,19 +26,14 @@ LOG="logger -t QoS"
 IPTSCR="/etc/qos_firewall"
 
 start() {
-get_param
 if [ "$QoSEnable" != "" -a "$QoSEnable" != "0" ] || [ "$simple_qos" = "1" ]; then
     $LOG "Set default rules."
     set_def
 
     # increase queue for devices
-    if [ -f /tmp/is_32ram_dev ]; then
-	ifconfig $real_wan_if txqueuelen 1000
-	ifconfig $lan_if txqueuelen 1000
-    else
-	ifconfig $real_wan_if txqueuelen 100
-	ifconfig $lan_if txqueuelen 100
-    fi
+    get_txqlen
+    ifconfig $real_wan_if txqueuelen "$txqueuelen"
+    ifconfig $lan_if txqueuelen "$txqueuelen"
 
     # create iptables hook
     printf "#!/bin/sh\n\n" > $IPTSCR
@@ -73,7 +68,6 @@ fi
 stop() {
  $LOG "Stopping SHAPER"
     # Drop all QoS rules
-    get_param
     set_def
     INTERFACES=`ls /proc/sys/net/ipv4/conf/ | grep -vE "lo|all|default"`
     for i in $INTERFACES; do
@@ -116,11 +110,6 @@ show() {
     tc -s -d filter show dev $lan_if
     echo "############################################"
 }
-
-get_param() {
-    eval `nvram_buf_get 2860 QoSEnable simple_qos`
-}
-
 
 case "$1" in
         start)

@@ -26,7 +26,7 @@ start() {
 hw_nat_en() {
     # In bridge and chillispot mode not fastnat use
     if [ "$OperationMode" != "0" ] && [ "$OperationMode" != "4" ]; then
-	eval `nvram_buf_get 2860 simple_qos QoSEnable hw_nat_bind natFastpath`
+	eval `nvram_buf_get 2860 hw_nat_bind natFastpath`
 	# select NAT offload mode
 	if [ "$natFastpath" = "1" ]; then
 	    hw_nat=0

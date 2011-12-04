@@ -22,7 +22,8 @@ mcast_net="224.0.0.0/4"
 upmpm_net="239.0.0.0/8"
 
 # first get operation mode and wan mode  dns mode and relay mode vpn mode and type
-eval `nvram_buf_get 2860 OperationMode wanConnectionMode dnsPEnabled wan_ipaddr wan_static_dns vpnEnabled vpnPurePPPOE vpnType IPv6_Enable`
+eval `nvram_buf_get 2860 OperationMode wanConnectionMode dnsPEnabled wan_ipaddr wan_static_dns \
+	vpnEnabled vpnPurePPPOE vpnType	IPv6_Enable QoSEnable simple_qos`
 
 # get wireless, wan and lan mac adresses
 getMacIf()
@@ -91,13 +92,24 @@ getWanIpaddr()
 
 }
 
-# for memory save 16m device uses txqueuelen=100
 get_txqlen()
 {
-    if [ -f /tmp/is_16ram_dev ]; then
-	txqueuelen="100"
+    if [ "$QoSEnable" != "" -a "$QoSEnable" != "0" ] || [ "$simple_qos" = "1" ]; then
+	# QoS Enabled
+	# For memory save 16m device uses txqueuelen=100
+	if [ -f /tmp/is_16ram_dev ]; then
+	    txqueuelen="100"
+	else
+	    txqueuelen="1000"
+	fi
     else
-	txqueuelen="1000"
+	# QoS Disabled
+	# For memory save 16m device uses txqueuelen=50
+	if [ -f /tmp/is_16ram_dev ]; then
+	    txqueuelen="50"
+	else
+	    txqueuelen="500"
+	fi
     fi
 }
 

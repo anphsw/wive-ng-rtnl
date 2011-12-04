@@ -7,48 +7,8 @@ LOG="echo MODULES"
 
 start() {
     get_param
-    # if goahead not started
-    if [ ! -f /var/run/goahead.pid ]; then
-	# generate modules dep
-	if [ ! -f /etc/modules.dep ]; then
-	    $LOG "Start modules.dep generate..."
-	    depmod -a -n > /etc/modules.dep
-	fi
-	# not load nf_nat helpers in bridge mode
-	if [ "$OperationMode" != "0" ]; then
-	    # load conntrack helpers
-	    eval `nvram_buf_get 2860 fwAlgTFTP fwAlgSIP fwAlgGRE fwAlgPPTP fwAlgH323 fwAlgFTP`
-	    if [ "$fwAlgTFTP" != "0" ]; then
-		modprobe -q nf_conntrack_tftp
-	    fi
-	    if [ "$fwAlgSIP" != "0" ]; then
-		modprobe -q nf_conntrack_sip
-		modprobe -q nf_nat_sip
-	    fi
-	    if [ "$fwAlgGRE" != "0" ]; then
-		modprobe -q nf_conntrack_gre
-		modprobe -q nf_nat_proto_gre
-	    fi
-	    if [ "$fwAlgPPTP" != "0" ]; then
-		modprobe -q nf_conntrack_pptp
-	        modprobe -q nf_nat_pptp
-	    fi
-	    if [ "$fwAlgH323" != "0" ]; then
-		modprobe -q nf_conntrack_h323
-		modprobe -q nf_nat_h323
-	    fi
-	    if [ "$fwAlgFTP" != "0" ]; then
-		modprobe -q nf_nat_ftp
-	    fi
-    	    if [ "$ipt_account" = "1" ]; then
-		modprobe -q ipt_account
-	    fi
-	fi
-    else
-	# not load module before goahead start
-	. /etc/scripts/web_wait.sh
-	web_wait
-
+    # if goahead started
+    if [  -f /var/run/goahead.pid ]; then
 	# this is workaround for small memory devices
 	# and prevent memory fragmentation before load
 	# large ralink wifi drivers
@@ -56,6 +16,7 @@ start() {
 	    flush_net_caches
 	fi
 
+	# wifi reconfigure only after goahead start
 	$LOG "Prepare wifi config..."
 	gen_wifi_config
 	getMacIf
@@ -93,6 +54,16 @@ start() {
 	    ifconfig ra0 txqueuelen	"$txqueuelen"
 	    ip link set ra0 up
 	fi
+    else
+	# if goahead not started
+	# generate modules dep
+	if [ ! -f /etc/modules.dep ]; then
+	    $LOG "Start modules.dep generate..."
+	    depmod -a -n > /etc/modules.dep
+	fi
+	# not load this modules after goahead start
+	# load conntrack helpers modules
+	load_nat_helpers
     fi
 }
 
@@ -146,6 +117,40 @@ gen_wifi_config()
 {
     rm -f /etc/Wireless/RT2860/RT2860.dat
     ralink_init make_wireless_config rt2860
+}
+
+load_nat_helpers()
+{
+    # not load nf_nat helpers in bridge mode
+    if [ "$OperationMode" != "0" ]; then
+	# load conntrack helpers
+	eval `nvram_buf_get 2860 fwAlgTFTP fwAlgSIP fwAlgGRE fwAlgPPTP fwAlgH323 fwAlgFTP`
+	if [ "$fwAlgTFTP" != "0" ]; then
+	    modprobe -q nf_conntrack_tftp
+	fi
+	if [ "$fwAlgSIP" != "0" ]; then
+	    modprobe -q nf_conntrack_sip
+	    modprobe -q nf_nat_sip
+	fi
+	if [ "$fwAlgGRE" != "0" ]; then
+	    modprobe -q nf_conntrack_gre
+	    modprobe -q nf_nat_proto_gre
+	fi
+	if [ "$fwAlgPPTP" != "0" ]; then
+	    modprobe -q nf_conntrack_pptp
+	    modprobe -q nf_nat_pptp
+	fi
+	if [ "$fwAlgH323" != "0" ]; then
+	    modprobe -q nf_conntrack_h323
+	    modprobe -q nf_nat_h323
+	fi
+	if [ "$fwAlgFTP" != "0" ]; then
+	    modprobe -q nf_nat_ftp
+	fi
+    	if [ "$ipt_account" = "1" ]; then
+	    modprobe -q ipt_account
+	fi
+    fi
 }
 
 case "$1" in
