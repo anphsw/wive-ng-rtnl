@@ -1,4 +1,5 @@
-<html><head><!-- Copyright (c), Ralink Technology Corporation All Rights Reserved. -->
+<html>
+<head>
 
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0">

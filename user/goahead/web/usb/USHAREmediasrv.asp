@@ -1,4 +1,3 @@
-<!-- Copyright 2004, Ralink Technology Corporation All Rights Reserved. -->
 <html>
 <head>
 
@@ -188,7 +187,7 @@ function submit_apply(parm)
   <tr>
     <td class="head" id="mediaSrvName">Media Server Name</td>
     <td>
-      <input type=text name=media_name size=16 maxlength=16 value="RalinkSoC">
+      <input type=text name=media_name size=16 maxlength=16 value="Wive-NG-RTNL">
     </td>
   </tr>
 </table>

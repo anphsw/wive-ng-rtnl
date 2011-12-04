@@ -1,4 +1,3 @@
-<!-- Copyright 2004, Ralink Technology Corporation All Rights Reserved. -->
 <html>
 <head>
 
@@ -257,13 +256,13 @@ function submit_apply(parm)
   <tr>
     <td class="head" id="smbSrvWG">Workgroup</td>
     <td>
-      <input type=text name=smb_workgroup size=16 maxlength=16 value="ralink">
+      <input type=text name=smb_workgroup size=16 maxlength=16 value="LOCALNET">
     </td>
   </tr>
   <tr>
     <td class="head" id="smbSrvNetBIOS">NetBIOS Name</td>
     <td>
-      <input type=text name=smb_netbios size=16 maxlength=16 value="RalinkSoC">
+      <input type=text name=smb_netbios size=16 maxlength=16 value="Wive-NG-RTNL">
     </td>
   </tr>
 </table>

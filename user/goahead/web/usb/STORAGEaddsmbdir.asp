@@ -1,4 +1,3 @@
-<!-- Copyright (c), Ralink Technology Corporation All Rights Reserved. -->
 <html>
 <head>
 
@@ -26,7 +25,7 @@ function initTranslation()
 	e = document.getElementById("adddirCancel");
 	e.value = _("usb cancel");
 }
-	
+
 function initValue()
 {
 	initTranslation();

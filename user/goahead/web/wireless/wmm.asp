@@ -1,4 +1,3 @@
-<!-- Copyright 2004, Ralink Technology Corporation All Rights Reserved. -->
 <html>
 <head>
 

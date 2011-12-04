@@ -1,5 +1,9 @@
 <html>
-<!-- Copyright (c) Ralink Tech Inc. All Rights Reserved. -->
+
+<!-- Copyright (c) Ralink (2004-2010) Tech Inc. All Rights Reserved. -->
+<!-- Copyright (c) Wive project (2010-2011). All Rights Reserved. -->
+<!-- This is firmaware use ONLY in Acorp ralink based routers !!! NOT ANY WARRANTY AND SUPPORT FOR ALL OTHERS VENDORS. -->
+
 <head>
 <title>Wive-NG-RTNL Form submitted</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">

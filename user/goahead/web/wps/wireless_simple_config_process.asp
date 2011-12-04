@@ -1,4 +1,3 @@
-<!-- Copyright 2006, Ralink Technology Corporation All Rights Reserved. -->
 <html>
 <head>
 
@@ -9,7 +8,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 
 <link href="css.css" rel="stylesheet" type="text/css">
-<title>Ralink Wireless Access Point</title>
+<title>Wireless Access Point</title>
 
 <script language="JavaScript" type="text/javascript">
 
