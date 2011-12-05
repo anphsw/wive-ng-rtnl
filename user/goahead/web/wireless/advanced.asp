@@ -541,7 +541,7 @@ function wmm_capable_enable_switch()
 <tr>
 	<td class="head" id="staadvCountry">Country Region Code</td>
 	<td>
-		<select id="country_region" name="country_region_bg" class="mid">
+		<select id="country_region" name="country_region" class="mid">
 		<option value=0 <% var cr_bg = getCfgZero(0, "CountryRegion");
 			if (cr_bg == "0") write("selected"); %>>0: CH1-11 (FCC)</option>
 		<option value=1 <% if (cr_bg == "1") write("selected"); %>>1: CH1-13 (IC)</option>
