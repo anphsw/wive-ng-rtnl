@@ -860,6 +860,7 @@
 9) Fix change web remote managment port from web.<br>
 10) Cleanup ethetnet converter add profile code.<br>
 11) Init.d fix some codestyle issue.<br>
+12) Add VPN rx/tx status LED support(default alias GREEN_WPS_LED).<br>
 
 <br><br>
 <b>For support see:</b><br>

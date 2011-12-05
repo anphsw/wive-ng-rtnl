@@ -34,11 +34,16 @@
 #ifndef __RALINK_GPIO_H__
 #define __RALINK_GPIO_H__
 
+#include <linux/config.h>
+
 #ifdef __KERNEL__
+#include <linux/kernel.h>
 #include <asm/rt2880/rt_mmap.h>
 #endif
 
-#define GPIO_DEV "/dev/gpio"
+#define NAME			"ralink_gpio" 	//driver name
+#define RALINK_GPIO_DEVNAME	"gpio"		//nodename
+#define GPIO_DEV		"/dev/gpio"	//userlevel devname
 
 #if 0 /* BASE SDK CONFIG */
 #define GPIO_LED_WAN_GREEN      12
@@ -76,6 +81,11 @@
 /* Firmware update indicators */
 #define GPIO_MTD_LED1	GPIO_LED_SEC_GREEN
 #define GPIO_MTD_LED2	GPIO_WPS_LED_GREEN
+
+/* VPN tx/rx led */
+#ifdef CONFIG_RALINK_GPIO_LED
+#define GPIO_VPN_LED1	GPIO_WPS_LED_GREEN
+#endif
 
 #define RALINK_GPIO_HAS_5124	1
 //#define RALINK_GPIO_HAS_9524	1
@@ -309,6 +319,8 @@
 #define RALINK_GPIO_DIR_ALLIN		0
 #define RALINK_GPIO_DIR_ALLOUT		0x00FFFFFF
 
+#define RALINK_GPIO(x)			(1 << x)
+
 /*
  * structure used at regsitration
  */
@@ -328,7 +340,88 @@ typedef struct {
 	unsigned int times;		//blinking times
 } ralink_gpio_led_info;
 
+#ifdef __KERNEL__
+/*
+ * variables used at regsitration
+ */
+int ralink_gpio_major = 252;
+int ralink_gpio_irqnum = 0;
+u32 ralink_gpio_intp = 0;
+u32 ralink_gpio_edge = 0;
+#ifdef RALINK_GPIO_HAS_5124
+u32 ralink_gpio3924_intp = 0;
+u32 ralink_gpio3924_edge = 0;
+u32 ralink_gpio5140_intp = 0;
+u32 ralink_gpio5140_edge = 0;
+#endif
+#ifdef RALINK_GPIO_HAS_9524
+u32 ralink_gpio3924_intp = 0;
+u32 ralink_gpio3924_edge = 0;
+u32 ralink_gpio7140_intp = 0;
+u32 ralink_gpio7140_edge = 0;
+u32 ralink_gpio9572_intp = 0;
+u32 ralink_gpio9572_edge = 0;
+#endif
 
-#define RALINK_GPIO(x)			(1 << x)
+/*
+ * LED control section
+*/
+
+#define RALINK_LED_DEBUG 0
+#define RALINK_GPIO_LED_FREQ (HZ/10)
+#define RALINK_GPIO_BTN_LONG (2*HZ)
+#define RALINK_GPIO_BTN_SHORT (HZ/10)
+
+u32 ra_gpio_led_set = 0;
+u32 ra_gpio_led_clr = 0;
+#ifdef RALINK_GPIO_HAS_5124
+u32 ra_gpio3924_led_set = 0;
+u32 ra_gpio3924_led_clr = 0;
+u32 ra_gpio5140_led_set = 0;
+u32 ra_gpio5140_led_clr = 0;
+#endif
+#ifdef RALINK_GPIO_HAS_9524
+u32 ra_gpio3924_led_set = 0;
+u32 ra_gpio3924_led_clr = 0;
+u32 ra_gpio7140_led_set = 0;
+u32 ra_gpio7140_led_clr = 0;
+u32 ra_gpio9572_led_set = 0;
+u32 ra_gpio9572_led_clr = 0;
+#endif
+
+struct ralink_gpio_led_status_t {
+	int ticks;
+	unsigned int ons;
+	unsigned int offs;
+	unsigned int resting;
+	unsigned int times;
+} ralink_gpio_led_stat[RALINK_GPIO_NUMBER];
+
+int ralink_gpio_led_set(ralink_gpio_led_info led);
+
+#if RALINK_GPIO_LED_LOW_ACT
+#define __LED_ON(gpio)      ra_gpio_led_clr |= RALINK_GPIO(gpio);
+#define __LED_OFF(gpio)     ra_gpio_led_set |= RALINK_GPIO(gpio);
+#define __LED3924_ON(gpio)  ra_gpio3924_led_clr |= RALINK_GPIO((gpio-24));
+#define __LED3924_OFF(gpio) ra_gpio3924_led_set |= RALINK_GPIO((gpio-24));
+#define __LED5140_ON(gpio)  ra_gpio5140_led_clr |= RALINK_GPIO((gpio-40));
+#define __LED5140_OFF(gpio) ra_gpio5140_led_set |= RALINK_GPIO((gpio-40));
+#define __LED7140_ON(gpio)  ra_gpio7140_led_clr |= RALINK_GPIO((gpio-40));
+#define __LED7140_OFF(gpio) ra_gpio7140_led_set |= RALINK_GPIO((gpio-40));
+#define __LED9572_ON(gpio)  ra_gpio9572_led_clr |= RALINK_GPIO((gpio-72));
+#define __LED9572_OFF(gpio) ra_gpio9572_led_set |= RALINK_GPIO((gpio-72));
+#else
+#define __LED_ON(gpio)      ra_gpio_led_set |= RALINK_GPIO(gpio);
+#define __LED_OFF(gpio)     ra_gpio_led_clr |= RALINK_GPIO(gpio);
+#define __LED3924_ON(gpio)  ra_gpio3924_led_set |= RALINK_GPIO((gpio-24));
+#define __LED3924_OFF(gpio) ra_gpio3924_led_clr |= RALINK_GPIO((gpio-24));
+#define __LED5140_ON(gpio)  ra_gpio5140_led_set |= RALINK_GPIO((gpio-40));
+#define __LED5140_OFF(gpio) ra_gpio5140_led_clr |= RALINK_GPIO((gpio-40));
+#define __LED7140_ON(gpio)  ra_gpio7140_led_set |= RALINK_GPIO((gpio-40));
+#define __LED7140_OFF(gpio) ra_gpio7140_led_clr |= RALINK_GPIO((gpio-40));
+#define __LED9572_ON(gpio)  ra_gpio9572_led_set |= RALINK_GPIO((gpio-72));
+#define __LED9572_OFF(gpio) ra_gpio9572_led_clr |= RALINK_GPIO((gpio-72));
+#endif
+#endif /* __KERNEL__ */
 
 #endif

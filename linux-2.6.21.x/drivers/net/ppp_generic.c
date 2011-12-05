@@ -56,6 +56,11 @@
 extern int ppp_cpu_load;
 #endif
 
+#ifdef CONFIG_RALINK_GPIO_LED_VPN
+#include <linux/ralink_gpio.h>
+ralink_gpio_led_info led;
+#endif
+
 #define PPP_VERSION	"2.4.2"
 
 /*
@@ -881,7 +886,6 @@ static const struct file_operations ppp_device_fops = {
 static int __init ppp_init(void)
 {
 	int err;
-
 	printk(KERN_INFO "PPP generic driver version " PPP_VERSION "\n");
 	err = register_chrdev(PPP_MAJOR, "ppp", &ppp_device_fops);
 	if (!err) {
@@ -892,7 +896,15 @@ static int __init ppp_init(void)
 		}
 		device_create(ppp_class, NULL, MKDEV(PPP_MAJOR, 0), "ppp");
 	}
-
+#ifdef CONFIG_RALINK_GPIO_LED_VPN
+	printk(KERN_INFO "PPP vpn led has gpio %d\n", GPIO_VPN_LED1);
+	led.gpio = GPIO_VPN_LED1;
+	led.on = 1;
+	led.off = 1;
+	led.blinks = 1;
+	led.rests = 1;
+	led.times = 1;
+#endif
 out:
 	if (err)
 		printk(KERN_ERR "failed to register PPP device (%d)\n", err);
@@ -1031,7 +1043,9 @@ static inline void
 ppp_xmit_process(struct ppp *ppp)
 {
 	struct sk_buff *skb;
-
+#ifdef CONFIG_RALINK_GPIO_LED_VPN
+	ralink_gpio_led_set(led);
+#endif
 	ppp_xmit_lock(ppp);
 	if (ppp->dev) {
 		ppp_push(ppp);
@@ -1528,6 +1542,9 @@ ppp_channel_push(struct channel *pch)
 static inline void
 ppp_do_recv(struct ppp *ppp, struct sk_buff *skb, struct channel *pch)
 {
+#ifdef CONFIG_RALINK_GPIO_LED_VPN
+	ralink_gpio_led_set(led);
+#endif
 	ppp_recv_lock(ppp);
 	/* ppp->dev == 0 means interface is closing down */
 	if (ppp->dev)
@@ -1539,9 +1556,9 @@ ppp_do_recv(struct ppp *ppp, struct sk_buff *skb, struct channel *pch)
 
 void ppp_stat_add(struct ppp_channel *chan, struct sk_buff *skb) {
 	struct channel *pch = chan->ppp;
-	
+
 	if (pch == 0 || pch->ppp == 0 || skb->len == 0 ) return;
-	
+
 	skb->dev = pch->ppp->dev;
 	pch->ppp->stats.rx_packets++;
 	pch->ppp->stats.rx_bytes += skb->len;

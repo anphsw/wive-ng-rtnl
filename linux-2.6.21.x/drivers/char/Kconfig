@@ -13,6 +13,11 @@ config RALINK_GPIO_LED
 	depends on RALINK_GPIO
 	default y
 
+config CONFIG_RALINK_GPIO_LED_VPN
+	bool "Ralink GPIO VPN LED Support"
+	depends on RALINK_GPIO_LED
+	default y
+
 config RALINK_GDMA
 	tristate "Ralink GDMA Support"
 	depends on RALINK_RT3883 || RALINK_RT3352 || RALINK_RT5350 || RALINK_RT6855
