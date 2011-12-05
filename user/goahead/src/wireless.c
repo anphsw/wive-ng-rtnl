@@ -2307,11 +2307,11 @@ void disconnectSta(webs_t wp, char_t *path, char_t *query)
 	if ((mac != NULL) && (strlen(mac) > 0))
 	{
 		if (strcmp(mac, "*") == 0)
-			doSystem("iwpriv ra0 set DisConnectAllSta=1 1>/dev/null 2>&1");
+			doSystem("iwpriv ra0 set DisConnectAllSta=1 > /dev/null 2>&1");
 		else if (strlen(mac) == 17)
 		{
 			char cmd[80];
-			sprintf(cmd, "iwpriv ra0 set DisConnectSta=%s 1>/dev/null 2>&1", mac);
+			sprintf(cmd, "iwpriv ra0 set DisConnectSta=%s > /dev/null 2>&1", mac);
 			doSystem(cmd);
 		}
 	}

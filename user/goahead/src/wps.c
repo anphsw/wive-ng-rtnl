@@ -354,7 +354,7 @@ void WPSRestart(void)
 		return;
 
 	wordlist = nvram_get(RT2860_NVRAM, "WscModeOption");
-	doSystem("iwpriv ra0 set WscConfMode=0 1>/dev/null 2>&1");	// WPS disable
+	doSystem("iwpriv ra0 set WscConfMode=0 > /dev/null 2>&1");	// WPS disable
 	if(wordlist && (strcmp(wordlist, "0") != 0)) {
 		// WPS Enable
 		char lan_if_addr[16];
@@ -362,7 +362,7 @@ void WPSRestart(void)
 			printf("WPSRestart error, can't get lan ip.\n");
 			return;
 		}
-		doSystem("iwpriv ra0 set WscConfMode=7 1>/dev/null 2>&1");
+		doSystem("iwpriv ra0 set WscConfMode=7 > /dev/null 2>&1");
 		wordlist = nvram_get(RT2860_NVRAM, "WscConfigured");
 		if (strcmp(wordlist, "0") == 0)
         		doSystem("iwpriv ra0 set WscConfStatus=1");
@@ -427,7 +427,7 @@ static void WPSSetup(webs_t wp, char_t *path, char_t *query)
 	if (wsc_enable == 0)
 	{
 		doSystem("service wscd stop");
-		doSystem("iwpriv ra0 set WscConfMode=0 1>/dev/null 2>&1");
+		doSystem("iwpriv ra0 set WscConfMode=0 > /dev/null 2>&1");
 	}
 	else
 	{
@@ -439,7 +439,7 @@ static void WPSSetup(webs_t wp, char_t *path, char_t *query)
 		}
 
 		doSystem("service wscd restart");
-		doSystem("iwpriv ra0 set WscConfMode=7 1>/dev/null 2>&1");
+		doSystem("iwpriv ra0 set WscConfMode=7 > /dev/null 2>&1");
 		printf("wsc_enable:%d\n",  7);
 	}
 
@@ -455,7 +455,7 @@ static void GenPIN(webs_t wp, char_t *path, char_t *query)
 	sprintf(new_pin, "%08d", getAPPIN("ra0"));
 
 	nvram_set(RT2860_NVRAM, "WscVendorPinCode", new_pin);
-	gen_wifi_config(RT2860_NVRAM);	
+	gen_wifi_config(RT2860_NVRAM);
 	websRedirect(wp, "wps/wps.asp");
 }
 
