@@ -1839,12 +1839,6 @@ void Security(int nvram, webs_t wp, char_t *path, char_t *query)
 
 	LFW(security_mode, security_mode);
 
-/*	if (!strcmp(security_mode, "Disable") || !strcmp(security_mode, "OPEN"))
-		ledAlways(GPIO_LED_SEC_GREEN, LED_OFF); //turn off security LED
-	else
-		ledAlways(GPIO_LED_SEC_GREEN, LED_ON); //turn on security LED
-*/
-
 	//clear Radius settings
 	clearRadiusSetting(nvram, mbssid);
 
@@ -1945,19 +1939,9 @@ void Security(int nvram, webs_t wp, char_t *path, char_t *query)
 
 	setupSecurityLed();
 
-//# Access Policy
+	//# Access Policy
 	if(AccessPolicyHandle(nvram, wp, mbssid) == -1)
 		trace(0, "** error in AccessPolicyHandle()\n");
-//# WPS
-	if(mbssid == 0){		// only ra0 supports WPS now.
-		char *wordlist= nvram_get(RT2860_NVRAM, "WscModeOption");
-		if(wordlist){
-			if (strcmp(wordlist, "0"))
-				doSystem("iwpriv ra0 set WscConfStatus=1");
-			nvram_set(RT2860_NVRAM, "WscConfigured", "1");
-			g_wsc_configured = 1;
-		}
-	}
 
 	mbssid_num = atoi(nvram_get(nvram, "BssidNum"));
 	for (i=0; i<mbssid_num; i++)
