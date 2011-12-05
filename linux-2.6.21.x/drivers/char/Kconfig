@@ -13,7 +13,7 @@ config RALINK_GPIO_LED
 	depends on RALINK_GPIO
 	default y
 
-config CONFIG_RALINK_GPIO_LED_VPN
+config RALINK_GPIO_LED_VPN
 	bool "Ralink GPIO VPN LED Support"
 	depends on RALINK_GPIO_LED
 	default y

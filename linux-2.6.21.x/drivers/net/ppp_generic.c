@@ -899,11 +899,11 @@ static int __init ppp_init(void)
 #ifdef CONFIG_RALINK_GPIO_LED_VPN
 	printk(KERN_INFO "PPP vpn led has gpio %d\n", GPIO_VPN_LED1);
 	led.gpio = GPIO_VPN_LED1;
-	led.on = 1;
-	led.off = 1;
+	led.on = 0;
+	led.off = 0;
 	led.blinks = 1;
-	led.rests = 1;
-	led.times = 1;
+	led.rests = 0;
+	led.times = 0;
 #endif
 out:
 	if (err)
@@ -1043,9 +1043,6 @@ static inline void
 ppp_xmit_process(struct ppp *ppp)
 {
 	struct sk_buff *skb;
-#ifdef CONFIG_RALINK_GPIO_LED_VPN
-	ralink_gpio_led_set(led);
-#endif
 	ppp_xmit_lock(ppp);
 	if (ppp->dev) {
 		ppp_push(ppp);
@@ -1236,6 +1233,10 @@ ppp_send_frame(struct ppp *ppp, struct sk_buff *skb)
 
 	ppp->xmit_pending = skb;
 	ppp_push(ppp);
+#ifdef CONFIG_RALINK_GPIO_LED_VPN
+	if (proto = PPP_IP)
+	    ralink_gpio_led_set(led);
+#endif
 	return;
 
  drop:
@@ -1542,9 +1543,6 @@ ppp_channel_push(struct channel *pch)
 static inline void
 ppp_do_recv(struct ppp *ppp, struct sk_buff *skb, struct channel *pch)
 {
-#ifdef CONFIG_RALINK_GPIO_LED_VPN
-	ralink_gpio_led_set(led);
-#endif
 	ppp_recv_lock(ppp);
 	/* ppp->dev == 0 means interface is closing down */
 	if (ppp->dev)
@@ -1804,6 +1802,10 @@ ppp_receive_nonmp_frame(struct ppp *ppp, struct sk_buff *skb)
 			netif_rx(skb);
 			ppp->dev->last_rx = jiffies;
 		}
+#ifdef CONFIG_RALINK_GPIO_LED_VPN
+	    if (proto = PPP_IP)
+		ralink_gpio_led_set(led);
+#endif
 	}
 	return;
 
