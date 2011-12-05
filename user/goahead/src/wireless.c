@@ -854,11 +854,11 @@ static void setupSecurityLed(void)
 					break;
 				}
 			}
-			
+
 			ledAlways(GPIO_LED_SEC_GREEN, led_on); // turn on/off security LED
 		}
 	}
-	
+
 	nvram_close(RT2860_NVRAM);
 }
 
@@ -919,16 +919,6 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 		is_n = 1;
 
 	nvram_init(RT2860_NVRAM);
-
-	//#WPS
-	char *wordlist= nvram_bufget(RT2860_NVRAM, "WscModeOption");
-	if (wordlist)
-	{
-		if (strcmp(wordlist, "0"))
-			doSystem("iwpriv ra0 set WscConfStatus=1");
-		nvram_bufset(RT2860_NVRAM, "WscConfigured", "1");
-		g_wsc_configured = 1;
-	}
 
 	default_shown_mbssid[RT2860_NVRAM] = 0;
 
@@ -1114,6 +1104,9 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 	else
 		websRedirect(wp, submitUrl);
 
+#if defined(CONFIG_RT2860V2_AP_WSC) || defined(CONFIG_RT2860V2_STA_WSC)
+	WPSRestart();
+#endif
 	doSystem("internet.sh wifionly");
 }
 

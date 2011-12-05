@@ -330,7 +330,7 @@ void updateWPS( webs_t wp, char_t *path, char_t *query)
 	//8. WSC Result
 	websWrite(wp, T("%d"), g_WscResult);
 
-    websDone(wp, 200);	
+	websDone(wp, 200);
 	return;
 }
 
