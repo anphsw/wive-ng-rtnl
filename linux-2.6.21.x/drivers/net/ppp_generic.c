@@ -901,7 +901,7 @@ static int __init ppp_init(void)
 	led.gpio = GPIO_VPN_LED1;
 	led.on = 0;
 	led.off = 0;
-	led.blinks = 1;
+	led.blinks = 0;
 	led.rests = 0;
 	led.times = 0;
 #endif
@@ -967,6 +967,10 @@ ppp_start_xmit(struct sk_buff *skb, struct net_device *dev)
  outf:
 	kfree_skb(skb);
 	++ppp->stats.tx_dropped;
+#ifdef CONFIG_RALINK_GPIO_LED_VPN
+	led.on = 0;
+	ralink_gpio_led_set(led);
+#endif
 	return 0;
 }
 
@@ -1234,8 +1238,11 @@ ppp_send_frame(struct ppp *ppp, struct sk_buff *skb)
 	ppp->xmit_pending = skb;
 	ppp_push(ppp);
 #ifdef CONFIG_RALINK_GPIO_LED_VPN
-	if (proto = PPP_IP)
-	    ralink_gpio_led_set(led);
+	if (proto == PPP_IP)
+	    led.on = 1;
+	else
+	    led.on = 0;
+	ralink_gpio_led_set(led);
 #endif
 	return;
 
@@ -1243,6 +1250,10 @@ ppp_send_frame(struct ppp *ppp, struct sk_buff *skb)
 	if (skb)
 		kfree_skb(skb);
 	++ppp->stats.tx_errors;
+#ifdef CONFIG_RALINK_GPIO_LED_VPN
+	led.on = 0;
+	ralink_gpio_led_set(led);
+#endif
 }
 
 /*
@@ -1494,6 +1505,10 @@ static int ppp_mp_explode(struct ppp *ppp, struct sk_buff *skb)
 		printk(KERN_ERR "PPP: no memory (fragment)\n");
 	++ppp->stats.tx_errors;
 	++ppp->nxseq;
+#ifdef CONFIG_RALINK_GPIO_LED_VPN
+	led.on = 0;
+	ralink_gpio_led_set(led);
+#endif
 	return 1;	/* abandon the frame */
 }
 #endif /* CONFIG_PPP_MULTILINK */
@@ -1575,7 +1590,7 @@ ppp_input(struct ppp_channel *chan, struct sk_buff *skb)
 		kfree_skb(skb);
 		return;
 	}
-	
+
 	proto = PPP_PROTO(skb);
 	if(dbg_print)
 	{
@@ -1583,7 +1598,7 @@ ppp_input(struct ppp_channel *chan, struct sk_buff *skb)
 			dbg_print = 0;
 
 		++dbg_max_print;
-		if(dbg_max_print > 50)
+		if(dbg_max_print > 10)
 			dbg_print = 0;
 	}
 
@@ -1801,11 +1816,14 @@ ppp_receive_nonmp_frame(struct ppp *ppp, struct sk_buff *skb)
 			skb_reset_mac_header(skb);
 			netif_rx(skb);
 			ppp->dev->last_rx = jiffies;
-		}
 #ifdef CONFIG_RALINK_GPIO_LED_VPN
-	    if (proto = PPP_IP)
-		ralink_gpio_led_set(led);
+			if (proto == PPP_IP)
+			    led.on = 1;
+			else
+			    led.on = 0;
+			ralink_gpio_led_set(led);
 #endif
+		}
 	}
 	return;
 
@@ -1930,6 +1948,10 @@ ppp_receive_mp_frame(struct ppp *ppp, struct sk_buff *skb, struct channel *pch)
 		kfree_skb(skb);
 		++ppp->stats.rx_dropped;
 		ppp_receive_error(ppp);
+#ifdef CONFIG_RALINK_GPIO_LED_VPN
+		led.on = 0;
+		ralink_gpio_led_set(led);
+#endif
 		return;
 	}
 
@@ -2090,6 +2112,10 @@ ppp_mp_reconstruct(struct ppp *ppp)
 				       ppp->nextseq, head->sequence-1);
 			++ppp->stats.rx_dropped;
 			ppp_receive_error(ppp);
+#ifdef CONFIG_RALINK_GPIO_LED_VPN
+			led.on = 0;
+			ralink_gpio_led_set(led);
+#endif
 		}
 
 		skb = head;
