@@ -115,7 +115,7 @@ eval `nvram_buf_get 2860 lan_ipaddr lan_netmask Lan2Enabled lan2_ipaddr lan2_net
 		echo "iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE" >> /etc/ppp_firewall
 	    fi
 	fi
-	if [ -f /etc/portforward_vpn ] && [ "$PortForwardEnable" = "1" ]; then
+	if [ -f /etc/portforward_vpn ] && [ -f /etc/ppp_firewall ] && [ "$PortForwardEnable" = "1" ]; then
 	    echo "/etc/portforward_vpn A $PPP_IFACE $PPP_LOCAL" >> /etc/ppp_firewall
         fi
     fi
