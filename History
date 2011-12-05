@@ -861,6 +861,8 @@
 10) Cleanup ethetnet converter add profile code.<br>
 11) Init.d fix some codestyle issue.<br>
 12) Add VPN rx/tx status LED support(default alias GREEN_WPS_LED).<br>
+13) Fix set regdomain.<br>
+14) Disable nat loopback in webui per default.<br>
 
 <br><br>
 <b>For support see:</b><br>
