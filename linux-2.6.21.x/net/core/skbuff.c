@@ -840,7 +840,7 @@ struct sk_buff *skb_realloc_headroom(struct sk_buff *skb, unsigned int headroom)
 	int delta = headroom - skb_headroom(skb);
 
 	if (delta <= 0)
-		skb2 = __pskb_copy(skb, GFP_ATOMIC);
+		skb2 = pskb_copy(skb, GFP_ATOMIC);
 	else {
 		skb2 = skb_clone(skb, GFP_ATOMIC);
 		if (skb2 && pskb_expand_head(skb2, SKB_DATA_ALIGN(delta), 0,
@@ -2544,6 +2544,7 @@ EXPORT_SYMBOL(__netdev_free_page);
 EXPORT_SYMBOL(kfree_skb);
 EXPORT_SYMBOL(skb_add_rx_frag);
 EXPORT_SYMBOL(pskb_expand_head);
+EXPORT_SYMBOL(pskb_copy);
 EXPORT_SYMBOL(skb_checksum);
 EXPORT_SYMBOL(skb_morph);
 EXPORT_SYMBOL(skb_clone);
