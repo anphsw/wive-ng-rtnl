@@ -394,8 +394,9 @@ extern struct sk_buff *skb_clone(struct sk_buff *skb,
 				 gfp_t priority);
 extern struct sk_buff *skb_copy(const struct sk_buff *skb,
 				gfp_t priority);
-extern struct sk_buff *pskb_copy(struct sk_buff *skb,
-				 gfp_t gfp_mask);
+extern struct sk_buff *__pskb_copy(struct sk_buff *skb,
+				 int headroom, gfp_t gfp_mask);
+
 extern int	       pskb_expand_head(struct sk_buff *skb,
 					int nhead, int ntail,
 					gfp_t gfp_mask);
@@ -1314,6 +1315,12 @@ static inline int __skb_cow(struct sk_buff *skb, unsigned int headroom,
                 return pskb_expand_head(skb, ALIGN(delta, NET_SKB_PAD), 0,
                                         GFP_ATOMIC);
         return 0;
+}
+
+static inline struct sk_buff *pskb_copy(struct sk_buff *skb,
+					gfp_t gfp_mask)
+{
+	return __pskb_copy(skb, skb_headroom(skb), gfp_mask);
 }
 
 /**

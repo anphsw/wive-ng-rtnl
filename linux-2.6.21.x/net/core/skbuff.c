@@ -695,8 +695,9 @@ struct sk_buff *skb_copy(const struct sk_buff *skb, gfp_t gfp_mask)
 
 
 /**
- *	pskb_copy	-	create copy of an sk_buff with private head.
+ *	__pskb_copy	-	create copy of an sk_buff with private head.
  *	@skb: buffer to copy
+ *	@headroom: headroom of new skb
  *	@gfp_mask: allocation priority
  *
  *	Make a copy of both an &sk_buff and part of its data, located
@@ -707,18 +708,19 @@ struct sk_buff *skb_copy(const struct sk_buff *skb, gfp_t gfp_mask)
  *	The returned buffer has a reference count of 1.
  */
 
-struct sk_buff *pskb_copy(struct sk_buff *skb, gfp_t gfp_mask)
+struct sk_buff *__pskb_copy(struct sk_buff *skb, int headroom, gfp_t gfp_mask)
 {
 	/*
 	 *	Allocate the copy buffer
 	 */
-	struct sk_buff *n = __alloc_skb(skb->end - skb->head, gfp_mask, skb_alloc_rx(skb), -1);
+	unsigned int size = skb_headlen(skb) + headroom;
+	struct sk_buff *n = __alloc_skb(size, gfp_mask, skb_alloc_rx(skb), -1);
 
 	if (!n)
 		goto out;
 
 	/* Set the data pointer */
-	skb_reserve(n, skb->data - skb->head);
+	skb_reserve(n, headroom);
 	/* Set the tail pointer and length */
 	skb_put(n, skb_headlen(skb));
 	/* Copy the bytes */
@@ -838,7 +840,7 @@ struct sk_buff *skb_realloc_headroom(struct sk_buff *skb, unsigned int headroom)
 	int delta = headroom - skb_headroom(skb);
 
 	if (delta <= 0)
-		skb2 = pskb_copy(skb, GFP_ATOMIC);
+		skb2 = __pskb_copy(skb, GFP_ATOMIC);
 	else {
 		skb2 = skb_clone(skb, GFP_ATOMIC);
 		if (skb2 && pskb_expand_head(skb2, SKB_DATA_ALIGN(delta), 0,
@@ -2532,15 +2534,15 @@ void __init skb_init(void)
 }
 
 EXPORT_SYMBOL(___pskb_trim);
+EXPORT_SYMBOL(__pskb_copy);
 EXPORT_SYMBOL(__kfree_skb);
-EXPORT_SYMBOL(kfree_skb);
 EXPORT_SYMBOL(__pskb_pull_tail);
 EXPORT_SYMBOL(__alloc_skb);
 EXPORT_SYMBOL(__netdev_alloc_skb);
 EXPORT_SYMBOL(__netdev_alloc_page);
 EXPORT_SYMBOL(__netdev_free_page);
+EXPORT_SYMBOL(kfree_skb);
 EXPORT_SYMBOL(skb_add_rx_frag);
-EXPORT_SYMBOL(pskb_copy);
 EXPORT_SYMBOL(pskb_expand_head);
 EXPORT_SYMBOL(skb_checksum);
 EXPORT_SYMBOL(skb_morph);
