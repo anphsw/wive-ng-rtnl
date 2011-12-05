@@ -16,16 +16,16 @@ start() {
     fi
 }
 
+get_param() {
+    eval `nvram_buf_get 2860 WatchdogEnabled ping_check_on`
+}
+
 stop() {
  $LOG "Stop watchdog"
     killall -q watchdog
     killall -q -SIGKILL watchdog
     killall -q pinger.sh
     killall -q -SIGKILL pinger.sh
-}
-
-get_param() {
-    eval `nvram_buf_get 2860 WatchdogEnabled ping_check_on`
 }
 
 case "$1" in

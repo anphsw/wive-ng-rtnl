@@ -51,15 +51,6 @@ start() {
     fi
 }
 
-stop() {
- $LOG "Stopping IGMPPROXY"
-    killall -q igmpproxy
-    killall -q -SIGKILL igmpproxy
-    echo 0 > /proc/sys/net/ipv4/conf/all/mc_forwarding
-    echo 0 > /proc/sys/net/ipv4/conf/default/mc_forwarding
-    ip route del "$mcast_net" dev "$wan_if" > /dev/null 2>&1
-}
-
 gen_config() {
 ####################generate config###########################
 printf "
@@ -107,6 +98,15 @@ get_param() {
 	    OPTS=""
 	fi
     fi
+}
+
+stop() {
+ $LOG "Stopping IGMPPROXY"
+    killall -q igmpproxy
+    killall -q -SIGKILL igmpproxy
+    echo 0 > /proc/sys/net/ipv4/conf/all/mc_forwarding
+    echo 0 > /proc/sys/net/ipv4/conf/default/mc_forwarding
+    ip route del "$mcast_net" dev "$wan_if" > /dev/null 2>&1
 }
 
 case "$1" in

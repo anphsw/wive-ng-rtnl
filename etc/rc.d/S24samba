@@ -64,16 +64,6 @@ if [ "$SmbEnabled" = "1" ]; then
 fi
 }
 
-stop() {
-    if [ -f /var/lock/smbd.pid ] || [ -f /var/lock/nmbd.pid ]; then
-     $LOG "Stop WINS/SMB SERVER."
-      killall -q nmbd
-      killall -q smbd
-      killall -q -SIGKILL nmbd
-      killall -q -SIGKILL smbd
-      rm -f /var/lock/*mbd.pid > /dev/null 2>&1
-    fi
-}
 
 get_param() {
     eval `nvram_buf_get 2860 WorkGroup SmbNetBIOS SmbString SmbOsLevel SmbTimeserver NTPEnabled NTPServerIP Login lan_ipaddr lan_netmask`
@@ -94,6 +84,17 @@ get_param() {
     interfaces="lo 127.0.0.1/255.0.0.0 $lan_if $lan_ipaddr/$lan_netmask"
 
     is_smb_v3=`grep -c "NTFS" < $TEMPLATE`
+}
+
+stop() {
+    if [ -f /var/lock/smbd.pid ] || [ -f /var/lock/nmbd.pid ]; then
+     $LOG "Stop WINS/SMB SERVER."
+      killall -q nmbd
+      killall -q smbd
+      killall -q -SIGKILL nmbd
+      killall -q -SIGKILL smbd
+      rm -f /var/lock/*mbd.pid > /dev/null 2>&1
+    fi
 }
 
 case "$1" in

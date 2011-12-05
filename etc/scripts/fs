@@ -17,11 +17,11 @@ MTD2FAC=/dev/mtdblock2
 BACKUPCGF=/etc/backup/nvram_backup.dat
 RWCONFIGS=/etc/Wireless/rf.bin
 
-get_size(){
+get_size() {
   ls -sk "$1" | sed -e "s/ \+/ /g" | cut -d" " -f2
 }
 
-usage(){
+usage() {
   echo "Usage: $0 | save | load | restore | backup_nvram | nvramreset | burnrf | fullreset | drop_caches |" >&2
   echo "____________________________________________________________________________" >&2
   echo " " >&2
@@ -42,13 +42,13 @@ usage(){
  exit 1
 }
 
-load(){
+load() {
   local dst=/ 
   echo "Loading TGZfs"
   bzcat $MTDRWFS | tar xf - -C $dst>>/dev/null
 }
 
-save(){
+save() {
   echo "Save curent date and current time to rwfs"
   sync
   date +%Y%m%d%H%M > /etc/compile-date
@@ -65,25 +65,25 @@ save(){
   rm -f $tmp
 }
 
-restore(){
+restore() {
     echo "Clear rwfs and reboot. Please go smoke..."
     dd if=/dev/zero of=$MTDRWFS conv=sync > /dev/null 2>&1
     reboot
 }
 
-nvramreset(){
+nvramreset() {
     echo "Load user defaults."
     nvram_default 2860
 }
 
-burnrf(){
+burnrf() {
     echo "Erase wifi factory part $MTD2FAC."
     dd if=/dev/zero of=$MTD2FAC conv=sync bs=64k count=1 > /dev/null 2>&1
     echo "Flash RF defaults."
     dd if=$RWCONFIGS of=$MTD2FAC conv=sync > /dev/null 2>&1
 }
 
-fullreset(){
+fullreset() {
     echo "Stop services and unload modules..."
     killall -q goahead
     killall -q -SIGKILL goahead
@@ -95,7 +95,7 @@ fullreset(){
     reboot
 }
 
-backup_nvram(){
+backup_nvram() {
     mkdir -p /etc/backup
     echo "Store settings to backup file...."
     echo "#The following line must not be removed." > "$BACKUPCGF"
@@ -103,13 +103,13 @@ backup_nvram(){
     ralink_init show 2860 >> "$BACKUPCGF"
 }
 
-load_nvram(){
+load_nvram() {
     echo "Load settings from backup file...."
     ralink_init renew 2860 "$BACKUPCGF"
 }
 
 # free memory
-drop_caches(){
+drop_caches() {
     for i in `seq 1 3`; do
         echo $i > /proc/sys/vm/drop_caches
 	sync
@@ -117,7 +117,7 @@ drop_caches(){
     echo 0 > /proc/sys/vm/drop_caches
 }
 
-main(){
+main() {
   local cmd="$1"
   [ -z "$cmd" ] && usage
   shift

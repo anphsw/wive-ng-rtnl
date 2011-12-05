@@ -15,14 +15,14 @@ start() {
     fi
 }
 
+get_param() {
+    eval `nvram_buf_get 2860 snmpd lan_ipaddr HostName`
+}
+
 stop() {
  $LOG "Stopping WPS"
     killall -q snmpd
     killall -q -SIGKILL snmpd
-}
-
-get_param() {
-    eval `nvram_buf_get 2860 snmpd lan_ipaddr HostName`
 }
 
 case "$1" in

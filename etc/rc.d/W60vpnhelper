@@ -53,6 +53,12 @@ start() {
     fi
 }
 
+get_param() {
+    eval `nvram_buf_get 2860 vpnInterface vpnUser vpnPassword l2tp_srv_enabled`
+    lanauthpid=`pidof lanauth`
+    ppp=/etc/ppp
+}
+
 stop() {
  $LOG "Stop vpnhelper"
     # Kill helpers
@@ -81,12 +87,6 @@ stop() {
 	    rmmod $module > /dev/null 2>&1
 	done
     fi
-}
-
-get_param() {
-    eval `nvram_buf_get 2860 vpnInterface vpnUser vpnPassword l2tp_srv_enabled`
-    lanauthpid=`pidof lanauth`
-    ppp=/etc/ppp
 }
 
 case "$1" in

@@ -64,7 +64,7 @@ start() {
 }
 
 stop() {
- echo "" > /dev/null
+    :
 }
 
 case "$1" in

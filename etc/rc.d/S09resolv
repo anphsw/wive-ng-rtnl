@@ -36,10 +36,6 @@ if [ ! -f /var/run/goahead.pid ] || [ "$wan_static_dns" = "on" ]; then
 fi
 }
 
-stop() {
-    echo "" > /dev/null
-}
-
 get_param() {
     eval `nvram_buf_get 2860 wan_static_dns wan_primary_dns wan_secondary_dns dnsPEnabled`
     fname="/etc/resolv.conf"
@@ -49,6 +45,10 @@ get_param() {
     if [ -f $fname ]; then
         touch $fname
     fi
+}
+
+stop() {
+    :
 }
 
 case "$1" in

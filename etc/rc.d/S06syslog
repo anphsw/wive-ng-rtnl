@@ -20,6 +20,10 @@ start() {
     fi
 }
 
+get_param() {
+    eval `nvram_buf_get 2860 KLogd SysLogd RemoteSysLogIP`
+}
+
 stop() {
  $LOG "Stop syslog and klog"
     killall -q klogd
@@ -27,10 +31,6 @@ stop() {
     killall -q syslogd
     killall -q -SIGKILL syslogd
     rm -f /var/log/messages > /dev/null 2>&1
-}
-
-get_param() {
-    eval `nvram_buf_get 2860 KLogd SysLogd RemoteSysLogIP`
 }
 
 case "$1" in

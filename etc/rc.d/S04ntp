@@ -3,6 +3,16 @@
 LOG="logger -t ntp"
 
 start() {
+    # generate new timezone file
+    TZ_generate
+    # wait to start web and run from goahead code
+    . /etc/scripts/web_wait.sh
+    web_wait
+    # start time sync daemon
+    ntp_start
+}
+
+TZ_generate() {
     TZ=`nvram_get 2860 TZ`
     if [ "$TZ" = "" ]; then
         tz="MSK-3MSD-4"
@@ -22,15 +32,14 @@ start() {
 	    touch /tmp/time_restored
         fi
     fi
+}
 
+ntp_start() {
     # if app not exist
     if [ ! -f /bin/ntpd ]; then
 	exit 0
     fi
 
-    # wait to start web and run from goahead code
-    . /etc/scripts/web_wait.sh
-    web_wait
 
     eval `nvram_buf_get 2860 NTPEnabled NTPServerIP`
     if [ "$NTPEnabled" = "on" ] && [ "$NTPServerIP" != "" ]; then

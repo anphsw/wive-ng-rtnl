@@ -47,7 +47,6 @@ start() {
     fi
 }
 
-
 stop() {
  $LOG "Stop mdev generate..."
     killall -q mdev

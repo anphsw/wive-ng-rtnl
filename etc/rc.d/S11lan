@@ -74,21 +74,6 @@ start() {
 
 }
 
-stop() {
-  $LOG "Stop network interfaces..."
-    # first down bridge
-    ip link set br0 down > /dev/null 2>&1
-    dev=`grep eth < /proc/net/vlan/config | cut -d' ' -f 1`
-    for i in $dev; do
-	ip link set $i down > /dev/null 2>&1
-	vconfig rem $i > /dev/null 2>&1
-    done
-    ip link set "$lan_if" down > /dev/null 2>&1
-    ip link set "$lan2_if" down > /dev/null 2>&1
-    # last delete bridge interface
-    brctl delbr br0 > /dev/null 2>&1
-}
-
 get_param() {
     eval `nvram_buf_get 2860 lan_ipaddr lan_netmask lan2_ipaddr lan2_netmask Lan2Enabled`
     brisup=`ip link show br0 up | grep -c ""` > /dev/null 2>&1
@@ -122,6 +107,21 @@ conf_double_tag() {
 	fi
 	sysctl -w net.ipv4.vlan_double_tag="$DOUBLE_TAG"
     fi
+}
+
+stop() {
+  $LOG "Stop network interfaces..."
+    # first down bridge
+    ip link set br0 down > /dev/null 2>&1
+    dev=`grep eth < /proc/net/vlan/config | cut -d' ' -f 1`
+    for i in $dev; do
+	ip link set $i down > /dev/null 2>&1
+	vconfig rem $i > /dev/null 2>&1
+    done
+    ip link set "$lan_if" down > /dev/null 2>&1
+    ip link set "$lan2_if" down > /dev/null 2>&1
+    # last delete bridge interface
+    brctl delbr br0 > /dev/null 2>&1
 }
 
 case "$1" in

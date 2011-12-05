@@ -40,7 +40,6 @@ start() {
 		fi
 	    fi
 	fi
-
 ###########################################SERVICES#######################################
 	$LOG "Service limit set"
         # add limit connection rules for local services
@@ -426,35 +425,6 @@ start() {
     $LOG "Configure netfilter OK..."
 }
 
-
-stop() {
-    # drop all rules
-    iptables -F > /dev/null 2>&1
-    iptables -t nat -F > /dev/null 2>&1
-    iptables -t filter -F > /dev/null 2>&1
-    iptables -t mangle -F > /dev/null 2>&1
-    iptables -X > /dev/null 2>&1
-    iptables -t nat -X > /dev/null 2>&1
-    iptables -t filter -X > /dev/null 2>&1
-    iptables -t mangle -X > /dev/null 2>&1
-
-    iptables -t mangle -F PREROUTING > /dev/null 2>&1
-    iptables -t mangle -F FORWARD > /dev/null 2>&1
-    iptables -t mangle -F INPUT > /dev/null 2>&1
-    iptables -t mangle -F OUTPUT > /dev/null 2>&1
-    iptables -t mangle -F POSTROUTING > /dev/null 2>&1
-
-    iptables -t nat -Z > /dev/null 2>&1
-    iptables -t filter -Z > /dev/null 2>&1
-    iptables -t mangle -Z > /dev/null 2>&1
-    iptables -Z > /dev/null 2>&1
-
-    # default actions
-    iptables -P FORWARD DROP > /dev/null 2>&1
-    iptables -P INPUT   DROP > /dev/null 2>&1
-    iptables -P OUTPUT ACCEPT > /dev/null 2>&1
-}
-
 get_param() {
     # get network, vpn, netfiletrs and others config variables
     eval `nvram_buf_get 2860 lan_ipaddr lan_netmask Lan2Enabled lan2_ipaddr lan2_netmask mss_use_pmtu \
@@ -520,6 +490,34 @@ clamp_mss() {
 	    iptables -t mangle -A FORWARD -p tcp -o $real_wan_if --tcp-flags SYN,RST SYN -m tcpmss --mss $hole_mtu:65535 -j TCPMSS --set-mss $hole_mtu
 	fi
     fi
+}
+
+stop() {
+    # drop all rules
+    iptables -F > /dev/null 2>&1
+    iptables -t nat -F > /dev/null 2>&1
+    iptables -t filter -F > /dev/null 2>&1
+    iptables -t mangle -F > /dev/null 2>&1
+    iptables -X > /dev/null 2>&1
+    iptables -t nat -X > /dev/null 2>&1
+    iptables -t filter -X > /dev/null 2>&1
+    iptables -t mangle -X > /dev/null 2>&1
+
+    iptables -t mangle -F PREROUTING > /dev/null 2>&1
+    iptables -t mangle -F FORWARD > /dev/null 2>&1
+    iptables -t mangle -F INPUT > /dev/null 2>&1
+    iptables -t mangle -F OUTPUT > /dev/null 2>&1
+    iptables -t mangle -F POSTROUTING > /dev/null 2>&1
+
+    iptables -t nat -Z > /dev/null 2>&1
+    iptables -t filter -Z > /dev/null 2>&1
+    iptables -t mangle -Z > /dev/null 2>&1
+    iptables -Z > /dev/null 2>&1
+
+    # default actions
+    iptables -P FORWARD DROP > /dev/null 2>&1
+    iptables -P INPUT   DROP > /dev/null 2>&1
+    iptables -P OUTPUT ACCEPT > /dev/null 2>&1
 }
 
 case "$1" in

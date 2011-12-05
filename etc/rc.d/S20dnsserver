@@ -25,19 +25,6 @@ start() {
     fi
 }
 
-stop() {
-  $LOG "Stopping DNSMASQ"
-    killall -q dnsmasq
-    dnsmasqpid=`pidof dnsmasq`
-    if [ "$dnsmasqpid" != "" ]; then
-	# workaround for not clean kill dnsmasq
-	killall -q dnsmasq
-	sleep 1
-	killall -q -SIGKILL dnsmasq
-	rm -rf /var/run/dnsmasq.pid > /dev/null 2>&1
-    fi
-}
-
 gen_hosts() {
   $LOG "Generate /etc/hosts file."
     /bin/hostname $HostName
@@ -66,6 +53,19 @@ get_param() {
     chmod 644 "$cname" > /dev/null 2>&1
     chmod 644 "$fname" > /dev/null 2>&1
     chmod 644 "$hname" > /dev/null 2>&1
+}
+
+stop() {
+  $LOG "Stopping DNSMASQ"
+    killall -q dnsmasq
+    dnsmasqpid=`pidof dnsmasq`
+    if [ "$dnsmasqpid" != "" ]; then
+	# workaround for not clean kill dnsmasq
+	killall -q dnsmasq
+	sleep 1
+	killall -q -SIGKILL dnsmasq
+	rm -rf /var/run/dnsmasq.pid > /dev/null 2>&1
+    fi
 }
 
 case "$1" in

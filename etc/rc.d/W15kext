@@ -147,7 +147,7 @@ bridge_stp() {
 }
 
 stop() {
-    echo "" > /dev/null
+    :
 }
 
 case "$1" in

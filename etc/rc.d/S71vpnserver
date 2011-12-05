@@ -31,25 +31,6 @@ start() {
  fi
 }
 
-stop() {
-    $LOG "Stop l2tp vpn server"
-    # try firt disconnect all clients
-    if [ -f $var/l2tp-control ]; then
-	echo "d default" > $var/l2tp-control
-	sleep 3
-    fi
-    # stop vpn server
-    if [ -f $var/l2tpd.pid ]; then
-	pid=`cat $var/l2tpd.pid`
-	if [ "$pid" != "" ]; then
-	    kill $pid > /dev/null 2>&1
-	    sleep 2
-	    kill -SIGKILL $pid > /dev/null 2>&1
-	    rm -f $var/l2tpd.pid
-	fi
-    fi
-}
-
 load_modules() {
     if [ ! -d /sys/module/pppol2tp ]; then
 	mod="ppp_generic pppox pppol2tp"
@@ -159,6 +140,25 @@ get_param() {
     # final options compile
     gen_configs
     full_l2tpd_opts="-c $ppp/l2tpd.conf -s $ppp/chap-secrets -p $var/l2tpd.pid -C $var/l2tp-control $l2tp_srv_debug"
+}
+
+stop() {
+    $LOG "Stop l2tp vpn server"
+    # try firt disconnect all clients
+    if [ -f $var/l2tp-control ]; then
+	echo "d default" > $var/l2tp-control
+	sleep 3
+    fi
+    # stop vpn server
+    if [ -f $var/l2tpd.pid ]; then
+	pid=`cat $var/l2tpd.pid`
+	if [ "$pid" != "" ]; then
+	    kill $pid > /dev/null 2>&1
+	    sleep 2
+	    kill -SIGKILL $pid > /dev/null 2>&1
+	    rm -f $var/l2tpd.pid
+	fi
+    fi
 }
 
 case "$1" in

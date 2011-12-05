@@ -9,12 +9,6 @@ start() {
     fi
 }
 
-stop() {
-    $LOG "Stopping lanauth "
-    killall -q lanauth
-    killall -q -SIGKILL lanauth
-}
-
 reload() {
     get_param
     if  [ "$vpnPassword"  != "" ] && [ "$LANAUTH_LVL" != "" ]; then
@@ -38,6 +32,11 @@ get_param() {
     pid=`pidof lanauth`
 }
 
+stop() {
+    $LOG "Stopping lanauth "
+    killall -q lanauth
+    killall -q -SIGKILL lanauth
+}
 
 case "$1" in
        start)

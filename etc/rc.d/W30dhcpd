@@ -52,7 +52,8 @@ start() {
 	    if [ "$dhcpPriDns" != "" -o "$dhcpSecDns" != "" ] && \
 		[ "$dhcpPriDns" != "0.0.0.0" -a "$dhcpSecDns" != "0.0.0.0" ] && \
 		[ "$dhcpPriDns" != "$lan_ipaddr" -a "$dhcpSecDns" != "$lan_ipaddr" ]; then
-		echo ""
+		# nothing
+		:
 	    else
 		if [ -f /etc/resolv.conf ]; then
 		    # parse resolv.conf file
@@ -112,14 +113,6 @@ start() {
 
 }
 
-stop() {
-  $LOG "Stop dhcpserver "
-    killall -q udhcpd
-    killall -q dhcprelay
-    killall -q -SIGKILL udhcpd
-    killall -q -SIGKILL dhcprelay
-}
-
 set_dns()
 {
     if [ "$dhcpPriDns" != "" ] || [ "$dhcpSecDns" != "" ]; then
@@ -133,6 +126,14 @@ get_param() {
     # dhcpd params
     eval `nvram_buf_get 2860 dhcpDomain dhcpStart dhcpEnd dhcpMask dhcpPriDns dhcpSecDns dhcpGateway dhcpLease \
 	    SmbEnabled dnsPEnabled lan_ipaddr lan_netmask HostName`
+}
+
+stop() {
+  $LOG "Stop dhcpserver "
+    killall -q udhcpd
+    killall -q dhcprelay
+    killall -q -SIGKILL udhcpd
+    killall -q -SIGKILL dhcprelay
 }
 
 case "$1" in

@@ -31,18 +31,6 @@ start() {
     fi
 }
 
-stop() {
- $LOG "Stop upnp "
-    count=0
-    while killall -q miniupnpd ; do
-	if [ "$count" = "3" ]; then
-	    killall -q -SIGKILL miniupnpd
-	fi
-	sleep 2
-    done
-    ip route del $upmpm_net dev "$lan_if" > /dev/null 2>&1
-}
-
 gen_config() {
 ####################generate config###########################
 printf "
@@ -69,6 +57,17 @@ get_param() {
     eval `nvram_buf_get 2860 lan_ipaddr lan_netmask upnpEnabled`
 }
 
+stop() {
+ $LOG "Stop upnp "
+    count=0
+    while killall -q miniupnpd ; do
+	if [ "$count" = "3" ]; then
+	    killall -q -SIGKILL miniupnpd
+	fi
+	sleep 2
+    done
+    ip route del $upmpm_net dev "$lan_if" > /dev/null 2>&1
+}
 
 case "$1" in
 	start)

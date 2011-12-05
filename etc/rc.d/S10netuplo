@@ -20,8 +20,7 @@ start() {
 }
 
 stop() {
- $LOG "Stop loopback interface..."
-    ip link set lo down > /dev/null 2>&1
+    :
 }
 
 case "$1" in

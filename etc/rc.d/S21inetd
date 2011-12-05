@@ -31,14 +31,14 @@ start() {
     fi
 }
 
+get_param() {
+    eval `nvram_buf_get 2860 Login RemoteSSH RemoteFTP RemoteTelnet`
+}
+
 stop() {
  $LOG "Stopping inetd"
     killall -q inetd
     killall -q -SIGKILL inetd
-}
-
-get_param() {
-    eval `nvram_buf_get 2860 Login RemoteSSH RemoteFTP RemoteTelnet`
 }
 
 case "$1" in

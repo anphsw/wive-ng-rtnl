@@ -26,15 +26,15 @@ start() {
     fi
 }
 
+get_param() {
+    eval `nvram_buf_get 2860 lltdEnabled RadioOff`
+}
+
 stop() {
   $LOG "Stopping LLD2D"
     killall -q lld2d
     killall -q -SIGKILL lld2d
     rm -rf /var/run/lld2d-* > /dev/null 2>&1
-}
-
-get_param() {
-    eval `nvram_buf_get 2860 lltdEnabled RadioOff`
 }
 
 case "$1" in
