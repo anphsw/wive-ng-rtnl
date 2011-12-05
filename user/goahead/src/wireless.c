@@ -238,7 +238,7 @@ static int listCountryCodes(int eid, webs_t wp, int argc, char_t **argv)
 	char *c_code = nvram_get(RT2860_NVRAM, "CountryCode");;
 	
 	websWrite(wp, T("\t<option value=\"NONE\">NONE</option>\n"));
-	
+
 	while (codes->iso != NULL)
 	{
 		websWrite(wp, T("\t<option value=\"%s\"%s>%s (%s)</option>\n"),
@@ -247,7 +247,7 @@ static int listCountryCodes(int eid, webs_t wp, int argc, char_t **argv)
 			codes->name, codes->iso);
 		codes++;
 	}
-	
+
 	return 0;
 }
 
@@ -259,13 +259,13 @@ static int getEEPROMCountryCode(char *eeprom_addr)
 	struct iwreq wrq;
 	char data[4096] = "";
 	int addr, value, p1, p2;
-	
+
 	socket_id = socket(AF_INET, SOCK_DGRAM, 0);
 	if(socket_id < 0) {
 		printf("\nrtuser::error::Open socket error!\n\n");
 		return -1;
 	}
-	
+
 	//strcpy(data, "39"); // Country region code in eeprom 0x39
 	strcpy(data, eeprom_addr); // Country region code in eeprom 0x39(2.4G), 0x38(5G)
 	strcpy(wrq.ifr_name, "ra0");
@@ -600,7 +600,7 @@ const mbss_param_t mbss_params[] =
 static int dumpBSSKeys(int eid, webs_t wp, int argc, char_t **argv)
 {
 	int count = 0;
-	
+
 	const mbss_param_t *parm = mbss_params;
 	while ((parm->name) != NULL)
 	{
@@ -619,16 +619,16 @@ static int dumpBSS(int eid, webs_t wp, int argc, char_t **argv)
 	int bssnum = (argv[0][0] - '0') + 1;
 	if ((bssnum < 1) || (bssnum > 8))
 		return 0;
-	
+
 	html_buffer_t buf;
 	char tempbuf[32], tmpvalue[128];
-	
+
 	initHTMLBuffer(&buf);
-	
+
 	// Write begin
 	websWrite(wp, "\t\t<div style=\"display: none;\" id=\"MBSSHidden%d\">\n", bssnum);
 	nvram_init(RT2860_NVRAM);
-	
+
 	const mbss_param_t *parm = mbss_params;
 	while ((parm->name) != NULL)
 	{
@@ -638,7 +638,7 @@ static int dumpBSS(int eid, webs_t wp, int argc, char_t **argv)
 			char *value = nvram_bufget(RT2860_NVRAM, parm->name);
 			if (value == NULL)
 				value = "";
-			
+
 			// Fetch parameter
 			fetchIndexedParam(value, bssnum-1, tmpvalue);
 			encodeHTMLContent(tmpvalue, &buf);
@@ -659,9 +659,9 @@ static int dumpBSS(int eid, webs_t wp, int argc, char_t **argv)
 	nvram_close(RT2860_NVRAM);
 	websWrite(wp, "\t\t</div>\n");
 	// Write end
-	
+
 	freeHTMLBuffer(&buf);
-	
+
 	return 0;
 }
 
@@ -684,7 +684,6 @@ static void revise_mbss_updated_values(webs_t wp, int bssnum)
 				char *v = websGetVar(wp, tempbuf, T(""));
 				if (v == NULL)
 					v = "";
-//				printf("web.%s = %s\n", tempbuf, v);
 				sprintf(tmpvalue, "%s%s;", tmpvalue, v);
 			}
 			printf("%s = %s\n", parm->name, tmpvalue);
@@ -698,147 +697,27 @@ static void revise_mbss_updated_values(webs_t wp, int bssnum)
 				char *v = websGetVar(wp, tempbuf, T(""));
 				if (v == NULL)
 					v = "";
-//				printf("web.%s = %s\n", tempbuf, v);
 				printf("%s = %s\n", tempbuf, v);
 				nvram_bufset(RT2860_NVRAM, tempbuf, v);
 			}
 		}
 		parm++;
 	}
-	
+
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
 }
-
-/*
-static void revise_mbss_value(int old_num, int new_num)
-{
-
-	char new_value[264], *old_value, *p;
-	int i;
-
-#define MBSS_INIT(field, default_value) \
-	do { \
-		old_value = nvram_bufget(RT2860_NVRAM, #field); \
-		snprintf(new_value, 264, "%s", old_value); \
-		p = new_value + strlen(old_value); \
-		for (i = old_num; i < new_num; i++) { \
-			snprintf(p, 264 - (p - new_value), ";%s", default_value); \
-			p += 1 + strlen(default_value); \
-		} \
-		nvram_bufset(RT2860_NVRAM, #field, new_value); \
-	} while (0)
-
-#define MBSS_REMOVE(field) \
-	do { \
-		old_value = nvram_bufget(RT2860_NVRAM, #field); \
-		snprintf(new_value, 264, "%s", old_value); \
-		p = new_value; \
-		for (i = 0; i < new_num; i++) { \
-			if (0 == i) \
-				p = strchr(p, ';'); \
-			else \
-				p = strchr(p+1, ';'); \
-			if (NULL == p) \
-				break; \
-		} \
-		if (p) \
-			*p = '\0'; \
-		nvram_bufset(RT2860_NVRAM, #field, new_value); \
-	} while (0)
-
-	if (new_num > old_num) {
-		nvram_init(RT2860_NVRAM);
-		//MBSS_INIT(SSID, "ssid");
-		MBSS_INIT(AuthMode, "OPEN");
-		MBSS_INIT(EncrypType, "NONE");
-		//MBSS_INIT(WPAPSK, "12345678");
-		MBSS_INIT(DefaultKeyID, "1");
-		MBSS_INIT(Key1Type, "0");
-		//MBSS_INIT(Key1Str, "");
-		MBSS_INIT(Key2Type, "0");
-		//MBSS_INIT(Key2Str, "");
-		MBSS_INIT(Key3Type, "0");
-		//MBSS_INIT(Key3Str, "");
-		MBSS_INIT(Key4Type, "0");
-		//MBSS_INIT(Key4Str, "");
-		MBSS_INIT(NoForwarding, "0");
-		MBSS_INIT(NoForwardingBTNBSSID, "0");
-		MBSS_INIT(IEEE8021X, "0");
-		MBSS_INIT(TxRate, "0");
-		//MBSS_INIT(HideSSID, "0");
-		MBSS_INIT(PreAuth, "0");
-		MBSS_INIT(WmmCapable, "1");
-		nvram_commit(RT2860_NVRAM);
-		nvram_close(RT2860_NVRAM);
-
-		nvram_init(RT2860_NVRAM);
-		for (i = old_num + 1; i <= new_num; i++) {
-			nvram_bufset(RT2860_NVRAM, racat("WPAPSK", i), "12345678");
-			nvram_bufset(RT2860_NVRAM, racat("Key1Str", i), "");
-			nvram_bufset(RT2860_NVRAM, racat("Key2Str", i), "");
-			nvram_bufset(RT2860_NVRAM, racat("Key3Str", i), "");
-			nvram_bufset(RT2860_NVRAM, racat("Key4Str", i), "");
-			// The index of AccessPolicy & AccessControlList starts at 0.
-			nvram_bufset(RT2860_NVRAM, racat("AccessPolicy", i-1), "0");
-			nvram_bufset(RT2860_NVRAM, racat("AccessControlList", i-1), "");
-		}
-		nvram_commit(RT2860_NVRAM);
-		nvram_close(RT2860_NVRAM);
-	}
-	else if (new_num < old_num) {
-		nvram_init(RT2860_NVRAM);
-		//MBSS_REMOVE(SSID);
-		MBSS_REMOVE(AuthMode);
-		MBSS_REMOVE(EncrypType);
-		//MBSS_REMOVE(WPAPSK);
-		MBSS_REMOVE(DefaultKeyID);
-		MBSS_REMOVE(Key1Type);
-		//MBSS_REMOVE(Key1Str);
-		MBSS_REMOVE(Key2Type);
-		//MBSS_REMOVE(Key2Str);
-		MBSS_REMOVE(Key3Type);
-		//MBSS_REMOVE(Key3Str);
-		MBSS_REMOVE(Key4Type);
-		//MBSS_REMOVE(Key4Str);
-		MBSS_REMOVE(NoForwarding);
-		MBSS_REMOVE(NoForwardingBTNBSSID);
-		MBSS_REMOVE(IEEE8021X);
-		MBSS_REMOVE(TxRate);
-		MBSS_REMOVE(HideSSID);
-		MBSS_REMOVE(PreAuth);
-		MBSS_REMOVE(WmmCapable);
-		nvram_commit(RT2860_NVRAM);
-		nvram_close(RT2860_NVRAM);
-
-		nvram_init(RT2860_NVRAM);
-		for (i = new_num + 1; i <= old_num; i++) {
-			nvram_bufset(RT2860_NVRAM, racat("SSID", i), "");
-			nvram_bufset(RT2860_NVRAM, racat("WPAPSK", i), "");
-			nvram_bufset(RT2860_NVRAM, racat("Key1Str", i), "");
-			nvram_bufset(RT2860_NVRAM, racat("Key2Str", i), "");
-			nvram_bufset(RT2860_NVRAM, racat("Key3Str", i), "");
-			nvram_bufset(RT2860_NVRAM, racat("Key4Str", i), "");
-			// The index of AccessPolicy & AccessControlList starts at 0.
-			nvram_bufset(RT2860_NVRAM, racat("AccessPolicy", i-1), "0");
-			nvram_bufset(RT2860_NVRAM, racat("AccessControlList", i-1), "");
-		}
-		nvram_commit(RT2860_NVRAM);
-		nvram_close(RT2860_NVRAM);
-	}
-}
-*/
 
 static void setupSecurityLed(void)
 {
 	int i, bss_num, led_on;
 	char buf[32];
-	
+
 	nvram_init(RT2860_NVRAM);
 
 	char *BssNum = nvram_bufget(RT2860_NVRAM, "BssidNum");
 	char *AuthMode = nvram_bufget(RT2860_NVRAM, "AuthMode");
-	
+
 	if (CHK_IF_SET(BssNum))
 	{
 		bss_num = CHK_GET_DIGIT(BssNum);
@@ -1072,10 +951,6 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 		websHeader(wp);
 		websWrite(wp, T("<h2>mode: %s</h2><br>\n"), wirelessmode);
 		websWrite(wp, T("ssid: %s, bssid_num: %s<br>\n"), ssid, bssid_num);
-/*		websWrite(wp, T("mssid_1: %s, mssid_2: %s, mssid_3: %s<br>\n"),
-				mssid_1, mssid_2, mssid_3);
-		websWrite(wp, T("mssid_4: %s, mssid_5: %s, mssid_6: %s, mssid_7: %s<br>\n"),
-				mssid_4, mssid_5, mssid_6, mssid_7);*/
 		websWrite(wp, T("hssid: %s<br>\n"), hssid);
 		websWrite(wp, T("isolated_ssid: %s<br>\n"), isolated_ssid);
 		websWrite(wp, T("mbssidapisolated: %s<br>\n"), mbssidapisolated);
@@ -1554,8 +1429,6 @@ void getSecurity(int nvram, webs_t wp, char_t *path, char_t *query)
 		   *Key3Type, *Key4Type, *RekeyMethod, *RekeyInterval, *PMKCachePeriod, *IEEE8021X;
 	char_t *RADIUS_Server, *RADIUS_Port, *RADIUS_Key, *session_timeout_interval;
 
-//	printf("***** nvram = %d\n", nvram);
-
 	if(num_s)
 		num_ssid = atoi(num_s);
 	else
@@ -1727,7 +1600,6 @@ void conf8021x(int nvram, webs_t wp, int mbssid)
 	LFW(RadiusServerPort, RadiusServerPort);
 	LFW(RadiusServerSecret, RadiusServerSecret);
 	LFW(RadiusServerSessionTimeout, RadiusServerSessionTimeout);
-	// LFW(RadiusServerIdleTimeout, RadiusServerIdleTimeout);
 	if(!gstrlen(RadiusServerSessionTimeout))
 		RadiusServerSessionTimeout = "0";
 
@@ -2299,4 +2171,3 @@ void disconnectSta(webs_t wp, char_t *path, char_t *query)
 	else
 		websDone(wp, 200);
 }
-
