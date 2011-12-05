@@ -919,7 +919,8 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 		is_n = 1;
 
 	nvram_init(RT2860_NVRAM);
-//#WPS
+
+	//#WPS
 	char *wordlist= nvram_bufget(RT2860_NVRAM, "WscModeOption");
 	if (wordlist)
 	{
@@ -992,20 +993,11 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 	{
 		nvram_bufset(RT2860_NVRAM, "AutoChannelSelect", "0");
 		if (CHK_IF_SET(sz11aChannel))
-		{
 			nvram_bufset(RT2860_NVRAM, "Channel", sz11aChannel);
-			doSystem("iwpriv ra0 set Channel=%s", sz11aChannel);
-		}
 		if (CHK_IF_SET(sz11bChannel))
-		{
 			nvram_bufset(RT2860_NVRAM, "Channel", sz11bChannel);
-			doSystem("iwpriv ra0 set Channel=%s", sz11bChannel);
-		}
 		if (CHK_IF_SET(sz11gChannel))
-		{
 			nvram_bufset(RT2860_NVRAM, "Channel", sz11gChannel);
-			doSystem("iwpriv ra0 set Channel=%s", sz11gChannel);
-		}
 	}
 
 	//Rate for a, b, g
@@ -2311,7 +2303,7 @@ static int get802_1XBuilt(int eid, webs_t wp, int argc, char_t **argv)
 void disconnectSta(webs_t wp, char_t *path, char_t *query)
 {
 	char_t *mac = websGetVar(wp, T("disconnectSta"), "");
-	
+
 	if ((mac != NULL) && (strlen(mac) > 0))
 	{
 		if (strcmp(mac, "*") == 0)
@@ -2323,7 +2315,7 @@ void disconnectSta(webs_t wp, char_t *path, char_t *query)
 			doSystem(cmd);
 		}
 	}
-	
+
 	char_t *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
 	if (submitUrl[0])
 		websRedirect(wp, submitUrl);
