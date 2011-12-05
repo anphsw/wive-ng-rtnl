@@ -240,7 +240,7 @@ function CheckValue(form)
 		}
 	}
 	
-	if (form.RemoteManagementPort != rmtManagementPort)
+	if (form.RemoteManagementPort.value != rmtManagementPort)
 	{
 		if (!confirm("You have changed remote management port number. This change needs to reboot your router. Do you want to proceed?"))
 			return false;
@@ -333,7 +333,7 @@ function httpRmtSelect(form)
 </tr>
 <tr id="http_rmt_port" style="display: none;">
 	<td class="head">Remote HTTP port</td>
-	<td><input class="half" name="RemoteManagementPort" value="<% getCfgZero(1, "RemoteManagementPort"); %>"</td>
+	<td><input class="half" name="RemoteManagementPort" value="<% getCfgZero(1, "RemoteManagementPort"); %>"></td>
 </tr>
 <tr>
 <td class="head">SSH Remote Management</td>
