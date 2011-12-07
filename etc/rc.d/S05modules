@@ -9,12 +9,8 @@ start() {
     get_param
     # if goahead started
     if [  -f /var/run/goahead.pid ]; then
-	# this is workaround for small memory devices
-	# and prevent memory fragmentation before load
-	# large ralink wifi drivers
-	if [ -f /tmp/is_16ram_dev ]; then
-	    flush_net_caches
-	fi
+	# clear conntrack and routes tables/caches
+	flush_net_caches
 
 	# wifi reconfigure only after goahead start
 	$LOG "Prepare wifi config..."
@@ -71,14 +67,12 @@ get_param() {
     eval `nvram_buf_get 2860 macCloneEnabled macCloneMac ipt_account`
 }
 
-gen_wifi_config()
-{
+gen_wifi_config() {
     rm -f /etc/Wireless/RT2860/RT2860.dat
     ralink_init make_wireless_config rt2860
 }
 
-load_nat_helpers()
-{
+load_nat_helpers() {
     # not load nf_nat helpers in bridge mode
     if [ "$OperationMode" != "0" ]; then
 	# load conntrack helpers
@@ -112,8 +106,10 @@ load_nat_helpers()
 }
 
 #  Flush ip address from all wireless interfaces, remove from bridge and down
-WlanDownAll()
-{
+WlanDownAll() {
+    # clear conntrack and routes tables/caches
+    flush_net_caches
+    # process iface shutdonw
     for i in `seq 0 7`; do
 	ip addr flush dev ra$i > /dev/null 2>&1
 	if [ -d /proc/sys/net/ipv6 ] && [ "$IPv6_Enable" = "1" ]; then

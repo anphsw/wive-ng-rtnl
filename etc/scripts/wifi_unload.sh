@@ -36,14 +36,12 @@ if [ -f /proc/sys/kernel/hotplug ]; then
     echo > /proc/sys/kernel/hotplug
 fi
 
-unload_ra0()
-{
+unload_ra0() {
     service modules WlanDownAll
     ip link set eth2.2 down > /dev/null 2>&1
 }
 
-unload_ra0br0()
-{
+unload_ra0br0() {
     br0_mac=`ifconfig br0 | sed -n '/HWaddr/p' | sed -e 's/.*HWaddr \(.*\)/\1/'`
     br0_ip=`ifconfig br0 | sed -n '/inet addr:/p' | sed -e 's/ *inet addr:\(.*\)  Bcast.*/\1/'`
     br0_netmask=`ifconfig br0 | sed -n '/inet addr:/p' | sed -e 's/.*Mask:\(.*\)/\1/'`
@@ -69,8 +67,7 @@ unload_ra0br0()
     fi
 }
 
-disable_net()
-{
+disable_net() {
     if [ -f /tmp/is_16ram_dev ]; then
 	# check in bridge
 	is_ra0_in_br0=`brctl show | sed -n '/ra0/p'`
@@ -85,8 +82,7 @@ disable_net()
     fi
 }
 
-unload_modules()
-{
+unload_modules() {
     echo "Unload modules"
     # unload modules all unused
     rmmod -a
@@ -113,8 +109,7 @@ unload_modules()
     rmmod -a
 }
 
-unload_apps()
-{
+unload_apps() {
     echo "Stop services..." # first step stop services
     for serv in $stop_serv
     do
@@ -135,8 +130,7 @@ unload_apps()
     fi
 }
 
-umount_all()
-{
+umount_all() {
     # umount all exclude base system fs
     mounted=`mount | grep -vE "tmpfs|ramfs|squashfs|proc|sysfs|root|pts" | cut -f1 -d" " | cut -f3 -d "/"`
     if [ -n "$mounted" ]; then
@@ -155,8 +149,7 @@ umount_all()
 
 }
 
-free_mem_cahce()
-{
+free_mem_cahce() {
     sysctl -w vm.min_free_kbytes=2048
     sync
     sysctl -w vm.min_free_kbytes=1024

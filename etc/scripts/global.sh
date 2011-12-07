@@ -26,14 +26,12 @@ eval `nvram_buf_get 2860 OperationMode wanConnectionMode dnsPEnabled wan_ipaddr 
 	vpnEnabled vpnPurePPPOE vpnType	IPv6_Enable QoSEnable simple_qos`
 
 # get wireless, wan and lan mac adresses
-getMacIf()
-{
+getMacIf() {
     eval `nvram_buf_get 2860 WLAN_MAC_ADDR WAN_MAC_ADDR LAN_MAC_ADDR`
 }
 
 # LAN interface name -> $lan_if
-getLanIfName()
-{
+getLanIfName() {
     if [ "$OperationMode" = "2" ]; then
 	lan_if="eth2"
 	lan2_if="eth2:9"
@@ -44,8 +42,7 @@ getLanIfName()
 }
 
 # WAN interface name -> $wan_if
-getWanIfName()
-{
+getWanIfName() {
     # real wan name
     if [ "$OperationMode" = "0" ]; then
 	wan_if="br0"
@@ -77,8 +74,7 @@ getWanIfName()
     fi
 }
 
-getWanIpaddr()
-{
+getWanIpaddr() {
     # always return physical wan ip
     if [ "$wanConnectionMode" != "STATIC" ] || [ "$wan_ipaddr" = "" ]; then
 	wan_ipaddr=`ip -4 addr show dev $wan_if | awk '/inet / {print $2}' | cut -f1 -d"/"` > /dev/null 2>&1
@@ -92,8 +88,7 @@ getWanIpaddr()
 
 }
 
-get_txqlen()
-{
+get_txqlen() {
     if [ "$QoSEnable" != "" -a "$QoSEnable" != "0" ] || [ "$simple_qos" = "1" ]; then
 	# QoS Enabled
 	# For memory save 16m device uses txqueuelen=100
@@ -114,8 +109,7 @@ get_txqlen()
 }
 
 # wait connect to AP
-wait_connect()
-{
+wait_connect() {
     if [ "$OperationMode" = "2" ]; then
 	connected=`iwpriv ra0 connStatus | grep Connected -c`
 	if [ "$connected" = "0" ] || [ ! -f /tmp/sta_connected ]; then
@@ -127,8 +121,7 @@ wait_connect()
 }
 
 # configure and start dhcp client
-udhcpc_opts()
-{
+udhcpc_opts() {
     CL_SLEEP=1
     if [ "$OperationMode" = "0" ] || [ "$OperationMode" = "2" ]; then
 	CL_SLEEP=5
@@ -163,8 +156,7 @@ udhcpc_opts()
 }
 
 # configure and start zeroconf daemon
-zero_conf()
-{
+zero_conf() {
     wan_is_not_null=`ip -4 addr show $wan_if | grep inet -c`
     if [ "$wan_is_not_null" = "0" ]; then
 	killall -q zcip
@@ -175,15 +167,13 @@ zero_conf()
 }
 
 # conntrack and route table/caches flush
-flush_net_caches()
-{
+flush_net_caches() {
     ip route flush cache > /dev/null 2>&1
     echo 1 > /proc/sys/net/nf_conntrack_table_flush
 }
 
 # L2TP and PPTP kernel dead-loop fix
-vpn_deadloop_fix()
-{
+vpn_deadloop_fix() {
     if [ "$vpnEnabled" = "on" ]; then
 	if [ "$vpnType" != "0" ] || [ "$OperationMode" = "2" ]; then
 	    # First vpn stop...
@@ -194,8 +184,7 @@ vpn_deadloop_fix()
     fi
 }
 
-killall_vpn()
-{
+killall_vpn() {
     # correct terminate xl2tpd daemon
     # first disconnect
     if [ -f /var/run/xl2tpd/l2tp-control ] && [ ! -f /etc/ppp/l2tpd.conf ]; then

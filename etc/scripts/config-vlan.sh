@@ -8,8 +8,7 @@
 #   vlan_type: 0=no_vlan, 1=vlan, LLLLW=wan_4, WLLLL=wan_0 #
 ############################################################
 
-usage()
-{
+usage() {
 	echo "Usage:"
 	echo "  $0 0 0 - restore IC+ to no VLAN partition"
 	echo "  $0 0 LLLLW - config IC+ with VLAN and WAN at port 4"
@@ -32,8 +31,7 @@ usage()
 	exit 0
 }
 
-configEsw()
-{
+configEsw() {
 	# preinit
 	switch reg w 14 405555
 	switch reg w 50 2001
@@ -84,8 +82,7 @@ configEsw()
 	switch reg w 74 $r74
 }
 
-restoreEsw()
-{
+restoreEsw() {
         switch reg w 14 5555
         switch reg w 40 1001
         switch reg w 44 1001
@@ -100,23 +97,20 @@ restoreEsw()
         switch clear
 }
 
-disableEsw()
-{
+disableEsw() {
     for i in `seq 0 4`; do
 	mii_mgr -s -p $i -r 0 -v 0x0800
     done
 }
 
-enableEsw()
-{
+enableEsw() {
     for i in `seq 0 4`; do
 	mii_mgr -s -p $i -r 0 -v 0x9000
     done
 }
 
 # arg1:  phy address.
-link_down()
-{
+link_down() {
 	# get original register value
 	get_mii=`mii_mgr -g -p $1 -r 0`
 	orig=`echo $get_mii | sed 's/^.....................//'`
@@ -142,8 +136,7 @@ link_down()
 	mii_mgr -s -p "$1" -r 0 -v $new
 }
 
-link_up()
-{
+link_up() {
 	# get original register value
 	get_mii=`mii_mgr -g -p "$1" -r 0`
 	orig=`echo $get_mii | sed 's/^.....................//'`
@@ -169,8 +162,7 @@ link_up()
 	mii_mgr -s -p "$1" -r 0 -v $new
 }
 
-reset_all_phys()
-{
+reset_all_phys() {
 	if [ "$SWITCH_MODE" != "0" ] && [ "$SWITCH_MODE" != "2" ]; then
 		return
 	fi
@@ -208,15 +200,13 @@ reset_all_phys()
 	done
 }
 
-reinit_all_phys()
-{
+reinit_all_phys() {
 	disableEsw
 	enableEsw
 	reset_all_phys
 }
 
-config175C()
-{
+config175C() {
 	mii_mgr -s -p 29 -r 23 -v 0x07c2
 	mii_mgr -s -p 29 -r 22 -v 0x8420
 
@@ -243,8 +233,7 @@ config175C()
 	fi
 }
 
-restore175C()
-{
+restore175C() {
 	mii_mgr -s -p 29 -r 23 -v 0x0
 	mii_mgr -s -p 29 -r 22 -v 0x420
 	mii_mgr -s -p 29 -r 24 -v 0x1
@@ -257,8 +246,7 @@ restore175C()
 	mii_mgr -s -p 30 -r 2 -v 0x3f30
 }
 
-restore175D()
-{
+restore175D() {
 	mii_mgr -s -p 20 -r  4 -v 0xa000
 	mii_mgr -s -p 20 -r 13 -v 0x20
 	mii_mgr -s -p 21 -r  1 -v 0x1800
@@ -278,8 +266,7 @@ restore175D()
 	mii_mgr -s -p 23 -r 0 -v 0x3f3f
 }
 
-config175D()
-{
+config175D() {
 	mii_mgr -s -p 20 -r  4 -v 0xa000
 	mii_mgr -s -p 20 -r 13 -v 0x21
 	mii_mgr -s -p 21 -r  1 -v 0x1800
@@ -310,13 +297,11 @@ config175D()
 	fi
 }
 
-configVtss()
-{
+configVtss() {
 	spicmd vtss vlan
 }
 
-restoreVtss()
-{
+restoreVtss() {
 	spicmd vtss novlan
 }
 

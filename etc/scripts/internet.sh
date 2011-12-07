@@ -12,8 +12,7 @@ MODE="$1"
 
 LOG="logger -t reconfig"
 
-addMesh()
-{
+addMesh() {
     # if kernel build without MESH support - exit
     if [ "$CONFIG_RT2860V2_STA_MESH" != "" ] || [ "$CONFIG_RT2860V2_AP_MESH" != "" ]; then
         meshenabled=`nvram_get 2860 MeshEnabled`
@@ -31,8 +30,7 @@ addMesh()
     fi
 }
 
-addWds()
-{
+addWds() {
     # if kernel build without WDS support - exit
     if [ "$CONFIG_RT2860V2_AP_WDS" != "" ]; then
 	wds_en=`nvram_get 2860 WdsEnable`
@@ -52,8 +50,7 @@ addWds()
     fi
 }
 
-addMBSSID()
-{
+addMBSSID() {
     # if kernel build without Multiple SSID support - exit
     if [ "$CONFIG_RT2860V2_AP_MBSS" != "" ]; then
 	bssidnum=`nvram_get 2860 BssidNum`
