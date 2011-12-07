@@ -37,7 +37,7 @@ get_vpn_ip() {
     	    SERVER=$NS
     	    $LOG "Server adress is $SERVER"
 	fi
-	if [ $count = "3" ]; then
+	if [ "$count" = "3" ]; then
 	    resolved=1
     	    SERVER=$vpnServer
     	    $LOG "Not resolve adress for $SERVER"

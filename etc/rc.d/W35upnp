@@ -62,22 +62,22 @@ stop() {
     pid=`pidof miniupnpd`
     count=0
     # try 3 times for correct shutdown
-    while kill $pid > /dev/null 2>&1; do
+    while kill "$pid" > /dev/null 2>&1; do
 	pid=`pidof miniupnpd`
 	count="$(($count+1))"
-	if [ $count = "3" ] || [ $pid = "" ]; then
+	if [ "$count" = "3" ] || [ "$pid" = "" ]; then
 	    break
 	fi
 	usleep 300000
     done
     # if not correct terminate need kill
-    if [ $pid != "" ]; then
-	kill -SIGKILL $pid > /dev/null 2>&1
+    if [ "$pid" != "" ]; then
+	kill -SIGKILL "$pid" > /dev/null 2>&1
 	if [ -f /var/run/miniupnpd.pid ]; then
 	    rm -f /var/run/miniupnpd.pid
 	fi
     fi
-    ip route del $upmpm_net dev "$lan_if" > /dev/null 2>&1
+    ip route del "$upmpm_net" dev "$lan_if" > /dev/null 2>&1
 }
 
 case "$1" in
