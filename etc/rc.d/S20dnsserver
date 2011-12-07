@@ -70,7 +70,7 @@ stop() {
     done
     # if not correct terminate need kill
     if [ $pid != "" ]; then
-	kill -9 $pid > /dev/null 2>&1
+	kill -SIGKILL $pid > /dev/null 2>&1
 	if [ -f /var/run/dnsmasq.pid ]; then
 	    rm -f /var/run/dnsmasq.pid
 	fi
