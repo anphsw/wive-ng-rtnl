@@ -19,7 +19,6 @@ LOG="logger -t igmpproxy"
 start() {
   # if igmpproxy enable and mode not full bridge
   get_param
-    sysctl -w net.ipv4.igmp_max_memberships=5
     if [ "$igmpEnabled" = "1" ] && [ "$OperationMode" != "0" ]; then
         $LOG "Starting IGMPPROXY"
 	# check ip adress set at wan and if need kill igmpproxy
