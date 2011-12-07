@@ -57,14 +57,23 @@ get_param() {
 
 stop() {
   $LOG "Stopping DNSMASQ"
-    killall -q dnsmasq
-    dnsmasqpid=`pidof dnsmasq`
-    if [ "$dnsmasqpid" != "" ]; then
-	# workaround for not clean kill dnsmasq
-	killall -q dnsmasq
-	sleep 1
-	killall -q -SIGKILL dnsmasq
-	rm -rf /var/run/dnsmasq.pid > /dev/null 2>&1
+    pid=`pidof dnsmasq`
+    count=0
+    # try 3 times for correct shutdown
+    while kill $pid > /dev/null 2>&1; do
+	usleep 300000
+	pid=`pidof dnsmasq`
+	count="$(($count+1))"
+	if [ $count = "3" ]; then
+	    break
+	fi
+    done
+    # if not correct terminate need kill
+    if [ $pid != "" ]; then
+	kill -9 $pid > /dev/null 2>&1
+	if [ -f /var/run/dnsmasq.pid ]; then
+	    rm -f /var/run/dnsmasq.pid
+	fi
     fi
 }
 
