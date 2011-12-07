@@ -50,6 +50,8 @@ start() {
 	    ifconfig ra0 txqueuelen	"$txqueuelen"
 	    ip link set ra0 up
 	fi
+	$LOG "Tune wifi modules."
+	retune_wifi
     else
 	# if goahead not started
 	# generate modules dep
@@ -106,7 +108,7 @@ load_nat_helpers() {
 }
 
 #  Flush ip address from all wireless interfaces, remove from bridge and down
-WlanDownAll() {
+wlan_down_all() {
     # clear conntrack and routes tables/caches
     flush_net_caches
     # process iface shutdonw
@@ -146,11 +148,16 @@ WlanDownAll() {
     fi
 }
 
+retune_wifi() {
+    # preconfigure wifi and 40Mhz workaround
+    /etc/scripts/wifi.sh
+}
+
 stop() {
     get_param
     if [ -f /var/run/goahead.pid ]; then
 	$LOG "link wifi down first"
-	WlanDownAll
+	wlan_down_all
 	if [ -d /sys/module/hw_nat ]; then
 	    $LOG "Unload hw_nat and wireless modules..."
 	    mod="hw_nat rt2860v2_ap rt2860v2_sta"
@@ -177,8 +184,12 @@ case "$1" in
 	    stop
 	    ;;
 
-	WlanDownAll)
-	    WlanDownAll
+	wlan_down_all)
+	    wlan_down_all
+	    ;;
+
+	retune_wifi)
+	    retune_wifi
 	    ;;
 
 	restart)
@@ -187,6 +198,6 @@ case "$1" in
 	    ;;
 
 	*)
-	    echo $"Usage: $0 {start|stop|restart|WlanDownAll}"
+	    echo $"Usage: $0 {start|stop|restart|wlan_down_all|retune_wifi}"
 	    exit 1
 esac

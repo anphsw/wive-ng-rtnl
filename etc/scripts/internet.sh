@@ -129,11 +129,6 @@ spot_config() {
 	addMesh
 }
 
-retune_wifi() {
-	# preconfigure wifi and 40Mhz workaround
-	/etc/scripts/wifi.sh
-}
-
 # All WDS interfaces down and reload wifi modules
 if [ "$MODE" != "connect_sta" ]; then
     if [ "$MODE" != "wifionly" ] || [ "$OperationMode" = "2" ]; then
@@ -141,8 +136,6 @@ if [ "$MODE" != "connect_sta" ]; then
     fi
     $LOG "Shutdown wireless interfaces and reload modules drivers for current mode."
     service modules restart
-    $LOG "Tune wifi modules."
-    retune_wifi
     if [ "$MODE" != "wifionly" ]; then
 	$LOG "Reconfigure lan..."
 	service lan restart

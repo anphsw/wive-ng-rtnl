@@ -37,7 +37,7 @@ if [ -f /proc/sys/kernel/hotplug ]; then
 fi
 
 unload_ra0() {
-    service modules WlanDownAll
+    service modules wlan_down_all
     ip link set eth2.2 down > /dev/null 2>&1
 }
 
