@@ -49,8 +49,10 @@ unload_ra0br0() {
 
     if [ "$ra0_mac" = "$br0_mac" ]; then
 	# destory br0
-	ip link set br0 down > /dev/null 2>&1
-	brctl delbr br0 > /dev/null 2>&1
+	if [ -d /proc/sys/net/ipv4/conf/br0 ]; then
+	    ip link set br0 down > /dev/null 2>&1
+	    brctl delbr br0 > /dev/null 2>&1
+	fi
 
 	# disable WAN and WLAN
 	unload_ra0

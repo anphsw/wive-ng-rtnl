@@ -110,11 +110,11 @@ load_nat_helpers() {
     fi
 }
 
-#  Flush ip address from all wireless interfaces, remove from bridge and down
 wlan_down_all() {
-    # clear conntrack and routes tables/caches
+    # Flush ip address from all wireless interfaces, remove from bridge and down
+    # First clear conntrack and routes tables/caches
     flush_net_caches
-    # process iface shutdonw
+    # process iface shutdown
     for i in `seq 0 7`; do
 	ip addr flush dev ra$i > /dev/null 2>&1
 	if [ -d /proc/sys/net/ipv6 ] && [ "$IPv6_Enable" = "1" ]; then

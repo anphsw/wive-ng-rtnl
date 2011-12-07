@@ -7,7 +7,7 @@ LOG="logger -t sysctl"
 
 start() {
     $LOG "Tune kernel with sysctl."
-    sysctl -w -p /etc/sysctl.conf > /dev/null 2>&1
+    sysctl -w -p -n -e /etc/sysctl.conf > /dev/null 2>&1
 
     MINPORT=3072
     if [ -f /tmp/is_32ram_dev ]; then
