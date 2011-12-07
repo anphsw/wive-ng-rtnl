@@ -142,9 +142,7 @@ if [ "$MODE" != "connect_sta" ]; then
     if [ "$MODE" != "wifionly" ] || [ "$OperationMode" = "2" ]; then
 	vpn_deadloop_fix
     fi
-    $LOG "Shutdown wireless interfaces."
-    WlanDownAll
-    $LOG "Reload modules drivers for current mode."
+    $LOG "Shutdown wireless interfaces and reload modules drivers for current mode."
     service modules restart
     $LOG "Tune wifi modules."
     retune_wifi

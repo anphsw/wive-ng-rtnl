@@ -38,7 +38,7 @@ fi
 
 unload_ra0()
 {
-    WlanDownAll
+    service modules WlanDownAll
     ip link set eth2.2 down > /dev/null 2>&1
 }
 

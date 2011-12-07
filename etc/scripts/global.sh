@@ -113,45 +113,6 @@ get_txqlen()
     fi
 }
 
-#  Flush ip address from all wireless interfaces, remove from bridge and down
-WlanDownAll()
-{
-    for i in `seq 0 7`; do
-	ip addr flush dev ra$i > /dev/null 2>&1
-	if [ -d /proc/sys/net/ipv6 ] && [ "$IPv6_Enable" = "1" ]; then
-    	    ip -6 addr flush dev ra$i > /dev/null 2>&1
-	fi
-	ip link set ra$i down > /dev/null 2>&1
-	brctl delif br0 ra$i > /dev/null 2>&1
-    done
-    if [ "$CONFIG_RT2860V2_AP_WDS" != "" ]; then
-	for i in `seq 0 3`; do
-	    ip addr flush dev wds$i > /dev/null 2>&1
-	    if [ -d /proc/sys/net/ipv6 ] && [ "$IPv6_Enable" = "1" ]; then
-    		ip -6 addr flush dev wds$i > /dev/null 2>&1
-	    fi
-    	    ip link set wds$i down > /dev/null 2>&1
-	    brctl delif br0 wds$i > /dev/null 2>&1
-	done
-    fi
-    if [ "$CONFIG_RT2860V2_AP_APCLI" != "" ]; then
-	ip addr flush dev apcli0 > /dev/null 2>&1
-	if [ -d /proc/sys/net/ipv6 ] && [ "$IPv6_Enable" = "1" ]; then
-    	    ip -6 addr flush dev apcli0 > /dev/null 2>&1
-	fi
-	ip link set apcli0 down > /dev/null 2>&1
-	brctl delif br0 apcli0 > /dev/null 2>&1
-    fi
-    if [ "$CONFIG_RT2860V2_STA_MESH" != "" ] || [ "$CONFIG_RT2860V2_AP_MESH" != "" ]; then
-	ip addr flush dev mesh0 > /dev/null 2>&1
-	if [ -d /proc/sys/net/ipv6 ] && [ "$IPv6_Enable" = "1" ]; then
-    	    ip -6 addr flush dev mesh0 > /dev/null 2>&1
-	fi
-	ip link set mesh0 down > /dev/null 2>&1
-	brctl delif br0 mesh0 > /dev/null 2>&1
-    fi
-}
-
 # wait connect to AP
 wait_connect()
 {
