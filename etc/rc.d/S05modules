@@ -3,6 +3,9 @@
 # get params
 . /etc/scripts/global.sh
 
+# include kernel config
+. /etc/scripts/config.sh
+
 LOG="echo MODULES"
 
 start() {
