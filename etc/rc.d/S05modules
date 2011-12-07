@@ -131,10 +131,7 @@ stop() {
     if [ -f /var/run/goahead.pid ]; then
 	$LOG "link wifi down first"
 	ra0flushadress
-	ip link set ra0 down > /dev/null 2>&1
-	if [ "$OperationMode" = "3" ]; then
-	    ip link set apcli0 down > /dev/null 2>&1
-	fi
+	WlanDownAll
 	if [ -d /sys/module/hw_nat ]; then
 	    $LOG "Unload hw_nat and wireless modules..."
 	    mod="hw_nat rt2860v2_ap rt2860v2_sta"
