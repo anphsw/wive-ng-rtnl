@@ -863,6 +863,9 @@
 12) Add VPN rx/tx status LED support(default alias GREEN_WPS_LED).<br>
 13) Fix set regdomain.<br>
 14) Disable nat loopback in webui per default.<br>
+15) More correct down wifi interfaces at modules reload and firmware update.<br>
+16) Consolidate some code in init.d.<br>
+17) Backport tcp: drop SYN+FIN messages fixes from 3.x.x kernel.<br>
 
 <br><br>
 <b>For support see:</b><br>
