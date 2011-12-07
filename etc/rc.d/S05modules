@@ -67,21 +67,6 @@ start() {
     fi
 }
 
-ra0flushadress()
-{
-    # flush adresses
-    ip addr flush dev ra0  > /dev/null 2>&1
-    if [ "$OperationMode" = "3" ]; then
-	ip addr flush dev apcli0  > /dev/null 2>&1
-    fi
-    if [ -d /proc/sys/net/ipv6 ] && [ "$IPv6_Enable" = "1" ]; then
-        ip -6 addr flush dev ra0 > /dev/null 2>&1
-	if [ "$OperationMode" = "3" ]; then
-	    ip -6 addr flush dev apcli0  > /dev/null 2>&1
-	fi
-    fi
-}
-
 get_param() {
     eval `nvram_buf_get 2860 macCloneEnabled macCloneMac ipt_account`
 }
@@ -130,7 +115,6 @@ stop() {
     get_param
     if [ -f /var/run/goahead.pid ]; then
 	$LOG "link wifi down first"
-	ra0flushadress
 	WlanDownAll
 	if [ -d /sys/module/hw_nat ]; then
 	    $LOG "Unload hw_nat and wireless modules..."
@@ -150,10 +134,6 @@ stop() {
 
 case "$1" in
 
-	ra0flushadress)
-	    ra0flushadress
-	    ;;
-
 	start)
 	    start
 	    ;;
@@ -168,6 +148,6 @@ case "$1" in
 	    ;;
 
 	*)
-	    echo $"Usage: $0 {start|stop|restart|ra0flushadress}"
+	    echo $"Usage: $0 {start|stop|restart}"
 	    exit 1
 esac
