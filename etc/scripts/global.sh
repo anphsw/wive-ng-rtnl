@@ -113,7 +113,7 @@ get_txqlen()
     fi
 }
 
-# Down all wireless interfaces and remove from bridge
+#  Flush ip address from all wireless interfaces, remove from bridge and down
 WlanDownAll()
 {
     for i in `seq 0 7`; do
@@ -137,7 +137,7 @@ WlanDownAll()
     if [ "$CONFIG_RT2860V2_AP_APCLI" != "" ]; then
 	ip addr flush dev apcli0 > /dev/null 2>&1
 	if [ -d /proc/sys/net/ipv6 ] && [ "$IPv6_Enable" = "1" ]; then
-    		ip -6 addr flush dev apcli0 > /dev/null 2>&1
+    	    ip -6 addr flush dev apcli0 > /dev/null 2>&1
 	fi
 	ip link set apcli0 down > /dev/null 2>&1
 	brctl delif br0 apcli0 > /dev/null 2>&1
@@ -145,7 +145,7 @@ WlanDownAll()
     if [ "$CONFIG_RT2860V2_STA_MESH" != "" ] || [ "$CONFIG_RT2860V2_AP_MESH" != "" ]; then
 	ip addr flush dev mesh0 > /dev/null 2>&1
 	if [ -d /proc/sys/net/ipv6 ] && [ "$IPv6_Enable" = "1" ]; then
-    		ip -6 addr flush dev mesh0 > /dev/null 2>&1
+    	    ip -6 addr flush dev mesh0 > /dev/null 2>&1
 	fi
 	ip link set mesh0 down > /dev/null 2>&1
 	brctl delif br0 mesh0 > /dev/null 2>&1
