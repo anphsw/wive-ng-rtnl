@@ -63,12 +63,12 @@ stop() {
     count=0
     # try 3 times for correct shutdown
     while kill $pid > /dev/null 2>&1; do
-	usleep 300000
 	pid=`pidof miniupnpd`
 	count="$(($count+1))"
 	if [ $count = "3" ] || [ $pid = "" ]; then
 	    break
 	fi
+	usleep 300000
     done
     # if not correct terminate need kill
     if [ $pid != "" ]; then
