@@ -59,13 +59,24 @@ get_param() {
 
 stop() {
  $LOG "Stop upnp "
+    pid=`pidof miniupnpd`
     count=0
-    while killall -q miniupnpd ; do
-	if [ "$count" = "3" ]; then
-	    killall -q -SIGKILL miniupnpd
+    # try 3 times for correct shutdown
+    while kill $pid > /dev/null 2>&1; do
+	usleep 300000
+	pid=`pidof miniupnpd`
+	count="$(($count+1))"
+	if [ $count = "3" ]; then
+	    break
 	fi
-	sleep 2
     done
+    # if not correct terminate need kill
+    if [ $pid != "" ]; then
+	kill -SIGKILL $pid > /dev/null 2>&1
+	if [ -f /var/run/miniupnpd.pid ]; then
+	    rm -f /var/run/miniupnpd.pid
+	fi
+    fi
     ip route del $upmpm_net dev "$lan_if" > /dev/null 2>&1
 }
 
