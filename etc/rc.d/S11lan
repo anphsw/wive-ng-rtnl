@@ -12,6 +12,8 @@ start() {
     get_txqlen
     conf_double_tag
 #-------------------PRECONFIG-----------------------------
+    # bridge preconfigure
+    brisup=`ip link show br0 up | grep -c ""` > /dev/null 2>&1
     if [ "$brisup" = "0" ]; then
 	if [ ! -d /proc/sys/net/ipv4/conf/br0 ]; then
 	    $LOG "Add bridge in the system"
@@ -22,7 +24,7 @@ start() {
 	$LOG "Up bridge interface"
 	ip link set br0 up
     fi
-
+    # lan/wan particions preconfigure
     if [ "$phys_wan_if" = "eth3" ] && [ "$phys_lan_if" = "eth2" ]; then
 	# external switch
 	$LOG "$phys_wan_if_MACADDR $WAN_MAC_ADDR"
@@ -34,6 +36,7 @@ start() {
 	ip link set "$phys_wan_if" up
     else
 	# internal switch
+	lanisup=`ip link show eth2 up | grep -c ""` > /dev/null 2>&1
 	if [ "$lanisup" = "0" ]; then
 	    $LOG "ETH2_MACADDR $LAN_MAC_ADDR"
 	    ifconfig eth2 hw ether "$LAN_MAC_ADDR"
@@ -88,8 +91,6 @@ start() {
 
 get_param() {
     eval `nvram_buf_get 2860 lan_ipaddr lan_netmask lan2_ipaddr lan2_netmask Lan2Enabled`
-    brisup=`ip link show br0 up | grep -c ""` > /dev/null 2>&1
-    lanisup=`ip link show eth2 up | grep -c ""` > /dev/null 2>&1
 }
 
 addr_flush() {
