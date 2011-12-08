@@ -23,30 +23,33 @@ start() {
 	ip link set br0 up
     fi
 
-    if [ "$lanisup" = "0" ]; then
-	$LOG "ROOT_MACADDR $LAN_MAC_ADDR"
-	ifconfig "$phys_lan_if" hw ether "$LAN_MAC_ADDR"
-	ifconfig "$phys_lan_if" txqueuelen "$txqueuelen"
-	$LOG "Up root interface $phys_lan_if"
-	ip link set $phys_lan_if up
-    fi
-
-    if [ "$OperationMode" = "1" ] || [ "$OperationMode" = "4" ]; then
-	if [ "$phys_wan_if" = "eth3" ] && [ "$phys_lan_if" = "eth2" ]; then
-	    # external switch
-	    $LOG "$phys_wan_if_MACADDR $WAN_MAC_ADDR"
-	    ifconfig "$phys_wan_if" hw ether "$WAN_MAC_ADDR"
-	    ip link set "$phys_wan_if" up
-	else
-	    # internal switch
+    if [ "$phys_wan_if" = "eth3" ] && [ "$phys_lan_if" = "eth2" ]; then
+	# external switch
+	$LOG "$phys_wan_if_MACADDR $WAN_MAC_ADDR"
+	ifconfig "$phys_wan_if" hw ether "$WAN_MAC_ADDR"
+	ip link set "$phys_wan_if" up
+	$LOG "$phys_lan_if_MACADDR $LAN_MAC_ADDR"
+	ifconfig "$phys_wan_if" hw ether "$LAN_MAC_ADDR"
+	ifconfig "$phys_wan_if" txqueuelen "$txqueuelen"
+	ip link set "$phys_wan_if" up
+    else
+	# internal switch
+	if [ "$lanisup" = "0" ]; then
+	    $LOG "ETH2_MACADDR $LAN_MAC_ADDR"
+	    ifconfig eth2 hw ether "$LAN_MAC_ADDR"
+	    ifconfig eth2 txqueuelen "$txqueuelen"
+	    $LOG "Up vlan root interface"
+	    ip link set eth2 up
+	fi
+	if [ "$OperationMode" = "1" ] || [ "$OperationMode" = "4" ]; then
 	    if [ ! -d /proc/sys/net/ipv4/conf/eth2.1 ] || [ ! -d /proc/sys/net/ipv4/conf/eth2.2 ]; then
-    	        $LOG "Add vlans and config"
-	        vconfig add eth2 1
-	        vconfig add eth2 2
-	        $LOG "ETH2.1_MACADDR $LAN_MAC_ADDR"
-	        ifconfig eth2.1 hw ether "$LAN_MAC_ADDR"
-	        $LOG "ETH2.2_MACADDR $WAN_MAC_ADDR"
-	        ifconfig eth2.2 hw ether "$WAN_MAC_ADDR"
+		$LOG "Add vlans and config"
+		vconfig add eth2 1
+		vconfig add eth2 2
+		$LOG "ETH2.1_MACADDR $LAN_MAC_ADDR"
+		ifconfig eth2.1 hw ether "$LAN_MAC_ADDR"
+		$LOG "ETH2.2_MACADDR $WAN_MAC_ADDR"
+		ifconfig eth2.2 hw ether "$WAN_MAC_ADDR"
 	    fi
 	    # phys_lan_if always up
 	    ip link set eth2.1 up
