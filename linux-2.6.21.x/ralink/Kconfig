@@ -123,11 +123,12 @@ endmenu
 #######
 # USB
 #######
-source "drivers/usb/dwc_otg/Kconfig"
-
 config RT3XXX_EHCI_OHCI
 	bool "Ralink USB EHCI/OHCI controller support"
-        depends on (RALINK_RT3883 || RALINK_RT3352)
+        depends on (RALINK_RT3883 || RALINK_RT3352 || RALINK_RT5350)
 	select USB_ARCH_HAS_OHCI
 	select USB_ARCH_HAS_EHCI
+
+source "drivers/usb/dwc_otg/Kconfig"
+
 endmenu

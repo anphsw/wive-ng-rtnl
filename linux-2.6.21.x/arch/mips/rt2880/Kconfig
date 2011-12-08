@@ -23,9 +23,6 @@ choice
 
 config  RT3352_ASIC
 	bool "RT3352-ASIC"
-	select USB_ARCH_HAS_OHCI
-	select USB_ARCH_HAS_EHCI
-
 endchoice
 
 endif
@@ -40,8 +37,6 @@ choice
 
 config  RT3883_ASIC 
 	bool "RT3883/RT3662-ASIC"
-	select USB_ARCH_HAS_OHCI
-	select USB_ARCH_HAS_EHCI
 endchoice
 
 choice
@@ -69,9 +64,6 @@ choice
 
 config	RT5350_ASIC
 	bool "RT5350-ASIC"
-	select USB_ARCH_HAS_OHCI
-	select USB_ARCH_HAS_EHCI
-
 endchoice
 
 endif
@@ -129,9 +121,3 @@ config  KERNEL_NVRAM
 	bool 'Kernel NVRAM'
 	depends on MTD_RALINK
 	default y
-
-config RT3XXX_EHCI_OHCI
-	bool "Ralink USB EHCI/OHCI controller support"
-        depends on (RALINK_RT3883 || RALINK_RT3352)
-	select USB_ARCH_HAS_OHCI
-	select USB_ARCH_HAS_EHCI
