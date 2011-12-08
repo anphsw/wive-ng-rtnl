@@ -57,8 +57,8 @@ inline int mtd_write_firmware(char *filename, int offset, int len)
 
 /* check image size before erase flash and write image */
 #ifdef CONFIG_RT2880_ROOTFS_IN_FLASH
-    if(len > MAX_IMG_SIZE ){
-	fprintf(stderr, "Image in is BIG!!!%d", len);
+    if(len > MAX_IMG_SIZE || len < MIN_FIRMWARE_SIZE){
+	fprintf(stderr, "Image size is not correct!!!%d", len);
         return -1;
     }
 #endif
