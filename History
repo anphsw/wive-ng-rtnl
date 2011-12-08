@@ -867,6 +867,12 @@
 16) Consolidate some code in init.d.<br>
 17) Backport tcp: drop SYN+FIN messages fixes from 3.x.x kernel.<br>
 18) Decrease SQUASHFS_FRAGMENT_CACHE_SIZE from 4 to 1 for save memory(no more need big cache).<br>
+19) Timezone fixup.<br>
+20) Fix image size check in flash padded mode.<br>
+21) Fix kernel Kconfig files for RT3352/RT5350 SoCs.<br>
+22) Small update defaults.<br>
+23) Header cpu-feature-overrides.h update for corect ralink cpus support.<br>
+24) Init.d Start base support exernal switch plugged to GMAC2. See Asus RT-N56U.<br>
 
 <br><br>
 <b>For support see:</b><br>
