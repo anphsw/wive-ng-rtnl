@@ -79,7 +79,7 @@ disable_net() {
 	if [ "$is_ra0_in_br0" == "" ]; then
 	    unload_ra0
 	elif [ "$is_eth21_in_br0" != "" ]; then
-	    unload_ra0br0 eth2.1
+	    unload_ra0br0 "$real_lan_if"
 	fi
     fi
 }

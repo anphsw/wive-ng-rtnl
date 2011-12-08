@@ -15,6 +15,7 @@ wan_if="eth2.2"
 real_wan_if="eth2.2"
 lan_if="br0"
 lan2_if="br0:9"
+real_lan_if="eth2.1"
 vpn_if="ppp0"
 
 # set some constatns
@@ -38,6 +39,17 @@ getLanIfName() {
     else
 	lan_if="br0"
 	lan2_if="br0:9"
+    fi
+    if [ "$CONFIG_RT_3052_ESW" = "y" ]; then
+	# internal switch support
+	real_lan_if="eth2.1"
+    elif [ "$CONFIG_RAETH_GMAC2" = "y" ]; then
+	# external switch support
+	real_lan_if="eth3"
+    else
+	# this is stub
+	# support only switched devices
+	real_lan_if="eth2.1"
     fi
 }
 
