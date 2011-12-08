@@ -34,10 +34,9 @@ start() {
     if [ "$OperationMode" = "1" ] || [ "$OperationMode" = "4" ]; then
 	if [ "$phys_wan_if" = "eth3" ] && [ "$phys_lan_if" = "eth2" ]; then
 	    # external switch
-	    # phys_lan_if always up
-	    $LOG "ETH2_MACADDR $WAN_MAC_ADDR"
-	    ifconfig eth2 hw ether "$WAN_MAC_ADDR"
-	    ip link set eth2 up
+	    $LOG "$phys_wan_if_MACADDR $WAN_MAC_ADDR"
+	    ifconfig "$phys_wan_if" hw ether "$WAN_MAC_ADDR"
+	    ip link set "$phys_wan_if" up
 	else
 	    # internal switch
 	    if [ ! -d /proc/sys/net/ipv4/conf/eth2.1 ] || [ ! -d /proc/sys/net/ipv4/conf/eth2.2 ]; then
