@@ -76,7 +76,7 @@ bridge_config() {
 	# flush eth2 ip and remove from bridge
         ip addr flush dev eth2 > /dev/null 2>&1
 	brctl delif br0 eth2 > /dev/null 2>&1
-	# in bridge mode add only eth2 NOT ADD "$real_lan_if" or "$gw_if"
+	# in bridge mode add only eth2 NOT ADD "$phys_lan_if" or "$phys_wan_if"
 	brctl addif br0 eth2
 	# add wifi interface
 	brctl addif br0 ra0
@@ -87,11 +87,11 @@ bridge_config() {
 
 gate_config() {
 	$LOG "Gateway OperationMode: $OperationMode"
-	# flush "$real_lan_if" ip and remove from bridge
-        ip addr flush dev "$real_lan_if" > /dev/null 2>&1
-	brctl delif br0 "$real_lan_if" > /dev/null 2>&1
+	# flush "$phys_lan_if" ip and remove from bridge
+        ip addr flush dev "$phys_lan_if" > /dev/null 2>&1
+	brctl delif br0 "$phys_lan_if" > /dev/null 2>&1
 	# add lan interface
-	brctl addif br0 "$real_lan_if"
+	brctl addif br0 "$phys_lan_if"
 	# add wifi interface
 	brctl addif br0 ra0
 	addMBSSID
@@ -108,7 +108,7 @@ apcli_config() {
 	# flush eth2 ip and remove from bridge
         ip addr flush dev eth2 > /dev/null 2>&1
 	brctl delif br0 eth2 > /dev/null 2>&1
-	# in apcli mode add only eth2 NOT ADD "$real_lan_if" or "$gw_if"
+	# in apcli mode add only eth2 NOT ADD "$phys_lan_if" or "$phys_wan_if"
 	brctl addif br0 eth2
 	# add wifi interface
 	brctl addif br0 ra0
@@ -117,11 +117,11 @@ apcli_config() {
 
 spot_config() {
 	$LOG "HotSpot OperationMode: $OperationMode"
-	# flush "$real_lan_if" ip and remove from bridge
-        ip addr flush dev "$real_lan_if" > /dev/null 2>&1
-	brctl delif br0 "$real_lan_if" > /dev/null 2>&1
+	# flush "$phys_lan_if" ip and remove from bridge
+        ip addr flush dev "$phys_lan_if" > /dev/null 2>&1
+	brctl delif br0 "$phys_lan_if" > /dev/null 2>&1
 	# add lan interface
-	brctl addif br0 "$real_lan_if"
+	brctl addif br0 "$phys_lan_if"
 	# add wifi interface
 	brctl addif br0 ra0
 	addMBSSID

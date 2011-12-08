@@ -15,8 +15,11 @@ wan_if="eth2.2"
 real_wan_if="eth2.2"
 lan_if="br0"
 lan2_if="br0:9"
-real_lan_if="eth2.1"
 vpn_if="ppp0"
+
+# phys names
+phys_lan_if="eth2.1"
+phys_wan_if="eth2.2"
 
 # set some constatns
 mcast_net="224.0.0.0/4"
@@ -33,6 +36,19 @@ getMacIf() {
 
 # LAN interface name -> $lan_if
 getLanIfName() {
+    # phys port names
+    if [ "$CONFIG_RT_3052_ESW" = "y" ]; then
+	# internal switch support
+	phys_lan_if="eth2.1"
+    elif [ "$CONFIG_RAETH_GMAC2" = "y" ]; then
+	# external switch support
+	phys_lan_if="eth2"
+    else
+	# this is stub
+	# support only switched devices
+	phys_lan_if="eth2.1"
+    fi
+    # logical names
     if [ "$OperationMode" = "2" ]; then
 	lan_if="eth2"
 	lan2_if="eth2:9"
@@ -40,37 +56,27 @@ getLanIfName() {
 	lan_if="br0"
 	lan2_if="br0:9"
     fi
-    if [ "$CONFIG_RT_3052_ESW" = "y" ]; then
-	# internal switch support
-	real_lan_if="eth2.1"
-    elif [ "$CONFIG_RAETH_GMAC2" = "y" ]; then
-	# external switch support
-	real_lan_if="eth2"
-    else
-	# this is stub
-	# support only switched devices
-	real_lan_if="eth2.1"
-    fi
 }
 
 # WAN interface name -> $wan_if
 getWanIfName() {
+    # phys wan name
     if [ "$CONFIG_RT_3052_ESW" = "y" ]; then
 	# internal switch support
-	gw_if="eth2.2"
+	phys_wan_if="eth2.2"
     elif [ "$CONFIG_RAETH_GMAC2" = "y" ]; then
 	# external switch support
-	gw_if="eth3"
+	phys_wan_if="eth3"
     else
 	# this is stub
 	# support only switched devices
-	gw_if="eth2.2"
+	phys_wan_if="eth2.2"
     fi
     # real wan name
     if [ "$OperationMode" = "0" ]; then
 	wan_if="br0"
     elif [ "$OperationMode" = "1" ] || [ "$OperationMode" = "4" ]; then
-	wan_if="$gw_if"
+	wan_if="$phys_wan_if"
     elif [ "$OperationMode" = "2" ]; then
 	wan_if="ra0"
     elif [ "$OperationMode" = "3" ]; then
@@ -78,12 +84,11 @@ getWanIfName() {
 	    wan_if="apcli0"
 	else
 	    echo "Driver not support APCLI mode."
-	    wan_if="$gw_if"
+	    wan_if="$phys_wan_if"
 	fi
     elif [ "$OperationMode" = "4" ]; then
-	    wan_if="$gw_if"
+	    wan_if="$phys_wan_if"
     fi
-
     # upnp wan name
     if [ "$vpnEnabled" = "on" ]; then
 	get_ppp_wan_if=`ls /proc/sys/net/ipv4/conf/ | grep ppp | tail -q -n1`
