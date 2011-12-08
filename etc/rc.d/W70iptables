@@ -269,7 +269,7 @@ start() {
 		iptables -A FORWARD ! -o $lan_if -s $lan_ipaddr/$lan_netmask -j ACCEPT
 		if [ "$OperationMode" = "4" ]; then
 		    iptables -A FORWARD -o $wan_if -s $chilli_net -j ACCEPT
-		    iptables -t nat -A POSTROUTING -o eth2.2  -s $chilli_net -j MASQUERADE
+		    iptables -t nat -A POSTROUTING -o $gw_if -s $chilli_net -j MASQUERADE
 		fi
 		# second lan
 		if [ "$Lan2Enabled" = "1" ]; then

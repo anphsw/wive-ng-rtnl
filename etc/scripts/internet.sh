@@ -76,7 +76,7 @@ bridge_config() {
 	# flush eth2 ip and remove from bridge
         ip addr flush dev eth2 > /dev/null 2>&1
 	brctl delif br0 eth2 > /dev/null 2>&1
-	# in bridge mode add only eth2 NOT ADD "$real_lan_if" o eth2.2
+	# in bridge mode add only eth2 NOT ADD "$real_lan_if" or "$gw_if"
 	brctl addif br0 eth2
 	# add wifi interface
 	brctl addif br0 ra0
@@ -108,7 +108,7 @@ apcli_config() {
 	# flush eth2 ip and remove from bridge
         ip addr flush dev eth2 > /dev/null 2>&1
 	brctl delif br0 eth2 > /dev/null 2>&1
-	# in apcli mode add only eth2 NOT ADD "$real_lan_if" o eth2.2
+	# in apcli mode add only eth2 NOT ADD "$real_lan_if" or "$gw_if"
 	brctl addif br0 eth2
 	# add wifi interface
 	brctl addif br0 ra0

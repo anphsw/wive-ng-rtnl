@@ -45,7 +45,7 @@ getLanIfName() {
 	real_lan_if="eth2.1"
     elif [ "$CONFIG_RAETH_GMAC2" = "y" ]; then
 	# external switch support
-	real_lan_if="eth3"
+	real_lan_if="eth2"
     else
 	# this is stub
 	# support only switched devices
@@ -55,11 +55,22 @@ getLanIfName() {
 
 # WAN interface name -> $wan_if
 getWanIfName() {
+    if [ "$CONFIG_RT_3052_ESW" = "y" ]; then
+	# internal switch support
+	gw_if="eth2.2"
+    elif [ "$CONFIG_RAETH_GMAC2" = "y" ]; then
+	# external switch support
+	gw_if="eth3"
+    else
+	# this is stub
+	# support only switched devices
+	gw_if="eth2.2"
+    fi
     # real wan name
     if [ "$OperationMode" = "0" ]; then
 	wan_if="br0"
     elif [ "$OperationMode" = "1" ] || [ "$OperationMode" = "4" ]; then
-	wan_if="eth2.2"
+	wan_if="$gw_if"
     elif [ "$OperationMode" = "2" ]; then
 	wan_if="ra0"
     elif [ "$OperationMode" = "3" ]; then
@@ -67,10 +78,10 @@ getWanIfName() {
 	    wan_if="apcli0"
 	else
 	    echo "Driver not support APCLI mode."
-	    wan_if="eth2.2"
+	    wan_if="$gw_if"
 	fi
     elif [ "$OperationMode" = "4" ]; then
-	    wan_if="eth2.2"
+	    wan_if="$gw_if"
     fi
 
     # upnp wan name

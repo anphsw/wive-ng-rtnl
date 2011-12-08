@@ -15,7 +15,7 @@ start() {
 TZ_generate() {
     TZ=`nvram_get 2860 TZ`
     if [ "$TZ" = "" ]; then
-        tz="MSK-3MSD-4"
+        tz="MSD-4"
     fi
 
     echo "$TZ" > /etc/tmpTZ

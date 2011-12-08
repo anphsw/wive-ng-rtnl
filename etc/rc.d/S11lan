@@ -30,26 +30,28 @@ start() {
 	ip link set eth2 up
     fi
 
-    if [ "$real_lan_if" = "eth3" ]; then
-	    # external switch
-	    # real_wan_if always up
-	    ip link set eth3 up
-    else
 	if [ "$OperationMode" = "1" ] || [ "$OperationMode" = "4" ]; then
-	    # internal switch
-	    if [ ! -d /proc/sys/net/ipv4/conf/eth2.1 ] || [ ! -d /proc/sys/net/ipv4/conf/eth2.2 ]; then
-    		$LOG "Add vlans and config"
-		vconfig add eth2 1
-		vconfig add eth2 2
-		$LOG "ETH2.1_MACADDR $LAN_MAC_ADDR"
-		ifconfig eth2.1 hw ether "$LAN_MAC_ADDR"
-		$LOG "ETH2.2_MACADDR $WAN_MAC_ADDR"
-		ifconfig eth2.2 hw ether "$WAN_MAC_ADDR"
+	    if [ "$gw_if" = "eth3" ] && [ "$real_lan_if" = "eth2" ]; then
+		# external switch
+		# real_lan_if always up
+		$LOG "ETH3_MACADDR $WAN_MAC_ADDR"
+		ifconfig eth2 hw ether "$WAN_MAC_ADDR"
+		ip link set eth2 up
+	    else
+		# internal switch
+		if [ ! -d /proc/sys/net/ipv4/conf/eth2.1 ] || [ ! -d /proc/sys/net/ipv4/conf/eth2.2 ]; then
+    		    $LOG "Add vlans and config"
+		    vconfig add eth2 1
+		    vconfig add eth2 2
+		    $LOG "ETH2.1_MACADDR $LAN_MAC_ADDR"
+		    ifconfig eth2.1 hw ether "$LAN_MAC_ADDR"
+		    $LOG "ETH2.2_MACADDR $WAN_MAC_ADDR"
+		    ifconfig eth2.2 hw ether "$WAN_MAC_ADDR"
 	    fi
-	    # real_wan_if always up
-	    ip link set eth2.1 up
+		# real_lan_if always up
+		ip link set eth2.1 up
+	    fi
 	fi
-    fi
 
     # flush ip from interfaces
     addr_flush
