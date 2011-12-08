@@ -1414,7 +1414,7 @@ config SQUASHFS_EMBEDDED
 config SQUASHFS_FRAGMENT_CACHE_SIZE
 	int "Number of fragments cached" if SQUASHFS_EMBEDDED
 	depends on SQUASHFS
-	default "3"
+	default "1"
 	help
 	  By default SquashFS caches the last 3 fragments read from
 	  the filesystem.  Increasing this amount may mean SquashFS

@@ -866,6 +866,7 @@
 15) More correct down wifi interfaces at modules reload and firmware update.<br>
 16) Consolidate some code in init.d.<br>
 17) Backport tcp: drop SYN+FIN messages fixes from 3.x.x kernel.<br>
+18) Decrease SQUASHFS_FRAGMENT_CACHE_SIZE from 4 to 1 for save memory(no more need big cache).<br>
 
 <br><br>
 <b>For support see:</b><br>
