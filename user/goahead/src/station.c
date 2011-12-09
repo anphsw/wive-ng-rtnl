@@ -1530,17 +1530,16 @@ int initStaProfile(void)
 	if (wordlist == NULL || strcmp(wordlist, "" ) == 0)
 	{
 		error(E_L, E_LOG, T("Sta SSID has no data."));
-		return -1;
-	}
-
-	currentProfileSetting = headerProfileSetting;
-	sprintf(tmp_buffer, "%s", wordlist);
-	for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++)
-	{
+	} else {
+	    currentProfileSetting = headerProfileSetting;
+	    sprintf(tmp_buffer, "%s", wordlist);
+	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++)
+	    {
 		sprintf((char *)currentProfileSetting->SSID, "%s", tok);
 		currentProfileSetting->SsidLen = strlen(tok);
 		if (currentProfileSetting->Next != NULL)
 			currentProfileSetting = currentProfileSetting->Next;
+	    }
 	}
 
 	// NetworkType
@@ -1548,16 +1547,15 @@ int initStaProfile(void)
 	wordlist = nvram_get(RT2860_NVRAM, "staNetworkType");
 	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
 		error(E_L, E_LOG, T("Sta NetworkType has no data."));
-		return -1;
-	}
-
-	currentProfileSetting = headerProfileSetting;
-	sprintf(tmp_buffer, "%s", wordlist);
-	for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
+	} else {
+	    currentProfileSetting = headerProfileSetting;
+	    sprintf(tmp_buffer, "%s", wordlist);
+	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
 		currentProfileSetting->NetworkType = atoi(tok);
 		// fprintf(stderr, "i=%d, NetworkType=%d\n", i,currentProfileSetting->NetworkType);
 		if (currentProfileSetting->Next != NULL)
 			currentProfileSetting = currentProfileSetting->Next;
+	    }
 	}
 
 	// PSMode
@@ -1565,15 +1563,14 @@ int initStaProfile(void)
 	wordlist = nvram_get(RT2860_NVRAM, "staPSMode");
 	if (wordlist == NULL || strcmp(wordlist, "" ) == 0)	{
 		error(E_L, E_LOG, T("Sta PSMode has no data."));
-		return -1;
-	}
-
-	currentProfileSetting = headerProfileSetting;
-	sprintf(tmp_buffer, "%s", wordlist);
-	for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
+	} else {
+	    currentProfileSetting = headerProfileSetting;
+	    sprintf(tmp_buffer, "%s", wordlist);
+	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
 		currentProfileSetting->PSmode= atoi(tok);
 		if (currentProfileSetting->Next != NULL)
 			currentProfileSetting = currentProfileSetting->Next;
+	    }
 	}
 
 	// AdhocMode
@@ -1581,15 +1578,14 @@ int initStaProfile(void)
 	wordlist = nvram_get(RT2860_NVRAM, "staAdhocMode");
 	if (wordlist == NULL || strcmp(wordlist, "" ) == 0)	{
 		error(E_L, E_LOG, T("Sta AdhocMode has no data."));
-		return -1;
-	}
-
-	currentProfileSetting = headerProfileSetting;
-	sprintf(tmp_buffer, "%s", wordlist);
-	for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
+	} else {
+	    currentProfileSetting = headerProfileSetting;
+	    sprintf(tmp_buffer, "%s", wordlist);
+	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
 		currentProfileSetting->AdhocMode= atoi(tok);
 		if (currentProfileSetting->Next != NULL)
 			currentProfileSetting = currentProfileSetting->Next;
+	    }
 	}
 
 	// Channel
@@ -1597,15 +1593,15 @@ int initStaProfile(void)
 	wordlist = nvram_get(RT2860_NVRAM, "staChannel");
 	if (wordlist == NULL || strcmp(wordlist, "" ) == 0)	{
 		error(E_L, E_LOG, T("Sta Channel has no data."));
-		return -1;
-	}
+	} else {
 
-	currentProfileSetting = headerProfileSetting;
-	sprintf(tmp_buffer, "%s", wordlist);
-	for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
+	    currentProfileSetting = headerProfileSetting;
+	    sprintf(tmp_buffer, "%s", wordlist);
+	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
 		currentProfileSetting->Channel= atoi(tok);
 		if (currentProfileSetting->Next != NULL)
 			currentProfileSetting = currentProfileSetting->Next;
+	    }
 	}
 
 	// PreamType
@@ -1613,15 +1609,14 @@ int initStaProfile(void)
 	wordlist = nvram_get(RT2860_NVRAM, "staPreamType");
 	if (wordlist == NULL || strcmp(wordlist, "" ) == 0)	{
 		error(E_L, E_LOG, T("Sta PreamType has no data."));
-		return -1;
-	}
-
-	currentProfileSetting = headerProfileSetting;
-	sprintf(tmp_buffer, "%s", wordlist);
-	for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
+	} else {
+	    currentProfileSetting = headerProfileSetting;
+	    sprintf(tmp_buffer, "%s", wordlist);
+	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
 		currentProfileSetting->PreamType= atoi(tok);
 		if (currentProfileSetting->Next != NULL)
 			currentProfileSetting = currentProfileSetting->Next;
+	    }
 	}
 
 	// RTSCheck
@@ -1629,15 +1624,14 @@ int initStaProfile(void)
 	wordlist = nvram_get(RT2860_NVRAM, "staRTSCheck");
 	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
 		error(E_L, E_LOG, T("Sta RTSCheck has no data."));
-		return -1;
-	}
-
-	currentProfileSetting = headerProfileSetting;
-	sprintf(tmp_buffer, "%s", wordlist);
-	for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
+	} else {
+	    currentProfileSetting = headerProfileSetting;
+	    sprintf(tmp_buffer, "%s", wordlist);
+	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
 		currentProfileSetting->RTSCheck= atoi(tok);
 		if (currentProfileSetting->Next != NULL)
 			currentProfileSetting = currentProfileSetting->Next;
+	    }
 	}
 
 	// FragmentCheck
@@ -1645,15 +1639,14 @@ int initStaProfile(void)
 	wordlist = nvram_get(RT2860_NVRAM, "staFragmentCheck");
 	if (wordlist == NULL || strcmp(wordlist, "" ) == 0)	{
 		error(E_L, E_LOG, T("Sta FragmentCheck has no data."));
-		return -1;
-	}
-
-	currentProfileSetting = headerProfileSetting;
-	sprintf(tmp_buffer, "%s", wordlist);
-	for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
+	} else {
+	    currentProfileSetting = headerProfileSetting;
+	    sprintf(tmp_buffer, "%s", wordlist);
+	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
 		currentProfileSetting->FragmentCheck= atoi(tok);
 		if (currentProfileSetting->Next != NULL)
 			currentProfileSetting = currentProfileSetting->Next;
+	    }
 	}
 
 	// RTS
@@ -1661,15 +1654,14 @@ int initStaProfile(void)
 	wordlist = nvram_get(RT2860_NVRAM, "staRTS");
 	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
 		error(E_L, E_LOG, T("Sta RTS has no data."));
-		return -1;
-	}
-
-	currentProfileSetting = headerProfileSetting;
-	sprintf(tmp_buffer, "%s", wordlist);
-	for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
+	} else {
+	    currentProfileSetting = headerProfileSetting;
+	    sprintf(tmp_buffer, "%s", wordlist);
+	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
 		currentProfileSetting->RTS= atoi(tok);
 		if (currentProfileSetting->Next != NULL)
 			currentProfileSetting = currentProfileSetting->Next;
+	    }
 	}
 
 	// Fragment
@@ -1677,15 +1669,14 @@ int initStaProfile(void)
 	wordlist = nvram_get(RT2860_NVRAM, "staFragment");
 	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
 		error(E_L, E_LOG, T("Sta Fragment has no data."));
-		return -1;
-	}
-
-	currentProfileSetting = headerProfileSetting;
-	sprintf(tmp_buffer, "%s", wordlist);
-	for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
+	} else {
+	    currentProfileSetting = headerProfileSetting;
+	    sprintf(tmp_buffer, "%s", wordlist);
+	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
 		currentProfileSetting->Fragment= atoi(tok);
 		if (currentProfileSetting->Next != NULL)
 			currentProfileSetting = currentProfileSetting->Next;
+	    }
 	}
 
 	// Auth
@@ -1693,7 +1684,7 @@ int initStaProfile(void)
 	wordlist = nvram_get(RT2860_NVRAM, "staAuth");
 	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
 		error(E_L, E_LOG, T("Sta Auth has no data."));
-		return -1;
+		goto out_wep;
 	}
 
 	currentProfileSetting = headerProfileSetting;
@@ -1709,215 +1700,215 @@ int initStaProfile(void)
 	wordlist = nvram_get(RT2860_NVRAM, "staEncrypt");
 	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
 		error(E_L, E_LOG, T("Sta Encryption has no data."));
-		return -1;
-	}
-
-	currentProfileSetting = headerProfileSetting;
-	sprintf(tmp_buffer, "%s", wordlist);
-	for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
+		goto out_wep;
+	} else {
+	    currentProfileSetting = headerProfileSetting;
+	    sprintf(tmp_buffer, "%s", wordlist);
+	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
 		currentProfileSetting->Encryption= atoi(tok);
 		if (currentProfileSetting->Next != NULL)
 			currentProfileSetting = currentProfileSetting->Next;
-	}
+	    }
 
-	// Key1	
-	bzero(tmp_buffer, sizeof(tmp_buffer));
-	wordlist = nvram_get(RT2860_NVRAM, "staKey1");
-	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
-		error(E_L, E_LOG, T("Sta Key1 has no data."));
-		return -1;
-	}
+	    // Key1
+	    bzero(tmp_buffer, sizeof(tmp_buffer));
+	    wordlist = nvram_get(RT2860_NVRAM, "staKey1");
+	    if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
+		    error(E_L, E_LOG, T("Sta Key1 has no data."));
+		goto out_wep;
+	    }
 
-	currentProfileSetting = headerProfileSetting;
-	sprintf(tmp_buffer, "%s", wordlist);
-	for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
+	    currentProfileSetting = headerProfileSetting;
+	    sprintf(tmp_buffer, "%s", wordlist);
+	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
 		sprintf((char *)currentProfileSetting->Key1, "%s", tok);
 		if (currentProfileSetting->Next != NULL)
 			currentProfileSetting = currentProfileSetting->Next;
-	}
+	    }
 
-	// Key2
-	bzero(tmp_buffer, sizeof(tmp_buffer));
-	wordlist = nvram_get(RT2860_NVRAM, "staKey2");
-	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
+	    // Key2
+	    bzero(tmp_buffer, sizeof(tmp_buffer));
+	    wordlist = nvram_get(RT2860_NVRAM, "staKey2");
+	    if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
 		error(E_L, E_LOG, T("Sta Key2 has no data."));
-		return -1;
-	}
+		goto out_wep;
+	    }
 
-	currentProfileSetting = headerProfileSetting;
-	sprintf(tmp_buffer, "%s", wordlist);
-	for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
+	    currentProfileSetting = headerProfileSetting;
+	    sprintf(tmp_buffer, "%s", wordlist);
+	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
 		sprintf((char *)currentProfileSetting->Key2, "%s", tok);
 		if (currentProfileSetting->Next != NULL)
 			currentProfileSetting = currentProfileSetting->Next;
-	}
+	    }
 
-	// Key3
-	bzero(tmp_buffer, sizeof(tmp_buffer));
-	wordlist = nvram_get(RT2860_NVRAM, "staKey3");
-	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
+	    // Key3
+	    bzero(tmp_buffer, sizeof(tmp_buffer));
+	    wordlist = nvram_get(RT2860_NVRAM, "staKey3");
+	    if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
 		error(E_L, E_LOG, T("Sta Key3 has no data."));
-		return -1;
-	}
+		goto out_wep;
+	    }
 
-	currentProfileSetting = headerProfileSetting;
-	sprintf(tmp_buffer, "%s", wordlist);
-	for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
+	    currentProfileSetting = headerProfileSetting;
+	    sprintf(tmp_buffer, "%s", wordlist);
+	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
 		sprintf((char *)currentProfileSetting->Key3, "%s", tok);
 		if (currentProfileSetting->Next != NULL)
 			currentProfileSetting = currentProfileSetting->Next;
-	}
+	    }
 
-	// Key4
-	bzero(tmp_buffer, sizeof(tmp_buffer));
-	wordlist = nvram_get(RT2860_NVRAM, "staKey4");
-	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
+	    // Key4
+	    bzero(tmp_buffer, sizeof(tmp_buffer));
+	    wordlist = nvram_get(RT2860_NVRAM, "staKey4");
+	    if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
 		error(E_L, E_LOG, T("Sta Key4 has no data."));
-		return -1;
-	}
+		goto out_wep;
+	    }
 
-	currentProfileSetting = headerProfileSetting;
-	sprintf(tmp_buffer, "%s", wordlist);
-	for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
+	    currentProfileSetting = headerProfileSetting;
+	    sprintf(tmp_buffer, "%s", wordlist);
+	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
 		sprintf((char *)currentProfileSetting->Key4, "%s", tok);
 		if (currentProfileSetting->Next != NULL)
 			currentProfileSetting = currentProfileSetting->Next;
-	}
+	    }
 
-	// Key1Type
-	bzero(tmp_buffer, sizeof(tmp_buffer));
-	wordlist = nvram_get(RT2860_NVRAM, "staKey1Type");
-	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
+	    // Key1Type
+	    bzero(tmp_buffer, sizeof(tmp_buffer));
+	    wordlist = nvram_get(RT2860_NVRAM, "staKey1Type");
+	    if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
 		error(E_L, E_LOG, T("Sta Key1Type has no data."));
-		return -1;
-	}
+		goto out_wep;
+	    }
 
-	currentProfileSetting = headerProfileSetting;
-	sprintf(tmp_buffer, "%s", wordlist);
-	for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
+	    currentProfileSetting = headerProfileSetting;
+	    sprintf(tmp_buffer, "%s", wordlist);
+	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
 		currentProfileSetting->Key1Type= atoi(tok);
 		if (currentProfileSetting->Next != NULL)
 			currentProfileSetting = currentProfileSetting->Next;
-	}
+	    }
 
-	// Key2Type
-	bzero(tmp_buffer, sizeof(tmp_buffer));
-	wordlist = nvram_get(RT2860_NVRAM, "staKey2Type");
-	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
+	    // Key2Type
+	    bzero(tmp_buffer, sizeof(tmp_buffer));
+	    wordlist = nvram_get(RT2860_NVRAM, "staKey2Type");
+	    if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
 		error(E_L, E_LOG, T("Sta Key2Type has no data."));
-		return -1;
-	}
+		goto out_wep;
+	    }
 
-	currentProfileSetting = headerProfileSetting;
-	sprintf(tmp_buffer, "%s", wordlist);
-	for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
+	    currentProfileSetting = headerProfileSetting;
+	    sprintf(tmp_buffer, "%s", wordlist);
+	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
 		currentProfileSetting->Key2Type= atoi(tok);
 		if (currentProfileSetting->Next != NULL)
 			currentProfileSetting = currentProfileSetting->Next;
-	}
+	    }
 
-	// Key3Type
-	bzero(tmp_buffer, sizeof(tmp_buffer));
-	wordlist = nvram_get(RT2860_NVRAM, "staKey3Type");
-	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
+	    // Key3Type
+	    bzero(tmp_buffer, sizeof(tmp_buffer));
+	    wordlist = nvram_get(RT2860_NVRAM, "staKey3Type");
+	    if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
 		error(E_L, E_LOG, T("Sta Key3Type has no data."));
-		return -1;
-	}
+		goto out_wep;
+	    }
 
-	currentProfileSetting = headerProfileSetting;
-	sprintf(tmp_buffer, "%s", wordlist);
-	for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
+	    currentProfileSetting = headerProfileSetting;
+	    sprintf(tmp_buffer, "%s", wordlist);
+	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
 		currentProfileSetting->Key3Type= atoi(tok);
 		if (currentProfileSetting->Next != NULL)
 			currentProfileSetting = currentProfileSetting->Next;
-	}
+	    }
 
-	// Key4Type
-	bzero(tmp_buffer, sizeof(tmp_buffer));
-	wordlist = nvram_get(RT2860_NVRAM, "staKey4Type");
-	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
+	    // Key4Type
+	    bzero(tmp_buffer, sizeof(tmp_buffer));
+	    wordlist = nvram_get(RT2860_NVRAM, "staKey4Type");
+	    if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
 		error(E_L, E_LOG, T("Sta Key4Type has no data."));
-		return -1;
-	}
+		goto out_wep;
+	    }
 
-	currentProfileSetting = headerProfileSetting;
-	sprintf(tmp_buffer, "%s", wordlist);
-	for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
+	    currentProfileSetting = headerProfileSetting;
+	    sprintf(tmp_buffer, "%s", wordlist);
+	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
 		currentProfileSetting->Key4Type= atoi(tok);
 		if (currentProfileSetting->Next != NULL)
 			currentProfileSetting = currentProfileSetting->Next;
-	}
+	    }
 
-	// Key1Length
-	bzero(tmp_buffer, sizeof(tmp_buffer));
-	wordlist = nvram_get(RT2860_NVRAM, "staKey1Length");
-	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
+	    // Key1Length
+	    bzero(tmp_buffer, sizeof(tmp_buffer));
+	    wordlist = nvram_get(RT2860_NVRAM, "staKey1Length");
+	    if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
 		error(E_L, E_LOG, T("Sta Key1Lenght has no data."));
-		return -1;
-	}
+		goto out_wep;
+	    }
 
-	currentProfileSetting = headerProfileSetting;
-	sprintf(tmp_buffer, "%s", wordlist);
-	for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
+	    currentProfileSetting = headerProfileSetting;
+	    sprintf(tmp_buffer, "%s", wordlist);
+	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
 		currentProfileSetting->Key1Length= atoi(tok);
 		if (currentProfileSetting->Next != NULL)
 			currentProfileSetting = currentProfileSetting->Next;
-	}
+	    }
 
-	// Key2Length
-	bzero(tmp_buffer, sizeof(tmp_buffer));
-	wordlist = nvram_get(RT2860_NVRAM, "staKey2Length");
-	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
+	    // Key2Length
+	    bzero(tmp_buffer, sizeof(tmp_buffer));
+	    wordlist = nvram_get(RT2860_NVRAM, "staKey2Length");
+	    if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
 		error(E_L, E_LOG, T("Sta Key2Lenght has no data."));
-		return -1;
-	}
+		goto out_wep;
+	    }
 
-	currentProfileSetting = headerProfileSetting;
-	sprintf(tmp_buffer, "%s", wordlist);
-	for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
+	    currentProfileSetting = headerProfileSetting;
+	    sprintf(tmp_buffer, "%s", wordlist);
+	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
 		currentProfileSetting->Key2Length= atoi(tok);
 		if (currentProfileSetting->Next != NULL)
 			currentProfileSetting = currentProfileSetting->Next;
-	}
+	    }
 
-	// Key3Length
-	bzero(tmp_buffer, sizeof(tmp_buffer));
-	wordlist = nvram_get(RT2860_NVRAM, "staKey3Length");
-	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
+	    // Key3Length
+	    bzero(tmp_buffer, sizeof(tmp_buffer));
+	    wordlist = nvram_get(RT2860_NVRAM, "staKey3Length");
+	    if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
 		error(E_L, E_LOG, T("Sta Key3Lenght has no data."));
-		return -1;
-	}
+		goto out_wep;
+	    }
 
-	currentProfileSetting = headerProfileSetting;
-	sprintf(tmp_buffer, "%s", wordlist);
-	for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
+	    currentProfileSetting = headerProfileSetting;
+	    sprintf(tmp_buffer, "%s", wordlist);
+	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
 		currentProfileSetting->Key3Length= atoi(tok);
 		if (currentProfileSetting->Next != NULL)
 			currentProfileSetting = currentProfileSetting->Next;
-	}
+	    }
 
-	// Key4Length
-	bzero(tmp_buffer, sizeof(tmp_buffer));
-	wordlist = nvram_get(RT2860_NVRAM, "staKey4Length");
-	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
+	    // Key4Length
+	    bzero(tmp_buffer, sizeof(tmp_buffer));
+	    wordlist = nvram_get(RT2860_NVRAM, "staKey4Length");
+	    if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
 		error(E_L, E_LOG, T("Sta Key4Length has no data."));
-		return -1;
-	}
+		goto out_wep;
+	    }
 
-	currentProfileSetting = headerProfileSetting;
-	sprintf(tmp_buffer, "%s", wordlist);
-	for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
+	    currentProfileSetting = headerProfileSetting;
+	    sprintf(tmp_buffer, "%s", wordlist);
+	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
 		currentProfileSetting->Key4Length= atoi(tok);
 		if (currentProfileSetting->Next != NULL)
 			currentProfileSetting = currentProfileSetting->Next;
-	}
+	    }
 
-	// DefaultKeyID
-	bzero(tmp_buffer, sizeof(tmp_buffer));
-	wordlist = nvram_get(RT2860_NVRAM, "staKeyDefaultId");
-	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
+	    // DefaultKeyID
+	    bzero(tmp_buffer, sizeof(tmp_buffer));
+	    wordlist = nvram_get(RT2860_NVRAM, "staKeyDefaultId");
+	    if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
 		error(E_L, E_LOG, T("Sta DefaultKeyID has no data."));
-		return -1;
+		goto out_wep;
+	    }
 	}
 
 	currentProfileSetting = headerProfileSetting;
@@ -1927,30 +1918,29 @@ int initStaProfile(void)
 		if (currentProfileSetting->Next != NULL)
 			currentProfileSetting = currentProfileSetting->Next;
 	}
+out_wep:
 
 	// WPAPSK
 	bzero(tmp_buffer, sizeof(tmp_buffer));
 	wordlist = nvram_get(RT2860_NVRAM, "staWpaPsk");
 	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
 		error(E_L, E_LOG, T("Sta WPAPSK has no data."));
-		return -1;
-	}
-
-	currentProfileSetting = headerProfileSetting;
-	sprintf(tmp_buffer, "%s", wordlist);
-	for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
+	} else {
+	    currentProfileSetting = headerProfileSetting;
+	    sprintf(tmp_buffer, "%s", wordlist);
+	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
 		sprintf((char *)currentProfileSetting->WpaPsk, "%s", tok);
 		if (currentProfileSetting->Next != NULL)
 			currentProfileSetting = currentProfileSetting->Next;
+	    }
 	}
-
 #ifdef WPA_SUPPLICANT_SUPPORT
 	//keymgmt
 	bzero(tmp_buffer, sizeof(tmp_buffer));
 	wordlist = nvram_get(RT2860_NVRAM, "sta8021xKeyMgmt");
 	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
 		error(E_L, E_LOG, T("Sta 802.1x Key Mgmt has no data."));
-		return -1;
+		goto out_wpa_sp;
 	}
 
 	currentProfileSetting = headerProfileSetting;
@@ -1967,7 +1957,7 @@ int initStaProfile(void)
 	wordlist = nvram_get(RT2860_NVRAM, "sta8021xEAP");
 	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
 		error(E_L, E_LOG, T("Sta 802.1x EAP has no data."));
-		return -1;
+		goto out_wpa_sp;
 	}
 
 	currentProfileSetting = headerProfileSetting;
@@ -1983,7 +1973,7 @@ int initStaProfile(void)
 	wordlist = nvram_get(RT2860_NVRAM, "sta8021xIdentity");
 	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
 		error(E_L, E_LOG, T("Sta 802.1x Identity has no data."));
-		return -1;
+		goto out_wpa_sp;
 	}
 
 	currentProfileSetting = headerProfileSetting;
@@ -1999,7 +1989,7 @@ int initStaProfile(void)
 	wordlist = nvram_get(RT2860_NVRAM, "sta8021xPassword");
 	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
 		error(E_L, E_LOG, T("Sta 802.1x Password has no data."));
-		return -1;
+		goto out_wpa_sp;
 	}
 
 	currentProfileSetting = headerProfileSetting;
@@ -2015,7 +2005,7 @@ int initStaProfile(void)
 	wordlist = nvram_get(RT2860_NVRAM, "sta8021xClientCert");
 	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
 		error(E_L, E_LOG, T("Sta 802.1x Client Cert has no data."));
-		return -1;
+		goto out_wpa_sp;
 	}
 
 	currentProfileSetting = headerProfileSetting;
@@ -2031,7 +2021,7 @@ int initStaProfile(void)
 	wordlist = nvram_get(RT2860_NVRAM, "sta8021xPrivateKey");
 	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
 		error(E_L, E_LOG, T("Sta 802.1x Private Key has no data."));
-		return -1;
+		goto out_wpa_sp;
 	}
 
 	currentProfileSetting = headerProfileSetting;
@@ -2047,7 +2037,7 @@ int initStaProfile(void)
 	wordlist = nvram_get(RT2860_NVRAM, "sta8021xPrivateKeyPassword");
 	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
 		error(E_L, E_LOG, T("Sta 802.1x Private Key Password has no data."));
-		return -1;
+		goto out_wpa_sp;
 	}
 
 	currentProfileSetting = headerProfileSetting;
@@ -2063,7 +2053,7 @@ int initStaProfile(void)
 	wordlist = nvram_get(RT2860_NVRAM, "sta8021xCACert");
 	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
 		error(E_L, E_LOG, T("Sta 802.1x CA Cert has no data."));
-		return -1;
+		goto out_wpa_sp;
 	}
 
 	currentProfileSetting = headerProfileSetting;
@@ -2079,7 +2069,7 @@ int initStaProfile(void)
 	wordlist = nvram_get(RT2860_NVRAM, "sta8021xTunnel");
 	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
 		error(E_L, E_LOG, T("Sta 802.1x Tunnel has no data."));
-		return -1;
+		goto out_wpa_sp;
 	}
 
 	currentProfileSetting = headerProfileSetting;
@@ -2089,6 +2079,7 @@ int initStaProfile(void)
 		if (currentProfileSetting->Next != NULL)
 			currentProfileSetting = currentProfileSetting->Next;
 	}
+out_wpa_sp:
 #endif
 
 	//Active
@@ -2096,15 +2087,14 @@ int initStaProfile(void)
 	wordlist = nvram_get(RT2860_NVRAM, "staActive");
 	if (wordlist == NULL || strcmp(wordlist, "" ) == 0)	{
 		error(E_L, E_LOG, T("Sta Active has no data."));
-		return -1;
-	}
-
-	currentProfileSetting = headerProfileSetting;
-	sprintf(tmp_buffer, "%s", wordlist);
-	for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
+	} else {
+	    currentProfileSetting = headerProfileSetting;
+	    sprintf(tmp_buffer, "%s", wordlist);
+	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
 		currentProfileSetting->Active = atoi(tok);
 		if (currentProfileSetting->Next != NULL)
 			currentProfileSetting = currentProfileSetting->Next;
+	    }
 	}
 	return 0;
 }
