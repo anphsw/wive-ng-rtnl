@@ -2,7 +2,6 @@
  * Layer Two Tunnelling Protocol Daemon
  * Copyright (C) 1998 Adtran, Inc.
  * Copyright (C) 2002 Jeff McAdams
- * Portions copyright (c) 2011 wl500g.googlecode.com project
  *
  * Mark Spencer
  *
@@ -41,7 +40,7 @@ int kernel_support;             /* Kernel Support there or not? */
 
 int init_network (void)
 {
-    long arg=1;
+    long arg;
     unsigned int length = sizeof (server);
     gethostname (hostname, sizeof (hostname));
     server.sin_family = AF_INET;
@@ -54,6 +53,7 @@ int init_network (void)
         return -EINVAL;
     };
 
+    arg=1;
     setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &arg, sizeof(arg));
     setsockopt(server_socket, SOL_SOCKET, SO_NO_CHECK, &arg, sizeof(arg));
 
@@ -335,11 +335,6 @@ int build_fdset (fd_set *readfds)
 
 	while (tun)
 	{
-		if (tun->u_fd > -1) {
-			if (tun->u_fd > max)
-				max = tun->u_fd;
-			FD_SET (tun->u_fd, readfds);
-		}
 		call = tun->call_head;
 		while (call)
 		{
@@ -412,7 +407,7 @@ void network_thread ()
 
     /* set high priority */
     if (setpriority(PRIO_PROCESS, 0, -20) < 0)
-	l2tp_log (LOG_INFO, "xl2tpd: can't set priority to high: %m");
+	warn("xl2tpd: can't set priority to high: %m");
 
     /* This one buffer can be recycled for everything except control packets */
     buf = new_buf (MAX_RECV_SIZE);
@@ -427,26 +422,36 @@ void network_thread ()
         max = build_fdset (&readfds);
         ptv = process_schedule(&tv);
         ret = select (max + 1, &readfds, NULL, NULL, ptv);
-
+        
+        /*if (ret <= 0)
+        {
+             if (ret == 0)
+            {
+                if (gconfig.debug_network)
+                {
+                    l2tp_log (LOG_DEBUG, "%s: select timeout\n", __FUNCTION__);
+                }
+            }
+            else
+            {
+                if (gconfig.debug_network)
+                {
+                    l2tp_log (LOG_DEBUG,
+                        "%s: select returned error %d (%s)\n",
+                        __FUNCTION__, errno, strerror (errno));
+                }
+            }
+            
+            
+            continue;
+        }
+        */
+        
         if (FD_ISSET (control_fd, &readfds))
         {
             do_control ();
         }
-        int server_socket_processed = 0;
-        int * currentfd = NULL;
-        st = tunnels.head;
-        while (st || !server_socket_processed) {
-            if (st && (st->u_fd == -1)) {
-                st=st->next;
-                continue;
-            }
-            if (st) {
-                currentfd = &st->u_fd;
-            } else {
-                currentfd = &server_socket;
-                server_socket_processed = 1;
-            }
-        if (FD_ISSET (*currentfd, &readfds))
+        if (FD_ISSET (server_socket, &readfds))
         {
             /*
              * Okay, now we're ready for reading and processing new data.
@@ -459,10 +464,10 @@ void network_thread ()
 
 	    memset(&from, 0, sizeof(from));
 	    memset(&to,   0, sizeof(to));
-
+	    
 	    fromlen = sizeof(from);
 	    tolen   = sizeof(to);
-
+	    
 	    memset(&msgh, 0, sizeof(struct msghdr));
 	    iov.iov_base = buf->start;
 	    iov.iov_len  = buf->len;
@@ -473,21 +478,14 @@ void network_thread ()
 	    msgh.msg_iov  = &iov;
 	    msgh.msg_iovlen = 1;
 	    msgh.msg_flags = 0;
-
+	    
 	    /* Receive one packet. */
-	    recvsize = recvmsg(*currentfd, &msgh, 0);
+	    recvsize = recvmsg(server_socket, &msgh, 0);
 
             if (recvsize < MIN_PAYLOAD_HDR_LEN)
             {
                 if (recvsize < 0)
                 {
-                    if (errno == ECONNREFUSED) {
-                        close(*currentfd);
-                    }
-                    if ((errno == ECONNREFUSED) ||
-                        (errno == EBADF)) {
-                        *currentfd = -1;
-                    }
                     if (errno != EAGAIN)
                         l2tp_log (LOG_WARNING,
                              "%s: recvfrom returned error %d (%s)\n",
@@ -593,8 +591,6 @@ void network_thread ()
 		}
 	    };
 	}
-	if (st) st=st->next;
-	}
 
 	/*
 	 * finished obvious sources, look for data from PPP connections.
@@ -665,82 +661,5 @@ void network_thread ()
             st = st->next;
         }
     }
-}
 
-int connect_pppol2tp(struct tunnel * t) {
-#ifdef USE_KERNEL
-        if (kernel_support) {
-            int ufd = -1, fd2 = -1;
-            int flags;
-            struct sockaddr_pppol2tp sax;
-            struct sockaddr_in server;
-            server.sin_family = AF_INET;
-            server.sin_addr.s_addr = gconfig.listenaddr;
-            server.sin_port = htons (gconfig.port);
-            if ((ufd = socket (PF_INET, SOCK_DGRAM, 0)) < 0)
-            {
-                l2tp_log (LOG_CRIT, "%s: Unable to allocate UDP socket. Terminating.\n",
-                    __FUNCTION__);
-                return -EINVAL;
-            };
-
-            flags=1;
-            setsockopt(ufd, SOL_SOCKET, SO_REUSEADDR, &flags, sizeof(flags));
-            setsockopt(ufd, SOL_SOCKET, SO_NO_CHECK, &flags, sizeof(flags));
-
-            if (bind (ufd, (struct sockaddr *) &server, sizeof (server)))
-            {
-                close (ufd);
-                l2tp_log (LOG_CRIT, "%s: Unable to bind UDP socket: %s. Terminating.\n",
-                     __FUNCTION__, strerror(errno), errno);
-                return -EINVAL;
-            };
-            server = t->peer;
-            flags = fcntl(ufd, F_GETFL);
-            if (flags == -1 || fcntl(ufd, F_SETFL, flags | O_NONBLOCK) == -1) {
-                l2tp_log (LOG_WARNING, "%s: Unable to set UDP socket nonblock.\n",
-                     __FUNCTION__);
-                return -EINVAL;
-            }
-            if (connect (ufd, (struct sockaddr *) &server, sizeof(server)) < 0) {
-                l2tp_log (LOG_CRIT, "%s: Unable to connect UDP peer. Terminating.\n",
-                 __FUNCTION__);
-                return -EINVAL;
-            }
-
-            t->u_fd=ufd;
-
-            fd2 = socket(AF_PPPOX, SOCK_DGRAM, PX_PROTO_OL2TP);
-            if (fd2 < 0) {
-                l2tp_log (LOG_WARNING, "%s: Unable to allocate PPPoL2TP socket.\n",
-                     __FUNCTION__);
-                return -EINVAL;
-            }
-            flags = fcntl(fd2, F_GETFL);
-            if (flags == -1 || fcntl(fd2, F_SETFL, flags | O_NONBLOCK) == -1) {
-                l2tp_log (LOG_WARNING, "%s: Unable to set PPPoL2TP socket nonblock.\n",
-                     __FUNCTION__);
-                return -EINVAL;
-            }
-            sax.sa_family = AF_PPPOX;
-            sax.sa_protocol = PX_PROTO_OL2TP;
-            sax.pppol2tp.pid = 0;
-            sax.pppol2tp.fd = t->u_fd;
-            sax.pppol2tp.addr.sin_addr.s_addr = t->peer.sin_addr.s_addr;
-            sax.pppol2tp.addr.sin_port = t->peer.sin_port;
-            sax.pppol2tp.addr.sin_family = AF_INET;
-            sax.pppol2tp.s_tunnel  = t->ourtid;
-            sax.pppol2tp.s_session = 0;
-            sax.pppol2tp.d_tunnel  = t->tid;
-            sax.pppol2tp.d_session = 0;
-            if ((connect(fd2, (struct sockaddr *)&sax, sizeof(sax))) < 0) {
-                l2tp_log (LOG_WARNING, "%s: Unable to connect PPPoL2TP socket. %d %s\n",
-                     __FUNCTION__, errno, strerror(errno));
-                close(fd2);
-                return -EINVAL;
-            }
-            t->m_fd = fd2;
-        }
-#endif
-    return 0;
 }

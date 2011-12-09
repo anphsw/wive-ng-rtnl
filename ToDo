@@ -4,6 +4,7 @@
 ) Add /proc/rt3052/esw_cnt for traffic statistic per switch port.(need add in WebUI).
 
 # For me
-) goahead need bind only lan_if if managment in only lan mode
+need?) goahead need bind only lan_if if managment in only lan mode
+suspended) xl2tpd now support new l2tp kernel module introduced in 2.6.32.
 #need fix
-) Add skb reuse support.
+buggy) Add skb reuse support.

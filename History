@@ -874,7 +874,6 @@
 23) Header cpu-feature-overrides.h update for corect ralink cpus support.<br>
 24) Init.d Start base support exernal switch plugged to GMAC2. See Asus RT-N56U.<br>
 25) Rewrite switch,lan,br configure logic for more device independed version.<br>
-26) xl2tpd now support new l2tp kernel module introduced in 2.6.32.<br>
 
 <br><br>
 <b>For support see:</b><br>
