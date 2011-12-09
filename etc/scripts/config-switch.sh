@@ -165,9 +165,9 @@ if [ "$CONFIG_RT_3052_ESW" != "" ]; then
 	else
 	    DOUBLE_TAG=0
 	fi
+	# double vlan tag support enable/disable
+	switch reg w e4 $DOUBLE_TAG
     fi
-    # double vlan tag support enable/disable
-    switch reg w e4 $DOUBLE_TAG
     ##########################################################################
     echo '######### Clear switch mac table  ###########'
     switch clear > /dev/null 2>&1
