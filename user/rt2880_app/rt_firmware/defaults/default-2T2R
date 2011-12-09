@@ -126,6 +126,7 @@ CSPeriod=6
 PreAuth=0
 AuthMode=OPEN
 EncrypType=NONE
+staEncrypt=
 RekeyInterval=3600
 RekeyMethod=DISABLE
 PMKCachePeriod=10
