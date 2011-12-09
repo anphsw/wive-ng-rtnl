@@ -399,7 +399,7 @@ int start_pppd (struct call *c, struct ppp_opts *opts)
        sax.sa_family = AF_PPPOX;
        sax.sa_protocol = PX_PROTO_OL2TP;
        sax.pppol2tp.pid = 0;
-       sax.pppol2tp.fd = server_socket;
+       sax.pppol2tp.fd = c->container->u_fd;
        sax.pppol2tp.addr.sin_addr.s_addr = c->container->peer.sin_addr.s_addr;
        sax.pppol2tp.addr.sin_port = c->container->peer.sin_port;
        sax.pppol2tp.addr.sin_family = AF_INET;
@@ -410,6 +410,7 @@ int start_pppd (struct call *c, struct ppp_opts *opts)
        if (connect(fd2, (struct sockaddr *)&sax, sizeof(sax)) < 0) {
            l2tp_log (LOG_WARNING, "%s: Unable to connect PPPoL2TP socket.\n",
                 __FUNCTION__);
+           close(fd2);
            return -EINVAL;
        }
        stropt[pos++] = strdup ("plugin");
@@ -617,6 +618,10 @@ void destroy_tunnel (struct tunnel *t)
        the memory pointed to by t->chal_us.vector at some other place */
     if (t->chal_them.vector)
         free (t->chal_them.vector);
+    if (t->m_fd > -1 )
+        close (t->m_fd);
+    if (t->u_fd > -1 )
+        close (t->u_fd);
     route_del(&t->rt);
     free (t);
     free (me);
