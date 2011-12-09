@@ -71,11 +71,11 @@ if [ "$CONFIG_RT_3052_ESW" != "" ]; then
 	# with not correct configured from uboot
 	# need only start boot
 	######################################################################
-	echo "Reinit power mode for all switch ports"
+	$LOG "Reinit power mode for all switch ports"
 	/etc/scripts/config-vlan.sh $SWITCH_MODE FFFFF > /dev/null 2>&1
     fi
     ##########################################################################
-    echo '######### Clear switch partition  ###########'
+    $LOG '######### Clear switch partition  ###########'
     /etc/scripts/config-vlan.sh $SWITCH_MODE 0 > /dev/null 2>&1
     ##########################################################################
     # Set speed and duplex modes per port
@@ -97,7 +97,7 @@ if [ "$CONFIG_RT_3052_ESW" != "" ]; then
     elif [ -f /proc/rt63365/gmac ]; then
 	PROC="/proc/rt63365/gmac"
     else
-	echo "No swith in system!!!"
+	$LOG "No swith in system!!!"
 	PROC=
     fi
     if [ -f /bin/ethtool ] && [ "$PROC" != "" ]; then
@@ -111,7 +111,7 @@ if [ "$CONFIG_RT_3052_ESW" != "" ]; then
 	    # get mode for current port
 	    port_swmode=`nvram_get 2860 port"$i"_swmode`
 	    if [ "$port_swmode" != "auto" ] && [ "$port_swmode" != "" ]; then
-		echo ">>> Port $phys_portN set mode $port_swmode <<<"
+		$LOG ">>> Port $phys_portN set mode $port_swmode <<<"
 		# first disable autoneg
 		ethtool -s eth2 autoneg off > /dev/null 2>&1
 		if [ "$port_swmode" = "100f" ]; then
@@ -140,18 +140,18 @@ if [ "$CONFIG_RT_3052_ESW" != "" ]; then
     if [ "$OperationMode" = "1" ] || [ "$OperationMode" = "4" ]; then
 	if [ "$wan_port" = "0" ]; then
 	    if [ "$tv_port" = "1" ]; then
-		echo '##### ESW config vlan partition (WWLLL) #####'
+		$LOG '##### ESW config vlan partition (WWLLL) #####'
 		/etc/scripts/config-vlan.sh $SWITCH_MODE WWLLL > /dev/null 2>&1
 	    else
-		echo '##### ESW config vlan partition (WLLLL) #####'
+		$LOG '##### ESW config vlan partition (WLLLL) #####'
 		/etc/scripts/config-vlan.sh $SWITCH_MODE WLLLL > /dev/null 2>&1
 	    fi
 	else
 	    if [ "$tv_port" = "1" ]; then
-		echo '##### ESW config vlan partition (LLLWW) #####'
+		$LOG '##### ESW config vlan partition (LLLWW) #####'
 		/etc/scripts/config-vlan.sh $SWITCH_MODE LLLWW > /dev/null 2>&1
 	    else
-		echo '##### ESW config vlan partition (LLLLW) #####'
+		$LOG '##### ESW config vlan partition (LLLLW) #####'
 		/etc/scripts/config-vlan.sh $SWITCH_MODE LLLLW > /dev/null 2>&1
 	    fi
 	fi
@@ -169,7 +169,7 @@ if [ "$CONFIG_RT_3052_ESW" != "" ]; then
 	switch reg w e4 $DOUBLE_TAG
     fi
     ##########################################################################
-    echo '######### Clear switch mac table  ###########'
+    $LOG '######### Clear switch mac table  ###########'
     switch clear > /dev/null 2>&1
 ##############################################################################
 # VTSS external switch
@@ -177,9 +177,9 @@ if [ "$CONFIG_RT_3052_ESW" != "" ]; then
 elif [ "$CONFIG_MAC_TO_MAC_MODE" != "" ]; then
     SWITCH_MODE=1
     ##########################################################################
-    echo '######## clear switch partition  ########'
+    $LOG '######## clear switch partition  ########'
     /etc/scripts/config-vlan.sh $SWITCH_MODE 0 > /dev/null 2>&1
-    echo '##### config vlan partition (VTSS) #####'
+    $LOG '##### config vlan partition (VTSS) #####'
     /etc/scripts/config-vlan.sh $SWITCH_MODE 1 > /dev/null 2>&1
 ##############################################################################
 # IC+ external switch
@@ -187,17 +187,17 @@ elif [ "$CONFIG_MAC_TO_MAC_MODE" != "" ]; then
 elif [ "$CONFIG_RAETH_ROUTER" != "" ]; then
     SWITCH_MODE=0
     ##########################################################################
-    echo '######## clear switch partition  ########'
+    $LOG '######## clear switch partition  ########'
     /etc/scripts/config-vlan.sh $SWITCH_MODE 0 > /dev/null 2>&1
     ##########################################################################
     # In gate mode and hotspot mode configure vlans
     ##########################################################################
     if [ "$OperationMode" = "1" ] || [ "$OperationMode" = "4" ]; then
 	if [ "$wan_port" = "0" ]; then
-	    echo '##### IC+ config vlan partition (WLLLL) #####'
+	    $LOG '##### IC+ config vlan partition (WLLLL) #####'
 	    /etc/scripts/config-vlan.sh $SWITCH_MODE WLLLL > /dev/null 2>&1
 	else
-	    echo '##### IC+ config vlan partition (LLLLW) #####'
+	    $LOG '##### IC+ config vlan partition (LLLLW) #####'
 	    /etc/scripts/config-vlan.sh $SWITCH_MODE LLLLW > /dev/null 2>&1
 	fi
     fi
