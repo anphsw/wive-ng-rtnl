@@ -412,7 +412,7 @@ void network_thread ()
 
     /* set high priority */
     if (setpriority(PRIO_PROCESS, 0, -20) < 0)
-	warn("xl2tpd: can't set priority to high: %m");
+	l2tp_log (LOG_INFO, "xl2tpd: can't set priority to high: %m");
 
     /* This one buffer can be recycled for everything except control packets */
     buf = new_buf (MAX_RECV_SIZE);
@@ -427,38 +427,13 @@ void network_thread ()
         max = build_fdset (&readfds);
         ptv = process_schedule(&tv);
         ret = select (max + 1, &readfds, NULL, NULL, ptv);
-        
-        /*if (ret <= 0)
-        {
-             if (ret == 0)
-            {
-                if (gconfig.debug_network)
-                {
-                    l2tp_log (LOG_DEBUG, "%s: select timeout\n", __FUNCTION__);
-                }
-            }
-            else
-            {
-                if (gconfig.debug_network)
-                {
-                    l2tp_log (LOG_DEBUG,
-                        "%s: select returned error %d (%s)\n",
-                        __FUNCTION__, errno, strerror (errno));
-                }
-            }
-            
-            
-            continue;
-        }
-        */
-        
+
         if (FD_ISSET (control_fd, &readfds))
         {
             do_control ();
         }
         int server_socket_processed = 0;
         int * currentfd = NULL;
-        int oldfd = server_socket;
         st = tunnels.head;
         while (st || !server_socket_processed) {
             if (st && (st->u_fd == -1)) {
@@ -484,10 +459,10 @@ void network_thread ()
 
 	    memset(&from, 0, sizeof(from));
 	    memset(&to,   0, sizeof(to));
-	    
+
 	    fromlen = sizeof(from);
 	    tolen   = sizeof(to);
-	    
+
 	    memset(&msgh, 0, sizeof(struct msghdr));
 	    iov.iov_base = buf->start;
 	    iov.iov_len  = buf->len;
@@ -498,7 +473,7 @@ void network_thread ()
 	    msgh.msg_iov  = &iov;
 	    msgh.msg_iovlen = 1;
 	    msgh.msg_flags = 0;
-	    
+
 	    /* Receive one packet. */
 	    recvsize = recvmsg(*currentfd, &msgh, 0);
 
@@ -690,7 +665,6 @@ void network_thread ()
             st = st->next;
         }
     }
-
 }
 
 int connect_pppol2tp(struct tunnel * t) {
@@ -699,8 +673,6 @@ int connect_pppol2tp(struct tunnel * t) {
             int ufd = -1, fd2 = -1;
             int flags;
             struct sockaddr_pppol2tp sax;
-            socklen_t sock_len;
-
             struct sockaddr_in server;
             server.sin_family = AF_INET;
             server.sin_addr.s_addr = gconfig.listenaddr;
@@ -770,4 +742,5 @@ int connect_pppol2tp(struct tunnel * t) {
             t->m_fd = fd2;
         }
 #endif
+    return 0;
 }
