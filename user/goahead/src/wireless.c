@@ -573,7 +573,7 @@ typedef struct mbss_param_t
 const mbss_param_t mbss_params[] =
 {
 	{ "AuthMode", 1 },
-	{ "EncryptType", 1 },
+	{ "EncrypType", 1 },
 	{ "WPAPSK", 0 },
 	{ "DefaultKeyID", 1 },
 	{ "Key1Type", 1 },
