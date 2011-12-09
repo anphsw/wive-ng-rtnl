@@ -8,6 +8,6 @@
  */
 
 void formDefineStation(void);
-int initStaProfile(void);
+void initStaProfile(void);
 void initStaConnection(void);
 void freeHeaderProfileSettings(void);

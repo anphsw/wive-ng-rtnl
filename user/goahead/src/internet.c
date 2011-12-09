@@ -2024,8 +2024,8 @@ void initInternet(void)
 	//automatically connect to AP according to the active profile
 	opmode = nvram_get(RT2860_NVRAM, "OperationMode");
 	if (!strcmp(opmode, "2")) {
-		if (initStaProfile() != -1)
-			    initStaConnection();
+	    initStaProfile();
+	    initStaConnection();
 	}
 #endif
 #ifdef CONFIG_USER_802_1X

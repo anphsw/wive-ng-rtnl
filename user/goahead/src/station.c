@@ -1477,7 +1477,7 @@ static int getStaNoiseLevel(int eid, webs_t wp, int argc, char_t **argv)
 /*
  * description: station profile initialization
  */
-int initStaProfile(void)
+void initStaProfile(void)
 {
 	PRT_PROFILE_SETTING nextProfileSetting;
 	char tmp_buffer[512];
@@ -1493,7 +1493,7 @@ int initStaProfile(void)
 	wordlist = nvram_get(RT2860_NVRAM, "staProfile");
 	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
 		error(E_L, E_LOG, T("no previous profiles defined"));
-		return 0;
+		return;
 	}
 
 	if (headerProfileSetting == NULL )
@@ -2096,7 +2096,6 @@ out_wpa_sp:
 			currentProfileSetting = currentProfileSetting->Next;
 	    }
 	}
-	return 0;
 }
 
 /*
@@ -3001,6 +3000,7 @@ static int getStaProfile(int eid, webs_t wp, int argc, char_t **argv)
 	NDIS_802_11_NETWORK_INFRASTRUCTURE      NetworkType = Ndis802_11Infrastructure;
 
 	initStaProfile();
+
 	if (G_staProfileNum == 0)
 		return 0;
 	if (headerProfileSetting == NULL)
