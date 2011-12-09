@@ -41,7 +41,7 @@ int kernel_support;             /* Kernel Support there or not? */
 
 int init_network (void)
 {
-    long arg;
+    long arg=1;
     unsigned int length = sizeof (server);
     gethostname (hostname, sizeof (hostname));
     server.sin_family = AF_INET;
@@ -54,13 +54,8 @@ int init_network (void)
         return -EINVAL;
     };
 
-    arg=1;
     setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &arg, sizeof(arg));
     setsockopt(server_socket, SOL_SOCKET, SO_NO_CHECK, &arg, sizeof(arg));
-
-    int flags=1;
-    setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &flags, sizeof(flags));
-    setsockopt(server_socket, SOL_SOCKET, SO_NO_CHECK, &flags, sizeof(flags));
 
     if (bind (server_socket, (struct sockaddr *) &server, sizeof (server)))
     {
