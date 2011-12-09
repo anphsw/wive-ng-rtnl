@@ -18,7 +18,6 @@ start() {
 	# wifi reconfigure only after goahead start
 	$LOG "Prepare wifi config..."
 	gen_wifi_config
-	getMacIf
 	if [ "$OperationMode" = "2" ] && [ "$macCloneEnabled" = "1" ] && [ "$macCloneMac" != "" ]; then
 	    WLAN_MAC_ADDR="$macCloneMac"
 	    $LOG "STA Macclone mode. MAC: $WLAN_MAC_ADDR"
@@ -37,7 +36,6 @@ start() {
 	fi
 
 	$LOG "WiFi interface up..."
-	get_txqlen
 	if [ "$OperationMode" = "3" ]; then
 	    # apcli mode ap interface
 	    ifconfig ra0 hw ether	"$WLAN_MAC_ADDR"

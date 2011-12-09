@@ -30,11 +30,6 @@ if [ "$QoSEnable" != "" -a "$QoSEnable" != "0" ] || [ "$simple_qos" = "1" ]; the
     $LOG "Set default rules."
     set_def
 
-    # increase queue for devices
-    get_txqlen
-    ifconfig $real_wan_if txqueuelen "$txqueuelen"
-    ifconfig $lan_if txqueuelen "$txqueuelen"
-
     # create iptables hook
     printf "#!/bin/sh\n\n" > $IPTSCR
 

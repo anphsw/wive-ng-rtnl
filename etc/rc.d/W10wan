@@ -10,10 +10,8 @@ web_wait
 LOG="logger -t wan"
 
 start() {
- $LOG "Start wan config"
-
+ $LOG "Start WAN config"
     get_param
-    $LOG "Configure WAN."
 
     # stop dhcp client
     killall -q udhcpc
@@ -22,24 +20,29 @@ start() {
     # clear conntrack and routes tables/caches
     flush_net_caches
 
+    # set MAC adresses LAN/WAN if not bridge and not ethernet converter modes
+    if [ "$OperationMode" != "0" ] && [ "$OperationMode" != "2" ]; then
+	$LOG "$phys_wan_if_MACADDR $WAN_MAC_ADDR"
+	ifconfig "$phys_wan_if" hw ether "$WAN_MAC_ADDR"
+	ifconfig "$phys_wan_if" txqueuelen "$txqueuelen"
+    fi
+
     # if not bridge wan up
     if [ "$OperationMode" != "0" ]; then
 	# drop adress from wan if pure pppoe enabled
 	if [ "$vpnEnabled" = "on" ] && [ "$vpnType" = "0" ] && [ "$vpnPurePPPOE" = "1" ]; then
 	    $LOG "PURE PPPOE Mode - NOT start dhcpc or config wan!"
-	    ip addr flush dev $wan_if
+	    ip addr flush dev "$wan_if"
 	fi
 	# set manual mtu to wan if set
 	if [ "$wan_manual_mtu" != "0" ] && [ "$wan_manual_mtu" != "" ]; then
 	    $LOG "Set manual MTU to WAN $wan_manual_mtu"
-	    ip link set mtu $wan_manual_mtu dev $wan_if
+	    ip link set mtu $wan_manual_mtu dev "$wan_if"
 	fi
 	# enable wan interface
-	ip link set $wan_if up
+	ip link set "$wan_if" up
 	# enable forward for wan
 	echo 1 > "/proc/sys/net/ipv4/conf/$wan_if/forwarding"
-	# reinit switch fix 2.1 driver issue
-	/etc/scripts/config-switch.sh
     fi
 
     if [ "$wanConnectionMode" = "STATIC" ] || [ "$OperationMode" = "0" ]; then
@@ -59,7 +62,7 @@ start() {
 	    # add routes configured in web
 	    if [ -f /etc/routes_replace ]; then
 		$LOF "Add user routes."
-		/etc/routes_replace replace $lan_if $wan_if
+		/etc/routes_replace replace "$phys_lan_if" "$wan_if"
 	    fi
 	    # send Cisco Discovery request
 	    if [ -f /bin/cdp-send ] && [ -f /etc/scripts/config-cdp.sh ]; then
@@ -86,7 +89,7 @@ start() {
 	udhcpc_opts
 
 	$LOG "Start DHCP client."
-	(sleep $CL_SLEEP && udhcpc $UDHCPCOPTS > /dev/null 2>&1) &
+	(sleep 2 && udhcpc $UDHCPCOPTS > /dev/null 2>&1) &
     elif [ "$wanConnectionMode" = "ZERO" ] || [ "$vpnPurePPPOE" = "1" ]; then
 	# reload global
 	. /etc/scripts/global.sh

@@ -6,137 +6,84 @@
 LOG="logger -t lan"
 
 start() {
-  $LOG "Start network interfaces..."
+  $LOG "Start LAN network interfaces..."
     get_param
-    getMacIf
-    get_txqlen
-    conf_double_tag
-#-------------------PRECONFIG-----------------------------
-    # bridge preconfigure
-    brisup=`ip link show br0 up | grep -c ""` > /dev/null 2>&1
-    if [ "$brisup" = "0" ]; then
-	if [ ! -d /proc/sys/net/ipv4/conf/br0 ]; then
-	    $LOG "Add bridge in the system"
-	    brctl addbr br0
-        fi
-	$LOG "BR0_MACADDR $LAN_MAC_ADDR"
-	ifconfig br0 hw ether "$LAN_MAC_ADDR"
-	$LOG "Up bridge interface"
-	ip link set br0 up
-    fi
-    # lan/wan particions preconfigure
-    if [ "$phys_wan_if" = "eth3" ] && [ "$phys_lan_if" = "eth2" ]; then
-	# external switch
-	$LOG "$phys_wan_if_MACADDR $WAN_MAC_ADDR"
-	ifconfig "$phys_wan_if" hw ether "$WAN_MAC_ADDR"
-	ip link set "$phys_wan_if" up
-	$LOG "$phys_lan_if_MACADDR $LAN_MAC_ADDR"
-	ifconfig "$phys_wan_if" hw ether "$LAN_MAC_ADDR"
-	ifconfig "$phys_wan_if" txqueuelen "$txqueuelen"
-	ip link set "$phys_wan_if" up
-    else
-	# internal switch
-	lanisup=`ip link show eth2 up | grep -c ""` > /dev/null 2>&1
-	if [ "$lanisup" = "0" ]; then
-	    $LOG "ETH2_MACADDR $LAN_MAC_ADDR"
-	    ifconfig eth2 hw ether "$LAN_MAC_ADDR"
-	    ifconfig eth2 txqueuelen "$txqueuelen"
-	    $LOG "Up vlan root interface"
-	    ip link set eth2 up
-	fi
-	if [ "$OperationMode" = "1" ] || [ "$OperationMode" = "4" ]; then
-	    if [ ! -d /proc/sys/net/ipv4/conf/eth2.1 ] || [ ! -d /proc/sys/net/ipv4/conf/eth2.2 ]; then
-		$LOG "Add vlans and config"
-		vconfig add eth2 1
-		vconfig add eth2 2
-		$LOG "ETH2.1_MACADDR $LAN_MAC_ADDR"
-		ifconfig eth2.1 hw ether "$LAN_MAC_ADDR"
-		$LOG "ETH2.2_MACADDR $WAN_MAC_ADDR"
-		ifconfig eth2.2 hw ether "$WAN_MAC_ADDR"
-	    fi
-	    # phys_lan_if always up
-	    ip link set eth2.1 up
-	fi
-    fi
 
     # flush ip from interfaces
     addr_flush
 
-#-------------------CONFIG--------------------------------
-    ip link set $lan_if down
-    #-------------------LAN1----------------
-    $LOG "Add LAN1 iface"
+    # bridge preconfigure if not ethernet converter mode
+    brisup=`ip link show br0 up | grep -c ""` > /dev/null 2>&1
+    if [ "$brisup" = "0" ] && [ "$OperationMode" != "2" ]; then
+	if [ ! -d /proc/sys/net/ipv4/conf/br0 ]; then
+	    $LOG "Add bridge in the system"
+	    brctl addbr br0
+        fi
+	$LOG "br0_MACADDR $LAN_MAC_ADDR"
+	ifconfig br0 hw ether "$LAN_MAC_ADDR"
+	ifconfig br0 txqueuelen "$txqueuelen"
+	$LOG "Up bridge interface"
+	ip link set br0 up
+    fi
+
+    # lan/wan particions preconfigure
+    if [ ! -f /var/run/goahead.pid ]; then
+	/etc/scripts/config-switch.sh
+    fi
+
+    # set MAC adresses LAN for phys iface
+    if [ "$OperationMode" = "1" ] || [ "$OperationMode" = "4" ]; then
+	$LOG "$phys_lan_if_MACADDR $LAN_MAC_ADDR"
+	ifconfig "$phys_lan_if" hw ether "$LAN_MAC_ADDR"
+	ifconfig "$phys_lan_if" txqueuelen "$txqueuelen"
+	# always up phys lan iface
+	ifconfig "$phys_lan_if" up
+    fi
+
+    # configure LAN1/BR0
     if [ "$lan_ipaddr" != "" ]; then
 	if [ "$lan_netmask" = "" ]; then
 	    lan_netmask="255.0.0.0"
 	fi
 	ifconfig "$lan_if" "$lan_ipaddr" netmask "$lan_netmask" up
+	$LOG "Add LAN1 Mode is $OperationMode lan iface $lan_if, adress $lan_ipaddr"
     else
 	ifconfig "$lan_if" 0.0.0.0 up
+	$LOG "Add LAN1 Mode is $OperationMode lan iface $lan_if, adress 0.0.0.0"
     fi
-    $LOG "Mode is $OperationMode, wan iface $wan_if, lan iface $lan_if, adress $lan_ipaddr"
 
-     #-------------------LAN2----------------
+    # configure LAN2/BR0:9
     if [ "$Lan2Enabled" = "1" ]; then
 	$LOG "Add LAN2 iface $lan2_if $lan2_ipaddr netmask $lan2_netmask"
-        ifconfig "$lan2_if" "$lan2_ipaddr" netmask "$lan2_netmask"
+        ifconfig "$lan2_if" "$lan2_ipaddr" netmask "$lan2_netmask" up
     fi
+}
 
-    # configure switch at start
-    if [ ! -f /var/run/goahead.pid ]; then
-	/etc/scripts/config-switch.sh
+addr_flush() {
+    # drop adresses
+    ip addr flush dev "$lan_if" > /dev/null 2>&1
+    ip addr flush dev "$lan2_if" > /dev/null 2>&1
+    ip addr flush dev "$phys_lan_if" > /dev/null 2>&1
+    if [ -d /proc/sys/net/ipv6 ] && [ "$IPv6_Enable" = "1" ]; then
+	ip -6 addr flush dev "$lan_if" > /dev/null 2>&1
+	ip -6 addr flush dev "$lan2_if" > /dev/null 2>&1
+	ip -6 addr flush dev "$phys_lan_if" > /dev/null 2>&1
     fi
-
 }
 
 get_param() {
     eval `nvram_buf_get 2860 lan_ipaddr lan_netmask lan2_ipaddr lan2_netmask Lan2Enabled`
 }
 
-addr_flush() {
-    # drop adresses
-    dev=`grep eth < /proc/net/vlan/config | cut -d' ' -f 1`
-    for i in $dev; do
-	ip addr flush dev $i > /dev/null 2>&1
-	if [ -d /proc/sys/net/ipv6 ] && [ "$IPv6_Enable" = "1" ]; then
-	    ip -6 addr flush dev $i > /dev/null 2>&1
-	fi
-    done
-}
-
-conf_double_tag() {
-    if [ -f /proc/sys/net/ipv4/vlan_double_tag ]; then
-	eval `nvram_buf_get 2860 vlan_double_tag natFastpath`
-	if [ "$vlan_double_tag" = "1" ] || [ "$natFastpath" = "2" ] || [ "$natFastpath" = "3" ]; then
-	    if [ "$natFastpath" = "2" ] || [ "$natFastpath" = "3" ]; then
-		$LOG "Double vlan tag and HW_NAT enabled. HW_VLAN offload disabled."
-	    else
-		$LOG "Double vlan tag enabled. HW_VLAN and HW_NAT offload disabled."
-	    fi
-	    DOUBLE_TAG=1
-	else
-	    $LOG "Double vlan tag and HW_NAT disabled. HW_VLAN offload enabled."
-	    DOUBLE_TAG=0
-	fi
-	sysctl -w net.ipv4.vlan_double_tag="$DOUBLE_TAG"
-    fi
-}
-
 stop() {
-  $LOG "Stop network interfaces..."
-    # first down bridge
-    if [ -d /proc/sys/net/ipv4/conf/br0 ]; then
-	ip link set br0 down
-    fi
-    dev=`grep eth < /proc/net/vlan/config | cut -d' ' -f 1`
-    for i in $dev; do
-	ip link set $i down > /dev/null 2>&1
-	vconfig rem $i > /dev/null 2>&1
-    done
-    ip link set "$lan_if" down > /dev/null 2>&1
+  $LOG "Stop LAN network interfaces..."
+    # flush ip from interfaces
+    addr_flush
     ip link set "$lan2_if" down > /dev/null 2>&1
+    ip link set "$phys_lan_if" down > /dev/null 2>&1
     # last delete bridge interface
     if [ -d /proc/sys/net/ipv4/conf/br0 ]; then
+	ip link set br0 down
 	brctl delbr br0
     fi
 }

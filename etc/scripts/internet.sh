@@ -17,7 +17,6 @@ addMesh() {
     if [ "$CONFIG_RT2860V2_STA_MESH" != "" ] || [ "$CONFIG_RT2860V2_AP_MESH" != "" ]; then
         meshenabled=`nvram_get 2860 MeshEnabled`
 	if [ "$meshenabled" = "1" ]; then
-	    getMacIf
 	    ip addr flush dev mesh0 > /dev/null 2>&1
 	    if [ -d /proc/sys/net/ipv6 ] && [ "$IPv6_Enable" = "1" ]; then
 		ip -6 addr flush dev mesh0 /dev/null 2>&1
@@ -35,7 +34,6 @@ addWds() {
     if [ "$CONFIG_RT2860V2_AP_WDS" != "" ]; then
 	wds_en=`nvram_get 2860 WdsEnable`
 	if [ "$wds_en" != "0" ]; then
-	    getMacIf
     	    for i in `seq 0 3`; do
     		ip addr flush dev wds$i > /dev/null 2>&1
 		if [ -d /proc/sys/net/ipv6 ] && [ "$IPv6_Enable" = "1" ]; then
@@ -55,7 +53,6 @@ addMBSSID() {
     if [ "$CONFIG_RT2860V2_AP_MBSS" != "" ]; then
 	bssidnum=`nvram_get 2860 BssidNum`
 	if [ "$bssidnum" != "0" ] && [ "$bssidnum" != "1" ]; then
-	    getMacIf
 	    let "bssrealnum=$bssidnum-1"
 	    for i in `seq 1 $bssrealnum`; do
     		ip addr flush dev ra$i > /dev/null 2>&1

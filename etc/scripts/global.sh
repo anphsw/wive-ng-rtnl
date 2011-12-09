@@ -27,12 +27,8 @@ upmpm_net="239.0.0.0/8"
 
 # first get operation mode and wan mode  dns mode and relay mode vpn mode and type
 eval `nvram_buf_get 2860 OperationMode wanConnectionMode dnsPEnabled wan_ipaddr wan_static_dns \
+	WLAN_MAC_ADDR WAN_MAC_ADDR LAN_MAC_ADDR \
 	vpnEnabled vpnPurePPPOE vpnType	IPv6_Enable QoSEnable simple_qos`
-
-# get wireless, wan and lan mac adresses
-getMacIf() {
-    eval `nvram_buf_get 2860 WLAN_MAC_ADDR WAN_MAC_ADDR LAN_MAC_ADDR`
-}
 
 # LAN interface name -> $lan_if
 getLanIfName() {
@@ -150,22 +146,6 @@ wait_connect() {
 
 # configure and start dhcp client
 udhcpc_opts() {
-    CL_SLEEP=1
-    if [ "$OperationMode" = "0" ] || [ "$OperationMode" = "2" ]; then
-	CL_SLEEP=5
-	# disable dhcp renew from driver
-	sysctl -w net.ipv4.send_sigusr_dhcpc=9
-    else
-	eval `nvram_buf_get 2860 ForceRenewDHCP wan_port`
-	if [ "$ForceRenewDHCP" != "0" ] && [ "$wan_port" != "" ]; then
-	    # configure event wait port
-	    sysctl -w net.ipv4.send_sigusr_dhcpc=$wan_port
-	else
-	    # disable dhcp renew from driver
-	    sysctl -w net.ipv4.send_sigusr_dhcpc=9
-	fi
-
-    fi
     eval `nvram_buf_get 2860 dhcpRequestIP wan_manual_mtu HostName`
     if [ "$dhcpRequestIP" != "" ]; then
 	dhcpRequestIP="-r $dhcpRequestIP"
@@ -264,3 +244,4 @@ killall_vpn() {
 getLanIfName
 getWanIfName
 getWanIpaddr
+get_txqlen

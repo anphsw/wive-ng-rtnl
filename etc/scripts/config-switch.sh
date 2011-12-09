@@ -6,8 +6,10 @@
 # include kernel config
 . /etc/scripts/config.sh
 
+LOG="logger -t ESW"
+
 # get need variables
-eval `nvram_buf_get 2860 wan_port OperationMode tv_port vlan_double_tag natFastpath`
+eval `nvram_buf_get 2860 wan_port OperationMode tv_port vlan_double_tag natFastpath ForceRenewDHCP LAN_MAC_ADDR`
 
 ##############################################################################
 # Internal 3052 ESW
@@ -15,6 +17,55 @@ eval `nvram_buf_get 2860 wan_port OperationMode tv_port vlan_double_tag natFastp
 if [ "$CONFIG_RT_3052_ESW" != "" ]; then
     SWITCH_MODE=2
     if [ ! -f /var/run/goahead.pid ]; then
+	##########################################################################
+	# Configure touch dhcp from driver in kernel. Only one per start
+	##########################################################################
+	if [ "$OperationMode" = "0" ] || [ "$OperationMode" = "2" ]; then
+	    # disable dhcp renew from driver
+	    sysctl -w net.ipv4.send_sigusr_dhcpc=9
+	else
+	    if [ "$ForceRenewDHCP" != "0" ] && [ "$wan_port" != "" ]; then
+		# configure event wait port
+		sysctl -w net.ipv4.send_sigusr_dhcpc=$wan_port
+	    else
+		# disable dhcp renew from driver
+		sysctl -w net.ipv4.send_sigusr_dhcpc=9
+	    fi
+
+	fi
+	##########################################################################
+	# Configure double vlan tag support in kernel. Only one per start
+	##########################################################################
+	if [ -f /proc/sys/net/ipv4/vlan_double_tag ]; then
+	    if [ "$vlan_double_tag" = "1" ] || [ "$natFastpath" = "2" ] || [ "$natFastpath" = "3" ]; then
+		if [ "$natFastpath" = "2" ] || [ "$natFastpath" = "3" ]; then
+		    $LOG "Double vlan tag and HW_NAT enabled. HW_VLAN offload disabled."
+		else
+		    $LOG "Double vlan tag enabled. HW_VLAN and HW_NAT offload disabled."
+		fi
+		DOUBLE_TAG=1
+	    else
+		$LOG "Double vlan tag and HW_NAT disabled. HW_VLAN offload enabled."
+		DOUBLE_TAG=0
+	    fi
+	    sysctl -w net.ipv4.vlan_double_tag="$DOUBLE_TAG"
+	fi
+	##########################################################################
+	# Configure vlans in kernel. Only one per start
+	##########################################################################
+	$LOG "ROOT_MACADDR $LAN_MAC_ADDR"
+	ifconfig eth2 hw ether "$LAN_MAC_ADDR"
+	ip link set eth2 up
+	# only if not bridge and not ethernet converter mode
+	if [ "$OperationMode" != "0" ] && [ "$OperationMode" != "2" ]; then
+	    $LOG "Add vlans interfaces"
+	    if [ ! -d /proc/sys/net/ipv4/conf/eth2.1 ]; then
+		vconfig add eth2 1
+	    fi
+	    if [ ! -d /proc/sys/net/ipv4/conf/eth2.2 ]; then
+		vconfig add eth2 2
+	    fi
+	fi
 	######################################################################
 	# workaroud for dir-300NRU and some devices
 	# with not correct configured from uboot
@@ -109,7 +160,7 @@ if [ "$CONFIG_RT_3052_ESW" != "" ]; then
     # Configure double vlan tag and eneble forward
     ##########################################################################
     if [ -f /proc/sys/net/ipv4/vlan_double_tag ]; then
-	if [ "$vlan_double_tag" = "1" ] || [ "$natFastpath" = "2" ] || [ "$natFastpath" = "3" ]; then
+	if [ "$DOUBLE_TAG" = "1" ]; then
 	    DOUBLE_TAG=3f
 	else
 	    DOUBLE_TAG=0
