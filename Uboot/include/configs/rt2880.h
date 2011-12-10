@@ -29,7 +29,7 @@
 #define __CONFIG_H
 
 
-#define DEBUG				1
+//#define DEBUG				1
 //#define ET_DEBUG
 
 #define CONFIG_RT2880_ETH		1	/* Enable built-in 10/100 Ethernet */
@@ -49,24 +49,24 @@
 #ifdef RT2880_ASIC_BOARD
 #define CPU_CLOCK_RATE	266666666 /* default: 150 MHz clock for the MIPS core */
 #elif defined (RT3052_ASIC_BOARD)
-#define CPU_CLOCK_RATE	384000000 
+#define CPU_CLOCK_RATE	384000000
 #elif defined (RT3352_ASIC_BOARD)
-#define CPU_CLOCK_RATE	400000000 
+#define CPU_CLOCK_RATE	400000000
 #elif defined (RT6855_ASIC_BOARD)
-#define CPU_CLOCK_RATE	400000000 
+#define CPU_CLOCK_RATE	400000000
 #elif defined (RT2883_ASIC_BOARD)
-#define CPU_CLOCK_RATE	400000000 
+#define CPU_CLOCK_RATE	400000000
 #elif defined (RT3883_ASIC_BOARD)
-#define CPU_CLOCK_RATE	500000000 
+#define CPU_CLOCK_RATE	500000000
 #else
 #define CPU_CLOCK_RATE	FPGA_BOARD_CLOCK_RATE /* default: 150 MHz clock for the MIPS core */
 #endif
 
-#endif 
+#endif
 
 #define SERIAL_CLOCK_DIVISOR 16
 
-#define CONFIG_BOOTDELAY	5	/* autoboot after 5 seconds	*/
+#define CONFIG_BOOTDELAY	3	/* autoboot after 3 seconds	*/
 
 #define CONFIG_BAUDRATE		57600
 
@@ -375,7 +375,7 @@
 #define RT2880_REG_PIODATA      (RT2880_PRGIO_ADDR + 0x20)
 #define RT2880_REG_PIODIR       (RT2880_PRGIO_ADDR + 0x24)
 
-#define RALINK_REG(x)		(*((volatile u32 *)(x)))	
+#define RALINK_REG(x)		(*((volatile u32 *)(x)))
 
 #define RT2880_WDRST            (1<<1)
 #define RT2880_SWSYSRST         (1<<2)
