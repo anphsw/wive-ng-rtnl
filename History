@@ -875,6 +875,7 @@
 24) Init.d Start base support exernal switch plugged to GMAC2. See Asus RT-N56U.<br>
 25) Rewrite switch,lan,br configure logic for more device independed version.<br>
 26) Fix connect to STA at boot if profile not full.<br>
+27) Uboot add recovery mode at RESET button pressed (send wive.bin image to 192.168.1.1 from 192.168.1.131 by tftp client).<br>
 
 <br><br>
 <b>For support see:</b><br>

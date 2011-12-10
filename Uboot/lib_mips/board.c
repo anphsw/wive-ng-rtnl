@@ -33,6 +33,9 @@
 #include <spi_api.h>
 #include <nand_api.h>
 
+#include <cmd_tftpServer.h>
+#include <gpio.h>
+
 DECLARE_GLOBAL_DATA_PTR;
 #undef DEBUG
 
@@ -54,13 +57,8 @@ unsigned char BootType='3';
 #endif
 #define ARGV_LEN  128
 
-
 extern int timer_init(void);
-
-extern void  rt2880_eth_halt(struct eth_device* dev);
-
-//extern void pci_init(void);
-
+extern void rt2880_eth_halt(struct eth_device* dev);
 extern int incaip_set_cpuclk(void);
 extern int do_bootm (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[]);
 extern int do_tftpb (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[]);
@@ -1616,11 +1614,19 @@ void board_init_r (gd_t *id, ulong dest_addr)
 	putc ('\n');
 
 	if(BootType == '3') {
+#if 0 /* boot ftp */
 		char *argv[2];
 		sprintf(addr_str, "0x%X", CFG_KERN_ADDR);
 		argv[1] = &addr_str[0];
 		printf("   \n3: System Boot system code via Flash.\n");
 		do_bootm(cmdtp, 0, 2, argv);
+#else
+		eth_initialize(gd->bd);
+		char *argv[2];
+		sprintf(addr_str, "0x%X", CFG_KERN_ADDR);
+		argv[1] = &addr_str[0];
+		do_tftpd(cmdtp, 0, 2, argv);
+#endif
 	}
 	else {
 		char *argv[4];

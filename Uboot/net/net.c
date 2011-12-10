@@ -116,6 +116,7 @@ uchar		NetServerEther[6] =	/* Boot server enet address		*/
 			{ 0, 0, 0, 0, 0, 0 };
 IPaddr_t	NetOurIP;		/* Our IP addr (0 = unknown)		*/
 IPaddr_t	NetServerIP;		/* Our IP addr (0 = unknown)		*/
+IPaddr_t	NetTestIP;		/* Our IP addr (0 = unknown)		*/
 volatile uchar *NetRxPkt;		/* Current receive packet		*/
 int		NetRxPktLen;		/* Current rx packet length		*/
 unsigned	NetIPID;		/* IP packet ID				*/
@@ -197,7 +198,10 @@ extern VALID_BUFFER_STRUCT  rt2880_free_buf_list;
 extern BUFFER_ELEM *rt2880_free_buf_entry_dequeue(VALID_BUFFER_STRUCT *hdr);
 extern void TftpSend (void);
 
-
+extern void TftpdStart(void);
+extern void LEDON(void);
+extern void LEDOFF(void);
+extern IPaddr_t TempServerIP=0;
 
 /*=======================================*/
 //===================================================
@@ -254,6 +258,9 @@ void ArpTimeoutCheck(void)
 
 	/* check for arp timeout */
 	if ((t - NetArpWaitTimerStart) > ARP_TIMEOUT * CFG_HZ) {
+		printf("t: %x, NetArpWaitTimerStart: %x, ARP_TIMEOUT * CFG_HZ: %x\n", t, NetArpWaitTimerStart, ARP_TIMEOUT * CFG_HZ);
+		printf("NetArpWaitTry: %x, ARP_TIMEOUT_COUNT: %x\n", NetArpWaitTry, ARP_TIMEOUT_COUNT);
+
 		NetArpWaitTry++;
 
 		if (NetArpWaitTry >= ARP_TIMEOUT_COUNT) {
@@ -280,6 +287,7 @@ NetLoop(proto_t protocol)
 	DECLARE_GLOBAL_DATA_PTR;
 
 	bd_t *bd = gd->bd;
+	int i = 0;
 
 #ifdef CONFIG_NET_MULTI
 	NetRestarted = 0;
@@ -410,6 +418,16 @@ restart:
 		}
 
 		break;
+
+        case TFTPD:
+                NetCopyIP(&NetOurIP, &bd->bi_ip_addr);
+                NetServerIP = getenv_IPaddr ("serverip");
+                NetOurGatewayIP = getenv_IPaddr ("gatewayip");
+                NetOurSubnetMask= getenv_IPaddr ("netmask");
+                NetOurVLAN = getenv_VLAN("vlan");
+                NetOurNativeVLAN = getenv_VLAN("nvlan");
+
+                break;
 	case BOOTP:
 	case RARP:
 		/*
@@ -448,6 +466,11 @@ restart:
 			/* always use ARP to get server ethernet address */
 			TftpStart();
 			break;
+
+		case TFTPD:
+			TftpdStart();
+			break;
+
 
 #if (CONFIG_COMMANDS & CFG_CMD_DHCP)
 		case DHCP:
@@ -515,6 +538,10 @@ restart:
 	 *	Main packet reception loop.  Loop receiving packets until
 	 *	someone sets `NetQuit'.
 	 */
+
+	i = 1;
+	timeDelta = 266000000;
+
 	for (;;) {		
 		WATCHDOG_RESET();
 #ifdef CONFIG_SHOW_ACTIVITY
@@ -546,6 +573,16 @@ restart:
 		 */
 		if (timeHandler && ((get_timer(0) - timeStart) > timeDelta)) {
 			thand_f *x;
+
+
+                        if (i%2 == 0){
+                                LEDON();
+                        } else{
+                                LEDOFF();
+                        }
+                        ++i;
+                        if (i==0xffffff)
+                                i = 0;
 
 #if defined(CONFIG_MII) || (CONFIG_COMMANDS & CFG_CMD_MII)
 #if defined(CFG_FAULT_ECHO_LINK_DOWN) && defined(CONFIG_STATUS_LED) && defined(STATUS_LED_RED)
@@ -1356,11 +1393,15 @@ NetReceive(volatile uchar * inpkt, int len)
 				(*packetHandler)(0,0,0,0);
 #endif
 
+				/* modify header, and transmit it */
+				memcpy(((Ethernet_t *)NetArpWaitTxPacket)->et_dest, NetArpWaitPacketMAC, 6);
+				(void) eth_send(NetArpWaitTxPacket, NetArpWaitTxPacketSize);
+
 				/* no arp request pending now */
 				NetArpWaitPacketIP = 0;
 				NetArpWaitTxPacketSize = 0;
 				NetArpWaitPacketMAC = NULL;
-
+#if 0
 				/* if Arp response requested by TFTP,
 				 * send "TFTP Read Request" packet 
 				 * immediately */
@@ -1368,6 +1409,7 @@ NetReceive(volatile uchar * inpkt, int len)
 				if(TftpStarted == 1) {
 				    TftpSend ();
 				}
+#endif
 			}
 			return;
 		default:
@@ -1488,6 +1530,7 @@ NetReceive(volatile uchar * inpkt, int len)
 		/*
 		 *	IP header OK.  Pass the packet to the current handler.
 		 */
+		 NetCopyIP(&TempServerIP,(void*)&ip->ip_src); /*TempServerIP is used in TFTPD */
 		(*packetHandler)((uchar *)ip +IP_HDR_SIZE,
 						ntohs(ip->udp_dst),
 						ntohs(ip->udp_src),
@@ -1515,6 +1558,9 @@ static int net_check_prereq (proto_t protocol)
 	case NFS:
 #endif
 	case NETCONS:
+
+	case TFTPD:
+
 	case TFTP:
 		if (NetServerIP == 0) {
 			puts ("*** ERROR: `serverip' not set\n");

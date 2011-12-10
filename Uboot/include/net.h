@@ -335,7 +335,8 @@ extern int		NetState;		/* Network loop state		*/
 extern int		NetRestartWrap;		/* Tried all network devices	*/
 #endif
 
-typedef enum { BOOTP, RARP, ARP, TFTP, DHCP, PING, DNS, NFS, CDP, NETCONS } proto_t;
+
+typedef enum { BOOTP, RARP, ARP, TFTP, DHCP, PING, DNS, NFS, CDP, NETCONS, TFTPD} proto_t;
 
 /* from net/net.c */
 extern char	BootFile[128];			/* Boot File name		*/

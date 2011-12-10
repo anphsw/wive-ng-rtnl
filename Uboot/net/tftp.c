@@ -231,6 +231,10 @@ TftpHandler (uchar * pkt, unsigned dest, unsigned src, unsigned len)
 			TftpBlockWrapOffset += TFTP_BLOCK_SIZE * TFTP_SEQUENCE_SIZE;
 			printf ("\n\t %lu MB reveived\n\t ", TftpBlockWrapOffset>>20);
 		} else {
+
+			if (TftpBlock == 1)
+				puts ("\n\t ");
+
 			if (((TftpBlock - 1) % 10) == 0) {
 				puts ("#");
 			} else if ((TftpBlock % (10 * HASHES_PER_LINE)) == 0) {
@@ -303,6 +307,7 @@ TftpHandler (uchar * pkt, unsigned dest, unsigned src, unsigned len)
 	}
 }
 
+extern unsigned char boottype;
 
 static void
 TftpTimeout (void)
