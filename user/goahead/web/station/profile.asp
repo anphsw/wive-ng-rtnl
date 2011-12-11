@@ -23,7 +23,7 @@ function edit_profile_page(){
 }
 
 function selectedProfileChange()
-{	
+{
 	document.sta_profile.deleteProfileButton.disabled=false;
 	document.sta_profile.editProfileButton.disabled=false;
 	document.sta_profile.activateProfileButton.disabled=false;

@@ -487,10 +487,10 @@ static int getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv)
 	}
 	if ( pBssidList->NumberOfItems == 0)
 	{
-		websError(wp, 500, "Bssid List number is 0!\n");
+		//websError(wp, 500, "Bssid List number is 0!\n");
 		free(pBssidList);
 		close(s);
-		return -1;
+		return 0;
 	}
 	else
 	{
@@ -4566,6 +4566,7 @@ static void writeProfileToNvram()
 	bzero(tmp_data, 8);
 	currentProfileSetting = headerProfileSetting;
 	do {
+		printf("currentProfileSetting->Tunnel = %d\n", currentProfileSetting->Tunnel);
 		sprintf(tmp_data, "%d", currentProfileSetting->Tunnel);
 		strcat(tmp_buffer, tmp_data);
 		currentProfileSetting = currentProfileSetting->Next;
@@ -4706,32 +4707,35 @@ static void editStaProfile(webs_t wp, char_t *path, char_t *query)
 	printf("editStaProfile()\n");
 
 	value = websGetVar(wp, T("profile_name"), T(""));
-	if (strcmp(value, "") != 0)
+	if (CHK_IF_SET(value))
 		strcpy((char *)selectedProfileSetting->Profile, value);
 
 	value = websGetVar(wp, T("Ssid"), T(""));
-	if (strcmp(value, "") != 0)
+	if (CHK_IF_SET(value))
 		strcpy((char *)selectedProfileSetting->SSID, value);
 
 	value = websGetVar(wp, T("network_type"), T(""));
-	if (strcmp(value, "") != 0)
+	if (CHK_IF_SET(value))
 		selectedProfileSetting->NetworkType = atoi(value);
-	if (selectedProfileSetting->NetworkType == Ndis802_11Infrastructure) {
+	if (selectedProfileSetting->NetworkType == Ndis802_11Infrastructure)
+	{
 		selectedProfileSetting->AdhocMode = 0;
 		selectedProfileSetting->Channel = 0;
 		selectedProfileSetting->PreamType = Rt802_11PreambleLong;
 	}
 
 	value = websGetVar(wp, T("power_saving_mode"), T(""));
-	if (strcmp(value, "") != 0) {
-		if (strcmp(value, "0") == 0)
+	if (CHK_IF_SET(value))
+	{
+		if (CHK_IF_DIGIT(value, 0))
 			selectedProfileSetting->PSmode = Ndis802_11PowerModeCAM;
 		else
 			selectedProfileSetting->PSmode = Ndis802_11PowerModeMAX_PSP;
 	}
 
 	value = websGetVar(wp, T("channel"), T(""));
-	if (strcmp(value, "") != 0) {
+	if (CHK_IF_SET(value))
+	{
 		if (selectedProfileSetting->NetworkType == Ndis802_11IBSS)
 			selectedProfileSetting->Channel = atoi(value);
 		else
@@ -4739,41 +4743,52 @@ static void editStaProfile(webs_t wp, char_t *path, char_t *query)
 	}
 
 	value = websGetVar(wp, T("b_premable_type"), T(""));
-	if (strcmp(value, "") != 0) {
+	if (CHK_IF_SET(value))
+	{
 		if (strcmp(value, "0") == 0)
 			selectedProfileSetting->PreamType = Rt802_11PreambleAuto;
 		else
 			selectedProfileSetting->PreamType = Rt802_11PreambleLong;
 	}
 
-	if (websCompareVar(wp, T("rts_threshold"), T("on"))) {
+	if (websCompareVar(wp, T("rts_threshold"), T("on")))
+	{
 		selectedProfileSetting->RTSCheck = 1;
 		value = websGetVar(wp, T("rts_thresholdvalue"), T(""));
 		if (strcmp(value, "") != 0)
 			selectedProfileSetting->RTS = atoi(value);
 	}
-	else {
+	else
+	{
 		selectedProfileSetting->RTSCheck = 0;
 		selectedProfileSetting->RTS = 2347;
 	}
 
-	if (websCompareVar(wp, T("fragment_threshold"), T("on"))) {
+	if (websCompareVar(wp, T("fragment_threshold"), T("on")))
+	{
 		selectedProfileSetting->FragmentCheck = 1;
 		value = websGetVar(wp, T("fragment_thresholdvalue"), T(""));
 		if (strcmp(value, "") != 0)
 			selectedProfileSetting->Fragment = atoi(value);
 	}
-	else {
+	else
+	{
 		selectedProfileSetting->FragmentCheck = 0;
 		selectedProfileSetting->Fragment = 2346;
 	}
 
-	value = websGetVar(wp, T("security_infra_mode"), T(""));
-	if (strcmp(value, "") != 0)
-		selectedProfileSetting->Authentication = atoi(value);
-	value = websGetVar(wp, T("security_adhoc_mode"), T(""));
-	if (strcmp(value, "") != 0)
-		selectedProfileSetting->Authentication = atoi(value);
+	if (selectedProfileSetting->NetworkType == 1)
+	{
+		value = websGetVar(wp, T("security_infra_mode"), T(""));
+		if (CHK_IF_SET(value))
+			selectedProfileSetting->Authentication = atoi(value);
+	}
+	else
+	{
+		value = websGetVar(wp, T("security_adhoc_mode"), T(""));
+		if (CHK_IF_SET(value))
+			selectedProfileSetting->Authentication = atoi(value);
+	}
 
 #ifdef WPA_SUPPLICANT_SUPPORT
 	if ( selectedProfileSetting->Authentication == Ndis802_11AuthModeWPA
@@ -4786,7 +4801,6 @@ static void editStaProfile(webs_t wp, char_t *path, char_t *query)
 	else 
 		selectedProfileSetting->KeyMgmt = Rtwpa_supplicantKeyMgmtNONE;
 #endif
-
 	value = websGetVar(wp, T("wep_key_1"), T("0"));
 	strcpy((char *)selectedProfileSetting->Key1, value);
 	value = websGetVar(wp, T("wep_key_2"), T("0"));
@@ -4797,7 +4811,7 @@ static void editStaProfile(webs_t wp, char_t *path, char_t *query)
 	strcpy((char *)selectedProfileSetting->Key4, value);
 
 	value = websGetVar(wp, T("wep_key_entry_method"), T(""));
-	if (strcmp(value, "") != 0)
+	if (CHK_IF_SET(value))
 	{
 		selectedProfileSetting->Key1Type =
 		selectedProfileSetting->Key2Type =
@@ -4807,7 +4821,7 @@ static void editStaProfile(webs_t wp, char_t *path, char_t *query)
 	}
 
 	value = websGetVar(wp, T("wep_key_length"), T(""));
-	if (strcmp(value, "") != 0)
+	if (CHK_IF_SET(value))
 	{
 		selectedProfileSetting->Key1Length =
 		selectedProfileSetting->Key2Length =
@@ -4817,80 +4831,86 @@ static void editStaProfile(webs_t wp, char_t *path, char_t *query)
 	}
 
 	value = websGetVar(wp, T("wep_default_key"), T(""));
-	if (strcmp(value, "") != 0)
+	if (CHK_IF_SET(value))
 		selectedProfileSetting->KeyDefaultId = atoi(value);
 
 	value = websGetVar(wp, T("cipher"), T(""));
-	if (strcmp(value, "") != 0) {
-		if (0 == atoi(value)) //TKIP
+	if (CHK_IF_SET(value))
+	{
+		if (CHK_IF_DIGIT(value, 0)) //TKIP
 			selectedProfileSetting->Encryption = Ndis802_11Encryption2Enabled;
 		else //AES
 			selectedProfileSetting->Encryption = Ndis802_11Encryption3Enabled;
 	}
 
 	value = websGetVar(wp, T("passphrase"), T(""));
-	if (strcmp(value, "") != 0)
+	if (CHK_IF_SET(value))
 		strcpy((char *)selectedProfileSetting->WpaPsk, value);
 	else
 		strcpy((char *)selectedProfileSetting->WpaPsk, "0");
 
+	printf("WPA supplicant begin\n");
+
 #ifdef WPA_SUPPLICANT_SUPPORT
 	value = websGetVar(wp, T("cert_auth_type_from_1x"), T(""));
-	if (strcmp(value, "") != 0)
+	if (CHK_IF_SET(value))
 		selectedProfileSetting->EAP = atoi(value);
 	value = websGetVar(wp, T("cert_auth_type_from_wpa"), T(""));
-	if (strcmp(value, "") != 0)
+	if (CHK_IF_SET(value))
 		selectedProfileSetting->EAP = atoi(value);
 
 	value = websGetVar(wp, T("cert_tunnel_auth_peap"), T(""));
-	if (strcmp(value, "") != 0)
+	if (CHK_IF_SET(value))
 		selectedProfileSetting->Tunnel = atoi(value);
 	value = websGetVar(wp, T("cert_tunnel_auth_ttls"), T(""));
-	if (strcmp(value, "") != 0)
+	if (CHK_IF_SET(value))
 		selectedProfileSetting->Tunnel = atoi(value);
 
 	value = websGetVar(wp, T("cert_id"), T(""));
-	if (strcmp(value, "") != 0)
+	if (CHK_IF_SET(value))
 		strcpy((char *)selectedProfileSetting->Identity, value);
 	else
 		strcpy((char *)selectedProfileSetting->Identity, "0");
 
 	value = websGetVar(wp, T("cert_password"), T(""));
-	if (strcmp(value, "") != 0)
+	if (CHK_IF_SET(value))
 		strcpy((char *)selectedProfileSetting->Password, value);
 	else
 		strcpy((char *)selectedProfileSetting->Password, "0");
 
 	value = websGetVar(wp, T("cert_client_cert_path"), T(""));
-	if (strcmp(value, "") != 0) {
+	if (CHK_IF_SET(value))
+	{
 		strcpy((char *)selectedProfileSetting->ClientCert, value);
 
 		value = websGetVar(wp, T("cert_private_key_path"), T(""));
-		if (strcmp(value, "") != 0)
+		if (CHK_IF_SET(value))
 			strcpy((char *)selectedProfileSetting->PrivateKey, value);
 		else
 			strcpy((char *)selectedProfileSetting->PrivateKey, "0");
 
 		value = websGetVar(wp, T("cert_private_key_password"), T(""));
-		if (strcmp(value, "") != 0)
+		if (CHK_IF_SET(value))
 			strcpy((char *)selectedProfileSetting->PrivateKeyPassword, value);
 		else
 			strcpy((char *)selectedProfileSetting->PrivateKeyPassword, "0");
 	}
-	else {
+	else
+	{
 		strcpy((char *)selectedProfileSetting->ClientCert, "0");
 		strcpy((char *)selectedProfileSetting->PrivateKey, "0");
 		strcpy((char *)selectedProfileSetting->PrivateKeyPassword, "0");
 	}
 
 	value = websGetVar(wp, T("cert_ca_cert_path"), T(""));
-	if (strcmp(value, "") != 0)
+	if (CHK_IF_SET(value))
 		strcpy((char *)selectedProfileSetting->CACert, value);
 	else
 		strcpy((char *)selectedProfileSetting->CACert, "0");
 #endif				
 
-	if (selectedProfileSetting->Authentication <= Ndis802_11AuthModeShared) {
+	if (selectedProfileSetting->Authentication <= Ndis802_11AuthModeShared)
+	{
 		if( strlen((char *)selectedProfileSetting->Key1) > 1 || strlen((char *)selectedProfileSetting->Key2) > 1 ||
 			strlen((char *)selectedProfileSetting->Key4) > 1 || strlen((char *)selectedProfileSetting->Key3) > 1)
 		{
@@ -4936,6 +4956,7 @@ static void editStaProfile(webs_t wp, char_t *path, char_t *query)
 	}
 
 	// setp 2, write all profile into nvram
+	printf("writeProfileToNvram()\n");
 	writeProfileToNvram();
 
 	selectedProfileSetting = NULL;
