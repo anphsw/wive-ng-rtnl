@@ -459,7 +459,9 @@ static void SolveImage(void)
 		if (rrc)
 		{
 			printf("rescue failed!\n");
+#if !defined (CFG_ENV_IS_IN_NAND) && ! defined (CFG_ENV_IS_IN_SPI)
 			flash_perror(rrc);
+#endif
 			NetState = NETLOOP_FAIL;
 			TftpState = STATE_FINISHACK;
 			RescueAckFlag= 0x0000;
