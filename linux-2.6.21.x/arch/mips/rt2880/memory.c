@@ -135,6 +135,9 @@ void __init prom_meminit(void)
 
 	spin_lock_irqsave(&rtlmem_lock, flags);
 
+	/* Maximum RAM for autodetect */
+	reg_mem = MAX_SDRAM_SIZE >> 20;
+
 	/* Test to be sure in RAM capacity */
 	before = ((unsigned long) &prom_init) & (TEST_OFFSET << 20);
 	offset = ((unsigned long) &prom_init) - before;
@@ -147,15 +150,14 @@ void __init prom_meminit(void)
 	 }
 
 	/* correct ram size for current CPU type */
-	reg_mem = MAX_SDRAM_SIZE >> 20;
-	detect_ram_sequence[0] = reg_mem;
+	detect_ram_sequence[0] = MAX_SDRAM_SIZE;
 	detect_ram_sequence[1] = mem;
 
-	if(mem > MAX_SDRAM_SIZE){
+	if (mem > MAX_SDRAM_SIZE) {
 	    mem = MAX_SDRAM_SIZE;
 	}
 
-	if(mem < MIN_SDRAM_SIZE){
+	if (mem < MIN_SDRAM_SIZE) {
 	    mem = MIN_SDRAM_SIZE;
 	}
 
