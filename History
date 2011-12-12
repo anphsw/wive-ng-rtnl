@@ -876,6 +876,8 @@
 25) Rewrite switch,lan,br configure logic for more device independed version.<br>
 26) Fix connect to STA at boot if profile not full.<br>
 27) Uboot add recovery mode at RESET button pressed (send wive.bin image to 192.168.1.1 from 192.168.1.131 by tftp client).<br>
+28) Small fix use socket in pppol2tp plugin.<br>
+29) Small cleanup pppd-pppoe plugin.<br>
 
 <br><br>
 <b>For support see:</b><br>
