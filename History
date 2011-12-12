@@ -879,6 +879,7 @@
 28) Small fix use socket in pppol2tp plugin.<br>
 29) Small cleanup pppd-pppoe plugin.<br>
 30) Fix parse wifi sta profile without any encrypt configured.<br>
+31) Fix PWS mode set by default and generate rf config.<br>
 
 <br><br>
 <b>For support see:</b><br>

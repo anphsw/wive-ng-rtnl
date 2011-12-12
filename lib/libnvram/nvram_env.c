@@ -1290,6 +1290,7 @@ int gen_wifi_config(int mode)
 		FPRINT_STR(own_ip_addr);
 		FPRINT_STR(EAPifname);
 		FPRINT_STR(PreAuthifname);
+		FPRINT_STR(PSMode);
 		FPRINT_NUM(session_timeout_interval);
 		FPRINT_NUM(quiet_interval);
 		FPRINT_NUM(TGnWifiTest);
