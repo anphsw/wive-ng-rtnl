@@ -46,12 +46,14 @@
     defined (CONFIG_RALINK_RT3352) || \
     defined (CONFIG_RALINK_RT3052) || \
     defined (CONFIG_RALINK_RT5350)
+
+int boot_from = BOOT_FROM_NOR;
+
 int ra_check_flash_type(void)
 {
 
     uint8_t Id[10];
     int syscfg=0;
-    int boot_from=0;
     int chip_mode=0;
 
     memset(Id, 0, sizeof(Id));
