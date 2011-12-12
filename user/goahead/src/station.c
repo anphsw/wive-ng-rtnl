@@ -1659,7 +1659,7 @@ void initStaProfile(void)
 	    sprintf(tmp_buffer, "%s", wordlist);
 	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
 		currentProfileSetting->RTS= atoi(tok);
-		if (currentProfileSetting->Next != NULL)
+ 		if (currentProfileSetting->Next != NULL)
 			currentProfileSetting = currentProfileSetting->Next;
 	    }
 	}
@@ -1674,6 +1674,21 @@ void initStaProfile(void)
 	    sprintf(tmp_buffer, "%s", wordlist);
 	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
 		currentProfileSetting->Fragment= atoi(tok);
+		if (currentProfileSetting->Next != NULL)
+			currentProfileSetting = currentProfileSetting->Next;
+	    }
+	}
+
+	// Active
+	bzero(tmp_buffer, sizeof(tmp_buffer));
+	wordlist = nvram_get(RT2860_NVRAM, "staActive");
+	if (wordlist == NULL || strcmp(wordlist, "" ) == 0)	{
+		error(E_L, E_LOG, T("Sta Active has no data."));
+	} else {
+	    currentProfileSetting = headerProfileSetting;
+	    sprintf(tmp_buffer, "%s", wordlist);
+	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
+		currentProfileSetting->Active = atoi(tok);
 		if (currentProfileSetting->Next != NULL)
 			currentProfileSetting = currentProfileSetting->Next;
 	    }
@@ -1699,7 +1714,8 @@ void initStaProfile(void)
 	bzero(tmp_buffer, sizeof(tmp_buffer));
 	wordlist = nvram_get(RT2860_NVRAM, "staEncrypt");
 	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
-		error(E_L, E_LOG, T("Sta Encryption has no data."));
+		if (strcmp(wordlist, "" ))
+		    error(E_L, E_LOG, T("Sta Encryption has no data."));
 		goto out_wep;
 	} else {
 	    currentProfileSetting = headerProfileSetting;
@@ -2081,21 +2097,6 @@ out_wep:
 	}
 out_wpa_sp:
 #endif
-
-	//Active
-	bzero(tmp_buffer, sizeof(tmp_buffer));
-	wordlist = nvram_get(RT2860_NVRAM, "staActive");
-	if (wordlist == NULL || strcmp(wordlist, "" ) == 0)	{
-		error(E_L, E_LOG, T("Sta Active has no data."));
-	} else {
-	    currentProfileSetting = headerProfileSetting;
-	    sprintf(tmp_buffer, "%s", wordlist);
-	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
-		currentProfileSetting->Active = atoi(tok);
-		if (currentProfileSetting->Next != NULL)
-			currentProfileSetting = currentProfileSetting->Next;
-	    }
-	}
 }
 
 /*
