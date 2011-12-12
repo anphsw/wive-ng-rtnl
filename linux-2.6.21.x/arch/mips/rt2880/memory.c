@@ -68,7 +68,7 @@
 #endif
 
 spinlock_t rtlmem_lock = SPIN_LOCK_UNLOCKED;
-unsigned long detect_ram_sequence[4];
+unsigned long detect_ram_sequence[3];
 
 #ifdef DEBUG
 enum surfboard_memtypes {
@@ -125,79 +125,49 @@ struct prom_pmemblock * __init prom_getmdesc(void)
 void __init prom_meminit(void)
 {
 #ifdef DEBUG
-    struct prom_pmemblock *p;
-    struct prom_pmemblock *psave;
+	struct prom_pmemblock *p;
+	struct prom_pmemblock *psave;
 #endif
 #ifdef CONFIG_RAM_SIZE_AUTO
-    unsigned long mem, memsize, reg_mem, mempos, memmeg;
-    unsigned long before, offset;
-    unsigned long flags;
-    unsigned short save_dword;
+	unsigned long mem, reg_mem;
+	unsigned long before, offset;
+	unsigned long flags;
 
-    spin_lock_irqsave(&rtlmem_lock, flags);
+	spin_lock_irqsave(&rtlmem_lock, flags);
 
-    //Maximum RAM for autodetect
-    reg_mem = MAX_SDRAM_SIZE >> 20;
+	/* Test to be sure in RAM capacity */
+	before = ((unsigned long) &prom_init) & (TEST_OFFSET << 20);
+	offset = ((unsigned long) &prom_init) - before;
 
-       //FIRST PASS RAM capacity
-       for(memmeg=8;memmeg<reg_mem;memmeg+=8){
-	    mempos = 0xa0000000L + memmeg * 0x100000;
-	    save_dword = *(volatile unsigned short *)mempos;
-
-	    *(volatile unsigned short *)mempos = (unsigned short)0xABCD;
-	    if (*(volatile unsigned short *)mempos != (unsigned short)0xABCD){
-		*(volatile unsigned short *)mempos = save_dword;
-		break;
-	    }
-
-	    *(volatile unsigned short *)mempos = (unsigned short)0xDCBA;
-	    if (*(volatile unsigned short *)mempos != (unsigned short)0xDCBA){
-		*(volatile unsigned short *)mempos = save_dword;
-		break;
-	    }
-	    *(volatile unsigned short *)mempos = save_dword;
-	}
-
-       //SECOND PASS Test to be sure in RAM capacity
-       before = ((unsigned long) &prom_init) & (TEST_OFFSET << 20);
-       offset = ((unsigned long) &prom_init) - before;
-
-       for (mem = before + (1 << 20); mem < (reg_mem << 20); mem += (1 << 20))
+	for (mem = before + (1 << 20); mem < (reg_mem << 20); mem += (1 << 20))
          if (*(unsigned long *)(offset + mem) == *(unsigned long *)(prom_init))
 	 {
     		mem -= before;
 		break;
 	 }
 
-       //Calculate ram size
-       memsize = memmeg << 20;
-       detect_ram_sequence[0] = reg_mem;
-       detect_ram_sequence[1] = memsize;
+	/* correct ram size for current CPU type */
+	reg_mem = MAX_SDRAM_SIZE >> 20;
+	detect_ram_sequence[0] = reg_mem;
+	detect_ram_sequence[1] = mem;
 
-	//Select smallest size from passes...
-	if(mem < memsize){
-	    memsize = mem;
+	if(mem > MAX_SDRAM_SIZE){
+	    mem = MAX_SDRAM_SIZE;
 	}
 
-	//This correct detect ram for some china routers..
-	if(memsize > MAX_SDRAM_SIZE){
-	    memsize = MAX_SDRAM_SIZE;
+	if(mem < MIN_SDRAM_SIZE){
+	    mem = MIN_SDRAM_SIZE;
 	}
 
-	if(memsize < MIN_SDRAM_SIZE){
-	    memsize = MIN_SDRAM_SIZE;
-	}
+	detect_ram_sequence[2] = mem;
 
-       detect_ram_sequence[2] = mem;
-       detect_ram_sequence[3] = memsize;
-
-    spin_unlock_irq(&rtlmem_lock);
+	spin_unlock_irq(&rtlmem_lock);
 
 	/* Set ram size */
 #if defined(CONFIG_RT2880_ASIC) || defined(CONFIG_RT2880_FPGA)
-	add_memory_region(0x08000000, memsize, BOOT_MEM_RAM);
+	add_memory_region(0x08000000, mem, BOOT_MEM_RAM);
 #else
-	add_memory_region(0x00000000, memsize, BOOT_MEM_RAM);
+	add_memory_region(0x00000000, mem, BOOT_MEM_RAM);
 #endif
 #else /* Fix mesize */
 #if defined(CONFIG_RT2880_ASIC) || defined(CONFIG_RT2880_FPGA)

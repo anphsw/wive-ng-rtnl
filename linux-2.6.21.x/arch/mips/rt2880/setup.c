@@ -160,13 +160,13 @@ void __init rt2880_setup(void)
 }
 
 #ifdef CONFIG_RAM_SIZE_AUTO
-extern unsigned long detect_ram_sequence[4];
+extern unsigned long detect_ram_sequence[3];
 #endif
 void __init plat_mem_setup(void)
 {
 #ifdef CONFIG_RAM_SIZE_AUTO
-    printk("DetectRAMsequence\nMAX memory:[%ld]\nRAM after first pass:[%ld]\nRAM after second pass:[%ld]\nFullviewRAM:[%ld]\n",
-           detect_ram_sequence[0],detect_ram_sequence[1],detect_ram_sequence[2],detect_ram_sequence[3]);
+    printk("DetectRAMsequence\nMAX memory:[%ld]\nRAM size detected:[%ld]\nFullviewRAM:[%ld]\n",
+           detect_ram_sequence[0],detect_ram_sequence[1],detect_ram_sequence[2]);
 #else
     printk("Fixed Ramsize = %d MBytes\n", CONFIG_RALINK_RAM_SIZE );
 #endif
