@@ -11,7 +11,6 @@
 static char const RCSID[] =
 "$Id: discovery.c,v 1.6 2008/06/15 04:35:50 paulus Exp $";
 
-#define _GNU_SOURCE 1
 #include "pppoe.h"
 #include "pppd/pppd.h"
 #include "pppd/fsm.h"
@@ -19,7 +18,6 @@ static char const RCSID[] =
 
 #include <string.h>
 #include <stdlib.h>
-#include <errno.h>
 
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>

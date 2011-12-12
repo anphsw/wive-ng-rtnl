@@ -25,7 +25,6 @@
 static char const RCSID[] =
 "$Id: plugin.c,v 1.17 2008/06/15 04:35:50 paulus Exp $";
 
-#define _GNU_SOURCE 1
 #include "pppoe.h"
 
 #include "pppd/pppd.h"
@@ -33,7 +32,6 @@ static char const RCSID[] =
 #include "pppd/lcp.h"
 #include "pppd/ipcp.h"
 #include "pppd/ccp.h"
-/* #include "pppd/pathnames.h" */
 
 #include <linux/types.h>
 #include <sys/ioctl.h>
@@ -42,7 +40,6 @@ static char const RCSID[] =
 #include <sys/stat.h>
 #include <string.h>
 #include <stdlib.h>
-#include <errno.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <signal.h>

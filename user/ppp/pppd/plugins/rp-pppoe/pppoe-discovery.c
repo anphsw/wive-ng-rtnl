@@ -9,17 +9,31 @@
  *
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <errno.h>
-#include <string.h>
-
 #include "pppoe.h"
+#include "../pppd/pppd.h"
+
+#include <string.h>
+#include <stdlib.h>
+
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
+#include <time.h>
+
+#ifdef HAVE_SYS_UIO_H
+#include <sys/uio.h>
+#endif
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+
+#ifdef USE_LINUX_PACKET
+#include <sys/ioctl.h>
+#include <fcntl.h>
+#endif
+
+#include <signal.h>
 
 #ifdef HAVE_NETPACKET_PACKET_H
 #include <netpacket/packet.h>
@@ -38,10 +52,6 @@
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif
-
-#include <errno.h>
-#include <stdlib.h>
-#include <string.h>
 
 #ifdef HAVE_NET_IF_ARP_H
 #include <net/if_arp.h>

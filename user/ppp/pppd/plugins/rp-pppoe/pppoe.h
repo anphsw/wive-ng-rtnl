@@ -21,6 +21,7 @@
 
 #include <stdio.h>		/* For FILE */
 #include <sys/types.h>		/* For pid_t */
+#include <errno.h>
 
 /* How do we access raw Ethernet devices? */
 #undef USE_LINUX_PACKET
