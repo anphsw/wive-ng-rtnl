@@ -1714,15 +1714,16 @@ void initStaProfile(void)
 	bzero(tmp_buffer, sizeof(tmp_buffer));
 	wordlist = nvram_get(RT2860_NVRAM, "staEncrypt");
 	// if not set or open
-	if (wordlist == NULL || strcmp(wordlist, "" ) == 0 || strcmp(wordlist, "1" ) == 0) {
+	if (wordlist == NULL || strcmp(wordlist, "" ) == 0 || strcmp(wordlist, "NONE" ) == 0) {
 		if (strcmp(wordlist, "" ) == 0)
 		    error(E_L, E_LOG, T("Sta Encryption has no data."));
+		currentProfileSetting->Encryption = Ndis802_11WEPDisabled;
 		goto out_wep;
 	} else {
 	    currentProfileSetting = headerProfileSetting;
 	    sprintf(tmp_buffer, "%s", wordlist);
 	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
-		currentProfileSetting->Encryption= atoi(tok);
+		currentProfileSetting->Encryption = atoi(tok);
 		if (currentProfileSetting->Next != NULL)
 			currentProfileSetting = currentProfileSetting->Next;
 	    }
