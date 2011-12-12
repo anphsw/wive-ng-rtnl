@@ -441,12 +441,20 @@ static void SolveImage(void)
 		}
 
 		puts ("Copy to Flash... ");
+#if defined (CFG_ENV_IS_IN_NAND)
+		printf ("\n Copy %d byte to Flash... ", count*size);
+		rrc = ranand_erase_write((char *)CFG_LOAD_ADDR, 0, NetBootFileXferSize);
+#elif defined (CFG_ENV_IS_IN_SPI)
+		printf ("\n Copy %d byte to Flash... ", count*size);
+		rrc = raspi_erase_write((char *)CFG_LOAD_ADDR, 0, NetBootFileXferSize);
+#else /* NOR */
 		printf("\n Erase File System block !!\n From 0xBC450000 To 0xBC7FFFFF\n");
 		flash_sect_protect(0, CFG_FLASH_BASE + 0x50000, CFG_FLASH_BASE + 0x7fffff);
 		flash_sect_erase(CFG_FLASH_BASE + 0x50000, CFG_FLASH_BASE + 0x7FFFFF);
 		printf ("\n Copy %d byte to Flash... ", count*size);
 		rrc = flash_write((uchar *)ptr, (ulong)(CFG_FLASH_BASE + 0x50000), count*size);
 		flash_sect_protect(1, CFG_FLASH_BASE + 0x50000, CFG_FLASH_BASE + 0x7fffff);
+#endif
 
 		if (rrc)
 		{
