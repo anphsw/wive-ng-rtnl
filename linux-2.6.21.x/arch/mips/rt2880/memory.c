@@ -36,7 +36,7 @@
  **************************************************************************
  */
 
-
+#include <linux/config.h>
 #include <linux/init.h>
 #include <linux/mm.h>
 #include <linux/bootmem.h>

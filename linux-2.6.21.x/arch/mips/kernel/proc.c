@@ -50,13 +50,13 @@ static int show_cpuinfo(struct seq_file *m, void *v)
 	              (cpu_data[n].udelay_val / (5000/HZ)) % 100);
 #ifdef CONFIG_MTD_RALINK
 	if (boot_from == BOOT_FROM_NOR)
-	    seq_printf(m, "flash_type\t\t: NOR\n");
+	    seq_printf(m, "flash type\t\t: NOR\n");
 	else if ( boot_from == BOOT_FROM_SPI )
-	    seq_printf(m, "flash_type\t\t: SPI\n");
+	    seq_printf(m, "flash type\t\t: SPI\n");
 	else if ( boot_from == BOOT_FROM_NAND )
-	    seq_printf(m, "flash_type\t\t: NAND\n");
+	    seq_printf(m, "flash type\t\t: NAND\n");
 	else
-	    seq_printf(m, "flash_type\t\t: UNKNOWN\n");
+	    seq_printf(m, "flash type\t\t: UNKNOWN\n");
 #endif
 	seq_printf(m, "wait instruction\t: %s\n", cpu_wait ? "yes" : "no");
 	seq_printf(m, "microsecond timers\t: %s\n",
