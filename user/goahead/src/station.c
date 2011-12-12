@@ -1715,7 +1715,7 @@ void initStaProfile(void)
 	wordlist = nvram_get(RT2860_NVRAM, "staEncrypt");
 	// if not set or open
 	if (wordlist == NULL || strcmp(wordlist, "" ) == 0 || strcmp(wordlist, "1" ) == 0) {
-		if (strcmp(wordlist, "" ))
+		if (strcmp(wordlist, "" ) == 0)
 		    error(E_L, E_LOG, T("Sta Encryption has no data."));
 		goto out_wep;
 	} else {
