@@ -16,6 +16,7 @@
 
 #include <linux/module.h>
 #include <linux/random.h>
+#include <linux/prefetch.h>
 
 #include <net/inet_connection_sock.h>
 #include <net/inet_hashtables.h>

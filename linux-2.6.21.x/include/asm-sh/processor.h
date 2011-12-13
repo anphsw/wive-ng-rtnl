@@ -10,6 +10,7 @@
 #ifdef __KERNEL__
 
 #include <linux/compiler.h>
+#include <linux/prefetch.h>
 #include <asm/page.h>
 #include <asm/types.h>
 #include <asm/cache.h>

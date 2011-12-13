@@ -20,6 +20,7 @@
 #include <asm/percpu.h>
 #include <linux/personality.h>
 #include <linux/cpumask.h>
+#include <linux/prefetch.h>
 
 #define TF_MASK		0x00000100
 #define IF_MASK		0x00000200

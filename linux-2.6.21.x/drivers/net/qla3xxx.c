@@ -34,6 +34,7 @@
 #include <linux/init.h>
 #include <linux/delay.h>
 #include <linux/mm.h>
+#include <linux/prefetch.h>
 
 #include "qla3xxx.h"
 

@@ -52,6 +52,7 @@
 #include <linux/tsacct_kern.h>
 #include <linux/kprobes.h>
 #include <linux/delayacct.h>
+#include <linux/prefetch.h>
 #include <asm/tlb.h>
 
 #include <asm/unistd.h>

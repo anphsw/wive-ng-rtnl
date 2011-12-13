@@ -253,6 +253,7 @@ struct iattr {
 #include <linux/list.h>
 #include <linux/fs.h>
 #include <linux/stat.h>
+#include <linux/prefetch.h>
 #endif
 
 #endif

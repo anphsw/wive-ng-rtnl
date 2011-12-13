@@ -361,6 +361,7 @@ struct sk_buff {
  *	Handling routines are only of interest to the kernel
  */
 #include <linux/slab.h>
+#include <linux/prefetch.h>
 
 #include <asm/system.h>
 

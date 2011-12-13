@@ -40,6 +40,7 @@
 #include <linux/capability.h>
 #include <linux/rcupdate.h>
 #include <linux/completion.h>
+#include <linux/prefetch.h>
 
 #include <asm/errno.h>
 #include <asm/intrinsics.h>

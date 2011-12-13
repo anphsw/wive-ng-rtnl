@@ -112,6 +112,7 @@
 #include <linux/hdreg.h>
 #include <linux/ide.h>
 #include <linux/init.h>
+#include <linux/prefetch.h>
 
 #include <asm/io.h>
 

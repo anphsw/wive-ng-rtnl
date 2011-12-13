@@ -33,6 +33,7 @@
 #include <linux/if.h>
 #include <linux/list.h>
 #include <linux/if_ether.h>
+#include <linux/prefetch.h>
 #include <net/ip.h>
 
 #include "ehea.h"

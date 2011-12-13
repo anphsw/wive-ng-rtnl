@@ -156,6 +156,7 @@
 #else /* __ASSEMBLY__ not defined */
 
 #include <linux/sched.h>
+#include <linux/prefetch.h>
 #include <asm/types.h>
 
 /*

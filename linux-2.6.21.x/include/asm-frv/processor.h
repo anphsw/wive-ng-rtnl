@@ -23,6 +23,7 @@
 
 #include <linux/compiler.h>
 #include <linux/linkage.h>
+#include <linux/prefetch.h>
 #include <asm/sections.h>
 #include <asm/segment.h>
 #include <asm/fpu.h>

@@ -60,6 +60,7 @@
 #include <linux/crc32.h>
 #include <linux/moduleparam.h>
 #include <linux/io.h>
+#include <linux/prefetch.h>
 #include <net/checksum.h>
 #include <asm/byteorder.h>
 #include <asm/io.h>

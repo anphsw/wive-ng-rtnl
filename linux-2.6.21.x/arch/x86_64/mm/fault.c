@@ -25,6 +25,7 @@
 #include <linux/kprobes.h>
 #include <linux/uaccess.h>
 #include <linux/kdebug.h>
+#include <linux/prefetch.h>
 
 #include <asm/system.h>
 #include <asm/pgalloc.h>

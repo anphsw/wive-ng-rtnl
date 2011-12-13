@@ -22,6 +22,7 @@
  */
 
 #include <linux/platform_device.h>
+#include <linux/prefetch.h>
 
 #include "lh7a40x_udc.h"
 

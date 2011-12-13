@@ -67,6 +67,7 @@
 #include <linux/compiler.h>
 #include <linux/threads.h>
 #include <linux/types.h>
+#include <linux/prefetch.h>
 
 #include <asm/fpu.h>
 #include <asm/page.h>

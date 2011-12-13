@@ -22,6 +22,7 @@
 #include <linux/module.h>
 #include <linux/kprobes.h>
 #include <linux/uaccess.h>
+#include <linux/prefetch.h>
 
 #include <asm/system.h>
 #include <asm/desc.h>

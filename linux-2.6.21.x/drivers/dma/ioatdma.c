@@ -31,6 +31,7 @@
 #include <linux/dmaengine.h>
 #include <linux/delay.h>
 #include <linux/dma-mapping.h>
+#include <linux/prefetch.h>
 #include "ioatdma.h"
 #include "ioatdma_io.h"
 #include "ioatdma_registers.h"

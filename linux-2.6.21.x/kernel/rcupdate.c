@@ -48,6 +48,7 @@
 #include <linux/cpu.h>
 #include <linux/mutex.h>
 #include <linux/hardirq.h>
+#include <linux/prefetch.h>
 
 #ifdef CONFIG_DEBUG_LOCK_ALLOC
 static struct lock_class_key rcu_lock_key;

@@ -53,6 +53,7 @@
 #endif
 
 #include <linux/err.h>
+#include <linux/prefetch.h>
 
 #include <asm/tlbflush.h>
 #include <asm/cpu.h>

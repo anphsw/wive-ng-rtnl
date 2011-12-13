@@ -34,6 +34,7 @@
 #include <linux/mount.h>
 #include <linux/bitops.h>
 #include <linux/mutex.h>
+#include <linux/prefetch.h>
 #include <asm/uaccess.h>
 #include <asm/system.h>
 #include <asm/io.h>

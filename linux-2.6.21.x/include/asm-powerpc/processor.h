@@ -14,6 +14,7 @@
 
 #ifndef __ASSEMBLY__
 #include <linux/compiler.h>
+#include <linux/prefetch.h>
 #include <asm/ptrace.h>
 #include <asm/types.h>
 

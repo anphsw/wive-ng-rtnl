@@ -18,6 +18,7 @@
 #include <linux/sched.h>
 #include <linux/slab.h>
 #include <linux/wait.h>
+#include <linux/prefetch.h>
 
 #include <net/inet_connection_sock.h>
 #include <net/inet_hashtables.h>

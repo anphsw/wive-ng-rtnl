@@ -21,6 +21,7 @@
 #include <asm/percpu.h>
 #include <linux/cpumask.h>
 #include <linux/init.h>
+#include <linux/prefetch.h>
 
 /* flag for disabling the tsc */
 extern int tsc_disable;

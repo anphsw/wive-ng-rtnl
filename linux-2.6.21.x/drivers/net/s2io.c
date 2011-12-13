@@ -72,6 +72,7 @@
 #include <linux/if_vlan.h>
 #include <linux/ip.h>
 #include <linux/tcp.h>
+#include <linux/prefetch.h>
 #include <net/tcp.h>
 
 #include <asm/system.h>

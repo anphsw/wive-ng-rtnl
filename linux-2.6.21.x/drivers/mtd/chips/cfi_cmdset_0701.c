@@ -37,6 +37,7 @@
 #include <linux/mtd/mtd.h>
 #include <linux/mtd/cfi.h>
 #include <linux/mtd/xip.h>
+#include <linux/prefetch.h>
 
 #define SST_BOOTLOC_BUG
 #define FORCE_WORD_WRITE 0

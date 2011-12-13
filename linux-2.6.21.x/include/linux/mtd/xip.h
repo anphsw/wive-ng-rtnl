@@ -26,6 +26,7 @@
  * We absolutely _need_ proper inlining.
  */
 #include <linux/compiler.h>
+#include <linux/prefetch.h>
 
 /*
  * Function that are modifying the flash state away from array mode must

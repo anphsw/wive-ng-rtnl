@@ -36,6 +36,7 @@
 #include <linux/ip.h>
 #include <linux/tcp.h>
 #include <linux/dma-mapping.h>
+#include <linux/prefetch.h>
 #include "common.h"
 #include "regs.h"
 #include "sge_defs.h"

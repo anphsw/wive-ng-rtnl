@@ -147,6 +147,7 @@
 #include <linux/init.h>
 #include <linux/if_vlan.h>
 #include <linux/dma-mapping.h>
+#include <linux/prefetch.h>
 
 #include <asm/irq.h>
 #include <asm/io.h>

@@ -42,6 +42,7 @@
 #include <asm/div64.h>
 
 #include <linux/swapops.h>
+#include <linux/prefetch.h>
 
 #include "internal.h"
 

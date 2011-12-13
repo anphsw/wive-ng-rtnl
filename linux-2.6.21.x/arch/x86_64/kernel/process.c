@@ -38,6 +38,7 @@
 #include <linux/notifier.h>
 #include <linux/kprobes.h>
 #include <linux/kdebug.h>
+#include <linux/prefetch.h>
 
 #include <asm/uaccess.h>
 #include <asm/pgtable.h>

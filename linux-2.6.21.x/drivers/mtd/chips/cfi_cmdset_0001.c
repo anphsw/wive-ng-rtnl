@@ -35,6 +35,7 @@
 #include <linux/mtd/mtd.h>
 #include <linux/mtd/compatmac.h>
 #include <linux/mtd/cfi.h>
+#include <linux/prefetch.h>
 
 /* #define CMDSET0001_DISABLE_ERASE_SUSPEND_ON_WRITE */
 /* #define CMDSET0001_DISABLE_WRITE_SUSPEND */

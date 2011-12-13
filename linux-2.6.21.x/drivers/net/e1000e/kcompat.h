@@ -1576,6 +1576,7 @@ extern int __kc_adapter_clean(struct net_device *, int *);
 
 #if ( LINUX_VERSION_CODE > KERNEL_VERSION(2,6,18) )
 #include <linux/latency.h>
+#include <linux/prefetch.h>
 #define PM_QOS_DEFAULT_VALUE	INFINITE_LATENCY
 #define pm_qos_add_requirement(pm_qos_class, name, value) \
 		set_acceptable_latency(name, value)

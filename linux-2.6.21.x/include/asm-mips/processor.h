@@ -13,6 +13,7 @@
 
 #include <linux/cpumask.h>
 #include <linux/threads.h>
+#include <linux/prefetch.h>
 
 #include <asm/cachectl.h>
 #include <asm/cpu.h>

@@ -75,6 +75,7 @@ struct thread_struct {
 #ifndef __ASSEMBLY__
 
 #include <linux/types.h>
+#include <linux/prefetch.h>
 
 /* Return saved PC of a blocked thread. */
 struct task_struct;

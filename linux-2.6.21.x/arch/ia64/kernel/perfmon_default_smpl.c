@@ -11,6 +11,7 @@
 #include <linux/init.h>
 #include <asm/delay.h>
 #include <linux/smp.h>
+#include <linux/prefetch.h>
 
 #include <asm/perfmon.h>
 #include <asm/perfmon_default_smpl.h>

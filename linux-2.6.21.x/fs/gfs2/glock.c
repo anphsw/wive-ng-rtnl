@@ -22,6 +22,7 @@
 #include <linux/wait.h>
 #include <linux/module.h>
 #include <linux/rwsem.h>
+#include <linux/prefetch.h>
 #include <asm/uaccess.h>
 
 #include "gfs2.h"
