@@ -1332,6 +1332,7 @@ static int unix_dgram_sendmsg(struct kiocb *kiocb, struct socket *sock,
 	struct sk_buff *skb;
 	long timeo;
 	struct scm_cookie tmp_scm;
+	bool fds_sent = false;
 
 	if (NULL == siocb->scm)
 		siocb->scm = &tmp_scm;
@@ -1370,10 +1371,12 @@ static int unix_dgram_sendmsg(struct kiocb *kiocb, struct socket *sock,
 		goto out;
 
 	memcpy(UNIXCREDS(skb), &siocb->scm->creds, sizeof(struct ucred));
-	if (siocb->scm->fp) {
+	/* Only send the fds in the first buffer */
+	if (siocb->scm->fp && !fds_sent) {
 		err = unix_attach_fds(siocb->scm, skb);
 		if (err)
 			goto out_free;
+		fds_sent = true;
 	}
 	unix_get_secdata(siocb->scm, skb);
 
