@@ -6,7 +6,7 @@
 
 ACLOCAL_AMFLAGS = -I m4
 
-DISTCHECK_CONFIGURE_FLAGS = --disable-debug --disable-samples
+DISTCHECK_CONFIGURE_FLAGS = --enable-debug --enable-samples
 
 SUBDIRS = \
 	ixml \
@@ -53,11 +53,6 @@ pkgconfigexec_DATA = libupnp.pc
 
 $(pkgconfigexec_DATA): config.status
 
-
-if WITH_DOCUMENTATION
-	doc_DATA = LICENSE README NEWS TODO THANKS
-endif
-
 shared: install
 	cp -vfa ./filesystem/lib/*.*    $(ROOTDIR)/lib/lib
 	cp -vfra ./filesystem/include/* $(ROOTDIR)/lib/include_shared
@@ -66,5 +61,10 @@ shared: install
 	cp -vf autoconfig.h		$(ROOTDIR)/lib/include_shared/upnp/autoconfig.h
 	rm -rf ./filesystem
 
-CLEANFILES = IUpnpErrFile.txt IUpnpInfoFile.txt *~ ./filesystem/*
+if WITH_DOCUMENTATION
+	doc_DATA = LICENSE README NEWS TODO THANKS
+endif
+
+
+CLEANFILES = IUpnpErrFile.txt IUpnpInfoFile.txt
 
