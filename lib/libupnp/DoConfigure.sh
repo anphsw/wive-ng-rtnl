@@ -19,8 +19,9 @@ if [ ! -f $APROOTDIR/Makefile.in ]; then
 fi
 
 CONFOPTS="--host=mipsel-linux --build=i686-pc-linux-gnu"
-CONFOPTS="$CONFOPTS --disable-samples --disable-debug"
-CONFOPTS="$CONFOPTS --disable-dependency-tracking --enable-shared --enable-static"
+CONFOPTS="$CONFOPTS --disable-dependency-tracking"
+CONFOPTS="$CONFOPTS --disable-samples --disable-debug --without-documentation"
+CONFOPTS="$CONFOPTS --enable-shared --enable-static"
 CONFOPTS="$CONFOPTS --prefix=$APROOTDIR/filesystem"
 CFLAGS="$BACKUPCFLAGS -I$ZLIB -I$LIBSSL" 
 LDFLAGS="$BACKUPLDFLAGS -L$ZLIB -L$LIBSSL"
