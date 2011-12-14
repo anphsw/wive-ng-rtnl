@@ -16,10 +16,7 @@ struct udphdr;
 /* This macros replace some functions from new version of kernels for easy backport some code */
 #define udp_hdr(skb) (struct udphdr *) (skb)->h.raw
 #define ipv6_hdr(skb) skb->nh.ipv6h
-#define skb_network_header(skb)	skb->nh.raw
 #define skb_transport_header(skb) skb->h.raw
 #define skb_network_header_len(skb) (skb->h.raw - skb->nh.raw)
-#define skb_reset_network_header(skb) (skb)->nh.raw = (skb)->data
-#define skb_reset_transport_header(skb) (skb)->h.raw = (skb)->data
 
 #endif /* COMPAT_SKBUFF_H */

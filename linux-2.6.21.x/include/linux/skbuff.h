@@ -1066,6 +1066,37 @@ static inline void skb_reserve(struct sk_buff *skb, int len)
 	skb->tail += len;
 }
 
+static inline void skb_reset_transport_header(struct sk_buff *skb)
+{
+	skb->h.raw = skb->data;
+}
+
+static inline void skb_set_transport_header(struct sk_buff *skb,
+					    const int offset)
+{
+	skb->h.raw = skb->data + offset;
+}
+
+static inline int skb_transport_offset(const struct sk_buff *skb)
+{
+	return skb->h.raw - skb->data;
+}
+
+static inline unsigned char *skb_network_header(const struct sk_buff *skb)
+{
+	return skb->nh.raw;
+}
+
+static inline void skb_reset_network_header(struct sk_buff *skb)
+{
+	skb->nh.raw = skb->data;
+}
+
+static inline void skb_set_network_header(struct sk_buff *skb, const int offset)
+{
+	skb->nh.raw = skb->data + offset;
+}
+
 static inline int skb_network_offset(const struct sk_buff *skb)
 {
 	return skb->nh.raw - skb->data;
@@ -1084,6 +1115,11 @@ static inline int skb_mac_header_was_set(const struct sk_buff *skb)
 static inline void skb_reset_mac_header(struct sk_buff *skb)
 {
 	skb->mac.raw = skb->data;
+}
+
+static inline void skb_set_mac_header(struct sk_buff *skb, const int offset)
+{
+	skb->mac.raw = skb->data + offset;
 }
 
 /*

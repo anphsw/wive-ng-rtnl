@@ -42,21 +42,18 @@
 static int esp6_output(struct xfrm_state *x, struct sk_buff *skb)
 {
 	int err;
-	int hdr_len;
 	struct ipv6hdr *top_iph;
 	struct ipv6_esp_hdr *esph;
 	struct crypto_blkcipher *tfm;
 	struct blkcipher_desc desc;
-	struct esp_data *esp;
 	struct sk_buff *trailer;
 	int blksize;
 	int clen;
 	int alen;
 	int nfrags;
-
-	esp = x->data;
-	hdr_len = skb->h.raw - skb->data +
-		  sizeof(*esph) + esp->conf.ivlen;
+	struct esp_data *esp = x->data;
+	int hdr_len = (skb_transport_offset(skb) +
+		       sizeof(*esph) + esp->conf.ivlen);
 
 	/* Strip IP+ESP header. */
 	__skb_pull(skb, hdr_len);
@@ -92,8 +89,8 @@ static int esp6_output(struct xfrm_state *x, struct sk_buff *skb)
 	top_iph = (struct ipv6hdr *)__skb_push(skb, hdr_len);
 	esph = (struct ipv6_esp_hdr *)skb->h.raw;
 	top_iph->payload_len = htons(skb->len + alen - sizeof(*top_iph));
-	*(u8*)(trailer->tail - 1) = *skb->nh.raw;
-	*skb->nh.raw = IPPROTO_ESP;
+	*(u8 *)(trailer->tail - 1) = *skb_network_header(skb);
+	*skb_network_header(skb) = IPPROTO_ESP;
 
 	esph->spi = x->id.spi;
 	esph->seq_no = htonl(++x->replay.oseq);
@@ -231,8 +228,8 @@ static int esp6_input(struct xfrm_state *x, struct sk_buff *skb)
 		ret = nexthdr[1];
 	}
 
-	skb->h.raw = __skb_pull(skb, sizeof(*esph) + esp->conf.ivlen) - hdr_len;
-
+	__skb_pull(skb, sizeof(*esph) + esp->conf.ivlen);
+	skb_set_transport_header(skb, -hdr_len);
 out:
 	return ret;
 }

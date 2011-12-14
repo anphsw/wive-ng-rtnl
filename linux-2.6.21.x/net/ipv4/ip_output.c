@@ -516,9 +516,9 @@ int ip_fragment(struct sk_buff *skb, int (*output)(struct sk_buff*))
 			 * before previous one went down. */
 			if (frag) {
 				frag->ip_summed = CHECKSUM_NONE;
-				frag->h.raw = frag->data;
+				skb_reset_transport_header(frag);
 				frag->nh.raw = __skb_push(frag, hlen);
-				memcpy(frag->nh.raw, iph, hlen);
+				memcpy(skb_network_header(frag), iph, hlen);
 				iph = frag->nh.iph;
 				iph->tot_len = htons(frag->len);
 				ip_copy_metadata(frag, skb);
@@ -618,8 +618,8 @@ slow_path:
 		ip_copy_metadata(skb2, skb);
 		skb_reserve(skb2, ll_rs);
 		skb_put(skb2, len + hlen);
-		skb2->nh.raw = skb2->data;
-		skb2->h.raw = skb2->data + hlen;
+		skb_reset_network_header(skb2);
+		skb2->h.raw = skb2->nh.raw + hlen;
 
 		/*
 		 *	Charge the memory for the fragment to any owner
@@ -633,7 +633,7 @@ slow_path:
 		 *	Copy the packet header into the new buffer.
 		 */
 
-		memcpy(skb2->nh.raw, skb->data, hlen);
+		memcpy(skb_network_header(skb2), skb->data, hlen);
 
 		/*
 		 *	Copy a block of the IP datagram.
@@ -747,7 +747,7 @@ static inline int ip_ufo_append_data(struct sock *sk,
 		skb_put(skb,fragheaderlen + transhdrlen);
 
 		/* initialize network header pointer */
-		skb->nh.raw = skb->data;
+		skb_reset_network_header(skb);
 
 		/* initialize protocol header pointer */
 		skb->h.raw = skb->data + fragheaderlen;
@@ -1232,7 +1232,7 @@ int ip_push_pending_frames(struct sock *sk)
 	tail_skb = &(skb_shinfo(skb)->frag_list);
 
 	/* move skb->data to ip header from ext header */
-	if (skb->data < skb->nh.raw)
+	if (skb->data < skb_network_header(skb))
 		__skb_pull(skb, skb_network_offset(skb));
 	while ((tmp_skb = __skb_dequeue(&sk->sk_write_queue)) != NULL) {
 		__skb_pull(tmp_skb, skb->h.raw - skb->nh.raw);

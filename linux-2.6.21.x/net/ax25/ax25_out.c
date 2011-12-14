@@ -148,7 +148,8 @@ void ax25_output(ax25_cb *ax25, int paclen, struct sk_buff *skb)
 
 			if (ka9qfrag == 1) {
 				skb_reserve(skbn, frontlen + 2);
-				skbn->nh.raw = skbn->data + skb_network_offset(skb);
+				skb_set_network_header(skbn,
+						      skb_network_offset(skb));
 				memcpy(skb_put(skbn, len), skb->data, len);
 				p = skb_push(skbn, 2);
 
@@ -161,7 +162,8 @@ void ax25_output(ax25_cb *ax25, int paclen, struct sk_buff *skb)
 				}
 			} else {
 				skb_reserve(skbn, frontlen + 1);
-				skbn->nh.raw = skbn->data + skb_network_offset(skb);
+				skb_set_network_header(skbn,
+						      skb_network_offset(skb));
 				memcpy(skb_put(skbn, len), skb->data, len);
 				p = skb_push(skbn, 1);
 				*p = AX25_P_TEXT;
@@ -205,7 +207,7 @@ static void ax25_send_iframe(ax25_cb *ax25, struct sk_buff *skb, int poll_bit)
 	if (skb == NULL)
 		return;
 
-	skb->nh.raw = skb->data;
+	skb_reset_network_header(skb);
 
 	if (ax25->modulus == AX25_MODULUS) {
 		frame = skb_push(skb, 1);

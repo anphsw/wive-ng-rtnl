@@ -53,7 +53,7 @@ static int xfrm6_tunnel_output(struct xfrm_state *x, struct sk_buff *skb)
 	skb_push(skb, x->props.header_len);
 	iph = skb->nh.ipv6h;
 
-	skb->nh.raw = skb->data;
+	skb_reset_network_header(skb);
 	top_iph = skb->nh.ipv6h;
 	skb->nh.raw = &top_iph->nexthdr;
 	skb->h.ipv6h = top_iph + 1;
@@ -87,9 +87,10 @@ static int xfrm6_tunnel_output(struct xfrm_state *x, struct sk_buff *skb)
 static int xfrm6_tunnel_input(struct xfrm_state *x, struct sk_buff *skb)
 {
 	int err = -EINVAL;
+	const unsigned char *nh = skb_network_header(skb);
 
-	if (skb->nh.raw[IP6CB(skb)->nhoff] != IPPROTO_IPV6
-	    && skb->nh.raw[IP6CB(skb)->nhoff] != IPPROTO_IPIP)
+	if (nh[IP6CB(skb)->nhoff] != IPPROTO_IPV6 &&
+	    nh[IP6CB(skb)->nhoff] != IPPROTO_IPIP)
 		goto out;
 	if (!pskb_may_pull(skb, sizeof(struct ipv6hdr)))
 		goto out;
@@ -98,7 +99,8 @@ static int xfrm6_tunnel_input(struct xfrm_state *x, struct sk_buff *skb)
 	    (err = pskb_expand_head(skb, 0, 0, GFP_ATOMIC)))
 		goto out;
 
-	if (skb->nh.raw[IP6CB(skb)->nhoff] == IPPROTO_IPV6) {
+	nh = skb_network_header(skb);
+	if (nh[IP6CB(skb)->nhoff] == IPPROTO_IPV6) {
 		if (x->props.flags & XFRM_STATE_DECAP_DSCP)
 			ipv6_copy_dscp(skb->nh.ipv6h, skb->h.ipv6h);
 		if (!(x->props.flags & XFRM_STATE_NOECN))
@@ -110,7 +112,7 @@ static int xfrm6_tunnel_input(struct xfrm_state *x, struct sk_buff *skb)
 	}
 	skb->mac.raw = memmove(skb->data - skb->mac_len,
 			       skb->mac.raw, skb->mac_len);
-	skb->nh.raw = skb->data;
+	skb_reset_network_header(skb);
 	err = 0;
 
 out:

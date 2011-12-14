@@ -1320,9 +1320,10 @@ static void write_ofld_wr(struct adapter *adap, struct sk_buff *skb,
 	/* Only TX_DATA builds SGLs */
 
 	from = (struct work_request_hdr *)skb->data;
-	memcpy(&d->flit[1], &from[1], skb->h.raw - skb->data - sizeof(*from));
+	memcpy(&d->flit[1], &from[1],
+	       skb_transport_offset(skb) - sizeof(*from));
 
-	flits = (skb->h.raw - skb->data) / 8;
+	flits = skb_transport_offset(skb) / 8;
 	sgp = ndesc == 1 ? (struct sg_ent *)&d->flit[flits] : sgl;
 	sgl_flits = make_sgl(skb, sgp, skb->h.raw, skb->tail - skb->h.raw,
 			     adap->pdev);
@@ -1350,7 +1351,7 @@ static inline unsigned int calc_tx_descs_ofld(const struct sk_buff *skb)
 	if (skb->len <= WR_LEN && cnt == 0)
 		return 1;	/* packet fits as immediate data */
 
-	flits = (skb->h.raw - skb->data) / 8;	/* headers */
+	flits = skb_transport_offset(skb) / 8;	/* headers */
 	if (skb->tail != skb->h.raw)
 		cnt++;
 	return flits_to_desc(flits + sgl_len(cnt));
@@ -1622,7 +1623,8 @@ static inline int rx_offload(struct t3cdev *tdev, struct sge_rspq *rq,
 {
 	rq->offload_pkts++;
 	skb_reset_mac_header(skb);
-	skb->nh.raw = skb->h.raw = skb->data;
+	skb_reset_network_header(skb);
+	skb_reset_transport_header(skb);
 
 	if (rq->polling) {
 		rx_gather[gather_idx++] = skb;

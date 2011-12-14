@@ -122,7 +122,7 @@ int ipv6_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type *pt
 	if (ipv6_addr_is_multicast(&hdr->saddr))
 		goto err;
 
-	skb->h.raw = (u8 *)(hdr + 1);
+	skb->h.raw = skb->nh.raw + sizeof(*hdr);
 	IP6CB(skb)->nhoff = offsetof(struct ipv6hdr, nexthdr);
 
 	pkt_len = ntohs(hdr->payload_len);
@@ -181,10 +181,10 @@ static int ip6_input_finish(struct sk_buff *skb)
 	rcu_read_lock();
 resubmit:
 	idev = ip6_dst_idev(skb->dst);
-	if (!pskb_pull(skb, skb->h.raw - skb->data))
+	if (!pskb_pull(skb, skb_transport_offset(skb)))
 		goto discard;
 	nhoff = IP6CB(skb)->nhoff;
-	nexthdr = skb->nh.raw[nhoff];
+	nexthdr = skb_network_header(skb)[nhoff];
 
 	raw_sk = sk_head(&raw_v6_htable[nexthdr & (MAX_INET_PROTOS - 1)]);
 	if (raw_sk && !ipv6_raw_deliver(skb, nexthdr))
@@ -202,7 +202,7 @@ resubmit:
 			   indefinitely. */
 			nf_reset(skb);
 
-			skb_postpull_rcsum(skb, skb->nh.raw,
+			skb_postpull_rcsum(skb, skb_network_header(skb),
 					   skb->h.raw - skb->nh.raw);
 			hdr = skb->nh.ipv6h;
 			if (ipv6_addr_is_multicast(&hdr->daddr) &&

@@ -946,8 +946,8 @@ static void iucv_callback_rx(struct iucv_path *path, struct iucv_message *msg)
 			return;
 		}
 
-		skb->h.raw = skb->data;
-		skb->nh.raw = skb->data;
+		skb_reset_transport_header(skb);
+		skb_reset_network_header(skb);
 		skb->len = msg->length;
 	}
 

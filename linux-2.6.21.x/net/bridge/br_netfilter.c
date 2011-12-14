@@ -351,7 +351,8 @@ static int check_hbh_len(struct sk_buff *skb)
 {
 	unsigned char *raw = (u8 *) (skb->nh.ipv6h + 1);
 	u32 pkt_len;
-	int off = raw - skb->nh.raw;
+	const unsigned char *nh = skb_network_header(skb);
+	int off = raw - nh;
 	int len = (raw[1] + 1) << 3;
 
 	if ((raw + len) - skb->data > skb_headlen(skb))
@@ -361,9 +362,9 @@ static int check_hbh_len(struct sk_buff *skb)
 	len -= 2;
 
 	while (len > 0) {
-		int optlen = skb->nh.raw[off + 1] + 2;
+		int optlen = nh[off + 1] + 2;
 
-		switch (skb->nh.raw[off]) {
+		switch (nh[off]) {
 		case IPV6_TLV_PAD0:
 			optlen = 1;
 			break;
@@ -372,9 +373,9 @@ static int check_hbh_len(struct sk_buff *skb)
 			break;
 
 		case IPV6_TLV_JUMBO:
-			if (skb->nh.raw[off + 1] != 4 || (off & 3) != 2)
+			if (nh[off + 1] != 4 || (off & 3) != 2)
 				goto bad;
-			pkt_len = ntohl(*(__be32 *) (skb->nh.raw + off + 2));
+			pkt_len = ntohl(*(__be32 *) (nh + off + 2));
 			if (pkt_len <= IPV6_MAXPLEN ||
 			    skb->nh.ipv6h->payload_len)
 				goto bad;
@@ -383,6 +384,7 @@ static int check_hbh_len(struct sk_buff *skb)
 			if (pskb_trim_rcsum(skb,
 					    pkt_len + sizeof(struct ipv6hdr)))
 				goto bad;
+			nh = skb_network_header(skb);
 			break;
 		default:
 			if (optlen > len)
@@ -730,7 +732,8 @@ static unsigned int br_nf_post_routing(unsigned int hook, struct sk_buff **pskb,
 #ifdef CONFIG_NETFILTER_DEBUG
 	/* Be very paranoid. This probably won't happen anymore, but let's
 	 * keep the check just to be sure... */
-	if (skb->mac.raw < skb->head || skb->mac.raw + ETH_HLEN > skb->data) {
+	if (skb_mac_header(skb) < skb->head ||
+	    skb_mac_header(skb) + ETH_HLEN > skb->data) {
 		printk(KERN_CRIT "br_netfilter: Argh!! br_nf_post_routing: "
 		       "bad mac.raw pointer.\n");
 		goto print_error;
@@ -785,7 +788,7 @@ print_error:
 		if (realoutdev)
 			printk("[%s]", realoutdev->name);
 	}
-	printk(" head:%p, raw:%p, data:%p\n", skb->head, skb->mac.raw,
+	printk(" head:%p, raw:%p, data:%p\n", skb->head, skb_mac_header(skb),
 	       skb->data);
 	dump_stack();
 	return NF_ACCEPT;

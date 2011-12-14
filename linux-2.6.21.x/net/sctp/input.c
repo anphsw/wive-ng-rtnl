@@ -141,7 +141,7 @@ int sctp_rcv(struct sk_buff *skb)
 	sh = (struct sctphdr *) skb->h.raw;
 
 	/* Pull up the IP and SCTP headers. */
-	__skb_pull(skb, skb->h.raw - skb->data);
+	__skb_pull(skb, skb_transport_offset(skb));
 	if (skb->len < sizeof(struct sctphdr))
 		goto discard_it;
 	if (!skb_csum_unnecessary(skb) && sctp_rcv_checksum(skb) < 0)

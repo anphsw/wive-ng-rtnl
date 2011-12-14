@@ -129,7 +129,7 @@ static int xfrm4_tunnel_input(struct xfrm_state *x, struct sk_buff *skb)
 #endif
 	skb->mac.raw = memmove(skb->data - skb->mac_len,
 			       skb->mac.raw, skb->mac_len);
-	skb->nh.raw = skb->data;
+	skb_reset_network_header(skb);
 	err = 0;
 
 out:

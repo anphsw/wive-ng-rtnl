@@ -59,7 +59,8 @@ struct sk_buff *llc_alloc_frame(struct sock *sk, struct net_device *dev,
 	if (skb) {
 		skb_reset_mac_header(skb);
 		skb_reserve(skb, hlen);
-		skb->nh.raw   = skb->h.raw = skb->data;
+		skb_reset_network_header(skb);
+		skb_reset_transport_header(skb);
 		skb->protocol = htons(ETH_P_802_2);
 		skb->dev      = dev;
 		if (sk != NULL)

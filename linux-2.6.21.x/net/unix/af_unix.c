@@ -1377,7 +1377,7 @@ static int unix_dgram_sendmsg(struct kiocb *kiocb, struct socket *sock,
 	}
 	unix_get_secdata(siocb->scm, skb);
 
-	skb->h.raw = skb->data;
+	skb_reset_transport_header(skb);
 	err = memcpy_fromiovec(skb_put(skb,len), msg->msg_iov, len);
 	if (err)
 		goto out_free;

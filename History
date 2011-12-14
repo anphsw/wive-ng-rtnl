@@ -881,6 +881,8 @@
 30) Fix parse wifi sta profile without any encrypt configured.<br>
 31) Fix PWS mode set by default and generate rf config.<br>
 32) Add boot_update.sh for automatic boot update from internet(only RT3052 with NOR flash and >=32Mb mem in 32bit mode support).
+33) Some backports to skb susystem.<br>
+34) Fix prefetch uses in kernel code.<br>
 
 <br><br>
 <b>For support see:</b><br>

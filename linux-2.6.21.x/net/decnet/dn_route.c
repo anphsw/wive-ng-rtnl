@@ -386,7 +386,7 @@ static int dn_return_short(struct sk_buff *skb)
 	__le16 tmp;
 
 	/* Add back headers */
-	skb_push(skb, skb->data - skb->nh.raw);
+	skb_push(skb, skb->data - skb_network_header(skb));
 
 	if ((skb = skb_unshare(skb, GFP_ATOMIC)) == NULL)
 		return NET_RX_DROP;
@@ -425,7 +425,7 @@ static int dn_return_long(struct sk_buff *skb)
 	unsigned char tmp[ETH_ALEN];
 
 	/* Add back all headers */
-	skb_push(skb, skb->data - skb->nh.raw);
+	skb_push(skb, skb->data - skb_network_header(skb));
 
 	if ((skb = skb_unshare(skb, GFP_ATOMIC)) == NULL)
 		return NET_RX_DROP;
@@ -504,7 +504,7 @@ static int dn_route_rx_long(struct sk_buff *skb)
 		goto drop_it;
 
 	skb_pull(skb, 20);
-	skb->h.raw = skb->data;
+	skb_reset_transport_header(skb);
 
 	/* Destination info */
 	ptr += 2;
@@ -542,7 +542,7 @@ static int dn_route_rx_short(struct sk_buff *skb)
 		goto drop_it;
 
 	skb_pull(skb, 5);
-	skb->h.raw = skb->data;
+	skb_reset_transport_header(skb);
 
 	cb->dst = *(__le16 *)ptr;
 	ptr += 2;
@@ -615,7 +615,7 @@ int dn_route_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type
 		flags = *skb->data;
 	}
 
-	skb->nh.raw = skb->data;
+	skb_reset_network_header(skb);
 
 	/*
 	 * Weed out future version DECnet

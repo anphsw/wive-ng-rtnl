@@ -40,7 +40,7 @@
 void ip_options_build(struct sk_buff * skb, struct ip_options * opt,
 			    __be32 daddr, struct rtable *rt, int is_frag)
 {
-	unsigned char * iph = skb->nh.raw;
+	unsigned char *iph = skb_network_header(skb);
 
 	memcpy(&(IPCB(skb)->opt), opt, sizeof(struct ip_options));
 	memcpy(iph+sizeof(struct iphdr), opt->__data, opt->optlen);
@@ -104,7 +104,7 @@ int ip_options_echo(struct ip_options * dopt, struct sk_buff * skb)
 		return 0;
 	}
 
-	sptr = skb->nh.raw;
+	sptr = skb_network_header(skb);
 	dptr = dopt->__data;
 
 	if (skb->dst)
@@ -217,7 +217,7 @@ int ip_options_echo(struct ip_options * dopt, struct sk_buff * skb)
 
 void ip_options_fragment(struct sk_buff * skb)
 {
-	unsigned char * optptr = skb->nh.raw + sizeof(struct iphdr);
+	unsigned char *optptr = skb_network_header(skb) + sizeof(struct iphdr);
 	struct ip_options * opt = &(IPCB(skb)->opt);
 	int  l = opt->optlen;
 	int  optlen;
@@ -556,7 +556,7 @@ void ip_forward_options(struct sk_buff *skb)
 	struct   ip_options * opt	= &(IPCB(skb)->opt);
 	unsigned char * optptr;
 	struct rtable *rt = (struct rtable*)skb->dst;
-	unsigned char *raw = skb->nh.raw;
+	unsigned char *raw = skb_network_header(skb);
 
 	if (opt->rr_needaddr) {
 		optptr = (unsigned char *)raw + opt->rr;
@@ -602,7 +602,7 @@ int ip_options_rcv_srr(struct sk_buff *skb)
 	int srrspace, srrptr;
 	__be32 nexthop;
 	struct iphdr *iph = skb->nh.iph;
-	unsigned char * optptr = skb->nh.raw + opt->srr;
+	unsigned char *optptr = skb_network_header(skb) + opt->srr;
 	struct rtable *rt = (struct rtable*)skb->dst;
 	struct rtable *rt2;
 	int err;

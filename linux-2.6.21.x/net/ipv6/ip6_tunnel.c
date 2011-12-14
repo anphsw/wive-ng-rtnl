@@ -468,7 +468,7 @@ ip6ip6_err(struct sk_buff *skb, struct inet6_skb_parm *opt,
 		dst_release(skb2->dst);
 		skb2->dst = NULL;
 		skb_pull(skb2, offset);
-		skb2->nh.raw = skb2->data;
+		skb_reset_network_header(skb2);
 
 		/* Try to guess incoming interface */
 		rt = rt6_lookup(&skb2->nh.ipv6h->saddr, NULL, 0, 0);
@@ -548,7 +548,7 @@ ip6ip6_rcv(struct sk_buff *skb)
 		}
 		secpath_reset(skb);
 		skb->mac.raw = skb->nh.raw;
-		skb->nh.raw = skb->data;
+		skb_reset_network_header(skb);
 		skb->protocol = htons(ETH_P_IPV6);
 		skb->pkt_type = PACKET_HOST;
 		memset(skb->cb, 0, sizeof(struct inet6_skb_parm));
@@ -680,9 +680,10 @@ ip6ip6_tnl_xmit(struct sk_buff *skb, struct net_device *dev)
 	    !ip6_tnl_xmit_ctl(t) || ip6ip6_tnl_addr_conflict(t, ipv6h))
 		goto tx_err;
 
-	if ((offset = parse_tlv_tnl_enc_lim(skb, skb->nh.raw)) > 0) {
+	offset = parse_tlv_tnl_enc_lim(skb, skb_network_header(skb));
+	if (offset > 0) {
 		struct ipv6_tlv_tnl_enc_lim *tel;
-		tel = (struct ipv6_tlv_tnl_enc_lim *) &skb->nh.raw[offset];
+		tel = (struct ipv6_tlv_tnl_enc_lim *)&skb_network_header(skb)[offset];
 		if (tel->encap_limit == 0) {
 			icmpv6_send(skb, ICMPV6_PARAMPROB,
 				    ICMPV6_HDR_FIELD, offset + 2, skb->dev);

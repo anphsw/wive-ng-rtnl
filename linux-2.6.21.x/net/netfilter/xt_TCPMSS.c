@@ -59,7 +59,7 @@ tcpmss_mangle_packet(struct sk_buff **pskb,
 		return -1;
 
 	tcplen = (*pskb)->len - tcphoff;
-	tcph = (struct tcphdr *)((*pskb)->nh.raw + tcphoff);
+	tcph = (struct tcphdr *)(skb_network_header(*pskb) + tcphoff);
 
 	/* Header cannot be larger than the packet */                                                                                       
 	if (tcplen < tcph->doff*4)
@@ -121,7 +121,7 @@ tcpmss_mangle_packet(struct sk_buff **pskb,
 				    TCPOLEN_MSS - skb_tailroom(*pskb),
 				    GFP_ATOMIC))
 			return -1;
-		tcph = (struct tcphdr *)((*pskb)->nh.raw + tcphoff);
+		tcph = (struct tcphdr *)(skb_network_header(*pskb) + tcphoff);
 	}
 
 	skb_put((*pskb), TCPOLEN_MSS);

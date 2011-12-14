@@ -137,7 +137,7 @@ static int xfrm4_rcv_encap(struct sk_buff *skb, __u16 encap_type)
 		return 0;
 	} else {
 #ifdef CONFIG_NETFILTER
-		__skb_push(skb, skb->data - skb->nh.raw);
+		__skb_push(skb, skb->data - skb_network_header(skb));
 		skb->nh.iph->tot_len = htons(skb->len);
 		ip_send_check(skb->nh.iph);
 

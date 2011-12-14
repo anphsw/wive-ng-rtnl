@@ -1147,7 +1147,8 @@ static int inet_gso_send_check(struct sk_buff *skb)
 	if (unlikely(!pskb_may_pull(skb, ihl)))
 		goto out;
 
-	skb->h.raw = __skb_pull(skb, ihl);
+	__skb_pull(skb, ihl);
+	skb_reset_transport_header(skb);
 	iph = skb->nh.iph;
 	proto = iph->protocol & (MAX_INET_PROTOS - 1);
 	err = -EPROTONOSUPPORT;
@@ -1190,7 +1191,8 @@ static struct sk_buff *inet_gso_segment(struct sk_buff *skb, int features)
 	if (unlikely(!pskb_may_pull(skb, ihl)))
 		goto out;
 
-	skb->h.raw = __skb_pull(skb, ihl);
+	__skb_pull(skb, ihl);
+	skb_reset_transport_header(skb);
 	iph = skb->nh.iph;
 	id = ntohs(iph->id);
 	proto = iph->protocol & (MAX_INET_PROTOS - 1);
@@ -1211,7 +1213,7 @@ static struct sk_buff *inet_gso_segment(struct sk_buff *skb, int features)
 		iph->id = htons(id++);
 		iph->tot_len = htons(skb->len - skb->mac_len);
 		iph->check = 0;
-		iph->check = ip_fast_csum(skb->nh.raw, iph->ihl);
+		iph->check = ip_fast_csum(skb_network_header(skb), iph->ihl);
 	} while ((skb = skb->next));
 
 out:

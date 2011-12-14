@@ -358,7 +358,8 @@ static void arp_reply(struct sk_buff *skb)
 				 (2 * sizeof(u32)))))
 		return;
 
-	skb->h.raw = skb->nh.raw = skb->data;
+	skb_reset_network_header(skb);
+	skb_reset_transport_header(skb);
 	arp = skb->nh.arph;
 
 	if ((arp->ar_hrd != htons(ARPHRD_ETHER) &&
@@ -388,7 +389,7 @@ static void arp_reply(struct sk_buff *skb)
 	if (!send_skb)
 		return;
 
-	send_skb->nh.raw = send_skb->data;
+	skb_reset_network_header(send_skb);
 	arp = (struct arphdr *) skb_put(send_skb, size);
 	send_skb->dev = skb->dev;
 	send_skb->protocol = htons(ETH_P_ARP);

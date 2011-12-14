@@ -1105,13 +1105,13 @@ static void dev_queue_xmit_nit(struct sk_buff *skb, struct net_device *dev)
 			 */
 			skb_reset_mac_header(skb2);
 
-			if (skb2->nh.raw < skb2->data ||
-			    skb2->nh.raw > skb2->tail) {
+			if (skb_network_header(skb2) < skb2->data ||
+			    skb_network_header(skb2) > skb2->tail) {
 				if (net_ratelimit())
 					printk(KERN_CRIT "protocol %04x is "
 					       "buggy, dev %s\n",
 					       skb2->protocol, dev->name);
-				skb2->nh.raw = skb2->data;
+				skb_reset_network_header(skb2);
 			}
 
 			skb2->h.raw = skb2->nh.raw;
@@ -1195,7 +1195,7 @@ EXPORT_SYMBOL(netif_device_attach);
 int skb_checksum_help(struct sk_buff *skb)
 {
 	__wsum csum;
-	int ret = 0, offset = skb->h.raw - skb->data;
+	int ret = 0, offset = skb_transport_offset(skb);
 
 	if (skb->ip_summed == CHECKSUM_COMPLETE)
 		goto out_set_summed;
@@ -1246,7 +1246,7 @@ struct sk_buff *skb_gso_segment(struct sk_buff *skb, int features)
 	BUG_ON(skb_shinfo(skb)->frag_list);
 
 	skb_reset_mac_header(skb);
-	skb->mac_len = skb->nh.raw - skb->data;
+	skb->mac_len = skb->nh.raw - skb->mac.raw;
 	__skb_pull(skb, skb->mac_len);
 
 	if (unlikely(skb->ip_summed != CHECKSUM_PARTIAL)) {
@@ -1263,7 +1263,8 @@ struct sk_buff *skb_gso_segment(struct sk_buff *skb, int features)
 				segs = ERR_PTR(err);
 				if (err || skb_gso_ok(skb, features))
 					break;
-				__skb_push(skb, skb->data - skb->nh.raw);
+				__skb_push(skb, (skb->data -
+						 skb_network_header(skb)));
 			}
 			segs = ptype->gso_segment(skb, features);
 			break;
@@ -1852,7 +1853,8 @@ int netif_receive_skb(struct sk_buff *skb)
 
 	__get_cpu_var(netdev_rx_stat).total++;
 
-	skb->h.raw = skb->nh.raw = skb->data;
+	skb_reset_network_header(skb);
+	skb_reset_transport_header(skb);
 	skb->mac_len = skb->nh.raw - skb->mac.raw;
 
 	pt_prev = NULL;
