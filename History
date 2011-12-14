@@ -883,6 +883,7 @@
 32) Add boot_update.sh for automatic boot update from internet(only RT3052 with NOR flash and >=32Mb mem in 32bit mode support).
 33) Some backports to skb susystem.<br>
 34) Fix prefetch uses in kernel code.<br>
+35) Fix conntrack path for inbound local svc packets with hw_nat.<br>
 
 <br><br>
 <b>For support see:</b><br>
