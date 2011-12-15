@@ -133,7 +133,7 @@ static int ip_rt_error_burst		= 5 * HZ;
 static int ip_rt_gc_elasticity		= 4;
 static int ip_rt_mtu_expires		= 10 * 30 * HZ;
 static int ip_rt_min_pmtu		= 512 + 20 + 20;
-static int ip_rt_min_advmss		= 256;
+static int ip_rt_min_advmss		= 512;
 static int ip_rt_secret_interval	= 10 * 60 * HZ;
 static int ip_rt_flush_expected;
 static unsigned long rt_deadline;
