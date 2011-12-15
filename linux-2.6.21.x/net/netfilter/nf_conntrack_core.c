@@ -185,8 +185,8 @@ static unsigned int nf_conntrack_hash_rnd __read_mostly;
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE) || defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 inline unsigned int is_local_prtc(u_int8_t protonm)
 {
-	/* Local gre/esp/ah proto */
-	if (protonm == IPPROTO_GRE || protonm == IPPROTO_ESP || protonm == IPPROTO_AH)
+	/* Local gre/esp/ah/ip-ip proto */
+	if (protonm == IPPROTO_GRE || protonm == IPPROTO_ESP || protonm == IPPROTO_AH || protonm == IPPROTO_IPIP)
 		return 1;
     return 0;
 };
@@ -219,11 +219,7 @@ inline unsigned int is_local_svc(struct sk_buff **pskb, u_int8_t protonum)
 	    }
 	}
 
-	/* Local gre/esp/ah proto */
-	if (is_local_prtc(protonum))
-		return 1;
-
-    return 0;
+    return is_local_prtc(protonum);
 };
 #endif
 
