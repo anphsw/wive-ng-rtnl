@@ -57,39 +57,6 @@
 extern int (*ra_sw_nat_hook_rx)(struct sk_buff *skb);
 extern int (*ra_sw_nat_hook_tx)(struct sk_buff *skb, int gmac_no);
 #endif
-inline int is_local_svc(struct sk_buff **pskb, u_int8_t protonum, unsigned int offl_enabled, unsigned int skip)
-{
-	struct udphdr *hdr;
-	struct iphdr *iph;
-
-	/* filter icmp traffic for correct pmtu works. */
-	/* or if offload skip/disabled */
-	if (!offl_enabled || skip || protonum == IPPROTO_ICMP)
-	    return 0;
-
-	/* parse udp packets */
-	if (protonum == IPPROTO_UDP) {
-	    iph	= (struct iphdr *)(*pskb)->nh.raw;
-	    if (iph != NULL) {
-		hdr = (struct udphdr*)((*pskb)->data + (iph->ihl << 2));
-		if (hdr != NULL) {
-		    /* Packet with no checksum */
-		    if (hdr->check == 0)
-			return 1;
-
-		    /* Local L2TP */
-		    if (hdr->dest == htons(1701) && hdr->source == htons(1701))
-			return 1;
-		}
-	    }
-	}
-
-	/* Local gre/esp/ah proto */
-	if (protonum == IPPROTO_GRE || protonum == IPPROTO_ESP || protonum == IPPROTO_AH)
-		return 1;
-
-    return 0;
-};
 #endif
 
 #if defined(CONFIG_NETFILTER_XT_MATCH_WEBSTR) || defined(CONFIG_NETFILTER_XT_MATCH_WEBSTR_MODULE)
@@ -214,6 +181,51 @@ DEFINE_RWLOCK(nf_ct_cache_lock);
 static DEFINE_MUTEX(nf_ct_cache_mutex);
 
 static unsigned int nf_conntrack_hash_rnd __read_mostly;
+
+#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE) || defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+inline unsigned int is_local_prtc(u_int8_t protonm)
+{
+	/* Local gre/esp/ah proto */
+	if (protonm == IPPROTO_GRE || protonm == IPPROTO_ESP || protonm == IPPROTO_AH)
+		return 1;
+    return 0;
+};
+#endif
+
+#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+inline unsigned int is_local_svc(struct sk_buff **pskb, u_int8_t protonum)
+{
+	struct udphdr *hdr;
+	struct iphdr *iph;
+
+	/* filter icmp traffic for correct pmtu works. */
+	if (protonum == IPPROTO_ICMP)
+	    return 0;
+
+	/* parse udp packets */
+	if (protonum == IPPROTO_UDP) {
+	    iph	= (struct iphdr *)(*pskb)->nh.raw;
+	    if (iph != NULL) {
+		hdr = (struct udphdr*)((*pskb)->data + (iph->ihl << 2));
+		if (hdr != NULL) {
+		    /* Packet with no checksum */
+		    if (hdr->check == 0)
+			return 1;
+
+		    /* Local L2TP */
+		    if (hdr->dest == htons(1701) && hdr->source == htons(1701))
+			return 1;
+		}
+	    }
+	}
+
+	/* Local gre/esp/ah proto */
+	if (is_local_prtc(protonum))
+		return 1;
+
+    return 0;
+};
+#endif
 
 static u_int32_t __hash_conntrack(const struct nf_conntrack_tuple *tuple,
 				  unsigned int size, unsigned int rnd)
@@ -1185,7 +1197,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE) || \
     defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 	struct nf_conn_help *help;
-        unsigned int is_helper = 0, nat_offload_enabled = 0, need_skip = 0;
+    	unsigned int is_helper = 0;
 #endif
 	/* Previously seen (loopback or untracked)?  Ignore. */
 	if ((*pskb)->nfct) {
@@ -1267,9 +1279,9 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 
 /* This code section may be used for skip some types traffic */
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE) || defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-	if (pf == PF_INET && nat && (protonum == IPPROTO_ICMP || protonum == IPPROTO_TCP || protonum == IPPROTO_GRE)) {
-		/* dropp flags enable disable flt */
-		nat_offload_enabled=0, need_skip=0;
+	if (pf == PF_INET && nat && protonum == IPPROTO_TCP) {
+		/* drop flags enable disable flt */
+    		unsigned int nat_offload_enabled = 0, need_skip = 0;
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 		/* hardware nat support */
 		if (ra_sw_nat_hook_rx && ra_sw_nat_hook_tx)
@@ -1279,12 +1291,6 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 		/* software fastnat support */
 		if (nf_conntrack_fastnat && bcm_nat_bind_hook)
 		    nat_offload_enabled=1;
-
-		/* filter gre traffic skip all sw_nat and checks */
-		if (nf_conntrack_fastnat && protonum == IPPROTO_GRE) {
-		    nat->info.nat_type |= NF_FAST_NAT_DENY;
-		    goto skip_sw;
-		}
 #endif
 #if defined(CONFIG_NETFILTER_XT_MATCH_WEBSTR) || defined(CONFIG_NETFILTER_XT_MATCH_WEBSTR_MODULE)
 		/* skip http post/get/head traffic for correct webstr work */
@@ -1331,7 +1337,7 @@ filter:
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
         if (nf_conntrack_fastnat && bcm_nat_bind_hook && pf == PF_INET) {
 		/* if need helper or nat type unknown/fast deny need skip packets */
-        	if (is_helper || !nat || (nat->info.nat_type & NF_FAST_NAT_DENY))
+        	if (is_helper || !nat || is_local_prtc(protonum) || (nat->info.nat_type & NF_FAST_NAT_DENY))
 		    goto skip_sw;
 
 		/* Try send selected pakets to bcm_nat */
@@ -1354,7 +1360,7 @@ skip_sw:
 #endif
 
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-	if (is_helper || is_local_svc(pskb, protonum, nat_offload_enabled, need_skip) || hooknum == NF_IP_LOCAL_OUT) {
+	if (is_helper || hooknum == NF_IP_LOCAL_OUT || is_local_svc(pskb, protonum)) {
             if (IS_SPACE_AVAILABLED(*pskb) && IS_MAGIC_TAG_VALID(*pskb)) {
                     FOE_ALG(*pskb)=1;
 	    }
