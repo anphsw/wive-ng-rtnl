@@ -108,7 +108,9 @@ LIST_HEAD(unconfirmed);
 
 #if defined (CONFIG_NAT_FCONE) || defined (CONFIG_NAT_RCONE)
 extern char wan_name[IFNAMSIZ];
+#if defined (CONFIG_PPP) || defined (CONFIG_PPP_MODULE)
 extern char wan_ppp[IFNAMSIZ];
+#endif
 #endif
 
 #ifdef CONFIG_NF_PRIVILEGE_CONNTRACK
@@ -1132,9 +1134,13 @@ resolve_normal_ct(struct sk_buff *skb,
          *             Restricted Cone=dst_ip/port & proto & src_ip
          *
          */
-	if( (skb->dev!=NULL) && (iph!=NULL) && /* CASE III */
-		( (strcmp(skb->dev->name, wan_name)==0) ||(strcmp(skb->dev->name, wan_ppp)==0) ) &&
-		(iph->protocol == IPPROTO_UDP)) {
+	if( (skb->dev!=NULL) && (iph!=NULL) /* CASE III */
+#if defined (CONFIG_PPP) || defined (CONFIG_PPP_MODULE)
+		&& ((strcmp(skb->dev->name, wan_name) == 0) || (strcmp(skb->dev->name, wan_ppp) == 0))
+#else
+		&& (strcmp(skb->dev->name, wan_name) == 0)
+#endif
+		&& (iph->protocol == IPPROTO_UDP)) {
 	    h = nf_cone_conntrack_find_get(&tuple, NULL);
         }else{ /* CASE I.II.IV */
             h = nf_conntrack_find_get(&tuple, NULL);

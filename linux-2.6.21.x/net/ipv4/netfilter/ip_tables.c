@@ -47,7 +47,9 @@ MODULE_DESCRIPTION("IPv4 packet filter");
 
 #if defined (CONFIG_NAT_FCONE) || defined (CONFIG_NAT_RCONE)
 unsigned char wan_name[IFNAMSIZ];
+#if defined (CONFIG_PPP) || defined (CONFIG_PPP_MODULE)
 unsigned char wan_ppp[IFNAMSIZ];
+#endif
 struct net_device *wan_dev;
 #endif
 
@@ -1485,31 +1487,27 @@ add_counter_to_entry(struct ipt_entry *e,
 #if defined (CONFIG_NAT_FCONE) || defined (CONFIG_NAT_RCONE)
 	struct ipt_entry_target *f;
 
-	//set default wan dev to eth2.2
-	wan_dev = __dev_get_by_name("eth2.2");
-
 	f = ipt_get_target(e);
 
-	//MASQ target
-        if (strcmp(f->u.kernel.target->name,"MASQUERADE")==0 && strlen(e->ip.outiface)!=0) {
-                if (strcmp(e->ip.outiface, "eth2.2") == 0) {
-                        memset(wan_name, 0, sizeof(wan_name));
-                        memcpy(wan_name, e->ip.outiface, strlen(e->ip.outiface));
-			dprintf("ip_table: set wan_name=%s\n", wan_name);
-		} 
-#if defined (CONFIG_PPP) || defined (CONFIG_PPP_MODULE)
-		else if (strncmp(e->ip.outiface, "ppp", 3) == 0) {
-			memset(wan_ppp, 0, sizeof(wan_ppp));
-                        memcpy(wan_ppp, e->ip.outiface, strlen(e->ip.outiface));
-			dprintf("ip_table: set wan_ppp=%s\n", wan_ppp);
-        	} 
-#endif
-	} else {
 	//SNAT target
-		if (strcmp(f->u.kernel.target->name,"SNAT")==0 && strlen(e->ip.outiface)!=0) {
-			wan_dev = __dev_get_by_name(e->ip.outiface);
-			dprintf("ip_table: SNAT set wan_dev's name=%s\n", e->ip.outiface);
-                }
+	if (strcmp(f->u.kernel.target->name,"SNAT") == 0 && strlen(e->ip.outiface) != 0) {
+		wan_dev = __dev_get_by_name(e->ip.outiface);
+		dprintf("ip_table: SNAT set wan_dev's name=%s\n", e->ip.outiface);
+        } else
+	//MASQ target
+	if (strcmp(f->u.kernel.target->name,"MASQUERADE") == 0 && strlen(e->ip.outiface) != 0) {
+            if (strcmp(e->ip.outiface, "eth2.2") == 0) {
+                    memset(wan_name, 0, sizeof(wan_name));
+                    memcpy(wan_name, e->ip.outiface, strlen(e->ip.outiface));
+		    dprintf("ip_table: set wan_name=%s\n", wan_name);
+	    }
+#if defined (CONFIG_PPP) || defined (CONFIG_PPP_MODULE)
+	    else if (strncmp(e->ip.outiface, "ppp", 3) == 0) {
+		    memset(wan_ppp, 0, sizeof(wan_ppp));
+                    memcpy(wan_ppp, e->ip.outiface, strlen(e->ip.outiface));
+		    dprintf("ip_table: set wan_ppp=%s\n", wan_ppp);
+	    }
+#endif
         }
 #endif
 
@@ -2395,6 +2393,11 @@ static struct xt_match icmp_matchstruct __read_mostly = {
 static int __init ip_tables_init(void)
 {
 	int ret;
+
+#if defined (CONFIG_NAT_FCONE) || defined (CONFIG_NAT_RCONE)
+	//set default wan dev to eth2.2
+	wan_dev = __dev_get_by_name("eth2.2");
+#endif
 
 	ret = xt_proto_init(AF_INET);
 	if (ret < 0)

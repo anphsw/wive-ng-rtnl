@@ -885,6 +885,7 @@
 34) Fix prefetch uses in kernel code.<br>
 35) Fix conntrack path for inbound local svc packets with hw_nat.<br>
 36) Optimize skip some protocols in sw/hw nat offloads.<br>
+37) Fix init wan_dev/wan_ppp and parse SNAT/MASQ in kernel iptables code.<br>
 
 <br><br>
 <b>For support see:</b><br>
