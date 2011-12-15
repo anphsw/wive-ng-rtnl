@@ -1492,20 +1492,34 @@ add_counter_to_entry(struct ipt_entry *e,
 	//SNAT target
 	if (strcmp(f->u.kernel.target->name,"SNAT") == 0 && strlen(e->ip.outiface) != 0) {
 		wan_dev = __dev_get_by_name(e->ip.outiface);
-		dprintf("ip_table: SNAT set wan_dev's name=%s\n", e->ip.outiface);
         } else
 	//MASQ target
 	if (strcmp(f->u.kernel.target->name,"MASQUERADE") == 0 && strlen(e->ip.outiface) != 0) {
+#if defined (CONFIG_RT_3052_ESW)
+	    /* vlan - wan */
             if (strcmp(e->ip.outiface, "eth2.2") == 0) {
-                    memset(wan_name, 0, sizeof(wan_name));
-                    memcpy(wan_name, e->ip.outiface, strlen(e->ip.outiface));
-		    dprintf("ip_table: set wan_name=%s\n", wan_name);
+		memset(wan_name, 0, sizeof(wan_name));
+		memcpy(wan_name, e->ip.outiface, strlen(e->ip.outiface));
 	    }
+#elif defined (CONFIG_RAETH_GMAC2)
+	    /* giga - wan */
+	    if (strncmp(e->ip.outiface, "eth3", 3) == 0) {
+		    memset(wan_name, 0, sizeof(wan_name));
+                    memcpy(wan_name, e->ip.outiface, strlen(e->ip.outiface));
+	    }
+#else
+	    /* hw independed - wan */
+	    /* if not ppp - this wan */
+	    if (strncmp(e->ip.outiface, "ppp", 3) != 0) {
+		memset(wan_name, 0, sizeof(wan_name));
+		memcpy(wan_name, e->ip.outiface, strlen(e->ip.outiface));
+	    }
+#endif
 #if defined (CONFIG_PPP) || defined (CONFIG_PPP_MODULE)
-	    else if (strncmp(e->ip.outiface, "ppp", 3) == 0) {
+	    /* pppX - wan */
+	     else if (strncmp(e->ip.outiface, "ppp", 3) == 0) {
 		    memset(wan_ppp, 0, sizeof(wan_ppp));
                     memcpy(wan_ppp, e->ip.outiface, strlen(e->ip.outiface));
-		    dprintf("ip_table: set wan_ppp=%s\n", wan_ppp);
 	    }
 #endif
         }
