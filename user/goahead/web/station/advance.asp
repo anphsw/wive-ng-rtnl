@@ -357,7 +357,7 @@ function init11NValues()
 	<td class="head" id="advTxPW">TX Power</td>
 	<td>
 		<!--input type="text" name="tx_power" size="5" maxlength="3" value="<% getCfgZero(1, "TxPower"); %>">
-		<span style="color: #808080;">&nbsp;(range 1 - 100, default 100)</span-->
+		<span style="color: #808080;">&nbsp;(range 1 - 100)</span-->
 		<select name="tx_power" class="half">
 			<option value="5">5%</option>
 			<option value="10">10%</option>

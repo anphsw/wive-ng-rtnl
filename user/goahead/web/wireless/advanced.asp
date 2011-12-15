@@ -442,25 +442,25 @@ function wmm_capable_enable_switch()
 <tr> 
 	<td class="head" id="advBeaconInterval">Beacon Interval</td>
 	<td>
-		<input type="text" name="beacon" class="half" maxlength="3" value="<% getCfgZero(1, "BeaconPeriod"); %>"> ms <font color="#808080" id="advBeaconIntervalRange">(range 20 - 999, default 100)</font>
+		<input type="text" name="beacon" class="half" maxlength="3" value="<% getCfgZero(1, "BeaconPeriod"); %>"> ms <font color="#808080" id="advBeaconIntervalRange">(range 20 - 999)</font>
 	</td>
 </tr>
 <tr>
 	<td class="head" id="advDTIM">Data Beacon Rate (DTIM) </td>
 	<td>
-		<input type="text" name="dtim" class="half" maxlength="3" value="<% getCfgZero(1, "DtimPeriod"); %>"> ms <font color="#808080" id="advDTIMRange">(range 1 - 255, default 1)</font>
+		<input type="text" name="dtim" class="half" maxlength="3" value="<% getCfgZero(1, "DtimPeriod"); %>"> ms <font color="#808080" id="advDTIMRange">(range 1 - 255)</font>
 	</td>
 </tr>
 <tr>
 	<td class="head" id="advFrag">Fragment Threshold</td>
 	<td>
-		<input type="text" name="fragment" class="half" maxlength="4" value="<% getCfgZero(1, "FragThreshold"); %>"> <font color="#808080" id="advFragRange">(range 256 - 2346, default 2346)</font>
+		<input type="text" name="fragment" class="half" maxlength="4" value="<% getCfgZero(1, "FragThreshold"); %>"> <font color="#808080" id="advFragRange">(range 256 - 2346)</font>
 	</td>
 </tr>
 <tr>
 	<td class="head" id="advRTS">RTS Threshold</td>
 	<td>
-		<input type="text" name="rts" class="half" maxlength="4" value="<% getCfgZero(1, "RTSThreshold"); %>"> <font color="#808080" id="advRTSRange">(range 1 - 2347, default 2347)</font>
+		<input type="text" name="rts" class="half" maxlength="4" value="<% getCfgZero(1, "RTSThreshold"); %>"> <font color="#808080" id="advRTSRange">(range 1 - 2347)</font>
 	</td>
 </tr>
 <tr> 

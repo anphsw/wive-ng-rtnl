@@ -69,15 +69,15 @@
   <message msgid="adv basic data rate default" msgstr="Default(1-2-5.5-11 Mbps)" />
   <message msgid="adv basic data rate all" msgstr="All(1-2-5.5-6-11-12-24 Mbps)" />
   <message msgid="adv beacon interval" msgstr="Beacon Interval" />
-  <message msgid="adv beacon interval range" msgstr="(range 20 - 999, default 100)" />
+  <message msgid="adv beacon interval range" msgstr="(range 20 - 999)" />
   <message msgid="adv dtim" msgstr="Data Beacon Rate (DTIM)" />
-  <message msgid="adv dtim range" msgstr="(range 1 - 255, default 1)" />
+  <message msgid="adv dtim range" msgstr="(range 1 - 255)" />
   <message msgid="adv fragment threshold" msgstr="Fragment Threshold" />
-  <message msgid="adv fragment threshold range" msgstr="(range 256 - 2346, default 2346)" />
+  <message msgid="adv fragment threshold range" msgstr="(range 256 - 2346)" />
   <message msgid="adv rts threshold" msgstr="RTS Threshold" />
-  <message msgid="adv rts threshold range" msgstr="(range 1 - 2347, default 2347)" />
+  <message msgid="adv rts threshold range" msgstr="(range 1 - 2347)" />
   <message msgid="adv tx power" msgstr="TX Power" />
-  <message msgid="adv tx power range" msgstr="(range 1 - 100, default 100)" />
+  <message msgid="adv tx power range" msgstr="(range 1 - 100)" />
   <message msgid="adv short preamble" msgstr="Short Preamble" />
   <message msgid="adv short slot" msgstr="Short Slot" />
   <message msgid="adv tx burst" msgstr="Tx Burst" />
