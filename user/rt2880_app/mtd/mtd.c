@@ -491,8 +491,8 @@ int main (int argc, char **argv)
 		cmd = CMD_WRITE;
 		device = argv[2];
 		/* only if update need blink */
-		if ((!strncmp(device, "Kernel_RootFS", 13) || (!strncmp(device, "Kernel", 6)
-		    || (!strncmp(device, "RootFS", 6) || (!strncmp(device, "Bootloader", 6))
+		if ((!strncmp(device, "Kernel_RootFS", 13)) || (!strncmp(device, "Kernel", 6)) ||
+		     (!strncmp(device, "RootFS", 6)) || (!strncmp(device, "Bootloader", 6)))
 		    led_blink=1;
 		else
 		    led_blink=0;
