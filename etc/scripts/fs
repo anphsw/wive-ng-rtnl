@@ -7,12 +7,13 @@
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU GPL v2 or later.
 
+# Maximum rwfs to write
 TGZfs_size=131072
-BLOCKS=2
-KEEPMAC=YES
-MTDRWFS=/dev/mtdblock5
-MTD2CFG=/dev/mtdblock1
 
+# mtd dev for rfs
+MTDRWFS=/dev/mtdblock5
+
+# constants
 BACKUPCGF=/etc/backup/nvram_backup.dat
 RWCONFIGS=/etc/Wireless/rf.bin
 
@@ -26,7 +27,7 @@ usage() {
   echo " " >&2
   echo "save - Save rwfs to mtd." >&2
   echo "load - Load rwfs from mtd." >&2
-  echo "restore - Crash $MTDRWFS and reboot for restore clean rwfs." >&2
+  echo "restore - Crash RW-FS and reboot for restore clean rwfs." >&2
   echo "backup_nvram - Save nvram snapshot to rwfs in $BACKUPCGF" >&2
   echo "nvramreset - Nvarm clean and load default config." >&2
   echo "burnrf - Burn RF config template to Factory." >&2
@@ -49,14 +50,13 @@ load() {
 
 save() {
   echo "Save curent date and current time to rwfs"
-  sync
   date +%Y%m%d%H%M > /etc/compile-date
   echo "Compress config files"
   tmp="/tmp/tgzfs"
   tar cf - /etc | bzip2 -9 > $tmp
   if [ "$(get_size $tmp)" -lt $(($TGZfs_size/1024)) ]; then
-    echo "Write configs to flash"
-    dd if=$tmp of=$MTDRWFS bs=64k count=$BLOCKS conv=sync > /dev/null 2>&1
+    echo "Write RW-FS to flash"
+    mtd_write write $tmp RW-FS
     echo "Config saved. OK."
   else
     echo "Error: File $tmp too big: $(get_size $tmp)k"
@@ -86,9 +86,9 @@ fullreset() {
     killall -q goahead
     killall -q -SIGKILL goahead
     wifi_unload.sh
-    echo "Write zero in $MTDRWFS,$MTD2CFG mtd particions."
+    echo "Write zero in RW-FS and Config mtd particions."
     mtd_write erase RW-FS
-    dd if=/dev/zero of=$MTD2CFG conv=sync bs=8k seek=1 count=7 > /dev/null 2>&1
+    mtd_write erase Config
     burnrf
     reboot
 }

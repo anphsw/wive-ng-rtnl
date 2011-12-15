@@ -888,6 +888,8 @@
 37) Fix init wan_dev/wan_ppp and parse SNAT/MASQ in kernel iptables code.<br>
 38) Fix cone nat for external switch devices.<br>
 39) Fix some wireless defaults for all devices(more compat with some STA).<br>
+40) Small wifi webUI cleanup.<br>
+41) Script fs rewrite to use mtd_write instead dd.<br>
 
 <br><br>
 <b>For support see:</b><br>
