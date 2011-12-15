@@ -957,7 +957,6 @@ int gen_wifi_config(int mode)
 		FPRINT_NUM(TxBurst);
 		FPRINT_NUM(PktAggregate);
 		FPRINT_NUM(FreqDelta);
-		fprintf(fp, "TurboRate=0\n");
 
 #if defined (CONFIG_RT2860V2_AP_VIDEO_TURBINE) || defined (CONFIG_RT2860V2_STA_VIDEO_TURBINE)
 		FPRINT_NUM(VideoTurbine);
@@ -1030,7 +1029,7 @@ int gen_wifi_config(int mode)
 		FPRINT_NUM(LongPulseRadarTh);
 		FPRINT_NUM(AvgRssiReq);
 		FPRINT_NUM(DFS_R66);
-		FPRINT_STR(BlockCh);
+		FPRINT_STR(blockch);
 #endif
 
 		FPRINT_STR(PreAuth);
