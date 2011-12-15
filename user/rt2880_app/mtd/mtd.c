@@ -78,6 +78,7 @@ int buflen;
 int quiet;
 int verbose;
 int write_check=1;
+int led_blink=0;
 
 int mtd_check(char *mtd)
 {
@@ -125,12 +126,12 @@ mtd_unlock(const char *mtd)
 		close(fd);
 		return 0;
 	}
-		
+
 	close(fd);
 	return 0;
 }
 
-int 
+int
 mtd_open(const char *name, int flags)
 {
 	FILE *fp;
@@ -154,7 +155,6 @@ mtd_open(const char *name, int flags)
 	}
 	return -1;
 }
-
 
 int
 mtd_erase(const char *mtd)
@@ -214,12 +214,11 @@ mtd_erase(const char *mtd)
 			}
 		}
 
-	}		
+	}
 
 	free(test_buf);
 	close(fd);
 	return 0;
-
 }
 
 int
@@ -242,7 +241,7 @@ mtd_write(int imagefd, int offset, int len, const char *mtd)
 		close(fd);
 		exit(1);
 	}
-		
+
 	r = w = e = 0;
 	if (!quiet)
 		fprintf(stderr, " [ ]");
@@ -297,8 +296,10 @@ not_nand:
 
 		/* need to erase the next block before writing data to it */
 		while (w > e) {
-		        ledAlways(GPIO_MTD_LED1, LED_ON);
-			ledAlways(GPIO_MTD_LED2, LED_OFF);
+			if (led_blink) {
+		    	    ledAlways(GPIO_MTD_LED1, LED_ON);
+			    ledAlways(GPIO_MTD_LED2, LED_OFF);
+			}
 			mtdEraseInfo.start = e;
 			mtdEraseInfo.length = mtdInfo.erasesize;
 
@@ -313,8 +314,10 @@ not_nand:
 			e += mtdInfo.erasesize;
 		}
 
-	        ledAlways(GPIO_MTD_LED1, LED_OFF);
-		ledAlways(GPIO_MTD_LED2, LED_ON);
+		if (led_blink) {
+	    	    ledAlways(GPIO_MTD_LED1, LED_OFF);
+		    ledAlways(GPIO_MTD_LED2, LED_ON);
+		}
 		if (!quiet)
 			fprintf(stderr, "\b\b\b[w]");
 
@@ -431,7 +434,7 @@ int main (int argc, char **argv)
 		CMD_WRITE,
 		CMD_UNLOCK
 	} cmd;
-	
+
 	erase[0] = NULL;
 	boot = 0;
 	buflen = 0;
@@ -487,6 +490,12 @@ int main (int argc, char **argv)
 	} else if ((strcmp(argv[0], "write") == 0) && (argc == 3)) {
 		cmd = CMD_WRITE;
 		device = argv[2];
+		/* only if update need blink */
+		if ((!strncmp(device, "Kernel_RootFS", 13) || (!strncmp(device, "Kernel", 6)
+		    || (!strncmp(device, "RootFS", 6) || (!strncmp(device, "Bootloader", 6)
+		    led_blink=1;
+		else
+		    led_blink=0;
 
 		if (strcmp(argv[1], "-") == 0) {
 			imagefile = "<stdin>";
