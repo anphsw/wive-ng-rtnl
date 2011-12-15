@@ -492,7 +492,7 @@ int main (int argc, char **argv)
 		device = argv[2];
 		/* only if update need blink */
 		if ((!strncmp(device, "Kernel_RootFS", 13) || (!strncmp(device, "Kernel", 6)
-		    || (!strncmp(device, "RootFS", 6) || (!strncmp(device, "Bootloader", 6)
+		    || (!strncmp(device, "RootFS", 6) || (!strncmp(device, "Bootloader", 6))
 		    led_blink=1;
 		else
 		    led_blink=0;
