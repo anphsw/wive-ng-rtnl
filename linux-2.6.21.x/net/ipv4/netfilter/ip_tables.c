@@ -1483,17 +1483,26 @@ add_counter_to_entry(struct ipt_entry *e,
 		     const struct xt_counters addme[],
 		     unsigned int *i)
 {
-
 #if defined (CONFIG_NAT_FCONE) || defined (CONFIG_NAT_RCONE)
-	struct ipt_entry_target *f;
+	struct ipt_entry_target *f = ipt_get_target(e);
 
-	f = ipt_get_target(e);
-
-	//SNAT target
+	/* set default wan dev to eth2.2 */
+	if (!wan_dev)
+#if defined (CONFIG_RT_3052_ESW)
+	    /* vlan - wan */
+	    wan_dev = __dev_get_by_name("eth2.2");
+#elif defined (CONFIG_RAETH_GMAC2)
+	    /* giga - wan */
+	    wan_dev = __dev_get_by_name("eth3");
+#else
+	    /* stub ... fix me later */
+	    wan_dev = __dev_get_by_name("eth0");
+#endif
+	/* SNAT target */
 	if (strcmp(f->u.kernel.target->name,"SNAT") == 0 && strlen(e->ip.outiface) != 0) {
 		wan_dev = __dev_get_by_name(e->ip.outiface);
         } else
-	//MASQ target
+	/* MASQ target */
 	if (strcmp(f->u.kernel.target->name,"MASQUERADE") == 0 && strlen(e->ip.outiface) != 0) {
 #if defined (CONFIG_RT_3052_ESW)
 	    /* vlan - wan */
@@ -2407,11 +2416,6 @@ static struct xt_match icmp_matchstruct __read_mostly = {
 static int __init ip_tables_init(void)
 {
 	int ret;
-
-#if defined (CONFIG_NAT_FCONE) || defined (CONFIG_NAT_RCONE)
-	//set default wan dev to eth2.2
-	wan_dev = __dev_get_by_name("eth2.2");
-#endif
 
 	ret = xt_proto_init(AF_INET);
 	if (ret < 0)
