@@ -452,7 +452,7 @@ int main (int argc, char **argv)
 				i = 0;
 				while ((erase[i] != NULL) && ((i + 1) < MAX_ARGS))
 					i++;
-					
+
 				erase[i++] = optarg;
 				erase[i] = NULL;
 				break;
@@ -474,13 +474,9 @@ int main (int argc, char **argv)
 		}
 	argc -= optind;
 	argv += optind;
-	
+
 	if (argc < 2)
 		usage();
-
-	if(len == 0){
-		len = getFileSize(argv[1]);
-	}
 
 	if ((strcmp(argv[0], "unlock") == 0) && (argc == 2)) {
 		cmd = CMD_UNLOCK;
@@ -491,7 +487,7 @@ int main (int argc, char **argv)
 	} else if ((strcmp(argv[0], "write") == 0) && (argc == 3)) {
 		cmd = CMD_WRITE;
 		device = argv[2];
-	
+
 		if (strcmp(argv[1], "-") == 0) {
 			imagefile = "<stdin>";
 			imagefd = 0;
@@ -502,7 +498,7 @@ int main (int argc, char **argv)
 				exit(1);
 			}
 		}
-	
+
 		if (!mtd_check(device)) {
 			fprintf(stderr, "Can't open device for writing: %s!\n", device);
 			exit(1);
@@ -512,7 +508,7 @@ int main (int argc, char **argv)
 	}
 
 	sync();
-	
+
 	i = 0;
 	unlocked = 0;
 	while (erase[i] != NULL) {
@@ -526,13 +522,13 @@ int main (int argc, char **argv)
 			unlocked = 1;
 		i++;
 	}
-	
+
 	if (!unlocked) {
 		if (quiet < 2) 
 			fprintf(stderr, "Unlocking %s ...\n", device);
 		mtd_unlock(device);
 	}
-		
+
 	switch (cmd) {
 		case CMD_UNLOCK:
 			break;
@@ -544,6 +540,9 @@ int main (int argc, char **argv)
 		case CMD_WRITE:
 			if (quiet < 2)
 				fprintf(stderr, "Writing from %s to %s ... ", imagefile, device);
+			if(len == 0) {
+			    len = getFileSize(argv[1]);
+			}
 			mtd_write(imagefd, offset, len,  device);
 			if (quiet < 2)
 				fprintf(stderr, "\n");
@@ -551,7 +550,7 @@ int main (int argc, char **argv)
 	}
 
 	sync();
-	
+
 	if (boot) {
 		fflush(stdout);
 		syscall(SYS_reboot,LINUX_REBOOT_MAGIC1,LINUX_REBOOT_MAGIC2,LINUX_REBOOT_CMD_RESTART,NULL);
