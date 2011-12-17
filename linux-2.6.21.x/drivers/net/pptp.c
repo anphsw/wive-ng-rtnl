@@ -230,7 +230,7 @@ found_middle:
 #endif
 
 
-static spinlock_t chan_lock;
+static DEFINE_SPINLOCK(chan_lock);
 
 #define SK_STATE(sk) (sk)->sk_state
 
@@ -257,16 +257,18 @@ static struct pppox_sock * lookup_chan(__u16 call_id, __be32 s_addr)
 {
 	struct pppox_sock *sock;
 	struct pptp_opt *opt;
-	
-	spin_lock(&chan_lock);
-	sock=callid_sock[call_id];
+
+	rcu_read_lock();
+	sock = rcu_dereference(callid_sock[call_id]);
 	if (sock) {
 		opt=&sock->proto.pptp;
-		if (opt->dst_addr.sin_addr.s_addr!=s_addr) sock=NULL;
-		else sock_hold(sk_pppox(sock));
+		if (opt->dst_addr.sin_addr.s_addr != s_addr)
+			sock = NULL;
+		else
+			sock_hold(sk_pppox(sock));
 	}
-	spin_unlock(&chan_lock);
-	
+	rcu_read_unlock();
+
 	return sock;
 }
 
@@ -279,15 +281,20 @@ static int lookup_chan_dst(__u16 call_id, __be32 d_addr)
 	struct pppox_sock *sock;
 	struct pptp_opt *opt;
 	int i;
-	
-	spin_lock(&chan_lock);
-	for(i=find_next_bit(callid_bitmap,MAX_CALLID,1); i<MAX_CALLID; i=find_next_bit(callid_bitmap,MAX_CALLID,i+1)){
-	    sock=callid_sock[i];
+
+	rcu_read_lock();
+	for (i = find_next_bit(callid_bitmap, MAX_CALLID, 1); i < MAX_CALLID;
+	     i = find_next_bit(callid_bitmap, MAX_CALLID, i + 1)) {
+		sock = rcu_dereference(callid_sock[i]);
+		if (!sock)
+			continue;
 	    opt=&sock->proto.pptp;
-	    if (opt->dst_addr.call_id==call_id && opt->dst_addr.sin_addr.s_addr==d_addr) break;
+		if (opt->dst_addr.call_id == call_id &&
+			  opt->dst_addr.sin_addr.s_addr == d_addr)
+			break;
 	}
-	spin_unlock(&chan_lock);
-	
+	rcu_read_unlock();
+
 	return i<MAX_CALLID;
 }
 
@@ -322,8 +329,9 @@ static void del_chan(struct pppox_sock *sock)
 {
 	spin_lock(&chan_lock);
 	clear_bit(sock->proto.pptp.src_addr.call_id,callid_bitmap);
-	callid_sock[sock->proto.pptp.src_addr.call_id]=NULL;
+	rcu_assign_pointer(callid_sock[sock->proto.pptp.src_addr.call_id], NULL);
 	spin_unlock(&chan_lock);
+	synchronize_rcu();
 }
 
 static int pptp_xmit(struct ppp_channel *chan, struct sk_buff *skb)
@@ -1135,8 +1143,6 @@ static int pptp_init_module(void)
 	int err=0;
 
 	printk(KERN_INFO "PPTP driver version " PPTP_DRIVER_VERSION "\n");
-
-	spin_lock_init(&chan_lock);
 
 	#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
 	inet_add_protocol(&net_pptp_protocol);
