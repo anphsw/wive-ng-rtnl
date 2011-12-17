@@ -230,13 +230,9 @@ found_middle:
 #endif
 
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
-static rwlock_t chan_lock=RW_LOCK_UNLOCKED;
-#define SK_STATE(sk) (sk)->state
-#else
-static DEFINE_RWLOCK(chan_lock);
+static spinlock_t chan_lock;
+
 #define SK_STATE(sk) (sk)->sk_state
-#endif
 
 static int pptp_xmit(struct ppp_channel *chan, struct sk_buff *skb);
 static int pptp_ppp_ioctl(struct ppp_channel *chan, unsigned int cmd,
@@ -262,14 +258,14 @@ static struct pppox_sock * lookup_chan(__u16 call_id, __be32 s_addr)
 	struct pppox_sock *sock;
 	struct pptp_opt *opt;
 	
-	read_lock(&chan_lock);
+	spin_lock(&chan_lock);
 	sock=callid_sock[call_id];
 	if (sock) {
 		opt=&sock->proto.pptp;
 		if (opt->dst_addr.sin_addr.s_addr!=s_addr) sock=NULL;
 		else sock_hold(sk_pppox(sock));
 	}
-	read_unlock(&chan_lock);
+	spin_unlock(&chan_lock);
 	
 	return sock;
 }
@@ -284,13 +280,13 @@ static int lookup_chan_dst(__u16 call_id, __be32 d_addr)
 	struct pptp_opt *opt;
 	int i;
 	
-	read_lock(&chan_lock);
+	spin_lock(&chan_lock);
 	for(i=find_next_bit(callid_bitmap,MAX_CALLID,1); i<MAX_CALLID; i=find_next_bit(callid_bitmap,MAX_CALLID,i+1)){
 	    sock=callid_sock[i];
 	    opt=&sock->proto.pptp;
 	    if (opt->dst_addr.call_id==call_id && opt->dst_addr.sin_addr.s_addr==d_addr) break;
 	}
-	read_unlock(&chan_lock);
+	spin_unlock(&chan_lock);
 	
 	return i<MAX_CALLID;
 }
@@ -300,7 +296,7 @@ static int add_chan(struct pppox_sock *sock)
 	static int call_id=0;
 	int res=-1;
 
-	write_lock_bh(&chan_lock);
+	spin_lock(&chan_lock);
 	
 	if (!sock->proto.pptp.src_addr.call_id)
 	{
@@ -317,17 +313,17 @@ static int add_chan(struct pppox_sock *sock)
 	res=0;
 
 exit:	
-	write_unlock_bh(&chan_lock);
+	spin_unlock(&chan_lock);
 	
 	return res;
 }
 
 static void del_chan(struct pppox_sock *sock)
 {
-	write_lock_bh(&chan_lock);
+	spin_lock(&chan_lock);
 	clear_bit(sock->proto.pptp.src_addr.call_id,callid_bitmap);
 	callid_sock[sock->proto.pptp.src_addr.call_id]=NULL;
-	write_unlock_bh(&chan_lock);
+	spin_unlock(&chan_lock);
 }
 
 static int pptp_xmit(struct ppp_channel *chan, struct sk_buff *skb)
@@ -1137,8 +1133,10 @@ static struct net_protocol net_pptp_protocol = {
 static int pptp_init_module(void)
 {
 	int err=0;
-	
+
 	printk(KERN_INFO "PPTP driver version " PPTP_DRIVER_VERSION "\n");
+
+	spin_lock_init(&chan_lock);
 
 	#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
 	inet_add_protocol(&net_pptp_protocol);
@@ -1162,7 +1160,7 @@ static int pptp_init_module(void)
 		printk(KERN_INFO "PPTP: can't register pppox_proto\n");
 		goto out_unregister_sk_proto;
 	}
-		
+
 	//assuming PAGESIZE is 4096 bytes
 	callid_bitmap=(unsigned long*)__get_free_pages(GFP_KERNEL,1);
 	if (!callid_bitmap){

@@ -890,6 +890,7 @@
 39) Fix some wireless defaults for all devices(more compat with some STA).<br>
 40) Small wifi webUI cleanup.<br>
 41) Script fs rewrite to use mtd_write instead dd.<br>
+42) VPN pptp/l2tp drivers now use spinlock instead write_lock_bh(speedup).<br>
 
 <br><br>
 <b>For support see:</b><br>

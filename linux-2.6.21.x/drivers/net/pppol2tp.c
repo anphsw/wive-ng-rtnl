@@ -5,7 +5,7 @@
  * PPPoL2TP --- PPP over L2TP (RFC 2661)
  *
  *
- * Version:    0.17.1
+ * Version:    0.17.2
  *
  * 251003 :	Copied from pppoe.c version 0.6.9.
  *
@@ -95,28 +95,19 @@
 #include <net/dst.h>
 #include <net/ip.h>
 #include <net/udp.h>
-#ifndef CONFIG_UDP_LITE_DISABLE
-#include <net/udplite.h>
-#endif
 #ifdef CONFIG_XFRM
 #include <net/xfrm.h>
 #endif
 
 #ifdef CONFIG_PPPOL2TP_FASTPATH
-//define PPPOL2TP_NO_LOCK
 //#define DISABLE_WORKQUEUE
-#define DISABLE_GET_FS
-#endif
-
-#define PPPOL2TP_DRV_VERSION	"V0.17"
-
-#ifdef CONFIG_UDP_LITE_DISABLE
-#define UDP_LITE_DISABLE
-#endif
-
 #ifdef CONFIG_PROC_FS
 #undef CONFIG_PROC_FS
 #endif
+#define DISABLE_GET_FS
+#endif
+
+#define PPPOL2TP_DRV_VERSION	"V0.17.2"
 
 /* Developer debug code. */
 #if 0
@@ -268,7 +259,7 @@ struct pppol2tp_tunnel
 
 	struct proto		*old_proto;	/* original proto */
 	struct proto		l2tp_proto;	/* L2TP proto */
-	rwlock_t		hlist_lock;	/* protect session_hlist */
+	spinlock_t              hlist_lock;     /* protect session_hlist */
 	struct hlist_head	session_hlist[PPPOL2TP_HASH_SIZE];
 						/* hashed list of sessions,
 						 * hashed by id */
@@ -913,265 +904,6 @@ error:
  * Transmit handling
  ***********************************************************************/
 
-#ifdef PPPOL2TP_NO_LOCK
-/* Push out all pending data as one UDP datagram. Standart method. */
-static int pppol2tp_udp_push_pending_frames(struct sock *sk)
-{
-	int err = 0;
-	struct udp_sock  *up = udp_sk(sk);
-	struct inet_sock *inet = inet_sk(sk);
-	struct flowi *fl = &inet->cork.fl;
-	struct sk_buff *skb;
-	struct udphdr *uh;
-
-	/* Grab the skbuff where UDP header space exists. */
-	if ((skb = skb_peek(&sk->sk_write_queue)) == NULL)
-		goto out;
-
-	/* Create a UDP header */
-	uh = skb->h.uh;
-	uh->source = fl->fl_ip_sport;
-	uh->dest = fl->fl_ip_dport;
-	uh->len = htons(up->len);
-	uh->check = 0;
-
-	skb->ip_summed = CHECKSUM_NONE;
-	err = ip_push_pending_frames(sk);
-out:
-	up->len = 0;
-	up->pending = 0;
-	if (!err)
-		#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,19)
-		#ifndef UDP_LITE_DISABLE
-		UDP_INC_STATS_USER(UDP_MIB_OUTDATAGRAMS, up->pcflag);
-		#else
-		UDP_INC_STATS_USER(UDP_MIB_OUTDATAGRAMS, 0);
-		#endif
-		#else
-		UDP_INC_STATS_USER(UDP_MIB_OUTDATAGRAMS);
-		#endif
-	return err;
-}
-
-/* udp_sendmsg without lock_sock and release_sock functions for fast speed */
-static int pppol2tp_udp_sendmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg, size_t len)
-{
-	struct inet_sock *inet = inet_sk(sk);
-	struct udp_sock *up = udp_sk(sk);
-	int ulen = len;
-	int free = 0, connected = 0;
-	int err;
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,19) && !defined(UDP_LITE_DISABLE)
-	int is_udplite = IS_UDPLITE(sk);
-#endif
-	int corkreq = up->corkflag || msg->msg_flags&MSG_MORE;
-	int (*getfrag)(void *, char *, int, int, int, struct sk_buff *);
-	struct ipcm_cookie ipc;
-	struct rtable *rt = NULL;
-	__be32 daddr, faddr, saddr;
-	__be16 dport;
-	u8  tos;
-
-	if (len > 0xFFFF)
-		return -EMSGSIZE;
-
-	/* Check the flags. */
-	if (msg->msg_flags&MSG_OOB)	/* Mirror BSD error message compatibility */
-		return -EOPNOTSUPP;
-
-	ipc.opt = NULL;
-
-	if (up->pending) {
-		if (likely(up->pending)) {
-			if (unlikely(up->pending != AF_INET)) {
-				return -EINVAL;
-			}
-			goto do_append_data;
-		}
-	}
-	ulen += sizeof(struct udphdr);
-
-	/* Get and verify the address. */
-	if (msg->msg_name) {
-		struct sockaddr_in * usin = (struct sockaddr_in*)msg->msg_name;
-		if (msg->msg_namelen < sizeof(*usin))
-			return -EINVAL;
-		if (usin->sin_family != AF_INET) {
-			if (usin->sin_family != AF_UNSPEC)
-				return -EAFNOSUPPORT;
-		}
-
-		daddr = usin->sin_addr.s_addr;
-		dport = usin->sin_port;
-		if (dport == 0)
-			return -EINVAL;
-	} else {
-		if (sk->sk_state != TCP_ESTABLISHED)
-			return -EDESTADDRREQ;
-		daddr = inet->daddr;
-		dport = inet->dport;
-		/* Open fast path for connected socket.
-		   Route will not be used, if at least one option is set. */
-		connected = 1;
-	}
-	ipc.addr = inet->saddr;
-
-	ipc.oif = sk->sk_bound_dev_if;
-	if (msg->msg_controllen) {
-		err = ip_cmsg_send(msg, &ipc);
-		if (err)
-			return err;
-		if (ipc.opt)
-			free = 1;
-		connected = 0;
-	}
-	if (!ipc.opt)
-		ipc.opt = inet->opt;
-
-	saddr = ipc.addr;
-	ipc.addr = faddr = daddr;
-
-	if (ipc.opt && ipc.opt->srr) {
-		if (!daddr)
-			return -EINVAL;
-		faddr = ipc.opt->faddr;
-		connected = 0;
-	}
-	tos = RT_TOS(inet->tos);
-	if (sock_flag(sk, SOCK_LOCALROUTE) ||
-	    (msg->msg_flags & MSG_DONTROUTE) ||
-	    (ipc.opt && ipc.opt->is_strictroute)) {
-		tos |= RTO_ONLINK;
-		connected = 0;
-	}
-
-	if (MULTICAST(daddr)) {
-		if (!ipc.oif)
-			ipc.oif = inet->mc_index;
-		if (!saddr)
-			saddr = inet->mc_addr;
-		connected = 0;
-	}
-
-	if (connected)
-		rt = (struct rtable*)sk_dst_check(sk, 0);
-
-	if (!rt) {
-		struct flowi fl = { .oif = ipc.oif,
-				    .nl_u = { .ip4_u =
-					      { .daddr = faddr,
-						.saddr = saddr,
-						.tos = tos } },
-				    .proto = sk->sk_protocol,
-				    .uli_u = { .ports =
-					       { .sport = inet->sport,
-						 .dport = dport } } };
-
-		security_sk_classify_flow(sk, &fl);
-		err = ip_route_output_flow(&rt, &fl, sk, 1);
-		if (err) {
-			if (err == -ENETUNREACH)
-				IP_INC_STATS_BH(IPSTATS_MIB_OUTNOROUTES);
-			goto out;
-		}
-
-		err = -EACCES;
-		if ((rt->rt_flags & RTCF_BROADCAST) &&
-		    !sock_flag(sk, SOCK_BROADCAST))
-			goto out;
-		if (connected)
-			sk_dst_set(sk, dst_clone(&rt->u.dst));
-	}
-
-	if (msg->msg_flags&MSG_CONFIRM)
-		goto do_confirm;
-back_from_confirm:
-
-	saddr = rt->rt_src;
-	if (!ipc.addr)
-		daddr = ipc.addr = rt->rt_dst;
-
-	if (unlikely(up->pending)) {
-		/* The socket is already corked while preparing it.
-		    ... which is an evident application bug. --ANK */
-		LIMIT_NETDEBUG(KERN_DEBUG "udp cork app bug 2\n");
-		err = -EINVAL;
-		goto out;
-	}
-
-	/* Now cork the socket to pend data. */
-	inet->cork.fl.fl4_dst = daddr;
-	inet->cork.fl.fl_ip_dport = dport;
-	inet->cork.fl.fl4_src = saddr;
-	inet->cork.fl.fl_ip_sport = inet->sport;
-	up->pending = AF_INET;
-
-do_append_data:
-	up->len += ulen;
-
-	#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,19) && !defined(UDP_LITE_DISABLE)
-	getfrag  =  is_udplite ?  udplite_getfrag : ip_generic_getfrag;
-	#else
-	getfrag  =  ip_generic_getfrag;
-	#endif
-
-	err = ip_append_data(sk, getfrag, msg->msg_iov, ulen,
-			#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,21)
-			sizeof(struct udphdr), &ipc, rt,
-			#else
-			sizeof(struct udphdr), &ipc, &rt,
-			#endif
-			corkreq ? msg->msg_flags|MSG_MORE : msg->msg_flags);
-	if (err) {
-	    #if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,21)
-	    pppol2tp_udp_flush_pending_frames(sk);
-	    #else
-	    struct udp_sock *up = udp_sk(sk);
-	    if (up->pending) {
-		up->len = 0;
-		up->pending = 0;
-		ip_flush_pending_frames(sk);
-	    }
-	    #endif
-	}
-	else if (!corkreq)
-		err = pppol2tp_udp_push_pending_frames(sk);
-	else if (unlikely(skb_queue_empty(&sk->sk_write_queue)))
-		up->pending = 0;
-out:
-	if (rt)
-		ip_rt_put(rt);
-	if (free)
-		kfree(ipc.opt);
-	if (!err)
-		return len;
-	/*
-	 * ENOBUFS = no kernel mem, SOCK_NOSPACE = no sndbuf space.  Reporting
-	 * ENOBUFS might not be good (it's not tunable per se), but otherwise
-	 * we don't have a good statistic (IpOutDiscards but it can be too many
-	 * things).  We could add another new stat but at least for now that
-	 * seems like overkill.
-	 */
-	if (err == -ENOBUFS || test_bit(SOCK_NOSPACE, &sk->sk_socket->flags)) {
-		#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,19) && !defined(UDP_LITE_DISABLE)
-		UDP_INC_STATS_USER(UDP_MIB_SNDBUFERRORS, is_udplite);
-		#elif LINUX_VERSION_CODE > KERNEL_VERSION(2,6,19)
-		UDP_INC_STATS_USER(UDP_MIB_SNDBUFERRORS, 0);
-		#else
-		UDP_INC_STATS_USER(UDP_MIB_SNDBUFERRORS);
-		#endif
-	}
-	return err;
-
-do_confirm:
-	dst_confirm(&rt->u.dst);
-	if (!(msg->msg_flags&MSG_PROBE) || len)
-		goto back_from_confirm;
-	err = 0;
-	goto out;
-}
-#endif
-
 /* Internal UDP socket transmission
  */
 static int pppol2tp_udp_sock_send(struct kiocb *iocb,
@@ -1217,11 +949,7 @@ static int pppol2tp_udp_sock_send(struct kiocb *iocb,
 #endif
 
 	/* The actual sendmsg() call... */
-#ifdef PPPOL2TP_NO_LOCK
-	error = pppol2tp_udp_sendmsg(iocb, session->tunnel_sock, msg, total_len);
-#else
 	error = tunnel->old_proto->sendmsg(iocb, session->tunnel_sock, msg, total_len);
-#endif
 	if (error == -EIOCBQUEUED)
 		error = wait_on_sync_kiocb(iocb);
 
@@ -1608,9 +1336,9 @@ static void pppol2tp_tunnel_closeall(struct pppol2tp_tunnel *tunnel)
 			PRINTK(session->debug, PPPOL2TP_MSG_CONTROL, KERN_INFO,
 			       "%s: closing session\n", session->name);
 
-			write_lock_bh(&tunnel->hlist_lock);
+			spin_lock(&tunnel->hlist_lock);
 			hlist_del_init(&session->hlist);
-			write_unlock_bh(&tunnel->hlist_lock);
+			spin_unlock(&tunnel->hlist_lock);
 
 			sock_hold(sk);
 
@@ -1776,9 +1504,9 @@ static int pppol2tp_release(struct socket *sock)
 		if (tunnel) {
 			if (tunnel->magic == L2TP_TUNNEL_MAGIC) {
 				/* Delete the session socket from the hash */
-				write_lock_bh(&tunnel->hlist_lock);
+				spin_lock(&tunnel->hlist_lock);
 				hlist_del_init(&session->hlist);
-				write_unlock_bh(&tunnel->hlist_lock);
+				spin_unlock(&tunnel->hlist_lock);
 			} else {
 				printk(KERN_ERR "%s: %s:%d: BAD TUNNEL MAGIC "
 				       "( tunnel=%p magic=%x )\n",
@@ -1984,7 +1712,7 @@ static struct sock *pppol2tp_prepare_tunnel_socket(pid_t pid, int fd,
 	tunnel->sock = sk;
 	sk->sk_allocation = GFP_ATOMIC;
 
-	rwlock_init(&tunnel->hlist_lock);
+	spin_lock_init(&tunnel->hlist_lock);
 
 	/* Add tunnel to our list */
 	INIT_LIST_HEAD(&tunnel->list);
@@ -2166,11 +1894,11 @@ int pppol2tp_connect(struct socket *sock, struct sockaddr *uservaddr,
 
 	/* Add session to the tunnel's hash list */
 	SOCK_2_TUNNEL(tunnel_sock, tunnel, error, -EBADF, end, 0);
-	write_lock_bh(&tunnel->hlist_lock);
+	spin_lock(&tunnel->hlist_lock);
 	hlist_add_head(&session->hlist,
 		       pppol2tp_session_id_hash(tunnel,
 						session->tunnel_addr.s_session));
-	write_unlock_bh(&tunnel->hlist_lock);
+	spin_lock(&tunnel->hlist_lock);
 
 	/* This is how we get the session context from the socket. */
 	sk->sk_user_data = session;
