@@ -24,6 +24,7 @@
 #include <linux/if_ether.h>
 #include <linux/if.h>
 #include <linux/netdevice.h>
+#include <linux/in.h>
 #include <linux/ppp_channel.h>
 #endif /* __KERNEL__ */
 #include <linux/if_pppol2tp.h>
@@ -76,6 +77,12 @@ struct sockaddr_pppox {
  * sockaddr_pppox) to fill it. We use a protocol specific sockaddr
  * type instead.
  */
+struct sockaddr_pppoe {
+	sa_family_t     sa_family;	/* address family, AF_PPPOX */
+	unsigned int    sa_protocol;    /* protocol identifier */
+	struct pppoe_addr pppoe;
+}__attribute__ ((packed));
+
 struct sockaddr_pppol2tp {
 	sa_family_t     sa_family;      /* address family, AF_PPPOX */
 	unsigned int    sa_protocol;    /* protocol identifier */
@@ -90,7 +97,8 @@ struct sockaddr_pppol2tp {
 
 #define PPPOEIOCSFWD	_IOW(0xB1 ,0, size_t)
 #define PPPOEIOCDFWD	_IO(0xB1 ,1)
-/*#define PPPOEIOCGFWD	_IOWR(0xB1,2, size_t)*/
+/*#define PPPOEIOCGFWD	_IOWR(0xB1, 2, size_t)*/
+#define PPPTPIOWFP	_IOWR(0xB1 ,2, size_t)*/
 
 /* Codes to identify message types */
 #define PADI_CODE	0x09
@@ -153,21 +161,13 @@ struct pppoe_opt {
 	struct sockaddr_pppox	relay;	  /* what socket data will be
 					     relayed to (PPPoE relaying) */
 };
+
 struct pptp_opt {
-       struct pptp_addr        src_addr;
-       struct pptp_addr        dst_addr;
-       int timeout;
-       int window;
-       __u32 ack_sent, ack_recv;
-       __u32 seq_sent, seq_recv;
-       int pause:1;
-       int proc:1;
-       spinlock_t skb_buf_lock;
-       struct sk_buff_head skb_buf;
-       struct work_struct ack_work;  //send ack work
-       struct work_struct buf_work; //check bufferd packets work
-       struct gre_statistics *stat;
-       int ppp_flags;
+	struct pptp_addr	src_addr;
+	struct pptp_addr	dst_addr;
+	__u32 ack_sent, ack_recv;
+	__u32 seq_sent, seq_recv;
+	int ppp_flags;
 };
 
 #define PPTP_FLAG_PAUSE 0
