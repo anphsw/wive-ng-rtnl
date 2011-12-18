@@ -898,6 +898,7 @@
 46) Do not install hw_nat ac/acl/mtr by default (save flash space).<br>
 47) Do not install pppd chat script interpreter ib 4Mb without usb images.<br>
 48) Remove iwconfig no more used. Use iwpriv always instead (save flash space).<br>
+49) Fix WebUI js compat with IE.<br>
 
 <br><br>
 <b>For support see:</b><br>

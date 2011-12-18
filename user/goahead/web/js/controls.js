@@ -39,8 +39,10 @@ function showElement(elementID, display)
 	}
 	else
 	{
-		item.style.display = display;
-		item.style.visibility = "visible";
+		if (item.style.display != null)
+			item.style.display = display;
+		if (item.style.visibility)
+			item.style.visibility = "visible";
 	}
 }
 
@@ -67,8 +69,10 @@ function hideElement(elementID, display)
 	}
 	else
 	{
-		item.style.display = display;
-		item.style.visibility = "hidden";
+		if (item.style.display != null)
+			item.style.display = display;
+		if (item.style.visibility)
+			item.style.visibility = "hidden";
 	}
 }
 
