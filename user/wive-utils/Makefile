@@ -1,6 +1,9 @@
 #based utilites for all routers
 
-UTILSLIST = ader cpu mcprobe ipget
+####################################
+#UTILSLIST = ader cpu mcprobe ipget#
+####################################
+UTILSLIST = cpu mcprobe ipget
 CFLAGS += -Os
 
 all:
