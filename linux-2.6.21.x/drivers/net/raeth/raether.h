@@ -5,11 +5,13 @@
 
 /* mtu and rx sizes */
 #ifdef CONFIG_RAETH_JUMBOFRAME
-#define	MAX_RX_LENGTH	4096
+#define	MAX_RX_LENGTH	4096		/* limit size for rx packets 1Gb */
 #else
-#define	MAX_RX_LENGTH	1600
+#define	MAX_RX_LENGTH	1600		/* limit size for rx packets 100Mb */
 #endif
-#define DEFAULT_MTU	1500
+#define DEFAULT_MTU	1500		/* default MTU set to device */
+
+#define PKT_BUF_SZ      1536            /* Size of each temporary Rx buffer.*/
 
 /* hardware minimum and maximum for a single frame's data payload */
 #ifdef CONFIG_VLAN_8021Q_DOUBLE_TAG
