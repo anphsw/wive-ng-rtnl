@@ -202,6 +202,11 @@ bool 'RT2880 GPIO Test'			CONFIG_RT2880_GPIO_TEST
 bool 'RT2880 SPI Command'		CONFIG_RT2880_SPI
 bool 'RT2880 I2C Command'		CONFIG_RT2880_I2C
 bool 'HW NAT'                   	CONFIG_RALINKAPP_HWNAT
+if [ "$CONFIG_RALINKAPP_HWNAT" = "y" ]; then
+    bool 'HW NAT Accounting'		CONFIG_RALINKAPP_HWNAT_AC
+    bool 'HW NAT ACL'			CONFIG_RALINKAPP_HWNAT_ACL
+    bool 'HW NAT Up/Download Metr'	CONFIG_RALINKAPP_HWNAT_MTR
+fi
 bool 'SW_QOS'				CONFIG_RALINKAPP_SWQOS
 bool 'Video Flow Classification cmd'	CONFIG_RALINKAPP_CLS
 if [ "$CONFIG_RALINKAPP_SWQOS" = "y" ]; then

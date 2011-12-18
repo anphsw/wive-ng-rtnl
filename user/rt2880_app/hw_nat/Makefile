@@ -23,9 +23,9 @@ mtr: $(MTR_OBJS)
 
 romfs:
 	$(ROMFSINST) -S /bin/hw_nat
-	$(ROMFSINST) -S /bin/acl
-	$(ROMFSINST) -S /bin/ac
-	$(ROMFSINST) -S /bin/mtr
+	$(ROMFSINST) -S -e CONFIG_RALINKAPP_HWNAT_ACL /bin/acl
+	$(ROMFSINST) -S -e CONFIG_RALINKAPP_HWNAT_AC /bin/ac
+	$(ROMFSINST) -S -e CONFIG_RALINKAPP_HWNAT_MTR /bin/mtr
 
 clean:
 	-rm -f $(EXEC) *.elf *.gdb *.o
