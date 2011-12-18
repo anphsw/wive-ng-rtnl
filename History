@@ -892,6 +892,7 @@
 41) Script fs rewrite to use mtd_write instead dd.<br>
 41) Update pptp kernel module.<br>
 42) VPN pptp/l2tp drivers now use spinlock instead write_lock_bh(speedup).<br>
+43) Check for ip vpn server variable before resolve.<br>
 
 <br><br>
 <b>For support see:</b><br>

@@ -26,25 +26,34 @@ check_param() {
 }
 
 get_vpn_ip() {
-    ##########TRY RESOLV SERVER IP############
-    $LOG "Get vpn server $vpnServer ip adress"
-    count=0
-    resolved=0
-    while [ $resolved -eq 0 ]; do
-	NS=`ipget $vpnServer | tail -q -n1`
-	if [ "$NS" != "" ]; then
-	    resolved=1
-    	    SERVER=$NS
-    	    $LOG "Server adress is $SERVER"
-	fi
-	if [ "$count" = "3" ]; then
-	    resolved=1
-    	    SERVER=$vpnServer
-    	    $LOG "Not resolve adress for $SERVER"
-	fi
-	sleep 5
-	count="$(($count+1))"
-    done
+    ##############################################
+    # Check $vpnServer variable for ip/name set
+    ##############################################
+    is_ip=`ipcalc -sn $vpnServer`
+    if [ "$is_ip" = "" ]; then
+	##########################################
+	##########TRY RESOLV SERVER IP############
+	##########################################
+	$LOG "Get vpn server $vpnServer ip adress"
+	count=0
+	resolved=0
+	while [ $resolved -eq 0 ]; do
+	    NS=`ipget $vpnServer | tail -q -n1`
+	    if [ "$NS" != "" ]; then
+		resolved=1
+		SERVER=$NS
+	    fi
+	    if [ "$count" = "5" ]; then
+		resolved=1
+    		SERVER=$vpnServer
+    		$LOG "Not resolve adress for $SERVER"
+	    fi
+	    sleep 2
+	    count="$(($count+1))"
+	done
+    fi
+
+    $LOG "Server adress is $SERVER"
 
     # always create /tmp/vpnip
     # fix if server string = IP
