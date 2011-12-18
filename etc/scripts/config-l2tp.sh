@@ -54,6 +54,8 @@ get_vpn_ip() {
 	    sleep 2
 	    count="$(($count+1))"
 	done
+    else
+		SERVER=$vpnServer
     fi
 
     $LOG "Server adress is $SERVER"
