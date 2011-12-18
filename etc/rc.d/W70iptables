@@ -442,11 +442,11 @@ get_param() {
 	natEnabled=0
     fi
     if [ "$ipt_account" = "1" ]; then
-	lan_ip_acc=`ipcalc "$lan_ipaddr" "$lan_netmask" -n -s | cut -f 2- -d =`
-	lan_ip_prf=`ipcalc "$lan_ipaddr" "$lan_netmask" -p -s | cut -f 2- -d =`
+	lan_ip_acc=`ipcalc "$lan_ipaddr" "$lan_netmask" -ns | cut -f 2- -d =`
+	lan_ip_prf=`ipcalc "$lan_ipaddr" "$lan_netmask" -ps | cut -f 2- -d =`
 	if [ "$Lan2Enabled" = "1" ]; then
-	    lan2_ip_acc=`ipcalc "$lan2_ipaddr" "$lan2_netmask" -n -s | cut -f 2- -d =`
-	    lan2_ip_prf=`ipcalc "$lan2_ipaddr" "$lan2_netmask" -p -s | cut -f 2- -d =`
+	    lan2_ip_acc=`ipcalc "$lan2_ipaddr" "$lan2_netmask" -ns | cut -f 2- -d =`
+	    lan2_ip_prf=`ipcalc "$lan2_ipaddr" "$lan2_netmask" -ps | cut -f 2- -d =`
 	fi
     fi
     # load needed modules

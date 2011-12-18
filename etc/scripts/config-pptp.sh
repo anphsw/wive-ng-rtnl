@@ -91,9 +91,9 @@ echo "==================START-PPTP-CLIENT======================="
     fi
 
     if [ "$newdgw" != "" ] && [ "$newdgw" != "$SERVER" ]; then
-	dgw_net=`ipcalc "$newdgw" -n | cut -f 2- -d =`
-	srv_net=`ipcalc "$SERVER" -n | cut -f 2- -d =`
-	if [ "$dgw_net" != "$srv_net" ]; then
+	dgw_net=`ipcalc "$newdgw" -sn | cut -f 2- -d =`
+	srv_net=`ipcalc "$SERVER" -sn | cut -f 2- -d =`
+	if [ "$dgw_net" != "" ] && [ "$srv_net" != "" ] && [ "$dgw_net" != "$srv_net" ]; then
 	    $LOG "Add route to $SERVER via $newdgw"
 	    ip route replace $SERVER via $newdgw
 	fi
