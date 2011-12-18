@@ -49,7 +49,7 @@ case "$1" in
 	    if [ "$staCur_SSID" != "" ]; then
 		# Reconnect
 		$LOG "Reconnect to STA $staCur_SSID"
-		iwconfig ra0 essid "$staCur_SSID"
+		iwpriv ra0 set SSID="$staCur_SSID"
 	    fi
 	    # Full reinit network and services
 	    internet.sh
