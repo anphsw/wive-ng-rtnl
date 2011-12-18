@@ -894,6 +894,7 @@
 42) VPN pptp/l2tp drivers now use spinlock instead write_lock_bh(speedup).<br>
 43) Check for ip vpn server variable before resolve.<br>
 44) Fix raeth rx_buff size calculation.<br>
+45) Wireless tools now build as dynamic linked (free some space in fash).<br>
 
 <br><br>
 <b>For support see:</b><br>

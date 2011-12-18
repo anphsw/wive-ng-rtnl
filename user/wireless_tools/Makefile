@@ -5,7 +5,7 @@
 ## Installation directory. By default, go in /usr/local.
 ## Distributions should probably use /, but they probably know better...
 ifndef PREFIX
-  PREFIX = /usr/local
+  PREFIX = ./filesystem
 endif
 
 ## Compiler to use (modify this for cross compile).
@@ -19,15 +19,15 @@ endif
 ## a local version (non-root).
 ## Standard distros should comment that option to save space and to
 ## build libiw.so used by third parties...
-BUILD_STATIC = y
+# BUILD_STATIC = y
 
 ## Uncomment this to build without using libm (less efficient).
 ## This is mostly useful for embedded platforms without maths.
-BUILD_NOLIBM = n
+# BUILD_NOLIBM = y
 
 ## Uncomment this to strip binary from symbols. This reduce binary size.
 ## by a few percent but make debug worse...
-BUILD_STRIPPING = y
+# BUILD_STRIPPING = y
 
 ## Uncomment this to build with only essential functionality.
 ## This leaves out the less used features and cut in half the tools.
@@ -157,6 +157,8 @@ romfs:
 	$(ROMFSINST) -S -e CONFIG_USER_WIRELESS_TOOLS_IWEVENT  /bin/iwevent
 ifndef BUILD_STATIC
 	$(ROMFSINST) -S /lib/$(IWLIB)
+	$(ROMFSINST) -s /lib/$(IWLIB) /lib/libiw.so
+	$(ROMFSINST) -s /lib/$(IWLIB) /lib/libiw.so.0
 endif
 
 # Compilation of the static library
