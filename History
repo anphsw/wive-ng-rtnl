@@ -893,7 +893,7 @@
 41) Update pptp kernel module.<br>
 42) VPN pptp/l2tp drivers now use spinlock instead write_lock_bh(speedup).<br>
 43) Check for ip vpn server variable before resolve.<br>
-44) Fix raeth skb buff size calculate.<br>
+44) Fix raeth rx_buff size calculation.<br>
 
 <br><br>
 <b>For support see:</b><br>
