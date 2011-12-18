@@ -3,7 +3,7 @@
 # PPP top-level Makefile for Linux.
 -include ../../config.arch
 
-CC 	?= gcc                                                                                                                                   
+CC 	?= gcc
 COPTS	 = -fPIC -O2
 LIBS	 =
 
@@ -17,7 +17,9 @@ ETCDIR = $(INSTROOT)@SYSCONF@/ppp
 INSTALL= install
 
 all:
+ifdef CONFIG_USER_PPPD_CHAT
 	cd chat; $(MAKE) $(MFLAGS) all
+endif
 	cd pppd/plugins; $(MAKE) $(MFLAGS) all
 	cd pppd; $(MAKE) $(MFLAGS) all
 #	cd pppstats; $(MAKE) $(MFLAGS) all
@@ -26,7 +28,9 @@ all:
 install: $(BINDIR) $(MANDIR)/man8 install-progs install-devel
 
 install-progs:
+ifdef CONFIG_USER_PPPD_CHAT
 	cd chat; $(MAKE) $(MFLAGS) install
+endif
 	cd pppd/plugins; $(MAKE) $(MFLAGS) install
 	cd pppd; $(MAKE) $(MFLAGS) install
 #	cd pppstats; $(MAKE) $(MFLAGS) install
