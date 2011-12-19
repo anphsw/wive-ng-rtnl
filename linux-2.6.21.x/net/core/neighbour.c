@@ -406,13 +406,6 @@ struct neighbour *neigh_create(struct neigh_table *tbl, const void *pkey,
 		goto out_neigh_release;
 	}
 
-	/* Device specific setup. */
-	if (n->parms->neigh_setup &&
-	    (error = n->parms->neigh_setup(n)) < 0) {
-		rc = ERR_PTR(error);
-		goto out_neigh_release;
-	}
-
 	n->confirmed = jiffies - (n->parms->base_reachable_time << 1);
 
 	write_lock_bh(&tbl->lock);
