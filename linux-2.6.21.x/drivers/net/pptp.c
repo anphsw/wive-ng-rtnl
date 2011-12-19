@@ -769,10 +769,7 @@ static int pptp_bind(struct socket *sock,struct sockaddr *uservaddr,int sockaddr
 
 	opt->src_addr=sp->sa_addr.pptp;
 	if (add_chan(po))
-	{
-	    release_sock(sk);
 		error=-EBUSY;
-	}
 #ifdef DEBUG
 	if (log_level>=1)
 		printk(KERN_INFO"PPTP: using call_id %i\n",opt->src_addr.call_id);
