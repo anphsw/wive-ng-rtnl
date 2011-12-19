@@ -464,13 +464,23 @@ static size_t process_reply(struct dns_header *header, time_t now,
     return n;
   
   /* Complain loudly if the upstream server is non-recursive. */
+#ifdef SRV_TRY_NEXT
+  if (!(header->hb4 & HB4_RA) && RCODE(header) == NOERROR && ntohs(header->ancount) == 0 &&
+      server)
+#else
   if (!(header->hb4 & HB4_RA) && RCODE(header) == NOERROR && ntohs(header->ancount) == 0 &&
       server && !(server->flags & SERV_WARNED_RECURSIVE))
+#endif
     {
       prettyprint_addr(&server->addr, daemon->namebuff);
+#ifdef SRV_TRY_NEXT
+      my_syslog(LOG_WARNING, _("nameserver %s refused try next server"), daemon->namebuff);
+      return 0;
+#else
       my_syslog(LOG_WARNING, _("nameserver %s refused to do a recursive query"), daemon->namebuff);
       if (!option_bool(OPT_LOG))
 	server->flags |= SERV_WARNED_RECURSIVE;
+#endif
     }  
     
   if (daemon->bogus_addr && RCODE(header) != NXDOMAIN &&
@@ -619,6 +629,10 @@ void reply_query(int fd, int family, time_t now)
 	  header->hb4 |= HB4_RA; /* recursion if available */
 	  send_from(forward->fd, option_bool(OPT_NOWILD), daemon->packet, nn, 
 		    &forward->source, &forward->dest, forward->iface);
+#ifdef SRV_TRY_NEXT
+	} else {
+	  daemon->last_server = server->next;
+#endif
 	}
       free_frec(forward); /* cancel */
     }

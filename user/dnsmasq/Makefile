@@ -21,11 +21,11 @@ LOCALEDIR = ${PREFIX}/share/locale
 -include $(LINUX_CONFIG)
 
 ifndef CONFIG_IPV6
-COPTS = -DNO_HAVE_DBUS -DNO_DHCP -DNO_TFTP -DNO_IPV6 -Os -fPIC -fomit-frame-pointer -mno-memcpy
-CFLAGS = -DNO_IPV6
+COPTS = -DNO_HAVE_DBUS -DNO_DHCP -DNO_TFTP -DNO_IPV6 -DSRV_TRY_NEXT -Os -fPIC -fomit-frame-pointer -mno-memcpy
+CFLAGS += -DNO_IPV6
 else
-COPTS = -DNO_HAVE_DBUS -DNO_DHCP -DNO_TFTP -Os -fPIC -fomit-frame-pointer -mno-memcpy
-endif    
+COPTS = -DNO_HAVE_DBUS -DNO_DHCP -DNO_TFTP -DSRV_TRY_NEXT -Os -fPIC -fomit-frame-pointer -mno-memcpy
+endif
 
 SRC = src
 PO = po
