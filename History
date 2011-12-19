@@ -900,6 +900,7 @@
 48) Remove iwconfig no more used. Use iwpriv always instead (save flash space).<br>
 49) Fix WebUI js compat with IE.<br>
 50) Add dmsamsq support try next server instead try recursive.<br>
+51) Update supported device lists or usb cdc-acm and option drivers.<br>
 
 <br><br>
 <b>For support see:</b><br>
