@@ -324,3 +324,22 @@ int get_entropy (unsigned char *buf, int count)
 	    return -1;
     }
 }
+
+void kill_pppd (pid_t pid)
+{
+#ifdef TRUST_PPPD_TO_DIE
+ #ifdef DEBUG_PPPD
+      l2tp_log (LOG_DEBUG, "Terminating pppd: sending TERM signal to pid %d\n", pid);
+ #endif
+      kill (pid, SIGTERM);
+#else
+ #ifdef DEBUG_PPPD
+      l2tp_log (LOG_DEBUG, "Terminating pppd: sending KILL signal to pid %d\n", pid);
+ #endif
+      /* first try correct stop */
+      kill (pid, SIGTERM);
+      sleep(2);
+      /* kill now */
+      kill (pid, SIGKILL);
+#endif
+}

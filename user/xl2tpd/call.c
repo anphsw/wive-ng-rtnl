@@ -440,18 +440,7 @@ void destroy_call (struct call *c)
        * Sometimes pppd takes 7 sec to go down! We don't have that much time,
        * since all other calls are suspended while doing this.
        */
-
-#ifdef TRUST_PPPD_TO_DIE
- #ifdef DEBUG_PPPD
-      l2tp_log (LOG_DEBUG, "Terminating pppd: sending TERM signal to pid %d\n", pid);
- #endif
-      kill (pid, SIGTERM);
-#else
- #ifdef DEBUG_PPPD
-      l2tp_log (LOG_DEBUG, "Terminating pppd: sending KILL signal to pid %d\n", pid);
- #endif
-      kill (pid, SIGKILL);
-#endif
+       kill_pppd(pid);
     }
     if (c->container)
     {

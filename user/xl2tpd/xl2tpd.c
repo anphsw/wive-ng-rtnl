@@ -799,8 +799,8 @@ void lac_hangup (int cid)
                      "%s :Hanging up call %d, Local: %d, Remote: %d\n",
                      __FUNCTION__, tmp->serno, tmp->ourcid, tmp->cid);
                 strcpy (tmp->errormsg, "Goodbye!");
-/*                                    tmp->needclose = -1; */
-                kill (tmp->pppd, SIGTERM);
+		if (tmp->pppd)
+		    kill_pppd(tmp->pppd);
                 return;
             }
             tmp = tmp->next;
