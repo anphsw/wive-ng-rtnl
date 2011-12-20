@@ -902,6 +902,7 @@
 50) Add dmsamsq support try next server instead try recursive.<br>
 51) Update supported device lists or usb cdc-acm and option drivers.<br>
 52) L2TP client fix work with some strange ISPs.<br>
+53) Update udpxy to 1.0.21-2-prod version.<br>
 
 <br><br>
 <b>For support see:</b><br>
