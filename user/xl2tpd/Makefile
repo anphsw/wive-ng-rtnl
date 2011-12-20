@@ -36,6 +36,12 @@
 # The cost of not trusting pppd to die (and shoot it down hard), is that your
 # pppd's ip-down scripts will not have a chance to run.
 #
+# -DDISABLE_OCRP_OCCN
+# Defining DISABLE_OCRP_OCCN disable L2TPv3 extensions support.
+#
+# -DFIX_ZLB
+# Defining FIX_ZLB for fix connections with some providers.
+#
 # For more details see: http://bugs.xelerance.com/view.php?id=739
 #
 # Confirmed bad versions of pppd:
@@ -49,7 +55,7 @@
 # DFLAGS= -g -DDEBUG_HELLO -DDEBUG_CLOSE -DDEBUG_FLOW -DDEBUG_PAYLOAD -DDEBUG_CONTROL -DDEBUG_CONTROL_XMIT -DDEBUG_FLOW_MORE -DDEBUG_MAGIC -DDEBUG_ENTROPY -DDEBUG_HIDDEN -DDEBUG_PPPD -DDEBUG_AAA -DDEBUG_FILE -DDEBUG_FLOW -DDEBUG_HELLO -DDEBUG_CLOSE -DDEBUG_ZLB -DDEBUG_AUTH
 # DFLAGS?= -DDEBUG_PPPD -DTRUST_PPPD_TO_DIE
 
-DFLAGS= -g -DTRUST_PPPD_TO_DIE
+DFLAGS= -g -DTRUST_PPPD_TO_DIE -DDISABLE_OCRP_OCCN -DFIX_ZLB
 
 # Uncomment the next line for Linux. KERNELSRC is needed for if_pppol2tp.h,
 # but we use a local copy if we don't find it.

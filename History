@@ -901,6 +901,7 @@
 49) Fix WebUI js compat with IE.<br>
 50) Add dmsamsq support try next server instead try recursive.<br>
 51) Update supported device lists or usb cdc-acm and option drivers.<br>
+52) L2TP client fix work with some strange ISPs.<br>
 
 <br><br>
 <b>For support see:</b><br>

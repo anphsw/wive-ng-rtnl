@@ -615,6 +615,7 @@ int control_finish (struct tunnel *t, struct call *c)
             magic_lac_dial (t->lac);
         }
         break;
+#ifndef DISABLE_OCRP_OCCN
     case SCCCN:
         if (t->chal_them.state)
         {
@@ -644,6 +645,7 @@ int control_finish (struct tunnel *t, struct call *c)
 #endif
         t->hello = schedule (tv, hello, (void *) t);
         break;
+#endif
     case StopCCN:
         if (t->qtid < 0)
         {
@@ -983,6 +985,7 @@ int control_finish (struct tunnel *t, struct call *c)
              IPADDY (t->peer.sin_addr), c->ourcid, c->cid,
              c->serno);
         break;
+#ifndef DISABLE_OCRP_OCCN
     case OCRP:                 /* jz: nothing to do for OCRP, waiting for OCCN */
         break;
     case OCCN:                 /* jz: get OCCN, so the only thing we must do is to start the pppd */
@@ -1042,12 +1045,12 @@ int control_finish (struct tunnel *t, struct call *c)
         l2tp_log (LOG_INFO,
 		  "parameters: Local: %d , Remote: %d , Serial: %d , Pid: %d , Tunnelid: %d , Phoneid: %s\n",
 		  c->ourcid, c->cid, c->serno, c->pppd, t->ourtid, c->dial_no); 
-	
+
         opt_destroy (po);
         if (c->lac)
             c->lac->rtries = 0;
         break;
-
+#endif
 
     case CDN:
         if (c->qcid < 0)
@@ -1178,7 +1181,9 @@ inline int check_control (const struct buffer *buf, struct tunnel *t,
 #endif
             zlb = new_outgoing (t);
             control_zlb (zlb, t, c);
+#ifndef FIX_ZLB
             udp_xmit (zlb, t);
+#endif
             toss (zlb);
         }
         else if (!t->control_rec_seq_num && (t->tid == -1))
@@ -1711,7 +1716,9 @@ void handle_special (struct buffer *buf, struct call *c, _u16 call)
         /* FIXME: If I'm not a CDN, I need to send a CDN */
         control_zlb (buf, t, c);
         c->cid = 0;
+#ifndef FIX_ZLB
         udp_xmit (buf, t);
+#endif
         toss (buf);
     }
     else
