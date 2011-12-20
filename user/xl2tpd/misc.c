@@ -23,6 +23,17 @@
 #include <errno.h>
 #include <string.h>
 #include <syslog.h>
+#if (__GLIBC__ < 2)
+# if defined(FREEBSD) || defined(OPENBSD)
+#  include <sys/signal.h>
+# elif defined(LINUX)
+#  include <bsd/signal.h>
+# elif defined(SOLARIS)
+#  include <signal.h>
+# endif
+#else
+# include <signal.h>
+#endif
 #if defined(SOLARIS)
 # include <varargs.h>
 #endif
