@@ -826,16 +826,20 @@ void vlan_dev_set_multicast_list(struct net_device *vlan_dev)
 		/* compare the current promiscuity to the last promisc we had.. */
 		inc = vlan_dev->promiscuity - VLAN_DEV_INFO(vlan_dev)->old_promiscuity;
 		if (inc) {
+#ifdef VLAN_DEBUG
 			printk(KERN_INFO "%s: dev_set_promiscuity(master, %d)\n",
 			       vlan_dev->name, inc);
+#endif
 			dev_set_promiscuity(real_dev, inc); /* found in dev.c */
 			VLAN_DEV_INFO(vlan_dev)->old_promiscuity = vlan_dev->promiscuity;
 		}
 
 		inc = vlan_dev->allmulti - VLAN_DEV_INFO(vlan_dev)->old_allmulti;
 		if (inc) {
+#ifdef VLAN_DEBUG
 			printk(KERN_INFO "%s: dev_set_allmulti(master, %d)\n",
 			       vlan_dev->name, inc);
+#endif
 			dev_set_allmulti(real_dev, inc); /* dev.c */
 			VLAN_DEV_INFO(vlan_dev)->old_allmulti = vlan_dev->allmulti;
 		}
@@ -844,6 +848,7 @@ void vlan_dev_set_multicast_list(struct net_device *vlan_dev)
 		for (dmi = vlan_dev->mc_list; dmi != NULL; dmi = dmi->next) {
 			if (vlan_should_add_mc(dmi, VLAN_DEV_INFO(vlan_dev)->old_mc_list)) {
 				dev_mc_add(real_dev, dmi->dmi_addr, dmi->dmi_addrlen, 0);
+#ifdef VLAN_DEBUG
 				printk(KERN_DEBUG "%s: add %.2x:%.2x:%.2x:%.2x:%.2x:%.2x mcast address to master interface\n",
 				       vlan_dev->name,
 				       dmi->dmi_addr[0],
@@ -852,6 +857,7 @@ void vlan_dev_set_multicast_list(struct net_device *vlan_dev)
 				       dmi->dmi_addr[3],
 				       dmi->dmi_addr[4],
 				       dmi->dmi_addr[5]);
+#endif
 			}
 		}
 
@@ -862,6 +868,7 @@ void vlan_dev_set_multicast_list(struct net_device *vlan_dev)
 				 * delete it from the real list on the underlying device.
 				 */
 				dev_mc_delete(real_dev, dmi->dmi_addr, dmi->dmi_addrlen, 0);
+#ifdef VLAN_DEBUG
 				printk(KERN_DEBUG "%s: del %.2x:%.2x:%.2x:%.2x:%.2x:%.2x mcast address from master interface\n",
 				       vlan_dev->name,
 				       dmi->dmi_addr[0],
@@ -870,6 +877,7 @@ void vlan_dev_set_multicast_list(struct net_device *vlan_dev)
 				       dmi->dmi_addr[3],
 				       dmi->dmi_addr[4],
 				       dmi->dmi_addr[5]);
+#endif
 			}
 		}
 
