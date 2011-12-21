@@ -903,7 +903,7 @@
 51) Update supported device lists or usb cdc-acm and option drivers.<br>
 52) L2TP client fix work with some strange ISPs.<br>
 53) Update udpxy to 1.0.21-2-prod version.<br>
-54) Fix lan igmp snooping esw support.<br>
+54) Full lan igmp snooping esw support(no more multicast flood for all lans).<br>
 
 <br><br>
 <b>For support see:</b><br>
