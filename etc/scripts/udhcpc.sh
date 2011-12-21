@@ -31,15 +31,15 @@ fi
 
 case "$1" in
     deconfig)
-	vpn_deadloop_fix
+	service vpnhelper stop_safe
 	ip addr flush dev $interface
 	ip link set $interface up
     ;;
 
     leasefail)
-	# Try reconnect at lease failed
 	# Workaround for infinite OFFER wait
-	vpn_deadloop_fix
+	service vpnhelper stop_safe
+	# Try reconnect at lease failed
 	if [ "$OperationMode" = "2" ]; then
 	    # Wait connect and get SSID
 	    wait_connect
@@ -234,17 +234,8 @@ case "$1" in
 	    # or vpn enabled and not started
 	    if [ "$vpnEnabled" = "on" ] && [ "$vpnType" != "0" -o ! -f /var/run/$vpn_if.pid ]; then
 		$LOG "Restart vpnhelper.."
-		# vpn client always use $vpn_if
-		# prevent start after start
-		if [ -f /var/run/$vpn_if.pid ] || [ -f /var/run/xl2tpd/l2tpd.pid ]; then
-		    service vpnhelper stop
-		    # wait ip-down script work
-		    sleep 8
-		fi
-		service vpnhelper start
+		service vpnhelper restart
 	    fi
-	fi
-	if [ "$OLD_IP" != "$NEW_IP" ]; then
 	    $LOG "End renew procedure..."
 	fi
     ;;

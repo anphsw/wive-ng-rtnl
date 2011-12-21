@@ -7,11 +7,13 @@ web_wait
 # get params
 . /etc/scripts/global.sh
 
+# get local param always
+get_param
+
 LOG="logger -t vpnhelper"
 
 start() {
     if [ "$vpnEnabled" = "on" ]; then
-      get_param
 
       # wait connetc to ap in sta mode
       # if VPN=PPPOE and vpnInterface=LAN no need wait
@@ -79,6 +81,9 @@ stop() {
     # stop all pppd/xl2tpd daemons
     killall_vpn
 
+    # prevent loop
+    flush_net_caches
+
     if [ -f /tmp/is_16ram_dev ] && [ "$l2tp_srv_enabled" != "1" ]; then
 	# At 16Mb devices remove modules for savemem.
 	mod="ppp_mppe blkcipher cryptomgr crypto_algapi pppoe pppol2tp pptp pppox ppp_generic"
@@ -89,6 +94,19 @@ stop() {
     fi
 }
 
+######################################################
+# L2TP and PPTP kernel route dead-loop workaround
+# PPPOE or not gateway mode no need this workaround
+# Clear all connection in conntrack and route cache
+######################################################
+stop_safe() {
+    if [ "$OperationMode" != "0" ] && [ "$vpnEnabled" = "on" ] && [ "$vpnType" != "0" ]; then
+	flush_net_caches
+	stop > /dev/null 2>&1
+    fi
+}
+
+
 case "$1" in
 	start)
 	    start
@@ -96,6 +114,10 @@ case "$1" in
 
 	stop)
 	    stop
+	    ;;
+
+	stop_safe)
+	    stop_safe
 	    ;;
 
 	restart)

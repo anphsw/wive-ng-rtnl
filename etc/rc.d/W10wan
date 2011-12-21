@@ -36,7 +36,7 @@ start() {
 	if [ "$OperationMode" != "0" ]; then
 	    # lan and wan ip should not be the same except in bridge mode
 	    if [ "$wan_ipaddr" = "$lan_ipaddr" ]; then
-		$LOG "wan service: warning: WAN's IP address is set identical to LAN"
+		$LOG "ERROR: WAN's IP address is set identical to LAN. Need change LAN_IP adress!!!"
 		exit 0
 	    fi
 	    # wan interface up and default gateway

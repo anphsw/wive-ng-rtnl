@@ -178,19 +178,11 @@ flush_net_caches() {
     echo 1 > /proc/sys/net/nf_conntrack_table_flush
 }
 
-# L2TP and PPTP kernel dead-loop fix
-vpn_deadloop_fix() {
-    if [ "$vpnEnabled" = "on" ]; then
-	if [ "$vpnType" != "0" ] || [ "$OperationMode" = "2" ]; then
-	    # First vpn stop...
-	    # Auto start later renew/bound
-	    service vpnhelper stop > /dev/null 2>&1
-	    flush_net_caches
-	fi
-    fi
-}
-
 killall_vpn() {
+    # delete all routes to vpnnet
+    # this prevent deadloop in kernel
+    ip route flush dev $vpn_if > /dev/null 2>&1
+
     # correct terminate xl2tpd daemon
     # first disconnect
     if [ -f /var/run/xl2tpd/l2tp-control ] && [ ! -f /etc/ppp/l2tpd.conf ]; then

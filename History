@@ -907,6 +907,7 @@
 55) Decrease noisly debug in vlans support code.<br>
 56) Refactoring some init.d code and cleanup.<br>
 57) Udhcpc script add check wanip in local subnet and log it.<br>
+58) Rewrite vpn deadloop fixup code.<br>
 
 <br><br>
 <b>For support see:</b><br>

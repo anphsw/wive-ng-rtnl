@@ -128,8 +128,8 @@ spot_config() {
 
 # All WDS interfaces down and reload wifi modules
 if [ "$MODE" != "connect_sta" ]; then
-    if [ "$MODE" != "wifionly" ] || [ "$OperationMode" = "2" ]; then
-	vpn_deadloop_fix
+    if [ "$MODE" != "wifionly" ]; then
+	service vpnhelper stop_safe
     fi
     $LOG "Shutdown wireless interfaces and reload modules drivers for current mode."
     service modules restart
