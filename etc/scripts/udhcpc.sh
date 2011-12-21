@@ -18,7 +18,7 @@ ROUTELIST_DGW=""
 ROUTELIST_FGW=""
 
 # Get MTU config and VPN DGW mode
-eval `nvram_buf_get 2860 wan_manual_mtu vpnDGW dhcpSwReset`
+eval `nvram_buf_get 2860 wan_manual_mtu vpnDGW dhcpSwReset lan_ipaddr lan_netmask`
 
 # If pppoe mode and dgw in pppoe no need replace default gw
 replace_dgw=1
@@ -68,9 +68,16 @@ case "$1" in
     ########################################################################################################
 
 	# Small check
-	if [ "$NEW_IP" = "" ]; then
-	    $LOG "ERROR: DHCP not send IP.... Exit..."
+	if [ "$NEW_IP" = "" ] || [ "$NETMASK" = "" ]; then
+	    $LOG "ERROR: DHCP not send IP/MASK.... Call you provider support!!!"
 	    exit 1
+	fi
+
+	# Check subnets
+	lan_net=`ipcalc "$lan_ipaddr" "$lan_netmask" -ns | cut -f 2- -d =`
+	wan_net=`ipcalc "$NEW_IP "$NETMASK" -ns | cut -f 2- -d =`
+	if [ "$NEW_IP" = "$lan_ipaddr" ] || [ "$lan_net" = "$wan_net" ]; then
+	    $LOG "ERROR: WAN ip in lan subnet. Need change LAN_IP adress!!!"
 	fi
 
 	# MTU is default for all session time.
