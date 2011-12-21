@@ -41,19 +41,11 @@ start() {
     fi
 
     # configure LAN1/BR0
-    if [ "$lan_ipaddr" != "" ]; then
-	if [ "$lan_netmask" = "" ]; then
-	    lan_netmask="255.0.0.0"
-	fi
-	ifconfig "$lan_if" "$lan_ipaddr" netmask "$lan_netmask" up
-	$LOG "Add LAN1 Mode is $OperationMode lan iface $lan_if, adress $lan_ipaddr"
-    else
-	ifconfig "$lan_if" 0.0.0.0 up
-	$LOG "Add LAN1 Mode is $OperationMode lan iface $lan_if, adress 0.0.0.0"
-    fi
+    ifconfig "$lan_if" "$lan_ipaddr" netmask "$lan_netmask" up
+    $LOG "Add LAN1 Mode is $OperationMode lan iface $lan_if, adress $lan_ipaddr"
 
     # configure LAN2/BR0:9
-    if [ "$Lan2Enabled" = "1" ]; then
+    if [ "$Lan2Enabled" = "1" ] && [ "$lan2_ipaddr" != "" ] && [ "$lan2_netmask" != "" ] ; then
 	$LOG "Add LAN2 iface $lan2_if $lan2_ipaddr netmask $lan2_netmask"
         ifconfig "$lan2_if" "$lan2_ipaddr" netmask "$lan2_netmask" up
     fi
