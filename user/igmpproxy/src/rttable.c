@@ -410,11 +410,11 @@ extern void remove_multicast_ip(uint32 m_ip_addr);
 */
 void ageActiveRoutes() {
     struct RouteTable   *croute, *nroute;
-    
+
     my_log(LOG_DEBUG, 0, "Aging routes in table.");
 
 #ifdef RALINK_ESW_SUPPORT
-        sweap_no_report_members();
+    sweap_no_report_members();
 #endif
 
     // Scan all routes...

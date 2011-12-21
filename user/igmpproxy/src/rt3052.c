@@ -593,7 +593,6 @@ static void update_group_port_map(struct group *entry)
 	}
 }
 
-#if 1
 void insert_multicast_ip(uint32 m_ip_addr, uint32 u_ip_addr)
 {
 #ifdef WIFI_IGMPSNOOP_SUPPORT
@@ -635,7 +634,7 @@ void insert_multicast_ip(uint32 m_ip_addr, uint32 u_ip_addr)
 	update_group_port_map(entry);
 	return;
 }
-#endif
+
 static void create_all_hosts_rule(void)
 {
 	struct group entry	= {
@@ -909,9 +908,7 @@ static void ZeroEntriesBarrier(struct group *entry, int mode)
 	    }
 	}
 }
-#endif
 
-#ifdef CONFIG_RAETH_SPECIAL_TAG
 static void ZeroEntry(struct group *entry, int port, int mode)
 {
 	int value;

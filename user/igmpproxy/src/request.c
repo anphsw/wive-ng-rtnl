@@ -63,10 +63,6 @@ void acceptGroupReport(uint32_t src, uint32_t group, uint8_t type) {
         return;
     }
 
-#ifdef RALINK_ESW_SUPPORT
-        remove_member(ntohl(group), ntohl(src));
-#endif
-
     // Find the interface on which the report was recieved.
     sourceVif = getIfByAddress( src );
     if(sourceVif == NULL) {
@@ -84,8 +80,11 @@ void acceptGroupReport(uint32_t src, uint32_t group, uint8_t type) {
     if(sourceVif->state == IF_STATE_DOWNSTREAM) {
 
         my_log(LOG_DEBUG, 0, "Should insert group %s (from: %s) to route table. Vif Ix : %d",
-            inetFmt(group,s1), inetFmt(src,s2), sourceVif->index);
+        inetFmt(group,s1), inetFmt(src,s2), sourceVif->index);
 
+#ifdef RALINK_ESW_SUPPORT
+	insert_multicast_ip(ntohl(group), ntohl(src));
+#endif
 	// If we don't have a whitelist we insertRoute and done
 	if(sourceVif->allowedgroups == NULL)
 	{
@@ -97,9 +96,6 @@ void acceptGroupReport(uint32_t src, uint32_t group, uint8_t type) {
 	for(sn = sourceVif->allowedgroups; sn != NULL; sn = sn->next)
 	    if((group & sn->subnet_mask) == sn->subnet_addr)
 	    {
-#ifdef RALINK_ESW_SUPPORT
-                insert_multicast_ip(ntohl(group), ntohl(src));
-#endif
         	// The membership report was OK... Insert it into the route table..
         	insertRoute(group, sourceVif->index);
 		return;
@@ -118,7 +114,7 @@ void acceptGroupReport(uint32_t src, uint32_t group, uint8_t type) {
 */
 void acceptLeaveMessage(uint32_t src, uint32_t group) {
     struct IfDesc   *sourceVif;
-    
+
     my_log(LOG_DEBUG, 0,
 	    "Got leave message from %s to %s. Starting last member detection.",
 	    inetFmt(src, s1), inetFmt(group, s2));
@@ -129,6 +125,10 @@ void acceptLeaveMessage(uint32_t src, uint32_t group) {
             inetFmt(group, s1));
         return;
     }
+
+#ifdef RALINK_ESW_SUPPORT
+    remove_member(ntohl(group), ntohl(src));
+#endif
 
     // Find the interface on which the report was recieved.
     sourceVif = getIfByAddress( src );
