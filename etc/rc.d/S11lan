@@ -59,18 +59,10 @@ start() {
     fi
 
     # enable forward for LAN interfaces
-    if [ "$OperationMode" != "0" ]; then
-	# only not bridge mode enable forward
-	if [ -f /proc/sys/net/ipv4/conf/$lan_if/forwarding ]; then
-	    echo 1 > "/proc/sys/net/ipv4/conf/$lan_if/forwarding"
-	fi
-	if [ "$Lan2Enabled" = "1" ]; then
-	    if [ -f /proc/sys/net/ipv4/conf/$lan2_if/forwarding ]; then
-		echo 1 > "/proc/sys/net/ipv4/conf/$lan2_if/forwarding"
-	    fi
-	fi
+    # only not bridge mode enable forward
+    if [ "$OperationMode" != "0" ] && [ -f /proc/sys/net/ipv4/conf/$lan_if/forwarding ]; then
+	echo 1 > "/proc/sys/net/ipv4/conf/$lan_if/forwarding"
     fi
-
 }
 
 addr_flush() {

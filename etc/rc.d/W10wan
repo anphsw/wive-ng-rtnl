@@ -29,6 +29,9 @@ start() {
     # Start config wan and start configure daemon depend by current mode
     ####################################################################################
 
+    # enable wan interface
+    ip link set "$wan_if" up
+
     if [ "$wanConnectionMode" = "STATIC" ] || [ "$OperationMode" = "0" ]; then
 	if [ "$OperationMode" != "0" ]; then
 	    # lan and wan ip should not be the same except in bridge mode
@@ -116,8 +119,6 @@ wan_if_preconf() {
 	    $LOG "Set manual MTU to WAN $wan_manual_mtu"
 	    ip link set mtu $wan_manual_mtu dev "$wan_if"
 	fi
-	# enable wan interface
-	ip link set "$wan_if" up
 	# enable/disable forward for wan
 	if [ "$vpnEnabled" = "on" ] && [ "$vpnType" = "0" ] && [ "$vpnPurePPPOE" = "1" ]; then
 	    # no need forward for phys wan
