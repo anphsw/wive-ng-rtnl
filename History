@@ -904,6 +904,9 @@
 52) L2TP client fix work with some strange ISPs.<br>
 53) Update udpxy to 1.0.21-2-prod version.<br>
 54) Full lan igmp snooping esw support(no more multicast flood for all lans).<br>
+55) Decrease noisly debug in vlans support code.<br>
+56) Refactoring some init.d code and cleanup.<br>
+57) Udhcpc script add check wanip in local subnet and log it.<br>
 
 <br><br>
 <b>For support see:</b><br>
