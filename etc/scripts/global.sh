@@ -167,10 +167,8 @@ udhcpc_opts() {
 zero_conf() {
     wan_is_not_null=`ip -4 addr show $wan_if | grep inet -c`
     if [ "$wan_is_not_null" = "0" ]; then
-	killall -q zcip
-	killall -q -SIGKILL zcip
 	zcip $wan_if /etc/scripts/zcip.script > /dev/null 2>&1
-	sleep 10
+	sleep 5
     fi
 }
 

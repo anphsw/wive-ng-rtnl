@@ -57,6 +57,20 @@ start() {
 	$LOG "Add LAN2 iface $lan2_if $lan2_ipaddr netmask $lan2_netmask"
         ifconfig "$lan2_if" "$lan2_ipaddr" netmask "$lan2_netmask" up
     fi
+
+    # enable forward for LAN interfaces
+    if [ "$OperationMode" != "0" ]; then
+	# only not bridge mode enable forward
+	if [ -f /proc/sys/net/ipv4/conf/$lan_if/forwarding ]; then
+	    echo 1 > "/proc/sys/net/ipv4/conf/$lan_if/forwarding"
+	fi
+	if [ "$Lan2Enabled" = "1" ]; then
+	    if [ -f /proc/sys/net/ipv4/conf/$lan2_if/forwarding ]; then
+		echo 1 > "/proc/sys/net/ipv4/conf/$lan2_if/forwarding"
+	    fi
+	fi
+    fi
+
 }
 
 addr_flush() {
