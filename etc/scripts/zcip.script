@@ -41,10 +41,6 @@ config)
 	    $LOG "Add user routes for $lan_if $wan_if interfaces."
 	    /etc/routes_replace replace $lan_if $wan_if
 	fi
-	if [ -f /proc/sys/net/ipv4/conf/$interface/forwarding ]; then
-	    $LOG "Enable forward for $interface interface."
-	    echo 1 > "/proc/sys/net/ipv4/conf/$interface/forwarding"
-	fi
 	if [ -f /bin/cdp-send ] && [ -f /etc/scripts/config-cdp.sh ]; then
 	    $LOG "Send Cisco Discovery request from $interface interface."
 	    config-cdp.sh &

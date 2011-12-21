@@ -240,7 +240,6 @@ case "$1" in
 		service vpnhelper start
 	    fi
 	fi
-	echo 1 > "/proc/sys/net/ipv4/conf/$interface/forwarding"
 	if [ "$OLD_IP" != "$NEW_IP" ]; then
 	    $LOG "End renew procedure..."
 	fi
