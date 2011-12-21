@@ -8,7 +8,9 @@ web_wait
 . /etc/scripts/global.sh
 
 # get local param always
-get_param
+eval `nvram_buf_get 2860 vpnInterface vpnUser vpnPassword l2tp_srv_enabled`
+lanauthpid=`pidof lanauth`
+ppp=/etc/ppp
 
 LOG="logger -t vpnhelper"
 
@@ -53,12 +55,6 @@ start() {
 	fi
       fi
     fi
-}
-
-get_param() {
-    eval `nvram_buf_get 2860 vpnInterface vpnUser vpnPassword l2tp_srv_enabled`
-    lanauthpid=`pidof lanauth`
-    ppp=/etc/ppp
 }
 
 stop() {
