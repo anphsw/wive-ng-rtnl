@@ -97,6 +97,8 @@
 #endif
 #include <linux/rcupdate.h>
 #include <linux/times.h>
+#include <linux/slab.h>
+#include <linux/prefetch.h>
 #include <net/protocol.h>
 #include <net/ip.h>
 #include <net/route.h>
