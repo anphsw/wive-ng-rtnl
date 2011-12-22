@@ -601,7 +601,7 @@ s32 e1000_check_for_fiber_link_generic(struct e1000_hw *hw)
 	if ((ctrl & E1000_CTRL_SWDPIN1) && (!(status & E1000_STATUS_LU)) &&
 	    (!(rxcw & E1000_RXCW_C))) {
 		if (mac->autoneg_failed == 0) {
-			mac->autoneg_failed = 1;
+			mac->autoneg_failed = true;
 			goto out;
 		}
 		DEBUGOUT("NOT RXing /C/, disable AutoNeg and force link.\n");
@@ -669,7 +669,7 @@ s32 e1000_check_for_serdes_link_generic(struct e1000_hw *hw)
 	/* (ctrl & E1000_CTRL_SWDPIN1) == 1 == have signal */
 	if ((!(status & E1000_STATUS_LU)) && (!(rxcw & E1000_RXCW_C))) {
 		if (mac->autoneg_failed == 0) {
-			mac->autoneg_failed = 1;
+			mac->autoneg_failed = true;
 			goto out;
 		}
 		DEBUGOUT("NOT RXing /C/, disable AutoNeg and force link.\n");
@@ -904,7 +904,7 @@ s32 e1000_poll_fiber_serdes_link_generic(struct e1000_hw *hw)
 	}
 	if (i == FIBER_LINK_UP_LIMIT) {
 		DEBUGOUT("Never got a valid link from auto-neg!!!\n");
-		mac->autoneg_failed = 1;
+		mac->autoneg_failed = true;
 		/*
 		 * AutoNeg failed to achieve a link, so we'll call
 		 * mac->check_for_link. This routine will force the
@@ -916,9 +916,9 @@ s32 e1000_poll_fiber_serdes_link_generic(struct e1000_hw *hw)
 			DEBUGOUT("Error while checking for link\n");
 			goto out;
 		}
-		mac->autoneg_failed = 0;
+		mac->autoneg_failed = false;
 	} else {
-		mac->autoneg_failed = 0;
+		mac->autoneg_failed = false;
 		DEBUGOUT("Valid Link Found\n");
 	}
 
