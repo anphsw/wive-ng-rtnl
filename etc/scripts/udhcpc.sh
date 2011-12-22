@@ -41,7 +41,7 @@ case "$1" in
 	service vpnhelper stop_safe
 	# Try reconnect at lease failed
 	if [ "$OperationMode" = "2" ]; then
-	    # Wait connect and get SSID
+	    $LOG "Wait connect and reconnect to AP if need."
 	    wait_connect reconnect
 	else
 	    if [ "$dhcpSwReset" = "1" ]; then
