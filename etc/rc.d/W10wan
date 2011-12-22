@@ -66,9 +66,6 @@ start() {
 	# reload global
 	. /etc/scripts/global.sh
 
-	# wait sta connected
-	wait_connect
-
 	# get udhcp param
 	udhcpc_opts
 
@@ -77,9 +74,6 @@ start() {
     elif [ "$wanConnectionMode" = "ZERO" ] || [ "$vpnPurePPPOE" = "1" ]; then
 	# reload global
 	. /etc/scripts/global.sh
-
-	# wait sta connected
-	wait_connect
 
 	$LOG "Call zeroconf for get wan ip address."
 	zero_conf
