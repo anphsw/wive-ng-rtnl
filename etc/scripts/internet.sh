@@ -126,12 +126,12 @@ spot_config() {
 	addMesh
 }
 
-# All WDS interfaces down and reload wifi modules
+# WiFi modules reloand and reconfigure
 if [ "$MODE" != "connect_sta" ]; then
     if [ "$MODE" != "wifionly" ]; then
 	service vpnhelper stop_safe
     fi
-    $LOG "Shutdown wireless interfaces and reload modules drivers for current mode."
+    $LOG "Reload wireless modules..."
     service modules restart
     if [ "$MODE" != "wifionly" ]; then
 	$LOG "Reconfigure lan..."

@@ -109,6 +109,7 @@ load_nat_helpers() {
 }
 
 wlan_down_all() {
+    $LOG "Shutdown all wireless interfaces."
     # Flush ip address from all wireless interfaces, remove from bridge and down
     # First clear conntrack and routes tables/caches
     flush_net_caches
