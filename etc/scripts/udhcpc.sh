@@ -37,18 +37,16 @@ case "$1" in
     ;;
 
     leasefail)
-	# Workaround for infinite OFFER wait
 	service vpnhelper stop_safe
-	# Try reconnect at lease failed
-	if [ "$OperationMode" = "2" ]; then
+	# Workaround for infinite OFFER wait
+	if [ "$OperationMode" != "2" ] && [ "$dhcpSwReset" = "1" ]; then
+	    # Reset switch to uplink touch
+	    $LOG "Reinit switch."
+	    /etc/scripts/config-switch.sh
+	else
+	    # Try reconnect at lease failed
 	    $LOG "Wait connect and reconnect to AP if need."
 	    wait_connect reconnect
-	else
-	    if [ "$dhcpSwReset" = "1" ]; then
-		$LOG "Reinit switch"
-		# Reset switch
-		/etc/scripts/config-switch.sh
-	    fi
 	fi
     ;;
 
