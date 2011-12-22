@@ -42,14 +42,7 @@ case "$1" in
 	# Try reconnect at lease failed
 	if [ "$OperationMode" = "2" ]; then
 	    # Wait connect and get SSID
-	    wait_connect
-	    if [ "$staCur_SSID" != "" ]; then
-		# Reconnect
-		$LOG "Reconnect to STA $staCur_SSID"
-		iwpriv ra0 set SSID="$staCur_SSID"
-	    fi
-	    # Full reinit network and services
-	    internet.sh
+	    wait_connect reconnect
 	else
 	    if [ "$dhcpSwReset" = "1" ]; then
 		$LOG "Reinit switch"
