@@ -136,8 +136,11 @@ stop() {
     if [ "$OperationMode" != "0" ] && [ "$vpnEnabled" = "on" ] && [ "$vpnType" != "0" ]; then
 	ip route flush dev "$vpn_if" > /dev/null 2>&1
     fi
-    # down wan iface
-    ip link set "$wan_if" down > /dev/null 2>&1
+    # down wlan if not bridge and not ethconvert
+    if [ "$OperationMode" != "0" ] && [ "$OperationMode" != "2" ]; then
+	# down wan iface
+	ip link set "$wan_if" down > /dev/null 2>&1
+    fi
     # clear conntrack and routes tables/caches
     flush_net_caches
 

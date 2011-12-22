@@ -134,17 +134,20 @@ get_txqlen() {
 
 # wait connect to AP
 wait_connect() {
-    staCur_SSID=""
     if [ "$OperationMode" = "2" ]; then
+	# Reconnect to AP if need
+	if [ "$1" = "reconnect" ]; then
+	    staCur_SSID=`nvram_get 2860 staCur_SSID`
+	    if [ "$staCur_SSID" != "" ]; then
+		# Reconnect to STA
+		iwpriv ra0 set SSID="$staCur_SSID"
+		sleep 1
+	    fi
+	fi
+	# Get connection status
 	connected=`iwpriv ra0 connStatus | grep Connected -c`
 	if [ "$connected" = "0" ] || [ ! -f /tmp/sta_connected ]; then
-    	    exit 0
-	fi
-	staCur_SSID=`iwpriv ra0 connStatus | grep ra0 | awk ' { print $3 } ' | cut -f1 -d[`
-	# Reconnect to AP if need
-	if [ "$1" = "reconnect" ] && [ "$staCur_SSID" != "" ]; then
-	    #Reconnect to STA
-	    iwpriv ra0 set SSID="$staCur_SSID"
+	    exit 1
 	fi
     fi
 }

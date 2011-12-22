@@ -128,6 +128,7 @@ PreAuth=0
 AuthMode=OPEN
 EncrypType=NONE
 staEncrypt=NONE
+staCur_SSID=
 RekeyInterval=3600
 RekeyMethod=DISABLE
 PMKCachePeriod=10

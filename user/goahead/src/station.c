@@ -4952,8 +4952,9 @@ static void editStaProfile(webs_t wp, char_t *path, char_t *query)
 		}
 		else
 #endif
-		sta_connection(selectedProfileSetting->NetworkType, selectedProfileSetting->Authentication, selectedProfileSetting->Encryption, selectedProfileSetting->KeyDefaultId, &Ssid, Bssid, (char *)selectedProfileSetting->WpaPsk, (char *)selectedProfileSetting->Key1, (char *)selectedProfileSetting->Key2, (char *)selectedProfileSetting->Key3, (char *)selectedProfileSetting->Key4, selectedProfileSetting->PreamType, selectedProfileSetting->RTSCheck, selectedProfileSetting->RTS, selectedProfileSetting->FragmentCheck, selectedProfileSetting->Fragment, selectedProfileSetting->PSmode, selectedProfileSetting->Channel);
 
+		nvram_set(RT2860_NVRAM, "staCur_SSID", SSID.Ssid);
+		sta_connection(selectedProfileSetting->NetworkType, selectedProfileSetting->Authentication, selectedProfileSetting->Encryption, selectedProfileSetting->KeyDefaultId, &Ssid, Bssid, (char *)selectedProfileSetting->WpaPsk, (char *)selectedProfileSetting->Key1, (char *)selectedProfileSetting->Key2, (char *)selectedProfileSetting->Key3, (char *)selectedProfileSetting->Key4, selectedProfileSetting->PreamType, selectedProfileSetting->RTSCheck, selectedProfileSetting->RTS, selectedProfileSetting->FragmentCheck, selectedProfileSetting->Fragment, selectedProfileSetting->PSmode, selectedProfileSetting->Channel);
 		Active_flag = 1;
 		Sleep(1);
 	}
@@ -5307,6 +5308,7 @@ static void setStaConnect(webs_t wp, char_t *path, char_t *query)
 	}
 	else
 #endif
+		nvram_set(RT2860_NVRAM, "staCur_SSID", SSID.Ssid);
 		sta_connection(tmp_networktype, tmp_auth, tmp_encry, tmp_defaultkeyid, &SSID, Bssid, tmp_wpapsk, tmp_key1, tmp_key2, tmp_key3, tmp_key4, tmp_preamtype, 0, tmp_rts, 0, tmp_fragment, tmp_psmode, 0);  //tmp_channel 0 is auto.
 
 	close(s);
@@ -5494,6 +5496,7 @@ static void setStaProfile(webs_t wp, char_t *path, char_t *query)
 
 		unsigned char Bssid[6];
 		//activate
+		nvram_set(RT2860_NVRAM, "staCur_SSID", SSID.Ssid);
 #ifdef WPA_SUPPLICANT_SUPPORT
 		if (selectedProfileSetting->Authentication == Ndis802_11AuthModeWPA ||
 				selectedProfileSetting->Authentication == Ndis802_11AuthModeWPA2 ||

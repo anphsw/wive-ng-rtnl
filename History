@@ -908,6 +908,7 @@
 56) Refactoring some init.d code and cleanup.<br>
 57) Udhcpc script add check wanip in local subnet and log it.<br>
 58) Rewrite vpn deadloop fixup code.<br>
+59) Rewrite connect to AP logic. More correct.<br>
 
 <br><br>
 <b>For support see:</b><br>

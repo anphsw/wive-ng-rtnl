@@ -162,7 +162,7 @@ else
     gate_config
 fi
 
-if [ "$MODE" != "wifionly" ] || [ "$OperationMode" = "2" ]; then
+if [ "$MODE" != "wifionly" ] && [ "$MODE" != "connect_sta" ]; then
     $LOG "Reconfigure wan..."
     service wan restart
 fi
