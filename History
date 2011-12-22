@@ -909,6 +909,7 @@
 57) Udhcpc script add check wanip in local subnet and log it.<br>
 58) Rewrite vpn deadloop fixup code.<br>
 59) Rewrite connect to AP logic. More correct.<br>
+60) Fix igmpsnooping work at wan_port=0.<br>
 
 <br><br>
 <b>For support see:</b><br>

@@ -73,7 +73,7 @@ get_param() {
 	####################################
 	if [ "$wan_port" = "0" ]; then
 	    # switch managment mode enabled
-	    $igmpPort="w"
+	    igmpPort="w"
 	fi
 	####################################
 	# correct mode for igmpsnooping
