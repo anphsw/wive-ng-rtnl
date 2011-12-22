@@ -4953,7 +4953,7 @@ static void editStaProfile(webs_t wp, char_t *path, char_t *query)
 		else
 #endif
 
-		nvram_set(RT2860_NVRAM, "staCur_SSID", SSID.Ssid);
+		nvram_set(RT2860_NVRAM, "staCur_SSID", Ssid.Ssid);
 		sta_connection(selectedProfileSetting->NetworkType, selectedProfileSetting->Authentication, selectedProfileSetting->Encryption, selectedProfileSetting->KeyDefaultId, &Ssid, Bssid, (char *)selectedProfileSetting->WpaPsk, (char *)selectedProfileSetting->Key1, (char *)selectedProfileSetting->Key2, (char *)selectedProfileSetting->Key3, (char *)selectedProfileSetting->Key4, selectedProfileSetting->PreamType, selectedProfileSetting->RTSCheck, selectedProfileSetting->RTS, selectedProfileSetting->FragmentCheck, selectedProfileSetting->Fragment, selectedProfileSetting->PSmode, selectedProfileSetting->Channel);
 		Active_flag = 1;
 		Sleep(1);
