@@ -13,9 +13,6 @@ start() {
  $LOG "Start WAN config"
     get_param
 
-    # stop dhcp and zeroconf client
-    stop_dhcp_zcip
-
     # set MAC adresses LAN/WAN if not bridge and not ethernet converter modes
     set_mac_to_wan
 
@@ -82,13 +79,6 @@ start() {
     fi
 }
 
-stop_dhcp_zcip() {
-    killall -q udhcpc
-    killall -q zcip
-    killall -q -SIGKILL udhcpc
-    killall -q -SIGKILL zcip
-}
-
 set_mac_to_wan() {
     if [ "$OperationMode" != "0" ] && [ "$OperationMode" != "2" ]; then
 	$LOG "$phys_wan_if_MACADDR $WAN_MAC_ADDR"
@@ -126,7 +116,12 @@ get_param() {
 }
 
 stop() {
-    # prevent infinit route loop
+    # stop dhcp and zeroconf client
+    killall -q udhcpc
+    killall -q zcip
+    killall -q -SIGKILL udhcpc
+    killall -q -SIGKILL zcip
+    # prevent infinitive route loop in kernel code
     if [ "$OperationMode" != "0" ] && [ "$vpnEnabled" = "on" ] && [ "$vpnType" != "0" ]; then
 	ip route flush dev "$vpn_if" > /dev/null 2>&1
     fi
@@ -137,7 +132,6 @@ stop() {
     fi
     # clear conntrack and routes tables/caches
     flush_net_caches
-
 }
 
 case "$1" in
