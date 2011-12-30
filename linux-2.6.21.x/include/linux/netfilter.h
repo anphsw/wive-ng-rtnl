@@ -16,6 +16,13 @@
 #include <linux/types.h>
 #include <linux/compiler.h>
 
+/* Nat mode type */
+#ifdef CONFIG_NAT_CONE
+#define NAT_MODE_LINUX		0
+#define NAT_MODE_FCONE		1
+#define NAT_MODE_RCONE		2
+#endif
+
 /* Responses from hook functions. */
 #define NF_DROP 0
 #define NF_ACCEPT 1

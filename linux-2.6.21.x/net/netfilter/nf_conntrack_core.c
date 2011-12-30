@@ -106,7 +106,8 @@ EXPORT_SYMBOL_GPL(nf_conntrack_untracked);
 unsigned int nf_ct_log_invalid __read_mostly;
 LIST_HEAD(unconfirmed);
 
-#if defined (CONFIG_NAT_FCONE) || defined (CONFIG_NAT_RCONE)
+#ifdef CONFIG_NAT_CONE
+extern unsigned int nf_conntrack_nat_mode;
 extern char wan_name[IFNAMSIZ];
 #if defined (CONFIG_PPP) || defined (CONFIG_PPP_MODULE)
 extern char wan_ppp[IFNAMSIZ];
@@ -230,23 +231,21 @@ static u_int32_t __hash_conntrack(const struct nf_conntrack_tuple *tuple,
 {
 	unsigned int a, b;
 
-	a = jhash2(tuple->src.u3.all, ARRAY_SIZE(tuple->src.u3.all),
-#if defined (CONFIG_NAT_FCONE)
-		tuple->dst.u.all); // dst ip, dst port
-#elif defined (CONFIG_NAT_RCONE)
-		(tuple->src.l3num << 16) | tuple->dst.protonum);
-#else /* CONFIG_NAT_LINUX */
-		((tuple->src.l3num) << 16) | tuple->dst.protonum);
+#ifdef CONFIG_NAT_CONE
+	if (nf_conntrack_nat_mode = NAT_MODE_FCONE) {
+	    a = jhash2(tuple->src.u3.all, ARRAY_SIZE(tuple->src.u3.all), tuple->dst.u.all); // dst ip, dst port
+	    b = jhash2(tuple->dst.u3.all, ARRAY_SIZE(tuple->dst.u3.all), tuple->dst.protonum); //dst ip, & dst ip protocol
+	 } else if (nf_conntrack_nat_mode = NAT_MODE_RCONE) {
+	    a = jhash2(tuple->src.u3.all, ARRAY_SIZE(tuple->src.u3.all), (tuple->src.l3num << 16) | tuple->dst.protonum);
+	    b = jhash2(tuple->dst.u3.all, ARRAY_SIZE(tuple->dst.u3.all), (tuple->dst.u.all << 16) | tuple->dst.protonum);
+	} else {
+#endif
+	a = jhash2(tuple->src.u3.all, ARRAY_SIZE(tuple->src.u3.all), ((tuple->src.l3num) << 16) | tuple->dst.protonum);
+	b = jhash2(tuple->dst.u3.all, ARRAY_SIZE(tuple->dst.u3.all), (tuple->src.u.all << 16) | tuple->dst.u.all);
+#ifdef CONFIG_NAT_CONE
+	}
 #endif
 
-	b = jhash2(tuple->dst.u3.all, ARRAY_SIZE(tuple->dst.u3.all),
-#if defined (CONFIG_NAT_FCONE)
-		tuple->dst.protonum); //dst ip, & dst ip protocol
-#elif defined (CONFIG_NAT_RCONE)
-		(tuple->dst.u.all << 16) | tuple->dst.protonum);
-#else /* CONFIG_NAT_LINUX */
-		(tuple->src.u.all << 16) | tuple->dst.u.all);
-#endif
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 	/* SpeedMod: Change modulo to AND */
 	return jhash_2words(a, b, rnd) & (size-1);
@@ -592,24 +591,22 @@ __nf_conntrack_find(const struct nf_conntrack_tuple *tuple,
 }
 EXPORT_SYMBOL_GPL(__nf_conntrack_find);
 
-/* Added by Steven Liu */
-#if defined (CONFIG_NAT_FCONE) || defined (CONFIG_NAT_RCONE)
+#ifdef CONFIG_NAT_CONE
 static inline int nf_ct_cone_tuple_equal(const struct nf_conntrack_tuple *t1,
                                     const struct nf_conntrack_tuple *t2)
 {
-#if defined (CONFIG_NAT_FCONE)    /* Full Cone */
-        return nf_ct_tuple_dst_equal(t1, t2);
-#elif defined (CONFIG_NAT_RCONE)  /* Restricted Cone */
-        return (nf_ct_tuple_dst_equal(t1, t2) &&
+	if (nf_conntrack_nat_mode = NAT_MODE_FCONE)    /* Full Cone */
+    	    return nf_ct_tuple_dst_equal(t1, t2);
+	else if (nf_conntrack_nat_mode = NAT_MODE_RCONE)    /* Restricted Cone */
+	    return (nf_ct_tuple_dst_equal(t1, t2) &&
 	        t1->src.u3.all[0] == t2->src.u3.all[0] &&
                 t1->src.u3.all[1] == t2->src.u3.all[1] &&
 		t1->src.u3.all[2] == t2->src.u3.all[2] &&
                 t1->src.u3.all[3] == t2->src.u3.all[3] &&
 		t1->src.l3num == t2->src.l3num &&
 		t1->dst.protonum == t2->dst.protonum);
-#endif
+	else return 0;
 }
-
 
 static struct nf_conntrack_tuple_hash *
 __nf_cone_conntrack_find(const struct nf_conntrack_tuple *tuple,
@@ -630,7 +627,6 @@ __nf_cone_conntrack_find(const struct nf_conntrack_tuple *tuple,
     return NULL;
 }
 
-
 /* Find a connection corresponding to a tuple. */
 struct nf_conntrack_tuple_hash *
 nf_cone_conntrack_find_get(const struct nf_conntrack_tuple *tuple,
@@ -647,7 +643,6 @@ nf_cone_conntrack_find_get(const struct nf_conntrack_tuple *tuple,
     return h;
 }
 EXPORT_SYMBOL_GPL(nf_cone_conntrack_find_get);
-
 #endif
 
 /* Find a connection corresponding to a tuple. */
@@ -1067,7 +1062,7 @@ resolve_normal_ct(struct sk_buff *skb,
 	struct nf_conntrack_tuple tuple;
 	struct nf_conntrack_tuple_hash *h;
 	struct nf_conn *ct;
-#if defined (CONFIG_NAT_FCONE) || defined (CONFIG_NAT_RCONE)
+#ifdef CONFIG_NAT_CONE
 	struct iphdr *iph = (struct iphdr *)skb->nh.raw;
 #endif
 
@@ -1079,7 +1074,7 @@ resolve_normal_ct(struct sk_buff *skb,
 	}
 
 	/* look for tuple match */
-#if defined (CONFIG_NAT_FCONE) || defined (CONFIG_NAT_RCONE)
+#ifdef CONFIG_NAT_CONE
         /*
          * Based on NAT treatments of UDP in RFC3489:
          *
@@ -1134,7 +1129,7 @@ resolve_normal_ct(struct sk_buff *skb,
          *             Restricted Cone=dst_ip/port & proto & src_ip
          *
          */
-	if ((skb->dev!=NULL) && (iph!=NULL) /* CASE III To Cone NAT */
+	if ((nf_conntrack_nat_mode > 0) && (skb->dev!=NULL) && (iph!=NULL) /* CASE III To Cone NAT */
 #if defined (CONFIG_PPP) || defined (CONFIG_PPP_MODULE)
 		&& ((strcmp(skb->dev->name, wan_name) == 0) || (strcmp(skb->dev->name, wan_ppp) == 0))
 #else

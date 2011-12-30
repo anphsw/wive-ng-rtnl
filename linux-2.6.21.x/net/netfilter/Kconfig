@@ -3,16 +3,19 @@ menu "Core Netfilter Configuration"
 
 choice
         prompt "NAT Types"
-        default NAT_LINUX
+        default NAT_CONE
 
-        config  NAT_FCONE
-        bool "Full_Cone"
-
-        config  NAT_RCONE
-        bool "Restricted_Cone"
+        config  NAT_CONE
+        bool "Full/Restricted_Cone"
+	help
+	    This Netfilter option must be enabled to support Cone nat mode instead linux hybrid nat.
+	    sysctl -w net.nf_conntrack_nat_mode=0/1/2(Linux/FullCone/RestrictedCone).
+	    This is processed UDP traffic for direct SIP/uTP and others complex UDP based protocol via NAT.
 
         config  NAT_LINUX
         bool "Linux"
+	help
+	    Classical Linux Hybryd NAT support only.
 
 endchoice
 

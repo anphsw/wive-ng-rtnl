@@ -224,6 +224,7 @@ ipv6_pass=0
 natFastpath=3
 bridgeFastpath=1
 hw_nat_bind=30
+nat_mode=1
 ForceRenewDHCP=1
 dnsPEnabled=1
 M2UEnabled=1

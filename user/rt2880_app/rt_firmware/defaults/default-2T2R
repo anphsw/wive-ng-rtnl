@@ -223,6 +223,7 @@ pppoe_pass=0
 ipv6_pass=0
 natFastpath=3
 hw_nat_bind=30
+nat_mode=1
 bridgeFastpath=1
 ForceRenewDHCP=1
 dnsPEnabled=1

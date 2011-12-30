@@ -910,6 +910,7 @@
 58) Rewrite vpn deadloop fixup code.<br>
 59) Rewrite connect to AP logic. More correct.<br>
 60) Fix igmpsnooping work at wan_port=0.<br>
+61) Add Nat Mode select variable nat_mode=0/1/2(Linux/Fcone/Rcone, default 1).<br>
 
 <br><br>
 <b>For support see:</b><br>

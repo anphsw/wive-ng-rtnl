@@ -54,6 +54,11 @@ unsigned int nf_conntrack_max_general = 640;
 EXPORT_SYMBOL_GPL(nf_conntrack_max_general);
 #endif
 
+#ifdef CONFIG_NAT_CONE
+unsigned int nf_conntrack_nat_mode = NAT_MODE_FCONE;
+EXPORT_SYMBOL_GPL(nf_conntrack_nat_mode);
+#endif
+
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 int nf_conntrack_fastnat = 0;
 EXPORT_SYMBOL_GPL(nf_conntrack_fastnat);
@@ -430,6 +435,16 @@ static ctl_table nf_ct_netfilter_table[] = {
 		.ctl_name	= NET_NF_CONNTRACK_MAX_GENERAL,
 		.procname	= "nf_conntrack_max_general",
 		.data		= &nf_conntrack_max_general,
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= &proc_dointvec
+	},
+#endif
+#ifdef CONFIG_NAT_CONE
+	{
+		.ctl_name	= NET_NF_CONNTRACK_NAT_MODE,
+		.procname	= "nf_conntrack_nat_mode",
+		.data		= &nf_conntrack_nat_mode,
 		.maxlen		= sizeof(int),
 		.mode		= 0644,
 		.proc_handler	= &proc_dointvec

@@ -10,6 +10,7 @@ web_wait
 LOG="logger -t kext"
 
 start() {
+    nat_mode
     hw_nat_en
     pthrough
     # This is set only if wan or lan in bridge
@@ -20,6 +21,20 @@ start() {
     # Only if VPN enabled
     if [ "$vpnEnabled" = "on" ]; then
 	vpn_limit
+    fi
+}
+
+nat_mode() {
+    eval `nvram_buf_get 2860 nat_mode`
+    if [ "$nat_mode" = "0" ]; then
+	sysctl -w net.nf_conntrack_nat_mode=0
+	$LOG "Nat mode Linux"
+    elif [ "$nat_mode" = "2" ]; then
+	sysctl -w net.nf_conntrack_nat_mode=2
+	$LOG "Nat mode Restricted Cone"
+    else
+	sysctl -w net.nf_conntrack_nat_mode=1
+	$LOG "Nat mode Full Cone"
     fi
 }
 

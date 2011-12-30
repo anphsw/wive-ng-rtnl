@@ -352,6 +352,9 @@ enum
 #ifdef CONFIG_NF_PRIVILEGE_CONNTRACK
 	NET_NF_CONNTRACK_MAX_GENERAL=35,
 #endif
+#ifdef CONFIG_NAT_CONE
+	NET_NF_CONNTRACK_NAT_MODE=36,
+#endif
 };
 
 /* /proc/sys/net/ipv4 */

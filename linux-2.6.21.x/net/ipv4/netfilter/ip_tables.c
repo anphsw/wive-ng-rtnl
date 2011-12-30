@@ -45,7 +45,8 @@ MODULE_DESCRIPTION("IPv4 packet filter");
 /*#define DEBUG_ALLOW_ALL*/ /* Useful for remote debugging */
 /*#define DEBUG_IP_FIREWALL_USER*/
 
-#if defined (CONFIG_NAT_FCONE) || defined (CONFIG_NAT_RCONE)
+#ifdef CONFIG_NAT_CONE
+extern unsigned int nf_conntrack_nat_mode;
 unsigned char wan_name[IFNAMSIZ];
 #if defined (CONFIG_PPP) || defined (CONFIG_PPP_MODULE)
 unsigned char wan_ppp[IFNAMSIZ];
@@ -1483,8 +1484,11 @@ add_counter_to_entry(struct ipt_entry *e,
 		     const struct xt_counters addme[],
 		     unsigned int *i)
 {
-#if defined (CONFIG_NAT_FCONE) || defined (CONFIG_NAT_RCONE)
+#ifdef CONFIG_NAT_CONE
 	struct ipt_entry_target *f = ipt_get_target(e);
+
+	if (nf_conntrack_nat_mode = NAT_MODE_LINUX)
+	    goto skip_cone;
 
 	/* set default wan dev to eth2.2 */
 	if (!wan_dev)
@@ -1532,8 +1536,8 @@ add_counter_to_entry(struct ipt_entry *e,
 	    }
 #endif
         }
+skip_cone:
 #endif
-
 	ADD_COUNTER(e->counters, addme[*i].bcnt, addme[*i].pcnt);
 
 	(*i)++;
@@ -2438,13 +2442,6 @@ static int __init ip_tables_init(void)
 		goto err5;
 
 	printk("ip_tables: (C) 2000-2006 Netfilter Core Team, ");
-#if defined (CONFIG_NAT_FCONE)
-	printk("Type=Fully Cone\n");
-#elif defined (CONFIG_NAT_RCONE)
-	printk("Type=Restricted Cone\n");
-#else
-	printk("Type=Linux native\n");
-#endif
 
 	return 0;
 

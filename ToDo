@@ -1,4 +1,5 @@
 # For sadko
+) Add Nat Mode select variable nat_mode=0/1/2(Linux/Fcone/Rcone, default 1). Need add in WebUI in misc.
 ) Rewrite profiles managment code in ethernet converter mode. (in progress)
 ) Need rewrite QoS page (remove ralink QoS and add new types QoS)
 ) Add /proc/rt3052/esw_cnt for traffic statistic per switch port.(need add in WebUI).
