@@ -100,13 +100,13 @@ case "$1" in
 		    done
 		fi
 
-		# always parse router varisble
+		# always parse router variable
 		metric=0
 		for i in $router ; do
-		    $LOG "Add default route $i dev $interface metric $metric"
+		    $LOG "Add route $i/32:0.0.0.0 dev $interface metric $metric to route list."
 		    ROUTELIST_FGW="$ROUTELIST_FGW $i/32:0.0.0.0:$interface:"
 		    if [ "$replace_dgw" = "1" ]; then
-			# add gw to route dgw list
+			$LOG "Add default:$i:$interface:$metric to route dgw list"
 			ROUTELIST_DGW="$ROUTELIST_DGW default:$i:$interface:$metric"
 			# save first dgw with metric=0 to use in corbina hack
 			if [ "$metric" = "0" ]; then
@@ -158,8 +158,10 @@ case "$1" in
 	# default gateways need replace/add at end route parces
 	if [ "$replace_dgw" = "1" ]; then
 	    ROUTELIST="$ROUTELIST_FGW $ROUTELIST $ROUTELIST_DGW"
+	    $LOG "Apply route list. And replace DGW."
 	else
 	    ROUTELIST="$ROUTELIST_FGW $ROUTELIST"
+	    $LOG "Apply route list without modify DGW."
 	fi
 	for i in `echo $ROUTELIST | sed 's/ /\n/g' | sort | uniq`; do
 		IPCMD=`echo $i|awk '{split($0,a,":"); \
@@ -170,7 +172,7 @@ case "$1" in
 
 	# add routes configured in web
 	if [ -f /etc/routes_replace ]; then
-	    $LOF "Add user routes."
+	    $LOF "Apply user routes."
 	    /etc/routes_replace replace $lan_if $wan_if
 	fi
 
