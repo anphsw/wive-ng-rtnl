@@ -10,14 +10,14 @@ start() {
 	nice --19 watchdog -T 120 -t 10 -F /dev/watchdog > /dev/null 2>&1 &
     fi
     ###############PINGER_DOG################################################
-    if [ "$ping_check_on" = "1" ]; then
+    if [ "$pinger_check_on" = "1" ]; then
 	$LOG "Start pinger"
 	nice --19 /etc/scripts/pinger.sh &
     fi
 }
 
 get_param() {
-    eval `nvram_buf_get 2860 WatchdogEnabled ping_check_on`
+    eval `nvram_buf_get 2860 WatchdogEnabled pinger_check_on`
 }
 
 stop() {
