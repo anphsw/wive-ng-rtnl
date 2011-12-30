@@ -20,6 +20,9 @@ ROUTELIST_FGW=""
 # Get MTU config and VPN DGW mode
 eval `nvram_buf_get 2860 wan_manual_mtu vpnDGW dhcpSwReset lan_ipaddr lan_netmask`
 
+# Renew flag
+FULL_RENEW=1
+
 # If pppoe mode and dgw in pppoe no need replace default gw
 REPLACE_DGW=1
 if [ "$vpnEnabled" = "on" ] && [ "$vpnDGW" = "1" ] && [ "$vpnType" = "0" ]; then
@@ -54,9 +57,7 @@ case "$1" in
 	NEW_IP="$ip"
 	OLD_IP=`ip -4 addr show dev $interface | awk '/inet / {print $2}' | cut -f1 -d"/"` > /dev/null 2>&1
 	# set full renew flag
-	if [ "$FULL_RENEW" = "1" ]; then
-	    FULL_RENEW=1
-	else
+	if [ "$NEW_IP" = "$OLD_IP" ]; then
 	    FULL_RENEW=0
 	fi
 
