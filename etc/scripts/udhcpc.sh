@@ -21,9 +21,9 @@ ROUTELIST_FGW=""
 eval `nvram_buf_get 2860 wan_manual_mtu vpnDGW dhcpSwReset lan_ipaddr lan_netmask`
 
 # If pppoe mode and dgw in pppoe no need replace default gw
-replace_dgw=1
+REPLACE_DGW=1
 if [ "$vpnEnabled" = "on" ] && [ "$vpnDGW" = "1" ] && [ "$vpnType" = "0" ]; then
-    replace_dgw=0
+    REPLACE_DGW=0
 fi
 
 [ -n "$broadcast" ] && BROADCAST="broadcast $broadcast"
@@ -53,6 +53,12 @@ case "$1" in
     renew|bound)
 	NEW_IP="$ip"
 	OLD_IP=`ip -4 addr show dev $interface | awk '/inet / {print $2}' | cut -f1 -d"/"` > /dev/null 2>&1
+	# set full renew flag
+	if [ "$FULL_RENEW" = "1" ]; then
+	    FULL_RENEW=1
+	else
+	    FULL_RENEW=0
+	fi
 
     ########################################################################################################
     # IP/NETMASK/MTU
@@ -72,7 +78,7 @@ case "$1" in
 	fi
 
 	# MTU is default for all session time.
-	if [ "$OLD_IP" != "$NEW_IP" ]; then
+	if [ "$FULL_RENEW" = "1" ]; then
 	    $LOG "Renew ip adress $NEW_IP and $NETMASK for $interface from dhcp"
 	    ifconfig $interface $NEW_IP $BROADCAST $NETMASK
 	    # Get MTU from dhcp server
@@ -93,7 +99,7 @@ case "$1" in
 	    if [ -z "$dgw_otherif" ]; then
 		# if ip not changed not need delete old default route
 		# this is workaroud for ppp used tunnels up over not default routes
-		if [ "$OLD_IP" != "$NEW_IP" ] && [ "$replace_dgw" = "1" ]; then
+		if [ "$FULL_RENEW" = "1" ] && [ "$REPLACE_DGW" = "1" ]; then
 		    $LOG "Deleting default route dev $interface"
 		    while ip route del default dev $interface ; do
 			:
@@ -105,7 +111,7 @@ case "$1" in
 		for i in $router ; do
 		    $LOG "Add route $i/32:0.0.0.0 dev $interface metric $metric to route list."
 		    ROUTELIST_FGW="$ROUTELIST_FGW $i/32:0.0.0.0:$interface:"
-		    if [ "$replace_dgw" = "1" ]; then
+		    if [ "$REPLACE_DGW" = "1" ]; then
 			$LOG "Add default:$i:$interface:$metric to route dgw list"
 			ROUTELIST_DGW="$ROUTELIST_DGW default:$i:$interface:$metric"
 			# save first dgw with metric=0 to use in corbina hack
@@ -156,20 +162,21 @@ case "$1" in
 
 	# first add stub for routesm next add static routes and
 	# default gateways need replace/add at end route parces
-	if [ "$replace_dgw" = "1" ]; then
+	# replace dgw must be replaced only if ip selected
+	if [ "$REPLACE_DGW" = "1" ] && [ "$FULL_RENEW" = "1" ]; then
 	    ROUTELIST="$ROUTELIST_FGW $ROUTELIST $ROUTELIST_DGW"
 	    $LOG "Apply route list. And replace DGW."
 	else
 	    ROUTELIST="$ROUTELIST_FGW $ROUTELIST"
 	    $LOG "Apply route list without modify DGW."
 	fi
+	# aplly parsed route
 	for i in `echo $ROUTELIST | sed 's/ /\n/g' | sort | uniq`; do
 		IPCMD=`echo $i|awk '{split($0,a,":"); \
 		    printf " %s via %s dev %s", a[1], a[2], a[3]; \
 		    if (a[4]!="") printf " metric %s", a[4]}'`
 		ip route replace $IPCMD
 	done
-
 	# add routes configured in web
 	if [ -f /etc/routes_replace ]; then
 	    $LOF "Apply user routes."
@@ -180,7 +187,7 @@ case "$1" in
     # DNS
     ########################################################################################################
 
-        if [ "$OLD_IP" != "$NEW_IP" ]; then
+        if [ "$FULL_RENEW" = "1" ]; then
 	    # Get DNS servers
 	    if [ "$wan_static_dns" != "on" ]; then
 		if [ "$dns" ]; then
@@ -218,7 +225,7 @@ case "$1" in
 
 	# if dhcp disables restart must from internet.sh
 	# this is restart vpn and others if need
-    	if [ "$OLD_IP" != "$NEW_IP" ]; then
+    	if [ "$FULL_RENEW" = "1" ]; then
 	    # send Cisco Discovery request
 	    if [ -f /bin/cdp-send ] && [ -f /etc/scripts/config-cdp.sh ]; then
 		/etc/scripts/config-cdp.sh &
