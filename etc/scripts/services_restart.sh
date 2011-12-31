@@ -26,7 +26,7 @@ if [ -f /bin/zebra ]; then
     service ripd restart
     service zebra restart
 fi
-    service dnsserver restart
+    service dnsserver reload
 
 ##########################################################
 # Need restart this servieces only:                    	 #

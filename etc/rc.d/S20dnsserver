@@ -15,9 +15,9 @@ start() {
   gen_hosts
     if [ "$dnsPEnabled" = "1" ] && [ -f $cname ]; then
 	if [ -f /tmp/is_32ram_dev ]; then
-	    EXT_OPT="-c 128 --dns-forward-max=32"
+	    EXT_OPT="-c 128 --dns-forward-max=32 -n"
 	else
-	    EXT_OPT="-c 32 --dns-forward-max=16"
+	    EXT_OPT="-c 32 --dns-forward-max=16 -n"
 	fi
 	$LOG "Starting DNSMASQ"
 	/bin/dnsmasq -N $EXT_OPT --all-servers --clear-on-reload --leasefile-ro \
@@ -55,6 +55,16 @@ get_param() {
     chmod 644 "$hname" > /dev/null 2>&1
 }
 
+reload() {
+    is_run=`pidof dnsmasq`
+    if [ "$is_run" != "" ]; then
+	$LOG "Send HUP to dnsmasq."
+	killall -q -SIGHUP dnsmasq
+    else
+	start
+    fi
+}
+
 stop() {
   $LOG "Stopping DNSMASQ"
     pid=`pidof dnsmasq`
@@ -84,6 +94,10 @@ case "$1" in
 
         stop)
             stop
+            ;;
+
+        reload)
+            reload
             ;;
 
         restart)
