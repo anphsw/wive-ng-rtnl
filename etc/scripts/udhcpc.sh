@@ -185,12 +185,15 @@ case "$1" in
 	fi
 
     ########################################################################################################
-    # DNS
+    # DNS and services
     ########################################################################################################
 
         if [ "$FULL_RENEW" = "1" ]; then
 	    # Get DNS servers
-	    if [ "$wan_static_dns" != "on" ]; then
+	    if [ "$wan_static_dns" = "on" ]; then
+		$LOG "Use static DNS."
+		# resolv.conf allready generated in internet.sh
+	    else
 		if [ "$dns" ]; then
 		    $LOG "Renew DNS from dhcp $dns $domain"
 		    rm -f $RESOLV_CONF
@@ -209,13 +212,10 @@ case "$1" in
 		else
 		    $LOG "Server not send DNS. Please manual set DNS in wan config."
 		fi
-	    else
-		$LOG "Use static DNS."
-		# Regenerate resolv.conf
-		service resolv start
 	    fi
 	    # read for all write by root
 	    chmod 644 "$RESOLV_CONF" > /dev/null 2>&1
+	    # restart some external services depended by wan ip
 	    $LOG "Restart needed services"
 	    services_restart.sh dhcp
 	fi
@@ -223,7 +223,6 @@ case "$1" in
     ########################################################################################################
     # VPN Logic and workarounds
     ########################################################################################################
-
 	# if dhcp disables restart must from internet.sh
 	# this is restart vpn and others if need
     	if [ "$FULL_RENEW" = "1" ]; then
