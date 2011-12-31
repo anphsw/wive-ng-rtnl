@@ -14,13 +14,8 @@ start() {
   get_param
   gen_hosts
     if [ "$dnsPEnabled" = "1" ] && [ -f $cname ]; then
-	if [ -f /tmp/is_32ram_dev ]; then
-	    EXT_OPT="-c 128 --dns-forward-max=32 -n"
-	else
-	    EXT_OPT="-c 32 --dns-forward-max=16 -n"
-	fi
 	$LOG "Starting DNSMASQ"
-	/bin/dnsmasq -N $EXT_OPT --all-servers --clear-on-reload --leasefile-ro \
+	/bin/dnsmasq -N -c 64 --dns-forward-max=32 --no-poll --all-servers --clear-on-reload --leasefile-ro \
 	    -u nobody -g nobody -C "$cname" -r "$fname" -H "$hname" -f &
     fi
 }
