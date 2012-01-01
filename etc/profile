@@ -5,6 +5,10 @@ export TERM=xterm
 export TERMCAP=/etc/termcap
 export TERMINFO=/etc/xterm
 export CONSOLE=/dev/console
+export HISTSIZE=1000
+
+#export for some apps
+export HOSTNAME=`/bin/hostname`
 
 #paths settings
 if [ -d /opt/etc ]; then
