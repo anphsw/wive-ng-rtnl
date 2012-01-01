@@ -135,6 +135,6 @@ eval `nvram_buf_get 2860 lan_ipaddr lan_netmask Lan2Enabled lan2_ipaddr lan2_net
 #run scrips from /etc/ppp/ip-up.d/
 export PPP_IFACE PPP_TTY PPP_SPEED PPP_LOCAL PPP_REMOTE PPP_IPPARAM
 if [ -d /etc/ppp/ip-up.d/ -a -x /bin/run-parts ]; then
-    /bin/run-parts /etc/ppp/ip-up.d/
+    run-parts /etc/ppp/ip-up.d/
 fi
 $LOG "All is start OK"

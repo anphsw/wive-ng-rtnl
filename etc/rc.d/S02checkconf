@@ -86,7 +86,8 @@ start() {
 	HostName="Wive-RTNL"
 	nvram_set 2860 HostName "$HostName"
     fi
-    /bin/hostname $HostName
+    echo "$HostName" > /etc/hostname
+    hostname -F /etc/hostname
     #
     # samba configs to
     #

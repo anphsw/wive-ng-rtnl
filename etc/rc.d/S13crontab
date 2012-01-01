@@ -11,7 +11,7 @@ start() {
     CrondEnable=`nvram_get 2860 CrondEnable`
     if [ "$CrondEnable" = "1" ]; then
 	$LOG "Starting crontab"
-	 /bin/crond -l 0 -L /var/log/cron.log
+	crond -l 0 -L /var/log/cron.log
     fi
 }
 

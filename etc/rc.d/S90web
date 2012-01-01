@@ -12,7 +12,8 @@ start() {
 	done
     fi
     if [ -f /bin/goahead ]; then
-	/bin/goahead &
+	# start daemon
+	goahead &
     else
 	# asinc blink wps/sec led
 	# if goahead not found

@@ -26,7 +26,7 @@ start() {
 	fi
 	if [ "$need_start" = "1" ]; then
 	    $LOG "Starting inetd"
-    	    /bin/inetd -R 30 -q 64
+    	    inetd -R 30 -q 64
 	fi
     fi
 }
