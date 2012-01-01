@@ -158,14 +158,13 @@ void my_log( int Serverity, int Errno, const char *FmtSt, ... );
 #define IF_STATE_DOWNSTREAM    2   // Interface is a downstream interface
 
 // Multicast default values...
-#define DEFAULT_ROBUSTNESS     2
+#define DEFAULT_ROBUSTNESS     8
 #define DEFAULT_THRESHOLD      1
 #define DEFAULT_RATELIMIT      0
 
 // Define timer constants (in seconds...)
-#define INTERVAL_QUERY          125
+#define INTERVAL_QUERY          60
 #define INTERVAL_QUERY_RESPONSE  10
-//#define INTERVAL_QUERY_RESPONSE  10
 
 #define ROUTESTATE_NOTJOINED            0   // The group corresponding to route is not joined
 #define ROUTESTATE_JOINED               1   // The group corresponding to route is joined
