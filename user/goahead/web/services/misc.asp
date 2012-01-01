@@ -141,6 +141,7 @@ function initValue()
 	form.pingerEnable.value = (pinger == '1') ? '1' : '0';
 	form.mssPmtu.value = (mss_pmtu == '0') ? '0' : '1';
 
+	form.natMode.value = defaultNumber("<% getCfgGeneral(1, "nat_mode"); %>", "1");
 	form.rmtHTTP.value = defaultNumber("<% getCfgGeneral(1, "RemoteManagement"); %>", "1");
 	form.rmtSSH.value = defaultNumber("<% getCfgGeneral(1, "RemoteSSH"); %>", "1");
 
@@ -154,6 +155,7 @@ function initValue()
 		displayElement('rmt_ftpd', false);
 
 	form.udpxyMode.value = defaultNumber("<% getCfgGeneral(1, "UDPXYMode"); %>", "0");
+	form.udpxyPort.value = defaultNumber("<% getCfgGeneral(1, "UDPXYPort"); %>", "81");
 	form.watchdogEnable.value = defaultNumber("<% getCfgGeneral(1, "WatchdogEnabled"); %>", "0");
 	form.dhcpSwReset.value = defaultNumber("<% getCfgGeneral(1, "dhcpSwReset"); %>", "0");
 
@@ -216,6 +218,7 @@ function initValue()
 	igmpSelect(form);
 	httpRmtSelect(form);
 	pingerSelect(form);
+	udpxySelect(form);
 }
 
 function CheckValue(form)
@@ -238,6 +241,14 @@ function CheckValue(form)
 			form.hwnatThreshold.focus();
 			return false;
 		}
+	}
+	
+	var udpxy_port = form.udpxyPort.value * 1;
+	if (!((udpxy_port == 81) || ((udpxy_port >= 1024) && (udpxy_port <= 65535))))
+	{
+		alert("UDPXY port must be set to 81 or between 1024-65535");
+		form.udpxyPort.focus();
+		return false;
 	}
 	
 	if (form.RemoteManagementPort.value != rmtManagementPort)
@@ -277,6 +288,11 @@ function httpRmtSelect(form)
 	displayElement( 'http_rmt_port', form.rmtHTTP.value != '0');
 }
 
+function udpxySelect(form)
+{
+	displayElement( 'udpxy_port_row', form.udpxyMode.value != '0');
+}
+
 </script>
 </head>
 
@@ -306,6 +322,16 @@ function httpRmtSelect(form)
 <td>
 	<input name="hwnatThreshold" value="<% getCfgZero(1, "hw_nat_bind"); %>" class="half">&nbsp;
 	<span style="color: #c0c0c0;">(0-500)</span>
+</td>
+</tr>
+<tr>
+<td class="head">NAT mode</td>
+<td>
+	<select name="natMode" class="half">
+		<option value="0">Linux</option>
+		<option value="1" selected>Fcone</option>
+		<option value="2">Rcone</option>
+	</select>
 </td>
 </tr>
 <tr>
@@ -481,13 +507,19 @@ function httpRmtSelect(form)
 </td>
 </tr>
 <tr>
-<td class="head">Multicast to http proxy (udpxy)</td>
+<td class="head">Multicast to http proxy (UDPXY)</td>
 <td>
-	<select name="udpxyMode" class="half">
+	<select name="udpxyMode" class="half" onchange="udpxySelect(this.form);">
 		<option value="0">Disable</option>
 		<option value="1">LAN</option>
 		<option value="2">LAN &amp; WAN</option>
 	</select>
+</td>
+</tr>
+<tr id="udpxy_port_row" style="display:none;">
+<td class="head">UDPXY port</td>
+<td>
+	<input name="udpxyPort" class="half">
 </td>
 </tr>
 
