@@ -371,6 +371,9 @@ int activateRoute(uint32_t group, uint32_t originAddr) {
 		"No table entry for %s [From: %s]. Inserting route.",
 		inetFmt(group, s1),inetFmt(originAddr, s2));
 
+#ifdef RALINK_ESW_SUPPORT
+	insert_multicast_ip(ntohl(group), ntohl(originAddr));
+#endif
         // Insert route, but no interfaces have yet requested it downstream.
         insertRoute(group, -1);
 
@@ -589,12 +592,12 @@ int internAgeRoute(struct RouteTable*  croute) {
             // No activity was registered within the timelimit, so remove the route.
             removeRoute(croute);
 #ifdef RALINK_ESW_SUPPORT
-                       /*
-                        *  Avoid to remove a "pre-allocate" routing rule created by igmpproxy.
-                        *  "vifBits == 0" means the dest IF is still unknown.
-                        */
-                       if(croute->vifBits > 0)
-                               remove_multicast_ip(ntohl(croute->group));
+           /*
+            *  Avoid to remove a "pre-allocate" routing rule created by igmpproxy.
+            *  "vifBits == 0" means the dest IF is still unknown.
+            */
+           if(croute->vifBits > 0)
+			 remove_multicast_ip(ntohl(croute->group));
 #endif
         }
         // Tell that the route was updated...

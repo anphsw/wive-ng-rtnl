@@ -129,10 +129,6 @@ void acceptLeaveMessage(uint32_t src, uint32_t group) {
         return;
     }
 
-#ifdef RALINK_ESW_SUPPORT
-    remove_member(ntohl(group), ntohl(src));
-#endif
-
     // Find the interface on which the report was recieved.
     sourceVif = getIfByAddress( src );
     if(sourceVif == NULL) {
@@ -140,6 +136,7 @@ void acceptLeaveMessage(uint32_t src, uint32_t group) {
             inetFmt(src,s1));
         return;
     }
+
 
     // We have a IF so check that it's an downstream IF.
     if(sourceVif->state == IF_STATE_DOWNSTREAM) {
@@ -157,6 +154,9 @@ void acceptLeaveMessage(uint32_t src, uint32_t group) {
 
         sendGroupSpecificMemberQuery(gvDesc);
 
+#ifdef RALINK_ESW_SUPPORT
+	remove_member(ntohl(group), ntohl(src));
+#endif
     } else {
         // just ignore the leave request...
         my_log(LOG_DEBUG, 0, "The found if for %s was not downstream. Ignoring leave request.", inetFmt(src, s1));

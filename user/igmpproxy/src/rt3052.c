@@ -415,7 +415,7 @@ void sweap_no_report_members(void)
 				craft_mip |= ((unsigned long)( IP_MULTICAST_A1(member->a0, pos->a1) ) << 8 );
 				craft_mip |= ((unsigned long)(pos->a2) << 16) ;
 				craft_mip |= ((unsigned long)(pos->a3) << 24) ;
-				
+
 				//my_log(LOG_WARNING, 0, "*** RT3052: remove [%s] in the group [%s].", inetFmt(htonl(member->ip_addr), s1) , inetFmt(craft_mip, s2));
 				remove_member( ntohl(craft_mip), member->ip_addr);
 			}
