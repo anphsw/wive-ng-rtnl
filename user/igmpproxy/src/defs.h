@@ -163,8 +163,8 @@ void my_log( int Serverity, int Errno, const char *FmtSt, ... );
 #define DEFAULT_RATELIMIT      0
 
 // Define timer constants (in seconds...)
-#define INTERVAL_QUERY          60
-#define INTERVAL_QUERY_RESPONSE  10
+#define INTERVAL_QUERY		60
+#define INTERVAL_QUERY_RESPONSE	10
 
 #define ROUTESTATE_NOTJOINED            0   // The group corresponding to route is not joined
 #define ROUTESTATE_JOINED               1   // The group corresponding to route is joined
@@ -172,7 +172,7 @@ void my_log( int Serverity, int Errno, const char *FmtSt, ... );
 
 
 
-// Linked list of networks... 
+// Linked list of networks...
 struct SubnetList {
     uint32              subnet_addr;
     uint32              subnet_mask;
@@ -181,7 +181,7 @@ struct SubnetList {
 
 struct IfDesc {
     char                Name[ sizeof( ((struct ifreq *)NULL)->ifr_name ) ];
-    struct in_addr      InAdr;          /* == 0 for non IP interfaces */            
+    struct in_addr      InAdr;          /* == 0 for non IP interfaces */
     short               Flags;
     short               state;
     struct SubnetList*  allowednets;
