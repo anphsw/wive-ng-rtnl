@@ -34,8 +34,14 @@ fi
 
 case "$1" in
     deconfig)
+	# first stop vpn. prevent loop
 	service vpnhelper stop_safe
+	# generate random ip from zeroconfig range end set
+	# this is hack for some ISPs checked client alive by arping
+	rndip="169.254.$(($RANDOM%253+1)).$(($RANDOM%253+1))"
 	ip addr flush dev $interface
+	ip addr add $rndip/16 dev $interface
+	# never need down iface
 	ip link set $interface up
     ;;
 
