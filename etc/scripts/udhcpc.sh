@@ -38,9 +38,13 @@ case "$1" in
 	service vpnhelper stop_safe
 	# generate random ip from zeroconfig range end set
 	# this is hack for some ISPs checked client alive by arping
+	# and prevent fake unset FULL_RENEW flag at next time bound
 	rndip="169.254.$(($RANDOM%253+1)).$(($RANDOM%253+1))"
 	ip addr flush dev $interface
 	ip addr add $rndip/16 dev $interface
+	# set route to astral via $interface
+	# this is block all traffic via this $interface
+	ip route replace 0/0 dev $interface
 	# never need down iface
 	ip link set $interface up
     ;;
