@@ -191,7 +191,12 @@ case "$1" in
 	# add routes configured in web
 	if [ -f /etc/routes_replace ]; then
 	    $LOF "Apply user routes."
-	    /etc/routes_replace replace $lan_if $wan_if
+	    /etc/routes_replace replace $lan_if $interface
+	fi
+	# Add route to multicast subnet
+	if [ "$igmpEnabled" = "1" -o "$UDPXYMode" != "0" ]; then
+	    $LOG "Add route to multicast subnet."
+	    ip route replace "$mcast_net" dev "$interface"
 	fi
 
     ########################################################################################################

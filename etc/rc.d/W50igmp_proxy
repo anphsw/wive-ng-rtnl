@@ -18,8 +18,8 @@ LOG="logger -t igmpproxy"
 
 start() {
   # if igmpproxy enable and mode not full bridge
-  get_param
     if [ "$igmpEnabled" = "1" ] && [ "$OperationMode" != "0" ]; then
+	get_param
         $LOG "Starting IGMPPROXY"
 	# check ip adress set at wan and if need kill igmpproxy
 	wan_is_not_null=`ip -4 addr show $wan_if | grep inet -c`
@@ -33,9 +33,6 @@ start() {
 
 	#generate config file
 	gen_config
-
-	# add route to multicast subnet
-	ip route replace "$mcast_net" dev $wan_if
 
 	# start igmpproxy in switch managment mode
     	igmpproxy $OPTS /etc/igmpproxy.conf &
@@ -63,7 +60,7 @@ phyint $vpn_if disabled
 }
 
 get_param() {
-    eval `nvram_buf_get 2860 igmpEnabled igmpSnoopMode M2UEnabled wan_port tv_port`
+    eval `nvram_buf_get 2860 igmpSnoopMode M2UEnabled wan_port tv_port`
     if [ "$igmpSnoopMode" != "f" ] && [ "$igmpSnoopMode" != "n" ]; then
 	# if snoop mode unknown = auto
 	igmpSnoopMode=""
@@ -105,7 +102,6 @@ stop() {
     killall -q -SIGKILL igmpproxy
     echo 0 > /proc/sys/net/ipv4/conf/all/mc_forwarding
     echo 0 > /proc/sys/net/ipv4/conf/default/mc_forwarding
-    ip route del "$mcast_net" dev "$wan_if" > /dev/null 2>&1
 }
 
 case "$1" in
