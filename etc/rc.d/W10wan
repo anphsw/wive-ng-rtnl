@@ -46,7 +46,7 @@ start() {
 		/etc/routes_replace replace "$phys_lan_if" "$wan_if"
 	    fi
 	    # Add route to multicast subnet
-	    if [ "$igmpEnabled" = "1" -o "$UDPXYMode" != "0" ] && [ "$OperationMode" != "0" ]; then
+	    if [ "$igmpEnabled" = "1" -o "$UDPXYMode" != "0" ]; then
 		$LOG "Add route to multicast subnet."
 		ip route replace "$mcast_net" dev "$wan_if"
 	    fi
