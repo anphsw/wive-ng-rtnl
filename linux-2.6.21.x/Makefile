@@ -808,8 +808,11 @@ endif
 	$(call if_changed_rule,vmlinux__)
 	$(Q)$(MAKE) -f $(srctree)/scripts/Makefile.modpost $@
 	$(Q)rm -f .old_version
-	$(STRIP) --strip-unneeded --strip-debug vmlinux 
-# The actual objects are generated when descending, 
+ifndef CONFIG_DEBUG_INFO
+	$(STRIP) --strip-unneeded --strip-debug vmlinux
+endif
+
+# The actual objects are generated when descending,
 # make sure no implicit rule kicks in
 $(sort $(vmlinux-init) $(vmlinux-main)) $(vmlinux-lds): $(vmlinux-dirs) ;
 
