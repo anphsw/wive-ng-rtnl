@@ -184,6 +184,10 @@ config OOM_EMBEDDED_REBOOT
 	  This option wont do it, saving possibilities to hang on a production
 	  system.
 
+config DELAY_OOM
+	bool "Some times wait for try allocate mem before reboot instead panic."
+	def_bool y
+
 config RESOURCES_64BIT
 	bool "64 bit Memory and IO resources (EXPERIMENTAL)" if (!64BIT && EXPERIMENTAL)
 	default 64BIT

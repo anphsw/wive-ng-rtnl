@@ -1327,7 +1327,9 @@ __alloc_pages(gfp_t gfp_mask, unsigned int order,
 	int do_retry;
 	int alloc_flags=0;
 	int did_some_progress;
-
+#ifdef CONFIG_DELAY_OOM
+	int restart_times=0;
+#endif
 	might_sleep_if(wait);
 
 	if (should_fail_alloc_page(gfp_mask, order))
@@ -1441,6 +1443,20 @@ nofail_alloc:
 			goto got_pg;
 
 		out_of_memory(zonelist, gfp_mask, order);
+#ifdef CONFIG_DELAY_OOM
+		if (restart_times<(HZ<<3))
+		{
+			if (printk_ratelimit())
+				printk("Retring for memory alloc %d\n", restart_times);
+			restart_times++;
+		}
+		else
+		{
+			if (printk_ratelimit())
+				printk("Not free memory for allocate - reboot....");
+			emergency_restart();
+		}
+#endif
 		goto restart;
 	}
 
