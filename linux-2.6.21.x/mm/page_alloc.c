@@ -28,6 +28,7 @@
 #include <linux/blkdev.h>
 #include <linux/slab.h>
 #include <linux/notifier.h>
+#include <linux/reboot.h>
 #include <linux/topology.h>
 #include <linux/sysctl.h>
 #include <linux/cpu.h>
