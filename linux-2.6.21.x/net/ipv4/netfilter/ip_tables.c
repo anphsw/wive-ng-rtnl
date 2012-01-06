@@ -1487,7 +1487,7 @@ add_counter_to_entry(struct ipt_entry *e,
 #ifdef CONFIG_NAT_CONE
 	struct ipt_entry_target *f = ipt_get_target(e);
 
-	if (nf_conntrack_nat_mode = NAT_MODE_LINUX)
+	if (nf_conntrack_nat_mode == NAT_MODE_LINUX)
 	    goto skip_cone;
 
 	/* set default wan dev to eth2.2 */
