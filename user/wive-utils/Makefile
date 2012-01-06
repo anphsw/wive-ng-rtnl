@@ -8,7 +8,7 @@ CFLAGS += -Os
 
 all:
 	@set -e;
-	for i in $(UTILSLIST); do $(CC) $(CFLAGS) $$i.c -o $$i; $(STRIP) $$i; done
+	for i in $(UTILSLIST); do $(CC) $(CFLAGS) $(LDFLAGS) $$i.c -o $$i; $(STRIP) $$i; done
 
 clean:
 	@set -e; 
