@@ -101,7 +101,7 @@ ifeq ($(CONFIG_LIB_NET),y)
 endif
 ifeq ($(strip $(HAVE_DOT_CONFIG)),y)
 
-all: headers pregen configure subdirs shared finished
+all: headers pregen subdirs shared finished
 
 # In this section, we need .config
 -include .config.cmd
@@ -271,6 +271,7 @@ endif
 
 subdirs: $(patsubst %, _dir_%, $(DIRS))
 $(patsubst %, _dir_%, $(DIRS)): headers
+	if [ -f $(patsubst _dir_%, %, $@)/DoConfigure.sh ]; then ( cd $(patsubst _dir_%, %, $@); ./DoConfigure.sh; cd .. ) fi
 	$(MAKE) -C $(patsubst _dir_%, %, $@)
 
 tags:
