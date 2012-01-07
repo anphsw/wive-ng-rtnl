@@ -23,7 +23,7 @@
 #CFLAGS=-Os -Wall -Wwrite-strings -Wpointer-arith -Wconversion \
 #           -Wstrict-prototypes -Wmissing-prototypes
 
-SFLAGS+=-Os -fPIC -D_LARGEFILE64_SOURCE=1
+SFLAGS+= $(CFLAGS) -fPIC -D_LARGEFILE64_SOURCE=1
 LDFLAGS= -L. libz.a
 TEST_LDFLAGS=-L. libz.a
 LDSHARED=$(CC) -shared -Wl,-soname,libz.so.1,--version-script,zlib.map
