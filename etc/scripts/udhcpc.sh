@@ -56,8 +56,8 @@ case "$1" in
 	# Workaround for infinite OFFER wait
 	if [ "$OperationMode" != "2" ] && [ "$dhcpSwReset" = "1" ]; then
 	    # Reset switch to uplink touch
-	    $LOG "Reinit switch."
-	    /etc/scripts/config-switch.sh
+	    $LOG "Restart WAN switch port."
+	    /etc/scripts/config-vlan.sh WWWWW
 	else
 	    # Try reconnect at lease failed
 	    $LOG "Wait connect and reconnect to AP if need."

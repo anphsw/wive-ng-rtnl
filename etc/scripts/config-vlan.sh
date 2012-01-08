@@ -19,6 +19,7 @@ usage() {
 	echo "  $0 2 EEEEE - config RT3052 Enable all ports 100FD"
 	echo "  $0 2 DDDDD - config RT3052 Disable all ports"
 	echo "  $0 2 RRRRR - config RT3052 Reset all ports"
+	echo "  $0 2 WWWWW - config RT3052 Reinit WAN port at switch"
 	echo "  $0 2 FFFFF - config RT3052 Full reinit switch"
 	echo "  $0 2 LLLLW - config RT3052 with LAN at ports 0-3 and WAN at port 4"
 	echo "  $0 2 WLLLL - config RT3052 with LAN at ports 1-4 and WAN at port 0"
@@ -200,6 +201,24 @@ reset_all_phys() {
 	done
 }
 
+reset_wan_phys() {
+	if [ "$SWITCH_MODE" != "0" ] && [ "$SWITCH_MODE" != "2" ]; then
+		return
+	fi
+
+	echo "Reset wan phy port"
+	eval `nvram_buf_get 2860 OperationMode wan_port`
+	if [ "$OperationMode" = "1" ]; then
+	    if [ "$wan_portN" = "0" ]; then
+		link_down 4
+		link_up 4
+	    else
+		link_down 0
+		link_up 0
+	    fi
+	fi
+}
+
 reinit_all_phys() {
 	disableEsw
 	enableEsw
@@ -351,6 +370,8 @@ elif [ "$1" = "2" ]; then
 		disableEsw
 	elif [ "$2" = "RRRRR" ]; then
 		reset_all_phys
+	elif [ "$2" = "WWWWW" ]; then
+		reset_wan_phys
 	elif [ "$2" = "FFFFF" ]; then
 		reinit_all_phys
 	elif [ "$2" = "LLLLW" ]; then
