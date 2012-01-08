@@ -7,7 +7,6 @@
     max log size		= 10
     max disk size		= 0
     security			= share
-    name resolve order		= lmhosts host bcast
     announce version		= 4.9
     domain master		= yes
     preferred master		= yes

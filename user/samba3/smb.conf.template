@@ -15,7 +15,6 @@
     security			= share
     guest account		= nobody
 
-    name resolve order		= lmhosts host bcast
     wins support		= yes
     wins proxy			= no
     dns proxy			= no

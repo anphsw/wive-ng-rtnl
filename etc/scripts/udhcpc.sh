@@ -9,6 +9,7 @@
 
 LOG="logger -t udhcpc"
 RESOLV_CONF="/etc/resolv.conf"
+WINS_CONF="/tmp/wins.dhcp"
 
 # Full route list
 ROUTELIST=""
@@ -47,6 +48,7 @@ case "$1" in
 	ip route replace 0/0 dev $interface
 	# never need down iface
 	ip link set $interface up
+	rm -f $WINS_CONF
     ;;
 
     leasefail)
@@ -61,6 +63,7 @@ case "$1" in
 	    $LOG "Wait connect and reconnect to AP if need."
 	    wait_connect reconnect
 	fi
+	rm -f $WINS_CONF
     ;;
 
     renew|bound)
@@ -200,7 +203,7 @@ case "$1" in
 	fi
 
     ########################################################################################################
-    # DNS and services
+    # DNS/WINS and services
     ########################################################################################################
 
         if [ "$FULL_RENEW" = "1" ]; then
@@ -227,6 +230,10 @@ case "$1" in
 		else
 		    $LOG "Server not send DNS. Please manual set DNS in wan config."
 		fi
+	    fi
+	    if [ "$wins" ]; then
+		echo "$wins" > $WINS_CONF
+		chmod 644 "$WINS_CONF" > /dev/null 2>&1
 	    fi
 	    # read for all write by root
 	    chmod 644 "$RESOLV_CONF" > /dev/null 2>&1

@@ -26,6 +26,15 @@ if [ "$SmbEnabled" = "1" ]; then
     echo "    force user = $Login" >> $CONFIG
     echo "    time server = $ntp_support" >> $CONFIG
 
+    # external wins register support
+    if [ -f /tmp/wins.dhcp ]; then
+	echo "name resolve order		= lmhosts host wins bcast"	>> $CONFIG
+	wins_srvs=`cat /tmp/wins.dhcp | tail -n1`
+	echo "wins server			= $wins_srvs"			>> $CONFIG
+    else
+	echo "name resolve order		= lmhosts host bcast"		>> $CONFIG
+    fi
+
     # check samba version
     if [ "$is_smb_v3" != "0" ]; then
 	echo "    hosts allow = $lan_ipaddr/$lan_netmask" >> $CONFIG
