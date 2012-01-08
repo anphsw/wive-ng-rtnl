@@ -1,5 +1,8 @@
 #!/bin/sh
 
+#path to shell
+export SHELL=/bin/sh
+
 #terminal settings
 export TERM=xterm
 export TERMCAP=/etc/termcap
