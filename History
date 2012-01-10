@@ -923,6 +923,12 @@
 8) Tune restart vpn helper in static/zeroconf/and pure pppoe modes(no need restarts in some situation).<br>
 9) Igmpsnooping fix leave and alive procedure for ESW.<br>
 10) Some times wait for try allocate mem before reboot instead panic.<br>
+11) Fix igmp kernel module regression.<br>
+12) Fix switch NAT mode.<br>
+13) Now if dhcpSwReset is set restart only WAN port instead full switch reinit.<br>
+14) Add support external wins server get from dhcp and correct samba config for registration.<br>
+15) Some times wait for try allocate mem before reboot instead panic.<br>
+16) Some fixes in build system.<br>
 
 
 <br><br>
