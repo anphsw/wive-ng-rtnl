@@ -169,7 +169,7 @@ udhcpc_opts() {
     fi
     UDHCPCOPTS="-i $wan_if $dhcpRequestIP -S -R -T 5 -a \
 		-s /bin/udhcpc.sh -p /var/run/udhcpc.pid \
-		-O routes -O staticroutes -O msstaticroutes -o wins \
+		-O routes -O staticroutes -O msstaticroutes -O wins \
 		$wan_manual_mtu -x hostname:$HostName -f &"
 }
 
