@@ -21,7 +21,9 @@ start() {
 }
 
 get_param() {
-    eval `nvram_buf_get 2860 Login Password`
+    # do not use eval + bufget
+    Login=`nvram_get 2860 Login`
+    Password=`nvram_get 2860 Password`
 }
 
 stop() {
