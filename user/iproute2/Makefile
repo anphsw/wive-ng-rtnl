@@ -13,7 +13,7 @@ ADDLIB+=dnet_ntop.o dnet_pton.o
 ADDLIB+=ipx_ntop.o ipx_pton.o
 
 HOSTCC = gcc
-CCOPTS = -D_GNU_SOURCE -Os -Wall -mips32r2 -mtune=24kec
+CCOPTS = -D_GNU_SOURCE -Os -Wall -mips32r2 -march=mips32r2
 CFLAGS = $(CCOPTS) -I../include $(DEFINES)
 
 LDLIBS += -L../lib -lnetlink -lutil

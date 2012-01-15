@@ -43,7 +43,7 @@ CFLAGS += -I$(ROOTDIR)/linux/include  -Iinclude/
 CFLAGS += -DIPTABLES_VERSION=\"$(IPTABLES_VERSION)\"
 CFLAGS += -Os -std=gnu99
 CFLAGS += -Wall -Wunused
-CFLAGS += -mips32r2 -mtune=24kec
+CFLAGS += -mips32r2 -march=mips32r2
 CFLAGS += -DDISABLE_INSMOD
 
 ifdef NO_SHARED_LIBS
