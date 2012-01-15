@@ -10,6 +10,7 @@ CP = cp
 RM = rm -f
 
 all : configures include/localcharset.h.build.in
+	make -p autoconf
 
 autoconf/aclocal.m4 : $(wildcard m4/*.m4)
 	$(ACLOCAL) -I m4 --output=$@
