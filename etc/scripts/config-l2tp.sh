@@ -153,17 +153,17 @@ echo "==================START-L2TP-CLIENT======================="
         vpnMTU="mtu $vpnMTU"
     fi
 
-    if [ "$vpnAuthProtol" = "1" ]; then
+    if [ "$vpnAuthProtocol" = "1" ]; then
 	L2TPPAP="require pap = yes"
 	L2TPCHAP="require chap = no"
 	PAP="require-pap"
 	CHAP="refuse-chap"
-    elif [ "$vpnAuthProtol" = "2" ]; then
+    elif [ "$vpnAuthProtocol" = "2" ]; then
 	L2TPPAP="require pap = no"
 	L2TPCHAP="require chap = yes"
 	PAP="refuse-pap"
 	CHAP="require-chap"
-    elif [ "$vpnAuthProtol" = "3" ]; then
+    elif [ "$vpnAuthProtocol" = "3" ]; then
 	L2TPPAP="require pap = no"
 	L2TPCHAP="require chap = yes"
 	PAP="refuse-pap"

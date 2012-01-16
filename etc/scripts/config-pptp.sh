@@ -150,13 +150,13 @@ echo "==================START-PPTP-CLIENT======================="
 	vpnDebug=""
     fi
 
-    if [ "$vpnAuthProtol" = "1" ]; then
+    if [ "$vpnAuthProtocol" = "1" ]; then
 	PAP="require-pap"
 	CHAP="refuse-chap"
-    elif [ "$vpnAuthProtol" = "2" ]; then
+    elif [ "$vpnAuthProtocol" = "2" ]; then
 	PAP="refuse-pap"
 	CHAP="require-chap"
-    elif [ "$vpnAuthProtol" = "3" ]; then
+    elif [ "$vpnAuthProtocol" = "3" ]; then
 	PAP="refuse-pap"
 	CHAP="refuse-chap"
     else
