@@ -232,10 +232,10 @@ static u_int32_t __hash_conntrack(const struct nf_conntrack_tuple *tuple,
 	unsigned int a, b;
 
 #ifdef CONFIG_NAT_CONE
-	if (nf_conntrack_nat_mode = NAT_MODE_FCONE) {
+	if (nf_conntrack_nat_mode == NAT_MODE_FCONE) {
 	    a = jhash2(tuple->src.u3.all, ARRAY_SIZE(tuple->src.u3.all), tuple->dst.u.all); // dst ip, dst port
 	    b = jhash2(tuple->dst.u3.all, ARRAY_SIZE(tuple->dst.u3.all), tuple->dst.protonum); //dst ip, & dst ip protocol
-	 } else if (nf_conntrack_nat_mode = NAT_MODE_RCONE) {
+	 } else if (nf_conntrack_nat_mode == NAT_MODE_RCONE) {
 	    a = jhash2(tuple->src.u3.all, ARRAY_SIZE(tuple->src.u3.all), (tuple->src.l3num << 16) | tuple->dst.protonum);
 	    b = jhash2(tuple->dst.u3.all, ARRAY_SIZE(tuple->dst.u3.all), (tuple->dst.u.all << 16) | tuple->dst.protonum);
 	} else {
@@ -595,9 +595,9 @@ EXPORT_SYMBOL_GPL(__nf_conntrack_find);
 static inline int nf_ct_cone_tuple_equal(const struct nf_conntrack_tuple *t1,
                                     const struct nf_conntrack_tuple *t2)
 {
-	if (nf_conntrack_nat_mode = NAT_MODE_FCONE)    /* Full Cone */
+	if (nf_conntrack_nat_mode == NAT_MODE_FCONE)    /* Full Cone */
     	    return nf_ct_tuple_dst_equal(t1, t2);
-	else if (nf_conntrack_nat_mode = NAT_MODE_RCONE)    /* Restricted Cone */
+	else if (nf_conntrack_nat_mode == NAT_MODE_RCONE)    /* Restricted Cone */
 	    return (nf_ct_tuple_dst_equal(t1, t2) &&
 	        t1->src.u3.all[0] == t2->src.u3.all[0] &&
                 t1->src.u3.all[1] == t2->src.u3.all[1] &&
