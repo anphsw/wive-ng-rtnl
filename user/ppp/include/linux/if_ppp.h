@@ -1,4 +1,4 @@
-/*	$Id: if_ppp.h,v 1.9 2008/03/25 10:12:41 alex Exp $	*/
+/*	$Id: if_ppp.h,v 1.21 2000/03/27 06:03:36 paulus Exp $	*/
 
 /*
  * if_ppp.h - Point-to-Point Protocol definitions.
@@ -35,10 +35,8 @@
 #ifndef _IF_PPP_H_
 #define _IF_PPP_H_
 
-#ifdef __KERNEL__
 #include <linux/compiler.h>
-#include <linux/config.h>
-#endif
+
 /*
  * Packet sizes
  */
@@ -116,7 +114,6 @@ struct ifpppcstatsreq {
 struct pppol2tp_ioc_stats {
 	__u16	tunnel_id;	/* redundant */
 	__u16	session_id;	/* if zero, get tunnel stats */
-	__u32	using_ipsec:1;	/* valid only for session_id == 0 */
 	__u64	tx_packets;
 	__u64	tx_bytes;
 	__u64	tx_errors;
@@ -125,6 +122,7 @@ struct pppol2tp_ioc_stats {
 	__u64	rx_seq_discards;
 	__u64	rx_oos_packets;
 	__u64	rx_errors;
+	int	using_ipsec;	/* valid only for session_id == 0 */
 };
 
 #define ifr__name       b.ifr_ifrn.ifrn_name
@@ -132,18 +130,7 @@ struct pppol2tp_ioc_stats {
 
 /*
  * Ioctl definitions.
- */     
-
-#ifdef   CONFIG_PPPOE_PROXY
-typedef char peermacaddr[6];
-#define    PPPIOCSPEERMAC  _IOW('t', 94, peermacaddr)      /* set pppoe proxy peermac */
-#define    PPPIOCSSESSION  _IOW('t', 93, int)      /* set pppoe proxy session id */
-#endif
-
-/*patch from linux 2.4*/
-
-#define	PPPIOCGTIMEOUT	_IOR('t', 92, int)	/* get configuration flags */
-#define	PPPIOCSTIMEOUT	_IOW('t', 91, int)	/* set configuration flags */
+ */
 
 #define	PPPIOCGFLAGS	_IOR('t', 90, int)	/* get configuration flags */
 #define	PPPIOCSFLAGS	_IOW('t', 89, int)	/* set configuration flags */
@@ -184,96 +171,4 @@ typedef char peermacaddr[6];
 #define ifr_mtu	ifr_ifru.ifru_metric
 #endif
 
-#ifdef   CONFIG_PPPOE_PROXY
-//alex_huang
-#define SIOCPPPOEPROXY                                0x89F6
-#define PPPOE_WAN_UNIT_SET                        0x9877
-#define PPPOE_GET_WAN_UNIT                        0x9878
-#define PPPOE_PROXY_ENABLE                         0x9879
-#define PPPOE_UNIT_LAN_IP_SET                     0x987a
-#define PPPOE_LAN_SESSION_SET                    0x987b
-#define PPPOE_DEL_WAN_UNIT                         0x987c
-#define PPPOE_DEL_SINGLE_UNIT                     0x987d
-#define PPPOE_SET_SHARED_UNIT                    0x987e
-#define PPPOE_DEL_SHARED_UNIT                    0x987f
-#define PPPOE_SHARE_NUM                               0x9880
-#define PPPOE_DEL_ONE_SHARE_UNIT             0x9881
-#define PPPOE_CHECK_USER                             0x9882
-#define PPPOE_GET_LAN_UNIT                           0x9883
-#define PPPOE_PROXY_DISABLE                         0x9884
-#define PPPOE_PROXY_ACCOUNT_ISENABLE      0x9885
-#define PPPOE_PROXY_ACCOUNT_ENABLE          0x9886
-#define PPPOE_PROXY_ACCOUNT_DISABLE         0x9887
-
-extern int pppoe_proxy_enabled;
-
-#define MAXSHARENUM    6
-#define MAXCHARLEN     30
-
-struct LAN_UNIT{
-unsigned lan_unit_id;
-int      pid;
-};
-
-struct PPP_UNIT{
-  unsigned char isempty;
-  struct LAN_UNIT lan_unit[MAXSHARENUM];
-  char    wan_unit;
-  char    pvc_unit; 
-  char    isdgw;
-  unsigned char    share_num;
-  unsigned char   maxsharenum;
-  unsigned int   mru;
-  unsigned short  pppIdleTime;   
-  char  user[MAXCHARLEN];
-  char  passwd[MAXCHARLEN];
-  char  ServiceName[MAXCHARLEN];
-
-};
-
-
-
-typedef struct ppoe_proxy{
-  int  cmd;
-  int pid;//tmp
-  char wan_unit;
-  char pvc_unit;
-  char isdgw; 
-  char lan_unit;
-  unsigned int  mru;
-  unsigned short pppIdleTime;
-  char  user[MAXCHARLEN];
-  char  passwd[MAXCHARLEN];
-  char  ServiceName[MAXCHARLEN];
-  char share;
-  char share_num;
-  int share_pid[MAXSHARENUM];
-  int share_lan_unit[MAXSHARENUM];
-  char  maxShareNum;
-}pppoe_proxy;
-
-#define  NUM_PPP                     8
-
-
-#define  EMPTY_UNIT                  0
-#define  NEED_SET_WAN_UNIT           1
-#define  WAN_UNIT                    2
-#define  FULL_UNIT                   3
-
-#define  NO_SHARE                      0
-#define  SHARED_UNIT                 1
-#define   NO_SHARE_NO_OTHER          2
-#define   CANNOTSHARE                3
-#define   NO_LAN_UNIT                 4
-#define   NO_WAN_UNIT                5
-extern struct  PPP_UNIT  pppoe_proxy_unit[NUM_PPP];
-
-#define PACKET_FROM_LAN       6
-#define PACKET_FROM_WLAN    7
-extern int maxlan_unit;
-extern int regMacType(char *mac , int type);
-extern short pppoeproxy_portmap;
-
-extern int enable_port_mapping;
-#endif
 #endif /* _IF_PPP_H_ */

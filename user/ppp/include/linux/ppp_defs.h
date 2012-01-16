@@ -1,4 +1,4 @@
-/*	$Id: ppp_defs.h,v 1.1.1.1 2007/12/17 06:27:30 shlee Exp $	*/
+/*	$Id: ppp_defs.h,v 1.2 1994/09/21 01:31:06 paulus Exp $	*/
 
 /*
  * ppp_defs.h - PPP definitions.
@@ -88,8 +88,6 @@
 #define PPP_LQR		0xc025	/* Link Quality Report protocol */
 #define PPP_CHAP	0xc223	/* Cryptographic Handshake Auth. Protocol */
 #define PPP_CBCP	0xc029	/* Callback Control Protocol */
-#define PPP_EAP         0xc227  /* Extensible Authentication Protocol */
-#define PPP_ECP         0x8053  /* Encryption Control Protocol */
 
 /*
  * Values for FCS calculations.
@@ -101,10 +99,7 @@
 #ifdef __KERNEL__
 #include <linux/crc-ccitt.h>
 #define PPP_FCS(fcs, c) crc_ccitt_byte(fcs, c)
-#else
-#define PPP_FCS(fcs, c) (((fcs) >> 8) ^ fcstab[((fcs) ^ (c)) & 0xff])
 #endif
-
 
 /*
  * Extended asyncmap - allows any character to be escaped.

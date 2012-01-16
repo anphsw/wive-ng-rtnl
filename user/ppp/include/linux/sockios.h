@@ -115,12 +115,17 @@
 #define SIOCBONDSLAVEINFOQUERY 0x8993   /* rtn info about slave state   */
 #define SIOCBONDINFOQUERY      0x8994	/* rtn info about bond state    */
 #define SIOCBONDCHANGEACTIVE   0x8995   /* update to a new active slave */
+#define SIOCBONDSETWEIGHT      0x899e   /* update weight */
 			
 /* bridge calls */
 #define SIOCBRADDBR     0x89a0		/* create new bridge device     */
 #define SIOCBRDELBR     0x89a1		/* remove bridge device         */
 #define SIOCBRADDIF	0x89a2		/* add interface to bridge      */
 #define SIOCBRDELIF	0x89a3		/* remove interface from bridge */
+
+/* bridge extensions call */
+#define SIOCBRMCAST	0x89a4		/* multicast bridge control 	*/
+#define SIOCBRPFWCT	0x89a5		/* portforwart bridge control 	*/
 
 /* Device private ioctl calls */
 
@@ -134,7 +139,8 @@
  */
  
 #define SIOCDEVPRIVATE	0x89F0	/* to 89FF */
-
+#define SIOCGMIILINK	0x89FE    /* marklin 20080821 : Read MII PHY link status.	*/
+#define SIOCGADDINTERFACE 0x89FF  /* marklin 20080821 : Add interface to wanLanPassThroughHandler */
 /*
  *	These 16 ioctl calls are protocol private
  */
