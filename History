@@ -929,6 +929,10 @@
 14) Add support external wins server get from dhcp and correct samba config for registration.<br>
 15) Some times wait for try allocate mem before reboot instead panic.<br>
 16) Some fixes in build system.<br>
+17) Fix select auth protocol in vpn.<br>
+18) Gcc flags cleanup.<br>
+19) Some unicode patches.<br>
+20) Fix get login/pasword variables (not use eval).<br>
 
 
 <br><br>

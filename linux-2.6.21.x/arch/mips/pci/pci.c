@@ -4,14 +4,19 @@
  * Free Software Foundation;  either version 2 of the  License, or (at your
  * option) any later version.
  *
- * Copyright (C) 2003, 04 Ralf Baechle (ralf@linux-mips.org)
+ * Copyright (C) 2003, 04, 11 Ralf Baechle (ralf@linux-mips.org)
+ * Copyright (C) 2011 Wind River Systems,
+ *   written by Ralf Baechle (ralf@linux-mips.org)
  */
+#include <linux/bug.h>
 #include <linux/kernel.h>
 #include <linux/mm.h>
 #include <linux/bootmem.h>
 #include <linux/init.h>
 #include <linux/types.h>
 #include <linux/pci.h>
+
+#include <asm/cpu-info.h>
 
 /*
  * Indicate whether we respect the PCI setup left by the firmware.
