@@ -43,7 +43,7 @@ libpptp.a: pptp_callmgr.o pptp_ctrl.o util.o vector.o dirutil.o pptp_quirks.o or
 
 pptp.so: libpptp.a
 	$(CC) -o $@ pptp.c $(CFLAGS) $(LDFLAGS) $^
-	cp pptp.so libpptp.so
+	mv -f pptp.so libpptp.so
 
 %.so: %.c
 	$(CC) -o $@ $(LDFLAGS) $(CFLAGS) $^
@@ -53,8 +53,7 @@ clean:
 
 
 install: all
-	$(INSTALL) -m 4750 pptp.so $(LIBDIR)
 	$(INSTALL) -m 4750 libpptp.so $(LIBDIR)
-                
+
 depend:
 	$(CPP) -M $(CFLAGS) $(PLUGINSRCS) >.depend
