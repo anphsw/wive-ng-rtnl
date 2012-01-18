@@ -188,6 +188,6 @@ echo "==================START-PPTP-CLIENT======================="
     $LOG "PPTP connect to $SERVER ....."
     $LOG "Start pppd"
     PPPDOPT="file $OPTFILE ifname $vpn_if -detach $vpnDebug $vpnMTU $vpnMRU $vpnMPPE plugin"
-    PLUGOPT="/lib/pptp.so pptp_server $SERVER call pptp persist $vpnPeerDNS user $vpnUser password $vpnPassword"
+    PLUGOPT="/lib/libpptp.so pptp_server $SERVER call pptp persist $vpnPeerDNS user $vpnUser password $vpnPassword"
     FULLOPT="$PPPDOPT $PLUGOPT"
     pppd $FULLOPT &
