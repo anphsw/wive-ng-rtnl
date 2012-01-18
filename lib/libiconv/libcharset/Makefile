@@ -31,7 +31,7 @@ mkinstalldirs = $(SHELL) ./build-aux/mkinstalldirs
 SHELL = /bin/sh
 
 all : include/libcharset.h force
-	mkdir -p autoconf
+	make -p autoconf
 	cd lib && $(MAKE) all
 
 include/libcharset.h :
