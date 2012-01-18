@@ -19,7 +19,6 @@
 #else
 #define MAX_PACKET_SIZE	1522
 #endif
-#define	MIN_PACKET_SIZE 64
 
 #ifdef DSP_VIA_NONCACHEABLE
 #define ESRAM_BASE	0xa0800000	/* 0x0080-0000  ~ 0x00807FFF */

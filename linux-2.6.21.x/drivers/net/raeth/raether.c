@@ -1641,12 +1641,12 @@ static int ei_start_xmit(struct sk_buff* skb, struct net_device *dev, int gmac_n
 	mcast_tx(skb);
 #endif
 
-	 if (skb->len < MIN_PACKET_SIZE) {
-	     if (skb_padto(skb, MIN_PACKET_SIZE)) {
+	 if (skb->len < ETH_ZLEN) {
+	     if (skb_padto(skb, ETH_ZLEN)) {
 		 printk("raeth: skb_padto failed\n");
 		 return 0;
 	     }
-	     skb_put(skb, MIN_PACKET_SIZE - skb->len);
+	     skb_put(skb, ETH_ZLEN - skb->len);
 	 }
 
 	dev->trans_start = jiffies;	/* save the timestamp */
@@ -2008,9 +2008,9 @@ static int ei_change_mtu(struct net_device *dev, int new_mtu)
 	}
 
 #ifdef CONFIG_RAETH_JUMBOFRAME
-	if ((new_mtu > MAX_RX_LENGTH) || (new_mtu < MIN_PACKET_SIZE)) {
+	if ((new_mtu > MAX_RX_LENGTH) || (new_mtu < (ETH_ZLEN + 4))) {
 #else
-	if ((new_mtu > DEFAULT_MTU)   || (new_mtu < MIN_PACKET_SIZE)) {
+	if ((new_mtu > DEFAULT_MTU)   || (new_mtu < (ETH_ZLEN + 4))) {
 #endif
 		return -EINVAL;
 	}
