@@ -1643,8 +1643,10 @@ static int ei_start_xmit(struct sk_buff* skb, struct net_device *dev, int gmac_n
 
 	 if (skb->len < ETH_ZLEN) {
 	     if (skb_padto(skb, ETH_ZLEN)) {
-		 printk("raeth: skb_padto failed\n");
-		 return 0;
+		if (net_ratelimit())
+		    printk("raeth: skb_padto failed\n");
+		ei_local->stat.tx_dropped++;
+		return 0;
 	     }
 	     skb_put(skb, ETH_ZLEN - skb->len);
 	 }
