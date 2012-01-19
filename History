@@ -933,6 +933,8 @@
 18) Gcc flags cleanup.<br>
 19) Some unicode patches.<br>
 20) Fix get login/pasword variables (not use eval).<br>
+21) Cleanup pptp plugin.<br>
+22) Fix padding in raeth.<br>
 
 
 <br><br>
