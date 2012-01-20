@@ -5,9 +5,9 @@
 #include "../../../../../../net/nat/hw_nat/frame_engine.h"
 #endif
 
-#if !defined(CONFIG_RA_NAT_NONE)					// ASUS EXT
+#if !defined(CONFIG_RA_NAT_NONE)
 extern int (*ra_sw_nat_hook_tx)(struct sk_buff *skb);
-extern int (*ra_sw_nat_hook_rx)(struct sk_buff *skb);
+extern int (*ra_sw_nat_hook_tx)(struct sk_buff *skb, int gmac_no);
 #endif
 
 ULONG	RTDebugLevel = RT_DEBUG_ERROR;
