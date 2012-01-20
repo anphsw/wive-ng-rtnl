@@ -123,7 +123,7 @@ void br_fdb_cleanup(unsigned long _data)
 	unsigned long delay = hold_time(br);
 	int i;
 
-	spin_lock_bh(&br->hash_lock);
+	spin_lock(&br->hash_lock);
 	for (i = 0; i < BR_HASH_SIZE; i++) {
 		struct net_bridge_fdb_entry *f;
 		struct hlist_node *h, *n;
@@ -134,7 +134,7 @@ void br_fdb_cleanup(unsigned long _data)
 				fdb_delete(f);
 		}
 	}
-	spin_unlock_bh(&br->hash_lock);
+	spin_unlock(&br->hash_lock);
 
 	mod_timer(&br->gc_timer, jiffies + HZ/10);
 }
