@@ -36,7 +36,7 @@ meters from a configuration file and doing all the initialization and communi-
 cation stuff, with heavy help from "libusb".
 It is mainly used automatically - via udev events and rules - to do the switch
 without any user interaction. But it can also be run as a command line tool,
-usually when trying to make unknown devices work with it.
+usually when trying to make unknown devices work.
 
 We have already collected a wide range of information on how to switch all
 sorts of devices. If you run into a new one that is unknown yet, don't despair:
@@ -106,10 +106,13 @@ See also the provided man page.
 
 Note: Manual use is mainly intended for testing and analyzing !
 
-Once your new device is switching fine you can add a rule entry to the rules
-file to let udev run usb_modeswitch as soon as the default IDs are found
-(when the device is plugged). If you look into the rules file you will see
-immediately how your new entry should look like.
+Once your new device is switching fine you can add it to the data files to
+make the process automatic.
+
+For this to work, add a rule entry to the rules file to let udev run
+usb_modeswitch as soon as the default IDs are found (when the device is
+plugged). If you look into the rules file you will see immediately how
+your new entry should look like.
 The location is:
 /lib/udev/rules.d/40-usb_modeswitch.rules
 
@@ -224,4 +227,4 @@ Or find it as the file COPYING in this folder.
 
 
 
-Last revised: 2011-10-23, Josua Dietze
+Last revised: 2011-12-26, Josua Dietze

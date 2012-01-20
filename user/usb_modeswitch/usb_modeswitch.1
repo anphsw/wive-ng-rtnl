@@ -3,7 +3,7 @@
 usb_modeswitch - switch mode of "multi-state" USB devices
 .SH "SYNOPSIS"
 .PP
-\fBusb_modeswitch\fR [\fB\-hvpVPmM23rdHn\fP]  [\fB\-c \fIfilename\fP]
+\fBusb_modeswitch\fR [\fB\-heWQDIvpVPmM23rwdHSOBGTNALnsRiuagft\fP] [\fB\-c \fIfilename\fP]
 .SH "DESCRIPTION"
 .PP
 Several new USB devices have their proprietary Windows drivers onboard,
@@ -47,6 +47,11 @@ for information purposes. If success checking (option \-s) is active,
 providing target IDs (vendor/product) or target class is recommended
 .IP "\fB-P\fP \fB\-\-target-product NUM\fP         " 10
 Target product ID
+.IP "\fB-b\fP \fB\-\-busnum NUM\fP         " 10
+.IP "\fB-g\fP \fB\-\-devnum NUM\fP         " 10
+If bus and device number are provided, the handling of a specific device on
+a specific USB port is guaranteed, in contrast to using only the USB ID. This
+is important if there are multiple similar devices on a system
 .IP "\fB-C\fP \fB\-\-target-class NUM\fP         " 10
 Target Device Class according to the USB specification. Some devices keep
 their original vendor/product ID after successful switching. To prevent
@@ -151,4 +156,4 @@ later version published by the Free Software Foundation.
 The complete text of the current GNU General Public
 License can be found in http://www.gnu.org/licenses/gpl.txt
 
-.\" last edited 2011-10-23 for version 1.2.0
+.\" last edited 2011-10-23 for version 1.2.2

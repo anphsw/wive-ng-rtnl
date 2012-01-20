@@ -1,8 +1,8 @@
 /*
   Mode switching tool for controlling flip flop (multiple device) USB gear
-  Version 1.2.0, 2011/10/22
+  Version 1.2.2, 2012/01/19
 
-  Copyright (C) 2007 - 2011 Josua Dietze (mail to "usb_admin" at the domain
+  Copyright (C) 2007 - 2012 Josua Dietze (mail to "usb_admin" at the domain
   of the home page; or write a personal message through the forum to "Josh".
   NO SUPPORT VIA E-MAIL - please use the forum for that)
 
@@ -45,7 +45,7 @@
 
 /* Recommended tab size: 4 */
 
-#define VERSION "1.2.0"
+#define VERSION "1.2.1"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -65,6 +65,9 @@
 
 #define SEARCH_DEFAULT 0
 #define SEARCH_TARGET 1
+#define SEARCH_BUSDEV 2
+
+#define SWITCH_CONFIG_MAXTRIES   5
 
 #define SHOW_PROGRESS if (show_progress) fprintf
 
@@ -75,7 +78,7 @@ struct usb_dev_handle *devh;
 
 int DefaultVendor=0, DefaultProduct=0, TargetVendor=0, TargetProduct=-1, TargetClass=0;
 int MessageEndpoint=0, ResponseEndpoint=0, ReleaseDelay=0;
-int targetDeviceCount=0;
+int targetDeviceCount=0, searchMode;
 int devnum=-1, busnum=-1;
 int ret;
 
@@ -114,6 +117,8 @@ static struct option long_options[] = {
 	{"message-content3",	required_argument, 0, '3'},
 	{"release-delay",		required_argument, 0, 'w'},
 	{"response-endpoint",	required_argument, 0, 'r'},
+	{"bus-num",				required_argument, 0, 'b'},
+	{"device-num",			required_argument, 0, 'g'},
 	{"detach-only",			no_argument, 0, 'd'},
 	{"huawei-mode",			no_argument, 0, 'H'},
 	{"sierra-mode",			no_argument, 0, 'S'},
@@ -266,7 +271,7 @@ int readArguments(int argc, char **argv)
 
 	while (1)
 	{
-		c = getopt_long (argc, argv, "heWQDndHSOBGTNALRItv:p:V:P:C:m:M:2:3:w:r:c:i:u:a:s:f:",
+		c = getopt_long (argc, argv, "heWQDndHSOBGTNALRItv:p:V:P:C:m:M:2:3:w:r:c:i:u:a:s:f:b:g:",
 						long_options, &option_index);
 
 		/* Detect the end of the options. */
@@ -285,7 +290,7 @@ int readArguments(int argc, char **argv)
 			case 'M': strncpy(MessageContent, optarg, LINE_DIM); break;
 			case '2': strncpy(MessageContent2, optarg, LINE_DIM); break;
 			case '3': strncpy(MessageContent3, optarg, LINE_DIM); break;
-			case 'w': ReleaseDelay = strtol(optarg, NULL, 10); count--; break;
+			case 'w': ReleaseDelay = strtol(optarg, NULL, 10); break;
 			case 'n': NeedResponse = 1; break;
 			case 'r': ResponseEndpoint = strtol(optarg, NULL, 16); break;
 			case 'd': DetachStorageOnly = 1; break;
@@ -305,6 +310,8 @@ int readArguments(int argc, char **argv)
 			case 'D': sysmode = 1; count--; break;
 			case 's': CheckSuccess = strtol(optarg, NULL, 10); count--; break;
 			case 'I': InquireDevice = 0; break;
+			case 'b': busnum = strtol(optarg, NULL, 10); break;
+			case 'g': devnum = strtol(optarg, NULL, 10); break;
 
 			case 'i': Interface = strtol(optarg, NULL, 16); break;
 			case 'u': Configuration = strtol(optarg, NULL, 16); break;
@@ -344,6 +351,7 @@ int main(int argc, char **argv)
 {
 	int numDefaults=0, specialMode=0, sonySuccess=0;
 	int currentConfig=0, defaultClass=0, interfaceClass=0;
+
 
 	/* Make sure we have empty strings even if not set by config */
 	TargetProductList[0] = '\0';
@@ -393,6 +401,13 @@ int main(int argc, char **argv)
 	}
 	SHOW_PROGRESS(output,"\n");
 
+	if (devnum == -1) {
+		searchMode = SEARCH_DEFAULT;
+	} else {
+		SHOW_PROGRESS(output,"Use given bus/device number: %03d/%03d ...\n", busnum, devnum);
+		searchMode = SEARCH_BUSDEV;
+	}
+
 	if (show_progress)
 		if (CheckSuccess && !(TargetVendor || TargetProduct > -1 || TargetProductList[0] != '\0') && !TargetClass)
 			printf("Note: target parameter missing; success check limited\n");
@@ -407,7 +422,7 @@ int main(int argc, char **argv)
 	usb_find_devices();
 
 	/* Count existing target devices, remember for success check */
-	if (TargetVendor || TargetClass) {
+	if ((TargetVendor || TargetClass) && searchMode != SEARCH_BUSDEV) {
 		SHOW_PROGRESS(output,"Looking for target devices ...\n");
 		search_devices(&targetDeviceCount, TargetVendor, TargetProduct, TargetProductList, TargetClass, 0, SEARCH_TARGET);
 		if (targetDeviceCount) {
@@ -418,21 +433,27 @@ int main(int argc, char **argv)
 
 	/* Count default devices, get the last one found */
 	SHOW_PROGRESS(output,"Looking for default devices ...\n");
-	dev = search_devices(&numDefaults, DefaultVendor, DefaultProduct, "\0", TargetClass, Configuration, SEARCH_DEFAULT);
+	dev = search_devices(&numDefaults, DefaultVendor, DefaultProduct, "\0", TargetClass, Configuration, searchMode);
 	if (numDefaults) {
-		SHOW_PROGRESS(output," Found devices in default mode, class or configuration (%d)\n", numDefaults);
+		SHOW_PROGRESS(output," Found device in default mode, class or configuration (%d)\n", numDefaults);
 	} else {
 		SHOW_PROGRESS(output," No devices in default mode found. Nothing to do. Bye.\n\n");
 		exit(0);
 	}
-	if (dev != NULL) {
+	if (dev == NULL) {
+		SHOW_PROGRESS(output," No bus/device match. Is device connected? Bye.\n\n");
+		exit(0);
+	} else {
+		if (devnum == -1) {
 		devnum = dev->devnum;
 		busnum = (int)strtol(dev->bus->dirname,NULL,10);
 		SHOW_PROGRESS(output,"Accessing device %03d on bus %03d ...\n", devnum, busnum);
+		}
 		devh = usb_open(dev);
-	} else {
-		SHOW_PROGRESS(output," No default device found. Is it connected? Bye.\n\n");
-		exit(0);
+		if (devh == NULL) {
+			SHOW_PROGRESS(output,"Error opening the device. Aborting.\n\n");
+			exit(1);
+		}
 	}
 
 	/* Get current configuration of default device
@@ -528,7 +549,7 @@ int main(int argc, char **argv)
 
 	if (sysmode) {
 		openlog("usb_modeswitch", 0, LOG_SYSLOG);
-		syslog(LOG_NOTICE, "switching %04x:%04x (%s: %s)", DefaultVendor, DefaultProduct, imanufact, iproduct);
+		syslog(LOG_NOTICE, "switching device %04x:%04x on %03d/%03d", DefaultVendor, DefaultProduct, busnum, devnum);
 	}
 
 	if (DetachStorageOnly) {
@@ -617,6 +638,11 @@ int main(int argc, char **argv)
 	}
 
 	if (CheckSuccess) {
+		if (searchMode == SEARCH_BUSDEV && sysmode) {
+			SHOW_PROGRESS(output,"Bus/dev search active, referring success check to wrapper. Bye.\n\n");
+			printf("ok:busdev\n");
+			goto CLOSING;
+		}
 		if (checkSuccess()) {
 			if (sysmode) {
 				if (NoDriverLoading)
@@ -646,7 +672,7 @@ int main(int argc, char **argv)
 		else
 			SHOW_PROGRESS(output,"-> Run lsusb to note any changes. Bye.\n\n");
 	}
-
+CLOSING:
 	if (sysmode)
 		closelog();
 	if (devh)
@@ -864,8 +890,6 @@ skip:
 	devh = 0;
 	return 2;
 }
-
-#define SWITCH_CONFIG_MAXTRIES   5
 
 int switchConfiguration ()
 {
@@ -1346,7 +1370,7 @@ int checkSuccess()
 			break;
 		case 2: 
 			if (sysmode)
-				syslog(LOG_NOTICE, "switched to %04x:%04x (%s: %s)", TargetVendor, TargetProduct, imanufact, iproduct);
+				syslog(LOG_NOTICE, "switched to %04x:%04x on %03d/%03d", TargetVendor, TargetProduct, busnum, devnum);
 			success = 1;
 			break;
 		case 1:
@@ -1407,8 +1431,8 @@ void release_usb_device(int dummy) {
 }
 
 
-/* Iterates over busses and devices, counts the ones with the given
- * ID/class and returns the last one of them
+/* Iterates over busses and devices, counts the ones which match the given
+ * parameters and returns the last one of them
 */
 struct usb_device* search_devices( int *numFound, int vendor, int product, char* productList, int targetClass, int configuration, int mode)
 {
@@ -1433,8 +1457,17 @@ struct usb_device* search_devices( int *numFound, int vendor, int product, char*
 		listcopy = malloc(strlen(productList)+1);
 
 	for (bus = usb_get_busses(); bus; bus = bus->next) {
+		if (mode == SEARCH_BUSDEV)
+			if (busnum != (int)strtol(bus->dirname,NULL,10))
+				continue;
 		struct usb_device *dev;
 		for (dev = bus->devices; dev; dev = dev->next) {
+			if (mode == SEARCH_BUSDEV) {
+				if (dev->devnum != devnum)
+					continue;
+				else
+					SHOW_PROGRESS(output," bus/device number matched\n");
+			}
 			if (verbose)
 				fprintf (output,"  searching devices, found USB ID %04x:%04x\n", dev->descriptor.idVendor, dev->descriptor.idProduct);
 			if (dev->descriptor.idVendor != vendor)
@@ -1471,20 +1504,17 @@ struct usb_device* search_devices( int *numFound, int vendor, int product, char*
 								break;
 							}
 					}
-
 					NextToken:
 					token = strtok(NULL, ",");
 				}
 			/* Product ID is given */
 			} else
 				if (product == dev->descriptor.idProduct) {
-					if (verbose)
-						fprintf (output,"   found matching product ID\n");
+					SHOW_PROGRESS(output,"   found matching product ID\n");
 					if (targetClass == 0 && configuration < 1) {
 						(*numFound)++;
+						SHOW_PROGRESS(output,"   adding device\n");
 						right_dev = dev;
-						if (verbose)
-							fprintf (output,"   adding device\n");
 					} else {
 						if (targetClass != 0) {
 							devClass = dev->descriptor.bDeviceClass;
@@ -1508,7 +1538,7 @@ struct usb_device* search_devices( int *numFound, int vendor, int product, char*
 							} else {
 								if (verbose)
 									fprintf (output,"   target class %02x not matching\n", targetClass);
-								if (mode == SEARCH_DEFAULT) {
+								if (mode == SEARCH_DEFAULT || mode == SEARCH_BUSDEV) {
 									(*numFound)++;
 									right_dev = dev;
 									if (verbose)
@@ -1531,15 +1561,6 @@ struct usb_device* search_devices( int *numFound, int vendor, int product, char*
 									fprintf (output,"   not adding device, target configuration already set\n");
 						}
 					}
-					/* hack: if busnum has other than init value, we are called from
-					 * successCheck() and do probe for plausible new devnum/busnum
-					 */
-					if (busnum != -1)
-						if (dev->devnum < devnum || (int)strtol(dev->bus->dirname,NULL,10) != busnum) {
-							if (verbose)
-								fprintf (output,"   warning: busnum/devnum indicates an unrelated device\n");
-							//right_dev = NULL;
-						}
 				}
 		}
 	}
@@ -1796,6 +1817,8 @@ void printHelp()
 	" -V, --target-vendor NUM       target mode vendor ID (optional)\n"
 	" -P, --target-product NUM      target mode product ID (optional)\n"
 	" -C, --target-class NUM        target mode device class (optional)\n"
+	" -b, --busnum NUM              system bus number of device (for hard ID)\n"
+	" -g, --devnum NUM              system device number (for hard ID)\n"
 	" -m, --message-endpoint NUM    direct the message transfer there (optional)\n"
 	" -M, --message-content <msg>   message to send (hex number as string)\n"
 	" -2 <msg>, -3 <msg>            additional messages to send (-n recommended)\n"

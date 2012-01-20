@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 Josua Dietze, usb_modeswitch version 1.2.0
+ * Copyright (c) 2011-2012 Josua Dietze, usb_modeswitch version 1.2.2
  * Contains code under
  * Copyright (c) 2010 Wojciech A. Koszek <wkoszek@FreeBSD.org>
  * All rights reserved.
@@ -60,7 +60,7 @@ int main(int argc, char **argv)
 			continue;
 		}
 		sprintf(arg,"{%s} ",argv[i]);
-		strncat(arglist,arg,MAX_ARGSIZE);
+		strncat(arglist,arg,MAX_ARGSIZE-1);
 	}
 
     char code[sizeof(RAW) + sizeof(arglist)];

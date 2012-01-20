@@ -1,6 +1,6 @@
 #!/usr/bin/env tclsh
 
-# (c) Josua Dietze 2011
+# (c) Josua Dietze 2012
 #
 # Usage: mk_script_string.tcl source.tcl >jim-source.c
 

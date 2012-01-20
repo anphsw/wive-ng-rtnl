@@ -1,5 +1,5 @@
 #!/bin/sh
-# part of usb_modeswitch 1.2.0
+# part of usb_modeswitch 1.2.2
 device_in()
 {
 	if [ ! -e /var/lib/usb_modeswitch/$1 ]; then
@@ -63,11 +63,10 @@ case "$1" in
 		exit 0
 		;;
 	--symlink-name)
-		echo "symlink-name: $2" >/tmp/debug
 		device_in "link_list" $v_id $p_id
 		if [ "$?" = "1" ]; then
 			if [ -e "/usr/sbin/usb_modeswitch_dispatcher" ]; then
-				exec /usr/sbin/usb_modeswitch_dispatcher $1 $2 2>/dev/null
+				exec /usr/sbin/usb_modeswitch_dispatcher $1 $2 2>>/dev/null
 			fi
 		fi
 		exit 0
@@ -81,7 +80,7 @@ while [ $count != 0 ]; do
 		sleep 1
 		count=$(($count - 1))
 	else
-		exec /usr/sbin/usb_modeswitch_dispatcher "$@" &
+		exec /usr/sbin/usb_modeswitch_dispatcher --switch-mode $1 $0 &
 		exit 0
 	fi
 done
