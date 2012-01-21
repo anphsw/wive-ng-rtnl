@@ -935,6 +935,9 @@
 20) Fix get login/pasword variables (not use eval).<br>
 21) Cleanup pptp plugin.<br>
 22) Fix padding in raeth.<br>
+23) Fix lock in bridge fdb_clean code.<br>
+24) Fix ra_nat hook in wifi derivers.<br>
+25) Fix drop counter in raeth driver.<br>
 
 
 <br><br>
