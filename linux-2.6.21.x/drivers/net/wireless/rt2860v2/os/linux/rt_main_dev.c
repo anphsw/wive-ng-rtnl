@@ -816,7 +816,7 @@ int rt28xx_packet_xmit(struct sk_buff *skb)
 		unsigned long flags;
 
 		RTMP_INT_LOCK(&pAd->page_lock, flags)
-		ra_sw_nat_hook_tx(pPacket);
+		ra_sw_nat_hook_tx(pPacket, 0);
 		RTMP_INT_UNLOCK(&pAd->page_lock, flags);
 	}
 #endif
