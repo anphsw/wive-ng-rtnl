@@ -938,6 +938,12 @@
 23) Fix lock in bridge fdb_clean code.<br>
 24) Fix ra_nat hook in wifi derivers.<br>
 25) Fix drop counter in raeth driver.<br>
+26) Fix drop counter at no padded pakets.<br>
+27) BH already disabled in br_fdb_cleanup().<br>
+28) update usb-modeswitch to 1.2.2 version.<br>
+29) Cosmetics ra_sw_nat_hook_tx fix in wifi drivers.<br>
+30) miniupnpd up to 1.6.20120121 version.<br>
+31) upnp: fix uuid/model generate.<br>
 
 
 <br><br>
