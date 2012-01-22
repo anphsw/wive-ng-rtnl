@@ -47,7 +47,8 @@ clean_ruleset_threshold=20
 clean_ruleset_interval=600
 allow 1024-65535 $lan_ipaddr/$lan_netmask 1024-65535
 deny 0-65535 0.0.0.0/0 0-65535
-model_number=1" > /etc/miniupnpd.conf
+model_number=1
+" > /etc/miniupnpd.conf
 ###############################################################
 cat /etc/miniupnpd.conf.uuid >> /etc/miniupnpd.conf
 ###############################################################
