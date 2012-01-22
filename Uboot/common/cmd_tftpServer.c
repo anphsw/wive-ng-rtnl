@@ -68,6 +68,14 @@ int check_image(int mode)
 		read_dataflash(addr, sizeof(image_header_t), (char *)&header);
 	}
 	else
+#elif defined (CFG_ENV_IS_IN_NAND)
+	if (addr >= CFG_FLASH_BASE)
+		ranand_read(&header, (char *)(addr - CFG_FLASH_BASE), sizeof(image_header_t));
+	else
+#elif defined (CFG_ENV_IS_IN_SPI)
+	if (addr >= CFG_FLASH_BASE)
+		raspi_read(&header, (char *)(addr - CFG_FLASH_BASE), sizeof(image_header_t));
+	else
 #endif
 		memmove(&header, (char *)addr, sizeof(image_header_t));
 
@@ -101,7 +109,20 @@ int check_image(int mode)
 		read_dataflash(data, len, (char *)CFG_LOAD_ADDR);
 		data = CFG_LOAD_ADDR;
 	}
+#elif defined (CFG_ENV_IS_IN_NAND)
+	if (addr >= CFG_FLASH_BASE) {
+		ulong load_addr = CFG_SPINAND_LOAD_ADDR;
+		ranand_read(load_addr, data - CFG_FLASH_BASE, len);
+		data = load_addr;
+	}
+#elif defined (CFG_ENV_IS_IN_SPI)
+	if (addr >= CFG_FLASH_BASE) {
+		ulong load_addr = CFG_SPINAND_LOAD_ADDR;
+		raspi_read(load_addr, data - CFG_FLASH_BASE, len);
+		data = load_addr;
+	}
 #endif
+
 	if (verify)
 	{
 		puts("   Verifying Checksum ... ");

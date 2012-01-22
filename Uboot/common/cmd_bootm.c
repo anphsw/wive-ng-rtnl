@@ -289,7 +289,6 @@ int do_bootm (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 		raspi_read(load_addr, data - CFG_FLASH_BASE, len);
 		data = load_addr;
 	}
-#else //CFG_ENV_IS_IN_FLASH
 #endif
 
 	if (verify) {
