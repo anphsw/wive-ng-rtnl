@@ -1,4 +1,4 @@
-/* $Id: getifaddr.c,v 1.11 2011/05/15 08:59:27 nanard Exp $ */
+/* $Id: getifaddr.c,v 1.13 2012/01/20 21:45:57 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * (c) 2006-2011 Thomas Bernard 
@@ -13,8 +13,8 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <net/if.h>
-#include <arpa/inet.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #if defined(sun)
 #include <sys/sockio.h>
 #endif
@@ -74,8 +74,10 @@ getifaddr(const char * ifname, char * buf, int len)
 	}
 	for(ife = ifap; ife; ife = ife->ifa_next)
 	{
-		/* skip other interfaces */
-		if(0 != strcmp(ifname, ife->ifa_name))
+		/* skip other interfaces if one was specified */
+		if(ifname && (0 != strcmp(ifname, ife->ifa_name)))
+			continue;
+		if(ife->ifa_addr == NULL)
 			continue;
 		switch(ife->ifa_addr->sa_family)
 		{
@@ -120,6 +122,8 @@ find_ipv6_addr(const char * ifname,
 	{
 		/* skip other interfaces if one was specified */
 		if(ifname && (0 != strcmp(ifname, ife->ifa_name)))
+			continue;
+		if(ife->ifa_addr == NULL)
 			continue;
 		if(ife->ifa_addr->sa_family == AF_INET6)
 		{

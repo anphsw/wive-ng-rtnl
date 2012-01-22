@@ -1,4 +1,4 @@
-/* $Id: obsdrdr.c,v 1.67 2011/06/22 21:20:27 nanard Exp $ */
+/* $Id: obsdrdr.c,v 1.68 2012/01/20 21:57:46 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * (c) 2006-2010 Thomas Bernard 
@@ -248,6 +248,9 @@ add_redirect_rule2(const char * ifname,
 #ifdef PFRULE_HAS_RTABLEID
 		pcr.rule.rtableid = -1;	/* first appeared in OpenBSD 4.0 */
 #endif
+#ifdef PFRULE_HAS_ONRDOMAIN
+		pcr.rule.onrdomain = -1;	/* first appeared in OpenBSD 5.0 */
+#endif
 		pcr.rule.quick = 1;
 		pcr.rule.keep_state = PF_STATE_NORMAL;
 		if(tag)
@@ -377,6 +380,9 @@ add_filter_rule2(const char * ifname,
 		pcr.rule.flagset = (TH_SYN|TH_ACK);
 #ifdef PFRULE_HAS_RTABLEID
 		pcr.rule.rtableid = -1;	/* first appeared in OpenBSD 4.0 */ 
+#endif
+#ifdef PFRULE_HAS_ONRDOMAIN
+		pcr.rule.onrdomain = -1;	/* first appeared in OpenBSD 5.0 */
 #endif
 		pcr.rule.keep_state = 1;
 		strlcpy(pcr.rule.label, desc, PF_RULE_LABEL_SIZE);
