@@ -272,7 +272,7 @@ endif
 subdirs: $(patsubst %, _dir_%, $(DIRS))
 $(patsubst %, _dir_%, $(DIRS)): headers
 	if [ -f $(patsubst _dir_%, %, $@)/DoConfigure.sh ]; then ( cd $(patsubst _dir_%, %, $@); ./DoConfigure.sh; cd .. ) fi
-	$(MAKE) -C $(patsubst _dir_%, %, $@)
+	$(MAKE) -C $(patsubst _dir_%, %, $@) || exit 1
 
 tags:
 	ctags -R
