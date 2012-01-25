@@ -235,7 +235,11 @@ void igmpCreateVIFs() {
 		    my_log(LOG_DEBUG, 0, "Dp state is UPSTREAM ViF %d\n", Ix);
                     if(upStreamVif == -1) {
                         upStreamVif = Ix;
-                    } else  my_log(LOG_DEBUG, 0, "Vif #%d was already upstream. Cannot set VIF #%d as upstream as well.", upStreamVif, Ix);
+                    } else {
+                        my_log(LOG_WARNING, 0, "Vif #%d was already upstream. Cannot set VIF #%d as upstream as well (skipping this VIF).",
+                         upStreamVif, Ix);
+                        Dp->state = IF_STATE_DISABLED;
+		    }
                 }
     	     }
 	if (Dp->state != IF_STATE_DISABLED) {
