@@ -8,7 +8,7 @@ all:
 		echo "Making all in $$dir"; \
 		(cd $$dir; $(MAKE) all) || exit 1; \
 	done
-	
+
 clean:
 	@for dir in ${SUBDIRS}; do \
 		echo "Cleaning in $$dir"; \

@@ -1,7 +1,7 @@
 TOPDIR=../
 include $(TOPDIR)Rules.mak
 
-CFLAGS+=$(SSP_ALL_CFLAGS) -DHAVE_CONFIG_H -Iinclude/
+CFLAGS+=$(SSP_ALL_CFLAGS) -DHAVE_CONFIG_H -Iinclude/ -O3
 
 LIBNTFS3G=libntfs-3g.a
 LIBNTFS3G_VERS=26
