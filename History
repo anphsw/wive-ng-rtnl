@@ -944,6 +944,12 @@
 29) Cosmetics ra_sw_nat_hook_tx fix in wifi drivers.<br>
 30) miniupnpd up to 1.6.20120121 version.<br>
 31) upnp: fix uuid/model generate.<br>
+32) SPI/NAND Fix restore firmware from emerge mode in uboot.<br>
+33) Build lib fixup.<br>
+34) ntfs-3g support cleanup and build more optimized.<br>
+35) Igmpproxy ignore non-primary addresses on upstream VIF, fix work on dhcp mode.<br>
+36) Update usb_modeswitch and devicelist.<br>
+37) Backport fork fixes.<br>
 
 
 <br><br>
