@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # if app not exist
-if [ ! -f /usr/bin/xupnpd ]; then
+if [ ! -f /bin/xupnpd ]; then
     exit 0
 fi
 
@@ -12,6 +12,7 @@ web_wait
 LOG="logger -t xupnpd "
 
 start() {
+    get_param
     if [ "$xupnpd" = "1" ]; then
         $LOG "Start"
 	export XUPNPDROOTDIR=/etc/xupnpd

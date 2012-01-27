@@ -22,7 +22,7 @@ start() {
 	# only WAN interface recived multicast
 	if [ "$OperationMode" != "0" ]; then
 	    # INPUT needed by unpxy and igmpproxy
-	    if [ "$igmpEnabled" != "0" ] || [ "$UDPXYMode" != "0" ]; then
+	    if [ "$igmpEnabled" != "0" ] || [ "$UDPXYMode" != "0" ] || [ "$xupnpd" != "0" ]; then
 		$LOG "Set igmp input rules"
 		iptables -A INPUT -p igmp -i $lan_if -j ACCEPT
 	        iptables -A INPUT -d $mcast_net -i $wan_if -j ACCEPT
@@ -148,6 +148,18 @@ start() {
 	    fi
 	else
     	    iptables -A servicelimit $STATE_NEW -p tcp --dport $UDPXYPort -j DROP
+	fi
+	if [ "$xupnpd" != "0" ]; then
+	    $LOG "xupnpd limit"
+	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 4044 -j ACCEPT
+	    iptables -A servicelimit -i $lan_if -p udp --dport 14288 -j ACCEPT
+	    if [ "$Lan2Enabled" = "1" ]; then
+    		iptables -A servicelimit -i $lan2_if $STATE_NEW -p tcp --dport 4044 -j ACCEPT
+		iptables -A servicelimit -i $lan2_if -p udp --dport 14288 -j ACCEPT
+	    fi
+	    iptables -A servicelimit -p udp --dport 1900 -j ACCEPT
+	else
+    	    iptables -A servicelimit $STATE_NEW -p tcp --dport 4044 -j DROP
 	fi
 	if [ "$SmbEnabled" = "1" ]; then
 	    $LOG "samba"
