@@ -271,7 +271,7 @@ endif
 
 subdirs: $(patsubst %, _dir_%, $(DIRS))
 $(patsubst %, _dir_%, $(DIRS)): headers
-	if [ -f $(patsubst _dir_%, %, $@)/DoConfigure.sh ]; then ( cd $(patsubst _dir_%, %, $@); ./DoConfigure.sh; cd .. ) fi
+	if [ -f $(patsubst _dir_%, %, $@)/DoConfigure.sh ]; then ( cd $(patsubst _dir_%, %, $@); ./DoConfigure.sh || exit 1 ; cd .. ) || exit 1 ; fi
 	$(MAKE) -C $(patsubst _dir_%, %, $@) || exit 1
 
 tags:

@@ -101,6 +101,7 @@ bool 'Proxy ARP daemon'				CONFIG_USER_PARPROUTED
 bool 'ripd-zebra (RIP)' 			CONFIG_USER_ZEBRA
 bool 'snmpd(v1)'                                CONFIG_USER_SNMPD
 bool 'miniupnpd'				CONFIG_USER_MINIUPNPD
+bool 'xupnpd'					CONFIG_USER_XUPNPD
 bool 'radvd (Router Advertisement Daemon)'	CONFIG_USER_RADVD
 bool 'Cisco Discovery Protocol'			CONFIG_USER_CDP
 bool 'Link Layer Topology Discovery Protocol'	CONFIG_USER_LLTD

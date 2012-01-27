@@ -60,7 +60,7 @@ export $(CFLAGS)
 SUBDIRS_APP =  goahead iptables miniupnp  rt2880_app wpa_supplicant ethtool
 SUBDIRS_APP += igmpproxy lldt ppp strace wsc_upnp busybox inadyn pppoe-relay udpxy xl2tpd
 SUBDIRS_APP += 802.1x dnsmasq gdbserver iproute2 wive-utils kabinet radvd wireless_tools zebra dropbear
-SUBDIRS_APP += ntfs-3g p910nd transmission openssl minidlna samba samba3 cdp-tools
+SUBDIRS_APP += ntfs-3g p910nd transmission openssl minidlna samba samba3 cdp-tools xupnpd
 #
 # must run the vendor build first
 #
@@ -96,6 +96,7 @@ dir_$(CONFIG_USER_UDPXY)                    += udpxy
 dir_$(CONFIG_USER_WIVE)			    += wive-utils
 dir_$(CONFIG_USER_KABINET)		    += kabinet
 dir_$(CONFIG_USER_MINIUPNPD)                += miniupnp
+dir_$(CONFIG_USER_XUPNPD)		    += xupnpd
 dir_$(CONFIG_USER_RADVD)               	    += radvd
 dir_$(CONFIG_USER_ZEBRA)		    += zebra
 dir_$(CONFIG_USER_SNMPD)                    += snmpd
@@ -140,11 +141,11 @@ ifeq ($(CONFIG_USER_OPENSSL),y)
 endif
 	# ">>>>>>>>>>>>>>>> CONFIGURE ALL NEEDED  <<<<<<<<<<<<<<<<<<<<<<"
 	for i in $(dir_y) ; do \
-	    if [ -f "$$i/DoConfigure.sh" ]; then ( cd $$i; ./DoConfigure.sh; cd .. ) fi \
+	    if [ -f "$$i/DoConfigure.sh" ]; then ( cd $$i; ./DoConfigure.sh || exit 1 ; cd .. ) || exit 1 ; fi \
 	done
 	# ">>>>>>>>>>>>>>>>  MAKE USERSPACE  <<<<<<<<<<<<<<<<<<<<<<"
 	for i in $(dir_y) ; do \
-	    if [ -d "$$i" ]; then ( cd $$i; make -j$(HOST_NCPU); cd .. ) fi \
+	    if [ -d "$$i" ]; then ( cd $$i; make -j$(HOST_NCPU) || exit 1 ; cd .. ) || exit 1 ; fi \
 	done
 
 #

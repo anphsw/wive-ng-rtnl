@@ -950,7 +950,8 @@
 35) Igmpproxy ignore non-primary addresses on upstream VIF, fix work on dhcp mode.<br>
 36) Update usb_modeswitch and devicelist.<br>
 37) Backport fork fixes.<br>
-
+38) Add make checks in buildtree.<br>
+39) Add xupnpd r283.<br>
 
 <br><br>
 <b>For support see:</b><br>
