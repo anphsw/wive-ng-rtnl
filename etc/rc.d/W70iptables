@@ -129,6 +129,26 @@ start() {
 	else
     	    iptables -A servicelimit $STATE_NEW -p tcp --dport 20:21 -j DROP
 	fi
+	if [ "$upnpEnabled" = "1" ] && [ "$OperationMode" != "0" ]; then
+	    $LOG "upnp"
+	    # not safe fix me later
+	    iptables -A servicelimit -i $lan_if -p udp --dport 1024:65535 -j ACCEPT
+	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 1024:65535 -j ACCEPT
+	fi
+	if [ "$xupnpd" != "0" ]; then
+	    $LOG "xupnpd"
+	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 4044 -j ACCEPT
+	    # not safe fix me later
+	    iptables -A servicelimit -i $lan_if -p udp --dport 1024:65535 -j ACCEPT
+	    if [ "$Lan2Enabled" = "1" ]; then
+    		iptables -A servicelimit -i $lan2_if $STATE_NEW -p tcp --dport 4044 -j ACCEPT
+		# not safe fix me later
+		iptables -A servicelimit -i $lan2_if -p udp --dport 1024:65535 -j ACCEPT
+	    fi
+	    iptables -A servicelimit -p udp --dport 1900 -j ACCEPT
+	else
+    	    iptables -A servicelimit $STATE_NEW -p tcp --dport 4044 -j DROP
+	fi
 	if [ "$UDPXYMode" != "0" ]; then
 	    $LOG "udpxy limit"
     	    iptables -A servicelimit $STATE_NEW -p tcp --dport $UDPXYPort $CONNLIMIT 8 -j REJECT
@@ -149,18 +169,6 @@ start() {
 	else
     	    iptables -A servicelimit $STATE_NEW -p tcp --dport $UDPXYPort -j DROP
 	fi
-	if [ "$xupnpd" != "0" ]; then
-	    $LOG "xupnpd limit"
-	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 4044 -j ACCEPT
-	    iptables -A servicelimit -i $lan_if -p udp --dport 14288 -j ACCEPT
-	    if [ "$Lan2Enabled" = "1" ]; then
-    		iptables -A servicelimit -i $lan2_if $STATE_NEW -p tcp --dport 4044 -j ACCEPT
-		iptables -A servicelimit -i $lan2_if -p udp --dport 14288 -j ACCEPT
-	    fi
-	    iptables -A servicelimit -p udp --dport 1900 -j ACCEPT
-	else
-    	    iptables -A servicelimit $STATE_NEW -p tcp --dport 4044 -j DROP
-	fi
 	if [ "$SmbEnabled" = "1" ]; then
 	    $LOG "samba"
 	    iptables -A servicelimit -i $lan_if -p udp --dport 137:138 -j ACCEPT
@@ -178,12 +186,6 @@ start() {
 	else
 	    iptables -A servicelimit -i $lan_if -p udp --dport 53 -j DROP
 	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 53 -j DROP
-	fi
-	if [ "$upnpEnabled" = "1" ] && [ "$OperationMode" != "0" ]; then
-	    $LOG "upnp"
-	    # not safe fix me later
-	    iptables -A servicelimit -i $lan_if -p udp --dport 1024:65535 -j ACCEPT
-	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 1024:65535 -j ACCEPT
 	fi
 	if [ "$snmpd" = "1" ]; then
 	    $LOG "snmpd"

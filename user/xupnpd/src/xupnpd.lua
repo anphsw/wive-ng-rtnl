@@ -23,10 +23,10 @@ cfg.embedded=false
 cfg.debug=0
 
 -- external 'udpxy' url for multicast playlists (udp://@...)
---cfg.udpxy_url='http://192.168.1.1:4022'
+-- cfg.udpxy_url='http://192.168.1.1:4022'
 
 -- downstream interface for builtin multicast proxy (comment 'cfg.udpxy_url' for processing 'udp://@...' playlists)
-cfg.mcast_interface='br0'
+cfg.mcast_interface='eth2.2'
 
 -- 'cfg.proxy' enables proxy for injection DLNA headers to stream
 -- 0-off, 1-radio, 2-radio/TV
@@ -51,7 +51,7 @@ cfg.dlna_notify=true
 cfg.group=true
 
 -- Device name
-cfg.name='Wive-NG-RTNL-IPTV'
+cfg.name='WiveNG'
 
 -- static device UUID, '60bd2fb3-dabe-cb14-c766-0e319b54c29a' for example or nil
 cfg.uuid='60bd2fb3-dabe-cb14-c766-0e319b54c29a'

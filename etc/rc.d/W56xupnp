@@ -27,6 +27,7 @@ get_param() {
 stop() {
     killall -q xupnpd
     killall -q -SIGKILL xupnpd
+    rm -f /var/run/xupnpd.pid
 }
 
 case "$1" in
