@@ -13,7 +13,7 @@ install:
 	#OK
 
 romfs:
-	cp -fv src/xupnpd $(ROMFSDIR)/usr/bin/xupnpd
+	cp -fv src/xupnpd $(ROMFSDIR)/bin/xupnpd
 	rm -rf $(ROMFSDIR)/etc/xupnpd
 	mkdir -p $(ROMFSDIR)/etc/xupnpd
 	mkdir -p $(ROMFSDIR)/etc/xupnpd/config

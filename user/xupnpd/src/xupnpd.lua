@@ -51,7 +51,7 @@ cfg.dlna_notify=true
 cfg.group=true
 
 -- Device name
-cfg.name='WiveNG'
+cfg.name='Wive-NG'
 
 -- static device UUID, '60bd2fb3-dabe-cb14-c766-0e319b54c29a' for example or nil
 cfg.uuid='60bd2fb3-dabe-cb14-c766-0e319b54c29a'
@@ -71,7 +71,7 @@ cfg.feeds_update_interval=1800
 -- playlist (m3u file path or path with alias
 playlist=
 {
-    { '/etc/xupnpd/playlists/mozhay.m3u',             'Mozhay.tv' },
+    { './playlists/mozhay.m3u',             'Mozhay.tv' },
 --    { './localmedia', 'Local Media Files', '127.0.0.1;192.168.1.1' }
 }
 
@@ -94,12 +94,12 @@ feeds=
 cfg.version='1.0-rc6'
 cfg.log_ident=arg[1] or 'xupnpd'
 cfg.pid_file='/var/run/'..cfg.log_ident..'.pid'
-cfg.www_root='/etc/xupnpd/www/'
+cfg.www_root='./www/'
 cfg.tmp_path='/tmp/'
-cfg.plugin_path='/etc/xupnpd/plugins/'
-cfg.config_path='/etc/xupnpd/config/'
-cfg.playlists_path='/etc/xupnpd/playlists/'
-cfg.feeds_path='/etc/xupnpd/xupnpd-feeds/'
-cfg.ui_path='/etc/xupnpd/ui/'
+cfg.plugin_path='./plugins/'
+cfg.config_path='./config/'
+cfg.playlists_path='./playlists/'
+cfg.feeds_path='./xupnpd-feeds/'
+cfg.ui_path='./ui/'
 
 dofile('xupnpd_main.lua')
