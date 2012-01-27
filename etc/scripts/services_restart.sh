@@ -37,8 +37,8 @@ fi
 if [ "$MODE" = "pppd" ] || [ "$MODE" = "all" ] || [ "$vpnEnabled" != "on" ]; then
     service ddns restart
     service ntp restart
-    service upnp restart
-    service xupnp restart
+    service miniupnpd restart
+    service xupnpd restart
 fi
 
 ##########################################################
