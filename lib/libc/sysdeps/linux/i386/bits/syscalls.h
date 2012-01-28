@@ -4,14 +4,12 @@
 # error "Never use <bits/syscalls.h> directly; include <sys/syscall.h> instead."
 #endif
 
+#include <errno.h>
+
 /* This includes the `__NR_<name>' syscall numbers taken from the Linux kernel
  * header files.  It also defines the traditional `SYS_<name>' macros for older
  * programs.  */
 #include <bits/sysnum.h>
-
-#ifndef __set_errno
-# define __set_errno(val) (*__errno_location ()) = (val)
-#endif
 
 /*
    Some of the sneaky macros in the code were taken from 
@@ -22,7 +20,7 @@
 
 /* We need some help from the assembler to generate optimal code.  We
    define some macros here which later will be used.  */
-asm (".L__X'%ebx = 1\n\t"
+__asm__ (".L__X'%ebx = 1\n\t"
      ".L__X'%ecx = 2\n\t"
      ".L__X'%edx = 2\n\t"
      ".L__X'%eax = 3\n\t"
@@ -55,7 +53,6 @@ asm (".L__X'%ebx = 1\n\t"
      ".endif\n\t"
      ".endif\n\t"
      ".endm\n\t");
-
 
 #undef _syscall0
 #define _syscall0(type,name) \
@@ -100,10 +97,18 @@ type name (type1 arg1,type2 arg2,type3 arg3,type4 arg4,type5 arg5) \
 return (type) (INLINE_SYSCALL(name, 5, arg1, arg2, arg3, arg4, arg5)); \
 }
 
+#undef _syscall6
+#define _syscall6(type,name,type1,arg1,type2,arg2,type3,arg3,type4,arg4, \
+	  type5,arg5,type6,arg6) \
+type name (type1 arg1,type2 arg2,type3 arg3,type4 arg4,type5 arg5, type6 arg6) \
+{ \
+return (type) (INLINE_SYSCALL(name, 6, arg1, arg2, arg3, arg4, arg5, arg6)); \
+}
+
 #define INLINE_SYSCALL(name, nr, args...) \
   ({									      \
     unsigned int resultvar;						      \
-    asm volatile (							      \
+    __asm__ volatile (							      \
     LOADARGS_##nr							      \
     "movl %1, %%eax\n\t"						      \
     "int $0x80\n\t"							      \
@@ -125,6 +130,7 @@ return (type) (INLINE_SYSCALL(name, 5, arg1, arg2, arg3, arg4, arg5)); \
 #define LOADARGS_3	LOADARGS_1
 #define LOADARGS_4	LOADARGS_1
 #define LOADARGS_5	LOADARGS_1
+#define LOADARGS_6	LOADARGS_1 "push %%ebp ; movl %7, %%ebp\n\t"
 
 #define RESTOREARGS_0
 #define RESTOREARGS_1 \
@@ -133,6 +139,7 @@ return (type) (INLINE_SYSCALL(name, 5, arg1, arg2, arg3, arg4, arg5)); \
 #define RESTOREARGS_3	RESTOREARGS_1
 #define RESTOREARGS_4	RESTOREARGS_1
 #define RESTOREARGS_5	RESTOREARGS_1
+#define RESTOREARGS_6	"pop %%ebp\n\t" RESTOREARGS_1
 
 #define ASMFMT_0()
 #define ASMFMT_1(arg1) \
@@ -145,6 +152,8 @@ return (type) (INLINE_SYSCALL(name, 5, arg1, arg2, arg3, arg4, arg5)); \
 	, "aD" (arg1), "c" (arg2), "d" (arg3), "S" (arg4)
 #define ASMFMT_5(arg1, arg2, arg3, arg4, arg5) \
 	, "a" (arg1), "c" (arg2), "d" (arg3), "S" (arg4), "D" (arg5)
+#define ASMFMT_6(arg1, arg2, arg3, arg4, arg5, arg6) \
+	, "a" (arg1), "c" (arg2), "d" (arg3), "S" (arg4), "D" (arg5), "m" (arg6)
 
 
 #endif /* __ASSEMBLER__ */

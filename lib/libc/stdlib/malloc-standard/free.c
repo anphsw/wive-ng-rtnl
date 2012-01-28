@@ -281,7 +281,7 @@ void free(void* mem)
     if (mem == NULL)
 	return;
 
-    LOCK;
+    __MALLOC_LOCK;
     av = get_malloc_state();
     p = mem2chunk(mem);
     size = chunksize(p);
@@ -408,6 +408,6 @@ void free(void* mem)
 	/* munmap returns non-zero on failure */
 	assert(ret == 0);
     }
-    UNLOCK;
+    __MALLOC_UNLOCK;
 }
 

@@ -43,6 +43,7 @@ static inline unsigned long arm_modulus(unsigned long m, unsigned long p)
 	return m;
 }
 #define do_rem(result, n, base) ((result) = arm_modulus(n, base))
+#define do_div_10(result, remain) ((result) = (((result) - (remain)) / 2) * -(-1ul / 5ul))
 
 /* Here we define the magic numbers that this dynamic loader should accept */
 #define MAGIC1 EM_ARM
@@ -85,7 +86,25 @@ elf_machine_load_address (void)
 	extern void __dl_start asm ("_dl_start");
 	Elf32_Addr got_addr = (Elf32_Addr) &__dl_start;
 	Elf32_Addr pcrel_addr;
+#if !defined __thumb__
 	asm ("adr %0, _dl_start" : "=r" (pcrel_addr));
+#else
+	int tmp;
+	/* The above adr will not work on thumb because it
+	 * is negative.  The only safe way is to temporarily
+	 * swap to arm.
+	 */
+	asm(   ".align	2\n"
+	"	bx	pc\n"
+	"	nop	\n"
+	"	.arm	\n"
+	"	adr	%0, _dl_start\n"
+	"	.align	2\n"
+	"	orr	%1, pc, #1\n"
+	"	bx	%1\n"
+	"	.force_thumb\n"
+	: "=r" (pcrel_addr), "=&r" (tmp));
+#endif
 	return pcrel_addr - got_addr;
 }
 

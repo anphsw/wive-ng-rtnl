@@ -1,8 +1,23 @@
+/* vi: set sw=4 ts=4: */
+/*
+ * Copyright (C) 2000-2005 by Erik Andersen <andersen@codepoet.org>
+ *
+ * GNU Lesser General Public License version 2.1 or later.
+ */
+
 #ifndef _LINUX_STRING_H_
 #define _LINUX_STRING_H_
 
-#include <dl-sysdep.h> // for do_rem
+#include <dl-sysdep.h> /* for do_rem */
 #include <features.h>
+
+/* provide some sane defaults */
+#ifndef do_rem
+# define do_rem(result, n, base) ((result) = (n) % (base))
+#endif
+#ifndef do_div_10
+# define do_div_10(result, remain) ((result) /= 10)
+#endif
 
 static size_t _dl_strlen(const char * str);
 static char *_dl_strcat(char *dst, const char *src);
@@ -26,8 +41,8 @@ static char *_dl_simple_ltoahex(char * local, unsigned long i);
 static __always_inline size_t _dl_strlen(const char * str)
 {
 	register const char *ptr = (char *) str-1;
-
-	while (*++ptr);
+	while (*++ptr)
+		;/* empty */
 	return (ptr - str);
 }
 
@@ -49,7 +64,8 @@ static __always_inline char * _dl_strcpy(char * dst,const char *src)
 	register char *ptr = dst;
 
 	dst--;src--;
-	while ((*++dst = *++src) != 0);
+	while ((*++dst = *++src) != 0)
+		;/* empty */
 
 	return ptr;
 }
@@ -63,8 +79,7 @@ static __always_inline int _dl_strcmp(const char * s1,const char * s2)
 		c2 = (unsigned char) *++s2;
 		if (c1 == '\0')
 			return c1 - c2;
-	}
-	while (c1 == c2);
+	} while (c1 == c2);
 
 	return c1 - c2;
 }
@@ -98,7 +113,7 @@ static __always_inline char * _dl_strchr(const char * str,int c)
 	return 0;
 }
 
-static inline char * _dl_strrchr(const char *str, int c)
+static __always_inline char * _dl_strrchr(const char *str, int c)
 {
     register char *prev = 0;
     register char *ptr = (char *) str-1;
@@ -112,29 +127,27 @@ static inline char * _dl_strrchr(const char *str, int c)
     return(prev);
 }
 
-static inline char * _dl_strstr(const char *s1, const char *s2)
+static __always_inline char * _dl_strstr(const char *s1, const char *s2)
 {
     register const char *s = s1;
     register const char *p = s2;
 
     do {
-        if (!*p) {
+		if (!*p)
 	    return (char *) s1;;
-	}
 	if (*p == *s) {
 	    ++p;
 	    ++s;
 	} else {
 	    p = s2;
-	    if (!*s) {
+			if (!*s)
 	      return NULL;
-	    }
 	    s = ++s1;
 	}
     } while (1);
 }
 
-static inline void * _dl_memcpy(void * dst, const void * src, size_t len)
+static __always_inline void * _dl_memcpy(void * dst, const void * src, size_t len)
 {
 	register char *a = dst-1;
 	register const char *b = src-1;
@@ -178,7 +191,8 @@ static __always_inline void * _dl_memset(void *to, int c, size_t n)
         } while (--chunks);
  lessthan4:
         n = n % 4;
-        if (!n ) return to;
+	if (!n)
+		return to;
         tmp_char = (unsigned char *)tmp_to;
         do {
                 *--tmp_char = c;
@@ -228,7 +242,7 @@ static __always_inline char * _dl_simple_ltoa(char * local, unsigned long i)
 	    char temp;
 	    do_rem(temp, i, 10);
 	    *--p = '0' + temp;
-	    i /= 10;
+		do_div_10(i, temp);
 	} while (i > 0);
 	return p;
 }
@@ -270,8 +284,8 @@ static __always_inline char * _dl_simple_ltoahex(char * local, unsigned long i)
 
 /* On some arches constant strings are referenced through the GOT.
  * This requires that load_addr must already be defined... */
-#if defined(mc68000) || defined(__arm__) || defined(__mips__)	\
-                     || defined(__sh__) ||  defined(__powerpc__)
+#if defined(mc68000)  || defined(__arm__) || defined(__thumb__) || \
+    defined(__mips__) || defined(__sh__)  || defined(__powerpc__)
 # define CONSTANT_STRING_GOT_FIXUP(X) \
 	if ((X) < (const char *) load_addr) (X) += load_addr
 # define NO_EARLY_SEND_STDERR
@@ -318,7 +332,7 @@ static __always_inline char * _dl_simple_ltoahex(char * local, unsigned long i)
 	do { \
 		do_rem(v, (X), 10); \
 		*--tmp2 = '0' + v; \
-		(X) /= 10; \
+		do_div_10((X), v); \
 	} while ((X) > 0); \
 	_dl_write(2, tmp2, tmp1 - tmp2 + sizeof(tmp) - 1); \
 }

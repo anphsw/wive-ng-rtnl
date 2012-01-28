@@ -289,13 +289,15 @@ install_dev:
 	$(INSTALL) -d $(PREFIX)$(DEVEL_PREFIX)lib
 	$(INSTALL) -d $(PREFIX)$(DEVEL_PREFIX)include
 	-$(INSTALL) -m 644 lib/*.[ao] $(PREFIX)$(DEVEL_PREFIX)lib/
-	if [ "$(KERNEL_SOURCE)" == "$(DEVEL_PREFIX)" ] ; then \
+	if [ "$(KERNEL_SOURCE)" = "$(DEVEL_PREFIX)" ] ; then \
 		extra_exclude="--exclude include/linux --exclude include/asm'*'" ; \
 	else \
 		extra_exclude="" ; \
 	fi ; \
 	tar -chf - include --exclude .svn --exclude CVS $$extra_exclude \
 		| tar -xf - -C $(PREFIX)$(DEVEL_PREFIX)
+	echo '/* Dont use _syscall#() macros; use the syscall() function */' > \
+		$(PREFIX)$(DEVEL_PREFIX)include/bits/syscalls.h
 ifneq ($(strip $(UCLIBC_HAS_FLOATS)),y)
 	# Remove floating point related headers since float support is disabled.
 	$(RM) $(PREFIX)$(DEVEL_PREFIX)include/complex.h

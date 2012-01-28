@@ -17,6 +17,44 @@
 .globl _dl_linux_resolve
 .type _dl_linux_resolve,@function
 
+#ifdef __arch_v32
+
+_dl_linux_resolve:
+	subq	4,$sp
+	move.d	$r0,[$sp]
+	subq	4,$sp
+	move.d	$r13,[$sp]
+	subq	4,$sp
+	move.d	$r12,[$sp]
+	subq	4,$sp
+	move.d	$r11,[$sp]
+	subq	4,$sp
+	addoq	5*4,$sp,$acr
+	move.d	$r10,[$sp]
+	subq	4,$sp
+	move	$mof,$r10
+	move.d	$r9,[$sp]
+	subq	4,$sp
+	move.d	[$acr],$r11
+	move	$srp,[$sp]
+	lapc	_GLOBAL_OFFSET_TABLE_,$r0
+	move.d	_dl_linux_resolver:PLTG,$r9
+	add.d	$r0,$r9
+	jsr	$r9
+	nop
+	move.d	$r10,$acr
+	move	[$sp+],$srp
+	move.d	[$sp+],$r9
+	move.d	[$sp+],$r10
+	move.d	[$sp+],$r11
+	move.d	[$sp+],$r12
+	move.d	[$sp+],$r13
+	move.d	[$sp+],$r0
+	jump	$acr
+	addq	4,$sp
+
+#else
+
 _dl_linux_resolve:
 	push $r13
 	push $r12
@@ -45,5 +83,7 @@ _dl_linux_resolve:
 	pop $r12
 	pop $r13
 	jump [$sp+]
+
+#endif /* __arch_v32 */
 
 	.size _dl_linux_resolve, . - _dl_linux_resolve

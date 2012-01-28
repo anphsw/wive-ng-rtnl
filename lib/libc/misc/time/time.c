@@ -143,6 +143,8 @@
 #include <locale.h>
 #include <bits/uClibc_uintmaxtostr.h>
 
+#include <bits/uClibc_mutex.h>
+
 #ifdef __UCLIBC_HAS_XLOCALE__
 #include <xlocale.h>
 #endif
@@ -153,6 +155,22 @@
 
 #ifndef TZNAME_MAX
 #define TZNAME_MAX _POSIX_TZNAME_MAX
+#endif
+
+#if defined (L_tzset) || defined (L_localtime_r) || defined(L_strftime) || \
+	 defined(L__time_mktime) || defined(L__time_mktime_tzi) || \
+	 ((defined(L_strftime) || defined(L_strftime_l)) && \
+	  defined(__UCLIBC_HAS_XLOCALE__))
+
+void _time_tzset (int);
+
+#ifndef L__time_mktime
+
+ /* Jan 1, 2007 Z - tm = 0,0,0,1,0,107,1,0,0 */
+
+const static time_t new_rule_starts = 1167609600;
+
+#endif
 #endif
 
 /**********************************************************************/
@@ -191,21 +209,7 @@ typedef struct {
 	char tzname[TZNAME_MAX+1];
 } rule_struct;
 
-#ifdef __UCLIBC_HAS_THREADS__
-
-#include <pthread.h>
-
-extern pthread_mutex_t _time_tzlock;
-
-#define TZLOCK		__pthread_mutex_lock(&_time_tzlock)
-#define TZUNLOCK	__pthread_mutex_unlock(&_time_tzlock)
-
-#else
-
-#define TZLOCK		((void) 0)
-#define TZUNLOCK	((void) 0)
-
-#endif
+__UCLIBC_MUTEX_EXTERN(_time_tzlock);
 
 extern rule_struct _time_tzinfo[2];
 
@@ -543,13 +547,13 @@ struct tm *localtime(const time_t *timer)
 struct tm *localtime_r(register const time_t *__restrict timer,
 					   register struct tm *__restrict result)
 {
-	TZLOCK;
+	__UCLIBC_MUTEX_LOCK(_time_tzlock);
 
-	tzset();
+	_time_tzset(*timer < new_rule_starts);
 
 	__time_localtime_tzi(timer, result, _time_tzinfo);
 
-	TZUNLOCK;
+	__UCLIBC_MUTEX_UNLOCK(_time_tzlock);
 
 	return result;
 }
@@ -969,7 +973,8 @@ size_t __XL(strftime)(char *__restrict s, size_t maxsize,
 	unsigned char mod;
 	unsigned char code;
 
-	tzset();					/* We'll, let's get this out of the way. */
+	/* We'll, let's get this out of the way. */
+	_time_tzset(_time_mktime((struct tm *) timeptr, 0) < new_rule_starts);
 
 	lvl = 0;
 	p = format;
@@ -1038,7 +1043,7 @@ size_t __XL(strftime)(char *__restrict s, size_t maxsize,
 			goto LOOP;
 		}
 
-		o = spec + 26;		/* set to "????" */
+		o = ((const char *) spec) + 26;	/* set to "????" */
 		if ((code & MASK_SPEC) == CALC_SPEC) {
 
 			if (*p == 's') {
@@ -1074,17 +1079,15 @@ size_t __XL(strftime)(char *__restrict s, size_t maxsize,
 
 #ifdef __UCLIBC_HAS_TM_EXTENSIONS__
 
-#define RSP_TZUNLOCK	((void) 0)
 #define RSP_TZNAME		timeptr->tm_zone
 #define RSP_GMT_OFFSET	(-timeptr->tm_gmtoff)
 
 #else
 
-#define RSP_TZUNLOCK	TZUNLOCK
 #define RSP_TZNAME		rsp->tzname
 #define RSP_GMT_OFFSET	rsp->gmt_offset
 
-				TZLOCK;
+				__UCLIBC_MUTEX_LOCK(_time_tzlock);
 
 				rsp = _time_tzinfo;
 				if (timeptr->tm_isdst > 0) {
@@ -1115,15 +1118,17 @@ size_t __XL(strftime)(char *__restrict s, size_t maxsize,
 					}
 #endif
 					o_count = SIZE_MAX;
-					RSP_TZUNLOCK;
+/* 					RSP_TZUNLOCK; */
+#ifdef __UCLIBC_HAS_TM_EXTENSIONS__
 					goto OUTPUT;
+#endif
 				} else {		/* z */
 					*s = '+';
 					if ((tzo = -RSP_GMT_OFFSET) < 0) {
 						tzo = -tzo;
 						*s = '-';
 					}
-					RSP_TZUNLOCK;
+/* 					RSP_TZUNLOCK; */
 					++s;
 					--count;
 
@@ -1132,7 +1137,13 @@ size_t __XL(strftime)(char *__restrict s, size_t maxsize,
 			
 					i = 16 + 6;	/* 0-fill, width = 4 */
 				}
-
+#ifdef __UCLIBC_HAS_TM_EXTENSIONS__
+#else
+				__UCLIBC_MUTEX_UNLOCK(_time_tzlock);
+				if (*p == 'Z') {
+					goto OUTPUT;
+				}
+#endif
 			} else {
 				/* TODO: don't need year for U, W */
 				for (i=0 ; i < 3 ; i++) {
@@ -1651,7 +1662,9 @@ static const char vals[] = {
 	6,  0,  0,					/* Note: overloaded for non-M non-J case... */
 	0, 1, 0,					/* J */
 	',', 'M',      '4', '.', '1', '.', '0',
-	',', 'M', '1', '0', '.', '5', '.', '0', 0
+	',', 'M', '1', '0', '.', '5', '.', '0', 0,
+	',', 'M',      '3', '.', '2', '.', '0',
+	',', 'M', '1', '1', '.', '1', '.', '0', 0
 };
 
 #define TZ    vals
@@ -1659,15 +1672,14 @@ static const char vals[] = {
 #define RANGE (vals + 7)
 #define RULE  (vals + 11 - 1)
 #define DEFAULT_RULES (vals + 22)
+#define DEFAULT_2007_RULES (vals + 38)
 
 /* Initialize to UTC. */
 int daylight = 0;
 long timezone = 0;
 char *tzname[2] = { (char *) UTC, (char *) (UTC-1) };
 
-#ifdef __UCLIBC_HAS_THREADS__
-pthread_mutex_t _time_tzlock = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
-#endif
+__UCLIBC_MUTEX_INIT(_time_tzlock, PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP);
 
 rule_struct _time_tzinfo[2];
 
@@ -1783,6 +1795,11 @@ static char *read_TZ_file(char *buf)
 
 void tzset(void)
 {
+    _time_tzset((time(NULL)) < new_rule_starts);
+}
+
+void _time_tzset(int use_old_rules)
+{
 	register const char *e;
 	register char *s;
 	long off;
@@ -1797,7 +1814,7 @@ void tzset(void)
 	static char oldval[TZ_BUFLEN]; /* BSS-zero'd. */
 #endif /* __UCLIBC_HAS_TZ_CACHING__ */
 
-	TZLOCK;
+	__UCLIBC_MUTEX_LOCK(_time_tzlock);
 
 	e = getenv(TZ);				/* TZ env var always takes precedence. */
 
@@ -1905,7 +1922,15 @@ void tzset(void)
 	} else {					/* OK, we have dst, so get some rules. */
 		count = 0;
 		if (!*e) {				/* No rules so default to US rules. */
-			e = DEFAULT_RULES;
+		        e = use_old_rules ? DEFAULT_RULES : DEFAULT_2007_RULES;
+#ifdef DEBUG_TZSET			
+			if (e == DEFAULT_RULES)
+			    printf("tzset: Using old rules.\n");
+			else if (e == DEFAULT_2007_RULES)
+			    printf("tzset: Using new rules\n");
+			else
+			    printf("tzset: Using undefined rules\n");
+#endif /* DEBUG_TZSET */
 		}
 
 		do {
@@ -1963,10 +1988,10 @@ void tzset(void)
 	daylight = !!_time_tzinfo[1].tzname[0];
 	timezone = _time_tzinfo[0].gmt_offset;
 
-#if defined(__UCLIBC_HAS_TZ_FILE__)
+#if defined(__UCLIBC_HAS_TZ_FILE__) || defined(__UCLIBC_HAS_TZ_CACHING__)
  FAST_DONE:
 #endif
-	TZUNLOCK;
+	__UCLIBC_MUTEX_UNLOCK(_time_tzlock);
 }
 
 #endif
@@ -2168,13 +2193,13 @@ time_t _time_mktime(struct tm *timeptr, int store_on_success)
 {
 	time_t t;
 
-	TZLOCK;
+	__UCLIBC_MUTEX_LOCK(_time_tzlock);
 
 	tzset();
 
 	t = _time_mktime_tzi(timeptr, store_on_success, _time_tzinfo);
 
-	TZUNLOCK;
+	__UCLIBC_MUTEX_UNLOCK(_time_tzlock);
 
 	return t;
 }
@@ -2238,6 +2263,8 @@ time_t _time_mktime_tzi(struct tm *timeptr, int store_on_success,
 		++s;
 		--d;
 	}
+
+	_time_tzset (x.tm_year < 2007);	/* tm_year was expanded above */
 
 #ifdef __BCC__
 	d = p[5] - 1;

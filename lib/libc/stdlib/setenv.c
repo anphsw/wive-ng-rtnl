@@ -26,16 +26,9 @@
 #include <string.h>
 #include <unistd.h>
 
-#ifdef __UCLIBC_HAS_THREADS__
-#include <pthread.h>
-static pthread_mutex_t mylock = PTHREAD_MUTEX_INITIALIZER;
-# define LOCK	__pthread_mutex_lock(&mylock)
-# define UNLOCK	__pthread_mutex_unlock(&mylock);
-#else
-# define LOCK
-# define UNLOCK
-#endif
+#include <bits/uClibc_mutex.h>
 
+__UCLIBC_MUTEX_STATIC(mylock, PTHREAD_MUTEX_INITIALIZER);
 
 /* If this variable is not a null pointer we allocated the current
    environment.  */
@@ -55,8 +48,9 @@ int __add_to_environ (const char *name, const char *value,
     register size_t size;
     const size_t namelen = strlen (name);
     const size_t vallen = value != NULL ? strlen (value) + 1 : 0;
+    int rv = -1;
 
-    LOCK;
+    __UCLIBC_MUTEX_LOCK(mylock);
 
     /* We have to get the pointer now that we have the lock and not earlier
        since another thread might have created a new environment.  */
@@ -79,8 +73,7 @@ int __add_to_environ (const char *name, const char *value,
 	new_environ = (char **) realloc (last_environ,
 		(size + 2) * sizeof (char *));
 	if (new_environ == NULL) {
-	    UNLOCK;
-	    return -1;
+			goto DONE;
 	}
 
 	/* If the whole entry is given add it.  */
@@ -93,8 +86,7 @@ int __add_to_environ (const char *name, const char *value,
 	    new_environ[size] = (char *) malloc (namelen + 1 + vallen);
 	    if (new_environ[size] == NULL) {
 		__set_errno (ENOMEM);
-		UNLOCK;
-		return -1;
+				goto DONE;
 	    }
 
 	    memcpy (new_environ[size], name, namelen);
@@ -118,8 +110,7 @@ int __add_to_environ (const char *name, const char *value,
 	} else {
 	    np = malloc (namelen + 1 + vallen);
 	    if (np == NULL) {
-		UNLOCK;
-		return -1;
+				goto DONE;
 	    }
 	    memcpy (np, name, namelen);
 	    np[namelen] = '=';
@@ -128,8 +119,11 @@ int __add_to_environ (const char *name, const char *value,
 	*ep = np;
     }
 
-    UNLOCK;
-    return 0;
+    rv = 0;
+
+ DONE:
+    __UCLIBC_MUTEX_UNLOCK(mylock);
+    return rv;
 }
 
 int setenv (const char *name, const char *value, int replace)
@@ -148,7 +142,7 @@ int unsetenv (const char *name)
     }
 
     len = strlen (name);
-    LOCK;
+    __UCLIBC_MUTEX_LOCK(mylock);
     ep = __environ;
     while (*ep != NULL) {
 	if (!strncmp (*ep, name, len) && (*ep)[len] == '=') {
@@ -162,7 +156,7 @@ int unsetenv (const char *name)
 	    ++ep;
 	}
     }
-    UNLOCK;
+    __UCLIBC_MUTEX_UNLOCK(mylock);
     return 0;
 }
 
@@ -171,7 +165,7 @@ int unsetenv (const char *name)
    for Fortran 77) requires this function.  */
 int clearenv (void)
 {
-    LOCK;
+    __UCLIBC_MUTEX_LOCK(mylock);
     if (__environ == last_environ && __environ != NULL) {
 	/* We allocated this environment so we can free it.  */
 	free (__environ);
@@ -179,7 +173,7 @@ int clearenv (void)
     }
     /* Clear the environment pointer removes the whole environment.  */
     __environ = NULL;
-    UNLOCK;
+    __UCLIBC_MUTEX_UNLOCK(mylock);
     return 0;
 }
 

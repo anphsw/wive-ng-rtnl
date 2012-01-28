@@ -32,7 +32,7 @@ extern void __guard_setup(void);
 /*
  * Prototypes.
  */
-extern void *__libc_stack_end;
+void *__libc_stack_end;
 extern void weak_function _stdio_init(void);
 extern int *weak_const_function __errno_location(void);
 extern int *weak_const_function __h_errno_location(void);
@@ -159,6 +159,16 @@ void attribute_hidden (*__app_fini)(void) = NULL;
 #endif
 
 void attribute_hidden (*__rtld_fini)(void) = NULL;
+
+#ifdef _DL_FINI_CRT_COMPAT
+void attribute_hidden (*__dl_fini)(void) = NULL;
+
+void _set__dl_fini(void *fini_func)
+{
+	if (fini_func != NULL)
+		__dl_fini = fini_func;
+}
+#endif
 
 /* __uClibc_start_main is the new main stub for uClibc. This function is
  * called from crt0 (version 0.9.16 or newer), after ALL shared libraries

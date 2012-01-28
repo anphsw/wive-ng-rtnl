@@ -19,14 +19,22 @@
 TOPDIR=../
 include $(TOPDIR)Rules.mak
 
-CFLAGS+=$(SSP_ALL_CFLAGS)
+CFLAGS+=$(SSP_ALL_CFLAGS) -B../lib
+# This isnt the correct variable, but hijacking it for now is fine by me as it works
+LDPIEFLAG+=../lib/$(UCLIBC_LDSO)
 
-TARGETS = ldd ldconfig readelf
+TARGETS = ldd ldconfig
 
 ifeq ($(strip $(UCLIBC_HAS_LOCALE)),y)
 TARGET_ICONV = iconv
 else
 TARGET_ICONV =
+endif
+
+ifeq ($(strip $(LDSO_CACHE_SUPPORT)),y)
+HOST_LDSO_CACHE_FLAG = -D__LDSO_CACHE_SUPPORT__=1
+else
+HOST_LDSO_CACHE_FLAG =
 endif
 
 # NOTE: We build the utils AFTER we have a uClibc-targeted toolchain.
@@ -51,7 +59,7 @@ LDCONFIG_CFLAGS := -static
 else
 LDCONFIG_CFLAGS := $(PIEFLAG) $(LDPIEFLAG)
 endif
-ldconfig: ldconfig.c
+ldconfig: ldconfig.c chroot_realpath.c
 	$(CC) $(CFLAGS) $(LDCONFIG_CFLAGS) \
 		-DUCLIBC_RUNTIME_PREFIX=\"$(RUNTIME_PREFIX)\" \
 		-DUCLIBC_LDSO=$(UCLIBC_LDSO) -I. -I../ldso/include \
@@ -79,13 +87,13 @@ endif
 
 ldd.host: ldd.c
 	$(HOSTCC) $(HOSTCFLAGS) -Wl,-s \
-		-DUCLIBC_RUNTIME_PREFIX=\"$(RUNTIME_PREFIX)\" \
+ 		-DUCLIBC_RUNTIME_PREFIX=\"$(RUNTIME_PREFIX)\" $(HOST_LDSO_CACHE_FLAG) \
 		-DUCLIBC_LDSO=$(UCLIBC_LDSO) -I. -I../ldso/include \
 		$^ -o $@
 
-ldconfig.host: ldconfig.c
+ldconfig.host: ldconfig.c chroot_realpath.c
 	$(HOSTCC) $(HOSTCFLAGS) -Wl,-s \
-		-DUCLIBC_RUNTIME_PREFIX=\"$(RUNTIME_PREFIX)\" \
+ 		-DUCLIBC_RUNTIME_PREFIX=\"$(RUNTIME_PREFIX)\" $(HOST_LDSO_CACHE_FLAG) \
 		-DUCLIBC_LDSO=$(UCLIBC_LDSO) -I. -I../ldso/include \
 		$^ -o $@
 
