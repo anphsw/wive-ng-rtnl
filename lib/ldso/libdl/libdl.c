@@ -52,8 +52,10 @@ extern struct elf_resolve *_dl_loaded_modules;
 extern struct r_debug *_dl_debug_addr;
 extern unsigned long _dl_error_number;
 extern void *(*_dl_malloc_function)(size_t);
+#if 0
 extern void _dl_run_init_array(struct elf_resolve *);
 extern void _dl_run_fini_array(struct elf_resolve *);
+#endif
 #ifdef __LDSO_CACHE_SUPPORT__
 int _dl_map_cache(void);
 int _dl_unmap_cache(void);
@@ -387,8 +389,9 @@ void *dlopen(const char *libname, int flag)
 				(*dl_elf_func) ();
 			}
 		}
-
+#if 0
 		_dl_run_init_array(tpnt);
+#endif
 	}
 #endif /* SHARED */
 
@@ -509,7 +512,7 @@ static int do_dlclose(void *vhandle, int need_fini)
 			    && need_fini &&
 			    !(tpnt->init_flag & FINI_FUNCS_CALLED)) {
 				tpnt->init_flag |= FINI_FUNCS_CALLED;
-#ifdef SHARED
+#if 0
 				_dl_run_fini_array(tpnt);
 #endif
 
