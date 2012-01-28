@@ -57,6 +57,7 @@ char resolved_path[];
 	char *max_path;
 	int readlinks = 0;
 	int n;
+	int is_buffer_malloc = 0;
 
 	/* Make a copy of the source path since we may need to modify it. */
 	if (strlen(path) >= PATH_MAX - 2) {
@@ -124,12 +125,21 @@ char resolved_path[];
 		/* See if latest pathname component is a symlink. */
 		*new_path = '\0';
 		n = readlink(got_path, link_path, PATH_MAX - 1);
+		/* Add this to prevent from segmentation fault when resolved_path is NULL */
+		if(!resolved_path) {
+			resolved_path = malloc(PATH_MAX);
+			if(!resolved_path)
+				return NULL;
+			is_buffer_malloc = 1;
+		}
 		if (n < 0) {
 			/* EINVAL means the file exists but isn't a symlink. */
 			if (errno != EINVAL) {
 				/* Make sure it's null terminated. */
 				*new_path = '\0';
 				strcpy(resolved_path, got_path);
+				if(is_buffer_malloc)
+					free(resolved_path);
 				return NULL;
 			}
 		} else {
@@ -144,6 +154,8 @@ char resolved_path[];
 			/* Safe sex check. */
 			if (strlen(path) + n >= PATH_MAX - 2) {
 				__set_errno(ENAMETOOLONG);
+				if(is_buffer_malloc)
+					free(resolved_path);
 				return NULL;
 			}
 			/* Insert symlink contents into path. */

@@ -59,7 +59,7 @@ $(LIBNAME) shared_$(LIBNAME) ar-target: subdirs
 	$(AR) dN 2 $(LIBNAME) $$objs && \
 	$(AR) dN 2 $(LIBNAME) $$objs
 	@for objfile in obj.signal \
-	                obj.string.generic obj.string.$(TARGET_ARCH) obj.string \
+	                obj.string obj.string.generic obj.string.$(TARGET_ARCH) \
 	                obj.sysdeps.common obj.sysdeps.$(TARGET_ARCH) ; do \
 		if [ -e $$objfile ] ; then \
 			if [ "$(MAKE_IS_SILENT)" = "n" ] ; then \

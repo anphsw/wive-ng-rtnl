@@ -188,7 +188,7 @@ int __pthread_manager(void *arg)
     {
 
       PDEBUG("before __libc_read\n");
-      n = __libc_read(reqfd, (char *)&request, sizeof(request));
+      n = TEMP_FAILURE_RETRY(__libc_read(reqfd, (char *)&request, sizeof(request)));
       PDEBUG("after __libc_read, n=%d\n", n);
       ASSERT(n == sizeof(request));
       switch(request.req_kind) {
