@@ -43,7 +43,7 @@ CFLAGS += -DCONFIG_GACT -DCONFIG_GACT_PROB
 
 TCSO :=
 
-LDLIBS += -L. -ltc -lm -ldl -L../../lib/libflex
+LDLIBS += -L. -ltc -lm -L../../lib/libflex -ldl
 
 LDFLAGS += -Wl,-export-dynamic
 
