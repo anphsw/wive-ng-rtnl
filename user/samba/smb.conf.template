@@ -7,6 +7,7 @@
     max log size		= 10
     max disk size		= 0
     security			= share
+    encrypt passwords		= yes
     announce version		= 4.9
     domain master		= yes
     preferred master		= yes

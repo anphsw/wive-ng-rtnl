@@ -13,6 +13,7 @@
     max log size		= 10
 
     security			= share
+    encrypt passwords		= yes
     guest account		= nobody
 
     wins support		= yes
