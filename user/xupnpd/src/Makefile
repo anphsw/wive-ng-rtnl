@@ -24,11 +24,9 @@ embedded:
 	make -C $(LUA) CC=$(CROSS_COMPILE)gcc a
 	$(CROSS_COMPILE)gcc -Os -c -o md5.o md5c.c
 	$(CROSS_COMPILE)gcc $(CFLAGS) -DWITH_URANDOM -o xupnpd $(SRC) md5.o -lm -llua -ldl
-	$(CROSS_COMPILE)strip xupnpd
 
 clean:
 	make -C $(LUA) clean
 	rm -f $(LUA)/liblua.a
 	rm -f md5.o
 	rm -f xupnpd
-	rm -f xupnpd-
