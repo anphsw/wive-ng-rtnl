@@ -102,6 +102,6 @@ ssdp_init(ssdp_msg_alive,'ssdp:alive')
 ssdp_init(ssdp_msg_byebye,'ssdp:byebye')
 
 ssdp_alive()
-core.timer(15,"ssdp_timer")
+core.timer(10,"ssdp_timer")
 
 table.insert(atexit,ssdp_byebye)

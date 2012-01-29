@@ -36,7 +36,7 @@ cfg.proxy=2
 cfg.user_agent='Mozilla/5.0'
 
 -- I/O timeout
-cfg.http_timeout=15
+cfg.http_timeout=20
 
 -- 'cfg.dlna_extras' enables DLNA extras
 cfg.dlna_extras=true
@@ -54,7 +54,7 @@ cfg.group=true
 cfg.name='Wive-NG'
 
 -- static device UUID, '60bd2fb3-dabe-cb14-c766-0e319b54c29a' for example or nil
-cfg.uuid='60bd2fb3-dabe-cb14-c766-0e319b54c29a'
+cfg.uuid='60bd2fb3-dabe-cb14-c766-0e114b52c22a'
 
 -- max url cache size
 cfg.cache_size=8
