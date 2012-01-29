@@ -1,7 +1,8 @@
 # xupnpd top-level include
 -include ../../config.arch
 
-DIRLIST=playlists plugins ui www
+DIRLIST_ETC=playlists plugins
+DIRLIST_SHR=ui www
 
 all:
 	make -C src embedded
@@ -16,7 +17,9 @@ romfs:
 	cp -fv src/xupnpd $(ROMFSDIR)/bin/xupnpd
 	rm -rf $(ROMFSDIR)/etc/xupnpd
 	mkdir -p $(ROMFSDIR)/etc/xupnpd
+	cp -fv src/*.lua $(ROMFSDIR)/etc/xupnpd
 	mkdir -p $(ROMFSDIR)/etc/xupnpd/config
 	mkdir -p $(ROMFSDIR)/etc/xupnpd/xupnpd-feeds
-	cp -fv src/*.lua $(ROMFSDIR)/etc/xupnpd
-	for i in $(DIRLIST); do cp -apr src/$$i $(ROMFSDIR)/etc/xupnpd/$$i; done
+	for i in $(DIRLIST_ETC); do cp -apr src/$$i $(ROMFSDIR)/etc/xupnpd/$$i; done
+	mkdir -p $(ROMFSDIR)/share/xupnpd
+	for i in $(DIRLIST_SHR); do cp -apr src/$$i $(ROMFSDIR)/share/xupnpd/$$i; done
