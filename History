@@ -953,6 +953,7 @@
 38) Add make checks in buildtree.<br>
 39) Add xupnpd r283 and now work ok.<br>
 40) Apply post 0.9.28 uclibc patches and reconfigure uclibc for more compat with new apps.<br>
+41) Fix work samba/wins with windowsxp KB2536276 update.<br>
 
 <br><br>
 <b>For support see:</b><br>
