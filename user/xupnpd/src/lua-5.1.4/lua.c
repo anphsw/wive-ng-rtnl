@@ -16,7 +16,7 @@
 
 #include "lauxlib.h"
 #include "lualib.h"
-
+#include "llimits.h"
 
 
 static lua_State *globalL = NULL;
@@ -382,6 +382,15 @@ int main (int argc, char **argv) {
     l_message(argv[0], "cannot create state: not enough memory");
     return EXIT_FAILURE;
   }
+  /* Checking 'sizeof(lua_Integer)' cannot be made in preprocessor on all compilers.
+  */
+#ifdef LNUM_INT16
+  lua_assert( sizeof(lua_Integer) == 2 );
+#elif defined(LNUM_INT32)
+  lua_assert( sizeof(lua_Integer) == 4 );
+#elif defined(LNUM_INT64)
+  lua_assert( sizeof(lua_Integer) == 8 );
+#endif
   s.argc = argc;
   s.argv = argv;
   status = lua_cpcall(L, &pmain, &s);

@@ -25,6 +25,7 @@ typedef struct {
  ZIO* Z;
  Mbuffer* b;
  const char* name;
+ int swap;
 } LoadState;
 
 #ifdef LUAC_TRUST_BINARIES
@@ -40,7 +41,6 @@ static void error(LoadState* S, const char* why)
 }
 #endif
 
-#define LoadMem(S,b,n,size)	LoadBlock(S,b,(n)*(size))
 #define	LoadByte(S)		(lu_byte)LoadChar(S)
 #define LoadVar(S,x)		LoadMem(S,&x,1,sizeof(x))
 #define LoadVector(S,b,n,size)	LoadMem(S,b,n,size)
@@ -49,6 +49,49 @@ static void LoadBlock(LoadState* S, void* b, size_t size)
 {
  size_t r=luaZ_read(S->Z,b,size);
  IF (r!=0, "unexpected end");
+}
+
+static void LoadMem (LoadState* S, void* b, int n, size_t size)
+{
+ LoadBlock(S,b,n*size);
+ if (S->swap)
+ {
+  char* p=(char*) b;
+  char c;
+  switch (size)
+  {
+   case 1:
+  	break;
+   case 2:
+	while (n--)
+	{
+	 c=p[0]; p[0]=p[1]; p[1]=c;
+	 p+=2;
+	}
+  	break;
+   case 4:
+	while (n--)
+	{
+	 c=p[0]; p[0]=p[3]; p[3]=c;
+	 c=p[1]; p[1]=p[2]; p[2]=c;
+	 p+=4;
+	}
+  	break;
+   case 8:
+	while (n--)
+	{
+	 c=p[0]; p[0]=p[7]; p[7]=c;
+	 c=p[1]; p[1]=p[6]; p[6]=c;
+	 c=p[2]; p[2]=p[5]; p[5]=c;
+	 c=p[3]; p[3]=p[4]; p[4]=c;
+	 p+=8;
+	}
+  	break;
+   default:
+   	IF(1, "bad size");
+  	break;
+  }
+ }
 }
 
 static int LoadChar(LoadState* S)
@@ -73,9 +116,16 @@ static lua_Number LoadNumber(LoadState* S)
  return x;
 }
 
+static lua_Integer LoadInteger(LoadState* S)
+{
+ lua_Integer x;
+ LoadVar(S,x);
+ return x;
+}
+
 static TString* LoadString(LoadState* S)
 {
- size_t size;
+ unsigned int size;
  LoadVar(S,size);
  if (size==0)
   return NULL;
@@ -118,6 +168,9 @@ static void LoadConstants(LoadState* S, Proto* f)
 	break;
    case LUA_TNUMBER:
 	setnvalue(o,LoadNumber(S));
+	break;
+   case LUA_TINT:   /* Integer type saved in bytecode (see lcode.c) */
+	setivalue(o,LoadInteger(S));
 	break;
    case LUA_TSTRING:
 	setsvalue2n(S->L,o,LoadString(S));
@@ -186,6 +239,7 @@ static void LoadHeader(LoadState* S)
  char s[LUAC_HEADERSIZE];
  luaU_header(h);
  LoadBlock(S,s,LUAC_HEADERSIZE);
+ S->swap=(s[6]!=h[6]); s[6]=h[6];
  IF (memcmp(h,s,LUAC_HEADERSIZE)!=0, "bad header");
 }
 
@@ -220,8 +274,25 @@ void luaU_header (char* h)
  *h++=(char)LUAC_FORMAT;
  *h++=(char)*(char*)&x;				/* endianness */
  *h++=(char)sizeof(int);
- *h++=(char)sizeof(size_t);
+ *h++=(char)sizeof(unsigned int);
  *h++=(char)sizeof(Instruction);
  *h++=(char)sizeof(lua_Number);
- *h++=(char)(((lua_Number)0.5)==0);		/* is lua_Number integral? */
+
+ /* 
+  * Last byte of header (0/1 in unpatched Lua 5.1.3):
+  *
+  * 0: lua_Number is float or double, lua_Integer not used. (nonpatched only)
+  * 1: lua_Number is integer (nonpatched only)
+  *
+  * +2: LNUM_INT16: sizeof(lua_Integer)
+  * +4: LNUM_INT32: sizeof(lua_Integer)
+  * +8: LNUM_INT64: sizeof(lua_Integer)
+  *
+  * +0x80: LNUM_COMPLEX
+  */
+ *h++ = (char)(sizeof(lua_Integer)
+#ifdef LNUM_COMPLEX
+    | 0x80
+#endif
+    );
 }

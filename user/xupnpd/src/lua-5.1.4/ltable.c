@@ -33,6 +33,7 @@
 #include "lobject.h"
 #include "lstate.h"
 #include "ltable.h"
+#include "lnum.h"
 
 
 /*
@@ -51,24 +52,14 @@
   
 #define hashstr(t,str)  hashpow2(t, (str)->tsv.hash)
 #define hashboolean(t,p)        hashpow2(t, p)
-
+#define hashint(t,i)    hashpow2(t,i)
 
 /*
 ** for some types, it is better to avoid modulus by power of 2, as
 ** they tend to have many 2 factors.
 */
 #define hashmod(t,n)	(gnode(t, ((n) % ((sizenode(t)-1)|1))))
-
-
 #define hashpointer(t,p)	hashmod(t, IntPoint(p))
-
-
-/*
-** number of ints inside a lua_Number
-*/
-#define numints		cast_int(sizeof(lua_Number)/sizeof(int))
-
-
 
 #define dummynode		(&dummynode_)
 
@@ -80,27 +71,46 @@ static const Node dummynode_ = {
 
 /*
 ** hash for lua_Numbers
+**
+** for non-complex modes, never called with 'lua_Integer' value range (s.a. 0)
 */
 static Node *hashnum (const Table *t, lua_Number n) {
-  unsigned int a[numints];
-  int i;
-  if (luai_numeq(n, 0))  /* avoid problems with -0 */
-    return gnode(t, 0);
-  memcpy(a, &n, sizeof(a));
-  for (i = 1; i < numints; i++) a[0] += a[i];
-  return hashmod(t, a[0]);
+  const unsigned int *p= cast(const unsigned int *,&n);
+  unsigned int sum= *p;
+  unsigned int m= sizeof(lua_Number)/sizeof(int);
+  unsigned int i;
+  /* OS X Intel has 'm'==4 and gives "Bus error" if the last integer of 
+   * 'n' is read; the actual size of long double is only 80 bits = 10 bytes.
+   * Linux x86 has 'm'==3, and does not require reduction.
+   */
+#if defined(LNUM_LDOUBLE) && defined(__i386__)
+  if (m>3) m--;
+#endif
+  for (i = 1; i < m; i++) sum += p[i];
+  return hashmod(t, sum);
 }
-
 
 
 /*
 ** returns the `main' position of an element in a table (that is, the index
 ** of its hash value)
+**
+** Floating point numbers with integer value give the hash position of the
+** integer (so they use the same table position).
 */
 static Node *mainposition (const Table *t, const TValue *key) {
+  lua_Integer i;
   switch (ttype(key)) {
     case LUA_TNUMBER:
-      return hashnum(t, nvalue(key));
+      if (tt_integer_valued(key,&i)) 
+        return hashint(t, i);
+#ifdef LNUM_COMPLEX
+      if (nvalue_img_fast(key)!=0 && luai_numeq(nvalue_fast(key),0))
+        return gnode(t, 0);  /* 0 and -0 to give same hash */
+#endif
+      return hashnum(t, nvalue_fast(key));
+    case LUA_TINT:
+      return hashint(t, ivalue(key));
     case LUA_TSTRING:
       return hashstr(t, rawtsvalue(key));
     case LUA_TBOOLEAN:
@@ -116,16 +126,20 @@ static Node *mainposition (const Table *t, const TValue *key) {
 /*
 ** returns the index for `key' if `key' is an appropriate key to live in
 ** the array part of the table, -1 otherwise.
+**
+** Anything <=0 is taken as not being in the array part.
 */
-static int arrayindex (const TValue *key) {
-  if (ttisnumber(key)) {
-    lua_Number n = nvalue(key);
-    int k;
-    lua_number2int(k, n);
-    if (luai_numeq(cast_num(k), n))
-      return k;
+static int arrayindex (const TValue *key, int max) {
+  lua_Integer k;
+  switch( ttype(key) ) {
+    case LUA_TINT:
+      k= ivalue(key); break;
+    case LUA_TNUMBER:
+      if (tt_integer_valued(key,&k)) break;
+    default:
+      return -1;  /* not to be used as array index */
   }
-  return -1;  /* `key' did not match some condition */
+  return ((k>0) && (k <= max)) ? cast_int(k) : -1;
 }
 
 
@@ -137,8 +151,8 @@ static int arrayindex (const TValue *key) {
 static int findindex (lua_State *L, Table *t, StkId key) {
   int i;
   if (ttisnil(key)) return -1;  /* first iteration */
-  i = arrayindex(key);
-  if (0 < i && i <= t->sizearray)  /* is `key' inside array part? */
+  i = arrayindex(key, t->sizearray);
+  if (i>0)  /* inside array part? */
     return i-1;  /* yes; that's the index (corrected to C) */
   else {
     Node *n = mainposition(t, key);
@@ -163,7 +177,7 @@ int luaH_next (lua_State *L, Table *t, StkId key) {
   int i = findindex(L, t, key);  /* find original element */
   for (i++; i < t->sizearray; i++) {  /* try first array part */
     if (!ttisnil(&t->array[i])) {  /* a non-nil value? */
-      setnvalue(key, cast_num(i+1));
+      setivalue(key, i+1);
       setobj2s(L, key+1, &t->array[i]);
       return 1;
     }
@@ -209,8 +223,8 @@ static int computesizes (int nums[], int *narray) {
 
 
 static int countint (const TValue *key, int *nums) {
-  int k = arrayindex(key);
-  if (0 < k && k <= MAXASIZE) {  /* is `key' an appropriate array index? */
+  int k = arrayindex(key,MAXASIZE);
+  if (k>0) {  /* appropriate array index? */
     nums[ceillog2(k)]++;  /* count as such */
     return 1;
   }
@@ -308,7 +322,7 @@ static void resize (lua_State *L, Table *t, int nasize, int nhsize) {
     /* re-insert elements from vanishing slice */
     for (i=nasize; i<oldasize; i++) {
       if (!ttisnil(&t->array[i]))
-        setobjt2t(L, luaH_setnum(L, t, i+1), &t->array[i]);
+        setobjt2t(L, luaH_setint(L, t, i+1), &t->array[i]);
     }
     /* shrink array */
     luaM_reallocvector(L, t->array, oldasize, nasize, TValue);
@@ -409,7 +423,9 @@ static TValue *newkey (lua_State *L, Table *t, const TValue *key) {
     othern = mainposition(t, key2tval(mp));
     if (othern != mp) {  /* is colliding node out of its main position? */
       /* yes; move colliding node into free position */
-      while (gnext(othern) != mp) othern = gnext(othern);  /* find previous */
+      while (gnext(othern) != mp) {
+        othern = gnext(othern);  /* find previous */
+      }
       gnext(othern) = n;  /* redo the chain with `n' in place of `mp' */
       *n = *mp;  /* copy colliding node into free pos. (mp->next also goes) */
       gnext(mp) = NULL;  /* now `mp' is free */
@@ -432,17 +448,18 @@ static TValue *newkey (lua_State *L, Table *t, const TValue *key) {
 /*
 ** search function for integers
 */
-const TValue *luaH_getnum (Table *t, int key) {
+const TValue *luaH_getint (Table *t, lua_Integer key) {
   /* (1 <= key && key <= t->sizearray) */
   if (cast(unsigned int, key-1) < cast(unsigned int, t->sizearray))
     return &t->array[key-1];
   else {
-    lua_Number nk = cast_num(key);
-    Node *n = hashnum(t, nk);
+    Node *n = hashint(t, key);
     do {  /* check whether `key' is somewhere in the chain */
-      if (ttisnumber(gkey(n)) && luai_numeq(nvalue(gkey(n)), nk))
+      if (ttisint(gkey(n)) && (ivalue(gkey(n)) == key)) {
         return gval(n);  /* that's it */
-      else n = gnext(n);
+      } else { 
+      n = gnext(n);
+    }
     } while (n);
     return luaO_nilobject;
   }
@@ -470,14 +487,12 @@ const TValue *luaH_get (Table *t, const TValue *key) {
   switch (ttype(key)) {
     case LUA_TNIL: return luaO_nilobject;
     case LUA_TSTRING: return luaH_getstr(t, rawtsvalue(key));
+    case LUA_TINT: return luaH_getint(t, ivalue(key));
     case LUA_TNUMBER: {
-      int k;
-      lua_Number n = nvalue(key);
-      lua_number2int(k, n);
-      if (luai_numeq(cast_num(k), nvalue(key))) /* index is int? */
-        return luaH_getnum(t, k);  /* use specialized version */
-      /* else go through */
-    }
+      lua_Integer i;
+      if (tt_integer_valued(key,&i))
+        return luaH_getint(t,i);
+    } /* pass through */
     default: {
       Node *n = mainposition(t, key);
       do {  /* check whether `key' is somewhere in the chain */
@@ -498,20 +513,25 @@ TValue *luaH_set (lua_State *L, Table *t, const TValue *key) {
     return cast(TValue *, p);
   else {
     if (ttisnil(key)) luaG_runerror(L, "table index is nil");
-    else if (ttisnumber(key) && luai_numisnan(nvalue(key)))
+    else if (ttype(key)==LUA_TNUMBER) {
+      lua_Integer k;
+      if (luai_numisnan(nvalue_fast(key)))
       luaG_runerror(L, "table index is NaN");
+      if (tt_integer_valued(key,&k))
+        return luaH_setint(L, t, k);
+    }
     return newkey(L, t, key);
   }
 }
 
 
-TValue *luaH_setnum (lua_State *L, Table *t, int key) {
-  const TValue *p = luaH_getnum(t, key);
+TValue *luaH_setint (lua_State *L, Table *t, lua_Integer key) {
+  const TValue *p = luaH_getint(t, key);
   if (p != luaO_nilobject)
     return cast(TValue *, p);
   else {
     TValue k;
-    setnvalue(&k, cast_num(key));
+    setivalue(&k, key);
     return newkey(L, t, &k);
   }
 }
@@ -533,20 +553,21 @@ static int unbound_search (Table *t, unsigned int j) {
   unsigned int i = j;  /* i is zero or a present index */
   j++;
   /* find `i' and `j' such that i is present and j is not */
-  while (!ttisnil(luaH_getnum(t, j))) {
+  while (!ttisnil(luaH_getint(t, j))) {
     i = j;
     j *= 2;
     if (j > cast(unsigned int, MAX_INT)) {  /* overflow? */
       /* table was built with bad purposes: resort to linear search */
-      i = 1;
-      while (!ttisnil(luaH_getnum(t, i))) i++;
-      return i - 1;
+      for( i = 1; i<MAX_INT+1; i++ ) {
+        if (ttisnil(luaH_getint(t, i))) break;
+      }
+      return i - 1;  /* up to MAX_INT */
     }
   }
   /* now do a binary search between them */
   while (j - i > 1) {
     unsigned int m = (i+j)/2;
-    if (ttisnil(luaH_getnum(t, m))) j = m;
+    if (ttisnil(luaH_getint(t, m))) j = m;
     else i = m;
   }
   return i;
