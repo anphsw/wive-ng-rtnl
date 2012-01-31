@@ -1,5 +1,5 @@
 # Makefile for zlib
-# Copyright (C) 1995-2010 Jean-loup Gailly.
+# Copyright (C) 1995-2011 Jean-loup Gailly.
 # For conditions of distribution and use, see copyright notice in zlib.h
 
 # To compile and test, type:
@@ -16,18 +16,10 @@
 # To install in $HOME instead of /usr/local, use:
 #    make install prefix=$HOME
 
-#CC=cc
-#CFLAGS=-O
-#CFLAGS=-O -DMAX_WBITS=14 -DMAX_MEM_LEVEL=7
-#CFLAGS=-g -DDEBUG
-#CFLAGS=-Os -Wall -Wwrite-strings -Wpointer-arith -Wconversion \
-#           -Wstrict-prototypes -Wmissing-prototypes
-
 SFLAGS+= $(CFLAGS) -fPIC -D_LARGEFILE64_SOURCE=1
-LDFLAGS= -L. libz.a
+LDFLAGS= 
 TEST_LDFLAGS=-L. libz.a
-LDSHARED=$(CC) -shared -Wl,-soname,libz.so.1,--version-script,zlib.map
-#CPP=gcc -E
+LDSHARED= $(CC) -shared -Wl,-soname,libz.so.1,--version-script,zlib.map
 
 STATICLIB=libz.a
 SHAREDLIB=libz.so
@@ -35,16 +27,14 @@ SHAREDLIBV=libz.so.1.2.6
 SHAREDLIBM=libz.so.1
 LIBS=$(STATICLIB) $(SHAREDLIBV)
 
-#AR=ar rc
 ARFLAGS=rc
-#RANLIB=ranlib
 LDCONFIG=ldconfig
 LDSHAREDLIBC=-lc
-#TAR=tar
+TAR=tar
 SHELL=/bin/sh
 EXE=
 
-prefix =filesystem
+prefix =/usr/local
 exec_prefix =${prefix}
 libdir =${exec_prefix}/lib
 sharedlibdir =${libdir}
@@ -52,12 +42,15 @@ includedir =${prefix}/include
 mandir =${prefix}/share/man
 man3dir = ${mandir}/man3
 pkgconfigdir = ${libdir}/pkgconfig
+tempfile := $(shell mktemp -u __XXXXXX)
 
-OBJC = adler32.o compress.o crc32.o deflate.o gzclose.o gzlib.o gzread.o \
-	gzwrite.o infback.o inffast.o inflate.o inftrees.o trees.o uncompr.o zutil.o
+OBJZ = adler32.o crc32.o deflate.o infback.o inffast.o inflate.o inftrees.o trees.o zutil.o
+OBJG = compress.o uncompr.o gzclose.o gzlib.o gzread.o gzwrite.o
+OBJC = $(OBJZ) $(OBJG)
 
-PIC_OBJC = adler32.lo compress.lo crc32.lo deflate.lo gzclose.lo gzlib.lo gzread.lo \
-	gzwrite.lo infback.lo inffast.lo inflate.lo inftrees.lo trees.lo uncompr.lo zutil.lo
+PIC_OBJZ = adler32.lo crc32.lo deflate.lo infback.lo inffast.lo inflate.lo inftrees.lo trees.lo zutil.lo
+PIC_OBJG = compress.lo uncompr.lo gzclose.lo gzlib.lo gzread.lo gzwrite.lo
+PIC_OBJC = $(PIC_OBJZ) $(PIC_OBJG)
 
 # to use the asm code: make OBJA=match.o, PIC_OBJA=match.lo
 OBJA =
@@ -67,18 +60,19 @@ OBJS = $(OBJC) $(OBJA)
 
 PIC_OBJS = $(PIC_OBJC) $(PIC_OBJA)
 
-all: static shared
+all: static shared all64
 
-static:
-	#ok
+static: example$(EXE) minigzip$(EXE)
 
-shared:
+shared: examplesh$(EXE) minigzipsh$(EXE)
 	cp -vfa ./libz.so*	$(ROOTDIR)/lib/lib
 	cp -vfa *.h		$(ROOTDIR)/lib/include_shared
 
+all64: example64$(EXE) minigzip64$(EXE)
+
 check: test
 
-test: all teststatic testshared
+test: all teststatic testshared test64
 
 teststatic: static
 	@if echo hello world | ./minigzip | ./minigzip -d && ./example; then \
@@ -108,6 +102,17 @@ test64: all64
 	fi
 	-@rm -f foo.gz
 
+infcover.o: test/infcover.c zlib.h zconf.h
+	$(CC) $(CFLAGS) -I. -c -o $@ test/infcover.c
+
+infcover: infcover.o libz.a
+	$(CC) $(CFLAGS) -o $@ infcover.o libz.a
+
+cover: infcover
+	rm -f *.gcda
+	./infcover
+	gcov inf*.c
+
 libz.a: $(OBJS)
 	$(AR) $(ARFLAGS) $@ $(OBJS)
 	-@ ($(RANLIB) $@ || true) >/dev/null 2>&1
@@ -124,6 +129,18 @@ match.lo: match.S
 	mv _match.o match.lo
 	rm -f _match.s
 
+example.o: test/example.c zlib.h zconf.h
+	$(CC) $(CFLAGS) -I. -c -o $@ test/example.c
+
+minigzip.o: test/minigzip.c zlib.h zconf.h
+	$(CC) $(CFLAGS) -I. -c -o $@ test/minigzip.c
+
+example64.o: test/example.c zlib.h zconf.h
+	$(CC) $(CFLAGS) -I. -D_FILE_OFFSET_BITS=64 -c -o $@ test/example.c
+
+minigzip64.o: test/minigzip.c zlib.h zconf.h
+	$(CC) $(CFLAGS) -I. -D_FILE_OFFSET_BITS=64 -c -o $@ test/minigzip.c
+
 .SUFFIXES: .lo
 
 .c.lo:
@@ -131,12 +148,30 @@ match.lo: match.S
 	$(CC) $(SFLAGS) -DPIC -c -o objs/$*.o $<
 	-@mv objs/$*.o $@
 
-$(SHAREDLIBV): $(PIC_OBJS)
+placebo $(SHAREDLIBV): $(PIC_OBJS) libz.a
 	$(LDSHARED) $(SFLAGS) -o $@ $(PIC_OBJS) $(LDSHAREDLIBC) $(LDFLAGS)
 	rm -f $(SHAREDLIB) $(SHAREDLIBM)
 	ln -s $@ $(SHAREDLIB)
 	ln -s $@ $(SHAREDLIBM)
 	-@rmdir objs
+
+example$(EXE): example.o $(STATICLIB)
+	$(CC) $(CFLAGS) -o $@ example.o $(TEST_LDFLAGS)
+
+minigzip$(EXE): minigzip.o $(STATICLIB)
+	$(CC) $(CFLAGS) -o $@ minigzip.o $(TEST_LDFLAGS)
+
+examplesh$(EXE): example.o $(SHAREDLIBV)
+	$(CC) $(CFLAGS) -o $@ example.o -L. $(SHAREDLIBV)
+
+minigzipsh$(EXE): minigzip.o $(SHAREDLIBV)
+	$(CC) $(CFLAGS) -o $@ minigzip.o -L. $(SHAREDLIBV)
+
+example64$(EXE): example64.o $(STATICLIB)
+	$(CC) $(CFLAGS) -o $@ example64.o $(TEST_LDFLAGS)
+
+minigzip64$(EXE): minigzip64.o $(STATICLIB)
+	$(CC) $(CFLAGS) -o $@ minigzip64.o $(TEST_LDFLAGS)
 
 install-libs: $(LIBS)
 	-@if [ ! -d $(DESTDIR)$(exec_prefix)  ]; then mkdir -p $(DESTDIR)$(exec_prefix); fi
@@ -145,14 +180,16 @@ install-libs: $(LIBS)
 	-@if [ ! -d $(DESTDIR)$(man3dir)      ]; then mkdir -p $(DESTDIR)$(man3dir); fi
 	-@if [ ! -d $(DESTDIR)$(pkgconfigdir) ]; then mkdir -p $(DESTDIR)$(pkgconfigdir); fi
 	cp $(STATICLIB) $(DESTDIR)$(libdir)
-	cp $(SHAREDLIBV) $(DESTDIR)$(sharedlibdir)
-	cd $(DESTDIR)$(libdir); chmod u=rw,go=r $(STATICLIB)
-	-@(cd $(DESTDIR)$(libdir); $(RANLIB) libz.a || true) >/dev/null 2>&1
-	-@cd $(DESTDIR)$(sharedlibdir); if test "$(SHAREDLIBV)" -a -f $(SHAREDLIBV); then \
-	  chmod 755 $(SHAREDLIBV); \
-	  rm -f $(SHAREDLIB) $(SHAREDLIBM); \
-	  ln -s $(SHAREDLIBV) $(SHAREDLIB); \
-	  ln -s $(SHAREDLIBV) $(SHAREDLIBM); \
+	chmod 644 $(DESTDIR)$(libdir)/$(STATICLIB)
+	-@($(RANLIB) $(DESTDIR)$(libdir)/libz.a || true) >/dev/null 2>&1
+	-@if test -n "$(SHAREDLIBV)"; then \
+	  cp $(SHAREDLIBV) $(DESTDIR)$(sharedlibdir); \
+	  echo "cp $(SHAREDLIBV) $(DESTDIR)$(sharedlibdir)"; \
+	  chmod 755 $(DESTDIR)$(sharedlibdir)/$(SHAREDLIBV); \
+	  echo "chmod 755 $(DESTDIR)$(sharedlibdir)/$(SHAREDLIBV)"; \
+	  rm -f $(DESTDIR)$(sharedlibdir)/$(SHAREDLIB) $(DESTDIR)$(sharedlibdir)/$(SHAREDLIBM); \
+	  ln -s $(SHAREDLIBV) $(DESTDIR)$(sharedlibdir)/$(SHAREDLIB); \
+	  ln -s $(SHAREDLIBV) $(DESTDIR)$(sharedlibdir)/$(SHAREDLIBM); \
 	  ($(LDCONFIG) || true)  >/dev/null 2>&1; \
 	fi
 	cp zlib.3 $(DESTDIR)$(man3dir)
@@ -162,13 +199,6 @@ install-libs: $(LIBS)
 # The ranlib in install is needed on NeXTSTEP which checks file times
 # ldconfig is for Linux
 
-romfs:
-	if [ -f $(SHAREDLIBV) ] ; then \
-	    $(ROMFSINST) $(SHAREDLIBV) /lib/$(SHAREDLIBV) ; \
-	    $(ROMFSINST) -s $(SHAREDLIBV) /lib/$(SHAREDLIBM) ; \
-	    $(ROMFSINST) -s $(SHAREDLIBV) /lib/$(SHAREDLIB) ; \
-	fi
-
 install: install-libs
 	-@if [ ! -d $(DESTDIR)$(includedir)   ]; then mkdir -p $(DESTDIR)$(includedir); fi
 	cp zlib.h zconf.h $(DESTDIR)$(includedir)
@@ -177,7 +207,7 @@ install: install-libs
 uninstall:
 	cd $(DESTDIR)$(includedir); rm -f zlib.h zconf.h
 	cd $(DESTDIR)$(libdir); rm -f libz.a; \
-	if test "$(SHAREDLIBV)" -a -f $(SHAREDLIBV); then \
+	if test -n "$(SHAREDLIBV)" -a -f $(SHAREDLIBV); then \
 	  rm -f $(SHAREDLIBV) $(SHAREDLIB) $(SHAREDLIBM); \
 	fi
 	cd $(DESTDIR)$(man3dir); rm -f zlib.3
@@ -188,9 +218,11 @@ docs: zlib.3.pdf
 zlib.3.pdf: zlib.3
 	groff -mandoc -f H -T ps zlib.3 | ps2pdf - zlib.3.pdf
 
-zconf.h.in: zconf.h.cmakein
-	sed "/^#cmakedefine/D" < zconf.h.cmakein > zconf.h.in
-	touch -r zconf.h.cmakein zconf.h.in
+zconf.h.cmakein: zconf.h.in
+	-@echo "/#define ZCONF_H/ a\\\\\n#cmakedefine Z_PREFIX\\\\\n#cmakedefine Z_HAVE_UNISTD_H\n" > $(tempfile)
+	-@sed -f $(tempfile) zconf.h.in > zconf.h.cmakein
+	-@touch -r zconf.h.in zconf.h.cmakein
+	-@rm $(tempfile)
 
 zconf: zconf.h.in
 	cp -p zconf.h.in zconf.h
@@ -200,13 +232,16 @@ clean:
 	rm -f *.o *.lo *~ \
 	   example$(EXE) minigzip$(EXE) examplesh$(EXE) minigzipsh$(EXE) \
 	   example64$(EXE) minigzip64$(EXE) \
+	   infcover \
 	   libz.* foo.gz so_locations \
 	   _match.s maketree contrib/infback9/*.o
 	rm -rf objs
+	rm -f *.gcda *.gcno *.gcov
+	rm -f contrib/infback9/*.gcda contrib/infback9/*.gcno contrib/infback9/*.gcov
 
 maintainer-clean: distclean
-distclean: clean zconf docs
-	rm -f zlib.pc
+distclean: clean zconf zconf.h.cmakein docs
+	rm -f zlib.pc configure.log
 	-@rm -f .DS_Store
 
 tags:
