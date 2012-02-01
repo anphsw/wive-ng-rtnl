@@ -46,7 +46,7 @@ start() {
 		/etc/routes_replace replace "$phys_lan_if" "$wan_if"
 	    fi
 	    # Add route to multicast subnet
-	    if [ "$igmpEnabled" = "1" -o "$UDPXYMode" != "0" ]; then
+	    if [ "$igmpEnabled" = "1" -o "$UDPXYMode" != "0" ] || [ "$xupnpd" = "1" ]; then
 		$LOG "Add route to multicast subnet."
 		ip route replace "$mcast_net" dev "$wan_if"
 	    fi
@@ -117,7 +117,7 @@ wan_if_preconf() {
 
 get_param() {
     # get parametrs
-    eval `nvram_buf_get 2860 wan_ipaddr wan_netmask wan_gateway wan_manual_mtu lan_ipaddr lan_netmask HostName`
+    eval `nvram_buf_get 2860 wan_ipaddr wan_netmask wan_gateway wan_manual_mtu lan_ipaddr lan_netmask HostName xupnpd`
 }
 
 stop() {

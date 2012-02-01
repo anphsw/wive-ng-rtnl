@@ -22,7 +22,7 @@ start() {
 	# only WAN interface recived multicast
 	if [ "$OperationMode" != "0" ]; then
 	    # INPUT needed by unpxy and igmpproxy
-	    if [ "$igmpEnabled" != "0" ] || [ "$UDPXYMode" != "0" ] || [ "$xupnpd" != "0" ]; then
+	    if [ "$igmpEnabled" != "0" ] || [ "$UDPXYMode" != "0" ] || [ "$xupnpd" = "1" ]; then
 		$LOG "Set igmp input rules"
 		iptables -A INPUT -p igmp -i $lan_if -j ACCEPT
 	        iptables -A INPUT -d $mcast_net -i $wan_if -j ACCEPT
@@ -135,7 +135,7 @@ start() {
 	    iptables -A servicelimit -i $lan_if -p udp --dport 1024:65535 -j ACCEPT
 	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 1024:65535 -j ACCEPT
 	fi
-	if [ "$xupnpd" != "0" ]; then
+	if [ "$xupnpd" = "1" ]; then
 	    $LOG "xupnpd"
 	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 4044 -j ACCEPT
 	    # not safe fix me later
