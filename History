@@ -948,7 +948,7 @@
 33) Build lib fixup.<br>
 34) ntfs-3g support cleanup and build more optimized.<br>
 35) Igmpproxy ignore non-primary addresses on upstream VIF, fix work on dhcp mode.<br>
-36) Update usb_modeswitch and devicelist.<br>
+36) Update usb_modeswitch and devicelist (1.2.3 version and data 2012-01-20).<br>
 37) Backport fork fixes.<br>
 38) Add make checks in buildtree.<br>
 39) Add xupnpd r284.<br>

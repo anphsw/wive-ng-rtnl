@@ -28,4 +28,4 @@ while {[gets $f buf] >= 0} {
 	}
 }
 close $f
-puts "#define RAW \"set argv {%s}\\nset argc %d\\n[join $sourcelines ""]\""
+puts "#define RAW \"[join $sourcelines ""]\""

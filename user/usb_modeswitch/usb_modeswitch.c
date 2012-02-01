@@ -1,6 +1,6 @@
 /*
   Mode switching tool for controlling flip flop (multiple device) USB gear
-  Version 1.2.2, 2012/01/19
+  Version 1.2.3, 2012/01/28
 
   Copyright (C) 2007 - 2012 Josua Dietze (mail to "usb_admin" at the domain
   of the home page; or write a personal message through the forum to "Josh".
@@ -45,7 +45,7 @@
 
 /* Recommended tab size: 4 */
 
-#define VERSION "1.2.1"
+#define VERSION "1.2.3"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -1802,7 +1802,7 @@ void printVersion()
 {
 	char* version = VERSION;
 	printf("\n * usb_modeswitch: handle USB devices with multiple modes\n"
-		" * Version %s (C) Josua Dietze 2011\n"
+		" * Version %s (C) Josua Dietze 2012\n"
 		" * Based on libusb0 (0.1.12 and above)\n\n"
 		" ! PLEASE REPORT NEW CONFIGURATIONS !\n\n", version);
 }

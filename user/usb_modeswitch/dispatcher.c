@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2012 Josua Dietze, usb_modeswitch version 1.2.2
+ * Copyright (c) 2011-2012 Josua Dietze, usb_modeswitch version 1.2.3
  * Contains code under
  * Copyright (c) 2010 Wojciech A. Koszek <wkoszek@FreeBSD.org>
  * All rights reserved.
@@ -63,8 +63,9 @@ int main(int argc, char **argv)
 		strncat(arglist,arg,MAX_ARGSIZE-1);
 	}
 
-    char code[sizeof(RAW) + sizeof(arglist)];
-	sprintf(code, RAW, arglist, argc-1);
+	char code[sizeof(RAW) + sizeof(arglist) + 28];
+	sprintf(code, "set argv {%s}\nset argc %d\n", arglist, argc-1);
+	strncat(code, RAW, sizeof(RAW));
 
 	/* Create Jim instance */
 	interp = Jim_CreateInterp();

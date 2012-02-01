@@ -2,6 +2,10 @@
 History of USB_ModeSwitch
 =========================
 
+Version 1.2.3, 2012/01/28
+    Fixed two bugs both causing the embedded-jimsh install variant of the
+    dispatcher crash (the "pure-script" install variant was NOT affected);
+    fixed some "regexp" incompatibilities with Debian's libjim
 Version 1.2.2, 2012/01/19
     Fixed bad bug preventing mode switch for devices using TargetClass;
     improved logging in case of negative success check
