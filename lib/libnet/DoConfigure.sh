@@ -7,6 +7,7 @@ if [ ! -f $APROOTDIR/configure ]; then
     libtoolize --force
     aclocal
     autoconf
+    autoreconf -if
 fi
 if [ ! -f $APROOTDIR/Makefile.in ]; then
     automake

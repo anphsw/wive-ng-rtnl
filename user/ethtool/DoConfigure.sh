@@ -5,6 +5,7 @@ APROOTDIR=`pwd`
 
 if [ ! -f $APROOTDIR/configure ]; then
     sh ./autogen.sh
+    autoreconf -if
 fi
 if [ ! -f $APROOTDIR/Makefile.in ]; then
     automake
