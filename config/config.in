@@ -78,7 +78,6 @@ fi
 if [ "$CONFIG_USER_SAMBA" = "y" ] || [ "$CONFIG_USER_SAMBA3" = "y" ] || [ "$CONFIG_USER_TRANSMISSION" = "y" ]; then
     bool 'storage apps, scripts and goahead conf' CONFIG_USER_STORAGE
 fi
-bool 'dlna server'				CONFIG_USER_MINIDLNA
 bool 'igmp proxy (RFC4605)'			CONFIG_USER_IGMP_PROXY
 bool 'udpxy'					CONFIG_USER_UDPXY
 bool 'wive-utils'				CONFIG_USER_WIVE
