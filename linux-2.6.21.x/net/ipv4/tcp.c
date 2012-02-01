@@ -662,9 +662,6 @@ ssize_t tcp_sendpage(struct socket *sock, struct page *page, int offset,
 	return res;
 }
 
-#define TCP_PAGE(sk)	(sk->sk_sndmsg_page)
-#define TCP_OFF(sk)	(sk->sk_sndmsg_off)
-
 static inline int select_size(struct sock *sk, bool sg)
 {
 	struct tcp_sock *tp = tcp_sk(sk);
@@ -778,13 +775,13 @@ new_segment:
 			} else {
 				int merge = 0;
 				int i = skb_shinfo(skb)->nr_frags;
-				struct page *page = TCP_PAGE(sk);
+				struct page *page = sk->sk_sndmsg_page;
 				int off;
 
 				if (page && page_count(page) == 1)
-					TCP_OFF(sk) = 0;
+					sk->sk_sndmsg_off = 0;
 
-				off = TCP_OFF(sk);
+				off = sk->sk_sndmsg_off;
 
 				if (skb_can_coalesce(skb, i, page, off) &&
 				    off != PAGE_SIZE) {
@@ -801,7 +798,7 @@ new_segment:
 				} else if (page) {
 					if (off == PAGE_SIZE) {
 						put_page(page);
-						TCP_PAGE(sk) = page = NULL;
+						sk->sk_sndmsg_page = page = NULL;
 						off = 0;
 					}
 				} else
@@ -827,9 +824,9 @@ new_segment:
 					/* If this page was new, give it to the
 					 * socket so it does not get leaked.
 					 */
-					if (!TCP_PAGE(sk)) {
-						TCP_PAGE(sk) = page;
-						TCP_OFF(sk) = 0;
+					if (!sk->sk_sndmsg_page) {
+						sk->sk_sndmsg_page = page;
+						sk->sk_sndmsg_off = 0;
 					}
 					goto do_error;
 				}
@@ -840,15 +837,15 @@ new_segment:
 									copy;
 				} else {
 					skb_fill_page_desc(skb, i, page, off, copy);
-					if (TCP_PAGE(sk)) {
+					if (sk->sk_sndmsg_page) {
 						get_page(page);
 					} else if (off + copy < PAGE_SIZE) {
 						get_page(page);
-						TCP_PAGE(sk) = page;
+						sk->sk_sndmsg_page = page;
 					}
 				}
 
-				TCP_OFF(sk) = off + copy;
+				sk->sk_sndmsg_off = off + copy;
 			}
 
 			if (!copied)
