@@ -7,7 +7,6 @@ cd $APROOTDIR/source
 
 if [ ! -f configure ]; then
     sh ./autogen.sh
-    autoreconf -if
 fi
 
 #arch options

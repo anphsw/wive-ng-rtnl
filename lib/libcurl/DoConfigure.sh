@@ -11,7 +11,6 @@ LIBSSL=$FIRMROOT/user/openssl
 if [ ! -f $APROOTDIR/configure ]; then
     aclocal
     autoconf
-    autoreconf -if
 fi
 if [ ! -f $APROOTDIR/Makefile.in ]; then
     automake
