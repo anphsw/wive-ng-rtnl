@@ -1,5 +1,4 @@
 # For sadko
-) Add xupnpd r283. Need add in webui in misc after upnp (variable xupnpd default=0)
 ) Rewrite profiles managment code in ethernet converter mode. (in progress)
 ) Need rewrite QoS page (remove ralink QoS and add new types QoS)
 ) Add /proc/rt3052/esw_cnt for traffic statistic per switch port.(need add in WebUI).

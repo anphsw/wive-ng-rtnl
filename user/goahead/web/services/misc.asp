@@ -1,4 +1,3 @@
-<html>
 <head>
 <title>Internet Services Settings</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -15,6 +14,7 @@
 <script type="text/javascript" src="/js/ajax.js"></script>
 
 <script language="JavaScript" type="text/javascript">
+
 Butterlate.setTextDomain("internet");
 Butterlate.setTextDomain("services");
 
@@ -22,6 +22,7 @@ var secs;
 var timerID = null;
 var timerRunning = false;
 var rmtManagementPort = '<% getCfgZero(1, "RemoteManagementPort"); %>';
+var serviceStatusTimer = null;
 
 function StartTheTimer()
 {
@@ -43,8 +44,11 @@ function StartTheTimer()
 function TimeoutReload(timeout)
 {
 	secs = timeout;
+	if (serviceStatusTimer != null)
+		clearTimeout(serviceStatusTimer);
 	if (timerRunning)
 		clearTimeout(timerID);
+	serviceStatusTimer = null;
 	timerRunning = false;
 	StartTheTimer();
 }
@@ -97,6 +101,7 @@ function initValue()
 	var igmp = <% getCfgZero(1, "igmpEnabled"); %>;
 	var igmp_snoop = '<% getCfgGeneral(1, "igmpSnoopMode"); %>';
 	var upnp = <% getCfgZero(1, "upnpEnabled"); %>;
+	var xupnpd = <% getCfgZero(1, "xupnpd"); %>;
 	var radvd = <% getCfgZero(1, "radvdEnabled"); %>;
 	var pppoe = <% getCfgZero(1, "pppoeREnabled"); %>;
 	var dns = <% getCfgZero(1, "dnsPEnabled"); %>;
@@ -105,10 +110,12 @@ function initValue()
 	var lltd = "<% getCfgZero(1, "lltdEnabled"); %>";
 	var wpf = "<% getCfgGeneral(1, "WANPingFilter"); %>";
 	var arp_pt = "<% getCfgGeneral(1, "parproutedEnabled"); %>";
+	var transmb = "<% getTransmissionBuilt(); %>";
 	var cdpb = "<% getCdpBuilt(); %>";
 	var lltdb = "<% getLltdBuilt(); %>";
 	var igmpb = "<% getIgmpProxyBuilt(); %>";
 	var upnpb = "<% getUpnpBuilt(); %>";
+	var xupnpdb = "<% getXupnpdBuilt(); %>";
 	var radvdb = "<% getRadvdBuilt(); %>";
 	var pppoeb = "<% getPppoeRelayBuilt(); %>";
 	var dnsp = "<% getDnsmasqBuilt(); %>";
@@ -129,6 +136,7 @@ function initValue()
 	form.igmpEnbl.options.selectedIndex = (igmpb == '1') ? 1*igmp : 0;
 	form.igmpSnoop.value = igmp_snoop;
 	form.upnpEnbl.options.selectedIndex = 1*upnp;
+	form.xupnpdEnbl.options.selectedIndex = 1*xupnpd;
 	form.radvdEnbl.options.selectedIndex = 1*radvd;
 	form.pppoeREnbl.options.selectedIndex = 1*pppoe;
 	form.dnspEnbl.options.selectedIndex = 1*dns;
@@ -163,40 +171,19 @@ function initValue()
 	form.CrondEnable.value = defaultNumber("<% getCfgGeneral(1, "CrondEnable"); %>", "0");
 	form.ForceRenewDHCP.value = defaultNumber("<% getCfgGeneral(1, "ForceRenewDHCP"); %>", "1");
 	form.SnmpdEnabled.value = defaultNumber("<% getCfgGeneral(1, "snmpd"); %>", "0");
+	form.transmission.value = defaultNumber("<% getCfgGeneral(1, "TransmissionEnabled"); %>", "0");
 	form.ttlStore.value = (store_ttl == '1') ? '1' : '0';
 	form.ttlMcastStore.value = (store_ttl_mcast == '1') ? '1' : '0';
 
-	if (cdpb == "0")
-	{
-		hideElement("cdp");
-		form.cdpEnbl.options.selectedIndex = 0;
-	}
-	if (lltdb == "0")
-	{
-		hideElement("lltd");
-		form.lltdEnbl.options.selectedIndex = 0;
-	}
-	displayElement( 'igmpProxy', igmpb == '1');
-	if (upnpb == "0")
-	{
-		hideElement("upnp");
-		form.upnpEnbl.options.selectedIndex = 0;
-	}
-	if (radvdb == "0")
-	{
-		hideElement("radvd");
-		form.radvdEnbl.options.selectedIndex = 0;
-	}
-	if (pppoeb == "0")
-	{
-		hideElement("pppoerelay");
-		form.pppoeREnbl.options.selectedIndex = 0;
-	}
-	if (dnsp == "0")
-	{
-		hideElement("dnsproxy");
-		form.dnspEnbl.options.selectedIndex = 0;
-	}
+	displayElement('cdp', cdpb == '1');
+	displayElement('lltd', lltdb == '1');
+	displayElement('igmpProxy', igmpb == '1');
+	displayElement('upnp', upnpb == '1');
+	displayElement('xupnpd', xupnpdb == '1');
+	displayElement('radvd', radvdb == '1');
+	displayElement('pppoerelay', pppoeb == '1');
+	displayElement('dnsproxy', dnsp == '1');
+	displayElement('transmission', transmb == '1');
 	
 	// Set-up NAT fastpath
 	var qos_en = defaultNumber("<% getCfgGeneral(1, "QoSEnable"); %>", "0");
@@ -219,6 +206,8 @@ function initValue()
 	httpRmtSelect(form);
 	pingerSelect(form);
 	udpxySelect(form);
+	
+	displayServiceStatus();
 }
 
 function CheckValue(form)
@@ -293,6 +282,68 @@ function udpxySelect(form)
 	displayElement( 'udpxy_port_row', form.udpxyMode.value != '0');
 }
 
+function displayServiceHandler(response)
+{
+	var form = document.miscServiceCfg;
+	
+	var services = [
+		// turned_on, row_id, daemon_id, url-finish, about
+		[ '<% getCfgGeneral(1, "UDPXYMode"); %>', 'udpxy', 'udpxy', '<% getCfgGeneral(1, "UDPXYPort"); %>/status/', 'udpxy.sourceforge.net/' ],
+		[ '<% getCfgGeneral(1, "TransmissionEnabled"); %>', 'transmission', 'transmission-daemon', '9091/', 'www.transmissionbt.com/' ],
+		[ '<% getCfgGeneral(1, "xupnpd"); %>', 'xupnpd', 'xupnpd', '4044/', 'xupnpd.org/' ],
+		[ '<% getCfgGeneral(1, "CrondEnable"); %>', 'crond', 'crond', null, 'crontab.org/' ],
+		[ '<% getCfgGeneral(1, "snmpd"); %>', 'snmpd', 'snmpd', null, 'www.net-snmp.org/docs/man/snmpd.html' ],
+		[ '<% getCfgGeneral(1, "igmpEnabled"); %>', 'igmpProxy', 'igmpproxy', null, 'sourceforge.net/projects/igmpproxy/' ],
+		[ '<% getCfgGeneral(1, "lltdEnabled"); %>', 'lltd', 'lld2d', null, 'msdn.microsoft.com/en-us/windows/hardware/gg463061.aspx' ],
+		[ '<% getCfgGeneral(1, "upnpEnabled"); %>', 'upnp', 'miniupnpd', null, 'miniupnp.free.fr/' ],
+		[ '<% getCfgGeneral(1, "cdpEnabled"); %>', 'cdp', 'cdp-send', null, 'freecode.com/projects/cdp-tools' ],
+		[ '<% getCfgGeneral(1, "dnsPEnabled"); %>', 'dnsproxy', 'dnsmasq', null, 'thekelleys.org.uk/dnsmasq/doc.html' ],
+		[ '<% getCfgGeneral(1, "parproutedEnabled"); %>', 'parprouted', 'parprouted', null, 'freecode.com/projects/parprouted' ]
+	];
+	
+	// Create associative array
+	var tmp = response.split(',');
+	var daemons = [];
+	for (var i=0; i<tmp.length; i++)
+		daemons[tmp[i]] = 1;
+	
+	// Now display all services
+	for (var i=0; i<services.length; i++)
+	{
+		var service = services[i];
+		var row = document.getElementById(service[1]);
+		var tds = [];
+		for (var j=0; j<row.childNodes.length; j++)
+			if (row.childNodes[j].nodeName == 'TD')
+				tds.push(row.childNodes[j]);
+		
+		if (row != null)
+		{
+			// Fill-up about
+			tds[2].innerHTML = (service[4] != null) ? '<a href="http://' + service[4] + '" target="_blank">Learn more...</a>' : "&nbsp;";
+
+			// Fill-up status
+			if (service[0]*1 == '0')
+				tds[3].innerHTML = '<span style="color: #808080"><b>off</b></span>';
+			else
+				tds[3].innerHTML = (daemons[service[2]] == 1) ?
+					'<span style="color: #008000"><b>running</b></span>' :
+					'<span style="color: #808000"><b>starting</b></span>';
+
+			// Fill-up configure
+			tds[4].innerHTML = ((service[0]*1 > '0') && (daemons[service[2]] == 1) && (service[3] != null)) ?
+				'<a href="http://<% getLanIp(); %>:' + service[3] + '">Configure...</a>' : '&nbsp;';
+		}
+	}
+	
+	serviceStatusTimer = setTimeout('displayServiceStatus();', 5000);
+}
+
+function displayServiceStatus()
+{
+	ajaxPerformRequest('/services/misc-stat.asp', displayServiceHandler);
+}
+
 </script>
 </head>
 
@@ -305,12 +356,14 @@ function udpxySelect(form)
 
 <form method="POST" name="miscServiceCfg" action="/goform/setMiscServices" onSubmit="return CheckValue(this);">
 <table class="form">
+
+<!-- Offload engine -->
 <tr>
-	<td class="title" colspan="2">Offload engine</td>
+	<td class="title" colspan="5">Offload engine</td>
 </tr>
 <tr>
 <td class="head"><a name="nat_fastpath_ref"></a>NAT fastpath</td>
-<td>
+<td colspan="4">
 	<select name="natFastpath" class="half" onchange="natFastpathSelect(this.form);">
 		<option value="0">Disable</option>
 		<option value="2">Hardware</option>
@@ -319,14 +372,14 @@ function udpxySelect(form)
 </tr>
 <tr id="hwnat_threshold_row" style="display: none;">
 <td class="head">NAT Binding Threshold</td>
-<td>
+<td colspan="4">
 	<input name="hwnatThreshold" value="<% getCfgZero(1, "hw_nat_bind"); %>" class="half">&nbsp;
 	<span style="color: #c0c0c0;">(0-500)</span>
 </td>
 </tr>
 <tr>
 <td class="head">NAT mode</td>
-<td>
+<td colspan="4">
 	<select name="natMode" class="half">
 		<option value="0">Linux</option>
 		<option value="1" selected>Fcone</option>
@@ -336,7 +389,7 @@ function udpxySelect(form)
 </tr>
 <tr>
 <td class="head">Bridge fastpath</td>
-<td>
+<td colspan="4">
 	<select name="bridgeFastpath" class="half">
 		<option value="0">Disable</option>
 		<option value="1">Enable</option>
@@ -344,12 +397,13 @@ function udpxySelect(form)
 </td>
 </tr>
 
+<!-- Remote management -->
 <tr>
-	<td class="title" colspan="2">Remote management</td>
+	<td class="title" colspan="5">Remote management</td>
 </tr>
 <tr>
 <td class="head">HTTP Remote Management</td>
-<td>
+<td colspan="4">
 	<select name="rmtHTTP" class="half" onchange="httpRmtSelect(this.form);">
 		<option value="0">Disable</option>
 		<option value="1">LAN</option>
@@ -359,11 +413,11 @@ function udpxySelect(form)
 </tr>
 <tr id="http_rmt_port" style="display: none;">
 	<td class="head">Remote HTTP port</td>
-	<td><input class="half" name="RemoteManagementPort" value="<% getCfgZero(1, "RemoteManagementPort"); %>"></td>
+	<td colspan="4"><input class="half" name="RemoteManagementPort" value="<% getCfgZero(1, "RemoteManagementPort"); %>"></td>
 </tr>
 <tr>
 <td class="head">SSH Remote Management</td>
-<td>
+<td colspan="4">
 	<select name="rmtSSH" class="half">
 		<option value="0">Disable</option>
 		<option value="1">LAN</option>
@@ -373,7 +427,7 @@ function udpxySelect(form)
 </tr>
 <tr id="rmt_telnetd">
 <td class="head">Remote Telnet</td>
-<td>
+<td colspan="4">
 	<select name="rmtTelnet" class="half">
 		<option value="0">Disable</option>
 		<option value="1">Enable</option>
@@ -382,7 +436,7 @@ function udpxySelect(form)
 </tr>
 <tr id="rmt_ftpd">
 <td class="head">Remote FTP</td>
-<td>
+<td colspan="4">
 	<select name="rmtFTP" class="half">
 		<option value="0">Disable</option>
 		<option value="1">Enable</option>
@@ -390,12 +444,18 @@ function udpxySelect(form)
 </td>
 </tr>
 
+<!-- Pass Through -->
 <tr>
-	<td class="title" colspan="2">Pass Through</td>
+	<td class="title">Pass Through</td>
+	<td class="title">Value</td>
+	<td class="title" style="width: 88px;">Details</td>
+	<td class="title" style="width: 56px;">Status</td>
+	<td class="title" style="width: 80px;">Configure</td>
+</tr>
 </tr>
 <tr>
 <td class="head">PPPOE pass through</td>
-<td>
+<td colspan="4">
 	<select name="krnlPppoePass" class="half">
 		<option value="0">Disable</option>
 		<option value="1">Enable</option>
@@ -404,14 +464,14 @@ function udpxySelect(form)
 </tr>
 <tr>
 <td class="head">IPv6 pass through</td>
-<td>
+<td colspan="4">
 	<select name="krnlIpv6Pass" class="half">
 		<option value="0">Disable</option>
 		<option value="1">Enable</option>
 	</select>
 </td>
 </tr>
-<tr>
+<tr id="parprouted">
 <td class="head">ARP Proxy</td>
 <td>
 	<select name="arpPT" class="half">
@@ -419,11 +479,18 @@ function udpxySelect(form)
 		<option value="1">Enable</option>
 	</select>
 </td>
+<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
 </tr>
 
+<!-- Services -->
 <tr>
-	<td class="title" colspan="2">Services</td>
+	<td class="title">Services</td>
+	<td class="title">Value</td>
+	<td class="title" style="width: 88px;">Details</td>
+	<td class="title" style="width: 56px;">Status</td>
+	<td class="title" style="width: 80px;">Configure</td>
 </tr>
+
 <tr id="cdp">
 <td class="head" id="lCdp">CDP daemon</td>
 <td>
@@ -432,6 +499,7 @@ function udpxySelect(form)
 		<option value="1" id="lCdpE">Enable</option>
 	</select>
 </td>
+<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
 </tr>
 <tr id="lltd">
 <td class="head" id="lLltd">LLTD daemon</td>
@@ -441,8 +509,9 @@ function udpxySelect(form)
 		<option value="1" id="lLltdE">Enable</option>
 	</select>
 </td>
+<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
 </tr>
-<tr>
+<tr id="snmpd">
 <td class="head">SNMP daemon</td>
 <td>
 	<select name="SnmpdEnabled" class="half">
@@ -450,6 +519,7 @@ function udpxySelect(form)
 		<option value="1">Enable</option>
 	</select>
 </td>
+<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
 </tr>
 <tr id="igmpProxy">
 <td class="head" id="lIgmpp">IGMP proxy</td>
@@ -459,10 +529,11 @@ function udpxySelect(form)
 		<option value="1" id="lIgmppE">Enable</option>
 	</select>
 </td>
+<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
 </tr>
 <tr id="igmpSnoop">
 <td class="head" id="lIgmpp">LAN IGMP snooping</td>
-<td>
+<td colspan="4">
 	<select name="igmpSnoop" class="half">
 		<option value="">auto</option>
 		<option value="n">none/disable</option>
@@ -478,10 +549,21 @@ function udpxySelect(form)
 		<option value="1" id="lUpnpE">Enable</option>
 	</select>
 </td>
+<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
+</tr>
+<tr id="xupnpd">
+<td class="head">XUPNPD r283 support</td>
+<td>
+	<select name="xupnpdEnbl" class="half">
+		<option value="0">Disable</option>
+		<option value="1">Enable</option>
+	</select>
+</td>
+<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
 </tr>
 <tr id="radvd">
 <td class="head" id="lRadvd">Router Advertisement</td>
-<td>
+<td colspan="4">
 	<select name="radvdEnbl" class="half">
 		<option value="0" id="lRadvdD">Disable</option>
 		<option value="1" id="lRadvdE">Enable</option>
@@ -490,7 +572,7 @@ function udpxySelect(form)
 </tr>
 <tr id="pppoerelay">
 <td class="head" id="lPppoer">PPPOE relay</td>
-<td>
+<td colspan="4">
 	<select name="pppoeREnbl" class="half">
 		<option value="0" id="lPppoerD">Disable</option>
 		<option value="1" id="lPppoerE">Enable</option>
@@ -505,8 +587,9 @@ function udpxySelect(form)
 		<option value="1">Enable</option>
 	</select>
 </td>
+<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
 </tr>
-<tr>
+<tr id="udpxy">
 <td class="head">Multicast to http proxy (UDPXY)</td>
 <td>
 	<select name="udpxyMode" class="half" onchange="udpxySelect(this.form);">
@@ -515,15 +598,27 @@ function udpxySelect(form)
 		<option value="2">LAN &amp; WAN</option>
 	</select>
 </td>
+<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
 </tr>
 <tr id="udpxy_port_row" style="display:none;">
 <td class="head">UDPXY port</td>
-<td>
+<td colspan="4">
 	<input name="udpxyPort" class="half">
 </td>
 </tr>
 
-<tr>
+<tr id="transmission">
+<td class="head">BitTorrent daemon</td>
+<td>
+	<select name="transmission" class="half">
+		<option value="0">Disable</option>
+		<option value="1">Enable</option>
+	</select>
+</td>
+<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
+</tr>
+
+<tr id="crond">
 <td class="head">Cron daemon</td>
 <td>
 	<select name="CrondEnable" class="half">
@@ -531,15 +626,16 @@ function udpxySelect(form)
 		<option value="1">Enable</option>
 	</select>
 </td>
+<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
 </tr>
 
 <!-- Watchers -->
 <tr>
-	<td class="title" colspan="2">Watchers</td>
+	<td class="title" colspan="5">Watchers</td>
 </tr>
 <tr>
 <td class="head">Watchdog service</td>
-<td>
+<td colspan="4">
 	<select name="watchdogEnable" class="half">
 		<option value="0">Disable</option>
 		<option value="1">Enable</option>
@@ -548,7 +644,7 @@ function udpxySelect(form)
 </tr>
 <tr>
 <td class="head">Pinger service</td>
-<td>
+<td colspan="4">
 	<select name="pingerEnable" class="half" onchange="pingerSelect(this.form);">
 		<option value="0">Disable</option>
 		<option value="1">Enable</option>
@@ -557,24 +653,24 @@ function udpxySelect(form)
 </tr>
 <tr id="pinger_row1">
 <td class="head">Ping check time</td>
-<td>
+<td colspan="4">
 	<input name="ping_check_time" class="half" value="<% getCfgGeneral(1, "ping_check_time"); %>">
 </td>
 </tr>
 <tr id="pinger_row2">
 <td class="head">Ping check interval</td>
-<td>
+<td colspan="4">
 	<input name="ping_check_interval" class="half" value="<% getCfgGeneral(1, "ping_check_interval"); %>">
 </td>
 </tr>
 
 <!-- Others -->
 <tr>
-	<td class="title" colspan="2">Others</td>
+	<td class="title" colspan="5">Others</td>
 </tr>
 <tr>
 <td class="head">Switch reinit on DHCP lease fail</td>
-<td>
+<td colspan="4">
 	<select name="dhcpSwReset" class="half">
 		<option value="0">Disable</option>
 		<option value="1">Enable</option>
@@ -583,7 +679,7 @@ function udpxySelect(form)
 </tr>
 <tr>
 <td class="head">Force DHCP renew lease at WAN port status change</td>
-<td>
+<td colspan="4">
 	<select name="ForceRenewDHCP" class="half">
 		<option value="0">Disable</option>
 		<option value="1">Enable</option>
@@ -592,7 +688,7 @@ function udpxySelect(form)
 </tr>
 <tr>
 <td class="head" id="sysfwPingFrmWANFilterHead">Accept ping from WAN</td>
-<td>
+<td colspan="4">
 	<select name="pingWANEnbl" class="half">
 		<option value="0">Disable</option>
 		<option value="1">Enable</option>
@@ -601,7 +697,7 @@ function udpxySelect(form)
 </tr>
 <tr>
 <td class="head" id="lStp">802.1d Spanning Tree</td>
-<td>
+<td colspan="4">
 	<select name="stpEnbl" class="half">
 		<option value="0" id="lStpD">Disable</option>
 		<option value="1" id="lStpE">Enable</option>
@@ -610,7 +706,7 @@ function udpxySelect(form)
 </tr>
 <tr>
 <td class="head">Do not modify TTL</td>
-<td>
+<td colspan="4">
 	<select name="ttlStore" class="half">
 		<option value="0" id="lStpD">Disable</option>
 		<option value="1" id="lStpE">Enable</option>
@@ -619,7 +715,7 @@ function udpxySelect(form)
 </tr>
 <tr id="mcast_store_ttl_row">
 <td class="head">Do not modify multicast TTL</td>
-<td>
+<td colspan="4">
 	<select name="ttlMcastStore" class="half">
 		<option value="0" id="lStpD">Disable</option>
 		<option value="1" id="lStpE">Enable</option>
@@ -628,7 +724,7 @@ function udpxySelect(form)
 </tr>
 <tr>
 <td class="head">PMTU discovery for TCP packets</td>
-<td>
+<td colspan="4">
 	<select name="mssPmtu" class="half">
 		<option value="0">Disable</option>
 		<option value="1">Enable</option>

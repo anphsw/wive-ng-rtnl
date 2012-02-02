@@ -70,6 +70,7 @@ static int getCdpBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getLltdBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getPppoeRelayBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getUpnpBuilt(int eid, webs_t wp, int argc, char_t **argv);
+static int getXupnpdBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getRadvdBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getDynamicRoutingBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getSWQoSBuilt(int eid, webs_t wp, int argc, char_t **argv);
@@ -130,6 +131,7 @@ void formDefineInternet(void) {
 	websAspDefine(T("getLltdBuilt"), getLltdBuilt);
 	websAspDefine(T("getPppoeRelayBuilt"), getPppoeRelayBuilt);
 	websAspDefine(T("getUpnpBuilt"), getUpnpBuilt);
+	websAspDefine(T("getXupnpdBuilt"), getXupnpdBuilt);
 	websAspDefine(T("getRadvdBuilt"), getRadvdBuilt);
 	websAspDefine(T("getWanIp"), getWanIp);
 	websAspDefine(T("getWanMac"), getWanMac);
@@ -1137,6 +1139,15 @@ static int getPppoeRelayBuilt(int eid, webs_t wp, int argc, char_t **argv)
 static int getUpnpBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
 #ifdef CONFIG_USER_MINIUPNPD
+	return websWrite(wp, T("1"));
+#else
+	return websWrite(wp, T("0"));
+#endif
+}
+
+static int getXupnpdBuilt(int eid, webs_t wp, int argc, char_t **argv)
+{
+#ifdef CONFIG_USER_XUPNPD
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));

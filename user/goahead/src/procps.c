@@ -11,22 +11,32 @@
 // Initialize command-line buffer
 void procps_init(cmdline_t *src)
 {
-	src->pid    = -1;
-	src->cap    = CMDLINE_EXT;
-	src->size   = 0;
-	src->buffer = (char *)malloc(CMDLINE_EXT);
-	src->acap   = CMDLINE_AEXT;
-	src->argc   = 0;
-	src->argv   = (char **)malloc(CMDLINE_AEXT * sizeof(char *));
+	src->pid        = -1;
+	src->cap        = CMDLINE_EXT;
+	src->size       = 0;
+	src->buffer     = (char *)malloc(CMDLINE_EXT);
+	src->acap       = CMDLINE_AEXT;
+	src->argc       = 0;
+	src->argv       = (char **)malloc(CMDLINE_AEXT * sizeof(char *));
+	src->dynamic    = 0;
+	src->next       = NULL;
 }
 
 // Finalize command-line buffer
 void procps_free(cmdline_t *src)
 {
-	if (src->argv!=NULL)
-		free(src->argv);
-	if (src->buffer!=NULL)
-		free(src->buffer);
+	while (src != NULL)
+	{
+		cmdline_t *next = src->next;
+		
+		if (src->argv!=NULL)
+			free(src->argv);
+		if (src->buffer!=NULL)
+			free(src->buffer);
+		if (src->dynamic)
+			free(src);
+		src = next;
+	}
 }
 
 // Read process arguments
@@ -34,7 +44,7 @@ int procps_read_args(pid_t procnum, cmdline_t *pcmdline)
 {
 	char cmdline[64];
 	size_t i;
-	sprintf(cmdline, "/proc/%ld/cmdline", procnum);
+	sprintf(cmdline, "/proc/%ld/cmdline", (long int)procnum);
 
 	FILE *fd = fopen(cmdline, "r");
 	if (fd!=NULL)
@@ -176,6 +186,65 @@ int procps_find(const char *procname, size_t elems, pid_t *pids)
 		
 		closedir(proc);
 	}
+	return result;
+}
+
+// Find process containing string
+cmdline_t *procps_list()
+{
+	struct dirent *dent;
+	cmdline_t *result = NULL;
+
+	// Try to open /proc
+	DIR *proc = opendir("/proc");
+
+	if (proc != NULL)
+	{
+		cmdline_t *cmdline = NULL;
+		
+		// Initialize process command line buffer
+		while ((dent = readdir(proc)) != NULL)
+		{
+			// Allocate new entry if needed
+			if (cmdline == NULL)
+			{
+				cmdline = (cmdline_t *)malloc(sizeof(cmdline_t));
+				if (cmdline == NULL) // Allocation failed?
+				{
+					// Free previously allocated data & return
+					procps_free(result);
+					closedir(proc);
+					return NULL;
+				}
+				else
+				{
+					procps_init(cmdline);
+					cmdline->dynamic = 1;
+				}
+			}
+			
+			// Read process number
+			long procnum = readUnsigned(dent->d_name);
+			if (procnum >= 0) // Valid unsigned ?
+			{
+				int code = procps_read_args(procnum, cmdline);
+				if (code == 0) // All seems to be OK?
+				{
+					// Add to list
+					cmdline->next   = result;
+					result          = cmdline;
+					cmdline         = NULL;
+				}
+			}
+		}
+		
+		// Free allocated cmdline if exists
+		if (cmdline != NULL)
+			procps_free(cmdline);
+		
+		closedir(proc);
+	}
+
 	return result;
 }
 
