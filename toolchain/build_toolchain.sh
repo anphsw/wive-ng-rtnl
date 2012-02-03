@@ -113,7 +113,7 @@ if [ "$GCC" = "YES" ]; then
 	--disable-tls --disable-libmudflap --disable-libssp $EXT_OPT \
 	--disable-libgomp --disable-threads \
 	--with-sysroot=$PREFIX \
-	--enable-languages=c && \
+	--enable-version-specific-runtime-libs --enable-languages=c && \
     make -j3 && \
     make install) || exit 1
     cd ..
@@ -138,10 +138,10 @@ if [ "$GCCCPP" = "YES" ]; then
 	--disable-tls --disable-libmudflap --disable-libssp $EXT_OPT \
 	--disable-libgomp --disable-threads \
 	--with-sysroot=$PREFIX \
-	--enable-languages=c++ && \
-    make -j3 all-host all-target-libgcc && \
-    make install-host install-target-libgcc) || exit 1
+	--enable-version-specific-runtime-libs --enable-languages=c++ && \
+    make -j3 all-host all-target-libgcc all-target-libstdc++-v3  && \
+    make install-host install-target-libgcc install-target-libstdc++-v3) || exit 1
     cd ..
 fi
-echo "====================All IS DONE!========================"
 
+echo "====================All IS DONE!========================"
