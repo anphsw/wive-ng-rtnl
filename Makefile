@@ -289,9 +289,10 @@ romfs.subdirs:
 
 .PHONY: romfs.post
 romfs.post:
+	##################COPY_RUNTIME_LIBS####################
+	find $(ROOTDIR)/toolchain/lib -type f -name 'librt*' -exec cp -vfap {} $(ROMFSDIR)/lib/ \;
+	find $(ROOTDIR)/toolchain/lib -type f -name 'libgcc_s*' -exec cp -vfap {} $(ROMFSDIR)/lib/ \;
 	#################STRIP-APPS-LIB-ROMFS##################
-	cp -vfa $(ROOTDIR)/toolchain/mipsel-linux-uclibc/lib/libgcc_s* $(ROMFSDIR)/lib/
-	cp -vfa $(ROOTDIR)/toolchain/lib/librt* $(ROMFSDIR)/lib/
 	./strip.sh
 	######################CLEANUP##########################
 	-find $(ROMFSDIR)/. -name CVS | xargs -r rm -rf
