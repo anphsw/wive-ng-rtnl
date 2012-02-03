@@ -17,7 +17,8 @@
 #    make install prefix=$HOME
 
 SFLAGS+= $(CFLAGS) -fPIC -D_LARGEFILE64_SOURCE=1
-LDFLAGS= 
+CFLAGS=
+LDFLAGS=
 TEST_LDFLAGS=-L. libz.a
 LDSHARED= $(CC) -shared -Wl,-soname,libz.so.1,--version-script,zlib.map
 
