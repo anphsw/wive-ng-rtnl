@@ -292,11 +292,12 @@ romfs.post:
 	##################COPY_RUNTIME_LIBS####################
 	find $(ROOTDIR)/toolchain/lib -type f -name 'librt*' -exec cp -vfap {} $(ROMFSDIR)/lib/ \;
 	find $(ROOTDIR)/toolchain/lib -type f -name 'libgcc_s*' -exec cp -vfap {} $(ROMFSDIR)/lib/ \;
-	#################STRIP-APPS-LIB-ROMFS##################
-	./strip.sh
 	######################CLEANUP##########################
 	-find $(ROMFSDIR)/. -name CVS | xargs -r rm -rf
 	-rm -fr $(ROOTDIR)/dev
+	#################STRIP_APPS_LIB_ROMFS##################
+	./strip.sh
+	###################SET_COMPILE_DATE####################
 	date +%Y%m%d%H%M > $(ROMFSDIR)/etc/compile-date
 	###################APPS-INSTALLED######################
 	$(MAKEARCH) -C vendors romfs.post
