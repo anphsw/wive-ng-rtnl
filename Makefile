@@ -290,8 +290,7 @@ romfs.subdirs:
 .PHONY: romfs.post
 romfs.post:
 	##################COPY_RUNTIME_LIBS####################
-	find $(ROOTDIR)/toolchain/lib -type f -name 'librt*' -exec cp -vfap {} $(ROMFSDIR)/lib/ \;
-	find $(ROOTDIR)/toolchain/lib -type f -name 'libgcc_s*' -exec cp -vfap {} $(ROMFSDIR)/lib/ \;
+	find $(ROOTDIR)/toolchain/lib -type f -name 'libgcc_s*so*' -exec cp -vfap {} $(ROMFSDIR)/lib/ \;
 	######################CLEANUP##########################
 	-find $(ROMFSDIR)/. -name CVS | xargs -r rm -rf
 	-rm -fr $(ROOTDIR)/dev

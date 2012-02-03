@@ -35,7 +35,7 @@ CFLAGS += -Os -I$(ROOTDIR)/$(LINUXDIR)/include -I$(ROOTDIR)/lib/include
 
 export $(CFLAGS)
 
-DIRS = ldso libc
+DIRS = ldso libc librt
 ifeq ($(strip $(UCLIBC_HAS_GETTEXT_AWARENESS)),y)
     DIRS += libintl
 endif
@@ -50,9 +50,6 @@ ifeq ($(CONFIG_LIB_NSL_FORCE),y)
 endif
 ifeq ($(CONFIG_LIB_UTIL_FORCE),y)
     DIRS += libutil
-endif
-ifeq ($(CONFIG_LIB_RT_FORCE),y)
-    DIRS += librt
 endif
 ifeq ($(CONFIG_LIB_LIBGMP_FORCE),y)
     DIRS += libgmp
@@ -113,6 +110,7 @@ ifeq ($(strip $(HAVE_SHARED)),y)
 	$(SECHO)
 	@$(MAKE) -C libc shared
 	@$(MAKE) -C ldso shared
+	@$(MAKE) -C librt shared
 ifeq ($(CONFIG_LIB_FLEX),y)
 	@$(MAKE) -C libflex
 endif
@@ -127,9 +125,6 @@ ifeq ($(CONFIG_LIB_NSL_FORCE),y)
 endif
 ifeq ($(CONFIG_LIB_UTIL_FORCE),y)
 	@$(MAKE) -C libutil shared
-endif
-ifeq ($(CONFIG_LIB_RT_FORCE),y)
-	@$(MAKE) -C librt shared
 endif
 ifeq ($(CONFIG_LIB_LIBGMP_FORCE),y)
 	@$(MAKE) -C libgmp shared
