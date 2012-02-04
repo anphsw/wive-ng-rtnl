@@ -445,9 +445,9 @@ int main(int argc, char **argv)
 		exit(0);
 	} else {
 		if (devnum == -1) {
-		devnum = dev->devnum;
-		busnum = (int)strtol(dev->bus->dirname,NULL,10);
-		SHOW_PROGRESS(output,"Accessing device %03d on bus %03d ...\n", devnum, busnum);
+			devnum = dev->devnum;
+			busnum = (int)strtol(dev->bus->dirname,NULL,10);
+			SHOW_PROGRESS(output,"Accessing device %03d on bus %03d ...\n", devnum, busnum);
 		}
 		devh = usb_open(dev);
 		if (devh == NULL) {
@@ -897,10 +897,10 @@ int switchConfiguration ()
 	int ret;
 
 	SHOW_PROGRESS(output,"Changing configuration to %i ...\n", Configuration);
-	while (((ret = usb_set_configuration(devh, Configuration)) < 0) && --count) { 
-		SHOW_PROGRESS(output," Device is busy, trying to detach kernel driver\n"); 
-		detachDriver(); 
-	} 
+	while (((ret = usb_set_configuration(devh, Configuration)) < 0) && --count) {
+		SHOW_PROGRESS(output," Device is busy, trying to detach kernel driver\n");
+		detachDriver();
+	}
 	if (ret == 0 ) {
 		SHOW_PROGRESS(output," OK, configuration set\n");
 		return 1;
