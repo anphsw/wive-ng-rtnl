@@ -417,6 +417,7 @@ clean: modules_clean
 	find $(ROOTDIR) -type f -name 'config.status' | xargs rm -f
 	find $(ROOTDIR) -type f -name 'aclocal.m4' | xargs rm -f
 	find $(ROOTDIR) -type f -name '.sgbuilt_user' | xargs rm -f
+	find $(ROOTDIR) -type f -name '.config.cmd' | xargs rm -f
 	find $(ROOTDIR)/lib -type f -name '*.o' | xargs rm -f
 	find $(ROOTDIR)/lib -type f -name '*.so' | xargs rm -f
 	find $(ROOTDIR)/user -type f -name '*.o' | xargs rm -f
