@@ -201,15 +201,15 @@ int do_bootm (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 
    /* YJ, 5/16/2006 */
    if (addr == 0x8A200000)
-	   ((void(*) (void)) (0x8A200000U))();	
+	   ((void(*) (void)) (0x8A200000U))();
    else if(addr == 0x80200000)
-	   ((void(*) (void)) (0x80200000U))();	
+	   ((void(*) (void)) (0x80200000U))();
    else if(addr == 0x8A300000)
-	   ((void(*) (void)) (0x8A300000U))();	
+	   ((void(*) (void)) (0x8A300000U))();
    else if(addr == 0x88001000)
-	   ((void(*) (void)) (0x88001000U))();	
+	   ((void(*) (void)) (0x88001000U))();
    else if(addr == 0x8B800000)
-	   ((void(*) (void)) (0x8B800000U))();	
+	   ((void(*) (void)) (0x8B800000U))();
 
 	/* Copy header so we can blank CRC field for re-calculation */
 #ifdef CONFIG_HAS_DATAFLASH

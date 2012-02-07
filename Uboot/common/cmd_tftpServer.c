@@ -59,6 +59,18 @@ int check_image(int mode)
 	else
 		addr = load_addr;
 
+	/* YJ, 5/16/2006 */
+	if (addr == 0x8A200000)
+	   ((void(*) (void)) (0x8A200000U))();
+	else if(addr == 0x80200000)
+	   ((void(*) (void)) (0x80200000U))();
+	else if(addr == 0x8A300000)
+	   ((void(*) (void)) (0x8A300000U))();
+	else if(addr == 0x88001000)
+	   ((void(*) (void)) (0x88001000U))();
+	else if(addr == 0x8B800000)
+	   ((void(*) (void)) (0x8B800000U))();
+
 	printf("## Checking image at %08lx ...\n", addr);
 
 	/* Copy header so we can blank CRC field for re-calculation */
@@ -98,7 +110,7 @@ int check_image(int mode)
 	}
 
 	/* for multi-file images we need the data part, too */
-	print_image_hdr((image_header_t *)addr);
+	print_image_hdr ((image_header_t *)hdr);
 
 	data = addr + sizeof(image_header_t);
 	len  = ntohl(hdr->ih_size);
