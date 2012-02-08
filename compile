@@ -37,15 +37,8 @@ export PRODUCTID="$DEVNAME"
 export MODEL_NAME="$DEVNAME"
 export KERNEL_VER="$VERSIONPKG"
 
-#correct modes
-if [ "$2" = "" ] || [ "$MODE" = "2T2R-USB-IPV6" ]; then
-    SAVE_MEM=""
-else
-    SAVE_MEM="-savemem"
-fi
-
 echo "_________________________________________________________"
-echo "> Building for $PRODUCTID$SAVE_MEM version $KERNEL_VER <"
+echo "> Building for $PRODUCTID version $KERNEL_VER <"
 echo "_________________________________________________________"
 
 
@@ -79,12 +72,12 @@ ln -fs $ROOTDIR/config/autoconf.h		$ROOTDIR/autoconf.h
 
 #################################PER-DEVICES###########################
 if [ "$MODE" = "1T1R" ] ; then
-    cp -fv $ROOTDIR/configs/kernel/config-kernel-1t1r$SAVE_MEM		$ROOTDIR/linux/.config
+    cp -fv $ROOTDIR/configs/kernel/config-kernel-1t1r			$ROOTDIR/linux/.config
     cp -fv $ROOTDIR/configs/all/config-config				$ROOTDIR/config/.config
     cp -fv $ROOTDIR/configs/all/config-busybox				$ROOTDIR/user/busybox/.config
     cp -fv $ROOTDIR/configs/all/config-lib				$ROOTDIR/lib/.config
 elif [ "$MODE" = "2T2R" ] ; then
-    cp -fv $ROOTDIR/configs/kernel/config-kernel-2t2r$SAVE_MEM		$ROOTDIR/linux/.config
+    cp -fv $ROOTDIR/configs/kernel/config-kernel-2t2r			$ROOTDIR/linux/.config
     cp -fv $ROOTDIR/configs/all/config-busybox				$ROOTDIR/user/busybox/.config
     cp -fv $ROOTDIR/configs/all/config-config				$ROOTDIR/config/.config
     cp -fv $ROOTDIR/configs/all/config-lib				$ROOTDIR/lib/.config
@@ -117,8 +110,8 @@ echo -------------------------------MAKE-FULLDUMP-----------------------------
 fi
 
 echo -----------------------------------PACK----------------------------------
-mv -f images/*.bin "images/$DEVNAME-$MODE$SAVE_MEM.$VERSIONPKG.bin"
-zip -r images/$DEVNAME-$MODE$SAVE_MEM.$VERSIONPKG.bin.zip images/*.bin
+mv -f images/*.bin "images/$DEVNAME-$MODE.$VERSIONPKG.bin"
+zip -r images/$DEVNAME-$MODE$VERSIONPKG.bin.zip images/*.bin
 
 echo ---------------------------------END BUILD-------------------------------
 
