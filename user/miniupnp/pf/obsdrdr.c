@@ -1,4 +1,4 @@
-/* $Id: obsdrdr.c,v 1.68 2012/01/20 21:57:46 nanard Exp $ */
+/* $Id: obsdrdr.c,v 1.69 2012/02/03 11:59:16 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * (c) 2006-2010 Thomas Bernard 
@@ -100,9 +100,6 @@ remove_timestamp_entry(unsigned short eport, int proto)
 		e = *p;
 	}
 }
-
-/* anchor name */
-static const char anchor_name[] = "miniupnpd";
 
 /* /dev/pf when opened */
 static int dev = -1;

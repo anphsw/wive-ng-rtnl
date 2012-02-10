@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.59 2011/05/26 22:47:32 nanard Exp $
+# $Id: Makefile,v 1.60 2012/02/06 16:28:25 nanard Exp $
 # MiniUPnP project
 # http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
 # Author: Thomas Bernard
@@ -18,7 +18,7 @@
 
 IPTABLESPATH=../iptables
 LIBS = $(IPTABLESPATH)/libiptc/libiptc.a
-CFLAGS += -Wall -Os -D_GNU_SOURCE -I../iptables -I../iptables/include -I../iptables/libiptc
+CFLAGS += -Wall -Os -D_GNU_SOURCE -I../iptables -I../iptables/include -I../iptables/libiptc -ansi
 
 PREFIX=./filesystem
 RM = rm -f

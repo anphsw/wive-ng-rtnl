@@ -1,7 +1,7 @@
-/* $Id: miniupnpd.c,v 1.138 2011/05/27 21:58:12 nanard Exp $ */
+/* $Id: miniupnpd.c,v 1.144 2012/02/07 00:29:43 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
- * (c) 2006-2011 Thomas Bernard
+ * (c) 2006-2012 Thomas Bernard
  * This software is subject to the conditions detailed
  * in the LICENCE file provided within the distribution */
 
@@ -193,32 +193,32 @@ OpenAndConfNFqueue(){
 
 	inet_pton(AF_INET, "239.255.255.250", &(ssdp.sin_addr));
 
-        //Get a queue connection handle from the module
+        /* Get a queue connection handle from the module */
         if (!(nfqHandle = nfq_open())) {
 		syslog(LOG_ERR, "Error in nfq_open(): %m");
                 return -1;
         }
 
-        //Unbind the handler from processing any IP packets
-        //      Not totally sure why this is done, or if it's necessary...
+        /* Unbind the handler from processing any IP packets
+           Not totally sure why this is done, or if it's necessary... */
         if ((e = nfq_unbind_pf(nfqHandle, AF_INET)) < 0) {
 		syslog(LOG_ERR, "Error in nfq_unbind_pf(): %m");
                 return -1;
         }
 
-        //Bind this handler to process IP packets...
+        /* Bind this handler to process IP packets... */
         if (nfq_bind_pf(nfqHandle, AF_INET) < 0) {
 		syslog(LOG_ERR, "Error in nfq_bind_pf(): %m");
                 return -1;
         }
 
-        //      Install a callback on queue -Q
+        /*      Install a callback on queue -Q */
         if (!(myQueue = nfq_create_queue(nfqHandle,  nfqueue, &nfqueue_cb, NULL))) {
 		syslog(LOG_ERR, "Error in nfq_create_queue(): %m");
                 return -1;
         }
 
-        //      Turn on packet copy mode
+        /*      Turn on packet copy mode */
         if (nfq_set_mode(myQueue, NFQNL_COPY_PACKET, 0xffff) < 0) {
 		syslog(LOG_ERR, "Error setting packet copy mode (): %m");
                 return -1;
@@ -289,7 +289,8 @@ static int nfqueue_cb(
 
 	} else {
 		syslog(LOG_ERR,"nfq_get_msg_packet_hdr failed");
-		return 1; // from nfqueue source: 0 = ok, >0 = soft error, <0 hard error
+		return 1;
+		/* from nfqueue source: 0 = ok, >0 = soft error, <0 hard error */
 	}
 
 	return 0;
@@ -506,7 +507,7 @@ struct runtime_vars {
 
 /* parselanaddr()
  * parse address with mask
- * ex: 192.168.1.1/24 or 192.168.1.1/255.255.255.0
+ * ex: 192.168.1.1/24
  * When MULTIPLE_EXTERNAL_IP is enabled, the ip address of the
  * external interface associated with the lan subnet follows.
  * ex : 192.168.1.1/24 81.21.41.11
@@ -526,15 +527,7 @@ parselanaddr(struct lan_addr_s * lan_addr, const char * str)
 	n = p - str;
 	if(*p == '/')
 	{
-		unsigned short i, mask[4];
-		unsigned char *am = (unsigned char *) &(lan_addr->mask.s_addr);
-		if (sscanf(++p, "%3hu.%3hu.%3hu.%3hu", &mask[0], &mask[1], &mask[2], &mask[3]) == 4) {
-			for (i = 0; i < 4; i++)
-				am[i] = (unsigned char) mask[i];
-		} else {
-			nbits = atoi(p);
-			lan_addr->mask.s_addr = htonl(nbits ? (0xffffffff << (32 - nbits)) : 0);
-		}
+		nbits = atoi(++p);
 		while(*p && !isspace(*p))
 			p++;
 	}
@@ -550,6 +543,7 @@ parselanaddr(struct lan_addr_s * lan_addr, const char * str)
 		fprintf(stderr, "Error parsing address/mask : %s\n", str);
 		return -1;
 	}
+	lan_addr->mask.s_addr = htonl(nbits ? (0xffffffff << (32 - nbits)) : 0);
 #ifdef MULTIPLE_EXTERNAL_IP
 	/* skip spaces */
 	while(*p && isspace(*p))
@@ -669,6 +663,10 @@ init(int argc, char * * argv, struct runtime_vars * v)
 			case UPNPPRESENTATIONURL:
 				presurl = ary_options[i].value;
 				break;
+			case UPNPFRIENDLY_NAME:
+				strncpy(friendly_name, ary_options[i].value, FRIENDLY_NAME_MAX_LEN);
+				friendly_name[FRIENDLY_NAME_MAX_LEN-1] = '\0';
+				break;
 #ifdef USE_NETFILTER
 			case UPNPFORWARDCHAIN:
 				miniupnpd_forward_chain = ary_options[i].value;
@@ -707,6 +705,9 @@ init(int argc, char * * argv, struct runtime_vars * v)
 				v->clean_ruleset_interval = atoi(ary_options[i].value);
 				break;
 #ifdef USE_PF
+			case UPNPANCHOR:
+				anchor_name = ary_options[i].value;
+				break;
 			case UPNPQUEUE:
 				queue = ary_options[i].value;
 				break;
@@ -950,7 +951,6 @@ init(int argc, char * * argv, struct runtime_vars * v)
 	}
 
 	openlog("miniupnpd", openlog_option, LOG_MINIUPNPD);
-	syslog(LOG_INFO, "version " MINIUPNPD_VERSION " started");
 
 	if(!debug_flag)
 	{
@@ -1047,7 +1047,7 @@ print_usage:
 			"\t-U causes miniupnpd to report system uptime instead "
 			"of daemon uptime.\n"
 #ifdef ENABLE_NATPMP
-			"\t-N enable NAT-PMP functionnality.\n"
+			"\t-N enable NAT-PMP functionality.\n"
 #endif
 			"\t-B sets bitrates reported by daemon in bits per second.\n"
 			"\t-w sets the presentation url. Default is http address on port 80\n"
@@ -1076,7 +1076,7 @@ main(int argc, char * * argv)
 	int sudpv6 = -1;	/* IP v6 socket for receiving SSDP */
 #endif
 #ifdef ENABLE_NATPMP
-	int * snatpmp;
+	int * snatpmp = NULL;
 #endif
 #ifdef ENABLE_NFQUEUE
 	int nfqh = -1;
@@ -1085,15 +1085,13 @@ main(int argc, char * * argv)
 	int sifacewatcher = -1;
 #endif
 
-	int * snotify;
+	int * snotify = NULL;
 	int addr_count;
 	LIST_HEAD(httplisthead, upnphttp) upnphttphead;
 	struct upnphttp * e = 0;
 	struct upnphttp * next;
 	fd_set readset;	/* for select() */
-#ifdef ENABLE_EVENTS
 	fd_set writeset;
-#endif
 	struct timeval timeout, timeofday, lasttimeofday = {0, 0};
 	int max_fd = -1;
 #ifdef USE_MINIUPNPDCTL
@@ -1107,6 +1105,7 @@ main(int argc, char * * argv)
 	struct rule_state * rule_list = 0;
 	struct timeval checktime = {0, 0};
 	struct lan_addr_s * lan_addr;
+	syslog(LOG_INFO, "SNet version started");
 
 	if(init(argc, argv, &v) != 0)
 		return 1;
@@ -1114,11 +1113,15 @@ main(int argc, char * * argv)
 	addr_count = 0;
 	for(lan_addr = lan_addrs.lh_first; lan_addr != NULL; lan_addr = lan_addr->list.le_next)
 		addr_count++;
-	snotify = (int*) malloc(addr_count * sizeof(int));
-	memset(snotify, 0, sizeof(snotify));
+	if(addr_count > 0) {
+		snotify = calloc(addr_count, sizeof(int));
+	}
 #ifdef ENABLE_NATPMP
-	snatpmp = (int*) malloc(addr_count * sizeof(int));
-	for(i = 0; i < addr_count; i++)
+	if(addr_count > 0) {
+		snatpmp = malloc(addr_count * sizeof(int));
+		for(i = 0; i < addr_count; i++)
+			snatpmp[i] = -1;
+	}
 #endif
 
 	LIST_INIT(&upnphttphead);
@@ -1354,6 +1357,7 @@ main(int argc, char * * argv)
 
 		/* select open sockets (SSDP, HTTP listen, and all HTTP soap sockets) */
 		FD_ZERO(&readset);
+		FD_ZERO(&writeset);
 
 		if (sudp >= 0) 
 		{
@@ -1391,10 +1395,15 @@ main(int argc, char * * argv)
 		i = 0;	/* active HTTP connections count */
 		for(e = upnphttphead.lh_first; e != NULL; e = e->entries.le_next)
 		{
-			if((e->socket >= 0) && (e->state <= 2))
+			if(e->socket >= 0)
 			{
-				FD_SET(e->socket, &readset);
-				max_fd = MAX( max_fd, e->socket);
+				if(e->state <= EWaitingForHttpContent)
+					FD_SET(e->socket, &readset);
+				else if(e->state == ESendingAndClosing)
+					FD_SET(e->socket, &writeset);
+				else
+					continue;
+				max_fd = MAX(max_fd, e->socket);
 				i++;
 			}
 		}
@@ -1429,15 +1438,10 @@ main(int argc, char * * argv)
 #endif
 
 #ifdef ENABLE_EVENTS
-		FD_ZERO(&writeset);
 		upnpevents_selectfds(&readset, &writeset, &max_fd);
 #endif
 
-#ifdef ENABLE_EVENTS
 		if(select(max_fd+1, &readset, &writeset, 0, &timeout) < 0)
-#else
-		if(select(max_fd+1, &readset, 0, 0, &timeout) < 0)
-#endif
 		{
 			if(quitting) goto shutdown;
 			if(errno == EINTR) continue; /* interrupted by a signal, start again */
@@ -1534,10 +1538,13 @@ main(int argc, char * * argv)
 		/* LIST_FOREACH macro is not available under linux */
 		for(e = upnphttphead.lh_first; e != NULL; e = e->entries.le_next)
 		{
-			if(  (e->socket >= 0) && (e->state <= 2)
-				&&(FD_ISSET(e->socket, &readset)) )
+			if(e->socket >= 0)
 			{
-				Process_upnphttp(e);
+				if(FD_ISSET(e->socket, &readset) ||
+				   FD_ISSET(e->socket, &writeset))
+				{
+					Process_upnphttp(e);
+				}
 			}
 		}
 		/* process incoming HTTP connections */
@@ -1618,7 +1625,7 @@ main(int argc, char * * argv)
 		for(e = upnphttphead.lh_first; e != NULL; )
 		{
 			next = e->entries.le_next;
-			if(e->state >= 100)
+			if(e->state >= EToDelete)
 			{
 				LIST_REMOVE(e, entries);
 				Delete_upnphttp(e);

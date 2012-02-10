@@ -1,6 +1,6 @@
-/* $Id: natpmp.c,v 1.26 2011/07/15 07:48:26 nanard Exp $ */
+/* $Id: natpmp.c,v 1.28 2012/02/04 23:34:39 nanard Exp $ */
 /* MiniUPnP project
- * (c) 2007-2010 Thomas Bernard
+ * (c) 2007-2012 Thomas Bernard
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * This software is subject to the conditions detailed
  * in the LICENCE file provided within the distribution */
@@ -8,6 +8,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <syslog.h>
+#include <errno.h>
 #include <time.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -37,7 +38,7 @@ int OpenAndConfNATPMPSocket(in_addr_t addr)
 		memset(&natpmp_addr, 0, sizeof(natpmp_addr));
 		natpmp_addr.sin_family = AF_INET;
 		natpmp_addr.sin_port = htons(NATPMP_PORT);
-		//natpmp_addr.sin_addr.s_addr = INADDR_ANY;
+		/*natpmp_addr.sin_addr.s_addr = INADDR_ANY; */
 		natpmp_addr.sin_addr.s_addr = addr;
 		if(bind(snatpmp, (struct sockaddr *)&natpmp_addr, sizeof(natpmp_addr)) < 0)
 		{
@@ -116,7 +117,13 @@ void ProcessIncomingNATPMPPacket(int s)
 	n = recvfrom(s, req, sizeof(req), 0,
 	             (struct sockaddr *)&senderaddr, &senderaddrlen);
 	if(n<0) {
+		/* EAGAIN, EWOULDBLOCK and EINTR : silently ignore (retry next time)
+		 * other errors : log to LOG_ERR */
+		if(errno != EAGAIN &&
+		   errno != EWOULDBLOCK &&
+		   errno != EINTR) {
 		syslog(LOG_ERR, "recvfrom(natpmp): %m");
+		}
 		return;
 	}
 	if(!inet_ntop(AF_INET, &senderaddr.sin_addr,

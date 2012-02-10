@@ -1,7 +1,7 @@
-/* $Id: upnpevents.c,v 1.17 2011/06/27 11:24:00 nanard Exp $ */
+/* $Id: upnpevents.c,v 1.20 2012/02/06 23:41:15 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
- * (c) 2008-2011 Thomas Bernard
+ * (c) 2008-2012 Thomas Bernard
  * This software is subject to the conditions detailed
  * in the LICENCE file provided within the distribution */
 
@@ -16,13 +16,13 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <fcntl.h>
 #include <errno.h>
 #include "config.h"
 #include "upnpevents.h"
 #include "miniupnpdpath.h"
 #include "upnpglobalvars.h"
 #include "upnpdescgen.h"
+#include "upnputils.h"
 
 #ifdef ENABLE_EVENTS
 /*enum subscriber_service_enum {
@@ -184,7 +184,7 @@ static void
 upnp_event_create_notify(struct subscriber * sub)
 {
 	struct upnp_event_notify * obj;
-	int flags;
+
 	obj = calloc(1, sizeof(struct upnp_event_notify));
 	if(!obj) {
 		syslog(LOG_ERR, "%s: calloc(): %m", "upnp_event_create_notify");
@@ -202,13 +202,8 @@ upnp_event_create_notify(struct subscriber * sub)
 		syslog(LOG_ERR, "%s: socket(): %m", "upnp_event_create_notify");
 		goto error;
 	}
-	if((flags = fcntl(obj->s, F_GETFL, 0)) < 0) {
-		syslog(LOG_ERR, "%s: fcntl(..F_GETFL..): %m",
-		       "upnp_event_create_notify");
-		goto error;
-	}
-	if(fcntl(obj->s, F_SETFL, flags | O_NONBLOCK) < 0) {
-		syslog(LOG_ERR, "%s: fcntl(..F_SETFL..): %m",
+	if(!set_non_blocking(obj->s)) {
+		syslog(LOG_ERR, "%s: set_non_blocking(): %m",
 		       "upnp_event_create_notify");
 		goto error;
 	}
@@ -373,11 +368,16 @@ static void upnp_event_send(struct upnp_event_notify * obj)
 	       "upnp_event_send", obj->buffer + obj->sent);
 	i = send(obj->s, obj->buffer + obj->sent, obj->tosend - obj->sent, 0);
 	if(i<0) {
-		syslog(LOG_DEBUG, "%s: send(): %m", "upnp_event_send");
-		obj->state = EError;
-		return;
+		if(errno != EAGAIN && errno != EWOULDBLOCK && errno != EINTR) {
+			syslog(LOG_NOTICE, "%s: send(): %m", "upnp_event_send");
+			obj->state = EError;
+			return;
+		} else {
+			/* EAGAIN or EWOULDBLOCK or EINTR : no data sent */
+			i = 0;
+		}
 	}
-	else if(i != (obj->tosend - obj->sent))
+	if(i != (obj->tosend - obj->sent))
 		syslog(LOG_NOTICE, "%s: %d bytes send out of %d",
 		       "upnp_event_send", i, obj->tosend - obj->sent);
 	obj->sent += i;
@@ -390,12 +390,19 @@ static void upnp_event_recv(struct upnp_event_notify * obj)
 	int n;
 	n = recv(obj->s, obj->buffer, obj->buffersize, 0);
 	if(n<0) {
-		syslog(LOG_DEBUG, "%s: recv(): %m", "upnp_event_recv");
-		obj->state = EError;
+		if(errno != EAGAIN &&
+		   errno != EWOULDBLOCK &&
+		   errno != EINTR) {
+			syslog(LOG_ERR, "%s: recv(): %m", "upnp_event_recv");
+			obj->state = EError;
+		}
 		return;
 	}
 	syslog(LOG_DEBUG, "%s: (%dbytes) %.*s", "upnp_event_recv",
 	       n, n, obj->buffer);
+	/* TODO : do something with the data recevied ?
+	 * right now, n (number of bytes received) is ignored
+	 * We may need to recv() more bytes. */
 	obj->state = EFinished;
 	if(obj->sub)
 		obj->sub->seq++;

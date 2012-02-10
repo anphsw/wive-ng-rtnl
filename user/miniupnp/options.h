@@ -1,8 +1,8 @@
-/* $Id: options.h,v 1.15 2008/10/06 13:22:02 nanard Exp $ */
+/* $Id: options.h,v 1.18 2012/02/05 00:29:49 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * author: Ryan Wagoner
- * (c) 2006 Thomas Bernard 
+ * (c) 2006-2012 Thomas Bernard 
  * This software is subject to the conditions detailed
  * in the LICENCE file provided within the distribution */
 
@@ -21,6 +21,7 @@ enum upnpconfigoptions {
 	UPNPBITRATE_UP,			/* "bitrate_up" */
 	UPNPBITRATE_DOWN,		/* "bitrate_down" */
 	UPNPPRESENTATIONURL,	/* presentation_url */
+	UPNPFRIENDLY_NAME,		/* "friendly_name" */
 	UPNPNOTIFY_INTERVAL,	/* notify_interval */
 	UPNPSYSTEM_UPTIME,		/* "system_uptime" */
 	UPNPPACKET_LOG,			/* "packet_log" */
@@ -35,6 +36,7 @@ enum upnpconfigoptions {
 	UPNPNATCHAIN,
 #endif
 #ifdef USE_PF
+	UPNPANCHOR,				/* anchor */
 	UPNPQUEUE,				/* queue */
 	UPNPTAG,				/* tag */
 #endif
@@ -60,11 +62,10 @@ readoptionsfile(const char * fname);
 void
 freeoptions(void);
 
-#define MAX_OPTION_VALUE_LEN (80)
 struct option
 {
 	enum upnpconfigoptions id;
-	char value[MAX_OPTION_VALUE_LEN];
+	const char * value;
 };
 
 extern struct option * ary_options;

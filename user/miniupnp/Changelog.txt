@@ -1,8 +1,27 @@
-$Id: Changelog.txt,v 1.248 2012/01/20 21:57:45 nanard Exp $
+$Id: Changelog.txt,v 1.256 2012/02/07 00:21:51 nanard Exp $
+
+2012/02/06:
+  Make HTTP (SOAP) sockets non blocking.
+
+2012/02/05:
+  Compile ok with -ansi flag.
+  Save a few bytes in options.c using a string repository, instead of a fixed size
+    buffer for each option value.
+
+2012/02/04:
+  Added friendly_name= option to config file
+
+2012/02/03:
+  Anchor name (PF) is now configurable through the config file with anchor=
+  Added test of presence of /lib/libip4tc.so and /lib/libip6tc.so files in
+    Makefile.linux in order to add -lip4tc and -lip6tc to LIBS accordingly.
+
+2012/02/01:
+  always handle EAGAIN, EWOULDBLOCK and EINTR after recv()/recvfrom() calls
 
 2012/01/20:
   Always #include <netinet/in.h> before #include <arpa/inet.h> (for OpenBSD)
-  .onrdomain field was added in ps with OpenBSD 5.0. Add PFRULE_HAS_ONRDOMAIN
+  .onrdomain field was added in pf with OpenBSD 5.0. Add PFRULE_HAS_ONRDOMAIN
 
 2012/01/02:
   Fixing netfilter/iptables_*.sh scripts for new ifconfig output format.
