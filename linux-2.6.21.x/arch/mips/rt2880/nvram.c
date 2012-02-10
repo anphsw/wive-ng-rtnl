@@ -152,6 +152,12 @@ int ralink_nvram_ioctl(struct inode *inode, struct file *file, unsigned int req,
 		nvr = (nvram_ioctl_t __user *)arg;
 		p = nvram_get(nvr->index, nvr->name);
 
+		len = strlen(p) + 1;
+		if (nvr->size < len) {
+			nvr->size = len;
+			return -EOVERFLOW;
+		}
+		
 		if (copy_to_user(nvr->value, p, strlen(p) + 1))
 			return -EFAULT;
 		break;
@@ -167,11 +173,15 @@ int ralink_nvram_ioctl(struct inode *inode, struct file *file, unsigned int req,
 		break;
 	case RALINK_NVRAM_IOCTL_SET:
 		nvr = (nvram_ioctl_t *)arg;
-		value = (char *)kzalloc(MAX_VALUE_LEN, GFP_KERNEL);
+		len = (nvr->size + MAX_VALUE_LEN) % MAX_VALUE_LEN;
+		if ((len > MAX_PERMITTED_VALUE_LEN) || (len < 0))
+			return -EOVERFLOW;
+		
+		value = (char *)kzalloc(len, GFP_KERNEL);
 		if (!value)
 			return -ENOMEM;
-
-		if (copy_from_user(value, nvr->value, strlen(nvr->value) + 1)) {
+		
+		if (copy_from_user(value, nvr->value, len)) {
 			KFREE(value);
 			return -EFAULT;
 		}

@@ -2,6 +2,7 @@
 #include "nvram.h"
 #include "nvram_env.h"
 #include "flash_api.h"
+#include <errno.h>
 
 //#define DEBUG
 
@@ -329,15 +330,10 @@ char *nvram_bufget(int index, char *name)
 	LIBNV_CHECK_VALID("");
 
 #ifdef CONFIG_KERNEL_NVRAM
+	nvr.size  = MAX_VALUE_LEN;
 	nvr.index = index;
-	nvr.name = name;
-	nvr.value = malloc(MAX_VALUE_LEN);
-	if ( !nvr.value )
-	{
-		perror("malloc");
-		return "";
-	}
-
+	nvr.name  = name;
+	
 	fd = open(NV_DEV, O_RDONLY);
 	if ( fd < 0 )
 	{
@@ -345,12 +341,40 @@ char *nvram_bufget(int index, char *name)
 		free(nvr.value);
 		return "";
 	}
-	if ( ioctl(fd, RALINK_NVRAM_IOCTL_GET, &nvr) < 0 )
+
+	while (1)
 	{
-		perror("ioctl");
+		nvr.value = malloc(nvr.size);
+		
+		if (nvr.value == NULL)
+		{
+			perror("malloc");
+			return "";
+		}
+
+		// Perform request
+		int result = ioctl(fd, RALINK_NVRAM_IOCTL_GET, &nvr);
+		if (result >= 0)
+			break;
+		
+		if (errno != EOVERFLOW) // Error is not caused by not-enough-space?
+		{
+			perror("ioctl");
+			free(nvr.value);
+			close(fd);
+			return "";
+		}
+		
+		// Calculate new buffer size
 		free(nvr.value);
-		close(fd);
-		return "";
+		nvr.size += ((MAX_VALUE_LEN - nvr.size % MAX_VALUE_LEN) % MAX_VALUE_LEN);
+		if (nvr.size >= MAX_PERMITTED_VALUE_LEN)
+		{
+			perror("nvram_bufget overflow");
+			free(nvr.value);
+			close(fd);
+			return "";
+		}
 	}
 	close(fd);
 #endif
@@ -402,16 +426,21 @@ int nvram_bufset(int index, char *name, char *value)
 
 #ifdef CONFIG_KERNEL_NVRAM
 	nvr.index = index;
-	nvr.name = name;
+	nvr.name  = name;
 	nvr.value = value;
+	nvr.size  = strlen(value) + 1;
 
 	fd = open(NV_DEV, O_RDONLY);
 	if (fd < 0) {
 		perror(NV_DEV);
 		return -1;
 	}
-	if (ioctl(fd, RALINK_NVRAM_IOCTL_SET, &nvr) < 0) {
-		perror("ioctl");
+	if (ioctl(fd, RALINK_NVRAM_IOCTL_SET, &nvr) < 0)
+	{
+		if (errno == EOVERFLOW)
+			perror("nvram_bufset overflow");
+		else
+			perror("ioctl");
 		close(fd);
 		return -1;
 	}

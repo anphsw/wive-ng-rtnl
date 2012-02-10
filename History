@@ -957,6 +957,7 @@
 42) Update tunnels support in kernel.<br>
 43) Update zlib to 1.2.6 version.<br>
 44) Add service status in webui.<br>
+45) Fix buffer overflow in nvram driver/lib.<br>
 
 <br><br>
 <b>For support see:</b><br>
