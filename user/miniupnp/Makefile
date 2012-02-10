@@ -18,7 +18,7 @@
 
 IPTABLESPATH=../iptables
 LIBS = $(IPTABLESPATH)/libiptc/libiptc.a
-CFLAGS += -Wall -Os -D_GNU_SOURCE -I../iptables -I../iptables/include -I../iptables/libiptc -ansi
+CFLAGS += -Wall -Os -D_GNU_SOURCE -I../iptables -I../iptables/include -I../iptables/libiptc
 
 PREFIX=./filesystem
 RM = rm -f

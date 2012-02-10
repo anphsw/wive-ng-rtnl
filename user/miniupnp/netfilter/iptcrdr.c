@@ -13,8 +13,6 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <dlfcn.h>
-//#include <xtables.h>
-//#include <iptables.h>
 #include <libiptc/libiptc.h>
 
 #include <linux/version.h>
