@@ -399,8 +399,8 @@ clean: modules_clean
 	make clean -C tools
 	##############REMOVE UNUSED FILES 1###########################
 	rm -rf $(ROOTDIR)/dev
-	rm -rf $(ROOTDIR)/$(IMAGEDIR)
-	rm -rf $(ROOTDIR)/$(ROMFSDIR)
+	rm -rf $(IMAGEDIR)
+	rm -rf $(ROMFSDIR)
 	rm -f $(ROOTDIR)/etc/compile-date
 	rm -f $(ROOTDIR)/etc/scripts/config.sh
 	rm -f $(ROOTDIR)/config.tk
