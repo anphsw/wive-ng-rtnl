@@ -386,17 +386,6 @@ relink:
 
 clean: modules_clean
 	echo "Clean temporary files..."
-	rm -rf $(ROOTDIR)/dev
-	rm -rf $(ROOTDIR)/$(IMAGEDIR)
-	rm -rf $(ROOTDIR)/$(ROMFSDIR)
-	rm -f $(LINUXDIR)/linux
-	rm -f $(LINUXDIR)/arch/mips/ramdisk/*.gz
-	rm -f $(ROOTDIR)/etc/compile-date
-	rm -f $(ROOTDIR)/etc/scripts/config.sh
-	rm -f config.tk
-	rm -f .tmp*
-	rm -f sdk_version.h
-	rm -f version
 	echo "Clean subtargets..."
 	touch config.arch
 	touch linux/.config
@@ -408,7 +397,19 @@ clean: modules_clean
 	make mrproper -C Uboot
 	make clean -C fulldump
 	make clean -C tools
-	##############REMOVE UNUSED FILES#############################
+	##############REMOVE UNUSED FILES 1###########################
+	rm -rf $(ROOTDIR)/dev
+	rm -rf $(ROOTDIR)/$(IMAGEDIR)
+	rm -rf $(ROOTDIR)/$(ROMFSDIR)
+	rm -f $(ROOTDIR)/etc/compile-date
+	rm -f $(ROOTDIR)/etc/scripts/config.sh
+	rm -f $(ROOTDIR)/config.tk
+	rm -f $(ROOTDIR)/.tmp*
+	rm -f $(ROOTDIR)/sdk_version.h
+	rm -f $(ROOTDIR)/version
+	rm -f $(LINUXDIR)/linux
+	rm -f $(LINUXDIR)/arch/mips/ramdisk/*.gz
+	##############REMOVE UNUSED FILES 2###########################
 	find $(ROOTDIR) -type f -name '*.*~' | xargs rm -f
 	find $(ROOTDIR) -type f -name '*.ko' | xargs rm -f
 	find $(ROOTDIR) -type f -name '*.old' | xargs rm -f
