@@ -959,6 +959,12 @@
 44) Add service status in webui.<br>
 45) Fix buffer overflow in nvram driver/lib.<br>
 46) Up miniupnpd to 1.6.20120121 version.<br>
+47) busybox bump version 1.19.4.<br>
+48) Fix wrong order of ip_rt_get_source() and update iph->daddr.<br>
+49) Fix work usb_modemswitch.<br>
+50) Update toolchain and rebuild with dynamic runtime.<br>
+51) Fix copy rutime lib from toolchain if toolchain configured as dynamic linked runtime.<br>
+52) Fix librt install in romfs.<br>
 
 <br><br>
 <b>For support see:</b><br>
