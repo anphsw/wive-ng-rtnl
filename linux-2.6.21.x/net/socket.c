@@ -352,7 +352,7 @@ static int sock_alloc_fd(struct file **filep)
 	return fd;
 }
 
-static noinline int sock_attach_fd(struct socket *sock, struct file *file)
+static int sock_attach_fd(struct socket *sock, struct file *file)
 {
 	struct qstr this;
 	char name[32];
