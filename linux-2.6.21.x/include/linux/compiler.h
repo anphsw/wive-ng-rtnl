@@ -194,6 +194,12 @@ void ftrace_likely_update(struct ftrace_likely_data *f, int val, int expect);
 #define noinline
 #endif
 
+/*
+ * Rather then using noinline to prevent stack consumption, use
+ * noinline_for_stack instead.  For documentaiton reasons.
+ */
+#define noinline_for_stack noinline
+
 #ifndef __always_inline
 #define __always_inline inline
 #endif

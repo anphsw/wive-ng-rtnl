@@ -792,7 +792,7 @@ EXPORT_SYMBOL_GPL(nf_conntrack_tuple_taken);
 
 /* There's a small race here where we may free a just-assured
    connection.  Too bad: we're in trouble anyway. */
-static int early_drop(struct list_head *chain)
+static noinline int early_drop(struct list_head *chain)
 {
 	/* Traverse backwards: gives us oldest, which is roughly LRU */
 	struct nf_conntrack_tuple_hash *h;
@@ -848,8 +848,8 @@ __nf_conntrack_alloc(const struct nf_conntrack_tuple *orig,
 	/* We don't want any race condition at early drop stage */
 	atomic_inc(&nf_conntrack_count);
 
-	if (nf_conntrack_max
-	    && atomic_read(&nf_conntrack_count) > nf_conntrack_max) {
+	if (nf_conntrack_max &&
+	    unlikely(atomic_read(&nf_conntrack_count) > nf_conntrack_max)) {
 		unsigned int hash = hash_conntrack(orig);
 		/* Try dropping from this hash chain. */
 		if (!early_drop(&nf_conntrack_hash[hash])) {
