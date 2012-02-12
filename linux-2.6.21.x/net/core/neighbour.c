@@ -1222,10 +1222,10 @@ static void neigh_proxy_process(unsigned long arg)
 			__skb_unlink(back, &tbl->proxy_queue);
 			if (tbl->proxy_redo && netif_running(dev)) {
 				rcu_read_lock();
-				tbl->proxy_redo(skb);
+				tbl->proxy_redo(back);
 				rcu_read_unlock();
 			} else {
-				kfree_skb(skb);
+				kfree_skb(back);
 			}
 
 			dev_put(dev);
