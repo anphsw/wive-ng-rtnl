@@ -812,7 +812,7 @@ static void neigh_timer_handler(unsigned long arg)
 		struct sk_buff *skb = skb_peek(&neigh->arp_queue);
 		/* keep skb alive even if arp_queue overflows */
 		if (skb)
-			skb_get(skb);
+			skb = skb_copy(skb, GFP_ATOMIC);
 		write_unlock(&neigh->lock);
 		neigh->ops->solicit(neigh, skb);
 		atomic_inc(&neigh->probes);
@@ -875,8 +875,7 @@ int __neigh_event_send(struct neighbour *neigh, struct sk_buff *skb)
 			if (skb_queue_len(&neigh->arp_queue) >=
 			    neigh->parms->queue_len) {
 				struct sk_buff *buff;
-				buff = neigh->arp_queue.next;
-				__skb_unlink(buff, &neigh->arp_queue);
+				buff = __skb_dequeue(&neigh->arp_queue);
 				kfree_skb(buff);
 			}
 			__skb_queue_tail(&neigh->arp_queue, skb);
@@ -1206,26 +1205,22 @@ static void neigh_proxy_process(unsigned long arg)
 	struct neigh_table *tbl = (struct neigh_table *)arg;
 	long sched_next = 0;
 	unsigned long now = jiffies;
-	struct sk_buff *skb;
+	struct sk_buff *skb, *n;
 
 	spin_lock(&tbl->proxy_queue.lock);
 
-	skb = tbl->proxy_queue.next;
+	skb_queue_walk_safe(&tbl->proxy_queue, skb, n) {
+		long tdif = NEIGH_CB(skb)->sched_next - now;
 
-	while (skb != (struct sk_buff *)&tbl->proxy_queue) {
-		struct sk_buff *back = skb;
-		long tdif = NEIGH_CB(back)->sched_next - now;
-
-		skb = skb->next;
 		if (tdif <= 0) {
-			struct net_device *dev = back->dev;
-			__skb_unlink(back, &tbl->proxy_queue);
+			struct net_device *dev = skb->dev;
+			__skb_unlink(skb, &tbl->proxy_queue);
 			if (tbl->proxy_redo && netif_running(dev)) {
 				rcu_read_lock();
-				tbl->proxy_redo(back);
+				tbl->proxy_redo(skb);
 				rcu_read_unlock();
 			} else {
-				kfree_skb(back);
+				kfree_skb(skb);
 			}
 
 			dev_put(dev);
@@ -2318,8 +2313,7 @@ EXPORT_SYMBOL(neigh_seq_stop);
 
 static void *neigh_stat_seq_start(struct seq_file *seq, loff_t *pos)
 {
-	struct proc_dir_entry *pde = seq->private;
-	struct neigh_table *tbl = pde->data;
+	struct neigh_table *tbl = seq->private;
 	int cpu;
 
 	if (*pos == 0)
@@ -2336,8 +2330,7 @@ static void *neigh_stat_seq_start(struct seq_file *seq, loff_t *pos)
 
 static void *neigh_stat_seq_next(struct seq_file *seq, void *v, loff_t *pos)
 {
-	struct proc_dir_entry *pde = seq->private;
-	struct neigh_table *tbl = pde->data;
+	struct neigh_table *tbl = seq->private;
 	int cpu;
 
 	for (cpu = *pos; cpu < NR_CPUS; ++cpu) {
@@ -2356,8 +2349,7 @@ static void neigh_stat_seq_stop(struct seq_file *seq, void *v)
 
 static int neigh_stat_seq_show(struct seq_file *seq, void *v)
 {
-	struct proc_dir_entry *pde = seq->private;
-	struct neigh_table *tbl = pde->data;
+	struct neigh_table *tbl = seq->private;
 	struct neigh_statistics *st = v;
 
 	if (v == SEQ_START_TOKEN) {
@@ -2401,7 +2393,7 @@ static int neigh_stat_seq_open(struct inode *inode, struct file *file)
 
 	if (!ret) {
 		struct seq_file *sf = file->private_data;
-		sf->private = PDE(inode);
+		sf->private = PDE(inode)->data;
 	}
 	return ret;
 };
