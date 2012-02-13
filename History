@@ -965,6 +965,8 @@
 50) Update toolchain and rebuild with dynamic runtime.<br>
 51) Fix copy runtime lib from toolchain if toolchain configured as dynamic linked runtime.<br>
 52) Fix librt install in romfs.<br>
+53) Arp, neigh subsystems fixup.<br>
+54) Reapply allow lost netmask patch to miniupnpd.<br>
 
 <br><br>
 <b>For support see:</b><br>
