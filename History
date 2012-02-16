@@ -967,6 +967,7 @@
 52) Fix librt install in romfs.<br>
 53) Arp, neigh subsystems fixup.<br>
 54) Reapply allow lost netmask patch to miniupnpd.<br>
+55) Update xupnpd to r290.<br>
 
 <br><br>
 <b>For support see:</b><br>

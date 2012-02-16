@@ -39,6 +39,7 @@
 // TODO: RTSP/RTP, RTMP, MMS
 // TODO: RTP to builtin udpxy
 // http://www.gupnp.org
+// TODO: YouTube max-count>50
 
 namespace core
 {
