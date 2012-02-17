@@ -33,9 +33,6 @@ else
 64bit-emul		= elf64btsmip
 endif
 
-cflags-y += -ffunction-sections
-cflags-y += $(call cc-option, -mno-check-zero-division)
-
 ifdef CONFIG_32BIT
 tool-prefix		= $(32bit-tool-prefix)
 UTS_MACHINE		:= mips
@@ -87,6 +84,8 @@ LDFLAGS_vmlinux                 += -G 0 -static -n -nostdlib
 MODFLAGS                        += -mlong-calls
 
 cflags-y += -ffreestanding
+cflags-y += -ffunction-sections
+cflags-y += $(call cc-option, -mno-check-zero-division)
 
 #
 # We explicitly add the endianness specifier if needed, this allows
