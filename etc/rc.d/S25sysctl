@@ -14,48 +14,35 @@ start() {
 	# conntrack table size set coherent to foetable
 	if [ "$CONFIG_RA_HW_NAT_TBL_1K" != "" ]; then
     	    CONNTRACK_MAX=1024
+	    HASHSIZE=1024
 	elif [ "$CONFIG_RA_HW_NAT_TBL_2K" != "" ]; then
     	    CONNTRACK_MAX=2048
+	    HASHSIZE=2048
 	elif [ "$CONFIG_RA_HW_NAT_TBL_4K" != "" ]; then
     	    CONNTRACK_MAX=4096
+	    HASHSIZE=2048
 	elif [ "$CONFIG_RA_HW_NAT_TBL_8K" != "" ]; then
     	    CONNTRACK_MAX=8192
+	    HASHSIZE=4096
 	elif [ "$CONFIG_RA_HW_NAT_TBL_16K" != "" ]; then
     	    CONNTRACK_MAX=16384
+	    HASHSIZE=4096
 	else
     	    CONNTRACK_MAX=4096
 	fi
 	ROUTEMAX=4096
-	sysctl -w vm.min_free_kbytes=2048
+	MIN_FREE=2048
     else
         CONNTRACK_MAX=1024
+	HASHSIZE=1024
 	ROUTEMAX=1024
-	sysctl -w vm.min_free_kbytes=896
+	MIN_FREE=896
     fi
 
     # calculate params
-    let "HASHSIZE=$CONNTRACK_MAX/4"
     let "MAXPORT=$MINPORT+$CONNTRACK_MAX*2"
     let "CONNGEN=$CONNTRACK_MAX-384"
 
-    if [ -f /sys/module/nf_conntrack/parameters/hashsize ]; then
-        echo $HASHSIZE > /sys/module/nf_conntrack/parameters/hashsize
-    fi
-
-    sysctl -w net.nf_conntrack_max=$CONNTRACK_MAX
-    sysctl -w net.nf_conntrack_max_general=$CONNGEN
-
-    sysctl -w net.ipv4.route.max_size=$ROUTEMAX
-    sysctl -w net.ipv4.ip_local_port_range="$MINPORT $MAXPORT"
-
-    $LOG "##conntrack table max:$CONNTRACK_MAX##hashsize:$HASHSIZE##"
-    $LOG "##route table max:$ROUTEMAX##portrange:$MINPORT $MAXPORT##"
-
-    $LOG "Tune with proc proc"
-    # on kernel crash
-    echo 1    > /proc/sys/kernel/panic
-    echo 1    > /proc/sys/kernel/panic_on_oops
-    echo 1    > /proc/sys/vm/panic_on_oom
 
 ###################### SECTION FOR SAMBA AND TRANSMISION KERNEL TUNE ###################
     eval `nvram_buf_get 2860 SmbEnabled TransmissionEnabled xupnpd dhcpDomain`
@@ -73,17 +60,37 @@ start() {
         echo "2097152" > /proc/sys/net/core/rmem_max
 	# more mem reserved
 	if [ -f /tmp/is_32ram_dev ]; then
-	    sysctl -w vm.min_free_kbytes=4096
+	    MIN_FREE=4096
 	fi
     fi
-    # set domain name
+#######################################APPLY PARAMS######################################
     if [ "$dhcpDomain" != "" ]; then
 	krn_domain="$dhcpDomain"
     else
 	krn_domain="Wive-NG-RTNL"
     fi
     sysctl -w kernel.domainname="$krn_domain"
-########################################################################################
+
+    if [ -f /sys/module/nf_conntrack/parameters/hashsize ]; then
+        echo $HASHSIZE > /sys/module/nf_conntrack/parameters/hashsize
+    fi
+
+    sysctl -w net.nf_conntrack_max=$CONNTRACK_MAX
+    sysctl -w net.nf_conntrack_max_general=$CONNGEN
+
+    sysctl -w net.ipv4.route.max_size=$ROUTEMAX
+    sysctl -w net.ipv4.ip_local_port_range="$MINPORT $MAXPORT"
+
+    sysctl -w vm.min_free_kbytes="$MIN_FREE"
+
+    $LOG "##conntrack table max:$CONNTRACK_MAX##hashsize:$HASHSIZE##"
+    $LOG "##route table max:$ROUTEMAX##portrange:$MINPORT $MAXPORT##"
+
+    $LOG "Tune with proc proc"
+    # on kernel crash
+    echo 1    > /proc/sys/kernel/panic
+    echo 1    > /proc/sys/kernel/panic_on_oops
+    echo 1    > /proc/sys/vm/panic_on_oom
 }
 
 stop() {
