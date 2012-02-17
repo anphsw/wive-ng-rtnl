@@ -40,9 +40,8 @@ start() {
     fi
 
     # calculate params
-    let "MAXPORT=$MINPORT+$CONNTRACK_MAX*2"
+    let "MAXPORT=$MINPORT+$HASHSIZE*2"
     let "CONNGEN=$CONNTRACK_MAX-384"
-
 
 ###################### SECTION FOR SAMBA AND TRANSMISION KERNEL TUNE ###################
     eval `nvram_buf_get 2860 SmbEnabled TransmissionEnabled xupnpd dhcpDomain`
@@ -64,6 +63,7 @@ start() {
 	fi
     fi
 #######################################APPLY PARAMS######################################
+    # set domainname
     if [ "$dhcpDomain" != "" ]; then
 	krn_domain="$dhcpDomain"
     else
@@ -71,6 +71,10 @@ start() {
     fi
     sysctl -w kernel.domainname="$krn_domain"
 
+    # set minimal free thres
+    sysctl -w vm.min_free_kbytes="$MIN_FREE"
+
+    # set conntrack params
     if [ -f /sys/module/nf_conntrack/parameters/hashsize ]; then
         echo $HASHSIZE > /sys/module/nf_conntrack/parameters/hashsize
     fi
@@ -81,13 +85,10 @@ start() {
     sysctl -w net.ipv4.route.max_size=$ROUTEMAX
     sysctl -w net.ipv4.ip_local_port_range="$MINPORT $MAXPORT"
 
-    sysctl -w vm.min_free_kbytes="$MIN_FREE"
-
     $LOG "##conntrack table max:$CONNTRACK_MAX##hashsize:$HASHSIZE##"
     $LOG "##route table max:$ROUTEMAX##portrange:$MINPORT $MAXPORT##"
 
-    $LOG "Tune with proc proc"
-    # on kernel crash
+    # set panic mode
     echo 1    > /proc/sys/kernel/panic
     echo 1    > /proc/sys/kernel/panic_on_oops
     echo 1    > /proc/sys/vm/panic_on_oom
