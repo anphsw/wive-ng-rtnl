@@ -27,7 +27,7 @@ start() {
 	fi
 	ROUTEMAX=4096
         let "HASHSIZE=$CONNTRACK_MAX/2"
-	sysctl -w vm.min_free_kbytes=2304
+	sysctl -w vm.min_free_kbytes=2048
     else
         CONNTRACK_MAX=1024
 	ROUTEMAX=1024
