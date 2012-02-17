@@ -11,7 +11,7 @@ start() {
 
     MINPORT=3072
     if [ -f /tmp/is_32ram_dev ]; then
-	#conntrack table size set coherent to foetable
+	# conntrack table size set coherent to foetable
 	if [ "$CONFIG_RA_HW_NAT_TBL_1K" != "" ]; then
     	    CONNTRACK_MAX=1024
 	elif [ "$CONFIG_RA_HW_NAT_TBL_2K" != "" ]; then
@@ -26,14 +26,15 @@ start() {
     	    CONNTRACK_MAX=4096
 	fi
 	ROUTEMAX=4096
-        let "HASHSIZE=$CONNTRACK_MAX/2"
 	sysctl -w vm.min_free_kbytes=2048
     else
         CONNTRACK_MAX=1024
 	ROUTEMAX=1024
-        let "HASHSIZE=$CONNTRACK_MAX/4"
 	sysctl -w vm.min_free_kbytes=896
     fi
+
+    # calculate params
+    let "HASHSIZE=$CONNTRACK_MAX/4"
     let "MAXPORT=$MINPORT+$CONNTRACK_MAX*2"
     let "CONNGEN=$CONNTRACK_MAX-384"
 
