@@ -968,6 +968,9 @@
 53) Arp, neigh subsystems fixup.<br>
 54) Reapply allow lost netmask patch to miniupnpd.<br>
 55) Update xupnpd to r290.<br>
+56) Small rewrite kernel autotune logic.<br>
+57) Fix radvd start only if ipv6 support enabled.<br>
+58) Fix LCP params get in pppoe helper.<br>
 
 <br><br>
 <b>For support see:</b><br>
