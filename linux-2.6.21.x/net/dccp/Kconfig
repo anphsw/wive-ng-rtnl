@@ -22,7 +22,7 @@ config IP_DCCP
 config INET_DCCP_DIAG
 	depends on IP_DCCP && INET_DIAG
 	def_tristate y if (IP_DCCP = y && INET_DIAG = y)
-	def_tristate m
+	def_tristate n
 
 config IP_DCCP_ACKVEC
 	depends on IP_DCCP

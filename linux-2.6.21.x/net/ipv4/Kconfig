@@ -400,12 +400,12 @@ config INET_LRO
 
 config INET_DIAG
 	tristate "INET: socket monitoring interface"
-	default y
+	default n
 	---help---
 	  Support for INET (TCP, DCCP, etc) socket monitoring interface used by
 	  native Linux tools such as ss. ss is included in iproute2, currently
 	  downloadable at <http://linux-net.osdl.org/index.php/Iproute2>.
-	  
+
 	  If unsure, say Y.
 
 config INET_TCP_DIAG
