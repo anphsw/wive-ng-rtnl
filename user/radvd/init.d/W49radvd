@@ -19,9 +19,6 @@ fi
 LOG="logger -t radvd"
 
 start() {
- if [ "$OperationMode" = "2" ]; then
-    lan_if="eth2"
- fi
     radvdEnabled=`nvram_get 2860 radvdEnabled`
     if [ "$radvdEnabled" = "1" ] && [ "$IPv6_Enable" = "1" ]; then
 	$LOG "Flush addres and route sit0 interface"
