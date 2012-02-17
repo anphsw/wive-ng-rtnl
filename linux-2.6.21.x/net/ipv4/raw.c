@@ -933,7 +933,7 @@ static int raw_seq_show(struct seq_file *seq, void *v)
 		seq_printf(seq, "%-*s\n", TMPSZ-1,
 			       "  sl  local_address rem_address   st tx_queue "
 			       "rx_queue tr tm->when retrnsmt   uid  timeout "
-			       "inode  drops");
+			       "inode ref pointer drops");
 	else {
 		struct raw_iter_state *state = raw_seq_private(seq);
 

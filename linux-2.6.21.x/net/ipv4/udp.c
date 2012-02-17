@@ -1044,8 +1044,10 @@ udp:
 
 	if ((rc = sock_queue_rcv_skb(sk,skb)) < 0) {
 		/* Note that an ENOMEM error is charged twice */
-		if (rc == -ENOMEM)
+		if (rc == -ENOMEM) {
 			UDP_INC_STATS_BH(UDP_MIB_RCVBUFERRORS, up->pcflag);
+			atomic_inc(&sk->sk_drops);
+		}
 		goto drop;
 	}
 
@@ -1656,12 +1658,13 @@ static void udp4_format_sock(struct sock *sp, char *tmpbuf, int bucket)
 	__u16 srcp	  = ntohs(inet->sport);
 
 	sprintf(tmpbuf, "%4d: %08X:%04X %08X:%04X"
-		" %02X %08X:%08X %02X:%08lX %08X %5d %8d %lu %d %p",
+		" %02X %08X:%08X %02X:%08lX %08X %5d %8d %lu %d %p %d",
 		bucket, src, srcp, dest, destp, sp->sk_state,
 		sk_wmem_alloc_get(sp),
 		sk_rmem_alloc_get(sp),
 		0, 0L, 0, sock_i_uid(sp), 0, sock_i_ino(sp),
-		atomic_read(&sp->sk_refcnt), sp);
+		atomic_read(&sp->sk_refcnt), sp,
+		atomic_read(&sp->sk_drops), len);
 }
 
 int udp4_seq_show(struct seq_file *seq, void *v)
@@ -1670,7 +1673,7 @@ int udp4_seq_show(struct seq_file *seq, void *v)
 		seq_printf(seq, "%-127s\n",
 			   "  sl  local_address rem_address   st tx_queue "
 			   "rx_queue tr tm->when retrnsmt   uid  timeout "
-			   "inode");
+			   "inode ref pointer drops");
 	else {
 		char tmpbuf[129];
 		struct udp_iter_state *state = seq->private;
