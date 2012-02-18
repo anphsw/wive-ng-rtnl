@@ -1,5 +1,4 @@
 /*
- *   $Id: radvd.c,v 1.62 2011/06/07 04:53:42 reubenhwk Exp $
  *
  *   Authors:
  *    Pedro Roque		<roque@di.fc.ul.pt>
@@ -39,9 +38,9 @@ char usage_str[] = {
 "  -l, --logfile=PATH     Sets the log file.\n"
 "  -m, --logmethod=X      Sets the log method to one of: syslog, stderr, stderr_syslog, logfile, or none.\n"
 "  -p, --pidfile=PATH     Sets the pid file.\n"
-"  -s, --singleprocess    Use privsep.\n"
 "  -t, --chrootdir=PATH   Chroot to the specified path.\n"
 "  -u, --username=USER    Switch to the specified user.\n"
+"  -n, --nodaemon         Prevent the daemonizing.\n"
 "  -v, --version          Print the version and quit.\n"
 };
 
@@ -60,13 +59,14 @@ struct option prog_opt[] = {
 #ifdef USE_PRIVSEP
 	{"singleprocess", 0, 0, 's'},
 #endif
+	{"nodaemon", 0, 0, 'n'},
 	{NULL, 0, 0, 0}
 };
 
 #else
 
 char usage_str[] =
-	"[-hsvc] [-d level] [-C config_file] [-m log_method] [-l log_file]\n"
+	"[-hsvcn] [-d level] [-C config_file] [-m log_method] [-l log_file]\n"
 	"\t[-f facility] [-p pid_file] [-u username] [-t chrootdir]";
 
 #endif
@@ -95,22 +95,20 @@ void usage(void);
 int drop_root_privileges(const char *);
 int readin_config(char *);
 int check_conffile_perm(const char *, const char *);
+pid_t strtopid(char const * pidstr);
+void write_pid_file(char const *);
 void main_loop(void);
 
 int
 main(int argc, char *argv[])
 {
-	char pidstr[16];
-	ssize_t ret;
 	int c, log_method;
 	char *logfile, *pidfile;
-	int facility, fd;
+	int facility;
 	char *username = NULL;
 	char *chrootdir = NULL;
 	int configtest = 0;
-#ifdef USE_PRIVSEP
-	int singleprocess = 0;
-#endif
+	int daemonize = 1;
 #ifdef HAVE_GETOPT_LONG
 	int opt_idx;
 #endif
@@ -126,7 +124,7 @@ main(int argc, char *argv[])
 	pidfile = PATH_RADVD_PID;
 
 	/* parse args */
-#define OPTIONS_STR "d:C:l:m:p:t:u:vhcs"
+#define OPTIONS_STR "d:C:l:m:p:t:u:vhcsn"
 #ifdef HAVE_GETOPT_LONG
 	while ((c = getopt_long(argc, argv, OPTIONS_STR, prog_opt, &opt_idx)) > 0)
 #else
@@ -190,9 +188,12 @@ main(int argc, char *argv[])
 			break;
 #ifdef USE_PRIVSEP
 		case 's':
-			singleprocess = 1;
+			fprintf(stderr, "privsep is not optional.  This options will be removed in a near future release.");
 			break;
 #endif
+		case 'n':
+			daemonize = 0;
+			break;
 		case 'h':
 			usage();
 #ifdef HAVE_GETOPT_LONG
@@ -273,22 +274,68 @@ main(int argc, char *argv[])
 	}
 
 #ifdef USE_PRIVSEP
+	dlog(LOG_DEBUG, 3, "Initializing privsep");
+	if (privsep_init() < 0) {
+		perror("Failed to initialize privsep.");
+		exit(1);
+	}
+#endif
+
+#ifdef USE_PRIVSEP
 	/* drop root privileges if requested. */
 	if (username) {
-		if (!singleprocess) {
-		 	dlog(LOG_DEBUG, 3, "Initializing privsep");
-			if (privsep_init() < 0) {
-				perror("Failed to initialize privsep.");
-				exit(1);
-			}
-		}
-
 		if (drop_root_privileges(username) < 0) {
 			perror("drop_root_privileges");
 			exit(1);
 		}
 	}
 #endif
+
+	/*
+	 * okay, config file is read in, socket and stuff is setup, so
+	 * lets fork now...
+	 */
+
+	if (get_debuglevel() == 0) {
+
+		if (daemonize) {
+			/* Detach from controlling terminal */
+			if (daemon(0, 0) < 0)
+				perror("daemon");
+		}
+	}
+
+	write_pid_file(pidfile);
+
+	/*
+	 *	config signal handlers
+	 */
+	signal(SIGHUP, sighup_handler);
+	signal(SIGTERM, sigterm_handler);
+	signal(SIGINT, sigint_handler);
+	signal(SIGUSR1, sigusr1_handler);
+
+	config_interface();
+	kickoff_adverts();
+	main_loop();
+	flog(LOG_INFO, "sending stop adverts", pidfile);
+	stop_adverts();
+	flog(LOG_INFO, "removing %s", pidfile);
+	unlink(pidfile);
+
+	return 0;
+}
+
+
+pid_t strtopid(char const * pidstr)
+{
+	return atol(pidstr);
+}
+
+void write_pid_file(char const * pidfile)
+{
+	int fd, ret;
+	char pidstr[32];
 
 	if ((fd = open(pidfile, O_RDONLY, 0)) > 0)
 	{
@@ -298,11 +345,14 @@ main(int argc, char *argv[])
 			flog(LOG_ERR, "cannot read radvd pid file, terminating: %s", strerror(errno));
 			exit(1);
 		}
-		pidstr[ret] = '\0';
-		if (!kill((pid_t)atol(pidstr), 0))
-		{
-			flog(LOG_ERR, "radvd already running, terminating.");
-			exit(1);
+		if (ret > 0) {
+				pid_t pid;
+				pidstr[ret] = '\0';
+				pid = strtopid(pidstr);
+				if (pid > 0 && !kill(pid, 0)) {
+					flog(LOG_ERR, "radvd already running, terminating.");
+					exit(1);
+				}
 		}
 		close(fd);
 		fd = open(pidfile, O_CREAT|O_TRUNC|O_WRONLY, 0644);
@@ -316,38 +366,6 @@ main(int argc, char *argv[])
 		exit(1);
 	}
 
-	/*
-	 * okay, config file is read in, socket and stuff is setup, so
-	 * lets fork now...
-	 */
-
-	if (get_debuglevel() == 0) {
-
-		/* Detach from controlling terminal */
-		if (daemon(0, 0) < 0)
-			perror("daemon");
-
-		/* close old logfiles, including stderr */
-		log_close();
-
-		/* reopen logfiles, but don't log to stderr unless explicitly requested */
-		if (log_method == L_STDERR_SYSLOG)
-			log_method = L_SYSLOG;
-		if (log_open(log_method, pname, logfile, facility) < 0) {
-			perror("log_open");
-			exit(1);
-		}
-
-	}
-
-	/*
-	 *	config signal handlers
-	 */
-	signal(SIGHUP, sighup_handler);
-	signal(SIGTERM, sigterm_handler);
-	signal(SIGINT, sigint_handler);
-	signal(SIGUSR1, sigusr1_handler);
-
 	snprintf(pidstr, sizeof(pidstr), "%ld\n", (long)getpid());
 
 	ret = write(fd, pidstr, strlen(pidstr));
@@ -358,14 +376,6 @@ main(int argc, char *argv[])
 	}
 
 	close(fd);
-
-	config_interface();
-	kickoff_adverts();
-	main_loop();
-	stop_adverts();
-	unlink(pidfile);
-
-	return 0;
 }
 
 void main_loop(void)
@@ -440,8 +450,8 @@ void main_loop(void)
 			if (next)
 				timer_handler(next);
 		}
-		else if ( rc == -1 && errno != EINTR ) {
-			flog(LOG_ERR, "poll error: %s", strerror(errno));
+		else if ( rc == -1 ) {
+			dlog(LOG_INFO, 3, "poll returned early: %s", strerror(errno));
 		}
 
 		if (sigterm_received || sigint_received) {
@@ -451,12 +461,14 @@ void main_loop(void)
 
 		if (sighup_received)
 		{
+			dlog(LOG_INFO, 3, "sig hup received.\n");
 			reload_config();
 			sighup_received = 0;
 		}
 
 		if (sigusr1_received)
 		{
+			dlog(LOG_INFO, 3, "sig usr1 received.\n");
 			reset_prefix_lifetimes();
 			sigusr1_received = 0;
 		}
@@ -564,12 +576,6 @@ void reload_config(void)
 	struct Interface *iface;
 
 	flog(LOG_INFO, "attempting to reread config file");
-
-	dlog(LOG_DEBUG, 4, "reopening log");
-	if (log_reopen() < 0) {
-		perror("log_reopen");
-		exit(1);
-	}
 
 	iface=IfaceList;
 	while(iface)
@@ -770,7 +776,6 @@ check_conffile_perm(const char *username, const char *conf_file)
                 flog(LOG_ERR, "Insecure file permissions (writable by self/group): %s", conf_file);
 		return (-1);
         }
-
 #endif
         return 0;
 }

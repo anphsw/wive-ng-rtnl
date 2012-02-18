@@ -973,6 +973,7 @@
 58) Fix LCP params get in pppoe helper.<br>
 59) Update libevent to 2.0.17 stable.<br>
 60) Update libupnp to 1.6.15 version.<br>
+61) Update radvd to 1.8.5 version.<br>
 
 <br><br>
 <b>For support see:</b><br>
