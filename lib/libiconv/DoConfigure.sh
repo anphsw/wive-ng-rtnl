@@ -4,7 +4,7 @@ echo "=====================CONFIGURE-LIBICONV===================="
 APROOTDIR=`pwd`
 
 if [ ! -f $APROOTDIR/configure ]; then
-    sh ./autogen.sh
+    sh ./autogen.sh --skip-gnulib
 fi
 if [ ! -f $APROOTDIR/Makefile.in ]; then
     automake
