@@ -1,4 +1,44 @@
 *******************************************************************************
+Version 1.6.15
+*******************************************************************************
+
+2012-01-11 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	Bug fix on M-SEARCH for IPv6 CPs.
+
+	Small bug fix on IPv6 Control Point: now CP will also send M-SEARCH on
+	site-scope address (FF05::C) instead of only sending M-SEARCH on
+	link-scope (FF02::C).
+
+2012-01-11 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	Retrieve IPv6 addresses in Upnp_Discovery.
+
+	Changing sockaddr_in into sockaddr_storage in Upnp_Discovery to be able
+	to retrieve IPv6 addresses of devices in Control Points using pupnp.
+
+2012-01-04 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	Bug fix for IPv4-mapped IPv6 addresses.
+
+	Setting IPv6 sockets with IPV6_V6ONLY flag to avoid getting IP packets
+	with IPv4-mapped IPv6 addresses on IPv6 sockets.
+
+2012-01-09 Marcelo Roberto Jimenez <mroberto(at)users.sourceforge.net>
+
+	SF Bug tracker, ID: 3469344
+	Submitted: dimmman ( dimmman ) - 2012-01-04 01:44:29 PST
+	Details: Looking at the code (v1.6.14, upnptools.c) for UpnpResolveURL
+	and UpnpResolveURL2 it shows that the ExitFunction: always returns
+	UPNP_E_SUCCESS.
+
+	I'm farily sure it's a simple mistake that should have been "return ret;"
+	in both cases.
+
+	Br,
+	Jonny
+
+*******************************************************************************
 Version 1.6.14
 *******************************************************************************
 

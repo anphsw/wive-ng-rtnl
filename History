@@ -972,6 +972,7 @@
 57) Fix radvd start only if ipv6 support enabled.<br>
 58) Fix LCP params get in pppoe helper.<br>
 59) Update libevent to 2.0.17 stable.<br>
+60) Update libupnp to 1.6.15 version.<br>
 
 <br><br>
 <b>For support see:</b><br>
