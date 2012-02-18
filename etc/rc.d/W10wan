@@ -42,7 +42,7 @@ start() {
 	    fi
 	    # add routes configured in web
 	    if [ -f /etc/routes_replace ]; then
-		$LOF "Add user routes."
+		$LOG "Add user routes."
 		/etc/routes_replace replace "$phys_lan_if" "$wan_if"
 	    fi
 	    # Add route to multicast subnet
