@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2002-2007 Niels Provos <provos@citi.umich.edu>
- * Copyright (c) 2007-2011 Niels Provos and Nick Mathewson
+ * Copyright (c) 2007-2012 Niels Provos and Nick Mathewson
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -1469,7 +1469,7 @@ evhttp_parse_http_version(const char *version, struct evhttp_request *req)
 	int major, minor;
 	char ch;
 	int n = sscanf(version, "HTTP/%d.%d%c", &major, &minor, &ch);
-	if (n > 2 || major > 1) {
+	if (n != 2 || major > 1) {
 		event_debug(("%s: bad version %s on message %p from %s",
 			__func__, version, req, req->remote_host));
 		return (-1);
@@ -2115,6 +2115,12 @@ evhttp_connection_base_new(struct event_base *base, struct evdns_base *dnsbase,
 	if (evcon != NULL)
 		evhttp_connection_free(evcon);
 	return (NULL);
+}
+
+struct bufferevent *
+evhttp_connection_get_bufferevent(struct evhttp_connection *evcon)
+{
+	return evcon->bufev;
 }
 
 void

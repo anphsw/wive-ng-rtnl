@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2003-2007 Niels Provos <provos@citi.umich.edu>
- * Copyright (c) 2007-2011 Niels Provos and Nick Mathewson
+ * Copyright (c) 2007-2012 Niels Provos and Nick Mathewson
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -862,6 +862,7 @@ end:
 /* === Test for bufferevent_socket_connect_hostname */
 
 static int total_connected_or_failed = 0;
+static int total_n_accepted = 0;
 static struct event_base *be_connect_hostname_base = NULL;
 
 /* Implements a DNS server for the connect_hostname test and the
@@ -995,7 +996,11 @@ nil_accept_cb(struct evconnlistener *l, evutil_socket_t fd, struct sockaddr *s,
 {
 	int *p = arg;
 	(*p)++;
+	++total_n_accepted;
 	/* don't do anything with the socket; let it close when we exit() */
+	if (total_n_accepted >= 3 && total_connected_or_failed >= 5)
+		event_base_loopexit(be_connect_hostname_base,
+		    NULL);
 }
 
 struct be_conn_hostname_result {
@@ -1015,14 +1020,14 @@ be_connect_hostname_event_cb(struct bufferevent *bev, short what, void *ctx)
 
 		if ((what & BEV_EVENT_CONNECTED) || (what & BEV_EVENT_ERROR)) {
 			int r;
-			++total_connected_or_failed;
-			TT_BLATHER(("Got %d connections or errors.", total_connected_or_failed));
 			if ((r = bufferevent_socket_get_dns_error(bev))) {
 				got->dnserr = r;
 				TT_BLATHER(("DNS error %d: %s", r,
 					   evutil_gai_strerror(r)));
-			}
-			if (total_connected_or_failed >= 5)
+			}			++total_connected_or_failed;
+			TT_BLATHER(("Got %d connections or errors.", total_connected_or_failed));
+
+			if (total_n_accepted >= 3 && total_connected_or_failed >= 5)
 				event_base_loopexit(be_connect_hostname_base,
 				    NULL);
 		}
@@ -1665,7 +1670,7 @@ static void
 cnt_free(void *ptr)
 {
 	allocated_chunks -= 1;
-	return free(ptr);
+	free(ptr);
 }
 
 struct testleak_env_t {

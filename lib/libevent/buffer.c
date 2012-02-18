@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2002-2007 Niels Provos <provos@citi.umich.edu>
- * Copyright (c) 2007-2011 Niels Provos and Nick Mathewson
+ * Copyright (c) 2007-2012 Niels Provos and Nick Mathewson
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -2582,14 +2582,21 @@ evbuffer_peek(struct evbuffer *buffer, ev_ssize_t len,
 		chain = buffer->first;
 	}
 
+	if (n_vec == 0 && len < 0) {
+		/* If no vectors are provided and they asked for "everything",
+		 * pretend they asked for the actual available amount. */
+		len = buffer->total_len - len_so_far;
+	}
+
 	while (chain) {
 		if (len >= 0 && len_so_far >= len)
 			break;
 		if (idx<n_vec) {
 			vec[idx].iov_base = chain->buffer + chain->misalign;
 			vec[idx].iov_len = chain->off;
-		} else if (len<0)
+		} else if (len<0) {
 			break;
+		}
 		++idx;
 		len_so_far += chain->off;
 		chain = chain->next;

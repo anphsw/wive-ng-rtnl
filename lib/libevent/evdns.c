@@ -1,18 +1,32 @@
-/* $Id: evdns.c 6979 2006-08-04 18:31:13Z nickm $ */
-
-/* The original version of this module was written by Adam Langley; for
- * a history of modifications, check out the subversion logs.
+/* Copyright 2006-2007 Niels Provos
+ * Copyright 2007-2012 Nick Mathewson and Niels Provos
  *
- * When editing this module, try to keep it re-mergeable by Adam.  Don't
- * reformat the whitespace, add Tor dependencies, or so on.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. The name of the author may not be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
  *
- * TODO:
- *   - Support IPv6 and PTR records.
- *   - Replace all externally visible magic numbers with #defined constants.
- *   - Write documentation for APIs of all external functions.
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* Async DNS Library
+/* Based on software by Adam Langly. Adam's original message:
+ *
+ * Async DNS Library
  * Adam Langley <agl@imperialviolet.org>
  * http://www.imperialviolet.org/eventdns.html
  * Public Domain code
@@ -167,6 +181,7 @@ struct request {
 	struct nameserver *ns;	/* the server which we last sent it */
 
 	/* these objects are kept in a circular list */
+	/* XXX We could turn this into a CIRCLEQ. */
 	struct request *next, *prev;
 
 	struct event timeout_event;
@@ -2472,9 +2487,7 @@ _evdns_nameserver_add_impl(struct evdns_base *base, const struct sockaddr *addre
 		ns->next = base->server_head->next;
 		ns->prev = base->server_head;
 		base->server_head->next = ns;
-		if (base->server_head->prev == base->server_head) {
-			base->server_head->prev = ns;
-		}
+		ns->next->prev = ns;
 	}
 
 	base->global_good_nameservers++;

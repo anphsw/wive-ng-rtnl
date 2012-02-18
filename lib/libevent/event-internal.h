@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2000-2007 Niels Provos <provos@citi.umich.edu>
- * Copyright (c) 2007-2011 Niels Provos and Nick Mathewson
+ * Copyright (c) 2007-2012 Niels Provos and Nick Mathewson
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -346,6 +346,14 @@ void event_active_nolock(struct event *ev, int res, short count);
 /* FIXME document. */
 void event_base_add_virtual(struct event_base *base);
 void event_base_del_virtual(struct event_base *base);
+
+/** For debugging: unless assertions are disabled, verify the referential
+    integrity of the internal data structures of 'base'.  This operation can
+    be expensive.
+
+    Returns on success; aborts on failure.
+*/
+void event_base_assert_ok(struct event_base *base);
 
 #ifdef __cplusplus
 }

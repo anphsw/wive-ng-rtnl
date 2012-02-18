@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2000-2007 Niels Provos <provos@citi.umich.edu>
- * Copyright (c) 2007-2011 Niels Provos and Nick Mathewson
+ * Copyright (c) 2007-2012 Niels Provos and Nick Mathewson
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -820,6 +820,10 @@ event_reinit(struct event_base *base)
 		if (base->sig.ev_signal.ev_flags & EVLIST_ACTIVE)
 			event_queue_remove(base, &base->sig.ev_signal,
 			    EVLIST_ACTIVE);
+		if (base->sig.ev_signal_pair[0] != -1)
+			EVUTIL_CLOSESOCKET(base->sig.ev_signal_pair[0]);
+		if (base->sig.ev_signal_pair[1] != -1)
+			EVUTIL_CLOSESOCKET(base->sig.ev_signal_pair[1]);
 		base->sig.ev_signal_added = 0;
 	}
 	if (base->th_notify_fd[0] != -1) {
@@ -856,6 +860,13 @@ event_reinit(struct event_base *base)
 
 	TAILQ_FOREACH(ev, &base->eventqueue, ev_next) {
 		if (ev->ev_events & (EV_READ|EV_WRITE)) {
+			if (ev == &base->sig.ev_signal) {
+				/* If we run into the ev_signal event, it's only
+				 * in eventqueue because some signal event was
+				 * added, which made evsig_add re-add ev_signal.
+				 * So don't double-add it. */
+				continue;
+			}
 			if (evmap_io_add(base, ev->ev_fd, ev) == -1)
 				res = -1;
 		} else if (ev->ev_events & EV_SIGNAL) {
@@ -1038,6 +1049,7 @@ event_signal_closure(struct event_base *base, struct event *ev)
 
 	/* Allows deletes to work */
 	ncalls = ev->ev_ncalls;
+	if (ncalls != 0)
 	ev->ev_pncalls = &ncalls;
 	EVBASE_RELEASE_LOCK(base, th_base_lock);
 	while (ncalls) {
@@ -1045,15 +1057,18 @@ event_signal_closure(struct event_base *base, struct event *ev)
 		ev->ev_ncalls = ncalls;
 		if (ncalls == 0)
 			ev->ev_pncalls = NULL;
-		(*ev->ev_callback)((int)ev->ev_fd, ev->ev_res, ev->ev_arg);
+		(*ev->ev_callback)(ev->ev_fd, ev->ev_res, ev->ev_arg);
 
 		EVBASE_ACQUIRE_LOCK(base, th_base_lock);
 		should_break = base->event_break;
 		EVBASE_RELEASE_LOCK(base, th_base_lock);
 
-		if (should_break)
+		if (should_break) {
+			if (ncalls != 0)
+				ev->ev_pncalls = NULL;
 			return;
 	}
+}
 }
 
 /* Common timeouts are special timeouts that are handled as queues rather than
@@ -1273,7 +1288,7 @@ event_persist_closure(struct event_base *base, struct event *ev)
 		event_add_internal(ev, &run_at, 1);
 	}
 	EVBASE_RELEASE_LOCK(base, th_base_lock);
-	(*ev->ev_callback)((int)ev->ev_fd, ev->ev_res, ev->ev_arg);
+	(*ev->ev_callback)(ev->ev_fd, ev->ev_res, ev->ev_arg);
 }
 
 /*
@@ -1323,7 +1338,7 @@ event_process_active_single_queue(struct event_base *base,
 		case EV_CLOSURE_NONE:
 			EVBASE_RELEASE_LOCK(base, th_base_lock);
 			(*ev->ev_callback)(
-				(int)ev->ev_fd, ev->ev_res, ev->ev_arg);
+				ev->ev_fd, ev->ev_res, ev->ev_arg);
 			break;
 		}
 
@@ -2845,3 +2860,38 @@ event_global_setup_locks_(const int enable_locks)
 	return 0;
 }
 #endif
+
+void
+event_base_assert_ok(struct event_base *base)
+{
+	int i;
+	EVBASE_ACQUIRE_LOCK(base, th_base_lock);
+	evmap_check_integrity(base);
+
+	/* Check the heap property */
+	for (i = 1; i < (int)base->timeheap.n; ++i) {
+		int parent = (i - 1) / 2;
+		struct event *ev, *p_ev;
+		ev = base->timeheap.p[i];
+		p_ev = base->timeheap.p[parent];
+		EVUTIL_ASSERT(ev->ev_flags & EV_TIMEOUT);
+		EVUTIL_ASSERT(evutil_timercmp(&p_ev->ev_timeout, &ev->ev_timeout, <=));
+		EVUTIL_ASSERT(ev->ev_timeout_pos.min_heap_idx == i);
+	}
+
+	/* Check that the common timeouts are fine */
+	for (i = 0; i < base->n_common_timeouts; ++i) {
+		struct common_timeout_list *ctl = base->common_timeout_queues[i];
+		struct event *last=NULL, *ev;
+		TAILQ_FOREACH(ev, &ctl->events, ev_timeout_pos.ev_next_with_common_timeout) {
+			if (last)
+				EVUTIL_ASSERT(evutil_timercmp(&last->ev_timeout, &ev->ev_timeout, <=));
+			EVUTIL_ASSERT(ev->ev_flags & EV_TIMEOUT);
+			EVUTIL_ASSERT(is_common_timeout(&ev->ev_timeout,base));
+			EVUTIL_ASSERT(COMMON_TIMEOUT_IDX(&ev->ev_timeout) == i);
+			last = ev;
+		}
+	}
+
+	EVBASE_RELEASE_LOCK(base, th_base_lock);
+}

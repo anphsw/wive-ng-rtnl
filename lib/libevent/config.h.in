@@ -241,6 +241,9 @@
 /* Define to 1 if `__ss_family' is a member of `struct sockaddr_storage'. */
 #undef HAVE_STRUCT_SOCKADDR_STORAGE___SS_FAMILY
 
+/* Define to 1 if you have the `sysctl' function. */
+#undef HAVE_SYSCTL
+
 /* Define to 1 if you have the <sys/devpoll.h> header file. */
 #undef HAVE_SYS_DEVPOLL_H
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2011 Niels Provos, Nick Mathewson
+ * Copyright (c) 2008-2012 Niels Provos, Nick Mathewson
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -84,7 +84,12 @@ evthread_set_lock_callbacks(const struct evthread_lock_callbacks *cbs)
 	}
 	if (target->alloc) {
 		/* Uh oh; we already had locking callbacks set up.*/
-		if (!memcmp(target, cbs, sizeof(_evthread_lock_fns))) {
+		if (target->lock_api_version == cbs->lock_api_version &&
+			target->supported_locktypes == cbs->supported_locktypes &&
+			target->alloc == cbs->alloc &&
+			target->free == cbs->free &&
+			target->lock == cbs->lock &&
+			target->unlock == cbs->unlock) {
 			/* no change -- allow this. */
 			return 0;
 		}
@@ -117,7 +122,11 @@ evthread_set_condition_callbacks(const struct evthread_condition_callbacks *cbs)
 	}
 	if (target->alloc_condition) {
 		/* Uh oh; we already had condition callbacks set up.*/
-		if (!memcmp(target, cbs, sizeof(_evthread_cond_fns))) {
+		if (target->condition_api_version == cbs->condition_api_version &&
+			target->alloc_condition == cbs->alloc_condition &&
+			target->free_condition == cbs->free_condition &&
+			target->signal_condition == cbs->signal_condition &&
+			target->wait_condition == cbs->wait_condition) {
 			/* no change -- allow this. */
 			return 0;
 		}

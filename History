@@ -971,6 +971,7 @@
 56) Small rewrite kernel autotune logic.<br>
 57) Fix radvd start only if ipv6 support enabled.<br>
 58) Fix LCP params get in pppoe helper.<br>
+59) Update libevent to 2.0.17 stable.<br>
 
 <br><br>
 <b>For support see:</b><br>

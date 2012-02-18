@@ -1,13 +1,19 @@
 dnl configure.in for libevent
-dnl Dug Song <dugsong@monkey.org>
+dnl Copyright 2000-2007 Niels Provos
+dnl Copyright 2007-2012 Niels Provos and Nick Mathewson
+dnl
+dnl See LICENSE for copying information.
+dnl
+dnl Original version Dug Song <dugsong@monkey.org>
+
 AC_PREREQ(2.59c)
 AC_INIT(event.c)
 
 AC_CONFIG_MACRO_DIR([m4])
 
-AM_INIT_AUTOMAKE(libevent,2.0.16-stable)
+AM_INIT_AUTOMAKE(libevent,2.0.17-stable)
 AM_CONFIG_HEADER(config.h)
-AC_DEFINE(NUMERIC_VERSION, 0x02001000, [Numeric representation of the version])
+AC_DEFINE(NUMERIC_VERSION, 0x02001100, [Numeric representation of the version])
 
 dnl Initialize prefix.
 if test "$prefix" = "NONE"; then
@@ -267,7 +273,7 @@ AC_HEADER_TIME
 
 dnl Checks for library functions.
 AC_CHECK_FUNCS([gettimeofday vasprintf fcntl clock_gettime strtok_r strsep])
-AC_CHECK_FUNCS([getnameinfo strlcpy inet_ntop inet_pton signal sigaction strtoll inet_aton pipe eventfd sendfile mmap splice arc4random arc4random_buf issetugid geteuid getegid getprotobynumber setenv unsetenv putenv])
+AC_CHECK_FUNCS([getnameinfo strlcpy inet_ntop inet_pton signal sigaction strtoll inet_aton pipe eventfd sendfile mmap splice arc4random arc4random_buf issetugid geteuid getegid getprotobynumber setenv unsetenv putenv sysctl])
 
 AC_CACHE_CHECK(
     [for getaddrinfo],

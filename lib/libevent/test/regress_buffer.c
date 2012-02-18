@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2003-2007 Niels Provos <provos@citi.umich.edu>
- * Copyright (c) 2007-2011 Niels Provos and Nick Mathewson
+ * Copyright (c) 2007-2012 Niels Provos and Nick Mathewson
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -1440,6 +1440,10 @@ test_evbuffer_peek(void *info)
 		evbuffer_add_printf(tmp_buf, "Contents of chunk [%d]\n", i);
 		evbuffer_add_buffer(buf, tmp_buf);
 	}
+
+	/* How many chunks do we need for everything? */
+	i = evbuffer_peek(buf, -1, NULL, NULL, 0);
+	tt_int_op(i, ==, 16);
 
 	/* Simple peek: get everything. */
 	i = evbuffer_peek(buf, -1, NULL, v, 20);
