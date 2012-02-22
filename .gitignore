@@ -82,6 +82,7 @@ romfs
 /lib/libevent/Makefile
 /lib/libevent/*/Makefile
 /lib/libevent/Makefile.in
+/lib/libevent/*/Makefile.in
 /lib/libevent/sample/Makefile
 /lib/libevent/stamp-h1
 /lib/libevent/test/Makefile
@@ -196,3 +197,10 @@ romfs
 /user/zebra/autom4te.cache/traces.0
 /user/zebra/config.h.in~
 /user/zebra/stamp-h1
+/toolchain/tmp/mipsel-linux-uclibc-toolchain/binutils-2.21/*
+/toolchain/tmp/mipsel-linux-uclibc-toolchain/build-binutils/*
+/toolchain/tmp/mipsel-linux-uclibc-toolchain/build-gcc-bootstrap/*
+/toolchain/tmp/mipsel-linux-uclibc-toolchain/build-gcc-bootstrap-cpp/*
+/toolchain/tmp/mipsel-linux-uclibc-toolchain/gcc-4.5.3/*
+/toolchain/tmp/mipsel-linux-uclibc-toolchain/include/*
+/toolchain/tmp/mipsel-linux-uclibc-toolchain/uClibc-0.9.28/*
