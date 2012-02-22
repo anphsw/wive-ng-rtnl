@@ -1,4 +1,4 @@
-/* $Id: getgateway.c,v 1.20 2011/07/15 08:30:11 nanard Exp $ */
+/* $Id: getgateway.c,v 1.22 2011/08/08 21:20:51 nanard Exp $ */
 /* libnatpmp
 
 Copyright (c) 2007-2011, Thomas BERNARD 
@@ -49,7 +49,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #undef USE_SYSCTL_NET_ROUTE
 #endif
 
-#ifdef BSD
+#if defined(BSD) || defined(__FreeBSD_kernel__)
 #undef USE_PROC_NET_ROUTE
 #define USE_SOCKET_ROUTE
 #undef USE_SYSCTL_NET_ROUTE

@@ -1,4 +1,7 @@
-$Id: Changelog.txt,v 1.28 2011/07/15 08:30:10 nanard Exp $
+$Id: Changelog.txt,v 1.29 2011/08/07 16:59:33 nanard Exp $
+
+2011/08/07:
+  Patch to build on debian/kFreeBSD.
 
 2011/07/15:
   Put 3 clauses BSD licence at the top of source files.
