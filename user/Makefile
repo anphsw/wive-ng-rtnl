@@ -70,7 +70,6 @@ dir_y =
 dir_n =
 dir_  =
 
-ifdef JJJJJJ
 #base system application
 dir_$(CONFIG_USER_GDBSERVER_GDBREPLAY)      += gdbserver
 dir_$(CONFIG_USER_GDBSERVER_GDBSERVER)      += gdbserver
@@ -122,9 +121,6 @@ dir_$(CONFIG_RT2880_APP)		    += rt2880_app
 #need last busybox and goahead
 dir_$(CONFIG_USER_BUSYBOX_BUSYBOX)          += busybox
 dir_$(CONFIG_USER_GOAHEAD_HTTPD)	    += goahead
-endif
-
-dir_$(CONFIG_USER_TRANSMISSION)             += transmission
 
 all: config
 	CC=$(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-gcc ; \
@@ -136,11 +132,11 @@ all: config
 	NM=$(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-nm ; \
 	RANLIB=$(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-ranlib ; \
 	STRIP=$(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-strip ;
-#ifeq ($(CONFIG_USER_OPENSSL),y)
-#	# ">>>>>>>>>>>>>>>> CONFIGURE SSL NEEDED  <<<<<<<<<<<<<<<<<<<<<<"
-#	cd openssl ; ./Configure RT2880 no-ripemd; $(MAKE) ; \
-#	cd ..
-#endif
+ifeq ($(CONFIG_USER_OPENSSL),y)
+	# ">>>>>>>>>>>>>>>> CONFIGURE SSL NEEDED  <<<<<<<<<<<<<<<<<<<<<<"
+	cd openssl ; ./Configure RT2880 no-ripemd; $(MAKE) ; \
+	cd ..
+endif
 	# ">>>>>>>>>>>>>>>> CONFIGURE ALL NEEDED  <<<<<<<<<<<<<<<<<<<<<<"
 	for i in $(dir_y) ; do \
 	    if [ -f "$$i/DoConfigure.sh" ]; then ( cd $$i; ./DoConfigure.sh || exit 1 ; cd .. ) || exit 1 ; fi \
