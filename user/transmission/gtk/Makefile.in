@@ -71,8 +71,6 @@ am_transmission_gtk_OBJECTS = actions.$(OBJEXT) conf.$(OBJEXT) \
 transmission_gtk_OBJECTS = $(am_transmission_gtk_OBJECTS)
 transmission_gtk_DEPENDENCIES =  \
 	$(top_builddir)/libtransmission/libtransmission.a \
-	$(top_builddir)/third-party/miniupnp/libminiupnp.a \
-	$(top_builddir)/third-party/libnatpmp/libnatpmp.a \
 	$(am__append_1)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -240,6 +238,10 @@ INTLTOOL_EXTRACT = @INTLTOOL_EXTRACT@
 INTLTOOL_MERGE = @INTLTOOL_MERGE@
 INTLTOOL_PERL = @INTLTOOL_PERL@
 INTLTOOL_UPDATE = @INTLTOOL_UPDATE@
+INTLTOOL_V_MERGE = @INTLTOOL_V_MERGE@
+INTLTOOL_V_MERGE_OPTIONS = @INTLTOOL_V_MERGE_OPTIONS@
+INTLTOOL__v_MERGE_ = @INTLTOOL__v_MERGE_@
+INTLTOOL__v_MERGE_0 = @INTLTOOL__v_MERGE_0@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBAPPINDICATOR_CFLAGS = @LIBAPPINDICATOR_CFLAGS@
@@ -250,11 +252,18 @@ LIBCURL_LIBS = @LIBCURL_LIBS@
 LIBEVENT_CFLAGS = @LIBEVENT_CFLAGS@
 LIBEVENT_LIBS = @LIBEVENT_LIBS@
 LIBEVENT_MINIUM = @LIBEVENT_MINIUM@
+LIBNATPMP_CFLAGS = @LIBNATPMP_CFLAGS@
+LIBNATPMP_LIBS = @LIBNATPMP_LIBS@
+LIBNATPMP_LIBS_QT = @LIBNATPMP_LIBS_QT@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
+LIBUPNP_CFLAGS = @LIBUPNP_CFLAGS@
+LIBUPNP_LIBS = @LIBUPNP_LIBS@
+LIBUPNP_LIBS_QT = @LIBUPNP_LIBS_QT@
 LIBUTP_CFLAGS = @LIBUTP_CFLAGS@
 LIBUTP_LIBS = @LIBUTP_LIBS@
+LIBUTP_LIBS_QT = @LIBUTP_LIBS_QT@
 LIPO = @LIPO@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
@@ -338,6 +347,8 @@ htmldir = @htmldir@
 includedir = @includedir@
 infodir = @infodir@
 install_sh = @install_sh@
+intltool__v_merge_options_ = @intltool__v_merge_options_@
+intltool__v_merge_options_0 = @intltool__v_merge_options_0@
 libdir = @libdir@
 libexecdir = @libexecdir@
 localedir = @localedir@
@@ -437,11 +448,10 @@ transmission_gtk_SOURCES = \
 dist_man_MANS = transmission-gtk.1
 transmission_gtk_LDADD =  \
 	$(top_builddir)/libtransmission/libtransmission.a \
-	$(top_builddir)/third-party/miniupnp/libminiupnp.a \
-	$(top_builddir)/third-party/libnatpmp/libnatpmp.a @DHT_LIBS@ \
-	@LIBUTP_LIBS@ @GTK_LIBS@ @LIBAPPINDICATOR_LIBS@ \
-	@LIBEVENT_LIBS@ @LIBCURL_LIBS@ @OPENSSL_LIBS@ @ZLIB_LIBS@ \
-	@PTHREAD_LIBS@ $(am__append_1)
+	@LIBUPNP_LIBS@ @LIBNATPMP_LIBS@ @DHT_LIBS@ @LIBUTP_LIBS@ \
+	@GTK_LIBS@ @LIBAPPINDICATOR_LIBS@ @LIBEVENT_LIBS@ \
+	@LIBCURL_LIBS@ @OPENSSL_LIBS@ @ZLIB_LIBS@ @PTHREAD_LIBS@ \
+	$(am__append_1)
 DESKTOP_IN_FILES = transmission-gtk.desktop.in
 DESKTOP_FILES = $(DESKTOP_IN_FILES:.desktop.in=.desktop)
 Productivitydir = $(datadir)/applications

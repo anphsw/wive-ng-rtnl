@@ -114,6 +114,8 @@ EXTRA_DIST = \
     MessageWindowController.m \
     NSApplicationAdditions.h \
     NSApplicationAdditions.m \
+    NSImageAdditions.h \
+    NSImageAdditions.m \
     NSMutableArrayAdditions.h \
     NSMutableArrayAdditions.m \
     NSStringAdditions.h \
@@ -173,7 +175,7 @@ define PACKAGE_RULE1
 	$(RM) tmp "Transmission $(VERSION_PACKAGE)" \
 	  Transmission-$(VERSION_PACKAGE).dmg
 	mkdir -p tmp
-	cp -Ra macosx/Transmission.app tmp/
+	cp -R macosx/Transmission.app tmp/
 endef
 define PACKAGE_RULE2
 	mv tmp "Transmission $(VERSION_PACKAGE)"

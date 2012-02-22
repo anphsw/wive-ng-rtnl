@@ -7,7 +7,7 @@
  * This exemption does not extend to derived works not owned by
  * the Transmission project.
  *
- * $Id: session.c 12649 2011-08-08 16:29:47Z jordan $
+ * $Id: session.c 13191 2012-02-03 16:44:07Z jordan $
  */
 
 #include <assert.h>
@@ -38,6 +38,7 @@
 #include "peer-io.h"
 #include "peer-mgr.h"
 #include "platform.h" /* tr_lock, tr_getTorrentDir(), tr_getFreeSpace() */
+#include "port-forwarding.h"
 #include "rpc-server.h"
 #include "session.h"
 #include "stats.h"
@@ -399,6 +400,7 @@ tr_sessionGetSettings( tr_session * s, struct tr_benc * d )
     tr_bencDictAddStr ( d, TR_PREFS_KEY_PEER_SOCKET_TOS,                  format_tos(s->peerSocketTOS) );
     tr_bencDictAddStr ( d, TR_PREFS_KEY_PEER_CONGESTION_ALGORITHM,        s->peer_congestion_algorithm );
     tr_bencDictAddBool( d, TR_PREFS_KEY_PEX_ENABLED,                      s->isPexEnabled );
+    tr_bencDictAddBool( d, TR_PREFS_KEY_PORT_FORWARDING,                  tr_sessionIsPortForwardingEnabled( s ) );
     tr_bencDictAddInt ( d, TR_PREFS_KEY_PREALLOCATION,                    s->preallocationMode );
     tr_bencDictAddInt ( d, TR_PREFS_KEY_PREFETCH_ENABLED,                 s->isPrefetchEnabled );
     tr_bencDictAddBool( d, TR_PREFS_KEY_QUEUE_STALLED_ENABLED,            tr_sessionGetQueueStalledEnabled( s ) );
@@ -691,6 +693,8 @@ tr_sessionInitImpl( void * vdata )
 
     session->peerMgr = tr_peerMgrNew( session );
 
+    session->shared = tr_sharedInit( session );
+
     /**
     ***  Blocklist
     **/
@@ -848,6 +852,8 @@ sessionSetImpl( void * vdata )
     if( !tr_bencDictFindInt( settings, TR_PREFS_KEY_PEER_PORT, &i ) )
         i = session->private_peer_port;
     setPeerPort( session, boolVal ? getRandomPort( session ) : i );
+    if( tr_bencDictFindBool( settings, TR_PREFS_KEY_PORT_FORWARDING, &boolVal ) )
+        tr_sessionSetPortForwardingEnabled( session, boolVal );
 
     if( tr_bencDictFindInt( settings, TR_PREFS_KEY_PEER_LIMIT_GLOBAL, &i ) )
         session->peerLimit = i;
@@ -1066,6 +1072,7 @@ peerPortChanged( void * session )
 
     close_incoming_peer_port( session );
     open_incoming_peer_port( session );
+    tr_sharedPortChanged( session );
 
     while(( tor = tr_torrentNext( session, tor )))
         tr_torrentChangeMyPort( tor );
@@ -1119,6 +1126,14 @@ tr_sessionGetPeerPortRandomOnStart( tr_session * session )
     assert( tr_isSession( session ) );
 
     return session->isPortRandom;
+}
+
+tr_port_forwarding
+tr_sessionGetPortForwarding( const tr_session * session )
+{
+    assert( tr_isSession( session ) );
+
+    return tr_sharedTraversalStatus( session->shared );
 }
 
 /***
@@ -1732,6 +1747,7 @@ sessionCloseImpl( void * vsession )
     session->nowTimer = NULL;
 
     tr_verifyClose( session );
+    tr_sharedClose( session );
     tr_rpcClose( &session->rpcServer );
 
     /* Close the torrents. Get the most active ones first so that
@@ -2102,6 +2118,42 @@ tr_sessionGetCacheLimit_MB( const tr_session * session )
     assert( tr_isSession( session ) );
 
     return toMemMB( tr_cacheGetLimit( session->cache ) );
+}
+
+/***
+****
+***/
+
+struct port_forwarding_data
+{
+    bool enabled;
+    struct tr_shared * shared;
+};
+
+static void
+setPortForwardingEnabled( void * vdata )
+{
+    struct port_forwarding_data * data = vdata;
+    tr_sharedTraversalEnable( data->shared, data->enabled );
+    tr_free( data );
+}
+
+void
+tr_sessionSetPortForwardingEnabled( tr_session  * session, bool enabled )
+{
+    struct port_forwarding_data * d;
+    d = tr_new0( struct port_forwarding_data, 1 );
+    d->shared = session->shared;
+    d->enabled = enabled;
+    tr_runInEventThread( session, setPortForwardingEnabled, d );
+}
+
+bool
+tr_sessionIsPortForwardingEnabled( const tr_session * session )
+{
+    assert( tr_isSession( session ) );
+
+    return tr_sharedTraversalIsEnabled( session->shared );
 }
 
 /***
@@ -2623,7 +2675,6 @@ tr_sessionSetQueueStalledMinutes( tr_session * session, int minutes )
     assert( minutes > 0 );
 
     session->queueStalledMinutes = minutes;
-   
 }
 
 void
@@ -2634,7 +2685,7 @@ tr_sessionSetQueueStalledEnabled( tr_session * session, bool is_enabled )
 
     session->stalledEnabled = is_enabled;
 }
-  
+
 bool
 tr_sessionGetQueueStalledEnabled( const tr_session * session )
 {

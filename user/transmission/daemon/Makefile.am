@@ -20,6 +20,8 @@ bin_PROGRAMS = \
 
 LDADD = \
     $(top_builddir)/libtransmission/libtransmission.a \
+    @LIBUPNP_LIBS@ \
+    @LIBNATPMP_LIBS@ \
     @DHT_LIBS@ \
     @LIBUTP_LIBS@ \
     @LIBEVENT_LIBS@ \

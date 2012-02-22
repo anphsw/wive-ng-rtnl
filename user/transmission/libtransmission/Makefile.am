@@ -1,13 +1,13 @@
 AM_CPPFLAGS = \
-    -I. \
     -I$(top_srcdir) \
-    -I$(top_srcdir)/third-party/ \
     -D__TRANSMISSION__ \
     -DPACKAGE_DATA_DIR=\""$(datadir)"\"
 
 AM_CFLAGS = \
     @DHT_CFLAGS@ \
     @LIBUTP_CFLAGS@ \
+    @LIBUPNP_CFLAGS@ \
+    @LIBNATPMP_CFLAGS@ \
     @LIBEVENT_CFLAGS@ \
     @LIBCURL_CFLAGS@ \
     @OPENSSL_CFLAGS@ \
@@ -39,11 +39,13 @@ libtransmission_a_SOURCES = \
     magnet.c \
     makemeta.c \
     metainfo.c \
+    natpmp.c \
     net.c \
     peer-io.c \
     peer-mgr.c \
     peer-msgs.c \
     platform.c \
+    port-forwarding.c \
     ptrarray.c \
     resume.c \
     rpcimpl.c \
@@ -59,6 +61,7 @@ libtransmission_a_SOURCES = \
     tr-utp.c \
     tr-getopt.c \
     trevent.c \
+    upnp.c \
     utils.c \
     verify.c \
     web.c \
@@ -87,12 +90,14 @@ noinst_HEADERS = \
     magnet.h \
     makemeta.h \
     metainfo.h \
+    natpmp_local.h \
     net.h \
     peer-common.h \
     peer-io.h \
     peer-mgr.h \
     peer-msgs.h \
     platform.h \
+    port-forwarding.h \
     ptrarray.h \
     resume.h \
     rpcimpl.h \
@@ -108,6 +113,7 @@ noinst_HEADERS = \
     tr-utp.h \
     tr-lpd.h \
     trevent.h \
+    upnp.h \
     utils.h \
     verify.h \
     version.h \
@@ -133,6 +139,8 @@ apps_ldflags = \
 
 apps_ldadd = \
     ./libtransmission.a  \
+    @LIBUPNP_LIBS@ \
+    @LIBNATPMP_LIBS@ \
     @INTLLIBS@ \
     @DHT_LIBS@ \
     @LIBUTP_LIBS@ \

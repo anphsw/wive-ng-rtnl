@@ -1,10 +1,10 @@
-#define PEERID_PREFIX             "-TR2420-"
-#define USERAGENT_PREFIX          "2.42"
-#define SVN_REVISION              "13002"
-#define SVN_REVISION_NUM          13002
-#define SHORT_VERSION_STRING      "2.42"
-#define LONG_VERSION_STRING       "2.42 (13002)"
-#define VERSION_STRING_INFOPLIST  2.42
+#define PEERID_PREFIX             "-TR2500-"
+#define USERAGENT_PREFIX          "2.50"
+#define SVN_REVISION              "13226"
+#define SVN_REVISION_NUM          13226
+#define SHORT_VERSION_STRING      "2.50"
+#define LONG_VERSION_STRING       "2.50 (13226)"
+#define VERSION_STRING_INFOPLIST  2.50
 #define MAJOR_VERSION             2
-#define MINOR_VERSION             42
+#define MINOR_VERSION             50
 #define TR_STABLE_RELEASE         1

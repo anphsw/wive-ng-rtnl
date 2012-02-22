@@ -1,0 +1,2 @@
+# Generated config based on /opt/Wive-RTNL/user/iproute2/include
+TC_CONFIG_ATM:=y

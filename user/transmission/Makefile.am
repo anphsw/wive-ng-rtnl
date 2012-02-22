@@ -36,15 +36,14 @@ EXTRA_DIST = \
   update-version-h.sh \
   Transmission.xcodeproj/project.pbxproj
 
+dist-hook:
+	rm -rf `find $(distdir)/qt -name .svn`
+
 romfs: install
 	$(ROMFSINST) -S init.d/W79transmission /etc/rc.d/W79transmission
 	$(ROMFSINST) -s /etc/rc.d/W79transmission /etc/init.d/transmission
 	$(ROMFSINST) -S filesystem/bin/transmission-daemon /bin/transmission-daemon
 	cp -rfva filesystem/share/transmission* $(ROMFSDIR)/share/transmission/
-
-dist-hook:
-	rm -rfa `find $(distdir)/qt -name .svn`
-
 
 DISTCLEANFILES = \
   intltool-extract \

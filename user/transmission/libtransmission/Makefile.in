@@ -75,15 +75,17 @@ am_libtransmission_a_OBJECTS = announcer.$(OBJEXT) \
 	fdlimit.$(OBJEXT) handshake.$(OBJEXT) history.$(OBJEXT) \
 	inout.$(OBJEXT) json.$(OBJEXT) JSON_parser.$(OBJEXT) \
 	list.$(OBJEXT) magnet.$(OBJEXT) makemeta.$(OBJEXT) \
-	metainfo.$(OBJEXT) net.$(OBJEXT) peer-io.$(OBJEXT) \
-	peer-mgr.$(OBJEXT) peer-msgs.$(OBJEXT) platform.$(OBJEXT) \
+	metainfo.$(OBJEXT) natpmp.$(OBJEXT) net.$(OBJEXT) \
+	peer-io.$(OBJEXT) peer-mgr.$(OBJEXT) peer-msgs.$(OBJEXT) \
+	platform.$(OBJEXT) port-forwarding.$(OBJEXT) \
 	ptrarray.$(OBJEXT) resume.$(OBJEXT) rpcimpl.$(OBJEXT) \
 	rpc-server.$(OBJEXT) session.$(OBJEXT) stats.$(OBJEXT) \
 	torrent.$(OBJEXT) torrent-ctor.$(OBJEXT) \
 	torrent-magnet.$(OBJEXT) tr-dht.$(OBJEXT) tr-lpd.$(OBJEXT) \
 	tr-udp.$(OBJEXT) tr-utp.$(OBJEXT) tr-getopt.$(OBJEXT) \
-	trevent.$(OBJEXT) utils.$(OBJEXT) verify.$(OBJEXT) \
-	web.$(OBJEXT) webseed.$(OBJEXT) wildmat.$(OBJEXT)
+	trevent.$(OBJEXT) upnp.$(OBJEXT) utils.$(OBJEXT) \
+	verify.$(OBJEXT) web.$(OBJEXT) webseed.$(OBJEXT) \
+	wildmat.$(OBJEXT)
 libtransmission_a_OBJECTS = $(am_libtransmission_a_OBJECTS)
 am__EXEEXT_1 = blocklist-test$(EXEEXT) bencode-test$(EXEEXT) \
 	clients-test$(EXEEXT) history-test$(EXEEXT) json-test$(EXEEXT) \
@@ -255,6 +257,10 @@ INTLTOOL_EXTRACT = @INTLTOOL_EXTRACT@
 INTLTOOL_MERGE = @INTLTOOL_MERGE@
 INTLTOOL_PERL = @INTLTOOL_PERL@
 INTLTOOL_UPDATE = @INTLTOOL_UPDATE@
+INTLTOOL_V_MERGE = @INTLTOOL_V_MERGE@
+INTLTOOL_V_MERGE_OPTIONS = @INTLTOOL_V_MERGE_OPTIONS@
+INTLTOOL__v_MERGE_ = @INTLTOOL__v_MERGE_@
+INTLTOOL__v_MERGE_0 = @INTLTOOL__v_MERGE_0@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBAPPINDICATOR_CFLAGS = @LIBAPPINDICATOR_CFLAGS@
@@ -265,11 +271,18 @@ LIBCURL_LIBS = @LIBCURL_LIBS@
 LIBEVENT_CFLAGS = @LIBEVENT_CFLAGS@
 LIBEVENT_LIBS = @LIBEVENT_LIBS@
 LIBEVENT_MINIUM = @LIBEVENT_MINIUM@
+LIBNATPMP_CFLAGS = @LIBNATPMP_CFLAGS@
+LIBNATPMP_LIBS = @LIBNATPMP_LIBS@
+LIBNATPMP_LIBS_QT = @LIBNATPMP_LIBS_QT@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
+LIBUPNP_CFLAGS = @LIBUPNP_CFLAGS@
+LIBUPNP_LIBS = @LIBUPNP_LIBS@
+LIBUPNP_LIBS_QT = @LIBUPNP_LIBS_QT@
 LIBUTP_CFLAGS = @LIBUTP_CFLAGS@
 LIBUTP_LIBS = @LIBUTP_LIBS@
+LIBUTP_LIBS_QT = @LIBUTP_LIBS_QT@
 LIPO = @LIPO@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
@@ -353,6 +366,8 @@ htmldir = @htmldir@
 includedir = @includedir@
 infodir = @infodir@
 install_sh = @install_sh@
+intltool__v_merge_options_ = @intltool__v_merge_options_@
+intltool__v_merge_options_0 = @intltool__v_merge_options_0@
 libdir = @libdir@
 libexecdir = @libexecdir@
 localedir = @localedir@
@@ -374,15 +389,15 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 transmissionlocaledir = @transmissionlocaledir@
 AM_CPPFLAGS = \
-    -I. \
     -I$(top_srcdir) \
-    -I$(top_srcdir)/third-party/ \
     -D__TRANSMISSION__ \
     -DPACKAGE_DATA_DIR=\""$(datadir)"\"
 
 AM_CFLAGS = \
     @DHT_CFLAGS@ \
     @LIBUTP_CFLAGS@ \
+    @LIBUPNP_CFLAGS@ \
+    @LIBNATPMP_CFLAGS@ \
     @LIBEVENT_CFLAGS@ \
     @LIBCURL_CFLAGS@ \
     @OPENSSL_CFLAGS@ \
@@ -413,11 +428,13 @@ libtransmission_a_SOURCES = \
     magnet.c \
     makemeta.c \
     metainfo.c \
+    natpmp.c \
     net.c \
     peer-io.c \
     peer-mgr.c \
     peer-msgs.c \
     platform.c \
+    port-forwarding.c \
     ptrarray.c \
     resume.c \
     rpcimpl.c \
@@ -433,6 +450,7 @@ libtransmission_a_SOURCES = \
     tr-utp.c \
     tr-getopt.c \
     trevent.c \
+    upnp.c \
     utils.c \
     verify.c \
     web.c \
@@ -461,12 +479,14 @@ noinst_HEADERS = \
     magnet.h \
     makemeta.h \
     metainfo.h \
+    natpmp_local.h \
     net.h \
     peer-common.h \
     peer-io.h \
     peer-mgr.h \
     peer-msgs.h \
     platform.h \
+    port-forwarding.h \
     ptrarray.h \
     resume.h \
     rpcimpl.h \
@@ -482,6 +502,7 @@ noinst_HEADERS = \
     tr-utp.h \
     tr-lpd.h \
     trevent.h \
+    upnp.h \
     utils.h \
     verify.h \
     version.h \
@@ -493,6 +514,8 @@ apps_ldflags = \
 
 apps_ldadd = \
     ./libtransmission.a  \
+    @LIBUPNP_LIBS@ \
+    @LIBNATPMP_LIBS@ \
     @INTLLIBS@ \
     @DHT_LIBS@ \
     @LIBUTP_LIBS@ \
@@ -647,12 +670,14 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/magnet.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/makemeta.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/metainfo.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/natpmp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/net.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/peer-io.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/peer-mgr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/peer-msgs-test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/peer-msgs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/platform.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/port-forwarding.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ptrarray.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/resume.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rpc-server.Po@am__quote@
@@ -670,6 +695,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tr-udp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tr-utp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/trevent.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/upnp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/utils-test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/utils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/verify.Po@am__quote@

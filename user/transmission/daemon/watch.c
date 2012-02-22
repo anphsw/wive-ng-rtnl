@@ -9,9 +9,8 @@
  *
  * $Id: watch.c 12476 2011-05-30 15:28:55Z jordan $
  */
-#define WITH_INOTIFY
 #ifdef WITH_INOTIFY
-  #include "inotify.h"
+  #include <sys/inotify.h>
   #include <sys/select.h>
   #include <unistd.h> /* close */
 #else
