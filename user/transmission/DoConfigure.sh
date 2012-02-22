@@ -17,8 +17,8 @@ fi
 	    --without-inotify \
 	    --enable-external-natpmp \
 	    --enable-lightweight \
-	    --with-zlib="$FIRMROOT/lib/lib/" \
-	    --with-zlib-includes="$FIRMROOT/lib/include_shared/" \
+	    --with-zlib=$FIRMROOT/lib/lib/ \
+	    --with-zlib-includes=$FIRMROOT/lib/include_shared/ \
 	    OPENSSL_CFLAGS="-I$FIRMROOT/user/openssl/include" \
 	    OPENSSL_LIBS="-L$FIRMROOT/user/openssl -lcrypto -lssl" \
 	    LIBCURL_CFLAGS="-I$FIRMROOT/lib/libcurl/include" \
