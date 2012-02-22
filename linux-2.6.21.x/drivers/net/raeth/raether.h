@@ -7,7 +7,7 @@
 #ifdef CONFIG_RAETH_JUMBOFRAME
 #define	MAX_RX_LENGTH	4096		/* limit size for rx packets 1Gb */
 #else
-#define	MAX_RX_LENGTH	1600		/* limit size for rx packets 100Mb */
+#define	MAX_RX_LENGTH	1536		/* limit size for rx packets 100Mb */
 #endif
 #define DEFAULT_MTU	1500		/* default MTU set to device */
 
