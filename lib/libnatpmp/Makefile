@@ -90,6 +90,8 @@ else
 endif
 
 shared: $(SHAREDLIB)
+	cp -vfa *.so*		$(ROOTDIR)/lib/lib
+	cp -vfa *.h		$(ROOTDIR)/lib/include_shared
 
 # DO NOT DELETE
 
