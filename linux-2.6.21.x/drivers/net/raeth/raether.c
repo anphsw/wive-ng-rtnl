@@ -922,7 +922,7 @@ static int rt2880_eth_recv(struct net_device* dev)
 	unsigned long	RxProcessed;
 	int bReschedule = 0;
 	END_DEVICE* 	ei_local = netdev_priv(dev);
-	int mtu = dev->mtu, true_rx_buf_sz = MAX_RX_LENGTH + NET_IP_ALIGN;
+	int mtu = dev->mtu;
 #if defined (CONFIG_RAETH_MULTIPLE_RX_RING)
 	int rx_ring_no=0;
 #endif
@@ -935,9 +935,6 @@ static int rt2880_eth_recv(struct net_device* dev)
 	PSEUDO_ADAPTER *pAd;
 #endif
 	RxProcessed = 0;
-
-	/* calculate rx_buff truesize */
-	true_rx_buf_sz = ((mtu <= ETH_DATA_LEN) ? PKT_BUF_SZ : mtu + 32) + NET_IP_ALIGN;
 
 	for ( ; ; ) {
 
@@ -1003,7 +1000,8 @@ static int rt2880_eth_recv(struct net_device* dev)
 		rx_skb->tail 	= rx_skb->data + length;
 
 		/* check oversized packets */
-		if (rx_skb->len > MAX_PACKET_SIZE) {
+		/* hardware maximum for a single frame's data payload */
+		if (rx_skb->len > (MAX_RX_LENGTH + NET_IP_ALIGN)) {
 		    ei_local->stat.rx_dropped++;
                     bReschedule = 1;
 		    if (net_ratelimit())
@@ -1067,7 +1065,7 @@ static int rt2880_eth_recv(struct net_device* dev)
 #if defined (CONFIG_RAETH_SKB_RECYCLE_2K)
                 skb = skbmgr_dev_alloc_skb2k();
 #else
-		skb = __netdev_alloc_skb(dev, true_rx_buf_sz , GFP_DMA | GFP_ATOMIC);
+		skb = __netdev_alloc_skb(dev, MAX_RX_LENGTH + NET_IP_ALIGN , GFP_DMA | GFP_ATOMIC);
 #endif
 
 		if (unlikely(skb == NULL))
@@ -1157,7 +1155,7 @@ static int rt2880_eth_recv(struct net_device* dev)
 
 #endif  // CONFIG_RA_NAT_NONE //
 		rx_ring[rx_dma_owner_idx].rxd_info2.DDONE_bit = 0;
-		rx_ring[rx_dma_owner_idx].rxd_info1.PDP0 = dma_map_single(NULL, skb->data, true_rx_buf_sz, PCI_DMA_FROMDEVICE);
+		rx_ring[rx_dma_owner_idx].rxd_info1.PDP0 = dma_map_single(NULL, skb->data, MAX_RX_LENGTH, PCI_DMA_FROMDEVICE);
 		dma_cache_sync(NULL, &rx_ring[rx_dma_owner_idx], sizeof(struct PDMA_rxdesc), DMA_FROM_DEVICE);
 
 		/*  Move point to next RXD which wants to alloc*/

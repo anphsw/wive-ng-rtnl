@@ -11,15 +11,6 @@
 #endif
 #define DEFAULT_MTU	1500		/* default MTU set to device */
 
-#define PKT_BUF_SZ      1536            /* Size of each temporary Rx buffer.*/
-
-/* hardware minimum and maximum for a single frame's data payload */
-#ifdef CONFIG_VLAN_8021Q_DOUBLE_TAG
-#define MAX_PACKET_SIZE	1526
-#else
-#define MAX_PACKET_SIZE	1522
-#endif
-
 #ifdef DSP_VIA_NONCACHEABLE
 #define ESRAM_BASE	0xa0800000	/* 0x0080-0000  ~ 0x00807FFF */
 #else
