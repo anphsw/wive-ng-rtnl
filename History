@@ -967,16 +967,19 @@
 52) Fix librt install in romfs.<br>
 53) Arp, neigh subsystems fixup.<br>
 54) Reapply allow lost netmask patch to miniupnpd.<br>
-55) Update xupnpd to r290.<br>
-56) Small rewrite kernel autotune logic.<br>
-57) Fix radvd start only if ipv6 support enabled.<br>
-58) Fix LCP params get in pppoe helper.<br>
-59) Update libevent to 2.0.17 stable.<br>
-60) Update libupnp to 1.6.15 version.<br>
-61) Update radvd to 1.8.5 version.<br>
-62) Update transmission to 2.50 version.<br>
-63) Raeth fix memleak of pppoe send packet to ppe.<br>
-64) HW_NAT check sizes and types packets before process.<br>
+
+<br>
+<b>2.1.x</b><br>
+1) Update xupnpd to r291.<br>
+2) Small rewrite kernel autotune logic.<br>
+3) Fix radvd start only if ipv6 support enabled.<br>
+4) Fix LCP params get in pppoe helper.<br>
+5) Update libevent to 2.0.17 stable.<br>
+6) Update libupnp to 1.6.15 version.<br>
+7) Update radvd to 1.8.5 version.<br>
+8) Update transmission to 2.50 version.<br>
+9) Raeth fix memleak of pppoe send packet to ppe.<br>
+10) HW_NAT check sizes and types packets before process.<br>
 
 <br><br>
 <b>For support see:</b><br>
