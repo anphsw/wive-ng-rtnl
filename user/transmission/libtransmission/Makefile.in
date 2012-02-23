@@ -47,17 +47,15 @@ DIST_COMMON = $(noinst_HEADERS) $(srcdir)/Makefile.am \
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/acx-pthread.m4 \
 	$(top_srcdir)/m4/check-ssl.m4 $(top_srcdir)/m4/glib-gettext.m4 \
-	$(top_srcdir)/m4/intltool.m4 $(top_srcdir)/m4/libtool.m4 \
-	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
-	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
-	$(top_srcdir)/m4/pkg.m4 $(top_srcdir)/m4/zlib.m4 \
-	$(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/intltool.m4 $(top_srcdir)/m4/pkg.m4 \
+	$(top_srcdir)/m4/zlib.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 LIBRARIES = $(noinst_LIBRARIES)
+AR = ar
 ARFLAGS = cru
 AM_V_AR = $(am__v_AR_@AM_V@)
 am__v_AR_ = $(am__v_AR_@AM_DEFAULT_V@)
@@ -96,85 +94,64 @@ am_bencode_test_OBJECTS = bencode-test.$(OBJEXT)
 bencode_test_OBJECTS = $(am_bencode_test_OBJECTS)
 am__DEPENDENCIES_1 = ./libtransmission.a
 bencode_test_DEPENDENCIES = $(am__DEPENDENCIES_1)
-AM_V_lt = $(am__v_lt_@AM_V@)
-am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
-am__v_lt_0 = --silent
-bencode_test_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+bencode_test_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(bencode_test_LDFLAGS) $(LDFLAGS) -o $@
 am_blocklist_test_OBJECTS = blocklist-test.$(OBJEXT)
 blocklist_test_OBJECTS = $(am_blocklist_test_OBJECTS)
 blocklist_test_DEPENDENCIES = $(am__DEPENDENCIES_1)
-blocklist_test_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(AM_CFLAGS) $(CFLAGS) $(blocklist_test_LDFLAGS) $(LDFLAGS) -o \
-	$@
+blocklist_test_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(blocklist_test_LDFLAGS) $(LDFLAGS) -o $@
 am_clients_test_OBJECTS = clients-test.$(OBJEXT)
 clients_test_OBJECTS = $(am_clients_test_OBJECTS)
 clients_test_DEPENDENCIES = $(am__DEPENDENCIES_1)
-clients_test_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+clients_test_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(clients_test_LDFLAGS) $(LDFLAGS) -o $@
 am_history_test_OBJECTS = history-test.$(OBJEXT)
 history_test_OBJECTS = $(am_history_test_OBJECTS)
 history_test_DEPENDENCIES = $(am__DEPENDENCIES_1)
-history_test_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+history_test_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(history_test_LDFLAGS) $(LDFLAGS) -o $@
 am_json_test_OBJECTS = json-test.$(OBJEXT)
 json_test_OBJECTS = $(am_json_test_OBJECTS)
 json_test_DEPENDENCIES = $(am__DEPENDENCIES_1)
-json_test_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(json_test_LDFLAGS) $(LDFLAGS) -o $@
+json_test_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(json_test_LDFLAGS) \
+	$(LDFLAGS) -o $@
 am_magnet_test_OBJECTS = magnet-test.$(OBJEXT)
 magnet_test_OBJECTS = $(am_magnet_test_OBJECTS)
 magnet_test_DEPENDENCIES = $(am__DEPENDENCIES_1)
-magnet_test_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+magnet_test_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(magnet_test_LDFLAGS) $(LDFLAGS) -o $@
 am_peer_msgs_test_OBJECTS = peer-msgs-test.$(OBJEXT)
 peer_msgs_test_OBJECTS = $(am_peer_msgs_test_OBJECTS)
 peer_msgs_test_DEPENDENCIES = $(am__DEPENDENCIES_1)
-peer_msgs_test_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(AM_CFLAGS) $(CFLAGS) $(peer_msgs_test_LDFLAGS) $(LDFLAGS) -o \
-	$@
+peer_msgs_test_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(peer_msgs_test_LDFLAGS) $(LDFLAGS) -o $@
 am_rpc_test_OBJECTS = rpc-test.$(OBJEXT)
 rpc_test_OBJECTS = $(am_rpc_test_OBJECTS)
 rpc_test_DEPENDENCIES = $(am__DEPENDENCIES_1)
-rpc_test_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(rpc_test_LDFLAGS) $(LDFLAGS) -o $@
+rpc_test_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(rpc_test_LDFLAGS) \
+	$(LDFLAGS) -o $@
 am_test_peer_id_OBJECTS = test-peer-id.$(OBJEXT)
 test_peer_id_OBJECTS = $(am_test_peer_id_OBJECTS)
 test_peer_id_DEPENDENCIES = $(am__DEPENDENCIES_1)
-test_peer_id_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+test_peer_id_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(test_peer_id_LDFLAGS) $(LDFLAGS) -o $@
 am_utils_test_OBJECTS = utils-test.$(OBJEXT)
 utils_test_OBJECTS = $(am_utils_test_OBJECTS)
 utils_test_DEPENDENCIES = $(am__DEPENDENCIES_1)
-utils_test_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(utils_test_LDFLAGS) $(LDFLAGS) -o $@
+utils_test_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(utils_test_LDFLAGS) \
+	$(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
-LTCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) \
-	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
-	$(AM_CFLAGS) $(CFLAGS)
 AM_V_CC = $(am__v_CC_@AM_V@)
 am__v_CC_ = $(am__v_CC_@AM_DEFAULT_V@)
 am__v_CC_0 = @echo "  CC    " $@;
 CCLD = $(CC)
-LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(AM_LDFLAGS) $(LDFLAGS) -o $@
+LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD  " $@;
@@ -203,7 +180,6 @@ ACLOCAL = @ACLOCAL@
 ALL_LINGUAS = @ALL_LINGUAS@
 AMTAR = @AMTAR@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
-AR = @AR@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
@@ -217,7 +193,6 @@ CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CURL_MINIMUM = @CURL_MINIMUM@
 CXX = @CXX@
-CXXCPP = @CXXCPP@
 CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
@@ -226,15 +201,11 @@ DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DHT_CFLAGS = @DHT_CFLAGS@
 DHT_LIBS = @DHT_LIBS@
-DLLTOOL = @DLLTOOL@
-DSYMUTIL = @DSYMUTIL@
-DUMPBIN = @DUMPBIN@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
-FGREP = @FGREP@
 GETTEXT_PACKAGE = @GETTEXT_PACKAGE@
 GIO_MINIMUM = @GIO_MINIMUM@
 GLIB_MINIMUM = @GLIB_MINIMUM@
@@ -261,7 +232,6 @@ INTLTOOL_V_MERGE = @INTLTOOL_V_MERGE@
 INTLTOOL_V_MERGE_OPTIONS = @INTLTOOL_V_MERGE_OPTIONS@
 INTLTOOL__v_MERGE_ = @INTLTOOL__v_MERGE_@
 INTLTOOL__v_MERGE_0 = @INTLTOOL__v_MERGE_0@
-LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBAPPINDICATOR_CFLAGS = @LIBAPPINDICATOR_CFLAGS@
 LIBAPPINDICATOR_LIBS = @LIBAPPINDICATOR_LIBS@
@@ -276,31 +246,22 @@ LIBNATPMP_LIBS = @LIBNATPMP_LIBS@
 LIBNATPMP_LIBS_QT = @LIBNATPMP_LIBS_QT@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
-LIBTOOL = @LIBTOOL@
 LIBUPNP_CFLAGS = @LIBUPNP_CFLAGS@
 LIBUPNP_LIBS = @LIBUPNP_LIBS@
 LIBUPNP_LIBS_QT = @LIBUPNP_LIBS_QT@
 LIBUTP_CFLAGS = @LIBUTP_CFLAGS@
 LIBUTP_LIBS = @LIBUTP_LIBS@
 LIBUTP_LIBS_QT = @LIBUTP_LIBS_QT@
-LIPO = @LIPO@
-LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
 MAKEINFO = @MAKEINFO@
-MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
 MKINSTALLDIRS = @MKINSTALLDIRS@
 MSGFMT = @MSGFMT@
 MSGMERGE = @MSGMERGE@
-NM = @NM@
-NMEDIT = @NMEDIT@
-OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
 OPENSSL_CFLAGS = @OPENSSL_CFLAGS@
 OPENSSL_LIBS = @OPENSSL_LIBS@
 OPENSSL_MINIMUM = @OPENSSL_MINIMUM@
-OTOOL = @OTOOL@
-OTOOL64 = @OTOOL64@
 PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
 PACKAGE_NAME = @PACKAGE_NAME@
@@ -319,7 +280,6 @@ PTHREAD_CC = @PTHREAD_CC@
 PTHREAD_CFLAGS = @PTHREAD_CFLAGS@
 PTHREAD_LIBS = @PTHREAD_LIBS@
 RANLIB = @RANLIB@
-SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -335,10 +295,8 @@ abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
 abs_top_srcdir = @abs_top_srcdir@
-ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
-ac_ct_DUMPBIN = @ac_ct_DUMPBIN@
 acx_pthread_config = @acx_pthread_config@
 am__include = @am__include@
 am__leading_dot = @am__leading_dot@
@@ -558,7 +516,7 @@ utils_test_LDFLAGS = ${apps_ldflags}
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .c .lo .o .obj
+.SUFFIXES: .c .o .obj
 $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -598,13 +556,7 @@ libtransmission.a: $(libtransmission_a_OBJECTS) $(libtransmission_a_DEPENDENCIES
 	$(AM_V_at)$(RANLIB) libtransmission.a
 
 clean-noinstPROGRAMS:
-	@list='$(noinst_PROGRAMS)'; test -n "$$list" || exit 0; \
-	echo " rm -f" $$list; \
-	rm -f $$list || exit $$?; \
-	test -n "$(EXEEXT)" || exit 0; \
-	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
-	echo " rm -f" $$list; \
-	rm -f $$list
+	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
 bencode-test$(EXEEXT): $(bencode_test_OBJECTS) $(bencode_test_DEPENDENCIES) $(EXTRA_bencode_test_DEPENDENCIES) 
 	@rm -f bencode-test$(EXEEXT)
 	$(AM_V_CCLD)$(bencode_test_LINK) $(bencode_test_OBJECTS) $(bencode_test_LDADD) $(LIBS)
@@ -716,19 +668,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(COMPILE) -c `$(CYGPATH_W) '$<'`
-
-.c.lo:
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
-
-mostlyclean-libtool:
-	-rm -f *.lo
-
-clean-libtool:
-	-rm -rf .libs _libs
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
@@ -942,8 +881,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-generic clean-libtool clean-noinstLIBRARIES \
-	clean-noinstPROGRAMS mostlyclean-am
+clean-am: clean-generic clean-noinstLIBRARIES clean-noinstPROGRAMS \
+	mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -998,8 +937,7 @@ maintainer-clean-am: distclean-am maintainer-clean-generic
 
 mostlyclean: mostlyclean-am
 
-mostlyclean-am: mostlyclean-compile mostlyclean-generic \
-	mostlyclean-libtool
+mostlyclean-am: mostlyclean-compile mostlyclean-generic
 
 pdf: pdf-am
 
@@ -1014,17 +952,16 @@ uninstall-am:
 .MAKE: check-am install-am install-strip
 
 .PHONY: CTAGS GTAGS all all-am check check-TESTS check-am clean \
-	clean-generic clean-libtool clean-noinstLIBRARIES \
-	clean-noinstPROGRAMS ctags distclean distclean-compile \
-	distclean-generic distclean-libtool distclean-tags distdir dvi \
-	dvi-am html html-am info info-am install install-am \
-	install-data install-data-am install-dvi install-dvi-am \
-	install-exec install-exec-am install-html install-html-am \
-	install-info install-info-am install-man install-pdf \
-	install-pdf-am install-ps install-ps-am install-strip \
-	installcheck installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	clean-generic clean-noinstLIBRARIES clean-noinstPROGRAMS ctags \
+	distclean distclean-compile distclean-generic distclean-tags \
+	distdir dvi dvi-am html html-am info info-am install \
+	install-am install-data install-data-am install-dvi \
+	install-dvi-am install-exec install-exec-am install-html \
+	install-html-am install-info install-info-am install-man \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic pdf pdf-am ps ps-am \
 	tags uninstall uninstall-am
 
 
