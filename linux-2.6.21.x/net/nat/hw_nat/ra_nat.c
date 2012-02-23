@@ -431,23 +431,22 @@ int32_t PpeRxHandler(struct sk_buff * skb)
     }
 #endif
 
-    if( ((FOE_MAGIC_TAG(skb) == FOE_MAGIC_PCI) || (FOE_MAGIC_TAG(skb) == FOE_MAGIC_WLAN))){
+    /* PPE only can handle not over(under)sized packets */
+    if(!IS_SIZE_OK(skb))
+	return 1;
 
-	    /* PPE only can handle not over(under)sized packets */
-	    if(!IS_SIZE_OK(skb))
-		return 1;
-
-	    /* PPE only can handle IPv4/VLAN/IPv6/PPP packets */
-	    if(skb->protocol != htons(ETH_P_IP) &&
+    /* PPE only can handle IPv4/VLAN/IPv6/PPP packets */
+    if(skb->protocol != htons(ETH_P_IP) &&
 #if defined(CONFIG_RA_HW_NAT_IPV6)
-	       skb->protocol != htons(ETH_P_IPV6) &&
+       skb->protocol != htons(ETH_P_IPV6) &&
 #endif
-	       skb->protocol != htons(ETH_P_8021Q)  &&
-	       skb->protocol != htons(ETH_P_PPP_SES) &&
-	       skb->protocol != htons(ETH_P_PPP_DISC)) {
-		return 1;
-	    }
+       skb->protocol != htons(ETH_P_8021Q)  &&
+       skb->protocol != htons(ETH_P_PPP_SES) &&
+       skb->protocol != htons(ETH_P_PPP_DISC)) {
+	return 1;
+    }
 
+    if( ((FOE_MAGIC_TAG(skb) == FOE_MAGIC_PCI) || (FOE_MAGIC_TAG(skb) == FOE_MAGIC_WLAN))){
 #if defined  (CONFIG_RA_HW_NAT_WIFI)
 	    if(skb->dev == DstPort[DP_RA0]) { VirIfIdx=DP_RA0;}
 #if defined (CONFIG_RT2860V2_AP_MBSS)
