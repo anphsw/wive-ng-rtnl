@@ -64,4 +64,4 @@ int rw_rf_reg(int write, int reg, int *data)
 
         return 0;
 }
-
+EXPORT_SYMBOL(rw_rf_reg);

@@ -78,11 +78,14 @@
 #include "mtr_policy.h"
 #include "ac_policy.h"
 #include "util.h"
-#include "ra_rfrw.h"
 
 #if !defined (CONFIG_RA_HW_NAT_MANUAL_BIND)
 #define LAN_PORT_VLAN_ID	CONFIG_RA_HW_NAT_LAN_VLANID
 #define WAN_PORT_VLAN_ID	CONFIG_RA_HW_NAT_WAN_VLANID
+#endif
+
+#if defined (CONFIG_RALINK_RT3052)
+extern int rw_rf_reg(int write, int reg, int *data);
 #endif
 
 extern int (*ra_sw_nat_hook_rx) (struct sk_buff * skb);
