@@ -267,9 +267,9 @@ inline int ip_local_deliver(struct sk_buff *skb)
 			return 0;
 	}
 
-/* patch from Ralink to fix HW NAT LAN<->LAN binding */ 
+/* patch from Ralink to fix HW NAT LAN<->LAN binding */
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-        if (IS_SPACE_AVAILABLED(skb) && IS_MAGIC_TAG_VALID(skb)) {
+        if (IS_SPACE_AVAILABLED(skb) && IS_SIZE_OK(skb) && IS_MAGIC_TAG_VALID(skb)) {
                 FOE_ALG(skb)=1;
         }
 #endif
