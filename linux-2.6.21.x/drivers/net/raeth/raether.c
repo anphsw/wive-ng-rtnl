@@ -922,7 +922,6 @@ static int rt2880_eth_recv(struct net_device* dev)
 	unsigned long	RxProcessed;
 	int bReschedule = 0;
 	END_DEVICE* 	ei_local = netdev_priv(dev);
-	int mtu = dev->mtu;
 #if defined (CONFIG_RAETH_MULTIPLE_RX_RING)
 	int rx_ring_no=0;
 #endif
