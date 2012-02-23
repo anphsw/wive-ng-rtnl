@@ -1278,7 +1278,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
     		unsigned int nat_offload_enabled = 0, need_skip = 0;
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 		/* hardware nat support */
-		if (ra_sw_nat_hook_rx && ra_sw_nat_hook_tx)
+		if (ra_sw_nat_hook_rx != NULL && ra_sw_nat_hook_tx != NULL)
 		    nat_offload_enabled=1;
 #endif
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
