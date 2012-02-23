@@ -176,15 +176,6 @@ typedef struct
 #define FOE_AIS(skb)		    ((PdmaRxDescInfo4 *)(&(skb)->cb[40]))->AIS
 #endif
 
-#ifdef CONFIG_RAETH_JUMBOFRAME
-#define	MAX_RX_FR_LENGTH	    4096 /* limit size for rx packets 1Gb */
-#else
-#define	MAX_RX_FR_LENGTH	    1536 /* limit size for rx packets 100Mb */
-#endif
-
-/* check size packets before ppe process. fix process fragmented packets */
-#define IS_SIZE_OK(skb)		    ((skb->len > ETH_ZLEN) && (skb->len < MAX_RX_FR_LENGTH))
-
 #define IS_MAGIC_TAG_VALID(skb)	    ((FOE_MAGIC_TAG(skb) == FOE_MAGIC_PCI)	|| \
 				     (FOE_MAGIC_TAG(skb) == FOE_MAGIC_GE)	|| \
 				     (FOE_MAGIC_TAG(skb) == FOE_MAGIC_WLAN))

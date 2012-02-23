@@ -979,7 +979,7 @@
 7) Update radvd to 1.8.5 version.<br>
 8) Update transmission to 2.50 version.<br>
 9) Raeth fix memleak of pppoe send packet to ppe.<br>
-10) HW_NAT check sizes and types packets before process.<br>
+10) HW_NAT check types packets before process.<br>
 
 <br><br>
 <b>For support see:</b><br>

@@ -434,10 +434,6 @@ int32_t PpeRxHandler(struct sk_buff * skb)
     }
 #endif
 
-    /* PPE only can handle not over(under)sized packets */
-    if(!IS_SIZE_OK(skb))
-	return 1;
-
     /* PPE only can handle IPv4/VLAN/IPv6/PPP packets */
     if(skb->protocol != htons(ETH_P_IP) &&
 #if defined(CONFIG_RA_HW_NAT_IPV6)
