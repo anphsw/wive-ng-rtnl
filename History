@@ -980,6 +980,10 @@
 8) Update transmission to 2.50 version.<br>
 9) Raeth fix memleak of pppoe send packet to ppe.<br>
 10) HW_NAT check types packets before process.<br>
+11) HW_NAT do not touch foe table before check pkt.<br>
+12) Consolidate pppd options to one file.<br>
+13) Enable ATE+QA+DBG in wifi ap driver per default (need for test on fabric).<br>
+14) Enable telnet support and allow connect from lan per default (need for test on fabric).<br>
 
 <br><br>
 <b>For support see:</b><br>

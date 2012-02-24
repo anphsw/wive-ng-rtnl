@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
-# Busybox version: 1.19.0
-# Thu Aug 18 23:40:45 2011
+# Busybox version: 1.19.4
+# Fri Feb 24 16:08:28 2012
 #
 CONFIG_HAVE_DOT_CONFIG=y
 
@@ -811,9 +811,9 @@ CONFIG_ROUTE=y
 # CONFIG_TELNET is not set
 # CONFIG_FEATURE_TELNET_TTYPE is not set
 # CONFIG_FEATURE_TELNET_AUTOLOGIN is not set
-# CONFIG_TELNETD is not set
-# CONFIG_FEATURE_TELNETD_STANDALONE is not set
-# CONFIG_FEATURE_TELNETD_INETD_WAIT is not set
+CONFIG_TELNETD=y
+CONFIG_FEATURE_TELNETD_STANDALONE=y
+CONFIG_FEATURE_TELNETD_INETD_WAIT=y
 # CONFIG_TFTP is not set
 # CONFIG_TFTPD is not set
 # CONFIG_FEATURE_TFTP_GET is not set

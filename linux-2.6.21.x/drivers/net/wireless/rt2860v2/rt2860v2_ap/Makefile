@@ -159,6 +159,10 @@ rt2860v2_ap-objs +=  ../common/rt_rf.o
 rt2860v2_ap-objs +=  ../chips/rt305x.o
 endif
 
+ifeq ($(CONFIG_RT2860V2_AP_ATE),y)
+rt2860v2_ap-objs += ../common/rt_ate.o
+endif
+
 ###################
 #  CFLAGS
 ##################
@@ -169,7 +173,9 @@ EXTRA_CFLAGS += -DSTATS_COUNT_SUPPORT -DRESOURCE_PRE_ALLOC
 EXTRA_CFLAGS += -DMAT_SUPPORT
 
 #provide ATE testmode
-#EXTRA_CFLAGS += -DRALINK_ATE -DRALINK_28xx_QA -DCONFIG_RT2880_ATE_CMD_NEW -DNEW_TXCON
+ifeq ($(CONFIG_RT2860V2_AP_ATE),y)
+EXTRA_CFLAGS += -DRALINK_ATE -DRALINK_QA -DCONFIG_RT2880_ATE_CMD_NEW -DNEW_TXCON
+endif
 
 #provide some debug messages and iapp roaming daemon support
 #EXTRA_CFLAGS += -DRELASE_EXCLUDE -DIAPP_SUPPORT
@@ -180,10 +186,6 @@ EXTRA_CFLAGS += -DMAT_SUPPORT
 # provide busy time alarm mechanism
 # use the function to avoid to locate in some noise environments
 #EXTRA_CFLAGS += -DQLOAD_FUNC_BUSY_TIME_ALARM
-
-ifdef RALINK_ATE
-rt2860v2_ap-objs += ../common/rt_ate.o
-endif
 
 ifeq ($(CONFIG_RALINK_RT2880),y)
 EXTRA_CFLAGS += -DRT2880
