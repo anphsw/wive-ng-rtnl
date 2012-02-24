@@ -61,70 +61,6 @@ void MacReverse(uint8_t *Mac)
     }
 }
 
-#ifdef HWNAT_DEBUG
-int GetNext(char *src, int separator, char *  dest)
-{
-        char *  c;
-        int     len;
-
-        if ( (src == NULL) || (dest == NULL) ) {
-                return -1;
-        }
-
-        c = strchr(src, separator);
-        if (c == NULL) {
-                strcpy(dest, src);
-                return -1;
-        }
-        len = c - src;
-        strncpy(dest, src, len);
-        dest[len] = '\0';
-        return len + 1;
-}
-
-static inline int atoi(char *s)
-{
-        int i=0;
-        while (isdigit(*s)) {
-                i = i*10 + *(s++) - '0';
-        }
-        return i;
-}
-
-/* Convert IP address from Hex to string */
-uint8_t *Ip2Str(IN uint32_t Ip) 
-{
-    static uint8_t Buf[32];
-    uint8_t *ptr = (char *)&Ip;
-    uint8_t  c[4];
-
-    c[0] = *(ptr);
-    c[1] = *(ptr+1);
-    c[2] = *(ptr+2);
-    c[3] = *(ptr+3);
-    sprintf(Buf, "%d.%d.%d.%d", c[3], c[2], c[1], c[0]);
-    return Buf;
-}
-
-unsigned int Str2Ip(IN char *str)
-{
-    int             len;
-    char *          ptr = str;
-    char            buf[128];
-    unsigned char   c[4];
-    int             i;
-    for (i = 0; i < 3; ++i) {
-	if ((len = GetNext(ptr, '.', buf)) == -1) {
-	    return 1; /* parsing error */
-	}
-	c[i] = atoi(buf);
-	ptr += len;
-    }
-    c[3] = atoi(ptr);
-    return ((c[0]<<24) + (c[1]<<16) + (c[2]<<8) + c[3]);
-}
-#endif
-
 /* calculate ip address range */
 /* start_ip <= x < end_ip */
 void CalIpRange(uint32_t StartIp, uint32_t EndIp, uint8_t *M, uint8_t *E)
@@ -148,71 +84,7 @@ void CalIpRange(uint32_t StartIp, uint32_t EndIp, uint8_t *M, uint8_t *E)
 
 }
 
-#if 0
-/* update mss field in tcp header to avoid packet fragmentation */
-void ChangeTcpMssOpt(INOUT struct sk_buff *skb,
-	IN uint16_t mss, INOUT struct tcphdr *th)
-{
-    uint8_t *ptr;
-    uint16_t org_mss;
-    uint32_t sum;
-
-    uint32_t length=(th->doff*4)-sizeof(struct tcphdr);
-    ptr = (uint8_t *)(th + 1);
-
-    while(length>0) {
-	int opcode=*ptr++;
-	int opsize;
-
-	switch (opcode) {
-	case TCPOPT_EOL:
-	    return;
-	case TCPOPT_NOP:        /* Ref: RFC 793 section 3.1 */
-	    length--;
-	    continue;
-	default:
-	    opsize=*ptr++;
-	    if (opsize < 2) /* "silly options" */
-		return;
-	    if (opsize > length)
-		return; /* don't parse partial options */
-	    switch(opcode) {
-	    case TCPOPT_MSS:
-		if(opsize==TCPOLEN_MSS) {
-		    org_mss = ntohs(*(__u16 *)ptr);
-		    if (org_mss) {
-			// if original mss is bigger than new mss, overwrite it.
-			if(org_mss > mss){
-			    *(__u16 *)ptr = htons(mss);
-
-			    // Recalculate tcp checksum
-			    // Ref RFC1141(Incremental Updating of the Internet Checksum)
-			    sum = org_mss + (~mss & 0xffff);
-			    sum += ntohs(th->check);
-			    sum = (sum & 0xffff) + (sum>>16);
-			    th->check = htons(sum + (sum>>16));
-			}
-		    }
-		}
-		break;
-	    case TCPOPT_WINDOW:
-		break;
-	    case TCPOPT_TIMESTAMP:
-		break;
-	    case TCPOPT_SACK_PERM:
-		break;
-	    case TCPOPT_SACK:
-		break;
-	    };
-	    ptr+=opsize-2;
-	    length-=opsize;
-	};
-    }
-
-}
-#endif
-
-void RegModifyBits ( uint32_t Addr, uint32_t Data, 
+void RegModifyBits( uint32_t Addr, uint32_t Data, 
 		     uint32_t  Offset, uint32_t Len)
 {
     uint32_t Mask=0;
@@ -280,79 +152,66 @@ void FoeToOrgIpHdr(IN struct FoeEntry *foe_entry, OUT struct iphdr *iph)
 
 }
 
-/*
- * Recover SIP/DIP, SP/DP, SMAC/DMAC, VLANID and recalculate ip checksum
- */
-void PpeIpv4PktRebuild(struct sk_buff *skb, struct iphdr *iph, struct FoeEntry *foe_entry)
+#ifdef HWNAT_DEBUG
+int GetNext(char *src, int separator, char *  dest)
 {
-    struct udphdr *uh;
-    struct tcphdr *th;
-    struct ethhdr *eth;
-    struct FoeEntry entry;
-    
-    memcpy(&entry, foe_entry, sizeof(entry));
-   
-    //overwrite layer4 header
-    if(iph->protocol==IPPROTO_TCP) {
-	th = (struct tcphdr *) ((uint8_t *) iph + iph->ihl * 4);
-	th->check = CsumPart((th->source) ^ 0xffff, htons(entry.new_sport), th->check);
-	th->check = CsumPart((th->dest) ^ 0xffff, htons(entry.new_dport), th->check);
-	th->check = CsumPart(~(iph->saddr), htonl(entry.new_sip), th->check);
-	th->check = CsumPart(~(iph->daddr), htonl(entry.new_dip), th->check);
-	th->source = htons(entry.new_sport);
-	th->dest = htons(entry.new_dport);
-    }else if(iph->protocol==IPPROTO_UDP) {
-	uh = (struct udphdr *) ((uint8_t *) iph + iph->ihl * 4);
-	uh->check = CsumPart((uh->source)^0xffff, htons(entry.new_sport), uh->check);
-	uh->check = CsumPart((uh->dest)^0xffff, htons(entry.new_dport), uh->check);
-	uh->check = CsumPart(~(iph->saddr), htonl(entry.new_sip), uh->check);
-	uh->check = CsumPart(~(iph->daddr), htonl(entry.new_dip), uh->check);
-	uh->source = htons(entry.new_sport);
-	uh->dest = htons(entry.new_dport);
-    } 
+        char *  c;
+        int     len;
 
-    //overwrite layer3 header
-    iph->saddr = htonl(entry.new_sip);
-    iph->daddr = htonl(entry.new_dip);
-    iph->check = 0;   
-    iph->check = ip_fast_csum((unsigned char *) (iph), iph->ihl);
+        if ( (src == NULL) || (dest == NULL) ) {
+                return -1;
+        }
 
-    //overwrite vlan header
-    if (entry.bfib1.v1==INSERT) { 
-	skb_push(skb, VLAN_HLEN);
-	/* vlan_type(0x8100) + vlan id + eth_type(0x0800) */
-	*(uint16_t *) ((skb)->data) = htons(entry.vlan1);
-	*(uint16_t *) ((skb)->data - 2) = htons(ETH_P_8021Q);
-    }
-
-    //overwrite layer2 header
-    skb_push(skb, ETH_HLEN);
-    eth=(struct ethhdr *)skb->data;
-    FoeGetMacInfo(eth->h_dest, entry.dmac_hi);
-    FoeGetMacInfo(eth->h_source, entry.smac_hi);
+        c = strchr(src, separator);
+        if (c == NULL) {
+                strcpy(dest, src);
+                return -1;
+        }
+        len = c - src;
+        strncpy(dest, src, len);
+        dest[len] = '\0';
+        return len + 1;
 }
 
-/*
- * Recover SMAC/DMAC, VLANID
- */
-void PpeIpv6PktRebuild(struct sk_buff *skb, struct FoeEntry *foe_entry)
+static inline int atoi(char *s)
 {
-    struct ethhdr *eth;
-    struct FoeEntry entry;
-    
-    memcpy(&entry, foe_entry, sizeof(entry));
-   
-    //overwrite vlan header
-    if (entry.bfib1.v1==INSERT) { 
-	skb_push(skb, VLAN_HLEN);
-	/* vlan_type(0x8100) + vlan id + eth_type(0x0800) */
-	*(uint16_t *) ((skb)->data) = htons(entry.vlan1);
-	*(uint16_t *) ((skb)->data - 2) = htons(ETH_P_8021Q);
-    }
-
-    //overwrite layer2 header
-    skb_push(skb, ETH_HLEN);
-    eth=(struct ethhdr *)skb->data;
-    FoeGetMacInfo(eth->h_dest, entry.dmac_hi);
-    FoeGetMacInfo(eth->h_source, entry.smac_hi);
+        int i=0;
+        while (isdigit(*s)) {
+                i = i*10 + *(s++) - '0';
+        }
+        return i;
 }
+
+/* Convert IP address from Hex to string */
+uint8_t *Ip2Str(IN uint32_t Ip) 
+{
+    static uint8_t Buf[32];
+    uint8_t *ptr = (char *)&Ip;
+    uint8_t  c[4];
+
+    c[0] = *(ptr);
+    c[1] = *(ptr+1);
+    c[2] = *(ptr+2);
+    c[3] = *(ptr+3);
+    sprintf(Buf, "%d.%d.%d.%d", c[3], c[2], c[1], c[0]);
+    return Buf;
+}
+
+unsigned int Str2Ip(IN char *str)
+{
+    int             len;
+    char *          ptr = str;
+    char            buf[128];
+    unsigned char   c[4];
+    int             i;
+    for (i = 0; i < 3; ++i) {
+	if ((len = GetNext(ptr, '.', buf)) == -1) {
+	    return 1; /* parsing error */
+	}
+	c[i] = atoi(buf);
+	ptr += len;
+    }
+    c[3] = atoi(ptr);
+    return ((c[0]<<24) + (c[1]<<16) + (c[2]<<8) + c[3]);
+}
+#endif

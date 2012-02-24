@@ -1425,7 +1425,7 @@ static void PpeSetFoeGloCfgEbl(uint32_t Ebl)
 
 }
 
-#ifndef CONFIG_RALINK_RT3052_MP
+#ifndef CONFIG_RALINK_RT3052_MP2
 /*
  * - VLAN->UP: Incoming VLAN Priority to User Priority (Fixed)
  * - DSCP->UP: Incoming DSCP to User Priority
@@ -1550,7 +1550,7 @@ static int32_t PpeEngStart(void)
 	/* Set PPE Global Configuration */
 	PpeSetFoeGloCfgEbl(1);
 
-#ifndef CONFIG_RALINK_RT3052_MP
+#ifdef CONFIG_RALINK_RT3052_MP2
 	/* Set User Priority related register */
 	PpeSetUserPriority();
 #endif

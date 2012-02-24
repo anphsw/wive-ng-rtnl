@@ -292,13 +292,16 @@ config  RA_HW_NAT_IPV6
 config  RA_HW_NAT_ACL2UP_HELPER
 	bool "ACL -> UP helper"
 	depends on RA_HW_NAT
+	default n
 	help
 	"use ACL rule to get user priority"
 
 config  RA_HW_NAT_WIFI
 	depends on RA_HW_NAT
+	default n
 	bool "Speed up WiFi traffic by HNAT"
 
 config  RA_HW_NAT_MINIMAL
 	depends on RA_HW_NAT
+	default y
 	bool "Only minimal hw_nat code support. No ACL/AC/MTR"

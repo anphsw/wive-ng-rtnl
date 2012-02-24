@@ -984,6 +984,8 @@
 12) Consolidate pppd options to one file.<br>
 13) Enable ATE+QA+DBG in wifi ap driver per default (need for test on fabric).<br>
 14) Enable telnet support and allow connect from lan per default (need for test on fabric).<br>
+13) HW_NAT code cleanup and use hw_nat minimal (disable unused functions).<br>
+14) HW_NAT disable use ppe2set user priority for 3052MP2 chips (this is upstream bug).<br>
 
 <br><br>
 <b>For support see:</b><br>
