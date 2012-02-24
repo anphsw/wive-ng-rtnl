@@ -175,7 +175,6 @@ echo "==================START-PPTP-CLIENT======================="
 	vpnLCPInterval=30
     fi
 
-    cp -f /etc/ppp/options.template $OPTFILE
     printf "
     nomp
     lcp-echo-failure  $vpnLCPFailure
@@ -183,7 +182,7 @@ echo "==================START-PPTP-CLIENT======================="
     $vpnEnableLCP
     $PAP
     $CHAP
-    " >> $OPTFILE
+    " > $OPTFILE
 
     $LOG "PPTP connect to $SERVER ....."
     $LOG "Start pppd"

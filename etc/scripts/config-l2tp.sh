@@ -186,10 +186,6 @@ echo "==================START-L2TP-CLIENT======================="
 	vpnLCPInterval=30
     fi
 
-    # clear all configs
-    echo > $ppp/l2tpd.conf
-    echo > $ppp/options.l2tp
-
     printf "[global]
     access control = yes
     rand source = dev
@@ -206,7 +202,7 @@ echo "==================START-L2TP-CLIENT======================="
     rx bps = 100000000
     tunnel rws = 8
     pppoptfile = $ppp/options.l2tp
-    " >> $ppp/l2tpd.conf
+    " > $ppp/l2tpd.conf
 
     printf "
     connect /bin/true
@@ -226,7 +222,7 @@ echo "==================START-L2TP-CLIENT======================="
     lcp-echo-interval $vpnLCPInterval
     $vpnEnableLCP
     ifname $vpn_if
-    " >> $ppp/options.l2tp
+    " > $ppp/options.l2tp
 
     printf "$vpnUser * $vpnPassword" >> $ppp/chap-secrets
     printf "$vpnUser * $vpnPassword" >> $ppp/pap-secrets

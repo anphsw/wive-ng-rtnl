@@ -122,7 +122,6 @@ if [ "$vpnLCPFailure" = "" ] || [ "$vpnLCPInterval" = "" ]; then
     vpnLCPInterval=30
 fi
 
-cp -f /etc/ppp/options.template $OPTFILE
 printf "
 lock
 nomp
@@ -131,7 +130,7 @@ lcp-echo-interval $vpnLCPInterval
 $vpnEnableLCP
 $PAP
 $CHAP
-" >> $OPTFILE
+" > $OPTFILE
 
 # Standard PPP options we always use
 PPP_STD_OPTIONS="noipdefault noauth persist $vpnPeerDNS ifname $vpn_if -detach $vpnDebug"
