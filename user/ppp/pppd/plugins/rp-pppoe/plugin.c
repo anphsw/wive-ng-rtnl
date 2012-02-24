@@ -307,7 +307,16 @@ PPPoEDevnameHook(char *cmd, char **argv, int doit)
      * Take any otherwise-unrecognized option as a possible device name,
      * and test if it is the name of a network interface with a
      * hardware address whose sa_family is ARPHRD_ETHER.
+     *
+     * ILC -	If devnam is already set, don't do this again. This solves a
+     *		performance problem by avoiding unnecessary modprobe's as
+     *		the kernel services the below check for 'IFINDEX' with whatever
+     *		random string pppd feeds us from the command line. Works best
+     *		when the PPPD command line is like "pppd plugin rp-pppoe.so nic-ethX..." 
      */
+     
+    if ( devnam[0] ) { return 0; }
+     
     if (strlen(cmd) > 4 && !strncmp(cmd, "nic-", 4)) {
 	/* Strip off "nic-" */
 	cmd += 4;
