@@ -1550,7 +1550,7 @@ static int32_t PpeEngStart(void)
 	/* Set PPE Global Configuration */
 	PpeSetFoeGloCfgEbl(1);
 
-#ifdef CONFIG_RALINK_RT3052_MP2
+#ifndef CONFIG_RALINK_RT3052_MP2
 	/* Set User Priority related register */
 	PpeSetUserPriority();
 #endif
