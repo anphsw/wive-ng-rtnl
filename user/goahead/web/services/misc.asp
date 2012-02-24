@@ -552,7 +552,7 @@ function displayServiceStatus()
 <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
 </tr>
 <tr id="xupnpd">
-<td class="head">XUPNPD r283 support</td>
+<td class="head">UPNP media server (XUPNPD)</td>
 <td>
 	<select name="xupnpdEnbl" class="half">
 		<option value="0">Disable</option>
