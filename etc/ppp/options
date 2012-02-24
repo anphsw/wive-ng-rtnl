@@ -1,16 +1,16 @@
-#for all pppd sessions options
+# Options for all pppd sessions
 lock
 noauth
 noipdefault
 nolog
 noktune
 
-#Options for redial
+# Redial options
 idle 0
 maxfail 0
 holdoff 5
 
-#Disable ARP proxy and IPX protocol
+# Disable ARP proxy and IPX protocol
 noproxyarp
 noipx
 
@@ -25,5 +25,6 @@ nodeflate
 # Turn off EAP auth protocol support
 refuse-eap
 
-#minimum autoincrement pppX name
+# Minimum autoincrement pppX name
+# Need for fix vpn ifname to ppp0
 minunit 1
