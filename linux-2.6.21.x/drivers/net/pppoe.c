@@ -103,36 +103,31 @@ static const struct ppp_channel_ops pppoe_chan_ops;
 
 static inline int cmp_2_addr(struct pppoe_addr *a, struct pppoe_addr *b)
 {
-	return (a->sid == b->sid &&
-		(memcmp(a->remote, b->remote, ETH_ALEN) == 0));
+	return a->sid == b->sid && !memcmp(a->remote, b->remote, ETH_ALEN);
 }
 
-static inline int cmp_addr(struct pppoe_addr *a, unsigned long sid, unsigned char *addr)
+static inline int cmp_addr(struct pppoe_addr *a, __be16 sid, char *addr)
 {
-	return (a->sid == sid &&
-		(memcmp(a->remote,addr,ETH_ALEN) == 0));
+	return a->sid == sid && !memcmp(a->remote, addr, ETH_ALEN);
 }
 
-#if 8%PPPOE_HASH_BITS
+#if 8 % PPPOE_HASH_BITS
 #error 8 must be a multiple of PPPOE_HASH_BITS
 #endif
 
-static int hash_item(unsigned int sid, unsigned char *addr)
+static int hash_item(__be16 sid, unsigned char *addr)
 {
 	unsigned char hash = 0;
 	unsigned int i;
 
-	for (i = 0 ; i < ETH_ALEN ; i++) {
+	for (i = 0; i < ETH_ALEN; i++)
 		hash ^= addr[i];
-	}
-	for (i = 0 ; i < sizeof(sid_t)*8 ; i += 8 ){
-		hash ^= sid>>i;
-	}
-	for (i = 8 ; (i>>=1) >= PPPOE_HASH_BITS ; ) {
-		hash ^= hash>>i;
-	}
+	for (i = 0; i < sizeof(sid_t) * 8; i += 8)
+		hash ^= (__force __u32)sid >> i;
+	for (i = 8; (i >>= 1) >= PPPOE_HASH_BITS;)
+		hash ^= hash >> i;
 
-	return hash & ( PPPOE_HASH_SIZE - 1 );
+	return hash & PPPOE_HASH_MASK;
 }
 
 /* zeroed because its in .bss */
