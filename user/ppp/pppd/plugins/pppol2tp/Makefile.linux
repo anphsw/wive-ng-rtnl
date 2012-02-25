@@ -1,4 +1,6 @@
 CFLAGS	+= -I. -I../.. -I../../../include $(COPTS)
+# Uncoment this to enable check kernel l2tp support
+#CFLAGS	+= -DL2TP_CHECK_KERNEL
 LDFLAGS	= -shared
 INSTALL	= install
 

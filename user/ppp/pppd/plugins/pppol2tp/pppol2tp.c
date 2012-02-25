@@ -85,6 +85,7 @@ void (*pppol2tp_send_accm_hook)(int tunnel_id, int session_id,
 /* Hook provided to allow other plugins to handle IP up/down */
 void (*pppol2tp_ip_updown_hook)(int tunnel_id, int session_id, int up) = NULL;
 
+
 static option_t pppol2tp_options[] = {
 	{ "pppol2tp", o_special, &setdevname_pppol2tp,
 	  "FD for PPPoL2TP socket", OPT_DEVNAM | OPT_A2STRVAL,
@@ -121,8 +122,11 @@ static option_t pppol2tp_options[] = {
 static int setdevname_pppol2tp(char **argv)
 {
 	struct sockaddr_pppol2tp sax;
-	int len = sizeof(sax);
-
+	socklen_t len = sizeof(sax);
+#if L2TP_CHECK_KERNEL
+	int tmp;
+	unsigned int tmp_len = sizeof(tmp);
+#endif
 	if (device_got_set)
 		return 0;
 
@@ -137,14 +141,16 @@ static int setdevname_pppol2tp(char **argv)
 		fatal("Socket is not a PPPoL2TP socket");
 	}
 
+#if L2TP_CHECK_KERNEL
 	/* Do a test getsockopt() to ensure that the kernel has the necessary
 	 * feature available.
 	 * driver returns -ENOTCONN until session established!
+	*/
 	if (getsockopt(pppol2tp_fd, SOL_PPPOL2TP, PPPOL2TP_SO_DEBUG,
 		       &tmp, &tmp_len) < 0) {
 		fatal("PPPoL2TP kernel driver not installed");
-	} */
-
+	}
+#endif
 	/* Setup option defaults. Compression options are disabled! */
 
 	modem = 0;

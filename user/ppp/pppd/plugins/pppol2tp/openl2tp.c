@@ -56,26 +56,25 @@
 extern int pppol2tp_tunnel_id;
 extern int pppol2tp_session_id;
 
-extern void (*pppol2tp_send_accm_hook)(int tunnel_id, int session_id,
-				       uint32_t send_accm, uint32_t recv_accm);
+extern void (*pppol2tp_send_accm_hook)(int tunnel_id, int session_id, uint32_t send_accm, uint32_t recv_accm);
 extern void (*pppol2tp_ip_updown_hook)(int tunnel_id, int session_id, int up);
 
 const char pppd_version[] = VERSION;
 
 static int openl2tp_fd = -1;
 
-static void (*old_pppol2tp_send_accm_hook)(int tunnel_id, int session_id,
-					   uint32_t send_accm,
-					   uint32_t recv_accm) = NULL;
-static void (*old_pppol2tp_ip_updown_hook)(int tunnel_id, int session_id,
-					   int up) = NULL;
-static void (*old_multilink_join_hook)(void) = NULL;
+static void (*old_pppol2tp_send_accm_hook)(int tunnel_id, int session_id, uint32_t send_accm, uint32_t recv_accm) = NULL;
+static void (*old_pppol2tp_ip_updown_hook)(int tunnel_id, int session_id, int up) = NULL;
+static int (*old_new_phase_hook)(int phase) = NULL;
 
 /*****************************************************************************
- * OpenL2TP interface.
+ * OpenL2TP RPC interface.
  * We send a PPP_ACCM_IND to openl2tpd to report ACCM values and
  * SESSION_PPP_UPDOWN_IND to indicate when the PPP link comes up or
  * goes down.
+ * Async RPC is used so that we don't stall waiting for openl2tpd to send a 
+ * reply. Since we're running on the same host as openl2tpd, UDP is reliable,
+ * hence there's no need to worry about whether our message arrives.
  *****************************************************************************/
 
 static int openl2tp_client_create(void)
@@ -93,8 +92,7 @@ static int openl2tp_client_create(void)
 		addr.sun_family = AF_UNIX;
 		strcpy(&addr.sun_path[0], OPENL2TP_EVENT_SOCKET_NAME);
 
-		result = connect(openl2tp_fd, (struct sockaddr *) &addr,
-				 sizeof(addr));
+		result = connect(openl2tp_fd, (struct sockaddr *) &addr, sizeof(addr));
 		if (result < 0) {
 			error("openl2tp connection connect: %m");
 			return -ENOTCONN;
@@ -104,8 +102,7 @@ static int openl2tp_client_create(void)
 	return 0;
 }
 
-static void openl2tp_send_accm_ind(int tunnel_id, int session_id,
-				   uint32_t send_accm, uint32_t recv_accm)
+static void openl2tp_send_accm_ind(int tunnel_id, int session_id, uint32_t send_accm, uint32_t recv_accm)
 {
 	int result;
 	uint8_t buf[OPENL2TP_MSG_MAX_LEN];
@@ -147,21 +144,18 @@ static void openl2tp_send_accm_ind(int tunnel_id, int session_id,
 	memcpy(&tlv->tlv_value[0], &accm, tlv->tlv_len);
 	msg->msg_len += sizeof(*tlv) + ALIGN32(tlv->tlv_len);
 
-	result = send(openl2tp_fd, msg, sizeof(*msg) + msg->msg_len,
-		      MSG_NOSIGNAL);
+	result = send(openl2tp_fd, msg, sizeof(*msg) + msg->msg_len, MSG_NOSIGNAL);
 	if (result < 0) {
 		error("openl2tp send: %m");
 	}
 	if (result != (sizeof(*msg) + msg->msg_len)) {
-		warn("openl2tp send: unexpected byte count %d, expected %d",
-		     result, sizeof(msg) + msg->msg_len);
+		warn("openl2tp send: unexpected byte count %d, expected %d", result, sizeof(msg) + msg->msg_len);
 	}
 	dbglog("openl2tp send: sent PPP_ACCM_IND, %d bytes", result);
 
 out:
 	if (old_pppol2tp_send_accm_hook != NULL) {
-		(*old_pppol2tp_send_accm_hook)(tunnel_id, session_id,
-					       send_accm, recv_accm);
+		(*old_pppol2tp_send_accm_hook)(tunnel_id, session_id, send_accm, recv_accm);
 	}
 	return;
 }
@@ -231,14 +225,12 @@ static void openl2tp_ppp_updown_ind(int tunnel_id, int session_id, int up)
 		msg->msg_len += sizeof(*tlv) + ALIGN32(tlv->tlv_len);
 	}
 
-	result = send(openl2tp_fd, msg, sizeof(*msg) + msg->msg_len,
-		      MSG_NOSIGNAL);
+	result = send(openl2tp_fd, msg, sizeof(*msg) + msg->msg_len, MSG_NOSIGNAL);
 	if (result < 0) {
 		error("openl2tp send: %m");
 	}
 	if (result != (sizeof(*msg) + msg->msg_len)) {
-		warn("openl2tp send: unexpected byte count %d, expected %d",
-		     result, sizeof(msg) + msg->msg_len);
+		warn("openl2tp send: unexpected byte count %d, expected %d", result, sizeof(msg) + msg->msg_len);
 	}
 	dbglog("openl2tp send: sent PPP_UPDOWN_IND, %d bytes", result);
 
@@ -264,17 +256,30 @@ out:
  * openl2tpd needs the SESSION_PPP_UPDOWN_IND for all interfaces of a
  * PPP bundle, we must fake the event.
  *
- * We use the ip_multilink_join_hook to hear when an interface joins a
- * multilink bundle.
+ * Unfortunately, pppd provides no easy way to tell that the new link
+ * successfully attaches to the bundle. We use its new_phase_hook to
+ * watch state changes. If the new interface reaches PHASE_NETWORK,
+ * then it is up. However, pppd sets variables that we need to test
+ * _after_ it reaches PHASE_NETWORK, so we use a timer to check the
+ * variables. This is messy. It would be much easier if pppd exported
+ * a hook for multilink interface up.
  *****************************************************************************/
 
-static void openl2tp_multilink_join_ind(void)
+static void openl2tp_multilink_check(void *p)
 {
 	if (doing_multilink && !multilink_master) {
 		/* send event only if not master */
-		openl2tp_ppp_updown_ind(pppol2tp_tunnel_id,
-					pppol2tp_session_id, 1);
+		openl2tp_ppp_updown_ind(pppol2tp_tunnel_id, pppol2tp_session_id, 1);
 	}
+}
+
+static int openl2tp_new_phase_hook(int phase)
+{
+	if ((phase == PHASE_NETWORK) && multilink) {
+		TIMEOUT(openl2tp_multilink_check, NULL, 1);
+	}
+
+	return 0;
 }
 
 /*****************************************************************************
@@ -289,7 +294,7 @@ void plugin_init(void)
 	old_pppol2tp_ip_updown_hook = pppol2tp_ip_updown_hook;
 	pppol2tp_ip_updown_hook = openl2tp_ppp_updown_ind;
 
-	old_multilink_join_hook = multilink_join_hook;
-	multilink_join_hook = openl2tp_multilink_join_ind;
+	old_new_phase_hook = new_phase_hook;
+	new_phase_hook = openl2tp_new_phase_hook;
 }
 

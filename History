@@ -988,6 +988,7 @@
 14) HW_NAT disable use ppe2set user priority for 3052MP2 chips (this is upstream bug).<br>
 15) Reduce arp latency.<br>
 16) PPPOE plugin set dev name only once.<br>
+17) Update l2tp pppd plugin to 1.8 version from openl2tp project.<br>
 
 <br><br>
 <b>For support see:</b><br>
