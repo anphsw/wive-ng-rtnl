@@ -56,11 +56,7 @@ pamConvFunc(int num_msg,
 	struct UserDataS* userDatap = (struct UserDataS*) appdata_ptr;
 	unsigned int msg_len = 0;
 	unsigned int i = 0;
-
-	const char* message = (*msg)->msg;
-
-	/* make a copy we can strip */
-	char * compare_message = m_strdup(message);
+	char * compare_message = NULL;
 
 	TRACE(("enter pamConvFunc"))
 
@@ -72,13 +68,8 @@ pamConvFunc(int num_msg,
 		return PAM_CONV_ERR;
 	}
 	
-	TRACE(("msg_style is %d", (*msg)->msg_style))
-	if (compare_message) {
-		TRACE(("message is '%s'", compare_message))
-	} else {
-		TRACE(("null message"))
-	}
-
+	/* make a copy we can strip */
+	compare_message = m_strdup((*msg)->msg);
 
 	/* Make the string lowercase. */
 	msg_len = strlen(compare_message);
