@@ -90,7 +90,8 @@
 #endif
 
 #define PPPOE_HASH_BITS 4
-#define PPPOE_HASH_SIZE (1<<PPPOE_HASH_BITS)
+#define PPPOE_HASH_SIZE (1 << PPPOE_HASH_BITS)
+#define PPPOE_HASH_MASK	(PPPOE_HASH_SIZE - 1)
 
 static int pppoe_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg);
 static int pppoe_xmit(struct ppp_channel *chan, struct sk_buff *skb);
