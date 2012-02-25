@@ -1002,9 +1002,9 @@ out:
 static __inline__ struct pppox_sock *pppoe_get_idx(loff_t pos)
 {
 	struct pppox_sock *po = NULL;
-	int i = 0;
+	int i;
 
-	for (; i < PPPOE_HASH_SIZE; i++) {
+	for (i = 0; i < PPPOE_HASH_SIZE; i++) {
 		po = item_hash_table[i];
 		while (po) {
 			if (!pos--)
