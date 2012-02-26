@@ -123,8 +123,6 @@ if [ "$vpnLCPFailure" = "" ] || [ "$vpnLCPInterval" = "" ]; then
 fi
 
 printf "
-lock
-nomp
 lcp-echo-failure  $vpnLCPFailure
 lcp-echo-interval $vpnLCPInterval
 $vpnEnableLCP

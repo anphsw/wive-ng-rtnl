@@ -176,7 +176,6 @@ echo "==================START-PPTP-CLIENT======================="
     fi
 
     printf "
-    nomp
     lcp-echo-failure  $vpnLCPFailure
     lcp-echo-interval $vpnLCPInterval
     $vpnEnableLCP

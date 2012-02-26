@@ -205,15 +205,8 @@ echo "==================START-L2TP-CLIENT======================="
     " > $ppp/l2tpd.conf
 
     printf "
-    connect /bin/true
-    idle 0
-    maxfail 0
-    refuse-eap
     $PAP
     $CHAP
-    noipx
-    nomp
-    noproxyarp
     $vpnMTU
     $vpnMRU
     $vpnMPPE

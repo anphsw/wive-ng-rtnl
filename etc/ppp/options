@@ -15,6 +15,7 @@ noproxyarp
 noipx
 
 # Turn off compression protocols we know won't be used
+nomp
 novj
 novjccomp
 nopcomp
