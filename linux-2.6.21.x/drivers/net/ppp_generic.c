@@ -1577,32 +1577,28 @@ void ppp_stat_add(struct ppp_channel *chan, struct sk_buff *skb) {
 	pch->ppp->stats.rx_bytes += skb->len;
 }
 
-unsigned int dbg_print = 0;
-unsigned int dbg_max_print = 0;
-
 void
 ppp_input(struct ppp_channel *chan, struct sk_buff *skb)
 {
 	struct channel *pch = chan->ppp;
 	unsigned int proto;
 
-	if (pch == 0 || skb->len == 0) {
+	if (!pch) {
 		kfree_skb(skb);
 		return;
 	}
 
-	proto = PPP_PROTO(skb);
-	if(dbg_print)
-	{
-		if(proto == 0x80fd)
-			dbg_print = 0;
-
-		++dbg_max_print;
-		if(dbg_max_print > 10)
-			dbg_print = 0;
+	read_lock_bh(&pch->upl);
+	if (!pskb_may_pull(skb, 2)) {
+		kfree_skb(skb);
+		if (pch->ppp) {
+			++pch->ppp->dev->stats.rx_length_errors;
+			ppp_receive_error(pch->ppp);
+		}
+		goto done;
 	}
 
-	read_lock_bh(&pch->upl);
+	proto = PPP_PROTO(skb);
 	if (pch->ppp == 0 || proto >= 0xc000 || proto == PPP_CCPFRAG) {
 		/* put it on the channel queue */
 		skb_queue_tail(&pch->file.rq, skb);
@@ -1616,6 +1612,7 @@ ppp_input(struct ppp_channel *chan, struct sk_buff *skb)
 	} else {
 		ppp_do_recv(pch->ppp, skb, pch);
 	}
+done:
 	read_unlock_bh(&pch->upl);
 }
 
@@ -1648,7 +1645,8 @@ ppp_input_error(struct ppp_channel *chan, int code)
 static void
 ppp_receive_frame(struct ppp *ppp, struct sk_buff *skb, struct channel *pch)
 {
-	if (pskb_may_pull(skb, 2)) {
+	/* note: a 0-length skb is used as an error indication */
+	if (skb->len > 0) {
 #ifdef CONFIG_PPP_MULTILINK
 		/* XXX do channel-level decompression here */
 		if (PPP_PROTO(skb) == PPP_MP)
@@ -1656,15 +1654,10 @@ ppp_receive_frame(struct ppp *ppp, struct sk_buff *skb, struct channel *pch)
 		else
 #endif /* CONFIG_PPP_MULTILINK */
 			ppp_receive_nonmp_frame(ppp, skb);
-		return;
+	} else {
+		kfree_skb(skb);
+		ppp_receive_error(ppp);
 	}
-
-	if (skb->len > 0)
-		/* note: a 0-length skb is used as an error indication */
-		++ppp->stats.rx_length_errors;
-
-	kfree_skb(skb);
-	ppp_receive_error(ppp);
 }
 
 static void
