@@ -58,7 +58,7 @@ case "$1" in
 	    # Reset switch to uplink touch
 	    $LOG "Restart WAN switch port."
 	    /etc/scripts/config-vlan.sh WWWWW
-	else
+	elif [ "$OperationMode" = "2" ]; then
 	    # Try reconnect at lease failed
 	    $LOG "Wait connect and reconnect to AP if need."
 	    wait_connect reconnect
