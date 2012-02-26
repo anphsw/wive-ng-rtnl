@@ -87,4 +87,7 @@ export PPP_IFACE PPP_TTY PPP_SPEED PPP_LOCAL PPP_REMOTE PPP_IPPARAM
 if [ -d /etc/ppp/ip-down.d/ -a -x /bin/run-parts ]; then
     run-parts /etc/ppp/ip-down.d/
 fi
+    #remove exported vpn_if_name
+    rm -f /tmp/vpn_if_name
+
 $LOG "Down is OK"

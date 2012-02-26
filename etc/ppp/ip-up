@@ -14,6 +14,9 @@ LOG="logger -t pppd"
 eval `nvram_buf_get 2860 lan_ipaddr lan_netmask Lan2Enabled lan2_ipaddr lan2_netmask \
 		vpnNAT vpnDGW vpnPeerDNS use_snat PortForwardEnable upnpEnabled chilli_net`
 
+    #export vpn_if_name
+    echo "$PPP_IFACE" > /tmp/vpn_if_name
+
     #if wan ip not get
     if [ "$PPP_LOCAL" = "" ]; then
 	use_snat=0

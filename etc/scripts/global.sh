@@ -56,6 +56,16 @@ getLanIfName() {
     fi
 }
 
+# VPN interface name -> $vpn_if
+getVpnIfName() {
+    if [ -f /tmp/vpn_if_name ]; then
+	if_tmp=`grep -v "^$" < /tmp/vpn_if_name`
+	if [ "$if_tmp" != "" ]; then
+	    vpn_if="$if_tmp"
+	fi
+    fi
+}
+
 # WAN interface name -> $wan_if
 getWanIfName() {
     # phys wan name
@@ -242,6 +252,7 @@ killall_vpn() {
 
 # get params
 getLanIfName
+getVpnIfName
 getWanIfName
 getWanIpaddr
 get_txqlen
