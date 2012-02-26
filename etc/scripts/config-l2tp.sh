@@ -214,7 +214,7 @@ echo "==================START-L2TP-CLIENT======================="
     lcp-echo-failure  $vpnLCPFailure
     lcp-echo-interval $vpnLCPInterval
     $vpnEnableLCP
-    ifname $vpn_if
+    ifname $vpn_def_if
     " > $ppp/options.l2tp
 
     printf "$vpnUser * $vpnPassword" >> $ppp/chap-secrets

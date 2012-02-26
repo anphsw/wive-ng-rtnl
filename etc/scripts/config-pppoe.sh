@@ -131,7 +131,7 @@ $CHAP
 " > $OPTFILE
 
 # Standard PPP options we always use
-PPP_STD_OPTIONS="noipdefault noauth persist $vpnPeerDNS ifname $vpn_if -detach $vpnDebug"
+PPP_STD_OPTIONS="noipdefault noauth persist $vpnPeerDNS ifname $vpn_def_if -detach $vpnDebug"
 # PPPoE invocation
 PPPOE_CMD="$vpnInterface $vpnServer $vpnService user $vpnUser password $vpnPassword"
 
