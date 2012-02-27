@@ -2114,11 +2114,8 @@ static int __mkroute_output(struct rtable **result,
 
 
 	rth = dst_alloc(&ipv4_dst_ops);
-	if (!rth) {
-		rcu_read_unlock();
+	if (!rth)
 		return -ENOBUFS;
-	}
-	rcu_read_unlock();
 
 	atomic_set(&rth->u.dst.__refcnt, 1);
 	rth->u.dst.flags= DST_HOST;
