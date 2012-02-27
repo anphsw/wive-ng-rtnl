@@ -2085,10 +2085,8 @@ static int __mkroute_output(struct rtable **result,
 	if (dev_out->flags & IFF_LOOPBACK)
 		flags |= RTCF_LOCAL;
 
-	rcu_read_lock();
 	in_dev = __in_dev_get_rcu(dev_out);
 	if (!in_dev) {
-		rcu_read_unlock();
 		return -EINVAL;
 	}
 	if (res->type == RTN_BROADCAST) {
