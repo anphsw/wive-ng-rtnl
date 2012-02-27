@@ -2086,9 +2086,9 @@ static int __mkroute_output(struct rtable **result,
 		flags |= RTCF_LOCAL;
 
 	in_dev = __in_dev_get_rcu(dev_out);
-	if (!in_dev) {
+	if (!in_dev)
 		return -EINVAL;
-	}
+
 	if (res->type == RTN_BROADCAST) {
 		flags |= RTCF_BROADCAST | RTCF_LOCAL;
 		if (res->fi) {
