@@ -2085,10 +2085,12 @@ static int __mkroute_output(struct rtable **result,
 	if (dev_out->flags & IFF_LOOPBACK)
 		flags |= RTCF_LOCAL;
 
+	rcu_read_lock();
 	in_dev = __in_dev_get_rcu(dev_out);
-	if (!in_dev)
+	if (!in_dev) {
+		rcu_read_unlock();
 		return -EINVAL;
-
+	}
 	if (res->type == RTN_BROADCAST) {
 		flags |= RTCF_BROADCAST | RTCF_LOCAL;
 		if (res->fi) {
@@ -2112,8 +2114,11 @@ static int __mkroute_output(struct rtable **result,
 
 
 	rth = dst_alloc(&ipv4_dst_ops);
-	if (!rth)
+	if (!rth) {
+		rcu_read_unlock();
 		return -ENOBUFS;
+	}
+	rcu_read_unlock();
 
 	atomic_set(&rth->u.dst.__refcnt, 1);
 	rth->u.dst.flags= DST_HOST;
