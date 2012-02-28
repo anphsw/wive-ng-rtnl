@@ -970,7 +970,7 @@
 
 <br>
 <b>2.1.x</b><br>
-1) Update xupnpd to r291.<br>
+1) Update xupnpd to r292.<br>
 2) Small rewrite kernel autotune logic.<br>
 3) Fix radvd start only if ipv6 support enabled.<br>
 4) Fix LCP params get in pppoe helper.<br>
