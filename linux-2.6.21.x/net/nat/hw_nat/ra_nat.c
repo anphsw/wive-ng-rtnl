@@ -579,7 +579,7 @@ int32_t PpeRxHandler(struct sk_buff * skb)
 	if(VirIfIdx < MAX_IF_NUM) {
 	    skb->dev=DstPort[VirIfIdx];
 	}else {
-	    NAT_PRINT("HNAT: unknow interface (VirIfIdx=%d)\n", VirIfIdx);
+	    NAT_PRINT("HNAT: unknown interface (VirIfIdx=%d)\n", VirIfIdx);
 	    goto skip_reentry;
 	}
 
@@ -1189,7 +1189,7 @@ int32_t PpeTxHandler(struct sk_buff *skb, int gmac_no)
 		}else if(strncmp(skb->dev->name, "eth0", 4)==0) {
 			offset = DP_PCI; //for debugging purpose
 		}else {
-		    printk("HNAT: unknow interface %s\n",skb->dev->name);
+		    printk("HNAT: unknown interface %s\n",skb->dev->name);
 		}
 
 		entry.act_dp = offset;
