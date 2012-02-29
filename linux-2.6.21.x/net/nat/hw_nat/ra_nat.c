@@ -512,6 +512,8 @@ int32_t PpeRxHandler(struct sk_buff * skb)
 	    //so HNAT module can know the actual incoming interface from vlan id.
 	    skb_push(skb, ETH_HLEN); //pointer to layer2 header before calling hard_start_xmit
 	    skb = __vlan_put_tag(skb, VirIfIdx);
+	    if (!skb)
+		return 1; // not valid tag ? memleak ?
 
 	    //redirect to PPE
 	    FOE_AI(skb) = UN_HIT;
@@ -577,7 +579,8 @@ int32_t PpeRxHandler(struct sk_buff * skb)
 	if(VirIfIdx < MAX_IF_NUM) {
 	    skb->dev=DstPort[VirIfIdx];
 	}else {
-	    printk("HNAT: unknow interface (VirIfIdx=%d)\n", VirIfIdx);
+	    NAT_PRINT("HNAT: unknow interface (VirIfIdx=%d)\n", VirIfIdx);
+	    goto skip_reentry;
 	}
 
 #if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,21)
@@ -604,6 +607,8 @@ int32_t PpeRxHandler(struct sk_buff * skb)
 
 	return 1;
     }
+
+skip_reentry:
 #endif
 
 
