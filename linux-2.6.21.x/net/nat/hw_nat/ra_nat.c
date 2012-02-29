@@ -97,8 +97,6 @@ dma_addr_t	    PpePhyFoeBase;
 struct net_device  *DstPort[MAX_IF_NUM];
 uint32_t           DscpReMarkerEbl=0;
 #ifdef HWNAT_DEBUG
-uint32_t	    DebugLevel=1;
-#else
 uint32_t	    DebugLevel=0;
 #endif
 
@@ -808,7 +806,7 @@ int32_t GetPppoeSid(struct sk_buff *skb, uint32_t vlan_gap,
 	}
 
 	peh = (struct pppoe_hdr *) (skb->data + offset + vlan_gap);
-
+#ifdef HWNAT_DEBUG
 	if(DebugLevel==1) { 
 		NAT_PRINT("\n==============\n");
 		NAT_PRINT(" Ver=%d\n",peh->ver);
@@ -820,7 +818,7 @@ int32_t GetPppoeSid(struct sk_buff *skb, uint32_t vlan_gap,
 		NAT_PRINT(" tag_len=%d\n",ntohs(peh->tag[0].tag_len));
 		NAT_PRINT("=================\n");
 	}
-
+#endif
 	*ppp_tag = ntohs(peh->tag[0].tag_type);
 #if defined (CONFIG_RA_HW_NAT_IPV6)
 	if (peh->ver != 1 || peh->type != 1 || (*ppp_tag != PPP_IP && *ppp_tag != PPP_IPV6) ) {
@@ -1211,12 +1209,15 @@ int32_t PpeTxHandler(struct sk_buff *skb, int gmac_no)
 		 * just drop it */
 		memset(FOE_INFO_START_ADDR(skb), 0, FOE_INFO_LEN);
 		return 0;
-	}else if(IS_MAGIC_TAG_VALID(skb) && (FOE_AI(skb)==HIT_UNBIND_RATE_REACH)&& FOE_ALG(skb)==1) {
+	}
+#ifdef HWNAT_DEBUG
+	else if(IS_MAGIC_TAG_VALID(skb) && (FOE_AI(skb)==HIT_UNBIND_RATE_REACH)&& FOE_ALG(skb)==1) {
 		if(DebugLevel==1) {
 		    NAT_PRINT("%s: I cannot bind it becuase of FOE_ALG=1\n",__FUNCTION__);
 		}
 
 	}
+#endif
 	return 1;
 }
 

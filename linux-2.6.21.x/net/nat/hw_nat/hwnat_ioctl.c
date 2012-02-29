@@ -30,13 +30,13 @@
 #include <linux/init.h>
 #include <linux/config.h>
 #include <linux/module.h>
-#include <linux/kernel.h>   
-#include <linux/fs.h>       
-#include <linux/errno.h>    
-#include <linux/types.h>    
+#include <linux/kernel.h>
+#include <linux/fs.h>
+#include <linux/errno.h>
+#include <linux/types.h>
 #include <linux/proc_fs.h>
-#include <linux/fcntl.h>    
-#include <asm/system.h>     
+#include <linux/fcntl.h>
+#include <asm/system.h>
 #include <linux/wireless.h>
 #include <asm/uaccess.h>
 
@@ -48,7 +48,9 @@
 
 int	hw_nat_major =  HW_NAT_MAJOR;
 unsigned char bind_dir = BIDIRECTION;
+#ifdef HWNAT_DEBUG
 extern int DebugLevel;
+#endif
 
 #if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,35)
 long HwNatIoctl(struct file *file, unsigned int cmd,
@@ -86,9 +88,11 @@ int HwNatIoctl (struct inode *inode, struct file *filp,
     case HW_NAT_DUMP_ENTRY: 
 	FoeDumpEntry(opt->entry_num);
 	break;
+#ifdef HWNAT_DEBUG
     case HW_NAT_DEBUG: /* For Debug */
 	DebugLevel=opt->debug;
 	break;
+#endif
     case HW_NAT_DSCP_REMARK:
 	opt3->result = PpeSetDscpRemarkEbl(opt3->enable);
 	break;

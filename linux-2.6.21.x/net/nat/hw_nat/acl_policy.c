@@ -16,7 +16,7 @@
  ***************************************************************************
 
     Module Name:
-    
+
     acl_policy.c
 
     Abstract:
@@ -44,7 +44,9 @@
 #include "frame_engine.h"
 
 AclPlcyNode AclPlcyList= { .List = LIST_HEAD_INIT(AclPlcyList.List)};
+#ifdef HWNAT_DEBUG
 extern uint32_t DebugLevel;
+#endif
 extern uint16_t GLOBAL_PRE_ACL_STR; 
 extern uint16_t GLOBAL_PRE_ACL_END; 
 
@@ -466,12 +468,14 @@ void inline PpeInsAclEntry(void *Rule)
 	uint32_t *p=(uint32_t *)Rule;
 
 	Index = PpeGetPreAclEnd();
+#ifdef HWNAT_DEBUG
         if(DebugLevel==1)
 	{
 		printk("Policy Table Base=%08X Offset=%d\n",POLICY_TBL_BASE, Index*8);
 		printk("%08X: %08X\n",POLICY_TBL_BASE + Index*8, *p);
 		printk("%08X: %08X\n",POLICY_TBL_BASE + Index*8+4, *(p+1));
 	}
+#endif
 	RegWrite(POLICY_TBL_BASE + Index*8, *p); /* Low bytes */
 	RegWrite(POLICY_TBL_BASE + Index*8 + 4, *(p+1)); /* High bytes */
 
