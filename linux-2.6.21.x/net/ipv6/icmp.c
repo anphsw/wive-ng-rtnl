@@ -422,9 +422,7 @@ void icmpv6_send(struct sk_buff *skb, int type, int code, __u32 info,
 	else
 		hlimit = np->hop_limit;
 	if (hlimit < 0)
-		hlimit = dst_metric(dst, RTAX_HOPLIMIT);
-	if (hlimit < 0)
-		hlimit = ipv6_get_hoplimit(dst->dev);
+		hlimit = ip6_dst_hoplimit(dst);
 
 	tclass = np->tclass;
 	if (tclass < 0)
@@ -519,9 +517,7 @@ static void icmpv6_echo_reply(struct sk_buff *skb)
 	else
 		hlimit = np->hop_limit;
 	if (hlimit < 0)
-		hlimit = dst_metric(dst, RTAX_HOPLIMIT);
-	if (hlimit < 0)
-		hlimit = ipv6_get_hoplimit(dst->dev);
+		hlimit = ip6_dst_hoplimit(dst);
 
 	tclass = np->tclass;
 	if (tclass < 0)
