@@ -1441,9 +1441,10 @@ void ndisc_send_redirect(struct sk_buff *skb, struct neighbour *neigh,
 			dev->ifindex);
 
 	dst = ip6_route_output(NULL, &fl);
-	if (dst == NULL)
+	if (dst->error) {
+		dst_release(dst);
 		return;
-
+	}
 	err = xfrm_lookup(&dst, &fl, NULL, 0);
 	if (err)
 		return;
