@@ -991,6 +991,8 @@
 17) Update l2tp pppd plugin to 1.8 version from openl2tp project.<br>
 18) Update dropbear to 2012.55 version.<br>
 19) Fixes in pppoe/ppp/arp/neigh kernel code.<br>
+20) Disable some unused debug.<br>
+21) Fix new transmission work.<br>
 
 <br><br>
 <b>For support see:</b><br>

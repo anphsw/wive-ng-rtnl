@@ -91,6 +91,7 @@ endif
 
 shared: $(SHAREDLIB)
 	ln -sf libnatpmp.so	libnatpmp.so.1
+	ln -sf libnatpmp.so	libnatpmp.so.0
 	cp -vfa *.so*		$(ROOTDIR)/lib/lib
 	cp -vfa *.h		$(ROOTDIR)/lib/include_shared
 
