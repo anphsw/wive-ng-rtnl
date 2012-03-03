@@ -400,6 +400,7 @@ enum sock_flags {
 	SOCK_QUEUE_SHRUNK, /* write queue has been shrunk recently */
 	SOCK_VMIO, /* the VM depends on us - make sure we're serviced */
 	SOCK_KERNEL, /* userspace cannot touch this socket */
+	SOCK_FASYNC, /* fasync() active */
 };
 
 static inline void sock_copy_flags(struct sock *nsk, struct sock *osk)
@@ -1306,7 +1307,7 @@ static inline unsigned long sock_wspace(struct sock *sk)
 
 static inline void sk_wake_async(struct sock *sk, int how, int band)
 {
-	if (sk->sk_socket && sk->sk_socket->fasync_list)
+	if (sock_flag(sk, SOCK_FASYNC))
 		sock_wake_async(sk->sk_socket, how, band);
 }
 
