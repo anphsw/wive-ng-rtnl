@@ -37,7 +37,9 @@ export LC_NUMERIC=
 export LC_MESSAGES=
 export LC_CTYPE=
 export LC_TIME=
-export LC_ALL=C
+
+export LANG=en_US
+export LC_ALL=POSIX
 
 export WDIR=$DIR/tmp
 export TARGET=mipsel-linux-uclibc
@@ -55,14 +57,16 @@ mkdir -p ${TARGET}-toolchain  && cd ${TARGET}-toolchain
 
 ##################################TUNE FOR CURRENT VERSION GCC BUILD####################################
 
-HOSTGCCVER=`gcc --version | grep "(GCC)" | awk {' print $3 '}`
-if [ "$HOSTGCCVER" = "4.6.0" ] || [ "$HOSTGCCVER" = "4.6.1" ]; then
-    export CFLAGS="-g -Os -Wno-pointer-sign -Wno-unused-but-set-variable -Wno-trigraphs -Wno-format-security"
+HOSTGCCVER=`gcc --version | grep "(GCC)" | awk {' print $3 '} | cut -f -2 -d .`
+if [ "$HOSTGCCVER" = "4.5" ] || [ "$HOSTGCCVER" = "4.6" ] || [ "$HOSTGCCVER" = "4.7" ]; then
+    export CFLAGS="-g -O2 -Wno-pointer-sign -Wno-unused-but-set-variable -Wno-trigraphs -Wno-format-security"
 fi
 
-EXT_OPT=""
-if [ "$GCCVER" = "gcc-4.6.0" ] || [ "$GCCVER" = "gcc-4.6.1" ]; then
-    EXT_OPT="--disable-lto --enable-ld=yes --enable-gold=no --disable-multilib --disable-libiberty"
+EXT_OPT="--disable-sanity-checks --disable-werror"
+EXT_OPT="$EXT_OPT --disable-lto --enable-ld=yes --enable-gold=no"
+if [ "$GCCVER" = "gcc-4.6.0" ] || [ "$GCCVER" = "gcc-4.6.1" ] || [ "$GCCVER" = "gcc-4.6.2" ] || [ "$GCCVER" = "gcc-4.6.3" ]; then
+    EXT_OPT="$EXT_OPT --disable-biendian --disable-softfloat"
+    EXT_OPT="$EXT_OPT --disable-libiberty --disable-multilib"
 fi
 
 #########################################################################################################
