@@ -11,7 +11,6 @@
 	addi 1,1,32
 	mtlr 0
 	blr
-	.size	_init, .-_init
 #APP
 	
 	.section .fini
@@ -24,7 +23,6 @@
 	addi 1,1,32
 	mtlr 0
 	blr
-	.size	_fini, .-_fini
 #APP
 	
 	.ident	"GCC: (GNU) 3.3.1 20030626 (Debian prerelease)"

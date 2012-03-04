@@ -9,7 +9,6 @@
 #NO_APP
 	unlk %a6
 	rts
-	.size	_init, .-_init
 #APP
 	
 	.section .fini
@@ -20,7 +19,6 @@
 #NO_APP
 	unlk %a6
 	rts
-	.size	_fini, .-_fini
 #APP
 	
 	.ident	"GCC: (GNU) 3.3.2"

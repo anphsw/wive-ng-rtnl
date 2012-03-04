@@ -19,7 +19,6 @@ L$L$1:
 	SP += 12;
 	UNLINK;
 	rts;
-	.size	_dummy, .-_dummy
 .align 2
 .global __init;
 .type __init, STT_FUNC;

@@ -10,7 +10,6 @@
 #NO_APP
 	movem [$sp+],$r0
 	Jump [$sp+]
-	.size	_init, .-_init
 #APP
 	
 	.section .fini
@@ -21,7 +20,6 @@
 #NO_APP
 	movem [$sp+],$r0
 	Jump [$sp+]
-	.size	_fini, .-_fini
 #APP
 	
 /*@TRAILER_BEGINS*/

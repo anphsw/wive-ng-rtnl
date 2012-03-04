@@ -68,7 +68,6 @@ _start:
 	jmp @r1
 	nop
 
-	.size _start,.-_start
 	.align	2
 
 L_main:

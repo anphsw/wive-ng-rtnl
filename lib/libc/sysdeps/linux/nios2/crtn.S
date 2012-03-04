@@ -11,7 +11,6 @@
     ldw fp, 4(sp)
     addi sp, sp, 8
     ret
-   .size   _init, .-_init
 #APP
     
    .section .fini
@@ -24,7 +23,6 @@
     ldw fp, 4(sp)
     addi sp, sp, 8
     ret
-   .size   _fini, .-_fini
 #APP
     
    .ident  "GCC: (GNU) 3.3.2"
