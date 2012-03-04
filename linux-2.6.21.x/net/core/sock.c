@@ -1048,20 +1048,15 @@ struct sock *sk_alloc(int family, gfp_t priority,
 {
 	struct sock *sk;
 
-	if (zero_it)
-		priority |= __GFP_ZERO;
-
-	sk = sk_prot_alloc(prot, priority, family);
+	sk = sk_prot_alloc(prot, priority | __GFP_ZERO, family);
 	if (sk) {
-		if (zero_it) {
-			sk->sk_family = family;
-			/*
-			 * See comment in struct sock definition to understand
-			 * why we need sk_prot_creator -acme
-			 */
-			sk->sk_prot = sk->sk_prot_creator = prot;
-			sock_lock_init(sk);
-		}
+		sk->sk_family = family;
+		/*
+		 * See comment in struct sock definition to understand
+		 * why we need sk_prot_creator -acme
+		 */
+		sk->sk_prot = sk->sk_prot_creator = prot;
+		sock_lock_init(sk);
 	}
 
 	return sk;
