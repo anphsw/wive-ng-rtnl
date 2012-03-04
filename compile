@@ -10,6 +10,10 @@ export ROOTDIR=$ROOTDIR
 export FIRMROOT=$ROOTDIR
 export LINUXDIR=$ROOTDIR/linux
 
+#-------Set_env_LANG------#
+export LANG=en_US
+export LC_ALL=POSIX
+
 #----WR-150N---WR-300N----#
 if [ "$1" = "" ]; then
     MODE=2T2R
