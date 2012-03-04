@@ -1056,6 +1056,7 @@ struct sock *sk_alloc(int family, gfp_t priority,
 		 */
 		sk->sk_prot = sk->sk_prot_creator = prot;
 		sock_lock_init(sk);
+		atomic_set(&sk->sk_wmem_alloc, 1);
 	}
 
 	return sk;
@@ -1736,7 +1737,6 @@ void sock_init_data(struct socket *sock, struct sock *sk)
 	sk->sk_stamp = ktime_set(-1L, -1L);
 
 	atomic_set(&sk->sk_refcnt, 1);
-	atomic_set(&sk->sk_wmem_alloc, 1);
 	atomic_set(&sk->sk_drops, 0);
 }
 
