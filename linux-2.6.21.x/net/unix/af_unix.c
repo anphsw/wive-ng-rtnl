@@ -577,7 +577,7 @@ static struct sock * unix_create1(struct socket *sock)
 	if (atomic_read(&unix_nr_socks) >= 2*get_max_files())
 		goto out;
 
-	sk = sk_alloc(PF_UNIX, GFP_KERNEL, &unix_proto);
+	sk = sk_alloc(PF_UNIX, GFP_KERNEL, &unix_proto, 1);
 	if (!sk)
 		goto out;
 

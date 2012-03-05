@@ -411,7 +411,7 @@ static struct sock *sco_sock_alloc(struct socket *sock, int proto, gfp_t prio)
 {
 	struct sock *sk;
 
-	sk = sk_alloc(PF_BLUETOOTH, prio, &sco_proto);
+	sk = sk_alloc(PF_BLUETOOTH, prio, &sco_proto, 1);
 	if (!sk)
 		return NULL;
 
