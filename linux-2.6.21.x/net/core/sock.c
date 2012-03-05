@@ -1036,8 +1036,8 @@ struct sock *sk_alloc(int family, gfp_t priority,
 			 */
 			sk->sk_prot = sk->sk_prot_creator = prot;
 			sock_lock_init(sk);
-			atomic_set(&sk->sk_wmem_alloc, 1);
 		}
+		atomic_set(&sk->sk_wmem_alloc, 1);
 
 		if (security_sk_alloc(sk, family, priority))
 			goto out_free;
