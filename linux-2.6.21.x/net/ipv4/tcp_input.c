@@ -1756,7 +1756,8 @@ static void tcp_mark_head_lost(struct sock *sk,
 			cnt += tcp_skb_pcount(skb);
 
 		if (cnt > packets) {
-			if (tp->rx_opt.sack_ok || (oldcnt >= packets))
+			if ((tcp_is_sack(tp) && !tcp_is_fack(tp)) ||
+			    (oldcnt >= packets))
 				break;
 
 			mss = skb_shinfo(skb)->gso_size;
