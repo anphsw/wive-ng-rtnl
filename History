@@ -997,6 +997,7 @@
 23) Fix socket memory allocations.<br>
 24) Small update toolchain.<br>
 25) Update miniupnpd to 1.6.20120305 version.<br>
+26) Small fix in kernel tcp/bridge.<br>
 
 <br><br>
 <b>For support see:</b><br>
