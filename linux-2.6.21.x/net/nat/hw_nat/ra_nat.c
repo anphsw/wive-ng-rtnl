@@ -423,6 +423,10 @@ int32_t PpeRxHandler(struct sk_buff * skb)
     uint16_t VirIfIdx=0;
 #endif
 
+    /* return trunclated packets to normal path */
+    if (!skb || skb->len < ETH_HLEN)
+	return 1;
+
     eth_type=ntohs(skb->protocol);
 
     /* PPE only can handle IPv4/VLAN/IPv6/PPP packets */
@@ -863,12 +867,16 @@ int32_t PpeTxHandler(struct sk_buff *skb, int gmac_no)
 	uint32_t now=0;
 #endif
 
+	/* return trunclated packets to normal path with padding */
+	if (!skb || skb->len < ETH_HLEN)
+	    return 1;
+
 	/*
 	 * Packet is interested by ALG?
 	 * Yes: Don't enter binind state
 	 * No: If flow rate exceed binding threshold, enter binding state.
 	 */
-	if(IS_MAGIC_TAG_VALID(skb) && (FOE_AI(skb)==HIT_UNBIND_RATE_REACH) && (FOE_ALG(skb)==0)) 
+	if(IS_MAGIC_TAG_VALID(skb) && (FOE_AI(skb)==HIT_UNBIND_RATE_REACH) && (FOE_ALG(skb)==0))
 	{
 		eth = (struct ethhdr *) skb->data;
 		eth_type=ntohs(eth->h_proto);

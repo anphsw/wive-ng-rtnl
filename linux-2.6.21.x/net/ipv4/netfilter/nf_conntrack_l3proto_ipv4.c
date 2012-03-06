@@ -77,6 +77,8 @@ static int ipv4_print_tuple(struct seq_file *s,
 /* Returns new sk_buff, or NULL */
 #if !defined(CONFIG_BCM_NAT) && !defined(CONFIG_BCM_NAT_MODULE)
 static
+#else
+inline
 #endif
 struct sk_buff *
 nf_ct_ipv4_gather_frags(struct sk_buff *skb, u_int32_t user)
@@ -153,14 +155,14 @@ static unsigned int ipv4_conntrack_help(unsigned int hooknum,
 		return NF_ACCEPT;
 
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-            if (IS_SPACE_AVAILABLED(*pskb) && IS_MAGIC_TAG_VALID(*pskb)) {
-                    FOE_ALG(*pskb)=1;
-            }
+        if (IS_SPACE_AVAILABLED(*pskb) && IS_MAGIC_TAG_VALID(*pskb)) {
+                FOE_ALG(*pskb)=1;
+        }
 #endif
 
-	    return help->helper->help(pskb,
-				skb_network_offset(*pskb) + ip_hdrlen(*pskb),
-				ct, ctinfo);
+	return help->helper->help(pskb,
+			skb_network_offset(*pskb) + ip_hdrlen(*pskb),
+			ct, ctinfo);
 }
 
 static unsigned int ipv4_conntrack_defrag(unsigned int hooknum,
@@ -170,8 +172,7 @@ static unsigned int ipv4_conntrack_defrag(unsigned int hooknum,
 					  int (*okfn)(struct sk_buff *))
 {
 #if !defined(CONFIG_IP_NF_NAT) && !defined(CONFIG_IP_NF_NAT_MODULE)
-	/* Previously seen (loopback)?  Ignore.  Do this before
-	   fragment check. */
+	/* Previously seen (loopback)?  Ignore.  Do this before fragment check. */
 	if ((*pskb)->nfct)
 		return NF_ACCEPT;
 #endif

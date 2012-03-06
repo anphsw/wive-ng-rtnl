@@ -374,7 +374,7 @@ EXPORT_SYMBOL(nf_nat_setup_info);
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 inline
 #else
-static 
+static
 #endif
 int manip_pkt(u_int16_t proto,
 	  struct sk_buff **pskb,
