@@ -996,6 +996,7 @@
 22) WiFi drivers use native functions for check mcast/bcast mac adress.<br>
 23) Fix socket memory allocations.<br>
 24) Small update toolchain.<br>
+25) Update miniupnpd to 1.6.20120305 version.<br>
 
 <br><br>
 <b>For support see:</b><br>
