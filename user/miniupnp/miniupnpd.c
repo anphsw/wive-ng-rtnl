@@ -507,7 +507,7 @@ struct runtime_vars {
 
 /* parselanaddr()
  * parse address with mask
- * ex: 192.168.1.1/24 or 192.168.1.1/255.255.255.0
+ * ex: 192.168.1.1/24
  * When MULTIPLE_EXTERNAL_IP is enabled, the ip address of the
  * external interface associated with the lan subnet follows.
  * ex : 192.168.1.1/24 81.21.41.11
@@ -527,15 +527,7 @@ parselanaddr(struct lan_addr_s * lan_addr, const char * str)
 	n = p - str;
 	if(*p == '/')
 	{
-		unsigned short i, mask[4];
-		unsigned char *am = (unsigned char *) &(lan_addr->mask.s_addr);
-		if (sscanf(++p, "%3hu.%3hu.%3hu.%3hu", &mask[0], &mask[1], &mask[2], &mask[3]) == 4) {
-			for (i = 0; i < 4; i++)
-				am[i] = (unsigned char) mask[i];
-		} else {
-			nbits = atoi(p);
-			lan_addr->mask.s_addr = htonl(nbits ? (0xffffffff << (32 - nbits)) : 0);
-		}
+		nbits = atoi(++p);
 		while(*p && !isspace(*p))
 			p++;
 	}
@@ -551,6 +543,7 @@ parselanaddr(struct lan_addr_s * lan_addr, const char * str)
 		fprintf(stderr, "Error parsing address/mask : %s\n", str);
 		return -1;
 	}
+	lan_addr->mask.s_addr = htonl(nbits ? (0xffffffff << (32 - nbits)) : 0);
 #ifdef MULTIPLE_EXTERNAL_IP
 	/* skip spaces */
 	while(*p && isspace(*p))
@@ -958,6 +951,7 @@ init(int argc, char * * argv, struct runtime_vars * v)
 	}
 
 	openlog("miniupnpd", openlog_option, LOG_MINIUPNPD);
+	syslog(LOG_INFO, "version " MINIUPNPD_VERSION " started");
 
 	if(!debug_flag)
 	{
@@ -1112,7 +1106,6 @@ main(int argc, char * * argv)
 	struct rule_state * rule_list = 0;
 	struct timeval checktime = {0, 0};
 	struct lan_addr_s * lan_addr;
-	syslog(LOG_INFO, "SNet version started");
 
 	if(init(argc, argv, &v) != 0)
 		return 1;

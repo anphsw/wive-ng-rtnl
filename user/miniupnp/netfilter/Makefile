@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.3 2011/03/02 16:04:23 nanard Exp $
+# $Id: Makefile,v 1.4 2012/03/05 20:36:20 nanard Exp $
 CFLAGS?=-Wall -g -DDEBUG
 CC = gcc
 

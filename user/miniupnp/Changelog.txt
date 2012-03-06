@@ -1,4 +1,24 @@
-$Id: Changelog.txt,v 1.256 2012/02/07 00:21:51 nanard Exp $
+$Id: Changelog.txt,v 1.262 2012/03/05 20:36:14 nanard Exp $
+
+2012/03/05:
+  fixed reload_from_lease_file().
+
+2012/02/15:
+  Change parselanaddr() function to allow 192.168.1.1/255.255.255.0 in
+    configuration file.
+  Change read_permission_line() to allow 192.168.1.1/255.255.255.0 in
+    permission line (in configuration file).
+
+2012/02/12:
+  More syntax checks in upnppermissions.c
+
+2012/02/11:
+  Fix ipfw/Mac OS X specific source files to compile ok with -ansi flag
+
+2012/02/09:
+  Make HTTP listen socket non blocking (so accept() can't block)
+  Make SSDP receive sockets non blocking
+  use sockaddr_to_string() in SendSSDPAnnonce2 to handle IPv6 addresses
 
 2012/02/06:
   Make HTTP (SOAP) sockets non blocking.

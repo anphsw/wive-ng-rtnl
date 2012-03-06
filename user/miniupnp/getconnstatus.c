@@ -1,4 +1,4 @@
-/* $Id: getconnstatus.c,v 1.4 2011/05/23 20:22:41 nanard Exp $ */
+/* $Id: getconnstatus.c,v 1.5 2012/03/05 20:36:16 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * (c) 2011 Thomas Bernard 

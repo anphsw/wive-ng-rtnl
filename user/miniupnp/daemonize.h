@@ -1,4 +1,4 @@
-/* $Id: daemonize.h,v 1.6 2008/01/29 13:04:46 nanard Exp $ */
+/* $Id: daemonize.h,v 1.7 2012/03/05 20:36:16 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * (c) 2006 Thomas Bernard 

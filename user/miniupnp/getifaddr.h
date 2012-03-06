@@ -1,4 +1,4 @@
-/* $Id: getifaddr.h,v 1.5 2011/05/15 08:59:27 nanard Exp $ */
+/* $Id: getifaddr.h,v 1.6 2012/03/05 20:36:16 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * (c) 2006-2011 Thomas Bernard 

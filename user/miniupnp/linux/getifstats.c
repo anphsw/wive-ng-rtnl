@@ -1,4 +1,4 @@
-/* $Id: getifstats.c,v 1.9 2011/05/25 22:22:57 nanard Exp $ */
+/* $Id: getifstats.c,v 1.10 2012/03/05 20:36:19 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * (c) 2006-2011 Thomas Bernard 
@@ -89,6 +89,7 @@ getifstats(const char * ifname, struct ifdata * data)
 
 #if 0 /* Disable get speed. In 2.6.21 kernel not supported this. */
 	/* get interface speed */
+	/* NB! some interfaces, like ppp, don't support speed queries */
 	snprintf(fname, sizeof(fname), "/sys/class/net/%s/speed", ifname);
 	f = fopen(fname, "r");
 	if(f) {
@@ -96,8 +97,6 @@ getifstats(const char * ifname, struct ifdata * data)
 			data->baudrate = 1000000*atoi(line);
 		}
 		fclose(f);
-	} else {
-		syslog(LOG_WARNING, "cannot read %s file : %m", fname);
 	}
 #endif
 #ifdef ENABLE_GETIFSTATS_CACHING

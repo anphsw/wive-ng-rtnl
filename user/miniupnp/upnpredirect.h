@@ -1,4 +1,4 @@
-/* $Id: upnpredirect.h,v 1.24 2011/06/22 20:34:39 nanard Exp $ */
+/* $Id: upnpredirect.h,v 1.25 2012/03/05 20:36:18 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * (c) 2006-2011 Thomas Bernard 

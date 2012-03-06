@@ -1,4 +1,4 @@
-/* $Id: upnphttp.c,v 1.67 2012/02/07 00:21:54 nanard Exp $ */
+/* $Id: upnphttp.c,v 1.68 2012/03/05 20:36:17 nanard Exp $ */
 /* Project :  miniupnp
  * Website :  http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * Author :   Thomas Bernard
@@ -487,7 +487,7 @@ ProcessHttpQuery_upnphttp(struct upnphttp * h)
 #endif
 		else
 		{
-			syslog(LOG_NOTICE, "%s not found, responding ERROR 404", HttpUrl);
+			syslog(LOG_INFO, "%s not found, responding ERROR 404", HttpUrl);
 			Send404(h);
 		}
 	}

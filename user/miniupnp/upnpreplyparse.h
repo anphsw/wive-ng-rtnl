@@ -1,4 +1,4 @@
-/* $Id: upnpreplyparse.h,v 1.12 2012/01/21 13:30:33 nanard Exp $ */
+/* $Id: upnpreplyparse.h,v 1.13 2012/03/05 19:42:48 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * (c) 2006-2012 Thomas Bernard 

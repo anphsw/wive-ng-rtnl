@@ -1,4 +1,4 @@
-/* $Id: getifaddr.c,v 1.13 2012/01/20 21:45:57 nanard Exp $ */
+/* $Id: getifaddr.c,v 1.15 2012/03/05 20:36:16 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * (c) 2006-2011 Thomas Bernard 
@@ -140,6 +140,7 @@ find_ipv6_addr(const char * ifname,
 			}
 		}
 	}
+	freeifaddrs(ifap);
 	return r;
 }
 #endif

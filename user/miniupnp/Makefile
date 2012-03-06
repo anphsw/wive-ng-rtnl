@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.60 2012/02/06 16:28:25 nanard Exp $
+# $Id: Makefile,v 1.61 2012/03/05 20:36:15 nanard Exp $
 # MiniUPnP project
 # http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
 # Author: Thomas Bernard

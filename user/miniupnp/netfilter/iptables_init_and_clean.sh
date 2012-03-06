@@ -1,5 +1,5 @@
 #! /bin/sh
-# $Id: iptables_init_and_clean.sh,v 1.2 2012/01/02 09:55:20 nanard Exp $
+# $Id: iptables_init_and_clean.sh,v 1.3 2012/03/05 20:36:19 nanard Exp $
 # Improved Miniupnpd iptables init script.
 # Checks for state of filter before doing anything..
 
