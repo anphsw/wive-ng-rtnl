@@ -464,8 +464,12 @@ int early_drop_all(u_int32_t dstip,u_int32_t srcip)
 
 	if (del_timer(&ct->timeout)) {
 		death_by_timeout((unsigned long)ct);
-		dropped = 1;
-		NF_CT_STAT_INC_ATOMIC(early_drop);
+		/* Check if we indeed killed this entry. Reliable event
+		   delivery may have inserted it into the dying list. */
+		if (test_bit(IPS_DYING_BIT, &ct->status)) {
+			dropped = 1;
+			NF_CT_STAT_INC_ATOMIC(early_drop);
+		}
 	}
 	nf_ct_put(ct);
 	return dropped;
