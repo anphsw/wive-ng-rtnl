@@ -14,7 +14,7 @@ ROOTDIR=$DIR
 KERNELHDRS=kernel-headers
 BINUTILVER=binutils-2.21
 UCLIBCVER=uClibc-0.9.28
-GCCVER=gcc-4.5.3
+GCCVER=gcc-4.6.3
 
 UNPACK=YES
 HEADERS=YES
@@ -66,7 +66,7 @@ EXT_OPT="--disable-sanity-checks --disable-werror"
 EXT_OPT="$EXT_OPT --disable-lto --enable-ld=yes --enable-gold=no"
 if [ "$GCCVER" = "gcc-4.6.0" ] || [ "$GCCVER" = "gcc-4.6.1" ] || [ "$GCCVER" = "gcc-4.6.2" ] || [ "$GCCVER" = "gcc-4.6.3" ]; then
     EXT_OPT="$EXT_OPT --disable-biendian --disable-softfloat"
-    EXT_OPT="$EXT_OPT --disable-libiberty --disable-multilib"
+    EXT_OPT="$EXT_OPT --disable-libquadmath --disable-libquadmath-support"
 fi
 
 #########################################################################################################

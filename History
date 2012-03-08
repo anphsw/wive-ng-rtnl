@@ -999,6 +999,13 @@
 25) Update miniupnpd to 1.6.20120305 version.<br>
 26) Small fix in kernel tcp/bridge.<br>
 
+<br>
+<b>2.2.x</b><br>
+1) Update toolchain gcc to 4.6.3 version.<br>
+2) Disable zebra. need replace to quagga in future.<br>
+3) nf_conntrack: fix early_drop with reliable event.<br>
+4) hw_nat: prevent trunclated packets process to PPE. And small conntrack optimize.<br>
+
 <br><br>
 <b>For support see:</b><br>
 <a href="http://acorp.ru">acorp.ru - Acorp Electronics Inc.</a><br>

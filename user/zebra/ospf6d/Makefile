@@ -132,7 +132,7 @@ AWK = gawk
 BGPD = 
 CC = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc
 CCDEPMODE = depmode=none
-CFLAGS = -Os -pipe -mips32r2 -march=mips32r2 -Os -pipe -mips32r2 -march=mips32r2 -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL/lib/include_shared -I/opt/Wive-RTNL/lib/include_shared/curl -I/opt/Wive-RTNL/lib/include_shared/event2 -Wall -Wno-trigraphs -Wno-long-long -Wno-pointer-sign -Os -pipe -mips32r2 -march=mips32r2 -I/opt/Wive-RTNL -DIPV6=1 -DINET6 -funit-at-a-time -membedded-data -muninit-const-in-rodata -ffast-math -fforce-addr -fno-stack-protector
+CFLAGS = -Os -pipe -mips32r2 -march=mips32r2 -Os -pipe -mips32r2 -march=mips32r2 -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL/lib/include_shared -I/opt/Wive-RTNL/lib/include_shared/curl -I/opt/Wive-RTNL/lib/include_shared/event2 -Wall -Wno-trigraphs -Wno-long-long -Wno-pointer-sign -Wno-unused-but-set-variable -Os -pipe -mips32r2 -march=mips32r2 -I/opt/Wive-RTNL -DIPV6=1 -DINET6 -funit-at-a-time -membedded-data -muninit-const-in-rodata -ffast-math -fforce-addr -fno-stack-protector
 CPP = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc -E
 CPPFLAGS = 
 CURSES = 
