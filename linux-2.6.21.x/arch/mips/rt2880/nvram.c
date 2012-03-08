@@ -529,7 +529,7 @@ int const nvram_getall(int index, char *buf)
 			up(&nvram_sem);
 			return -1;
 		}
-
+		snprintf(p, l, "%s=%s", fb[index].cache[i].name, fb[index].cache[i].value);
 		p += l;
 	}
 	*p = '\0'; //ending null
