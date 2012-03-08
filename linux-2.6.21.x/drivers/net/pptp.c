@@ -906,7 +906,9 @@ static int pptp_release(struct socket *sock)
 {
 	struct sock *sk = sock->sk;
 	struct pppox_sock *po;
+#ifdef DEBUG
 	struct pptp_opt *opt;
+#endif
 	int error = 0;
 
 	if (!sk)
@@ -925,7 +927,9 @@ static int pptp_release(struct socket *sock)
 	}
 		
 	po = pppox_sk(sk);
+#ifdef DEBUG
 	opt=&po->proto.pptp;
+#endif
 	del_chan(po);
 
 	pppox_unbind_sock(sk);

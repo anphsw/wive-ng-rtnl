@@ -519,7 +519,7 @@ int const nvram_getall(int index, char *buf)
 	memset(fb[index].env.data, 0, len);
 	p = buf;
 	for (i = 0; i < MAX_CACHE_ENTRY; i++) {
-		int l, ret;
+		int l;
 
 		if (!fb[index].cache[i].name || !fb[index].cache[i].value)
 			break;
@@ -529,7 +529,6 @@ int const nvram_getall(int index, char *buf)
 			up(&nvram_sem);
 			return -1;
 		}
-		ret = snprintf(p, l, "%s=%s", fb[index].cache[i].name, fb[index].cache[i].value);
 
 		p += l;
 	}
