@@ -11,7 +11,7 @@ start() {
     if [ -d /proc/sys/net/ipv6 ] && [ "$IPv6_Enable" = "1" ]; then
 	ip -6  addr flush dev lo
     fi
-    ip addr add 127.0.0.0/8 dev lo
+    ip addr add 127.0.0.1/8 dev lo
     if [ -d /proc/sys/net/ipv6 ] && [ "$IPv6_Enable" = "1" ]; then
 	ip -6 addr add ::1/128 dev lo
     fi
