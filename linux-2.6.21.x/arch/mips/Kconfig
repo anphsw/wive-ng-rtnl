@@ -42,6 +42,7 @@ config RALINK_RT2880
 	select BOOT_ELF32
 	select SYS_SUPPORTS_32BIT_KERNEL
 	select RALINK_RT2880_MP
+	select HAVE_GET_USER_PAGES_FAST
         help
          Ralink evaluation board based on RT2880
 
@@ -59,6 +60,7 @@ config RALINK_RT2880
 	select SYS_SUPPORTS_32BIT_KERNEL
 	select CPU_MIPSR2_IRQ_EI
 	select RALINK_RT3052_MP2 if !RALINK_RT3350
+	select HAVE_GET_USER_PAGES_FAST
         help
          Ralink evaluation board based on RT3052
 
@@ -76,6 +78,7 @@ config RALINK_RT2880
 	select SYS_SUPPORTS_32BIT_KERNEL
 	select CPU_MIPSR2_IRQ_EI
 	select RALINK_RT3352_MP
+	select HAVE_GET_USER_PAGES_FAST
         help
          Ralink evaluation board based on RT3352
 
@@ -94,6 +97,7 @@ config RALINK_RT5350
 	select CPU_MIPSR2_IRQ_EI
 	select MTD_SPI_RALINK
 	select RALINK_RT5350_MP
+	select HAVE_GET_USER_PAGES_FAST
 	help
 	 Ralink evaluation board based on RT5350
 
@@ -113,6 +117,7 @@ config RALINK_RT3883
 	select SYS_SUPPORTS_32BIT_KERNEL
 	select CPU_MIPSR2_IRQ_EI
 	select RALINK_RT3883_MP
+	select HAVE_GET_USER_PAGES_FAST
 	help
 	 Ralink evaluation board based on RT3883
 
