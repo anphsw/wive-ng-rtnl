@@ -1,5 +1,4 @@
 # For sadko
-) WebUI must use interface name readed from /tmp/vpn_if_name instead static ppp0. If file not exist - use ppp0 per default.
 ) Rewrite profiles managment code in ethernet converter mode. (in progress)
 ) Need rewrite QoS page (remove ralink QoS and add new types QoS)
 ) Add /proc/rt3052/esw_cnt for traffic statistic per switch port.(need add in WebUI).
