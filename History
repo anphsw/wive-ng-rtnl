@@ -1006,6 +1006,8 @@
 3) nf_conntrack: fix early_drop with reliable event.<br>
 4) hw_nat: prevent trunclated packets process to PPE. And small conntrack optimize.<br>
 5) Fix lo ip configure.<br>
+6) Backport some mips arch depended code from upstream.<br>
+7) Update dnsmasq to 2.60 version.<br>
 
 <br><br>
 <b>For support see:</b><br>
