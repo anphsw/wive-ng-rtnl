@@ -1,4 +1,4 @@
-/* dnsmasq is Copyright (c) 2000-2011 Simon Kelley
+/* dnsmasq is Copyright (c) 2000-2012 Simon Kelley
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#define VERSION "2.59"
+#define VERSION "2.60"
 
 #define FTABSIZ 50 /* max number of outstanding requests (default) */
 #define MAX_PROCS 10 /* max no children for TCP requests */
@@ -84,20 +84,16 @@ HAVE_TFTP
    define this to get dnsmasq's built-in TFTP server.
 
 HAVE_DHCP
-   define this to get dnsmasq's DHCP server.
+   define this to get dnsmasq's DHCPv4 server.
+
+HAVE_DHCP6
+   define this to get dnsmasq's DHCPv6 server. (implies HAVE_DHCP).
 
 HAVE_SCRIPT
-   define this to get the ability to call scripts on lease-change
+   define this to get the ability to call scripts on lease-change.
 
-HAVE_GETOPT_LONG
-   define this if you have GNU libc or GNU getopt. 
-
-HAVE_ARC4RANDOM
-   define this if you have arc4random() to get better security from DNS spoofs
-   by using really random ids (OpenBSD) 
-
-HAVE_SOCKADDR_SA_LEN
-   define this if struct sockaddr has sa_len field (*BSD) 
+HAVE_LUASCRIPT
+   define this to get the ability to call Lua script on lease-change. (implies HAVE_SCRIPT) 
 
 HAVE_DBUS
    define this if you want to link against libdbus, and have dnsmasq
@@ -259,8 +255,100 @@ NOTES:
 #  define ADDRSTRLEN 16 /* 4*3 + 3 dots + NULL */
 #endif
 
-/* Can't do scripts without fork */
-#ifdef NOFORK
-#  undef HAVE_SCRIPT
+
+/* rules to implement compile-time option dependencies and 
+   the NO_XXX flags */
+
+#ifdef NO_IPV6
+#undef HAVE_IPV6
 #endif
 
+#ifdef NO_TFTP
+#undef HAVE_TFTP
+#endif
+
+#ifdef NO_DHCP
+#undef HAVE_DHCP
+#undef HAVE_DHCP6
+#endif
+
+#if defined(NO_DHCP6) || !defined(HAVE_IPV6)
+#undef HAVE_DHCP6
+#endif
+
+/* DHCP6 needs DHCP too */
+#ifdef HAVE_DHCP6
+#define HAVE_DHCP
+#endif
+
+#if defined(NO_SCRIPT) || !defined(HAVE_DHCP) || defined(NO_FORK)
+#  undef HAVE_SCRIPT
+#undef HAVE_LUASCRIPT
+#endif
+
+/* Must HAVE_SCRIPT to HAVE_LUASCRIPT */
+#ifdef HAVE_LUASCRIPT
+#define HAVE_SCRIPT
+#endif
+
+
+/* Define a string indicating which options are in use.
+   DNSMASQP_COMPILE_OPTS is only defined in dnsmasq.c */
+
+#ifdef DNSMASQ_COMPILE_OPTS
+
+static char *compile_opts = 
+#ifndef HAVE_IPV6
+"no-"
+#endif
+"IPv6 "
+#ifndef HAVE_GETOPT_LONG
+"no-"
+#endif
+"GNU-getopt "
+#ifdef HAVE_BROKEN_RTC
+"no-RTC "
+#endif
+#ifdef NO_FORK
+"no-MMU "
+#endif
+#ifndef HAVE_DBUS
+"no-"
+#endif
+"DBus "
+#ifndef LOCALEDIR
+"no-"
+#endif
+"i18n "
+#if !defined(LOCALEDIR) && !defined(HAVE_IDN)
+"no-"
+#endif 
+"IDN "
+#ifndef HAVE_DHCP
+"no-"
+#endif
+"DHCP "
+#if defined(HAVE_DHCP)
+#  if !defined (HAVE_DHCP6)
+     "no-"
+#  endif  
+     "DHCPv6 "
+#  if !defined(HAVE_SCRIPT)
+     "no-scripts "
+#  else
+#    if !defined(HAVE_LUASCRIPT)
+       "no-"
+#    endif
+     "Lua "
+#  endif
+#endif
+#ifndef HAVE_TFTP
+"no-"
+#endif
+"TFTP "
+#ifndef HAVE_CONNTRACK
+"no-"
+#endif
+"conntrack";
+
+#endif
