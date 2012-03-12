@@ -11,7 +11,7 @@
 #include    "qos.h"
 
 extern char l7name[];							// in firewall.c
-inline int getRuleNums(char *);
+int getRuleNums(char *);
 
 struct entry_s QOS_PROFILE[QOS_PROFILE_ENTRYS_MAX] = {
 	{"QoSAF5Name","High"},
@@ -30,7 +30,7 @@ struct entry_s QOS_PROFILE[QOS_PROFILE_ENTRYS_MAX] = {
 	{ NULL, NULL}
 };
 
-inline void QoSRestart(void)
+void QoSRestart(void)
 {
     doSystem("service shaper restart && service iptables restart && service kext restart");
 }

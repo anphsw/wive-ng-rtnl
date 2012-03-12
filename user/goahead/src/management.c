@@ -287,14 +287,6 @@ int showSystemCommandASP(int eid, webs_t wp, int argc, char_t **argv)
 	return 0;
 }
 
-static inline char *strip_space(char *str)
-{
-	while( *str == ' ')
-		str++;
-	return str;
-}
-
-
 char* getField(char *a_line, char *delim, int count)
 {
 	int i=0;

@@ -28,7 +28,7 @@
 
 /*** Busybox leases.h ***/
 
-static inline uint64_t hton64(uint64_t v)
+static uint64_t hton64(uint64_t v)
 {
         return (((uint64_t)htonl(v)) << 32) | htonl(v >> 32);
 }

@@ -1676,7 +1676,7 @@ out:
 	return;
 }
 
-inline void clearRadiusSetting(int nvram, int mbssid)
+void clearRadiusSetting(int nvram, int mbssid)
 {
 	char *RADIUS_Server, *RADIUS_Port, *RADIUS_Key;
 

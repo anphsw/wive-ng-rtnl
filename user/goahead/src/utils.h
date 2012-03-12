@@ -64,5 +64,6 @@ unsigned int Sleep(unsigned int secs);
 char *racat(char *s, int i);
 void arplookup(char *ip, char *arp);
 void websLongWrite(webs_t wp, char *longstr);
+char *strip_space(char *str);
 int netmask_aton(const char *ip);
 void STFs(int nvram, int index, char *flash_key, char *value);

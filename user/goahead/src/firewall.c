@@ -938,8 +938,7 @@ static void iptablesPortForwardBuildScript(void)
 	fclose(fd_vpn);
 	fclose(fd);
 }
-
-inline int getRuleNums(char *rules)
+int getRuleNums(char *rules)
 {
 	return getNums(rules, ';');
 }

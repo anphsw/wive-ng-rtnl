@@ -422,6 +422,14 @@ void websLongWrite(webs_t wp, char *longstr)
     return;
 }
 
+char *strip_space(char *str)
+{
+	while( *str == ' ')
+		str++;
+	return str;
+}
+
+
 /*********************************************************************
  * Web Related Utilities
  */

@@ -31,6 +31,14 @@
 #define IF_NAMESIZE IFNAMSIZ
 #endif
 
+#if defined(CONFIG_RAETH_ROUTER) || defined(CONFIG_MAC_TO_MAC_MODE) || defined(CONFIG_RT_3052_ESW)
+#define WAN_DEF "eth2.2"
+#else /* MARVELL & IC+ */
+#define WAN_DEF "eth2"
+#endif
+#define VPN_SIG	"ppp"
+#define VPN_DEF "ppp0"
+
 #ifdef CONFIG_USER_802_1X
 #include	"wps.h"
 #endif
@@ -104,7 +112,7 @@ static void editRouting(webs_t wp, char_t *path, char_t *query);
 
 #ifdef CONFIG_USER_ZEBRA
 static void dynamicRouting(webs_t wp, char_t *path, char_t *query);
-inline void zebraRestart(void);
+void zebraRestart(void);
 void ripdRestart(void);
 #endif
 
@@ -339,21 +347,38 @@ char* getWanIfName(void)
 
 	if (NULL == mode)
 		return if_name;
-	if (!strncmp(mode, "0", 2))
+	if (!strncmp(mode, "0", 2)) /* bridge mode */
 		if_name = "br0";
-	else if (!strncmp(mode, "1", 2) || !strncmp(mode, "4", 2)) { 
-	/* for gw and chillispot mode */
-#if defined(CONFIG_RAETH_ROUTER) || defined(CONFIG_MAC_TO_MAC_MODE) || defined(CONFIG_RT_3052_ESW)
-		if_name = "eth2.2";
-#else /* MARVELL & CONFIG_ICPLUS_PHY */
-		if_name = "eth2";
-#endif
-	}
-	else if (!strncmp(mode, "2", 2))
+	else if (!strncmp(mode, "1", 2) || !strncmp(mode, "4", 2)) /* gw and chillispot mode */
+		if_name = WAN_DEF;
+	else if (!strncmp(mode, "2", 2)) /* ethernet converter mode */
 		if_name = "ra0";
-	else if (!strncmp(mode, "3", 2))
+	else if (!strncmp(mode, "3", 2)) /* apcli mode */
 		if_name = "apcli0";
 	return if_name;
+}
+
+/*
+ * description: return vpn interface name or VPN_DEF as default
+ */
+char* getPPPIfName(void)
+{
+    FILE *fp;
+    char ppp_if[16]; /* max 16 char in vpn if name */
+
+    fp = fopen("/tmp/vpn_if_name", "r");
+    if (fp) {
+	/* get first ppp_if in file */
+	while (fgets(ppp_if, sizeof(ppp_if), fp) != NULL) {
+	    if (strstr(ppp_if, VPN_SIG) != NULL) {
+		fclose(fp);
+		return strip_space(ppp_if);
+	    }
+	}
+	fclose(fp);
+    }
+
+    return VPN_DEF;
 }
 
 /*
@@ -364,7 +389,7 @@ char* getWanIfNamePPP(void)
     char *cm = nvram_get(RT2860_NVRAM, "wanConnectionMode");
 
     if (!strncmp(cm, "PPPOE", 6) || !strncmp(cm, "L2TP", 5) || !strncmp(cm, "PPTP", 5))
-        return "ppp0";
+        return getPPPIfName();
 
     return getWanIfName();
 }
@@ -427,7 +452,7 @@ char *getLanWanNamebyIf(char *ifname)
 #if defined(CONFIG_RAETH_ROUTER) || defined(CONFIG_MAC_TO_MAC_MODE) || defined(CONFIG_RT_3052_ESW)
 		if(!strcmp(ifname, "br0"))
 			return "LAN";
-		if(!strcmp(ifname, "eth2.2") || !strcmp(ifname, "ppp0"))
+		if(!strcmp(ifname, getWanIfName()) || !strcmp(ifname, getPPPIfName()))
 			return "WAN";
 		return ifname;
 #elif defined  CONFIG_ICPLUS_PHY && CONFIG_RT2860V2_AP_MBSS
@@ -436,7 +461,7 @@ char *getLanWanNamebyIf(char *ifname)
 			return "LAN";
 		if(atoi(num_s) == 1 && !strcmp(ifname, "ra0"))
 			return "LAN";
-		if (!strcmp(ifname, "eth2") || !strcmp(ifname, "ppp0"))
+		if (!strcmp(ifname, getWanIfName()) || !strcmp(ifname, getPPPIfName()))
 			return "WAN";
 		return ifname;
 #else
@@ -1232,8 +1257,8 @@ static int getWanNetmask(int eid, webs_t wp, int argc, char_t **argv)
 	char *cm = nvram_get(RT2860_NVRAM, "wanConnectionMode");
 
 	if (!strncmp(cm, "PPPOE", 6) || !strncmp(cm, "L2TP", 5) || !strncmp(cm, "PPTP", 5)) { 
-		//fetch ip from ppp0
-		if (-1 == getIfNetmask("ppp0", if_net)) {
+		//fetch ip from vpn if
+		if (-1 == getIfNetmask(getPPPIfName(), if_net)) {
 			return websWrite(wp, T(""));
 		}
 	}
@@ -1641,7 +1666,7 @@ void RoutingInit(void)
 
 }
 
-static inline int getNums(char *value, char delimit)
+static int getNums(char *value, char delimit)
 {
     char *pos = value;
     int count = 1;
@@ -1936,7 +1961,7 @@ out:
 	doSystem("service ripd restart");
 }
 
-inline void zebraRestart(void)
+void zebraRestart(void)
 {
 	char *opmode = nvram_get(RT2860_NVRAM, "OperationMode");
 	char *password = nvram_get(RT2860_NVRAM, "Password");
