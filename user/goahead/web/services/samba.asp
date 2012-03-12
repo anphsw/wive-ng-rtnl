@@ -101,7 +101,7 @@ function checkForm(form)
 	<td><input name="SmbOsLevel" class="half" value="<% getCfgGeneral(1, "SmbOsLevel"); %>" ></td>
 </tr>
 <tr>
-	<td class="head">Enable compatable with WinNT time server</td>
+	<td class="head">Enable time server</td>
 	<td>
 		<select name="SmbTimeserver" class="half">
 			<option value="0">Disable</option>
