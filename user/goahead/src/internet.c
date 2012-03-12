@@ -438,30 +438,35 @@ char* getLanIfName(void)
 char *getLanWanNamebyIf(char *ifname)
 {
 	char *mode = nvram_get(RT2860_NVRAM, "OperationMode");
+	char *cm = nvram_get(RT2860_NVRAM, "wanConnectionMode");
 
 	if (NULL == mode)
 		return "Unknown";
 
-	if (!strcmp(mode, "0")){	// bridge mode
+	/* VPN in all mode return VPN if vpn enabled */
+	if ((!strncmp(cm, "PPPOE", 6) || !strncmp(cm, "L2TP", 5) || !strncmp(cm, "PPTP", 5)) && strstr(ifname, getPPPIfName()) != NULL)
+		return "VPN";
+
+	if (!strcmp(mode, "0")) { /* bridge mode */
 		if(!strcmp(ifname, "br0"))
 			return "LAN";
 		return ifname;
 	}
 
-	if (!strcmp(mode, "1") || !strcmp(mode, "4")) {	// gateway mode or chillispot
+	if (!strcmp(mode, "1") || !strcmp(mode, "4")) {	/* gateway mode or chillispot */
 #if defined(CONFIG_RAETH_ROUTER) || defined(CONFIG_MAC_TO_MAC_MODE) || defined(CONFIG_RT_3052_ESW)
 		if(!strcmp(ifname, "br0"))
 			return "LAN";
-		if(!strcmp(ifname, getWanIfName()) || !strcmp(ifname, getPPPIfName()))
+		if(!strcmp(ifname, getWanIfName()))
 			return "WAN";
 		return ifname;
 #elif defined  CONFIG_ICPLUS_PHY && CONFIG_RT2860V2_AP_MBSS
 		char *num_s = nvram_get(RT2860_NVRAM, "BssidNum");
-		if(atoi(num_s) > 1 && !strcmp(ifname, "br0") )	// multiple ssid
+		if(atoi(num_s) > 1 && !strcmp(ifname, "br0"))	/* multiple ssid */
 			return "LAN";
 		if(atoi(num_s) == 1 && !strcmp(ifname, "ra0"))
 			return "LAN";
-		if (!strcmp(ifname, getWanIfName()) || !strcmp(ifname, getPPPIfName()))
+		if (!strcmp(ifname, getWanIfName()))
 			return "WAN";
 		return ifname;
 #else
@@ -469,13 +474,13 @@ char *getLanWanNamebyIf(char *ifname)
 			return "LAN";
 		return ifname;
 #endif
-	}else if (!strncmp(mode, "2", 2)) {	// ethernet convertor
+	}else if (!strncmp(mode, "2", 2)) {	/* ethernet convertor */
 		if(!strcmp("eth2", ifname))
 			return "LAN";
 		if(!strcmp("ra0", ifname))
 			return "WAN";
 		return ifname;
-	}else if (!strncmp(mode, "3", 2)) {	// apcli mode
+	}else if (!strncmp(mode, "3", 2)) {	/* apcli mode */
 		if(!strcmp("br0", ifname))
 			return "LAN";
 		if(!strcmp("apcli0", ifname))
