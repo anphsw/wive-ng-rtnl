@@ -867,7 +867,7 @@ int ip_append_data(struct sock *sk,
 	inet->cork.length += length;
 	if (((length> mtu) || !skb_queue_empty(&sk->sk_write_queue)) &&
 	    (sk->sk_protocol == IPPROTO_UDP) &&
-	    (rt->u.dst.dev->features & NETIF_F_UFO)) {
+	    (rt->u.dst.dev->features & NETIF_F_UFO) && !rt->u.dst.header_len) {
 		err = ip_ufo_append_data(sk, getfrag, from, length, hh_len,
 					 fragheaderlen, transhdrlen, mtu,
 					 flags);
