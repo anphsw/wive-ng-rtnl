@@ -63,8 +63,6 @@ static int		finished;				/* Finished flag */
 
 static int writeGoPid(void);
 static void InitSignals(int helper);
-static void goaSigWPSHold(int signum);
-static void goaSigWPSHlpr(int signum);
 static int initWebs(void);
 static int websHomePageHandler(webs_t wp, char_t *urlPrefix, char_t *webDir, int arg, char_t *url, char_t *path, char_t *query);
 extern void defaultErrorHandler(int etype, char_t *msg);
@@ -82,6 +80,7 @@ extern void WPSSTAPBCStartEnr(void);
 #ifdef CONFIG_USER_GOAHEAD_HAS_WPSBTN
 static void goaSigReset(int signum);
 static void goaSigWPSHold(int signum);
+static void goaSigWPSHlpr(int signum);
 #endif
 #ifdef B_STATS
 static void printMemStats(int handle, char_t *fmt, ...);
@@ -233,9 +232,9 @@ int writeGoPid(void)
 }
 
 #ifdef CONFIG_RALINK_GPIO
-#ifdef CONFIG_USER_WSC
 static void goaSigHandler(int signum)
 {
+#ifdef CONFIG_USER_WSC
 #ifdef CONFIG_RT2860V2_STA_WSC
 	char *opmode = nvram_get(RT2860_NVRAM, "OperationMode");
 
@@ -244,8 +243,10 @@ static void goaSigHandler(int signum)
 	else
 #endif
 		WPSAPPBCStartAll();
-}
+#else
+	printf("goaSigHandler: wsc not compiled, no think to do...");
 #endif
+}
 
 static void goaInitGpio(int helper)
 {
@@ -294,8 +295,9 @@ ioctl_err:
 
 static void fs_nvram_reset_handler (int signum)
 {
+	printf("fs_nvram_reset_handler: load nvram default and restore original rwfs...");
+
 	nvram_load_default();
-        //crash rwfs. restore at load
         system("fs restore");
 }
 #endif
@@ -308,33 +310,26 @@ static void InitSignals(int helper)
 {
 
 //--------REGISTER SIGNALS-------------------------
-	if (helper) {
-#ifdef CONFIG_RALINK_GPIO
-		signal(SIGUSR1, goaSigWPSHlpr);
-		signal(SIGUSR2, goaSigWPSHold);
-#endif
-	} else {
 #ifdef CONFIG_RALINK_GPIO
 #ifdef CONFIG_USER_GOAHEAD_HAS_WPSBTN
-		//register fs nvram reset helper
-		signal(SIGUSR1, goaSigReset);
-#ifdef CONFIG_USER_WSC
-		signal(SIGHUP,  goaSigHandler);
+	if (helper) {
+	    signal(SIGUSR1, goaSigWPSHlpr);
+	    signal(SIGUSR2, goaSigWPSHold);
+	} else {
 #endif
+#ifdef CONFIG_USER_WSC
+	    signal(SIGXFSZ, WPSSingleTriggerHandler);
+#endif
+#ifdef CONFIG_USER_GOAHEAD_HAS_WPSBTN
+	    signal(SIGUSR1, goaSigReset);
+	    signal(SIGHUP,  goaSigHandler);
 #else
-#ifdef CONFIG_USER_WSC
-		signal(SIGUSR1, goaSigHandler);
+	    signal(SIGUSR1, goaSigHandler);
 #endif
-#endif
-		signal(SIGUSR2, fs_nvram_reset_handler);
-#endif
-#ifdef CONFIG_USER_WSC
-		//regist WPS button
-		signal(SIGXFSZ, WPSSingleTriggerHandler);
-#endif
+	    signal(SIGUSR2, fs_nvram_reset_handler);
+#ifdef CONFIG_USER_GOAHEAD_HAS_WPSBTN
 	}
-
-#ifdef CONFIG_RALINK_GPIO
+#endif
 	goaInitGpio(helper);
 #endif
 }
@@ -616,14 +611,13 @@ static void printMemStats(int handle, char_t *fmt, ...)
 }
 #endif
 
+#ifdef CONFIG_RALINK_GPIO
 #ifdef CONFIG_USER_GOAHEAD_HAS_WPSBTN
 static void goaSigReset(int signum)
 {
 	reboot_now();
 }
-#endif
 
-#ifdef CONFIG_RALINK_GPIO
 static void goaSigWPSHold(int signum)
 {
        doSystem("/etc/scripts/OnHoldWPS.button");
@@ -632,15 +626,14 @@ static void goaSigWPSHold(int signum)
 static void goaSigWPSHlpr(int signum)
 {
 	int ppid;
-#ifdef CONFIG_USER_GOAHEAD_HAS_WPSBTN
 	char *WPSHlprmode = nvram_get(RT2860_NVRAM, "UserWPSHlpr");
 	if (!strcmp(WPSHlprmode, "1")) {
     	    doSystem("/etc/scripts/OnPressWPS.button");
 	    return;
 	}
-#endif
 	ppid = getppid();
 	if (kill(ppid, SIGHUP))
 		printf("goahead.c: (helper) can't send SIGHUP to parent %d", ppid);
 }
+#endif
 #endif

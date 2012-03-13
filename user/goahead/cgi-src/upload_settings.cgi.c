@@ -1,7 +1,7 @@
 #include "upload.h"
 #include "../options.h"
 
-void reboot_now(void)
+void up_reboot_now(void)
 {
 #ifdef CONFIG_USER_STORAGE
 	system("/etc/scripts/wifi_unload.sh && reboot &");
@@ -148,7 +148,7 @@ int main (int argc, char *argv[])
 	fflush(stdout);
 	fclose(stdout);
 
-	reboot_now();
+	up_reboot_now();
 err:
 	free(boundary);
 	exit(0);
