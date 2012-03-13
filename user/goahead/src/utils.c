@@ -18,10 +18,6 @@
 #include	"internet.h"
 #include	"wireless.h"
 
-#ifdef CONFIG_USER_802_1X
-#include 	"wps.h"
-#endif
-
 static int  getCfgGeneral(int eid, webs_t wp, int argc, char_t **argv);
 static int  getCfgNthGeneral(int eid, webs_t wp, int argc, char_t **argv);
 static int  getCfgZero(int eid, webs_t wp, int argc, char_t **argv);

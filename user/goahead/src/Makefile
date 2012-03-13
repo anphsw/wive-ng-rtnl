@@ -38,8 +38,11 @@ DEPEND_FILES	= asp.o balloc.o base64.o cgi.o default.o  \
 				  md5c.o um.o umui.o websda.o emfdb.o \
 				  webrom.o webs.o websuemf.o \
 				  internet.o services.o utils.o wireless.o \
-				  firewall.o management.o wps.o helpers.o procps.o $(NAME).o
+				  firewall.o management.o helpers.o procps.o $(NAME).o
 
+ifeq ("$(CONFIG_USER_WSC)", "y")
+DEPEND_FILES += wps.o
+endif
 ifeq ("$(CONFIG_USER_STORAGE)", "y")
 DEPEND_FILES += storage.o
 endif

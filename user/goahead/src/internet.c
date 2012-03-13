@@ -24,7 +24,6 @@
 #include	"management.h"
 #include	"station.h"
 #include	"wireless.h"
-#include        "wps.h"
 #include	"helpers.h"
 
 #ifndef IF_NAMESIZE
@@ -38,10 +37,6 @@
 #endif
 #define VPN_SIG	"ppp"
 #define VPN_DEF "ppp0"
-
-#ifdef CONFIG_USER_802_1X
-#include	"wps.h"
-#endif
 
 #define _PATH_PROCNET_DEV      "/proc/net/dev"
 #define PATH_PPP_ROUTES        "/etc/routes_ppp_replace"

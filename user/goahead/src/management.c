@@ -18,8 +18,6 @@
 #include "wireless.h"
 #include "management.h"
 
-#include "wps.h"
-
 #define COMMAND_MAX	1024
 static char system_command[COMMAND_MAX];
 
@@ -792,5 +790,7 @@ void formDefineManagement(void)
 	websFormDefine(T("clearlog"), clearlog);
 	websFormDefine(T("setuplog"), setuplog);
 #endif
+#ifdef CONFIG_USER_WSC
 	formDefineWPS();
+#endif
 }

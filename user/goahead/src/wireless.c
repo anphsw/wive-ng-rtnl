@@ -20,7 +20,6 @@
 #include	"internet.h"
 #include	"oid.h"
 #include	"stapriv.h"
-#include 	"wps.h"
 #include 	"helpers.h"
 
 #define AP_MODE
@@ -34,7 +33,9 @@
  */
 static int default_shown_mbssid[3]  = {0,0,0};
 
+#ifdef CONFIG_USER_WSC
 extern int g_wsc_configured;
+#endif
 
 static int  getWlan11aChannels(int eid, webs_t wp, int argc, char_t **argv);
 static int  getWlan11bChannels(int eid, webs_t wp, int argc, char_t **argv);
@@ -2056,9 +2057,11 @@ static int is3t3r(int eid, webs_t wp, int argc, char_t **argv)
 
 static int isWPSConfiguredASP(int eid, webs_t wp, int argc, char_t **argv)
 {
+#ifdef CONFIG_USER_WSC
 	if(g_wsc_configured){
 		websWrite(wp, T("1"));
 	}else
+#endif
 		websWrite(wp, T("0"));
 	return 0;
 }

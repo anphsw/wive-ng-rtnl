@@ -15,7 +15,6 @@
 #include "wireless.h"
 #include "linux/config.h"									/* for CONFIG_RT2860V2_STA_WSC */
 
-#include "wps.h"
 #include "oid.h"
 
 #define DD printf("%s(),  %d\n", __FUNCTION__, __LINE__);	fflush(stdout);

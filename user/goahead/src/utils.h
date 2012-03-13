@@ -19,6 +19,10 @@
 #include 	"webs.h"
 #include	"uemf.h"
 
+#ifdef CONFIG_USER_WSC
+#include	"wps.h"
+#endif
+
 #define LED_ON				1
 #define LED_OFF				0
 

@@ -70,10 +70,15 @@ static int websHomePageHandler(webs_t wp, char_t *urlPrefix, char_t *webDir, int
 extern void defaultErrorHandler(int etype, char_t *msg);
 extern void defaultTraceHandler(int level, char_t *buf);
 extern void ripdRestart(void);
-extern void WPSAPPBCStartAll(void);
-extern void WPSSingleTriggerHandler(int);
 extern void formDefineWireless(void);
 
+#ifdef CONFIG_USER_WSC
+extern void WPSSingleTriggerHandler(int);
+extern void WPSAPPBCStartAll(void);
+#ifdef CONFIG_RT2860V2_STA_WSC
+extern void WPSSTAPBCStartEnr(void);
+#endif
+#endif
 #ifdef CONFIG_USER_GOAHEAD_HAS_WPSBTN
 static void goaSigReset(int signum);
 static void goaSigWPSHold(int signum);
@@ -84,9 +89,6 @@ static void memLeaks();
 #endif
 #ifdef CONFIG_USB
 extern void hotPluglerHandler(int);
-#endif
-#ifdef CONFIG_RT2860V2_STA_WSC
-extern void WPSSTAPBCStartEnr(void);
 #endif
 
 /*********************************** Code *************************************/
@@ -230,6 +232,8 @@ int writeGoPid(void)
     return 0;
 }
 
+#ifdef CONFIG_RALINK_GPIO
+#ifdef CONFIG_USER_WSC
 static void goaSigHandler(int signum)
 {
 #ifdef CONFIG_RT2860V2_STA_WSC
@@ -241,8 +245,8 @@ static void goaSigHandler(int signum)
 #endif
 		WPSAPPBCStartAll();
 }
+#endif
 
-#ifdef CONFIG_RALINK_GPIO
 static void goaInitGpio(int helper)
 {
 	int fd;
@@ -314,14 +318,20 @@ static void InitSignals(int helper)
 #ifdef CONFIG_USER_GOAHEAD_HAS_WPSBTN
 		//register fs nvram reset helper
 		signal(SIGUSR1, goaSigReset);
-		signal(SIGHUP, goaSigHandler);
+#ifdef CONFIG_USER_WSC
+		signal(SIGHUP,  goaSigHandler);
+#endif
 #else
+#ifdef CONFIG_USER_WSC
 		signal(SIGUSR1, goaSigHandler);
+#endif
 #endif
 		signal(SIGUSR2, fs_nvram_reset_handler);
 #endif
+#ifdef CONFIG_USER_WSC
 		//regist WPS button
 		signal(SIGXFSZ, WPSSingleTriggerHandler);
+#endif
 	}
 
 #ifdef CONFIG_RALINK_GPIO
