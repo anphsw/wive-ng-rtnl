@@ -74,7 +74,7 @@ extern void WPSAPPBCStartAll(void);
 extern void WPSSingleTriggerHandler(int);
 extern void formDefineWireless(void);
 
-#if CONFIG_USER_GOAHEAD_HAS_WPSBTN
+#ifdef CONFIG_USER_GOAHEAD_HAS_WPSBTN
 static void goaSigReset(int signum);
 static void goaSigWPSHold(int signum);
 #endif
@@ -102,7 +102,7 @@ int main(int argc, char** argv)
  *	60KB allows for several concurrent page requests.  If more space
  *	is required, malloc will be used for the overflow.
  */
-#if CONFIG_USER_GOAHEAD_HAS_WPSBTN
+#ifdef CONFIG_USER_GOAHEAD_HAS_WPSBTN
 	int pid;
 #endif
 	char *auth_mode;
@@ -118,7 +118,7 @@ int main(int argc, char** argv)
 	if (writeGoPid() < 0)
 		return -1;
 
-#if CONFIG_USER_GOAHEAD_HAS_WPSBTN
+#ifdef CONFIG_USER_GOAHEAD_HAS_WPSBTN
 	pid = fork();
 
 	if (pid == -1) {
@@ -135,7 +135,7 @@ int main(int argc, char** argv)
 	/* Initialize the web server */
 	if (initWebs() < 0) {
 		//Clean-up and exit
-#if CONFIG_USER_GOAHEAD_HAS_WPSBTN
+#ifdef CONFIG_USER_GOAHEAD_HAS_WPSBTN
 	    if (pid > 0)
 		kill(pid, SIGTERM);
 #endif
@@ -183,7 +183,7 @@ int main(int argc, char** argv)
 		emfSchedProcess();
 	}
 
-#if CONFIG_USER_GOAHEAD_HAS_WPSBTN
+#ifdef CONFIG_USER_GOAHEAD_HAS_WPSBTN
 	//Kill helper
 	kill(pid, SIGTERM);
 #endif
@@ -234,9 +234,7 @@ static void goaSigHandler(int signum)
 {
 #ifdef CONFIG_RT2860V2_STA_WSC
 	char *opmode = nvram_get(RT2860_NVRAM, "OperationMode");
-#endif
 
-#ifdef CONFIG_RT2860V2_STA_WSC
 	if (!strcmp(opmode, "2"))	// wireless sta isp mode
 		WPSSTAPBCStartEnr();	// STA WPS default is "Enrollee mode".
 	else
@@ -289,7 +287,6 @@ ioctl_err:
 	close(fd);
 	return;
 }
-#endif
 
 static void fs_nvram_reset_handler (int signum)
 {
@@ -297,7 +294,7 @@ static void fs_nvram_reset_handler (int signum)
         //crash rwfs. restore at load
         system("fs restore");
 }
-
+#endif
 
 /******************************************************************************/
 /*
@@ -314,7 +311,7 @@ static void InitSignals(int helper)
 #endif
 	} else {
 #ifdef CONFIG_RALINK_GPIO
-#if CONFIG_USER_GOAHEAD_HAS_WPSBTN
+#ifdef CONFIG_USER_GOAHEAD_HAS_WPSBTN
 		//register fs nvram reset helper
 		signal(SIGUSR1, goaSigReset);
 		signal(SIGHUP, goaSigHandler);
@@ -609,7 +606,7 @@ static void printMemStats(int handle, char_t *fmt, ...)
 }
 #endif
 
-#if CONFIG_USER_GOAHEAD_HAS_WPSBTN
+#ifdef CONFIG_USER_GOAHEAD_HAS_WPSBTN
 static void goaSigReset(int signum)
 {
 	reboot_now();
@@ -625,7 +622,7 @@ static void goaSigWPSHold(int signum)
 static void goaSigWPSHlpr(int signum)
 {
 	int ppid;
-#if CONFIG_USER_GOAHEAD_HAS_WPSBTN
+#ifdef CONFIG_USER_GOAHEAD_HAS_WPSBTN
 	char *WPSHlprmode = nvram_get(RT2860_NVRAM, "UserWPSHlpr");
 	if (!strcmp(WPSHlprmode, "1")) {
     	    doSystem("/etc/scripts/OnPressWPS.button");
