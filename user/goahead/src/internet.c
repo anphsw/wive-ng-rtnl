@@ -189,6 +189,19 @@ void formDefineInternet(void) {
 }
 
 /*
+ * description: return 1 if vpn enables or 0 if disabled
+ */
+int vpn_mode_enabled(void)
+{
+    char *cm = nvram_get(RT2860_NVRAM, "wanConnectionMode");
+
+    if (!strncmp(cm, "PPPOE", 6) || !strncmp(cm, "L2TP", 5) || !strncmp(cm, "PPTP", 5))
+        return 1
+
+    return 0
+}
+
+/*
  * arguments: ifname  - interface name
  * description: test the existence of interface through /proc/net/dev
  * return: -1 = fopen error, 1 = not found, 0 = found
@@ -386,12 +399,10 @@ char* getPPPIfName(void)
  */
 char* getWanIfNamePPP(void)
 {
-    char *cm = nvram_get(RT2860_NVRAM, "wanConnectionMode");
-
-    if (!strncmp(cm, "PPPOE", 6) || !strncmp(cm, "L2TP", 5) || !strncmp(cm, "PPTP", 5))
+    if (vpn_mode_enabled() == 1)
         return getPPPIfName();
-
-    return getWanIfName();
+    else
+	return getWanIfName();
 }
 
 
@@ -438,13 +449,12 @@ char* getLanIfName(void)
 char *getLanWanNamebyIf(char *ifname)
 {
 	char *mode = nvram_get(RT2860_NVRAM, "OperationMode");
-	char *cm = nvram_get(RT2860_NVRAM, "wanConnectionMode");
 
 	if (NULL == mode)
 		return "Unknown";
 
 	/* VPN in all mode return VPN if vpn enabled */
-	if ((!strncmp(cm, "PPPOE", 6) || !strncmp(cm, "L2TP", 5) || !strncmp(cm, "PPTP", 5)) && strstr(ifname, getPPPIfName()) != NULL)
+	if (vpn_mode_enabled() == 1 && strstr(ifname, getPPPIfName()) != NULL)
 		return "VPN";
 
 	if (!strcmp(mode, "0")) { /* bridge mode */
