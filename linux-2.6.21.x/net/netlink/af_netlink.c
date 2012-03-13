@@ -416,7 +416,12 @@ static int netlink_create(struct socket *sock, int protocol)
 	if (nl_table[protocol].registered &&
 	    try_module_get(nl_table[protocol].module))
 		module = nl_table[protocol].module;
+	else
+		err = -EPROTONOSUPPORT;
 	netlink_unlock_table();
+
+	if (err < 0)
+		goto out;
 
 	if ((err = __netlink_create(sock, protocol)) < 0)
 		goto out_module;
