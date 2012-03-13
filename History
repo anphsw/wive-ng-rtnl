@@ -1008,7 +1008,7 @@
 5) Fix lo ip configure.<br>
 6) Backport some mips arch depended code from upstream.<br>
 7) Update dnsmasq to 2.60 version.<br>
-8) WebUI readed VPN iface name from /tmp/vpn_if_name instead static ppp0 (If file not exist - use ppp0 per default).<br>
+8) WebUI read VPN iface name from /tmp/vpn_if_name instead static ppp0 (If file not exist - use ppp0 per default).<br>
 9) WebUi corrects ifnames for WAN/LAN/PPP.<br>
 10) Small mm optimize.<br>
 11) Small net fixes backport.<br>
