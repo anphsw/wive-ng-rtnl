@@ -196,9 +196,9 @@ int vpn_mode_enabled(void)
     char *cm = nvram_get(RT2860_NVRAM, "wanConnectionMode");
 
     if (!strncmp(cm, "PPPOE", 6) || !strncmp(cm, "L2TP", 5) || !strncmp(cm, "PPTP", 5))
-        return 1
-
-    return 0
+        return 1;
+    else
+	return 0;
 }
 
 /*
