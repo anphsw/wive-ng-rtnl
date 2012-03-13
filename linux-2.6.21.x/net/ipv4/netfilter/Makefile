@@ -33,7 +33,7 @@ obj-$(CONFIG_NF_NAT_PPTP) += nf_nat_pptp.o
 # generic IP tables
 obj-$(CONFIG_IP_NF_IPTABLES) += ip_tables.o
 
-# the three instances of ip_tables                                                                                                          
+# the three instances of ip_tables
 obj-$(CONFIG_IP_NF_FILTER) += iptable_filter.o
 obj-$(CONFIG_IP_NF_MANGLE) += iptable_mangle.o
 obj-$(CONFIG_NF_NAT) += iptable_nat.o
