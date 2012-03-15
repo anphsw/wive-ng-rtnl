@@ -83,7 +83,7 @@ SECTIONS
 
 	.text : {			/* Real text segment		*/
 		_text = .;		/* Text and read-only data	*/
-			*(.text)
+			TEXT_TEXT
 			SCHED_TEXT
 			LOCK_TEXT
 #ifdef CONFIG_MMU
@@ -151,7 +151,7 @@ SECTIONS
 		/*
 		 * and the usual data section
 		 */
-		*(.data)
+		DATA_DATA
 		CONSTRUCTORS
 
 		_edata = .;

@@ -50,7 +50,7 @@ SECTIONS
     . = . + 0x8000;
 #endif
 #endif
-    *(.text)
+    TEXT_TEXT
     SCHED_TEXT
     LOCK_TEXT
     *(.fixup)
@@ -105,7 +105,7 @@ SECTIONS
     . = ALIGN(_PAGE_SIZE);
     *(.data.init_task)
 
-    *(.data)
+    DATA_DATA
 
     CONSTRUCTORS
   }

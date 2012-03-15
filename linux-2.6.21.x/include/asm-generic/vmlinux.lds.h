@@ -9,6 +9,10 @@
 /* Align . to a 8 byte boundary equals to maximum function alignment. */
 #define ALIGN_FUNCTION()  . = ALIGN(8)
 
+/* .data section */
+#define DATA_DATA							\
+	*(.data)
+
 #define RODATA								\
 	. = ALIGN(4096);						\
 	.rodata           : AT(ADDR(.rodata) - LOAD_OFFSET) {		\
@@ -139,6 +143,12 @@
 		VMLINUX_SYMBOL(__security_initcall_end) = .;		\
 	}
 
+/* .text section. Map to function alignment to avoid address changes
+ * during second ld run in second ld pass when generating System.map */
+#define TEXT_TEXT							\
+		ALIGN_FUNCTION();					\
+		*(.text)
+
 /* sched.text is aling to function alignment to secure we have same
  * address even at second ld pass when generating System.map */
 #define SCHED_TEXT							\
@@ -208,7 +218,7 @@
 	}
 
 #define NOTES								\
-		.notes : { *(.note.*) } :note
+	.notes : { *(.note.*) } :note
 
 #define INITCALLS							\
 	*(.initcallearly.init)						\

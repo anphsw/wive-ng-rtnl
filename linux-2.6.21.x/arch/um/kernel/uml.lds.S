@@ -37,7 +37,7 @@ SECTIONS
 
   .text      :
   {
-    *(.text)
+    TEXT_TEXT
     SCHED_TEXT
     LOCK_TEXT
     *(.fixup)
@@ -59,7 +59,7 @@ SECTIONS
   {
     . = ALIGN(KERNEL_STACK_SIZE);		/* init_task */
     *(.data.init_task)
-    *(.data)
+    DATA_DATA
     *(.gnu.linkonce.d*)
     CONSTRUCTORS
   }
