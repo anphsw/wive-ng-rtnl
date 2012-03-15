@@ -2015,7 +2015,7 @@ static size_t calculate_slab_order(struct kmem_cache *cachep,
 	return left_over;
 }
 
-static int setup_cpu_cache(struct kmem_cache *cachep)
+static int __init_refok setup_cpu_cache(struct kmem_cache *cachep)
 {
 	if (g_cpucache_up == FULL)
 		return enable_cpucache(cachep);

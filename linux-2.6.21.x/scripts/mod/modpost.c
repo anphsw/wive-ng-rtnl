@@ -563,6 +563,12 @@ static int strrcmp(const char *s, const char *sub)
 
 /**
  * Whitelist to allow certain references to pass with no warning.
+ *
+ * Pattern 0:
+ *   Do not warn if funtion/data are marked with __init_refok/__initdata_refok.
+ *   The pattern is identified by:
+ *   fromsec = .text.init.refok | .data.init.refok
+ *
  * Pattern 1:
  *   If a module parameter is declared __initdata and permissions=0
  *   then this is legal despite the warning generated.
@@ -615,6 +621,11 @@ static int secref_whitelist(const char *modname, const char *tosec,
 		"_einittext",
 		NULL
 	};
+
+	/* Check for pattern 0 */
+	if ((strcmp(fromsec, ".text.init.refok") == 0) ||
+	    (strcmp(fromsec, ".data.init.refok") == 0))
+		return 1;
 
 	/* Check for pattern 1 */
 	if (strcmp(tosec, ".init.data") != 0)
