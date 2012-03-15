@@ -6,8 +6,8 @@
 #define QOS_REMARK_CHAIN	"qos_remark_chain"
 
 #define CLASSIFIER_RULE		0
-#define REMARK_RULE			1
-#define RETURN_RULE			2
+#define REMARK_RULE		1
+#define RETURN_RULE		2
 
 #define HARD_LIMIT_RATE_MIN			2.0			// kbits
 
