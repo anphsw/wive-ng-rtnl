@@ -141,10 +141,20 @@
 	 * Reserved space for exception handlers.
 	 * Necessary for machines which link their kernels at KSEG0.
 	 */
-	/* fix ralink spi iomap bug */
+#if !defined (CONFIG_RALINK_RT2880) && \
+    !defined (CONFIG_RALINK_RT2883) && \
+    !defined (CONFIG_RALINK_RT3883) && \
+    !defined (CONFIG_RALINK_RT3352) && \
+    !defined (CONFIG_RALINK_RT3052) && \
+    !defined (CONFIG_RALINK_RT6855) && \
+    !defined (CONFIG_RALINK_RT5350)
+	.fill   0x400
+#else
+	/* workaround for SPI flash boot */
 	j       kernel_entry
 	nop
 	.fill   0x3f4
+#endif
 
 EXPORT(stext)					# used for profiling
 EXPORT(_stext)
