@@ -15,9 +15,10 @@
 #include        "sdk_version.h"				//vetsion config
 #include        "../options.h" 				//goahead options
 
-#include        "nvram.h"
 #include 	"webs.h"
 #include	"uemf.h"
+
+#include        "nvram.h"
 #include        "stapriv.h"
 
 #ifdef CONFIG_USER_WSC
