@@ -142,11 +142,11 @@ static inline void ip_tr_mc_map(__be32 addr, char *buf)
 }
 
 struct ip_reply_arg {
-	struct kvec iov[1];   
+	struct kvec iov[1];
 	__wsum 	    csum;
 	int	    csumoffset; /* u16 offset of csum in iov[0].iov_base */
-				/* -1 if not needed */ 
-}; 
+				/* -1 if not needed */
+};
 
 void ip_send_reply(struct sock *sk, struct sk_buff *skb, struct ip_reply_arg *arg,
 		   unsigned int len); 
@@ -214,6 +214,9 @@ int ip_dont_fragment(struct sock *sk, struct dst_entry *dst)
 		(inet_sk(sk)->pmtudisc == IP_PMTUDISC_WANT &&
 		 !(dst_metric(dst, RTAX_LOCK)&(1<<RTAX_MTU))));
 }
+
+/* ip_skb_dst_mtu need for external nat offload */
+extern inline int ip_skb_dst_mtu(struct sk_buff *skb);
 
 extern void __ip_select_ident(struct iphdr *iph, struct dst_entry *dst, int more);
 

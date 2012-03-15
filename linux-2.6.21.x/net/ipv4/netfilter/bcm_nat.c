@@ -12,7 +12,7 @@
  */
 
 #include <linux/module.h>
-#include <net/ip.h> 
+#include <net/ip.h>
 #include <net/route.h>
 #include <net/netfilter/nf_conntrack_core.h>
 
@@ -29,7 +29,7 @@ manip_pkt(u_int16_t proto,
 	  const struct nf_conntrack_tuple *target,
 	  enum nf_nat_manip_type maniptype);
 
-/* 
+/*
  * Send packets to output.
  */
 static inline int bcm_fast_path_output(struct sk_buff *skb)
@@ -51,23 +51,15 @@ static inline int bcm_fast_path_output(struct sk_buff *skb)
 		} while (read_seqretry(&hh->hh_lock, seq));
 
 		skb_push(skb, hh_len);
-		ret = hh->hh_output(skb); 
+		ret = hh->hh_output(skb);
 	} else if (dst->neighbour)
-		ret = dst->neighbour->output(skb);  
+		ret = dst->neighbour->output(skb);
 
-	/* Don't return 1 */	
-	if (ret==1) 
+	/* Don't return 1 */
+	if (ret==1)
 	    return 0;
 	else
 	    return ret;
-}
-
-static inline int ip_skb_dst_mtu(struct sk_buff *skb)
-{
-	struct inet_sock *inet = skb->sk ? inet_sk(skb->sk) : NULL;
-
-	return (inet && inet->pmtudisc == IP_PMTUDISC_PROBE) ?
-	       skb->dst->dev->mtu : dst_mtu(skb->dst);
 }
 
 static inline int bcm_fast_path(struct sk_buff *skb)
