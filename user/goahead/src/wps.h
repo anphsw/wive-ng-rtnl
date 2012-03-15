@@ -1,10 +1,6 @@
 #ifndef __WPS__H__
 #define __WPS__H__
 
-#ifdef CONFIG_RT2860V2_STA_WSC                      // if support Wifi - STA
-#include "stapriv.h"
-#endif
-
 #include "utils.h"
 
 #define LedReset()                  {ledWps(GPIO_WPS_LED_ORANGE, WPS_LED_RESET); ledWps(GPIO_WPS_LED_GREEN, WPS_LED_RESET);}

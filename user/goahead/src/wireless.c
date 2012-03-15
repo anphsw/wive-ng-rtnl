@@ -19,7 +19,6 @@
 #include	"wireless.h"
 #include	"internet.h"
 #include	"oid.h"
-#include	"stapriv.h"
 #include 	"helpers.h"
 
 #define AP_MODE

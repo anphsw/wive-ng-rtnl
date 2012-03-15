@@ -15,7 +15,6 @@
 
 #include	"utils.h"
 #include	"oid.h"
-#include	"stapriv.h"
 #include	"internet.h"
 #include	"helpers.h"
 

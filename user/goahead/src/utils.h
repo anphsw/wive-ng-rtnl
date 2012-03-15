@@ -18,6 +18,7 @@
 #include        "nvram.h"
 #include 	"webs.h"
 #include	"uemf.h"
+#include        "stapriv.h"
 
 #ifdef CONFIG_USER_WSC
 #include	"wps.h"
