@@ -8,7 +8,6 @@
 #include    "utils.h"
 #include    "internet.h"
 #include    "firewall.h"
-#include    "qos.h"
 
 extern char l7name[];							// in firewall.c
 int getRuleNums(char *);

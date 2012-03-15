@@ -34,10 +34,6 @@
 #include	"station.h"
 #include	"usb.h"
 
-#ifdef CONFIG_NET_SCHED
-#include      "qos.h"
-#endif
-
 #ifdef WEBS_SSL_SUPPORT
 #include	"websSSL.h"
 #endif
@@ -61,34 +57,26 @@ static int		finished;				/* Finished flag */
 
 /****************************** Forward Declarations **************************/
 
+extern void defaultErrorHandler(int etype, char_t *msg);
+extern void defaultTraceHandler(int level, char_t *buf);
+extern void formDefineWireless(void);
+
 static int writeGoPid(void);
 static void InitSignals(int helper);
 static int initWebs(void);
 static int websHomePageHandler(webs_t wp, char_t *urlPrefix, char_t *webDir, int arg, char_t *url, char_t *path, char_t *query);
-extern void defaultErrorHandler(int etype, char_t *msg);
-extern void defaultTraceHandler(int level, char_t *buf);
-extern void ripdRestart(void);
-extern void formDefineWireless(void);
 
-#ifdef CONFIG_USER_WSC
-extern void WPSSingleTriggerHandler(int);
-extern void WPSAPPBCStartAll(void);
-#ifdef CONFIG_RT2860V2_STA_WSC
-extern void WPSSTAPBCStartEnr(void);
+#ifdef B_STATS
+static void printMemStats(int handle, char_t *fmt, ...);
+static void memLeaks();
 #endif
-#endif
+
 #ifdef CONFIG_USER_GOAHEAD_HAS_WPSBTN
 static void goaSigReset(int signum);
 static void goaSigWPSHold(int signum);
 static void goaSigWPSHlpr(int signum);
 #endif
-#ifdef B_STATS
-static void printMemStats(int handle, char_t *fmt, ...);
-static void memLeaks();
-#endif
-#ifdef CONFIG_USB
-extern void hotPluglerHandler(int);
-#endif
+
 
 /*********************************** Code *************************************/
 /*

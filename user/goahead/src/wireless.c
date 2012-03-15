@@ -7,7 +7,6 @@
  *	$Id: wireless.c,v 1.113.2.3 2009-04-17 03:37:53 chhung Exp $
  */
 
-#include	"../../autoconf.h"
 #include	<stdlib.h>
 #include	<sys/ioctl.h>
 #include	<arpa/inet.h>
@@ -189,7 +188,8 @@ const country_code_t country_codes[] =
 	{ NULL, NULL }
 };
 
-void formDefineWireless(void) {
+void formDefineWireless(void)
+{
 	websAspDefine(T("getVideoTurbineBuilt"), getVideoTurbineBuilt);
 	websAspDefine(T("getWlan11aChannels"), getWlan11aChannels);
 	websAspDefine(T("getWlan11bChannels"), getWlan11bChannels);

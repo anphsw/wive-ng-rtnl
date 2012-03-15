@@ -49,10 +49,6 @@ typedef struct vpn_status_t
 	long          color;
 } vpn_status_t;
 
-#ifdef CONFIG_NET_SCHED
-#include      "qos.h"
-#endif
-
 static int getMeshBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getWDSBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getWSCBuilt(int eid, webs_t wp, int argc, char_t **argv);

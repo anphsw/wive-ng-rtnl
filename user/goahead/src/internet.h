@@ -18,5 +18,4 @@ char* getWanIfNamePPP(void);
 char* getLanIfName(void);
 char *getLanWanNamebyIf(char *ifname);
 void initInternet(void);
-
-
+void ripdRestart(void);

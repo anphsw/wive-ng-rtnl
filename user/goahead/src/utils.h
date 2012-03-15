@@ -6,14 +6,14 @@
  *	$Id: utils.h,v 1.25 2008-03-17 09:28:40 yy Exp $
  */
 
-#include        "linux/config.h"			//kernel config
-#include        "linux/ralink_gpio.h"			//gpio config
-#include 	"linux/reboot.h"			//reboot function
-
 #include        "config/autoconf.h"			//user config
+#include        "linux/config.h"			//kernel config
+#include        "../options.h" 				//goahead options
 #include        "user/busybox/include/autoconf.h"	//busybox config
 #include        "sdk_version.h"				//vetsion config
-#include        "../options.h" 				//goahead options
+
+#include        "linux/ralink_gpio.h"			//gpio config
+#include 	"linux/reboot.h"			//reboot function
 
 #include 	"webs.h"
 #include	"uemf.h"
@@ -23,6 +23,10 @@
 
 #ifdef CONFIG_USER_WSC
 #include	"wps.h"
+#endif
+
+#ifdef CONFIG_NET_SCHED
+#include	"qos.h"
 #endif
 
 #define LED_ON				1
