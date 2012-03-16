@@ -1014,6 +1014,7 @@
 11) Small net fixes backport.<br>
 12) WebUI not build wsc support if WSC daemon disabled.<br>
 13) Fix pmtu discovery probe (re add lost patch).<br>
+14) Update xupnpd to r295 version.<br>
 
 <br><br>
 <b>For support see:</b><br>
