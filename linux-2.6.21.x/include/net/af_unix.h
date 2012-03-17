@@ -16,7 +16,7 @@ extern void wait_for_unix_gc(void);
 extern struct hlist_head unix_socket_table[UNIX_HASH_SIZE + 1];
 extern spinlock_t unix_table_lock;
 
-extern atomic_t unix_tot_inflight;
+extern unsigned int unix_tot_inflight;
 
 static inline struct sock *first_unix_socket(int *i)
 {
