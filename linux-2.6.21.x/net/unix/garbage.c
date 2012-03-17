@@ -163,7 +163,7 @@ static inline struct sk_buff *sock_queue_head(struct sock *sk)
 	for (skb = sock_queue_head(sk)->next, next = skb->next; \
 	     skb != sock_queue_head(sk); skb = next, next = skb->next)
 
-static void scan_inflight(struct sock *x, void (*func)(struct sock *),
+static void scan_inflight(struct sock *x, void (*func)(struct unix_sock *),
 			  struct sk_buff_head *hitlist)
 {
 	struct sk_buff *skb;
@@ -187,7 +187,7 @@ static void scan_inflight(struct sock *x, void (*func)(struct sock *),
 				 *	if it indeed does so
 				 */
 				struct sock *sk = unix_get_socket(*fp++);
-				if(sk) {
+				if (sk) {
 					struct unix_sock *u = unix_sk(sk);
 
 					/*
@@ -197,7 +197,7 @@ static void scan_inflight(struct sock *x, void (*func)(struct sock *),
 					 */
 					if (u->gc_candidate) {
 						hit = true;
-						func(sk);
+						func(unix_sk(sk));
 					}
 				}
 			}
@@ -210,7 +210,7 @@ static void scan_inflight(struct sock *x, void (*func)(struct sock *),
 	spin_unlock(&x->sk_receive_queue.lock);
 }
 
-static void scan_children(struct sock *x, void (*func)(struct sock *),
+static void scan_children(struct sock *x, void (*func)(struct unix_sock *),
 			  struct sk_buff_head *hitlist)
 {
 	if (x->sk_state != TCP_LISTEN)
@@ -246,20 +246,18 @@ static void scan_children(struct sock *x, void (*func)(struct sock *),
 	}
 }
 
-static void dec_inflight(struct sock *sk)
+static void dec_inflight(struct unix_sock *usk)
 {
-	atomic_dec(&unix_sk(sk)->inflight);
+	atomic_dec(&usk->inflight);
 }
 
-static void inc_inflight(struct sock *sk)
+static void inc_inflight(struct unix_sock *usk)
 {
-	atomic_inc(&unix_sk(sk)->inflight);
+	atomic_inc(&usk->inflight);
 }
 
-static void inc_inflight_move_tail(struct sock *sk)
+static void inc_inflight_move_tail(struct unix_sock *u)
 {
-	struct unix_sock *u = unix_sk(sk);
-
 	atomic_inc(&u->inflight);
 	/*
 	 * If this still might be part of a cycle, move it to the end
