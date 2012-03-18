@@ -176,9 +176,6 @@ config ARCH_MAY_HAVE_PC_FDC
 config DMA_COHERENT
 	bool
 
-config DMA_IP27
-	bool
-
 config DMA_IP32
 	bool
 	select DMA_NEED_PCI_MAP_STATE
