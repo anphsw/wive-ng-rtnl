@@ -223,7 +223,7 @@ static int ct_seq_show(struct seq_file *s, void *v)
 	return 0;
 }
 
-static struct seq_operations ct_seq_ops = {
+static const struct seq_operations ct_seq_ops = {
 	.start = ct_seq_start,
 	.next  = ct_seq_next,
 	.stop  = ct_seq_stop,
@@ -312,7 +312,7 @@ static int ct_cpu_seq_show(struct seq_file *seq, void *v)
 	return 0;
 }
 
-static struct seq_operations ct_cpu_seq_ops = {
+static const struct seq_operations ct_cpu_seq_ops = {
 	.start	= ct_cpu_seq_start,
 	.next	= ct_cpu_seq_next,
 	.stop	= ct_cpu_seq_stop,
