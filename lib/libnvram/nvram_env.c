@@ -989,6 +989,9 @@ int gen_wifi_config(int mode)
 
 #if defined (CONFIG_RT2860V2_AP_VIDEO_TURBINE) || defined (CONFIG_RT2860V2_STA_VIDEO_TURBINE)
 		FPRINT_NUM(VideoTurbine);
+		FPRINT_NUM(VideoClassifierEnable);
+		FPRINT_NUM(VideoHighTxMode);
+		FPRINT_NUM(VideoTxLifeTimeMode);
 #endif
 
 		//WmmCapable
