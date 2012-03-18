@@ -1018,6 +1018,7 @@
 15) Revert incorrect accept queue backlog changes.<br>
 16) Add some videoturbine parametrs to default nvram base.<br>
 17) Some fixes in af_unix.<br>
+18) Openssl up to 0.9.8u (12.03.2012) version.<br>
 
 <br><br>
 <b>For support see:</b><br>
