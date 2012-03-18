@@ -92,7 +92,7 @@ swap_off() {
 }
 
 mount_err() {
-  if ! rm -r "$MOUNT_DST"; then
+  if ! rmdir "$MOUNT_DST"; then
     $LOG "can not del $MOUNT_DST"
     exit 1
   fi

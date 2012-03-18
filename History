@@ -1015,6 +1015,9 @@
 12) WebUI not build wsc support if WSC daemon disabled.<br>
 13) Fix pmtu discovery probe (re add lost patch).<br>
 14) Update xupnpd to r295 version.<br>
+15) Revert incorrect accept queue backlog changes.<br>
+16) Add some videoturbine parametrs to default nvram base.<br>
+17) Some fixes in af_unix.<br>
 
 <br><br>
 <b>For support see:</b><br>
