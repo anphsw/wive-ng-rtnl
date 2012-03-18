@@ -27,6 +27,10 @@
 #undef CONFIG_CPU_HAS_PREFETCH
 #endif
 
+#ifdef CONFIG_CPU_HAS_PREFETCH
+#include <linux/prefetch.h>
+#endif
+
 #include <asm/asm.h>
 #include <asm/asm-offsets.h>
 #include <asm/regdef.h>
