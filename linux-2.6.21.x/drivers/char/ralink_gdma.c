@@ -770,7 +770,6 @@ static void __exit RalinkGdmaExit(void)
 module_init(RalinkGdmaInit);
 module_exit(RalinkGdmaExit);
 
-
 EXPORT_SYMBOL(GdmaI2sTx);
 EXPORT_SYMBOL(GdmaPcmRx);
 EXPORT_SYMBOL(GdmaPcmTx);
@@ -778,7 +777,6 @@ EXPORT_SYMBOL(GdmaMem2Mem);
 EXPORT_SYMBOL(GdmaReqQuickIns);
 EXPORT_SYMBOL(GdmaMaskChannel);
 EXPORT_SYMBOL(GdmaUnMaskChannel);
-
 
 MODULE_DESCRIPTION("Ralink SoC GDMA Controller API Module");
 MODULE_AUTHOR("Steven Liu <steven_liu@ralinktech.com.tw>");

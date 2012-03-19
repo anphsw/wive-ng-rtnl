@@ -59,6 +59,7 @@ extern int ppp_cpu_load;
 #ifdef CONFIG_RALINK_GPIO_LED_VPN
 #include <linux/ralink_gpio.h>
 ralink_gpio_led_info led;
+extern int ralink_gpio_led_set(ralink_gpio_led_info led);
 #endif
 
 #define PPP_VERSION	"2.4.2"
