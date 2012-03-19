@@ -24,10 +24,8 @@ static int	getWPASupplicantBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int	getCACLCertList(int eid, webs_t wp, int argc, char_t **argv);
 static int	getKeyCertList(int eid, webs_t wp, int argc, char_t **argv);
 static int	getStaAdhocChannel(int eid, webs_t wp, int argc, char_t **argv);
-static int	getStaAllProfileName(int eid, webs_t wp, int argc, char_t **argv);
 static int	getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv);
 static int	getStaConnectedBSSID(int eid, webs_t wp, int argc, char_t **argv);
-static int	getStaConnectionSSID(int eid, webs_t wp, int argc, char_t **argv);
 static int	getStaDbm(int eid, webs_t wp, int argc, char_t **argv);
 static int	getStaDLSList(int eid, webs_t wp, int argc, char_t **argv);
 static int	getStaDriverVer(int eid, webs_t wp, int argc, char_t **argv);
@@ -42,8 +40,8 @@ static int	getStaLinkTxRate(int eid, webs_t wp, int argc, char_t **argv);
 static int	getStaMacAddr(int eid, webs_t wp, int argc, char_t **argv);
 static int	getStaNewProfileName(int eid, webs_t wp, int argc, char_t **argv);
 static int	getStaNoiseLevel(int eid, webs_t wp, int argc, char_t **argv);
-static int	getStaProfile(int eid, webs_t wp, int argc, char_t **argv);
-static int	getStaProfileData(int eid, webs_t wp, int argc, char_t **argv);
+static int	getStaAuthModes(int eid, webs_t wp, int argc, char_t **argv);
+static int	getStaEncryptModes(int eid, webs_t wp, int argc, char_t **argv);
 static int	getStaRadioStatus(int eid, webs_t wp, int argc, char_t **argv);
 static int	getStaRxThroughput(int eid, webs_t wp, int argc, char_t **argv);
 static int	getStaTxThroughput(int eid, webs_t wp, int argc, char_t **argv);
@@ -61,12 +59,9 @@ static int	getStaWirelessMode(int eid, webs_t wp, int argc, char_t **argv);
 
 static int	getStaTrModes(int eid, webs_t wp, int argc, char_t **argv);
 
-static void addStaProfile(webs_t wp, char_t *path, char_t *query);
-static void editStaProfile(webs_t wp, char_t *path, char_t *query);
 static void resetStaCounters(webs_t wp, char_t *path, char_t *query);
 static void setSta11nCfg(webs_t wp, char_t *path, char_t *query);
 static void setStaAdvance(webs_t wp, char_t *path, char_t *query);
-static void setStaConnect(webs_t wp, char_t *path, char_t *query);
 static void setStaDbm(webs_t wp, char_t *path, char_t *query);
 static void setStaProfile(webs_t wp, char_t *path, char_t *query);
 static void setStaOrgAdd(webs_t wp, char_t *path, char_t *query);
@@ -74,6 +69,7 @@ static void setStaOrgDel(webs_t wp, char_t *path, char_t *query);
 static void setStaQoS(webs_t wp, char_t *path, char_t *query);
 static int getStaDLSTimeout(int eid, webs_t wp, int argc, char_t **argv);
 static int getStaDLSMacAddress(int eid, webs_t wp, int argc, char_t **argv);
+static int getActiveProfileStatus(int eid, webs_t wp, int argc, char_t **argv);
 
 void formDefineStation(void)
 {
@@ -81,10 +77,8 @@ void formDefineStation(void)
 	websAspDefine(T("getCACLCertList"), getCACLCertList);
 	websAspDefine(T("getKeyCertList"), getKeyCertList);
 	websAspDefine(T("getStaAdhocChannel"), getStaAdhocChannel);
-	websAspDefine(T("getStaAllProfileName"), getStaAllProfileName);
 	websAspDefine(T("getStaBSSIDList"), getStaBSSIDList);
 	websAspDefine(T("getStaConnectedBSSID"), getStaConnectedBSSID);
-	websAspDefine(T("getStaConnectionSSID"), getStaConnectionSSID);
 	websAspDefine(T("getStaDbm"), getStaDbm);
 	websAspDefine(T("getStaDLSList"), getStaDLSList);
 	websAspDefine(T("getStaDriverVer"), getStaDriverVer);
@@ -99,8 +93,9 @@ void formDefineStation(void)
 	websAspDefine(T("getStaMacAddr"), getStaMacAddr);
 	websAspDefine(T("getStaNewProfileName"), getStaNewProfileName);
 	websAspDefine(T("getStaNoiseLevel"), getStaNoiseLevel);
-	websAspDefine(T("getStaProfile"), getStaProfile);
-	websAspDefine(T("getStaProfileData"), getStaProfileData);
+	websAspDefine(T("getActiveProfileStatus"), getActiveProfileStatus);
+	websAspDefine(T("getStaAuthModes"), getStaAuthModes);
+	websAspDefine(T("getStaEncryptModes"), getStaEncryptModes);
 	websAspDefine(T("getStaRadioStatus"), getStaRadioStatus);
 	websAspDefine(T("getStaRxThroughput"), getStaRxThroughput);
 	websAspDefine(T("getStaTxThroughput"), getStaTxThroughput);
@@ -119,11 +114,8 @@ void formDefineStation(void)
 	websAspDefine(T("getStaDLSMacAddress"), getStaDLSMacAddress);
 	websAspDefine(T("getStaTrModes"), getStaTrModes);
 
-	websFormDefine(T("addStaProfile"), addStaProfile);
-	websFormDefine(T("editStaProfile"), editStaProfile);
 	websFormDefine(T("resetStaCounters"), resetStaCounters);
 	websFormDefine(T("setStaAdvance"), setStaAdvance);
-	websFormDefine(T("setStaConnect"), setStaConnect);
 	websFormDefine(T("setStaDbm"), setStaDbm);
 	websFormDefine(T("setStaProfile"), setStaProfile);
 	websFormDefine(T("setStaOrgAdd"), setStaOrgAdd);
@@ -132,7 +124,7 @@ void formDefineStation(void)
 }
 
 
-PRT_PROFILE_SETTING selectedProfileSetting = NULL, headerProfileSetting = NULL, currentProfileSetting = NULL;
+PRT_PROFILE_SETTING headerProfileSetting = NULL; //selectedProfileSetting = NULL, headerProfileSetting = NULL, currentProfileSetting = NULL;
 
 unsigned char   Active_flag=0, nConfig_flag=0;
 unsigned int    m_nSigQua[3] = {0,0,0};
@@ -207,14 +199,17 @@ int G_nChanFreqCount = sizeof (ChannelFreqTable) / sizeof(PAIR_CHANNEL_FREQ_ENTR
 
 void freeHeaderProfileSettings(void)
 {
-	PRT_PROFILE_SETTING list = headerProfileSetting;
-	PRT_PROFILE_SETTING next;
-	while(list){
+	PRT_PROFILE_SETTING list = headerProfileSetting, next;
+
+	while (list != NULL)
+	{
 		next = list->Next;
 		free(list);
 		list = next;
 		next = list->Next;
 	}
+	
+	headerProfileSetting = NULL;
 }
 
 int OidQueryInformation(unsigned long OidQueryCode, int socket_id, char *DeviceName, void *ptr, unsigned long PtrLength)
@@ -244,67 +239,6 @@ int OidSetInformation(unsigned long OidQueryCode, int socket_id, char *DeviceNam
 	wrq.u.data.flags = OidQueryCode | OID_GET_SET_TOGGLE;
 
 	return (ioctl(socket_id, RT_PRIV_IOCTL, &wrq));
-}
-
-void ConverterStringToDisplay(char *str)
-{
-    int  len, i;
-    char buffer[193];
-    char *pOut;
-
-    memset(buffer,0,193);
-    len = strlen(str);
-    pOut = &buffer[0];
-
-    for (i = 0; i < len; i++) {
-		switch (str[i]) {
-			case '&':
-				strcpy (pOut, "&amp;");
-				pOut += 5;
-				break;
-
-			case '<': 
-				strcpy (pOut, "&lt;");
-				pOut += 4;
-				break;
-
-			case '>': 
-				strcpy (pOut, "&gt;");
-				pOut += 4;
-				break;
-
-			case '"':
-				strcpy (pOut, "&quot;");
-				pOut += 6;
-				break;
-
-				//case ' ':
-				//strcpy (pOut, "&nbsp;");
-				//pOut += 6;
-				//break;
-
-			default:
-				if ((str[i]>=0) && (str[i]<=31)) {
-					//Device Control Characters
-					sprintf(pOut, "&#%02d;", str[i]);
-					pOut += 5;
-				} else if ((str[i]==39) || (str[i]==47) || (str[i]==59) || (str[i]==92)) {
-					// ' / ; (backslash)
-					sprintf(pOut, "&#%02d;", str[i]);
-					pOut += 5;
-				} else if (str[i]>=127) {
-					//Device Control Characters
-					sprintf(pOut, "&#%03d;", str[i]);
-					pOut += 6;
-				} else {
-					*pOut = str[i];
-					pOut++;
-				}
-				break;
-		}
-    }
-    *pOut = '\0';
-    strcpy(str, buffer);
 }
 
 unsigned int ConvertRssiToSignalQuality(long RSSI)
@@ -340,27 +274,6 @@ static int getStaAdhocChannel(int eid, webs_t wp, int argc, char_t **argv)
 
 	country_region = country_region_bg | ( country_region_a << 8);
 	return websWrite(wp, "%ld", country_region);
-}
-
-/*
- * description: write station all profile names
- */
-static int getStaAllProfileName(int eid, webs_t wp, int argc, char_t **argv)
-{
-	char tmp[1024];
-	memset(tmp, 0x00, sizeof(tmp));
-	if (headerProfileSetting != NULL) {
-		currentProfileSetting = headerProfileSetting;
-		snprintf(tmp, 1024, "%s", currentProfileSetting->Profile);
-		do {
-			currentProfileSetting = currentProfileSetting->Next;
-			if (currentProfileSetting != NULL)
-				snprintf(tmp, 1024, "%s;%s", tmp, currentProfileSetting->Profile);
-		} while (currentProfileSetting != NULL );
-		return websWrite(wp, tmp);
-	}
-	else
-		return websWrite(wp, " ");
 }
 
 /*
@@ -875,68 +788,6 @@ static int getStaConnectedBSSID(int eid, webs_t wp, int argc, char_t **argv)
 }
 
 /*
- * description: write the SSID that station connected to
- */
-static int getStaConnectionSSID(int eid, webs_t wp, int argc, char_t **argv)
-{
-	int  ConnectStatus = NdisMediaStateDisconnected;
-	NDIS_802_11_SSID  SsidQuery;
-	unsigned char     BssidQuery[6];
-	char              strSSID[NDIS_802_11_LENGTH_SSID + 1];
-	int  s, ret;
-
-	s = socket(AF_INET, SOCK_DGRAM, 0);
-
-	//step 1
-	if (OidQueryInformation(OID_GEN_MEDIA_CONNECT_STATUS, s, "ra0", &ConnectStatus, sizeof(ConnectStatus)) < 0)
-	{
-		websError(wp, 500, "Query OID_GEN_MEDIA_CONNECT_STATUS error!");
-		close(s);
-		return -1;
-	}
-
-	//step 2
-	if (OidQueryInformation(RT_OID_802_11_RADIO, s, "ra0", &G_bRadio, sizeof(G_bRadio)) < 0)
-	{
-		websError(wp, 500, "Query RT_OID_802_11_RADIO error!");
-		close(s);
-		return -1;
-	}
-
-	if (ConnectStatus == NdisMediaStateConnected && G_bRadio)
-	{
-		memset(&SsidQuery, 0x00, sizeof(SsidQuery));
-		OidQueryInformation(OID_802_11_SSID, s, "ra0", &SsidQuery, sizeof(SsidQuery));
-
-		if (SsidQuery.SsidLength == 0) {
-			memset(&BssidQuery, 0x00, sizeof(BssidQuery));
-			ret = OidQueryInformation(OID_802_11_BSSID, s, "ra0", &BssidQuery, sizeof(BssidQuery));
-			websWrite(wp, "Connected <--> [%02X:%02X:%02X:%02X:%02X:%02X]",
-					BssidQuery[0], BssidQuery[1], BssidQuery[2],
-					BssidQuery[3], BssidQuery[4], BssidQuery[5]);
-		}
-		else {
-			memset(strSSID, 0x00, NDIS_802_11_LENGTH_SSID + 1);
-			memcpy(strSSID, SsidQuery.Ssid, SsidQuery.SsidLength);
-			websWrite(wp, "Connected <--> %s", strSSID);
-		}
-		G_ConnectStatus = NdisMediaStateConnected;
-	}
-	else if (G_bRadio)
-	{
-		websWrite(wp, "Disconnected");
-		G_ConnectStatus = NdisMediaStateDisconnected;
-	}
-	else
-	{
-		G_ConnectStatus = NdisMediaStateDisconnected;
-		websWrite(wp, "Radio Off");
-	}
-	close(s);
-	return 0;
-}
-
-/*
  * description: return G_bdBm_ischeck (displaying dbm or % type)
  */
 static int getStaDLSList(int eid, webs_t wp, int argc, char_t **argv)
@@ -1400,7 +1251,7 @@ static int getStaNewProfileName(int eid, webs_t wp, int argc, char_t **argv)
 	{
 		int count = 1, len=0;
 		char cnum;
-		currentProfileSetting = headerProfileSetting;
+		PRT_PROFILE_SETTING currentProfileSetting = headerProfileSetting;
 		do {
 			if (strncmp(currentProfileSetting->Profile, "PROF", 4) == 0) {
 				len = strlen((char *)currentProfileSetting->Profile);
@@ -1478,626 +1329,139 @@ static int getStaNoiseLevel(int eid, webs_t wp, int argc, char_t **argv)
  */
 void initStaProfile(void)
 {
-	PRT_PROFILE_SETTING nextProfileSetting;
-	char tmp_buffer[512];
-	const char *wordlist = NULL;
-	char *tok = NULL;
 	int i;
 
-	// fprintf(stderr, "kathy -- init_StaProfile()\n");
 	G_ConnectStatus = NdisMediaStateDisconnected;
 
-	//staProfile
-	bzero(tmp_buffer, sizeof(tmp_buffer));
-	wordlist = nvram_get(RT2860_NVRAM, "staProfile");
-	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
-		error(E_L, E_LOG, T("no previous profiles defined"));
+	// Free previously allocated profile settings
+	freeHeaderProfileSettings();
+	
+	// Initialize string splitter
+	string_split_t split;
+	if (initSplitter(&split) != 0)
+	{
+		error(E_L, E_LOG, T("Error while trying to acqiure resources for profile parsing"));
 		return;
 	}
-
-	if (headerProfileSetting == NULL )
+	
+	// Initialize NVRAM
+	nvram_init(RT2860_NVRAM);
+	
+	// Try to fetch profile names & determine number of profiles
+	splitString(&split, nvram_bufget(RT2860_NVRAM, "staProfile"), ';');
+	PRT_PROFILE_SETTING *p_new = &headerProfileSetting;
+	
+	for (i=0; i<split.found; i++)
 	{
-		headerProfileSetting = malloc(sizeof(RT_PROFILE_SETTING));
-		memset(headerProfileSetting, 0x00, sizeof(RT_PROFILE_SETTING));
-		headerProfileSetting->Next = NULL;
-	}
-	currentProfileSetting = headerProfileSetting;
-
-	sprintf(tmp_buffer, "%s", wordlist);
-	for (i = 0, tok = strtok(tmp_buffer,";") ; tok ;  i++)
-	{
-		//profile
-		sprintf((char *)currentProfileSetting->Profile, "%s", tok);
-		// fprintf(stderr, "i=%d, Profile=%s, tok=%s\n", i,currentProfileSetting->Profile, tok);
-		tok = strtok(NULL,";");
-
-		if (tok != NULL && currentProfileSetting->Next == NULL) {
-			nextProfileSetting = malloc(sizeof(RT_PROFILE_SETTING));
-			memset(nextProfileSetting, 0x00, sizeof(RT_PROFILE_SETTING));
-			nextProfileSetting->Next = NULL;
-			currentProfileSetting->Next = nextProfileSetting;
-			currentProfileSetting = nextProfileSetting;
+		// String is empty?
+		if (CHK_IF_EMPTYSTR(split.items[i]) && (i <= 0))
+		{
+			error(E_L, E_LOG, T("no previous profiles defined"));
+			freeSplitter(&split);
+			nvram_close(RT2860_NVRAM);
+			return;
 		}
-		else
-			currentProfileSetting = currentProfileSetting->Next;
-	}
-	G_staProfileNum = i;
+		
+		PRT_PROFILE_SETTING p = (PRT_PROFILE_SETTING)malloc(sizeof(RT_PROFILE_SETTING));
+		if (p == NULL)
+		{
+			error(E_L, E_LOG, T("Not enough memory"));
+			freeSplitter(&split);
+			freeHeaderProfileSettings();
+			nvram_close(RT2860_NVRAM);
+			return;
+		}
+		bzero(p, sizeof(RT_PROFILE_SETTING));
+		strcpy(p->Profile, split.items[i]); // TODO: profile name length check
+		//printf("staProfile[%d]=%s\n", i, p->Profile);
 
-	// SSID
-	bzero(tmp_buffer, sizeof(tmp_buffer));
-	wordlist = nvram_get(RT2860_NVRAM, "staSSID");
-	if (wordlist == NULL || strcmp(wordlist, "" ) == 0)
-	{
-		error(E_L, E_LOG, T("Sta SSID has no data."));
-	} else {
-	    currentProfileSetting = headerProfileSetting;
-	    sprintf(tmp_buffer, "%s", wordlist);
-	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++)
-	    {
-		sprintf((char *)currentProfileSetting->SSID, "%s", tok);
-		currentProfileSetting->SsidLen = strlen(tok);
-		if (currentProfileSetting->Next != NULL)
-			currentProfileSetting = currentProfileSetting->Next;
-	    }
+		// Add to list
+		p->Next = NULL;
+		*p_new = p;
+		p_new = &p->Next;
 	}
 
-	// NetworkType
-	bzero(tmp_buffer, sizeof(tmp_buffer));
-	wordlist = nvram_get(RT2860_NVRAM, "staNetworkType");
-	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
-		error(E_L, E_LOG, T("Sta NetworkType has no data."));
-	} else {
-	    currentProfileSetting = headerProfileSetting;
-	    sprintf(tmp_buffer, "%s", wordlist);
-	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
-		currentProfileSetting->NetworkType = atoi(tok);
-		// fprintf(stderr, "i=%d, NetworkType=%d\n", i,currentProfileSetting->NetworkType);
-		if (currentProfileSetting->Next != NULL)
-			currentProfileSetting = currentProfileSetting->Next;
-	    }
+	G_staProfileNum = split.found;
+
+	// Now parse other variables
+	PRT_PROFILE_SETTING p = headerProfileSetting;
+
+#define PARSE_STR(var, p_var) \
+	splitString(&split, nvram_bufget(RT2860_NVRAM, var), ';'); \
+	for (i=0, p=headerProfileSetting ; (i < split.found) && (p != NULL); i++, p=p->Next) \
+	{ \
+		strcpy((char *)(p_var), split.items[i]); \
+		/*printf(var "[%d]=%s\n", i, p_var);*/ \
 	}
 
-	// PSMode
-	bzero(tmp_buffer, sizeof(tmp_buffer));
-	wordlist = nvram_get(RT2860_NVRAM, "staPSMode");
-	if (wordlist == NULL || strcmp(wordlist, "" ) == 0)	{
-		error(E_L, E_LOG, T("Sta PSMode has no data."));
-	} else {
-	    currentProfileSetting = headerProfileSetting;
-	    sprintf(tmp_buffer, "%s", wordlist);
-	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
-		currentProfileSetting->PSmode= atoi(tok);
-		if (currentProfileSetting->Next != NULL)
-			currentProfileSetting = currentProfileSetting->Next;
-	    }
+#define PARSE_INT(var, p_var) \
+	splitString(&split, nvram_bufget(RT2860_NVRAM, var), ';'); \
+	for (i=0, p=headerProfileSetting; (i < split.found) && (p != NULL); i++, p=p->Next) \
+	{ \
+		p_var = atoi(split.items[i]); \
+		/*printf(var "[%d]=%d\n", i, p_var);*/ \
 	}
 
-	// AdhocMode
-	bzero(tmp_buffer, sizeof(tmp_buffer));
-	wordlist = nvram_get(RT2860_NVRAM, "staAdhocMode");
-	if (wordlist == NULL || strcmp(wordlist, "" ) == 0)	{
-		error(E_L, E_LOG, T("Sta AdhocMode has no data."));
-	} else {
-	    currentProfileSetting = headerProfileSetting;
-	    sprintf(tmp_buffer, "%s", wordlist);
-	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
-		currentProfileSetting->AdhocMode= atoi(tok);
-		if (currentProfileSetting->Next != NULL)
-			currentProfileSetting = currentProfileSetting->Next;
-	    }
-	}
+	// Common config
+	PARSE_STR("staSSID", p->SSID); // SSID
+	
+	PARSE_INT("staNetworkType", p->NetworkType); // NetworkType
+	PARSE_INT("staPSMode", p->PSmode); // PSMode
+	PARSE_INT("staAdhocMode", p->AdhocMode); // AdhocMode
+	PARSE_INT("staChannel", p->Channel); // Channel
+	PARSE_INT("staPreamType", p->PreamType); // PreamType
+	PARSE_INT("staRTSCheck", p->RTSCheck); // RTSCheck
+	PARSE_INT("staFragmentCheck", p->FragmentCheck); // FragmentCheck
+	PARSE_INT("staRTS", p->RTS); // RTS
+	PARSE_INT("staFragment", p->Fragment); // Fragment
+	PARSE_INT("staActive", p->Active); // Active
+	PARSE_INT("staAuth", p->Authentication); // Auth
+	PARSE_INT("staEncrypt", p->Encryption); // Encryption
 
-	// Channel
-	bzero(tmp_buffer, sizeof(tmp_buffer));
-	wordlist = nvram_get(RT2860_NVRAM, "staChannel");
-	if (wordlist == NULL || strcmp(wordlist, "" ) == 0)	{
-		error(E_L, E_LOG, T("Sta Channel has no data."));
-	} else {
+	// WEP config
+	PARSE_STR("staKey1", p->Key1); // Key1
+	PARSE_STR("staKey2", p->Key2); // Key2
+	PARSE_STR("staKey3", p->Key3); // Key3
+	PARSE_STR("staKey4", p->Key4); // Key4
+	PARSE_INT("staKey1Type", p->Key1Type); // Key1Type
+	PARSE_INT("staKey2Type", p->Key2Type); // Key2Type
+	PARSE_INT("staKey3Type", p->Key3Type); // Key3Type
+	PARSE_INT("staKey4Type", p->Key4Type); // Key4Type
+	PARSE_INT("staKey1Length", p->Key1Length); // Key1Length
+	PARSE_INT("staKey2Length", p->Key2Length); // Key2Length
+	PARSE_INT("staKey3Length", p->Key3Length); // Key3Length
+	PARSE_INT("staKey4Length", p->Key4Length); // Key4Length
+	PARSE_INT("staKeyDefaultId", p->KeyDefaultId); // KeyDefaultId
 
-	    currentProfileSetting = headerProfileSetting;
-	    sprintf(tmp_buffer, "%s", wordlist);
-	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
-		currentProfileSetting->Channel= atoi(tok);
-		if (currentProfileSetting->Next != NULL)
-			currentProfileSetting = currentProfileSetting->Next;
-	    }
-	}
-
-	// PreamType
-	bzero(tmp_buffer, sizeof(tmp_buffer));
-	wordlist = nvram_get(RT2860_NVRAM, "staPreamType");
-	if (wordlist == NULL || strcmp(wordlist, "" ) == 0)	{
-		error(E_L, E_LOG, T("Sta PreamType has no data."));
-	} else {
-	    currentProfileSetting = headerProfileSetting;
-	    sprintf(tmp_buffer, "%s", wordlist);
-	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
-		currentProfileSetting->PreamType= atoi(tok);
-		if (currentProfileSetting->Next != NULL)
-			currentProfileSetting = currentProfileSetting->Next;
-	    }
-	}
-
-	// RTSCheck
-	bzero(tmp_buffer, sizeof(tmp_buffer));
-	wordlist = nvram_get(RT2860_NVRAM, "staRTSCheck");
-	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
-		error(E_L, E_LOG, T("Sta RTSCheck has no data."));
-	} else {
-	    currentProfileSetting = headerProfileSetting;
-	    sprintf(tmp_buffer, "%s", wordlist);
-	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
-		currentProfileSetting->RTSCheck= atoi(tok);
-		if (currentProfileSetting->Next != NULL)
-			currentProfileSetting = currentProfileSetting->Next;
-	    }
-	}
-
-	// FragmentCheck
-	bzero(tmp_buffer, sizeof(tmp_buffer));
-	wordlist = nvram_get(RT2860_NVRAM, "staFragmentCheck");
-	if (wordlist == NULL || strcmp(wordlist, "" ) == 0)	{
-		error(E_L, E_LOG, T("Sta FragmentCheck has no data."));
-	} else {
-	    currentProfileSetting = headerProfileSetting;
-	    sprintf(tmp_buffer, "%s", wordlist);
-	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
-		currentProfileSetting->FragmentCheck= atoi(tok);
-		if (currentProfileSetting->Next != NULL)
-			currentProfileSetting = currentProfileSetting->Next;
-	    }
-	}
-
-	// RTS
-	bzero(tmp_buffer, sizeof(tmp_buffer));
-	wordlist = nvram_get(RT2860_NVRAM, "staRTS");
-	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
-		error(E_L, E_LOG, T("Sta RTS has no data."));
-	} else {
-	    currentProfileSetting = headerProfileSetting;
-	    sprintf(tmp_buffer, "%s", wordlist);
-	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
-		currentProfileSetting->RTS= atoi(tok);
- 		if (currentProfileSetting->Next != NULL)
-			currentProfileSetting = currentProfileSetting->Next;
-	    }
-	}
-
-	// Fragment
-	bzero(tmp_buffer, sizeof(tmp_buffer));
-	wordlist = nvram_get(RT2860_NVRAM, "staFragment");
-	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
-		error(E_L, E_LOG, T("Sta Fragment has no data."));
-	} else {
-	    currentProfileSetting = headerProfileSetting;
-	    sprintf(tmp_buffer, "%s", wordlist);
-	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
-		currentProfileSetting->Fragment= atoi(tok);
-		if (currentProfileSetting->Next != NULL)
-			currentProfileSetting = currentProfileSetting->Next;
-	    }
-	}
-
-	// Active
-	bzero(tmp_buffer, sizeof(tmp_buffer));
-	wordlist = nvram_get(RT2860_NVRAM, "staActive");
-	if (wordlist == NULL || strcmp(wordlist, "" ) == 0)	{
-		error(E_L, E_LOG, T("Sta Active has no data."));
-	} else {
-	    currentProfileSetting = headerProfileSetting;
-	    sprintf(tmp_buffer, "%s", wordlist);
-	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
-		currentProfileSetting->Active = atoi(tok);
-		if (currentProfileSetting->Next != NULL)
-			currentProfileSetting = currentProfileSetting->Next;
-	    }
-	}
-
-	// Auth
-	bzero(tmp_buffer, sizeof(tmp_buffer));
-	wordlist = nvram_get(RT2860_NVRAM, "staAuth");
-	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
-		error(E_L, E_LOG, T("Sta Auth has no data."));
-		goto out_wep;
-	}
-
-	currentProfileSetting = headerProfileSetting;
-	sprintf(tmp_buffer, "%s", wordlist);
-	for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
-		currentProfileSetting->Authentication= atoi(tok);
-		if (currentProfileSetting->Next != NULL)
-			currentProfileSetting = currentProfileSetting->Next;
-	}
-
-	// Encryption
-	bzero(tmp_buffer, sizeof(tmp_buffer));
-	wordlist = nvram_get(RT2860_NVRAM, "staEncrypt");
-	// if not set or open
-	if (wordlist == NULL || strcmp(wordlist, "" ) == 0 || strcmp(wordlist, "NONE" ) == 0) {
-		if (strcmp(wordlist, "" ) == 0)
-		    error(E_L, E_LOG, T("Sta Encryption has no data."));
-		currentProfileSetting->Encryption = Ndis802_11WEPDisabled;
-		goto out_wep;
-	} else {
-	    currentProfileSetting = headerProfileSetting;
-	    sprintf(tmp_buffer, "%s", wordlist);
-	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
-		currentProfileSetting->Encryption = atoi(tok);
-		if (currentProfileSetting->Next != NULL)
-			currentProfileSetting = currentProfileSetting->Next;
-	    }
-
-	    // Key1
-	    bzero(tmp_buffer, sizeof(tmp_buffer));
-	    wordlist = nvram_get(RT2860_NVRAM, "staKey1");
-	    if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
-		    error(E_L, E_LOG, T("Sta Key1 has no data."));
-		goto out_wep;
-	    }
-
-	    currentProfileSetting = headerProfileSetting;
-	    sprintf(tmp_buffer, "%s", wordlist);
-	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
-		sprintf((char *)currentProfileSetting->Key1, "%s", tok);
-		if (currentProfileSetting->Next != NULL)
-			currentProfileSetting = currentProfileSetting->Next;
-	    }
-
-	    // Key2
-	    bzero(tmp_buffer, sizeof(tmp_buffer));
-	    wordlist = nvram_get(RT2860_NVRAM, "staKey2");
-	    if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
-		error(E_L, E_LOG, T("Sta Key2 has no data."));
-		goto out_wep;
-	    }
-
-	    currentProfileSetting = headerProfileSetting;
-	    sprintf(tmp_buffer, "%s", wordlist);
-	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
-		sprintf((char *)currentProfileSetting->Key2, "%s", tok);
-		if (currentProfileSetting->Next != NULL)
-			currentProfileSetting = currentProfileSetting->Next;
-	    }
-
-	    // Key3
-	    bzero(tmp_buffer, sizeof(tmp_buffer));
-	    wordlist = nvram_get(RT2860_NVRAM, "staKey3");
-	    if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
-		error(E_L, E_LOG, T("Sta Key3 has no data."));
-		goto out_wep;
-	    }
-
-	    currentProfileSetting = headerProfileSetting;
-	    sprintf(tmp_buffer, "%s", wordlist);
-	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
-		sprintf((char *)currentProfileSetting->Key3, "%s", tok);
-		if (currentProfileSetting->Next != NULL)
-			currentProfileSetting = currentProfileSetting->Next;
-	    }
-
-	    // Key4
-	    bzero(tmp_buffer, sizeof(tmp_buffer));
-	    wordlist = nvram_get(RT2860_NVRAM, "staKey4");
-	    if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
-		error(E_L, E_LOG, T("Sta Key4 has no data."));
-		goto out_wep;
-	    }
-
-	    currentProfileSetting = headerProfileSetting;
-	    sprintf(tmp_buffer, "%s", wordlist);
-	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
-		sprintf((char *)currentProfileSetting->Key4, "%s", tok);
-		if (currentProfileSetting->Next != NULL)
-			currentProfileSetting = currentProfileSetting->Next;
-	    }
-
-	    // Key1Type
-	    bzero(tmp_buffer, sizeof(tmp_buffer));
-	    wordlist = nvram_get(RT2860_NVRAM, "staKey1Type");
-	    if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
-		error(E_L, E_LOG, T("Sta Key1Type has no data."));
-		goto out_wep;
-	    }
-
-	    currentProfileSetting = headerProfileSetting;
-	    sprintf(tmp_buffer, "%s", wordlist);
-	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
-		currentProfileSetting->Key1Type= atoi(tok);
-		if (currentProfileSetting->Next != NULL)
-			currentProfileSetting = currentProfileSetting->Next;
-	    }
-
-	    // Key2Type
-	    bzero(tmp_buffer, sizeof(tmp_buffer));
-	    wordlist = nvram_get(RT2860_NVRAM, "staKey2Type");
-	    if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
-		error(E_L, E_LOG, T("Sta Key2Type has no data."));
-		goto out_wep;
-	    }
-
-	    currentProfileSetting = headerProfileSetting;
-	    sprintf(tmp_buffer, "%s", wordlist);
-	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
-		currentProfileSetting->Key2Type= atoi(tok);
-		if (currentProfileSetting->Next != NULL)
-			currentProfileSetting = currentProfileSetting->Next;
-	    }
-
-	    // Key3Type
-	    bzero(tmp_buffer, sizeof(tmp_buffer));
-	    wordlist = nvram_get(RT2860_NVRAM, "staKey3Type");
-	    if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
-		error(E_L, E_LOG, T("Sta Key3Type has no data."));
-		goto out_wep;
-	    }
-
-	    currentProfileSetting = headerProfileSetting;
-	    sprintf(tmp_buffer, "%s", wordlist);
-	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
-		currentProfileSetting->Key3Type= atoi(tok);
-		if (currentProfileSetting->Next != NULL)
-			currentProfileSetting = currentProfileSetting->Next;
-	    }
-
-	    // Key4Type
-	    bzero(tmp_buffer, sizeof(tmp_buffer));
-	    wordlist = nvram_get(RT2860_NVRAM, "staKey4Type");
-	    if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
-		error(E_L, E_LOG, T("Sta Key4Type has no data."));
-		goto out_wep;
-	    }
-
-	    currentProfileSetting = headerProfileSetting;
-	    sprintf(tmp_buffer, "%s", wordlist);
-	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
-		currentProfileSetting->Key4Type= atoi(tok);
-		if (currentProfileSetting->Next != NULL)
-			currentProfileSetting = currentProfileSetting->Next;
-	    }
-
-	    // Key1Length
-	    bzero(tmp_buffer, sizeof(tmp_buffer));
-	    wordlist = nvram_get(RT2860_NVRAM, "staKey1Length");
-	    if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
-		error(E_L, E_LOG, T("Sta Key1Lenght has no data."));
-		goto out_wep;
-	    }
-
-	    currentProfileSetting = headerProfileSetting;
-	    sprintf(tmp_buffer, "%s", wordlist);
-	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
-		currentProfileSetting->Key1Length= atoi(tok);
-		if (currentProfileSetting->Next != NULL)
-			currentProfileSetting = currentProfileSetting->Next;
-	    }
-
-	    // Key2Length
-	    bzero(tmp_buffer, sizeof(tmp_buffer));
-	    wordlist = nvram_get(RT2860_NVRAM, "staKey2Length");
-	    if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
-		error(E_L, E_LOG, T("Sta Key2Lenght has no data."));
-		goto out_wep;
-	    }
-
-	    currentProfileSetting = headerProfileSetting;
-	    sprintf(tmp_buffer, "%s", wordlist);
-	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
-		currentProfileSetting->Key2Length= atoi(tok);
-		if (currentProfileSetting->Next != NULL)
-			currentProfileSetting = currentProfileSetting->Next;
-	    }
-
-	    // Key3Length
-	    bzero(tmp_buffer, sizeof(tmp_buffer));
-	    wordlist = nvram_get(RT2860_NVRAM, "staKey3Length");
-	    if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
-		error(E_L, E_LOG, T("Sta Key3Lenght has no data."));
-		goto out_wep;
-	    }
-
-	    currentProfileSetting = headerProfileSetting;
-	    sprintf(tmp_buffer, "%s", wordlist);
-	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
-		currentProfileSetting->Key3Length= atoi(tok);
-		if (currentProfileSetting->Next != NULL)
-			currentProfileSetting = currentProfileSetting->Next;
-	    }
-
-	    // Key4Length
-	    bzero(tmp_buffer, sizeof(tmp_buffer));
-	    wordlist = nvram_get(RT2860_NVRAM, "staKey4Length");
-	    if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
-		error(E_L, E_LOG, T("Sta Key4Length has no data."));
-		goto out_wep;
-	    }
-
-	    currentProfileSetting = headerProfileSetting;
-	    sprintf(tmp_buffer, "%s", wordlist);
-	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
-		currentProfileSetting->Key4Length= atoi(tok);
-		if (currentProfileSetting->Next != NULL)
-			currentProfileSetting = currentProfileSetting->Next;
-	    }
-
-	    // DefaultKeyID
-	    bzero(tmp_buffer, sizeof(tmp_buffer));
-	    wordlist = nvram_get(RT2860_NVRAM, "staKeyDefaultId");
-	    if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
-		error(E_L, E_LOG, T("Sta DefaultKeyID has no data."));
-		goto out_wep;
-	    }
-	}
-
-	currentProfileSetting = headerProfileSetting;
-	sprintf(tmp_buffer, "%s", wordlist);
-	for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
-		currentProfileSetting->KeyDefaultId = atoi(tok);
-		if (currentProfileSetting->Next != NULL)
-			currentProfileSetting = currentProfileSetting->Next;
-	}
-out_wep:
-
-	// WPAPSK
-	bzero(tmp_buffer, sizeof(tmp_buffer));
-	wordlist = nvram_get(RT2860_NVRAM, "staWpaPsk");
-	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
-		error(E_L, E_LOG, T("Sta WPAPSK has no data."));
-	} else {
-	    currentProfileSetting = headerProfileSetting;
-	    sprintf(tmp_buffer, "%s", wordlist);
-	    for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
-		sprintf((char *)currentProfileSetting->WpaPsk, "%s", tok);
-		if (currentProfileSetting->Next != NULL)
-			currentProfileSetting = currentProfileSetting->Next;
-	    }
-	}
+	// WPA config
+	PARSE_STR("staWpaPsk", p->WpaPsk); // WpaPsk
+	
 #ifdef WPA_SUPPLICANT_SUPPORT
-	//keymgmt
-	bzero(tmp_buffer, sizeof(tmp_buffer));
-	wordlist = nvram_get(RT2860_NVRAM, "sta8021xKeyMgmt");
-	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
-		error(E_L, E_LOG, T("Sta 802.1x Key Mgmt has no data."));
-		goto out_wpa_sp;
-	}
-
-	currentProfileSetting = headerProfileSetting;
-	sprintf(tmp_buffer, "%s", wordlist);
-	for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
-		currentProfileSetting->KeyMgmt = atoi(tok);
-
-		if (currentProfileSetting->Next != NULL)
-			currentProfileSetting = currentProfileSetting->Next;
-	}
-
-	// EAP
-	bzero(tmp_buffer, sizeof(tmp_buffer));
-	wordlist = nvram_get(RT2860_NVRAM, "sta8021xEAP");
-	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
-		error(E_L, E_LOG, T("Sta 802.1x EAP has no data."));
-		goto out_wpa_sp;
-	}
-
-	currentProfileSetting = headerProfileSetting;
-	sprintf(tmp_buffer, "%s", wordlist);
-	for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
-		currentProfileSetting->EAP = atoi(tok);
-		if (currentProfileSetting->Next != NULL)
-			currentProfileSetting = currentProfileSetting->Next;
-	}
-
-	//Cert ID
-	bzero(tmp_buffer, sizeof(tmp_buffer));
-	wordlist = nvram_get(RT2860_NVRAM, "sta8021xIdentity");
-	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
-		error(E_L, E_LOG, T("Sta 802.1x Identity has no data."));
-		goto out_wpa_sp;
-	}
-
-	currentProfileSetting = headerProfileSetting;
-	sprintf(tmp_buffer, "%s", wordlist);
-	for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
-		sprintf((char *)currentProfileSetting->Identity, "%s", tok);
-		if (currentProfileSetting->Next != NULL)
-			currentProfileSetting = currentProfileSetting->Next;
-	}
-
-	//Cert Password
-	bzero(tmp_buffer, sizeof(tmp_buffer));
-	wordlist = nvram_get(RT2860_NVRAM, "sta8021xPassword");
-	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
-		error(E_L, E_LOG, T("Sta 802.1x Password has no data."));
-		goto out_wpa_sp;
-	}
-
-	currentProfileSetting = headerProfileSetting;
-	sprintf(tmp_buffer, "%s", wordlist);
-	for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
-		sprintf((char *)currentProfileSetting->Password, "%s", tok);
-		if (currentProfileSetting->Next != NULL)
-			currentProfileSetting = currentProfileSetting->Next;
-	}
-
-	//Cert Client Cert Path
-	bzero(tmp_buffer, sizeof(tmp_buffer));
-	wordlist = nvram_get(RT2860_NVRAM, "sta8021xClientCert");
-	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
-		error(E_L, E_LOG, T("Sta 802.1x Client Cert has no data."));
-		goto out_wpa_sp;
-	}
-
-	currentProfileSetting = headerProfileSetting;
-	sprintf(tmp_buffer, "%s", wordlist);
-	for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
-		sprintf((char *)currentProfileSetting->ClientCert, "%s", tok);
-		if (currentProfileSetting->Next != NULL)
-			currentProfileSetting = currentProfileSetting->Next;
-	}
-
-	//Cert Private Key Path
-	bzero(tmp_buffer, sizeof(tmp_buffer));
-	wordlist = nvram_get(RT2860_NVRAM, "sta8021xPrivateKey");
-	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
-		error(E_L, E_LOG, T("Sta 802.1x Private Key has no data."));
-		goto out_wpa_sp;
-	}
-
-	currentProfileSetting = headerProfileSetting;
-	sprintf(tmp_buffer, "%s", wordlist);
-	for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
-		sprintf((char *)currentProfileSetting->PrivateKey, "%s", tok);
-		if (currentProfileSetting->Next != NULL)
-			currentProfileSetting = currentProfileSetting->Next;
-	}
-
-	//Cert Private Key Password
-	bzero(tmp_buffer, sizeof(tmp_buffer));
-	wordlist = nvram_get(RT2860_NVRAM, "sta8021xPrivateKeyPassword");
-	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
-		error(E_L, E_LOG, T("Sta 802.1x Private Key Password has no data."));
-		goto out_wpa_sp;
-	}
-
-	currentProfileSetting = headerProfileSetting;
-	sprintf(tmp_buffer, "%s", wordlist);
-	for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
-		sprintf((char *)currentProfileSetting->PrivateKeyPassword, "%s", tok);
-		if (currentProfileSetting->Next != NULL)
-			currentProfileSetting = currentProfileSetting->Next;
-	}
-
-	//Cert CA Cert
-	bzero(tmp_buffer, sizeof(tmp_buffer));
-	wordlist = nvram_get(RT2860_NVRAM, "sta8021xCACert");
-	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
-		error(E_L, E_LOG, T("Sta 802.1x CA Cert has no data."));
-		goto out_wpa_sp;
-	}
-
-	currentProfileSetting = headerProfileSetting;
-	sprintf(tmp_buffer, "%s", wordlist);
-	for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
-		sprintf((char *)currentProfileSetting->CACert, "%s", tok);
-		if (currentProfileSetting->Next != NULL)
-			currentProfileSetting = currentProfileSetting->Next;
-	}
-
-	//Tunnel
-	bzero(tmp_buffer, sizeof(tmp_buffer));
-	wordlist = nvram_get(RT2860_NVRAM, "sta8021xTunnel");
-	if (wordlist == NULL || strcmp(wordlist, "" ) == 0) {
-		error(E_L, E_LOG, T("Sta 802.1x Tunnel has no data."));
-		goto out_wpa_sp;
-	}
-
-	currentProfileSetting = headerProfileSetting;
-	sprintf(tmp_buffer, "%s", wordlist);
-	for (i = 0, tok = strtok(tmp_buffer,";"); tok; tok = strtok(NULL,";"), i++) {
-		currentProfileSetting->Tunnel = atoi(tok);
-		if (currentProfileSetting->Next != NULL)
-			currentProfileSetting = currentProfileSetting->Next;
-	}
-out_wpa_sp:
+	PARSE_INT("sta8021xKeyMgmt", p->KeyMgmt); // 8021xKeyMgmt
+	PARSE_INT("sta8021xEAP", p->EAP); // 8021xEAP
+	PARSE_INT("sta8021xIdentity", p->Identity); // 8021xIdentity
+	PARSE_STR("sta8021xPassword", p->Password); // 8021xPassword
+	PARSE_STR("sta8021xClientCert", p->ClientCert); // 8021xClientCert
+	PARSE_STR("sta8021xPrivateKey", p->PrivateKey); // 8021xPrivateKey
+	PARSE_STR("sta8021xPrivateKeyPassword", p->PrivateKeyPassword); // 8021xPrivateKeyPassword
+	PARSE_STR("sta8021xCACert", p->CACert); // 8021xCACert
+	PARSE_INT("sta8021xTunnel", p->Tunnel); // 8021xTunnel
 #endif
+	// Make some magix
+	for (i=0, p=headerProfileSetting; p != NULL; i++, p=p->Next)
+	{
+		p->SsidLen = strlen(p->SSID);
+		//printf("staSsidLen[%d]=%d\n", i, p->SsidLen);
+	}
+
+	// Release splitter
+	freeSplitter(&split);
+	
+	// Release NVRAM
+	nvram_close(RT2860_NVRAM);
+
+#undef PARSE_STR
+#undef PARSE_INT
 }
 
 /*
@@ -2661,6 +2025,7 @@ static void conf_WPASupplicant(char* ssid, RT_WPA_SUPPLICANT_KEY_MGMT keymgmt, R
 /*
  * description: station connection
  */
+/*
 static void sta_connection(int tmp_networktype, int tmp_auth, int tmp_encry, int tmp_defaultkeyid, PNDIS_802_11_SSID pSsid, unsigned char Bssid[6], char *tmp_wpapsk, char *tmp_key1, char *tmp_key2, char *tmp_key3, char *tmp_key4, RT_802_11_PREAMBLE tmp_preamtype, int tmp_rtscheck, NDIS_802_11_RTS_THRESHOLD tmp_rts, int tmp_fragmentcheck, NDIS_802_11_FRAGMENTATION_THRESHOLD tmp_fragment, NDIS_802_11_POWER_MODE tmp_psmode, int tmp_channel)
 {
 	int s, ret, nKeyLen=0, j, i;
@@ -2943,12 +2308,11 @@ static void sta_connection(int tmp_networktype, int tmp_auth, int tmp_encry, int
 		else
 			memcpy(&G_SSID, pSsid, sizeof(NDIS_802_11_SSID));
 
-		/*
-		ret = OidSetInformation(OID_802_11_BSSID, s, "ra0", &Bssid, 6);
-		if (ret < 0) {
-			error(E_L, E_LOG, "Set OID_802_11_BSSID has error =%d, \n", ret);
-		} else 
-		*/
+		
+//		ret = OidSetInformation(OID_802_11_BSSID, s, "ra0", &Bssid, 6);
+//		if (ret < 0) {
+//			error(E_L, E_LOG, "Set OID_802_11_BSSID has error =%d, \n", ret);
+//		} else 
 		{
 			memcpy(G_Bssid, Bssid, 6);
 		}
@@ -2963,339 +2327,412 @@ static void sta_connection(int tmp_networktype, int tmp_auth, int tmp_encry, int
 	//Configure wan and get param from dhcp and restart all service. Not use wifi only mode
 	doSystem("(sleep 2 && internet.sh connect_sta) &");
 }
+*/
 
 /*
  * description: connect to AP according to the active profile
  */
 void initStaConnection(void)
 {
-	NDIS_802_11_SSID Ssid;
-	PRT_PROFILE_SETTING p = headerProfileSetting;
+	// Clear current SSID
+	nvram_set(RT2860_NVRAM, "staCur_SSID", "");
 
+	PRT_PROFILE_SETTING p = headerProfileSetting;
 	if (p == NULL)
 		return;
-	while (p->Active == 0) {
-		if (p->Next == NULL) {
-			p = headerProfileSetting;
-			break;
-		}
+	while (p->Active == 0)
+	{
 		p = p->Next;
+		if (p == NULL)
+			return;
 	}
 
+	printf("Activate profile: %s\n", p->Profile);
+	
+	// Set-up current SSID
+	nvram_set(RT2860_NVRAM, "staCur_SSID", p->SSID);
+
+#ifdef WPA_SUPPLICANT_SUPPORT
+	if (p->Authentication == Ndis802_11AuthModeWPA ||
+		p->Authentication == Ndis802_11AuthModeWPA2 ||
+		p->Authentication == Ndis802_11AuthMode8021x )//802.1x
+	{
+		char tmp_key[27];
+		if (p->DefaultKeyId == 2)
+			strcpy(tmp_key, (char *)p->Key2);
+		else if (p->DefaultKeyId == 3)
+			strcpy(tmp_key, (char *)p->Key3);
+		else if (p->DefaultKeyId == 4)
+			strcpy(tmp_key, (char *)p->Key4);
+		else
+			strcpy(tmp_key, (char *)p->Key1);
+
+		// Configure WPA supplicant & return
+		conf_WPASupplicant((char*)p->SSID, p->KeyMgmt, p->EAP, (char*)p->Identity, (char*)p->Password,
+			(char*)p->CACert, (char*)p->ClientCert, (char*)p->PrivateKey, (char*)p->PrivateKeyPassword,
+			tmp_key, p->KeyDefaultId-1, p->Encryption, p->Tunnel, p->Authentication);
+		return;
+	}
+#endif
+
+	int i, j;
+	int s = socket(AF_INET, SOCK_DGRAM, 0);
+
+	// Fetch current wireless mode
+	unsigned long CurrentWirelessMode;
+	if (OidQueryInformation(RT_OID_802_11_PHY_MODE, s, "ra0", &CurrentWirelessMode, sizeof(unsigned char)) < 0 )
+	{
+		error(E_L, E_LOG, T("Query OID_802_11_QUERY_WirelessMode error!"));
+		close(s);
+		return;
+	}
+
+	// Check WPA Supplicant
+	int ret = 0;
+	if (WpaSupplicant_flag == TRUE)
+	{
+		int wpa_supplicant_support = 0, ieee8021x_support = 0;
+
+		doSystem("killall -q wpa_supplicant");
+		sleep(1);
+		doSystem("killall -q -SIGKILL wpa_supplicant");
+		sleep(1);
+
+		ret = OidSetInformation(OID_802_11_SET_IEEE8021X, s, "ra0", &ieee8021x_support, sizeof(ieee8021x_support));
+		if (ret < 0)
+			fprintf(stderr, "Set OID_802_11_SET_IEEE8021X has error =%d, ieee8021x_support=%d\n", ret, ieee8021x_support);
+		ret = OidSetInformation(RT_OID_WPA_SUPPLICANT_SUPPORT, s, "ra0", &wpa_supplicant_support, sizeof(wpa_supplicant_support));                                           if (ret < 0)
+			fprintf(stderr, "Set RT_OID_WPA_SUPPLICANT_SUPPORT has error =%d, wpa_supplicant_support=%d\n", ret, wpa_supplicant_support);
+		WpaSupplicant_flag = FALSE;
+	}
+
+	// step 0: OID_802_11_INFRASTRUCTURE_MODE
+	ret = OidSetInformation(OID_802_11_INFRASTRUCTURE_MODE, s, "ra0", &p->NetworkType, sizeof(int));
+	if (ret < 0)
+		error(E_L, E_LOG, T("Set OID_802_11_INFRASTRUCTURE_MODE has error =%d, networktype=%d"), ret, p->NetworkType);
+
+	// step 1:
+	// RTS Threshold
+	if (!p->RTSCheck)
+		p->RTS = 2347;
+	OidSetInformation(OID_802_11_RTS_THRESHOLD, s, "ra0", &p->RTS, sizeof(NDIS_802_11_RTS_THRESHOLD));
+
+	// Fragment Threshold
+	if (!p->FragmentCheck)
+		p->Fragment = 2346;
+	OidSetInformation(OID_802_11_FRAGMENTATION_THRESHOLD, s, "ra0", &p->Fragment, sizeof(NDIS_802_11_FRAGMENTATION_THRESHOLD));
+
+	// Network type
+	if (p->NetworkType == Ndis802_11Infrastructure)
+	{
+		printf("NetworkType is INFRASTRUCTURE\n");
+		OidSetInformation(OID_802_11_POWER_MODE, s, "ra0", &p->PSmode, sizeof(NDIS_802_11_POWER_MODE));
+		OidSetInformation(RT_OID_802_11_PREAMBLE, s, "ra0", &p->PreamType, sizeof(RT_802_11_PREAMBLE));
+	}
+	else if (p->NetworkType == Ndis802_11IBSS)
+	{
+		unsigned long	lFreq = 0;
+		NDIS_802_11_CONFIGURATION	Configuration;
+		OidQueryInformation(OID_802_11_CONFIGURATION, s, "ra0", &Configuration, sizeof(Configuration));
+
+		for (i = 0; i < G_nChanFreqCount; i++)
+		{
+			if (p->Channel == ChannelFreqTable[i].lChannel)
+			{
+				lFreq = ChannelFreqTable[i].lFreq;
+				break;
+			}
+		}
+		if (lFreq != Configuration.DSConfig)
+		{
+			Configuration.DSConfig = lFreq/1000;
+			ret = OidSetInformation(OID_802_11_CONFIGURATION, s, "ra0", &Configuration, sizeof(Configuration));
+			if (ret < 0)
+				error(E_L, E_LOG, T("Set OID_802_11_CONFIGURATION has error=%d"),ret);
+		}
+	}
+
+	// step 2: Security mode
+	// Authentication
+	ret = OidSetInformation(OID_802_11_AUTHENTICATION_MODE, s, "ra0", &p->Authentication, sizeof(p->Authentication));
+	if (ret < 0)
+		error(E_L, E_LOG, T("Set OID_802_11_AUTHENTICATION_MODE has error =%d, auth=%d"), ret, p->Authentication);
+
+	// Encryption
+	ret = OidSetInformation(OID_802_11_ENCRYPTION_STATUS, s, "ra0", &p->Encryption, sizeof(p->Encryption));
+	if (ret < 0)
+		error(E_L, E_LOG, T("Set OID_802_11_ENCRYPTION_STATUS has error =%d, encry=%d"), ret, p->Encryption);
+
+	// WEP
+	if (p->Encryption == Ndis802_11WEPEnabled)
+	{
+		printf("Authentication is WEP\n");
+	
+		// Initialize array of WEP keys
+		char *wep_keys[4];
+		wep_keys[0] = (char *)p->Key1;
+		wep_keys[1] = (char *)p->Key2;
+		wep_keys[2] = (char *)p->Key3;
+		wep_keys[3] = (char *)p->Key4;
+	
+		// For each WEP key
+		for (i=0; i<4; i++)
+		{
+			//printf("WEP key[%d]=%s\n", i, wep_keys[i]);
+		
+			int nKeyLen = strlen(wep_keys[i]);
+			if (nKeyLen == 0)
+			{
+				NDIS_802_11_REMOVE_KEY removeKey;
+				
+				removeKey.Length = sizeof(NDIS_802_11_REMOVE_KEY);
+				removeKey.KeyIndex = 0;
+				for (j = 0; j < 6; j++)
+					removeKey.BSSID[j] = 0xff;
+				ret = OidSetInformation(OID_802_11_REMOVE_KEY, s, "ra0", &removeKey, removeKey.Length);
+				if (ret < 0)
+					error(E_L, E_LOG, T("Set OID_802_11_REMOVE_KEY has error =%d"), ret);
+			}
+			else if (strcmp(wep_keys[i], "0") != 0)
+			{
+				int wep_key_len = nKeyLen;
+				if (wep_key_len == 10)
+					wep_key_len = 5;
+				else if (wep_key_len == 26)
+					wep_key_len = 13;
+
+				int lBufLen = sizeof(NDIS_802_11_WEP) + nKeyLen + 1;
+				// Allocate Resource
+				PNDIS_802_11_WEP pWepKey = (PNDIS_802_11_WEP)malloc(lBufLen);
+				bzero(pWepKey, lBufLen);
+				pWepKey->Length    = lBufLen - 2;
+				pWepKey->KeyLength = wep_key_len;
+				pWepKey->KeyIndex  = i;
+
+				if (p->KeyDefaultId == (i+1))
+					pWepKey->KeyIndex |= 0x80000000;
+
+				if (nKeyLen == 5)
+					memcpy(pWepKey->KeyMaterial, wep_keys[i], 5);
+				else if (nKeyLen == 10)
+					AtoH(wep_keys[i], pWepKey->KeyMaterial, 5);
+				else if (nKeyLen == 13)
+					memcpy(pWepKey->KeyMaterial, wep_keys[i], 13);
+				else if (nKeyLen == 26)
+					AtoH(wep_keys[i], pWepKey->KeyMaterial, 13);
+				
+				//printf("Setup key[%d]: key_len=%d, wep_len=%d, value=%s, index=%x, length=%d \n",
+				//	i, nKeyLen, wep_key_len, pWepKey->KeyMaterial, pWepKey->KeyIndex, pWepKey->Length);
+
+				OidSetInformation(OID_802_11_ADD_WEP, s, "ra0", pWepKey, pWepKey->Length);
+				free(pWepKey);
+			}
+		} // end WEP key cycle
+	}
+	else if ((p->Authentication == Ndis802_11AuthModeWPAPSK) || 
+		(p->Authentication == Ndis802_11AuthModeWPA2PSK) ||
+		(p->Authentication == Ndis802_11AuthModeWPANone))
+	{
+		printf("Authentication is WPA\n");
+		int nKeyLen = 32;
+		int lBufLen = (sizeof(NDIS_802_11_KEY) + nKeyLen - 1);
+		unsigned char keyMaterial[40];
+		
+		// Allocate Resouce
+		PNDIS_802_11_KEY pKey = (PNDIS_802_11_KEY)malloc(lBufLen); // Don't use GMEM_ZEROINIT to get random key
+		pKey->Length = lBufLen;
+		pKey->KeyLength = nKeyLen;
+		pKey->KeyIndex = 0x80000000;
+
+		if (strlen(p->WpaPsk) == 64)
+		{
+			AtoH(p->WpaPsk, keyMaterial, 32);
+			memcpy(pKey->KeyMaterial, keyMaterial, 32);
+		}
+		else
+		{
+			PasswordHash(p->WpaPsk, p->SSID, p->SsidLen, keyMaterial);
+			memcpy(pKey->KeyMaterial, keyMaterial, 32);
+		}
+
+		int PassphraseBufLen = sizeof(NDIS_802_11_PASSPHRASE) + strlen(p->WpaPsk) - 1;
+		PNDIS_802_11_PASSPHRASE pPassPhrase=(PNDIS_802_11_PASSPHRASE)malloc(PassphraseBufLen);
+		pPassPhrase->KeyLength = strlen(p->WpaPsk);
+
+		memcpy(pPassPhrase->KeyMaterial, p->WpaPsk, pPassPhrase->KeyLength);
+		OidSetInformation(OID_802_11_SET_PASSPHRASE, s, "ra0", pPassPhrase, PassphraseBufLen);
+		OidSetInformation(RT_OID_802_11_ADD_WPA, s, "ra0", pKey, pKey->Length);
+		free(pKey);
+	}
+
+	//step 3: SSID
+	NDIS_802_11_SSID Ssid;
 	strcpy((char *)Ssid.Ssid ,(char *)p->SSID);
 	Ssid.SsidLength = p->SsidLen;
-	unsigned char Bssid[6];
-	sta_connection(p->NetworkType, p->Authentication, p->Encryption, p->KeyDefaultId, &Ssid, Bssid, (char *)p->WpaPsk, (char *)p->Key1, (char *)p->Key2, (char *)p->Key3, (char *)p->Key4, p->PreamType, p->RTSCheck, p->RTS, p->FragmentCheck, p->Fragment, p->PSmode, p->Channel);
+	
+	if (p->NetworkType == Ndis802_11IBSS ) // Ad hoc use SSID
+	{
+		ret = OidSetInformation(OID_802_11_SSID, s, "ra0", &Ssid, sizeof(NDIS_802_11_SSID));
+		if (ret < 0)
+			error(E_L, E_LOG, T("Set OID_802_11_SSID has error =%d, Ssid.Ssid=%s"), ret, Ssid.Ssid);
+		else
+			memcpy(&G_SSID, &Ssid, sizeof(NDIS_802_11_SSID));
+	}
+	else
+	{
+		ret = OidSetInformation(OID_802_11_SSID, s, "ra0", &Ssid, sizeof(NDIS_802_11_SSID));
+		if (ret < 0)
+			error(E_L, E_LOG, T("Set OID_802_11_SSID has error =%d, Ssid.Ssid=%s"), ret, Ssid.Ssid);
+		else
+			memcpy(&G_SSID, &Ssid, sizeof(NDIS_802_11_SSID));
+
+		if (p->Encryption == Ndis802_11WEPEnabled)
+		{
+			char Bssid[6];
+			memset(Bssid, 0x00, sizeof(Bssid));
+			AtoH(p->SSID, Bssid, sizeof(Bssid));
+
+			/*ret = OidSetInformation(OID_802_11_BSSID, s, "ra0", Bssid, sizeof(Bssid));
+			if (ret < 0)
+				error(E_L, E_LOG, "Set OID_802_11_BSSID has error=%d\n", ret);
+			else*/
+				memcpy(G_Bssid, Bssid, sizeof(Bssid));
+		}
+		Sleep(1);
+	}
+
+	close(s);
+	sync();
+
+	//set flag for daemons is connected
+	doSystem("touch /tmp/sta_connected");
+	//Configure wan and get param from dhcp and restart all service. Not use wifi only mode
+	doSystem("(sleep 2 && internet.sh connect_sta) &");
 }
 
-/*
- * description: return station radio status
- */
-static int getStaProfile(int eid, webs_t wp, int argc, char_t **argv)
+static int getActiveProfileStatus(int eid, webs_t wp, int argc, char_t **argv)
 {
-	int i = 0, s;
-
-	NDIS_802_11_SSID                SsidQuery;
-	unsigned int                    ConnectStatus = 0;
-	NDIS_802_11_WEP_STATUS          Encryp = Ndis802_11WEPDisabled;
-	NDIS_802_11_AUTHENTICATION_MODE AuthenType = Ndis802_11AuthModeOpen;
-	NDIS_802_11_NETWORK_INFRASTRUCTURE      NetworkType = Ndis802_11Infrastructure;
-
-	initStaProfile();
-
-	if (G_staProfileNum == 0)
-		return 0;
+	// Check if profiles are read
+	if (headerProfileSetting == NULL)
+		initStaProfile();
 	if (headerProfileSetting == NULL)
 		return 0;
+	
+	// Find active profile in configuration
+	PRT_PROFILE_SETTING p = headerProfileSetting;
+	while ((p!= NULL) && (!p->Active))
+		p = p->Next;
+	if (p == NULL)
+		return 0;
 
-	currentProfileSetting = headerProfileSetting;
-	do {
-		int backgroundColor = 0xffffff;
-		int fontColor = 0;
+	// Perform driver requests
+	int s = socket(AF_INET, SOCK_DGRAM, 0);
+	if (s < 0)
+		return 0;
+	
+	//step 1
+	unsigned int ConnectStatus = 0;
+	if (OidQueryInformation(OID_GEN_MEDIA_CONNECT_STATUS, s, "ra0", &ConnectStatus, sizeof(ConnectStatus)) < 0)
+	{
+		error(E_L, E_LOG, T("Query OID_GEN_MEDIA_CONNECT_STATUS error!"));
+		close(s);
+		return 0;
+	}
 
-		// check activate function for the profile
-		if (currentProfileSetting->Active)
-		{
-			fontColor = 0xffffff;
-			backgroundColor = 0x800000;
+	//step 2
+	if (OidQueryInformation(RT_OID_802_11_RADIO, s, "ra0", &G_bRadio, sizeof(G_bRadio)) < 0)
+	{
+		error(E_L, E_LOG, T("Query RT_OID_802_11_RADIO error!"));
+		close(s);
+		return 0;
+	}
+	
+	const char *status = "0";
 
-			// get connected SSID
-			s = socket(AF_INET, SOCK_DGRAM, 0);
-
-			//step 1
-			if (OidQueryInformation(OID_GEN_MEDIA_CONNECT_STATUS, s, "ra0", &ConnectStatus, sizeof(ConnectStatus)) < 0) {
-				error(E_L, E_LOG, T("Query OID_GEN_MEDIA_CONNECT_STATUS error!"));
-				close(s);
-				return 0;
-			}
-
-			//step 2
-			if (OidQueryInformation(RT_OID_802_11_RADIO, s, "ra0", &G_bRadio, sizeof(G_bRadio)) < 0) {
-				error(E_L, E_LOG, T("Query RT_OID_802_11_RADIO error!"));
-				close(s);
-				return 0;
-			}
-
-			if ((ConnectStatus == 1) && G_bRadio)
-			{
-				OidQueryInformation(OID_802_11_WEP_STATUS, s, "ra0", &Encryp, sizeof(Encryp) );
-				OidQueryInformation(OID_802_11_AUTHENTICATION_MODE, s, "ra0", &AuthenType, sizeof(AuthenType));
-				OidQueryInformation(OID_802_11_INFRASTRUCTURE_MODE, s, "ra0", &NetworkType, sizeof(NetworkType));
-
-				memset(&SsidQuery, 0x00, sizeof(SsidQuery));
-				OidQueryInformation(OID_802_11_SSID, s, "ra0", &SsidQuery, sizeof(SsidQuery));
-
-				if (strcmp((char *)SsidQuery.Ssid, (char *)currentProfileSetting->SSID) == 0 &&
-						currentProfileSetting->Encryption == Encryp &&
-						currentProfileSetting->Authentication == AuthenType &&
-						currentProfileSetting->NetworkType == NetworkType)
-				{
-					memcpy(&G_SSID, &SsidQuery, sizeof(NDIS_802_11_SSID));
-					backgroundColor=0x008000;
-				}
-			}
-			else if (G_bRadio)
-			{
-				int tmp_auth, tmp_encry, tmp_defaultkeyid, tmp_networktype, tmp_preamtype, tmp_channel; //tmp_adhocmode,
-				char tmp_wpapsk[65], tmp_key1[27], tmp_key2[27], tmp_key3[27], tmp_key4[27], tmp_bssid[13];
-				char tmp_rtscheck=0, tmp_fragmentcheck=0;
-				NDIS_802_11_RTS_THRESHOLD	tmp_rts;
-				NDIS_802_11_FRAGMENTATION_THRESHOLD	tmp_fragment;
-				NDIS_802_11_SSID			SSID;
-				NDIS_802_11_POWER_MODE		tmp_psmode;
-
-				memset(&SSID, 0x00, sizeof(SSID));
-				bzero(tmp_bssid, sizeof(tmp_bssid));
-				bzero(tmp_wpapsk, sizeof(tmp_wpapsk));
-				bzero(tmp_key1, sizeof(tmp_key1));
-				bzero(tmp_key2, sizeof(tmp_key2));
-				bzero(tmp_key3, sizeof(tmp_key3));
-				bzero(tmp_key4, sizeof(tmp_key4));
-				memset(tmp_wpapsk, 0x00, sizeof(tmp_wpapsk));
-
-				SSID.SsidLength = currentProfileSetting->SsidLen;
-				memcpy(SSID.Ssid, (const void *)currentProfileSetting->SSID, currentProfileSetting->SsidLen);
-
-				tmp_networktype = currentProfileSetting->NetworkType;
-				tmp_auth  = currentProfileSetting->Authentication;
-				tmp_encry = currentProfileSetting->Encryption;
-				tmp_preamtype = currentProfileSetting->PreamType;
-				tmp_rts = currentProfileSetting->RTS;
-				tmp_rtscheck = currentProfileSetting->RTSCheck;
-				tmp_fragment = currentProfileSetting->Fragment;
-				tmp_fragmentcheck = currentProfileSetting->FragmentCheck;
-				tmp_psmode = currentProfileSetting->PSmode;
-				tmp_channel = currentProfileSetting->Channel;
-				tmp_defaultkeyid = currentProfileSetting->KeyDefaultId;
-
-				//strncpy(tmp_wpapsk, selectedProfileSetting->WpaPsk, 63);
-				sprintf((char *)tmp_wpapsk, "%s", currentProfileSetting->WpaPsk);
-				strcpy(tmp_key1, (char *)currentProfileSetting->Key1);
-				strcpy(tmp_key2, (char *)currentProfileSetting->Key2);
-				strcpy(tmp_key3, (char *)currentProfileSetting->Key3);
-				strcpy(tmp_key4, (char *)currentProfileSetting->Key4);
-			}
-
-			close(s);
-		}
-
-		// Row begin
-		websWrite(wp, "<tr style=\"background-color: #%06x; color:#%06x;\">", backgroundColor, fontColor);
-
-		// Radio
-		websWrite(wp, "<td style=\"color:#%06x;\"><input type=\"radio\" name=\"selectedProfile\" value=\"%d\" onClick=\"selectedProfileChange();\"></td>",
-			fontColor, i+1);
-
-		// Profile 
-		websWrite(wp, "<td style=\"color:#%06x;\">%s</td>", fontColor, currentProfileSetting->Profile);
-		websWrite(wp, "<td style=\"color:#%06x;\">%s</td>", fontColor, currentProfileSetting->SSID);
-
-		// Channel
-		if (currentProfileSetting->Channel <= 0)
-			websWrite(wp, "<td style=\"color:#%06x;\">%s</td>", fontColor, "Auto");
-		else
-			websWrite(wp, "<td style=\"color:#%06x;\">%d</td>", fontColor, currentProfileSetting->Channel);
-
-		// Auth
-		const char *auth_mode = "unknown";
-
-		switch (currentProfileSetting->Authentication)
-		{
-			case Ndis802_11AuthModeOpen: auth_mode = "OPEN"; break;
-			case Ndis802_11AuthModeShared: auth_mode = "SHARED"; break;
-			case Ndis802_11AuthModeWPAPSK: auth_mode = "WPA-PSK"; break;
-			case Ndis802_11AuthModeWPA2PSK: auth_mode = "WPA2-PSK"; break;
-			case Ndis802_11AuthModeWPANone: auth_mode = "WPA-NONE"; break;
-			case Ndis802_11AuthModeWPA: auth_mode = "WPA"; break;
-			case Ndis802_11AuthModeWPA2: auth_mode = "WPA2"; break;
-			case Ndis802_11AuthModeMax: auth_mode = "OPEN"; break;
-			case Ndis802_11AuthModeAutoSwitch: auth_mode = "AUTO"; break;
-			case Ndis802_11AuthModeWPA1WPA2: auth_mode = "WPA, WPA2"; break;
-			case Ndis802_11AuthModeWPA1PSKWPA2PSK: auth_mode = "WPA-PSK, WPA2-PSK"; break;
-			default: auth_mode = "unknown";
-		}
-
-		websWrite(wp, "<td style=\"color:#%06x;\">%s</td>", fontColor, auth_mode);
-
+	if ((ConnectStatus == 1) && G_bRadio)
+	{
 		// Encryption
-		const char *encryption = "unknown";
-		switch (currentProfileSetting->Encryption)
-		{
-			case Ndis802_11WEPEnabled: encryption = "WEP"; break;
-			case Ndis802_11WEPDisabled: encryption = "NONE"; break;
-			case Ndis802_11Encryption2Enabled: encryption = "TKIP"; break;
-			case Ndis802_11Encryption3Enabled: encryption = "AES"; break;
-			default: encryption="unknown";
-		}
+		NDIS_802_11_WEP_STATUS Encryp = Ndis802_11WEPDisabled;
+		OidQueryInformation(OID_802_11_WEP_STATUS, s, "ra0", &Encryp, sizeof(Encryp) );
+		
+		// Auth type
+		NDIS_802_11_AUTHENTICATION_MODE AuthenType = Ndis802_11AuthModeOpen;
+		OidQueryInformation(OID_802_11_AUTHENTICATION_MODE, s, "ra0", &AuthenType, sizeof(AuthenType));
+		
+		// Network type
+		NDIS_802_11_NETWORK_INFRASTRUCTURE NetworkType = Ndis802_11Infrastructure;
+		OidQueryInformation(OID_802_11_INFRASTRUCTURE_MODE, s, "ra0", &NetworkType, sizeof(NetworkType));
 
-		websWrite(wp, "<td style=\"color:#%06x;\">%s</td>", fontColor, encryption);
+		// SSID
+		NDIS_802_11_SSID SsidQuery;
+		bzero(&SsidQuery, sizeof(SsidQuery));
+		OidQueryInformation(OID_802_11_SSID, s, "ra0", &SsidQuery, sizeof(SsidQuery));
 
-		// NetworkType
-		websWrite(wp, "<td style=\"color:#%06x;\">%s</td>",
-				fontColor,
-				(currentProfileSetting->NetworkType == Ndis802_11Infrastructure) ?
-					"Infrastructure" : "Ad Hoc"
-			);
+		// Check if parameters match
+		if (strcmp((char *)SsidQuery.Ssid, (char *)p->SSID) == 0 &&
+			p->Encryption == Encryp &&
+			p->Authentication == AuthenType &&
+			p->NetworkType == NetworkType)
+			status = "1";
+	}
+	
+	// Write active profile status
+	websWrite(wp, "%s", status);
 
-		websWrite(wp, "</tr>\n");
-		currentProfileSetting = currentProfileSetting->Next;
-		i++;
-	} while (currentProfileSetting != NULL );
+	close(s);
+	return 0;
+}
+
+typedef struct auth_modes_t
+{
+	int code;
+	const char *desc;
+} auth_modes_t;
+
+const auth_modes_t authModes[] =
+{
+	{ Ndis802_11AuthModeOpen, "OPEN" },
+	{ Ndis802_11AuthModeShared, "SHARED" },
+	{ Ndis802_11AuthModeWPAPSK, "WPA-PSK" },
+	{ Ndis802_11AuthModeWPA2PSK, "WPA2-PSK" },
+	{ Ndis802_11AuthModeWPANone, "WPA-NONE" },
+	{ Ndis802_11AuthModeWPA, "WPA" },
+	{ Ndis802_11AuthModeWPA2, "WPA2" },
+	{ Ndis802_11AuthModeMax, "OPEN" },
+	{ Ndis802_11AuthModeAutoSwitch, "AUTO" },
+	{ Ndis802_11AuthModeWPA1WPA2, "WPA, WPA2" },
+	{ Ndis802_11AuthModeWPA1PSKWPA2PSK, "WPA-PSK, WPA2-PSK" },
+	{ -1, NULL }
+};
+
+const auth_modes_t encryptModes[] =
+{
+	{ Ndis802_11WEPEnabled, "WEP" },
+	{ Ndis802_11WEPDisabled, "NONE" },
+	{ Ndis802_11Encryption2Enabled, "TKIP" },
+	{ Ndis802_11Encryption3Enabled, "AES" },
+	{ -1, NULL }
+};
+
+static int getStaModes(webs_t wp, const auth_modes_t *pt)
+{
+	while (pt->desc != NULL)
+	{
+		websWrite(wp, "\t'%d': '%s',\n", pt->code, pt->desc);
+		pt++;
+	}
 
 	return 0;
 }
 
-/*
- * arguments:   type - 1 ~ hmm
- * description: write selected profile data
- */
-static int getStaProfileData(int eid, webs_t wp, int argc, char_t **argv)
+static int getStaAuthModes(int eid, webs_t wp, int argc, char_t **argv)
 {
-	int type;
+	return getStaModes(wp, authModes);
+}
 
-	if (selectedProfileSetting == NULL)
-		return websWrite(wp, "0");
-	if (ejArgs(argc, argv, T("%d"), &type) != 1)
-		return websWrite(wp, " ");
-
-	switch (type)
-	{
-		case 1: //profile name
-			if (selectedProfileSetting->Profile == NULL)
-				return websWrite(wp, "none");
-			return websWrite(wp, "%s", selectedProfileSetting->Profile);
-		case 2: //ssid
-			if (selectedProfileSetting->SSID == NULL)
-				return websWrite(wp, "none");
-			return websWrite(wp, "%s", selectedProfileSetting->SSID);
-		case 3: //network type
-			return websWrite(wp, "%d", selectedProfileSetting->NetworkType);
-		case 4: //power saving mode
-			if (selectedProfileSetting->PSmode == Ndis802_11PowerModeCAM)
-				return websWrite(wp, "0");
-			return websWrite(wp, "1");
-		case 5: //preamble type
-			if (selectedProfileSetting->PreamType == Rt802_11PreambleAuto)
-				return websWrite(wp, "0");
-			return websWrite(wp, "1");
-		case 6: //RTS check
-			return websWrite(wp, "%d", selectedProfileSetting->RTSCheck);
-		case 7: //RTS
-			return websWrite(wp, "%d", selectedProfileSetting->RTS);
-		case 8: //fragment check
-			return websWrite(wp, "%d", selectedProfileSetting->FragmentCheck);
-		case 9: //fragment
-			return websWrite(wp, "%d", selectedProfileSetting->Fragment);
-		case 10: //encryp
-			return websWrite(wp, "%d", selectedProfileSetting->Encryption);
-		case 11: //authentication
-			return websWrite(wp, "%d", selectedProfileSetting->Authentication);
-		case 12: //key1
-			if (selectedProfileSetting->Key1 == NULL || strcmp(selectedProfileSetting->Key1, "0") == 0)
-				return websWrite(wp, "");
-			return websWrite(wp, "%s", selectedProfileSetting->Key1);
-		case 13: //key2
-			if (selectedProfileSetting->Key2 == NULL || strcmp(selectedProfileSetting->Key2, "0") == 0)
-				return websWrite(wp, "");
-			return websWrite(wp, "%s", selectedProfileSetting->Key2);
-		case 14: //key3
-			if (selectedProfileSetting->Key3 == NULL || strcmp(selectedProfileSetting->Key3, "0") == 0)
-				return websWrite(wp, "");
-			return websWrite(wp, "%s", selectedProfileSetting->Key3);
-		case 15: //key4
-			if (selectedProfileSetting->Key4 == NULL || strcmp(selectedProfileSetting->Key4, "0") == 0)
-				return websWrite(wp, "");
-			return websWrite(wp, "%s", selectedProfileSetting->Key4);
-		case 16: //key1 type
-			return websWrite(wp, "%d", selectedProfileSetting->Key1Type);
-		case 17: //key2 type
-			return websWrite(wp, "%d", selectedProfileSetting->Key2Type);
-		case 18: //key3 type
-			return websWrite(wp, "%d", selectedProfileSetting->Key3Type);
-		case 19: //key4 type
-			return websWrite(wp, "%d", selectedProfileSetting->Key4Type);
-		case 20: //key1 length
-			return websWrite(wp, "%d", selectedProfileSetting->Key1Length);
-		case 21: //key2 length
-			return websWrite(wp, "%d", selectedProfileSetting->Key2Length);
-		case 22: //key3 length
-			return websWrite(wp, "%d", selectedProfileSetting->Key3Length);
-		case 23: //key4 length
-			return websWrite(wp, "%d", selectedProfileSetting->Key4Length);
-		case 24: //key default id
-			return websWrite(wp, "%d", selectedProfileSetting->KeyDefaultId);
-		case 25: //passphrase
-			if (selectedProfileSetting->WpaPsk == NULL || strcmp(selectedProfileSetting->WpaPsk, "0") == 0)
-				return websWrite(wp, "");
-			return websWrite(wp, "%s", selectedProfileSetting->WpaPsk);
-#ifdef WPA_SUPPLICANT_SUPPORT
-		case 26: //key mgmt
-			return websWrite(wp, "%d", selectedProfileSetting->KeyMgmt);
-		case 27: //eap
-			return websWrite(wp, "%d", selectedProfileSetting->EAP);
-		case 28: //cert id
-			if (selectedProfileSetting->Identity == NULL || strcmp(selectedProfileSetting->Identity, "0") == 0)
-				return websWrite(wp, "");
-			return websWrite(wp, "%s", selectedProfileSetting->Identity);
-		case 29: //ca cert
-			if (selectedProfileSetting->CACert == NULL || strcmp(selectedProfileSetting->CACert, "0") == 0)
-				return websWrite(wp, "");
-			return websWrite(wp, "%s", selectedProfileSetting->CACert);
-		case 30: //client cert
-			if (selectedProfileSetting->ClientCert == NULL || strcmp(selectedProfileSetting->ClientCert, "0") == 0)
-				return websWrite(wp, "");
-			return websWrite(wp, "%s", selectedProfileSetting->ClientCert);
-		case 31: //private key path
-			if (selectedProfileSetting->PrivateKey == NULL || strcmp(selectedProfileSetting->PrivateKey, "0") == 0)
-				return websWrite(wp, "");
-			return websWrite(wp, "%s", selectedProfileSetting->PrivateKey);
-		case 32: //private key passwd
-			if (selectedProfileSetting->PrivateKeyPassword == NULL || strcmp(selectedProfileSetting->PrivateKeyPassword, "0") == 0)
-				return websWrite(wp, "");
-			return websWrite(wp, "%s", selectedProfileSetting->PrivateKeyPassword);
-		case 33: //passwd
-			if (selectedProfileSetting->Password == NULL || strcmp(selectedProfileSetting->Password, "0") == 0)
-				return websWrite(wp, "");
-			return websWrite(wp, "%s", selectedProfileSetting->Password);
-		case 34: //tunnel
-			return websWrite(wp, "%d", selectedProfileSetting->Tunnel);
-#else
-		case 26:
-		case 27:
-		case 34:
-			return websWrite(wp, "0");
-		case 28:
-		case 29:
-		case 30:
-		case 31:
-		case 32:
-		case 33:
-			return websWrite(wp, "");
-#endif
-		case 35: //channel
-			return websWrite(wp, "%d", selectedProfileSetting->Channel);
-	}
-	return websWrite(wp, "unknown");
+static int getStaEncryptModes(int eid, webs_t wp, int argc, char_t **argv)
+{
+	return getStaModes(wp, encryptModes);
 }
 
 /*
@@ -3695,1277 +3132,6 @@ static int getStaWirelessMode(int eid, webs_t wp, int argc, char_t **argv)
 }
 
 /*
- * description: goform - add station profile
- */
-static void addStaProfile(webs_t wp, char_t *path, char_t *query)
-{
-	RT_PROFILE_SETTING  tmpProfileSetting;
-	int  securitymode=-1;
-	char tmp_buffer[512];
-	const char *wordlist = NULL;
-	char_t *value;
-
-	memset(&tmpProfileSetting, 0x00, sizeof(RT_PROFILE_SETTING));
-	tmpProfileSetting.Next = NULL;
-
-	//printf("query=%s\n", query);
-
-	//profile name
-	// TODO: to tell profile is duplication with other
-	value = websGetVar(wp, T("profile_name"), T(""));
-	if (strlen(value) <= 0)
-	{
-		websError(wp, 500, T("No profile name given!"));
-		return;
-	}
-
-	nvram_init(RT2860_NVRAM);
-
-	strcpy((char *)tmpProfileSetting.Profile, value);
-	wordlist = nvram_bufget(RT2860_NVRAM, "staProfile");
-	if (CHK_IF_SET(wordlist))
-		sprintf(tmp_buffer, "%s;%s", wordlist, value);
-	else
-		sprintf(tmp_buffer, "%s", value);
-	nvram_bufset(RT2860_NVRAM, "staProfile", tmp_buffer);
-
-	//ssid
-	value = websGetVar(wp, T("Ssid"), T(""));
-	strcpy((char *)tmpProfileSetting.SSID, value);
-	tmpProfileSetting.SsidLen = strlen((char *)tmpProfileSetting.SSID);
-	wordlist = nvram_bufget(RT2860_NVRAM, "staSSID");
-	if (CHK_IF_SET(wordlist))
-		sprintf(tmp_buffer, "%s;%s", wordlist, value);
-	else
-		sprintf(tmp_buffer, "%s", value);
-	nvram_bufset(RT2860_NVRAM, "staSSID", tmp_buffer);
-
-	//network type
-	value = websGetVar(wp, T("network_type"), T("1"));
-	tmpProfileSetting.NetworkType = atoi(value);
-	wordlist = nvram_bufget(RT2860_NVRAM, "staNetworkType");
-	if (CHK_IF_SET(wordlist))
-		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.NetworkType);
-	else
-		sprintf(tmp_buffer, "%d", tmpProfileSetting.NetworkType);
-	nvram_bufset(RT2860_NVRAM, "staNetworkType", tmp_buffer);
-
-	//Adhoc mode
-	if (tmpProfileSetting.NetworkType == Ndis802_11Infrastructure)
-		tmpProfileSetting.AdhocMode = 0;
-	else
-		tmpProfileSetting.AdhocMode = 1;
-	wordlist = nvram_bufget(RT2860_NVRAM, "staAdhocMode");
-	if (CHK_IF_SET(wordlist))
-		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.AdhocMode);
-	else
-		sprintf(tmp_buffer, "%d", tmpProfileSetting.AdhocMode);
-	nvram_bufset(RT2860_NVRAM, "staAdhocMode", tmp_buffer);
-
-	//power saving mode
-	value = websGetVar(wp, T("power_saving_mode"), T("0"));
-	if (CHK_IF_SET(wordlist))
-		tmpProfileSetting.PSmode = Ndis802_11PowerModeCAM;
-	else
-		tmpProfileSetting.PSmode = Ndis802_11PowerModeMAX_PSP;
-	wordlist = nvram_bufget(RT2860_NVRAM, "staPSMode");
-	if (CHK_IF_SET(wordlist))
-		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.PSmode);
-	else
-		sprintf(tmp_buffer, "%d", tmpProfileSetting.PSmode);
-	nvram_bufset(RT2860_NVRAM, "staPSMode", tmp_buffer);
-
-	//channel
-	value = websGetVar(wp, T("channel"), T(""));
-	if (tmpProfileSetting.NetworkType == Ndis802_11IBSS)
-		tmpProfileSetting.Channel = atoi(value);
-	else
-		tmpProfileSetting.Channel = 0;
-	wordlist = nvram_bufget(RT2860_NVRAM, "staChannel");
-	if (CHK_IF_SET(wordlist))
-		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.Channel);
-	else
-		sprintf(tmp_buffer, "%d", tmpProfileSetting.Channel);
-	nvram_bufset(RT2860_NVRAM, "staChannel", tmp_buffer);
-
-	//b preamble type
-	value = websGetVar(wp, T("b_premable_type"), T("0"));
-	if (CHK_IF_DIGIT(value, 0) == 0)
-		tmpProfileSetting.PreamType = Rt802_11PreambleAuto;
-	else
-		tmpProfileSetting.PreamType = Rt802_11PreambleLong;
-	wordlist = nvram_bufget(RT2860_NVRAM, "staPreamType");
-	if (CHK_IF_SET(wordlist))
-		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.PreamType);
-	else
-		sprintf(tmp_buffer, "%d", tmpProfileSetting.PreamType);
-	nvram_bufset(RT2860_NVRAM, "staPreamType", tmp_buffer);
-
-	//rts threshold value
-	if (websCompareVar(wp, T("rts_threshold"), T("on")))
-	{
-		tmpProfileSetting.RTSCheck = 1;
-		value = websGetVar(wp, T("rts_thresholdvalue"), T("2347"));
-		tmpProfileSetting.RTS = atoi(value);
-	}
-	else
-	{
-		tmpProfileSetting.RTSCheck = 0;
-		tmpProfileSetting.RTS = 2347;
-	}
-	wordlist = nvram_bufget(RT2860_NVRAM, "staRTSCheck");
-	if (CHK_IF_SET(wordlist))
-		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.RTSCheck);
-	else
-		sprintf(tmp_buffer, "%d", tmpProfileSetting.RTSCheck);
-	nvram_bufset(RT2860_NVRAM, "staRTSCheck", tmp_buffer);
-
-	wordlist = nvram_bufget(RT2860_NVRAM, "staRTS");
-	if (CHK_IF_SET(wordlist))
-		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.RTS);
-	else
-		sprintf(tmp_buffer, "%d", tmpProfileSetting.RTS);
-	nvram_bufset(RT2860_NVRAM, "staRTS", tmp_buffer);
-
-	//fragment threshold value
-	if (websCompareVar(wp, T("fragment_threshold"), T("on"))) {
-		tmpProfileSetting.FragmentCheck = 1;
-		value = websGetVar(wp, T("fragment_thresholdvalue"), T("2346"));
-		tmpProfileSetting.Fragment = atoi(value);
-	}
-	else {
-		tmpProfileSetting.FragmentCheck = 0;
-		tmpProfileSetting.Fragment = 2346;
-	}
-	wordlist = nvram_bufget(RT2860_NVRAM, "staFragmentCheck");
-	if (CHK_IF_SET(wordlist))
-		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.FragmentCheck);
-	else
-		sprintf(tmp_buffer, "%d", tmpProfileSetting.FragmentCheck);
-	nvram_bufset(RT2860_NVRAM, "staFragmentCheck", tmp_buffer);
-
-	wordlist = nvram_bufget(RT2860_NVRAM, "staFragment");
-	if (CHK_IF_SET(wordlist))
-		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.Fragment);
-	else
-		sprintf(tmp_buffer, "%d", tmpProfileSetting.Fragment);
-	nvram_bufset(RT2860_NVRAM, "staFragment", tmp_buffer);
-
-	//security policy (security_infra_mode or security_adhoc_mode)
-	if (tmpProfileSetting.NetworkType == 1)
-	{
-		value = websGetVar(wp, T("security_infra_mode"), T(""));
-		if (CHK_IF_SET(value))
-			securitymode = atoi(value);
-	}
-	else if (tmpProfileSetting.NetworkType == 0)
-	{
-		value = websGetVar(wp, T("security_adhoc_mode"), T(""));
-		if (CHK_IF_SET(value))
-			securitymode = atoi(value);
-	}
-
-	tmpProfileSetting.Authentication = securitymode;
-	wordlist = nvram_bufget(RT2860_NVRAM, "staAuth");
-	if (CHK_IF_SET(wordlist))
-		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.Authentication);
-	else
-		sprintf(tmp_buffer, "%d", tmpProfileSetting.Authentication);
-	nvram_bufset(RT2860_NVRAM, "staAuth", tmp_buffer);
-
-#ifdef WPA_SUPPLICANT_SUPPORT
-	if (tmpProfileSetting.Authentication == Ndis802_11AuthModeWPA || tmpProfileSetting.Authentication == Ndis802_11AuthModeWPA2)
-	{
-		tmpProfileSetting.KeyMgmt = Rtwpa_supplicantKeyMgmtWPAEAP;
-	}
-	else if (tmpProfileSetting.Authentication == Ndis802_11AuthModeMax) //802.1x
-		tmpProfileSetting.KeyMgmt = Rtwpa_supplicantKeyMgmtIEEE8021X;
-	else 
-		tmpProfileSetting.KeyMgmt = Rtwpa_supplicantKeyMgmtNONE;
-
-	wordlist = nvram_bufget(RT2860_NVRAM, "sta8021xKeyMgmt");
-	if (CHK_IF_SET(wordlist))
-		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.KeyMgmt);
-	else
-		sprintf(tmp_buffer, "%d", tmpProfileSetting.KeyMgmt);
-	nvram_bufset(RT2860_NVRAM, "sta8021xKeyMgmt", tmp_buffer);
-#endif
-
-	//wep key 1
-	value = websGetVar(wp, T("wep_key_1"), T("0"));
-	if (CHK_IF_SET(value))
-		strcpy((char *)tmpProfileSetting.Key1, "0");
-	else
-		strcpy((char *)tmpProfileSetting.Key1, value);
-	wordlist = nvram_bufget(RT2860_NVRAM, "staKey1");
-	if (CHK_IF_SET(wordlist))
-		sprintf(tmp_buffer, "%s;%s", wordlist, tmpProfileSetting.Key1);
-	else
-		sprintf(tmp_buffer, "%s", tmpProfileSetting.Key1);
-	nvram_bufset(RT2860_NVRAM, "staKey1", tmp_buffer);
-
-	//wep key 2
-	value = websGetVar(wp, T("wep_key_2"), T("0"));
-	if (CHK_IF_SET(value))
-		strcpy((char *)tmpProfileSetting.Key2, "0");
-	else
-		strcpy((char *)tmpProfileSetting.Key2, value);
-	wordlist = nvram_bufget(RT2860_NVRAM, "staKey2");
-	if (CHK_IF_SET(wordlist))
-		sprintf(tmp_buffer, "%s;%s", wordlist, tmpProfileSetting.Key2);
-	else
-		sprintf(tmp_buffer, "%s", tmpProfileSetting.Key2);
-	nvram_bufset(RT2860_NVRAM, "staKey2", tmp_buffer);
-
-	//wep key 3
-	value = websGetVar(wp, T("wep_key_3"), T("0"));
-	if (CHK_IF_SET(value))
-		strcpy((char *)tmpProfileSetting.Key3, "0");
-	else
-		strcpy((char *)tmpProfileSetting.Key3, value);
-	wordlist = nvram_bufget(RT2860_NVRAM, "staKey3");
-	if (CHK_IF_SET(wordlist))
-		sprintf(tmp_buffer, "%s;%s", wordlist, tmpProfileSetting.Key3);
-	else
-		sprintf(tmp_buffer, "%s", tmpProfileSetting.Key3);
-	nvram_bufset(RT2860_NVRAM, "staKey3", tmp_buffer);
-
-	//wep key 4
-	value = websGetVar(wp, T("wep_key_4"), T("0"));
-	if (CHK_IF_SET(value))
-		strcpy((char *)tmpProfileSetting.Key4, "0");
-	else
-		strcpy((char *)tmpProfileSetting.Key4, value);
-	wordlist = nvram_bufget(RT2860_NVRAM, "staKey4");
-	if (CHK_IF_SET(wordlist))
-		sprintf(tmp_buffer, "%s;%s", wordlist, tmpProfileSetting.Key4);
-	else
-		sprintf(tmp_buffer, "%s", tmpProfileSetting.Key4);
-	nvram_bufset(RT2860_NVRAM, "staKey4", tmp_buffer);
-
-	//wep key entry method
-	value = websGetVar(wp, T("wep_key_entry_method"), T("0"));
-	tmpProfileSetting.Key1Type = tmpProfileSetting.Key2Type =
-		tmpProfileSetting.Key3Type = tmpProfileSetting.Key4Type =
-		atoi(value);
-
-	wordlist = nvram_bufget(RT2860_NVRAM, "staKey1Type");
-	if (CHK_IF_SET(wordlist))
-		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.Key1Type);
-	else
-		sprintf(tmp_buffer, "%d", tmpProfileSetting.Key1Type);
-	nvram_bufset(RT2860_NVRAM, "staKey1Type", tmp_buffer);
-
-	wordlist = nvram_bufget(RT2860_NVRAM, "staKey2Type");
-	if (CHK_IF_SET(wordlist))
-		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.Key2Type);
-	else
-		sprintf(tmp_buffer, "%d", tmpProfileSetting.Key2Type);
-	nvram_bufset(RT2860_NVRAM, "staKey2Type", tmp_buffer);
-
-	wordlist = nvram_bufget(RT2860_NVRAM, "staKey3Type");
-	if (CHK_IF_SET(wordlist))
-		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.Key3Type);
-	else
-		sprintf(tmp_buffer, "%d", tmpProfileSetting.Key3Type);
-	nvram_bufset(RT2860_NVRAM, "staKey3Type", tmp_buffer);
-
-	wordlist = nvram_bufget(RT2860_NVRAM, "staKey4Type");
-	if (CHK_IF_SET(wordlist))
-		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.Key4Type);
-	else
-		sprintf(tmp_buffer, "%d", tmpProfileSetting.Key4Type);
-	nvram_bufset(RT2860_NVRAM, "staKey4Type", tmp_buffer);
-
-	//wep key length
-	value = websGetVar(wp, T("wep_key_length"), T("0"));
-	tmpProfileSetting.Key1Length = tmpProfileSetting.Key2Length = 
-		tmpProfileSetting.Key3Length = tmpProfileSetting.Key4Length =
-		atoi(value);
-
-	wordlist = nvram_bufget(RT2860_NVRAM, "staKey1Length");
-	if (CHK_IF_SET(wordlist))
-		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.Key1Length);
-	else
-		sprintf(tmp_buffer, "%d", tmpProfileSetting.Key1Length);
-	nvram_bufset(RT2860_NVRAM, "staKey1Length", tmp_buffer);
-
-	wordlist = nvram_bufget(RT2860_NVRAM, "staKey2Length");
-	if (CHK_IF_SET(wordlist))
-		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.Key2Length);
-	else
-		sprintf(tmp_buffer, "%d", tmpProfileSetting.Key2Length);
-	nvram_bufset(RT2860_NVRAM, "staKey2Length", tmp_buffer);
-
-	wordlist = nvram_bufget(RT2860_NVRAM, "staKey3Length");
-	if (CHK_IF_SET(wordlist))
-		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.Key3Length);
-	else
-		sprintf(tmp_buffer, "%d", tmpProfileSetting.Key3Length);
-	nvram_bufset(RT2860_NVRAM, "staKey3Length", tmp_buffer);
-
-	wordlist = nvram_bufget(RT2860_NVRAM, "staKey4Length");
-	if (CHK_IF_SET(wordlist))
-		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.Key4Length);
-	else
-		sprintf(tmp_buffer, "%d", tmpProfileSetting.Key4Length);
-	nvram_bufset(RT2860_NVRAM, "staKey4Length", tmp_buffer);
-
-	//wep default key
-	value = websGetVar(wp, T("wep_default_key"), T("1"));
-	tmpProfileSetting.KeyDefaultId= atoi(value);
-	wordlist = nvram_bufget(RT2860_NVRAM, "staKeyDefaultId");
-	if (CHK_IF_SET(wordlist))
-		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.KeyDefaultId);
-	else
-		sprintf(tmp_buffer, "%d", tmpProfileSetting.KeyDefaultId);
-	nvram_bufset(RT2860_NVRAM, "staKeyDefaultId", tmp_buffer);
-
-	//cipher, "staEncrypt"
-	value = websGetVar(wp, T("cipher"), T(""));
-	if (strcmp(value, "0") == 0) //TKIP
-		tmpProfileSetting.Encryption = Ndis802_11Encryption2Enabled;
-	else if (strcmp(value, "1") == 0) //AES
-		tmpProfileSetting.Encryption = Ndis802_11Encryption3Enabled;
-	else { //empty
-		if (tmpProfileSetting.Authentication <= Ndis802_11AuthModeShared) {
-			if (strlen((char *)tmpProfileSetting.Key1) > 1 || strlen((char *)tmpProfileSetting.Key2) > 1 ||
-					strlen((char *)tmpProfileSetting.Key4) > 1 || strlen((char *)tmpProfileSetting.Key3) > 1)
-			{
-				tmpProfileSetting.Encryption = Ndis802_11WEPEnabled;
-			}
-			else
-				tmpProfileSetting.Encryption = Ndis802_11WEPDisabled;
-		}
-		else if (tmpProfileSetting.Authentication == Ndis802_11AuthModeMax) //802.1x
-			tmpProfileSetting.Encryption = Ndis802_11WEPEnabled;
-		else
-			tmpProfileSetting.Encryption = Ndis802_11WEPDisabled;
-	}
-	wordlist = nvram_bufget(RT2860_NVRAM, "staEncrypt");
-	if (CHK_IF_SET(wordlist))
-		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.Encryption);
-	else
-		sprintf(tmp_buffer, "%d", tmpProfileSetting.Encryption);
-	nvram_bufset(RT2860_NVRAM, "staEncrypt", tmp_buffer);
-
-	//passphrase
-	value = websGetVar(wp, T("passphrase"), T("0"));
-	strcpy((char *)tmpProfileSetting.WpaPsk, value);
-	wordlist = nvram_bufget(RT2860_NVRAM, "staWpaPsk");
-	if (CHK_IF_SET(wordlist))
-		sprintf(tmp_buffer, "%s;%s", wordlist, tmpProfileSetting.WpaPsk);
-	else
-		sprintf(tmp_buffer, "%s", tmpProfileSetting.WpaPsk);
-	nvram_bufset(RT2860_NVRAM, "staWpaPsk", tmp_buffer);
-
-#ifdef WPA_SUPPLICANT_SUPPORT
-	//cert auth from 1x, wpa
-	tmpProfileSetting.EAP = Rtwpa_supplicantEAPNONE;
-	value = websGetVar(wp, T("cert_auth_type_from_1x"), T(""));
-	if (CHK_IF_SET(value))
-		tmpProfileSetting.EAP = (RT_WPA_SUPPLICANT_EAP)atoi(value);
-	value = websGetVar(wp, T("cert_auth_type_from_wpa"), T(""));
-	if (CHK_IF_SET(value))
-		tmpProfileSetting.EAP = (RT_WPA_SUPPLICANT_EAP)atoi(value);
-
-	wordlist = nvram_bufget(RT2860_NVRAM, "sta8021xEAP");
-	if (CHK_IF_SET(wordlist))
-		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.EAP);
-	else
-		sprintf(tmp_buffer, "%d", tmpProfileSetting.EAP);
-	nvram_bufset(RT2860_NVRAM, "sta8021xEAP", tmp_buffer);
-
-	//cert tunnel auth peap, ttls
-	tmpProfileSetting.Tunnel = Rtwpa_supplicantTUNNENONE;
-	value = websGetVar(wp, T("cert_tunnel_auth_peap"), T(""));
-	if (CHK_IF_SET(value))
-		tmpProfileSetting.Tunnel = (RT_WPA_SUPPLICANT_TUNNEL)atoi(value);
-	value = websGetVar(wp, T("cert_tunnel_auth_ttls"), T(""));
-	if (CHK_IF_SET(value))
-		tmpProfileSetting.Tunnel = (RT_WPA_SUPPLICANT_TUNNEL)atoi(value);
-
-	wordlist = nvram_bufget(RT2860_NVRAM, "sta8021xTunnel");
-	if (CHK_IF_SET(wordlist))
-		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.Tunnel);
-	else
-		sprintf(tmp_buffer, "%d", tmpProfileSetting.Tunnel);
-	nvram_bufset(RT2860_NVRAM, "sta8021xTunnel", tmp_buffer);
-
-	//certificate identity
-	value = websGetVar(wp, T("cert_id"), T("0"));
-	sprintf((char *)tmpProfileSetting.Identity, "%s", value);
-	wordlist = nvram_bufget(RT2860_NVRAM, "sta8021xIdentity");
-	if (CHK_IF_SET(wordlist))
-		sprintf(tmp_buffer, "%s;%s", wordlist, tmpProfileSetting.Identity);
-	else
-		sprintf(tmp_buffer, "%s", tmpProfileSetting.Identity);
-	nvram_bufset(RT2860_NVRAM, "sta8021xIdentity", tmp_buffer);
-
-	//certificate password
-	value = websGetVar(wp, T("cert_password"), T("0"));
-	sprintf((char *)tmpProfileSetting.Password, "%s", value);
-	wordlist = nvram_bufget(RT2860_NVRAM, "sta8021xPassword");
-	if (CHK_IF_SET(wordlist))
-		sprintf(tmp_buffer, "%s;%s", wordlist, tmpProfileSetting.Password);
-	else
-		sprintf(tmp_buffer, "%s", tmpProfileSetting.Password);
-	nvram_bufset(RT2860_NVRAM, "sta8021xPassword", tmp_buffer);
-
-	//client certificate path
-	value = websGetVar(wp, T("cert_client_cert_path"), T("0"));
-	sprintf((char *)tmpProfileSetting.ClientCert, "%s", value);
-	wordlist = nvram_bufget(RT2860_NVRAM, "sta8021xClientCert");
-	if (CHK_IF_SET(wordlist))
-		sprintf(tmp_buffer, "%s;%s", wordlist, tmpProfileSetting.ClientCert);
-	else
-		sprintf(tmp_buffer, "%s", tmpProfileSetting.ClientCert);
-	nvram_bufset(RT2860_NVRAM, "sta8021xClientCert", tmp_buffer);
-
-	//private key path
-	value = websGetVar(wp, T("cert_private_key_path"), T("0"));
-	sprintf((char *)tmpProfileSetting.PrivateKey, "%s", value);
-	wordlist = nvram_bufget(RT2860_NVRAM, "sta8021xPrivateKey");
-	if (CHK_IF_SET(wordlist))
-		sprintf(tmp_buffer, "%s;%s", wordlist, tmpProfileSetting.PrivateKey);
-	else
-		sprintf(tmp_buffer, "%s", tmpProfileSetting.PrivateKey);
-	nvram_bufset(RT2860_NVRAM, "sta8021xPrivateKey", tmp_buffer);
-
-	//private key password
-	value = websGetVar(wp, T("cert_private_key_password"), T("0"));
-	sprintf((char *)tmpProfileSetting.PrivateKeyPassword, "%s", value);
-	wordlist = nvram_bufget(RT2860_NVRAM, "sta8021xPrivateKeyPassword");
-	if (CHK_IF_SET(wordlist))
-		sprintf(tmp_buffer, "%s;%s", wordlist, tmpProfileSetting.PrivateKeyPassword);
-	else
-		sprintf(tmp_buffer, "%s", tmpProfileSetting.PrivateKeyPassword);
-	nvram_bufset(RT2860_NVRAM, "sta8021xPrivateKeyPassword", tmp_buffer);
-
-	//CA cert path
-	value = websGetVar(wp, T("cert_ca_cert_path"), T("0"));
-	sprintf((char *)tmpProfileSetting.CACert, "%s", value);
-	wordlist = nvram_bufget(RT2860_NVRAM, "sta8021xCACert");
-	if (CHK_IF_SET(wordlist))
-		sprintf(tmp_buffer, "%s;%s", wordlist, tmpProfileSetting.CACert);
-	else
-		sprintf(tmp_buffer, "%s", tmpProfileSetting.CACert);
-	nvram_bufset(RT2860_NVRAM, "sta8021xCACert", tmp_buffer);
-	nvram_commit(RT2860_NVRAM);
-	nvram_close(RT2860_NVRAM);
-#else
-#define BUFSET(column, value) \
-	wordlist = nvram_bufget(RT2860_NVRAM, column); \
-	if (CHK_IF_SET(wordlist)) \
-		sprintf(tmp_buffer, "%s;%s", wordlist, value); \
-	else \
-		sprintf(tmp_buffer, "%s", value); \
-	nvram_bufset(RT2860_NVRAM, column, tmp_buffer);
-
-	nvram_init(RT2860_NVRAM);
-	BUFSET("sta8021xEAP", "7");
-	BUFSET("sta8021xTunnel", "3");
-	BUFSET("sta8021xKeyMgmt", "3");
-	BUFSET("sta8021xIdentity", "0");
-	BUFSET("sta8021xPassword", "0");
-	BUFSET("sta8021xClientCert", "0");
-	BUFSET("sta8021xPrivateKey", "0");
-	BUFSET("sta8021xPrivateKeyPassword", "0");
-	BUFSET("sta8021xCACert", "0");
-	nvram_commit(RT2860_NVRAM);
-	nvram_close(RT2860_NVRAM);
-#endif
-	websRedirect(wp, "/form_close.asp");
-
-	tmpProfileSetting.Active = 0;
-	wordlist = nvram_get(RT2860_NVRAM, "staActive");
-	if (CHK_IF_SET(wordlist))
-		sprintf(tmp_buffer, "%s;%d", wordlist, tmpProfileSetting.Active);
-	else
-		sprintf(tmp_buffer, "%d", tmpProfileSetting.Active);
-	nvram_set(RT2860_NVRAM, "staActive", tmp_buffer);
-
-	freeHeaderProfileSettings();
-	headerProfileSetting = NULL;
-	initStaProfile();
-}
-
-static void writeProfileToNvram()
-{
-	char tmp_buffer[512], tmp_data[8];
-
-	if (headerProfileSetting == NULL)
-		return;
-
-	//profile name
-	nvram_init(RT2860_NVRAM);
-	bzero(tmp_buffer, 512);
-	currentProfileSetting = headerProfileSetting;
-	do {
-		strcat(tmp_buffer, (char *)currentProfileSetting->Profile);
-		currentProfileSetting = currentProfileSetting->Next;
-		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");
-	} while (currentProfileSetting != NULL);
-	nvram_bufset(RT2860_NVRAM, "staProfile", tmp_buffer);
-
-	//ssid
-	bzero(tmp_buffer, 512);
-	currentProfileSetting = headerProfileSetting;
-	do {
-		strcat(tmp_buffer, (char *)currentProfileSetting->SSID);
-		currentProfileSetting = currentProfileSetting->Next;
-		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");
-	} while (currentProfileSetting != NULL);
-	nvram_bufset(RT2860_NVRAM, "staSSID", tmp_buffer);
-
-	//NetworkType
-	bzero(tmp_buffer, 512);
-	bzero(tmp_data, 8);
-	currentProfileSetting = headerProfileSetting;
-	do {
-		sprintf(tmp_data, "%d", currentProfileSetting->NetworkType);
-		strcat(tmp_buffer, tmp_data);
-		currentProfileSetting = currentProfileSetting->Next;
-		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");
-	} while (currentProfileSetting != NULL);
-	nvram_bufset(RT2860_NVRAM, "staNetworkType", tmp_buffer);
-
-	//PSMode
-	bzero(tmp_buffer, 512);
-	bzero(tmp_data, 8);
-	currentProfileSetting = headerProfileSetting;
-	do {
-		sprintf(tmp_data, "%d", currentProfileSetting->PSmode);
-		strcat(tmp_buffer, tmp_data);
-		currentProfileSetting = currentProfileSetting->Next;
-		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");
-	} while (currentProfileSetting != NULL);
-	nvram_bufset(RT2860_NVRAM, "staPSMode", tmp_buffer);
-
-	//AdhocMode
-	bzero(tmp_buffer, 512);
-	bzero(tmp_data, 8);
-	currentProfileSetting = headerProfileSetting;
-	do {
-		sprintf(tmp_data, "%d", currentProfileSetting->AdhocMode);
-		strcat(tmp_buffer, tmp_data);
-		currentProfileSetting = currentProfileSetting->Next;
-		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");
-	} while (currentProfileSetting != NULL);
-	nvram_bufset(RT2860_NVRAM, "staAdhocMode", tmp_buffer);
-
-	//Channel
-	bzero(tmp_buffer, 512);
-	bzero(tmp_data, 8);
-	currentProfileSetting = headerProfileSetting;
-	do {
-		sprintf(tmp_data, "%d", currentProfileSetting->Channel);
-		strcat(tmp_buffer, tmp_data);
-		currentProfileSetting = currentProfileSetting->Next;
-		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");
-	} while (currentProfileSetting != NULL);
-	nvram_bufset(RT2860_NVRAM, "staChannel", tmp_buffer);
-
-	//PreamType
-	bzero(tmp_buffer, 512);
-	bzero(tmp_data, 8);
-	currentProfileSetting = headerProfileSetting;
-	do {
-		sprintf(tmp_data, "%d", currentProfileSetting->PreamType);
-		strcat(tmp_buffer, tmp_data);
-		currentProfileSetting = currentProfileSetting->Next;
-		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");
-	} while (currentProfileSetting != NULL);
-	nvram_bufset(RT2860_NVRAM, "staPreamType", tmp_buffer);
-
-	//RTSCheck
-	bzero(tmp_buffer, 512);
-	bzero(tmp_data, 8);
-	currentProfileSetting = headerProfileSetting;
-	do {
-		sprintf(tmp_data, "%d", currentProfileSetting->RTSCheck);
-		strcat(tmp_buffer, tmp_data);
-		currentProfileSetting = currentProfileSetting->Next;
-		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");
-	} while (currentProfileSetting != NULL);
-	nvram_bufset(RT2860_NVRAM, "staRTSCheck", tmp_buffer);
-
-	//FragmentCheck
-	bzero(tmp_buffer, 512);
-	bzero(tmp_data, 8);
-	currentProfileSetting = headerProfileSetting;
-	do {
-		sprintf(tmp_data, "%d", currentProfileSetting->FragmentCheck);
-		strcat(tmp_buffer, tmp_data);
-		currentProfileSetting = currentProfileSetting->Next;
-		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");
-	} while (currentProfileSetting != NULL);
-	nvram_bufset(RT2860_NVRAM, "staFragmentCheck", tmp_buffer);
-
-	//AdhocMode
-	bzero(tmp_buffer, 512);
-	bzero(tmp_data, 8);
-	currentProfileSetting = headerProfileSetting;
-	do {
-		sprintf(tmp_data, "%d", currentProfileSetting->RTS);
-		strcat(tmp_buffer, tmp_data);
-		currentProfileSetting = currentProfileSetting->Next;
-		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");
-	} while (currentProfileSetting != NULL);
-	nvram_bufset(RT2860_NVRAM, "staRTS", tmp_buffer);
-
-	//Fragment
-	bzero(tmp_buffer, 512);
-	bzero(tmp_data, 8);
-	currentProfileSetting = headerProfileSetting;
-	do {
-		sprintf(tmp_data, "%d", currentProfileSetting->Fragment);
-		strcat(tmp_buffer, tmp_data);
-		currentProfileSetting = currentProfileSetting->Next;
-		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");
-	} while (currentProfileSetting != NULL);
-	nvram_bufset(RT2860_NVRAM, "staFragment", tmp_buffer);
-	/* Security Policy */
-
-	//Authentication
-	bzero(tmp_buffer, 512);
-	bzero(tmp_data, 8);
-	currentProfileSetting = headerProfileSetting;
-	do {
-		sprintf(tmp_data, "%d", currentProfileSetting->Authentication);
-		strcat(tmp_buffer, tmp_data);
-		currentProfileSetting = currentProfileSetting->Next;
-		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");
-	} while (currentProfileSetting != NULL);
-	nvram_bufset(RT2860_NVRAM, "staAuth", tmp_buffer);
-
-	//Encryption
-	bzero(tmp_buffer, 512);
-	bzero(tmp_data, 8);
-	currentProfileSetting = headerProfileSetting;
-	do {
-		sprintf(tmp_data, "%d", currentProfileSetting->Encryption);
-		strcat(tmp_buffer, tmp_data);
-		currentProfileSetting = currentProfileSetting->Next;
-		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");
-	} while (currentProfileSetting != NULL);
-	nvram_bufset(RT2860_NVRAM, "staEncrypt", tmp_buffer);
-
-	//KeyDefaultId
-	bzero(tmp_buffer, 512);
-	bzero(tmp_data, 8);
-	currentProfileSetting = headerProfileSetting;
-	do {
-		sprintf(tmp_data, "%d", currentProfileSetting->KeyDefaultId);
-		strcat(tmp_buffer, tmp_data);
-		currentProfileSetting = currentProfileSetting->Next;
-		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");
-	} while (currentProfileSetting != NULL);
-	nvram_bufset(RT2860_NVRAM, "staKeyDefaultId", tmp_buffer);
-
-	//Key1Type
-	bzero(tmp_buffer, 512);
-	bzero(tmp_data, 8);
-	currentProfileSetting = headerProfileSetting;
-	do {
-		sprintf(tmp_data, "%d", currentProfileSetting->Key1Type);
-		strcat(tmp_buffer, tmp_data);
-		currentProfileSetting = currentProfileSetting->Next;
-		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");
-	} while (currentProfileSetting != NULL);
-	nvram_bufset(RT2860_NVRAM, "staKey1Type", tmp_buffer);
-
-	//Key2Type
-	bzero(tmp_buffer, 512);
-	bzero(tmp_data, 8);
-	currentProfileSetting = headerProfileSetting;
-	do {
-		sprintf(tmp_data, "%d", currentProfileSetting->Key2Type);
-		strcat(tmp_buffer, tmp_data);
-		currentProfileSetting = currentProfileSetting->Next;
-		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");
-	} while (currentProfileSetting != NULL);
-	nvram_bufset(RT2860_NVRAM, "staKey2Type", tmp_buffer);
-
-	//Key3Type
-	bzero(tmp_buffer, 512);
-	bzero(tmp_data, 8);
-	currentProfileSetting = headerProfileSetting;
-	do {
-		sprintf(tmp_data, "%d", currentProfileSetting->Key3Type);
-		strcat(tmp_buffer, tmp_data);
-		currentProfileSetting = currentProfileSetting->Next;
-		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");
-	} while (currentProfileSetting != NULL);
-	nvram_bufset(RT2860_NVRAM, "staKey3Type", tmp_buffer);
-
-	//Key4Type
-	bzero(tmp_buffer, 512);
-	bzero(tmp_data, 8);
-	currentProfileSetting = headerProfileSetting;
-	do {
-		sprintf(tmp_data, "%d", currentProfileSetting->Key4Type);
-		strcat(tmp_buffer, tmp_data);
-		currentProfileSetting = currentProfileSetting->Next;
-		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");
-	} while (currentProfileSetting != NULL);
-	nvram_bufset(RT2860_NVRAM, "staKey4Type", tmp_buffer);
-
-	//Key1Lenght
-	bzero(tmp_buffer, 512);
-	bzero(tmp_data, 8);
-	currentProfileSetting = headerProfileSetting;
-	do {
-		sprintf(tmp_data, "%d", currentProfileSetting->Key1Length);
-		strcat(tmp_buffer, tmp_data);
-		currentProfileSetting = currentProfileSetting->Next;
-		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");
-	} while (currentProfileSetting != NULL);
-	nvram_bufset(RT2860_NVRAM, "staKey1Length", tmp_buffer);
-
-	//Key2Length
-	bzero(tmp_buffer, 512);
-	bzero(tmp_data, 8);
-	currentProfileSetting = headerProfileSetting;
-	do {
-		sprintf(tmp_data, "%d", currentProfileSetting->Key2Length);
-		strcat(tmp_buffer, tmp_data);
-		currentProfileSetting = currentProfileSetting->Next;
-		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");
-	} while (currentProfileSetting != NULL);
-	nvram_bufset(RT2860_NVRAM, "staKey2Type", tmp_buffer);
-
-	//Key3Length
-	bzero(tmp_buffer, 512);
-	bzero(tmp_data, 8);
-	currentProfileSetting = headerProfileSetting;
-	do {
-		sprintf(tmp_data, "%d", currentProfileSetting->Key3Length);
-		strcat(tmp_buffer, tmp_data);
-		currentProfileSetting = currentProfileSetting->Next;
-		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");
-	} while (currentProfileSetting != NULL);
-	nvram_bufset(RT2860_NVRAM, "staKey3Length", tmp_buffer);
-
-	//Key4Length
-	bzero(tmp_buffer, 512);
-	bzero(tmp_data, 8);
-	currentProfileSetting = headerProfileSetting;
-	do {
-		sprintf(tmp_data, "%d", currentProfileSetting->Key4Length);
-		strcat(tmp_buffer, tmp_data);
-		currentProfileSetting = currentProfileSetting->Next;
-		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");
-	} while (currentProfileSetting != NULL);
-	nvram_bufset(RT2860_NVRAM, "staKey4Length", tmp_buffer);
-
-	//Key1
-	bzero(tmp_buffer, 512);
-	currentProfileSetting = headerProfileSetting;
-	do {
-		strcat(tmp_buffer, (char *)currentProfileSetting->Key1);
-		currentProfileSetting = currentProfileSetting->Next;
-		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");
-	} while (currentProfileSetting != NULL);
-	nvram_bufset(RT2860_NVRAM, "staKey1", tmp_buffer);
-
-	//Key2
-	bzero(tmp_buffer, 512);
-	currentProfileSetting = headerProfileSetting;
-	do {
-		strcat(tmp_buffer, (char *)currentProfileSetting->Key2);
-		currentProfileSetting = currentProfileSetting->Next;
-		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");	
-	} while (currentProfileSetting != NULL);
-	nvram_bufset(RT2860_NVRAM, "staKey2", tmp_buffer);
-
-	//Key3
-	bzero(tmp_buffer, 512);
-	currentProfileSetting = headerProfileSetting;
-	do {
-		strcat(tmp_buffer, (char *)currentProfileSetting->Key3);
-		currentProfileSetting = currentProfileSetting->Next;
-		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");
-	} while (currentProfileSetting != NULL);
-	nvram_bufset(RT2860_NVRAM, "staKey3", tmp_buffer);
-
-	//Key4
-	bzero(tmp_buffer, 512);
-	currentProfileSetting = headerProfileSetting;
-	do {
-		strcat(tmp_buffer, (char *)currentProfileSetting->Key4);
-		currentProfileSetting = currentProfileSetting->Next;
-		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");
-	} while (currentProfileSetting != NULL);
-	nvram_bufset(RT2860_NVRAM, "staKey4", tmp_buffer);
-
-	//WpaPsk
-	bzero(tmp_buffer, 512);
-	currentProfileSetting = headerProfileSetting;
-	do {
-		strcat(tmp_buffer, (char *)currentProfileSetting->WpaPsk);
-		currentProfileSetting = currentProfileSetting->Next;
-		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");
-	} while (currentProfileSetting != NULL);
-	nvram_bufset(RT2860_NVRAM, "staWpaPsk", tmp_buffer);
-
-#ifdef WPA_SUPPLICANT_SUPPORT
-	//Key Mgmt
-	bzero(tmp_buffer, 512);
-	bzero(tmp_data, 8);
-	currentProfileSetting = headerProfileSetting;
-	do {
-		sprintf(tmp_data, "%d", currentProfileSetting->KeyMgmt);
-		strcat(tmp_buffer, tmp_data);
-		currentProfileSetting = currentProfileSetting->Next;
-		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");
-	} while (currentProfileSetting != NULL);
-	nvram_bufset(RT2860_NVRAM, "sta8021xKeyMgmt", tmp_buffer);
-
-	//EAP
-	bzero(tmp_buffer, 512);
-	bzero(tmp_data, 8);
-	currentProfileSetting = headerProfileSetting;
-	do {
-		sprintf(tmp_data, "%d", currentProfileSetting->EAP);
-		strcat(tmp_buffer, tmp_data);
-		currentProfileSetting = currentProfileSetting->Next;
-		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");
-	} while (currentProfileSetting != NULL);
-	nvram_bufset(RT2860_NVRAM, "sta8021xEAP", tmp_buffer);
-
-	//Tunnel
-	bzero(tmp_buffer, 512);
-	bzero(tmp_data, 8);
-	currentProfileSetting = headerProfileSetting;
-	do {
-		printf("currentProfileSetting->Tunnel = %d\n", currentProfileSetting->Tunnel);
-		sprintf(tmp_data, "%d", currentProfileSetting->Tunnel);
-		strcat(tmp_buffer, tmp_data);
-		currentProfileSetting = currentProfileSetting->Next;
-		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");
-	} while (currentProfileSetting != NULL);
-	nvram_bufset(RT2860_NVRAM, "sta8021xTunnel", tmp_buffer);
-
-	//Identity
-	bzero(tmp_buffer, 512);
-	currentProfileSetting = headerProfileSetting;
-	do {
-		strcat(tmp_buffer, (char *)currentProfileSetting->Identity);
-		currentProfileSetting = currentProfileSetting->Next;
-		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");
-	} while (currentProfileSetting != NULL);
-	nvram_bufset(RT2860_NVRAM, "sta8021xIdentity", tmp_buffer);
-
-	//Password
-	bzero(tmp_buffer, 512);
-	currentProfileSetting = headerProfileSetting;
-	do {
-		strcat(tmp_buffer, (char *)currentProfileSetting->Password);
-		currentProfileSetting = currentProfileSetting->Next;
-		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");
-	} while (currentProfileSetting != NULL);
-	nvram_bufset(RT2860_NVRAM, "sta8021xPassword", tmp_buffer);
-
-	//Client Cert Path
-	bzero(tmp_buffer, 512);
-	currentProfileSetting = headerProfileSetting;
-	do {
-		strcat(tmp_buffer, (char *)currentProfileSetting->ClientCert);
-		currentProfileSetting = currentProfileSetting->Next;
-		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");
-	} while (currentProfileSetting != NULL);
-	nvram_bufset(RT2860_NVRAM, "sta8021xClientCert", tmp_buffer);
-
-	//Private Key
-	bzero(tmp_buffer, 512);
-	currentProfileSetting = headerProfileSetting;
-	do {
-		strcat(tmp_buffer, (char *)currentProfileSetting->PrivateKey);
-		currentProfileSetting = currentProfileSetting->Next;
-		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");
-	} while (currentProfileSetting != NULL);
-	nvram_bufset(RT2860_NVRAM, "sta8021xPrivateKey", tmp_buffer);
-
-	//Private Key Password
-	bzero(tmp_buffer, 512);
-	currentProfileSetting = headerProfileSetting;
-	do {
-		strcat(tmp_buffer, (char *)currentProfileSetting->PrivateKeyPassword);
-		currentProfileSetting = currentProfileSetting->Next;
-		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");
-	} while (currentProfileSetting != NULL);
-	nvram_bufset(RT2860_NVRAM, "sta8021xPrivateKeyPassword", tmp_buffer);
-
-	//CA CertPath
-	bzero(tmp_buffer, 512);
-	currentProfileSetting = headerProfileSetting;
-	do {
-		strcat(tmp_buffer, (char *)currentProfileSetting->CACert);
-		currentProfileSetting = currentProfileSetting->Next;
-		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");
-	} while (currentProfileSetting != NULL);
-	nvram_bufset(RT2860_NVRAM, "sta8021xCACert", tmp_buffer);
-#else
-	bzero(tmp_buffer, 512);
-	currentProfileSetting = headerProfileSetting;
-	do {
-		strcat(tmp_buffer, "7");
-		currentProfileSetting = currentProfileSetting->Next;
-		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");
-	} while (currentProfileSetting != NULL);
-	nvram_bufset(RT2860_NVRAM, "sta8021xEAP", tmp_buffer);
-
-	bzero(tmp_buffer, 512);
-	currentProfileSetting = headerProfileSetting;
-	do {
-		strcat(tmp_buffer, "3");
-		currentProfileSetting = currentProfileSetting->Next;
-		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");
-	} while (currentProfileSetting != NULL);
-	nvram_bufset(RT2860_NVRAM, "sta8021xTunnel", tmp_buffer);
-	nvram_bufset(RT2860_NVRAM, "sta8021xKeyMgmt", tmp_buffer);
-
-	bzero(tmp_buffer, 512);
-	currentProfileSetting = headerProfileSetting;
-	do {
-		strcat(tmp_buffer, "0");
-		currentProfileSetting = currentProfileSetting->Next;
-		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");
-	} while (currentProfileSetting != NULL);
-	nvram_bufset(RT2860_NVRAM, "sta8021xIdentity", tmp_buffer);
-	nvram_bufset(RT2860_NVRAM, "sta8021xPassword", tmp_buffer);
-	nvram_bufset(RT2860_NVRAM, "sta8021xClientCert", tmp_buffer);
-	nvram_bufset(RT2860_NVRAM, "sta8021xPrivateKey", tmp_buffer);
-	nvram_bufset(RT2860_NVRAM, "sta8021xPrivateKeyPassword", tmp_buffer);
-	nvram_bufset(RT2860_NVRAM, "sta8021xCACert", tmp_buffer);
-#endif
-
-	//Active
-	bzero(tmp_buffer, 512);
-	bzero(tmp_data, 8);
-	currentProfileSetting = headerProfileSetting;
-	do {
-		sprintf(tmp_data, "%d", currentProfileSetting->Active);
-		strcat(tmp_buffer, tmp_data);
-		currentProfileSetting = currentProfileSetting->Next;
-		if (currentProfileSetting != NULL)
-			strcat(tmp_buffer, ";");
-	} while (currentProfileSetting != NULL);
-	nvram_bufset(RT2860_NVRAM, "staActive", tmp_buffer);
-
-	nvram_commit(RT2860_NVRAM);
-	nvram_close(RT2860_NVRAM);
-}
-
-/*
- * description: goform - reset statistics counters
- */
-static void editStaProfile(webs_t wp, char_t *path, char_t *query)
-{
-	char_t *value;
-
-	// step 1, modify info on selectedProfileSetting
-
-	printf("editStaProfile()\n");
-
-	value = websGetVar(wp, T("profile_name"), T(""));
-	if (CHK_IF_SET(value))
-		strcpy((char *)selectedProfileSetting->Profile, value);
-
-	value = websGetVar(wp, T("Ssid"), T(""));
-	if (CHK_IF_SET(value))
-		strcpy((char *)selectedProfileSetting->SSID, value);
-
-	value = websGetVar(wp, T("network_type"), T(""));
-	if (CHK_IF_SET(value))
-		selectedProfileSetting->NetworkType = atoi(value);
-	if (selectedProfileSetting->NetworkType == Ndis802_11Infrastructure)
-	{
-		selectedProfileSetting->AdhocMode = 0;
-		selectedProfileSetting->Channel = 0;
-		selectedProfileSetting->PreamType = Rt802_11PreambleLong;
-	}
-
-	value = websGetVar(wp, T("power_saving_mode"), T(""));
-	if (CHK_IF_SET(value))
-	{
-		if (CHK_IF_DIGIT(value, 0))
-			selectedProfileSetting->PSmode = Ndis802_11PowerModeCAM;
-		else
-			selectedProfileSetting->PSmode = Ndis802_11PowerModeMAX_PSP;
-	}
-
-	value = websGetVar(wp, T("channel"), T(""));
-	if (CHK_IF_SET(value))
-	{
-		if (selectedProfileSetting->NetworkType == Ndis802_11IBSS)
-			selectedProfileSetting->Channel = atoi(value);
-		else
-			selectedProfileSetting->Channel = 0;
-	}
-
-	value = websGetVar(wp, T("b_premable_type"), T(""));
-	if (CHK_IF_SET(value))
-	{
-		if (strcmp(value, "0") == 0)
-			selectedProfileSetting->PreamType = Rt802_11PreambleAuto;
-		else
-			selectedProfileSetting->PreamType = Rt802_11PreambleLong;
-	}
-
-	if (websCompareVar(wp, T("rts_threshold"), T("on")))
-	{
-		selectedProfileSetting->RTSCheck = 1;
-		value = websGetVar(wp, T("rts_thresholdvalue"), T(""));
-		if (strcmp(value, "") != 0)
-			selectedProfileSetting->RTS = atoi(value);
-	}
-	else
-	{
-		selectedProfileSetting->RTSCheck = 0;
-		selectedProfileSetting->RTS = 2347;
-	}
-
-	if (websCompareVar(wp, T("fragment_threshold"), T("on")))
-	{
-		selectedProfileSetting->FragmentCheck = 1;
-		value = websGetVar(wp, T("fragment_thresholdvalue"), T(""));
-		if (strcmp(value, "") != 0)
-			selectedProfileSetting->Fragment = atoi(value);
-	}
-	else
-	{
-		selectedProfileSetting->FragmentCheck = 0;
-		selectedProfileSetting->Fragment = 2346;
-	}
-
-	if (selectedProfileSetting->NetworkType == 1)
-	{
-		value = websGetVar(wp, T("security_infra_mode"), T(""));
-		if (CHK_IF_SET(value))
-			selectedProfileSetting->Authentication = atoi(value);
-	}
-	else
-	{
-		value = websGetVar(wp, T("security_adhoc_mode"), T(""));
-		if (CHK_IF_SET(value))
-			selectedProfileSetting->Authentication = atoi(value);
-	}
-
-#ifdef WPA_SUPPLICANT_SUPPORT
-	if ( selectedProfileSetting->Authentication == Ndis802_11AuthModeWPA
-			|| selectedProfileSetting->Authentication == Ndis802_11AuthModeWPA2)
-	{
-		selectedProfileSetting->KeyMgmt = Rtwpa_supplicantKeyMgmtWPAEAP;
-	}
-	else if (selectedProfileSetting->Authentication == Ndis802_11AuthModeMax) //802.1x
-		selectedProfileSetting->KeyMgmt = Rtwpa_supplicantKeyMgmtIEEE8021X;
-	else 
-		selectedProfileSetting->KeyMgmt = Rtwpa_supplicantKeyMgmtNONE;
-#endif
-	value = websGetVar(wp, T("wep_key_1"), T("0"));
-	strcpy((char *)selectedProfileSetting->Key1, value);
-	value = websGetVar(wp, T("wep_key_2"), T("0"));
-	strcpy((char *)selectedProfileSetting->Key2, value);
-	value = websGetVar(wp, T("wep_key_3"), T("0"));
-	strcpy((char *)selectedProfileSetting->Key3, value);
-	value = websGetVar(wp, T("wep_key_4"), T("0"));
-	strcpy((char *)selectedProfileSetting->Key4, value);
-
-	value = websGetVar(wp, T("wep_key_entry_method"), T(""));
-	if (CHK_IF_SET(value))
-	{
-		selectedProfileSetting->Key1Type =
-		selectedProfileSetting->Key2Type =
-		selectedProfileSetting->Key3Type =
-		selectedProfileSetting->Key4Type =
-		atoi(value);
-	}
-
-	value = websGetVar(wp, T("wep_key_length"), T(""));
-	if (CHK_IF_SET(value))
-	{
-		selectedProfileSetting->Key1Length =
-		selectedProfileSetting->Key2Length =
-		selectedProfileSetting->Key3Length =
-		selectedProfileSetting->Key4Length =
-		atoi(value);
-	}
-
-	value = websGetVar(wp, T("wep_default_key"), T(""));
-	if (CHK_IF_SET(value))
-		selectedProfileSetting->KeyDefaultId = atoi(value);
-
-	value = websGetVar(wp, T("cipher"), T(""));
-	if (CHK_IF_SET(value))
-	{
-		if (CHK_IF_DIGIT(value, 0)) //TKIP
-			selectedProfileSetting->Encryption = Ndis802_11Encryption2Enabled;
-		else //AES
-			selectedProfileSetting->Encryption = Ndis802_11Encryption3Enabled;
-	}
-
-	value = websGetVar(wp, T("passphrase"), T(""));
-	if (CHK_IF_SET(value))
-		strcpy((char *)selectedProfileSetting->WpaPsk, value);
-	else
-		strcpy((char *)selectedProfileSetting->WpaPsk, "0");
-
-	printf("WPA supplicant begin\n");
-
-#ifdef WPA_SUPPLICANT_SUPPORT
-	value = websGetVar(wp, T("cert_auth_type_from_1x"), T(""));
-	if (CHK_IF_SET(value))
-		selectedProfileSetting->EAP = atoi(value);
-	value = websGetVar(wp, T("cert_auth_type_from_wpa"), T(""));
-	if (CHK_IF_SET(value))
-		selectedProfileSetting->EAP = atoi(value);
-
-	value = websGetVar(wp, T("cert_tunnel_auth_peap"), T(""));
-	if (CHK_IF_SET(value))
-		selectedProfileSetting->Tunnel = atoi(value);
-	value = websGetVar(wp, T("cert_tunnel_auth_ttls"), T(""));
-	if (CHK_IF_SET(value))
-		selectedProfileSetting->Tunnel = atoi(value);
-
-	value = websGetVar(wp, T("cert_id"), T(""));
-	if (CHK_IF_SET(value))
-		strcpy((char *)selectedProfileSetting->Identity, value);
-	else
-		strcpy((char *)selectedProfileSetting->Identity, "0");
-
-	value = websGetVar(wp, T("cert_password"), T(""));
-	if (CHK_IF_SET(value))
-		strcpy((char *)selectedProfileSetting->Password, value);
-	else
-		strcpy((char *)selectedProfileSetting->Password, "0");
-
-	value = websGetVar(wp, T("cert_client_cert_path"), T(""));
-	if (CHK_IF_SET(value))
-	{
-		strcpy((char *)selectedProfileSetting->ClientCert, value);
-
-		value = websGetVar(wp, T("cert_private_key_path"), T(""));
-		if (CHK_IF_SET(value))
-			strcpy((char *)selectedProfileSetting->PrivateKey, value);
-		else
-			strcpy((char *)selectedProfileSetting->PrivateKey, "0");
-
-		value = websGetVar(wp, T("cert_private_key_password"), T(""));
-		if (CHK_IF_SET(value))
-			strcpy((char *)selectedProfileSetting->PrivateKeyPassword, value);
-		else
-			strcpy((char *)selectedProfileSetting->PrivateKeyPassword, "0");
-	}
-	else
-	{
-		strcpy((char *)selectedProfileSetting->ClientCert, "0");
-		strcpy((char *)selectedProfileSetting->PrivateKey, "0");
-		strcpy((char *)selectedProfileSetting->PrivateKeyPassword, "0");
-	}
-
-	value = websGetVar(wp, T("cert_ca_cert_path"), T(""));
-	if (CHK_IF_SET(value))
-		strcpy((char *)selectedProfileSetting->CACert, value);
-	else
-		strcpy((char *)selectedProfileSetting->CACert, "0");
-#endif				
-
-	if (selectedProfileSetting->Authentication <= Ndis802_11AuthModeShared)
-	{
-		if( strlen((char *)selectedProfileSetting->Key1) > 1 || strlen((char *)selectedProfileSetting->Key2) > 1 ||
-			strlen((char *)selectedProfileSetting->Key4) > 1 || strlen((char *)selectedProfileSetting->Key3) > 1)
-		{
-			selectedProfileSetting->Encryption = Ndis802_11WEPEnabled;
-		}
-		else
-			selectedProfileSetting->Encryption = Ndis802_11WEPDisabled;
-	}
-	else if (selectedProfileSetting->Authentication == Ndis802_11AuthModeMax) //802.1x
-		selectedProfileSetting->Encryption = Ndis802_11WEPEnabled;
-
-	if (selectedProfileSetting->Active)
-	{
-		NDIS_802_11_SSID Ssid;
-		memset(&Ssid, 0x00, sizeof(NDIS_802_11_SSID));
-		strcpy((char *)Ssid.Ssid ,(char *)selectedProfileSetting->SSID);
-		Ssid.SsidLength = selectedProfileSetting->SsidLen;
-
-		unsigned char Bssid[6];
-#ifdef WPA_SUPPLICANT_SUPPORT
-		if (selectedProfileSetting->Authentication == Ndis802_11AuthModeWPA ||
-			selectedProfileSetting->Authentication == Ndis802_11AuthModeWPA2 ||
-			selectedProfileSetting->Authentication == Ndis802_11AuthModeMax )//802.1x
-		{
-			char tmp_key[27];
-			if (selectedProfileSetting->KeyDefaultId == 1) // 1~4
-				strcpy(tmp_key, (char *)selectedProfileSetting->Key1);
-			else if (selectedProfileSetting->KeyDefaultId == 2)
-				strcpy(tmp_key, (char *)selectedProfileSetting->Key2);
-			else if (selectedProfileSetting->KeyDefaultId == 3)
-				strcpy(tmp_key, (char *)selectedProfileSetting->Key3);
-			else if (selectedProfileSetting->KeyDefaultId == 4)
-				strcpy(tmp_key, (char *)selectedProfileSetting->Key4);
-
-			conf_WPASupplicant((char*)selectedProfileSetting->SSID, selectedProfileSetting->KeyMgmt, selectedProfileSetting->EAP, (char*)selectedProfileSetting->Identity, (char*)selectedProfileSetting->Password, (char*)selectedProfileSetting->CACert, (char*)selectedProfileSetting->ClientCert, (char*)selectedProfileSetting->PrivateKey, (char*)selectedProfileSetting->PrivateKeyPassword, tmp_key, selectedProfileSetting->KeyDefaultId-1, selectedProfileSetting->Encryption, selectedProfileSetting->Tunnel, selectedProfileSetting->Tunnel);
-		}
-		else
-#endif
-
-		nvram_set(RT2860_NVRAM, "staCur_SSID", Ssid.Ssid);
-		sta_connection(selectedProfileSetting->NetworkType, selectedProfileSetting->Authentication, selectedProfileSetting->Encryption, selectedProfileSetting->KeyDefaultId, &Ssid, Bssid, (char *)selectedProfileSetting->WpaPsk, (char *)selectedProfileSetting->Key1, (char *)selectedProfileSetting->Key2, (char *)selectedProfileSetting->Key3, (char *)selectedProfileSetting->Key4, selectedProfileSetting->PreamType, selectedProfileSetting->RTSCheck, selectedProfileSetting->RTS, selectedProfileSetting->FragmentCheck, selectedProfileSetting->Fragment, selectedProfileSetting->PSmode, selectedProfileSetting->Channel);
-		Active_flag = 1;
-		Sleep(1);
-	}
-
-	// setp 2, write all profile into nvram
-	printf("writeProfileToNvram()\n");
-	writeProfileToNvram();
-
-	selectedProfileSetting = NULL;
-}
-
-/*
  * description: goform - reset statistics counters
  */
 static void resetStaCounters(webs_t wp, char_t *path, char_t *query)
@@ -5148,172 +3314,6 @@ static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 }
 
 /*
- * description: goform - make the station connect to the AP with given SSID
- */
-static void setStaConnect(webs_t wp, char_t *path, char_t *query)
-{
-	int  tmp_auth=0, tmp_encry=0, tmp_defaultkeyid=0, tmp_networktype=0;
-	char_t *tmp_ssid, *tmp_wpapsk, *tmp_key1, *tmp_key2, *tmp_key3, *tmp_key4, *tmp_bssid;
-#ifdef WPA_SUPPLICANT_SUPPORT
-	int  tmp_keymgmt = Rtwpa_supplicantKeyMgmtNONE, tmp_eap = Rtwpa_supplicantEAPNONE, tmp_tunnel = Rtwpa_supplicantTUNNENONE;
-	char_t *tmp_identity, *tmp_cacert, *tmp_clientcert, *tmp_privatekey, *tmp_privatekeypassword, *tmp_password;
-#endif
-	char_t *value;
-
-	tmp_auth  = Ndis802_11AuthModeOpen;
-	tmp_encry = Ndis802_11WEPDisabled;
-
-	//ssid, networktype, bssid
-	tmp_ssid = websGetVar(wp, T("Ssid"), T(""));
-	value = websGetVar(wp, T("network_type"), T("0"));
-	tmp_networktype = atoi(value);
-	tmp_bssid = websGetVar(wp, T("bssid"), T(""));
-
-	//security mode
-	value = websGetVar(wp, T("security_infra_mode"), T(""));
-	if (strcmp(value, "") != 0)
-		tmp_auth = atoi(value);
-	value = websGetVar(wp, T("security_adhoc_mode"), T(""));
-	if (strcmp(value, "") != 0)
-		tmp_auth = atoi(value);
-#ifdef WPA_SUPPLICANT_SUPPORT
-	//key management
-	if (tmp_auth == Ndis802_11AuthModeWPA || tmp_auth == Ndis802_11AuthModeWPA2)
-		tmp_keymgmt = Rtwpa_supplicantKeyMgmtWPAEAP;
-	else if (tmp_auth == Ndis802_11AuthMode8021x) //802.1x
-		tmp_keymgmt= Rtwpa_supplicantKeyMgmtIEEE8021X;
-	else 
-		tmp_keymgmt = Rtwpa_supplicantKeyMgmtNONE;
-#endif
-
-	//wep key1~4
-	tmp_key1 = websGetVar(wp, T("wep_key_1"), T(""));
-	tmp_key2 = websGetVar(wp, T("wep_key_2"), T(""));
-	tmp_key3 = websGetVar(wp, T("wep_key_3"), T(""));
-	tmp_key4 = websGetVar(wp, T("wep_key_4"), T(""));
-	if (strcmp(tmp_key1, "") || strcmp(tmp_key2, "") || strcmp(tmp_key3, "")
-			|| strcmp(tmp_key4, ""))
-	{
-		// Auth mode OPEN might use encryption type: none or wep
-		// if set wep key, the encry must be WEPEnable
-		tmp_encry = Ndis802_11WEPEnabled;
-	}
-
-	//default key
-	value = websGetVar(wp, T("wep_default_key"), T("0"));
-	tmp_defaultkeyid = atoi(value);
-
-	//cipher
-	value = websGetVar(wp, T("cipher"), T(""));
-	if (strcmp(value, "") != 0)
-	{
-		int enc = atoi(value);
-		if (enc == 0) //TKIP
-			tmp_encry= Ndis802_11Encryption2Enabled;
-		else //AES
-			tmp_encry = Ndis802_11Encryption3Enabled;
-	}
-
-	//passphrase
-	tmp_wpapsk = websGetVar(wp, T("passphrase"), T(""));
-
-#ifdef WPA_SUPPLICANT_SUPPORT
-	//eap
-	value = websGetVar(wp, T("cert_auth_type_from_1x"), T(""));
-	if (strcmp(value, "") != 0)
-		tmp_eap = (RT_WPA_SUPPLICANT_EAP)atoi(value);
-	value = websGetVar(wp, T("cert_auth_type_from_wpa"), T(""));
-	if (strcmp(value, "") != 0)
-		tmp_eap = (RT_WPA_SUPPLICANT_EAP)atoi(value);
-
-	//tunnel
-	value = websGetVar(wp, T("cert_tunnel_auth_peap"), T(""));
-	if (strcmp(value, "") != 0)
-		tmp_tunnel = (RT_WPA_SUPPLICANT_TUNNEL)atoi(value);
-	value = websGetVar(wp, T("cert_tunnel_auth_ttls"), T(""));
-	if (strcmp(value, "") != 0)
-		tmp_tunnel = (RT_WPA_SUPPLICANT_TUNNEL)atoi(value);
-
-	//certificate
-	tmp_identity = websGetVar(wp, T("cert_id"), T(""));
-	tmp_password = websGetVar(wp, T("cert_password"), T(""));
-	tmp_clientcert = websGetVar(wp, T("cert_client_cert_path"), T(""));
-	tmp_privatekey = websGetVar(wp, T("cert_private_key_path"), T(""));
-	tmp_privatekeypassword = websGetVar(wp, T("cert_private_key_password"), T(""));
-	tmp_cacert = websGetVar(wp, T("cert_ca_cert_path"), T(""));
-#endif
-
-	//encryp
-	if (tmp_auth <= Ndis802_11AuthModeShared)
-	{
-		if (strlen((char *)tmp_key1) > 1 || strlen((char *)tmp_key2) > 1 ||
-				strlen((char *)tmp_key3) > 1 || strlen((char *)tmp_key4) > 1)
-		{
-			tmp_encry= Ndis802_11WEPEnabled;
-		}
-		else
-			tmp_encry = Ndis802_11WEPDisabled;
-	}
-	else if (tmp_auth == Ndis802_11AuthModeMax) //802.1x
-		tmp_encry = Ndis802_11WEPEnabled;
-
-	RT_802_11_PREAMBLE                      tmp_preamtype = Rt802_11PreambleAuto;
-	NDIS_802_11_RTS_THRESHOLD               tmp_rts = MAX_RTS_THRESHOLD;
-	NDIS_802_11_FRAGMENTATION_THRESHOLD     tmp_fragment = 2346;
-	NDIS_802_11_POWER_MODE                  tmp_psmode = Ndis802_11PowerModeCAM;
-	NDIS_802_11_SSID                        SSID;
-	unsigned char                           Bssid[6];
-	int                                     s = socket(AF_INET, SOCK_DGRAM, 0);
-
-	OidQueryInformation(RT_OID_802_11_PREAMBLE, s, "ra0", &tmp_preamtype, sizeof(RT_802_11_PREAMBLE));
-	OidQueryInformation(OID_802_11_POWER_MODE, s, "ra0", &tmp_psmode, sizeof(NDIS_802_11_POWER_MODE));
-	OidQueryInformation(OID_802_11_RTS_THRESHOLD, s, "ra0", &tmp_rts, sizeof(NDIS_802_11_RTS_THRESHOLD));
-	OidQueryInformation(OID_802_11_FRAGMENTATION_THRESHOLD, s, "ra0", &tmp_fragment, sizeof(NDIS_802_11_FRAGMENTATION_THRESHOLD));
-	// Set SSID
-	memset(&SSID, 0x00, sizeof(NDIS_802_11_SSID));
-	SSID.SsidLength = strlen(tmp_ssid);
-	memcpy(SSID.Ssid, (const void *)tmp_ssid, SSID.SsidLength);
-
-	// Set BSSID
-	memset(Bssid, 0x00, sizeof(Bssid));
-	AtoH(tmp_bssid, Bssid, 6);
-
-	//site_survey_connect
-#ifdef WPA_SUPPLICANT_SUPPORT
-	if (tmp_auth == Ndis802_11AuthModeWPA ||
-			tmp_auth == Ndis802_11AuthModeWPA2 ||
-			tmp_auth == Ndis802_11AuthMode8021x )//802.1x
-	{
-		char tmp_key[27];
-		if (tmp_defaultkeyid == 1) // 1~4
-			strcpy(tmp_key, tmp_key1);
-		else if (tmp_defaultkeyid == 2)
-			strcpy(tmp_key, tmp_key2);
-		else if (tmp_defaultkeyid == 3)
-			strcpy(tmp_key, tmp_key3);
-		else if (tmp_defaultkeyid == 4)
-			strcpy(tmp_key, tmp_key4);
-
-		tmp_defaultkeyid -=1;
-
-		unsigned long CurrentWirelessMode;
-		if (OidQueryInformation(RT_OID_802_11_PHY_MODE, s, "ra0", &CurrentWirelessMode, sizeof(unsigned char)) < 0 )
-		{
-			websError(wp, 500, "Query OID_802_11_QUERY_WirelessMode error!");
-			close(s);
-			return;
-		}
-		conf_WPASupplicant(tmp_ssid, tmp_keymgmt, tmp_eap, tmp_identity, tmp_password, tmp_cacert, tmp_clientcert, tmp_privatekey, tmp_privatekeypassword, tmp_key, tmp_defaultkeyid, tmp_encry, tmp_tunnel, tmp_auth);
-	}
-	else
-#endif
-		nvram_set(RT2860_NVRAM, "staCur_SSID", SSID.Ssid);
-		sta_connection(tmp_networktype, tmp_auth, tmp_encry, tmp_defaultkeyid, &SSID, Bssid, tmp_wpapsk, tmp_key1, tmp_key2, tmp_key3, tmp_key4, tmp_preamtype, 0, tmp_rts, 0, tmp_fragment, tmp_psmode, 0);  //tmp_channel 0 is auto.
-
-	close(s);
-}
-
-/*
  * description: goform - set G_bdBm_ischeck (displaying dbm or % type)
  */
 static void setStaDbm(webs_t wp, char_t *path, char_t *query)
@@ -5329,200 +3329,60 @@ static void setStaDbm(webs_t wp, char_t *path, char_t *query)
 	return;
 }
 
-/*
- * description: goform - add ampdu originator
- */
+const parameter_fetch_t sta_profile_args[] =
+{
+	{ T("staProfile"),              "staProfile",           0,      T("") },
+	{ T("staSSID"),                 "staSSID",              0,      T("") },
+	{ T("staNetworkType"),          "staNetworkType",       0,      T("") },
+	{ T("staPSMode"),               "staPSMode",            0,      T("") },
+	{ T("staAdhocMode"),            "staAdhocMode",         0,      T("") },
+	{ T("staChannel"),              "staChannel",           0,      T("") },
+	{ T("staPreamType"),            "staPreamType",         0,      T("") },
+	{ T("staRTSCheck"),             "staRTSCheck",          0,      T("") },
+	{ T("staFragmentCheck"),        "staFragmentCheck",     0,      T("") },
+	{ T("staRTS"),                  "staRTS",               0,      T("") },
+	{ T("staFragment"),             "staFragment",          0,      T("") },
+	{ T("staAuth"),                 "staAuth",              0,      T("") },
+	{ T("staEncrypt"),              "staEncrypt",           0,      T("") },
+	{ T("staKeyDefaultId"),         "staKeyDefaultId",      0,      T("") },
+	{ T("staKey1Type"),             "staKey1Type",          0,      T("") },
+	{ T("staKey2Type"),             "staKey2Type",          0,      T("") },
+	{ T("staKey3Type"),             "staKey3Type",          0,      T("") },
+	{ T("staKey4Type"),             "staKey4Type",          0,      T("") },
+	{ T("staKey1Length"),           "staKey1Length",        0,      T("") },
+	{ T("staKey2Length"),           "staKey2Length",        0,      T("") },
+	{ T("staKey3Length"),           "staKey3Length",        0,      T("") },
+	{ T("staKey4Length"),           "staKey4Length",        0,      T("") },
+	{ T("staKey1"),                 "staKey1",              0,      T("") },
+	{ T("staKey2"),                 "staKey2",              0,      T("") },
+	{ T("staKey3"),                 "staKey3",              0,      T("") },
+	{ T("staKey4"),                 "staKey4",              0,      T("") },
+	{ T("staWpaPsk"),               "staWpaPsk",            0,      T("") },
+	{ T("sta8021xKeyMgmt"),         "sta8021xKeyMgmt",      0,      T("") },
+	{ T("sta8021xEAP"),             "sta8021xEAP",          0,      T("") },
+	{ T("sta8021xTunnel"),          "sta8021xTunnel",       0,      T("") },
+	{ T("sta8021xIdentity"),        "sta8021xIdentity",     0,      T("") },
+	{ T("sta8021xPassword"),        "sta8021xPassword",     0,      T("") },
+	{ T("sta8021xClientCert"),      "sta8021xClientCert",   0,      T("") },
+	{ T("sta8021xPrivateKey"),      "sta8021xPrivateKey",   0,      T("") },
+	{ T("sta8021xPrivateKeyPassword"),              "sta8021xPrivateKeyPassword",           0,      T("") },
+	{ T("sta8021xCACert"),          "sta8021xCACert",       0,      T("") },
+	{ T("staActive"),               "staActive",            0,      T("") },
+	{ NULL, NULL, 0, NULL }
+};
+
 static void setStaProfile(webs_t wp, char_t *path, char_t *query)
 {
-	PRT_PROFILE_SETTING	previousProfileSetting = NULL;
-	int selectedProfile=0 , i=0;
-	char_t *value;
-
-	if (headerProfileSetting == NULL) {
-		error(E_L, E_LOG, T("headerProfileSetting is NULL"));
-		return;
-	}
-
-	value = websGetVar(wp, T("selectedProfile"), T("0"));
-	selectedProfile = atoi(value);
-	if (selectedProfile <= 0) {
-		error(E_L, E_LOG, T("selectedProfile(%d) is invalid"), selectedProfile);
-		return;
-	}
-
-	previousProfileSetting = selectedProfileSetting = headerProfileSetting;
-	for (i=2; i <= selectedProfile; i++) {
-		selectedProfileSetting = selectedProfileSetting->Next;
-		if (i == selectedProfile-1)
-			previousProfileSetting = selectedProfileSetting;
-	}
-	if (selectedProfileSetting == headerProfileSetting) {
-		previousProfileSetting = NULL;
-	}
-
-	value = websGetVar(wp, T("hiddenButton"), T(""));
-	if (!strcmp(value, "edit")) {
-		//do nothing
-	}
-	else if (!strcmp(value, "delete"))
-	{
-		if (selectedProfileSetting == headerProfileSetting) {
-			if (headerProfileSetting->Next == NULL)
-				selectedProfileSetting = headerProfileSetting = NULL;
-			else
-				headerProfileSetting = headerProfileSetting->Next;
-			writeProfileToNvram();
-		}
-		else {
-			if (previousProfileSetting != NULL && selectedProfileSetting != NULL) {
-				previousProfileSetting->Next = selectedProfileSetting->Next;
-				writeProfileToNvram();
-			}
-			selectedProfileSetting = NULL;
-		}
-
-		if (!headerProfileSetting)
-		{
-			nvram_init(RT2860_NVRAM);
-			nvram_bufset(RT2860_NVRAM, "staProfile", "");
-			nvram_bufset(RT2860_NVRAM, "staSSID", "");
-			nvram_bufset(RT2860_NVRAM, "staNetworkType", "");
-			nvram_bufset(RT2860_NVRAM, "staPSMode", "");
-			nvram_bufset(RT2860_NVRAM, "staAdhocMode", "");
-			nvram_bufset(RT2860_NVRAM, "staChannel", "");
-			nvram_bufset(RT2860_NVRAM, "staPreamType", "");
-			nvram_bufset(RT2860_NVRAM, "staRTSCheck", "");
-			nvram_bufset(RT2860_NVRAM, "staFragmentCheck", "");
-			nvram_bufset(RT2860_NVRAM, "staRTS", "");
-			nvram_bufset(RT2860_NVRAM, "staFragment", "");
-			nvram_bufset(RT2860_NVRAM, "staAuth", "");
-			nvram_bufset(RT2860_NVRAM, "staEncrypt", "");
-			nvram_bufset(RT2860_NVRAM, "staKeyDefaultId", "");
-			nvram_bufset(RT2860_NVRAM, "staKey1Type", "");
-			nvram_bufset(RT2860_NVRAM, "staKey2Type", "");
-			nvram_bufset(RT2860_NVRAM, "staKey3Type", "");
-			nvram_bufset(RT2860_NVRAM, "staKey4Type", "");
-			nvram_bufset(RT2860_NVRAM, "staKey1Length", "");
-			nvram_bufset(RT2860_NVRAM, "staKey2Length", "");
-			nvram_bufset(RT2860_NVRAM, "staKey3Length", "");
-			nvram_bufset(RT2860_NVRAM, "staKey4Length", "");
-			nvram_bufset(RT2860_NVRAM, "staKey1", "");
-			nvram_bufset(RT2860_NVRAM, "staKey2", "");
-			nvram_bufset(RT2860_NVRAM, "staKey3", "");
-			nvram_bufset(RT2860_NVRAM, "staKey4", "");
-			nvram_bufset(RT2860_NVRAM, "staWpaPsk", "");
-			nvram_bufset(RT2860_NVRAM, "sta8021xKeyMgmt", "");
-			nvram_bufset(RT2860_NVRAM, "sta8021xEAP", "");
-			nvram_bufset(RT2860_NVRAM, "sta8021xIdentity", "");
-			nvram_bufset(RT2860_NVRAM, "sta8021xCACert", "");
-			nvram_bufset(RT2860_NVRAM, "sta8021xClientCert", "");
-			nvram_bufset(RT2860_NVRAM, "sta8021xPrivateKey", "");
-			nvram_bufset(RT2860_NVRAM, "sta8021xPrivateKeyPassword", "");
-			nvram_bufset(RT2860_NVRAM, "sta8021xPassword", "");
-			nvram_bufset(RT2860_NVRAM, "sta8021xTunnel", "");
-			nvram_bufset(RT2860_NVRAM, "staActive", "");
-			nvram_commit(RT2860_NVRAM);
-			nvram_close(RT2860_NVRAM);
-		}
-	}
-	else if (!strcmp(value, "activate"))
-	{
-		int tmp_auth, tmp_encry, tmp_defaultkeyid, tmp_networktype, tmp_preamtype, tmp_channel; //tmp_adhocmode,
-		int s, ret;
-		char tmp_wpapsk[65], tmp_key1[27], tmp_key2[27], tmp_key3[27], tmp_key4[27], tmp_bssid[13];
-		char tmp_rtscheck=0, tmp_fragmentcheck=0;
-		NDIS_802_11_RTS_THRESHOLD	tmp_rts;
-		NDIS_802_11_FRAGMENTATION_THRESHOLD	tmp_fragment;
-		NDIS_802_11_SSID			SSID;
-		NDIS_802_11_POWER_MODE		tmp_psmode;
-
-		currentProfileSetting = headerProfileSetting;
-		do {
-			currentProfileSetting->Active = 0;
-			currentProfileSetting = currentProfileSetting->Next;
-		} while (currentProfileSetting != NULL);
-
-		selectedProfileSetting->Active = 1; // acivate
-
-		char tmp_buffer[512] = {0}, tmp_data[8] = {0};
-		currentProfileSetting = headerProfileSetting;
-		do {
-			sprintf(tmp_data, "%d", currentProfileSetting->Active);
-			strcat(tmp_buffer, tmp_data);
-			currentProfileSetting = currentProfileSetting->Next;
-			if (currentProfileSetting != NULL)
-				strcat(tmp_buffer, ";");	
-		} while (currentProfileSetting);
-
-		nvram_set(RT2860_NVRAM, "staActive", tmp_buffer);
-
-		memset(&SSID, 0x00, sizeof(SSID));
-		bzero(tmp_bssid, sizeof(tmp_bssid));
-		bzero(tmp_wpapsk, sizeof(tmp_wpapsk));
-		bzero(tmp_key1, sizeof(tmp_key1));
-		bzero(tmp_key2, sizeof(tmp_key2));
-		bzero(tmp_key3, sizeof(tmp_key3));
-		bzero(tmp_key4, sizeof(tmp_key4));
-		memset(tmp_wpapsk, 0x00, sizeof(tmp_wpapsk));
-
-		SSID.SsidLength = selectedProfileSetting->SsidLen;
-		memcpy(SSID.Ssid, (const void *)selectedProfileSetting->SSID, selectedProfileSetting->SsidLen);
-
-		tmp_networktype = selectedProfileSetting->NetworkType;
-		tmp_auth  = selectedProfileSetting->Authentication;
-		tmp_encry = selectedProfileSetting->Encryption;
-		tmp_preamtype = selectedProfileSetting->PreamType;
-		tmp_rts = selectedProfileSetting->RTS;
-		tmp_rtscheck = selectedProfileSetting->RTSCheck;
-		tmp_fragment = selectedProfileSetting->Fragment;
-		tmp_fragmentcheck = selectedProfileSetting->FragmentCheck;
-		tmp_psmode = selectedProfileSetting->PSmode;
-		tmp_channel = selectedProfileSetting->Channel;
-		tmp_defaultkeyid = selectedProfileSetting->KeyDefaultId;
-
-		sprintf(tmp_wpapsk, "%s", selectedProfileSetting->WpaPsk);
-		strcpy(tmp_key1, (char *)selectedProfileSetting->Key1);
-		strcpy(tmp_key2, (char *)selectedProfileSetting->Key2);
-		strcpy(tmp_key3, (char *)selectedProfileSetting->Key3);
-		strcpy(tmp_key4, (char *)selectedProfileSetting->Key4);
-
-		s = socket(AF_INET, SOCK_DGRAM, 0);
-		//step 1: OID_802_11_INFRASTRUCTURE_MODE
-		ret = OidSetInformation(OID_802_11_INFRASTRUCTURE_MODE, s, "ra0", &tmp_networktype, sizeof(int));
-		if (ret < 0)
-			fprintf(stderr, "Set OID_802_11_INFRASTRUCTURE_MODE has error =%d, networktype=%d\n", ret, tmp_networktype);
-		close(s);
-
-		unsigned char Bssid[6];
-		//activate
-		nvram_set(RT2860_NVRAM, "staCur_SSID", SSID.Ssid);
-#ifdef WPA_SUPPLICANT_SUPPORT
-		if (selectedProfileSetting->Authentication == Ndis802_11AuthModeWPA ||
-				selectedProfileSetting->Authentication == Ndis802_11AuthModeWPA2 ||
-				selectedProfileSetting->Authentication == Ndis802_11AuthMode8021x )//802.1x
-		{
-			char tmp_key[27];
-			if (tmp_defaultkeyid == 1) // 1~4
-				strcpy(tmp_key, tmp_key1);
-			else if (tmp_defaultkeyid == 2)
-				strcpy(tmp_key, tmp_key2);
-			else if (tmp_defaultkeyid == 3)
-				strcpy(tmp_key, tmp_key3);
-			else if (tmp_defaultkeyid == 4)
-				strcpy(tmp_key, tmp_key4);
-
-			conf_WPASupplicant((char*)selectedProfileSetting->SSID, selectedProfileSetting->KeyMgmt, selectedProfileSetting->EAP, (char*)selectedProfileSetting->Identity, (char*)selectedProfileSetting->Password, (char*)selectedProfileSetting->CACert, (char*)selectedProfileSetting->ClientCert, (char*)selectedProfileSetting->PrivateKey, (char*)selectedProfileSetting->PrivateKeyPassword, tmp_key, selectedProfileSetting->KeyDefaultId-1, selectedProfileSetting->Encryption, selectedProfileSetting->Tunnel, selectedProfileSetting->Authentication);
-		}
-		else
-#endif
-			sta_connection(tmp_networktype, tmp_auth, tmp_encry, tmp_defaultkeyid, &SSID, Bssid, tmp_wpapsk, tmp_key1, tmp_key2, tmp_key3, tmp_key4, tmp_preamtype, tmp_rtscheck, tmp_rts, tmp_fragmentcheck, tmp_fragment, tmp_psmode, tmp_channel);
-
-		Active_flag = 1;
-	}
-	else {
-		error(E_L, E_LOG, T("hiddenButton(%s) is invalid"), value);
-		return;
-	}
+	// Store parameters
+	setupParameters(wp, sta_profile_args, 1);
+	
+	// Initialize profiles
+	initStaProfile();
+	
+	// Initialize STA connection
+	initStaConnection();
+	
+	// Redirect to success
 	websRedirect(wp, "station/profile.asp");
 }
 

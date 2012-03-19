@@ -257,3 +257,37 @@ acronym
 {
 	border-bottom: 0px;
 }
+
+div.tab, div.tab_sel
+{
+	float: left;
+	margin: 5px 5px -1px 0px;
+	padding: 4px 8px 4px 8px;
+	font-weight: bold;
+	color: #0066cc;
+	background-color: #ffffff;
+	border: 1px solid #0066cc;
+	cursor: pointer;
+
+	border-top-left-radius: 4px;
+	border-top-right-radius: 4px;
+	-moz-border-radius-topleft: 4px;
+	-moz-border-radius-topright: 4px;
+	-webkit-border-radius-topleft: 4px;
+	-webkit-border-radius-topright: 4px;
+}
+
+div.tab_sel
+{
+	color: #ffffff;
+	background-color: #0066cc;
+}
+
+div.tab_control
+{
+	margin-top: 5px;
+	margin-bottom: 5px;
+	border-bottom: 1px solid #0066cc;
+	float: left;
+	width: 100%;
+}

@@ -19,6 +19,7 @@
 #include	"wireless.h"
 
 static int  getCfgGeneral(int eid, webs_t wp, int argc, char_t **argv);
+static int  getCfgGeneralHTML(int eid, webs_t wp, int argc, char_t **argv);
 static int  getCfgNthGeneral(int eid, webs_t wp, int argc, char_t **argv);
 static int  getCfgZero(int eid, webs_t wp, int argc, char_t **argv);
 static int  getCfgNthZero(int eid, webs_t wp, int argc, char_t **argv);
@@ -433,6 +434,7 @@ char *strip_space(char *str)
 void formDefineUtilities(void)
 {
 	websAspDefine(T("getCfgGeneral"), getCfgGeneral);
+	websAspDefine(T("getCfgGeneralHTML"), getCfgGeneralHTML);
 	websAspDefine(T("getCfgNthGeneral"), getCfgNthGeneral);
 	websAspDefine(T("getCfgZero"), getCfgZero);
 	websAspDefine(T("getCfgNthZero"), getCfgNthZero);
@@ -473,7 +475,7 @@ static int getCfgGeneral(int eid, webs_t wp, int argc, char_t **argv)
 
 	value = nvram_get(RT2860_NVRAM, field);
 
-	if ((!value) && (field == "Language")) {
+	if ((!value) && (strcmp(field, "Language") == 0)) {
 	    printf("Unknown lang %s. Set lang to en.\n", value);
 	    value = "en";
 	}
@@ -490,6 +492,68 @@ static int getCfgGeneral(int eid, webs_t wp, int argc, char_t **argv)
 	    ejSetResult(eid, value);
 
     return 0;
+}
+
+/* 
+ * arguments: type - 0 = return the configuration of 'field' (default)
+ *                   1 = write the configuration of 'field' 
+ *            field - parameter name in nvram
+ * description: read general configurations from nvram
+ *              if value is NULL -> ""
+ */
+static int getCfgGeneralHTML(int eid, webs_t wp, int argc, char_t **argv)
+{
+	int type;
+	char_t *field;
+	char *value;
+
+	if (ejArgs(argc, argv, T("%d %s"), &type, &field) < 2)
+		return websWrite(wp, T("Insufficient args\n"));
+
+	value = nvram_get(RT2860_NVRAM, field);
+
+	if ((!value) && (strcmp(field, "Language") == 0))
+	{
+		printf("Unknown lang %s. Set lang to en.\n", value);
+		value = "en";
+	}
+
+	if (type == 1)
+	{
+		if (!value)
+			return websWrite(wp, T(""));
+
+		int result = 0;
+		for (; *value != '\0'; value++)
+		{
+			switch (*value)
+			{
+				case '&':
+					result += websWrite(wp, T("&amp;"));
+					break;
+				case '\"':
+					result += websWrite(wp, T("&quot;"));
+					break;
+				case '<':
+					result += websWrite(wp, T("&lt;"));
+					break;
+				case '>':
+					result += websWrite(wp, T("&gt;"));
+					break;
+				default:
+					result += websWrite(wp, T("%c"), *value);
+					break;
+			}
+		}
+		return result;
+	}
+
+	if (!value)
+		ejSetResult(eid, "");
+	else
+		ejSetResult(eid, value);
+
+	return 0;
 }
 
 /* 

@@ -125,12 +125,11 @@ if (opmode == '2')
 	a.add(400,   0, _("treeapp wireless settings"),     "javascript:a.oo(400);");
 	a.add(401, 400, _("treeapp profile"),               "javascript:go('station/profile.asp');");
 	a.add(402, 400, _("treeapp link status"),           "javascript:go('station/link_status.asp');");
-	a.add(403, 400, _("treeapp site survey"),           "javascript:go('station/site_survey.asp');");
-	a.add(404, 400, _("treeapp statistics"),            "javascript:go('station/statistics.asp');");
-	a.add(405, 400, _("treeapp advance"),               "javascript:go('station/advance.asp');");
-	a.add(406, 400, _("treeapp qos"),                   "javascript:go('station/qos.asp');");
+	a.add(403, 400, _("treeapp statistics"),            "javascript:go('station/statistics.asp');");
+	a.add(404, 400, _("treeapp advance"),               "javascript:go('station/advance.asp');");
+	a.add(405, 400, _("treeapp qos"),                   "javascript:go('station/qos.asp');");
 	if (stab == "1")
-		a.add(407, 400, _("treeapp wps"),                   "javascript:go('wps/wps_sta.asp');");
+		a.add(406, 400, _("treeapp wps"),                   "javascript:go('wps/wps_sta.asp');");
 }
 else
 {

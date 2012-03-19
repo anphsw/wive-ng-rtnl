@@ -233,3 +233,103 @@ void fetchIndexedParam(const char *buf, int index, char *retbuf)
 		*(retbuf++) = *(start++);
 	*retbuf = '\0';
 }
+
+// String splitting tools
+int initSplitter(string_split_t *buf)
+{
+	buf->buf = (char *)malloc(SPLITTER_BUFFER_QUANTITY);
+	if (buf->buf == NULL)
+		return errno;
+	buf->items = (char **)malloc(SPLITTER_TOKEN_QUANTITY * sizeof(char *));
+	if (buf->items == NULL)
+	{
+		free(buf->buf);
+		buf->buf = NULL;
+		return errno;
+	}
+	
+	buf->buf_size = SPLITTER_BUFFER_QUANTITY;
+	buf->pointers = SPLITTER_TOKEN_QUANTITY;
+	buf->found    = 0;
+	
+	return 0;
+}
+
+int splitString(string_split_t *buf, const char *string, char splitter)
+{
+	// First reset
+	buf->found = 0;
+	if (string == NULL)
+		return 0;
+	
+	// Calculate character buffer size
+	size_t size = strlen(string) + 1;
+	
+	// Check if need to realloc buffer
+	if (buf->buf_size < size)
+	{
+		free(buf->buf);
+		size_t amount = size + (SPLITTER_BUFFER_QUANTITY - size%SPLITTER_BUFFER_QUANTITY);
+		buf->buf = (char *)malloc(amount);
+		if (buf->buf == NULL)
+			return errno;
+		buf->buf_size = amount;
+	}
+	
+	// copy string
+	memcpy(buf->buf, string, size);
+	
+	// calculate splitters
+	buf->found = 1;
+	char *p = buf->buf;
+	while (*p != '\0')
+	{
+		if (*(p++) == splitter)
+			buf->found++;
+	}
+	
+	// Check if need to realloc pointers
+	if (buf->pointers < buf->found)
+	{
+		free(buf->items);
+		size_t amount = buf->found + (SPLITTER_TOKEN_QUANTITY - buf->found%SPLITTER_TOKEN_QUANTITY);
+		buf->items = (char **)malloc(amount * sizeof(char *));
+		if (buf->items == NULL)
+			return errno;
+		buf->pointers = amount;
+	}
+	
+	// Make split
+	p = buf->buf;
+	char **it = buf->items;
+	*(it++) = p; // Assign first token
+	
+	while (*p != '\0')
+	{
+		if (*p == splitter)
+		{
+			*(p++) = '\0';
+			*(it++) = p;
+		}
+		else
+			p++;
+	}
+	
+	return 0;
+}
+
+int freeSplitter(string_split_t *buf)
+{
+	if (buf->buf != NULL)
+	{
+		free(buf->buf);
+		buf->buf = NULL;
+	}
+	if (buf->items != NULL)
+	{
+		free(buf->items);
+		buf->items = NULL;
+	}
+	return 0;
+}
+

@@ -166,3 +166,21 @@ self.setInnerHTML = function(elementID, text)
 	// Set inner HTML code
 	element.innerHTML = text;
 }
+
+self.createNode = function(cl, attributes, innerHTML)
+{
+	var element = document.createElement(cl);
+	if (attributes != null)
+	{
+		for (var key in attributes)
+		{
+			if (key)
+				element.setAttribute(key, attributes[key]);
+		}
+	}
+	if (innerHTML != null)
+		element.innerHTML = innerHTML;
+	return element;
+}
+
+
