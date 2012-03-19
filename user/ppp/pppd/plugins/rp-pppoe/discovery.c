@@ -399,7 +399,7 @@ waitForPADO(PPPoEConnection *conn, int timeout)
 
 	if (packet.code == CODE_PADO) {
 	    if (BROADCAST(packet.ethHdr.h_source)) {
-		warn(stderr, "Ignoring PADO packet from broadcast MAC address\n");
+		warn("Ignoring PADO packet from broadcast MAC address");
 		continue;
 	    }
 	    if (conn->req_peer && memcmp(packet.ethHdr.h_source, conn->req_peer_mac, ETH_ALEN) != 0) {
