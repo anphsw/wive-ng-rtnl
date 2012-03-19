@@ -398,12 +398,11 @@ waitForPADO(PPPoEConnection *conn, int timeout)
 	if (!packetIsForMe(conn, &packet)) continue;
 
 	if (packet.code == CODE_PADO) {
-	    if (NOT_UNICAST(packet.ethHdr.h_source)) {
-		error("Ignoring PADO packet from non-unicast MAC address");
+	    if (BROADCAST(packet.ethHdr.h_source)) {
+		warn(stderr, "Ignoring PADO packet from broadcast MAC address\n");
 		continue;
 	    }
-	    if (conn->req_peer
-		&& memcmp(packet.ethHdr.h_source, conn->req_peer_mac, ETH_ALEN) != 0) {
+	    if (conn->req_peer && memcmp(packet.ethHdr.h_source, conn->req_peer_mac, ETH_ALEN) != 0) {
 		warn("Ignoring PADO packet from wrong MAC address");
 		continue;
 	    }
@@ -412,11 +411,11 @@ waitForPADO(PPPoEConnection *conn, int timeout)
 	    if (conn->error)
 		return;
 	    if (!pc.seenACName) {
-		error("Ignoring PADO packet with no AC-Name tag");
+		warn("Ignoring PADO packet with no AC-Name tag");
 		continue;
 	    }
 	    if (!pc.seenServiceName) {
-		error("Ignoring PADO packet with no Service-Name tag");
+		warn("Ignoring PADO packet with no Service-Name tag");
 		continue;
 	    }
 	    conn->numPADOs++;
