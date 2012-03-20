@@ -10,14 +10,32 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <sys/ioctl.h>
-#include <net/if.h>
 #include <string.h>
-#include <linux/reboot.h>
 #include <errno.h>
 #include <unistd.h>
+#include <wait.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/ioctl.h>
+#include <net/if.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <linux/reboot.h>
+#include <sys/reboot.h>
 
-#include "upload.cgi.h"
+/* for CONFIG_MTD_KERNEL_PART_SIZ  */
+#include "linux/config.h"  				/* kernel config		*/
+#include "config/autoconf.h"				/* user config			*/
+#include "../../../tools/mkimage/include/image.h"	/* For Uboot image header format */
+
+/* for calculate max image size */
+#include "../../../linux/drivers/mtd/ralink/ralink-flash.h"
+#define MAX_IMG_SIZE (IMAGE1_SIZE - MTD_RWFS_PART_SIZE - MTD_FACTORY_PART_SIZE - MTD_CONFIG_PART_SIZE - MTD_BOOT_PART_SIZE)
+
 #include "../options.h"
 
 extern unsigned long crc32 (unsigned long, const unsigned char *, unsigned int);

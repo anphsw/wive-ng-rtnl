@@ -3,6 +3,81 @@
 
 #ifdef UPLOAD_FIRMWARE_SUPPORT
 
+static unsigned int getMTDPartSize(char *part)
+{
+	char buf[128], name[32], size[32], dev[32], erase[32];
+	unsigned int result=0;
+	FILE *fp = fopen("/proc/mtd", "r");
+	if(!fp){
+		fprintf(stderr, "mtd support not enable?");
+		return 0;
+	}
+	while(fgets(buf, sizeof(buf), fp)){
+		sscanf(buf, "%s %s %s %s", dev, size, erase, name);
+		if(!strcmp(name, part)){
+			result = strtol(size, NULL, 16);
+			break;
+		}
+	}
+	fclose(fp);
+	return result;
+}
+
+static int mtd_write_firmware(char *filename, int offset, int len)
+{
+    char cmd[512];
+    int status;
+    int err=0;
+
+/* check image size before erase flash and write image */
+#ifdef CONFIG_RT2880_ROOTFS_IN_FLASH
+    if(len > MAX_IMG_SIZE || len < MIN_FIRMWARE_SIZE){
+	fprintf(stderr, "Image size is not correct!!!%d", len);
+        return -1;
+    }
+#endif
+
+#if defined(CONFIG_RT2880_FLASH_8M) || defined(CONFIG_RT2880_FLASH_16M)
+#ifdef CONFIG_RT2880_FLASH_TEST
+    /* workaround: erase 8k sector by myself instead of mtd_erase */
+    /* this is for bottom 8M NOR flash only */
+    snprintf(cmd, sizeof(cmd), "/bin/flash -f 0x400000 -l 0x40ffff");
+    status = system(cmd);
+    if (!WIFEXITED(status) || WEXITSTATUS(status) != 0)
+	err++;
+#endif
+#endif
+#if defined(CONFIG_RT2880_ROOTFS_IN_RAM)
+    snprintf(cmd, sizeof(cmd), "/bin/mtd_write -o %d -l %d write %s Kernel", offset, len, filename);
+    status = system(cmd);
+    if (!WIFEXITED(status) || WEXITSTATUS(status) != 0)
+	err++;
+#elif defined(CONFIG_RT2880_ROOTFS_IN_FLASH)
+  #ifdef CONFIG_ROOTFS_IN_FLASH_NO_PADDING
+    snprintf(cmd, sizeof(cmd), "/bin/mtd_write -o %d -l %d write %s Kernel_RootFS", offset, len, filename);
+    status = system(cmd);
+    if (!WIFEXITED(status) || WEXITSTATUS(status) != 0)
+	err++;
+  #else
+    snprintf(cmd, sizeof(cmd), "/bin/mtd_write -o %d -l %d write %s Kernel", offset,  CONFIG_MTD_KERNEL_PART_SIZ, filename);
+    status = system(cmd);
+    if (!WIFEXITED(status) || WEXITSTATUS(status) != 0)
+	err++;
+
+    snprintf(cmd, sizeof(cmd), "/bin/mtd_write -o %d -l %d write %s RootFS", offset + CONFIG_MTD_KERNEL_PART_SIZ, len - CONFIG_MTD_KERNEL_PART_SIZ, filename);
+    status = system(cmd);
+    if (!WIFEXITED(status) || WEXITSTATUS(status) != 0)
+	err++;
+  #endif
+#else
+    fprintf(stderr, "goahead: no CONFIG_RT2880_ROOTFS defined!");
+#endif
+    if (err == 0)
+        return 0;
+    else
+        return -1;
+}
+
 /*
  *  taken from "mkimage -l" with few modified....
  */
@@ -239,7 +314,7 @@ int main (int argc, char *argv[])
 	}
 	else
 		html_success(20*(IMAGE1_SIZE/0x100000) + 35);
-	
+
 	// Output success message
 	fflush(stdout);
 	fclose(stdout);
@@ -247,9 +322,6 @@ int main (int argc, char *argv[])
 	// flash write
 	if (mtd_write_firmware(filename, (int)file_begin, (file_end - file_begin)) == -1)
 	{
-//		html_error("mtd_write fatal error! The corrupted image has ruined the flash!!");
-//		fflush(stdout);
-//		fclose(stdout);
 		return -1;
 	}
 
