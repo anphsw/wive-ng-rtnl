@@ -14,10 +14,9 @@ ROOTDIR=$DIR
 KERNELHDRS=kernel-headers
 BINUTILVER=binutils-2.21
 UCLIBCVER=uClibc-0.9.28
-GCCVER=gcc-4.6.3
+GCCVER=gcc-4.5.3
 
 UNPACK=YES
-HEADERS=YES
 BINUTILS=YES
 GCC=YES
 UCLIB=YES
@@ -85,16 +84,6 @@ if [ "$UNPACK" = "YES" ]; then
     tar xjf $UCLIBCVER.tar.bz2
     echo "=======================EXTRACT-GCC======================"
     tar xjf $GCCVER.tar.bz2
-fi
-
-if [ "$HEADERS" = "YES" ]; then
-    echo "=====================BUILD-C-HEADERS===================="
-    cp -fv uclibc-config-head $UCLIBCVER/.config
-    make -C $UCLIBCVER install_headers KERNEL_HEADERS=$TARGET_DIR/include
-    mkdir -p $DIR/usr
-    rm -rf $DIR/usr/include
-    cp -rf $KERNEL_HEADERS $DIR/usr
-    ln -sf $DIR/usr/include $DIR/include
 fi
 
 if [ "$BINUTILS" = "YES" ]; then

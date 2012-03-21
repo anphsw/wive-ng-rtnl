@@ -1001,24 +1001,23 @@
 
 <br>
 <b>2.2.x</b><br>
-1) Update toolchain gcc to 4.6.3 version.<br>
-2) Disable zebra. need replace to quagga in future.<br>
-3) nf_conntrack: fix early_drop with reliable event.<br>
-4) hw_nat: prevent trunclated packets process to PPE. And small conntrack optimize.<br>
-5) Fix lo ip configure.<br>
-6) Backport some mips arch depended code from upstream.<br>
-7) Update dnsmasq to 2.60 version.<br>
-8) WebUI read VPN iface name from /tmp/vpn_if_name instead static ppp0 (If file not exist - use ppp0 per default).<br>
-9) WebUi corrects ifnames for WAN/LAN/PPP.<br>
-10) Small mm optimize.<br>
-11) Small net fixes backport.<br>
-12) WebUI not build wsc support if WSC daemon disabled.<br>
-13) Fix pmtu discovery probe (re add lost patch).<br>
-14) Update xupnpd to r295 version.<br>
-15) Revert incorrect accept queue backlog changes.<br>
-16) Add some videoturbine parametrs to default nvram base.<br>
-17) Some fixes in af_unix.<br>
-18) Openssl up to 0.9.8u (12.03.2012) version.<br>
+1) Disable zebra. need replace to quagga in future.<br>
+2) nf_conntrack: fix early_drop with reliable event.<br>
+3) hw_nat: prevent trunclated packets process to PPE. And small conntrack optimize.<br>
+4) Fix lo ip configure.<br>
+5) Backport some mips arch depended code from upstream.<br>
+6) Update dnsmasq to 2.60 version.<br>
+7) WebUI read VPN iface name from /tmp/vpn_if_name instead static ppp0 (If file not exist - use ppp0 per default).<br>
+8) WebUi corrects ifnames for WAN/LAN/PPP.<br>
+9) Small mm optimize.<br>
+10) Small net fixes backport.<br>
+11) WebUI not build wsc support if WSC daemon disabled.<br>
+12) Fix pmtu discovery probe (re add lost patch).<br>
+13) Update xupnpd to r295 version.<br>
+14) Revert incorrect accept queue backlog changes.<br>
+15) Add some videoturbine parametrs to default nvram base.<br>
+16) Some fixes in af_unix.<br>
+17) Openssl up to 0.9.8u (12.03.2012) version.<br>
 
 <br><br>
 <b>For support see:</b><br>
