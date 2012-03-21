@@ -1125,7 +1125,7 @@ static void autoconfig_irq(struct uart_8250_port *up)
 		ICP = (up->port.iobase & 0xfe0) | 0x1f;
 		save_ICP = inb_p(ICP);
 		outb_p(0x80, ICP);
-		(void) inb_p(ICP);
+		inb_p(ICP);
 	}
 
 	/* forget possible initially masked and pending IRQ */
@@ -1145,10 +1145,10 @@ static void autoconfig_irq(struct uart_8250_port *up)
 			    UART_MCR_DTR | UART_MCR_RTS | UART_MCR_OUT2);
 	}
 	serial_outp(up, UART_IER, 0x0f);	/* enable all intrs */
-	(void)serial_inp(up, UART_LSR);
-	(void)serial_inp(up, UART_RX);
-	(void)serial_inp(up, UART_IIR);
-	(void)serial_inp(up, UART_MSR);
+	serial_inp(up, UART_LSR);
+	serial_inp(up, UART_RX);
+	serial_inp(up, UART_IIR);
+	serial_inp(up, UART_MSR);
 	serial_outp(up, UART_TX, 0xFF);
 	udelay (20);
 	irq = probe_irq_off(irqs);
@@ -1708,10 +1708,10 @@ static int serial8250_startup(struct uart_port *port)
 	/*
 	 * Clear the interrupt registers.
 	 */
-	(void) serial_inp(up, UART_LSR);
-	(void) serial_inp(up, UART_RX);
-	(void) serial_inp(up, UART_IIR);
-	(void) serial_inp(up, UART_MSR);
+	serial_inp(up, UART_LSR);
+	serial_inp(up, UART_RX);
+	serial_inp(up, UART_IIR);
+	serial_inp(up, UART_MSR);
 
 	/*
 	 * At this point, there's no way the LSR could still be 0xff;
@@ -1849,16 +1849,16 @@ static int serial8250_startup(struct uart_port *port)
 		 */
 		icp = (up->port.iobase & 0xfe0) | 0x01f;
 		outb_p(0x80, icp);
-		(void) inb_p(icp);
+		inb_p(icp);
 	}
 
 	/*
 	 * And clear the interrupt registers again for luck.
 	 */
-	(void) serial_inp(up, UART_LSR);
-	(void) serial_inp(up, UART_RX);
-	(void) serial_inp(up, UART_IIR);
-	(void) serial_inp(up, UART_MSR);
+	serial_inp(up, UART_LSR);
+	serial_inp(up, UART_RX);
+	serial_inp(up, UART_IIR);
+	serial_inp(up, UART_MSR);
 
 	return 0;
 }
@@ -1902,7 +1902,7 @@ static void serial8250_shutdown(struct uart_port *port)
 	 * Read data port to reset things, and then unlink from
 	 * the IRQ chain.
 	 */
-	(void) serial_in(up, UART_RX);
+	serial_in(up, UART_RX);
 
 	del_timer_sync(&up->timer);
 	up->timer.function = serial8250_timeout;
