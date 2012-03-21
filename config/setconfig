@@ -210,12 +210,9 @@ if [ "$PASS" != "final" ]; then
 
 	rm -f config.arch
 	ln -s "vendors/$VENDOR/$PRODUCT/config.arch" config.arch
-
+	echo "vendors/$VENDOR/$PRODUCT/config/4M_32M_config.$LINUXDIR"
 	if [ ! -f $LINUXDIR/.config ] || var_isset CONFIG_DEFAULTS_OVERRIDE; then
-		if [ ! -f "vendors/$VENDOR/$PRODUCT/config/2M_8M_config.$LINUXDIR" ] &&
-			[ ! -f "vendors/$VENDOR/$PRODUCT/config/2M_16M_config.$LINUXDIR" ] &&
-			[ ! -f "vendors/$VENDOR/$PRODUCT/config/4M_16M_config.$LINUXDIR" ] &&
-			[ ! -f "vendors/$VENDOR/$PRODUCT/config/4M_32M_config.$LINUXDIR" ] &&
+		if	[ ! -f "vendors/$VENDOR/$PRODUCT/config/4M_32M_config.$LINUXDIR" ] &&
 			[ ! -f "vendors/$VENDOR/$PRODUCT/config/8M_32M_config.$LINUXDIR" ]; then
 			echo; echo; echo; echo
 			echo "*********************** NOTICE ****************************"
@@ -229,13 +226,7 @@ if [ "$PASS" != "final" ]; then
 			echo "Type ^C to abort."
 			read dummy
 		else
-			if var_isset CONFIG_DEFSETTING_2M8M; then
-				cp "vendors/$VENDOR/$PRODUCT/config/2M_8M_config.$LINUXDIR" $LINUXDIR/.config
-			elif var_isset CONFIG_DEFSETTING_2M16M; then
-				cp "vendors/$VENDOR/$PRODUCT/config/2M_16M_config.$LINUXDIR" $LINUXDIR/.config
-			elif var_isset CONFIG_DEFSETTING_4M16M; then
-				cp "vendors/$VENDOR/$PRODUCT/config/4M_16M_config.$LINUXDIR" $LINUXDIR/.config
-			elif var_isset CONFIG_DEFSETTING_4M32M; then
+			if var_isset CONFIG_DEFSETTING_4M32M; then
 				cp "vendors/$VENDOR/$PRODUCT/config/4M_32M_config.$LINUXDIR" $LINUXDIR/.config
 			elif var_isset CONFIG_DEFSETTING_8M32M; then
 				cp "vendors/$VENDOR/$PRODUCT/config/8M_32M_config.$LINUXDIR" $LINUXDIR/.config
@@ -247,10 +238,7 @@ if [ "$PASS" != "final" ]; then
 	# Added by Steven Liu
 	TMP=`expr $LINUXDIR : "[^-][^-]*\(-.*\)"`
 	if [ ! -f user/busybox/.config ] || var_isset CONFIG_DEFAULTS_OVERRIDE; then
-		if [ ! -f "vendors/$VENDOR/$PRODUCT/config/2M_8M_config.busybox$TMP" ] && 
-		   [ ! -f "vendors/$VENDOR/$PRODUCT/config/2M_16M_config.busybox$TMP" ] &&
-		   [ ! -f "vendors/$VENDOR/$PRODUCT/config/4M_16M_config.busybox$TMP" ] &&
-		   [ ! -f "vendors/$VENDOR/$PRODUCT/config/4M_32M_config.busybox$TMP" ] &&
+		if [ ! -f "vendors/$VENDOR/$PRODUCT/config/4M_32M_config.busybox$TMP" ] &&
 		   [ ! -f "vendors/$VENDOR/$PRODUCT/config/8M_32M_config.busybox$TMP" ]; then
 			echo; echo; echo; echo
 			echo "*********************** NOTICE ****************************"
@@ -260,13 +248,7 @@ if [ "$PASS" != "final" ]; then
 			echo "Type ^C to abort."
 			read dummy
 		else
-			if var_isset CONFIG_DEFSETTING_2M8M; then
-				cp "vendors/$VENDOR/$PRODUCT/config/2M_8M_config.busybox$TMP" user/busybox/.config
-			elif var_isset CONFIG_DEFSETTING_2M16M; then
-				cp "vendors/$VENDOR/$PRODUCT/config/2M_16M_config.busybox$TMP" user/busybox/.config
-			elif var_isset CONFIG_DEFSETTING_4M16M; then
-				cp "vendors/$VENDOR/$PRODUCT/config/4M_16M_config.busybox$TMP" user/busybox/.config
-			elif var_isset CONFIG_DEFSETTING_4M32M; then
+			if var_isset CONFIG_DEFSETTING_4M32M; then
 				cp "vendors/$VENDOR/$PRODUCT/config/4M_32M_config.busybox$TMP" user/busybox/.config
 			elif var_isset CONFIG_DEFSETTING_8M32M; then
 				cp "vendors/$VENDOR/$PRODUCT/config/8M_32M_config.busybox$TMP" user/busybox/.config
@@ -275,10 +257,7 @@ if [ "$PASS" != "final" ]; then
 		make -C user/busybox oldconfig
 	fi
 	if [ ! -f lib/.config ] || var_isset CONFIG_DEFAULTS_OVERRIDE; then
-		if [ ! -f "vendors/$VENDOR/$PRODUCT/config/2M_8M_config.uclibc$TMP" ] &&
-			 [ ! -f "vendors/$VENDOR/$PRODUCT/config/2M_16M_config.uclibc$TMP" ] &&
-			 [ ! -f "vendors/$VENDOR/$PRODUCT/config/4M_16M_config.uclibc$TMP" ] &&
-			 [ ! -f "vendors/$VENDOR/$PRODUCT/config/4M_32M_config.uclibc$TMP" ] &&
+		if 	 [ ! -f "vendors/$VENDOR/$PRODUCT/config/4M_32M_config.uclibc$TMP" ] &&
 			 [ ! -f "vendors/$VENDOR/$PRODUCT/config/8M_32M_config.uclibc$TMP" ]; then
 			echo; echo; echo; echo
 			echo "*********************** NOTICE ****************************"
@@ -288,13 +267,7 @@ if [ "$PASS" != "final" ]; then
 			echo "Type ^C to abort."
 			read dummy
 		else
-			if var_isset CONFIG_DEFSETTING_2M8M; then
-				cp "vendors/$VENDOR/$PRODUCT/config/2M_8M_config.uclibc$TMP" lib/.config
-			elif var_isset CONFIG_DEFSETTING_2M16M; then
-				cp "vendors/$VENDOR/$PRODUCT/config/2M_16M_config.uclibc$TMP" lib/.config
-			elif var_isset CONFIG_DEFSETTING_4M16M; then
-				cp "vendors/$VENDOR/$PRODUCT/config/4M_16M_config.uclibc$TMP" lib/.config
-			elif var_isset CONFIG_DEFSETTING_4M32M; then
+			if var_isset CONFIG_DEFSETTING_4M32M; then
 				cp "vendors/$VENDOR/$PRODUCT/config/4M_32M_config.uclibc$TMP" lib/.config
 			elif var_isset CONFIG_DEFSETTING_8M32M; then
 				cp "vendors/$VENDOR/$PRODUCT/config/8M_32M_config.uclibc$TMP" lib/.config
@@ -325,10 +298,7 @@ if [ "$PASS" != "final" ]; then
 
 	if [ ! -f config/.config ] || var_isset CONFIG_DEFAULTS_OVERRIDE; then
 		TMP=`expr $LINUXDIR : "[^-][^-]*\(-.*\)"`
-		if [ ! -f "vendors/$VENDOR/$PRODUCT/config/2M_8M_config.vendor$TMP" ] && 
-			[ ! -f "vendors/$VENDOR/$PRODUCT/config/2M_16M_config.vendor$TMP" ] &&
-			[ ! -f "vendors/$VENDOR/$PRODUCT/config/4M_16M_config.vendor$TMP" ] &&
-			[ ! -f "vendors/$VENDOR/$PRODUCT/config/4M_32M_config.vendor$TMP" ] &&
+		if 	[ ! -f "vendors/$VENDOR/$PRODUCT/config/4M_32M_config.vendor$TMP" ] &&
 			[ ! -f "vendors/$VENDOR/$PRODUCT/config/8M_32M_config.vendor$TMP" ]; then
 			echo; echo; echo; echo
 			echo "*********************** NOTICE ****************************"
@@ -348,13 +318,7 @@ if [ "$PASS" != "final" ]; then
 			replace_line CONFIG_DEFAULTS_VENDOR= \
 					"CONFIG_DEFAULTS_VENDOR=y" .config
 		else
-			if var_isset CONFIG_DEFSETTING_2M8M; then
-				cp "vendors/$VENDOR/$PRODUCT/config/2M_8M_config.vendor$TMP" config/.config
-			elif var_isset CONFIG_DEFSETTING_2M16M; then
-				cp "vendors/$VENDOR/$PRODUCT/config/2M_16M_config.vendor$TMP" config/.config
-			elif var_isset CONFIG_DEFSETTING_4M16M; then
-				cp "vendors/$VENDOR/$PRODUCT/config/4M_16M_config.vendor$TMP" config/.config
-			elif var_isset CONFIG_DEFSETTING_4M32M; then
+			if var_isset CONFIG_DEFSETTING_4M32M; then
 				cp "vendors/$VENDOR/$PRODUCT/config/4M_32M_config.vendor$TMP" config/.config
 			elif var_isset CONFIG_DEFSETTING_8M32M; then
 				cp "vendors/$VENDOR/$PRODUCT/config/8M_32M_config.vendor$TMP" config/.config
@@ -397,66 +361,36 @@ if [ "$PASS" = "final" ]; then
 	fi
 
 	if var_isset CONFIG_DEFAULTS_VENDOR_UPDATE; then
-		if var_isset CONFIG_DEFSETTING_2M8M; then
-			cp $LINUXDIR/.config "vendors/$VENDOR/$PRODUCT/config/2M_8M_config.$LINUXDIR"
-		elif var_isset CONFIG_DEFSETTING_2M16M; then
-			cp $LINUXDIR/.config "vendors/$VENDOR/$PRODUCT/config/2M_16M_config.$LINUXDIR"
-		elif var_isset CONFIG_DEFSETTING_4M16M; then
-			cp $LINUXDIR/.config "vendors/$VENDOR/$PRODUCT/config/4M_16M_config.$LINUXDIR"
-		elif var_isset CONFIG_DEFSETTING_4M32M; then
+		if var_isset CONFIG_DEFSETTING_4M32M; then
 			cp $LINUXDIR/.config "vendors/$VENDOR/$PRODUCT/config/4M_32M_config.$LINUXDIR"
 		elif var_isset CONFIG_DEFSETTING_8M32M; then
 			cp $LINUXDIR/.config "vendors/$VENDOR/$PRODUCT/config/8M_32M_config.$LINUXDIR"
 		fi
 
 		TMP=`expr $LINUXDIR : "[^-][^-]*\(-.*\)"`
-		if var_isset CONFIG_DEFSETTING_2M8M; then
-			cp config/.config "vendors/$VENDOR/$PRODUCT/config/2M_8M_config.vendor$TMP"
-		elif var_isset CONFIG_DEFSETTING_2M16M; then
-			cp config/.config "vendors/$VENDOR/$PRODUCT/config/2M_16M_config.vendor$TMP"
-		elif var_isset CONFIG_DEFSETTING_4M16M; then
-			cp config/.config "vendors/$VENDOR/$PRODUCT/config/4M_16M_config.vendor$TMP"
-		elif var_isset CONFIG_DEFSETTING_4M32M; then
+		if var_isset CONFIG_DEFSETTING_4M32M; then
 			cp config/.config "vendors/$VENDOR/$PRODUCT/config/4M_32M_config.vendor$TMP"
 		elif var_isset CONFIG_DEFSETTING_8M32M; then
 			cp config/.config "vendors/$VENDOR/$PRODUCT/config/8M_32M_config.vendor$TMP"
 		fi
-		
+
 		if [ -f modules/.config ]; then
-			if var_isset CONFIG_DEFSETTING_2M8M; then
-				cp modules/.config "vendors/$VENDOR/$PRODUCT/config/2M_8M_config.modules$TMP"
-			elif var_isset CONFIG_DEFSETTING_2M16M; then
-				cp modules/.config "vendors/$VENDOR/$PRODUCT/config/2M_16M_config.modules$TMP"
-			elif var_isset CONFIG_DEFSETTING_4M16M; then
-				cp modules/.config "vendors/$VENDOR/$PRODUCT/config/4M_16M_config.modules$TMP"
-			elif var_isset CONFIG_DEFSETTING_4M32M; then
+			if var_isset CONFIG_DEFSETTING_4M32M; then
 				cp modules/.config "vendors/$VENDOR/$PRODUCT/config/4M_32M_config.modules$TMP"
 			elif var_isset CONFIG_DEFSETTING_8M32M; then
 				cp modules/.config "vendors/$VENDOR/$PRODUCT/config/8M_32M_config.modules$TMP"
 			fi
 		fi
 		if [ -f "lib/.config" ]; then
-			if var_isset CONFIG_DEFSETTING_2M8M; then
-				cp lib/.config "vendors/$VENDOR/$PRODUCT/config/2M_8M_config.uclibc$TMP"
-			elif var_isset CONFIG_DEFSETTING_2M16M; then
-				cp lib/.config "vendors/$VENDOR/$PRODUCT/config/2M_16M_config.uclibc$TMP"
-			elif var_isset CONFIG_DEFSETTING_4M16M; then
-				cp lib/.config "vendors/$VENDOR/$PRODUCT/config/4M_16M_config.uclibc$TMP"
-			elif var_isset CONFIG_DEFSETTING_4M32M; then
+			if var_isset CONFIG_DEFSETTING_4M32M; then
 				cp lib/.config "vendors/$VENDOR/$PRODUCT/config/4M_32M_config.uclibc$TMP"
 			elif var_isset CONFIG_DEFSETTING_8M32M; then
 				cp lib/.config "vendors/$VENDOR/$PRODUCT/config/8M_32M_config.uclibc$TMP"
 			fi
 		fi
-		
+
 		if [ -f "user/busybox/.config" ]; then
-			if var_isset CONFIG_DEFSETTING_2M8M; then
-				cp user/busybox/.config "vendors/$VENDOR/$PRODUCT/config/2M_8M_config.busybox$TMP"
-			elif var_isset CONFIG_DEFSETTING_2M16M; then
-				cp user/busybox/.config "vendors/$VENDOR/$PRODUCT/config/2M_16M_config.busybox$TMP"
-			elif var_isset CONFIG_DEFSETTING_4M16M; then
-				cp user/busybox/.config "vendors/$VENDOR/$PRODUCT/config/4M_16M_config.busybox$TMP"
-			elif var_isset CONFIG_DEFSETTING_4M32M; then
+			if var_isset CONFIG_DEFSETTING_4M32M; then
 				cp user/busybox/.config "vendors/$VENDOR/$PRODUCT/config/4M_32M_config.busybox$TMP"
 			elif var_isset CONFIG_DEFSETTING_8M32M; then
 				cp user/busybox/.config "vendors/$VENDOR/$PRODUCT/config/8M_32M_config.busybox$TMP"
