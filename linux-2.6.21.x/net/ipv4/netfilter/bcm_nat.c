@@ -14,6 +14,7 @@
 #include <linux/module.h>
 #include <net/ip.h>
 #include <net/route.h>
+#include <net/neighbour.h>
 #include <net/netfilter/nf_conntrack_core.h>
 
 typedef int (*bcmNatHitHook)(struct sk_buff *skb);
@@ -30,36 +31,25 @@ manip_pkt(u_int16_t proto,
 	  enum nf_nat_manip_type maniptype);
 
 /*
- * Send packets to output.
+ * Direct send packets to output.
+ * Stolen from ip_finish_output2.
  */
 static inline int bcm_fast_path_output(struct sk_buff *skb)
 {
-	int ret = 0;
 	struct dst_entry *dst = skb->dst;
 	struct hh_cache *hh = dst->hh;
+	int ret;
 
 	if (hh) {
-		unsigned seq;
-		int hh_len;
-
-		do {
-			int hh_alen;
-			seq = read_seqbegin(&hh->hh_lock);
-			hh_len = hh->hh_len;
-			hh_alen = HH_DATA_ALIGN(hh_len);
-			memcpy(skb->data - hh_alen, hh->hh_data, hh_alen);
-		} while (read_seqretry(&hh->hh_lock, seq));
-
-		skb_push(skb, hh_len);
-		ret = hh->hh_output(skb);
+		ret = neigh_hh_output(hh, skb);
 	} else if (dst->neighbour)
 		ret = dst->neighbour->output(skb);
 
 	/* Don't return 1 */
-	if (ret==1)
+	if (ret == 1)
 	    return 0;
-	else
-	    return ret;
+
+	return ret;
 }
 
 static inline int bcm_fast_path(struct sk_buff *skb)
@@ -82,6 +72,8 @@ static inline int bcm_fast_path(struct sk_buff *skb)
 			return bcm_fast_path_output(skb);
 	}
 
+	if (net_ratelimit())
+		printk(KERN_DEBUG "bcm_fast_path: No header cache and no neighbour!\n");
 	kfree_skb(skb);
 	return -EINVAL;
 }

@@ -1018,6 +1018,7 @@
 15) Add some videoturbine parametrs to default nvram base.<br>
 16) Some fixes in af_unix.<br>
 17) Openssl up to 0.9.8u (12.03.2012) version.<br>
+18) Fastnat more native functions use instead hardcoded blocks.<br>
 
 <br><br>
 <b>For support see:</b><br>
