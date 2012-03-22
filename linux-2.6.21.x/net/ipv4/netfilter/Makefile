@@ -77,6 +77,3 @@ obj-$(CONFIG_IP_NF_ARP_MANGLE) += arpt_mangle.o
 obj-$(CONFIG_IP_NF_ARPFILTER) += arptable_filter.o
 
 obj-$(CONFIG_IP_NF_QUEUE) += ip_queue.o
-
-# Broadcom NAT
-obj-$(CONFIG_BCM_NAT) += bcm_nat.o

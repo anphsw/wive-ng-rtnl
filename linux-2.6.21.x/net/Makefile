@@ -52,6 +52,8 @@ obj-$(CONFIG_IUCV)		+= iucv/
 ifeq ($(CONFIG_NET),y)
 obj-$(CONFIG_SYSCTL)		+= sysctl_net.o
 endif
+
+# This is hooks for Ralink PPE
 ifneq ($(CONFIG_RA_NAT_NONE),y)
 # if raeth not module build move hook to raether.c
 ifneq ($(CONFIG_RAETH),y)
@@ -59,4 +61,7 @@ obj-y                           += nat/foe_hook/
 endif
 endif
 
+# Broadcom Software NAT Offload
+obj-$(CONFIG_BCM_NAT)		+= nat/bcm_nat/
+# Ralink hardware NAT/PPPOE Offload support
 obj-$(CONFIG_RA_NAT_HW)         += nat/hw_nat/

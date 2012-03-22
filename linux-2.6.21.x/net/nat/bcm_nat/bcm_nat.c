@@ -40,9 +40,9 @@ static inline int bcm_fast_path_output(struct sk_buff *skb)
 	struct hh_cache *hh = dst->hh;
 	int ret;
 
-	if (hh) {
-		ret = neigh_hh_output(hh, skb);
-	} else if (dst->neighbour)
+	if (hh)
+	    ret = neigh_hh_output(hh, skb);
+	else if (dst->neighbour)
 		ret = dst->neighbour->output(skb);
 
 	/* Don't return 1 */
