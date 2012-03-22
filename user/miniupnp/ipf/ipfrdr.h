@@ -1,4 +1,4 @@
-/* $Id: ipfrdr.h,v 1.4 2012/03/05 20:36:19 nanard Exp $ */
+/* $Id: ipfrdr.h,v 1.5 2012/03/19 21:14:13 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * (c) 2006-2007 Thomas Bernard 
@@ -10,12 +10,12 @@
 #include "../commonrdr.h"
 
 int
-add_redirect_rule2(const char * ifname, unsigned short eport,
+add_redirect_rule2(const char * ifname, const char * rhost, unsigned short eport,
                    const char * iaddr, unsigned short iport, int proto,
-				   const char * desc);
+				   const char * desc, unsigned int timestamp);
 
 int
-add_filter_rule2(const char * ifname, const char * iaddr,
+add_filter_rule2(const char * ifname, const char * rhost, const char * iaddr,
                  unsigned short eport, unsigned short iport,
 				 int proto, const char * desc);
  

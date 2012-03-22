@@ -1001,7 +1001,7 @@
 
 <br>
 <b>2.2.x</b><br>
-1) Disable zebra. need replace to quagga in future.<br>
+1) Disable zebra. Need replace to quagga in future.<br>
 2) nf_conntrack: fix early_drop with reliable event.<br>
 3) hw_nat: prevent trunclated packets process to PPE. And small conntrack optimize.<br>
 4) Fix lo ip configure.<br>
@@ -1019,6 +1019,7 @@
 16) Some fixes in af_unix.<br>
 17) Openssl up to 0.9.8u (12.03.2012) version.<br>
 18) Fastnat more native functions use instead hardcoded blocks.<br>
+19) Update miniupnpd to 1.6.20120320 version.<br>
 
 <br><br>
 <b>For support see:</b><br>
