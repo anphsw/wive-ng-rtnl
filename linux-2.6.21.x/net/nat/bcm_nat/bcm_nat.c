@@ -38,7 +38,7 @@ static inline int bcm_fast_path_output(struct sk_buff *skb)
 {
 	struct dst_entry *dst = skb->dst;
 	struct hh_cache *hh = dst->hh;
-	int ret;
+	int ret = 0;
 
 	if (hh)
 	    ret = neigh_hh_output(hh, skb);
