@@ -1,13 +1,5 @@
 #!/bin/sh
 
-#need lib`s
-urpmi --auto -a glibc-
-urpmi --auto  -a libgmpxx-devel --download-all --allow-force
-urpmi --auto  -a libmpc- --download-all --allow-force
-urpmi --auto  -a mpfr- --download-all --allow-force
-urpmi --auto  -a gcc-gfortran --download-all --allow-force
-urpmi --auto  -a texinfo- --download-all --allow-force
-
 DIR=`pwd`
 ROOTDIR=$DIR
 
@@ -16,7 +8,9 @@ BINUTILVER=binutils-2.21
 UCLIBCVER=uClibc-0.9.28
 GCCVER=gcc-4.5.3
 
+INSTALL_DEP=YES
 UNPACK=YES
+HEADERS=YES
 BINUTILS=YES
 GCC=YES
 UCLIB=YES
@@ -48,6 +42,16 @@ export PATH="${PATH}":${PREFIX}/bin:${PREFIX}/lib
 export TARGET_DIR=$WDIR/$TARGET-toolchain
 export KERNEL_HEADERS=$TARGET_DIR/include
 export CC=gcc
+
+#install need lib`s
+if [ -f /etc/mandriva-release ] && [ "$INSTALL_DEP" = "YES" ]; then
+    urpmi --auto -a glibc-
+    urpmi --auto  -a libgmpxx-devel --download-all --allow-force
+    urpmi --auto  -a libmpc- --download-all --allow-force
+    urpmi --auto  -a mpfr- --download-all --allow-force
+    urpmi --auto  -a gcc-gfortran --download-all --allow-force
+    urpmi --auto  -a texinfo- --download-all --allow-force
+fi
 
 mkdir -p $WDIR
 
@@ -84,6 +88,14 @@ if [ "$UNPACK" = "YES" ]; then
     tar xjf $UCLIBCVER.tar.bz2
     echo "=======================EXTRACT-GCC======================"
     tar xjf $GCCVER.tar.bz2
+fi
+
+if [ "$HEADERS" = "YES" ]; then
+    echo "=====================INSTALL-C-HEADERS===================="
+    mkdir -p $DIR/usr
+    rm -rf $DIR/usr/include
+    cp -rf $KERNEL_HEADERS $DIR/usr
+    ln -sf $DIR/usr/include $DIR/include
 fi
 
 if [ "$BINUTILS" = "YES" ]; then
