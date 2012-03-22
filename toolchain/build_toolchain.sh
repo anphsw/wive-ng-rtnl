@@ -126,7 +126,7 @@ fi
 
 if [ "$UCLIB" = "YES" ]; then
     echo "=====================BUILD-C-HEADERS===================="
-    cp -fv uclibc-config-all $UCLIBCVER/.config
+    cp -fv uclibc-config $UCLIBCVER/.config
     cd $UCLIBCVER
     (make oldconfig && \
     make -j3 && \
