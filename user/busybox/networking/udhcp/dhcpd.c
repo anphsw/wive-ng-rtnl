@@ -440,13 +440,17 @@ int udhcpd_main(int argc UNUSED_PARAM, char **argv)
 
 		switch (udhcp_sp_read(&rfds)) {
 		case SIGUSR1:
+#ifdef DEBUG
 			bb_info_msg("Received SIGUSR1");
+#endif
 			write_leases();
 			/* why not just reset the timeout, eh */
 			timeout_end = monotonic_sec() + server_config.auto_time;
 			continue;
 		case SIGTERM:
+#ifdef DEBUG
 			bb_info_msg("Received SIGTERM");
+#endif
 			goto ret0;
 		case 0: /* no signal: read a packet */
 			break;
