@@ -13,7 +13,7 @@ libdir = ${exec_prefix}/lib
 
 # Programs used by "make":
 CC = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc
-CFLAGS =  -Wall -Wstrict-prototypes -Wno-trigraphs  -mips32r2 -march=mips32r2 -fno-stack-protector -fno-builtin -nostdinc -D_LIBC -I./include -I.  -Os -funit-at-a-time  -ffast-math -fforce-addr -fno-stack-protector -isystem /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.5.3/include -DNDEBUG -fPIC -Os -I/opt/Wive-RTNL/linux/include -I/opt/Wive-RTNL/lib/include -fvisibility=hidden
+CFLAGS =  -Wall -Wstrict-prototypes -Wno-trigraphs  -mips32r2 -march=mips32r2 -fno-stack-protector -fno-builtin -nostdinc -D_LIBC -I./include -I.  -Os -funit-at-a-time  -ffast-math -fforce-addr -fno-stack-protector -isystem /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.4.7/include -DNDEBUG -fPIC -Os -I/opt/Wive-RTNL/linux/include -I/opt/Wive-RTNL/lib/include -fvisibility=hidden
 CPPFLAGS = 
 LDFLAGS = 
 INCLUDES = -I../lib -I$(srcdir)/../lib -I../include -I$(srcdir)/../include -I.. -I$(srcdir)/..
