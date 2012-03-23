@@ -98,6 +98,12 @@
 #include <asm/byteorder.h>
 #include <asm/atomic.h>
 
+#ifdef CONFIG_PPPOL2TP_FASTPATH
+#ifdef CONFIG_PROC_FS
+#undef CONFIG_PROC_FS
+#endif
+#endif
+
 #define PPPOL2TP_DRV_VERSION	"V0.18.3"
 
 /* Developer debug code. */
