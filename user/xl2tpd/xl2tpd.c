@@ -280,7 +280,11 @@ void death_handler (int signal)
     struct tunnel *st, *st2;
     int sec;
     l2tp_log (LOG_CRIT, "%s: Fatal signal %d received\n", __FUNCTION__, signal);
+#ifdef USE_KERNEL
+        if (kernel_support || signal != SIGTERM) {
+#else
         if (signal != SIGTERM) {
+#endif
                 st = tunnels.head;
                 while (st)
                 {
@@ -351,7 +355,7 @@ int start_pppd (struct call *c, struct ppp_opts *opts)
     int flags;
 #endif
     int pos = 1;
-    int fd2;
+    int fd2 = -1;
 #ifdef DEBUG_PPPD
     int x;
 #endif
@@ -399,7 +403,7 @@ int start_pppd (struct call *c, struct ppp_opts *opts)
        sax.sa_family = AF_PPPOX;
        sax.sa_protocol = PX_PROTO_OL2TP;
        sax.pppol2tp.pid = 0;
-       sax.pppol2tp.fd = server_socket;
+       sax.pppol2tp.fd = c->container->udp_fd;
        sax.pppol2tp.addr.sin_addr.s_addr = c->container->peer.sin_addr.s_addr;
        sax.pppol2tp.addr.sin_port = c->container->peer.sin_port;
        sax.pppol2tp.addr.sin_family = AF_INET;
@@ -410,6 +414,7 @@ int start_pppd (struct call *c, struct ppp_opts *opts)
        if (connect(fd2, (struct sockaddr *)&sax, sizeof(sax)) < 0) {
            l2tp_log (LOG_WARNING, "%s: Unable to connect PPPoL2TP socket.\n",
                 __FUNCTION__);
+           close(fd2);
            return -EINVAL;
        }
        stropt[pos++] = strdup ("plugin");
@@ -486,7 +491,7 @@ int start_pppd (struct call *c, struct ppp_opts *opts)
         dup2 (fd2, 0);
         dup2 (fd2, 1);
 	close(fd2);
-
+       }
         /* close all the calls pty fds */
         st = tunnels.head;
         while (st)
@@ -494,12 +499,17 @@ int start_pppd (struct call *c, struct ppp_opts *opts)
             sc = st->call_head;
             while (sc)
             {
-                close (sc->fd);
+#ifdef USE_KERNEL
+                if (kernel_support) {
+                    close(st->udp_fd); /* tunnel UDP fd */
+                    close(st->pppox_fd); /* tunnel PPPoX fd */
+                } else
+#endif
+                    close (sc->fd); /* call pty fd */
                 sc = sc->next;
             }
             st = st->next;
         }
-       }
 
         /* close the UDP socket fd */
         close (server_socket);
@@ -617,7 +627,10 @@ void destroy_tunnel (struct tunnel *t)
        the memory pointed to by t->chal_us.vector at some other place */
     if (t->chal_them.vector)
         free (t->chal_them.vector);
-    route_del(&t->rt);
+    if (t->pppox_fd > -1 )
+        close (t->pppox_fd);
+    if (t->udp_fd > -1 )
+        close (t->udp_fd);
     free (t);
     free (me);
 }
@@ -1575,97 +1588,4 @@ int main (int argc, char *argv[])
     dial_no_tmp = calloc (128, sizeof (char));
     network_thread ();
     return 0;
-}
-
-/* Route manipulation */
-
-static int
-route_ctrl(int ctrl, struct rtentry *rt)
-{
-	int s;
-
-	/* Open a raw socket to the kernel */
-	if ((s = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ||	ioctl(s, ctrl, rt) < 0)
-		l2tp_log (LOG_ERR, "route_ctrl: %s", strerror(errno));
-	else errno = 0;
-
-	close(s);
-	return errno;
-}
-
-int
-route_del(struct rtentry *rt)
-{
-	if (rt->rt_dev) {
-		route_ctrl(SIOCDELRT, rt);
-		free(rt->rt_dev);
-		rt->rt_dev = NULL;
-	}
-	return 0;
-}
-
-int
-route_add(const struct in_addr inetaddr, struct rtentry *rt)
-{
-	char buf[256], dev[64];
-	int metric, flags;
-	u_int32_t dest, mask;
-
-	FILE *f = fopen("/proc/net/route", "r");
-	if (f == NULL) {
-	        l2tp_log (LOG_ERR, "/proc/net/route: %s", strerror(errno));
-		return -1;
-	}
-
-	while (fgets(buf, sizeof(buf), f)) {
-		if (sscanf(buf, "%63s %x %x %X %*s %*s %d %x", dev, &dest,
-		    	&sin_addr(&rt->rt_gateway).s_addr, &flags, &metric, &mask) != 6)
-			continue;
-		if ((flags & RTF_UP) == RTF_UP && (inetaddr.s_addr & mask) == dest) {
-			rt->rt_metric = metric + 1;
-			rt->rt_gateway.sa_family = AF_INET;
-			break;
-		}
-	}
-
-	fclose(f);
-
-	/* check for no route */
-	if (rt->rt_gateway.sa_family != AF_INET) {
-	        l2tp_log (LOG_ERR, "route_add: no route to host");
-		return -1;
-	}
-
-	/* check for existing route to this host, 
-	add if missing based on the existing routes */
-	if (mask == INADDR_BROADCAST) {
-	        /* l2tp_log (LOG_ERR, "route_add: not adding existing route"); */
-		return -1;
-	}
-
-	sin_addr(&rt->rt_dst) = inetaddr;
-	rt->rt_dst.sa_family = AF_INET;
-
-	sin_addr(&rt->rt_genmask).s_addr = INADDR_BROADCAST;
-	rt->rt_genmask.sa_family = AF_INET;
-
-	rt->rt_flags = RTF_UP | RTF_HOST;
-	if (sin_addr(&rt->rt_gateway).s_addr)
-		rt->rt_flags |= RTF_GATEWAY;
-
-	rt->rt_metric++;
-	rt->rt_dev = strdup(dev);
-
-	if (!rt->rt_dev) {
-	        l2tp_log (LOG_ERR, "route_add: no memory");
-		return -1;
-	}
-
-	if (!route_ctrl(SIOCADDRT, rt))
-		return 0;
-
-	free(rt->rt_dev);
-	rt->rt_dev = NULL;
-
-	return -1;
 }

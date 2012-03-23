@@ -168,6 +168,8 @@ struct tunnel
     int ourrws;                 /* Receive Window Size */
     int rxspeed;		/* Receive bps */
     int txspeed;		/* Transmit bps */
+    int udp_fd;			/* UDP fd */
+    int pppox_fd;			/* PPPOX tunnel fd */
     struct call *self;
     struct lns *lns;            /* LNS that owns us */
     struct lac *lac;            /* LAC that owns us */
@@ -222,6 +224,7 @@ extern void control_xmit (void *);
 extern int ppd;
 extern int switch_io;           /* jz */
 extern int control_fd;
+extern int connect_pppol2tp(struct tunnel *t);
 extern int start_pppd (struct call *c, struct ppp_opts *);
 extern void magic_lac_dial (void *);
 extern int get_entropy (unsigned char *, int);
@@ -231,12 +234,7 @@ extern int get_entropy (unsigned char *, int);
 #endif
 #endif
 
-/* Route manipulation */
-#define sin_addr(s) (((struct sockaddr_in *)(s))->sin_addr)
-extern int route_add(const struct in_addr inetaddr, struct rtentry *rt);
-extern int route_del(struct rtentry *rt);
-
-/* 
+/*
  * This is just some stuff to take
  * care of kernel definitions
  */

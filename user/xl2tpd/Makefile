@@ -73,6 +73,9 @@ OSFLAGS?= -DLINUX -I$(KERNELSRC)/include/
 #
 OSFLAGS+= -DUSE_KERNEL
 #
+# Uncomment the following for kernel module autoload
+#
+#OSFLAGS+= -DMODULE_AUTO
 #
 # Uncomment the next line for FreeBSD
 #

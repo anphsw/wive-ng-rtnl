@@ -1021,6 +1021,8 @@
 18) Fastnat more native functions use instead hardcoded blocks.<br>
 19) Update miniupnpd to 1.6.20120320 version.<br>
 20) Temporary back to 4.4.7 gcc in toolchain.<br>
+21) Fix xl2tp work with new kernels.<br>
+22) Update l2tp kernel module(speedup).<br>
 
 <br><br>
 <b>For support see:</b><br>
