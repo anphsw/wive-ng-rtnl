@@ -369,8 +369,8 @@ start() {
     		    iptables -t nat -A PREROUTING -i $wan_if -j MINIUPNPD
 		fi
 		# all packets from join redirect to UPNP
-		if [ "$vpnNAT" != "off" ] && [ "$real_wan_ipaddr" != "" ]; then
-		    iptables -t nat -A PREROUTING -i $real_wan_ipaddr -j MINIUPNPD
+		if [ "$vpnNAT" != "off" ] && [ "$real_wan_if" != "" ]; then
+		    iptables -t nat -A PREROUTING -i $real_wan_if -j MINIUPNPD
 		fi
 		# filter rules
     		iptables -t filter -N MINIUPNPD
