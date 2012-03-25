@@ -4,8 +4,7 @@
 #define XT_FUNCTION_MAXNAMELEN 30
 #define XT_TABLE_MAXNAMELEN 32
 
-struct xt_entry_match
-{
+struct xt_entry_match {
 	union {
 		struct {
 			u_int16_t match_size;
@@ -29,8 +28,7 @@ struct xt_entry_match
 	unsigned char data[0];
 };
 
-struct xt_entry_target
-{
+struct xt_entry_target {
 	union {
 		struct {
 			u_int16_t target_size;
@@ -54,16 +52,14 @@ struct xt_entry_target
 	unsigned char data[0];
 };
 
-struct xt_standard_target
-{
+struct xt_standard_target {
 	struct xt_entry_target target;
 	int verdict;
 };
 
 /* The argument to IPT_SO_GET_REVISION_*.  Returns highest revision
  * kernel supports, if >= revision. */
-struct xt_get_revision
-{
+struct xt_get_revision {
 	char name[XT_FUNCTION_MAXNAMELEN-1];
 
 	u_int8_t revision;
@@ -80,8 +76,7 @@ struct xt_get_revision
  * ip6t_entry and arpt_entry.  This sucks, and it is a hack.  It will be my
  * personal pleasure to remove it -HW
  */
-struct _xt_align
-{
+struct _xt_align {
 	u_int8_t u8;
 	u_int16_t u16;
 	u_int32_t u32;
@@ -99,14 +94,12 @@ struct _xt_align
 #define SET_COUNTER(c,b,p) do { (c).bcnt = (b); (c).pcnt = (p); } while(0)
 #define ADD_COUNTER(c,b,p) do { (c).bcnt += (b); (c).pcnt += (p); } while(0)
 
-struct xt_counters
-{
+struct xt_counters {
 	u_int64_t pcnt, bcnt;			/* Packet and byte counters */
 };
 
 /* The argument to IPT_SO_ADD_COUNTERS. */
-struct xt_counters_info
-{
+struct xt_counters_info {
 	/* Which table. */
 	char name[XT_TABLE_MAXNAMELEN];
 
@@ -165,8 +158,7 @@ struct xt_counters_info
 
 #include <linux/netdevice.h>
 
-struct xt_match
-{
+struct xt_match {
 	struct list_head list;
 
 	const char name[XT_FUNCTION_MAXNAMELEN-1];
@@ -217,8 +209,7 @@ struct xt_match
 };
 
 /* Registration hooks for targets. */
-struct xt_target
-{
+struct xt_target {
 	struct list_head list;
 
 	const char name[XT_FUNCTION_MAXNAMELEN-1];
@@ -264,8 +255,7 @@ struct xt_target
 };
 
 /* Furniture shopping... */
-struct xt_table
-{
+struct xt_table {
 	struct list_head list;
 
 	/* A unique name... */
@@ -287,8 +277,7 @@ struct xt_table
 #include <linux/netfilter_ipv4.h>
 
 /* The table itself */
-struct xt_table_info
-{
+struct xt_table_info {
 	/* Size per table */
 	unsigned int size;
 	/* Number of entries: FIXME. --RR */
@@ -444,8 +433,7 @@ static inline unsigned long ifname_compare_aligned(const char *_a,
 #ifdef CONFIG_COMPAT
 #include <net/compat.h>
 
-struct compat_xt_entry_match
-{
+struct compat_xt_entry_match {
 	union {
 		struct {
 			u_int16_t match_size;
@@ -461,8 +449,7 @@ struct compat_xt_entry_match
 	unsigned char data[0];
 };
 
-struct compat_xt_entry_target
-{
+struct compat_xt_entry_target {
 	union {
 		struct {
 			u_int16_t target_size;
@@ -482,8 +469,7 @@ struct compat_xt_entry_target
  * need to change whole approach in order to calculate align as function of
  * current task alignment */
 
-struct compat_xt_counters
-{
+struct compat_xt_counters {
 #if defined(CONFIG_X86_64) || defined(CONFIG_IA64)
 	u_int32_t cnt[4];
 #else
@@ -491,8 +477,7 @@ struct compat_xt_counters
 #endif
 };
 
-struct compat_xt_counters_info
-{
+struct compat_xt_counters_info {
 	char name[XT_TABLE_MAXNAMELEN];
 	compat_uint_t num_counters;
 	struct compat_xt_counters counters[0];

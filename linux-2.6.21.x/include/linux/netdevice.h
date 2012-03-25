@@ -113,8 +113,7 @@ struct netpoll_info;
  *	with byte counters.
  */
  
-struct net_device_stats
-{
+struct net_device_stats {
 	unsigned long long	rx_packets;		/* total packets received	*/
 	unsigned long long	tx_packets;		/* total packets transmitted	*/
 	unsigned long long	rx_bytes;		/* total bytes received 	*/
@@ -140,7 +139,7 @@ struct net_device_stats
 	unsigned long	tx_fifo_errors;
 	unsigned long	tx_heartbeat_errors;
 	unsigned long	tx_window_errors;
-	
+
 	/* for cslip etc */
 	unsigned long	rx_compressed;
 	unsigned long	tx_compressed;
@@ -167,8 +166,7 @@ struct neighbour;
 struct neigh_parms;
 struct sk_buff;
 
-struct netif_rx_stats
-{
+struct netif_rx_stats {
 	unsigned total;
 	unsigned dropped;
 	unsigned time_squeeze;
@@ -182,8 +180,7 @@ DECLARE_PER_CPU(struct netif_rx_stats, netdev_rx_stat);
  *	We tag multicasts with these structures.
  */
  
-struct dev_mc_list
-{	
+struct dev_mc_list {
 	struct dev_mc_list	*next;
 	__u8			dmi_addr[MAX_ADDR_LEN];
 	unsigned char		dmi_addrlen;
@@ -191,8 +188,7 @@ struct dev_mc_list
 	int			dmi_gusers;
 };
 
-struct hh_cache
-{
+struct hh_cache {
 	struct hh_cache *hh_next;	/* Next entry			     */
 	atomic_t	hh_refcnt;	/* number of users                   */
 /*
@@ -278,8 +274,7 @@ extern int __init netdev_boot_setup(char *str);
  *	moves out.
  */
 
-struct net_device
-{
+struct net_device {
 
 	/*
 	 * This is the first field of the "visible" part of this structure
@@ -310,7 +305,7 @@ struct net_device
 	unsigned long		state;
 
 	struct net_device	*next;
-	
+
 	/* The device initialization function. Called only once. */
 	int			(*init)(struct net_device *dev);
 
@@ -502,9 +497,9 @@ struct net_device
 						void *saddr,
 						unsigned len);
 	int			(*rebuild_header)(struct sk_buff *skb);
-#define HAVE_MULTICAST			 
+#define HAVE_MULTICAST
 	void			(*set_multicast_list)(struct net_device *dev);
-#define HAVE_SET_MAC_ADDR  		 
+#define HAVE_SET_MAC_ADDR
 	int			(*set_mac_address)(struct net_device *dev,
 						   void *addr);
 #define HAVE_PRIVATE_IOCTL
@@ -790,7 +785,8 @@ static inline int netif_dormant(const struct net_device *dev)
 }
 
 
-static inline int netif_oper_up(const struct net_device *dev) {
+static inline int netif_oper_up(const struct net_device *dev)
+{
 	return (dev->operstate == IF_OPER_UP ||
 		dev->operstate == IF_OPER_UNKNOWN /* backward compat */);
 }

@@ -134,8 +134,7 @@ struct arpt_entry
 #define ARPT_RETURN XT_RETURN
 
 /* The argument to ARPT_SO_GET_INFO */
-struct arpt_getinfo
-{
+struct arpt_getinfo {
 	/* Which table: caller fills this in. */
 	char name[ARPT_TABLE_MAXNAMELEN];
 
@@ -157,8 +156,7 @@ struct arpt_getinfo
 };
 
 /* The argument to ARPT_SO_SET_REPLACE. */
-struct arpt_replace
-{
+struct arpt_replace {
 	/* Which table. */
 	char name[ARPT_TABLE_MAXNAMELEN];
 
@@ -193,8 +191,7 @@ struct arpt_replace
 #define arpt_counters xt_counters
 
 /* The argument to ARPT_SO_GET_ENTRIES. */
-struct arpt_get_entries
-{
+struct arpt_get_entries {
 	/* Which table: user fills this in. */
 	char name[ARPT_TABLE_MAXNAMELEN];
 

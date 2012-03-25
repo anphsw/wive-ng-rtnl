@@ -20,8 +20,7 @@
 /* i_flags values for SIT mode */
 #define	SIT_ISATAP	0x0001
 
-struct ip_tunnel_parm
-{
+struct ip_tunnel_parm {
 	char			name[IFNAMSIZ];
 	int			link;
 	__be16			i_flags;

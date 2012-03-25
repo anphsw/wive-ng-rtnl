@@ -29,16 +29,14 @@
 
 #define MAX_LINKS 64 /* update for csr_test, by bobtseng 2006.5.15. */
 
-struct sockaddr_nl
-{
+struct sockaddr_nl {
 	sa_family_t	nl_family;	/* AF_NETLINK	*/
 	unsigned short	nl_pad;		/* zero		*/
 	__u32		nl_pid;		/* process pid	*/
        	__u32		nl_groups;	/* multicast groups mask */
 };
 
-struct nlmsghdr
-{
+struct nlmsghdr {
 	__u32		nlmsg_len;	/* Length of message including header */
 	__u16		nlmsg_type;	/* Message content */
 	__u16		nlmsg_flags;	/* Additional flags */
@@ -94,8 +92,7 @@ struct nlmsghdr
 
 #define NLMSG_MIN_TYPE		0x10	/* < 0x10: reserved control messages */
 
-struct nlmsgerr
-{
+struct nlmsgerr {
 	int		error;
 	struct nlmsghdr msg;
 };
@@ -104,8 +101,7 @@ struct nlmsgerr
 #define NETLINK_DROP_MEMBERSHIP	2
 #define NETLINK_PKTINFO		3
 
-struct nl_pktinfo
-{
+struct nl_pktinfo {
 	__u32	group;
 };
 
@@ -125,8 +121,7 @@ enum {
  *  <-------------- nlattr->nla_len -------------->
  */
 
-struct nlattr
-{
+struct nlattr {
 	__u16           nla_len;
 	__u16           nla_type;
 };
@@ -154,8 +149,7 @@ struct nlattr
 #include <linux/capability.h>
 #include <linux/skbuff.h>
 
-struct netlink_skb_parms
-{
+struct netlink_skb_parms {
 	struct ucred		creds;		/* Skb credentials	*/
 	__u32			pid;
 	__u32			dst_group;
@@ -199,8 +193,7 @@ int netlink_sendskb(struct sock *sk, struct sk_buff *skb, int protocol);
 #define NLMSG_DEFAULT_SIZE (NLMSG_GOODSIZE - NLMSG_HDRLEN)
 
 
-struct netlink_callback
-{
+struct netlink_callback {
 	struct sk_buff	*skb;
 	struct nlmsghdr	*nlh;
 	int		(*dump)(struct sk_buff * skb, struct netlink_callback *cb);
@@ -209,8 +202,7 @@ struct netlink_callback
 	long		args[5];
 };
 
-struct netlink_notify
-{
+struct netlink_notify {
 	int pid;
 	int protocol;
 };

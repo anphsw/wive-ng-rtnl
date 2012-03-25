@@ -79,8 +79,7 @@ struct ipt_ip {
 /* This structure defines each of the firewall rules.  Consists of 3
    parts which are 1) general IP header stuff 2) match specific
    stuff 3) the target to perform if the rule matches */
-struct ipt_entry
-{
+struct ipt_entry {
 	struct ipt_ip ip;
 
 	/* Mark with fields that we care about. */
@@ -138,8 +137,7 @@ struct ipt_entry
 #define IPT_UDP_INV_MASK	XT_UDP_INV_MASK
 
 /* ICMP matching stuff */
-struct ipt_icmp
-{
+struct ipt_icmp {
 	u_int8_t type;				/* type to match */
 	u_int8_t code[2];			/* range of code */
 	u_int8_t invflags;			/* Inverse flags */
@@ -149,8 +147,7 @@ struct ipt_icmp
 #define IPT_ICMP_INV	0x01	/* Invert the sense of type/code test */
 
 /* The argument to IPT_SO_GET_INFO */
-struct ipt_getinfo
-{
+struct ipt_getinfo {
 	/* Which table: caller fills this in. */
 	char name[IPT_TABLE_MAXNAMELEN];
 
@@ -172,8 +169,7 @@ struct ipt_getinfo
 };
 
 /* The argument to IPT_SO_SET_REPLACE. */
-struct ipt_replace
-{
+struct ipt_replace {
 	/* Which table. */
 	char name[IPT_TABLE_MAXNAMELEN];
 
@@ -207,8 +203,7 @@ struct ipt_replace
 #define ipt_counters_info xt_counters_info
 
 /* The argument to IPT_SO_GET_ENTRIES. */
-struct ipt_get_entries
-{
+struct ipt_get_entries {
 	/* Which table: user fills this in. */
 	char name[IPT_TABLE_MAXNAMELEN];
 
@@ -257,20 +252,17 @@ extern int ipt_register_table(struct xt_table *table,
 extern void ipt_unregister_table(struct xt_table *table);
 
 /* Standard entry. */
-struct ipt_standard
-{
+struct ipt_standard {
 	struct ipt_entry entry;
 	struct ipt_standard_target target;
 };
 
-struct ipt_error_target
-{
+struct ipt_error_target {
 	struct ipt_entry_target target;
 	char errorname[IPT_FUNCTION_MAXNAMELEN];
 };
 
-struct ipt_error
-{
+struct ipt_error {
 	struct ipt_entry entry;
 	struct ipt_error_target target;
 };
@@ -286,8 +278,7 @@ extern unsigned int ipt_do_table(struct sk_buff **pskb,
 #ifdef CONFIG_COMPAT
 #include <net/compat.h>
 
-struct compat_ipt_entry
-{
+struct compat_ipt_entry {
 	struct ipt_ip ip;
 	compat_uint_t nfcache;
 	u_int16_t target_offset;
