@@ -264,7 +264,9 @@ static inline int proto_ports_offset(int proto)
 	case IPPROTO_DCCP:
 	case IPPROTO_ESP:	/* SPI */
 	case IPPROTO_SCTP:
+#ifndef CONFIG_UDP_LITE_DISABLE
 	case IPPROTO_UDPLITE:
+#endif
 		return 0;
 	case IPPROTO_AH:	/* SPI */
 		return 4;

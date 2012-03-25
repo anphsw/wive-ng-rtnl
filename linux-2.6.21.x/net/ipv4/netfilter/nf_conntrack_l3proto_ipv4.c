@@ -171,7 +171,7 @@ static unsigned int ipv4_conntrack_defrag(unsigned int hooknum,
 					  const struct net_device *out,
 					  int (*okfn)(struct sk_buff *))
 {
-	struct inet_sock *inet = inet_sk(skb->sk);
+	struct inet_sock *inet = inet_sk((*pskb)->sk);
 
 	if (inet && inet->nodefrag)
 		return NF_ACCEPT;

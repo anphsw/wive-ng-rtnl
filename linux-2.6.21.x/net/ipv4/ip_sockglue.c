@@ -619,6 +619,35 @@ static int do_ip_setsockopt(struct sock *sk, int level,
 				goto e_inval;
 			inet->mc_loop = !!val;
 			break;
+		case IP_UNICAST_IF:
+		{
+			struct net_device *dev = NULL;
+			int ifindex;
+
+			if (optlen != sizeof(int))
+				goto e_inval;
+
+			ifindex = (__force int)ntohl((__force __be32)val);
+			if (ifindex == 0) {
+				inet->uc_index = 0;
+				err = 0;
+				break;
+			}
+
+			dev = dev_get_by_index(ifindex);
+			err = -EADDRNOTAVAIL;
+			if (!dev)
+				break;
+			dev_put(dev);
+
+			err = -EINVAL;
+			if (sk->sk_bound_dev_if)
+				break;
+
+			inet->uc_index = ifindex;
+			err = 0;
+			break;
+		}
 		case IP_MULTICAST_IF:
 		{
 			struct ip_mreqn mreq;
@@ -1114,10 +1143,9 @@ static int do_ip_getsockopt(struct sock *sk, int level, int optname,
 		val = inet->hdrincl;
 		break;
 	case IP_NODEFRAG:
-		if (sk->sk_type != SOCK_RAW) {
-			err = -ENOPROTOOPT;
-			break;
-		}
+		if (sk->sk_type != SOCK_RAW)
+			return -ENOPROTOOPT;
+
 		inet->nodefrag = val ? 1 : 0;
 		break;
 	case IP_MTU_DISCOVER:
@@ -1147,35 +1175,6 @@ static int do_ip_getsockopt(struct sock *sk, int level, int optname,
 	case IP_MULTICAST_LOOP:
 		val = inet->mc_loop;
 		break;
-	case IP_UNICAST_IF:
-	{
-		struct net_device *dev = NULL;
-		int ifindex;
-
-		if (optlen != sizeof(int))
-			goto e_inval;
-
-		ifindex = (__force int)ntohl((__force __be32)val);
-		if (ifindex == 0) {
-			inet->uc_index = 0;
-			err = 0;
-			break;
-		}
-
-		dev = dev_get_by_index(sock_net(sk), ifindex);
-		err = -EADDRNOTAVAIL;
-		if (!dev)
-			break;
-		dev_put(dev);
-
-		err = -EINVAL;
-		if (sk->sk_bound_dev_if)
-			break;
-
-		inet->uc_index = ifindex;
-		err = 0;
-		break;
-	}
 	case IP_UNICAST_IF:
 		val = (__force int)htonl((__u32) inet->uc_index);
 		break;
