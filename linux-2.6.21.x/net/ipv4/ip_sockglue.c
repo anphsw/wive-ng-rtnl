@@ -464,6 +464,7 @@ static int do_ip_setsockopt(struct sock *sk, int level,
 			     (1<<IP_ROUTER_ALERT) | (1<<IP_FREEBIND) |
 			     (1<<IP_PASSSEC) | (1<<IP_TRANSPARENT))) ||
 	    optname == IP_MULTICAST_TTL ||
+	    optname == IP_MULTICAST_ALL ||
 	    optname == IP_MULTICAST_LOOP ||
 	    optname == IP_RECVORIGDSTADDR) {
 		if (optlen >= sizeof(int)) {
@@ -916,6 +917,13 @@ mc_msf_out:
 			break;
 		}
 #endif
+		case IP_MULTICAST_ALL:
+			if (optlen < 1)
+				goto e_inval;
+			if (val != 0 && val != 1)
+				goto e_inval;
+			inet->mc_all = val;
+			break;
 		case IP_ROUTER_ALERT:
 			err = ip_ra_control(sk, val ? 1 : 0, NULL);
 			break;
@@ -1171,6 +1179,9 @@ static int do_ip_getsockopt(struct sock *sk, int level, int optname,
 		release_sock(sk);
 		return err;
 	}
+	case IP_MULTICAST_ALL:
+		val = inet->mc_all;
+		break;
 	case IP_PKTOPTIONS:
 	{
 		struct msghdr msg;
