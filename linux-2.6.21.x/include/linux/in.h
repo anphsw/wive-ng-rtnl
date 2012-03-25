@@ -282,6 +282,14 @@ static inline bool ipv4_is_zeronet(__be32 addr)
 #define ZERONET(x)             ipv4_is_zeronet(x)
 #define LOCAL_MCAST(x)         ipv4_is_local_multicast(x)
 
+/* Special-Use IPv4 Addresses (RFC3330) */
+#define PRIVATE_10(x)	(((x) & htonl(0xff000000)) == htonl(0x0A000000))
+#define LINKLOCAL_169(x) (((x) & htonl(0xffff0000)) == htonl(0xA9FE0000))
+#define PRIVATE_172(x)	(((x) & htonl(0xfff00000)) == htonl(0xAC100000))
+#define TEST_192(x)	(((x) & htonl(0xffffff00)) == htonl(0xC0000200))
+#define ANYCAST_6TO4(x)	(((x) & htonl(0xffffff00)) == htonl(0xC0586300))
+#define PRIVATE_192(x)	(((x) & htonl(0xffff0000)) == htonl(0xC0A80000))
+#define TEST_198(x)	(((x) & htonl(0xfffe0000)) == htonl(0xC6120000))
 #endif
 
 #endif	/* _LINUX_IN_H */
