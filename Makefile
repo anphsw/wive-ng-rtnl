@@ -264,8 +264,8 @@ modules_install:
 		$(MAKEARCH_KERNEL) -C $(LINUXDIR) INSTALL_MOD_PATH=$(ROMFSDIR) DEPMOD="../user/busybox/examples/depmod.pl" modules_install; \
 		rm -f $(ROMFSDIR)/lib/modules/*/build; \
 		rm -f $(ROMFSDIR)/lib/modules/*/source; \
-		find $(ROMFSDIR)/lib/modules -type f -name "*.ko" | xargs -r $(STRIP) -R .comment -R .note -g --strip-unneeded; \
-		find $(ROMFSDIR)/lib/modules -type f -name "*.ko" | xargs -r --strip-debug --strip-unneeded $(OBJCOPY) ; \
+		find $(ROMFSDIR)/lib/modules -type f -name '*.ko' | xargs -r $(STRIP) -R .comment -R .note -g --strip-unneeded; \
+		find $(ROMFSDIR)/lib/modules -type f -name '*.ko' -print -print | xargs -n2 -r $(OBJCOPY) -v --strip-debug --strip-unneeded; \
 	fi
 
 .PHONY: romfs.post
