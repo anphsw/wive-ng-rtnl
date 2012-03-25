@@ -5,7 +5,6 @@ TOOLSPREFIX=./toolchain/bin/mipsel-linux-uclibc
 STRIP="$TOOLSPREFIX-strip --strip-debug --strip-unneeded"
 OBJCOPY="$TOOLSPREFIX-objcopy --strip-debug --strip-unneeded"
 SSTRIP=./tools/sstrip/sstrip
-MODULES=`find romfs/lib/modules -type f -name "*.ko"`;
 
 echo --------------------------------GENERATE CONFIG-----------------------------
 . linux/.config
@@ -58,12 +57,6 @@ if [ "$NON_STRIPS_LIB" != "" ]; then
     $STRIP -R .comment -R .note $NON_STRIPS_LIB
     $SSTRIP $NON_STRIPS_LIB
 fi
-echo -----------------------------------STRIP MOD----------------------------------
-for i in $MODULES; do
-    echo $i;
-    $OBJCOPY $i $i
-done
-
 echo -----------------------------------SYNC!!-------------------------------------
 sync
 echo ----------------------------APP STRIP AND COPY OK-----------------------------

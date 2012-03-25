@@ -18,7 +18,6 @@ UCLINUX_BUILD_USER=1
 -include $(LINUX_CONFIG)
 -include $(CONFIG_CONFIG)
 -include $(ARCH_CONFIG)
--include $(MODULES_CONFIG)
 
 VEND=$(ROOTDIR)/vendors
 

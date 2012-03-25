@@ -45,7 +45,6 @@ ROMFSDIR	= $(ROOTDIR)/romfs
 SCRIPTSDIR	= $(ROOTDIR)/config/scripts
 LINUX_CONFIG	= $(ROOTDIR)/$(LINUXDIR)/.config
 CONFIG_CONFIG	= $(ROOTDIR)/config/.config
-MODULES_CONFIG	= $(ROOTDIR)/modules/.config
 
 #NUM MAKE PROCESS = CPU NUMBER IN THE SYSTEM * CPU_OVERLOAD
 CPU_OVERLOAD	= 1
@@ -79,7 +78,7 @@ endif
 DIRS    =  $(ROOTDIR)/vendors $(ROOTDIR)/uClibc++ $(ROOTDIR)/user $(ROOTDIR)/lib
 
 export VENDOR PRODUCT ROOTDIR LINUXDIR HOSTCC CONFIG_SHELL
-export CONFIG_CONFIG LINUX_CONFIG MODULES_CONFIG ROMFSDIR SCRIPTSDIR
+export CONFIG_CONFIG LINUX_CONFIG ROMFSDIR SCRIPTSDIR
 export RT288X_SDK_VERSION VERSIONPKG VERSIONSTR ROMFSINST PATH IMAGEDIR RELFILES TFTPDIR
 export BUILD_START_STRING
 export HOST_NCPU DIRS
@@ -139,9 +138,6 @@ xconfig: config.tk
 	@if egrep "^CONFIG_DEFAULTS_KERNEL=y" .config > /dev/null; then \
 		$(MAKE) linux_xconfig; \
 	 fi
-	@if egrep "^CONFIG_DEFAULTS_MODULES=y" .config > /dev/null; then \
-		$(MAKE) modules_xconfig; \
-	 fi
 	@if egrep "^CONFIG_DEFAULTS_VENDOR=y" .config > /dev/null; then \
 		$(MAKE) config_xconfig; \
 	 fi
@@ -164,9 +160,6 @@ config: config.in
 	@config/setconfig defaults
 	@if egrep "^CONFIG_DEFAULTS_KERNEL=y" .config > /dev/null; then \
 		$(MAKE) linux_config; \
-	 fi
-	@if egrep "^CONFIG_DEFAULTS_MODULES=y" .config > /dev/null; then \
-		$(MAKE) modules_config; \
 	 fi
 	@if egrep "^CONFIG_DEFAULTS_VENDOR=y" .config > /dev/null; then \
 		$(MAKE) config_config; \
@@ -198,9 +191,6 @@ menuconfig: config.in
 	@if egrep "^CONFIG_DEFAULTS_KERNEL=y" .config > /dev/null; then \
 		$(MAKE) linux_menuconfig; \
 	 fi
-	@if egrep "^CONFIG_DEFAULTS_MODULES=y" .config > /dev/null; then \
-		$(MAKE) modules_menuconfig; \
-	 fi
 	@if egrep "^CONFIG_DEFAULTS_VENDOR=y" .config > /dev/null; then \
 		$(MAKE) config_menuconfig; \
 	 fi
@@ -220,20 +210,9 @@ oldconfig: config.in
 	@HELP_FILE=config/Configure.help \
 		$(CONFIG_SHELL) $(SCRIPTSDIR)/Configure -d config.in
 	@$(MAKE) oldconfig_linux
-	@$(MAKE) oldconfig_modules
 	@$(MAKE) oldconfig_config
 	@chmod u+x config/setconfig
 	@config/setconfig final
-
-.PHONY: modules_install
-modules_install:
-	. $(LINUXDIR)/.config; if [ "$$CONFIG_MODULES" = "y" ]; then \
-		[ -d $(ROMFSDIR)/lib/modules ] || mkdir -p $(ROMFSDIR)/lib/modules; \
-		$(MAKEARCH_KERNEL) -C $(LINUXDIR) INSTALL_MOD_PATH=$(ROMFSDIR) DEPMOD="../user/busybox/examples/depmod.pl" modules_install; \
-		rm -f $(ROMFSDIR)/lib/modules/*/build; \
-		rm -f $(ROMFSDIR)/lib/modules/*/source; \
-		find $(ROMFSDIR)/lib/modules -type f -name "*o" | xargs -r $(STRIP) -R .comment -R .note -g --strip-unneeded; \
-	fi
 
 linux_xconfig:
 	KCONFIG_NOTIMESTAMP=1 $(MAKEARCH_KERNEL) -C $(LINUXDIR) xconfig
@@ -241,14 +220,6 @@ linux_menuconfig:
 	KCONFIG_NOTIMESTAMP=1 $(MAKEARCH_KERNEL) -C $(LINUXDIR) menuconfig
 linux_config:
 	KCONFIG_NOTIMESTAMP=1 $(MAKEARCH_KERNEL) -C $(LINUXDIR) config
-modules_xconfig:
-	[ ! -d modules ] || $(MAKEARCH) -C modules xconfig
-modules_menuconfig:
-	[ ! -d modules ] || $(MAKEARCH) -C modules menuconfig
-modules_config:
-	[ ! -d modules ] || $(MAKEARCH) -C modules config
-modules_clean:
-	-[ ! -d modules ] || $(MAKEARCH) -C modules clean
 config_xconfig:
 	$(MAKEARCH) -C config xconfig
 config_menuconfig:
@@ -257,8 +228,6 @@ config_config:
 	$(MAKEARCH) -C config config
 oldconfig_config:
 	$(MAKEARCH) -C config oldconfig
-oldconfig_modules:
-	[ ! -d modules ] || $(MAKEARCH) -C modules oldconfig
 oldconfig_linux:
 	KCONFIG_NOTIMESTAMP=1 $(MAKEARCH_KERNEL) -C $(LINUXDIR) oldconfig
 
@@ -286,6 +255,18 @@ romfs.subdirs:
 	cd $(ROOTDIR)
 	for dir in $(DIRS) ; do [ ! -d $$dir ] || $(MAKEARCH) -C $$dir romfs || exit 1 ; done
 	#################INSTALL-APPS-ROMFS###################
+
+.PHONY: modules_install
+modules_install:
+	#----------------------------STRIP-AND-INSTALL_MODULES----------------------------------
+	. $(LINUXDIR)/.config; if [ "$$CONFIG_MODULES" = "y" ]; then \
+		[ -d $(ROMFSDIR)/lib/modules ] || mkdir -p $(ROMFSDIR)/lib/modules; \
+		$(MAKEARCH_KERNEL) -C $(LINUXDIR) INSTALL_MOD_PATH=$(ROMFSDIR) DEPMOD="../user/busybox/examples/depmod.pl" modules_install; \
+		rm -f $(ROMFSDIR)/lib/modules/*/build; \
+		rm -f $(ROMFSDIR)/lib/modules/*/source; \
+		find $(ROMFSDIR)/lib/modules -type f -name "*.ko" | xargs -r $(STRIP) -R .comment -R .note -g --strip-unneeded; \
+		find $(ROMFSDIR)/lib/modules -type f -name "*.ko" | xargs -r --strip-debug --strip-unneeded $(OBJCOPY) ; \
+	fi
 
 .PHONY: romfs.post
 romfs.post:
@@ -361,7 +342,7 @@ sparseall:
 	$(MAKEARCH_KERNEL) -C $(LINUXDIR) C=2 $(LINUXTARGET) || exit 1
 
 .PHONY: subdirs
-subdirs: lib uClibc++ linux modules
+subdirs: lib uClibc++ linux
 	for dir in $(DIRS) ; do [ ! -d $$dir ] || $(MAKEARCH) -C $$dir || exit 1 ; done
 
 dep:
@@ -384,17 +365,16 @@ tools:
 relink:
 	find user prop vendors -type f -name '*.gdb' | sed 's/^\(.*\)\.gdb/\1 \1.gdb/' | xargs rm -f
 
-clean: modules_clean
-	echo "Clean temporary files..."
-	echo "Clean subtargets..."
-	touch config.arch
-	touch linux/.config
-	touch .config
+clean:
+	################PREPARE FOR CLEANUP############################
+	touch $(ROOTDIR)/linux/.config
+	touch $(ROOTDIR)/config/autoconf.h
+	touch $(ROOTDIR)/config.arch
+	touch $(ROOTDIR)/.config
+	#################CLEAN ALL SUBDIRS#############################
 	for dir in $(LINUXDIR) $(DIRS); do [ ! -d $$dir ] || $(MAKEARCH) -C $$dir clean ; done
 	make clean -C uClibc++/extra/config
-	make distclean -C uClibc++/extra/config
 	make clean -C Uboot
-	make mrproper -C Uboot
 	make clean -C fulldump
 	make clean -C tools
 	##############REMOVE UNUSED FILES 1###########################
@@ -433,14 +413,16 @@ clean: modules_clean
 	find $(ROOTDIR) -type d -name '.dep' | xargs rm -rf
 	find $(ROOTDIR) -type d -name '.deps' | xargs rm -rf
 
-real_clean mrproper: clean
-	make -C linux mrproper
-	make -C config clean
+mrproper: clean
+	make mrproper -C Uboot
+	make mrproper -C linux
+	make clean -C config
 	rm -rf romfs config.in config.arch config.tk images
 	rm -f modules/config.tk
 	rm -rf .config .config.old .oldconfig autoconf.h
 
 distclean: mrproper
+	make distclean -C uClibc++/extra/config
 	make -C linux distclean
 
 %_only:

@@ -4,15 +4,16 @@ ROOTDIR=`pwd`
 export ROOTDIR=$ROOTDIR
 ln -sf linux-2.6.21.x linux
 
-echo "-------------CLEAN-ALL---------------"
+echo "-------------REMOVE_IMAGES---------------"
 rm -rf $ROOTDIR/images
 if [ "$1" != "RELEASE" ]; then
     rm -rf $ROOTDIR/releases
 fi
-touch $ROOTDIR/config/autoconf.h
-make clean
-echo "--------------MRPROPER---------------"
-make mrproper
+
+echo "------------FULL_DISTCLEAN---------------"
+make distclean
+rm -f linux
+
+echo "-------------RESTORE_DIRS----------------"
 mkdir -p $ROOTDIR/releases
 mkdir -p $ROOTDIR/images
-rm -f linux

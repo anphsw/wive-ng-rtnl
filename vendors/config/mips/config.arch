@@ -19,10 +19,6 @@ ifndef CONSOLE_BAUD_RATE
   CONSOLE_BAUD_RATE = 57600
 endif
 
-ifeq ($(ROOTDIR)/modules,$(wildcard $(ROOTDIR)/modules))
-  EXTRA_MODULE_DIRS = $(ROOTDIR)/modules
-endif
-
 ifndef VERSIONPKG
   VERSIONPKG  := 1.0.0
 endif
