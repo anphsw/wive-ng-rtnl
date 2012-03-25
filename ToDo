@@ -1,9 +1,8 @@
 # For sadko
-) Rewrite profiles managment code in ethernet converter mode. (in progress)
-) Need rewrite QoS page (remove ralink QoS and add new types QoS)
+) Need fix new profile code to work without encryptions and cleanup ap encryptions option code.
+) Need rewrite QoS page (remove ralink QoS and add new types QoS).
 ) Add /proc/rt3052/esw_cnt for traffic statistic per switch port.(need add in WebUI).
 
 # For me
-need?) goahead need bind only lan_if if managment in only lan mode
 #need fix
 buggy) Add skb reuse support.
