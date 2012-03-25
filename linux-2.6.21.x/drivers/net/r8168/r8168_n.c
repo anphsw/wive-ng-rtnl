@@ -266,15 +266,6 @@ static inline u32 netif_msg_init(int debug_value, int default_msg_enable_bits)
 
 #endif //LINUX_VERSION_CODE < KERNEL_VERSION(2,6,5)
 
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,22)
-static inline void eth_copy_and_sum (struct sk_buff *dest,
-				     const unsigned char *src,
-				     int len, int base)
-{
-	memcpy (dest->data, src, len);
-}
-#endif //LINUX_VERSION_CODE > KERNEL_VERSION(2,6,22)
-
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,7)
 /* copied from linux kernel 2.6.20 /include/linux/time.h */
 /* Parameters used to convert the timespec values: */
@@ -4564,7 +4555,7 @@ rtl8168_try_rx_copy(struct sk_buff **sk_buff,
 		skb = dev_alloc_skb(pkt_size + NET_IP_ALIGN);
 		if (skb) {
 			skb_reserve(skb, NET_IP_ALIGN);
-			eth_copy_and_sum(skb, sk_buff[0]->data, pkt_size, 0);
+			skb_copy_to_linear_data(skb, sk_buff[0]->data, pkt_size);
 			*sk_buff = skb;
 			rtl8168_mark_to_asic(desc, rx_buf_sz);
 			ret = 0;

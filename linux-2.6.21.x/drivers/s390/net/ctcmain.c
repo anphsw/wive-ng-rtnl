@@ -472,7 +472,8 @@ ctc_unpack_skb(struct channel *ch, struct sk_buff *pskb)
 			privptr->stats.rx_dropped++;
 			return;
 		}
-		memcpy(skb_put(skb, pskb->len), pskb->data, pskb->len);
+		skb_copy_from_linear_data(pskb, skb_put(skb, pskb->len),
+					  pskb->len);
 		skb_reset_mac_header(skb);
 		skb->dev = pskb->dev;
 		skb->protocol = pskb->protocol;
@@ -715,8 +716,9 @@ ch_action_txdone(fsm_instance * fi, int event, void *arg)
 		*((__u16 *) skb_put(ch->trans_skb, 2)) = ch->collect_len + 2;
 		i = 0;
 		while ((skb = skb_dequeue(&ch->collect_queue))) {
-			memcpy(skb_put(ch->trans_skb, skb->len), skb->data,
-			       skb->len);
+			skb_copy_from_linear_data(skb, skb_put(ch->trans_skb,
+							       skb->len),
+						  skb->len);
 			privptr->stats.tx_packets++;
 			privptr->stats.tx_bytes += skb->len - LL_HEADER_LENGTH;
 			atomic_dec(&skb->users);
@@ -2265,8 +2267,9 @@ transmit_skb(struct channel *ch, struct sk_buff *skb)
 			ch->trans_skb->tail = ch->trans_skb->data;
 			ch->trans_skb->len = 0;
 			ch->ccw[1].count = skb->len;
-			memcpy(skb_put(ch->trans_skb, skb->len), skb->data,
-			       skb->len);
+			skb_copy_from_linear_data(skb, skb_put(ch->trans_skb,
+							       skb->len),
+						  skb->len);
 			atomic_dec(&skb->users);
 			dev_kfree_skb_irq(skb);
 			ccw_idx = 0;

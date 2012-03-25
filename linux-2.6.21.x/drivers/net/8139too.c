@@ -1904,10 +1904,10 @@ static __inline__ void wrap_copy(struct sk_buff *skb, const unsigned char *ring,
 	u32 left = RX_BUF_LEN - offset;
 
 	if (size > left) {
-		memcpy(skb->data, ring + offset, left);
-		memcpy(skb->data+left, ring, size - left);
+		skb_copy_to_linear_data(skb, ring + offset, left);
+		skb_copy_to_linear_data_offset(skb, left, ring, size - left);
 	} else
-		memcpy(skb->data, ring + offset, size);
+		skb_copy_to_linear_data(skb, ring + offset, size);
 }
 #endif
 
@@ -2017,7 +2017,7 @@ no_early_rx:
 #if RX_BUF_IDX == 3
 			wrap_copy(skb, rx_ring, ring_offset+4, pkt_size);
 #else
-			eth_copy_and_sum (skb, &rx_ring[ring_offset + 4], pkt_size, 0);
+			skb_copy_to_linear_data (skb, &rx_ring[ring_offset + 4], pkt_size);
 #endif
 			skb_put (skb, pkt_size);
 

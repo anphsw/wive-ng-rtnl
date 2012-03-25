@@ -724,7 +724,7 @@ struct sk_buff *__pskb_copy(struct sk_buff *skb, int headroom, gfp_t gfp_mask)
 	/* Set the tail pointer and length */
 	skb_put(n, skb_headlen(skb));
 	/* Copy the bytes */
-	memcpy(n->data, skb->data, n->len);
+	skb_copy_from_linear_data(skb, n->data, n->len);
 	n->csum	     = skb->csum;
 	n->ip_summed = skb->ip_summed;
 
@@ -1245,7 +1245,7 @@ int skb_copy_bits(const struct sk_buff *skb, int offset, void *to, int len)
 	if ((copy = start - offset) > 0) {
 		if (copy > len)
 			copy = len;
-		memcpy(to, skb->data + offset, copy);
+		skb_copy_from_linear_data_offset(skb, offset, to, copy);
 		if ((len -= copy) == 0)
 			return 0;
 		offset += copy;
@@ -1331,7 +1331,7 @@ int skb_store_bits(const struct sk_buff *skb, int offset, void *from, int len)
 	if ((copy = start - offset) > 0) {
 		if (copy > len)
 			copy = len;
-		memcpy(skb->data + offset, from, copy);
+		skb_copy_to_linear_data_offset(skb, offset, from, copy);
 		if ((len -= copy) == 0)
 			return 0;
 		offset += copy;
@@ -1564,7 +1564,7 @@ void skb_copy_and_csum_dev(const struct sk_buff *skb, u8 *to)
 
 	BUG_ON(csstart > skb_headlen(skb));
 
-	memcpy(to, skb->data, csstart);
+	skb_copy_from_linear_data(skb, to, csstart);
 
 	csum = 0;
 	if (csstart != skb->len)
@@ -1738,8 +1738,8 @@ static inline void skb_split_inside_header(struct sk_buff *skb,
 {
 	int i;
 
-	memcpy(skb_put(skb1, pos - len), skb->data + len, pos - len);
-
+	skb_copy_from_linear_data_offset(skb, len, skb_put(skb1, pos - len),
+					 pos - len);
 	/* And move data appendix as is. */
 	for (i = 0; i < skb_shinfo(skb)->nr_frags; i++)
 		skb_shinfo(skb1)->frags[i] = skb_shinfo(skb)->frags[i];
@@ -2130,7 +2130,8 @@ struct sk_buff *skb_segment(struct sk_buff *skb, int features)
 		skb_reset_mac_header(nskb);
 		nskb->nh.raw = nskb->data + skb->mac_len;
 		nskb->h.raw = nskb->nh.raw + (skb->h.raw - skb->nh.raw);
-		memcpy(skb_put(nskb, doffset), skb->data, doffset);
+		skb_copy_from_linear_data(skb, skb_put(nskb, doffset),
+					  doffset);
 
 		if (!sg) {
 			nskb->ip_summed = CHECKSUM_NONE;
@@ -2143,7 +2144,8 @@ struct sk_buff *skb_segment(struct sk_buff *skb, int features)
 		frag = skb_shinfo(nskb)->frags;
 		k = 0;
 
-		memcpy(skb_put(nskb, hsize), skb->data + offset, hsize);
+		skb_copy_from_linear_data_offset(skb, offset,
+						 skb_put(nskb, hsize), hsize);
 
 		while (pos < offset + len) {
 			BUG_ON(i >= nfrags);

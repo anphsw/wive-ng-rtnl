@@ -233,7 +233,7 @@ xpnet_receive(partid_t partid, int channel, struct xpnet_message *msg)
 			"%lu)\n", skb->data, &msg->data,
 			(size_t) msg->embedded_bytes);
 
-		memcpy(skb->data, &msg->data, (size_t) msg->embedded_bytes);
+		skb_copy_to_linear_data(skb, &msg->data, (size_t)msg->embedded_bytes);
 	} else {
 		dev_dbg(xpnet, "transferring buffer to the skb->data area;\n\t"
 			"bte_copy(0x%p, 0x%p, %hu)\n", (void *)msg->buf_pa,
@@ -566,7 +566,8 @@ xpnet_dev_hard_start_xmit(struct sk_buff *skb, struct net_device *dev)
 			msg->version = XPNET_VERSION_EMBED;
 			dev_dbg(xpnet, "calling memcpy(0x%p, 0x%p, 0x%lx)\n",
 				&msg->data, skb->data, (size_t) embedded_bytes);
-			memcpy(&msg->data, skb->data, (size_t) embedded_bytes);
+			skb_copy_from_linear_data(skb, &msg->data,
+						  (size_t)embedded_bytes);
 		} else {
 			msg->version = XPNET_VERSION;
 		}
