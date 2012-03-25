@@ -2,8 +2,9 @@
 
 RO_ROOT=romfs
 TOOLSPREFIX=./toolchain/bin/mipsel-linux-uclibc
-STRIP="$TOOLSPREFIX-strip --strip-debug --strip-unneeded"
-OBJCOPY="$TOOLSPREFIX-objcopy --strip-debug --strip-unneeded"
+STRIPOPT="-R .comment -R .note -g --strip-unneeded"
+STRIP="$TOOLSPREFIX-strip $STRIPOPT"
+OBJCOPY="$TOOLSPREFIX-objcopy $STRIPOPT"
 SSTRIP=./tools/sstrip/sstrip
 
 echo --------------------------------GENERATE CONFIG-----------------------------

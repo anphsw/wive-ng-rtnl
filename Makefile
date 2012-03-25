@@ -45,6 +45,7 @@ ROMFSDIR	= $(ROOTDIR)/romfs
 SCRIPTSDIR	= $(ROOTDIR)/config/scripts
 LINUX_CONFIG	= $(ROOTDIR)/$(LINUXDIR)/.config
 CONFIG_CONFIG	= $(ROOTDIR)/config/.config
+STRIPOPT	= -R .comment -R .note -g --strip-unneeded
 
 #NUM MAKE PROCESS = CPU NUMBER IN THE SYSTEM * CPU_OVERLOAD
 CPU_OVERLOAD	= 1
@@ -264,8 +265,8 @@ modules_install:
 		$(MAKEARCH_KERNEL) -C $(LINUXDIR) INSTALL_MOD_PATH=$(ROMFSDIR) DEPMOD="../user/busybox/examples/depmod.pl" modules_install; \
 		rm -f $(ROMFSDIR)/lib/modules/*/build; \
 		rm -f $(ROMFSDIR)/lib/modules/*/source; \
-		find $(ROMFSDIR)/lib/modules -type f -name '*.ko' | xargs -r $(STRIP) -R .comment -R .note -g --strip-unneeded; \
-		find $(ROMFSDIR)/lib/modules -type f -name '*.ko' -print -print | xargs -n2 -r $(OBJCOPY) --strip-debug --strip-unneeded; \
+		find $(ROMFSDIR)/lib/modules -type f -name '*.ko' | xargs -r $(STRIP) $(STRIPOPT); \
+		find $(ROMFSDIR)/lib/modules -type f -name '*.ko' -print -print | xargs -n2 -r $(OBJCOPY) $(STRIPOPT); \
 	fi
 
 .PHONY: romfs.post
