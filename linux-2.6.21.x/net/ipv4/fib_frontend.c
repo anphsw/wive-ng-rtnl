@@ -155,7 +155,7 @@ static inline unsigned __inet_dev_addr_type(const struct net_device *dev,
 	struct fib_result	res;
 	unsigned ret = RTN_BROADCAST;
 
-	if (ipv4_is_zeronet(addr) || ipv4_is_badclass(addr))
+	if (ipv4_is_zeronet(addr) || ipv4_is_lbcast(addr))
 		return RTN_BROADCAST;
 	if (ipv4_is_multicast(addr))
 		return RTN_MULTICAST;
