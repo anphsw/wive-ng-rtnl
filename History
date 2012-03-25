@@ -1023,6 +1023,7 @@
 20) Temporary back to 4.4.7 gcc in toolchain.<br>
 21) Fix xl2tp work with new kernels.<br>
 22) Update l2tp kernel module(speedup).<br>
+23) Make kernel sockopts compat with upstream.<br>
 
 <br><br>
 <b>For support see:</b><br>
