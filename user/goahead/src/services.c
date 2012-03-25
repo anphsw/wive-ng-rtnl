@@ -167,7 +167,7 @@ static int getDhcpCliList(int eid, webs_t wp, int argc, char_t **argv)
 	{
 		// Output structure
 		// Host
-		websWrite(wp, T("<tr><td>%s</td>"), lease.hostname);
+		websWrite(wp, T("<tr><td>%s&nbsp;</td>"), lease.hostname);
 		// MAC
 		websWrite(wp, T("<td id=\"dhclient_row%d_mac\">%02X"), rownum, lease.lease_mac[0]);
 		for (i = 1; i < 6; i++)
@@ -194,7 +194,9 @@ static int getDhcpCliList(int eid, webs_t wp, int argc, char_t **argv)
 		}
 		else
 			websWrite(wp, T("expired</td>"));
-		websWrite(wp, "<td><input id=\"dhclient_row%d\" type=\"checkbox\" onchange=\"toggleDhcpTable(this);\"></td>", rownum);
+		websWrite(wp, "<td id=\"dhclient_row%d_status\" style=\"align: center;\">"
+			"<input id=\"dhclient_row%d\" type=\"checkbox\" onchange=\"toggleDhcpTable(this);\"></td>",
+			rownum, rownum);
 		websWrite(wp, "</tr>\n");
 
 		rownum++;

@@ -60,11 +60,37 @@ function genIPTableData(form)
 function addIPItem(form)
 {
 	if (!validateMAC(form.dhcpStaticMAC.value, true))
+	{
+		Alert('You have entered invalid MAC address');
+		form.dhcpStaticMAC.focus();
 		return;
+	}
 	if (!validateIP(form.dhcpStaticIP, true))
+	{
+		Alert('You have entered invalid IP address');
+		form.dhcpStaticMAC.focus();
 		return;
-	dhcpList.push( [ form.dhcpStaticMAC.value, form.dhcpStaticIP.value ] );
-	genTable();
+	}
+	
+	addEntry(form.dhcpStaticMAC.value, form.dhcpStaticIP.value);
+}
+
+function addEntry(mac, ip)
+{
+	var index = findEntry(mac, null);
+	if (index < 0)
+	{
+		dhcpList.push( [ mac, ip ] );
+		genTable();
+	}
+	else
+	{
+		if (confirm('Do you want to overwrite existing record in static table for MAC address ' + mac + '?'))
+		{
+			dhcpList[index][1] = ip;
+			genTable();
+		}
+	}
 }
 
 function deleteIPItem(index)
@@ -224,7 +250,17 @@ function updateDhcpClientsList(element)
 		mac = mac.innerHTML;
 		
 		// Set-up checked value
-		rows[i].checked = (findEntry(mac, ip) > 0);
+		var index = findEntry(mac);
+		rows[i].checked = (index >= 0);
+		
+		var status = document.getElementById(id + '_status');
+		if (status != null)
+		{
+			if (index >= 0)
+				status.style.backgroundColor = (ip == dhcpList[index][1]) ? '#008000' : '#ff0000';
+			else
+				status.style.backgroundColor = 'inherit';
+		}
 	}
 }
 
@@ -246,7 +282,7 @@ function findEntry(mac, ip)
 	for (var i=0; i<dhcpList.length; i++)
 	{
 		var row = dhcpList[i];
-		if ((row[0] == mac) && (row[1] == ip))
+		if (row[0] == mac)
 			return i;
 	}
 	
@@ -277,11 +313,7 @@ function toggleDhcpTable(check)
 		if (!validateIP(ip, true))
 			return;
 
-		if (findEntry(mac, ip) < 0)
-		{
-			dhcpList.push( [ mac, ip ] );
-			genTable();
-		}
+		addEntry(mac, ip);
 	}
 	else // Remove item from list
 	{
