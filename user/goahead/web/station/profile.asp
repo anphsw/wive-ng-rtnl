@@ -24,6 +24,13 @@ var auth_modes = { <% getStaAuthModes(); %> };
 var encrypt_modes = { <% getStaEncryptModes(); %> };
 var active_status = '<% getActiveProfileStatus(); %>';
 
+var security = { // Auth mode :  [ Encryption modes ]
+	'-': [ 1 ], // NONE
+	'0': [ 1, 0 ], // OPEN: NONE, WEP
+	'4': [ 6, 4 ], // WPA: AES, TKIP
+	'7': [ 6, 4 ]  // WPA2: AES, TKIP
+};
+
 var colors = [
 	'ff0000', '00ff00', '0000ff', 'ffff00', '00ffff', 'ff00ff',
 	'c00000', '00c000', '0000c0', 'c0ff00', 'ffc000', 'c000ff',
@@ -92,7 +99,7 @@ function appendProfile(p)
 	tr({ 'id': 'rowHead' + p_id });
 		var style = {};
 		if ((p['staActive'] == '1') && (active_status != ''))
-			style = { 'style' : 'background-color: #' + ((active_status) == '1' ? '008000' : 'ff0000' )};
+			style = { 'style' : 'background-color: #' + ((active_status) == '1' ? '3da42c' : 'dd3b3b' )};
 		
 		td(style, '<input type="radio" id="staActive' + p_id + '" name="staActive" value="' + p_id + '">');
 		td(n, '<span style="cursor: pointer; color: #0000ff;" id="staMore' + p_id + '" onclick="triggerStaDetails(' + p_id + ');"></span>&nbsp;' +
@@ -102,13 +109,12 @@ function appendProfile(p)
 		td(n, '<select id="staChannel' + p_id + '">' +
 			'<option value="0" selected>Auto</option>' +
 			'</select>');
-		td(n, '<td><select id="staAuth' + p_id + '" onchange="staAuthChange(this, ' + p_id + ')">' +
+		td(n, '<td><select id="staAuth' + p_id + '" onchange="staAuthChange(' + p_id + ')">' +
 			'<option value="0" selected>OPEN</option>' +
-			'<option value="1">SHARED</option>' +
-			'<option value="4">WPA-Personal</option>' +
-			'<option value="7">WPA2-Personal</option>' +
+			'<option value="4">WPA</option>' +
+			'<option value="7">WPA2</option>' +
 			'</select>');
-		td(n, '<span id="staEncrypt' + p_id + '">&nbsp;</span>');
+		td(n, '<select id="staEncrypt' + p_id + '" onchange="staEncryptChange(' + p_id + ');">&nbsp;</select>');
 //		td(n, '<select id="staNetworkType' + p_id + '">' +
 //			'<option value="0" selected>802.11 Ad Hoc</option>' +
 //			'<option value="1">Infrastructure</option>' +
@@ -169,24 +175,34 @@ function appendProfile(p)
 	// WPA/WPA2 configuration
 	tr( { 'id': 'rowWpaHeader' + p_id });
 		td( { 'class': 'title', 'colspan': 6 }, 'Wireless Protected Access (WPA1, WPA2)');
-	tr( { 'id': 'rowWpaCipher' + p_id });
-		td( { 'class': 'head', 'colspan': 1 }, 'WPA Algorithms');
-		td( { 'colspan': 5 }, '<select id="staCipher' + p_id + '" onchange="staCipherChange(' + p_id + ')">' +
-			'<option value="4" selected>TKIP</option>' +
-			'<option value="6">AES</option>' +
-			'</select>');
 	tr( { 'id': 'rowWpaPsk' + p_id });
 		td( { 'class': 'head', 'colspan': 1 }, 'WPA Pass Phrase');
 		td( { 'colspan': 5 }, '<input type="password" id="staWpaPsk' + p_id + '" >');
+}
+
+function setupEncryption(p)
+{
+	var p_id = p['html_id'];
+	var ex = function(id) { return document.getElementById(id + p_id); };
+	
+	// Get auth & encryption controls
+	var enc = ex('staEncrypt');
+	var auth = ex('staAuth');
+
+	// Fill-up encryption control
+	enc.options.length = 0;
+	var sec = security[auth.value];
+	if (sec == null)
+		sec = security['-'];
+	for (var i=0; i<sec.length; i++)
+		enc.options.add(new Option(encrypt_modes[sec[i]], sec[i]));
 }
 
 function fillTable(p)
 {
 	// Fill table body
 	var p_id = p['html_id'];
-
-	var ei = function(id) { return id + p_id; };
-	var ex = function(id) { return document.getElementById(ei(id)); };
+	var ex = function(id) { return document.getElementById(id + p_id); };
 	
 	// Main rows
 	var visibleRows = [];
@@ -196,8 +212,10 @@ function fillTable(p)
 	ex('staSSID').value = p['staSSID'];
 	ex('staChannel').value = p['staChannel'];
 	ex('staAuth').value = p['staAuth'];
-//	ex('staEncrypt').value = p['staEncrypt'];
-//	ex('staNetworkType').value = p['staNetworkType'];
+	
+	setupEncryption(p);
+	ex('staEncrypt').value = p['staEncrypt'];
+	
 	ex('staPSMode').value = p['staPSMode'];
 	ex('staRTS').value = (p['staRTS']*1 > 0) ? p['staRTS'] : 2347;
 	ex('staFragment').value = (p['staFragment']*1 > 0) ? p['staFragment'] : 2346;
@@ -215,9 +233,6 @@ function fillTable(p)
 	}
 	
 	// WPA
-	var encr = encrypt_modes[p['staEncrypt']];
-	if ((p['staAuth'] == '4') || (p['staAuth'] == '7'))
-		ex('staCipher').value = p['staEncrypt'];
 	ex('staWpaPsk').value = p['staWpaPsk'];
 }
 
@@ -227,9 +242,9 @@ function deleteProfile(id)
 	if (p == null)
 		return;
 	
-	var ei = function(xid) { return xid + p['html_id']; };
-	var ex = function(id) { return document.getElementById(ei(id)); };
+	var ex = function(id) { return document.getElementById(id + p['html_id']); };
 	var p_name = ex('staProfile').value;
+
 	if (confirm('Do you really want to delete profile "' + p_name + '"?'))
 	{
 		for (var i=0; i<p['trows'].length; i++)
@@ -249,15 +264,16 @@ function deleteProfile(id)
 	}
 }
 
-function staAuthChange(sender, id)
+function staAuthChange(id)
 {
 	var p = profileById(id);
 	if (p == null)
 		return;
+	setupEncryption(p);
 	showStaDetails(p);
 }
 
-function staCipherChange(id)
+function staEncryptChange(id)
 {
 	var p = profileById(id);
 	if (p == null)
@@ -290,25 +306,19 @@ function showStaDetails(p)
 	rows[ei('rowRTS')] = det;
 	rows[ei('rowFragment')] = det;
 	
-	var enc_mode = '0';
-	var wep_on = ((vl('staAuth') == '0') || (vl('staAuth') == '1'));
+	var wep_on = ((vl('staAuth') == '0') && (vl('staEncrypt') == '0'));
 	var wpa_on = ((vl('staAuth') == '4') || (vl('staAuth') == '7'));
 	
 	rows[ei('rowWepHeader')] = det && wep_on;
 	rows[ei('rowWepDescription')] = det && wep_on;
 	for (var key=1; key<=4; key++)
 		rows[ei('rowWepKey' + key)] = det && wep_on;
-	if (wep_on)
-		enc_mode = (vl('staAuth') == '0') ? '0' : '1';
 
 	rows[ei('rowWpaHeader')] = det && wpa_on;
-	rows[ei('rowWpaCipher')] = det && wpa_on;
 	rows[ei('rowWpaPsk')] = det && wpa_on;
-	if (wpa_on)
-		enc_mode = vl('staCipher');
-	
+
 	// Encryption
-	ex('staEncrypt').innerHTML = encrypt_modes[enc_mode];
+//	ex('staEncrypt').innerHTML = encrypt_modes[enc_mode];
 
 	// Show/hide elements
 	var visible = 0;
@@ -363,7 +373,7 @@ function createProfile()
 	p['staRTS'] = 2347;
 	p['staFragment'] = 2346;
 	p['staAuth'] = 0;
-	p['staEncrypt'] = 0;
+	p['staEncrypt'] = 1;
 	p['staKeyDefaultId'] = 1;
 	p['staKey1Type'] = 0;
 	p['staKey2Type'] = 0;
@@ -478,16 +488,11 @@ function updateProfiles(form)
 		}
 		p['staFragment'] = vl('staFragment');
 		
-		var wep_on = ((vl('staAuth') == '0') || (vl('staAuth') == '1'));
+		var wep_on = ((vl('staAuth') == '0') && (vl('staEncrypt') == '0'));
 		var wpa_on = ((vl('staAuth') == '4') || (vl('staAuth') == '7'));
-		var enc_mode = '0';
-		if (wep_on)
-			enc_mode = (vl('staAuth') == '0') ? '0' : '1';
-		if (wpa_on)
-			enc_mode = vl('staCipher');
 		
 		p['staAuth'] = vl('staAuth');
-		p['staEncrypt'] = enc_mode;
+		p['staEncrypt'] = vl('staEncrypt');
 		p['staKeyDefaultId'] = 1;
 		
 		// Keys
@@ -570,9 +575,6 @@ function updateProfiles(form)
 		p['sta8021xPrivateKeyPassword'] = 0;
 		p['sta8021xCACert'] = 0;
 		p['staActive'] = (ex('staActive').checked) ? 1 : 0;
-
-		if (ex('staActive').checked)
-			form.staActiveProfile.value = i+1;
 	}
 	
 	return true;
@@ -634,7 +636,7 @@ function genStaTable()
 	{
 		var row = bssid_list[i];
 		var color = colors[i % colors.length];
-		var style = (row[0] == 1) ? ' style="color: #ffffff; background-color: #008000;">' : '>'; // Category
+		var style = (row[0] == 1) ? ' style="color: #ffffff; background-color: #3da42c;">' : '>'; // Category
 		var sel = (row[0] == 1) ? ' checked' : '';
 
 		html += '<tr' + style;
@@ -903,7 +905,10 @@ function createSurveyProfile()
 	}
 
 	// Encryption
-	p['staCipher'] = (g_encry.indexOf("TKIP") >= 0) ? 4 : 6;
+	if (p['staAuth'] == '0') // OPEN
+		p['staEncrypt'] = (g_encry.indexOf("WEP") >= 0) ? 0 : 1;
+	else
+		p['staEncrypt'] = (g_encry.indexOf("TKIP") >= 0) ? 4 : 6;
 	
 	// Add profile to list
 	addProfile(p);
@@ -952,7 +957,7 @@ function createSurveyProfile()
 			<tr>
 				<td>
 					<input type="button" value="Add profile" onclick="addProfile();" >
-					<input type="submit" value="Update configuration" >
+					<input type="submit" value="Save &amp; Activate Profile" >
 				</td>
 			</tr>
 		</table>
@@ -994,8 +999,6 @@ function createSurveyProfile()
 		<input type="hidden" name="sta8021xPrivateKeyPassword" value="<% getCfgGeneralHTML(1, "sta8021xPrivateKeyPassword"); %>" > <!-- 802.1 Private key password -->
 		<input type="hidden" name="sta8021xCACert" value="<% getCfgGeneralHTML(1, "sta8021xCACert"); %>" > <!-- 802.1 CA Cert Path -->
 		<input type="hidden" name="staActive" value="<% getCfgGeneralHTML(1, "staActive"); %>" > <!-- STA active -->
-
-		<input type="hidden" name="staActiveProfile" value="0" > <!-- Active STA profile -->
 	</form>
 </div>
 

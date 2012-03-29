@@ -257,7 +257,7 @@ function updateDhcpClientsList(element)
 		if (status != null)
 		{
 			if (index >= 0)
-				status.style.backgroundColor = (ip == dhcpList[index][1]) ? '#008000' : '#ff0000';
+				status.style.backgroundColor = (ip == dhcpList[index][1]) ? '#3da42c' : '#dd3b3b';
 			else
 				status.style.backgroundColor = 'inherit';
 		}

@@ -54,7 +54,7 @@ function showValue(value)
 
 function showPolicy(policy)
 {
-	var color = (policy == '1') ? '#008000' : '#ff0000';
+	var color = (policy == '1') ? '#3da42c' : '#dd3b3b';
 	var text  = (policy == '1') ? 'accept' : 'drop';
 	
 	return '<td rowspan="2" style="color: ' + color + ';">' + text + '</td>';

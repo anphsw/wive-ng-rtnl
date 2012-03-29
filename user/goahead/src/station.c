@@ -2464,70 +2464,71 @@ void initStaConnection(void)
 		error(E_L, E_LOG, T("Set OID_802_11_ENCRYPTION_STATUS has error =%d, encry=%d"), ret, p->Encryption);
 
 	// WEP
-	if (p->Encryption == Ndis802_11WEPEnabled)
+	if (p->Authentication == Ndis802_11AuthModeOpen)
 	{
-		printf("Authentication is WEP\n");
-	
-		// Initialize array of WEP keys
-		char *wep_keys[4];
-		wep_keys[0] = (char *)p->Key1;
-		wep_keys[1] = (char *)p->Key2;
-		wep_keys[2] = (char *)p->Key3;
-		wep_keys[3] = (char *)p->Key4;
-	
-		// For each WEP key
-		for (i=0; i<4; i++)
+		if (p->Encryption == Ndis802_11WEPEnabled)
 		{
-			//printf("WEP key[%d]=%s\n", i, wep_keys[i]);
+			// Initialize array of WEP keys
+			char *wep_keys[4];
+			wep_keys[0] = (char *)p->Key1;
+			wep_keys[1] = (char *)p->Key2;
+			wep_keys[2] = (char *)p->Key3;
+			wep_keys[3] = (char *)p->Key4;
+	
+			// For each WEP key
+			for (i=0; i<4; i++)
+			{
+				//printf("WEP key[%d]=%s\n", i, wep_keys[i]);
 		
-			int nKeyLen = strlen(wep_keys[i]);
-			if (nKeyLen == 0)
-			{
-				NDIS_802_11_REMOVE_KEY removeKey;
+				int nKeyLen = strlen(wep_keys[i]);
+				if (nKeyLen == 0)
+				{
+					NDIS_802_11_REMOVE_KEY removeKey;
 				
-				removeKey.Length = sizeof(NDIS_802_11_REMOVE_KEY);
-				removeKey.KeyIndex = 0;
-				for (j = 0; j < 6; j++)
-					removeKey.BSSID[j] = 0xff;
-				ret = OidSetInformation(OID_802_11_REMOVE_KEY, s, "ra0", &removeKey, removeKey.Length);
-				if (ret < 0)
-					error(E_L, E_LOG, T("Set OID_802_11_REMOVE_KEY has error =%d"), ret);
-			}
-			else if (strcmp(wep_keys[i], "0") != 0)
-			{
-				int wep_key_len = nKeyLen;
-				if (wep_key_len == 10)
-					wep_key_len = 5;
-				else if (wep_key_len == 26)
-					wep_key_len = 13;
+					removeKey.Length = sizeof(NDIS_802_11_REMOVE_KEY);
+					removeKey.KeyIndex = 0;
+					for (j = 0; j < 6; j++)
+						removeKey.BSSID[j] = 0xff;
+					ret = OidSetInformation(OID_802_11_REMOVE_KEY, s, "ra0", &removeKey, removeKey.Length);
+					if (ret < 0)
+						error(E_L, E_LOG, T("Set OID_802_11_REMOVE_KEY has error =%d"), ret);
+				}
+				else if (strcmp(wep_keys[i], "0") != 0)
+				{
+					int wep_key_len = nKeyLen;
+					if (wep_key_len == 10)
+						wep_key_len = 5;
+					else if (wep_key_len == 26)
+						wep_key_len = 13;
 
-				int lBufLen = sizeof(NDIS_802_11_WEP) + nKeyLen + 1;
-				// Allocate Resource
-				PNDIS_802_11_WEP pWepKey = (PNDIS_802_11_WEP)malloc(lBufLen);
-				bzero(pWepKey, lBufLen);
-				pWepKey->Length    = lBufLen - 2;
-				pWepKey->KeyLength = wep_key_len;
-				pWepKey->KeyIndex  = i;
+					int lBufLen = sizeof(NDIS_802_11_WEP) + nKeyLen + 1;
+					// Allocate Resource
+					PNDIS_802_11_WEP pWepKey = (PNDIS_802_11_WEP)malloc(lBufLen);
+					bzero(pWepKey, lBufLen);
+					pWepKey->Length    = lBufLen - 2;
+					pWepKey->KeyLength = wep_key_len;
+					pWepKey->KeyIndex  = i;
 
-				if (p->KeyDefaultId == (i+1))
-					pWepKey->KeyIndex |= 0x80000000;
+					if (p->KeyDefaultId == (i+1))
+						pWepKey->KeyIndex |= 0x80000000;
 
-				if (nKeyLen == 5)
-					memcpy(pWepKey->KeyMaterial, wep_keys[i], 5);
-				else if (nKeyLen == 10)
-					AtoH(wep_keys[i], pWepKey->KeyMaterial, 5);
-				else if (nKeyLen == 13)
-					memcpy(pWepKey->KeyMaterial, wep_keys[i], 13);
-				else if (nKeyLen == 26)
-					AtoH(wep_keys[i], pWepKey->KeyMaterial, 13);
+					if (nKeyLen == 5)
+						memcpy(pWepKey->KeyMaterial, wep_keys[i], 5);
+					else if (nKeyLen == 10)
+						AtoH(wep_keys[i], pWepKey->KeyMaterial, 5);
+					else if (nKeyLen == 13)
+						memcpy(pWepKey->KeyMaterial, wep_keys[i], 13);
+					else if (nKeyLen == 26)
+						AtoH(wep_keys[i], pWepKey->KeyMaterial, 13);
 				
-				//printf("Setup key[%d]: key_len=%d, wep_len=%d, value=%s, index=%x, length=%d \n",
-				//	i, nKeyLen, wep_key_len, pWepKey->KeyMaterial, pWepKey->KeyIndex, pWepKey->Length);
+					//printf("Setup key[%d]: key_len=%d, wep_len=%d, value=%s, index=%x, length=%d \n",
+					//	i, nKeyLen, wep_key_len, pWepKey->KeyMaterial, pWepKey->KeyIndex, pWepKey->Length);
 
-				OidSetInformation(OID_802_11_ADD_WEP, s, "ra0", pWepKey, pWepKey->Length);
-				free(pWepKey);
-			}
-		} // end WEP key cycle
+					OidSetInformation(OID_802_11_ADD_WEP, s, "ra0", pWepKey, pWepKey->Length);
+					free(pWepKey);
+				}
+			} // end WEP key cycle
+		} // WEP encryption
 	}
 	else if ((p->Authentication == Ndis802_11AuthModeWPAPSK) || 
 		(p->Authentication == Ndis802_11AuthModeWPA2PSK) ||
@@ -2691,17 +2692,16 @@ typedef struct auth_modes_t
 
 const auth_modes_t authModes[] =
 {
-	{ Ndis802_11AuthModeOpen, "OPEN" },
-	{ Ndis802_11AuthModeShared, "SHARED" },
-	{ Ndis802_11AuthModeWPAPSK, "WPA-PSK" },
-	{ Ndis802_11AuthModeWPA2PSK, "WPA2-PSK" },
-	{ Ndis802_11AuthModeWPANone, "WPA-NONE" },
-	{ Ndis802_11AuthModeWPA, "WPA" },
-	{ Ndis802_11AuthModeWPA2, "WPA2" },
-	{ Ndis802_11AuthModeMax, "OPEN" },
-	{ Ndis802_11AuthModeAutoSwitch, "AUTO" },
-	{ Ndis802_11AuthModeWPA1WPA2, "WPA, WPA2" },
-	{ Ndis802_11AuthModeWPA1PSKWPA2PSK, "WPA-PSK, WPA2-PSK" },
+	{ Ndis802_11AuthModeOpen, "OPEN" }, // 0
+	{ Ndis802_11AuthModeShared, "SHARED" }, // 1
+	{ Ndis802_11AuthModeAutoSwitch, "AUTO" }, // 2
+	{ Ndis802_11AuthModeWPA, "WPA" }, // 3
+	{ Ndis802_11AuthModeWPAPSK, "WPA-PSK" }, // 4
+	{ Ndis802_11AuthModeWPANone, "WPA-NONE" }, // 5
+	{ Ndis802_11AuthModeWPA2, "WPA2" }, // 6
+	{ Ndis802_11AuthModeWPA2PSK, "WPA2-PSK" }, // 7
+	{ Ndis802_11AuthModeWPA1WPA2, "WPA, WPA2" }, // 8
+	{ Ndis802_11AuthModeWPA1PSKWPA2PSK, "WPA-PSK, WPA2-PSK" }, // 9
 	{ -1, NULL }
 };
 

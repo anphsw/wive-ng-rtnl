@@ -61,7 +61,7 @@ tcpmss_mangle_packet(struct sk_buff **pskb,
 	tcplen = (*pskb)->len - tcphoff;
 	tcph = (struct tcphdr *)(skb_network_header(*pskb) + tcphoff);
 
-	/* Header cannot be larger than the packet */                                                                                       
+	/* Header cannot be larger than the packet */
 	if (tcplen < tcph->doff*4)
 		return -1;
 

@@ -1,5 +1,4 @@
 # For sadko
-) Need fix new profile code to work without encryptions and cleanup ap encryptions option code.
 ) Need rewrite QoS page (remove ralink QoS and add new types QoS).
 ) Add /proc/rt3052/esw_cnt for traffic statistic per switch port.(need add in WebUI).
 
