@@ -9,9 +9,14 @@
 #include <arpa/inet.h>
 
 #ifdef WITH_LIBUUID
+#ifdef __FreeBSD__
+#include <uuid.h>
+#else
 #include <uuid/uuid.h>
-#endif
+#endif /* __FreeBSD__ */
+#endif /* WITH_LIBUUID */
 
+#include <netinet/in.h>
 #include <netdb.h>
 #include <sys/ioctl.h>
 #include <net/if.h>
@@ -19,7 +24,10 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <err.h>
+#include <errno.h>
 #include "mem.h"
+#include "compat.h"
 
 namespace mcast
 {
@@ -35,11 +43,22 @@ void mcast::uuid_init(void)
 void mcast::uuid_gen(char* dst)
 {
 #ifdef WITH_LIBUUID
+#ifdef __FreeBSD__
+    uuid_t uuid;
+    char *p;
+
+    uuid_create(&uuid, NULL);
+    uuid_to_string(&uuid, &p, NULL);
+    snprintf(dst, 48, "%s", p);
+    free(p);
+#else
     uuid_t uuid;
     uuid_generate(uuid);
 
     uuid_unparse_lower(uuid,dst);
-#else
+#endif /* __FreeBSD__ */
+
+#else /* WITH_LIBUUID */
     u_int16_t t[8];
 
     int n=0;
@@ -75,7 +94,12 @@ int mcast::get_if_info(const char* if_name,if_info* ifi)
     if(s!=-1)
     {
         ifreq ifr;
+
+#ifdef __FreeBSD__
+        snprintf(ifr.ifr_name,IFNAMSIZ,"%s",if_name);
+#else
         snprintf(ifr.ifr_ifrn.ifrn_name,IFNAMSIZ,"%s",if_name);
+#endif /* __FreeBSD__ */
 
         snprintf(ifi->if_name,IF_NAME_LEN,"%s",if_name);
 
@@ -134,7 +158,13 @@ int mcast::get_if_list(if_info* ifi,int nifi)
                     n=nifi;
 
                 for(int i=0;i<n;i++)
+                {
+#ifdef __FreeBSD__
+                    get_if_info(ifr[i].ifr_name,ifi+i);
+#else
                     get_if_info(ifr[i].ifr_ifrn.ifrn_name,ifi+i);
+#endif /* __FreeBSD__ */
+                }
             }
 
             FREE(ifr);
@@ -205,10 +235,16 @@ int mcast::mcast_grp::init(const char* addr,const char* iface,int ttl,int loop)
     mcast_sin.sin_family=AF_INET;
     mcast_sin.sin_port=0;
     mcast_sin.sin_addr.s_addr=INADDR_ANY;
+#ifdef __FreeBSD__
+    mcast_sin.sin_len=sizeof(mcast_sin);
+#endif /* __FreeBSD__ */
 
     mcast_if_sin.sin_family=AF_INET;
     mcast_if_sin.sin_port=0;
     mcast_if_sin.sin_addr.s_addr=INADDR_ANY;
+#ifdef __FreeBSD__
+    mcast_if_sin.sin_len=sizeof(mcast_if_sin);
+#endif /* __FreeBSD__ */
 
     *interface=0;
 
@@ -275,6 +311,9 @@ int mcast::mcast_grp::join(void) const
         sin.sin_family=AF_INET;
         sin.sin_port=mcast_sin.sin_port;
         sin.sin_addr.s_addr=INADDR_ANY;
+#ifdef __FreeBSD__
+        sin.sin_len=sizeof(sin);
+#endif /* __FreeBSD__ */
 
         int reuse=1;
         setsockopt(sock,SOL_SOCKET,SO_REUSEADDR,&reuse,sizeof(reuse));
@@ -353,6 +392,9 @@ int mcast::mcast_grp::upstream(void) const
         sin.sin_family=AF_INET;
         sin.sin_addr.s_addr=mcast_if_sin.sin_addr.s_addr;
         sin.sin_port=0;
+#ifdef __FreeBSD__
+        sin.sin_len=sizeof(sin);
+#endif /* __FreeBSD__ */
         bind(sock,(sockaddr*)&sin,sizeof(sin));
 
         if(verb_fp)
@@ -395,6 +437,9 @@ int mcast::mcast_grp::send(int sock,const char* buf,int len,const char* to) cons
         sin.sin_family=AF_INET;
         sin.sin_addr.s_addr=inet_addr(tmp);
         sin.sin_port=htons(atoi(p));
+#ifdef __FreeBSD__
+        sin.sin_len=sizeof(sin);
+#endif /* __FreeBSD__ */
     }
 
     int n=sendto(sock,buf,len,0,(sockaddr*)(to?&sin:&mcast_sin),sizeof(sockaddr_in));
@@ -460,6 +505,9 @@ int mcast::create_tcp_listener(int port)
         sin.sin_family=AF_INET;
         sin.sin_addr.s_addr=INADDR_ANY;
         sin.sin_port=htons(port);
+#ifdef __FreeBSD__
+        sin.sin_len=sizeof(sin);
+#endif /* __FreeBSD__ */
 
         if(!bind(s,(sockaddr*)&sin,sizeof(sin)))
         {

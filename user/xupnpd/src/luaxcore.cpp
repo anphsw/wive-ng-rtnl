@@ -28,14 +28,12 @@
 #include <netinet/tcp.h>
 #include <netdb.h>
 #include <ctype.h>
-
+#include "compat.h"
 
 // TODO: m3u tree by group-title (grp/subgrp1/subgrp2 => reload_playlists)
-// TODO: local media tree (lua_m3u_scan)
+// TODO: sendfile
 // TODO: sendurl alarm?
-// TODO: schedule
 // TODO: XBox 360
-// TODO: tvigle.ru, narkom.su, kinobaza.tv
 // TODO: RTSP/RTP, RTMP, MMS
 // !!! TODO: RTP to builtin udpxy
 // http://www.gupnp.org

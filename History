@@ -1013,7 +1013,7 @@
 10) Small net fixes backport.<br>
 11) WebUI not build wsc support if WSC daemon disabled.<br>
 12) Fix pmtu discovery probe (re add lost patch).<br>
-13) Update xupnpd to r296 version.<br>
+13) Update xupnpd to r301 version.<br>
 14) Revert incorrect accept queue backlog changes.<br>
 15) Add some videoturbine parametrs to default nvram base.<br>
 16) Some fixes in af_unix.<br>

@@ -32,7 +32,7 @@ function playlist_new_folder(parent,name)
     parent.size=parent.size+1
     child.name=name
     child.objid=parent.objid..'/'..parent.size
-    child.id=parent.size
+--    child.id=parent.size
     child.parent=parent
     child.size=0
     child.elements={}
@@ -40,10 +40,30 @@ function playlist_new_folder(parent,name)
     return child
 end
 
+function playlist_fix_sub_tree(pls)
+    for i,j in ipairs(pls.elements) do
+--        j.id=i
+        j.objid=pls.objid..'/'..i
+        j.parent=pls
+
+        if j.elements then
+            playlist_fix_sub_tree(j)
+        else
+            j.type=util.getfext(j.url)
+
+            local m=mime[j.type]
+            if not m then j.type=cfg.default_mime_type m=mime[j.type] end
+            j.mime=m
+            j.dlna_extras=m[5]
+        end
+
+    end
+end
+
 function playlist_attach(parent,pls)
     parent.size=parent.size+1
     pls.objid=parent.objid..'/'..parent.size
-    pls.id=parent.size
+--    pls.id=parent.size
     pls.parent=parent
     parent.elements[parent.size]=pls
 end
@@ -66,8 +86,6 @@ function reload_playlists()
         pls_folder=playlist_new_folder(playlist_data,'Playlists')
     end
 
-    local folder=nil
-
     local groups={}
 
     for i,j in ipairs(plist) do
@@ -76,21 +94,28 @@ function reload_playlists()
 
         if type(j)=='table' then
 
-            if string.find(j[1],'%.m3u$') then pls=m3u.parse(j[1]) folder=pls_folder else pls=m3u.scan(j[1]) folder=playlist_data end
+            if string.find(j[1],'%.m3u$') then pls=m3u.parse(j[1]) else pls=m3u.scan(j[1]) end
 
             if pls then
                 if j[2] then pls.name=j[2] end
                 if j[3] then pls.acl=j[3] end
             end
         else
-            if string.find(j,'%.m3u$') then pls=m3u.parse(j) folder=pls_folder else pls=m3u.scan(j) folder=playlist_data end
+            if string.find(j,'%.m3u$') then pls=m3u.parse(j) else pls=m3u.scan(j) end
         end
 
         if pls then
-            playlist_attach(folder,pls)
+            if pls.filesystem then
+                playlist_attach(playlist_data,pls)
+            else
+                playlist_attach(pls_folder,pls)
+            end
 
             if cfg.debug>0 then print('playlist \''..pls.name..'\'') end
 
+            if pls.filesystem then
+                playlist_fix_sub_tree(pls)
+            else
             local udpxy=nil
             if cfg.udpxy_url then udpxy=cfg.udpxy_url..'/udp/' end
 
@@ -122,9 +147,8 @@ function reload_playlists()
                 end
 
                 jj.objid=pls.objid..'/'..ii
-
                 jj.parent=pls
-
+--                    jj.id=ii
                 if cfg.debug>1 then print('\''..jj.name..'\' '..jj.url..' <'..jj.mime[3]..'>') end
 
                 if cfg.group==true then
@@ -147,7 +171,7 @@ function reload_playlists()
                         group.elements[group.size]=element
                     end
                 end
-
+                end
             end
         end
     end
