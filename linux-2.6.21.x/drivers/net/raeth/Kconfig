@@ -93,7 +93,6 @@ config  GE1_RVMII_FORCE_100
 config  GE1_RGMII_FORCE_1000
         bool "RGMII_FORCE_1000 (GigaSW, CPU)"
         depends on (RALINK_RT2880 || RALINK_RT3883)
-	select RALINK_SPI
 
 config  GE1_RGMII_AN
         bool "RGMII_AN (GigaPhy)"
@@ -158,7 +157,6 @@ config  GE2_RVMII_FORCE_100
 config  GE2_RGMII_FORCE_1000
         bool "RGMII_FORCE_1000 (GigaSW, CPU)"
         depends on RAETH_GMAC2
-	select RALINK_SPI
 
 config  GE2_RGMII_AN
         bool "RGMII_AN (GigaPhy)"

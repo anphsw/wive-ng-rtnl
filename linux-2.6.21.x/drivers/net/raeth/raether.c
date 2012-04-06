@@ -2057,20 +2057,13 @@ void ra2880_setup_dev_fptable(struct net_device *dev)
 	dev->mtu                = DEFAULT_MTU;
 	dev->do_ioctl		= ei_ioctl;
 	dev->tx_timeout		= ei_tx_timeout;
-
 #ifdef CONFIG_RAETH_NAPI
-	dev->poll = &raeth_clean;
-#if defined(CONFIG_BRIDGE_FASTPATH)
-	dev->weight = 64;
-#elif defined (CONFIG_RAETH_ROUTER) || defined (CONFIG_RT_3052_ESW)
-	dev->weight = 32;
-#else
-	dev->weight = 128;
-#endif
+	dev->poll		= &raeth_clean;
+	dev->weight		= DEV_WEIGHT;
 #endif
 #endif
 
-#if defined (CONFIG_ETHTOOL)
+#ifdef CONFIG_ETHTOOL
 	dev->ethtool_ops	= &ra_ethtool_ops;
 #endif
 	dev->watchdog_timeo	= TX_TIMEOUT;
