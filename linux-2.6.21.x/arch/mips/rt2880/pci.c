@@ -119,22 +119,6 @@ static int config_access(unsigned char access_type, struct pci_bus *bus,
   u8 func = PCI_FUNC(devfn);
   uint32_t address_reg, data_reg;
   unsigned int address;
-#if 0
-  //if (bus->number==2){
-	  /*
-  	unsigned int i, val;
-	for(i=0;i<16;i++){
-	read_config(0, 0, 0, i<<2, &val);
-	printk("P2P(PCIe0) 0x%02x = %08x\n", i<<2, val);
-	}
-	for(i=0;i<16;i++){
-	read_config(0, 1, 0, i<<2, &val);
-	printk("P2P(PCIe1) 0x%02x = %08x\n", i<<2, val);
-	}
-	*/
-  printk("***[try]%x->[%x][%x][%x][%x]=%x\n",access_type,bus->number, slot, func, where, *data);
-  //}
-#endif
   address_reg = RALINK_PCI_CONFIG_ADDR;
   data_reg = RALINK_PCI_CONFIG_DATA_VIRTUAL_REG;
 
@@ -174,9 +158,11 @@ static int config_access(unsigned char access_type, struct pci_bus *bus,
     printk("no specify access type\n");
     break;
   }
-  //if (bus->number==2){
-  //printk("***[done]%x->[%x][%x][%x][%x]=%x\n",access_type,bus->number, slot, func, where, *data);
-  //}
+#if 0
+  if (bus->number==1&&where==0x30){
+  printk("%x->[%x][%x][%x][%x]=%x\n",access_type,bus->number, slot, func, where, *data);
+  }
+#endif
   return 0;
 }
 
@@ -492,8 +478,6 @@ int __init pcibios_map_irq(struct pci_dev *dev, u8 slot, u8 pin)
 #if defined(CONFIG_RALINK_RT3883)
   if((dev->bus->number ==0) && (slot == 0)) {
 	RALINK_PCI0_BAR0SETUP_ADDR = 0x03FF0001;	//open 3FF:64M; ENABLE
-	RALINK_PCI0_BAR0SETUP_ADDR = 0x03FF0001;	//open 3FF:64M; ENABLE
-	RALINK_PCI1_BAR0SETUP_ADDR = 0x03FF0001;	//open 3FF:64M; ENABLE
 	RALINK_PCI1_BAR0SETUP_ADDR = 0x03FF0001;	//open 3FF:64M; ENABLE
   	write_config(0, 0, 0, PCI_BASE_ADDRESS_0, MEMORY_BASE);
   	read_config(0, 0, 0, PCI_BASE_ADDRESS_0, &val);
@@ -502,37 +486,48 @@ int __init pcibios_map_irq(struct pci_dev *dev, u8 slot, u8 pin)
    	res = &dev->resource[0];
     	res->start = MEMORY_BASE;
     	res->end   = MEMORY_BASE + 0x01ffffff;
+#if 0
 	for(i=0;i<16;i++){
 	read_config(0, 0, 0, i<<2, &val);
 	printk("P2P(PCI) 0x%02x = %08x\n", i<<2, val);
 	}
+#endif
   	irq = 0;
   }else if((dev->bus->number ==0) && (slot == 0x1)){
 	write_config(0, 1, 0, 0x1c, 0x00000101);
+	printk("bus=0, slot = 0x%x\n", slot);
+#if 0
 	for(i=0;i<16;i++){
 	read_config(0, 1, 0, i<<2, &val);
 	printk("P2P(PCIe)  0x%02x = %08x\n", i<<2, val);
 	}
+#endif
   }else if((dev->bus->number ==0) && (slot == 0x11)){
  	printk("bus=0, slot = 0x%x\n", slot);
+#if 0
 	for(i=0;i<16;i++){
 	read_config(0, 0x11, 0, i<<2, &val);
 	printk("dev I(PCI)  0x%02x = %08x\n", i<<2, val);
 	}
+#endif
 	irq = 2;
   }else if((dev->bus->number ==0) && (slot == 0x12)){
  	printk("bus=0, slot = 0x%x\n", slot);
+#if 0
 	for(i=0;i<16;i++){
 	read_config(0, 0x12, 0, i<<2, &val);
 	printk("dev II(PCI)  0x%02x = %08x\n", i<<2, val);
 	}
+#endif
 	irq = 15;
   }else if((dev->bus->number ==1) ){
  	printk("bus=1, slot = 0x%x\n", slot);
+#if 0
 	for(i=0;i<16;i++){
 	read_config(1, 0, 0, i<<2, &val);
 	printk("dev III(PCIe)  0x%02x = %08x\n", i<<2, val);
 	}
+#endif
 	irq = 16;
   }else{
   	return 0;
@@ -548,7 +543,7 @@ int __init pcibios_map_irq(struct pci_dev *dev, u8 slot, u8 pin)
    	res = &dev->resource[0];
     	res->start = MEMORY_BASE;
     	res->end   = MEMORY_BASE + 0x03ffffff;
-  	//dev->irq = RALINK_INT_PCIE0;
+  	//irq = RALINK_INT_PCIE0;
 #if 0
 	for(i=0;i<16;i++){
 	read_config(0, 0, 0, i<<2, &val);
@@ -565,7 +560,7 @@ int __init pcibios_map_irq(struct pci_dev *dev, u8 slot, u8 pin)
    	res = &dev->resource[0];
     	res->start = MEMORY_BASE;
     	res->end   = MEMORY_BASE + 0x03ffffff;
-  	//dev->irq = RALINK_INT_PCIE1;
+  	//irq = RALINK_INT_PCIE1;
 #if 0
 	for(i=0;i<16;i++){
 	read_config(0, 1, 0, i<<2, &val);
@@ -574,13 +569,13 @@ int __init pcibios_map_irq(struct pci_dev *dev, u8 slot, u8 pin)
 #endif
   }else if((dev->bus->number ==1) && (slot == 0x0)){
  	printk("bus=0x%x, slot = 0x%x\n",dev->bus->number, slot);
-	//dev->irq = RALINK_INT_PCIE1;
+	//irq = RALINK_INT_PCIE1;
 #if 1 //James want to go back
 	if(pcie0_disable!=1){
-		dev->irq = RALINK_INT_PCIE0;
+		irq = RALINK_INT_PCIE0;
 		printk("%s %s %d\n", __FILE__, __FUNCTION__, __LINE__);
 	}else{
-		dev->irq = RALINK_INT_PCIE1;
+		irq = RALINK_INT_PCIE1;
 		printk("%s %s %d\n", __FILE__, __FUNCTION__, __LINE__);
 	}
 #endif
@@ -592,10 +587,10 @@ int __init pcibios_map_irq(struct pci_dev *dev, u8 slot, u8 pin)
 #endif
   }else if((dev->bus->number ==1) && (slot == 0x1)){
  	printk("bus=0x%x, slot = 0x%x\n",dev->bus->number, slot);
-	dev->irq = RALINK_INT_PCIE1;
+	irq = RALINK_INT_PCIE1;
   }else if((dev->bus->number ==2) && (slot == 0x0)){
  	printk("bus=0x%x, slot = 0x%x\n",dev->bus->number, slot);
-	dev->irq = RALINK_INT_PCIE1;
+	irq = RALINK_INT_PCIE1;
 #if 0
 	for(i=0;i<16;i++){
 	read_config(2, 0, 0, i<<2, &val);
@@ -604,7 +599,7 @@ int __init pcibios_map_irq(struct pci_dev *dev, u8 slot, u8 pin)
 #endif
   }else if((dev->bus->number ==2) && (slot == 0x1)){
  	printk("bus=0x%x, slot = 0x%x\n",dev->bus->number, slot);
-	dev->irq = RALINK_INT_PCIE1;
+	irq = RALINK_INT_PCIE1;
   }else{
  	printk("bus=0x%x, slot = 0x%x\n",dev->bus->number, slot);
   	return 0;
@@ -655,11 +650,13 @@ int __init pcibios_map_irq(struct pci_dev *dev, u8 slot, u8 pin)
   }	
 #endif
 
+#if 0
   for(i=0;i<6;i++){
     res = &dev->resource[i];
     printk("res[%d]->start = %x\n", i, res->start);
     printk("res[%d]->end = %x\n", i, res->end);
   }
+#endif
 
   pci_write_config_byte(dev, PCI_CACHE_LINE_SIZE, 0x14);  //configure cache line size 0x14
   pci_write_config_byte(dev, PCI_LATENCY_TIMER, 0xFF);  //configure latency timer 0x10
@@ -953,4 +950,5 @@ int pcibios_plat_dev_init(struct pci_dev *dev)
 struct pci_fixup pcibios_fixups[] = {
 	{0}
 };
+
 #endif	/* CONFIG_PCI */
