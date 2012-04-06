@@ -1663,9 +1663,9 @@ static void option_start_huawei(struct usb_serial *serial)
        char *buf;
        int rc;
 
-       if (!(le16_to_cpu(dev->descriptor.idVendor) == HUAWEI_VENDOR_ID) &&
+       if (!((le16_to_cpu(dev->descriptor.idVendor) == HUAWEI_VENDOR_ID) &&
            ((le16_to_cpu(dev->descriptor.idProduct) == HUAWEI_PRODUCT_E220 )||
-            (le16_to_cpu(dev->descriptor.idProduct) == HUAWEI_PRODUCT_E600 )) )
+             (le16_to_cpu(dev->descriptor.idProduct) == HUAWEI_PRODUCT_E600 ))) )
                return;
                
        if ((buf = kmalloc(1, GFP_KERNEL)) == 0)
