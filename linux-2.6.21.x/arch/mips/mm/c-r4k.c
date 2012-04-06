@@ -1269,6 +1269,7 @@ void __init r4k_cache_init(void)
 		set_uncached_handler(0x100, &except_vec2_sb1, 0x80);
 		break;
 
+#if !defined(CONFIG_RALINK_RT3052)
 	case CPU_LOONGSON2:
 		icache_size = 1 << (12 + ((config & CONF_IC) >> 9));
 		c->icache.linesz = 16 << ((config & CONF_IB) >> 5);
@@ -1286,7 +1287,7 @@ void __init r4k_cache_init(void)
 			c->dcache.ways = 2;
 		c->dcache.waybit = 0;
 		break;
-
+#endif
 	default:
 		set_uncached_handler(0x100, &except_vec2_generic, 0x80);
 		break;
