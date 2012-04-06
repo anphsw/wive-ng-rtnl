@@ -1,7 +1,6 @@
 #
 # Automatically generated make config: don't edit
-# Linux kernel version: 2.6.21.9
-# Mon Mar 12 05:09:00 2012
+# Linux kernel version: 2.6.21.10
 #
 CONFIG_MIPS=y
 
@@ -567,7 +566,7 @@ CONFIG_MTD_CFI_UTIL=y
 # CONFIG_MTD_COMPLEX_MAPPINGS is not set
 # CONFIG_MTD_PHYSMAP is not set
 CONFIG_MTD_PHYSMAP_START=0xBF000000
-CONFIG_MTD_PHYSMAP_LEN=0x400000
+CONFIG_MTD_PHYSMAP_LEN=0x1000000
 # CONFIG_MTD_PLATRAM is not set
 
 #
@@ -679,6 +678,11 @@ CONFIG_IMQ_NUM_DEVS=2
 # PHY device support
 #
 # CONFIG_PHYLIB is not set
+
+#
+# PHY multiport switches
+#
+# CONFIG_RTL8367M is not set
 
 #
 # Ethernet (10 or 100Mbit)
