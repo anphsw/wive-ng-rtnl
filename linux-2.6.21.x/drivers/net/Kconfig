@@ -270,6 +270,12 @@ source "drivers/net/arcnet/Kconfig"
 
 source "drivers/net/phy/Kconfig"
 
+menu "PHY multiport switches"
+
+source "drivers/net/rtl8367m/Kconfig"
+
+endmenu
+
 #
 #	Ethernet
 #
