@@ -140,7 +140,7 @@ echo "==================START-L2TP-CLIENT======================="
     fi
 
     if [ "$vpnDebug" = "on" ]; then
-        vpnDebug="-D"
+        vpnDebug="debug"
     else
         vpnDebug=""
     fi
@@ -165,9 +165,9 @@ echo "==================START-L2TP-CLIENT======================="
 	CHAP="require-chap"
     elif [ "$vpnAuthProtocol" = "3" ]; then
 	L2TPPAP="require pap = no"
-	L2TPCHAP="require chap = yes"
+	L2TPCHAP="require chap = no"
 	PAP="refuse-pap"
-	CHAP="refuse-chap"
+	CHAP="require-mschap-v2"
     else
 	L2TPPAP=""
 	L2TPCHAP=""
@@ -205,6 +205,7 @@ echo "==================START-L2TP-CLIENT======================="
     " > $ppp/l2tpd.conf
 
     printf "
+    $vpnDebug
     $PAP
     $CHAP
     $vpnMTU
@@ -223,5 +224,5 @@ echo "==================START-L2TP-CLIENT======================="
     $LOG "Starting VPN network l2tp..."
     $LOG "Start xl2tpd"
 
-    FULLOPTS="$vpnDebug -c $ppp/l2tpd.conf -s $ppp/chap-secrets -p $var/l2tpd.pid"
+    FULLOPTS="-c $ppp/l2tpd.conf -s $ppp/chap-secrets -p $var/l2tpd.pid"
     xl2tpd $FULLOPTS &

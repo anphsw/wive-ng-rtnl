@@ -105,7 +105,7 @@ elif [ "$vpnAuthProtocol" = "2" ]; then
     CHAP="require-chap"
 elif [ "$vpnAuthProtocol" = "3" ]; then
     PAP="refuse-pap"
-    CHAP="refuse-chap"
+    CHAP="require-mschap-v2"
 else
     PAP=""
     CHAP=""
