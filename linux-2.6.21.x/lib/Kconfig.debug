@@ -97,7 +97,7 @@ config DEBUG_SHIRQ
 config LOG_BUF_SHIFT
 	int "Kernel log buffer size (16 => 64KB, 17 => 128KB)" if DEBUG_KERNEL
 	range 12 21
-	default 12
+	default 14
 	help
 	  Select kernel log buffer size as a power of 2.
 	  Defaults and Examples:
