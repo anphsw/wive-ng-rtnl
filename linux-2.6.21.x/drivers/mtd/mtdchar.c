@@ -24,6 +24,36 @@
 
 #include <asm/uaccess.h>
 
+static struct class *mtd_class;
+
+static void mtd_notify_add(struct mtd_info* mtd)
+{
+	if (!mtd)
+		return;
+
+	class_device_create(mtd_class, NULL, MKDEV(MTD_CHAR_MAJOR, mtd->index*2),
+			    NULL, "mtd%d", mtd->index);
+
+	class_device_create(mtd_class, NULL,
+			    MKDEV(MTD_CHAR_MAJOR, mtd->index*2+1),
+			    NULL, "mtd%dro", mtd->index);
+}
+
+static void mtd_notify_remove(struct mtd_info* mtd)
+{
+	if (!mtd)
+		return;
+
+	class_device_destroy(mtd_class, MKDEV(MTD_CHAR_MAJOR, mtd->index*2));
+	class_device_destroy(mtd_class, MKDEV(MTD_CHAR_MAJOR, mtd->index*2+1));
+}
+
+static struct mtd_notifier notifier = {
+	.add	= mtd_notify_add,
+	.remove	= mtd_notify_remove,
+};
+
+
 /*
  * Data structure to hold the pointer to the mtd device as well
  * as mode information ofr various use cases.
@@ -764,11 +794,23 @@ static int __init init_mtdchar(void)
 		       MTD_CHAR_MAJOR);
 	}
 
+	mtd_class = class_create(THIS_MODULE, "mtd");
+
+	if (IS_ERR(mtd_class)) {
+		printk(KERN_ERR "Error creating mtd class.\n");
+		unregister_chrdev(MTD_CHAR_MAJOR, "mtd");
+		return PTR_ERR(mtd_class);
+	}
+
+	register_mtd_user(&notifier);
+
 	return status;
 }
 
 static void __exit cleanup_mtdchar(void)
 {
+	unregister_mtd_user(&notifier);
+	class_destroy(mtd_class);
 	unregister_chrdev(MTD_CHAR_MAJOR, "mtd");
 }
 
