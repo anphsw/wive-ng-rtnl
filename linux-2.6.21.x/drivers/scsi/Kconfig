@@ -1803,4 +1803,8 @@ endmenu
 
 source "drivers/scsi/pcmcia/Kconfig"
 
+config SCSI_SHOW_PROBE
+	bool "Show disk and bus type."
+	depends on SCSI
+
 endmenu

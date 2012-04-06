@@ -153,12 +153,26 @@ static int proc_print_scsidevice(struct device *dev, void *data)
 {
 	struct scsi_device *sdev;
 	struct seq_file *s = data;
+#ifdef CONFIG_SCSI_SHOW_PROBE
+	struct Scsi_Host *shost;
+	struct scsi_disk *sdkp;
+#endif
 	int i;
 
 	if (!scsi_is_sdev_device(dev))
 		goto out;
 
 	sdev = to_scsi_device(dev);
+
+#ifdef CONFIG_SCSI_SHOW_PROBE
+	shost=sdev->host;
+	sdkp=(struct scsi_disk*)dev->driver_data;
+	if (strncmp(scsi_device_type(sdev->type), "Direct-Access", 13)==0)
+		seq_printf(s, "BusType: %s Diskname: %s ", shost->hostt->name, sdkp->disk->disk_name);
+	else
+		seq_printf(s, "BusType: %s Diskname: %s ", shost->hostt->name, "NONE");
+#endif
+
 	seq_printf(s,
 		"Host: scsi%d Channel: %02d Id: %02d Lun: %02d\n  Vendor: ",
 		sdev->host->host_no, sdev->channel, sdev->id, sdev->lun);

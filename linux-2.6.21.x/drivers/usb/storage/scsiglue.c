@@ -391,6 +391,10 @@ US_DO_ALL_FLAGS
 		*(pos++) = '\n';
 	}
 
+#ifdef CONFIG_SCSI_SHOW_PROBE
+	SPRINTF("         Port: %s\n", us->pusb_dev->devpath);
+#endif
+
 	/*
 	 * Calculate start of next buffer, and return value.
 	 */
