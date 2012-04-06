@@ -1013,17 +1013,29 @@
 10) Small net fixes backport.<br>
 11) WebUI not build wsc support if WSC daemon disabled.<br>
 12) Fix pmtu discovery probe (re add lost patch).<br>
-13) Update xupnpd to r302 version.<br>
+13) Update xupnpd to r295 version.<br>
 14) Revert incorrect accept queue backlog changes.<br>
 15) Add some videoturbine parametrs to default nvram base.<br>
 16) Some fixes in af_unix.<br>
 17) Openssl up to 0.9.8u (12.03.2012) version.<br>
-18) Fastnat more native functions use instead hardcoded blocks.<br>
-19) Update miniupnpd to 1.6.20120320 version.<br>
-20) Temporary back to 4.4.7 gcc in toolchain.<br>
-21) xl2tpd now support new l2tp kernel module introduced in 2.6.32.<br>
-22) Update l2tp kernel module(speedup).<br>
-23) Make kernel sockopts compat with upstream.<br>
+
+<br>
+<b>2.3.x</b><br>
+1) Update xupnpd to r302 version.<br>
+2) Fastnat more native functions use instead hardcoded blocks.<br>
+3) Update miniupnpd to 1.6.20120320 version.<br>
+4) Temporary back to 4.4.7 gcc in toolchain.<br>
+5) xl2tpd now support new l2tp kernel module introduced in 2.6.32.<br>
+6) Update l2tp kernel module(speedup).<br>
+7) Make kernel sockopts compat with upstream.<br>
+8) Fix mschap-v2 only mode for all ppp based tunnels.<br>
+9) Some kernel fixes and code for support RT3883 merge with N56U project.<br>
+10) Some backport in kernel mm/vfs/network subsystems.<br>
+11) New STA profiles code support.<br>
+12) WiFi igmpsnooping code must be compatable with MacOS client.<br>
+13) PPPOE plugin ignore broadcasted PADO-packets.<br>
+14) More fixes for not 305x systems(wait new SDK for full compat).<br>
+15) Build system cleanup and some rewrites.<br>
 
 <br><br>
 <b>For support see:</b><br>
