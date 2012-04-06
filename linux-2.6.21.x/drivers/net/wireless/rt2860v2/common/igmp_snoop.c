@@ -972,6 +972,44 @@ void rtmp_read_igmp_snoop_from_file(
 	}
 }
 
+static rsv_table_t ip_addr_rsvd[] =
+{
+	{ 0xe0000001, 0xffffffff }, /* All hosts */
+	{ 0xe0000002, 0xffffffff }, /* All routers */
+	{ 0xe0000004, 0xffffffff }, /* DVMRP routers */
+	{ 0xe0000005, 0xffffffff }, /* OSPF1 routers */
+	{ 0xe0000006, 0xffffffff }, /* OSPF2 routers */
+	{ 0xe0000009, 0xffffffff }, /* RIP v2 routers */
+	{ 0xe000000d, 0xffffffff }, /* PIMd routers */
+	{ 0xe0000010, 0xffffffff }, /* IGMP v3 routers */
+	{ 0xe00000fb, 0xffffffff }, /* Reserved */
+	{ 0xe000ff87, 0xffffffff }, /* Reserved */
+	{ 0xeffffffa, 0xffffffff }, /* UPnP */
+};
+
+inline BOOLEAN IPv4MulticastFilterExcluded(IN PUCHAR pDstMacAddr)
+{
+	UINT32 DstIpAddr;
+	UINT32 Count;
+
+	if(!isIgmpMacAddr(pDstMacAddr))
+		return FALSE;
+
+	/* Check IGMP packet */
+	if(*(pDstMacAddr + 23) == IGMP_PROTOCOL_DESCRIPTOR)
+		return TRUE;
+
+	/* Get destination Ip address of IP header */
+	DstIpAddr = ntohl(*((UINT32*)(pDstMacAddr + 30)));
+
+	/* Check adress exist in reserved ranges by ip_addr_rsvd table */
+	for (Count = 0; Count < sizeof(ip_addr_rsvd)/sizeof(rsv_table_t); Count++)
+		if ((DstIpAddr & ip_addr_rsvd[Count].mask) == (ip_addr_rsvd[Count].addr & ip_addr_rsvd[Count].mask))
+			return TRUE;
+
+	return FALSE;
+}
+
 NDIS_STATUS IgmpPktInfoQuery(
 	IN PRTMP_ADAPTER pAd,
 	IN PUCHAR pSrcBufVA,
@@ -982,18 +1020,22 @@ NDIS_STATUS IgmpPktInfoQuery(
 {
 	if(IS_MULTICAST_MAC_ADDR(pSrcBufVA))
 	{
-		BOOLEAN IgmpMldPkt = FALSE;
-		PUCHAR pIpHeader = pSrcBufVA + 12;
+		BOOLEAN NeedForwardToAll = FALSE;
+		UINT16 EtherType = ntohs(*((UINT16 *)(pSrcBufVA + 12)));
 
-		if(ntohs(*((UINT16 *)(pIpHeader))) == ETH_P_IPV6)
-			IgmpMldPkt = IPv6MulticastFilterExcluded(pSrcBufVA, pIpHeader);
-		else
-			IgmpMldPkt = isIgmpPkt(pSrcBufVA, pIpHeader);
+		if (EtherType == ETH_P_IPV6)
+		{
+			NeedForwardToAll = IPv6MulticastFilterExcluded(pSrcBufVA);
+		}
+		else if(EtherType == ETH_P_IP)
+		{
+			NeedForwardToAll = IPv4MulticastFilterExcluded(pSrcBufVA);
+		}
 
-		if (IgmpMldPkt)
+		if (NeedForwardToAll)
 		{
 			*ppGroupEntry = NULL;
-			*pInIgmpGroup = IGMP_PKT;
+			*pInIgmpGroup = IGMP_PKT; // IGMP and all reserved
 		}
 		else if ((*ppGroupEntry = MulticastFilterTableLookup(pAd->pMulticastFilterTable, pSrcBufVA,
 									get_netdev_from_bssid(pAd, FromWhichBSSID))) == NULL)
@@ -1186,7 +1228,7 @@ NDIS_STATUS IgmpPktClone(
 				bContinue = FALSE;
 		}
 		else
-			bContinue = FALSE;	
+			bContinue = FALSE;
 	}
 
 	return NDIS_STATUS_SUCCESS;
@@ -1263,35 +1305,28 @@ BOOLEAN isMldPkt(
 	return result;
 }
 
-BOOLEAN IPv6MulticastFilterExcluded(
-	IN PUCHAR pDstMacAddr,
-	IN PUCHAR pIpHeader)
+BOOLEAN IPv6MulticastFilterExcluded(IN PUCHAR pDstMacAddr)
 {
 	BOOLEAN result = FALSE;
-	UINT16 IpProtocol = ntohs(*((UINT16 *)(pIpHeader)));
+	PUCHAR pIpHeader;
+	PRT_IPV6_HDR pIpv6Hdr;
+	PRT_IPV6_ADDR pIpv6DstAddr;
+	UINT32 offset;
 	INT idx;
 	UINT8 nextProtocol;
 
 	if(!IS_IPV6_MULTICAST_MAC_ADDR(pDstMacAddr))
 		return FALSE;
 
-	if(IpProtocol != ETH_P_IPV6)
-		return FALSE;
-
-	// skip protocol (2 Bytes).
-	pIpHeader += 2;
-	do
-	{
-		PRT_IPV6_HDR pIpv6Hdr = (PRT_IPV6_HDR)(pIpHeader);
-		UINT32 offset = IPV6_HDR_LEN;
-
+	pIpHeader = pDstMacAddr + 14;
+	pIpv6Hdr = (PRT_IPV6_HDR)(pIpHeader);
+	offset = IPV6_HDR_LEN;
 		nextProtocol = pIpv6Hdr->nextHdr;
 		while(nextProtocol == IPV6_NEXT_HEADER_HOP_BY_HOP)
 		{
 			if(IPv6ExtHdrHandle((RT_IPV6_EXT_HDR *)(pIpHeader + offset), &nextProtocol, &offset) == FALSE)
 				break;
 		}
-	} while(FALSE);
 
 	for (idx = 0; idx < IPV6_MULTICAST_FILTER_EXCLUED_SIZE; idx++)
 	{
@@ -1300,6 +1335,22 @@ BOOLEAN IPv6MulticastFilterExcluded(
 			result = TRUE;
 			break;
 		}
+	}
+
+	if(!result)
+	{
+		// SSDP
+		// FF0x:0000:0000:0000:0000:0000:0000:000C
+		// mDNS
+		// FF0x:0000:0000:0000:0000:0000:0000:00FB
+		pIpv6DstAddr = &pIpv6Hdr->dstAddr;
+
+		if ( (ntohl(pIpv6DstAddr->ipv6_addr32[0]) & 0xFFF0FFFF) == 0xFF000000 &&
+		            pIpv6DstAddr->ipv6_addr32[1] == 0 &&
+		            pIpv6DstAddr->ipv6_addr32[2] == 0 &&
+		     (ntohl(pIpv6DstAddr->ipv6_addr32[3]) == 0x0000000C ||
+		      ntohl(pIpv6DstAddr->ipv6_addr32[3]) == 0x000000FB ) )
+			result = TRUE;
 	}
 
 	return result;

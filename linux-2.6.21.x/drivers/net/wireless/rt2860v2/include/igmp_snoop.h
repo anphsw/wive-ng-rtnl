@@ -103,8 +103,7 @@ BOOLEAN isMldPkt(
 	OUT PUCHAR *pMldHeader);
 
 BOOLEAN IPv6MulticastFilterExcluded(
-	IN PUCHAR pDstMacAddr,
-	IN PUCHAR pIpHeader);
+	IN PUCHAR pDstMacAddr);
 
 VOID MLDSnooping(
 	IN PRTMP_ADAPTER pAd,
@@ -159,5 +158,9 @@ NDIS_STATUS IgmpPktClone(
 	IN UINT8 UserPriority,
 	IN PNET_DEV pNetDev);
 
-#endif /* __RTMP_IGMP_SNOOP_H__ */
+typedef struct rsv_table {
+	UINT32 addr;
+	UINT32 mask;
+} rsv_table_t;
 
+#endif /* __RTMP_IGMP_SNOOP_H__ */
