@@ -326,6 +326,10 @@ static void __init r4k_blast_scache_setup(void)
 
 static inline void local_r4k___flush_cache_all(void * args)
 {
+#if defined(CONFIG_CPU_LOONGSON2)
+	r4k_blast_scache();
+	return;
+#endif
 	r4k_blast_dcache();
 	r4k_blast_icache();
 
@@ -992,6 +996,14 @@ static void __init probe_pcache(void)
 		break;
 	}
 
+#ifdef  CONFIG_CPU_LOONGSON2
+	/*
+	 * LOONGSON2 has 4 way icache, but when using indexed cache op,
+	 * one op will act on all 4 ways
+	 */
+	c->icache.ways = 1;
+#endif
+
 	printk("Primary instruction cache %ldkB, %s, %s, linesize %d bytes.\n",
 	       icache_size >> 10,
 	       cpu_has_vtag_icache ? "virtually tagged" : "physically tagged",
@@ -1067,6 +1079,24 @@ static int __init probe_scache(void)
 }
 #endif
 
+#if defined(CONFIG_CPU_LOONGSON2)
+static void __init loongson2_sc_init(void)
+{
+	struct cpuinfo_mips *c = &current_cpu_data;
+
+	scache_size = 512*1024;
+	c->scache.linesz = 32;
+	c->scache.ways = 4;
+	c->scache.waybit = 0;
+	c->scache.waysize = scache_size / (c->scache.ways);
+	c->scache.sets = scache_size / (c->scache.linesz * c->scache.ways);
+	pr_info("Unified secondary cache %ldkB %s, linesize %d bytes.\n",
+	       scache_size >> 10, way_string[c->scache.ways], c->scache.linesz);
+
+	c->options |= MIPS_CPU_INCLUSIVE_CACHES;
+}
+#endif
+
 extern int r5k_sc_init(void);
 extern int rm7k_sc_init(void);
 extern int mips_sc_init(void);
@@ -1122,6 +1152,11 @@ static void __init setup_scache(void)
 	case CPU_UNKNOWN:
 		return;
 #endif /* !defined(CONFIG_RALINK_RT3052) */
+#if defined(CONFIG_CPU_LOONGSON2)
+	case CPU_LOONGSON2:
+		loongson2_sc_init();
+		return;
+#endif
 	default:
 		if (c->isa_level == MIPS_CPU_ISA_M32R1 ||
 		    c->isa_level == MIPS_CPU_ISA_M32R2 ||
@@ -1232,6 +1267,24 @@ void __init r4k_cache_init(void)
 	case CPU_SB1:
 	case CPU_SB1A:
 		set_uncached_handler(0x100, &except_vec2_sb1, 0x80);
+		break;
+
+	case CPU_LOONGSON2:
+		icache_size = 1 << (12 + ((config & CONF_IC) >> 9));
+		c->icache.linesz = 16 << ((config & CONF_IB) >> 5);
+		if (prid & 0x3)
+			c->icache.ways = 4;
+		else
+			c->icache.ways = 2;
+		c->icache.waybit = 0;
+
+		dcache_size = 1 << (12 + ((config & CONF_DC) >> 6));
+		c->dcache.linesz = 16 << ((config & CONF_DB) >> 4);
+		if (prid & 0x3)
+			c->dcache.ways = 4;
+		else
+			c->dcache.ways = 2;
+		c->dcache.waybit = 0;
 		break;
 
 	default:
