@@ -1036,6 +1036,8 @@
 13) PPPOE plugin ignore broadcasted PADO-packets.<br>
 14) More fixes for not 305x systems(wait new SDK for full compat).<br>
 15) Build system cleanup and some rewrites.<br>
+16) Fix calculate tcp_mem instead of all memory.<br>
+17) Speedup kernel ppp (don't stop and restart queue on every TX packet).<br>
 
 <br><br>
 <b>For support see:</b><br>
