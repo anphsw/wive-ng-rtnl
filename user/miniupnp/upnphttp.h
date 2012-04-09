@@ -1,7 +1,7 @@
-/* $Id: upnphttp.h,v 1.28 2012/03/05 20:36:18 nanard Exp $ */
+/* $Id: upnphttp.h,v 1.29 2012/04/06 17:20:03 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
- * (c) 2006-2011 Thomas Bernard 
+ * (c) 2006-2012 Thomas Bernard
  * This software is subject to the conditions detailed
  * in the LICENCE file provided within the distribution */
 
@@ -13,8 +13,16 @@
 
 #include "config.h"
 
+#if 0
+/* according to "UPnP Device Architecture 1.0" */
+#define UPNP_VERSION_STRING "UPnP/1.0"
+#else
+/* according to "UPnP Device Architecture 1.1" */
+#define UPNP_VERSION_STRING "UPnP/1.1"
+#endif
+
 /* server: HTTP header returned in all HTTP responses : */
-#define MINIUPNPD_SERVER_STRING	OS_VERSION " UPnP/1.0 MiniUPnPd/" MINIUPNPD_VERSION
+#define MINIUPNPD_SERVER_STRING	OS_VERSION " " UPNP_VERSION_STRING " MiniUPnPd/" MINIUPNPD_VERSION
 
 /*
  states :
@@ -103,7 +111,7 @@ BuildHeader_upnphttp(struct upnphttp * h, int respcode,
                      const char * respmsg,
                      int bodylen);
 
-/* BuildResp_upnphttp() 
+/* BuildResp_upnphttp()
  * fill the res_buf buffer with the complete
  * HTTP 200 OK response from the body passed as argument */
 void

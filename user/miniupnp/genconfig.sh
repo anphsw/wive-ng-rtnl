@@ -344,7 +344,7 @@ echo "/* #define USE_IFNAME_IN_RULES */" >> ${CONFIGFILE}
 echo "" >> ${CONFIGFILE}
 
 echo "/* Experimental NFQUEUE support. */" >> ${CONFIGFILE}
-echo "/* #define ENABLE_NFQUEUE */" >> ${CONFIGFILE}
+echo "/*#define ENABLE_NFQUEUE*/" >> ${CONFIGFILE}
 echo "" >> ${CONFIGFILE}
 
 echo "/* Enable to make MiniUPnPd more strict about UPnP conformance" >> ${CONFIGFILE}

@@ -2,7 +2,7 @@
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * author: Ryan Wagoner
- * (c) 2006-2012 Thomas Bernard 
+ * (c) 2006-2012 Thomas Bernard
  * This software is subject to the conditions detailed
  * in the LICENCE file provided within the distribution */
 
@@ -99,7 +99,7 @@ readoptionsfile(const char * fname)
 	while(fgets(buffer, sizeof(buffer), hfile))
 	{
 		linenum++;
-		t = strchr(buffer, '\n'); 
+		t = strchr(buffer, '\n');
 		if(t)
 		{
 			*t = '\0';
@@ -111,7 +111,7 @@ readoptionsfile(const char * fname)
 				t--;
 			}
 		}
-       
+
 		/* skip leading whitespaces */
 		name = buffer;
 		while(isspace(*name))
@@ -132,16 +132,16 @@ readoptionsfile(const char * fname)
 			else
 			{
 				upnppermlist = tmp;
-			/* parse the rule */
-			if(read_permission_line(upnppermlist + num_upnpperm, name) >= 0)
-			{
-				num_upnpperm++;
-			}
-			else
-			{
-				fprintf(stderr, "parsing error file %s line %d : %s\n",
-				        fname, linenum, name);
-			}
+				/* parse the rule */
+				if(read_permission_line(upnppermlist + num_upnpperm, name) >= 0)
+				{
+					num_upnpperm++;
+				}
+				else
+				{
+					fprintf(stderr, "parsing error file %s line %d : %s\n",
+					        fname, linenum, name);
+				}
 			}
 			continue;
 		}
@@ -197,32 +197,32 @@ readoptionsfile(const char * fname)
 				if(tmp == NULL)
 				{
 					fprintf(stderr, "memory allocation error, Option value in file %s line %d : %s=%s\n",
-			        fname, linenum, name, value);
-		}
-		else
-		{
+					        fname, linenum, name, value);
+				}
+				else
+				{
 					string_repo = tmp;
 					memcpy(string_repo + string_repo_len, value, len);
 					ary_options[num_options].id = id;
 					/* save the offset instead of the absolute address because realloc() could
 					 * change it */
 					ary_options[num_options].value = (const char *)string_repo_len;
-			num_options += 1;
+					num_options += 1;
 					string_repo_len += len;
 				}
 			}
 		}
 
 	}
-	
+
 	fclose(hfile);
-	
+
 	for(i = 0; i < num_options; i++)
 	{
 		/* add start address of string_repo to get right pointer */
 		ary_options[i].value = string_repo + (size_t)ary_options[i].value;
 	}
-	
+
 	return 0;
 }
 

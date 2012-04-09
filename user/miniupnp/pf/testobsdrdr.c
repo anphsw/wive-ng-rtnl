@@ -1,7 +1,7 @@
 /* $Id: testobsdrdr.c,v 1.23 2012/03/05 20:36:20 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
- * (c) 2006-2011 Thomas Bernard 
+ * (c) 2006-2011 Thomas Bernard
  * This software is subject to the conditions detailed
  * in the LICENCE file provided within the distribution */
 
@@ -91,7 +91,7 @@ main(int arc, char * * argv)
 
 	list_rules();
 	list_eports_tcp();
-	
+
 
 	if(get_redirect_rule("xl1", 4662, IPPROTO_TCP,
 	                     buf, sizeof(buf), &iport, desc, sizeof(desc),

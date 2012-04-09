@@ -144,7 +144,7 @@ add_redirect_desc(unsigned short eport, int proto,
 {
 	struct rdr_desc * p;
 	size_t l;
-	
+
 	if (desc != NULL) {
 		l = strlen(desc) + 1;
 		p = malloc(sizeof(struct rdr_desc) + l);
@@ -181,7 +181,7 @@ static void
 get_redirect_desc(unsigned short eport, int proto, char * desc, int desclen, unsigned int * timestamp)
 {
 	struct rdr_desc * p;
-	
+
 	if (desc == NULL || desclen == 0)
 		return;
 	for (p = rdr_desc_list; p; p = p->next) {
@@ -197,7 +197,7 @@ get_redirect_desc(unsigned short eport, int proto, char * desc, int desclen, uns
 
 int init_redirect(void)
 {
-	
+
 	dev = open(IPNAT_NAME, O_RDWR);
 	if (dev < 0) {
 		syslog(LOG_ERR, "open(\"%s\"): %m", IPNAT_NAME);
@@ -213,7 +213,7 @@ int init_redirect(void)
 
 void shutdown_redirect(void)
 {
-	
+
 	if (dev >= 0) {
 		close(dev);
 		dev = -1;

@@ -1,4 +1,4 @@
-/* $Id: miniupnpd.c,v 1.144 2012/02/07 00:29:43 nanard Exp $ */
+/* $Id: miniupnpd.c,v 1.151 2012/04/06 17:24:37 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * (c) 2006-2012 Thomas Bernard
@@ -256,13 +256,13 @@ static int nfqueue_cb(
 		int dport = get_udp_dst_port(pkt);
 
 		int x = sizeof (struct ip) + sizeof (struct udphdr);
-	
-		/* packets we are interested in are UDP multicast to 239.255.255.250:1900	
+
+		/* packets we are interested in are UDP multicast to 239.255.255.250:1900
 		 * and start with a data string M-SEARCH
 		 */
-		if ( (dport == 1900) && (id_protocol == IPPROTO_UDP) 
+		if ( (dport == 1900) && (id_protocol == IPPROTO_UDP)
 			&& (ssdp.sin_addr.s_addr == iph->ip_dst.s_addr) ) {
-		
+
 			/* get the index that the packet came in on */
 			u_int32_t idx = nfq_get_indev(nfa);
 			int i = 0;
@@ -272,7 +272,7 @@ static int nfqueue_cb(
 					struct udphdr *udp = (struct udphdr *) (pkt + sizeof(struct ip));
 
 					char *dd = pkt + x;
-					
+
 					struct sockaddr_in sendername;
 					sendername.sin_family = AF_INET;
 					sendername.sin_port = udp->source;
@@ -284,7 +284,7 @@ static int nfqueue_cb(
 				}
 			}
 		}
-		
+
 		nfq_set_verdict(qh, id, NF_ACCEPT, 0, NULL);
 
 	} else {
@@ -404,7 +404,7 @@ write_command_line(int fd, int argc, char * * argv)
 
 #endif
 
-/* Handler for the SIGTERM signal (kill) 
+/* Handler for the SIGTERM signal (kill)
  * SIGINT is also handled */
 static void
 sigterm(int sig)
@@ -512,44 +512,69 @@ struct runtime_vars {
  * external interface associated with the lan subnet follows.
  * ex : 192.168.1.1/24 81.21.41.11
  *
- * return value : 
+ * Can also use the interface name (ie eth0)
+ *
+ * return value :
  *    0 : ok
  *   -1 : error */
 static int
 parselanaddr(struct lan_addr_s * lan_addr, const char * str)
 {
 	const char * p;
-	int nbits = 24;	/* by default, networks are /24 */
 	int n;
+	char tmp[16];
+
+	memset(lan_addr, 0, sizeof(struct lan_addr_s));
 	p = str;
 	while(*p && *p != '/' && !isspace(*p))
 		p++;
 	n = p - str;
+	if(!isdigit(str[0]) && n < sizeof(lan_addr->ifname))
+	{
+		/* not starting with a digit : suppose it is an interface name */
+		memcpy(lan_addr->ifname, str, n);
+		lan_addr->ifname[n] = '\0';
+		if(getifaddr(lan_addr->ifname, lan_addr->str, sizeof(lan_addr->str)) < 0)
+			goto parselan_error;
+	}
+	else
+	{
+		if(n>15)
+			goto parselan_error;
+		memcpy(lan_addr->str, str, n);
+		lan_addr->str[n] = '\0';
+	}
+	if(!inet_aton(lan_addr->str, &lan_addr->addr))
+		goto parselan_error;
 	if(*p == '/')
 	{
-		unsigned short i, mask[4];
-		unsigned char *am = (unsigned char *) &(lan_addr->mask.s_addr);
-		if (sscanf(++p, "%3hu.%3hu.%3hu.%3hu", &mask[0], &mask[1], &mask[2], &mask[3]) == 4) {
-			for (i = 0; i < 4; i++)
-				am[i] = (unsigned char) mask[i];
-		} else {
-			nbits = atoi(p);
-			lan_addr->mask.s_addr = htonl(nbits ? (0xffffffff << (32 - nbits)) : 0);
-		}
-		while(*p && !isspace(*p))
+		const char * q = ++p;
+		while(*p && isdigit(*p))
 			p++;
+		if(*p=='.')
+		{
+			while(*p && (*p=='.' || isdigit(*p)))
+				p++;
+			n = p - q;
+			if(n>15)
+				goto parselan_error;
+			memcpy(tmp, q, n);
+			tmp[n] = '\0';
+			if(!inet_aton(tmp, &lan_addr->mask))
+				goto parselan_error;
+		}
+		else
+		{
+			int nbits = atoi(q);
+			if(nbits > 32 || nbits < 0)
+				goto parselan_error;
+			lan_addr->mask.s_addr = htonl(nbits ? (0xffffffffu << (32 - nbits)) : 0);
+		}
 	}
-	if(n>15)
+	else
 	{
-		fprintf(stderr, "Error parsing address/mask : %s\n", str);
-		return -1;
-	}
-	memcpy(lan_addr->str, str, n);
-	lan_addr->str[n] = '\0';
-	if(!inet_aton(lan_addr->str, &lan_addr->addr))
-	{
-		fprintf(stderr, "Error parsing address/mask : %s\n", str);
-		return -1;
+		/* by default, networks are /24 */
+		lan_addr->mask.s_addr = htonl(0xffffff00u);
 	}
 #ifdef MULTIPLE_EXTERNAL_IP
 	/* skip spaces */
@@ -570,7 +595,20 @@ parselanaddr(struct lan_addr_s * lan_addr, const char * str)
 		}
 	}
 #endif
+#ifdef ENABLE_IPV6
+	if(lan_addr->ifname[0] != '\0')
+	{
+		lan_addr->index = if_nametoindex(lan_addr->ifname);
+		if(lan_addr->index == 0)
+			fprintf(stderr, "Cannot get index for network interface %s",
+			        lan_addr->ifname);
+	}
+#endif
 	return 0;
+parselan_error:
+	fprintf(stderr, "Error parsing address/mask (or interface name) : %s\n",
+	        str);
+	return -1;
 }
 
 /* init phase :
@@ -700,7 +738,7 @@ init(int argc, char * * argv, struct runtime_vars * v)
 			case UPNPSERIAL:
 				strncpy(serialnumber, ary_options[i].value, SERIALNUMBER_MAX_LEN);
 				serialnumber[SERIALNUMBER_MAX_LEN-1] = '\0';
-				break;				
+				break;
 			case UPNPMODEL_NUMBER:
 				strncpy(modelnumber, ary_options[i].value, MODELNUMBER_MAX_LEN);
 				modelnumber[MODELNUMBER_MAX_LEN-1] = '\0';
@@ -970,7 +1008,7 @@ init(int argc, char * * argv, struct runtime_vars * v)
 	{
 		syslog(LOG_ERR, "MiniUPnPd is already running. EXITING");
 		return 1;
-	}	
+	}
 
 	set_startup_time(GETFLAG(SYSUPTIMEMASK));
 
@@ -1018,7 +1056,8 @@ init(int argc, char * * argv, struct runtime_vars * v)
 		return 1;
 	}
 
-	writepidfile(pidfilename, pid);
+	if(writepidfile(pidfilename, pid) < 0)
+		pidfilename = NULL;
 
 #ifdef ENABLE_LEASEFILE
 	/*remove(lease_file);*/
@@ -1121,7 +1160,12 @@ main(int argc, char * * argv)
 	for(lan_addr = lan_addrs.lh_first; lan_addr != NULL; lan_addr = lan_addr->list.le_next)
 		addr_count++;
 	if(addr_count > 0) {
+#ifndef ENABLE_IPV6
 		snotify = calloc(addr_count, sizeof(int));
+#else
+		/* one for IPv4, one for IPv6 */
+		snotify = calloc(addr_count * 2, sizeof(int));
+#endif
 	}
 #ifdef ENABLE_NATPMP
 	if(addr_count > 0) {
@@ -1254,7 +1298,7 @@ main(int argc, char * * argv)
 		if((startup_time<60*60*24) && (time(NULL)>60*60*24))
 		{
 			set_startup_time(GETFLAG(SYSUPTIMEMASK));
-		} 
+		}
 		/* send public address change notifications if needed */
 		if(should_send_public_address_change_notif)
 		{
@@ -1366,7 +1410,7 @@ main(int argc, char * * argv)
 		FD_ZERO(&readset);
 		FD_ZERO(&writeset);
 
-		if (sudp >= 0) 
+		if (sudp >= 0)
 		{
 			FD_SET(sudp, &readset);
 			max_fd = MAX( max_fd, sudp);
@@ -1378,7 +1422,7 @@ main(int argc, char * * argv)
 			}
 #endif
 		}
-		if (shttpl >= 0) 
+		if (shttpl >= 0)
 		{
 			FD_SET(shttpl, &readset);
 			max_fd = MAX( max_fd, shttpl);
@@ -1392,7 +1436,7 @@ main(int argc, char * * argv)
 #endif
 
 #ifdef ENABLE_NFQUEUE
-		if (nfqh >= 0) 
+		if (nfqh >= 0)
 		{
 			FD_SET(nfqh, &readset);
 			max_fd = MAX( max_fd, nfqh);
@@ -1434,7 +1478,7 @@ main(int argc, char * * argv)
 			FD_SET(sctl, &readset);
 			max_fd = MAX( max_fd, sctl);
 		}
-		
+
 		for(ectl = ctllisthead.lh_first; ectl; ectl = ectl->entries.le_next)
 		{
 			if(ectl->socket >= 0) {
@@ -1569,7 +1613,7 @@ main(int argc, char * * argv)
 			shttp = accept(shttpl, (struct sockaddr *)&clientname, &clientnamelen);
 			if(shttp<0)
 			{
-				syslog(LOG_ERR, "accept(http): %m");
+					syslog(LOG_ERR, "accept(http): %m");
 			}
 			else
 			{
@@ -1578,9 +1622,6 @@ main(int argc, char * * argv)
 
 				sockaddr_to_string((struct sockaddr *)&clientname, addr_str, sizeof(addr_str));
 				syslog(LOG_INFO, "HTTP connection from %s", addr_str);
-				/*if (fcntl(shttp, F_SETFL, O_NONBLOCK) < 0) {
-					syslog(LOG_ERR, "fcntl F_SETFL, O_NONBLOCK");
-				}*/
 				/* Create a new upnphttp object and add it to
 				 * the active upnphttp object list */
 				tmp = New_upnphttp(shttp);
@@ -1655,7 +1696,6 @@ shutdown:
 	if (shttpl >= 0) close(shttpl);
 #ifdef ENABLE_IPV6
 	if (sudpv6 >= 0) close(sudpv6);
-	//if (shttplv6 >= 0) close(shttplv6);
 #endif
 #ifdef USE_IFACEWATCHER
 	if(sifacewatcher >= 0) close(sifacewatcher);
@@ -1680,19 +1720,26 @@ shutdown:
 		}
 	}
 #endif
-	
-	/*if(SendSSDPGoodbye(snotify, v.n_lan_addr) < 0)*/
+
 	if (GETFLAG(ENABLEUPNPMASK))
 	{
+#ifndef ENABLE_IPV6
 		if(SendSSDPGoodbye(snotify, addr_count) < 0)
+#else
+		if(SendSSDPGoodbye(snotify, addr_count * 2) < 0)
+#endif
 		{
 			syslog(LOG_ERR, "Failed to broadcast good-bye notifications");
 		}
-		for(i=0; i<addr_count; i++)
+#ifndef ENABLE_IPV6
+		for(i = 0; i < addr_count; i++)
+#else
+		for(i = 0; i < addr_count * 2; i++)
+#endif
 			close(snotify[i]);
 	}
 
-	if(unlink(pidfilename) < 0)
+	if(pidfilename && (unlink(pidfilename) < 0))
 	{
 		syslog(LOG_ERR, "Failed to remove pidfile %s: %m", pidfilename);
 	}
@@ -1709,9 +1756,9 @@ shutdown:
 	free(snatpmp);
 #endif
 	free(snotify);
-	closelog();	
+	closelog();
 	freeoptions();
-	
+
 	return 0;
 }
 
