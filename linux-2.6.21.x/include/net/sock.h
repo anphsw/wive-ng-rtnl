@@ -49,7 +49,6 @@
 #include <linux/skbuff.h>	/* struct sk_buff */
 #include <linux/mm.h>
 #include <linux/security.h>
-#include <linux/log2.h>
 
 #include <linux/filter.h>
 
@@ -398,8 +397,6 @@ enum sock_flags {
 	SOCK_RCVTSTAMP, /* %SO_TIMESTAMP setting */
 	SOCK_LOCALROUTE, /* route locally only, %SO_DONTROUTE setting */
 	SOCK_QUEUE_SHRUNK, /* write queue has been shrunk recently */
-	SOCK_VMIO, /* the VM depends on us - make sure we're serviced */
-	SOCK_KERNEL, /* userspace cannot touch this socket */
 	SOCK_FASYNC, /* fasync() active */
 };
 
@@ -421,50 +418,6 @@ static inline void sock_reset_flag(struct sock *sk, enum sock_flags flag)
 static inline int sock_flag(struct sock *sk, enum sock_flags flag)
 {
 	return test_bit(flag, &sk->sk_flags);
-}
-
-static inline int sk_has_vmio(struct sock *sk)
-{
-	return sock_flag(sk, SOCK_VMIO);
-}
-
-/*
- * Guestimate the per request queue TX upper bound.
- *
- * Max packet size is 64k, and we need to reserve that much since the data
- * might need to bounce it. Double it to be on the safe side.
- */
-#define TX_RESERVE_PAGES DIV_ROUND_UP(2*65536, PAGE_SIZE)
-
-extern atomic_t vmio_socks;
-
-static inline int sk_vmio_socks(void)
-{
-	return atomic_read(&vmio_socks);
-}
-
-extern int rx_emergency_get(int bytes);
-extern int rx_emergency_get_overcommit(int bytes);
-extern void rx_emergency_put(int bytes);
-
-static inline
-int guess_kmem_cache_pages(struct kmem_cache *cachep, int nr_objs)
-{
-	int guess = DIV_ROUND_UP((kmem_cache_objsize(cachep) * nr_objs),
-			PAGE_SIZE);
-	guess += ilog2(guess);
-	return guess;
-}
-
-extern void sk_adjust_memalloc(int socks, int tx_reserve_pages);
-extern void skb_reserve_memory(int skb_reserve_bytes);
-extern void aux_reserve_memory(int aux_reserve_pages);
-extern int sk_set_vmio(struct sock *sk);
-extern int sk_clear_vmio(struct sock *sk);
-
-static inline gfp_t sk_allocation(struct sock *sk, gfp_t gfp_mask)
-{
-	return gfp_mask | (sk->sk_allocation & __GFP_EMERGENCY);
 }
 
 static inline void sk_acceptq_removed(struct sock *sk)
@@ -531,15 +484,6 @@ static inline void sk_add_backlog(struct sock *sk, struct sk_buff *skb)
 	}
 	skb->next = NULL;
 }
-
-#ifndef CONFIG_NETVM
-static inline int sk_backlog_rcv(struct sock *sk, struct sk_buff *skb)
-{
-	return sk->sk_backlog_rcv(sk, skb);
-}
-#else
-extern int sk_backlog_rcv(struct sock *sk, struct sk_buff *skb);
-#endif
 
 #define sk_wait_event(__sk, __timeo, __condition)			\
 	({	int __rc;						\
@@ -756,8 +700,7 @@ static inline struct inode *SOCK_INODE(struct socket *socket)
 }
 
 extern void __sk_stream_mem_reclaim(struct sock *sk);
-extern int sk_stream_mem_schedule(struct sock *sk, struct sk_buff *skb,
-		int size, int kind);
+extern int sk_stream_mem_schedule(struct sock *sk, int size, int kind);
 
 #define SK_STREAM_MEM_QUANTUM ((int)PAGE_SIZE)
 #define SK_STREAM_MEM_QUANTUM_SHIFT ilog2(SK_STREAM_MEM_QUANTUM)
@@ -785,13 +728,13 @@ static inline void sk_stream_writequeue_purge(struct sock *sk)
 static inline int sk_stream_rmem_schedule(struct sock *sk, struct sk_buff *skb)
 {
 	return (int)skb->truesize <= sk->sk_forward_alloc ||
-		sk_stream_mem_schedule(sk, skb, skb->truesize, 1);
+		sk_stream_mem_schedule(sk, skb->truesize, 1);
 }
 
 static inline int sk_stream_wmem_schedule(struct sock *sk, int size)
 {
 	return size <= sk->sk_forward_alloc ||
-	       sk_stream_mem_schedule(sk, NULL, size, 0);
+	       sk_stream_mem_schedule(sk, size, 0);
 }
 
 /* Used by processes to "lock" a socket state, so that
@@ -955,9 +898,6 @@ static inline int sk_filter(struct sock *sk, struct sk_buff *skb)
 {
 	int err;
 	struct sk_filter *filter;
-
-	if (skb_emergency(skb) && !sk_has_vmio(sk))
-		return -EPERM;
 	
 	err = security_sock_rcv_skb(sk, skb);
 	if (err)

@@ -354,19 +354,6 @@ static void object_err(struct kmem_cache *s, struct page *page,
 	dump_stack();
 }
 
-static void slab_err(struct kmem_cache *s, struct page *page, char *reason, ...)
-{
-	va_list args;
-	char buf[100];
-
-	va_start(args, reason);
-	vsnprintf(buf, sizeof(buf), reason, args);
-	va_end(args);
-	printk(KERN_ERR "*** SLUB %s: %s in slab @0x%p\n", s->name, buf,
-		page);
-	dump_stack();
-}
-
 static void init_object(struct kmem_cache *s, void *object, int active)
 {
 	u8 *p = object;
@@ -861,13 +848,13 @@ static void __free_slab(struct kmem_cache *s, struct page *page)
 {
 	int pages = 1 << s->order;
 
-	if (unlikely(SlabDebug(page))) {
+	if (unlikely(PageError(page))) {
 		void *start = page_address(page);
 		void *end = start + (pages << PAGE_SHIFT);
 		void *p;
 
 		slab_pad_check(s, page);
-		for_each_object(p, s, page_address(page))
+		for (p = start; p <= end - s->size; p += s->size)
 			check_object(s, page, p, 0);
 	}
 
@@ -1737,7 +1724,6 @@ EXPORT_SYMBOL(kmem_cache_open);
 int kmem_ptr_validate(struct kmem_cache *s, const void *object)
 {
 	struct page * page;
-	void *addr;
 
 	page = get_object_page(object);
 

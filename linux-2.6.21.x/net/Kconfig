@@ -234,10 +234,6 @@ config W7_LOGO
 	bool "This is hacks for Windows Vista/7 compatable test check OK (Vista/W7 Logo test)"
 	default y
 
-config NETVM
-	bool "This is hacks present memory reservaion for network stack. This is ~30% speedup some network operations."
-	default y
-
 endif   # if NET
 endmenu # Networking
 

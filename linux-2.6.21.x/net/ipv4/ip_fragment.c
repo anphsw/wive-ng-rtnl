@@ -775,7 +775,6 @@ void __init ipfrag_init(void)
 	ipfrag_secret_timer.function = ipfrag_secret_rebuild;
 	ipfrag_secret_timer.expires = jiffies + sysctl_ipfrag_secret_interval;
 	add_timer(&ipfrag_secret_timer);
-	skb_reserve_memory(sysctl_ipfrag_high_thresh);
 }
 
 EXPORT_SYMBOL(ip_defrag);

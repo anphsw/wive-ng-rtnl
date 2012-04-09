@@ -578,8 +578,7 @@ static int tcp_v6_md5_do_add(struct sock *sk, struct in6_addr *peer,
 	} else {
 		/* reallocate new list if current one is full. */
 		if (!tp->md5sig_info) {
-			tp->md5sig_info = kzalloc(sizeof(*tp->md5sig_info),
-					sk_allocation(sk, GFP_ATOMIC));
+			tp->md5sig_info = kzalloc(sizeof(*tp->md5sig_info), GFP_ATOMIC);
 			if (!tp->md5sig_info) {
 				kfree(newkey);
 				return -ENOMEM;
@@ -591,8 +590,7 @@ static int tcp_v6_md5_do_add(struct sock *sk, struct in6_addr *peer,
 		}
 		if (tp->md5sig_info->alloced6 == tp->md5sig_info->entries6) {
 			keys = kmalloc((sizeof (tp->md5sig_info->keys6[0]) *
-				       (tp->md5sig_info->entries6 + 1)),
-				       sk_allocation(sk, GFP_ATOMIC));
+				       (tp->md5sig_info->entries6 + 1)), GFP_ATOMIC);
 
 			if (!keys) {
 				tcp_free_md5sig_pool();
@@ -715,7 +713,7 @@ static int tcp_v6_parse_md5_keys (struct sock *sk, char __user *optval,
 		struct tcp_sock *tp = tcp_sk(sk);
 		struct tcp_md5sig_info *p;
 
-		p = kzalloc(sizeof(struct tcp_md5sig_info), sk->allocation);
+		p = kzalloc(sizeof(struct tcp_md5sig_info), GFP_KERNEL);
 		if (!p)
 			return -ENOMEM;
 
@@ -1009,7 +1007,7 @@ static void tcp_v6_send_reset(struct sock *sk, struct sk_buff *skb)
 	 */
 
 	buff = alloc_skb(MAX_HEADER + sizeof(struct ipv6hdr) + tot_len,
-			 sk_allocation(sk, GFP_ATOMIC));
+			 GFP_ATOMIC);
 	if (buff == NULL)
 		return;
 
@@ -1090,12 +1088,10 @@ static void tcp_v6_send_ack(struct tcp_timewait_sock *tw,
 	struct tcp_md5sig_key *key;
 	struct tcp_md5sig_key tw_key;
 #endif
-	gfp_t gfp_mask = GFP_ATOMIC;
 
 #ifdef CONFIG_TCP_MD5SIG
 	if (!tw && skb->sk) {
 		key = tcp_v6_md5_do_lookup(skb->sk, &skb->nh.ipv6h->daddr);
-		gfp_mask = sk_allocation(skb->sk, gfp_mask);
 	} else if (tw && tw->tw_md5_keylen) {
 		tw_key.key = tw->tw_md5_key;
 		tw_key.keylen = tw->tw_md5_keylen;
@@ -1113,7 +1109,7 @@ static void tcp_v6_send_ack(struct tcp_timewait_sock *tw,
 #endif
 
 	buff = alloc_skb(MAX_HEADER + sizeof(struct ipv6hdr) + tot_len,
-			 gfp_mask);
+			 GFP_ATOMIC);
 	if (buff == NULL)
 		return;
 

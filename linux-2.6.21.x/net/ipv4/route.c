@@ -2721,21 +2721,6 @@ static int ipv4_sysctl_rtcache_flush_strategy(ctl_table *table,
 	return 0;
 }
 
-static int proc_dointvec_rt_size(ctl_table *table, int write, struct file *filp,
-		     void __user *buffer, size_t *lenp, loff_t *ppos)
-{
-	int ret;
-	int new_pages;
-	int old_pages = guess_kmem_cache_pages(ipv4_dst_ops.kmem_cachep,
-			*(int *)table->data);
-	ret = proc_dointvec(table,write,filp,buffer,lenp,ppos);
-	new_pages = guess_kmem_cache_pages(ipv4_dst_ops.kmem_cachep,
-			*(int *)table->data);
-	if (write && (new_pages - old_pages))
-		aux_reserve_memory(new_pages - old_pages);
-	return ret;
-}
-
 ctl_table ipv4_route_table[] = {
 	{
 		.ctl_name 	= NET_IPV4_ROUTE_FLUSH,
@@ -2778,7 +2763,7 @@ ctl_table ipv4_route_table[] = {
 		.data		= &ip_rt_max_size,
 		.maxlen		= sizeof(int),
 		.mode		= 0644,
-		.proc_handler	= &proc_dointvec_rt_size,
+		.proc_handler	= &proc_dointvec,
 	},
 	{
 		/*  Deprecated. Use gc_min_interval_ms */
@@ -2999,7 +2984,6 @@ int __init ip_rt_init(void)
 
 	ipv4_dst_ops.gc_thresh = (rt_hash_mask + 1);
 	ip_rt_max_size = (rt_hash_mask + 1) * 8; /* normal speed and normal stability */
-	aux_reserve_memory(guess_kmem_cache_pages(ipv4_dst_ops.kmem_cachep, ip_rt_max_size));
 
 	devinet_init();
 	ip_fib_init();

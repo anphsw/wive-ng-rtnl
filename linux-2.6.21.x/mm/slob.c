@@ -231,15 +231,6 @@ unsigned int ksize(const void *block)
 	return ((slob_t *)block - 1)->units * SLOB_UNIT;
 }
 
-unsigned int kobjsize(size_t size)
-{
-	if (size < PAGE_SIZE)
-		return size;
-
-	return PAGE_SIZE << find_order(size);
-}
-EXPORT_SYMBOL_GPL(kobjsize);
-
 struct kmem_cache {
 	unsigned int size, align;
 	const char *name;
@@ -315,15 +306,6 @@ unsigned int kmem_cache_size(struct kmem_cache *c)
 	return c->size;
 }
 EXPORT_SYMBOL(kmem_cache_size);
-
-unsigned int kmem_cache_objsize(struct kmem_cache *c)
-{
-	if (c->size < PAGE_SIZE)
-		return c->size + c->align;
-
-	return PAGE_SIZE << find_order(c->size);
-}
-EXPORT_SYMBOL_GPL(kmem_cache_objsize);
 
 const char *kmem_cache_name(struct kmem_cache *c)
 {

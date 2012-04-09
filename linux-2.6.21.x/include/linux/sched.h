@@ -1221,10 +1221,6 @@ static inline void put_task_struct(struct task_struct *t)
 #define tsk_used_math(p) ((p)->flags & PF_USED_MATH)
 #define used_math() tsk_used_math(current)
 
-#define tsk_restore_flags(p, pflags, mask) \
-	do {	(p)->flags &= ~(mask); \
-		(p)->flags |= ((pflags) & (mask)); } while (0)
-
 #ifdef CONFIG_SMP
 extern int set_cpus_allowed(struct task_struct *p, cpumask_t new_mask);
 #else

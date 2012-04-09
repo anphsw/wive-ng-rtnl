@@ -199,10 +199,5 @@ config ZONE_DMA_FLAG
 	default "0" if !ZONE_DMA
 	default "1"
 
-config SLAB_FAIR
-	bool "Alloc memory by rankinkg."
-	default y
-	depends on SLAB
-
 config HAVE_GET_USER_PAGES_FAST
 	bool

@@ -53,7 +53,6 @@ void *kmem_cache_alloc(struct kmem_cache *, gfp_t);
 void *kmem_cache_zalloc(struct kmem_cache *, gfp_t);
 void kmem_cache_free(struct kmem_cache *, void *);
 unsigned int kmem_cache_size(struct kmem_cache *);
-unsigned int kmem_cache_objsize(struct kmem_cache *);
 const char *kmem_cache_name(struct kmem_cache *);
 int kmem_ptr_validate(struct kmem_cache *cachep, const void *ptr);
 
@@ -68,28 +67,12 @@ static inline void *kmem_cache_alloc_node(struct kmem_cache *cachep,
 #endif
 
 /*
- * The largest kmalloc size supported by the slab allocators is
- * 32 megabyte (2^25) or the maximum allocatable page order if that is
- * less than 32 MB.
- *
- * WARNING: Its not easy to increase this value since the allocators have
- * to do various tricks to work around compiler limitations in order to
- * ensure proper constant folding.
- */
-#define KMALLOC_SHIFT_HIGH	((MAX_ORDER + PAGE_SHIFT - 1) <= 25 ? \
-				(MAX_ORDER + PAGE_SHIFT - 1) : 25)
-
-#define KMALLOC_MAX_SIZE	(1UL << KMALLOC_SHIFT_HIGH)
-#define KMALLOC_MAX_ORDER	(KMALLOC_SHIFT_HIGH - PAGE_SHIFT)
-
-/*
  * Common kmalloc functions provided by all allocators
  */
 void *__kmalloc(size_t, gfp_t);
 void *__kzalloc(size_t, gfp_t);
 void kfree(const void *);
 unsigned int ksize(const void *);
-unsigned int kobjsize(size_t);
 
 /**
  * kcalloc - allocate memory for an array. The memory is set to zero.
@@ -110,7 +93,10 @@ static inline void *kcalloc(size_t n, size_t size, gfp_t flags)
  * the appropriate general cache at compile time.
  */
 
-#if defined(CONFIG_SLAB) || defined(CONFIG_SLUB)
+#define KMALLOC_MAX_SIZE	(1UL << KMALLOC_SHIFT_HIGH)
+#define KMALLOC_MAX_ORDER	(KMALLOC_SHIFT_HIGH - PAGE_SHIFT)
+
+#if defined(CONFIG_SLAB) || defined(CONFIG_SLUB) || defined(CONFIG_SLOB)
 #ifdef CONFIG_SLUB
 #include <linux/slub_def.h>
 #else

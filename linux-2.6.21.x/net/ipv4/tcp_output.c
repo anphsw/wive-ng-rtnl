@@ -2003,8 +2003,7 @@ void tcp_send_fin(struct sock *sk)
 	} else {
 		/* Socket is locked, keep trying until memory is available. */
 		for (;;) {
-			skb = alloc_skb_fclone(MAX_TCP_HEADER,
-					       sk->sk_allocation);
+			skb = alloc_skb_fclone(MAX_TCP_HEADER, GFP_KERNEL);
 			if (skb)
 				break;
 			yield();
@@ -2037,7 +2036,7 @@ void tcp_send_active_reset(struct sock *sk, gfp_t priority)
 	struct sk_buff *skb;
 
 	/* NOTE: No TCP options attached and we never retransmit this. */
-	skb = alloc_skb(MAX_TCP_HEADER, sk_allocation(sk, priority));
+	skb = alloc_skb(MAX_TCP_HEADER, priority);
 	if (!skb) {
 		NET_INC_STATS(LINUX_MIB_TCPABORTFAILED);
 		return;
@@ -2111,8 +2110,7 @@ struct sk_buff * tcp_make_synack(struct sock *sk, struct dst_entry *dst,
 #endif
 	int mss;
 
-	skb = sock_wmalloc(sk, MAX_TCP_HEADER + 15, 1,
-			sk_allocation(sk, GFP_ATOMIC));
+	skb = sock_wmalloc(sk, MAX_TCP_HEADER + 15, 1, GFP_ATOMIC);
 	if (skb == NULL)
 		return NULL;
 
@@ -2376,7 +2374,7 @@ void tcp_send_ack(struct sock *sk)
 		 * tcp_transmit_skb() will set the ownership to this
 		 * sock.
 		 */
-		buff = alloc_skb(MAX_TCP_HEADER, sk_allocation(sk, GFP_ATOMIC));
+		buff = alloc_skb(MAX_TCP_HEADER, GFP_ATOMIC);
 		if (buff == NULL) {
 			inet_csk_schedule_ack(sk);
 			inet_csk(sk)->icsk_ack.ato = TCP_ATO_MIN;
@@ -2418,7 +2416,7 @@ static int tcp_xmit_probe_skb(struct sock *sk, int urgent)
 	struct sk_buff *skb;
 
 	/* We don't queue it, tcp_transmit_skb() sets ownership. */
-	skb = alloc_skb(MAX_TCP_HEADER, sk_allocation(sk, GFP_ATOMIC));
+	skb = alloc_skb(MAX_TCP_HEADER, GFP_ATOMIC);
 	if (skb == NULL)
 		return -1;
 

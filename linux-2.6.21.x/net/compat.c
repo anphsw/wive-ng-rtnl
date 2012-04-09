@@ -171,7 +171,7 @@ int cmsghdr_from_user_compat_to_kern(struct msghdr *kmsg, struct sock *sk,
 	 * from the user.
 	 */
 	if (kcmlen > stackbuf_size)
-		kcmsg_base = kcmsg = sock_kmalloc(sk, kcmlen, sk->sk_allocation);
+		kcmsg_base = kcmsg = sock_kmalloc(sk, kcmlen, GFP_KERNEL);
 	if (kcmsg == NULL)
 		return -ENOBUFS;
 

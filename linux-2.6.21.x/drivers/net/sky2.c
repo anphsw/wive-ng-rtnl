@@ -1088,7 +1088,7 @@ static struct sk_buff *sky2_rx_alloc(struct sky2_port *sky2)
 	skb_reserve(skb, ALIGN(p, RX_SKB_ALIGN) - p);
 
 	for (i = 0; i < sky2->rx_nfrags; i++) {
-		struct page *page = netdev_alloc_page(sky2->netdev);
+		struct page *page = alloc_page(GFP_ATOMIC);
 
 		if (!page)
 			goto free_partial;
@@ -1979,8 +1979,8 @@ static struct sk_buff *receive_copy(struct sky2_port *sky2,
 }
 
 /* Adjust length of skb with fragments to match received data */
-static void skb_put_frags(struct sky2_port *sky2, struct sk_buff *skb,
-			  unsigned int hdr_space, unsigned int length)
+static void skb_put_frags(struct sk_buff *skb, unsigned int hdr_space,
+			  unsigned int length)
 {
 	int i, num_frags;
 	unsigned int size;
@@ -1997,11 +1997,15 @@ static void skb_put_frags(struct sky2_port *sky2, struct sk_buff *skb,
 
 		if (length == 0) {
 			/* don't need this page */
-			netdev_free_page(sky2->netdev, frag->page);
+			__free_page(frag->page);
 			--skb_shinfo(skb)->nr_frags;
 		} else {
 			size = min(length, (unsigned) PAGE_SIZE);
-			skb_add_rx_frag(skb, i, frag->page, 0, size);
+
+			frag->size = size;
+			skb->data_len += size;
+			skb->truesize += size;
+			skb->len += size;
 			length -= size;
 		}
 	}
@@ -2030,7 +2034,7 @@ static struct sk_buff *receive_new(struct sky2_port *sky2,
 	sky2_rx_map_skb(sky2->hw->pdev, re, hdr_space);
 
 	if (skb_shinfo(skb)->nr_frags)
-		skb_put_frags(sky2, skb, hdr_space, length);
+		skb_put_frags(skb, hdr_space, length);
 	else
 		skb_put(skb, length);
 	return skb;

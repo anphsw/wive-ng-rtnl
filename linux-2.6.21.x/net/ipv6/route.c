@@ -2446,21 +2446,6 @@ int ipv6_sysctl_rtcache_flush(ctl_table *ctl, int write, struct file * filp,
 		return -EINVAL;
 }
 
-static int proc_dointvec_rt_size(ctl_table *table, int write, struct file *filp,
-		     void __user *buffer, size_t *lenp, loff_t *ppos)
-{
-	int ret;
-	int new_pages;
-	int old_pages = guess_kmem_cache_pages(ip6_dst_ops.kmem_cachep,
-			*(int *)table->data);
-	ret = proc_dointvec(table,write,filp,buffer,lenp,ppos);
-	new_pages = guess_kmem_cache_pages(ip6_dst_ops.kmem_cachep,
-			*(int *)table->data);
-	if (write && (new_pages - old_pages))
-		aux_reserve_memory(new_pages - old_pages);
-	return ret;
-}
-
 ctl_table ipv6_route_table[] = {
 	{
 		.ctl_name	=	NET_IPV6_ROUTE_FLUSH,
@@ -2484,7 +2469,7 @@ ctl_table ipv6_route_table[] = {
 		.data		=	&ip6_rt_max_size,
 		.maxlen		=	sizeof(int),
 		.mode		=	0644,
-         	.proc_handler	=	&proc_dointvec_rt_size,
+		.proc_handler	=	&proc_dointvec,
 	},
 	{
 		.ctl_name	=	NET_IPV6_ROUTE_GC_MIN_INTERVAL,
@@ -2569,8 +2554,6 @@ void __init ip6_route_init(void)
 
 	proc_net_fops_create("rt6_stats", S_IRUGO, &rt6_stats_seq_fops);
 #endif
-	aux_reserve_memory(guess_kmem_cache_pages(ip6_dst_ops.kmem_cachep,
-				ip6_rt_max_size));
 #ifdef CONFIG_XFRM
 	xfrm6_init();
 #endif

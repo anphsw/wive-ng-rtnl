@@ -551,9 +551,9 @@ static int zoneinfo_show(struct seq_file *m, void *arg)
 			   "\n        spanned  %lu"
 			   "\n        present  %lu",
 			   zone_page_state(zone, NR_FREE_PAGES),
-			   zone->pages_emerg + zone->pages_min,
-			   zone->pages_emerg + zone->pages_low,
-			   zone->pages_emerg + zone->pages_high,
+			   zone->pages_min,
+			   zone->pages_low,
+			   zone->pages_high,
 			   zone->pages_scanned,
 			   zone->nr_scan_active, zone->nr_scan_inactive,
 			   zone->spanned_pages,
