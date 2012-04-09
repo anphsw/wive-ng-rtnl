@@ -267,8 +267,7 @@ qeth_eddp_copy_data_tcp(char *dst, struct qeth_eddp_data *eddp, int len,
 
 	QETH_DBF_TEXT(trace, 5, "eddpcdtc");
 	if (skb_shinfo(eddp->skb)->nr_frags == 0) {
-		skb_copy_from_linear_data_offset(eddp->skb, eddp->skb_offset,
-						 dst, len);
+		memcpy(dst, eddp->skb->data + eddp->skb_offset, len);
 		*hcsum = csum_partial(eddp->skb->data + eddp->skb_offset, len,
 				      *hcsum);
 		eddp->skb_offset += len;

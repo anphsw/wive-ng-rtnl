@@ -936,7 +936,7 @@ static void ni52_rcv_int(struct net_device *dev)
 					{
 						skb_reserve(skb,2);
 						skb_put(skb,totlen);
-						skb_copy_to_linear_data(skb,(char *) p->base+(unsigned long) rbd->buffer,totlen);
+						eth_copy_and_sum(skb,(char *) p->base+(unsigned long) rbd->buffer,totlen,0);
 						skb->protocol=eth_type_trans(skb,dev);
 						netif_rx(skb);
 						dev->last_rx = jiffies;
@@ -1182,7 +1182,7 @@ static int ni52_send_packet(struct sk_buff *skb, struct net_device *dev)
 	else
 #endif
 	{
-		skb_copy_from_linear_data(skb, p->xmit_cbuffs[p->xmit_count], skb->len);
+		memcpy((char *)p->xmit_cbuffs[p->xmit_count],(char *)(skb->data),skb->len);
 		len = skb->len;
 		if (len < ETH_ZLEN) {
 			len = ETH_ZLEN;

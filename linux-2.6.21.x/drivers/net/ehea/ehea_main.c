@@ -391,8 +391,8 @@ static int ehea_poll(struct net_device *dev, int *budget)
 					if (!skb)
 						break;
 				}
-				skb_copy_to_linear_data(skb, ((char*)cqe) + 64,
-					       cqe->num_bytes_transfered - 4);
+				memcpy(skb->data, ((char*)cqe) + 64,
+				       cqe->num_bytes_transfered - 4);
 				ehea_fill_skb(dev, skb, cqe);
 			} else if (rq == 2) {  /* RQ2 */
 				skb = get_skb_by_index(skb_arr_rq2,
@@ -1306,7 +1306,7 @@ static void write_swqe2_TSO(struct sk_buff *skb,
 
 	if (skb_data_size >= headersize) {
 		/* copy immediate data */
-		skb_copy_from_linear_data(skb, imm_data, headersize);
+		memcpy(imm_data, skb->data, headersize);
 		swqe->immediate_data_length = headersize;
 
 		if (skb_data_size > headersize) {
@@ -1337,7 +1337,7 @@ static void write_swqe2_nonTSO(struct sk_buff *skb,
 	 */
 	if (skb_data_size >= SWQE2_MAX_IMM) {
 		/* copy immediate data */
-		skb_copy_from_linear_data(skb, imm_data, SWQE2_MAX_IMM);
+		memcpy(imm_data, skb->data, SWQE2_MAX_IMM);
 
 		swqe->immediate_data_length = SWQE2_MAX_IMM;
 
@@ -1350,7 +1350,7 @@ static void write_swqe2_nonTSO(struct sk_buff *skb,
 			swqe->descriptors++;
 		}
 	} else {
-		skb_copy_from_linear_data(skb, imm_data, skb_data_size);
+		memcpy(imm_data, skb->data, skb_data_size);
 		swqe->immediate_data_length = skb_data_size;
 	}
 }
@@ -1770,11 +1770,10 @@ static void ehea_xmit3(struct sk_buff *skb, struct net_device *dev,
 	/* copy (immediate) data */
 	if (nfrags == 0) {
 		/* data is in a single piece */
-		skb_copy_from_linear_data(skb, imm_data, skb->len);
+		memcpy(imm_data, skb->data, skb->len);
 	} else {
 		/* first copy data from the skb->data buffer ... */
-		skb_copy_from_linear_data(skb, imm_data,
-					  skb->len - skb->data_len);
+		memcpy(imm_data, skb->data, skb->len - skb->data_len);
 		imm_data += skb->len - skb->data_len;
 
 		/* ... then copy data from the fragments */

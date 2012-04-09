@@ -1063,7 +1063,7 @@ static inline struct sk_buff *get_packet(struct pci_dev *pdev,
 					    pci_unmap_addr(ce, dma_addr),
 					    pci_unmap_len(ce, dma_len),
 					    PCI_DMA_FROMDEVICE);
-		skb_copy_from_linear_data(ce->skb, skb->data, len);
+		memcpy(skb->data, ce->skb->data, len);
 		pci_dma_sync_single_for_device(pdev,
 					       pci_unmap_addr(ce, dma_addr),
 					       pci_unmap_len(ce, dma_len),
@@ -2096,14 +2096,10 @@ static void espibug_workaround_t204(unsigned long data)
 					0x0, 0x7, 0x43, 0x0, 0x0, 0x0
 				};
 
-				skb_copy_to_linear_data_offset(skb,
-						    sizeof(struct cpl_tx_pkt),
-							       ch_mac_addr,
-							       ETH_ALEN);
-				skb_copy_to_linear_data_offset(skb,
-							       skb->len - 10,
-							       ch_mac_addr,
-							       ETH_ALEN);
+				memcpy(skb->data + sizeof(struct cpl_tx_pkt),
+					ch_mac_addr, ETH_ALEN);
+				memcpy(skb->data + skb->len - 10,
+					ch_mac_addr, ETH_ALEN);
 				skb->cb[0] = 0xff;
 			}
 
@@ -2130,14 +2126,10 @@ static void espibug_workaround(unsigned long data)
 	                if (!skb->cb[0]) {
 	                        u8 ch_mac_addr[ETH_ALEN] =
 	                            {0x0, 0x7, 0x43, 0x0, 0x0, 0x0};
-	                        skb_copy_to_linear_data_offset(skb,
-						     sizeof(struct cpl_tx_pkt),
-							       ch_mac_addr,
-							       ETH_ALEN);
-	                        skb_copy_to_linear_data_offset(skb,
-							       skb->len - 10,
-							       ch_mac_addr,
-							       ETH_ALEN);
+	                        memcpy(skb->data + sizeof(struct cpl_tx_pkt),
+	                               ch_mac_addr, ETH_ALEN);
+	                        memcpy(skb->data + skb->len - 10, ch_mac_addr,
+	                               ETH_ALEN);
 	                        skb->cb[0] = 0xff;
 	                }
 

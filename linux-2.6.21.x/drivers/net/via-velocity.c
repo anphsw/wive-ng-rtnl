@@ -1339,8 +1339,7 @@ static inline int velocity_rx_copy(struct sk_buff **rx_skb, int pkt_size,
 			if (vptr->flags & VELOCITY_FLAGS_IP_ALIGN)
 				skb_reserve(new_skb, 2);
 
-			skb_copy_from_linear_data(rx_skb[0], new_skb->data,
-						  pkt_size);
+			memcpy(new_skb->data, rx_skb[0]->data, pkt_size);
 			*rx_skb = new_skb;
 			ret = 0;
 		}
@@ -1928,7 +1927,7 @@ static int velocity_xmit(struct sk_buff *skb, struct net_device *dev)
 	if (pktlen < ETH_ZLEN) {
 		/* Cannot occur until ZC support */
 		pktlen = ETH_ZLEN;
-		skb_copy_from_linear_data(skb, tdinfo->buf, skb->len);
+		memcpy(tdinfo->buf, skb->data, skb->len);
 		memset(tdinfo->buf + skb->len, 0, ETH_ZLEN - skb->len);
 		tdinfo->skb = skb;
 		tdinfo->skb_dma[0] = tdinfo->buf_dma;
@@ -1944,7 +1943,7 @@ static int velocity_xmit(struct sk_buff *skb, struct net_device *dev)
 		int nfrags = skb_shinfo(skb)->nr_frags;
 		tdinfo->skb = skb;
 		if (nfrags > 6) {
-			skb_copy_from_linear_data(skb, tdinfo->buf, skb->len);
+			memcpy(tdinfo->buf, skb->data, skb->len);
 			tdinfo->skb_dma[0] = tdinfo->buf_dma;
 			td_ptr->tdesc0.pktsize =
 			td_ptr->td_buf[0].pa_low = cpu_to_le32(tdinfo->skb_dma[0]);

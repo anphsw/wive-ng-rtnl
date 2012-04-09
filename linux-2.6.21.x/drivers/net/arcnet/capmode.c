@@ -273,8 +273,7 @@ static int ack_tx(struct net_device *dev, int acked)
   /* skb_pull(ackskb, ARC_HDR_SIZE); */
 
 
-  skb_copy_from_linear_data(lp->outgoing.skb, ackpkt,
-		ARC_HDR_SIZE + sizeof(struct arc_cap));
+  memcpy(ackpkt, lp->outgoing.skb->data, ARC_HDR_SIZE+sizeof(struct arc_cap));
   ackpkt->soft.cap.proto=0; /* using protocol 0 for acknowledge */
   ackpkt->soft.cap.mes.ack=acked;
 

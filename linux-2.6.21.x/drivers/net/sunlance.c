@@ -549,9 +549,9 @@ static void lance_rx_dvma(struct net_device *dev)
 
 			skb_reserve(skb, 2);		/* 16 byte align */
 			skb_put(skb, len);		/* make room */
-			skb_copy_to_linear_data(skb,
+			eth_copy_and_sum(skb,
 					 (unsigned char *)&(ib->rx_buf [entry][0]),
-					 len);
+					 len, 0);
 			skb->protocol = eth_type_trans(skb, dev);
 			netif_rx(skb);
 			dev->last_rx = jiffies;
@@ -1143,7 +1143,7 @@ static int lance_start_xmit(struct sk_buff *skb, struct net_device *dev)
 		struct lance_init_block *ib = lp->init_block_mem;
 		ib->btx_ring [entry].length = (-len) | 0xf000;
 		ib->btx_ring [entry].misc = 0;
-		skb_copy_from_linear_data(skb, &ib->tx_buf [entry][0], skblen);
+		memcpy((char *)&ib->tx_buf [entry][0], skb->data, skblen);
 		if (len != skblen)
 			memset((char *) &ib->tx_buf [entry][skblen], 0, len - skblen);
 		ib->btx_ring [entry].tmd1_bits = (LE_T1_POK | LE_T1_OWN);

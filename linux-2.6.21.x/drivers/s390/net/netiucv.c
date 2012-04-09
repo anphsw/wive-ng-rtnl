@@ -645,8 +645,7 @@ static void netiucv_unpack_skb(struct iucv_connection *conn,
 			privptr->stats.rx_dropped++;
 			return;
 		}
-		skb_copy_from_linear_data(pskb, skb_put(skb, pskb->len),
-					  pskb->len);
+		memcpy(skb_put(skb, pskb->len), pskb->data, pskb->len);
 		skb_reset_mac_header(skb);
 		skb->dev = pskb->dev;
 		skb->protocol = pskb->protocol;
@@ -743,9 +742,7 @@ static void conn_action_txdone(fsm_instance *fi, int event, void *arg)
 		header.next = conn->tx_buff->len + skb->len + NETIUCV_HDRLEN;
 		memcpy(skb_put(conn->tx_buff, NETIUCV_HDRLEN), &header,
 		       NETIUCV_HDRLEN);
-		skb_copy_from_linear_data(skb,
-					  skb_put(conn->tx_buff, skb->len),
-					  skb->len);
+		memcpy(skb_put(conn->tx_buff, skb->len), skb->data, skb->len);
 		txbytes += skb->len;
 		txpackets++;
 		stat_maxcq++;

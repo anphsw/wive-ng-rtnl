@@ -1702,7 +1702,7 @@ static int lmc_rx (struct net_device *dev) /*fold00*/
             if(!nsb) {
                 goto give_it_anyways;
             }
-            skb_copy_from_linear_data(skb, skb_put(nsb, len), len);
+            memcpy(skb_put(nsb, len), skb->data, len);
             
             nsb->protocol = lmc_proto_type(sc, skb);
             skb_reset_mac_header(nsb);

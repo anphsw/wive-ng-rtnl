@@ -129,8 +129,7 @@ static inline void nf_bridge_save_header(struct sk_buff *skb)
 	if (skb->protocol == htons(ETH_P_8021Q))
 		header_size += VLAN_HLEN;
 
-	skb_copy_from_linear_data_offset(skb, -header_size,
-					 skb->nf_bridge->data, header_size);
+	memcpy(skb->nf_bridge->data, skb->data - header_size, header_size);
 }
 
 /* PF_BRIDGE/PRE_ROUTING *********************************************/

@@ -124,7 +124,7 @@ static inline void cmtp_add_msgpart(struct cmtp_session *session, int id, const 
 	}
 
 	if (skb && (skb->len > 0))
-		skb_copy_from_linear_data(skb, skb_put(nskb, skb->len), skb->len);
+		memcpy(skb_put(nskb, skb->len), skb->data, skb->len);
 
 	memcpy(skb_put(nskb, count), buf, count);
 
@@ -256,7 +256,7 @@ static void cmtp_process_transmit(struct cmtp_session *session)
 			hdr[2] = size >> 8;
 		}
 
-		skb_copy_from_linear_data(skb, skb_put(nskb, size), size);
+		memcpy(skb_put(nskb, size), skb->data, size);
 		skb_pull(skb, size);
 
 		if (skb->len > 0) {

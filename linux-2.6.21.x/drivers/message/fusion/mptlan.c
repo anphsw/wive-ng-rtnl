@@ -932,7 +932,7 @@ mpt_lan_receive_post_turbo(struct net_device *dev, u32 tmsg)
 		pci_dma_sync_single_for_cpu(mpt_dev->pcidev, priv->RcvCtl[ctx].dma,
 					    priv->RcvCtl[ctx].len, PCI_DMA_FROMDEVICE);
 
-		skb_copy_from_linear_data(old_skb, skb_put(skb, len), len);
+		memcpy(skb_put(skb, len), old_skb->data, len);
 
 		pci_dma_sync_single_for_device(mpt_dev->pcidev, priv->RcvCtl[ctx].dma,
 					       priv->RcvCtl[ctx].len, PCI_DMA_FROMDEVICE);
@@ -1093,7 +1093,7 @@ mpt_lan_receive_post_reply(struct net_device *dev,
 						    priv->RcvCtl[ctx].dma,
 						    priv->RcvCtl[ctx].len,
 						    PCI_DMA_FROMDEVICE);
-			skb_copy_from_linear_data(old_skb, skb_put(skb, l), l);
+			memcpy(skb_put(skb, l), old_skb->data, l);
 
 			pci_dma_sync_single_for_device(mpt_dev->pcidev,
 						       priv->RcvCtl[ctx].dma,
@@ -1122,7 +1122,7 @@ mpt_lan_receive_post_reply(struct net_device *dev,
 					    priv->RcvCtl[ctx].len,
 					    PCI_DMA_FROMDEVICE);
 
-		skb_copy_from_linear_data(old_skb, skb_put(skb, len), len);
+		memcpy(skb_put(skb, len), old_skb->data, len);
 
 		pci_dma_sync_single_for_device(mpt_dev->pcidev,
 					       priv->RcvCtl[ctx].dma,

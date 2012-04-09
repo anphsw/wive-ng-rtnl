@@ -457,8 +457,7 @@ static void c4_dispatch_tx(avmcard *card)
 		printk(KERN_DEBUG "%s: tx put 0x%x len=%d\n",
 				card->name, skb->data[2], txlen);
 #endif
-		skb_copy_from_linear_data_offset(skb, 2, dma->sendbuf.dmabuf,
-						 skb->len - 2);
+		memcpy(dma->sendbuf.dmabuf, skb->data+2, skb->len-2);
 	}
 	txlen = (txlen + 3) & ~3;
 

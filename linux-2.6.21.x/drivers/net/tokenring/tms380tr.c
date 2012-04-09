@@ -644,7 +644,7 @@ static int tms380tr_hardware_send_packet(struct sk_buff *skb, struct net_device 
 		dmabuf  = 0;
 		i 	= tp->TplFree->TPLIndex;
 		buf 	= tp->LocalTxBuffers[i];
-		skb_copy_from_linear_data(skb, buf, length);
+		memcpy(buf, skb->data, length);
 		newbuf 	= ((char *)buf - (char *)tp) + tp->dmabuffer;
 	}
 	else {
@@ -2178,8 +2178,7 @@ static void tms380tr_rcv_status_irq(struct net_device *dev)
 				|| rpl->SkbStat == SKB_DMA_DIRECT))
 			{
 				if(rpl->SkbStat == SKB_DATA_COPY)
-					skb_copy_to_linear_data(skb, ReceiveDataPtr,
-						       Length);
+					memcpy(skb->data, ReceiveDataPtr, Length);
 
 				/* Deliver frame to system */
 				rpl->Skb = NULL;

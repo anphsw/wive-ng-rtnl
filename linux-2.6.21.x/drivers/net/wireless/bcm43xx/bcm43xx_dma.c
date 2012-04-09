@@ -998,8 +998,7 @@ static void dma_tx_fragment(struct bcm43xx_dmaring *ring,
 			assert(0);
 			return;
 		}
-		skb_copy_from_linear_data(skb, skb_put(bounce_skb, skb->len),
-					  skb->len);
+		memcpy(skb_put(bounce_skb, skb->len), skb->data, skb->len);
 		dev_kfree_skb_any(skb);
 		skb = bounce_skb;
 	}

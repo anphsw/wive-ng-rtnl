@@ -2127,7 +2127,7 @@ rx_start:
 						    (dma_addr_t) PhysAddr,
 						    FrameLength,
 						    PCI_DMA_FROMDEVICE);
-			skb_copy_to_linear_data(pNewMsg, pMsg, FrameLength);
+			memcpy(pNewMsg->data, pMsg, FrameLength);
 
 			pci_dma_sync_single_for_device(pAC->PciDev,
 						       (dma_addr_t) PhysAddr,

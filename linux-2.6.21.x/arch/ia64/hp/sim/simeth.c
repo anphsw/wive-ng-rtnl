@@ -473,7 +473,7 @@ simeth_rx(struct net_device *dev)
 		 * XXX Fix me
 		 * Should really do a csum+copy here
 		 */
-		skb_copy_to_linear_data(skb, frame, len);
+		memcpy(skb->data, frame, len);
 #endif
 		skb->protocol = eth_type_trans(skb, dev);
 

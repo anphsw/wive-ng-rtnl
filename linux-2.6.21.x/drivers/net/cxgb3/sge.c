@@ -662,7 +662,7 @@ static inline struct sk_buff *get_imm_packet(const struct rsp_desc *resp)
 
 	if (skb) {
 		__skb_put(skb, IMMED_PKT_SIZE);
-		skb_copy_to_linear_data(skb, resp->imm_data, IMMED_PKT_SIZE);
+		memcpy(skb->data, resp->imm_data, IMMED_PKT_SIZE);
 	}
 	return skb;
 }
@@ -914,8 +914,7 @@ static void write_tx_pkt_wr(struct adapter *adap, struct sk_buff *skb,
 		if (skb->len <= WR_LEN - sizeof(*cpl)) {
 			q->sdesc[pidx].skb = NULL;
 			if (!skb->data_len)
-				skb_copy_from_linear_data(skb, &d->flit[2],
-							  skb->len);
+				memcpy(&d->flit[2], skb->data, skb->len);
 			else
 				skb_copy_bits(skb, 0, &d->flit[2], skb->len);
 
@@ -1721,11 +1720,11 @@ static void skb_data_init(struct sk_buff *skb, struct sge_fl_page *p,
 {
 	skb->len = len;
 	if (len <= SKB_DATA_SIZE) {
-		skb_copy_to_linear_data(skb, p->va, len);
+		memcpy(skb->data, p->va, len);
 		skb->tail += len;
 		put_page(p->frag.page);
 	} else {
-		skb_copy_to_linear_data(skb, p->va, SKB_DATA_SIZE);
+		memcpy(skb->data, p->va, SKB_DATA_SIZE);
 		skb_shinfo(skb)->frags[0].page = p->frag.page;
 		skb_shinfo(skb)->frags[0].page_offset =
 		    p->frag.page_offset + SKB_DATA_SIZE;
@@ -1771,7 +1770,7 @@ static struct sk_buff *get_packet(struct adapter *adap, struct sge_fl *fl,
 			__skb_put(skb, len);
 			pci_dma_sync_single_for_cpu(adap->pdev, mapping, len,
 						    PCI_DMA_FROMDEVICE);
-			skb_copy_from_linear_data(sd->t.skb, skb->data, len);
+			memcpy(skb->data, sd->t.skb->data, len);
 			pci_dma_sync_single_for_device(adap->pdev, mapping, len,
 						       PCI_DMA_FROMDEVICE);
 		} else if (!drop_thres)

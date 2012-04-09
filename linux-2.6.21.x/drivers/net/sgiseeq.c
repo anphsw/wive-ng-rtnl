@@ -322,7 +322,7 @@ static inline void sgiseeq_rx(struct net_device *dev, struct sgiseeq_private *sp
 				skb_put(skb, len);
 
 				/* Copy out of kseg1 to avoid silly cache flush. */
-				skb_copy_to_linear_data(skb, pkt_pointer + 2, len);
+				eth_copy_and_sum(skb, pkt_pointer + 2, len, 0);
 				skb->protocol = eth_type_trans(skb, dev);
 
 				/* We don't want to receive our own packets */
@@ -534,7 +534,7 @@ static int sgiseeq_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	 *    entry and the HPC got to the end of the chain before we
 	 *    added this new entry and restarted it.
 	 */
-	skb_copy_from_linear_data(skb, (char *)(long)td->buf_vaddr, skblen);
+	memcpy((char *)(long)td->buf_vaddr, skb->data, skblen);
 	if (len != skblen)
 		memset((char *)(long)td->buf_vaddr + skb->len, 0, len-skblen);
 	td->tdma.cntinfo = (len & HPCDMA_BCNT) |

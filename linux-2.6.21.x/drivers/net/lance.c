@@ -987,7 +987,7 @@ static int lance_start_xmit(struct sk_buff *skb, struct net_device *dev)
 		if (lance_debug > 5)
 			printk("%s: bouncing a high-memory packet (%#x).\n",
 				   dev->name, (u32)isa_virt_to_bus(skb->data));
-		skb_copy_from_linear_data(skb, &lp->tx_bounce_buffs[entry], skb->len);
+		memcpy(&lp->tx_bounce_buffs[entry], skb->data, skb->len);
 		lp->tx_ring[entry].base =
 			((u32)isa_virt_to_bus((lp->tx_bounce_buffs + entry)) & 0xffffff) | 0x83000000;
 		dev_kfree_skb(skb);
@@ -1185,9 +1185,9 @@ lance_rx(struct net_device *dev)
 				}
 				skb_reserve(skb,2);	/* 16 byte align */
 				skb_put(skb,pkt_len);	/* Make room */
-				skb_copy_to_linear_data(skb,
+				eth_copy_and_sum(skb,
 					(unsigned char *)isa_bus_to_virt((lp->rx_ring[entry].base & 0x00ffffff)),
-					pkt_len);
+					pkt_len,0);
 				skb->protocol=eth_type_trans(skb,dev);
 				netif_rx(skb);
 				dev->last_rx = jiffies;

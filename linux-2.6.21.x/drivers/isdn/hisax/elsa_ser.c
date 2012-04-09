@@ -254,16 +254,14 @@ write_modem(struct BCState *bcs) {
 	count = len;
 	if (count > MAX_MODEM_BUF - fp) {
 		count = MAX_MODEM_BUF - fp;
-		skb_copy_from_linear_data(bcs->tx_skb,
-					  cs->hw.elsa.transbuf + fp, count);
+		memcpy(cs->hw.elsa.transbuf + fp, bcs->tx_skb->data, count);
 		skb_pull(bcs->tx_skb, count);
 		cs->hw.elsa.transcnt += count;
 		ret = count;
 		count = len - count;
 		fp = 0;
 	}
-	skb_copy_from_linear_data(bcs->tx_skb,
-				  cs->hw.elsa.transbuf + fp, count);
+	memcpy((cs->hw.elsa.transbuf + fp), bcs->tx_skb->data, count);
 	skb_pull(bcs->tx_skb, count);
 	cs->hw.elsa.transcnt += count;
 	ret += count;

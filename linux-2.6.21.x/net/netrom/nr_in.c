@@ -54,9 +54,7 @@ static int nr_queue_rx_frame(struct sock *sk, struct sk_buff *skb, int more)
 		skb_reset_transport_header(skbn);
 
 		while ((skbo = skb_dequeue(&nr->frag_queue)) != NULL) {
-			skb_copy_from_linear_data(skbo,
-						  skb_put(skbn, skbo->len),
-						  skbo->len);
+			memcpy(skb_put(skbn, skbo->len), skbo->data, skbo->len);
 			kfree_skb(skbo);
 		}
 

@@ -612,12 +612,12 @@ int ieee80211_rx(struct ieee80211_device *ieee, struct sk_buff *skb,
 		if (frag == 0) {
 			/* copy first fragment (including full headers) into
 			 * beginning of the fragment cache skb */
-			skb_copy_from_linear_data(skb, skb_put(frag_skb, flen), flen);
+			memcpy(skb_put(frag_skb, flen), skb->data, flen);
 		} else {
 			/* append frame payload to the end of the fragment
 			 * cache skb */
-			skb_copy_from_linear_data_offset(skb, hdrlen,
-				      skb_put(frag_skb, flen), flen);
+			memcpy(skb_put(frag_skb, flen), skb->data + hdrlen,
+			       flen);
 		}
 		dev_kfree_skb_any(skb);
 		skb = NULL;
@@ -765,9 +765,8 @@ int ieee80211_rx(struct ieee80211_device *ieee, struct sk_buff *skb,
 		    IEEE80211_FCTL_TODS) && skb->len >= ETH_HLEN + ETH_ALEN) {
 		/* Non-standard frame: get addr4 from its bogus location after
 		 * the payload */
-		skb_copy_to_linear_data_offset(skb, ETH_ALEN,
-					       skb->data + skb->len - ETH_ALEN,
-					       ETH_ALEN);
+		memcpy(skb->data + ETH_ALEN,
+		       skb->data + skb->len - ETH_ALEN, ETH_ALEN);
 		skb_trim(skb, skb->len - ETH_ALEN);
 	}
 #endif

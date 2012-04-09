@@ -353,7 +353,7 @@ static unsigned mcs_wrap_fir_skb(const struct sk_buff *skb, __u8 *buf)
 	buf[0] = len & 0xff;
 	buf[1] = (len >> 8) & 0xff;
 	/* copy the data into the tx buffer. */
-	skb_copy_from_linear_data(skb, buf + 2, skb->len);
+	memcpy(buf+2, skb->data, skb->len);
 	/* put the fcs in the last four bytes in little endian order. */
 	buf[len - 4] = fcs & 0xff;
 	buf[len - 3] = (fcs >> 8) & 0xff;
@@ -377,7 +377,7 @@ static unsigned mcs_wrap_mir_skb(const struct sk_buff *skb, __u8 *buf)
 	buf[0] = len & 0xff;
 	buf[1] = (len >> 8) & 0xff;
 	/* copy the data */
-	skb_copy_from_linear_data(skb, buf + 2, skb->len);
+	memcpy(buf+2, skb->data, skb->len);
 	/* put the fcs in last two bytes in little endian order. */
 	buf[len - 2] = fcs & 0xff;
 	buf[len - 1] = (fcs >> 8) & 0xff;
@@ -426,7 +426,7 @@ static void mcs_unwrap_mir(struct mcs_cb *mcs, __u8 *buf, int len)
 	}
 
 	skb_reserve(skb, 1);
-	skb_copy_to_linear_data(skb, buf, new_len);
+	memcpy(skb->data, buf, new_len);
 	skb_put(skb, new_len);
 	skb_reset_mac_header(skb);
 	skb->protocol = htons(ETH_P_IRDA);
@@ -479,7 +479,7 @@ static void mcs_unwrap_fir(struct mcs_cb *mcs, __u8 *buf, int len)
 	}
 
 	skb_reserve(skb, 1);
-	skb_copy_to_linear_data(skb, buf, new_len);
+	memcpy(skb->data, buf, new_len);
 	skb_put(skb, new_len);
 	skb_reset_mac_header(skb);
 	skb->protocol = htons(ETH_P_IRDA);

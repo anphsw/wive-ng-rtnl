@@ -381,7 +381,7 @@ static inline int bnep_rx_frame(struct bnep_session *s, struct sk_buff *skb)
 		break;
 	}
 
-	skb_copy_from_linear_data(skb, __skb_put(nskb, skb->len), skb->len);
+	memcpy(__skb_put(nskb, skb->len), skb->data, skb->len);
 	kfree_skb(skb);
 
 	s->stats.rx_packets++;

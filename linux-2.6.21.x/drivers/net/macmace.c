@@ -420,7 +420,8 @@ static int mace_xmit_start(struct sk_buff *skb, struct net_device *dev)
 	mp->stats.tx_bytes += skb->len;
 
 	/* We need to copy into our xmit buffer to take care of alignment and caching issues */
-	skb_copy_from_linear_data(skb, mp->tx_ring, skb->len);
+
+	memcpy((void *) mp->tx_ring, skb->data, skb->len);
 
 	/* load the Tx DMA and fire it off */
 

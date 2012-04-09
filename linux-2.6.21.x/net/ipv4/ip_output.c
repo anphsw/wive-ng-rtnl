@@ -642,7 +642,7 @@ slow_path:
 		 *	Copy the packet header into the new buffer.
 		 */
 
-		skb_copy_from_linear_data(skb, skb_network_header(skb2), hlen);
+		memcpy(skb_network_header(skb2), skb->data, hlen);
 
 		/*
 		 *	Copy a block of the IP datagram.

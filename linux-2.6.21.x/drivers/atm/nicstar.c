@@ -2393,7 +2393,7 @@ static void dequeue_rx(ns_dev *card, ns_rsqe *rsqe)
                skb->destructor = ns_lb_destructor;
 #endif /* NS_USE_DESTRUCTORS */
                skb_push(skb, NS_SMBUFSIZE);
-               skb_copy_from_linear_data(sb, skb->data, NS_SMBUFSIZE);
+               memcpy(skb->data, sb->data, NS_SMBUFSIZE);
                skb_put(skb, len - NS_SMBUFSIZE);
                ATM_SKB(skb)->vcc = vcc;
 	       __net_timestamp(skb);
@@ -2477,7 +2477,7 @@ static void dequeue_rx(ns_dev *card, ns_rsqe *rsqe)
 	 {
             /* Copy the small buffer to the huge buffer */
             sb = (struct sk_buff *) iov->iov_base;
-            skb_copy_from_linear_data(sb, hb->data, iov->iov_len);
+            memcpy(hb->data, sb->data, iov->iov_len);
             skb_put(hb, iov->iov_len);
             remaining = len - iov->iov_len;
             iov++;

@@ -579,7 +579,7 @@ static int ipmr_cache_report(struct sk_buff *pkt, vifi_t vifi, int assert)
 	 */
 
 	skb->nh.iph = (struct iphdr *)skb_put(skb, ihl);
-	skb_copy_to_linear_data(skb, pkt->data, ihl);
+	memcpy(skb->data,pkt->data,ihl);
 	skb->nh.iph->protocol = 0;			/* Flag to the kernel this is a route add */
 	msg = (struct igmpmsg*)skb->nh.iph;
 	msg->im_vif = vifi;

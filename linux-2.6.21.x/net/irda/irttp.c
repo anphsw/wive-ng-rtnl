@@ -256,7 +256,7 @@ static struct sk_buff *irttp_reassemble_skb(struct tsap_cb *self)
 	 *  Copy all fragments to a new buffer
 	 */
 	while ((frag = skb_dequeue(&self->rx_fragments)) != NULL) {
-		skb_copy_to_linear_data_offset(skb, n, frag->data, frag->len);
+		memcpy(skb->data+n, frag->data, frag->len);
 		n += frag->len;
 
 		dev_kfree_skb(frag);
@@ -314,8 +314,8 @@ static inline void irttp_fragment_skb(struct tsap_cb *self,
 		skb_reserve(frag, self->max_header_size);
 
 		/* Copy data from the original skb into this fragment. */
-		skb_copy_from_linear_data(skb, skb_put(frag, self->max_seg_size),
-			      self->max_seg_size);
+		memcpy(skb_put(frag, self->max_seg_size), skb->data,
+		       self->max_seg_size);
 
 		/* Insert TTP header, with the more bit set */
 		frame = skb_push(frag, TTP_HEADER);

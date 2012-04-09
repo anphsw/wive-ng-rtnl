@@ -1492,9 +1492,9 @@ static int rhine_rx(struct net_device *dev, int limit)
 							    rp->rx_buf_sz,
 							    PCI_DMA_FROMDEVICE);
 
-				skb_copy_to_linear_data(skb,
+				eth_copy_and_sum(skb,
 						 rp->rx_skbuff[entry]->data,
-						 pkt_len);
+						 pkt_len, 0);
 				skb_put(skb, pkt_len);
 				pci_dma_sync_single_for_device(rp->pdev,
 							       rp->rx_skbuff_dma[entry],

@@ -1451,7 +1451,7 @@ static int rr_start_xmit(struct sk_buff *skb, struct net_device *dev)
 		}
 		skb_reserve(new_skb, 8);
 		skb_put(new_skb, len);
-		skb_copy_from_linear_data(skb, new_skb->data, len);
+		memcpy(new_skb->data, skb->data, len);
 		dev_kfree_skb(skb);
 		skb = new_skb;
 	}

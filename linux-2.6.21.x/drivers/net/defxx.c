@@ -3091,9 +3091,7 @@ static void dfx_rcv_queue_process(
 					{
 						/* Receive buffer allocated, pass receive packet up */
 
-						skb_copy_to_linear_data(skb,
-							       p_buff + RCV_BUFF_K_PADDING,
-							       pkt_len + 3);
+						memcpy(skb->data, p_buff + RCV_BUFF_K_PADDING, pkt_len+3);
 					}
 
 					skb_reserve(skb,3);		/* adjust data field so that it points to FC byte */
