@@ -1038,6 +1038,9 @@
 15) Build system cleanup and some rewrites.<br>
 16) Fix calculate tcp_mem instead of all memory.<br>
 17) Speedup kernel ppp (don't stop and restart queue on every TX packet).<br>
+18) Fix regression in skb subsystem introduced in 2.3.0 version.<br>
+19) Revert some netvm resource preallocate code(this break some slab logic).<br>
+20) Update miniupnpd to 1.6.20120406 version.<br>
 
 <br><br>
 <b>For support see:</b><br>
