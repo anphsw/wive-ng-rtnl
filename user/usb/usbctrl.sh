@@ -40,7 +40,6 @@ case $TYPE in
 	if [ ! -f /dev/usb/lp0 ]; then
 	    $LOG "Create devs node... for ${idVendor}:${idProduct}"
 	    mknod /dev/usb/lp0 c 180 0
-	    ln -sf /dev/usb/lp0 /dev/usblp0
 	fi
 	;;
     8/6/*)
