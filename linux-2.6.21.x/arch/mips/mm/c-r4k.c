@@ -30,6 +30,16 @@
 #include <asm/war.h>
 #include <asm/cacheflush.h> /* for run_uncached() */
 
+#if defined (CONFIG_RALINK_RT2880) || \
+    defined (CONFIG_RALINK_RT2883) || \
+    defined (CONFIG_RALINK_RT3883) || \
+    defined (CONFIG_RALINK_RT3352) || \
+    defined (CONFIG_RALINK_RT3052) || \
+    defined (CONFIG_RALINK_RT6855) || \
+    defined (CONFIG_RALINK_RT5350)
+#define IS_RALINK
+#endif
+
 
 /*
  * Special Variant of smp_call_function for use by cache functions:
@@ -140,7 +150,7 @@ static void __init r4k_blast_dcache_setup(void)
 		)
 #define CACHE32_UNROLL32_ALIGN	JUMP_TO_ALIGN(10) /* 32 * 32 = 1024 */
 #define CACHE32_UNROLL32_ALIGN2	JUMP_TO_ALIGN(11)
-#if !defined(CONFIG_RALINK_RT3052)
+#ifndef IS_RALINK
 static inline void blast_r4600_v1_icache32(void)
 {
 	unsigned long flags;
@@ -201,7 +211,7 @@ static inline void tx49_blast_icache32_page_indexed(unsigned long page)
 		for (addr = start; addr < end; addr += 0x400 * 2)
 			cache32_unroll32(addr|ws, Index_Invalidate_I);
 }
-#endif /* !defined(CONFIG_RALINK_RT3052) */
+#endif /* !defined(IS_RALINK) */
 static void (* r4k_blast_icache_page)(unsigned long addr);
 
 static void __init r4k_blast_icache_page_setup(void)
@@ -223,7 +233,7 @@ static void (* r4k_blast_icache_page_indexed)(unsigned long addr);
 
 static void __init r4k_blast_icache_page_indexed_setup(void)
 {
-#if !defined(CONFIG_RALINK_RT3052)
+#ifndef IS_RALINK
 	unsigned long ic_lsize = cpu_icache_line_size();
 	if (ic_lsize == 0)
 		r4k_blast_icache_page_indexed = (void *)cache_noop;
@@ -243,14 +253,14 @@ static void __init r4k_blast_icache_page_indexed_setup(void)
 		r4k_blast_icache_page_indexed = blast_icache64_page_indexed;
 #else
 	r4k_blast_icache_page_indexed =blast_icache32_page_indexed;
-#endif /* !defined(CONFIG_RALINK_RT3052) */
+#endif /* !defined(IS_RALINK) */
 }
 
 static void (* r4k_blast_icache)(void);
 
 static void __init r4k_blast_icache_setup(void)
 {
-#if !defined(CONFIG_RALINK_RT3052)
+#ifndef IS_RALINK
 	unsigned long ic_lsize = cpu_icache_line_size();
 	if (ic_lsize == 0)
 		r4k_blast_icache = (void *)cache_noop;
@@ -267,7 +277,7 @@ static void __init r4k_blast_icache_setup(void)
 		r4k_blast_icache = blast_icache64;
 #else
 	r4k_blast_icache = blast_icache32;
-#endif /* !defined(CONFIG_RALINK_RT3052) */
+#endif /* !defined(IS_RALINK) */
 }
 
 static void (* r4k_blast_scache_page)(unsigned long addr);
@@ -679,7 +689,7 @@ static void r4k_flush_icache_all(void)
 	if (cpu_has_vtag_icache)
 		r4k_blast_icache();
 }
-#if !defined(CONFIG_RALINK_RT3052)
+#ifndef IS_RALINK
 static inline void rm7k_erratum31(void)
 {
 	const unsigned long ic_lsize = 32;
@@ -711,7 +721,7 @@ static inline void rm7k_erratum31(void)
 			: "r" (addr), "i" (Index_Store_Tag_I), "i" (Fill));
 	}
 }
-#endif /* !defined(CONFIG_RALINK_RT3052) */
+#endif /* !defined(IS_RALINK) */
 static char *way_string[] __initdata = { NULL, "direct mapped", "2-way",
 	"3-way", "4-way", "5-way", "6-way", "7-way", "8-way"
 };
@@ -725,7 +735,7 @@ static void __init probe_pcache(void)
 	unsigned int lsize;
 
 	switch (c->cputype) {
-#if !defined(CONFIG_RALINK_RT3052)
+#ifndef IS_RALINK
 	case CPU_R4600:			/* QED style two way caches? */
 	case CPU_R4700:
 	case CPU_R5000:
@@ -874,7 +884,7 @@ static void __init probe_pcache(void)
 #else
 	case CPU_UNKNOWN:
 		break;
-#endif /* !defined(CONFIG_RALINK_RT3052) */
+#endif /* !defined(IS_RALINK) */
 	default:
 		if (!(config & MIPS_CONF_M))
 			panic("Don't know how to probe P-caches on this cpu.");
@@ -1019,7 +1029,7 @@ static void __init probe_pcache(void)
  * executes in KSEG1 space or else you will crash and burn badly.  You have
  * been warned.
  */
-#if !defined(CONFIG_RALINK_RT3052)
+#ifndef IS_RALINK
 static int __init probe_scache(void)
 {
 	extern unsigned long stext;
@@ -1104,7 +1114,7 @@ extern int mips_sc_init(void);
 static void __init setup_scache(void)
 {
 	struct cpuinfo_mips *c = &current_cpu_data;
-#if !defined(CONFIG_RALINK_RT3052)
+#ifndef IS_RALINK
 	unsigned int config = read_c0_config();
 #endif
 	int sc_present = 0;
@@ -1115,7 +1125,7 @@ static void __init setup_scache(void)
 	 * Linux memory managment.
 	 */
 	switch (c->cputype) {
-#if !defined(CONFIG_RALINK_RT3052)
+#ifndef IS_RALINK
 	case CPU_R4000SC:
 	case CPU_R4000MC:
 	case CPU_R4400SC:
@@ -1151,7 +1161,7 @@ static void __init setup_scache(void)
 #else
 	case CPU_UNKNOWN:
 		return;
-#endif /* !defined(CONFIG_RALINK_RT3052) */
+#endif /* !defined(IS_RALINK) */
 #if defined(CONFIG_CPU_LOONGSON2)
 	case CPU_LOONGSON2:
 		loongson2_sc_init();
@@ -1191,7 +1201,7 @@ static void __init setup_scache(void)
 
 	c->options |= MIPS_CPU_INCLUSIVE_CACHES;
 }
-#if !defined(CONFIG_RALINK_RT3052)
+#ifndef IS_RALINK
 void au1x00_fixup_config_od(void)
 {
 
@@ -1217,7 +1227,7 @@ void au1x00_fixup_config_od(void)
 		break;
 	}
 }
-#endif /* !defined(CONFIG_RALINK_RT3052) */
+#endif /* !defined(IS_RALINK) */
 static void __init coherency_setup(void)
 {
 	change_c0_config(CONF_CM_CMASK, CONF_CM_DEFAULT);
@@ -1230,7 +1240,7 @@ static void __init coherency_setup(void)
 	 * silly idea of putting something else there ...
 	 */
 	switch (current_cpu_type()) {
-#if !defined(CONFIG_RALINK_RT3052)
+#ifndef IS_RALINK
 	case CPU_R4000PC:
 	case CPU_R4000SC:
 	case CPU_R4000MC:
@@ -1251,7 +1261,7 @@ static void __init coherency_setup(void)
 #else
 	case CPU_UNKNOWN:
 		break;
-#endif /* !defined(CONFIG_RALINK_RT3052) */
+#endif /* !defined(IS_RALINK) */
 	}
 }
 
@@ -1269,7 +1279,7 @@ void __init r4k_cache_init(void)
 		set_uncached_handler(0x100, &except_vec2_sb1, 0x80);
 		break;
 
-#if !defined(CONFIG_RALINK_RT3052)
+#if defined(CONFIG_CPU_LOONGSON2)
 	case CPU_LOONGSON2:
 		icache_size = 1 << (12 + ((config & CONF_IC) >> 9));
 		c->icache.linesz = 16 << ((config & CONF_IB) >> 5);
