@@ -498,21 +498,6 @@ tunnel on your Router.
 			<select id="vpn_cpu_limit_select" disabled="disabled" name="vpn_cpu_limit_type" onChange="cpuLimitChange(this.form);" class="mid" >
 				<option value="0">Disabled</option>
 				<option value="1" selected="selected">Custom</option>
-				<option value="1000">1000</option>
-				<option value="1100">1100</option>
-				<option value="1200">1200</option>
-				<option value="1300">1300</option>
-				<option value="1400">1400</option>
-				<option value="1500">1500</option>
-				<option value="1600">1600</option>
-				<option value="1700">1700</option>
-				<option value="1800">1800</option>
-				<option value="1900">1900</option>
-				<option value="2000">2000</option>
-				<option value="2100">2100</option>
-				<option value="2200">2200</option>
-				<option value="2300">2300</option>
-				<option value="2400">2400</option>
 				<option value="2500">2500</option>
 				<option value="2600">2600</option>
 				<option value="2700">2700</option>
