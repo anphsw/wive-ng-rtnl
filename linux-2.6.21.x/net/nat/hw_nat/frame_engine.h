@@ -158,10 +158,15 @@ enum FoeCpuReason {
     ACL_FORCE_PRIORITY6=0xAE,		/* ACL to UP6 */
     ACL_FORCE_PRIORITY7=0xAF,		/* ACL to UP7 */
     EXCEED_MTU=0xA1			/* Exceed mtu */
-};	
+};
 
 /* PPE_GLO_CFG, Offset=0x200 */
+/* ipv6 logo self-test send icmp ttl=0 packet,router need response ttl expired. */
+#if defined(CONFIG_RA_HW_NAT_IPV6)
+#define DFL_TTL0_DRP		(0) /* 1:Drop, 0: Alert CPU */
+#else
 #define DFL_TTL0_DRP		(1) /* 1:Drop, 0: Alert CPU */
+#endif
 #define DFL_VPRI_EN		(1) /* Use VLAN pri tag as priority desision */
 #define DFL_DPRI_EN		(1) /* Use DSCP as priority decision */
 

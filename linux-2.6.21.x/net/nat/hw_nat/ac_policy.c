@@ -69,6 +69,9 @@ void SyncAcTbl(void)
 	case AC_IP_GROUP:
 	    AcInsIp(node);
 	    break;
+	case AC_VLAN_GROUP:
+	    AcInsVlan(node);
+	    break;
 	default:
 	    break;
 	}
@@ -110,6 +113,12 @@ AcPlcyNode *AcExistNode(AcPlcyNode *NewNode)
                         break;
                 case AC_IP_GROUP:
                         if(node->IpS==NewNode->IpS && node->IpE==NewNode->IpE &&
+			   node->Type == NewNode->Type) {
+                                return node;
+                        }
+                        break;
+                case AC_VLAN_GROUP:
+                        if(node->VLAN==NewNode->VLAN &&
 			   node->Type == NewNode->Type) {
                                 return node;
                         }
@@ -159,6 +168,11 @@ uint32_t AcDelNode(AcPlcyNode *DelNode)
 	    break;
 	case AC_IP_GROUP:
 	    if(node->IpS== DelNode->IpS && node->IpE== DelNode->IpE){
+		goto found;
+	    }
+	    break;
+	case AC_VLAN_GROUP:
+	    if(node->VLAN== DelNode->VLAN){
 		goto found;
 	    }
 	    break;
@@ -423,6 +437,38 @@ uint32_t AcInsIp(AcPlcyNode *node)
 }
 
 
+/*
+ * VLAN
+ */
+uint32_t AcInsVlan(AcPlcyNode *node)
+{
+    struct l2_rule L2Rule;
+
+    memset(&L2Rule,0,sizeof(L2Rule));
+    
+    L2Rule.others.vid = node->VLAN;
+    L2Rule.others.v = 1;
+
+    L2Rule.com.rt=L2_RULE;
+    L2Rule.com.pn = PN_DONT_CARE;
+    L2Rule.com.match = 1;
+
+    L2Rule.com.ac.ee=1;
+    L2Rule.com.ac.ag=node->AgNum;
+
+
+    if(node->Type==PRE_AC){
+	    L2Rule.com.dir= OTHERS;
+	    PpeInsAcEntry(&L2Rule, PRE_AC);
+    }else { /* Post AC */
+	    L2Rule.com.dir= OTHERS;
+	    PpeInsAcEntry(&L2Rule, POST_AC);
+    }
+
+    return 1;
+}
+
+
 
 /* Remove all AC entries */
 uint32_t AcCleanTbl(void)
@@ -473,6 +519,13 @@ uint32_t AcGetCnt(AcPlcyNode *SearchNode, enum AcCntType AcCntType)
 				goto found;
 			}
 			break;
+		case AC_VLAN_GROUP:
+			if( (node->VLAN== SearchNode->VLAN) && 
+				(node->Type==SearchNode->Type)){
+				goto found;
+			}
+			break;
+
 		}
 	}
 

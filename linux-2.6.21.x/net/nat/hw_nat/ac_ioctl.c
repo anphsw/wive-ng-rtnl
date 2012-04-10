@@ -64,6 +64,12 @@ struct _AcParam {
 	{PRE_AC, AC_IP_GROUP}, /*AC_DEL_IP_UL_ENTRY*/
 	{POST_AC, AC_IP_GROUP}, /*AC_DEL_IP_DL_ENTRY*/
 
+	{PRE_AC, AC_VLAN_GROUP}, /*AC_ADD_VLAN_UL_ENTRY*/
+	{POST_AC, AC_VLAN_GROUP}, /*AC_ADD_VLAN_DL_ENTRY*/
+	{PRE_AC, AC_VLAN_GROUP}, /*AC_DEL_VLAN_UL_ENTRY*/
+	{POST_AC, AC_VLAN_GROUP}, /*AC_DEL_VLAN_DL_ENTRY*/
+
+
 	{PRE_AC, AC_MAC_GROUP}, /*AC_GET_MAC_UL_PKT_CNT*/
 	{POST_AC, AC_MAC_GROUP}, /*AC_GET_MAC_DL_PKT_CNT*/
 	{PRE_AC, AC_MAC_GROUP}, /*AC_GET_MAC_UL_BYTE_CNT*/
@@ -73,6 +79,12 @@ struct _AcParam {
 	{POST_AC, AC_IP_GROUP}, /*AC_GET_IP_DL_PKT_CNT*/
 	{PRE_AC, AC_IP_GROUP}, /*AC_GET_IP_UL_BYTE_CNT*/
 	{POST_AC, AC_IP_GROUP}, /*AC_GET_IP_DL_BYTE_CNT*/
+
+	{PRE_AC, AC_VLAN_GROUP}, /*AC_GET_VLAN_UL_PKT_CNT*/
+	{POST_AC, AC_VLAN_GROUP}, /*AC_GET_VLAN_DL_PKT_CNT*/
+	{PRE_AC, AC_VLAN_GROUP}, /*AC_GET_VLAN_UL_BYTE_CNT*/
+	{POST_AC, AC_VLAN_GROUP}, /*AC_GET_VLAN_DL_BYTE_CNT*/
+
 
 	{PRE_AC+POST_AC, AC_MAC_GROUP + AC_IP_GROUP} /* AC_CLEAN_TBL */
 
@@ -125,6 +137,7 @@ int AcIoctl(struct inode *inode, struct file *filp,
     memcpy(node.Mac,opt->mac,ETH_ALEN);
     node.IpS=opt->ip_s;
     node.IpE=opt->ip_e;
+    node.VLAN=opt->vid;
     node.Type=AcParam[cmd].Type;	
     node.RuleType=AcParam[cmd].RuleType;
 
@@ -134,6 +147,8 @@ int AcIoctl(struct inode *inode, struct file *filp,
     case AC_ADD_MAC_DL_ENTRY:
     case AC_ADD_IP_UL_ENTRY:
     case AC_ADD_IP_DL_ENTRY:
+    case AC_ADD_VLAN_UL_ENTRY:
+    case AC_ADD_VLAN_DL_ENTRY:
         opt->result=AcBndryCheck(&node);
 	if(opt->result!=AC_TBL_FULL) {
 		opt->result=AcAddNode(&node);
@@ -143,18 +158,24 @@ int AcIoctl(struct inode *inode, struct file *filp,
     case AC_DEL_MAC_DL_ENTRY:
     case AC_DEL_IP_UL_ENTRY:
     case AC_DEL_IP_DL_ENTRY:
+    case AC_DEL_VLAN_UL_ENTRY:
+    case AC_DEL_VLAN_DL_ENTRY:
 	opt->result=AcDelNode(&node);
 	break;
     case AC_GET_MAC_UL_PKT_CNT:
     case AC_GET_IP_UL_PKT_CNT:
+    case AC_GET_VLAN_UL_PKT_CNT:
     case AC_GET_MAC_DL_PKT_CNT:
     case AC_GET_IP_DL_PKT_CNT:
+    case AC_GET_VLAN_DL_PKT_CNT:
 	opt->cnt=AcGetCnt(&node, AC_PKT_CNT);
 	break;
     case AC_GET_MAC_UL_BYTE_CNT:
     case AC_GET_IP_UL_BYTE_CNT:
+    case AC_GET_VLAN_UL_BYTE_CNT:
     case AC_GET_MAC_DL_BYTE_CNT:
     case AC_GET_IP_DL_BYTE_CNT:
+    case AC_GET_VLAN_DL_BYTE_CNT:
 	opt->cnt=AcGetCnt(&node, AC_BYTE_CNT);
 	break;
     case AC_CLEAN_TBL:
@@ -197,3 +218,5 @@ void AcUnRegIoctlHandler(void)
     unregister_chrdev(ac_major, AC_DEVNAME);
 }
 
+EXPORT_SYMBOL(AcBndryCheck);
+EXPORT_SYMBOL(AcAddNode);

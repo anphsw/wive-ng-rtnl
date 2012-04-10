@@ -62,7 +62,7 @@
 #define HW_NAT_BIND_DIRECTION		(0x1c)
 
 #define HW_NAT_DEVNAME			"hwnat0"
-#define HW_NAT_MAJOR			(220)
+#define HW_NAT_MAJOR			(251)
 
 enum hwnat_status {
 	HWNAT_SUCCESS=0,

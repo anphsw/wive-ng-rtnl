@@ -1042,6 +1042,10 @@
 19) Revert some netvm resource preallocate code(this break some slab logic).<br>
 20) Update miniupnpd to 1.6.20120406 version.<br>
 21) Samba 3.3.16 fix CVE-2012-1182("root" credential remote code execution).<br>
+22) Update hw_nat code.<br>
+23) HW_NAT disable mcast/bcast process in PPE.<br>
+24) HW_NAT fix gre track in PPE.<br>
+25) HW_NAT use 215 devnode for /dev/hwnat0 (220 used by rdm).<br>
 
 
 <br><br>

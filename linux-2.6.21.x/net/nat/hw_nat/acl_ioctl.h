@@ -112,5 +112,4 @@ struct acl_list_args {
 };
 int AclRegIoctlHandler(void);
 void AclUnRegIoctlHandler(void);
-
 #endif

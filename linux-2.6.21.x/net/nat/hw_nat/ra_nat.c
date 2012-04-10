@@ -125,7 +125,7 @@ void skb_dump(struct sk_buff* sk) {
 
                 if(i==(unsigned int)sk->head) printk("@h");
                 if(i==(unsigned int)sk->data) printk("@d");
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,21)
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,32)
                 if(i==(unsigned int)sk->mac_header) printk("*");
 #else
                 if(i==(unsigned int)sk->mac.raw) printk("@m");
@@ -142,7 +142,7 @@ int RemoveVlanTag(struct sk_buff *skb)
     struct vlan_ethhdr *veth;
     uint16_t VirIfIdx;
 
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,21)
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,32)
     veth = (struct vlan_ethhdr *)(skb->mac_header);
 #else
     veth = (struct vlan_ethhdr *)(skb->mac.raw);
@@ -167,7 +167,7 @@ int RemoveVlanTag(struct sk_buff *skb)
     }
 
     /* remove VLAN tag */
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,21)
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,32)
     skb->data= skb->mac_header;
     skb->mac_header += VLAN_HLEN;
     memmove(skb->mac_header, skb->data, ETH_ALEN * 2);
@@ -179,7 +179,7 @@ int RemoveVlanTag(struct sk_buff *skb)
     skb_pull(skb, VLAN_HLEN);
     skb->data += ETH_HLEN;  //pointer to layer3 header
 
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,21)
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,32)
     eth = (struct ethhdr *)(skb->mac_header);
 #else
     eth = (struct ethhdr *)(skb->mac.raw);
@@ -523,7 +523,7 @@ int32_t PpeRxHandler(struct sk_buff * skb)
 	    FOE_AI(skb) = UN_HIT;
 	    FOE_MAGIC_TAG(skb) = FOE_MAGIC_PPE;
 	    skb->dev = DstPort[DP_GMAC]; //we use GMAC1 to send to packet to PPE
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,35)
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,32)
 	    skb->dev->netdev_ops->ndo_start_xmit(skb,skb->dev);
 #else
 	    skb->dev->hard_start_xmit(skb, skb->dev);
@@ -542,7 +542,7 @@ int32_t PpeRxHandler(struct sk_buff * skb)
     if((FOE_AI(skb)==HIT_BIND_FORCE_TO_CPU)) {
 	    skb->dev = DstPort[foe_entry->act_dp];
 	    skb_push(skb, ETH_HLEN); //pointer to layer2 header
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,35)
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,32)
 	    skb->dev->netdev_ops->ndo_start_xmit(skb,skb->dev);
 #else
 	    skb->dev->hard_start_xmit(skb, skb->dev);
@@ -587,7 +587,7 @@ int32_t PpeRxHandler(struct sk_buff * skb)
 	    goto skip_reentry;
 	}
 
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,21)
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,32)
 	eth=(struct ethhdr *)(skb->mac_header);
 #else
 	eth=(struct ethhdr *)(skb->mac.raw);
@@ -1032,7 +1032,15 @@ int32_t PpeTxHandler(struct sk_buff *skb, int gmac_no)
 #endif
 		    }else {
 			/* we support IPv4 NAT mode */
+#if defined (HWNAT_FIX_GRE)
+			/* gre will fail in this case.*/
+			if (eth_type == IPPROTO_GRE) {
+			    memset(FOE_INFO_START_ADDR(skb), 0, FOE_INFO_LEN);
+			    return 1;
+			}
+#else
 			;
+#endif
 		    }
 #if defined (CONFIG_RA_HW_NAT_IPV6)
 		/* IPv6 or IPv6 over PPPoE */
@@ -1242,7 +1250,11 @@ void  PpeSetFoeEbl(uint32_t FoeEbl)
 
 	/* FOE engine need to handle unicast/multicast/broadcast flow */
 	if(FoeEbl==1) {
+#if defined(HWNAT_SPKIP_MCAST_BCAST)
+		PpeFlowSet = (BIT_FUC_FOE);
+#else
 		PpeFlowSet = (BIT_FUC_FOE | BIT_FMC_FOE | BIT_FBC_FOE);
+#endif
 		PpeFlowSet|= (BIT_IPV4_NAPT_EN | BIT_IPV4_NAT_EN);
 
 #if defined(CONFIG_RA_HW_NAT_IPV6)
@@ -1595,7 +1607,7 @@ static int32_t PpeEngStop(void)
 
 struct net_device *ra_dev_get_by_name(const char *name)
 {
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,35)
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,32)
     return dev_get_by_name(&init_net, name);
 #else
     return dev_get_by_name(name);

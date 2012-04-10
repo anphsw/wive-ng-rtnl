@@ -48,7 +48,7 @@ done
 # ralink depended
 mknod /dev/swnat0	c	210	0
 mknod /dev/i2cM0	c	218	0
-mknod /dev/hwnat0	c	220	0
+mknod /dev/hwnat0	c	215	0
 mknod /dev/acl0		c	230	0
 mknod /dev/PCM		c	233	0
 mknod /dev/pcm0		c	233	0

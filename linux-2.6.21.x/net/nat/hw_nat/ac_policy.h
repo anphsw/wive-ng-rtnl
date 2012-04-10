@@ -35,12 +35,13 @@ Steven Liu  2007-01-23      Initial version
 
 enum AcRuleType {
 	AC_MAC_GROUP=0,
-	AC_IP_GROUP=1
+	AC_IP_GROUP=1,
+	AC_VLAN_GROUP=2
 };
 
 enum AcType {
 	PRE_AC=0,
-	POST_AC=1,
+	POST_AC=1
 };
 
 enum AcCntType {
@@ -58,6 +59,7 @@ typedef struct {
     uint32_t IpS; /* start of ip */
     uint32_t IpE; /* end of ip */
     uint32_t IpProto; /* ip protocol */
+    uint16_t VLAN:12; /* VLAN ID */
     uint8_t  AgNum; /* accounting group number */
 } AcPlcyNode;
 
@@ -67,6 +69,7 @@ typedef struct {
 
 uint32_t AcInsMac(AcPlcyNode *node);
 uint32_t AcInsIp(AcPlcyNode *node);
+uint32_t AcInsVlan(AcPlcyNode *node);
 
 uint32_t AcAddNode(AcPlcyNode *NewNode);
 uint32_t AcDelNode(AcPlcyNode *NewNode);
