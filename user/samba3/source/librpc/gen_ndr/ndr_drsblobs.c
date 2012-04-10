@@ -68,16 +68,18 @@ static enum ndr_err_code ndr_push_replPropertyMetaDataCtr1(struct ndr_push *ndr,
 
 static enum ndr_err_code ndr_pull_replPropertyMetaDataCtr1(struct ndr_pull *ndr, int ndr_flags, struct replPropertyMetaDataCtr1 *r)
 {
+	uint32_t size_array_0 = 0;
 	uint32_t cntr_array_0;
 	TALLOC_CTX *_mem_save_array_0;
 	if (ndr_flags & NDR_SCALARS) {
 		NDR_CHECK(ndr_pull_align(ndr, 8));
 		NDR_CHECK(ndr_pull_uint32(ndr, NDR_SCALARS, &r->count));
 		NDR_CHECK(ndr_pull_uint32(ndr, NDR_SCALARS, &r->reserved));
-		NDR_PULL_ALLOC_N(ndr, r->array, r->count);
+		size_array_0 = r->count;
+		NDR_PULL_ALLOC_N(ndr, r->array, size_array_0);
 		_mem_save_array_0 = NDR_PULL_GET_MEM_CTX(ndr);
 		NDR_PULL_SET_MEM_CTX(ndr, r->array, 0);
-		for (cntr_array_0 = 0; cntr_array_0 < r->count; cntr_array_0++) {
+		for (cntr_array_0 = 0; cntr_array_0 < size_array_0; cntr_array_0++) {
 			NDR_CHECK(ndr_pull_replPropertyMetaData1(ndr, NDR_SCALARS, &r->array[cntr_array_0]));
 		}
 		NDR_PULL_SET_MEM_CTX(ndr, _mem_save_array_0, 0);
@@ -231,16 +233,18 @@ static enum ndr_err_code ndr_push_replUpToDateVectorCtr1(struct ndr_push *ndr, i
 
 static enum ndr_err_code ndr_pull_replUpToDateVectorCtr1(struct ndr_pull *ndr, int ndr_flags, struct replUpToDateVectorCtr1 *r)
 {
+	uint32_t size_cursors_0 = 0;
 	uint32_t cntr_cursors_0;
 	TALLOC_CTX *_mem_save_cursors_0;
 	if (ndr_flags & NDR_SCALARS) {
 		NDR_CHECK(ndr_pull_align(ndr, 8));
 		NDR_CHECK(ndr_pull_uint32(ndr, NDR_SCALARS, &r->count));
 		NDR_CHECK(ndr_pull_uint32(ndr, NDR_SCALARS, &r->reserved));
-		NDR_PULL_ALLOC_N(ndr, r->cursors, r->count);
+		size_cursors_0 = r->count;
+		NDR_PULL_ALLOC_N(ndr, r->cursors, size_cursors_0);
 		_mem_save_cursors_0 = NDR_PULL_GET_MEM_CTX(ndr);
 		NDR_PULL_SET_MEM_CTX(ndr, r->cursors, 0);
-		for (cntr_cursors_0 = 0; cntr_cursors_0 < r->count; cntr_cursors_0++) {
+		for (cntr_cursors_0 = 0; cntr_cursors_0 < size_cursors_0; cntr_cursors_0++) {
 			NDR_CHECK(ndr_pull_drsuapi_DsReplicaCursor(ndr, NDR_SCALARS, &r->cursors[cntr_cursors_0]));
 		}
 		NDR_PULL_SET_MEM_CTX(ndr, _mem_save_cursors_0, 0);
@@ -288,16 +292,18 @@ static enum ndr_err_code ndr_push_replUpToDateVectorCtr2(struct ndr_push *ndr, i
 
 static enum ndr_err_code ndr_pull_replUpToDateVectorCtr2(struct ndr_pull *ndr, int ndr_flags, struct replUpToDateVectorCtr2 *r)
 {
+	uint32_t size_cursors_0 = 0;
 	uint32_t cntr_cursors_0;
 	TALLOC_CTX *_mem_save_cursors_0;
 	if (ndr_flags & NDR_SCALARS) {
 		NDR_CHECK(ndr_pull_align(ndr, 8));
 		NDR_CHECK(ndr_pull_uint32(ndr, NDR_SCALARS, &r->count));
 		NDR_CHECK(ndr_pull_uint32(ndr, NDR_SCALARS, &r->reserved));
-		NDR_PULL_ALLOC_N(ndr, r->cursors, r->count);
+		size_cursors_0 = r->count;
+		NDR_PULL_ALLOC_N(ndr, r->cursors, size_cursors_0);
 		_mem_save_cursors_0 = NDR_PULL_GET_MEM_CTX(ndr);
 		NDR_PULL_SET_MEM_CTX(ndr, r->cursors, 0);
-		for (cntr_cursors_0 = 0; cntr_cursors_0 < r->count; cntr_cursors_0++) {
+		for (cntr_cursors_0 = 0; cntr_cursors_0 < size_cursors_0; cntr_cursors_0++) {
 			NDR_CHECK(ndr_pull_drsuapi_DsReplicaCursor2(ndr, NDR_SCALARS, &r->cursors[cntr_cursors_0]));
 		}
 		NDR_PULL_SET_MEM_CTX(ndr, _mem_save_cursors_0, 0);
@@ -465,10 +471,12 @@ _PUBLIC_ enum ndr_err_code ndr_push_repsFromTo1OtherInfo(struct ndr_push *ndr, i
 
 _PUBLIC_ enum ndr_err_code ndr_pull_repsFromTo1OtherInfo(struct ndr_pull *ndr, int ndr_flags, struct repsFromTo1OtherInfo *r)
 {
+	uint32_t size_dns_name_0 = 0;
 	if (ndr_flags & NDR_SCALARS) {
 		NDR_CHECK(ndr_pull_align(ndr, 4));
 		NDR_CHECK(ndr_pull_uint32(ndr, NDR_SCALARS, &r->__dns_name_size));
-		NDR_CHECK(ndr_pull_charset(ndr, NDR_SCALARS, &r->dns_name, r->__dns_name_size, sizeof(uint8_t), CH_DOS));
+		size_dns_name_0 = r->__dns_name_size;
+		NDR_CHECK(ndr_pull_charset(ndr, NDR_SCALARS, &r->dns_name, size_dns_name_0, sizeof(uint8_t), CH_DOS));
 	}
 	if (ndr_flags & NDR_BUFFERS) {
 	}
@@ -526,6 +534,7 @@ _PUBLIC_ enum ndr_err_code ndr_pull_repsFromTo1(struct ndr_pull *ndr, int ndr_fl
 {
 	uint32_t _ptr_other_info;
 	TALLOC_CTX *_mem_save_other_info_0;
+	uint32_t size_schedule_0 = 0;
 	{
 		uint32_t _flags_save_STRUCT = ndr->flags;
 		ndr_set_flags(&ndr->flags, LIBNDR_PRINT_ARRAY_HEX);
@@ -545,7 +554,8 @@ _PUBLIC_ enum ndr_err_code ndr_pull_repsFromTo1(struct ndr_pull *ndr, int ndr_fl
 			}
 			NDR_CHECK(ndr_pull_uint32(ndr, NDR_SCALARS, &r->other_info_length));
 			NDR_CHECK(ndr_pull_drsuapi_DsReplicaNeighbourFlags(ndr, NDR_SCALARS, &r->replica_flags));
-			NDR_CHECK(ndr_pull_array_uint8(ndr, NDR_SCALARS, r->schedule, 84));
+			size_schedule_0 = 84;
+			NDR_CHECK(ndr_pull_array_uint8(ndr, NDR_SCALARS, r->schedule, size_schedule_0));
 			NDR_CHECK(ndr_pull_uint32(ndr, NDR_SCALARS, &r->reserved));
 			NDR_CHECK(ndr_pull_drsuapi_DsReplicaHighWaterMark(ndr, NDR_SCALARS, &r->highwatermark));
 			NDR_CHECK(ndr_pull_GUID(ndr, NDR_SCALARS, &r->source_dsa_obj_guid));
@@ -733,15 +743,17 @@ static enum ndr_err_code ndr_push_partialAttributeSetCtr1(struct ndr_push *ndr, 
 
 static enum ndr_err_code ndr_pull_partialAttributeSetCtr1(struct ndr_pull *ndr, int ndr_flags, struct partialAttributeSetCtr1 *r)
 {
+	uint32_t size_array_0 = 0;
 	uint32_t cntr_array_0;
 	TALLOC_CTX *_mem_save_array_0;
 	if (ndr_flags & NDR_SCALARS) {
 		NDR_CHECK(ndr_pull_align(ndr, 4));
 		NDR_CHECK(ndr_pull_uint32(ndr, NDR_SCALARS, &r->count));
-		NDR_PULL_ALLOC_N(ndr, r->array, r->count);
+		size_array_0 = r->count;
+		NDR_PULL_ALLOC_N(ndr, r->array, size_array_0);
 		_mem_save_array_0 = NDR_PULL_GET_MEM_CTX(ndr);
 		NDR_PULL_SET_MEM_CTX(ndr, r->array, 0);
-		for (cntr_array_0 = 0; cntr_array_0 < r->count; cntr_array_0++) {
+		for (cntr_array_0 = 0; cntr_array_0 < size_array_0; cntr_array_0++) {
 			NDR_CHECK(ndr_pull_drsuapi_DsAttributeId(ndr, NDR_SCALARS, &r->array[cntr_array_0]));
 		}
 		NDR_PULL_SET_MEM_CTX(ndr, _mem_save_array_0, 0);
@@ -1167,10 +1179,12 @@ _PUBLIC_ enum ndr_err_code ndr_push_ldapControlDirSyncCookie(struct ndr_push *nd
 _PUBLIC_ enum ndr_err_code ndr_pull_ldapControlDirSyncCookie(struct ndr_pull *ndr, int ndr_flags, struct ldapControlDirSyncCookie *r)
 {
 	uint32_t _save_relative_base_offset = ndr_pull_get_relative_base_offset(ndr);
+	uint32_t size_msds_0 = 0;
 	if (ndr_flags & NDR_SCALARS) {
 		NDR_CHECK(ndr_pull_align(ndr, 8));
 		NDR_CHECK(ndr_pull_setup_relative_base_offset1(ndr, r, ndr->offset));
-		NDR_CHECK(ndr_pull_charset(ndr, NDR_SCALARS, &r->msds, 4, sizeof(uint8_t), CH_DOS));
+		size_msds_0 = 4;
+		NDR_CHECK(ndr_pull_charset(ndr, NDR_SCALARS, &r->msds, size_msds_0, sizeof(uint8_t), CH_DOS));
 		{
 			struct ndr_pull *_ndr_blob;
 			NDR_CHECK(ndr_pull_subcontext_start(ndr, &_ndr_blob, 0, -1));
@@ -1211,13 +1225,17 @@ static enum ndr_err_code ndr_push_supplementalCredentialsPackage(struct ndr_push
 
 static enum ndr_err_code ndr_pull_supplementalCredentialsPackage(struct ndr_pull *ndr, int ndr_flags, struct supplementalCredentialsPackage *r)
 {
+	uint32_t size_name_0 = 0;
+	uint32_t size_data_0 = 0;
 	if (ndr_flags & NDR_SCALARS) {
 		NDR_CHECK(ndr_pull_align(ndr, 2));
 		NDR_CHECK(ndr_pull_uint16(ndr, NDR_SCALARS, &r->name_len));
 		NDR_CHECK(ndr_pull_uint16(ndr, NDR_SCALARS, &r->data_len));
 		NDR_CHECK(ndr_pull_uint16(ndr, NDR_SCALARS, &r->reserved));
-		NDR_CHECK(ndr_pull_charset(ndr, NDR_SCALARS, &r->name, r->name_len, sizeof(uint8_t), CH_UTF16));
-		NDR_CHECK(ndr_pull_charset(ndr, NDR_SCALARS, &r->data, r->data_len, sizeof(uint8_t), CH_DOS));
+		size_name_0 = r->name_len;
+		NDR_CHECK(ndr_pull_charset(ndr, NDR_SCALARS, &r->name, size_name_0, sizeof(uint8_t), CH_UTF16));
+		size_data_0 = r->data_len;
+		NDR_CHECK(ndr_pull_charset(ndr, NDR_SCALARS, &r->data, size_data_0, sizeof(uint8_t), CH_DOS));
 	}
 	if (ndr_flags & NDR_BUFFERS) {
 	}
@@ -1294,17 +1312,21 @@ static enum ndr_err_code ndr_push_supplementalCredentialsSubBlob(struct ndr_push
 
 static enum ndr_err_code ndr_pull_supplementalCredentialsSubBlob(struct ndr_pull *ndr, int ndr_flags, struct supplementalCredentialsSubBlob *r)
 {
+	uint32_t size_prefix_0 = 0;
+	uint32_t size_packages_0 = 0;
 	uint32_t cntr_packages_0;
 	TALLOC_CTX *_mem_save_packages_0;
 	if (ndr_flags & NDR_SCALARS) {
 		NDR_CHECK(ndr_pull_align(ndr, 2));
-		NDR_CHECK(ndr_pull_charset(ndr, NDR_SCALARS, &r->prefix, 0x30, sizeof(uint16_t), CH_UTF16));
+		size_prefix_0 = 0x30;
+		NDR_CHECK(ndr_pull_charset(ndr, NDR_SCALARS, &r->prefix, size_prefix_0, sizeof(uint16_t), CH_UTF16));
 		NDR_CHECK(ndr_pull_supplementalCredentialsSignature(ndr, NDR_SCALARS, &r->signature));
 		NDR_CHECK(ndr_pull_uint16(ndr, NDR_SCALARS, &r->num_packages));
-		NDR_PULL_ALLOC_N(ndr, r->packages, r->num_packages);
+		size_packages_0 = r->num_packages;
+		NDR_PULL_ALLOC_N(ndr, r->packages, size_packages_0);
 		_mem_save_packages_0 = NDR_PULL_GET_MEM_CTX(ndr);
 		NDR_PULL_SET_MEM_CTX(ndr, r->packages, 0);
-		for (cntr_packages_0 = 0; cntr_packages_0 < r->num_packages; cntr_packages_0++) {
+		for (cntr_packages_0 = 0; cntr_packages_0 < size_packages_0; cntr_packages_0++) {
 			NDR_CHECK(ndr_pull_supplementalCredentialsPackage(ndr, NDR_SCALARS, &r->packages[cntr_packages_0]));
 		}
 		NDR_PULL_SET_MEM_CTX(ndr, _mem_save_packages_0, 0);
@@ -1662,8 +1684,10 @@ static enum ndr_err_code ndr_push_package_PrimaryKerberosCtr3(struct ndr_push *n
 
 static enum ndr_err_code ndr_pull_package_PrimaryKerberosCtr3(struct ndr_pull *ndr, int ndr_flags, struct package_PrimaryKerberosCtr3 *r)
 {
+	uint32_t size_keys_0 = 0;
 	uint32_t cntr_keys_0;
 	TALLOC_CTX *_mem_save_keys_0;
+	uint32_t size_old_keys_0 = 0;
 	uint32_t cntr_old_keys_0;
 	TALLOC_CTX *_mem_save_old_keys_0;
 	if (ndr_flags & NDR_SCALARS) {
@@ -1671,17 +1695,19 @@ static enum ndr_err_code ndr_pull_package_PrimaryKerberosCtr3(struct ndr_pull *n
 		NDR_CHECK(ndr_pull_uint16(ndr, NDR_SCALARS, &r->num_keys));
 		NDR_CHECK(ndr_pull_uint16(ndr, NDR_SCALARS, &r->num_old_keys));
 		NDR_CHECK(ndr_pull_package_PrimaryKerberosString(ndr, NDR_SCALARS, &r->salt));
-		NDR_PULL_ALLOC_N(ndr, r->keys, r->num_keys);
+		size_keys_0 = r->num_keys;
+		NDR_PULL_ALLOC_N(ndr, r->keys, size_keys_0);
 		_mem_save_keys_0 = NDR_PULL_GET_MEM_CTX(ndr);
 		NDR_PULL_SET_MEM_CTX(ndr, r->keys, 0);
-		for (cntr_keys_0 = 0; cntr_keys_0 < r->num_keys; cntr_keys_0++) {
+		for (cntr_keys_0 = 0; cntr_keys_0 < size_keys_0; cntr_keys_0++) {
 			NDR_CHECK(ndr_pull_package_PrimaryKerberosKey3(ndr, NDR_SCALARS, &r->keys[cntr_keys_0]));
 		}
 		NDR_PULL_SET_MEM_CTX(ndr, _mem_save_keys_0, 0);
-		NDR_PULL_ALLOC_N(ndr, r->old_keys, r->num_old_keys);
+		size_old_keys_0 = r->num_old_keys;
+		NDR_PULL_ALLOC_N(ndr, r->old_keys, size_old_keys_0);
 		_mem_save_old_keys_0 = NDR_PULL_GET_MEM_CTX(ndr);
 		NDR_PULL_SET_MEM_CTX(ndr, r->old_keys, 0);
-		for (cntr_old_keys_0 = 0; cntr_old_keys_0 < r->num_old_keys; cntr_old_keys_0++) {
+		for (cntr_old_keys_0 = 0; cntr_old_keys_0 < size_old_keys_0; cntr_old_keys_0++) {
 			NDR_CHECK(ndr_pull_package_PrimaryKerberosKey3(ndr, NDR_SCALARS, &r->old_keys[cntr_old_keys_0]));
 		}
 		NDR_PULL_SET_MEM_CTX(ndr, _mem_save_old_keys_0, 0);
@@ -1693,15 +1719,17 @@ static enum ndr_err_code ndr_pull_package_PrimaryKerberosCtr3(struct ndr_pull *n
 	}
 	if (ndr_flags & NDR_BUFFERS) {
 		NDR_CHECK(ndr_pull_package_PrimaryKerberosString(ndr, NDR_BUFFERS, &r->salt));
+		size_keys_0 = r->num_keys;
 		_mem_save_keys_0 = NDR_PULL_GET_MEM_CTX(ndr);
 		NDR_PULL_SET_MEM_CTX(ndr, r->keys, 0);
-		for (cntr_keys_0 = 0; cntr_keys_0 < r->num_keys; cntr_keys_0++) {
+		for (cntr_keys_0 = 0; cntr_keys_0 < size_keys_0; cntr_keys_0++) {
 			NDR_CHECK(ndr_pull_package_PrimaryKerberosKey3(ndr, NDR_BUFFERS, &r->keys[cntr_keys_0]));
 		}
 		NDR_PULL_SET_MEM_CTX(ndr, _mem_save_keys_0, 0);
+		size_old_keys_0 = r->num_old_keys;
 		_mem_save_old_keys_0 = NDR_PULL_GET_MEM_CTX(ndr);
 		NDR_PULL_SET_MEM_CTX(ndr, r->old_keys, 0);
-		for (cntr_old_keys_0 = 0; cntr_old_keys_0 < r->num_old_keys; cntr_old_keys_0++) {
+		for (cntr_old_keys_0 = 0; cntr_old_keys_0 < size_old_keys_0; cntr_old_keys_0++) {
 			NDR_CHECK(ndr_pull_package_PrimaryKerberosKey3(ndr, NDR_BUFFERS, &r->old_keys[cntr_old_keys_0]));
 		}
 		NDR_PULL_SET_MEM_CTX(ndr, _mem_save_old_keys_0, 0);
@@ -1854,7 +1882,6 @@ _PUBLIC_ void ndr_print_package_PrimaryKerberosKey4(struct ndr_print *ndr, const
 static enum ndr_err_code ndr_push_package_PrimaryKerberosCtr4(struct ndr_push *ndr, int ndr_flags, const struct package_PrimaryKerberosCtr4 *r)
 {
 	uint32_t cntr_keys_0;
-	uint32_t cntr_service_keys_0;
 	uint32_t cntr_old_keys_0;
 	uint32_t cntr_older_keys_0;
 	if (ndr_flags & NDR_SCALARS) {
@@ -1868,9 +1895,6 @@ static enum ndr_err_code ndr_push_package_PrimaryKerberosCtr4(struct ndr_push *n
 		for (cntr_keys_0 = 0; cntr_keys_0 < r->num_keys; cntr_keys_0++) {
 			NDR_CHECK(ndr_push_package_PrimaryKerberosKey4(ndr, NDR_SCALARS, &r->keys[cntr_keys_0]));
 		}
-		for (cntr_service_keys_0 = 0; cntr_service_keys_0 < 0; cntr_service_keys_0++) {
-			NDR_CHECK(ndr_push_package_PrimaryKerberosKey4(ndr, NDR_SCALARS, &r->service_keys[cntr_service_keys_0]));
-		}
 		for (cntr_old_keys_0 = 0; cntr_old_keys_0 < r->num_old_keys; cntr_old_keys_0++) {
 			NDR_CHECK(ndr_push_package_PrimaryKerberosKey4(ndr, NDR_SCALARS, &r->old_keys[cntr_old_keys_0]));
 		}
@@ -1882,9 +1906,6 @@ static enum ndr_err_code ndr_push_package_PrimaryKerberosCtr4(struct ndr_push *n
 		NDR_CHECK(ndr_push_package_PrimaryKerberosString(ndr, NDR_BUFFERS, &r->salt));
 		for (cntr_keys_0 = 0; cntr_keys_0 < r->num_keys; cntr_keys_0++) {
 			NDR_CHECK(ndr_push_package_PrimaryKerberosKey4(ndr, NDR_BUFFERS, &r->keys[cntr_keys_0]));
-		}
-		for (cntr_service_keys_0 = 0; cntr_service_keys_0 < 0; cntr_service_keys_0++) {
-			NDR_CHECK(ndr_push_package_PrimaryKerberosKey4(ndr, NDR_BUFFERS, &r->service_keys[cntr_service_keys_0]));
 		}
 		for (cntr_old_keys_0 = 0; cntr_old_keys_0 < r->num_old_keys; cntr_old_keys_0++) {
 			NDR_CHECK(ndr_push_package_PrimaryKerberosKey4(ndr, NDR_BUFFERS, &r->old_keys[cntr_old_keys_0]));
@@ -1898,12 +1919,16 @@ static enum ndr_err_code ndr_push_package_PrimaryKerberosCtr4(struct ndr_push *n
 
 static enum ndr_err_code ndr_pull_package_PrimaryKerberosCtr4(struct ndr_pull *ndr, int ndr_flags, struct package_PrimaryKerberosCtr4 *r)
 {
+	uint32_t size_keys_0 = 0;
 	uint32_t cntr_keys_0;
 	TALLOC_CTX *_mem_save_keys_0;
+	uint32_t size_service_keys_0 = 0;
 	uint32_t cntr_service_keys_0;
 	TALLOC_CTX *_mem_save_service_keys_0;
+	uint32_t size_old_keys_0 = 0;
 	uint32_t cntr_old_keys_0;
 	TALLOC_CTX *_mem_save_old_keys_0;
+	uint32_t size_older_keys_0 = 0;
 	uint32_t cntr_older_keys_0;
 	TALLOC_CTX *_mem_save_older_keys_0;
 	if (ndr_flags & NDR_SCALARS) {
@@ -1914,58 +1939,66 @@ static enum ndr_err_code ndr_pull_package_PrimaryKerberosCtr4(struct ndr_pull *n
 		NDR_CHECK(ndr_pull_uint16(ndr, NDR_SCALARS, &r->num_older_keys));
 		NDR_CHECK(ndr_pull_package_PrimaryKerberosString(ndr, NDR_SCALARS, &r->salt));
 		NDR_CHECK(ndr_pull_uint32(ndr, NDR_SCALARS, &r->default_iteration_count));
-		NDR_PULL_ALLOC_N(ndr, r->keys, r->num_keys);
+		size_keys_0 = r->num_keys;
+		NDR_PULL_ALLOC_N(ndr, r->keys, size_keys_0);
 		_mem_save_keys_0 = NDR_PULL_GET_MEM_CTX(ndr);
 		NDR_PULL_SET_MEM_CTX(ndr, r->keys, 0);
-		for (cntr_keys_0 = 0; cntr_keys_0 < r->num_keys; cntr_keys_0++) {
+		for (cntr_keys_0 = 0; cntr_keys_0 < size_keys_0; cntr_keys_0++) {
 			NDR_CHECK(ndr_pull_package_PrimaryKerberosKey4(ndr, NDR_SCALARS, &r->keys[cntr_keys_0]));
 		}
 		NDR_PULL_SET_MEM_CTX(ndr, _mem_save_keys_0, 0);
-		NDR_PULL_ALLOC_N(ndr, r->service_keys, r->num_service_keys);
+		size_service_keys_0 = r->num_service_keys;
+		NDR_PULL_ALLOC_N(ndr, r->service_keys, size_service_keys_0);
 		_mem_save_service_keys_0 = NDR_PULL_GET_MEM_CTX(ndr);
 		NDR_PULL_SET_MEM_CTX(ndr, r->service_keys, 0);
-		for (cntr_service_keys_0 = 0; cntr_service_keys_0 < r->num_service_keys; cntr_service_keys_0++) {
+		for (cntr_service_keys_0 = 0; cntr_service_keys_0 < size_service_keys_0; cntr_service_keys_0++) {
 			NDR_CHECK(ndr_pull_package_PrimaryKerberosKey4(ndr, NDR_SCALARS, &r->service_keys[cntr_service_keys_0]));
 		}
 		NDR_PULL_SET_MEM_CTX(ndr, _mem_save_service_keys_0, 0);
-		NDR_PULL_ALLOC_N(ndr, r->old_keys, r->num_old_keys);
+		size_old_keys_0 = r->num_old_keys;
+		NDR_PULL_ALLOC_N(ndr, r->old_keys, size_old_keys_0);
 		_mem_save_old_keys_0 = NDR_PULL_GET_MEM_CTX(ndr);
 		NDR_PULL_SET_MEM_CTX(ndr, r->old_keys, 0);
-		for (cntr_old_keys_0 = 0; cntr_old_keys_0 < r->num_old_keys; cntr_old_keys_0++) {
+		for (cntr_old_keys_0 = 0; cntr_old_keys_0 < size_old_keys_0; cntr_old_keys_0++) {
 			NDR_CHECK(ndr_pull_package_PrimaryKerberosKey4(ndr, NDR_SCALARS, &r->old_keys[cntr_old_keys_0]));
 		}
 		NDR_PULL_SET_MEM_CTX(ndr, _mem_save_old_keys_0, 0);
-		NDR_PULL_ALLOC_N(ndr, r->older_keys, r->num_older_keys);
+		size_older_keys_0 = r->num_older_keys;
+		NDR_PULL_ALLOC_N(ndr, r->older_keys, size_older_keys_0);
 		_mem_save_older_keys_0 = NDR_PULL_GET_MEM_CTX(ndr);
 		NDR_PULL_SET_MEM_CTX(ndr, r->older_keys, 0);
-		for (cntr_older_keys_0 = 0; cntr_older_keys_0 < r->num_older_keys; cntr_older_keys_0++) {
+		for (cntr_older_keys_0 = 0; cntr_older_keys_0 < size_older_keys_0; cntr_older_keys_0++) {
 			NDR_CHECK(ndr_pull_package_PrimaryKerberosKey4(ndr, NDR_SCALARS, &r->older_keys[cntr_older_keys_0]));
 		}
 		NDR_PULL_SET_MEM_CTX(ndr, _mem_save_older_keys_0, 0);
 	}
 	if (ndr_flags & NDR_BUFFERS) {
 		NDR_CHECK(ndr_pull_package_PrimaryKerberosString(ndr, NDR_BUFFERS, &r->salt));
+		size_keys_0 = r->num_keys;
 		_mem_save_keys_0 = NDR_PULL_GET_MEM_CTX(ndr);
 		NDR_PULL_SET_MEM_CTX(ndr, r->keys, 0);
-		for (cntr_keys_0 = 0; cntr_keys_0 < r->num_keys; cntr_keys_0++) {
+		for (cntr_keys_0 = 0; cntr_keys_0 < size_keys_0; cntr_keys_0++) {
 			NDR_CHECK(ndr_pull_package_PrimaryKerberosKey4(ndr, NDR_BUFFERS, &r->keys[cntr_keys_0]));
 		}
 		NDR_PULL_SET_MEM_CTX(ndr, _mem_save_keys_0, 0);
+		size_service_keys_0 = r->num_service_keys;
 		_mem_save_service_keys_0 = NDR_PULL_GET_MEM_CTX(ndr);
 		NDR_PULL_SET_MEM_CTX(ndr, r->service_keys, 0);
-		for (cntr_service_keys_0 = 0; cntr_service_keys_0 < r->num_service_keys; cntr_service_keys_0++) {
+		for (cntr_service_keys_0 = 0; cntr_service_keys_0 < size_service_keys_0; cntr_service_keys_0++) {
 			NDR_CHECK(ndr_pull_package_PrimaryKerberosKey4(ndr, NDR_BUFFERS, &r->service_keys[cntr_service_keys_0]));
 		}
 		NDR_PULL_SET_MEM_CTX(ndr, _mem_save_service_keys_0, 0);
+		size_old_keys_0 = r->num_old_keys;
 		_mem_save_old_keys_0 = NDR_PULL_GET_MEM_CTX(ndr);
 		NDR_PULL_SET_MEM_CTX(ndr, r->old_keys, 0);
-		for (cntr_old_keys_0 = 0; cntr_old_keys_0 < r->num_old_keys; cntr_old_keys_0++) {
+		for (cntr_old_keys_0 = 0; cntr_old_keys_0 < size_old_keys_0; cntr_old_keys_0++) {
 			NDR_CHECK(ndr_pull_package_PrimaryKerberosKey4(ndr, NDR_BUFFERS, &r->old_keys[cntr_old_keys_0]));
 		}
 		NDR_PULL_SET_MEM_CTX(ndr, _mem_save_old_keys_0, 0);
+		size_older_keys_0 = r->num_older_keys;
 		_mem_save_older_keys_0 = NDR_PULL_GET_MEM_CTX(ndr);
 		NDR_PULL_SET_MEM_CTX(ndr, r->older_keys, 0);
-		for (cntr_older_keys_0 = 0; cntr_older_keys_0 < r->num_older_keys; cntr_older_keys_0++) {
+		for (cntr_older_keys_0 = 0; cntr_older_keys_0 < size_older_keys_0; cntr_older_keys_0++) {
 			NDR_CHECK(ndr_pull_package_PrimaryKerberosKey4(ndr, NDR_BUFFERS, &r->older_keys[cntr_older_keys_0]));
 		}
 		NDR_PULL_SET_MEM_CTX(ndr, _mem_save_older_keys_0, 0);
@@ -2218,12 +2251,14 @@ static enum ndr_err_code ndr_push_package_PrimaryWDigestHash(struct ndr_push *nd
 
 static enum ndr_err_code ndr_pull_package_PrimaryWDigestHash(struct ndr_pull *ndr, int ndr_flags, struct package_PrimaryWDigestHash *r)
 {
+	uint32_t size_hash_0 = 0;
 	{
 		uint32_t _flags_save_STRUCT = ndr->flags;
 		ndr_set_flags(&ndr->flags, LIBNDR_PRINT_ARRAY_HEX);
 		if (ndr_flags & NDR_SCALARS) {
 			NDR_CHECK(ndr_pull_align(ndr, 1));
-			NDR_CHECK(ndr_pull_array_uint8(ndr, NDR_SCALARS, r->hash, 16));
+			size_hash_0 = 16;
+			NDR_CHECK(ndr_pull_array_uint8(ndr, NDR_SCALARS, r->hash, size_hash_0));
 		}
 		if (ndr_flags & NDR_BUFFERS) {
 		}
@@ -2266,6 +2301,7 @@ _PUBLIC_ enum ndr_err_code ndr_push_package_PrimaryWDigestBlob(struct ndr_push *
 
 _PUBLIC_ enum ndr_err_code ndr_pull_package_PrimaryWDigestBlob(struct ndr_pull *ndr, int ndr_flags, struct package_PrimaryWDigestBlob *r)
 {
+	uint32_t size_hashes_0 = 0;
 	uint32_t cntr_hashes_0;
 	TALLOC_CTX *_mem_save_hashes_0;
 	if (ndr_flags & NDR_SCALARS) {
@@ -2275,10 +2311,11 @@ _PUBLIC_ enum ndr_err_code ndr_pull_package_PrimaryWDigestBlob(struct ndr_pull *
 		NDR_CHECK(ndr_pull_uint8(ndr, NDR_SCALARS, &r->num_hashes));
 		NDR_CHECK(ndr_pull_uint32(ndr, NDR_SCALARS, &r->unknown3));
 		NDR_CHECK(ndr_pull_udlong(ndr, NDR_SCALARS, &r->uuknown4));
-		NDR_PULL_ALLOC_N(ndr, r->hashes, r->num_hashes);
+		size_hashes_0 = r->num_hashes;
+		NDR_PULL_ALLOC_N(ndr, r->hashes, size_hashes_0);
 		_mem_save_hashes_0 = NDR_PULL_GET_MEM_CTX(ndr);
 		NDR_PULL_SET_MEM_CTX(ndr, r->hashes, 0);
-		for (cntr_hashes_0 = 0; cntr_hashes_0 < r->num_hashes; cntr_hashes_0++) {
+		for (cntr_hashes_0 = 0; cntr_hashes_0 < size_hashes_0; cntr_hashes_0++) {
 			NDR_CHECK(ndr_pull_package_PrimaryWDigestHash(ndr, NDR_SCALARS, &r->hashes[cntr_hashes_0]));
 		}
 		NDR_PULL_SET_MEM_CTX(ndr, _mem_save_hashes_0, 0);
@@ -2829,10 +2866,12 @@ _PUBLIC_ enum ndr_err_code ndr_push_DsCompressedBlob(struct ndr_push *ndr, int n
 
 _PUBLIC_ enum ndr_err_code ndr_pull_DsCompressedBlob(struct ndr_pull *ndr, int ndr_flags, struct DsCompressedBlob *r)
 {
+	uint32_t size_chunks_0 = 0;
 	uint32_t cntr_chunks_0;
 	if (ndr_flags & NDR_SCALARS) {
 		NDR_CHECK(ndr_pull_align(ndr, 4));
-		for (cntr_chunks_0 = 0; cntr_chunks_0 < 5; cntr_chunks_0++) {
+		size_chunks_0 = 5;
+		for (cntr_chunks_0 = 0; cntr_chunks_0 < size_chunks_0; cntr_chunks_0++) {
 			NDR_CHECK(ndr_pull_DsCompressedChunk(ndr, NDR_SCALARS, &r->chunks[cntr_chunks_0]));
 		}
 	}

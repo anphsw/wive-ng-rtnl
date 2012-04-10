@@ -93,6 +93,7 @@ _PUBLIC_ enum ndr_err_code ndr_push_eventlog_Record(struct ndr_push *ndr, int nd
 
 _PUBLIC_ enum ndr_err_code ndr_pull_eventlog_Record(struct ndr_pull *ndr, int ndr_flags, struct eventlog_Record *r)
 {
+	uint32_t size_strings_0 = 0;
 	uint32_t cntr_strings_0;
 	TALLOC_CTX *_mem_save_strings_0;
 	if (ndr_flags & NDR_SCALARS) {
@@ -128,10 +129,11 @@ _PUBLIC_ enum ndr_err_code ndr_pull_eventlog_Record(struct ndr_pull *ndr, int nd
 		{
 			uint32_t _flags_save_string = ndr->flags;
 			ndr_set_flags(&ndr->flags, LIBNDR_FLAG_STR_NULLTERM);
-			NDR_PULL_ALLOC_N(ndr, r->strings, r->num_of_strings);
+			size_strings_0 = r->num_of_strings;
+			NDR_PULL_ALLOC_N(ndr, r->strings, size_strings_0);
 			_mem_save_strings_0 = NDR_PULL_GET_MEM_CTX(ndr);
 			NDR_PULL_SET_MEM_CTX(ndr, r->strings, 0);
-			for (cntr_strings_0 = 0; cntr_strings_0 < r->num_of_strings; cntr_strings_0++) {
+			for (cntr_strings_0 = 0; cntr_strings_0 < size_strings_0; cntr_strings_0++) {
 				NDR_CHECK(ndr_pull_string(ndr, NDR_SCALARS, &r->strings[cntr_strings_0]));
 			}
 			NDR_PULL_SET_MEM_CTX(ndr, _mem_save_strings_0, 0);
@@ -857,6 +859,7 @@ static enum ndr_err_code ndr_push_eventlog_ReadEventLogW(struct ndr_push *ndr, i
 
 static enum ndr_err_code ndr_pull_eventlog_ReadEventLogW(struct ndr_pull *ndr, int flags, struct eventlog_ReadEventLogW *r)
 {
+	uint32_t size_data_1 = 0;
 	TALLOC_CTX *_mem_save_handle_0;
 	TALLOC_CTX *_mem_save_sent_size_0;
 	TALLOC_CTX *_mem_save_real_size_0;
@@ -885,10 +888,11 @@ static enum ndr_err_code ndr_pull_eventlog_ReadEventLogW(struct ndr_pull *ndr, i
 	}
 	if (flags & NDR_OUT) {
 		NDR_CHECK(ndr_pull_array_size(ndr, &r->out.data));
+		size_data_1 = ndr_get_array_size(ndr, &r->out.data);
 		if (ndr->flags & LIBNDR_FLAG_REF_ALLOC) {
-			NDR_PULL_ALLOC_N(ndr, r->out.data, ndr_get_array_size(ndr, &r->out.data));
+			NDR_PULL_ALLOC_N(ndr, r->out.data, size_data_1);
 		}
-		NDR_CHECK(ndr_pull_array_uint8(ndr, NDR_SCALARS, r->out.data, ndr_get_array_size(ndr, &r->out.data)));
+		NDR_CHECK(ndr_pull_array_uint8(ndr, NDR_SCALARS, r->out.data, size_data_1));
 		if (ndr->flags & LIBNDR_FLAG_REF_ALLOC) {
 			NDR_PULL_ALLOC(ndr, r->out.sent_size);
 		}

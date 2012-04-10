@@ -1041,6 +1041,7 @@
 18) Fix regression in skb subsystem introduced in 2.3.0 version.<br>
 19) Revert some netvm resource preallocate code(this break some slab logic).<br>
 20) Update miniupnpd to 1.6.20120406 version.<br>
+21) Samba 3.3.16 fix CVE-2012-1182("root" credential remote code execution).<br>
 
 
 <br><br>

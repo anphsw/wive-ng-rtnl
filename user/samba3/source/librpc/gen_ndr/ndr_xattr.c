@@ -63,15 +63,17 @@ _PUBLIC_ enum ndr_err_code ndr_push_tdb_xattrs(struct ndr_push *ndr, int ndr_fla
 
 _PUBLIC_ enum ndr_err_code ndr_pull_tdb_xattrs(struct ndr_pull *ndr, int ndr_flags, struct tdb_xattrs *r)
 {
+	uint32_t size_xattrs_0 = 0;
 	uint32_t cntr_xattrs_0;
 	TALLOC_CTX *_mem_save_xattrs_0;
 	if (ndr_flags & NDR_SCALARS) {
 		NDR_CHECK(ndr_pull_align(ndr, 4));
 		NDR_CHECK(ndr_pull_uint32(ndr, NDR_SCALARS, &r->num_xattrs));
-		NDR_PULL_ALLOC_N(ndr, r->xattrs, r->num_xattrs);
+		size_xattrs_0 = r->num_xattrs;
+		NDR_PULL_ALLOC_N(ndr, r->xattrs, size_xattrs_0);
 		_mem_save_xattrs_0 = NDR_PULL_GET_MEM_CTX(ndr);
 		NDR_PULL_SET_MEM_CTX(ndr, r->xattrs, 0);
-		for (cntr_xattrs_0 = 0; cntr_xattrs_0 < r->num_xattrs; cntr_xattrs_0++) {
+		for (cntr_xattrs_0 = 0; cntr_xattrs_0 < size_xattrs_0; cntr_xattrs_0++) {
 			NDR_CHECK(ndr_pull_tdb_xattr(ndr, NDR_SCALARS, &r->xattrs[cntr_xattrs_0]));
 		}
 		NDR_PULL_SET_MEM_CTX(ndr, _mem_save_xattrs_0, 0);
@@ -119,6 +121,7 @@ _PUBLIC_ enum ndr_err_code ndr_pull_security_descriptor_hash(struct ndr_pull *nd
 {
 	uint32_t _ptr_sd;
 	TALLOC_CTX *_mem_save_sd_0;
+	uint32_t size_hash_0 = 0;
 	if (ndr_flags & NDR_SCALARS) {
 		NDR_CHECK(ndr_pull_align(ndr, 4));
 		NDR_CHECK(ndr_pull_generic_ptr(ndr, &_ptr_sd));
@@ -127,7 +130,8 @@ _PUBLIC_ enum ndr_err_code ndr_pull_security_descriptor_hash(struct ndr_pull *nd
 		} else {
 			r->sd = NULL;
 		}
-		NDR_CHECK(ndr_pull_array_uint8(ndr, NDR_SCALARS, r->hash, 16));
+		size_hash_0 = 16;
+		NDR_CHECK(ndr_pull_array_uint8(ndr, NDR_SCALARS, r->hash, size_hash_0));
 	}
 	if (ndr_flags & NDR_BUFFERS) {
 		if (r->sd) {
@@ -199,7 +203,9 @@ static enum ndr_err_code ndr_pull_xattr_NTACL_Info(struct ndr_pull *ndr, int ndr
 	int level;
 	uint16_t _level;
 	TALLOC_CTX *_mem_save_sd_0;
+	uint32_t _ptr_sd;
 	TALLOC_CTX *_mem_save_sd_hs_0;
+	uint32_t _ptr_sd_hs;
 	level = ndr_pull_get_switch_value(ndr, r);
 	if (ndr_flags & NDR_SCALARS) {
 		NDR_CHECK(ndr_pull_uint16(ndr, NDR_SCALARS, &_level));
@@ -208,7 +214,6 @@ static enum ndr_err_code ndr_pull_xattr_NTACL_Info(struct ndr_pull *ndr, int ndr
 		}
 		switch (level) {
 			case 1: {
-				uint32_t _ptr_sd;
 				NDR_CHECK(ndr_pull_generic_ptr(ndr, &_ptr_sd));
 				if (_ptr_sd) {
 					NDR_PULL_ALLOC(ndr, r->sd);
@@ -218,7 +223,6 @@ static enum ndr_err_code ndr_pull_xattr_NTACL_Info(struct ndr_pull *ndr, int ndr
 			break; }
 
 			case 2: {
-				uint32_t _ptr_sd_hs;
 				NDR_CHECK(ndr_pull_generic_ptr(ndr, &_ptr_sd_hs));
 				if (_ptr_sd_hs) {
 					NDR_PULL_ALLOC(ndr, r->sd_hs);
