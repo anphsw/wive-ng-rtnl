@@ -21,9 +21,7 @@ timestamp='2012-01-01'
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA
-# 02110-1301, USA.
+# along with this program; if not, see <http://www.gnu.org/licenses/>.
 #
 # As a special exception to the GNU General Public License, if you
 # distribute this file as part of a program that contains a
@@ -131,6 +129,10 @@ case $maybe_os in
   storm-chaos* | os2-emx* | rtmk-nova*)
     os=-$maybe_os
     basic_machine=`echo $1 | sed 's/^\(.*\)-\([^-]*-[^-]*\)$/\1/'`
+    ;;
+  android-linux)
+    os=-linux-android
+    basic_machine=`echo $1 | sed 's/^\(.*\)-\([^-]*-[^-]*\)$/\1/'`-unknown
     ;;
   *)
     basic_machine=`echo $1 | sed 's/-[^-]*$//'`
@@ -332,7 +334,10 @@ case $basic_machine in
 	strongarm | thumb | xscale)
 		basic_machine=arm-unknown
 		;;
-
+	xgate)
+		basic_machine=$basic_machine-unknown
+		os=-none
+		;;
 	xscaleeb)
 		basic_machine=armeb-unknown
 		;;

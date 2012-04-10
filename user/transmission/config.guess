@@ -17,9 +17,7 @@ timestamp='2012-01-01'
 # General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA
-# 02110-1301, USA.
+# along with this program; if not, see <http://www.gnu.org/licenses/>.
 #
 # As a special exception to the GNU General Public License, if you
 # distribute this file as part of a program that contains a
@@ -809,6 +807,9 @@ EOF
     i*:MSYS*:*)
 	echo ${UNAME_MACHINE}-pc-msys
 	exit ;;
+    i*:MSYS*:*)
+	echo ${UNAME_MACHINE}-pc-msys
+	exit ;;
     i*:windows32*:*)
 	# uname -m includes "-pc" on this system.
 	echo ${UNAME_MACHINE}-mingw32
@@ -862,6 +863,13 @@ EOF
 	exit ;;
     i*86:Minix:*:*)
 	echo ${UNAME_MACHINE}-pc-minix
+	exit ;;
+    aarch64:Linux:*:*)
+	echo ${UNAME_MACHINE}-unknown-linux-gnu
+	exit ;;
+    aarch64_be:Linux:*:*)
+	UNAME_MACHINE=aarch64_be
+	echo ${UNAME_MACHINE}-unknown-linux-gnu
 	exit ;;
     alpha:Linux:*:*)
 	case `sed -n '/^cpu model/s/^.*: \(.*\)/\1/p' < /proc/cpuinfo` in
@@ -1319,6 +1327,9 @@ EOF
 	exit ;;
     i*86:AROS:*:*)
 	echo ${UNAME_MACHINE}-pc-aros
+	exit ;;
+    x86_64:VMkernel:*:*)
+	echo ${UNAME_MACHINE}-unknown-esx
 	exit ;;
 esac
 

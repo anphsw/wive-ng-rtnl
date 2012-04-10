@@ -1,4 +1,4 @@
-/* $Id: portlistingparse.c,v 1.4 2011/03/18 11:02:17 nanard Exp $ */
+/* $Id: portlistingparse.c,v 1.5 2012/03/05 19:42:47 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * (c) 2011 Thomas Bernard 
