@@ -462,9 +462,7 @@ static int do_ip_setsockopt(struct sock *sk, int level,
 			     (1<<IP_TTL) | (1<<IP_HDRINCL) |
 			     (1<<IP_MTU_DISCOVER) | (1<<IP_RECVERR) |
 			     (1<<IP_ROUTER_ALERT) | (1<<IP_FREEBIND) |
-			     (1<<IP_PASSSEC) | (1<<IP_TRANSPARENT) |
-			     (1<<IP_MINTTL) | (1<<IP_NODEFRAG))) ||
-	    optname == IP_UNICAST_IF ||
+			     (1<<IP_PASSSEC) | (1<<IP_TRANSPARENT))) ||
 	    optname == IP_MULTICAST_TTL ||
 	    optname == IP_MULTICAST_ALL ||
 	    optname == IP_MULTICAST_LOOP ||
@@ -619,35 +617,6 @@ static int do_ip_setsockopt(struct sock *sk, int level,
 				goto e_inval;
 			inet->mc_loop = !!val;
 			break;
-		case IP_UNICAST_IF:
-		{
-			struct net_device *dev = NULL;
-			int ifindex;
-
-			if (optlen != sizeof(int))
-				goto e_inval;
-
-			ifindex = (__force int)ntohl((__force __be32)val);
-			if (ifindex == 0) {
-				inet->uc_index = 0;
-				err = 0;
-				break;
-			}
-
-			dev = dev_get_by_index(ifindex);
-			err = -EADDRNOTAVAIL;
-			if (!dev)
-				break;
-			dev_put(dev);
-
-			err = -EINVAL;
-			if (sk->sk_bound_dev_if)
-				break;
-
-			inet->uc_index = ifindex;
-			err = 0;
-			break;
-		}
 		case IP_MULTICAST_IF:
 		{
 			struct ip_mreqn mreq;
@@ -983,14 +952,6 @@ mc_msf_out:
 			inet->transparent = !!val;
 			break;
 
-		case IP_MINTTL:
-			if (optlen < 1)
-				goto e_inval;
-			if (val < 0 || val > 255)
-				goto e_inval;
-			inet->min_ttl = val;
-		break;
-
 		default:
 			err = -ENOPROTOOPT;
 			break;
@@ -1142,12 +1103,6 @@ static int do_ip_getsockopt(struct sock *sk, int level, int optname,
 	case IP_HDRINCL:
 		val = inet->hdrincl;
 		break;
-	case IP_NODEFRAG:
-		if (sk->sk_type != SOCK_RAW)
-			return -ENOPROTOOPT;
-
-		inet->nodefrag = val ? 1 : 0;
-		break;
 	case IP_MTU_DISCOVER:
 		val = inet->pmtudisc;
 		break;
@@ -1174,9 +1129,6 @@ static int do_ip_getsockopt(struct sock *sk, int level, int optname,
 		break;
 	case IP_MULTICAST_LOOP:
 		val = inet->mc_loop;
-		break;
-	case IP_UNICAST_IF:
-		val = (__force int)htonl((__u32) inet->uc_index);
 		break;
 	case IP_MULTICAST_IF:
 	{
@@ -1263,9 +1215,6 @@ static int do_ip_getsockopt(struct sock *sk, int level, int optname,
 		break;
 	case IP_TRANSPARENT:
 		val = inet->transparent;
-		break;
-	case IP_MINTTL:
-		val = inet->min_ttl;
 		break;
 	default:
 		release_sock(sk);

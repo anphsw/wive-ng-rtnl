@@ -1616,7 +1616,6 @@ csum_err:
 
 int tcp_v4_rcv(struct sk_buff *skb)
 {
-	const struct iphdr *iph;
 	struct tcphdr *th;
 	struct sock *sk;
 	int ret;
@@ -1631,7 +1630,7 @@ int tcp_v4_rcv(struct sk_buff *skb)
 		goto discard_it;
 
 	th = skb->h.th;
-	iph = ip_hdr(skb);
+
 	if (th->doff < sizeof(struct tcphdr) / 4)
 		goto bad_packet;
 	if (!pskb_may_pull(skb, th->doff * 4))
@@ -1656,9 +1655,6 @@ int tcp_v4_rcv(struct sk_buff *skb)
         sk = __inet_lookup_skb(&tcp_hashinfo, skb, th->source, th->dest);
 	if (!sk)
 		goto no_tcp_socket;
-
-	if (iph->ttl < inet_sk(sk)->min_ttl)
-		goto discard_and_relse;
 
 process:
 	if (sk->sk_state == TCP_TIME_WAIT)

@@ -100,7 +100,6 @@ struct rtable;
  * @tos - TOS
  * @mc_ttl - Multicasting TTL
  * @is_icsk - is this an inet_connection_sock?
- * @uc_index - Unicast outgoing device index
  * @mc_index - Multicast device index
  * @mc_list - Group array
  * @cork - info to build ip hdr on each ip frag while socket is corked
@@ -119,12 +118,10 @@ struct inet_sock {
 	__be32			saddr;
 	__s16			uc_ttl;
 	__u16			cmsg_flags;
+	struct ip_options	*opt;
 	__be16			sport;
 	__u16			id;
-
-	struct ip_options	*opt;
 	__u8			tos;
-	__u8                    min_ttl;
 	__u8			mc_ttl;
 	__u8			pmtudisc;
 	__u8			recverr:1,
@@ -133,9 +130,7 @@ struct inet_sock {
 				hdrincl:1,
 				mc_loop:1,
 				transparent:1,
-				mc_all:1,
-				nodefrag:1;
-	int			uc_index;
+				mc_all:1;
 	int			mc_index;
 	__be32			mc_addr;
 	struct ip_mc_socklist	*mc_list;
