@@ -2,6 +2,7 @@
  *
  * Copyright (c) 2000-2003 Intel Corporation 
  * All rights reserved. 
+ * Copyright (c) 2012 France Telecom All rights reserved. 
  *
  * Redistribution and use in source and binary forms, with or without 
  * modification, are permitted provided that the following conditions are met: 
@@ -49,9 +50,13 @@
 #include <stdio.h>
 
 #ifdef WIN32
+	#define snprintf _snprintf
 #else
 	#include <sys/types.h>
 #endif
+
+#ifdef INCLUDE_DEVICE_APIS
+#ifdef INTERNAL_WEB_SERVER
 
 /************************************************************************
 *	Function :	addrToString
@@ -59,31 +64,41 @@
 *	Parameters :
 *		IN const struct sockaddr* addr ;	socket address object with 
 *					the IP Address and port information
-*		OUT char ipaddr_port[] ;	character array which will hold the 
+*		OUT char ipaddr_port ;	character array which will hold the 
 *					IP Address  in a string format.
+*		IN size_t ipaddr_port_size ;	ipaddr_port buffer size
 *
 *	Description : Converts an Internet address to a string and stores it 
 *		a buffer.
 *
-*	Return : void ;
+*	Return : int ;
+*		UPNP_E_SUCCESS - On Success.
+*		UPNP_E_BUFFER_TOO_SMALL - Given buffer doesn't have enough size.
 *
 *	Note :
 ************************************************************************/
-static UPNP_INLINE void
+static UPNP_INLINE int
 addrToString( IN const struct sockaddr *addr,
-              OUT char ipaddr_port[] )
+              OUT char *ipaddr_port,
+              IN size_t ipaddr_port_size )
 {
-    char buf_ntop[64];
+    char buf_ntop[INET6_ADDRSTRLEN];
+    int rc = 0;
 
     if( addr->sa_family == AF_INET ) {
         struct sockaddr_in* sa4 = (struct sockaddr_in*)addr;
         inet_ntop(AF_INET, &sa4->sin_addr, buf_ntop, sizeof(buf_ntop) );
-        sprintf( ipaddr_port, "%s:%d", buf_ntop, ntohs( sa4->sin_port ) );
+        rc = snprintf( ipaddr_port, ipaddr_port_size, "%s:%d", buf_ntop,
+            (int)ntohs( sa4->sin_port ) );
     } else if( addr->sa_family == AF_INET6 ) {
         struct sockaddr_in6* sa6 = (struct sockaddr_in6*)addr;
         inet_ntop(AF_INET6, &sa6->sin6_addr, buf_ntop, sizeof(buf_ntop) );
-        sprintf( ipaddr_port, "[%s]:%d", buf_ntop, ntohs( sa6->sin6_port ) );
+        rc = snprintf( ipaddr_port, ipaddr_port_size, "[%s]:%d", buf_ntop,
+            (int)ntohs( sa6->sin6_port ) );
     }
+	if (rc < 0 || (unsigned int) rc >= ipaddr_port_size)
+		return UPNP_E_BUFFER_TOO_SMALL;
+	return UPNP_E_SUCCESS;
 }
 
 /************************************************************************
@@ -129,12 +144,14 @@ static UPNP_INLINE int calc_alias(
 	else 
 		aliasPtr = alias;
 	new_alias_len = root_len + strlen(temp_str) + strlen(aliasPtr);
-	alias_temp = malloc(new_alias_len + 1);
+	alias_temp = malloc(new_alias_len + (size_t)1);
 	if (alias_temp == NULL)
 		return UPNP_E_OUTOF_MEMORY;
-	strcpy(alias_temp, rootPath);
-	strcat(alias_temp, temp_str);
-	strcat(alias_temp, aliasPtr);
+	memset(alias_temp, 0, new_alias_len + (size_t)1);
+	strncpy(alias_temp, rootPath, root_len);
+	alias_temp[root_len] = '\0';
+	strncat(alias_temp, temp_str, strlen(temp_str));
+	strncat(alias_temp, aliasPtr, strlen(aliasPtr));
 
 	*newAlias = alias_temp;
 	return UPNP_E_SUCCESS;
@@ -170,11 +187,13 @@ static UPNP_INLINE int calc_descURL(
 	assert(alias != NULL && strlen(alias) > 0);
 
 	len = strlen(http_scheme) + strlen(ipPortStr) + strlen(alias);
-	if (len > (LINE_SIZE - 1))
+	if (len > ((size_t)LINE_SIZE - (size_t)1))
 		return UPNP_E_URL_TOO_BIG;
-	strcpy(descURL, http_scheme);
-	strcat(descURL, ipPortStr);
-	strcat(descURL, alias);
+	strncpy(descURL, http_scheme, strlen(http_scheme));
+	descURL[strlen(http_scheme)] = '\0';
+	strncat(descURL, ipPortStr, strlen(ipPortStr));
+	strncat(descURL, alias, strlen(alias));
+	descURL[len] = '\0';
 	UpnpPrintf(UPNP_INFO, API, __FILE__, __LINE__,
 		   "desc url: %s\n", descURL);
 
@@ -211,10 +230,8 @@ static int config_description_doc(
 	IN const char *ip_str,
 	OUT char **root_path_str )
 {
-	int addNew = FALSE;
 	IXML_NodeList *baseList;
 	IXML_Element *element = NULL;
-	IXML_Element *newElement = NULL;
 	IXML_Node *textNode = NULL;
 	IXML_Node *rootNode = NULL;
 	IXML_Node *urlbase_node = NULL;
@@ -232,7 +249,6 @@ static int config_description_doc(
 	baseList = ixmlDocument_getElementsByTagName(doc, urlBaseStr);
 	if (baseList == NULL) {
 		/* urlbase not found -- create new one */
-		addNew = TRUE;
 		element = ixmlDocument_createElement(doc, urlBaseStr);
 		if (element == NULL) {
 			goto error_handler;
@@ -265,7 +281,7 @@ static int config_description_doc(
 		}
 	} else {
 		/* urlbase found */
-		urlbase_node = ixmlNodeList_item(baseList, 0);
+		urlbase_node = ixmlNodeList_item(baseList, 0lu);
 		assert(urlbase_node != NULL);
 		textNode = ixmlNode_getFirstChild(urlbase_node);
 		if (textNode == NULL) {
@@ -305,7 +321,7 @@ static int config_description_doc(
 		}
 		/* add trailing '/' if missing */
 		if (url_str.buf[url_str.length - 1] != '/') {
-			if (membuffer_append(&url_str, "/", 1) != 0) {
+			if (membuffer_append(&url_str, "/", (size_t)1) != 0) {
 				goto error_handler;
 			}
 		}
@@ -319,7 +335,7 @@ static int config_description_doc(
 
  error_handler:
 	if (err_code != UPNP_E_SUCCESS) {
-		ixmlElement_free(newElement);
+		ixmlElement_free(element);
 	}
 	ixmlNodeList_free(baseList);
 	membuffer_destroy(&root_path);
@@ -371,10 +387,11 @@ configure_urlbase( INOUT IXML_Document * doc,
     int err_code;
     char ipaddr_port[LINE_SIZE];
 
-    err_code = UPNP_E_OUTOF_MEMORY; /* default error */
-
     /* get IP address and port */
-    addrToString( serverAddr, ipaddr_port );
+    err_code = addrToString( serverAddr, ipaddr_port, sizeof(ipaddr_port) );
+    if ( err_code != UPNP_E_SUCCESS ) {
+        goto error_handler;
+    }
 
     /* config url-base in 'doc' */
     err_code = config_description_doc( doc, ipaddr_port, &root_path );
@@ -415,3 +432,5 @@ error_handler:
     }
     return err_code;
 }
+#endif /* INCLUDE_DEVICE_APIS */
+#endif /* INTERNAL_WEB_SERVER */ 

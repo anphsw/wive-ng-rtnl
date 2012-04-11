@@ -998,8 +998,6 @@
 24) Small update toolchain.<br>
 25) Update miniupnpd to 1.6.20120305 version.<br>
 26) Small fix in kernel tcp/bridge.<br>
-27) Update transmission to 2.51 version.<br>
-28) Fix cpu based ppp policer work with new l2tp driver.<br>
 
 <br>
 <b>2.2.x</b><br>
@@ -1048,6 +1046,9 @@
 23) HW_NAT disable mcast/bcast process in PPE.<br>
 24) HW_NAT fix gre track in PPE.<br>
 25) HW_NAT use 215 devnode for /dev/hwnat0 (220 used by rdm).<br>
+26) Update transmission to 2.51 version.<br>
+27) Fix cpu based ppp policer work with new l2tp driver.<br>
+28) libupnp up to 1.6.17 version.<br>
 
 
 <br><br>

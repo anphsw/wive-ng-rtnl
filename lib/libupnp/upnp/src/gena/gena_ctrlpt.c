@@ -2,6 +2,7 @@
  *
  * Copyright (c) 2000-2003 Intel Corporation 
  * All rights reserved. 
+ * Copyright (c) 2012 France Telecom All rights reserved. 
  *
  * Redistribution and use in source and binary forms, with or without 
  * modification, are permitted provided that the following conditions are met: 
@@ -51,6 +52,9 @@
 #include "uuid.h"
 #include "upnpapi.h"
 
+#ifdef WIN32
+	#define snprintf _snprintf
+#endif
 
 extern ithread_mutex_t GlobalClientSubscribeMutex;
 
@@ -142,6 +146,8 @@ static int ScheduleGenaAutoRenew(
 	const UpnpString *tmpSID = UpnpClientSubscription_get_SID(sub);
 	const UpnpString *tmpEventURL = UpnpClientSubscription_get_EventURL(sub);
 
+	memset(&job, 0, sizeof(job));
+
 	if (TimeOut == UPNP_INFINITE) {
 		return_code = GENA_SUCCESS;
 		goto end_function;
@@ -152,6 +158,7 @@ static int ScheduleGenaAutoRenew(
 		return_code = UPNP_E_OUTOF_MEMORY;
 		goto end_function;
 	}
+	memset(RenewEventStruct, 0, sizeof(struct Upnp_Event_Subscribe));
 
 	RenewEvent = (upnp_timeout *) malloc(sizeof(upnp_timeout));
 	if (RenewEvent == NULL) {
@@ -159,11 +166,13 @@ static int ScheduleGenaAutoRenew(
 		return_code = UPNP_E_OUTOF_MEMORY;
 		goto end_function;
 	}
+	memset(RenewEvent, 0, sizeof(upnp_timeout));
 
 	/* schedule expire event */
 	RenewEventStruct->ErrCode = UPNP_E_SUCCESS;
 	RenewEventStruct->TimeOut = TimeOut;
-	strcpy(RenewEventStruct->Sid, UpnpString_get_String(tmpSID));
+	strncpy(RenewEventStruct->Sid, UpnpString_get_String(tmpSID),
+		sizeof(RenewEventStruct->Sid) - 1);
 	strncpy(RenewEventStruct->PublisherUrl,
 		UpnpString_get_String(tmpEventURL), NAME_SIZE - 1);
 
@@ -283,6 +292,7 @@ static int gena_subscribe(
 	membuffer request;
 	uri_type dest_url;
 	http_parser_t response;
+	int rc = 0;
 
 	UpnpString_clear(sid);
 
@@ -291,12 +301,16 @@ static int gena_subscribe(
 		timeout = &local_timeout;
 	}
 	if (*timeout < 0) {
-		strcpy(timeout_str, "infinite");
+		memset(timeout_str, 0, sizeof(timeout_str));
+		strncpy(timeout_str, "infinite", sizeof(timeout_str) - 1);
 	} else if(*timeout < CP_MINIMUM_SUBSCRIPTION_TIME) {
-		sprintf(timeout_str, "%d", CP_MINIMUM_SUBSCRIPTION_TIME);
+		rc = snprintf(timeout_str, sizeof(timeout_str),
+			"%d", CP_MINIMUM_SUBSCRIPTION_TIME);
 	} else {
-		sprintf(timeout_str, "%d", *timeout);
+		rc = snprintf(timeout_str, sizeof(timeout_str), "%d", *timeout);
 	}
+	if (rc < 0 || (unsigned int) rc >= sizeof(timeout_str))
+		return UPNP_E_OUTOF_MEMORY;
 
 	/* parse url */
 	return_code = http_FixStrUrl(
@@ -512,6 +526,10 @@ int genaSubscribe(
 	UpnpString *ActualSID = UpnpString_new();
 	UpnpString *EventURL = UpnpString_new();
 	struct Handle_Info *handle_info;
+	int rc = 0;
+
+	memset(temp_sid, 0, sizeof(temp_sid));
+	memset(temp_sid2, 0, sizeof(temp_sid2));
 
 	UpnpPrintf(UPNP_INFO, GENA, __FILE__, __LINE__, "GENA SUBSCRIBE BEGIN");
 
@@ -520,9 +538,9 @@ int genaSubscribe(
 	HandleReadLock();
 	/* validate handle */
 	if (GetHandleInfo(client_handle, &handle_info) != HND_CLIENT) {
-		HandleUnlock();
-
-		return GENA_E_BAD_HANDLE;
+		return_code = GENA_E_BAD_HANDLE;
+		SubscribeLock();
+		goto error_handler;
 	}
 	HandleUnlock();
 
@@ -545,7 +563,11 @@ int genaSubscribe(
 	/* generate client SID */
 	uuid_create(&uid );
 	uuid_unpack(&uid, temp_sid);
-	sprintf(temp_sid2, "uuid:%s", temp_sid);
+	rc = snprintf(temp_sid2, sizeof(temp_sid2), "uuid:%s", temp_sid);
+	if (rc < 0 || (unsigned int) rc >= sizeof(temp_sid2)) {
+		return_code = UPNP_E_OUTOF_MEMORY;
+		goto error_handler;
+	}
 	UpnpString_set_String(out_sid, temp_sid2);
 
 	/* create event url */
@@ -567,11 +589,10 @@ int genaSubscribe(
 	return_code = ScheduleGenaAutoRenew(client_handle, *TimeOut, newSubscription);
 
 error_handler:
-	if (return_code != UPNP_E_SUCCESS) {
 		UpnpString_delete(ActualSID);
 		UpnpString_delete(EventURL);
+	if (return_code != UPNP_E_SUCCESS)
 		UpnpClientSubscription_delete(newSubscription);
-	}
 	HandleUnlock();
 	SubscribeUnlock();
 
@@ -789,7 +810,9 @@ void gena_process_notification_event(
 
 	/* fill event struct */
 	tmpSID = UpnpClientSubscription_get_SID(subscription);
-	strcpy(event_struct.Sid, UpnpString_get_String(tmpSID));
+	memset(event_struct.Sid, 0, sizeof(event_struct.Sid));
+	strncpy(event_struct.Sid, UpnpString_get_String(tmpSID),
+		sizeof(event_struct.Sid) - 1);
 	event_struct.EventKey = eventKey;
 	event_struct.ChangedVariables = ChangedVars;
 

@@ -9,7 +9,7 @@
 
 AC_PREREQ(2.60)
 
-AC_INIT([libupnp], [1.6.15], [mroberto@users.sourceforge.net])
+AC_INIT([libupnp], [1.6.17], [mroberto@users.sourceforge.net])
 dnl ############################################################################
 dnl # *Independently* of the above libupnp package version, the libtool version
 dnl # of the 3 libraries need to be updated whenever there is a change released:
@@ -281,9 +281,41 @@ dnl #AC_SUBST([LT_VERSION_THREADUTIL], [6:0:0])
 dnl #AC_SUBST([LT_VERSION_UPNP],       [8:1:2])
 dnl #
 dnl ############################################################################
-AC_SUBST([LT_VERSION_IXML],       [2:6:0])
-AC_SUBST([LT_VERSION_THREADUTIL], [6:0:0])
-AC_SUBST([LT_VERSION_UPNP],       [8:1:2])
+dnl # Release 1.6.16:
+dnl # "current:revision:age"
+dnl #
+dnl # - Code has changed in ixml
+dnl #	revision: 6 -> 7
+dnl # - Code has changed in threadutil
+dnl #   revision: 0 -> 1
+dnl # - Code has changed in upnp
+dnl #	revision: 1 -> 2
+dnl # - interface changed/added/removed in upnp
+dnl #   current++(9); revision = 0
+dnl # - interface added in upnp
+dnl #   age++(3)
+dnl #
+dnl #AC_SUBST([LT_VERSION_IXML],       [2:7:0])
+dnl #AC_SUBST([LT_VERSION_THREADUTIL], [6:1:0])
+dnl #AC_SUBST([LT_VERSION_UPNP],       [9:0:3])
+dnl #
+dnl ############################################################################
+dnl # Release 1.6.17:
+dnl # "current:revision:age"
+dnl #
+dnl # - Code has changed in threadutil
+dnl #   revision: 1 -> 2
+dnl # - Code has changed in upnp
+dnl #   revision: 0 -> 1
+dnl #
+dnl #AC_SUBST([LT_VERSION_IXML],       [2:7:0])
+dnl #AC_SUBST([LT_VERSION_THREADUTIL], [6:2:0])
+dnl #AC_SUBST([LT_VERSION_UPNP],       [9:1:3])
+dnl #
+dnl ############################################################################
+AC_SUBST([LT_VERSION_IXML],       [2:7:0])
+AC_SUBST([LT_VERSION_THREADUTIL], [6:2:0])
+AC_SUBST([LT_VERSION_UPNP],       [9:1:3])
 dnl ############################################################################
 dnl # Repeating the algorithm to place it closer to the modificatin place:
 dnl # 	- library code modified:		revision++
@@ -371,6 +403,29 @@ if test "x$enable_webserver" = xyes ; then
 	AC_DEFINE(UPNP_HAVE_WEBSERVER, 1, [see upnpconfig.h])
 fi
 
+RT_BOOL_ARG_ENABLE([ssdp], [yes], [SSDP part])
+if test "x$enable_ssdp" = xyes ; then
+        AC_DEFINE(UPNP_HAVE_SSDP, 1, [see upnpconfig.h])
+fi
+
+RT_BOOL_ARG_ENABLE([optssdp], [yes], [optionnal SSDP headers support)])
+if test "x$enable_optssdp" = xyes ; then
+        AC_DEFINE(UPNP_HAVE_OPTSSDP, 1, [see upnpconfig.h])
+	enable_uuid=yes
+fi
+
+RT_BOOL_ARG_ENABLE([soap], [yes], [SOAP part])
+if test "x$enable_soap" = xyes ; then
+        AC_DEFINE(UPNP_HAVE_SOAP, 1, [see upnpconfig.h])
+fi
+
+RT_BOOL_ARG_ENABLE([gena], [yes], [GENA part])
+if test "x$enable_gena" = xyes ; then
+        AC_DEFINE(UPNP_HAVE_GENA, 1, [see upnpconfig.h])
+	enable_uuid=yes
+fi
+
+AM_CONDITIONAL(ENABLE_UUID, test x"$enable_uuid" = xyes)
 
 RT_BOOL_ARG_ENABLE([tools], [yes], [helper APIs in upnptools.h])
 if test "x$enable_tools" = xyes ; then
@@ -380,6 +435,11 @@ fi
 RT_BOOL_ARG_ENABLE([ipv6], [no], [ipv6 support])
 if test "x$enable_ipv6" = xyes ; then
         AC_DEFINE(UPNP_ENABLE_IPV6, 1, [see upnpconfig.h])
+fi
+
+RT_BOOL_ARG_ENABLE([unspecified_server], [no], [unspecified SERVER header])
+if test "x$enable_unspecified_server" = xyes ; then
+        AC_DEFINE(UPNP_ENABLE_UNSPECIFIED_SERVER, 1, [see upnpconfig.h])
 fi
 
 RT_BOOL_ARG_ENABLE([notification_reordering], [yes], [GENA notification reordering in gena_device.c])

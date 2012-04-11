@@ -2,7 +2,7 @@
  *
  * Copyright (c) 2000-2003 Intel Corporation 
  * All rights reserved. 
- * Copyright (C) 2011 France Telecom All rights reserved. 
+ * Copyright (C) 2011-2012 France Telecom All rights reserved. 
  *
  * Redistribution and use in source and binary forms, with or without 
  * modification, are permitted provided that the following conditions are met: 
@@ -56,7 +56,7 @@
 #define DEFAULT_MAXAGE 1800
 
 #define DEFAULT_SOAP_CONTENT_LENGTH 16000
-#define MAX_SOAP_CONTENT_LENGTH 32000
+#define MAX_SOAP_CONTENT_LENGTH (size_t)32000
 
 extern size_t g_maxContentLength;
 
@@ -174,7 +174,7 @@ Upnp_Handle_Type GetClientHandleInfo(
  */
 Upnp_Handle_Type GetDeviceHandleInfo(
 	/*! [in] Address family. */
-	const int AddressFamily,
+	int AddressFamily,
 	/*! [out] Device handle pointer. */
 	int *device_handle_out, 
 	/*! [out] Device handle structure passed by this function. */
@@ -182,10 +182,8 @@ Upnp_Handle_Type GetDeviceHandleInfo(
 
 
 extern char gIF_NAME[LINE_SIZE];
-/*! INET_ADDRSTRLEN. */
-extern char gIF_IPV4[22];
-/*! INET6_ADDRSTRLEN. */
-extern char gIF_IPV6[65];
+extern char gIF_IPV4[INET_ADDRSTRLEN];
+extern char gIF_IPV6[INET6_ADDRSTRLEN];
 
 extern char gIF_IPV6_ULA_GUA[INET6_ADDRSTRLEN];
 

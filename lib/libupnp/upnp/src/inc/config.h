@@ -2,6 +2,7 @@
  *
  * Copyright (c) 2000-2003 Intel Corporation
  * All rights reserved.
+ * Copyright (c) 2012 France Telecom All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -125,7 +126,7 @@
  *
  * @{
  */
-#define THREAD_STACK_SIZE 0
+#define THREAD_STACK_SIZE (size_t)0
 /* @} */
 
 
@@ -178,7 +179,7 @@
  *
  * @{
  */
-#define SSDP_PAUSE  100
+#define SSDP_PAUSE  100u
 /* @} */
 
 /*!
@@ -189,7 +190,7 @@
  *
  * @{
  */
-#define WEB_SERVER_BUF_SIZE  (1024*1024)
+#define WEB_SERVER_BUF_SIZE  (size_t)(1024*1024)
 /* @} */
 
 /*!
@@ -435,11 +436,34 @@
 #endif
 
 
-/* configure --enable-webserver --enable-device */
+/* configure --enable-webserver */
 #if UPNP_HAVE_WEBSERVER
 #	define INTERNAL_WEB_SERVER	1
 #endif
 
+/* configure --enable-ssdp */
+#undef EXCLUDE_SSDP
+#if UPNP_HAVE_SSDP
+#       define EXCLUDE_SSDP 0
+#else
+#       define EXCLUDE_SSDP 1
+#endif
+
+/* configure --enable-soap */
+#undef EXCLUDE_SOAP
+#if UPNP_HAVE_SOAP
+#	define EXCLUDE_SOAP 0
+#else
+#	define EXCLUDE_SOAP 1
+#endif
+
+/* configure --enable-gena */
+#undef EXCLUDE_GENA
+#if UPNP_HAVE_GENA
+#       define EXCLUDE_GENA 0
+#else
+#       define EXCLUDE_GENA 1
+#endif
 
 #undef  EXCLUDE_WEB_SERVER
 #undef  EXCLUDE_MINISERVER
@@ -452,7 +476,7 @@
 #endif
 
 
-#if EXCLUDE_GENA == 1 && EXCLUDE_SOAP == 1 && EXCLUDE_WEB_SERVER == 1
+#if EXCLUDE_SSDP == 1 && EXCLUDE_GENA == 1 && EXCLUDE_SOAP == 1 && EXCLUDE_WEB_SERVER == 1
 #	undef  EXCLUDE_MINISERVER
 #	define EXCLUDE_MINISERVER 1
 #	if INTERNAL_WEB_SERVER
@@ -461,7 +485,7 @@
 #endif
 
 
-#if EXCLUDE_GENA == 0 || EXCLUDE_SOAP == 0 || EXCLUDE_WEB_SERVER == 0
+#if EXCLUDE_SSDP == 0 || EXCLUDE_GENA == 0 || EXCLUDE_SOAP == 0 || EXCLUDE_WEB_SERVER == 0
 #	undef  EXCLUDE_MINISERVER
 #	define EXCLUDE_MINISERVER 0
 #	if EXCLUDE_WEB_SERVER == 0 && !defined INTERNAL_WEB_SERVER

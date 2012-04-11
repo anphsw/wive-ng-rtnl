@@ -2,6 +2,7 @@
  *
  * Copyright (c) 2000-2003 Intel Corporation 
  * All rights reserved. 
+ * Copyright (c) 2012 France Telecom All rights reserved. 
  *
  * Redistribution and use in source and binary forms, with or without 
  * modification, are permitted provided that the following conditions are met: 
@@ -42,6 +43,7 @@
 
 #ifdef INCLUDE_DEVICE_APIS
 
+#if EXCLUDE_GENA == 0
 /************************************************************************
 *	Function :	copy_subscription
 *
@@ -321,6 +323,7 @@ FindServiceEventURLPath( service_table * table,
 
     return NULL;
 }
+#endif /* EXCLUDE_GENA */
 
 /************************************************************************
 *	Function :	FindServiceControlURLPath
@@ -338,6 +341,7 @@ FindServiceEventURLPath( service_table * table,
 *
 *	Note :
 ************************************************************************/
+#if EXCLUDE_SOAP == 0
 service_info *
 FindServiceControlURLPath( service_table * table,
                            const char *controlURLPath )
@@ -369,6 +373,7 @@ FindServiceControlURLPath( service_table * table,
     return NULL;
 
 }
+#endif /* EXCLUDE_SOAP */
 
 /************************************************************************
 *	Function :	printService
@@ -514,6 +519,7 @@ void printServiceTable(
     printServiceList( table->serviceList, level, module );}
 #endif
 
+#if EXCLUDE_GENA == 0
 /************************************************************************
 *	Function :	freeService
 *
@@ -737,8 +743,8 @@ service_info *getServiceList(
 	service_info *current = NULL;
 	service_info *previous = NULL;
 	IXML_NodeList *serviceNodeList = NULL;
-	long unsigned int NumOfServices = 0;
-	long unsigned int i = 0;
+	long unsigned int NumOfServices = 0lu;
+	long unsigned int i = 0lu;
 	int fail = 0;
 
 	if (getSubElement("UDN", node, &UDN) &&
@@ -747,7 +753,7 @@ service_info *getServiceList(
 			(IXML_Element *)serviceList, "service");
 		if (serviceNodeList != NULL) {
 			NumOfServices = ixmlNodeList_length(serviceNodeList);
-			for (i = 0; i < NumOfServices; i++) {
+			for (i = 0lu; i < NumOfServices; i++) {
 				current_service =
 				    ixmlNodeList_item(serviceNodeList, i);
 				fail = 0;
@@ -761,6 +767,7 @@ service_info *getServiceList(
 				}
 				if (!current) {
 					freeServiceList(head);
+					ixmlNodeList_free(serviceNodeList);
 					return NULL;
 				}
 				current->next = NULL;
@@ -860,8 +867,8 @@ getAllServiceList( IXML_Node * node,
 	IXML_NodeList *deviceList = NULL;
 	IXML_Node *currentDevice = NULL;
 
-	long unsigned int NumOfDevices = 0;
-	long unsigned int i = 0;
+	long unsigned int NumOfDevices = 0lu;
+	long unsigned int i = 0lu;
 
 	(*out_end) = NULL;
 
@@ -869,7 +876,7 @@ getAllServiceList( IXML_Node * node,
 		(IXML_Element *)node, "device");
 	if (deviceList) {
 		NumOfDevices = ixmlNodeList_length(deviceList);
-		for (i = 0; i < NumOfDevices; i++) {
+		for (i = 0lu; i < NumOfDevices; i++) {
 			currentDevice = ixmlNodeList_item(deviceList, i);
 			if (head) {
 				end->next = getServiceList(currentDevice,
@@ -912,12 +919,11 @@ removeServiceTable( IXML_Node * node,
     IXML_Node *currentUDN = NULL;
     DOMString UDN = NULL;
     IXML_NodeList *deviceList = NULL;
-    IXML_Node *currentDevice = NULL;
     service_info *current_service = NULL;
     service_info *start_search = NULL;
     service_info *prev_service = NULL;
-    long unsigned int NumOfDevices = 0;
-    long unsigned int i = 0;
+    long unsigned int NumOfDevices = 0lu;
+    long unsigned int i = 0lu;
 
     if( getSubElement( "root", node, &root ) ) {
         current_service = in->serviceList;
@@ -927,8 +933,7 @@ removeServiceTable( IXML_Node * node,
                                               "device" );
         if( deviceList != NULL ) {
             NumOfDevices = ixmlNodeList_length( deviceList );
-            for( i = 0; i < NumOfDevices; i++ ) {
-                currentDevice = ixmlNodeList_item( deviceList, i );
+            for( i = 0lu; i < NumOfDevices; i++ ) {
                 if( ( start_search )
                     && ( ( getSubElement( "UDN", node, &currentUDN ) )
                          && ( UDN = getElementValue( currentUDN ) ) ) ) {
@@ -939,6 +944,7 @@ removeServiceTable( IXML_Node * node,
                     while( ( current_service )
                            && ( strcmp( current_service->UDN, UDN ) ) ) {
                         current_service = current_service->next;
+			if( current_service != NULL) 
                         prev_service = current_service->next;
                     }
                     while( ( current_service )
@@ -954,6 +960,8 @@ removeServiceTable( IXML_Node * node,
                         freeService( current_service );
                         current_service = start_search;
                     }
+                    ixmlFreeDOMString( UDN );
+                    UDN = NULL;
                 }
             }
 
@@ -1060,6 +1068,7 @@ getServiceTable( IXML_Node * node,
 
     return 0;
 }
+#endif /* EXCLUDE_GENA */
 
 #endif /* INCLUDE_DEVICE_APIS */
 

@@ -2,6 +2,7 @@
  *
  * Copyright (c) 2000-2003 Intel Corporation 
  * All rights reserved. 
+ * Copyright (c) 2012 France Telecom All rights reserved. 
  *
  * Redistribution and use in source and binary forms, with or without 
  * modification, are permitted provided that the following conditions are met: 
@@ -38,6 +39,8 @@
 
 #include "config.h"
 
+#if EXCLUDE_WEB_SERVER == 0
+
 #include "webserver.h"
 
 #include "httpparser.h"
@@ -58,6 +61,10 @@
 #include <assert.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+
+#ifdef WIN32
+	 #define snprintf _snprintf
+#endif
 
 /*!
  * Response Types.
@@ -299,6 +306,7 @@ static UPNP_INLINE int get_content_type(
 	int ctype_found = FALSE;
 	char *temp = NULL;
 	size_t length = 0;
+	int rc = 0;
 
 	(*content_type) = NULL;
 	/* get ext */
@@ -315,7 +323,11 @@ static UPNP_INLINE int get_content_type(
 	temp = malloc(length);
 	if (!temp)
 		return UPNP_E_OUTOF_MEMORY;
-	sprintf(temp, "%s/%s", type, subtype);
+	rc = snprintf(temp, length, "%s/%s", type, subtype);
+	if (rc < 0 || (unsigned int) rc >= length) {
+		free(temp);
+		return UPNP_E_OUTOF_MEMORY;
+	}
 	(*content_type) = ixmlCloneDOMString(temp);
 	free(temp);
 	if (!content_type)
@@ -501,6 +513,7 @@ static int get_file_info(
 	FILE *fp;
 	int rc = 0;
 
+	ixmlFreeDOMString(info->content_type);	
 	info->content_type = NULL;
 	code = stat(filename, &s);
 	if (code == -1)
@@ -759,6 +772,7 @@ static int CreateHTTPRangeResponseHeader(
 	off_t FirstByte, LastByte;
 	char *RangeInput;
 	char *Ptr;
+	int rc = 0;
 
 	Instr->IsRangeActive = 1;
 	Instr->ReadSendSize = FileLength;
@@ -767,7 +781,8 @@ static int CreateHTTPRangeResponseHeader(
 	RangeInput = malloc(strlen(ByteRangeSpecifier) + 1);
 	if (!RangeInput)
 		return UPNP_E_OUTOF_MEMORY;
-	strcpy(RangeInput, ByteRangeSpecifier);
+	memset(RangeInput, 0, strlen(ByteRangeSpecifier) + 1);
+	strncpy(RangeInput, ByteRangeSpecifier, strlen(ByteRangeSpecifier));
 	/* CONTENT-RANGE: bytes 222-3333/4000  HTTP_PARTIAL_CONTENT */
 	if (StrStr(RangeInput, "bytes") == NULL ||
 	    (Ptr = StrStr(RangeInput, "=")) == NULL) {
@@ -792,27 +807,38 @@ static int CreateHTTPRangeResponseHeader(
 			Instr->RangeOffset = FirstByte;
 			Instr->ReadSendSize = LastByte - FirstByte + 1;
 			/* Data between two range. */
-			sprintf(Instr->RangeHeader,
+			rc = snprintf(Instr->RangeHeader,
+				sizeof(Instr->RangeHeader),
 				"CONTENT-RANGE: bytes %" PRId64
 				"-%" PRId64 "/%" PRId64 "\r\n",
 				(int64_t)FirstByte,
 				(int64_t)LastByte,
 				(int64_t)FileLength);
+			if (rc < 0 || (unsigned int) rc >= sizeof(Instr->RangeHeader)) {
+				free(RangeInput);
+				return UPNP_E_OUTOF_MEMORY;
+			}
 		} else if (FirstByte >= 0 && LastByte == -1
 			   && FirstByte < FileLength) {
 			Instr->RangeOffset = FirstByte;
 			Instr->ReadSendSize = FileLength - FirstByte;
-			sprintf(Instr->RangeHeader,
+			rc = snprintf(Instr->RangeHeader,
+				sizeof(Instr->RangeHeader),
 				"CONTENT-RANGE: bytes %" PRId64
 				"-%" PRId64 "/%" PRId64 "\r\n",
 				(int64_t)FirstByte,
 				(int64_t)(FileLength - 1),
 				(int64_t)FileLength);
+			if (rc < 0 || (unsigned int) rc >= sizeof(Instr->RangeHeader)) {
+				free(RangeInput);
+				return UPNP_E_OUTOF_MEMORY;
+			}
 		} else if (FirstByte == -1 && LastByte > 0) {
 			if (LastByte >= FileLength) {
 				Instr->RangeOffset = 0;
 				Instr->ReadSendSize = FileLength;
-				sprintf(Instr->RangeHeader,
+				rc = snprintf(Instr->RangeHeader,
+					sizeof(Instr->RangeHeader),
 					"CONTENT-RANGE: bytes 0-%" PRId64
 					"/%" PRId64 "\r\n",
 					(int64_t)(FileLength - 1),
@@ -820,12 +846,17 @@ static int CreateHTTPRangeResponseHeader(
 			} else {
 				Instr->RangeOffset = FileLength - LastByte;
 				Instr->ReadSendSize = LastByte;
-				sprintf(Instr->RangeHeader,
+				rc = snprintf(Instr->RangeHeader,
+					sizeof(Instr->RangeHeader),
 					"CONTENT-RANGE: bytes %" PRId64
 					"-%" PRId64 "/%" PRId64 "\r\n",
 					(int64_t)(FileLength - LastByte + 1),
 					(int64_t)FileLength,
 					(int64_t)FileLength);
+			}
+			if (rc < 0 || (unsigned int) rc >= sizeof(Instr->RangeHeader)) {
+				free(RangeInput);
+				return UPNP_E_OUTOF_MEMORY;
 			}
 		} else {
 			free(RangeInput);
@@ -863,8 +894,9 @@ static int CheckOtherHTTPHeaders(
 	/*NNS: dlist_node* node; */
 	int index, RetCode = HTTP_OK;
 	char *TmpBuf;
+	size_t TmpBufSize = LINE_SIZE;
 
-	TmpBuf = (char *)malloc(LINE_SIZE);
+	TmpBuf = (char *)malloc(TmpBufSize);
 	if (!TmpBuf)
 		return UPNP_E_OUTOF_MEMORY;
 	node = ListHead(&Req->headers);
@@ -874,9 +906,10 @@ static int CheckOtherHTTPHeaders(
 		index = map_str_to_int((const char *)header->name.buf,
 				header->name.length, Http_Header_Names,
 				NUM_HTTP_HEADER_NAMES, FALSE);
-		if (header->value.length >= LINE_SIZE) {
+		if (header->value.length >= TmpBufSize) {
 			free(TmpBuf);
-			TmpBuf = (char *)malloc(header->value.length + 1);
+			TmpBufSize = header->value.length + 1;
+			TmpBuf = (char *)malloc(TmpBufSize);
 			if (!TmpBuf)
 				return UPNP_E_OUTOF_MEMORY;
 		}
@@ -908,8 +941,14 @@ static int CheckOtherHTTPHeaders(
 				}
 				break;
 			case HDR_ACCEPT_LANGUAGE:
+				if (header->value.length + 1 > sizeof(RespInstr->AcceptLanguageHeader)) {
+					size_t length = sizeof(RespInstr->AcceptLanguageHeader) - 1;
+					memcpy(RespInstr->AcceptLanguageHeader, TmpBuf, length);
+					RespInstr->AcceptLanguageHeader[length] = '\0';
+				} else {
 				memcpy(RespInstr->AcceptLanguageHeader, TmpBuf,
-				       sizeof(RespInstr->AcceptLanguageHeader) - 1);
+						header->value.length + 1);
+				}
 				break;
 			default:
 				/*
@@ -1001,6 +1040,7 @@ static int process_request(
 	       req->method == HTTPMETHOD_POST ||
 	       req->method == HTTPMETHOD_SIMPLEGET);
 	/* init */
+	memset(&finfo, 0, sizeof(finfo));
 	request_doc = NULL;
 	finfo.content_type = NULL;
 	alias_grabbed = FALSE;
@@ -1308,7 +1348,7 @@ static int http_RecvPostMessage(
 	int ok_on_close = FALSE;
 	size_t entity_offset = 0;
 	int num_read = 0;
-	int ret_code = 0;
+	int ret_code = HTTP_OK;
 
 	if (Instr && Instr->IsVirtualFile) {
 		Fp = (virtualDirCallback.open) (filename, UPNP_WRITE);
@@ -1331,8 +1371,8 @@ static int http_RecvPostMessage(
 			   && (status != PARSE_CONTINUE_1)
 			   && (status != PARSE_INCOMPLETE)) {
 			/* error */
-			fclose(Fp);
-			return HTTP_BAD_REQUEST;
+			ret_code = HTTP_BAD_REQUEST;
+			goto ExitFunction;
 		}
 		/* read more if necessary entity */
 		while (entity_offset + Data_Buf_Size > parser->msg.entity.length &&
@@ -1340,13 +1380,13 @@ static int http_RecvPostMessage(
 			num_read = sock_read(info, Buf, sizeof(Buf), &Timeout);
 			if (num_read > 0) {
 				/* append data to buffer */
-				ret_code = membuffer_append(&parser->msg.msg,
-					Buf, (size_t)num_read);
-				if (ret_code != 0) {
+				if (membuffer_append(&parser->msg.msg,
+					Buf, (size_t)num_read) != 0) {
 					/* set failure status */
 					parser->http_error_code =
 					    HTTP_INTERNAL_SERVER_ERROR;
-					return HTTP_INTERNAL_SERVER_ERROR;
+					ret_code = HTTP_INTERNAL_SERVER_ERROR;
+					goto ExitFunction;
 				}
 				status = parser_parse_entity(parser);
 				if (status == PARSE_INCOMPLETE_ENTITY) {
@@ -1355,7 +1395,8 @@ static int http_RecvPostMessage(
 				} else if ((status != PARSE_SUCCESS)
 					   && (status != PARSE_CONTINUE_1)
 					   && (status != PARSE_INCOMPLETE)) {
-					return HTTP_BAD_REQUEST;
+					ret_code = HTTP_BAD_REQUEST;
+					goto ExitFunction;
 				}
 			} else if (num_read == 0) {
 				if (ok_on_close) {
@@ -1367,10 +1408,12 @@ static int http_RecvPostMessage(
 				} else {
 					/* partial msg or response */
 					parser->http_error_code = HTTP_BAD_REQUEST;
-					return HTTP_BAD_REQUEST;
+					ret_code = HTTP_BAD_REQUEST;
+					goto ExitFunction;
 				}
 			} else {
-				return num_read;
+				ret_code = num_read;
+				goto ExitFunction;
 			}
 		}
 		if ((entity_offset + Data_Buf_Size) > parser->msg.entity.length) {
@@ -1384,25 +1427,26 @@ static int http_RecvPostMessage(
 		if (Instr->IsVirtualFile) {
 			int n = virtualDirCallback.write(Fp, Buf, Data_Buf_Size);
 			if (n < 0) {
-				virtualDirCallback.close(Fp);
-				return HTTP_INTERNAL_SERVER_ERROR;
+				ret_code = HTTP_INTERNAL_SERVER_ERROR;
+				goto ExitFunction;
 			}
 		} else {
 			size_t n = fwrite(Buf, 1, Data_Buf_Size, Fp);
 			if (n != Data_Buf_Size) {
-				fclose(Fp);
-				return HTTP_INTERNAL_SERVER_ERROR;
+				ret_code = HTTP_INTERNAL_SERVER_ERROR;
+				goto ExitFunction;
 			}
 		}
 	} while (parser->position != POS_COMPLETE ||
 		 entity_offset != parser->msg.entity.length);
-	if (Instr->IsVirtualFile) {
+ExitFunction:
+	if (Instr && Instr->IsVirtualFile) {
 		virtualDirCallback.close(Fp);
 	} else {
 		fclose(Fp);
 	}
 
-	return HTTP_OK;
+	return ret_code;
 }
 
 void web_server_callback(http_parser_t *parser, INOUT http_message_t *req,
@@ -1488,4 +1532,5 @@ void web_server_callback(http_parser_t *parser, INOUT http_message_t *req,
 	membuffer_destroy(&headers);
 	membuffer_destroy(&filename);
 }
+#endif /* EXCLUDE_WEB_SERVER */
 

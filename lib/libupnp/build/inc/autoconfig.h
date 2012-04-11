@@ -105,7 +105,7 @@
 #define PACKAGE_NAME "libupnp"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "libupnp 1.6.16"
+#define PACKAGE_STRING "libupnp 1.6.17"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "libupnp"
@@ -114,7 +114,7 @@
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "1.6.16"
+#define PACKAGE_VERSION "1.6.17"
 
 /* Define to necessary symbol if this constant uses a non-standard name on
    your system. */
@@ -133,6 +133,9 @@
 #define UPNP_ENABLE_NOTIFICATION_REORDERING 1
 
 /* see upnpconfig.h */
+/* #undef UPNP_ENABLE_UNSPECIFIED_SERVER */
+
+/* see upnpconfig.h */
 #define UPNP_HAVE_CLIENT 1
 
 /* see upnpconfig.h */
@@ -140,6 +143,18 @@
 
 /* see upnpconfig.h */
 #define UPNP_HAVE_DEVICE 1
+
+/* see upnpconfig.h */
+#define UPNP_HAVE_GENA 1
+
+/* see upnpconfig.h */
+#define UPNP_HAVE_OPTSSDP 1
+
+/* see upnpconfig.h */
+#define UPNP_HAVE_SOAP 1
+
+/* see upnpconfig.h */
+#define UPNP_HAVE_SSDP 1
 
 /* see upnpconfig.h */
 #define UPNP_HAVE_TOOLS 1
@@ -157,13 +172,13 @@
 #define UPNP_VERSION_MINOR 6
 
 /* see upnpconfig.h */
-#define UPNP_VERSION_PATCH 16
+#define UPNP_VERSION_PATCH 17
 
 /* see upnpconfig.h */
-#define UPNP_VERSION_STRING "1.6.16"
+#define UPNP_VERSION_STRING "1.6.17"
 
 /* Version number of package */
-#define VERSION "1.6.16"
+#define VERSION "1.6.17"
 
 /* File Offset size */
 #define _FILE_OFFSET_BITS 64

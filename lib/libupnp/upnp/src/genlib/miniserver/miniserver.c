@@ -2,6 +2,7 @@
  *
  * Copyright (c) 2000-2003 Intel Corporation
  * All rights reserved.
+ * Copyright (C) 2012 France Telecom All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -30,6 +31,8 @@
  **************************************************************************/
 
 #include "config.h"
+
+#if EXCLUDE_MINISERVER == 0
 
 /*!
  * \file
@@ -88,10 +91,11 @@ uint16_t miniStopSockPort;
 /*!
  * module vars
  */
+static MiniServerState gMServState = MSERV_IDLE;
+#ifdef INTERNAL_WEB_SERVER
 static MiniServerCallback gGetCallback = NULL;
 static MiniServerCallback gSoapCallback = NULL;
 static MiniServerCallback gGenaCallback = NULL;
-static MiniServerState gMServState = MSERV_IDLE;
 
 void SetHTTPGetCallback(MiniServerCallback callback)
 {
@@ -110,7 +114,6 @@ void SetGenaCallback(MiniServerCallback callback)
 	gGenaCallback = callback;
 }
 
-#ifdef INTERNAL_WEB_SERVER
 /*!
  * \brief Based on the type pf message, appropriate callback is issued.
  *
@@ -259,6 +262,8 @@ static UPNP_INLINE void schedule_request_job(
 	struct mserv_request_t *request;
 	ThreadPoolJob job;
 
+	memset(&job, 0, sizeof(job));
+
 	request = (struct mserv_request_t *)malloc(
 		sizeof (struct mserv_request_t));
 	if (request == NULL) {
@@ -329,13 +334,13 @@ static int receive_from_stopSock(SOCKET ssock, fd_set *set)
 	socklen_t clientLen;
 	struct sockaddr_storage clientAddr;
 	char requestBuf[256];
-	char buf_ntop[64];
+	char buf_ntop[INET6_ADDRSTRLEN];
 
 	if (FD_ISSET(ssock, set)) {
 		clientLen = sizeof(clientAddr);
 		memset((char *)&clientAddr, 0, sizeof(clientAddr));
 		byteReceived = recvfrom(ssock, requestBuf,
-			25, 0, (struct sockaddr *)&clientAddr, &clientLen);
+			(size_t)25, 0, (struct sockaddr *)&clientAddr, &clientLen);
 		if (byteReceived > 0) {
 			requestBuf[byteReceived] = '\0';
 			inet_ntop(AF_INET,
@@ -471,7 +476,7 @@ static int get_port(
 		*port = ntohs(((struct sockaddr_in6*)&sockinfo)->sin6_port);
 	}
 	UpnpPrintf(UPNP_INFO, MSERV, __FILE__, __LINE__,
-		"sockfd = %d, .... port = %u\n", sockfd, *port);
+		"sockfd = %d, .... port = %d\n", sockfd, (int)*port);
 
 	return 0;
 }
@@ -506,12 +511,13 @@ static int get_miniserver_sockets(
 	struct sockaddr_storage __ss_v4;
 	struct sockaddr_in* serverAddr4 = (struct sockaddr_in*)&__ss_v4;
 	SOCKET listenfd4;
-	uint16_t actual_port4;
+	uint16_t actual_port4 = 0u;
 #ifdef UPNP_ENABLE_IPV6
 	struct sockaddr_storage __ss_v6;
 	struct sockaddr_in6* serverAddr6 = (struct sockaddr_in6*)&__ss_v6;
 	SOCKET listenfd6;
-	uint16_t actual_port6;
+	uint16_t actual_port6 = 0u;
+	int onOff;
 #endif
 	int ret_code;
 	int reuseaddr_on = 0;
@@ -527,25 +533,34 @@ static int get_miniserver_sockets(
 #ifdef UPNP_ENABLE_IPV6
 	listenfd6 = socket(AF_INET6, SOCK_STREAM, 0);
 	if (listenfd6 == INVALID_SOCKET) {
+		sock_close(listenfd4);
 		return UPNP_E_OUTOF_SOCKET;
+	}
+	onOff = 1;
+	sockError = setsockopt(listenfd6, IPPROTO_IPV6, IPV6_V6ONLY,
+			 (char *)&onOff, sizeof(onOff));
+	if (sockError == SOCKET_ERROR) {
+		sock_close(listenfd4);
+		sock_close(listenfd6);
+		return UPNP_E_SOCKET_BIND;
 	}
 #endif
 	/* As per the IANA specifications for the use of ports by applications
 	 * override the listen port passed in with the first available. */
 	if (listen_port4 < APPLICATION_LISTENING_PORT) {
-		listen_port4 = APPLICATION_LISTENING_PORT;
+		listen_port4 = (uint16_t)APPLICATION_LISTENING_PORT;
 	}
 #ifdef UPNP_ENABLE_IPV6
 	if (listen_port6 < APPLICATION_LISTENING_PORT) {
-		listen_port6 = APPLICATION_LISTENING_PORT;
+		listen_port6 = (uint16_t)APPLICATION_LISTENING_PORT;
 	}
 #endif
 	memset(&__ss_v4, 0, sizeof (__ss_v4));
-	serverAddr4->sin_family = AF_INET;
+	serverAddr4->sin_family = (sa_family_t)AF_INET;
 	serverAddr4->sin_addr.s_addr = htonl(INADDR_ANY);
 #ifdef UPNP_ENABLE_IPV6
 	memset(&__ss_v6, 0, sizeof (__ss_v6));
-	serverAddr6->sin6_family = AF_INET6;
+	serverAddr6->sin6_family = (sa_family_t)AF_INET6;
 	serverAddr6->sin6_addr = in6addr_any;
 #endif
 	/* Getting away with implementation of re-using address:port and
@@ -748,7 +763,7 @@ static int get_miniserver_sockets(
 #else
 	/* Silence compiler warning message:
 	 * warning: unused parameter ‘listen_port6’ */
-	listen_port6 = 0;
+	listen_port6 = 0u;
 #endif
 	return UPNP_E_SUCCESS;
 }
@@ -782,7 +797,7 @@ static int get_miniserver_stopsock(
 	}
 	/* Bind to local socket. */
 	memset(&stop_sockaddr, 0, sizeof (stop_sockaddr));
-	stop_sockaddr.sin_family = AF_INET;
+	stop_sockaddr.sin_family = (sa_family_t)AF_INET;
 	stop_sockaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
 	ret = bind(miniServerStopSock, (struct sockaddr *)&stop_sockaddr,
 		sizeof(stop_sockaddr));
@@ -812,9 +827,9 @@ static UPNP_INLINE void InitMiniServerSockArray(MiniServerSockArray *miniSocket)
 	miniSocket->ssdpSock4 = INVALID_SOCKET;
 	miniSocket->ssdpSock6 = INVALID_SOCKET;
 	miniSocket->ssdpSock6UlaGua = INVALID_SOCKET;
-	miniSocket->stopPort = 0;
-	miniSocket->miniServerPort4 = 0;
-	miniSocket->miniServerPort6 = 0;
+	miniSocket->stopPort = 0u;
+	miniSocket->miniServerPort4 = 0u;
+	miniSocket->miniServerPort6 = 0u;
 #ifdef INCLUDE_CLIENT_APIS
 	miniSocket->ssdpReqSock4 = INVALID_SOCKET;
 	miniSocket->ssdpReqSock6 = INVALID_SOCKET;
@@ -835,7 +850,12 @@ int StartMiniServer(
 	MiniServerSockArray *miniSocket;
 	ThreadPoolJob job;
 
-	if (gMServState != MSERV_IDLE) {
+	memset(&job, 0, sizeof(job));
+
+	switch (gMServState) {
+	case MSERV_IDLE:
+		break;
+	default:
 		/* miniserver running. */
 		return UPNP_E_INTERNAL_ERROR;
 	}
@@ -890,9 +910,9 @@ int StartMiniServer(
 	}
 	/* Wait for miniserver to start. */
 	count = 0;
-	while (gMServState != MSERV_RUNNING && count < max_count) {
+	while (gMServState != (MiniServerState)MSERV_RUNNING && count < max_count) {
 		/* 0.05s */
-		usleep(50 * 1000);
+		usleep(50u * 1000u);
 		count++;
 	}
 	if (count >= max_count) {
@@ -926,9 +946,11 @@ int StopMiniServer()
 	char buf[256] = "ShutDown";
 	size_t bufLen = strlen(buf);
 
-	if(gMServState == MSERV_RUNNING) {
+	switch(gMServState) {
+	case MSERV_RUNNING:
 		gMServState = MSERV_STOPPING;
-	} else {
+		break;
+	default:
 		return 0;
 	}
 	sock = socket(AF_INET, SOCK_DGRAM, 0);
@@ -939,19 +961,20 @@ int StopMiniServer()
 			errorBuffer);
 		return 0;
 	}
-	while(gMServState != MSERV_IDLE) {
-		ssdpAddr.sin_family = AF_INET;
+	while(gMServState != (MiniServerState)MSERV_IDLE) {
+		ssdpAddr.sin_family = (sa_family_t)AF_INET;
 		ssdpAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
 		ssdpAddr.sin_port = htons(miniStopSockPort);
 		sendto(sock, buf, bufLen, 0,
 			(struct sockaddr *)&ssdpAddr, socklen);
-		usleep(1000);
-		if (gMServState == MSERV_IDLE) {
+		usleep(1000u);
+		if (gMServState == (MiniServerState)MSERV_IDLE) {
 			break;
 		}
-		isleep(1);
+		isleep(1u);
 	}
 	sock_close(sock);
 
 	return 0;
 }
+#endif /* EXCLUDE_MINISERVER */

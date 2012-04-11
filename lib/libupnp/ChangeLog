@@ -1,4 +1,810 @@
 *******************************************************************************
+Version 1.6.17
+*******************************************************************************
+
+2012-04-02 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	SF Bug Tracker id 3514145 - Memory leak fix in threadutil
+
+	Submitted: Fabrice Fontaine ( ffontaine ) - 2012-04-02 06:49:20 PDT
+
+	Put thread in a detached state when calling ithread_create otherwise in
+	some circumstances, thread can end before the call to ithread_detach.
+
+2012-03-30 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	Add --enable-unspecified_server
+
+	Add --enable-unspecified_server configure option to set to "Unspecified"
+	the OS name, OS version, product name and product version normally
+	contained in the SERVER header as this could be used by an attacker.
+
+2012-03-29 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	Removing implicit casts in miniserver.c
+
+	Removing implicit integer or enum casts in miniserver.c.
+
+2012-03-29 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	SF Bug Tracker id 3512833 - Miniserver is wrongly disabled
+
+	Submitted: Fabrice Fontaine ( ffontaine ) - 2012-03-29 07:36:34 PDT
+
+	Miniserver is disabled if ECXLUDE_GENA, EXCLUDE_SOAP and
+	EXCLUDE_WEBSERVER are set.
+	However, SSDP needs the Miniserver to answer to M-SEARCH requests.
+	So, MiniServer should not be disabled if EXCLUDE_SSDP is not also set.
+
+2012-03-26 Yoichi NAKAYAMA <yoichi.nakayama(at)gmail.com>
+
+	SF Bug Tracker id 3510693 - build fail with --disable-device
+
+	Use INCLUDE_DEVICE_APIS instead of UPNP_HAVE_DEVICE as in other sources.
+	Don't use soap_device_callback if INCLUDE_DEVICE_APIS is not set,
+	otherwise link error occur on Windows.
+
+2012-03-26 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	SF Bug Tracker id 3511149 - --disable-ssdp has no effect
+
+	Submitted: Yoichi NAKAYAMA ( yoichi ) - 2012-03-25 18:14:34 PDT
+
+	There are typos in upnp/src/inc/config.h "EXCLUDE_SSSDP" (shold be
+	EXCLUDE_SSDP), therefore EXCLUDE_SSDP is always 0, and --disable-ssdp
+	has no effect.
+
+2012-03-24 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	Remove implicit casts
+
+	Cast parameters of htonl in uint32_t in IN6_IS_ADDR_GLOBAL and
+	IN6_IS_ADDR_ULA definitions.
+	Remove comparison with 0 in while statement of vfmatch,
+	http_SendMessage and http_MakeMessage.
+
+2012-03-24 Yoichi NAKAYAMA <yoichi.nakayama(at)gmail.com>
+
+	SF Bug Tracker id 3510693 - build fail with --disable-device
+
+	GetDeviceHandleInfo just fail without using undefined member DeviceAf
+	if UPNP_HAVE_DEVICE is not defined.
+	Move ContentTypeHeader definition to soap_common.c, since it is
+	also used in soap_ctrlpt.c.
+
+*******************************************************************************
+Version 1.6.16
+*******************************************************************************
+
+2012-03-18 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	Replace sprintf by snprintf in http_WriteHttpPost
+
+	Replace sprintf by snprintf in http_WriteHttpPost to avoid buffer
+	overflow.
+
+2012-03-18 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	Add infoSize parameter to get_sdk_info
+
+	Add infoSize parameter to get_sdk_info function to replace sprintf call
+	by a snprintf call.
+
+2012-03-16 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	Check return code in ixml
+
+	Check return code of ixmlDocument_CreateElementEx in
+	ixmlDocument_CreateElement.
+	Check return code of ixmlNode_setNodeName and ixmlNode_setNodeValue in
+	ixmlNode_cloneCDATASect and ixmlNode_cloneTextNode.
+
+2012-03-16 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	Add more explicit casts and remove dead code
+
+	Comment unused SERVER from DeviceShutdown.
+	Comment unused max from parse_hostport.
+	Comment unused nodeptr from ixmlNode_cloneDoc.
+	Comment unused newNode from Parser_hasDefaultNamespace.
+	Comment unused Parser_parseReference function
+	Check return code of shutdown and display an error if needed.
+
+2012-03-15 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	Fix previous commit
+
+	Replace HAVE_UPNP_OPTSSDP by UPNP_HAVE_OPTSSDP in upnpapi.c.
+
+2012-03-15 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	Add --disable-optssdp option
+
+	Modify configure.ac to add --disable-optssdp option. This option will
+	remove OPT, 01-NLS and X_USER_AGENT headers from SSDP messages as those
+	headers are optional. If --disable-gena and disable-optssdp are both
+	used, uuid part will not be compiled anymore.
+
+2012-03-15 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	Bug fix in ixmlNode_allowChildren
+
+	Commit d48d73720bd325062c4d3b9ce85f3944be4f562d added a bug in
+	ixmlNode_allowChildren, this function was returning FALSE instead of
+	TRUE when newChild->nodeName was eELEMENT_NODE.
+
+2012-03-15 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	Improve upnp/genlib/net
+
+	Change ret_code from int to parse_status_t in match.
+	Set back return code of ReadResponseLineAndHeaders from parse_status_t
+	to int as this function can return UPNP_E_BAD_HTTPMSG. As a result, do
+	not cast the result of this function into parse_status_t in
+	http_OpenHttpGetProxy and http_OpenHttpGetEx.
+	Use switch with PARSE_OK in parsetools.c.
+	Add missing explicit casts of integer constants in uri.c and
+	httpreadwrite.c.
+	Use switch, int and sa_family_t with AF_INET in uri.c.
+	Print an error in http_Download if realloc failed.
+
+2012-03-14 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	Use switch instead of if with enums in upnpapi.c
+
+	Replace if statements with switch when using HND_DEVICE and HND_CLIENT
+	enum constants.
+	Correct also UpnpUnRegisterRootDeviceLowPower and UpnpUnRegisterClient
+	as those functions were wrongly awaiting an UPNP_E_INVALID_HANDLE
+	instead of HND_INVALID from GetHandleInfo.
+
+2012-03-14 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	Improve ssdp part
+
+	Do not compile CreateClientRequestPacketUlaGua if IPv6 is disable.
+	Cast DestAddr->sa_family from sa_family_t into int when calling
+	CreateServicePacket as this function has been set back to accept int in
+	a692e591defe6ed9a617b9b4a083964a01f7bbab.
+	Use switch instead of if with AF_INET and AF_INET6.
+	Add missing casts from AF_INET and AF_INET6 into sa_family_t when using
+	them to set sin_family and sin6_family.
+	Add missing explicit casts into size_t or lu when using	integer
+	constants with strlen or unsigned long indexes.
+	Set SSDP_PAUSE to be unsigned as it is used with usleep.
+
+2012-03-14 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	Use switch insted of if with enums in ixml
+
+	Replace if statements with switch when using enums in ixml.
+	Remove uneeded initialization in ixmlAttr_init, Parser_init and
+	ixmlNode_init which was added by wrongly added in commit
+	06660b6383c438e4e2c9ca9854077cecc4da9e5d.
+
+2012-03-14 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	Use switch insted of if with enums in threadutil
+
+	Replace if statements with switch when using enums in threadutil.
+
+2012-03-14 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	Fix missing break in http_RecvMessage
+
+	There was a missing break in PARSE_INCOMPLETE_ENTITY due to commit
+	2eb3e069badd5c8676738c3ead37f9551fd8448e.
+
+2012-03-14 Yoichi NAKAYAMA <yoichi.nakayama(at)gmail.com>
+
+	Fix parse failure observed with tvdevice sample.
+
+	Commit c40d2bc0c9b60c43b641ac4669c7b8bbcd6134c5 has a problem
+	at removing the parentheses in parser_parse_responseline.
+	Difference of pointers was used with intention, don't cast
+	them separately.
+
+2012-03-14 Yoichi NAKAYAMA <yoichi.nakayama(at)gmail.com>
+
+	Fix compile error on Windows.
+
+	Include UpnpStdInt.h for ssize_t.
+	Define sa_family_t in UpnpInet.h.
+
+2012-03-14 Yoichi NAKAYAMA <yoichi.nakayama(at)gmail.com>
+
+	Avoid ambiguous change of SsdpEvent in unique_service_name.
+
+	Handle overflow before changing SsdpEvent.
+	Because the behavior of "snprintf" is platform dependent in such case.
+
+2012-03-14 Yoichi NAKAYAMA <yoichi.nakayama(at)gmail.com>
+
+	SF Bug Tracker id 3502958 - The commit 5944960e prevents a pupnp client (amule) from receiving replies from an IGD device.
+
+	Previous change broke the feature. The error of unique_service_name
+	in ssdp_request_type should be ignored.
+	This reverts commit 5944960e172a797a9fcc196291f4046cafa7f6ec.
+
+2012-03-13 Marcelo Roberto Jimenez <mroberto(at)users.sourceforge.net>
+
+	Address family is an int
+
+	Reference: "man 2 socket".
+
+2012-03-11 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	Remove more implicit casts in upnp part
+
+	Remove more "implicit integer or enum conversions" errors as well as
+	dead code. 
+
+2012-03-11 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	Remove more implicit casts in upnp part
+
+	Remove more "implicit integer or enum conversions" as well as memset
+	before snprintf.
+
+2012-03-11 Yoichi NAKAYAMA <yoichi.nakayama(at)gmail.com>
+
+	Avoid out of range access in CheckOtherHTTPHeaders.
+
+	There was a problem in HDR_ACCEPT_LANGUAGE case.
+	It may read from TmpBuf larger amount than allocated,
+	since condition was always true.
+	Terminate RespInstr->AcceptLanguageHeader correctly.
+	Skip allocation if there is already sufficient buffer.
+
+2012-03-10 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	Remove some of the implicit cast in upnp part
+
+	Remove some of the "implicit integer or enum conversions" as well as
+	some access to NULL reference in upnp part.
+
+2012-03-10 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	Remove lock in ThreadPoolInit
+
+	If ThreadPoolInit returned EAGAIN, tp->lock was not freed. 
+
+2012-03-10 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	Improve ixml
+
+	Remove "implicit integer conversions" and
+	"dereference NULL return value" errors in ixml part.
+
+2012-03-10 Yoichi NAKAYAMA <yoichi.nakayama(at)gmail.com>
+
+	Exclude IPv6 stuff in SearchByTarget when UPNP_ENABLE_IPV6 is not defined.
+
+2012-03-10 Yoichi NAKAYAMA <yoichi.nakayama(at)gmail.com>
+
+	Further measures against buffer overflows.
+
+	* Pass output buffer size to CreateClientRequestPacket(UlaGua)
+	  from SearchByTarget and detect overflow.
+	* Handle SearchByTarget error in UpnpSearchAsync.
+	* Pass output buffer size to addrToString and detect overflow.
+	* Handle addrToString error in configure_urlbase. 
+	* Handle overflow in http_SendMessage.
+	* Respect unique_service_name error in ssdp_request_type
+	  so as not to touch non-terminated buffer under Evt.
+	* Treat large argument as error in UpnpAddVirtualDir.
+	* Use strncpy with the standard way in readFromSSDPSocket.
+	* Do not clear buffer before snprintf.
+	* Clarify the last argument of GetDescDocumentAndURL has size LINE_SIZE.
+	* For inet_ntop, use buffer with size INET6_ADDRSTRLEN or INET_ADDRSTRLEN.
+
+2012-03-10 Yoichi NAKAYAMA <yoichi.nakayama(at)gmail.com>
+
+	Handle allocation error in strndup to avoid access violation.
+
+	Return NULL before calling strncpy.
+	Platforms with HAVE_STRNDUP are not affected.
+
+2012-03-10 Yoichi NAKAYAMA <yoichi.nakayama(at)gmail.com>
+
+	Synchronize autoconfig.h with upnpconfig.h.
+
+	It fixes WIN32 build where configure is not invoked. 
+
+2012-03-09 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	More compilaton optimisation
+
+	Do not compile most of service_table.c and client_table.c if
+	--disable-gena is used.
+	Do not compile urlconfig.c if --disable-webserver is used.
+	Adding new UPNP_HAVE_xxx variables in upnpconfig.h and upnpconfig.h.in.
+
+2012-03-09 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	Optimisation of --disable-webserver
+
+	Do not compile webserver.c if --disable-webserver is used.
+
+2012-03-09 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	Improve threadutil
+
+	Remove "dereference NULL return" errors and implicit conversions to
+	double or enum types.
+
+2012-03-09 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	Optimisation of --disable-webserver
+
+	Do not compile miniserver.c if --disable-webserver is used.
+
+2012-03-09 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	Adding configure options
+
+	Adding --disable-ssdp, --disable-soap, --disable-gena options to
+	configure script.
+
+2012-03-09 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	Bug fix of last commit
+
+	_snprintf was wrongly defined in ssdp_server.c
+
+2012-03-09 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	SF Bug Tracker id 3499781 - msvc doesn't have snprintf
+
+	Submitted: Yoichi NAKAYAMA ( yoichi ) - 2012-03-08 10:18:39 PST
+
+	97a17ff5add73c97844e2fa74456bab4df0800f1 commit breaks build on
+	windows/msvc since there is no snprintf.
+
+	Note:
+	* Some existing sources use _snprintf when WIN32 is defined, but its
+	behavior is a bit different from C99 snprintf.
+	* snprintf does terminate the buffer, so the commit (use buffer size
+	minus 1 as argument) changes the behavior at the boundary.
+	* Truncation might be better than crash in some cases. But it may
+	result in not good.
+
+2012-03-08 Marcelo Roberto Jimenez <mroberto(at)users.sourceforge.net>
+
+	SF Bug Tracker id 3499878 - UpnpUnSubscribeAsync(): ‘retVal’ may be used uninitialized
+
+	Submitted: Marcelo Roberto Jimenez ( mroberto ) - 2012-03-08 12:38:57 PST
+
+	src/api/upnpapi.c: In function ‘UpnpUnSubscribeAsync’:
+	src/api/upnpapi.c:2060:6: warning: ‘retVal’ may be used uninitialized in this function
+
+2012-03-08 Marcelo Roberto Jimenez <mroberto(at)users.sourceforge.net>
+
+	SF Bug Tracker id 3175217 - Crash bug in Parser_addNamespace()
+
+	Submitted: Terry Farnham ( tfarnham ) - 2011-02-07 09:25:25 PST
+
+	Details: The strcmp(pNode->prefix,pCur->prefix) crashes on pCur->prefix
+	being NULL. This occurs on invalidly formatted xml where a node uses an
+	undefined namespace. I would expect to receive IXML_FAILED in this
+	situation.
+
+2012-03-08 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	Removing access to NULL pointers in node.c and element.c
+
+	Check that newNode is not NULL ixmlNode_cloneNodeTree and pass newAttr
+	as the return node in the ixmlElement_setAttributeNodeNS call of
+	ixmlElement_setAttributeNS.
+
+2012-03-08 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	Memory leaks correction in upnpapi.c
+	
+	Fix memory leaks in UpnpUnSubscribe, SendActionExAsync and
+	RenewSubscription.
+
+2012-03-08 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	SF Bug Tracker id 3496993 - Write after free in ixmlNode_insertBefore
+
+	Submitted: Fabrice Fontaine ( ffontaine ) - 2012-03-05 04:54:40 PST
+
+	If ixmlNode_isParent(nodeptr, newChild) returns TRUE,
+	ixmlNode_removeChild(nodeptr, newChild, NULL) will free newChild before
+	the modifications of newChild->nextSibling and newChild->prevSibling.
+
+2012-03-08 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	Remove most of strcpy, sprintf and strcat
+
+	Replace strcpy, sprintf and strcat by strncpy, snprintf and strncat to
+	avoid buffer overflows.
+
+2012-03-07 Yoichi NAKAYAMA <yoichi.nakayama(at)gmail.com>
+
+	SF Bug Tracker id 3497714 - Buffer overflows
+
+	Fix compile error on WIN32.
+
+	Local variables must be declared first.
+	Remove outdated comment.
+
+2012-03-07 Yoichi NAKAYAMA <yoichi.nakayama(at)gmail.com>
+
+	Avoid access violation in assertion.
+
+	xmlParser->pCurElement was dereferenced before null check.
+	Affects debug build only.
+
+2012-03-07 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	Remove SIZEOF_MISTACH error in notify_send_and_recv
+
+	Replace sizeof(CRLF) by strlen(CRLF) as CRLF is a const char*.
+
+2012-03-07 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	SF Bug Tracker id 3498442 - Memory leak in get_file_info
+
+	Submitted: Fabrice Fontaine ( ffontaine ) - 2012-03-07 02:44:30 PST
+
+	info->contentType is not freed before being set to NULL.
+
+2012-03-07 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	SF Bug Tracker id 3498439 - Memory leak in removeServiceTable
+
+	Submitted: Fabrice Fontaine ( ffontaine ) - 2012-03-07 02:35:46 PST
+
+	UDN is not freed.
+
+2012-03-07 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	SF Bug Tracker id 3498436 - Memory leak in Parser_processAttributeName
+
+	Submitted: Fabrice Fontaine ( ffontaine ) - 2012-03-07 02:30:57 PST
+
+	attr is not freed if ixmlNode_setNodeProperties or
+	ixmlNode_setAttributeNode return an error in
+	Parser_processAttributeName.
+
+2012-03-07 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	Fixing an error in d6db7c555d0f11856ce5e3e479b16a4cf4689107 commit
+
+	Evt.Sid should not be cast into char* when calling sizeof otherwise
+	size will be 4.
+
+2012-03-06 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	Removing two unused variables in ssdp_server.c
+
+	Removing first TempPtr allocation in unique_service_name as well as one
+	of the dbgStr allocation in AdvertizeAndReply as those values were not
+	used.
+
+2012-03-06 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	SF Bug Tracker id 3497714 - Buffer overflows
+
+	Submitted: Fabrice Fontaine ( ffontaine ) - 2012-03-06 07:36:08 PST
+
+	Call to strcpy should be replaced by call to memset and strncpy to
+	avoid getting buffer overflows.
+
+2012-03-05 Marcelo Roberto Jimenez <mroberto(at)users.sourceforge.net>
+
+	SF Bug Tracker id 2989399 - UpnpSetVirtualDirCallbacks API removal in 1.6.x
+
+	Submitted: Nick Leverton ( leveret ) - 2010-04-19 07:44:10 PDT
+
+	Details: The recent codebase merge has removed a significant API call
+	which is used by several pupnp devices such as mediatomb and gmediaserver.
+	UpnpSetVirtualDirCallbacks() has been replaced by individual routines to
+	set each callback. Essentially this means that 1.6.7 will in fact be a majo
+	bump and 1.6.6 devices can no longer link against it. Could we have the call
+	reinstated please, perhaps as a wrapper around the individual calls ? As
+	it is, all distros will have to patch their 1.6.x apps, rebuild and re-link them.
+
+	The other removed API calls and external variables don't seem to be used
+	by any of the apps I have copies of, but UpnpSetVirtualDirCallbacks is
+	important for maintaining compatibility within 1.6.x.
+
+2012-03-05 Marcelo Roberto Jimenez <mroberto(at)users.sourceforge.net>
+
+	SF Bug Tracker id 3325246 - Memory Leak in XML Parser
+
+	Submitted: Terry Farnham ( tfarnham ) - 2011-06-23 09:45:54 PDT
+
+	Details: The following bit of xml results in a memory leak from the xml
+	parser:
+
+	const char *xmlbuffer="<?xml version=\"1.0\" encoding=\"utf-8\"?>
+	<root xmlns=\"urn:schemas-upnp-org:device-1-0\" xmlns:dlna=\"urn:schemas-dlna-org:device-1-0\">
+	<dlna:X_DLNADOC xmlns:dlna=\"urn:schemas-dlna-org:device-1-0\">DMS-1.50</dlna:X_DLNADOC></root>";
+
+	When I execute the following code:
+
+	IXML_Document *doc = ixmlParseBuffer(xmlbuffer);
+	ixmlDocument_free(doc);
+
+	It results in a memory leak in ixmlparser.c line 2107 where it calls
+	safe_strdup( newElement->namespaceURI ); It's difficult to figure out why.
+
+2012-03-05 Marcelo Roberto Jimenez <mroberto(at)users.sourceforge.net>
+
+	SF Bug Tracker id 3417134 - Crash seen in UpnpFinish
+
+	Submitted: Sunil ( sunilangadi ) - 2011-10-02 08:28:47 PDT
+
+	Details: I observed crash in the below mentioned log statement in
+	function upnpfinish(file: upnpapi.c).
+	UpnpPrintf(UPNP_INFO, API, __FILE__, __LINE__, "Exiting UpnpFinish:
+		UpnpSdkInit is :%d:\n", UpnpSdkInit);
+
+	In particular it was crashing in ithread_self in
+	UpnpDisplayFileAndLine(file upnpdebug.c) on WIN32.
+
+	Moving the call ithread_cleanup_library() below the upnp printf call
+	mentioned above in function upnpfinish fixed the crash but I couldn't get
+	to the root of the problem.
+
+	The problem was observed on WIN32.
+
+
+2012-03-05 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	SF Bug Tracker id 3497159 - Bug fix in Parser_readFileOrBuffer
+
+	Submitted: Fabrice Fontaine ( ffontaine ) - 2012-03-05 14:20:58 PST
+
+	fileSize = ftell( xmlFilePtr ); can return a negative value, in this
+	 case the function should exit (at the moment, the function exits only
+	if ftell returns 0).
+
+2012-03-05 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	SF Bug Tracker id 3497140 - Bug fix in http_get_code_text
+
+	Submitted: Fabrice Fontaine ( ffontaine ) - 2012-03-05 13:07:03 PST
+
+	Replace if( statusCode < 100 && statusCode >= 600 ) which can't be true
+	by if( statusCode < 100 || statusCode >= 600 ).
+
+2012-03-05 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	SF Bug Tracker id 3497126 - Resource leak in http_RecvPostMessage
+
+	Submitted: Fabrice Fontaine ( ffontaine ) - 2012-03-05 12:33:59 PST
+
+	Fp is not closed when an error is raised on membuffer_append or
+	sock_read.
+
+2012-03-05 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	SF Bug Tracker id 3497034 - Buffer not null terminated in UpnpGetIfInfo
+
+	Submitted: Fabrice Fontaine ( ffontaine ) - 2012-03-05 06:43:52 PST
+
+	gIF_NAME might be not null terminated.
+
+2012-03-05 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	SF Bug Tracker id 3497033 - Buffer not null terminated in UpnpInit
+
+	Submitted: Fabrice Fontaine ( ffontaine ) - 2012-03-05 06:42:18 PST
+
+	gIF_IPV4, gIF_IPV6 and gIF_IPV6_ULA_GUA might be not null terminated.
+	Moreover, gIF_IPV4 should be 16 characters (INET_ADDRSTRLEN) and not 22
+	and gIF_IPV6 should be 46 characters (INET6_ADDRSTRLEN) and not 65.
+
+2012-03-05 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	Bug fix of lastest commit (parse_hostport)
+
+	Missing parenthesis in memset.
+
+2012-03-05 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	SF Bug Tracker id 3497027 - Buffer not null terminated in parse_hostport
+
+	Submitted: Fabrice Fontaine ( ffontaine ) - 2012-03-05 06:28:38 PST
+
+	workbuf might be not null terminated.
+
+2012-03-05 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	SF Bug Tracker id 3497009 - Resource leak in http_SendMessage
+
+	Submitted: Fabrice Fontaine ( ffontaine ) - 2012-03-05 05:51:44 PST
+
+	Fp is not closed if fseeko(Fp, Instr->RangeOffset, SEEK_CUR) does not return 0.
+
+2012-03-05 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	HInfo->ServiceTable initialization in UpnpRegisterRootDevice2 and UpnpRegisterRootDevice4
+
+	Initialize also HInfo->ServiceTable in UpnpRegisterRootDevice2 and
+	UpnpRegisterRootDevice4 functions
+
+2012-03-05 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	SF Bug Tracker id 3496703 - Handle_Info::ServiceList may have undefined value
+
+	Submitted: Yoichi NAKAYAMA ( yoichi ) - 2012-03-03 20:49:25 PST
+
+	In UpnpRegisterRootDevice(), HInfo->ServiceTable is not initialized and
+	getServiceTable() may leave it intact. It will cause crash on
+	freeServiceTable() called from UpnpUnRegisterRootDevice().
+
+2012-03-05 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	SF Bug Tracker id 3496702 - TvDeviceStop is called even if Start failed
+
+	Submitted: Yoichi NAKAYAMA ( yoichi ) - 2012-03-03 20:35:08 PST
+
+	In sample tvdevice, error of device_main() is not handled, and
+	TvDeviceStop() cause crash.
+
+2012-03-05 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	SF Bug Tracker id 3496942 - Memory leak in config_description_doc
+
+	Submitted: Fabrice Fontaine ( ffontaine ) - 2012-03-05 01:55:54 PST
+
+	element was not freed if membuffer_append_str(&url_str, "http://") does
+	not return 0. Moreover addNew was not used.
+
+2012-03-05 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	SF Bug Tracker id 3496938 - Missing structures initialisation in some functions
+
+	Submitted: Fabrice Fontaine ( ffontaine ) - 2012-03-05 01:31:16 PST
+
+	Memsetting to 0 some of the structures: finfo in process_request,
+	job in readFromSSDPSocket, request in http_OpenHttpGetEx, job in
+	genaNotifyThread, job in genaNotifyAllExt, job in genaNotifyAll,
+	job in genaInitNotifyExt, job in genaInitNotify, LocalAddr in
+	getlocalhostname.
+
+2012-03-05 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	SF Bug Tracker id 3496934 - Memory leaks in getlocalhostname and UpnpGetIfInfo
+
+	Submitted: Fabrice Fontaine ( ffontaine ) - 2012-03-05 01:25:42 PST
+
+	LocalSock is not closed if ioctl(LocalSock, SIOCGIFCONF, &ifConf);
+	returns an error.
+
+2012-03-05 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	SF Bug Tracker id 3496933 - Out-of-bounds access in CheckOtherHTTPHeaders
+
+	Submitted: Fabrice Fontaine ( ffontaine ) - 2012-03-05 01:15:34 PST
+
+	An out-of-bands access is raised because size of
+	RespInst->AcceptLanguageHeader is 200 and TmpBuf size is 180.
+
+2012-03-05 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	Remove unused currentDevice variable in removeServiceTable
+
+	currentDevice is not used in this function.
+
+2012-03-05 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	SF Bug Tracker id 3496581 - Memory leak in getServiceList
+
+	Submitted: Fabrice Fontaine ( ffontaine ) - 2012-03-03 08:43:23 PST
+
+	serviceNodeList is not freed if
+	current->next = malloc(sizeof(service_info)); returns NULL.
+
+2012-02-29 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	SF Bug Tracker id 3495616 - Memory leak in ixmlElement_setAttributeNS
+
+	Submitted: Fabrice Fontaine ( ffontaine ) - 2012-02-29 02:09:43 PST
+
+	newAttrNode is not freed if newAttr->n.nodeValue = strdup(value); returns
+	NULL or if ixmlElement_setAttributeNodeNS(element, newAttr, NULL) does
+	not return IXML_SUCCESS.
+
+2012-02-28 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	SF Bug Tracker id 3495286 - Double free in get_action_node
+
+	Submitted: Fabrice Fontaine ( ffontaine ) - 2012-02-28 04:27:54 PST
+
+	ixmlFreeDOMString(ActNodeName); is called twice if
+	ixmlParseBufferEx(ActNodeName, RespNode); does not return IXML_SUCCESS.
+
+2012-02-28 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	SF Bug Tracker id 3495280 - Memory leak in ixmlDocument_createElementEx
+
+	Submitted: Fabrice Fontaine ( ffontaine ) - 2012-02-28 04:01:02 PST
+
+	There is a memory leak in ixmlDocument_createElementEx:
+	newElement->tagName is not freed if
+	newElement->n.nodeName = strdup(tagName); returns NULL.
+
+2012-02-27 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	SF Bug Tracker id 3494865 - Use of non-initialized variable in parser_parse_requestline
+
+	Submitted: Marcelo Roberto Jimenez ( mroberto ) - 2012-02-26 16:50:23 PST
+
+	src/genlib/net/http/httpparser.c: In function ‘parser_parse_requestline’:
+	src/genlib/net/http/httpparser.c:1319:28: warning: ‘index’ may be used uninitialized in this function
+
+2012-02-24 Marcelo Roberto Jimenez <mroberto(at)users.sourceforge.net>
+
+	SF Bug Tracker id 3489999 - UpnpString leaks in genaSubscribe()
+
+	Submitted: Yoichi NAKAYAMA ( yoichi ) - 2012-02-21 07:06:35 PST
+
+	In genaSubscribe() (defined in upnp/src/gena/gena_ctrlpt.c),
+	ActualSID and EventURL will not be freed if ScheduleGenaAutoRenew
+	returns UPNP_E_SUCCESS.
+
+	This fixes the an issue introduced by the previous fix.
+
+2012-02-23 Marcelo Roberto Jimenez <mroberto(at)users.sourceforge.net>
+
+	SF Bug Tracker id 3489990 - some files are missing in tarball
+
+	Submitted: Yoichi NAKAYAMA ( yoichi ) - 2012-02-21 06:52:57 PST
+
+	Released tarball (e.g. libupnp-1.6.15.tar.bz2) does not contain
+	some files under upnp/{inc,src} used by the project files for
+	windows (build/vc8/libupnp. vcproj and build/vc9/libupnp.vcproj).
+
+	This breaks build on Windows from tarball released after following changes
+	http://pupnp.git.sourceforge.net/git/gitweb.cgi?p=pupnp/pupnp;a=commitdiff;h=0eba550da039be01211b56fea0d02d03f0a12343
+	http://pupnp.git.sourceforge.net/git/gitweb.cgi?p=pupnp/pupnp;a=commitdiff;h=7a796b264ec7d5de5876fd6a2001c2d329709e02
+
+2012-02-23 Marcelo Roberto Jimenez <mroberto(at)users.sourceforge.net>
+
+	SF Bug Tracker id 3489999 - UpnpString leaks in genaSubscribe()
+
+	Submitted: Yoichi NAKAYAMA ( yoichi ) - 2012-02-21 07:06:35 PST
+
+	In genaSubscribe() (defined in upnp/src/gena/gena_ctrlpt.c),
+	ActualSID and EventURL will not be freed if ScheduleGenaAutoRenew
+	returns UPNP_E_SUCCESS.
+
+	This fixes the original issue.
+
+2012-02-23 Marcelo Roberto Jimenez <mroberto(at)users.sourceforge.net>
+
+	SF Bug Tracker: UpnpString leaks in genaSubscribe()
+
+	In genaSubscribe() (defined in upnp/src/gena/gena_ctrlpt.c),
+	ActualSID and EventURL will not be freed if ScheduleGenaAutoRenew
+	returns UPNP_E_SUCCESS.
+
+2012-02-23 Marcelo Roberto Jimenez <mroberto(at)users.sourceforge.net>
+
+	Revert cb89781a55466703763c1b0ee67094eb401ddfe9 as suggested by
+	Fabrice Fontaine.
+
+2012-02-07 Edwin Stearns <edwin(at)vtilt.com>
+
+	Attached is a patch that resolved an issue I found with a server that
+	gave its device description URI without a trailing slash (e.g.
+	`http://127.0.0.1:5555`).
+
+2012-01-04 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	Bug fix for IPv4-mapped IPv6 addresses.
+
+	Setting IPv6 sockets with IPV6_V6ONLY flag to avoid getting IP packets
+	with IPv4-mapped IPv6 addresses on IPv6 sockets.
+
+
+*******************************************************************************
 Version 1.6.15
 *******************************************************************************
 
@@ -16,13 +822,6 @@ Version 1.6.15
 
 	Changing sockaddr_in into sockaddr_storage in Upnp_Discovery to be able
 	to retrieve IPv6 addresses of devices in Control Points using pupnp.
-
-2012-01-04 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
-
-	Bug fix for IPv4-mapped IPv6 addresses.
-
-	Setting IPv6 sockets with IPV6_V6ONLY flag to avoid getting IP packets
-	with IPv4-mapped IPv6 addresses on IPv6 sockets.
 
 2012-01-09 Marcelo Roberto Jimenez <mroberto(at)users.sourceforge.net>
 

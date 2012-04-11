@@ -9,10 +9,8 @@ ZLIB=$LIBDIR/zlib
 LIBSSL=$FIRMROOT/user/openssl
 
 if [ ! -f $APROOTDIR/configure ]; then
-    #workaround for aclocal issue
-    cp -fv configure.3052 configure
-    cp -fv configure.ac.3052 configure.ac
-    cp -fv aclocal.m4.3052 aclocal.m4
+    autoreconf
+    autoconf
 fi
 if [ ! -f $APROOTDIR/Makefile.in ]; then
     automake
@@ -23,7 +21,7 @@ CONFOPTS="$CONFOPTS --disable-dependency-tracking"
 CONFOPTS="$CONFOPTS --disable-samples --disable-debug --without-documentation"
 CONFOPTS="$CONFOPTS --enable-shared --enable-static"
 CONFOPTS="$CONFOPTS --prefix=$APROOTDIR/filesystem"
-CFLAGS="$BACKUPCFLAGS -I$ZLIB -I$LIBSSL" 
+CFLAGS="$BACKUPCFLAGS -I$ZLIB -I$LIBSSL"
 LDFLAGS="$BACKUPLDFLAGS -L$ZLIB -L$LIBSSL"
 
 export CFLAGS LDFLAGS

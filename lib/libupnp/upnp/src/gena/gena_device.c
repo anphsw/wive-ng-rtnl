@@ -2,6 +2,7 @@
  *
  * Copyright (c) 2000-2003 Intel Corporation 
  * All rights reserved. 
+ * Copyright (c) 2012 France Telecom All rights reserved. 
  *
  * Redistribution and use in source and binary forms, with or without 
  * modification, are permitted provided that the following conditions are met: 
@@ -48,6 +49,10 @@
 #include "unixutil.h"
 #include "upnpapi.h"
 #include "uuid.h"
+
+#ifdef WIN32
+	#define snprintf _snprintf
+#endif
 
 /*!
  * \brief Unregisters a device.
@@ -210,7 +215,7 @@ static UPNP_INLINE int notify_send_and_recv(
 		"bbb",
 		start_msg.buf, start_msg.length,
 		propertySet, strlen(propertySet),
-		CRLF, sizeof CRLF);
+		CRLF, strlen(CRLF));
 	if (ret_code) {
 		membuffer_destroy(&start_msg);
 		sock_destroy(&info, SD_BOTH);
@@ -315,6 +320,8 @@ static void genaNotifyThread(
 	struct Handle_Info *handle_info;
 	ThreadPoolJob job;
 
+	memset(&job, 0, sizeof(job));
+
 	/* This should be a HandleLock and not a HandleReadLock otherwise if there
 	 * is a lot of notifications, then multiple threads will acquire a read
 	 * lock and the thread which sends the notification will be blocked forever
@@ -410,6 +417,7 @@ static char *AllocGenaHeaders(
 	char *headers = NULL;
 	size_t headers_size = 0;
 	int line = 0;
+	int rc = 0;
 
 	headers_size =
 		strlen(HEADER_LINE_1 ) +
@@ -422,7 +430,7 @@ static char *AllocGenaHeaders(
 		line = __LINE__;
 		goto ExitFunction;
 	}
-	sprintf(headers, "%s%s%"PRIzu"%s%s%s",
+	rc = snprintf(headers, headers_size, "%s%s%"PRIzu"%s%s%s",
 		HEADER_LINE_1,
 		HEADER_LINE_2A,
 		strlen(propertySet) + 1,
@@ -431,7 +439,7 @@ static char *AllocGenaHeaders(
 		HEADER_LINE_4);
 
 ExitFunction:
-	if (headers == NULL) {
+	if (headers == NULL || rc < 0 || (unsigned int) rc >= headers_size) {
 		UpnpPrintf(UPNP_ALL, GENA, __FILE__, line,
 			"AllocGenaHeaders(): Error UPNP_E_OUTOF_MEMORY\n");
 	}
@@ -463,6 +471,8 @@ int genaInitNotify(
 	struct Handle_Info *handle_info;
 	ThreadPoolJob job;
 
+	memset(&job, 0, sizeof(job));
+
 	UpnpPrintf(UPNP_INFO, GENA, __FILE__, __LINE__,
 		"GENA BEGIN INITIAL NOTIFY");
 
@@ -488,8 +498,10 @@ int genaInitNotify(
 		goto ExitFunction;
 	}
 
-	strcpy(UDN_copy, UDN);
-	strcpy(servId_copy, servId);
+	memset(UDN_copy, 0, strlen(UDN) + 1);
+	strncpy(UDN_copy, UDN, strlen(UDN));
+	memset(servId_copy, 0, strlen(servId) + 1);
+	strncpy(servId_copy, servId, strlen(servId));
 
 	HandleLock();
 
@@ -553,7 +565,9 @@ int genaInitNotify(
 		thread_struct->UDN = UDN_copy;
 		thread_struct->headers = headers;
 		thread_struct->propertySet = propertySet;
-		strcpy(thread_struct->sid, sid);
+		memset(thread_struct->sid, 0, sizeof(thread_struct->sid));
+		strncpy(thread_struct->sid, sid,
+			sizeof(thread_struct->sid) - 1);
 		thread_struct->eventKey = sub->eventKey++;
 		thread_struct->reference_count = reference_count;
 		thread_struct->device_handle = device_handle;
@@ -616,6 +630,8 @@ int genaInitNotifyExt(
 	struct Handle_Info *handle_info;
 	ThreadPoolJob job;
 
+	memset(&job, 0, sizeof(job));
+
 	UpnpPrintf(UPNP_INFO, GENA, __FILE__, __LINE__,
 		"GENA BEGIN INITIAL NOTIFY EXT");
 	
@@ -641,8 +657,10 @@ int genaInitNotifyExt(
 		goto ExitFunction;
 	}
 
-	strcpy(UDN_copy, UDN);
-	strcpy(servId_copy, servId);
+	memset(UDN_copy, 0, strlen(UDN) + 1);
+	strncpy(UDN_copy, UDN, strlen(UDN));
+	memset(servId_copy, 0, strlen(servId) + 1);
+	strncpy(servId_copy, servId, strlen(servId));
 
 	HandleLock();
 
@@ -707,7 +725,9 @@ int genaInitNotifyExt(
 		thread_struct->UDN = UDN_copy;
 		thread_struct->headers = headers;
 		thread_struct->propertySet = propertySet;
-		strcpy(thread_struct->sid, sid);
+		memset(thread_struct->sid, 0, sizeof(thread_struct->sid));
+		strncpy(thread_struct->sid, sid,
+			sizeof(thread_struct->sid) - 1);
 		thread_struct->eventKey = sub->eventKey++;
 		thread_struct->reference_count = reference_count;
 		thread_struct->device_handle = device_handle;
@@ -769,6 +789,8 @@ int genaNotifyAllExt(
 	struct Handle_Info *handle_info;
 	ThreadPoolJob job;
 
+	memset(&job, 0, sizeof(job));
+
 	UpnpPrintf(UPNP_INFO, GENA, __FILE__, __LINE__,
 		"GENA BEGIN NOTIFY ALL EXT");
 
@@ -794,8 +816,10 @@ int genaNotifyAllExt(
 		goto ExitFunction;
 	}
 
-	strcpy(UDN_copy, UDN);
-	strcpy(servId_copy, servId);
+	memset(UDN_copy, 0, strlen(UDN) + 1);
+	strncpy(UDN_copy, UDN, strlen(UDN));
+	memset(servId_copy, 0, strlen(servId) + 1);
+	strncpy(servId_copy, servId, strlen(servId));
 
 	propertySet = ixmlPrintNode((IXML_Node *)PropSet);
 	if (propertySet == NULL) {
@@ -837,7 +861,10 @@ int genaNotifyAllExt(
 				thread_struct->servId = servId_copy;
 				thread_struct->headers = headers;
 				thread_struct->propertySet = propertySet;
-				strcpy(thread_struct->sid, finger->sid);
+				memset(thread_struct->sid, 0,
+					sizeof(thread_struct->sid));
+				strncpy(thread_struct->sid, finger->sid,
+					sizeof(thread_struct->sid) - 1);
 				thread_struct->eventKey = finger->eventKey++;
 				thread_struct->device_handle = device_handle;
 				/* if overflow, wrap to 1 */
@@ -908,6 +935,8 @@ int genaNotifyAll(
 	struct Handle_Info *handle_info;
 	ThreadPoolJob job;
 
+	memset(&job, 0, sizeof(job));
+
 	UpnpPrintf(UPNP_INFO, GENA, __FILE__, __LINE__,
 		"GENA BEGIN NOTIFY ALL");
 
@@ -933,8 +962,10 @@ int genaNotifyAll(
 		goto ExitFunction;
 	}
 
-	strcpy(UDN_copy, UDN);
-	strcpy(servId_copy, servId);
+	memset(UDN_copy, 0, strlen(UDN) + 1);
+	strncpy(UDN_copy, UDN, strlen(UDN));
+	memset(servId_copy, 0, strlen(servId) + 1);
+	strncpy(servId_copy, servId, strlen(servId));
 
 	ret = GeneratePropertySet(VarNames, VarValues, var_count, &propertySet);
 	if (ret != XML_SUCCESS) {
@@ -975,7 +1006,10 @@ int genaNotifyAll(
 				thread_struct->servId = servId_copy;
 				thread_struct->headers = headers;
 				thread_struct->propertySet = propertySet;
-				strcpy(thread_struct->sid, finger->sid);
+				memset(thread_struct->sid, 0,
+					sizeof(thread_struct->sid));
+				strncpy(thread_struct->sid, finger->sid,
+					sizeof(thread_struct->sid) - 1);
 				thread_struct->eventKey = finger->eventKey++;
 				thread_struct->device_handle = device_handle;
 				/* if overflow, wrap to 1 */
@@ -1045,14 +1079,22 @@ static int respond_ok(
     int return_code;
     char timeout_str[100];
     int upnp_timeout = UPNP_TIMEOUT;
+    int rc = 0;
 
     http_CalcResponseVersion( request->major_version,
                               request->minor_version, &major, &minor );
 
     if( time_out >= 0 ) {
-        sprintf( timeout_str, "TIMEOUT: Second-%d", time_out );
+        rc = snprintf( timeout_str, sizeof ( timeout_str ),
+                       "TIMEOUT: Second-%d", time_out );
     } else {
-        strcpy( timeout_str, "TIMEOUT: Second-infinite" );
+        memset( timeout_str, 0, sizeof( timeout_str ) );
+        strncpy( timeout_str, "TIMEOUT: Second-infinite",
+                 sizeof ( timeout_str ) - 1);
+    }
+    if (rc < 0 || (unsigned int) rc >= sizeof ( timeout_str ) ) {
+        error_respond( info, HTTP_INTERNAL_SERVER_ERROR, request ); 
+        return UPNP_E_OUTOF_MEMORY;
     }
 
     membuffer_init( &response );
@@ -1184,6 +1226,9 @@ void gena_process_subscription_request(
 	char *event_url_path = NULL;
 	memptr callback_hdr;
 	memptr timeout_hdr;
+	int rc = 0;
+
+	memset(&request_struct, 0, sizeof(request_struct));
 
 	UpnpPrintf(UPNP_INFO, GENA, __FILE__, __LINE__,
 		"Subscription Request Received:\n");
@@ -1314,10 +1359,12 @@ void gena_process_subscription_request(
 	/* generate SID */
 	uuid_create(&uid);
 	uuid_unpack(&uid, temp_sid);
-	sprintf(sub->sid, "uuid:%s", temp_sid);
+	rc = snprintf(sub->sid, sizeof(sub->sid), "uuid:%s", temp_sid);
 
 	/* respond OK */
-	if (respond_ok(info, time_out, sub, request) != UPNP_E_SUCCESS) {
+	if (rc < 0 || (unsigned int) rc >= sizeof(sub->sid) ||
+		(respond_ok(info, time_out,
+		sub, request) != UPNP_E_SUCCESS)) {
 		freeSubscriptionList(sub);
 		HandleUnlock();
 		goto exit_function;
@@ -1330,7 +1377,8 @@ void gena_process_subscription_request(
 	/* finally generate callback for init table dump */
 	request_struct.ServiceId = service->serviceId;
 	request_struct.UDN = service->UDN;
-	strcpy((char *)request_struct.Sid, sub->sid);
+	strncpy((char *)request_struct.Sid, sub->sid,
+		sizeof(request_struct.Sid) - 1);
 
 	/* copy callback */
 	callback_fun = handle_info->Callback;

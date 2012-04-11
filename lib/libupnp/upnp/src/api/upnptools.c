@@ -2,6 +2,7 @@
  *
  * Copyright (c) 2000-2003 Intel Corporation 
  * All rights reserved. 
+ * Copyright (c) 2012 France Telecom All rights reserved.  
  *
  * Redistribution and use in source and binary forms, with or without 
  * modification, are permitted provided that the following conditions are met: 
@@ -55,6 +56,9 @@
 /*! Maximum action header buffer length. */
 #define HEADER_LENGTH 2000
 
+#ifdef WIN32
+	#define snprintf _snprintf
+#endif
 
 /*!
  * \brief Structure to maintain a error code and string associated with the
@@ -220,13 +224,17 @@ static int addToAction(
 		}
 
 		if (response) {
-			sprintf(ActBuff,
+			rc = snprintf(ActBuff, HEADER_LENGTH,
 				"<u:%sResponse xmlns:u=\"%s\">\r\n</u:%sResponse>",
 				ActionName, ServType, ActionName);
 		} else {
-			sprintf(ActBuff,
+			rc = snprintf(ActBuff, HEADER_LENGTH,
 				"<u:%s xmlns:u=\"%s\">\r\n</u:%s>",
 				ActionName, ServType, ActionName);
+		}
+		if (rc < 0 || (unsigned int) rc >= HEADER_LENGTH) {
+			free(ActBuff);
+			return UPNP_E_OUTOF_MEMORY;
 		}
 
 		rc = ixmlParseBufferEx(ActBuff, ActionDoc);
@@ -282,6 +290,7 @@ static IXML_Document *makeAction(
 	IXML_Node *node;
 	IXML_Element *Ele;
 	IXML_Node *Txt = NULL;
+	int rc = 0;
 
 	if (ActionName == NULL || ServType == NULL) {
 		return NULL;
@@ -293,15 +302,16 @@ static IXML_Document *makeAction(
 	}
 
 	if (response) {
-		sprintf(ActBuff,
+		rc = snprintf(ActBuff, HEADER_LENGTH,
 			"<u:%sResponse xmlns:u=\"%s\">\r\n</u:%sResponse>",
 			ActionName, ServType, ActionName);
 	} else {
-		sprintf(ActBuff,
+		rc = snprintf(ActBuff, HEADER_LENGTH,
 			"<u:%s xmlns:u=\"%s\">\r\n</u:%s>",
 			ActionName, ServType, ActionName);
 	}
-	if (ixmlParseBufferEx(ActBuff, &ActionDoc) != IXML_SUCCESS) {
+	if (rc < 0 || (unsigned int) rc >= HEADER_LENGTH ||
+		ixmlParseBufferEx(ActBuff, &ActionDoc) != IXML_SUCCESS) {
 		free(ActBuff);
 		return NULL;
 	}

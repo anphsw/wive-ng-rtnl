@@ -2,6 +2,7 @@
  *
  * Copyright (c) 2000-2003 Intel Corporation 
  * All rights reserved. 
+ * Copyright (c) 2012 France Telecom All rights reserved. 
  *
  * Redistribution and use in source and binary forms, with or without 
  * modification, are permitted provided that the following conditions are met: 
@@ -58,6 +59,7 @@
 #ifdef WIN32
 	#include <malloc.h>
 	#define fseeko fseek
+	#define snprintf _snprintf
 #else
 	#include <arpa/inet.h>
 	#include <sys/types.h>
@@ -74,8 +76,8 @@
 const int CHUNK_HEADER_SIZE = 10;
 const int CHUNK_TAIL_SIZE = 10;
 */
-#define CHUNK_HEADER_SIZE 10
-#define CHUNK_TAIL_SIZE 10
+#define CHUNK_HEADER_SIZE (size_t)10
+#define CHUNK_TAIL_SIZE (size_t)10
 
 #ifndef UPNP_ENABLE_BLOCKING_TCP_CONNECTIONS
 
@@ -170,13 +172,13 @@ int http_FixUrl(IN uri_type *url, OUT uri_type *fixed_url)
 	if (token_string_casecmp(&fixed_url->scheme, "http") != 0) {
 		return UPNP_E_INVALID_URL;
 	}
-	if( fixed_url->hostport.text.size == 0 ) {
+	if( fixed_url->hostport.text.size == ( size_t ) 0 ) {
 		return UPNP_E_INVALID_URL;
 	}
 	/* set pathquery to "/" if it is empty */
-	if (fixed_url->pathquery.size == 0) {
+	if (fixed_url->pathquery.size == (size_t)0) {
 		fixed_url->pathquery.buff = temp_path;
-		fixed_url->pathquery.size = 1;
+		fixed_url->pathquery.size = (size_t)1;
 	}
 
 	return UPNP_E_SUCCESS;
@@ -218,10 +220,12 @@ SOCKET http_Connect(
 	SOCKET connfd;
 	socklen_t sockaddr_len;
 	int ret_connect;
+	char errorBuffer[ERROR_BUFFER_LEN];
 
 	http_FixUrl(destination_url, url);
 
-	connfd = socket(url->hostport.IPaddress.ss_family, SOCK_STREAM, 0);
+	connfd = socket((int)url->hostport.IPaddress.ss_family,
+		SOCK_STREAM, 0);
 	if (connfd == INVALID_SOCKET) {
 		return (SOCKET)(UPNP_E_OUTOF_SOCKET);
 	}
@@ -234,7 +238,11 @@ SOCKET http_Connect(
 		UpnpPrintf(UPNP_CRITICAL, HTTP, __FILE__, __LINE__,
 			"connect error: %d\n", WSAGetLastError());
 #endif
-		shutdown(connfd, SD_BOTH);
+		if (shutdown(connfd, SD_BOTH) == -1) {
+			strerror_r(errno, errorBuffer, ERROR_BUFFER_LEN);
+			UpnpPrintf(UPNP_INFO, HTTP, __FILE__, __LINE__,
+				   "Error in shutdown: %s\n", errorBuffer);
+		}
 		UpnpCloseSocket(connfd);
 		return (SOCKET)(UPNP_E_SOCKET_CONNECT);
 	}
@@ -275,7 +283,7 @@ int http_RecvMessage(
 	int ok_on_close = FALSE;
 	char buf[2 * 1024];
 
-	if (request_method == HTTPMETHOD_UNKNOWN) {
+	if (request_method == (http_method_t)HTTPMETHOD_UNKNOWN) {
 		parser_request_init(parser);
 	} else {
 		parser_response_init(parser, request_method);
@@ -286,12 +294,13 @@ int http_RecvMessage(
 		if (num_read > 0) {
 			/* got data */
 			status = parser_append(parser, buf, (size_t)num_read);
-			if (status == PARSE_SUCCESS) {
+			switch (status) {
+			case PARSE_SUCCESS:
 				UpnpPrintf( UPNP_INFO, HTTP, __FILE__, __LINE__,
 					"<<< (RECVD) <<<\n%s\n-----------------\n",
 					parser->msg.msg.buf );
 				print_http_headers( &parser->msg );
-				if (g_maxContentLength > 0 && parser->content_length > (unsigned int)g_maxContentLength) {
+				if (g_maxContentLength > (size_t)0 && parser->content_length > (unsigned int)g_maxContentLength) {
 					*http_error_code = HTTP_REQ_ENTITY_TOO_LARGE;
 					line = __LINE__;
 					ret = UPNP_E_OUTOF_BOUNDS;
@@ -300,19 +309,22 @@ int http_RecvMessage(
 				line = __LINE__;
 				ret = 0;
 				goto ExitFunction;
-			} else if (status == PARSE_FAILURE) {
+			case PARSE_FAILURE:
 				*http_error_code = parser->http_error_code;
 				line = __LINE__;
 				ret = UPNP_E_BAD_HTTPMSG;
 				goto ExitFunction;
-			} else if (status == PARSE_INCOMPLETE_ENTITY) {
+			case PARSE_INCOMPLETE_ENTITY:
 				/* read until close */
 				ok_on_close = TRUE;
-			} else if (status == PARSE_CONTINUE_1) {
+				break;
+			case PARSE_CONTINUE_1:
 				/* Web post request. */
 				line = __LINE__;
 				ret = PARSE_SUCCESS;
 				goto ExitFunction;
+			default:
+				break;
 			}
 		} else if (num_read == 0) {
 			if (ok_on_close) {
@@ -365,12 +377,13 @@ int http_SendMessage(SOCKINFO *info, int *TimeOut, const char *fmt, ...)
 	size_t buf_length;
 	size_t num_read;
 	size_t num_written;
-	size_t amount_to_be_read = 0;
+	size_t amount_to_be_read = (size_t)0;
 	/* 10 byte allocated for chunk header. */
 	size_t Data_Buf_Size = WEB_SERVER_BUF_SIZE;
 
+	memset(Chunk_Header, 0, sizeof(Chunk_Header));
 	va_start(argp, fmt);
-	while ((c = *fmt++) != 0) {
+	while ((c = *fmt++)) {
 		if (c == 'I') {
 			Instr = va_arg(argp, struct SendInstruction *);
 			if (Instr->ReadSendSize >= 0)
@@ -402,12 +415,12 @@ int http_SendMessage(SOCKINFO *info, int *TimeOut, const char *fmt, ...)
 				if (virtualDirCallback.seek(Fp, Instr->RangeOffset,
 				    SEEK_CUR) != 0) {
 					RetVal = UPNP_E_FILE_READ_ERROR;
-					goto ExitFunction;
+					goto Cleanup_File;
 				}
 			} else if (Instr && Instr->IsRangeActive) {
 				if (fseeko(Fp, Instr->RangeOffset, SEEK_CUR) != 0) {
 					RetVal = UPNP_E_FILE_READ_ERROR;
-					goto ExitFunction;
+					goto Cleanup_File;
 				}
 			}
 			while (amount_to_be_read) {
@@ -419,7 +432,7 @@ int http_SendMessage(SOCKINFO *info, int *TimeOut, const char *fmt, ...)
 						nr = virtualDirCallback.read(Fp, file_buf, n);
 						num_read = (size_t)nr;
 					} else {
-						num_read = fread(file_buf, 1, n, Fp);
+						num_read = fread(file_buf, (size_t)1, n, Fp);
 					}
 					amount_to_be_read -= num_read;
 					if (Instr->ReadSendSize < 0) {
@@ -427,9 +440,9 @@ int http_SendMessage(SOCKINFO *info, int *TimeOut, const char *fmt, ...)
 						amount_to_be_read = Data_Buf_Size;
 					}
 				} else {
-					num_read = fread(file_buf, 1, Data_Buf_Size, Fp);
+					num_read = fread(file_buf, (size_t)1, Data_Buf_Size, Fp);
 				}
-				if (num_read == 0) {
+				if (num_read == (size_t)0) {
 					/* EOF so no more to send. */
 					if (Instr && Instr->IsChunkActive) {
 						const char *str = "0\r\n\r\n";
@@ -443,12 +456,20 @@ int http_SendMessage(SOCKINFO *info, int *TimeOut, const char *fmt, ...)
 				}
 				/* Create chunk for the current buffer. */
 				if (Instr && Instr->IsChunkActive) {
+					int rc;
 					/* Copy CRLF at the end of the chunk */
-					memcpy(file_buf + num_read, "\r\n", 2);
+					memcpy(file_buf + num_read, "\r\n", (size_t)2);
 					/* Hex length for the chunk size. */
-					sprintf(Chunk_Header, "%" PRIzx, num_read);
-					/*itoa(num_read,Chunk_Header,16);  */
-					strcat(Chunk_Header, "\r\n");
+					memset(Chunk_Header, 0,
+						sizeof(Chunk_Header));
+					rc = snprintf(Chunk_Header,
+						sizeof(Chunk_Header) - strlen ("\r\n"),
+						"%" PRIzx, num_read);
+					if (rc < 0 || (unsigned int) rc >= sizeof(Chunk_Header) - strlen ("\r\n")) {
+						RetVal = UPNP_E_INTERNAL_ERROR;
+						goto Cleanup_File;
+					}
+					strncat(Chunk_Header, "\r\n", strlen ("\r\n"));
 					/* Copy the chunk size header  */
 					memcpy(file_buf - strlen(Chunk_Header),
 					       Chunk_Header,
@@ -458,10 +479,10 @@ int http_SendMessage(SOCKINFO *info, int *TimeOut, const char *fmt, ...)
 					/*printf("Sending %s\n",file_buf-strlen(Chunk_Header)); */
 					nw = sock_write(info,
 						file_buf - strlen(Chunk_Header),
-						num_read + strlen(Chunk_Header) + 2,
+						num_read + strlen(Chunk_Header) + (size_t)2,
 						TimeOut);
 					num_written = (size_t)nw;
-					if (nw <= 0 || num_written != num_read + strlen(Chunk_Header) + 2)
+					if (nw <= 0 || num_written != num_read + strlen(Chunk_Header) + (size_t)2)
 						/* Send error nothing we can do. */
 						goto Cleanup_File;
 				} else {
@@ -488,7 +509,7 @@ Cleanup_File:
 			/* memory buffer */
 			buf = va_arg(argp, char *);
 			buf_length = va_arg(argp, size_t);
-			if (buf_length > 0) {
+			if (buf_length > (size_t)0) {
 				nw = sock_write(info, buf, buf_length, TimeOut);
 				num_written = (size_t)nw;
 				UpnpPrintf(UPNP_INFO, HTTP, __FILE__, __LINE__,
@@ -548,7 +569,7 @@ int http_RequestAndResponse(
 	SOCKINFO info;
 
 	tcp_connection = socket(
-		destination->hostport.IPaddress.ss_family, SOCK_STREAM, 0);
+		(int)destination->hostport.IPaddress.ss_family, SOCK_STREAM, 0);
 	if (tcp_connection == INVALID_SOCKET) {
 		parser_response_init(response, req_method);
 		return UPNP_E_SOCKET_ERROR;
@@ -625,7 +646,7 @@ int http_Download( IN const char *url_str,
 	memptr ctype;
 	size_t copy_len;
 	membuffer request;
-	char *urlPath = alloca(strlen(url_str) + 1);
+	char *urlPath = alloca(strlen(url_str) + (size_t)1);
 
 	/*ret_code = parse_uri( (char*)url_str, strlen(url_str), &url ); */
 	UpnpPrintf(UPNP_INFO, HTTP, __FILE__, __LINE__,
@@ -635,17 +656,20 @@ int http_Download( IN const char *url_str,
 		return ret_code;
 	/* make msg */
 	membuffer_init(&request);
-	strcpy(urlPath, url_str);
+	memset(urlPath, 0, strlen(url_str) + (size_t)1);
+	strncpy(urlPath, url_str, strlen(url_str));
 	hoststr = strstr(urlPath, "//");
 	if (hoststr == NULL)
 		return UPNP_E_INVALID_URL;
 	hoststr += 2;
 	temp = strchr(hoststr, '/');
-	if (temp == NULL)
-		return UPNP_E_INVALID_URL;
+	if (temp) {
 	*temp = '\0';
 	hostlen = strlen(hoststr);
 	*temp = '/';
+	} else {
+		hostlen = strlen(hoststr);
+	}
 	UpnpPrintf(UPNP_INFO, HTTP, __FILE__, __LINE__,
 		   "HOSTNAME : %s Length : %" PRIzu "\n", hoststr, hostlen);
 	ret_code = http_MakeMessage(&request, 1, 1,
@@ -680,15 +704,15 @@ int http_Download( IN const char *url_str,
 			*content_type = '\0';	/* no content-type */
 		} else {
 			/* safety */
-			copy_len = ctype.length < LINE_SIZE - 1 ?
-			    ctype.length : LINE_SIZE - 1;
+			copy_len = ctype.length < LINE_SIZE - (size_t)1 ?
+			    ctype.length : LINE_SIZE - (size_t)1;
 
 			memcpy(content_type, ctype.buf, copy_len);
 			content_type[copy_len] = '\0';
 		}
 	}
 	/* extract doc from msg */
-	if ((*doc_length = response.msg.entity.length) == 0) {
+	if ((*doc_length = response.msg.entity.length) == (size_t)0) {
 		/* 0-length msg */
 		*document = NULL;
 	} else if (response.msg.status_code == HTTP_OK) {
@@ -698,13 +722,18 @@ int http_Download( IN const char *url_str,
 		msg_length = response.msg.msg.length;	/* save for posterity    */
 		msg_start = membuffer_detach(&response.msg.msg);	/* whole msg */
 		/* move entity to the start; copy null-terminator too */
-		memmove(msg_start, entity_start, *doc_length + 1);
+		memmove(msg_start, entity_start, *doc_length + (size_t)1);
 		/* save mem for body only */
-		*document = realloc(msg_start, *doc_length + 1);	/*LEAK_FIX_MK */
+		*document = realloc(msg_start, *doc_length + (size_t)1);	/*LEAK_FIX_MK */
 		/* *document = Realloc( msg_start,msg_length, *doc_length + 1 ); LEAK_FIX_MK */
 		/* shrink can't fail */
 		assert(msg_length > *doc_length);
 		assert(*document != NULL);
+		if (msg_length <= *doc_length || *document == NULL)
+			UpnpPrintf(UPNP_INFO, HTTP, __FILE__, __LINE__,
+				"msg_length(%" PRIzu ") <= *doc_length(%"
+				PRIzu ") or document is NULL",
+				msg_length, *doc_length);
 	}
 	if (response.msg.status_code == HTTP_OK) {
 		ret_code = 0;	/* success */
@@ -746,8 +775,8 @@ int MakePostMessage(const char *url_str, membuffer *request,
 	uri_type *url, int contentLength, const char *contentType)
 {
 	int ret_code = 0;
-	char *urlPath = alloca(strlen(url_str) + 1);
-	size_t hostlen = 0;
+	char *urlPath = alloca(strlen(url_str) + (size_t)1);
+	size_t hostlen = (size_t)0;
 	char *hoststr;
 	char *temp;
 
@@ -758,7 +787,8 @@ int MakePostMessage(const char *url_str, membuffer *request,
 		return ret_code;
 	/* make msg */
 	membuffer_init(request);
-	strcpy(urlPath, url_str);
+	memset(urlPath, 0, strlen(url_str) + (size_t)1);
+	strncpy(urlPath, url_str, strlen(url_str));
 	hoststr = strstr(urlPath, "//");
 	if (hoststr == NULL)
 		return UPNP_E_INVALID_URL;
@@ -834,29 +864,29 @@ int http_WriteHttpPost( IN void *Handle,
 {
 	http_post_handle_t *handle = (http_post_handle_t *)Handle;
 	char *tempbuf = NULL;
-	size_t tempbufSize = 0;
+	size_t tempbufSize = (size_t)0;
 	int freeTempbuf = 0;
 	int numWritten = 0;
 
 	if (!handle || !size || !buf) {
 		if (size)
-			*size = 0;
+			*size = (size_t)0;
 		return UPNP_E_INVALID_PARAM;
 	}
 	if (handle->contentLength == UPNP_USING_CHUNKED) {
 		if (*size) {
-			size_t tempSize = 0;
-			tempbuf = malloc(*size +
-				CHUNK_HEADER_SIZE + CHUNK_TAIL_SIZE);
+			size_t tempSize = *size +
+				CHUNK_HEADER_SIZE + CHUNK_TAIL_SIZE;
+			tempbuf = malloc(tempSize);
 			if (!tempbuf)
 				return UPNP_E_OUTOF_MEMORY;
 			/* begin chunk */
-			sprintf(tempbuf, "%" PRIzx "\r\n", *size);
+			snprintf(tempbuf, tempSize, "%" PRIzx "\r\n", *size);
 			tempSize = strlen(tempbuf);
 			memcpy(tempbuf + tempSize, buf, *size);
-			memcpy(tempbuf + tempSize + *size, "\r\n", 2);
+			memcpy(tempbuf + tempSize + *size, "\r\n", (size_t)2);
 			/* end of chunk */
-			tempbufSize = tempSize + *size + 2;
+			tempbufSize = tempSize + *size + (size_t)2;
 			freeTempbuf = 1;
 		}
 	} else {
@@ -868,7 +898,7 @@ int http_WriteHttpPost( IN void *Handle,
 	if (freeTempbuf)
 		free(tempbuf);
 	if (numWritten < 0) {
-		*size = 0;
+		*size = (size_t)0;
 		return numWritten;
 	} else {
 		*size = (size_t)numWritten;
@@ -968,7 +998,7 @@ int http_OpenHttpPost(
 	if (!handle)
 		return UPNP_E_OUTOF_MEMORY;
 	handle->contentLength = contentLength;
-	tcp_connection = socket(url.hostport.IPaddress.ss_family,
+	tcp_connection = socket((int)url.hostport.IPaddress.ss_family,
 		SOCK_STREAM, 0);
 	if (tcp_connection == INVALID_SOCKET) {
 		ret_code = UPNP_E_SOCKET_ERROR;
@@ -1031,10 +1061,10 @@ int MakeGetMessage(const char *url_str, const char *proxy_str,
 	membuffer *request, uri_type *url)
 {
 	int ret_code;
-	char *urlPath = alloca(strlen(url_str) + 1);
-	size_t querylen = 0;
+	char *urlPath = alloca(strlen(url_str) + (size_t)1);
+	size_t querylen = (size_t)0;
 	const char *querystr;
-	size_t hostlen = 0;
+	size_t hostlen = (size_t)0;
 	char *hoststr, *temp;
 
 	UpnpPrintf(UPNP_INFO, HTTP, __FILE__, __LINE__,
@@ -1044,7 +1074,8 @@ int MakeGetMessage(const char *url_str, const char *proxy_str,
 		return ret_code;
 	/* make msg */
 	membuffer_init(request);
-	strcpy(urlPath, url_str);
+	memset(urlPath, 0, strlen(url_str) + (size_t)1);
+	strncpy(urlPath, url_str, strlen(url_str));
 	hoststr = strstr(urlPath, "//");
 	if (hoststr == NULL)
 		return UPNP_E_INVALID_URL;
@@ -1110,13 +1141,17 @@ static int ReadResponseLineAndHeaders(
 
 	/*read response line */
 	status = parser_parse_responseline(parser);
-	if (status == PARSE_OK)
+	switch (status) {
+	case PARSE_OK:
 		done = 1;
-	else if (status == PARSE_INCOMPLETE)
+		break;
+	case PARSE_INCOMPLETE:
 		done = 0;
-	else
+		break;
+	default:
 		/*error */
 		return status;
+	}
 	while (!done) {
 		num_read = sock_read(info, buf, sizeof(buf), timeout_secs);
 		if (num_read > 0) {
@@ -1130,11 +1165,14 @@ static int ReadResponseLineAndHeaders(
 				return PARSE_FAILURE;
 			}
 			status = parser_parse_responseline(parser);
-			if (status == PARSE_OK) {
+			switch (status) {
+			case PARSE_OK:
 				done = 1;
-			} else if (status == PARSE_INCOMPLETE) {
+				break;
+			case PARSE_INCOMPLETE:
 				done = 0;
-			} else {
+				break;
+			default:
 				/*error */
 				return status;
 			}
@@ -1149,9 +1187,10 @@ static int ReadResponseLineAndHeaders(
 	}
 	done = 0;
 	status = parser_parse_headers(parser);
-	if ((status == PARSE_OK) && (parser->position == POS_ENTITY))
+	if ((status == (parse_status_t)PARSE_OK) &&
+		(parser->position == (parser_pos_t)POS_ENTITY))
 		done = 1;
-	else if (status == PARSE_INCOMPLETE)
+	else if (status == (parse_status_t)PARSE_INCOMPLETE)
 		done = 0;
 	else
 		/*error */
@@ -1169,9 +1208,10 @@ static int ReadResponseLineAndHeaders(
 				return PARSE_FAILURE;
 			}
 			status = parser_parse_headers(parser);
-			if (status == PARSE_OK && parser->position == POS_ENTITY)
+			if (status == (parse_status_t)PARSE_OK &&
+				parser->position == (parser_pos_t)POS_ENTITY)
 				done = 1;
-			else if (status == PARSE_INCOMPLETE)
+			else if (status == (parse_status_t)PARSE_INCOMPLETE)
 				done = 0;
 			else
 				/*error */
@@ -1222,31 +1262,35 @@ int http_ReadHttpGet(
 	char tempbuf[2 * 1024];
 	int ret_code = 0;
 
-	if (!handle || !size || (*size > 0 && !buf)) {
+	if (!handle || !size || (*size > (size_t)0 && !buf)) {
 		if (size)
-			*size = 0;
+			*size = (size_t)0;
 		return UPNP_E_INVALID_PARAM;
 	}
 	/* first parse what has already been gotten */
-	if (handle->response.position != POS_COMPLETE)
+	if (handle->response.position != (parser_pos_t)POS_COMPLETE)
 		status = parser_parse_entity(&handle->response);
 	else
 		status = PARSE_SUCCESS;
-	if (status == PARSE_INCOMPLETE_ENTITY)
+	switch (status) {
+	case PARSE_INCOMPLETE_ENTITY:
 		/* read until close */
 		ok_on_close = TRUE;
-	else if ((status != PARSE_SUCCESS)
-		   && (status != PARSE_CONTINUE_1)
-		   && (status != PARSE_INCOMPLETE)) {
+		break;
+	case PARSE_SUCCESS:
+	case PARSE_CONTINUE_1:
+	case PARSE_INCOMPLETE:
+		break;
+	default:
 		/*error */
-		*size = 0;
+		*size = (size_t)0;
 		return UPNP_E_BAD_RESPONSE;
 	}
 	/* read more if necessary entity */
 	while (handle->response.msg.amount_discarded + *size >
 	       handle->response.msg.entity.length &&
 	       !handle->cancel &&
-	       handle->response.position != POS_COMPLETE) {
+	       handle->response.position != (parser_pos_t)POS_COMPLETE) {
 		num_read = sock_read(&handle->sock_info, tempbuf,
 			sizeof(tempbuf), &timeout);
 		if (num_read > 0) {
@@ -1257,18 +1301,22 @@ int http_ReadHttpGet(
 				/* set failure status */
 				handle->response.http_error_code =
 				    HTTP_INTERNAL_SERVER_ERROR;
-				*size = 0;
+				*size = (size_t)0;
 				return PARSE_FAILURE;
 			}
 			status = parser_parse_entity(&handle->response);
-			if (status == PARSE_INCOMPLETE_ENTITY) {
+			switch (status) {
+			case PARSE_INCOMPLETE_ENTITY:
 				/* read until close */
 				ok_on_close = TRUE;
-			} else if ((status != PARSE_SUCCESS)
-				   && (status != PARSE_CONTINUE_1)
-				   && (status != PARSE_INCOMPLETE)) {
+				break;
+			case PARSE_SUCCESS:
+			case PARSE_CONTINUE_1:
+			case PARSE_INCOMPLETE:
+				break;
+			default:
 				/*error */
-				*size = 0;
+				*size = (size_t)0;
 				return UPNP_E_BAD_RESPONSE;
 			}
 		} else if (num_read == 0) {
@@ -1279,12 +1327,12 @@ int http_ReadHttpGet(
 				handle->response.position = POS_COMPLETE;
 			} else {
 				/* partial msg */
-				*size = 0;
+				*size = (size_t)0;
 				handle->response.http_error_code = HTTP_BAD_REQUEST;	/* or response */
 				return UPNP_E_BAD_HTTPMSG;
 			}
 		} else {
-			*size = 0;
+			*size = (size_t)0;
 			return num_read;
 		}
 	}
@@ -1297,7 +1345,7 @@ int http_ReadHttpGet(
 		*size = handle->response.msg.entity.length -
 			handle->response.msg.amount_discarded;
 	/* copy data to user buffer. delete copied data */
-	if (*size > 0) {
+	if (*size > (size_t)0) {
 		memcpy(buf, &handle->response.msg.msg.buf[handle->response.entity_start_position],
 			*size);
 		membuffer_delete(&handle->response.msg.msg,
@@ -1446,7 +1494,7 @@ int http_OpenHttpGetProxy(const char *url_str, const char *proxy_str,
 	handle->cancel = 0;
 	parser_response_init(&handle->response, HTTPMETHOD_GET);
 	tcp_connection =
-	    socket(peer->hostport.IPaddress.ss_family, SOCK_STREAM, 0);
+	    socket((int)peer->hostport.IPaddress.ss_family, SOCK_STREAM, 0);
 	if (tcp_connection == INVALID_SOCKET) {
 		ret_code = UPNP_E_SOCKET_ERROR;
 		goto errorHandler;
@@ -1473,15 +1521,18 @@ int http_OpenHttpGetProxy(const char *url_str, const char *proxy_str,
 		sock_destroy(&handle->sock_info, SD_BOTH);
 		goto errorHandler;
 	}
-	status = ReadResponseLineAndHeaders(&handle->sock_info,
+	if (ReadResponseLineAndHeaders(&handle->sock_info,
 					    &handle->response, &timeout,
-					    &http_error_code);
-	if (status != PARSE_OK) {
+				       &http_error_code) != (int)PARSE_OK) {
 		ret_code = UPNP_E_BAD_RESPONSE;
 		goto errorHandler;
 	}
 	status = parser_get_entity_read_method(&handle->response);
-	if (status != PARSE_CONTINUE_1 && status != PARSE_SUCCESS) {
+	switch (status) {
+	case PARSE_CONTINUE_1:
+	case PARSE_SUCCESS:
+		break;
+	default:
 		ret_code = UPNP_E_BAD_RESPONSE;
 		goto errorHandler;
 	}
@@ -1492,7 +1543,7 @@ int http_OpenHttpGetProxy(const char *url_str, const char *proxy_str,
 		*contentType = NULL;
 	else
 		*contentType = ctype.buf;
-	if (handle->response.position == POS_COMPLETE)
+	if (handle->response.position == (parser_pos_t)POS_COMPLETE)
 		*contentLength = 0;
 	else if (handle->response.ent_position == ENTREAD_USING_CHUNKED)
 		*contentLength = UPNP_USING_CHUNKED;
@@ -1540,7 +1591,7 @@ int http_SendStatusResponse(IN SOCKINFO *info, IN int http_status_code,
 	http_CalcResponseVersion(request_major_version, request_minor_version,
 				 &response_major, &response_minor);
 	membuffer_init(&membuf);
-	membuf.size_inc = 70;
+	membuf.size_inc = (size_t)70;
 	/* response start line */
 	ret = http_MakeMessage(&membuf, response_major, response_minor, "RSCB",
 			       http_status_code, http_status_code);
@@ -1581,9 +1632,11 @@ int http_MakeMessage(membuffer *buf, int http_major_version,
 	const char *weekday_str = "Sun\0Mon\0Tue\0Wed\0Thu\0Fri\0Sat";
 	const char *month_str = "Jan\0Feb\0Mar\0Apr\0May\0Jun\0"
 	    "Jul\0Aug\0Sep\0Oct\0Nov\0Dec";
+	int rc = 0;
 
+	memset(tempbuf, 0, sizeof(tempbuf));
 	va_start(argp, fmt);
-	while ((c = *fmt++) != 0) {
+	while ((c = *fmt++)) {
 		if (c == 's') {
 			/* C string */
 			s = (char *)va_arg(argp, char *);
@@ -1611,26 +1664,29 @@ int http_MakeMessage(membuffer *buf, int http_major_version,
 			/* mem buffer */
 			s = (char *)va_arg(argp, char *);
 			UpnpPrintf(UPNP_ALL, HTTP, __FILE__, __LINE__,
-				"Adding a char Buffer starting with: %c\n", s[0]);
+				"Adding a char Buffer starting with: %c\n", (int)s[0]);
 			assert(s);
 			length = (size_t) va_arg(argp, size_t);
 			if (membuffer_append(buf, s, length))
 				goto error_handler;
 		} else if (c == 'c') {
 			/* crlf */
-			if (membuffer_append(buf, "\r\n", 2))
+			if (membuffer_append(buf, "\r\n", (size_t)2))
 				goto error_handler;
 		} else if (c == 'd') {
 			/* integer */
 			num = (size_t)va_arg(argp, int);
-			sprintf(tempbuf, "%" PRIzu, num);
-			if (membuffer_append(buf, tempbuf, strlen(tempbuf)))
+			rc = snprintf(tempbuf, sizeof(tempbuf), "%" PRIzu, num);
+			if (rc < 0 || (unsigned int) rc >= sizeof(tempbuf) ||
+				membuffer_append(buf, tempbuf, strlen(tempbuf)))
 				goto error_handler;
 		} else if (c == 'h') {
 			/* off_t */
 			bignum = (off_t) va_arg(argp, off_t);
-			sprintf(tempbuf, "%" PRId64, (int64_t) bignum);
-			if (membuffer_append(buf, tempbuf, strlen(tempbuf)))
+			rc = snprintf(tempbuf, sizeof(tempbuf), "%" PRId64,
+				(int64_t) bignum);
+			if (rc < 0 || (unsigned int) rc >= sizeof(tempbuf) ||
+				membuffer_append(buf, tempbuf, strlen(tempbuf)))
 				goto error_handler;
 		} else if (c == 't' || c == 'D') {
 			/* date */
@@ -1647,13 +1703,16 @@ int http_MakeMessage(membuffer *buf, int http_major_version,
 			}
 			assert(loc_time);
 			date = gmtime(loc_time);
-			sprintf(tempbuf,
+			if (date == NULL)
+				goto error_handler;
+			rc = snprintf(tempbuf, sizeof(tempbuf),
 				"%s%s, %02d %s %d %02d:%02d:%02d GMT%s",
 				start_str, &weekday_str[date->tm_wday * 4],
 				date->tm_mday, &month_str[date->tm_mon * 4],
 				date->tm_year + 1900, date->tm_hour,
 				date->tm_min, date->tm_sec, end_str);
-			if (membuffer_append(buf, tempbuf, strlen(tempbuf)))
+			if (rc < 0 || (unsigned int) rc >= sizeof(tempbuf) ||
+				membuffer_append(buf, tempbuf, strlen(tempbuf)))
 				goto error_handler;
 		} else if (c == 'L') {
 			/* Add CONTENT-LANGUAGE header only if WEB_SERVER_CONTENT_LANGUAGE */
@@ -1687,7 +1746,7 @@ int http_MakeMessage(membuffer *buf, int http_major_version,
 		} else if (c == 'S' || c == 'U') {
 			/* SERVER or USER-AGENT header */
 			temp_str = (c == 'S') ? "SERVER: " : "USER-AGENT: ";
-			get_sdk_info(tempbuf);
+			get_sdk_info(tempbuf, sizeof(tempbuf));
 			if (http_MakeMessage(buf, http_major_version, http_minor_version,
 					     "ss", temp_str, tempbuf) != 0)
 				goto error_handler;
@@ -1704,21 +1763,24 @@ int http_MakeMessage(membuffer *buf, int http_major_version,
 			/*   e.g.: 'HTTP/1.1 200 OK' code */
 			status_code = (int)va_arg(argp, int);
 			assert(status_code > 0);
-			sprintf(tempbuf, "HTTP/%d.%d %d ",
+			rc = snprintf(tempbuf, sizeof(tempbuf), "HTTP/%d.%d %d ",
 				http_major_version, http_minor_version,
 				status_code);
 			/* str */
 			status_msg = http_get_code_text(status_code);
-			if (http_MakeMessage(buf, http_major_version, http_minor_version,
+			if (rc < 0 || (unsigned int) rc >= sizeof(tempbuf) ||
+				http_MakeMessage(buf, http_major_version, http_minor_version,
 					     "ssc", tempbuf, status_msg) != 0)
 				goto error_handler;
 		} else if (c == 'B') {
 			/* body of a simple reply */
 			status_code = (int)va_arg(argp, int);
-			sprintf(tempbuf, "%s%d %s%s",
+			rc = snprintf(tempbuf, sizeof(tempbuf), "%s%d %s%s",
 				"<html><body><h1>",
 				status_code, http_get_code_text(status_code),
 				"</h1></body></html>");
+			if (rc < 0 || (unsigned int) rc >= sizeof(tempbuf))
+				goto error_handler;
 			bignum = (off_t)strlen(tempbuf);
 			if (http_MakeMessage(buf, http_major_version, http_minor_version,
 					     "NTcs", bignum,	/* content-length */
@@ -1831,7 +1893,7 @@ int MakeGetMessageEx( const char *url_str,
 {
 	int errCode = UPNP_E_SUCCESS;
 	char *urlPath = NULL;
-	size_t hostlen = 0;
+	size_t hostlen = (size_t)0;
 	char *hoststr, *temp;
 
 	do {
@@ -1844,13 +1906,13 @@ int MakeGetMessageEx( const char *url_str,
 		}
 		/* make msg */
 		membuffer_init(request);
-		urlPath = alloca(strlen(url_str) + 1);
+		urlPath = alloca(strlen(url_str) + (size_t)1);
 		if (!urlPath) {
 			errCode = UPNP_E_OUTOF_MEMORY;
 			break;
 		}
-		memset(urlPath, 0, strlen(url_str) + 1);
-		strcpy(urlPath, url_str);
+		memset(urlPath, 0, strlen(url_str) + (size_t)1);
+		strncpy(urlPath, url_str, strlen(url_str));
 		hoststr = strstr(urlPath, "//");
 		if (hoststr == NULL) {
 			errCode = UPNP_E_INVALID_URL;
@@ -1935,6 +1997,9 @@ int http_OpenHttpGetEx(
 	int errCode = UPNP_E_SUCCESS;
 	/* char rangeBuf[SIZE_RANGE_BUFFER]; */
 	struct SendInstruction rangeBuf;
+	int rc = 0;
+
+	membuffer_init(&request);
 
 	do {
 		/* Checking Input parameters */
@@ -1952,8 +2017,10 @@ int http_OpenHttpGetEx(
 			break;
 		}
 		memset(&rangeBuf, 0, sizeof(rangeBuf));
-		sprintf(rangeBuf.RangeHeader,
+		rc = snprintf(rangeBuf.RangeHeader, sizeof(rangeBuf.RangeHeader),
 			"Range: bytes=%d-%d\r\n", lowRange, highRange);
+		if (rc < 0 || (unsigned int) rc >= sizeof(rangeBuf.RangeHeader))
+			break;
 		membuffer_init(&request);
 		errCode = MakeGetMessageEx(url_str, &request, &url, &rangeBuf);
 		if (errCode != UPNP_E_SUCCESS)
@@ -1965,7 +2032,8 @@ int http_OpenHttpGetEx(
 		}
 		memset(handle, 0, sizeof(*handle));
 		parser_response_init(&handle->response, HTTPMETHOD_GET);
-		tcp_connection = socket(url.hostport.IPaddress.ss_family, SOCK_STREAM, 0);
+		tcp_connection = socket((int)url.hostport.IPaddress.ss_family,
+			SOCK_STREAM, 0);
 		if (tcp_connection == INVALID_SOCKET) {
 			errCode = UPNP_E_SOCKET_ERROR;
 			free(handle);
@@ -1996,15 +2064,15 @@ int http_OpenHttpGetEx(
 			free(handle);
 			break;
 		}
-		status = ReadResponseLineAndHeaders(&handle->sock_info,
-			&handle->response, &timeout, &http_error_code);
-		if (status != PARSE_OK) {
+		if (ReadResponseLineAndHeaders(&handle->sock_info,
+			&handle->response, &timeout, &http_error_code) != (int)PARSE_OK) {
 			errCode = UPNP_E_BAD_RESPONSE;
 			free(handle);
 			break;
 		}
 		status = parser_get_entity_read_method(&handle->response);
-		if (status != PARSE_CONTINUE_1 && status != PARSE_SUCCESS) {
+		if (status != (parse_status_t)PARSE_CONTINUE_1 &&
+			status != (parse_status_t)PARSE_SUCCESS) {
 			errCode = UPNP_E_BAD_RESPONSE;
 			free(handle);
 			break;
@@ -2017,7 +2085,7 @@ int http_OpenHttpGetEx(
 			*contentType = NULL;
 		else
 			*contentType = ctype.buf;
-		if (handle->response.position == POS_COMPLETE)
+		if (handle->response.position == (parser_pos_t)POS_COMPLETE)
 			*contentLength = 0;
 		else if(handle->response.ent_position == ENTREAD_USING_CHUNKED)
 			*contentLength = UPNP_USING_CHUNKED;
@@ -2039,6 +2107,7 @@ int http_OpenHttpGetEx(
  *
  * Parameters:
  *	OUT char *info;	buffer to store the operating system information
+ *	IN size_t infoSize; size of buffer
  *
  * Description:
  *	Returns the server information for the operating system
@@ -2047,14 +2116,17 @@ int http_OpenHttpGetEx(
  *	UPNP_INLINE void
  ************************************************************************/
 /* 'info' should have a size of at least 100 bytes */
-void get_sdk_info(OUT char *info)
+void get_sdk_info(OUT char *info, IN size_t infoSize)
 {
+#ifdef UPNP_ENABLE_UNSPECIFIED_SERVER
+	snprintf(info, infoSize, "Unspecified, UPnP/1.0, Unspecified\r\n");
+#else /* UPNP_ENABLE_UNSPECIFIED_SERVER */
 #ifdef WIN32
 	OSVERSIONINFO versioninfo;
 	versioninfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
 
 	if (GetVersionEx(&versioninfo) != 0)
-		sprintf(info,
+		snprintf(info, infoSize,
 			"%d.%d.%d %d/%s, UPnP/1.0, Portable SDK for UPnP devices/"
 			PACKAGE_VERSION "\r\n", versioninfo.dwMajorVersion,
 			versioninfo.dwMinorVersion, versioninfo.dwBuildNumber,
@@ -2068,9 +2140,10 @@ void get_sdk_info(OUT char *info)
 	ret_code = uname(&sys_info);
 	if (ret_code == -1)
 		*info = '\0';
-	sprintf(info,
+	snprintf(info, infoSize,
 		"%s/%s, UPnP/1.0, Portable SDK for UPnP devices/"
 		PACKAGE_VERSION "\r\n", sys_info.sysname, sys_info.release);
 #endif
+#endif /* UPNP_ENABLE_UNSPECIFIED_SERVER */
 }
 

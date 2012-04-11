@@ -50,7 +50,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\pthreads\include;..\..\ixml\src\inc;..\..\ixml\inc;..\..\threadutil\inc;..\..\upnp\inc;..\..\upnp\src\inc;..\inc;..\msvc"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;LIBUPNP_EXPORTS;PTW32_STATIC_LIB;UPNP_STATIC_LIB;UPNP_USE_MSVCPP;_CRT_SECURE_NO_WARNINGS"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;LIBUPNP_EXPORTS;PTW32_STATIC_LIB;UPNP_USE_MSVCPP;_CRT_SECURE_NO_WARNINGS"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -80,8 +80,8 @@
 				OutputFile="$(OutDir)\libupnp.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				ProgramDatabaseFile=".\Release/libupnp.pdb"
-				ImportLibrary=".\Release/libupnp.lib"
+				ProgramDatabaseFile="$(OutDir)\libupnp.pdb"
+				ImportLibrary="$(OutDir)\libupnp.lib"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -96,7 +96,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Release/libupnp.bsc"
+				OutputFile="$(OutDir)\libupnp.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -219,14 +219,6 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
-				RelativePath="..\..\upnp\src\api\ActionComplete.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\upnp\src\api\ActionRequest.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\ixml\src\attr.c"
 				>
 			</File>
@@ -235,27 +227,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\upnp\src\api\Discovery.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\ixml\src\document.c"
 				>
 			</File>
 			<File
 				RelativePath="..\..\ixml\src\element.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\upnp\src\api\Event.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\upnp\src\api\EventSubscribe.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\upnp\src\api\FileInfo.c"
 				>
 			</File>
 			<File
@@ -359,10 +335,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\upnp\src\ssdp\ssdp_ResultData.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\upnp\src\ssdp\ssdp_server.c"
 				>
 			</File>
@@ -371,19 +343,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\upnp\src\api\StateVarComplete.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\upnp\src\api\StateVarRequest.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\upnp\src\genlib\util\strintmap.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\upnp\src\api\SubscriptionRequest.c"
 				>
 			</File>
 			<File
@@ -448,35 +408,11 @@
 			Filter="h;hpp;hxx;hm;inl"
 			>
 			<File
-				RelativePath="..\..\upnp\inc\ActionComplete.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\upnp\inc\actionrequest.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\upnp\src\inc\client_table.h"
 				>
 			</File>
 			<File
 				RelativePath="..\..\upnp\src\inc\config.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\upnp\inc\discovery.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\upnp\inc\Event.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\upnp\inc\EventSubscribe.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\upnp\inc\FileInfo.h"
 				>
 			</File>
 			<File
@@ -564,23 +500,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\upnp\inc\StateVarComplete.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\upnp\inc\statevarrequest.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\upnp\src\inc\statuscodes.h"
 				>
 			</File>
 			<File
 				RelativePath="..\..\upnp\src\inc\strintmap.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\upnp\inc\SubscriptionRequest.h"
 				>
 			</File>
 			<File

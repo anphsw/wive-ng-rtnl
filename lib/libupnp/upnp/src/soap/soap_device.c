@@ -2,6 +2,7 @@
  *
  * Copyright (c) 2000-2003 Intel Corporation 
  * All rights reserved. 
+ * Copyright (c) 2012 France Telecom All rights reserved. 
  *
  * Redistribution and use in source and binary forms, with or without 
  * modification, are permitted provided that the following conditions are met: 
@@ -71,9 +72,6 @@ static const char *Soap_Invalid_Action = "Invalid Action";
 /*static const char* Soap_Invalid_Args = "Invalid Args"; */
 static const char *Soap_Action_Failed = "Action Failed";
 static const char *Soap_Invalid_Var = "Invalid Var";
-
-const char *ContentTypeHeader =
-    "CONTENT-TYPE: text/xml; charset=\"utf-8\"\r\n";
 
 /*!
  * \brief This function retrives the name of the SOAP action.
@@ -192,7 +190,8 @@ static void send_error_response(
 	char err_code_str[30];
 	membuffer headers;
 
-	sprintf(err_code_str, "%d", error_code);
+	memset(err_code_str, 0, sizeof(err_code_str));
+	snprintf(err_code_str, sizeof(err_code_str), "%d", error_code);
 	/* calc body len */
 	content_length = (off_t) (strlen(start_body) + strlen(err_code_str) +
 				  strlen(mid_body) + strlen(err_msg) +
@@ -322,7 +321,6 @@ static UPNP_INLINE int get_action_node(
 			goto error_handler;
 		ret_code = ixmlParseBufferEx(ActNodeName, RespNode);
 		if (ret_code != IXML_SUCCESS) {
-			ixmlFreeDOMString(ActNodeName);
 			ret_code = -1;
 			goto error_handler;
 		}

@@ -40,7 +40,7 @@
  ***************************************************************************/ 
 
 /** The library version (string) e.g. "1.3.0" */
-#define UPNP_VERSION_STRING "1.6.16"
+#define UPNP_VERSION_STRING "1.6.17"
 
 /** Major version of the library */
 #define UPNP_VERSION_MAJOR 1
@@ -49,7 +49,7 @@
 #define UPNP_VERSION_MINOR 6
 
 /** Patch version of the library */
-#define UPNP_VERSION_PATCH 16
+#define UPNP_VERSION_PATCH 17
 
 /** The library version (numeric) e.g. 10300 means version 1.3.0 */
 #define UPNP_VERSION	\
@@ -100,6 +100,26 @@
 #define UPNP_HAVE_WEBSERVER 1
 
 
+/** Defined to 1 if the library has been compiled with the SSDP part enabled
+ *  (i.e. configure --enable-ssdp) */
+#define UPNP_HAVE_SSDP 1
+
+
+/** Defined to 1 if the library has been compiled with optional SSDP headers
+ *  support (i.e. configure --enable-optssdp) */
+#define UPNP_HAVE_OPTSSDP 1
+
+
+/** Defined to 1 if the library has been compiled with the SOAP part enabled
+ *  (i.e. configure --enable-soap) */
+#define UPNP_HAVE_SOAP 1
+
+
+/** Defined to 1 if the library has been compiled with the GENA part enabled
+ *  (i.e. configure --enable-gena) */
+#define UPNP_HAVE_GENA 1
+
+
 /** Defined to 1 if the library has been compiled with helper API
  *  (i.e. configure --enable-tools) : <upnp/upnptools.h> file is available */
 #define UPNP_HAVE_TOOLS 1
@@ -107,6 +127,10 @@
 /** Defined to 1 if the library has been compiled with ipv6 support
  *  (i.e. configure --enable-ipv6) */
 /* #undef UPNP_ENABLE_IPV6 */
+
+/** Defined to 1 if the library has been compiled with unspecified SERVER
+ * header (i.e. configure --enable-unspecified_server) */
+/* #undef UPNP_ENABLE_UNSPECIFIED_SERVER */
 
 #endif /* UPNP_CONFIG_H */
 
