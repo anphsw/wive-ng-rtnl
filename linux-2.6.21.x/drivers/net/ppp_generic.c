@@ -1134,13 +1134,14 @@ ppp_send_frame(struct ppp *ppp, struct sk_buff *skb)
 #ifdef CONFIG_PPP_PREVENT_DROP_SESSION_ON_FULL_CPU_LOAD
 	unsigned long load;
 
-	if (ppp_cpu_load >= 2500) {
+	if (ppp_cpu_load >= 2500 && proto != PPP_LCP && proto != PPP_CCP) {
 	    load = weighted_cpuload(0);
-	    if (proto != PPP_LCP && load > ppp_cpu_load) {
+	    if (load > ppp_cpu_load) {
 		if ((ppp->debug & 1) && net_ratelimit())
 		    printk(KERN_DEBUG "PPP: HIGH CPU LOAD %ld DROP PACKET\n", load);
 
-		goto drop;      /* Drop packet ... */
+		msleep(1);	/* small sleep ... */
+		goto drop;      /* drop packet ... */
 	    }
 	}
 #endif
