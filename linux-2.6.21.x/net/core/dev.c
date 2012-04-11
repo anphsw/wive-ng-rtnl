@@ -2800,9 +2800,9 @@ int dev_ioctl(unsigned int cmd, void __user *arg)
 		case SIOCGIFINDEX:
 		case SIOCGIFTXQLEN:
 			dev_load(ifr.ifr_name);
-			read_lock(&dev_base_lock);
+			rcu_read_lock();
 			ret = dev_ifsioc(&ifr, cmd);
-			read_unlock(&dev_base_lock);
+			rcu_read_unlock();
 			if (!ret) {
 				if (colon)
 					*colon = ':';
