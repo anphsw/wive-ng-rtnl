@@ -52,6 +52,7 @@
 
 #ifdef CONFIG_PPP_PREVENT_DROP_SESSION_ON_FULL_CPU_LOAD
 #include <linux/sched.h>
+#include <linux/delay.h>
 /* limit cpu load */
 extern int ppp_cpu_load;
 #endif
