@@ -52,7 +52,6 @@
 
 #ifdef CONFIG_PPP_PREVENT_DROP_SESSION_ON_FULL_CPU_LOAD
 #include <linux/sched.h>
-#include <linux/delay.h>
 /* limit cpu load */
 extern int ppp_cpu_load;
 #endif
@@ -1133,19 +1132,10 @@ ppp_send_frame(struct ppp *ppp, struct sk_buff *skb)
 	unsigned char *cp;
 #endif
 #ifdef CONFIG_PPP_PREVENT_DROP_SESSION_ON_FULL_CPU_LOAD
-	unsigned long load;
-
-	if (ppp_cpu_load >= 2500 && proto != PPP_LCP && proto != PPP_CCP) {
-	    load = weighted_cpuload(0);
-	    if (load > ppp_cpu_load) {
-		if ((ppp->debug & 1) && net_ratelimit())
-		    printk(KERN_DEBUG "PPP: HIGH CPU LOAD %ld DROP PACKET\n", load);
-
-		msleep(1);	/* small sleep ... */
-		goto drop;      /* drop packet ... */
-	    }
-	}
+	static unsigned long load;
+	static unsigned long prev_jiffies;
 #endif
+
 	if (proto < 0x8000) {
 #ifdef CONFIG_PPP_FILTER
 		/* check if we should pass this packet */
@@ -1243,8 +1233,19 @@ ppp_send_frame(struct ppp *ppp, struct sk_buff *skb)
 		return;
 	}
 
-	ppp->xmit_pending = skb;
-	ppp_push(ppp);
+#ifdef CONFIG_PPP_PREVENT_DROP_SESSION_ON_FULL_CPU_LOAD
+	/* this is simple cpu based policer need for prevent drop session at high cpu load */
+	if (ppp_cpu_load >= 2500 && proto != PPP_LCP && proto != PPP_CCP && ((jiffies - prev_jiffies) >= HZ)) {
+		prev_jiffies = jiffies;
+		load = weighted_cpuload(0);
+		if (load > ppp_cpu_load) {
+//		if ((ppp->debug & 1) && net_ratelimit())
+		    printk(KERN_DEBUG "PPP: HIGH CPU LOAD %ld DROP PACKET\n", load);
+
+		goto drop;      /* drop packet ... */
+	    }
+	}
+#endif
 #ifdef CONFIG_RALINK_GPIO_LED_VPN
 	if (proto == PPP_IP)
 	    led.on = 1;
@@ -1252,6 +1253,10 @@ ppp_send_frame(struct ppp *ppp, struct sk_buff *skb)
 	    led.on = 0;
 	ralink_gpio_led_set(led);
 #endif
+
+	ppp->xmit_pending = skb;
+	ppp_push(ppp);
+
 	return;
 
  drop:
