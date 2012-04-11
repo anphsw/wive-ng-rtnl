@@ -1239,7 +1239,7 @@ ppp_send_frame(struct ppp *ppp, struct sk_buff *skb)
 		prev_jiffies = jiffies;
 		load = weighted_cpuload(0);
 		if (load > ppp_cpu_load) {
-//		if ((ppp->debug & 1) && net_ratelimit())
+		if ((ppp->debug & 1) && net_ratelimit())
 		    printk(KERN_DEBUG "PPP: HIGH CPU LOAD %ld DROP PACKET\n", load);
 
 		goto drop;      /* drop packet ... */
