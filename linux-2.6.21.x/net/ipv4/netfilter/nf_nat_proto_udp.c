@@ -26,7 +26,7 @@ udp_unique_tuple(struct nf_conntrack_tuple *tuple,
 		 const struct nf_conn *ct)
 {
 	return nf_nat_proto_unique_tuple(tuple, range, maniptype, ct,
-					 &tcp_port_rover);
+					 &udp_port_rover);
 }
 
 static int
