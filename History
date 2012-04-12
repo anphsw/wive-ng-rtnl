@@ -1049,6 +1049,8 @@
 26) Update transmission to 2.51 version.<br>
 27) Fix cpu based ppp policer work with new l2tp driver.<br>
 28) libupnp up to 1.6.17 version.<br>
+29) Fix check cork.rt regression in ip_output.<br>
+30) Netfilter use hardware checksumming when possible.<br>
 
 
 <br><br>
