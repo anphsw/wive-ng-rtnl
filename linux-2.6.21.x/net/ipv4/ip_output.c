@@ -842,7 +842,7 @@ int ip_append_data(struct sock *sk,
 			transhdrlen += exthdrlen;
 		}
 	} else {
-		if (inet->cork.rt) {
+		if (!inet->cork.rt) {
             	    LIMIT_NETDEBUG(KERN_INFO "ip_append_data: cork.rt empty !!!\n");
 		    return -EFAULT;
 		}
