@@ -212,7 +212,9 @@ enum {
  *	@data_len: Data length
  *	@mac_len: Length of link layer header
  *	@hdr_len: writable header length of cloned skb
- *	@csum: Checksum
+ *	@csum: Checksum (must include start/offset pair)
+ *	@csum_start: Offset from skb->head where checksumming should start
+ *	@csum_offset: Offset from csum_start where checksum should be stored
  *	@local_df: allow local fragmentation
  *	@cloned: Head may be cloned (check refcnt to be sure)
  *	@nohdr: Payload reference only, must not modify header
@@ -292,7 +294,10 @@ struct sk_buff {
 				hdr_len;
 	union {
 		__wsum		csum;
-		__u32		csum_offset;
+		struct {
+			__u16	csum_start;
+			__u16	csum_offset;
+		};
 	};
 	__u32			priority;
 	__u8			local_df:1,
