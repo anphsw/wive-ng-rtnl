@@ -591,7 +591,7 @@ void change_green_ethernet_mode(u32 green_ethernet_enabled, int force_change)
 	{
 		printk("%s - green ethernet: %d\n", RTL8367M_DEVNAME, green_ethernet_enabled);
 		
-		rtl8370_setAsicGreenEthernet(green_ethernet_enabled);
+		rtk_switch_greenEthernet_set(green_ethernet_enabled);
 		
 		g_green_ethernet_enabled = green_ethernet_enabled;
 	}
