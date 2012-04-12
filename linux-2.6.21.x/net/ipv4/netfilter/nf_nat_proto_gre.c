@@ -43,24 +43,6 @@ MODULE_DESCRIPTION("Netfilter NAT protocol helper module for GRE");
 #define DEBUGP(x, args...)
 #endif
 
-/* is key in given range between min and max */
-static int
-gre_in_range(const struct nf_conntrack_tuple *tuple,
-	     enum nf_nat_manip_type maniptype,
-	     const union nf_conntrack_man_proto *min,
-	     const union nf_conntrack_man_proto *max)
-{
-	__be16 key;
-
-	if (maniptype == IP_NAT_MANIP_SRC)
-		key = tuple->src.u.gre.key;
-	else
-		key = tuple->dst.u.gre.key;
-
-	return ntohs(key) >= ntohs(min->gre.key) &&
-	       ntohs(key) <= ntohs(max->gre.key);
-}
-
 /* generate unique tuple ... */
 static int
 gre_unique_tuple(struct nf_conntrack_tuple *tuple,
@@ -146,7 +128,7 @@ static struct nf_nat_protocol gre __read_mostly = {
 	.name			= "GRE",
 	.protonum		= IPPROTO_GRE,
 	.manip_pkt		= gre_manip_pkt,
-	.in_range		= gre_in_range,
+	.in_range		= nf_nat_proto_in_range,
 	.unique_tuple		= gre_unique_tuple,
 #if defined(CONFIG_NF_CT_NETLINK) || defined(CONFIG_NF_CT_NETLINK_MODULE)
 	.range_to_nfattr	= nf_nat_port_range_to_nfattr,
