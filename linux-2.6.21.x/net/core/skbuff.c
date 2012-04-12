@@ -776,6 +776,9 @@ struct sk_buff *skb_copy_expand(const struct sk_buff *skb,
 			  skb->len + head_copy_len))
 		BUG();
 
+	if (n->ip_summed == CHECKSUM_PARTIAL)
+		n->csum_start += off;
+
 	copy_skb_header(n, skb);
 
 	return n;
