@@ -690,6 +690,9 @@ int pskb_expand_head(struct sk_buff *skb, int nhead, int ntail,
 	skb->mac.raw += off;
 	skb->h.raw   += off;
 	skb->nh.raw  += off;
+	/* Only adjust this if it actually is csum_start rather than csum */
+	if (skb->ip_summed == CHECKSUM_PARTIAL)
+		skb->csum_start += nhead;
 	skb->cloned   = 0;
 	skb->hdr_len  = 0;
 	skb->nohdr    = 0;
