@@ -53,8 +53,9 @@
 #include <linux/kprobes.h>
 #include <linux/delayacct.h>
 #include <linux/prefetch.h>
-#include <asm/tlb.h>
+#include <linux/reciprocal_div.h>
 
+#include <asm/tlb.h>
 #include <asm/unistd.h>
 
 /*
@@ -181,6 +182,27 @@ static unsigned int static_prio_timeslice(int static_prio)
 	else
 		return SCALE_PRIO(DEF_TIMESLICE, static_prio);
 }
+
+#ifdef CONFIG_SMP
+/*
+ * Divide a load by a sched group cpu_power : (load / sg->__cpu_power)
+ * Since cpu_power is a 'constant', we can use a reciprocal divide.
+ */
+static inline u32 sg_div_cpu_power(const struct sched_group *sg, u32 load)
+{
+	return reciprocal_divide(load, sg->reciprocal_cpu_power);
+}
+
+/*
+ * Each time a sched group cpu_power is changed,
+ * we must compute its reciprocal value
+ */
+static inline void sg_inc_cpu_power(struct sched_group *sg, u32 val)
+{
+	sg->__cpu_power += val;
+	sg->reciprocal_cpu_power = reciprocal_value(sg->__cpu_power);
+}
+#endif
 
 /*
  * task_timeslice() scales user-nice values [ -20 ... 0 ... 19 ]
@@ -1208,7 +1230,8 @@ find_idlest_group(struct sched_domain *sd, struct task_struct *p, int this_cpu)
 		}
 
 		/* Adjust by relative CPU power of the group */
-		avg_load = (avg_load * SCHED_LOAD_SCALE) / group->cpu_power;
+		avg_load = sg_div_cpu_power(group,
+				avg_load * SCHED_LOAD_SCALE);
 
 		if (local_group) {
 			this_load = avg_load;
@@ -2296,12 +2319,13 @@ find_busiest_group(struct sched_domain *sd, int this_cpu,
 		}
 
 		total_load += avg_load;
-		total_pwr += group->cpu_power;
+		total_pwr += group->__cpu_power;
 
 		/* Adjust by relative CPU power of the group */
-		avg_load = (avg_load * SCHED_LOAD_SCALE) / group->cpu_power;
+		avg_load = sg_div_cpu_power(group,
+				avg_load * SCHED_LOAD_SCALE);
 
-		group_capacity = group->cpu_power / SCHED_LOAD_SCALE;
+		group_capacity = group->__cpu_power / SCHED_LOAD_SCALE;
 
 		if (local_group) {
 			this_load = avg_load;
@@ -2412,8 +2436,8 @@ group_next:
 	max_pull = min(max_load - avg_load, max_load - busiest_load_per_task);
 
 	/* How much load to actually move to equalise the imbalance */
-	*imbalance = min(max_pull * busiest->cpu_power,
-				(avg_load - this_load) * this->cpu_power)
+	*imbalance = min(max_pull * busiest->__cpu_power,
+				(avg_load - this_load) * this->__cpu_power)
 			/ SCHED_LOAD_SCALE;
 
 	/*
@@ -2447,28 +2471,29 @@ small_imbalance:
 		 * moving them.
 		 */
 
-		pwr_now += busiest->cpu_power *
-			min(busiest_load_per_task, max_load);
-		pwr_now += this->cpu_power *
-			min(this_load_per_task, this_load);
+		pwr_now += busiest->__cpu_power *
+				min(busiest_load_per_task, max_load);
+		pwr_now += this->__cpu_power *
+				min(this_load_per_task, this_load);
 		pwr_now /= SCHED_LOAD_SCALE;
 
 		/* Amount of load we'd subtract */
-		tmp = busiest_load_per_task * SCHED_LOAD_SCALE /
-			busiest->cpu_power;
+		tmp = sg_div_cpu_power(busiest,
+				busiest_load_per_task * SCHED_LOAD_SCALE);
 		if (max_load > tmp)
-			pwr_move += busiest->cpu_power *
+			pwr_move += busiest->__cpu_power *
 				min(busiest_load_per_task, max_load - tmp);
 
 		/* Amount of load we'd add */
-		if (max_load * busiest->cpu_power <
+		if (max_load * busiest->__cpu_power <
 				busiest_load_per_task * SCHED_LOAD_SCALE)
-			tmp = max_load * busiest->cpu_power / this->cpu_power;
+			tmp = sg_div_cpu_power(this,
+					max_load * busiest->__cpu_power);
 		else
-			tmp = busiest_load_per_task * SCHED_LOAD_SCALE /
-				this->cpu_power;
-		pwr_move += this->cpu_power *
-			min(this_load_per_task, this_load + tmp);
+			tmp = sg_div_cpu_power(this,
+				busiest_load_per_task * SCHED_LOAD_SCALE);
+		pwr_move += this->__cpu_power *
+				min(this_load_per_task, this_load + tmp);
 		pwr_move /= SCHED_LOAD_SCALE;
 
 		/* Move if we gain throughput */
@@ -5216,7 +5241,7 @@ static void sched_domain_debug(struct sched_domain *sd, int cpu)
 				break;
 			}
 
-			if (!group->cpu_power) {
+			if (!group->__cpu_power) {
 				printk("\n");
 				printk(KERN_ERR "ERROR: domain->cpu_power not "
 						"set\n");
@@ -5393,7 +5418,7 @@ init_sched_build_groups(cpumask_t span, const cpumask_t *cpu_map,
 			continue;
 
 		sg->cpumask = CPU_MASK_NONE;
-		sg->cpu_power = 0;
+		sg->__cpu_power = 0;
 
 		for_each_cpu_mask(j, span) {
 			if (group_fn(j, cpu_map, NULL) != group)
@@ -6082,7 +6107,7 @@ next_sg:
 			continue;
 		}
 
-		sg->cpu_power += sd->groups->cpu_power;
+		sg_inc_cpu_power(sg, sd->groups->__cpu_power);
 	}
 	sg = sg->next;
 	if (sg != group_head)
@@ -6157,6 +6182,8 @@ static void init_sched_groups_power(int cpu, struct sched_domain *sd)
 
 	child = sd->child;
 
+	sd->groups->__cpu_power = 0;
+
 	/*
 	 * For perf policy, if the groups in child domain share resources
 	 * (for example cores sharing some portions of the cache hierarchy
@@ -6167,18 +6194,16 @@ static void init_sched_groups_power(int cpu, struct sched_domain *sd)
 	if (!child || (!(sd->flags & SD_POWERSAVINGS_BALANCE) &&
 		       (child->flags &
 			(SD_SHARE_CPUPOWER | SD_SHARE_PKG_RESOURCES)))) {
-		sd->groups->cpu_power = SCHED_LOAD_SCALE;
+		sg_inc_cpu_power(sd->groups, SCHED_LOAD_SCALE);
 		return;
 	}
-
-	sd->groups->cpu_power = 0;
 
 	/*
 	 * add cpu_power of each child group to this groups cpu_power
 	 */
 	group = child->groups;
 	do {
-		sd->groups->cpu_power += group->cpu_power;
+		sg_inc_cpu_power(sd->groups, group->__cpu_power);
 		group = group->next;
 	} while (group != child->groups);
 }
@@ -6338,7 +6363,7 @@ static int build_sched_domains(const cpumask_t *cpu_map)
 			sd = &per_cpu(node_domains, j);
 			sd->groups = sg;
 		}
-		sg->cpu_power = 0;
+		sg->__cpu_power = 0;
 		sg->cpumask = nodemask;
 		sg->next = sg;
 		cpus_or(covered, covered, nodemask);
@@ -6366,7 +6391,7 @@ static int build_sched_domains(const cpumask_t *cpu_map)
 				"Can not alloc domain group for node %d\n", j);
 				goto error;
 			}
-			sg->cpu_power = 0;
+			sg->__cpu_power = 0;
 			sg->cpumask = tmp;
 			sg->next = prev->next;
 			cpus_or(covered, covered, tmp);
