@@ -1320,10 +1320,6 @@ skip_defrtr:
 		}
 	}
 
-#ifdef CONFIG_IPV6_NDISC_NODETYPE
-skip_linkparms:
-#endif
-
 skip_linkparms:
 
 	/*
