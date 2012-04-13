@@ -125,7 +125,6 @@ extern unsigned int nf_conntrack_table_flush;
 #endif
 
 static int nf_conntrack_vmalloc __read_mostly;
-static unsigned int nf_conntrack_next_id;
 
 DEFINE_PER_CPU(struct ip_conntrack_stat, nf_conntrack_stat);
 EXPORT_PER_CPU_SYMBOL(nf_conntrack_stat);
@@ -670,7 +669,6 @@ static void __nf_conntrack_hash_insert(struct nf_conn *ct,
 				       unsigned int hash,
 				       unsigned int repl_hash)
 {
-	ct->id = ++nf_conntrack_next_id;
 	list_add(&ct->tuplehash[IP_CT_DIR_ORIGINAL].list,
 		 &nf_conntrack_hash[hash]);
 	list_add(&ct->tuplehash[IP_CT_DIR_REPLY].list,

@@ -238,7 +238,7 @@ nfattr_failure:
 static inline int
 ctnetlink_dump_id(struct sk_buff *skb, const struct nf_conn *ct)
 {
-	__be32 id = htonl(ct->id);
+	__be32 id = htonl((unsigned long)ct);
 	NFA_PUT(skb, CTA_ID, sizeof(u_int32_t), &id);
 	return 0;
 
@@ -695,7 +695,7 @@ ctnetlink_del_conntrack(struct sock *ctnl, struct sk_buff *skb,
 
 	if (cda[CTA_ID-1]) {
 		u_int32_t id = ntohl(*(__be32 *)NFA_DATA(cda[CTA_ID-1]));
-		if (ct->id != id) {
+		if (id != (u32)(unsigned long)ct) {
 			nf_ct_put(ct);
 			return -ENOENT;
 		}
