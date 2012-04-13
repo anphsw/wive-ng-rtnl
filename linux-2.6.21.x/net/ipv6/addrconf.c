@@ -360,7 +360,7 @@ static struct inet6_dev * ipv6_add_dev(struct net_device *dev)
 	neigh_sysctl_register(dev, ndev->nd_parms, NET_IPV6,
 			      NET_IPV6_NEIGH, "ipv6",
 			      &ndisc_ifinfo_sysctl_change,
-			      NULL);
+			      ndisc_ifinfo_sysctl_strategy);
 	addrconf_sysctl_register(ndev, &ndev->cnf);
 #endif
 	/* protected by rtnl_lock */
@@ -2380,7 +2380,7 @@ static int addrconf_notify(struct notifier_block *this, unsigned long event,
 			neigh_sysctl_register(dev, idev->nd_parms,
 					      NET_IPV6, NET_IPV6_NEIGH, "ipv6",
 					      &ndisc_ifinfo_sysctl_change,
-					      NULL);
+					      ndisc_ifinfo_sysctl_strategy);
 			addrconf_sysctl_register(idev, &idev->cnf);
 #endif
 			snmp6_register_dev(idev);
