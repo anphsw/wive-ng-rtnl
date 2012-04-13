@@ -1544,16 +1544,11 @@ asmlinkage long sys_sendto(int fd, void __user *buff, size_t len,
 	struct msghdr msg;
 	struct iovec iov;
 	int fput_needed;
-	struct file *sock_file;
 
-	sock_file = fget_light(fd, &fput_needed);
-	err = -EBADF;
-	if (!sock_file)
+	sock = sockfd_lookup_light(fd, &err, &fput_needed);
+	if (!sock)
 		goto out;
 
-	sock = sock_from_file(sock_file, &err);
-	if (!sock)
-		goto out_put;
 	iov.iov_base = buff;
 	iov.iov_len = len;
 	msg.msg_name = NULL;
@@ -1575,7 +1570,7 @@ asmlinkage long sys_sendto(int fd, void __user *buff, size_t len,
 	err = sock_sendmsg(sock, &msg, len);
 
 out_put:
-	fput_light(sock_file, fput_needed);
+	fput_light(sock->file, fput_needed);
 out:
 	return err;
 }
@@ -1604,17 +1599,11 @@ asmlinkage long sys_recvfrom(int fd, void __user *ubuf, size_t size,
 	struct msghdr msg;
 	char address[MAX_SOCK_ADDR];
 	int err, err2;
-	struct file *sock_file;
 	int fput_needed;
 
-	sock_file = fget_light(fd, &fput_needed);
-	err = -EBADF;
-	if (!sock_file)
-		goto out;
-
-	sock = sock_from_file(sock_file, &err);
+	sock = sockfd_lookup_light(fd, &err, &fput_needed);
 	if (!sock)
-		goto out_put;
+		goto out;
 
 	msg.msg_control = NULL;
 	msg.msg_controllen = 0;
@@ -1633,8 +1622,8 @@ asmlinkage long sys_recvfrom(int fd, void __user *ubuf, size_t size,
 		if (err2 < 0)
 			err = err2;
 	}
-out_put:
-	fput_light(sock_file, fput_needed);
+
+	fput_light(sock->file, fput_needed);
 out:
 	return err;
 }
