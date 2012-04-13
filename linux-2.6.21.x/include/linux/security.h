@@ -745,11 +745,6 @@ struct request_sock;
  *	@sock contains the listening socket structure.
  *	@newsock contains the newly created server socket for connection.
  *	Return 0 if permission is granted.
- * @socket_post_accept:
- *	This hook allows a security module to copy security
- *	information into the newly created socket's inode.
- *	@sock contains the listening socket structure.
- *	@newsock contains the newly created server socket for connection.
  * @socket_sendmsg:
  *	Check permission before transmitting a message to another socket.
  *	@sock contains the socket structure.
@@ -1344,8 +1339,6 @@ struct security_operations {
 			       struct sockaddr * address, int addrlen);
 	int (*socket_listen) (struct socket * sock, int backlog);
 	int (*socket_accept) (struct socket * sock, struct socket * newsock);
-	void (*socket_post_accept) (struct socket * sock,
-				    struct socket * newsock);
 	int (*socket_sendmsg) (struct socket * sock,
 			       struct msghdr * msg, int size);
 	int (*socket_recvmsg) (struct socket * sock,
@@ -2863,12 +2856,6 @@ static inline int security_socket_accept(struct socket * sock,
 	return security_ops->socket_accept(sock, newsock);
 }
 
-static inline void security_socket_post_accept(struct socket * sock, 
-					       struct socket * newsock)
-{
-	security_ops->socket_post_accept(sock, newsock);
-}
-
 static inline int security_socket_sendmsg(struct socket * sock, 
 					  struct msghdr * msg, int size)
 {
@@ -3024,11 +3011,6 @@ static inline int security_socket_accept(struct socket * sock,
 					 struct socket * newsock)
 {
 	return 0;
-}
-
-static inline void security_socket_post_accept(struct socket * sock, 
-					       struct socket * newsock)
-{
 }
 
 static inline int security_socket_sendmsg(struct socket * sock, 
