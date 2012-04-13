@@ -20,7 +20,7 @@ get_param() {
 }
 
 stop() {
- $LOG "Stopping WPS"
+ $LOG "Stopping SNMPD"
     killall -q snmpd
     killall -q -SIGKILL snmpd
 }

@@ -49,7 +49,7 @@ ntp_start() {
 }
 
 stop() {
- $LOG "Stopping NTPD"
+  $LOG "Stopping NTPD"
     killall -q ntpd
     killall -q -SIGKILL ntpd
 }

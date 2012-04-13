@@ -97,7 +97,7 @@ get_param() {
 }
 
 stop() {
- $LOG "Stopping IGMPPROXY"
+  $LOG "Stopping IGMPPROXY"
     killall -q igmpproxy
     killall -q -SIGKILL igmpproxy
     echo 0 > /proc/sys/net/ipv4/conf/all/mc_forwarding

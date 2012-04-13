@@ -33,7 +33,7 @@ get_param() {
 }
 
 stop() {
-    $LOG "Stopping lanauth "
+  $LOG "Stopping lanauth "
     killall -q lanauth
     killall -q -SIGKILL lanauth
 }
