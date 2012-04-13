@@ -345,8 +345,8 @@ struct sk_buff {
 #ifdef CONFIG_NETWORK_SECMARK
 	__u32			secmark;
 #endif
-
 	__u32			mark;
+	__u32			avail_size;
 
 	/* These elements must be at the end, see alloc_skb() for details.  */
 
@@ -1041,6 +1041,18 @@ static inline int skb_headroom(const struct sk_buff *skb)
 static inline int skb_tailroom(const struct sk_buff *skb)
 {
 	return skb_is_nonlinear(skb) ? 0 : skb->end - skb->tail;
+}
+
+/**
+ *	skb_availroom - bytes at buffer end
+ *	@skb: buffer to check
+ *
+ *	Return the number of bytes of free space at the tail of an sk_buff
+ *	allocated by sk_stream_alloc()
+ */
+static inline int skb_availroom(const struct sk_buff *skb)
+{
+	return skb_is_nonlinear(skb) ? 0 : skb->avail_size - skb->len;
 }
 
 /**

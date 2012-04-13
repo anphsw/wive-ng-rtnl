@@ -1622,7 +1622,7 @@ static void tcp_retrans_try_collapse(struct sock *sk, struct sk_buff *skb, int m
 		 * the data in the second, or the total combined payload
 		 * would exceed the MSS.
 		 */
-		if ((next_skb_size > skb_tailroom(skb)) ||
+		if ((next_skb_size > skb_availroom(skb)) ||
 		    ((skb_size + next_skb_size) > mss_now))
 			return;
 
