@@ -157,6 +157,7 @@ config IPV6_SIT
 	bool "IPv6: IPv6-in-IPv4 tunnel (SIT driver)"
 	depends on IPV6
 	select INET_TUNNEL
+	select IPV6_NDISC_NODETYPE
 	default y
 	---help---
 	  Tunneling means encapsulating data of one protocol type within
@@ -166,6 +167,9 @@ config IPV6_SIT
 	  networks over an IPv4-only path.
 
 	  Saying M here will produce a module called sit.ko. If unsure, say Y.
+
+config IPV6_NDISC_NODETYPE
+	bool
 
 config IPV6_TUNNEL
 	bool "IPv6: IPv6-in-IPv6 tunnel"
