@@ -310,6 +310,7 @@ extern void nf_reinject(struct sk_buff *skb,
 
 extern void (*ip_ct_attach)(struct sk_buff *, struct sk_buff *);
 extern void nf_ct_attach(struct sk_buff *, struct sk_buff *);
+extern void (*nf_ct_destroy)(struct nf_conntrack *);
 
 /* FIXME: Before cache is ever used, this must be implemented for real. */
 extern void nf_invalidate_cache(int pf);

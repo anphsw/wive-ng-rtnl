@@ -87,7 +87,6 @@ struct net_device;
 #ifdef CONFIG_NETFILTER
 struct nf_conntrack {
 	atomic_t use;
-	void (*destroy)(struct nf_conntrack *);
 };
 
 #ifdef CONFIG_BRIDGE_NETFILTER
@@ -1665,10 +1664,11 @@ static inline struct iphdr *ip_hdr(const struct sk_buff *skb)
 }
 
 #ifdef CONFIG_NETFILTER
+extern void nf_conntrack_destroy(struct nf_conntrack *nfct);
 static inline void nf_conntrack_put(struct nf_conntrack *nfct)
 {
 	if (nfct && atomic_dec_and_test(&nfct->use))
-		nfct->destroy(nfct);
+		nf_conntrack_destroy(nfct);
 }
 static inline void nf_conntrack_get(struct nf_conntrack *nfct)
 {
