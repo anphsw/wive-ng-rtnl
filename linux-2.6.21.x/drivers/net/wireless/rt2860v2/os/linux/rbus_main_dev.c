@@ -41,11 +41,11 @@ module_exit(rt2880_module_exit);
 
 int rt2880_module_init(VOID)
 {
-	struct  net_device		*net_dev;
+	struct  net_device		*net_dev = NULL;
 	ULONG				csr_addr;
-	INT					rv;
+	INT				rv;
 	PVOID				*handle = NULL;
-	RTMP_ADAPTER		*pAd;
+	RTMP_ADAPTER			*pAd = NULL;
 	unsigned int			dev_irq;
 	RTMP_OS_NETDEV_OP_HOOK	netDevHook;
 	
