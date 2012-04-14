@@ -39,7 +39,7 @@ Portability
  libssh2      0.16
  c-ares       1.6.0
  libidn       0.4.1
- cyassl       1.4.0
+ cyassl       2.0.0
  openldap     2.0
  MIT krb5 lib 1.2.4
  qsossl       V5R2M0
@@ -68,7 +68,7 @@ Portability
  GNU Autoconf 2.57
  GNU Automake 1.7 (we currently avoid 1.10 due to Solaris-related bugs)
  GNU M4       1.4
- perl         4
+ perl         5.004
  roffit       0.5
  groff        ? (any version that supports "groff -Tps -man [in] [out]")
  ps2pdf (gs)  ?

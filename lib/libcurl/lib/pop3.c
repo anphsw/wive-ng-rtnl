@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -27,11 +27,6 @@
 #include "setup.h"
 
 #ifndef CURL_DISABLE_POP3
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <ctype.h>
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -84,7 +79,6 @@
 #include "url.h"
 #include "rawstr.h"
 #include "strtoofft.h"
-#include "http_proxy.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -124,12 +118,13 @@ const struct Curl_handler Curl_handler_pop3 = {
   pop3_doing,                       /* doing */
   pop3_getsock,                     /* proto_getsock */
   pop3_getsock,                     /* doing_getsock */
+  ZERO_NULL,                        /* domore_getsock */
   ZERO_NULL,                        /* perform_getsock */
   pop3_disconnect,                  /* disconnect */
   ZERO_NULL,                        /* readwrite */
   PORT_POP3,                        /* defport */
   CURLPROTO_POP3,                   /* protocol */
-  PROTOPT_CLOSEACTION               /* flags */
+  PROTOPT_CLOSEACTION | PROTOPT_NOURLQUERY /* flags */
 };
 
 
@@ -149,12 +144,14 @@ const struct Curl_handler Curl_handler_pop3s = {
   pop3_doing,                       /* doing */
   pop3_getsock,                     /* proto_getsock */
   pop3_getsock,                     /* doing_getsock */
+  ZERO_NULL,                        /* domore_getsock */
   ZERO_NULL,                        /* perform_getsock */
   pop3_disconnect,                  /* disconnect */
   ZERO_NULL,                        /* readwrite */
   PORT_POP3S,                       /* defport */
   CURLPROTO_POP3 | CURLPROTO_POP3S, /* protocol */
-  PROTOPT_CLOSEACTION | PROTOPT_SSL /* flags */
+  PROTOPT_CLOSEACTION | PROTOPT_SSL
+  | PROTOPT_NOURLQUERY              /* flags */
 };
 #endif
 
@@ -174,6 +171,7 @@ static const struct Curl_handler Curl_handler_pop3_proxy = {
   ZERO_NULL,                            /* doing */
   ZERO_NULL,                            /* proto_getsock */
   ZERO_NULL,                            /* doing_getsock */
+  ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
   ZERO_NULL,                            /* readwrite */
@@ -199,6 +197,7 @@ static const struct Curl_handler Curl_handler_pop3s_proxy = {
   ZERO_NULL,                            /* doing */
   ZERO_NULL,                            /* proto_getsock */
   ZERO_NULL,                            /* doing_getsock */
+  ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
   ZERO_NULL,                            /* readwrite */
@@ -285,7 +284,7 @@ static void pop3_to_pop3s(struct connectdata *conn)
   conn->handler = &Curl_handler_pop3s;
 }
 #else
-#define pop3_to_pop3s(x)
+#define pop3_to_pop3s(x) Curl_nop_stmt
 #endif
 
 /* for STARTTLS responses */
@@ -298,9 +297,13 @@ static CURLcode pop3_state_starttls_resp(struct connectdata *conn,
   (void)instate; /* no use for this yet */
 
   if(pop3code != 'O') {
-    failf(data, "STARTTLS denied. %c", pop3code);
-    result = CURLE_LOGIN_DENIED;
-    state(conn, POP3_STOP);
+    if(data->set.use_ssl != CURLUSESSL_TRY) {
+      failf(data, "STARTTLS denied. %c", pop3code);
+      result = CURLE_USE_SSL_FAILED;
+      state(conn, POP3_STOP);
+    }
+    else
+      result = pop3_state_user(conn);
   }
   else {
     /* Curl_ssl_connect is BLOCKING */
@@ -421,6 +424,16 @@ static CURLcode pop3_state_list_resp(struct connectdata *conn,
     return CURLE_RECV_ERROR;
   }
 
+  /* This 'OK' line ends with a CR LF pair which is the two first bytes of the
+     EOB string so count this is two matching bytes. This is necessary to make
+     the code detect the EOB if the only data than comes now is %2e CR LF like
+     when there is no body to return. */
+  pop3c->eob = 2;
+
+  /* But since this initial CR LF pair is not part of the actual body, we set
+     the strip counter here so that these bytes won't be delivered. */
+  pop3c->strip = 2;
+
   /* POP3 download */
   Curl_setup_transfer(conn, FIRSTSOCKET, -1, FALSE, pop3->bytecountp,
                       -1, NULL); /* no upload here */
@@ -522,7 +535,7 @@ static CURLcode pop3_statemach_act(struct connectdata *conn)
         return CURLE_FTP_WEIRD_SERVER_REPLY;
       }
 
-      if(data->set.ftp_ssl && !conn->ssl[FIRSTSOCKET].use) {
+      if(data->set.use_ssl && !conn->ssl[FIRSTSOCKET].use) {
         /* We don't have a SSL/TLS connection yet, but SSL is requested. Switch
            to TLS connection now */
         result = Curl_pp_sendf(&pop3c->pp, "STLS");
@@ -575,7 +588,7 @@ static CURLcode pop3_multi_statemach(struct connectdata *conn, bool *done)
   struct pop3_conn *pop3c = &conn->proto.pop3c;
   CURLcode result = Curl_pp_multi_statemach(&pop3c->pp);
 
-  *done = (bool)(pop3c->state == POP3_STOP);
+  *done = (pop3c->state == POP3_STOP) ? TRUE : FALSE;
 
   return result;
 }
@@ -656,33 +669,6 @@ static CURLcode pop3_connect(struct connectdata *conn,
   pp->endofresp = pop3_endofresp;
   pp->conn = conn;
 
-  if(conn->bits.tunnel_proxy && conn->bits.httpproxy) {
-    /* for POP3 over HTTP proxy */
-    struct HTTP http_proxy;
-    struct FTP *pop3_save;
-
-    /* BLOCKING */
-    /* We want "seamless" POP3 operations through HTTP proxy tunnel */
-
-    /* Curl_proxyCONNECT is based on a pointer to a struct HTTP at the member
-     * conn->proto.http; we want POP3 through HTTP and we have to change the
-     * member temporarily for connecting to the HTTP proxy. After
-     * Curl_proxyCONNECT we have to set back the member to the original struct
-     * POP3 pointer
-     */
-    pop3_save = data->state.proto.pop3;
-    memset(&http_proxy, 0, sizeof(http_proxy));
-    data->state.proto.http = &http_proxy;
-
-    result = Curl_proxyCONNECT(conn, FIRSTSOCKET,
-                               conn->host.name, conn->remote_port);
-
-    data->state.proto.pop3 = pop3_save;
-
-    if(CURLE_OK != result)
-      return result;
-  }
-
   if(conn->handler->flags & PROTOPT_SSL) {
     /* BLOCKING */
     result = Curl_ssl_connect(conn, FIRSTSOCKET);
@@ -741,7 +727,7 @@ static CURLcode pop3_done(struct connectdata *conn, CURLcode status,
   Curl_safefree(pop3c->mailbox);
   pop3c->mailbox = NULL;
 
-  /* clear these for next connection */
+  /* Clear the transfer mode for the next connection */
   pop3->transfer = FTPTRANSFER_BODY;
 
   return result;
@@ -792,7 +778,7 @@ CURLcode pop3_perform(struct connectdata *conn,
     result = pop3_easy_statemach(conn);
     *dophase_done = TRUE; /* with the easy interface we are done here */
   }
-  *connected = conn->bits.tcpconnect;
+  *connected = conn->bits.tcpconnect[FIRSTSOCKET];
 
   if(*dophase_done)
     DEBUGF(infof(conn->data, "DO phase is complete\n"));
@@ -900,11 +886,7 @@ static CURLcode pop3_parse_url_path(struct connectdata *conn)
   const char *path = data->state.path;
 
   /* url decode the path and use this mailbox */
-  pop3c->mailbox = curl_easy_unescape(data, path, 0, NULL);
-  if(!pop3c->mailbox)
-    return CURLE_OUT_OF_MEMORY;
-
-  return CURLE_OK;
+  return Curl_urldecode(data, path, 0, &pop3c->mailbox, NULL, TRUE);
 }
 
 /* call this when the DO phase has completed */
@@ -1025,42 +1007,121 @@ CURLcode Curl_pop3_write(struct connectdata *conn,
                          char *str,
                          size_t nread)
 {
-  /* This code could be made into a special function in the handler struct. */
-  CURLcode result;
+  /* This code could be made into a special function in the handler struct */
+  CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
   struct SingleRequest *k = &data->req;
 
-  /* Detect the end-of-body marker, which is 5 bytes:
-     0d 0a 2e 0d 0a. This marker can of course be spread out
-     over up to 5 different data chunks. Deal with it! */
   struct pop3_conn *pop3c = &conn->proto.pop3c;
-  size_t checkmax = (nread >= POP3_EOB_LEN?POP3_EOB_LEN:nread);
-  size_t checkleft = POP3_EOB_LEN-pop3c->eob;
-  size_t check = (checkmax >= checkleft?checkleft:checkmax);
+  bool strip_dot = FALSE;
+  size_t last = 0;
+  size_t i;
 
-  if(!memcmp(POP3_EOB, &str[nread - check], check)) {
-    /* substring match */
-    pop3c->eob += check;
-    if(pop3c->eob == POP3_EOB_LEN) {
-      /* full match, the transfer is done! */
-      str[nread - check] = '\0';
-      nread -= check;
-      k->keepon &= ~KEEP_RECV;
+  /* Search through the buffer looking for the end-of-body marker which is
+     5 bytes (0d 0a 2e 0d 0a). Note that a line starting with a dot matches
+     the eob so the server will have prefixed it with an extra dot which we
+     need to strip out. Additionally the marker could of course be spread out
+     over 5 different data chunks */
+  for(i = 0; i < nread; i++) {
+    size_t prev = pop3c->eob;
+
+    switch(str[i]) {
+    case 0x0d:
+      if(pop3c->eob == 0) {
+        pop3c->eob++;
+
+        if(i) {
+          /* Write out the body part that didn't match */
+          result = Curl_client_write(conn, CLIENTWRITE_BODY, &str[last],
+                                     i - last);
+
+          if(result)
+            return result;
+
+          last = i;
+        }
+      }
+      else if(pop3c->eob == 3)
+        pop3c->eob++;
+      else
+        /* If the character match wasn't at position 0 or 3 then restart the
+           pattern matching */
+        pop3c->eob = 1;
+      break;
+
+    case 0x0a:
+      if(pop3c->eob == 1 || pop3c->eob == 4)
+        pop3c->eob++;
+      else
+        /* If the character match wasn't at position 1 or 4 then start the
+           search again */
+        pop3c->eob = 0;
+      break;
+
+    case 0x2e:
+      if(pop3c->eob == 2)
+        pop3c->eob++;
+      else if(pop3c->eob == 3) {
+        /* We have an extra dot after the CRLF which we need to strip off */
+        strip_dot = TRUE;
+        pop3c->eob = 0;
+      }
+      else
+        /* If the character match wasn't at position 2 then start the search
+           again */
+        pop3c->eob = 0;
+      break;
+
+    default:
       pop3c->eob = 0;
+      break;
+    }
+
+    /* Did we have a partial match which has subsequently failed? */
+    if(prev && prev >= pop3c->eob) {
+      /* Strip can only be non-zero for the very first mismatch after CRLF
+         and then both prev and strip are equal and nothing will be output
+         below */
+      while(prev && pop3c->strip) {
+        prev--;
+        pop3c->strip--;
+      }
+
+      if(prev) {
+        /* If the partial match was the CRLF and dot then only write the CRLF
+           as the server would have inserted the dot */
+        result = Curl_client_write(conn, CLIENTWRITE_BODY, (char*)POP3_EOB,
+                                   strip_dot ? prev - 1 : prev);
+
+        if(result)
+          return result;
+
+        last = i;
+        strip_dot = FALSE;
+      }
     }
   }
-  else if(pop3c->eob) {
-    /* not a match, but we matched a piece before so we must now
-       send that part as body first, before we move on and send
-       this buffer */
-    result = Curl_client_write(conn, CLIENTWRITE_BODY,
-                               (char *)POP3_EOB, pop3c->eob);
-    if(result)
-      return result;
+
+  if(pop3c->eob == POP3_EOB_LEN) {
+    /* We have a full match so the transfer is done, however we must transfer
+    the CRLF at the start of the EOB as this is considered to be part of the
+    message as per RFC-1939, sect. 3 */
+    result = Curl_client_write(conn, CLIENTWRITE_BODY, (char*)POP3_EOB, 2);
+
+    k->keepon &= ~KEEP_RECV;
     pop3c->eob = 0;
+
+    return result;
   }
 
-  result = Curl_client_write(conn, CLIENTWRITE_BODY, str, nread);
+  if(pop3c->eob)
+    /* While EOB is matching nothing should be output */
+    return CURLE_OK;
+
+  if(nread - last) {
+    result = Curl_client_write(conn, CLIENTWRITE_BODY, &str[last],
+                               nread - last);
+  }
 
   return result;
 }

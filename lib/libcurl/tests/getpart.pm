@@ -63,6 +63,10 @@ sub getpartattr {
             }
             last;
         }
+        # detect end of section when part wasn't found
+        elsif((1 ==$inside) && ($_ =~ /^ *\<\/$section\>/)) {
+            last;
+        }
         elsif((2 ==$inside) && ($_ =~ /^ *\<\/$part/)) {
             $inside--;
         }
@@ -118,6 +122,11 @@ sub getpart {
         print STDERR "*** getpart.pm: $section/$part returned empty!\n";
     }
     return @this; #empty!
+}
+
+# Return entire document as list of lines
+sub getall {
+    return @xml;
 }
 
 sub loadtest {

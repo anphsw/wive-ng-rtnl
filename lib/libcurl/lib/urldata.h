@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -112,7 +112,7 @@
 #endif
 
 #ifdef USE_CYASSL
-#include <openssl/ssl.h>
+#include <cyassl/openssl/ssl.h>
 #endif
 
 #ifdef USE_NSS
@@ -273,6 +273,7 @@ struct ssl_connect_data {
   struct SessionHandle *data;
 #ifdef HAVE_PK11_CREATEGENERICOBJECT
   struct curl_llist *obj_list;
+  PK11GenericObject *obj_clicert;
 #endif
 #endif /* USE_NSS */
 #ifdef USE_QSOSSL
@@ -298,7 +299,7 @@ struct ssl_config_data {
   char *random_file;     /* path to file containing "random" data */
   char *egdsocket;       /* path to file containing the EGD daemon socket */
   char *cipher_list;     /* list of ciphers to use */
-  long numsessions;      /* SSL session id cache size */
+  size_t max_ssl_sessions; /* SSL session id cache size */
   curl_ssl_ctx_callback fsslctx; /* function to initialize ssl ctx */
   void *fsslctxp;        /* parameter for call back */
   bool sessionid;        /* cache session IDs or not */
@@ -360,7 +361,7 @@ struct ntlmdata {
   SEC_WINNT_AUTH_IDENTITY *p_identity;
   int has_handles;
   void *type_2;
-  int n_type_2;
+  unsigned long n_type_2;
 #else
   unsigned int flags;
   unsigned char nonce[8];
@@ -410,8 +411,7 @@ struct ConnectBits {
 
   bool do_more; /* this is set TRUE if the ->curl_do_more() function is
                    supposed to be called, after ->curl_do() */
-
-  bool tcpconnect;    /* the TCP layer (or similar) is connected, this is set
+  bool tcpconnect[2]; /* the TCP layer (or similar) is connected, this is set
                          the first time on the first connect function call */
   bool protoconnstart;/* the protocol layer has STARTED its operation after
                          the TCP layer connect */
@@ -422,8 +422,6 @@ struct ConnectBits {
                          This is implicit when SSL-protocols are used through
                          proxies, but can also be enabled explicitly by
                          apps */
-  bool tunnel_connecting; /* TRUE while we're still waiting for a proxy CONNECT
-                           */
   bool authneg;       /* TRUE when the auth phase has started, which means
                          that we are creating a request with an auth header,
                          but it is not the final request in the auth
@@ -509,7 +507,7 @@ struct Curl_async {
 /* These function pointer types are here only to allow easier typecasting
    within the source when we need to cast between data pointers (such as NULL)
    and function pointers. */
-typedef CURLcode (*Curl_do_more_func)(struct connectdata *);
+typedef CURLcode (*Curl_do_more_func)(struct connectdata *, bool *);
 typedef CURLcode (*Curl_done_func)(struct connectdata *, CURLcode, bool);
 
 
@@ -670,6 +668,12 @@ struct Curl_handler {
                        curl_socket_t *socks,
                        int numsocks);
 
+  /* Called from the multi interface during the DO_MORE phase, and it should
+     then return a proper fd set */
+  int (*domore_getsock)(struct connectdata *conn,
+                        curl_socket_t *socks,
+                        int numsocks);
+
   /* Called from the multi interface during the DO_DONE, PERFORM and
      WAITPERFORM phases, and it should then return a proper fd set. Not setting
      this will make libcurl use the generic default one. */
@@ -706,6 +710,8 @@ struct Curl_handler {
 #define PROTOPT_NONETWORK (1<<4)   /* protocol doesn't use the network! */
 #define PROTOPT_NEEDSPWD (1<<5)    /* needs a password, and if none is set it
                                       gets a default */
+#define PROTOPT_NOURLQUERY (1<<6)   /* protocol can't handle
+                                        url query strings (?foo=bar) ! */
 
 
 /* return the count of bytes sent, or -1 on error */
@@ -807,7 +813,8 @@ struct connectdata {
   struct timeval created; /* creation time */
   curl_socket_t sock[2]; /* two sockets, the second is used for the data
                             transfer when doing FTP */
-
+  bool sock_accepted[2]; /* TRUE if the socket on this index was created with
+                            accept() */
   Curl_recv *recv[2];
   Curl_send *send[2];
 
@@ -905,6 +912,14 @@ struct connectdata {
                                single requests! */
   struct ntlmdata proxyntlm; /* NTLM data for proxy */
 
+#if defined(USE_NTLM) && defined(NTLM_WB_ENABLED)
+  /* used for communication with Samba's winbind daemon helper ntlm_auth */
+  curl_socket_t ntlm_auth_hlpr_socket;
+  pid_t ntlm_auth_hlpr_pid;
+  char* challenge_header;
+  char* response_header;
+#endif
+
   char syserr_buf [256]; /* buffer for Curl_strerror() */
 
 #ifdef CURLRES_ASYNCH
@@ -947,6 +962,12 @@ struct connectdata {
   unsigned short localport;
   int localportrange;
 
+  /* tunnel as in tunnel through a HTTP proxy with CONNECT */
+  enum {
+    TUNNEL_INIT,    /* init/default/no tunnel state */
+    TUNNEL_CONNECT, /* CONNECT has been sent off */
+    TUNNEL_COMPLETE /* CONNECT response received completely */
+  } tunnel_state[2]; /* two separate ones to allow FTP */
 };
 
 /* The end of connectdata. */
@@ -1020,6 +1041,7 @@ struct Progress {
 
   struct timeval start;
   struct timeval t_startsingle;
+  struct timeval t_acceptdata;
 #define CURR_TIME (5+1) /* 6 entries for 5 seconds */
 
   curl_off_t speeder[ CURR_TIME ];
@@ -1122,7 +1144,7 @@ struct UrlState {
                        following not keep sending user+password... This is
                        strdup() data.
                     */
-  struct curl_ssl_session *session; /* array of 'numsessions' size */
+  struct curl_ssl_session *session; /* array of 'max_ssl_sessions' size */
   long sessionage;                  /* number of the most recent session */
   char *tempwrite;      /* allocated buffer to keep data in when a write
                            callback returns to make the connection paused */
@@ -1317,6 +1339,7 @@ enum dupstring {
   STRING_SOCKS5_GSSAPI_SERVICE,  /* GSSAPI service name */
 #endif
   STRING_MAIL_FROM,
+  STRING_MAIL_AUTH,
 
 #ifdef USE_TLS_SRP
   STRING_TLSAUTH_USERNAME,     /* TLS auth <username> */
@@ -1389,6 +1412,7 @@ struct UserDefined {
   void *ioctl_client;   /* pointer to pass to the ioctl callback */
   long timeout;         /* in milliseconds, 0 means no timeout */
   long connecttimeout;  /* in milliseconds, 0 means no timeout */
+  long accepttimeout;   /* in milliseconds, 0 means no timeout */
   long server_response_timeout; /* in milliseconds, 0 means no timeout */
   long tftp_blksize ; /* in bytes, 0 means use default */
   curl_off_t infilesize;      /* size of file to upload, -1 means unknown */
@@ -1478,7 +1502,7 @@ struct UserDefined {
   bool ftp_use_eprt;     /* if EPRT is to be attempted or not */
   bool ftp_use_pret;     /* if PRET is to be used before PASV or not */
 
-  curl_usessl ftp_ssl;   /* if AUTH TLS is to be attempted etc, for FTP or
+  curl_usessl use_ssl;   /* if AUTH TLS is to be attempted etc, for FTP or
                             IMAP or POP3 or others! */
   curl_ftpauth ftpsslauth; /* what AUTH XXX to be attempted */
   curl_ftpccc ftp_ccc;   /* FTP CCC options */
@@ -1489,6 +1513,8 @@ struct UserDefined {
   bool ftp_skip_ip;      /* skip the IP address the FTP server passes on to
                             us */
   bool connect_only;     /* make connection, let application use the socket */
+  bool ssl_enable_beast; /* especially allow this flaw for interoperability's
+                            sake*/
   long ssh_auth_types;   /* allowed SSH auth types */
   bool http_te_skip;     /* pass the raw body data to the user, even when
                             transfer-encoded (chunked, compressed) */
@@ -1517,6 +1543,13 @@ struct UserDefined {
   curl_fnmatch_callback fnmatch; /* callback to decide which file corresponds
                                     to pattern (e.g. if WILDCARDMATCH is on) */
   void *fnmatch_data;
+
+  long gssapi_delegation; /* GSSAPI credential delegation, see the
+                             documentation of CURLOPT_GSSAPI_DELEGATION */
+
+  bool tcp_keepalive;    /* use TCP keepalives */
+  long tcp_keepidle;     /* seconds in idle before sending keepalive probe */
+  long tcp_keepintvl;    /* seconds between TCP keepalive probes */
 };
 
 struct Names {

@@ -13,6 +13,7 @@ if [ ! -f $APROOTDIR/configure ]; then
     autoconf
 fi
 if [ ! -f $APROOTDIR/Makefile.in ]; then
+    autoreconf
     automake
 fi
 

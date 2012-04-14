@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -26,6 +26,7 @@ AC_PREREQ(2.57)
 dnl We don't know the version number "statically" so we use a dash here
 AC_INIT([curl], [-], [a suitable curl mailing list: http://curl.haxx.se/mail/])
 
+XC_OVR_ZZ50
 CURL_OVERRIDE_AUTOCONF
 
 dnl configure script copyright
@@ -154,6 +155,7 @@ curl_tls_srp_msg="no      (--enable-tls-srp)"
    curl_ipv6_msg="no      (--enable-ipv6)"
     curl_idn_msg="no      (--with-libidn)"
  curl_manual_msg="no      (--enable-manual)"
+curl_libcurl_msg="enabled (--disable-libcurl-option)"
 curl_verbose_msg="enabled (--disable-verbose)"
    curl_sspi_msg="no      (--enable-sspi)"
    curl_ldap_msg="no      (--enable-ldap / --with-ldap-lib / --with-lber-lib)"
@@ -313,6 +315,26 @@ if test "x$cross_compiling" != "xno" &&
    test "x$enable_shared" != "xno"; then
   supports_unittests=no
 fi
+
+# IRIX 6.5.24 gcc 3.3 autobuilds fail unittests library compilation due to
+# a problem related with OpenSSL headers and library versions not matching.
+# Disable unit tests while time to further investigate this is found.
+case $host in
+  mips-sgi-irix6.5)
+    if test "$compiler_id" = "GNU_C"; then
+      supports_unittests=no
+    fi
+    ;;
+esac
+
+# All AIX autobuilds fails unit tests linking against unittests library
+# due to unittests library being built with no symbols or members. Libtool ?
+# Disable unit tests while time to further investigate this is found.
+case $host_os in
+  aix*)
+    supports_unittests=no
+    ;;
+esac
 
 dnl Build unit tests when option --enable-debug is given.
 if test "x$want_debug" = "xyes" &&
@@ -629,6 +651,25 @@ AC_HELP_STRING([--disable-manual],[Disable built-in manual]),
 )
 dnl The actual use of the USE_MANUAL variable is done much later in this
 dnl script to allow other actions to disable it as well.
+
+dnl ************************************************************
+dnl disable C code generation support
+dnl
+AC_MSG_CHECKING([whether to enable generation of C code])
+AC_ARG_ENABLE(libcurl_option,
+AC_HELP_STRING([--enable-libcurl-option],[Enable --libcurl C code generation support])
+AC_HELP_STRING([--disable-libcurl-option],[Disable --libcurl C code generation support]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_LIBCURL_OPTION, 1, [to disable --libcurl C code generation option])
+       curl_libcurl_msg="no"
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
 
 dnl **********************************************************************
 dnl Checks for libraries.
@@ -1330,7 +1371,7 @@ if test X"$OPT_SSL" != Xno; then
     dnl the user told us to look
     OPENSSL_PCDIR="$OPT_SSL/lib/pkgconfig"
     AC_MSG_NOTICE([PKG_CONFIG_LIBDIR will be set to "$OPENSSL_PCDIR"])
-    if test -e "$OPENSSL_PCDIR/openssl.pc"; then
+    if test -f "$OPENSSL_PCDIR/openssl.pc"; then
       PKGTEST="yes"
     fi
 
@@ -1475,7 +1516,6 @@ if test X"$OPT_SSL" != Xno; then
        test "$OPENSSL_ENABLED" != "1"; then
       AC_MSG_ERROR([OpenSSL libs and/or directories were not found where specified!])
     fi
-    CURL_CHECK_OPENSSL_API
   fi
 
   if test X"$OPENSSL_ENABLED" = X"1"; then
@@ -1495,7 +1535,8 @@ if test X"$OPT_SSL" != Xno; then
                     RAND_egd \
                     ENGINE_cleanup \
                     CRYPTO_cleanup_all_ex_data \
-                    SSL_get_shutdown )
+                    SSL_get_shutdown \
+                    SSLv2_client_method )
 
     dnl Make an attempt to detect if this is actually yassl's headers and
     dnl OpenSSL emulation layer. We still leave everything else believing
@@ -1520,6 +1561,20 @@ if test X"$OPT_SSL" != Xno; then
     ],[
       AC_MSG_RESULT([no])
     ])
+  fi
+
+  if test "$OPENSSL_ENABLED" = "1"; then
+    if test -n "$LIB_OPENSSL"; then
+       dnl when the ssl shared libs were found in a path that the run-time
+       dnl linker doesn't search through, we need to add it to LD_LIBRARY_PATH
+       dnl to prevent further configure tests to fail due to this
+       if test "x$cross_compiling" != "xyes"; then
+         LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$LIB_OPENSSL"
+         export LD_LIBRARY_PATH
+         AC_MSG_NOTICE([Added $LIB_OPENSSL to LD_LIBRARY_PATH])
+       fi
+    fi
+    CURL_CHECK_OPENSSL_API
   fi
 
 fi
@@ -1745,6 +1800,22 @@ if test "$OPENSSL_ENABLED" != "1"; then
          CPPFLAGS="$CLEANCPPFLAGS"
        ])
 
+      if test "x$USE_GNUTLS" = "xyes"; then
+        AC_MSG_NOTICE([detected GnuTLS version $version])
+
+        if test -n "$gtlslib"; then
+          dnl when shared libs were found in a path that the run-time
+          dnl linker doesn't search through, we need to add it to
+          dnl LD_LIBRARY_PATH to prevent further configure tests to fail
+          dnl due to this
+          if test "x$cross_compiling" != "xyes"; then 
+            LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$gtlslib"
+            export LD_LIBRARY_PATH
+            AC_MSG_NOTICE([Added $gtlslib to LD_LIBRARY_PATH])
+          fi
+        fi
+      fi
+
     fi
 
   fi dnl GNUTLS not disabled
@@ -1752,17 +1823,33 @@ if test "$OPENSSL_ENABLED" != "1"; then
 fi dnl OPENSSL != 1
 
 dnl ---
-dnl If GnuTLS is enabled, we MUST verify that it uses libgcrypt since
-dnl curl code relies on that but recent GnuTLS versions can in fact build
-dnl with different crypto libraries which curl right now cannot handle
+dnl Check which crypto backend GnuTLS uses
 dnl ---
 
 if test "$GNUTLS_ENABLED" = "1"; then
-  AC_CHECK_LIB(gcrypt,
-               gcry_control, ,
-    [
-      AC_MSG_ERROR([need GnuTLS built with gcrypt to function with GnuTLS])
-    ])
+  USE_GNUTLS_NETTLE=
+  # First check if we can detect either crypto library via transitive linking
+  AC_CHECK_LIB(gnutls, nettle_MD5Init, [ USE_GNUTLS_NETTLE=1 ])
+  if test "$USE_GNUTLS_NETTLE" = ""; then
+    AC_CHECK_LIB(gnutls, gcry_control, [ USE_GNUTLS_NETTLE=0 ])
+  fi
+  # If not, try linking directly to both of them to see if they are available
+  if test "$USE_GNUTLS_NETTLE" = ""; then
+    AC_CHECK_LIB(nettle, nettle_MD5Init, [ USE_GNUTLS_NETTLE=1 ])
+  fi
+  if test "$USE_GNUTLS_NETTLE" = ""; then
+    AC_CHECK_LIB(gcrypt, gcry_control, [ USE_GNUTLS_NETTLE=0 ])
+  fi
+  if test "$USE_GNUTLS_NETTLE" = ""; then
+    AC_MSG_ERROR([GnuTLS found, but neither gcrypt nor nettle found])
+  fi
+  if test "$USE_GNUTLS_NETTLE" = "1"; then
+    AC_DEFINE(USE_GNUTLS_NETTLE, 1, [if GnuTLS uses nettle as crypto backend])
+    AC_SUBST(USE_GNUTLS_NETTLE, [1])
+    LIBS="$LIBS -lnettle"
+  else
+    LIBS="$LIBS -lgcrypt"
+  fi
 fi
 
 dnl ---
@@ -1848,12 +1935,12 @@ if test "$OPENSSL_ENABLED" != "1"; then
         dnl linker doesn't search through, we need to add it to
         dnl LD_LIBRARY_PATH to prevent further configure tests to fail
         dnl due to this
-
-        LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$polarssllib"
-        export LD_LIBRARY_PATH
-        AC_MSG_NOTICE([Added $polarssllib to LD_LIBRARY_PATH])
+        if test "x$cross_compiling" != "xyes"; then
+          LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$polarssllib"
+          export LD_LIBRARY_PATH
+          AC_MSG_NOTICE([Added $polarssllib to LD_LIBRARY_PATH])
+        fi
       fi
-
     fi
 
   fi dnl PolarSSL not disabled
@@ -1870,7 +1957,7 @@ OPT_CYASSL=no
 _cppflags=$CPPFLAGS
 _ldflags=$LDFLAGS
 AC_ARG_WITH(cyassl,dnl
-AC_HELP_STRING([--with-cyassl=PATH],[where to look for CyaSSL, PATH points to the installation root (default: /usr/local/cyassl)])
+AC_HELP_STRING([--with-cyassl=PATH],[where to look for CyaSSL, PATH points to the installation root (default: system lib default)])
 AC_HELP_STRING([--without-cyassl], [disable CyaSSL detection]),
   OPT_CYASSL=$withval)
 
@@ -1883,14 +1970,9 @@ if test "$OPENSSL_ENABLED" != "1"; then
     fi
 
     if test -z "$OPT_CYASSL" ; then
-      dnl check for lib in default first
+      dnl check for lib in system default first
 
-      trycyassldir="/usr/local/cyassl"
-
-      LDFLAGS="$LDFLAGS -L$trycyassldir/lib"
-      CPPFLAGS="$CPPFLAGS -I$trycyassldir/include"
-
-      AC_CHECK_LIB(cyassl, InitCyaSSL,
+      AC_CHECK_LIB(cyassl, CyaSSL_Init,
       dnl libcyassl found, set the variable
        [
          AC_DEFINE(USE_CYASSL, 1, [if CyaSSL is enabled])
@@ -1912,7 +1994,7 @@ if test "$OPENSSL_ENABLED" != "1"; then
          CPPFLAGS="$CPPFLAGS $addcflags"
       fi
 
-      AC_CHECK_LIB(cyassl, InitCyaSSL,
+      AC_CHECK_LIB(cyassl, CyaSSL_Init,
        [
        AC_DEFINE(USE_CYASSL, 1, [if CyaSSL is enabled])
        AC_SUBST(USE_CYASSL, [1])
@@ -1937,10 +2019,11 @@ if test "$OPENSSL_ENABLED" != "1"; then
         dnl linker doesn't search through, we need to add it to
         dnl LD_LIBRARY_PATH to prevent further configure tests to fail
         dnl due to this
-
-        LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$cyassllib"
-        export LD_LIBRARY_PATH
-        AC_MSG_NOTICE([Added $cyassllib to LD_LIBRARY_PATH])
+        if test "x$cross_compiling" != "xyes"; then
+          LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$cyassllib"
+          export LD_LIBRARY_PATH
+          AC_MSG_NOTICE([Added $cyassllib to LD_LIBRARY_PATH])
+        fi
       fi
 
     fi
@@ -2033,10 +2116,11 @@ if test "$OPENSSL_ENABLED" != "1" -a "$GNUTLS_ENABLED" != "1"; then
         dnl linker doesn't search through, we need to add it to
         dnl LD_LIBRARY_PATH to prevent further configure tests to fail
         dnl due to this
-
-        LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$nssprefix/lib$libsuff"
-        export LD_LIBRARY_PATH
-        AC_MSG_NOTICE([Added $nssprefix/lib$libsuff to LD_LIBRARY_PATH])
+        if test "x$cross_compiling" != "xyes"; then
+          LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$nssprefix/lib$libsuff"
+          export LD_LIBRARY_PATH
+          AC_MSG_NOTICE([Added $nssprefix/lib$libsuff to LD_LIBRARY_PATH])
+        fi
       fi
 
     fi
@@ -2193,10 +2277,11 @@ if test X"$OPT_LIBSSH2" != Xno; then
        dnl libssh2_session_handshake was added in 1.2.8
        AC_CHECK_FUNCS( libssh2_version libssh2_init libssh2_exit \
                        libssh2_scp_send64 libssh2_session_handshake)
-
-       LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$DIR_SSH2"
-       export LD_LIBRARY_PATH
-       AC_MSG_NOTICE([Added $DIR_SSH2 to LD_LIBRARY_PATH])
+       if test "x$cross_compiling" != "xyes"; then
+         LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$DIR_SSH2"
+         export LD_LIBRARY_PATH
+         AC_MSG_NOTICE([Added $DIR_SSH2 to LD_LIBRARY_PATH])
+       fi
     fi
   else
     dnl no libssh2, revert back to clean variables
@@ -2285,54 +2370,200 @@ if test X"$OPT_LIBRTMP" != Xno; then
 fi
 
 dnl **********************************************************************
+dnl Check for linker switch for versioned symbols
+dnl **********************************************************************
+
+AC_MSG_CHECKING([if libraries can be versioned])
+GLD=`$LD --help < /dev/null 2>/dev/null | grep version-script`
+if test -z "$GLD"; then
+    versioned_symbols_flavour=
+    AC_MSG_RESULT(no)
+    AC_MSG_WARN(***
+*** You need an ld version supporting the --version-script option.
+)
+else
+    AC_MSG_RESULT(yes)
+
+AC_MSG_CHECKING([whether versioned symbols are wanted])
+versioned_symbols_flavour=
+
+AC_ARG_ENABLE(versioned-symbols,
+AC_HELP_STRING([--enable-versioned-symbols], [Enable versioned symbols in shared library])
+AC_HELP_STRING([--disable-versioned-symbols], [Disable versioned symbols in shared library]),
+[ case "$enableval" in
+  yes) AC_MSG_RESULT(yes)
+    if test "x$OPENSSL_ENABLED" = "x1"; then
+      versioned_symbols_flavour="OPENSSL_"
+    elif test "x$GNUTLS_ENABLED" == "x1"; then
+      versioned_symbols_flavour="GNUTLS_"
+    elif test "x$NSS_ENABLED" == "x1"; then
+      versioned_symbols_flavour="NSS_"
+    elif test "x$POLARSSL_ENABLED" == "x1"; then
+      versioned_symbols_flavour="POLARSSL_"
+    elif test "x$CYASSL_ENABLED" == "x1"; then
+      versioned_symbols_flavour="CYASSL_"
+    elif test "x$AXTLS_ENABLED" == "x1"; then
+      versioned_symbols_flavour="AXTLS_"
+    else
+      versioned_symbols_flavour=""
+    fi
+    versioned_symbols="yes"
+    ;;
+
+  *)   AC_MSG_RESULT(no)
+    ;;
+  esac
+], [
+AC_MSG_RESULT(no)
+]
+)
+fi
+
+AC_SUBST(VERSIONED_FLAVOUR, ["$versioned_symbols_flavour"])
+AM_CONDITIONAL(VERSIONED_SYMBOLS, test "x$versioned_symbols" = "xyes")
+
+
+dnl **********************************************************************
 dnl Check for the presence of IDN libraries and headers
 dnl **********************************************************************
 
 AC_MSG_CHECKING([whether to build with libidn])
+OPT_IDN="default"
 AC_ARG_WITH(libidn,
 AC_HELP_STRING([--with-libidn=PATH],[Enable libidn usage])
 AC_HELP_STRING([--without-libidn],[Disable libidn usage]),
-  [LIBIDN="$withval"])
-
-case "$LIBIDN" in
+  [OPT_IDN=$withval])
+case "$OPT_IDN" in
   no)
-       AC_MSG_RESULT(no)
-       ;;
-  *)   AC_MSG_RESULT(yes)
-
-       idn=""
-       dnl if there is a given path, check that FIRST
-       if test -n "$LIBIDN"; then
-         if test "x$LIBIDN" != "xyes"; then
-            oldLDFLAGS=$LDFLAGS
-            oldCPPFLAGS=$CPPFLAGS
-            LDFLAGS="$LDFLAGS -L$LIBIDN/lib"
-            CPPFLAGS="$CPPFLAGS -I$LIBIDN/include"
-            idn="yes"
-            AC_CHECK_LIB(idn, idna_to_ascii_4i, ,
-                         idn=""
-                         LDFLAGS=$oldLDFLAGS
-                         CPPFLAGS=$oldCPPFLAGS)
-         fi
-       fi
-
-       if test "x$idn" != "xyes"; then
-          dnl check with default paths
-          idn="yes"
-          AC_CHECK_LIB(idn, idna_to_ascii_lz, ,
-                       idn="")
-       fi
-
-       if test "x$idn" = "xyes"; then
-         curl_idn_msg="enabled"
-         AC_SUBST(IDN_ENABLED, [1])
-         dnl different versions of libidn have different setups of these:
-         AC_CHECK_FUNCS( idn_free idna_strerror tld_strerror)
-         AC_CHECK_HEADERS( idn-free.h tld.h )
-       fi
-
-       ;;
+    dnl --without-libidn option used
+    want_idn="no"
+    AC_MSG_RESULT([no])
+    ;;
+  default)
+    dnl configure option not specified
+    want_idn="yes"
+    want_idn_path="default"
+    AC_MSG_RESULT([(assumed) yes])
+    ;;
+  yes)
+    dnl --with-libidn option used without path
+    want_idn="yes"
+    want_idn_path="default"
+    AC_MSG_RESULT([yes])
+    ;;
+  *)
+    dnl --with-libidn option used with path
+    want_idn="yes"
+    want_idn_path="$withval"
+    AC_MSG_RESULT([yes ($withval)])
+    ;;
 esac
+
+if test "$want_idn" = "yes"; then
+  dnl idn library support has been requested
+  clean_CPPFLAGS="$CPPFLAGS"
+  clean_LDFLAGS="$LDFLAGS"
+  clean_LIBS="$LIBS"
+  PKGCONFIG="no"
+  #
+  if test "$want_idn_path" != "default"; then
+    dnl path has been specified
+    IDN_PCDIR="$want_idn_path/lib$libsuff/pkgconfig"
+    CURL_CHECK_PKGCONFIG(libidn, [$IDN_PCDIR])
+    if test "$PKGCONFIG" != "no"; then
+      IDN_LIBS=`CURL_EXPORT_PCDIR([$IDN_PCDIR]) dnl
+        $PKGCONFIG --libs-only-l libidn 2>/dev/null`
+      IDN_LDFLAGS=`CURL_EXPORT_PCDIR([$IDN_PCDIR]) dnl
+        $PKGCONFIG --libs-only-L libidn 2>/dev/null`
+      IDN_CPPFLAGS=`CURL_EXPORT_PCDIR([$IDN_PCDIR]) dnl
+        $PKGCONFIG --cflags-only-I libidn 2>/dev/null`
+      IDN_DIR=`echo $IDN_LDFLAGS | $SED -e 's/-L//'`
+    else
+      dnl pkg-config not available or provides no info
+      IDN_LIBS="-lidn"
+      IDN_LDFLAGS="-L$want_idn_path/lib$libsuff"
+      IDN_CPPFLAGS="-I$want_idn_path/include"
+      IDN_DIR="$want_idn_path/lib$libsuff"
+    fi
+  else
+    dnl path not specified
+    CURL_CHECK_PKGCONFIG(libidn)
+    if test "$PKGCONFIG" != "no"; then
+      IDN_LIBS=`$PKGCONFIG --libs-only-l libidn 2>/dev/null`
+      IDN_LDFLAGS=`$PKGCONFIG --libs-only-L libidn 2>/dev/null`
+      IDN_CPPFLAGS=`$PKGCONFIG --cflags-only-I libidn 2>/dev/null`
+      IDN_DIR=`echo $IDN_LDFLAGS | $SED -e 's/-L//'`
+    else
+      dnl pkg-config not available or provides no info
+      IDN_LIBS="-lidn"
+    fi
+  fi
+  #
+  if test "$PKGCONFIG" != "no"; then
+    AC_MSG_NOTICE([pkg-config: IDN_LIBS: "$IDN_LIBS"])
+    AC_MSG_NOTICE([pkg-config: IDN_LDFLAGS: "$IDN_LDFLAGS"])
+    AC_MSG_NOTICE([pkg-config: IDN_CPPFLAGS: "$IDN_CPPFLAGS"])
+    AC_MSG_NOTICE([pkg-config: IDN_DIR: "$IDN_DIR"])
+  else
+    AC_MSG_NOTICE([IDN_LIBS: "$IDN_LIBS"])
+    AC_MSG_NOTICE([IDN_LDFLAGS: "$IDN_LDFLAGS"])
+    AC_MSG_NOTICE([IDN_CPPFLAGS: "$IDN_CPPFLAGS"])
+    AC_MSG_NOTICE([IDN_DIR: "$IDN_DIR"])
+  fi
+  #
+  CPPFLAGS="$IDN_CPPFLAGS $CPPFLAGS"
+  LDFLAGS="$IDN_LDFLAGS $LDFLAGS"
+  LIBS="$IDN_LIBS $LIBS"
+  #
+  AC_MSG_CHECKING([if idna_to_ascii_4i can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_FUNC_LINK_TRY([idna_to_ascii_4i])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_libidn="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_libidn="no"
+  ])
+  if test "$tst_links_libidn" = "no"; then
+    AC_MSG_CHECKING([if idna_to_ascii_lz can be linked])
+    AC_LINK_IFELSE([
+      AC_LANG_FUNC_LINK_TRY([idna_to_ascii_lz])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_links_libidn="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_links_libidn="no"
+    ])
+  fi
+  #
+  if test "$tst_links_libidn" = "yes"; then
+    AC_DEFINE(HAVE_LIBIDN, 1, [Define to 1 if you have the `idn' library (-lidn).])
+    dnl different versions of libidn have different setups of these:
+    AC_CHECK_FUNCS( idn_free idna_strerror tld_strerror )
+    AC_CHECK_HEADERS( idn-free.h tld.h )
+    if test "x$ac_cv_header_tld_h" = "xyes"; then
+      AC_SUBST([IDN_ENABLED], [1])
+      curl_idn_msg="enabled"
+      if test -n "$IDN_DIR"; then
+        LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$IDN_DIR"
+        export LD_LIBRARY_PATH
+        AC_MSG_NOTICE([Added $IDN_DIR to LD_LIBRARY_PATH])
+      fi
+    else
+      AC_MSG_WARN([Libraries for IDN support too old: IDN disabled])
+      CPPFLAGS="$clean_CPPFLAGS"
+      LDFLAGS="$clean_LDFLAGS"
+      LIBS="$clean_LIBS"
+    fi
+  else
+    AC_MSG_WARN([Cannot find libraries for IDN support: IDN disabled])
+    CPPFLAGS="$clean_CPPFLAGS"
+    LDFLAGS="$clean_LDFLAGS"
+    LIBS="$clean_LIBS"
+  fi
+fi
 
 
 dnl Let's hope this split URL remains working:
@@ -2392,6 +2623,7 @@ AC_CHECK_HEADERS(
         stdbool.h \
         arpa/tftp.h \
         sys/filio.h \
+        sys/wait.h \
         setjmp.h,
 dnl to do if not found
 [],
@@ -2537,6 +2769,7 @@ CURL_CHECK_FUNC_SIGINTERRUPT
 CURL_CHECK_FUNC_SIGNAL
 CURL_CHECK_FUNC_SIGSETJMP
 CURL_CHECK_FUNC_SOCKET
+CURL_CHECK_FUNC_SOCKETPAIR
 CURL_CHECK_FUNC_STRCASECMP
 CURL_CHECK_FUNC_STRCASESTR
 CURL_CHECK_FUNC_STRCMPI
@@ -2767,6 +3000,10 @@ AC_HELP_STRING([--disable-crypto-auth],[Disable cryptographic authentication]),
        AC_MSG_RESULT(yes)
 )
 
+CURL_CHECK_OPTION_NTLM_WB
+
+CURL_CHECK_NTLM_WB
+
 dnl ************************************************************
 dnl disable TLS-SRP authentication
 dnl
@@ -2942,6 +3179,9 @@ if test "x$CURL_DISABLE_HTTP" != "x1"; then
   if test "x$USE_SSLEAY" = "x1" -o "x$USE_WINDOWS_SSPI" = "x1" \
       -o "x$GNUTLS_ENABLED" = "x1" -o "x$NSS_ENABLED" = "x1"; then
     SUPPORT_FEATURES="$SUPPORT_FEATURES NTLM"
+    if test "x$NTLM_WB_ENABLED" = "x1"; then
+      SUPPORT_FEATURES="$SUPPORT_FEATURES NTLM_WB"
+    fi
   fi
 fi
 if test "x$USE_TLS_SRP" = "x1"; then
@@ -3052,6 +3292,7 @@ AC_CONFIG_FILES([Makefile \
            include/curl/Makefile \
            src/Makefile \
            lib/Makefile \
+           lib/libcurl.vers \
            tests/Makefile \
            tests/data/Makefile \
            tests/server/Makefile \
@@ -3080,31 +3321,32 @@ CURL_GENERATE_CONFIGUREHELP_PM
 
 AC_MSG_NOTICE([Configured to build curl/libcurl:
 
-  curl version:    ${CURLVERSION}
-  Host setup:      ${host}
-  Install prefix:  ${prefix}
-  Compiler:        ${CC}
-  SSL support:     ${curl_ssl_msg}
-  SSH support:     ${curl_ssh_msg}
-  zlib support:    ${curl_zlib_msg}
-  krb4 support:    ${curl_krb4_msg}
-  GSSAPI support:  ${curl_gss_msg}
-  SPNEGO support:  ${curl_spnego_msg}
-  TLS-SRP support: ${curl_tls_srp_msg}
-  resolver:        ${curl_res_msg}
-  ipv6 support:    ${curl_ipv6_msg}
-  IDN support:     ${curl_idn_msg}
-  Build libcurl:   Shared=${enable_shared}, Static=${enable_static}
-  Built-in manual: ${curl_manual_msg}
-  Verbose errors:  ${curl_verbose_msg}
-  SSPI support:    ${curl_sspi_msg}
-  ca cert bundle:  ${ca}
-  ca cert path:    ${capath}
-  LDAP support:    ${curl_ldap_msg}
-  LDAPS support:   ${curl_ldaps_msg}
-  RTSP support:    ${curl_rtsp_msg}
-  RTMP support:    ${curl_rtmp_msg}
-  Protocols:       ${SUPPORT_PROTOCOLS}
+  curl version:     ${CURLVERSION}
+  Host setup:       ${host}
+  Install prefix:   ${prefix}
+  Compiler:         ${CC}
+  SSL support:      ${curl_ssl_msg}
+  SSH support:      ${curl_ssh_msg}
+  zlib support:     ${curl_zlib_msg}
+  krb4 support:     ${curl_krb4_msg}
+  GSSAPI support:   ${curl_gss_msg}
+  SPNEGO support:   ${curl_spnego_msg}
+  TLS-SRP support:  ${curl_tls_srp_msg}
+  resolver:         ${curl_res_msg}
+  ipv6 support:     ${curl_ipv6_msg}
+  IDN support:      ${curl_idn_msg}
+  Build libcurl:    Shared=${enable_shared}, Static=${enable_static}
+  Built-in manual:  ${curl_manual_msg}
+  --libcurl option: ${curl_libcurl_msg}
+  Verbose errors:   ${curl_verbose_msg}
+  SSPI support:     ${curl_sspi_msg}
+  ca cert bundle:   ${ca}
+  ca cert path:     ${capath}
+  LDAP support:     ${curl_ldap_msg}
+  LDAPS support:    ${curl_ldaps_msg}
+  RTSP support:     ${curl_rtsp_msg}
+  RTMP support:     ${curl_rtmp_msg}
+  Protocols:        ${SUPPORT_PROTOCOLS}
 ])
 
 if test "x$soname_bump" = "xyes"; then
