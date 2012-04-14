@@ -98,7 +98,7 @@ fi
 #for wantusoid`s like.
 if [ "$DOS2UNIX" = "YES" ] ; then
 echo ---------------------------------DOS2UNIX--------------------------------
-    find -type f -exec dos2unix -U -b {} \;
+    find -type f -exec dos2unix {} \;
 fi
 
 echo -------------------------------MAKE-OLDCONFIGS---------------------------
