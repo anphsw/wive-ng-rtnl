@@ -67,7 +67,7 @@ static int count_them(struct ipt_connlimit_data *data,
 	for (lh = hash->next; lh != hash; lh = lh->next) {
 		struct nf_conn *found_ct = NULL;
 		conn = list_entry(lh, struct ipt_connlimit_conn, list);
-		found = nf_conntrack_find_get(&conn->tuple, ct);
+		found = nf_conntrack_find_get(&conn->tuple);
 
 		 if (found != NULL 
 		     && (found_ct = nf_ct_tuplehash_to_ctrack(found)) != NULL

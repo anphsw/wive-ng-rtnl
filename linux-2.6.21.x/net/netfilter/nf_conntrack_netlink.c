@@ -682,7 +682,7 @@ ctnetlink_del_conntrack(struct sock *ctnl, struct sk_buff *skb,
 	if (err < 0)
 		return err;
 
-	h = nf_conntrack_find_get(&tuple, NULL);
+	h = nf_conntrack_find_get(&tuple);
 	if (!h)
 		return -ENOENT;
 
@@ -747,7 +747,7 @@ ctnetlink_get_conntrack(struct sock *ctnl, struct sk_buff *skb,
 	if (err < 0)
 		return err;
 
-	h = nf_conntrack_find_get(&tuple, NULL);
+	h = nf_conntrack_find_get(&tuple);
 	if (!h)
 		return -ENOENT;
 
@@ -1428,7 +1428,7 @@ ctnetlink_create_expect(struct nfattr *cda[], u_int8_t u3)
 		return err;
 
 	/* Look for master conntrack of this expectation */
-	h = nf_conntrack_find_get(&master_tuple, NULL);
+	h = nf_conntrack_find_get(&master_tuple);
 	if (!h)
 		return -ENOENT;
 	ct = nf_ct_tuplehash_to_ctrack(h);
