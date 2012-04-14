@@ -1051,6 +1051,8 @@
 28) Fix check cork.rt regression in ip_output.<br>
 29) Netfilter use hardware checksumming when possible.<br>
 30) HW_NAT use 215 devnode for /dev/hwnat0 (220 used by rdm).<br>
+31) Update libcurl to 7.25.0 version.<br>
+32) Update libevent to 2.0.18 version.<br>
 
 <br><br>
 <b>For support see:</b><br>
