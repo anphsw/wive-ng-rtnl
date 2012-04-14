@@ -1,7 +1,5 @@
 /* IP tables module for matching the routing realm
  *
- * $Id: xt_realm.c,v 1.1.1.1 2007-05-25 06:49:59 bruce Exp $
- *
  * (C) 2003 by Sampsa Ranta <sampsa@netsonic.fi>
  *
  * This program is free software; you can redistribute it and/or modify
