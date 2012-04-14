@@ -1052,7 +1052,6 @@
 29) Netfilter use hardware checksumming when possible.<br>
 30) HW_NAT use 215 devnode for /dev/hwnat0 (220 used by rdm).<br>
 
-
 <br><br>
 <b>For support see:</b><br>
 <a href="http://acorp.ru">acorp.ru - Acorp Electronics Inc.</a><br>
