@@ -124,7 +124,7 @@ ipt_limit_checkentry(const char *tablename,
 
 	priv = kmalloc(sizeof(*priv), GFP_KERNEL);
 	if (priv == NULL)
-		return 0;
+		return false;
 
 	/* For SMP, we only want to use one set of state. */
 	r->master = priv;
