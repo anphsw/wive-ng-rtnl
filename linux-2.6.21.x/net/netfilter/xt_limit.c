@@ -70,7 +70,7 @@ ipt_limit_match(const struct sk_buff *skb,
 		const void *matchinfo,
 		int offset,
 		unsigned int protoff,
-		int *hotdrop)
+		bool *hotdrop)
 {
 	const struct xt_rateinfo *r = (struct xt_rateinfo *)matchinfo;
 	struct xt_limit_priv *priv = r->master;

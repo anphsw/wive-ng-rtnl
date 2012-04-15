@@ -240,7 +240,7 @@ unsigned int arpt_do_table(struct sk_buff **pskb,
 	static const char nulldevname[IFNAMSIZ] __attribute__((aligned(sizeof(long))));
 	unsigned int verdict = NF_DROP;
 	struct arphdr *arp;
-	int hotdrop = 0;
+	bool hotdrop = false;
 	struct arpt_entry *e, *back;
 	const char *indev, *outdev;
 	void *table_base;

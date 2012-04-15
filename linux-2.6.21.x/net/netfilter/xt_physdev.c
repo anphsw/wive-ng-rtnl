@@ -32,7 +32,7 @@ match(const struct sk_buff *skb,
       const void *matchinfo,
       int offset,
       unsigned int protoff,
-      int *hotdrop)
+      bool *hotdrop)
 {
 	static const char nulldevname[IFNAMSIZ] __attribute__((aligned(sizeof(long))));
 	const struct xt_physdev_info *info = matchinfo;

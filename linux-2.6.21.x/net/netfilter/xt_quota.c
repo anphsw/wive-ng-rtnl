@@ -25,7 +25,7 @@ static int
 match(const struct sk_buff *skb,
       const struct net_device *in, const struct net_device *out,
       const struct xt_match *match, const void *matchinfo,
-      int offset, unsigned int protoff, int *hotdrop)
+      int offset, unsigned int protoff, bool *hotdrop)
 {
 	struct xt_quota_info *q = (void *)matchinfo;
 	struct xt_quota_priv *priv = q->master;

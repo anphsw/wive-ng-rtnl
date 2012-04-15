@@ -449,7 +449,7 @@ hashlimit_match(const struct sk_buff *skb,
 		const void *matchinfo,
 		int offset,
 		unsigned int protoff,
-		int *hotdrop)
+		bool *hotdrop)
 {
 	const struct xt_hashlimit_info *r = matchinfo;
 
@@ -496,7 +496,7 @@ hashlimit_match(const struct sk_buff *skb,
 	return 0;
 
 hotdrop:
-	*hotdrop = 1;
+	*hotdrop = true;
 	return 0;
 }
 

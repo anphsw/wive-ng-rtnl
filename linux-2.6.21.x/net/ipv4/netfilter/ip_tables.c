@@ -227,7 +227,7 @@ int do_match(struct ipt_entry_match *m,
 	     const struct net_device *in,
 	     const struct net_device *out,
 	     int offset,
-	     int *hotdrop)
+	     bool *hotdrop)
 {
 	/* Stop iteration if it doesn't match */
 	if (!m->u.kernel.match->match(skb, in, out, m->u.kernel.match, m->data,
@@ -389,7 +389,7 @@ ipt_do_table(struct sk_buff **pskb,
 	static const char nulldevname[IFNAMSIZ] __attribute__((aligned(sizeof(long))));
 	u_int16_t offset;
 	struct iphdr *ip;
-	int hotdrop = 0;
+	bool hotdrop = false;
 	/* Initializing verdict to NF_DROP keeps gcc happy. */
 	unsigned int verdict = NF_DROP;
 	const char *indev, *outdev;
@@ -2324,7 +2324,7 @@ icmp_match(const struct sk_buff *skb,
 	   const void *matchinfo,
 	   int offset,
 	   unsigned int protoff,
-	   int *hotdrop)
+	   bool *hotdrop)
 {
 	struct icmphdr _icmph, *ic;
 	const struct ipt_icmp *icmpinfo = matchinfo;
@@ -2339,7 +2339,7 @@ icmp_match(const struct sk_buff *skb,
 		 * can't.  Hence, no choice but to drop.
 		 */
 		duprintf("Dropping evil ICMP tinygram.\n");
-		*hotdrop = 1;
+		*hotdrop = true;
 		return 0;
 	}
 
