@@ -1167,8 +1167,9 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE) || \
     defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 	struct nf_conn_help *help;
-    	unsigned int is_helper = 0;
+    	static unsigned int is_helper = 0, nat_offload_enabled = 0;
 #endif
+
 	/* Previously seen (loopback or untracked)?  Ignore. */
 	if ((*pskb)->nfct) {
 		NF_CT_STAT_INC_ATOMIC(ignore);
@@ -1244,24 +1245,25 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 	nat = nfct_nat(ct);
 #endif
 
-/* This code section may be used for skip some types traffic */
-#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE) || defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-	if (pf == PF_INET && nat && protonum == IPPROTO_TCP) {
-		/* drop flags enable disable flt */
-    		unsigned int nat_offload_enabled = 0, need_skip = 0;
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-		/* hardware nat support */
-		if (ra_sw_nat_hook_rx != NULL && ra_sw_nat_hook_tx != NULL)
-		    nat_offload_enabled=1;
+	/* hardware nat support */
+	if (ra_sw_nat_hook_rx != NULL && ra_sw_nat_hook_tx != NULL)
+	    nat_offload_enabled=1;
 #endif
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-		/* software fastnat support */
-		if (nf_conntrack_fastnat && bcm_nat_bind_hook != NULL)
-		    nat_offload_enabled=1;
+	/* software fastnat support */
+	if (nf_conntrack_fastnat && bcm_nat_bind_hook != NULL)
+	    nat_offload_enabled=1;
 #endif
+
+/* This code section may be used for skip some types traffic */
+#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE) || defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+	if (nat_offload_enabled && pf == PF_INET && protonum == IPPROTO_TCP && nat && !is_helper) {
 #if defined(CONFIG_NETFILTER_XT_MATCH_WEBSTR) || defined(CONFIG_NETFILTER_XT_MATCH_WEBSTR_MODULE)
+    		static unsigned int need_skip = 0;
+
 		/* skip http post/get/head traffic for correct webstr work */
-		if (nat_offload_enabled && web_str_loaded && protonum == IPPROTO_TCP) {
+		if (web_str_loaded) {
 		    struct tcphdr _tcph, *tcph;
 		    unsigned char _data[2], *data;
 
@@ -1279,7 +1281,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 #endif /* XT_MATCH_WEBSTR */
 		/* Other traffic skip section
 		    EXAMPLE_CODE:
-		    if (nat_offload_enabled && (need ... rules ...)) {
+		    if (need ... rules ...) {
 			need_skip=1;
 			goto filter;
 		    }
