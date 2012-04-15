@@ -22,13 +22,13 @@ MODULE_AUTHOR("Harald Welte <laforge@netfilter.org>");
 MODULE_DESCRIPTION("Xtables: Explicit Congestion Notification (ECN) flag match for IPv4");
 MODULE_LICENSE("GPL");
 
-static inline int match_ip(const struct sk_buff *skb,
+static inline bool match_ip(const struct sk_buff *skb,
 			   const struct ipt_ecn_info *einfo)
 {
 	return ((skb->nh.iph->tos&IPT_ECN_IP_MASK) == einfo->ip_ect);
 }
 
-static inline int match_tcp(const struct sk_buff *skb,
+static inline bool match_tcp(const struct sk_buff *skb,
 			    const struct ipt_ecn_info *einfo,
 			    bool *hotdrop)
 {
@@ -40,33 +40,33 @@ static inline int match_tcp(const struct sk_buff *skb,
 	th = skb_header_pointer(skb, ip_hdrlen(skb), sizeof(_tcph), &_tcph);
 	if (th == NULL) {
 		*hotdrop = false;
-		return 0;
+		return false;
 	}
 
 	if (einfo->operation & IPT_ECN_OP_MATCH_ECE) {
 		if (einfo->invert & IPT_ECN_OP_MATCH_ECE) {
 			if (th->ece == 1)
-				return 0;
+				return false;
 		} else {
 			if (th->ece == 0)
-				return 0;
+				return false;
 		}
 	}
 
 	if (einfo->operation & IPT_ECN_OP_MATCH_CWR) {
 		if (einfo->invert & IPT_ECN_OP_MATCH_CWR) {
 			if (th->cwr == 1)
-				return 0;
+				return false;
 		} else {
 			if (th->cwr == 0)
-				return 0;
+				return false;
 		}
 	}
 
 	return 1;
 }
 
-static int match(const struct sk_buff *skb,
+static bool match(const struct sk_buff *skb,
 		 const struct net_device *in, const struct net_device *out,
 		 const struct xt_match *match, const void *matchinfo,
 		 int offset, unsigned int protoff, bool *hotdrop)
@@ -75,16 +75,16 @@ static int match(const struct sk_buff *skb,
 
 	if (info->operation & IPT_ECN_OP_MATCH_IP)
 		if (!match_ip(skb, info))
-			return 0;
+			return false;
 
 	if (info->operation & (IPT_ECN_OP_MATCH_ECE|IPT_ECN_OP_MATCH_CWR)) {
 		if (skb->nh.iph->protocol != IPPROTO_TCP)
-			return 0;
+			return false;
 		if (!match_tcp(skb, info, hotdrop))
-			return 0;
+			return false;
 	}
 
-	return 1;
+	return true;
 }
 
 static int checkentry(const char *tablename, const void *ip_void,

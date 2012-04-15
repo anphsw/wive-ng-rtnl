@@ -14,8 +14,6 @@
 #include <linux/netfilter/xt_physdev.h>
 #include <linux/netfilter/x_tables.h>
 #include <linux/netfilter_bridge.h>
-#define MATCH   1
-#define NOMATCH 0
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Bart De Schuymer <bdschuym@pandora.be>");
@@ -24,7 +22,7 @@ MODULE_ALIAS("ipt_physdev");
 MODULE_ALIAS("ip6t_physdev");
 
 
-static int
+static bool
 match(const struct sk_buff *skb,
       const struct net_device *in,
       const struct net_device *out,
@@ -36,7 +34,7 @@ match(const struct sk_buff *skb,
 {
 	static const char nulldevname[IFNAMSIZ] __attribute__((aligned(sizeof(long))));
 	const struct xt_physdev_info *info = matchinfo;
-	unsigned long ret;
+	bool ret;
 	const char *indev, *outdev;
 	struct nf_bridge_info *nf_bridge;
 
@@ -47,50 +45,50 @@ match(const struct sk_buff *skb,
 		/* Return MATCH if the invert flags of the used options are on */
 		if ((info->bitmask & XT_PHYSDEV_OP_BRIDGED) &&
 		    !(info->invert & XT_PHYSDEV_OP_BRIDGED))
-			return NOMATCH;
+			return false;
 		if ((info->bitmask & XT_PHYSDEV_OP_ISIN) &&
 		    !(info->invert & XT_PHYSDEV_OP_ISIN))
-			return NOMATCH;
+			return false;
 		if ((info->bitmask & XT_PHYSDEV_OP_ISOUT) &&
 		    !(info->invert & XT_PHYSDEV_OP_ISOUT))
-			return NOMATCH;
+			return false;
 		if ((info->bitmask & XT_PHYSDEV_OP_IN) &&
 		    !(info->invert & XT_PHYSDEV_OP_IN))
-			return NOMATCH;
+			return false;
 		if ((info->bitmask & XT_PHYSDEV_OP_OUT) &&
 		    !(info->invert & XT_PHYSDEV_OP_OUT))
-			return NOMATCH;
-		return MATCH;
+			return false;
+		return true;
 	}
 
 	/* This only makes sense in the FORWARD and POSTROUTING chains */
 	if ((info->bitmask & XT_PHYSDEV_OP_BRIDGED) &&
 	    (!!(nf_bridge->mask & BRNF_BRIDGED) ^
 	    !(info->invert & XT_PHYSDEV_OP_BRIDGED)))
-		return NOMATCH;
+		return false;
 
 	if ((info->bitmask & XT_PHYSDEV_OP_ISIN &&
 	    (!nf_bridge->physindev ^ !!(info->invert & XT_PHYSDEV_OP_ISIN))) ||
 	    (info->bitmask & XT_PHYSDEV_OP_ISOUT &&
 	    (!nf_bridge->physoutdev ^ !!(info->invert & XT_PHYSDEV_OP_ISOUT))))
-		return NOMATCH;
+		return false;
 
 	if (!(info->bitmask & XT_PHYSDEV_OP_IN))
 		goto match_outdev;
 	indev = nf_bridge->physindev ? nf_bridge->physindev->name : nulldevname;
 	ret = ifname_compare_aligned(indev, info->physindev, info->in_mask);
 
-	if ((ret == 0) ^ !(info->invert & XT_PHYSDEV_OP_IN))
-		return NOMATCH;
+	if (!ret ^ !(info->invert & XT_PHYSDEV_OP_IN))
+		return false;
 
 match_outdev:
 	if (!(info->bitmask & XT_PHYSDEV_OP_OUT))
-		return MATCH;
+		return true;
 	outdev = nf_bridge->physoutdev ?
 		 nf_bridge->physoutdev->name : nulldevname;
 	ret = ifname_compare_aligned(outdev, info->physoutdev, info->out_mask);
 
-	return (!!ret ^ !(info->invert & XT_PHYSDEV_OP_OUT));
+	return ret ^ !(info->invert & XT_PHYSDEV_OP_OUT);
 }
 
 static int

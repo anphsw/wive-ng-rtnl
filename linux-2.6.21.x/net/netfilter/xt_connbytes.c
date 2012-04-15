@@ -31,7 +31,7 @@ static u_int64_t div64_64(u_int64_t dividend, u_int64_t divisor)
 	return dividend;
 }
 
-static int
+static bool
 match(const struct sk_buff *skb,
       const struct net_device *in,
       const struct net_device *out,
@@ -51,7 +51,7 @@ match(const struct sk_buff *skb,
 
 	ct = nf_ct_get(skb, &ctinfo);
 	if (!ct)
-		return 0;
+		return false;
 	counters = ct->counters;
 
 	switch (sinfo->what) {
