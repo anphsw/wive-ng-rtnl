@@ -1302,7 +1302,7 @@ filter:
 /* end skip section */
 
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-        if (nf_conntrack_fastnat && bcm_nat_bind_hook && pf == PF_INET) {
+        if (nf_conntrack_fastnat && bcm_nat_bind_hook != NULL && pf == PF_INET) {
 		/* if need helper or nat type unknown/fast deny need skip packets */
         	if (is_helper || !nat || is_local_prtc(protonum) || (nat->info.nat_type & NF_FAST_NAT_DENY))
 		    goto skip_sw;
