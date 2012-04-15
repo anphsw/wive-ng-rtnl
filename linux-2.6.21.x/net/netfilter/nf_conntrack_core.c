@@ -1185,15 +1185,12 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 	if (nf_conntrack_fastnat && pf == PF_INET) {
-		/* Gather fragments. */
-		if (ip_hdr(*pskb)->frag_off & htons(IP_MF | IP_OFFSET)) {
-			*pskb = nf_ct_ipv4_gather_frags(*pskb,
-						hooknum == NF_IP_PRE_ROUTING ?
-						IP_DEFRAG_CONNTRACK_IN :
-						IP_DEFRAG_CONNTRACK_OUT);
-			if (!*pskb)
-				return NF_STOLEN;
-		}
+	    /* Gather fragments. */
+	    if (ip_hdr(*pskb)->frag_off & htons(IP_MF | IP_OFFSET)) {
+	        *pskb = nf_ct_ipv4_gather_frags(*pskb, hooknum == NF_IP_PRE_ROUTING ? IP_DEFRAG_CONNTRACK_IN : IP_DEFRAG_CONNTRACK_OUT);
+	        if (!*pskb)
+		    return NF_STOLEN;
+	    }
 	}
 #endif
 
@@ -1259,7 +1256,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 #endif
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 		/* software fastnat support */
-		if (nf_conntrack_fastnat && bcm_nat_bind_hook)
+		if (nf_conntrack_fastnat && bcm_nat_bind_hook != NULL)
 		    nat_offload_enabled=1;
 #endif
 #if defined(CONFIG_NETFILTER_XT_MATCH_WEBSTR) || defined(CONFIG_NETFILTER_XT_MATCH_WEBSTR_MODULE)

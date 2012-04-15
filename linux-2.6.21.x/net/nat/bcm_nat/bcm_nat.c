@@ -17,6 +17,8 @@
 #include <net/neighbour.h>
 #include <net/netfilter/nf_conntrack_core.h>
 
+//#define DEBUG
+
 typedef int (*bcmNatHitHook)(struct sk_buff *skb);
 typedef int (*bcmNatBindHook)(struct nf_conn *ct, enum ip_conntrack_info ctinfo, unsigned int hooknum, struct sk_buff **pskb);
 
@@ -29,6 +31,27 @@ manip_pkt(u_int16_t proto,
 	  unsigned int iphdroff,
 	  const struct nf_conntrack_tuple *target,
 	  enum nf_nat_manip_type maniptype);
+
+/*
+ * check NAT session initialized and ready
+ */
+static inline int nat_is_ready(struct nf_conn *ct)
+{
+	/* If NAT initialized is finished may be offload */
+	if ((ct->status & IPS_NAT_DONE_MASK) == IPS_NAT_DONE_MASK)
+		return 1;
+	return 0;
+}
+
+/*
+ * check SKB really accesseble
+ */
+static inline int skb_is_ready(struct sk_buff *skb)
+{
+	if (skb_cloned(skb) && !skb->sk)
+		return 0;
+	return 1;
+}
 
 /*
  * Direct send packets to output.
@@ -72,8 +95,11 @@ static inline int bcm_fast_path(struct sk_buff *skb)
 			return bcm_fast_path_output(skb);
 	}
 
+#ifdef DEBUG
 	if (net_ratelimit())
 		printk(KERN_DEBUG "bcm_fast_path: No header cache and no neighbour!\n");
+#endif
+
 	kfree_skb(skb);
 	return -EINVAL;
 }
@@ -90,6 +116,15 @@ bcm_do_bindings(struct nf_conn *ct,
 	enum ip_conntrack_dir dir = CTINFO2DIR(ctinfo);
 	unsigned int i = 1;
 
+	/* This check prevent corrupt conntrack data */
+	if(!nat_is_ready(ct) || !skb_is_ready(*pskb)) {
+#ifdef DEBUG
+		if (net_ratelimit())
+		    printk(KERN_DEBUG "bcm_fast_path: SKB or CT not ready for offload\n");
+#endif
+		return NF_ACCEPT; /* Ignore */
+	}
+
 	do {
 		enum nf_nat_manip_type mtype = HOOK2MANIP(hn[i]);
 		unsigned long statusbit;
@@ -105,9 +140,6 @@ bcm_do_bindings(struct nf_conn *ct,
 
 		if (ct->status & statusbit) {
 			struct nf_conntrack_tuple target;
-
-			if (!skb_make_writable(*pskb, 0))
-				return NF_DROP;
 
 			if ((*pskb)->dst == NULL && mtype == IP_NAT_MANIP_SRC) {
 				struct net_device *dev = (*pskb)->dev;
