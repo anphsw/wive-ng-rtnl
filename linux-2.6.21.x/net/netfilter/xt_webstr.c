@@ -287,7 +287,7 @@ static char *search_linear (char *needle, char *haystack, int needle_len, int ha
 }
 
 
-static int
+static bool
 match(const struct sk_buff *skb,
       const struct net_device *in,
       const struct net_device *out,
@@ -295,7 +295,7 @@ match(const struct sk_buff *skb,
       const void *matchinfo,
       int offset,
       unsigned int protoff,
-      int *hotdrop)
+      bool *hotdrop)
 {
 	const struct ipt_webstr_info *info = matchinfo;
 	struct iphdr *ip = skb->nh.iph;
@@ -310,7 +310,7 @@ match(const struct sk_buff *skb,
 
 
 	if (!ip || info->len < 1)
-	    return 0;
+	    return false;
 
 	SPARQ_LOG("\n************************************************\n"
 		"%s: type=%s\n", __FUNCTION__, (info->type == IPT_WEBSTR_URL) 
@@ -345,12 +345,12 @@ match(const struct sk_buff *skb,
 
 	    default:
 		printk("%s: Sorry! Cannot find this match option.\n", __FILE__);
-		return 0;
+		return false;
 	}
 
 	/* Get the http header info */
 	if (get_http_info(skb, flags, &htinfo) < 1)
-	    return 0;
+	    return false;
 
 	/* Check if the http header content contains the forbidden keyword */
 	if (info->type == IPT_WEBSTR_HOST || info->type == IPT_WEBSTR_URL) {
@@ -423,7 +423,7 @@ match_ret:
 	return (found ^ info->invert);
 }
 
-static int
+static bool
 checkentry(const char *tablename,
 	   const void *entry,
 	   const struct xt_match *match,
@@ -432,9 +432,9 @@ checkentry(const char *tablename,
 {
 #if 0
        if (matchsize != IPT_ALIGN(sizeof(struct ipt_webstr_info)))
-               return 0;
+               return false;
 #endif
-       return 1;
+       return true;
 }
 
 static struct xt_match xt_webstr_match[] = {

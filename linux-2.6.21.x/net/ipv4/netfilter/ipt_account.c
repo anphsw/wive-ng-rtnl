@@ -350,11 +350,7 @@ __account_short(struct t_ipt_account_stat_short *stat, const struct sk_buff *skb
 /*
  * Match function. Here we do accounting stuff.
  */
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,23)
 static bool
-#else
-static int
-#endif
 match(const struct sk_buff *skb,
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,29)
     const struct xt_match_param *par
@@ -367,11 +363,7 @@ match(const struct sk_buff *skb,
     const void *matchinfo,
     int offset,
     unsigned int protoff,
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,23)
     bool *hotdrop
-#else
-    int *hotdrop
-#endif
 #endif
 )
 {
@@ -385,11 +377,7 @@ match(const struct sk_buff *skb,
   /* Get current time. */
   struct timespec now = CURRENT_TIME_SEC;
   /* Default we assume no match. */
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,23)
   bool ret = false;
-#else
-  int ret = 0;
-#endif
     
 #ifdef DEBUG_IPT_ACCOUNT  
   if (debug) printk(KERN_DEBUG "ipt_account [match]: name = %s\n", table->name);
@@ -432,11 +420,7 @@ match(const struct sk_buff *skb,
     }
     write_unlock_bh(&table->stats_lock);
     /* Yes, it's a match. */
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,23)
     ret = true;
-#else
-    ret = 1;
-#endif
 
   }
   
@@ -471,11 +455,7 @@ match(const struct sk_buff *skb,
       }
     }
     write_unlock_bh(&table->stats_lock);
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,23)
     ret = true;
-#else
-    ret = 1;
-#endif
   }
   
   return ret;
@@ -484,11 +464,7 @@ match(const struct sk_buff *skb,
 /*
  * Checkentry function.
  */
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,23)
 static bool
-#else
-static int
-#endif
 checkentry(
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,29)
     const struct xt_mtchk_param *par
@@ -525,11 +501,7 @@ checkentry(
 #ifdef DEBUG_IPT_ACCOUNT  
     if (debug) printk(KERN_DEBUG "ipt_account [checkentry]: matchsize %u != %u\n", matchsize, IPT_ALIGN(sizeof(struct t_ipt_account_info)));
 #endif    
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,23)
     return false;
-#else
-    return 0;
-#endif
   }
 #endif
 
@@ -538,27 +510,15 @@ checkentry(
    */
   if (info->netmask < ((~0L << (32 - netmask)) & 0xffffffff)) {
     printk(KERN_ERR "ipt_account[checkentry]: too big netmask (increase module 'netmask' parameter).\n");
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,23)
     return false;
-#else
-    return 0;
-#endif
   }
   if ((info->network & info->netmask) != info->network) {
     printk(KERN_ERR "ipt_account[checkentry]: wrong network/netmask.\n");
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,23)
     return false;
-#else
-    return 0;
-#endif
   }
   if (info->name[0] == '\0') {
     printk(KERN_ERR "ipt_account[checkentry]: wrong table name.\n");
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,23)
     return false;
-#else
-    return 0;
-#endif
   }
 
   /*
@@ -572,18 +532,10 @@ checkentry(
       if (info->table != table) {
         printk(KERN_ERR "ipt_account[checkentry]: reloaded rule has invalid table pointer.\n");
         up(&ipt_account_mutex);
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,23)
         return false;
-#else
-        return 0;
-#endif
       }
       up(&ipt_account_mutex);
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,23)
       return true;
-#else
-      return 1;
-#endif
     } else {
 #ifdef DEBUG_IPT_ACCOUNT  
       if (debug) printk(KERN_DEBUG "ipt_account [checkentry]: table found, checking.\n");
@@ -599,11 +551,7 @@ checkentry(
          */
         ipt_account_table_put(table);
         up(&ipt_account_mutex);
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,23)
         return false;
-#else
-        return 0;
-#endif
       }
 #ifdef DEBUG_IPT_ACCOUNT  
       if (debug) printk(KERN_DEBUG "ipt_account [checkentry]: table found, reusing.\n");
@@ -623,19 +571,11 @@ checkentry(
     info->table = table = ipt_account_table_init(info);
     if (!table) {
       up(&ipt_account_mutex);
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,23)
       return false;
-#else
-      return 0;
-#endif
     }
   }
   up(&ipt_account_mutex);
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,23)
   return true;
-#else
-  return 1;
-#endif
 }
 
 /*
@@ -646,15 +586,15 @@ destroy(
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,29)
     const struct xt_mtdtor_param *par
 #else
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,17)    
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,17)
     const struct xt_match *match,
-#endif    
+#endif
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,19)
     void *matchinfo
 #else
     void *matchinfo,
     unsigned int matchsize
-#endif    
+#endif
 #endif
 )
 {

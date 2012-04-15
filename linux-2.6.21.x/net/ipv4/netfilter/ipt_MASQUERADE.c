@@ -67,7 +67,7 @@ masquerade_target(struct sk_buff **pskb,
 	enum ip_conntrack_info ctinfo;
 	struct nf_nat_range newrange;
 	const struct nf_nat_multi_range_compat *mr;
-	const struct rtable *rt;
+	struct rtable *rt;
 	__be32 newsrc;
 
 	NF_CT_ASSERT(hooknum == NF_IP_POST_ROUTING);

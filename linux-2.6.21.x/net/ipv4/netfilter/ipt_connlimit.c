@@ -129,7 +129,7 @@ static int count_them(struct ipt_connlimit_data *data,
 	return matches;
 }
 
-static int
+static bool
 match(const struct sk_buff *skb,
       const struct net_device *in,
       const struct net_device *out,
@@ -141,18 +141,18 @@ match(const struct sk_buff *skb,
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,16)
       unsigned int protoff,
 #endif
-      int *hotdrop)
+      bool *hotdrop)
 {
 	const struct ipt_connlimit_info *info = matchinfo;
-	int connections, rv;
+	int connections;
 	struct nf_conn *ct;
 	enum ip_conntrack_info ctinfo;
 
 	ct = nf_ct_get((struct sk_buff *)skb, &ctinfo);
 	if (NULL == ct) {
 		//printk("ipt_connlimit: Oops: invalid ct state ?\n");
-		*hotdrop = 1;
-		return 0;
+		*hotdrop = true;
+		return false;
 	}
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,22)
@@ -162,21 +162,14 @@ match(const struct sk_buff *skb,
 #endif
 	if (-1 == connections) {
 		printk("ipt_connlimit: Hmm, kmalloc failed :-(\n");
-		*hotdrop = 1; /* let's free some memory :-) */
-		return 0;
+		*hotdrop = true; /* let's free some memory :-) */
+		return false;
 	}
-        rv = (info->inverse) ? (connections <= info->limit) : (connections > info->limit);
-#ifdef DEBUG
-	printk("ipt_connlimit: src=%u.%u.%u.%u mask=%u.%u.%u.%u "
-	       "connections=%d limit=%d match=%s\n",
-	       NIPQUAD(skb->nh.iph->saddr), NIPQUAD(info->mask),
-	       connections, info->limit, rv?"yes":"no");
-#endif
 
-	return rv;
+	return (connections > info->limit) ^ info->inverse;
 }
 
-static int checkentry(const char *tablename,
+static bool checkentry(const char *tablename,
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,16)
 		 const void *ip_void,
 #else
@@ -201,12 +194,12 @@ static int checkentry(const char *tablename,
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,17)
 	/* verify size */
 	if (matchsize != IPT_ALIGN(sizeof(struct ipt_connlimit_info)))
-		return 0;
+		return false;
 #endif
 
 	/* refuse anything but tcp */
 	if (ip->proto != IPPROTO_TCP)
-		return 0;
+		return false;
 
 	/* init private data */
 	info->data = kmalloc(sizeof(struct ipt_connlimit_data),GFP_KERNEL);
@@ -214,7 +207,7 @@ static int checkentry(const char *tablename,
 	for (i = 0; i < 256; i++)
 		INIT_LIST_HEAD(&(info->data->iphash[i]));
 	
-	return 1;
+	return true;
 }
 
 static void destroy(
