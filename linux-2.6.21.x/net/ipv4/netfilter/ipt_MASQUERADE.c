@@ -67,7 +67,7 @@ masquerade_target(struct sk_buff **pskb,
 	enum ip_conntrack_info ctinfo;
 	struct nf_nat_range newrange;
 	const struct nf_nat_multi_range_compat *mr;
-	struct rtable *rt;
+	const struct rtable *rt;
 	__be32 newsrc;
 
 	NF_CT_ASSERT(hooknum == NF_IP_POST_ROUTING);
@@ -123,7 +123,7 @@ masquerade_target(struct sk_buff **pskb,
 static inline int
 device_cmp(struct nf_conn *i, void *ifindex)
 {
-	struct nf_conn_nat *nat = nfct_nat(i);
+	const struct nf_conn_nat *nat = nfct_nat(i);
 
 	if (!nat)
 		return 0;
@@ -134,7 +134,7 @@ static int masq_device_event(struct notifier_block *this,
 			     unsigned long event,
 			     void *ptr)
 {
-	struct net_device *dev = ptr;
+	const struct net_device *dev = ptr;
 
 	if (event == NETDEV_DOWN) {
 		/* Device was downed.  Search entire table for

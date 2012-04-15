@@ -31,11 +31,11 @@ match(const struct sk_buff *skb,
       bool *hotdrop)
 {
 	const struct xt_conntrack_info *sinfo = matchinfo;
-	struct nf_conn *ct;
+	const struct nf_conn *ct;
 	enum ip_conntrack_info ctinfo;
 	unsigned int statebit;
 
-	ct = nf_ct_get((struct sk_buff *)skb, &ctinfo);
+	ct = nf_ct_get(skb, &ctinfo);
 
 #define FWINV(bool,invflg) ((bool) ^ !!(sinfo->invflags & invflg))
 

@@ -51,7 +51,7 @@ checkentry(const char *tablename, const void *entry,
 	   const struct xt_match *match, void *matchinfo,
 	   unsigned int hook_mask)
 {
-	struct xt_quota_info *q = (struct xt_quota_info *)matchinfo;
+	struct xt_quota_info *q = matchinfo;
 
 	if (q->flags & ~XT_QUOTA_MASK)
 		return false;

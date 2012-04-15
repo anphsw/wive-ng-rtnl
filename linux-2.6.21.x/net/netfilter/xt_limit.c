@@ -162,7 +162,7 @@ struct compat_xt_rateinfo {
  * master pointer, which does not need to be preserved. */
 static void compat_from_user(void *dst, void *src)
 {
-	struct compat_xt_rateinfo *cm = src;
+	const struct compat_xt_rateinfo *cm = src;
 	struct xt_rateinfo m = {
 		.avg		= cm->avg,
 		.burst		= cm->burst,
@@ -176,7 +176,7 @@ static void compat_from_user(void *dst, void *src)
 
 static int compat_to_user(void __user *dst, void *src)
 {
-	struct xt_rateinfo *m = src;
+	const struct xt_rateinfo *m = src;
 	struct compat_xt_rateinfo cm = {
 		.avg		= m->avg,
 		.burst		= m->burst,

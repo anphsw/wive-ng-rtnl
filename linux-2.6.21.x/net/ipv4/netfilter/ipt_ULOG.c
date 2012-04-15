@@ -334,7 +334,7 @@ static int ipt_ulog_checkentry(const char *tablename,
 			       void *targinfo,
 			       unsigned int hookmask)
 {
-	struct ipt_ulog_info *loginfo = (struct ipt_ulog_info *) targinfo;
+	const struct ipt_ulog_info *loginfo = targinfo;
 
 	if (loginfo->prefix[sizeof(loginfo->prefix) - 1] != '\0') {
 		DEBUGP("ipt_ULOG: prefix term %i\n",

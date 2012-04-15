@@ -117,7 +117,7 @@ checkentry_v0(const char *tablename,
 	      void *targinfo,
 	      unsigned int hook_mask)
 {
-	struct xt_mark_target_info *markinfo = targinfo;
+	const struct xt_mark_target_info *markinfo = targinfo;
 
 	if (markinfo->mark > 0xffffffff) {
 		printk(KERN_WARNING "MARK: Only supports 32bit wide mark\n");
@@ -133,7 +133,7 @@ checkentry_v1(const char *tablename,
 	      void *targinfo,
 	      unsigned int hook_mask)
 {
-	struct xt_mark_target_info_v1 *markinfo = targinfo;
+	const struct xt_mark_target_info_v1 *markinfo = targinfo;
 
 	if (markinfo->mode != XT_MARK_SET
 	    && markinfo->mode != XT_MARK_AND
@@ -159,7 +159,7 @@ struct compat_xt_mark_target_info_v1 {
 
 static void compat_from_user_v1(void *dst, void *src)
 {
-	struct compat_xt_mark_target_info_v1 *cm = src;
+	const struct compat_xt_mark_target_info_v1 *cm = src;
 	struct xt_mark_target_info_v1 m = {
 		.mark	= cm->mark,
 		.mode	= cm->mode,
@@ -169,7 +169,7 @@ static void compat_from_user_v1(void *dst, void *src)
 
 static int compat_to_user_v1(void __user *dst, void *src)
 {
-	struct xt_mark_target_info_v1 *m = src;
+	const struct xt_mark_target_info_v1 *m = src;
 	struct compat_xt_mark_target_info_v1 cm = {
 		.mark	= m->mark,
 		.mode	= m->mode,

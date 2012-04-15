@@ -158,7 +158,7 @@ static void send_reset(struct sk_buff *oldskb)
 	tcph->check = csum_ipv6_magic(&nskb->nh.ipv6h->saddr,
 				      &nskb->nh.ipv6h->daddr,
 				      sizeof(struct tcphdr), IPPROTO_TCP,
-				      csum_partial((char *)tcph,
+				      csum_partial(tcph,
 						   sizeof(struct tcphdr), 0));
 
 	nf_ct_attach(nskb, oldskb);

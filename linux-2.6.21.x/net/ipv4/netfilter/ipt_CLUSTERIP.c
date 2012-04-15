@@ -261,7 +261,7 @@ clusterip_hashfn(struct sk_buff *skb, struct clusterip_config *config)
 	case IPPROTO_SCTP:
 	case IPPROTO_DCCP:
 	case IPPROTO_ICMP:
-		ports = (void *)iph+iph->ihl*4;
+		ports = (const void *)iph+iph->ihl*4;
 		sport = ports[0];
 		dport = ports[1];
 		break;
@@ -301,7 +301,7 @@ clusterip_hashfn(struct sk_buff *skb, struct clusterip_config *config)
 }
 
 static inline int
-clusterip_responsible(struct clusterip_config *config, u_int32_t hash)
+clusterip_responsible(const struct clusterip_config *config, u_int32_t hash)
 {
 	return test_bit(hash - 1, &config->local_nodes);
 }
