@@ -46,7 +46,7 @@ match(const struct sk_buff *skb,
 	return ret;
 }
 
-static int
+static bool
 checkentry(const char *tablename, const void *entry,
 	   const struct xt_match *match, void *matchinfo,
 	   unsigned int hook_mask)
@@ -54,11 +54,11 @@ checkentry(const char *tablename, const void *entry,
 	struct xt_quota_info *q = (struct xt_quota_info *)matchinfo;
 
 	if (q->flags & ~XT_QUOTA_MASK)
-		return 0;
+		return false;
 
 	q->master = kmalloc(sizeof(*q->master), GFP_KERNEL);
 	if (q->master == NULL)
-		return 0;
+		return true;
 
 	q->master->quota = q->quota;
 	return 1;

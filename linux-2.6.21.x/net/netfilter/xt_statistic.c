@@ -55,7 +55,7 @@ match(const struct sk_buff *skb,
 	return ret;
 }
 
-static int
+static bool
 checkentry(const char *tablename, const void *entry,
 	   const struct xt_match *match, void *matchinfo,
 	   unsigned int hook_mask)
@@ -64,16 +64,16 @@ checkentry(const char *tablename, const void *entry,
 
 	if (info->mode > XT_STATISTIC_MODE_MAX ||
 	    info->flags & ~XT_STATISTIC_MASK)
-		return 0;
+		return false;
 
 	info->master = kzalloc(sizeof(*info->master), GFP_KERNEL);
 	if (info->master == NULL) {
 		printk(KERN_ERR KBUILD_MODNAME ": Out of memory\n");
-		return 0;
+		return false;
 	}
 	info->master->count = info->u.nth.count;
 
-	return 1;
+	return true;
 }
 
 static void statistic_mt_destroy(const struct xt_match *match, void *matchinfo)

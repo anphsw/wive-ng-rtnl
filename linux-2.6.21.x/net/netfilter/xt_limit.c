@@ -104,7 +104,7 @@ user2credits(u_int32_t user)
 	return (user * HZ * CREDITS_PER_JIFFY) / XT_LIMIT_SCALE;
 }
 
-static int
+static bool
 ipt_limit_checkentry(const char *tablename,
 		     const void *inf,
 		     const struct xt_match *match,
@@ -119,7 +119,7 @@ ipt_limit_checkentry(const char *tablename,
 	    || user2credits(r->avg * r->burst) < user2credits(r->avg)) {
 		printk("Overflow in xt_limit, try lower: %u/%u\n",
 		       r->avg, r->burst);
-		return 0;
+		return false;
 	}
 
 	priv = kmalloc(sizeof(*priv), GFP_KERNEL);
@@ -136,7 +136,7 @@ ipt_limit_checkentry(const char *tablename,
 		r->credit_cap = user2credits(r->avg * r->burst); /* Credits full. */
 		r->cost = user2credits(r->avg);
 	}
-	return 1;
+	return true;
 }
 
 static void limit_mt_destroy(const struct xt_match *match, void *matchinfo)
