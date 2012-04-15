@@ -572,7 +572,7 @@ __nf_conntrack_find(const struct nf_conntrack_tuple *tuple,
 EXPORT_SYMBOL_GPL(__nf_conntrack_find);
 
 #ifdef CONFIG_NAT_CONE
-static inline int nf_ct_cone_tuple_equal(const struct nf_conntrack_tuple *t1,
+static int nf_ct_cone_tuple_equal(const struct nf_conntrack_tuple *t1,
                                     const struct nf_conntrack_tuple *t2)
 {
 	if (nf_conntrack_nat_mode == NAT_MODE_FCONE)    /* Full Cone */
@@ -629,15 +629,15 @@ EXPORT_SYMBOL_GPL(nf_cone_conntrack_find_get);
 struct nf_conntrack_tuple_hash *
 nf_conntrack_find_get(const struct nf_conntrack_tuple *tuple)
 {
-	struct nf_conntrack_tuple_hash *h;
+    struct nf_conntrack_tuple_hash *h;
 
-	read_lock_bh(&nf_conntrack_lock);
-	h = __nf_conntrack_find(tuple, NULL);
-	if (h)
-		atomic_inc(&nf_ct_tuplehash_to_ctrack(h)->ct_general.use);
-	read_unlock_bh(&nf_conntrack_lock);
+    read_lock_bh(&nf_conntrack_lock);
+    h = __nf_conntrack_find(tuple, NULL);
+    if (h)
+	atomic_inc(&nf_ct_tuplehash_to_ctrack(h)->ct_general.use);
+    read_unlock_bh(&nf_conntrack_lock);
 
-	return h;
+    return h;
 }
 EXPORT_SYMBOL_GPL(nf_conntrack_find_get);
 
@@ -1039,7 +1039,7 @@ resolve_normal_ct(struct sk_buff *skb,
 	struct nf_conntrack_tuple_hash *h;
 	struct nf_conn *ct;
 #ifdef CONFIG_NAT_CONE
-	struct iphdr *iph = (struct iphdr *)skb->nh.raw;
+	struct iphdr *iph = skb->nh.iph;
 #endif
 
 	if (!nf_ct_get_tuple(skb, skb_network_offset(skb),
@@ -1105,17 +1105,21 @@ resolve_normal_ct(struct sk_buff *skb,
          *             Restricted Cone=dst_ip/port & proto & src_ip
          *
          */
-	if ((nf_conntrack_nat_mode > 0) && (skb->dev!=NULL) && (iph!=NULL) /* CASE III To Cone NAT */
+	if ((nf_conntrack_nat_mode > 0) && (iph != NULL && iph->protocol == IPPROTO_UDP)) {
 #if defined (CONFIG_PPP) || defined (CONFIG_PPP_MODULE)
-		&& ((strcmp(skb->dev->name, wan_name) == 0) || (strcmp(skb->dev->name, wan_ppp) == 0))
+		if ((skb->dev != NULL) && (strcmp(skb->dev->name, wan_name) == 0 || strcmp(skb->dev->name, wan_ppp) == 0))
 #else
-		&& (strcmp(skb->dev->name, wan_name) == 0)
+		if ((skb->dev != NULL) && (strcmp(skb->dev->name, wan_name) == 0))
 #endif
-		&& (iph->protocol == IPPROTO_UDP))
-	    h = nf_cone_conntrack_find_get(&tuple, NULL);
-        else /* CASE I.II.IV To Linux NAT */
+		    /* CASE III To Cone NAT */
+		    h = nf_cone_conntrack_find_get(&tuple, NULL);
+		else
+		    /* CASE I.II.IV To Linux NAT */
+		    h = nf_conntrack_find_get(&tuple);
+	} else
 #endif
-	    h = nf_conntrack_find_get(&tuple);
+	/* CASE I.II.IV To Linux NAT */
+	h = nf_conntrack_find_get(&tuple);
 
 	if (!h) {
 		h = init_conntrack(&tuple, l3proto, l4proto, skb, dataoff);

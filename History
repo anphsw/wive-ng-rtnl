@@ -1054,6 +1054,7 @@
 31) Update libcurl to 7.25.0 version.<br>
 32) Update libevent to 2.0.18 version.<br>
 33) BCM_NAT optimize and fix offload ready checks.<br>
+34) Small CONE NAT optimization.<br>
 
 <br><br>
 <b>For support see:</b><br>
