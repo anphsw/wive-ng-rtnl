@@ -52,7 +52,7 @@
 
 #include <linux/filter.h>
 
-#include <asm/atomic.h>
+#include <linux/atomic.h>
 #include <net/dst.h>
 #include <net/checksum.h>
 
