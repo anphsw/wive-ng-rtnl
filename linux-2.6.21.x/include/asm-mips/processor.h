@@ -87,6 +87,7 @@ extern unsigned int vced_count, vcei_count;
 #define TASK_IS_32BIT_ADDR test_thread_flag(TIF_32BIT_ADDR)
 
 #endif
+#define STACK_TOP_MAX  TASK_SIZE
 
 #define NUM_FPU_REGS	32
 
