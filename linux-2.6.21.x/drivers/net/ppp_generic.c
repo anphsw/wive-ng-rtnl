@@ -133,6 +133,7 @@ struct ppp {
 	unsigned long	last_xmit;	/* jiffies when last pkt sent 9c */
 	unsigned long	last_recv;	/* jiffies when last pkt rcvd a0 */
 	struct net_device *dev;		/* network interface device a4 */
+	int		closing;	/* is device closing down? a8 */
 #ifdef CONFIG_PPP_MULTILINK
 	int		nxchan;		/* next channel to send something on */
 	u32		nxseq;		/* next sequence number to send */
@@ -1051,7 +1052,7 @@ ppp_xmit_process(struct ppp *ppp)
 	int ret = 0;
 
 	ppp_xmit_lock(ppp);
-	if (ppp->dev) {
+	if (!ppp->closing) {
 		ppp_push(ppp);
 		while (ppp->xmit_pending == 0
 		       && (skb = skb_dequeue(&ppp->file.xq)) != 0)
@@ -1574,8 +1575,7 @@ static inline void
 ppp_do_recv(struct ppp *ppp, struct sk_buff *skb, struct channel *pch)
 {
 	ppp_recv_lock(ppp);
-	/* ppp->dev == 0 means interface is closing down */
-	if (ppp->dev)
+	if (!ppp->closing)
 		ppp_receive_frame(ppp, skb, pch);
 	else
 		kfree_skb(skb);
@@ -2664,18 +2664,16 @@ init_ppp_file(struct ppp_file *pf, int kind)
  */
 static void ppp_shutdown_interface(struct ppp *ppp)
 {
-	struct net_device *dev;
-
 	mutex_lock(&all_ppp_mutex);
-	ppp_lock(ppp);
-	dev = ppp->dev;
-	ppp->dev = NULL;
-	ppp_unlock(ppp);
 	/* This will call dev_close() for us. */
-	if (dev) {
-		unregister_netdev(dev);
-		free_netdev(dev);
-	}
+	ppp_lock(ppp);
+	if (!ppp->closing) {
+		ppp->closing = 1;
+		ppp_unlock(ppp);
+		unregister_netdev(ppp->dev);
+	} else
+		ppp_unlock(ppp);
+
 	cardmap_set(&all_ppp_units, ppp->file.index, NULL);
 	ppp->file.dead = 1;
 	ppp->owner = NULL;
@@ -2722,7 +2720,7 @@ static void ppp_destroy_interface(struct ppp *ppp)
 	if (ppp->xmit_pending)
 		kfree_skb(ppp->xmit_pending);
 
-	kfree(ppp);
+	free_netdev(ppp->dev);
 }
 
 /*
@@ -2784,7 +2782,7 @@ ppp_connect_channel(struct channel *pch, int unit)
 	if (pch->file.hdrlen > ppp->file.hdrlen)
 		ppp->file.hdrlen = pch->file.hdrlen;
 	hdrlen = pch->file.hdrlen + 2;	/* for protocol bytes */
-	if (ppp->dev && hdrlen > ppp->dev->hard_header_len)
+	if (hdrlen > ppp->dev->hard_header_len)
 		ppp->dev->hard_header_len = hdrlen;
 	list_add_tail(&pch->clist, &ppp->channels);
 	++ppp->n_channels;
