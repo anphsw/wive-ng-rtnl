@@ -3042,8 +3042,7 @@ static void pktgen_stop(struct pktgen_thread *t)
 
 	list_for_each_entry(pkt_dev, &t->if_list, list) {
 		pktgen_stop_device(pkt_dev);
-		if (pkt_dev->skb)
-			kfree_skb(pkt_dev->skb);
+		kfree_skb(pkt_dev->skb);
 
 		pkt_dev->skb = NULL;
 	}
@@ -3070,8 +3069,7 @@ static void pktgen_rem_one_if(struct pktgen_thread *t)
 		if (!cur->removal_mark)
 			continue;
 
-		if (cur->skb)
-			kfree_skb(cur->skb);
+		kfree_skb(cur->skb);
 		cur->skb = NULL;
 
 		pktgen_remove_device(t, cur);
@@ -3095,8 +3093,7 @@ static void pktgen_rem_all_ifs(struct pktgen_thread *t)
 	list_for_each_safe(q, n, &t->if_list) {
 		cur = list_entry(q, struct pktgen_dev, list);
 
-		if (cur->skb)
-			kfree_skb(cur->skb);
+		kfree_skb(cur->skb);
 		cur->skb = NULL;
 
 		pktgen_remove_device(t, cur);
@@ -3148,8 +3145,7 @@ static __inline__ void pktgen_xmit(struct pktgen_dev *pkt_dev)
 
 		if (!netif_running(odev)) {
 			pktgen_stop_device(pkt_dev);
-			if (pkt_dev->skb)
-				kfree_skb(pkt_dev->skb);
+			kfree_skb(pkt_dev->skb);
 			pkt_dev->skb = NULL;
 			goto out;
 		}
@@ -3169,8 +3165,7 @@ static __inline__ void pktgen_xmit(struct pktgen_dev *pkt_dev)
 		if ((++pkt_dev->clone_count >= pkt_dev->clone_skb)
 		    || (!pkt_dev->skb)) {
 			/* build a new pkt */
-			if (pkt_dev->skb)
-				kfree_skb(pkt_dev->skb);
+			kfree_skb(pkt_dev->skb);
 
 			pkt_dev->skb = fill_packet(odev, pkt_dev);
 			if (pkt_dev->skb == NULL) {
@@ -3246,8 +3241,7 @@ static __inline__ void pktgen_xmit(struct pktgen_dev *pkt_dev)
 
 		/* Done with this */
 		pktgen_stop_device(pkt_dev);
-		if (pkt_dev->skb)
-			kfree_skb(pkt_dev->skb);
+		kfree_skb(pkt_dev->skb);
 		pkt_dev->skb = NULL;
 	}
 out:;

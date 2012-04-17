@@ -261,8 +261,7 @@ ipq_build_packet_message(struct ipq_queue_entry *entry, int *errp)
 	return skb;
 
 nlmsg_failure:
-	if (skb)
-		kfree_skb(skb);
+	kfree_skb(skb);
 	*errp = -EINVAL;
 	printk(KERN_ERR "ip6_queue: error creating packet message\n");
 	return NULL;

@@ -153,8 +153,7 @@ static inline void frag_kfree_skb(struct sk_buff *skb, unsigned int *work)
 	if (work)
 		*work -= skb->truesize;
 	atomic_sub(skb->truesize, &nf_ct_frag6_mem);
-	if (NFCT_FRAG6_CB(skb)->orig)
-		kfree_skb(NFCT_FRAG6_CB(skb)->orig);
+	kfree_skb(NFCT_FRAG6_CB(skb)->orig);
 
 	kfree_skb(skb);
 }

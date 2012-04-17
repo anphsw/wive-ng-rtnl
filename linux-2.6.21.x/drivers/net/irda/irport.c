@@ -235,8 +235,7 @@ static int irport_close(struct irport_cb *self)
 
 	kfree(self->tx_buff.head);
 	
-	if (self->rx_buff.skb)
-		kfree_skb(self->rx_buff.skb);
+	kfree_skb(self->rx_buff.skb);
 	self->rx_buff.skb = NULL;
 	
 	/* Remove ourselves */

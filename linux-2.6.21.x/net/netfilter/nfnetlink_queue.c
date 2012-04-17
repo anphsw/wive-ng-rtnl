@@ -526,8 +526,7 @@ nfqnl_build_packet_message(struct nfqnl_instance *queue,
 
 nlmsg_failure:
 nfattr_failure:
-	if (skb)
-		kfree_skb(skb);
+	kfree_skb(skb);
 	*errp = -EINVAL;
 	if (net_ratelimit())
 		printk(KERN_ERR "nf_queue: error creating packet message\n");

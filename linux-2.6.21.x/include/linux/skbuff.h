@@ -1683,8 +1683,7 @@ static inline void nf_conntrack_get_reasm(struct sk_buff *skb)
 }
 static inline void nf_conntrack_put_reasm(struct sk_buff *skb)
 {
-	if (skb)
-		kfree_skb(skb);
+	kfree_skb(skb);
 }
 #endif
 #ifdef CONFIG_BRIDGE_NETFILTER

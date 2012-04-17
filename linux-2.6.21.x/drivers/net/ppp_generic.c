@@ -1263,8 +1263,7 @@ ppp_send_frame(struct ppp *ppp, struct sk_buff *skb)
 	return;
 
  drop:
-	if (skb)
-		kfree_skb(skb);
+	kfree_skb(skb);
 	++ppp->stats.tx_errors;
 #ifdef CONFIG_RALINK_GPIO_LED_VPN
 	led.on = 0;
@@ -2717,8 +2716,7 @@ static void ppp_destroy_interface(struct ppp *ppp)
 	ppp->active_filter = NULL;
 #endif /* CONFIG_PPP_FILTER */
 
-	if (ppp->xmit_pending)
-		kfree_skb(ppp->xmit_pending);
+	kfree_skb(ppp->xmit_pending);
 
 	free_netdev(ppp->dev);
 }

@@ -943,8 +943,7 @@ int netlink_broadcast(struct sock *ssk, struct sk_buff *skb, u32 pid,
 
 	netlink_unlock_table();
 
-	if (info.skb2)
-		kfree_skb(info.skb2);
+	kfree_skb(info.skb2);
 
 	if (info.delivered) {
 		if (info.congested && (allocation & __GFP_WAIT) && !in_interrupt())
@@ -1326,8 +1325,7 @@ void netlink_set_nonroot(int protocol, unsigned int flags)
 
 static void netlink_destroy_callback(struct netlink_callback *cb)
 {
-	if (cb->skb)
-		kfree_skb(cb->skb);
+	kfree_skb(cb->skb);
 	kfree(cb);
 }
 

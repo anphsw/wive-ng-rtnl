@@ -599,8 +599,7 @@ void __rxrpc_put_message(struct rxrpc_message *msg)
 
 	_enter("%p #%d", msg, atomic_read(&rxrpc_message_count));
 
-	if (msg->pkt)
-		kfree_skb(msg->pkt);
+	kfree_skb(msg->pkt);
 	rxrpc_put_connection(msg->conn);
 
 	for (loop = 0; loop < 8; loop++)

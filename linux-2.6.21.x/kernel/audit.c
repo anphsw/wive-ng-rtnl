@@ -462,8 +462,7 @@ struct sk_buff *audit_make_reply(int pid, int seq, int type, int done,
 	return skb;
 
 nlmsg_failure:			/* Used by NLMSG_PUT */
-	if (skb)
-		kfree_skb(skb);
+	kfree_skb(skb);
 	return NULL;
 }
 
@@ -845,8 +844,7 @@ static void audit_buffer_free(struct audit_buffer *ab)
 	if (!ab)
 		return;
 
-	if (ab->skb)
-		kfree_skb(ab->skb);
+	kfree_skb(ab->skb);
 
 	spin_lock_irqsave(&audit_freelist_lock, flags);
 	if (audit_freelist_count > AUDIT_MAXFREE)

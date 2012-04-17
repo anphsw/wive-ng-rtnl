@@ -970,8 +970,7 @@ static int pppoe_recvmsg(struct kiocb *iocb, struct socket *sock,
 	}
 
 do_skb_free:
-	if (skb)
-		kfree_skb(skb);
+	kfree_skb(skb);
 end:
 	return error;
 }

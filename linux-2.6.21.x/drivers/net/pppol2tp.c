@@ -865,8 +865,7 @@ static int pppol2tp_recvmsg(struct kiocb *iocb, struct socket *sock,
 	if (likely(err == 0))
 		err = len;
 
-	if (skb)
-		kfree_skb(skb);
+	kfree_skb(skb);
 
 error:
 	EXIT_FUNCTION;
