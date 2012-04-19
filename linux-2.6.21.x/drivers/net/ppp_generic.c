@@ -962,8 +962,7 @@ ppp_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	put_unaligned_be16(proto, pp);
 
 	skb_queue_tail(&ppp->file.xq, skb);
-	if (!ppp_xmit_process(ppp))
-		netif_stop_queue(dev);
+	ppp_xmit_process(ppp)
 	return 0;
 
  outf:
@@ -1045,11 +1044,10 @@ static void ppp_setup(struct net_device *dev)
  * Called to do any work queued up on the transmit side
  * that can now be done.
  */
-static inline int
+static inline void
 ppp_xmit_process(struct ppp *ppp)
 {
 	struct sk_buff *skb;
-	int ret = 0;
 
 	ppp_xmit_lock(ppp);
 	if (!ppp->closing) {
@@ -1059,13 +1057,12 @@ ppp_xmit_process(struct ppp *ppp)
 			ppp_send_frame(ppp, skb);
 		/* If there's no work left to do, tell the core net
 		   code that we can accept some more. */
-		if (!(ppp->xmit_pending) && !(skb_peek(&ppp->file.xq))) {
+		if (!(ppp->xmit_pending) && !(skb_peek(&ppp->file.xq)))
 			netif_wake_queue(ppp->dev);
-			ret = 1;
-		}
+		else
+			netif_stop_queue(ppp->dev);
 	}
 	ppp_xmit_unlock(ppp);
-	return ret;
 }
 
 static inline struct sk_buff *
