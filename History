@@ -1059,6 +1059,8 @@
 3) BCM_NAT optimize and fix offload ready checks.<br>
 4) Small CONE NAT optimization.<br>
 5) Netfilter optimization and fixes.<br>
+6) Remove some pointless conditionals before kfree_skb().<br>
+7) Fix vfs sendfile regression.<br>
 
 <br><br>
 <b>For support see:</b><br>
