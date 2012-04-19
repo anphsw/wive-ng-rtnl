@@ -266,7 +266,7 @@ static atomic_t channel_count = ATOMIC_INIT(0);
 void ppp_stat_add(struct ppp_channel *chan, struct sk_buff *skb);
 static int ppp_unattached_ioctl(struct ppp_file *pf, struct file *file,
 				unsigned int cmd, unsigned long arg);
-static int ppp_xmit_process(struct ppp *ppp);
+static void ppp_xmit_process(struct ppp *ppp);
 static void ppp_send_frame(struct ppp *ppp, struct sk_buff *skb);
 static void ppp_push(struct ppp *ppp);
 static void ppp_channel_push(struct channel *pch);
@@ -1044,8 +1044,7 @@ static void ppp_setup(struct net_device *dev)
  * Called to do any work queued up on the transmit side
  * that can now be done.
  */
-static inline void
-ppp_xmit_process(struct ppp *ppp)
+static void ppp_xmit_process(struct ppp *ppp)
 {
 	struct sk_buff *skb;
 
