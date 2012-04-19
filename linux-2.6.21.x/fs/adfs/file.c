@@ -33,7 +33,7 @@ const struct file_operations adfs_file_operations = {
 	.fsync		= file_fsync,
 	.write		= do_sync_write,
 	.aio_write	= generic_file_aio_write,
-	.splice_read	= generic_file_splice_read,
+	.sendfile	= generic_file_sendfile,
 };
 
 const struct inode_operations adfs_file_inode_operations = {

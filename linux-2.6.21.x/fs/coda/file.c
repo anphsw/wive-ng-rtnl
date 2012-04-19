@@ -47,9 +47,8 @@ coda_file_read(struct file *coda_file, char __user *buf, size_t count, loff_t *p
 }
 
 static ssize_t
-coda_file_splice_read(struct file *coda_file, loff_t *ppos,
-		      struct pipe_inode_info *pipe, size_t count,
-		      unsigned int flags)
+coda_file_sendfile(struct file *coda_file, loff_t *ppos, size_t count,
+		   read_actor_t actor, void *target)
 {
 	struct coda_file_info *cfi;
 	struct file *host_file;
@@ -58,10 +57,10 @@ coda_file_splice_read(struct file *coda_file, loff_t *ppos,
 	BUG_ON(!cfi || cfi->cfi_magic != CODA_MAGIC);
 	host_file = cfi->cfi_container;
 
-	if (!host_file->f_op || !host_file->f_op->splice_read)
+	if (!host_file->f_op || !host_file->f_op->sendfile)
 		return -EINVAL;
 
-	return host_file->f_op->splice_read(host_file, ppos, pipe, count,flags);
+	return host_file->f_op->sendfile(host_file, ppos, count, actor, target);
 }
 
 static ssize_t
@@ -296,6 +295,6 @@ const struct file_operations coda_file_operations = {
 	.flush		= coda_flush,
 	.release	= coda_release,
 	.fsync		= coda_fsync,
-	.splice_read	= coda_file_splice_read,
+	.sendfile	= coda_file_sendfile,
 };
 

@@ -42,7 +42,7 @@ const struct file_operations ramfs_file_operations = {
 	.write			= do_sync_write,
 	.aio_write		= generic_file_aio_write,
 	.fsync			= simple_sync_file,
-	.splice_read		= generic_file_splice_read,
+	.sendfile		= generic_file_sendfile,
 	.llseek			= generic_file_llseek,
 };
 
