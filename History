@@ -1061,6 +1061,8 @@
 5) Netfilter optimization and fixes.<br>
 6) Remove some pointless conditionals before kfree_skb().<br>
 7) Fix vfs sendfile regression.<br>
+8) Fix race condition with queue start/stop regression in ppp_generic.<br>
+9) Back to pre-gcc-4.4 behaviour of .eh_frame for mips.<br>
 
 <br><br>
 <b>For support see:</b><br>
