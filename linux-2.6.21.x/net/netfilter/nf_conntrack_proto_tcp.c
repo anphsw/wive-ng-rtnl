@@ -532,9 +532,7 @@ static int tcp_in_window(struct nf_conn *ct,
 	struct ip_ct_tcp_state *receiver = &state->seen[!dir];
 	__u32 seq, ack, sack, end, win;
 	s16 receiver_offset;
-#ifdef CONFIG_RA_NAT_NONE
 	__u32 swin;
-#endif
 	int res;
 
 #ifdef CONFIG_IPTABLES_SPEEDUP
@@ -599,8 +597,8 @@ static int tcp_in_window(struct nf_conn *ct,
 			 * Let's try to use the data from the packet.
 			 */
 			sender->td_end = end;
-			win <<= sender->td_scale;
-			sender->td_maxwin = (win == 0 ? 1 : win);
+			swin = win << sender->td_scale;
+			sender->td_maxwin = (swin == 0 ? 1 : swin);
 			sender->td_maxend = end + sender->td_maxwin;
 			/*
 			 * We haven't seen traffic in the other direction yet
