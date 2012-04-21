@@ -1063,6 +1063,7 @@
 7) Fix vfs sendfile regression.<br>
 8) Fix race condition with queue start/stop regression in ppp_generic.<br>
 9) Back to pre-gcc-4.4 behaviour of .eh_frame for mips.<br>
+10) Update miniupnpd to 1.6.20120420 version.<br>
 
 <br><br>
 <b>For support see:</b><br>
