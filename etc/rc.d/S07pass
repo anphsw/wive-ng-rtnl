@@ -16,7 +16,7 @@ start() {
 
     # set new password
     echo "$Login:$Password" > /tmp/tmpchpw
-    chpasswd < /tmp/tmpchpw
+    chpasswd -m < /tmp/tmpchpw
     rm -f /tmp/tmpchpw
 }
 
