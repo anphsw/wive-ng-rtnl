@@ -1,4 +1,19 @@
-$Id: Changelog.txt,v 1.267 2012/04/06 17:24:36 nanard Exp $
+$Id: Changelog.txt,v 1.272 2012/04/20 14:38:38 nanard Exp $
+
+2012/04/20:
+  Enough WANIPv6FirewallControl is implemented on pf so that AddPinhole() and
+    DeletePinhole() works !
+
+2012/04/19:
+  First working experiment of IPv6 "pinhole" with pf
+
+2012/04/15:
+  More C++ => ANSI C comments to compile with -ansi option
+  Add command line arguments to genconfig.sh config script.
+
+2012/04/12:
+  Set TTL on SSDP Notify sockets (IPv4). TTL is set to 2 (recommendation from
+    UPnP Device Architecture v1.1)
 
 2012/04/06:
   Implementing IPv6 support :
