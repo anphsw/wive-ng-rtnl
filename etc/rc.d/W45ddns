@@ -23,7 +23,7 @@ start() {
 	elif [ "$DDNSProvider" = "zoneedit.com" ] || [ "$DDNSProvider" = "no-ip.com" ]; then
 	    inadyn -u $DDNSAccount -p $DDNSPassword -a $DDNS --dyndns_system default@$DDNSProvider --update_period_sec $update_period --background --syslog
 	elif [ "$DDNSProvider" = "freedns.afraid.org" ]; then
-	    inadyn -a $DDNS,$DDNSPassword --dyndns_system default@$DDNSProvider --update_period_sec $update_period --background --syslog
+	    inadyn -a $DDNS,$DDNSAccount --dyndns_system default@$DDNSProvider --update_period_sec $update_period --background --syslog
 	else
 	    $LOG "Unknown DDNS provider: $DDNSProvider"
 	    exit 1
