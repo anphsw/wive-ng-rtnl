@@ -51,7 +51,7 @@
 //usage:     "\n	-F	Don't store or verify checksum"
 
 #include "libbb.h"
-#include "archive.h"
+#include "bb_archive.h"
 #include "liblzo_interface.h"
 
 /* lzo-2.03/src/lzo_ptr.h */
@@ -211,7 +211,8 @@ static NOINLINE int lzo1x_optimize(uint8_t *in, unsigned in_len,
 					*litp = (unsigned char)(lit - 3);
 
 					o_m1_b++;
-					*op++ = *m_pos++; *op++ = *m_pos++;
+					*op++ = *m_pos++;
+					*op++ = *m_pos++;
 					goto copy_literal_run;
 				}
  copy_m1:
@@ -1076,7 +1077,7 @@ static char* FAST_FUNC make_new_name_lzop(char *filename, const char *expected_e
 	return xasprintf("%s.lzo", filename);
 }
 
-static IF_DESKTOP(long long) int FAST_FUNC pack_lzop(unpack_info_t *info UNUSED_PARAM)
+static IF_DESKTOP(long long) int FAST_FUNC pack_lzop(transformer_aux_data_t *aux UNUSED_PARAM)
 {
 	if (option_mask32 & OPT_DECOMPRESS)
 		return do_lzo_decompress();

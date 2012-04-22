@@ -1067,6 +1067,7 @@
 11) Rework some code in xl2tpd.<br>
 12) Update openssl to 0.9.8v version.<br>
 13) Chpasswd: use md5 by default.<br>
+14) Update busybox to 1.20.0 version.<br>
 
 <br><br>
 <b>For support see:</b><br>
