@@ -121,6 +121,11 @@
 #include <linux/ctype.h>
 #include <linux/prefetch.h>
 
+#if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+#include "../../net/nat/hw_nat/ra_nat.h"
+#include "../../net/nat/hw_nat/frame_engine.h"
+#endif
+
 #ifdef CONFIG_NET_PPPOE_IPV6_PTHROUGH
 extern int private_pthrough(struct sk_buff *skb);
 extern int pthrough_create_proc_entry(void);
@@ -1622,7 +1627,7 @@ int netif_rx(struct sk_buff *skb)
 	unsigned char *dest = eth_hdr(skb)->h_dest;
 
 	p = skb->dev->br_port;
-	if ((bridge_fast_path_enabled) && (((p!=NULL) && (p->br!=NULL)))) {
+	if ((bridge_fast_path_enabled) && ((p!=NULL) && (p->br!=NULL))) {
 		br=p->br;
 		br_fdb_update(br, p, eth_hdr(skb)->h_source);
 		dst = br_fdb_get(br, dest);
@@ -1631,11 +1636,14 @@ int netif_rx(struct sk_buff *skb)
 		    skb->dev = dst->dst->dev;
 		    skb_push(skb, ETH_HLEN);
 		    dev = skb->dev;
+#if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+		    /* hit this for PPE correct macs */
+		    FOE_AI(skb) = UN_HIT;
+#endif
 		    dev->hard_start_xmit(skb, dev);
 		    return NET_RX_SUCCESS;
 		}
 	}
-	
 #endif /* CONFIG_BRIDGE_NETFILTER */
 #endif /* CONFIG_BRIDGE_FASTPATH */
 
