@@ -204,3 +204,4 @@ romfs
 /toolchain/tmp/mipsel-linux-uclibc-toolchain/gcc-4.5.3/*
 /toolchain/tmp/mipsel-linux-uclibc-toolchain/include/*
 /toolchain/tmp/mipsel-linux-uclibc-toolchain/uClibc-0.9.28/*
+/user/miniupnp/config.h
