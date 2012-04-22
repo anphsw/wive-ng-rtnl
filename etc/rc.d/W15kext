@@ -60,9 +60,9 @@ hw_nat_en() {
 	    sw_nat=0
 	    $LOG "NAT Offload mode DISABLE"
 	fi
-	if [ "$QoSEnable" != "" -a "$QoSEnable" != "0" ] || [ "$simple_qos" = "1" ]; then
+	if [ "$QoSEnable" != "" -a "$QoSEnable" != "0" ]; then
 	    hw_nat=0
-	    $LOG "QoS or SimpleQoS enabled - HW_NAT Offload mode DISABLE"
+	    $LOG "QoS enabled - HW_NAT Offload mode DISABLE"
 	fi
 	# configure nat offload
 	if [ "$hw_nat" = "1" ]; then
