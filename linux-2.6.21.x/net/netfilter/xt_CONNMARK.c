@@ -77,7 +77,7 @@ target(struct sk_buff **pskb,
 				}
 #endif
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-	    			FOE_AI(*pskb) = UN_HIT;
+	    			FOE_AI(*pskb) = HIT_UNBIND;
 #endif
 				nf_conntrack_event_cache(IPCT_MARK, *pskb);
 			}

@@ -60,7 +60,7 @@ target_v0(struct sk_buff **pskb,
 	}
 #endif
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-	FOE_AI(*pskb) = UN_HIT;
+	FOE_AI(*pskb) = HIT_UNBIND;
 #endif
 	return XT_CONTINUE;
 }
@@ -92,7 +92,7 @@ target_v1(struct sk_buff **pskb,
 		}
 #endif
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-	        FOE_AI(*pskb) = UN_HIT;
+	        FOE_AI(*pskb) = HIT_UNBIND;
 #endif
 		break;
 
