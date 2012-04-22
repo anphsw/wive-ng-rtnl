@@ -24,6 +24,7 @@
 # -DDEBUG_MAGIC
 # -DDEBUG_FLOW_MORE
 # -DDEBUG_AUTH
+# -DDEBUG_MORE
 #
 # -DTEST_HIDDEN makes Assigned Call ID sent as a hidden AVP
 #
@@ -76,6 +77,10 @@ OSFLAGS+= -DUSE_KERNEL
 # Uncomment the following for kernel module autoload
 #
 #OSFLAGS+= -DMODULE_AUTO
+#
+# Uncomment the following for set high prio for xl2tpd process
+#
+OSFLAGS+= -DHIGH_PRIO
 #
 # Uncomment the next line for FreeBSD
 #

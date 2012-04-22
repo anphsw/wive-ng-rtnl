@@ -1166,11 +1166,12 @@ inline int check_control (const struct buffer *buf, struct tunnel *t,
 #endif
     if (h->Ns != t->control_rec_seq_num)
     {
-        /*if (DEBUG)
+#ifdef DEBUG_MORE
+        if (DEBUG)
             l2tp_log (LOG_DEBUG,
                  "%s: Received out of order control packet on tunnel %d (got %d, expected %d)\n",
                  __FUNCTION__, t->tid, h->Ns, t->control_rec_seq_num);
-        sfstudio - no log*/
+#endif
         if (((h->Ns < t->control_rec_seq_num) && 
             ((t->control_rec_seq_num - h->Ns) < 32768)) ||
             ((h->Ns > t->control_rec_seq_num) &&
@@ -1568,9 +1569,10 @@ inline int write_packet (struct buffer *buf, struct tunnel *t, struct call *c,
 
     if (c->fd < 0)
     {
-        //sfstudio not in log
-        //if (DEBUG || 1)
-        //    l2tp_log (LOG_DEBUG, "%s: tty is not open yet.\n", __FUNCTION__);
+#ifdef DEBUG_MORE
+        if (DEBUG || 1)
+            l2tp_log (LOG_DEBUG, "%s: tty is not open yet.\n", __FUNCTION__);
+#endif
         return -EIO;
     }
     /*
@@ -1784,8 +1786,10 @@ inline int handle_packet (struct buffer *buf, struct tunnel *t,
             }
         }
         else
-        {    //sfstudio - no log
-            //l2tp_log (LOG_DEBUG, "%s: bad control packet!\n", __FUNCTION__);
+        {
+#ifdef DEBUG_MORE
+            l2tp_log (LOG_DEBUG, "%s: bad control packet!\n", __FUNCTION__);
+#endif
             return -EINVAL;
         }
     }

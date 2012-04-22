@@ -631,8 +631,9 @@ struct call *get_call (int tunnel, int call,  struct in_addr addr, int port,
             }
             st = st->next;
         }
-	 //sfstudio - no log
-        //l2tp_log (LOG_INFO, "Can not find tunnel %u (refhim=%u)\n", tunnel, refhim);
+#ifdef DEBUG_MORE
+        l2tp_log (LOG_INFO, "Can not find tunnel %u (refhim=%u)\n", tunnel, refhim);
+#endif
         return NULL;
     }
     else

@@ -1557,12 +1557,13 @@ void init (int argc,char *argv[])
 
     l2tp_log (LOG_INFO, "xl2tpd version " SERVER_VERSION " started on %s PID:%d\n", hostname, getpid ());
 
-/*  l2tp_log (LOG_INFO, "Written by Mark Spencer, Copyright (C) 1998, Adtran, Inc.\n");
+#ifdef DEBUG_MORE
+    l2tp_log (LOG_INFO, "Written by Mark Spencer, Copyright (C) 1998, Adtran, Inc.\n");
     l2tp_log (LOG_INFO, "Forked by Scott Balmos and David Stipp, (C) 2001\n");
     l2tp_log (LOG_INFO, "Inherited by Jeff McAdams, (C) 2002\n");
     l2tp_log (LOG_INFO, "Forked again by Xelerance (www.xelerance.com) (C) 2006\n");
     l2tp_log (LOG_INFO, "Listening on IP address %s, port %d\n", inet_ntoa(listenaddr), gconfig.port);
-sfstudio - no log */
+#endif
 
     listenaddr.s_addr = gconfig.listenaddr;
     lac = laclist;

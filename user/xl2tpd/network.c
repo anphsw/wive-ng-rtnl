@@ -92,7 +92,7 @@ int init_network (void)
     server.sin_family = AF_INET;
     server.sin_addr.s_addr = gconfig.listenaddr; 
     server.sin_port = htons (gconfig.port);
-    int flags;
+
     if ((server_socket = socket (PF_INET, SOCK_DGRAM, 0)) < 0)
     {
         l2tp_log (LOG_CRIT, "%s: Unable to allocate socket. Terminating.\n",
@@ -103,10 +103,6 @@ int init_network (void)
     arg=1;
     setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &arg, sizeof(arg));
     setsockopt(server_socket, SOL_SOCKET, SO_NO_CHECK, &arg, sizeof(arg));
-
-    flags = 1;
-    setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &flags, sizeof(flags));
-    setsockopt(server_socket, SOL_SOCKET, SO_NO_CHECK, &flags, sizeof(flags));
 
     if (bind (server_socket, (struct sockaddr *) &server, sizeof (server)))
     {
@@ -130,8 +126,9 @@ int init_network (void)
     arg=1;
     if(setsockopt(server_socket, IPPROTO_IP, gconfig.sarefnum,
 		  &arg, sizeof(arg)) != 0) {
-	    //l2tp_log(LOG_CRIT, "setsockopt recvref[%d]: %s\n", gconfig.sarefnum, strerror(errno));
-
+#ifdef DEBUG_MORE
+	    l2tp_log(LOG_CRIT, "setsockopt recvref[%d]: %s\n", gconfig.sarefnum, strerror(errno));
+#endif
 	    gconfig.ipsecsaref=0;
     }
 #else
@@ -466,9 +463,11 @@ void network_thread ()
     int * currentfd;
     int server_socket_processed;
 
+#ifdef HIGH_PRIO
     /* set high priority */
     if (setpriority(PRIO_PROCESS, 0, -20) < 0)
 	warn("xl2tpd: can't set priority to high: %m");
+#endif
 
     /* This one buffer can be recycled for everything except control packets */
     buf = new_buf (MAX_RECV_SIZE);
@@ -483,8 +482,9 @@ void network_thread ()
         max = build_fdset (&readfds);
         ptv = process_schedule(&tv);
         ret = select (max + 1, &readfds, NULL, NULL, ptv);
-        
-        /*if (ret <= 0)
+
+#ifdef DEBUG_MORE
+        if (ret <= 0)
         {
              if (ret == 0)
             {
@@ -502,12 +502,10 @@ void network_thread ()
                         __FUNCTION__, errno, strerror (errno));
                 }
             }
-            
-            
             continue;
         }
-        */
-        
+#endif
+
         if (FD_ISSET (control_fd, &readfds))
         {
             do_control ();
@@ -648,12 +646,13 @@ void network_thread ()
 		    /* get a new buffer */
 		    buf = new_buf (MAX_RECV_SIZE);
 		}
+#ifdef DEBUG_MORE
 		else{
-		    /*l2tp_log (LOG_DEBUG,
+		    l2tp_log (LOG_DEBUG,
 			      "%s: unable to find call or tunnel to handle packet.  call = %d, tunnel = %d Dumping.\n",
 			      __FUNCTION__, call, tunnel);
-		sfstudio - no log*/
 		    }
+#endif
 	    }
 	    else
 	    {
