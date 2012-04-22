@@ -1064,6 +1064,9 @@
 8) Fix race condition with queue start/stop regression in ppp_generic.<br>
 9) Back to pre-gcc-4.4 behaviour of .eh_frame for mips.<br>
 10) Update miniupnpd to 1.6.20120420 version.<br>
+11) Rework some code in xl2tpd.<br>
+12) Update openssl to 0.9.8v version.<br>
+13) Chpasswd: use md5 by default.<br>
 
 <br><br>
 <b>For support see:</b><br>
