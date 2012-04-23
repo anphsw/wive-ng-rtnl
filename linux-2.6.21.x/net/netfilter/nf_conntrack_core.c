@@ -171,8 +171,17 @@ static unsigned int is_local_prtc(u_int8_t protonm)
 {
 	/* Local gre/esp/ah/ip-ip/icmp proto must be skip from software offload
 	    and mark as interested by ALG  for correct tracking this */
-	if (protonm == IPPROTO_GRE || protonm == IPPROTO_ESP || protonm == IPPROTO_AH || protonm == IPPROTO_IPIP || protonm == IPPROTO_ICMP)
+	switch (protonm) {
+	case IPPROTO_IPIP:
+	case IPPROTO_ICMP:
+	case IPPROTO_GRE:
+	case IPPROTO_ESP:
+	case IPPROTO_AH:
 		return 1;
+	default:
+		return 0;
+	}
+
     return 0;
 };
 #endif
