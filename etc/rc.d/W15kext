@@ -66,6 +66,7 @@ hw_nat_en() {
 	fi
 	if [ "$hw_nat_wifi" = "1" ]; then
 	    hw_nat_wifi="wifi_offload=1"
+	    $LOG "WiFi HW_NAT Offload mode ENABLE"
 	fi
 	# configure nat offload
 	if [ "$hw_nat" = "1" ]; then
