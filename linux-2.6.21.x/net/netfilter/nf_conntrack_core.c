@@ -1760,14 +1760,22 @@ int __init nf_conntrack_init(void)
 	}
 	nf_conntrack_max = 8 * nf_conntrack_htable_size;
 #endif
-	 /* SpeedMod: Hashtable size: Limit ~2k records for 16Mb devices and ~4k for 32Mb. */
-#if defined(CONFIG_RAETH_MEMORY_OPTIMIZATION) || defined(CONFIG_RT2860V2_AP_MEMORY_OPTIMIZATION) || defined(CONFIG_RALINK_RT3050_1T1R)
-        nf_conntrack_htable_size = 8192;
-        nf_conntrack_max = nf_conntrack_htable_size / 8;
+	 /* SpeedMod: Hashtable size: Limit ~2k records for 16Mb devices and ~4k for 32Mb.
+	    This is must be set depended at foe table size. And may be changed by /proc */
+#if defined(CONFIG_RAETH_MEMORY_OPTIMIZATION) || defined(CONFIG_RT2860V2_AP_MEMORY_OPTIMIZATION) || \
+    defined(CONFIG_RA_HW_NAT_TBL_1K) || defined(CONFIG_RA_HW_NAT_TBL_2K)
+        nf_conntrack_htable_size = 1024;
 #else
-        nf_conntrack_htable_size = 16384;
-        nf_conntrack_max = nf_conntrack_htable_size / 4;
+#if defined(CONFIG_RA_HW_NAT_TBL_4K)
+        nf_conntrack_htable_size = 2048;
+#elif defined(CONFIG_RA_HW_NAT_TBL_8K)
+        nf_conntrack_htable_size = 4096;
+#elif defined(CONFIG_RA_HW_NAT_TBL_16K)
+        nf_conntrack_htable_size = 8192;
+#else
+        nf_conntrack_htable_size = 2048;
 #endif
+        nf_conntrack_max = nf_conntrack_htable_size * 2;
 
 	printk("nf_conntrack version %s (%u buckets, %d max)\n",
 	       NF_CONNTRACK_VERSION, nf_conntrack_htable_size,
