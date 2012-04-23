@@ -1076,6 +1076,7 @@
 4) Fix bridge fastpath traffic allow offloaded with PPE.<br>
 5) Netfilter rework some init/destroy code.<br>
 6) Disable APSD (WMM PowerSave) by default.<br>
+7) Add PPE wifi offload support (hw_nat_wifi variable default 0).<br>
 
 <br><br>
 <b>For support see:</b><br>

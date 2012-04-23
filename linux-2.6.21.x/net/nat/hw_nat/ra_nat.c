@@ -79,6 +79,16 @@
 #include "ac_policy.h"
 #include "util.h"
 
+#if defined  (CONFIG_RA_HW_NAT_WIFI)
+static int wifi_offload __read_mostly = 0;
+module_param(wifi_offload, bool, 0);
+MODULE_PARM_DESC(wifi_offload, "Enable/Disable wifi PPE NAT Offload.");
+#endif
+
+MODULE_AUTHOR("Steven Liu/Kurtis Ke");
+MODULE_LICENSE("Proprietary");
+MODULE_DESCRIPTION("Ralink Hardware NAT v0.92\n");
+
 #if !defined (CONFIG_RA_HW_NAT_MANUAL_BIND)
 #define LAN_PORT_VLAN_ID	CONFIG_RA_HW_NAT_LAN_VLANID
 #define WAN_PORT_VLAN_ID	CONFIG_RA_HW_NAT_WAN_VLANID
@@ -100,16 +110,16 @@ uint32_t           DscpReMarkerEbl=0;
 uint32_t	    DebugLevel=0;
 #endif
 
-uint16_t GLOBAL_PRE_ACL_STR  = DFL_PRE_ACL_STR; 
-uint16_t GLOBAL_PRE_ACL_END  = DFL_PRE_ACL_END; 
-uint16_t GLOBAL_PRE_MTR_STR  = DFL_PRE_MTR_STR; 
-uint16_t GLOBAL_PRE_MTR_END  = DFL_PRE_MTR_END; 
-uint16_t GLOBAL_PRE_AC_STR   = DFL_PRE_AC_STR; 
-uint16_t GLOBAL_PRE_AC_END   = DFL_PRE_AC_END; 
-uint16_t GLOBAL_POST_MTR_STR = DFL_POST_MTR_STR; 
-uint16_t GLOBAL_POST_MTR_END = DFL_POST_MTR_END; 
-uint16_t GLOBAL_POST_AC_STR  = DFL_POST_AC_STR; 
-uint16_t GLOBAL_POST_AC_END  = DFL_POST_AC_END; 
+uint16_t GLOBAL_PRE_ACL_STR  = DFL_PRE_ACL_STR;
+uint16_t GLOBAL_PRE_ACL_END  = DFL_PRE_ACL_END;
+uint16_t GLOBAL_PRE_MTR_STR  = DFL_PRE_MTR_STR;
+uint16_t GLOBAL_PRE_MTR_END  = DFL_PRE_MTR_END;
+uint16_t GLOBAL_PRE_AC_STR   = DFL_PRE_AC_STR;
+uint16_t GLOBAL_PRE_AC_END   = DFL_PRE_AC_END;
+uint16_t GLOBAL_POST_MTR_STR = DFL_POST_MTR_STR;
+uint16_t GLOBAL_POST_MTR_END = DFL_POST_MTR_END;
+uint16_t GLOBAL_POST_AC_STR  = DFL_POST_AC_STR;
+uint16_t GLOBAL_POST_AC_END  = DFL_POST_AC_END;
 
 #ifdef HWNAT_DEBUG
 void skb_dump(struct sk_buff* sk) {
@@ -148,16 +158,14 @@ int RemoveVlanTag(struct sk_buff *skb)
     veth = (struct vlan_ethhdr *)(skb->mac.raw);
 #endif
 
-    //something wrong
+    /* something wrong */
     if(veth->h_vlan_proto != htons(ETH_P_8021Q)) {
 	printk("HNAT: Reentry packet is untagged frame?\n");
 	return 65535;
     }
 
-    VirIfIdx = ntohs(veth->h_vlan_TCI);
-
+    /* make skb writable */
     if (skb_cloned(skb) || skb_shared(skb)) {
-
 	struct sk_buff *new_skb;
 	new_skb = skb_copy(skb, GFP_ATOMIC);
 	kfree_skb(skb);
@@ -165,6 +173,9 @@ int RemoveVlanTag(struct sk_buff *skb)
 	    return 65535;
 	skb = new_skb;
     }
+
+    /* get VirIfIdx */
+    VirIfIdx = ntohs(veth->h_vlan_TCI);
 
     /* remove VLAN tag */
 #if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,32)
@@ -450,6 +461,16 @@ int32_t PpeRxHandler(struct sk_buff * skb)
 
     if( ((FOE_MAGIC_TAG(skb) == FOE_MAGIC_PCI) || (FOE_MAGIC_TAG(skb) == FOE_MAGIC_WLAN))){
 #if defined  (CONFIG_RA_HW_NAT_WIFI)
+	    if (!wifi_offload)
+		    return 1;
+
+#if defined (CONFIG_RALINK_RT3052) || defined(HWNAT_SPKIP_MCAST_BCAST)
+	    /* skip bcast/unicast traffic PPE or wifi bug ? */
+	    eth = eth_hdr(skb);
+	    if(is_multicast_ether_addr(eth->h_dest) || is_broadcast_ether_addr(eth->h_dest) || is_zero_ether_addr(eth->h_dest))
+		    return 1;
+#endif
+
 	    if(skb->dev == DstPort[DP_RA0]) { VirIfIdx=DP_RA0;}
 #if defined (CONFIG_RT2860V2_AP_MBSS)
 	    else if(skb->dev == DstPort[DP_RA1]) { VirIfIdx=DP_RA1; }
@@ -516,8 +537,10 @@ int32_t PpeRxHandler(struct sk_buff * skb)
 	    //so HNAT module can know the actual incoming interface from vlan id.
 	    skb_push(skb, ETH_HLEN); //pointer to layer2 header before calling hard_start_xmit
 	    skb = __vlan_put_tag(skb, VirIfIdx);
-	    if (!skb)
-		return 1; // not valid tag ? memleak ?
+	    if (!skb) {
+		NAT_PRINT("HNAT: not valid tag ? memleak ? (VirIfIdx=%d)\n", VirIfIdx);
+		return 1;
+	    }
 
 	    //redirect to PPE
 	    FOE_AI(skb) = UN_HIT;
@@ -528,11 +551,10 @@ int32_t PpeRxHandler(struct sk_buff * skb)
 #else
 	    skb->dev->hard_start_xmit(skb, skb->dev);
 #endif
+	    return 0;
 #else
 	    return 1;
 #endif // CONFIG_RA_HW_NAT_WIFI //
-
-	    return 0;
 
     }
 
@@ -551,6 +573,8 @@ int32_t PpeRxHandler(struct sk_buff * skb)
     }
 
 #if defined (CONFIG_RA_HW_NAT_WIFI)
+    if (!wifi_offload)
+	    goto skip_reentry;
     /*
      * RT3883/RT3352/RT6855:
      * If FOE_AIS=1 and FOE_SP=0/6, it means this is reentry packet.
@@ -582,7 +606,7 @@ int32_t PpeRxHandler(struct sk_buff * skb)
 	//recover to right incoming interface
 	if(VirIfIdx < MAX_IF_NUM) {
 	    skb->dev=DstPort[VirIfIdx];
-	}else {
+	} else {
 	    NAT_PRINT("HNAT: unknown interface (VirIfIdx=%d)\n", VirIfIdx);
 	    goto skip_reentry;
 	}
@@ -1071,7 +1095,11 @@ int32_t PpeTxHandler(struct sk_buff *skb, int gmac_no)
 		    (strncmp(skb->dev->name,"apcli",5)==0) ||
 		    (skb->dev == DstPort[DP_PCI])) {
 #if defined  (CONFIG_RA_HW_NAT_WIFI)
-			entry.iblk2.dp=0; /* cpu */
+			if (!wifi_offload) {
+			    memset(FOE_INFO_START_ADDR(skb), 0, FOE_INFO_LEN);
+			    return 1;
+			} else
+			    entry.iblk2.dp=0; /* cpu */
 #else
 			memset(FOE_INFO_START_ADDR(skb), 0, FOE_INFO_LEN);
 			return 1;
@@ -2292,8 +2320,3 @@ int PpeSetBindLifetime(uint16_t tcp_life, uint16_t udp_life, uint16_t fin_life)
 
 module_init(PpeInitMod);
 module_exit(PpeCleanupMod);
-
-MODULE_AUTHOR("Steven Liu/Kurtis Ke");
-MODULE_LICENSE("Proprietary");
-MODULE_DESCRIPTION("Ralink Hardware NAT v0.92\n");
-

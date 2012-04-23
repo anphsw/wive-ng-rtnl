@@ -1,4 +1,5 @@
 # For sadko
+) hw_nat_wifi variable need add in gui (0/1 default 0 - wifi hardware nat offload).
 ) Need rewrite QoS page (remove ralink QoS and add new types QoS).
 ) Add /proc/rt3052/esw_cnt for traffic statistic per switch port.(need add in WebUI).
 

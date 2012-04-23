@@ -41,7 +41,7 @@ nat_mode() {
 hw_nat_en() {
     # In bridge and chillispot mode not fastnat use
     if [ "$OperationMode" != "0" ] && [ "$OperationMode" != "4" ]; then
-	eval `nvram_buf_get 2860 hw_nat_bind natFastpath`
+	eval `nvram_buf_get 2860 hw_nat_bind hw_nat_wifi natFastpath`
 	# select NAT offload mode
 	if [ "$natFastpath" = "1" ]; then
 	    hw_nat=0
@@ -64,10 +64,13 @@ hw_nat_en() {
 	    hw_nat=0
 	    $LOG "QoS enabled - HW_NAT Offload mode DISABLE"
 	fi
+	if [ "$hw_nat_wifi" = "1" ]; then
+	    hw_nat_wifi="wifi_offload=1"
+	fi
 	# configure nat offload
 	if [ "$hw_nat" = "1" ]; then
 	    if [ ! -d /sys/module/hw_nat ]; then
-		modprobe -q hw_nat
+		modprobe -q hw_nat "$hw_nat_wifi"
 	    fi
 	    # set HW_NAT default QOS Mode to WRR policy
 	    hw_nat -L 0
