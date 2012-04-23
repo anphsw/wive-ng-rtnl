@@ -33,26 +33,6 @@
 
 MODULE_LICENSE("GPL");
 
-#ifdef CONFIG_NF_FLUSH_CONNTRACK
-unsigned int nf_conntrack_table_flush = 0;
-EXPORT_SYMBOL_GPL(nf_conntrack_table_flush);
-#endif
-
-#ifdef CONFIG_NF_PRIVILEGE_CONNTRACK
-unsigned int nf_conntrack_max_general = 640;
-EXPORT_SYMBOL_GPL(nf_conntrack_max_general);
-#endif
-
-#ifdef CONFIG_NAT_CONE
-unsigned int nf_conntrack_nat_mode = NAT_MODE_FCONE;
-EXPORT_SYMBOL_GPL(nf_conntrack_nat_mode);
-#endif
-
-#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-int nf_conntrack_fastnat = 0;
-EXPORT_SYMBOL_GPL(nf_conntrack_fastnat);
-#endif
-
 #ifdef CONFIG_PROC_FS
 int
 print_tuple(struct seq_file *s, const struct nf_conntrack_tuple *tuple,

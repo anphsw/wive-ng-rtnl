@@ -276,6 +276,22 @@ extern int nf_conntrack_checksum;
 extern atomic_t nf_conntrack_count;
 extern unsigned int nf_conntrack_max;
 
+#ifdef CONFIG_NF_PRIVILEGE_CONNTRACK
+extern unsigned int nf_conntrack_max_general;
+#endif
+
+#ifdef CONFIG_NF_FLUSH_CONNTRACK
+extern unsigned int nf_conntrack_table_flush;
+#endif
+
+#ifdef CONFIG_NAT_CONE
+extern unsigned int nf_conntrack_nat_mode;
+#endif
+
+#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+extern int nf_conntrack_fastnat;
+#endif
+
 DECLARE_PER_CPU(struct ip_conntrack_stat, nf_conntrack_stat);
 #define NF_CT_STAT_INC(count) (__get_cpu_var(nf_conntrack_stat).count++)
 #define NF_CT_STAT_INC_ATOMIC(count)			\

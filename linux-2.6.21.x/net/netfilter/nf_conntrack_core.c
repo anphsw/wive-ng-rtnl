@@ -89,7 +89,8 @@ unsigned int nf_ct_log_invalid __read_mostly;
 LIST_HEAD(unconfirmed);
 
 #ifdef CONFIG_NAT_CONE
-extern unsigned int nf_conntrack_nat_mode;
+unsigned int nf_conntrack_nat_mode __read_mostly;
+EXPORT_SYMBOL_GPL(nf_conntrack_nat_mode);
 extern char wan_name[IFNAMSIZ];
 #if defined (CONFIG_PPP) || defined (CONFIG_PPP_MODULE)
 extern char wan_ppp[IFNAMSIZ];
@@ -98,26 +99,25 @@ extern char wan_ppp[IFNAMSIZ];
 
 #ifdef CONFIG_NF_PRIVILEGE_CONNTRACK
 #define CONNTRACK_PORT_ARRAY_SIZE   15
-extern unsigned int nf_conntrack_max_general;
+unsigned int nf_conntrack_max_general __read_mostly;
+EXPORT_SYMBOL_GPL(nf_conntrack_max_general);
 static __u16 privilege_conntrack_port[CONNTRACK_PORT_ARRAY_SIZE]={80,23,3128,1863,5190,5222,22,21,25,110,443,53,67,68,69};
 #endif
 
 #ifdef CONFIG_NF_FLUSH_CONNTRACK
-extern unsigned int nf_conntrack_table_flush;
+unsigned int nf_conntrack_table_flush __read_mostly;
+EXPORT_SYMBOL_GPL(nf_conntrack_table_flush);
 #endif
 
-static int nf_conntrack_vmalloc __read_mostly;
-
-DEFINE_PER_CPU(struct ip_conntrack_stat, nf_conntrack_stat);
-EXPORT_PER_CPU_SYMBOL(nf_conntrack_stat);
-
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-extern int nf_conntrack_fastnat;
+int nf_conntrack_fastnat __read_mostly;
+EXPORT_SYMBOL_GPL(nf_conntrack_fastnat);
+
 extern struct sk_buff * nf_ct_ipv4_gather_frags(struct sk_buff *skb, u_int32_t user);
 
 typedef int (*bcmNatBindHook)(struct nf_conn *ct,
 	enum ip_conntrack_info ctinfo,
-	struct sk_buff **pskb, 
+	struct sk_buff **pskb,
 	struct nf_conntrack_l3proto *l3proto,
 	struct nf_conntrack_l4proto *l4proto);
 
@@ -136,6 +136,11 @@ int bcm_nat_hit_hook_func(bcmNatHitHook hook_func) {
 };
 EXPORT_SYMBOL(bcm_nat_hit_hook_func);
 #endif
+
+static int nf_conntrack_vmalloc __read_mostly;
+
+DEFINE_PER_CPU(struct ip_conntrack_stat, nf_conntrack_stat);
+EXPORT_PER_CPU_SYMBOL(nf_conntrack_stat);
 
 /*
  * This scheme offers various size of "struct nf_conn" dependent on
@@ -1746,6 +1751,13 @@ int __init nf_conntrack_init(void)
 	unsigned int i;
 	int ret;
 
+#ifdef CONFIG_NAT_CONE
+	nf_conntrack_nat_mode = NAT_MODE_FCONE;
+#endif
+#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+	nf_conntrack_fastnat = 0;
+#endif
+
 	/* Idea from tcp.c: use 1/16384 of memory.  On i386: 32MB
 	 * machine has 256 buckets.  >= 1GB machines have 8192 buckets. */
 #if 0
@@ -1775,7 +1787,12 @@ int __init nf_conntrack_init(void)
 #else
         nf_conntrack_htable_size = 2048;
 #endif
+#endif
         nf_conntrack_max = nf_conntrack_htable_size * 2;
+
+#ifdef CONFIG_NF_PRIVILEGE_CONNTRACK
+	nf_conntrack_max_general = nf_conntrack_max - 384;
+#endif
 
 	printk("nf_conntrack version %s (%u buckets, %d max)\n",
 	       NF_CONNTRACK_VERSION, nf_conntrack_htable_size,
