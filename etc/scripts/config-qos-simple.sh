@@ -18,7 +18,7 @@ IPTSCR="/etc/qos_firewall"
     echo "iptables -N simple_qos -t mangle > /dev/null 2>&1" >> $IPTSCR
     echo "iptables -F simple_qos -t mangle > /dev/null 2>&1" >> $IPTSCR
     echo "iptables -A OUTPUT -t mangle -j simple_qos > /dev/null 2>&1" >> $IPTSCR
-    echo "iptables -A PREROUTING -t mangle ! -d 224.0.0.0/4 -j simple_qos > /dev/null 2>&1" >> $IPTSCR
+    echo "iptables -A FORWARD ! -o $lan_if -t mangle ! -d 224.0.0.0/4 -j simple_qos > /dev/null 2>&1" >> $IPTSCR
 
     MIN_DEL="-j TOS --set-tos Minimize-Delay"
     MAX_THR="-j TOS --set-tos Maximize-Throughput"
