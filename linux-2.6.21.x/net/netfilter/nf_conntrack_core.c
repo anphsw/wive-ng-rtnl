@@ -167,27 +167,24 @@ static DEFINE_MUTEX(nf_ct_cache_mutex);
 static unsigned int nf_conntrack_hash_rnd __read_mostly;
 
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE) || defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-static inline unsigned int is_local_prtc(u_int8_t protonm)
+static unsigned int is_local_prtc(u_int8_t protonm)
 {
-	/* Local gre/esp/ah/ip-ip proto */
-	if (protonm == IPPROTO_GRE || protonm == IPPROTO_ESP || protonm == IPPROTO_AH || protonm == IPPROTO_IPIP)
+	/* Local gre/esp/ah/ip-ip/icmp proto must be skip from software offload
+	    and mark as interested by ALG  for correct tracking this */
+	if (protonm == IPPROTO_GRE || protonm == IPPROTO_ESP || protonm == IPPROTO_AH || protonm == IPPROTO_IPIP || protonm == IPPROTO_ICMP)
 		return 1;
     return 0;
 };
 #endif
 
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-static inline unsigned int is_local_svc(struct sk_buff **pskb, u_int8_t protonum)
+static unsigned int is_local_svc(struct sk_buff **pskb, u_int8_t protonm)
 {
 	struct udphdr *hdr;
 	struct iphdr *iph;
 
-	/* filter icmp traffic for correct pmtu works. */
-	if (protonum == IPPROTO_ICMP)
-	    return 0;
-
 	/* parse udp packets */
-	if (protonum == IPPROTO_UDP) {
+	if (protonm == IPPROTO_UDP) {
 	    iph	= (struct iphdr *)(*pskb)->nh.raw;
 	    if (iph != NULL) {
 		hdr = (struct udphdr*)((*pskb)->data + (iph->ihl << 2));
@@ -203,7 +200,7 @@ static inline unsigned int is_local_svc(struct sk_buff **pskb, u_int8_t protonum
 	    }
 	}
 
-    return is_local_prtc(protonum);
+    return is_local_prtc(protonm);
 };
 #endif
 
@@ -1310,7 +1307,7 @@ filter:
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
         if (nf_conntrack_fastnat && bcm_nat_bind_hook != NULL && pf == PF_INET) {
 		/* if need helper or nat type unknown/fast deny need skip packets */
-        	if (is_helper || !nat || is_local_prtc(protonum) || (nat->info.nat_type & NF_FAST_NAT_DENY))
+        	if (is_helper || is_local_prtc(protonum) || !nat || (nat->info.nat_type & NF_FAST_NAT_DENY))
 		    goto skip_sw;
 
 		/* Try send selected pakets to bcm_nat */
