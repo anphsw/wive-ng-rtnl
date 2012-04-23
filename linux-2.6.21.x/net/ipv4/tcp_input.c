@@ -278,6 +278,7 @@ static void tcp_grow_window(struct sock *sk,
 			incr = __tcp_grow_window(sk, skb);
 
 		if (incr) {
+			incr = max_t(int, incr, 2 * skb->len);
 			tp->rcv_ssthresh = min(tp->rcv_ssthresh + incr, tp->window_clamp);
 			inet_csk(sk)->icsk_ack.quick |= 1;
 		}
