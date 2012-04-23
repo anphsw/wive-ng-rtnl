@@ -1067,7 +1067,15 @@
 11) Rework some code in xl2tpd.<br>
 12) Update openssl to 0.9.8v version.<br>
 13) Chpasswd: use md5 by default.<br>
-14) Update busybox to 1.20.0 version.<br>
+
+<br>
+<b>2.5.x</b><br>
+1) Update busybox to 1.20.0 version.<br>
+2) Fix TOS/MARK/CONNMARK target need skip offload.<br>
+3) Fix icmp conntrack work.<br>
+4) Fix bridge fastpath traffic allow offloaded with PPE.<br>
+5) Netfilter rework some init/destroy code.<br>
+6) Disable APSD (WMM PowerSave) by default.<br>
 
 <br><br>
 <b>For support see:</b><br>
