@@ -167,7 +167,7 @@ static DEFINE_MUTEX(nf_ct_cache_mutex);
 static unsigned int nf_conntrack_hash_rnd __read_mostly;
 
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE) || defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-inline unsigned int is_local_prtc(u_int8_t protonm)
+static inline unsigned int is_local_prtc(u_int8_t protonm)
 {
 	/* Local gre/esp/ah/ip-ip proto */
 	if (protonm == IPPROTO_GRE || protonm == IPPROTO_ESP || protonm == IPPROTO_AH || protonm == IPPROTO_IPIP)
@@ -177,7 +177,7 @@ inline unsigned int is_local_prtc(u_int8_t protonm)
 #endif
 
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-inline unsigned int is_local_svc(struct sk_buff **pskb, u_int8_t protonum)
+static inline unsigned int is_local_svc(struct sk_buff **pskb, u_int8_t protonum)
 {
 	struct udphdr *hdr;
 	struct iphdr *iph;
