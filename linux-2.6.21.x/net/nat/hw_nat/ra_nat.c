@@ -466,9 +466,10 @@ int32_t PpeRxHandler(struct sk_buff * skb)
     }
 #endif
 
-    if( eth_type != ETH_P_8021Q && ((FOE_MAGIC_TAG(skb) == FOE_MAGIC_PCI) || (FOE_MAGIC_TAG(skb) == FOE_MAGIC_WLAN))){
+    if((FOE_MAGIC_TAG(skb) == FOE_MAGIC_PCI) || (FOE_MAGIC_TAG(skb) == FOE_MAGIC_WLAN)){
 #if defined  (CONFIG_RA_HW_NAT_WIFI)
-	    if (!wifi_offload)
+	    /* check wifi offload enabled and prevent vlan double incap */
+	    if (!wifi_offload || eth_type == ETH_P_8021Q)
 		    return 1;
 
 #if defined (CONFIG_RALINK_RT3052) || defined(HWNAT_SPKIP_MCAST_BCAST)
