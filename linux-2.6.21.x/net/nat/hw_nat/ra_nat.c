@@ -411,6 +411,16 @@ uint32_t FoeDumpPkt(struct sk_buff *skb)
 #endif
 #endif
 
+/*
+ * check SKB really accesseble
+ */
+static inline int ra_skb_is_ready(struct sk_buff *skb)
+{
+	if (skb_cloned(skb) && !skb->sk)
+		return 0;
+	return 1;
+}
+
 int32_t PpeRxHandler(struct sk_buff * skb)
 {
     struct ethhdr *eth=NULL;
@@ -528,6 +538,10 @@ int32_t PpeRxHandler(struct sk_buff * skb)
 #endif // CONFIG_RTDEV_AP_MESH //
 	    else if(skb->dev == DstPort[DP_PCI]) { VirIfIdx=DP_PCI; }
 	    else { printk("HNAT: The interface %s is unknown\n", skb->dev->name); }
+
+	    /* check skb avail to modify */
+	    if(!ra_skb_is_ready(skb))
+		return 1;
 
 	    //push vlan tag to stand for actual incoming interface,
 	    //so HNAT module can know the actual incoming interface from vlan id.
