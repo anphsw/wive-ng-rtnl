@@ -81,7 +81,7 @@
 
 #if defined  (CONFIG_RA_HW_NAT_WIFI)
 static int wifi_offload __read_mostly = 0;
-module_param(wifi_offload, bool, 0);
+module_param(wifi_offload, bool, S_IRUGO);
 MODULE_PARM_DESC(wifi_offload, "Enable/Disable wifi PPE NAT Offload.");
 #endif
 
