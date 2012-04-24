@@ -127,6 +127,7 @@ function initValue()
 	var store_ttl = '<% getCfgGeneral(1, "store_ttl"); %>';
 	var store_ttl_mcast = '<% getCfgGeneral(1, "store_ttl_mcast"); %>';
 	var mss_pmtu = '<% getCfgGeneral(1, "mss_use_pmtu"); %>';
+	var hw_nat_wifi_pt = '<% getCfgGeneral(1, "hw_nat_wifi"); %>';
 
 	initTranslation();
 
@@ -146,6 +147,7 @@ function initValue()
 	form.krnlIpv6Pass.options.selectedIndex = 1*krnl_ipv6;
 	form.pingWANEnbl.options.selectedIndex = (wpf == '1') ? 1 : 0;
 	form.arpPT.options.selectedIndex = (arp_pt == '1') ? 1 : 0;
+	form.hw_nat_wifiPT.options.selectedIndex = (hw_nat_wifi_pt == "1") ? 1 : 0;
 	form.pingerEnable.value = (pinger == '1') ? '1' : '0';
 	form.mssPmtu.value = (mss_pmtu == '0') ? '0' : '1';
 
@@ -362,7 +364,7 @@ function displayServiceStatus()
 	<td class="title" colspan="5">Offload engine</td>
 </tr>
 <tr>
-<td class="head"><a name="nat_fastpath_ref"></a>NAT fastpath</td>
+<td class="head"><a name="nat_fastpath_ref"></a>NAT offload mode</td>
 <td colspan="4">
 	<select name="natFastpath" class="half" onchange="natFastpathSelect(this.form);">
 		<option value="0">Disable</option>
@@ -370,15 +372,24 @@ function displayServiceStatus()
 	</select>
 </td>
 </tr>
+<tr>
+<td class="head">WiFi hardware nat offload</td>
+<td colspan="4">
+	<select name="hw_nat_wifiPT" class="half">
+		<option value="0">Disable</option>
+		<option value="1">Enable</option>
+	</select>
+</td>
+</tr>
 <tr id="hwnat_threshold_row" style="display: none;">
-<td class="head">NAT Binding Threshold</td>
+<td class="head">HW_NAT binding threshold</td>
 <td colspan="4">
 	<input name="hwnatThreshold" value="<% getCfgZero(1, "hw_nat_bind"); %>" class="half">&nbsp;
 	<span style="color: #c0c0c0;">(0-500)</span>
 </td>
 </tr>
 <tr>
-<td class="head">NAT mode</td>
+<td class="head">NAT implementation</td>
 <td colspan="4">
 	<select name="natMode" class="half">
 		<option value="0">Linux</option>
