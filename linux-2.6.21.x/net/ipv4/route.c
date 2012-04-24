@@ -643,6 +643,9 @@ static void rt_check_expire(void)
 		i = (i + 1) & rt_hash_mask;
 		rthp = &rt_hash_table[i].chain;
 
+		if (need_resched())
+			cond_resched();
+
 		if (*rthp == NULL)
 			continue;
 		spin_lock_bh(rt_hash_lock_addr(i));
