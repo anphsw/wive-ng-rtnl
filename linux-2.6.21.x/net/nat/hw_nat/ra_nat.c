@@ -94,7 +94,7 @@ MODULE_DESCRIPTION("Ralink Hardware NAT v0.92\n");
 #define WAN_PORT_VLAN_ID	CONFIG_RA_HW_NAT_WAN_VLANID
 #endif
 
-#if defined (CONFIG_RALINK_RT3052)
+#if defined (CONFIG_RALINK_RT3052) && defined (CONFIG_RA_HW_NAT_SEMIAUTO_BIND)
 extern int rw_rf_reg(int write, int reg, int *data);
 #endif
 
