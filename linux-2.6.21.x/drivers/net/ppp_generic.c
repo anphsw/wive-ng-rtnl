@@ -1053,11 +1053,6 @@ static void ppp_xmit_process(struct ppp *ppp)
 		ppp_push(ppp);
 		while (ppp->xmit_pending == 0
 		       && (skb = skb_dequeue(&ppp->file.xq)) != 0)
-#ifdef CONFIG_PPP_PREVENT_DROP_SESSION_ON_FULL_CPU_LOAD
-			/* first touch cond_resched */
-			if (need_resched())
-				cond_resched();
-#endif
 			ppp_send_frame(ppp, skb);
 		/* If there's no work left to do, tell the core net
 		   code that we can accept some more. */
