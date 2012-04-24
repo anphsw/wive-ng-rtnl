@@ -152,17 +152,17 @@ int RemoveVlanTag(struct sk_buff *skb)
     struct vlan_ethhdr *veth;
     uint16_t VirIfIdx;
 
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,32)
-    veth = (struct vlan_ethhdr *)(skb->mac_header);
-#else
-    veth = (struct vlan_ethhdr *)(skb->mac.raw);
-#endif
+    /* get vlan header */
+    veth = vlan_eth_hdr(skb);
 
     /* something wrong */
     if(veth->h_vlan_proto != htons(ETH_P_8021Q)) {
 	printk("HNAT: Reentry packet is untagged frame?\n");
 	return 65535;
     }
+
+    /* get VirIfIdx */
+    VirIfIdx = ntohs(veth->h_vlan_TCI);
 
     /* make skb writable */
     if (skb_cloned(skb) || skb_shared(skb)) {
@@ -173,9 +173,6 @@ int RemoveVlanTag(struct sk_buff *skb)
 	    return 65535;
 	skb = new_skb;
     }
-
-    /* get VirIfIdx */
-    VirIfIdx = ntohs(veth->h_vlan_TCI);
 
     /* remove VLAN tag */
 #if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,32)
@@ -190,11 +187,9 @@ int RemoveVlanTag(struct sk_buff *skb)
     skb_pull(skb, VLAN_HLEN);
     skb->data += ETH_HLEN;  //pointer to layer3 header
 
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,32)
-    eth = (struct ethhdr *)(skb->mac_header);
-#else
-    eth = (struct ethhdr *)(skb->mac.raw);
-#endif
+    /* get ethernet header */
+    eth = eth_hdr(skb);
+
     skb->protocol = eth->h_proto;
 
     return VirIfIdx;
