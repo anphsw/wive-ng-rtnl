@@ -287,6 +287,7 @@ uint32_t FoeDumpPkt(struct sk_buff *skb)
     uint32_t vlan2_gap = 0;
     uint32_t pppoe_gap=0;
     uint16_t pppoe_sid = 0;
+    uint16_t ppp_tag = 0;
     uint16_t eth_type=0;
 
     NAT_PRINT("\nRx===<FOE_Entry=%d>=====\n",FOE_ENTRY_NUM(skb)); 
@@ -309,7 +310,7 @@ uint32_t FoeDumpPkt(struct sk_buff *skb)
 	/* VLAN + PPPoE */
 	if(ntohs(vh1->h_vlan_encapsulated_proto)==ETH_P_PPP_SES){
 	    pppoe_gap = 8;
-	    if (GetPppoeSid(skb, vlan1_gap, &pppoe_sid, 0)) {
+	    if (GetPppoeSid(skb, vlan1_gap, &pppoe_sid, &ppp_tag, 0)) {
 		return 0;
 	    }
 	    /* Double VLAN = VLAN + VLAN */
@@ -320,7 +321,7 @@ uint32_t FoeDumpPkt(struct sk_buff *skb)
 	    /* VLAN + VLAN + PPPoE */
 	    if(ntohs(vh2->h_vlan_encapsulated_proto)==ETH_P_PPP_SES){
 		pppoe_gap = 8;
-		if (GetPppoeSid(skb, (vlan1_gap + vlan2_gap), &pppoe_sid, 0)) {
+		if (GetPppoeSid(skb, (vlan1_gap + vlan2_gap), &pppoe_sid, &ppp_tag, 0)) {
 		    return 0;
 		}
 		/* VLAN + VLAN + IP */
