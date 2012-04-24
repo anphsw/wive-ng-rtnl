@@ -607,7 +607,7 @@ int32_t PpeRxHandler(struct sk_buff * skb)
     }
 #endif
 
-    if(wifi_offload && (FOE_AIS(skb) == 1) && (FOE_SP(skb) == SrcPortNo) && (FOE_AI(skb)!=HIT_BIND_KEEPALIVE)) {
+    if(wifi_offload && eth_type == ETH_P_8021Q && (FOE_AIS(skb) == 1) && (FOE_SP(skb) == SrcPortNo) && (FOE_AI(skb)!=HIT_BIND_KEEPALIVE)) {
 	VirIfIdx = RemoveVlanTag(skb);
 
 	/* recover to right incoming interface */
