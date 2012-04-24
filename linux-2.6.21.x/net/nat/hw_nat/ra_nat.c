@@ -175,7 +175,7 @@ int RemoveVlanTag(struct sk_buff *skb)
     }
 
     /* remove VLAN tag */
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,32)
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,35)
     skb->data= skb->mac_header;
     skb->mac_header += VLAN_HLEN;
     memmove(skb->mac_header, skb->data, ETH_ALEN * 2);
@@ -465,7 +465,7 @@ int32_t PpeRxHandler(struct sk_buff * skb)
     }
 #endif
 
-    if( ((FOE_MAGIC_TAG(skb) == FOE_MAGIC_PCI) || (FOE_MAGIC_TAG(skb) == FOE_MAGIC_WLAN))){
+    if( eth_type != ETH_P_8021Q && ((FOE_MAGIC_TAG(skb) == FOE_MAGIC_PCI) || (FOE_MAGIC_TAG(skb) == FOE_MAGIC_WLAN))){
 #if defined  (CONFIG_RA_HW_NAT_WIFI)
 	    if (!wifi_offload)
 		    return 1;
