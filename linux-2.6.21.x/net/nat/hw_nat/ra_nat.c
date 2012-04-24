@@ -463,7 +463,7 @@ int32_t PpeRxHandler(struct sk_buff * skb)
 #if defined (CONFIG_RALINK_RT3052) || defined(HWNAT_SPKIP_MCAST_BCAST)
 	    /* skip bcast/unicast traffic PPE or wifi bug ? */
 	    eth = eth_hdr(skb);
-	    if(is_multicast_ether_addr(eth->h_dest) || is_broadcast_ether_addr(eth->h_dest) || is_zero_ether_addr(eth->h_dest))
+	    if(is_multicast_ether_addr(eth->h_dest) || is_broadcast_ether_addr(eth->h_dest))
 		    return 1;
 #endif
 
