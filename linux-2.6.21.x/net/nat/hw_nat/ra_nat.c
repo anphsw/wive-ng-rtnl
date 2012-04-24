@@ -94,7 +94,8 @@ MODULE_DESCRIPTION("Ralink Hardware NAT v0.92\n");
 #define WAN_PORT_VLAN_ID	CONFIG_RA_HW_NAT_WAN_VLANID
 #endif
 
-#if defined (CONFIG_RALINK_RT3052) && defined (CONFIG_RA_HW_NAT_SEMIAUTO_BIND)
+//#define RT3052_USE_RF_REG
+#if defined (CONFIG_RALINK_RT3052) && defined (RT3052_USE_RF_REG)
 extern int rw_rf_reg(int write, int reg, int *data);
 #endif
 
@@ -1029,6 +1030,7 @@ int32_t PpeTxHandler(struct sk_buff *skb, int gmac_no)
 			    return 1;
 			}
 #elif defined (CONFIG_RALINK_RT3052)
+#if defined (RT3052_USE_RF_REG)
 			rw_rf_reg(0, 0, &phy_val);
 			phy_val = phy_val & 0xFF;
 
@@ -1041,6 +1043,18 @@ int32_t PpeTxHandler(struct sk_buff *skb, int gmac_no)
 			    memset(FOE_INFO_START_ADDR(skb), 0, FOE_INFO_LEN);
 			    return 1;
 			}
+#else /* old mode offload check */
+			uh = (struct udphdr *) ((uint8_t *) iph + iph->ihl * 4);
+
+			/* ChipBug: if udp check is zero, it cannot be accelerated by HNAT */
+			if(uh->check == 0) {
+			    return 1;
+			}
+
+			entry.new_sport = ntohs(uh->source);
+			entry.new_dport = ntohs(uh->dest);
+			entry.bfib1.t_u = UDP;
+#endif
 #else
 			/* if udp check is zero, it cannot be accelerated by HNAT */
 			/* we found the application is possible to use udp checksum=0 at first stage,
