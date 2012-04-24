@@ -1169,13 +1169,13 @@ int32_t PpeTxHandler(struct sk_buff *skb, int gmac_no)
 #endif
 		}
 
+#if defined (CONFIG_RA_HW_NAT_ACL2UP_HELPER)
 		if(IS_FORCE_ACL_TO_UP(skb))
 		{
 			entry.iblk2.up=(GET_ACL_TO_UP(skb)); /* new user priority */
 			entry.iblk2.fp=1; /* enable force user priority */
 		}
-
-
+#endif
 
 		/* This is ugly soultion to support WiFi pseudo interface.
 		 * Please double check the definition is the same as include/rt_linux.h
