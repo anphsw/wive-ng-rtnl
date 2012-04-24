@@ -335,7 +335,7 @@ uint32_t FoeDumpPkt(struct sk_buff *skb)
 	return 0;
     }
 
-    eth = (struct ethhdr *)(skb->data-14) ; /* DA + SA + ETH_TYPE */
+    eth = (struct ethhdr *)(skb->data-ETH_HLEN) ; /* DA + SA + ETH_TYPE */
 
     // Layer 3
     iph = (struct iphdr *) (skb->data + vlan1_gap + vlan2_gap + pppoe_gap);
