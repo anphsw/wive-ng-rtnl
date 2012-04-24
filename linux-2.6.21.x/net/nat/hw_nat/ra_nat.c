@@ -573,8 +573,6 @@ int32_t PpeRxHandler(struct sk_buff * skb)
     }
 
 #if defined (CONFIG_RA_HW_NAT_WIFI)
-    if (!wifi_offload)
-	    goto skip_reentry;
     /*
      * RT3883/RT3352/RT6855:
      * If FOE_AIS=1 and FOE_SP=0/6, it means this is reentry packet.
@@ -599,46 +597,33 @@ int32_t PpeRxHandler(struct sk_buff * skb)
     }
 #endif
 
-    if((FOE_AIS(skb) == 1) && (FOE_SP(skb) == SrcPortNo) && (FOE_AI(skb)!=HIT_BIND_KEEPALIVE)) {
-
+    if(wifi_offload && (FOE_AIS(skb) == 1) && (FOE_SP(skb) == SrcPortNo) && (FOE_AI(skb)!=HIT_BIND_KEEPALIVE)) {
 	VirIfIdx = RemoveVlanTag(skb);
 
-	//recover to right incoming interface
+	/* recover to right incoming interface */
 	if(VirIfIdx < MAX_IF_NUM) {
 	    skb->dev=DstPort[VirIfIdx];
+	    eth = eth_hdr(skb);
+
+	    if (is_multicast_ether_addr(eth->h_dest)) {
+		if (!compare_ether_addr(eth->h_dest, skb->dev->broadcast))
+			skb->pkt_type = PACKET_BROADCAST;
+		else
+			skb->pkt_type = PACKET_MULTICAST;
+	    } else {
+		if (!compare_ether_addr(eth->h_dest, skb->dev->dev_addr))
+			skb->pkt_type=PACKET_HOST;
+		else
+			skb->pkt_type=PACKET_OTHERHOST;
+	    }
+
+	    return 1;
+
 	} else {
 	    NAT_PRINT("HNAT: unknown interface (VirIfIdx=%d)\n", VirIfIdx);
-	    goto skip_reentry;
 	}
-
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,32)
-	eth=(struct ethhdr *)(skb->mac_header);
-#else
-	eth=(struct ethhdr *)(skb->mac.raw);
-#endif
-
-	if(eth->h_dest[0] & 1)
-	{
-	    if(memcmp(eth->h_dest, skb->dev->broadcast, ETH_ALEN)==0){
-		skb->pkt_type=PACKET_BROADCAST;
-	    } else {
-		skb->pkt_type=PACKET_MULTICAST;
-	    }
-	}else {
-
-	    if(memcmp(eth->h_dest, skb->dev->dev_addr, ETH_ALEN)==0){
-		skb->pkt_type=PACKET_HOST;
-	    }else{
-		skb->pkt_type=PACKET_OTHERHOST;
-	    }
-	}
-
-	return 1;
     }
-
-skip_reentry:
 #endif
-
 
     if( (FOE_AI(skb)==HIT_BIND_KEEPALIVE) && (DFL_FOE_KA_ORG==0)){
 
