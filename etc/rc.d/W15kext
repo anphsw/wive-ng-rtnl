@@ -64,7 +64,7 @@ hw_nat_en() {
 	    hw_nat=0
 	    $LOG "QoS enabled - HW_NAT Offload mode DISABLE"
 	fi
-	if [ "$hw_nat_wifi" = "on" ]; then
+	if [ "$hw_nat_wifi" = "1" ]; then
 	    hw_nat_wifi="wifi_offload=1"
 	    $LOG "WiFi HW_NAT Offload mode ENABLE"
 	else
