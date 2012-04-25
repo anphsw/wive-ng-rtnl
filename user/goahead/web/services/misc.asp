@@ -734,7 +734,7 @@ function displayServiceStatus()
 </td>
 </tr>
 <tr>
-<td class="head">PMTU discovery for TCP packets</td>
+<td class="head">Use PMTU discovery</td>
 <td colspan="4">
 	<select name="mssPmtu" class="half">
 		<option value="0">Disable</option>
