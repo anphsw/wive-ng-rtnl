@@ -649,6 +649,49 @@ int vlan_dev_get_vid(const char *dev_name, unsigned short* result)
 	return rv;
 }
 
+
+int vlan_dev_set_mac_address(struct net_device *dev, void *addr_struct_p)
+{
+	struct sockaddr *addr = (struct sockaddr *)(addr_struct_p);
+	int i;
+
+	if (netif_running(dev))
+		return -EBUSY;
+
+	memcpy(dev->dev_addr, addr->sa_data, dev->addr_len);
+
+	printk("%s: Setting MAC address to ", dev->name);
+	for (i = 0; i < 6; i++)
+		printk(" %2.2x", dev->dev_addr[i]);
+	printk(".\n");
+
+	if (memcmp(VLAN_DEV_INFO(dev)->real_dev->dev_addr,
+		   dev->dev_addr,
+		   dev->addr_len) != 0) {
+		if (!(VLAN_DEV_INFO(dev)->real_dev->flags & IFF_PROMISC)) {
+			int flgs = VLAN_DEV_INFO(dev)->real_dev->flags;
+
+			/* Increment our in-use promiscuity counter */
+			dev_set_promiscuity(VLAN_DEV_INFO(dev)->real_dev, 1);
+
+			/* Make PROMISC visible to the user. */
+			flgs |= IFF_PROMISC;
+#ifdef VLAN_DEBUG
+			printk("VLAN (%s):  Setting underlying device (%s) to promiscious mode.\n",
+			       dev->name, VLAN_DEV_INFO(dev)->real_dev->name);
+#endif
+			dev_change_flags(VLAN_DEV_INFO(dev)->real_dev, flgs);
+		}
+#ifdef VLAN_DEBUG
+	} else {
+		printk("VLAN (%s):  Underlying device (%s) has same MAC, not checking promiscious mode.\n",
+		       dev->name, VLAN_DEV_INFO(dev)->real_dev->name);
+#endif
+	}
+
+	return 0;
+}
+
 static inline int vlan_dmi_equals(struct dev_mc_list *dmi1,
 				  struct dev_mc_list *dmi2)
 {
@@ -737,32 +780,15 @@ static void vlan_flush_mc_list(struct net_device *dev)
 
 int vlan_dev_open(struct net_device *dev)
 {
-	struct vlan_dev_info *vlan = VLAN_DEV_INFO(dev);
-	struct net_device *real_dev = vlan->real_dev;
-	int err;
-
-	if (!(real_dev->flags & IFF_UP))
+	if (!(VLAN_DEV_INFO(dev)->real_dev->flags & ~(IFF_UP | IFF_PROMISC | IFF_ALLMULTI)))
 		return -ENETDOWN;
-
-	if (compare_ether_addr(dev->dev_addr, real_dev->dev_addr)) {
-		err = dev_unicast_add(real_dev, dev->dev_addr, ETH_ALEN);
-		if (err < 0)
-			return err;
-	}
-	memcpy(vlan->real_dev_addr, real_dev->dev_addr, ETH_ALEN);
 
 	return 0;
 }
 
 int vlan_dev_stop(struct net_device *dev)
 {
-	struct net_device *real_dev = VLAN_DEV_INFO(dev)->real_dev;
-
 	vlan_flush_mc_list(dev);
-
-	if (compare_ether_addr(dev->dev_addr, real_dev->dev_addr))
-		dev_unicast_delete(real_dev, dev->dev_addr, dev->addr_len);
-
 	return 0;
 }
 
