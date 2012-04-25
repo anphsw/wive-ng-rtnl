@@ -121,11 +121,6 @@
 #include <linux/ctype.h>
 #include <linux/prefetch.h>
 
-#if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-#include "../../net/nat/hw_nat/ra_nat.h"
-#include "../../net/nat/hw_nat/frame_engine.h"
-#endif
-
 #ifdef CONFIG_NET_PPPOE_IPV6_PTHROUGH
 extern int private_pthrough(struct sk_buff *skb);
 extern int pthrough_create_proc_entry(void);
@@ -1636,10 +1631,6 @@ int netif_rx(struct sk_buff *skb)
 		    skb->dev = dst->dst->dev;
 		    skb_push(skb, ETH_HLEN);
 		    dev = skb->dev;
-#if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-		    /* hit this for PPE correct macs */
-		    FOE_AI(skb) = UN_HIT;
-#endif
 		    dev->hard_start_xmit(skb, dev);
 		    return NET_RX_SUCCESS;
 		}
