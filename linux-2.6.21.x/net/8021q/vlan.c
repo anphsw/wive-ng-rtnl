@@ -365,9 +365,6 @@ static int vlan_dev_init(struct net_device *dev)
 					  (1<<__LINK_STATE_DORMANT))) |
 		      (1<<__LINK_STATE_PRESENT);
 
-	/* TODO: maybe just assign it to be ETHERNET? */
-	dev->type = real_dev->type;
-
 #if defined (CONFIG_RAETH_TSO)
 	/* make pseudo interface has same capacity like real interface */
 	dev->features = real_dev->features;
@@ -375,7 +372,6 @@ static int vlan_dev_init(struct net_device *dev)
 
 	memcpy(dev->broadcast, real_dev->broadcast, real_dev->addr_len);
 	memcpy(dev->dev_addr, real_dev->dev_addr, real_dev->addr_len);
-	dev->addr_len = real_dev->addr_len;
 
 	if (real_dev->features & NETIF_F_HW_VLAN_TX) {
 		dev->hard_header     = real_dev->hard_header;
@@ -389,6 +385,7 @@ static int vlan_dev_init(struct net_device *dev)
 		dev->rebuild_header  = vlan_dev_rebuild_header;
 	}
 	dev->hard_header_parse = real_dev->hard_header_parse;
+	dev->hard_header_cache = NULL;
 
 	lockdep_set_class(&dev->_xmit_lock, &vlan_netdev_xmit_lock_key);
 	return 0;
@@ -397,6 +394,8 @@ static int vlan_dev_init(struct net_device *dev)
 static void vlan_setup(struct net_device *new_dev)
 {
 	SET_MODULE_OWNER(new_dev);
+
+	ether_setup(new_dev);
 
 	/* new_dev->ifindex = 0;  it will be set when added to
 	 * the global list.
@@ -417,7 +416,6 @@ static void vlan_setup(struct net_device *new_dev)
 	new_dev->init = vlan_dev_init;
 	new_dev->open = vlan_dev_open;
 	new_dev->stop = vlan_dev_stop;
-	new_dev->set_mac_address = vlan_dev_set_mac_address;
 	new_dev->set_multicast_list = vlan_dev_set_multicast_list;
 	new_dev->destructor = free_netdev;
 	new_dev->do_ioctl = vlan_dev_ioctl;
@@ -630,6 +628,30 @@ out_ret_null:
 	return NULL;
 }
 
+static void vlan_sync_address(struct net_device *dev,
+			      struct net_device *vlandev)
+{
+	struct vlan_dev_info *vlan = VLAN_DEV_INFO(vlandev);
+
+	/* May be called without an actual change */
+	if (!compare_ether_addr(vlan->real_dev_addr, dev->dev_addr))
+		return;
+
+	/* vlan address was different from the old address and is equal to
+	 * the new address */
+	if (compare_ether_addr(vlandev->dev_addr, vlan->real_dev_addr) &&
+	    !compare_ether_addr(vlandev->dev_addr, dev->dev_addr))
+		dev_unicast_delete(dev, vlandev->dev_addr, ETH_ALEN);
+
+	/* vlan address was equal to the old address and is different from
+	 * the new address */
+	if (!compare_ether_addr(vlandev->dev_addr, vlan->real_dev_addr) &&
+	    compare_ether_addr(vlandev->dev_addr, dev->dev_addr))
+		dev_unicast_add(dev, vlandev->dev_addr, ETH_ALEN);
+
+	memcpy(vlan->real_dev_addr, dev->dev_addr, ETH_ALEN);
+}
+
 static int vlan_device_event(struct notifier_block *unused, unsigned long event, void *ptr)
 {
 	struct net_device *dev = ptr;
@@ -653,6 +675,17 @@ static int vlan_device_event(struct notifier_block *unused, unsigned long event,
 				continue;
 
 			vlan_transfer_operstate(dev, vlandev);
+		}
+		break;
+
+	case NETDEV_CHANGEADDR:
+		/* Adjust unicast filters on underlying device */
+		for (i = 0; i < VLAN_GROUP_ARRAY_LEN; i++) {
+			vlandev = vlan_group_get_device(grp, i);
+			if (!vlandev)
+				continue;
+
+			vlan_sync_address(dev, vlandev);
 		}
 		break;
 
