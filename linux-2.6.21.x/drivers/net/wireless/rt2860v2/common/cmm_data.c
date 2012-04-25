@@ -189,8 +189,7 @@ NDIS_STATUS MiniportMMRequest(
 				}
 			}
 #endif // RTMP_MAC_PCI //
-			DBGPRINT(RT_DEBUG_ERROR, ("Qidx(%d), not enough space in MgmtRing, MgmtRingFullCount=%ld!\n",
-										QueIdx, pAd->RalinkCounters.MgmtRingFullCount));
+			//DBGPRINT(RT_DEBUG_ERROR, ("Qidx(%d), not enough space in MgmtRing, MgmtRingFullCount=%ld!\n", QueIdx, pAd->RalinkCounters.MgmtRingFullCount));
 		}
 	} while (retryCnt > 0);
 
