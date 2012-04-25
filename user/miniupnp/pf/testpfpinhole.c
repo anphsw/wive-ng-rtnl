@@ -1,7 +1,7 @@
-/* $Id: testpfpinhole.c,v 1.5 2012/04/20 14:36:23 nanard Exp $ */
+/* $Id: testpfpinhole.c,v 1.10 2012/04/22 23:12:51 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
- * (c) 2006-2012 Thomas Bernard
+ * (c) 2012 Thomas Bernard
  * This software is subject to the conditions detailed
  * in the LICENCE file provided within the distribution */
 
@@ -20,6 +20,33 @@ const char * tag = NULL;
 
 const char * anchor_name = "miniupnpd";
 const char * queue = NULL;
+
+static int print_pinhole(int uid)
+{
+	int r;
+	char rem_host[64];
+	unsigned short rem_port;
+	char int_client[64];
+	unsigned short int_port;
+	int proto;
+	unsigned int timestamp;
+	u_int64_t packets, bytes;
+
+	r = get_pinhole((unsigned short)uid,
+	                rem_host, sizeof(rem_host), &rem_port,
+	                int_client, sizeof(int_client), &int_port,
+	                &proto, &timestamp,
+	                &packets, &bytes);
+	if(r < 0) {
+		fprintf(stderr, "get_pinhole(%d) returned %d\n", uid, r);
+	} else {
+		printf("pinhole %d : [%s]:%hu => [%s]:%hu proto=%d ts=%u\n",
+		       uid, rem_host, rem_port, int_client, int_port,
+		       proto, timestamp);
+		printf("    packets=%llu bytes=%llu\n", packets, bytes);
+	}
+	return r;
+}
 
 int main(int argc, char * *argv)
 {
@@ -46,6 +73,10 @@ int main(int argc, char * *argv)
 		fprintf(stderr, "add_pinhole() failed\n");
 	}
 	printf("add_pinhole() returned %d\n", uid);
+
+	print_pinhole(1);
+	print_pinhole(2);
+	clean_pinhole_list(NULL);
 
 	ret = delete_pinhole(1);
 	printf("delete_pinhole() returned %d\n", ret);

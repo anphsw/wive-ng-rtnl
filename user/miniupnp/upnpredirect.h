@@ -1,4 +1,4 @@
-/* $Id: upnpredirect.h,v 1.26 2012/04/20 13:29:48 nanard Exp $ */
+/* $Id: upnpredirect.h,v 1.32 2012/04/23 21:46:16 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * (c) 2006-2012 Thomas Bernard
@@ -109,11 +109,13 @@ upnp_get_portmappings_in_range(unsigned short startport,
                                unsigned int * number);
 
 #ifdef ENABLE_6FC_SERVICE
-/* function to be used by WANIPv6_FirewallControl implementation */
+/* functions to be used by WANIPv6_FirewallControl implementation */
 
-/* retreive outbound pinhole timeout*/
+#if 0
+/* retrieve outbound pinhole timeout */
 int
 upnp_check_outbound_pinhole(int proto, int * timeout);
+#endif
 
 /* add an inbound pinehole
  * return value :
@@ -123,42 +125,37 @@ upnp_check_outbound_pinhole(int proto, int * timeout);
 int
 upnp_add_inboundpinhole(const char * raddr, unsigned short rport,
               const char * iaddr, unsigned short iport,
-              const char * protocol, unsigned int leasetime, int * uid);
-
-int
-upnp_add_inboundpinhole_internal(const char * raddr, unsigned short rport,
-                       const char * iaddr, unsigned short iport,
-                       const char * proto, int * uid);
+              int proto, unsigned int leasetime, int * uid);
 
 /*
  * return values :
- *  -4 not found
- *  -5 in another table
- *  -6 in another chain
- *  -7 in a chain but not a rule. (chain policy)
+ *  -1 not found
  * */
 int
-upnp_get_pinhole_info(const char * raddr, unsigned short rport, char * iaddr, unsigned short * iport, char * proto, const char * uid, char * lt);
+upnp_get_pinhole_info(unsigned short uid,
+                      char * raddr, int raddrlen,
+                      unsigned short * rport,
+                      char * iaddr, int iaddrlen,
+                      unsigned short * iport,
+                      int * proto,
+                      unsigned int * leasetime,
+                      unsigned int * packets);
 
 /* update the lease time */
 int
-upnp_update_inboundpinhole(const char * uid, const char * leasetime);
+upnp_update_inboundpinhole(unsigned short uid, unsigned int leasetime);
 
 /* remove the inbound pinhole */
 int
-upnp_delete_inboundpinhole(const char * uid);
+upnp_delete_inboundpinhole(unsigned short uid);
 
 /* ... */
 int
 upnp_check_pinhole_working(const char * uid, char * eaddr, char * iaddr, unsigned short * eport, unsigned short * iport, char * protocol, int * rulenum_used);
 
-/* number of packets that went through the pinhole */
-int
-upnp_get_pinhole_packets(const char * uid, int * packets);
-
 /* ? */
 int
-upnp_clean_expiredpinhole(void);
+upnp_clean_expired_pinholes(unsigned int * next_timestamp);
 
 #endif /* ENABLE_6FC_SERVICE */
 

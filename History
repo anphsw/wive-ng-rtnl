@@ -1076,7 +1076,8 @@
 4) Netfilter rework some init/destroy code.<br>
 5) Disable APSD (WMM PowerSave) by default.<br>
 6) Add PPE wifi offload support (hw_nat_wifi variable default 0).<br>
-7) Update openssl to 0.9.8w.<br>
+7) Update openssl to 0.9.8w. version.<br>
+8) Update miniupnpd to 1.6.20120424 version.<br>
 
 <br><br>
 <b>For support see:</b><br>

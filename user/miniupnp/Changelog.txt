@@ -1,4 +1,8 @@
-$Id: Changelog.txt,v 1.272 2012/04/20 14:38:38 nanard Exp $
+$Id: Changelog.txt,v 1.273 2012/04/23 22:42:05 nanard Exp $
+
+2012/04/23:
+  Implement CheckPinholeWorking GetPinholePackets. WANIPv6FirewallControl
+  UpdatePinhole still to be done. And also netfilter/ipf/ipfw versions
 
 2012/04/20:
   Enough WANIPv6FirewallControl is implemented on pf so that AddPinhole() and

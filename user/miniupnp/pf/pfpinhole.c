@@ -1,7 +1,7 @@
-/* $Id: pfpinhole.c,v 1.7 2012/04/20 14:48:03 nanard Exp $ */
+/* $Id: pfpinhole.c,v 1.16 2012/04/23 22:17:34 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
- * (c) 2006-2012 Thomas Bernard
+ * (c) 2012 Thomas Bernard
  * This software is subject to the conditions detailed
  * in the LICENCE file provided within the distribution */
 
@@ -39,17 +39,20 @@
  * with the label "pinhole-$uid ts-$timestamp"
  */
 
-#ifdef ENABLE_IPV6
+#ifdef ENABLE_6FC_SERVICE
 /* /dev/pf when opened */
 extern int dev;
 
-static int uid = 1;
+static int next_uid = 1;
+
+#define PINEHOLE_LABEL_FORMAT "pinhole-%d ts-%u"
 
 int add_pinhole(const char * ifname,
                 const char * rem_host, unsigned short rem_port,
                 const char * int_client, unsigned short int_port,
                 int proto, unsigned int timestamp)
 {
+	int uid;
 	struct pfioc_rule pcr;
 #ifndef PF_NEWSTYLE
 	struct pfioc_pooladdr pp;
@@ -99,8 +102,9 @@ int add_pinhole(const char * ifname,
 		pcr.rule.onrdomain = -1;	/* first appeared in OpenBSD 5.0 */
 #endif
 		pcr.rule.keep_state = 1;
+		uid = next_uid;
 		snprintf(pcr.rule.label, PF_RULE_LABEL_SIZE,
-		         "pinhole-%d ts-%u", uid, timestamp);
+		         PINEHOLE_LABEL_FORMAT, uid, timestamp);
 		if(queue)
 			strlcpy(pcr.rule.qname, queue, PF_QNAME_SIZE);
 		if(tag)
@@ -142,7 +146,10 @@ int add_pinhole(const char * ifname,
 		}
 	}
 
-	return (uid++);
+	if(++next_uid >= 65535) {
+		next_uid = 1;
+	}
+	return uid;
 }
 
 int delete_pinhole(unsigned short uid)
@@ -192,7 +199,167 @@ int delete_pinhole(unsigned short uid)
 		}
 	}
 	/* not found */
+	return -2;
+}
+
+int get_pinhole(unsigned short uid,
+                char * rem_host, int rem_hostlen, unsigned short * rem_port,
+                char * int_client, int int_clientlen, unsigned short * int_port,
+                int * proto, unsigned int * timestamp,
+                u_int64_t * packets, u_int64_t * bytes)
+{
+	int i, n;
+	struct pfioc_rule pr;
+	char label_start[PF_RULE_LABEL_SIZE];
+	char tmp_label[PF_RULE_LABEL_SIZE];
+	char * p;
+
+	if(dev<0) {
+		syslog(LOG_ERR, "pf device is not open");
+		return -1;
+	}
+	snprintf(label_start, sizeof(label_start),
+	         "pinhole-%hu", uid);
+	memset(&pr, 0, sizeof(pr));
+	strlcpy(pr.anchor, anchor_name, MAXPATHLEN);
+#ifndef PF_NEWSTYLE
+	pr.rule.action = PF_PASS;
+#endif
+	if(ioctl(dev, DIOCGETRULES, &pr) < 0) {
+		syslog(LOG_ERR, "ioctl(dev, DIOCGETRULES, ...): %m");
+		return -1;
+	}
+	n = pr.nr;
+	for(i=0; i<n; i++) {
+		pr.nr = i;
+		if(ioctl(dev, DIOCGETRULE, &pr) < 0) {
+			syslog(LOG_ERR, "ioctl(dev, DIOCGETRULE): %m");
+			return -1;
+		}
+		strlcpy(tmp_label, pr.rule.label, sizeof(tmp_label));
+		p = tmp_label;
+		strsep(&p, " ");
+		if(0 == strcmp(tmp_label, label_start)) {
+			if(rem_host && (inet_ntop(AF_INET6, &pr.rule.src.addr.v.a.addr.v6, rem_host, rem_hostlen) == NULL)) {
+				return -1;
+			}
+			if(rem_port)
+				*rem_port = ntohs(pr.rule.src.port[0]);
+			if(int_client && (inet_ntop(AF_INET6, &pr.rule.dst.addr.v.a.addr.v6, int_client, int_clientlen) == NULL)) {
+				return -1;
+			}
+			if(int_port)
+				*int_port = ntohs(pr.rule.dst.port[0]);
+			if(proto)
+				*proto = pr.rule.proto;
+			if(timestamp)
+				sscanf(p, "ts-%u", timestamp);
+#ifdef PFRULE_INOUT_COUNTS
+			if(packets)
+				*packets = pr.rule.packets[0] + pr.rule.packets[1];
+			if(bytes)
+				*bytes = pr.rule.bytes[0] + pr.rule.bytes[1];
+#else
+			if(packets)
+				*packets = pr.rule.packets;
+			if(bytes)
+				*bytes = pr.rule.bytes;
+#endif
+			return 0;
+		}
+	}
+	/* not found */
+	return -2;
+}
+
+int update_pinhole(unsigned short uid, unsigned int timestamp)
+{
+	/* TODO :
+	 * As it is not possible to change rule label, we should :
+	 * 1 - delete
+	 * 2 - Add new
+	 * the stats of the rule will then be reset :( */
+	return -42; /* not implemented */
+}
+
+/* return the number of rules removed
+ * or a negative integer in case of error */
+int clean_pinhole_list(unsigned int * next_timestamp)
+{
+	int i;
+	struct pfioc_rule pr;
+	time_t current_time;
+	unsigned int ts;
+	int uid;
+	unsigned int min_ts = UINT_MAX;
+	int min_uid = INT_MAX, max_uid = -1;
+	int n = 0;
+
+	if(dev<0) {
+		syslog(LOG_ERR, "pf device is not open");
+		return -1;
+	}
+	current_time = time(NULL);
+	memset(&pr, 0, sizeof(pr));
+	strlcpy(pr.anchor, anchor_name, MAXPATHLEN);
+#ifndef PF_NEWSTYLE
+	pr.rule.action = PF_PASS;
+#endif
+	if(ioctl(dev, DIOCGETRULES, &pr) < 0) {
+		syslog(LOG_ERR, "ioctl(dev, DIOCGETRULES, ...): %m");
+		return -1;
+	}
+	for(i = pr.nr - 1; i >= 0; i--) {
+		pr.nr = i;
+		if(ioctl(dev, DIOCGETRULE, &pr) < 0) {
+			syslog(LOG_ERR, "ioctl(dev, DIOCGETRULE): %m");
 	return -1;
+}
+		if(sscanf(pr.rule.label, PINEHOLE_LABEL_FORMAT, &uid, &ts) != 2) {
+			syslog(LOG_INFO, "rule with label '%s' is not a IGD pinhole", pr.rule.label);
+			continue;
+		}
+		if(ts <= current_time) {
+			syslog(LOG_INFO, "removing expired pinhole '%s'", pr.rule.label);
+			pr.action = PF_CHANGE_GET_TICKET;
+			if(ioctl(dev, DIOCCHANGERULE, &pr) < 0) {
+				syslog(LOG_ERR, "ioctl(dev, DIOCCHANGERULE, ...) PF_CHANGE_GET_TICKET: %m");
+				return -1;
+			}
+			pr.action = PF_CHANGE_REMOVE;
+			pr.nr = i;
+			if(ioctl(dev, DIOCCHANGERULE, &pr) < 0) {
+				syslog(LOG_ERR, "ioctl(dev, DIOCCHANGERULE, ...) PF_CHANGE_REMOVE: %m");
+				return -1;
+			}
+			n++;
+#ifndef PF_NEWSTYLE
+			pr.rule.action = PF_PASS;
+#endif
+			if(ioctl(dev, DIOCGETRULES, &pr) < 0) {
+				syslog(LOG_ERR, "ioctl(dev, DIOCGETRULES, ...): %m");
+				return -1;
+			}
+		} else {
+			if(uid > max_uid)
+				max_uid = uid;
+			else if(uid < min_uid)
+				min_uid = uid;
+			if(ts < min_ts)
+				min_ts = ts;
+		}
+	}
+	if(next_timestamp)
+		*next_timestamp = min_ts;
+	if(max_uid > 0) {
+		if(((min_uid - 32000) <= next_uid) && (next_uid <= max_uid)) {
+			next_uid = max_uid + 1;
+		}
+		if(next_uid >= 65535) {
+			next_uid = 1;
+		}
+	}
+	return n;	/* number of rules removed */
 }
 
 #endif /* ENABLE_IPV6 */

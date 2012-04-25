@@ -1,4 +1,4 @@
-/* $Id: upnpredirect.c,v 1.66 2012/04/20 14:38:38 nanard Exp $ */
+/* $Id: upnpredirect.c,v 1.75 2012/04/23 22:36:57 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * (c) 2006-2012 Thomas Bernard
@@ -581,10 +581,10 @@ upnp_get_portmappings_in_range(unsigned short startport,
 }
 
 #ifdef ENABLE_6FC_SERVICE
+#if 0
 int
 upnp_check_outbound_pinhole(int proto, int * timeout)
 {
-#if 0
 	int s, tmptimeout, tmptime_out;
 	switch(proto)
 	{
@@ -620,9 +620,9 @@ upnp_check_outbound_pinhole(int proto, int * timeout)
 			return -5;
 			break;
 	}
-#endif
 	return 0;
 }
+#endif
 
 /* upnp_add_inboundpinhole()
  * returns: 0 on success
@@ -636,32 +636,22 @@ upnp_add_inboundpinhole(const char * raddr,
                         unsigned short rport,
                         const char * iaddr,
                         unsigned short iport,
-                        const char * protocol,
+                        int proto,
                         unsigned int leasetime,
                         int * uid)
 {
 	int r;
-#if 0
-	char iaddr_old[40]="", idfound[5]=""; /* IPv6 Modification*/
-	unsigned short iport_old = 0;
-#endif
 	time_t current;
 	unsigned int timestamp;
-	struct in6_addr address; /* IPv6 Modification*/
-	int proto;
+	struct in6_addr address;
 
-	if(inet_pton(AF_INET6, iaddr, &address) < 0) /* IPv6 Modification */
+	if(inet_pton(AF_INET6, iaddr, &address) < 0)
 	{
 		syslog(LOG_ERR, "inet_pton(%s) : %m", iaddr);
 		return 0;
 	}
-	proto = atoi(protocol); /* for WANIPv6FirewallControl AddPinhole, the protocol argument
-	                         * is passed as an integer, not a string */
 	current = time(NULL);
 	timestamp = current + leasetime;
-#if 0
-	r = get_rule_from_file(raddr, rport, iaddr_old, &iport_old, proto, 0, 0, idfound);
-#endif
 	r = 0;
 
 #if 0
@@ -675,32 +665,17 @@ upnp_add_inboundpinhole(const char * raddr,
 	else
 #endif
 	{
-		syslog(LOG_INFO, "Adding pinhole for inbound traffic from [%s]:%hu to [%s]:%hu with protocol %s and %u lease time.", raddr, rport, iaddr, iport, protocol, leasetime);
+		syslog(LOG_INFO, "Adding pinhole for inbound traffic from [%s]:%hu to [%s]:%hu with proto %d and %u lease time.", raddr, rport, iaddr, iport, proto, leasetime);
 #ifdef USE_PF
 		*uid = add_pinhole (0/*ext_if_name*/, raddr, rport, iaddr, iport, proto, timestamp);
 		return 1;
 #else
 		return -42;	/* not implemented */
 #endif
-#if 0
-		s = upnp_add_inboundpinhole_internal(raddr, rport, iaddr, iport, protocol, uid);
-		if(rule_file_add(raddr, rport, iaddr, iport, protocol, leaseTmp, uid)<0)
-			return -8;
-		else
-		{
-			if(nextpinholetoclean_timestamp == 0 || (atoi(leaseTmp) <= nextpinholetoclean_timestamp))
-			{
-				printf("Initializing the nextpinholetoclean variables. uid = %d\n", *uid);
-				snprintf(nextpinholetoclean_uid, 5, "%.4d", *uid);
-				nextpinholetoclean_timestamp = atoi(leaseTmp);
-			}
-			return s;
 		}
-#endif
-	}
-return 0;
 }
 
+#if 0
 int
 upnp_add_inboundpinhole_internal(const char * raddr, unsigned short rport,
                        const char * iaddr, unsigned short iport,
@@ -767,52 +742,69 @@ upnp_add_inboundpinhole_internal(const char * raddr, unsigned short rport,
 	printf("\t_add_ uid: %s\n", cuid);
 	return 1;
 }
+#endif
 
+/* upnp_get_pinhole_info()
+ * return values :
+ *   0   OK
+ *  -1   Internal error
+ *  -2   NOT FOUND (no such entry)
+ *  .. 
+ *  -42  Not implemented
+ */
 int
-upnp_get_pinhole_info(const char * raddr,
-                      unsigned short rport,
-                      char * iaddr,
+upnp_get_pinhole_info(unsigned short uid,
+                      char * raddr, int raddrlen,
+                      unsigned short * rport,
+                      char * iaddr, int iaddrlen,
                       unsigned short * iport,
-                      char * proto,
-                      const char * uid,
-                      char * lt)
+                      int * proto,
+                      unsigned int * leasetime,
+                      unsigned int * packets)
 {
-	/* TODO : to be done
-	 * Call Firewall specific code to get IPv6 pinhole infos */
-	return 0;
-}
-
-int
-upnp_update_inboundpinhole(const char * uid, const char * leasetime)
-{
-	/* TODO : to be implemented */
-#if 0
-	int r, n;
-	syslog(LOG_INFO, "Updating pinhole for inbound traffic with ID: %s", uid);
-	r = check_rule_from_file(uid, 0);
-	if(r < 0)
-		return r;
-	else
-	{
-		n = rule_file_update(uid, leasetime);
-		upnp_update_expiredpinhole();
-		return n;
+	/* Call Firewall specific code to get IPv6 pinhole infos */
+#ifdef USE_PF
+	int r;
+	unsigned int timestamp;
+	u_int64_t packets_tmp, bytes_tmp;
+	r = get_pinhole(uid, raddr, raddrlen, rport,
+	                iaddr, iaddrlen, iport, proto, &timestamp,
+	                &packets_tmp, &bytes_tmp);
+	if(r >= 0) {
+		if(leasetime) {
+			time_t current_time;
+			current_time = time(NULL);
+			if(timestamp > current_time)
+				*leasetime = timestamp - current_time;
+			else
+				*leasetime = 0;
+		}
+		if(packets)
+			*packets = (unsigned int)packets_tmp;
 	}
+	return r;
 #else
-	return -1;
+	return -42;	/* not implemented */
 #endif
 }
 
 int
-upnp_delete_inboundpinhole(const char * uid)
+upnp_update_inboundpinhole(unsigned short uid, unsigned int leasetime)
 {
-	unsigned short uid_s;
-
-	if(!uid)
-		return -1;
-	uid_s = (unsigned short)atoi(uid);
 #ifdef USE_PF
-	return delete_pinhole(uid_s);
+	unsigned int timestamp;
+	timestamp = time(NULL) + leasetime;
+	return update_pinhole(uid, timestamp);
+#else
+	return -42; /* not implemented */
+#endif
+}
+
+int
+upnp_delete_inboundpinhole(unsigned short uid)
+{
+#ifdef USE_PF
+	return delete_pinhole(uid);
 #else
 return -1;
 #endif
@@ -1031,59 +1023,18 @@ upnp_check_pinhole_working(const char * uid,
 	fclose(fd);
 	return res;
 #else
-	return -4;
+	return -42;	/* to be implemented */
 #endif
 }
 
 int
-upnp_get_pinhole_packets(const char * uid, int * packets)
+upnp_clean_expired_pinholes(unsigned int * next_timestamp)
 {
-	/* TODO : to be implemented */
-#if 0
-	int line=0, r;
-	char cmd[256];
-	r = check_rule_from_file(uid, &line);
-	if(r < 0)
-		return r;
-	else
-	{
-		snprintf(cmd, sizeof(cmd), "ip6tables -L MINIUPNPD %d -v", line);
-		return retrieve_packets(cmd, &line, packets);
-	}
+#ifdef USE_PF
+	return clean_pinhole_list(next_timestamp);
 #else
-	return 0;
+	return 0;	/* nothing to do */
 #endif
-}
-
-int
-upnp_update_expiredpinhole(void)
-{
-#if 0
-	int r;
-	char uid[5], leaseTime[12];
-
-	r = get_rule_from_leasetime(uid, leaseTime);
-	if(r<0)
-		return r;
-	else
-	{
-		strcpy(nextpinholetoclean_uid, uid);
-		nextpinholetoclean_timestamp = atoi(leaseTime);
-		return 1;
-	}
-#endif
-	return 0;
-}
-
-int
-upnp_clean_expiredpinhole()
-{
-#if 0
-	upnp_delete_inboundpinhole(nextpinholetoclean_uid);
-
-	return upnp_update_expiredpinhole();
-#endif
-	return 0;
 }
 #endif
 
