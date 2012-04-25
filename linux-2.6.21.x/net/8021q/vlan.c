@@ -551,6 +551,7 @@ static struct net_device *register_vlan_device(const char *eth_IF_name,
 	VLAN_MEM_DBG("new_dev->priv malloc, addr: %p  size: %i\n",
 		     new_dev->priv,
 		     sizeof(struct vlan_dev_info));
+#endif
 
 	memcpy(new_dev->broadcast, real_dev->broadcast, real_dev->addr_len);
 	memcpy(new_dev->dev_addr, real_dev->dev_addr, real_dev->addr_len);
