@@ -433,7 +433,7 @@ int32_t PpeRxHandler(struct sk_buff * skb)
 #endif
 
     /* return trunclated packets to normal path */
-    if (!skb || skb->len < ETH_HLEN) {
+    if (!skb || (skb->len < ETH_HLEN)) {
 	NAT_PRINT("HNAT: skb null or small len in rx path\n");
 	return 1;
     }
@@ -462,7 +462,7 @@ int32_t PpeRxHandler(struct sk_buff * skb)
     if((FOE_MAGIC_TAG(skb) == FOE_MAGIC_PCI) || (FOE_MAGIC_TAG(skb) == FOE_MAGIC_WLAN)){
 #if defined  (CONFIG_RA_HW_NAT_WIFI)
 	    /* check wifi offload enabled and prevent vlan double incap */
-	    if (!wifi_offload || eth_type == ETH_P_8021Q)
+	    if (!wifi_offload || (eth_type == ETH_P_8021Q))
 		    return 1;
 
 #if defined (CONFIG_RALINK_RT3052) || defined(HWNAT_SPKIP_MCAST_BCAST)
@@ -610,7 +610,7 @@ int32_t PpeRxHandler(struct sk_buff * skb)
     }
 #endif
 
-    if(wifi_offload && eth_type == ETH_P_8021Q && (FOE_AIS(skb) == 1) && (FOE_SP(skb) == SrcPortNo) && (FOE_AI(skb)!=HIT_BIND_KEEPALIVE)) {
+    if(wifi_offload && (eth_type == ETH_P_8021Q) && (FOE_AIS(skb) == 1) && (FOE_SP(skb) == SrcPortNo) && (FOE_AI(skb)!=HIT_BIND_KEEPALIVE)) {
 	VirIfIdx = RemoveVlanTag(skb);
 
 	/* recover to right incoming interface */
@@ -890,7 +890,7 @@ int32_t PpeTxHandler(struct sk_buff *skb, int gmac_no)
 #endif
 
 	/* return trunclated packets to normal path with padding */
-	if (!skb || skb->len < ETH_HLEN) {
+	if (!skb || (skb->len < ETH_HLEN)) {
 	    NAT_PRINT("HNAT: skb null or small len in rx path\n");
 	    return 1;
 	}
