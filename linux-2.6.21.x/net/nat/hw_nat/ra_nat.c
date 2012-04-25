@@ -169,8 +169,10 @@ int RemoveVlanTag(struct sk_buff *skb)
 	struct sk_buff *new_skb;
 	new_skb = skb_copy(skb, GFP_ATOMIC);
 	kfree_skb(skb);
-	if (!new_skb)
+	if (!new_skb) {
+	    NAT_PRINT("HNAT: no mem for remove tag? (VirIfIdx=%d)\n", VirIfIdx);
 	    return 65535;
+	}
 	skb = new_skb;
     }
 
@@ -193,8 +195,8 @@ int RemoveVlanTag(struct sk_buff *skb)
     skb->protocol = eth->h_proto;
 
     return VirIfIdx;
-
 }
+
 static void FoeAllocTbl(uint32_t NumOfEntry)
 {
     uint32_t FoeTblSize;
@@ -411,16 +413,6 @@ uint32_t FoeDumpPkt(struct sk_buff *skb)
 #endif
 #endif
 
-/*
- * check SKB really accesseble
- */
-static inline int ra_skb_is_ready(struct sk_buff *skb)
-{
-	if (skb_cloned(skb) && !skb->sk)
-		return 0;
-	return 1;
-}
-
 int32_t PpeRxHandler(struct sk_buff * skb)
 {
     struct ethhdr *eth=NULL;
@@ -441,8 +433,10 @@ int32_t PpeRxHandler(struct sk_buff * skb)
 #endif
 
     /* return trunclated packets to normal path */
-    if (!skb || skb->len < ETH_HLEN)
+    if (!skb || skb->len < ETH_HLEN) {
+	NAT_PRINT("HNAT: skb null or small len in rx path\n");
 	return 1;
+    }
 
     eth_type=ntohs(skb->protocol);
 
@@ -540,9 +534,17 @@ int32_t PpeRxHandler(struct sk_buff * skb)
 	    else if(skb->dev == DstPort[DP_PCI]) { VirIfIdx=DP_PCI; }
 	    else { printk("HNAT: The interface %s is unknown\n", skb->dev->name); }
 
-	    /* check skb avail to modify */
-	    if(!ra_skb_is_ready(skb))
-		return 1;
+	    /* make skb writable */
+	    if (skb_cloned(skb) || skb_shared(skb)) {
+		struct sk_buff *new_skb;
+		new_skb = skb_copy(skb, GFP_ATOMIC);
+		kfree_skb(skb);
+		if (!new_skb) {
+		    NAT_PRINT("HNAT: no mem for add tag? (VirIfIdx=%d)\n", VirIfIdx);
+		    return 1;
+		}
+		skb = new_skb;
+	    }
 
 	    //push vlan tag to stand for actual incoming interface,
 	    //so HNAT module can know the actual incoming interface from vlan id.
@@ -888,8 +890,10 @@ int32_t PpeTxHandler(struct sk_buff *skb, int gmac_no)
 #endif
 
 	/* return trunclated packets to normal path with padding */
-	if (!skb || skb->len < ETH_HLEN)
+	if (!skb || skb->len < ETH_HLEN) {
+	    NAT_PRINT("HNAT: skb null or small len in rx path\n");
 	    return 1;
+	}
 
 	/*
 	 * Packet is interested by ALG?
