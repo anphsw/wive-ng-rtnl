@@ -149,7 +149,7 @@ int32_t mcast_rx(struct sk_buff * skb)
 	MCAST_PRINT("%s: %0X:%0X:%0X:%0X:%0X:%0X\n", __FUNCTION__, \
 		MAC_ARG(eth->h_dest));
 
-	if(ntohs(eth->h_vlan_proto)==0x8100) {
+	if(ntohs(eth->h_vlan_proto)==ETH_P_8021Q) {
 	    return mcast_entry_del(eth->h_vlan_TCI, eth->h_source, eth->h_dest);
 	} else {
 	    return mcast_entry_del(0, eth->h_source, eth->h_dest);
