@@ -168,11 +168,11 @@ int RemoveVlanTag(struct sk_buff *skb)
     if (skb_cloned(skb) || skb_shared(skb)) {
 	struct sk_buff *new_skb;
 	new_skb = skb_copy(skb, GFP_ATOMIC);
-	kfree_skb(skb);
 	if (!new_skb) {
 	    NAT_PRINT("HNAT: no mem for remove tag? (VirIfIdx=%d)\n", VirIfIdx);
 	    return 65535;
 	}
+	kfree_skb(skb);
 	skb = new_skb;
     }
 
@@ -538,11 +538,11 @@ int32_t PpeRxHandler(struct sk_buff * skb)
 	    if (skb_cloned(skb) || skb_shared(skb)) {
 		struct sk_buff *new_skb;
 		new_skb = skb_copy(skb, GFP_ATOMIC);
-		kfree_skb(skb);
 		if (!new_skb) {
 		    NAT_PRINT("HNAT: no mem for add tag? (VirIfIdx=%d)\n", VirIfIdx);
 		    return 1;
 		}
+		kfree_skb(skb);
 		skb = new_skb;
 	    }
 
