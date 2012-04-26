@@ -48,6 +48,7 @@
 
 #include "util.h"
 
+#ifndef CONFIG_RA_HW_NAT_MINIMAL
 void MacReverse(uint8_t *Mac)
 {
     uint8_t tmp;
@@ -83,6 +84,7 @@ void CalIpRange(uint32_t StartIp, uint32_t EndIp, uint8_t *M, uint8_t *E)
   }
 
 }
+#endif
 
 void RegModifyBits( uint32_t Addr, uint32_t Data, 
 		     uint32_t  Offset, uint32_t Len)

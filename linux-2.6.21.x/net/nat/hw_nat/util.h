@@ -55,9 +55,11 @@
 /*
  * TYPEDEFS AND STRUCTURES
  */
+#ifndef CONFIG_RA_HW_NAT_MINIMAL
 void MacReverse(uint8_t *Mac);
-void RegModifyBits( uint32_t Addr, uint32_t Data, uint32_t  Offset, uint32_t Len);
 void CalIpRange(uint32_t StartIp, uint32_t EndIp, uint8_t *M, uint8_t *E);
+#endif
+void RegModifyBits( uint32_t Addr, uint32_t Data, uint32_t  Offset, uint32_t Len);
 void FoeToOrgTcpHdr(IN struct FoeEntry *foe_entry, IN struct iphdr *iph, OUT struct tcphdr *th);
 void FoeToOrgUdpHdr(IN struct FoeEntry *foe_entry, IN struct iphdr *iph, OUT struct udphdr *uh);
 void FoeToOrgIpHdr(IN struct FoeEntry *foe_entry, OUT struct iphdr *iph);
