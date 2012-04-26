@@ -413,32 +413,15 @@ uint32_t FoeDumpPkt(struct sk_buff *skb)
 #endif
 #endif
 
-int32_t PpeRxHandler(struct sk_buff * skb)
+int32_t PpeRxSkip(struct sk_buff * skb, uint16_t eth_type)
 {
     struct ethhdr *eth=NULL;
-    struct vlan_hdr *vh = NULL;
-    struct iphdr *iph = NULL;
-    struct tcphdr *th = NULL;
-    struct udphdr *uh = NULL;
-    struct FoeEntry *foe_entry=NULL;
-
-
-    uint32_t vlan1_gap = 0;
-    uint32_t vlan2_gap = 0;
-    uint32_t pppoe_gap=0;
-    uint16_t eth_type=0;
-#if defined  (CONFIG_RA_HW_NAT_WIFI)
-    uint32_t SrcPortNo=0;
-    uint16_t VirIfIdx=0;
-#endif
 
     /* return trunclated packets to normal path */
     if (!skb || (skb->len < ETH_HLEN)) {
 	NAT_PRINT("HNAT: skb null or small len in rx path\n");
 	return 1;
     }
-
-    eth_type=ntohs(skb->protocol);
 
     /* PPE only can handle IPv4/VLAN/IPv6/PPP packets */
     if(eth_type != ETH_P_IP &&
@@ -451,26 +434,22 @@ int32_t PpeRxHandler(struct sk_buff * skb)
 	return 1;
     }
 
-    foe_entry=&PpeFoeBase[FOE_ENTRY_NUM(skb)];
-
-#ifdef HWNAT_DEBUG
-    if(DebugLevel==1) {
-       FoeDumpPkt(skb);
-    }
+#if defined (CONFIG_RALINK_RT3052) || defined(HWNAT_SPKIP_MCAST_BCAST)
+    /* skip bcast/unicast traffic PPE. WiFi bug ? */
+    eth = eth_hdr(skb);
+    if(is_multicast_ether_addr(eth->h_dest) || is_broadcast_ether_addr(eth->h_dest))
+	    return 1;
 #endif
 
-    if((FOE_MAGIC_TAG(skb) == FOE_MAGIC_PCI) || (FOE_MAGIC_TAG(skb) == FOE_MAGIC_WLAN)){
+    return 0;
+}
+
 #if defined  (CONFIG_RA_HW_NAT_WIFI)
+int32_t PpeRxWifiTag(struct sk_buff * skb, uint16_t eth_type, uint16_t VirIfIdx)
+{
 	    /* check wifi offload enabled and prevent vlan double incap */
 	    if (!wifi_offload || (eth_type == ETH_P_8021Q))
 		    return 1;
-
-#if defined (CONFIG_RALINK_RT3052) || defined(HWNAT_SPKIP_MCAST_BCAST)
-	    /* skip bcast/unicast traffic PPE. WiFi bug ? */
-	    eth = eth_hdr(skb);
-	    if(is_multicast_ether_addr(eth->h_dest) || is_broadcast_ether_addr(eth->h_dest))
-		    return 1;
-#endif
 
 	    if(skb->dev == DstPort[DP_RA0]) { VirIfIdx=DP_RA0;}
 #if defined (CONFIG_RT2860V2_AP_MBSS)
@@ -564,28 +543,11 @@ int32_t PpeRxHandler(struct sk_buff * skb)
 #else
 	    skb->dev->hard_start_xmit(skb, skb->dev);
 #endif
-	    return 0;
-#else
-	    return 1;
-#endif // CONFIG_RA_HW_NAT_WIFI //
+    return 0;
+}
 
-    }
-
-    /* It means the flow is already in binding state, just transfer to output interface 
-     * rax<->raix binded traffic: HIT_BIND_FORCE_TO_CPU + FOE_AIS=1 + FOE_SP = 0 or 6
-     */
-    if((FOE_AI(skb)==HIT_BIND_FORCE_TO_CPU)) {
-	    skb->dev = DstPort[foe_entry->act_dp];
-	    skb_push(skb, ETH_HLEN); //pointer to layer2 header
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,32)
-	    skb->dev->netdev_ops->ndo_start_xmit(skb,skb->dev);
-#else
-	    skb->dev->hard_start_xmit(skb, skb->dev);
-#endif
-	    return 0;
-    }
-
-#if defined (CONFIG_RA_HW_NAT_WIFI)
+int32_t PpeRxWifiDeTag(struct sk_buff * skb, uint16_t eth_type, uint16_t VirIfIdx)
+{
     /*
      * RT3883/RT3352/RT6855:
      * If FOE_AIS=1 and FOE_SP=0/6, it means this is reentry packet.
@@ -604,6 +566,9 @@ int32_t PpeRxHandler(struct sk_buff * skb)
      *       GE1    |     N/A     |     1
      *       GE2    |     5*      |     2
      */
+    struct ethhdr *eth=NULL;
+    uint32_t SrcPortNo=0;
+
 #if defined(CONFIG_RALINK_RT3883) || defined(CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT6855)
     if(IS_EXT_SW_EN(RegRead(FE_COS_MAP))){
 	SrcPortNo=6;
@@ -636,6 +601,65 @@ int32_t PpeRxHandler(struct sk_buff * skb)
 	    NAT_PRINT("HNAT: unknown interface (VirIfIdx=%d)\n", VirIfIdx);
 	}
     }
+    return 0;
+}
+#endif
+
+int32_t PpeRxHandler(struct sk_buff * skb)
+{
+    struct ethhdr *eth=NULL;
+    struct vlan_hdr *vh = NULL;
+    struct iphdr *iph = NULL;
+    struct tcphdr *th = NULL;
+    struct udphdr *uh = NULL;
+    struct FoeEntry *foe_entry=NULL;
+
+    uint32_t vlan1_gap = 0;
+    uint32_t vlan2_gap = 0;
+    uint32_t pppoe_gap=0;
+    uint16_t eth_type=0;
+#if defined  (CONFIG_RA_HW_NAT_WIFI)
+    uint16_t VirIfIdx=0;
+#endif
+
+    eth_type=ntohs(skb->protocol);
+
+    if (PpeRxSkip(skb, eth_type))
+	return 1;
+
+    foe_entry=&PpeFoeBase[FOE_ENTRY_NUM(skb)];
+
+#ifdef HWNAT_DEBUG
+    if(DebugLevel==1) {
+       FoeDumpPkt(skb);
+    }
+#endif
+
+    if((FOE_MAGIC_TAG(skb) == FOE_MAGIC_PCI) || (FOE_MAGIC_TAG(skb) == FOE_MAGIC_WLAN)){
+#if defined  (CONFIG_RA_HW_NAT_WIFI)
+	return PpeRxWifiTag(skb, eth_type, VirIfIdx);
+#else
+	return 1;
+#endif
+    }
+
+    /* It means the flow is already in binding state, just transfer to output interface 
+     * rax<->raix binded traffic: HIT_BIND_FORCE_TO_CPU + FOE_AIS=1 + FOE_SP = 0 or 6
+     */
+    if((FOE_AI(skb)==HIT_BIND_FORCE_TO_CPU)) {
+	    skb->dev = DstPort[foe_entry->act_dp];
+	    skb_push(skb, ETH_HLEN); //pointer to layer2 header
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,32)
+	    skb->dev->netdev_ops->ndo_start_xmit(skb,skb->dev);
+#else
+	    skb->dev->hard_start_xmit(skb, skb->dev);
+#endif
+	    return 0;
+    }
+
+#if defined  (CONFIG_RA_HW_NAT_WIFI)
+    if(PpeRxWifiDeTag(skb, eth_type, VirIfIdx))
+	return 1;
 #endif
 
     if( (FOE_AI(skb)==HIT_BIND_KEEPALIVE) && (DFL_FOE_KA_ORG==0)){
