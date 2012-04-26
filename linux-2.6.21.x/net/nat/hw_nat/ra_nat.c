@@ -156,7 +156,7 @@ int RemoveVlanTag(struct sk_buff *skb)
     veth = vlan_eth_hdr(skb);
 
     /* something wrong */
-    if((veth->h_vlan_proto != htons(ETH_P_8021Q)) || (veth->h_vlan_TCI == NULL)) {
+    if(veth->h_vlan_proto != htons(ETH_P_8021Q)) {
 	printk("HNAT: Reentry packet is untagged frame?\n");
 	return 65535;
     }
