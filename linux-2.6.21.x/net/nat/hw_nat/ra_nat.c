@@ -453,6 +453,13 @@ int32_t PpeRxWifiTag(struct sk_buff * skb, uint16_t eth_type)
 	    if (!wifi_offload || (eth_type == ETH_P_8021Q))
 		    return 1;
 
+	    /* check dst if exist */
+	    if (skb->dev == NULL) {
+		NAT_PRINT("HNAT: RX: interface (VirIfIdx=%d) not exist\n", VirIfIdx);
+		kfree_skb(skb);
+		return 0;
+	    }
+
 	    if(skb->dev == DstPort[DP_RA0]) { VirIfIdx=DP_RA0;}
 #if defined (CONFIG_RT2860V2_AP_MBSS)
 	    else if(skb->dev == DstPort[DP_RA1]) { VirIfIdx=DP_RA1; }
@@ -516,13 +523,6 @@ int32_t PpeRxWifiTag(struct sk_buff * skb, uint16_t eth_type)
 	    else {
 		NAT_PRINT("HNAT: The interface %s is unknown\n", skb->dev->name);
 		return 1;
-	    }
-
-	    /* check dst if exist */
-	    if (DstPort[VirIfIdx] == NULL) {
-		NAT_PRINT("HNAT: RX: interface (VirIfIdx=%d) not exist\n", VirIfIdx);
-		kfree_skb(skb);
-		return 0;
 	    }
 
 	    /* make skb writable */
