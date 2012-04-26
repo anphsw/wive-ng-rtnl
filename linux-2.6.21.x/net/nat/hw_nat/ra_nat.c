@@ -580,9 +580,17 @@ int32_t PpeRxWifiDeTag(struct sk_buff * skb, uint16_t eth_type, uint16_t VirIfId
 
 	/* recover to right incoming interface */
 	if(VirIfIdx < MAX_IF_NUM) {
-	    skb->dev=DstPort[VirIfIdx];
-	    eth = eth_hdr(skb);
 
+	    /* check dst if exist */
+	    if (DstPort[VirIfIdx] == NULL) {
+		NAT_PRINT("HNAT: interface (VirIfIdx=%d) not exist\n", VirIfIdx);
+		kfree_skb(skb);
+		return 0;
+	    }
+
+	    skb->dev=DstPort[VirIfIdx];
+
+	    eth = eth_hdr(skb);
 	    if (is_multicast_ether_addr(eth->h_dest)) {
 		if (!compare_ether_addr(eth->h_dest, skb->dev->broadcast))
 			skb->pkt_type = PACKET_BROADCAST;
