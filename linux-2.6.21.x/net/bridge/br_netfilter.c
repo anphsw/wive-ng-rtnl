@@ -29,6 +29,8 @@
 #include <linux/if_arp.h>
 #include <linux/if_ether.h>
 #include <linux/if_vlan.h>
+#include <linux/if_pppox.h>
+#include <linux/ppp_defs.h>
 #include <linux/netfilter_bridge.h>
 #include <linux/netfilter_ipv4.h>
 #include <linux/netfilter_ipv6.h>
@@ -57,8 +59,10 @@ static int brnf_call_iptables __read_mostly = 1;
 static int brnf_call_ip6tables __read_mostly = 1;
 static int brnf_call_arptables __read_mostly = 1;
 static int brnf_filter_vlan_tagged __read_mostly = 1;
+static int brnf_filter_pppoe_tagged __read_mostly = 1;
 #else
 #define brnf_filter_vlan_tagged 1
+#define brnf_filter_pppoe_tagged 1
 #endif
 
 static inline __be16 vlan_proto(const struct sk_buff *skb)
@@ -80,6 +84,22 @@ static inline __be16 vlan_proto(const struct sk_buff *skb)
 	(skb->protocol == htons(ETH_P_8021Q) &&	\
 	 vlan_proto(skb) == htons(ETH_P_ARP) &&	\
 	 brnf_filter_vlan_tagged)
+
+static inline __be16 pppoe_proto(const struct sk_buff *skb)
+{
+	return *((__be16 *)(skb_mac_header(skb) + ETH_HLEN +
+			    sizeof(struct pppoe_hdr)));
+}
+
+#define IS_PPPOE_IP(skb) \
+	(skb->protocol == htons(ETH_P_PPP_SES) && \
+	 pppoe_proto(skb) == htons(PPP_IP) && \
+	 brnf_filter_pppoe_tagged)
+
+#define IS_PPPOE_IPV6(skb) \
+	(skb->protocol == htons(ETH_P_PPP_SES) && \
+	 pppoe_proto(skb) == htons(PPP_IPV6) && \
+	 brnf_filter_pppoe_tagged)
 
 /* We need these fake structures to make netfilter happy --
  * lots of places assume that skb->dst != NULL, which isn't
@@ -128,6 +148,8 @@ static inline void nf_bridge_save_header(struct sk_buff *skb)
 
 	if (skb->protocol == htons(ETH_P_8021Q))
 		header_size += VLAN_HLEN;
+	else if (skb->protocol == htons(ETH_P_PPP_SES))
+		header_size += PPPOE_SES_HLEN;
 
 	memcpy(skb->nf_bridge->data, skb->data - header_size, header_size);
 }
@@ -462,7 +484,7 @@ static unsigned int br_nf_pre_routing(unsigned int hook, struct sk_buff **pskb,
 {
 	struct iphdr *iph;
 	struct sk_buff *skb = *pskb;
-	__u32 len = nf_bridge_encap_header_len(skb);
+	__u32 len;
 
 	if ((skb = skb_share_check(skb, GFP_ATOMIC)) == NULL)
 		return NF_STOLEN;
@@ -470,7 +492,8 @@ static unsigned int br_nf_pre_routing(unsigned int hook, struct sk_buff **pskb,
 	if (unlikely(!pskb_may_pull(skb, len)))
 		goto out;
 
-	if (skb->protocol == htons(ETH_P_IPV6) || IS_VLAN_IPV6(skb)) {
+	if (skb->protocol == htons(ETH_P_IPV6) || IS_VLAN_IPV6(skb) ||
+	    IS_PPPOE_IPV6(skb)) {
 #ifdef CONFIG_SYSCTL
 		if (!brnf_call_ip6tables)
 			return NF_ACCEPT;
@@ -486,7 +509,8 @@ static unsigned int br_nf_pre_routing(unsigned int hook, struct sk_buff **pskb,
 		return NF_ACCEPT;
 #endif
 
-	if (skb->protocol != htons(ETH_P_IP) && !IS_VLAN_IP(skb))
+	if (skb->protocol != htons(ETH_P_IP) && !IS_VLAN_IP(skb) &&
+	    !IS_PPPOE_IP(skb))
 		return NF_ACCEPT;
 
 	if (skb->protocol == htons(ETH_P_8021Q)) {
@@ -601,7 +625,8 @@ static unsigned int br_nf_forward_ip(unsigned int hook, struct sk_buff **pskb,
 	if (!parent)
 		return NF_DROP;
 
-	if (skb->protocol == htons(ETH_P_IP) || IS_VLAN_IP(skb))
+	if (skb->protocol == htons(ETH_P_IP) || IS_VLAN_IP(skb) ||
+	    IS_PPPOE_IP(skb))
 		pf = PF_INET;
 	else
 		pf = PF_INET6;
@@ -746,7 +771,8 @@ static unsigned int br_nf_post_routing(unsigned int hook, struct sk_buff **pskb,
 	if (!realoutdev)
 		return NF_DROP;
 
-	if (skb->protocol == htons(ETH_P_IP) || IS_VLAN_IP(skb))
+	if (skb->protocol == htons(ETH_P_IP) || IS_VLAN_IP(skb) ||
+	    IS_PPPOE_IP(skb))
 		pf = PF_INET;
 	else
 		pf = PF_INET6;
@@ -901,6 +927,14 @@ static ctl_table brnf_table[] = {
 		.ctl_name	= NET_BRIDGE_NF_FILTER_VLAN_TAGGED,
 		.procname	= "bridge-nf-filter-vlan-tagged",
 		.data		= &brnf_filter_vlan_tagged,
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= &brnf_sysctl_call_tables,
+	},
+	{
+		.ctl_name	= NET_BRIDGE_NF_FILTER_PPPOE_TAGGED,
+		.procname	= "bridge-nf-filter-pppoe-tagged",
+		.data		= &brnf_filter_pppoe_tagged,
 		.maxlen		= sizeof(int),
 		.mode		= 0644,
 		.proc_handler	= &brnf_sysctl_call_tables,

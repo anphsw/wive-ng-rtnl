@@ -147,6 +147,9 @@ struct pppoe_hdr {
 /* Length of entire PPPoE + PPP header */
 #define PPPOE_SES_HLEN	8
 
+/* Length of entire PPPoE + PPP header */
+#define PPPOE_SES_HLEN	8
+
 #ifdef __KERNEL__
 #include <linux/skbuff.h>
 static inline struct pppoe_hdr *pppoe_hdr(const struct sk_buff *skb)

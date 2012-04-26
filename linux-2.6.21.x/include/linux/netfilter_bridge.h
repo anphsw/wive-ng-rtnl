@@ -8,6 +8,7 @@
 #include <linux/if_ether.h>
 #include <linux/if_pppox.h>
 #include <linux/if_vlan.h>
+#include <linux/if_pppox.h>
 
 /* Bridge Hooks */
 /* After promisc drops, checksum checks. */
@@ -58,8 +59,14 @@ static inline unsigned int nf_bridge_mtu_reduction(const struct sk_buff *skb)
  * enough room for the encapsulating header (if there is one). */
 static inline int nf_bridge_pad(const struct sk_buff *skb)
 {
- 	return (skb->nf_bridge && skb->protocol == htons(ETH_P_8021Q))
-		? VLAN_HLEN : 0;
+	int padding = 0;
+
+	if (skb->nf_bridge && skb->protocol == htons(ETH_P_8021Q))
+		padding = VLAN_HLEN;
+	else if (skb->nf_bridge && skb->protocol == htons(ETH_P_PPP_SES))
+		padding = PPPOE_SES_HLEN;
+
+	return padding;
 }
 
 struct bridge_skb_cb {
