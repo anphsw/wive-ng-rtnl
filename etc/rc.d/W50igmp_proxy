@@ -19,22 +19,27 @@ LOG="logger -t igmpproxy"
 start() {
   # if igmpproxy enable and mode not full bridge
     if [ "$igmpEnabled" = "1" ] && [ "$OperationMode" != "0" ]; then
-	get_param
-        $LOG "Starting IGMPPROXY"
-	# check ip adress set at wan and if need kill igmpproxy
-	wan_is_not_null=`ip -4 addr show $wan_if | grep inet -c`
+
+	# if need kill igmpproxy
 	igmp_is_start=`pidof igmpproxy`
-	if [ "$wan_is_not_null" = "0" ] || [ "$igmp_is_start" != "" ]; then
-    	    $LOG "Wait 20 sec before start..."
+	if [ "$igmp_is_start" != "" ]; then
 	    killall -q igmpproxy
 	    killall -q -SIGKILL igmpproxy
-	    sleep 20
+	    sleep 2
+	fi
+
+	# check ip adress set at wan
+	wan_is_not_null=`ip -4 addr show $wan_if | grep inet -c`
+	if [ "$wan_is_not_null" = "0" ]; then
+    	    $LOG "Wait 10 sec before start..."
+	    sleep 10
 	fi
 
 	#generate config file
+	get_param
 	gen_config
 
-	# start igmpproxy in switch managment mode
+        $LOG "Starting IGMPPROXY"
     	igmpproxy $OPTS /etc/igmpproxy.conf &
 
 	# enable mc forwarding
