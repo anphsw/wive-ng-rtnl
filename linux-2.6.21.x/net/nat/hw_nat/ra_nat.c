@@ -455,7 +455,7 @@ int32_t PpeRxWifiTag(struct sk_buff * skb, uint16_t eth_type)
 
 	    /* check dst if exist */
 	    if (skb->dev == NULL) {
-		NAT_PRINT("HNAT: RX: interface (VirIfIdx=%d) not exist\n", VirIfIdx);
+		NAT_PRINT("HNAT: RX: interface not exist\n");
 		kfree_skb(skb);
 		return 0;
 	    }
