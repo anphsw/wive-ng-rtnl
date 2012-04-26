@@ -445,8 +445,10 @@ int32_t PpeRxSkip(struct sk_buff * skb, uint16_t eth_type)
 }
 
 #if defined  (CONFIG_RA_HW_NAT_WIFI)
-int32_t PpeRxWifiTag(struct sk_buff * skb, uint16_t eth_type, uint16_t VirIfIdx)
+int32_t PpeRxWifiTag(struct sk_buff * skb, uint16_t eth_type)
 {
+	    uint16_t VirIfIdx=0;
+
 	    /* check wifi offload enabled and prevent vlan double incap */
 	    if (!wifi_offload || (eth_type == ETH_P_8021Q))
 		    return 1;
@@ -511,7 +513,10 @@ int32_t PpeRxWifiTag(struct sk_buff * skb, uint16_t eth_type, uint16_t VirIfIdx)
 	    else if(skb->dev == DstPort[DP_MESHI0]) { VirIfIdx=DP_MESHI0; }
 #endif // CONFIG_RTDEV_AP_MESH //
 	    else if(skb->dev == DstPort[DP_PCI]) { VirIfIdx=DP_PCI; }
-	    else { printk("HNAT: The interface %s is unknown\n", skb->dev->name); }
+	    else {
+		NAT_PRINT("HNAT: The interface %s is unknown\n", skb->dev->name);
+		return 1;
+	    }
 
 	    /* make skb writable */
 	    if (skb_cloned(skb) || skb_shared(skb)) {
@@ -546,7 +551,7 @@ int32_t PpeRxWifiTag(struct sk_buff * skb, uint16_t eth_type, uint16_t VirIfIdx)
     return 0;
 }
 
-int32_t PpeRxWifiDeTag(struct sk_buff * skb, uint16_t eth_type, uint16_t VirIfIdx)
+int32_t PpeRxWifiDeTag(struct sk_buff * skb, uint16_t eth_type)
 {
     /*
      * RT3883/RT3352/RT6855:
@@ -567,6 +572,7 @@ int32_t PpeRxWifiDeTag(struct sk_buff * skb, uint16_t eth_type, uint16_t VirIfId
      *       GE2    |     5*      |     2
      */
     struct ethhdr *eth=NULL;
+    uint16_t VirIfIdx=0;
     uint32_t SrcPortNo=0;
 
 #if defined(CONFIG_RALINK_RT3883) || defined(CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT6855)
@@ -585,7 +591,7 @@ int32_t PpeRxWifiDeTag(struct sk_buff * skb, uint16_t eth_type, uint16_t VirIfId
 	    if (DstPort[VirIfIdx] == NULL) {
 		NAT_PRINT("HNAT: interface (VirIfIdx=%d) not exist\n", VirIfIdx);
 		kfree_skb(skb);
-		return 0;
+		return -1;
 	    }
 
 	    skb->dev=DstPort[VirIfIdx];
@@ -627,7 +633,7 @@ int32_t PpeRxHandler(struct sk_buff * skb)
     uint32_t pppoe_gap=0;
     uint16_t eth_type=0;
 #if defined  (CONFIG_RA_HW_NAT_WIFI)
-    uint16_t VirIfIdx=0;
+    int32_t ret=0;
 #endif
 
     eth_type=ntohs(skb->protocol);
@@ -645,7 +651,7 @@ int32_t PpeRxHandler(struct sk_buff * skb)
 
     if((FOE_MAGIC_TAG(skb) == FOE_MAGIC_PCI) || (FOE_MAGIC_TAG(skb) == FOE_MAGIC_WLAN)){
 #if defined  (CONFIG_RA_HW_NAT_WIFI)
-	return PpeRxWifiTag(skb, eth_type, VirIfIdx);
+	return PpeRxWifiTag(skb, eth_type);
 #else
 	return 1;
 #endif
@@ -666,8 +672,16 @@ int32_t PpeRxHandler(struct sk_buff * skb)
     }
 
 #if defined  (CONFIG_RA_HW_NAT_WIFI)
-    if(PpeRxWifiDeTag(skb, eth_type, VirIfIdx))
-	return 1;
+    /* PpeRxWifiDeTag return:
+	-1 - iface exist error with kfree_skb
+	 0 - no need detag
+	 1 - detag ok and return to normal path
+    */
+    ret=PpeRxWifiDeTag(skb, eth_type);
+    if(ret == 1)
+	return 1;	/* return to normal path */
+    else if(ret == -1)	/* drop this packet */
+	return 0;
 #endif
 
     if( (FOE_AI(skb)==HIT_BIND_KEEPALIVE) && (DFL_FOE_KA_ORG==0)){
