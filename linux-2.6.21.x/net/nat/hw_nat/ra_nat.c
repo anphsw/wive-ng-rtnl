@@ -518,6 +518,13 @@ int32_t PpeRxWifiTag(struct sk_buff * skb, uint16_t eth_type)
 		return 1;
 	    }
 
+	    /* check dst if exist */
+	    if (DstPort[VirIfIdx] == NULL) {
+		NAT_PRINT("HNAT: RX: interface (VirIfIdx=%d) not exist\n", VirIfIdx);
+		kfree_skb(skb);
+		return 0;
+	    }
+
 	    /* make skb writable */
 	    if (skb_cloned(skb) || skb_shared(skb)) {
 		struct sk_buff *new_skb;
@@ -589,7 +596,7 @@ int32_t PpeRxWifiDeTag(struct sk_buff * skb, uint16_t eth_type)
 
 	    /* check dst if exist */
 	    if (DstPort[VirIfIdx] == NULL) {
-		NAT_PRINT("HNAT: interface (VirIfIdx=%d) not exist\n", VirIfIdx);
+		NAT_PRINT("HNAT: TX: interface (VirIfIdx=%d) not exist\n", VirIfIdx);
 		kfree_skb(skb);
 		return -1;
 	    }
