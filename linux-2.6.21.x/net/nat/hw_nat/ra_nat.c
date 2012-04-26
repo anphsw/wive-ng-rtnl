@@ -543,7 +543,7 @@ int32_t PpeRxWifiTag(struct sk_buff * skb, uint16_t eth_type)
 	    skb = __vlan_put_tag(skb, VirIfIdx);
 	    if (!skb) {
 		NAT_PRINT("HNAT: not valid tag ? memleak ? (VirIfIdx=%d)\n", VirIfIdx);
-		return 1;
+		return 0;
 	    }
 
 	    //redirect to PPE
