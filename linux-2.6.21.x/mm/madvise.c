@@ -10,6 +10,7 @@
 #include <linux/syscalls.h>
 #include <linux/mempolicy.h>
 #include <linux/hugetlb.h>
+#include <linux/sched.h>
 
 /*
  * We can potentially split a vm area into separate

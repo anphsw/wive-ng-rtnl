@@ -17,6 +17,7 @@
 #include <rxrpc/transport.h>
 #include <rxrpc/call.h>
 #include <rxrpc/peer.h>
+#include <linux/sched.h>
 #include "cache.h"
 #include "cell.h"
 #include "server.h"

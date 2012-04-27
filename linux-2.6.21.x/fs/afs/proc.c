@@ -16,6 +16,7 @@
 #include "cell.h"
 #include "volume.h"
 #include <asm/uaccess.h>
+#include <linux/sched.h>
 #include "internal.h"
 
 static struct proc_dir_entry *proc_afs;

@@ -11,6 +11,7 @@
 
 #include <linux/module.h>
 #include <linux/slab.h>
+#include <linux/sched.h>
 #include <rxrpc/peer.h>
 #include <rxrpc/connection.h>
 #include "volume.h"

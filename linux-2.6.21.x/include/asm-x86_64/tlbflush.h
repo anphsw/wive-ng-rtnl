@@ -2,6 +2,7 @@
 #define _X8664_TLBFLUSH_H
 
 #include <linux/mm.h>
+#include <linux/sched.h>
 #include <asm/processor.h>
 
 static inline unsigned long get_cr3(void)

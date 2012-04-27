@@ -22,6 +22,7 @@
 #include "vlclient.h"
 #include "kafstimod.h"
 #include <rxrpc/connection.h>
+#include <linux/sched.h>
 #include "internal.h"
 
 #define AFS_VLDB_TIMEOUT HZ*1000

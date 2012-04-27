@@ -16,6 +16,7 @@
 #include <linux/kernel.h>
 #include <linux/fs.h>
 #include <linux/pagemap.h>
+#include <linux/workqueue.h>
 
 /*
  * debug tracing

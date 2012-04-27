@@ -20,6 +20,7 @@
 #include "volume.h"
 #include <rxrpc/call.h>
 #include "super.h"
+#include <linux/sched.h>
 #include "internal.h"
 
 static struct dentry *afs_dir_lookup(struct inode *dir, struct dentry *dentry,

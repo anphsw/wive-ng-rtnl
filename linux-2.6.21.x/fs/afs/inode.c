@@ -19,6 +19,7 @@
 #include <linux/slab.h>
 #include <linux/fs.h>
 #include <linux/pagemap.h>
+#include <linux/sched.h>
 #include "volume.h"
 #include "vnode.h"
 #include "super.h"
