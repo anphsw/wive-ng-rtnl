@@ -413,10 +413,8 @@ uint32_t FoeDumpPkt(struct sk_buff *skb)
 #endif
 #endif
 
-int32_t PpeRxSkip(struct sk_buff * skb, uint16_t eth_type)
+static int32_t PpeRxSkip(struct sk_buff * skb, uint16_t eth_type)
 {
-    struct ethhdr *eth=NULL;
-
     /* return trunclated packets to normal path */
     if (!skb || (skb->len < ETH_HLEN)) {
 	NAT_PRINT("HNAT: skb null or small len in rx path\n");
@@ -433,32 +431,32 @@ int32_t PpeRxSkip(struct sk_buff * skb, uint16_t eth_type)
 	eth_type != ETH_P_PPP_DISC) {
 	return 1;
     }
-
-#if defined (CONFIG_RALINK_RT3052) || defined(HWNAT_SPKIP_MCAST_BCAST)
-    /* skip bcast/mcast traffic PPE. WiFi bug ? */
-    eth = eth_hdr(skb);
-    if(wifi_offload && is_multicast_ether_addr(eth->h_dest))
-	    return 1;
-#endif
-
     return 0;
 }
 
 #if defined  (CONFIG_RA_HW_NAT_WIFI)
 int32_t PpeRxWifiTag(struct sk_buff * skb, uint16_t eth_type)
 {
+	    struct ethhdr *eth=NULL;
 	    uint16_t VirIfIdx=0;
 
 	    /* check wifi offload enabled and prevent vlan double incap */
 	    if (!wifi_offload || (eth_type == ETH_P_8021Q))
 		    return 1;
 
-	    /* check dst if exist */
+	    /* check dst interface exist */
 	    if (skb->dev == NULL) {
 		NAT_PRINT("HNAT: RX: interface not exist\n");
 		kfree_skb(skb);
 		return 0;
 	    }
+
+#if defined (CONFIG_RALINK_RT3052) || defined(HWNAT_SPKIP_MCAST_BCAST)
+	    /* skip bcast/mcast traffic PPE. WiFi bug ? */
+	    eth = eth_hdr(skb);
+	    if(wifi_offload && is_multicast_ether_addr(eth->h_dest))
+		return 1;
+#endif
 
 	    if(skb->dev == DstPort[DP_RA0]) { VirIfIdx=DP_RA0;}
 #if defined (CONFIG_RT2860V2_AP_MBSS)
@@ -594,7 +592,7 @@ int32_t PpeRxWifiDeTag(struct sk_buff * skb, uint16_t eth_type)
 	/* recover to right incoming interface */
 	if(VirIfIdx < MAX_IF_NUM) {
 
-	    /* check dst if exist */
+	    /* check dst interface exist */
 	    if (DstPort[VirIfIdx] == NULL) {
 		NAT_PRINT("HNAT: TX: interface (VirIfIdx=%d) not exist\n", VirIfIdx);
 		kfree_skb(skb);
