@@ -184,10 +184,6 @@ typedef struct
  * EXPORT FUNCTION
  */
 int32_t GetPppoeSid(struct sk_buff *skb, uint32_t vlan_gap, uint16_t *sid, uint16_t *ppp_tag, uint32_t is_in);
-void AclInsTestEntry(void);
-void AcInsTestEntry(void);
-void MtrInsTestEntry(void);
-void FoeInsTestEntry(void);
 int PpeSetDscpRemarkEbl(uint32_t enable);
 int PpeSetVpriRemarkEbl(uint32_t enable);
 int PpeSetWeightFOE(uint32_t weight);
