@@ -9,6 +9,7 @@
 #include <asm/elf.h>
 #include <asm/uaccess.h>
 #include <asm/tlbflush.h>
+#include <linux/sched.h>
 #include "internal.h"
 
 char *task_mem(struct mm_struct *mm, char *buffer)
