@@ -782,6 +782,21 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 	old_bssid_num = atoi(nvram_get(RT2860_NVRAM, "BssidNum"));
 	new_bssid_num = atoi(bssid_num);
 
+	if (new_bssid_num < 1 || new_bssid_num > 8) {
+		websError(wp, 403, T("'bssid_num' %s is out of range!"), bssid_num);
+		return;
+	}
+
+	//11abg Channel or AutoSelect
+	if ((0 == strlen(sz11aChannel)) && (0 == strlen(sz11bChannel)) && (0 == strlen(sz11gChannel)))
+	{
+		websError(wp, 403, T("'Channel' should not be empty!"));
+		return;
+	}
+
+	if (atoi(wirelessmode) >= 6)
+		is_n = 1;
+
 	nvram_init(RT2860_NVRAM);
 	nvram_bufset(RT2860_NVRAM, "WirelessMode", wirelessmode);
 	//BasicRate: bg,bgn,n:15, b:3; g,gn:351
@@ -791,13 +806,6 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 		nvram_bufset(RT2860_NVRAM, "BasicRate", "3");
 	else //bg,bgn,n
 		nvram_bufset(RT2860_NVRAM, "BasicRate", "15");
-	nvram_commit(RT2860_NVRAM);
-	nvram_close(RT2860_NVRAM);
-
-	if (atoi(wirelessmode) >= 6)
-		is_n = 1;
-
-	nvram_init(RT2860_NVRAM);
 
 	default_shown_mbssid[RT2860_NVRAM] = 0;
 
@@ -835,25 +843,7 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "HideSSID", hidden_ssid);
 	nvram_bufset(RT2860_NVRAM, "NoForwarding", noforwarding);
 	nvram_bufset(RT2860_NVRAM, "NoForwardingBTNBSSID", mbssidapisolated);
-	nvram_commit(RT2860_NVRAM);
-	nvram_close(RT2860_NVRAM);
 
-	if (new_bssid_num < 1 || new_bssid_num > 8) {
-		websError(wp, 403, T("'bssid_num' %s is out of range!"), bssid_num);
-		return;
-	}
-	//revise_mbss_value(old_bssid_num, new_bssid_num);
-	revise_mbss_updated_values(wp, new_bssid_num);
-	setupSecurityLed();
-
-	//11abg Channel or AutoSelect
-	if ((0 == strlen(sz11aChannel)) && (0 == strlen(sz11bChannel)) && (0 == strlen(sz11gChannel)))
-	{
-		websError(wp, 403, T("'Channel' should not be empty!"));
-		return;
-	}
-
-	nvram_init(RT2860_NVRAM);
 	if (!strncmp(sz11aChannel, "0", 2) && !strncmp(sz11bChannel, "0", 2) && !strncmp(sz11gChannel, "0", 2))
 	{
 		nvram_bufset(RT2860_NVRAM, "AutoChannelSelect", "1");
@@ -943,6 +933,10 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
+
+	//revise_mbss_value(old_bssid_num, new_bssid_num);
+	revise_mbss_updated_values(wp, new_bssid_num);
+	setupSecurityLed();
 
 	submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
 	if (! submitUrl[0])
