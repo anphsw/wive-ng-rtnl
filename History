@@ -1078,6 +1078,8 @@
 6) Add PPE wifi offload support (hw_nat_wifi variable default 0).<br>
 7) Update openssl to 0.9.8w. version.<br>
 8) Update miniupnpd to 1.6.20120424 version.<br>
+9) HW_NAT now work with wifi traffic.<br>
+10) Vlan supsystem small fixes.<br>
 
 <br><br>
 <b>For support see:</b><br>
