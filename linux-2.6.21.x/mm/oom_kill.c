@@ -87,12 +87,6 @@ unsigned long badness(struct task_struct *p, unsigned long uptime)
 		return ULONG_MAX;
 
 	/*
-	 * swapoff can easily use up all memory, so kill those first.
-	 */
-	if (p->flags & PF_SWAPOFF)
-		return ULONG_MAX;
-
-	/*
 	 * Processes which fork a lot of child processes are likely
 	 * a good choice. We add half the vmsize of the children if they
 	 * have an own mm. This prevents forking servers to flood the
@@ -426,7 +420,6 @@ void out_of_memory(struct zonelist *zonelist, gfp_t gfp_mask, int order)
 	struct task_struct *p;
 	unsigned long points = 0;
 	unsigned long freed = 0;
-	unsigned int ct_policy = 0;
 
 	blocking_notifier_call_chain(&oom_notify_list, 0, &freed);
 	if (freed > 0)
@@ -450,13 +443,11 @@ void out_of_memory(struct zonelist *zonelist, gfp_t gfp_mask, int order)
 	 */
 	switch (constrained_alloc(zonelist, gfp_mask)) {
 	case CONSTRAINT_MEMORY_POLICY:
-		ct_policy = 1;
 		oom_kill_process(current, points,
 				"No available memory (MPOL_BIND)");
 		break;
 
 	case CONSTRAINT_NONE:
-		ct_policy = 3;
 		if (sysctl_panic_on_oom)
 			panic("out of memory. panic_on_oom is selected\n");
                /* Fall-through */
@@ -505,10 +496,4 @@ out:
 	 */
 	if (!test_thread_flag(TIF_MEMDIE))
 		schedule_timeout_uninterruptible(1);
-
-	if(ct_policy > 0)
-	{
-		printk("\nKill process by oom\n");
-		kill_proc(1, SIGUSR1, 1);
-	}
 }
