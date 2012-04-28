@@ -33,6 +33,14 @@
 	for (order = 0; order < MAX_ORDER; order++) \
 		for (type = 0; type < MIGRATE_TYPES; type++)
 
+/*
+ * PAGE_ALLOC_COSTLY_ORDER is the order at which allocations are deemed
+ * costly to service.  That is between allocation orders which should
+ * coelesce naturally under reasonable reclaim pressure and those which
+ * will not.
+ */
+#define PAGE_ALLOC_COSTLY_ORDER 3
+
 struct free_area {
 	struct list_head	free_list[MIGRATE_TYPES];
 	unsigned long		nr_free;
