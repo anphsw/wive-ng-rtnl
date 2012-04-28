@@ -1462,6 +1462,10 @@ nofail_alloc:
 		if (page)
 			goto got_pg;
 
+		/* The OOM killer will not help higher order allocs so fail */
+		if (order > PAGE_ALLOC_COSTLY_ORDER)
+			goto nopage;
+
 		out_of_memory(zonelist, gfp_mask, order);
 #ifdef CONFIG_DELAY_OOM
 		if (restart_times<(HZ<<3))
