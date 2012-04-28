@@ -1058,6 +1058,8 @@ static unsigned long shrink_zone(int priority, struct zone *zone,
 		nr_inactive = 0;
 
 	while (nr_active || nr_inactive) {
+		if (test_thread_flag(TIF_MEMDIE))
+			return 0;
 		if (nr_active) {
 			nr_to_scan = min(nr_active,
 					(unsigned long)sc->swap_cluster_max);
@@ -1106,6 +1108,8 @@ static unsigned long shrink_zones(int priority, struct zone **zones,
 	for (i = 0; zones[i] != NULL; i++) {
 		struct zone *zone = zones[i];
 
+		if (test_thread_flag(TIF_MEMDIE))
+			return 0;
 		if (!populated_zone(zone))
 			continue;
 
@@ -1168,6 +1172,8 @@ unsigned long try_to_free_pages(struct zone **zones, int order, gfp_t gfp_mask)
 	}
 
 	for (priority = DEF_PRIORITY; priority >= 0; priority--) {
+		if (test_thread_flag(TIF_MEMDIE))
+			goto out;
 		sc.nr_scanned = 0;
 		if (!priority)
 			disable_swap_token();
