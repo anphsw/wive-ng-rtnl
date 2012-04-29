@@ -536,7 +536,7 @@ struct net_device {
 	void			(*vlan_rx_kill_vid)(struct net_device *dev,
 						    unsigned short vid);
 
-	int			(*hard_header_parse)(struct sk_buff *skb,
+	int			(*hard_header_parse)(const struct sk_buff *skb,
 						     unsigned char *haddr);
 	int			(*neigh_setup)(struct net_device *dev, struct neigh_parms *);
 #ifdef CONFIG_NETPOLL
@@ -630,6 +630,25 @@ extern int		dev_restart(struct net_device *dev);
 #ifdef CONFIG_NETPOLL_TRAP
 extern int		netpoll_trap(void);
 #endif
+
+static inline int dev_hard_header(struct sk_buff *skb, struct net_device *dev,
+				  unsigned short type,
+				  void *daddr, void *saddr, unsigned len)
+{
+	if (!dev->hard_header)
+		return 0;
+	return dev->hard_header(skb, dev, type, daddr, saddr, len);
+}
+
+static inline int dev_parse_header(const struct sk_buff *skb,
+				   unsigned char *haddr)
+{
+	const struct net_device *dev = skb->dev;
+
+	if (!dev->hard_header_parse)
+		return 0;
+	return dev->hard_header_parse(skb, haddr);
+}
 
 typedef int gifconf_func_t(struct net_device * dev, char __user * bufptr, int len);
 extern int		register_gifconf(unsigned int family, gifconf_func_t * gifconf);

@@ -827,8 +827,8 @@ static int pppoe_sendmsg(struct kiocb *iocb, struct socket *sock,
 	}
 
 	error = total_len;
-	dev->hard_header(skb, dev, ETH_P_PPP_SES,
-			 po->pppoe_pa.remote, NULL, total_len);
+	dev_hard_header(skb, dev, ETH_P_PPP_SES,
+			po->pppoe_pa.remote, NULL, total_len);
 
 	memcpy(ph, &hdr, sizeof(struct pppoe_hdr));
 

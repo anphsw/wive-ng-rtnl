@@ -582,10 +582,8 @@ static int packet_rcv(struct sk_buff *skb, struct net_device *dev, struct packet
 		sll->sll_ifindex = orig_dev->ifindex;
 	else
 		sll->sll_ifindex = dev->ifindex;
-	sll->sll_halen = 0;
 
-	if (dev->hard_header_parse)
-		sll->sll_halen = dev->hard_header_parse(skb, sll->sll_addr);
+	sll->sll_halen = dev_parse_header(skb, sll->sll_addr);
 
 	PACKET_SKB_CB(skb)->origlen = skb->len;
 
@@ -745,9 +743,7 @@ static int tpacket_rcv(struct sk_buff *skb, struct net_device *dev, struct packe
 	}
 
 	sll = h.raw + TPACKET_ALIGN(hdrlen);
-	sll->sll_halen = 0;
-	if (dev->hard_header_parse)
-		sll->sll_halen = dev->hard_header_parse(skb, sll->sll_addr);
+	sll->sll_halen = dev_parse_header(skb, sll->sll_addr);
 	sll->sll_family = AF_PACKET;
 	sll->sll_hatype = dev->type;
 	sll->sll_protocol = skb->protocol;
@@ -848,16 +844,10 @@ static int packet_sendmsg(struct kiocb *iocb, struct socket *sock,
 	skb_reserve(skb, LL_RESERVED_SPACE(dev));
 	skb_reset_network_header(skb);
 
-	if (dev->hard_header) {
-		int res;
-		err = -EINVAL;
-		res = dev->hard_header(skb, dev, ntohs(proto), addr, NULL, len);
-		if (sock->type != SOCK_DGRAM) {
-			skb_reset_tail_pointer(skb);
-			skb->len = 0;
-		} else if (res < 0)
-			goto out_free;
-	}
+	err = -EINVAL;
+	if (sock->type == SOCK_DGRAM &&
+	    dev_hard_header(skb, dev, ntohs(proto), addr, NULL, len) < 0)
+		goto out_free;
 
 	/* Returns -EFAULT on error */
 	err = memcpy_fromiovec(skb_put(skb,len), msg->msg_iov, len);
