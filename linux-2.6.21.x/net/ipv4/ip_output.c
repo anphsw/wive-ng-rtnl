@@ -1222,6 +1222,17 @@ error:
 	return err;
 }
 
+static void ip_cork_release(struct inet_sock *inet)
+{
+	inet->cork.flags &= ~IPCORK_OPT;
+	kfree(inet->cork.opt);
+	inet->cork.opt = NULL;
+	if (inet->cork.rt) {
+		ip_rt_put(inet->cork.rt);
+		inet->cork.rt = NULL;
+	}
+}
+
 /*
  *	Combined all pending IP fragments on the socket as one IP datagram
  *	and push them out.
@@ -1314,13 +1325,7 @@ int ip_push_pending_frames(struct sock *sk)
 	}
 
 out:
-	inet->cork.flags &= ~IPCORK_OPT;
-	kfree(inet->cork.opt);
-	inet->cork.opt = NULL;
-	if (inet->cork.rt) {
-		ip_rt_put(inet->cork.rt);
-		inet->cork.rt = NULL;
-	}
+	ip_cork_release(inet);
 	return err;
 
 error:
@@ -1333,19 +1338,12 @@ error:
  */
 void ip_flush_pending_frames(struct sock *sk)
 {
-	struct inet_sock *inet = inet_sk(sk);
 	struct sk_buff *skb;
 
 	while ((skb = __skb_dequeue_tail(&sk->sk_write_queue)) != NULL)
 		kfree_skb(skb);
 
-	inet->cork.flags &= ~IPCORK_OPT;
-	kfree(inet->cork.opt);
-	inet->cork.opt = NULL;
-	if (inet->cork.rt) {
-		ip_rt_put(inet->cork.rt);
-		inet->cork.rt = NULL;
-	}
+	ip_cork_release(inet_sk(sk));
 }
 
 
