@@ -235,8 +235,6 @@ enum {
  *	@nfctinfo: Relationship of this skb to the connection
  *	@nfct_reasm: netfilter conntrack re-assembly pointer
  *	@nf_bridge: Saved data about a bridged frame - see br_netfilter.c
- *	@iif: ifindex of device we arrived on
- *	@queue_mapping: Queue mapping for multiqueue devices
  *	@tc_index: Traffic control index
  *	@tc_verd: traffic control verdict
  *	@dma_cookie: a cookie to one of several possible DMA operations
@@ -254,6 +252,8 @@ struct sk_buff {
 
 	struct sock		*sk;
 	struct net_device	*dev;
+	int			iif;
+	/* 4 byte hole on 64 bit*/
 
 	union {
 		struct tcphdr	*th;
@@ -331,10 +331,6 @@ struct sk_buff {
 	struct nf_bridge_info	*nf_bridge;
 #endif
 #endif /* CONFIG_NETFILTER */
-
-	int			iif;
-	__u16			queue_mapping;
-
 #ifdef CONFIG_NET_SCHED
 	__u16			tc_index;	/* traffic control index */
 #ifdef CONFIG_NET_CLS_ACT
@@ -1766,20 +1762,6 @@ static inline void skb_copy_secmark(struct sk_buff *to, const struct sk_buff *fr
 static inline void skb_init_secmark(struct sk_buff *skb)
 { }
 #endif
-
-static inline void skb_set_queue_mapping(struct sk_buff *skb, u16 queue_mapping)
-{
-#ifdef CONFIG_NETDEVICES_MULTIQUEUE
-	skb->queue_mapping = queue_mapping;
-#endif
-}
-
-static inline void skb_copy_queue_mapping(struct sk_buff *to, const struct sk_buff *from)
-{
-#ifdef CONFIG_NETDEVICES_MULTIQUEUE
-	to->queue_mapping = from->queue_mapping;
-#endif
-}
 
 static inline int skb_is_gso(const struct sk_buff *skb)
 {

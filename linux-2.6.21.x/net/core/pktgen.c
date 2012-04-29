@@ -3133,9 +3133,7 @@ static __inline__ void pktgen_xmit(struct pktgen_dev *pkt_dev)
 		}
 	}
 
-	if ((netif_queue_stopped(odev) ||
-	     netif_subqueue_stopped(odev, pkt_dev->skb->queue_mapping)) ||
-	     need_resched()) {
+	if (netif_queue_stopped(odev) || need_resched()) {
 		idle_start = getCurUs();
 
 		if (!netif_running(odev)) {
@@ -3149,8 +3147,7 @@ static __inline__ void pktgen_xmit(struct pktgen_dev *pkt_dev)
 
 		pkt_dev->idle_acc += getCurUs() - idle_start;
 
-		if (netif_queue_stopped(odev) ||
-		    netif_subqueue_stopped(odev, pkt_dev->skb->queue_mapping)) {
+		if (netif_queue_stopped(odev)) {
 			pkt_dev->next_tx_us = getCurUs();	/* TODO */
 			pkt_dev->next_tx_ns = 0;
 			goto out;	/* Try the next interface */
@@ -3176,8 +3173,7 @@ static __inline__ void pktgen_xmit(struct pktgen_dev *pkt_dev)
 	}
 
 	netif_tx_lock_bh(odev);
-	if (!netif_queue_stopped(odev) &&
-	    !netif_subqueue_stopped(odev, pkt_dev->skb->queue_mapping)) {
+	if (!netif_queue_stopped(odev)) {
 
 		atomic_inc(&(pkt_dev->skb->users));
 	      retry_now:
