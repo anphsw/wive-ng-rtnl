@@ -619,6 +619,7 @@ int netxen_niu_macaddr_set(struct netxen_port *port,
 	int phy = port->portnum;
 	unsigned char mac_addr[6];
 	int i;
+	DECLARE_MAC_BUF(mac);
 
 	for (i = 0; i < 10; i++) {
 		temp[0] = temp[1] = 0;

@@ -118,6 +118,13 @@ static inline struct ethhdr *eth_hdr(const struct sk_buff *skb)
 	return (struct ethhdr *)skb_mac_header(skb);
 }
 
+/*
+ *	Display a 6 byte device address (MAC) in a readable format.
+ */
+#define MAC_FMT "%02x:%02x:%02x:%02x:%02x:%02x"
+extern char *print_mac(char *buf, const u8 *addr);
+#define DECLARE_MAC_BUF(var) char var[18] __maybe_unused
+
 #endif
 
 #endif	/* _LINUX_IF_ETHER_H */

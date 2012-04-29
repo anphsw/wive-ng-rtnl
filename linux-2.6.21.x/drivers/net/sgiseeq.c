@@ -630,6 +630,7 @@ static int sgiseeq_init(struct hpc3_regs* hpcregs, int irq)
 	struct sgiseeq_private *sp;
 	struct net_device *dev;
 	int err, i;
+	DECLARE_MAC_BUF(mac);
 
 	dev = alloc_etherdev(sizeof (struct sgiseeq_private));
 	if (!dev) {
@@ -709,9 +710,8 @@ static int sgiseeq_init(struct hpc3_regs* hpcregs, int irq)
 		goto err_out_free_page;
 	}
 
-	printk(KERN_INFO "%s: %s ", dev->name, sgiseeqstr);
-	for (i = 0; i < 6; i++)
-		printk("%2.2x%c", dev->dev_addr[i], i == 5 ? '\n' : ':');
+	printk(KERN_INFO "%s: %s %s\n",
+	       dev->name, sgiseeqstr, print_mac(mac, dev->dev_addr));
 
 	sp->next_module = root_sgiseeq_dev;
 	root_sgiseeq_dev = dev;

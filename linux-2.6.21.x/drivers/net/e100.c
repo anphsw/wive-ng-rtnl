@@ -2548,6 +2548,7 @@ static int __devinit e100_probe(struct pci_dev *pdev,
 	struct net_device *netdev;
 	struct nic *nic;
 	int err;
+	DECLARE_MAC_BUF(mac);
 
 	if(!(netdev = alloc_etherdev(sizeof(struct nic)))) {
 		if(((1 << debug) - 1) & NETIF_MSG_PROBE)

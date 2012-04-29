@@ -253,12 +253,13 @@ int zd_mac_set_mac_address(struct net_device *netdev, void *p)
 	struct sockaddr *addr = p;
 	struct zd_mac *mac = zd_netdev_mac(netdev);
 	struct zd_chip *chip = &mac->chip;
+	DECLARE_MAC_BUF(mac2);
 
 	if (!is_valid_ether_addr(addr->sa_data))
 		return -EADDRNOTAVAIL;
 
 	dev_dbg_f(zd_mac_dev(mac),
-		  "Setting MAC to " MAC_FMT "\n", MAC_ARG(addr->sa_data));
+		  "Setting MAC to %s\n", print_mac(mac2, addr->sa_data));
 
 	r = zd_write_mac_addr(chip, addr->sa_data);
 	if (r)
@@ -290,14 +291,15 @@ void zd_mac_set_multicast_list(struct net_device *dev)
 	struct zd_mac *mac = zd_netdev_mac(dev);
 	struct dev_mc_list *mc;
 	unsigned long flags;
+	DECLARE_MAC_BUF(mac2);
 
 	if (dev->flags & (IFF_PROMISC|IFF_ALLMULTI)) {
 		zd_mc_add_all(&hash);
 	} else {
 		zd_mc_clear(&hash);
 		for (mc = dev->mc_list; mc; mc = mc->next) {
-			dev_dbg_f(zd_mac_dev(mac), "mc addr " MAC_FMT "\n",
-				  MAC_ARG(mc->dmi_addr));
+			dev_dbg_f(zd_mac_dev(mac), "mc addr %s\n",
+				  print_mac(mac2, mc->dmi_addr));
 			zd_mc_add_addr(&hash, mc->dmi_addr);
 		}
 	}

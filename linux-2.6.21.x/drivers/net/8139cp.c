@@ -1961,13 +1961,10 @@ static int cp_init_one (struct pci_dev *pdev, const struct pci_device_id *ent)
 		goto err_out_iomap;
 
 	printk (KERN_INFO "%s: RTL-8139C+ at 0x%lx, "
-		"%02x:%02x:%02x:%02x:%02x:%02x, "
-		"IRQ %d\n",
+		"%s, IRQ %d\n",
 		dev->name,
 		dev->base_addr,
-		dev->dev_addr[0], dev->dev_addr[1],
-		dev->dev_addr[2], dev->dev_addr[3],
-		dev->dev_addr[4], dev->dev_addr[5],
+		print_mac(mac, dev->dev_addr),
 		dev->irq);
 
 	pci_set_drvdata(pdev, dev);

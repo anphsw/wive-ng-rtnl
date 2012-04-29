@@ -252,6 +252,7 @@ static int __init atp_probe1(long ioaddr)
 	struct net_local *lp;
 	int saved_ctrl_reg, status, i;
 	int res;
+	DECLARE_MAC_BUF(mac);
 
 	outb(0xff, ioaddr + PAR_DATA);
 	/* Save the original value of the Control register, in case we guessed
@@ -327,10 +328,9 @@ static int __init atp_probe1(long ioaddr)
 		printk(KERN_INFO "%s" KERN_INFO "%s", versionA, versionB);
 #endif
 
-	printk(KERN_NOTICE "%s: Pocket adapter found at %#3lx, IRQ %d, SAPROM "
-		   "%02X:%02X:%02X:%02X:%02X:%02X.\n", dev->name, dev->base_addr,
-		   dev->irq, dev->dev_addr[0], dev->dev_addr[1], dev->dev_addr[2],
-		   dev->dev_addr[3], dev->dev_addr[4], dev->dev_addr[5]);
+	printk(KERN_NOTICE "%s: Pocket adapter found at %#3lx, IRQ %d, "
+	       "SAPROM %s.\n",
+	       dev->name, dev->base_addr, dev->irq, print_mac(mac, dev->dev_addr));
 
 	/* Reset the ethernet hardware and activate the printer pass-through. */
 	write_reg_high(ioaddr, CMR1, CMR1h_RESET | CMR1h_MUX);

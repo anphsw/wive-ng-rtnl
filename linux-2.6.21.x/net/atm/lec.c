@@ -273,6 +273,7 @@ static int lec_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	char buf[300];
 	int i = 0;
 #endif /* DUMP_PACKETS >0 */
+	DECLARE_MAC_BUF(mac);
 
 	DPRINTK("lec_start_xmit called\n");
 	if (!priv->lecd) {
@@ -460,6 +461,7 @@ static int lec_atm_send(struct atm_vcc *vcc, struct sk_buff *skb)
 	struct lec_arp_table *entry;
 	int i;
 	char *tmp;		/* FIXME */
+	DECLARE_MAC_BUF(mac);
 
 	atomic_sub(skb->truesize, &sk_atm(vcc)->sk_wmem_alloc);
 	mesg = (struct atmlec_msg *)skb->data;

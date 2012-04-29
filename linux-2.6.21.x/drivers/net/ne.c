@@ -295,6 +295,7 @@ static int __init ne_probe1(struct net_device *dev, int ioaddr)
 	int neX000, ctron, copam, bad_card;
 	int reg0, ret;
 	static unsigned version_printed;
+	DECLARE_MAC_BUF(mac);
 
 	if (!request_region(ioaddr, NE_IO_EXTENT, DRV_NAME))
 		return -EBUSY;

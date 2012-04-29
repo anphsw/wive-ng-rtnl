@@ -1001,6 +1001,7 @@ static int __devinit macb_probe(struct platform_device *pdev)
 	unsigned long pclk_hz;
 	u32 config;
 	int err = -ENXIO;
+	DECLARE_MAC_BUF(mac);
 
 	regs = platform_get_resource(pdev, IORESOURCE_MEM, 0);
 	if (!regs) {
@@ -1134,10 +1135,9 @@ static int __devinit macb_probe(struct platform_device *pdev)
 	macb_register_sysfs(dev);
 
 	printk(KERN_INFO "%s: Atmel MACB at 0x%08lx irq %d "
-	       "(%02x:%02x:%02x:%02x:%02x:%02x)\n",
+	       "(%s)\n",
 	       dev->name, dev->base_addr, dev->irq,
-	       dev->dev_addr[0], dev->dev_addr[1], dev->dev_addr[2],
-	       dev->dev_addr[3], dev->dev_addr[4], dev->dev_addr[5]);
+	       print_mac(mac, dev->dev_addr));
 
 	return 0;
 

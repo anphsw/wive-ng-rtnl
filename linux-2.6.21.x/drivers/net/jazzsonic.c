@@ -200,6 +200,7 @@ static int __init jazz_sonic_probe(struct platform_device *pdev)
 	struct sonic_local *lp;
 	int err = 0;
 	int i;
+	DECLARE_MAC_BUF(mac);
 
 	/*
 	 * Don't probe if we're not running on a Jazz board.
@@ -238,13 +239,8 @@ static int __init jazz_sonic_probe(struct platform_device *pdev)
 	if (err)
 		goto out1;
 
-	printk("%s: MAC ", dev->name);
-	for (i = 0; i < 6; i++) {
-		printk("%2.2x", dev->dev_addr[i]);
-		if (i < 5)
-			printk(":");
-	}
-	printk(" IRQ %d\n", dev->irq);
+	printk("%s: MAC %s IRQ %d\n",
+	       dev->name, print_mac(mac, dev->dev_addr), dev->irq);
 
 	return 0;
 

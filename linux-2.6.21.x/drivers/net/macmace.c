@@ -177,6 +177,7 @@ struct net_device *mace_probe(int unit)
 	unsigned char checksum = 0;
 	static int found = 0;
 	int err;
+	DECLARE_MAC_BUF(mac);
 
 	if (found || macintosh_config->ether_type != MAC_ETHER_MACE)
 		return ERR_PTR(-ENODEV);
@@ -231,9 +232,8 @@ struct net_device *mace_probe(int unit)
 	dev->set_multicast_list	= mace_set_multicast;
 	dev->set_mac_address	= mace_set_address;
 
-	printk(KERN_INFO "%s: 68K MACE, hardware address %.2X", dev->name, dev->dev_addr[0]);
-	for (j = 1 ; j < 6 ; j++) printk(":%.2X", dev->dev_addr[j]);
-	printk("\n");
+	printk(KERN_INFO "%s: 68K MACE, hardware address %s\n",
+	       dev->name, print_mac(mac, dev->dev_addr));
 
 	err = register_netdev(dev);
 	if (!err)

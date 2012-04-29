@@ -73,6 +73,7 @@ ieee80211softmac_wx_set_essid(struct net_device *net_dev,
 	struct ieee80211softmac_network *n;
 	struct ieee80211softmac_auth_queue_item *authptr;
 	int length = 0;
+	DECLARE_MAC_BUF(mac);
 
 	mutex_lock(&sm->associnfo.mutex);
 
