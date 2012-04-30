@@ -147,8 +147,8 @@ int iface_enumerate(int family, void *parm, int (*callback)())
   addr.nl_pad = 0;
   addr.nl_groups = 0;
   addr.nl_pid = 0; /* address to kernel */
-
- again:
+ 
+ again: 
   if (family == AF_UNSPEC)
     req.nlh.nlmsg_type = RTM_GETNEIGH;
   else if (family == AF_LOCAL)
@@ -281,7 +281,7 @@ int iface_enumerate(int family, void *parm, int (*callback)())
 		  }
 		
 		rta = RTA_NEXT(rta, len1);
-	  }	
+	      }
 
 	    if (mac && callback_ok && !((link->ifi_flags & (IFF_LOOPBACK | IFF_POINTOPOINT))) && 
 		!((*callback)((int)link->ifi_index, (unsigned int)link->ifi_type, mac, maclen, parm)))
@@ -345,10 +345,11 @@ static void nl_routechange(struct nlmsghdr *h)
       /* force RAs to sync new network and pick up new interfaces.  */
       if (daemon->ra_contexts)
 	{
-	  ra_start_unsolicted(dnsmasq_time());
+	  schedule_subnet_map();
+	  ra_start_unsolicted(dnsmasq_time(), NULL);
 	  /* cause lease_update_file to run after we return, in case we were called from
 	     iface_enumerate and can't re-enter it now */
-	  send_alarm();
+	  send_alarm(0, 0);
 	}
 #endif
 

@@ -26,9 +26,9 @@ static struct randfd *allocate_rfd(int family);
 
 /* Send a UDP packet with its source address set as "source" 
    unless nowild is true, when we just send it with the kernel default */
-void send_from(int fd, int nowild, char *packet, size_t len, 
-		      union mysockaddr *to, struct all_addr *source,
-		      unsigned int iface)
+int send_from(int fd, int nowild, char *packet, size_t len, 
+	      union mysockaddr *to, struct all_addr *source,
+	      unsigned int iface)
 {
   struct msghdr msg;
   struct iovec iov[1]; 
@@ -111,7 +111,11 @@ void send_from(int fd, int nowild, char *packet, size_t len,
 	goto retry;
       
       my_syslog(LOG_ERR, _("failed to send packet: %s"), strerror(errno));
+      
+      return 0;
     }
+
+  return 1;
 }
           
 static unsigned int search_servers(time_t now, struct all_addr **addrpp, 
@@ -467,23 +471,13 @@ static size_t process_reply(struct dns_header *header, time_t now,
     return n;
   
   /* Complain loudly if the upstream server is non-recursive. */
-#ifdef SRV_TRY_NEXT
-  if (!(header->hb4 & HB4_RA) && RCODE(header) == NOERROR && ntohs(header->ancount) == 0 &&
-      server)
-#else
   if (!(header->hb4 & HB4_RA) && RCODE(header) == NOERROR && ntohs(header->ancount) == 0 &&
       server && !(server->flags & SERV_WARNED_RECURSIVE))
-#endif
     {
       prettyprint_addr(&server->addr, daemon->namebuff);
-#ifdef SRV_TRY_NEXT
-      my_syslog(LOG_WARNING, _("nameserver %s refused try next server"), daemon->namebuff);
-      return 0;
-#else
       my_syslog(LOG_WARNING, _("nameserver %s refused to do a recursive query"), daemon->namebuff);
       if (!option_bool(OPT_LOG))
 	server->flags |= SERV_WARNED_RECURSIVE;
-#endif
     }  
     
   if (daemon->bogus_addr && RCODE(header) != NXDOMAIN &&
@@ -632,10 +626,6 @@ void reply_query(int fd, int family, time_t now)
 	  header->hb4 |= HB4_RA; /* recursion if available */
 	  send_from(forward->fd, option_bool(OPT_NOWILD), daemon->packet, nn, 
 		    &forward->source, &forward->dest, forward->iface);
-#ifdef SRV_TRY_NEXT
-	} else {
-	  daemon->last_server = server->next;
-#endif
 	}
       free_frec(forward); /* cancel */
     }
@@ -674,7 +664,7 @@ void receive_query(struct listener *listen, time_t now)
   /* packet buffer overwritten */
   daemon->srv_save = NULL;
   
-  if (listen->family == AF_INET && option_bool(OPT_NOWILD))
+  if (listen->iface && listen->family == AF_INET && option_bool(OPT_NOWILD))
     {
       dst_addr_4 = listen->iface->addr.in.sin_addr;
       netmask = listen->iface->netmask;
@@ -786,7 +776,7 @@ void receive_query(struct listener *listen, time_t now)
 	  
 	  /* get the netmask of the interface whch has the address we were sent to.
 	     This is no neccessarily the interface we arrived on. */
-      
+	  
 	  for (iface = daemon->interfaces; iface; iface = iface->next)
 	    if (iface->addr.sa.sa_family == AF_INET &&
 		iface->addr.in.sin_addr.s_addr == dst_addr_4.s_addr)

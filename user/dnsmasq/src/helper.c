@@ -178,7 +178,7 @@ int create_helper(int event_fd, int err_fd, uid_t uid, gid_t gid, long max_fd)
       int is6, err = 0;
 
       free(alloc_buff);
-
+      
       /* we read zero bytes when pipe closed: this is our signal to exit */ 
       if (!read_write(pipefd[0], (unsigned char *)&data, sizeof(data), 1))
 	{
@@ -190,8 +190,10 @@ int create_helper(int event_fd, int err_fd, uid_t uid, gid_t gid, long max_fd)
 		lua_call(lua, 0, 0);
 	    }
 #endif
-	_exit(0);
+	  _exit(0);
 	}
+ 
+      is6 = !!(data.flags & (LEASE_TA | LEASE_NA));
       
       if (data.action == ACTION_DEL)
 	action_str = "del";
@@ -199,23 +201,27 @@ int create_helper(int event_fd, int err_fd, uid_t uid, gid_t gid, long max_fd)
 	action_str = "add";
       else if (data.action == ACTION_OLD || data.action == ACTION_OLD_HOSTNAME)
 	action_str = "old";
+      else if (data.action == ACTION_TFTP)
+	{
+	  action_str = "tftp";
+	  is6 = (data.flags != AF_INET);
+	}
       else
 	continue;
-	
-      is6 = !!(data.flags & (LEASE_TA | LEASE_NA));
-	
+
+      	
       if (!is6)
 	{
-      /* stringify MAC into dhcp_buff */
-      p = daemon->dhcp_buff;
-      if (data.hwaddr_type != ARPHRD_ETHER || data.hwaddr_len == 0) 
-        p += sprintf(p, "%.2x-", data.hwaddr_type);
-      for (i = 0; (i < data.hwaddr_len) && (i < DHCP_CHADDR_MAX); i++)
-        {
-          p += sprintf(p, "%.2x", data.hwaddr[i]);
-          if (i != data.hwaddr_len - 1)
-            p += sprintf(p, ":");
-        }
+	  /* stringify MAC into dhcp_buff */
+	  p = daemon->dhcp_buff;
+	  if (data.hwaddr_type != ARPHRD_ETHER || data.hwaddr_len == 0) 
+	    p += sprintf(p, "%.2x-", data.hwaddr_type);
+	  for (i = 0; (i < data.hwaddr_len) && (i < DHCP_CHADDR_MAX); i++)
+	    {
+	      p += sprintf(p, "%.2x", data.hwaddr[i]);
+	      if (i != data.hwaddr_len - 1)
+		p += sprintf(p, ":");
+	    }
 	}
        
       /* expiry or length into dhcp_buff2 */
@@ -236,12 +242,12 @@ int create_helper(int event_fd, int err_fd, uid_t uid, gid_t gid, long max_fd)
 
       /* CLID into packet */
       if (!is6)
-      for (p = daemon->packet, i = 0; i < data.clid_len; i++)
-	{
-	  p += sprintf(p, "%.2x", buf[i]);
-	  if (i != data.clid_len - 1) 
-	    p += sprintf(p, ":");
-	}
+	for (p = daemon->packet, i = 0; i < data.clid_len; i++)
+	  {
+	    p += sprintf(p, "%.2x", buf[i]);
+	    if (i != data.clid_len - 1) 
+	      p += sprintf(p, ":");
+	  }
 #ifdef HAVE_DHCP6
       else
 	{
@@ -271,13 +277,16 @@ int create_helper(int event_fd, int err_fd, uid_t uid, gid_t gid, long max_fd)
 	  char *dot;
 	  hostname = (char *)buf;
 	  hostname[data.hostname_len - 1] = 0;
-	  if (!legal_hostname(hostname))
-	    hostname = NULL;
-	  else if ((dot = strchr(hostname, '.')))
+	  if (data.action != ACTION_TFTP)
 	    {
-	      domain = dot+1;
-	      *dot = 0;
-	    } 
+	      if (!legal_hostname(hostname))
+		hostname = NULL;
+	      else if ((dot = strchr(hostname, '.')))
+		{
+		  domain = dot+1;
+		  *dot = 0;
+		} 
+	    }
 	}
     
       extradata = buf + data.hostname_len;
@@ -289,130 +298,155 @@ int create_helper(int event_fd, int err_fd, uid_t uid, gid_t gid, long max_fd)
 	inet_ntop(AF_INET6, &data.hwaddr, daemon->addrbuff, ADDRSTRLEN);
 #endif
 
+      /* file length */
+      if (data.action == ACTION_TFTP)
+	sprintf(daemon->dhcp_buff, "%u", data.hwaddr_len);
+      
 #ifdef HAVE_LUASCRIPT
       if (daemon->luascript)
 	{
-	  lua_getglobal(lua, "lease");     /* function to call */
-	  lua_pushstring(lua, action_str); /* arg1 - action */
-	  lua_newtable(lua);               /* arg2 - data table */
-
-	  if (is6)
+	  if (data.action == ACTION_TFTP)
 	    {
-	      lua_pushstring(lua, daemon->dhcp_buff);
-	      lua_setfield(lua, -2, "client_duid");
-	      lua_pushstring(lua, daemon->packet);
-	      lua_setfield(lua, -2, "server_duid");
-	      lua_pushstring(lua, daemon->dhcp_buff3);
-	      lua_setfield(lua, -2, "iaid");
+	      lua_getglobal(lua, "tftp"); 
+	      if (lua_type(lua, -1) != LUA_TFUNCTION)
+		lua_pop(lua, 1); /* tftp function optional */
+	      else
+		{
+		  lua_pushstring(lua, action_str); /* arg1 - action */
+		  lua_newtable(lua);               /* arg2 - data table */
+		  lua_pushstring(lua, daemon->addrbuff);
+		  lua_setfield(lua, -2, "destination_address");
+		  lua_pushstring(lua, hostname);
+		  lua_setfield(lua, -2, "file_name"); 
+		  lua_pushstring(lua, daemon->dhcp_buff);
+		  lua_setfield(lua, -2, "file_size");
+		  lua_call(lua, 2, 0);	/* pass 2 values, expect 0 */
+		}
 	    }
-
-	  if (!is6 && data.clid_len != 0)
-	    {
-	      lua_pushstring(lua, daemon->packet);
-	      lua_setfield(lua, -2, "client_id");
-	    }
-	  
-	  if (strlen(data.interface) != 0)
-	    {
-	      lua_pushstring(lua, data.interface);
-	      lua_setfield(lua, -2, "interface");
-	    }
-      
-#ifdef HAVE_BROKEN_RTC
-	  lua_pushnumber(lua, data.length);
-	  lua_setfield(lua, -2, "lease_length");
-#else
-	  lua_pushnumber(lua, data.expires);
-	  lua_setfield(lua, -2, "lease_expires");
-#endif
-      
-	  if (hostname)
-	    {
-	      lua_pushstring(lua, hostname);
-	      lua_setfield(lua, -2, "hostname");
-	    }
-      
-	  if (domain)
-	    {
-	      lua_pushstring(lua, domain);
-	      lua_setfield(lua, -2, "domain");
-	    }
-
-	  end = extradata + data.ed_len;
-	  buf = extradata;
-	  
-	  if (!is6)
-	    buf = grab_extradata_lua(buf, end, "vendor_class");
-#ifdef HAVE_DHCP6
 	  else
-	    for (i = 0; i < data.hwaddr_len; i++)
-	      {
-		sprintf(daemon->dhcp_buff2, "vendor_class%i", i);
-		buf = grab_extradata_lua(buf, end, daemon->dhcp_buff2);
-	      }
+	    {
+	      lua_getglobal(lua, "lease");     /* function to call */
+	      lua_pushstring(lua, action_str); /* arg1 - action */
+	      lua_newtable(lua);               /* arg2 - data table */
+	      
+	      if (is6)
+		{
+		  lua_pushstring(lua, daemon->dhcp_buff);
+		  lua_setfield(lua, -2, "client_duid");
+		  lua_pushstring(lua, daemon->packet);
+		  lua_setfield(lua, -2, "server_duid");
+		  lua_pushstring(lua, daemon->dhcp_buff3);
+		  lua_setfield(lua, -2, "iaid");
+		}
+	      
+	      if (!is6 && data.clid_len != 0)
+		{
+		  lua_pushstring(lua, daemon->packet);
+		  lua_setfield(lua, -2, "client_id");
+		}
+	      
+	      if (strlen(data.interface) != 0)
+		{
+		  lua_pushstring(lua, data.interface);
+		  lua_setfield(lua, -2, "interface");
+		}
+	      
+#ifdef HAVE_BROKEN_RTC	
+	      lua_pushnumber(lua, data.length);
+	      lua_setfield(lua, -2, "lease_length");
+#else
+	      lua_pushnumber(lua, data.expires);
+	      lua_setfield(lua, -2, "lease_expires");
 #endif
-	  
-	  buf = grab_extradata_lua(buf, end, "supplied_hostname");
-	  
-	  if (!is6)
-	    {
-	      buf = grab_extradata_lua(buf, end, "cpewan_oui");
-	      buf = grab_extradata_lua(buf, end, "cpewan_serial");   
-	      buf = grab_extradata_lua(buf, end, "cpewan_class");
+	      
+	      if (hostname)
+		{
+		  lua_pushstring(lua, hostname);
+		  lua_setfield(lua, -2, "hostname");
+		}
+	      
+	      if (domain)
+		{
+		  lua_pushstring(lua, domain);
+		  lua_setfield(lua, -2, "domain");
+		}
+	      
+	      end = extradata + data.ed_len;
+	      buf = extradata;
+	      
+	      if (!is6)
+		buf = grab_extradata_lua(buf, end, "vendor_class");
+#ifdef HAVE_DHCP6
+	      else
+		for (i = 0; i < data.hwaddr_len; i++)
+		  {
+		    sprintf(daemon->dhcp_buff2, "vendor_class%i", i);
+		    buf = grab_extradata_lua(buf, end, daemon->dhcp_buff2);
+		  }
+#endif
+	      
+	      buf = grab_extradata_lua(buf, end, "supplied_hostname");
+	      
+	      if (!is6)
+		{
+		  buf = grab_extradata_lua(buf, end, "cpewan_oui");
+		  buf = grab_extradata_lua(buf, end, "cpewan_serial");   
+		  buf = grab_extradata_lua(buf, end, "cpewan_class");
+		}
+	      
+	      buf = grab_extradata_lua(buf, end, "tags");
+	      
+	      if (is6)
+		buf = grab_extradata_lua(buf, end, "relay_address");
+	      else if (data.giaddr.s_addr != 0)
+		{
+		  lua_pushstring(lua, inet_ntoa(data.giaddr));
+		  lua_setfield(lua, -2, "relay_address");
+		}
+	      
+	      for (i = 0; buf; i++)
+		{
+		  sprintf(daemon->dhcp_buff2, "user_class%i", i);
+		  buf = grab_extradata_lua(buf, end, daemon->dhcp_buff2);
+		}
+	      
+	      if (data.action != ACTION_DEL && data.remaining_time != 0)
+		{
+		  lua_pushnumber(lua, data.remaining_time);
+		  lua_setfield(lua, -2, "time_remaining");
+		}
+	      
+	      if (data.action == ACTION_OLD_HOSTNAME && hostname)
+		{
+		  lua_pushstring(lua, hostname);
+		  lua_setfield(lua, -2, "old_hostname");
+		}
+	      
+	      if (!is6)
+		{
+		  lua_pushstring(lua, daemon->dhcp_buff);
+		  lua_setfield(lua, -2, "mac_address");
+		}
+	      
+	      lua_pushstring(lua, daemon->addrbuff);
+	      lua_setfield(lua, -2, "ip_address");
+	    
+	      lua_call(lua, 2, 0);	/* pass 2 values, expect 0 */
 	    }
-	  
-	  buf = grab_extradata_lua(buf, end, "tags");
-
-	  if (is6)
-	    buf = grab_extradata_lua(buf, end, "relay_address");
-	  else if (data.giaddr.s_addr != 0)
-	    {
-	      lua_pushstring(lua, inet_ntoa(data.giaddr));
-	      lua_setfield(lua, -2, "relay_address");
-	    }
-
-	  for (i = 0; buf; i++)
-	    {
-	      sprintf(daemon->dhcp_buff2, "user_class%i", i);
-	      buf = grab_extradata_lua(buf, end, daemon->dhcp_buff2);
-	    }
- 
-	  if (data.action != ACTION_DEL && data.remaining_time != 0)
-	    {
-	      lua_pushnumber(lua, data.remaining_time);
-	      lua_setfield(lua, -2, "time_remaining");
-	    }
-	  
-	  if (data.action == ACTION_OLD_HOSTNAME && hostname)
-	    {
-	      lua_pushstring(lua, hostname);
-	      lua_setfield(lua, -2, "old_hostname");
-	    }
-	  
-	  if (!is6)
-	    {
-	      lua_pushstring(lua, daemon->dhcp_buff);
-	      lua_setfield(lua, -2, "mac_address");
-	    }
-	  
-	  lua_pushstring(lua, daemon->addrbuff);
-	  lua_setfield(lua, -2, "ip_address");
-
-	  lua_call(lua, 2, 0);	/* pass 2 values, expect 0 */
 	}
 #endif
 
       /* no script, just lua */
       if (!daemon->lease_change_command)
 	continue;
-      
+
       /* possible fork errors are all temporary resource problems */
       while ((pid = fork()) == -1 && (errno == EAGAIN || errno == ENOMEM))
 	sleep(2);
 
       if (pid == -1)
 	continue;
-	  
+      
       /* wait for child to complete */
       if (pid != 0)
 	{
@@ -439,81 +473,87 @@ int create_helper(int event_fd, int err_fd, uid_t uid, gid_t gid, long max_fd)
 	  continue;
 	}
       
-      if (is6)
+      if (data.action != ACTION_TFTP)
 	{
-	  my_setenv("DNSMASQ_IAID", daemon->dhcp_buff3, &err);
-	  my_setenv("DNSMASQ_SERVER_DUID", daemon->packet, &err);
-	}
-
-      if (!is6 && data.clid_len != 0)
-	my_setenv("DNSMASQ_CLIENT_ID", daemon->packet, &err);
-
-      if (strlen(data.interface) != 0)
-	my_setenv("DNSMASQ_INTERFACE", data.interface, &err);
-            
-#ifdef HAVE_BROKEN_RTC
-      my_setenv("DNSMASQ_LEASE_LENGTH", daemon->dhcp_buff2, &err);
-#else
-      my_setenv("DNSMASQ_LEASE_EXPIRES", daemon->dhcp_buff2, &err); 
-#endif
-      
-      if (domain)
-	my_setenv("DNSMASQ_DOMAIN", domain, &err);
-	     
-      end = extradata + data.ed_len;
-      buf = extradata;
-      
-      if (!is6)
-	buf = grab_extradata(buf, end, "DNSMASQ_VENDOR_CLASS", &err);
-#ifdef HAVE_DHCP6
-      else
-	{
-	  if (data.hwaddr_len != 0)
+	  if (is6)
 	    {
-	      buf = grab_extradata(buf, end, "DNSMASQ_VENDOR_CLASS_ID", &err);
-	      for (i = 0; i < data.hwaddr_len - 1; i++)
-		{
-		  sprintf(daemon->dhcp_buff2, "DNSMASQ_VENDOR_CLASS%i", i);
-		  buf = grab_extradata(buf, end, daemon->dhcp_buff2, &err);
-		}
-	    } 
-	}
+	      my_setenv("DNSMASQ_IAID", daemon->dhcp_buff3, &err);
+	      my_setenv("DNSMASQ_SERVER_DUID", daemon->packet, &err);
+	    }
+	  
+	  if (!is6 && data.clid_len != 0)
+	    my_setenv("DNSMASQ_CLIENT_ID", daemon->packet, &err);
+	  
+	  if (strlen(data.interface) != 0)
+	    my_setenv("DNSMASQ_INTERFACE", data.interface, &err);
+	  
+#ifdef HAVE_BROKEN_RTC
+	  my_setenv("DNSMASQ_LEASE_LENGTH", daemon->dhcp_buff2, &err);
+#else
+	  my_setenv("DNSMASQ_LEASE_EXPIRES", daemon->dhcp_buff2, &err); 
 #endif
-
-      buf = grab_extradata(buf, end, "DNSMASQ_SUPPLIED_HOSTNAME", &err);
-      
-      if (!is6)
-	{
-      buf = grab_extradata(buf, end, "DNSMASQ_CPEWAN_OUI", &err);
-      buf = grab_extradata(buf, end, "DNSMASQ_CPEWAN_SERIAL", &err);   
-      buf = grab_extradata(buf, end, "DNSMASQ_CPEWAN_CLASS", &err);
+	  
+	  if (domain)
+	    my_setenv("DNSMASQ_DOMAIN", domain, &err);
+	  
+	  end = extradata + data.ed_len;
+	  buf = extradata;
+	  
+	  if (!is6)
+	    buf = grab_extradata(buf, end, "DNSMASQ_VENDOR_CLASS", &err);
+#ifdef HAVE_DHCP6
+	  else
+	    {
+	      if (data.hwaddr_len != 0)
+		{
+		  buf = grab_extradata(buf, end, "DNSMASQ_VENDOR_CLASS_ID", &err);
+		  for (i = 0; i < data.hwaddr_len - 1; i++)
+		    {
+		      sprintf(daemon->dhcp_buff2, "DNSMASQ_VENDOR_CLASS%i", i);
+		      buf = grab_extradata(buf, end, daemon->dhcp_buff2, &err);
+		    }
+		}
+	    }
+#endif
+	  
+	  buf = grab_extradata(buf, end, "DNSMASQ_SUPPLIED_HOSTNAME", &err);
+	  
+	  if (!is6)
+	    {
+	      buf = grab_extradata(buf, end, "DNSMASQ_CPEWAN_OUI", &err);
+	      buf = grab_extradata(buf, end, "DNSMASQ_CPEWAN_SERIAL", &err);   
+	      buf = grab_extradata(buf, end, "DNSMASQ_CPEWAN_CLASS", &err);
+	    }
+	  
+	  buf = grab_extradata(buf, end, "DNSMASQ_TAGS", &err);
+	  
+	  if (is6)
+	    buf = grab_extradata(buf, end, "DNSMASQ_RELAY_ADDRESS", &err);
+	  else if (data.giaddr.s_addr != 0)
+	    my_setenv("DNSMASQ_RELAY_ADDRESS", inet_ntoa(data.giaddr), &err); 
+	  
+	  for (i = 0; buf; i++)
+	    {
+	      sprintf(daemon->dhcp_buff2, "DNSMASQ_USER_CLASS%i", i);
+	      buf = grab_extradata(buf, end, daemon->dhcp_buff2, &err);
+	    }
+	  
+	  if (data.action != ACTION_DEL && data.remaining_time != 0)
+	    {
+	      sprintf(daemon->dhcp_buff2, "%u", data.remaining_time);
+	      my_setenv("DNSMASQ_TIME_REMAINING", daemon->dhcp_buff2, &err);
+	    }
+	  
+	  if (data.action == ACTION_OLD_HOSTNAME && hostname)
+	    {
+	      my_setenv("DNSMASQ_OLD_HOSTNAME", hostname, &err);
+	      hostname = NULL;
+	    }
 	}
-      
-      buf = grab_extradata(buf, end, "DNSMASQ_TAGS", &err);
-      
-      if (is6)
-	buf = grab_extradata(buf, end, "DNSMASQ_RELAY_ADDRESS", &err);
-      else if (data.giaddr.s_addr != 0)
-	my_setenv("DNSMASQ_RELAY_ADDRESS", inet_ntoa(data.giaddr), &err); 
 
-      for (i = 0; buf; i++)
-	{
-	  sprintf(daemon->dhcp_buff2, "DNSMASQ_USER_CLASS%i", i);
-	  buf = grab_extradata(buf, end, daemon->dhcp_buff2, &err);
-	}
-      
-      if (data.action != ACTION_DEL && data.remaining_time != 0)
-	{
-	  sprintf(daemon->dhcp_buff2, "%u", data.remaining_time);
-	  my_setenv("DNSMASQ_TIME_REMAINING", daemon->dhcp_buff2, &err);
-	}
-
-      if (data.action == ACTION_OLD_HOSTNAME && hostname)
-	{
-	  my_setenv("DNSMASQ_OLD_HOSTNAME", hostname, &err);
-	  hostname = NULL;
-	}
-
+      if (option_bool(OPT_LOG_OPTS))
+	my_setenv("DNSMASQ_LOG_DHCP", "1", &err);
+	 
       /* we need to have the event_fd around if exec fails */
       if ((i = fcntl(event_fd, F_GETFD)) != -1)
 	fcntl(event_fd, F_SETFD, i | FD_CLOEXEC);
@@ -584,32 +624,8 @@ static unsigned char *grab_extradata_lua(unsigned char *buf, unsigned char *end,
 }
 #endif
 
-/* pack up lease data into a buffer */    
-void queue_script(int action, struct dhcp_lease *lease, char *hostname, time_t now)
+static void buff_alloc(size_t size)
 {
-  unsigned char *p;
-  size_t size;
-  unsigned int hostname_len = 0, clid_len = 0, ed_len = 0;
-  int fd = daemon->dhcpfd;
-
-#ifdef HAVE_DHCP6
-  if (!daemon->dhcp)
-    fd = daemon->dhcp6fd;
-#endif
-  
-  /* no script */
-  if (daemon->helperfd == -1)
-    return;
-
-  if (lease->extradata)
-    ed_len = lease->extradata_len;
-  if (lease->clid)
-    clid_len = lease->clid_len;
-  if (hostname)
-    hostname_len = strlen(hostname) + 1;
-
-  size = sizeof(struct script_data) +  clid_len + ed_len + hostname_len;
-
   if (size > buf_size)
     {
       struct script_data *new;
@@ -625,6 +641,32 @@ void queue_script(int action, struct dhcp_lease *lease, char *hostname, time_t n
       buf = new;
       buf_size = size;
     }
+}
+
+/* pack up lease data into a buffer */    
+void queue_script(int action, struct dhcp_lease *lease, char *hostname, time_t now)
+{
+  unsigned char *p;
+  unsigned int hostname_len = 0, clid_len = 0, ed_len = 0;
+  int fd = daemon->dhcpfd;
+
+#ifdef HAVE_DHCP6
+  if (!daemon->dhcp)
+    fd = daemon->dhcp6fd;
+#endif
+
+  /* no script */
+  if (daemon->helperfd == -1)
+    return;
+
+  if (lease->extradata)
+    ed_len = lease->extradata_len;
+  if (lease->clid)
+    clid_len = lease->clid_len;
+  if (hostname)
+    hostname_len = strlen(hostname) + 1;
+
+  buff_alloc(sizeof(struct script_data) +  clid_len + ed_len + hostname_len);
 
   buf->action = action;
   buf->flags = lease->flags;
@@ -646,7 +688,7 @@ void queue_script(int action, struct dhcp_lease *lease, char *hostname, time_t n
 #endif
 
   if (lease->expires != 0)
-  buf->remaining_time = (unsigned int)difftime(lease->expires, now);
+    buf->remaining_time = (unsigned int)difftime(lease->expires, now);
   else
     buf->remaining_time = 0;
 
@@ -668,6 +710,37 @@ void queue_script(int action, struct dhcp_lease *lease, char *hostname, time_t n
     }
   bytes_in_buf = p - (unsigned char *)buf;
 }
+
+#ifdef HAVE_TFTP
+/* This nastily re-uses DHCP-fields for TFTP stuff */
+void queue_tftp(off_t file_len, char *filename, union mysockaddr *peer)
+{
+  unsigned int filename_len;
+
+  /* no script */
+  if (daemon->helperfd == -1)
+    return;
+  
+  filename_len = strlen(filename) + 1;
+  buff_alloc(sizeof(struct script_data) +  filename_len);
+  memset(buf, 0, sizeof(struct script_data));
+
+  buf->action = ACTION_TFTP;
+  buf->hostname_len = filename_len;
+  buf->hwaddr_len = file_len;
+
+  if ((buf->flags = peer->sa.sa_family) == AF_INET)
+    buf->addr = peer->in.sin_addr;
+#ifdef HAVE_IPV6
+  else
+    memcpy(buf->hwaddr, &peer->in6.sin6_addr, IN6ADDRSZ);
+#endif
+
+  memcpy((unsigned char *)(buf+1), filename, filename_len);
+  
+  bytes_in_buf = sizeof(struct script_data) +  filename_len;
+}
+#endif
 
 int helper_buf_empty(void)
 {

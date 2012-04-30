@@ -1,4 +1,4 @@
-CFLAGS?= -Os -Wall -W
+CFLAGS?= -O2 -Wall -W
 
 all: dhcp_release dhcp_lease_time
 

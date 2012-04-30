@@ -1084,6 +1084,7 @@
 12) Move to Lumpy Reclaim algoritm in mm.<br>
 13) Cleanup and fix oom_kill logic.<br>
 14) Kernel libs some up.<br>
+15) Update dnsmasq to 2.61 version.<br>
 
 <br><br>
 <b>For support see:</b><br>

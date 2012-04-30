@@ -14,12 +14,11 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#define VERSION "2.60"
-
 #define FTABSIZ 50 /* max number of outstanding requests (default) */
 #define MAX_PROCS 10 /* max no children for TCP requests */
 #define CHILD_LIFETIME 150 /* secs 'till terminated (RFC1035 suggests > 120s) */
 #define EDNS_PKTSZ 4096 /* default max EDNS.0 UDP packet from RFC5625 */
+#define KEYBLOCK_LEN 140 /* choose to mininise fragmentation when storing DNSSEC keys */
 #define TIMEOUT 10 /* drop UDP queries after TIMEOUT seconds */
 #define FORWARD_TEST 250 /* try all servers every 250 queries */
 #define FORWARD_TIME 60 /* or 60 seconds */
@@ -65,20 +64,6 @@ HAVE_LINUX_NETWORK
 HAVE_BSD_NETWORK
 HAVE_SOLARIS_NETWORK
    define exactly one of these to alter interaction with kernel networking.
-
-HAVE_BROKEN_RTC
-   define this on embedded systems which don't have an RTC
-   which keeps time over reboots. Causes dnsmasq to use uptime
-   for timing, and keep lease lengths rather than expiry times
-   in its leases file. This also make dnsmasq "flash disk friendly".
-   Normally, dnsmasq tries very hard to keep the on-disk leases file
-   up-to-date: rewriting it after every renewal.  When HAVE_BROKEN_RTC 
-   is in effect, the lease file is only written when a new lease is 
-   created, or an old one destroyed. (Because those are the only times 
-   it changes.) This vastly reduces the number of file writes, and makes
-   it viable to keep the lease file on a flash filesystem.
-   NOTE: when enabling or disabling this, be sure to delete any old
-   leases file, otherwise dnsmasq may get very confused.
 
 HAVE_TFTP
    define this to get dnsmasq's built-in TFTP server.
@@ -129,11 +114,6 @@ NOTES:
                        (FreeBSD and OpenBSD only if you link GNU getopt) 
 
 */
-
-/* platform independent options- uncomment to enable */
-#define HAVE_BROKEN_RTC
-#define NO_TFTP
-#define NO_DHCP
 
 //#define NO_HAVE_DBUS
 /* #define HAVE_BROKEN_RTC */
@@ -270,6 +250,10 @@ NOTES:
 #ifdef NO_DHCP
 #undef HAVE_DHCP
 #undef HAVE_DHCP6
+#endif
+
+#ifdef NO_HAVE_DBUS
+#undef HAVE_DBUS
 #endif
 
 #if defined(NO_DHCP6) || !defined(HAVE_IPV6)

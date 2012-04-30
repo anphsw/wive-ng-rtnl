@@ -7,13 +7,13 @@ ARCH=${ARCH:-i486}
 BUILD=${BUILD:-1}
 
 if [ "$ARCH" = "i386" ]; then
-  SLKCFLAGS="-Os -march=i386 -mcpu=i686"
+  SLKCFLAGS="-O2 -march=i386 -mcpu=i686"
 elif [ "$ARCH" = "i486" ]; then
-  SLKCFLAGS="-Os -march=i486 -mcpu=i686"
+  SLKCFLAGS="-O2 -march=i486 -mcpu=i686"
 elif [ "$ARCH" = "s390" ]; then
-  SLKCFLAGS="-Os"
+  SLKCFLAGS="-O2"
 elif [ "$ARCH" = "x86_64" ]; then
-  SLKCFLAGS="-Os"
+  SLKCFLAGS="-O2"
 fi
 
 rm -rf $PKG

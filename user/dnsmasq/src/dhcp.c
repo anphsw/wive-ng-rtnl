@@ -120,7 +120,7 @@ void dhcp_init(void)
   
   check_dhcp_hosts(1);
 }
-  
+
 void dhcp_packet(time_t now, int pxe_fd)
 {
   int fd = pxe_fd ? daemon->pxefd : daemon->dhcpfd;
@@ -151,19 +151,19 @@ void dhcp_packet(time_t now, int pxe_fd)
 #endif
   } control_u;
   struct dhcp_bridge *bridge, *alias;
-  
+
   msg.msg_controllen = sizeof(control_u);
   msg.msg_control = control_u.control;
   msg.msg_name = &dest;
   msg.msg_namelen = sizeof(dest);
   msg.msg_iov = &daemon->dhcp_packet;
   msg.msg_iovlen = 1;
-
+  
   if ((sz = recv_dhcp_packet(fd, &msg)) == -1 || 
       (sz < (ssize_t)(sizeof(*mess) - sizeof(mess->options)))) 
     return;
-  
-#if defined (HAVE_LINUX_NETWORK)
+    
+  #if defined (HAVE_LINUX_NETWORK)
   if (msg.msg_controllen >= sizeof(struct cmsghdr))
     for (cmptr = CMSG_FIRSTHDR(&msg); cmptr; cmptr = CMSG_NXTHDR(&msg, cmptr))
       if (cmptr->cmsg_level == IPPROTO_IP && cmptr->cmsg_type == IP_PKTINFO)
@@ -243,20 +243,20 @@ void dhcp_packet(time_t now, int pxe_fd)
   if (!(msg.msg_flags & MSG_BCAST))
     unicast_dest = 1;
 #endif
-
+  
   ifr.ifr_addr.sa_family = AF_INET;
   if (ioctl(daemon->dhcpfd, SIOCGIFADDR, &ifr) != -1 )
-      iface_addr = ((struct sockaddr_in *) &ifr.ifr_addr)->sin_addr;
+    iface_addr = ((struct sockaddr_in *) &ifr.ifr_addr)->sin_addr;
   else
     {
       my_syslog(MS_DHCP | LOG_WARNING, _("DHCP packet received on %s which has no address"), ifr.ifr_name);
-    return;
+      return;
     }
   
   for (tmp = daemon->dhcp_except; tmp; tmp = tmp->next)
     if (tmp->name && (strcmp(tmp->name, ifr.ifr_name) == 0))
       return;
-
+  
   /* weird libvirt-inspired access control */
   for (context = daemon->dhcp; context; context = context->next)
     if (!context->interface || strcmp(context->interface, ifr.ifr_name) == 0)
@@ -264,7 +264,7 @@ void dhcp_packet(time_t now, int pxe_fd)
 
   if (!context)
     return;
-  
+
   /* unlinked contexts are marked by context->current == context */
   for (context = daemon->dhcp; context; context = context->next)
     context->current = context;
@@ -284,14 +284,14 @@ void dhcp_packet(time_t now, int pxe_fd)
       if (!daemon->if_addrs ||
 	  !iface_enumerate(AF_INET, &match, check_listen_addrs) ||
 	  !match.matched)
-      return;
+	return;
 
       iface_addr = match.addr;
       /* make sure secondary address gets priority in case
 	 there is more than one address on the interface in the same subnet */
       complete_context(match.addr, iface_index, match.netmask, match.broadcast, &parm);
-    } 
-
+    }    
+      
   if (!iface_enumerate(AF_INET, &parm, complete_context))
     return;
   
@@ -299,7 +299,7 @@ void dhcp_packet(time_t now, int pxe_fd)
   iov.iov_len = dhcp_reply(parm.current, ifr.ifr_name, iface_index, (size_t)sz, 
 			   now, unicast_dest, &is_inform, pxe_fd, iface_addr);
   lease_update_file(now);
-  lease_update_dns();
+  lease_update_dns(0);
     
   if (iov.iov_len == 0)
     return;
@@ -317,7 +317,7 @@ void dhcp_packet(time_t now, int pxe_fd)
 #ifdef HAVE_SOCKADDR_SA_LEN
   dest.sin_len = sizeof(struct sockaddr_in);
 #endif
-     
+  
   if (pxe_fd)
     { 
       if (mess->ciaddr.s_addr != 0)
