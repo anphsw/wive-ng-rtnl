@@ -321,7 +321,7 @@ static int drain_freelist(struct kmem_cache *cache,
 static void free_block(struct kmem_cache *cachep, void **objpp, int len,
 			int node);
 static int enable_cpucache(struct kmem_cache *cachep);
-static void cache_reap(struct work_struct *unused);
+static void cache_reap(struct work_struct *w);
 
 /*
  * This function must be completely optimized away if a constant is passed to
