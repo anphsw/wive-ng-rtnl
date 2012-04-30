@@ -1079,7 +1079,11 @@
 7) Update openssl to 0.9.8w. version.<br>
 8) Update miniupnpd to 1.6.20120424 version.<br>
 9) HW_NAT now work with wifi traffic.<br>
-10) Vlan subsystem small fixes.<br>
+10) HW_NAT increase foe table size to 16k.<br>
+11) Vlan subsystem small fixes.<br>
+12) Move to Lumpy Reclaim algoritm in mm.<br>
+13) Cleanup and fix oom_kill logic.<br>
+14) Kernel libs some up.<br>
 
 <br><br>
 <b>For support see:</b><br>
