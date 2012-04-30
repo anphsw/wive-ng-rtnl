@@ -1,7 +1,7 @@
 #ifndef _ASM_GENERIC_DIV64_H
 #define _ASM_GENERIC_DIV64_H
 /*
- * Copyright (C) 2003 Bernardo Innocenti <bernie@develer.com>
+ * Copyright (C) 2003, 07 Ralf Baechle (ralf@linux-mips.org)
  * Based on former asm-ppc/div64.h and asm-m68knommu/div64.h
  *
  * The semantics of do_div() are:
@@ -30,6 +30,10 @@
 	__rem;							\
  })
 
+static inline uint64_t div64_64(uint64_t dividend, uint64_t divisor)
+{
+	return dividend / divisor;
+}
 #elif BITS_PER_LONG == 32
 
 extern uint32_t __div64_32(uint64_t *dividend, uint32_t divisor);
@@ -49,6 +53,7 @@ extern uint32_t __div64_32(uint64_t *dividend, uint32_t divisor);
 	__rem;						\
  })
 
+extern uint64_t div64_64(uint64_t dividend, uint64_t divisor);
 #else /* BITS_PER_LONG == ?? */
 
 # error do_div() does not yet support the C64
