@@ -36,6 +36,7 @@ gen_config() {
 printf "
 minissdpdsocket=/var/run/minissdpd.sock
 lease_file=/var/upnp_leases
+port=8666
 enable_natpmp=yes
 enable_upnp=yes
 bitrate_up=3500000

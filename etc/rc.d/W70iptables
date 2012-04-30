@@ -131,9 +131,9 @@ start() {
 	fi
 	if [ "$upnpEnabled" = "1" ] && [ "$OperationMode" != "0" ]; then
 	    $LOG "upnp"
+	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 8666 -j ACCEPT
 	    # not safe fix me later
 	    iptables -A servicelimit -i $lan_if -p udp --dport 1024:65535 -j ACCEPT
-	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 1024:65535 -j ACCEPT
 	fi
 	if [ "$xupnpd" = "1" ]; then
 	    $LOG "xupnpd"
