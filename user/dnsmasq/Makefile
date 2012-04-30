@@ -84,6 +84,7 @@ all : $(BUILDDIR)
  -f $(top)/Makefile dnsmasq 
 
 clean :
+	rm -rf filesystem
 	rm -f *~ $(BUILDDIR)/*.mo contrib/*/*~ */*~ $(BUILDDIR)/*.pot 
 	rm -f $(BUILDDIR)/*.o $(BUILDDIR)/dnsmasq.a $(BUILDDIR)/dnsmasq core */core
 
@@ -94,8 +95,8 @@ install-common :
 	$(INSTALL) -m 644 $(MAN)/dnsmasq.8 $(DESTDIR)$(MANDIR)/man8 
 	$(INSTALL) -m 755 $(BUILDDIR)/dnsmasq $(DESTDIR)$(BINDIR)
 
-romfs : install
-	$(ROMFSINST) -S filesystem/sbin/dnsmasq /bin/dnsmasq
+romfs :
+	$(ROMFSINST) -S src/dnsmasq /bin/dnsmasq
 	$(ROMFSINST) -S dnsmasq.conf /etc/dnsmasq.conf
 
 all-i18n : $(BUILDDIR)
