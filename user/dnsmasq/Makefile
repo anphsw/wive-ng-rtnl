@@ -25,9 +25,7 @@ MANDIR        = $(PREFIX)/share/man
 LOCALEDIR     = $(PREFIX)/share/locale
 BUILDDIR      = $(SRC)
 DESTDIR       = 
-LDFLAGS       = 
 RPM_OPT_FLAGS = 
-LIBS          = 
 
 ifndef CONFIG_IPV6
 COPTS = -DHAVE_BROKEN_RTC -DNO_HAVE_DBUS -DNO_DHCP -DNO_TFTP -DNO_SCRIPT -DNO_IPV6 -DSRV_TRY_NEXT -Os -fPIC -fomit-frame-pointer -mno-memcpy
