@@ -7,6 +7,9 @@ if [ "$ping_check_time" = "" ] || [ "$ping_check_time" = "0" ] || \
     exit 0
 fi
 
+# include global config
+. /etc/scripts/global.sh
+
 while "true"; do
     # wait before check
     sleep $ping_check_time
@@ -14,12 +17,12 @@ while "true"; do
     ##################################RADIO################################################################################
     if [ "$RadioOff" != "1" ]; then
 	# Unsolicited ARP mode, update your neighbors
-	arping -U 255.255.255.255 -w1 -Ibr0 -b -c1 -q
-	arping -A 255.255.255.255 -w1 -Ibr0 -b -c1 -q
+	arping -U 255.255.255.255 -w1 -I"$lan_if" -b -c1 -q
+	arping -A 255.255.255.255 -w1 -I"$lan_if" -b -c1 -q
 
 	# arping for client wakeup - from arp table
 	grep -v "IP" < /proc/net/arp | awk '{ print $1 }' | while read test_ip; do
-	    arping "$test_ip" -I br0 -f -q -w1
+	    arping "$test_ip" -I"$lan_if" -f -q -w1
 	done
 
 	sleep $ping_check_interval
@@ -29,7 +32,7 @@ while "true"; do
 	    if [ "$size" != "0" ]; then
 		# arping for client wakeup - from dhcp lease table
 		dumpleases | grep -v "IP" | awk '{ print $2 }' | while read test_ip; do
-		    arping "$test_ip" -I br0 -f -q -w1
+		    arping "$test_ip" -I"$lan_if" -f -q -w1
 		done
 	    fi
 	fi
