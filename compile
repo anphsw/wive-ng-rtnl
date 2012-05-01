@@ -26,11 +26,11 @@ fi
 #------------------------------------#
 #WR-N for full and WR-NL for ligth HW
 if [ "$MODE" = "2T2R-USB-IPV6" ]; then
-    DEVNAME="Acorp_WR-300NU"
+    DEVNAME="Wive_WR-300NU"
 elif [ "$MODE" = "2T2R" ]; then
-    DEVNAME="Acorp_WR-300N"
+    DEVNAME="Wive_WR-300N"
 elif [ "$MODE" = "1T1R" ]; then
-    DEVNAME="Acorp_WR-150N"
+    DEVNAME="Wive_WR-150N"
 else
     echo "Not supported (unknown) mode."
     exit 1
