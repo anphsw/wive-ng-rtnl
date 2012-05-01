@@ -34,6 +34,12 @@ static inline unsigned swp_type(swp_entry_t entry)
 	return (entry.val >> SWP_TYPE_SHIFT(entry));
 }
 
+/* check whether a pte points to a swap entry */
+static inline int is_swap_pte(pte_t pte)
+{
+	return !pte_none(pte) && !pte_present(pte) && !pte_file(pte);
+}
+
 /*
  * Extract the `offset' field from a swp_entry_t.  The swp_entry_t is in
  * arch-independent format
