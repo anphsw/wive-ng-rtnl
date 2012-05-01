@@ -26,17 +26,16 @@ start() {
 	fi
 	mac="mac=$WLAN_MAC_ADDR"
 
-	$LOG "Load wifi module..."
     	if [ "$OperationMode" = "2" ]; then
+	    $LOG "Load wifi STA module..."
     	    modprobe -q rt2860v2_sta "$mac"
-	    # wait module read config from flash
-	    sleep 2
 	else
+	    $LOG "Load wifi AP module..."
     	    modprobe -q rt2860v2_ap  "$mac"
 	fi
 
-	$LOG "WiFi interface up..."
 	if [ "$OperationMode" = "3" ]; then
+	    $LOG "WiFi interface up APCLI..."
 	    # apcli mode ap interface
 	    ifconfig ra0 hw ether	"$WLAN_MAC_ADDR"
 	    ifconfig ra0 txqueuelen	"$txqueuelen"
@@ -46,6 +45,7 @@ start() {
 	    ifconfig apcli0 txqueuelen	"$txqueuelen"
 	    ip link set apcli0 up
 	else
+	    $LOG "WiFi interface up..."
 	    # others modes
 	    ifconfig ra0 hw ether	"$WLAN_MAC_ADDR"
 	    ifconfig ra0 txqueuelen	"$txqueuelen"
