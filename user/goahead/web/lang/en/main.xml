@@ -78,14 +78,14 @@
   
   <message msgid="opmode title" msgstr="Operation Mode Configuration" />
   <message msgid="opmode introduction" msgstr="You can configure the operation mode suitable for your environment." />
-  <message msgid="opmode mode b" msgstr="Bridge:" />
+  <message msgid="opmode mode b" msgstr="AP-Bridge:" />
   <message msgid="opmode mode b intro" msgstr="All Ethernet and Wireless interfaces are combined into a single bridge interface." />
-  <message msgid="opmode mode g" msgstr="Gateway:" />
+  <message msgid="opmode mode g" msgstr="AP-Gateway:" />
   <message msgid="opmode mode g intro" msgstr="The first Ethernet port is treated as WAN port. All other Ethernet ports and the Wireless interface are bridged together and treated as LAN ports." />
-  <message msgid="opmode mode e" msgstr="Ethernet Converter:" />
+  <message msgid="opmode mode e" msgstr="Client-Gateway:" />
   <message msgid="opmode mode e intro" msgstr="The Wireless interface is treated as WAN port, and Ethernet ports are used as LAN ports." />
-  <message msgid="opmode mode a" msgstr="AP Client/Client-Bridge:" />
-  <message msgid="opmode mode a intro" msgstr="The Wireless APCli interface is treated as WAN port others posrt as LAN (Ap-Client). Or all interfaces in bridge + NAT2.5 for wireless client connection (Client-Bridge)." />
+  <message msgid="opmode mode a" msgstr="Client-AP-Gateway/Client-AP-Bridge:" />
+  <message msgid="opmode mode a intro" msgstr="The Wireless APCli interface is treated as WAN port others posrt as LAN (Client-AP-Gateway). Or all interfaces in bridge + NAT2.5 for wireless client connection (Client-AP-Bridge)." />
   <message msgid="opmode mode s" msgstr="Hotspot:" />
   <message msgid="opmode mode s intro" msgstr="The first Ethernet port is treated as WAN port. Other Ethernet ports and the Wireless interface are bridged together and are treated as hotspot ports. NAT acceleration will be disabled in this mode!" />
   <message msgid="opmode nat" msgstr="NAT Enabled" />
