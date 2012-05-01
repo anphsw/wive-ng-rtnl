@@ -71,6 +71,14 @@ start() {
 	nvram_set 2860 OperationMode 1
 	OperationMode="1"
     fi
+    if [ "$OperationMode" != "3" ]; then
+	if [ "$ApCliBridgeOnly" != "0" ]; then
+	    nvram_set ApCliBridgeOnly 0
+	fi
+	if [ "$ApCliClientOnly" != "0" ]; then
+	    nvram_set ApCliClientOnly 0
+	fi
+    fi
     #
     # dafault lan ip/mask
     #
