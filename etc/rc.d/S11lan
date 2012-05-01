@@ -52,7 +52,7 @@ start() {
 
     # enable forward for LAN interfaces
     # only not bridge mode enable forward
-    if [ "$OperationMode" != "0" ] && [ -f /proc/sys/net/ipv4/conf/$lan_if/forwarding ]; then
+    if [ "$OperationMode" != "0" ] && [ -f /proc/sys/net/ipv4/conf/$lan_if/forwarding ] && [ "$ApCliBridgeOnly" != "1" ]; then
 	echo 1 > "/proc/sys/net/ipv4/conf/$lan_if/forwarding"
     fi
 }

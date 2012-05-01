@@ -11,7 +11,7 @@ LOG="logger -t dhcpd"
 
 start() {
   dhcpEnabled=`nvram_get 2860 dhcpEnabled`
-    if [ "$dhcpEnabled" = "1" ]; then
+    if [ "$dhcpEnabled" = "1" ] && [ "$OperationMode" != "0" ] && [ "$ApCliBridgeOnly" != "1" ]; then
 	$LOG "Configure dhcpserver"
 	get_param
 
@@ -101,6 +101,8 @@ start() {
     elif [ "$dhcpEnabled" = "2" ]; then
 	$LOG "Start dhcprelay"
 	dhcprelay $lan_if $wan_if &
+    else
+	$LOG "DHCP server disabled. OPMODE=$OperationMode APCLIBR=$ApCliBridgeOnly"
     fi
 
     # if dnsmasq disabled need reset LAN ports for clients renew params

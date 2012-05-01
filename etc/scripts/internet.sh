@@ -107,8 +107,12 @@ apcli_config() {
 	brctl delif br0 eth2 > /dev/null 2>&1
 	# in apcli mode add only eth2 NOT ADD "$phys_lan_if" or "$phys_wan_if"
 	brctl addif br0 eth2
-	# add wifi interface
+	# add ap wifi interface
 	brctl addif br0 ra0
+	if [ "$ApCliBridgeOnly" = "1" ]; then
+	    # add client wifi interface
+	    brctl addif br0 apcli0
+	fi
 	addMBSSID
 }
 

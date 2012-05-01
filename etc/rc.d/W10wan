@@ -26,8 +26,8 @@ start() {
     # enable wan interface
     ip link set "$wan_if" up
 
-    if [ "$wanConnectionMode" = "STATIC" ] || [ "$OperationMode" = "0" ]; then
-	if [ "$OperationMode" != "0" ]; then
+    if [ "$wanConnectionMode" = "STATIC" ] || [ "$OperationMode" = "0" ] || [ "$ApCliBridgeOnly" = "1" ]; then
+	if [ "$OperationMode" != "0" ] && [ "$ApCliBridgeOnly" != "1" ]; then
 	    # lan and wan ip should not be the same except in bridge mode
 	    if [ "$wan_ipaddr" = "$lan_ipaddr" ]; then
 		$LOG "ERROR: WAN's IP address is set identical to LAN. Need change LAN_IP adress!!!"
@@ -85,7 +85,7 @@ start() {
 }
 
 set_mac_to_wan() {
-    if [ "$OperationMode" != "0" ] && [ "$OperationMode" != "2" ]; then
+    if [ "$OperationMode" != "0" ] && [ "$OperationMode" != "2" ] && [ "$ApCliBridgeOnly" != "1" ]; then
 	$LOG "$phys_wan_if_MACADDR $WAN_MAC_ADDR"
 	ifconfig "$phys_wan_if" hw ether "$WAN_MAC_ADDR"
 	ifconfig "$phys_wan_if" txqueuelen "$txqueuelen"
@@ -94,7 +94,7 @@ set_mac_to_wan() {
 
 wan_if_preconf() {
     # if not bridge wan up
-    if [ "$OperationMode" != "0" ]; then
+    if [ "$OperationMode" != "0" ] && [ "$ApCliBridgeOnly" != "1" ]; then
 	# drop adress from wan if pure pppoe enabled
 	if [ "$vpnEnabled" = "on" ] && [ "$vpnType" = "0" ] && [ "$vpnPurePPPOE" = "1" ]; then
 	    $LOG "PURE PPPOE Mode - NOT start dhcpc or config wan!"
@@ -127,11 +127,11 @@ stop() {
     killall -q -SIGKILL udhcpc
     killall -q -SIGKILL zcip
     # prevent infinitive route loop in kernel code
-    if [ "$OperationMode" != "0" ] && [ "$vpnEnabled" = "on" ] && [ "$vpnType" != "0" ]; then
+    if [ "$OperationMode" != "0" ] && [ "$vpnEnabled" = "on" ] && [ "$vpnType" != "0" ] && [ "$ApCliBridgeOnly" != "1" ]; then
 	ip route flush dev "$vpn_if" > /dev/null 2>&1
     fi
     # down wlan if not bridge and not ethconvert
-    if [ "$OperationMode" != "0" ] && [ "$OperationMode" != "2" ]; then
+    if [ "$OperationMode" != "0" ] && [ "$OperationMode" != "2" ] && [ "$ApCliBridgeOnly" != "1" ]; then
 	# down wan iface
 	ip link set "$wan_if" down > /dev/null 2>&1
     fi

@@ -1,4 +1,7 @@
 # For sadko
+) Need add ApCliBridgeOnly variable in ApCLient page for enable client-brigde mode.
+) Need add ApCliClientOnly variable in ApCLient page for disable AP interface in ApCli mode.
+) Need fix ApCLient page get current EncType and Passphrase variable.
 ) Need rewrite QoS page (remove ralink QoS and add new types QoS).
 ) Add /proc/rt3052/esw_cnt for traffic statistic per switch port.(need add in WebUI).
 

@@ -190,7 +190,7 @@ reset_all_phys() {
     	    link_down $i
 	done
 
-	if [ "$OperationMode" != "0" ]; then
+	if [ "$OperationMode" != "0" ] && [ "$ApCliBridgeOnly" != "1" ]; then
 	  # force Windows clients to renew IP and update DNS server
 	  sleep 2
 	fi

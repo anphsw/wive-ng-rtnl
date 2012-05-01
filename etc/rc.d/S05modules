@@ -77,7 +77,7 @@ gen_wifi_config() {
 
 load_nat_helpers() {
     # not load nf_nat helpers in bridge mode
-    if [ "$OperationMode" != "0" ]; then
+    if [ "$OperationMode" != "0" ] && [ "$ApCliBridgeOnly" != "1" ]; then
 	# load conntrack helpers
 	eval `nvram_buf_get 2860 fwAlgTFTP fwAlgSIP fwAlgGRE fwAlgPPTP fwAlgH323 fwAlgFTP`
 	if [ "$fwAlgTFTP" != "0" ]; then

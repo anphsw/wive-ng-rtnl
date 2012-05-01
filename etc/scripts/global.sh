@@ -31,7 +31,8 @@ eval `nvram_buf_get 2860 OperationMode wanConnectionMode wan_ipaddr wan_static_d
 	WLAN_MAC_ADDR WAN_MAC_ADDR LAN_MAC_ADDR \
 	dnsPEnabled UDPXYMode igmpEnabled \
 	vpnEnabled vpnPurePPPOE vpnType \
-	IPv6_Enable QoSEnable simple_qos`
+	IPv6_Enable QoSEnable simple_qos \
+	ApCliBridgeOnly`
 
 # LAN interface name -> $lan_if
 getLanIfName() {

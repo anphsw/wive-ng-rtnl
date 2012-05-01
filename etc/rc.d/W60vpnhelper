@@ -99,7 +99,7 @@ stop() {
 # Clear all connection in conntrack and route cache
 ######################################################
 stop_safe() {
-    if [ "$OperationMode" != "0" ] && [ "$vpnEnabled" = "on" ] && [ "$vpnType" != "0" ]; then
+    if [ "$OperationMode" != "0" ] && [ "$vpnEnabled" = "on" ] && [ "$vpnType" != "0" ] && [ "$ApCliBridgeOnly" != "1" ]; then
 	flush_net_caches
 	stop > /dev/null 2>&1
     fi

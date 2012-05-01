@@ -1085,6 +1085,7 @@
 13) Cleanup and fix oom_kill logic.<br>
 14) Kernel libs some up.<br>
 15) Update dnsmasq to 2.61 version.<br>
+16) ApCli mode now work (client bridge or client - AP modes).<br>
 
 <br><br>
 <b>For support see:</b><br>

@@ -100,7 +100,7 @@ eval `nvram_buf_get 2860 lan_ipaddr lan_netmask Lan2Enabled lan2_ipaddr lan2_net
     #########################GENERATE VPN NETFILTER SCRIPT########################################################################
     echo "iptables -A FORWARD -o $PPP_IFACE -j ACCEPT" > /etc/ppp_firewall
     #NAT in vpn
-    if [ "$vpnNAT" = "on" ] && [ "$OperationMode" != "0" ]; then
+    if [ "$vpnNAT" = "on" ] && [ "$OperationMode" != "0" ] && [ "$ApCliBridgeOnly" != "1" ]; then
 	if  [ "$use_snat" = "1" ] && [ "$PPP_LOCAL" != "" ] ; then
 	    echo "iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $lan_ipaddr/$lan_netmask -j SNAT --to-source $PPP_LOCAL" >> /etc/ppp_firewall
 	    if [ "$OperationMode" = 4 ]; then

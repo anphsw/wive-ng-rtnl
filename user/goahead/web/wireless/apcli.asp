@@ -261,6 +261,7 @@ function CheckValue()
 
 <h1>AP Client Feature</h1>
 <p>Here you can configure AP Client parameters.</p>
+<p>For correct work need set wireless channel (in Wireless Settings->Basiс) as channel used by AP to connect.</p>
 <hr />
 
 <form method=post name=wireless_apcli action="/goform/wirelessApcli" onSubmit="return CheckValue()">

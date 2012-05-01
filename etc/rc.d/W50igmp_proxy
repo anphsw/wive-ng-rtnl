@@ -18,7 +18,7 @@ LOG="logger -t igmpproxy"
 
 start() {
   # if igmpproxy enable and mode not full bridge
-    if [ "$igmpEnabled" = "1" ] && [ "$OperationMode" != "0" ]; then
+    if [ "$igmpEnabled" = "1" ] && [ "$OperationMode" != "0" ] && [ "$ApCliBridgeOnly" != "1" ]; then
 
 	# if need kill igmpproxy
 	igmp_is_start=`pidof igmpproxy`
