@@ -420,7 +420,7 @@ static int initWebs(void)
 	formDefineUtilities();
 	formDefineInternet();
 	formDefineServices();
-#ifdef CONFIG_NET_SCHED
+#ifdef CONFIG_RALINKAPP_SWQOS
 	formDefineQoS();
 #endif
 #ifdef CONFIG_USB

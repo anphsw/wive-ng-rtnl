@@ -58,7 +58,7 @@ endif
 ifneq ("$(CONFIG_USB)", "")
 DEPEND_FILES += usb.o
 endif
-ifeq ("$(CONFIG_NET_SCHED)", "y")
+ifeq ("$(CONFIG_RALINKAPP_SWQOS)", "y")
 DEPEND_FILES += qos.o
 endif
 

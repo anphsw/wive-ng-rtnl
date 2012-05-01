@@ -25,7 +25,7 @@
 #include	"wps.h"
 #endif
 
-#ifdef CONFIG_NET_SCHED
+#ifdef CONFIG_RALINKAPP_SWQOS
 #include	"qos.h"
 #endif
 

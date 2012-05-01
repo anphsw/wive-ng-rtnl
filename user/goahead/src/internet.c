@@ -1012,7 +1012,7 @@ static int getDynamicRoutingBuilt(int eid, webs_t wp, int argc, char_t **argv)
 
 static int getSWQoSBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
-#ifdef CONFIG_NET_SCHED
+#ifdef CONFIG_RALINKAPP_SWQOS
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));
