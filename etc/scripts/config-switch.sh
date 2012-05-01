@@ -20,7 +20,7 @@ if [ "$CONFIG_RT_3052_ESW" != "" ]; then
 	##########################################################################
 	# Configure touch dhcp from driver in kernel. Only one per start
 	##########################################################################
-	if [ "$OperationMode" = "0" ] || [ "$OperationMode" = "2" ]; then
+	if [ "$OperationMode" = "0" ] || [ "$OperationMode" = "2" ] || [ "$ApCliBridgeOnly" = "1" ]; then
 	    # disable dhcp renew from driver
 	    sysctl -w net.ipv4.send_sigusr_dhcpc=9
 	else

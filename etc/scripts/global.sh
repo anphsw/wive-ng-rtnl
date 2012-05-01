@@ -83,7 +83,7 @@ getWanIfName() {
 	phys_wan_if="eth2.2"
     fi
     # real wan name
-    if [ "$OperationMode" = "0" ]; then
+    if [ "$OperationMode" = "0" ] || [ "$ApCliBridgeOnly" = "1" ]; then
 	wan_if="br0"
     elif [ "$OperationMode" = "1" ] || [ "$OperationMode" = "4" ]; then
 	wan_if="$phys_wan_if"

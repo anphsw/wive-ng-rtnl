@@ -12,7 +12,7 @@ web_wait
 # include functions and env
 . /etc/scripts/global.sh
 
-if [ "$OperationMode" = "0" ]; then
+if [ "$OperationMode" = "0" ] || [ "$ApCliBridgeOnly" = "1" ]; then
     exit 0
 fi
 
