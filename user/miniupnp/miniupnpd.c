@@ -1,4 +1,4 @@
-/* $Id: miniupnpd.c,v 1.152 2012/04/22 00:55:44 nanard Exp $ */
+/* $Id: miniupnpd.c,v 1.155 2012/05/01 20:13:35 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * (c) 2006-2012 Thomas Bernard
@@ -56,6 +56,7 @@
 #include "options.h"
 #include "minissdp.h"
 #include "upnpredirect.h"
+#include "upnppinhole.h"
 #include "miniupnpdtypes.h"
 #include "daemonize.h"
 #include "upnpevents.h"
@@ -66,6 +67,11 @@
 #include "upnputils.h"
 #ifdef USE_IFACEWATCHER
 #include "ifacewatcher.h"
+#endif
+#ifdef ENABLE_6FC_SERVICE
+#ifdef USE_NETFILTER
+void init_iptpinhole(void);
+#endif
 #endif
 
 #ifndef DEFAULT_CONFIG
@@ -529,7 +535,7 @@ parselanaddr(struct lan_addr_s * lan_addr, const char * str)
 	while(*p && *p != '/' && !isspace(*p))
 		p++;
 	n = p - str;
-	if(!isdigit(str[0]) && n < sizeof(lan_addr->ifname))
+	if(!isdigit(str[0]) && n < (int)sizeof(lan_addr->ifname))
 	{
 		/* not starting with a digit : suppose it is an interface name */
 		memcpy(lan_addr->ifname, str, n);
@@ -671,7 +677,7 @@ init(int argc, char * * argv, struct runtime_vars * v)
 	}
 	else
 	{
-		for(i=0; i<num_options; i++)
+		for(i=0; i<(int)num_options; i++)
 		{
 			switch(ary_options[i].id)
 			{
@@ -1055,6 +1061,11 @@ init(int argc, char * * argv, struct runtime_vars * v)
 		syslog(LOG_ERR, "Failed to init redirection engine. EXITING");
 		return 1;
 	}
+#ifdef ENABLE_6FC_SERVICE
+#ifdef USE_NETFILTER
+	init_iptpinhole();
+#endif
+#endif
 
 	if(writepidfile(pidfilename, pid) < 0)
 		pidfilename = NULL;
@@ -1370,13 +1381,13 @@ main(int argc, char * * argv)
 		/* Remove expired port mappings, based on UPnP IGD LeaseDuration
 		 * or NAT-PMP lifetime) */
 		if(nextruletoclean_timestamp
-		  && (timeofday.tv_sec >= nextruletoclean_timestamp))
+		  && ((unsigned int)timeofday.tv_sec >= nextruletoclean_timestamp))
 		{
 			syslog(LOG_DEBUG, "cleaning expired Port Mappings");
 			get_upnp_rules_state_list(0);
 		}
 		if(nextruletoclean_timestamp
-		  && timeout.tv_sec >= (nextruletoclean_timestamp - timeofday.tv_sec))
+		  && ((unsigned int)timeout.tv_sec >= (nextruletoclean_timestamp - timeofday.tv_sec)))
 		{
 			timeout.tv_sec = nextruletoclean_timestamp - timeofday.tv_sec;
 			timeout.tv_usec = 0;

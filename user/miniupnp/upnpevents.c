@@ -1,4 +1,4 @@
-/* $Id: upnpevents.c,v 1.21 2012/03/05 20:36:17 nanard Exp $ */
+/* $Id: upnpevents.c,v 1.24 2012/04/30 21:21:33 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * (c) 2008-2012 Thomas Bernard
@@ -140,7 +140,7 @@ renewSubscription(const char * sid, int sidlen, int timeout)
 {
 	struct subscriber * sub;
 	for(sub = subscriberlist.lh_first; sub != NULL; sub = sub->entries.le_next) {
-		if(memcmp(sid, sub->uuid, 41) == 0) {
+		if((sidlen == 41) && (memcmp(sid, sub->uuid, 41) == 0)) {
 			sub->timeout = (timeout ? time(NULL) + timeout : 0);
 			return 0;
 		}
@@ -155,7 +155,7 @@ upnpevents_removeSubscriber(const char * sid, int sidlen)
 	if(!sid)
 		return -1;
 	for(sub = subscriberlist.lh_first; sub != NULL; sub = sub->entries.le_next) {
-		if(memcmp(sid, sub->uuid, 41) == 0) {
+		if((sidlen == 41) && (memcmp(sid, sub->uuid, 41) == 0)) {
 			if(sub->notify) {
 				sub->notify->sub = NULL;
 			}
@@ -220,7 +220,7 @@ error:
 static void
 upnp_event_notify_connect(struct upnp_event_notify * obj)
 {
-	int i;
+	unsigned int i;
 	const char * p;
 	unsigned short port;
 #ifdef ENABLE_IPV6
@@ -346,8 +346,14 @@ static void upnp_event_prepare(struct upnp_event_notify * obj)
 	}
 	obj->buffersize = 1024;
 	obj->buffer = malloc(obj->buffersize);
-	/*if(!obj->buffer) {
-	}*/
+	if(!obj->buffer) {
+		syslog(LOG_ERR, "%s: malloc returned NULL", "upnp_event_prepare");
+		if(xml) {
+			free(xml);
+		}
+		obj->state = EError;
+		return;
+	}
 	obj->tosend = snprintf(obj->buffer, obj->buffersize, notifymsg,
 	                       obj->path, obj->addrstr, obj->portstr, l+2,
 	                       obj->sub->uuid, obj->sub->seq,
@@ -362,6 +368,7 @@ static void upnp_event_prepare(struct upnp_event_notify * obj)
 static void upnp_event_send(struct upnp_event_notify * obj)
 {
 	int i;
+
 	syslog(LOG_DEBUG, "%s: sending event notify message to %s:%s",
 	       "upnp_event_send", obj->addrstr, obj->portstr);
 	syslog(LOG_DEBUG, "%s: msg: %s",
@@ -415,6 +422,7 @@ upnp_event_process_notify(struct upnp_event_notify * obj)
 	case EConnecting:
 		/* now connected or failed to connect */
 		upnp_event_prepare(obj);
+		if(obj->state == ESending)
 		upnp_event_send(obj);
 		break;
 	case ESending:

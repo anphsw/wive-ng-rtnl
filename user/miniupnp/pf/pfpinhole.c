@@ -1,4 +1,4 @@
-/* $Id: pfpinhole.c,v 1.16 2012/04/23 22:17:34 nanard Exp $ */
+/* $Id: pfpinhole.c,v 1.18 2012/05/01 22:37:53 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * (c) 2012 Thomas Bernard
@@ -202,7 +202,8 @@ int delete_pinhole(unsigned short uid)
 	return -2;
 }
 
-int get_pinhole(unsigned short uid,
+int
+get_pinhole_info(unsigned short uid,
                 char * rem_host, int rem_hostlen, unsigned short * rem_port,
                 char * int_client, int int_clientlen, unsigned short * int_port,
                 int * proto, unsigned int * timestamp,
@@ -319,7 +320,7 @@ int clean_pinhole_list(unsigned int * next_timestamp)
 			syslog(LOG_INFO, "rule with label '%s' is not a IGD pinhole", pr.rule.label);
 			continue;
 		}
-		if(ts <= current_time) {
+		if(ts <= (unsigned int)current_time) {
 			syslog(LOG_INFO, "removing expired pinhole '%s'", pr.rule.label);
 			pr.action = PF_CHANGE_GET_TICKET;
 			if(ioctl(dev, DIOCCHANGERULE, &pr) < 0) {

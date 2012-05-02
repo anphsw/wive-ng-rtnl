@@ -1,4 +1,4 @@
-/* $Id: iptcrdr.c,v 1.48 2012/03/05 20:36:19 nanard Exp $ */
+/* $Id: iptcrdr.c,v 1.49 2012/04/30 21:08:02 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * (c) 2006-2011 Thomas Bernard
@@ -47,6 +47,8 @@
 #define IPT_ALIGN XT_ALIGN
 #endif
 
+#include "../macros.h"
+#include "../config.h"
 #include "iptcrdr.h"
 #include "../upnpglobalvars.h"
 
@@ -195,7 +197,10 @@ add_redirect_rule2(const char * ifname,
                    const char * iaddr, unsigned short iport, int proto,
 				   const char * desc, unsigned int timestamp)
 {
-	int r = addnatrule(proto, eport, iaddr, iport, rhost);
+	int r;
+	UNUSED(ifname);
+
+	r = addnatrule(proto, eport, iaddr, iport, rhost);
 	if(r >= 0)
 		add_redirect_desc(eport, proto, desc, timestamp);
 	return r;
@@ -207,6 +212,10 @@ add_filter_rule2(const char * ifname,
                  unsigned short eport, unsigned short iport,
                  int proto, const char * desc)
 {
+	UNUSED(ifname);
+	UNUSED(eport);
+	UNUSED(desc);
+
 	return add_filter_rule(proto, rhost, iaddr, iport);
 }
 
@@ -226,6 +235,7 @@ get_redirect_rule(const char * ifname, unsigned short eport, int proto,
 	const struct ipt_entry_target * target;
 	const struct ip_nat_multi_range * mr;
 	const struct ipt_entry_match *match;
+	UNUSED(ifname);
 
 	h = iptc_init("nat");
 	if(!h)
@@ -323,6 +333,7 @@ get_redirect_rule_by_index(int index,
 	const struct ipt_entry_target * target;
 	const struct ip_nat_multi_range * mr;
 	const struct ipt_entry_match *match;
+	UNUSED(ifname);
 
 	h = iptc_init("nat");
 	if(!h)

@@ -1077,7 +1077,7 @@
 5) Disable APSD (WMM PowerSave) by default.<br>
 6) Add PPE wifi offload support (hw_nat_wifi variable default 0).<br>
 7) Update openssl to 0.9.8w. version.<br>
-8) Update miniupnpd to 1.6.20120424 version.<br>
+8) Update miniupnpd to 1.6.20120502 version.<br>
 9) HW_NAT now work with wifi traffic.<br>
 10) HW_NAT increase foe table size to 16k.<br>
 11) Vlan subsystem small fixes.<br>

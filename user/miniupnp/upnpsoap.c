@@ -1,4 +1,4 @@
-/* $Id: upnpsoap.c,v 1.106 2012/04/23 22:38:06 nanard Exp $ */
+/* $Id: upnpsoap.c,v 1.109 2012/05/01 20:08:23 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * (c) 2006-2012 Thomas Bernard
@@ -17,12 +17,14 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 
+#include "macros.h"
 #include "config.h"
 #include "upnpglobalvars.h"
 #include "upnphttp.h"
 #include "upnpsoap.h"
 #include "upnpreplyparse.h"
 #include "upnpredirect.h"
+#include "upnppinhole.h"
 #include "getifaddr.h"
 #include "getifstats.h"
 #include "getconnstatus.h"
@@ -66,6 +68,8 @@ GetConnectionTypeInfo(struct upnphttp * h, const char * action)
 		"<NewConnectionType>IP_Routed</NewConnectionType>"
 		"<NewPossibleConnectionTypes>IP_Routed</NewPossibleConnectionTypes>"
 		"</u:GetConnectionTypeInfoResponse>";
+	UNUSED(action);
+
 	BuildSendAndCloseSoapResp(h, resp, sizeof(resp)-1);
 }
 
@@ -233,6 +237,7 @@ GetNATRSIPStatus(struct upnphttp * h, const char * action)
 		"<NewRSIPAvailable>0</NewRSIPAvailable>"
 		"<NewNATEnabled>1</NewNATEnabled>"
 		"</u:GetNATRSIPStatusResponse>";
+	UNUSED(action);
 	/* 2.2.9. RSIPAvailable
 	 * This variable indicates if Realm-specific IP (RSIP) is available
 	 * as a feature on the InternetGatewayDevice. RSIP is being defined
@@ -720,6 +725,7 @@ DeletePortMappingRange(struct upnphttp * h, const char * action)
 	int manage;
 	unsigned short * port_list;
 	unsigned int i, number = 0;
+	UNUSED(action);
 
 	ParseNameValue(h->req_buf + h->req_contentoff, h->req_contentlen, &data);
 	startport = (unsigned short)atoi(GetValueFromNameValueList(&data, "NewStartPort"));
@@ -912,6 +918,11 @@ http://www.upnp.org/schemas/gw/WANIPConnection-v2.xsd">
 	}
 	bodylen = snprintf(body, bodyalloc, resp_start,
 	              action, SERVICE_TYPE_WANIPC);
+	if(bodylen < 0)
+	{
+		SoapError(h, 501, "ActionFailed");
+		return;
+	}
 	memcpy(body+bodylen, list_start, sizeof(list_start));
 	bodylen += (sizeof(list_start) - 1);
 
@@ -921,7 +932,7 @@ http://www.upnp.org/schemas/gw/WANIPConnection-v2.xsd">
 	for(i = 0; number > 0 && i < list_size; i++)
 	{
 		/* have a margin of 1024 bytes to store the new entry */
-		if(bodylen + 1024 > bodyalloc)
+		if((unsigned int)bodylen + 1024 > bodyalloc)
 		{
 			bodyalloc += 4096;
 			body = realloc(body, bodyalloc);
@@ -1006,6 +1017,7 @@ SetConnectionType(struct upnphttp * h, const char * action)
 {
 	const char * connection_type;
 	struct NameValueParserData data;
+	UNUSED(action);
 
 	ParseNameValue(h->req_buf + h->req_contentoff, h->req_contentlen, &data);
 	connection_type = GetValueFromNameValueList(&data, "NewConnectionType");
@@ -1019,6 +1031,7 @@ SetConnectionType(struct upnphttp * h, const char * action)
 static void
 RequestConnection(struct upnphttp * h, const char * action)
 {
+	UNUSED(action);
 	SoapError(h, 606, "Action not authorized");
 }
 
@@ -1026,6 +1039,7 @@ RequestConnection(struct upnphttp * h, const char * action)
 static void
 ForceTermination(struct upnphttp * h, const char * action)
 {
+	UNUSED(action);
 	SoapError(h, 606, "Action not authorized");
 }
 
@@ -1237,7 +1251,7 @@ PinholeVerification(struct upnphttp * h, char * int_ip, unsigned short int_port)
         freeaddrinfo(p);
 	}
 
-	if(inet_ntop(AF_INET6, &(h->clientaddr_v6), senderAddr, INET6_ADDRSTRLEN)<=0)
+	if(inet_ntop(AF_INET6, &(h->clientaddr_v6), senderAddr, INET6_ADDRSTRLEN) == NULL)
 	{
 		syslog(LOG_ERR, "inet_ntop: %m");
 	}
