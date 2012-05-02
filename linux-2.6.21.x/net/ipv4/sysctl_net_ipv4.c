@@ -841,6 +841,14 @@ ctl_table ipv4_table[] = {
 		.proc_handler   = &proc_allowed_congestion_control,
 		.strategy	= &strategy_allowed_congestion_control,
 	},
+	{
+		.ctl_name	= NET_TCP_MAX_SSTHRESH,
+		.procname	= "tcp_max_ssthresh",
+		.data		= &sysctl_tcp_max_ssthresh,
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= &proc_dointvec,
+	},
 #ifdef CONFIG_BRIDGE_FASTPATH
 	{
 		.ctl_name	= NET_TCP_ALLOWED_BRIDGE_FASTPATH,
