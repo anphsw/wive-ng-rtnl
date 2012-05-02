@@ -87,8 +87,8 @@ struct netpoll_info;
  *	used.
  */
  
-#if defined(CONFIG_WLAN_80211) || defined(CONFIG_AX25) || defined(CONFIG_AX25_MODULE)
-# if defined(CONFIG_MAC80211_MESH)
+#if defined(CONFIG_WIRELESS_EXT) || if defined(CONFIG_IEEE80211) || defined(CONFIG_AX25) || defined(CONFIG_AX25_MODULE)
+# if 1
 #  define LL_MAX_HEADER 128
 # else
 #  define LL_MAX_HEADER 96
