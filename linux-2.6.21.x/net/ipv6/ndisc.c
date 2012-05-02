@@ -1509,9 +1509,10 @@ static void ndisc_redirect_rcv(struct sk_buff *skb)
 
 	if (ipv6_addr_equal(dest, target)) {
 		on_link = 1;
-	} else if (!(ipv6_addr_type(target) & IPV6_ADDR_LINKLOCAL)) {
+	} else if (ipv6_addr_type(target) !=
+		   (IPV6_ADDR_UNICAST|IPV6_ADDR_LINKLOCAL)) {
 		ND_PRINTK2(KERN_WARNING
-			   "ICMPv6 Redirect: target address is not link-local.\n");
+			   "ICMPv6 Redirect: target address is not link-local unicast.\n");
 		return;
 	}
 
@@ -1585,9 +1586,9 @@ void ndisc_send_redirect(struct sk_buff *skb, struct neighbour *neigh,
 	}
 
 	if (!ipv6_addr_equal(&skb->nh.ipv6h->daddr, target) &&
-	    !(ipv6_addr_type(target) & IPV6_ADDR_LINKLOCAL)) {
+	    ipv6_addr_type(target) != (IPV6_ADDR_UNICAST|IPV6_ADDR_LINKLOCAL)) {
 		ND_PRINTK2(KERN_WARNING
-			"ICMPv6 Redirect: target address is not link-local.\n");
+			"ICMPv6 Redirect: target address is not link-local unicast.\n");
 		return;
 	}
 
