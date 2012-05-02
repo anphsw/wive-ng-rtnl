@@ -415,9 +415,6 @@ static int claimintf(struct dev_state *ps, unsigned int ifnum)
 	struct usb_interface *intf;
 	int err;
 
-	if (!strcmp(current->comm, "u2ec"))			// patch for U2EC
-		return 0;
-
 	if (ifnum >= 8*sizeof(ps->ifclaimed))
 		return -EINVAL;
 	/* already claimed */
@@ -434,8 +431,6 @@ static int claimintf(struct dev_state *ps, unsigned int ifnum)
 	up_write(&usb_bus_type.subsys.rwsem);
 	if (err == 0)
 		set_bit(ifnum, &ps->ifclaimed);
-//	else if (!strcmp(intf->dev.driver->name, "usblp"))      // old patch for U2EC
-//		err = 0;                                        // old patch for U2EC
 	return err;
 }
 
@@ -470,9 +465,6 @@ static int checkintf(struct dev_state *ps, unsigned int ifnum)
 		return -EINVAL;
 	if (test_bit(ifnum, &ps->ifclaimed))
 		return 0;
-	/* if not yet claimed, claim it for the driver */
-//	dev_warn(&ps->dev->dev, "usbfs: process %d (%s) did not claim interface %u before use\n", // patch for U2EC
-//	       current->pid, current->comm, ifnum);						  // patch for U2EC
 	return claimintf(ps, ifnum);
 }
 
