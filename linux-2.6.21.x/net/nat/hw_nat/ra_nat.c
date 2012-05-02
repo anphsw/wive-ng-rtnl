@@ -413,36 +413,11 @@ uint32_t FoeDumpPkt(struct sk_buff *skb)
 #endif
 #endif
 
-static int32_t PpeRxSkip(struct sk_buff * skb, uint16_t eth_type)
-{
-    /* return trunclated packets to normal path */
-    if (!skb || (skb->len < ETH_HLEN)) {
-	NAT_PRINT("HNAT: skb null or small len in rx path\n");
-	return 1;
-    }
-
-    /* PPE only can handle IPv4/VLAN/IPv6/PPP packets */
-    if(eth_type != ETH_P_IP &&
-#if defined(CONFIG_RA_HW_NAT_IPV6)
-	eth_type != ETH_P_IPV6 &&
-#endif
-	eth_type != ETH_P_8021Q &&
-	eth_type != ETH_P_PPP_SES &&
-	eth_type != ETH_P_PPP_DISC) {
-	return 1;
-    }
-    return 0;
-}
-
 #if defined  (CONFIG_RA_HW_NAT_WIFI)
-int32_t PpeRxWifiTag(struct sk_buff * skb, uint16_t eth_type)
+int32_t PpeRxWifiTag(struct sk_buff * skb)
 {
 	    struct ethhdr *eth=NULL;
 	    uint16_t VirIfIdx=0;
-
-	    /* check wifi offload enabled and prevent vlan double incap */
-	    if (!wifi_offload || (eth_type == ETH_P_8021Q))
-		    return 1;
 
 	    /* check dst interface exist */
 	    if (skb->dev == NULL) {
@@ -556,7 +531,7 @@ int32_t PpeRxWifiTag(struct sk_buff * skb, uint16_t eth_type)
     return 0;
 }
 
-int32_t PpeRxWifiDeTag(struct sk_buff * skb, uint16_t eth_type)
+int32_t PpeRxWifiDeTag(struct sk_buff * skb)
 {
     /*
      * RT3883/RT3352/RT6855:
@@ -586,12 +561,11 @@ int32_t PpeRxWifiDeTag(struct sk_buff * skb, uint16_t eth_type)
     }
 #endif
 
-    if(wifi_offload && (eth_type == ETH_P_8021Q) && (FOE_AIS(skb) == 1) && (FOE_SP(skb) == SrcPortNo) && (FOE_AI(skb)!=HIT_BIND_KEEPALIVE)) {
+    if((FOE_AIS(skb) == 1) && (FOE_SP(skb) == SrcPortNo)) {
 	VirIfIdx = RemoveVlanTag(skb);
 
 	/* recover to right incoming interface */
 	if(VirIfIdx < MAX_IF_NUM) {
-
 	    /* check dst interface exist */
 	    if (DstPort[VirIfIdx] == NULL) {
 		NAT_PRINT("HNAT: TX: interface (VirIfIdx=%d) not exist\n", VirIfIdx);
@@ -641,10 +615,24 @@ int32_t PpeRxHandler(struct sk_buff * skb)
     int32_t ret=0;
 #endif
 
+    /* return trunclated packets to normal path */
+    if (!skb || (skb->len < ETH_HLEN)) {
+	NAT_PRINT("HNAT: skb null or small len in rx path\n");
+	return 1;
+    }
+
     eth_type=ntohs(skb->protocol);
 
-    if (PpeRxSkip(skb, eth_type))
+    /* PPE only can handle IPv4/VLAN/IPv6/PPP packets */
+    if(eth_type != ETH_P_IP &&
+#if defined(CONFIG_RA_HW_NAT_IPV6)
+	eth_type != ETH_P_IPV6 &&
+#endif
+	eth_type != ETH_P_8021Q &&
+	eth_type != ETH_P_PPP_SES &&
+	eth_type != ETH_P_PPP_DISC) {
 	return 1;
+    }
 
     foe_entry=&PpeFoeBase[FOE_ENTRY_NUM(skb)];
 
@@ -656,7 +644,11 @@ int32_t PpeRxHandler(struct sk_buff * skb)
 
     if((FOE_MAGIC_TAG(skb) == FOE_MAGIC_PCI) || (FOE_MAGIC_TAG(skb) == FOE_MAGIC_WLAN)){
 #if defined  (CONFIG_RA_HW_NAT_WIFI)
-	return PpeRxWifiTag(skb, eth_type);
+	/* check wifi offload enabled and prevent vlan double incap */
+	if (wifi_offload && (eth_type != ETH_P_8021Q))
+	    return PpeRxWifiTag(skb);
+	else
+	    return 1;
 #else
 	return 1;
 #endif
@@ -677,16 +669,18 @@ int32_t PpeRxHandler(struct sk_buff * skb)
     }
 
 #if defined  (CONFIG_RA_HW_NAT_WIFI)
+    if(wifi_offload && (eth_type == ETH_P_8021Q) && (FOE_AI(skb)!=HIT_BIND_KEEPALIVE)) {
     /* PpeRxWifiDeTag return:
 	-1 - iface exist error with kfree_skb
 	 0 - no need detag
 	 1 - detag ok and return to normal path
     */
-    ret=PpeRxWifiDeTag(skb, eth_type);
+	ret=PpeRxWifiDeTag(skb);
     if(ret == 1)
 	return 1;	/* return to normal path */
     else if(ret == -1)	/* drop this packet */
 	return 0;
+    }
 #endif
 
     if( (FOE_AI(skb)==HIT_BIND_KEEPALIVE) && (DFL_FOE_KA_ORG==0)){
@@ -940,8 +934,13 @@ int32_t PpeTxHandler(struct sk_buff *skb, int gmac_no)
 	uint32_t now=0;
 #endif
 
+	if (!skb) {
+	    NAT_PRINT("HNAT: skb is null ?\n");
+	    return 1;
+	}
+
 	/* return trunclated packets to normal path with padding */
-	if (!skb || (skb->len < ETH_HLEN)) {
+	if (skb->len < ETH_HLEN) {
 	    memset(FOE_INFO_START_ADDR(skb), 0, FOE_INFO_LEN);
 	    NAT_PRINT("HNAT: skb null or small len in tx path\n");
 	    return 1;
