@@ -942,6 +942,7 @@ int32_t PpeTxHandler(struct sk_buff *skb, int gmac_no)
 
 	/* return trunclated packets to normal path with padding */
 	if (!skb || (skb->len < ETH_HLEN)) {
+	    memset(FOE_INFO_START_ADDR(skb), 0, FOE_INFO_LEN);
 	    NAT_PRINT("HNAT: skb null or small len in tx path\n");
 	    return 1;
 	}
