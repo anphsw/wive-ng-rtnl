@@ -1088,6 +1088,7 @@
 16) ApCli mode now work (client bridge or client - AP modes).<br>
 17) Fix DFS support and enable by default.<br>
 18) Fix Channle auto select logic.<br>
+19) ReEnable ripd (zebra) support.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
