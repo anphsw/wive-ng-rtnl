@@ -253,20 +253,22 @@ LEAF(csum_partial)
 	dsra32	sum, sum, 0
 	addu	sum, v1
 #endif
-	sll	v1, sum, 16
-	addu	sum, v1
-	sltu	v1, sum, v1
-	srl	sum, sum, 16
-	addu	sum, v1
 
 	/* odd buffer alignment? */
-	beqz	t7, 1f
-	 nop
-	sll	v1, sum, 8
+#ifdef CPU_MIPSR2
+	wsbh	v1, sum
+	movn	sum, v1, t7
+#else
+	beqz	t7, 1f			/* odd buffer alignment? */
+	 lui	v1, 0x00ff
+	addu	v1, 0x00ff
+	and	t0, sum, v1
+	sll	t0, t0, 8
 	srl	sum, sum, 8
-	or	sum, v1
-	andi	sum, 0xffff
+	and	sum, sum, v1
+	or	sum, sum, t0
 1:
+#endif
 	.set	reorder
 	/* Add the passed partial csum.  */
 	ADDC(sum, a2)
@@ -638,20 +640,21 @@ EXC(	sb	t0, NBYTES-2(dst), .Ls_exc)
 	dsra32	sum, sum, 0
 	addu	sum, v1
 #endif
-	sll	v1, sum, 16
-	addu	sum, v1
-	sltu	v1, sum, v1
-	srl	sum, sum, 16
-	addu	sum, v1
 
-	/* odd buffer alignment? */
-	beqz	odd, 1f
-	 nop
-	sll	v1, sum, 8
+#ifdef CPU_MIPSR2
+	wsbh	v1, sum
+	movn	sum, v1, odd
+#else
+	beqz	odd, 1f			/* odd buffer alignment? */
+	 lui	v1, 0x00ff
+	addu	v1, 0x00ff
+	and	t0, sum, v1
+	sll	t0, t0, 8
 	srl	sum, sum, 8
-	or	sum, v1
-	andi	sum, 0xffff
+	and	sum, sum, v1
+	or	sum, sum, t0
 1:
+#endif
 	.set reorder
 	ADDC(sum, psum)
 	jr	ra
