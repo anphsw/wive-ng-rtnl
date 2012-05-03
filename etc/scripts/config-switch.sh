@@ -57,7 +57,7 @@ if [ "$CONFIG_RT_3052_ESW" != "" ]; then
 	ifconfig eth2 hw ether "$LAN_MAC_ADDR"
 	ip link set eth2 up
 	# only if not bridge and not ethernet converter mode
-	if [ "$OperationMode" != "0" ] && [ "$OperationMode" != "2" ] && [ "$ApCliBridgeOnly" != "1" ]; then
+	if [ "$OperationMode" != "0" ] && [ "$OperationMode" != "2" ]  && [ "$OperationMode" != "3" ]; then
 	    $LOG "Add vlans interfaces"
 	    if [ ! -d /proc/sys/net/ipv4/conf/eth2.1 ]; then
 		vconfig add eth2 1
