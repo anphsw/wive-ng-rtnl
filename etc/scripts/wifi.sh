@@ -52,10 +52,12 @@ if [ "$CONFIG_RT2860V2_AP_IGMP_SNOOP" != "" ]; then
     fi
 fi
 ########################################DFS Setup #############################
-if [ "$CONFIG_RT2860V2_AP_DFS" != "" ] && [ "$OperationMode" = "1" ] && [ "$DfsEbanle" = "1" ]; then
-    iwpriv ra0 set RadarStart=1
-else
-    iwpriv ra0 set RadarStop=1
+if [ "$CONFIG_RT2860V2_AP_DFS" != "" ] && [ "$OperationMode" = "1" ]; then
+    if [ "$DfsEbanle" = "1" ]; then
+	iwpriv ra0 set RadarStart=1
+    else
+	iwpriv ra0 set RadarStop=1
+    fi
 fi
 ########################################Channel select#########################
 if [ "$AutoChannelSelect" = "1" ]; then
