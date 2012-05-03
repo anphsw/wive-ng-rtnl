@@ -27,7 +27,7 @@ if [ "$OperationMode" = "2" ]; then
 fi
 ########################################APMODE param###########################
 eval `nvram_buf_get 2860 AutoChannelSelect Channel AP2040Rescan RadioOff \
-			    GreenAP HT_OpMode DfsEbanle`
+			    GreenAP HT_OpMode DfsEnable`
 #########################################ON/OFF param##########################
 if [ "$RadioOff" = "1" ]; then
     iwpriv ra0 set RadioOn=0
@@ -53,7 +53,7 @@ if [ "$CONFIG_RT2860V2_AP_IGMP_SNOOP" != "" ]; then
 fi
 ########################################DFS Setup #############################
 if [ "$CONFIG_RT2860V2_AP_DFS" != "" ] && [ "$OperationMode" = "1" ]; then
-    if [ "$DfsEbanle" = "1" ]; then
+    if [ "$DfsEnable" = "1" ]; then
 	iwpriv ra0 set RadarStart=1
     else
 	iwpriv ra0 set RadarStop=1
