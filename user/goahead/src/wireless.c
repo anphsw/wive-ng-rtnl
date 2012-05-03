@@ -1219,69 +1219,35 @@ static void wirelessWds(webs_t wp, char_t *path, char_t *query)
 	doSystem("internet.sh wifionly");
 }
 
+const parameter_fetch_t apcli_args[] =
+{
+	{ T("apcli_ssid"),              "ApCliSsid",            0,       T("") },
+	{ T("apcli_bssid"),             "ApCliBssid",           0,       T("") },
+	{ T("apcli_mode"),              "ApCliAuthMode",        0,       T("OPEN") },
+	{ T("apcli_enc"),               "ApCliEncrypType",      0,       T("NONE") },
+	{ T("apcli_wpapsk"),            "ApCliWPAPSK",          0,       T("12345678") },
+	{ T("apcli_apiface"),           "ApCliClientOnly",      2,       T("off") },
+	{ T("apcli_bridge"),            "ApCliBridgeOnly",      2,       T("off") },
+	{ NULL, NULL, 0, NULL }
+};
+
 /* goform/wirelessApcli */
 static void wirelessApcli(webs_t wp, char_t *path, char_t *query)
 {
-	char_t	*ssid, *bssid, *mode, *enc, *wpapsk, *keyid, *keytype,
-			*key1, *key2, *key3, *key4;
-
 	//fetch from web input
-	ssid = websGetVar(wp, T("apcli_ssid"), T(""));
-	bssid = websGetVar(wp, T("apcli_bssid"), T(""));
-	mode = websGetVar(wp, T("apcli_mode"), T("OPEN"));
-	enc = websGetVar(wp, T("apcli_enc"), T("NONE"));
-	wpapsk = websGetVar(wp, T("apcli_wpapsk"), T("12345678"));
-	keyid = websGetVar(wp, T("apcli_default_key"), T("1"));
-	keytype = websGetVar(wp, T("apcli_key1type"), T("1"));
-	key1 = websGetVar(wp, T("apcli_key1"), T(""));
-	key2 = websGetVar(wp, T("apcli_key2"), T(""));
-	key3 = websGetVar(wp, T("apcli_key3"), T(""));
-	key4 = websGetVar(wp, T("apcli_key4"), T(""));
-
-	if (gstrlen(ssid) == 0) {
-		websError(wp, 200, "SSID is empty");
-		return;
-	}
-
 	nvram_init(RT2860_NVRAM);
 	nvram_bufset(RT2860_NVRAM, "ApCliEnable", "1");
-	nvram_bufset(RT2860_NVRAM, "ApCliSsid", ssid);
-	nvram_bufset(RT2860_NVRAM, "ApCliBssid", bssid);
-	nvram_bufset(RT2860_NVRAM, "ApCliAuthMode", mode);
-	nvram_bufset(RT2860_NVRAM, "ApCliEncrypType", enc);
-	nvram_bufset(RT2860_NVRAM, "ApCliWPAPSK", wpapsk);
-	nvram_bufset(RT2860_NVRAM, "ApCliDefaultKeyId", keyid);
-	nvram_bufset(RT2860_NVRAM, "ApCliKey1Type", keytype);
-	nvram_bufset(RT2860_NVRAM, "ApCliKey1Str", key1);
-	nvram_bufset(RT2860_NVRAM, "ApCliKey2Type", keytype);
-	nvram_bufset(RT2860_NVRAM, "ApCliKey2Str", key2);
-	nvram_bufset(RT2860_NVRAM, "ApCliKey3Type", keytype);
-	nvram_bufset(RT2860_NVRAM, "ApCliKey3Str", key3);
-	nvram_bufset(RT2860_NVRAM, "ApCliKey4Type", keytype);
-	nvram_bufset(RT2860_NVRAM, "ApCliKey4Str", key4);
+	setupParameters(wp, apcli_args, 0);
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
 
 	//debug print
-	websHeader(wp);
-	websWrite(wp, T("ssid: %s<br>\n"), ssid);
-	websWrite(wp, T("bssid: %s<br>\n"), bssid);
-	websWrite(wp, T("mode: %s<br>\n"), mode);
-	websWrite(wp, T("enc: %s<br>\n"), enc);
-	if (!strcmp(mode, "WPAPSK") || !strcmp(mode, "WPA2PSK")) {
-		websWrite(wp, T("wpapsk: %s<br>\n"), wpapsk);
-	}
-	if (!strcmp(mode, "OPEN") || !strcmp(mode, "SHARED")) {
-		websWrite(wp, T("keyid: %s<br>\n"), keyid);
-		websWrite(wp, T("keytype: %s<br>\n"), keytype);
-		websWrite(wp, T("key1: %s<br>\n"), key1);
-		websWrite(wp, T("key2: %s<br>\n"), key2);
-		websWrite(wp, T("key3: %s<br>\n"), key3);
-		websWrite(wp, T("key4: %s<br>\n"), key4);
-	}
-	websFooter(wp);
-	websDone(wp, 200);
-
+	char_t *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
+	if (submitUrl[0])
+		websRedirect(wp, submitUrl);
+	else
+		websDone(wp, 200);
+	
 	//network configure
 	doSystem("internet.sh");
 }
