@@ -949,7 +949,7 @@ redo:
 	}
 
 #ifdef CONFIG_AP_SUPPORT
-#if defined(CARRIER_DETECTION_SUPPORT)  || defined(DFS_HARDWARE_SUPPORT) 
+#ifdef DFS_HARDWARE_SUPPORT
 #if defined(TONE_RADAR_DETECT_SUPPORT)  || defined (RTMP_RBUS_SUPPORT) || defined(DFS_INTERRUPT_SUPPORT)
 	if (IntSource.word & INT_TONE_RADAR)
 	{
