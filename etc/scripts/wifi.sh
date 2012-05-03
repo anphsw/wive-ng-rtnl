@@ -25,17 +25,6 @@ if [ "$OperationMode" = "2" ]; then
   # in sta mode exit
   exit 0
 fi
-#######################################APCLIMODE param ########################
-if [ "$OperationMode" = "3" ]; then
-    eval `nvram_buf_get 2860 ApCliAutoConnect ApCliClientOnly`
-    if [ "$ApCliAutoConnect" = "1" ]; then
-	iwpriv apcli0 set ApCliAutoConnect=1
-    fi
-    if [ "$ApCliClientOnly" = "1" ]; then
-	echo "APCLI Only client mode enable shutdown ra0..."
-	ip link set ra0 down
-    fi
-fi
 ########################################APMODE param###########################
 eval `nvram_buf_get 2860 AutoChannelSelect Channel AP2040Rescan RadioOff \
 			    GreenAP HT_OpMode`
@@ -65,8 +54,10 @@ fi
 ########################################Channel select#########################
 if [ "$AutoChannelSelect" = "1" ]; then
     # rescan and select optimal channel
-    iwpriv ra0 set AutoChannelSel=1
+    # first need scan
     iwpriv ra0 set SiteSurvey=1
+    # second select channel
+    iwpriv ra0 set AutoChannelSel=1
 else
     # set channel manual
     iwpriv ra0 set Channel=$Channel
@@ -77,6 +68,17 @@ if [ "$CONFIG_RT2860V2_AP_GREENAP" != "" ]; then
 	iwpriv ra0 set GreenAP=1
     else
 	iwpriv ra0 set GreenAP=0
+    fi
+fi
+#######################################APCLIMODE param ########################
+if [ "$OperationMode" = "3" ]; then
+    eval `nvram_buf_get 2860 ApCliAutoConnect ApCliClientOnly`
+    if [ "$ApCliAutoConnect" = "1" ]; then
+	iwpriv apcli0 set ApCliAutoConnect=1
+    fi
+    if [ "$ApCliClientOnly" = "1" ]; then
+	echo "APCLI Only client mode enable shutdown ra0..."
+	ip link set ra0 down
     fi
 fi
 ###########################################ALWAYS END##########################
