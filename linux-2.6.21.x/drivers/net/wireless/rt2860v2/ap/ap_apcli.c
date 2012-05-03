@@ -326,10 +326,9 @@ BOOLEAN ApCliLinkUp(
 	{
 		if (ifIndex < MAX_APCLI_NUM)
 		{
-			DBGPRINT(RT_DEBUG_TRACE, ("!!! APCLI LINK UP - IF(apcli%d) AuthMode(%d)=%s, WepStatus(%d)=%s !!!\n", 
-										ifIndex, 
-										pAd->ApCfg.ApCliTab[ifIndex].AuthMode, GetAuthMode(pAd->ApCfg.ApCliTab[ifIndex].AuthMode),
-										pAd->ApCfg.ApCliTab[ifIndex].WepStatus, GetEncryptType(pAd->ApCfg.ApCliTab[ifIndex].WepStatus)));			
+			printk("!!! APCLI LINK UP - IF(apcli%d) AuthMode(%d)=%s, WepStatus(%d)=%s !!!\n", ifIndex,
+					pAd->ApCfg.ApCliTab[ifIndex].AuthMode, GetAuthMode(pAd->ApCfg.ApCliTab[ifIndex].AuthMode),
+					pAd->ApCfg.ApCliTab[ifIndex].WepStatus, GetEncryptType(pAd->ApCfg.ApCliTab[ifIndex].WepStatus));
 		}
 		else
 		{
@@ -546,8 +545,8 @@ BOOLEAN ApCliLinkUp(
 				 
 				if (pAd->ApCfg.ApCliTab[ifIndex].DesiredTransmitSetting.field.MCS != MCS_AUTO)
 				{
-					DBGPRINT(RT_DEBUG_TRACE, ("IF-apcli%d : Desired MCS = %d\n", ifIndex,
-						pAd->ApCfg.ApCliTab[ifIndex].DesiredTransmitSetting.field.MCS));
+					printk("IF-apcli%d : Desired MCS = %d\n", ifIndex,
+						pAd->ApCfg.ApCliTab[ifIndex].DesiredTransmitSetting.field.MCS);
 
 					if (pAd->ApCfg.ApCliTab[ifIndex].DesiredTransmitSetting.field.MCS == 32)
 					{
@@ -593,8 +592,7 @@ BOOLEAN ApCliLinkUp(
 			else
 			{
 				pAd->MacTab.fAnyStationIsLegacy = TRUE;
-				DBGPRINT(RT_DEBUG_TRACE, ("ApCliLinkUp - MaxSupRate=%d Mbps\n",
-								  RateIdToMbps[pMacEntry->MaxSupportedRate]));
+				printk("ApCliLinkUp - MaxSupRate=%d Mbps\n", RateIdToMbps[pMacEntry->MaxSupportedRate]);
 			}				
 
 #endif // DOT11_N_SUPPORT //
@@ -715,7 +713,7 @@ VOID ApCliLinkDown(
 
 	if (ifIndex < MAX_APCLI_NUM)
 	{
-		DBGPRINT(RT_DEBUG_TRACE, ("!!! APCLI LINK DOWN - IF(apcli%d)!!!\n", ifIndex));
+		printk("!!! APCLI LINK DOWN - IF(apcli%d)!!!\n", ifIndex);
 	}
 	else
 	{
