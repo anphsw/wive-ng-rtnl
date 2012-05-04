@@ -378,8 +378,10 @@ int udhcpd_main(int argc UNUSED_PARAM, char **argv)
 	/* Sanity check */
 	num_ips = server_config.end_ip - server_config.start_ip + 1;
 	if (server_config.max_leases > num_ips) {
+#ifdef DEBUG
 		bb_error_msg("max_leases=%u is too big, setting to %u",
 			(unsigned)server_config.max_leases, num_ips);
+#endif
 		server_config.max_leases = num_ips;
 	}
 
