@@ -14,7 +14,7 @@ div.popup_window {
 	top: 0px;
 	background-color: #c0c0c0;
 	opacity: 0.5;
-	align: center;
+	text-align: center;
 	vertical-align: middle;
 }
 

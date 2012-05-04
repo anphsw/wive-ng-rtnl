@@ -194,7 +194,7 @@ static int getDhcpCliList(int eid, webs_t wp, int argc, char_t **argv)
 		}
 		else
 			websWrite(wp, T("expired</td>"));
-		websWrite(wp, "<td id=\"dhclient_row%d_status\" style=\"align: center;\">"
+		websWrite(wp, "<td id=\"dhclient_row%d_status\" style=\"text-align: center;\">"
 			"<input id=\"dhclient_row%d\" type=\"checkbox\" onchange=\"toggleDhcpTable(this);\"></td>",
 			rownum, rownum);
 		websWrite(wp, "</tr>\n");
