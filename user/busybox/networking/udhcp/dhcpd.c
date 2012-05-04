@@ -77,21 +77,38 @@ static void send_packet_to_client(struct dhcp_packet *dhcp_pkt, int force_broadc
 		/*dst*/ ciaddr, CLIENT_PORT, chaddr,
 		server_config.ifindex);
 #else
-        //Always first UNICAST SECOND BCAST send
         //Workaround for rtl8187su and others buggy wifi cards in SoC
-        result = udhcp_send_raw_packet(dhcp_pkt,
-                /*src*/ server_config.server_nip, SERVER_PORT,
-                /*dst*/ dhcp_pkt->ciaddr, CLIENT_PORT, dhcp_pkt->chaddr,
-                server_config.ifindex);
-        if (result <= 0)
-            bb_perror_msg("UCAST send error try new: %s", strerror(errno));
-
-        result = udhcp_send_raw_packet(dhcp_pkt,
+	if (force_broadcast) {
+	    log1("First broadcasting");
+    	    result = udhcp_send_raw_packet(dhcp_pkt,
                 /*src*/ server_config.server_nip, SERVER_PORT,
                 /*dst*/ INADDR_BROADCAST, CLIENT_PORT, MAC_BCAST_ADDR,
                 server_config.ifindex);
-        if (result <= 0)
-            bb_perror_msg("BCAST send error try new: %s", strerror(errno));
+    	    if (result <= 0)
+        	bb_perror_msg("BCAST send error try new: %s", strerror(errno));
+
+    	    result = udhcp_send_raw_packet(dhcp_pkt,
+                /*src*/ server_config.server_nip, SERVER_PORT,
+                /*dst*/ dhcp_pkt->ciaddr, CLIENT_PORT, dhcp_pkt->chaddr,
+                server_config.ifindex);
+    	    if (result <= 0)
+        	bb_perror_msg("UCAST send error try new: %s", strerror(errno));
+	} else {
+	    log1("First unicasting");
+    	    result = udhcp_send_raw_packet(dhcp_pkt,
+                /*src*/ server_config.server_nip, SERVER_PORT,
+                /*dst*/ dhcp_pkt->ciaddr, CLIENT_PORT, dhcp_pkt->chaddr,
+                server_config.ifindex);
+    	    if (result <= 0)
+        	bb_perror_msg("UCAST send error try new: %s", strerror(errno));
+
+    	    result = udhcp_send_raw_packet(dhcp_pkt,
+                /*src*/ server_config.server_nip, SERVER_PORT,
+                /*dst*/ INADDR_BROADCAST, CLIENT_PORT, MAC_BCAST_ADDR,
+                server_config.ifindex);
+    	    if (result <= 0)
+        	bb_perror_msg("BCAST send error try new: %s", strerror(errno));
+	}
 #endif
 }
 
