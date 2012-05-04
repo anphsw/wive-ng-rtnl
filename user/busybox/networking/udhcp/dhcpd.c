@@ -77,8 +77,11 @@ static void send_packet_to_client(struct dhcp_packet *dhcp_pkt, int force_broadc
 		/*dst*/ ciaddr, CLIENT_PORT, chaddr,
 		server_config.ifindex);
 #else
-        //Workaround for rtl8187su and others buggy wifi cards in SoC
-	if (force_broadcast) {
+        /* Workaround for rtl8187su and others buggy wifi cards in SoC */
+	if (force_broadcast
+	 || (dhcp_pkt->flags & htons(BROADCAST_FLAG))
+	 || dhcp_pkt->ciaddr == 0
+	) {
 	    log1("First broadcasting");
     	    result = udhcp_send_raw_packet(dhcp_pkt,
                 /*src*/ server_config.server_nip, SERVER_PORT,
