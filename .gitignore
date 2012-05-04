@@ -197,6 +197,9 @@ romfs
 /user/zebra/autom4te.cache/traces.0
 /user/zebra/config.h.in~
 /user/zebra/stamp-h1
+/user/zebra/configure
+/user/zebra/Makefile
+/user/zebra/Makefile.in
 /toolchain/tmp/mipsel-linux-uclibc-toolchain/binutils-2.21/*
 /toolchain/tmp/mipsel-linux-uclibc-toolchain/build-binutils/*
 /toolchain/tmp/mipsel-linux-uclibc-toolchain/build-gcc-bootstrap/*
