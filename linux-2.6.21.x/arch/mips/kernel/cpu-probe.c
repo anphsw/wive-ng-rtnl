@@ -324,18 +324,6 @@ static inline void cpu_probe_legacy(struct cpuinfo_mips *c)
 			     MIPS_CPU_LLSC;
 		c->tlbsize = 48;
 		break;
- 	case PRID_IMP_R4650:
-		/*
-		 * This processor doesn't have an MMU, so it's not
-		 * "real easy" to run Linux on it. It is left purely
-		 * for documentation.  Commented out because it shares
-		 * it's c0_prid id number with the TX3900.
-		 */
-		c->cputype = CPU_R4650;
-	 	c->isa_level = MIPS_CPU_ISA_III;
-		c->options = R4K_OPTS | MIPS_CPU_FPU | MIPS_CPU_LLSC;
-	        c->tlbsize = 48;
-		break;
 	case PRID_IMP_TX39:
 		c->isa_level = MIPS_CPU_ISA_I;
 		c->options = MIPS_CPU_TLB | MIPS_CPU_TX39_CACHE;
