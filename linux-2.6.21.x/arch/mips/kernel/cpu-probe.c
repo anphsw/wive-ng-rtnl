@@ -31,7 +31,6 @@
  */
 void (*cpu_wait)(void) = NULL;
 
-#if !defined(CONFIG_RALINK_RT3052) && !defined(CONFIG_RALINK_RT3052_MP2)
 static void r3081_wait(void)
 {
 	unsigned long cfg = read_c0_conf();
@@ -45,7 +44,6 @@ static void r39xx_wait(void)
 		write_c0_conf(read_c0_conf() | TX39_CONF_HALT);
 	local_irq_enable();
 }
-#endif
 
 extern void r4k_wait(void);
 
@@ -56,7 +54,6 @@ extern void r4k_wait(void);
  * interrupt is requested" restriction in the MIPS32/MIPS64 architecture makes
  * using this version a gamble.
  */
-#if !defined(CONFIG_RALINK_RT3052) && !defined(CONFIG_RALINK_RT3052_MP2)
 static void r4k_wait_irqoff(void)
 {
 	local_irq_disable();
@@ -66,19 +63,11 @@ static void r4k_wait_irqoff(void)
 			"	.set	mips0		\n");
 	local_irq_enable();
 }
-#endif
 
 /*
  * The RM7000 variant has to handle erratum 38.  The workaround is to not
  * have any pending stores when the WAIT instruction is executed.
  */
-#if !defined (CONFIG_RALINK_RT2880) && \
-    !defined (CONFIG_RALINK_RT2883) && \
-    !defined (CONFIG_RALINK_RT3883) && \
-    !defined (CONFIG_RALINK_RT3352) && \
-    !defined (CONFIG_RALINK_RT3052) && \
-    !defined (CONFIG_RALINK_RT5350)
-
 static void rm7k_wait_irqoff(void)
 {
 	local_irq_disable();
@@ -95,11 +84,9 @@ static void rm7k_wait_irqoff(void)
 		"	.set	pop					\n");
 	local_irq_enable();
 }
-#endif
 
 /* The Au1xxx wait is available only if using 32khz counter or
  * external timer source, but specifically not CP0 Counter. */
-#if !defined(CONFIG_RALINK_RT3052) && !defined(CONFIG_RALINK_RT3052_MP2)
 int allow_au1k_wait;
 
 static void au1k_wait(void)
@@ -118,7 +105,6 @@ static void au1k_wait(void)
 		"	.set	mips0			\n"
 		: : "r" (au1k_wait));
 }
-#endif
 
 static int __initdata nowait = 0;
 
@@ -139,16 +125,7 @@ void __init check_wait(void)
 		printk("Wait instruction disabled.\n");
 		return;
 	}
-#if defined(CONFIG_RALINK_RT3052) || defined(CONFIG_RALINK_RT3052_MP2)
-        switch (c->cputype) {
-        case CPU_24K:
-                cpu_wait = r4k_wait;
-                printk("set cpu_wait to r4k_wait\n");
-                break;
-        default:
-                break;
-        }
-#else
+
         switch (c->cputype) {
 	case CPU_R3081:
 	case CPU_R3081E:
@@ -171,12 +148,21 @@ void __init check_wait(void)
 	case CPU_4KSC:
 	case CPU_5KC:
 /*	case CPU_20KC:*/
-	case CPU_24K:
 	case CPU_25KF:
-	case CPU_34K:
-	case CPU_74K:
- 	case CPU_PR4450:
+	case CPU_PR4450:
 		cpu_wait = r4k_wait;
+		break;
+
+	case CPU_24K:
+	case CPU_34K:
+		cpu_wait = r4k_wait;
+		if (read_c0_config7() & MIPS_CONF7_WII)
+			cpu_wait = r4k_wait_irqoff;
+		break;
+	case CPU_74K:
+		cpu_wait = r4k_wait;
+		if ((c->processor_id & 0xff) >= PRID_REV_ENCODE_332(2, 1, 0))
+			cpu_wait = r4k_wait_irqoff;
 		break;
 	case CPU_TX49XX:
 		cpu_wait = r4k_wait_irqoff;
@@ -196,7 +182,6 @@ void __init check_wait(void)
 	default:
 		break;
 	}
-#endif
 }
 
 void __init check_bugs32(void)
@@ -339,12 +324,6 @@ static inline void cpu_probe_legacy(struct cpuinfo_mips *c)
 			     MIPS_CPU_LLSC;
 		c->tlbsize = 48;
 		break;
-#if !defined (CONFIG_RALINK_RT2880) && \
-    !defined (CONFIG_RALINK_RT2883) && \
-    !defined (CONFIG_RALINK_RT3883) && \
-    !defined (CONFIG_RALINK_RT3352) && \
-    !defined (CONFIG_RALINK_RT3052) && \
-    !defined (CONFIG_RALINK_RT5350)
  	case PRID_IMP_R4650:
 		/*
 		 * This processor doesn't have an MMU, so it's not
@@ -357,7 +336,6 @@ static inline void cpu_probe_legacy(struct cpuinfo_mips *c)
 		c->options = R4K_OPTS | MIPS_CPU_FPU | MIPS_CPU_LLSC;
 	        c->tlbsize = 48;
 		break;
-#endif
 	case PRID_IMP_TX39:
 		c->isa_level = MIPS_CPU_ISA_I;
 		c->options = MIPS_CPU_TLB | MIPS_CPU_TX39_CACHE;
@@ -845,19 +823,6 @@ __init void cpu_probe(void)
 	c->processor_id = read_c0_prid();
 
         switch (c->processor_id & 0xff0000) {
-/* We only probe MIPs CPU without FPU */
-#if defined (CONFIG_RALINK_RT2880) || \
-    defined (CONFIG_RALINK_RT2883) || \
-    defined (CONFIG_RALINK_RT3883) || \
-    defined (CONFIG_RALINK_RT3352) || \
-    defined (CONFIG_RALINK_RT3052) || \
-    defined (CONFIG_RALINK_RT5350)
-        case PRID_COMP_MIPS:
-                cpu_probe_mips(c);
-                break;
-        default:
-                c->cputype = CPU_UNKNOWN;
-#else
 	case PRID_COMP_LEGACY:
 		cpu_probe_legacy(c);
 		break;
@@ -889,7 +854,6 @@ __init void cpu_probe(void)
 			if (c->fpu_id & MIPS_FPIR_3D)
 				c->ases |= MIPS_ASE_MIPS3D;
 		}
-#endif
 	}
 
 	__cpu_name[cpu] = cpu_to_name(c);
