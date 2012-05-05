@@ -163,17 +163,12 @@ static void set_pageblock_migratetype(struct page *page, int migratetype)
 					PB_migrate, PB_migrate_end);
 }
 
-static inline int allocflags_to_migratetype(gfp_t gfp_flags, int order)
+static inline int allocflags_to_migratetype(gfp_t gfp_flags)
 {
 	WARN_ON((gfp_flags & GFP_MOVABLE_MASK) == GFP_MOVABLE_MASK);
 
 	if (unlikely(page_group_by_mobility_disabled))
 		return MIGRATE_UNMOVABLE;
-
-	/* Cluster high-order atomic allocations together */
-	if (unlikely(order > 0) &&
-			(!(gfp_flags & __GFP_WAIT) || in_interrupt()))
-		return MIGRATE_HIGHATOMIC;
 
 	/* Cluster based on mobility */
 	return (((gfp_flags & __GFP_MOVABLE) != 0) << 1) |
@@ -719,11 +714,10 @@ static struct page *__rmqueue_smallest(struct zone *zone, unsigned int order,
  * the free lists for the desirable migrate type are depleted
  */
 static int fallbacks[MIGRATE_TYPES][MIGRATE_TYPES-1] = {
-	[MIGRATE_UNMOVABLE]   = { MIGRATE_RECLAIMABLE, MIGRATE_MOVABLE,   MIGRATE_HIGHATOMIC, MIGRATE_RESERVE },
-	[MIGRATE_RECLAIMABLE] = { MIGRATE_UNMOVABLE,   MIGRATE_MOVABLE,   MIGRATE_HIGHATOMIC, MIGRATE_RESERVE },
-	[MIGRATE_MOVABLE]     = { MIGRATE_RECLAIMABLE, MIGRATE_UNMOVABLE, MIGRATE_HIGHATOMIC, MIGRATE_RESERVE },
-	[MIGRATE_HIGHATOMIC]  = { MIGRATE_RECLAIMABLE, MIGRATE_UNMOVABLE, MIGRATE_MOVABLE,    MIGRATE_RESERVE },
-	[MIGRATE_RESERVE]     = { MIGRATE_RESERVE,     MIGRATE_RESERVE,   MIGRATE_RESERVE,    MIGRATE_RESERVE }, /* Never used */
+	[MIGRATE_UNMOVABLE]   = { MIGRATE_RECLAIMABLE, MIGRATE_MOVABLE,   MIGRATE_RESERVE },
+	[MIGRATE_RECLAIMABLE] = { MIGRATE_UNMOVABLE,   MIGRATE_MOVABLE,   MIGRATE_RESERVE },
+	[MIGRATE_MOVABLE]     = { MIGRATE_RECLAIMABLE, MIGRATE_UNMOVABLE, MIGRATE_RESERVE },
+	[MIGRATE_RESERVE]     = { MIGRATE_RESERVE,     MIGRATE_RESERVE,   MIGRATE_RESERVE }, /* Never used */
 };
 
 /*
@@ -817,9 +811,7 @@ static struct page *__rmqueue_fallback(struct zone *zone, int order,
 	int current_order;
 	struct page *page;
 	int migratetype, i;
-	int nonatomic_fallback_atomic = 0;
 
-retry:
 	/* Find the largest possible block of pages in the other list */
 	for (current_order = MAX_ORDER-1; current_order >= order;
 						--current_order) {
@@ -828,14 +820,6 @@ retry:
 
 			/* MIGRATE_RESERVE handled later if necessary */
 			if (migratetype == MIGRATE_RESERVE)
-				continue;
-			/*
-			 * Make it hard to fallback to blocks used for
-			 * high-order atomic allocations
-			 */
-			if (migratetype == MIGRATE_HIGHATOMIC &&
-				start_migratetype != MIGRATE_UNMOVABLE &&
-				!nonatomic_fallback_atomic)
 				continue;
 
 			area = &(zone->free_area[current_order]);
@@ -862,8 +846,7 @@ retry:
 								start_migratetype);
 
 				/* Claim the whole block if over half of it is free */
-				if ((pages << current_order) >= (1 << (MAX_ORDER-2)) &&
-						migratetype != MIGRATE_HIGHATOMIC)
+				if ((pages << current_order) >= (1 << (MAX_ORDER-2)))
 					set_pageblock_migratetype(page,
 								start_migratetype);
 
@@ -883,12 +866,6 @@ retry:
 			expand(zone, page, order, current_order, area, migratetype);
 			return page;
 		}
-	}
-
-	/* Allow fallback to high-order atomic blocks if memory is that low */
-	if (!nonatomic_fallback_atomic) {
-		nonatomic_fallback_atomic = 1;
-		goto retry;
 	}
 
 	/* Use MIGRATE_RESERVE rather than fail an allocation */
@@ -1134,7 +1111,7 @@ static struct page *buffered_rmqueue(struct zonelist *zonelist,
 	struct page *page;
 	int cold = !!(gfp_flags & __GFP_COLD);
 	int cpu;
-	int migratetype = allocflags_to_migratetype(gfp_flags, order);
+	int migratetype = allocflags_to_migratetype(gfp_flags);
 
 again:
 	cpu  = get_cpu();
