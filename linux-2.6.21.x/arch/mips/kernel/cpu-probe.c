@@ -64,27 +64,6 @@ static void r4k_wait_irqoff(void)
 	local_irq_enable();
 }
 
-/*
- * The RM7000 variant has to handle erratum 38.  The workaround is to not
- * have any pending stores when the WAIT instruction is executed.
- */
-static void rm7k_wait_irqoff(void)
-{
-	local_irq_disable();
-	if (!need_resched())
-		__asm__(
-		"	.set	push					\n"
-		"	.set	mips3					\n"
-		"	.set	noat					\n"
-		"	mfc0	$1, $12					\n"
-		"	sync						\n"
-		"	mtc0	$1, $12		# stalls until W stage	\n"
-		"	wait						\n"
-		"	mtc0	$1, $12		# stalls until W stage	\n"
-		"	.set	pop					\n");
-	local_irq_enable();
-}
-
 /* The Au1xxx wait is available only if using 32khz counter or
  * external timer source, but specifically not CP0 Counter. */
 int allow_au1k_wait;
