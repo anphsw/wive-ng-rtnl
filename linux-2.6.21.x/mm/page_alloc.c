@@ -146,7 +146,6 @@ static unsigned long __initdata dma_reserve;
   EXPORT_SYMBOL(movable_zone);
 #endif /* CONFIG_ARCH_POPULATES_NODE_MAP */
 
-#ifdef CONFIG_PAGE_GROUP_BY_MOBILITY
 int page_group_by_mobility_disabled __read_mostly;
 
 static inline int get_pageblock_migratetype(struct page *page)
@@ -174,22 +173,6 @@ static inline int allocflags_to_migratetype(gfp_t gfp_flags)
 	return (((gfp_flags & __GFP_MOVABLE) != 0) << 1) |
 		((gfp_flags & __GFP_RECLAIMABLE) != 0);
 }
-
-#else
-static inline int get_pageblock_migratetype(struct page *page)
-{
-	return MIGRATE_UNMOVABLE;
-}
-
-static void set_pageblock_migratetype(struct page *page, int migratetype)
-{
-}
-
-static inline int allocflags_to_migratetype(gfp_t gfp_flags, int order)
-{
-	return MIGRATE_UNMOVABLE;
-}
-#endif /* CONFIG_PAGE_GROUP_BY_MOBILITY */
 
 #ifdef CONFIG_DEBUG_VM
 static int page_outside_zone_boundaries(struct zone *zone, struct page *page)
@@ -708,7 +691,6 @@ static struct page *__rmqueue_smallest(struct zone *zone, unsigned int order,
 }
 
 
-#ifdef CONFIG_PAGE_GROUP_BY_MOBILITY
 /*
  * This array describes the order lists are fallen back to when
  * the free lists for the desirable migrate type are depleted
@@ -739,7 +721,7 @@ int move_freepages(struct zone *zone,
 	 * CONFIG_HOLES_IN_ZONE is set. This bug check is probably redundant
 	 * anyway as we check zone boundaries in move_freepages_block().
 	 * Remove at a later date when no bug reports exist related to
-	 * CONFIG_PAGE_GROUP_BY_MOBILITY
+	 * grouping pages by mobility
 	 */
 	BUG_ON(page_zone(start_page) != page_zone(end_page));
 #endif
@@ -871,13 +853,6 @@ static struct page *__rmqueue_fallback(struct zone *zone, int order,
 	/* Use MIGRATE_RESERVE rather than fail an allocation */
 	return __rmqueue_smallest(zone, order, MIGRATE_RESERVE);
 }
-#else
-static struct page *__rmqueue_fallback(struct zone *zone, int order,
-						int start_migratetype)
-{
-	return NULL;
-}
-#endif /* CONFIG_PAGE_GROUP_BY_MOBILITY */
 
 /*
  * Do the hard work of removing an element from the buddy allocator.
@@ -1127,7 +1102,6 @@ again:
 				goto failed;
 		}
 
-#ifdef CONFIG_PAGE_GROUP_BY_MOBILITY
 		/* Find a page of the appropriate migrate type */
 		list_for_each_entry(page, &pcp->list, lru)
 			if (page_private(page) == migratetype)
@@ -1139,9 +1113,6 @@ again:
 					pcp->batch, &pcp->list, migratetype);
 			page = list_entry(pcp->list.next, struct page, lru);
 		}
-#else
-		page = list_entry(pcp->list.next, struct page, lru);
-#endif /* CONFIG_PAGE_GROUP_BY_MOBILITY */
 
 		list_del(&page->lru);
 		pcp->count--;
@@ -2476,7 +2447,6 @@ static inline unsigned long wait_table_bits(unsigned long size)
 
 #define LONG_ALIGN(x) (((x)+(sizeof(long))-1)&~((sizeof(long))-1))
 
-#ifdef CONFIG_PAGE_GROUP_BY_MOBILITY
 /*
  * Mark a number of MAX_ORDER_NR_PAGES blocks as MIGRATE_RESERVE. The number
  * of blocks reserved is based on zone->pages_min. The memory within the
@@ -2530,11 +2500,7 @@ static void setup_zone_migrate_reserve(struct zone *zone)
 		}
 	}
 }
-#else
-static inline void setup_zone_migrate_reserve(struct zone *zone)
-{
-}
-#endif /* CONFIG_PAGE_GROUP_BY_MOBILITY */
+
 /*
  * Initially all pages are reserved - free ones are freed
  * up by free_all_bootmem() once the early boot process is
