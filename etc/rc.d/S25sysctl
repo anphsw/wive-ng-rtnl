@@ -31,12 +31,12 @@ start() {
     	    CONNTRACK_MAX=4096
 	fi
 	ROUTEMAX=4096
-	MIN_FREE=2048
+	MIN_FREE=3072
     else
         CONNTRACK_MAX=1024
 	HASHSIZE=1024
 	ROUTEMAX=1024
-	MIN_FREE=896
+	MIN_FREE=1024
     fi
 
     # calculate params
@@ -59,8 +59,13 @@ start() {
         echo "2097152" > /proc/sys/net/core/rmem_max
 	# more mem reserved
 	if [ -f /tmp/is_32ram_dev ]; then
-	    MIN_FREE=4096
+	    MIN_FREE=5120
 	fi
+	# always overommit
+	sysctl -w vm.overcommit_memory=1
+    else
+	# fixed overcommit
+	sysctl -w vm.overcommit_memory=2
     fi
 #######################################APPLY PARAMS######################################
     # set domainname
