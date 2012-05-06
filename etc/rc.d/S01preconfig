@@ -37,7 +37,8 @@ start() {
 	mkdir -p "$dir" > /dev/null 2>&1
     done
 
-    if [ -f /tmp/is_32ram_dev ]; then
+    web2ramfs=`nvram_get 2860 web2ramfs`
+    if [ -f /tmp/is_32ram_dev ] && [ "$web2ramfs" = "1" ]; then
 	$LOG "Copy web pages to tmpfs."
         mkdir -p /tmp/web
         cp -rpf /web/* /tmp/web

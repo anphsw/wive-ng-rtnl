@@ -1089,6 +1089,7 @@
 17) Fix DFS support and enable by default.<br>
 18) Fix Channle auto select logic.<br>
 19) ReEnable ripd (zebra) support.<br>
+20) Add web2ramfs variable (default 0 - not copy web pages to ramfs).<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
