@@ -1463,8 +1463,6 @@ static struct kmem_cache_node * __init early_kmem_cache_node_alloc(gfp_t gfpflag
 	BUG_ON(kmalloc_caches->size < sizeof(struct kmem_cache_node));
 
 	page = new_slab(kmalloc_caches, gfpflags | GFP_THISNODE, node);
-	/* new_slab() disables interupts */
-	local_irq_enable();
 
 	BUG_ON(!page);
 	n = page->freelist;
@@ -1476,6 +1474,12 @@ static struct kmem_cache_node * __init early_kmem_cache_node_alloc(gfp_t gfpflag
 	init_kmem_cache_node(n);
 	atomic_long_inc(&n->nr_slabs);
 	add_partial(kmalloc_caches, page);
+
+	/*
+	 * new_slab() disables interupts. If we do not reenable interrupts here
+	 * then bootup would continue with interrupts disabled.
+	 */
+	local_irq_enable();
 	return n;
 }
 
