@@ -247,6 +247,7 @@ extern void scheduler_tick(void);
 extern void softlockup_tick(void);
 extern void spawn_softlockup_task(void);
 extern void touch_softlockup_watchdog(void);
+extern int softlockup_thresh;
 #else
 static inline void softlockup_tick(void)
 {
