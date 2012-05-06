@@ -1136,6 +1136,23 @@ function switch_isolated_ssid()
 		document.wireless_basic.isolated_ssid[i].checked = document.wireless_basic.apisolated[1].checked;
 }
 
+function CheckValue(form)
+{
+	var auto_select = false;
+	var wmode = form.wirelessmode.value;
+	
+	if ((wmode == "0") || (wmode == "4") || (wmode == "9") || (wmode == "6") || (wmode=="7"))
+		auto_select = form.sz11gChannel.value == '0';
+	else if (wmode == "1")
+		auto_select = form.sz11bChannel.value == '0';
+	else if ((wmode == "2") || (wmode == "8") || (wmode == "11"))
+		auto_select = form.sz11aChannel.value == '0';
+
+	form.AutoChannelSelect.value = (auto_select) ? '1' : '0';
+	
+	return true;
+}
+
 </script>
 </head>
 
@@ -1146,7 +1163,7 @@ function switch_isolated_ssid()
 <p id="basicIntroduction"> Here you can configure the most basic settings of Wireless communication, such as Network Name (SSID) and Channel. These settings are sufficient to have a working Access Point. </p>
 <hr>
 
-<form method="POST" name="wireless_basic" action="/goform/wirelessBasic" onSubmit="return CheckValue(this);">
+<form method="POST" name="wireless_basic" action="/goform/wirelessBasic" onsubmit="return CheckValue(this);">
 <table class="form">
 <tr>
 	<td class="title" colspan="2" id="basicWirelessNet">Wireless Network</td>
@@ -1439,6 +1456,7 @@ function switch_isolated_ssid()
 <table class="buttons">
 <tr align="center">
 	<td>
+		<input type="hidden" name="AutoChannelSelect" value="1">
 		<input type="submit" class="normal" value="Apply" id="basicApply">&nbsp;&nbsp;
 		<input type="button" class="normal" value="Cancel" id="basicCancel" onClick="window.location.reload();">
 		<input type="hidden" name="submit-url" value="/wireless/basic.asp">

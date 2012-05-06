@@ -747,7 +747,7 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 	char_t	*wirelessmode;
 	char_t  *bssid_num, *hssid, *isolated_ssid, *mbssidapisolated;
 	char_t	*sz11aChannel, *sz11bChannel, *sz11gChannel, *abg_rate;
-	char_t	*n_mode, *n_bandwidth, *n_gi, *n_mcs, *n_rdg, *n_extcha, *n_amsdu;
+	char_t	*n_mode, *n_bandwidth, *n_gi, *n_mcs, *n_rdg, *n_extcha, *n_amsdu, *auto_select;
 	char_t	*n_autoba, *n_badecline;
 	char_t	*tx_stream, *rx_stream;
 	char	hidden_ssid[16] = "", noforwarding[16] = "";
@@ -779,6 +779,7 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 	n_badecline = websGetVar(wp, T("n_badecline"), T("0"));
 	tx_stream = websGetVar(wp, T("tx_stream"), T("0"));
 	rx_stream = websGetVar(wp, T("rx_stream"), T("0"));
+	auto_select = websGetVar(wp, T("AutoChannelSelect"), T("0"));
 	old_bssid_num = atoi(nvram_get(RT2860_NVRAM, "BssidNum"));
 	new_bssid_num = atoi(bssid_num);
 
@@ -844,20 +845,15 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "NoForwarding", noforwarding);
 	nvram_bufset(RT2860_NVRAM, "NoForwardingBTNBSSID", mbssidapisolated);
 
-	if (!strncmp(sz11aChannel, "0", 2) && !strncmp(sz11bChannel, "0", 2) && !strncmp(sz11gChannel, "0", 2))
-	{
-		nvram_bufset(RT2860_NVRAM, "AutoChannelSelect", "1");
-	}
-	else
-	{
-		nvram_bufset(RT2860_NVRAM, "AutoChannelSelect", "0");
-		if (CHK_IF_SET(sz11aChannel))
-			nvram_bufset(RT2860_NVRAM, "Channel", sz11aChannel);
-		if (CHK_IF_SET(sz11bChannel))
-			nvram_bufset(RT2860_NVRAM, "Channel", sz11bChannel);
-		if (CHK_IF_SET(sz11gChannel))
-			nvram_bufset(RT2860_NVRAM, "Channel", sz11gChannel);
-	}
+	// Channel & automatic channel select
+	if (CHK_IF_SET(auto_select))
+		nvram_bufset(RT2860_NVRAM, "AutoChannelSelect", auto_select);
+	if (CHK_IF_SET(sz11aChannel))
+		nvram_bufset(RT2860_NVRAM, "Channel", sz11aChannel);
+	if (CHK_IF_SET(sz11bChannel))
+		nvram_bufset(RT2860_NVRAM, "Channel", sz11bChannel);
+	if (CHK_IF_SET(sz11gChannel))
+		nvram_bufset(RT2860_NVRAM, "Channel", sz11gChannel);
 
 	//Rate for a, b, g
 	if (strncmp(abg_rate, "", 1))
