@@ -30,7 +30,7 @@ start() {
 	else
     	    CONNTRACK_MAX=4096
 	fi
-	ROUTEMAX=4096
+	ROUTEMAX=2048
 	MIN_FREE=3072
     else
         CONNTRACK_MAX=1024
@@ -54,13 +54,6 @@ start() {
 	ulimit -v unlimited
 	# max memory size
 	ulimit -m unlimited
-	# increase memlimits
-        echo "524288" > /proc/sys/net/core/wmem_max
-        echo "2097152" > /proc/sys/net/core/rmem_max
-	# more mem reserved
-	if [ -f /tmp/is_32ram_dev ]; then
-	    MIN_FREE=5120
-	fi
 	# always overommit
 	sysctl -w vm.overcommit_memory=1
     else
