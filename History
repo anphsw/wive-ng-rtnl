@@ -1090,6 +1090,12 @@
 18) Fix Channle auto select logic.<br>
 19) ReEnable ripd (zebra) support.<br>
 20) Add web2ramfs variable (default 0 - not copy web pages to ramfs).<br>
+21) Fix memory allocation in small system issue.<br>
+22) Fix slub allocator work.<br>
+23) Fix ApCli webui.<br>
+24) Rename operation modes for more human readable.<br>
+25) TCP implementation more RFC compatable.<br>
+26) Kernel improve ipv6 support.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
