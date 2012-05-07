@@ -1686,8 +1686,8 @@ static struct list_head *alloc_hashtable(int size, int *vmalloced)
 
 int nf_conntrack_set_hashsize(const char *val, struct kernel_param *kp)
 {
-	int i, bucket, hashsize, vmalloced;
-	int old_vmalloced, old_size;
+	int i, bucket, vmalloced, old_vmalloced;
+	unsigned int hashsize, old_size;
 	int rnd;
 	struct list_head *hash, *old_hash;
 	struct nf_conntrack_tuple_hash *h;
@@ -1696,7 +1696,7 @@ int nf_conntrack_set_hashsize(const char *val, struct kernel_param *kp)
 	if (!nf_conntrack_htable_size)
 		return param_set_uint(val, kp);
 
-	hashsize = simple_strtol(val, NULL, 0);
+	hashsize = simple_strtoul(val, NULL, 0);
 	if (!hashsize)
 		return -EINVAL;
 
