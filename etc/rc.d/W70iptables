@@ -133,17 +133,17 @@ start() {
 	    $LOG "upnp"
 	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 8666 -j ACCEPT
 	    # not safe fix me later
-	    iptables -A servicelimit -i $lan_if -p udp --dport 1024:65535 -j ACCEPT
+	    iptables -A servicelimit -i $lan_if -p udp --dport "$LOCAL_PRT" -j ACCEPT
 	fi
 	if [ "$xupnpd" = "1" ]; then
 	    $LOG "xupnpd"
 	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 4044 -j ACCEPT
 	    # not safe fix me later
-	    iptables -A servicelimit -i $lan_if -p udp --dport 1024:65535 -j ACCEPT
+	    iptables -A servicelimit -i $lan_if -p udp --dport "$LOCAL_PRT" -j ACCEPT
 	    if [ "$Lan2Enabled" = "1" ]; then
     		iptables -A servicelimit -i $lan2_if $STATE_NEW -p tcp --dport 4044 -j ACCEPT
 		# not safe fix me later
-		iptables -A servicelimit -i $lan2_if -p udp --dport 1024:65535 -j ACCEPT
+		iptables -A servicelimit -i $lan2_if -p udp --dport "$LOCAL_PRT" -j ACCEPT
 	    fi
 	    iptables -A servicelimit -p udp --dport 1900 -j ACCEPT
 	else
@@ -174,7 +174,7 @@ start() {
 	    iptables -A servicelimit -i $lan_if -p udp --dport 137:138 -j ACCEPT
 	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp -m multiport --dport 139,445 -j ACCEPT
 	    # not safe fix me later
-	    iptables -A servicelimit -i $lan_if -p udp --dport 1024:65535 -j ACCEPT
+	    iptables -A servicelimit -i $lan_if -p udp --dport "$LOCAL_PRT" -j ACCEPT
 	else
 	    iptables -A servicelimit -i $lan_if -p udp --dport 137:138 -j DROP
 	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp -m multiport --dport 139,445 -j DROP
@@ -462,6 +462,7 @@ get_param() {
 	modprobe ipt_TTL
     fi
     # macros
+    LOCAL_PRT=`sysctl -n net.ipv4.ip_local_port_range | awk {' print $1":"$2 '}`
     STATE_NEW="-m state --state NEW"
     STATE_EST="-m state --state ESTABLISHED,RELATED"
     CONNLIMIT="-m connlimit --connlimit-above"

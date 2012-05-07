@@ -9,39 +9,21 @@ start() {
     $LOG "Tune kernel with sysctl."
     sysctl -w -p -n -e /etc/sysctl.conf > /dev/null 2>&1
 
-    MINPORT=3072
+    # set reserved memory barrier
     if [ -f /tmp/is_32ram_dev ]; then
-	# conntrack table size set coherent to foetable
-	if [ "$CONFIG_RA_HW_NAT_TBL_1K" != "" ]; then
-    	    CONNTRACK_MAX=1024
-	    HASHSIZE=1024
-	elif [ "$CONFIG_RA_HW_NAT_TBL_2K" != "" ]; then
-    	    CONNTRACK_MAX=2048
-	    HASHSIZE=2048
-	elif [ "$CONFIG_RA_HW_NAT_TBL_4K" != "" ]; then
-    	    CONNTRACK_MAX=4096
-	    HASHSIZE=2048
-	elif [ "$CONFIG_RA_HW_NAT_TBL_8K" != "" ]; then
-    	    CONNTRACK_MAX=8192
-	    HASHSIZE=4096
-	elif [ "$CONFIG_RA_HW_NAT_TBL_16K" != "" ]; then
-    	    CONNTRACK_MAX=16384
-	    HASHSIZE=4096
-	else
-    	    CONNTRACK_MAX=4096
-	fi
-	ROUTEMAX=2048
 	MIN_FREE=3072
     else
-        CONNTRACK_MAX=1024
-	HASHSIZE=1024
-	ROUTEMAX=1024
 	MIN_FREE=1024
     fi
+    sysctl -w vm.min_free_kbytes="$MIN_FREE"
 
-    # calculate params
-    let "MAXPORT=$MINPORT+$HASHSIZE*2"
-    let "CONNGEN=$CONNTRACK_MAX-384"
+    # set domainname
+    if [ "$dhcpDomain" != "" ]; then
+	krn_domain="$dhcpDomain"
+    else
+	krn_domain="Wive-NG-RTNL"
+    fi
+    sysctl -w kernel.domainname="$krn_domain"
 
 ###################### SECTION FOR SAMBA AND TRANSMISION KERNEL TUNE ###################
     eval `nvram_buf_get 2860 SmbEnabled TransmissionEnabled xupnpd dhcpDomain`
@@ -57,36 +39,11 @@ start() {
 	# always overommit
 	sysctl -w vm.overcommit_memory=1
     else
-	# fixed overcommit
-	sysctl -w vm.overcommit_memory=2
-    fi
-#######################################APPLY PARAMS######################################
-    # set domainname
-    if [ "$dhcpDomain" != "" ]; then
-	krn_domain="$dhcpDomain"
-    else
-	krn_domain="Wive-NG-RTNL"
-    fi
-    sysctl -w kernel.domainname="$krn_domain"
-
-    # set minimal free thres
-    sysctl -w vm.min_free_kbytes="$MIN_FREE"
-
-    # set conntrack params
-    if [ -f /sys/module/nf_conntrack/parameters/hashsize ]; then
-        echo $HASHSIZE > /sys/module/nf_conntrack/parameters/hashsize
+	# heruistic overcommit
+	sysctl -w vm.overcommit_memory=0
     fi
 
-    sysctl -w net.nf_conntrack_max=$CONNTRACK_MAX
-    sysctl -w net.nf_conntrack_max_general=$CONNGEN
-
-    sysctl -w net.ipv4.route.max_size=$ROUTEMAX
-    sysctl -w net.ipv4.ip_local_port_range="$MINPORT $MAXPORT"
-
-    $LOG "##conntrack table max:$CONNTRACK_MAX##hashsize:$HASHSIZE##"
-    $LOG "##route table max:$ROUTEMAX##portrange:$MINPORT $MAXPORT##"
-
-    # set panic mode
+#################################### SET PARANOID PARAMS###################################
     echo 1    > /proc/sys/kernel/panic
     echo 1    > /proc/sys/kernel/panic_on_oops
     echo 1    > /proc/sys/vm/panic_on_oom
