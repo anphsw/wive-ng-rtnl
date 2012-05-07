@@ -1100,6 +1100,7 @@
 28) Remove some init.d sysctl tune logic (use kernel mode preselect params).<br>
 29) HW_NAT Foe table decrease to 4K (not more need for home and more stable).<br>
 30) Fix conntrack hash table/route hashtable configure in kernel.<br>
+31) Fix sysfs module registration regression.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
