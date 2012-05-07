@@ -71,6 +71,7 @@ static inline const char * kobject_name(const struct kobject * kobj)
 }
 
 extern void kobject_init(struct kobject *);
+extern void kobject_init_ng(struct kobject *kobj, struct kobj_type *ktype);
 extern void kobject_cleanup(struct kobject *);
 
 extern int __must_check kobject_add(struct kobject *);
