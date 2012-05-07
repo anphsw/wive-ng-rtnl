@@ -77,6 +77,9 @@ extern int __must_check kobject_add(struct kobject *);
 extern int __must_check kobject_shadow_add(struct kobject *, struct dentry *);
 extern void kobject_del(struct kobject *);
 
+extern struct kobject * __must_check kobject_create_and_add(const char *name,
+						struct kobject *parent);
+
 extern int __must_check kobject_rename(struct kobject *, const char *new_name);
 extern int __must_check kobject_shadow_rename(struct kobject *kobj,
 						struct dentry *new_parent,
