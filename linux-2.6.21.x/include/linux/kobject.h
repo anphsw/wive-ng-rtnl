@@ -70,11 +70,13 @@ static inline const char * kobject_name(const struct kobject * kobj)
 	return kobj->k_name;
 }
 
+extern void kobject_cleanup(struct kobject *);
 extern void kobject_init(struct kobject *);
 extern void kobject_init_ng(struct kobject *kobj, struct kobj_type *ktype);
-extern void kobject_cleanup(struct kobject *);
-
 extern int __must_check kobject_add(struct kobject *);
+extern int __must_check kobject_add_ng(struct kobject *kobj,
+				       struct kobject *parent,
+				       const char *fmt, ...);
 extern int __must_check kobject_shadow_add(struct kobject *, struct dentry *);
 extern void kobject_del(struct kobject *);
 
