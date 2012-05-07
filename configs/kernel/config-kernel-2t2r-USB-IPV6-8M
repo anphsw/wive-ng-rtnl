@@ -1,6 +1,6 @@
 #
 # Automatically generated make config: don't edit
-# Linux kernel version: 2.6.21.13
+# Linux kernel version: 2.6.21.14
 #
 CONFIG_MIPS=y
 
@@ -1460,9 +1460,9 @@ CONFIG_RA_HW_NAT_HALF_LMT=50
 CONFIG_RA_HW_NAT_FULL_LMT=25
 # CONFIG_RA_HW_NAT_TBL_1K is not set
 # CONFIG_RA_HW_NAT_TBL_2K is not set
-# CONFIG_RA_HW_NAT_TBL_4K is not set
+CONFIG_RA_HW_NAT_TBL_4K=y
 # CONFIG_RA_HW_NAT_TBL_8K is not set
-CONFIG_RA_HW_NAT_TBL_16K=y
+# CONFIG_RA_HW_NAT_TBL_16K is not set
 # CONFIG_RA_HW_NAT_HASH0 is not set
 CONFIG_RA_HW_NAT_HASH1=y
 CONFIG_RA_HW_NAT_PRE_ACL_SIZE=383
