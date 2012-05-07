@@ -6,8 +6,6 @@
  * Copyright (c) 2004 Silicon Graphics, Inc.
  */
 
-#undef DEBUG
-
 #include <linux/errno.h>
 #include <linux/fs.h>
 #include <linux/kernel.h>
