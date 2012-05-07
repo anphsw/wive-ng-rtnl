@@ -27,6 +27,8 @@ extern unsigned int nf_conntrack_in(int pf,
 
 extern int nf_conntrack_init(void);
 extern void nf_conntrack_cleanup(void);
+extern int nf_conntrack_register_cache(u_int32_t features, const char *name, size_t size);
+extern void nf_conntrack_unregister_cache(u_int32_t features);
 
 extern int
 nf_ct_get_tuple(const struct sk_buff *skb,

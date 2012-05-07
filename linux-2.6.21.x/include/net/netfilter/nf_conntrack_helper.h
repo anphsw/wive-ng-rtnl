@@ -51,7 +51,5 @@ __nf_conntrack_helper_find_byname(const char *name);
 extern void nf_ct_helper_put(struct nf_conntrack_helper *helper);
 extern int nf_conntrack_helper_register(struct nf_conntrack_helper *);
 extern void nf_conntrack_helper_unregister(struct nf_conntrack_helper *);
-extern int nf_conntrack_register_cache(u_int32_t features, const char *name, size_t size);
-extern void nf_conntrack_unregister_cache(u_int32_t features);
 
 #endif /*_NF_CONNTRACK_HELPER_H*/
