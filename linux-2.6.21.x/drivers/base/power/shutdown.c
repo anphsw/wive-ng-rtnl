@@ -34,7 +34,6 @@ void device_shutdown(void)
 {
 	struct device * dev, *devn;
 
-	down_write(&devices_subsys.rwsem);
 	list_for_each_entry_safe_reverse(dev, devn, &devices_subsys.list,
 				kobj.entry) {
 		if (dev->bus && dev->bus->shutdown) {
@@ -45,7 +44,6 @@ void device_shutdown(void)
 			dev->driver->shutdown(dev);
 		}
 	}
-	up_write(&devices_subsys.rwsem);
 
 	sysdev_shutdown();
 }
