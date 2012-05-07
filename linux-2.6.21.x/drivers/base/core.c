@@ -485,7 +485,9 @@ static struct kobject *virtual_device_parent(struct device *dev)
 	static struct kobject *virtual_dir = NULL;
 
 	if (!virtual_dir)
-		virtual_dir = kobject_add_dir(&devices_subsys.kset.kobj, "virtual");
+		virtual_dir = kobject_create_and_add("virtual",
+						     &devices_subsys.kset.kobj);
+
 
 	return virtual_dir;
 }
