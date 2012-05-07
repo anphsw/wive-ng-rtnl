@@ -200,6 +200,11 @@ romfs
 /user/zebra/configure
 /user/zebra/Makefile
 /user/zebra/Makefile.in
+/user/zebra/bgpd/Makefile
+/user/zebra/ospf6d/Makefile
+/user/zebra/ospfd/Makefile
+/user/zebra/ripngd/Makefile
+/user/zebra/vtysh/Makefile
 /toolchain/tmp/mipsel-linux-uclibc-toolchain/binutils-2.21/*
 /toolchain/tmp/mipsel-linux-uclibc-toolchain/build-binutils/*
 /toolchain/tmp/mipsel-linux-uclibc-toolchain/build-gcc-bootstrap/*
