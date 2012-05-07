@@ -2,6 +2,8 @@
  * dir.c - Operations for sysfs directories.
  */
 
+#undef DEBUG
+
 #include <linux/fs.h>
 #include <linux/mount.h>
 #include <linux/module.h>
