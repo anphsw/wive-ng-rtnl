@@ -237,13 +237,7 @@ static u_int32_t __hash_conntrack(const struct nf_conntrack_tuple *tuple,
 #ifdef CONFIG_NAT_CONE
 	}
 #endif
-
-#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-	/* SpeedMod: Change modulo to AND */
-	return jhash_2words(a, b, rnd) & (size-1);
-#else
-	return jhash_2words(a, b, rnd) % size;
-#endif
+	return ((u64)jhash_2words(a, b, rnd) * size) >> 32;
 }
 
 static inline u_int32_t hash_conntrack(const struct nf_conntrack_tuple *tuple)
