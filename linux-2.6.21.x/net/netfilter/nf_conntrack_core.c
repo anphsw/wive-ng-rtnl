@@ -1501,7 +1501,7 @@ EXPORT_SYMBOL_GPL(nf_ct_port_nfattr_to_tuple);
 #endif
 
 /* Used by ipt_REJECT and ip6t_REJECT. */
-void __nf_conntrack_attach(struct sk_buff *nskb, struct sk_buff *skb)
+static void nf_conntrack_attach(struct sk_buff *nskb, struct sk_buff *skb)
 {
 	struct nf_conn *ct;
 	enum ip_conntrack_info ctinfo;
@@ -1518,7 +1518,6 @@ void __nf_conntrack_attach(struct sk_buff *nskb, struct sk_buff *skb)
 	nskb->nfctinfo = ctinfo;
 	nf_conntrack_get(nskb->nfct);
 }
-EXPORT_SYMBOL_GPL(__nf_conntrack_attach);
 
 static inline int
 do_iter(const struct nf_conntrack_tuple_hash *i,
@@ -1823,7 +1822,7 @@ int __init nf_conntrack_init(void)
 		nf_ct_l3protos[i] = &nf_conntrack_l3proto_generic;
 
 	/* For use by REJECT target */
-	rcu_assign_pointer(ip_ct_attach, __nf_conntrack_attach);
+	rcu_assign_pointer(ip_ct_attach, nf_conntrack_attach);
 	rcu_assign_pointer(nf_ct_destroy, destroy_conntrack);
 
 	/* Howto get NAT offsets */
