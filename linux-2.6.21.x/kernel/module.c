@@ -46,6 +46,8 @@
 #include <asm/cacheflush.h>
 #include <linux/license.h>
 
+extern int module_sysfs_initialized;
+
 #if 0
 #define DEBUGP printk
 #else
@@ -1253,8 +1255,8 @@ int mod_sysfs_init(struct module *mod)
 {
 	int err;
 
-	if (!module_subsys.kset.subsys) {
-		printk(KERN_ERR "%s: module_subsys not initialized\n",
+	if (!module_sysfs_initialized) {
+		printk(KERN_ERR "%s: module sysfs not initialized\n",
 		       mod->name);
 		err = -EINVAL;
 		goto out;
@@ -2541,7 +2543,7 @@ void module_add_driver(struct module *mod, struct device_driver *drv)
 		struct kobject *mkobj;
 
 		/* Lookup built-in module entry in /sys/modules */
-		mkobj = kset_find_obj(&module_subsys.kset, drv->mod_name);
+		mkobj = kset_find_obj(&module_subsys, drv->mod_name);
 		if (mkobj) {
 			mk = container_of(mkobj, struct module_kobject, kobj);
 			/* remember our module structure */

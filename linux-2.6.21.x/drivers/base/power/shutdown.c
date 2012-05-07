@@ -16,8 +16,6 @@
 
 #define to_dev(node) container_of(node, struct device, kobj.entry)
 
-extern struct subsystem devices_subsys;
-
 
 /**
  * We handle system devices differently - we suspend and shut them
@@ -37,7 +35,7 @@ void device_shutdown(void)
 	struct device * dev, *devn;
 
 	down_write(&devices_subsys.rwsem);
-	list_for_each_entry_safe_reverse(dev, devn, &devices_subsys.kset.list,
+	list_for_each_entry_safe_reverse(dev, devn, &devices_subsys.list,
 				kobj.entry) {
 		if (dev->bus && dev->bus->shutdown) {
 			dev_dbg(dev, "shutdown\n");
