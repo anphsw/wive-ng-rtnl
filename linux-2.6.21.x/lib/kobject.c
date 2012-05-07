@@ -242,64 +242,53 @@ int kobject_register(struct kobject * kobj)
 	return error;
 }
 
-
 /**
- *	kobject_set_name - Set the name of an object
- *	@kobj:	object.
- *	@fmt:	format string used to build the name
- *
- *	If strlen(name) >= KOBJ_NAME_LEN, then use a dynamically allocated
- *	string that @kobj->k_name points to. Otherwise, use the static 
- *	@kobj->name array.
+ * kobject_set_name_vargs - Set the name of an kobject
+ * @kobj: struct kobject to set the name of
+ * @fmt: format string used to build the name
+ * @vargs: vargs to format the string.
  */
-int kobject_set_name(struct kobject * kobj, const char * fmt, ...)
+static int kobject_set_name_vargs(struct kobject *kobj, const char *fmt,
+				  va_list vargs)
 {
-	int error = 0;
-	int limit = KOBJ_NAME_LEN;
-	int need;
-	va_list args;
-	char * name;
+	va_list aq;
+	char *name;
 
-	/* 
-	 * First, try the static array 
-	 */
-	va_start(args,fmt);
-	need = vsnprintf(kobj->name,limit,fmt,args);
-	va_end(args);
-	if (need < limit) 
-		name = kobj->name;
-	else {
-		/* 
-		 * Need more space? Allocate it and try again 
-		 */
-		limit = need + 1;
-		name = kmalloc(limit,GFP_KERNEL);
-		if (!name) {
-			error = -ENOMEM;
-			goto Done;
-		}
-		va_start(args,fmt);
-		need = vsnprintf(name,limit,fmt,args);
-		va_end(args);
+	va_copy(aq, vargs);
+	name = kvasprintf(GFP_KERNEL, fmt, vargs);
+	va_end(aq);
 
-		/* Still? Give up. */
-		if (need >= limit) {
-			kfree(name);
-			error = -EFAULT;
-			goto Done;
-		}
-	}
+	if (!name)
+		return -ENOMEM;
 
 	/* Free the old name, if necessary. */
-	if (kobj->k_name && kobj->k_name != kobj->name)
-		kfree(kobj->k_name);
+	kfree(kobj->k_name);
 
 	/* Now, set the new name */
 	kobj->k_name = name;
- Done:
-	return error;
+
+	return 0;
 }
 
+/**
+ * kobject_set_name - Set the name of a kobject
+ * @kobj: struct kobject to set the name of
+ * @fmt: format string used to build the name
+ *
+ * This sets the name of the kobject.  If you have already added the
+ * kobject to the system, you must call kobject_rename() in order to
+ * change the name of the kobject.
+ */
+int kobject_set_name(struct kobject *kobj, const char *fmt, ...)
+{
+	va_list args;
+	int retval;
+
+ 	va_start(args, fmt);
+	retval = kobject_set_name_vargs(kobj, fmt, args);
+	va_end(args);
+	return retval;
+}
 EXPORT_SYMBOL(kobject_set_name);
 
 
