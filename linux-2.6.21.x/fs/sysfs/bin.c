@@ -29,7 +29,7 @@ fill_read(struct dentry *dentry, char *buffer, loff_t off, size_t count)
 	if (!attr->read)
 		return -EIO;
 
-	return attr->read(kobj, buffer, off, count);
+	return attr->read(kobj, attr, buffer, off, count);
 }
 
 static ssize_t
