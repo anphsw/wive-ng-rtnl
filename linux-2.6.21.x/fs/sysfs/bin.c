@@ -71,7 +71,7 @@ flush_write(struct dentry *dentry, char *buffer, loff_t offset, size_t count)
 	if (!attr->write)
 		return -EIO;
 
-	return attr->write(kobj, buffer, offset, count);
+	return attr->write(kobj, attr, buffer, offset, count);
 }
 
 static ssize_t write(struct file *file, const char __user *userbuf,
