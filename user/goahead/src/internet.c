@@ -318,7 +318,6 @@ int getIfIsUp(char *ifname)
  * arguments: ifname - interface name
  *            if_net - a 16-byte buffer to store subnet mask
  * description: fetch subnet mask associated to given interface name
- *              0 = bridge, 1 = gateway, 2 = wirelss isp
  */
 int getIfNetmask(char *ifname, char *if_net)
 {
@@ -339,26 +338,31 @@ int getIfNetmask(char *ifname, char *if_net)
 	close(skfd);
 	return 0;
 }
- 
+
 /*
- * description: return WAN interface name
- *              0 = bridge, 1 = gateway, 2 = wirelss isp
+ * description: return WAN interface name depend by opmode
  */
 char* getWanIfName(void)
 {
 	char *mode = nvram_get(RT2860_NVRAM, "OperationMode");
-	static char *if_name = "br0";
+	char *apc_cli_mode = nvram_get(RT2860_NVRAM, "ApCliBridgeOnly");
+	static char *if_name = WAN_DEF;
 
-	if (NULL == mode)
-		return if_name;
-	if (!strncmp(mode, "0", 2)) /* bridge mode */
+	if (mode == NULL)
+		return WAN_DEF;
+
+	if (!strncmp(mode, "0", 2))					/* bridge mode */
 		if_name = "br0";
-	else if (!strncmp(mode, "1", 2) || !strncmp(mode, "4", 2)) /* gw and chillispot mode */
+	else if (!strncmp(mode, "1", 2) || !strncmp(mode, "4", 2))	/* gw and chillispot mode */
 		if_name = WAN_DEF;
-	else if (!strncmp(mode, "2", 2)) /* ethernet converter mode */
+	else if (!strncmp(mode, "2", 2))				/* ethernet converter mode */
 		if_name = "ra0";
-	else if (!strncmp(mode, "3", 2)) /* apcli mode */
-		if_name = "apcli0";
+	else if (!strncmp(mode, "3", 2))				/* apcli mode */
+		if (!strncmp(apc_cli_mode, "1", 2))
+		    if_name = "br0";					/* Client-AP-Bridge */
+		else
+		    if_name = "apcli0";					/* Client-AP-Gateway */
+
 	return if_name;
 }
 
@@ -407,30 +411,13 @@ char* getLanIfName(void)
 
 	if (NULL == mode)
 		return if_name;
-	if (!strncmp(mode, "0", 2))
-		if_name = "br0";
-	else if (!strncmp(mode, "1", 2)) {
-#if defined(CONFIG_RAETH_ROUTER) || defined(CONFIG_MAC_TO_MAC_MODE) || defined(CONFIG_RT_3052_ESW)
-		if_name = "br0";
-#elif defined  CONFIG_ICPLUS_PHY && CONFIG_RT2860V2_AP_MBSS
-		char *num_s = nvram_get(RT2860_NVRAM, "BssidNum");
-		if(atoi(num_s) > 1)	// multiple ssid
-			if_name = "br0";
-		else
-			if_name = "ra0";
-#else
-		if_name = "ra0";
-#endif
-	}
-	else if (!strncmp(mode, "2", 2)) {
-		if_name = "eth2";
-	}
-	else if (!strncmp(mode, "3", 2)) {
-		if_name = "br0";
-	}
-	else if (!strncmp(mode, "4", 2)) {
-		if_name = "br0";
-	}
+
+	/* in ethernet converter mode lan_if = eth2 */
+	if (!strncmp(mode, "2", 2))
+	    if_name = "eth2";
+	else
+	    if_name = "br0";
+
 	return if_name;
 }
 

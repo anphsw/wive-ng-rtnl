@@ -40,26 +40,29 @@ DEPEND_FILES	= asp.o balloc.o base64.o cgi.o default.o  \
 				  internet.o services.o utils.o wireless.o \
 				  firewall.o management.o helpers.o procps.o $(NAME).o
 
-ifeq ("$(CONFIG_USER_WSC)", "y")
-DEPEND_FILES += wps.o
-endif
-ifeq ("$(CONFIG_USER_STORAGE)", "y")
-DEPEND_FILES += storage.o
-endif
-ifneq ("$(CONFIG_RT2860V2_STA)", "")
-DEPEND_FILES += station.o
-endif
+# gahead flags
 ifeq ("$(CONFIG_USER_GOAHEAD_IPV6)", "y")
 CFLAGS += -DWF_USE_IPV6
 endif
 ifeq ("$(CONFIG_USER_GOAHEAD_HOSTNAME)", "y")
 CFLAGS += -DGA_HOSTNAME_SUPPORT
 endif
-ifneq ("$(CONFIG_USB)", "")
-DEPEND_FILES += usb.o
+
+# external apps flags
+ifneq ("$(CONFIG_RT2860V2_STA)", "")
+DEPEND_FILES += station.o
+endif
+ifeq ("$(CONFIG_USER_WSC)", "y")
+DEPEND_FILES += wps.o
 endif
 ifeq ("$(CONFIG_RALINKAPP_SWQOS)", "y")
 DEPEND_FILES += qos.o
+endif
+ifneq ("$(CONFIG_USB)", "")
+DEPEND_FILES += usb.o
+ifeq ("$(CONFIG_USER_STORAGE)", "y")
+DEPEND_FILES += storage.o
+endif
 endif
 
 CFLAGS	+= -DWEBS -DUEMF -DOS="LINUX" -DLINUX $(UMSW) $(DASW) $(SSLSW) $(IFMODSW)

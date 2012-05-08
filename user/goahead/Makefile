@@ -24,6 +24,10 @@ endif
 ifeq ("$(CONFIG_USB)", "")
 	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/usb
 else
+ifeq ("$(CONFIG_USER_STORAGE)", "")
+	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/usb/STORAGE*
+	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/storage/
+endif
 ifeq ("$(CONFIG_USER_USHARE)", "")
 	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/usb/USHARE*
 endif
@@ -33,10 +37,6 @@ endif
 ifeq ("$(CONFIG_USER_P910ND)", "")
 	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/usb/P910ND*
 endif
-endif
-ifeq ("$(CONFIG_USER_STORAGE)", "")
-	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/usb/STORAGE*
-	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/storage/
 endif
 ifneq ("$(CONFIG_USER_GOAHEAD_LANG_ZHTW)", "y")
 	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/lang/zhtw
