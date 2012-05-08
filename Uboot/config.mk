@@ -399,6 +399,10 @@ ifeq ($(MAC_TO_VITESSE_MODE),y)
 CPPFLAGS += -DMAC_TO_VITESSE_MODE
 endif
 
+ifeq ($(RTL8367_SW),y)
+CPPFLAGS += -DRTL8367_SW
+endif
+
 ifeq ($(MAC_TO_GIGAPHY_MODE),y)
 CPPFLAGS += -DMAC_TO_GIGAPHY_MODE
 endif
@@ -546,13 +550,15 @@ endif
 endif
 CPPFLAGS += -DCFG_ENV_IS_$(CFG_ENV_IS)
 
-
 ifdef BUILD_TAG
 CFLAGS := $(CPPFLAGS) -Wall -Wstrict-prototypes \
 	-DBUILD_TAG='"$(BUILD_TAG)"'
 else
 CFLAGS := $(CPPFLAGS) -Wall -Wstrict-prototypes
 endif
+
+# for compat with external esw drivers.
+CFLAGS += -D_LITTLE_ENDIAN
 
 # avoid trigraph warnings while parsing pci.h (produced by NIOS gcc-2.9)
 # this option have to be placed behind -Wall -- that's why it is here

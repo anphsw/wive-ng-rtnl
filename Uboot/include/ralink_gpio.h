@@ -267,7 +267,7 @@ typedef struct {
 	unsigned int times;		//blinking times
 } ralink_gpio_led_info;
 
-#ifdef __KERNEL__
+#if defined(__KERNEL__) && !defined(RTL8367_SW)
 /*
  * variables used at regsitration
  */

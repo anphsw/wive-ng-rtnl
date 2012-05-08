@@ -39,6 +39,18 @@ else
 OBJS	+= rt2880_eth.o
 endif
 
+ifdef RTL8367_SW
+OBJS += smi.o
+
+OBJS += rtk_api.o
+OBJS += rtl8370_asicdrv.o
+OBJS += rtl8370_asicdrv_led.o
+OBJS += rtl8370_asicdrv_lut.o
+OBJS += rtl8370_asicdrv_phy.o
+OBJS += rtl8370_asicdrv_port.o
+OBJS += rtl8370_asicdrv_portIsolation.o
+endif
+
 ifeq ($(CFG_ENV_IS), IN_FLASH)
 OBJS	+= spi_drv.o 
 endif

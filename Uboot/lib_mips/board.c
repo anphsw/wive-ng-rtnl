@@ -1108,6 +1108,10 @@ int check_image_validation(void)
 
 extern int do_load_serial_bin (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[]);
 gd_t gd_data;
+#ifdef RTL8367_SW
+int rtl8367m_switch_inited = 0;
+extern int rtl8367m_switch_init_pre();
+#endif
 
 void board_init_r (gd_t *id, ulong dest_addr)
 {
@@ -1126,6 +1130,9 @@ void board_init_r (gd_t *id, ulong dest_addr)
 	char addr_str[11];
 #if defined (CFG_ENV_IS_IN_FLASH)
 	ulong e_end;
+#endif
+#ifdef RTL8367_SW
+	int esw_ret;
 #endif
 
 #if defined (RT2880_FPGA_BOARD) || defined (RT2880_ASIC_BOARD)
@@ -1579,6 +1586,11 @@ void board_init_r (gd_t *id, ulong dest_addr)
 	rt305x_esw_init();
 #elif defined (RT6855_ASIC_BOARD) || defined (RT6855_FPGA_BOARD)
 	rt6855_esw_init();
+#endif
+#ifdef RTL8367_SW
+	printf("Init RTL8367 externam seitch...\n");
+	esw_ret = rtl8367m_switch_init_pre();
+	printf("Init end with exit code %d\n", esw_ret);
 #endif
 	LANWANPartition();
 

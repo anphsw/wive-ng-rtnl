@@ -269,17 +269,19 @@ choice 'GE2 connected to' "GE_MII_FORCE_100		GE_MII_FORCE_100 \
 			   "
 fi
 
+bool "RTL8367 swich support" RTL8367_SW
+
 if [ "$GE_MII_FORCE_100" = "y" -o \
      "$GE_RVMII_FORCE_100" = "y" ]; then
     define_bool MAC_TO_100SW_MODE y
-fi     
+fi
 
 if [ "$GE_MII_AN" = "y" ]; then
     define_bool MAC_TO_100PHY_MODE y
     hex "10/100 PHY address for Auto Polling" MAC_TO_GIGAPHY_MODE_ADDR 0x1f
 fi
 
-if [ "$GE_RGMII_FORCE_1000" = "y" ]; then
+if [ "$GE_RGMII_FORCE_1000" = "y" ] || [ "$RTL8367_SW" = "y" ]; then
     define_bool  MAC_TO_VITESSE_MODE y
     define_bool GPIOx_RESET_MODE y
 fi
