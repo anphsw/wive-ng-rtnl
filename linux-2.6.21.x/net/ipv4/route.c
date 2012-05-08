@@ -2246,7 +2246,7 @@ static int ip_route_output_slow(struct rtable **rp, const struct flowi *oldflp)
 		if (oldflp->oif == 0
 		    && (ipv4_is_multicast(oldflp->fl4_dst) || oldflp->fl4_dst == htonl(0xFFFFFFFF))) {
 			/* It is equivalent to inet_addr_type(saddr) == RTN_LOCAL */
-			dev_out = ip_dev_find(net, oldflp->fl4_src);
+			dev_out = ip_dev_find(oldflp->fl4_src);
 			if (dev_out == NULL)
 				goto out;
 
@@ -2271,7 +2271,7 @@ static int ip_route_output_slow(struct rtable **rp, const struct flowi *oldflp)
 
 		if (!(oldflp->flags & FLOWI_FLAG_ANYSRC)) {
 			/* It is equivalent to inet_addr_type(saddr) == RTN_LOCAL */
-			dev_out = ip_dev_find(net, oldflp->fl4_src);
+			dev_out = ip_dev_find(oldflp->fl4_src);
 			if (dev_out == NULL)
 				goto out;
 			dev_put(dev_out);
