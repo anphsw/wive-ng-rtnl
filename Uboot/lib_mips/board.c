@@ -1588,9 +1588,9 @@ void board_init_r (gd_t *id, ulong dest_addr)
 	rt6855_esw_init();
 #endif
 #ifdef RTL8367_SW
-	printf("Init RTL8367 externam seitch...\n");
+	printf("Init RTL8367 externam switch...\n");
 	esw_ret = rtl8367m_switch_init_pre();
-	printf("Init end with exit code %d\n", esw_ret);
+	printf("Init esw end with exit code %d\n", esw_ret);
 #endif
 	LANWANPartition();
 
