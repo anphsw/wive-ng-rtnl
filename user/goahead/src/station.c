@@ -208,7 +208,7 @@ void freeHeaderProfileSettings(void)
 		list = next;
 		next = list->Next;
 	}
-	
+
 	headerProfileSetting = NULL;
 }
 
@@ -472,7 +472,7 @@ static int getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv)
 				sprintf((char *)tmpNetworkType, "%s", "Infrastructure");
 			else
 				sprintf((char *)tmpNetworkType, "%s", "Ad Hoc");
-			
+
 			// work with NDIS_WLAN_BSSID_EX
 			unsigned char bTKIP = FALSE;
 			unsigned char bAESWRAP = FALSE;
@@ -516,7 +516,7 @@ static int getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv)
 						unsigned int* plAuthenKey=NULL;
 						unsigned short* pdAuthenKeyCount;
 						plGroupKey = (unsigned int*)((char*)pVarIE + 8);
-				
+
 						unsigned int lGroupKey = *plGroupKey & 0x00ffffff;
 						//fprintf(stderr, "lGroupKey=%d\n", lGroupKey);
 						if (lGroupKey == WPA_OUI) {
@@ -536,10 +536,10 @@ static int getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv)
 
 							if(pVarIE->Length <= 0)
 								break;
-							
+
 							continue;
 						}
-				
+
 						pdPairKeyCount = (unsigned short*)((char*)plGroupKey + 4);
 						plPairwiseKey = (unsigned int*) ((char*)pdPairKeyCount + 2);
 						unsigned short k = 0;
@@ -557,10 +557,10 @@ static int getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv)
 							}
 							else
 								break;
-							
+
 							plPairwiseKey++;
 						}
-				
+
 						pdAuthenKeyCount = (unsigned short*)((char*)pdPairKeyCount + 2 + 4 * (*pdPairKeyCount));
 						plAuthenKey = (unsigned int*)((char*)pdAuthenKeyCount + 2);
 
@@ -581,10 +581,9 @@ static int getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv)
 									else
 										bWPANONE = TRUE;
 								}
-							}					
+							}
 							plAuthenKey++;
 						}
-					//break;
 					}
 					else if (pVarIE->ElementID == 48 && pVarIE->Length >= 12)
 					{
@@ -613,7 +612,7 @@ static int getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv)
 
 							if(pVarIE->Length <= 0)
 								break;
-							
+
 							continue;
 						}
 
@@ -637,7 +636,7 @@ static int getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv)
 								break;
 							plPairwiseKey++;
 						}
-			
+
 						pdAuthenKeyCount = (unsigned short*)((char*)pdPairKeyCount + 2 + 4 * *pdPairKeyCount);
 						plAuthenKey = (unsigned int*)((char*)pdAuthenKeyCount + 2);
 						for (k = 0; k < *pdAuthenKeyCount; k++)
@@ -668,7 +667,7 @@ static int getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv)
 						break;
 				}
 			}
-			
+
 			char strAuth[32], strEncry[32];
 			memset( strAuth, 0x00, sizeof(strAuth) );
 			memset( strEncry, 0x00, sizeof(strEncry) );
@@ -686,7 +685,7 @@ static int getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv)
 				strcat(strAuth, "WPA2-PSK; ");
 			if (bWPA2NONE)
 				strcat(strAuth, "WPA2-NONE; ");
-			
+
 			if (strlen(strAuth) > 0)
 			{
 				strncpy((char *)tmpAuth, strAuth, strlen(strAuth) - 2);
@@ -736,7 +735,7 @@ static int getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv)
 				tmpNetworkType,
 				pBssid->InfrastructureMode
 			);
-			
+
 			pBssid = (PNDIS_WLAN_BSSID_EX)((char *)pBssid + pBssid->Length);
 		}
 	}
@@ -890,7 +889,7 @@ static int getLinkingMode(int eid, webs_t wp, int argc, char_t **argv)
 	memset(&HTSetting, 0x00, sizeof(HTTRANSMIT_SETTING));
 	OidQueryInformation(RT_OID_802_11_QUERY_LAST_TX_RATE, s, "ra0", &HTSetting, sizeof(HTTRANSMIT_SETTING));
 	close(s);
-	
+
 	return websWrite(wp, (HTSetting.field.MODE > 1) ? T("0") : T("1"));
 }
 
@@ -1132,11 +1131,11 @@ static int getStaLinkRxRate(int eid, webs_t wp, int argc, char_t **argv)
 
 	if (G_ConnectStatus == NdisMediaStateDisconnected)
 		return websWrite(wp, "0");
-	
+
 	s = socket(AF_INET, SOCK_DGRAM, 0);
 	double fLastRxRate = 1;
 	DisplayLastTxRxRateFor11n(s, RT_OID_802_11_QUERY_LAST_RX_RATE, &fLastRxRate);
-	
+
 	snprintf(buf, sizeof(buf), "%.1f", fLastRxRate);
 	websWrite(wp, "%s", buf);
 
@@ -1335,7 +1334,7 @@ void initStaProfile(void)
 
 	// Free previously allocated profile settings
 	freeHeaderProfileSettings();
-	
+
 	// Initialize string splitter
 	string_split_t split;
 	if (initSplitter(&split) != 0)
@@ -1343,14 +1342,14 @@ void initStaProfile(void)
 		error(E_L, E_LOG, T("Error while trying to acqiure resources for profile parsing"));
 		return;
 	}
-	
+
 	// Initialize NVRAM
 	nvram_init(RT2860_NVRAM);
-	
+
 	// Try to fetch profile names & determine number of profiles
 	splitString(&split, nvram_bufget(RT2860_NVRAM, "staProfile"), ';');
 	PRT_PROFILE_SETTING *p_new = &headerProfileSetting;
-	
+
 	for (i=0; i<split.found; i++)
 	{
 		// String is empty?
@@ -1361,7 +1360,7 @@ void initStaProfile(void)
 			nvram_close(RT2860_NVRAM);
 			return;
 		}
-		
+
 		PRT_PROFILE_SETTING p = (PRT_PROFILE_SETTING)malloc(sizeof(RT_PROFILE_SETTING));
 		if (p == NULL)
 		{
@@ -1404,7 +1403,7 @@ void initStaProfile(void)
 
 	// Common config
 	PARSE_STR("staSSID", p->SSID); // SSID
-	
+
 	PARSE_INT("staNetworkType", p->NetworkType); // NetworkType
 	PARSE_INT("staPSMode", p->PSmode); // PSMode
 	PARSE_INT("staAdhocMode", p->AdhocMode); // AdhocMode
@@ -1456,7 +1455,7 @@ void initStaProfile(void)
 
 	// Release splitter
 	freeSplitter(&split);
-	
+
 	// Release NVRAM
 	nvram_close(RT2860_NVRAM);
 
@@ -1494,7 +1493,7 @@ void AtoH(char *src, unsigned char *dest, int destlen)
 	}
 }
 
-static void shaHashBlock(A_SHA_CTX *ctx) 
+static void shaHashBlock(A_SHA_CTX *ctx)
 {
 	int t;
 	unsigned long A,B,C,D,E,TEMP;
@@ -1509,22 +1508,22 @@ static void shaHashBlock(A_SHA_CTX *ctx)
 	D = ctx->H[3];
 	E = ctx->H[4];
 
-	for (t = 0; t <= 19; t++) 
+	for (t = 0; t <= 19; t++)
 	{
 		TEMP = (SHA_ROTL(A,5) + (((C^D)&B)^D)     + E + ctx->W[t] + 0x5a827999L) & 0xffffffffL;
 		E = D; D = C; C = SHA_ROTL(B, 30); B = A; A = TEMP;
 	}
-	for (t = 20; t <= 39; t++) 
+	for (t = 20; t <= 39; t++)
 	{
 		TEMP = (SHA_ROTL(A,5) + (B^C^D)           + E + ctx->W[t] + 0x6ed9eba1L) & 0xffffffffL;
 		E = D; D = C; C = SHA_ROTL(B, 30); B = A; A = TEMP;
 	}
-	for (t = 40; t <= 59; t++) 
+	for (t = 40; t <= 59; t++)
 	{
 		TEMP = (SHA_ROTL(A,5) + ((B&C)|(D&(B|C))) + E + ctx->W[t] + 0x8f1bbcdcL) & 0xffffffffL;
 		E = D; D = C; C = SHA_ROTL(B, 30); B = A; A = TEMP;
 	}
-	for (t = 60; t <= 79; t++) 
+	for (t = 60; t <= 79; t++)
 	{
 		TEMP = (SHA_ROTL(A,5) + (B^C^D)           + E + ctx->W[t] + 0xca62c1d6L) & 0xffffffffL;
 		E = D; D = C; C = SHA_ROTL(B, 30); B = A; A = TEMP;
@@ -1537,7 +1536,7 @@ static void shaHashBlock(A_SHA_CTX *ctx)
 	ctx->H[4] += E;
 }
 
-void A_SHAInit(A_SHA_CTX *ctx) 
+void A_SHAInit(A_SHA_CTX *ctx)
 {
 	int i;
 
@@ -1556,16 +1555,16 @@ void A_SHAInit(A_SHA_CTX *ctx)
 		ctx->W[i] = 0;
 }
 
-void A_SHAUpdate(A_SHA_CTX *ctx, unsigned char *dataIn, int len) 
+void A_SHAUpdate(A_SHA_CTX *ctx, unsigned char *dataIn, int len)
 {
 	int i;
 
 	/* Read the data into W and process blocks as they get full */
-	for (i = 0; i < len; i++) 
+	for (i = 0; i < len; i++)
 	{
 		ctx->W[ctx->lenW / 4] <<= 8;
 		ctx->W[ctx->lenW / 4] |= (unsigned long)dataIn[i];
-		if ((++ctx->lenW) % 64 == 0) 
+		if ((++ctx->lenW) % 64 == 0)
 		{
 			shaHashBlock(ctx);
 			ctx->lenW = 0;
@@ -1575,7 +1574,7 @@ void A_SHAUpdate(A_SHA_CTX *ctx, unsigned char *dataIn, int len)
 	}
 }
 
-void A_SHAFinal(A_SHA_CTX *ctx, unsigned char hashout[20]) 
+void A_SHAFinal(A_SHA_CTX *ctx, unsigned char hashout[20])
 {
 	unsigned char pad0x80 = 0x80;
 	unsigned char pad0x00 = 0x00;
@@ -1598,7 +1597,7 @@ void A_SHAFinal(A_SHA_CTX *ctx, unsigned char hashout[20])
 
 	/* Output hash
 	*/
-	for (i = 0; i < 20; i++) 
+	for (i = 0; i < 20; i++)
 	{
 		hashout[i] = (unsigned char)(ctx->H[i / 4] >> 24);
 		ctx->H[i / 4] <<= 8;
@@ -1612,110 +1611,111 @@ void A_SHAFinal(A_SHA_CTX *ctx, unsigned char hashout[20])
 
 static void hmac_sha1(unsigned char *text, int text_len, unsigned char *key, int key_len, unsigned char *digest) 
 { 
-	A_SHA_CTX context; 
-	unsigned char k_ipad[65]; /* inner padding - key XORd with ipad */ 
-	unsigned char k_opad[65]; /* outer padding - key XORd with opad */ 
-	int i; 
+	A_SHA_CTX context;
+	unsigned char k_ipad[65]; /* inner padding - key XORd with ipad */
+	unsigned char k_opad[65]; /* outer padding - key XORd with opad */
+	int i;
 
-	/* if key is longer than 64 bytes reset it to key=SHA1(key) */ 
-	if (key_len > 64) 
-	{ 
-		A_SHA_CTX tctx; 
+	/* if key is longer than 64 bytes reset it to key=SHA1(key) */
+	if (key_len > 64)
+	{
+		A_SHA_CTX tctx;
 
-		A_SHAInit(&tctx); 
-		A_SHAUpdate(&tctx, key, key_len); 
-		A_SHAFinal(&tctx, key); 
+		A_SHAInit(&tctx);
+		A_SHAUpdate(&tctx, key, key_len);
+		A_SHAFinal(&tctx, key);
 
-		key_len = 20; 
-	} 
+		key_len = 20;
+	}
 
-	/* 
-	 * the HMAC_SHA1 transform looks like: 
-	 * 
-	 * SHA1(K XOR opad, SHA1(K XOR ipad, text)) 
-	 * 
-	 * where K is an n byte key 
-	 * ipad is the byte 0x36 repeated 64 times 
-	 * opad is the byte 0x5c repeated 64 times 
-	 * and text is the data being protected 
-	 */ 
+	/*
+	 * the HMAC_SHA1 transform looks like:
+	 *
+	 * SHA1(K XOR opad, SHA1(K XOR ipad, text))
+	 *
+	 * where K is an n byte key
+	 * ipad is the byte 0x36 repeated 64 times
+	 * opad is the byte 0x5c repeated 64 times
+	 * and text is the data being protected
+	 */
 
-	/* start out by storing key in pads */ 
-	memset(k_ipad, 0, sizeof k_ipad); 
-	memset(k_opad, 0, sizeof k_opad); 
-	memcpy(k_ipad, key, key_len); 
-	memcpy(k_opad, key, key_len); 
+	/* start out by storing key in pads */
+	memset(k_ipad, 0, sizeof k_ipad);
+	memset(k_opad, 0, sizeof k_opad);
+	memcpy(k_ipad, key, key_len);
+	memcpy(k_opad, key, key_len);
 
-	/* XOR key with ipad and opad values */ 
-	for (i = 0; i < 64; i++) 
-	{ 
-		k_ipad[i] ^= 0x36; 
-		k_opad[i] ^= 0x5c; 
-	} 
+	/* XOR key with ipad and opad values */
+	for (i = 0; i < 64; i++)
+	{
+		k_ipad[i] ^= 0x36;
+		k_opad[i] ^= 0x5c;
+	}
 
-	/* perform inner SHA1*/ 
-	A_SHAInit(&context); /* init context for 1st pass */ 
-	A_SHAUpdate(&context, k_ipad, 64); /* start with inner pad */ 
-	A_SHAUpdate(&context, text, text_len); /* then text of datagram */ 
-	A_SHAFinal(&context, digest); /* finish up 1st pass */ 
+	/* perform inner SHA1*/
+	A_SHAInit(&context); /* init context for 1st pass */
+	A_SHAUpdate(&context, k_ipad, 64); /* start with inner pad */
+	A_SHAUpdate(&context, text, text_len); /* then text of datagram */
+	A_SHAFinal(&context, digest); /* finish up 1st pass */
 
-	/* perform outer SHA1 */ 
-	A_SHAInit(&context); /* init context for 2nd pass */ 
-	A_SHAUpdate(&context, k_opad, 64); /* start with outer pad */ 
-	A_SHAUpdate(&context, digest, 20); /* then results of 1st hash */ 
-	A_SHAFinal(&context, digest); /* finish up 2nd pass */ 
-} 
+	/* perform outer SHA1 */
+	A_SHAInit(&context); /* init context for 2nd pass */
+	A_SHAUpdate(&context, k_opad, 64); /* start with outer pad */
+	A_SHAUpdate(&context, digest, 20); /* then results of 1st hash */
+	A_SHAFinal(&context, digest); /* finish up 2nd pass */
+}
 
 /*
- * F(P, S, c, i) = U1 xor U2 xor ... Uc 
- * U1 = PRF(P, S || Int(i)) 
- * U2 = PRF(P, U1) 
- * Uc = PRF(P, Uc-1) 
- */ 
+ * F(P, S, c, i) = U1 xor U2 xor ... Uc
+ * U1 = PRF(P, S || Int(i))
+ * U2 = PRF(P, U1)
+ * Uc = PRF(P, Uc-1)
+ */
 
-static void F(char *password, unsigned char *ssid, int ssidlength, int iterations, int count, unsigned char *output) 
-{ 
-	unsigned char digest[36], digest1[A_SHA_DIGEST_LEN]; 
-	int i, j; 
+static void F(char *password, unsigned char *ssid, int ssidlength, int iterations, int count, unsigned char *output)
+{
+	unsigned char digest[36], digest1[A_SHA_DIGEST_LEN];
+	int i, j;
 
-	/* U1 = PRF(P, S || int(i)) */ 
-	memcpy(digest, ssid, ssidlength); 
-	digest[ssidlength] = (unsigned char)((count>>24) & 0xff); 
-	digest[ssidlength+1] = (unsigned char)((count>>16) & 0xff); 
-	digest[ssidlength+2] = (unsigned char)((count>>8) & 0xff); 
-	digest[ssidlength+3] = (unsigned char)(count & 0xff); 
+	/* U1 = PRF(P, S || int(i)) */
+	memcpy(digest, ssid, ssidlength);
+	digest[ssidlength] = (unsigned char)((count>>24) & 0xff);
+	digest[ssidlength+1] = (unsigned char)((count>>16) & 0xff);
+	digest[ssidlength+2] = (unsigned char)((count>>8) & 0xff);
+	digest[ssidlength+3] = (unsigned char)(count & 0xff);
 	hmac_sha1(digest, ssidlength+4, (unsigned char*) password, (int) strlen(password), digest1); // for WPA update
 
-	/* output = U1 */ 
-	memcpy(output, digest1, A_SHA_DIGEST_LEN); 
+	/* output = U1 */
+	memcpy(output, digest1, A_SHA_DIGEST_LEN);
 
-	for (i = 1; i < iterations; i++) 
-	{ 
-		/* Un = PRF(P, Un-1) */ 
+	for (i = 1; i < iterations; i++)
+	{
+		/* Un = PRF(P, Un-1) */
 		hmac_sha1(digest1, A_SHA_DIGEST_LEN, (unsigned char*) password, (int) strlen(password), digest); // for WPA update
-		memcpy(digest1, digest, A_SHA_DIGEST_LEN); 
+		memcpy(digest1, digest, A_SHA_DIGEST_LEN);
 
-		/* output = output xor Un */ 
-		for (j = 0; j < A_SHA_DIGEST_LEN; j++) 
-		{ 
-			output[j] ^= digest[j]; 
-		} 
-	} 
-} 
-/* 
- * password - ascii string up to 63 characters in length 
- * ssid - octet string up to 32 octets 
- * ssidlength - length of ssid in octets 
- * output must be 40 octets in length and outputs 256 bits of key 
- */ 
-int PasswordHash(char *password, unsigned char *ssid, int ssidlength, unsigned char *output) 
-{ 
-	if ((strlen(password) > 63) || (ssidlength > 32)) 
-		return 0; 
+		/* output = output xor Un */
+		for (j = 0; j < A_SHA_DIGEST_LEN; j++)
+		{
+			output[j] ^= digest[j];
+		}
+	}
+}
 
-	F(password, ssid, ssidlength, 4096, 1, output); 
-	F(password, ssid, ssidlength, 4096, 2, &output[A_SHA_DIGEST_LEN]); 
-	return 1; 
+/*
+ * password - ascii string up to 63 characters in length
+ * ssid - octet string up to 32 octets
+ * ssidlength - length of ssid in octets
+ * output must be 40 octets in length and outputs 256 bits of key
+ */
+int PasswordHash(char *password, unsigned char *ssid, int ssidlength, unsigned char *output)
+{
+	if ((strlen(password) > 63) || (ssidlength > 32))
+		return 0;
+
+	F(password, ssid, ssidlength, 4096, 1, output);
+	F(password, ssid, ssidlength, 4096, 2, &output[A_SHA_DIGEST_LEN]);
+	return 1;
 }
 
 static int getCACLCertList(int eid, webs_t wp, int argc, char_t **argv)
@@ -1728,7 +1728,7 @@ static int getCACLCertList(int eid, webs_t wp, int argc, char_t **argv)
 	else
 #endif
 		websWrite(wp, T("<option value=\"\"></option>"));
-	
+
 	return 0;
 }
 
@@ -1742,7 +1742,7 @@ static int getKeyCertList(int eid, webs_t wp, int argc, char_t **argv)
 	else
 #endif
 		websWrite(wp, T("<option value=\"\"></option>"));
-	
+
 	return 0;
 }
 
@@ -1888,14 +1888,6 @@ static void exec_WPASupplicant(char* ssid, NDIS_802_11_WEP_STATUS encryp, NDIS_8
 		return;
 	}
 
-	/*
-	if (OidSetInformation(OID_802_11_BSSID, s, "ra0", &bssid, 6) < 0) {
-		error(E_L, E_LOG, T("Set OID_802_11_BSSID has error."));
-		close(s);
-		return;
-	}
-	*/
-
 	close(s);
 
 	doSystem("wpa_supplicant -B -ira0 -bbr0 -c/etc/wpa_supplicant.conf -Dralink -d");
@@ -1930,7 +1922,7 @@ static void conf_WPASupplicant(char* ssid, RT_WPA_SUPPLICANT_KEY_MGMT keymgmt, R
 			fprintf(wsconf, "proto=RSN\n");
 
 		if (encryp == Ndis802_11Encryption2Enabled) //tkip
-		{			
+		{
 			fprintf(wsconf, "pairwise=TKIP\n");
 			fprintf(wsconf, "group=TKIP\n");
 		}
@@ -2023,313 +2015,6 @@ static void conf_WPASupplicant(char* ssid, RT_WPA_SUPPLICANT_KEY_MGMT keymgmt, R
 #endif
 
 /*
- * description: station connection
- */
-/*
-static void sta_connection(int tmp_networktype, int tmp_auth, int tmp_encry, int tmp_defaultkeyid, PNDIS_802_11_SSID pSsid, unsigned char Bssid[6], char *tmp_wpapsk, char *tmp_key1, char *tmp_key2, char *tmp_key3, char *tmp_key4, RT_802_11_PREAMBLE tmp_preamtype, int tmp_rtscheck, NDIS_802_11_RTS_THRESHOLD tmp_rts, int tmp_fragmentcheck, NDIS_802_11_FRAGMENTATION_THRESHOLD tmp_fragment, NDIS_802_11_POWER_MODE tmp_psmode, int tmp_channel)
-{
-	int s, ret, nKeyLen=0, j, i;
-	NDIS_802_11_REMOVE_KEY		removeKey;
-	PNDIS_802_11_KEY			pKey = NULL;
-	PNDIS_802_11_WEP			pWepKey = NULL;
-	PNDIS_802_11_PASSPHRASE		pPassPhrase = NULL;
-	unsigned long               PassphraseBufLen;
-	unsigned long				lBufLen;
-	unsigned char				keyMaterial[40];
-	NDIS_802_11_CONFIGURATION	Configuration;
-	unsigned long				CurrentWirelessMode;
-
-	s = socket(AF_INET, SOCK_DGRAM, 0);
-
-	if (OidQueryInformation(RT_OID_802_11_PHY_MODE, s, "ra0", &CurrentWirelessMode, sizeof(unsigned char)) < 0 ) {
-		error(E_L, E_LOG, T("Query OID_802_11_QUERY_WirelessMode error!"));
-		close(s);
-		return;
-	}
-
-	if (WpaSupplicant_flag == TRUE)
-	{
-		int wpa_supplicant_support = 0 ,ieee8021x_support = 0;
-
-		doSystem("killall -q wpa_supplicant");
-		sleep(1);
-		doSystem("killall -q -SIGKILL wpa_supplicant");
-		sleep(1);
-
-		ret = OidSetInformation(OID_802_11_SET_IEEE8021X, s, "ra0", &ieee8021x_support, sizeof(ieee8021x_support));
-		if (ret < 0)
-			fprintf(stderr, "Set OID_802_11_SET_IEEE8021X has error =%d, ieee8021x_support=%d\n", ret, ieee8021x_support);
-		ret = OidSetInformation(RT_OID_WPA_SUPPLICANT_SUPPORT, s, "ra0", &wpa_supplicant_support, sizeof(wpa_supplicant_support));                                           if (ret < 0)
-			fprintf(stderr, "Set RT_OID_WPA_SUPPLICANT_SUPPORT has error =%d, wpa_supplicant_support=%d\n", ret, wpa_supplicant_support);
-		WpaSupplicant_flag = FALSE;
-	}
-
-	//step 0: OID_802_11_INFRASTRUCTURE_MODE
-	ret = OidSetInformation(OID_802_11_INFRASTRUCTURE_MODE, s, "ra0", &tmp_networktype, sizeof(int));
-	if (ret < 0)
-		error(E_L, E_LOG, T("Set OID_802_11_INFRASTRUCTURE_MODE has error =%d, networktype=%d"), ret, tmp_networktype);
-
-	//step 1:
-	if (!tmp_rtscheck)
-		tmp_rts = 2347;
-	OidSetInformation(OID_802_11_RTS_THRESHOLD, s, "ra0", &tmp_rts, sizeof(NDIS_802_11_RTS_THRESHOLD));
-
-	if (!tmp_fragmentcheck)
-		tmp_fragment = 2346;
-	OidSetInformation(OID_802_11_FRAGMENTATION_THRESHOLD, s, "ra0", &selectedProfileSetting->Fragment, sizeof(NDIS_802_11_FRAGMENTATION_THRESHOLD));
-
-	if (tmp_networktype == Ndis802_11Infrastructure) {
-		OidSetInformation(OID_802_11_POWER_MODE, s, "ra0", &tmp_psmode, sizeof(NDIS_802_11_POWER_MODE));
-		OidSetInformation(RT_OID_802_11_PREAMBLE, s, "ra0", &tmp_preamtype, sizeof(RT_802_11_PREAMBLE));
-	}
-	else if (tmp_networktype == Ndis802_11IBSS) {
-		unsigned long	lFreq = 0;
-		OidQueryInformation(OID_802_11_CONFIGURATION, s, "ra0", &Configuration, sizeof(Configuration));
-
-		for (i = 0; i < G_nChanFreqCount; i++) {
-			if (tmp_channel == ChannelFreqTable[i].lChannel) {
-				lFreq = ChannelFreqTable[i].lFreq;
-				break;
-			}
-		}
-		if (lFreq != Configuration.DSConfig) {
-			Configuration.DSConfig = lFreq/1000;
-			ret = OidSetInformation(OID_802_11_CONFIGURATION, s, "ra0", &Configuration, sizeof(Configuration));
-			if (ret < 0)
-				error(E_L, E_LOG, T("Set OID_802_11_CONFIGURATION has error=%d"),ret);
-		}
-	}
-
-	//step 2: Security mode
-	ret = OidSetInformation(OID_802_11_AUTHENTICATION_MODE, s, "ra0", &tmp_auth, sizeof(tmp_auth));
-	if (ret < 0)
-		error(E_L, E_LOG, T("Set OID_802_11_AUTHENTICATION_MODE has error =%d, auth=%d"), ret, tmp_auth);
-
-	ret = OidSetInformation(OID_802_11_ENCRYPTION_STATUS, s, "ra0", &tmp_encry, sizeof(tmp_encry));
-	if (ret < 0)
-		error(E_L, E_LOG, T("Set OID_802_11_ENCRYPTION_STATUS has error =%d, encry=%d"), ret, tmp_encry);
-
-	if (tmp_encry == Ndis802_11WEPEnabled) {
-		//----------------------------------------------------------//
-		//Key 1
-		//----------------------------------------------------------//
-	
-		nKeyLen = strlen(tmp_key1);
-		if (nKeyLen == 0) {
-			removeKey.Length = sizeof(NDIS_802_11_REMOVE_KEY);
-			removeKey.KeyIndex = 0;
-			for (j = 0; j < 6; j++)
-				removeKey.BSSID[j] = 0xff;
-			ret = OidSetInformation(OID_802_11_REMOVE_KEY, s, "ra0", &removeKey, removeKey.Length);
-			if (ret < 0)
-				error(E_L, E_LOG, T("Set OID_802_11_REMOVE_KEY has error =%d"), ret);
-		} else if (strcmp(tmp_key1, "0")) {
-			if (nKeyLen == 10)
-				nKeyLen = 5;
-			else if (nKeyLen == 26)
-				nKeyLen = 13;
-
-			lBufLen = sizeof(NDIS_802_11_WEP) + nKeyLen - 1;
-			// Allocate Resource
-			pWepKey = (PNDIS_802_11_WEP)malloc(lBufLen);
-			pWepKey->Length = lBufLen;
-			pWepKey->KeyLength = nKeyLen;
-			pWepKey->KeyIndex = 0;
-
-			if (tmp_defaultkeyid == 1)
-				pWepKey->KeyIndex |= 0x80000000;
-
-			if (strlen(tmp_key1) == 5)
-				memcpy(pWepKey->KeyMaterial, tmp_key1, 5);
-			else if (strlen(tmp_key1) == 10)
-				AtoH(tmp_key1, pWepKey->KeyMaterial, 5);
-			else if (strlen(tmp_key1) == 13)
-				memcpy(pWepKey->KeyMaterial, tmp_key1, 13);
-			else if (strlen(tmp_key1) == 26)
-				AtoH(tmp_key1, pWepKey->KeyMaterial, 13);
-
-			OidSetInformation(OID_802_11_ADD_WEP, s, "ra0", pWepKey, pWepKey->Length);
-			free(pWepKey);
-		}
-
-        //----------------------------------------------------------//
-        //Key 2
-        //----------------------------------------------------------//
-        nKeyLen = strlen(tmp_key2);
-        if (nKeyLen == 0) {
-            removeKey.Length = sizeof(NDIS_802_11_REMOVE_KEY);
-            removeKey.KeyIndex = 1;
-            for (j = 0; j < 6; j++)
-                removeKey.BSSID[j] = 0xff;
-            OidSetInformation(OID_802_11_REMOVE_KEY, s, "ra0", &removeKey, removeKey.Length);
-        } else if (strcmp(tmp_key2, "0")) {
-            if (nKeyLen == 10)
-                nKeyLen = 5;
-            else if (nKeyLen == 26)
-                nKeyLen = 13;
-
-            lBufLen = sizeof(NDIS_802_11_WEP) + nKeyLen - 1;
-            // Allocate Resource
-            pWepKey = (PNDIS_802_11_WEP)malloc(lBufLen);
-            pWepKey->Length = lBufLen;
-            pWepKey->KeyLength = nKeyLen;
-            pWepKey->KeyIndex = 1;
-
-            if (tmp_defaultkeyid == 2)
-                pWepKey->KeyIndex |= 0x80000000;
-
-            if (strlen(tmp_key2) == 5)
-                memcpy(pWepKey->KeyMaterial, tmp_key2, 5);
-            else if (strlen(tmp_key2) == 10)
-                AtoH(tmp_key2, pWepKey->KeyMaterial, 5);
-            else if (strlen(tmp_key2) == 13)
-                memcpy(pWepKey->KeyMaterial, tmp_key2, 13);
-            else if (strlen(tmp_key2) == 26)
-                AtoH(tmp_key2, pWepKey->KeyMaterial, 13);
-
-            OidSetInformation(OID_802_11_ADD_WEP, s, "ra0", pWepKey, pWepKey->Length);
-            free(pWepKey);
-        }
-        //----------------------------------------------------------//
-        //Key 3
-        //----------------------------------------------------------//
-        nKeyLen = strlen(tmp_key3);
-        if (nKeyLen == 0) {
-            removeKey.Length = sizeof(NDIS_802_11_REMOVE_KEY);
-            removeKey.KeyIndex = 2;
-            for(j = 0; j < 6; j++)
-                removeKey.BSSID[j] = 0xff;
-            OidSetInformation(OID_802_11_REMOVE_KEY, s, "ra0", &removeKey, removeKey.Length);
-        } else if (strcmp(tmp_key3, "0")) {
-            if (nKeyLen == 10)
-                nKeyLen = 5;
-            else if (nKeyLen == 26)
-                nKeyLen = 13;
-
-            lBufLen = sizeof(NDIS_802_11_WEP) + nKeyLen - 1;
-            // Allocate Resource
-            pWepKey = (PNDIS_802_11_WEP)malloc(lBufLen);
-            pWepKey->Length = lBufLen;
-            pWepKey->KeyLength = nKeyLen;
-            pWepKey->KeyIndex = 2;
-            if (tmp_defaultkeyid == 3)
-                pWepKey->KeyIndex |= 0x80000000;
-            
-            if (strlen(tmp_key3) == 5)
-                memcpy(pWepKey->KeyMaterial, tmp_key3, 5);
-            else if (strlen(tmp_key3) == 10)
-                AtoH(tmp_key3, pWepKey->KeyMaterial, 5);
-            else if (strlen(tmp_key3) == 13)
-                memcpy(pWepKey->KeyMaterial, tmp_key3, 13);
-            else if (strlen(tmp_key3) == 26)
-                AtoH(tmp_key3, pWepKey->KeyMaterial, 13);
-
-			OidSetInformation(OID_802_11_ADD_WEP, s, "ra0", pWepKey, pWepKey->Length);
-            free(pWepKey);
-        }
-        //----------------------------------------------------------//
-        //Key 4
-        //----------------------------------------------------------//
-        nKeyLen = strlen(tmp_key4);
-        if (nKeyLen == 0) {
-            removeKey.Length = sizeof(NDIS_802_11_REMOVE_KEY);
-            removeKey.KeyIndex = 3;
-            for(j = 0; j < 6; j++)
-                removeKey.BSSID[j] = 0xff;
-            OidSetInformation(OID_802_11_REMOVE_KEY, s, "ra0", &removeKey, removeKey.Length);
-        } else if (strcmp(tmp_key4, "0")) {
-            if (nKeyLen == 10)
-                nKeyLen = 5;
-            else if (nKeyLen == 26)
-                nKeyLen = 13;
-
-            lBufLen = sizeof(NDIS_802_11_WEP) + nKeyLen - 1;
-            // Allocate Resource
-            pWepKey = (PNDIS_802_11_WEP)malloc(lBufLen);
-            pWepKey->Length = lBufLen;
-            pWepKey->KeyLength = nKeyLen;
-            pWepKey->KeyIndex = 3;
-            if (tmp_defaultkeyid == 4)
-                pWepKey->KeyIndex |= 0x80000000;
-           
-            if (strlen(tmp_key4) == 5)
-                memcpy(pWepKey->KeyMaterial, tmp_key4, 5);
-            else if (strlen(tmp_key4) == 10)
-                AtoH(tmp_key4, pWepKey->KeyMaterial, 5);
-            else if (strlen(tmp_key4) == 13)
-                memcpy(pWepKey->KeyMaterial, tmp_key4, 13);
-            else if (strlen(tmp_key4) == 26)
-                AtoH(tmp_key4, pWepKey->KeyMaterial, 13);
-
-			OidSetInformation(OID_802_11_ADD_WEP, s, "ra0", pWepKey, pWepKey->Length);
-			free(pWepKey);
-        }
-	}
-	else if (tmp_auth == Ndis802_11AuthModeWPAPSK || tmp_auth == Ndis802_11AuthModeWPA2PSK || tmp_auth == Ndis802_11AuthModeWPANone) {
-        nKeyLen = 32;
-		lBufLen = (sizeof(NDIS_802_11_KEY) + nKeyLen - 1);
-		// Allocate Resouce
-		pKey = (PNDIS_802_11_KEY)malloc(lBufLen); // Don't use GMEM_ZEROINIT to get random key
-		pKey->Length = lBufLen;
-		pKey->KeyLength = nKeyLen;
-		pKey->KeyIndex = 0x80000000;
-
-		if (strlen(tmp_wpapsk) == 64) {
-			AtoH(tmp_wpapsk, keyMaterial, 32);
-			memcpy(pKey->KeyMaterial, keyMaterial, 32);		
-		}
-		else {
-			PasswordHash(tmp_wpapsk, pSsid->Ssid, pSsid->SsidLength, keyMaterial);
-			memcpy(pKey->KeyMaterial, keyMaterial, 32);
-		}
-		PassphraseBufLen = sizeof(NDIS_802_11_PASSPHRASE) + strlen(tmp_wpapsk) - 1;
-		pPassPhrase=(PNDIS_802_11_PASSPHRASE)malloc(PassphraseBufLen);
-		pPassPhrase->KeyLength = strlen(tmp_wpapsk);
-		memcpy(pPassPhrase->KeyMaterial, tmp_wpapsk, pPassPhrase->KeyLength);
-		OidSetInformation(OID_802_11_SET_PASSPHRASE, s, "ra0", pPassPhrase, PassphraseBufLen);
-		OidSetInformation(RT_OID_802_11_ADD_WPA, s, "ra0", pKey, pKey->Length);
-		free(pKey);
-	}
-
-	//step 3: SSID
-	if (tmp_networktype == Ndis802_11IBSS ) // Ad hoc use SSID
-	{
-		ret = OidSetInformation(OID_802_11_SSID, s, "ra0", pSsid, sizeof(NDIS_802_11_SSID));
-		if (ret < 0)
-			error(E_L, E_LOG, T("Set OID_802_11_SSID has error =%d, pSsid->Ssid=%s"), ret, pSsid->Ssid);
-		else
-			memcpy(&G_SSID, pSsid, sizeof(NDIS_802_11_SSID));
-	}
-	else
-	{
-		ret = OidSetInformation(OID_802_11_SSID, s, "ra0", pSsid, sizeof(NDIS_802_11_SSID));
-		if (ret < 0)
-			error(E_L, E_LOG, T("Set OID_802_11_SSID has error =%d, pSsid->Ssid=%s"), ret, pSsid->Ssid);
-		else
-			memcpy(&G_SSID, pSsid, sizeof(NDIS_802_11_SSID));
-
-		
-//		ret = OidSetInformation(OID_802_11_BSSID, s, "ra0", &Bssid, 6);
-//		if (ret < 0) {
-//			error(E_L, E_LOG, "Set OID_802_11_BSSID has error =%d, \n", ret);
-//		} else 
-		{
-			memcpy(G_Bssid, Bssid, 6);
-		}
-		Sleep(1);
-	}
-
-	close(s);
-	sync();
-
-	//set flag for daemons is connected
-	doSystem("touch /tmp/sta_connected");
-	//Configure wan and get param from dhcp and restart all service. Not use wifi only mode
-	doSystem("(sleep 2 && internet.sh connect_sta) &");
-}
-*/
-
-/*
  * description: connect to AP according to the active profile
  */
 void initStaConnection(void)
@@ -2348,7 +2033,7 @@ void initStaConnection(void)
 	}
 
 	printf("Activate profile: %s\n", p->Profile);
-	
+
 	// Set-up current SSID
 	nvram_set(RT2860_NVRAM, "staCur_SSID", p->SSID);
 
@@ -2474,17 +2159,17 @@ void initStaConnection(void)
 			wep_keys[1] = (char *)p->Key2;
 			wep_keys[2] = (char *)p->Key3;
 			wep_keys[3] = (char *)p->Key4;
-	
+
 			// For each WEP key
 			for (i=0; i<4; i++)
 			{
 				//printf("WEP key[%d]=%s\n", i, wep_keys[i]);
-		
+
 				int nKeyLen = strlen(wep_keys[i]);
 				if (nKeyLen == 0)
 				{
 					NDIS_802_11_REMOVE_KEY removeKey;
-				
+
 					removeKey.Length = sizeof(NDIS_802_11_REMOVE_KEY);
 					removeKey.KeyIndex = 0;
 					for (j = 0; j < 6; j++)
@@ -2520,7 +2205,7 @@ void initStaConnection(void)
 						memcpy(pWepKey->KeyMaterial, wep_keys[i], 13);
 					else if (nKeyLen == 26)
 						AtoH(wep_keys[i], pWepKey->KeyMaterial, 13);
-				
+
 					//printf("Setup key[%d]: key_len=%d, wep_len=%d, value=%s, index=%x, length=%d \n",
 					//	i, nKeyLen, wep_key_len, pWepKey->KeyMaterial, pWepKey->KeyIndex, pWepKey->Length);
 
@@ -2538,7 +2223,7 @@ void initStaConnection(void)
 		int nKeyLen = 32;
 		int lBufLen = (sizeof(NDIS_802_11_KEY) + nKeyLen - 1);
 		unsigned char keyMaterial[40];
-		
+
 		// Allocate Resouce
 		PNDIS_802_11_KEY pKey = (PNDIS_802_11_KEY)malloc(lBufLen); // Don't use GMEM_ZEROINIT to get random key
 		pKey->Length = lBufLen;
@@ -2570,7 +2255,7 @@ void initStaConnection(void)
 	NDIS_802_11_SSID Ssid;
 	strcpy((char *)Ssid.Ssid ,(char *)p->SSID);
 	Ssid.SsidLength = p->SsidLen;
-	
+
 	if (p->NetworkType == Ndis802_11IBSS ) // Ad hoc use SSID
 	{
 		ret = OidSetInformation(OID_802_11_SSID, s, "ra0", &Ssid, sizeof(NDIS_802_11_SSID));
@@ -2618,7 +2303,7 @@ static int getActiveProfileStatus(int eid, webs_t wp, int argc, char_t **argv)
 		initStaProfile();
 	if (headerProfileSetting == NULL)
 		return 0;
-	
+
 	// Find active profile in configuration
 	PRT_PROFILE_SETTING p = headerProfileSetting;
 	while ((p!= NULL) && (!p->Active))
@@ -2630,7 +2315,7 @@ static int getActiveProfileStatus(int eid, webs_t wp, int argc, char_t **argv)
 	int s = socket(AF_INET, SOCK_DGRAM, 0);
 	if (s < 0)
 		return 0;
-	
+
 	//step 1
 	unsigned int ConnectStatus = 0;
 	if (OidQueryInformation(OID_GEN_MEDIA_CONNECT_STATUS, s, "ra0", &ConnectStatus, sizeof(ConnectStatus)) < 0)
@@ -2647,7 +2332,7 @@ static int getActiveProfileStatus(int eid, webs_t wp, int argc, char_t **argv)
 		close(s);
 		return 0;
 	}
-	
+
 	const char *status = "0";
 
 	if ((ConnectStatus == 1) && G_bRadio)
@@ -2655,11 +2340,11 @@ static int getActiveProfileStatus(int eid, webs_t wp, int argc, char_t **argv)
 		// Encryption
 		NDIS_802_11_WEP_STATUS Encryp = Ndis802_11WEPDisabled;
 		OidQueryInformation(OID_802_11_WEP_STATUS, s, "ra0", &Encryp, sizeof(Encryp) );
-		
+
 		// Auth type
 		NDIS_802_11_AUTHENTICATION_MODE AuthenType = Ndis802_11AuthModeOpen;
 		OidQueryInformation(OID_802_11_AUTHENTICATION_MODE, s, "ra0", &AuthenType, sizeof(AuthenType));
-		
+
 		// Network type
 		NDIS_802_11_NETWORK_INFRASTRUCTURE NetworkType = Ndis802_11Infrastructure;
 		OidQueryInformation(OID_802_11_INFRASTRUCTURE_MODE, s, "ra0", &NetworkType, sizeof(NetworkType));
@@ -2676,7 +2361,7 @@ static int getActiveProfileStatus(int eid, webs_t wp, int argc, char_t **argv)
 			p->NetworkType == NetworkType)
 			status = "1";
 	}
-	
+
 	// Write active profile status
 	websWrite(wp, "%s", status);
 
@@ -3375,13 +3060,13 @@ static void setStaProfile(webs_t wp, char_t *path, char_t *query)
 {
 	// Store parameters
 	setupParameters(wp, sta_profile_args, 1);
-	
+
 	// Initialize profiles
 	initStaProfile();
-	
+
 	// Initialize STA connection
 	initStaConnection();
-	
+
 	// Redirect to success
 	websRedirect(wp, "station/profile.asp");
 }
@@ -3485,7 +3170,7 @@ static void setStaQoS(webs_t wp, char_t *path, char_t *query)
 		mac3 = websGetVar(wp, T("mac3"), T("3"));
 		mac4 = websGetVar(wp, T("mac4"), T("4"));
 		mac5 = websGetVar(wp, T("mac5"), T("5"));
-		
+
 		dls.MacAddr[0] = (unsigned char)strtoul(mac0, (char **)NULL, 16);
 		dls.MacAddr[1] = (unsigned char)strtoul(mac1, (char **)NULL, 16);
 		dls.MacAddr[2] = (unsigned char)strtoul(mac2, (char **)NULL, 16);
@@ -3570,7 +3255,7 @@ static void setStaQoS(webs_t wp, char_t *path, char_t *query)
 		OidSetInformation(OID_802_11_DISASSOCIATE, s, "ra0", NULL, 0);
 		Sleep(1);
 		OidSetInformation(OID_802_11_SSID, s, "ra0", &Ssid, sizeof(Ssid));
-		
+
 		// Setup DLS
 		OidSetInformation(RT_OID_802_11_SET_DLS, s, "ra0", &dls_en, sizeof(unsigned long));
 		if (dls_en)
@@ -3594,10 +3279,9 @@ static void setStaQoS(webs_t wp, char_t *path, char_t *query)
 			}
 		}
 	}
-	
+
 	close(s);
-	sleep(1);
-	
+
 	char *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
 	if (submitUrl[0])
 		websRedirect(wp, submitUrl);
