@@ -36,8 +36,6 @@ static int  getSdkVersion(int eid, webs_t wp, int argc, char_t **argv);
 static int  getMemAmount(int eid, webs_t wp, int argc, char_t **argv);
 static int  getSysUptime(int eid, webs_t wp, int argc, char_t **argv);
 static int  getPortStatus(int eid, webs_t wp, int argc, char_t **argv);
-static int  getOnePortOnly(void);
-static int  isOnePortOnly(int eid, webs_t wp, int argc, char_t **argv);
 static void setOpMode(webs_t wp, char_t *path, char_t *query);
 static void setWanPort(webs_t wp, char_t *path, char_t *query);
 
@@ -451,7 +449,6 @@ void formDefineUtilities(void)
 	websAspDefine(T("getMemAmount"), getMemAmount);
 	websAspDefine(T("getSysUptime"), getSysUptime);
 	websAspDefine(T("getPortStatus"), getPortStatus);
-	websAspDefine(T("isOnePortOnly"), isOnePortOnly);
 	websFormDefine(T("setOpMode"), setOpMode);
 	websFormDefine(T("setWanPort"), setWanPort);
 }
@@ -1020,27 +1017,6 @@ static int getPortStatus(int eid, webs_t wp, int argc, char_t **argv)
 	return 0;
 }
 
-static int getOnePortOnly(void)
-{
-#if defined(CONFIG_RAETH_ROUTER) || defined(CONFIG_MAC_TO_MAC_MODE) || defined(CONFIG_RT_3052_ESW)
-	return 0;
-#elif defined(CONFIG_ICPLUS_PHY)
-	return 1;
-#else
-	return 0;
-#endif
-	return 0;
-}
-
-static int isOnePortOnly(int eid, webs_t wp, int argc, char_t **argv)
-{
-	if( getOnePortOnly() == 1)
-		websWrite(wp, T("true"));
-	else
-		websWrite(wp, T("false"));		 
-	return 0;
-}
-
 void redirect_wholepage(webs_t wp, const char *url)
 {
 	websWrite(wp, T("HTTP/1.1 200 OK\nContent-type: text/html\n"));
@@ -1116,66 +1092,10 @@ static void setOpMode(webs_t wp, char_t *path, char_t *query)
 	char_t	*mode;
 
 	int	need_commit = 0;
-#if !defined CONFIG_RAETH_ROUTER && !defined CONFIG_MAC_TO_MAC_MODE && !defined CONFIG_RT_3052_ESW && !defined CONFIG_ICPLUS_PHY
-	char	*wan_ip, *lan_ip;
-#endif
 	mode = websGetVar(wp, T("opMode"), T("0")); 
-	
-	nvram_init(RT2860_NVRAM);
-	
-	char	*old_mode = nvram_bufget(RT2860_NVRAM, "OperationMode");
 
-	if (!strncmp(old_mode, "0", 2)) {
-	}
-	else if (!strncmp(old_mode, "1", 2) || !strncmp(old_mode, "3", 2)) {
-		if (!strncmp(mode, "0", 2)) {
-#if !defined CONFIG_RAETH_ROUTER && !defined CONFIG_MAC_TO_MAC_MODE && !defined CONFIG_RT_3052_ESW && !defined CONFIG_ICPLUS_PHY
-			/*
-			 * mode: gateway (or ap-client) -> bridge
-			 * config: wan_ip(wired) overwrites lan_ip(bridge)
-			 */
-			wan_ip = nvram_bufget(RT2860_NVRAM, "wan_ipaddr");
-			nvram_bufset(RT2860_NVRAM, "lan_ipaddr", wan_ip);
-			need_commit = 1;
-#endif
-		}
-		if (!strncmp(mode, "2", 2)) {
-#if !defined CONFIG_RAETH_ROUTER && !defined CONFIG_MAC_TO_MAC_MODE && !defined CONFIG_RT_3052_ESW && !defined CONFIG_ICPLUS_PHY
-			/*
-			 * mode: gateway (or ap-client) -> ethernet-converter
-			 * config: wan_ip(wired) overwrites lan_ip(wired) 
-			 *         lan_ip(wireless) overwrites wan_ip(wireless)
-			 */
-			wan_ip = nvram_bufget(RT2860_NVRAM, "wan_ipaddr");
-			lan_ip = nvram_bufget(RT2860_NVRAM, "lan_ipaddr");
-			nvram_bufset(RT2860_NVRAM, "lan_ipaddr", wan_ip);
-			nvram_bufset(RT2860_NVRAM, "wan_ipaddr", lan_ip);
-			need_commit = 1;
-#endif
-		}
-	}
-	else if (!strncmp(old_mode, "2", 2)) {
-		if (!strncmp(mode, "0", 2)) {
-			/*
-			 * mode: wireless-isp -> bridge
-			 * config: lan_ip(wired) overwrites lan_ip(bridge) -> the same
-			 */
-		}
-		else if (!strncmp(mode, "1", 2) || !strncmp(mode, "3", 2)) {
-#if !defined CONFIG_RAETH_ROUTER && !defined CONFIG_MAC_TO_MAC_MODE && !defined CONFIG_RT_3052_ESW && !defined CONFIG_ICPLUS_PHY
-			/*
-			 * mode: ethernet-converter -> gateway (or ap-client)
-			 * config: lan_ip(wired) overwrites wan_ip(wired) 
-			 *         wan_ip(wireless) overwrites lan_ip(wireless)
-			 */
-			wan_ip = nvram_bufget(RT2860_NVRAM, "wan_ipaddr");
-			lan_ip = nvram_bufget(RT2860_NVRAM, "lan_ipaddr");
-			nvram_bufset(RT2860_NVRAM, "lan_ipaddr", wan_ip);
-			nvram_bufset(RT2860_NVRAM, "wan_ipaddr", lan_ip);
-			need_commit = 1;
-#endif
-		}
-	}
+	nvram_init(RT2860_NVRAM);
+	char	*old_mode = nvram_bufget(RT2860_NVRAM, "OperationMode");
 
 	//new OperationMode
 	if (strncmp(mode, old_mode, 2))
@@ -1194,38 +1114,9 @@ static void setOpMode(webs_t wp, char_t *path, char_t *query)
 			nvram_bufset(RT2860_NVRAM, "ApCliEnable", "0");
 		need_commit = 1;
 	}
-	
+
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
-
-	// For 100PHY  ( Ethernet Convertor with one port only)
-	// If this is one port only board(IC+ PHY) then redirect
-	// the user browser to our alias ip address.
-	if (getOnePortOnly())
-	{
-		//     old mode is Gateway, and new mode is BRIDGE/WirelessISP/Apcli
-		if ((!strcmp(old_mode, "1") && !strcmp(mode, "0"))  ||
-				(!strcmp(old_mode, "1") && !strcmp(mode, "2"))  ||
-				(!strcmp(old_mode, "1") && !strcmp(mode, "3"))  )
-		{
-			char redirect_url[512];
-			char *lan_ip = nvram_get(RT2860_NVRAM, "lan_ipaddr");
-
-			if (!strlen(lan_ip))
-				lan_ip = "DEFAULT_LAN_IP";
-			snprintf(redirect_url, 512, "http://%s", lan_ip);
-			redirect_wholepage(wp, redirect_url);
-			goto final;
-		}
-
-		//     old mode is BRIDGE/WirelessISP/Apcli, and new mode is Gateway
-		if ((!strcmp(old_mode, "0") && !strcmp(mode, "1"))  ||
-				(!strcmp(old_mode, "2") && !strcmp(mode, "1"))  ||
-				(!strcmp(old_mode, "3") && !strcmp(mode, "1"))  ){
-			redirect_wholepage(wp, "http://172.32.1.254");
-			goto final;
-		}
-	}
 
 	outputTimerForReload(wp, 50000);
 

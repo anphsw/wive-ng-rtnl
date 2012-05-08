@@ -105,8 +105,6 @@ function initValue()
 
 function msg()
 {
-	if ((document.opmode.opMode[1].checked == true) && (<% isOnePortOnly(); %>))
-		alert("In order to access web page please \nchange or alias your IP address to 172.32.1.1");
 }
 
 </script>

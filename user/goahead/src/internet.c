@@ -448,15 +448,6 @@ char *getLanWanNamebyIf(char *ifname)
 		if(!strcmp(ifname, getWanIfName()))
 			return "WAN";
 		return ifname;
-#elif defined  CONFIG_ICPLUS_PHY && CONFIG_RT2860V2_AP_MBSS
-		char *num_s = nvram_get(RT2860_NVRAM, "BssidNum");
-		if(atoi(num_s) > 1 && !strcmp(ifname, "br0"))	/* multiple ssid */
-			return "LAN";
-		if(atoi(num_s) == 1 && !strcmp(ifname, "ra0"))
-			return "LAN";
-		if (!strcmp(ifname, getWanIfName()))
-			return "WAN";
-		return ifname;
 #else
 		if(!strcmp(ifname, "ra0"))
 			return "LAN";
