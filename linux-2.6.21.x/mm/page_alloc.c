@@ -1597,7 +1597,6 @@ nofail_alloc:
 		if (order > PAGE_ALLOC_COSTLY_ORDER)
 			goto nopage;
 
-		out_of_memory(zonelist, gfp_mask, order);
 #ifdef CONFIG_DELAY_OOM
 		if (restart_times<(HZ<<3))
 		{
@@ -1609,8 +1608,11 @@ nofail_alloc:
 		{
 			if (printk_ratelimit())
 				printk("Not free memory for allocate - reboot....");
+			out_of_memory(zonelist, gfp_mask, order);
 			emergency_restart();
 		}
+#else
+		out_of_memory(zonelist, gfp_mask, order);
 #endif
 		goto restart;
 	}
