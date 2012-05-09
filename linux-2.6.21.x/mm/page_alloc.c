@@ -108,7 +108,11 @@ static char * const zone_names[MAX_NR_ZONES] = {
 	 "Movable",
 };
 
-int min_free_kbytes = 1536;
+#if defined(CONFIG_RAETH_MEMORY_OPTIMIZATION) || defined(CONFIG_RT2860V2_AP_MEMORY_OPTIMIZATION)
+int min_free_kbytes = 1024;
+#else
+int min_free_kbytes = 1920;
+#endif
 
 static unsigned long __meminitdata nr_kernel_pages;
 static unsigned long __meminitdata nr_all_pages;

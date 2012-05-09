@@ -11,7 +11,7 @@ start() {
 
     # set reserved memory barrier
     if [ -f /tmp/is_32ram_dev ]; then
-	MIN_FREE=3072
+	MIN_FREE=1920
     else
 	MIN_FREE=1024
     fi
@@ -37,7 +37,8 @@ start() {
 	# max memory size
 	ulimit -m unlimited
 	# always overommit
-	sysctl -w vm.overcommit_memory=1
+	sysctl -w vm.overcommit_ratio=100
+	sysctl -w vm.overcommit_memory=2
     else
 	# heruistic overcommit
 	sysctl -w vm.overcommit_memory=0
