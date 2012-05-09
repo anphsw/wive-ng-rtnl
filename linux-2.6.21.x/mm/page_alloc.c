@@ -1583,6 +1583,11 @@ nofail_alloc:
 		if (page)
 			goto got_pg;
 	} else if ((gfp_mask & __GFP_FS) && !(gfp_mask & __GFP_NORETRY)) {
+		if (!try_set_zone_oom(zonelist)) {
+			schedule_timeout_uninterruptible(1);
+			goto restart;
+		}
+
 		/*
 		 * Go through the zonelist yet one more time, keep
 		 * very high watermark here, this is only to catch
@@ -1591,12 +1596,16 @@ nofail_alloc:
 		 */
 		page = get_page_from_freelist(gfp_mask|__GFP_HARDWALL, order,
 				zonelist, ALLOC_WMARK_HIGH|ALLOC_CPUSET);
-		if (page)
+		if (page) {
+			clear_zonelist_oom(zonelist);
 			goto got_pg;
+		}
 
 		/* The OOM killer will not help higher order allocs so fail */
-		if (order > PAGE_ALLOC_COSTLY_ORDER)
+		if (order > PAGE_ALLOC_COSTLY_ORDER) {
+			clear_zonelist_oom(zonelist);
 			goto nopage;
+		}
 
 #ifdef CONFIG_DELAY_OOM
 		if (restart_times<(HZ<<3))
@@ -1610,10 +1619,12 @@ nofail_alloc:
 			if (printk_ratelimit())
 				printk("Not free memory for allocate - reboot....");
 			out_of_memory(zonelist, gfp_mask, order);
+			clear_zonelist_oom(zonelist);
 			emergency_restart();
 		}
 #else
 		out_of_memory(zonelist, gfp_mask, order);
+		clear_zonelist_oom(zonelist);
 #endif
 		goto restart;
 	}
