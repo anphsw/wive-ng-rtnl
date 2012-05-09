@@ -443,8 +443,11 @@ void out_of_memory(struct zonelist *zonelist, gfp_t gfp_mask, int order)
 		break;
 
 	case CONSTRAINT_NONE:
-		if (sysctl_panic_on_oom)
+		if (sysctl_panic_on_oom) {
+			dump_stack();
+			show_mem();
 			panic("out of memory. panic_on_oom is selected\n");
+		}
                /* Fall-through */
 	case CONSTRAINT_CPUSET:
 		if (sysctl_oom_kill_allocating_task) {

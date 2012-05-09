@@ -1602,6 +1602,16 @@ nofail_alloc:
 		if (order > PAGE_ALLOC_COSTLY_ORDER)
 			goto nopage;
 
+		/*
+		 * GFP_THISNODE contains __GFP_NORETRY and we never hit this.
+		 * Sanity check for bare calls of __GFP_THISNODE, not real OOM.
+		 * The caller should handle page allocation failure by itself if
+		 * it specifies __GFP_THISNODE.
+		 * Note: Hugepage uses it but will hit PAGE_ALLOC_COSTLY_ORDER.
+		 */
+		if (gfp_mask & __GFP_THISNODE)
+			goto nopage;
+
 #ifdef CONFIG_DELAY_OOM
 		if (restart_times<(HZ<<3))
 		{
