@@ -1101,6 +1101,9 @@
 29) HW_NAT Foe table decrease to 4K (not more need for home and more stable).<br>
 30) Fix conntrack hash table/route hashtable configure in kernel.<br>
 31) Fix sysfs module registration regression.<br>
+32) Fix delay oom work with panic on oom enabled.<br>
+33) Fix bad oom call in some situations.<br>
+34) Update squashfs to 3.4 version.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
