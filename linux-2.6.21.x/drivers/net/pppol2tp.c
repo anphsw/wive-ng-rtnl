@@ -1113,7 +1113,7 @@ static int pppol2tp_xmit(struct ppp_channel *chan, struct sk_buff *skb)
 #ifndef UDP_ENCAP_L2TPINUDP
 	uhlen = 0;
 #else
-	uhlen = (tunnel->encap_type == UDP_ENCAP_L2TPINUDP) ? sizeof(struct udphdr) : 0;
+	uhlen = ((udp_sk(sk))->encap_type == UDP_ENCAP_L2TPINUDP) ? sizeof(struct udphdr) : 0;
 #endif
 	headroom = NET_SKB_PAD +
 		   sizeof(struct iphdr) + /* IP header */
