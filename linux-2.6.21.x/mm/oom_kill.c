@@ -466,9 +466,11 @@ retry:
 		if (!p) {
 			read_unlock(&tasklist_lock);
 #ifdef CONFIG_OOM_EMBEDDED_REBOOT
+			printk("Out of memory and no killable processes...\n");
 			emergency_restart();
-#endif
+#else
 			panic("Out of memory and no killable processes...\n");
+#endif
 		}
 
 		if (oom_kill_process(p, points, "Out of memory"))
