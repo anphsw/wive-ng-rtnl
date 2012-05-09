@@ -1110,7 +1110,11 @@ static int pppol2tp_xmit(struct ppp_channel *chan, struct sk_buff *skb)
 	 * make room. Adjust truesize.
 	 */
 	old_headroom = skb_headroom(skb);
+#ifndef UDP_ENCAP_L2TPINUDP
+	uhlen = 0;
+#else
 	uhlen = (tunnel->encap == UDP_ENCAP_L2TPINUDP) ? sizeof(struct udphdr) : 0;
+#endif
 	headroom = NET_SKB_PAD +
 		   sizeof(struct iphdr) + /* IP header */
 		   uhlen +		/* UDP header (if L2TP_ENCAPTYPE_UDP) */
