@@ -1079,7 +1079,6 @@ static int pppol2tp_xmit(struct ppp_channel *chan, struct sk_buff *skb)
 	int error;
 	u16 udp_len;
 	int hdr_len;
-	int headroom;
 	int data_len = skb->len;
 	struct pppol2tp_session *session;
 	struct pppol2tp_tunnel *tunnel;
@@ -1110,7 +1109,8 @@ static int pppol2tp_xmit(struct ppp_channel *chan, struct sk_buff *skb)
 	 * UDP and L2TP and PPP headers. If not enough, expand it to
 	 * make room. Adjust truesize.
 	 */
-	uhlen = (tunnel->encap == L2TP_ENCAPTYPE_UDP) ? sizeof(struct udphdr) : 0;
+	old_headroom = skb_headroom(skb);
+	uhlen = (tunnel->encap == UDP_ENCAP_L2TPINUDP) ? sizeof(struct udphdr) : 0;
 	headroom = NET_SKB_PAD +
 		   sizeof(struct iphdr) + /* IP header */
 		   uhlen +		/* UDP header (if L2TP_ENCAPTYPE_UDP) */
