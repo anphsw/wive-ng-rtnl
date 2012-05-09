@@ -1611,10 +1611,7 @@ nofail_alloc:
 		}
 		else
 		{
-			if (printk_ratelimit())
-				printk("Not free memory for allocate - reboot....");
 			out_of_memory(zonelist, gfp_mask, order);
-			emergency_restart();
 		}
 #else
 		out_of_memory(zonelist, gfp_mask, order);
