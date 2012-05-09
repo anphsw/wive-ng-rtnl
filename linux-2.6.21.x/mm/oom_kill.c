@@ -434,7 +434,6 @@ void out_of_memory(struct zonelist *zonelist, gfp_t gfp_mask, int order)
 	 * NUMA) that may require different handling.
 	 */
 	constraint = constrained_alloc(zonelist, gfp_mask);
-	cpuset_lock();
 	read_lock(&tasklist_lock);
 
 	switch (constraint) {
@@ -466,7 +465,6 @@ retry:
 		/* Found nothing?!?! Either we hang forever, or we panic. */
 		if (!p) {
 			read_unlock(&tasklist_lock);
-			cpuset_unlock();
 #ifdef CONFIG_OOM_EMBEDDED_REBOOT
 			emergency_restart();
 #endif
@@ -484,7 +482,6 @@ out:
 	oom_reconfigure_wanted++;
 #endif
 	read_unlock(&tasklist_lock);
-	cpuset_unlock();
 
 	/*
 	 * Give "p" a good chance of killing itself before we
