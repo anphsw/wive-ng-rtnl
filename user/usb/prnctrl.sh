@@ -7,15 +7,29 @@ LOG="logger -t prnctrl"
 port=${MDEV##*lp}
 devs="/dev/usb/$MDEV"
 
+upload_firmware() {
+    # For GDI printers put printers firmware
+    # file in /etc, rename to prnfw.dl
+    if [ -f /opt/etc/prnfw.dl ]; then
+	FW="/opt/etc/prnfw.dl"
+    elif [ -f /etc/prnfw.dl ]; then
+        FW="/etc/prnfw.dl"
+    else
+	FW=""
+    fi
+    # if found - upload
+    if [ "$FW" != "" ]; then
+	$LOG "Upload firmware $FW to printer $MDEV to $devs."
+	cat $FW > "$devs"
+    else
+	$LOG "Not found firmware for printer"
+    fi
+}
+
 if [ "$ACTION" = "add" ]; then
     eval `nvram_buf_get 2860 PrinterSrvEnabled PrinterSrvBidir`
     if [ "$PrinterSrvEnabled" = "1" ] && [ -z "`pidof p910nd`" ]; then
-	# For GDI printers put printers firmware
-	# file in /etc, rename to prnfw.dl
-	if [ -f /etc/prnfw.dl ]; then
-	    $LOG "Upload firmware /etc/prnfw.dl to printer $MDEV to $devs."
-	    cat /etc/prnfw.dl > "$devs"
-	fi
+	upload_firmware
 	$LOG "Start p910nd daemon on port 910${port}"
 	if [ "$PrinterSrvBidir" = "1" ]; then
 	    /bin/p910nd -b -f "$devs" "$port"
