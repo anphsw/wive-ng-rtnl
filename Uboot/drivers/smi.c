@@ -2,7 +2,7 @@
 * Copyright c		  Realtek Semiconductor Corporation, 2006 
 * All rights reserved.
 *
-* Program : Control  smi connected RTL8366
+* Program : Control smi connected RTL8367
 * Abstract :
 * Author : Yu-Mei Pan (ympan@realtek.com.cn)
 *  $Id: smi.c,v 1.2 2008-04-10 03:04:19 shiehyy Exp $
@@ -17,26 +17,17 @@
 #include <common.h>		/* for cpu_to_le32() and cpu_to_le32() */
 #include <ralink_gpio.h>
 
-//#define DELAY			10000
-#define DELAY			166 * 2
-#define CLK_DURATION(clk)	{ int i; for(i=0; i<clk; i++); }
-#define _SMI_ACK_RESPONSE(ok)	{ /*if (!(ok)) return RT_ERR_FAILED; */}
+#define DELAY_SMI			2 /* 2 microseconds */
 
-typedef int gpioID;
-
-int ralink_gpio_write_bit(int idx, int value);
 int ralink_gpio_read_bit(int idx, int *value);
-int ralink_initGpioPin(unsigned int idx, int dir);
+int ralink_gpio_write_bit(int idx, int value);
+int ralink_gpio_direction(int idx, int dir);
 
-extern int input_txDelay, input_rxDelay;
-extern int rtl8367m_switch_inited;
+const int smi_SCK = 2;	/* GPIO used for SMI Clock Generation */	/* GPIO2 */
+const int smi_SDA = 1;	/* GPIO used for SMI Data signal */		/* GPIO1 */
+const int smi_RST = 7;	/* GPIO used for reset swtich */		/* GPIO7, not used */
 
-gpioID smi_SCK = 2;	/* GPIO used for SMI Clock Generation */	/* GPIO2 */
-gpioID smi_SDA = 1;	/* GPIO used for SMI Data signal */		/* GPIO1 */
-gpioID smi_RST = 7;	/* GPIO used for reset swtich */		/* GPIO7, not used */
-
-#define ack_timer	5
-#define max_register	0x018A 
+#define ack_timeout			5
 
 #define	PHY_CONTROL_REG			0
 #define	CONTROL_REG_PORT_POWER_BIT	0x800
@@ -45,69 +36,64 @@ void _smi_start(void)
 {
 
     /* change GPIO pin to Output only */
-    ralink_initGpioPin(smi_SDA, RALINK_GPIO_DIR_OUT);
-    ralink_initGpioPin(smi_SCK, RALINK_GPIO_DIR_OUT);
+    ralink_gpio_direction(smi_SDA, RALINK_GPIO_DIR_OUT);
+    ralink_gpio_direction(smi_SCK, RALINK_GPIO_DIR_OUT);
 
     /* Initial state: SCK: 0, SDA: 1 */
     ralink_gpio_write_bit(smi_SCK, 0);
     ralink_gpio_write_bit(smi_SDA, 1);
-    CLK_DURATION(DELAY);
+    udelay(DELAY_SMI);
 
     /* CLK 1: 0 -> 1, 1 -> 0 */
     ralink_gpio_write_bit(smi_SCK, 1);
-    CLK_DURATION(DELAY);
+    udelay(DELAY_SMI);
     ralink_gpio_write_bit(smi_SCK, 0);
-    CLK_DURATION(DELAY);
+    udelay(DELAY_SMI);
 
     /* CLK 2: */
     ralink_gpio_write_bit(smi_SCK, 1);
-    CLK_DURATION(DELAY);
+    udelay(DELAY_SMI);
     ralink_gpio_write_bit(smi_SDA, 0);
-    CLK_DURATION(DELAY);
+    udelay(DELAY_SMI);
     ralink_gpio_write_bit(smi_SCK, 0);
-    CLK_DURATION(DELAY);
+    udelay(DELAY_SMI);
     ralink_gpio_write_bit(smi_SDA, 1);
-
 }
-
-
 
 void _smi_writeBit(uint16 signal, uint32 bitLen)
 {
     for( ; bitLen > 0; bitLen--)
     {
-	CLK_DURATION(DELAY);
+	udelay(DELAY_SMI);
 
 	/* prepare data */
 	if ( signal & (1<<(bitLen-1)) ) 
 	    ralink_gpio_write_bit(smi_SDA, 1);
 	else
 	    ralink_gpio_write_bit(smi_SDA, 0);
-	CLK_DURATION(DELAY);
+	udelay(DELAY_SMI);
 
 	/* clocking */
 	ralink_gpio_write_bit(smi_SCK, 1);
-	CLK_DURATION(DELAY);
+	udelay(DELAY_SMI);
 	ralink_gpio_write_bit(smi_SCK, 0);
     }
 }
-
-
 
 void _smi_readBit(uint32 bitLen, uint32 *rData) 
 {
     uint32 u;
 
     /* change GPIO pin to Input only */
-    ralink_initGpioPin(smi_SDA, RALINK_GPIO_DIR_IN);
+    ralink_gpio_direction(smi_SDA, RALINK_GPIO_DIR_IN);
 
     for (*rData = 0; bitLen > 0; bitLen--)
     {
-	CLK_DURATION(DELAY);
+	udelay(DELAY_SMI);
 
 	/* clocking */
 	ralink_gpio_write_bit(smi_SCK, 1);
-	CLK_DURATION(DELAY);
+	udelay(DELAY_SMI);
 	ralink_gpio_read_bit(smi_SDA, &u);
 	ralink_gpio_write_bit(smi_SCK, 0);
 
@@ -115,38 +101,32 @@ void _smi_readBit(uint32 bitLen, uint32 *rData)
     }
 
     /* change GPIO pin to Output only */
-    ralink_initGpioPin(smi_SDA, RALINK_GPIO_DIR_OUT);
+    ralink_gpio_direction(smi_SDA, RALINK_GPIO_DIR_OUT);
 }
-
-
 
 void _smi_stop(void)
 {
-
-    CLK_DURATION(DELAY);
+    udelay(DELAY_SMI);
     ralink_gpio_write_bit(smi_SDA, 0);
     ralink_gpio_write_bit(smi_SCK, 1);
-    CLK_DURATION(DELAY);
+    udelay(DELAY_SMI);
     ralink_gpio_write_bit(smi_SDA, 1);
-    CLK_DURATION(DELAY);
+    udelay(DELAY_SMI);
     ralink_gpio_write_bit(smi_SCK, 1);
-    CLK_DURATION(DELAY);
+    udelay(DELAY_SMI);
     ralink_gpio_write_bit(smi_SCK, 0);
-    CLK_DURATION(DELAY);
+    udelay(DELAY_SMI);
     ralink_gpio_write_bit(smi_SCK, 1);
 
     /* add a click */
-    CLK_DURATION(DELAY);
+    udelay(DELAY_SMI);
     ralink_gpio_write_bit(smi_SCK, 0);
-    CLK_DURATION(DELAY);
+    udelay(DELAY_SMI);
     ralink_gpio_write_bit(smi_SCK, 1);
 
-
     /* change GPIO pin to Output only */
-    ralink_initGpioPin(smi_SDA, RALINK_GPIO_DIR_IN);
-    ralink_initGpioPin(smi_SCK, RALINK_GPIO_DIR_IN);
-
-
+    ralink_gpio_direction(smi_SDA, RALINK_GPIO_DIR_IN);
+    ralink_gpio_direction(smi_SCK, RALINK_GPIO_DIR_IN);
 }
 
 
@@ -172,7 +152,7 @@ int32 smi_read(uint32 mAddrs, uint32 *rData)
     do {
 	con++;
 	_smi_readBit(1, &ACK);		    /* ACK for issuing READ command*/
-    } while ((ACK != 0) && (con < ack_timer));
+    } while ((ACK != 0) && (con < ack_timeout));
 
     if (ACK != 0) ret = RT_ERR_FAILED;
 
@@ -182,7 +162,7 @@ int32 smi_read(uint32 mAddrs, uint32 *rData)
     do {
 	con++;
 	_smi_readBit(1, &ACK);		    /* ACK for setting reg_addr[7:0] */    
-    } while ((ACK != 0) && (con < ack_timer));
+    } while ((ACK != 0) && (con < ack_timeout));
 
     if (ACK != 0) ret = RT_ERR_FAILED;
 
@@ -192,7 +172,7 @@ int32 smi_read(uint32 mAddrs, uint32 *rData)
     do {
 	con++;
 	_smi_readBit(1, &ACK);		    /* ACK by RTL8369 */
-    } while ((ACK != 0) && (con < ack_timer));
+    } while ((ACK != 0) && (con < ack_timeout));
     if (ACK != 0) ret = RT_ERR_FAILED;
 
     _smi_readBit(8, &rawData);		    /* Read DATA [7:0] */
@@ -229,7 +209,7 @@ int32 smi_write(uint32 mAddrs, uint32 rData)
     do {
 	con++;
 	_smi_readBit(1, &ACK);		    /* ACK for issuing WRITE command*/
-    } while ((ACK != 0) && (con < ack_timer));
+    } while ((ACK != 0) && (con < ack_timeout));
     if (ACK != 0) ret = RT_ERR_FAILED;
 
     _smi_writeBit((mAddrs&0xff), 8);	     /* Set reg_addr[7:0] */
@@ -238,7 +218,7 @@ int32 smi_write(uint32 mAddrs, uint32 rData)
     do {
 	con++;
 	_smi_readBit(1, &ACK);		    /* ACK for setting reg_addr[7:0] */
-    } while ((ACK != 0) && (con < ack_timer));
+    } while ((ACK != 0) && (con < ack_timeout));
     if (ACK != 0) ret = RT_ERR_FAILED;
 
     _smi_writeBit((mAddrs>>8), 8);		 /* Set reg_addr[15:8] */
@@ -247,7 +227,7 @@ int32 smi_write(uint32 mAddrs, uint32 rData)
     do {
 	con++;
 	_smi_readBit(1, &ACK);		    /* ACK for setting reg_addr[15:8] */
-    } while ((ACK != 0) && (con < ack_timer));
+    } while ((ACK != 0) && (con < ack_timeout));
     if (ACK != 0) ret = RT_ERR_FAILED;
 
     _smi_writeBit(rData&0xff, 8);		/* Write Data [7:0] out */
@@ -256,7 +236,7 @@ int32 smi_write(uint32 mAddrs, uint32 rData)
     do {
 	con++;
 	_smi_readBit(1, &ACK);		    /* ACK for writting data [7:0] */
-    } while ((ACK != 0) && (con < ack_timer));
+    } while ((ACK != 0) && (con < ack_timeout));
     if (ACK != 0) ret = RT_ERR_FAILED;
 
     _smi_writeBit(rData>>8, 8);		    /* Write Data [15:8] out */
@@ -265,7 +245,7 @@ int32 smi_write(uint32 mAddrs, uint32 rData)
     do {
 	con++;
 	_smi_readBit(1, &ACK);			/* ACK for writting data [15:8] */
-    } while ((ACK != 0) && (con < ack_timer));
+    } while ((ACK != 0) && (con < ack_timeout));
     if (ACK != 0) ret = RT_ERR_FAILED;
 
     _smi_stop();
@@ -331,38 +311,32 @@ int ralink_gpio_ioctl(unsigned int req, int idx, unsigned long arg)
 
 int ralink_gpio_write_bit(int idx, int value)
 {
-	unsigned int req;
 	value &= 1;
 
-	if (0L <= idx && idx < RALINK_GPIO_NUMBER)
-		req = RALINK_GPIO_WRITE_BIT;
-	else
+	if (idx < 0 || idx >= RALINK_GPIO_NUMBER)
 		return -1;
 
-	return ralink_gpio_ioctl(req, idx, value);
+	return ralink_gpio_ioctl(RALINK_GPIO_WRITE_BIT, idx, value);
 }
 
 int ralink_gpio_read_bit(int idx, int *value)
 {
-	unsigned int req;
 	*value = 0;
 
-	if (0L <= idx && idx < RALINK_GPIO_NUMBER)
-		req = RALINK_GPIO_READ_BIT;
-	else
+	if (idx < 0 || idx >= RALINK_GPIO_NUMBER)
 		return -1;
 
-	if ((*value = ralink_gpio_ioctl(req, idx, value)) < 0)
+	if ((*value = ralink_gpio_ioctl(RALINK_GPIO_READ_BIT, idx, 0)) < 0)
 		return -1;
 
 	return *value;
 }
 
-int ralink_initGpioPin(unsigned int idx, int dir)
+int ralink_gpio_direction(int idx, int dir)
 {
 	unsigned long tmp;
 
-	if (idx < 0 || RALINK_GPIO_NUMBER <= idx)
+	if (idx < 0 || idx >= RALINK_GPIO_NUMBER)
 		return -1;
 
 	if (dir == RALINK_GPIO_DIR_OUT)
@@ -411,7 +385,7 @@ int ralink_initGpioPin(unsigned int idx, int dir)
 	return 0;
 }
 
-void LANWANPartition_8367m()
+void partition_bridge_default(void)
 {
 	rtk_portmask_t fwd_mask;
 
@@ -421,12 +395,12 @@ void LANWANPartition_8367m()
 	rtk_port_isolation_set(1, fwd_mask);
 	rtk_port_isolation_set(2, fwd_mask);
 	rtk_port_isolation_set(3, fwd_mask);
-	rtk_port_isolation_set(8, fwd_mask);
+	rtk_port_isolation_set(8, fwd_mask); // CPU LAN
 
 	/* WAN */
 	fwd_mask.bits[0] = 0x210;
 	rtk_port_isolation_set(4, fwd_mask);
-	rtk_port_isolation_set(9, fwd_mask);
+	rtk_port_isolation_set(9, fwd_mask); // CPU WAN
 
 	/* EFID setting LAN */
 	rtk_port_efid_set(0, 0);
@@ -440,52 +414,44 @@ void LANWANPartition_8367m()
 	rtk_port_efid_set(9, 1);
 }
 
-void asus_led_init(void)
+int rtl8367m_switch_init_pre(void)
 {
-	printf("PWR LED on\n");
-	ralink_initGpioPin(0, RALINK_GPIO_DIR_OUT);
-	ralink_gpio_write_bit(0, 1);	// PWR LED
-	ralink_gpio_write_bit(0, 0);	// PWR LED
-/*
-	printf("USB LED on\n");
-	ralink_initGpioPin(24, RALINK_GPIO_DIR_OUT);
-	ralink_gpio_write_bit(24, 1);	// USB LED
-	ralink_gpio_write_bit(24, 0);	// USB LED
-
-	printf("WAN LED on\n");
-	ralink_initGpioPin(27, RALINK_GPIO_DIR_OUT);
-	ralink_gpio_write_bit(27, 1);	// WAN LED
-	ralink_gpio_write_bit(27, 0);	// WAN LED
-
-	printf("LAN LED on\n");
-	ralink_initGpioPin(31, RALINK_GPIO_DIR_OUT);
-	ralink_gpio_write_bit(31, 1);	// LAN LED
-	ralink_gpio_write_bit(31, 0);	// LAN LED
-*/
-}
-
-unsigned long gpiomode_backup;
-
-int rtl8367m_switch_init_pre()
-{
+	printf("Init RTL8367M external switch...\n");
+	
 	rtk_api_ret_t retVal;
+	rtk_port_t port;
+	rtk_portmask_t portmask;
+	rtk_port_mac_ability_t mac_cfg;
+	rtk_port_phy_data_t pData = 0;
+	rtk_data_t txDelay, rxDelay;
 	unsigned long gpiomode;
 
-	gpiomode_backup = le32_to_cpu(*(volatile u32 *)(RALINK_REG_GPIOMODE));
-	printf("GPIOMODE current: %x\n",  gpiomode_backup);
-	gpiomode = gpiomode_backup;
-	gpiomode &= ~RALINK_GPIOMODE_I2C;
-	gpiomode |= RALINK_GPIOMODE_I2C;
-	printf("GPIOMODE writing: %x\n", gpiomode);
-	*(volatile u32 *)(RALINK_REG_GPIOMODE) = cpu_to_le32(gpiomode);
+	/* set RT3883 GPIO mode: disable I2C and JTAG (JTAG for LED LAN control) */
 	gpiomode = le32_to_cpu(*(volatile u32 *)(RALINK_REG_GPIOMODE));
-	printf("GPIOMODE current: %x\n",  gpiomode);
+	gpiomode |= RALINK_GPIOMODE_I2C;
+	gpiomode |= RALINK_GPIOMODE_JTAG;
+	*(volatile u32 *)(RALINK_REG_GPIOMODE) = cpu_to_le32(gpiomode);
 
+	/* delay 125ms after power-on-reset */
+	udelay(125000);
+
+	/* main switch init */
 	retVal = rtk_switch_init();
-	printf("rtk_switch_init(): return %d\n", retVal);
-	if (retVal !=RT_ERR_OK) return retVal;
+	if (retVal != RT_ERR_OK) {
+		printf("Init RTL8367M: FAILED! (%d)\n", retVal);
+		return retVal;
+	}
 
-	rtk_port_mac_ability_t mac_cfg;
+	/* power down LAN4, LAN3, LAN2, LAN1, WAN ports */
+	for (port = 0; port <= 4; port++) {
+		retVal = rtk_port_phyReg_get(port, PHY_CONTROL_REG, &pData);
+		if (retVal == RT_ERR_OK) {
+			pData |= CONTROL_REG_PORT_POWER_BIT;
+			rtk_port_phyReg_set(port, PHY_CONTROL_REG, pData);
+		}
+	}
+
+	/* configure both cpu RGMII to fixed gigabit mode w/o autoneg */
 	mac_cfg.forcemode	= MAC_FORCE;
 	mac_cfg.speed		= SPD_1000M;
 	mac_cfg.duplex		= FULL_DUPLEX;
@@ -493,134 +459,45 @@ int rtl8367m_switch_init_pre()
 	mac_cfg.nway		= 0;
 	mac_cfg.rxpause		= 1;
 	mac_cfg.txpause		= 1;
+	rtk_port_macForceLinkExt0_set(MODE_EXT_RGMII, &mac_cfg); // Ext0 -> RT3883 GMAC WAN
+	rtk_port_macForceLinkExt1_set(MODE_EXT_RGMII, &mac_cfg); // Ext1 -> RT3883 GMAC LAN
 
-	retVal = rtk_port_macForceLinkExt1_set(MODE_EXT_RGMII, &mac_cfg);
-	printf("rtk_port_macForceLinkExt1_set(): return %d\n", retVal);
-	if (retVal !=RT_ERR_OK) return retVal;
+	/* configure both cpu RGMII delay for RT3883 */
+	txDelay = 1; // 0..1
+	rxDelay = 0; // 0..7
+	rtk_port_rgmiiDelayExt0_set(txDelay, rxDelay); // Ext0 -> RT3883 GMAC WAN
+	rtk_port_rgmiiDelayExt1_set(txDelay, rxDelay); // Ext1 -> RT3883 GMAC LAN
 
-	/* power down all ports */
-	rtk_port_phy_data_t pData;
-	rtk_port_phyReg_get(0, PHY_CONTROL_REG, &pData);
-	pData |= CONTROL_REG_PORT_POWER_BIT;
-	rtk_port_phyReg_set(0, PHY_CONTROL_REG, pData);
+	/* configure bridge isolation [LAN4 LAN3 LAN2 LAN1] [WAN] */
+	partition_bridge_default();
 
-	rtk_port_phyReg_get(1, PHY_CONTROL_REG, &pData);
-	pData |= CONTROL_REG_PORT_POWER_BIT;
-	rtk_port_phyReg_set(1, PHY_CONTROL_REG, pData);
+	/* configure PHY leds */
+	portmask.bits[0] = 0x1F;	// LAN4, LAN3, LAN2, LAN1, WAN
+	rtk_led_enable_set(LED_GROUP_0, portmask);
+	rtk_led_enable_set(LED_GROUP_1, portmask);
+	rtk_led_operation_set(LED_OP_PARALLEL);
+	rtk_led_groupConfig_set(LED_GROUP_0, LED_CONFIG_SPD10010ACT);	// group 0 - RJ45 green LED
+	rtk_led_groupConfig_set(LED_GROUP_1, LED_CONFIG_SPD1000ACT);	// group 1 - RJ45 yellow LED
 
-	rtk_port_phyReg_get(2, PHY_CONTROL_REG, &pData);
-	pData |= CONTROL_REG_PORT_POWER_BIT;
-	rtk_port_phyReg_set(2, PHY_CONTROL_REG, pData);
+	printf("Init RTL8367M: SUCCESS!\n");
 
-	rtk_port_phyReg_get(3, PHY_CONTROL_REG, &pData);
-	pData |= CONTROL_REG_PORT_POWER_BIT;
-	rtk_port_phyReg_set(3, PHY_CONTROL_REG, pData);
-
-	rtk_port_phyReg_get(4, PHY_CONTROL_REG, &pData);
-	pData |= CONTROL_REG_PORT_POWER_BIT;
-	rtk_port_phyReg_set(4, PHY_CONTROL_REG, pData);
-
-	rtk_data_t txDelay_ro, rxDelay_ro;
-	rtk_port_rgmiiDelayExt1_get(&txDelay_ro, &rxDelay_ro);
-	printf("org Ext1 txDelay: %d, rxDelay: %d\n", txDelay_ro, rxDelay_ro);
-
-	rtk_data_t txDelay = 0;
-	rtk_data_t rxDelay = 7;
-	printf("new Ext txDelay: %d, rxDelay: %d\n", txDelay, rxDelay);
-	retVal = rtk_port_rgmiiDelayExt1_set(txDelay, rxDelay);
-	printf("rtk_port_rgmiiDelayExt1_set(): return %d\n", retVal);
-	if (retVal !=RT_ERR_OK) return retVal;
-
-	LANWANPartition_8367m();
-
-	rtk_portmask_t portmask;
-	portmask.bits[0] = 0x1F;
-
-	retVal = rtk_led_enable_set(LED_GROUP_0, portmask);
-	printf("rtk_led_enable_set(LED_GROUP_0...): return %d\n", retVal);
-	if (retVal !=RT_ERR_OK) return retVal;
-	retVal = rtk_led_enable_set(LED_GROUP_1, portmask);
-	printf("rtk_led_enable_set(LED_GROUP_1...): return %d\n", retVal);
-	if (retVal !=RT_ERR_OK) return retVal;
-
-	retVal = rtk_led_operation_set(LED_OP_PARALLEL);
-	printf("rtk_led_operation_set(): return %d\n", retVal);
-	if (retVal !=RT_ERR_OK) return retVal;
-	retVal = rtk_led_groupConfig_set(LED_GROUP_0, LED_CONFIG_SPD10010ACT);
-	printf("rtk_led_groupConfig_set(LED_GROUP_0...): return %d\n", retVal);
-	if (retVal !=RT_ERR_OK) return retVal;
-	retVal = rtk_led_groupConfig_set(LED_GROUP_1, LED_CONFIG_SPD1000ACT);
-	printf("rtk_led_groupConfig_set(LED_GROUP_1...): return %d\n", retVal);
-	if (retVal !=RT_ERR_OK) return retVal;
-
-	rtl8367m_switch_inited = 1;
 	return RT_ERR_OK;
 }
 
-int
-rtl8367m_switch_init()
+int rtl8367m_switch_init_post(void)
 {
 	rtk_api_ret_t retVal;
+	rtk_port_t port;
+	rtk_port_phy_data_t pData = 0;
 
-	printf("software reset RTL8367M...\n");
-	rtl8370_setAsicReg(0x1322, 1);	// software reset
-	udelay(1000);
+	/* power up LAN4, LAN3, LAN2, LAN1 ports */
+	for (port = 0; port <= 3; port++) {
+		retVal = rtk_port_phyReg_get(port, PHY_CONTROL_REG, &pData);
+		if (retVal == RT_ERR_OK) {
+			pData &= ~CONTROL_REG_PORT_POWER_BIT;
+			rtk_port_phyReg_set(port, PHY_CONTROL_REG, pData);
+		}
+	}
 
-	retVal = rtk_switch_init();
-	printf("rtk_switch_init(): return %d\n", retVal);
-	if (retVal !=RT_ERR_OK) return retVal;
-
-	rtk_port_mac_ability_t mac_cfg;
-	mac_cfg.forcemode	= MAC_FORCE;
-	mac_cfg.speed		= SPD_1000M;
-	mac_cfg.duplex		= FULL_DUPLEX;
-	mac_cfg.link		= 1;
-	mac_cfg.nway		= 0;
-	mac_cfg.rxpause		= 1;
-	mac_cfg.txpause		= 1;
-
-	retVal = rtk_port_macForceLinkExt1_set(MODE_EXT_RGMII, &mac_cfg);
-	printf("rtk_port_macForceLinkExt1_set(): return %d\n", retVal);
-	if (retVal !=RT_ERR_OK) return retVal;
-
-	/* power down default wan port */
-	rtk_port_phy_data_t pData;
-	rtk_port_phyReg_get(4, PHY_CONTROL_REG, &pData);
-	pData |= CONTROL_REG_PORT_POWER_BIT;
-	rtk_port_phyReg_set(4, PHY_CONTROL_REG, pData);
-
-	rtk_data_t txDelay_ro, rxDelay_ro;
-	rtk_port_rgmiiDelayExt1_get(&txDelay_ro, &rxDelay_ro);
-	printf("org Ext1 txDelay: %d, rxDelay: %d\n", txDelay_ro, rxDelay_ro);
-
-	rtk_data_t txDelay = 1;
-	rtk_data_t rxDelay = 0;
-	printf("new Ext txDelay: %d, rxDelay: %d\n", txDelay, rxDelay);
-	retVal = rtk_port_rgmiiDelayExt1_set(txDelay, rxDelay);
-	printf("rtk_port_rgmiiDelayExt1_set(): return %d\n", retVal);
-	if (retVal !=RT_ERR_OK) return retVal;
-
-	LANWANPartition_8367m();
-
-	rtk_portmask_t portmask;
-	portmask.bits[0] = 0x1F;
-
-	retVal = rtk_led_enable_set(LED_GROUP_0, portmask);
-	printf("rtk_led_enable_set(LED_GROUP_0...): return %d\n", retVal);
-	if (retVal !=RT_ERR_OK) return retVal;
-	retVal = rtk_led_enable_set(LED_GROUP_1, portmask);
-	printf("rtk_led_enable_set(LED_GROUP_1...): return %d\n", retVal);
-	if (retVal !=RT_ERR_OK) return retVal;
-	retVal = rtk_led_operation_set(LED_OP_PARALLEL);
-	printf("rtk_led_operation_set(): return %d\n", retVal);
-	if (retVal !=RT_ERR_OK) return retVal;
-	retVal = rtk_led_groupConfig_set(LED_GROUP_0, LED_CONFIG_SPD10010ACT);
-	printf("rtk_led_groupConfig_set(LED_GROUP_0...): return %d\n", retVal);
-	if (retVal !=RT_ERR_OK) return retVal;
-	retVal = rtk_led_groupConfig_set(LED_GROUP_1, LED_CONFIG_SPD1000ACT);
-	printf("rtk_led_groupConfig_set(LED_GROUP_1...): return %d\n", retVal);
-	if (retVal !=RT_ERR_OK) return retVal;
-
-	rtl8367m_switch_inited = 1;
 	return RT_ERR_OK;
 }

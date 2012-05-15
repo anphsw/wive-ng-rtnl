@@ -8,7 +8,13 @@
 #include <rt_mmap.h>
 #include <ralink_gpio.h>
 
-#define BTN_RESET 10
+#if defined(RT3883_ASIC_BOARD)
+#define BTN_RESET	13
+#define LED_POWER	0
+#elif defined(RT3052_ASIC_BOARD)
+#define BTN_RESET	10
+#define LED_POWER	9
+#endif
 
 unsigned long gpiomode_org;
 
@@ -177,12 +183,12 @@ unsigned long DETECT(void)
 
 void LEDON(void)
 {
-	ralink_gpio_write_bit2(GPIO_POWER_LED, 0);
+	ralink_gpio_write_bit2(LED_POWER, 0);
 }
 
 void LEDOFF(void)
 {
-	ralink_gpio_write_bit2(GPIO_POWER_LED, 1);
+	ralink_gpio_write_bit2(LED_POWER, 1);
 }
 
 void gpio_init(void)
@@ -196,7 +202,7 @@ void gpio_init(void)
         gpiomode |= RALINK_GPIOMODE_DFT;
 	*(volatile u32 *)(RALINK_REG_GPIOMODE) = cpu_to_le32(gpiomode);
 
-	ralink_initGpioPin2(GPIO_POWER_LED, RALINK_GPIO_DIR_OUT);
+	ralink_initGpioPin2(LED_POWER, RALINK_GPIO_DIR_OUT);
 	ralink_initGpioPin2(BTN_RESET, RALINK_GPIO_DIR_IN);
 }
 

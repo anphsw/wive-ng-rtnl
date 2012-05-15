@@ -1103,6 +1103,7 @@
 31) Fix sysfs module registration regression.<br>
 32) Fix delay oom work with panic on oom enabled.<br>
 33) Fix bad oom call in some situations.<br>
+34) Uboot more correct RTL8367 esw support.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>

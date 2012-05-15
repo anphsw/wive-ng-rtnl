@@ -11445,26 +11445,6 @@ rtk_api_ret_t rtk_switch_init(void)
     rtk_api_ret_t retVal;
     uint32 regData1,regData2;
 
-	/* ASUS EXT */
-	#define DELAY			166
-	#define CLK_DURATION(clk)	{ int i; for(i=0; i<clk; i++); }
-	int count, count2;
-	for (count = 0, count2 = 0; count < 100; count++)
-	{
-		rtl8370_setAsicReg(0x13c2, 0x0249);
-		CLK_DURATION(DELAY);
-		rtl8370_getAsicReg(0x1300, &regData1);
-		CLK_DURATION(DELAY);
-		printf("get reg 0x1300: %x\n", regData1);
-		if (regData1 == 0x6088)
-		{
-			if (++count2 > 4)
-				break;
-		}
-		CLK_DURATION(DELAY);
-	}
-	/* ASUS EXT */
-
     if ((retVal = rtl8370_setAsicReg(0x13C2,0x0249))!=RT_ERR_OK)
         return retVal;
 

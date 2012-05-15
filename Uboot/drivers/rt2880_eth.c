@@ -1607,16 +1607,13 @@ static int rt2880_eth_setup(struct eth_device* dev)
 #endif
 // RT288x/RT388x + GigaSW
 #elif defined (MAC_TO_VITESSE_MODE)
-#ifdef RTL8367_SW
-	printf("set MDIO_CFG as MAC_FORCE, SPD 1000M, FULL_DUPLEX\n");
+	// set MDIO_CFG as MAC_FORCE, SPD 1000M, FULL_DUPLEX
 	RALINK_REG(MDIO_CFG)=cpu_to_le32((u32)(0x1F01DC01));
-	udelay(125000);
-	printf("\n Realtek giga Mac support.. \n");
-	i = rtl8367m_switch_init();
-	printf("rtl8367m_switch_init() return %d\n", i);
+#ifdef RTL8367_SW
+	printf("\n Realtek RTL8367M giga Mac support \n");
+	rtl8367m_switch_init_post();
 #else
 	printf("\n Vitesse giga Mac support \n");
-	RALINK_REG(MDIO_CFG)=cpu_to_le32((u32)(0x1F01DC01));
 	ResetSWusingGPIOx();
 	udelay(125000);
 	vtss_init();
