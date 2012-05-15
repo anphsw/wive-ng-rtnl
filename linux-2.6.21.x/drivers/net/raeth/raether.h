@@ -30,7 +30,7 @@
 #ifdef CONFIG_RAETH_ROUTER
 #define NUM_RX_DESC     128
 #define NUM_TX_DESC    	128
-#elif CONFIG_RT_3052_ESW
+#elif defined CONFIG_RT_3052_ESW
 #define NUM_RX_DESC     64
 #define NUM_TX_DESC     64
 #else
@@ -42,7 +42,7 @@
 /* To avoid driver tx ring full */
 #define NUM_RX_DESC	512
 #define NUM_TX_DESC	512
-#elif CONFIG_RT_3052_ESW /* for 305x/335x ralink say max=128 */
+#elif defined CONFIG_RT_3052_ESW /* for 305x/335x ralink say max=128 */
 #define NUM_RX_DESC     128
 #define NUM_TX_DESC     128
 #else
