@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2006-2008 Junjiro Okajima
- * Copyright (C) 2006-2008 Tomas Matejicek, slax.org
+ * Copyright (C) 2006 Junjiro Okajima
+ * Copyright (C) 2006 Tomas Matejicek, slax.org
  *
  * LICENSE follows the described one in lzma.
  */
 
-/* $Id: sqlzma.h,v 1.20 2008-03-12 16:58:34 jro Exp $ */
+/* $Id: sqlzma.h,v 1.1 2007-06-05 09:25:21 steven Exp $ */
 
 #ifndef __sqlzma_h__
 #define __sqlzma_h__
@@ -22,6 +22,13 @@
 #endif
 #define _7ZIP_BYTE_DEFINED
 
+/*
+ * detect the compression method automatically by the first byte of compressed
+ * data.
+ * according to rfc1950, the first byte of zlib compression must be 0x?8.
+ */
+#define is_lzma(c)	(c == 0x5d)
+
 /* ---------------------------------------------------------------------- */
 
 #ifdef __cplusplus
@@ -30,11 +37,8 @@ extern "C" {
 
 #ifndef __KERNEL__
 /* for mksquashfs only */
-struct sqlzma_opts {
-	unsigned int	try_lzma;
-	unsigned int 	dicsize;
-};
-int sqlzma_cm(struct sqlzma_opts *opts, z_stream *stream);
+int sqlzma_cm(int lzma, z_stream *stream, Bytef *next_in, uInt avail_in,
+	      Bytef *next_out, uInt avail_out);
 #endif
 
 /* ---------------------------------------------------------------------- */
@@ -54,7 +58,7 @@ enum {SQUN_PROB, SQUN_RESULT, SQUN_LAST};
 struct sqlzma_un {
 	int			un_lzma;
 	struct sized_buf	un_a[SQUN_LAST];
-	unsigned char           un_prob[31960]; /* unlzma 64KB - 1MB */
+	unsigned char		un_prob[31960]; /* unlzma 64KB */
 	z_stream		un_stream;
 #define un_cmbuf	un_stream.next_in
 #define un_cmlen	un_stream.avail_in
@@ -64,8 +68,7 @@ struct sqlzma_un {
 };
 
 int sqlzma_init(struct sqlzma_un *un, int do_lzma, unsigned int res_sz);
-int sqlzma_un(struct sqlzma_un *un, struct sized_buf *src,
-	      struct sized_buf *dst);
+int sqlzma_un(struct sqlzma_un *un, struct sized_buf *src, struct sized_buf *dst);
 void sqlzma_fin(struct sqlzma_un *un);
 
 /* ---------------------------------------------------------------------- */

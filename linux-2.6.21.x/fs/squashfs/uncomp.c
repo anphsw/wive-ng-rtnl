@@ -35,12 +35,12 @@
 #endif
 #endif /* __KERNEL__ */
 
-#include "sqlzma.h"
-#include <linux/LzmaDecode.h>
+#include "linux/sqlzma.h"
+#include "linux/LzmaDecode.h"
 
 static int LzmaUncompress(struct sqlzma_un *un)
 {
-	int err, i, ret;
+	int err=0, i, ret;
 	SizeT outSize, inProcessed, outProcessed, srclen;
 	/* it's about 24-80 bytes structure, if int is 32-bit */
 	CLzmaDecoderState state;
@@ -70,7 +70,7 @@ static int LzmaUncompress(struct sqlzma_un *un)
 #endif
 		err = -ENOMEM;
 		sbuf->sz = 0;
-		sbuf->buf = kmalloc(i, GFP_ATOMIC);
+		sbuf->buf = kzalloc(i, GFP_ATOMIC);
 		if (unlikely(!sbuf->buf))
 			goto out;
 		sbuf->sz = i;
@@ -101,7 +101,7 @@ static int LzmaUncompress(struct sqlzma_un *un)
 
  out:
 #ifndef __KERNEL__
-	if (err)
+	if (unlikely(err))
 		fprintf(stderr, "err %d\n", err);
 #endif
 	return err;
@@ -110,10 +110,8 @@ static int LzmaUncompress(struct sqlzma_un *un)
 int sqlzma_un(struct sqlzma_un *un, struct sized_buf *src,
 	      struct sized_buf *dst)
 {
-	int err;
-	short by_lzma = 1;
-
-	if (un->un_lzma) {
+	int err=0;
+	if (un->un_lzma && is_lzma(*src->buf)) {
 		un->un_cmbuf = src->buf;
 		un->un_cmlen = src->sz;
 		un->un_resbuf = dst->buf;
@@ -124,10 +122,11 @@ int sqlzma_un(struct sqlzma_un *un, struct sized_buf *src,
 		goto out;
 	}
 
-	by_lzma = 0;
 	err = zlib_inflateReset(&un->un_stream);
-	if (unlikely(err != Z_OK))
+	if (unlikely(err != Z_OK)) {
+		printk("%s: zlib_inflateReset %d\n", __func__, err);
 		goto out;
+	}
 	un->un_stream.next_in = src->buf;
 	un->un_stream.avail_in = src->sz;
 	un->un_stream.next_out = dst->buf;
@@ -137,37 +136,27 @@ int sqlzma_un(struct sqlzma_un *un, struct sized_buf *src,
 		err = 0;
 
  out:
+//this is very bad.... Fix me later!!!
+#ifndef CONFIG_SQUASHFS_NOERROR
 	if (unlikely(err)) {
 #ifdef __KERNEL__
 		WARN_ON_ONCE(1);
-#else
-		char a[64] = "ZLIB ";
-		if (by_lzma) {
-			strcpy(a, "LZMA ");
-#ifdef _REENTRANT
-			strerror_r(err, a + 5, sizeof(a) - 5);
-#else
-			strncat(a, strerror(err), sizeof(a) - 5);
-#endif
-		} else
-			strncat(a, zError(err), sizeof(a) - 5);
-		fprintf(stderr, "%s: %.*s\n", __func__, sizeof(a), a);
 #endif
 	}
+#endif
 	return err;
 }
 
 int sqlzma_init(struct sqlzma_un *un, int do_lzma, unsigned int res_sz)
 {
-	int err;
+	int err = -ENOMEM;
 
-	err = -ENOMEM;
 	un->un_lzma = do_lzma;
 	memset(un->un_a, 0, sizeof(un->un_a));
 	un->un_a[SQUN_PROB].buf = un->un_prob;
 	un->un_a[SQUN_PROB].sz = sizeof(un->un_prob);
 	if (res_sz) {
-		un->un_a[SQUN_RESULT].buf = kmalloc(res_sz, GFP_KERNEL);
+		un->un_a[SQUN_RESULT].buf = kzalloc(res_sz, GFP_KERNEL);
 		if (unlikely(!un->un_a[SQUN_RESULT].buf))
 			return err;
 		un->un_a[SQUN_RESULT].sz = res_sz;
@@ -176,7 +165,7 @@ int sqlzma_init(struct sqlzma_un *un, int do_lzma, unsigned int res_sz)
 	un->un_stream.next_in = NULL;
 	un->un_stream.avail_in = 0;
 #ifdef __KERNEL__
-	un->un_stream.workspace = kmalloc(zlib_inflate_workspacesize(),
+	un->un_stream.workspace = kzalloc(zlib_inflate_workspacesize(),
 					  GFP_KERNEL);
 	if (unlikely(!un->un_stream.workspace))
 		return err;

@@ -24,6 +24,7 @@
  */
 
 #include <linux/squashfs_fs.h>
+#include "sqlzma.h"
 
 struct squashfs_cache_entry {
 	long long	block;
@@ -63,11 +64,11 @@ struct squashfs_sb_info {
 	long long		*fragment_index;
 	unsigned int		*fragment_index_2;
 	char			*read_page;
-	struct mutex		read_data_mutex;
+	/* struct mutex		read_data_mutex; */
 	struct mutex		read_page_mutex;
 	struct mutex		meta_index_mutex;
 	struct meta_index	*meta_index;
-	z_stream		stream;
+	/* z_stream		stream; */
 	long long		*inode_lookup_table;
 	int			(*read_inode)(struct inode *i,  squashfs_inode_t \
 				inode);

@@ -21,6 +21,15 @@
  * squashfs.h
  */
 
+#ifdef CONFIG_SQUASHFS_1_0_COMPATIBILITY
+#undef CONFIG_SQUASHFS_1_0_COMPATIBILITY
+#endif
+#ifdef CONFIG_SQUASHFS_2_0_COMPATIBILITY
+#undef CONFIG_SQUASHFS_2_0_COMPATIBILITY
+#endif
+
+//#define SQUASHFS_TRACE
+
 #ifdef SQUASHFS_TRACE
 #define TRACE(s, args...)	printk(KERN_NOTICE "SQUASHFS: "s, ## args)
 #else
@@ -40,3 +49,43 @@ static inline struct squashfs_inode_info *SQUASHFS_I(struct inode *inode)
 {
 	return list_entry(inode, struct squashfs_inode_info, vfs_inode);
 }
+
+#if defined(CONFIG_SQUASHFS_1_0_COMPATIBILITY ) || defined(CONFIG_SQUASHFS_2_0_COMPATIBILITY)
+#define SQSH_EXTERN
+extern unsigned int squashfs_read_data(struct super_block *s, char *buffer,
+				long long index, unsigned int length,
+				long long *next_index, int srclength);
+extern int squashfs_get_cached_block(struct super_block *s, void *buffer,
+				long long block, unsigned int offset,
+				int length, long long *next_block,
+				unsigned int *next_offset);
+extern void release_cached_fragment(struct squashfs_sb_info *msblk, struct
+					squashfs_cache_entry *fragment);
+extern struct squashfs_cache_entry *get_cached_fragment(struct super_block
+					*s, long long start_block,
+					int length);
+extern struct inode *squashfs_iget(struct super_block *s, squashfs_inode_t inode, unsigned int inode_number);
+extern const struct address_space_operations squashfs_symlink_aops;
+extern const struct address_space_operations squashfs_aops;
+extern struct inode_operations squashfs_dir_inode_ops;
+#else
+#define SQSH_EXTERN static
+#endif
+
+#ifdef CONFIG_SQUASHFS_1_0_COMPATIBILITY
+extern int squashfs_1_0_supported(struct squashfs_sb_info *msblk);
+#else
+static inline int squashfs_1_0_supported(struct squashfs_sb_info *msblk)
+{
+	return 0;
+}
+#endif
+
+#ifdef CONFIG_SQUASHFS_2_0_COMPATIBILITY
+extern int squashfs_2_0_supported(struct squashfs_sb_info *msblk);
+#else
+static inline int squashfs_2_0_supported(struct squashfs_sb_info *msblk)
+{
+	return 0;
+}
+#endif
