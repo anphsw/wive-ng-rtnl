@@ -1,7 +1,7 @@
 #ifndef RA2882ETHEND_H
 #define RA2882ETHEND_H
 
-#define TX_TIMEOUT (2*HZ)
+#define TX_TIMEOUT (6*HZ)
 
 /* mtu and rx sizes */
 #ifdef CONFIG_RAETH_JUMBOFRAME
