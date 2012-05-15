@@ -541,13 +541,14 @@ __sum16 ip_vs_checksum_complete(struct sk_buff *skb, int offset)
 	return csum_fold(skb_checksum(skb, offset, skb->len - offset, 0));
 }
 
-static inline struct sk_buff *
-ip_vs_gather_frags(struct sk_buff *skb, u_int32_t user)
+static inline int ip_vs_gather_frags(struct sk_buff *skb, u_int32_t user)
 {
-	skb = ip_defrag(skb, user);
-	if (skb)
-		ip_send_check(skb->nh.iph);
-	return skb;
+	int err = ip_defrag(skb, user);
+
+	if (!err)
+		ip_send_check(ip_hdr(skb));
+
+	return err;
 }
 
 /*
