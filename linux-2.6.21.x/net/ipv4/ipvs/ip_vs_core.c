@@ -619,10 +619,8 @@ static int ip_vs_out_icmp(struct sk_buff **pskb, int *related)
 
 	/* reassemble IP fragments */
 	if (skb->nh.iph->frag_off & __constant_htons(IP_MF|IP_OFFSET)) {
-		skb = ip_vs_gather_frags(skb, IP_DEFRAG_VS_OUT);
-		if (!skb)
+		if (ip_vs_gather_frags(skb, IP_DEFRAG_VS_OUT))
 			return NF_STOLEN;
-		*pskb = skb;
 	}
 
 	iph = skb->nh.iph;
@@ -756,11 +754,9 @@ ip_vs_out(unsigned int hooknum, struct sk_buff **pskb,
 	/* reassemble IP fragments */
 	if (unlikely(iph->frag_off & __constant_htons(IP_MF|IP_OFFSET) &&
 		     !pp->dont_defrag)) {
-		skb = ip_vs_gather_frags(skb, IP_DEFRAG_VS_OUT);
-		if (!skb)
+		if (ip_vs_gather_frags(skb, IP_DEFRAG_VS_OUT))
 			return NF_STOLEN;
 		iph = skb->nh.iph;
-		*pskb = skb;
 	}
 
 	ihl = iph->ihl << 2;
@@ -861,12 +857,9 @@ ip_vs_in_icmp(struct sk_buff **pskb, int *related, unsigned int hooknum)
 
 	/* reassemble IP fragments */
 	if (skb->nh.iph->frag_off & __constant_htons(IP_MF|IP_OFFSET)) {
-		skb = ip_vs_gather_frags(skb,
-					 hooknum == NF_IP_LOCAL_IN ?
-					 IP_DEFRAG_VS_IN : IP_DEFRAG_VS_FWD);
-		if (!skb)
+		if (ip_vs_gather_frags(skb, hooknum == NF_IP_LOCAL_IN ?
+					    IP_DEFRAG_VS_IN : IP_DEFRAG_VS_FWD))
 			return NF_STOLEN;
-		*pskb = skb;
 	}
 
 	iph = skb->nh.iph;
