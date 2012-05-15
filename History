@@ -1105,6 +1105,7 @@
 33) Fix bad oom call in some situations.<br>
 34) Uboot more correct RTL8367 esw support.<br>
 35) Add check and upload printer firmware from /opt/etc/prnfw.dl.<br>
+36) Fix ip fragmentation regression introdused in 2.5.0.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>

@@ -1196,9 +1196,12 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 	if (nf_conntrack_fastnat && pf == PF_INET) {
 	    /* Gather fragments. */
-	    if (ip_hdr(*pskb)->frag_off & htons(IP_MF | IP_OFFSET)) {
-	        if(nf_ct_ipv4_gather_frags(*pskb, hooknum == NF_IP_PRE_ROUTING ? IP_DEFRAG_CONNTRACK_IN : IP_DEFRAG_CONNTRACK_OUT))
-		    return NF_STOLEN;
+	    if ((*pskb)->nh.iph->frag_off & htons(IP_MF|IP_OFFSET)) {
+		if (nf_ct_ipv4_gather_frags(*pskb,
+					    hooknum == NF_IP_PRE_ROUTING ?
+					    IP_DEFRAG_CONNTRACK_IN :
+					    IP_DEFRAG_CONNTRACK_OUT))
+			return NF_STOLEN;
 	    }
 	}
 #endif
