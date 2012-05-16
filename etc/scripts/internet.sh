@@ -46,6 +46,21 @@ addWds() {
     	    done
 	fi
     fi
+    if [ "$CONFIG_RT3090_AP_WDS" != "" ]; then
+	wds_en=`nvram_get 2860 WdsEnable`
+	if [ "$wds_en" != "0" ]; then
+    	    for i in `seq 0 3`; do
+    		ip addr flush dev wdsi$i > /dev/null 2>&1
+		if [ -d /proc/sys/net/ipv6 ] && [ "$IPv6_Enable" = "1" ]; then
+    		    ip -6 addr flush dev wdsi$i /dev/null 2>&1
+		fi
+		ip link set wdsi$i down > /dev/null 2>&1
+		ifconfig wdsi$i hw ether $WLAN_MAC_ADDR
+		brctl addif br0 wdsi$i
+    		ip link set wdsi$i up
+    	    done
+	fi
+    fi
 }
 
 addMBSSID() {
@@ -66,6 +81,22 @@ addMBSSID() {
 	    done
 	fi
     fi
+    if [ "$CONFIG_RT3090_AP_MBSS" != "" ]; then
+	bssidnum=`nvram_get 2860 BssidNum`
+	if [ "$bssidnum" != "0" ] && [ "$bssidnum" != "1" ]; then
+	    let "bssrealnum=$bssidnum-1"
+	    for i in `seq 1 $bssrealnum`; do
+    		ip addr flush dev rai$i > /dev/null 2>&1
+		if [ -d /proc/sys/net/ipv6 ] && [ "$IPv6_Enable" = "1" ]; then
+    		    ip -6 addr flush dev rai$i /dev/null 2>&1
+		fi
+		ip link set ra$i down > /dev/null 2>&1
+		ifconfig rai$i hw ether "$WLAN_MAC_ADDR"
+		brctl addif br0 rai$i
+    		ip link set rai$i up
+	    done
+	fi
+    fi
 }
 
 bridge_config() {
@@ -77,6 +108,10 @@ bridge_config() {
 	brctl addif br0 eth2
 	# add wifi interface
 	brctl addif br0 ra0
+	if [ "$CONFIG_RT3090_AP" != "" ]; theb
+	    # add wifi interface
+	    brctl addif br0 rai0
+	fi
 	addMBSSID
         addWds
         addMesh
@@ -91,6 +126,10 @@ gate_config() {
 	brctl addif br0 "$phys_lan_if"
 	# add wifi interface
 	brctl addif br0 ra0
+	if [ "$CONFIG_RT3090_AP" != "" ]; theb
+	    # add wifi interface
+	    brctl addif br0 rai0
+	fi
 	addMBSSID
 	addWds
 	addMesh
@@ -109,6 +148,10 @@ apcli_config() {
 	brctl addif br0 eth2
 	# add ap wifi interface
 	brctl addif br0 ra0
+	if [ "$CONFIG_RT3090_AP" != "" ]; theb
+	    # add wifi interface
+	    brctl addif br0 rai0
+	fi
 	if [ "$ApCliBridgeOnly" = "1" ]; then
 	    # add client wifi interface
 	    brctl addif br0 apcli0
@@ -125,6 +168,10 @@ spot_config() {
 	brctl addif br0 "$phys_lan_if"
 	# add wifi interface
 	brctl addif br0 ra0
+	if [ "$CONFIG_RT3090_AP" != "" ]; theb
+	    # add wifi interface
+	    brctl addif br0 rai0
+	fi
 	addMBSSID
 	addWds
 	addMesh

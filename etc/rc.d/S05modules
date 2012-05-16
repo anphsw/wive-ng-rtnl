@@ -33,6 +33,10 @@ start() {
 	    $LOG "Load wifi AP module..."
     	    modprobe -q rt2860v2_ap  "$mac"
 	fi
+	if [ "$CONFIG_RT3090_AP" != "" ]; then
+	    $LOG "Load RT3090 external wifi AP module..."
+	    modprobe -q rt3090_ap "$mac"
+	fi
 
 	if [ "$OperationMode" = "3" ]; then
 	    $LOG "WiFi interface up APCLI..."
@@ -50,6 +54,13 @@ start() {
 	    ifconfig ra0 hw ether	"$WLAN_MAC_ADDR"
 	    ifconfig ra0 txqueuelen	"$txqueuelen"
 	    ip link set ra0 up
+	fi
+	if [ "$CONFIG_RT3090_AP" != "" ]; then
+	    $LOG "WiFi RT3090 interface up..."
+	    # others modes
+	    ifconfig rai0 hw ether	"$WLAN_MAC_ADDR"
+	    ifconfig rai0 txqueuelen	"$txqueuelen"
+	    ip link set rai0 up
 	fi
 	$LOG "Tune wifi modules."
 	retune_wifi
@@ -148,6 +159,16 @@ wlan_down_all() {
 	ip link set mesh0 down > /dev/null 2>&1
 	brctl delif br0 mesh0 > /dev/null 2>&1
     fi
+    if [ "$CONFIG_RT3090_AP" != "" ]; then
+	for i in `seq 0 7`; do
+	    ip addr flush dev rai$i > /dev/null 2>&1
+	    if [ -d /proc/sys/net/ipv6 ] && [ "$IPv6_Enable" = "1" ]; then
+    		ip -6 addr flush dev rai$i > /dev/null 2>&1
+	    fi
+	    ip link set rai$i down > /dev/null 2>&1
+	    brctl delif br0 rai$i > /dev/null 2>&1
+	done
+    fi
 }
 
 retune_wifi() {
@@ -162,10 +183,10 @@ stop() {
 	wlan_down_all
 	if [ -d /sys/module/hw_nat ]; then
 	    $LOG "Unload hw_nat and wireless modules..."
-	    mod="hw_nat rt2860v2_ap rt2860v2_sta"
+	    mod="hw_nat rt2860v2_ap rt2860v2_sta rt3090_ap"
 	else
 	    $LOG "Unload wireless modules..."
-	    mod="rt2860v2_ap rt2860v2_sta"
+	    mod="rt2860v2_ap rt2860v2_sta rt3090_ap"
 	fi
 	for module in $mod
 	do
