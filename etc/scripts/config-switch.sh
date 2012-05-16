@@ -73,11 +73,10 @@ if [ ! -f /var/run/goahead.pid ]; then
     fi
 fi
 
-##############################################################################
-# Internal 3052 ESW
-##############################################################################
-if [ "$CONFIG_RT_3052_ESW" != "" ]; then
-    SWITCH_MODE=2
+##########################################################################
+# call this function only if VLAN as WAN need
+##########################################################################
+configs_system_vlans() {
     if [ ! -f /var/run/goahead.pid ]; then
 	##########################################################################
 	# Configure vlans in kernel. Only one per start
@@ -95,6 +94,16 @@ if [ "$CONFIG_RT_3052_ESW" != "" ]; then
 		vconfig add eth2 2
 	    fi
 	fi
+    fi
+}
+
+##############################################################################
+# Internal 3052 ESW
+##############################################################################
+if [ "$CONFIG_RT_3052_ESW" != "" ]; then
+    SWITCH_MODE=2
+    configs_system_vlans
+    if [ ! -f /var/run/goahead.pid ]; then
 	######################################################################
 	# workaroud for dir-300NRU and some devices
 	# with not correct configured from uboot
@@ -198,6 +207,7 @@ elif [ "$CONFIG_MAC_TO_MAC_MODE" != "" ] && [ "$CONFIG_RAETH_GMAC2" != "" ]; the
 ##############################################################################
 elif [ "$CONFIG_MAC_TO_MAC_MODE" != "" ] && [ "$CONFIG_RAETH_GMAC2" = "" ]; then
     SWITCH_MODE=1
+    configs_system_vlans
     ##########################################################################
     if [ "$CONFIG_RTL8367M" != "" ]; then
 	$LOG '##### config vlan partition (RTL ONE PHY) #####'
@@ -213,6 +223,7 @@ elif [ "$CONFIG_MAC_TO_MAC_MODE" != "" ] && [ "$CONFIG_RAETH_GMAC2" = "" ]; then
 ##############################################################################
 elif [ "$CONFIG_RAETH_ROUTER" != "" ]; then
     SWITCH_MODE=0
+    configs_system_vlans
     ##########################################################################
     $LOG '######## clear switch partition  ########'
     /etc/scripts/config-vlan.sh $SWITCH_MODE 0 > /dev/null 2>&1
