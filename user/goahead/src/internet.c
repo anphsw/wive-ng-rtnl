@@ -30,11 +30,14 @@
 #define IF_NAMESIZE IFNAMSIZ
 #endif
 
-#if defined(CONFIG_RAETH_ROUTER) || defined(CONFIG_MAC_TO_MAC_MODE) || defined(CONFIG_RT_3052_ESW)
+#if defined(CONFIG_RAETH_ROUTER) || defined(CONFIG_RT_3052_ESW)
 #define WAN_DEF "eth2.2"
-#else /* MARVELL & IC+ */
+#elif defined(CONFIG_RAETH_GMAC2) || defined(CONFIG_MAC_TO_MAC_MODE)  /* vetisse or rtl8367m dual phy */
+#define WAN_DEF "eth3"
+#else 			/* MARVELL & IC+ */
 #define WAN_DEF "eth2"
 #endif
+
 #define VPN_SIG	"ppp"
 #define VPN_DEF "ppp0"
 
@@ -442,17 +445,11 @@ char *getLanWanNamebyIf(char *ifname)
 	}
 
 	if (!strcmp(mode, "1") || !strcmp(mode, "4")) {	/* gateway mode or chillispot */
-#if defined(CONFIG_RAETH_ROUTER) || defined(CONFIG_MAC_TO_MAC_MODE) || defined(CONFIG_RT_3052_ESW)
 		if(!strcmp(ifname, "br0"))
 			return "LAN";
 		if(!strcmp(ifname, getWanIfName()))
 			return "WAN";
 		return ifname;
-#else
-		if(!strcmp(ifname, "ra0"))
-			return "LAN";
-		return ifname;
-#endif
 	}else if (!strncmp(mode, "2", 2)) {	/* ethernet convertor */
 		if(!strcmp("eth2", ifname))
 			return "LAN";
