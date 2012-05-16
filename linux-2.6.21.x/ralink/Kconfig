@@ -95,16 +95,26 @@ endmenu
 endif
 endmenu
 
-# split driver in one dir
-menu "AP MODE Ralink RT3xx/RT28xx wireless driver."
-source "drivers/net/wireless/rt2860v2/rt2860v2_ap/Kconfig"
-endmenu
-menu "STA/Client MODE Ralink RT3xx/RT28xx wireless driver."
-source "drivers/net/wireless/rt2860v2/rt2860v2_sta/Kconfig"
-endmenu
-menu "802.11a wireless driver."
-source "drivers/net/wireless/RT3090_ap/Kconfig"
-endmenu
+if RALINK_RT3052
+    menu "AP MODE Ralink RT335x wireless driver."
+    source "drivers/net/wireless/ralink/rt305x/rt2860v2_ap/Kconfig"
+    endmenu
+    menu "STA/Client MODE Ralink RT335x wireless driver."
+    source "drivers/net/wireless/ralink/rt305x/rt2860v2_sta/Kconfig"
+    endmenu
+endif
+
+if RALINK_RT3883
+    menu "AP MODE Ralink RT3883 wireless driver."
+    source "drivers/net/wireless/ralink/rt3883/rt2860v2_ap/Kconfig"
+    endmenu
+    menu "STA/Client MODE Ralink RT3883 wireless driver."
+    source "drivers/net/wireless/ralink/rt3883/rt2860v2_sta/Kconfig"
+    endmenu
+    menu "802.11 pci-e wireless driver."
+    source "drivers/net/wireless/ralink/rt3090/rt3090_ap/Kconfig"
+    endmenu
+endif
 
 menu "Ralink DEVICES."
 config RTDEV_USB

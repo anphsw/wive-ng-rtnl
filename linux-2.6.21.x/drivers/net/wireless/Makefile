@@ -44,6 +44,12 @@ obj-$(CONFIG_PCMCIA_WL3501)	+= wl3501_cs.o
 
 obj-$(CONFIG_USB_ZD1201)	+= zd1201.o
 
-obj-$(CONFIG_RT2860V2_AP)       += rt2860v2/rt2860v2_ap/
-obj-$(CONFIG_RT2860V2_STA)      += rt2860v2/rt2860v2_sta/
-obj-$(CONFIG_RT3090_AP)         += RT3090_ap/
+ifdef CONFIG_RALINK_RT3052
+obj-$(CONFIG_RT2860V2_AP)       += ralink/rt305x/rt2860v2_ap/
+obj-$(CONFIG_RT2860V2_STA)      += ralink/rt305x/rt2860v2_sta/
+endif
+ifdef CONFIG_RALINK_RT3883
+obj-$(CONFIG_RT2860V2_AP)       += ralink/rt3883/rt2860v2_ap/
+obj-$(CONFIG_RT2860V2_STA)      += ralink/rt3883/rt2860v2_sta/
+endif
+obj-$(CONFIG_RT3090_AP)         += ralink/rt3090/rt3090_ap/

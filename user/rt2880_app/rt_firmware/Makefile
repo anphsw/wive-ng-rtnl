@@ -52,11 +52,15 @@ endif
 ifdef CONFIG_RALINK_RT3883_3T3R
 	$(ROMFSINST) -S -e CONFIG_RALINK_RT3883_3T3R	RT3883_AP_3T3R_V0_1.bin		/etc/Wireless/RT3883_AP_3T3R_V0_1.bin
 	$(ROMFSINST) -S -e CONFIG_RALINK_RT3883_3T3R	defaults/RT2860.dat-3T3R-5G	/etc/Wireless/RT2860/RT2860.dat
-	$(ROMFSINST) -S -e CONFIG_RALINK_RT3883_3T3R	defaults/default-3T3R-5G		/etc/default/nvram_default
+	$(ROMFSINST) -S -e CONFIG_RALINK_RT3883_3T3R	defaults/default-3T3R-5G	/etc/default/nvram_default
 	$(ROMFSINST) -s /etc/Wireless/RT3883_AP_3T3R_V0_1.bin /etc/Wireless/rf.bin
 endif
-#5GHz-MODE-3090
+#2.4Gz-MODE-3090
+ifdef CONFIG_RT2860V2_AP
+	mkdir -p $(ROMFSDIR)/etc/Wireless/RT2860AP
 	$(ROMFSINST) -S -e CONFIG_RT3090_AP		RT3092_PCIe_LNA_2T2R_ALC_V1_2.bin /etc/Wireless/RT3092_PCIe_LNA_2T2R_ALC_V1_2.bin
+	$(ROMFSINST) -s /etc/Wireless/RT2860/RT2860.dat /etc/Wireless/RT2860AP/RT2860AP.dat
+endif
 ifdef CONFIG_RT2860V2_AP
 	mkdir -p $(ROMFSDIR)/etc/Wireless/RT2860AP
 	$(ROMFSINST) -s /etc/Wireless/RT2860/RT2860.dat /etc/Wireless/RT2860AP/RT2860AP.dat
