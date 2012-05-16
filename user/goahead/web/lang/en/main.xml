@@ -65,14 +65,14 @@
   <message msgid="treeapp reboot confirm" msgstr="Do you really want to reboot your router?" />
   <message msgid="treeapp system firewall" msgstr="System Security" />
 
-  <message msgid="treeapp usb" msgstr="USB App." />
-  <message msgid="treeapp storage" msgstr="Storage" />
+  <message msgid="treeapp usb" msgstr="USB services" />
+  <message msgid="treeapp storage" msgstr="Storage services" />
   <message msgid="treeapp useradmin" msgstr="User Admin" />
   <message msgid="treeapp ftpsrv" msgstr="FTP Server" />
   <message msgid="treeapp sambasrv" msgstr="SAMBA Server" />
   <message msgid="treeapp mediasrv" msgstr="MEDIA Server" />
   <message msgid="treeapp webcam" msgstr="Web Camera" />
-  <message msgid="treeapp disk" msgstr="Disk" />
+  <message msgid="treeapp disk" msgstr="Disk Management" />
   <message msgid="treeapp printersrv" msgstr="Printer Server" />
   <message msgid="treeapp usbinic" msgstr="USB iNIC" />
   
