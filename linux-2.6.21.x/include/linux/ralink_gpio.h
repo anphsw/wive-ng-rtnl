@@ -45,37 +45,21 @@
 #define RALINK_GPIO_DEVNAME	"gpio"		//nodename
 #define GPIO_DEV		"/dev/gpio"	//userlevel devname
 
-#if 0 /* BASE SDK CONFIG */
-#define GPIO_LED_WAN_GREEN      12
-#define GPIO_LED_WAN_ORANGE     14
-#define GPIO_LED_SEC_GREEN      13
-#define GPIO_WPS_LED_ORANGE  	13
-#define GPIO_WPS_LED_GREEN   	13
-//power led
-#ifdef CONFIG_RALINK_RT2880
-#define GPIO_POWER_LED		12
-#elif defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT2883) || \
-      defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT3052) || \
-      defined (CONFIG_RALINK_RT5350)
-#define GPIO_POWER_LED		9
-#elif defined (CONFIG_RALINK_RT3883)
-#define GPIO_POWER_LED		0
-#endif
-#else  /* FOR ACORP PRODUCT SECTION */
 #define GPIO_LED_WAN_GREEN      12
 #define GPIO_LED_WAN_ORANGE     12
 #define GPIO_LED_SEC_GREEN      13
-/* Only one LED in WR-150N/300N for WPS */
-#define GPIO_WPS_LED_ORANGE  	14
-#define GPIO_WPS_LED_GREEN   	14
 /* Power LED */
 #if defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT2883) || \
       defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT3052) || \
       defined (CONFIG_RALINK_RT5350)
 #define GPIO_POWER_LED		9
+/* Only one LED in WR-150N/300N for WPS */
+#define GPIO_WPS_LED_ORANGE  	14
+#define GPIO_WPS_LED_GREEN   	14
 #elif defined (CONFIG_RALINK_RT3883)
 #define GPIO_POWER_LED		0
-#endif
+#define GPIO_WPS_LED_ORANGE  	27
+#define GPIO_WPS_LED_GREEN   	27
 #endif
 
 /* Firmware update indicators */
@@ -297,12 +281,17 @@
 #define RALINK_GPIOMODE_PA_G		0x100000
 
 #else
-//error Please Choose System Type
+/* error Please Choose System Type */
 #endif
 
-// if you would like to enable GPIO mode for other pins, please modify this value
-// !! Warning: changing this value may make other features(MDIO, PCI, etc) lose efficacy
+/* if you would like to enable GPIO mode for other pins, please modify this value
+ !! Warning: changing this value may make other features(MDIO, PCI, etc) lose efficacy */
+#if defined(CONFIG_RALINK_RT3883)
+/* Disable UART Full, Disable JTAG (allow LAN LED) */
+#define RALINK_GPIOMODE_DFT		(RALINK_GPIOMODE_UARTF | RALINK_GPIOMODE_JTAG)
+#else
 #define RALINK_GPIOMODE_DFT		(RALINK_GPIOMODE_UARTF)
+#endif
 
 /*
  * bit is the unit of length
