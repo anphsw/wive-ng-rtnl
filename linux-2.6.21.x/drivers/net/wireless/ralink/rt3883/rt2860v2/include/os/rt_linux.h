@@ -118,8 +118,8 @@
 #ifdef RTMP_MAC_PCI
 #define AP_RTMP_FIRMWARE_FILE_NAME 	"/etc/Wireless/rf.bin"
 #define AP_PROFILE_PATH			"/etc/Wireless/RT2860AP/RT2860AP.dat"
-#define AP_NIC_DEVICE_NAME			"RT2860AP"
-#define AP_DRIVER_VERSION			"2.4.3.3"
+#define AP_NIC_DEVICE_NAME		"RT2860AP"
+#define AP_DRIVER_VERSION		"2.4.3.3"
 #ifdef MULTIPLE_CARD_SUPPORT
 #define CARD_INFO_PATH			"/etc/Wireless/RT2860AP/RT2860APCard.dat"
 #endif // MULTIPLE_CARD_SUPPORT //
@@ -137,8 +137,8 @@
 
 #ifdef CONFIG_STA_SUPPORT
 #ifdef RTMP_MAC_PCI
-#define STA_PROFILE_PATH			"/etc/Wireless/RT2860STA/RT2860STA.dat"
-#define STA_DRIVER_VERSION			"2.3.3.3"
+#define STA_PROFILE_PATH		"/etc/Wireless/RT2860STA/RT2860STA.dat"
+#define STA_DRIVER_VERSION		"2.3.3.3"
 #ifdef MULTIPLE_CARD_SUPPORT
 #define CARD_INFO_PATH			"/etc/Wireless/RT2860STA/RT2860STACard.dat"
 #endif // MULTIPLE_CARD_SUPPORT //
@@ -148,8 +148,8 @@
 #ifdef RTMP_RBUS_SUPPORT
 #define RTMP_FIRMWARE_FILE_NAME		"/etc/Wireless/rf.bin"
 #define PROFILE_PATH			"/etc/Wireless/RT2860i.dat"
-#define STA_PROFILE_PATH_RBUS	"/etc/Wireless/RT2860/RT2860.dat"
-#define RT2880_STA_DRIVER_VERSION		"1.0.0.0"
+#define STA_PROFILE_PATH_RBUS		"/etc/Wireless/RT2860/RT2860.dat"
+#define RT2880_STA_DRIVER_VERSION	"1.0.0.0"
 #endif // RTMP_RBUS_SUPPORT //
 
 extern	const struct iw_handler_def rt28xx_iw_handler_def;

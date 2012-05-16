@@ -67,7 +67,7 @@
 #endif // CONFIG_RALINK_RT3883_3T3R //
 
 #if defined(CONFIG_RALINK_RT3662_2T2R)
-#define EEPROM_DEFAULT_FILE_PATH                     "/etc_ro/Wireless/RT2860/RT3662_AP_2T2R_V0_0.bin"
+#define EEPROM_DEFAULT_FILE_PATH                     "/etc/Wireless/RT3662_AP_2T2R_V0_0.bin"
 #endif // CONFIG_RALINK_RT3662_2T2R //
 
 #if defined(CONFIG_RT2860V2_2850)
