@@ -71,15 +71,17 @@ getVpnIfName() {
 # WAN interface name -> $wan_if
 getWanIfName() {
     # phys wan name
-    if [ "$CONFIG_RT_3052_ESW" = "y" ]; then
+    if [ "$CONFIG_RT_3052_ESW" != "" ] || [ "$CONFIG_RAETH_ROUTER" != "" ]; then
 	# internal switch support
 	phys_wan_if="eth2.2"
-    elif [ "$CONFIG_RAETH_GMAC2" = "y" ]; then
-	# external switch support
+    elif [ "$CONFIG_MAC_TO_MAC_MODE" != "" ] && [ "$CONFIG_RAETH_GMAC2" = "" ]; then
+	# external one phy switch support
+	phys_wan_if="eth2.2"
+    elif [ "$CONFIG_MAC_TO_MAC_MODE" != "" ] && [ "$CONFIG_RAETH_GMAC2" != "" ]; then
+	# external dual phy switch support
 	phys_wan_if="eth3"
     else
-	# this is stub
-	# support only switched devices
+	# this is stub support only switched devices !!!
 	phys_wan_if="eth2.2"
     fi
     # real wan name
