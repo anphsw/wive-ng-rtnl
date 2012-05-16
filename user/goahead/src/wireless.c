@@ -452,7 +452,7 @@ static int getWlanStaInfo(int eid, webs_t wp, int argc, char_t **argv)
 	    // RSSI
 #if defined(CONFIG_RALINK_RT3050_1T1R)
 	    websWrite(wp, T("<td>%d</td>"), (int)(pe->AvgRssi0));
-#elif defined(CONFIG_RALINK_RT3051_1T2R) || defined(CONFIG_RALINK_RT3052_2T2R) || defined(CONFIG_RALINK_RT3352_2T2R)
+#elif defined(CONFIG_RALINK_RT3051_1T2R) || defined(CONFIG_RALINK_RT3052_2T2R) || defined(CONFIG_RALINK_RT3352_2T2R) || defined(CONFIG_RALINK_RT3662_2T2R)
 	    websWrite(wp, T("<td>%d,%d</td>"), (int)(pe->AvgRssi0), (int)(pe->AvgRssi1));
 #else
 	    websWrite(wp, T("<td>%d,%d,%d</td>"), (int)(pe->AvgRssi0), (int)(pe->AvgRssi1), (int)(pe->AvgRssi2));
