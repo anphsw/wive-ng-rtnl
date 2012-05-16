@@ -596,7 +596,7 @@ typedef union _BBP_R110_STRUC {
 #ifdef RALINK_ATE
 #define RTMP_BBP_CAN_WRITE(_pAd, _bbpId)	(!((ATE_ON(_pAd)) && ((_pAd)->ate.forceBBPReg == (_bbpId))))
 #else
-#define RTMP_BBP_CAN_WRTE(_pAd, _bbpId)	1
+#define RTMP_BBP_CAN_WRITE(_pAd, _bbpId)	1
 #endif // RALINK_ATE //
 
 
