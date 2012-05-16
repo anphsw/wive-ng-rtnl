@@ -5353,10 +5353,6 @@ INT RTMPQueryInformation(
 	UCHAR						tmp[64];
 #endif //SNMP
 
-#ifdef WMM_ACM_SUPPORT
-ACM_BANDWIDTH_INFO BwInfo, *pInfo;
-#endif
-
     switch(cmd) 
     {
         case RT_OID_DEVICE_NAME:
