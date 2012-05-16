@@ -251,92 +251,147 @@ static int listCountryCodes(int eid, webs_t wp, int argc, char_t **argv)
 	return 0;
 }
 
-//Jacky.Yang 7-Jan-2007, get Country region code in eeprom 0x39
-#if !defined (CONFIG_RALINK_RT3052) && !defined (CONFIG_RALINK_RT3352) && !defined (CONFIG_RALINK_RT5350)
-static int getEEPROMCountryCode(char *eeprom_addr)
-{
-	int socket_id, ret;
-	struct iwreq wrq;
-	char data[4096] = "";
-	int addr, value, p1, p2;
-
-	socket_id = socket(AF_INET, SOCK_DGRAM, 0);
-	if(socket_id < 0) {
-		printf("\nrtuser::error::Open socket error!\n\n");
-		return -1;
-	}
-
-	//strcpy(data, "39"); // Country region code in eeprom 0x39
-	strcpy(data, eeprom_addr); // Country region code in eeprom 0x39(2.4G), 0x38(5G)
-	strcpy(wrq.ifr_name, "ra0");
-	wrq.u.data.length = strlen(data)+1;
-	wrq.u.data.pointer = data;
-	wrq.u.data.flags = 0;
-	ret = ioctl(socket_id, RTPRIV_IOCTL_E2P, &wrq);
-	if(ret != 0) {
-		printf("\nrtuser::error::get eeprom\n\n");
-		//exit(0);
-	}
-	sscanf(wrq.u.data.pointer, "\n[%dx%04X]:%dx%X ", &p1, &addr, &p2, &value);
-	printf("\nGet EEP[0x%02X]:0x%04X\n", addr, value);
-	return value;
-}
-#endif
-
 /*
  * description: write 802.11a channels in <select> tag
  */
 static int getWlan11aChannels(int eid, webs_t wp, int argc, char_t **argv)
 {
 #if !defined (CONFIG_RALINK_RT3052) && !defined (CONFIG_RALINK_RT3352) && !defined (CONFIG_RALINK_RT5350)
-	int  idx = 0, channel = 0, returnEEPROMValue=0;
-	char *RemoveDFSChannel = nvram_get(RT2860_NVRAM, "RemoveDFSChannel");
+	int  idx = 0, channel;
+	const char *value = nvram_bufget(RT2860_NVRAM,"CountryRegionABand");
+	const char *channel_s = nvram_bufget(RT2860_NVRAM, "Channel");
 
-#ifdef CONFIG_RALINK_RT3883
-	returnEEPROMValue = getEEPROMCountryCode("3F");
-#else
-	returnEEPROMValue = getEEPROMCountryCode("38");
-#endif
-	if (((returnEEPROMValue & 0x00FF) == 0x00) || ((returnEEPROMValue & 0x00FF) == 0x01) || ((returnEEPROMValue & 0x00FF) == 0x02) ||
-		((returnEEPROMValue & 0x00FF) == 0x06) || ((returnEEPROMValue & 0x00FF) == 0x07)) // EEPROM 0x38, channel:36~48
-	{
-		for (idx = 0; idx < 4; idx++)
+	channel = (channel_s == NULL)? 0 : atoi(channel_s);
+	if ((value == NULL) || (strcmp(value, "") == 0) ||
+		(strcmp(value, "7") == 0)) {
+		/* 36~64 */
+		for (idx = 0; idx < 8; idx++)
 			websWrite(wp, T("%s%d %s>%d%s%d%s"), "<option value=", 36+4*idx,
 					(36+4*idx == channel)? "selected" : "", 5180+20*idx,
 					"MHz (Channel ", 36+4*idx, ")</option>");
-	}
-if (atoi(RemoveDFSChannel) == 1)
-{
-	if (((returnEEPROMValue & 0x00FF) == 0x00) || ((returnEEPROMValue & 0x00FF) == 0x01) || ((returnEEPROMValue & 0x00FF) == 0x02) ||
-		((returnEEPROMValue & 0x00FF) == 0x03) || ((returnEEPROMValue & 0x00FF) == 0x07) || ((returnEEPROMValue & 0x00FF) == 0x08)) // EEPROM 0x38, channel:52~64
-	{
-		for (idx = 4; idx < 8; idx++)
-			websWrite(wp, T("%s%d %s>%d%s%d%s"), "<option value=", 36+4*idx,
-					(36+4*idx == channel)? "selected" : "", 5180+20*idx,
-					"MHz (Channel ", 36+4*idx, ")</option>");
-	}
-	if (((returnEEPROMValue & 0x00FF) == 0x01) || ((returnEEPROMValue & 0x00FF) == 0x07)) // EEPROM 0x38, channel:100~140
-	{
+		/* 100~140 */
 		for (idx = 16; idx < 27; idx++)
 			websWrite(wp, T("%s%d %s>%d%s%d%s"), "<option value=", 36+4*idx,
 				   	(36+4*idx == channel)? "selected" : "", 5180+20*idx,
 					"MHz (Channel ", 36+4*idx, ")</option>");
-	}
-}
-	if (((returnEEPROMValue & 0x00FF) == 0x00) || ((returnEEPROMValue & 0x00FF) == 0x03) || ((returnEEPROMValue & 0x00FF) == 0x04) || 
-		((returnEEPROMValue & 0x00FF) == 0x05) || ((returnEEPROMValue & 0x00FF) == 0x07)) // EEPROM 0x38, channel:149~161
-	{
+		/* 149~165 */
+		for (idx = 28; idx < 33; idx++)
+			websWrite(wp, T("%s%d %s>%d%s%d%s"), "<option value=",
+					36+4*idx+1, (36+4*idx+1 == channel)? "selected" : "",
+					5180+20*idx+5, "MHz (Channel ", 36+4*idx+1, ")</option>");
+	} else if (strcmp(value, "0") == 0) {
+		/* 36~64 */
+		for (idx = 0; idx < 8; idx++)
+			websWrite(wp, T("%s%d %s>%d%s%d%s"), "<option value=", 36+4*idx,
+					(36+4*idx == channel)? "selected" : "", 5180+20*idx,
+					"MHz (Channel ", 36+4*idx, ")</option>");
+		/* 149~165 */
+		for (idx = 28; idx < 33; idx++)
+			websWrite(wp, T("%s%d %s>%d%s%d%s"), "<option value=",
+					36+4*idx+1, (36+4*idx+1 == channel)? "selected" : "",
+					5180+20*idx+5, "MHz (Channel ", 36+4*idx+1, ")</option>");
+	} else if (strcmp(value, "1") == 0) {
+		/* 36~64 */
+		for (idx = 0; idx < 8; idx++)
+			websWrite(wp, T("%s%d %s>%d%s%d%s"), "<option value=", 36+4*idx,
+					(36+4*idx == channel)? "selected" : "", 5180+20*idx,
+					"MHz (Channel ", 36+4*idx, ")</option>");
+		/* 100~140 */
+		for (idx = 16; idx < 27; idx++)
+			websWrite(wp, T("%s%d %s>%d%s%d%s"), "<option value=", 36+4*idx,
+				   	(36+4*idx == channel)? "selected" : "", 5180+20*idx,
+					"MHz (Channel ", 36+4*idx, ")</option>");
+	} else if (strcmp(value, "2") == 0) {
+		/* 36~64 */
+		for (idx = 0; idx < 8; idx++)
+			websWrite(wp, T("%s%d %s>%d%s%d%s"), "<option value=", 36+4*idx,
+					(36+4*idx == channel)? "selected" : "", 5180+20*idx,
+					"MHz (Channel ", 36+4*idx, ")</option>");
+	} else if (strcmp(value, "3") == 0) {
+		/* 52~64 */
+		for (idx = 4; idx < 8; idx++)
+			websWrite(wp, T("%s%d %s>%d%s%d%s"), "<option value=", 36+4*idx,
+					(36+4*idx == channel)? "selected" : "", 5180+20*idx,
+					"MHz (Channel ", 36+4*idx, ")</option>");
+		/* 149~161 */
+		for (idx = 28; idx < 32; idx++)
+			websWrite(wp, T("%s%d %s>%d%s%d%s"), "<option value=",
+					36+4*idx+1, (36+4*idx+1 == channel)? "selected" : "",
+					5180+20*idx+5, "MHz (Channel ", 36+4*idx+1, ")</option>");
+	} else if (strcmp(value, "4") == 0) {
+		/* 149~165 */
+		for (idx = 28; idx < 33; idx++)
+			websWrite(wp, T("%s%d %s>%d%s%d%s"), "<option value=",
+					36+4*idx+1, (36+4*idx+1 == channel)? "selected" : "",
+					5180+20*idx+5, "MHz (Channel ", 36+4*idx+1, ")</option>");
+	} else if (strcmp(value, "5") == 0) {
+		/* 149~161 */
+		for (idx = 28; idx < 32; idx++)
+			websWrite(wp, T("%s%d %s>%d%s%d%s"), "<option value=",
+					36+4*idx+1, (36+4*idx+1 == channel)? "selected" : "",
+					5180+20*idx+5, "MHz (Channel ", 36+4*idx+1, ")</option>");
+	} else if (strcmp(value, "6") == 0) {
+		/* 36~48 */
+		for (idx = 0; idx < 4; idx++)
+			websWrite(wp, T("%s%d %s>%d%s%d%s"), "<option value=", 36+4*idx,
+					(36+4*idx == channel)? "selected" : "", 5180+20*idx,
+					"MHz (Channel ", 36+4*idx, ")</option>");
+	} else if (strcmp(value, "8") == 0) {
+		/* 52~64 */
+		for (idx = 4; idx < 8; idx++)
+			websWrite(wp, T("%s%d %s>%d%s%d%s"), "<option value=", 36+4*idx,
+					(36+4*idx == channel)? "selected" : "", 5180+20*idx,
+					"MHz (Channel ", 36+4*idx, ")</option>");
+	} else if (strcmp(value, "9") == 0) {
+		/* 36~64 */
+		for (idx = 0; idx < 8; idx++)
+			websWrite(wp, T("%s%d %s>%d%s%d%s"), "<option value=", 36+4*idx,
+				   	(36+4*idx == channel)? "selected" : "", 5180+20*idx,
+					"MHz (Channel ", 36+4*idx, ")</option>");
+		/* 100~116 */
+		for (idx = 16; idx < 21; idx++)
+			websWrite(wp, T("%s%d %s>%d%s%d%s"), "<option value=", 36+4*idx,
+				   	(36+4*idx == channel)? "selected" : "", 5180+20*idx,
+					"MHz (Channel ", 36+4*idx, ")</option>");
+		/* 132~140 */
+		for (idx = 24; idx < 27; idx++)
+			websWrite(wp, T("%s%d %s>%d%s%d%s"), "<option value=", 36+4*idx,
+				   	(36+4*idx == channel)? "selected" : "", 5180+20*idx,
+					"MHz (Channel ", 36+4*idx, ")</option>");
+		/* 149~165 */
+		for (idx = 28; idx < 33; idx++)
+			websWrite(wp, T("%s%d %s>%d%s%d%s"), "<option value=",
+					36+4*idx+1, (36+4*idx+1 == channel)? "selected" : "",
+					5180+20*idx+5, "MHz (Channel ", 36+4*idx+1, ")</option>");
+	} else if (strcmp(value, "10") == 0) {
+		/* 36~48 */
+		for (idx = 0; idx < 4; idx++)
+			websWrite(wp, T("%s%d %s>%d%s%d%s"), "<option value=", 36+4*idx,
+					(36+4*idx == channel)? "selected" : "", 5180+20*idx,
+					"MHz (Channel ", 36+4*idx, ")</option>");
+		/* 149~165 */
+		for (idx = 28; idx < 33; idx++)
+			websWrite(wp, T("%s%d %s>%d%s%d%s"), "<option value=",
+					36+4*idx+1, (36+4*idx+1 == channel)? "selected" : "",
+					5180+20*idx+5, "MHz (Channel ", 36+4*idx+1, ")</option>");
+	} else if (strcmp(value, "11") == 0) {
+		/* 36~64 */
+		for (idx = 0; idx < 8; idx++)
+			websWrite(wp, T("%s%d %s>%d%s%d%s"), "<option value=", 36+4*idx,
+					(36+4*idx == channel)? "selected" : "", 5180+20*idx,
+					"MHz (Channel ", 36+4*idx, ")</option>");
+		/* 100~120 */
+		for (idx = 16; idx < 22; idx++)
+			websWrite(wp, T("%s%d %s>%d%s%d%s"), "<option value=", 36+4*idx,
+				   	(36+4*idx == channel)? "selected" : "", 5180+20*idx,
+					"MHz (Channel ", 36+4*idx, ")</option>");
+		/* 149~161 */
 		for (idx = 28; idx < 32; idx++)
 			websWrite(wp, T("%s%d %s>%d%s%d%s"), "<option value=",
 					36+4*idx+1, (36+4*idx+1 == channel)? "selected" : "",
 					5180+20*idx+5, "MHz (Channel ", 36+4*idx+1, ")</option>");
 	}
-	if (((returnEEPROMValue & 0x00FF) == 0x00) || ((returnEEPROMValue & 0x00FF) == 0x04) || ((returnEEPROMValue & 0x00FF) == 0x07)) // EEPROM 0x38, channel:165
-	{
-		return websWrite(wp,
-				T("<option value=165 %s>5825MHz (Channel 165)</option>\n"),
-				(165 == channel)? "selected" : "");
-	}
+
 #endif
 	return 0;
 }
