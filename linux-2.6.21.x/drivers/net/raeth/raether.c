@@ -2415,8 +2415,8 @@ void RAETH_Init_PSEUDO(pEND_DEVICE pAd, struct net_device *net_dev)
     int index;
     struct net_device *dev;
     PSEUDO_ADAPTER *pPseudoAd;
-    int i = 0;
 #ifdef CONFIG_RAETH_READ_MAC_FROM_MTD
+    int i = 0;
     struct sockaddr addr;
     unsigned char zero[6]={0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
 #endif
