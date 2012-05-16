@@ -55,9 +55,11 @@ case "$1" in
 	service vpnhelper stop_safe
 	# Workaround for infinite OFFER wait
 	if [ "$OperationMode" != "2" ] && [ "$dhcpSwReset" = "1" ]; then
-	    # Reset switch to uplink touch
-	    $LOG "Restart WAN switch port."
-	    /etc/scripts/config-vlan.sh WWWWW
+	    if [ "$CONFIG_RT_3052_ESW" != "" ]; then
+		# Reset switch to uplink touch
+		$LOG "Restart WAN switch port."
+		/etc/scripts/config-vlan.sh WWWWW
+	    fi
 	elif [ "$OperationMode" = "2" ]; then
 	    # Try reconnect at lease failed
 	    $LOG "Wait connect and reconnect to AP if need."

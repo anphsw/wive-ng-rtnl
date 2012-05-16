@@ -11,11 +11,8 @@ LOG="logger -t ESW"
 # get need variables
 eval `nvram_buf_get 2860 wan_port OperationMode tv_port vlan_double_tag natFastpath ForceRenewDHCP LAN_MAC_ADDR`
 
-##############################################################################
-# Internal 3052 ESW
-##############################################################################
-if [ "$CONFIG_RT_3052_ESW" != "" ]; then
-    SWITCH_MODE=2
+conf_param_for_all()
+{
     if [ ! -f /var/run/goahead.pid ]; then
 	##########################################################################
 	# Configure touch dhcp from driver in kernel. Only one per start
@@ -50,6 +47,16 @@ if [ "$CONFIG_RT_3052_ESW" != "" ]; then
 	    fi
 	    sysctl -w net.ipv4.vlan_double_tag="$DOUBLE_TAG"
 	fi
+    fi
+}
+
+##############################################################################
+# Internal 3052 ESW
+##############################################################################
+if [ "$CONFIG_RT_3052_ESW" != "" ]; then
+    SWITCH_MODE=2
+    if [ ! -f /var/run/goahead.pid ]; then
+	conf_param_for_all
 	##########################################################################
 	# Configure vlans in kernel. Only one per start
 	##########################################################################
@@ -172,20 +179,34 @@ if [ "$CONFIG_RT_3052_ESW" != "" ]; then
     $LOG '######### Clear switch mac table  ###########'
     switch clear > /dev/null 2>&1
 ##############################################################################
-# VTSS external switch
+# VTSS OR RTL8367M external switch dual phy mode
 ##############################################################################
-elif [ "$CONFIG_MAC_TO_MAC_MODE" != "" ]; then
+elif [ "$CONFIG_MAC_TO_MAC_MODE" != "" ] && [ "$CONFIG_RAETH_GMAC2" != "" ]; then
     SWITCH_MODE=1
+    conf_param_for_all
+    ##########################################################################
+    $LOG '######## clear switch partition (DUAL_PHY) ########'
+    /etc/scripts/config-vlan.sh $SWITCH_MODE 0 > /dev/null 2>&1
+    #
+    # put code for configure switch port mode and others
+    #
+##############################################################################
+# VTSS OR RTL8367M external switch one phy mode
+##############################################################################
+elif [ "$CONFIG_MAC_TO_MAC_MODE" != "" ] && [ "$CONFIG_RAETH_GMAC2" = "" ]; then
+    SWITCH_MODE=1
+    conf_param_for_all
     ##########################################################################
     $LOG '######## clear switch partition  ########'
     /etc/scripts/config-vlan.sh $SWITCH_MODE 0 > /dev/null 2>&1
-    $LOG '##### config vlan partition (VTSS) #####'
+    $LOG '##### config vlan partition (ONE PHY) #####'
     /etc/scripts/config-vlan.sh $SWITCH_MODE 1 > /dev/null 2>&1
 ##############################################################################
 # IC+ external switch
 ##############################################################################
 elif [ "$CONFIG_RAETH_ROUTER" != "" ]; then
     SWITCH_MODE=0
+    conf_param_for_all
     ##########################################################################
     $LOG '######## clear switch partition  ########'
     /etc/scripts/config-vlan.sh $SWITCH_MODE 0 > /dev/null 2>&1
