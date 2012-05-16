@@ -3339,6 +3339,12 @@ static int getStaTrModes(int eid, webs_t wp, int argc, char_t **argv)
 	result = "1";
 #elif defined(CONFIG_RALINK_RT3052_2T2R) || defined(CONFIG_RALINK_RT3352_2T2R)
 	result = "2";
+#elif defined(CONFIG_RALINK_RT3662_2T2R)
+	result = "2";
+#elif defined(CONFIG_RALINK_RT3883_3T3R)
+	result = "3";
+#else
+	result = "1";
 #endif
 	return websWrite(wp, T("%s"), result);
 }
