@@ -1,7 +1,6 @@
 #
 # Automatically generated make config: don't edit
 # Linux kernel version: 2.6.21.15
-# Wed May 16 17:24:54 2012
 #
 CONFIG_MIPS=y
 
@@ -16,8 +15,8 @@ CONFIG_RALINK_RT3883_MP=y
 CONFIG_RALINK_RT3883=y
 CONFIG_SERIAL_CONSOLE=y
 CONFIG_RT3883_ASIC=y
-CONFIG_PCIE_PCI_CONCURRENT=y
-# CONFIG_PCIE_ONLY is not set
+# CONFIG_PCIE_PCI_CONCURRENT is not set
+CONFIG_PCIE_ONLY=y
 # CONFIG_PCI_ONLY is not set
 # CONFIG_PCIE_PCI_NONE is not set
 
