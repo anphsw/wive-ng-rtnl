@@ -56,8 +56,6 @@ extern REG_PAIR   RT3883_BBPRegTable[];
 extern UCHAR RT3883_NUM_BBP_REG_PARMS;
 
 #ifdef DFS_SUPPORT
-#define DFS_2_SUPPORT
-
 #define DFS_INTERRUPT_SUPPORT
 #define DFS_HWTIMER_SUPPORT
 #endif

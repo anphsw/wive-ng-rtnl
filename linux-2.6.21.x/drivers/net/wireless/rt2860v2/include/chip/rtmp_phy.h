@@ -228,7 +228,8 @@
 #define BBP_R189		189
 #define BBP_R190		190
 #define BBP_R191		191
-
+#define BBP_R250		250
+#define BBP_R255		255 // for TSSI and Tone Radar
 
 #define BBPR94_DEFAULT	0x06 // Add 1 value will gain 1db
 
@@ -775,6 +776,20 @@ typedef union _BBP_R110_STRUC {
 	BBP_IO_WRITE8_BY_REG_ID(_A, BBP_R140, _I);          \
 	BBP_IO_WRITE8_BY_REG_ID(_A, BBP_R141, _V);          \
 }
+
+#if defined(RT2883) || defined(RT3883) || defined(DFS_HARDWARE_SUPPORT)
+#define RTMP_CARRIER_IO_READ8(_A, _I, _V)               \
+{                                                       \
+	BBP_IO_WRITE8_BY_REG_ID(_A, BBP_R184, _I);          \
+	BBP_IO_READ8_BY_REG_ID(_A, BBP_R185, _V);           \
+}
+#define RTMP_CARRIER_IO_WRITE8(_A, _I, _V)              \
+{                                                       \
+	BBP_IO_WRITE8_BY_REG_ID(_A, BBP_R184, _I);          \
+	BBP_IO_WRITE8_BY_REG_ID(_A, BBP_R185, _V);          \
+}
+
+#endif // defined(RT2883) || defined(RT3883) || defined(DFS_HARDWARE_SUPPORT) //
 
 #endif // __RTMP_PHY_H__ //
 

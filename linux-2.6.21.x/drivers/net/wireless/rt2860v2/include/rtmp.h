@@ -91,7 +91,11 @@ typedef struct _RTMP_CHIP_OP_ RTMP_CHIP_OP;
 
 #define	MAXSEQ		(0xFFF)
 
+#ifdef DOT11N_SS3_SUPPORT
+#define MAX_MCS_SET 24 /* From MCS 0 ~ MCS 23 */
+#else
 #define MAX_MCS_SET 16 /* From MCS 0 ~ MCS 15 */
+#endif // DOT11N_SS3_SUPPORT //
 
 #if defined(CONFIG_AP_SUPPORT) && defined(CONFIG_STA_SUPPORT)
 #define IF_DEV_CONFIG_OPMODE_ON_AP(_pAd)	if(_pAd->OpMode == OPMODE_AP)
@@ -102,6 +106,14 @@ typedef struct _RTMP_CHIP_OP_ RTMP_CHIP_OP;
 #endif
 
 #define MAX_TXPOWER_ARRAY_SIZE	5
+#ifdef RT2883
+#undef MAX_TXPOWER_ARRAY_SIZE
+#define MAX_TXPOWER_ARRAY_SIZE	7
+#endif // RT2883 //
+#ifdef RT3883
+#undef MAX_TXPOWER_ARRAY_SIZE
+#define MAX_TXPOWER_ARRAY_SIZE	10
+#endif // RT3883 //
 
 extern  unsigned char   CISCO_OUI[];
 extern  UCHAR	BaSizeArray[4];
@@ -204,6 +216,9 @@ typedef	struct _ATE_INFO {
 #endif // RT3350 //
 	CHAR	TxPower0;
 	CHAR	TxPower1;
+#ifdef DOT11N_SS3_SUPPORT
+	CHAR	TxPower2;
+#endif // DOT11N_SS3_SUPPORT //
 	CHAR    TxAntennaSel;
 	CHAR    RxAntennaSel;
 	TXWI_STRUC  TxWI; 	  // TXWI
@@ -222,6 +237,11 @@ typedef	struct _ATE_INFO {
 	BOOLEAN	bQATxStart; // Have compiled QA in and use it to ATE tx.
 	BOOLEAN	bQARxStart;	// Have compiled QA in and use it to ATE rx.
 	BOOLEAN	bAutoTxAlc;	// Set Auto Tx Alc
+#ifdef TXBF_SUPPORT
+	BOOLEAN	bTxBF;		// Enable Tx Beam Forming
+	SHORT	txSoundingMode;	// Sounding mode for non-QA ATE. 0=none, 1=Data Sounding, 2=NDP
+	UCHAR	calParams[2];
+#endif // TXBF_SUPPORT //
 #ifdef RTMP_MAC_PCI
 #ifndef RTMP_RBUS_SUPPORT
 	BOOLEAN	bFWLoading;	// Reload firmware when ATE is done.
@@ -229,9 +249,13 @@ typedef	struct _ATE_INFO {
 #endif // RTMP_MAC_PCI //
 	UINT32	RxTotalCnt;
 	UINT32	RxCntPerSec;
+	UCHAR	forceBBPReg;	// force to not update the specific BBP register, now used for ATE TxBF
 
 	CHAR	LastSNR0;             // last received SNR
 	CHAR    LastSNR1;             // last received SNR for 2nd  antenna
+#ifdef DOT11N_SS3_SUPPORT
+	CHAR    LastSNR2;
+#endif // DOT11N_SS3_SUPPORT //
 	CHAR    LastRssi0;            // last received RSSI
 	CHAR    LastRssi1;            // last received RSSI for 2nd  antenna
 	CHAR    LastRssi2;            // last received RSSI for 3rd  antenna
@@ -271,9 +295,23 @@ typedef	struct _ATE_INFO {
 	UINT32		RSSI2;
 	UINT32		SNR0;
 	UINT32		SNR1;
+#ifdef DOT11N_SS3_SUPPORT
+	UINT32		SNR2;
+	INT32		BF_SNR[3];			// Last RXWI BF SNR. Units=0.25 dB
+#endif // DOT11N_SS3_SUPPORT //
 	// TxStatus : 0 --> task is idle, 1 --> task is running
 	UCHAR		TxStatus;
-#endif // RALINK_QA //
+#endif // RALINK_28xx_QA //
+#if defined(RT2883) || defined (RT3883)
+#define MAX_SOUNDING_RESPONSE_SIZE	(57*2*2*9+3+2+6)	// Assume 114 carriers (40MHz), 3x3, 8bits/coeff, + SNR + HT HEADER + MIMO CONTROL FIELD
+	UCHAR		sounding;
+	UINT32		sounding_jiffies;
+	CHAR		soundingSNR[3];
+	UINT32		LastRxRate;
+	UINT32		LastTxRate;
+	UINT32		soundingRespSize;						// Size of Sounding response
+	UCHAR		soundingResp[MAX_SOUNDING_RESPONSE_SIZE];	// Entire Sounding response
+#endif // defined(RT2883) || defined (RT3883) //
 }	ATE_INFO, *PATE_INFO;
 
 #ifdef RALINK_QA
@@ -886,9 +924,30 @@ typedef struct _COUNTER_DRS {
 
 
 #ifdef DOT11_N_SUPPORT
+#ifdef TXBF_SUPPORT
+typedef
+struct {
+	ULONG			TxSuccessCount;
+	ULONG			TxRetryCount;
+	ULONG			TxFailCount;
+	ULONG			ETxSuccessCount;
+	ULONG			ETxRetryCount;
+	ULONG			ETxFailCount;
+	ULONG			ITxSuccessCount;
+	ULONG			ITxRetryCount;
+	ULONG			ITxFailCount;
+} COUNTER_TXBF;
+#endif
 #endif // DOT11_N_SUPPORT //
 
 
+#ifdef STREAM_MODE_SUPPORT
+typedef struct _STREAM_MODE_ENTRY_{
+#define STREAM_MODE_STATIC		1
+	USHORT flag;
+	UCHAR macAddr[MAC_ADDR_LEN];
+}STREAM_MODE_ENTRY;
+#endif // STREAM_MODE_SUPPORT //
 
 /***************************************************************************
   *	security key related data structure
@@ -1991,6 +2050,13 @@ typedef struct _COMMON_CONFIG {
 	// <====== 11n D3.0 =======================
 	BOOLEAN					bOverlapScanning;
 	BOOLEAN					bBssCoexNotify;
+#ifdef DOT11N_PF_DEBUG
+	UCHAR					BAMaxSize;
+	/*  For test case to fix the MCS set as specific Spatial Stream */
+	UCHAR					fixRxMcsSet;
+	UCHAR					LocalMaxMcsRate;
+	UCHAR					LocalMinMcsRate;
+#endif // DOT11N_PF_DEBUG //
 #endif // DOT11N_DRAFT3 //
 
     BOOLEAN                 bHTProtect;
@@ -2255,18 +2321,39 @@ typedef struct _COMMON_CONFIG {
 	UCHAR	HighPowerPatchDisabled;
 #endif // defined(RT305x)|| defined(RT30xx) //
 
+#ifdef RT3883
+	UCHAR	VCORecalibrationThreshold;
+#endif // RT3883 //
 
 	BOOLEAN		HT_DisallowTKIP;		/* Restrict the encryption type in 11n HT mode */
 
 	BOOLEAN		HT_Disable; /* 1: disable HT function; 0: enable HT function */
 
-//#ifdef RTMP_RBUS_SUPPORT
+#if defined (RT2883) || defined (RT3883)
+	BOOLEAN PreAntSwitch;		// Preamble Antenna Switch
+	ULONG	PhyRateLimit;		// PHY Rate limit in Mbps
+	INT		FixedRate;			// Fix the rate during Rate Adaptation. FixedRate is ItemNo index into RateSwitch Table. -1 => disabled.
+	BOOLEAN FineAGC;			// Fine AGC enabled
+#endif // defined (RT2883) || defined (RT3883) //
+
+#ifdef STREAM_MODE_SUPPORT
+#define		STREAM_MODE_STA_NUM		4
+
+	UCHAR	StreamMode; 		// 0=disabled, 1=enable for 1SS, 2=enable for 2SS, 4=enable for 1,2SS
+	UCHAR	StreamModeMac[STREAM_MODE_STA_NUM][MAC_ADDR_LEN];
+#endif // STREAM_MODE_SUPPORT //
 
 #ifdef DOT11_N_SUPPORT
+#ifdef TXBF_SUPPORT
+	ULONG	ITxBfTimeout;
+	ULONG	ETxBfTimeout;
+	ULONG	ETxBfEnCond;		// Enable sending of sounding and beamforming
+	BOOLEAN	ETxBfNoncompress;	// Force non-compressed Sounding Response
+	BOOLEAN	ETxBfIncapable;		// Report Incapable of BF in TX BF Capabilities
+#endif // TXBF_SUPPORT //
 #endif // DOT11_N_SUPPORT //
 
 	ULONG DebugFlags;			// Temporary debug flags
-//#endif // RTMP_RBUS_SUPPORT //
 
 #ifdef RTMP_MAC_PCI
 	BOOLEAN bPCIeBus; // The adapter runs over PCIe bus
@@ -2298,6 +2385,15 @@ typedef struct _COMMON_CONFIG {
 #define DBF_UNUSED2000				0x2000	// unused
 #define DBF_UNUSED4000				0x4000	// unused
 #define DBF_UNUSED8000				0x8000	// unused
+#define DBF_DISABLE_CAL			0x0800	// Disable Divider Calibration at channel change
+#define DBF_DBQ_TXFIFO			0x1000	// Enable logging of TX information from FIFO
+#define DBF_DBQ_TXFRAME			0x2000	// Enable logging of Frames queued for TX
+#define DBF_DBQ_RXWI_FULL		0x4000	// Enable logging of full RXWI
+#define DBF_DBQ_RXWI			0x8000	// Enable logging of partial RXWI
+
+#define DBF_SHOW_RA_STATUS		0x010000	// Display concise Rate Adaptation information
+#define DBF_LOG_DIV_CAL			0x020000	// Log Divider Cal calls
+#define DBF_RESET_RXDMA			0x20000000		// reset RX dma
 //#endif // RTMP_RBUS_SUPPORT //
 
 #ifdef CONFIG_STA_SUPPORT 
@@ -2391,6 +2487,12 @@ typedef struct _STA_ADMIN_CONFIG {
 
 	UCHAR       LastSNR0;             // last received BEACON's SNR
 	UCHAR       LastSNR1;            // last received BEACON's SNR for 2nd  antenna
+#ifdef DOT11N_SS3_SUPPORT
+	UCHAR       LastSNR2;            // last received BEACON's SNR for 3nd  antenna
+#endif // DOT11N_SS3_SUPPORT //
+#if defined(RT2883) || defined(RT3883)
+	INT32		BF_SNR[3];			// Last RXWI BF SNR. Units=0.25 dB
+#endif // defined(RT2883) || defined(RT3883) //
 	RSSI_SAMPLE RssiSample;
 	ULONG       NumOfAvgRssiSample;
 
@@ -2617,6 +2719,11 @@ typedef enum _MAC_ENTRY_OP_MODE_{
 }MAC_ENTRY_OP_MODE;
 #endif // CONFIG_AP_SUPPORT //
 
+// Values of LastSecTxRateChangeAction
+#define RATE_NO_CHANGE	0		// No change in rate
+#define RATE_UP			1		// Trying higher rate or same rate with different BF
+#define RATE_DOWN		2		// Trying lower rate
+
 #ifdef ADHOC_WPA2PSK_SUPPORT
 typedef struct _FOUR_WAY_HANDSHAKE_PROFILE {
 	UCHAR           ANonce[LEN_KEY_DESC_NONCE];
@@ -2662,6 +2769,9 @@ typedef struct _MAC_TABLE_ENTRY {
 	UCHAR           ReTryCounter;   
 	RALINK_TIMER_STRUCT                 RetryTimer;
 #ifdef RTMP_RBUS_SUPPORT
+#ifdef TXBF_SUPPORT
+	RALINK_TIMER_STRUCT                 eTxBfProbeTimer;
+#endif // TXBF_SUPPORT //
 #endif // RTMP_RBUS_SUPPORT //
 	NDIS_802_11_AUTHENTICATION_MODE     AuthMode;   // This should match to whatever microsoft defined
 	NDIS_802_11_WEP_STATUS              WepStatus;
@@ -2744,6 +2854,10 @@ typedef struct _MAC_TABLE_ENTRY {
 
 	UINT32   		CachedBuf[16];		// UINT (4 bytes) for alignment
 
+#ifdef TXBF_SUPPORT
+	UINT			TxBFCount;
+	COUNTER_TXBF	TxBFCounters;
+#endif // TXBF_SUPPORT //
 #endif // DOT11_N_SUPPORT //
 
 	UINT			FIFOCount;
@@ -2751,6 +2865,10 @@ typedef struct _MAC_TABLE_ENTRY {
 	UINT			DebugTxCount;
     BOOLEAN			bDlsInit;
 #ifdef RTMP_RBUS_SUPPORT
+#ifdef TXBF_SUPPORT
+	UINT			DebugTxBFCount;
+	UINT			DebugTxNormalCount;
+#endif // TXBF_SUPPORT //
 #endif // RTMP_RBUS_SUPPORT //
 
 //====================================================
@@ -2778,6 +2896,10 @@ typedef struct _MAC_TABLE_ENTRY {
 	UCHAR			msiToTx, mrqCnt;//mrqCnt is used to count down the inverted-BF mrq to be sent
 //Rx mfb
 	UCHAR			pendingMfsi;
+#ifdef TXBF_SUPPORT
+	UCHAR			TxSndgType;
+	NDIS_SPIN_LOCK		TxSndgLock;
+#endif
 //Tx MFB
 	BOOLEAN			toTxMfb;
 	UCHAR			mfbToTx;
@@ -2866,6 +2988,11 @@ typedef struct _MAC_TABLE_ENTRY {
 	UCHAR		BSS2040CoexistenceMgmtSupport;
 	BOOLEAN		bForty_Mhz_Intolerant;
 #endif // DOT11N_DRAFT3 //
+#ifdef DOT11N_PF_DEBUG
+	UCHAR		RxMcsMask[5];
+	UCHAR		RxMcsMax;
+	UCHAR		RxMcsMin;
+#endif // DOT11N_PF_DEBUG //
 #endif // DOT11_N_SUPPORT //
 
 
@@ -2879,6 +3006,9 @@ typedef struct _MAC_TABLE_ENTRY {
 	RSSI_SAMPLE	RssiSample;
 	UINT32 LastRxRate;
 	
+#if defined (RT2883) || defined (RT3883)
+	INT32		BF_SNR[3];			// Last RXWI BF SNR. Units=0.25 dB
+#endif // defined (RT2883) || defined (RT3883) //
 
 #ifdef CONFIG_AP_SUPPORT
 #ifdef WSC_AP_SUPPORT
@@ -3190,6 +3320,9 @@ typedef struct _AP_ADMIN_CONFIG {
 
 	UCHAR       	LastSNR0;             // last received BEACON's SNR
 	UCHAR       	LastSNR1;            // last received BEACON's SNR for 2nd  antenna
+#ifdef DOT11N_SS3_SUPPORT
+	UCHAR       	LastSNR2;            // last received BEACON's SNR for 2nd  antenna
+#endif // DOT11N_SS3_SUPPORT //
 
 #ifdef DOT1X_SUPPORT
 	// dot1x related parameter
@@ -3336,6 +3469,9 @@ struct wificonf
 {
 	BOOLEAN	bShortGI;
 	BOOLEAN bGreenField;
+#ifdef DOT11N_PF_DEBUG
+	UCHAR	maxAMPDUExp;
+#endif // DOT11N_PF_DEBUG //
 };
 
 
@@ -3431,7 +3567,15 @@ typedef struct _TX_POWER_CONTROL_OVER_MAC_ENTRY
 //
 #define MAX_TX_PWR_CONTROL_OVER_MAC_REGISTERS 5
 
+#ifdef RT2883
+#undef MAX_TX_PWR_CONTROL_OVER_MAC_REGISTERS
+#define MAX_TX_PWR_CONTROL_OVER_MAC_REGISTERS	12
+#endif // RT2883 //
 
+#ifdef RT3883
+#undef MAX_TX_PWR_CONTROL_OVER_MAC_REGISTERS
+#define MAX_TX_PWR_CONTROL_OVER_MAC_REGISTERS	15
+#endif // RT3883 //
 
 //
 // The configuration of the transmit power control over MAC
@@ -3710,6 +3854,11 @@ struct _RTMP_ADAPTER
 	ULONG		Tx40MPwrCfgGBand[MAX_TXPOWER_ARRAY_SIZE];
 
 
+#ifdef RT3883
+	UCHAR		LatchTssi;
+	UCHAR		RefreshTssi;
+	BOOLEAN		EnableVCOCal;
+#endif // RT3883 //
 
 	BOOLEAN     bAutoTxAgcA;                // Enable driver auto Tx Agc control
 	UCHAR	    TssiRefA;					// Store Tssi reference value as 25 temperature.	
@@ -3727,7 +3876,6 @@ struct _RTMP_ADAPTER
 #ifdef RTMP_INTERNAL_TX_ALC
 	TX_POWER_CONTROL TxPowerCtrl; // The Tx power control using the internal ALC
 #endif // RTMP_INTERNAL_TX_ALC //
-
 
 	signed char		BGRssiOffset0;				// Store B/G RSSI#0 Offset value on EEPROM 0x46h
 	signed char		BGRssiOffset1;				// Store B/G RSSI#1 Offset value 
@@ -3756,6 +3904,10 @@ struct _RTMP_ADAPTER
 	// ----------------------------
 	// MAC control
 	// ----------------------------
+#ifdef SPECIFIC_BCN_BUF_SUPPORT
+	UCHAR				ShrMSel;
+	NDIS_SPIN_LOCK			ShrMemLock;	
+#endif // SPECIFIC_BCN_BUF_SUPPORT //
 
 /*****************************************************************************************/
 /*      802.11 related parameters                                                        */
@@ -4118,6 +4270,10 @@ struct _RTMP_ADAPTER
 	UINT8					PM_FlgSuspend;
 
 
+#if defined (RT2883) || defined (RT3883)
+	NDIS_SPIN_LOCK	fLastChangeAccordingMfbLock;
+	NDIS_SPIN_LOCK	TxSndgLock;
+#endif // defined (RT2883) || defined (RT3883) //
 
 #ifdef CONFIG_STA_SUPPORT
 #endif // CONFIG_STA_SUPPORT //
@@ -4177,9 +4333,13 @@ struct _RTMP_ADAPTER
 #endif // MAT_SUPPORT //
 #endif // OS_ABL_SUPPORT //
 	struct {
+	UCHAR	*pIe;
 	INT		IeLen;
-	UCHAR	*pIe;	
 	} ProbeRespIE[MAX_LEN_OF_BSS_TABLE];
+
+#ifdef RT3883
+	UINT32 FlgCWC;
+#endif // RT3883 //
 };
 
 #ifdef RTMP_INTERNAL_TX_ALC
@@ -4340,6 +4500,11 @@ typedef struct _TX_BLK_
 #endif // CONFIG_AP_SUPPORT //
 
 #ifdef RTMP_RBUS_SUPPORT
+#ifdef TXBF_SUPPORT
+	UCHAR				TxSndgPkt; // 1: sounding 2: NDP sounding
+	UCHAR				TxNDPSndgBW;
+	UCHAR				TxNDPSndgMcs;
+#endif // TXBF_SUPPORT //
 #endif // RTMP_RBUS_SUPPORT //
 } TX_BLK, *PTX_BLK;
 
@@ -5307,6 +5472,11 @@ VOID 	AsicUpdateProtect(
 VOID AsicBBPAdjust(
 	IN RTMP_ADAPTER *pAd);
 
+#ifdef DOT11N_PF_DEBUG
+VOID HtMcsSetAdjust(
+	IN RTMP_ADAPTER *pAd);
+#endif // DOT11N_PF_DEBUG //
+
 VOID AsicSwitchChannel(
 	IN  PRTMP_ADAPTER   pAd, 
 	IN	UCHAR			Channel,
@@ -5458,7 +5628,18 @@ VOID AsicUpdateWAPIPN(
 #endif // WAPI_SUPPORT //
 
 #ifdef RTMP_RBUS_SUPPORT
+#ifdef RT3883
+VOID AsicVCORecalibration(
+	IN PRTMP_ADAPTER pAd);
+#endif // RT3883 //
 #endif // RTMP_RBUS_SUPPORT //
+
+#ifdef STREAM_MODE_SUPPORT
+VOID AsicSetStreamMode(
+	IN RTMP_ADAPTER *pAd,
+	IN PUCHAR pMacAddr,
+	IN BOOLEAN bClear);
+#endif // STREAM_MODE_SUPPORT //
 
 VOID MacAddrRandomBssid(
 	IN  PRTMP_ADAPTER   pAd, 
@@ -7006,6 +7187,13 @@ VOID WPARetryExec(
 	IN PVOID SystemSpecific3);
 
 #ifdef RTMP_RBUS_SUPPORT
+#ifdef TXBF_SUPPORT
+VOID eTxBfProbeTimerExec(
+	IN PVOID SystemSpecific1, 
+	IN PVOID FunctionContext, 
+	IN PVOID SystemSpecific2,
+	IN PVOID SystemSpecific3);
+#endif // TXBF_SUPPORT //
 #endif // RTMP_RBUS_SUPPORT //
 
 VOID EnqueueStartForPSKExec(
@@ -7917,11 +8105,130 @@ INT	Set_Debug_Proc(
 #endif
 
 #ifdef RTMP_RBUS_SUPPORT
+#ifdef TXBF_SUPPORT
+INT	Set_ReadITxBf_Proc(
+	IN	PRTMP_ADAPTER	pAd, 
+	IN	PSTRING			arg);
+
+INT	Set_ReadETxBf_Proc(
+	IN	PRTMP_ADAPTER	pAd, 
+	IN	PSTRING			arg);
+
+INT	Set_WriteITxBf_Proc(
+	IN	PRTMP_ADAPTER	pAd, 
+	IN	PSTRING			arg);
+
+INT	Set_WriteETxBf_Proc(
+	IN	PRTMP_ADAPTER	pAd, 
+	IN	PSTRING			arg);
+
+INT	Set_StatITxBf_Proc(
+	IN	PRTMP_ADAPTER	pAd, 
+	IN	PSTRING			arg);
+
+INT	Set_StatETxBf_Proc(
+	IN	PRTMP_ADAPTER	pAd, 
+	IN	PSTRING			arg);
+
+INT	Set_TxBfTag_Proc(
+	IN	PRTMP_ADAPTER	pAd, 
+	IN	PSTRING			arg);
+
+INT Set_ITxBfTimeout_Proc(
+    IN  PRTMP_ADAPTER   pAd, 
+    IN  PSTRING          arg);
+
+INT Set_ETxBfTimeout_Proc(
+    IN  PRTMP_ADAPTER   pAd, 
+    IN  PSTRING          arg);
+
+INT	Set_InvTxBfTag_Proc(
+	IN	PRTMP_ADAPTER	pAd, 
+	IN	PSTRING			arg);
+
+INT	Set_ITxBfCal_Proc(
+	IN	PRTMP_ADAPTER	pAd, 
+	IN	PSTRING			arg);
+
+INT	Set_ITxBfDivCal_Proc(
+	IN	PRTMP_ADAPTER	pAd, 
+	IN	PSTRING			arg);
+
+INT	Set_ITxBfLnaCal_Proc(
+	IN	PRTMP_ADAPTER	pAd,
+	IN	PSTRING			arg);
+
+INT	Set_ETxBfEnCond_Proc(
+	IN	PRTMP_ADAPTER	pAd, 
+	IN	PSTRING			arg);
+
+INT Set_ETxBfCodebook_Proc(
+    IN  PRTMP_ADAPTER   pAd, 
+    IN  PSTRING          arg);
+
+INT Set_ETxBfCoefficient_Proc(
+    IN  PRTMP_ADAPTER   pAd, 
+    IN  PSTRING          arg);
+
+INT Set_ETxBfGrouping_Proc(
+    IN  PRTMP_ADAPTER   pAd, 
+    IN  PSTRING          arg);
+
+INT Set_ETxBfNoncompress_Proc(
+    IN  PRTMP_ADAPTER   pAd, 
+    IN  PSTRING          arg);
+
+INT	Set_NoSndgCntThrd_Proc(
+	IN	PRTMP_ADAPTER	pAd, 
+	IN	PSTRING			arg);
+
+INT	Set_NdpSndgStreams_Proc(
+	IN	PRTMP_ADAPTER	pAd, 
+	IN	PSTRING			arg);
+
+INT	Set_Trigger_Sounding_Proc(
+	IN	PRTMP_ADAPTER	pAd, 
+	IN	PSTRING			arg);
+
+INT	Set_ITxBfEn_Proc(
+	IN	PRTMP_ADAPTER	pAd, 
+	IN	PSTRING			arg);
+
+#endif // TXBF_SUPPORT //
 
 INT	Set_PerThrdAdj_Proc(
 	IN	PRTMP_ADAPTER	pAd, 
 	IN	PSTRING			arg);
 
+#if defined (RT2883) || defined (RT3883)
+INT Set_PreAntSwitch_Proc(
+    IN  PRTMP_ADAPTER   pAd, 
+    IN  PSTRING          arg);
+
+INT Set_PhyRateLimit_Proc(
+    IN  PRTMP_ADAPTER   pAd, 
+    IN  PSTRING         arg);
+
+INT Set_FixedRate_Proc(
+    IN  PRTMP_ADAPTER   pAd, 
+    IN  PSTRING         arg);
+#endif // defined (RT2883) || defined (RT3883) //
+
+#ifdef STREAM_MODE_SUPPORT
+INT Set_StreamMode_Proc(
+    IN  PRTMP_ADAPTER   pAd, 
+    IN  PSTRING         arg);
+
+INT Set_StreamModeMac_Proc(
+    IN  PRTMP_ADAPTER   pAd, 
+    IN  PSTRING          arg);
+#endif // STREAM_MODE_SUPPORT //
+
+#ifdef INCLUDE_DEBUG_QUEUE
+INT Set_DebugQueue_Proc(
+    IN  PRTMP_ADAPTER   pAd, 
+    IN  PSTRING         arg);
+#endif // INCLUDE_DEBUG_QUEUE //
 
 INT Set_DebugFlags_Proc(
     IN  PRTMP_ADAPTER   pAd, 
@@ -8079,6 +8386,16 @@ INT RTMPIoctlConnStatus(
 #endif //APCLI_SUPPORT//
 
 
+#ifdef RT3883
+INT	Set_VCORecalibrationThreshold_Proc(
+	IN	PRTMP_ADAPTER	pAd, 
+	IN	PSTRING		arg);
+
+INT	Set_VCORecalibration_Proc(
+	IN	PRTMP_ADAPTER	pAd, 
+	IN	PSTRING		arg);
+
+#endif // RT3883 //
 
 
 #ifdef CONFIG_STA_SUPPORT
@@ -8135,6 +8452,12 @@ VOID Handle_BSS_Width_Trigger_Events(
 void build_ext_channel_switch_ie(
 	IN PRTMP_ADAPTER pAd,
 	IN HT_EXT_CHANNEL_SWITCH_ANNOUNCEMENT_IE *pIE);
+
+void assoc_ht_info_debugshow(
+	IN	PRTMP_ADAPTER		pAd,
+	IN	MAC_TABLE_ENTRY 	*pEntry,
+	IN	UCHAR				HTCapability_Len,
+	IN	HT_CAPABILITY_IE	*pHTCapability);
 #endif // DOT11_N_SUPPORT //
 
 #ifdef CONFIG_AP_SUPPORT
@@ -8195,6 +8518,62 @@ UINT deaggregate_AMSDU_announce(
 	IN	ULONG			DataSize);
 
 #ifdef RTMP_RBUS_SUPPORT
+#ifdef TXBF_SUPPORT
+BOOLEAN clientSupportsETxBF(
+	IN	PRTMP_ADAPTER	 pAd,
+	IN	HT_BF_CAP *pTxBFCap);
+
+void setETxBFCap(
+	IN	PRTMP_ADAPTER	 pAd,
+	OUT	HT_BF_CAP *pTxBFCap);
+
+VOID txSndgSameMcs(
+	IN PRTMP_ADAPTER pAd,
+	IN MAC_TABLE_ENTRY * pEntry,
+	IN UCHAR smoothMfb);
+
+#ifdef ETXBF_EN_COND3_SUPPORT
+VOID txSndgOtherGroup(
+	IN	PRTMP_ADAPTER	pAd,
+	IN	MAC_TABLE_ENTRY	*pEntry);
+
+VOID txMrqInvTxBF(
+	IN	PRTMP_ADAPTER	pAd,
+	IN	MAC_TABLE_ENTRY	*pEntry);
+
+VOID chooseBestMethod(
+	IN	PRTMP_ADAPTER	pAd,
+	IN	MAC_TABLE_ENTRY	*pEntry,
+	IN	UCHAR			mfb);
+
+VOID rxBestSndg(
+	IN	PRTMP_ADAPTER	pAd,
+	IN	MAC_TABLE_ENTRY	*pEntry);
+#endif // ETXBF_EN_COND3_SUPPORT //
+
+VOID handleBfFb(
+	IN	PRTMP_ADAPTER	pAd,
+	IN	RX_BLK			*pRxBlk);
+
+VOID eTxBFProbing(
+ 	IN PRTMP_ADAPTER pAd,	
+	IN 	MAC_TABLE_ENTRY		*pEntry,
+	IN PRTMP_TX_RATE_SWITCH	pNextTxRate);
+
+VOID Trigger_Sounding_Packet(
+	IN	PRTMP_ADAPTER	pAd,
+	IN	UCHAR			SndgType,
+	IN	UCHAR			SndgBW,
+	IN	UCHAR			SndgMcs,
+	IN  MAC_TABLE_ENTRY *pEntry);
+
+VOID rtmp_asic_set_bf(
+	IN RTMP_ADAPTER *pAd);
+
+BOOLEAN rtmp_chk_itxbf_calibration(
+	IN RTMP_ADAPTER *pAd);
+
+#endif // TXBF_SUPPORT //
 #endif // RTMP_RBUS_SUPPORT //
 
 #ifdef CONFIG_AP_SUPPORT
@@ -8333,6 +8712,18 @@ VOID RTMPIoctlGetSiteSurvey(
 	IN	PRTMP_ADAPTER	pAdapter, 
 	IN	struct iwreq	*wrq);
 #endif
+
+VOID	RTMPIoctlGetSTAINFO(	// ASUS EXT by Jiahao
+	IN	PRTMP_ADAPTER	pAd,
+	IN	struct iwreq	*wrq);
+
+VOID	RTMPIoctlGetSTAT(	// ASUS EXT by Jiahao
+	IN	PRTMP_ADAPTER	pAd,
+	IN	struct iwreq	*wrq);
+
+VOID    RTMPIoctlGetRSSI(       // ASUS EXT by Jiahao
+        IN      PRTMP_ADAPTER   pAd,
+        IN      struct iwreq    *wrq);
 
 #ifdef CONFIG_AP_SUPPORT
 #ifdef APCLI_SUPPORT
@@ -8597,7 +8988,36 @@ INT Set_AutoFallBack_Proc(
 	IN	PRTMP_ADAPTER	pAdapter, 
 	IN	PSTRING			arg);
 
+#ifdef RT3883
+VOID NICInitRT3883RFRegisters(
+        IN PRTMP_ADAPTER pAd);
 
+VOID RT3883HaltAction(
+        IN PRTMP_ADAPTER        pAd);
+
+VOID RT3883LoadRFSleepModeSetup(
+        IN PRTMP_ADAPTER        pAd);
+
+VOID RT3883ReverseRFSleepModeSetup(
+        IN PRTMP_ADAPTER        pAd);
+
+VOID RTMPRT3883ReadTxPwrPerRate(
+	IN	PRTMP_ADAPTER	pAd);
+
+VOID RTMPRT3883ReadChannelPwr(
+	IN	PRTMP_ADAPTER	pAd);
+
+VOID	RTMPRT3883ABandSel(
+	IN	UCHAR	Channel);
+#endif // RT3883 //
+
+#ifdef RT2883
+VOID RTMPRT2883ReadTxPwrPerRate(
+	IN	PRTMP_ADAPTER	pAd);
+
+VOID RTMPRT2883ReadChannelPwr(
+	IN	PRTMP_ADAPTER	pAd);
+#endif // RT2883 //
 
 VOID RT28XXDMADisable(
 	IN RTMP_ADAPTER 		*pAd);
@@ -8876,7 +9296,40 @@ VOID RTMPSetAGCInitValue(
 	IN UCHAR			BandWidth);
 
 #ifdef RTMP_RBUS_SUPPORT
+#ifdef TXBF_SUPPORT
+VOID handleHtcField(
+	IN	PRTMP_ADAPTER	pAd,
+	IN	RX_BLK			*pRxBlk);
+#endif // TXBF_SUPPORT //
+
+#ifdef MFB_SUPPORT
+VOID MFB_PerPareMRQ(
+	IN	PRTMP_ADAPTER	pAd,
+	OUT	VOID* pBuf,
+	IN	PMAC_TABLE_ENTRY pEntry);
+
+VOID MFB_PerPareMFB(
+	IN	PRTMP_ADAPTER	pAd,
+	OUT	VOID* pBuf,
+	IN	PMAC_TABLE_ENTRY pEntry);
+#endif // MFB_SUPPORT //
 #endif // RTMP_RBUS_SUPPORT //
+
+
+#ifdef INCLUDE_DEBUG_QUEUE
+void dbQueueEnqueue(
+	IN UCHAR type,
+	IN UCHAR *data);
+
+void dbQueueEnqueueTxFrame(
+	IN UCHAR *pTxWI,
+	IN UCHAR *pHeader_802_11);
+
+void dbQueueEnqueueRxFrame(
+	IN UCHAR *pRxWI,
+	IN UCHAR *pHeader_802_11,
+	IN ULONG flags);
+#endif
 
 int rt28xx_close(IN PNET_DEV dev);
 int rt28xx_open(IN PNET_DEV dev);

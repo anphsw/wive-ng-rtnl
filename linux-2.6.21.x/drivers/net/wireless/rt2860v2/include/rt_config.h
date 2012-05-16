@@ -219,14 +219,9 @@
 #include "wsc_tlv.h"
 #endif // WSC_INCLUDED //
 
-
 #ifdef IKANOS_VX_1X0
 #include "vr_ikans.h"
 #endif // IKANOS_VX_1X0 //
-
-
-
-
 
 #ifdef WAPI_SUPPORT
 #include "wapi.h"
@@ -258,5 +253,8 @@
 #include	"led.h"
 #endif // WLAN_LED //
 
-#endif	// __RT_CONFIG_H__
+#ifdef TXBF_SUPPORT
+#include	"rt_txbf.h"
+#endif
 
+#endif	// __RT_CONFIG_H__

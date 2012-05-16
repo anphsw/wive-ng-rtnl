@@ -341,6 +341,12 @@ typedef struct GNU_PACKED {
 #endif /* RT_BIG_ENDIAN */
 } EXT_HT_CAP_INFO, *PEXT_HT_CAP_INFO;
 
+// HT Explicit Beamforming Feedback Capable
+#define HT_ExBF_FB_CAP_NONE			0
+#define HT_ExBF_FB_CAP_DELAYED		1
+#define HT_ExBF_FB_CAP_IMMEDIATE		2
+#define HT_ExBF_FB_CAP_BOTH			3
+
 //  HT Beamforming field in HT Cap IE .   
 typedef struct GNU_PACKED _HT_BF_CAP{
 #ifdef RT_BIG_ENDIAN
