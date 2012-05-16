@@ -44,15 +44,15 @@ endif
 #2T2R-MODE-3662
 ifdef CONFIG_RALINK_RT3662_2T2R
 	$(ROMFSINST) -S -e CONFIG_RALINK_RT3662_2T2R	RT3662_AP_2T2R_V0_0.bin		/etc/Wireless/RT3662_AP_2T2R_V0_0.bin
-	$(ROMFSINST) -S -e CONFIG_RALINK_RT3662_2T2R	defaults/RT2860.dat-2T2R	/etc/Wireless/RT2860/RT2860.dat
-	$(ROMFSINST) -S -e CONFIG_RALINK_RT3662_2T2R	defaults/default-2T2R		/etc/default/nvram_default
+	$(ROMFSINST) -S -e CONFIG_RALINK_RT3662_2T2R	defaults/RT2860.dat-2T2R-5G	/etc/Wireless/RT2860/RT2860.dat
+	$(ROMFSINST) -S -e CONFIG_RALINK_RT3662_2T2R	defaults/default-2T2R-5G		/etc/default/nvram_default
 	$(ROMFSINST) -s /etc/Wireless/RT3662_AP_2T2R_V0_0.bin /etc/Wireless/rf.bin
 endif
 #3T3R-MODE-3662
 ifdef CONFIG_RALINK_RT3883_3T3R
 	$(ROMFSINST) -S -e CONFIG_RALINK_RT3883_3T3R	RT3883_AP_3T3R_V0_1.bin		/etc/Wireless/RT3883_AP_3T3R_V0_1.bin
-	$(ROMFSINST) -S -e CONFIG_RALINK_RT3883_3T3R	defaults/RT2860.dat-3T3R	/etc/Wireless/RT2860/RT2860.dat
-	$(ROMFSINST) -S -e CONFIG_RALINK_RT3883_3T3R	defaults/default-3T3R		/etc/default/nvram_default
+	$(ROMFSINST) -S -e CONFIG_RALINK_RT3883_3T3R	defaults/RT2860.dat-3T3R-5G	/etc/Wireless/RT2860/RT2860.dat
+	$(ROMFSINST) -S -e CONFIG_RALINK_RT3883_3T3R	defaults/default-3T3R-5G		/etc/default/nvram_default
 	$(ROMFSINST) -s /etc/Wireless/RT3883_AP_3T3R_V0_1.bin /etc/Wireless/rf.bin
 endif
 #5GHz-MODE-3090

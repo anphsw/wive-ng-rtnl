@@ -18,7 +18,8 @@ export LC_ALL=POSIX
 if [ "$1" = "" ]; then
     MODE=2T2R
     #MODE=2T2R-USB-IPV6
-    #MODE=3T3R-USB-IPV6
+    #MODE=2T2R-5G-USB-IPV6
+    #MODE=3T3R-5G-USB-IPV6
     #MODE=1T1R
 else
     MODE=$1
@@ -26,8 +27,10 @@ fi
 
 #------------------------------------#
 #WR-N for full and WR-NL for ligth HW
-if [ "$MODE" = "3T3R-USB-IPV6" ]; then
-    DEVNAME="Wive_WR-450NU"
+if [ "$MODE" = "2T2R-5G-USB-IPV6" ]; then
+    DEVNAME="Wive_WR-5G-300NU"
+if [ "$MODE" = "3T3R-5G-USB-IPV6" ]; then
+    DEVNAME="Wive_WR-5G-450NU"
 elif [ "$MODE" = "2T2R-USB-IPV6" ]; then
     DEVNAME="Wive_WR-300NU"
 elif [ "$MODE" = "2T2R" ]; then
@@ -93,8 +96,13 @@ elif [ "$MODE" = "2T2R-USB-IPV6" ] ; then
     cp -fv $ROOTDIR/configs/all/config-busybox-USB-IPV6-8M		$ROOTDIR/user/busybox/.config
     cp -fv $ROOTDIR/configs/all/config-config-USB-IPV6-8M		$ROOTDIR/config/.config
     cp -fv $ROOTDIR/configs/all/config-lib-USB-IPV6-8M			$ROOTDIR/lib/.config
-elif [ "$MODE" = "3T3R-USB-IPV6" ] ; then
-    cp -fv $ROOTDIR/configs/kernel/config-kernel-3t3r-USB-IPV6-8M	$ROOTDIR/linux/.config
+elif [ "$MODE" = "2T2R-5G-USB-IPV6" ] ; then
+    cp -fv $ROOTDIR/configs/kernel/config-kernel-2t2r-5G-USB-IPV6-8M	$ROOTDIR/linux/.config
+    cp -fv $ROOTDIR/configs/all/config-busybox-USB-IPV6-8M		$ROOTDIR/user/busybox/.config
+    cp -fv $ROOTDIR/configs/all/config-config-USB-IPV6-8M		$ROOTDIR/config/.config
+    cp -fv $ROOTDIR/configs/all/config-lib-USB-IPV6-8M			$ROOTDIR/lib/.config
+elif [ "$MODE" = "3T3R-5G-USB-IPV6" ] ; then
+    cp -fv $ROOTDIR/configs/kernel/config-kernel-3t3r-5G-USB-IPV6-8M	$ROOTDIR/linux/.config
     cp -fv $ROOTDIR/configs/all/config-busybox-USB-IPV6-8M		$ROOTDIR/user/busybox/.config
     cp -fv $ROOTDIR/configs/all/config-config-USB-IPV6-8M		$ROOTDIR/config/.config
     cp -fv $ROOTDIR/configs/all/config-lib-USB-IPV6-8M			$ROOTDIR/lib/.config

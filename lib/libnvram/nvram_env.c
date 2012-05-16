@@ -824,7 +824,9 @@ int nvram_load_default(void)
 		return -1;
 
 	//set default chip type
-#if defined(CONFIG_RALINK_RT3050_1T1R)
+#if defined(CONFIG_RALINK_RT3662_2T2R) || defined(CONFIG_RALINK_RT3883_3T3R)
+        nvram_bufset(RT2860_NVRAM, "RFICType", "4");
+#elif defined(CONFIG_RALINK_RT3050_1T1R)
         nvram_bufset(RT2860_NVRAM, "RFICType", "5");
 #elif defined(CONFIG_RALINK_RT3051_1T2R)
         nvram_bufset(RT2860_NVRAM, "RFICType", "7");
