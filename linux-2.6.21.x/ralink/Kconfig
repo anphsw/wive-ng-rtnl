@@ -26,9 +26,8 @@ endmenu
 menu "Platform config for  Ralink RT3xx/RT28xx/RT5xx."
 choice
         prompt "RF Type"
-        depends on RALINK_RT5350 
+        depends on RALINK_RT5350
         default RALINK_RT5350_1T1R
-
         config  RALINK_RT5350_1T1R
         bool "1T1R"
 endchoice
@@ -88,6 +87,9 @@ config BCM_NAT
                 This helps packets pass through netfilter faster when a packet
                 is an established or reply traffic.
 
+#######
+# PPE
+#######
 if RA_NAT_HW
 menu "Ralink RT3xx/RT28xx NAT Acell support."
 source "net/nat/hw_nat/Kconfig"
@@ -95,26 +97,25 @@ endmenu
 endif
 endmenu
 
+#######
+# WIFI
+#######
+menu "AP(STA) MODE Ralink RT3xxx wireless driver."
 if RALINK_RT3052
-    menu "AP MODE Ralink RT335x wireless driver."
     source "drivers/net/wireless/ralink/rt305x/rt2860v2_ap/Kconfig"
-    endmenu
-    menu "STA/Client MODE Ralink RT335x wireless driver."
     source "drivers/net/wireless/ralink/rt305x/rt2860v2_sta/Kconfig"
-    endmenu
 endif
 
 if RALINK_RT3883
-    menu "AP MODE Ralink RT3883 wireless driver."
     source "drivers/net/wireless/ralink/rt3883/rt2860v2_ap/Kconfig"
-    endmenu
-    menu "STA/Client MODE Ralink RT3883 wireless driver."
     source "drivers/net/wireless/ralink/rt3883/rt2860v2_sta/Kconfig"
-    endmenu
-    menu "802.11 pci-e wireless driver."
+endif
+if HW_HAS_PCI
+    menu "802.11 3090 AP pci-e wireless driver."
     source "drivers/net/wireless/ralink/rt3090/rt3090_ap/Kconfig"
     endmenu
 endif
+endmenu
 
 menu "Ralink DEVICES."
 config RTDEV_USB
