@@ -108,7 +108,7 @@ bridge_config() {
 	brctl addif br0 eth2
 	# add wifi interface
 	brctl addif br0 ra0
-	if [ "$CONFIG_RT3090_AP" != "" ]; theb
+	if [ "$CONFIG_RT3090_AP" != "" ]; then
 	    # add wifi interface
 	    brctl addif br0 rai0
 	fi
@@ -126,7 +126,7 @@ gate_config() {
 	brctl addif br0 "$phys_lan_if"
 	# add wifi interface
 	brctl addif br0 ra0
-	if [ "$CONFIG_RT3090_AP" != "" ]; theb
+	if [ "$CONFIG_RT3090_AP" != "" ]; then
 	    # add wifi interface
 	    brctl addif br0 rai0
 	fi
@@ -148,7 +148,7 @@ apcli_config() {
 	brctl addif br0 eth2
 	# add ap wifi interface
 	brctl addif br0 ra0
-	if [ "$CONFIG_RT3090_AP" != "" ]; theb
+	if [ "$CONFIG_RT3090_AP" != "" ]; then
 	    # add wifi interface
 	    brctl addif br0 rai0
 	fi
@@ -168,7 +168,7 @@ spot_config() {
 	brctl addif br0 "$phys_lan_if"
 	# add wifi interface
 	brctl addif br0 ra0
-	if [ "$CONFIG_RT3090_AP" != "" ]; theb
+	if [ "$CONFIG_RT3090_AP" != "" ]; then
 	    # add wifi interface
 	    brctl addif br0 rai0
 	fi
