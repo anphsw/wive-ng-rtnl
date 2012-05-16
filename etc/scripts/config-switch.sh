@@ -11,44 +11,67 @@ LOG="logger -t ESW"
 # get need variables
 eval `nvram_buf_get 2860 wan_port OperationMode tv_port vlan_double_tag natFastpath ForceRenewDHCP LAN_MAC_ADDR`
 
-conf_param_for_all()
-{
-    if [ ! -f /var/run/goahead.pid ]; then
-	##########################################################################
-	# Configure touch dhcp from driver in kernel. Only one per start
-	##########################################################################
-	if [ "$OperationMode" = "0" ] || [ "$OperationMode" = "2" ] || [ "$ApCliBridgeOnly" = "1" ]; then
+##########################################################################
+# get proc path for phy configure
+##########################################################################
+if [ -f /proc/rt2880/gmac ]; then
+    PROC="/proc/rt2880/gmac"
+elif [ -f /proc/rt3052/gmac ]; then
+    PROC="/proc/rt3052/gmac"
+elif [ -f /proc/rt3352/gmac ]; then
+    PROC="/proc/rt3352/gmac"
+elif [ -f /proc/rt5350/gmac ]; then
+    PROC="/proc/rt5350/gmac"
+elif [ -f /proc/rt2883/gmac ]; then
+    PROC="/proc/rt2883/gmac"
+elif [ -f /proc/rt3883/gmac ]; then
+    PROC="/proc/rt23883/gmac"
+elif [ -f /proc/rt6855/gmac ]; then
+    PROC="/proc/rt6855/gmac"
+elif [ -f /proc/rt63365/gmac ]; then
+    PROC="/proc/rt63365/gmac"
+else
+    $LOG "No switch in system!!!"
+    PROC=
+fi
+
+##############################################################################
+# BASE FOR ALL ESW
+##############################################################################
+if [ ! -f /var/run/goahead.pid ]; then
+    ##########################################################################
+    # Configure touch dhcp from driver in kernel. Only one per start
+    ##########################################################################
+    if [ "$OperationMode" = "0" ] || [ "$OperationMode" = "2" ] || [ "$ApCliBridgeOnly" = "1" ]; then
+	# disable dhcp renew from driver
+	sysctl -w net.ipv4.send_sigusr_dhcpc=9
+    else
+	if [ "$ForceRenewDHCP" != "0" ] && [ "$wan_port" != "" ]; then
+	    # configure event wait port
+	    sysctl -w net.ipv4.send_sigusr_dhcpc=$wan_port
+	else
 	    # disable dhcp renew from driver
 	    sysctl -w net.ipv4.send_sigusr_dhcpc=9
-	else
-	    if [ "$ForceRenewDHCP" != "0" ] && [ "$wan_port" != "" ]; then
-		# configure event wait port
-		sysctl -w net.ipv4.send_sigusr_dhcpc=$wan_port
-	    else
-		# disable dhcp renew from driver
-		sysctl -w net.ipv4.send_sigusr_dhcpc=9
-	    fi
-
-	fi
-	##########################################################################
-	# Configure double vlan tag support in kernel. Only one per start
-	##########################################################################
-	if [ -f /proc/sys/net/ipv4/vlan_double_tag ]; then
-	    if [ "$vlan_double_tag" = "1" ] || [ "$natFastpath" = "2" ] || [ "$natFastpath" = "3" ]; then
-		if [ "$natFastpath" = "2" ] || [ "$natFastpath" = "3" ]; then
-		    $LOG "Double vlan tag and HW_NAT enabled. HW_VLAN offload disabled."
-		else
-		    $LOG "Double vlan tag enabled. HW_VLAN and HW_NAT offload disabled."
-		fi
-		DOUBLE_TAG=1
-	    else
-		$LOG "Double vlan tag and HW_NAT disabled. HW_VLAN offload enabled."
-		DOUBLE_TAG=0
-	    fi
-	    sysctl -w net.ipv4.vlan_double_tag="$DOUBLE_TAG"
 	fi
     fi
-}
+    ##########################################################################
+    # Configure double vlan tag support in kernel. Only one per start
+    ##########################################################################
+    if [ -f /proc/sys/net/ipv4/vlan_double_tag ]; then
+	if [ "$vlan_double_tag" = "1" ] || [ "$natFastpath" = "2" ] || [ "$natFastpath" = "3" ]; then
+	    if [ "$natFastpath" = "2" ] || [ "$natFastpath" = "3" ]; then
+		$LOG "Double vlan tag and HW_NAT enabled. HW_VLAN offload disabled."
+	    else
+		$LOG "Double vlan tag enabled. HW_VLAN and HW_NAT offload disabled."
+	    fi
+	    DOUBLE_TAG=1
+	else
+	    $LOG "Double vlan tag and HW_NAT disabled. HW_VLAN offload enabled."
+	    DOUBLE_TAG=0
+	fi
+	sysctl -w net.ipv4.vlan_double_tag="$DOUBLE_TAG"
+    fi
+fi
 
 ##############################################################################
 # Internal 3052 ESW
@@ -56,7 +79,6 @@ conf_param_for_all()
 if [ "$CONFIG_RT_3052_ESW" != "" ]; then
     SWITCH_MODE=2
     if [ ! -f /var/run/goahead.pid ]; then
-	conf_param_for_all
 	##########################################################################
 	# Configure vlans in kernel. Only one per start
 	##########################################################################
@@ -87,26 +109,6 @@ if [ "$CONFIG_RT_3052_ESW" != "" ]; then
     ##########################################################################
     # Set speed and duplex modes per port
     ##########################################################################
-    if [ -f /proc/rt2880/gmac ]; then
-	PROC="/proc/rt2880/gmac"
-    elif [ -f /proc/rt3052/gmac ]; then
-	PROC="/proc/rt3052/gmac"
-    elif [ -f /proc/rt3352/gmac ]; then
-	PROC="/proc/rt3352/gmac"
-    elif [ -f /proc/rt5350/gmac ]; then
-	PROC="/proc/rt5350/gmac"
-    elif [ -f /proc/rt2883/gmac ]; then
-	PROC="/proc/rt2883/gmac"
-    elif [ -f /proc/rt3883/gmac ]; then
-	PROC="/proc/rt23883/gmac"
-    elif [ -f /proc/rt6855/gmac ]; then
-	PROC="/proc/rt6855/gmac"
-    elif [ -f /proc/rt63365/gmac ]; then
-	PROC="/proc/rt63365/gmac"
-    else
-	$LOG "No swith in system!!!"
-	PROC=
-    fi
     if [ -f /bin/ethtool ] && [ "$PROC" != "" ]; then
 	##################################
 	# start configure by ethtool
@@ -183,7 +185,6 @@ if [ "$CONFIG_RT_3052_ESW" != "" ]; then
 ##############################################################################
 elif [ "$CONFIG_MAC_TO_MAC_MODE" != "" ] && [ "$CONFIG_RAETH_GMAC2" != "" ]; then
     SWITCH_MODE=1
-    conf_param_for_all
     ##########################################################################
     $LOG '######## clear switch partition (DUAL_PHY) ########'
     /etc/scripts/config-vlan.sh $SWITCH_MODE 0 > /dev/null 2>&1
@@ -196,7 +197,6 @@ elif [ "$CONFIG_MAC_TO_MAC_MODE" != "" ] && [ "$CONFIG_RAETH_GMAC2" != "" ]; the
 ##############################################################################
 elif [ "$CONFIG_MAC_TO_MAC_MODE" != "" ] && [ "$CONFIG_RAETH_GMAC2" = "" ]; then
     SWITCH_MODE=1
-    conf_param_for_all
     ##########################################################################
     $LOG '######## clear switch partition  ########'
     /etc/scripts/config-vlan.sh $SWITCH_MODE 0 > /dev/null 2>&1
@@ -212,7 +212,6 @@ elif [ "$CONFIG_MAC_TO_MAC_MODE" != "" ] && [ "$CONFIG_RAETH_GMAC2" = "" ]; then
 ##############################################################################
 elif [ "$CONFIG_RAETH_ROUTER" != "" ]; then
     SWITCH_MODE=0
-    conf_param_for_all
     ##########################################################################
     $LOG '######## clear switch partition  ########'
     /etc/scripts/config-vlan.sh $SWITCH_MODE 0 > /dev/null 2>&1
