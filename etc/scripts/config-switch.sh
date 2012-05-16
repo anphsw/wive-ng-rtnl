@@ -187,9 +187,10 @@ elif [ "$CONFIG_MAC_TO_MAC_MODE" != "" ] && [ "$CONFIG_RAETH_GMAC2" != "" ]; the
     ##########################################################################
     $LOG '######## clear switch partition (DUAL_PHY) ########'
     /etc/scripts/config-vlan.sh $SWITCH_MODE 0 > /dev/null 2>&1
-    #
-    # put code for configure switch port mode and others
-    #
+    if [ "$CONFIG_RTL8367M" != "" ]; then
+	# put code for configure switch port mode and others
+	$LOG "Need add code for config RTL switch mode"
+    fi
 ##############################################################################
 # VTSS OR RTL8367M external switch one phy mode
 ##############################################################################
@@ -199,8 +200,13 @@ elif [ "$CONFIG_MAC_TO_MAC_MODE" != "" ] && [ "$CONFIG_RAETH_GMAC2" = "" ]; then
     ##########################################################################
     $LOG '######## clear switch partition  ########'
     /etc/scripts/config-vlan.sh $SWITCH_MODE 0 > /dev/null 2>&1
-    $LOG '##### config vlan partition (ONE PHY) #####'
-    /etc/scripts/config-vlan.sh $SWITCH_MODE 1 > /dev/null 2>&1
+    if [ "$CONFIG_RTL8367M" != "" ]; then
+	$LOG '##### config vlan partition (RTL ONE PHY) #####'
+	$LOG '##### RTL ONE PHY - NOT SUPPORTED #####'
+    else
+	$LOG '##### config vlan partition (VTTS ONE PHY) #####'
+	/etc/scripts/config-vlan.sh $SWITCH_MODE 1 > /dev/null 2>&1
+    fi
 ##############################################################################
 # IC+ external switch
 ##############################################################################
