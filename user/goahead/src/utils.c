@@ -874,6 +874,8 @@ static int getPlatform(int eid, webs_t wp, int argc, char_t **argv)
     return websWrite(wp, T("RT3052 2T2R embedded switch"));
 #elif CONFIG_RALINK_RT3352_2T2R
     return websWrite(wp, T("RT3352 2T2R embedded switch"));
+#elif CONFIG_RTL8367M
+    return websWrite(wp, T("RTL8367M external gigaphy switch"));
 #else
     return websWrite(wp, T("Don`t detected RT3050 or RT3052 unknown switch mode"));
 #endif
