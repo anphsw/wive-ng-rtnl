@@ -12,6 +12,11 @@ start() {
     # flush ip from interfaces
     addr_flush
 
+    # lan/wan particions and hardware adresses preconfigure
+    if [ ! -f /var/run/goahead.pid ]; then
+	/etc/scripts/config-switch.sh
+    fi
+
     # bridge preconfigure if not ethernet converter mode
     brisup=`ip link show br0 up | grep -c ""` > /dev/null 2>&1
     if [ "$brisup" = "0" ] && [ "$OperationMode" != "2" ]; then
@@ -24,11 +29,6 @@ start() {
 	ifconfig br0 txqueuelen "$txqueuelen"
 	$LOG "Up bridge interface"
 	ip link set br0 up
-    fi
-
-    if [ ! -f /var/run/goahead.pid ]; then
-	# lan/wan particions preconfigure
-	/etc/scripts/config-switch.sh
     fi
 
     # always up lan iface

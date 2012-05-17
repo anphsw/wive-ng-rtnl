@@ -11,52 +11,54 @@ LOG="logger -t ESW"
 # get need variables
 eval `nvram_buf_get 2860 wan_port tv_port vlan_double_tag natFastpath ForceRenewDHCP`
 
-##########################################################################
-# get proc path for phy configure
-##########################################################################
-if [ -f /proc/rt2880/gmac ]; then
-    PROC="/proc/rt2880/gmac"
-elif [ -f /proc/rt3052/gmac ]; then
-    PROC="/proc/rt3052/gmac"
-elif [ -f /proc/rt3352/gmac ]; then
-    PROC="/proc/rt3352/gmac"
-elif [ -f /proc/rt5350/gmac ]; then
-    PROC="/proc/rt5350/gmac"
-elif [ -f /proc/rt2883/gmac ]; then
-    PROC="/proc/rt2883/gmac"
-elif [ -f /proc/rt3883/gmac ]; then
-    PROC="/proc/rt23883/gmac"
-elif [ -f /proc/rt6855/gmac ]; then
-    PROC="/proc/rt6855/gmac"
-elif [ -f /proc/rt63365/gmac ]; then
-    PROC="/proc/rt63365/gmac"
-else
-    $LOG "No switch in system!!!"
-    PROC=
-fi
-
 ##############################################################################
 # BASE FOR ALL ESW
 ##############################################################################
-if [ ! -f /var/run/goahead.pid ]; then
+start_sw_config() {
+    ##########################################################################
+    # get proc path for phy configure
+    ##########################################################################
+    if [ -f /proc/rt2880/gmac ]; then
+	PROC="/proc/rt2880/gmac"
+    elif [ -f /proc/rt3052/gmac ]; then
+	PROC="/proc/rt3052/gmac"
+    elif [ -f /proc/rt3352/gmac ]; then
+	PROC="/proc/rt3352/gmac"
+    elif [ -f /proc/rt5350/gmac ]; then
+	PROC="/proc/rt5350/gmac"
+    elif [ -f /proc/rt2883/gmac ]; then
+	PROC="/proc/rt2883/gmac"
+    elif [ -f /proc/rt3883/gmac ]; then
+	PROC="/proc/rt23883/gmac"
+    elif [ -f /proc/rt6855/gmac ]; then
+	PROC="/proc/rt6855/gmac"
+    elif [ -f /proc/rt63365/gmac ]; then
+	PROC="/proc/rt63365/gmac"
+    else
+	$LOG "No switch in system!!!"
+	PROC=
+    fi
+
     ##########################################################################
     # Configure double vlan tag support in kernel. Only one per start
     ##########################################################################
-    if [ -f /proc/sys/net/ipv4/vlan_double_tag ]; then
-	if [ "$vlan_double_tag" = "1" ] || [ "$natFastpath" = "2" ] || [ "$natFastpath" = "3" ]; then
-	    if [ "$natFastpath" = "2" ] || [ "$natFastpath" = "3" ]; then
-		$LOG "Double vlan tag and HW_NAT enabled. HW_VLAN offload disabled."
+    if [ ! -f /var/run/goahead.pid ]; then
+	if [ -f /proc/sys/net/ipv4/vlan_double_tag ]; then
+	    if [ "$vlan_double_tag" = "1" ] || [ "$natFastpath" = "2" ] || [ "$natFastpath" = "3" ]; then
+		if [ "$natFastpath" = "2" ] || [ "$natFastpath" = "3" ]; then
+		    $LOG "Double vlan tag and HW_NAT enabled. HW_VLAN offload disabled."
+		else
+		    $LOG "Double vlan tag enabled. HW_VLAN and HW_NAT offload disabled."
+		fi
+		DOUBLE_TAG=1
 	    else
-		$LOG "Double vlan tag enabled. HW_VLAN and HW_NAT offload disabled."
+		$LOG "Double vlan tag and HW_NAT disabled. HW_VLAN offload enabled."
+		DOUBLE_TAG=0
 	    fi
-	    DOUBLE_TAG=1
-	else
-	    $LOG "Double vlan tag and HW_NAT disabled. HW_VLAN offload enabled."
-	    DOUBLE_TAG=0
+	    sysctl -w net.ipv4.vlan_double_tag="$DOUBLE_TAG"
 	fi
-	sysctl -w net.ipv4.vlan_double_tag="$DOUBLE_TAG"
     fi
-fi
+}
 
 ##########################################################################
 # call this function only if VLAN as WAN need
@@ -87,21 +89,28 @@ configs_system_vlans() {
 ##########################################################################
 set_mac_wan_lan() {
     # set MAC adresses LAN for phys iface (always set for physycal external switch one or dual phy mode)
-    if [ "$OperationMode" = "1" ] || [ "$OperationMode" = "4" ] || [ "$CONFIG_MAC_TO_MAC_MODE" != "" ]; then
+    if [ "$OperationMode" = "1" ] || [ "$OperationMode" = "4" ] || [ "$CONFIG_MAC_TO_MAC_MODE" = "y" ]; then
+	# ALWAYS UP ROOT IFACE BEFORE CONFIGURE SECOND
 	$LOG "$phys_lan_if MACADDR $LAN_MAC_ADDR"
-	ifconfig "$phys_lan_if" hw ether "$LAN_MAC_ADDR"
-	ifconfig "$phys_lan_if" txqueuelen "$txqueuelen"
+	ifconfig "$phys_lan_if" down
+	ifconfig "$phys_lan_if" hw ether "$LAN_MAC_ADDR" txqueuelen "$txqueuelen" up
     fi
 
     # set MAC adresses LAN/WAN if not bridge and not ethernet converter modes
     # in gw/hotspot modes set mac to wan (always set for physycal external dual phy mode swicth)
-    if [ "$OperationMode" = "1" ] || [ "$OperationMode" = "4" ] || [ "$CONFIG_RAETH_GMAC2" != "" ]; then
+    if [ "$OperationMode" = "1" ] || [ "$OperationMode" = "4" ] || [ "$CONFIG_RAETH_GMAC2" = "y" ]; then
+	# ROOT IFACE MUST BE READY AND ENABLED
 	$LOG "$phys_wan_if MACADDR $WAN_MAC_ADDR"
-	ifconfig "$phys_wan_if" hw ether "$WAN_MAC_ADDR"
-	ifconfig "$phys_wan_if" txqueuelen "$txqueuelen"
+	ifconfig "$phys_wan_if" down
+	ifconfig "$phys_wan_if" hw ether "$WAN_MAC_ADDR" txqueuelen "$txqueuelen"
     fi
 }
 
+
+##############################################################################
+# preconfig
+start_sw_config
+##############################################################################
 
 ##############################################################################
 # Internal 3052 ESW
