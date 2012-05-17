@@ -637,7 +637,7 @@ function initValue()
 	show14channel(true);
 
 	// Wireless mode
-	if (((wmode*1) >= 8) || ((wmode*1) == 6))
+	if ((wmode*1) >= 5)
 	{
 		showElement("div_11n");
 		displayElement('htOpModeRow', green_on);
@@ -658,7 +658,7 @@ function initValue()
 		form.wirelessmode.options[index++] = new Option("11n only(5G)", "11");
 	}
 
-	if ((wmode == "0") || (wmode == "4") || (wmode == "9") || (wmode == "6") || (wmode == "7"))
+	if ((wmode == "0") || (wmode == "4") || (wmode == "6") || (wmode == "7") || (wmode == "9"))
 	{
 		form.sz11gChannel.disabled = false;
 		showElementEx("div_11g_channel", style_display_on());
@@ -679,6 +679,13 @@ function initValue()
 	{
 		form.sz11aChannel.disabled = false;
 		showElementEx("div_11a_channel", style_display_on());
+
+		if ((1*wmode) >= 5)
+		{
+			showElementEx("div_ht_tx_stream", style_display_on());
+			showElementEx("div_ht_rx_stream", style_display_on());
+			show14channel(false);
+		}
 	}
 
 	ssidDisplay(form);
