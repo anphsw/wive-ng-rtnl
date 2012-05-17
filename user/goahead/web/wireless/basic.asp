@@ -606,10 +606,9 @@ function initValue()
 	initTranslation();
 	if (countrycode == '')
 		countrycode = 'NONE';
-	
+
 	var form                  = document.wireless_basic;
 	form.wirelessmode.value   = "<% getCfgZero(1, "WirelessMode"); %>";
-//	form.radioButton.value    = (radio_off == "1") ? "RADIO ON" : "RADIO OFF";
 	form.radioWirelessEnabled.checked = (radio_off == "0");
 
 	var wmode = form.wirelessmode.value;
@@ -632,34 +631,34 @@ function initValue()
 	form.n_rdg.disabled = true;
 	form.n_gi.disabled = true;
 	form.n_mcs.disabled = true;
-	
+
 	hideElement("div_mbssidapisolated");
 	form.mbssidapisolated.disabled = true;
 	show14channel(true);
-	
+
 	// Wireless mode
-	if ((wmode*1) >= 6)
+	if (((wmode*1) >= 8) || ((wmode*1) == 6))
 	{
 		showElement("div_11n");
 		displayElement('htOpModeRow', green_on);
-		
+
 		form.n_mode.disabled = false;
 		form.n_bandwidth.disabled = false;
 		form.n_rdg.disabled = false;
 		form.n_gi.disabled = false;
 		form.n_mcs.disabled = false;
 	}
-	
+
 	var rfic = '<% getCfgGeneral(1, "RFICType"); %>';
-	if ((rfic == "2") || (rfic == "4"))
+	if ((rfic == "2") || (rfic == "4") || (rfic == "a") || (rfic == "d"))
 	{
 		index = form.wirelessmode.options.length;
 		form.wirelessmode.options[index++] = new Option("11a only", "2");
 		form.wirelessmode.options[index++] = new Option("11a/n mixed mode", "8");
 		form.wirelessmode.options[index++] = new Option("11n only(5G)", "11");
 	}
-	
-	if ((wmode == "0") || (wmode == "4") || (wmode == "9") || (wmode == "6") || (wmode=="7"))
+
+	if ((wmode == "0") || (wmode == "4") || (wmode == "9") || (wmode == "6") || (wmode == "7"))
 	{
 		form.sz11gChannel.disabled = false;
 		showElementEx("div_11g_channel", style_display_on());
@@ -681,9 +680,9 @@ function initValue()
 		form.sz11aChannel.disabled = false;
 		showElementEx("div_11a_channel", style_display_on());
 	}
-	
+
 	ssidDisplay(form);
-	
+
 	// Initialize bssid
 	var HiddenSSID  = '<% getCfgZero(1, "HideSSID"); %>';
 	var HiddenSSIDArray = HiddenSSID.split(";");
@@ -698,7 +697,7 @@ function initValue()
 	form.apisolated[ (APIsolated.indexOf("1") >= 0) ? 1 : 0 ].checked = true;
 	for (i=0; i<8; i++)
 		form.isolated_ssid[i].checked = (APIsolatedArray[i] == "1");
-	
+
 	var ht_bw = '<% getCfgZero(1, "HT_BW"); %>';
 	if (1*ht_bw == 0)
 	{
@@ -712,7 +711,7 @@ function initValue()
 		form.n_extcha.disabled      = false;
 		showElementEx("extension_channel", style_display_on());
 	}
-	
+
 	channel_index = 1*channel_index;
 
 	if ((wmode == "0") || (wmode == "4") || (wmode == "9") || (wmode == "6"))
