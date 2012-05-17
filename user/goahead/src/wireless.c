@@ -733,20 +733,23 @@ static void revise_mbss_updated_values(webs_t wp, int bssnum)
 		if (parm->is_comp)
 		{
 			tmpvalue[0] = '\0';
-			for (i=0; i<bssnum; i++) // Build string from parameters
+			for (i=0; i<bssnum; i++) /* Build string from parameters */
 			{
 				catIndex(tempbuf, parm->name, (i+1));
 				char *v = websGetVar(wp, tempbuf, T(""));
 				if (v == NULL)
 					v = "";
-				sprintf(tmpvalue, "%s%s;", tmpvalue, v);
+				if (bssnum > 1)
+				    sprintf(tmpvalue, "%s%s;", tmpvalue, v); /* multiple ssid by ; as separator */
+				else
+				    sprintf(tmpvalue, "%s%s", tmpvalue, v); /* separator ; not need if only one ssid enabled */
 			}
 			printf("%s = %s\n", parm->name, tmpvalue);
 			nvram_bufset(RT2860_NVRAM, parm->name, tmpvalue);
 		}
 		else
 		{
-			for (i=0; i<bssnum; i++) // set-up parameter by parameter
+			for (i=0; i<bssnum; i++) /* set-up parameter by parameter */
 			{
 				catIndex(tempbuf, parm->name, (i+1));
 				char *v = websGetVar(wp, tempbuf, T(""));
@@ -789,7 +792,7 @@ static void setupSecurityLed(void)
 				}
 			}
 
-			ledAlways(GPIO_LED_SEC_GREEN, led_on); // turn on/off security LED
+			ledAlways(GPIO_LED_SEC_GREEN, led_on); /* turn on/off security LED */
 		}
 	}
 
@@ -806,7 +809,7 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 	char_t	*n_autoba, *n_badecline;
 	char_t	*tx_stream, *rx_stream;
 	char	hidden_ssid[16] = "", noforwarding[16] = "";
-	int     is_n = 0, new_bssid_num, old_bssid_num = 1;
+	int     is_n = 0, new_bssid_num;
 	char *submitUrl;
 
 	// Get current mode & new mode
@@ -835,7 +838,6 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 	tx_stream = websGetVar(wp, T("tx_stream"), T("0"));
 	rx_stream = websGetVar(wp, T("rx_stream"), T("0"));
 	auto_select = websGetVar(wp, T("AutoChannelSelect"), T("0"));
-	old_bssid_num = atoi(nvram_get(RT2860_NVRAM, "BssidNum"));
 	new_bssid_num = atoi(bssid_num);
 
 	if (new_bssid_num < 1 || new_bssid_num > 8) {
@@ -985,7 +987,6 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
 
-	//revise_mbss_value(old_bssid_num, new_bssid_num);
 	revise_mbss_updated_values(wp, new_bssid_num);
 	setupSecurityLed();
 
