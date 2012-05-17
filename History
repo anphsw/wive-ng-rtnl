@@ -1106,6 +1106,13 @@
 34) Uboot more correct RTL8367 esw support.<br>
 35) Add check and upload printer firmware from /opt/etc/prnfw.dl.<br>
 36) Fix ip fragmentation regression introdused in 2.5.0.<br>
+37) Fix race in wan/vlan configure.<br>
+38) Fix loop in route in deconfig state.<br>
+39) Support hw preconfig for RT3883 dual mac esw.<br>
+40) Fix race in addrconf ipv6.<br>
+41) Add drivers for RT3883 dual band wifi and RT3090 2.4GHz pci-e module.<br>
+42) libnvram not more use read nic conf before gen_wifi config. Use settings from nvram.<br>
+43) Fix not need add separator for some mbssid value if bssidnum<=1
 
 <br><br>
 <b>News and changes in Russian:</b><br>
