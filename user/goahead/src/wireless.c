@@ -852,7 +852,7 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 		return;
 	}
 
-	if (atoi(wirelessmode) >= 6)
+	if (atoi(wirelessmode) >= 5)
 		is_n = 1;
 
 	nvram_init(RT2860_NVRAM);
