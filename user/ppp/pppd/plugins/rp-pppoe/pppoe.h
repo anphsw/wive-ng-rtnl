@@ -266,7 +266,6 @@ int sendPacket(PPPoEConnection *conn, int sock, PPPoEPacket *pkt, int size);
 int receivePacket(int sock, PPPoEPacket *pkt, int *size);
 void fatalSys(char const *str);
 void rp_fatal(char const *str);
-void printErr(char const *str);
 void sysErr(char const *str);
 void dumpPacket(FILE *fp, PPPoEPacket *packet, char const *dir);
 void dumpHex(FILE *fp, unsigned char const *buf, int len);
