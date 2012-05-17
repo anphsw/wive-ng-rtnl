@@ -340,7 +340,7 @@ void inet_unhash(struct sock *sk)
 	}
 
 	if (__sk_del_node_init(sk))
-		sock_prot_inuse_add(sk->sk_prot, -1);
+		sock_prot_dec_use(sk->sk_prot);
 	write_unlock_bh(lock);
 out:
 	if (sk->sk_state == TCP_LISTEN)
