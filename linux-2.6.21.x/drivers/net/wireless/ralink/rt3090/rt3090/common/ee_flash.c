@@ -272,11 +272,11 @@ static NDIS_STATUS rtmp_ee_flash_init(PRTMP_ADAPTER pAd, PUCHAR start)
 		// Random number for the last bytes of MAC address
 		{
 			USHORT  Addr45;
-			
+
 			rtmp_ee_flash_read(pAd, 0x08, &Addr45);
 			Addr45 = Addr45 & 0xff;
 			Addr45 = Addr45 | (RandomByte(pAd)&0xf8) << 8;
-			
+
 			rtmp_ee_flash_write(pAd, 0x08, Addr45);
 			DBGPRINT(RT_DEBUG_ERROR, ("The EEPROM in Flash is wrong, use default\n"));
 		}
@@ -287,16 +287,14 @@ static NDIS_STATUS rtmp_ee_flash_init(PRTMP_ADAPTER pAd, PUCHAR start)
 			return NDIS_STATUS_FAILURE;
 		}
 	}
-	
+
 	return NDIS_STATUS_SUCCESS;
 }
 
 
 NDIS_STATUS rtmp_nv_init(PRTMP_ADAPTER pAd)
 {
-	UCHAR *eepromBuf;
-	DBGPRINT(RT_DEBUG_TRACE, ("--> rtmp_nv_init\n"));	
+	DBGPRINT(RT_DEBUG_TRACE, ("--> rtmp_nv_init\n"));
 	RtmpFlashRead(EeBuffer, RF_OFFSET, EEPROM_SIZE);
 	return rtmp_ee_flash_init(pAd, EeBuffer);
-
 }
