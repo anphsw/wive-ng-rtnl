@@ -264,7 +264,7 @@ function Check5GBandChannelException()
 		var current_length      = form_basic.sz11aChannel.options.length;
 		var current_index       = form_basic.sz11aChannel.options.selectedIndex;
 		var current_channel     = form_basic.sz11aChannel.value;
-		 
+
 		if (1*current_index == 0)
 		{
 			if (1*channel_index != 0)
@@ -279,14 +279,14 @@ function Check5GBandChannelException()
 		if (document.wireless_basic.n_bandwidth[1].checked == true)
 		{
 			if ((countrycode == 'NONE') || (countrycode == 'FR') || (countrycode == 'US') ||
-				(countrycode == 'IE') || (countrycode == 'JP') || (countrycode == 'HK'))
+				(countrycode == 'IE') || (countrycode == 'JP') || (countrycode == 'HK') || (countrycode == 'RU'))
 			{
 				for(ch = 36; ch <= 48; ch+=4)
 					insertChannelOption(ch, 5);
 			}
 
 			if ((countrycode == 'NONE') || (countrycode == 'FR') || (countrycode == 'US') ||
-				(countrycode == 'IE') || (countrycode == 'TW') || (countrycode == 'HK'))
+				(countrycode == 'IE') || (countrycode == 'TW') || (countrycode == 'HK') || (countrycode == 'RU'))
 			{
 				for(ch = 52; ch <= 64; ch+=4)
 					insertChannelOption(ch, 5);
@@ -299,7 +299,7 @@ function Check5GBandChannelException()
 			}
 
 			if ((countrycode == 'NONE') || (countrycode == 'US') || (countrycode == 'TW') ||
-				(countrycode == 'CN') || (countrycode == 'HK'))
+				(countrycode == 'CN') || (countrycode == 'HK')  || (countrycode == 'RU'))
 			{
 				for(ch = 149; ch <= 161; ch+=4)
 					insertChannelOption(ch, 5);
@@ -317,14 +317,14 @@ function Check5GBandChannelException()
 		else
 		{
 			if ((countrycode == 'NONE') || (countrycode == 'FR') || (countrycode == 'US') ||
-				(countrycode == 'IE') || (countrycode == 'JP') || (countrycode == 'HK'))
+				(countrycode == 'IE') || (countrycode == 'JP') || (countrycode == 'HK') || (countrycode == 'RU'))
 			{
 				for(ch = 36; ch <= 48; ch+=4)
 					insertChannelOption(ch, 5);
 			}
 
 			if ((countrycode == 'NONE') || (countrycode == 'FR') || (countrycode == 'US') ||
-				(countrycode == 'IE') || (countrycode == 'TW') || (countrycode == 'HK'))
+				(countrycode == 'IE') || (countrycode == 'TW') || (countrycode == 'HK') || (countrycode == 'RU'))
 			{
 				for(ch = 52; ch <= 64; ch+=4)
 					insertChannelOption(ch, 5);
@@ -337,14 +337,14 @@ function Check5GBandChannelException()
 			}
 
 			if ((countrycode == 'NONE') || (countrycode == 'US') || (countrycode == 'TW') ||
-				(countrycode == 'CN') || (countrycode == 'HK'))
+				(countrycode == 'CN') || (countrycode == 'HK') || (countrycode == 'RU'))
 			{
 				for(ch = 149; ch <= 161; ch+=4)
 					insertChannelOption(ch, 5);
 			}
 
 			if ((countrycode == 'NONE') || (countrycode == 'US') ||
-				(countrycode == 'CN') || (countrycode == 'HK'))
+				(countrycode == 'CN') || (countrycode == 'HK') || (countrycode == 'RU'))
 			{
 					insertChannelOption(165, 5);
 			}
