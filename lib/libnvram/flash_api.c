@@ -71,23 +71,6 @@ int flash_read_mac(char *buf)
 }
 #endif
 
-int flash_read_NicConf(char *buf)
-{
-	int fd, ret;
-
-	if (!buf)
-		return -1;
-	fd = mtd_open("Factory", O_RDONLY | O_NONBLOCK);
-	if (fd < 0) {
-		fprintf(stderr, "Could not open mtd device\n");
-		return -1;
-	}
-	lseek(fd, 0x34, SEEK_SET);
-	ret = read(fd, buf, 6);
-	close(fd);
-	return ret;
-}
-
 int flash_read(char *buf, off_t from, size_t len)
 {
 	int fd, ret;

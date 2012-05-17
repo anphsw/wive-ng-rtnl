@@ -804,7 +804,7 @@ int isMacValid(char *str)
 
 int nvram_load_default(void)
 {
-	//default macs is OK
+	/* default macs is OK */
 	int mac_ok=1;
 
 	LIBNV_PRINT("Store macs...");
@@ -819,11 +819,12 @@ int nvram_load_default(void)
 	renew_nvram(RT2860_NVRAM, "/etc/default/nvram_default");
 
 	LIBNV_PRINT("Renew nvram...");
-	//reinit nvram before commit
+
+	/* reinit nvram before commit */
 	if ( nvram_init(RT2860_NVRAM) == -1 )
 		return -1;
 
-	//set default chip type
+	/* set default RF Type by config */
 #if defined(CONFIG_RALINK_RT3662_2T2R) || defined(CONFIG_RALINK_RT3883_3T3R)
         nvram_bufset(RT2860_NVRAM, "RFICType", "4");
 #elif defined(CONFIG_RALINK_RT3050_1T1R)
@@ -849,7 +850,7 @@ int nvram_load_default(void)
 	else
 	    mac_ok=0;
 
-	//all restore ok ?
+	/* all restore ok ? */
 	if ( mac_ok == 1 )
 	{
 	    LIBNV_PRINT("Restore checkmac atribute.");
@@ -861,7 +862,7 @@ int nvram_load_default(void)
     	    nvram_bufset(RT2860_NVRAM, "CHECKMAC", "YES");
 	}
 
-	//set wive flag
+	/* set wive flag */
         nvram_bufset(RT2860_NVRAM, "IS_WIVE", "YES");
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
@@ -876,36 +877,6 @@ int gen_wifi_config(int mode)
 	char tx_rate[16], wmm_enable[16];
 	char temp[2], buf[4];
 
-	if ( mode == RT2860_NVRAM )
-	{
-	    //Read radio config
-	    flash_read_NicConf(buf);
-
-		if ( nvram_init(mode) == -1 )
-			return -1;
-
-	    //chiptype
-	    sprintf(temp, "%x", buf[1]);
-	    if (!atoi(temp))
-		sprintf(temp, "%x", "5");
-	    nvram_bufset(mode, "RFICType", temp);
-
-	    //TxStream for select HT mode
-	    sprintf(temp, "%x", buf[0]&0xf0>>4);
-	    if (atoi(temp) < atoi(nvram_bufget(mode, "HT_TxStream")))
-		nvram_bufset(mode, "HT_TxStream", temp);
-
-	    //RxStream for select HT mode
-	    nvram_bufset(mode, "TXPath", temp);
-	    sprintf(temp, "%x", buf[0]&0x0f);
-	    if (atoi(temp) < atoi(nvram_bufget(mode, "HT_RxStream")))
-		nvram_bufset(mode, "HT_RxStream", temp);
-	    nvram_bufset(mode, "RXPath", temp);
-	    nvram_commit(mode);
-
-	    //reinit nvram
-	    nvram_close(mode);
-	}
 	if ( nvram_init(mode) == -1 )
 		return -1;
 
@@ -924,6 +895,7 @@ int gen_wifi_config(int mode)
 #define FPRINT_STR(x) fprintf(fp, #x"=%s\n", nvram_bufget(mode, #x));
 
 	if (RT2860_NVRAM == mode) {
+		FPRINT_STR(RFICType);
 		FPRINT_STR(WLAN_MAC_ADDR);
 		FPRINT_NUM(CountryRegion);
 		FPRINT_NUM(CountryRegionABand);
