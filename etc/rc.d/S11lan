@@ -31,8 +31,11 @@ start() {
 	ip link set br0 up
     fi
 
-    # always up lan iface
-    ip link set "$phys_lan_if" up
+    if [ "$OperationMode" = "1" ] || [ "$OperationMode" = "4" ] || \
+	[ "$CONFIG_MAC_TO_MAC_MODE" = "y" ] || [ "$CONFIG_RAETH_GMAC2" = "y" ]; then
+	# always up lan iface
+	ip link set "$phys_lan_if" up
+    fi
 
     # configure LAN1/BR0
     ifconfig "$lan_if" "$lan_ipaddr" netmask "$lan_netmask" up

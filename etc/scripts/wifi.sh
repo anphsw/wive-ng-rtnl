@@ -85,12 +85,12 @@ fi
 #######################################APCLIMODE param ########################
 if [ "$OperationMode" = "3" ]; then
     eval `nvram_buf_get 2860 ApCliAutoConnect ApCliClientOnly`
-    if [ "$ApCliAutoConnect" = "1" ]; then
-	iwpriv apcli0 set ApCliAutoConnect=1
-    fi
     if [ "$ApCliClientOnly" = "1" ]; then
 	echo "APCLI Only client mode enable shutdown ra0..."
-	ip link set ra0 down
+	ip link set ra0 down > /dev/null 2>&1
+    fi
+    if [ "$ApCliAutoConnect" = "1" ]; then
+	iwpriv apcli0 set ApCliAutoConnect=1
     fi
 fi
 ###########################################ALWAYS END##########################

@@ -808,9 +808,10 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 	char_t	*n_mode, *n_bandwidth, *n_gi, *n_mcs, *n_rdg, *n_extcha, *n_amsdu, *auto_select;
 	char_t	*n_autoba, *n_badecline;
 	char_t	*tx_stream, *rx_stream;
+	int     is_n = 0, i = 1, ssid = 0, new_bssid_num;
 	char	hidden_ssid[16] = "", noforwarding[16] = "";
-	int     is_n = 0, new_bssid_num;
-	char *submitUrl;
+	char	ssid_web_var[8] = "mssid_\0", ssid_nvram_var[8] = "SSID\0\0\0";
+	char	*submitUrl;
 
 	// Get current mode & new mode
 	char *radio = websGetVar(wp, T("radioWirelessEnabled"), T("off"));
@@ -862,16 +863,12 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 		nvram_bufset(RT2860_NVRAM, "BasicRate", "351");
 	else if (!strncmp(wirelessmode, "1", 2)) //b
 		nvram_bufset(RT2860_NVRAM, "BasicRate", "3");
-	else //bg,bgn,n,an
+	else //bg,bgn,n
 		nvram_bufset(RT2860_NVRAM, "BasicRate", "15");
 
 	default_shown_mbssid[RT2860_NVRAM] = 0;
 
 	// Fill-in SSID
-	int i = 1, ssid = 0;
-	char ssid_web_var[8] = "mssid_\0";
-	char ssid_nvram_var[8] = "SSID\0\0\0";
-
 	for (ssid=0; ssid<8; ssid++)
 	{
 		ssid_web_var[6] = ssid  + '1';
