@@ -3,13 +3,13 @@
 # This is high level switch configure helper for Wive
 #######################################################
 
-# include kernel config
-. /etc/scripts/config.sh
+# include global
+. /etc/scripts/global.sh
 
 LOG="logger -t ESW"
 
 # get need variables
-eval `nvram_buf_get 2860 wan_port OperationMode tv_port vlan_double_tag natFastpath ForceRenewDHCP LAN_MAC_ADDR`
+eval `nvram_buf_get 2860 wan_port tv_port vlan_double_tag natFastpath ForceRenewDHCP`
 
 ##########################################################################
 # get proc path for phy configure
@@ -81,6 +81,29 @@ configs_system_vlans() {
 	fi
     fi
 }
+
+##########################################################################
+# call this function for set HW_ADDR to interaces
+##########################################################################
+set_mac_wan_lan() {
+    # set MAC adresses LAN for phys iface (always set for physycal external switch one or dual phy mode)
+    if [ "$OperationMode" = "1" ] || [ "$OperationMode" = "4" ] || [ "$CONFIG_MAC_TO_MAC_MODE" != "" ]; then
+	$LOG "$phys_lan_if MACADDR $LAN_MAC_ADDR"
+	ifconfig "$phys_lan_if" hw ether "$LAN_MAC_ADDR"
+	ifconfig "$phys_lan_if" txqueuelen "$txqueuelen"
+	# always up phys lan iface
+	ifconfig "$phys_lan_if" up
+    fi
+
+    # set MAC adresses LAN/WAN if not bridge and not ethernet converter modes
+    # in gw/hotspot modes set mac to wan (always set for physycal external dual phy mode swicth)
+    if [ "$OperationMode" = "1" ] || [ "$OperationMode" = "4" ] || [ "$CONFIG_RAETH_GMAC2" != "" ]; then
+	$LOG "$phys_wan_if MACADDR $WAN_MAC_ADDR"
+	ifconfig "$phys_wan_if" hw ether "$WAN_MAC_ADDR"
+	ifconfig "$phys_wan_if" txqueuelen "$txqueuelen"
+    fi
+}
+
 
 ##############################################################################
 # Internal 3052 ESW
@@ -242,3 +265,8 @@ elif [ "$CONFIG_RAETH_ROUTER" != "" ]; then
 	fi
     fi
 fi
+
+##############################################################################
+# set hwaddresses to wan/lan interfaces
+set_mac_wan_lan
+##############################################################################
