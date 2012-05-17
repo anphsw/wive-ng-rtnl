@@ -106,6 +106,11 @@ bridge_config() {
 	brctl delif br0 eth2 > /dev/null 2>&1
 	# in bridge mode add only eth2 NOT ADD "$phys_lan_if" or "$phys_wan_if"
 	brctl addif br0 eth2
+	if [ "$CONFIG_RAETH_GMAC2" != "" ]; then
+    	    ip addr flush dev eth3 > /dev/null 2>&1
+	    brctl delif br0 eth3 > /dev/null 2>&1
+	    brctl addif br0 eth3
+	fi
 	# add wifi interface
 	brctl addif br0 ra0
 	if [ "$CONFIG_RT3090_AP" != "" ]; then
