@@ -1112,7 +1112,8 @@
 40) Fix race in addrconf ipv6.<br>
 41) Add drivers for RT3883 dual band wifi and RT3090 2.4GHz pci-e module.<br>
 42) libnvram not more use read nic conf before gen_wifi config. Use settings from nvram.<br>
-43) Fix not need add separator for some mbssid value if bssidnum<=1
+43) Fix not need add separator for some mbssid value if bssidnum<=1.<br>
+44) miniupnpd update to 1.6.20120509 version.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
