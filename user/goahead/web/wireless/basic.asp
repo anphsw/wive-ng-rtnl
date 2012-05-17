@@ -148,7 +148,7 @@ function insertChannelOption(vChannel, band)
 function addOption(list, text, value)
 {
 	var option = new Option(text, value);
-	
+
 	try
 	{
 		list.add(option, null); // standards compliant
@@ -198,7 +198,7 @@ function insertExtChannelOption()
 			addOption(x, ChannelList_24G[CurrentCh - 4 - 1], 0);
 		else
 			addOption(x, "Auto Select", 0);
-		
+
 		x.value = tmp_value;
 	}
 }
@@ -422,7 +422,7 @@ function ssidAdd(form)
 		form.elements['mssid_' + count].value = '';
 		form.hssid[count-1].checked = false;
 		form.isolated_ssid[count-1].checked = false;
-		
+
 		// Clear values
 		for (var p=0; p<mbss_params.length; p++)
 			form.elements[mbss_params[p] + count].value = '';
@@ -442,23 +442,23 @@ function ssidRemove(form, index)
 			form.elements['mssid_' + (i+1)].value = form.elements['mssid_' + (i+2)].value;
 			form.hssid[i].checked = form.hssid[i+1].checked;
 			form.isolated_ssid[i].checked = form.isolated_ssid[i+1].checked;
-			
+
 			for (var p=0; p<mbss_params.length; p++)
 				form.elements[mbss_params[p] + (i + 1)].value = 
 					form.elements[mbss_params[p] + (i + 2)].value;
 		}
 	}
-	
+
 	// Clear values
 	form.elements['mssid_' + (count+1)].value = '';
 	form.hssid[count].checked = false;
 	form.isolated_ssid[count].checked = false;
 	for (var p=0; p<mbss_params.length; p++)
 		form.elements[mbss_params[p] + (count + 1)].value = '';
-	
+
 	hideElement('div_hssid' + count);
 	form.bssid_num.value = count;
-	
+
 	// Enable controls
 	enableElements(form.addBSSIDbtn, (count < 8));
 }
@@ -600,7 +600,7 @@ function initValue()
 	var channel_11a_index;
 	var current_channel_length;
 	var radio_off   = "<% getCfgZero(1, "RadioOff"); %>";
-
+	var wmode	= "<% getCfgZero(1, "WirelessMode"); %>";
 
 	saveRadioChannels();
 	initTranslation();
@@ -608,10 +608,8 @@ function initValue()
 		countrycode = 'NONE';
 
 	var form                  = document.wireless_basic;
-	form.wirelessmode.value   = "<% getCfgZero(1, "WirelessMode"); %>";
-	form.radioWirelessEnabled.checked = (radio_off == "0");
 
-	var wmode = form.wirelessmode.value;
+	form.radioWirelessEnabled.checked = (radio_off == "0");
 
 	// Hide & disable elements
 	hideElement("div_11a_channel");
@@ -635,19 +633,6 @@ function initValue()
 	hideElement("div_mbssidapisolated");
 	form.mbssidapisolated.disabled = true;
 	show14channel(true);
-
-	// Wireless mode
-	if ((wmode*1) >= 5)
-	{
-		showElement("div_11n");
-		displayElement('htOpModeRow', green_on);
-
-		form.n_mode.disabled = false;
-		form.n_bandwidth.disabled = false;
-		form.n_rdg.disabled = false;
-		form.n_gi.disabled = false;
-		form.n_mcs.disabled = false;
-	}
 
 	var rfic = '<% getCfgGeneral(1, "RFICType"); %>';
 	if ((rfic == "2") || (rfic == "4") || (rfic == "a") || (rfic == "d"))
@@ -675,9 +660,20 @@ function initValue()
 
 	}
 
+	// Set wmode after add all options
+	form.wirelessmode.value   = wmode
+
         // Display HT modes
 	if ((wmode*1) >= 5)
 	{
+		showElement("div_11n");
+		displayElement('htOpModeRow', green_on);
+
+		form.n_mode.disabled = false;
+		form.n_bandwidth.disabled = false;
+		form.n_rdg.disabled = false;
+		form.n_gi.disabled = false;
+		form.n_mcs.disabled = false;
 		showElementEx("div_ht_tx_stream", style_display_on());
 		showElementEx("div_ht_rx_stream", style_display_on());
 		show14channel(false);
@@ -907,7 +903,7 @@ function initValue()
 	{
 		form.n_extcha.options.selectedIndex = 0;
 	}
-	
+
 	if ((wmode == "8") || (wmode == "11"))
 	{
 		if (form.sz11aChannel.options.selectedIndex == 0)
@@ -1152,7 +1148,7 @@ function CheckValue(form)
 		auto_select = form.sz11aChannel.value == '0';
 
 	form.AutoChannelSelect.value = (auto_select) ? '1' : '0';
-	
+
 	return true;
 }
 
@@ -1188,20 +1184,6 @@ function CheckValue(form)
 			<option value="9">11b/g/n mixed mode</option>
 			<option value="6">11n only</option>
 		</select>
-	<!--
-		<select name="wirelessmode" id="wirelessmode" size="1" onChange="wirelessModeChange(this.form);">
-			<option value="0">802.11 b/g mixed mode</option>
-			<option value="1">802.11 b only</option>
-			<option value="2">802.11 a only</option>
-			<option value="3">802.11 a/b/g mixed mode</option>
-			<option value="4">802.11 g</option>
-			<option value="5">802.11 a/b/g/n mixed mode</option>
-			<option value="6">802.11 n only</option>
-			<option value="7">802.11 g/n mixed mode</option>
-			<option value="8">802.11 a/n mixed mode</option>
-			<option value="9">802.11 b/g/n mixed mode</option>
-		</select>
-	-->
 	</td>
 </tr>
 
@@ -1209,7 +1191,7 @@ function CheckValue(form)
 	<td class="head" id="basicSSID">Network Name (SSID)</td>
 	<td>
 		<input type="hidden" name="bssid_num" value="<% getCfgGeneral(1, "BssidNum"); %>">
-		
+
 		<input class="mid" type="text" name="mssid_1" maxlength="32" value="<% getCfgGeneral(1, "SSID1"); %>">
 		<font id="basicHSSID0">Hidden</font><input type="checkbox" name="hssid" value="0">&nbsp;
 		<font id="basicIsolatedSSID0">Isolated</font><input type="checkbox" name="isolated_ssid" value="0">
@@ -1287,14 +1269,14 @@ function CheckValue(form)
 		<% dumpBSS(7); %>
 	</td>
 </tr>
-<tr> 
+<tr>
 	<td class="head" id="basicBroadcastSSID">Broadcast Network Name (SSID)</td>
 	<td>
 		<span class="radio"><input type="radio" name="broadcastssid" value="0" onClick="switch_hidden_ssid()"><font id="basicBroadcastSSIDDisable">Disable</font></span>
 		<span class="radio"><input type="radio" name="broadcastssid" value="1" checked onClick="switch_hidden_ssid()"><font id="basicBroadcastSSIDEnable">Enable</font></span>
 	</td>
 </tr>
-<tr> 
+<tr>
 	<td class="head" id="basicApIsolated">AP Isolation</td>
 	<td>
 		<span class="radio"><input type="radio" name="apisolated" value="0" checked onClick="switch_isolated_ssid()"><font id="basicApIsolatedDisable">Disable</font></span>
