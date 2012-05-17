@@ -205,12 +205,13 @@ static int __inet_check_established(struct inet_timewait_death_row *death_row,
 	const __portpair ports = INET_COMBINED_PORTS(inet->dport, lport);
 	unsigned int hash = inet_ehashfn(daddr, lport, saddr, inet->dport);
 	struct inet_ehash_bucket *head = inet_ehash_bucket(hinfo, hash);
+	rwlock_t *lock = inet_ehash_lockp(hinfo, hash);
 	struct sock *sk2;
 	const struct hlist_node *node;
 	struct inet_timewait_sock *tw;
 
 	prefetch(head->chain.first);
-	write_lock(&head->lock);
+	write_lock(lock);
 
 	/* Check TIME-WAIT sockets first. */
 	sk_for_each(sk2, node, &head->twchain) {
@@ -240,7 +241,7 @@ unique:
 	WARN_ON(!sk_unhashed(sk));
 	__sk_add_node(sk, &head->chain);
 	sock_prot_inc_use(sk->sk_prot);
-	write_unlock(&head->lock);
+	write_unlock(lock);
 
 	if (twp) {
 		*twp = tw;
@@ -256,7 +257,7 @@ unique:
 	return 0;
 
 not_unique:
-	write_unlock(&head->lock);
+	write_unlock(lock);
 	return -EADDRNOTAVAIL;
 }
 
