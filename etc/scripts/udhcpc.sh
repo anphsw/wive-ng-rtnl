@@ -42,10 +42,7 @@ case "$1" in
 	# and prevent fake unset FULL_RENEW flag at next time bound
 	rndip="169.254.$(($RANDOM%253+1)).$(($RANDOM%253+1))"
 	ip addr flush dev $interface
-	ip addr add $rndip/16 dev $interface
-	# set route to astral via $interface
-	# this is block all traffic via this $interface
-	ip route replace 0/0 dev $interface
+	ip addr add $rndip/32 dev $interface
 	# never need down iface
 	ip link set $interface up
 	rm -f $WINS_CONF
