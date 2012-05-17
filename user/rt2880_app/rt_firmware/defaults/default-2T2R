@@ -1,6 +1,10 @@
 #The following line must not be removed.
 Default
 RFICType=8
+CountryRegion=5
+CountryRegionABand=0
+CountryCode=RU
+RDRegion=CE
 WebInit=1
 Language=en
 HostName=Wive-RTNL
@@ -58,13 +62,9 @@ DDNSProvider=
 DDNS=
 DDNSAccount=
 DDNSPassword=
-CountryRegion=5
-CountryRegionABand=0
-CountryCode=RU
 ChannelGeography=2
 Channel=2
 AutoChannelSelect=0
-RDRegion=CE
 BssidNum=1
 SSID1=Wive-RTNL
 WirelessMode=7
