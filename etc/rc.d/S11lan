@@ -31,6 +31,9 @@ start() {
 	/etc/scripts/config-switch.sh
     fi
 
+    # always up lan iface
+    ip link set "$phys_lan_if" up
+
     # configure LAN1/BR0
     ifconfig "$lan_if" "$lan_ipaddr" netmask "$lan_netmask" up
     $LOG "Add LAN1 Mode is $OperationMode lan iface $lan_if, adress $lan_ipaddr"

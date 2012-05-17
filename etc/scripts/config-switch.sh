@@ -91,8 +91,6 @@ set_mac_wan_lan() {
 	$LOG "$phys_lan_if MACADDR $LAN_MAC_ADDR"
 	ifconfig "$phys_lan_if" hw ether "$LAN_MAC_ADDR"
 	ifconfig "$phys_lan_if" txqueuelen "$txqueuelen"
-	# always up phys lan iface
-	ifconfig "$phys_lan_if" up
     fi
 
     # set MAC adresses LAN/WAN if not bridge and not ethernet converter modes
