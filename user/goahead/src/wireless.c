@@ -36,8 +36,7 @@ extern int g_wsc_configured;
 #endif
 
 static int  getWlan11aChannels(int eid, webs_t wp, int argc, char_t **argv);
-static int  getWlan11bChannels(int eid, webs_t wp, int argc, char_t **argv);
-static int  getWlan11gChannels(int eid, webs_t wp, int argc, char_t **argv);
+static int  getWlan11bgChannels(int eid, webs_t wp, int argc, char_t **argv);
 static int  getWlanApcliBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int  getWlanChannel(int eid, webs_t wp, int argc, char_t **argv);
 static int  getWlanCurrentMac(int eid, webs_t wp, int argc, char_t **argv);
@@ -192,8 +191,7 @@ void formDefineWireless(void)
 {
 	websAspDefine(T("getVideoTurbineBuilt"), getVideoTurbineBuilt);
 	websAspDefine(T("getWlan11aChannels"), getWlan11aChannels);
-	websAspDefine(T("getWlan11bChannels"), getWlan11bChannels);
-	websAspDefine(T("getWlan11gChannels"), getWlan11gChannels);
+	websAspDefine(T("getWlan11bgChannels"), getWlan11bgChannels);
 	websAspDefine(T("getWlanApcliBuilt"), getWlanApcliBuilt);
 	websAspDefine(T("getWlanChannel"), getWlanChannel);
 	websAspDefine(T("getWlanCurrentMac"), getWlanCurrentMac);
@@ -236,7 +234,7 @@ static int listCountryCodes(int eid, webs_t wp, int argc, char_t **argv)
 {
 	const country_code_t *codes = country_codes;
 	char *c_code = nvram_get(RT2860_NVRAM, "CountryCode");;
-	
+
 	websWrite(wp, T("\t<option value=\"NONE\">NONE</option>\n"));
 
 	while (codes->iso != NULL)
@@ -397,9 +395,9 @@ static int getWlan11aChannels(int eid, webs_t wp, int argc, char_t **argv)
 }
 
 /*
- * description: write 802.11b channels in <select> tag
+ * description: write 802.11b/g channels in <select> tag
  */
-static int getWlan11bChannels(int eid, webs_t wp, int argc, char_t **argv)
+static int getWlan11bgChannels(int eid, webs_t wp, int argc, char_t **argv)
 {
     int idx = 0, channel;
     char *channel_s = nvram_get(RT2860_NVRAM, "Channel");
@@ -408,23 +406,6 @@ static int getWlan11bChannels(int eid, webs_t wp, int argc, char_t **argv)
     for (idx = 0; idx < 13; idx++)
 	websWrite(wp, T("%s%d %s>%d%s%d%s"),
 		 "<option value=", idx+1, (idx+1 == channel)? "selected" : "", 2412+5*idx, "MHz (Channel ", idx+1, ")</option>");
-
- return websWrite(wp, T("<option value=14 %s>2484MHz (Channel 14)</option>\n"),(14 == channel)? "selected" : "");
-}
-
-/*
- * description: write 802.11g channels in <select> tag
- */
-static int getWlan11gChannels(int eid, webs_t wp, int argc, char_t **argv)
-{
-    int idx = 0, channel;
-    char *channel_s = nvram_get(RT2860_NVRAM, "Channel");
-
-    channel = (channel_s == NULL)? 0 : atoi(channel_s);
-
-    for (idx = 0; idx < 13; idx++)
-	websWrite(wp, T("%s%d %s>%d%s%d%s"), 
-		"<option value=", idx+1, (idx+1 == channel)? "selected" : "", 2412+5*idx, "MHz (Channel ", idx+1, ")</option>");
 
  return websWrite(wp, T("<option value=14 %s>2484MHz (Channel 14)</option>\n"),(14 == channel)? "selected" : "");
 }

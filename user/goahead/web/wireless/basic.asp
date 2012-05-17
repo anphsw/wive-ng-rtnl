@@ -1306,16 +1306,16 @@ function CheckValue(form)
 <tr id="div_11b_channel" name="div_11b_channel">
 	<td class="head"><font id="basicFreqB">Frequency (Channel)</font></td>
 	<td>
-		<select id="sz11bChannel" name="sz11bChannel" class="mid" onChange="ChannelOnChange()">
+		<select id="sz11bgChannel" name="sz11bChannel" class="mid" onChange="ChannelOnChange()">
 			<option value="0" id="basicFreqBAuto">AutoSelect</option>
-			<% getWlan11bChannels(); %>
+			<% getWlan11bgChannels(); %>
 		</select>
 	</td>
 </tr>
 <tr id="div_11g_channel" name="div_11g_channel">
 	<td class="head"><font id="basicFreqG">Frequency (Channel)</font></td>
 	<td>
-		<select id="sz11gChannel" name="sz11gChannel" class="mid" onChange="ChannelOnChange()">
+		<select id="sz11ggChannel" name="sz11gChannel" class="mid" onChange="ChannelOnChange()">
 			<option value="0" id="basicFreqGAuto">AutoSelect</option>
 			<% getWlan11gChannels(); %>
 		</select>
