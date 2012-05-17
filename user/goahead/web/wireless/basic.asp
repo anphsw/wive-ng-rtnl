@@ -554,7 +554,7 @@ function saveRadioChannels()
 		var id = channel_list[i];
 		var select = document.getElementById(id);
 		var options = [];
-		
+
 		if (select != null)
 		{
 			for (var j=0; j<select.options.length; j++)
@@ -572,21 +572,21 @@ function show14channel(show)
 		var id = channel_list[i];
 		var select = document.getElementById(id);
 		var options = channels[id];
-		
+
 		if ((select != null) && (options != null))
 		{
 			// Store selected option
 			var index = select.selectedIndex;
-			
+
 			// remove all options
 			select.options.length = 0;
-			
+
 			for (var j=0; j<options.length; j++)
 			{
 				if ((options[j].value != '14') || (show))
 					select.options[select.options.length] = options[j];
 			}
-			
+
 			// Restore selected option
 			select.selectedIndex = (index >= select.options.length) ? 0 : index;
 		}
@@ -655,20 +655,13 @@ function initValue()
 		index = form.wirelessmode.options.length;
 		form.wirelessmode.options[index++] = new Option("11a only", "2");
 		form.wirelessmode.options[index++] = new Option("11a/n mixed mode", "8");
-		form.wirelessmode.options[index++] = new Option("11n only(5G)", "11");
+		form.wirelessmode.options[index++] = new Option("11n only (5G)", "11");
 	}
 
 	if ((wmode == "0") || (wmode == "4") || (wmode == "6") || (wmode == "7") || (wmode == "9"))
 	{
 		form.sz11gChannel.disabled = false;
 		showElementEx("div_11g_channel", style_display_on());
-
-		if ((1*wmode) >= 5)
-		{
-			showElementEx("div_ht_tx_stream", style_display_on());
-			showElementEx("div_ht_rx_stream", style_display_on());
-			show14channel(false);
-		}
 	}
 	else if (wmode == "1")
 	{
@@ -680,12 +673,14 @@ function initValue()
 		form.sz11aChannel.disabled = false;
 		showElementEx("div_11a_channel", style_display_on());
 
-		if ((1*wmode) >= 5)
-		{
-			showElementEx("div_ht_tx_stream", style_display_on());
-			showElementEx("div_ht_rx_stream", style_display_on());
-			show14channel(false);
-		}
+	}
+
+        // Display HT modes
+	if ((wmode*1) >= 5)
+	{
+		showElementEx("div_ht_tx_stream", style_display_on());
+		showElementEx("div_ht_rx_stream", style_display_on());
+		show14channel(false);
 	}
 
 	ssidDisplay(form);
@@ -844,7 +839,7 @@ function initValue()
 		else
 			form.sz11aChannel.options.selectedIndex = channel_index;
 	}
-	
+
 	show_abg_rate(form);
 
 	if (mssidb == "1")
@@ -878,7 +873,7 @@ function initValue()
 		for (i = 16; i < 24; i++)
 			form.n_mcs.options[i] = new Option(i, i);
 	}
-	
+
 	var mcs_length = form.n_mcs.options.length;
 	if (1*is3t3r == 1)
 	{
@@ -929,7 +924,7 @@ function initValue()
 			form.n_extcha.disabled = true;
 		}
 	}
-	
+
 	form.n_amsdu [ (ht_amsdu ==  "0") ? 0 : 1 ].checked = true;
 	form.n_autoba[ (ht_autoba == "0") ? 0 : 1 ].checked = true;
 	form.n_badecline[ (ht_badecline == "0") ? 0 : 1].checked = true;
@@ -975,7 +970,7 @@ function show_abg_rate(form)
 	{
 		ht_mcs = 1*ht_mcs;
 		var abg_rate = form.abg_rate;
-		
+
 		abg_rate.options.length = 0;
 		abg_rate.options[0] = new Option("Auto", "0");
 		abg_rate.options[1] = new Option("1 Mbps", "1");
@@ -990,7 +985,7 @@ function show_abg_rate(form)
 		abg_rate.options[10] = new Option("36 Mbps", "36");
 		abg_rate.options[11] = new Option("48 Mbps", "48");
 		abg_rate.options[12] = new Option("54 Mbps", "54");
-		
+
 		if (fxtxmode == "CCK" || fxtxmode == "cck")
 		{
 			if (ht_mcs == 0)
@@ -1030,14 +1025,14 @@ function show_abg_rate(form)
 	{
 		ht_mcs = 1*ht_mcs;
 		var abg_rate = form.abg_rate;
-		
+
 		abg_rate.options.length = 0;
 		abg_rate.options[0] = new Option("Auto", "0");
 		abg_rate.options[1] = new Option("1 Mbps", "1");
 		abg_rate.options[2] = new Option("2 Mbps", "2");
 		abg_rate.options[3] = new Option("5.5 Mbps", "5");
 		abg_rate.options[4] = new Option("11 Mbps", "11");
-		
+
 		if (ht_mcs == 0)
 			abg_rate.value = "1";
 		else if (ht_mcs == 1)
@@ -1076,14 +1071,16 @@ function wirelessModeChange(form)
 	form.n_rdg.disabled = true;
 	form.n_gi.disabled = true;
 	form.n_mcs.disabled = true;
-	
+
 	// Hide & disable elements
 	var wmode = form.wirelessmode.value;
 
-	if ((wmode == "8") || (wmode == "9") || (wmode == "6") || (wmode == "7"))
+	// Wireless mode
+	if ((wmode*1) >= 5)
 	{
 		showElement("div_11n");
 		displayElement('htOpModeRow', green_on);
+
 		form.n_mode.disabled = false;
 		form.n_bandwidth.disabled = false;
 		form.n_rdg.disabled = false;
@@ -1095,14 +1092,7 @@ function wirelessModeChange(form)
 	{
 		form.sz11gChannel.disabled = false;
 		showElementEx("div_11g_channel", style_display_on());
-		
-		if ((1*wmode) >= 5)
-		{
-			showElementEx("div_ht_tx_stream", style_display_on());
-			showElementEx("div_ht_rx_stream", style_display_on());
-			show14channel(false);
-		}
-		
+
 		displayElement("extension_channel", form.sz11gChannel.options.selectedIndex != 0);
 
 		insertExtChannelOption();
@@ -1126,7 +1116,14 @@ function wirelessModeChange(form)
 
 		insertExtChannelOption();
 	}
-	
+
+	if ((1*wmode) >= 5)
+	{
+		showElementEx("div_ht_tx_stream", style_display_on());
+		showElementEx("div_ht_rx_stream", style_display_on());
+		show14channel(false);
+	}
+
 	show_abg_rate(form);
 }
 
@@ -1146,7 +1143,7 @@ function CheckValue(form)
 {
 	var auto_select = false;
 	var wmode = form.wirelessmode.value;
-	
+
 	if ((wmode == "0") || (wmode == "4") || (wmode == "9") || (wmode == "6") || (wmode=="7"))
 		auto_select = form.sz11gChannel.value == '0';
 	else if (wmode == "1")
