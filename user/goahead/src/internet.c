@@ -362,11 +362,12 @@ char* getWanIfName(void)
 		if_name = WAN_DEF;
 	else if (!strncmp(mode, "2", 2))				/* ethernet converter mode */
 		if_name = "ra0";
-	else if (!strncmp(mode, "3", 2))				/* apcli mode */
+	else if (!strncmp(mode, "3", 2)) {				/* apcli mode */
 		if (!strncmp(apc_cli_mode, "1", 2))
 		    if_name = "br0";					/* Client-AP-Bridge */
-		else
+		} else {
 		    if_name = "apcli0";					/* Client-AP-Gateway */
+		}
 
 	return if_name;
 }
