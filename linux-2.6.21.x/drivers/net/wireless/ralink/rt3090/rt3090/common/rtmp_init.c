@@ -2005,7 +2005,7 @@ VOID	NICReadEEPROMParameters(
 			Antenna.word = 0;
 			Antenna.field.RfIcType = RFIC_3020;
 			Antenna.field.TxPath = 1;
-			Antenna.field.RxPath = 1;		
+			Antenna.field.RxPath = 1;
 		}
 		else
 #endif // RT30xx //
