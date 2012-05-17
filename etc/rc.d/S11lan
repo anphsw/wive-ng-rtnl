@@ -31,8 +31,8 @@ start() {
 	/etc/scripts/config-switch.sh
     fi
 
-    # set MAC adresses LAN for phys iface
-    if [ "$OperationMode" = "1" ] || [ "$OperationMode" = "4" ]; then
+    # set MAC adresses LAN for phys iface (always set for physycal external switch one or dual phy mode)
+    if [ "$OperationMode" = "1" ] || [ "$OperationMode" = "4" ] || [ "$CONFIG_MAC_TO_MAC_MODE" != "" ]; then
 	$LOG "$phys_lan_if_MACADDR $LAN_MAC_ADDR"
 	ifconfig "$phys_lan_if" hw ether "$LAN_MAC_ADDR"
 	ifconfig "$phys_lan_if" txqueuelen "$txqueuelen"

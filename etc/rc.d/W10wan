@@ -85,8 +85,8 @@ start() {
 }
 
 set_mac_to_wan() {
-    # in gw/hotspot modes set mac to wan
-    if [ "$OperationMode" = "1" ] || [ "$OperationMode" = "4" ]; then
+    # in gw/hotspot modes set mac to wan (always set for physycal external dual phy mode swicth)
+    if [ "$OperationMode" = "1" ] || [ "$OperationMode" = "4" ] || [ "$CONFIG_RAETH_GMAC2" != "" ]; then
 	$LOG "$phys_wan_if_MACADDR $WAN_MAC_ADDR"
 	ifconfig "$phys_wan_if" hw ether "$WAN_MAC_ADDR"
 	ifconfig "$phys_wan_if" txqueuelen "$txqueuelen"
