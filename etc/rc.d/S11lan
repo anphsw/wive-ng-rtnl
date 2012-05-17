@@ -31,14 +31,8 @@ start() {
 	/etc/scripts/config-switch.sh
     fi
 
-    # set MAC adresses LAN for phys iface (always set for physycal external switch one or dual phy mode)
-    if [ "$OperationMode" = "1" ] || [ "$OperationMode" = "4" ] || [ "$CONFIG_MAC_TO_MAC_MODE" != "" ]; then
-	$LOG "$phys_lan_if_MACADDR $LAN_MAC_ADDR"
-	ifconfig "$phys_lan_if" hw ether "$LAN_MAC_ADDR"
-	ifconfig "$phys_lan_if" txqueuelen "$txqueuelen"
-	# always up phys lan iface
-	ifconfig "$phys_lan_if" up
-    fi
+    # set hwaddresses to wan/lan interfaces
+    set_mac_wan_lan
 
     # configure LAN1/BR0
     ifconfig "$lan_if" "$lan_ipaddr" netmask "$lan_netmask" up
@@ -69,6 +63,25 @@ addr_flush() {
     fi
 }
 
+set_mac_wan_lan() {
+    # set MAC adresses LAN for phys iface (always set for physycal external switch one or dual phy mode)
+    if [ "$OperationMode" = "1" ] || [ "$OperationMode" = "4" ] || [ "$CONFIG_MAC_TO_MAC_MODE" != "" ]; then
+	$LOG "$phys_lan_if MACADDR $LAN_MAC_ADDR"
+	ifconfig "$phys_lan_if" hw ether "$LAN_MAC_ADDR"
+	ifconfig "$phys_lan_if" txqueuelen "$txqueuelen"
+	# always up phys lan iface
+	ifconfig "$phys_lan_if" up
+    fi
+
+    # set MAC adresses LAN/WAN if not bridge and not ethernet converter modes
+    # in gw/hotspot modes set mac to wan (always set for physycal external dual phy mode swicth)
+    if [ "$OperationMode" = "1" ] || [ "$OperationMode" = "4" ] || [ "$CONFIG_RAETH_GMAC2" != "" ]; then
+	$LOG "$phys_wan_if MACADDR $WAN_MAC_ADDR"
+	ifconfig "$phys_wan_if" hw ether "$WAN_MAC_ADDR"
+	ifconfig "$phys_wan_if" txqueuelen "$txqueuelen"
+    fi
+}
+
 get_param() {
     eval `nvram_buf_get 2860 lan_ipaddr lan_netmask lan2_ipaddr lan2_netmask Lan2Enabled`
 }
@@ -95,12 +108,16 @@ case "$1" in
 	    stop
 	    ;;
 
+	set_mac_wan_lan)
+	    set_mac_wan_lan
+	    ;;
+
 	restart)
 	    stop
 	    start
 	    ;;
 
 	*)
-	    echo $"Usage: $0 {start|stop|restart}"
+	    echo $"Usage: $0 {start|stop|restart|set_mac_wan_lan}"
 	    exit 1
 esac
