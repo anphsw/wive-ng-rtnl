@@ -40,21 +40,6 @@ fi
 ##############################################################################
 if [ ! -f /var/run/goahead.pid ]; then
     ##########################################################################
-    # Configure touch dhcp from driver in kernel. Only one per start
-    ##########################################################################
-    if [ "$OperationMode" = "0" ] || [ "$OperationMode" = "2" ] || [ "$ApCliBridgeOnly" = "1" ]; then
-	# disable dhcp renew from driver
-	sysctl -w net.ipv4.send_sigusr_dhcpc=9
-    else
-	if [ "$ForceRenewDHCP" != "0" ] && [ "$wan_port" != "" ]; then
-	    # configure event wait port
-	    sysctl -w net.ipv4.send_sigusr_dhcpc=$wan_port
-	else
-	    # disable dhcp renew from driver
-	    sysctl -w net.ipv4.send_sigusr_dhcpc=9
-	fi
-    fi
-    ##########################################################################
     # Configure double vlan tag support in kernel. Only one per start
     ##########################################################################
     if [ -f /proc/sys/net/ipv4/vlan_double_tag ]; then
@@ -171,6 +156,23 @@ if [ "$CONFIG_RT_3052_ESW" != "" ]; then
 	    else
 		$LOG '##### ESW config vlan partition (LLLLW) #####'
 		/etc/scripts/config-vlan.sh $SWITCH_MODE LLLLW > /dev/null 2>&1
+	    fi
+	fi
+    fi
+    ##########################################################################
+    # Configure touch dhcp from driver in kernel.
+    ##########################################################################
+    if [ "$CONFIG_RAETH_DHCP_TOUCH" != "" ]; then
+        if [ "$OperationMode" = "0" ] || [ "$OperationMode" = "2" ] || [ "$ApCliBridgeOnly" = "1" ]; then
+	    # disable dhcp renew from driver
+	    sysctl -w net.ipv4.send_sigusr_dhcpc=9
+	else
+	    if [ "$ForceRenewDHCP" != "0" ] && [ "$wan_port" != "" ]; then
+		# configure event wait port
+		sysctl -w net.ipv4.send_sigusr_dhcpc=$wan_port
+	    else
+		# disable dhcp renew from driver
+		sysctl -w net.ipv4.send_sigusr_dhcpc=9
 	    fi
 	fi
     fi
