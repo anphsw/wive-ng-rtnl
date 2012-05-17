@@ -6079,10 +6079,6 @@ INT Set_ATE_TXBF_INIT_Proc(
 	return TRUE;
 }
 
-#ifdef RALINK_ATE
-extern UCHAR calParams_ASUS[];  /* ASUS EXT by Jiahao */
-#endif
-
 /* 
 ==========================================================================
     Description:
@@ -6103,11 +6099,6 @@ INT Set_ATE_TXBF_CAL_Proc(
 	UCHAR ch;
 	UCHAR cmdStr[32];
 
-#ifdef RALINK_ATE
-	calParams_ASUS[0] = 0xff;       // ASUS EXT by Jiahao
-	calParams_ASUS[1] = 0xff;       // ASUS EXT by Jiahao
-#endif
-	
 	ch = simple_strtol(arg, 0, 10);
 	if (rtmp_ate_txbf_cal_valid_ch(pAd, ch) == FALSE)
 		return FALSE;

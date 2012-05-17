@@ -538,14 +538,6 @@ INT rt28xx_ap_ioctl(
                         RTMPIoctlGetRSSI(pAd,wrq);
                         break;
 
-#ifdef TXBF_SUPPORT
-#ifdef RALINK_ATE
-		case RTPRIV_IOCTL_GTXBFCALP:	// ASUS EXT by Jiahao
-			RTMPIoctlGetTxBfCalParams(pAd,wrq);
-			break;
-#endif
-#endif
-
 		case RTPRIV_IOCTL_STATISTICS:
 			RTMPIoctlStatistics(pAd, wrq);
 			break;
@@ -568,11 +560,11 @@ INT rt28xx_ap_ioctl(
 		case RTPRIV_IOCTL_BBP:
 			RTMPAPIoctlBBP(pAd, wrq);
 			break;
-			
+
 		case RTPRIV_IOCTL_MAC:
 			RTMPAPIoctlMAC(pAd, wrq);
 			break;
-            
+
 #ifdef RTMP_RF_RW_SUPPORT
 		case RTPRIV_IOCTL_RF:
 			RTMPAPIoctlRF(pAd, wrq);

@@ -6124,10 +6124,6 @@ INT	Set_ITxBfLnaCal_Proc(
 	return ITxBFLNACalibration(pAd, calFunction, 0, channel<=14);
 }
 
-#ifdef RALINK_ATE
-UCHAR   calParams_ASUS[2];      // ASUS EXT by Jiahao
-#endif
-
 // Set_ITxBfCal_Proc - Calculate ITxBf Calibration parameters
 //	usage: "iwpriv ra0 set ITxBfCal=[0 | 1]"
 //			0=>calculate values, 1=>update BBP and EEPROM
@@ -6163,9 +6159,6 @@ INT	Set_ITxBfCal_Proc(
 #ifdef RALINK_ATE
 	pAd->ate.calParams[0] = (UCHAR)calParams[0];
 	pAd->ate.calParams[1] = (UCHAR)calParams[1];
-
-	calParams_ASUS[0] = (UCHAR)calParams[0];	// ASUS EXT by Jiahao
-	calParams_ASUS[1] = (UCHAR)calParams[1];	// ASUS EXT by Jiahao
 
 	// Dobule check
 	DBGPRINT((calFunction==0? RT_DEBUG_OFF: RT_DEBUG_WARN),
@@ -6264,32 +6257,6 @@ INT	Set_ITxBfCal_Proc(
 
 	return TRUE;
 }
-
-#ifdef RALINK_ATE
-VOID	RTMPIoctlGetTxBfCalParams(	// ASUS EXT by Jiahao
-	IN PRTMP_ADAPTER pAd,
-	IN struct iwreq *wrq)
-{
-	INT	Status;
-	PSTRING	msg;
-
-	msg = (PSTRING)kmalloc(sizeof(CHAR)*(32), MEM_ALLOC_FLAG);
-
-	if (msg == NULL)
-		return;
-
-	memset(msg, 0x00, 32);
-
-	sprintf(msg+strlen(msg), "0x%02x 0x%02x", calParams_ASUS[0], calParams_ASUS[1]);
-
-	// Copy the information into the user buffer
-	wrq->u.data.length = strlen(msg);
-	Status = copy_to_user(wrq->u.data.pointer, msg, wrq->u.data.length);
-
-	kfree(msg);
-	DBGPRINT(RT_DEBUG_TRACE, ("<==RTMPIoctlGetTxBfCalParams\n"));
-}
-#endif
 
 // Set_ETxBfEnCond_Proc - enable/disable ETxBF
 //	usage: iwpriv ra0 set ETxBfEnCond=dd

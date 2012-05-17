@@ -44,8 +44,6 @@
 #define PF_NOFREEZE  0
 #endif
 
-extern UINT WatchdogPid;	/* ASUS EXT by Jiahao */
-
 char WSC_MSG_SIGNATURE[]={"RAWSCMSG"};
 
 extern UCHAR   WPS_OUI[];
@@ -5778,37 +5776,6 @@ void    WscWriteConfToPortCfg(
 	DBGPRINT(RT_DEBUG_TRACE, ("<----- ra%d - WscWriteConfToPortCfg\n", CurApIdx));
 }
 
-void char_to_ascii(char *output, char *input)	/* ASUS EXT by Jiahao */
-{
-	int i;
-	char tmp[10];
-	char *ptr;
-
-	ptr = output;
-
-	for( i=0; i<strlen(input); i++ )
-	{
-		if((input[i]>='0' && input[i] <='9')
-		   ||(input[i]>='A' && input[i]<='Z')
-		   ||(input[i] >='a' && input[i]<='z')
-		   || input[i] == '!' || input[i] == '*'
-		   || input[i] == '(' || input[i] == ')'
-		   || input[i] == '_' || input[i] == '-'
-		   || input[i] == "'" || input[i] == '.')
-		{
-			*ptr = input[i];
-			ptr ++;
-		}
-		else
-		{
-			sprintf(tmp, "%%%.02X", input[i]);
-			strcpy(ptr, tmp);
-			ptr += 3;
-		}
-	}
-	*(ptr) = '\0';
-}
-
 VOID	WscWriteSsidToDatFile(
 	IN  PRTMP_ADAPTER	pAd,
 	IN  PSTRING		 	pTempStr,
@@ -5822,9 +5789,9 @@ VOID	WscWriteSsidToDatFile(
 	UCHAR tmpstr2[32], tempRandomByte = 0, idx = 0;	/* ASUS EXT by Jiahao */
 
 	if (bNewFormat == FALSE)
-	{		
+	{
 		NdisZeroMemory(pTempStr, 512);
-		
+
 #ifdef CONFIG_AP_SUPPORT
 		IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
 		{
