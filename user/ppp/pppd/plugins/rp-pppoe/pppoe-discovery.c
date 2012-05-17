@@ -716,7 +716,7 @@ void fatalSys(char const *str)
 
 void sysErr(char const *str)
 {
-    rp_fatal(str);
+    printErr(str);
 }
 
 char *xstrdup(const char *s)
