@@ -862,7 +862,7 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 		nvram_bufset(RT2860_NVRAM, "BasicRate", "351");
 	else if (!strncmp(wirelessmode, "1", 2)) //b
 		nvram_bufset(RT2860_NVRAM, "BasicRate", "3");
-	else //bg,bgn,n
+	else //bg,bgn,n,an
 		nvram_bufset(RT2860_NVRAM, "BasicRate", "15");
 
 	default_shown_mbssid[RT2860_NVRAM] = 0;
