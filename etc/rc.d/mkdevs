@@ -61,5 +61,10 @@ mknod /dev/nvram	c	251	0
 mknod /dev/gpio		c	252	0
 mknod /dev/rdm0		c	254	0
 
+# for realtek external gigaphy
+if [ "$CONFIG_RTL8367M" != "" ]; then
+    mknod   /dev/rtl8367m   c       206     0
+fi
+
 # autocreate/refrash some dev nodes
 mdev -s
