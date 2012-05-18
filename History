@@ -1116,6 +1116,8 @@
 44) miniupnpd update to 1.6.20120509 version.<br>
 45) xupnpd up to 303 svn revision.<br>
 46) Add rtl8367m switch control utility.<br>
+47) Fix 5GHz WebUi and only 5GHz mode.<br>
+48) Add configure RT8637 switch from webui.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
