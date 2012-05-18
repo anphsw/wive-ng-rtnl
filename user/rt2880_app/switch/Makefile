@@ -3,10 +3,14 @@ CFLAGS += -I$(ROOTDIR)/$(LINUXDIR)
 CFLAGS += -I$(ROOTDIR)/$(LINUXDIR)/drivers/net/raeth
 CONF_H  = $(ROOTDIR)/$(LINUXDIR)/include/linux/config.h
 
-ifeq ($(CONFIG_RALINK_RT6855),y)
+ifdef CONFIG_RALINK_RT6855
 SRC=switch_gsw.c
 else
+ifdef CONFIG_RTL8367M
+SRC=rtl8367m.c
+else
 SRC=switch.c
+endif
 endif
 
 all: $(EXEC)
