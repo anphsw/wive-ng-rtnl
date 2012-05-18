@@ -43,6 +43,7 @@ static int rt_set_host(void)
 	return 0;
 }
 
+#if 0
 static int rt_usbhost_reset(void)
 {
 	u32 val = rt_readl(RSTCTRL);
@@ -54,6 +55,7 @@ static int rt_usbhost_reset(void)
 
 	return 0;
 }
+#endif
 
 static int rt3xxx_ehci_init(struct usb_hcd *hcd)
 {
