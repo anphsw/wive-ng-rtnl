@@ -57,6 +57,7 @@ static void wirelessWmm(webs_t wp, char_t *path, char_t *query);
 static void wirelessGetSecurity(webs_t wp, char_t *path, char_t *query);
 static void APSecurity(webs_t wp, char_t *path, char_t *query);
 static int  is3t3r(int eid, webs_t wp, int argc, char_t **argv);
+static int  is5gh_only(int eid, webs_t wp, int argc, char_t **argv);
 static int  isWPSConfiguredASP(int eid, webs_t wp, int argc, char_t **argv);
 int deleteNthValueMulti(int index[], int count, char *value, char delimit);		/* for Access Policy list deletion*/
 static void APDeleteAccessPolicyList(webs_t wp, char_t *path, char_t *query);
@@ -208,6 +209,7 @@ void formDefineWireless(void)
 	websAspDefine(T("getGreenAPBuilt"), getGreenAPBuilt);
 	websAspDefine(T("listCountryCodes"), listCountryCodes);
 	websAspDefine(T("is3t3r"), is3t3r);
+	websAspDefine(T("is5gh_only"), is5gh_only);
 	websAspDefine(T("isWPSConfiguredASP"), isWPSConfiguredASP);
 	websAspDefine(T("isAntennaDiversityBuilt"), isAntennaDiversityBuilt);
 #ifdef CONFIG_RT2860V2_AP_MESH
@@ -2056,6 +2058,16 @@ static int ShowMeshState(int eid, webs_t wp, int argc, char_t **argv)
 static int is3t3r(int eid, webs_t wp, int argc, char_t **argv)
 {
 #if defined(CONFIG_RALINK_RT3883_3T3R)
+	websWrite(wp, T("1"));
+#else
+	websWrite(wp, T("0"));
+#endif
+	return 0;
+}
+
+static int is5gh_only(int eid, webs_t wp, int argc, char_t **argv)
+{
+#if defined(CONFIG_RALINK_RT3662_2T2R)
 	websWrite(wp, T("1"));
 #else
 	websWrite(wp, T("0"));

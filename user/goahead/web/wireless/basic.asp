@@ -636,12 +636,17 @@ function initValue()
 
 	var rfic = '<% getCfgGeneral(1, "RFICType"); %>';
 	index = form.wirelessmode.options.length;
-	form.wirelessmode.options[index++] = new Option("11b/g mixed mode", "0");
-	form.wirelessmode.options[index++] = new Option("11b only", "1");
-	form.wirelessmode.options[index++] = new Option("11g only", "4");
-	form.wirelessmode.options[index++] = new Option("11n only", "6");
-	form.wirelessmode.options[index++] = new Option("11g/n mixed mode", "7");
-	form.wirelessmode.options[index++] = new Option("11b/g/n mixed mode", "9");
+	var is5gh_only = '<% is5gh_only(); %>';
+
+	if (is5gh_only == 0)
+	{
+	    form.wirelessmode.options[index++] = new Option("11b/g mixed mode", "0");
+	    form.wirelessmode.options[index++] = new Option("11b only", "1");
+	    form.wirelessmode.options[index++] = new Option("11g only", "4");
+	    form.wirelessmode.options[index++] = new Option("11n only", "6");
+	    form.wirelessmode.options[index++] = new Option("11g/n mixed mode", "7");
+	    form.wirelessmode.options[index++] = new Option("11b/g/n mixed mode", "9");
+	}
 
 	if ((rfic == "2") || (rfic == "4") || (rfic == "a") || (rfic == "d"))
 	{
