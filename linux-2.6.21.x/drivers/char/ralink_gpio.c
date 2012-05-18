@@ -1002,7 +1002,7 @@ int __init ralink_gpio_init(void)
 	ralink_gpio_led_init_timer();
 #endif
 	printk("Ralink gpio driver initialized\n");
-	printk("Number of GPIO=%d\n",RALINK_GPIO_NUMBER);
+	printk("Number of GPIO: %d, GPIO mode: %08X\n", RALINK_GPIO_NUMBER, gpiomode);
 	return 0;
 }
 
