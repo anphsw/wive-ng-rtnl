@@ -238,7 +238,7 @@ void cpu_gpio_write(int gpionum, int value)
 // RTL8367M PROCESS
 ////////////////////////////////////////////////////////////////////////////////
 
-int rtl8367m_main(int argc, char **argv)
+int main(int argc, char **argv)
 {
 	unsigned int cmd, par = 0, arg = 0;
 
