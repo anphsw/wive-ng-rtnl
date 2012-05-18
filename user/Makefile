@@ -133,10 +133,7 @@ all: config
 	STRIP=$(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-strip ;
 ifeq ($(CONFIG_USER_OPENSSL),y)
 	# ">>>>>>>>>>>>>>>> CONFIGURE SSL NEEDED  <<<<<<<<<<<<<<<<<<<<<<"
-	if [ ! -f openssl/libssl.so ]; then \
-	    cd openssl ; ./Configure RT2880 no-ripemd; $(MAKE) ; \
-	    cd .. \
-	fi
+	if [ ! -f openssl/libssl.so ]; then  cd openssl ; ./Configure RT2880 no-ripemd; $(MAKE) ; cd .. ; fi
 endif
 	# ">>>>>>>>>>>>>>>> CONFIGURE ALL NEEDED  <<<<<<<<<<<<<<<<<<<<<<"
 	for i in $(dir_y) ; do \
