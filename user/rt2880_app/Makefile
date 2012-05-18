@@ -1,5 +1,5 @@
 
-SUBDIRS_APP = ated flash i2ccmd mii_mgr nvram reg switch csr_test gpio i2scmd mem_usage mtd pcmcmd spicmd mtd_verifier hw_nat
+SUBDIRS_APP = ated flash i2ccmd mii_mgr nvram reg switch csr_test gpio i2scmd mem_usage mtd pcmcmd spicmd mtd_verifier hw_nat switch_rtl
 
 #ralink specific applications
 ra_dir_$(CONFIG_RT2880_REG_RW)      += reg
