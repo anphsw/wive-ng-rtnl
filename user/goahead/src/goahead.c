@@ -261,7 +261,6 @@ static void goaInitGpio(int helper)
 	}
 
 	/* set gpio direction to input */
-	//set gpio direction to input
 	if (info.irq < 24) {
 		if (ioctl(fd, RALINK_GPIO_SET_DIR_IN, (1<<info.irq)) < 0)
 			goto ioctl_err;
