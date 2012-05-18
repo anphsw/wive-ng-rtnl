@@ -56,20 +56,24 @@
 /* Only one LED in WR-150N/300N for WPS */
 #define GPIO_WPS_LED_ORANGE  	14
 #define GPIO_WPS_LED_GREEN   	14
-#elif defined (CONFIG_RALINK_RT3883)
+#ifdef CONFIG_RALINK_GPIO_LED
+#define GPIO_VPN_LED1	GPIO_WPS_LED_GREEN /* VPN tx/rx led */
+#endif
+#elif defined (CONFIG_RALINK_RT3883) /* RT3662 or RT3883 based */
 #define GPIO_POWER_LED		0
 #define GPIO_WPS_LED_ORANGE  	27
 #define GPIO_WPS_LED_GREEN   	27
+#define GPIO_WAN_LED_GREEN   	19
+#define GPIO_USB_LED_GREEN   	20
+#ifdef CONFIG_RALINK_GPIO_LED
+#define GPIO_VPN_LED1	GPIO_WPS_LED_GREEN /* VPN tx/rx led */
+#endif
 #endif
 
 /* Firmware update indicators */
 #define GPIO_MTD_LED1	GPIO_LED_SEC_GREEN
 #define GPIO_MTD_LED2	GPIO_WPS_LED_GREEN
 
-/* VPN tx/rx led */
-#ifdef CONFIG_RALINK_GPIO_LED
-#define GPIO_VPN_LED1	GPIO_WPS_LED_GREEN
-#endif
 
 #define RALINK_GPIO_HAS_5124	1
 //#define RALINK_GPIO_HAS_9524	1
