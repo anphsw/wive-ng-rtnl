@@ -2055,7 +2055,7 @@ static int ShowMeshState(int eid, webs_t wp, int argc, char_t **argv)
 
 static int is3t3r(int eid, webs_t wp, int argc, char_t **argv)
 {
-#if defined(CONFIG_RALINK_RT2883) || defined(CONFIG_RALINK_RT3883)
+#if defined(CONFIG_RALINK_RT3883_3T3R)
 	websWrite(wp, T("1"));
 #else
 	websWrite(wp, T("0"));
