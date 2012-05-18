@@ -635,12 +635,19 @@ function initValue()
 	show14channel(true);
 
 	var rfic = '<% getCfgGeneral(1, "RFICType"); %>';
+	index = form.wirelessmode.options.length;
+	form.wirelessmode.options[index++] = new Option("11b/g mixed mode", "0");
+	form.wirelessmode.options[index++] = new Option("11b only", "1");
+	form.wirelessmode.options[index++] = new Option("11g only", "4");
+	form.wirelessmode.options[index++] = new Option("11n only", "6");
+	form.wirelessmode.options[index++] = new Option("11g/n mixed mode", "7");
+	form.wirelessmode.options[index++] = new Option("11b/g/n mixed mode", "9");
+
 	if ((rfic == "2") || (rfic == "4") || (rfic == "a") || (rfic == "d"))
 	{
-		index = form.wirelessmode.options.length;
-		form.wirelessmode.options[index++] = new Option("11a only", "2");
-		form.wirelessmode.options[index++] = new Option("11a/n mixed mode", "8");
-		form.wirelessmode.options[index++] = new Option("11n only (5G)", "11");
+		form.wirelessmode.options[index++] = new Option("5GHz 11a only", "2");
+		form.wirelessmode.options[index++] = new Option("5GHz 11a/n mixed mode", "8");
+		form.wirelessmode.options[index++] = new Option("5GHz 11n only", "11");
 	}
 
 	if ((wmode == "0") || (wmode == "4") || (wmode == "6") || (wmode == "7") || (wmode == "9"))
@@ -1177,12 +1184,6 @@ function CheckValue(form)
 	<td class="head" id="basicNetMode">Network Mode</td>
 	<td>
 		<select name="wirelessmode" id="wirelessmode" class="mid" onChange="wirelessModeChange(this.form);">
-			<option value="0">11b/g mixed mode</option>
-			<option value="1">11b only</option>
-			<option value="4">11g only</option>
-			<option value="7">11g/n mixed mode</option>
-			<option value="9">11b/g/n mixed mode</option>
-			<option value="6">11n only</option>
 		</select>
 	</td>
 </tr>
