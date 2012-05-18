@@ -1115,7 +1115,7 @@
 43) Fix not need add separator for some mbssid value if bssidnum<=1.<br>
 44) miniupnpd update to 1.6.20120509 version.<br>
 45) xupnpd up to 303 svn revision.<br>
-
+46) Add rtl8367m switch control utility.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>

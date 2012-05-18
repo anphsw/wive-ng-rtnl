@@ -1,13 +1,8 @@
-EXEC = switch
+EXEC = rtl8367m
 CFLAGS += -I$(ROOTDIR)/$(LINUXDIR)
-CFLAGS += -I$(ROOTDIR)/$(LINUXDIR)/drivers/net/raeth
 CONF_H  = $(ROOTDIR)/$(LINUXDIR)/include/linux/config.h
 
-ifdef CONFIG_RALINK_RT6855
-SRC=switch_gsw.c
-else
-SRC=switch.c
-endif
+SRC=rtl8367m.c
 
 all: $(EXEC)
 switch: $(SRC) $(CONF_H)

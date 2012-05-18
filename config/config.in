@@ -214,9 +214,8 @@ bool 'Video Flow Classification cmd'	CONFIG_RALINKAPP_CLS
 bool 'iproute2 support'			CONFIG_USER_IPROUTE2
 bool 'iproute2 tc util support'		CONFIG_USER_IPROUTE2_TC
 
-if [ "$CONFIG_DEFAULTS_RALINK_RT3052" = "y" ]; then
 bool 'RT3052 Switch Command'		CONFIG_RT3052_SWITCH
-fi
+bool 'RTL8567 Switch Command'		CONFIG_RTL8367M_SWITCH
 
 if [ "$CONFIG_DEFAULTS_RALINK_RT3052" = "y" -o "$CONFIG_DEFAULTS_RALINK_RT2883" = "y" ]; then
 bool 'I2S Command'		CONFIG_RALINKAPP_I2S
