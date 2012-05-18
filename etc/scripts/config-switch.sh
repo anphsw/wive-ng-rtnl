@@ -29,7 +29,7 @@ start_sw_config() {
     elif [ -f /proc/rt2883/gmac ]; then
 	PROC="/proc/rt2883/gmac"
     elif [ -f /proc/rt3883/gmac ]; then
-	PROC="/proc/rt23883/gmac"
+	PROC="/proc/rt3883/gmac"
     elif [ -f /proc/rt6855/gmac ]; then
 	PROC="/proc/rt6855/gmac"
     elif [ -f /proc/rt63365/gmac ]; then
@@ -85,7 +85,7 @@ configs_system_vlans() {
 }
 
 ##########################################################################
-# call this function for set HW_ADDR to interaces
+# call this function for set HW_ADDR to interfaces
 ##########################################################################
 set_mac_wan_lan() {
     # set MAC adresses LAN for phys iface (always set for physycal external switch one or dual phy mode)
@@ -106,6 +106,74 @@ set_mac_wan_lan() {
     fi
 }
 
+##########################################################################
+# call this function only for rtl8367 external switch
+##########################################################################
+esw_rtl8367_config() {
+    if [ "$CONFIG_RTL8367M" != "" ] && [ -f /bin/rtl8367m ]; then
+	# defines from rtl8367m_drv.h
+	RTL8367M_IOCTL_BRIDGE_MODE=50
+	RTL8367M_IOCTL_SPEED_PORT_XXXX=90
+	RTL8367M_WAN_BWAN_ISOLATION_NONE=0
+	RTL8367M_WAN_BWAN_ISOLATION_FROM_CPU=1
+	RTL8367M_WAN_BWAN_ISOLATION_BETWEEN=2
+	RTL8367M_WAN_BRIDGE_DISABLE=0
+	RTL8367M_WAN_BRIDGE_LAN1=1
+	RTL8367M_WAN_BRIDGE_LAN2=2
+	RTL8367M_WAN_BRIDGE_LAN3=3
+	RTL8367M_WAN_BRIDGE_LAN4=4
+	RTL8367M_WAN_BRIDGE_LAN3_LAN4=5
+	RTL8367M_WAN_BRIDGE_LAN1_LAN2=6
+	RTL8367M_WAN_BRIDGE_LAN1_LAN2_LAN3=7
+	##########################################################################
+	# In gate mode and hotspot mode configure WAN bridge
+	##########################################################################
+	if [ "$OperationMode" = "1" ] || [ "$OperationMode" = "4" ]; then
+	    if [ "$wan_port" = "0" ]; then
+		if [ "$tv_port" = "1" ]; then
+		    $LOG '##### ESW config vlan partition (WWLLL) #####'
+		    rtl8367m $RTL8367M_IOCTL_BRIDGE_MODE $RTL8367M_WAN_BRIDGE_LAN1 $RTL8367M_WAN_BWAN_ISOLATION_FROM_CPU
+		else
+		    $LOG '##### ESW config vlan partition (WLLLL) #####'
+		    rtl8367m $RTL8367M_IOCTL_BRIDGE_MODE $RTL8367M_WAN_BRIDGE_DISABLE
+		fi
+	    fi
+	fi
+	##########################################################################
+	# Set speed and duplex modes per port
+	##########################################################################
+	for i in `seq 1 5`; do
+	    # assume that port id is 1=WAN, 2=LAN1, 3=LAN2, 4=LAN3, 5=LAN4
+	    ioctl_arg=$(( $RTL8367M_IOCTL_SPEED_PORT_XXXX + $i - 1 ))
+	    # get mode for current port
+	    port_swmode=`nvram_get 2860 port"$i"_swmode`
+	    if [ "$port_swmode" != "auto" ] && [ "$port_swmode" != "" ]; then
+		$LOG ">>> Port ID $i set mode $port_swmode <<<"
+		if [ "$port_swmode" = "1000f" ]; then
+		    #set 1000Mbit full duplex and start negotinate
+		    rtl8367m $ioctl_arg 1
+		elif [ "$port_swmode" = "100f" ]; then
+		    #set 100Mbit full duplex and start negotinate
+		    rtl8367m $ioctl_arg 2
+		elif [ "$port_swmode" = "100h" ]; then
+		    #set 100Mbit half duplex and start negotinate
+		    rtl8367m $ioctl_arg 3
+		elif [ "$port_swmode" = "10f" ]; then
+		    #set 10Mbit full duplex and start negotinate
+		    rtl8367m $ioctl_arg 4
+		elif [ "$port_swmode" = "10h" ]; then
+		    #set 10Mbit half duplex and start negotinate
+		    rtl8367m $ioctl_arg 5
+		fi
+	    elif [ "$port_swmode" = "auto" ]; then
+		# enable full auto and start negotinate
+		rtl8367m $ioctl_arg 0
+	    fi
+	done
+    else
+	$LOG "rtl8367m tool not found in firmware or kernel support rtl8367 not configured !!!"
+    fi
+}
 
 ##############################################################################
 # preconfig
@@ -230,6 +298,7 @@ elif [ "$CONFIG_MAC_TO_MAC_MODE" != "" ] && [ "$CONFIG_RAETH_GMAC2" != "" ]; the
     if [ "$CONFIG_RTL8367M" != "" ]; then
 	# put code for configure switch port mode and others
 	$LOG '######## need add code for config RTL switch mode ######'
+	esw_rtl8367_config 2
     else
 	$LOG '######## clear switch partition (VTTS DUAL_PHY) ########'
 	/etc/scripts/config-vlan.sh $SWITCH_MODE 0 > /dev/null 2>&1
@@ -243,7 +312,8 @@ elif [ "$CONFIG_MAC_TO_MAC_MODE" != "" ] && [ "$CONFIG_RAETH_GMAC2" = "" ]; then
     ##########################################################################
     if [ "$CONFIG_RTL8367M" != "" ]; then
 	$LOG '##### config vlan partition (RTL ONE PHY) #####'
-	$LOG '##### RTL ONE PHY - NOT SUPPORTED         #####'
+	# this is sub need kernel level 8367 support driver fix
+	esw_rtl8367_config 1
     else
 	$LOG '##### clear switch partition (VTTS ONE_PHY) ########'
 	/etc/scripts/config-vlan.sh $SWITCH_MODE 0 > /dev/null 2>&1
