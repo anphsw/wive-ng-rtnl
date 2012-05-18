@@ -68,15 +68,11 @@
 #endif
 #elif defined (CONFIG_RALINK_RT3883) /* RT3662 or RT3883 based */
 /* BUTTONS GPIO */
-#if defined(CONFIG_RALINK_I2S) || defined(CONFIG_RALINK_I2S_MODULE)
-#define GPIO_BTN_RESET		43
-#else
 #define GPIO_BTN_RESET		13
-#endif
 #define GPIO_BTN_WPS		26
 /* LEDS GPIO */
 #define GPIO_POWER_LED		0
-#define GPIO_LED_SEC_GREEN      13
+#define GPIO_LED_SEC_GREEN      0 /* stub */
 #define GPIO_LED_WAN_GREEN      19
 #define GPIO_USB_LED_GREEN   	24
 #define GPIO_LED_WAN_ORANGE     27
