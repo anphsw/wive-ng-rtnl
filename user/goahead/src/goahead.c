@@ -248,14 +248,10 @@ static void goaInitGpio(int helper)
 
 	if (helper) {
 		//WPS button
-		info.irq = 0;
+		info.irq = GPIO_BTN_WPS;
 	} else {
 		//RT2883, RT3052 use gpio 10 for load-to-default
-#if defined(CONFIG_RALINK_I2S) || defined(CONFIG_RALINK_I2S_MODULE)
-		info.irq = 43;
-#else
-		info.irq = 10;
-#endif
+		info.irq = GPIO_BTN_RESET;
 	}
 
 	fd = open("/dev/gpio", O_RDONLY);
