@@ -38,6 +38,7 @@ static int  getSysUptime(int eid, webs_t wp, int argc, char_t **argv);
 static int  getPortStatus(int eid, webs_t wp, int argc, char_t **argv);
 static void setOpMode(webs_t wp, char_t *path, char_t *query);
 static void setWanPort(webs_t wp, char_t *path, char_t *query);
+static int  gigaphy(int eid, webs_t wp, int argc, char_t **argv);
 
 /*********************************************************************
  * System Utilities
@@ -81,7 +82,7 @@ int doSystem(char_t *fmt, ...)
 	va_list		vargs;
 	char_t		*cmd = NULL;
 	int			rc = 0;
-	
+
 	va_start(vargs, fmt);
 	if (fmtValloc(&cmd, WEBS_BUFSIZE, fmt, vargs) >= WEBS_BUFSIZE) {
 		trace(0, T("doSystem: lost data, buffer overflow\n"));
@@ -287,7 +288,7 @@ sleep_again:
 		ts.tv_sec = remain.tv_sec;
 		ts.tv_nsec = remain.tv_nsec;
 		goto sleep_again;
-	}	
+	}
 	return 0;
 }
 
@@ -297,7 +298,7 @@ sleep_again:
 int setTimer(int microsec, void ((*sigroutine)(int)))
 {
 	struct itimerval value, ovalue;
-   
+
 	signal(SIGALRM, sigroutine);
 	value.it_value.tv_sec = 0;
 	value.it_value.tv_usec = microsec;
@@ -309,7 +310,7 @@ int setTimer(int microsec, void ((*sigroutine)(int)))
 void stopTimer(void)
 {
 	struct itimerval value, ovalue;
-   
+
 	value.it_value.tv_sec = 0;
 	value.it_value.tv_usec = 0;
 	value.it_interval.tv_sec = 0;
@@ -451,10 +452,11 @@ void formDefineUtilities(void)
 	websAspDefine(T("getPortStatus"), getPortStatus);
 	websFormDefine(T("setOpMode"), setOpMode);
 	websFormDefine(T("setWanPort"), setWanPort);
+	websAspDefine(T("gigaphy"), gigaphy);
 }
 
 
-/* 
+/*
  * arguments: type - 0 = return the configuration of 'field' (default)
  *                   1 = write the configuration of 'field' 
  *            field - parameter name in nvram
@@ -885,6 +887,15 @@ static int getPlatform(int eid, webs_t wp, int argc, char_t **argv)
 static int getStationBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
 #if defined(CONFIG_RT2860V2_STA) || defined(CONFIG_RT2860V2_STA_MODULE)
+	return websWrite(wp, T("1"));
+#else
+	return websWrite(wp, T("0"));
+#endif
+}
+
+static int gigaphy(int eid, webs_t wp, int argc, char_t **argv)
+{
+#if defined(CONFIG_RTL8367M)
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));

@@ -37,7 +37,7 @@ function showOpMode()
 	var el = document.getElementById('inpOperationMode');
 	if (el == null)
 		return;
-	
+
 	var opmode = el.value;
 	var s_opmode = 'Unknown';
 	if (opmode == '0')
@@ -48,7 +48,7 @@ function showOpMode()
 		s_opmode = 'Ethernet Converter Mode';
 	else if (opmode == '3')
 		s_opmode = 'AP Client Mode';
-	
+
 	ajaxModifyElementHTML('tdOperationMode', s_opmode);
 }
 
@@ -65,7 +65,7 @@ function showPortStatus()
 		ajaxModifyElementHTML('portStatusRow', '<td>not supported</td>');
 		return;
 	}
-	
+
 	var form = document.setWanForm;
 	var wan = 1 * form.wan_port.value;
 	var stb_port = (!form.tv_stbEnabled.checked) ? -1 :
@@ -76,7 +76,7 @@ function showPortStatus()
 	{
 		var port = pstatus[i].split(',');
 		var image = 'empty';
-		
+
 		if (port[0] == '1')
 		{
 			if (port[1] == '10')
@@ -85,11 +85,11 @@ function showPortStatus()
 				image = '100';
 			else
 				image = '100';
-			
+
 			if (port[2] == 'H')
 				image += '_h';
 		}
-		
+
 		var text = i+1;
 		if (i == wan)
 			text = '<span style="color: #000080;">WAN</span>';
@@ -98,7 +98,7 @@ function showPortStatus()
 
 		content = content + '<td class="port_status" style="background-color: #ffffff; border: 0px; background-image: url(\'/graphics/' + image + '.gif\'); "><b>' + text + '</b></td>';
 	}
-	
+
 	ajaxModifyElementHTML('portStatusRow', '<table class="small" style="border: 0px;">' + content + '</table>');
 }
 
@@ -106,7 +106,7 @@ function initTranslation()
 {
 	_TR("statusTitle", "status title");
 	_TR("statusIntroduction", "status introduction");
-	
+
 	_TR("statusSysInfo", "status system information");
 	_TR("statusSDKVersion", "status sdk version");
 	_TR("statusSysUpTime", "status system up time");
@@ -143,12 +143,30 @@ function PageInit()
 	// Only WLLLL, WWLLL, LLLWW, LLLLW modes supported now
 	if ((wan_port != '0') && (wan_port != '4'))
 		wan_port = '4';
-	
+
 	var form = document.setWanForm;
-	
+
 	form.wan_port.value = wan_port;
 	form.tv_stbEnabled.checked = (tv_stb == '1');
-	
+
+	var gigaphy = '<% gigaphy(); %>';
+
+	// Add gigabit mode to combo
+	if (gigaphy == 1)
+	{
+	    index = form.port1_swmode.options.length;
+	    index = form.port2_swmode.options.length;
+	    index = form.port3_swmode.options.length;
+	    index = form.port4_swmode.options.length;
+	    index = form.port5_swmode.options.length;
+
+	    form.port1_swmode.options[index++] = new Option("1000 mbit/s full duplex", "1000f")
+	    form.port2_swmode.options[index++] = new Option("1000 mbit/s full duplex", "1000f")
+	    form.port3_swmode.options[index++] = new Option("1000 mbit/s full duplex", "1000f")
+	    form.port4_swmode.options[index++] = new Option("1000 mbit/s full duplex", "1000f")
+	    form.port5_swmode.options[index++] = new Option("1000 mbit/s full duplex", "1000f")
+	}
+
 	// Show port speeds
 	var port_swmode = [ '<% getCfgZero(1, "port1_swmode"); %>', '<% getCfgZero(1, "port2_swmode"); %>', '<% getCfgZero(1, "port3_swmode"); %>', '<% getCfgZero(1, "port4_swmode"); %>', '<% getCfgZero(1, "port5_swmode"); %>' ];
 
@@ -159,7 +177,7 @@ function PageInit()
 		if (element != null)
 			element.value = port_speed;
 	}
-	
+
 	reloadPage();
 }
 
@@ -225,10 +243,10 @@ function setWanPort(form)
 	<td>
 		<select name="port1_swmode" class="mid">
 			<option value="auto">auto</option>
-			<option value="100f">100 mbit/s full duplex</option>
-			<option value="100h">100 mbit/s half duplex</option>
-			<option value="10f">10 mbit/s full duplex</option>
 			<option value="10h">10 mbit/s half duplex</option>
+			<option value="10f">10 mbit/s full duplex</option>
+			<option value="100h">100 mbit/s half duplex</option>
+			<option value="100f">100 mbit/s full duplex</option>
 		</select>
 	</td>
 </tr>
@@ -237,10 +255,10 @@ function setWanPort(form)
 	<td>
 		<select name="port2_swmode" class="mid">
 			<option value="auto">auto</option>
-			<option value="100f">100 mbit/s full duplex</option>
-			<option value="100h">100 mbit/s half duplex</option>
-			<option value="10f">10 mbit/s full duplex</option>
 			<option value="10h">10 mbit/s half duplex</option>
+			<option value="10f">10 mbit/s full duplex</option>
+			<option value="100h">100 mbit/s half duplex</option>
+			<option value="100f">100 mbit/s full duplex</option>
 		</select>
 	</td>
 </tr>
@@ -249,10 +267,10 @@ function setWanPort(form)
 	<td>
 		<select name="port3_swmode" class="mid">
 			<option value="auto">auto</option>
-			<option value="100f">100 mbit/s full duplex</option>
-			<option value="100h">100 mbit/s half duplex</option>
-			<option value="10f">10 mbit/s full duplex</option>
 			<option value="10h">10 mbit/s half duplex</option>
+			<option value="10f">10 mbit/s full duplex</option>
+			<option value="100h">100 mbit/s half duplex</option>
+			<option value="100f">100 mbit/s full duplex</option>
 		</select>
 	</td>
 </tr>
@@ -261,10 +279,10 @@ function setWanPort(form)
 	<td>
 		<select name="port4_swmode" class="mid">
 			<option value="auto">auto</option>
-			<option value="100f">100 mbit/s full duplex</option>
-			<option value="100h">100 mbit/s half duplex</option>
-			<option value="10f">10 mbit/s full duplex</option>
 			<option value="10h">10 mbit/s half duplex</option>
+			<option value="10f">10 mbit/s full duplex</option>
+			<option value="100h">100 mbit/s half duplex</option>
+			<option value="100f">100 mbit/s full duplex</option>
 		</select>
 	</td>
 </tr>
@@ -273,10 +291,10 @@ function setWanPort(form)
 	<td>
 		<select name="port5_swmode" class="mid">
 			<option value="auto">auto</option>
-			<option value="100f">100 mbit/s full duplex</option>
-			<option value="100h">100 mbit/s half duplex</option>
-			<option value="10f">10 mbit/s full duplex</option>
 			<option value="10h">10 mbit/s half duplex</option>
+			<option value="10f">10 mbit/s full duplex</option>
+			<option value="100h">100 mbit/s half duplex</option>
+			<option value="100f">100 mbit/s full duplex</option>
 		</select>
 	</td>
 </tr>
