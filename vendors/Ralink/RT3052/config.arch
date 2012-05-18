@@ -28,6 +28,14 @@ TOOLCHAINDIR          	   = $(FIRMROOT)/toolchain
 LINUXINCDIR                = $(FIRMROOT)/linux/include
 CONFIG_CROSS_COMPILER_PATH = $(TOOLCHAINDIR)/bin
 
+#########################################################################################################
+# tune locale to eng
+#########################################################################################################
+LANG=C
+LC_COLLATE=C
+LC_MESSAGES=C
+LC_ALL=C
+
 ###########################################################################
 
 CC	= $(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-gcc
