@@ -154,17 +154,17 @@ function PageInit()
 	// Add gigabit mode to combo
 	if (gigaphy == 1)
 	{
-	    index = form.port1_swmode.options.length;
-	    index = form.port2_swmode.options.length;
-	    index = form.port3_swmode.options.length;
-	    index = form.port4_swmode.options.length;
-	    index = form.port5_swmode.options.length;
+	    index1 = form.port1_swmode.options.length;
+	    index2 = form.port2_swmode.options.length;
+	    index3 = form.port3_swmode.options.length;
+	    index4 = form.port4_swmode.options.length;
+	    index5 = form.port5_swmode.options.length;
 
-	    form.port1_swmode.options[index++] = new Option("1000 mbit/s full duplex", "1000f")
-	    form.port2_swmode.options[index++] = new Option("1000 mbit/s full duplex", "1000f")
-	    form.port3_swmode.options[index++] = new Option("1000 mbit/s full duplex", "1000f")
-	    form.port4_swmode.options[index++] = new Option("1000 mbit/s full duplex", "1000f")
-	    form.port5_swmode.options[index++] = new Option("1000 mbit/s full duplex", "1000f")
+	    form.port1_swmode.options[index1++] = new Option("1000 mbit/s full duplex", "1000f")
+	    form.port2_swmode.options[index2++] = new Option("1000 mbit/s full duplex", "1000f")
+	    form.port3_swmode.options[index3++] = new Option("1000 mbit/s full duplex", "1000f")
+	    form.port4_swmode.options[index4++] = new Option("1000 mbit/s full duplex", "1000f")
+	    form.port5_swmode.options[index5++] = new Option("1000 mbit/s full duplex", "1000f")
 	}
 
 	// Show port speeds
