@@ -1,15 +1,17 @@
 #########################################################################################################################
 -include config.arch
+-include ../../../linux/.config
 -include ../../../linux/drivers/mtd/ralink/ralink-flash.h
 -include ../../../sdk_version.h
 -include ../../../version
 #########################################################################################################################
+ROMFS_DIR	:= $(ROOTDIR)/romfs
+IMAGEDIR	:= $(ROOTDIR)/images
+MKIMAGE_DIR	:= $(ROOTDIR)/tools/mkimage
 KERNELZ		:= $(IMAGEDIR)/zImage
 RAMDISK		:= $(IMAGEDIR)/ramdisk
 IMAGE		:= $(IMAGEDIR)/$(PRODUCTID)_$(RT288X_SDK_VERSION).bin
-ROMFS_DIR	:= $(ROOTDIR)/romfs
 RAMDISK_SIZE	:= $(shell echo $(CONFIG_BLK_DEV_RAM_SIZE))
-MKIMAGE_DIR	:= $(ROOTDIR)/tools/mkimage
 CUR_DIR		:= $(shell pwd)
 COMP		:= lzma
 ROMFS_DIRS 	:= dev dev/pts sys proc tmp bin home mnt var etc web usr lib xml lib/modules  usr/codepages media share
