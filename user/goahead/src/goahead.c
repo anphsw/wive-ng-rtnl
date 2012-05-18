@@ -261,7 +261,21 @@ static void goaInitGpio(int helper)
 	}
 
 	/* set gpio direction to input */
-	if (ioctl(fd, RALINK_GPIO_SET_DIR_IN, (1<<info.irq)) < 0)
+	//set gpio direction to input
+	if (info.irq < 24) {
+		if (ioctl(fd, RALINK_GPIO_SET_DIR_IN, (1<<info.irq)) < 0)
+			goto ioctl_err;
+	}
+#ifdef RALINK_GPIO_HAS_5124
+	else if (24 <= info.irq && info.irq < 40) {
+		if (ioctl(fd, RALINK_GPIO3924_SET_DIR_IN, (1<<(info.irq-24))) < 0)
+			goto ioctl_err;
+	}
+	else {
+		if (ioctl(fd, RALINK_GPIO5140_SET_DIR_IN, (1<<(info.irq-40))) < 0)
+			goto ioctl_err;
+	}
+#endif
 		goto ioctl_err;
 
 	/* enable gpio interrupt */
