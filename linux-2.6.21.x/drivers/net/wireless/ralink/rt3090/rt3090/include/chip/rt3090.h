@@ -53,7 +53,7 @@
 #include "chip/mac_pci.h"
 #include "chip/rt30xx.h"
 #ifdef RTMP_FLASH_SUPPORT
-#define EEPROM_DEFAULT_FILE_PATH                     "/etc/Wireless/RT3092_PCIe_LNA_2T2R_ALC_V1_2.bin"
+#define EEPROM_DEFAULT_FILE_PATH                     "/etc/Wireless/iNIC/RT3092_PCIe_LNA_2T2R_ALC_V1_2.bin"
 #define RF_OFFSET					0x48000
 extern void RtmpFlashWrite(UCHAR * p, ULONG a, ULONG b);
 extern void RtmpFlashRead(UCHAR * p, ULONG a, ULONG b);
