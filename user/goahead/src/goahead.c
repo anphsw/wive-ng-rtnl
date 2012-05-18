@@ -243,14 +243,14 @@ static void goaInitGpio(int helper)
 	int fd;
 	ralink_gpio_reg_info info;
 
-	//register my information
+	/* register my information */
 	info.pid = getpid();
 
 	if (helper) {
-		//WPS button
+		/* WPS button */
 		info.irq = GPIO_BTN_WPS;
 	} else {
-		//RT2883, RT3052 use gpio 10 for load-to-default
+		/* RESET button */
 		info.irq = GPIO_BTN_RESET;
 	}
 
@@ -260,11 +260,11 @@ static void goaInitGpio(int helper)
 		return;
 	}
 
-	//set gpio direction to input
+	/* set gpio direction to input */
 	if (ioctl(fd, RALINK_GPIO_SET_DIR_IN, (1<<info.irq)) < 0)
 		goto ioctl_err;
 
-	//enable gpio interrupt
+	/* enable gpio interrupt */
 	if (ioctl(fd, RALINK_GPIO_ENABLE_INTP) < 0)
 		goto ioctl_err;
 
