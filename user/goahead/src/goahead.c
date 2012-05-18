@@ -147,6 +147,7 @@ int main(int argc, char** argv)
 #endif
 
 	    //Work - Green ON
+	    ledAlways(GPIO_POWER_LED, LED_OFF);		//Turn on power LED
 	    ledAlways(GPIO_LED_WAN_ORANGE, LED_OFF);	//Turn off orange LED
 	    ledAlways(GPIO_LED_WAN_GREEN, LED_ON);	//Turn on green LED
 
@@ -194,6 +195,7 @@ int main(int argc, char** argv)
 	memLeaks();
 #endif
 	//Exit - Orange ON
+	ledAlways(GPIO_POWER_LED, LED_OFF);		//Turn off power LED
 	ledAlways(GPIO_LED_WAN_ORANGE, LED_ON);		//Turn on orange LED
 	ledAlways(GPIO_LED_WAN_GREEN, LED_OFF);		//Turn off green LED
 
