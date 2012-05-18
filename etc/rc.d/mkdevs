@@ -4,9 +4,6 @@
 # refresh device table and nodes
 ##########################################################
 
-# include kernel config
-. /etc/scripts/config.sh
-
 ROOTDEVICE=/dev/mtdblock4
 TMPROOTFSD="/tmp/rootfs"
 
@@ -65,9 +62,7 @@ mknod /dev/gpio		c	252	0
 mknod /dev/rdm0		c	254	0
 
 # for realtek external gigaphy
-if [ "$CONFIG_RTL8367M" != "" ]; then
-    mknod   /dev/rtl8367m   c       206     0
-fi
+mknod /dev/rtl8367m	c	206	0
 
 # autocreate/refrash some dev nodes
 mdev -s
