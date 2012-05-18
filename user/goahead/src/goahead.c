@@ -275,7 +275,6 @@ static void goaInitGpio(int helper)
 			goto ioctl_err;
 	}
 #endif
-		goto ioctl_err;
 
 	/* enable gpio interrupt */
 	if (ioctl(fd, RALINK_GPIO_ENABLE_INTP) < 0)
