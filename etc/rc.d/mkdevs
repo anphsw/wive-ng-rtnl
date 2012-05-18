@@ -4,6 +4,9 @@
 # refresh device table and nodes
 ##########################################################
 
+# include kernel config
+. /etc/scripts/config.sh
+
 ROOTDEVICE=/dev/mtdblock4
 TMPROOTFSD="/tmp/rootfs"
 
