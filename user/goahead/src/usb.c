@@ -321,7 +321,7 @@ static void storageDiskAdm(webs_t wp, char_t *path, char_t *query)
 		while(EOF != fscanf(fp_mount, "%s %*s %*s %*s %*s %*s\n", part))
 		{
 			if (NULL != strstr(part, "/dev/sd"))
-				doSystem("umount -l %s", part);
+				doSystem("umount -lf %s", part);
 		}
 		fclose(fp_mount);
 	}
@@ -342,7 +342,7 @@ static void storageDiskPart(webs_t wp, char_t *path, char_t *query)
 	{
 		fprintf(stderr, "chhung part: %s\n", part);
 		if (NULL != strstr(part, "/dev/sd"))
-			doSystem("umount %s", part);
+			doSystem("umount -fl %s", part);
 	}
 	part1_vol = websGetVar(wp, T("part1_vol"), T(""));
 	part2_vol = websGetVar(wp, T("part2_vol"), T(""));
