@@ -36,6 +36,7 @@ static int  getSdkVersion(int eid, webs_t wp, int argc, char_t **argv);
 static int  getMemAmount(int eid, webs_t wp, int argc, char_t **argv);
 static int  getSysUptime(int eid, webs_t wp, int argc, char_t **argv);
 static int  getPortStatus(int eid, webs_t wp, int argc, char_t **argv);
+static int  getStaDriverVer(int eid, webs_t wp, int argc, char_t **argv);
 static void setOpMode(webs_t wp, char_t *path, char_t *query);
 static void setWanPort(webs_t wp, char_t *path, char_t *query);
 static int  gigaphy(int eid, webs_t wp, int argc, char_t **argv);
@@ -450,6 +451,7 @@ void formDefineUtilities(void)
 	websAspDefine(T("getMemAmount"), getMemAmount);
 	websAspDefine(T("getSysUptime"), getSysUptime);
 	websAspDefine(T("getPortStatus"), getPortStatus);
+	websAspDefine(T("getStaDriverVer"), getStaDriverVer);
 	websFormDefine(T("setOpMode"), setOpMode);
 	websFormDefine(T("setWanPort"), setWanPort);
 	websAspDefine(T("gigaphy"), gigaphy);
@@ -1193,4 +1195,32 @@ void STFs(int nvram, int index, char *flash_key, char *value)
 	result = setNthValue(index, tmp, value);
 	nvram_bufset(nvram, flash_key, result);
 	return ;
+}
+
+/*
+ * description: write station driver version
+ */
+static int getStaDriverVer(int eid, webs_t wp, int argc, char_t **argv)
+{
+#ifdef CONFIG_RT2860V2_STA
+	//RT_VERSION_INFO DriverVersionInfo;
+	unsigned char DriverVersionInfo[8];
+	int s;
+
+	s = socket(AF_INET, SOCK_DGRAM, 0);
+
+	//Driver
+	if (OidQueryInformation(RT_OID_VERSION_INFO, s, "ra0", &DriverVersionInfo, sizeof(DriverVersionInfo)) >= 0) {
+		//websWrite(wp, "%d.%d.%d.%d", DriverVersionInfo.DriverVersionW, DriverVersionInfo.DriverVersionX, DriverVersionInfo.DriverVersionY, DriverVersionInfo.DriverVersionZ);
+		//sprintf(tmp, "%04d-%02d-%02d", DriverVersionInfo.DriverBuildYear, DriverVersionInfo.DriverBuildMonth, DriverVersionInfo.DriverBuildDay);
+		websWrite(wp, "%s", DriverVersionInfo);
+	}
+	else
+		websWrite(wp, "&nbsp;");
+
+	close(s);
+#else
+	websWrite(wp, "STA driver not compiled &nbsp;");
+#endif
+	return 0;
 }

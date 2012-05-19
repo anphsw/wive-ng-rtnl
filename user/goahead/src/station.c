@@ -28,7 +28,6 @@ static int	getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv);
 static int	getStaConnectedBSSID(int eid, webs_t wp, int argc, char_t **argv);
 static int	getStaDbm(int eid, webs_t wp, int argc, char_t **argv);
 static int	getStaDLSList(int eid, webs_t wp, int argc, char_t **argv);
-static int	getStaDriverVer(int eid, webs_t wp, int argc, char_t **argv);
 static int	getStaExtraInfo(int eid, webs_t wp, int argc, char_t **argv);
 static int	getLinkingMode(int eid, webs_t wp, int argc, char_t **argv);
 static int	getStaHT(int eid, webs_t wp, int argc, char_t **argv);
@@ -81,7 +80,6 @@ void formDefineStation(void)
 	websAspDefine(T("getStaConnectedBSSID"), getStaConnectedBSSID);
 	websAspDefine(T("getStaDbm"), getStaDbm);
 	websAspDefine(T("getStaDLSList"), getStaDLSList);
-	websAspDefine(T("getStaDriverVer"), getStaDriverVer);
 	websAspDefine(T("getStaExtraInfo"), getStaExtraInfo);
 	websAspDefine(T("getLinkingMode"), getLinkingMode);
 	websAspDefine(T("getStaHT"), getStaHT);
@@ -818,34 +816,6 @@ static int getStaDLSList(int eid, webs_t wp, int argc, char_t **argv)
 static int getStaDbm(int eid, webs_t wp, int argc, char_t **argv)
 {
 	ejSetResult(eid, (G_bdBm_ischeck == 1) ? "1" : "0");
-	return 0;
-}
-
-/*
- * description: write station driver version
- */
-static int getStaDriverVer(int eid, webs_t wp, int argc, char_t **argv)
-{
-#ifdef CONFIG_RT2860V2_STA
-	//RT_VERSION_INFO DriverVersionInfo;
-	unsigned char DriverVersionInfo[8];
-	int s;
-
-	s = socket(AF_INET, SOCK_DGRAM, 0);
-
-	//Driver
-	if (OidQueryInformation(RT_OID_VERSION_INFO, s, "ra0", &DriverVersionInfo, sizeof(DriverVersionInfo)) >= 0) {
-		//websWrite(wp, "%d.%d.%d.%d", DriverVersionInfo.DriverVersionW, DriverVersionInfo.DriverVersionX, DriverVersionInfo.DriverVersionY, DriverVersionInfo.DriverVersionZ);
-		//sprintf(tmp, "%04d-%02d-%02d", DriverVersionInfo.DriverBuildYear, DriverVersionInfo.DriverBuildMonth, DriverVersionInfo.DriverBuildDay);
-		websWrite(wp, "%s", DriverVersionInfo);
-	}
-	else
-		websWrite(wp, "&nbsp;");
-
-	close(s);
-#else
-	websWrite(wp, "STA driver not compiled &nbsp;");
-#endif
 	return 0;
 }
 
