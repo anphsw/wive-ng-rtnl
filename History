@@ -1121,6 +1121,7 @@
 49) Update openssl to 0.9.8x version.<br>
 50) Disable hardware nat offload per default(expermental opton).<br>
 51) Reconfigure PPE for RT3662/RT3883 devices.<br>
+52) Add kernel option for disable tx timeout in raeth code(no need this logic).<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>

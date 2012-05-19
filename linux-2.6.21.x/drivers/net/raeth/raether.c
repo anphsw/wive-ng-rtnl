@@ -2028,7 +2028,9 @@ static const struct net_device_ops ei_netdev_ops = {
         .ndo_start_xmit         = ei_start_xmit_fake,
         .ndo_get_stats          = ra_get_stats,
         .ndo_set_mac_address    = eth_mac_addr,
+#ifndef CONFIG_RAETH_DISABLE_TX_TIMEO
         .ndo_tx_timeout         = ei_tx_timeout,
+#endif
         .ndo_change_mtu         = ei_change_mtu,
         .ndo_do_ioctl           = ei_ioctl,
         .ndo_validate_addr      = eth_validate_addr,
@@ -2036,7 +2038,6 @@ static const struct net_device_ops ei_netdev_ops = {
 #ifdef CONFIG_NET_POLL_CONTROLLER
         .ndo_poll_controller    = raeth_clean,
 #endif
-	.ndo_tx_timeout		= ei_tx_timeout,
 };
 #endif
 
@@ -2050,13 +2051,15 @@ void ra2880_setup_dev_fptable(struct net_device *dev)
 	dev->open		= ei_open;
 	dev->stop		= ei_close;
 	dev->hard_start_xmit	= ei_start_xmit_fake;
+#ifndef CONFIG_RAETH_DISABLE_TX_TIMEO
 	dev->tx_timeout		= ei_tx_timeout;
+#endif
 	dev->get_stats		= ra_get_stats;
 	dev->set_mac_address	= ei_set_mac_addr;
 	dev->change_mtu		= ei_change_mtu;
 	dev->mtu                = DEFAULT_MTU;
 	dev->do_ioctl		= ei_ioctl;
-	dev->tx_timeout		= ei_tx_timeout;
+
 #ifdef CONFIG_RAETH_NAPI
 	dev->poll		= &raeth_clean;
 	dev->weight		= DEV_WEIGHT;
@@ -2095,6 +2098,7 @@ void fe_reset(void)
 #endif
 }
 
+#ifndef CONFIG_RAETH_DISABLE_TX_TIMEO
 void ei_reset_task(struct work_struct *work)
 {
 	struct net_device *dev = dev_raether;
@@ -2111,6 +2115,7 @@ void ei_tx_timeout(struct net_device *dev)
 
         schedule_work(&ei_local->reset_task);
 }
+#endif
 
 void setup_statistics(END_DEVICE* ei_local)
 {
@@ -2579,7 +2584,9 @@ int ei_open(struct net_device *dev)
     	sysRegWrite(FE_INT_ENABLE, FE_INT_ALL);
 #endif
 
+#ifndef CONFIG_RAETH_DISABLE_TX_TIMEO
  	INIT_WORK(&ei_local->reset_task, ei_reset_task);
+#endif
 
 #ifdef WORKQUEUE_BH
 	INIT_WORK(&ei_local->tx_wq, ei_xmit_housekeeping_workq);
@@ -2631,8 +2638,10 @@ int ei_close(struct net_device *dev)
 	unsigned long flags;
 	spin_lock_irqsave(&(ei_local->page_lock), flags);
 
+#ifndef CONFIG_RAETH_DISABLE_TX_TIMEO
 #if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,35)
 	cancel_work_sync(&ei_local->reset_task);
+#endif
 #endif
 
 #ifdef CONFIG_PSEUDO_SUPPORT

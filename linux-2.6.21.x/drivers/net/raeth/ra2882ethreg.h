@@ -766,8 +766,9 @@ typedef struct end_device
     //send signal to user application to notify link status changed
     struct work_struct  kill_sig_wq;
 #endif
-
+#ifndef CONFIG_RAETH_DISABLE_TX_TIMEO
     struct work_struct  reset_task;
+#endif
 #ifdef WORKQUEUE_BH
     struct work_struct  rx_wq;
     struct work_struct  tx_wq;
