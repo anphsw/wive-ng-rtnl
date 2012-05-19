@@ -10,6 +10,7 @@
 #include <linux/if_vlan.h>
 #include <linux/if_ether.h>
 #include <linux/fs.h>
+#include <linux/sched.h>
 #include <asm/uaccess.h>
 #include <asm/rt2880/surfboardint.h>
 #if defined (CONFIG_RAETH_TSO)
@@ -20,9 +21,6 @@
 #include <linux/in.h>
 #include <linux/ppp_defs.h>
 #include <linux/if_pppox.h>
-#endif
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,35)
-#include <linux/sched.h>
 #endif
 
 #if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,0)
