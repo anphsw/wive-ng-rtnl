@@ -1122,6 +1122,7 @@
 50) Disable hardware nat offload per default(expermental opton).<br>
 51) Reconfigure PPE for RT3662/RT3883 devices.<br>
 52) Add kernel option for disable tx timeout in raeth code(no need this logic).<br>
+53) Fix printserver webui page.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>

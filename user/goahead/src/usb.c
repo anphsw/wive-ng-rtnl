@@ -607,11 +607,19 @@ static void webcamra(webs_t wp, char_t *path, char_t *query)
 static void printersrv(webs_t wp, char_t *path, char_t *query)
 {
 	char_t *enable;
+	char_t *bidirect;
+	char *submitUrl;
 
 	// fetch from web input
 	enable = websGetVar(wp, T("enabled"), T(""));
+	bidirect = websGetVar(wp, T("bdenabled"), T(""));
 	// set to nvram
 	nvram_set(RT2860_NVRAM, "PrinterSrvEnabled", enable);
+	nvram_set(RT2860_NVRAM, "PrinterSrvBidir", bidirect);
+
+submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
+	if (! submitUrl[0])
+	{
 
 	// debug print
 	websHeader(wp);
@@ -619,6 +627,9 @@ static void printersrv(webs_t wp, char_t *path, char_t *query)
 	websWrite(wp, T("enabled: %s<br>\n"), enable);
 	websFooter(wp);
 	websDone(wp, 200);
+	}
+	else
+		websRedirect(wp, submitUrl);
 }
 #endif
 
