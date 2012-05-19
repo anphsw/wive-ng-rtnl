@@ -1118,6 +1118,7 @@
 46) Add rtl8367m switch control utility.<br>
 47) Fix 5GHz WebUi and only 5GHz mode.<br>
 48) Add configure RT8637 switch from webui.<br>
+49) Update openssl to 0.9.8x version.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
