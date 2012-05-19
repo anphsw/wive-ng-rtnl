@@ -15,7 +15,12 @@ config RALINK_GPIO_LED
 
 config RALINK_GPIO_LED_VPN
 	bool "Ralink GPIO VPN LED Support"
-	depends on RALINK_GPIO_LED
+	depends on RALINK_GPIO_LED && PPP
+	default y
+
+config RALINK_GPIO_LED_USB
+	bool "Ralink GPIO USB LED Support"
+	depends on RALINK_GPIO_LED && USB
 	default y
 
 config RALINK_GDMA
@@ -32,7 +37,7 @@ choice
 		---help---
 		   RT305x/RT3350/RT2883=>Ch0-Ch7:PCM0/PCM1 
 		   RT3352/RT5350/RT3883/RT6855=>Ch0-Ch7:PCM0/PCM1, Ch8-Ch15:others
-	
+
 	config GDMA_PCM_I2S_OTHERS
 	        bool "PCM/I2S/Others"
 		---help---
@@ -41,7 +46,7 @@ choice
 
 	config GDMA_EVERYBODY
 	        bool "All for Everybody"
-	
+
 	config GDMA_DEBUG
 	        bool "Debug Mode 0->1..7->0->1..7.."
 endchoice

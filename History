@@ -1124,6 +1124,7 @@
 52) Add kernel option for disable tx timeout in raeth code(no need this logic).<br>
 53) Fix printserver webui page.<br>
 54) Disable packet recive/transmit before init/reinit(protect raeth code).<br>
+55) Add usb led blink at device activity(rt3662/rt3883).<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
