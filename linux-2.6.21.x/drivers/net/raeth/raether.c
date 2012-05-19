@@ -957,6 +957,9 @@ static int rt2880_eth_recv(struct net_device* dev)
 #ifdef CONFIG_PSEUDO_SUPPORT
 	PSEUDO_ADAPTER *pAd;
 #endif
+#ifdef CONFIG_RALINK_GPIO_LED_WAN
+	static unsigned long prev_jiffies;
+#endif
 #ifdef CONFIG_RAETH_INIT_PROTECT
 	if(eth_close == 1) /* protect eth while init or reinit */
 	    return 0;
@@ -1201,6 +1204,13 @@ static int rt2880_eth_recv(struct net_device* dev)
 		if (rx_ring[rx_dma_owner_idx].rxd_info4.SP == 2) {
 			if (ei_local->PseudoDev != NULL) {
 				pAd = netdev_priv(ei_local->PseudoDev);
+#ifdef CONFIG_RALINK_GPIO_LED_WAN
+			if ((jiffies - prev_jiffies) >= HZ) {
+			    /* blink led */
+			    ralink_gpio_led_set(wan_led);
+			    prev_jiffies = jiffies;
+			}
+#endif
 				pAd->stat.rx_packets++;
 				pAd->stat.rx_bytes += length;
 			}
