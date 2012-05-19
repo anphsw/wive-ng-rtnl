@@ -89,15 +89,17 @@ unsigned long long __attribute__((weak)) sched_clock(void)
 /*
  * Some helpers for converting nanosecond timing to jiffy resolution
  */
-#define NS_TO_JIFFIES(TIME)	((unsigned long)(TIME) / (1000000000 / HZ))
+#define NS_TO_JIFFIES(TIME)	((TIME) / (1000000000 / HZ))
 #define JIFFIES_TO_NS(TIME)	((TIME) * (1000000000 / HZ))
 
 /*
  * These are the 'tuning knobs' of the scheduler:
  *
- * default timeslice is 100 msecs (used only for SCHED_RR tasks).
+ * Minimum timeslice is 5 msecs (or 1 jiffy, whichever is larger),
+ * default timeslice is 100 msecs, maximum timeslice is 800 msecs.
  * Timeslices get refilled after they expire.
  */
+#define MIN_TIMESLICE		max(5 * HZ / 1000, 1)
 #define DEF_TIMESLICE		(100 * HZ / 1000)
 #define ON_RUNQUEUE_WEIGHT	 30
 #define CHILD_PENALTY		 95
@@ -169,6 +171,17 @@ unsigned long long __attribute__((weak)) sched_clock(void)
 
 #define TASK_PREEMPTS_CURR(p, rq) \
 	(((p)->prio < (rq)->curr->prio) && ((p)->array == (rq)->active))
+
+#define SCALE_PRIO(x, prio) \
+	max(x * (MAX_PRIO - prio) / (MAX_USER_PRIO / 2), MIN_TIMESLICE)
+
+static unsigned int static_prio_timeslice(int static_prio)
+{
+	if (static_prio < NICE_TO_PRIO(0))
+		return SCALE_PRIO(DEF_TIMESLICE * 4, static_prio);
+	else
+		return SCALE_PRIO(DEF_TIMESLICE, static_prio);
+}
 
 #ifdef CONFIG_SMP
 /*
@@ -4837,7 +4850,6 @@ asmlinkage
 long sys_sched_rr_get_interval(pid_t pid, struct timespec __user *interval)
 {
 	struct task_struct *p;
-	unsigned int time_slice;
 	int retval = -EINVAL;
 	struct timespec t;
 
@@ -4854,21 +4866,9 @@ long sys_sched_rr_get_interval(pid_t pid, struct timespec __user *interval)
 	if (retval)
 		goto out_unlock;
 
-	if (p->policy == SCHED_FIFO)
-		time_slice = 0;
-	else if (p->policy == SCHED_RR)
-		time_slice = DEF_TIMESLICE;
-	else {
-		struct sched_entity *se = &p->se;
-		unsigned long flags;
-		struct rq *rq;
-
-		rq = task_rq_lock(p, &flags);
-		time_slice = NS_TO_JIFFIES(sched_slice(cfs_rq_of(se), se));
-		task_rq_unlock(rq, &flags);
-	}
+	jiffies_to_timespec(p->policy == SCHED_FIFO ?
+				0 : task_timeslice(p), &t);
 	read_unlock(&tasklist_lock);
-	jiffies_to_timespec(time_slice, &t);
 	retval = copy_to_user(interval, &t, sizeof(t)) ? -EFAULT : 0;
 out_nounlock:
 	return retval;
