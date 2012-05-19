@@ -2189,7 +2189,15 @@ void setup_statistics(END_DEVICE* ei_local)
 #ifdef CONFIG_RAETH_NAPI
 	atomic_set(&ei_local->irq_sem, 1);
 #endif
-
+#ifdef CONFIG_RALINK_GPIO_LED_WAN
+	printk(KERN_INFO "WAN led has gpio %d\n", GPIO_LED_WAN_GREEN);
+	wan_led.gpio = GPIO_LED_WAN_GREEN;
+	wan_led.on = 1;
+	wan_led.off = 1;
+	wan_led.blinks = 1;
+	wan_led.rests = 1;
+	wan_led.times = 1;
+#endif
 }
 
 /**
@@ -2244,16 +2252,6 @@ int __init rather_probe(struct net_device *dev)
 	spin_lock_init(&ei_local->page_lock);
 
 	setup_statistics(ei_local);
-
-#ifdef CONFIG_RALINK_GPIO_LED_WAN
-	printk(KERN_INFO "USB led has gpio %d\n", GPIO_LED_WAN_GREEN);
-	wan_led.gpio = GPIO_LED_WAN_GREEN;
-	wan_led.on = 1;
-	wan_led.off = 1;
-	wan_led.blinks = 1;
-	wan_led.rests = 1;
-	wan_led.times = 1;
-#endif
 
 	return 0;
 }
