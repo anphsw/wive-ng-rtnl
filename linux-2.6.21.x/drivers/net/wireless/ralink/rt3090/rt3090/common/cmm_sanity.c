@@ -1535,13 +1535,15 @@ BOOLEAN PeerProbeReqSanity(
     OUT BOOLEAN *bRssiRequested)
 {
     PFRAME_802_11 Fr = (PFRAME_802_11)Msg;
-    UCHAR		*Ptr;
-    UCHAR		eid =0, eid_len = 0, *eid_data;
+    UCHAR	*Ptr;
+    UCHAR	eid =0, eid_len = 0, *eid_data;
 #ifdef CONFIG_AP_SUPPORT
+#ifdef WSC_INCLUDED
     UCHAR       apidx = MAIN_MBSSID;
-	UCHAR       Addr1[MAC_ADDR_LEN];
+#endif
+    UCHAR       Addr1[MAC_ADDR_LEN];
 #endif // CONFIG_AP_SUPPORT //
-	UINT		total_ie_len = 0;	
+    UINT	total_ie_len = 0;
 
     // to prevent caller from using garbage output value
     *SsidLen = 0;
