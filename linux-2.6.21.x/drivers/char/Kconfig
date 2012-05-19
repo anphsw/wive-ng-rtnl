@@ -23,6 +23,11 @@ config RALINK_GPIO_LED_USB
 	depends on RALINK_GPIO_LED && USB
 	default y
 
+config RALINK_GPIO_LED_WAN
+	bool "Ralink GPIO WAN TX LED Support"
+	depends on RALINK_GPIO_LED && RAETH_GMAC2
+ 	default y
+
 config RALINK_GDMA
 	tristate "Ralink GDMA Support"
 	depends on RALINK_RT3883 || RALINK_RT3352 || RALINK_RT5350 || RALINK_RT6855

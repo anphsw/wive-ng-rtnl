@@ -141,6 +141,12 @@ extern struct ethtool_ops	ra_virt_ethtool_ops;
 #endif // CONFIG_PSEUDO_SUPPORT //
 #endif // (CONFIG_ETHTOOL //
 
+#ifdef CONFIG_RALINK_GPIO_LED_WAN
+#include <linux/ralink_gpio.h>
+ralink_gpio_led_info wan_led;
+extern int ralink_gpio_led_set(ralink_gpio_led_info wan_led);
+#endif
+
 #ifdef CONFIG_RALINK_VISTA_BASIC
 int is_switch_175c = 1;
 #endif
@@ -668,7 +674,9 @@ static inline int rt2880_eth_send(struct net_device* dev, struct sk_buff *skb, i
 	struct skb_frag_struct *frag;
 	int i=0;
 #endif // CONFIG_RAETH_TSO //
-
+#ifdef CONFIG_RALINK_GPIO_LED_WAN
+	static unsigned long prev_jiffies;
+#endif
 
 #ifdef CONFIG_PSEUDO_SUPPORT
 	PSEUDO_ADAPTER *pAd;
@@ -900,6 +908,13 @@ static inline int rt2880_eth_send(struct net_device* dev, struct sk_buff *skb, i
 	if (gmac_no == 2) {
 		if (ei_local->PseudoDev != NULL) {
 			pAd = netdev_priv(ei_local->PseudoDev);
+#ifdef CONFIG_RALINK_GPIO_LED_WAN
+			if (jiffies - prev_jiffies) >= HZ) {
+			    /* blink led */
+			    ralink_gpio_led_set(wan_led);
+			    prev_jiffies = jiffies;
+			}
+#endif
 			pAd->stat.tx_packets++;
 			pAd->stat.tx_bytes += length;
 		}
@@ -2232,6 +2247,15 @@ int __init rather_probe(struct net_device *dev)
 
 	setup_statistics(ei_local);
 
+#ifdef CONFIG_RALINK_GPIO_LED_WAN
+	printk(KERN_INFO "USB led has gpio %d\n", GPIO_WAN_LED_GREEN);
+	wan_led.gpio = GPIO_LED_WAN_GREEN;
+	wan_led.on = 1;
+	wan_led.off = 1;
+	wan_led.blinks = 1;
+	wan_led.rests = 1;
+	wan_led.times = 1;
+#endif
 
 	return 0;
 }
