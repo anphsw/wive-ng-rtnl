@@ -165,15 +165,9 @@ int RemoveVlanTag(struct sk_buff *skb)
     VirIfIdx = ntohs(veth->h_vlan_TCI);
 
     /* make skb writable */
-    if (skb_cloned(skb) || skb_shared(skb)) {
-	struct sk_buff *new_skb;
-	new_skb = skb_copy(skb, GFP_ATOMIC);
-	if (!new_skb) {
-	    NAT_PRINT("HNAT: no mem for remove tag? (VirIfIdx=%d)\n", VirIfIdx);
-	    return 65535;
-	}
-	kfree_skb(skb);
-	skb = new_skb;
+    if (!skb_make_writable(skb, 0)) {
+	NAT_PRINT("HNAT: no mem for remove tag or corrupted packet? (VirIfIdx=%d)\n", VirIfIdx);
+	return 65535;
     }
 
     /* remove VLAN tag */
@@ -499,15 +493,9 @@ int32_t PpeRxWifiTag(struct sk_buff * skb)
 	    }
 
 	    /* make skb writable */
-	    if (skb_cloned(skb) || skb_shared(skb)) {
-		struct sk_buff *new_skb;
-		new_skb = skb_copy(skb, GFP_ATOMIC);
-		if (!new_skb) {
-		    NAT_PRINT("HNAT: no mem for add tag? (VirIfIdx=%d)\n", VirIfIdx);
-		    return 1;
-		}
-		kfree_skb(skb);
-		skb = new_skb;
+	    if (!skb_make_writable(skb, 0)) {
+		NAT_PRINT("HNAT: no mem or corrupted packet for add tag? (VirIfIdx=%d)\n", VirIfIdx);
+		return 1;
 	    }
 
 	    //push vlan tag to stand for actual incoming interface,
