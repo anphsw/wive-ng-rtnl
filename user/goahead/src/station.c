@@ -36,7 +36,6 @@ static int	getStaLinkQuality(int eid, webs_t wp, int argc, char_t **argv);
 static int	getStaLinkRxRate(int eid, webs_t wp, int argc, char_t **argv);
 static int	getStaLinkStatus(int eid, webs_t wp, int argc, char_t **argv);
 static int	getStaLinkTxRate(int eid, webs_t wp, int argc, char_t **argv);
-static int	getStaMacAddr(int eid, webs_t wp, int argc, char_t **argv);
 static int	getStaNewProfileName(int eid, webs_t wp, int argc, char_t **argv);
 static int	getStaNoiseLevel(int eid, webs_t wp, int argc, char_t **argv);
 static int	getStaAuthModes(int eid, webs_t wp, int argc, char_t **argv);
@@ -88,7 +87,6 @@ void formDefineStation(void)
 	websAspDefine(T("getStaLinkRxRate"), getStaLinkRxRate);
 	websAspDefine(T("getStaLinkStatus"), getStaLinkStatus);
 	websAspDefine(T("getStaLinkTxRate"), getStaLinkTxRate);
-	websAspDefine(T("getStaMacAddr"), getStaMacAddr);
 	websAspDefine(T("getStaNewProfileName"), getStaNewProfileName);
 	websAspDefine(T("getStaNoiseLevel"), getStaNoiseLevel);
 	websAspDefine(T("getActiveProfileStatus"), getActiveProfileStatus);
@@ -1188,25 +1186,6 @@ static int getStaLinkTxRate(int eid, webs_t wp, int argc, char_t **argv)
 
 	snprintf(buf, sizeof(buf), "%.1f", fLastTxRate);
 	websWrite(wp, "%s", buf);
-
-	close(s);
-	return 0;
-}
-
-/*
- * description: write station mac address
- */
-static int getStaMacAddr(int eid, webs_t wp, int argc, char_t **argv)
-{
-	unsigned char CurrentAddress[6];
-	int s;
-
-	s = socket(AF_INET, SOCK_DGRAM, 0);
-	if (OidQueryInformation(OID_802_3_CURRENT_ADDRESS, s, "ra0", &CurrentAddress, sizeof(CurrentAddress)) >= 0)
-		websWrite(wp, "%02X-%02X-%02X-%02X-%02X-%02X", CurrentAddress[0], CurrentAddress[1],
-				CurrentAddress[2], CurrentAddress[3], CurrentAddress[4], CurrentAddress[5]);
-	else
-		websWrite(wp, "&nbsp;");
 
 	close(s);
 	return 0;

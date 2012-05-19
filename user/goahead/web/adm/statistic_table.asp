@@ -10,7 +10,7 @@
 </tr>
 <tr id="wirelessMacAddr" style="display:none;">
 	<td class="head" colspan="3">Mac Address</td>
-	<td colspan="3"><% getStaMacAddr(); %></td>
+	<td colspan="3"><% getStaMacAddrw(); %></td>
 </tr>
 
 <!-- =================  MEMORY  ================= -->

@@ -51,7 +51,7 @@ function PageInit()
   </tr>
   <tr>
     <td class="head" id="aboutMacAddr">Mac Address</td>
-    <td><% getStaMacAddr(); %></td>
+    <td><% getStaMacAddrw(); %></td>
   </tr>
   </table>
 

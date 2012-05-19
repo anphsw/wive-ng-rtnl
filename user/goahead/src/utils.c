@@ -37,6 +37,7 @@ static int  getMemAmount(int eid, webs_t wp, int argc, char_t **argv);
 static int  getSysUptime(int eid, webs_t wp, int argc, char_t **argv);
 static int  getPortStatus(int eid, webs_t wp, int argc, char_t **argv);
 static int  getStaDriverVer(int eid, webs_t wp, int argc, char_t **argv);
+static int  getStaMacAddrw(int eid, webs_t wp, int argc, char_t **argv);
 static void setOpMode(webs_t wp, char_t *path, char_t *query);
 static void setWanPort(webs_t wp, char_t *path, char_t *query);
 static int  gigaphy(int eid, webs_t wp, int argc, char_t **argv);
@@ -142,22 +143,22 @@ char *setNthValue(int index, char *old_values, char *new_value)
 	for (i = 0; i < 8; i++)
 		memset(buf[i], 0, 256);
 
-	//copy original values
+	/* copy original values */
 	for ( i = 0, p = old_values, q = strchr(p, ';')  ;
 	      i < 8 && q != NULL                         ;
 	      i++, p = q + 1, q = strchr(p, ';')         )
 	{
 		strncpy(buf[i], p, q - p);
 	}
-	strcpy(buf[i], p); //the last one
+	strcpy(buf[i], p); /* the last one */
 
-	//replace buf[index] with new_value
+	/* replace buf[index] with new_value */
 	strncpy(buf[index], new_value, 256);
 
-	//calculate maximum index
+	/* calculate maximum index */
 	index = (i > index)? i : index;
 
-	//concatenate into a single string delimited by semicolons
+	/* concatenate into a single string delimited by semicolons */
 	strcat(ret, buf[0]);
 	for (i = 1; i <= index; i++) {
 		strncat(ret, ";", 2);
@@ -199,7 +200,7 @@ int getNthValueSafe(int index, char *value, char delimit, char *result, int len)
         i++;
     }
 
-    //no delimit
+    /* no delimit */
     if(!end){
 		if(i == index){
 			end = begin + strlen(begin);
@@ -452,6 +453,7 @@ void formDefineUtilities(void)
 	websAspDefine(T("getSysUptime"), getSysUptime);
 	websAspDefine(T("getPortStatus"), getPortStatus);
 	websAspDefine(T("getStaDriverVer"), getStaDriverVer);
+	websAspDefine(T("getStaMacAddrw"), getStaMacAddrw);
 	websFormDefine(T("setOpMode"), setOpMode);
 	websFormDefine(T("setWanPort"), setWanPort);
 	websAspDefine(T("gigaphy"), gigaphy);
@@ -495,9 +497,9 @@ static int getCfgGeneral(int eid, webs_t wp, int argc, char_t **argv)
     return 0;
 }
 
-/* 
+/*
  * arguments: type - 0 = return the configuration of 'field' (default)
- *                   1 = write the configuration of 'field' 
+ *                   1 = write the configuration of 'field'
  *            field - parameter name in nvram
  * description: read general configurations from nvram
  *              if value is NULL -> ""
@@ -557,9 +559,9 @@ static int getCfgGeneralHTML(int eid, webs_t wp, int argc, char_t **argv)
 	return 0;
 }
 
-/* 
+/*
  * arguments: type - 0 = return the configuration of 'field' (default)
- *                   1 = write the configuration of 'field' 
+ *                   1 = write the configuration of 'field'
  *            field - parameter name in nvram
  *            idx - index of nth
  * description: read general configurations from nvram (if value is NULL -> "")
@@ -595,7 +597,7 @@ static int getCfgNthGeneral(int eid, webs_t wp, int argc, char_t **argv)
 
 /*
  * arguments: type - 0 = return the configuration of 'field' (default)
- *                   1 = write the configuration of 'field' 
+ *                   1 = write the configuration of 'field'
  *            field - parameter name in nvram
  * description: read general configurations from nvram
  *              if value is NULL -> "0"
@@ -621,9 +623,9 @@ static int getCfgZero(int eid, webs_t wp, int argc, char_t **argv)
 	return 0;
 }
 
-/* 
+/*
  * arguments: type - 0 = return the configuration of 'field' (default)
- *                   1 = write the configuration of 'field' 
+ *                   1 = write the configuration of 'field'
  *            field - parameter name in nvram
  *            idx - index of nth
  * description: read general configurations from nvram (if value is NULL -> "0")
@@ -657,9 +659,9 @@ static int getCfgNthZero(int eid, webs_t wp, int argc, char_t **argv)
 	return 0;
 }
 
-/* 
+/*
  * arguments: type - 0 = return the configuration of 'field' (default)
- *                   1 = write the configuration of 'field' 
+ *                   1 = write the configuration of 'field'
  *            field - parameter name in nvram
  * description: read general configurations from nvram
  *              if value is NULL -> ""
@@ -685,9 +687,9 @@ static int getCfg2General(int eid, webs_t wp, int argc, char_t **argv)
 	return 0;
 }
 
-/* 
+/*
  * arguments: type - 0 = return the configuration of 'field' (default)
- *                   1 = write the configuration of 'field' 
+ *                   1 = write the configuration of 'field'
  *            field - parameter name in nvram
  *            idx - index of nth
  * description: read general configurations from nvram (if value is NULL -> "")
@@ -723,7 +725,7 @@ static int getCfg2NthGeneral(int eid, webs_t wp, int argc, char_t **argv)
 
 /*
  * arguments: type - 0 = return the configuration of 'field' (default)
- *                   1 = write the configuration of 'field' 
+ *                   1 = write the configuration of 'field'
  *            field - parameter name in nvram
  * description: read general configurations from nvram
  *              if value is NULL -> "0"
@@ -749,9 +751,9 @@ static int getCfg2Zero(int eid, webs_t wp, int argc, char_t **argv)
 	return 0;
 }
 
-/* 
+/*
  * arguments: type - 0 = return the configuration of 'field' (default)
- *                   1 = write the configuration of 'field' 
+ *                   1 = write the configuration of 'field'
  *            field - parameter name in nvram
  *            idx - index of nth
  * description: read general configurations from nvram (if value is NULL -> "0")
@@ -785,9 +787,9 @@ static int getCfg2NthZero(int eid, webs_t wp, int argc, char_t **argv)
 	return 0;
 }
 
-/* 
+/*
  * arguments: type - 0 = return the configuration of 'field' (default)
- *                   1 = write the configuration of 'field' 
+ *                   1 = write the configuration of 'field'
  *            field - parameter name in nvram
  * description: read general configurations from nvram
  *              if value is NULL -> ""
@@ -815,7 +817,7 @@ static int getCfg3General(int eid, webs_t wp, int argc, char_t **argv)
 
 /*
  * arguments: type - 0 = return the configuration of 'field' (default)
- *                   1 = write the configuration of 'field' 
+ *                   1 = write the configuration of 'field'
  *            field - parameter name in nvram
  * description: read general configurations from nvram
  *              if value is NULL -> "0"
@@ -998,14 +1000,14 @@ static int getPortStatus(int eid, webs_t wp, int argc, char_t **argv)
 		pclose(fp);
 		if (rc != -1)
 		{
-			// get Link status
+			/* get Link status */
 			if ((pos = strstr(buf, "Link detected: ")) != NULL)
 			{
 				pos += strlen("Link detected: ");
 				if(*pos == 'y')
 					link = '1';
 			}
-			// get speed
+			/* get speed */
 			if ((pos = strstr(buf, "Speed: ")) != NULL)
 			{
 				pos += strlen("Speed: ");
@@ -1014,7 +1016,7 @@ static int getPortStatus(int eid, webs_t wp, int argc, char_t **argv)
 				if(*pos == '1' && *(pos+1) == '0' && *(pos+2) == '0' && *(pos+3) == '0' && *(pos+4) == 'M')
 					speed = 1000;
 			}
-			// get duplex
+			/* get duplex */
 			if ((pos = strstr(buf, "Duplex: ")) != NULL)
 			{
 				pos += strlen("Duplex: ");
@@ -1046,7 +1048,7 @@ int netmask_aton(const char *ip)
 {
 	int i, a[4], result = 0;
 	sscanf(ip, "%d.%d.%d.%d", &a[0], &a[1], &a[2], &a[3]);
-	for(i=0; i<4; i++){	//this is dirty
+	for(i=0; i<4; i++){	/* this is dirty */
 		if(a[i] == 255){
 			result += 8;
 			continue;
@@ -1065,8 +1067,6 @@ int netmask_aton(const char *ip)
 			result += 2;
 		if(a[i] == 128)
 			result += 1;
-		//if(a[i] == 0)
-		//	result += 0;
 		break;
 	}
 	return result;
@@ -1112,7 +1112,7 @@ static void setOpMode(webs_t wp, char_t *path, char_t *query)
 	nvram_init(RT2860_NVRAM);
 	char	*old_mode = nvram_bufget(RT2860_NVRAM, "OperationMode");
 
-	//new OperationMode
+	/* new OperationMode */
 	if (strncmp(mode, old_mode, 2))
 	{
 		nvram_bufset(RT2860_NVRAM, "OperationMode", mode);
@@ -1122,7 +1122,7 @@ static void setOpMode(webs_t wp, char_t *path, char_t *query)
 			nvram_bufset(RT2860_NVRAM, "dhcpEnabled", "0");
 		}
 #endif
-		//from or to ap client mode
+		/* from or to ap client mode */
 		if (!strncmp(mode, "3", 2))
 			nvram_bufset(RT2860_NVRAM, "ApCliEnable", "1");
 		else if (!strncmp(old_mode, "3", 2))
@@ -1136,7 +1136,7 @@ static void setOpMode(webs_t wp, char_t *path, char_t *query)
 	outputTimerForReload(wp, 50000);
 
 final:
-	sleep(2);	// wait for websDone() to finish tcp http session(close socket)
+	sleep(2);	/* wait for websDone() to finish tcp http session(close socket) */
 
 #ifdef CONFIG_USER_802_1X
 	if (need_commit)
@@ -1154,14 +1154,14 @@ static void setWanPort(webs_t wp, char_t *path, char_t *query)
 
 	nvram_init(RT2860_NVRAM);
 
-	// Set-up WAN port
+	/* Set-up WAN port */
 	if ((w_port != NULL) && (strlen(w_port) == 1))
 	{
 		if ((w_port[0] >= '0') && (w_port[0] <= '4'))
 			nvram_bufset(RT2860_NVRAM, "wan_port", w_port);
 	}
 
-	// Now test values
+	/* Now test values */
 	for (i=1; i<=5; i++)
 	{
 		snprintf(w_name, sizeof(w_name), "port%d_swmode", i);
@@ -1175,14 +1175,14 @@ static void setWanPort(webs_t wp, char_t *path, char_t *query)
 
 	nvram_bufset(RT2860_NVRAM, "tv_port", (strcmp(tv_port, "on")==0) ? "1" : "0");
 
-	// Commit & close NVRAM
+	/* Commit & close NVRAM */
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
 
-	// Output timer for reloading
+	/* Output timer for reloading */
 	outputTimerForReload(wp, 50000);
 
-	// Reboot
+	/* Reboot */
 	reboot_now();
 }
 
@@ -1203,16 +1203,13 @@ void STFs(int nvram, int index, char *flash_key, char *value)
 static int getStaDriverVer(int eid, webs_t wp, int argc, char_t **argv)
 {
 #ifdef CONFIG_RT2860V2_STA
-	//RT_VERSION_INFO DriverVersionInfo;
 	unsigned char DriverVersionInfo[8];
 	int s;
 
 	s = socket(AF_INET, SOCK_DGRAM, 0);
 
-	//Driver
+	/* Driver */
 	if (OidQueryInformation(RT_OID_VERSION_INFO, s, "ra0", &DriverVersionInfo, sizeof(DriverVersionInfo)) >= 0) {
-		//websWrite(wp, "%d.%d.%d.%d", DriverVersionInfo.DriverVersionW, DriverVersionInfo.DriverVersionX, DriverVersionInfo.DriverVersionY, DriverVersionInfo.DriverVersionZ);
-		//sprintf(tmp, "%04d-%02d-%02d", DriverVersionInfo.DriverBuildYear, DriverVersionInfo.DriverBuildMonth, DriverVersionInfo.DriverBuildDay);
 		websWrite(wp, "%s", DriverVersionInfo);
 	}
 	else
@@ -1221,6 +1218,29 @@ static int getStaDriverVer(int eid, webs_t wp, int argc, char_t **argv)
 	close(s);
 #else
 	websWrite(wp, "STA driver not compiled &nbsp;");
+#endif
+	return 0;
+}
+
+/*
+ * description: write station mac address
+ */
+static int getStaMacAddrw(int eid, webs_t wp, int argc, char_t **argv)
+{
+#ifdef CONFIG_RT2860V2_STA
+	unsigned char CurrentAddress[6];
+	int s;
+
+	s = socket(AF_INET, SOCK_DGRAM, 0);
+	if (OidQueryInformation(OID_802_3_CURRENT_ADDRESS, s, "ra0", &CurrentAddress, sizeof(CurrentAddress)) >= 0)
+		websWrite(wp, "%02X-%02X-%02X-%02X-%02X-%02X", CurrentAddress[0], CurrentAddress[1],
+				CurrentAddress[2], CurrentAddress[3], CurrentAddress[4], CurrentAddress[5]);
+	else
+		websWrite(wp, "&nbsp;");
+
+	close(s);
+#else
+	websWrite(wp, "&nbsp;");
 #endif
 	return 0;
 }
