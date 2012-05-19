@@ -120,6 +120,10 @@ int ra_mtd_read_nm(char *name, loff_t from, size_t len, u_char *buf);
 
 struct net_device		*dev_raether;
 
+#ifdef CONFIG_RAETH_INIT_PROTECT
+unsigned char eth_close=1; /* default disable rx/tx processing while init */
+#endif
+
 static int rx_dma_owner_idx; 
 static int rx_dma_owner_idx0;     /* Point to the next RXD DMA wants to use in RXD Ring#0.  */
 #if defined (CONFIG_RAETH_MULTIPLE_RX_RING)
@@ -669,7 +673,12 @@ static inline int rt2880_eth_send(struct net_device* dev, struct sk_buff *skb, i
 #ifdef CONFIG_PSEUDO_SUPPORT
 	PSEUDO_ADAPTER *pAd;
 #endif
-
+#ifdef CONFIG_RAETH_INIT_PROTECT
+	if(eth_close == 1) { /* protect eth while init or reinit */
+		dev_kfree_skb_any(skb);
+		return 0;
+	}
+#endif
 	while(ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info2.DDONE_bit == 0)
 	{
 		printk(KERN_ERR "%s: TX DMA is Busy !! TX desc is Empty!\n", dev->name);
@@ -934,6 +943,10 @@ static int rt2880_eth_recv(struct net_device* dev)
 
 #ifdef CONFIG_PSEUDO_SUPPORT
 	PSEUDO_ADAPTER *pAd;
+#endif
+#ifdef CONFIG_RAETH_INIT_PROTECT
+	if(eth_close == 1) /* protect eth while init or reinit */
+	    return 0;
 #endif
 	for ( ; ; ) {
 
@@ -1604,7 +1617,12 @@ static int ei_start_xmit(struct sk_buff* skb, struct net_device *dev, int gmac_n
 #ifdef CONFIG_PSEUDO_SUPPORT
 	PSEUDO_ADAPTER *pAd;
 #endif
-
+#ifdef CONFIG_RAETH_INIT_PROTECT
+	if(eth_close == 1) { /* protect eth while init or reinit */
+		dev_kfree_skb_any(skb);
+		return 0;
+	}
+#endif
 #if !defined(CONFIG_RA_NAT_NONE)
 /* bruce+
  */
@@ -2077,6 +2095,9 @@ void fe_reset(void)
 {
 	u32 val;
 
+#ifdef CONFIG_RAETH_INIT_PROTECT
+	eth_close=1; /* set closed flag protect eth while init or reinit */
+#endif
 #if defined (CONFIG_RALINK_RT63365)
 	/* FIXME */
 #else
@@ -2103,6 +2124,9 @@ void ei_reset_task(struct work_struct *work)
 {
 	struct net_device *dev = dev_raether;
 
+#ifdef CONFIG_RAETH_INIT_PROTECT
+	eth_close=1; /* set closed flag protect eth while init or reinit */
+#endif
 	ei_close(dev);
 	ei_open(dev);
 
@@ -2207,6 +2231,7 @@ int __init rather_probe(struct net_device *dev)
 	spin_lock_init(&ei_local->page_lock);
 
 	setup_statistics(ei_local);
+
 
 	return 0;
 }
@@ -2620,6 +2645,10 @@ int ei_open(struct net_device *dev)
 	VirtualIF_open(ei_local->PseudoDev);
 #endif
 	forward_config(dev);
+
+#ifdef CONFIG_RAETH_INIT_PROTECT
+	eth_close=0; /* set flag to open protect eth while init or reinit */
+#endif
 	return 0;
 }
 
@@ -2643,14 +2672,16 @@ int ei_close(struct net_device *dev)
 	cancel_work_sync(&ei_local->reset_task);
 #endif
 #endif
-
+#ifdef CONFIG_RAETH_INIT_PROTECT
+	eth_close=1; /* set closed flag protect eth while init or reinit */
+#endif
 #ifdef CONFIG_PSEUDO_SUPPORT
 	VirtualIF_close(ei_local->PseudoDev);
 #endif
 
 	netif_stop_queue(dev);
 	ra2880stop(ei_local);
-	msleep(10);
+	udelay(100);
 
 #ifdef WORKQUEUE_BH
 #if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,35)
