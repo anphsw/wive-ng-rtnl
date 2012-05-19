@@ -45,6 +45,12 @@
 #include "../../../net/nat/hw_nat/ra_nat.h"
 #endif
 
+#ifdef CONFIG_RALINK_GPIO_LED_WAN
+#include <linux/ralink_gpio.h>
+ralink_gpio_led_info wan_led;
+extern int ralink_gpio_led_set(ralink_gpio_led_info wan_led);
+#endif
+
 #ifdef CONFIG_RAETH_DHCP_TOUCH
 /* for auto lease renew at cable connect */
 extern int send_sigusr_dhcpc;
@@ -138,12 +144,6 @@ extern struct ethtool_ops	ra_ethtool_ops;
 extern struct ethtool_ops	ra_virt_ethtool_ops;
 #endif // CONFIG_PSEUDO_SUPPORT //
 #endif // (CONFIG_ETHTOOL //
-
-#ifdef CONFIG_RALINK_GPIO_LED_WAN
-#include <linux/ralink_gpio.h>
-ralink_gpio_led_info wan_led;
-extern int ralink_gpio_led_set(ralink_gpio_led_info wan_led);
-#endif
 
 #ifdef CONFIG_RALINK_VISTA_BASIC
 int is_switch_175c = 1;
