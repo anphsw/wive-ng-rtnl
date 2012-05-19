@@ -58,8 +58,8 @@ extern int ppp_cpu_load;
 
 #ifdef CONFIG_RALINK_GPIO_LED_VPN
 #include <linux/ralink_gpio.h>
-ralink_gpio_led_info led;
-extern int ralink_gpio_led_set(ralink_gpio_led_info led);
+ralink_gpio_led_info ppp_led;
+extern int ralink_gpio_led_set(ralink_gpio_led_info ppp_led);
 #endif
 
 #define PPP_VERSION	"2.4.2"
@@ -900,12 +900,12 @@ static int __init ppp_init(void)
 	}
 #ifdef CONFIG_RALINK_GPIO_LED_VPN
 	printk(KERN_INFO "PPP vpn led has gpio %d\n", GPIO_VPN_LED1);
-	led.gpio = GPIO_VPN_LED1;
-	led.on = 0;
-	led.off = 0;
-	led.blinks = 0;
-	led.rests = 0;
-	led.times = 0;
+	ppp_led.gpio = GPIO_VPN_LED1;
+	ppp_led.on = 0;
+	ppp_led.off = 0;
+	ppp_led.blinks = 0;
+	ppp_led.rests = 0;
+	ppp_led.times = 0;
 #endif
 out:
 	if (err)
@@ -969,8 +969,8 @@ ppp_start_xmit(struct sk_buff *skb, struct net_device *dev)
 	kfree_skb(skb);
 	++ppp->stats.tx_dropped;
 #ifdef CONFIG_RALINK_GPIO_LED_VPN
-	led.on = 0;
-	ralink_gpio_led_set(led);
+	ppp_led.on = 0;
+	ralink_gpio_led_set(ppp_led);
 #endif
 	return 0;
 }
@@ -1247,10 +1247,10 @@ ppp_send_frame(struct ppp *ppp, struct sk_buff *skb)
 #endif
 #ifdef CONFIG_RALINK_GPIO_LED_VPN
 	if (proto == PPP_IP)
-	    led.on = 1;
+	    ppp_led.on = 1;
 	else
-	    led.on = 0;
-	ralink_gpio_led_set(led);
+	    ppp_led.on = 0;
+	ralink_gpio_led_set(ppp_led);
 #endif
 
 	ppp->xmit_pending = skb;
@@ -1262,8 +1262,8 @@ ppp_send_frame(struct ppp *ppp, struct sk_buff *skb)
 	kfree_skb(skb);
 	++ppp->stats.tx_errors;
 #ifdef CONFIG_RALINK_GPIO_LED_VPN
-	led.on = 0;
-	ralink_gpio_led_set(led);
+	ppp_led.on = 0;
+	ralink_gpio_led_set(ppp_led);
 #endif
 }
 
@@ -1517,8 +1517,8 @@ static int ppp_mp_explode(struct ppp *ppp, struct sk_buff *skb)
 	++ppp->stats.tx_errors;
 	++ppp->nxseq;
 #ifdef CONFIG_RALINK_GPIO_LED_VPN
-	led.on = 0;
-	ralink_gpio_led_set(led);
+	ppp_led.on = 0;
+	ralink_gpio_led_set(ppp_led);
 #endif
 	return 1;	/* abandon the frame */
 }
@@ -1821,10 +1821,10 @@ ppp_receive_nonmp_frame(struct ppp *ppp, struct sk_buff *skb)
 			ppp->dev->last_rx = jiffies;
 #ifdef CONFIG_RALINK_GPIO_LED_VPN
 			if (proto == PPP_IP)
-			    led.on = 1;
+			    ppp_led.on = 1;
 			else
-			    led.on = 0;
-			ralink_gpio_led_set(led);
+			    ppp_led.on = 0;
+			ralink_gpio_led_set(ppp_led);
 #endif
 		}
 	}
@@ -1952,8 +1952,8 @@ ppp_receive_mp_frame(struct ppp *ppp, struct sk_buff *skb, struct channel *pch)
 		++ppp->stats.rx_dropped;
 		ppp_receive_error(ppp);
 #ifdef CONFIG_RALINK_GPIO_LED_VPN
-		led.on = 0;
-		ralink_gpio_led_set(led);
+		ppp_led.on = 0;
+		ralink_gpio_led_set(ppp_led);
 #endif
 		return;
 	}
@@ -2116,8 +2116,8 @@ ppp_mp_reconstruct(struct ppp *ppp)
 			++ppp->stats.rx_dropped;
 			ppp_receive_error(ppp);
 #ifdef CONFIG_RALINK_GPIO_LED_VPN
-			led.on = 0;
-			ralink_gpio_led_set(led);
+			ppp_led.on = 0;
+			ralink_gpio_led_set(ppp_led);
 #endif
 		}
 
