@@ -1119,6 +1119,8 @@
 47) Fix 5GHz WebUi and only 5GHz mode.<br>
 48) Add configure RT8637 switch from webui.<br>
 49) Update openssl to 0.9.8x version.<br>
+50) Disable hardware nat offload per default(expermental opton).<br>
+51) Reconfigure PPE for RT3662/RT3883 devices.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
