@@ -826,6 +826,7 @@ static int getStaDbm(int eid, webs_t wp, int argc, char_t **argv)
  */
 static int getStaDriverVer(int eid, webs_t wp, int argc, char_t **argv)
 {
+#ifdef CONFIG_RT2860V2_STA
 	//RT_VERSION_INFO DriverVersionInfo;
 	unsigned char DriverVersionInfo[8];
 	int s;
@@ -842,6 +843,9 @@ static int getStaDriverVer(int eid, webs_t wp, int argc, char_t **argv)
 		websWrite(wp, "&nbsp;");
 
 	close(s);
+#else
+	websWrite(wp, "STA driver not compiled &nbsp;");
+#endif
 	return 0;
 }
 
