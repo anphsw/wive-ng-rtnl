@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Ralink SDK deprecated script for support storage webui
+# Need rewrite this webui and remove this script
+
 addTransmissionConfig() {
     CONF_DIR="/media/$2/.config/torrent"
     [ ! -d "$CONF_DIR" ] && mkdir -p "$CONF_DIR"

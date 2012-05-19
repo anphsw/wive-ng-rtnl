@@ -132,25 +132,6 @@ unload_apps() {
     fi
 }
 
-umount_all() {
-    # umount all exclude base system fs
-    mounted=`mount | grep -vE "tmpfs|ramfs|squashfs|proc|sysfs|root|pts" | cut -f1 -d" " | cut -f3 -d "/"`
-    if [ -n "$mounted" ]; then
-	for disk in $mounted; do
-	    echo "Umount external drive /dev/$disk."
-	    (sync && umount -fl /dev/$disk && sync) &
-	done
-	sleep 2
-    fi
-
-    # disable swaps
-    if [ -f /bin/swapoff ]; then
-	echo "Disable swaps."
-	swapoff -a
-    fi
-
-}
-
 free_mem_cahce() {
     sysctl -w vm.min_free_kbytes=2048
     sync
@@ -164,7 +145,9 @@ unload_apps
 disable_net
 
 # umount all particions and disable swap
-umount_all
+if [ -f /etc/scripts/umount_all.sh ]; then
+    /etc/scripts/umount_all.sh
+fi
 
 # unload all modules this is need after unmont
 unload_modules

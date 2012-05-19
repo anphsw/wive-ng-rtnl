@@ -1,8 +1,4 @@
-# For sadko
+) Add page for configure 2.4GHz wifi module in dual wan configuration
+) Rewrite usb managment in webui
 ) Need rewrite QoS page (remove ralink QoS and add new types QoS).
 ) Add /proc/rt3052/esw_cnt for traffic statistic per switch port.(need add in WebUI).
-
-# For me
-#need fix
-buggy) Add skb reuse support.
-add) mesh support ?
