@@ -907,7 +907,7 @@ static inline int rt2880_eth_send(struct net_device* dev, struct sk_buff *skb, i
 		if (ei_local->PseudoDev != NULL) {
 			pAd = netdev_priv(ei_local->PseudoDev);
 #ifdef CONFIG_RALINK_GPIO_LED_WAN
-			if (jiffies - prev_jiffies) >= HZ) {
+			if ((jiffies - prev_jiffies) >= HZ) {
 			    /* blink led */
 			    ralink_gpio_led_set(wan_led);
 			    prev_jiffies = jiffies;
