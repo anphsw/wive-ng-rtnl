@@ -2246,7 +2246,7 @@ int __init rather_probe(struct net_device *dev)
 	setup_statistics(ei_local);
 
 #ifdef CONFIG_RALINK_GPIO_LED_WAN
-	printk(KERN_INFO "USB led has gpio %d\n", GPIO_WAN_LED_GREEN);
+	printk(KERN_INFO "USB led has gpio %d\n", GPIO_LED_WAN_GREEN);
 	wan_led.gpio = GPIO_LED_WAN_GREEN;
 	wan_led.on = 1;
 	wan_led.off = 1;
