@@ -903,9 +903,9 @@ static int __init ppp_init(void)
 	ppp_led.gpio = GPIO_VPN_LED1;
 	ppp_led.on = 0;
 	ppp_led.off = 0;
-	ppp_led.blinks = 0;
-	ppp_led.rests = 0;
-	ppp_led.times = 0;
+	ppp_led.blinks = 1;
+	ppp_led.rests = 1;
+	ppp_led.times = 1;
 #endif
 out:
 	if (err)
