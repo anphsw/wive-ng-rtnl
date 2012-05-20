@@ -430,20 +430,20 @@ void forward_config(struct net_device *dev)
 #endif
 #endif
 
-/*
-* By default, Ralink cpu it will drop packets that size over 1514 bytes.
-* So, some packets will be drop if after insert tag or size over 1514 bytes.
-* How to solve it? Setup register to receive jumbo frame.
-* This is need for support not standart external tagging and some switches compat.
-*/
-#if defined(CONFIG_RAETH_JUMBOFRAME) || defined(CONFIG_RAETH_HAS_PORT5) || defined(CONFIG_RAETH_ACCEPT_OVERSIZED)
-#ifndef CONFIG_RTL8367M /* For all exclude RTL */
+#if defined(CONFIG_RAETH_JUMBOFRAME) || defined(CONFIG_RAETH_HAS_PORT5) \
+     defined(CONFIG_RAETH_ACCEPT_OVERSIZED) || defined(CONFIG_RTL8367M)
+#ifndef CONFIG_RTL8367M
 	regVal |= GDM1_JMB_EN;
 #ifdef CONFIG_PSEUDO_SUPPORT
 	regVal2 |= GDM1_JMB_EN;
 #endif
-#else /* For RTL */
+#else /* For RTL8367M */
 /*
+  * By default, Ralink cpu it will drop packets that size over 1514 bytes.
+  * So, some packets will be drop if after insert tag or size over 1514 bytes.
+  * How to solve it? Setup register to receive jumbo frame.
+  * This is need for support not standart external tagging and some switches compat.
+  *
   * When enable REALTEK switch's proprietary tag support,
   * switch will insert 8 bytes of tag data into ethernet packet.
   * If original ethernet frame size is 1514 bytes, after insert 8 bytes of data,
