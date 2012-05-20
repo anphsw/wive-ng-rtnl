@@ -456,12 +456,11 @@ void forward_config(struct net_device *dev)
 	regVal2 |= (((MAX_RX_LENGTH/1024)&0xf) << 28);
 #endif
 #elif defined(CONFIG_RAETH_JUMBOFRAME) || defined(CONFIG_RAETH_HAS_PORT5)
-#ifndef CONFIG_RTL8367M
 	regVal |= GDM1_JMB_EN;
 #ifdef CONFIG_PSEUDO_SUPPORT
 	regVal2 |= GDM1_JMB_EN;
 #endif
-#endif /* CONFIG_RTL8367M */
+#endif /* CONFIG_RTL8367M / CONFIG_RAETH_ACCEPT_OVERSIZED  */
 
 	/* set registers */
 	sysRegWrite(GDMA1_FWD_CFG, regVal);
