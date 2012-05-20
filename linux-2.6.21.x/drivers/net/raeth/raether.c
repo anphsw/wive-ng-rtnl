@@ -49,6 +49,7 @@
 #include <linux/ralink_gpio.h>
 ralink_gpio_led_info wan_led;
 extern int ralink_gpio_led_set(ralink_gpio_led_info wan_led);
+static unsigned long wan_prev_jiffies;
 #endif
 
 #ifdef CONFIG_RAETH_DHCP_TOUCH
@@ -672,9 +673,6 @@ static inline int rt2880_eth_send(struct net_device* dev, struct sk_buff *skb, i
 	struct skb_frag_struct *frag;
 	int i=0;
 #endif // CONFIG_RAETH_TSO //
-#ifdef CONFIG_RALINK_GPIO_LED_WAN
-	static unsigned long prev_jiffies;
-#endif
 
 #ifdef CONFIG_PSEUDO_SUPPORT
 	PSEUDO_ADAPTER *pAd;
@@ -907,10 +905,10 @@ static inline int rt2880_eth_send(struct net_device* dev, struct sk_buff *skb, i
 		if (ei_local->PseudoDev != NULL) {
 			pAd = netdev_priv(ei_local->PseudoDev);
 #ifdef CONFIG_RALINK_GPIO_LED_WAN
-			if ((jiffies - prev_jiffies) >= (HZ>>2)) {
+			if ((jiffies - wan_prev_jiffies) >= (HZ>>3)) {
 			    /* blink led */
 			    ralink_gpio_led_set(wan_led);
-			    prev_jiffies = jiffies;
+			    wan_prev_jiffies = jiffies;
 			}
 #endif
 			pAd->stat.tx_packets++;
@@ -956,9 +954,6 @@ static int rt2880_eth_recv(struct net_device* dev)
 
 #ifdef CONFIG_PSEUDO_SUPPORT
 	PSEUDO_ADAPTER *pAd;
-#endif
-#ifdef CONFIG_RALINK_GPIO_LED_WAN
-	static unsigned long prev_jiffies;
 #endif
 #ifdef CONFIG_RAETH_INIT_PROTECT
 	if(eth_close == 1) /* protect eth while init or reinit */
@@ -1205,10 +1200,10 @@ static int rt2880_eth_recv(struct net_device* dev)
 			if (ei_local->PseudoDev != NULL) {
 				pAd = netdev_priv(ei_local->PseudoDev);
 #ifdef CONFIG_RALINK_GPIO_LED_WAN
-			if ((jiffies - prev_jiffies) >= (HZ>>2)) {
+			if ((jiffies - wan_prev_jiffies) >= (HZ>>3)) {
 			    /* blink led */
 			    ralink_gpio_led_set(wan_led);
-			    prev_jiffies = jiffies;
+			    wan_prev_jiffies = jiffies;
 			}
 #endif
 				pAd->stat.rx_packets++;
