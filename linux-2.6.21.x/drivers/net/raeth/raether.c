@@ -1042,16 +1042,6 @@ static int rt2880_eth_recv(struct net_device* dev)
 		rx_skb->len 	= length;
 		rx_skb->tail 	= rx_skb->data + length;
 
-		/* check oversized packets */
-		/* hardware maximum for a single frame's data payload */
-		if (rx_skb->len > (MAX_RX_LENGTH + NET_IP_ALIGN)) {
-		    ei_local->stat.rx_dropped++;
-                    bReschedule = 1;
-		    if (net_ratelimit())
-			printk("ERROR: frame is BIG !!!\n");
-		    break;
-		}
-
 #ifdef CONFIG_PSEUDO_SUPPORT
 		if(rx_ring[rx_dma_owner_idx].rxd_info4.SP == 2) {
 		    if(ei_local->PseudoDev!=NULL) {
