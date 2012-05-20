@@ -460,7 +460,7 @@ void forward_config(struct net_device *dev)
 #ifdef CONFIG_PSEUDO_SUPPORT
 	regVal2 |= GDM1_JMB_EN;
 #endif
-#endif /* CONFIG_RTL8367M / CONFIG_RAETH_ACCEPT_OVERSIZED  */
+#endif /* CONFIG_RTL8367M or CONFIG_RAETH_ACCEPT_OVERSIZED  */
 
 	/* set registers */
 	sysRegWrite(GDMA1_FWD_CFG, regVal);
@@ -1068,11 +1068,10 @@ static int rt2880_eth_recv(struct net_device* dev)
 		rx_skb->dev 	  = dev;
 		rx_skb->protocol  = eth_type_trans(rx_skb,dev);
 #endif
-#ifdef CONFIG_RTL8367M
-/* For Jumbo frame bug that will make system crash and restart.
-   After discussion, we decide to filter out the packet lengh
-   over MAX_RX_LENGTH.
-*/
+#if defined(CONFIG_RAETH_ACCEPT_OVERSIZED) || defined(CONFIG_RTL8367M)
+		/* For Jumbo frame/oversized pkts bug that will make system crash and restart.
+		 *  After discussion, we decide to filter out the packet lengh over MAX_RX_LENGTH.
+		 */
 		if(length > MAX_RX_LENGTH) {
 #ifdef CONFIG_PSEUDO_SUPPORT
 		    if (rx_ring[rx_dma_owner_idx0].rxd_info4.SP == 2) {
