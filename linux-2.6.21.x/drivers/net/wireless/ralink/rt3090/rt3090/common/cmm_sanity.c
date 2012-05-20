@@ -1641,7 +1641,7 @@ BOOLEAN PeerProbeReqSanity(
 						{
 							return TRUE;
 						}
-						
+
 						if ((pAd->ApCfg.MBSSID[apidx].WscControl.WscConfMode & WSC_PROXY) != WSC_DISABLE)
 						{
 
