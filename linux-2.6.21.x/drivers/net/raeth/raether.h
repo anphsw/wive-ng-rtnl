@@ -1,11 +1,13 @@
 #ifndef RA2882ETHEND_H
 #define RA2882ETHEND_H
 
-#define TX_TIMEOUT (6*HZ)
+#define TX_TIMEOUT	(6*HZ)		/* netdev watchdog timeout */
+
+#define DEFAULT_MTU	1500		/* default MTU set to device */
 
 /* mtu and rx sizes */
 #ifdef CONFIG_RAETH_JUMBOFRAME
-#ifdef defined (CONFIG_RTL8367M)
+#ifdef CONFIG_RTL8367M
 #define	MAX_RX_LENGTH	2048            /* limit size for rx packets 1Gb RTL specific */
 #else
 #define	MAX_RX_LENGTH	4096		/* limit size for rx packets 1Gb */
@@ -13,7 +15,6 @@
 #else
 #define	MAX_RX_LENGTH	1536		/* limit size for rx packets 100Mb */
 #endif
-#define DEFAULT_MTU	1500		/* default MTU set to device */
 
 #ifdef DSP_VIA_NONCACHEABLE
 #define ESRAM_BASE	0xa0800000	/* 0x0080-0000  ~ 0x00807FFF */
