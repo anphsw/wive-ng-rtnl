@@ -1127,6 +1127,7 @@
 55) Add usb led blink at device activity(rt3662/rt3883).<br>
 56) Add wan rx/tx led indicator by gpio(rt3662/rt3882 with dual phy configuration).<br>
 57) Fix work jumbo frames with RTL8367 external swicth.<br>
+58) Raeth rework logic filter oversized packets.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
