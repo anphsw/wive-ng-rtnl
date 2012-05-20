@@ -7,11 +7,7 @@
 
 /* mtu and rx sizes */
 #ifdef CONFIG_RAETH_JUMBOFRAME
-#ifdef CONFIG_RTL8367M
-#define	MAX_RX_LENGTH	2048            /* limit size for rx packets 1Gb RTL specific */
-#else
 #define	MAX_RX_LENGTH	4096		/* limit size for rx packets 1Gb */
-#endif
 #else
 #define	MAX_RX_LENGTH	1536		/* limit size for rx packets 100Mb */
 #endif
