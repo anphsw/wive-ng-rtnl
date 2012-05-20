@@ -921,9 +921,11 @@ MODULE_DESCRIPTION (DRIVER_INFO);
 MODULE_AUTHOR (DRIVER_AUTHOR);
 MODULE_LICENSE ("GPL");
 
+#ifndef CONFIG_RALINK_RT3883
 #ifdef CONFIG_PCI
 #include "ehci-pci.c"
 #define	PCI_DRIVER		ehci_pci_driver
+#endif
 #endif
 
 #ifdef CONFIG_MPC834x
