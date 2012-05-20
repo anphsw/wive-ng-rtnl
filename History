@@ -1126,6 +1126,7 @@
 54) Disable packet recive/transmit before init/reinit(protect raeth code).<br>
 55) Add usb led blink at device activity(rt3662/rt3883).<br>
 56) Add wan rx/tx led indicator by gpio(rt3662/rt3882 with dual phy configuration).<br>
+57) Fix work jumbo frames with RTL8367 external swicth.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
