@@ -1132,10 +1132,11 @@ static int rt2880_eth_recv(struct net_device* dev)
 			} else
 #endif
 				ei_local->stat.rx_dropped++;
-			//Fix realloc skb buff.
+
+			/* Fix realloc skb buff. */
 			rx_ring[rx_dma_owner_idx0].rxd_info2.DDONE_bit = 0;
 			sysRegWrite(RX_CALC_IDX0, rx_dma_owner_idx0);
-                        bReschedule = 1;
+                    	bReschedule = 1;
 			break;
 		}
 
@@ -1278,11 +1279,11 @@ void kill_sig_workq(struct work_struct *work)
 	char pid[8];
 	struct task_struct *p = NULL;
 
-	//if 9 Disable touch dhcp
+	/* if set 9 - Disable touch dhcp */
 	if (send_sigusr_dhcpc == 9)
 	    return;
 
-	//read udhcpc pid from file, and send signal USR2,USR1 to get a new IP
+	/* read udhcpc pid from file, and send signal USR2,USR1 to get a new IP */
 	fp = filp_open("/var/run/udhcpc.pid", O_RDONLY, 0);
 	if (IS_ERR(fp))
 	    return;
@@ -1296,7 +1297,6 @@ void kill_sig_workq(struct work_struct *work)
 #endif
 
 		if (NULL != p) {
-		    //send_sig(SIGUSR2, p, 0); no need manual release sfstudio
 		    send_sig(SIGUSR1, p, 0);
 		}
 	    }
@@ -1619,7 +1619,7 @@ static irqreturn_t esw_interrupt(int irq, void *dev_id)
 		*/
 		if (send_sigusr_dhcpc != 8)
 		{
-		    //if  link down --> link up
+		    /* if  link down --> link up */
 		    port_offset=29-send_sigusr_dhcpc; //ports offset is 25..29 = 4..0
 		    if ((stat & (1<<port_offset)) || !(stat_curr & (1<<port_offset)))
 		    {
@@ -1629,7 +1629,7 @@ static irqreturn_t esw_interrupt(int irq, void *dev_id)
 		  RAETH_PRINT(KERN_INFO "RT305x_ESW: WAN Port Link Status Changed\n");
 		}
 
-		//send SIGUSR1 to dhcp client
+		/* send SIGUSR1 to dhcp client */
 		schedule_work(&ei_local->kill_sig_wq);
 out:
 #endif
@@ -2939,14 +2939,14 @@ void rt305x_esw_init(void)
 	 * DROP_RLS=120, DROP_SET_TH=80
 	 */
         *(unsigned long *)(RALINK_ETH_SW_BASE+0x0008) = 0xC8A07850;
-        *(unsigned long *)(RALINK_ETH_SW_BASE+0x00E4) = 0x00000000; //disable double VLAN
+        *(unsigned long *)(RALINK_ETH_SW_BASE+0x00E4) = 0x00000000; /* disable double VLAN */
         *(unsigned long *)(RALINK_ETH_SW_BASE+0x0014) = 0x00405555;
         *(unsigned long *)(RALINK_ETH_SW_BASE+0x0050) = 0x00002001;
         *(unsigned long *)(RALINK_ETH_SW_BASE+0x0090) = 0x00007f7f;
-        *(unsigned long *)(RALINK_ETH_SW_BASE+0x0098) = 0x00007f3f; //disable VLAN
+        *(unsigned long *)(RALINK_ETH_SW_BASE+0x0098) = 0x00007f3f; /* disable VLAN */
         *(unsigned long *)(RALINK_ETH_SW_BASE+0x00CC) = 0x0002500c;
 #ifndef CONFIG_UNH_TEST
-        *(unsigned long *)(RALINK_ETH_SW_BASE+0x009C) = 0x0008a301; //hashing algorithm=XOR48, aging interval=300sec
+        *(unsigned long *)(RALINK_ETH_SW_BASE+0x009C) = 0x0008a301; /* hashing algorithm=XOR48, aging interval=300sec */
 #else
 	/*
 	 * bit[30]:1	Backoff Algorithm Option: The latest one to pass UNH test
