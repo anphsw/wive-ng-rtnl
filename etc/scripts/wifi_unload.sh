@@ -117,8 +117,6 @@ unload_apps() {
     do
 	service $serv stop > /dev/null 2>&1
     done
-    echo "Wait 3 seconds."
-    sleep 3
     echo "Kill aplications..." # second step terminate and kill application
     for apps in $kill_apps
     do
@@ -133,6 +131,7 @@ unload_apps() {
 }
 
 free_mem_cahce() {
+    # small workaround for defrag ane clean mem
     sysctl -w vm.min_free_kbytes=2048
     sync
     sysctl -w vm.min_free_kbytes=1024
@@ -141,13 +140,13 @@ free_mem_cahce() {
 # unload all applications
 unload_apps
 
-# disable wan/wlan if mem=16Mb
-disable_net
-
 # umount all particions and disable swap
 if [ -f /etc/scripts/umount_all.sh ]; then
     /etc/scripts/umount_all.sh
 fi
+
+# disable wan/wlan if mem=16Mb
+disable_net
 
 # unload all modules this is need after unmont
 unload_modules
