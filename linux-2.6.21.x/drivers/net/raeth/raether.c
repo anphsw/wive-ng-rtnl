@@ -437,13 +437,32 @@ void forward_config(struct net_device *dev)
 * This is need for support not standart external tagging and some switches compat.
 */
 #if defined(CONFIG_RAETH_JUMBOFRAME) || defined(CONFIG_RAETH_HAS_PORT5) || defined(CONFIG_RAETH_ACCEPT_OVERSIZED)
-	// enable jumbo frame
+#ifndef CONFIG_RTL8367M /* For all exclude RTL */
 	regVal |= GDM1_JMB_EN;
 #ifdef CONFIG_PSEUDO_SUPPORT
 	regVal2 |= GDM1_JMB_EN;
 #endif
+#else /* For RTL */
+/*
+  * When enable REALTEK switch's proprietary tag support,
+  * switch will insert 8 bytes of tag data into ethernet packet.
+  * If original ethernet frame size is 1514 bytes, after insert 8 bytes of data,
+  * then the max packet size will be 1514 + 8 = 1522.
+  * For RALINK "frame engine", it has one register to setup "forward" condition.
+  * By default, it will drop packets that size over 1514 bytes.
+  * So, some packets will be drop if after insert tag and it's size over 1514 bytes.
+  * How to solve it?
+  *   Setup register to receive jumbo frame.
+  */
+	regVal |= GDM1_JMB_EN;
+	regVal &= ~0xf0000000; /* clear bit28-bit31 */
+	regVal |= (((MAX_RX_LENGTH/1024)&0xf) << 28);
+#ifdef CONFIG_PSEUDO_SUPPORT
+	regVal2 |= GDM1_JMB_EN;
+	regVal2 &= ~0xf0000000; /* clear bit28-bit31 */
+	regVal2 |= (((MAX_RX_LENGTH/1024)&0xf) << 28);
 #endif
-
+#endif /* CONFIG_RTL8367M */
 	sysRegWrite(GDMA1_FWD_CFG, regVal);
 	sysRegWrite(CDMA_CSG_CFG, regCsg);
 #ifdef CONFIG_PSEUDO_SUPPORT
@@ -959,6 +978,7 @@ static int rt2880_eth_recv(struct net_device* dev)
 	if(eth_close == 1) /* protect eth while init or reinit */
 	    return 0;
 #endif
+
 	for ( ; ; ) {
 
 #ifdef CONFIG_RAETH_NAPI
@@ -1048,11 +1068,30 @@ static int rt2880_eth_recv(struct net_device* dev)
 		rx_skb->dev 	  = dev;
 		rx_skb->protocol  = eth_type_trans(rx_skb,dev);
 #endif
-
+#ifdef CONFIG_RTL8367M
+/* For Jumbo frame bug that will make system crash and restart.
+   After discussion, we decide to filter out the packet lengh
+   over MAX_RX_LENGTH.
+*/
+		if(length > MAX_RX_LENGTH) {
+#ifdef CONFIG_PSEUDO_SUPPORT
+		    if (rx_ring[rx_dma_owner_idx0].rxd_info4.SP == 2) {
+			if (ei_local->PseudoDev != NULL) {
+				pAd = netdev_priv(ei_local->PseudoDev);
+				pAd->stat.rx_dropped++;
+			}
+		}else
+#endif
+			ei_local->stat.rx_dropped++;
+			rx_ring[rx_dma_owner_idx0].rxd_info2.DDONE_bit = 0;
+			sysRegWrite(RX_CALC_IDX0, rx_dma_owner_idx0);
+			continue;
+		}
+#endif
 #ifdef CONFIG_RAETH_CHECKSUM_OFFLOAD
 		if(rx_ring[rx_dma_owner_idx].rxd_info4.IPFVLD_bit) {
 			rx_skb->ip_summed = CHECKSUM_UNNECESSARY;
-		}else 
+		}else
 #endif
 			rx_skb->ip_summed = CHECKSUM_NONE;
 
@@ -2042,7 +2081,7 @@ static int ei_change_mtu(struct net_device *dev, int new_mtu)
 		return -ENXIO;
 	}
 
-#ifdef CONFIG_RAETH_JUMBOFRAME
+#if defined(CONFIG_RAETH_JUMBOFRAME)
 	if ((new_mtu > MAX_RX_LENGTH) || (new_mtu < (ETH_ZLEN + 4))) {
 #else
 	if ((new_mtu > DEFAULT_MTU)   || (new_mtu < (ETH_ZLEN + 4))) {

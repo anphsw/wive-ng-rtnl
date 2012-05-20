@@ -211,7 +211,7 @@ config RAETH_MEMORY_OPTIMIZATION
 
 config RAETH_ACCEPT_OVERSIZED
 	bool "Accept all oversized packets."
-	depends on RAETH
+	depends on RAETH && !RTL8367M
 	default y
 
 config RAETH_DISABLE_TX_TIMEO
