@@ -59,7 +59,8 @@ function initValue()
 <body onLoad="initValue()">
 <table class="body"><tr><td>
 <h1 id="printerTitle">Printer Server Settings</h1>
-<p id="printerIntroduction">Here you can configure printer server settings</p>
+<p id="printerIntroduction">Here you can configure printer server settings.
+    If you printer need firmware - upload firmware in /etc/prnfw.dl on rwfs or optware dir in external drive.</p>
 <hr /></tr></td>
 
 <form method=POST name=printer action="/goform/printersrv">
