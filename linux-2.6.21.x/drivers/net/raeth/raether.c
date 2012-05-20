@@ -468,6 +468,7 @@ void forward_config(struct net_device *dev)
 #ifdef CONFIG_PSEUDO_SUPPORT
 	sysRegWrite(GDMA2_FWD_CFG, regVal2);
 #endif
+#endif
 
 /*
  * 	PSE_FQ_CFG register definition -
