@@ -1093,9 +1093,6 @@ static inline BOOLEAN BuildHtcField(
 	IN PUCHAR pHeaderBufPtr)
 {
 	BOOLEAN bHTCPlus = FALSE;
-	HT_CONTROL *pHTCtrlField;
-
-
 
 	return bHTCPlus;
 }

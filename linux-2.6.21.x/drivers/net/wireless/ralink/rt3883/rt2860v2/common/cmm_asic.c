@@ -3848,21 +3848,16 @@ VOID AsicEnableIbssSync(
 	PUCHAR			ptr;
 	UINT i;
 	ULONG beaconBaseLocation = 0;
-	USHORT			beaconLen = pAd->BeaconTxWI.MPDUtotalByteCount;
 #ifdef SPECIFIC_BCN_BUF_SUPPORT	
 	unsigned long irqFlag;
 #endif // SPECIFIC_BCN_BUF_SUPPORT //
 
 #ifdef RT_BIG_ENDIAN
 	TXWI_STRUC		localTxWI;
-	
+
 	NdisMoveMemory((PUCHAR)&localTxWI, (PUCHAR)&pAd->BeaconTxWI, TXWI_SIZE);
 	RTMPWIEndianChange((PUCHAR)&localTxWI, TYPE_TXWI);
-	beaconLen = localTxWI.MPDUtotalByteCount;
 #endif // RT_BIG_ENDIAN //
-
-	DBGPRINT(RT_DEBUG_TRACE, ("--->AsicEnableIbssSync(MPDUtotalByteCount=%d, beaconLen=%d)\n", pAd->BeaconTxWI.MPDUtotalByteCount, beaconLen));
-
 
 	DBGPRINT(RT_DEBUG_TRACE, ("--->AsicEnableIbssSync(ADHOC mode. MPDUtotalByteCount = %d)\n", pAd->BeaconTxWI.MPDUtotalByteCount));
 
@@ -4603,7 +4598,9 @@ VOID AsicAddPairwiseKeyEntry(
 	PUCHAR		 pKey = pCipherKey->Key;
 	PUCHAR		 pTxMic = pCipherKey->TxMic;
 	PUCHAR		 pRxMic = pCipherKey->RxMic;
+#ifdef DEBUG
 	UCHAR		CipherAlg = pCipherKey->CipherAlg;
+#endif
 #ifdef SPECIFIC_BCN_BUF_SUPPORT
 	unsigned long irqFlag;
 #endif // SPECIFIC_BCN_BUF_SUPPORT //
@@ -4652,8 +4649,9 @@ VOID AsicAddPairwiseKeyEntry(
 #ifdef SPECIFIC_BCN_BUF_SUPPORT
 	RTMP_MAC_SHR_MSEL_UNLOCK(pAd, LOWER_SHRMEM, irqFlag);
 #endif // SPECIFIC_BCN_BUF_SUPPORT
-
+#ifdef DEBUG
 	DBGPRINT(RT_DEBUG_TRACE,("AsicAddPairwiseKeyEntry: WCID #%d Alg=%s\n",WCID, CipherName[CipherAlg]));
+#endif
 	DBGPRINT(RT_DEBUG_TRACE,("	Key = %02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x\n",
 		pKey[0],pKey[1],pKey[2],pKey[3],pKey[4],pKey[5],pKey[6],pKey[7],pKey[8],pKey[9],pKey[10],pKey[11],pKey[12],pKey[13],pKey[14],pKey[15]));
 	if (pRxMic)
@@ -4812,8 +4810,13 @@ VOID AsicUpdateWAPIPN(
 VOID AsicVCORecalibration(
 	IN PRTMP_ADAPTER pAd)
 {
-	UCHAR BbpR49 = 0, Tssi = 0;
+	UCHAR BbpR49 = 0;
+#ifdef TXBF_SUPPORT
 	UCHAR	idx;
+#endif
+#ifdef DEBUG
+	UCHAR	Tssi = 0;
+#endif
 
 #ifdef RALINK_ATE
 	if (ATE_ON(pAd))
@@ -4863,21 +4866,12 @@ VOID AsicVCORecalibration(
 		}
 #endif // TXBF_SUPPORT //
 	}
-
-	//if (pAd->RefreshTssi == 0)
-	{
-		//RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R49, &BbpR49);
-		//Tssi = BbpR49 >> 1; // bit 0 is used for update flag
-
-		//if (abs((pAd->LatchTssi) - Tssi) >= pAd->CommonCfg.VCORecalibrationThreshold)
-		{
+#ifdef DEBUG
 			DBGPRINT(RT_DEBUG_TRACE, ("AsicVCORecalibration: vcocal_en=1, TSSI difference=%ld\n", abs((pAd->LatchTssi) - Tssi)));
+#endif
 
 			RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R49, BbpR49 & 0xfe); // clear update flag
 			RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R49, &BbpR49);
-			pAd->RefreshTssi = 1;
-		}
-	}
 }
 #endif // RT3883 //
 
