@@ -1229,7 +1229,7 @@ ppp_send_frame(struct ppp *ppp, struct sk_buff *skb)
 
 #ifdef CONFIG_PPP_PREVENT_DROP_SESSION_ON_FULL_CPU_LOAD
 	/* this is simple cpu based policer need for prevent drop session at high cpu load */
-	if (ppp_cpu_load >= 2500 && proto != PPP_LCP && proto != PPP_CCP && ((jiffies - prev_jiffies) >= HZ)) {
+	if (ppp_cpu_load >= 2500 && proto != PPP_LCP && proto != PPP_CCP && ((jiffies - prev_jiffies) >= (HZ>>1))) {
 		/* get cpu load */
 		load = weighted_cpuload(0);
 		/* store current jiffies */

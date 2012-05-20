@@ -14,7 +14,6 @@ config  RT3090_AP_WDS
 	bool "WDS"
 	depends on RT3090_AP
 
-# ASUS EXT
 config  RT3090_AP_WMM_ACM
 	bool "WMM ACM"
 	depends on RT3090_AP
