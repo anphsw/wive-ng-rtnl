@@ -1058,7 +1058,7 @@ static int rt2880_eth_recv(struct net_device* dev)
 		rx_skb->dev 	  = dev;
 		rx_skb->protocol  = eth_type_trans(rx_skb,dev);
 #endif
-#if defined(CONFIG_RAETH_ACCEPT_OVERSIZED) || defined(CONFIG_RTL8367M)
+#if defined(CONFIG_RAETH_JUMBOFRAME) || if defined(CONFIG_RAETH_ACCEPT_OVERSIZED) || defined(CONFIG_RTL8367M)
 		/* For Jumbo frame/oversized pkts bug that will make system crash and restart.
 		 *  After discussion, we decide to filter out the packet lengh over MAX_RX_LENGTH.
 		 */
