@@ -22,10 +22,6 @@
 #include	"helpers.h"
 #include	"procps.h"
 
-#define _PATH_DHCP_ALIAS_FILE "/etc/dhcpd_static.conf"
-#define _PATH_IPT_ACCOUNTING_FILE "/proc/net/ipt_account/mynetwork"
-#define IPT_SHORT_ACCOUNT
-
 /*** Busybox leases.h ***/
 
 static uint64_t hton64(uint64_t v)

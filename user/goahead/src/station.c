@@ -18,8 +18,6 @@
 #include	"internet.h"
 #include	"helpers.h"
 
-#define Ndis802_11AuthMode8021x 20
-
 static int	getWPASupplicantBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int	getCACLCertList(int eid, webs_t wp, int argc, char_t **argv);
 static int	getKeyCertList(int eid, webs_t wp, int argc, char_t **argv);

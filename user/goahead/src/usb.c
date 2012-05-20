@@ -43,8 +43,8 @@ static void printersrv(webs_t wp, char_t *path, char_t *query);
 #define	LSDIR_INFO		"/tmp/lsdir"
 #define	MOUNT_INFO		"/proc/mounts"
 
-#define USB_STORAGE_PATH    "/media"
-#define USB_STORAGE_SIGN    "/media/sd"
+#define USB_STORAGE_PATH	"/media"
+#define USB_STORAGE_SIGN	"/media/sd"
 
 #define DEBUG(x) do{fprintf(stderr, #x); fprintf(stderr, ": %s\n", x); }while(0)
 

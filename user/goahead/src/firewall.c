@@ -21,14 +21,6 @@
 #include "internet.h"
 #include "helpers.h"
 
-#define _PATH_PFW           "/etc"
-#define _PATH_PFW_FILE      _PATH_PFW "/portforward"
-#define _PATH_PFW_FILE_VPN  _PATH_PFW "/portforward_vpn"
-#define _PATH_MACIP_FILE    _PATH_PFW "/macipfilter"
-#define _PATH_WEBS_FILE     _PATH_PFW "/websfilter"
-
-#define DD printf("---> %d\n", __LINE__);
-
 static void websSysFirewall(webs_t wp, char_t *path, char_t *query);
 char l7name[8192]; // export it for internet.c qos (The actual string is about 7200 bytes.)
 

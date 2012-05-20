@@ -17,17 +17,6 @@
 
 #include "oid.h"
 
-#define DD printf("%s(),  %d\n", __FUNCTION__, __LINE__);	fflush(stdout);
-#define AP_MODE
-
-#define WPS_AP_TIMEOUT_SECS		120000				// 120 seconds
-#define WPS_AP_TIMEOUT_SECS_SEND_M7	120000				// 120 seconds
-#define WPS_AP_CATCH_CONFIGURED_TIMER	100				// 0.1 sec 
-
-#define WPS_STA_TIMEOUT_SECS		120000				// 120 seconds
-#define WPS_STA_CATCH_CONFIGURED_TIMER	10				// 10 * 1000 microsecond = every 0.010 sec
-#define REGISTRAR_TIMER_MODE		0xdeadbeef			// okay, this is a magic number
-
 static int g_wps_timer_state = 0;
 int g_wsc_configured = 0;						// export for wireless.c
 									// We can't know if WSC process success or not by the variable 

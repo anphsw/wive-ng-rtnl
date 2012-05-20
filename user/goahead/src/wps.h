@@ -3,6 +3,14 @@
 
 #include "utils.h"
 
+#define WPS_AP_TIMEOUT_SECS		120000				// 120 seconds
+#define WPS_AP_TIMEOUT_SECS_SEND_M7	120000				// 120 seconds
+#define WPS_AP_CATCH_CONFIGURED_TIMER	100				// 0.1 sec
+
+#define WPS_STA_TIMEOUT_SECS		120000				// 120 seconds
+#define WPS_STA_CATCH_CONFIGURED_TIMER	10				// 10 * 1000 microsecond = every 0.010 sec
+#define REGISTRAR_TIMER_MODE		0xdeadbeef			// okay, this is a magic number
+
 #define LedReset()                  {ledWps(GPIO_WPS_LED_ORANGE, WPS_LED_RESET); ledWps(GPIO_WPS_LED_GREEN, WPS_LED_RESET);}
 #define LedInProgress()             {ledWps(GPIO_WPS_LED_ORANGE, WPS_LED_RESET); ledWps(GPIO_WPS_LED_GREEN, WPS_LED_RESET); ledWps(GPIO_WPS_LED_GREEN, WPS_LED_PROGRESS);}
 #define LedError()                  {ledWps(GPIO_WPS_LED_ORANGE, WPS_LED_RESET); ledWps(GPIO_WPS_LED_GREEN, WPS_LED_RESET); ledWps(GPIO_WPS_LED_ORANGE, WPS_LED_ERROR);}

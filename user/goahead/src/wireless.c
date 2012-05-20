@@ -20,12 +20,6 @@
 #include	"oid.h"
 #include 	"helpers.h"
 
-#define AP_MODE
-#define RTPRIV_IOCTL_E2P (SIOCIWFIRSTPRIV + 0x07) 
-#define MAX_MBSSID_NUM         8
-
-#define STF(nvram, index, flash_key)    STFs(nvram, index, #flash_key, flash_key)
-
 /*
  * RT2860
  */
@@ -1413,23 +1407,23 @@ void restart8021XDaemon(int nvram)
 }
 #endif
 
+/* STF means "Save To Flash" ...*/
+#define STF(nvram, index, flash_key)    STFs(nvram, index, #flash_key, flash_key)
+
 /* LFF means "Load From Flash" ...*/
-#define LFF(result, nvram, x, n)	\
-							do{		char tmp[128];										\
-									if(! ( x  = nvram_get(nvram, #x)) )				\
-										tmp[0] = '\0';									\
-									else{												\
-										if( getNthValueSafe(n, x, ';', tmp, 128) != -1){\
-											gstrncat(result, tmp, 4096);				\
-										}												\
-									}gstrncat(result, "\r", 4096);						\
-							}while(0)
+#define LFF(result, nvram, x, n)								\
+				do{		char tmp[128];					\
+				    if(! ( x  = nvram_get(nvram, #x)) )				\
+					tmp[0] = '\0';						\
+				    else{							\
+					if( getNthValueSafe(n, x, ';', tmp, 128) != -1){	\
+					    gstrncat(result, tmp, 4096);			\
+					}							\
+				    }gstrncat(result, "\r", 4096);				\
+				}while(0)
 
 /* Load from Web */
-#define LFW(x, y)	do{												\
-						if(! ( x = websGetVar(wp, T(#y), T(""))))	\
-							return;									\
-					}while(0)
+#define LFW(x, y) do{ if(! ( x = websGetVar(wp, T(#y), T("")))) return;	}while(0)
 
 void getSecurity(int nvram, webs_t wp, char_t *path, char_t *query)
 {

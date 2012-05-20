@@ -26,27 +26,6 @@
 #include	"wireless.h"
 #include	"helpers.h"
 
-#ifndef IF_NAMESIZE
-#define IF_NAMESIZE IFNAMSIZ
-#endif
-
-#if defined(CONFIG_RAETH_ROUTER) || defined(CONFIG_RT_3052_ESW)		/* internal ralink esw */
-#define WAN_DEF "eth2.2"
-#elif !defined(CONFIG_RAETH_GMAC2) && defined(CONFIG_MAC_TO_MAC_MODE)	/* vetisse or rtl8367m one phy */
-#define WAN_DEF "eth2.2"
-#elif defined(CONFIG_RAETH_GMAC2) && defined(CONFIG_MAC_TO_MAC_MODE)	/* vetisse or rtl8367m dual phy */
-#define WAN_DEF "eth3"
-#else 									/* MARVELL & IC+ */
-#define WAN_DEF "eth2"
-#endif
-
-#define VPN_SIG	"ppp"
-#define VPN_DEF "ppp0"
-
-#define _PATH_PROCNET_DEV      "/proc/net/dev"
-#define PATH_PPP_ROUTES        "/etc/routes_ppp_replace"
-#define PATH_LANWAN_ROUTES     "/etc/routes_replace"
-
 /*** VPN statuses ***/
 typedef struct vpn_status_t
 {
@@ -1303,9 +1282,6 @@ static int getWanGateway(int eid, webs_t wp, int argc, char_t **argv)
 	else
 		return websWrite(wp, T(""));
 }
-
-
-#define DD printf("%d\n", __LINE__);fflush(stdout);
 
 /*
  *

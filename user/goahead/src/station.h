@@ -7,6 +7,8 @@
  * $Id: station.h,v 1.3 2007-08-02 09:23:29 yy Exp $
  */
 
+#define Ndis802_11AuthMode8021x 20
+
 void formDefineStation(void);
 void initStaProfile(void);
 void initStaConnection(void);

@@ -880,6 +880,8 @@ static int getPlatform(int eid, webs_t wp, int argc, char_t **argv)
     return websWrite(wp, T("RT3052 2T2R embedded switch"));
 #elif CONFIG_RALINK_RT3352_2T2R
     return websWrite(wp, T("RT3352 2T2R embedded switch"));
+#elif defined(CONFIG_CONFIG_GE1_RGMII_AN) || defined(CONFIG_CONFIG_GE1_RGMII_AN)
+    return websWrite(wp, T("Marvel/Vetisse external gigaphy switch"));
 #elif CONFIG_RTL8367M
     return websWrite(wp, T("RTL8367M external gigaphy switch"));
 #else
@@ -899,7 +901,7 @@ static int getStationBuilt(int eid, webs_t wp, int argc, char_t **argv)
 
 static int gigaphy(int eid, webs_t wp, int argc, char_t **argv)
 {
-#if defined(CONFIG_RTL8367M)
+#if defined(CONFIG_RTL8367M) || defined(CONFIG_CONFIG_GE1_RGMII_AN) || defined(CONFIG_CONFIG_GE1_RGMII_AN)
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));
