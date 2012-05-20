@@ -8,8 +8,8 @@
 # include global
 . /etc/scripts/global.sh
 
-stop_serv="transmission vpnhelper inetd shaper crontab pppoe-relay ddns wscd dhcpd lld2d radvd syslog \
-	    zebra udpxy upnp hotplug igmp_proxy ntp samba dnsserver snmpd xupnp"
+stop_serv="transmission shaper crontab pppoe-relay ddns wscd dhcpd lld2d radvd zebra udpxy upnp \
+	    hotplug igmp_proxy ntp samba dnsserver snmpd xupnp vpnhelper syslog inetd"
 
 kill_apps="transmission-daemon smbd nmbd pppd xl2tpd udhcpd udhcpc crond lld2d igmpproxy inetd syslogd klogd \
 	    ntpclient ntpd zebra ripd inadyn ftpd scp miniupnpd \
