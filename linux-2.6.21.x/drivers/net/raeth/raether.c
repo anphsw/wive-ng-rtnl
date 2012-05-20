@@ -430,21 +430,14 @@ void forward_config(struct net_device *dev)
 #endif
 #endif
 
-#if defined(CONFIG_RAETH_JUMBOFRAME) || defined(CONFIG_RAETH_HAS_PORT5) \
-     defined(CONFIG_RAETH_ACCEPT_OVERSIZED) || defined(CONFIG_RTL8367M)
-#ifndef CONFIG_RTL8367M
-	regVal |= GDM1_JMB_EN;
-#ifdef CONFIG_PSEUDO_SUPPORT
-	regVal2 |= GDM1_JMB_EN;
-#endif
-#else /* For RTL8367M */
+#if defined(CONFIG_RAETH_ACCEPT_OVERSIZED) || defined(CONFIG_RTL8367M)
 /*
   * By default, Ralink cpu it will drop packets that size over 1514 bytes.
   * So, some packets will be drop if after insert tag or size over 1514 bytes.
   * How to solve it? Setup register to receive jumbo frame.
   * This is need for support not standart external tagging and some switches compat.
   *
-  * When enable REALTEK switch's proprietary tag support,
+  * Special case RT8637 with REALTEK switch's proprietary tag support,
   * switch will insert 8 bytes of tag data into ethernet packet.
   * If original ethernet frame size is 1514 bytes, after insert 8 bytes of data,
   * then the max packet size will be 1514 + 8 = 1522.
@@ -462,12 +455,19 @@ void forward_config(struct net_device *dev)
 	regVal2 &= ~0xf0000000; /* clear bit28-bit31 */
 	regVal2 |= (((MAX_RX_LENGTH/1024)&0xf) << 28);
 #endif
+#elif defined(CONFIG_RAETH_JUMBOFRAME) || defined(CONFIG_RAETH_HAS_PORT5)
+#ifndef CONFIG_RTL8367M
+	regVal |= GDM1_JMB_EN;
+#ifdef CONFIG_PSEUDO_SUPPORT
+	regVal2 |= GDM1_JMB_EN;
+#endif
 #endif /* CONFIG_RTL8367M */
+
+	/* set registers */
 	sysRegWrite(GDMA1_FWD_CFG, regVal);
 	sysRegWrite(CDMA_CSG_CFG, regCsg);
 #ifdef CONFIG_PSEUDO_SUPPORT
 	sysRegWrite(GDMA2_FWD_CFG, regVal2);
-#endif
 #endif
 
 /*
