@@ -77,7 +77,16 @@ case $TYPE in
 		fi
 	    fi
 	else
-	    $LOG "${ACTION} ${idVendor}:${idProduct} unknow device"
+	    $LOG "${ACTION} ${idVendor}:${idProduct} unknow serial device! Try load all serial drivers."
+	    if [ ! -d /sys/module/usbserial ]; then
+		modprobe -q usbserial
+	    fi
+	    if [ ! -d /sys/module/option ]; then
+		modprobe -q option
+	    fi
+	    if [ ! -d /sys/module/hso ]; then
+		modprobe -q hso
+	    fi
 	fi
         ;;
     *)
