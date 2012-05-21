@@ -56,6 +56,12 @@
 #include "ac_policy.h"
 #endif
 
+#if defined (CONFIG_RA_HW_NAT_WIFI) || defined (CONFIG_RA_HW_NAT_PCI)
+static int wifi_offload __read_mostly = 0;
+module_param(wifi_offload, bool, S_IRUGO);
+MODULE_PARM_DESC(wifi_offload, "Enable/Disable wifi/external if PPE NAT Offload.");
+#endif
+
 #define LAN_PORT_VLAN_ID	CONFIG_RA_HW_NAT_LAN_VLANID
 #define WAN_PORT_VLAN_ID	CONFIG_RA_HW_NAT_WAN_VLANID
 
@@ -299,6 +305,9 @@ uint32_t FoeDumpPkt(struct sk_buff * skb)
 uint32_t PpeExtIfRxHandler(struct sk_buff * skb)
 {
 #if defined  (CONFIG_RA_HW_NAT_WIFI) || defined (CONFIG_RA_HW_NAT_PCI)
+	if (!wifi_offload)
+	    return 1;
+
 	uint16_t VirIfIdx = 0;
 	uint16_t eth_type=0;
 
@@ -482,6 +491,9 @@ uint32_t PpeExtIfPingPongHandler(struct sk_buff * skb)
 	struct ethhdr *eth = NULL;
 	uint16_t VirIfIdx = 0;
 	struct net_device *dev;
+
+	if (!wifi_offload)
+	    return 1;
 
 	VirIfIdx = RemoveVlanTag(skb);
 
@@ -1499,18 +1511,22 @@ PpeSetForcePortInfo(struct sk_buff * skb,
 	    (strncmp(skb->dev->name, "apcli", 5) == 0) ||
 	    (skb->dev == DstPort[DP_PCI])) {
 #if defined  (CONFIG_RA_HW_NAT_WIFI) || defined (CONFIG_RA_HW_NAT_PCI)
+	if (wifi_offload) { /* wifi offload enabled */
 #if defined(CONFIG_HNAT_V2)
- 	if (IS_IPV4_GRP(foe_entry)) {
+ 	    if (IS_IPV4_GRP(foe_entry)) {
 		PpeSetInfoBlk2(&foe_entry->ipv4_hnapt.iblk2, 6, 0x3F, 0x3F);
-	}
+	    }
 #if defined (CONFIG_RA_HW_NAT_IPV6)
-	else if (IS_IPV6_GRP(foe_entry)) {
+	    else if (IS_IPV6_GRP(foe_entry)) {
 		PpeSetInfoBlk2(&foe_entry->ipv6_3t_route.iblk2, 6, 0x3F, 0x3F);
-	}
+	    }
 #endif
 #else
-	foe_entry->ipv4_hnapt.iblk2.dp = 0;	/* cpu */
+	    foe_entry->ipv4_hnapt.iblk2.dp = 0;	/* cpu */
 #endif
+	} else { /* wifi offload disabled */
+	    return 1;
+	}
 #else
 		return 1;
 #endif // CONFIG_RA_HW_NAT_WIFI || CONFIG_RA_HW_NAT_PCI //
@@ -1620,6 +1636,9 @@ uint32_t PpeSetExtIfNum(struct sk_buff * skb, struct FoeEntry * foe_entry)
 {
 #if defined  (CONFIG_RA_HW_NAT_WIFI) || defined  (CONFIG_RA_HW_NAT_PCI)
 	uint32_t offset = 0;
+
+	if (!wifi_offload)
+	    return 0;
 
 	/* This is ugly soultion to support WiFi pseudo interface.
 	 * Please double check the definition is the same as include/rt_linux.h 
@@ -1734,7 +1753,7 @@ uint32_t PpeSetExtIfNum(struct sk_buff * skb, struct FoeEntry * foe_entry)
 #endif // CONFIG_RA_HW_NAT_IPV6 //
 #endif // CONFIG_HNAT_V2 //
 #endif // CONFIG_RA_HW_NAT_WIFI || CONFIG_RA_HW_NAT_PCI //
-	
+
 	return 0;
 }
 
