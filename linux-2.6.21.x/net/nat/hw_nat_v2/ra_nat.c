@@ -708,7 +708,13 @@ int32_t PpeRxHandler(struct sk_buff * skb)
 		FoeDumpPkt(skb);
 	}
 
-	//the incoming packet is from PCI or WiFi interface
+	/* return trunclated packets to normal path */
+	if (!skb || (skb->len < ETH_HLEN)) {
+	    NAT_PRINT("HNAT: skb null or small len in rx path\n");
+	    return 1;
+	}
+
+	/* the incoming packet is from PCI or WiFi interface */
 	if (((FOE_MAGIC_TAG(skb) == FOE_MAGIC_PCI)
 	     || (FOE_MAGIC_TAG(skb) == FOE_MAGIC_WLAN))) {
 
@@ -1747,7 +1753,19 @@ int32_t PpeTxHandler(struct sk_buff *skb, int gmac_no)
 {
 	struct FoeEntry *foe_entry = &PpeFoeBase[FOE_ENTRY_NUM(skb)];
 
-	/* 
+	if (!skb) {
+	    NAT_PRINT("HNAT: skb is null ?\n");
+	    return 1;
+	}
+
+	/* return trunclated packets to normal path with padding */
+	if (skb->len < ETH_HLEN) {
+	    memset(FOE_INFO_START_ADDR(skb), 0, FOE_INFO_LEN);
+	    NAT_PRINT("HNAT: skb null or small len in tx path\n");
+	    return 1;
+	}
+
+	/*
 	 * Packet is interested by ALG?
 	 * Yes: Don't enter binind state
 	 * No: If flow rate exceed binding threshold, enter binding state.
