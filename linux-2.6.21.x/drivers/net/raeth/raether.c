@@ -449,11 +449,11 @@ void forward_config(struct net_device *dev)
   */
 	regVal |= GDM1_JMB_EN;
 	regVal &= ~0xf0000000; /* clear bit28-bit31 */
-	regVal |= (((MAX_RX_LENGTH/1024)&0xf) << 28);
+	regVal |= (((GDMA_MAX_RX_LENGTH/1024)&0xf) << 28);
 #ifdef CONFIG_PSEUDO_SUPPORT
 	regVal2 |= GDM1_JMB_EN;
 	regVal2 &= ~0xf0000000; /* clear bit28-bit31 */
-	regVal2 |= (((MAX_RX_LENGTH/1024)&0xf) << 28);
+	regVal2 |= (((GDMA_MAX_RX_LENGTH/1024)&0xf) << 28);
 #endif
 #elif defined(CONFIG_RAETH_JUMBOFRAME) || defined(CONFIG_RAETH_HAS_PORT5)
 	regVal |= GDM1_JMB_EN;
