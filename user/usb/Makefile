@@ -19,3 +19,7 @@ romfs:
 	$(ROMFSINST) -s /etc/scripts/storage.sh /bin/storage.sh
 	$(ROMFSINST) -s /etc/scripts/usbctrl.sh /bin/usbctrl.sh
 	$(ROMFSINST) -s /etc/scripts/prnctrl.sh /bin/prnctrl.sh
+ifdef CONFIG_USB_MODESWITCH
+	$(ROMFSINST) -S init.d/W61modemhelper /etc/rc.d/W61modemhelper
+	$(ROMFSINST) -s /etc/rc.d/W61modemhelper /etc/init.d/modemhelper
+endif

@@ -1,0 +1,155 @@
+#!/bin/sh
+
+# wait to start web and run from goahead code
+. /etc/scripts/web_wait.sh
+web_wait
+
+# constants
+LOG="logger -t modem helper"
+
+# default interface name
+MDEFIFN="ppp_modem"
+
+start() {
+    # get local params
+    get_param
+    if [ "$MODEMENABLED" = "1" ]; then
+      $LOG "Start Modemhelper"
+	# generate new chat scripts
+	if [ "$MODEMTYPE" = "0" ] then
+	    $LOG "Prepare chat-file for WCDMA/UMTS/GPRS modems"
+	    echo "ABORT '~'
+	    ABORT 'BUSY'
+	    ABORT 'NO CARRIER'
+	    ABORT 'ERROR'
+	    REPORT 'CONNECT'
+	    '' 'ATZ'
+	    SAY 'Calling WCDMA/UMTS/GPRS'
+	    '' 'AT+CGDCONT=1,\"IP\",\"$APN\"'
+	    'OK' 'ATD$DIALNUMBER'
+	    'CONNECT' ''" > $PPPDIR/peers/chat
+	elif [ "$MODEMTYPE" = "1" ] then
+	    $LOG "Prepare chat-file for CDMA/EVDO modems"
+	    echo "ABORT '~'
+	    ABORT 'BUSY'
+	    ABORT 'NO CARRIER'
+	    ABORT 'ERROR'
+	    ABORT 'NO DIAL TONE'
+	    ABORT 'NO ANSWER'
+	    ABORT 'DELAYED'
+	    REPORT 'CONNECT'
+	    '' 'ATZ'
+	    SAY 'Calling CDMA/EVDO'
+	    '' 'ATDT#777'
+	    'CONNECT' 'ATO'
+	    '' ''" > $PPPDIR/peers/chat
+	fi
+
+	$LOG "Generate ppp options file"
+	echo "debug
+	/dev/$MODEMPORT
+	$MODEMSPEED
+	crtscts
+	noipdefault
+	lock
+	ipcp-accept-local
+	lcp-echo-interval 60
+	lcp-echo-failure 6
+	$MODEMMTU
+	$MODEMMRU
+	usepeerdns
+	defaultroute
+	noauth
+	maxfail 0
+	holdoff 5
+	nodetach
+	persist
+	user $MODEMUSERNAME
+	password $MODEMPASSWORD
+	connect \"/usr/sbin/chat -s -S -V -t 60 -f $PPPDIR/peers/chat 2> $CHATLOG\"" > $OPTFILE
+
+	$LOG "Starting GSM_modem pppd..."
+	pppd call dialup $PPPDOPT & >> $CHATLOG
+    fi
+}
+
+stop() {
+ $LOG "Stop Modemhelper"
+    # first send HUP for terminate connections and try some times
+    # second send TERM for exit pppd process
+    # if process not terminated send KILL
+    # vpn client always use $vpn_if
+    if [ -f /var/run/$MDEFIFN.pid ]; then
+	pid=`cat /var/run/$MDEFIFN.pid`
+	if [ "$pid" != "" ]; then
+	    # close connection
+	    kill -SIGHUP "$pid"
+	fi
+	# terminate pppd
+	count=0
+	while kill "$pid" > /dev/null 2>&1; do
+	    if [ "$count" = "2" ]; then
+		kill -SIGKILL "$pid"  > /dev/null 2>&1
+		count=0
+		sleep 2
+	    fi
+	    count="$(($count+1))"
+	    sleep 2
+	done
+	rm -f /var/run/$MDEFIFN.pid
+    fi
+}
+
+get_param() {
+    # get local param always
+    eval `nvram_buf_get 2860 MODEMTYPE MODEMPORT MODEMSPEED MODEMUSERNAME MODEMPASSWORD MODEMDIALNUMBER MODEMMTU APN`
+
+    if [ "$MODEMTYPE" = "" ] || [ "$MODEMPORT" = "" ] || \
+	[ "$MODEMUSERNAME" = "" ] || [ "$MODEMPASSWORD" ] || [ "$MODEMDIALNUMBER" = "" ]; then
+	$LOG "One or more parametrs is NULL. Need correct this"
+    fi
+
+    # corrects parametrs
+    if [ "$MODEMTYPE" = "" ] then
+	MODEMTYPE="0"
+    fi
+    if [ "$MODEMSPEED" = "" ] then
+	MODEMSPEED=""
+    fi
+    if [ "$MODEMMTU" = "" ] || [ "$MODEMMTU" = "AUTO" ]; then
+        MODEMMRU=""
+        MODEMMTU=""
+    else
+        MODEMMRU="mru $MODEMMTU"
+        MODEMMTU="mtu $MODEMMTU"
+    fi
+    if [ "$MODEMDEBUG" != "" ]; then
+        MODEMDEBUG="debug"
+    else
+	MODEMDEBUG=""
+    fi
+
+    PPPDIR=/etc/ppp
+    OPTFILE="$PPPDIR/peers/dialup"
+    CHATLOG="/var/log/chat.log"
+    PPPDOPT="file $OPTFILE ifname $MDEFIFN $MODEMDEBUG -detach"
+}
+
+case "$1" in
+	start)
+	    start
+	    ;;
+
+	stop)
+	    stop
+	    ;;
+
+	restart)
+	    stop
+	    start
+	    ;;
+
+	*)
+	    echo $"Usage: $0 {start|stop|restart}"
+	    exit 1
+esac
