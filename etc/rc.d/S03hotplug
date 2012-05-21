@@ -26,8 +26,10 @@ start() {
 	    if [ -f /etc/scripts/prnctrl.sh ] && [ -f /bin/p910nd ]; then
 		echo "lp[0-9] 0:0 0660 */etc/scripts/prnctrl.sh" >> /etc/mdev.conf
 	    fi
-	    #echo "ttyUSB[0-9] 0:0 0660	*/etc/scripts/modem-call.sh $MDEV" >> /etc/mdev.conf
-	    #echo "ttyACM[0-9] 0:0 0660	*/etc/scripts/modem-call.sh $MDEV" >> /etc/mdev.conf
+	    if [ -f /etc/scripts/modem.sh ]; then
+		echo "ttyUSB[0-9] 0:0 0660 */etc/scripts/modem.sh $MDEV" >> /etc/mdev.conf
+		echo "ttyACM[0-9] 0:0 0660 */etc/scripts/modem.sh $MDEV" >> /etc/mdev.conf
+	    fi
 	fi
     fi
 

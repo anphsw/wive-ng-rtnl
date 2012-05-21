@@ -47,7 +47,7 @@ start() {
 
 	$LOG "Generate ppp options file"
 	echo "debug
-	/dev/$MODEMPORT
+	$MODEMPORT
 	$MODEMSPEED
 	crtscts
 	noipdefault
@@ -102,10 +102,9 @@ stop() {
 
 get_param() {
     # get local param always
-    eval `nvram_buf_get 2860 MODEMTYPE MODEMPORT MODEMSPEED MODEMUSERNAME MODEMPASSWORD MODEMDIALNUMBER MODEMMTU APN`
+    eval `nvram_buf_get 2860 MODEMTYPE MODEMSPEED MODEMUSERNAME MODEMPASSWORD MODEMDIALNUMBER MODEMMTU APN`
 
-    if [ "$MODEMTYPE" = "" ] || [ "$MODEMPORT" = "" ] || \
-	[ "$MODEMUSERNAME" = "" ] || [ "$MODEMPASSWORD" ] || [ "$MODEMDIALNUMBER" = "" ]; then
+    if [ "$MODEMTYPE" = "" ] || [ "$MODEMUSERNAME" = "" ] || [ "$MODEMPASSWORD" ] || [ "$MODEMDIALNUMBER" = "" ]; then
 	$LOG "One or more parametrs is NULL. Need correct this"
     fi
 
@@ -126,7 +125,8 @@ get_param() {
 	MODEMDEBUG=""
     fi
 
-    PPPDIR=/etc/ppp
+    PPPDIR="/etc/ppp"
+    MODEMPORT="/dev/modem"
     OPTFILE="$PPPDIR/peers/dialup"
     CHATLOG="/var/log/chat.log"
     PPPDOPT="file $OPTFILE ifname $MDEFIFN $MODEMDEBUG -detach"

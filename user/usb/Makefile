@@ -22,4 +22,6 @@ romfs:
 ifdef CONFIG_USB_MODESWITCH
 	$(ROMFSINST) -S init.d/W61modemhelper /etc/rc.d/W61modemhelper
 	$(ROMFSINST) -s /etc/rc.d/W61modemhelper /etc/init.d/modemhelper
+	$(ROMFSINST) -S modem.sh /etc/scripts/modem.sh
+	$(ROMFSINST) -s /etc/scripts/modem.sh /bin/modem.sh
 endif
