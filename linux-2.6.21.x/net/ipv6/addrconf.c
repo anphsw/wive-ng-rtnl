@@ -1208,7 +1208,7 @@ int ipv6_chk_addr(struct in6_addr *addr, struct net_device *dev, int strict)
 }
 
 static
-int ipv6_chk_same_addr(const struct in6_addr *addr, struct net_device *dev)
+bool ipv6_chk_same_addr(const struct in6_addr *addr, struct net_device *dev)
 {
 	unsigned int hash = ipv6_addr_hash(addr);
 	struct inet6_ifaddr *ifp;
