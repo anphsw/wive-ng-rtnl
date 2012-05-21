@@ -1129,6 +1129,7 @@
 57) Fix work jumbo frames with RTL8367 external swicth.<br>
 58) Raeth rework logic filter oversized packets.<br>
 59) Update transmission to 2.52 version.<br>
+60) Backport usbnet patches from upstream(need for Android/LTE devices support).<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
