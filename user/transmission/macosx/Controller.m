@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: Controller.m 13256 2012-03-18 14:33:50Z livings124 $
+ * $Id: Controller.m 13292 2012-04-28 23:56:53Z livings124 $
  * 
  * Copyright (c) 2005-2012 Transmission authors and contributors
  *
@@ -3250,11 +3250,14 @@ static void sleepCallback(void * controller, io_service_t y, natural_t messageTy
         const CGFloat minHeight = [self minWindowContentSizeAllowed]
                                     + (NSHeight([fWindow frame]) - NSHeight([[fWindow contentView] frame])); //contentView to window
         
-        if (windowSize.height < minHeight)
+        if (windowSize.height <= minHeight)
             windowSize.height = minHeight;
         else
         {
-            NSSize maxSize = [scrollView convertSize: [[fWindow screen] visibleFrame].size fromView: nil];
+            NSScreen * screen = [fWindow screen];
+            if (screen)
+            {
+                NSSize maxSize = [scrollView convertSize: [screen visibleFrame].size fromView: nil];
             if (!fStatusBar)
                 maxSize.height -= STATUS_BAR_HEIGHT;
             if (!fFilterBar)
@@ -3262,6 +3265,7 @@ static void sleepCallback(void * controller, io_service_t y, natural_t messageTy
             if (windowSize.height > maxSize.height)
                 windowSize.height = maxSize.height;
         }
+    }
     }
 
     //convert points to pixels
@@ -3301,7 +3305,6 @@ static void sleepCallback(void * controller, io_service_t y, natural_t messageTy
         [[fStatusBar view] setFrameOrigin: NSMakePoint(0.0, NSMaxY([contentView frame]))];
     }
     
-    NSRect frame;
     CGFloat heightChange = [[fStatusBar view] frame].size.height;
     if (!show)
         heightChange *= -1;
@@ -3309,8 +3312,12 @@ static void sleepCallback(void * controller, io_service_t y, natural_t messageTy
     //allow bar to show even if not enough room
     if (show && ![fDefaults boolForKey: @"AutoSize"])
     {
-        frame = [self windowFrameByAddingHeight: heightChange checkLimits: NO];
-        CGFloat change = [[fWindow screen] visibleFrame].size.height - frame.size.height;
+        NSRect frame = [self windowFrameByAddingHeight: heightChange checkLimits: NO];
+        
+        NSScreen * screen = [fWindow screen];
+        if (screen)
+        {
+            CGFloat change = [screen visibleFrame].size.height - frame.size.height;
         if (change < 0.0)
         {
             frame = [fWindow frame];
@@ -3318,6 +3325,7 @@ static void sleepCallback(void * controller, io_service_t y, natural_t messageTy
             frame.origin.y -= change;
             [fWindow setFrame: frame display: NO animate: NO];
         }
+    }
     }
     
     [self updateUI];
@@ -3336,7 +3344,7 @@ static void sleepCallback(void * controller, io_service_t y, natural_t messageTy
     const NSUInteger scrollMask = [scrollView autoresizingMask];
     [scrollView setAutoresizingMask: NSViewNotSizable];
     
-    frame = [self windowFrameByAddingHeight: heightChange checkLimits: NO];
+    NSRect frame = [self windowFrameByAddingHeight: heightChange checkLimits: NO];
     [fWindow setFrame: frame display: YES animate: animate]; 
     
     //re-enable autoresize
@@ -3418,7 +3426,11 @@ static void sleepCallback(void * controller, io_service_t y, natural_t messageTy
     if (show && ![fDefaults boolForKey: @"AutoSize"])
     {
         NSRect frame = [self windowFrameByAddingHeight: heightChange checkLimits: NO];
-        const CGFloat change = NSHeight([[fWindow screen] visibleFrame]) - NSHeight(frame);
+        
+        NSScreen * screen = [fWindow screen];
+        if (screen)
+        {
+            CGFloat change = [screen visibleFrame].size.height - frame.size.height;
         if (change < 0.0)
         {
             frame = [fWindow frame];
@@ -3426,6 +3438,7 @@ static void sleepCallback(void * controller, io_service_t y, natural_t messageTy
             frame.origin.y -= change;
             [fWindow setFrame: frame display: NO animate: NO];
         }
+    }
     }
     
     NSScrollView * scrollView = [fTableView enclosingScrollView];
@@ -4348,7 +4361,7 @@ static void sleepCallback(void * controller, io_service_t y, natural_t messageTy
 
 - (NSRect) sizedWindowFrame
 {
-    NSInteger groups = ([fDisplayedTorrents count] > 0 && ![[fDisplayedTorrents objectAtIndex: 0] isKindOfClass: [Torrent class]])
+    NSUInteger groups = ([fDisplayedTorrents count] > 0 && ![[fDisplayedTorrents objectAtIndex: 0] isKindOfClass: [Torrent class]])
                     ? [fDisplayedTorrents count] : 0;
     
     CGFloat heightChange = (GROUP_SEPARATOR_HEIGHT + [fTableView intercellSpacing].height) * groups
