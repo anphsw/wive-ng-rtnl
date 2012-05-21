@@ -110,9 +110,6 @@ get_param() {
     fi
 
     # corrects parametrs
-    if [ "$MODEMTYPE" = "" ] then
-	MODEMTYPE="0"
-    fi
     if [ "$MODEMSPEED" = "" ] then
 	MODEMSPEED=""
     fi
