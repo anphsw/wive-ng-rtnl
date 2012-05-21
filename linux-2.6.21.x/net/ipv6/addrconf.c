@@ -1222,15 +1222,16 @@ bool ipv6_chk_same_addr(const struct in6_addr *addr, struct net_device *dev)
 
 struct inet6_ifaddr * ipv6_get_ifaddr(struct in6_addr *addr, struct net_device *dev, int strict)
 {
-	struct inet6_ifaddr *ifp = NULL;
-	struct hlist_node *node;
+	struct inet6_ifaddr *ifp, *result = NULL;
 	unsigned int hash = ipv6_addr_hash(addr);
+	struct hlist_node *node;
 
 	rcu_read_lock_bh();
 	hlist_for_each_entry_rcu_bh(ifp, node, &inet6_addr_lst[hash], addr_lst) {
 		if (ipv6_addr_equal(&ifp->addr, addr)) {
 			if (dev == NULL || ifp->idev->dev == dev ||
 			    !(ifp->scope&(IFA_LINK|IFA_HOST) || strict)) {
+				result = ifp;
 				in6_ifa_hold(ifp);
 				break;
 			}
@@ -1238,7 +1239,7 @@ struct inet6_ifaddr * ipv6_get_ifaddr(struct in6_addr *addr, struct net_device *
 	}
 	rcu_read_unlock_bh();
 
-	return ifp;
+	return result;
 }
 
 int ipv6_rcv_saddr_equal(const struct sock *sk, const struct sock *sk2)
