@@ -298,7 +298,6 @@ uint32_t FoeDumpPkt(struct sk_buff * skb)
 /* push different VID for WiFi pseudo interface or USB external NIC */
 uint32_t PpeExtIfRxHandler(struct sk_buff * skb)
 {
-#if defined  (CONFIG_RA_HW_NAT_WIFI) || defined (CONFIG_RA_HW_NAT_PCI)
 	uint16_t VirIfIdx = 0;
 
 	/* PPE only can handle IPv4/VLAN/IPv6/PPP packets */
@@ -307,8 +306,6 @@ uint32_t PpeExtIfRxHandler(struct sk_buff * skb)
 	    (skb->protocol != htons(ETH_P_PPP_DISC))) {
 		return 1;
 	}
-
-#endif // CONFIG_RA_HW_NAT_WIFI || CONFIG_RA_HW_NAT_PCI //
 
 #if defined  (CONFIG_RA_HW_NAT_WIFI) || defined (CONFIG_RA_HW_NAT_PCI)
 	if (skb->dev == DstPort[DP_RA0]) {
