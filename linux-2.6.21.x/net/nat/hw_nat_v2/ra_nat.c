@@ -98,7 +98,7 @@ int RemoveVlanTag(struct sk_buff *skb)
 
 	veth = (struct vlan_ethhdr *)LAYER2_HEADER(skb);
 
-	//something wrong
+	/* something wrong */
 	if (veth->h_vlan_proto != htons(ETH_P_8021Q)) {
 		printk("HNAT: Reentry packet is untagged frame?\n");
 		return 65535;
@@ -106,21 +106,17 @@ int RemoveVlanTag(struct sk_buff *skb)
 
 	VirIfIdx = ntohs(veth->h_vlan_TCI);
 
-	if (skb_cloned(skb) || skb_shared(skb)) {
-
-		struct sk_buff *new_skb;
-		new_skb = skb_copy(skb, GFP_ATOMIC);
-		kfree_skb(skb);
-		if (!new_skb)
-			return 65535;
-		skb = new_skb;
+	/* make skb writable */
+	if (!skb_make_writable(skb, 0)) {
+	    NAT_PRINT("HNAT: no mem for remove tag or corrupted packet? (VirIfIdx=%d)\n", VirIfIdx);
+	    return 65535;
 	}
 
 	/* remove VLAN tag */
 	skb->data = LAYER2_HEADER(skb);
 	LAYER2_HEADER(skb) += VLAN_HLEN;
 	memmove(LAYER2_HEADER(skb), skb->data, ETH_ALEN * 2);
-	
+
 	skb_pull(skb, VLAN_HLEN);
 	skb->data += ETH_HLEN;	//pointer to layer3 header
 	eth = (struct ethhdr *)LAYER2_HEADER(skb);
@@ -431,9 +427,16 @@ uint32_t PpeExtIfRxHandler(struct sk_buff * skb)
 	else if (skb->dev == DstPort[DP_PCI]) {
 		VirIfIdx = DP_PCI;
 	}
-#endif	
+#endif
 	else {
-		printk("HNAT: The interface %s is unknown\n", skb->dev->name);
+		NAT_PRINT("HNAT: The interface %s is unknown\n", skb->dev->name);
+		return 1;
+	}
+
+	/* make skb writable */
+	if (!skb_make_writable(skb, 0)) {
+		NAT_PRINT("HNAT: no mem or corrupted packet for add tag? (VirIfIdx=%d)\n", VirIfIdx);
+		return 1;
 	}
 
 	//push vlan tag to stand for actual incoming interface,
