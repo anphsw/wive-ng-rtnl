@@ -98,6 +98,10 @@
 #define	INFINITY_LIFE_TIME	0xFFFFFFFF
 #define TIME_DELTA(a,b) ((unsigned long)((long)(a) - (long)(b)))
 
+#define ADDRCONF_TIMER_FUZZ_MINUS	(HZ > 50 ? HZ/50 : 1)
+#define ADDRCONF_TIMER_FUZZ		(HZ / 4)
+#define ADDRCONF_TIMER_FUZZ_MAX		(HZ)
+
 #ifdef CONFIG_SYSCTL
 static void addrconf_sysctl_register(struct inet6_dev *idev, struct ipv6_devconf *p);
 static void addrconf_sysctl_unregister(struct ipv6_devconf *p);
@@ -2920,15 +2924,15 @@ int ipv6_chk_home_addr(struct in6_addr *addr)
 
 static void addrconf_verify(unsigned long foo)
 {
+	unsigned long now, next, next_sec, next_sched;
 	struct inet6_ifaddr *ifp;
 	struct hlist_node *node;
-	unsigned long now, next;
 	int i;
 
 	rcu_read_lock_bh();
 	spin_lock(&addrconf_verify_lock);
 	now = jiffies;
-	next = now + ADDR_CHECK_FREQUENCY;
+	next = round_jiffies_up(now + ADDR_CHECK_FREQUENCY);
 
 	del_timer(&addr_chk_timer);
 
@@ -2946,7 +2950,8 @@ restart:
 				continue;
 
 			spin_lock(&ifp->lock);
-			age = (now - ifp->tstamp) / HZ;
+			/* We try to batch several events at once. */
+			age = (now - ifp->tstamp + ADDRCONF_TIMER_FUZZ_MINUS) / HZ;
 
 #ifdef CONFIG_IPV6_PRIVACY
 			regen_advance = ifp->idev->cnf.regen_max_retry *
@@ -3018,7 +3023,21 @@ restart:
 		}
 	}
 
-	addr_chk_timer.expires = time_before(next, jiffies + HZ) ? jiffies + HZ : next;
+	next_sec = round_jiffies_up(next);
+	next_sched = next;
+
+	/* If rounded timeout is accurate enough, accept it. */
+	if (time_before(next_sec, next + ADDRCONF_TIMER_FUZZ))
+		next_sched = next_sec;
+
+	/* And minimum interval is ADDRCONF_TIMER_FUZZ_MAX. */
+	if (time_before(next_sched, jiffies + ADDRCONF_TIMER_FUZZ_MAX))
+		next_sched = jiffies + ADDRCONF_TIMER_FUZZ_MAX;
+
+	ADBG((KERN_DEBUG "now = %lu, schedule = %lu, rounded schedule = %lu => %lu\n",
+	      now, next, next_sec, next_sched));
+
+	addr_chk_timer.expires = next_sched;
 	add_timer(&addr_chk_timer);
 	spin_unlock(&addrconf_verify_lock);
 	rcu_read_unlock_bh();
