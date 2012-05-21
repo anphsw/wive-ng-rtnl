@@ -759,7 +759,6 @@ int init_rt2880pci(void)
 
 #if defined(CONFIG_RALINK_RT3883)
 	printk("\n*************** Ralink PCIe RC mode *************\n");
-	mdelay(500);
 	if(RALINK_SYSCFG1 & RALINK_PCIE_RC_MODE_EN){
 		if(( RALINK_PCI1_STATUS & 0x1) == 0)
 		{
