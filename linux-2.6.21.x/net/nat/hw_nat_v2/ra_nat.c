@@ -300,6 +300,15 @@ uint32_t PpeExtIfRxHandler(struct sk_buff * skb)
 {
 #if defined  (CONFIG_RA_HW_NAT_WIFI) || defined (CONFIG_RA_HW_NAT_PCI)
 	uint16_t VirIfIdx = 0;
+	uint16_t eth_type=0;
+
+	/* check dst interface exist */
+	if (skb->dev == NULL) {
+	    NAT_PRINT("HNAT: RX: interface not exist drop this packet.\n");
+	    kfree_skb(skb);
+	    return 0;
+	}
+
 	eth_type=ntohs(skb->protocol);
 
 	/* PPE only can handle IPv4/VLAN/IPv6/PPP packets */
@@ -476,8 +485,14 @@ uint32_t PpeExtIfPingPongHandler(struct sk_buff * skb)
 
 	VirIfIdx = RemoveVlanTag(skb);
 
-	//recover to right incoming interface
+	/* recover to right incoming interface */
 	if (VirIfIdx < MAX_IF_NUM) {
+		/* check dst interface exist */
+		if (DstPort[VirIfIdx] == NULL) {
+		    NAT_PRINT("HNAT: TX: interface (VirIfIdx=%d) not exist. Drop this packet.\n", VirIfIdx);
+		    kfree_skb(skb);
+		    return 0;
+		}
 		skb->dev = DstPort[VirIfIdx];
 	} else {
 		printk("HNAT: unknow interface (VirIfIdx=%d)\n",
