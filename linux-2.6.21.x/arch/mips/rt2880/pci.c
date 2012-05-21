@@ -169,7 +169,7 @@ static int config_access(unsigned char access_type, struct pci_bus *bus,
 
 
 static int read_config_byte(struct pci_bus *bus, unsigned int devfn,
-                            int where, u8 * val)
+                            int where, u32 * val)
 {
   //u32 data;
   int ret;
@@ -180,7 +180,7 @@ static int read_config_byte(struct pci_bus *bus, unsigned int devfn,
 }
 
 static int read_config_word(struct pci_bus *bus, unsigned int devfn,
-                            int where, u16 * val)
+                            int where, u32 * val)
 {
   //u32 data;
   int ret;
@@ -200,7 +200,7 @@ static int read_config_dword(struct pci_bus *bus, unsigned int devfn,
 }
 static int
 write_config_byte(struct pci_bus *bus, unsigned int devfn, int where,
-                  u8 val)
+                  u32 val)
 {
   if (config_access(PCI_ACCESS_WRITE_1, bus, devfn, where, &val))
     return -1;
@@ -210,7 +210,7 @@ write_config_byte(struct pci_bus *bus, unsigned int devfn, int where,
 
 static int
 write_config_word(struct pci_bus *bus, unsigned int devfn, int where,
-                  u16 val)
+                  u32 val)
 {
   if (config_access(PCI_ACCESS_WRITE_2, bus, devfn, where, &val))
     return -1;
@@ -351,9 +351,9 @@ static int pci_config_read(struct pci_bus *bus, unsigned int devfn,
 {
    switch (size) {
   case 1:
-    return read_config_byte(bus, devfn, where, (u8 *) val);
+    return read_config_byte(bus, devfn, where, val);
   case 2:
-    return read_config_word(bus, devfn, where, (u16 *) val);
+    return read_config_word(bus, devfn, where, val);
   default:
     return read_config_dword(bus, devfn, where, val);
   }
@@ -455,7 +455,7 @@ void __inline__ write_config(unsigned long bus, unsigned long dev, unsigned long
 int __init pcibios_map_irq(struct pci_dev *dev, u8 slot, u8 pin)
 {
   u16 cmd;
-  u32 val;
+  unsigned long val;
   struct resource *res;
 #if 0
   int i;
@@ -483,7 +483,7 @@ int __init pcibios_map_irq(struct pci_dev *dev, u8 slot, u8 pin)
 	RALINK_PCI1_BAR0SETUP_ADDR = 0x03FF0001;	//open 3FF:64M; ENABLE
   	write_config(0, 0, 0, PCI_BASE_ADDRESS_0, MEMORY_BASE);
   	read_config(0, 0, 0, PCI_BASE_ADDRESS_0, &val);
- 	printk("BAR0 at slot 0 = %x\n", val);
+ 	printk("BAR0 at slot 0 = %lx\n", val);
  	printk("bus=0, slot = 0x%x\n", slot);
    	res = &dev->resource[0];
     	res->start = MEMORY_BASE;
