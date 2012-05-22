@@ -1130,6 +1130,7 @@
 58) Raeth rework logic filter oversized packets.<br>
 59) Update transmission to 2.52 version.<br>
 60) Backport usbnet patches from upstream(need for Android/LTE devices support).<br>
+61) Update wireless drivers for RT3x5x to 2.6.0.0 version.<br>
 
 <br>
 <b>3.0.x</b><br>
