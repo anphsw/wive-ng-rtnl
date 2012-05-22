@@ -77,10 +77,11 @@ int main(int argc, char *argv[])
 
 	if (argc < 3)
 	{
-		printf("syntax: reg [method(r/w/s/d)] [offset(Hex)] [value(hex, w only)]\n");
+		printf("syntax: reg [method(r/w/s/d/f)] [offset(Hex)] [value(hex, w only)]\n");
 		printf("read example : reg r 18\n");
 		printf("write example : reg w 18 12345678\n");
 		printf("dump example : reg d 18 \n");
+		printf("dump example [FPGA emulation]: reg f 18 \n");
 		printf("modify example : reg m [Offset:Hex] [Data:Hex] [StartBit:Decimal] [DataLen:Decimal] \n");
 		printf("To use system register: reg s 0\n");
 		printf("To use wireless register: reg s 1\n");
@@ -103,6 +104,10 @@ int main(int argc, char *argv[])
 	else if (*p == 'd')
 	{
 		method = RT_RDM_CMD_DUMP;
+	}
+	else if (*p == 'f')
+	{
+		method = RT_RDM_CMD_DUMP_FPGA_EMU;
 	}
 	else if (*p == 'w')
 	{
@@ -155,7 +160,7 @@ int main(int argc, char *argv[])
 	}
 	else
 	{
-		printf("method must be either r or w\n");
+		printf("method must be either r p d f w s m\n");
 		return 0;
 	}
 	
