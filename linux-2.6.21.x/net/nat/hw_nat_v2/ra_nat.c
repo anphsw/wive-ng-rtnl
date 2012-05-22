@@ -305,11 +305,12 @@ uint32_t FoeDumpPkt(struct sk_buff * skb)
 uint32_t PpeExtIfRxHandler(struct sk_buff * skb)
 {
 #if defined  (CONFIG_RA_HW_NAT_WIFI) || defined (CONFIG_RA_HW_NAT_PCI)
-	if (!wifi_offload)
-	    return 1;
-
 	uint16_t VirIfIdx = 0;
 	uint16_t eth_type=0;
+	struct ethhdr *eth = NULL;
+
+	if (!wifi_offload)
+	    return 1;
 
 	/* check dst interface exist */
 	if (skb->dev == NULL) {
@@ -317,6 +318,13 @@ uint32_t PpeExtIfRxHandler(struct sk_buff * skb)
 	    kfree_skb(skb);
 	    return 0;
 	}
+
+#if defined (CONFIG_RALINK_RT3052) || defined(HWNAT_SPKIP_MCAST_BCAST)
+	/* skip bcast/mcast traffic PPE. WiFi bug ? */
+	eth = eth_hdr(skb);
+	if(is_multicast_ether_addr(eth->h_dest))
+	    return 1;
+#endif
 
 	eth_type=ntohs(skb->protocol);
 
@@ -1891,7 +1899,11 @@ void PpeSetFoeEbl(uint32_t FoeEbl)
 	/* FOE engine need to handle unicast/multicast/broadcast flow */
 	if (FoeEbl == 1) {
 		PpeFlowSet |= (BIT_IPV4_NAPT_EN | BIT_IPV4_NAT_EN);
+#if defined(HWNAT_SPKIP_MCAST_BCAST)
+		PpeFlowSet |= (BIT_FUC_FOE);
+#else
 		PpeFlowSet |= (BIT_FUC_FOE | BIT_FMC_FOE | BIT_FBC_FOE);
+#endif
 #if defined (CONFIG_HNAT_V2)
 		PpeFlowSet |= (BIT_IPV4_NAT_FRAG_EN); //ip fragment
 #if defined(CONFIG_RA_HW_NAT_IPV6)

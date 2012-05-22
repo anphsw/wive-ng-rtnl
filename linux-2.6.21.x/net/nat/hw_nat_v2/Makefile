@@ -11,3 +11,5 @@ hw_nat-objs += ac_policy.o ac_ioctl.o
 hw_nat-objs += mtr_policy.o mtr_ioctl.o
 endif
 
+#uncomment this flag if you want to send bcast/mcast to cpu instead PPE
+EXTRA_CFLAGS += -DHWNAT_SPKIP_MCAST_BCAST
