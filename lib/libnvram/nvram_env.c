@@ -410,6 +410,10 @@ char *nvram_bufget(int index, char *name)
 	//btw, we don't return NULL anymore!
 	LIBNV_PRINT("bufget %d '%s'->''(empty) Warning!\n", index, name);
 
+#ifdef CONFIG_KERNEL_NVRAM
+	FREE(nvr.value);
+#endif
+
 	return "";
 }
 

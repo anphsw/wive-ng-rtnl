@@ -64,7 +64,11 @@ int flash_read_mac(char *buf)
 		fprintf(stderr, "Could not open mtd device\n");
 		return -1;
 	}
+#if ! defined (NO_WIFI_SOC)
 	lseek(fd, 0x2E, SEEK_SET);
+#else
+	lseek(fd, 0xE006, SEEK_SET);
+#endif
 	ret = read(fd, buf, 6);
 	close(fd);
 	return ret;
