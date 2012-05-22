@@ -1135,6 +1135,7 @@
 <b>3.0.x</b><br>
 1) Start migrate to v4.0.1.0 SDK
 2) Replace old hw_nat module v0.92 to v2.01.<br>
+3) Update raeth driver from new sdk.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
