@@ -1869,7 +1869,11 @@ static void __devexit ra_nand_remove(void)
 	}
 }
 
+#ifndef CONFIG_RT2880_ROOTFS_IN_FLASH
+fs_initcall(ra_nand_init);
+#else
 rootfs_initcall(ra_nand_init);
+#endif
 module_exit(ra_nand_remove);
 
 MODULE_LICENSE("GPL");

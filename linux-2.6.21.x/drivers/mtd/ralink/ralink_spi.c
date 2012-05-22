@@ -1445,7 +1445,11 @@ int raspi_init(void)
 	return raspi_prob();
 }
 
+#ifdef CONFIG_RT2880_ROOTFS_IN_FLASH
+rootfs_initcall(raspi_init);
+#else
 fs_initcall(raspi_init);
+#endif
 module_exit(raspi_remove);
 
 MODULE_LICENSE("GPL");

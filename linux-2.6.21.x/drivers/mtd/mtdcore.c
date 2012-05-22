@@ -447,7 +447,11 @@ static void __exit cleanup_mtd(void)
 		remove_proc_entry( "mtd", NULL);
 }
 
+#ifndef CONFIG_RT2880_ROOTFS_IN_FLASH
 fs_initcall(init_mtd);
+#else
+module_init(init_mtd);
+#endif
 module_exit(cleanup_mtd);
 
 #endif /* CONFIG_PROC_FS */
