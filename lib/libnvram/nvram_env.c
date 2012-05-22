@@ -333,7 +333,7 @@ char *nvram_bufget(int index, char *name)
 	nvr.size  = MAX_VALUE_LEN;
 	nvr.index = index;
 	nvr.name  = name;
-	
+
 	fd = open(NV_DEV, O_RDONLY);
 	if ( fd < 0 )
 	{
@@ -345,7 +345,7 @@ char *nvram_bufget(int index, char *name)
 	while (1)
 	{
 		nvr.value = malloc(nvr.size);
-		
+
 		if (nvr.value == NULL)
 		{
 			perror("malloc");
@@ -356,7 +356,7 @@ char *nvram_bufget(int index, char *name)
 		int result = ioctl(fd, RALINK_NVRAM_IOCTL_GET, &nvr);
 		if (result >= 0)
 			break;
-		
+
 		if (errno != EOVERFLOW) // Error is not caused by not-enough-space?
 		{
 			perror("ioctl");
@@ -364,7 +364,7 @@ char *nvram_bufget(int index, char *name)
 			close(fd);
 			return "";
 		}
-		
+
 		// Calculate new buffer size
 		free(nvr.value);
 		nvr.size += ((MAX_VALUE_LEN - nvr.size % MAX_VALUE_LEN) % MAX_VALUE_LEN);

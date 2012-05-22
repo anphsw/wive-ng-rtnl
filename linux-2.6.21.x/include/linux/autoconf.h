@@ -1,7 +1,7 @@
 /*
  * Automatically generated C config: don't edit
  * Linux kernel version: 2.6.21.16
- * Wed May 23 04:03:46 2012
+ * Wed May 23 05:11:59 2012
  */
 #define AUTOCONF_INCLUDED
 #define CONFIG_VLAN_8021Q_DOUBLE_TAG 1

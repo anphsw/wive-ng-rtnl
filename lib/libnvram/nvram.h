@@ -87,8 +87,8 @@ typedef struct block_s {
 } block_t;
 
 #define MAX_NAME_LEN 128
-#define MAX_VALUE_LEN 1024
-#define MAX_PERMITTED_VALUE_LEN  4096
+#define MAX_VALUE_LEN (ENV_BLK_SIZE * 5)
+#define MAX_PERMITTED_VALUE_LEN  (MAX_VALUE_LEN * 2)
 typedef struct nvram_ioctl_s {
 	int index;
 	int ret;
