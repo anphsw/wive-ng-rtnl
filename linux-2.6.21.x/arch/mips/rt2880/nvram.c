@@ -7,6 +7,10 @@
 #include <linux/fs.h>
 #include "nvram.h"
 
+/* cleanup and build config part */
+#define AUTO_REBUILD_NVRAM
+#define NEED_REINIT 0xFDEAD
+
 extern int ra_mtd_write_nm(char *name, loff_t to, size_t len, const u_char *buf);
 extern int ra_mtd_read_nm(char *name, loff_t from, size_t len, u_char *buf);
 
@@ -32,7 +36,7 @@ int nvram_clear(int index);
 /* /dev/nvram major number */
 static int ralink_nvram_major = 251;
 /* eneable debug */
-char ra_nvram_debug = 0;
+char ra_nvram_debug = 1;
 
 static DECLARE_MUTEX(nvram_sem);
 
@@ -217,7 +221,7 @@ struct file_operations ralink_nvram_fops =
 
 int ra_nvram_init(void)
 {
-	int i, r = 0;
+	int i, r = 0, ret = 0;
 
 	printk("NVRAM: Kernel NVRAM start init.\n");
 	r = register_chrdev(ralink_nvram_major, RALINK_NVRAM_DEVNAME,
@@ -233,10 +237,17 @@ int ra_nvram_init(void)
 
 	init_MUTEX(&nvram_sem);
 
+reinit:
 	down(&nvram_sem);
 	for (i = 0; i < FLASH_BLOCK_NUM; i++)
-		init_nvram_block(i);
+		ret=init_nvram_block(i);
+#ifdef AUTO_REBUILD_NVRAM
+		if (ret == NEED_REINIT) {  /* try flash cleanup */
+		    goto reinit;
+		}
+#endif
 	up(&nvram_sem);
+
 
 	return 0;
 }
@@ -248,7 +259,7 @@ static int init_nvram_block(int index)
 	char *p, *q;
 
 	i = index;
-	
+
 	RANV_PRINT("--> nvram_init %d\n", index);
 	RANV_CHECK_INDEX(-1);
 
@@ -273,10 +284,16 @@ static int init_nvram_block(int index)
 		if (nv_crc32(0, fb[i].env.data, len) != fb[i].env.crc) {
 			printk("NVRAM: Particion %x Bad CRC %x, start cleanup.\n", i, (unsigned int)fb[i].env.crc);
 			memset(fb[index].env.data, 0, len);
-			fb[i].valid = 1;
-			fb[i].dirty = 0;
-			/* try flash cleanup */
+			fb[i].valid = 0;
+			fb[i].dirty = 1;
+#ifdef AUTO_REBUILD_NVRAM
+			up(&nvram_sem); /* unlock before clear */
 			nvram_clear(i);
+			printk("NVRAM: Particion %x cleanup OK. Reinit.\n", i);
+			return NEED_REINIT;
+#else
+			return -1;
+#endif
 		}
 
 		//parse env to cache
