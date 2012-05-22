@@ -8,9 +8,7 @@ raeth-objs += ra_qos.o
 endif
 
 ifeq ($(CONFIG_ETHTOOL),y)
-ifeq ($(CONFIG_RAETH_ROUTER),y)
 raeth-objs += ra_ethtool.o
-endif
 endif
 
 ifeq ($(CONFIG_RALINK_RT3052_MP2),y)

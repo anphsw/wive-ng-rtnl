@@ -141,13 +141,13 @@ static int pending_recv;
 static struct PDMA_rxdesc	*rx_ring;
 static unsigned long tx_ring_full=0;
 
-#if defined (CONFIG_ETHTOOL) && defined (CONFIG_RAETH_ROUTER)
+#ifdef CONFIG_ETHTOOL
 #include "ra_ethtool.h"
 extern struct ethtool_ops	ra_ethtool_ops;
 #ifdef CONFIG_PSEUDO_SUPPORT
 extern struct ethtool_ops	ra_virt_ethtool_ops;
 #endif // CONFIG_PSEUDO_SUPPORT //
-#endif // (CONFIG_ETHTOOL //
+#endif // CONFIG_ETHTOOL //
 
 #ifdef CONFIG_RALINK_VISTA_BASIC
 int is_switch_175c = 1;
@@ -2361,7 +2361,7 @@ void ra2880_setup_dev_fptable(struct net_device *dev)
 #endif
 #endif
 
-#if defined (CONFIG_ETHTOOL) && defined (CONFIG_RAETH_ROUTER)
+#ifdef CONFIG_ETHTOOL
 	dev->ethtool_ops	= &ra_ethtool_ops;
 #endif
 	dev->watchdog_timeo	= TX_TIMEOUT;
@@ -2785,7 +2785,7 @@ void RAETH_Init_PSEUDO(pEND_DEVICE pAd, struct net_device *net_dev)
 	dev->mtu = DEFAULT_MTU;
 #endif
 
-#if defined (CONFIG_ETHTOOL) && defined (CONFIG_RAETH_ROUTER)
+#ifdef CONFIG_ETHTOOL
 	dev->ethtool_ops = &ra_virt_ethtool_ops;
     // init mii structure
 	pPseudoAd->mii_info.dev = dev;

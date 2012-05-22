@@ -268,7 +268,7 @@ void ra2880Mac2AddressSet(unsigned char p[6])
  */
 void ethtool_init(struct net_device *dev)
 {
-#if defined (CONFIG_ETHTOOL) && defined (CONFIG_RAETH_ROUTER)
+#ifdef CONFIG_ETHTOOL
 	END_DEVICE *ei_local = netdev_priv(dev);
 
 	// init mii structure
@@ -418,8 +418,8 @@ void dump_reg()
 	printk("RX_MAX_CNT0    : 0x%08x\n", sysRegRead(RX_MAX_CNT0));	
 	printk("RX_CALC_IDX0   : 0x%08x\n", sysRegRead(RX_CALC_IDX0));
 	printk("RX_DRX_IDX0    : 0x%08x\n", sysRegRead(RX_DRX_IDX0));
-	
-#if defined (CONFIG_ETHTOOL) && defined (CONFIG_RAETH_ROUTER)
+
+#ifdef CONFIG_ETHTOOL
 	printk("The current PHY address selected by ethtool is %d\n", get_current_phy_address());
 #endif
 
@@ -666,7 +666,7 @@ int EswCntRead(void)
 
 #endif
 
-#if defined (CONFIG_ETHTOOL) && defined (CONFIG_RAETH_ROUTER)
+#ifdef CONFIG_ETHTOOL
 /*
  * proc write procedure
  */
@@ -727,7 +727,7 @@ int debug_proc_init(void)
 
     if ((procGmac = create_proc_entry(PROCREG_GMAC, 0, procRegDir))){
 	 procGmac->read_proc = (read_proc_t*)&RegReadMain;
-#if defined (CONFIG_ETHTOOL) && defined (CONFIG_RAETH_ROUTER)
+#ifdef CONFIG_ETHTOOL
 	 procGmac->write_proc = (write_proc_t*)&change_phyid;
 #endif
 	}

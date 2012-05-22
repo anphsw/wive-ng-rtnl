@@ -131,7 +131,7 @@ typedef struct _PSEUDO_ADAPTER {
     struct net_device *RaethDev;
     struct net_device *PseudoDev;
     struct net_device_stats stat;
-#if defined (CONFIG_ETHTOOL) && defined (CONFIG_RAETH_ROUTER)
+#ifdef CONFIG_ETHTOOL
 	struct mii_if_info	mii_info;
 #endif
 
