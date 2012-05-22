@@ -16,6 +16,8 @@
  */
 
 #include <linux/init.h>
+#include <linux/kernel.h>
+#include <linux/version.h>
 #include <linux/module.h>
 #include <linux/device.h>
 #include <linux/interrupt.h>
@@ -525,12 +527,15 @@ static int raspi_read_devid(u8 *rxbuf, int n_rx)
 	return retval;
 }
 
+#ifdef SP_4B_MODE
 static int raspi_read_rg(u8 *val, u8 opcode)
 {
 	ssize_t retval;
 	u8 code = opcode;
+#ifdef COMMAND_MODE
 	u32 user;
-	
+#endif
+
 	if (!val)
 		printk("NULL pointer\n");
 
@@ -548,7 +553,10 @@ static int raspi_write_rg(u8 *val, u8 opcode)
 {
 	ssize_t retval;
 	u8 code = opcode;
-	u32 user, dr;
+	u32 dr;
+#ifdef COMMAND_MODE
+	u32 user;
+#endif
 
 	if (!val)
 		printk("NULL pointer\n");
@@ -565,8 +573,7 @@ static int raspi_write_rg(u8 *val, u8 opcode)
 	ra_outl(RT2880_SPI_DMA, dr);
 	return 0;
 }
-
-
+#endif
 
 /*
  * Read the status register, returning its value in the location
@@ -1444,48 +1451,3 @@ module_exit(raspi_remove);
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Mike Lavender");
 MODULE_DESCRIPTION("MTD SPI driver for ST M25Pxx flash chips");
-
-#else
-
-static void raspi_destroy(struct mtd_info *mtd)
-{
-	int			status;
-
-	/* Clean up MTD stuff. */
-	status = del_mtd_partitions(&flash->mtd);
-	if (status == 0) {
-		kfree(flash);
-	}
-}
-
-static struct mtd_chip_driver raspi_chipdrv = {
-        .probe   = raspi_probe,
-        .destroy = raspi_destroy,
-        .name    = "raspi_probe",
-        .module  = THIS_MODULE
-};
-
-static int __init raspi_init(void)
-{
-	register_mtd_chip_driver(&raspi_chipdrv);
-	
-        raspi_chipdrv.probe(NULL);
-
-	return 0;
-}
-
-static void __exit raspi_exit(void)
-{
-    unregister_mtd_chip_driver(&raspi_chipdrv);
-}
-
-
-
-module_init(raspi_init);
-module_exit(raspi_exit);
-
-MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Steven Liu");
-MODULE_DESCRIPTION("MTD SPI driver for Ralink flash chips");
-
-#endif

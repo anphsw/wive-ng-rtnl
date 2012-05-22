@@ -1,6 +1,6 @@
-#define DEBUG
+#include <linux/kernel.h>
+#include <linux/version.h>
 #include <linux/device.h>
-#undef DEBUG
 #include <linux/slab.h>
 #include <linux/mtd/mtd.h>
 #include <linux/pci.h>
@@ -13,6 +13,8 @@
 #include <linux/sched.h>
 #include "ralink_nand.h"
 #include "ralink-flash.h"
+
+#undef DEBUG
 
 #define READ_STATUS_RETRY	1000
 

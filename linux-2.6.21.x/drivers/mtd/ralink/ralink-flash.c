@@ -12,6 +12,7 @@
 #include <linux/types.h>
 #include <linux/init.h>
 #include <linux/kernel.h>
+#include <linux/version.h>
 #include <linux/err.h>
 #include <linux/delay.h>
 #include <linux/sched.h>
