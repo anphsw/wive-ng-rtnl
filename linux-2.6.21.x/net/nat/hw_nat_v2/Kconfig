@@ -72,7 +72,7 @@ config  RA_HW_NAT_TBL_8K
 config  RA_HW_NAT_TBL_16K
         bool "16K"
 	depends on RA_HW_NAT
-	
+
 endchoice
 
 config  HNAT_V2
@@ -84,7 +84,7 @@ choice
 	prompt "Hash Algorithm"
 	depends on RA_HW_NAT
 	default RA_HW_NAT_HASH1
-	
+
 config  RA_HW_NAT_HASH0
         bool "Hash0-Simple"
 	depends on RA_HW_NAT
@@ -316,7 +316,7 @@ config  RA_HW_NAT_NTU_DLTA
 	default 5
 	help
 	Set ageout time for Non-TCP/UDP entry
-	
+
 config  RA_HW_NAT_IPV6
         bool "IPv6 Acceleration"
 	depends on RA_HW_NAT && !(RALINK_RT2880 || RALINK_RT3052)
