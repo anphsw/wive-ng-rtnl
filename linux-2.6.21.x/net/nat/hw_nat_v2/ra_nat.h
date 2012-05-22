@@ -17,6 +17,8 @@
 #include "foe_fdb.h"
 #include <linux/ip.h>
 #include <linux/ipv6.h>
+#include <linux/etherdevice.h>
+#include <linux/if_ether.h>
 
 /*
  * TYPEDEFS AND STRUCTURES
