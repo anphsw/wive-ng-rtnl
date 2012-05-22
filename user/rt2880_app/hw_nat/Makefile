@@ -4,12 +4,12 @@ HWNAT_OBJS = hw_nat.o hwnat_api.o util.o
 AC_OBJS = ac.o ac_api.o util.o
 ACL_OBJS = acl.o acl_api.o util.o
 MTR_OBJS = mtr.o mtr_api.o util.o
-
+CONF_H  = $(ROOTDIR)/$(LINUXDIR)/include/linux/autoconf.h
 CFLAGS += -I$(ROOTDIR)/$(LINUXDIR)/net/nat/hw_nat 
 
 all: $(EXEC)
 
-hw_nat: $(HWNAT_OBJS)
+hw_nat: $(HWNAT_OBJS) $(CONF_H)
 	$(CC) $(LDFLAGS) -o $@ $(HWNAT_OBJS) 
 
 acl: $(ACL_OBJS)
@@ -22,10 +22,11 @@ mtr: $(MTR_OBJS)
 	$(CC) $(LDFLAGS) -o $@ $(MTR_OBJS) 
 
 romfs:
-	$(ROMFSINST) -S /bin/hw_nat
-	$(ROMFSINST) -S -e CONFIG_RALINKAPP_HWNAT_ACL /bin/acl
-	$(ROMFSINST) -S -e CONFIG_RALINKAPP_HWNAT_AC /bin/ac
-	$(ROMFSINST) -S -e CONFIG_RALINKAPP_HWNAT_MTR /bin/mtr
+	$(ROMFSINST) /bin/hw_nat
+	$(ROMFSINST) /bin/acl
+	$(ROMFSINST) /bin/ac
+	$(ROMFSINST) /bin/mtr
 
 clean:
 	-rm -f $(EXEC) *.elf *.gdb *.o
+
