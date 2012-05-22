@@ -22,7 +22,7 @@
 #include "ra_nat.h"
 
 unsigned char bind_dir = BIDIRECTION;
-int DebugLevel = 1;
+int DebugLevel = 0;
 
 #if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,35)
 long HwNatIoctl(struct file *file, unsigned int cmd, unsigned long arg)
