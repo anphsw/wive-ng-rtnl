@@ -46,7 +46,6 @@ module_param(ranfc_verify, int, 0644);
  *************************************************************/
 static int nfc_wait_ready(int snooze_ms);
 
-#if 0
 unsigned int nfc_addr_translate(struct ra_nand_chip *ra, unsigned int addr, unsigned int *column, unsigned int *row)
 {
 	unsigned int _col, _row;
@@ -83,9 +82,6 @@ static int nfc_chip_reset(void)
 
 }
 
-int nand_addrlen = 5;
-int is_nand_page_2048 = 0;
-const unsigned int nand_size_map[2][3] = {{25, 30, 30}, {20, 27, 30}};
 
 
 /** 
@@ -167,7 +163,7 @@ static int _nfc_read_status(char *status)
 	return 0;
 
 }
-#endif
+
 /**
  * @return !0, chip protect.
  * @return 0, chip not protected.
@@ -182,10 +178,11 @@ static int nfc_check_wp(void)
 	int ret;
 
 	ret = _nfc_read_status(&result);
-	//FIXME, if ret < 0
+	//fixme, if ret < 0
 
 	return !(result & NAND_STATUS_WP);
 #endif
+
 }
 
 #if !defined CONFIG_NOT_SUPPORT_RB
@@ -197,6 +194,7 @@ static int nfc_device_ready(void)
 {
 	/* Check the ready  */
 	return !!(ra_inl(NFC_STATUS) & 0x04);
+
 }
 #endif
 
@@ -207,19 +205,12 @@ static int nfc_device_ready(void)
  */
 static int _ra_nand_pull_data(char *buf, int len, int use_gdma)
 {
-#ifdef RW_DATA_BY_BYTE
 	char *p = buf;
-#else
-	__u32 *p = (__u32 *)buf;
-#endif
-	int retry, int_st;
-	unsigned int ret_data;
-	int ret_size;
+	int retry;
 
 	// receive data by use_gdma 
 	if (use_gdma) { 
-		//if (_ra_nand_dma_pull((unsigned long)p, len)) {
-		if (1) {
+		if (_ra_nand_dma_pull((unsigned long)p, len)) {
 			printk("%s: fail \n", __func__);
 			len = -1; //return error
 		}
@@ -231,12 +222,15 @@ static int _ra_nand_pull_data(char *buf, int len, int use_gdma)
 	retry = READ_STATUS_RETRY;
 	// no gdma
 	while (len > 0) {
-		int_st = ra_inl(NFC_INT_ST);
+		int int_st = ra_inl(NFC_INT_ST);
 		if (int_st & INT_ST_RX_BUF_RDY) {
+			unsigned int ret_data;
+			int ret_size;
 
+#if 1 //!fixme, need optimal by endian
 			ret_data = ra_inl(NFC_DATA);
 			ra_outl(NFC_INT_ST, INT_ST_RX_BUF_RDY); 
-#ifdef RW_DATA_BY_BYTE
+				
 			ret_size = sizeof(unsigned int);
 			ret_size = min(ret_size, len);
 			len -= ret_size;
@@ -246,36 +240,21 @@ static int _ra_nand_pull_data(char *buf, int len, int use_gdma)
 				ret_data >>= 8; 
 			}
 #else
-			ret_size = min(len, 4);
-			len -= ret_size;
-			if (ret_size == 4)
-				*p++ = ret_data;
-			else {
-				__u8 *q = (__u8 *)p;
-				while (ret_size-- > 0) {
-					*q++ = ret_data & 0x0ff;
-					ret_data >>= 8; 
-				}
-				p = (__u32 *)q;
-			}
+			//optimaize
 #endif
-			retry = READ_STATUS_RETRY;
 		}
 		else if (int_st & INT_ST_ND_DONE) {
+			printk("!! done\n");
 			break;
 		}
 		else {
-			udelay(1);
+			ndelay(2);
 			if (retry-- < 0) 
 				break;
 		}
 	}
 
-#ifdef RW_DATA_BY_BYTE
-	return (int)(p - buf);
-#else
-	return ((int)p - (int)buf);
-#endif
+	return (p-buf);
 }
 
 /**
@@ -330,11 +309,7 @@ static int _ra_nand_push_data(char *buf, int len, int use_gdma)
 	}
 
 	
-#ifdef RW_DATA_BY_BYTE
 	return (int)(p-buf);
-#else
-	return ((int)p - (int)buf);
-#endif
 
 }
 
@@ -463,21 +438,42 @@ static int nfc_erase_block(struct ra_nand_chip *ra, int row_addr)
 
 }
 
-static inline int _nfc_read_raw_data(int cmd1, int cmd2, int bus_addr, int bus_addr2, int conf, char *buf, int len, int flags)
+static inline int _nfc_write_raw_data(int cmd1, int cmd3, int bus_addr, int conf, char *buf, int len, int flags)
 {
 	int ret;
 
 	CLEAR_INT_STATUS();
 	ra_outl(NFC_CMD1, cmd1); 	
-	ra_outl(NFC_CMD2, cmd2);
+	ra_outl(NFC_CMD3, cmd3); 	
 	ra_outl(NFC_ADDR, bus_addr);
-#if defined (CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_RT6855A) || \
-    defined (CONFIG_RALINK_RT6352) || defined (CONFIG_RALINK_RT71100)	
-	ra_outl(NFC_ADDR2, bus_addr2);
-#endif	
 	ra_outl(NFC_CONF, conf); 
 
-	ret = _ra_nand_pull_data(buf, len, 0);
+	ret = _ra_nand_push_data(buf, len, flags & FLAG_USE_GDMA);
+	if (ret != len) {
+		ra_dbg("%s: ret:%x (%x) \n", __func__, ret, len);
+		return NAND_STATUS_FAIL;
+	}
+
+	ret = nfc_wait_ready(1); //write wait 1ms
+	if (ret & NAND_STATUS_FAIL) {
+		printk("%s: fail \n", __func__);
+		return NAND_STATUS_FAIL;
+	}
+
+	return 0;
+}
+
+
+static inline int _nfc_read_raw_data(int cmd1, int bus_addr, int conf, char *buf, int len, int flags)
+{
+	int ret;
+
+	CLEAR_INT_STATUS();
+	ra_outl(NFC_CMD1, cmd1); 	
+	ra_outl(NFC_ADDR, bus_addr);
+	ra_outl(NFC_CONF, conf); 
+
+	ret = _ra_nand_pull_data(buf, len, flags & FLAG_USE_GDMA);
 	if (ret != len) {
 		ra_dbg("%s: ret:%x (%x) \n", __func__, ret, len);
 		return NAND_STATUS_FAIL;
@@ -493,34 +489,6 @@ static inline int _nfc_read_raw_data(int cmd1, int cmd2, int bus_addr, int bus_a
 	return 0;
 }
 
-static inline int _nfc_write_raw_data(int cmd1, int cmd3, int bus_addr, int bus_addr2, int conf, char *buf, int len, int flags)
-{
-	int ret;
-
-	CLEAR_INT_STATUS();
-	ra_outl(NFC_CMD1, cmd1); 	
-	ra_outl(NFC_CMD3, cmd3); 	
-	ra_outl(NFC_ADDR, bus_addr);
-#if defined (CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_RT6855A) || \
-    defined (CONFIG_RALINK_RT6352) || defined (CONFIG_RALINK_RT71100)	
-	ra_outl(NFC_ADDR2, bus_addr2);
-#endif	
-	ra_outl(NFC_CONF, conf); 
-
-	ret = _ra_nand_push_data(buf, len, 0);
-	if (ret != len) {
-		ra_dbg("%s: ret:%x (%x) \n", __func__, ret, len);
-		return NAND_STATUS_FAIL;
-	}
-
-	ret = nfc_wait_ready(1); //write wait 1ms
-	if (ret & NAND_STATUS_FAIL) {
-		printk("%s: fail \n", __func__);
-		return NAND_STATUS_FAIL;
-	}
-
-	return 0;
-}
 
 /**
  * @return !0: fail
@@ -528,8 +496,8 @@ static inline int _nfc_write_raw_data(int cmd1, int cmd3, int bus_addr, int bus_
  */
 int nfc_read_oob(struct ra_nand_chip *ra, int page, unsigned int offs, char *buf, int len, int flags)
 {
-	unsigned int cmd1 = 0, cmd2 = 0, conf = 0;
-	unsigned int bus_addr = 0, bus_addr2 = 0;
+	unsigned int cmd1 = 0, conf = 0;
+	unsigned int bus_addr = 0;
 	unsigned int ecc_en;
 	int use_gdma;
 	int status;
@@ -548,17 +516,8 @@ int nfc_read_oob(struct ra_nand_chip *ra, int page, unsigned int offs, char *buf
 	ecc_en = flags & FLAG_ECC_EN;
 	bus_addr = (page << (CFG_COLUMN_ADDR_CYCLE*8)) | (offs & ((1<<CFG_COLUMN_ADDR_CYCLE*8) - 1));
 	
-	if (is_nand_page_2048) {
-		bus_addr += CFG_PAGESIZE;
-		bus_addr2 = page >> (CFG_COLUMN_ADDR_CYCLE*8);
-		cmd1 = 0x0;
-		cmd2 = 0x30;
-		conf = 0x000511| ((CFG_ADDR_CYCLE)<<16) | (len << 20); 
-	}
-	else {
 	cmd1 = 0x50;
-		conf = 0x000141| ((CFG_ADDR_CYCLE)<<16) | (len << 20); 
-	}
+	conf = 0x000141| ((CFG_ADDR_CYCLE)<<16) | ((len) << 20); 
 	if (ecc_en) 
 		conf |= (1<<3); 
 	if (use_gdma)
@@ -567,7 +526,7 @@ int nfc_read_oob(struct ra_nand_chip *ra, int page, unsigned int offs, char *buf
 	ra_dbg("%s: cmd1: %x, bus_addr: %x, conf: %x, len:%x, flag:%x\n", 
 	       __func__, cmd1, bus_addr, conf, len, flags);
 
-	status = _nfc_read_raw_data(cmd1, cmd2, bus_addr, bus_addr2, conf, buf, len, flags);
+	status = _nfc_read_raw_data(cmd1, bus_addr, conf, buf, len, flags);
 	if (status & NAND_STATUS_FAIL) {
 		printk("%s: fail\n", __func__);
 		return -EIO;
@@ -576,6 +535,7 @@ int nfc_read_oob(struct ra_nand_chip *ra, int page, unsigned int offs, char *buf
 	return 0; 
 }
 
+
 /**
  * @return !0: fail
  * @return 0: OK
@@ -583,7 +543,7 @@ int nfc_read_oob(struct ra_nand_chip *ra, int page, unsigned int offs, char *buf
 int nfc_write_oob(struct ra_nand_chip *ra, int page, unsigned int offs, char *buf, int len, int flags)
 {
 	unsigned int cmd1 = 0, cmd3=0, conf = 0;
-	unsigned int bus_addr = 0, bus_addr2 = 0;
+	unsigned int bus_addr = 0;
 	int use_gdma;
 	int status;
 
@@ -597,18 +557,9 @@ int nfc_write_oob(struct ra_nand_chip *ra, int page, unsigned int offs, char *bu
 	use_gdma = flags & FLAG_USE_GDMA;
 	bus_addr = (page << (CFG_COLUMN_ADDR_CYCLE*8)) | (offs & ((1<<CFG_COLUMN_ADDR_CYCLE*8) - 1));
 	
-	if (is_nand_page_2048) {
-		cmd1 = 0x80;
-		cmd3 = 0x10;
-		bus_addr += CFG_PAGESIZE;
-		bus_addr2 = page >> (CFG_COLUMN_ADDR_CYCLE*8);
-		conf = 0x001123 | ((CFG_ADDR_CYCLE)<<16) | ((len) << 20);
-	}
-	else {
 	cmd1 = 0x08050;
 	cmd3 = 0x10;
 	conf = 0x001223 | ((CFG_ADDR_CYCLE)<<16) | ((len) << 20); 
-	}
 	if (use_gdma)
 		conf |= (1<<2);
 
@@ -616,7 +567,7 @@ int nfc_write_oob(struct ra_nand_chip *ra, int page, unsigned int offs, char *bu
 	ra_dbg("%s: cmd1: %x, cmd3: %x bus_addr: %x, conf: %x, len:%x\n", 
 	       __func__, cmd1, cmd3, bus_addr, conf, len);
 
-	status = _nfc_write_raw_data(cmd1, cmd3, bus_addr, bus_addr2, conf, buf, len, flags);
+	status = _nfc_write_raw_data(cmd1, cmd3, bus_addr, conf, buf, len, flags);
 	if (status & NAND_STATUS_FAIL) {
 		printk("%s: fail \n", __func__);
 		return -EIO;
@@ -637,22 +588,22 @@ int nfc_ecc_verify(struct ra_nand_chip *ra, char *buf, int page, int mode)
 	char *p, *e;
 	int ecc;
 	
-	//ra_dbg("%s, page:%x mode:%d\n", __func__, page, mode);
+//	printk("%s, page:%x mode:%d\n", __func__, page, mode);
 
 	if (mode == FL_WRITING) {
-		int len = CFG_PAGESIZE + CFG_PAGE_OOBSIZE;
+		int len = (1<<ra->page_shift) + (1<<ra->oob_shift);
 		int conf = 0x000141| ((CFG_ADDR_CYCLE)<<16) | (len << 20); 
 		conf |= (1<<3); //(ecc_en) 
-		//conf |= (1<<2); // (use_gdma)
+		conf |= (1<<2); // (use_gdma)
 
 		p = ra->readback_buffers;
-		ret = nfc_read_page(ra, ra->readback_buffers, page, FLAG_ECC_EN); 
+		ret = nfc_read_page(ra, ra->readback_buffers, page, FLAG_USE_GDMA | FLAG_ECC_EN); 
 		if (ret == 0) 
 			goto ecc_check;
 		
 		//FIXME, double comfirm
 		printk("%s: read back fail, try again \n",__func__);
-		ret = nfc_read_page(ra, ra->readback_buffers, page, FLAG_ECC_EN); 
+		ret = nfc_read_page(ra, ra->readback_buffers, page, FLAG_USE_GDMA | FLAG_ECC_EN); 
 		if (ret != 0) {
 			printk("\t%s: read back fail agian \n",__func__);
 			goto bad_block;
@@ -665,91 +616,20 @@ int nfc_ecc_verify(struct ra_nand_chip *ra, char *buf, int page, int mode)
 		return -2;
 
 ecc_check:
-	p += CFG_PAGESIZE;
-	if (!is_nand_page_2048) {
+	p += (1<<ra->page_shift);
 	ecc = ra_inl(NFC_ECC); 
 	if (ecc == 0) //clean page.
 		return 0;
 	e = (char*)&ecc;
 	for (i=0; i<CONFIG_ECC_BYTES; i++) {
 		int eccpos = CONFIG_ECC_OFFSET + i;
-			if (*(p + eccpos) != (char)0xff)
-				break;
-			if (i == CONFIG_ECC_BYTES - 1) {
-				printk("skip ecc 0xff at page %x\n", page);
-				return 0;
-			}
-		}
-		for (i=0; i<CONFIG_ECC_BYTES; i++) {
-			int eccpos = CONFIG_ECC_OFFSET + i;
-			if (*(p + eccpos) != *(e + i)) {
-				printk("%s mode:%s, invalid ecc, page: %x read:%x %x %x, ecc:%x \n",
-						__func__, (mode == FL_READING)?"read":"write", page,	
-						*(p+ CONFIG_ECC_OFFSET), *(p+ CONFIG_ECC_OFFSET+1), *(p+ CONFIG_ECC_OFFSET +2), ecc);
-				return -1;
-			}
-		}
-	}
-#if defined (CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_RT6855A) || \
-    defined (CONFIG_RALINK_RT6352) || defined (CONFIG_RALINK_RT71100)	
-	else {
-		int ecc2, ecc3, ecc4, qsz;
-		char *e2, *e3, *e4;
-		ecc = ra_inl(NFC_ECC_P1);
-		ecc2 = ra_inl(NFC_ECC_P2);
-		ecc3 = ra_inl(NFC_ECC_P3);
-		ecc4 = ra_inl(NFC_ECC_P4);
-		e = (char*)&ecc;
-		e2 = (char*)&ecc2;
-		e3 = (char*)&ecc3;
-		e4 = (char*)&ecc4;
-		qsz = CFG_PAGE_OOBSIZE / 4;
-		if (ecc == 0 && ecc2 == 0 && ecc3 == 0 && ecc4 == 0)
-			return 0;
-		for (i=0; i<CONFIG_ECC_BYTES; i++) {
-			int eccpos = CONFIG_ECC_OFFSET + i;
-			if (*(p + eccpos) != (char)0xff)
-				break;
-			else if (*(p + eccpos + qsz) != (char)0xff)
-				break;
-			else if (*(p + eccpos + qsz*2) != (char)0xff)
-				break;
-			else if (*(p + eccpos + qsz*3) != (char)0xff)
-				break;
-			if (i == CONFIG_ECC_BYTES - 1) {
-				printk("skip ecc 0xff at page %x\n", page);
-				return 0;
-			}
-		}
-		for (i=0; i<CONFIG_ECC_BYTES; i++) {
-			int eccpos = CONFIG_ECC_OFFSET + i;
 		if (*(p + eccpos) != *(e + i)) {
 			printk("%s mode:%s, invalid ecc, page: %x read:%x %x %x, ecc:%x \n",
 			       __func__, (mode == FL_READING)?"read":"write", page,	
 			       *(p+ CONFIG_ECC_OFFSET), *(p+ CONFIG_ECC_OFFSET+1), *(p+ CONFIG_ECC_OFFSET +2), ecc);
 			return -1;
 		}
-			if (*(p + eccpos + qsz) != *(e2 + i)) {
-				printk("%s mode:%s, invalid ecc2, page: %x read:%x %x %x, ecc2:%x \n",
-						__func__, (mode == FL_READING)?"read":"write", page,
-						*(p+CONFIG_ECC_OFFSET+qsz), *(p+ CONFIG_ECC_OFFSET+1+qsz), *(p+ CONFIG_ECC_OFFSET+2+qsz), ecc2);
-				return -1;
-			}
-			if (*(p + eccpos + qsz*2) != *(e3 + i)) {
-				printk("%s mode:%s, invalid ecc3, page: %x read:%x %x %x, ecc3:%x \n",
-						__func__, (mode == FL_READING)?"read":"write", page,
-						*(p+CONFIG_ECC_OFFSET+qsz*2), *(p+ CONFIG_ECC_OFFSET+1+qsz*2), *(p+ CONFIG_ECC_OFFSET+2+qsz*2), ecc3);
-				return -1;
-			}
-			if (*(p + eccpos + qsz*3) != *(e4 + i)) {
-				printk("%s mode:%s, invalid ecc4, page: %x read:%x %x %x, ecc4:%x \n",
-						__func__, (mode == FL_READING)?"read":"write", page,
-						*(p+CONFIG_ECC_OFFSET+qsz*3), *(p+ CONFIG_ECC_OFFSET+1+qsz*3), *(p+ CONFIG_ECC_OFFSET+2+qsz*3), ecc4);
-				return -1;
 	}
-		}
-	}
-#endif	
 	return 0;
 
 bad_block:
@@ -785,9 +665,9 @@ int nfc_ecc_verify(struct ra_nand_chip *ra, char *buf, int page, int mode)
 	ra_dbg("%s, page:%x mode:%d\n", __func__, page, mode);
 
 	if (mode == FL_WRITING) { // read back and memcmp
-		ret = nfc_read_page(ra, ra->readback_buffers, page, FLAG_NONE); 
+		ret = nfc_read_page(ra, ra->readback_buffers, page, FLAG_USE_GDMA); 
 		if (ret != 0) //double comfirm
-			ret = nfc_read_page(ra, ra->readback_buffers, page, FLAG_NONE); 
+			ret = nfc_read_page(ra, ra->readback_buffers, page, FLAG_USE_GDMA); 
 
 		if (ret != 0) {
 			printk("%s: mode:%x read back fail \n", __func__, mode);
@@ -849,18 +729,19 @@ int nfc_ecc_verify(struct ra_nand_chip *ra, char *buf, int page, int mode)
  */
 int nfc_read_page(struct ra_nand_chip *ra, char *buf, int page, int flags)
 {
-	unsigned int cmd1 = 0, cmd2 = 0, conf = 0;
-	unsigned int bus_addr = 0, bus_addr2 = 0;
+	unsigned int cmd1 = 0, conf = 0;
+	unsigned int bus_addr = 0;
 	unsigned int ecc_en;
 	int use_gdma;
-	int size, offs;
+	int pagesize, size, offs;
 	int status = 0;
 
 	use_gdma = flags & FLAG_USE_GDMA;
 	ecc_en = flags & FLAG_ECC_EN;
 
-	page = page & (CFG_CHIPSIZE - 1); // chip boundary
-	size = CFG_PAGESIZE + CFG_PAGE_OOBSIZE; //add oobsize
+	page = page & ((1<<ra->chip_shift)-1); // chip boundary
+	pagesize = (1 << ra->page_shift);
+	size = pagesize + (1<<ra->oob_shift); //add oobsize
 	offs = 0;
 
 	while (size > 0) {
@@ -871,14 +752,7 @@ int nfc_read_page(struct ra_nand_chip *ra, char *buf, int page, int flags)
 		len = size;
 #endif		
 		bus_addr = (page << (CFG_COLUMN_ADDR_CYCLE*8)) | (offs & ((1<<CFG_COLUMN_ADDR_CYCLE*8)-1)); 
-		if (is_nand_page_2048) {
-			bus_addr2 = page >> (CFG_COLUMN_ADDR_CYCLE*8);
-			cmd1 = 0x0;
-			cmd2 = 0x30;
-			conf = 0x000511| ((CFG_ADDR_CYCLE)<<16) | (len << 20); 
-		}
-		else {
-			if (offs & ~(CFG_PAGESIZE-1))
+		if (unlikely((offs & ~((1<<ra->page_shift)-1))))
 			cmd1 = 0x50;
 		else if (offs & ~((1<<CFG_COLUMN_ADDR_CYCLE*8)-1))
 			cmd1 = 0x01;
@@ -886,7 +760,6 @@ int nfc_read_page(struct ra_nand_chip *ra, char *buf, int page, int flags)
 			cmd1 = 0;
 
 		conf = 0x000141| ((CFG_ADDR_CYCLE)<<16) | (len << 20); 
-		}
 #if !defined (WORKAROUND_RX_BUF_OV)
 		if (ecc_en) 
 			conf |= (1<<3); 
@@ -894,7 +767,7 @@ int nfc_read_page(struct ra_nand_chip *ra, char *buf, int page, int flags)
 		if (use_gdma)
 			conf |= (1<<2);
 
-		status = _nfc_read_raw_data(cmd1, cmd2, bus_addr, bus_addr2, conf, buf+offs, len, flags);
+		status = _nfc_read_raw_data(cmd1, bus_addr, conf, buf+offs, len, flags);
 		if (status & NAND_STATUS_FAIL) {
 			printk("%s: fail \n", __func__);
 			return -EIO;
@@ -919,6 +792,7 @@ int nfc_read_page(struct ra_nand_chip *ra, char *buf, int page, int flags)
 	}
 
 	return 0;
+
 }
 
 
@@ -929,10 +803,10 @@ int nfc_read_page(struct ra_nand_chip *ra, char *buf, int page, int flags)
 int nfc_write_page(struct ra_nand_chip *ra, char *buf, int page, int flags)
 {
 	unsigned int cmd1 = 0, cmd3, conf = 0;
-	unsigned int bus_addr = 0, bus_addr2 = 0;
+	unsigned int bus_addr = 0;
 	unsigned int ecc_en;
 	int use_gdma;
-	int size;
+	int pagesize;
 	char status;
 	uint8_t *oob = buf + (1<<ra->page_shift);
 
@@ -942,31 +816,24 @@ int nfc_write_page(struct ra_nand_chip *ra, char *buf, int page, int flags)
 	oob[ra->badblockpos] = 0xff;	//tag as good block.
 	ra->buffers_page = -1; //cached
 
-	page = page & (CFG_CHIPSIZE-1); //chip boundary
-	size = CFG_PAGESIZE + CFG_PAGE_OOBSIZE; //add oobsize
+	page = page & ((1<<ra->chip_shift)-1); // chip boundary
+	pagesize = (1 << ra->page_shift);
+	pagesize = pagesize + (1<<ra->oob_shift);
 	bus_addr = (page << (CFG_COLUMN_ADDR_CYCLE*8)); //write_page always write from offset 0.
 	
-	if (is_nand_page_2048) {
-	bus_addr2 = page >> (CFG_COLUMN_ADDR_CYCLE*8);
-		cmd1 = 0x80;
-		cmd3 = 0x10;
-		conf = 0x001123| ((CFG_ADDR_CYCLE)<<16) | (size << 20); 
-	}
-	else {
 	cmd1 = 0x8000;
 	cmd3 = 0x10;
-	conf = 0x001223| ((CFG_ADDR_CYCLE)<<16) | (size << 20); 
-}
+	conf = 0x001223| ((CFG_ADDR_CYCLE)<<16) | (pagesize << 20); 
 	if (ecc_en) 
-		conf |= (1<<3); //enable ecc
+		conf |= (1<<3); 
 	if (use_gdma)
 		conf |= (1<<2);
 
 	// set NFC
 	ra_dbg("nfc_write_page: cmd1: %x, cmd3: %x bus_addr: %x, conf: %x, len:%x\n", 
-	       cmd1, cmd3, bus_addr, conf, size);
+	       cmd1, cmd3, bus_addr, conf, pagesize);
 
-	status = _nfc_write_raw_data(cmd1, cmd3, bus_addr, bus_addr2, conf, buf, size, flags);
+	status = _nfc_write_raw_data(cmd1, cmd3, bus_addr, conf, buf, pagesize, flags);
 	if (status & NAND_STATUS_FAIL) {
 		printk("%s: fail \n", __func__);
 		return -EIO;
@@ -978,12 +845,9 @@ int nfc_write_page(struct ra_nand_chip *ra, char *buf, int page, int flags)
 		if (status != 0) {
 			printk("%s: ecc_verify fail: ret:%x \n", __func__, status);
 			oob[ra->badblockpos] = 0x33;
-			page -= page % (CFG_BLOCKSIZE/CFG_PAGESIZE);
+			page -= page % (CFG_BLOCKSIZE/pagesize);
 			printk("create a bad block at page %x\n", page);
-			if (!is_nand_page_2048)
 			status = nfc_write_oob(ra, page, ra->badblockpos, oob+ra->badblockpos, 1, flags);
-			else
-				status = _nfc_write_raw_data(cmd1, cmd3, bus_addr, bus_addr2, conf, buf, size, flags);
 			if (status == 0)
 				printk("bad block acknowledged, please write again\n");
 			else
@@ -995,6 +859,7 @@ int nfc_write_page(struct ra_nand_chip *ra, char *buf, int page, int flags)
 
 	ra->buffers_page = page; //cached
 	return 0;
+
 }
 
 
@@ -1464,7 +1329,7 @@ static int nand_do_write_ops(struct ra_nand_chip *ra, loff_t to,
 		memset(ra->buffers, 0x0ff, pagesize);
 		//fixme, should we reserve the original content?
 		if (ops->mode == MTD_OOB_AUTO) {
-			nfc_read_oob(ra, page, 0, ra->buffers, len, FLAG_NONE);
+			nfc_read_oob(ra, page, 0, ra->buffers, len, FLAG_USE_GDMA);
 		}
 		//prepare buffers
 		nand_write_oob_buf(ra, ra->buffers, oob, ooblen, ops->mode, ops->ooboffs);
@@ -1583,12 +1448,12 @@ static int nand_do_read_ops(struct ra_nand_chip *ra, loff_t from,
 
 		page = (int)((addr & ((1<<ra->chip_shift)-1)) >> ra->page_shift); 
 
-		ret = nfc_read_page(ra, ra->buffers, page, FLAG_VERIFY | 
+		ret = nfc_read_page(ra, ra->buffers, page, FLAG_USE_GDMA | FLAG_VERIFY | 
 				    ((ops->mode == MTD_OOB_RAW || ops->mode == MTD_OOB_PLACE) ? 0: FLAG_ECC_EN ));
 		//FIXME, something strange here, some page needs 2 more tries to guarantee read success.
 		if (ret) {
 			printk("read again:\n");
-			ret = nfc_read_page(ra, ra->buffers, page, FLAG_VERIFY | 
+			ret = nfc_read_page(ra, ra->buffers, page, FLAG_USE_GDMA | FLAG_VERIFY | 
 					    ((ops->mode == MTD_OOB_RAW || ops->mode == MTD_OOB_PLACE) ? 0: FLAG_ECC_EN ));
 
 			if (ret) {
@@ -1820,7 +1685,7 @@ static int ramtd_nand_block_isbad(struct mtd_info *mtd, loff_t offs)
 {
 
 	/* Check for invalid offset */
-	//ra_dbg("%s: \n", __func__);
+	ra_dbg("%s: \n", __func__);
 
 	if (offs > mtd->size)
 		return -EINVAL;
@@ -1855,7 +1720,7 @@ static int ramtd_nand_block_markbad(struct mtd_info *mtd, loff_t ofs)
 
 static struct nand_ecclayout ra_oob_layout = {
 	.eccbytes = CONFIG_ECC_BYTES,
-	.eccpos = {5, 6, 7},
+	.eccpos = {CONFIG_ECC_OFFSET, CONFIG_ECC_OFFSET+1, CONFIG_ECC_OFFSET+2},
 	.oobfree = {
 		 {.offset = 0, .length = 4},
 		 {.offset = 8, .length = 8},
@@ -1866,11 +1731,10 @@ static struct nand_ecclayout ra_oob_layout = {
 	// 5th byte is bad-block flag.
 };
 
-static int __init ra_nand_init(void) 
+int __devinit ra_nand_init(void) 
 {
 	struct ra_nand_chip *ra;
-	int alloc_size, bbt_size, buffers_size, reg;
-	unsigned char chip_mode = 12;
+	int alloc_size, bbt_size, buffers_size;
 #ifdef CONFIG_ROOTFS_IN_FLASH_NO_PADDING
 	loff_t offs;
 	struct __image_header {
@@ -1921,9 +1785,6 @@ static int __init ra_nand_init(void)
 	ra->oob_shift		= CONFIG_OOBSIZE_PER_PAGE_BIT;
 	ra->erase_shift		= (CONFIG_PAGE_SIZE_BIT + CONFIG_NUMPAGE_PER_BLOCK_BIT);
 	ra->badblockpos		= CONFIG_BAD_BLOCK_POS;
-	ra_oob_layout.eccpos[0] = CONFIG_ECC_OFFSET;
-	ra_oob_layout.eccpos[1] = CONFIG_ECC_OFFSET + 1;
-	ra_oob_layout.eccpos[2] = CONFIG_ECC_OFFSET + 2;
 	ra->oob			= &ra_oob_layout;
 	ra->buffers_page	= -1;
 
