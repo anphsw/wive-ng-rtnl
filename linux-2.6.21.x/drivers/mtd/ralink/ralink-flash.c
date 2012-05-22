@@ -105,6 +105,24 @@ int ra_check_flash_type(void)
 	boot_from = BOOT_FROM_NOR;
     }else if(strcmp(Id,"RT6855")==0) {
 	boot_from = BOOT_FROM_SPI;
+		}else if(strcmp(Id,"RT6352")==0) {
+	chip_mode = syscfg & 0xF;
+	switch(chip_mode)
+	{
+	case 0:
+	case 2:
+	case 3:
+		boot_from = BOOT_FROM_SPI;
+		break;
+	case 1:
+	case 10:
+	case 11:
+	case 12:
+		boot_from = BOOT_FROM_NAND;
+		break;	
+	}	
+	}else if(strcmp(Id,"RT71100")==0) {
+	boot_from = BOOT_FROM_SPI;
     } else {
 	printk("%s: %s is not supported\n",__FUNCTION__, Id);
     }
@@ -374,7 +392,7 @@ int ra_mtd_read_nm(char *name, loff_t from, size_t len, u_char *buf)
 	return ret;
 }
 
-rootfs_initcall(rt2880_mtd_init);
+fs_initcall(rt2880_mtd_init);
 module_exit(rt2880_mtd_cleanup);
 
 EXPORT_SYMBOL(ra_mtd_write_nm);
