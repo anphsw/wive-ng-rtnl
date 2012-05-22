@@ -194,7 +194,7 @@ config RALINK_PCMCOMPDIV
 	depends on RALINK_PCM
 	depends on RALINK_RT3352 || RALINK_RT5350 || RALINK_RT3883 || RALINK_RT6855
 	range 0 512
-	default "196"
+	default "136"
 	---help---
 	Set PCM clock dividor fraction part value based on SoC internal clock (40Mhz).
 
