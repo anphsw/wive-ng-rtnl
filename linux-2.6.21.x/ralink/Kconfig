@@ -101,11 +101,10 @@ endmenu
 # WIFI
 #######
 menu "AP(STA) MODE Ralink RT3xxx wireless driver."
-if RALINK_RT3052
+if RALINK_RT3052 || RALINK_RT3352
     source "drivers/net/wireless/ralink/rt305x/rt2860v2_ap/Kconfig"
     source "drivers/net/wireless/ralink/rt305x/rt2860v2_sta/Kconfig"
 endif
-
 if RALINK_RT3883
     source "drivers/net/wireless/ralink/rt3883/rt2860v2_ap/Kconfig"
     source "drivers/net/wireless/ralink/rt3883/rt2860v2_sta/Kconfig"

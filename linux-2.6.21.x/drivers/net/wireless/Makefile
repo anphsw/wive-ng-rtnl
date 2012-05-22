@@ -48,6 +48,10 @@ ifdef CONFIG_RALINK_RT3052
 obj-$(CONFIG_RT2860V2_AP)       += ralink/rt305x/rt2860v2_ap/
 obj-$(CONFIG_RT2860V2_STA)      += ralink/rt305x/rt2860v2_sta/
 endif
+ifdef CONFIG_RALINK_RT3352
+obj-$(CONFIG_RT2860V2_AP)       += ralink/rt305x/rt2860v2_ap/
+obj-$(CONFIG_RT2860V2_STA)      += ralink/rt305x/rt2860v2_sta/
+endif
 ifdef CONFIG_RALINK_RT3883
 obj-$(CONFIG_RT2860V2_AP)       += ralink/rt3883/rt2860v2_ap/
 obj-$(CONFIG_RT2860V2_STA)      += ralink/rt3883/rt2860v2_sta/

@@ -578,7 +578,7 @@ static int getWlanM2UBuilt(int eid, webs_t wp, int argc, char_t **argv)
 
 static int getGreenAPBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
-#ifdef CONFIG_RT2860V2_AP_GREENAP
+#ifdef CONFIG_RT2860V2_GREEN_AP
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));
