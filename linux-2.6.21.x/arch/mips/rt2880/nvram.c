@@ -20,6 +20,8 @@ static block_t fb[FLASH_BLOCK_NUM] = {
 };
 
 /* Prototypes */
+static int init_nvram_block(int index);
+static int ra_nvram_close(int index);
 char const *nvram_get(int index, char *name);
 int const nvram_getall(int index, char *buf);
 
@@ -151,13 +153,15 @@ int ralink_nvram_ioctl(struct inode *inode, struct file *file, unsigned int req,
 	case RALINK_NVRAM_IOCTL_GET:
 		nvr = (nvram_ioctl_t __user *)arg;
 		p = nvram_get(nvr->index, nvr->name);
+		if (p == NULL)
+			p = "";
 
 		len = strlen(p) + 1;
 		if (nvr->size < len) {
 			nvr->size = len;
 			return -EOVERFLOW;
 		}
-		
+
 		if (copy_to_user(nvr->value, p, strlen(p) + 1))
 			return -EFAULT;
 		break;
@@ -213,10 +217,7 @@ struct file_operations ralink_nvram_fops =
 
 int ra_nvram_init(void)
 {
-	unsigned long from;
-	int i, j, len;
-	char *p, *q;
-	int r = 0;
+	int i, r = 0;
 
 	printk("NVRAM: Kernel NVRAM start init.\n");
 	r = register_chrdev(ralink_nvram_major, RALINK_NVRAM_DEVNAME,
@@ -230,7 +231,30 @@ int ra_nvram_init(void)
 		printk(KERN_DEBUG "NVRAM: got dynamic major %d\n", r);
 	}
 
-	for (i = 0; i < FLASH_BLOCK_NUM; i++) {
+	init_MUTEX(&nvram_sem);
+
+	down(&nvram_sem);
+	for (i = 0; i < FLASH_BLOCK_NUM; i++)
+		init_nvram_block(i);
+	up(&nvram_sem);
+
+	return 0;
+}
+
+static int init_nvram_block(int index)
+{
+	unsigned long from;
+	int i, j, len;
+	char *p, *q;
+
+	i = index;
+	
+	RANV_PRINT("--> nvram_init %d\n", index);
+	RANV_CHECK_INDEX(-1);
+
+	if (fb[index].valid)
+		return -EINVAL;
+
 		//read crc from flash
 		from = fb[i].flash_offset;
 		len = sizeof(fb[i].env.crc);
@@ -248,7 +272,8 @@ int ra_nvram_init(void)
 		//check crc
 		if (nv_crc32(0, fb[i].env.data, len) != fb[i].env.crc) {
 			printk("NVRAM: Particion %x Bad CRC %x, start cleanup.\n", i, (unsigned int)fb[i].env.crc);
-			fb[i].valid = 0;
+			memset(fb[index].env.data, 0, len);
+			fb[i].valid = 1;
 			fb[i].dirty = 0;
 			/* try flash cleanup */
 			nvram_clear(i);
@@ -289,38 +314,56 @@ int ra_nvram_init(void)
 		printk("NVRAM: Particion %x CRC %x OK.\n", i, (unsigned int)fb[i].env.crc);
 		fb[i].valid = 1;
 		fb[i].dirty = 0;
-	}
 
-	init_MUTEX(&nvram_sem);
-
-	printk("NVRAM: initialized\n");
 	return 0;
 }
 
 static void ra_nvram_exit(void)
 {
-	int i, index;
+	int index;
 
 	for (index = 0; index < FLASH_BLOCK_NUM; index++) {
-		if (!fb[index].valid)
-			continue;
 		if (fb[index].dirty)
 			nvram_commit(index);
 
-		//free env
-		KFREE(fb[index].env.data);
-
-		//free cache
-		for (i = 0; i < MAX_CACHE_ENTRY; i++) {
-			KFREE(fb[index].cache[i].name);
-			KFREE(fb[index].cache[i].value);
-		}
+		ra_nvram_close(index);
 
 		fb[index].valid = 0;
+
+		//free env
+		kfree(fb[index].env.data);
 	}
 
 	unregister_chrdev(ralink_nvram_major, RALINK_NVRAM_DEVNAME);
 }
+
+static int ra_nvram_close(int index)
+{
+	int i;
+
+	RANV_PRINT("--> nvram_close %d\n", index);
+	RANV_CHECK_INDEX(-1);
+
+	if (!fb[index].valid)
+		return 0;
+	down(&nvram_sem);
+
+	//free cache
+	for (i = 0; i < MAX_CACHE_ENTRY; i++) {
+		if (fb[index].cache[i].name) {
+			kfree(fb[index].cache[i].name);
+			fb[index].cache[i].name = NULL;
+		}
+		if (fb[index].cache[i].value) {
+			kfree(fb[index].cache[i].value);
+			fb[index].cache[i].value = NULL;
+		}
+	}
+	
+	up(&nvram_sem);
+	return 0;
+}
+
 /*
  * return idx (0 ~ iMAX_CACHE_ENTRY)
  * return -1 if no such value or empty cache
@@ -349,10 +392,17 @@ int nvram_clear(int index)
 	RANV_PRINT("--> nvram_clear %d\n", index);
 	RANV_CHECK_INDEX(-1);
 
+	ra_nvram_close(index);
+
 	down(&nvram_sem);
 
 	//construct all 1s env block
 	len = fb[index].flash_max_len - sizeof(fb[index].env.crc);
+	if (!fb[index].env.data) {
+		fb[index].env.data = (char *)kmalloc(len, GFP_KERNEL);
+		if (!fb[index].env.data)
+			return -ENOMEM;
+	}
 	memset(fb[index].env.data, 0xFF, len);
 
 	//calculate crc
@@ -385,9 +435,9 @@ int nvram_commit(int index)
 	char *p;
 
 	RANV_CHECK_INDEX(-1);
-	RANV_CHECK_VALID(-1);
 
 	down(&nvram_sem);
+	RANV_CHECK_VALID();
 
 	if (!fb[index].dirty) {
 		RANV_PRINT("nothing to be committed\n");
@@ -397,6 +447,11 @@ int nvram_commit(int index)
 
 	//construct env block
 	len = fb[index].flash_max_len - sizeof(fb[index].env.crc);
+	if (!fb[index].env.data) {
+		fb[index].env.data = (char *)kmalloc(len, GFP_KERNEL);
+		if (!fb[index].env.data)
+			return -ENOMEM;
+	}
 	memset(fb[index].env.data, 0, len);
 	p = fb[index].env.data;
 	for (i = 0; i < MAX_CACHE_ENTRY; i++) {
@@ -440,10 +495,12 @@ int nvram_set(int index, char *name, char *value)
 {
 	int idx;
 
+	RANV_PRINT("--> nvram_set %d %s=%s\n", index, name, value);
+
 	RANV_CHECK_INDEX(-1);
-	RANV_CHECK_VALID(-1);
 
 	down(&nvram_sem);
+	RANV_CHECK_VALID();
 
 	idx = cache_idx(index, name);
 
@@ -480,10 +537,12 @@ char const *nvram_get(int index, char *name)
 	int idx;
 	static char const *ret;
 
-	RANV_CHECK_INDEX("");
-	RANV_CHECK_VALID("");
+	RANV_PRINT("--> nvram_get %d %s\n", index, name);
+
+	RANV_CHECK_INDEX(NULL);
 
 	down(&nvram_sem);
+	RANV_CHECK_VALID();
 
 	idx = cache_idx(index, name);
 	if (-1 != idx) {
@@ -502,7 +561,7 @@ char const *nvram_get(int index, char *name)
 
 	up(&nvram_sem);
 
-	return "";
+	return NULL;
 }
 
 int const nvram_getall(int index, char *buf) 
@@ -510,12 +569,17 @@ int const nvram_getall(int index, char *buf)
 	int i, len;
 	char *p;
 
-	RANV_CHECK_INDEX_ALL("");
-	RANV_CHECK_VALID_ALL("");
+	RANV_CHECK_INDEX(-1);
 
 	down(&nvram_sem);
+	RANV_CHECK_VALID();
 
 	len = fb[index].flash_max_len - sizeof(fb[index].env.crc);
+	if (!fb[index].env.data) {
+		fb[index].env.data = (char *)kmalloc(len, GFP_KERNEL);
+		if (!fb[index].env.data)
+			return -ENOMEM;
+	}
 	memset(fb[index].env.data, 0, len);
 	p = buf;
 	for (i = 0; i < MAX_CACHE_ENTRY; i++) {
@@ -539,5 +603,8 @@ int const nvram_getall(int index, char *buf)
 	return 0;
 }
 
-module_init(ra_nvram_init);
+late_initcall(ra_nvram_init);
 module_exit(ra_nvram_exit);
+EXPORT_SYMBOL(nvram_get);
+EXPORT_SYMBOL(nvram_set);
+EXPORT_SYMBOL(nvram_commit);
