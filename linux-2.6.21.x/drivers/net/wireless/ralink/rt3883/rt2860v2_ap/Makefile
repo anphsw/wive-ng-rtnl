@@ -317,7 +317,7 @@ endif
 #endif
 #endif
 
-ifeq ($(CONFIG_RT2860V2_AP_GREENAP),y)
+ifeq ($(CONFIG_RT2860V2_GREEN_AP),y)
 EXTRA_CFLAGS   += -DGREENAP_SUPPORT -DCOC_SUPPORT
 endif
 
