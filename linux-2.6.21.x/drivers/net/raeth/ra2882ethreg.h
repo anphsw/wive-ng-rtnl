@@ -875,7 +875,7 @@ typedef struct end_device
     struct net_device *PseudoDev;
     unsigned int isPseudo;
 #endif
-#if defined (CONFIG_ETHTOOL) && defined (CONFIG_RAETH_ROUTER)
+#ifdef CONFIG_ETHTOOL
 	struct mii_if_info	mii_info;
 #endif
 } END_DEVICE, *pEND_DEVICE;
