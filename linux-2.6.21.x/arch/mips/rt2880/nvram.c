@@ -237,7 +237,9 @@ int ra_nvram_init(void)
 
 	init_MUTEX(&nvram_sem);
 
+#ifdef AUTO_REBUILD_NVRAM
 reinit:
+#endif
 	down(&nvram_sem);
 	for (i = 0; i < FLASH_BLOCK_NUM; i++)
 		ret=init_nvram_block(i);
