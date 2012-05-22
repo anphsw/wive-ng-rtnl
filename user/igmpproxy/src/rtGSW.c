@@ -1,5 +1,5 @@
 /*
- *  This implementation is for RT3052 Switch.
+ *  This implementation is for rtGSW Switch.
  *
  *  We maintain an IGMP group list:
  *
@@ -23,13 +23,12 @@
 /*
  *  History:
  *
- * 1) Add an entry for igmp query on WAN
- * 2) Broadcast the multicast packets which not matched.
- * 3) Delay mac table deletion.
+ *	1) Add an entry for igmp query on WAN
+ *  2) Broadcast the multicast packets which not matched.
+ *  3) Delay mac table deletion.
  *	4) Don't follow igmpproxy to remove an invalid (unknown destination) group entry
  *  5) "no wan port" condition.
  *	6) WiFi Snooping support: a) search STA in WiFi tables  b) using WiFi(ra0)'s internal snooping
- * 7) Overflow bug fixed while handling high mac address(ex: F0:12:34:56:78:90)
  *
  */
 
@@ -40,14 +39,15 @@
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 
-//#define DEBUG_RT
-
-#include "linux/config.h"
+#include "linux/autoconf.h"
 
 #include "defs.h"
 
-#if defined(WIFI_IGMPSNOOP_SUPPORT) || defined(SEARCH_CLIENT_IN_WIFI_MACTABLE)
-#include "wireless.h"
+#include <linux/wireless.h>
+
+#if 1
+/*new switch address define*/
+#include "ra_ioctl.h"
 #endif
 
 #define MAX_MULTICASTS_GROUP		256
@@ -59,7 +59,7 @@
 #define RAETH_ESW_REG_READ			0x89F1
 #define RAETH_ESW_REG_WRITE			0x89F2
 
-/* rt3052 embedded ethernet switch registers */
+/* GSW embedded ethernet switch registers */
 #define REG_ESW_VLAN_ID_BASE		0x50
 #define REG_ESW_VLAN_MEMB_BASE		0x70
 #define REG_ESW_TABLE_SEARCH		0x24
@@ -71,9 +71,24 @@
 #define REG_ESW_WT_MAC_AD2			0x3C
 #define REG_ESW_MAX					0xFC
 
-#define IP_GET_LOST_MAPPING(mip)    ((mip & 0x0F800000) >> 23)
+
+
+#define IP_GET_LOST_MAPPING(mip)    ((mip & 0x0F800000) >> 23) 
 #define IP_MULTICAST_A0(a0)			((a0 >> 1) | 0xE0)
 #define IP_MULTICAST_A1(a0, a1)		(((a0 & 0x1) << 7) | a1)
+
+#if defined (CONFIG_WAN_AT_P0)
+#define WANPORT			0x1			/* 0000001 */
+#define LANPORT_RANGE		{1,2,3,4}
+#elif defined (CONFIG_WAN_AT_P4)
+#define WANPORT			0x10		/* 0010000 */
+#define LANPORT_RANGE		{0,1,2,3}
+#else
+#define WANPORT			0x0			/* no wan port */
+#define LANPORT_RANGE		{0,1,2,3,4}
+#endif
+
+#define OTHER_INTERFACE				7		/* port 7  (wifi)  */
 
 /* delay mac table deletion */
 #define DELETED			1
@@ -82,10 +97,7 @@
 #define ADDENTRY		1
 #define DELENTRY		2
 
-#if defined(CONFIG_RA_NAT_HW) && !defined(CONFIG_RAETH_SPECIAL_TAG)
-#define LAN_VLAN_IDX              (CONFIG_RA_HW_NAT_LAN_VLANID-1)
-#define WAN_VLAN_IDX              (CONFIG_RA_HW_NAT_WAN_VLANID-1)
-#elif defined(CONFIG_RAETH_SPECIAL_TAG)
+#ifdef CONFIG_RAETH_SPECIAL_TAG
 #define LAN_VLAN_IDX              6
 #define WAN_VLAN_IDX              7
 #else
@@ -93,19 +105,7 @@
 #define WAN_VLAN_IDX              1
 #endif
 
-#define LANPORT_RANGE_P0        {1,2,3,4}
-#define LANPORT_RANGE_P4        {0,1,2,3}
-#define OTHER_INTERFACE		7		/* port 7  (wifi)  */
 
-extern uint32_t WanPort;
-extern unsigned int rareg(int mode, unsigned int addr, long long int new_value);
-
-static int arpLookUp(char *ip, char *arp);
-
-typedef struct rt3052_esw_reg {
-	unsigned int off;
-	unsigned int val;
-} esw_reg;
 
 struct group_member
 {
@@ -139,13 +139,10 @@ static void updateMacTable(struct group *entry, int delay_deleted);
 static int	portLookUpByIP(char *ip);
 static inline int reg_read(int offset, int *value);
 static inline int reg_write(int offset, int value);
-#ifdef CONFIG_RAETH_SPECIAL_TAG
-static void updateMacTable_specialtag(struct group *entry, unsigned char new_portmap, int delay_delete);
 static void ZeroEntriesBarrier(struct group *entry, int mode);
-#endif
 
 // global variables.
-static struct mac_table internal_mac_table[1024];
+static struct mac_table internal_mac_table[2048];
 static int 				esw_fd = -1;
 static struct group 	*group_list = NULL;
 
@@ -170,21 +167,19 @@ static struct group *find_entry(uint32 ip_addr)
 	return NULL;
 }
 
-#ifdef DEBUG_RT
 static void dump_table(void)
 {
 	int i=0;
 	unsigned int mac1;
 	char show_buf[128];
 	mac1 = internal_mac_table[i].mac1;
-	while( i< 1024 && mac1 != END_OF_MAC_TABLE){
-		sprintf(show_buf, "%08x%04x, %d, %08x\n", internal_mac_table[i].mac1, internal_mac_table[i].mac2, internal_mac_table[i].vidx, internal_mac_table[i].port_map);
+	while( i< 2048 && mac1 != END_OF_MAC_TABLE){
+		sprintf(show_buf, "%08x%04x, %08x\n", internal_mac_table[i].mac1, internal_mac_table[i].mac2, internal_mac_table[i].port_map);
 		printf("%s\n", show_buf);
 		i++;
 		mac1 = internal_mac_table[i].mac1;
 	}
 }
-#endif
 
 static void dump_entry(void)
 {
@@ -221,6 +216,7 @@ static void dump_entry(void)
 static struct group *build_entry(uint32 m_ip_addr, uint32 u_ip_addr)
 {
 	unsigned char 		a1, a2, a3;
+	struct in_addr 		tmp;
 	struct group 		*new_entry;
 
 	static int group_count = 0;
@@ -239,11 +235,11 @@ static struct group *build_entry(uint32 m_ip_addr, uint32 u_ip_addr)
 
 	new_entry = (struct group *)malloc(sizeof(struct group));
 	if(!new_entry){
-		my_log(LOG_WARNING, 0, "*** RT3052: Out of memory.");
+		log(LOG_WARNING, 0, "*** rtGSW: Out of memory.");
 		return NULL;
 	}
 	printf("%s, %s\n", __FUNCTION__,  inetFmt(htonl(m_ip_addr), s1));
-
+	
 	/* set up address */
 	new_entry->a1 = a1;
 	new_entry->a2 = a2;
@@ -252,13 +248,11 @@ static struct group *build_entry(uint32 m_ip_addr, uint32 u_ip_addr)
 	/* set up ip address bitmap */
 	new_entry->port_map = 0x0;
 	new_entry->members = NULL;
-
 	/* GND */
 	new_entry->next = NULL;
 	return new_entry;
 }
 
-#if 0
 static struct group_member *lookup_ip_group(struct group *entry, uint32 m_ip_addr)
 {
 	struct group_member *pos = entry->members;
@@ -269,8 +263,7 @@ static struct group_member *lookup_ip_group(struct group *entry, uint32 m_ip_add
 		pos = pos->next;
 	}
 	return NULL;
-}
-#endif
+} 
 
 static struct group_member *lookup_member(struct group *entry, uint32 m_ip_addr, uint32 u_ip_addr)
 {
@@ -301,25 +294,24 @@ void remove_member(uint32 m_ip_addr, uint32 u_ip_addr)
 			sprintf(cmd, "iwpriv ra0 set IgmpDel=%s-%s", inetFmt(htonl(m_ip_addr), s1), mac);
 			system(cmd);
 		}else{
-			my_log(LOG_WARNING, 0, "Can't find Mac address(%s)", inetFmt(htonl(u_ip_addr), s1));
+			log(LOG_WARNING, 0, "Can't find Mac address(%s)", inetFmt(htonl(u_ip_addr), s1));
 		}
 	}
 #endif
 
 	entry = find_entry(m_ip_addr);
 	if(!entry){
-		my_log(LOG_WARNING, 0, "*** RT3052: can't find the group [%s].", inetFmt(htonl(m_ip_addr), s1));
+		log(LOG_WARNING, 0, "*** rtGSW: can't find the group [%s].", inetFmt(htonl(m_ip_addr), s1));
 		return;
 	}
 
 	pos = entry->members;
 	if(!pos){
-		my_log(LOG_WARNING, 0, "*** RT3052: group [%s] member list is empty.", inetFmt(htonl(m_ip_addr), s1));
+		log(LOG_WARNING, 0, "*** rtGSW: group [%s] member list is empty.", inetFmt(htonl(m_ip_addr), s1));
 		return;
 	}
 
 	printf("%s, %s, %s\n", __FUNCTION__,  inetFmt(htonl(m_ip_addr), s1), inetFmt(htonl(u_ip_addr), s2));
-
 	a0 = IP_GET_LOST_MAPPING(m_ip_addr);
 	if(entry->members->ip_addr == u_ip_addr && entry->members->a0 == a0){
 		del = pos;
@@ -338,9 +330,9 @@ void remove_member(uint32 m_ip_addr, uint32 u_ip_addr)
 	if(del){
 		free(del);
 	}else{
-		my_log(LOG_WARNING, 0, "************************************************");
-		my_log(LOG_WARNING, 0, "*** RT3052: can't delete [%s] in the group [%s].", inetFmt(htonl(u_ip_addr), s1) , inetFmt(htonl(m_ip_addr), s2));
-		my_log(LOG_WARNING, 0, "************************************************");
+		log(LOG_WARNING, 0, "************************************************");
+		log(LOG_WARNING, 0, "*** rtGSW: can't delete [%s] in the group [%s].", inetFmt(htonl(u_ip_addr), s1) , inetFmt(htonl(m_ip_addr), s2));
+		log(LOG_WARNING, 0, "************************************************");
 	}
 	update_group_port_map(entry);
 	return;
@@ -354,13 +346,15 @@ void remove_member(uint32 m_ip_addr, uint32 u_ip_addr)
  */
 static struct group_member *insert_member(struct group *entry, uint32 m_ip_addr, uint32 u_ip_addr)
 {
+	int rc = 0;
 	struct in_addr 		tmp;
 	struct group_member *new_member;
+	struct group_member *pos = entry->members;
 
 	if(entry->members != NULL){
 		struct group_member *member = lookup_member(entry, m_ip_addr, u_ip_addr);
 		if(member){
-			//my_log(LOG_DEBUG, 0, "*** RT3052: find the same member [%s] in [%s]. ", inetFmt(u_ip_addr, s1), inetFmt(m_ip_addr, s2));
+			 log(LOG_DEBUG, 0, "*** rtGSW: find the same member [%s] in [%s]. ", inetFmt(u_ip_addr, s1), inetFmt(m_ip_addr, s2));
 
 			/* check if port changed */
 			unsigned char port_num;
@@ -378,7 +372,7 @@ static struct group_member *insert_member(struct group *entry, uint32 m_ip_addr,
 	/* create a new member */
 	new_member = (struct group_member *)malloc(sizeof(struct group_member));
 	if(!new_member){
-			my_log(LOG_WARNING, 0, "*** RT3052: Out of memory.");
+			log(LOG_WARNING, 0, "*** rtGSW: Out of memory.");
 			return NULL;
 	}
 	tmp.s_addr				= htonl(u_ip_addr);
@@ -388,7 +382,6 @@ static struct group_member *insert_member(struct group *entry, uint32 m_ip_addr,
 	new_member->has_report	= 1;
 	new_member->next		= entry->members;
 
-	/* link onto list */
 	entry->members = new_member;
 
 	printf("%s, %s, %s(port%d), \n", __FUNCTION__,  inetFmt(htonl(m_ip_addr), s1), inetFmt(htonl(u_ip_addr), s2), new_member->port_num);
@@ -418,8 +411,8 @@ void sweap_no_report_members(void)
 				craft_mip |= ((unsigned long)( IP_MULTICAST_A1(member->a0, pos->a1) ) << 8 );
 				craft_mip |= ((unsigned long)(pos->a2) << 16) ;
 				craft_mip |= ((unsigned long)(pos->a3) << 24) ;
-
-				//my_log(LOG_WARNING, 0, "*** RT3052: remove [%s] in the group [%s].", inetFmt(htonl(member->ip_addr), s1) , inetFmt(craft_mip, s2));
+				
+				log(LOG_WARNING, 0, "*** rtGSW!: remove [%s] in the group [%s].", inetFmt(htonl(member->ip_addr), s1) , inetFmt(craft_mip, s2));
 				remove_member( ntohl(craft_mip), member->ip_addr);
 			}
 
@@ -484,9 +477,10 @@ void remove_multicast_ip(uint32 m_ip_addr)
 	system(cmd);
 	}
 #endif
+
 	if(!entry){
 		// This entry isn't in the list.
-		my_log(LOG_WARNING, 0, "*** RT3052: can't find group entry [%s].", inetFmt(htonl(m_ip_addr), s1));
+		log(LOG_WARNING, 0, "*** rtGSW: can't find group entry [%s].", inetFmt(htonl(m_ip_addr), s1));
 		return;
 	}
 
@@ -511,7 +505,7 @@ void remove_multicast_ip(uint32 m_ip_addr)
 	}
 
 	if(delete_found){
-		my_log(LOG_WARNING, 0, "*** RT3052: group entry [%s] found undeleted member.", inetFmt(htonl(m_ip_addr), s1));
+		log(LOG_WARNING, 0, "*** RT3052: group entry [%s] found undeleted member.", inetFmt(htonl(m_ip_addr), s1));
 	}
 
 	if(entry->members == NULL || new_portmap == 0){
@@ -532,9 +526,9 @@ void remove_multicast_ip(uint32 m_ip_addr)
 			}
 			if(!found){
 				// impossible
-				my_log(LOG_WARNING, 0, "*** RT3052: can't find group entry [%s].", inetFmt(htonl(m_ip_addr), s1));
-				return;
-			}
+		log(LOG_WARNING, 0, "*** rtGSW: can't find grou entry [%s].", inetFmt(htonl(m_ip_addr), s1));
+		return;
+	}
 		}
 
 #ifndef CONFIG_RAETH_SPECIAL_TAG
@@ -572,7 +566,7 @@ void remove_all_groups(void)
 		remove_all_members(del);
 		free(del);
 	}
-	group_list =  NULL;
+	group_list =  NULL;	
 }
 
 static void update_group_port_map(struct group *entry)
@@ -582,32 +576,27 @@ static void update_group_port_map(struct group *entry)
 	while(pos){
 		if(pos->port_num == -1){
 			// can't find which port it's in, so opens all ports for it.
-			my_log(LOG_WARNING, 0, "****************************************");
-			my_log(LOG_WARNING, 0, "*** RT3052: can't find %s's port number.", inetFmt(htonl(pos->ip_addr), s1));
-			my_log(LOG_WARNING, 0, "****************************************");
-			new_portmap =  (0x5f & ~(WanPort)); // All Lan ports
+			log(LOG_WARNING, 0, "****************************************");
+			log(LOG_WARNING, 0, "*** rtGSW: can't find %s's port number.", inetFmt(htonl(pos->ip_addr), s1));
+			log(LOG_WARNING, 0, "****************************************");
+			new_portmap =  (0x5f & ~(WANPORT)); // All Lan ports
 			break;
 		}else{
 			new_portmap = new_portmap | (0x1 << pos->port_num);
 			pos = pos->next;
+			printf("new_portmap 0x%2x", new_portmap);
 		}
 	}
 	if(entry->port_map != new_portmap){
-#ifndef CONFIG_RAETH_SPECIAL_TAG
 		entry->port_map = new_portmap;
 		updateMacTable(entry, ZEROED);
-#else
-		updateMacTable_specialtag(entry, new_portmap, ZEROED);
-		entry->port_map = new_portmap;
-#endif
 	}
 }
 
+#if 1
 void insert_multicast_ip(uint32 m_ip_addr, uint32 u_ip_addr)
 {
-#ifdef WIFI_IGMPSNOOP_SUPPORT
 	char cmd[128];
-#endif
 	struct group_member *new_member;
 	struct group *entry = find_entry(m_ip_addr);
 
@@ -623,10 +612,6 @@ void insert_multicast_ip(uint32 m_ip_addr, uint32 u_ip_addr)
 		system(cmd);
 #endif
 
-#ifdef CONFIG_RAETH_SPECIAL_TAG
-		/* build a zero entry barrier for this new MC group in mac tables */
-		ZeroEntriesBarrier(entry, ADDENTRY);
-#endif
 		if(group_list)
 			entry->next = group_list;
 		group_list = entry;
@@ -640,20 +625,20 @@ void insert_multicast_ip(uint32 m_ip_addr, uint32 u_ip_addr)
 			sprintf(cmd, "iwpriv ra0 set IgmpAdd=%s-%s", inetFmt(htonl(m_ip_addr), s1), mac);
 			system(cmd);
 		}else
-			my_log(LOG_WARNING, 0, "Can't find Mac address(%s)", u_ip_addr);
+			log(LOG_WARNING, 0, "Can't find Mac address(%s)", u_ip_addr);
 	}
 #endif
 	update_group_port_map(entry);
 	return;
 }
-
+#endif
 static void create_all_hosts_rule(void)
 {
 	struct group entry	= {
 		.a1 = 0x00,
 		.a2 = 0x00,
 		.a3 = 0x01,
-		.port_map = (0x5f & ~(WanPort)),	/* All LAN ports */
+		.port_map = (0x5f & ~(WANPORT)),	/* All LAN ports */
 		.next 		= NULL
 	};
 	updateMacTable(&entry, ZEROED);
@@ -676,21 +661,20 @@ static void destory_all_hosts_rule()
  */
 static void sync_internal_mac_table(void *argu)
 {
-	unsigned int value, mac2, i = 0;
+	unsigned int value, value1, mac1, mac2, i = 0;
 
 	//timer_setTimer(INTERNAL_SYNC_TIMEOUT, sync_internal_mac_table, NULL);
-
+#if 0	
+	
 	reg_write(REG_ESW_TABLE_SEARCH, 0x1);
 	while( i < 0x3fe) {
 		reg_read(REG_ESW_TABLE_STATUS0, &value);
 		if (value & 0x1) { //search_rdy
 			if ((value & 0x70) == 0) {
-				my_log(LOG_WARNING, 0, "*** RT3052: found an unused entry (age = 3'b000), please check!");
+				log(LOG_WARNING, 0, "*** rtGSW: found an unused entry (age = 3'b000), please check!");
 				reg_write(REG_ESW_TABLE_SEARCH, 0x2); //search for next address
 				continue;
 			}
-
-			internal_mac_table[i].vidx = (value >> 7) & 0xf;
 
 			// read mac1
 			reg_read(REG_ESW_TABLE_STATUS2, &(internal_mac_table[i].mac1));
@@ -702,19 +686,64 @@ static void sync_internal_mac_table(void *argu)
 			internal_mac_table[i].port_map = (value & 0x0007f000) >> 12 ;
 
 			if (value & 0x2) {
-				my_log(LOG_WARNING, 0, "*** RT3052: end of table. %d", i);
+				log(LOG_WARNING, 0, "*** rtGSW: end of table. %d", i);
 				internal_mac_table[i+1].mac1 = END_OF_MAC_TABLE;
 				return;
 			}
 			reg_write(REG_ESW_TABLE_SEARCH, 0x2); //search for next address
 			i++;
 		}else if (value & 0x2) { //at_table_end
-			//my_log(LOG_WARNING, 0, "*** RT3052: found the last entry (not ready). %d", i);
+			//log(LOG_WARNING, 0, "*** rtGSW: found the last entry (not ready). %d", i);
 			internal_mac_table[i].mac1 = END_OF_MAC_TABLE;
 			return;
 		}else
 			usleep(2000);
 	}
+#else
+	printf("sync table\n\r");
+	reg_write(REG_ESW_WT_MAC_ATC, 0x8004);
+	while( i < 0x7fe) {
+	//while( i < 0x3fe) {
+		reg_read(REG_ESW_WT_MAC_ATC, &value);
+		if (value & (0x1 << 13)) { //search_rdy
+			reg_read(REG_ESW_TABLE_ATRD, &value1);
+			if ((value1 & 0xff000000) == 0) {
+				log(LOG_WARNING, 0, "*** rtGSW: found an unused entry (age = 3'b000), please check!");
+				reg_write(REG_ESW_TABLE_SEARCH, 0x2); //search for next address
+				continue;
+			}
+
+			internal_mac_table[i].vidx = (value >> 7) & 0xf;
+			// read mac1
+			reg_read(REG_ESW_TABLE_TSRA1, &(internal_mac_table[i].mac1));
+
+			// read mac2
+			reg_read(REG_ESW_TABLE_TSRA2, &mac2);
+			internal_mac_table[i].mac2 = (mac2 >> 16);
+
+			//reg_read(REG_ESW_TABLE_ATRD, &value1);
+			internal_mac_table[i].port_map = (value1 & 0x0007f0) >> 4 ;
+
+			if (value & 0x4000) {
+				log(LOG_WARNING, 0, "*** rtGSW: end of table. %d", i);
+				printf("sync table at_table_end 1\n\r");
+				internal_mac_table[i+1].mac1 = END_OF_MAC_TABLE;
+				return;
+			}
+			reg_write(REG_ESW_WT_MAC_ATC, 0x8005); //search for next address
+			i++;
+		}else if (value & 0x4000) { //at_table_end
+			//log(LOG_WARNING, 0, "*** rtGSW: found the last entry (not ready). %d", i);
+			printf("sync table at_table_end\n\r");
+			internal_mac_table[i].mac1 = END_OF_MAC_TABLE;
+			return;
+		}else
+			usleep(2000);
+			//usleep(1000);
+	}
+
+#endif
+	printf("sync table OK\n\r");
 	internal_mac_table[i].mac1 = END_OF_MAC_TABLE;
 	return;
 }
@@ -724,7 +753,7 @@ static void sync_internal_mac_table(void *argu)
 void rt3052_fini(void)
 {
 	/*
-	 *  handle RT3052 registers
+	 *  handle rtGSW registers
 	 */
 	/* 1011009c */
 	unsigned int value;
@@ -736,10 +765,19 @@ void rt3052_fini(void)
 	//value = value & 0xF7FFFFFF;
 	//rareg(WRITE, 0x1011009c, value);
 	/* 10110014 */
+#if 0
 	value = rareg(READ, 0x10110014, 0);
 	value = value & 0xFF7FFFFF;
 	rareg(WRITE, 0x10110014, value);
 
+#else
+	/*IGMP forward to cpu*/
+	/* 10110014 */
+	value = rareg(READ, 0x1011001c, 0);
+	value = value & 0xffff9ff9;
+	rareg(WRITE, 0x1011001c, value);
+
+#endif
 	/* del 224.0.0.1( 01:00:5e:00:00:01) from mac table */
 	destory_all_hosts_rule();
 
@@ -749,21 +787,26 @@ void rt3052_fini(void)
 	if(esw_fd >= 0)
 		close(esw_fd);
 
-//no need disable wifi snoop
-//#ifdef WIFI_IGMPSNOOP_SUPPORT
-//	system("iwpriv ra0 set IgmpSnEnable=0");
-//#endif
+#ifdef WIFI_IGMPSNOOP_SUPPORT
+	system("iwpriv ra0 set IgmpSnEnable=0");
+#endif
 
 }
 
 void rt3052_init(int se)
 {
+	/*
+	 *  handle rtGSW registers
+	 */
 	unsigned int value;
 
 	snooping_enabled = se;
+
 	if(!snooping_enabled)
 		return;
 
+/* to check default IGMP flooding rule*/
+#if 0	
 	/* 1011009c */
 	value = rareg(READ, 0x1011009c, 0);
 	//value = value | 0x08000000;
@@ -774,7 +817,14 @@ void rt3052_init(int se)
 	value = rareg(READ, 0x10110014, 0);
 	value = value | 0x00800000;
 	rareg(WRITE, 0x10110014, value);
+#else
+/*IGMP report forward to cpu/query: default policy*/
+	/* 10110014 */
+	value = rareg(READ, 0x1011001c, 0);
+	value = value | 0x00006000;
+	rareg(WRITE, 0x1011001c, value);
 
+#endif
 	esw_fd = socket(AF_INET, SOCK_DGRAM, 0);
 	if (esw_fd < 0) {
 		perror("socket");
@@ -801,7 +851,7 @@ static int arpLookUp(char *ip, char *arp)
 	char buf[256];
 	FILE *fp = fopen("/proc/net/arp", "r");
 	if(!fp){
-		my_log(LOG_ERR, 0, "*** RT3052: no proc fs!");
+		log(LOG_ERR, 0, "*** rtGSW: no proc fs!");
 		return -1;
 	}
 
@@ -846,146 +896,39 @@ static inline int reg_write(int offset, int value)
     return 0;
 }
 
-static inline void wait_switch_done(void)
+static inline wait_switch_done(void)
 {
 	int i, value;
+
 	for (i = 0; i < 20; i++) {
-		reg_read(REG_ESW_WT_MAC_AD0, &value);
-		if (value & 0x2) {	//w_mac_done
-			//printf("done.\n");
-			break;
-		}
-		usleep(1000);
+	    reg_read(REG_ESW_WT_MAC_ATC, &value);
+	    if ((value & 0x8000) == 0 ){ //mac address busy
+		printf("mac table IO done.\n");
+		break;
+	    }
+	    usleep(1000);
 	}
 	if (i == 20)
-		my_log(LOG_WARNING, 0, "*** RT3052: timeout.");
+		log(LOG_WARNING, 0, "*** rtGSW: timeout.");
+
+
+
 }
 
-#ifdef CONFIG_RAETH_SPECIAL_TAG
-static void ZeroEntriesBarrier(struct group *entry, int mode)
-{
-	unsigned char lanport4[]=LANPORT_RANGE_P4;
-	unsigned char lanport0[]=LANPORT_RANGE_P0;
-
-	int i, value;
-	char wholestr[13];
-	char tmpstr[9];
-
-	sprintf(wholestr, "%s%02x%02x%02x", "01005e", entry->a1, entry->a2, entry->a3);
-
-	strncpy(tmpstr, wholestr, 8);
-	tmpstr[8] = '\0';
-
-	value = strtoul(tmpstr, NULL, 16);
-	reg_write(REG_ESW_WT_MAC_AD2, value);
-	strncpy(tmpstr, &wholestr[8], 4);
-	tmpstr[4] = '\0';
-	value = strtoul(tmpstr, NULL, 16);
-	reg_write(REG_ESW_WT_MAC_AD1, value);
-
-	if (WanPort == 0x1) {
-	    for(i=0; i < sizeof(lanport0)/sizeof(unsigned char); i++){
-		value = 0x1;			//w_mac_cmd
-		if(mode == ADDENTRY)
-			value |= (7 << 4);	//w_age_field
-		value |= (lanport0[i] << 7);	//w_index
-		reg_write(REG_ESW_WT_MAC_AD0, value);
-		wait_switch_done();
-	    }
-	} else {
-	    for(i=0; i < sizeof(lanport4)/sizeof(unsigned char); i++){
-		value = 0x1;			//w_mac_cmd
-		if(mode == ADDENTRY)
-			value |= (7 << 4);	//w_age_field
-		value |= (lanport4[i] << 7);	//w_index
-		reg_write(REG_ESW_WT_MAC_AD0, value);
-		wait_switch_done();
-	    }
-	}
-}
-
-static void ZeroEntry(struct group *entry, int port, int mode)
-{
-	int value;
-	char wholestr[13];
-	char tmpstr[9];
-
-	sprintf(wholestr, "%s%02x%02x%02x", "01005e", entry->a1, entry->a2, entry->a3);
-
-	strncpy(tmpstr, wholestr, 8);
-	tmpstr[8] = '\0';
-
-	value = strtoul(tmpstr, NULL, 16);
-	reg_write(REG_ESW_WT_MAC_AD2, value);
-	strncpy(tmpstr, &wholestr[8], 4);
-	tmpstr[4] = '\0';
-	value = strtoul(tmpstr, NULL, 16);
-	reg_write(REG_ESW_WT_MAC_AD1, value);
-
-
-	/* update the zero entry */
-	value = 0x1;				//w_mac_cmd
-	if(mode == ADDENTRY)
-		value |= (7 << 4);		//w_age_field
-	value |= (port << 7);			//w_index
-	reg_write(REG_ESW_WT_MAC_AD0, value);
-	wait_switch_done();
-	return;
-}
-
-static void updateMacTable_specialtag(struct group *entry, unsigned char new_portmap, int delay_delete)
-{
-	int i;
-	unsigned char lanport4[]=LANPORT_RANGE_P4;
-	unsigned char lanport0[]=LANPORT_RANGE_P0;
-
-	if (WanPort == 0x1) {
-	    for(i=0; i < sizeof(lanport0)/sizeof(unsigned char); i++){
-		unsigned char old_bit, new_bit;
-
-		old_bit = entry->port_map & (0x1 << lanport0[i]);
-		new_bit = new_portmap  & (0x1 << lanport0[i]);
-
-		if(old_bit == new_bit)
-			continue;
-
-		if(old_bit == 0 /* new_bit == 0x1 */){
-			ZeroEntry(entry, lanport0[i], DELENTRY);
-		}else{
-			ZeroEntry(entry, lanport0[i], ADDENTRY);
-		}
-	    }
-	} else {
-	    for(i=0; i < sizeof(lanport4)/sizeof(unsigned char); i++){
-		unsigned char old_bit, new_bit;
-
-		old_bit = entry->port_map & (0x1 << lanport4[i]);
-		new_bit = new_portmap  & (0x1 << lanport4[i]);
-
-		if(old_bit == new_bit)
-			continue;
-
-		if(old_bit == 0 /* new_bit == 0x1 */){
-			ZeroEntry(entry, lanport4[i], DELENTRY);
-		}else{
-			ZeroEntry(entry, lanport4[i], ADDENTRY);
-		}
-	    }
-	}
-}
-#endif
 
 /*
  * ripped from user/rt2880/switch/switch.c
  */
 static void updateMacTable(struct group *entry, int delay_delete)
 {
-	int value;
+	int i, value = 0, value1 = 0;
 	char wholestr[13];
 	char tmpstr[9];
 
+        //printf("updateMacTable: delay_delete is %d\n\r", delay_delete);
 	sprintf(wholestr, "%s%02x%02x%02x", "01005e", entry->a1, entry->a2, entry->a3);
 
+#if 0
 	strncpy(tmpstr, wholestr, 8);
 	tmpstr[8] = '\0';
 
@@ -996,35 +939,82 @@ static void updateMacTable(struct group *entry, int delay_delete)
 	value = strtoul(tmpstr, NULL, 16);
 	reg_write(REG_ESW_WT_MAC_AD1, value);
 
+#else
+
+	strncpy(tmpstr, wholestr, 8);
+	tmpstr[8] = '\0';
+
+	value = strtoul(tmpstr, NULL, 16);
+	
+	reg_write(REG_ESW_WT_MAC_ATA1, value);
+	printf("REG_ESW_WT_MAC_ATA1 is 0x%x\n\r",value);
+
+
+	strncpy(tmpstr, &wholestr[8], 4);
+	tmpstr[4] = '\0';
+
+	value = strtoul(tmpstr, NULL, 16);
+	value = (value << 16);
+	value |= (1 << 15);//IVL=1
+
+	value |= (1 << 0); //LAN ID ==1
+	
+	reg_write(REG_ESW_WT_MAC_ATA2, value);
+	printf("REG_ESW_WT_MAC_ATA2 is 0x%x\n\r",value);
+	value1 = value; //save for later usage        
+
+#endif
+
 	value = 0;
 	if(entry->port_map){
 		/*
 		 * force all mulicast addresses to bind with CPU.
 		 */
-		value = value | (0x1 << 18);
-
+		value |= (0x1 << 10);//port 6 cpu port
 		/*
 		 * fill the port map
 		 */
-		value = value | (entry->port_map & (0x7f)) << 12;
-		value += (7 << 4); //w_age_field
-		value += (LAN_VLAN_IDX << 7); //w_age_field
-		value += 1;				//w_mac_cmd
-		reg_write(REG_ESW_WT_MAC_AD0, value);
+		printf("entry->port_map is 0x%x\n\r", entry->port_map);
+		value |= (entry->port_map & (0x7f)) << 4;
+
+                value |= (0xff << 24); //w_age_field
+		value |= (0x3<< 2); //static
+
+
+
+		reg_write(REG_ESW_WT_MAC_ATWD, value);
+		value = 0x8001;  //w_mac_cmd
+	        reg_write(REG_ESW_WT_MAC_ATC, value);
+
+
 		wait_switch_done();
 
 		/*
 		 * new an additional entry for IGMP Inquery/Report on WAN.
 		 */
-		if(WanPort){
-			value = (WanPort << 12);
-			value |= (1 << 18);
-			value |= (7 << 4);		//w_age_field
-			value |= (WAN_VLAN_IDX << 7);		//w_index
-			value |= 1;				//w_mac_cmd
-			reg_write(REG_ESW_WT_MAC_AD0, value);
+		if(WANPORT){
+		        value = value1;
+			value = (value & 0xffffff00);
+			value |= (2 << 0); //WAN ID ==2
+	
+			reg_write(REG_ESW_WT_MAC_ATA2, value);
+			printf("WAN REG_ESW_WT_MAC_ATA2 is 0x%x\n\r",value);
+
+			value1 = (WANPORT << 4);
+			value1 |= (0x1 << 10);//port 6 cpu port
+
+			value1 |= (0xff << 24); //w_age_field
+			value1 |= (0x3<< 2); //static
+
+			reg_write(REG_ESW_WT_MAC_ATWD, value1);
+
+			value1 = 0x8001;  //w_mac_cmd
+			reg_write(REG_ESW_WT_MAC_ATC, value1);
+
 			wait_switch_done();
+			printf("for wan port is done\n\r");
 		}
+
 	}else{
 		if(delay_delete == ZEROED){
 			/*
@@ -1043,18 +1033,32 @@ static void updateMacTable(struct group *entry, int delay_delete)
 			 */
 
 			/*
-			 * zero the entry
+			 * zero the bitmap entry
 			 */
-			value |= (7 << 4);		//w_age_field, keep it alive
-			value |= 1;				//w_mac_cmd
-			reg_write(REG_ESW_WT_MAC_AD0, value);
-			wait_switch_done();
+#if 0
+		    value |= (7 << 4);		//w_age_field, keep it alive
+		    value |= 1;				//w_mac_cmd
+		    reg_write(REG_ESW_WT_MAC_AD0, value);
+		    wait_switch_done();
+#else
+
+		    value = (0xff << 24); //w_age_field
+		    value |= (0x3<< 2); //static
+		    reg_write(REG_ESW_WT_MAC_ATWD, value);
+		    printf("delay delete = zer0 REG_ESW_WT_MAC_ATWD is 0x%x\n\r",value);
+		  
+		    value = 0x8001;  //w_mac_cmd
+		    reg_write(REG_ESW_WT_MAC_ATC, value);
+		    wait_switch_done();
+
+#endif
+
 		}else if (delay_delete == DELETED){
 			/*
 			 * delete the entry
 			 */
+#if 0
 			value |= 1;				//w_mac_cmd
-			value |= (LAN_VLAN_IDX << 7); //w_age_field
 			reg_write(REG_ESW_WT_MAC_AD0, value);
 			wait_switch_done();
 
@@ -1062,12 +1066,40 @@ static void updateMacTable(struct group *entry, int delay_delete)
 			 * delete the additional entry on WAN.
 			 */
 			value = 0;
-			value |= (WAN_VLAN_IDX  << 7);		//w_index
+			value |= (1 << 7);		//w_index
 			value |= 1;				//w_mac_cmd
 			reg_write(REG_ESW_WT_MAC_AD0, value);
 			wait_switch_done();
+#else
+			value = 0; //STATUS=0, delete mac
+			reg_write(REG_ESW_WT_MAC_ATWD, value);
+
+			value = 0x8001;  //w_mac_cmd
+			reg_write(REG_ESW_WT_MAC_ATC, value);
+			wait_switch_done();
+
+
+			/*
+			 * delete the additional entry on WAN.
+			 */
+
+			value = value1;
+			value = (value & 0xffffff00);
+			value |= (2 << 0); //WAN ID ==2
+
+			reg_write(REG_ESW_WT_MAC_ATA2, value);
+			printf("REG_ESW_WT_MAC_ATA2 is 0x%x\n\r",value);
+
+			value = 0; //STATUS=0, delete mac
+			reg_write(REG_ESW_WT_MAC_ATWD, value);
+
+			value = 0x8001;  //w_mac_cmd
+			reg_write(REG_ESW_WT_MAC_ATC, value);
+			wait_switch_done();
+#endif
 		}
 	}
+
 }
 
 
@@ -1109,7 +1141,6 @@ typedef struct _RT_802_11_MAC_ENTRY {
 #endif
 } RT_802_11_MAC_ENTRY;
 
-#ifdef SEARCH_CLIENT_IN_WIFI_MACTABLE 
 #if defined (CONFIG_RT2860V2_AP_WAPI) || defined (CONFIG_RT3090_AP_WAPI) || \
     defined (CONFIG_RT3572_AP_WAPI) || defined (CONFIG_RT5392_AP_WAPI) || \
     defined (CONFIG_RT5572_AP_WAPI) || defined (CONFIG_RT5592_AP_WAPI) || \
@@ -1134,15 +1165,15 @@ int WiFiSTALookUPByMac(unsigned int mac1, unsigned int mac2)
 	strncpy(iwr.ifr_name, RALINK_WIFI_INTF, IFNAMSIZ);
 	iwr.u.data.pointer = (caddr_t) &table;
 	if (s < 0) {
-		my_log(LOG_WARNING, 0, "ioctl sock failed!");
+		log(LOG_WARNING, 0, "ioctl sock failed!");
 		return 0;
 	}
 #if 1 //def CONFIG_RT2860V2_AP_V24_DATA_STRUCTURE
 	if (ioctl(s, RTPRIV_IOCTL_GET_MAC_TABLE_STRUCT, &iwr) < 0) {
-		my_log(LOG_WARNING, 0, "ioctl -> RTPRIV_IOCTL_GET_MAC_TABLE_STRUCT failed!");
+		log(LOG_WARNING, 0, "ioctl -> RTPRIV_IOCTL_GET_MAC_TABLE_STRUCT failed!");
 #else
 	if (ioctl(s, RTPRIV_IOCTL_GET_MAC_TABLE, &iwr) < 0) {
-		my_log(LOG_WARNING, 0, "ioctl -> RTPRIV_IOCTL_GET_MAC_TABLE failed!");
+		log(LOG_WARNING, 0, "ioctl -> RTPRIV_IOCTL_GET_MAC_TABLE failed!");
 #endif
 		close(s);
 		return 0;
@@ -1164,7 +1195,6 @@ int WiFiSTALookUPByMac(unsigned int mac1, unsigned int mac2)
 	}
 	return 0;
 }
-#endif
 
 static int portLookUpByMac(char *mac)
 {
@@ -1177,17 +1207,15 @@ static int portLookUpByMac(char *mac)
 
 	strncpy(mac_entry1, mac, 8);
 	strncpy(mac_entry2, &mac[8], 4);
-
 	mac1 = strtoll(mac_entry1, 0, 16);
 	mac2 = strtol(mac_entry2, 0, 16);
 
 	mac_iter = internal_mac_table[i].mac1;
-	while(i < 0x3fe && mac_iter != END_OF_MAC_TABLE) {
-		//log(LOG_WARNING, 0, "look for [%s] (%d)%08x %04x, %08x %04x\n", mac, i, internal_mac_table[i].mac1, internal_mac_table[i].mac2, mac1, mac2);
-
+	//while(i < 0x3fe && mac_iter != END_OF_MAC_TABLE) {
+	while(i < 0x7fe && mac_iter != END_OF_MAC_TABLE) {
+		//printf("look for [%s] %08x %04x, %08x %04x\n", mac, internal_mac_table[i].mac1, internal_mac_table[i].mac2, mac1, mac2);
 		if(internal_mac_table[i].vidx != LAN_VLAN_IDX)
 			goto next_entry;
-
 		if(	internal_mac_table[i].mac1 == mac1 &&
 			internal_mac_table[i].mac2 == mac2){
 			switch( internal_mac_table[i].port_map ){
@@ -1204,7 +1232,7 @@ static int portLookUpByMac(char *mac)
 			case 0x40:	/* CPU Only */
 				break;
 			default:
-				my_log(LOG_WARNING, 0, "No/Multi ports found:%x", internal_mac_table[i].port_map);
+				log(LOG_WARNING, 0, "No/Multi ports found:%x", internal_mac_table[i].port_map);
 				return -1;
 			}
 		}
@@ -1251,7 +1279,7 @@ static void sendUDP(char *ip)
 	user_addr.sin_addr.s_addr = inet_addr(ip);
 
 	if((socket_fd = socket(AF_INET,SOCK_DGRAM, 0)) == -1) {
-		my_log(LOG_WARNING, 0, "*** RT3052: socket error");
+		log(LOG_WARNING, 0, "*** rtGSW: socket error");
 		return;
 	}
 	strcpy(buf, "arp please");
@@ -1270,24 +1298,32 @@ static void sendUDP(char *ip)
  */
 static int portLookUpByIP(char *ip)
 {
-	int rc;
 	char mac[32];
+	int rc;
 	if( arpLookUp(ip, mac) == -1){
-		my_log(LOG_WARNING, 0, "*** RT3052: Warning, Can't get mac address for %s", ip);
+		log(LOG_WARNING, 0, "*** rtGSW: Warning, Can't get mac address for %s", ip);
 
 		// send an udp then wait.
 		sendUDP(ip);
-		usleep(20000);
+		usleep(20000);	
 		if(arpLookUp(ip, mac) == -1){
-			my_log(LOG_WARNING, 0, "*** RT3052: Give up for %s", ip);
+			log(LOG_WARNING, 0, "*** rtGSW: Give up for %s", ip);
 			// means flooding.
 			return -1;
 		}
 	}
+	else{
+		log(LOG_WARNING, 0, "*** rtGSW: Get mac address for %s\n", ip);
+		log(LOG_WARNING, 0, "*** rtGSW: mac address for %s\n", mac);
+	
+	}
 	strip_mac(mac);
-	sync_internal_mac_table(NULL);
 	rc = portLookUpByMac(mac);
-
+	if(rc == -1){
+		sync_internal_mac_table(NULL);
+		rc = portLookUpByMac(mac);
+		printf("rc is %d \n\r", rc);
+	}
 	return rc;
 }
 
@@ -1297,9 +1333,7 @@ void sigUSR1Handler(int signo)
 		return;
 
 	dump_entry();
-#ifdef DEBUG_RT
 	dump_table();
-#endif
 }
 
 

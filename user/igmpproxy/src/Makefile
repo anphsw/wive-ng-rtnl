@@ -20,7 +20,12 @@ CFLAGS += -I$(ROOTDIR)/$(LINUXDIR)/drivers/net/raeth -DRALINK_ESW_SUPPORT
 endif
 
 ifeq ("$(CONFIG_PRODUCT)", "RT6855")
-IGMP_PROXY_OBJ+= rt3052.o rt3052_reg.o
+IGMP_PROXY_OBJ+= rtGSW.o rt3052_reg.o
+CFLAGS= -I$(ROOTDIR)/$(LINUXDIR)/include -DRT3052_SUPPORT
+endif
+
+ifeq ("$(CONFIG_PRODUCT)", "RT6855A")
+IGMP_PROXY_OBJ+= rtGSW.o rt3052_reg.o
 CFLAGS += -I$(ROOTDIR)/$(LINUXDIR)/drivers/net/raeth -DRALINK_ESW_SUPPORT
 endif
 
