@@ -68,7 +68,12 @@ int flash_sect_erase (ulong addr_first, ulong addr_last);
 int get_addr_boundary (ulong *addr);
 extern int do_reset(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[]);
 extern void input_value(u8 *str);
-#if defined (RT6855_ASIC_BOARD) || defined (RT6855_FPGA_BOARD)
+#if defined (RT6855_ASIC_BOARD) || defined (RT6855_FPGA_BOARD) || \
+    defined (RT6352_ASIC_BOARD) || defined (RT6352_FPGA_BOARD) || \
+    defined (RT71100_ASIC_BOARD) || defined (RT71100_FPGA_BOARD)
+extern void rt_gsw_init(void);
+#elif defined (RT6855A_ASIC_BOARD) || defined (RT6855A_FPGA_BOARD) 
+extern void rt6855A_gsw_init(void);
 extern void rt6855_esw_init(void);
 #else
 extern void rt305x_esw_init(void);
@@ -80,6 +85,9 @@ extern struct eth_device* 	rt2880_pdev;
 extern ulong uboot_end_data;
 extern ulong uboot_end;
 
+#if defined (RT6855A_ASIC_BOARD) || defined(RT6855A_FPGA_BOARD)	
+static int watchdog_reset();
+#endif
 
 ulong monitor_flash_len;
 
@@ -133,10 +141,14 @@ static void Init_System_Mode(void)
 #elif defined (RT2883_FPGA_BOARD) || defined (RT3052_FPGA_BOARD) || defined (RT3352_FPGA_BOARD) || defined (RT5350_FPGA_BOARD)
 	mips_cpu_feq = 40 * 1000 *1000;
 	mips_bus_feq = mips_cpu_feq/3;
+#elif defined (RT6855A_FPGA_BOARD)
+	mips_cpu_feq = 50 * 1000 *1000;
+	mips_bus_feq = mips_cpu_feq/2;
 #elif defined (RT3883_FPGA_BOARD)
 	mips_cpu_feq = 40 * 1000 *1000;
 	mips_bus_feq = mips_cpu_feq;
-#elif defined (RT6855_FPGA_BOARD)
+#elif defined (RT6855_FPGA_BOARD) || defined (RT6352_FPGA_BOARD) || defined (RT71100_FPGA_BOARD)
+	/* FIXME */
 	mips_cpu_feq = 50 * 1000 *1000;
 	mips_bus_feq = mips_cpu_feq/4;
 #elif defined (RT2883_ASIC_BOARD) 
@@ -205,6 +217,44 @@ static void Init_System_Mode(void)
 	}
 #elif defined(RT6855_ASIC_BOARD)
 	mips_cpu_feq = (400*1000*1000);
+	mips_bus_feq = (133*1000*1000);
+#elif defined (RT6855A_ASIC_BOARD)
+	/* FPGA is 25/32Mhz
+	 * ASIC RT6856/RT6856A: DDR(0): 233.33, DDR(1): 175, SDR: 140
+	 *      RT6855/RT6855A: DDR(0): 166.67, DDR(1): 125, SDR: 140 */
+	reg = RALINK_REG(RT2880_SYSCFG_REG);
+	if ((reg & (1 << 25)) == 0) { /* SDR */
+		if ((reg & (1 << 9)) != 0)
+			mips_cpu_feq = (560*1000*1000);
+		else {
+			if ((reg & (1 << 26)) != 0)	
+				mips_cpu_feq = (560*1000*1000);
+			else
+				mips_cpu_feq = (420*1000*1000);
+		}	
+		mips_bus_feq = (140*1000*1000);
+	} else { /* DDR */
+		if ((reg & (1 << 9)) != 0) {
+			mips_cpu_feq = (700*1000*1000);
+			if ((reg & (1 << 26)) != 0)
+				mips_bus_feq = (175*1000*1000);
+			else
+				mips_bus_feq = 233333333;
+		} else {
+			mips_cpu_feq = (500*1000*1000);
+			if ((reg & (1 << 26)) != 0)
+				mips_bus_feq = (125*1000*1000);
+			else
+				mips_bus_feq = 166666667;
+		}
+	}
+#elif defined(RT6352_ASIC_BOARD)
+	/* FIXME */
+	mips_cpu_feq = (600*1000*1000);
+	mips_bus_feq = (133*1000*1000);
+#elif defined(RT71100_ASIC_BOARD)
+	/* FIXME */
+	mips_cpu_feq = (800*1000*1000);
 	mips_bus_feq = (133*1000*1000);
 #elif defined (RT3883_ASIC_BOARD) 
 	clk_sel = (reg>>8) & 0x03;
@@ -508,6 +558,9 @@ void board_init_f(ulong bootflag)
 		
 	memset ((void *)gd, 0, sizeof (gd_t));
 
+#if defined (RT6855A_ASIC_BOARD) || defined(RT6855A_FPGA_BOARD)	
+	watchdog_reset();
+#endif
 	timer_init();
 	env_init();		/* initialize environment */
 	init_baudrate();		/* initialze baudrate settings */
@@ -649,7 +702,7 @@ void board_init_f(ulong bootflag)
 	copy_code(addr);
 #endif
 
-#ifdef RT6855_FPGA_BOARD
+#if defined RT6855_FPGA_BOARD || defined RT6352_FPGA_BOARD  || RT71100_FPGA_BOARD 
 	value = le32_to_cpu(*(volatile u_long *)(RALINK_SYSCTL_BASE + 0x0B10));
 	value &= ~(0x7);
 	*(volatile u_long *)(RALINK_SYSCTL_BASE + 0x0B10) = cpu_to_le32(value);	
@@ -670,6 +723,7 @@ void board_init_f(ulong bootflag)
 	/* NOTREACHED - relocate_code() does not return */
 }
 
+#define SEL_LOAD_LINUX_WRITE_FLASH_BY_SERIAL 0
 #define SEL_LOAD_LINUX_SDRAM            1
 #define SEL_LOAD_LINUX_WRITE_FLASH      2
 #define SEL_BOOT_FLASH                  3
@@ -784,7 +838,7 @@ int tftp_config(int type, char *argv[])
 #if defined (RT2880_ASIC_BOARD) || defined (RT2880_FPGA_BOARD)
 		argv[1] = "0x8a800000";
 #else
-		argv[1] = "0x80800000";
+		argv[1] = "0x80A00000";
 #endif
 		printf("\tInput Linux Kernel filename ");
 		//argv[2] = "uImage";
@@ -1185,7 +1239,7 @@ void board_init_r (gd_t *id, ulong dest_addr)
 #if defined(RT3052_ASIC_BOARD) || defined(RT2883_ASIC_BOARD)
 	void config_usbotg(void);
 	config_usbotg();
-#elif defined(RT3883_ASIC_BOARD) || defined(RT3352_ASIC_BOARD) || defined(RT5350_ASIC_BOARD) || defined(RT6855_ASIC_BOARD)
+#elif defined(RT3883_ASIC_BOARD) || defined(RT3352_ASIC_BOARD) || defined(RT5350_ASIC_BOARD) || defined(RT6855_ASIC_BOARD) || defined (RT6352_ASIC_BOARD)
 	void config_usb_ehciohci(void);
 	config_usb_ehciohci();
 #endif
@@ -1195,22 +1249,22 @@ void board_init_r (gd_t *id, ulong dest_addr)
 		printf("***********************\n");
 		printf("Watchdog Reset Occurred\n");
 		printf("***********************\n");
-		RALINK_REG(RT2880_RSTSTAT_REG)=RT2880_WDRST;
-		RALINK_REG(RT2880_RSTSTAT_REG)=0;
+		RALINK_REG(RT2880_RSTSTAT_REG)|=RT2880_WDRST;
+		RALINK_REG(RT2880_RSTSTAT_REG)&=~RT2880_WDRST;
 		trigger_hw_reset();
 	}else if(reg & RT2880_SWSYSRST){
 		printf("******************************\n");
 		printf("Software System Reset Occurred\n");
 		printf("******************************\n");
-		RALINK_REG(RT2880_RSTSTAT_REG)=RT2880_SWSYSRST;
-		RALINK_REG(RT2880_RSTSTAT_REG)=0;
+		RALINK_REG(RT2880_RSTSTAT_REG)|=RT2880_SWSYSRST;
+		RALINK_REG(RT2880_RSTSTAT_REG)&=~RT2880_SWSYSRST;
 		trigger_hw_reset();
 	}else if (reg & RT2880_SWCPURST){
 		printf("***************************\n");
 		printf("Software CPU Reset Occurred\n");
 		printf("***************************\n");
-		RALINK_REG(RT2880_RSTSTAT_REG)=RT2880_SWCPURST;
-		RALINK_REG(RT2880_RSTSTAT_REG)=0;
+		RALINK_REG(RT2880_RSTSTAT_REG)|=RT2880_SWCPURST;
+		RALINK_REG(RT2880_RSTSTAT_REG)&=~RT2880_SWCPURST;
 		trigger_hw_reset();
 	}
 
@@ -1301,6 +1355,11 @@ void board_init_r (gd_t *id, ulong dest_addr)
 #if defined(RT3052_ASIC_BOARD)
 	void adjust_frequency(void);
 	//adjust_frequency();
+#elif defined (RT3352_ASIC_BOARD)
+	void adjust_crystal_circuit(void);
+	adjust_crystal_circuit();
+	void adjust_rf_r17(void);
+	adjust_rf_r17();
 #endif
 
 	/* relocate environment function pointers etc. */
@@ -1421,34 +1480,63 @@ void board_init_r (gd_t *id, ulong dest_addr)
 	SHOW_VER_STR();
 #endif /* defined(CFG_ENV_IS_IN_SPI) || defined (CFG_ENV_IS_IN_NAND) */
 
-#elif defined (RT6855_ASIC_BOARD) || defined (RT6855_FPGA_BOARD)
+#elif (defined (RT6855_ASIC_BOARD) || defined (RT6855_FPGA_BOARD) ||  \
+      defined (RT6855A_ASIC_BOARD) || defined (RT6855A_FPGA_BOARD) || \
+      defined (RT6352_ASIC_BOARD) || defined (RT6352_FPGA_BOARD) ||  \
+      defined (RT71100_ASIC_BOARD) || defined (RT71100_FPGA_BOARD)) && defined (UBOOT_RAM)
 	{
 		unsigned long chip_mode, dram_comp, dram_bus, is_ddr1, is_ddr2, data, cfg0, cfg1, size=0;
-
+		int dram_type_bit_offset = 0;
+#if defined (RT6855A_ASIC_BOARD) || defined(RT6855A_FPGA_BOARD)	
+		data = RALINK_REG(RALINK_SYSCTL_BASE+0x8c);
+		chip_mode = ((data>>28) & 0x3)|(((data>>22) & 0x3)<<2);
+		dram_type_bit_offset = 24;
+#else		
 		data = RALINK_REG(RALINK_SYSCTL_BASE+0x10);
-
 		chip_mode = (data&0x0F);
-		switch((data>>4)&0x3)
+		dram_type_bit_offset = 4;
+#endif		
+		switch((data>>dram_type_bit_offset)&0x3)			
 		{
 			default:
 			case 0:
+#if defined (RT6855A_ASIC_BOARD) || defined(RT6855A_FPGA_BOARD)
+#else				
 			case 3:
+#endif
+#if defined (RT6352_ASIC_BOARD) || defined (RT6352_FPGA_BOARD)
+				is_ddr1 = 1; 
+				is_ddr2 = 0;
+#else				
 				is_ddr2 = is_ddr1 = 0;
+#endif
 				break;
+#if defined (RT6855A_ASIC_BOARD) || defined(RT6855A_FPGA_BOARD)
+			case 2:
+#else				
 			case 1:
+#endif
 				is_ddr2 = 0;
 				is_ddr1 = 1;
 				break;
+#if defined (RT6855A_ASIC_BOARD) || defined(RT6855A_FPGA_BOARD)
+			case 3:
+#else				
 			case 2:
+#endif
 				is_ddr2 = 1;
 				is_ddr1 = 0;
 				break;
 		}
 		
-		switch((data>>4)&0x3)
+		switch((data>>dram_type_bit_offset)&0x3)
 		{
 			case 0:
+#if defined (RT6352_ASIC_BOARD) || defined (RT6352_FPGA_BOARD) || \				
+	defined (RT6855A_ASIC_BOARD) || defined(RT6855A_FPGA_BOARD)
+#else
 			case 3:
+#endif				
 				cfg0 = RALINK_REG(RALINK_MEMCTRL_BASE+0x0);
 				cfg1 = RALINK_REG(RALINK_MEMCTRL_BASE+0x4);
 				data = cfg1;
@@ -1459,6 +1547,10 @@ void board_init_r (gd_t *id, ulong dest_addr)
 				break;
 			case 1:
 			case 2:
+#if defined (RT6352_ASIC_BOARD) || defined (RT6352_FPGA_BOARD) || \
+	defined (RT6855A_ASIC_BOARD) || defined(RT6855A_FPGA_BOARD)
+			case 3:
+#endif				
 				cfg0 = RALINK_REG(RALINK_MEMCTRL_BASE+0x40);
 				cfg1 = RALINK_REG(RALINK_MEMCTRL_BASE+0x44);
 				data = cfg1;
@@ -1474,20 +1566,73 @@ void board_init_r (gd_t *id, ulong dest_addr)
 				}	
 				break;
 		}
-		
+#if defined (RT6855A_ASIC_BOARD) || defined(RT6855A_FPGA_BOARD)		
+		if ((((RALINK_REG(RALINK_SYSCTL_BASE+0x8c)>>30)&0x1)==0) && ((chip_mode==2)||(chip_mode==3))) 
+		{
+#if defined(ON_BOARD_DDR2)
+			is_ddr2 = 1;
+			is_ddr1 = 0;
+#elif defined(ON_BOARD_DDR1)
+			is_ddr2 = 0;
+			is_ddr1 = 1;
+#else
+			is_ddr2 = is_ddr1 = 0;
+#endif
+			dram_comp = DRAM_COMPONENT;
+			dram_bus = DRAM_BUS;
+			size = DRAM_SIZE;
+		}
+#endif
+		printf("============================================ \n");
+		printf("Ralink UBoot Version: %s\n", RALINK_LOCAL_VERSION);
+		printf("-------------------------------------------- \n");
+		printf("%s %s %s\n",CHIP_TYPE, CHIP_VERSION, GMAC_MODE);
+#if defined (RT6855A_ASIC_BOARD) || defined (RT6855A_FPGA_BOARD)
+#if defined (RT6855A_FPGA_BOARD)
+		if((!is_ddr2)&&(!is_ddr1))
+		{
+		printf("[SDR_CFG0=0x%08X, SDR_CFG1=0x%08X]\n", RALINK_REG(RALINK_MEMCTRL_BASE+0x0),\
+								RALINK_REG(RALINK_MEMCTRL_BASE+0x4));
+		}	
+		else
+		{		
+		printf("[DDR_CFG0 =0x%08X, DDR_CFG1 =0x%08X]\n", RALINK_REG(RALINK_MEMCTRL_BASE+0x40),\
+								RALINK_REG(RALINK_MEMCTRL_BASE+0x44));
+		printf("[DDR_CFG2 =0x%08X, DDR_CFG3 =0x%08X]\n", RALINK_REG(RALINK_MEMCTRL_BASE+0x48),\
+								RALINK_REG(RALINK_MEMCTRL_BASE+0x4C));
+		printf("[DDR_CFG4 =0x%08X, DDR_CFG10=0x%08X]\n", RALINK_REG(RALINK_MEMCTRL_BASE+0x50),\
+								RALINK_REG(RALINK_MEMCTRL_BASE+0x68));
+		}
+#endif			
+		printf("DRAM_CONF_FROM: %s \n", ((RALINK_REG(RALINK_SYSCTL_BASE+0x8c)>>30)&0x1) ? \
+			"From SPI/NAND": (((chip_mode==2)||(chip_mode==3)) ? "From Uboot" : "Boot-strap"));
+#elif defined (RT6352_ASIC_BOARD) || defined(RT6352_FPGA_BOARD)
+		printf("DRAM_CONF_FROM: %s \n", (((RALINK_REG(RALINK_SYSCTL_BASE+0x10)>>8)&0x1)==0) ? "From SPI/NAND": 
+				(((chip_mode==2)||(chip_mode==3)) ? "From Uboot" : "Auto-detection"));
+#else
+		printf("DRAM_CONF_FROM: %s \n", ((RALINK_REG(RALINK_SYSCTL_BASE+0x10)>>7)&0x1) ? "From SPI/NAND":
+				(((chip_mode==2)||(chip_mode==3)) ? "From Uboot" : "Auto-detection"));
+#endif		
+		printf("DRAM_TYPE: %s \n", is_ddr2 ? "DDR2": (is_ddr1 ? "DDR1" : "SDRAM"));
+		printf("DRAM component: %d Mbits\n", dram_comp);
+		printf("DRAM bus: %d bit\n", dram_bus);
+		printf("Total memory: %d MBytes\n", size);
+		printf("%s\n", FLASH_MSG);
+		printf("%s\n", "Date:" __DATE__ "  Time:" __TIME__ );
+		printf("============================================ \n");
+#if 0		
 		printf("============================================ \n"); \
 		printf("Ralink UBoot Version: %s\n", RALINK_LOCAL_VERSION); \
 		printf("-------------------------------------------- \n"); \
 		printf("%s %s %s\n",CHIP_TYPE, CHIP_VERSION, GMAC_MODE); \
-		printf("DRAM_CONF_FROM: %s \n", ((RALINK_REG(RALINK_SYSCTL_BASE+0x10)>>7)&0x1) ? "From SPI/NAND": (((chip_mode==2)||(chip_mode==3)			) ? "From Uboot" : "Auto-detection"));
-		printf("DRAM_TYPE: %s \n", is_ddr2 ? "DDR2": (is_ddr1 ? "DDR1" : "SDRAM"));
-		printf("DRAM component: %d Mbits\n", dram_comp); \
-		printf("DRAM bus: %d bit\n", dram_bus); \
-		printf("Total memory: %d MBytes\n", size); \
+		printf("DRAM_CONF_FROM: %s \n", "From Uboot"); \
+		printf("DRAM component: %d Mbits %s\n", DRAM_COMPONENT, DDR_INFO); \
+		printf("DRAM bus: %d bit\n", DRAM_BUS); \
+		printf("Total memory: %d MBytes\n", DRAM_SIZE); \
 		printf("%s\n", FLASH_MSG); \
 		printf("%s\n", "Date:" __DATE__ "  Time:" __TIME__ ); \
-		printf("============================================ \n"); \
-
+		printf("============================================ \n");
+#endif
 	}
 #else
 	SHOW_VER_STR();
@@ -1579,8 +1724,15 @@ void board_init_r (gd_t *id, ulong dest_addr)
     defined (RT3352_ASIC_BOARD) || defined (RT3352_FPGA_BOARD)  || \
     defined (RT5350_ASIC_BOARD) || defined (RT5350_FPGA_BOARD)
 	rt305x_esw_init();
-#elif defined (RT6855_ASIC_BOARD) || defined (RT6855_FPGA_BOARD)
-	rt6855_esw_init();
+#elif defined (RT6855_ASIC_BOARD) || defined (RT6855_FPGA_BOARD) || \
+      defined (RT6352_ASIC_BOARD) || defined (RT6352_FPGA_BOARD) || \
+      defined (RT71100_ASIC_BOARD) || defined (RT71100_FPGA_BOARD)
+	rt_gsw_init();
+#elif defined (RT6855A_ASIC_BOARD) || defined (RT6855A_FPGA_BOARD)
+#ifdef FPGA_BOARD
+	rt6855A_eth_gpio_reset();
+#endif
+	rt6855A_gsw_init();
 #endif
 
 #ifdef RTL8367_SW
@@ -1609,7 +1761,7 @@ void board_init_r (gd_t *id, ulong dest_addr)
 			if ((my_tmp = tstc()) != 0) {	/* we got a key press	*/
 				timer1 = 0;	/* no more delay	*/
 				BootType = getc();
-				if ((BootType < '1' || BootType > '5') && (BootType != '7') && (BootType != '8') && (BootType != '9'))
+				if ((BootType < '0' || BootType > '5') && (BootType != '7') && (BootType != '8') && (BootType != '9'))
 					BootType = '3';
 				printf("\n\rYou choosed %c\n\n", BootType);
 				break;
@@ -1885,7 +2037,24 @@ void board_init_r (gd_t *id, ulong dest_addr)
 			//reset
 			do_reset(cmdtp, 0, argc, argv);
 			break;
+#if defined (CFG_ENV_IS_IN_NAND) || defined (CFG_ENV_IS_IN_SPI)
+		case '0':
+			printf("\n%d: System Load Linux then write to Flash via Serial. \n", SEL_LOAD_LINUX_WRITE_FLASH_BY_SERIAL);
+			argc= 1;
+			setenv("autostart", "no");
+			my_tmp = do_load_serial_bin(cmdtp, 0, argc, argv);
+			NetBootFileXferSize=simple_strtoul(getenv("filesize"), NULL, 16);
 
+#if defined (CFG_ENV_IS_IN_NAND)
+			ranand_erase_write((char *)CFG_LOAD_ADDR, CFG_KERN_ADDR-CFG_FLASH_BASE, NetBootFileXferSize);
+#elif defined (CFG_ENV_IS_IN_SPI)
+			raspi_erase_write((char *)CFG_LOAD_ADDR, CFG_KERN_ADDR-CFG_FLASH_BASE, NetBootFileXferSize);
+#endif //CFG_ENV_IS_IN_FLASH
+
+			//reset            
+			do_reset(cmdtp, 0, argc, argv);
+			break;
+#endif
 		default:
 			printf("   \nSystem Boot Linux via Flash.\n");
 			do_bootm(cmdtp, 0, 1, argv);
@@ -1987,6 +2156,15 @@ U_BOOT_CMD(
 );
 #endif
 
+#if defined(RT3352_ASIC_BOARD)
+void adjust_crystal_circuit(void)
+{
+	int d = 0x45;
+
+	rw_rf_reg(1, 18, &d);
+}
+#endif
+
 #if defined(RT3052_ASIC_BOARD)
 /*
  *  Adjust core voltage to 1.2V using RF reg 26 for the 3052 two layer board.
@@ -2017,7 +2195,109 @@ void adjust_frequency(void)
 #endif
 
 #ifdef RALINK_USB_SUPPORT
-#if defined(RT3883_ASIC_BOARD) || defined(RT3352_ASIC_BOARD) || defined(RT5350_ASIC_BOARD) || defined(RT6855_ASIC_BOARD)
+void adjust_rf_r17(void)
+{
+	u32 r17;
+	u32 i;
+	u32 val;
+	u32 j = 0;
+
+	//read from EE offset 0x3A
+#if defined (CFG_ENV_IS_IN_NAND)
+	ranand_read((char *)&r17, CFG_FACTORY_ADDR-CFG_FLASH_BASE+0x3a, 1);
+#elif defined (CFG_ENV_IS_IN_SPI)
+	raspi_read((char *)&r17, CFG_FACTORY_ADDR-CFG_FLASH_BASE+0x3a, 1);
+#else //CFG_ENV_IS_IN_FLASH
+	r17 = *(volatile u32 *)(CFG_FACTORY_ADDR+0x38);
+	r17 >>= 16;
+#endif
+	r17 &= 0xff;
+	//printf("EE offset 0x3A is  0x%0X\n", r17);
+	if((r17 == 0) || (r17 == 0xff)){
+	    r17 = 0x2c;
+	}
+
+	if(r17 <= 0xf) {
+		for(i=1; i<=r17; i++) {
+		//write to RF R17
+		val = i;
+		val |= 1 << 7;
+		rw_rf_reg(1, 17, &val);
+		udelay(2000);
+		rw_rf_reg(0, 17, &val);
+		//printf("Update RF_R17 to 0x%0X\n", val);
+		}	
+	}
+	else{
+		for(i=1; i<=0xf; i++) {
+		//write to RF R17
+		val = i;
+		val |= 1 << 7;
+		rw_rf_reg(1, 17, &val);
+		udelay(2000);
+		rw_rf_reg(0, 17, &val);
+		printf("Update RF_R17 to 0x%0X\n", val);
+		}
+		val = 0x1f;
+		val |= 1 << 7;
+		rw_rf_reg(1, 17, &val);
+		udelay(2000);
+		rw_rf_reg(0, 17, &val);
+		printf("Update RF_R17 to 0x%0X\n", val);
+
+		if(r17 <= 0x1f) {
+			for(i=0x1e; i>=r17; i--) {
+			//write to RF R17
+			val = i;
+			val |= 1 << 7;
+			rw_rf_reg(1, 17, &val);
+			udelay(2000);
+			rw_rf_reg(0, 17, &val);
+			printf("Update RF_R17 to 0x%0X\n", val);
+			}
+		} else if((r17 > 0x1f) && (r17 <=0x2f)){
+			for(i=0x2f; i>=r17; i--) {
+			//write to RF R17
+			val = i;
+			val |= 1 << 7;
+			rw_rf_reg(1, 17, &val);
+			udelay(2000);
+			rw_rf_reg(0, 17, &val);
+			//printf("Update RF_R17 to 0x%0X\n", val);
+			}
+		}else {
+			val = 0x2f;
+			val |= 1 << 7;
+			rw_rf_reg(1, 17, &val);
+			udelay(2000);
+			rw_rf_reg(0, 17, &val);
+			//printf("Update RF_R17 to 0x%0X\n", val);
+		}
+		if((r17 > 0x2f) && (r17 <= 0x3f)){
+			for(i=0x3f; i>=r17; i--) {
+			//write to RF R17
+			val = i;
+			val |= 1 << 7;
+			rw_rf_reg(1, 17, &val);
+			udelay(2000);
+			rw_rf_reg(0, 17, &val);
+			//printf("Update RF_R17 to 0x%0X\n", val);
+			}
+		}
+		if(r17 > 0x3f){
+			val = 0x3f;
+			val |= 1 << 7;
+			rw_rf_reg(1, 17, &val);
+			udelay(2000);
+			rw_rf_reg(0, 17, &val);
+			//printf("Only Update RF_R17 to 0x%0X\n", val);
+		}
+	}
+	//rw_rf_reg(0, 17, &val);
+	//printf("Read RF_R17 = 0x%0X\n", val);
+}
+
+#if defined(RT3883_ASIC_BOARD) || defined(RT3352_ASIC_BOARD) || defined(RT5350_ASIC_BOARD) || defined(RT6855_ASIC_BOARD) || defined (RT6352_ASIC_BOARD)
 /*
  * enter power saving mode
  */
@@ -2030,14 +2310,14 @@ void config_usb_ehciohci(void)
 	RALINK_REG(RT2880_RSTCTRL_REG) = val;
 
 	val = RALINK_REG(RT2880_CLKCFG1_REG);
-#if defined(RT5350_ASIC_BOARD)
+#if defined(RT5350_ASIC_BOARD) || defined(RT6855_ASIC_BOARD)
 	val = val & ~(RALINK_UPHY0_CLK_EN) ;  // disable USB port0 PHY. 
 #else
 	val = val & ~(RALINK_UPHY0_CLK_EN | RALINK_UPHY1_CLK_EN) ;  // disable USB port0 & port1 PHY. 
 #endif
 	RALINK_REG(RT2880_CLKCFG1_REG) = val;
 }
-#endif /* (RT3883_ASIC_BOARD) || defined(RT3352_ASIC_BOARD)|| defined(RT5350_ASIC_BOARD) || defined(RT6855_ASIC_BOARD) */
+#endif /* (RT3883_ASIC_BOARD) || defined(RT3352_ASIC_BOARD)|| defined(RT5350_ASIC_BOARD) || defined(RT6855_ASIC_BOARD) || defined (RT6352_ASIC_BOARD) */
 
 #if defined(RT3052_ASIC_BOARD) || defined(RT2883_ASIC_BOARD)
 int usbotg_host_suspend(void)
@@ -2206,4 +2486,26 @@ void config_usbotg(void)
 }
 
 #endif
+#endif
+#if defined (RT6855A_ASIC_BOARD) || defined(RT6855A_FPGA_BOARD)	
+static int watchdog_reset()
+{
+	unsigned int word;
+	unsigned int i;
+
+	/* check if do watch dog reset */
+	if (RALINK_REG(RALINK_HIR_REG) == 0x40002) {
+		if (!(RALINK_REG(0xbfb00080) >> 31)) {
+			/* set delay counter */
+			RALINK_REG(RALINK_TIMER5_LDV) = 1000;
+			/* enable watch dog timer */
+			word = RALINK_REG(RALINK_TIMER_CTL);
+			word |= ((1 << 5) | (1 << 25));
+			RALINK_REG(RALINK_TIMER_CTL) = word;
+			while(1);
+		}
+	}
+
+	return 0;
+}
 #endif

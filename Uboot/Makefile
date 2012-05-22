@@ -116,6 +116,9 @@ endif
 ifeq ($(ON_BOARD_1024M_DRAM_COMPONENT),y)
 DRAM_SIZE=128
 endif
+ifeq ($(ON_BOARD_2048M_DRAM_COMPONENT),y)
+DRAM_SIZE=256
+endif
 
 # DRAM_WIDTH: SDR(DDR2)
 # 0:16(8)
@@ -221,6 +224,27 @@ u-boot.srec:	u-boot
 uboot.bin:	u-boot
 		$(OBJCOPY) ${OBJCFLAGS} -O binary $< $@
 
+
+		@echo ""
+		@echo "===============<<IMPORTANT>>=================="
+ifeq ($(ON_BOARD_NAND_FLASH_COMPONENT),y)
+		@echo "Notes:Uboot firmware is uboot.img NOT uboot.bin"
+endif
+ifeq ($(ON_BOARD_NOR_FLASH_COMPONENT),y)
+		@echo "Notes:Uboot firmware is uboot.bin NOT uboot.img"
+endif
+ifeq ($(ON_BOARD_SPI_FLASH_COMPONENT),y)
+ifeq ($(UBOOT_ROM),y)
+		@echo "Notes:Uboot firmware is uboot.bin NOT uboot.img"
+else
+ifeq ($(UBOOT_RAM),y)
+		@echo "Notes:Uboot firmware in flash is uboot.img NOT uboot.bin"
+endif
+endif
+endif
+		@echo "================================================"
+		@echo ""
+
 uboot.img:	uboot.bin
 ifeq ($(CFG_ENV_IS), IN_SPI)
 		../tools/mkimage/mkimage -A $(ARCH) -T standalone -C none \
@@ -232,11 +256,6 @@ ifeq ($(CFG_ENV_IS), IN_NAND)
 		-a $(TEXT_BASE) -e $(shell readelf -h u-boot | grep "Entry" | awk '{print $$4}') \
 		-d $< $@
 endif
-		@echo ""
-		@echo "===============<<IMPORTANT>>=================="
-		@echo "Notes: Uboot firmware is uboot.img NOT uboot.bin"
-		@echo "================================================"
-		@echo ""
 
 u-boot.dis:	u-boot
 		$(OBJDUMP) -d $< > $@
