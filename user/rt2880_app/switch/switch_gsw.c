@@ -16,6 +16,15 @@
 #define RT_SWITCH_HELP		1
 #define RT_TABLE_MANIPULATE	1
 #endif
+
+#if defined (CONFIG_RALINK_RT6352)
+#define MAX_PORT		7
+#elif defined (CONFIG_RALINK_RT71100)
+#define MAX_PORT		2
+#else
+#define MAX_PORT		6
+#endif
+
 int esw_fd;
 
 void switch_init(void)
@@ -36,42 +45,45 @@ void usage(char *cmd)
 {
 #if RT_SWITCH_HELP
 	printf("Usage:\n");
-	printf(" %s dump                                 - dump switch table\n", cmd);
-	printf(" %s clear                                - clear switch table\n", cmd);
+	printf(" %s acl etype add [ethtype] [portmap]              - drop etherytype packets\n", cmd);
+	printf(" %s acl dip add [dip] [portmap]                    - drop dip packets\n", cmd);
+	printf(" %s acl dip meter [dip] [portmap][meter:kbps]      - rate limit dip packets\n", cmd);
+	printf(" %s acl dip trtcm [dip] [portmap][CIR:kbps][CBS][PIR][PBS] - TrTCM dip packets\n", cmd);
+	printf(" %s acl port add [sport] [portmap]           - drop src port packets\n", cmd);
+	printf(" %s acl L4 add [2byes] [portmap]             - drop L4 packets with 2bytes payload\n", cmd);
 	printf(" %s add [mac] [portmap]                  - add an entry to switch table\n", cmd);
 	printf(" %s add [mac] [portmap] [vlan id]       - add an entry to switch table\n", cmd);
 	printf(" %s add [mac] [portmap] [vlan id] [age] - add an entry to switch table\n", cmd);
-#if defined CONFIG_RALINK_RT6855
-	printf(" %s sip add [sip] [dip] [portmap]            - add a sip entry to switch table\n", cmd);
-	printf(" %s sip del [sip] [dip]		             - del a sip entry to switch table\n", cmd);
-	printf(" %s sip dump                                 - dump switch sip table\n", cmd);
-	printf(" %s sip clear                                - clear switch sip table\n", cmd);
+	printf(" %s clear                                - clear switch table\n", cmd);
+	printf(" %s del [mac]                            - delete an entry from switch table\n", cmd);
+	printf(" %s del [mac] [fid]			 - delete an entry from switch table\n", cmd);
 	printf(" %s dip add [dip] [portmap]                  - add a dip entry to switch table\n", cmd);
 	printf(" %s dip del [dip]	                     - del a dip entry to switch table\n", cmd);
 	printf(" %s dip dump                                 - dump switch dip table\n", cmd);
 	printf(" %s dip clear                                - clear switch dip table\n", cmd);
-	printf(" %s acl etype add [ethtype] [portmap]              - drop etherytype packets\n", cmd);
-	printf(" %s acl dip add [dip] [portmap]              - drop dip packets\n", cmd);
-	printf(" %s acl dip meter [dip] [portmap][meter:kbps]     - rate limit dip packets\n", cmd);
-	printf(" %s acl dip trtcm [dip] [portmap][CIR:kbps][CBS][PIR][PBS] - TrTCM dip packets\n", cmd);
-	printf(" %s acl port add [sport] [portmap]           - drop src port packets\n", cmd);
-	printf(" %s acl L4 add [2byes] [portmap]           - drop L4 packets with 2bytes payload\n", cmd);
-	printf(" %s mirror monitor [portnumber]            - enable port mirror and indicate monitor port number\n", cmd);
-	printf(" %s mirror target [portnumber] [0:off, 1:rx, 2:tx, 3:all]  - set port mirror target\n", cmd);
+	printf(" %s dump		- dump switch table\n", cmd);
+	printf(" %s ingress-rate on [port] [Mbps]        - set ingress rate limit on port 0~4 \n", cmd);
+	printf(" %s egress-rate on [port] [Mbps]         - set egress rate limit on port 0~4 \n", cmd);
+	printf(" %s ingress-rate off [port]              - del ingress rate limit on port 0~4 \n", cmd);
+	printf(" %s egress-rate off [port]               - del egress rate limit on port 0~4\n", cmd);
 	printf(" %s filt [mac]                           - add a SA filtering entry (with portmap 1111111) to switch table\n", cmd);
 	printf(" %s filt [mac] [portmap]                 - add a SA filtering entry to switch table\n", cmd);
 	printf(" %s filt [mac] [portmap] [vlan id]      - add a SA filtering entry to switch table\n", cmd);
 	printf(" %s filt [mac] [portmap] [vlan id] [age]- add a SA filtering entry to switch table\n", cmd);
-#endif
-	printf(" %s del [mac]                            - delete an entry from switch table\n", cmd);
-	printf(" %s del [mac] [fid]                 - delete an entry from switch table\n", cmd);
-	printf(" %s vlan dump                            - dump switch table\n", cmd);
-	printf(" %s vlan set [vlan idx] [vid] [portmap]  - set vlan id and associated member\n", cmd);
-	printf(" %s reg r [offset]                       - register read from offset\n", cmd);
-	printf(" %s reg w [offset] [value]               - register write value to offset\n", cmd);
-#endif
+	printf(" %s mymac [mac] [portmap]                  - add a mymac entry to switch table\n", cmd);
+	printf(" %s mirror monitor [portnumber]            - enable port mirror and indicate monitor port number\n", cmd);
+	printf(" %s mirror target [portnumber] [0:off, 1:rx, 2:tx, 3:all]  - set port mirror target\n", cmd);
 	printf(" %s phy [phy_addr]			 - dump phy register of specific port\n", cmd);
 	printf(" %s phy					 - dump all phy registers\n", cmd);
+	printf(" %s reg r [offset]                       - register read from offset\n", cmd);
+	printf(" %s reg w [offset] [value]               - register write value to offset\n", cmd);
+	printf(" %s sip add [sip] [dip] [portmap]            - add a sip entry to switch table\n", cmd);
+	printf(" %s sip del [sip] [dip]		             - del a sip entry to switch table\n", cmd);
+	printf(" %s sip dump                                 - dump switch sip table\n", cmd);
+	printf(" %s sip clear                                - clear switch sip table\n", cmd);
+	printf(" %s vlan dump                            - dump switch table\n", cmd);
+	printf(" %s vlan set [vlan idx] [vid] [portmap]  - set vlan id and associated member\n", cmd);
+#endif
 	switch_fini();
 	exit(0);
 }
@@ -249,7 +261,7 @@ void acl_dip_meter(int argc, char *argv[])
 	}
 
 		
-	if (!argv[5] || strlen(argv[5]) != 7) {
+	if (!argv[5] || strlen(argv[5]) != 8) {
 		printf("portmap format error, should be of length 7\n");
 			return;
 	}
@@ -398,7 +410,7 @@ void acl_dip_trtcm(int argc, char *argv[])
 		return;
 	}
 		
-	if (!argv[5] || strlen(argv[5]) != 7) {
+	if (!argv[5] || strlen(argv[5]) != 8) {
 		printf("portmap format error, should be of length 7\n");
 			return;
 	}
@@ -584,7 +596,7 @@ void acl_ethertype(int argc, char *argv[])
 	}
 
 		
-	if (!argv[5] || strlen(argv[5]) != 7) {
+	if (!argv[5] || strlen(argv[5]) != 8) {
 		printf("portmap format error, should be of length 7\n");
 			return;
 	}
@@ -709,7 +721,7 @@ void acl_dip_modify(int argc, char *argv[])
 	}
 
 		
-	if (!argv[5] || strlen(argv[5]) != 7) {
+	if (!argv[5] || strlen(argv[5]) != 8) {
 		printf("portmap format error, should be of length 7\n");
 			return;
 	}
@@ -867,7 +879,7 @@ void acl_dip_pppoe(int argc, char *argv[])
 	}
 
 		
-	if (!argv[5] || strlen(argv[5]) != 7) {
+	if (!argv[5] || strlen(argv[5]) != 8) {
 		printf("portmap format error, should be of length 7\n");
 			return;
 	}
@@ -1026,7 +1038,7 @@ void acl_dip_add(int argc, char *argv[])
 	}
 
 		
-	if (!argv[5] || strlen(argv[5]) != 7) {
+	if (!argv[5] || strlen(argv[5]) != 8) {
 		printf("portmap format error, should be of length 7\n");
 			return;
 	}
@@ -1182,7 +1194,7 @@ void acl_l4_add(int argc, char *argv[])
 	}
 
 		
-	if (!argv[5] || strlen(argv[5]) != 7) {
+	if (!argv[5] || strlen(argv[5]) != 8) {
 		printf("portmap format error, should be of length 7\n");
 			return;
 	}
@@ -1296,7 +1308,7 @@ void acl_sp_add(int argc, char *argv[])
 	}
 
 		
-	if (!argv[5] || strlen(argv[5]) != 7) {
+	if (!argv[5] || strlen(argv[5]) != 8) {
 		printf("portmap format error, should be of length 7\n");
 			return;
 	}
@@ -1474,7 +1486,7 @@ void dip_add(int argc, char *argv[])
 	reg_write(REG_ESW_WT_MAC_ATA2, value);
 	printf("REG_ESW_WT_MAC_ATA2 is 0x%x\n\r",value);
 #endif
-	if (!argv[4] || strlen(argv[4]) != 7) {
+	if (!argv[4] || strlen(argv[4]) != 8) {
 			printf("portmap format error, should be of length 7\n");
 			return;
 	}
@@ -1649,7 +1661,7 @@ void sip_add(int argc, char *argv[])
 	reg_write(REG_ESW_WT_MAC_ATA1, value);
 	printf("REG_ESW_WT_MAC_ATA1 is 0x%x\n\r",value);
 
-	if (!argv[5] || strlen(argv[5]) != 7) {
+	if (!argv[5] || strlen(argv[5]) != 8) {
 			printf("portmap format error, should be of length 7\n");
 			return;
 	}
@@ -1750,7 +1762,11 @@ void table_dump(void)
 	}
 
 	reg_write(REG_ESW_WT_MAC_ATC, 0x8004);
+#if defined (CONFIG_RALINK_RT6352)
+	printf("hash  port(0:6)   fid   vid  age   mac-address     filter my_mac\n");
+#else
 	printf("hash  port(0:6)   fid   vid  age   mac-address     filter\n");
+#endif
 	for (i = 0; i < 0x800; i++) {
 		while(1) {
 			reg_read(REG_ESW_WT_MAC_ATC, &value);
@@ -1776,7 +1792,12 @@ void table_dump(void)
 				reg_read(REG_ESW_TABLE_TSRA1, &mac);
 				printf("  %08x", mac);
 				printf("%04x", ((mac2 >> 16) & 0xffff));
+#if defined (CONFIG_RALINK_RT6352)
+				printf("     %c", (((value2 >> 20) & 0x03)== 0x03)? 'y':'-');
+				printf(" %c\n", (((value2 >> 23) & 0x01)== 0x01)? 'y':'-');
+#else
 				printf("     %c\n", (((value2 >> 20) & 0x03)== 0x03)? 'y':'-');
+#endif
 				if (value & 0x4000) {
 					printf("end of table %d\n", i);
 					return;
@@ -1796,10 +1817,11 @@ void table_dump(void)
 
 void table_add(int argc, char *argv[])
 {
-	int i, j, value, is_filter;
+	unsigned int i, j, value, is_filter, is_mymac;
 	char tmpstr[9];
 
 	is_filter = (argv[1][0] == 'f')? 1 : 0;
+	is_mymac = (argv[1][0] == 'm')? 1 : 0;
 	if (!argv[2] || strlen(argv[2]) != 12) {
 		printf("MAC address format error, should be of length 12\n");
 		return;
@@ -1829,7 +1851,7 @@ void table_add(int argc, char *argv[])
 	reg_write(REG_ESW_WT_MAC_ATA2, value);
 	printf("REG_ESW_WT_MAC_ATA2 is 0x%x\n\r",value);
 
-	if (!argv[3] || strlen(argv[3]) != 7) {
+	if (!argv[3] || strlen(argv[3]) != 8) {
 		if (is_filter)
 			argv[3] = "1111111";
 		else {
@@ -1876,6 +1898,10 @@ void table_add(int argc, char *argv[])
 
 	if (is_filter)
 		value |= (7 << 20); //sa_filter
+
+	if (is_mymac)
+		value |= (1 << 23); 
+
 
 	reg_write(REG_ESW_WT_MAC_ATWD, value);
 	
@@ -2008,6 +2034,7 @@ void vlan_dump(void)
 			printf("%c", (value & 0x00100000)? '1':'-');
 			printf("%c", (value & 0x00200000)? '1':'-');
 			printf("%c", (value & 0x00400000)? '1':'-');
+			printf("%c", (value & 0x00800000)? '1':'-');
 			printf("    %4d\n", ((value & 0xfff0)>>4)) ;
 		}
 		else{
@@ -2045,6 +2072,7 @@ void vlan_dump(void)
 			printf("%c", (value & 0x00100000)? '1':'-');
 			printf("%c", (value & 0x00200000)? '1':'-');
 			printf("%c", (value & 0x00400000)? '1':'-');
+			printf("%c", (value & 0x00800000)? '1':'-');
 			printf("    %4d\n", ((value & 0xfff0)>>4)) ;
 		}
 		else{
@@ -2075,12 +2103,12 @@ void vlan_set(int argc, char *argv[])
 		printf("wrong vlan id range, should be within 0~4095\n");
 		return;
 	}
-	if (strlen(argv[5]) != 7) {
+	if (strlen(argv[5]) != 8) {
 		printf("portmap format error, should be of length 7\n");
 		return;
 	}
 	j = 0;
-	for (i = 0; i < 7; i++) {
+	for (i = 0; i < 8; i++) {
 		if (argv[5][i] != '0' && argv[5][i] != '1') {
 			printf("portmap format error, should be of combination of 0 or 1\n");
 			return;
@@ -2136,7 +2164,7 @@ void vlan_set(int argc, char *argv[])
 
 	//set vlan member
 	value = (j << 16);
-#if 1	
+#if 0	
 	/*port based stag*/	
 	value |= ((stag & 0xfff) << 4);//stag
 	value |= (1 << 31);//port based stag=1
@@ -2144,6 +2172,7 @@ void vlan_set(int argc, char *argv[])
 	//value |= (idx << 1);//fid
 
 	value |= (1 << 30);//IVL=1
+	value |= ((stag & 0xfff) << 4);//stag
 
 #endif
 	value |= 1;//valid
@@ -2160,7 +2189,7 @@ void vlan_set(int argc, char *argv[])
         value2 |= eg_tag << 4; //port 2
 	reg_write(REG_ESW_VLAN_VAWD2, value2);
 	}
-#if 1
+#if 0
 /*port based stag*/	
 	value2 = 0; 
 	value2 |= ((stag & 0x3f) << 2);//stag
@@ -2197,8 +2226,8 @@ void set_mirror_to(int argc, char *argv[])
         int idx;
 
 	idx = strtoul(argv[3], NULL, 0);
-	if (idx < 0 || 6 < idx) {
-		printf("wrong port member, should be within 0~6\n");
+	if (idx < 0 || MAX_PORT < idx) {
+		printf("wrong port member, should be within 0~%d\n", MAX_PORT);
 		return;
 	}
        
@@ -2220,8 +2249,8 @@ void set_mirror_from(int argc, char *argv[])
 	idx = strtoul(argv[3], NULL, 0);
 	mirror = strtoul(argv[4], NULL, 0);
 
-	if (idx < 0 || 6 < idx) {
-		printf("wrong port member, should be within 0~6\n");
+	if (idx < 0 || MAX_PORT < idx) {
+		printf("wrong port member, should be within 0~%d\n", MAX_PORT);
 		return;
 	}
 
@@ -2267,6 +2296,8 @@ int main(int argc, char *argv[])
 			usage(argv[0]);
 	}
 	else if (!strncmp(argv[1], "add", 4))
+		table_add(argc, argv);
+	else if (!strncmp(argv[1], "mymac", 4))
 		table_add(argc, argv);
 	else if (!strncmp(argv[1], "filt", 5))
 		table_add(argc, argv);
@@ -2387,6 +2418,44 @@ int main(int argc, char *argv[])
 		else
 			usage(argv[0]);
 	}
+	else if (!strncmp(argv[1], "ingress-rate", 6)) {
+		int port=0, bw=0;
+
+		if (argv[2][1] == 'n') {
+			port = strtoul(argv[3], NULL, 0);
+			bw = strtoul(argv[4], NULL, 0);
+			ingress_rate_set(1, port, bw);
+			printf("switch port=%d, bw=%d\n", port, bw);
+		}
+		else if (argv[2][1] == 'f') {
+			if (argc != 4)
+				usage(argv[0]);
+			port = strtoul(argv[3], NULL, 0);
+			ingress_rate_set(0, port, bw);
+			printf("switch port=%d ingress rate limit off\n", port);
+		}
+		else
+			usage(argv[0]);
+	}
+	else if (!strncmp(argv[1], "egress-rate", 6)) {
+		int port=0, bw=0;
+		
+		if (argv[2][1] == 'n') {
+			port = strtoul(argv[3], NULL, 0);
+			bw = strtoul(argv[4], NULL, 0);
+			egress_rate_set(1, port, bw);
+			printf("switch port=%d, bw=%d\n", port, bw);
+		}
+		else if (argv[2][1] == 'f') {
+			if (argc != 4)
+				usage(argv[0]);
+			port = strtoul(argv[3], NULL, 0);
+			egress_rate_set(0, port, bw);
+			printf("switch port=%d egress rate limit off\n", port);
+		}
+		else
+			usage(argv[0]);
+	}	
 	else
 		usage(argv[0]);
 
