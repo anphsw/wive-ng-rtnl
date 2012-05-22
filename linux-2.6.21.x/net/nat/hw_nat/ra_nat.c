@@ -330,25 +330,21 @@ uint32_t PpeExtIfRxHandler(struct sk_buff * skb)
 
 	/* PPE only can handle IPv4/VLAN/IPv6/PPP packets */
 	if(eth_type != ETH_P_IP &&
-#if defined(CONFIG_RA_HW_NAT_IPV6)
+#ifdef CONFIG_RA_HW_NAT_IPV6
 	    eth_type != ETH_P_IPV6 &&
 #endif
+#ifndef HWNAT_RA_SKIP_8021Q
 	    eth_type != ETH_P_8021Q &&
+#endif
 	    eth_type != ETH_P_PPP_SES &&
 	    eth_type != ETH_P_PPP_DISC) {
 	    return 1;
 	}
 
-	/* PPE only can handle IPv4/VLAN/IPv6/PPP packets */
-	if ((skb->protocol != htons(ETH_P_IP)) && (skb->protocol != htons(ETH_P_8021Q)) &&
-	    (skb->protocol != htons(ETH_P_IPV6)) && (skb->protocol != htons(ETH_P_PPP_SES)) &&
-	    (skb->protocol != htons(ETH_P_PPP_DISC))) {
-		return 1;
-	}
-
 	if (skb->dev == DstPort[DP_RA0]) {
 		VirIfIdx = DP_RA0;
 	}
+
 #if defined (CONFIG_RT2860V2_AP_MBSS)
 	else if (skb->dev == DstPort[DP_RA1]) {
 		VirIfIdx = DP_RA1;

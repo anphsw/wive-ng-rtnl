@@ -11,5 +11,8 @@ hw_nat-objs += ac_policy.o ac_ioctl.o
 hw_nat-objs += mtr_policy.o mtr_ioctl.o
 endif
 
-#uncomment this flag if you want to send bcast/mcast to cpu instead PPE
+#uncomment this flag if you want to send bcast/mcast from external if and wifi to cpu instead PPE
 EXTRA_CFLAGS += -DHWNAT_SPKIP_MCAST_BCAST
+
+#uncomment this flag if you want to send 8021q from external if and wifi to cpu instead PPE
+EXTRA_CFLAGS += -DHWNAT_RA_SKIP_8021Q
