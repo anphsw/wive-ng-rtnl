@@ -129,7 +129,7 @@ static int config_access(unsigned char access_type, struct pci_bus *bus,
   address = (bus->number << 16) | (slot << 11) | (func << 8) | (where & 0xfc) | 0x80000000;
 #elif defined(CONFIG_RALINK_RT6855)
   address = (bus->number << 16) | (slot << 11) | (func << 8) | (where & 0xfc) | 0x80000000;
-#elif CONFIG_RALINK_RT6352
+#elif defined(CONFIG_RALINK_RT6352)
   address = (bus->number << 16) | (slot << 11) | (func << 8) | (where & 0xfc) | 0x80000000;
 #else
   address = (bus->number << 16) | (slot << 11) | (func << 8) | (where& 0xfc) | 0x80000000;
@@ -253,7 +253,7 @@ static int config_access(unsigned char access_type, struct pci_bus *bus,
   address = (bus->number << 16) | (slot << 11) | (func << 8) | (where & 0xfc) | 0x80000000;
 #elif defined(CONFIG_RALINK_RT6855)
   address = (bus->number << 16) | (slot << 11) | (func << 8) | (where & 0xfc) | 0x80000000;
-#elif CONFIG_RALINK_RT6352
+#elif defined(CONFIG_RALINK_RT6352)
   address = (bus->number << 16) | (slot << 11) | (func << 8) | (where & 0xfc) | 0x80000000;
 #else
   address = (bus->number << 16) | (slot << 11) | (func << 8) | (where& 0xfc) | 0x80000000;
@@ -421,7 +421,7 @@ void __inline__ read_config(unsigned long bus, unsigned long dev, unsigned long 
   		address = (bus << 16) | (dev << 11) | (func << 8) | (reg& 0xfc) | 0x80000000 ;
 #elif defined(CONFIG_RALINK_RT6855)
   		address = (bus << 16) | (dev << 11) | (func << 8) | (reg& 0xfc) | 0x80000000 ;
-#elif CONFIG_RALINK_RT6352
+#elif defined(CONFIG_RALINK_RT6352)
   		address = (bus << 16) | (dev << 11) | (func << 8) | (reg& 0xfc) | 0x80000000 ;
 #else
 		address = (bus << 16) | (dev << 11) | (func << 8) | (reg & 0xfc) | 0x80000000 ;
@@ -447,7 +447,7 @@ void __inline__ write_config(unsigned long bus, unsigned long dev, unsigned long
   		address = (bus << 16) | (dev << 11) | (func << 8) | (reg& 0xfc) | 0x80000000 ;
 #elif defined(CONFIG_RALINK_RT6855)
   		address = (bus << 16) | (dev << 11) | (func << 8) | (reg& 0xfc) | 0x80000000 ;
-#elif CONFIG_RALINK_RT6352
+#elif defined(CONFIG_RALINK_RT6352)
   		address = (bus << 16) | (dev << 11) | (func << 8) | (reg& 0xfc) | 0x80000000 ;
 #else
 		address = (bus << 16) | (dev << 11) | (func << 8) | (reg & 0xfc) | 0x80000000 ;
