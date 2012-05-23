@@ -1323,7 +1323,6 @@ int gen_wifi_config(int mode)
 		FPRINT_STR(ApCliKey4Str);
 		FPRINT_NUM(ApCliTxMode);
 		FPRINT_NUM(ApCliTxMcs);
-		FPRINT_NUM(ApCliAutoConnect);
 #endif
 
 		//Radio On/Off

@@ -1,6 +1,5 @@
-#The word of "Default" must not be removed
-Default
-RFICType=5
+#This file need be autogenerate ny ralink_init. Need fix. Only 3090 use!!!
+RFICType=8
 CountryRegion=5
 CountryRegionABand=0
 CountryCode=RU
@@ -14,8 +13,8 @@ SSID5=
 SSID6=
 SSID7=
 SSID8=
-TXPath=1
-RXPath=1
+TXPath=2
+RXPath=2
 WirelessMode=7
 FixedTxMode=HT
 TxRate=0
@@ -137,8 +136,8 @@ HT_GI=1
 HT_STBC=1
 HT_MCS=33
 HT_DisallowTKIP=0
-HT_TxStream=1
-HT_RxStream=1
+HT_TxStream=2
+HT_RxStream=2
 HT_PROTECT=1
 HT_40MHZ_INTOLERANT=0
 HT_MIMOPSMode=0
@@ -180,13 +179,13 @@ EAPifname=
 PreAuthifname=
 session_timeout_interval=0
 quiet_interval=0
+RadioOff=0
 PSMode=CAM
 AutoConnect=0
 FastConnect=0
-AutoRoaming=0
 HiPower=0
+AutoRoaming=0
 TGnWifiTest=0
-RadioOn=1
 SSID=
 WPAPSK=
 Key1Str=
