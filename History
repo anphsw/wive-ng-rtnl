@@ -1129,9 +1129,6 @@
 57) Fix work jumbo frames with RTL8367 external swicth.<br>
 58) Raeth rework logic filter oversized packets.<br>
 59) Update transmission to 2.52 version.<br>
-60) Backport usbnet patches from upstream(need for Android/LTE devices support).<br>
-61) Update wireless drivers for RT3x5x to 2.6.0.0 version.<br>
-62) Update wireless drivers for RT3662/3883 to 2.6.0.0 version.<br>
 
 <br>
 <b>3.0.x</b><br>
@@ -1139,6 +1136,10 @@
 2) Replace old hw_nat module v0.92 to v2.01.<br>
 3) Update raeth driver from new sdk.<br>
 4) Update RT3x52 driver from new sdk.<br>
+5) Backport usbnet patches from upstream(need for Android/LTE devices support).<br>
+6) Update wireless drivers for RT3x5x to 2.6.0.0 version.<br>
+7) Update wireless drivers for RT3662/3883 to 2.6.0.0 version.<br>
+8) Fix nvram overflow.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
