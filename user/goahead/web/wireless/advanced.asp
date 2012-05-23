@@ -20,8 +20,10 @@ var shortPreamble = '<% getCfgZero(1, "TxPreamble"); %>';
 var shortSlot = '<% getCfgZero(1, "ShortSlot"); %>';
 var txBurst = '<% getCfgZero(1, "TxBurst"); %>';
 var pktAggregate = '<% getCfgZero(1, "PktAggregate"); %>';
+/*
 var wmmCapable = '<% getCfgZero(1, "WmmCapable"); %>';
 var APSDCapable = '<% getCfgZero(1, "APSDCapable"); %>';
+*/
 var DLSCapable = '<% getCfgZero(1, "DLSCapable"); %>';
 var DLSBuilt = '<% getDLSBuilt(); %>';
 var m2uBuilt = '<% getWlanM2UBuilt(); %>';
@@ -176,7 +178,7 @@ function initValue()
 		form.carrier_detect.disabled = true;
 	}
 
-	if (wmmCapable.indexOf("1") >= 0)
+/*	if (wmmCapable.indexOf("1") >= 0)
 	{
 		form.wmm_capable[0].checked = true;
 		form.wmm_capable[1].checked = false;
@@ -199,7 +201,7 @@ function initValue()
 		form.apsd_capable[0].checked = false;
 		form.apsd_capable[1].checked = true;
 	}
-
+*/
 	if (DLSBuilt == 1)
 	{
 		if (DLSCapable == '1')
@@ -326,7 +328,7 @@ function CheckValue(form)
 		form.rts.select();
 		return false;
 	}
-
+/*
 	DLSBuilt = 1*DLSBuilt;
 	if (form.wmm_capable[0].checked)
 	{
@@ -353,7 +355,7 @@ function CheckValue(form)
 		if (1*APSDCapable == 1)
 			form.rebootAP.value = 1;
 	}
-
+*/
 	if (DLSBuilt == 1)
 	{
 		if (form.dls_capable[0].checked == true)
@@ -572,8 +574,7 @@ function wmm_capable_enable_switch()
 
 </table>
 
-<!--
-<table class="form">
+<!--  <table class="form">
 <tr> 
 	<td class="title" colspan="2" id="advWiFiMM">Wi-Fi Multimedia</td>
 </tr>
@@ -603,11 +604,9 @@ function wmm_capable_enable_switch()
 	<td>
 		<input type="button" name="wmm_list" class="normal" value="WMM Configuration" id="advWMMConf" onClick="open_wmm_window()">
 	</td>
-</tr>
-
+</tr> -->
 <input type="hidden" name="rebootAP" value="0">
 </table>
--->
 
 <table id="div_m2u" name="div_m2u" class="form">
 <tr>
