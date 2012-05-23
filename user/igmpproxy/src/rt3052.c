@@ -151,7 +151,7 @@ static struct group 	*group_list = NULL;
 
 static struct ifreq		ifr;
 static esw_reg			reg;
-static int				snooping_enabled = 0;
+static int			snooping_enabled = 0;
 
 static struct group *find_entry(uint32 ip_addr)
 {
@@ -554,7 +554,7 @@ void remove_multicast_ip(uint32 m_ip_addr)
 
 void remove_all_groups(void)
 {
-	struct group *del, *pos = group_list;	
+	struct group *del, *pos = group_list;
 
 	if(!snooping_enabled)
 		return;

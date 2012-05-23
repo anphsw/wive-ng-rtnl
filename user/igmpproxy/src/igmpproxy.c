@@ -75,7 +75,7 @@ static int sighandled = 0;
 int         upStreamVif;
 
 #ifdef RALINK_ESW_SUPPORT
-extern void rt3052_init(int sn);
+extern void rt3052_init(int se);
 extern void rt3052_fini(void);
 /* wan port select */
 uint32_t WanPort = 0x1;
@@ -91,7 +91,7 @@ int main( int ArgCn, char *ArgVc[] ) {
 
 #ifdef RALINK_ESW_SUPPORT
     int sw;
-    int force_snooping = -1;
+    int force_snooping = 1;
 
     /* check esw exist */
     FILE *fp = fopen(PROCREG_GMAC, "r");
@@ -108,7 +108,7 @@ int main( int ArgCn, char *ArgVc[] ) {
 
     // Parse the commandline options and setup basic settings..
 #ifdef RALINK_ESW_SUPPORT
-    for (c; (c = getopt(ArgCn, ArgVc, "dwfnvh")) != -1;) {
+    for (c; (c = getopt(ArgCn, ArgVc, "dwnvh")) != -1;) {
 #else
     for (c; (c = getopt(ArgCn, ArgVc, "dvh")) != -1;) {
 #endif
@@ -119,10 +119,6 @@ int main( int ArgCn, char *ArgVc[] ) {
 #ifdef RALINK_ESW_SUPPORT
         case 'w':
 	    WanPort = 0x10;
-            break;
-        case 'f':
-	    sw = 1;
-	    force_snooping = 1;
             break;
         case 'n':
 	    force_snooping = 0;
@@ -174,14 +170,11 @@ int main( int ArgCn, char *ArgVc[] ) {
 #ifdef RALINK_ESW_SUPPORT
 	if (sw) {
 	    if(force_snooping == 0) {
-        	my_log(LOG_INFO, 0, "Disable igmp_snooping.");
-		rt3052_init(1024);	/* disable snooping */
-	    } else if(force_snooping == 1) {
-        	my_log(LOG_INFO, 0, "Force igmp_snooping enabled.");
-		rt3052_init(1);		/* enable snooping */
+        	my_log(LOG_INFO, 0, "Force igmp_snooping disable.");
+		rt3052_init(0);	/* disable snooping */
 	    } else {
-        	my_log(LOG_INFO, 0, "Enable automatic igmp_snooping.");
-		rt3052_init(0);		/* automatic (default) */
+        	my_log(LOG_INFO, 0, "Enable igmp_snooping.");
+		rt3052_init(1);		/* automatic (default) */
 	    }
 	}
 #endif
