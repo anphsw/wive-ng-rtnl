@@ -469,7 +469,7 @@ sticky_done:
 		else if (optlen < sizeof(struct in6_pktinfo) || optval == NULL)
 			goto e_inval;
 
-		if (copy_from_user(&pkt, optval, optlen)) {
+		if (copy_from_user(&pkt, optval, sizeof(struct in6_pktinfo))) {
 				retv = -EFAULT;
 				break;
 		}
@@ -902,8 +902,10 @@ static int do_ipv6_getsockopt(struct sock *sk, int level, int optname,
 		} else {
 			if (np->rxopt.bits.rxinfo) {
 				struct in6_pktinfo src_info;
-				src_info.ipi6_ifindex = np->mcast_oif;
-				ipv6_addr_copy(&src_info.ipi6_addr, &np->daddr);
+				src_info.ipi6_ifindex = np->mcast_oif ? np->mcast_oif :
+					np->sticky_pktinfo.ipi6_ifindex;
+				np->mcast_oif? ipv6_addr_copy(&src_info.ipi6_addr, &np->daddr) :
+					ipv6_addr_copy(&src_info.ipi6_addr, &(np->sticky_pktinfo.ipi6_addr));
 				put_cmsg(&msg, SOL_IPV6, IPV6_PKTINFO, sizeof(src_info), &src_info);
 			}
 			if (np->rxopt.bits.rxhlim) {
@@ -912,8 +914,10 @@ static int do_ipv6_getsockopt(struct sock *sk, int level, int optname,
 			}
 			if (np->rxopt.bits.rxoinfo) {
 				struct in6_pktinfo src_info;
-				src_info.ipi6_ifindex = np->mcast_oif;
-				ipv6_addr_copy(&src_info.ipi6_addr, &np->daddr);
+				src_info.ipi6_ifindex = np->mcast_oif ? np->mcast_oif :
+					np->sticky_pktinfo.ipi6_ifindex;
+				np->mcast_oif? ipv6_addr_copy(&src_info.ipi6_addr, &np->daddr) :
+					ipv6_addr_copy(&src_info.ipi6_addr, &(np->sticky_pktinfo.ipi6_addr));
 				put_cmsg(&msg, SOL_IPV6, IPV6_2292PKTINFO, sizeof(src_info), &src_info);
 			}
 			if (np->rxopt.bits.rxohlim) {
