@@ -572,6 +572,7 @@ function wmm_capable_enable_switch()
 
 </table>
 
+<!--
 <table class="form">
 <tr> 
 	<td class="title" colspan="2" id="advWiFiMM">Wi-Fi Multimedia</td>
@@ -606,6 +607,7 @@ function wmm_capable_enable_switch()
 
 <input type="hidden" name="rebootAP" value="0">
 </table>
+-->
 
 <table id="div_m2u" name="div_m2u" class="form">
 <tr>
