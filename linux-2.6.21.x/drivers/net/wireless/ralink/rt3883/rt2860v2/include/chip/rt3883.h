@@ -34,7 +34,7 @@
 #error "For RT3883, you should define the compile flag -DRTMP_MAC_PCI"
 #endif
 
-#include "chip/mac_pci.h"
+struct _RTMP_ADAPTER;
 
 #define RTMP_MAC_CSR_ADDR 0xB0180000
 #define RTMP_FLASH_BASE_ADDR	0xbc000000
@@ -46,33 +46,55 @@
 #define BBP_REG_SNR2	BBP_R162
 
 
+#define MAX_RF_TX_POWER		31	// Maximum Tx Power value in RF Register
+
+// Macro to convert Tx Power setting to RF Reg for A Band
+#define TX_PWR_TO_RF_REG(p)	(CHAR)(0x48 | (((p) & 0x18) << 1) | ((p) & 0x7))
+
 extern UCHAR NUM_OF_3883_CHNL; 
 extern FREQUENCY_ITEM FreqItems3883[];
 
-
-extern REG_PAIR RT3883_RFRegTable[];
-extern UCHAR RT3883_NUM_RF_REG_PARMS;
-extern REG_PAIR   RT3883_BBPRegTable[];
-extern UCHAR RT3883_NUM_BBP_REG_PARMS;
-
 #ifdef DFS_SUPPORT
-#define DFS_2_SUPPORT
-
 #define DFS_INTERRUPT_SUPPORT
 #define DFS_HWTIMER_SUPPORT
 #endif
 
+VOID RTMPRT3883ABandSel(
+	IN UCHAR Channel);
 
-#ifdef CARRIER_DETECTION_SUPPORT
-#define TONE_RADAR_DETECT_SUPPORT
-#define TONE_RADAR_DETECT_V2
-#endif
+VOID RTMPRT3883ReadChannelPwr(
+	IN struct _RTMP_ADAPTER *pAd);
 
-//
-// Device ID & Vendor ID, these values should match EEPROM value
-//
+VOID RTMPRT3883ReadTxPwrPerRate(
+	IN struct _RTMP_ADAPTER *pAd);
 
+VOID RT3883_Init(
+	IN struct _RTMP_ADAPTER *pAd);
 
+VOID RT3883_AsicGetTxPowerOffset(
+	IN 		struct _RTMP_ADAPTER			*pAd,
+	INOUT 	PULONG 						pTxPwr);
 
-#endif //__RT3883_H__ //
+#ifdef CONFIG_AP_SUPPORT
+int RT3883_ext_pkt_len(
+	IN UCHAR *pOutBuffer,
+	IN ULONG FrameLen,
+	IN UCHAR *RalinkSpecificIe,
+	IN UCHAR IeLen);
+#endif /* CONFIG_AP_SUPPORT */
+
+VOID RT3883_CWC_ProtectAdjust(
+	IN struct _RTMP_ADAPTER *pAd,
+	IN UCHAR *pSetMask,
+	IN USHORT *pOperationMode);
+
+VOID RT3883_CWC_AsicSet(
+	IN struct _RTMP_ADAPTER *pAd,
+	IN BOOLEAN bCwc);
+
+void RT3883_AsicSetFreqOffset(
+	IN struct _RTMP_ADAPTER *pAd,
+	IN ULONG freqOffset);
+
+#endif /*__RT3883_H__ */
 

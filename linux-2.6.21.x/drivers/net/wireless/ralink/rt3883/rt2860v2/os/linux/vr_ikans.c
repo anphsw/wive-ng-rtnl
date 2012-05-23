@@ -1,32 +1,20 @@
 /****************************************************************************
- * Ralink Tech Inc.
- * 4F, No. 2 Technology 5th Rd.
- * Science-based Industrial Park
- * Hsin-chu, Taiwan, R.O.C.
- * (c) Copyright 2002, Ralink Technology, Inc.
- *
- * All rights reserved. Ralink's source code is an unpublished work and the
- * use of a copyright notice does not imply otherwise. This source code
- * contains confidential trade secret material of Ralink Tech. Any attemp
- * or participation in deciphering, decoding, reverse engineering or in any
- * way altering the source code is stricitly prohibited, unless the prior
- * written consent of Ralink Technology, Inc. is obtained.
- ****************************************************************************
- 
+
     Module Name:
     vr_ikans.c
  
     Abstract:
     Only for IKANOS Vx160 or Vx180 platform.
-
-	The fast path will check IP address/ IP port, etc. NOT only check MAC.
  
     Revision History:
-    Who         When          What
-    --------    ----------    ----------------------------------------------
+    Who        When          What
+    ---------  ----------    ----------------------------------------------
     Sample Lin	01-28-2008    Created
 
- */
+***************************************************************************/
+
+#define RTMP_MODULE_OS
+#define RTMP_MODULE_OS_UTIL
 
 #define MODULE_IKANOS
 
@@ -43,7 +31,7 @@
 
 #define IKANOS_PERAP_ID		7 /* IKANOS Fix Peripheral ID */
 #define K0_TO_K1(x)			((unsigned)(x)|0xA0000000) /* kseg0 to kseg1 */
-//#define IKANOS_DEBUG
+/*#define IKANOS_DEBUG */
 
 
 extern INT rt28xx_send_packets(
@@ -130,8 +118,8 @@ INT32 IKANOS_DataFramesTx(
 	ap2apFlowProcess(pSkb, pNetDev);
 
 #ifdef IKANOS_DEBUG
-	printk("ikanos> tx no fp\n"); // debug use
-#endif // IKANOS_DEBUG //
+	printk("ikanos> tx no fp\n"); /* debug use */
+#endif /* IKANOS_DEBUG */
 
 	return rt28xx_send_packets(pSkb, pNetDev);
 } /* End of IKANOS_DataFramesTx */
@@ -161,21 +149,21 @@ PRTMP_ADAPTER	pIkanosAd;
 
 void IKANOS_DataFrameRx(
 	IN PRTMP_ADAPTER	pAd,
-	IN void				*pRxParam,
-	IN struct sk_buff	*pSkb,
-	IN UINT32			Length)
+	IN struct sk_buff	*pSkb)
 {
     apPreHeader_t *apBuf;
+	void *pRxParam = pSkb->dev;
+	UINT32 Length = pSkb->len;
 
 
     apBuf = (apPreHeader_t *)(translateMbuf2Apbuf(pSkb, 0));
 
     apBuf->flags1 = 1 << AP_FLAG1_IS_ETH_BIT;
-    apBuf->specInfoElement = RTMP_GET_PACKET_NET_DEVICE_MBSSID(pSkb); // MBSS
+    apBuf->specInfoElement = RTMP_GET_PACKET_NET_DEVICE_MBSSID(pSkb); /* MBSS */
 	pIkanosAd = pAd;
 
-//  apBuf->egressList[0].pEgress = NULL;
-//  apBuf->egressList[0].pFlowID = NULL;
+/*  apBuf->egressList[0].pEgress = NULL; */
+/*  apBuf->egressList[0].pFlowID = NULL; */
     apBuf->flags2 = 0;
 
     apClassify(IKANOS_PERAP_ID, apBuf, (void *)IKANOS_WlanPktFromAp);
@@ -238,30 +226,22 @@ static INT32 GetSpecInfoIdxFromBssid(
 #ifdef APCLI_SUPPORT
 		if(FromWhichBSSID >= MIN_NET_DEVICE_FOR_APCLI)
 		{
-			IfIdx = MAX_MBSSID_NUM + MAX_WDS_ENTRY;
+			IfIdx = MAX_MBSSID_NUM(pAd) + MAX_WDS_ENTRY;
 		} 
 		else
-#endif // APCLI_SUPPORT //
-#ifdef WDS_SUPPORT
-		if(FromWhichBSSID >= MIN_NET_DEVICE_FOR_WDS)
-		{
-			INT WdsIndex = FromWhichBSSID - MIN_NET_DEVICE_FOR_WDS;
-			IfIdx = MAX_MBSSID_NUM + WdsIndex;
-		}
-		else
-#endif // WDS_SUPPORT //
+#endif /* APCLI_SUPPORT */
 		{
 			IfIdx = FromWhichBSSID;
 		}
 	}
-#endif // CONFIG_AP_SUPPORT //
+#endif /* CONFIG_AP_SUPPORT */
 
 #ifdef CONFIG_STA_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
 	{
 		IfIdx = MAIN_MBSSID;
 	}
-#endif // CONFIG_STA_SUPPORT //
+#endif /* CONFIG_STA_SUPPORT */
 
 	return IfIdx; /* return one of MBSS */
 }
@@ -293,30 +273,22 @@ static INT32 GetSpecInfoIdxFromBssid(
 #ifdef APCLI_SUPPORT
 		if(FromWhichBSSID >= MIN_NET_DEVICE_FOR_APCLI)
 		{
-			IfIdx = MAX_MBSSID_NUM + MAX_WDS_ENTRY;
+			IfIdx = MAX_MBSSID_NUM(pAd) + MAX_WDS_ENTRY;
 		}
 		else
-#endif // APCLI_SUPPORT //
-#ifdef WDS_SUPPORT
-		if(FromWhichBSSID >= MIN_NET_DEVICE_FOR_WDS)
-		{
-			INT WdsIndex = FromWhichBSSID - MIN_NET_DEVICE_FOR_WDS;
-			IfIdx = MAX_MBSSID_NUM + WdsIndex;
-		}
-		else
-#endif // WDS_SUPPORT //
+#endif /* APCLI_SUPPORT */
 		{
 			IfIdx = FromWhichBSSID;
 		}
 	}
-#endif // CONFIG_AP_SUPPORT //
+#endif /* CONFIG_AP_SUPPORT */
 
 #ifdef CONFIG_STA_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
 	{
 		IfIdx = MAIN_MBSSID;
 	}
-#endif // CONFIG_STA_SUPPORT //
+#endif /* CONFIG_STA_SUPPORT */
 
 	return IfIdx; /* return one of MBSS */
 } /* End of GetSpecInfoIdxFromBssid */
@@ -348,8 +320,8 @@ static void IKANOS_WlanPktFromAp(
 
 
 	pAd = pIkanosAd;
-    //index = apBuf->specInfoElement;
-	//dev = pAd->ApCfg.MBSSID[index].MSSIDDev;
+    /*index = apBuf->specInfoElement; */
+	/*dev = pAd->ApCfg.MBSSID[index].MSSIDDev; */
 	index = GetSpecInfoIdxFromBssid(pAd, apBuf->specInfoElement);
 	dev = get_netdev_from_bssid(pAd, apBuf->specInfoElement);
     if (dev == NULL)
@@ -370,18 +342,18 @@ static void IKANOS_WlanPktFromAp(
 
     skb->dev = dev;
     skb->apFlowData.rxApId = IKANOS_PERAP_ID;
-    //skb->apFlowData.txHandle = &(txinforx[index]);
+    /*skb->apFlowData.txHandle = &(txinforx[index]); */
     skb->apFlowData.rxHandle = &(pAd->IkanosRxInfo[index]);
     skb->protocol = eth_type_trans(skb, skb->dev);
 
 #ifdef IKANOS_DEBUG
-	printk("ikanos> rx no fp!\n"); // debug use
-#endif // IKANOS_DEBUG //
+	printk("ikanos> rx no fp!\n"); /* debug use */
+#endif /* IKANOS_DEBUG */
 
     netif_rx(skb);
     return;
 } /* End of IKANOS_WlanPktFromAp */
 
-#endif // IKANOS_VX_1X0 //
+#endif /* IKANOS_VX_1X0 */
 
 /* End of vr_ikans.c */

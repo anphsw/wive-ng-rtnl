@@ -9,7 +9,7 @@ O_TARGET := rt2860v2_ap.o
 RT2860_OBJ = md5.o mlme.o rtmp_wep.o action.o ba_action.o cmm_data.o cmm_data_pci.o \
 	     rtmp_init.o cmm_mac_pci.o rtmp_tkip.o cmm_sync.o cmm_sanity.o cmm_info.o cmm_cfg.o cmm_wpa.o cmm_asic.o\
 	     ap.o ap_assoc.o ap_auth.o ap_authrsp.o ap_connect.o ap_mlme.o ap_sanity.o \
-	     ap_sync.o ap_wpa.o ap_data.o ap_uapsd.o ap_autoChSel.o \
+	     ap_sync.o ap_wpa.o ap_data.o uapsd.o ap_autoChSel.o \
 	     rt_linux.o rt_profile.o cmm_profile.o rt_main_dev.o pci_main_dev.o ap_ioctl.o rt_2860_rbus.o rt_eeprom.o \
 	     rt_ate.o
 
@@ -30,7 +30,7 @@ endif
 endif
 
 ifeq ($(CONFIG_RT2860V2_AP_LED),y)
-RT2860_OBJ += led.o
+RT2860_OBJ += rt_led.o
 endif
 
 ifeq ($(CONFIG_RT2860V2_AP_WSC),y)
@@ -65,8 +65,8 @@ endif
 EXTRA_CFLAGS = -I../rt2860v2/include -DAGGREGATION_SUPPORT -DPIGGYBACK_SUPPORT -DWMM_SUPPORT  -DLINUX \
 	       -Wall -Wstrict-prototypes -Wno-trigraphs
 
-EXTRA_CFLAGS += -DCONFIG_AP_SUPPORT  -DUAPSD_AP_SUPPORT -DDBG -DRT2860 # -DDFS_DEBUG -DIAPP_SUPPORT
-EXTRA_CFLAGS += -DRALINK_ATE -DRALINK_28xx_QA -DCONFIG_RT2880_ATE_CMD_NEW
+EXTRA_CFLAGS += -DCONFIG_AP_SUPPORT  -DUAPSD_SUPPORT -DDBG -DRT2860 # -DDFS_DEBUG -DIAPP_SUPPORT
+EXTRA_CFLAGS += -DRALINK_ATE -DRALINK_QA -DCONFIG_RT2880_ATE_CMD_NEW
 
 ifeq ($(CONFIG_RT2860V2_AP_DLS),y)
 EXTRA_CFLAGS += -DQOS_DLS_SUPPORT

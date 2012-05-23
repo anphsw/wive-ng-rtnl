@@ -35,30 +35,53 @@
 
 #define MBSS_EXTERN
 
-#endif // MODULE_MBSS //
+#endif /* MODULE_MBSS */
+
+
+/*
+	For MBSS, the phy mode is different;
+	So MBSS_PHY_MODE_RESET() can help us to adjust the correct mode &
+	maximum MCS for the BSS.
+*/
+#define MBSS_PHY_MODE_RESET(__BssId, __HtPhyMode)				\
+	{															\
+		UCHAR __PhyMode = pAd->ApCfg.MBSSID[__BssId].PhyMode;	\
+		if ((__PhyMode == PHY_11B) &&							\
+			(__HtPhyMode.field.MODE != MODE_CCK))				\
+		{														\
+			__HtPhyMode.field.MODE = MODE_CCK;					\
+			__HtPhyMode.field.MCS = 3;							\
+		}														\
+		else if ((__PhyMode <= PHY_11G) &&						\
+				(__PhyMode != PHY_11B) &&						\
+				(__HtPhyMode.field.MODE != MODE_OFDM))			\
+		{														\
+			__HtPhyMode.field.MODE = MODE_OFDM;					\
+			__HtPhyMode.field.MCS = 7;							\
+		}														\
+	}
 
 
 /* Public function list */
-MBSS_EXTERN VOID RT28xx_MBSS_Init(
-	IN PRTMP_ADAPTER ad_p,
-	IN PNET_DEV main_dev_p);
+INT	Show_MbssInfo_Display_Proc(
+	IN	PRTMP_ADAPTER				pAd,
+	IN	PSTRING						arg);
 
-MBSS_EXTERN VOID RT28xx_MBSS_Close(
-	IN PRTMP_ADAPTER ad_p);
+VOID MBSS_Init(
+	IN PRTMP_ADAPTER				pAd,
+	IN RTMP_OS_NETDEV_OP_HOOK		*pNetDevOps);
 
-MBSS_EXTERN VOID RT28xx_MBSS_Remove(
-	IN PRTMP_ADAPTER ad_p);
+VOID MBSS_Remove(
+	IN PRTMP_ADAPTER				pAd);
 
-INT MBSS_VirtualIF_Open(
-	IN	PNET_DEV			dev_p);
-INT MBSS_VirtualIF_Close(
-	IN	PNET_DEV			dev_p);
-INT MBSS_VirtualIF_PacketSend(
-	IN PNDIS_PACKET			skb_p,
-	IN PNET_DEV				dev_p);
-INT MBSS_VirtualIF_Ioctl(
-	IN PNET_DEV				dev_p, 
-	IN OUT struct ifreq 	*rq_p, 
-	IN INT cmd);
+INT MBSS_Open(
+	IN	PNET_DEV					pDev);
+
+INT MBSS_Close(
+	IN	PNET_DEV					pDev);
+
+INT32 RT28xx_MBSS_IdxGet(
+	IN PRTMP_ADAPTER	pAd,
+	IN PNET_DEV			pDev);
 
 /* End of ap_mbss.h */

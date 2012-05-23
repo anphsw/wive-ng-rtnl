@@ -29,27 +29,27 @@
 #include "rt_config.h"
 
 UCHAR	CipherSuiteTDLSWpa2PskTkip[] = {
-		0x30,					// RSN IE
-		0x14,					// Length	
-		0x01, 0x00,				// Version
-		0x00, 0x00, 0x00, 0x00,	// no group cipher
-		0x01, 0x00,				// number of pairwise
-		0x00, 0x0f, 0xac, 0x02,	// unicast, TKIP
-		0x01, 0x00,				// number of authentication method
-		0x00, 0x0f, 0xac, TDLS_AKM_SUITE_PSK,	// TDLS authentication
-		0x02, 0x00,				// RSN capability, peer key enabled
+		0x30,					/* RSN IE */
+		0x14,					/* Length */
+		0x01, 0x00,				/* Version */
+		0x00, 0x00, 0x00, 0x00,	/* no group cipher */
+		0x01, 0x00,				/* number of pairwise */
+		0x00, 0x0f, 0xac, 0x02,	/* unicast, TKIP */
+		0x01, 0x00,				/* number of authentication method */
+		0x00, 0x0f, 0xac, TDLS_AKM_SUITE_PSK,	/* TDLS authentication */
+		0x02, 0x00,				/* RSN capability, peer key enabled */
 		};
 
 UCHAR	CipherSuiteTDLSWpa2PskAes[] = {
-		0x30,					// RSN IE
-		0x14,					// Length	
-		0x01, 0x00,				// Version
-		0x00, 0x00, 0x00, 0x00,	// no group cipher
-		0x01, 0x00,				// number of pairwise
-		0x00, 0x0f, 0xac, 0x04,	// unicast, AES
-		0x01, 0x00,				// number of authentication method
-		0x00, 0x0f, 0xac, TDLS_AKM_SUITE_PSK,	// TDLS authentication
-		0x02, 0x00,				// RSN capability, peer key enabled
+		0x30,					/* RSN IE */
+		0x14,					/* Length */
+		0x01, 0x00,				/* Version */
+		0x00, 0x00, 0x00, 0x00,	/* no group cipher */
+		0x01, 0x00,				/* number of pairwise */
+		0x00, 0x0f, 0xac, 0x04,	/* unicast, AES */
+		0x01, 0x00,				/* number of authentication method */
+		0x00, 0x0f, 0xac, TDLS_AKM_SUITE_PSK,	/* TDLS authentication */
+		0x02, 0x00,				/* RSN capability, peer key enabled */
 		};
 UCHAR	CipherSuiteTDLSLen = sizeof(CipherSuiteTDLSWpa2PskAes)/ sizeof(UCHAR);
 
@@ -86,58 +86,58 @@ TDLS_BuildSetupRequest(
 	/* fill link identifier */
 	TDLS_InsertLinkIdentifierIE(pAd, (pFrameBuf + *pFrameLen), pFrameLen, pAd->CurrentAddress, pTDLS->MacAddr);
 
-	// fill capability
+	/* fill capability */
 	TDLS_InsertCapIE(pAd, (pFrameBuf + *pFrameLen), pFrameLen);
 
-	// fill ssid
+	/* fill ssid */
 	TDLS_InsertSSIDIE(pAd, (pFrameBuf + *pFrameLen), pFrameLen);
 
-	// fill support rate
+	/* fill support rate */
 	TDLS_InsertSupportRateIE(pAd, (pFrameBuf + *pFrameLen), pFrameLen);
 
-	// fill ext rate
+	/* fill ext rate */
 	TDLS_InsertExtRateIE(pAd, (pFrameBuf + *pFrameLen), pFrameLen);
 
-	// fill Qos Capability
+	/* fill Qos Capability */
 	TDLS_InsertQosCapIE(pAd, (pFrameBuf + *pFrameLen), pFrameLen);
 
 #ifdef DOT11_N_SUPPORT
-	// fill HT Capability
+	/* fill HT Capability */
 	TDLS_InsertHtCapIE(pAd, (pFrameBuf + *pFrameLen), pFrameLen);
 
-	// fill 20/40 BSS Coexistence (7.3.2.61)
+	/* fill 20/40 BSS Coexistence (7.3.2.61) */
 #ifdef DOT11N_DRAFT3
 	TDLS_InsertBSSCoexistenceIE(pAd, (pFrameBuf + *pFrameLen), pFrameLen);
-#endif // DOT11N_DRAFT3 //
-#endif // DOT11_N_SUPPORT //
+#endif /* DOT11N_DRAFT3 */
+#endif /* DOT11_N_SUPPORT */
 
-	// fill  Extended Capabilities (7.3.2.27)
+	/* fill  Extended Capabilities (7.3.2.27) */
 	TDLS_InsertExtCapIE(pAd, (pFrameBuf + *pFrameLen), pFrameLen);
 
-	// TPK Handshake if RSNA Enabled
-	// Pack TPK Message 1 here! 
+	/* TPK Handshake if RSNA Enabled */
+	/* Pack TPK Message 1 here! */
 	if (((pAd->StaCfg.AuthMode == Ndis802_11AuthModeWPA2) || (pAd->StaCfg.AuthMode == Ndis802_11AuthModeWPA2PSK)) &&
 		((pAd->StaCfg.WepStatus == Ndis802_11Encryption2Enabled) || (pAd->StaCfg.WepStatus == Ndis802_11Encryption3Enabled)))
 	{		
 		UCHAR			CipherTmp[64] = {0};
 		UCHAR			CipherTmpLen = 0;
 		FT_FTIE			FtIe;
-		ULONG			KeyLifetime = TDLS_KEY_TIMEOUT;	// sec
+		ULONG			KeyLifetime = TDLS_KEY_TIMEOUT;	/* sec */
 		ULONG			tmp;
 		UCHAR			Length;
 		
-		// RSNIE (7.3.2.25)
+		/* RSNIE (7.3.2.25) */
 		CipherTmpLen = CipherSuiteTDLSLen;	
 		if (pAd->StaCfg.WepStatus == Ndis802_11Encryption2Enabled)
 			NdisMoveMemory(CipherTmp, CipherSuiteTDLSWpa2PskTkip, CipherTmpLen);
 		else
 			NdisMoveMemory(CipherTmp, CipherSuiteTDLSWpa2PskAes, CipherTmpLen);
 		
-		// update AKM
+		/* update AKM */
 		if (pAd->StaCfg.AuthMode == Ndis802_11AuthModeWPA2)
 			CipherTmp[19] = TDLS_AKM_SUITE_1X;
 		
-		// Insert RSN_IE to outgoing frame
+		/* Insert RSN_IE to outgoing frame */
 		MakeOutgoingFrame((pFrameBuf + *pFrameLen),	&tmp,
 				CipherTmpLen,						&CipherTmp,
 				END_OF_ARGS);
@@ -145,11 +145,11 @@ TDLS_BuildSetupRequest(
 		*pFrameLen = *pFrameLen + tmp;
 	
 			
-		// FTIE (7.3.2.48)
+		/* FTIE (7.3.2.48) */
 		NdisZeroMemory(&FtIe, sizeof(FtIe));
 		Length =  sizeof(FtIe);
 
-		// generate SNonce
+		/* generate SNonce */
 		GenRandom(pAd, pAd->CurrentAddress, FtIe.SNonce);
 		hex_dump("TDLS - Generate SNonce ", FtIe.SNonce, 32);
 		NdisMoveMemory(pTDLS->SNonce, FtIe.SNonce, 32);
@@ -165,7 +165,7 @@ TDLS_BuildSetupRequest(
 				FtIe.SNonce);
 
 		
-		// Timeout Interval (7.3.2.49)
+		/* Timeout Interval (7.3.2.49) */
 		TDLS_InsertTimeoutIntervalIE(
 				pAd, 
 				(pFrameBuf + *pFrameLen), 
@@ -177,10 +177,10 @@ TDLS_BuildSetupRequest(
 
 	}
 
-	// ==>> Set sendout timer
+	/* ==>> Set sendout timer */
 	RTMPCancelTimer(&pTDLS->Timer, &TimerCancelled);
 	RTMPSetTimer(&pTDLS->Timer, Timeout);
-	// ==>> State Change
+	/* ==>> State Change */
 
 	pTDLS->Status = TDLS_MODE_WAIT_RESPONSE;
 
@@ -221,28 +221,28 @@ TDLS_BuildSetupResponse(
 		/* fill link identifier */
 		TDLS_InsertLinkIdentifierIE(pAd, (pFrameBuf + *pFrameLen), pFrameLen, pTDLS->MacAddr, pAd->CurrentAddress);
 
-		// fill capability
+		/* fill capability */
 		TDLS_InsertCapIE(pAd, (pFrameBuf + *pFrameLen), pFrameLen);
 
-		// fill ssid
+		/* fill ssid */
 		TDLS_InsertSSIDIE(pAd, (pFrameBuf + *pFrameLen), pFrameLen);
 
-		// fill support rate
+		/* fill support rate */
 		TDLS_InsertSupportRateIE(pAd, (pFrameBuf + *pFrameLen), pFrameLen);
 
-		// fill ext rate
+		/* fill ext rate */
 		TDLS_InsertExtRateIE(pAd, (pFrameBuf + *pFrameLen), pFrameLen);
 
-		// fill Qos Capability
+		/* fill Qos Capability */
 		TDLS_InsertQosCapIE(pAd, (pFrameBuf + *pFrameLen), pFrameLen);
 
 #ifdef DOT11_N_SUPPORT
-		// fill HT Capability
+		/* fill HT Capability */
 		TDLS_InsertHtCapIE(pAd, (pFrameBuf + *pFrameLen), pFrameLen);
-#endif // DOT11_N_SUPPORT //
+#endif /* DOT11_N_SUPPORT */
 
-		// TPK Handshake if RSNA Enabled
-		// Pack TPK Message 2 here! 
+		/* TPK Handshake if RSNA Enabled */
+		/* Pack TPK Message 2 here! */
 		if (((pAd->StaCfg.AuthMode == Ndis802_11AuthModeWPA2) || (pAd->StaCfg.AuthMode == Ndis802_11AuthModeWPA2PSK)) &&
 			((pAd->StaCfg.WepStatus == Ndis802_11Encryption2Enabled) || (pAd->StaCfg.WepStatus == Ndis802_11Encryption3Enabled)))
 		{		
@@ -250,32 +250,32 @@ TDLS_BuildSetupResponse(
 			ULONG	tmp;
 			UINT	key_len = LEN_PMK;
 
-			// RSNIE (7.3.2.25)			
-			// Insert RSN_IE of the Peer TDLS to outgoing frame
+			/* RSNIE (7.3.2.25) */
+			/* Insert RSN_IE of the Peer TDLS to outgoing frame */
 			MakeOutgoingFrame((pFrameBuf + *pFrameLen),	&tmp,
 					RsnLen,								pRsnIe,
 					END_OF_ARGS);
 			*pFrameLen = *pFrameLen + tmp;
 
-			// FTIE (7.3.2.48)
-			// Construct FTIE (IE + Length + MIC Control + MIC + ANonce + SNonce)
+			/* FTIE (7.3.2.48) */
+			/* Construct FTIE (IE + Length + MIC Control + MIC + ANonce + SNonce) */
 			
-			// point to the element of IE
+			/* point to the element of IE */
 			ft = (FT_FTIE *)(pFTIe + 2);	
-			// generate ANonce
+			/* generate ANonce */
 			GenRandom(pAd, pAd->CurrentAddress, ft->ANonce);
 			hex_dump("TDLS - Generate ANonce ", ft->ANonce, 32);
-			// set MIC field to zero before MIC calculation
+			/* set MIC field to zero before MIC calculation */
 			NdisZeroMemory(ft->MIC, 16);
-			// copy SNonce from peer TDLS
+			/* copy SNonce from peer TDLS */
 			NdisMoveMemory(ft->SNonce, pTDLS->SNonce, 32);
-			// copy ANonce to TDLS entry
+			/* copy ANonce to TDLS entry */
 			NdisMoveMemory(pTDLS->ANonce, ft->ANonce, 32);
 
-			if (pAd->StaCfg.WepStatus == Ndis802_11Encryption2Enabled)
-				key_len = 48;
-			// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-			// Derive TPK-KCK for MIC key, TPK-TK for direct link data
+			/*if (pAd->StaCfg.WepStatus == Ndis802_11Encryption2Enabled) */
+				/*key_len = 48; */
+			/* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
+			/* Derive TPK-KCK for MIC key, TPK-TK for direct link data */
 			TDLS_FTDeriveTPK(
 					pTDLS->MacAddr,	/* MAC Address of Initiator */
 					pAd->CurrentAddress, /* I am Responder */
@@ -286,17 +286,17 @@ TDLS_BuildSetupResponse(
 					pTDLS->TPK,
 					pTDLS->TPKName);
 
-			// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+			/* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
 
-			////////////////////////////////////////////////////////////////////////
-			// The MIC field of FTIE shall be calculated on the concatenation, in the following order, of
-			// 1. MAC_I (6 bytes)
-			// 2. MAC_R (6 bytes)
-			// 3. Transaction Sequence = 2 (1 byte)
-			// 4. Link Identifier (20 bytes)
-			// 5. RSN IE without the IE header (20 bytes)
-			// 6. Timeout Interval IE (7 bytes)
-			// 7. FTIE without the IE header, with the MIC field of FTIE set to zero (82 bytes)	
+			/*////////////////////////////////////////////////////////////////////*/
+			/* The MIC field of FTIE shall be calculated on the concatenation, in the following order, of */
+			/* 1. MAC_I (6 bytes) */
+			/* 2. MAC_R (6 bytes) */
+			/* 3. Transaction Sequence = 2 (1 byte) */
+			/* 4. Link Identifier (20 bytes) */
+			/* 5. RSN IE without the IE header (20 bytes) */
+			/* 6. Timeout Interval IE (7 bytes) */
+			/* 7. FTIE without the IE header, with the MIC field of FTIE set to zero (82 bytes) */
 			{
 				UCHAR	content[512];
 				ULONG	c_len = 0;
@@ -348,19 +348,19 @@ TDLS_BuildSetupResponse(
 				c_len += tmp_len;
 
 				/* Calculate MIC */				
-				//AES_128_CMAC(pTDLS->TPK, content, c_len, mic);
+				/*AES_128_CMAC(pTDLS->TPK, content, c_len, mic); */
 
 				/* Compute AES-128-CMAC over the concatenation */
 				tmp_aes_len = AES_KEY128_LENGTH;
     			AES_CMAC(content, c_len, pTDLS->TPK, 16, mic, &tmp_aes_len);
 
-				// Fill Mic to ft struct
+				/* Fill Mic to ft struct */
 				NdisMoveMemory(ft->MIC, mic, 16);
 
 			}
-			////////////////////////////////////////////////////////////////////////
+			/*////////////////////////////////////////////////////////////////////*/
 			
-			// Insert FT_IE to outgoing frame
+			/* Insert FT_IE to outgoing frame */
 			TDLS_InsertFTIE(
 					pAd, 
 					(pFrameBuf + *pFrameLen), 
@@ -371,8 +371,8 @@ TDLS_BuildSetupResponse(
 					ft->ANonce, 
 					ft->SNonce);
 
-			// Timeout Interval (7.3.2.49)
-			// Insert TI_IE to outgoing frame
+			/* Timeout Interval (7.3.2.49) */
+			/* Insert TI_IE to outgoing frame */
 			TDLS_InsertTimeoutIntervalIE(
 					pAd, 
 					(pFrameBuf + *pFrameLen), 
@@ -416,47 +416,47 @@ TDLS_BuildSetupConfirm(
 	/* fill link identifier */
 	TDLS_InsertLinkIdentifierIE(pAd, (pFrameBuf + *pFrameLen), pFrameLen, pAd->CurrentAddress, pTDLS->MacAddr);
 
-	// fill Qos Capability
+	/* fill Qos Capability */
 	TDLS_InsertEDCAParameterSetIE(pAd, (pFrameBuf + *pFrameLen), pFrameLen, pTDLS);
 
 #ifdef DOT11_N_SUPPORT
-	// fill HT Capability
+	/* fill HT Capability */
 	TDLS_InsertHtCapIE(pAd, (pFrameBuf + *pFrameLen), pFrameLen);
-#endif // DOT11_N_SUPPORT //
+#endif /* DOT11_N_SUPPORT */
 
-	// TPK Handshake if RSNA Enabled
-	// Pack TPK Message 3 here! 
+	/* TPK Handshake if RSNA Enabled */
+	/* Pack TPK Message 3 here! */
 	if (((pAd->StaCfg.AuthMode == Ndis802_11AuthModeWPA2) || (pAd->StaCfg.AuthMode == Ndis802_11AuthModeWPA2PSK)) &&
 		((pAd->StaCfg.WepStatus == Ndis802_11Encryption2Enabled) || (pAd->StaCfg.WepStatus == Ndis802_11Encryption3Enabled)))
 	{		
 		FT_FTIE	*ft;
 		ULONG	tmp;
 			
-		// RSNIE (7.3.2.25)			
-		// Insert RSN_IE of the Peer TDLS to outgoing frame
+		/* RSNIE (7.3.2.25) */
+		/* Insert RSN_IE of the Peer TDLS to outgoing frame */
 		MakeOutgoingFrame((pFrameBuf + *pFrameLen),	&tmp,
 							RsnLen,					pRsnIe,
 							END_OF_ARGS);
 		*pFrameLen = *pFrameLen + tmp;
 		
 				
-		// FTIE (7.3.2.48)
-		// Construct FTIE (IE + Length + MIC Control + MIC + ANonce + SNonce)
+		/* FTIE (7.3.2.48) */
+		/* Construct FTIE (IE + Length + MIC Control + MIC + ANonce + SNonce) */
 	
-		// point to the element of IE
+		/* point to the element of IE */
 		ft = (FT_FTIE *)(pFTIe + 2);	
-		// set MIC field to zero before MIC calculation
+		/* set MIC field to zero before MIC calculation */
 		NdisZeroMemory(ft->MIC, 16);
 
-		////////////////////////////////////////////////////////////////////////
-		// The MIC field of FTIE shall be calculated on the concatenation, in the following order, of
-		// 1. MAC_I (6 bytes)
-		// 2. MAC_R (6 bytes)
-		// 3. Transaction Sequence = 2 (1 byte)
-		// 4. Link Identifier (20 bytes)
-		// 5. RSN IE without the IE header (20 bytes)
-		// 6. Timeout Interval IE (7 bytes)
-		// 7. FTIE without the IE header, with the MIC field of FTIE set to zero (82 bytes)	
+		/*////////////////////////////////////////////////////////////////////*/
+		/* The MIC field of FTIE shall be calculated on the concatenation, in the following order, of */
+		/* 1. MAC_I (6 bytes) */
+		/* 2. MAC_R (6 bytes) */
+		/* 3. Transaction Sequence = 2 (1 byte) */
+		/* 4. Link Identifier (20 bytes) */
+		/* 5. RSN IE without the IE header (20 bytes) */
+		/* 6. Timeout Interval IE (7 bytes) */
+		/* 7. FTIE without the IE header, with the MIC field of FTIE set to zero (82 bytes) */
 		{
 			UCHAR	content[512];
 			ULONG	c_len = 0;
@@ -509,18 +509,18 @@ TDLS_BuildSetupConfirm(
 			c_len += tmp_len;	
 
 			/* Calculate MIC */				
-			//AES_128_CMAC(pTDLS->TPK, content, c_len, mic);
+			/*AES_128_CMAC(pTDLS->TPK, content, c_len, mic); */
 
 			/* Compute AES-128-CMAC over the concatenation */
 			tmp_aes_len = AES_KEY128_LENGTH;
     		AES_CMAC(content, c_len, pTDLS->TPK, 16, mic, &tmp_aes_len);
 
-			// Fill Mic to ft struct
+			/* Fill Mic to ft struct */
 			NdisMoveMemory(ft->MIC, mic, 16);
 		}
-		////////////////////////////////////////////////////////////////////////
+		/*////////////////////////////////////////////////////////////////////*/
 	
-		// Insert FT_IE to outgoing frame
+		/* Insert FT_IE to outgoing frame */
 		TDLS_InsertFTIE(
 					pAd, 
 					(pFrameBuf + *pFrameLen), 
@@ -531,8 +531,8 @@ TDLS_BuildSetupConfirm(
 					ft->ANonce, 
 					ft->SNonce);
 
-		// Timeout Interval (7.3.2.49)
-		// Insert TI_IE to outgoing frame
+		/* Timeout Interval (7.3.2.49) */
+		/* Insert TI_IE to outgoing frame */
 		TDLS_InsertTimeoutIntervalIE(
 					pAd, 
 					(pFrameBuf + *pFrameLen), 
@@ -570,7 +570,7 @@ TDLS_BuildTeardown(
 	else
 		TDLS_InsertLinkIdentifierIE(pAd, (pFrameBuf + *pFrameLen), pFrameLen, pAd->CurrentAddress, pTDLS->MacAddr);
 
-	// FTIE includes if RSNA Enabled
+	/* FTIE includes if RSNA Enabled */
 	if (((pAd->StaCfg.AuthMode == Ndis802_11AuthModeWPA2) || (pAd->StaCfg.AuthMode == Ndis802_11AuthModeWPA2PSK)) &&
 		((pAd->StaCfg.WepStatus == Ndis802_11Encryption2Enabled) || (pAd->StaCfg.WepStatus == Ndis802_11Encryption3Enabled)))
 	{	
@@ -601,16 +601,16 @@ TDLS_BuildTeardown(
 		}
 
 
-		//NdisMoveMemory(&LinkIdentifier[8], pTDLS->MacAddr, 6);
-		//NdisMoveMemory(&LinkIdentifier[14], pAd->CurrentAddress, 6);
+		/*NdisMoveMemory(&LinkIdentifier[8], pTDLS->MacAddr, 6); */
+		/*NdisMoveMemory(&LinkIdentifier[14], pAd->CurrentAddress, 6); */
 
-		// FTIE (7.3.2.48)
-		// The contents of FTIE in the TDLS Teardown frame shall be the same as that included
-		// in the TPK Handshake Message3 with the exception of the MIC field.
+		/* FTIE (7.3.2.48) */
+		/* The contents of FTIE in the TDLS Teardown frame shall be the same as that included */
+		/* in the TPK Handshake Message3 with the exception of the MIC field. */
 
-		// Construct FTIE (IE + Length + MIC Control + MIC + ANonce + SNonce)
+		/* Construct FTIE (IE + Length + MIC Control + MIC + ANonce + SNonce) */
 			
-		// point to the element of IE
+		/* point to the element of IE */
 		NdisZeroMemory(FTIe, sizeof(FTIe));
 		FTIe[0] = IE_FT_FTIE;
 		FTIe[1] = sizeof(FT_FTIE);
@@ -618,13 +618,13 @@ TDLS_BuildTeardown(
 		NdisMoveMemory(ft->ANonce, pTDLS->ANonce, 32);
 		NdisMoveMemory(ft->SNonce, pTDLS->SNonce, 32);
 
-		////////////////////////////////////////////////////////////////////////
-		// The MIC field of FTIE shall be calculated on the concatenation, in the following order, of
-		// 1. Link Identifier (20 bytes)
-		// 2. Reason Code (2 bytes)
-		// 3. Dialog token (1 byte)
-		// 4. Transaction Sequence = 4 (1 byte)
-		// 5. FTIE with the MIC field of FTIE set to zero (84 bytes)	
+		/*////////////////////////////////////////////////////////////////////*/
+		/* The MIC field of FTIE shall be calculated on the concatenation, in the following order, of */
+		/* 1. Link Identifier (20 bytes) */
+		/* 2. Reason Code (2 bytes) */
+		/* 3. Dialog token (1 byte) */
+		/* 4. Transaction Sequence = 4 (1 byte) */
+		/* 5. FTIE with the MIC field of FTIE set to zero (84 bytes) */
 		
 		/* concatenate Link Identifier, Reason Code, Dialog token, Transaction Sequence */
 		MakeOutgoingFrame(content,            		&tmp_len,
@@ -643,7 +643,7 @@ TDLS_BuildTeardown(
 		
 		/* Calculate MIC */
 		NdisZeroMemory(mic, sizeof(mic));
-		//AES_128_CMAC(pTDLS->TPK, content, c_len, mic);
+		/*AES_128_CMAC(pTDLS->TPK, content, c_len, mic); */
 
 		/* Compute AES-128-CMAC over the concatenation */
 		tmp_aes_len = AES_KEY128_LENGTH;
@@ -651,9 +651,9 @@ TDLS_BuildTeardown(
 		
 		/* Fill Mic to ft struct */
 		NdisMoveMemory(ft->MIC, mic, 16);
-		////////////////////////////////////////////////////////////////////////
+		/*////////////////////////////////////////////////////////////////////*/
 
-		// Insert FT_IE to outgoing frame
+		/* Insert FT_IE to outgoing frame */
 		TDLS_InsertFTIE(
 					pAd, 
 					(pFrameBuf + *pFrameLen), 
@@ -688,12 +688,12 @@ USHORT	TDLS_TPKMsg1Process(
 	UCHAR			CipherTmpLen = 0;
 	FT_FTIE			*ft = NULL;
 
-	// Validate RsnIE
-	//
-	if (RsnLen == 0) // RSN not exist
+	/* Validate RsnIE */
+	/* */
+	if (RsnLen == 0) /* RSN not exist */
 		return  MLME_INVALID_INFORMATION_ELEMENT;
 
-	if (pRsnIe[2] < 1) // Smaller version
+	if (pRsnIe[2] < 1) /* Smaller version */
 		return	MLME_NOT_SUPPORT_RSN_VERSION;
 
 	CipherTmpLen = CipherSuiteTDLSLen;
@@ -705,24 +705,24 @@ USHORT	TDLS_TPKMsg1Process(
 	if(pAd->StaCfg.AuthMode == Ndis802_11AuthModeWPA2)
 		CipherTmp[19] = TDLS_AKM_SUITE_1X;
 
-	if ( RTMPEqualMemory(&pRsnIe[16], &CipherTmp[16], 4) == 0) // Invalid TDLS AKM
+	if ( RTMPEqualMemory(&pRsnIe[16], &CipherTmp[16], 4) == 0) /* Invalid TDLS AKM */
 		return MLME_INVALID_AKMP;
 
-	if ( RTMPEqualMemory(&pRsnIe[20], &CipherTmp[20], 2) == 0) // Invalid RSN capability
+	if ( RTMPEqualMemory(&pRsnIe[20], &CipherTmp[20], 2) == 0) /* Invalid RSN capability */
 		return MLME_INVALID_RSN_CAPABILITIES;
 
-	if ((RsnLen != 22) || (RTMPEqualMemory(pRsnIe, CipherTmp, RsnLen) == 0)) // Invalid Pairwise Cipher
+	if ((RsnLen != 22) || (RTMPEqualMemory(pRsnIe, CipherTmp, RsnLen) == 0)) /* Invalid Pairwise Cipher */
 		return REASON_UCIPHER_NOT_VALID;
 
-	// Validate FTIE
-	//
-	ft = (PFT_FTIE)(pFTIe + 2); // point to the element of IE
+	/* Validate FTIE */
+	/* */
+	ft = (PFT_FTIE)(pFTIe + 2); /* point to the element of IE */
 	if ((FTLen != (sizeof(FT_FTIE) + 2)) || RTMPEqualMemory(&ft->MICCtr, TdlsZeroSsid, 2) == 0 || 
 		(RTMPEqualMemory(ft->MIC, TdlsZeroSsid, 16) == 0) || (RTMPEqualMemory(ft->ANonce, TdlsZeroSsid, 32) == 0))
 		return REASON_FT_INVALID_FTIE;
 
-	// Validate TIIE
-	//
+	/* Validate TIIE */
+	/* */
 	if ((TILen != 7) || (pTIIe[2] != 2) || ( le2cpu32(*((PULONG) (pTIIe + 3))) < TDLS_KEY_TIMEOUT))
 		return TDLS_STATUS_CODE_UNACCEPTABLE_LIFETIME;
 
@@ -756,12 +756,12 @@ USHORT	TDLS_TPKMsg2Process(
 	UCHAR		LinkIdentifier[20];
 	UINT		key_len = LEN_PMK;
 	
-	// Validate RsnIE
-	//
-	if (RsnLen == 0) // RSN not exist
+	/* Validate RsnIE */
+	/* */
+	if (RsnLen == 0) /* RSN not exist */
 		return  MLME_INVALID_INFORMATION_ELEMENT;
 
-	if (pRsnIe[2] < 1) // Smaller version
+	if (pRsnIe[2] < 1) /* Smaller version */
 		return	MLME_NOT_SUPPORT_RSN_VERSION;
 
 	CipherTmpLen = CipherSuiteTDLSLen;
@@ -776,39 +776,39 @@ USHORT	TDLS_TPKMsg2Process(
 	if(pAd->StaCfg.AuthMode == Ndis802_11AuthModeWPA2)
 		CipherTmp[19] = TDLS_AKM_SUITE_1X;
 
-	if ( RTMPEqualMemory(&pRsnIe[16], &CipherTmp[16], 4) == 0) // Invalid TDLS AKM
+	if ( RTMPEqualMemory(&pRsnIe[16], &CipherTmp[16], 4) == 0) /* Invalid TDLS AKM */
 		return MLME_INVALID_AKMP;
 
-	if ( RTMPEqualMemory(&pRsnIe[20], &CipherTmp[20], 2) == 0) // Invalid RSN capability
+	if ( RTMPEqualMemory(&pRsnIe[20], &CipherTmp[20], 2) == 0) /* Invalid RSN capability */
 		return MLME_INVALID_RSN_CAPABILITIES;
 
-	if ((RsnLen != 22) || (RTMPEqualMemory(pRsnIe, CipherTmp, RsnLen) == 0)) // Invalid Pairwise Cipher
+	if ((RsnLen != 22) || (RTMPEqualMemory(pRsnIe, CipherTmp, RsnLen) == 0)) /* Invalid Pairwise Cipher */
 		return REASON_UCIPHER_NOT_VALID;
 
-	// Validate FTIE
-	//
-	ft = (PFT_FTIE)(pFTIe + 2); // point to the element of IE
+	/* Validate FTIE */
+	/* */
+	ft = (PFT_FTIE)(pFTIe + 2); /* point to the element of IE */
 	if ((FTLen != (sizeof(FT_FTIE) + 2)) || RTMPEqualMemory(&ft->MICCtr, TdlsZeroSsid, 2) == 0 || 
 		(RTMPEqualMemory(ft->SNonce, pTDLS->SNonce, 32) == 0))
 		return REASON_FT_INVALID_FTIE;
 
-	// Validate TIIE
-	//
+	/* Validate TIIE */
+	/* */
 	if ((TILen != 7) || (pTIIe[2] != 2) || ( le2cpu32(*((PULONG) (pTIIe + 3))) < TDLS_KEY_TIMEOUT))
 		return TDLS_STATUS_CODE_UNACCEPTABLE_LIFETIME;
 
 
-	// Validate the MIC field of FTIE
-	//
+	/* Validate the MIC field of FTIE */
+	/* */
 	
-	// point to the element of IE
+	/* point to the element of IE */
 	ft = (PFT_FTIE)(pFTIe + 2);	
-	// backup MIC fromm the peer TDLS
+	/* backup MIC fromm the peer TDLS */
 	NdisMoveMemory(oldMic, ft->MIC, 16);
 
 	
-	// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	// Derive TPK-KCK for MIC key, TPK-TK for direct link data
+	/* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
+	/* Derive TPK-KCK for MIC key, TPK-TK for direct link data */
 	TDLS_FTDeriveTPK(
 			pAd->CurrentAddress, /* I am Initiator */
 			pTDLS->MacAddr,	/* MAC Address of Responder */
@@ -819,12 +819,12 @@ USHORT	TDLS_TPKMsg2Process(
 			pTPK,
 			pTPKName);
 	
-	// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	/* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
 	
-	// set MIC field to zero before MIC calculation
+	/* set MIC field to zero before MIC calculation */
 	NdisZeroMemory(ft->MIC, 16);
 
-	// Construct LinkIdentifier (IE + Length + BSSID + Initiator MAC + Responder MAC)
+	/* Construct LinkIdentifier (IE + Length + BSSID + Initiator MAC + Responder MAC) */
 	NdisZeroMemory(LinkIdentifier, 20);
 	LinkIdentifier[0] = IE_TDLS_LINK_IDENTIFIER;
 	LinkIdentifier[1] = 18;
@@ -832,15 +832,15 @@ USHORT	TDLS_TPKMsg2Process(
 	NdisMoveMemory(&LinkIdentifier[8], pAd->CurrentAddress, 6);
 	NdisMoveMemory(&LinkIdentifier[14], pTDLS->MacAddr, 6);
 
-	////////////////////////////////////////////////////////////////////////
-	// The MIC field of FTIE shall be calculated on the concatenation, in the following order, of
-	// 1. MAC_I (6 bytes)
-	// 2. MAC_R (6 bytes)
-	// 3. Transaction Sequence = 2 (1 byte)
-	// 4. Link Identifier (20 bytes)
-	// 5. RSN IE without the IE header (20 bytes)
-	// 6. Timeout Interval IE (7 bytes)
-	// 7. FTIE without the IE header, with the MIC field of FTIE set to zero (82 bytes)	
+	/*////////////////////////////////////////////////////////////////////*/
+	/* The MIC field of FTIE shall be calculated on the concatenation, in the following order, of */
+	/* 1. MAC_I (6 bytes) */
+	/* 2. MAC_R (6 bytes) */
+	/* 3. Transaction Sequence = 2 (1 byte) */
+	/* 4. Link Identifier (20 bytes) */
+	/* 5. RSN IE without the IE header (20 bytes) */
+	/* 6. Timeout Interval IE (7 bytes) */
+	/* 7. FTIE without the IE header, with the MIC field of FTIE set to zero (82 bytes) */
 	{
 		UCHAR	content[512];
 		ULONG	c_len = 0;
@@ -887,7 +887,7 @@ USHORT	TDLS_TPKMsg2Process(
 		
 
 		/* Calculate MIC */				
-		//AES_128_CMAC(pTPK, content, c_len, mic);
+		/*AES_128_CMAC(pTPK, content, c_len, mic); */
 
 		/* Compute AES-128-CMAC over the concatenation */
 		tmp_aes_len = AES_KEY128_LENGTH;
@@ -896,7 +896,7 @@ USHORT	TDLS_TPKMsg2Process(
 		NdisMoveMemory(ft->MIC, mic, 16);
 
 	}
-	////////////////////////////////////////////////////////////////////////
+	/*////////////////////////////////////////////////////////////////////*/
 	
 	if (RTMPEqualMemory(oldMic, ft->MIC, 16) == 0)
 	{
@@ -932,12 +932,12 @@ USHORT	TDLS_TPKMsg3Process(
 	UCHAR			oldMic[16];
 	UCHAR			LinkIdentifier[20];
 	
-	// Validate RsnIE
-	//
-	if (RsnLen == 0) // RSN not exist
+	/* Validate RsnIE */
+	/* */
+	if (RsnLen == 0) /* RSN not exist */
 		return  MLME_INVALID_INFORMATION_ELEMENT;
 
-	if (pRsnIe[2] < 1) // Smaller version
+	if (pRsnIe[2] < 1) /* Smaller version */
 		return	MLME_NOT_SUPPORT_RSN_VERSION;
 
 	CipherTmpLen = CipherSuiteTDLSLen;
@@ -949,41 +949,41 @@ USHORT	TDLS_TPKMsg3Process(
 	if(pAd->StaCfg.AuthMode == Ndis802_11AuthModeWPA2)
 		CipherTmp[19] = TDLS_AKM_SUITE_1X;
 
-	if ( RTMPEqualMemory(&pRsnIe[16], &CipherTmp[16], 4) == 0) // Invalid TDLS AKM
+	if ( RTMPEqualMemory(&pRsnIe[16], &CipherTmp[16], 4) == 0) /* Invalid TDLS AKM */
 		return MLME_INVALID_AKMP;
 
-	if ( RTMPEqualMemory(&pRsnIe[20], &CipherTmp[20], 2) == 0) // Invalid RSN capability
+	if ( RTMPEqualMemory(&pRsnIe[20], &CipherTmp[20], 2) == 0) /* Invalid RSN capability */
 		return MLME_INVALID_RSN_CAPABILITIES;
 
-	if ((RsnLen != 22) || (RTMPEqualMemory(pRsnIe, CipherTmp, RsnLen) == 0)) // Invalid Pairwise Cipher
+	if ((RsnLen != 22) || (RTMPEqualMemory(pRsnIe, CipherTmp, RsnLen) == 0)) /* Invalid Pairwise Cipher */
 		return REASON_UCIPHER_NOT_VALID;
 
-	// Validate FTIE
-	//
-	ft = (PFT_FTIE)(pFTIe + 2); // point to the element of IE
+	/* Validate FTIE */
+	/* */
+	ft = (PFT_FTIE)(pFTIe + 2); /* point to the element of IE */
 	if ((FTLen != (sizeof(FT_FTIE) + 2)) || RTMPEqualMemory(&ft->MICCtr, TdlsZeroSsid, 2) == 0 || 
 		(RTMPEqualMemory(ft->SNonce, pTDLS->SNonce, 32) == 0) || (RTMPEqualMemory(ft->ANonce, pTDLS->ANonce, 32) == 0))
 		return REASON_FT_INVALID_FTIE;
 
-	// Validate TIIE
-	//
+	/* Validate TIIE */
+	/* */
 	if ((TILen != 7) || (pTIIe[2] != 2) || ( le2cpu32(*((PULONG) (pTIIe + 3))) < pTDLS->KeyLifetime))
 		return TDLS_STATUS_CODE_UNACCEPTABLE_LIFETIME;
 
 
-	// Validate the MIC field of FTIE
-	//
+	/* Validate the MIC field of FTIE */
+	/* */
 	
-	// point to the element of IE
+	/* point to the element of IE */
 	ft = (PFT_FTIE)(pFTIe + 2);	
-	// backup MIC fromm the peer TDLS
+	/* backup MIC fromm the peer TDLS */
 	NdisMoveMemory(oldMic, ft->MIC, 16);
 
 		
-	// set MIC field to zero before MIC calculation
+	/* set MIC field to zero before MIC calculation */
 	NdisZeroMemory(ft->MIC, 16);
 
-	// Construct LinkIdentifier (IE + Length + BSSID + Initiator MAC + Responder MAC)
+	/* Construct LinkIdentifier (IE + Length + BSSID + Initiator MAC + Responder MAC) */
 	NdisZeroMemory(LinkIdentifier, 20);
 	LinkIdentifier[0] = IE_TDLS_LINK_IDENTIFIER;
 	LinkIdentifier[1] = 18;
@@ -991,15 +991,15 @@ USHORT	TDLS_TPKMsg3Process(
 	NdisMoveMemory(&LinkIdentifier[8], pTDLS->MacAddr, 6);
 	NdisMoveMemory(&LinkIdentifier[14], pAd->CurrentAddress, 6);
 
-	////////////////////////////////////////////////////////////////////////
-	// The MIC field of FTIE shall be calculated on the concatenation, in the following order, of
-	// 1. MAC_I (6 bytes)
-	// 2. MAC_R (6 bytes)
-	// 3. Transaction Sequence = 3 (1 byte)
-	// 4. Link Identifier (20 bytes)
-	// 5. RSN IE without the IE header (20 bytes)
-	// 6. Timeout Interval IE (7 bytes)
-	// 7. FTIE without the IE header, with the MIC field of FTIE set to zero (82 bytes)
+	/*////////////////////////////////////////////////////////////////////*/
+	/* The MIC field of FTIE shall be calculated on the concatenation, in the following order, of */
+	/* 1. MAC_I (6 bytes) */
+	/* 2. MAC_R (6 bytes) */
+	/* 3. Transaction Sequence = 3 (1 byte) */
+	/* 4. Link Identifier (20 bytes) */
+	/* 5. RSN IE without the IE header (20 bytes) */
+	/* 6. Timeout Interval IE (7 bytes) */
+	/* 7. FTIE without the IE header, with the MIC field of FTIE set to zero (82 bytes) */
 	{
 		UCHAR	content[512];
 		ULONG	c_len = 0;
@@ -1046,7 +1046,7 @@ USHORT	TDLS_TPKMsg3Process(
 		
 
 		/* Calculate MIC */				
-		//AES_128_CMAC(pTDLS->TPK, content, c_len, mic);
+		/*AES_128_CMAC(pTDLS->TPK, content, c_len, mic); */
 
 		/* Compute AES-128-CMAC over the concatenation */
 		tmp_aes_len = AES_KEY128_LENGTH;
@@ -1055,7 +1055,7 @@ USHORT	TDLS_TPKMsg3Process(
 		NdisMoveMemory(ft->MIC, mic, 16);
 
 	}
-	////////////////////////////////////////////////////////////////////////
+	/*////////////////////////////////////////////////////////////////////*/
 	
 	if (RTMPEqualMemory(oldMic, ft->MIC, 16) == 0)
 	{
@@ -1066,5 +1066,5 @@ USHORT	TDLS_TPKMsg3Process(
 	
 	return StatusCode;
 }
-#endif // DOT11Z_TDLS_SUPPORT //
+#endif /* DOT11Z_TDLS_SUPPORT */
 

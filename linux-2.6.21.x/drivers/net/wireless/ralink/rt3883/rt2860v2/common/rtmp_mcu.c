@@ -30,10 +30,9 @@
 #include	"rt_config.h"
 #include 	"firmware.h"
 
-//#define BIN_IN_FILE /* use *.bin firmware */
 
 
-// New 8k byte firmware size for RT3071/RT3072
+/* New 8k byte firmware size for RT3071/RT3072*/
 #define FIRMWAREIMAGE_MAX_LENGTH	0x2000
 #define FIRMWAREIMAGE_LENGTH			(sizeof (FirmwareImage) / sizeof(UCHAR))
 #define FIRMWARE_MAJOR_VERSION		0
@@ -43,7 +42,7 @@
 
 #ifdef RTMP_MAC_PCI
 #define FIRMWARE_MINOR_VERSION		2
-#endif // RTMP_MAC_PCI //
+#endif /* RTMP_MAC_PCI */
 
 const unsigned short ccitt_16Table[] = {
 	0x0000, 0x1021, 0x2042, 0x3063, 0x4084, 0x50A5, 0x60C6, 0x70E7,
@@ -120,7 +119,59 @@ INT RtmpAsicEraseFirmware(
 
 	return 0;
 }
+NDIS_STATUS isMCUNeedToLoadFIrmware(
+	IN PRTMP_ADAPTER pAd)
+{
+	NDIS_STATUS		Status = NDIS_STATUS_SUCCESS;
+	ULONG			Index;
+	UINT32			MacReg;
+	
+	Index = 0;
 
+	do {
+		if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_NIC_NOT_EXIST))			
+			return NDIS_STATUS_FAILURE;
+		
+		RTMP_IO_READ32(pAd, PBF_SYS_CTRL, &MacReg);
+
+		if (MacReg & 0x100) /* check bit 8*/
+			break;
+		
+		RTMPusecDelay(1000);
+	} while (Index++ < 100);
+
+	if (Index >= 100)
+		Status = NDIS_STATUS_FAILURE;
+
+	return Status;
+}
+
+NDIS_STATUS isMCUnotReady(
+	IN PRTMP_ADAPTER pAd)
+{
+	NDIS_STATUS		Status = NDIS_STATUS_SUCCESS;
+	ULONG			Index;
+	UINT32			MacReg;
+	
+	Index = 0;
+
+	do {
+		if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_NIC_NOT_EXIST))			
+			return NDIS_STATUS_FAILURE;
+
+		RTMP_IO_READ32(pAd, PBF_SYS_CTRL, &MacReg);
+
+		if (MacReg & 0x80) /* check bit 7*/
+			break;
+		
+		RTMPusecDelay(1000);
+	} while (Index++ < 1000);
+
+	if (Index >= 1000)
+		Status = NDIS_STATUS_FAILURE;
+
+	return Status;
+}
 /*
 	========================================================================
 	
@@ -171,7 +222,8 @@ NDIS_STATUS RtmpAsicLoadFirmware(
 
 
 	/* allocate firmware buffer */
-	pFirmwareImage = kmalloc(MAX_FIRMWARE_IMAGE_SIZE, MEM_ALLOC_FLAG);
+/*	pFirmwareImage = kmalloc(MAX_FIRMWARE_IMAGE_SIZE, MEM_ALLOC_FLAG);*/
+	os_alloc_mem(pAd, (UCHAR **)&pFirmwareImage, MAX_FIRMWARE_IMAGE_SIZE);
 	if (pFirmwareImage == NULL)
 	{
 		/* allocate fail, use default firmware array in firmware.h */
@@ -281,7 +333,8 @@ NDIS_STATUS RtmpAsicLoadFirmware(
 	{
 		/* use default fimeware, free allocated buffer */
 		if (pFirmwareImage != NULL)
-			kfree(pFirmwareImage);
+/*			kfree(pFirmwareImage);*/
+			os_free_mem(NULL, pFirmwareImage);
 		/* End of if */
 
 		/* use default *.bin array */
@@ -313,7 +366,8 @@ NDIS_STATUS RtmpAsicLoadFirmware(
 	{
 		/* use file firmware, free allocated buffer */
 		if (pFirmwareImage != NULL)
-			kfree(pFirmwareImage);
+/*			kfree(pFirmwareImage);*/
+			os_free_mem(NULL, pFirmwareImage);
 		/* End of if */
 	} /* End of if */
 
@@ -322,27 +376,27 @@ NDIS_STATUS RtmpAsicLoadFirmware(
 
 	NDIS_STATUS		Status = NDIS_STATUS_SUCCESS;
 	PUCHAR			pFirmwareImage;
-	ULONG			FileLength, Index;
-	//ULONG			firm;
-	UINT32			MacReg = 0;
+	ULONG			FileLength;
+	/*ULONG			firm;*/
 	UINT32			Version = (pAd->MACVersion >> 16);
 
 	pFirmwareImage = FirmwareImage;
 	FileLength = sizeof(FirmwareImage);
 
-	// New 8k byte firmware size for RT3071/RT3072
-	//DBGPRINT(RT_DEBUG_TRACE, ("Usb Chip\n"));
+	/* New 8k byte firmware size for RT3071/RT3072*/
+	/*DBGPRINT(RT_DEBUG_TRACE, ("Usb Chip\n"));*/
 	if (FIRMWAREIMAGE_LENGTH == FIRMWAREIMAGE_MAX_LENGTH)
-	//The firmware image consists of two parts. One is the origianl and the other is the new.
-	//Use Second Part
+	/*The firmware image consists of two parts. One is the origianl and the other is the new.*/
+	/*Use Second Part*/
 	{
 #ifdef RTMP_MAC_PCI
-		if ((Version == 0x2860) || (Version == 0x3572) || IS_RT3090(pAd)||IS_RT3390(pAd) || IS_RT3593(pAd))
+		if ((Version == 0x2860) || (Version == 0x3572) || IS_RT3090(pAd) 
+			|| IS_RT3390(pAd) || IS_RT3593(pAd) || IS_RT5390(pAd) || IS_RT5392(pAd))
 		{
 			pFirmwareImage = FirmwareImage;
 			FileLength = FIRMWAREIMAGE_LENGTH;
 		}
-#endif // RTMP_MAC_PCI //
+#endif /* RTMP_MAC_PCI */
 	}
 	else
 	{
@@ -350,27 +404,20 @@ NDIS_STATUS RtmpAsicLoadFirmware(
 		Status = NDIS_STATUS_FAILURE;
 	}
 
-
+	if (isMCUNeedToLoadFIrmware(pAd))
+	{
+		DBGPRINT(RT_DEBUG_ERROR, ("NICLoadFirmware: We need to load firmware\n"));
 	RTMP_WRITE_FIRMWARE(pAd, pFirmwareImage, FileLength);
+	}
+	else
+	{
+		DBGPRINT(RT_DEBUG_ERROR, ("NICLoadFirmware: firmware loaded already\n"));
+	}
+		
 
 #endif
 
-	/* check if MCU is ready */
-	Index = 0;
-	do
-	{
-		if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_NIC_NOT_EXIST))			
-			return NDIS_STATUS_FAILURE;
-		
-		RTMP_IO_READ32(pAd, PBF_SYS_CTRL, &MacReg);
-
-		if (MacReg & 0x80)
-			break;
-		
-		RTMPusecDelay(1000);
-	} while (Index++ < 1000);
-
-    if (Index >= 1000)
+	if (isMCUnotReady(pAd))
 	{
 		DBGPRINT(RT_DEBUG_ERROR, ("NICLoadFirmware: MCU is not ready\n\n\n"));
 		Status = NDIS_STATUS_FAILURE;
@@ -383,11 +430,12 @@ NDIS_STATUS RtmpAsicLoadFirmware(
 
 
 INT RtmpAsicSendCommandToMcu(
-	IN PRTMP_ADAPTER pAd,
-	IN UCHAR		 Command,
-	IN UCHAR		 Token,
-	IN UCHAR		 Arg0,
-	IN UCHAR		 Arg1)
+	IN PRTMP_ADAPTER	pAd,
+	IN UCHAR			Command,
+	IN UCHAR			Token,
+	IN UCHAR			Arg0,
+	IN UCHAR			Arg1,
+	IN BOOLEAN			FlgIsNeedLocked)
 {
 	HOST_CMD_CSR_STRUC	H2MCmd;
 	H2M_MAILBOX_STRUC	H2MMailbox;
@@ -396,24 +444,41 @@ INT RtmpAsicSendCommandToMcu(
 #ifndef RTMP_RBUS_SUPPORT
 #ifdef RALINK_ATE
 	static UINT32 j = 0;
-#endif // RALINK_ATE //
-#endif // RTMP_RBUS_SUPPORT //
-#endif // RTMP_MAC_PCI //
+#endif /* RALINK_ATE */
+#endif /* RTMP_RBUS_SUPPORT */
+#endif /* RTMP_MAC_PCI */
 #ifdef CONFIG_STA_SUPPORT
 #ifdef PCIE_PS_SUPPORT
-	// 3090F power solution 3 has hw limitation that needs to ban all mcu command 
-	// when firmware is in radio state.  For other chip doesn't have this limitation. 
-	if ((IS_RT3090(pAd) || IS_RT3572(pAd) ||
-		IS_RT3390(pAd) || IS_RT3593(pAd)) && IS_VERSION_AFTER_F(pAd)
+	POS_COOKIE pObj;
+	ULONG	Configuration;
+	ULONG	offset;
+#endif /* PCIE_PS_SUPPORT */
+#endif /* CONFIG_STA_SUPPORT */
+
+
+#ifdef CONFIG_STA_SUPPORT
+#ifdef PCIE_PS_SUPPORT
+	pObj = (POS_COOKIE) pAd->OS_Cookie;
+
+
+
+	/* 3090F power solution 3 has hw limitation that needs to ban all mcu command */
+	/* when firmware is in radio state.  For other chip doesn't have this limitation. */
+	if ((IS_RT3090(pAd) || IS_RT3572(pAd) || IS_RT3390(pAd) 
+		|| IS_RT3593(pAd) || IS_RT5390(pAd) || IS_RT5392(pAd)) 
+		&& IS_VERSION_AFTER_F(pAd)
 		&& (pAd->StaCfg.PSControl.field.rt30xxPowerMode == 3) 
 		&& (pAd->StaCfg.PSControl.field.EnableNewPS == TRUE))
 	{
+
 		RTMP_SEM_LOCK(&pAd->McuCmdLock);
+
 		if ((pAd->brt30xxBanMcuCmd == TRUE)
 			&& (Command != WAKE_MCU_CMD) && (Command != RFOFF_MCU_CMD))
 		{
-			RTMP_SEM_UNLOCK(&pAd->McuCmdLock);
+
 			DBGPRINT(RT_DEBUG_TRACE, (" Ban Mcu Cmd %x in sleep mode\n",  Command));
+			RTMP_SEM_UNLOCK(&pAd->McuCmdLock);
 			return FALSE;
 		}
 		else if ((Command == SLEEP_MCU_CMD)
@@ -428,19 +493,20 @@ INT RtmpAsicSendCommandToMcu(
 
 		RTMP_SEM_UNLOCK(&pAd->McuCmdLock);
 
+
 	}
 
-	if (Command == SLEEP_MCU_CMD)
-		pAd->LastMCUCmd = Command;
 
-	if ((IS_RT3090(pAd) || IS_RT3572(pAd) ||
-		IS_RT3390(pAd) || IS_RT3593(pAd)) && IS_VERSION_AFTER_F(pAd)
+	if ((IS_RT3090(pAd) || IS_RT3572(pAd) || IS_RT3390(pAd) 
+		|| IS_RT3593(pAd) || IS_RT5390(pAd) || IS_RT5392(pAd)) 
+		&& IS_VERSION_AFTER_F(pAd)
 		&& (pAd->StaCfg.PSControl.field.rt30xxPowerMode == 3) 
 		&& (pAd->StaCfg.PSControl.field.EnableNewPS == TRUE)
 		&& (Command == WAKE_MCU_CMD))
 	{
 
-		// don't check MailBox for 0x84, 0x31
+
+		/* don't check MailBox for 0x84, 0x31*/
 		if ((Command != 0x84) && (Command != WAKE_MCU_CMD))
 		{
 			do
@@ -450,8 +516,9 @@ INT RtmpAsicSendCommandToMcu(
 					break;
 
 				if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_NIC_NOT_EXIST))				
+				{
 					return FALSE;
-
+				}
 				RTMPusecDelay(2);
 				DBGPRINT(RT_DEBUG_INFO, ("AsicSendCommanToMcu::Mail box is busy\n"));
 			} while(i++ < 100);
@@ -459,11 +526,12 @@ INT RtmpAsicSendCommandToMcu(
 			if (i >= 100)
 			{
 				DBGPRINT_ERR(("H2M_MAILBOX still hold by MCU. command fail\n"));
-				return FALSE;
+
+					return FALSE;
 			}
 		}
 
-		H2MMailbox.field.Owner	  = 1;	   // pass ownership to MCU
+		H2MMailbox.field.Owner	  = 1;	   /* pass ownership to MCU*/
 		H2MMailbox.field.CmdToken = Token;
 		H2MMailbox.field.HighByte = Arg1;
 		H2MMailbox.field.LowByte  = Arg0;
@@ -476,9 +544,11 @@ INT RtmpAsicSendCommandToMcu(
 
 	}
 	else
-#endif // PCIE_PS_SUPPORT //
-#endif // CONFIG_STA_SUPPORT //
+#endif /* PCIE_PS_SUPPORT */
+#endif /* CONFIG_STA_SUPPORT */
 	{
+
+
 	do
 	{
 		RTMP_IO_READ32(pAd, H2M_MAILBOX_CSR, &H2MMailbox.word);
@@ -486,8 +556,9 @@ INT RtmpAsicSendCommandToMcu(
 			break;
 
 		if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_NIC_NOT_EXIST))				
+		{
 			return FALSE;
-
+		}
 		RTMPusecDelay(2);
 	} while(i++ < 100);
 
@@ -496,7 +567,9 @@ INT RtmpAsicSendCommandToMcu(
 #ifdef RTMP_MAC_PCI
 #ifndef RTMP_RBUS_SUPPORT
 #ifdef RALINK_ATE
-		if (pAd->ate.bFWLoading == TRUE)
+		if ((pAd->infType == RTMP_DEV_INF_RBUS) && 
+			(pAd->ate.bFWLoading == TRUE)
+		)
 		{
 			/* reloading firmware when received iwpriv cmd "ATE=ATESTOP" */
 			if (j > 0)
@@ -518,9 +591,9 @@ INT RtmpAsicSendCommandToMcu(
 			}
 		}
 		else
-#endif // RALINK_ATE //
-#endif // RTMP_RBUS_SUPPORT //
-#endif // RTMP_MAC_PCI //
+#endif /* RALINK_ATE */
+#endif /* RTMP_RBUS_SUPPORT */
+#endif /* RTMP_MAC_PCI */
 		{
 		DBGPRINT_ERR(("H2M_MAILBOX still hold by MCU. command fail\n"));
 		}
@@ -530,18 +603,20 @@ INT RtmpAsicSendCommandToMcu(
 #ifdef RTMP_MAC_PCI
 #ifndef RTMP_RBUS_SUPPORT
 #ifdef RALINK_ATE
-	else if (pAd->ate.bFWLoading == TRUE)
+	else if ((pAd->infType == RTMP_DEV_INF_RBUS) && 
+				(pAd->ate.bFWLoading == TRUE)
+	)
 	{
 		/* reloading of firmware is completed */
 		pAd->ate.bFWLoading = FALSE;
 		DBGPRINT(RT_DEBUG_ERROR, ("\n"));
 		j = 0;
 	}
-#endif // RALINK_ATE //
-#endif // RTMP_RBUS_SUPPORT //
-#endif // RTMP_MAC_PCI //
+#endif /* RALINK_ATE */
+#endif /* RTMP_RBUS_SUPPORT */
+#endif /* RTMP_MAC_PCI */
 
-	H2MMailbox.field.Owner	  = 1;	   // pass ownership to MCU
+	H2MMailbox.field.Owner	  = 1;	   /* pass ownership to MCU*/
 	H2MMailbox.field.CmdToken = Token;
 	H2MMailbox.field.HighByte = Arg1;
 	H2MMailbox.field.LowByte  = Arg0;
@@ -551,31 +626,51 @@ INT RtmpAsicSendCommandToMcu(
 	H2MCmd.field.HostCommand  = Command;
 	RTMP_IO_WRITE32(pAd, HOST_CMD_CSR, H2MCmd.word);
 
+
 	if (Command != 0x80)
 	{
 	}
 }
+
 #ifdef CONFIG_STA_SUPPORT
 #ifdef PCIE_PS_SUPPORT
-	// 3090 MCU Wakeup command needs more time to be stable. 
-	// Before stable, don't issue other MCU command to prevent from firmware error.
-	if ((IS_RT3090(pAd) || IS_RT3572(pAd)
-		|| IS_RT3390(pAd) || IS_RT3593(pAd)) && IS_VERSION_AFTER_F(pAd)
+	/* 3090 MCU Wakeup command needs more time to be stable. */
+	/* Before stable, don't issue other MCU command to prevent from firmware error.*/
+	if ((IS_RT3090(pAd) || IS_RT3572(pAd) || IS_RT3390(pAd) 
+		|| IS_RT3593(pAd) || IS_RT5390(pAd) || IS_RT5392(pAd)) 
+		&& IS_VERSION_AFTER_F(pAd)
 		&& (pAd->StaCfg.PSControl.field.rt30xxPowerMode == 3) 
-		&& (pAd->StaCfg.PSControl.field.EnableNewPS == TRUE)
-		&& (Command == WAKE_MCU_CMD))
+		&& (pAd->StaCfg.PSControl.field.EnableNewPS == TRUE))
 	{
-		RTMPusecDelay(2000);
-		//Put this is after RF programming.  
-		//NdisAcquireSpinLock(&pAd->McuCmdLock);
-		//pAd->brt30xxBanMcuCmd = FALSE;
-		//NdisReleaseSpinLock(&pAd->McuCmdLock);
+		/*Put this is after RF programming.  */
+		/*NdisAcquireSpinLock(&pAd->McuCmdLock);*/
+		/*pAd->brt30xxBanMcuCmd = FALSE;*/
+		/*NdisReleaseSpinLock(&pAd->McuCmdLock);*/
+		switch (Command)
+		{
+			case WAKE_MCU_CMD :
+				RTMPusecDelay(2500);
+
+				if ((pAd->StaCfg.PSControl.field.rt30xxPowerMode == 3) &&
+					(pAd->StaCfg.PSControl.field.EnableNewPS == TRUE))
+				{
+					/* Put this is after RF program. */ 
+					pAd->brt30xxBanMcuCmd = FALSE;
+				}
+				break;
+			case SLEEP_MCU_CMD :
+				RTMPusecDelay(2000);
+				break;
 	}
-#endif // PCIE_PS_SUPPORT //	
-#endif // CONFIG_STA_SUPPORT //
+	}
+
+#endif /* PCIE_PS_SUPPORT */	
+#endif /* CONFIG_STA_SUPPORT */
 
 	if (Command == WAKE_MCU_CMD)
 		pAd->LastMCUCmd = Command;
 
 	return TRUE;
+
+
 }

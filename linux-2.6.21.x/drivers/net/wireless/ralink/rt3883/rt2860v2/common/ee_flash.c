@@ -29,8 +29,7 @@
 
 #include	"rt_config.h"
 
-/* The definition of the EeBuffer[] located in chips/rtxxxx.c */
-extern UCHAR EeBuffer[EEPROM_SIZE];
+UCHAR *EeBuffer = NULL;
 
 static NDIS_STATUS rtmp_ee_flash_init(PRTMP_ADAPTER pAd, PUCHAR start);
 
@@ -41,24 +40,28 @@ static PUCHAR nv_ee_start = 0;
 static USHORT EE_FLASH_ID_LIST[]={
 #ifdef RT2860
 	0x2860, 
-#endif // RT2860 //
+#endif /* RT2860 */
 #ifdef RT2880
 	0x2880, 
-#endif // RT2880 //
+#endif /* RT2880 */
 #ifdef RT2883
 	0x2883,
 	0x2880,
-#endif // RT2883 //
+#endif /* RT2883 */
 #ifdef RT3883
 	0x3662,
 	0x3883,
-#endif // RT3883 //
+#endif /* RT3883 */
 #ifdef RT305x
 	0x3052,
 	0x3051,
 	0x3050,
 	0x3350,
-#endif // RT305x //
+#endif /* RT305x */
+#ifdef RT3352
+	0x3352,
+#endif /* RT3352 */
+
 };
 
 #define EE_FLASH_ID_NUM  (sizeof(EE_FLASH_ID_LIST) / sizeof(USHORT))
@@ -94,9 +97,9 @@ int rtmp_ee_flash_write(PRTMP_ADAPTER pAd, USHORT Offset, USHORT Data)
 	if (init_flag)
 	{
 		memcpy(nv_ee_start+ Offset, &Data, 2);
-		//rt_nv_commit();
-		//rt_cfg_commit();
-		RtmpFlashWrite(EeBuffer, RF_OFFSET, EEPROM_SIZE);
+		/*rt_nv_commit();*/
+		/*rt_cfg_commit();*/
+		RtmpFlashWrite(pAd->eebuf, RF_OFFSET, EEPROM_SIZE);
 	}
 	return 0;
 }
@@ -116,11 +119,13 @@ VOID rtmp_ee_flash_write_all(PRTMP_ADAPTER pAd, USHORT *Data)
 	if (!init_flag)
 		return;
 	memcpy(nv_ee_start, Data, EEPROM_SIZE);
-	RtmpFlashWrite(EeBuffer, RF_OFFSET, EEPROM_SIZE);
+	RtmpFlashWrite(pAd->eebuf, RF_OFFSET, EEPROM_SIZE);
 }
 
 
-static NDIS_STATUS rtmp_ee_flash_reset(PUCHAR start)
+static NDIS_STATUS rtmp_ee_flash_reset(
+	IN RTMP_ADAPTER *pAd, 
+	IN PUCHAR start)
 {
 	PUCHAR				src;
 	RTMP_OS_FS_INFO		osFsInfo;
@@ -141,7 +146,7 @@ static NDIS_STATUS rtmp_ee_flash_reset(PUCHAR start)
 		}
 		else 
 		{
-			// The object must have a read method
+			/* The object must have a read method*/
 			NdisZeroMemory(start, EEPROM_SIZE);
 			
 			retval = RtmpOSFileRead(srcf, start, EEPROM_SIZE);
@@ -198,13 +203,13 @@ int	Set_EECMD_Proc(
 			{
 				DBGPRINT(RT_DEBUG_OFF, ("EEPROM reset to default......\n"));
 				DBGPRINT(RT_DEBUG_OFF, ("The last byte of MAC address will be re-generated...\n"));
-				if (rtmp_ee_flash_reset(nv_ee_start) != NDIS_STATUS_SUCCESS)
+				if (rtmp_ee_flash_reset(pAd, nv_ee_start) != NDIS_STATUS_SUCCESS)
 				{
 					DBGPRINT(RT_DEBUG_ERROR, ("Set_EECMD_Proc: rtmp_ee_flash_reset() failed\n"));
 					return FALSE;
 				}
 			
-				// Random number for the last bytes of MAC address
+				/* Random number for the last bytes of MAC address*/
 				{
 					USHORT  Addr45;
 
@@ -249,7 +254,7 @@ int	Set_EECMD_Proc(
 
 	return TRUE;
 }
-#endif // LINUX //
+#endif /* LINUX */
 
 
 static BOOLEAN  validFlashEepromID(RTMP_ADAPTER *pAd)
@@ -274,13 +279,13 @@ static NDIS_STATUS rtmp_ee_flash_init(PRTMP_ADAPTER pAd, PUCHAR start)
 
 	if (validFlashEepromID(pAd) == FALSE)
 	{
-		if (rtmp_ee_flash_reset(start) != NDIS_STATUS_SUCCESS)
+		if (rtmp_ee_flash_reset(pAd, start) != NDIS_STATUS_SUCCESS)
 		{
 			DBGPRINT(RT_DEBUG_ERROR, ("rtmp_ee_init(): rtmp_ee_flash_init() failed\n"));
 			return NDIS_STATUS_FAILURE;
 		}
 
-		// Random number for the last bytes of MAC address
+		/* Random number for the last bytes of MAC address*/
 		{
 			USHORT  Addr45;
 			
@@ -305,11 +310,18 @@ static NDIS_STATUS rtmp_ee_flash_init(PRTMP_ADAPTER pAd, PUCHAR start)
 
 NDIS_STATUS rtmp_nv_init(PRTMP_ADAPTER pAd)
 {
+/*	UCHAR *eepromBuf;*/
 
 	DBGPRINT(RT_DEBUG_TRACE, ("--> rtmp_nv_init\n"));
 
-	RtmpFlashRead(EeBuffer, RF_OFFSET, EEPROM_SIZE);
 
-	return rtmp_ee_flash_init(pAd, EeBuffer);
+	if (pAd->eebuf == NULL)
+	{
+		DBGPRINT(RT_DEBUG_ERROR, ("pAd->eebuf == NULL!!!\n"));
+		return NDIS_STATUS_FAILURE;
+	}
+	RtmpFlashRead(pAd->eebuf, RF_OFFSET, EEPROM_SIZE);
+	
 
+	return rtmp_ee_flash_init(pAd, pAd->eebuf);
 }

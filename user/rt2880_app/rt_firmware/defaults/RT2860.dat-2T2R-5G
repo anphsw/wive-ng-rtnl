@@ -194,7 +194,6 @@ Key2Str=
 Key3Str=
 Key4Str=
 ApCliEnable=0
-ApCliAutoConnect=1
 ApCliClientOnly=0
 ApCliBridgeOnly=0
 ApCliSsid=SF

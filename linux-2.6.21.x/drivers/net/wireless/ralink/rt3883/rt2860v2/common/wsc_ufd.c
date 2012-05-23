@@ -331,7 +331,7 @@ BOOLEAN WscGetXmlKeyIndex(
 	return TRUE;
 }
 
-//
+
 
 BOOLEAN	WscReadProfileFromUfdFile(
 	IN	PRTMP_ADAPTER		pAd,
@@ -365,7 +365,7 @@ BOOLEAN	WscReadProfileFromUfdFile(
 		{
 			fileLen += rv;
 		}
-		pXmlData = kmalloc(fileLen+1, MEM_ALLOC_FLAG);
+		os_alloc_mem(pAd, (UCHAR **)&pXmlData, fileLen+1);
 		if (pXmlData == NULL)
 		{
 			RtmpOSFileClose(file_r);
@@ -430,24 +430,23 @@ BOOLEAN	WscReadProfileFromUfdFile(
 		
 		DBGPRINT(RT_DEBUG_TRACE, ("WscReadProfileFromUfdFile OK\n"));
 
-		WscWriteConfToPortCfg(pAd, &pAd->ApCfg.MBSSID[ApIdx].WscControl, TRUE);
+		WscWriteConfToPortCfg(pAd, 
+							  &pAd->ApCfg.MBSSID[ApIdx].WscControl, 
+							  &pAd->ApCfg.MBSSID[ApIdx].WscControl.WscProfile.Profile[0], TRUE);
 
 		pAd->WriteWscCfgToDatFile = ApIdx;
-		
-#ifdef KTHREAD_SUPPORT
-		WAKE_UP(&(pAd->wscCfgWriteTask));
-#else
-		RTMP_SEM_EVENT_UP(&(pAd->wscCfgWriteTask.taskSema));
-#endif
+
+		RtmpOsTaskWakeUp(&(pAd->wscTask));
+
 		if (pXmlData)
-			kfree(pXmlData);
-		
+			os_free_mem(NULL, pXmlData);
+
 		return TRUE;
 	}
 
 ReadErr:
 	if (pXmlData)
-		kfree(pXmlData);
+		os_free_mem(NULL, pXmlData);
 	return FALSE;
 }
 
@@ -563,7 +562,7 @@ BOOLEAN	WscWriteProfileToUfdFile(
 			{
 				RtmpOSFileWrite(file_w, (PSTRING)XML_ENCR_END, (int)strlen(XML_ENCR_END));
 				RtmpOSFileWrite(file_w, (PSTRING)"\n", (int)1);
-				pXmlTemplate = offset + strlen(XML_KEY_MARK) + strlen(XML_KEY_END) + 1; // 1: '\n'
+				pXmlTemplate = offset + strlen(XML_KEY_MARK) + strlen(XML_KEY_END) + 1; /* 1: '\n' */
 			}			
 		}
 		RtmpOSFileWrite(file_w, (PSTRING)pXmlTemplate, (int)strlen(pXmlTemplate));
@@ -577,4 +576,4 @@ out:
 }
 
 
-#endif // WSC_INCLUDED //
+#endif /* WSC_INCLUDED */

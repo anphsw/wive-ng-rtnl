@@ -27,6 +27,12 @@ int main(int argc ,char *argv[])
 	 printf("Environment value \"CHIPSET\" not export \n");
 	 return -1;
     }	    
+	if (strlen(rt28xxdir) > (sizeof(infname)-100))
+	{
+		printf("Environment value \"RT28xx_DIR\" is too long!\n");
+		return -1;
+	}
+
     strcat(infname,rt28xxdir);
     if(strncmp(chipset, "2860",4)==0)
 	    strcat(infname,"/common/rt2860.bin");
@@ -40,10 +46,20 @@ int main(int argc ,char *argv[])
 	    strcat(infname,"/common/rt2870.bin");
 	else if(strncmp(chipset, "3572",4)==0)
 	    strcat(infname,"/common/rt2870.bin");
+	else if(strncmp(chipset, "3573",4)==0)
+	    strcat(infname,"/common/rt2870.bin");
 	else if(strncmp(chipset, "3370",4)==0)
             strcat(infname,"/common/rt2870.bin");
-	else if(strncmp(chipset, "USB_COMBO",9)==0)
+	else if(strncmp(chipset, "5370",4)==0)
+            strcat(infname,"/common/rt2870.bin");
+	else if(strncmp(chipset, "5572",4)==0)
+            strcat(infname,"/common/rt2870.bin");
+	else if(strncmp(chipset, "5592",4)==0)
+            strcat(infname,"/common/rt2860.bin");
+	else if(strncmp(chipset, "USB",3)==0)
 	    strcat(infname,"/common/rt2870.bin");
+	else if(strncmp(chipset, "PCI",3)==0)
+	    strcat(infname,"/common/rt2860.bin");
     else
     	strcat(infname,"/common/rt2860.bin");
 	    
@@ -71,7 +87,7 @@ int main(int argc ,char *argv[])
     fputs("UCHAR FirmwareImage [] = { \n",outfile);
     while(1)
     {
-	char cc[2];    
+	char cc[3];    
 
 	c = getc(infile);
 	

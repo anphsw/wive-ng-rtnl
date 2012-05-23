@@ -38,7 +38,7 @@
 
 // TxSndgPkt Sounding type definitions
 #define SNDG_TYPE_DISABLE		0
-#define SNDG_TYPE_SOUNGING	1
+#define SNDG_TYPE_SOUNDING	1
 #define SNDG_TYPE_NDP			2
 
 // Explicit TxBF feedback mechanism
