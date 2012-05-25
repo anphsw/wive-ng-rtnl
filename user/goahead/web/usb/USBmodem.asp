@@ -112,6 +112,8 @@ form.modem_apn.value     = '<% getCfgGeneral(1, "APN"); %>';
       <input type="radio" name="modem_enabled" value="1"><font id="Enable">Enable</font>
       <input type="radio" name="modem_enabled" value="0"><font id="Disable">Disable</font>
     </td>
+	</tr>
+	<tr id="modem_type_row">
   		<td class="head">Modem type:</td>
 		<td>
 			<select name="modem_type" class="mid" >
