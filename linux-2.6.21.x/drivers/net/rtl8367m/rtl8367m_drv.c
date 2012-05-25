@@ -969,7 +969,6 @@ void reset_params_default(void)
 void reset_and_init_switch(int first_call)
 {
 	rtk_api_ret_t retVal;
-	rtk_mode_ext_t extif_mode;
 	rtk_portmask_t portmask;
 	rtk_port_mac_ability_t mac_cfg;
 	u32 ports_mask_wan, ports_mask_lan;
