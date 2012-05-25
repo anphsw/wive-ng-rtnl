@@ -263,10 +263,6 @@ if [ "$RT3883_FPGA_BOARD" = "y" -o "$RT3883_ASIC_BOARD" = "y" ]; then
 
 define_bool RT3883_MP y
 
-choice 'Vendor select'	"ASUS_N56U	RT3883_MODEL_N56U \
-			 Belkin_N750	RT3883_MODEL_N750
-			"ASUS_N56U
-
 #-----------------------
 # RT3883 GMAC
 #-----------------------
@@ -290,6 +286,13 @@ choice 'GE2 connected to' "GE_MII_FORCE_100		GE_MII_FORCE_100 \
 fi
 
 bool "RTL8367 swich support" RTL8367_SW
+
+if [ "$RTL8367_SW" = "y" ]; then
+choice 'RTL8367 ASIC select'	"RTL8367M_VB	RTL8367_ASIC_MVB \
+			 RTL8367R_VB	RTL8367_ASIC_RVB
+			" RTL8367M_VB
+int ' RTL8367 Reset GPIO Pin'	RTL8367_RST_GPIO	-1
+fi
 
 if [ "$GE_MII_FORCE_100" = "y" -o \
      "$GE_RVMII_FORCE_100" = "y" ]; then
@@ -564,9 +567,6 @@ fi
 define_hex TEXT_BASE  0x80200000
 
 fi
-
-bool "USB support enable" RALINK_USB_SUPPORT
-bool "ERASE command support enable" RALINK_ERASE_SUPPORT
 
 #########################################################################################3
 # RT6855
@@ -1021,3 +1021,8 @@ fi
 
 fi
 ##################################################################################################
+
+bool "USB support enable" RALINK_USB_SUPPORT
+bool "ERASE command support enable" RALINK_ERASE_SUPPORT
+int 'Emergency GPIO Pin'	RALINK_EMR_GPIO	14
+

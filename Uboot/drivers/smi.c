@@ -21,23 +21,8 @@
 // ASIC
 //////////////////////////////////////////////////////
 
-/* select ASIC RTL8367R-VB (LQFP128, 5+1 Ports) */
-#if defined(RT3883_MODEL_N750)
-#define RTL8367R_VB 1
-#endif
-
-/* select GPIO pin for hard reset switch */
-#if defined(RT3883_MODEL_N750)
-#define RTL8367_RESET_GPIO		24
-#endif
-
-/* select RT3883 GPIO mode: default disable I2C (enable GPIO1~2 for SMI) and UARTF (enable GPIO7~14) */
-#if defined(RT3883_MODEL_N56U)
-/* disable JTAG for GPIO17~21: N56U GPIO19 = LED LAN) */
+/* ralink GPIO mode: disable I2C (enable GPIO1~2), UARTF (enable GPIO7~14), JTAG (enable GPIO17~21) */
 #define RALINK_VENDOR_GPIOMODE		(RALINK_GPIOMODE_I2C | RALINK_GPIOMODE_UARTF | RALINK_GPIOMODE_JTAG)
-#else
-#define RALINK_VENDOR_GPIOMODE		(RALINK_GPIOMODE_I2C | RALINK_GPIOMODE_UARTF)
-#endif
 
 #define RTL8367_RGMII_DELAY_TX		1	/* 0..1, 1 for RT3883/3662 */
 #define RTL8367_RGMII_DELAY_RX		0	/* 0..7, 0-1 for RT3883/3662  */
@@ -48,7 +33,8 @@
 #define RTL8367_PORT_LAN3		1	/* 8P8C LAN3 */
 #define RTL8367_PORT_LAN4		0	/* 8P8C LAN4 */
 
-#if defined(RTL8367R_VB)
+/* ASIC RTL8367R-VB (LQFP128, 5+1 Ports) */
+#if defined(RTL8367_ASIC_RVB)
 #define RTL8367_PORT_CPU_LAN		5	/* ExtIf1 -> GMAC1 (port set reduced to 0..5 in RTL8367R-VB) */
 #else
 #define RTL8367_PORT_CPU_LAN		8	/* ExtIf1 -> GMAC1 */
@@ -434,7 +420,7 @@ void partition_bridge_default(void)
 	rtk_port_isolation_set(RTL8367_PORT_LAN2, fwd_mask);
 	rtk_port_isolation_set(RTL8367_PORT_LAN3, fwd_mask);
 	rtk_port_isolation_set(RTL8367_PORT_LAN4, fwd_mask);
-#if defined(RTL8367R_VB)
+#if defined(RTL8367_ASIC_RVB)
 	fwd_mask.bits[0] |= RTL8367_PORT_WAN;
 	rtk_port_isolation_set(RTL8367_PORT_CPU_LAN, fwd_mask);
 	
@@ -492,11 +478,6 @@ int rtl8367m_switch_init_pre(void)
 	gpiomode |= RALINK_VENDOR_GPIOMODE;
 	*(volatile u32 *)(RALINK_REG_GPIOMODE) = cpu_to_le32(gpiomode);
 
-#if defined(RT3883_MODEL_N56U)
-	/* configure GPIO 24 (N56U GPIO24 = LED USB) and hide LED */
-	ralink_gpio_direction(24, RALINK_GPIO_DIR_OUT);
-	ralink_gpio_write_bit(24, 1);
-#endif
 	/* wait 100ms after power-on-reset */
 	mdelay(100);
 
@@ -524,19 +505,26 @@ int rtl8367m_switch_init_post(void)
 	rtk_api_ret_t retVal;
 	rtk_portmask_t portmask;
 	rtk_port_mac_ability_t mac_cfg;
+	int gpio_reset = -1;
 
-#if defined(RTL8367_RESET_GPIO)
-	printf(" Hard reset and init RTL8367 external switch...");
+#if defined(RTL8367_RST_GPIO)
+	gpio_reset = RTL8367_RST_GPIO;
+	if (gpio_reset < 3 || gpio_reset > 51)
+		gpio_reset = -1;
+#endif
+	printf(" Reset and init RTL8367 external switch...");
+	if (gpio_reset > 0) {
 	/* pulse -> 0 -> 1 for hard reset switch */
-	ralink_gpio_direction(RTL8367_RESET_GPIO, RALINK_GPIO_DIR_OUT);
-	ralink_gpio_write_bit(RTL8367_RESET_GPIO, 0);
+		ralink_gpio_direction(gpio_reset, RALINK_GPIO_DIR_OUT);
+		ralink_gpio_write_bit(gpio_reset, 0);
 	mdelay(50);
-	ralink_gpio_write_bit(RTL8367_RESET_GPIO, 1);
-#else
-	printf(" Soft reset and init RTL8367 external switch...");
+		ralink_gpio_write_bit(gpio_reset, 1);
+	}
+	else {
 	/* soft reset switch */
 	rtl8370_setAsicReg(0x1322, 1);
-#endif
+	}
+
 	/* wait 1s for switch ready */
 	mdelay(1000);
 
@@ -574,16 +562,9 @@ int rtl8367m_switch_init_post(void)
 	                   (1L << RTL8367_PORT_LAN4);
 	rtk_led_enable_set(LED_GROUP_0, portmask);
 	rtk_led_enable_set(LED_GROUP_1, portmask);
-	rtk_led_enable_set(LED_GROUP_2, portmask);
 	rtk_led_operation_set(LED_OP_PARALLEL);
-#if defined(RT3883_MODEL_N56U)
 	rtk_led_groupConfig_set(LED_GROUP_0, LED_CONFIG_SPD10010ACT);	// group 0 - green LED
 	rtk_led_groupConfig_set(LED_GROUP_1, LED_CONFIG_SPD1000ACT);	// group 1 - yellow LED
-#elif defined(RT3883_MODEL_N750)
-	rtk_led_groupConfig_set(LED_GROUP_0, LED_CONFIG_LEDOFF);
-	rtk_led_groupConfig_set(LED_GROUP_1, LED_CONFIG_LEDOFF);
-#endif
-	rtk_led_groupConfig_set(LED_GROUP_2, LED_CONFIG_LEDOFF);
 
 	printf("SUCCESS!\n");
 
