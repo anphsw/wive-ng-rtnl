@@ -103,7 +103,7 @@ static u32 g_rgmii_delay_rx                      = CONFIG_RTL8367M_RGMII_DELAY_R
 unsigned int get_phy_ports_mask_from_user(unsigned int user_port_mask)
 {
 	unsigned int phy_ports_mask = 0;
-	
+
 	if (user_port_mask & RTL8367M_PORTMASK_LAN1)
 		phy_ports_mask |= (1L << LAN_PORT_1);
 	if (user_port_mask & RTL8367M_PORTMASK_LAN2)
@@ -158,7 +158,7 @@ unsigned int get_phy_ports_mask_lan(u32 include_cpu)
 			portmask_lan |= (1L << WAN_PORT_CPU);
 		break;
 	}
-	
+
 	return portmask_lan;
 }
 
@@ -237,7 +237,7 @@ void asic_bridge_isolate(u32 wan_bridge_mode, u32 bwan_isolated_mode)
 	}
 
 	fwd_mask_lan.bits[0] = get_phy_ports_mask_lan(1);
-	
+
 	/* LAN (efid=0) */
 	for (i = 0; i < RTK_MAX_NUM_OF_PORT; i++)
 	{
@@ -264,7 +264,7 @@ void asic_bridge_isolate(u32 wan_bridge_mode, u32 bwan_isolated_mode)
 		if ((fwd_mask_wan.bits[0] >> i) & 0x1)
 		{
 			fwd_mask.bits[0] = fwd_mask_wan.bits[0];
-			
+
 #if defined(RTL8367M_SINGLE_EXTIF)
 			switch(i)
 			{
@@ -310,7 +310,7 @@ void asic_bridge_isolate(u32 wan_bridge_mode, u32 bwan_isolated_mode)
 					break;
 				}
 			}
-			
+
 			rtk_port_isolation_set(i, fwd_mask);
 #if !defined(RTL8367M_SINGLE_EXTIF)
 			rtk_port_efid_set(i, 1);
@@ -322,7 +322,7 @@ void asic_bridge_isolate(u32 wan_bridge_mode, u32 bwan_isolated_mode)
 void asic_vlan_ingress_mode(u32 ingress_enabled)
 {
 	u32 reg_ingress;
-	
+
 	if (ingress_enabled)
 	{
 		/* enable VLAN ingress filtering for each port */
@@ -335,7 +335,7 @@ void asic_vlan_ingress_mode(u32 ingress_enabled)
 		/* disable VLAN ingress filtering for all ports */
 		reg_ingress = 0;
 	}
-	
+
 	rtl8370_setAsicReg(RTL8370_REG_VLAN_INGRESS, reg_ingress);
 }
 
@@ -343,7 +343,7 @@ void asic_vlan_accept_port_mode(u32 accept_mode, u32 port_mask)
 {
 	int i;
 	rtk_vlan_acceptFrameType_t acceptFrameType = ACCEPT_FRAME_TYPE_ALL;
-	
+
 	switch (accept_mode)
 	{
 	case RTL8367M_VLAN_ACCEPT_FRAMES_UNTAG_ONLY:
@@ -353,9 +353,9 @@ void asic_vlan_accept_port_mode(u32 accept_mode, u32 port_mask)
 		acceptFrameType = ACCEPT_FRAME_TYPE_TAG_ONLY;
 		break;
 	}
-	
+
 	port_mask = get_phy_ports_mask_from_user(port_mask);
-	
+
 	for (i = 0; i < RTK_MAX_NUM_OF_PORT; i++)
 	{
 		if ((port_mask >> i) & 0x1)
@@ -391,30 +391,31 @@ void asic_vlan_create_port_vid(u32 vlan4k_info, u32 vlan4k_mask)
 
 void asic_bridge_isolate_vlan(u32 wan_bridge_mode, int force_reset_vlan)
 {
+#if defined(RTL8367M_SINGLE_EXTIF)
 	int i;
 	rtk_portmask_t mask_member, mask_untag;
-	
+#endif
 	if (force_reset_vlan)
 	{
 		/* init VLAN table (VLAN1) and enable VLAN */
 		rtk_vlan_init();
 	}
-	
+
 #if defined(RTL8367M_SINGLE_EXTIF)
 	if (wan_bridge_mode == RTL8367M_WAN_BRIDGE_DISABLE_WAN)
 	{
 		/* set CPU port accept mask (accept tag and untag in LLLLL mode) */
 		rtk_vlan_portAcceptFrameType_set(LAN_PORT_CPU, ACCEPT_FRAME_TYPE_ALL);
-		
+
 		/* set WAN port accept mask (accept tag and untag in LLLLL mode) */
 		rtk_vlan_portAcceptFrameType_set(WAN_PORT_X, ACCEPT_FRAME_TYPE_ALL);
-		
+
 		/* set LAN ports accept mask (accept tag and untag in LLLLL mode) */
 		rtk_vlan_portAcceptFrameType_set(LAN_PORT_4, ACCEPT_FRAME_TYPE_ALL);
 		rtk_vlan_portAcceptFrameType_set(LAN_PORT_3, ACCEPT_FRAME_TYPE_ALL);
 		rtk_vlan_portAcceptFrameType_set(LAN_PORT_2, ACCEPT_FRAME_TYPE_ALL);
 		rtk_vlan_portAcceptFrameType_set(LAN_PORT_1, ACCEPT_FRAME_TYPE_ALL);
-		
+
 		/* disable ingress filtering */
 		asic_vlan_ingress_mode(0);
 	}
@@ -424,36 +425,36 @@ void asic_bridge_isolate_vlan(u32 wan_bridge_mode, int force_reset_vlan)
 		mask_member.bits[0] = get_phy_ports_mask_lan(1);
 		mask_untag.bits[0]  = mask_member.bits[0] & ~(1 << LAN_PORT_CPU);
 		rtk_vlan_set(RTL8367M_VLANID_LAN, mask_member, mask_untag, 0);
-		
+
 		for (i = 0; i < RTK_MAX_NUM_OF_PORT; i++)
 		{
 			if ((mask_untag.bits[0] >> i) & 0x1)
 				rtk_vlan_portPvid_set(i, RTL8367M_VLANID_LAN, 0);
 		}
-		
+
 		/* VLAN2 for WAN */
 		mask_member.bits[0] = get_phy_ports_mask_wan(1);
 		mask_untag.bits[0]  = mask_member.bits[0] & ~(1 << LAN_PORT_CPU);
 		rtk_vlan_set(RTL8367M_VLANID_WAN, mask_member, mask_untag, 1);
-		
+
 		for (i = 0; i < RTK_MAX_NUM_OF_PORT; i++)
 		{
 			if ((mask_untag.bits[0] >> i) & 0x1)
 				rtk_vlan_portPvid_set(i, RTL8367M_VLANID_WAN, 0);
 		}
-		
+
 		/* set CPU port accept mask (trunk port - accept tag only) */
 		rtk_vlan_portAcceptFrameType_set(LAN_PORT_CPU, ACCEPT_FRAME_TYPE_TAG_ONLY);
-		
+
 		/* set WAN port accept mask (accept untag only, it safe for VLAN1/VLAN2) */
 		rtk_vlan_portAcceptFrameType_set(WAN_PORT_X, ACCEPT_FRAME_TYPE_UNTAG_ONLY);
-		
+
 		/* set LAN ports accept mask (accept untag only) */
 		rtk_vlan_portAcceptFrameType_set(LAN_PORT_4, ACCEPT_FRAME_TYPE_UNTAG_ONLY);
 		rtk_vlan_portAcceptFrameType_set(LAN_PORT_3, ACCEPT_FRAME_TYPE_UNTAG_ONLY);
 		rtk_vlan_portAcceptFrameType_set(LAN_PORT_2, ACCEPT_FRAME_TYPE_UNTAG_ONLY);
 		rtk_vlan_portAcceptFrameType_set(LAN_PORT_1, ACCEPT_FRAME_TYPE_UNTAG_ONLY);
-		
+
 		/* enable ingress filtering */
 		asic_vlan_ingress_mode(1);
 	}
@@ -462,19 +463,19 @@ void asic_bridge_isolate_vlan(u32 wan_bridge_mode, int force_reset_vlan)
 	{
 		/* set CPU LAN port accept mask (accept untug only) */
 		rtk_vlan_portAcceptFrameType_set(LAN_PORT_CPU, ACCEPT_FRAME_TYPE_UNTAG_ONLY);
-		
+
 		/* set CPU WAN port accept mask (accept untug only) */
 		rtk_vlan_portAcceptFrameType_set(WAN_PORT_CPU, ACCEPT_FRAME_TYPE_UNTAG_ONLY);
-		
+
 		/* set WAN port accept mask (accept untug only) */
 		rtk_vlan_portAcceptFrameType_set(WAN_PORT_X, ACCEPT_FRAME_TYPE_UNTAG_ONLY);
-		
+
 		/* set LAN ports accept mask (accept untag only) */
 		rtk_vlan_portAcceptFrameType_set(LAN_PORT_4, ACCEPT_FRAME_TYPE_UNTAG_ONLY);
 		rtk_vlan_portAcceptFrameType_set(LAN_PORT_3, ACCEPT_FRAME_TYPE_UNTAG_ONLY);
 		rtk_vlan_portAcceptFrameType_set(LAN_PORT_2, ACCEPT_FRAME_TYPE_UNTAG_ONLY);
 		rtk_vlan_portAcceptFrameType_set(LAN_PORT_1, ACCEPT_FRAME_TYPE_UNTAG_ONLY);
-		
+
 		/* disable ingress filtering */
 		asic_vlan_ingress_mode(0);
 	}
@@ -530,7 +531,7 @@ void asic_led_mode(rtk_led_group_t group, u32 led_mode)
 		led_config_group = LED_CONFIG_LEDOFF;
 		break;
 	}
-	
+
 	rtk_led_groupConfig_set(group, led_config_group);
 }
 
@@ -589,7 +590,7 @@ rtk_api_ret_t asic_status_link_ports_lan(rtk_port_linkStatus_t *pLinkStatus)
 			retVal = asic_status_link_port(i, pLinkStatus);
 			if (retVal != RT_ERR_OK)
 				return retVal;
-			
+
 			if (*pLinkStatus)
 				break;
 		}
@@ -612,7 +613,7 @@ rtk_api_ret_t asic_status_link_ports_wan(rtk_port_linkStatus_t *pLinkStatus)
 			retVal = asic_status_link_port(i, pLinkStatus);
 			if (retVal != RT_ERR_OK)
 				return retVal;
-			
+
 			if (*pLinkStatus)
 				break;
 		}
@@ -624,7 +625,7 @@ rtk_api_ret_t asic_status_link_ports_wan(rtk_port_linkStatus_t *pLinkStatus)
 int change_bridge_mode(u32 wan_bridge_mode, u32 isolated_mode)
 {
 	int bridge_changed;
-	
+
 	if (wan_bridge_mode > 7)
 		return -EINVAL;
 
@@ -635,7 +636,7 @@ int change_bridge_mode(u32 wan_bridge_mode, u32 isolated_mode)
 		// set global bridge_mode first
 		g_wan_bridge_mode = wan_bridge_mode;
 		g_wan_bridge_isolated_mode = isolated_mode;
-		
+
 		asic_bridge_isolate(wan_bridge_mode, isolated_mode);
 	}
 
@@ -658,7 +659,7 @@ int change_led_mode_group0(u32 led_mode, int force_change)
 	if (g_led_phy_mode_group0 != led_mode || force_change)
 	{
 		asic_led_mode(LED_GROUP_0, led_mode);
-		
+
 		g_led_phy_mode_group0 = led_mode;
 	}
 
@@ -673,7 +674,7 @@ int change_led_mode_group1(u32 led_mode, int force_change)
 	if (g_led_phy_mode_group1 != led_mode || force_change)
 	{
 		asic_led_mode(LED_GROUP_1, led_mode);
-		
+
 		g_led_phy_mode_group1 = led_mode;
 	}
 
@@ -688,7 +689,7 @@ int change_led_mode_group2(u32 led_mode, int force_change)
 	if (g_led_phy_mode_group2 != led_mode || force_change)
 	{
 		asic_led_mode(LED_GROUP_2, led_mode);
-		
+
 		g_led_phy_mode_group2 = led_mode;
 	}
 
@@ -701,18 +702,18 @@ void change_port_link_mode(rtk_port_t port, u32 port_link_mode, int force_change
 	u32 i_port_flowc;
 	rtk_api_ret_t retVal;
 	rtk_port_phy_ability_t phy_cfg;
-	
+
 	if (g_port_link_mode[port] == port_link_mode && !force_change)
 		return;
-	
+
 	i_port_speed =  (port_link_mode & 0x07);
 	i_port_flowc = ((port_link_mode >> 8) & 0x03);
-	
+
 	printk("%s - port [%d] link speed: %d, flow control: %d\n", RTL8367M_DEVNAME, port, i_port_speed, i_port_flowc);
-	
+
 	phy_cfg.FC	 = 1; //  Symmetric Flow Control
 	phy_cfg.AsyFC	 = 0; // Asymmetric Flow Control (only for 1Gbps)
-	
+
 	switch (i_port_flowc)
 	{
 	case RTL8367M_LINK_FLOW_CONTROL_RX_ASYNC:
@@ -724,14 +725,14 @@ void change_port_link_mode(rtk_port_t port, u32 port_link_mode, int force_change
 		phy_cfg.AsyFC	 = 0;
 		break;
 	}
-	
+
 	phy_cfg.AutoNegotiation	 = 1;
 	phy_cfg.Full_1000	 = 1;
 	phy_cfg.Full_100	 = 1;
 	phy_cfg.Half_100	 = 1;
 	phy_cfg.Full_10		 = 1;
 	phy_cfg.Half_10		 = 1;
-	
+
 	switch (i_port_speed)
 	{
 	case RTL8367M_LINK_SPEED_MODE_1000_FD:
@@ -765,7 +766,7 @@ void change_port_link_mode(rtk_port_t port, u32 port_link_mode, int force_change
 		phy_cfg.Full_10   = 0;
 		break;
 	}
-	
+
 	retVal = rtk_port_phyAutoNegoAbility_set(port, &phy_cfg);
 	if (retVal == RT_ERR_OK)
 		g_port_link_mode[port] = port_link_mode;
@@ -778,9 +779,9 @@ void change_jumbo_frames_accept(u32 jumbo_frames_enabled, int force_change)
 	if (g_jumbo_frames_enabled != jumbo_frames_enabled || force_change)
 	{
 		printk("%s - jumbo frames accept: %s bytes\n", RTL8367M_DEVNAME, (jumbo_frames_enabled) ? "16000" : "1536");
-		
+
 		rtk_switch_maxPktLen_set( (jumbo_frames_enabled) ? MAXPKTLEN_16000B : MAXPKTLEN_1536B );
-		
+
 		g_jumbo_frames_enabled = jumbo_frames_enabled;
 	}
 }
@@ -792,9 +793,9 @@ void change_green_ethernet_mode(u32 green_ethernet_enabled, int force_change)
 	if (g_green_ethernet_enabled != green_ethernet_enabled || force_change)
 	{
 		printk("%s - green ethernet: %d\n", RTL8367M_DEVNAME, green_ethernet_enabled);
-		
+
 		rtk_switch_greenEthernet_set(green_ethernet_enabled);
-		
+
 		g_green_ethernet_enabled = green_ethernet_enabled;
 	}
 }
@@ -810,15 +811,15 @@ int change_storm_control_unicast_unknown(u32 control_rate_mbps, int force_change
 	{
 		rate_kbps = control_rate_mbps * 1024;
 		if (rate_kbps > RTK_MAX_INPUT_RATE) rate_kbps = RTK_MAX_INPUT_RATE;
-		
+
 		printk("%s - set unknown unicast storm control rate as: %d kbps\n", RTL8367M_DEVNAME, rate_kbps);
-		
+
 		rtk_storm_controlRate_set(LAN_PORT_4, STORM_GROUP_UNKNOWN_UNICAST, rate_kbps, 1, MODE0);
 		rtk_storm_controlRate_set(LAN_PORT_3, STORM_GROUP_UNKNOWN_UNICAST, rate_kbps, 1, MODE0);
 		rtk_storm_controlRate_set(LAN_PORT_2, STORM_GROUP_UNKNOWN_UNICAST, rate_kbps, 1, MODE0);
 		rtk_storm_controlRate_set(LAN_PORT_1, STORM_GROUP_UNKNOWN_UNICAST, rate_kbps, 1, MODE0);
 		rtk_storm_controlRate_set(WAN_PORT_X, STORM_GROUP_UNKNOWN_UNICAST, rate_kbps, 1, MODE0);
-		
+
 		g_storm_rate_unicast_unknown = control_rate_mbps;
 	}
 
@@ -836,15 +837,15 @@ int change_storm_control_multicast_unknown(u32 control_rate_mbps, int force_chan
 	{
 		rate_kbps = control_rate_mbps * 1024;
 		if (rate_kbps > RTK_MAX_INPUT_RATE) rate_kbps = RTK_MAX_INPUT_RATE;
-		
+
 		printk("%s - set unknown multicast storm control rate as: %d kbps\n", RTL8367M_DEVNAME, rate_kbps);
-		
+
 		rtk_storm_controlRate_set(LAN_PORT_4, STORM_GROUP_UNKNOWN_MULTICAST, rate_kbps, 1, MODE0);
 		rtk_storm_controlRate_set(LAN_PORT_3, STORM_GROUP_UNKNOWN_MULTICAST, rate_kbps, 1, MODE0);
 		rtk_storm_controlRate_set(LAN_PORT_2, STORM_GROUP_UNKNOWN_MULTICAST, rate_kbps, 1, MODE0);
 		rtk_storm_controlRate_set(LAN_PORT_1, STORM_GROUP_UNKNOWN_MULTICAST, rate_kbps, 1, MODE0);
 		rtk_storm_controlRate_set(WAN_PORT_X, STORM_GROUP_UNKNOWN_MULTICAST, rate_kbps, 1, MODE0);
-		
+
 		g_storm_rate_multicast_unknown = control_rate_mbps;
 	}
 
@@ -862,15 +863,15 @@ int change_storm_control_multicast(u32 control_rate_mbps, int force_change)
 	{
 		rate_kbps = control_rate_mbps * 1024;
 		if (rate_kbps > RTK_MAX_INPUT_RATE) rate_kbps = RTK_MAX_INPUT_RATE;
-		
+
 		printk("%s - set multicast storm control rate as: %d kbps\n", RTL8367M_DEVNAME, rate_kbps);
-		
+
 		rtk_storm_controlRate_set(LAN_PORT_4, STORM_GROUP_MULTICAST, rate_kbps, 1, MODE0);
 		rtk_storm_controlRate_set(LAN_PORT_3, STORM_GROUP_MULTICAST, rate_kbps, 1, MODE0);
 		rtk_storm_controlRate_set(LAN_PORT_2, STORM_GROUP_MULTICAST, rate_kbps, 1, MODE0);
 		rtk_storm_controlRate_set(LAN_PORT_1, STORM_GROUP_MULTICAST, rate_kbps, 1, MODE0);
 		rtk_storm_controlRate_set(WAN_PORT_X, STORM_GROUP_MULTICAST, rate_kbps, 1, MODE0);
-		
+
 		g_storm_rate_multicast = control_rate_mbps;
 	}
 
@@ -888,15 +889,15 @@ int change_storm_control_broadcast(u32 control_rate_mbps, int force_change)
 	{
 		rate_kbps = control_rate_mbps * 1024;
 		if (rate_kbps > RTK_MAX_INPUT_RATE) rate_kbps = RTK_MAX_INPUT_RATE;
-		
+
 		printk("%s - set broadcast storm control rate as: %d kbps\n", RTL8367M_DEVNAME, rate_kbps);
-		
+
 		rtk_storm_controlRate_set(LAN_PORT_4, STORM_GROUP_BROADCAST, rate_kbps, 1, MODE0);
 		rtk_storm_controlRate_set(LAN_PORT_3, STORM_GROUP_BROADCAST, rate_kbps, 1, MODE0);
 		rtk_storm_controlRate_set(LAN_PORT_2, STORM_GROUP_BROADCAST, rate_kbps, 1, MODE0);
 		rtk_storm_controlRate_set(LAN_PORT_1, STORM_GROUP_BROADCAST, rate_kbps, 1, MODE0);
 		rtk_storm_controlRate_set(WAN_PORT_X, STORM_GROUP_BROADCAST, rate_kbps, 1, MODE0);
-		
+
 		g_storm_rate_broadcast = control_rate_mbps;
 	}
 
@@ -911,12 +912,12 @@ int change_cpu_rgmii_delay_tx(u32 rgmii_delay_tx, int force_change)
 	if (g_rgmii_delay_tx != rgmii_delay_tx || force_change)
 	{
 		printk("%s - set cpu rgmii delay tx: %d\n", RTL8367M_DEVNAME, rgmii_delay_tx);
-		
+
 #if !defined(RTL8367M_SINGLE_EXTIF)
 		rtk_port_rgmiiDelayExt0_set(rgmii_delay_tx, g_rgmii_delay_rx);
 #endif
 		rtk_port_rgmiiDelayExt1_set(rgmii_delay_tx, g_rgmii_delay_rx);
-		
+
 		g_rgmii_delay_tx = rgmii_delay_tx;
 	}
 
@@ -931,12 +932,12 @@ int change_cpu_rgmii_delay_rx(u32 rgmii_delay_rx, int force_change)
 	if (g_rgmii_delay_rx != rgmii_delay_rx || force_change)
 	{
 		printk("%s - set cpu rgmii delay rx: %d\n", RTL8367M_DEVNAME, rgmii_delay_rx);
-		
+
 #if !defined(RTL8367M_SINGLE_EXTIF)
 		rtk_port_rgmiiDelayExt0_set(g_rgmii_delay_tx, rgmii_delay_rx);
 #endif
 		rtk_port_rgmiiDelayExt1_set(g_rgmii_delay_tx, rgmii_delay_rx);
-		
+
 		g_rgmii_delay_rx = rgmii_delay_rx;
 	}
 
@@ -948,19 +949,19 @@ void reset_params_default(void)
 	int i;
 	for (i=0; i <= RTK_PHY_ID_MAX; i++)
 		g_port_link_mode[i] = RTL8367M_DEFAULT_LINK_MODE;
-	
+
 	g_storm_rate_unicast_unknown    = RTL8367M_DEFAULT_STORM_RATE;
 	g_storm_rate_multicast_unknown  = RTL8367M_DEFAULT_STORM_RATE;
 	g_storm_rate_multicast          = RTL8367M_DEFAULT_STORM_RATE;
 	g_storm_rate_broadcast          = RTL8367M_DEFAULT_STORM_RATE;
-	
+
 	g_green_ethernet_enabled        = RTL8367M_DEFAULT_GREEN_ETHERNET;
 	g_jumbo_frames_enabled          = RTL8367M_DEFAULT_JUMBO_FRAMES;
-	
+
 	g_led_phy_mode_group0           = RTL8367M_LED_PHYMODE_100_10_ACT;
 	g_led_phy_mode_group1           = RTL8367M_LED_PHYMODE_1000_ACT;
 	g_led_phy_mode_group2           = RTL8367M_LED_OFF;
-	
+
 	g_rgmii_delay_tx                = CONFIG_RTL8367M_RGMII_DELAY_TX;
 	g_rgmii_delay_rx                = CONFIG_RTL8367M_RGMII_DELAY_RX;
 }
@@ -972,19 +973,19 @@ void reset_and_init_switch(int first_call)
 	rtk_portmask_t portmask;
 	rtk_port_mac_ability_t mac_cfg;
 	u32 ports_mask_wan, ports_mask_lan;
-	
+
 	if (!first_call)
 		printk("%s - perform software reset asic!\n", RTL8367M_DEVNAME);
-	
+
 	reset_params_default();
-	
+
 	ports_mask_wan = get_phy_ports_mask_wan(0);
 	ports_mask_lan = get_phy_ports_mask_lan(0);
-	
+
 	retVal = rtk_switch_init();
 	if (retVal != RT_ERR_OK)
 		printk("rtk_switch_init() FAILED! (code %d)\n", retVal);
-	
+
 	/* configure ExtIf, RGMII fixed mode w/o autoneg */
 	mac_cfg.speed		= SPD_1000M;
 	mac_cfg.forcemode	= MAC_FORCE;
@@ -997,7 +998,7 @@ void reset_and_init_switch(int first_call)
 	rtk_port_macForceLinkExt0_set(MODE_EXT_RGMII, &mac_cfg);
 #endif
 	rtk_port_macForceLinkExt1_set(MODE_EXT_RGMII, &mac_cfg);
-	
+
 	/* configure ExtIf TX and RX delay  */
 #if !defined(RTL8367M_SINGLE_EXTIF)
 	rtk_port_rgmiiDelayExt0_set(g_rgmii_delay_tx, g_rgmii_delay_rx);
@@ -1034,7 +1035,7 @@ static long rtl8367m_ioctl(struct file *file, unsigned int req, unsigned long ar
 	rtk_data_t            port_speed = 0;
 	rtk_data_t            port_duplex = 0;
 	rtk_stat_port_cntr_t  port_counters;
-	
+
 	unsigned int uint_param = (req >> RTL8367M_IOCTL_CMD_LENGTH_BITS);
 	req &= ((1L << RTL8367M_IOCTL_CMD_LENGTH_BITS)-1);
 
@@ -1134,7 +1135,7 @@ static long rtl8367m_ioctl(struct file *file, unsigned int req, unsigned long ar
 		else
 			ioctl_result = -EIO;
 		break;
-		
+
 	case RTL8367M_IOCTL_STATUS_CNT_PORT_WAN:
 		retVal = rtk_stat_port_getAll(WAN_PORT_X, &port_counters);
 		if (retVal == RT_ERR_OK)
@@ -1333,9 +1334,9 @@ int __init rtl8367m_init(void)
 {
 	int r;
 	mutex_init(&asic_access_mutex);
-	
+
 	smi_init(SMI_RALINK_GPIO_SDA, SMI_RALINK_GPIO_SCK, SMI_RTL8367_DELAY_NS, SMI_RTL8367_SMI_ADDR);
-	
+
 	r = register_chrdev(RTL8367M_DEVMAJOR, RTL8367M_DEVNAME, &rtl8367m_fops);
 	if (r < 0) {
 		printk(KERN_ERR RTL8367M_DEVNAME ": unable to register character device\n");
