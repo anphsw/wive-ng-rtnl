@@ -17,24 +17,61 @@
 #include <common.h>		/* for cpu_to_le32() and cpu_to_le32() */
 #include <ralink_gpio.h>
 
-#define DELAY_SMI			2 /* 2 microseconds */
+//////////////////////////////////////////////////////
+// ASIC
+//////////////////////////////////////////////////////
+
+/* select ASIC RTL8367R-VB (LQFP128, 5+1 Ports) */
+#if defined(RT3883_MODEL_N750)
+#define RTL8367R_VB 1
+#endif
+
+/* select GPIO pin for hard reset switch */
+#if defined(RT3883_MODEL_N750)
+#define RTL8367_RESET_GPIO		24
+#endif
+
+/* select RT3883 GPIO mode: default disable I2C (enable GPIO1~2 for SMI) and UARTF (enable GPIO7~14) */
+#if defined(RT3883_MODEL_N56U)
+/* disable JTAG for GPIO17~21: N56U GPIO19 = LED LAN) */
+#define RALINK_VENDOR_GPIOMODE		(RALINK_GPIOMODE_I2C | RALINK_GPIOMODE_UARTF | RALINK_GPIOMODE_JTAG)
+#else
+#define RALINK_VENDOR_GPIOMODE		(RALINK_GPIOMODE_I2C | RALINK_GPIOMODE_UARTF)
+#endif
+
+#define RTL8367_RGMII_DELAY_TX		1	/* 0..1, 1 for RT3883/3662 */
+#define RTL8367_RGMII_DELAY_RX		0	/* 0..7, 0-1 for RT3883/3662  */
+
+#define RTL8367_PORT_WAN		4	/* 8P8C WAN  */
+#define RTL8367_PORT_LAN1		3	/* 8P8C LAN1 */
+#define RTL8367_PORT_LAN2		2	/* 8P8C LAN2 */
+#define RTL8367_PORT_LAN3		1	/* 8P8C LAN3 */
+#define RTL8367_PORT_LAN4		0	/* 8P8C LAN4 */
+
+#if defined(RTL8367R_VB)
+#define RTL8367_PORT_CPU_LAN		5	/* ExtIf1 -> GMAC1 (port set reduced to 0..5 in RTL8367R-VB) */
+#else
+#define RTL8367_PORT_CPU_LAN		8	/* ExtIf1 -> GMAC1 */
+#define RTL8367_PORT_CPU_WAN		9	/* ExtIf0 -> GMAC2 */
+#endif
+
+#define mdelay(n) ({unsigned long msec=(n); while (msec--) udelay(1000);})
+
+//////////////////////////////////////////////////////
+// SMI Bus
+//////////////////////////////////////////////////////
 
 int ralink_gpio_read_bit(int idx, int *value);
 int ralink_gpio_write_bit(int idx, int value);
 int ralink_gpio_direction(int idx, int dir);
 
-const int smi_SCK = 2;	/* GPIO used for SMI Clock Generation */	/* GPIO2 */
+const int smi_SCK = 2;				/* GPIO used for SMI Clock signal */	/* GPIO2 */
 const int smi_SDA = 1;	/* GPIO used for SMI Data signal */		/* GPIO1 */
-const int smi_RST = 7;	/* GPIO used for reset swtich */		/* GPIO7, not used */
-
+#define DELAY_SMI			2	/* 2 microseconds */
 #define ack_timeout			5
-
-#define	PHY_CONTROL_REG			0
-#define	CONTROL_REG_PORT_POWER_BIT	0x800
 
 void _smi_start(void)
 {
-
     /* change GPIO pin to Output only */
     ralink_gpio_direction(smi_SDA, RALINK_GPIO_DIR_OUT);
     ralink_gpio_direction(smi_SCK, RALINK_GPIO_DIR_OUT);
@@ -390,68 +427,133 @@ void partition_bridge_default(void)
 	rtk_portmask_t fwd_mask;
 
 	/* LAN */
-	fwd_mask.bits[0] = 0x10F;
-	rtk_port_isolation_set(0, fwd_mask);
-	rtk_port_isolation_set(1, fwd_mask);
-	rtk_port_isolation_set(2, fwd_mask);
-	rtk_port_isolation_set(3, fwd_mask);
-	rtk_port_isolation_set(8, fwd_mask); // CPU LAN
+	fwd_mask.bits[0] = (1L << RTL8367_PORT_LAN1) | (1L << RTL8367_PORT_LAN2) |
+	                   (1L << RTL8367_PORT_LAN3) | (1L << RTL8367_PORT_LAN4) |
+	                   (1L << RTL8367_PORT_CPU_LAN);
+	rtk_port_isolation_set(RTL8367_PORT_LAN1, fwd_mask);
+	rtk_port_isolation_set(RTL8367_PORT_LAN2, fwd_mask);
+	rtk_port_isolation_set(RTL8367_PORT_LAN3, fwd_mask);
+	rtk_port_isolation_set(RTL8367_PORT_LAN4, fwd_mask);
+#if defined(RTL8367R_VB)
+	fwd_mask.bits[0] |= RTL8367_PORT_WAN;
+	rtk_port_isolation_set(RTL8367_PORT_CPU_LAN, fwd_mask);
+	
+	/* WAN */
+	fwd_mask.bits[0] = (1L << RTL8367_PORT_WAN) | (1L << RTL8367_PORT_CPU_LAN);
+	rtk_port_isolation_set(RTL8367_PORT_WAN, fwd_mask);
+#else
+	rtk_port_isolation_set(RTL8367_PORT_CPU_LAN, fwd_mask);
 
 	/* WAN */
-	fwd_mask.bits[0] = 0x210;
-	rtk_port_isolation_set(4, fwd_mask);
-	rtk_port_isolation_set(9, fwd_mask); // CPU WAN
+	fwd_mask.bits[0] = (1L << RTL8367_PORT_WAN) | (1L << RTL8367_PORT_CPU_WAN);
+	rtk_port_isolation_set(RTL8367_PORT_WAN, fwd_mask);
+	rtk_port_isolation_set(RTL8367_PORT_CPU_WAN, fwd_mask);
 
 	/* EFID setting LAN */
-	rtk_port_efid_set(0, 0);
-	rtk_port_efid_set(1, 0);
-	rtk_port_efid_set(2, 0);
-	rtk_port_efid_set(3, 0);
-	rtk_port_efid_set(8, 0);
+	rtk_port_efid_set(RTL8367_PORT_LAN1, 0);
+	rtk_port_efid_set(RTL8367_PORT_LAN2, 0);
+	rtk_port_efid_set(RTL8367_PORT_LAN3, 0);
+	rtk_port_efid_set(RTL8367_PORT_LAN4, 0);
+	rtk_port_efid_set(RTL8367_PORT_CPU_LAN, 0);
 
 	/* EFID setting WAN */
-	rtk_port_efid_set(4, 1);
-	rtk_port_efid_set(9, 1);
+	rtk_port_efid_set(RTL8367_PORT_WAN, 1);
+	rtk_port_efid_set(RTL8367_PORT_CPU_WAN, 1);
+#endif
+}
+
+void asic_phy_port_enable(rtk_port_t port, int enabled)
+{
+#define PHY_CONTROL_REG			0
+#define PHY_CONTROL_REG_PORT_POWER_BIT	0x800
+	
+	rtk_api_ret_t retVal;
+	rtk_port_phy_data_t pData = 0;
+	
+	retVal = rtk_port_phyReg_get(port, PHY_CONTROL_REG, &pData);
+	if (retVal == RT_ERR_OK) {
+		if (enabled)
+			pData &= ~PHY_CONTROL_REG_PORT_POWER_BIT;
+		else
+			pData |= PHY_CONTROL_REG_PORT_POWER_BIT;
+		rtk_port_phyReg_set(port, PHY_CONTROL_REG, pData);
+	}
 }
 
 int rtl8367m_switch_init_pre(void)
 {
-	printf("Init RTL8367M external switch...\n");
-	
 	rtk_api_ret_t retVal;
-	rtk_port_t port;
-	rtk_portmask_t portmask;
-	rtk_port_mac_ability_t mac_cfg;
-	rtk_port_phy_data_t pData = 0;
-	rtk_data_t txDelay, rxDelay;
 	unsigned long gpiomode;
 
-	/* set RT3883 GPIO mode: disable I2C and JTAG (JTAG for LED LAN control) */
+	printf(" Init RTL8367 external switch...");
+
+	/* config RT3883 GPIO mode */
 	gpiomode = le32_to_cpu(*(volatile u32 *)(RALINK_REG_GPIOMODE));
-	gpiomode |= RALINK_GPIOMODE_I2C;
-	gpiomode |= RALINK_GPIOMODE_JTAG;
+	gpiomode |= RALINK_VENDOR_GPIOMODE;
 	*(volatile u32 *)(RALINK_REG_GPIOMODE) = cpu_to_le32(gpiomode);
 
-	/* delay 125ms after power-on-reset */
-	udelay(125000);
+#if defined(RT3883_MODEL_N56U)
+	/* configure GPIO 24 (N56U GPIO24 = LED USB) and hide LED */
+	ralink_gpio_direction(24, RALINK_GPIO_DIR_OUT);
+	ralink_gpio_write_bit(24, 1);
+#endif
+	/* wait 100ms after power-on-reset */
+	mdelay(100);
 
 	/* main switch init */
 	retVal = rtk_switch_init();
 	if (retVal != RT_ERR_OK) {
-		printf("Init RTL8367M: FAILED! (%d)\n", retVal);
+		printf("FAILED! (code: %d)\n", retVal);
 		return retVal;
 	}
 
-	/* power down LAN4, LAN3, LAN2, LAN1, WAN ports */
-	for (port = 0; port <= 4; port++) {
-		retVal = rtk_port_phyReg_get(port, PHY_CONTROL_REG, &pData);
-		if (retVal == RT_ERR_OK) {
-			pData |= CONTROL_REG_PORT_POWER_BIT;
-			rtk_port_phyReg_set(port, PHY_CONTROL_REG, pData);
+	/* power down all ports (prevent spoofing) */
+	asic_phy_port_enable(RTL8367_PORT_WAN, 0);
+	asic_phy_port_enable(RTL8367_PORT_LAN4, 0);
+	asic_phy_port_enable(RTL8367_PORT_LAN3, 0);
+	asic_phy_port_enable(RTL8367_PORT_LAN2, 0);
+	asic_phy_port_enable(RTL8367_PORT_LAN1, 0);
+
+	printf("SUCCESS!\n");
+
+	return RT_ERR_OK;
 		}
+
+int rtl8367m_switch_init_post(void)
+{
+	rtk_api_ret_t retVal;
+	rtk_portmask_t portmask;
+	rtk_port_mac_ability_t mac_cfg;
+
+#if defined(RTL8367_RESET_GPIO)
+	printf(" Hard reset and init RTL8367 external switch...");
+	/* pulse -> 0 -> 1 for hard reset switch */
+	ralink_gpio_direction(RTL8367_RESET_GPIO, RALINK_GPIO_DIR_OUT);
+	ralink_gpio_write_bit(RTL8367_RESET_GPIO, 0);
+	mdelay(50);
+	ralink_gpio_write_bit(RTL8367_RESET_GPIO, 1);
+#else
+	printf(" Soft reset and init RTL8367 external switch...");
+	/* soft reset switch */
+	rtl8370_setAsicReg(0x1322, 1);
+#endif
+	/* wait 1s for switch ready */
+	mdelay(1000);
+
+	/* main switch init */
+	retVal = rtk_switch_init();
+	if (retVal != RT_ERR_OK) {
+		printf("FAILED! (code: %d)\n", retVal);
+		return retVal;
 	}
 
-	/* configure both cpu RGMII to fixed gigabit mode w/o autoneg */
+	/* power down WAN port */
+	asic_phy_port_enable(RTL8367_PORT_WAN, 0);
+
+	/* configure bridge isolation WLLLL */
+	partition_bridge_default();
+
+	/* configure ExtIf1 to RGMII, fixed gigabit mode w/o autoneg */
 	mac_cfg.forcemode	= MAC_FORCE;
 	mac_cfg.speed		= SPD_1000M;
 	mac_cfg.duplex		= FULL_DUPLEX;
@@ -459,45 +561,31 @@ int rtl8367m_switch_init_pre(void)
 	mac_cfg.nway		= 0;
 	mac_cfg.rxpause		= 1;
 	mac_cfg.txpause		= 1;
-	rtk_port_macForceLinkExt0_set(MODE_EXT_RGMII, &mac_cfg); // Ext0 -> RT3883 GMAC WAN
-	rtk_port_macForceLinkExt1_set(MODE_EXT_RGMII, &mac_cfg); // Ext1 -> RT3883 GMAC LAN
+	rtk_port_macForceLinkExt1_set(MODE_EXT_RGMII, &mac_cfg);
 
-	/* configure both cpu RGMII delay for RT3883 */
-	txDelay = 1; // 0..1
-	rxDelay = 0; // 0..7
-	rtk_port_rgmiiDelayExt0_set(txDelay, rxDelay); // Ext0 -> RT3883 GMAC WAN
-	rtk_port_rgmiiDelayExt1_set(txDelay, rxDelay); // Ext1 -> RT3883 GMAC LAN
-
-	/* configure bridge isolation [LAN4 LAN3 LAN2 LAN1] [WAN] */
-	partition_bridge_default();
+	/* configure ExtIf1 RGMII delay for RT3883/3662 */
+	rtk_port_rgmiiDelayExt1_set(RTL8367_RGMII_DELAY_TX, RTL8367_RGMII_DELAY_RX);
 
 	/* configure PHY leds */
-	portmask.bits[0] = 0x1F;	// LAN4, LAN3, LAN2, LAN1, WAN
+	portmask.bits[0] = (1L << RTL8367_PORT_WAN)  |
+	                   (1L << RTL8367_PORT_LAN1) |
+	                   (1L << RTL8367_PORT_LAN2) |
+	                   (1L << RTL8367_PORT_LAN3) |
+	                   (1L << RTL8367_PORT_LAN4);
 	rtk_led_enable_set(LED_GROUP_0, portmask);
 	rtk_led_enable_set(LED_GROUP_1, portmask);
+	rtk_led_enable_set(LED_GROUP_2, portmask);
 	rtk_led_operation_set(LED_OP_PARALLEL);
-	rtk_led_groupConfig_set(LED_GROUP_0, LED_CONFIG_SPD10010ACT);	// group 0 - RJ45 green LED
-	rtk_led_groupConfig_set(LED_GROUP_1, LED_CONFIG_SPD1000ACT);	// group 1 - RJ45 yellow LED
+#if defined(RT3883_MODEL_N56U)
+	rtk_led_groupConfig_set(LED_GROUP_0, LED_CONFIG_SPD10010ACT);	// group 0 - green LED
+	rtk_led_groupConfig_set(LED_GROUP_1, LED_CONFIG_SPD1000ACT);	// group 1 - yellow LED
+#elif defined(RT3883_MODEL_N750)
+	rtk_led_groupConfig_set(LED_GROUP_0, LED_CONFIG_LEDOFF);
+	rtk_led_groupConfig_set(LED_GROUP_1, LED_CONFIG_LEDOFF);
+#endif
+	rtk_led_groupConfig_set(LED_GROUP_2, LED_CONFIG_LEDOFF);
 
-	printf("Init RTL8367M: SUCCESS!\n");
-
-	return RT_ERR_OK;
-}
-
-int rtl8367m_switch_init_post(void)
-{
-	rtk_api_ret_t retVal;
-	rtk_port_t port;
-	rtk_port_phy_data_t pData = 0;
-
-	/* power up LAN4, LAN3, LAN2, LAN1 ports */
-	for (port = 0; port <= 3; port++) {
-		retVal = rtk_port_phyReg_get(port, PHY_CONTROL_REG, &pData);
-		if (retVal == RT_ERR_OK) {
-			pData &= ~CONTROL_REG_PORT_POWER_BIT;
-			rtk_port_phyReg_set(port, PHY_CONTROL_REG, pData);
-		}
-	}
+	printf("SUCCESS!\n");
 
 	return RT_ERR_OK;
 }

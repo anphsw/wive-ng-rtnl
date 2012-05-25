@@ -9,11 +9,15 @@
 #include <ralink_gpio.h>
 
 #if defined(RT3883_ASIC_BOARD)
-#define BTN_RESET	13
 #define LED_POWER	0
+#if defined(RT3883_MODEL_N56U)
+#define BTN_RESET	13
+#else
+#error "Please define GPIO pin for BTN_RESET on our hardware"
+#endif
 #elif defined(RT3052_ASIC_BOARD)
-#define BTN_RESET	10
 #define LED_POWER	9
+#define BTN_RESET	10
 #endif
 
 unsigned long gpiomode_org;

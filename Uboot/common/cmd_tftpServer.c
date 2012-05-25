@@ -253,6 +253,9 @@ int do_tftpd(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 				return 1;
 		}
 
+		/* show LED POWER after success image integrity check */
+		LEDON();
+		
 		printf("   \n3: System Boot system code via Flash.\n");
 		do_bootm(cmdtp, 0, argc, argv);
 	}

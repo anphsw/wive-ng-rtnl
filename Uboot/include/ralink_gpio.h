@@ -224,8 +224,32 @@
 #define RALINK_GPIOMODE_UARTL		0x20
 #define RALINK_GPIOMODE_JTAG		0x40
 #define RALINK_GPIOMODE_MDIO		0x80
+
+#if defined(RT3052_ASIC_BOARD)
 #define RALINK_GPIOMODE_SDRAM		0x100
 #define RALINK_GPIOMODE_RGMII		0x200
+#endif
+
+#if defined(RT3352_ASIC_BOARD)
+#define RALINK_GPIOMODE_GE1		0x200
+#define RALINK_GPIOMODE_LNA_G		0x40000
+#define RALINK_GPIOMODE_PA_G		0x100000
+#define RALINK_GPIOMODE_SPI_CS1		0x400000
+#endif
+
+#if defined(RT3883_ASIC_BOARD)
+#define RALINK_GPIOMODE_GE1		0x200
+#define RALINK_GPIOMODE_GE2		0x400
+#define RALINK_GPIOMODE_PCI		0x1800
+#define RALINK_GPIOMODE_LNA_A		0x30000
+#define RALINK_GPIOMODE_LNA_G		0xC0000
+#endif
+
+#if defined(RT5350_ASIC_BOARD)
+#define RALINK_GPIOMODE_EPHY_BT		0xC000
+#define RALINK_GPIOMODE_SPI_CS1		0x400000
+#endif
+
 
 // if you would like to enable GPIO mode for other pins, please modify this value
 // !! Warning: changing this value may make other features(MDIO, PCI, etc) lose efficacy

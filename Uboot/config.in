@@ -263,6 +263,10 @@ if [ "$RT3883_FPGA_BOARD" = "y" -o "$RT3883_ASIC_BOARD" = "y" ]; then
 
 define_bool RT3883_MP y
 
+choice 'Vendor select'	"ASUS_N56U	RT3883_MODEL_N56U \
+			 Belkin_N750	RT3883_MODEL_N750
+			"ASUS_N56U
+
 #-----------------------
 # RT3883 GMAC
 #-----------------------
@@ -297,7 +301,7 @@ if [ "$GE_MII_AN" = "y" ]; then
     hex "10/100 PHY address for Auto Polling" MAC_TO_GIGAPHY_MODE_ADDR 0x1f
 fi
 
-if [ "$GE_RGMII_FORCE_1000" = "y" ] || [ "$RTL8367_SW" = "y" ]; then
+if [ "$GE_RGMII_FORCE_1000" = "y" ]; then
     define_bool  MAC_TO_VITESSE_MODE y
     define_bool GPIOx_RESET_MODE y
 fi
