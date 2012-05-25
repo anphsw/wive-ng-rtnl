@@ -3032,9 +3032,10 @@ VOID AsicAddPairwiseKeyEntry(
 	PUCHAR		 pKey = pCipherKey->Key;
 	PUCHAR		 pTxMic = pCipherKey->TxMic;
 	PUCHAR		 pRxMic = pCipherKey->RxMic;
+#idef DBG
 	UCHAR		CipherAlg = pCipherKey->CipherAlg;
+#endif
 
-	
 	/* EKEY*/
 	offset = PAIRWISE_KEY_TABLE_BASE + (WCID * HW_KEY_ENTRY_SIZE);
 #ifdef RTMP_MAC_PCI

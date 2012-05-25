@@ -436,8 +436,9 @@ INT	Set_Cmm_WirelessMode_Proc(
 
 #ifdef CONFIG_AP_SUPPORT
 #ifdef MBSS_SUPPORT
+#ifdef DBG
 	POS_COOKIE pObj = (POS_COOKIE) pAd->OS_Cookie;
-
+#endif
 	if (FlgIsDiffMbssModeUsed == 0)
 		success = RT_CfgSetWirelessMode(pAd, arg);
 	else

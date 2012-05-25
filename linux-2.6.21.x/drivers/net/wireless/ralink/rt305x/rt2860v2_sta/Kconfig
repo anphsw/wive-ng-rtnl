@@ -67,3 +67,7 @@ config  RT2860V2_STA_80211N_DRAFT3
 config  RT2860V2_STA_P2P
         bool "Wireless Direct(P2P)"
         depends on RT2860V2_STA
+
+config RALINK_RT2880_STA_DBG
+        bool "Debug support for STA mode"
+	depends on RT2860V2_STA

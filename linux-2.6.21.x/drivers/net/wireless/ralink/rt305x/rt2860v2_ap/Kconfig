@@ -144,3 +144,13 @@ config RT2860V2_SET_MAC_FROM_EEPROM
 	bool "Read and set MAC from MTD/EEPROM."
 	default n
 	depends on RT2860V2_AP
+
+config RALINK_RT2880_AP_DBG
+	bool "Debug support for AP mode"
+	default n
+	depends on RT2860V2_AP
+
+config RT2860V2_AP_ATE
+	bool "Provide ATE+QA testmode commands support"
+	default n
+	depends on RALINK_RT2880_AP_DBG

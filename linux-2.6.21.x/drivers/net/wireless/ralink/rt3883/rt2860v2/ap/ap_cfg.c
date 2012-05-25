@@ -11733,7 +11733,9 @@ INT Set_CwCTest_Proc(
 		IN PRTMP_ADAPTER pAd, 
 		IN PSTRING   arg)
 {
+#ifdef DBG
 	char *Cwc_mode_str[] = {"OFF", "ON", "AUTO"};
+#endif
 	long x = simple_strtol(arg, 0, 10);
 	
 	if ((x >= 0) && (x <= 2)) 
