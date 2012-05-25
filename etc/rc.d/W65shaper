@@ -65,8 +65,6 @@ set_def() {
     tc qdisc del dev $real_wan_if ingress > /dev/null 2>&1
     tc qdisc del dev $lan_if root  > /dev/null 2>&1
     tc qdisc del dev $lan_if ingress > /dev/null 2>&1
-    ip link set imq0 down > /dev/null 2>&1
-    ip link set imq1 down > /dev/null 2>&1
 }
 
 show() {
