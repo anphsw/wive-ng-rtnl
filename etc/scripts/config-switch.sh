@@ -113,30 +113,37 @@ esw_rtl8367_config() {
     if [ "$CONFIG_RTL8367M" != "" ] && [ -f /bin/rtl8367m ]; then
 	# defines from rtl8367m_drv.h
 	RTL8367M_IOCTL_BRIDGE_MODE=50
+	RTL8367M_IOCTL_VLAN_RESET_TABLE=60
 	RTL8367M_IOCTL_SPEED_PORT_XXXX=90
 	RTL8367M_WAN_BWAN_ISOLATION_NONE=0
 	RTL8367M_WAN_BWAN_ISOLATION_FROM_CPU=1
-	RTL8367M_WAN_BWAN_ISOLATION_BETWEEN=2
 	RTL8367M_WAN_BRIDGE_DISABLE=0
 	RTL8367M_WAN_BRIDGE_LAN1=1
-	RTL8367M_WAN_BRIDGE_LAN2=2
-	RTL8367M_WAN_BRIDGE_LAN3=3
-	RTL8367M_WAN_BRIDGE_LAN4=4
-	RTL8367M_WAN_BRIDGE_LAN3_LAN4=5
-	RTL8367M_WAN_BRIDGE_LAN1_LAN2=6
-	RTL8367M_WAN_BRIDGE_LAN1_LAN2_LAN3=7
+	RTL8367M_WAN_BRIDGE_DISABLE_WAN=8
 	##########################################################################
 	# In gate mode and hotspot mode configure WAN bridge
 	##########################################################################
 	if [ "$OperationMode" = "1" ] || [ "$OperationMode" = "4" ]; then
-	    if [ "$wan_port" = "0" ]; then
 		if [ "$tv_port" = "1" ]; then
 		    $LOG '##### ESW config vlan partition (WWLLL) #####'
 		    rtl8367m $RTL8367M_IOCTL_BRIDGE_MODE $RTL8367M_WAN_BRIDGE_LAN1 $RTL8367M_WAN_BWAN_ISOLATION_FROM_CPU
 		else
 		    $LOG '##### ESW config vlan partition (WLLLL) #####'
-		    rtl8367m $RTL8367M_IOCTL_BRIDGE_MODE $RTL8367M_WAN_BRIDGE_DISABLE
+		rtl8367m $RTL8367M_IOCTL_BRIDGE_MODE $RTL8367M_WAN_BRIDGE_DISABLE $RTL8367M_WAN_BWAN_ISOLATION_NONE
+	    fi
 		fi
+	##########################################################################
+	# In bridge, eth converter and apcli mode, neded config switch to LLLLL
+	##########################################################################
+	if [ "$OperationMode" = "0" ] || [ "$OperationMode" = "2" ] || [ "$OperationMode" = "3" ]; then
+	    # reset switch to LLLLL and disable VLAN only for one PHY mode (eth2 used in the soft bridge)
+	    if [ "$CONFIG_RAETH_GMAC2" = "" ]; then
+		$LOG '##### ESW disable vlan partitions (LLLLL) #####'
+		rtl8367m $RTL8367M_IOCTL_VLAN_RESET_TABLE
+		rtl8367m $RTL8367M_IOCTL_BRIDGE_MODE $RTL8367M_WAN_BRIDGE_DISABLE_WAN
+	    else
+		$LOG '##### ESW set default partition (WLLLL) #####'
+		rtl8367m $RTL8367M_IOCTL_BRIDGE_MODE $RTL8367M_WAN_BRIDGE_DISABLE $RTL8367M_WAN_BWAN_ISOLATION_NONE
 	    fi
 	fi
 	##########################################################################
@@ -296,9 +303,8 @@ elif [ "$CONFIG_MAC_TO_MAC_MODE" != "" ] && [ "$CONFIG_RAETH_GMAC2" != "" ]; the
     SWITCH_MODE=1
     ##########################################################################
     if [ "$CONFIG_RTL8367M" != "" ]; then
-	# put code for configure switch port mode and others
-	$LOG '######## need add code for config RTL switch mode ######'
-	esw_rtl8367_config 2
+	$LOG '##### config switch partition (RTL DUAL PHY) #####'
+	esw_rtl8367_config
     else
 	$LOG '######## clear switch partition (VTTS DUAL_PHY) ########'
 	/etc/scripts/config-vlan.sh $SWITCH_MODE 0 > /dev/null 2>&1
@@ -312,8 +318,7 @@ elif [ "$CONFIG_MAC_TO_MAC_MODE" != "" ] && [ "$CONFIG_RAETH_GMAC2" = "" ]; then
     ##########################################################################
     if [ "$CONFIG_RTL8367M" != "" ]; then
 	$LOG '##### config vlan partition (RTL ONE PHY) #####'
-	# this is sub need kernel level 8367 support driver fix
-	esw_rtl8367_config 1
+	esw_rtl8367_config
     else
 	$LOG '##### clear switch partition (VTTS ONE_PHY) ########'
 	/etc/scripts/config-vlan.sh $SWITCH_MODE 0 > /dev/null 2>&1
