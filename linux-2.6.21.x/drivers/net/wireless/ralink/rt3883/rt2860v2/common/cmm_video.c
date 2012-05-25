@@ -58,7 +58,7 @@ VOID TxSwQDepthAdjust(IN RTMP_ADAPTER *pAd, IN UINT32 qLen)
 	ULONG IrqFlags;
 	INT qIdx;
 	QUEUE_HEADER *pTxQ;
-	PQUEUE_ENTRY *pEntry;
+	PQUEUE_ENTRY pEntry;
 	PNDIS_PACKET pPacket;
 	
 	RTMP_IRQ_LOCK(&pAd->irq_lock, IrqFlags);

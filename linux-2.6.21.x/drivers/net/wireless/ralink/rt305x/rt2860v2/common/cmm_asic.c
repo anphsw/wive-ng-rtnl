@@ -844,6 +844,8 @@ VOID AsicGetAutoAgcOffset(
 	BBP_R49_STRUC BbpR49;
 	CHAR		TotalDeltaPower = 0; /* (non-positive number) including the transmit power controlled by the MAC and the BBP R1*/
 
+	BbpR49.byte = 0;
+
 #ifdef RTMP_INTERNAL_TX_ALC
 	/* Locate the internal Tx ALC tuning entry*/
 	if ((pAd->TxPowerCtrl.bInternalTxALC == TRUE) && (pAd->Mlme.OneSecPeriodicRound % 4 == 0))

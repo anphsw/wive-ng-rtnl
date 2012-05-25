@@ -1423,7 +1423,7 @@ void NewRadarDetectionStart(PRTMP_ADAPTER pAd)
 	dfs_sw_init(pAd);
 #ifdef DFS_HWTIMER_SUPPORT
 #ifdef RTMP_RBUS_SUPPORT
-	request_tmr_service(NEW_DFS_WATCH_DOG_TIME, &NewTimerCB_Radar, (unsigned long)pAd);
+	request_tmr_service(NEW_DFS_WATCH_DOG_TIME, &NewTimerCB_Radar, (void *)pAd);
 #else
 	if(pRadarDetect->DFSWatchDogIsRunning==FALSE)
 	{
