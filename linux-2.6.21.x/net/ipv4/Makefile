@@ -10,8 +10,7 @@ obj-y     := route.o inetpeer.o protocol.o \
 	     tcp_minisocks.o tcp_cong.o \
 	     datagram.o raw.o udp.o \
 	     arp.o icmp.o devinet.o af_inet.o  igmp.o \
-	     sysctl_net_ipv4.o fib_frontend.o fib_semantics.o fib_trie.o \
-	     inet_fragment.o
+	     sysctl_net_ipv4.o fib_frontend.o fib_semantics.o fib_trie.o
 
 ifndef CONFIG_UDP_LITE_DISABLE
 obj-y += udplite.o

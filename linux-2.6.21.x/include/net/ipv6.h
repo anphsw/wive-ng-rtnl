@@ -131,12 +131,6 @@ DECLARE_SNMP_STAT(struct ipstats_mib, ipv6_statistics);
 		SNMP_INC_STATS_USER(_idev->stats.ipv6, field);		\
 	SNMP_INC_STATS_USER(ipv6_statistics, field);			\
 })
-#define IP6_ADD_STATS_BH(idev,field,val)		({			\
-	struct inet6_dev *_idev = (idev);				\
-	if (likely(_idev != NULL))					\
-		SNMP_ADD_STATS_BH(_idev->stats.ipv6, field, val);		\
-	SNMP_ADD_STATS_BH(ipv6_statistics, field, val);			\
-})
 DECLARE_SNMP_STAT(struct icmpv6_mib, icmpv6_statistics);
 #define ICMP6_INC_STATS(idev, field)		({			\
 	struct inet6_dev *_idev = (idev);				\
@@ -276,8 +270,8 @@ struct ipv6_txoptions *ipv6_fixup_options(struct ipv6_txoptions *opt_space,
 
 extern int ipv6_opt_accepted(struct sock *sk, struct sk_buff *skb);
 
-int ip6_frag_nqueues(void);
-int ip6_frag_mem(void);
+extern int ip6_frag_nqueues;
+extern atomic_t ip6_frag_mem;
 
 #define IPV6_FRAG_TIMEOUT	(60*HZ)		/* 60 seconds */
 
@@ -396,17 +390,6 @@ static inline int ipv6_prefix_equal(const struct in6_addr *a1,
 	return __ipv6_prefix_equal(a1->s6_addr32, a2->s6_addr32,
 				   prefixlen);
 }
-
-struct inet_frag_queue;
-
-struct ip6_create_arg {
-	__be32 id;
-	struct in6_addr *src;
-	struct in6_addr *dst;
-};
-
-void ip6_frag_init(struct inet_frag_queue *q, void *a);
-int ip6_frag_match(struct inet_frag_queue *q, void *a);
 
 static inline int ipv6_addr_any(const struct in6_addr *a)
 {
@@ -621,8 +604,10 @@ extern int inet6_hash_connect(struct inet_timewait_death_row *death_row,
 /*
  * reassembly.c
  */
-struct inet_frags_ctl;
-extern struct inet_frags_ctl ip6_frags_ctl;
+extern int sysctl_ip6frag_high_thresh;
+extern int sysctl_ip6frag_low_thresh;
+extern int sysctl_ip6frag_time;
+extern int sysctl_ip6frag_secret_interval;
 
 extern const struct proto_ops inet6_stream_ops;
 extern const struct proto_ops inet6_dgram_ops;
