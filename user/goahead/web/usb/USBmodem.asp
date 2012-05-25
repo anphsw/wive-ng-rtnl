@@ -142,7 +142,7 @@ form.modem_apn.value     = '<% getCfgGeneral(1, "APN"); %>';
 		</td>
 	</tr>
 	<tr id ="modem_speed_row">
-	<td class="head">Modem speed:</td>
+	<td class="head">Modem port speed:</td>
 	<td><select name="modem_speed" class="mid">
 				<option value="AUTO">AUTO</option>
 				<option value="57600">57600</option>
