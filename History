@@ -1140,7 +1140,8 @@
 6) Update wireless drivers for RT3x5x to 2.6.0.0 version.<br>
 7) Update wireless drivers for RT3662/3883 to 2.6.0.0 version.<br>
 8) Fix nvram overflow.<br>
-9) Support one phy RTL8367 mode.<br>
+9) Support one phy RTL8367 mode(full support in uboot/kernel/userspace).<br>
+10) Add support usb modem webui.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
