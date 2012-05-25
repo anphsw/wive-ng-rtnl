@@ -45,6 +45,7 @@ static int getSmbBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getMediaBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getWebCamBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getPrinterSrvBuilt(int eid, webs_t wp, int argc, char_t **argv);
+static int getUSBModemBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getIgmpProxyBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getVPNBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getDnsmasqBuilt(int eid, webs_t wp, int argc, char_t **argv);
@@ -134,6 +135,7 @@ void formDefineInternet(void) {
 	websAspDefine(T("getMediaBuilt"), getMediaBuilt);
 	websAspDefine(T("getWebCamBuilt"), getWebCamBuilt);
 	websAspDefine(T("getPrinterSrvBuilt"), getPrinterSrvBuilt);
+	websAspDefine(T("getUSBModemBuilt"), getUSBModemBuilt);
 	websFormDefine(T("setLan"), setLan);
 	websFormDefine(T("setWan"), setWan);
 	websFormDefine(T("getMyMAC"), getMyMAC);
@@ -953,6 +955,15 @@ static int getWebCamBuilt(int eid, webs_t wp, int argc, char_t **argv)
 static int getPrinterSrvBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
 #ifdef CONFIG_USER_P910ND
+	return websWrite(wp, T("1"));
+#else
+	return websWrite(wp, T("0"));
+#endif
+}
+
+static int getUSBModemBuilt(int eid, webs_t wp, int argc, char_t **argv)
+{
+#ifdef CONFIG_USB_MODESWITCH
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));

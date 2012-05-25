@@ -90,6 +90,7 @@ var smbb = '<% getSmbBuilt(); %>';
 var mediab = '<% getMediaBuilt(); %>';
 var webcamb = '<% getWebCamBuilt(); %>';
 var printersrvb = '<% getPrinterSrvBuilt(); %>';
+var usbmodemb = '<% getUSBModemBuilt(); %>';
 var syslogb = '<% getSysLogBuilt(); %>';
 var swqos = '<% getSWQoSBuilt(); %>';
 var ad = '<% isAntennaDiversityBuilt(); %>';
@@ -183,6 +184,8 @@ if (usbb == "1")
 		a.add(801, 800, _("treeapp webcam"),		"javascript:go('usb/UVCwebcam.asp');");
 	if (printersrvb == "1")
 		a.add(802, 800, _("treeapp printersrv"),	"javascript:go('usb/P910NDprintersrv.asp');");
+        if (usbmodemb == "1")	
+		a.add(803, 800, _("treeapp usbmodem"),		"javascript:go('usb/USBmodem.asp');");
 	if (storageb == "1")
 	{
 		a.add(850,   0, _("treeapp storage"),		"javascript:a.oo(850);");

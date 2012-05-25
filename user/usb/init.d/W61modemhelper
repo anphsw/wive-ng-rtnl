@@ -16,7 +16,7 @@ start() {
     if [ "$MODEMENABLED" = "1" ]; then
       $LOG "Start Modemhelper"
 	# generate new chat scripts
-	if [ "$MODEMTYPE" = "0" ] then
+	if [ "$MODEMTYPE" = "0" ]; then
 	    $LOG "Prepare chat-file for WCDMA/UMTS/GPRS modems"
 	    echo "ABORT '~'
 	    ABORT 'BUSY'
@@ -26,9 +26,9 @@ start() {
 	    '' 'ATZ'
 	    SAY 'Calling WCDMA/UMTS/GPRS'
 	    '' 'AT+CGDCONT=1,\"IP\",\"$APN\"'
-	    'OK' 'ATD$DIALNUMBER'
+	    'OK' 'ATD$MODEMDIALNUMBER'
 	    'CONNECT' ''" > $PPPDIR/peers/chat
-	elif [ "$MODEMTYPE" = "1" ] then
+	elif [ "$MODEMTYPE" = "1" ]; then
 	    $LOG "Prepare chat-file for CDMA/EVDO modems"
 	    echo "ABORT '~'
 	    ABORT 'BUSY'
@@ -102,14 +102,14 @@ stop() {
 
 get_param() {
     # get local param always
-    eval `nvram_buf_get 2860 MODEMTYPE MODEMSPEED MODEMUSERNAME MODEMPASSWORD MODEMDIALNUMBER MODEMMTU APN`
+    eval `nvram_buf_get 2860 MODEMENABLED MODEMTYPE WMODEMPORT MODEMSPEED MODEMUSERNAME MODEMPASSWORD MODEMDIALNUMBER MODEMMTU APN`
 
-    if [ "$MODEMTYPE" = "" ] || [ "$MODEMUSERNAME" = "" ] || [ "$MODEMPASSWORD" ] || [ "$MODEMDIALNUMBER" = "" ]; then
+    if [ "$MODEMTYPE" = "" ] || [ "$MODEMUSERNAME" = "" ] || [ "$MODEMPASSWORD" = "" ] || [ "$MODEMDIALNUMBER" = "" ]; then
 	$LOG "One or more parametrs is NULL. Need correct this"
     fi
 
     # corrects parametrs
-    if [ "$MODEMSPEED" = "" ] then
+    if [ "$MODEMSPEED" = "" ]; then
 	MODEMSPEED=""
     fi
     if [ "$MODEMMTU" = "" ] || [ "$MODEMMTU" = "AUTO" ]; then
@@ -119,6 +119,11 @@ get_param() {
         MODEMMRU="mru $MODEMMTU"
         MODEMMTU="mtu $MODEMMTU"
     fi
+	if [ "$WMODEMPORT" = "AUTO" ]; then
+		MODEMPORT="/dev/modem"
+	else
+		MODEMPORT="/dev/$WMODEMPORT"
+	fi
     if [ "$MODEMDEBUG" != "" ]; then
         MODEMDEBUG="debug"
     else
@@ -126,7 +131,6 @@ get_param() {
     fi
 
     PPPDIR="/etc/ppp"
-    MODEMPORT="/dev/modem"
     OPTFILE="$PPPDIR/peers/dialup"
     CHATLOG="/var/log/chat.log"
     PPPDOPT="file $OPTFILE ifname $MDEFIFN $MODEMDEBUG -detach"

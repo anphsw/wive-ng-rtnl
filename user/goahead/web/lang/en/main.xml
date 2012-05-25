@@ -74,6 +74,7 @@
   <message msgid="treeapp webcam" msgstr="Web Camera" />
   <message msgid="treeapp disk" msgstr="Disk Management" />
   <message msgid="treeapp printersrv" msgstr="Printer Server" />
+  <message msgid="treeapp usbmodem" msgstr="USB Modem" />
   <message msgid="treeapp usbinic" msgstr="USB iNIC" />
   
   <message msgid="opmode title" msgstr="Operation Mode Configuration" />

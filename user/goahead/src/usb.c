@@ -39,6 +39,9 @@ static void webcamra(webs_t wp, char_t *path, char_t *query);
 #ifdef CONFIG_USER_P910ND
 static void printersrv(webs_t wp, char_t *path, char_t *query);
 #endif
+#ifdef CONFIG_USB_MODESWITCH
+static void usbmodem(webs_t wp, char_t *path, char_t *query);
+#endif
 
 #define	LSDIR_INFO		"/tmp/lsdir"
 #define	MOUNT_INFO		"/proc/mounts"
@@ -74,6 +77,9 @@ void formDefineUSB(void) {
 #endif
 #ifdef CONFIG_USER_P910ND
 	websFormDefine(T("printersrv"), printersrv);
+#endif
+#ifdef CONFIG_USB_MODESWITCH
+	websFormDefine(T("usbmodem"), usbmodem);
 #endif
 }
 
@@ -631,6 +637,84 @@ submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
 	else
 		websRedirect(wp, submitUrl);
 }
+#endif
+
+#ifdef CONFIG_USB_MODESWITCH
+static void usbmodem(webs_t wp, char_t *path, char_t *query)
+{
+	char_t *menable;
+	char_t *mtype;
+	char_t *mport;
+	char_t *mspeed;
+	char_t *mmtu;
+	char_t *mname;
+	char_t *mpassw;
+	char_t *mdial;
+	char_t *mapn;
+	char *submitUrl;
+	
+	// fetch from web input
+	menable = websGetVar(wp, T("modem_enabled"), T(""));
+	mtype = websGetVar(wp, T("modem_type"), T(""));
+	mport = websGetVar(wp, T("modem_port"), T(""));
+	mspeed = websGetVar(wp, T("modem_speed"), T(""));
+	mmtu = websGetVar(wp, T("modem_mtu"), T(""));
+	mname = websGetVar(wp, T("modem_user"), T(""));
+	mpassw = websGetVar(wp, T("modem_pass"), T(""));
+	mdial =  websGetVar(wp, T("modem_dialn"), T(""));
+	mapn = websGetVar(wp, T("modem_apn"), T(""));
+	// set to nvram
+	nvram_init(RT2860_NVRAM);
+	nvram_bufset(RT2860_NVRAM, "MODEMENABLED", menable);
+	nvram_bufset(RT2860_NVRAM, "MODEMTYPE", mtype);
+    nvram_bufset(RT2860_NVRAM, "WMODEMPORT", mport);
+	nvram_bufset(RT2860_NVRAM, "MODEMSPEED", mspeed);
+	nvram_bufset(RT2860_NVRAM, "MODEMMTU", mmtu);
+	nvram_bufset(RT2860_NVRAM, "MODEMUSERNAME", mname);
+	nvram_bufset(RT2860_NVRAM, "MODEMPASSWORD", mpassw);
+	nvram_bufset(RT2860_NVRAM, "MODEMDIALNUMBER", mdial);
+	nvram_bufset(RT2860_NVRAM, "APN", mapn);
+	nvram_commit(RT2860_NVRAM);
+	nvram_close(RT2860_NVRAM);
+	
+	if (0 == strcmp(menable, "1"))
+	{
+	doSystem("killall -q W61modemhelper");
+	doSystem("killall -q modemhelper");
+	doSystem("killall -q -SIGKILL W61modemhelper");
+	doSystem("killall -q -SIGKILL modemhelper");
+	doSystem("service modemhelper start&");
+	}
+	else 
+	{
+	doSystem("killall -q W61modemhelper");
+	doSystem("killall -q modemhelper");
+	doSystem("killall -q -SIGKILL W61modemhelper");
+	doSystem("killall -q -SIGKILL modemhelper");
+	doSystem("service modemhelper stop&");
+	}
+submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
+	if (! submitUrl[0])
+	{
+	// debug print
+	websHeader(wp);
+	websWrite(wp, T("<h2>USB Modem Settings</h2><br>\n"));
+	websWrite(wp, T("modem enabled: %s<br>\n"), menable);
+	websWrite(wp, T("modem type: %s<br>\n"), mtype);
+    websWrite(wp, T("modem port: %s<br>\n"), mport);
+	websWrite(wp, T("modem speed: %s<br>\n"), mspeed);
+	websWrite(wp, T("modem mtu: %s<br>\n"), mmtu);
+	websWrite(wp, T("user name: %s<br>\n"), mname);
+	websWrite(wp, T("user password: %s<br>\n"), mpassw);
+	websWrite(wp, T("dialing number: %s<br>\n"), mdial);
+	websWrite(wp, T("APN: %s<br>\n"), mapn);
+	
+	websFooter(wp);
+	websDone(wp, 200);
+    }
+	else
+		websRedirect(wp, submitUrl);
+}	
 #endif
 
 int initUSB(void)

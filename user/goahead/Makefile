@@ -35,7 +35,10 @@ ifeq ("$(CONFIG_USER_UVC_STREAM)", "")
 	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/usb/UVC*
 endif
 ifeq ("$(CONFIG_USER_P910ND)", "")
-	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/usb/P910ND*
+	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/usb/P910NDprintersrv.asp
+endif
+ifeq ("$(CONFIG_USB_MODESWITCH)", "")
+	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/usb/USBmodem.asp
 endif
 endif
 ifneq ("$(CONFIG_USER_GOAHEAD_LANG_ZHTW)", "y")
