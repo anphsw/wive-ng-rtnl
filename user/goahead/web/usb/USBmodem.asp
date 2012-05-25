@@ -72,15 +72,15 @@ function bodyOnLoad(form)
 
 function initializeForm(form)
 {
-var wmenabled     = '<% getCfgGeneral(1, "MODEMENABLED"); %>';
-var wmtype        = '<% getCfgGeneral(1, "MODEMTYPE"); %>';
-var wmport        = '<% getCfgGeneral(1, "WMODEMPORT"); %>';
-var wmspeed       = '<% getCfgGeneral(1, "MODEMSPEED"); %>';
-var wmmtu         = '<% getCfgGeneral(1, "MODEMMTU"); %>';
-var wmusername    = '<% getCfgGeneral(1, "MODEMUSERNAME"); %>';
-var wmpassword    = '<% getCfgGeneral(1, "MODEMPASSWORD"); %>';
-var wmdialnumber  = '<% getCfgGeneral(1, "MODEMDIALNUMBER"); %>';
-var wmapn         = '<% getCfgGeneral(1, "APN"); %>';
+var wmenabled     	 = '<% getCfgGeneral(1, "MODEMENABLED"); %>';
+form.modem_type.value    = '<% getCfgGeneral(1, "MODEMTYPE"); %>';
+form.modem_port.value    = '<% getCfgGeneral(1, "WMODEMPORT"); %>';
+form.modem_speed.value   = '<% getCfgGeneral(1, "MODEMSPEED"); %>';
+form.modem_mtu.value     = '<% getCfgGeneral(1, "MODEMMTU"); %>';
+form.modem_user.value    = '<% getCfgGeneral(1, "MODEMUSERNAME"); %>';
+form.modem_pass.value    = '<% getCfgGeneral(1, "MODEMPASSWORD"); %>';
+form.modem_dialn.value	 = '<% getCfgGeneral(1, "MODEMDIALNUMBER"); %>';
+form.modem_apn.value     = '<% getCfgGeneral(1, "APN"); %>';
 
 	if (wmenabled == "1")
 	{
@@ -90,18 +90,6 @@ var wmapn         = '<% getCfgGeneral(1, "APN"); %>';
 	{
 		document.usbmodem.modem_enabled[1].checked = true;
 	}
-
-
-form.modem_type.value      = wmtype;
-form.modem_port.value      = wmport;
-form.modem_speed.value     = wmspeed;
-form.modem_mtu.value       = wmmtu;
-form.modem_user.value      = wmusername;
-form.modem_pass.value      = wmpassword;
-form.modem_dialn.value     = wmdialnumber;
-form.modem_apn.value       = wmapn;
-
-
 }
 </script>
 </head>
@@ -124,8 +112,7 @@ form.modem_apn.value       = wmapn;
       <input type="radio" name="modem_enabled" value="1"><font id="Enable">Enable</font>
       <input type="radio" name="modem_enabled" value="0"><font id="Disable">Disable</font>
     </td>
-  	<tr id="modem_type_row" onMouseOver="showHint('modem_type')" onMouseOut="hideHint('modem_type')" >
-		<td class="head">Modem type:</td>
+  		<td class="head">Modem type:</td>
 		<td>
 			<select name="modem_type" class="mid" >
 				<option value="0">WCDMA/UMTS/GPRS</option>
@@ -165,7 +152,7 @@ form.modem_apn.value       = wmapn;
 	<tr id="modem_mtu_row">
 		<td class="head">Modem MTU/MRU:</td>
 		<td>
-			<input id="modem_mtu_field" name="modem_mtu" maxlength="4" type="text" class="half" style="display:none; " value="<% getCfgGeneral(1, "MODEMMTU"); %>" >
+			<input id="modem_mtu_field" name="modem_mtu" maxlength="4" type="text" class="half" style="display:none; ">
 			<select id="modem_mtu_select" name="modem_mtu_type" onChange="mtuChange(this.form);" class="mid" >
 				<option value="AUTO">AUTO</option>
 				<option value="1" selected="selected" >Custom</option>
@@ -201,7 +188,6 @@ form.modem_apn.value       = wmapn;
 <table class="buttons">
 	<tr>
 		<td>
-
 			<input value="/usb/USBmodem.asp" name="submit-url" type="hidden">
 			<input class="normal" value="Apply and connect" name="Apply" type="submit" onclick="return submitClick(this.form);" >&nbsp;&nbsp;
 			<input class="normal" value="Cancel" name="Cancel" onClick="window.location.reload()" type="button">

@@ -11,27 +11,9 @@
 <title>Print Server Settings</title>
 
 <script language="JavaScript" type="text/javascript">
-Butterlate.setTextDomain("usb");
-
-function initTranslation()
-{
-	_TR("printerTitle", "Printer Server Settings");
-	_TR("printerIntroduction", "Here you can configure printer server settings");
-	_TR("printerSettings", "printer settings");
-	_TR("printerCapability", "Print server");
-	_TR("printerEnable", "Enable");
-	_TR("printerDisable", "Disable");
-	_TR("printerBidirectional", "Bidirectional exchange");
-	_TR("bidirectEnable", "Enable");
-	_TR("bidirectDisable", "Disable");
-	_TRV("printerApply", "Apply");
-	_TRV("printerCancel", "Cancel");
-	
-}
 
 function initValue()
 {
-	initTranslation();
 	var printersrvebl = '<% getCfgZero(1, "PrinterSrvEnabled"); %>';
 
 	if (printersrvebl == "1")
