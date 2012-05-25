@@ -3032,7 +3032,7 @@ VOID AsicAddPairwiseKeyEntry(
 	PUCHAR		 pKey = pCipherKey->Key;
 	PUCHAR		 pTxMic = pCipherKey->TxMic;
 	PUCHAR		 pRxMic = pCipherKey->RxMic;
-#idef DBG
+#ifdef DBG
 	UCHAR		CipherAlg = pCipherKey->CipherAlg;
 #endif
 
