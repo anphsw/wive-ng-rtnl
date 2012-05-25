@@ -1132,7 +1132,7 @@
 
 <br>
 <b>3.0.x</b><br>
-1) Start migrate to v4.0.1.0 SDK
+1) Migrate to v4.0.1.0 SDK.<br>
 2) Replace old hw_nat module v0.92 to v2.01.<br>
 3) Update raeth driver from new sdk.<br>
 4) Update RT3x52 driver from new sdk.<br>
