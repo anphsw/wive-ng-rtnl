@@ -674,6 +674,13 @@ int pskb_expand_head(struct sk_buff *skb, int nhead, int ntail,
 
 	BUG_ON(nhead < 0);
 
+#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+#if defined (HNAT_USE_TAILROOM)
+	ntail += FOE_INFO_LEN;
+	size += FOE_INFO_LEN;
+#endif
+#endif
+
 	if (skb_shared(skb))
 		BUG();
 
