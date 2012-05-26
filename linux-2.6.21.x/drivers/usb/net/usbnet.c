@@ -1299,6 +1299,11 @@ usbnet_probe (struct usb_interface *udev, const struct usb_device_id *prod)
 		if ((dev->driver_info->flags & FLAG_ETHER) != 0
 				&& (net->dev_addr [0] & 0x02) == 0)
 		{
+#if defined (CONFIG_RA_HW_NAT) || defined (CONFIG_RA_HW_NAT_MODULE)
+			/* always use ethX names for ifaces */
+			strcpy (net->name, "eth%d");
+			fake_usb_class.name = "usbeth%d";
+#else
 			/* Check wimax devices */
 			//printk("usbnet: VID = 0x%04x, PID = 0x%04x\n", xdev->descriptor.idVendor, xdev->descriptor.idProduct); 
 			if(((xdev->descriptor.idProduct == 0x7112) && (xdev->descriptor.idVendor == 0x0e8d)) || /* ZyXEL on MTK */
@@ -1310,6 +1315,7 @@ usbnet_probe (struct usb_interface *udev, const struct usb_device_id *prod)
 				strcpy (net->name, "eth%d");
 				fake_usb_class.name = "usbeth%d";
 			}
+#endif
 		}
 
 		/* maybe the remote can't receive an Ethernet MTU */
