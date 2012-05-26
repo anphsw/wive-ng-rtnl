@@ -20,6 +20,12 @@ ifeq ("$(CONFIG_RT2860V2_STA)", "")
 	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/station
 	rm -f $(ROMFSDIR)$(ROOT_DIRECTORY)/wps/wps_sta.asp
 endif
+ifeq ("$(CONFIG_RT2860V2_AP_WSC)", "")
+ifeq ("$(CONFIG_RT2860V2_STA_WSC)", "")
+	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/adm/wps*
+	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/wps
+endif
+endif
 
 ifeq ("$(CONFIG_USB)", "")
 	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/usb
