@@ -95,9 +95,11 @@ romfs
 /lib/libiconv/configure
 /lib/libiconv/stamp-h1
 /lib/libiconv/Makefile
-/lib/libiconv/libcharset/libtool
 /lib/libiconv/libtool
 /lib/libiconv/preload/libtool
+/lib/libiconv/libcharset/libtool
+/lib/libiconv/libcharset/Makefile
+/lib/libiconv/libcharset/configure
 /lib/libupnp/configure
 /lib/libupnp/Makefile
 /lib/libupnp/aclocal.m4

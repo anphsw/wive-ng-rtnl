@@ -789,7 +789,7 @@
 /* Define if the machine's byte ordering is little endian. */
 #undef WORDS_LITTLEENDIAN
 
-/* Enable large inode numbers on Mac OS X.  */
+/* Enable large inode numbers on Mac OS X 10.5.  */
 #ifndef _DARWIN_USE_64_BIT_INODE
 # define _DARWIN_USE_64_BIT_INODE 1
 #endif
