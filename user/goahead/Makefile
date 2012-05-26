@@ -26,7 +26,6 @@ ifeq ("$(CONFIG_RT2860V2_STA_WSC)", "")
 	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/wps
 endif
 endif
-
 ifeq ("$(CONFIG_USB)", "")
 	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/usb
 else
