@@ -45,6 +45,12 @@
 
 #include "usbnet.h"
 
+#if defined (CONFIG_RA_HW_NAT) || defined (CONFIG_RA_HW_NAT_MODULE)
+#include "../../../net/nat/hw_nat/ra_nat.h"
+extern int (*ra_sw_nat_hook_rx)(struct sk_buff *skb);
+extern int (*ra_sw_nat_hook_tx)(struct sk_buff *skb, int gmac_no);
+#endif
+
 #define DRIVER_VERSION		"22-Aug-2005"
 
 
@@ -242,9 +248,31 @@ void usbnet_skb_return (struct usbnet *dev, struct sk_buff *skb)
 		devdbg (dev, "< rx, len %zu, type 0x%x",
 			skb->len + sizeof (struct ethhdr), skb->protocol);
 	memset (skb->cb, 0, sizeof (struct skb_data));
+#if defined (CONFIG_RA_HW_NAT) || defined (CONFIG_RA_HW_NAT_MODULE)
+	 /* ra_sw_nat_hook_rx return 1 --> continue
+	  * ra_sw_nat_hook_rx return 0 --> FWD & without netif_rx
+	  */
+	FOE_MAGIC_TAG(skb)= FOE_MAGIC_PCI;
+	if(ra_sw_nat_hook_rx!= NULL)
+	{
+		if(ra_sw_nat_hook_rx(skb)) {
+			status = netif_rx (skb);
+			if (status != NET_RX_SUCCESS) {
+				devdbg (dev, rx_err, dev->net, "netif_rx status %d\n", status);
+			}
+		}
+	} else  {
+		FOE_AI(skb)=UN_HIT;
+		status = netif_rx (skb);
+		if (status != NET_RX_SUCCESS) {
+			devdbg (dev, rx_err, dev->net, "netif_rx status %d\n", status);
+		}
+	}
+#else
 	status = netif_rx (skb);
 	if (status != NET_RX_SUCCESS && netif_msg_rx_err (dev))
 		devdbg (dev, "netif_rx status %d", status);
+#endif
 }
 EXPORT_SYMBOL_GPL(usbnet_skb_return);
 
@@ -1004,6 +1032,15 @@ static int usbnet_start_xmit (struct sk_buff *skb, struct net_device *net)
 			devdbg (dev, "no urb");
 		goto drop;
 	}
+
+#if defined (CONFIG_RA_HW_NAT) || defined (CONFIG_RA_HW_NAT_MODULE)
+	/* add tx hook point*/
+	if(ra_sw_nat_hook_tx != NULL) {
+		skb->data += 4; //pointer to DA
+		ra_sw_nat_hook_tx(skb, 1);
+		skb->data -= 4;
+	}
+#endif
 
 	entry = (struct skb_data *) skb->cb;
 	entry->urb = urb;
