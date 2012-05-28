@@ -546,8 +546,8 @@ function displayServiceStatus()
 <td class="head" id="lIgmpp">LAN IGMP snooping</td>
 <td colspan="4">
 	<select name="igmpSnoop" class="half">
-		<option value="">auto</option>
-		<option value="n">disable</option>
+		<option value="">Auto</option>
+		<option value="n">Disable</option>
 	</select>
 </td>
 </tr>

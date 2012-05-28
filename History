@@ -1142,6 +1142,11 @@
 8) Fix nvram overflow.<br>
 9) Support one phy RTL8367 mode(full support in uboot/kernel/userspace).<br>
 10) Add support usb modem webui.<br>
+11) Add rebuild dst_if table in hw_nat by one or more ifaces up.<br>
+12) Fix igmp_snooping init logic.<br>
+13) Fix hw_nat reentry logic.<br>
+14) Add usbnet hw_nat offload.<br>
+15) Skbuff fix pskb_expand corrupt hw_nat flags.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
