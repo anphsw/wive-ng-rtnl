@@ -101,7 +101,7 @@ enum DstPort {
 };
 
 typedef struct {
-#if defined (CONFIG_RALINK_RT6352)
+#if defined (CONFIG_HNAT_V2)
 	uint16_t MAGIC_TAG;
 	uint32_t FOE_Entry:14;
 	uint32_t CRSN:5;
