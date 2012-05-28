@@ -547,8 +547,7 @@ function displayServiceStatus()
 <td colspan="4">
 	<select name="igmpSnoop" class="half">
 		<option value="">auto</option>
-		<option value="n">none/disable</option>
-		<option value="f">force enabled</option>
+		<option value="n">disable</option>
 	</select>
 </td>
 </tr>
