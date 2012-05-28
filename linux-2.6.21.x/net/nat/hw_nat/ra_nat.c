@@ -98,33 +98,6 @@ void skb_dump(struct sk_buff* sk) {
 }
 #endif
 
-int RemoveVlanTag(struct sk_buff *skb, struct vlan_ethhdr *veth)
-{
-	struct ethhdr *eth;
-	uint16_t VirIfIdx;
-
-	VirIfIdx = ntohs(veth->h_vlan_TCI);
-
-	/* make skb writable */
-	if (!skb_make_writable(skb, 0)) {
-	    NAT_PRINT("HNAT: no mem for remove tag or corrupted packet? (VirIfIdx=%d)\n", VirIfIdx);
-	    return 65535;
-	}
-
-	/* remove VLAN tag */
-	skb->data = LAYER2_HEADER(skb);
-	LAYER2_HEADER(skb) += VLAN_HLEN;
-	memmove(LAYER2_HEADER(skb), skb->data, ETH_ALEN * 2);
-
-	skb_pull(skb, VLAN_HLEN);
-	skb->data += ETH_HLEN;	//pointer to layer3 header
-	eth = (struct ethhdr *)LAYER2_HEADER(skb);
-	skb->protocol = eth->h_proto;
-
-	return VirIfIdx;
-
-}
-
 static void FoeAllocTbl(uint32_t NumOfEntry)
 {
 	uint32_t FoeTblSize;
@@ -296,16 +269,38 @@ uint32_t FoeDumpPkt(struct sk_buff * skb)
 }
 #endif
 
+#if defined  (CONFIG_RA_HW_NAT_WIFI) || defined (CONFIG_RA_HW_NAT_PCI)
+int RemoveVlanTag(struct sk_buff *skb, struct vlan_ethhdr *veth)
+{
+	struct ethhdr *eth;
+	uint16_t VirIfIdx;
+
+	VirIfIdx = ntohs(veth->h_vlan_TCI);
+
+	/* make skb writable */
+	if (!skb_make_writable(skb, 0)) {
+	    NAT_PRINT("HNAT: no mem for remove tag or corrupted packet? (VirIfIdx=%d)\n", VirIfIdx);
+	    return 65535;
+	}
+
+	/* remove VLAN tag */
+	skb->data = LAYER2_HEADER(skb);
+	LAYER2_HEADER(skb) += VLAN_HLEN;
+	memmove(LAYER2_HEADER(skb), skb->data, ETH_ALEN * 2);
+
+	skb_pull(skb, VLAN_HLEN);
+	skb->data += ETH_HLEN;	//pointer to layer3 header
+	eth = (struct ethhdr *)LAYER2_HEADER(skb);
+	skb->protocol = eth->h_proto;
+
+	return VirIfIdx;
+
+}
+
 /* push different VID for WiFi pseudo interface or USB external NIC */
 uint32_t PpeExtIfRxHandler(struct sk_buff * skb)
 {
-#if defined  (CONFIG_RA_HW_NAT_WIFI) || defined (CONFIG_RA_HW_NAT_PCI)
 	uint16_t VirIfIdx = 0;
-	uint16_t eth_type=0;
-	struct ethhdr *eth = NULL;
-
-	if (!wifi_offload)
-	    return 1;
 
 	/* check dst interface exist */
 	if (skb->dev == NULL) {
@@ -314,32 +309,9 @@ uint32_t PpeExtIfRxHandler(struct sk_buff * skb)
 	    return 0;
 	}
 
-#if defined (CONFIG_RALINK_RT3052) || defined(HWNAT_SKIP_MCAST_BCAST)
-	/* skip bcast/mcast traffic PPE. WiFi bug ? */
-	eth = (struct ethhdr *)LAYER2_HEADER(skb);
-	if(is_multicast_ether_addr(eth->h_dest))
-	    return 1;
-#endif
-
-	eth_type=ntohs(skb->protocol);
-
-	/* PPE only can handle IPv4/VLAN/IPv6/PPP packets */
-	if(eth_type != ETH_P_IP &&
-#ifdef CONFIG_RA_HW_NAT_IPV6
-	    eth_type != ETH_P_IPV6 &&
-#endif
-#ifndef HWNAT_RA_SKIP_8021Q
-	    eth_type != ETH_P_8021Q &&
-#endif
-	    eth_type != ETH_P_PPP_SES &&
-	    eth_type != ETH_P_PPP_DISC) {
-	    return 1;
-	}
-
 	if (skb->dev == DstPort[DP_RA0]) {
 		VirIfIdx = DP_RA0;
 	}
-
 #if defined (CONFIG_RT2860V2_AP_MBSS)
 	else if (skb->dev == DstPort[DP_RA1]) {
 		VirIfIdx = DP_RA1;
@@ -484,23 +456,14 @@ uint32_t PpeExtIfRxHandler(struct sk_buff * skb)
 	skb->dev = DstPort[DP_GMAC];	//we use GMAC1 to send to packet to PPE
 	dev_queue_xmit(skb);
 	return 0;
-#else
-
-	return 1;
-#endif // CONFIG_RA_HW_NAT_WIFI || CONFIG_RA_HW_NAT_PCI //
-
 }
 
 uint32_t PpeExtIfPingPongHandler(struct sk_buff * skb)
 {
-#if defined (CONFIG_RA_HW_NAT_WIFI) || defined (CONFIG_RA_HW_NAT_PCI)
 	struct ethhdr *eth = NULL;
 	uint16_t VirIfIdx = 0;
 	struct net_device *dev;
 	struct vlan_ethhdr *veth;
-
-	if (!wifi_offload)
-	    return 1;
 
 	veth = (struct vlan_ethhdr *)LAYER2_HEADER(skb);
 
@@ -522,7 +485,9 @@ uint32_t PpeExtIfPingPongHandler(struct sk_buff * skb)
 		}
 		skb->dev = DstPort[VirIfIdx];
 	} else {
-		printk("HNAT: unknow interface (VirIfIdx=%d)\n", VirIfIdx);
+		printk("HNAT: unknow interface or corrupted data. Drop packet (VirIfIdx=%d)\n", VirIfIdx);
+		kfree_skb(skb);
+		return 0;
 	}
 
 	eth = (struct ethhdr *)LAYER2_HEADER(skb);
@@ -543,10 +508,9 @@ uint32_t PpeExtIfPingPongHandler(struct sk_buff * skb)
 	    }
 	}
 
-#endif
 	return 1;
-
 }
+#endif
 
 uint32_t PpeKeepAliveHandler(struct sk_buff * skb, struct FoeEntry * foe_entry)
 {
@@ -742,12 +706,11 @@ uint32_t PpeGetUpFromACLRule(struct sk_buff *skb)
 int32_t PpeRxHandler(struct sk_buff * skb)
 {
 	struct FoeEntry *foe_entry = &PpeFoeBase[FOE_ENTRY_NUM(skb)];
-
-#ifdef HWNAT_DEBUG
-	if (DebugLevel >= 3) {
-		FoeDumpPkt(skb);
-	}
+	uint16_t eth_type=0;
+#if defined (CONFIG_RALINK_RT3052) || defined(HWNAT_SKIP_MCAST_BCAST)
+	struct ethhdr *eth = NULL;
 #endif
+
 	/* return trunclated packets to normal path */
 	if (!skb || (skb->len < ETH_HLEN)) {
 #ifdef HWNAT_DEBUG
@@ -756,11 +719,44 @@ int32_t PpeRxHandler(struct sk_buff * skb)
 	    return 1;
 	}
 
+	/* PPE only can handle IPv4/VLAN/IPv6/PPP packets */
+	eth_type=ntohs(skb->protocol);
+	if(eth_type != ETH_P_IP &&
+#ifdef CONFIG_RA_HW_NAT_IPV6
+	    eth_type != ETH_P_IPV6 &&
+#endif
+	    eth_type != ETH_P_8021Q &&
+	    eth_type != ETH_P_PPP_SES &&
+	    eth_type != ETH_P_PPP_DISC) {
+	    return 1;
+	}
+
+#if defined (CONFIG_RALINK_RT3052) || defined(HWNAT_SKIP_MCAST_BCAST)
+	/* skip bcast/mcast traffic PPE. WiFi bug ? */
+	eth = (struct ethhdr *)LAYER2_HEADER(skb);
+	if(is_multicast_ether_addr(eth->h_dest))
+	    return 1;
+#endif
+
+#ifdef HWNAT_DEBUG
+	if (DebugLevel >= 3) {
+		FoeDumpPkt(skb);
+	}
+#endif
+
 	/* the incoming packet is from PCI or WiFi interface */
 	if (((FOE_MAGIC_TAG(skb) == FOE_MAGIC_PCI)
 	     || (FOE_MAGIC_TAG(skb) == FOE_MAGIC_WLAN))) {
-
+#if defined (CONFIG_RA_HW_NAT_WIFI) || defined (CONFIG_RA_HW_NAT_PCI)
+	    if (wifi_offload && (eth_type != ETH_P_8021Q)) {
+		/* add tag to pkts from external ifaces before send to PPE */
 		return PpeExtIfRxHandler(skb);
+	    } else {
+		return 1; /* wifi offload disabled */
+	    }
+#else
+		return 1; /* wifi offload not compiled */
+#endif
 
 	} else if ((FOE_AI(skb) == HIT_BIND_FORCE_TO_CPU)) {
 
@@ -768,14 +764,23 @@ int32_t PpeRxHandler(struct sk_buff * skb)
 
 	/* handle the incoming packet which came back from PPE */
 #if defined (CONFIG_HNAT_V2)
-	} else if ((FOE_SP(skb) == 6) && 
+	} else if ((FOE_SP(skb) == 6) &&
 			(FOE_AI(skb) != HIT_BIND_KEEPALIVE_UC_OLD_HDR) && 
 			(FOE_AI(skb) != HIT_BIND_KEEPALIVE_MC_NEW_HDR) && 
 			(FOE_AI(skb) != HIT_BIND_KEEPALIVE_DUP_OLD_HDR)) {
 #else
 	} else if (FOE_SP(skb) == 0 && (FOE_AI(skb) != HIT_BIND_KEEPALIVE)) {
 #endif
+#if defined (CONFIG_RA_HW_NAT_WIFI) || defined (CONFIG_RA_HW_NAT_PCI)
+	    if (wifi_offload && (eth_type == ETH_P_8021Q)) {
+		/* detag pkts from external ifaces after PPE process */
 		return PpeExtIfPingPongHandler(skb);
+	    } else {
+		return 1; /* wifi offload disabled */
+	    }
+#else
+		return 1; /* wifi offload not compiled */
+#endif
 #if defined (CONFIG_HNAT_V2)
 	} else if (FOE_AI(skb) == HIT_BIND_KEEPALIVE_UC_OLD_HDR) {
 		if (DebugLevel >= 2) {
