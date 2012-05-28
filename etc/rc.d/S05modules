@@ -172,8 +172,11 @@ wlan_down_all() {
 }
 
 retune_wifi() {
-    # preconfigure wifi and 40Mhz workaround
-    /etc/scripts/wifi.sh
+    # preconfigure wifi
+    /etc/scripts/wifi.sh ra0
+    if [ "$CONFIG_RT3090_AP" != "" ]; then
+	/etc/scripts/wifi.sh rai0
+    fi
 }
 
 stop() {
