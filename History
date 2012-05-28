@@ -1149,6 +1149,7 @@
 15) Skbuff fix pskb_expand corrupt hw_nat flags.<br>
 16) RT3883 5GHz driver move to 2.4.3.6 driver(2.6.0.0 buggy).<br>
 17) RT305x move to 2.5.0.4 driver(2.6.0.0 reanable in future).<br>
+18) Up busybox to 1.20.1 version.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
