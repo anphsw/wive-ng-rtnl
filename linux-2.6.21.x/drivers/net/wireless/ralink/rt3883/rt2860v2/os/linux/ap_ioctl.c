@@ -23,17 +23,14 @@
     Who          When          What
     ---------    ----------    ----------------------------------------------
 */
-#define RTMP_MODULE_OS
 
-/*#include "rt_config.h" */
-#include "rtmp_comm.h"
-#include "rt_os_util.h"
-#include "rt_os_net.h"
+#include "rt_config.h"
+#include "rtmp.h"
 #include <linux/wireless.h>
 
 struct iw_priv_args ap_privtab[] = {
 { RTPRIV_IOCTL_SET, 
-/* 1024 --> 1024 + 512 */
+// 1024 --> 1024 + 512
 /* larger size specific to allow 64 ACL MAC addresses to be set up all at once. */
   IW_PRIV_TYPE_CHAR | 1536, 0,
   "set"},  
@@ -68,14 +65,14 @@ struct iw_priv_args ap_privtab[] = {
 { RTPRIV_IOCTL_RF,
   IW_PRIV_TYPE_CHAR | 1024, IW_PRIV_TYPE_CHAR | 1024,
   "rf"},
-#endif /* RTMP_RF_RW_SUPPORT */
-#endif /* DBG */
+#endif // RTMP_RF_RW_SUPPORT //
+#endif // DBG //
 
 #ifdef WSC_AP_SUPPORT
 { RTPRIV_IOCTL_WSC_PROFILE,
   IW_PRIV_TYPE_CHAR | 1024, IW_PRIV_TYPE_CHAR | 1024 ,
   "get_wsc_profile"},
-#endif /* WSC_AP_SUPPORT */
+#endif // WSC_AP_SUPPORT //
 { RTPRIV_IOCTL_QUERY_BATABLE,
   IW_PRIV_TYPE_CHAR | 1024, IW_PRIV_TYPE_CHAR | 1024 ,
   "get_ba_table"},
@@ -83,7 +80,6 @@ struct iw_priv_args ap_privtab[] = {
   IW_PRIV_TYPE_CHAR | 1024, IW_PRIV_TYPE_CHAR | 1024,
   "stat"}
 };
-
 
 #ifdef CONFIG_APSTA_MIXED_SUPPORT
 const struct iw_handler_def rt28xx_ap_iw_handler_def =
@@ -95,26 +91,22 @@ const struct iw_handler_def rt28xx_ap_iw_handler_def =
 	.get_wireless_stats = rt28xx_get_wireless_stats,
 #endif 
 };
-#endif /* CONFIG_APSTA_MIXED_SUPPORT */
-
+#endif // CONFIG_APSTA_MIXED_SUPPORT //
 
 INT rt28xx_ap_ioctl(
 	IN	struct net_device	*net_dev, 
 	IN	OUT	struct ifreq	*rq, 
 	IN	INT					cmd)
 {
-	VOID			*pAd = NULL;
-    struct iwreq	*wrqin = (struct iwreq *) rq;
-	RTMP_IOCTL_INPUT_STRUCT rt_wrq, *wrq = &rt_wrq;
+	RTMP_ADAPTER	*pAd = NULL;
+    struct iwreq	*wrq = (struct iwreq *) rq;
     INT				Status = NDIS_STATUS_SUCCESS;
-    USHORT			subcmd; /*, index; */
-/*	POS_COOKIE		pObj; */
+    USHORT			subcmd, index;
+	POS_COOKIE		pObj;
 	INT			apidx=0;
-	UINT32		org_len;
-	RT_CMD_AP_IOCTL_CONFIG IoctlConfig, *pIoctlConfig = &IoctlConfig;
 
 	GET_PAD_FROM_NET_DEV(pAd, net_dev);	
-/*	pObj = (POS_COOKIE) pAd->OS_Cookie; */
+	pObj = (POS_COOKIE) pAd->OS_Cookie;
 
 	if (pAd == NULL)
 	{
@@ -123,231 +115,379 @@ INT rt28xx_ap_ioctl(
 		return -ENETDOWN;
 	}
 
-	wrq->u.data.pointer = wrqin->u.data.pointer;
-	wrq->u.data.length = wrqin->u.data.length;
-	org_len = wrq->u.data.length;
-
-	pIoctlConfig->Status = 0;
-	pIoctlConfig->net_dev = net_dev;
-	pIoctlConfig->priv_flags = net_dev->priv_flags;
-	pIoctlConfig->pCmdData = wrqin->u.data.pointer;
-	pIoctlConfig->CmdId_RTPRIV_IOCTL_SET = RTPRIV_IOCTL_SET;
-	pIoctlConfig->name = net_dev->name;
-	pIoctlConfig->apidx = 0;
-
-	if (RTMP_AP_IoctlHandle(pAd, NULL, CMD_RTPRIV_IOCTL_PREPARE, 0,
-							pIoctlConfig, 0) != NDIS_STATUS_SUCCESS)
-	{
-		/* prepare error */
-		Status = pIoctlConfig->Status;
-		goto LabelExit;
-	}
-
-	apidx = pIoctlConfig->apidx;
-	
-    /*+ patch for SnapGear Request even the interface is down */
+    //+ patch for SnapGear Request even the interface is down
     if(cmd== SIOCGIWNAME){
 	    DBGPRINT(RT_DEBUG_TRACE, ("IOCTL::SIOCGIWNAME\n"));
 
-	RTMP_COM_IoctlHandle(pAd, NULL, CMD_RTPRIV_IOCTL_SIOCGIWNAME, 0, wrqin->u.name, 0);
+		strcpy(wrq->u.name, "RTWIFI SoftAP");
 
 	    return Status;
-    }/*- patch for SnapGear */
+    }//- patch for SnapGear
+	
+    if((RT_DEV_PRIV_FLAGS_GET(net_dev) == INT_MAIN) && !RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_INTERRUPT_IN_USE))
+    {
+#ifdef CONFIG_APSTA_MIXED_SUPPORT
+	if (wrq->u.data.pointer == NULL)
+		return Status;
 
+	if (cmd == RTPRIV_IOCTL_SET)
+	{
+		if (strstr(wrq->u.data.pointer, "OpMode") == NULL)
+			return -ENETDOWN;
+	}
+	else
+#endif // CONFIG_APSTA_MIXED_SUPPORT //
+		return -ENETDOWN;
+    }
 
+    // determine this ioctl command is comming from which interface.
+    if (RT_DEV_PRIV_FLAGS_GET(net_dev) == INT_MAIN)
+    {
+		pObj->ioctl_if_type = INT_MAIN;
+        pObj->ioctl_if = MAIN_MBSSID;
+//        DBGPRINT(RT_DEBUG_INFO, ("rt28xx_ioctl I/F(ra%d)(flags=%d): cmd = 0x%08x\n", pObj->ioctl_if, net_dev->priv_flags, cmd));
+    }
+    if (RT_DEV_PRIV_FLAGS_GET(net_dev) == INT_MAIN)
+    {
+		pObj->ioctl_if_type = INT_MBSSID;
+//    	if (!RTMPEqualMemory(net_dev->name, pAd->net_dev->name, 3))  // for multi-physical card, no MBSSID
+		if (strcmp(net_dev->name, pAd->net_dev->name) != 0) // sample
+    	{
+	        for (index = 1; index < pAd->ApCfg.BssidNum; index++)
+	    	{
+	    	    if (pAd->ApCfg.MBSSID[index].MSSIDDev == net_dev)
+	    	    {
+	    	        pObj->ioctl_if = index;
+	    	        
+//	    	        DBGPRINT(RT_DEBUG_INFO, ("rt28xx_ioctl I/F(ra%d)(flags=%d): cmd = 0x%08x\n", index, net_dev->priv_flags, cmd));
+	    	        break;
+	    	    }
+	    	}
+	        // Interface not found!
+	        if(index == pAd->ApCfg.BssidNum)
+	        {
+//	        	DBGPRINT(RT_DEBUG_ERROR, ("rt28xx_ioctl can not find I/F\n"));
+	            return -ENETDOWN;
+	        }
+	    }
+	    else    // ioctl command from I/F(ra0)
+	    {
+			GET_PAD_FROM_NET_DEV(pAd, net_dev);	
+    	    pObj->ioctl_if = MAIN_MBSSID;
+//	        DBGPRINT(RT_DEBUG_ERROR, ("rt28xx_ioctl can not find I/F and use default: cmd = 0x%08x\n", cmd));
+	    }
+        MBSS_MR_APIDX_SANITY_CHECK(pObj->ioctl_if);
+        apidx = pObj->ioctl_if;
+    }
+#ifdef WDS_SUPPORT
+	else if (RT_DEV_PRIV_FLAGS_GET(net_dev) == INT_WDS)
+	{
+		pObj->ioctl_if_type = INT_WDS;
+		for(index = 0; index < MAX_WDS_ENTRY; index++)
+		{
+			if (pAd->WdsTab.WdsEntry[index].dev == net_dev)
+			{
+				pObj->ioctl_if = index;
+
+				break;
+			}
+			
+			if(index == MAX_WDS_ENTRY)
+			{
+				DBGPRINT(RT_DEBUG_ERROR, ("rt28xx_ioctl can not find wds I/F\n"));
+				return -ENETDOWN;
+			}
+		}
+	}
+#endif // WDS_SUPPORT //
+#ifdef APCLI_SUPPORT
+	else if (RT_DEV_PRIV_FLAGS_GET(net_dev) == INT_APCLI)
+	{
+		pObj->ioctl_if_type = INT_APCLI;
+		for (index = 0; index < MAX_APCLI_NUM; index++)
+		{
+			if (pAd->ApCfg.ApCliTab[index].dev == net_dev)
+			{
+				pObj->ioctl_if = index;
+
+				break;
+			}
+
+			if(index == MAX_APCLI_NUM)
+			{
+				DBGPRINT(RT_DEBUG_ERROR, ("rt28xx_ioctl can not find Apcli I/F\n"));
+				return -ENETDOWN;
+			}
+		}
+		APCLI_MR_APIDX_SANITY_CHECK(pObj->ioctl_if);
+	}
+#endif // APCLI_SUPPORT //
+    else
+    {
+//    	DBGPRINT(RT_DEBUG_WARN, ("IOCTL is not supported in WDS interface\n"));
+    	return -EOPNOTSUPP;
+    }
+		
 	switch(cmd)
 	{
 #ifdef RALINK_ATE
-#ifdef RALINK_QA
+#ifdef RALINK_28xx_QA
 		case RTPRIV_IOCTL_ATE:
 			{
-
-				RTMP_COM_IoctlHandle(pAd, wrq, CMD_RTPRIV_IOCTL_ATE, 0, wrqin->ifr_name, 0);
+				RtmpDoAte(pAd, wrq);
 			}
 			break;
-#endif /* RALINK_QA */ 
-#endif /* RALINK_ATE */
+#endif // RALINK_28xx_QA // 
+#endif // RALINK_ATE //
         case SIOCGIFHWADDR:
 			DBGPRINT(RT_DEBUG_TRACE, ("IOCTLIOCTLIOCTL::SIOCGIFHWADDR\n"));
-			RTMP_AP_IoctlHandle(pAd, wrq, CMD_RTPRIV_IOCTL_AP_SIOCGIFHWADDR, 0, NULL, 0);
-/*            if (pObj->ioctl_if < MAX_MBSSID_NUM(pAd)) */
-/*    			strcpy((PSTRING) wrq->u.name, (PSTRING) pAd->ApCfg.MBSSID[pObj->ioctl_if].Bssid); */
+            if (pObj->ioctl_if < MAX_MBSSID_NUM)
+    			strcpy((PSTRING) wrq->u.name, (PSTRING) pAd->ApCfg.MBSSID[pObj->ioctl_if].Bssid);
 			break;
-		case SIOCSIWESSID:  /*Set ESSID */
+		case SIOCGIWNAME:
+			DBGPRINT(RT_DEBUG_TRACE, ("IOCTL::SIOCGIWNAME\n"));
+#ifdef RTMP_MAC_PCI
+			strcpy(wrq->u.name, "RT2860 SoftAP");
+#endif // RTMP_MAC_PCI //
 			break;
-		case SIOCGIWESSID:  /*Get ESSID */
+		case SIOCSIWESSID:  //Set ESSID
+			Status = -EOPNOTSUPP;
+			break;
+		case SIOCGIWESSID:  //Get ESSID
 			{
-				RT_CMD_AP_IOCTL_SSID IoctlSSID, *pIoctlSSID = &IoctlSSID;
-				struct iw_point *erq = &wrqin->u.essid;
+				struct iw_point *erq = &wrq->u.essid;
 				PCHAR pSsidStr = NULL;
 
 				erq->flags=1;
-              /*erq->length = pAd->ApCfg.MBSSID[pObj->ioctl_if].SsidLen; */
-
-				pIoctlSSID->priv_flags = net_dev->priv_flags;
-				pIoctlSSID->apidx = apidx;
-				RTMP_AP_IoctlHandle(pAd, wrq, CMD_RTPRIV_IOCTL_AP_SIOCGIWESSID, 0, pIoctlSSID, 0);
-
-				pSsidStr = (PCHAR)pIoctlSSID->pSsidStr;
-				erq->length = pIoctlSSID->length;
-
+              //erq->length = pAd->ApCfg.MBSSID[pObj->ioctl_if].SsidLen;
+              
+#ifdef APCLI_SUPPORT
+				if (RT_DEV_PRIV_FLAGS_GET(net_dev) == INT_APCLI)
+				{
+					if (pAd->ApCfg.ApCliTab[pObj->ioctl_if].Valid == TRUE)
+					{
+						erq->length = pAd->ApCfg.ApCliTab[pObj->ioctl_if].SsidLen;
+						pSsidStr = (PCHAR)&pAd->ApCfg.ApCliTab[pObj->ioctl_if].Ssid;
+					}
+					else {
+						erq->length = 0;
+						pSsidStr = NULL;
+					}
+				}
+				else
+#endif // APCLI_SUPPORT //
+				{
+				erq->length = pAd->ApCfg.MBSSID[apidx].SsidLen;
+					pSsidStr = (PCHAR)pAd->ApCfg.MBSSID[apidx].Ssid;
+				}
 
 				if((erq->pointer) && (pSsidStr != NULL))
 				{
-					/*if(copy_to_user(erq->pointer, pAd->ApCfg.MBSSID[pObj->ioctl_if].Ssid, erq->length)) */
+					//if(copy_to_user(erq->pointer, pAd->ApCfg.MBSSID[pObj->ioctl_if].Ssid, erq->length))
 					if(copy_to_user(erq->pointer, pSsidStr, erq->length))
 					{
-						Status = RTMP_IO_EFAULT;
+						Status = -EFAULT;
 						break;
 					}
 				}
 				DBGPRINT(RT_DEBUG_TRACE, ("IOCTL::SIOCGIWESSID (Len=%d, ssid=%s...)\n", erq->length, (char *)erq->pointer));
 			}
 			break;
-		case SIOCGIWNWID: /* get network id */
-		case SIOCSIWNWID: /* set network id (the cell) */
-			Status = RTMP_IO_EOPNOTSUPP;
+		case SIOCGIWNWID: // get network id 
+		case SIOCSIWNWID: // set network id (the cell)
+			Status = -EOPNOTSUPP;
 			break;
-		case SIOCGIWFREQ: /* get channel/frequency (Hz) */
-		{
-			ULONG Channel;
-			RTMP_DRIVER_CHANNEL_GET(pAd, &Channel);
-			wrqin->u.freq.m = Channel; /*pAd->CommonCfg.Channel; */
-			wrqin->u.freq.e = 0;
-			wrqin->u.freq.i = 0;
-		}
+		case SIOCGIWFREQ: // get channel/frequency (Hz)
+			wrq->u.freq.m = pAd->CommonCfg.Channel;
+			wrq->u.freq.e = 0;
+			wrq->u.freq.i = 0;
 			break; 
-		case SIOCSIWFREQ: /*set channel/frequency (Hz) */
-			Status = RTMP_IO_EOPNOTSUPP;
-			break;
+		case SIOCSIWFREQ: //set channel/frequency (Hz)
 		case SIOCGIWNICKN:
-		case SIOCSIWNICKN: /*set node name/nickname */
-			Status = RTMP_IO_EOPNOTSUPP;
-			break;
-		case SIOCGIWRATE:  /*get default bit rate (bps) */
+		case SIOCSIWNICKN: //set node name/nickname
+		case SIOCGIWRATE:  //get default bit rate (bps)
             {
-				RT_CMD_IOCTL_RATE IoctlRate, *pIoctlRate = &IoctlRate;
 
-				pIoctlRate->priv_flags = net_dev->priv_flags;
-				RTMP_DRIVER_BITRATE_GET(pAd, pIoctlRate);
+				PHTTRANSMIT_SETTING		pHtPhyMode;
+#ifdef APCLI_SUPPORT
+				if (RT_DEV_PRIV_FLAGS_GET(net_dev) == INT_APCLI)
+					pHtPhyMode = &pAd->ApCfg.ApCliTab[pObj->ioctl_if].HTPhyMode;
+				else
+#endif // APCLI_SUPPORT //
+#ifdef WDS_SUPPORT
+				if (RT_DEV_PRIV_FLAGS_GET(net_dev) == INT_WDS)
+					pHtPhyMode = &pAd->WdsTab.WdsEntry[pObj->ioctl_if].HTPhyMode;
+				else
+#endif // WDS_SUPPORT //
+					pHtPhyMode = &pAd->ApCfg.MBSSID[pObj->ioctl_if].HTPhyMode;
 
 
-			wrqin->u.bitrate.value = pIoctlRate->BitRate;
-			wrqin->u.bitrate.disabled = 0;
+			RT28XX_IOCTL_MaxRateGet(pAd, pHtPhyMode, (UINT32 *)&wrq->u.bitrate.value);
+			wrq->u.bitrate.disabled = 0;
             }
 			break;
-		case SIOCSIWRATE:  /*set default bit rate (bps) */
-		case SIOCGIWRTS:  /* get RTS/CTS threshold (bytes) */
-		case SIOCSIWRTS:  /*set RTS/CTS threshold (bytes) */
-		case SIOCGIWFRAG:  /*get fragmentation thr (bytes) */
-		case SIOCSIWFRAG:  /*set fragmentation thr (bytes) */
-		case SIOCGIWENCODE:  /*get encoding token & mode */
-		case SIOCSIWENCODE:  /*set encoding token & mode */
-			Status = RTMP_IO_EOPNOTSUPP;
+		case SIOCSIWRATE:  //set default bit rate (bps)
+		case SIOCGIWRTS:  // get RTS/CTS threshold (bytes)
+		case SIOCSIWRTS:  //set RTS/CTS threshold (bytes)
+		case SIOCGIWFRAG:  //get fragmentation thr (bytes)
+		case SIOCSIWFRAG:  //set fragmentation thr (bytes)
+		case SIOCGIWENCODE:  //get encoding token & mode
+		case SIOCSIWENCODE:  //set encoding token & mode
+			Status = -EOPNOTSUPP;
 			break;
-		case SIOCGIWAP:  /*get access point MAC addresses */
+		case SIOCGIWAP:  //get access point MAC addresses
 			{
-/*				PCHAR pBssidStr; */
+				PCHAR pBssidStr;
 
-				wrqin->u.ap_addr.sa_family = ARPHRD_ETHER;
-				/*memcpy(wrqin->u.ap_addr.sa_data, &pAd->ApCfg.MBSSID[pObj->ioctl_if].Bssid, ETH_ALEN); */
-
-				RTMP_AP_IoctlHandle(pAd, wrq, CMD_RTPRIV_IOCTL_AP_SIOCGIWAP, 0,
-								wrqin->u.ap_addr.sa_data, net_dev->priv_flags);
-			}
-			break;
-		case SIOCGIWMODE:  /*get operation mode */
-			wrqin->u.mode = IW_MODE_INFRA;   /*SoftAP always on INFRA mode. */
-			break;
-		case SIOCSIWAP:  /*set access point MAC addresses */
-		case SIOCSIWMODE:  /*set operation mode */
-		case SIOCGIWSENS:   /*get sensitivity (dBm) */
-		case SIOCSIWSENS:	/*set sensitivity (dBm) */
-		case SIOCGIWPOWER:  /*get Power Management settings */
-		case SIOCSIWPOWER:  /*set Power Management settings */
-		case SIOCGIWTXPOW:  /*get transmit power (dBm) */
-		case SIOCSIWTXPOW:  /*set transmit power (dBm) */
-		/*case SIOCGIWRANGE:	//Get range of parameters */
-		case SIOCGIWRETRY:	/*get retry limits and lifetime */
-		case SIOCSIWRETRY:	/*set retry limits and lifetime */
-			Status = RTMP_IO_EOPNOTSUPP;
-			break;
-		case SIOCGIWRANGE:	/*Get range of parameters */
-		    {
-/*				struct iw_range range; */
-				struct iw_range *prange = NULL;
-				UINT32 len;
-
-				/* allocate memory */
-				os_alloc_mem(NULL, (UCHAR **)&prange, sizeof(struct iw_range));
-				if (prange == NULL)
+				wrq->u.ap_addr.sa_family = ARPHRD_ETHER;
+				//memcpy(wrq->u.ap_addr.sa_data, &pAd->ApCfg.MBSSID[pObj->ioctl_if].Bssid, ETH_ALEN);
+#ifdef APCLI_SUPPORT
+				if (RT_DEV_PRIV_FLAGS_GET(net_dev) == INT_APCLI)
 				{
-					DBGPRINT(RT_DEBUG_ERROR, ("%s: Allocate memory fail!!!\n", __FUNCTION__));
-					break;
+					if (pAd->ApCfg.ApCliTab[pObj->ioctl_if].Valid == TRUE)
+						pBssidStr = (PCHAR)&APCLI_ROOT_BSSID_GET(pAd, pAd->ApCfg.ApCliTab[pObj->ioctl_if].MacTabWCID);
+					else
+						pBssidStr = NULL;
+				}
+				else
+#endif // APCLI_SUPPORT //
+				{
+					pBssidStr = (PCHAR) &pAd->ApCfg.MBSSID[pObj->ioctl_if].Bssid[0];
 				}
 
-				memset(prange, 0, sizeof(struct iw_range));
-				prange->we_version_compiled = WIRELESS_EXT;
-				prange->we_version_source = 14;
+				if (pBssidStr != NULL)
+				{
+					memcpy(wrq->u.ap_addr.sa_data, pBssidStr, ETH_ALEN);
+					DBGPRINT(RT_DEBUG_TRACE, ("IOCTL::SIOCGIWAP(=%02x:%02x:%02x:%02x:%02x:%02x)\n",
+						pBssidStr[0],pBssidStr[1],pBssidStr[2], pBssidStr[3],pBssidStr[4],pBssidStr[5]));
+				}
+				else
+				{
+					memset(wrq->u.ap_addr.sa_data, 0, ETH_ALEN);
+				}
+			}
+			break;
+		case SIOCGIWMODE:  //get operation mode
+			wrq->u.mode = IW_MODE_INFRA;   //SoftAP always on INFRA mode.
+			break;
+		case SIOCSIWAP:  //set access point MAC addresses
+		case SIOCSIWMODE:  //set operation mode
+		case SIOCGIWSENS:   //get sensitivity (dBm)
+		case SIOCSIWSENS:	//set sensitivity (dBm)
+		case SIOCGIWPOWER:  //get Power Management settings
+		case SIOCSIWPOWER:  //set Power Management settings
+		case SIOCGIWTXPOW:  //get transmit power (dBm)
+		case SIOCSIWTXPOW:  //set transmit power (dBm)
+		//case SIOCGIWRANGE:	//Get range of parameters
+		case SIOCGIWRETRY:	//get retry limits and lifetime
+		case SIOCSIWRETRY:	//set retry limits and lifetime
+			Status = -EOPNOTSUPP;
+			break;
+		case SIOCGIWRANGE:	//Get range of parameters
+		    {
+				struct iw_range range;
+				UINT32 len;
+
+				memset(&range, 0, sizeof(range));
+				range.we_version_compiled = WIRELESS_EXT;
+				range.we_version_source = 14;
 
 				/*
 					what is correct max? This was not
 					documented exactly. At least
 					69 has been observed.
 				*/
-				prange->max_qual.qual = 100;
-				prange->max_qual.level = 0; /* dB */
-				prange->max_qual.noise = 0; /* dB */
-				len = copy_to_user(wrq->u.data.pointer, prange, sizeof(struct iw_range));
-				os_free_mem(NULL, prange);
+				range.max_qual.qual = 100;
+				range.max_qual.level = 0; /* dB */
+				range.max_qual.noise = 0; /* dB */
+				len = copy_to_user(wrq->u.data.pointer, &range, sizeof(range));
 		    }
 		    break;
 		    
 		case RT_PRIV_IOCTL:
-		case RT_PRIV_IOCTL_EXT:
-		{
-			subcmd = wrqin->u.data.flags;
-
-			Status = RTMP_AP_IoctlHandle(pAd, wrq, CMD_RT_PRIV_IOCTL, subcmd, wrqin->u.data.pointer, 0);
-		}
+			subcmd = wrq->u.data.flags;
+			if (subcmd & OID_GET_SET_TOGGLE)
+				Status = RTMPAPSetInformation(pAd, wrq,  (INT)subcmd);
+			else
+				Status = RTMPAPQueryInformation(pAd, wrq, (INT)subcmd);
 			break;
 		
 #ifdef HOSTAPD_SUPPORT
 		case SIOCSIWGENIE:
-			DBGPRINT(RT_DEBUG_TRACE,("ioctl SIOCSIWGENIE apidx=%d\n",apidx));
-			DBGPRINT(RT_DEBUG_TRACE,("ioctl SIOCSIWGENIE length=%d, pointer=%x\n", wrqin->u.data.length, wrqin->u.data.pointer));
 
+			if(wrq->u.data.length > 20 && MAX_LEN_OF_RSNIE > wrq->u.data.length && wrq->u.data.pointer)
+			{
+				UCHAR RSNIE_Len[2];
+				UCHAR RSNIe[2];
+				int offset_next_ie=0;
 
-			RTMP_AP_IoctlHandle(pAd, wrqin, CMD_RTPRIV_IOCTL_AP_SIOCSIWGENIE, 0, NULL, 0);
+				DBGPRINT(RT_DEBUG_TRACE,("ioctl SIOCSIWGENIE pAd->IoctlIF=%d\n",pAd->IoctlIF));
+
+				RSNIe[0]=*(UINT8 *)wrq->u.data.pointer;
+				if(IE_WPA != RSNIe[0] && IE_RSN != RSNIe[0] )
+				{
+					DBGPRINT(RT_DEBUG_TRACE,("IE %02x != 0x30/0xdd\n",RSNIe[0]));
+					Status = -EINVAL;
+					break;
+				}
+				RSNIE_Len[0]=*((UINT8 *)wrq->u.data.pointer + 1);
+				if(wrq->u.data.length != RSNIE_Len[0]+2)
+				{
+					DBGPRINT(RT_DEBUG_TRACE,("IE use WPA1 WPA2\n"));
+					NdisZeroMemory(pAd->ApCfg.MBSSID[pAd->IoctlIF].RSN_IE[1], MAX_LEN_OF_RSNIE);
+					RSNIe[1]=*(UINT8 *)wrq->u.data.pointer;
+					RSNIE_Len[1]=*((UINT8 *)wrq->u.data.pointer + 1);
+					DBGPRINT(RT_DEBUG_TRACE,( "IE1 %02x %02x\n",RSNIe[1],RSNIE_Len[1]));
+					pAd->ApCfg.MBSSID[pAd->IoctlIF].RSNIE_Len[1] = RSNIE_Len[1];
+					NdisMoveMemory(pAd->ApCfg.MBSSID[pAd->IoctlIF].RSN_IE[1], (UCHAR *)(wrq->u.data.pointer)+2, RSNIE_Len[1]);
+					offset_next_ie=RSNIE_Len[1]+2;
+				}
+				else
+					DBGPRINT(RT_DEBUG_TRACE,("IE use only %02x\n",RSNIe[0]));
+
+				NdisZeroMemory(pAd->ApCfg.MBSSID[pAd->IoctlIF].RSN_IE[0], MAX_LEN_OF_RSNIE);
+				RSNIe[0]=*(((UINT8 *)wrq->u.data.pointer)+offset_next_ie);
+				RSNIE_Len[0]=*(((UINT8 *)wrq->u.data.pointer) + offset_next_ie + 1);
+				if(IE_WPA != RSNIe[0] && IE_RSN != RSNIe[0] )
+				{
+					Status = -EINVAL;
+					break;
+				}
+				pAd->ApCfg.MBSSID[pAd->IoctlIF].RSNIE_Len[0] = RSNIE_Len[0];
+				NdisMoveMemory(pAd->ApCfg.MBSSID[pAd->IoctlIF].RSN_IE[0], ((UCHAR *)(wrq->u.data.pointer))+2+offset_next_ie, RSNIE_Len[0]);
+				APMakeAllBssBeacon(pAd);
+				APUpdateAllBeaconFrame(pAd);
+
+			}
 			break;
-#endif /* HOSTAPD_SUPPORT */
+#endif //HOSTAPD_SUPPORT//
 
 		case SIOCGIWPRIV:
-			if (wrqin->u.data.pointer) 
+			if (wrq->u.data.pointer) 
 			{
-				if ( access_ok(VERIFY_WRITE, wrqin->u.data.pointer, sizeof(ap_privtab)) != TRUE)
+				if ( access_ok(VERIFY_WRITE, wrq->u.data.pointer, sizeof(ap_privtab)) != TRUE)
 					break;
 				if ((sizeof(ap_privtab) / sizeof(ap_privtab[0])) <= wrq->u.data.length)
 				{
-					wrqin->u.data.length = sizeof(ap_privtab) / sizeof(ap_privtab[0]);
-					if (copy_to_user(wrqin->u.data.pointer, ap_privtab, sizeof(ap_privtab)))
-						Status = RTMP_IO_EFAULT;
+					wrq->u.data.length = sizeof(ap_privtab) / sizeof(ap_privtab[0]);
+					if (copy_to_user(wrq->u.data.pointer, ap_privtab, sizeof(ap_privtab)))
+						Status = -EFAULT;
 				}
 				else
-					Status = RTMP_IO_E2BIG;
+					Status = -E2BIG;
 			}
 			break;
 		case RTPRIV_IOCTL_SET:
 			{
-				if( access_ok(VERIFY_READ, wrqin->u.data.pointer, wrqin->u.data.length) == TRUE)
-					Status = RTMP_AP_IoctlHandle(pAd, wrq, CMD_RTPRIV_IOCTL_SET, 0, NULL, 0);
+				if( access_ok(VERIFY_READ, wrq->u.data.pointer, wrq->u.data.length) == TRUE)
+					Status = RTMPAPPrivIoctlSet(pAd, wrq);
 			}
 			break;
 		    
 		case RTPRIV_IOCTL_SHOW:
 			{
-				if( access_ok(VERIFY_READ, wrqin->u.data.pointer, wrqin->u.data.length) == TRUE)
-					Status = RTMP_AP_IoctlHandle(pAd, wrq, CMD_RTPRIV_IOCTL_SHOW, 0, NULL, 0);
+				if( access_ok(VERIFY_READ, wrq->u.data.pointer, wrq->u.data.length) == TRUE)
+					Status = RTMPAPPrivIoctlShow(pAd, wrq);
 			}
 			break;	
 			
@@ -355,93 +495,87 @@ INT rt28xx_ap_ioctl(
 #ifdef AR9_MAPI_SUPPORT
 		case RTPRIV_IOCTL_GET_AR9_SHOW:
 			{
-				if( access_ok(VERIFY_READ, wrqin->u.data.pointer, wrqin->u.data.length) == TRUE)
-					Status = RTMP_AP_IoctlHandle(pAd, wrq, CMD_RTPRIV_IOCTL_GET_AR9_SHOW, 0, NULL, 0);
+				if( access_ok(VERIFY_READ, wrq->u.data.pointer, wrq->u.data.length) == TRUE)
+					Status = RTMPAPPrivIoctlAR9Show(pAd, wrq);
 			}	
 		    break;
-#endif /*AR9_MAPI_SUPPORT*/
-#endif /* INF_AR9 */
+#endif //AR9_MAPI_SUPPORT//
+#endif//INF_AR9//
 
 #ifdef WSC_AP_SUPPORT
 		case RTPRIV_IOCTL_SET_WSCOOB:
-			RTMP_AP_IoctlHandle(pAd, wrq, CMD_RTPRIV_IOCTL_SET_WSCOOB, 0, NULL, 0);
+			RTMPIoctlSetWSCOOB(pAd);
 		    break;
-#endif/*WSC_AP_SUPPORT*/
+#endif//WSC_AP_SUPPORT//
 
 /* modified by Red@Ralink, 2009/09/30 */
 		case RTPRIV_IOCTL_GET_MAC_TABLE:
-			RTMP_AP_IoctlHandle(pAd, wrq, CMD_RTPRIV_IOCTL_GET_MAC_TABLE, 0, NULL, 0);
+			RTMPIoctlGetMacTable(pAd,wrq);
 		    break;
 
+#ifdef RTMP_RBUS_SUPPORT
 		case RTPRIV_IOCTL_GET_MAC_TABLE_STRUCT:
-			RTMP_AP_IoctlHandle(pAd, wrq, CMD_RTPRIV_IOCTL_GET_MAC_TABLE_STRUCT, 0, NULL, 0);
+			RTMPIoctlGetMacTableStaInfo(pAd,wrq);
 			break;
+#endif // RTMP_RBUS_SUPPORT //
 /* end of modification */
 
 #ifdef AP_SCAN_SUPPORT
 		case RTPRIV_IOCTL_GSITESURVEY:
-			RTMP_AP_IoctlHandle(pAd, wrq, CMD_RTPRIV_IOCTL_GSITESURVEY, 0, NULL, 0);
+			RTMPIoctlGetSiteSurvey(pAd,wrq);
 			break;
-#endif /* AP_SCAN_SUPPORT */
+#endif // AP_SCAN_SUPPORT //
+
+		case RTPRIV_IOCTL_GSTAINFO:	// ASUS EXT by Jiahao
+			RTMPIoctlGetSTAINFO(pAd,wrq);
+			break;
+
+		case RTPRIV_IOCTL_GSTAT:	// ASUS EXT by Jiahao
+			RTMPIoctlGetSTAT(pAd,wrq);
+			break;
+
+                case RTPRIV_IOCTL_GRSSI:        // ASUS EXT by Jiahao
+                        RTMPIoctlGetRSSI(pAd,wrq);
+                        break;
 
 		case RTPRIV_IOCTL_STATISTICS:
-			RTMP_AP_IoctlHandle(pAd, wrq, CMD_RTPRIV_IOCTL_STATISTICS, 0, NULL, 0);
+			RTMPIoctlStatistics(pAd, wrq);
 			break;
 
 #ifdef WSC_AP_SUPPORT
 		case RTPRIV_IOCTL_WSC_PROFILE:
-			RTMP_AP_IoctlHandle(pAd, wrq, CMD_RTPRIV_IOCTL_WSC_PROFILE, 0, NULL, 0);
+		    RTMPIoctlWscProfile(pAd, wrq);
 		    break;
-#endif /* WSC_AP_SUPPORT */
+#endif // WSC_AP_SUPPORT //
 #ifdef DOT11_N_SUPPORT
 		case RTPRIV_IOCTL_QUERY_BATABLE:
-			RTMP_AP_IoctlHandle(pAd, wrq, CMD_RTPRIV_IOCTL_QUERY_BATABLE, 0, NULL, 0);
+		    RTMPIoctlQueryBaTable(pAd, wrq);
 		    break;
-#endif /* DOT11_N_SUPPORT */
+#endif // DOT11_N_SUPPORT //
 		case RTPRIV_IOCTL_E2P:
-			RTMP_AP_IoctlHandle(pAd, wrq, CMD_RTPRIV_IOCTL_E2P, 0, NULL, 0);
+			RTMPAPIoctlE2PROM(pAd, wrq);
 			break;
 
 #ifdef DBG
 		case RTPRIV_IOCTL_BBP:
-			RTMP_AP_IoctlHandle(pAd, wrq, CMD_RTPRIV_IOCTL_BBP, 0, NULL, 0);
+			RTMPAPIoctlBBP(pAd, wrq);
 			break;
-			
+
 		case RTPRIV_IOCTL_MAC:
-			RTMP_AP_IoctlHandle(pAd, wrq, CMD_RTPRIV_IOCTL_MAC, 0, NULL, 0);
+			RTMPAPIoctlMAC(pAd, wrq);
 			break;
-            
+
 #ifdef RTMP_RF_RW_SUPPORT
 		case RTPRIV_IOCTL_RF:
-			RTMP_AP_IoctlHandle(pAd, wrq, CMD_RTPRIV_IOCTL_RF, 0, NULL, 0);
+			RTMPAPIoctlRF(pAd, wrq);
 			break;
-#endif /* RTMP_RF_RW_SUPPORT */
-#endif /* DBG */
+#endif // RTMP_RF_RW_SUPPORT //
+#endif // DBG //
 
 		default:
-/*			DBGPRINT(RT_DEBUG_ERROR, ("IOCTL::unknown IOCTL's cmd = 0x%08x\n", cmd)); */
-			Status = RTMP_IO_EOPNOTSUPP;
+//			DBGPRINT(RT_DEBUG_ERROR, ("IOCTL::unknown IOCTL's cmd = 0x%08x\n", cmd));
+			Status = -EOPNOTSUPP;
 			break;
-	}
-
-LabelExit:
-	if (Status != 0)
-	{
-		RT_CMD_STATUS_TRANSLATE(Status);
-	}
-	else
-	{
-		/*
-			If wrq length is modified, we reset the lenght of origin wrq;
-
-			Or we can not modify it because the address of wrq->u.data.length
-			maybe same as other union field, ex: iw_range, etc.
-
-			if the length is not changed but we change it, the value for other
-			union will also be changed, this is not correct.
-		*/
-		if (wrq->u.data.length != org_len)
-			wrqin->u.data.length = wrq->u.data.length;
 	}
 
 	return Status;

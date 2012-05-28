@@ -14,7 +14,7 @@
  ****************************************************************************
 
     Module Name:
-	rt2883.h
+	rt305x.h
  
     Abstract:
  
@@ -34,10 +34,21 @@
 #error "For RT2880, you should define the compile flag -DRTMP_MAC_PCI"
 #endif
 
-struct _RTMP_ADAPTER;
+#include "chip/mac_pci.h"
 
 #define RTMP_MAC_CSR_ADDR 0xB0180000
 #define RTMP_FLASH_BASE_ADDR	0xbfc00000
+
+#ifdef DFS_SUPPORT
+#define DFS_2_SUPPORT
+#endif
+
+
+#ifdef CARRIER_DETECTION_SUPPORT
+#define TONE_RADAR_DETECT_SUPPORT
+#define TONE_RADAR_DETECT_V2
+#endif
+
 
 #define BBP_REG_BF		BBP_R105
 #define BBP_REG_SNR0	BBP_R189
@@ -46,22 +57,12 @@ struct _RTMP_ADAPTER;
 
 
 extern REG_PAIR   RT2883_BBPRegTable[];
-extern UCHAR RT2883_NUM_BBP_REG_PARMS;
+
+//
+// Device ID & Vendor ID, these values should match EEPROM value
+//
 
 
-/* */
-/* Device ID & Vendor ID, these values should match EEPROM value */
-/* */
 
-
-/* ========================= 
-	Function definition
-   ========================= */
-VOID NICInitRT2883MacRegisters(
-	IN	struct _RTMP_ADAPTER		*pAd);
-
-VOID NICInitRT2883BbpRegisters(
-	IN	struct _RTMP_ADAPTER 		*pAd);
-
-#endif /*__RT2880_H__ */
+#endif //__RT2880_H__ //
 

@@ -33,17 +33,17 @@
 #include "dot11r_ft.h"
 
 #define LENGTH_TDLS_H				25
-#define TDLS_TIMEOUT				1200	/* unit: msec */
+#define TDLS_TIMEOUT				1200	// unit: msec
 
-/* TDLS State */
+// TDLS State
 typedef enum _TDLS_STATE {
-	TDLS_MODE_NONE,				/* Init state */
-	TDLS_MODE_WAIT_RESPONSE,		/* Wait a response from the Responder */
-	TDLS_MODE_WAIT_CONFIRM,			/* Wait an confirm from the Initiator */
-	TDLS_MODE_CONNECTED,		/* Tunneled Direct Link estabilished */
-/*	TDLS_MODE_SWITCH_CHANNEL, */
-/*	TDLS_MODE_PSM, */
-/*	TDLS_MODE_UAPSD */
+	TDLS_MODE_NONE,				// Init state
+	TDLS_MODE_WAIT_RESPONSE,		// Wait a response from the Responder
+	TDLS_MODE_WAIT_CONFIRM,			// Wait an confirm from the Initiator
+	TDLS_MODE_CONNECTED,		// Tunneled Direct Link estabilished
+//	TDLS_MODE_SWITCH_CHANNEL,
+//	TDLS_MODE_PSM,
+//	TDLS_MODE_UAPSD
 } TDLS_STATE;
 
 typedef struct _MLME_TDLS_REQ_STRUCT {
@@ -310,8 +310,8 @@ TDLS_InsertBSSCoexistenceIE(
 	IN	PRTMP_ADAPTER pAd,
 	OUT	PUCHAR	pFrameBuf,
 	OUT	PULONG	pFrameLen);
-#endif /* DOT11N_DRAFT3 */
-#endif /* DOT11_N_SUPPORT */
+#endif // DOT11N_DRAFT3 //
+#endif // DOT11_N_SUPPORT //
 
 VOID
 TDLS_InsertExtCapIE(
@@ -555,4 +555,4 @@ TDLS_InitChannelRelatedValue(
 	IN HT_CAPABILITY_IE *pHtCapability);
 #endif /* __TDLS_H */
 
-#endif /* DOT11Z_TDLS_SUPPORT */
+#endif // DOT11Z_TDLS_SUPPORT //

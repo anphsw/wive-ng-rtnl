@@ -39,8 +39,8 @@ TDLS_Table_Init(
 	UCHAR idx;
 	PRT_802_11_TDLS	pTDLS = NULL;
 
-	/* initialize TDLS allocate spin lock */
-	NdisAllocateSpinLock(pAd, &pAd->StaCfg.TDLSEntryLock);
+	// initialize TDLS allocate spin lock
+	NdisAllocateSpinLock(&pAd->StaCfg.TDLSEntryLock);
 
 	for (idx = 0; idx < MAX_NUM_OF_TDLS_ENTRY; idx++)
 	{
@@ -60,10 +60,9 @@ TDLS_SearchTabInit(
 	INT idx;
 	ULONG i;
 
-	NdisAllocateSpinLock(pAd, &pAd->StaCfg.TdlsSearchTabLock);
+	NdisAllocateSpinLock(&pAd->StaCfg.TdlsSearchTabLock);
 
-/*	pAd->StaCfg.pTdlsSearchEntryPool = kmalloc(sizeof(TDLS_SEARCH_ENTRY) * TDLS_SEARCH_POOL_SIZE, GFP_ATOMIC); */
-	os_alloc_mem(pAd, (UCHAR **)&(pAd->StaCfg.pTdlsSearchEntryPool), sizeof(TDLS_SEARCH_ENTRY) * TDLS_SEARCH_POOL_SIZE);
+	pAd->StaCfg.pTdlsSearchEntryPool = kmalloc(sizeof(TDLS_SEARCH_ENTRY) * TDLS_SEARCH_POOL_SIZE, GFP_ATOMIC);
 	if (pAd->StaCfg.pTdlsSearchEntryPool)
 	{
 		NdisZeroMemory(pAd->StaCfg.pTdlsSearchEntryPool, sizeof(TDLS_SEARCH_ENTRY) * TDLS_SEARCH_POOL_SIZE);
@@ -125,8 +124,7 @@ TDLS_SearchTabDestory(
 	}
 
 	if (pAd->StaCfg.pTdlsSearchEntryPool)
-/*		kfree(pAd->StaCfg.pTdlsSearchEntryPool); */
-		os_free_mem(NULL, pAd->StaCfg.pTdlsSearchEntryPool);
+		kfree(pAd->StaCfg.pTdlsSearchEntryPool);
 	pAd->StaCfg.pTdlsSearchEntryPool = NULL;	
 
 	return;
@@ -344,7 +342,7 @@ INT	Set_TdlsCapableProc(
 
 	if (!bTdlsCapable && pAd->StaCfg.bTDLSCapable)
 	{
-		/* tear	down local dls table entry */
+		// tear	down local dls table entry
 		TDLS_LinkTearDown(pAd);
 		TDLS_SearchTabReset(pAd);
 	}
@@ -371,7 +369,7 @@ INT	Set_TdlsSearchResetProc(
 {
 	BOOLEAN	bTdlsRest;
 
-	/*POS_COOKIE	pObj= (POS_COOKIE)pAd->OS_Cookie; */
+	//POS_COOKIE	pObj= (POS_COOKIE)pAd->OS_Cookie;
 
 	bTdlsRest = simple_strtol(arg, 0, 10);
 
@@ -396,18 +394,18 @@ INT	Set_TdlsSetupProc(
 	INT				value_offset;
 	RT_802_11_TDLS	Tdls;
 
-	if(strlen(arg) != 17)  /*Mac address acceptable format 01:02:03:04:05:06 length 17 */
+	if(strlen(arg) != 17)  //Mac address acceptable format 01:02:03:04:05:06 length 17
 		return FALSE;
 
 	for (value_offset=0, value = rstrtok(arg,":"); value; value = rstrtok(NULL,":")) 
 	{
 		if((strlen(value) != 2) || (!isxdigit(*value)) || (!isxdigit(*(value+1))) ) 
-			return FALSE;  /*Invalid */
+			return FALSE;  //Invalid
 
 		AtoH(value, &macAddr[value_offset++], 1);
 	}
 
-	/* TDLS will not be supported when Adhoc mode */
+	// TDLS will not be supported when Adhoc mode
 	if (INFRA_ON(pAd))
 	{
 		DBGPRINT(RT_DEBUG_TRACE,("\n%02x:%02x:%02x:%02x:%02x:%02x\n", macAddr[0], macAddr[1], macAddr[2],
@@ -447,18 +445,18 @@ INT	Set_TdlsTearDownProc(
 	INT				value_offset;
 	CHAR			idx;
 
-	if(strlen(arg) != 17)  /*Mac address acceptable format 01:02:03:04:05:06 length 17 */
+	if(strlen(arg) != 17)  //Mac address acceptable format 01:02:03:04:05:06 length 17
 		return FALSE;
 
 	for (value_offset=0, value = rstrtok(arg,":"); value; value = rstrtok(NULL,":")) 
 	{
 		if((strlen(value) != 2) || (!isxdigit(*value)) || (!isxdigit(*(value+1))) ) 
-			return FALSE;  /*Invalid */
+			return FALSE;  //Invalid
 
 		AtoH(value, &macAddr[value_offset++], 1);
 	}
 
-	/* TDLS will not be supported when Adhoc mode */
+	// TDLS will not be supported when Adhoc mode
 	if (INFRA_ON(pAd))
 	{
 		MLME_TDLS_REQ_STRUCT	MlmeTdlsReq;
@@ -513,7 +511,7 @@ TDLS_SetupRequestAction(
 
 	MAKE_802_3_HEADER(Header802_3, pTDLS->MacAddr, pAd->CurrentAddress, TDLS_ETHERTYPE);
 
-	/* Allocate buffer for transmitting message */
+	// Allocate buffer for transmitting message
 	NStatus = MlmeAllocateMemory(pAd, &pOutBuffer);
 	if (NStatus	!= NDIS_STATUS_SUCCESS)	
 		return NStatus;
@@ -569,7 +567,7 @@ TDLS_SetupResponseAction(
 
 	MAKE_802_3_HEADER(Header802_3, pTDLS->MacAddr, pAd->CurrentAddress, TDLS_ETHERTYPE);
 
-	/* Allocate buffer for transmitting message */
+	// Allocate buffer for transmitting message
 	NStatus = MlmeAllocateMemory(pAd, &pOutBuffer);
 	if (NStatus	!= NDIS_STATUS_SUCCESS)	
 		return NStatus;
@@ -625,7 +623,7 @@ TDLS_SetupConfirmAction(
 
 	MAKE_802_3_HEADER(Header802_3, pTDLS->MacAddr, pAd->CurrentAddress, TDLS_ETHERTYPE);
 
-	/* Allocate buffer for transmitting message */
+	// Allocate buffer for transmitting message
 	NStatus = MlmeAllocateMemory(pAd, &pOutBuffer);
 	if (NStatus	!= NDIS_STATUS_SUCCESS)	
 		return NStatus;
@@ -667,7 +665,7 @@ TDLS_LinkTearDown(
 
 	DBGPRINT(RT_DEBUG_TRACE, ("====> TDLS_LinkTearDown\n"));
 
-	/* tear down tdls table entry */
+	// tear down tdls table entry
 	for (idx = 0; idx < MAX_NUM_OF_TDLS_ENTRY; idx++)
 	{
 		pTDLS = &pAd->StaCfg.TDLSEntry[idx];
@@ -722,7 +720,7 @@ TDLS_TearDownAction(
 
 	MAKE_802_3_HEADER(Header802_3, pTDLS->MacAddr, pAd->CurrentAddress, TDLS_ETHERTYPE);
 
-	/* Allocate buffer for transmitting message */
+	// Allocate buffer for transmitting message
 	NStatus = MlmeAllocateMemory(pAd, &pOutBuffer);
 	if (NStatus	!= NDIS_STATUS_SUCCESS)	
 		return NStatus;
@@ -824,10 +822,10 @@ TDLS_InitPeerEntryRateCapability(
 	pEntry->HTCapability.MCSSet[0] = 0;
 	pEntry->HTCapability.MCSSet[1] = 0;
 
-	/* If this Entry supports 802.11n, upgrade to HT rate. */
+	// If this Entry supports 802.11n, upgrade to HT rate. 
 	if ((HtCapabilityLen != 0) && (pAd->CommonCfg.PhyMode >= PHY_11ABGN_MIXED))
 	{
-		UCHAR	j, bitmask; /*k,bitmask; */
+		UCHAR	j, bitmask; //k,bitmask;
 		CHAR    ii;
 
 		DBGPRINT(RT_DEBUG_TRACE, ("TDLS - Receive Peer HT Capable STA from %02x:%02x:%02x:%02x:%02x:%02x\n",
@@ -861,8 +859,8 @@ TDLS_InitPeerEntryRateCapability(
 			pAd->MacTab.fAnyStation20Only = TRUE;
 		}
 
-		/* find max fixed rate */
-		for (ii = 23; ii >= 0; ii--) /* 3*3 */
+		// find max fixed rate
+		for (ii = 23; ii >= 0; ii--) // 3*3
 		{
 			j = ii/8;
 			bitmask = (1<<(ii-(j*8)));
@@ -880,7 +878,7 @@ TDLS_InitPeerEntryRateCapability(
 		{
 			if (pAd->StaCfg.DesiredTransmitSetting.field.MCS == 32)
 			{
-				/* Fix MCS as HT Duplicated Mode */
+				// Fix MCS as HT Duplicated Mode
 				pEntry->MaxHTPhyMode.field.BW = 1;
 				pEntry->MaxHTPhyMode.field.MODE = MODE_HTMIX;
 				pEntry->MaxHTPhyMode.field.STBC = 0;
@@ -889,7 +887,7 @@ TDLS_InitPeerEntryRateCapability(
 			}
 			else if (pEntry->MaxHTPhyMode.field.MCS > pAd->StaCfg.HTPhyMode.field.MCS)
 			{
-				/* STA supports fixed MCS */
+				// STA supports fixed MCS 
 				pEntry->MaxHTPhyMode.field.MCS = pAd->StaCfg.HTPhyMode.field.MCS;
 			}
 		}
@@ -919,7 +917,7 @@ TDLS_InitPeerEntryRateCapability(
 		NdisMoveMemory(&pEntry->HTCapability, pHtCapability, sizeof(HT_CAPABILITY_IE));
 		CLIENT_STATUS_SET_FLAG(pEntry, fCLIENT_STATUS_WMM_CAPABLE);
 	}
-#endif /* DOT11_N_SUPPORT */
+#endif // DOT11_N_SUPPORT //
 
 	pEntry->HTPhyMode.word = pEntry->MaxHTPhyMode.word;
 	pEntry->CurrTxRate = pEntry->MaxSupportedRate;
@@ -1048,11 +1046,11 @@ VOID TDLS_CntlOidTDLSRequestProc(
 
 	Idx = TDLS_SearchLinkId(pAd, pTDLS->MacAddr);
 	
-	if (Idx == -1) /* not found and the entry is not full */
+	if (Idx == -1) // not found and the entry is not full
 	{
 		if (pTDLS->Valid) 
 		{
-			/* 1. Enable case, start TDLS setup procedure */
+			// 1. Enable case, start TDLS setup procedure
 			for (i = 0; i < MAX_NUM_OF_TDLS_ENTRY; i++)
 			{
 				if (!pAd->StaCfg.TDLSEntry[i].Valid)
@@ -1074,16 +1072,16 @@ VOID TDLS_CntlOidTDLSRequestProc(
 			DBGPRINT(RT_DEBUG_WARN,("CNTL - TDLS not changed in Idx = -1 (Valid=%d)\n", pTDLS->Valid));
 
 	}
-	else  if (Idx == MAX_NUM_OF_TDLS_ENTRY)		/* not found and full */
+	else  if (Idx == MAX_NUM_OF_TDLS_ENTRY)		// not found and full
 	{
 		if (pTDLS->Valid) 
 		{
-			/* 2. table full, cancel the non-finished entry and restart a new one */
+			// 2. table full, cancel the non-finished entry and restart a new one
 			for (i = 0; i < MAX_NUM_OF_TDLS_ENTRY; i++)
 			{
 				if ((pAd->StaCfg.TDLSEntry[i].Valid) &&(pAd->StaCfg.TDLSEntry[i].Status < TDLS_MODE_CONNECTED))
 				{
-					/* update mac case */
+					// update mac case
 					NdisMoveMemory(&pAd->StaCfg.TDLSEntry[i], pTDLS, sizeof(RT_802_11_TDLS));
 					TDLS_MlmeParmFill(pAd, &MlmeTdlsReq, &pAd->StaCfg.TDLSEntry[i], Reason, FALSE);
 					MlmeEnqueue(pAd,
@@ -1100,11 +1098,11 @@ VOID TDLS_CntlOidTDLSRequestProc(
 		else
 			DBGPRINT(RT_DEBUG_WARN,("CNTL - TDLS not changed in Idx = MAX_NUM_OF_TDLS_ENTRY (Valid=%d)\n", pTDLS->Valid));
 	}
-	else	/* found one in entry */
+	else	// found one in entry
 	{
 		if ((!pTDLS->Valid) && (pAd->StaCfg.TDLSEntry[Idx].Status >= TDLS_MODE_CONNECTED))
 		{
-			/* 3. Disable TDLS link case, just tear down TDLS link */
+			// 3. Disable TDLS link case, just tear down TDLS link
 			Reason = TDLS_REASON_CODE_TEARDOWN_FOR_UNSPECIFIED_REASON;
 			pAd->StaCfg.TDLSEntry[Idx].Valid	= FALSE;
 			pAd->StaCfg.TDLSEntry[Idx].Status	= TDLS_MODE_NONE;
@@ -1119,7 +1117,7 @@ VOID TDLS_CntlOidTDLSRequestProc(
 		}
 		else if ((pTDLS->Valid) && (pAd->StaCfg.TDLSEntry[Idx].Status >= TDLS_MODE_CONNECTED)) 
 		{
-			/* 4. re-setup case, tear down old link and re-start TDLS setup procedure */
+			// 4. re-setup case, tear down old link and re-start TDLS setup procedure 
 			Reason = TDLS_REASON_CODE_TEARDOWN_FOR_UNSPECIFIED_REASON;
 			pAd->StaCfg.TDLSEntry[Idx].Valid	= FALSE;
 			pAd->StaCfg.TDLSEntry[Idx].Status	= TDLS_MODE_NONE;
@@ -1250,29 +1248,29 @@ VOID TDLS_FTDeriveTPK(
 	UCHAR   context[128];
 	UINT    c_len=0; 
 	UCHAR	temp_var[32];
-	/*UINT	key_len = LEN_PMK; */
+	//UINT	key_len = LEN_PMK;
 	USHORT	len_in_bits = (key_len << 3);
 	UCHAR	key_material[LEN_PMK];
 
-	/* =============================== */
-	/* 		TPK derivation */
-	/* =============================== */
+	// ===============================
+	// 		TPK derivation	
+	// ===============================
 
-	/* construct the concatenated context for TPK */
-	/* min(MAC_I, MAC_R)	(6 bytes) */
-	/* max(MAC_I, MAC_R)	(6 bytes) */
-	/* min(SNonce, ANonce)	(32 bytes) */
-	/* max(SNonce, ANonce)	(32 bytes) */
-	/* BSSID				(6 bytes) */
-	/* Number of Key in bits(2 bytes) */
+	// construct the concatenated context for TPK
+	// min(MAC_I, MAC_R)	(6 bytes)
+	// max(MAC_I, MAC_R)	(6 bytes)
+	// min(SNonce, ANonce)	(32 bytes)
+	// max(SNonce, ANonce)	(32 bytes)
+	// BSSID				(6 bytes)
+	// Number of Key in bits(2 bytes)
 
-	/* Initial the related parameter */
+	// Initial the related parameter
 	NdisZeroMemory(temp_result, 64);
 	NdisZeroMemory(context, 128);
 	NdisZeroMemory(temp_var, 32);
 	c_len = 0;
 
-	/* concatenate min(MAC_I, MAC_R) with 6-octets */
+	// concatenate min(MAC_I, MAC_R) with 6-octets
 	if (RTMPCompareMemory(mac_i, mac_r, 6) == 1)
 		NdisMoveMemory(temp_var, mac_r, 6);
 	else
@@ -1280,7 +1278,7 @@ VOID TDLS_FTDeriveTPK(
     NdisMoveMemory(&context[c_len], temp_var, 6);
 	c_len += 6;
 
-	/* concatenate max(MAC_I, MAC_R) with 6-octets */
+	// concatenate max(MAC_I, MAC_R) with 6-octets
 	if (RTMPCompareMemory(mac_i, mac_r, 6) == 1)
 		NdisMoveMemory(temp_var, mac_i, 6);
 	else
@@ -1288,7 +1286,7 @@ VOID TDLS_FTDeriveTPK(
     NdisMoveMemory(&context[c_len], temp_var, 6);
 	c_len += 6;
 
-	/* concatenate min(SNonce, ANonce) with 32-octets */
+	// concatenate min(SNonce, ANonce) with 32-octets 
 	if (RTMPCompareMemory(s_nonce, a_nonce, 32) == 1)
 		NdisMoveMemory(temp_var, a_nonce, 32);
 	else
@@ -1296,7 +1294,7 @@ VOID TDLS_FTDeriveTPK(
     NdisMoveMemory(&context[c_len], temp_var, 32);
 	c_len += 32;
 	
-	/* concatenate max(SNonce, ANonce) with 32-octets */
+	// concatenate max(SNonce, ANonce) with 32-octets
 	if (RTMPCompareMemory(s_nonce, a_nonce, 32) == 1)
 		NdisMoveMemory(temp_var, s_nonce, 32);
 	else
@@ -1304,20 +1302,20 @@ VOID TDLS_FTDeriveTPK(
     NdisMoveMemory(&context[c_len], temp_var, 32);
 	c_len += 32;
 
-	/* concatenate the BSSID with 6-octets */
+	// concatenate the BSSID with 6-octets 
 	NdisMoveMemory(&context[c_len], bssid, MAC_ADDR_LEN);
 	c_len += MAC_ADDR_LEN;
 
-	/* concatenate the N_KEY with 2-octets */
+	// concatenate the N_KEY with 2-octets
 	NdisMoveMemory(&context[c_len], &len_in_bits, 2);
 	c_len += 2;
 	
-	/*hex_dump("TDLS_FTDeriveTPK", context, 128); */
+	//hex_dump("TDLS_FTDeriveTPK", context, 128);
 
-	/* Zero key material */
+	// Zero key material
 	NdisZeroMemory(key_material, LEN_PMK);
 	
-	/* Calculate a key material through FT-KDF */
+	// Calculate a key material through FT-KDF
 	KDF(key_material, 
 			LEN_PMK, 
 			(PUCHAR)"TDLS PMK", 
@@ -1331,24 +1329,24 @@ VOID TDLS_FTDeriveTPK(
 	hex_dump("TPK ", tpk , key_len);
 
 
-	/* =============================== */
-	/* 		TPK-Name derivation */
-	/* =============================== */
+	// ===============================
+	// 		TPK-Name derivation	
+	// ===============================
 
-	/* construct the concatenated context for TPK-Name */
-	/* min(MAC_I, MAC_R)	(6 bytes) */
-	/* max(MAC_I, MAC_R)	(6 bytes) */
-	/* min(SNonce, ANonce)	(32 bytes) */
-	/* max(SNonce, ANonce)	(32 bytes) */
-	/* BSSID				(6 bytes) */
-	/* Number of Key in bits(2 bytes) */
+	// construct the concatenated context for TPK-Name
+	// min(MAC_I, MAC_R)	(6 bytes)
+	// max(MAC_I, MAC_R)	(6 bytes)
+	// min(SNonce, ANonce)	(32 bytes)
+	// max(SNonce, ANonce)	(32 bytes)
+	// BSSID				(6 bytes)
+	// Number of Key in bits(2 bytes)
 
-	/* The context is the same as the contxex of TPK. */
+	// The context is the same as the contxex of TPK.
 	
-	/* Initial the related parameter */
+	// Initial the related parameter
 	NdisZeroMemory(temp_result, 64);
 
-	/* derive TPK-Name */
+	// derive TPK-Name
 	RT_SHA256(context, c_len, temp_result);
 	NdisMoveMemory(tpk_name, temp_result, LEN_PMK_NAME);
 
@@ -1377,7 +1375,7 @@ BOOLEAN MlmeTdlsReqSanity(
     
 	*pTDLS = pInfo->pTDLS;
 	*pReason = pInfo->Reason;
-	*pIsViaAP = pInfo->IsViaAP;/* default = FALSE, not pass through AP */
+	*pIsViaAP = pInfo->IsViaAP;// default = FALSE, not pass through AP
 
 	return TRUE;
 }
@@ -1402,7 +1400,7 @@ VOID TDLS_SendNullFrame(
 
 	DBGPRINT(RT_DEBUG_TRACE, ("====> TDLS_SendNullFrame\n"));
 
-    /* WPA 802.1x secured port control */
+    // WPA 802.1x secured port control
     if (((pAd->StaCfg.AuthMode == Ndis802_11AuthModeWPA) || 
          (pAd->StaCfg.AuthMode == Ndis802_11AuthModeWPAPSK) ||
          (pAd->StaCfg.AuthMode == Ndis802_11AuthModeWPA2) || 
@@ -1413,7 +1411,7 @@ VOID TDLS_SendNullFrame(
 #ifdef WAPI_SUPPORT
 		  || (pAd->StaCfg.AuthMode == Ndis802_11AuthModeWAICERT)
 		  || (pAd->StaCfg.AuthMode == Ndis802_11AuthModeWAIPSK)
-#endif /* WAPI_SUPPORT */
+#endif // WAPI_SUPPORT //
         ) &&
        (pAd->StaCfg.PortSecured == WPA_802_1X_PORT_NOT_SECURED)) 
 	{
@@ -1453,15 +1451,15 @@ VOID TDLS_SendNullFrame(
 			pAd->Sequence++;
 			pHeader_802_11->Sequence = pAd->Sequence;
 
-			/* Prepare QosNull function frame */
+			// Prepare QosNull function frame
 			if (bQosNull)
 			{
 				pHeader_802_11->FC.SubType = SUBTYPE_QOS_NULL;
 
-				/* copy QOS control bytes */
+				// copy QOS control bytes
 				NullFrame[Length]	=  0;
 				NullFrame[Length+1] =  0;
-				Length += 2;/* if pad with 2 bytes for alignment, APSD will fail */
+				Length += 2;// if pad with 2 bytes for alignment, APSD will fail
 			}
 
 			HAL_KickOutNullFrameTx(pAd, 0, NullFrame, Length);
@@ -1500,7 +1498,7 @@ VOID TDLS_LinkMaintenance(
 			pEntry->NoDataIdleCount++;
 			NdisReleaseSpinLock(&pAd->MacTabLock);
 
-			/* delete those TDLS entry that has been idle for a long time */
+			// delete those TDLS entry that has been idle for a long time
 			if (pEntry->NoDataIdleCount >= TDLS_ENTRY_AGEOUT_TIME)
 			{
 				DBGPRINT(RT_DEBUG_WARN, ("ageout %02x:%02x:%02x:%02x:%02x:%02x from TDLS #%d after %d-sec silence\n",
@@ -1543,13 +1541,13 @@ INT Set_TdlsEntryInfo_Display_Proc(
 			DBGPRINT(RT_DEBUG_OFF, ("%02x:%02x:%02x:%02x:%02x:%02x  \n",
 				pAd->StaCfg.TDLSEntry[i].MacAddr[0], pAd->StaCfg.TDLSEntry[i].MacAddr[1], pAd->StaCfg.TDLSEntry[i].MacAddr[2],
 				pAd->StaCfg.TDLSEntry[i].MacAddr[3], pAd->StaCfg.TDLSEntry[i].MacAddr[4], pAd->StaCfg.TDLSEntry[i].MacAddr[5]));
-			/*DBGPRINT(RT_DEBUG_OFF, ("%-8d\n", pAd->StaCfg.DLSEntry[i].TimeOut)); */
+			//DBGPRINT(RT_DEBUG_OFF, ("%-8d\n", pAd->StaCfg.DLSEntry[i].TimeOut));
 
 			DBGPRINT(RT_DEBUG_OFF, ("\n"));
 			DBGPRINT(RT_DEBUG_OFF, ("\n%-19s%-4s%-4s%-4s%-4s%-7s%-7s%-7s","MAC", "AID", "BSS", "PSM", "WMM", "RSSI0", "RSSI1", "RSSI2"));
 #ifdef DOT11_N_SUPPORT			
 			DBGPRINT(RT_DEBUG_OFF, ("%-8s%-10s%-6s%-6s%-6s%-6s", "MIMOPS", "PhMd", "BW", "MCS", "SGI", "STBC"));
-#endif /* DOT11_N_SUPPORT */
+#endif // DOT11_N_SUPPORT //
 			DBGPRINT(RT_DEBUG_OFF, ("\n%02X:%02X:%02X:%02X:%02X:%02X  ",
 				pEntry->Addr[0], pEntry->Addr[1], pEntry->Addr[2],
 				pEntry->Addr[3], pEntry->Addr[4], pEntry->Addr[5]));
@@ -1567,7 +1565,7 @@ INT Set_TdlsEntryInfo_Display_Proc(
 			DBGPRINT(RT_DEBUG_OFF, ("%-6d", pEntry->HTPhyMode.field.MCS));
 			DBGPRINT(RT_DEBUG_OFF, ("%-6d", pEntry->HTPhyMode.field.ShortGI));
 			DBGPRINT(RT_DEBUG_OFF, ("%-6d", pEntry->HTPhyMode.field.STBC));
-#endif /* DOT11_N_SUPPORT */
+#endif // DOT11_N_SUPPORT //
 			DBGPRINT(RT_DEBUG_OFF, ("%-10d, %d, %d%%\n", pEntry->DebugFIFOCount, pEntry->DebugTxCount, 
 						(pEntry->DebugTxCount) ? ((pEntry->DebugTxCount-pEntry->DebugFIFOCount)*100/pEntry->DebugTxCount) : 0));
 			DBGPRINT(RT_DEBUG_OFF, ("\n"));
@@ -1619,8 +1617,8 @@ VOID TDLS_InitChannelRelatedValue(
 	UINT32	Data = 0;
 
 #ifdef RTMP_MAC_PCI
-	/* In power save , We will force use 1R. */
-	/* So after link up, check Rx antenna # again. */
+	// In power save , We will force use 1R.
+	// So after link up, check Rx antenna # again.
 	RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R3, &Value);
 	if(pAd->Antenna.field.RxPath == 3)
 	{
@@ -1636,17 +1634,17 @@ VOID TDLS_InitChannelRelatedValue(
 	}
 	RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R3, Value);
 	pAd->StaCfg.BBPR3 = Value;
-#endif /* RTMP_MAC_PCI */
+#endif // RTMP_MAC_PCI //
 
-	/*pAd->CommonCfg.CentralChannel = pAd->MlmeAux.CentralChannel; */
-	/*pAd->CommonCfg.Channel = pAd->MlmeAux.Channel; */
+	//pAd->CommonCfg.CentralChannel = pAd->MlmeAux.CentralChannel;
+	//pAd->CommonCfg.Channel = pAd->MlmeAux.Channel;
 
 #ifdef DOT11_N_SUPPORT
-	/* Change to AP channel */
+	// Change to AP channel
     if ((pAd->CommonCfg.CentralChannel > pAd->CommonCfg.Channel) &&
 		(pHtCapability->HtCapInfo.ChannelWidth == BW_40))
 	{	
-		/* Must using 40MHz. */
+		// Must using 40MHz.
 		pAd->CommonCfg.BBPCurrentBW = BW_40;
 		AsicSwitchChannel(pAd, pAd->CommonCfg.CentralChannel, FALSE);
 		AsicLockChannel(pAd, pAd->CommonCfg.CentralChannel);
@@ -1656,13 +1654,13 @@ VOID TDLS_InitChannelRelatedValue(
 		Value |= 0x10;
 		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R4, Value);
 		
-		/*  RX : control channel at lower */
+		//  RX : control channel at lower 
 		RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R3, &Value);
 		Value &= (~0x20);
 		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R3, Value);
 #ifdef RTMP_MAC_PCI
         pAd->StaCfg.BBPR3 = Value;
-#endif /* RTMP_MAC_PCI */
+#endif // RTMP_MAC_PCI //
 
 		RTMP_IO_READ32(pAd, TX_BAND_CFG, &Data);
 		Data &= 0xfffffffe;
@@ -1681,7 +1679,7 @@ VOID TDLS_InitChannelRelatedValue(
 	else if ((pAd->CommonCfg.CentralChannel < pAd->CommonCfg.Channel) &&
 			(pHtCapability->HtCapInfo.ChannelWidth == BW_40))
     {	
-	    /* Must using 40MHz. */
+	    // Must using 40MHz.
 		pAd->CommonCfg.BBPCurrentBW = BW_40;
 		AsicSwitchChannel(pAd, pAd->CommonCfg.CentralChannel, FALSE);
 	    AsicLockChannel(pAd, pAd->CommonCfg.CentralChannel);
@@ -1700,7 +1698,7 @@ VOID TDLS_InitChannelRelatedValue(
 		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R3, Value);
 #ifdef RTMP_MAC_PCI
         pAd->StaCfg.BBPR3 = Value;
-#endif /* RTMP_MAC_PCI */
+#endif // RTMP_MAC_PCI //
 	
 		if (pAd->MACVersion == 0x28600100)
 		{
@@ -1713,7 +1711,7 @@ VOID TDLS_InitChannelRelatedValue(
 	    DBGPRINT(RT_DEBUG_TRACE, ("!!! 40MHz Upper !!! Control Channel at UpperCentral = %d \n", pAd->CommonCfg.CentralChannel ));
     }
     else
-#endif /* DOT11_N_SUPPORT */
+#endif // DOT11_N_SUPPORT //
     {
 	    pAd->CommonCfg.BBPCurrentBW = BW_20;
 		pAd->CommonCfg.CentralChannel = pAd->CommonCfg.Channel;
@@ -1733,7 +1731,7 @@ VOID TDLS_InitChannelRelatedValue(
 		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R3, Value);
 #ifdef RTMP_MAC_PCI
         pAd->StaCfg.BBPR3 = Value;
-#endif /* RTMP_MAC_PCI */
+#endif // RTMP_MAC_PCI //
 		
 		if (pAd->MACVersion == 0x28600100)
 		{
@@ -1748,5 +1746,5 @@ VOID TDLS_InitChannelRelatedValue(
 
 	RTMPSetAGCInitValue(pAd, pAd->CommonCfg.BBPCurrentBW);
 }
-#endif /* DOT11Z_TDLS_SUPPORT */
+#endif // DOT11Z_TDLS_SUPPORT //
  

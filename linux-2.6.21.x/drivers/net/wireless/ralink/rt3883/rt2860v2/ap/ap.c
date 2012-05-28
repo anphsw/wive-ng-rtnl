@@ -54,29 +54,35 @@ NDIS_STATUS APInitialize(
 
 	DBGPRINT(RT_DEBUG_TRACE, ("---> APInitialize\n"));
 
-	/* Init Group key update timer, and countermeasures timer */
-	for (i = 0; i < MAX_MBSSID_NUM(pAd); i++)
+	// Init Group key update timer, and countermeasures timer
+	for (i = 0; i < MAX_MBSSID_NUM; i++)
 		RTMPInitTimer(pAd, &pAd->ApCfg.MBSSID[i].REKEYTimer, GET_TIMER_FUNCTION(GREKEYPeriodicExec), pAd,  TRUE); 
 	
 	RTMPInitTimer(pAd, &pAd->ApCfg.CounterMeasureTimer, GET_TIMER_FUNCTION(CMTimerExec), pAd, FALSE);
 
 #ifdef IDS_SUPPORT
-	/* Init intrusion detection timer */
+	// Init intrusion detection timer
 	RTMPInitTimer(pAd, &pAd->ApCfg.IDSTimer, GET_TIMER_FUNCTION(RTMPIdsPeriodicExec), pAd, FALSE);
 	pAd->ApCfg.IDSTimerRunning = FALSE;
-#endif /* IDS_SUPPORT */
+#endif // IDS_SUPPORT //
 
 #ifdef WAPI_SUPPORT
-	/* Init WAPI rekey timer */
+	// Init WAPI rekey timer
 	RTMPInitWapiRekeyTimerAction(pAd, NULL);
-#endif /* WAPI_SUPPORT */
+#endif // WAPI_SUPPORT //
 
+#ifdef WDS_SUPPORT
+	APWdsInitialize(pAd);
+#endif // WDS_SUPPORT //
 
 #ifdef IGMP_SNOOP_SUPPORT
-	MulticastFilterTableInit(pAd, &pAd->pMulticastFilterTable);
-#endif /* IGMP_SNOOP_SUPPORT */
+	MulticastFilterTableInit(&pAd->pMulticastFilterTable);
+#endif // IGMP_SNOOP_SUPPORT //
 
 
+#ifdef WDS_SUPPORT
+	NdisAllocateSpinLock(&pAd->WdsTabLock);
+#endif // WDS_SUPPORT //
 
 	DBGPRINT(RT_DEBUG_TRACE, ("<--- APInitialize\n"));
 	return Status;
@@ -92,20 +98,31 @@ VOID APShutdown(
 	IN PRTMP_ADAPTER pAd)
 {
 	DBGPRINT(RT_DEBUG_TRACE, ("---> APShutdown\n"));
-/*	if (pAd->OpMode == OPMODE_AP) */
+//	if (pAd->OpMode == OPMODE_AP)
 #ifdef RTMP_MAC_PCI
 		APStop(pAd);
-#endif /* RTMP_MAC_PCI */
+#endif // RTMP_MAC_PCI //
 
 	MlmeRadioOff(pAd);
+/* mark by wy, this is done by firmware in MlmeRadioOff.
+#ifdef RTMP_MAC_PCI
+	// reset DMA Index
+	RTMP_IO_WRITE32(pAd, WPDMA_RST_IDX , 0xFFFFFFFF);
+	RTMP_IO_WRITE32(pAd, PBF_SYS_CTRL, 0xe1f);
+	RTMP_IO_WRITE32(pAd, PBF_SYS_CTRL, 0xe00);
+#endif // RTMP_MAC_PCI //
+*/
 
 #ifdef IGMP_SNOOP_SUPPORT
 	MultiCastFilterTableReset(&pAd->pMulticastFilterTable);
-#endif /* IGMP_SNOOP_SUPPORT */
+#endif // IGMP_SNOOP_SUPPORT //
 
 
 	NdisFreeSpinLock(&pAd->MacTabLock);
 
+#ifdef WDS_SUPPORT
+	NdisFreeSpinLock(&pAd->WdsTabLock);
+#endif // WDS_SUPPORT //
 
 	DBGPRINT(RT_DEBUG_TRACE, ("<--- APShutdown\n"));
 }
@@ -135,11 +152,11 @@ VOID APStartUp(
 	BOOLEAN		bWmmCapable = FALSE;
 	UCHAR		apidx;
 	BOOLEAN		TxPreamble, SpectrumMgmt = FALSE;
-	UCHAR		BBPR1 = 0, BBPR3 = 0; /*byteValue = 0; */
+	UCHAR		BBPR1 = 0, BBPR3 = 0; //byteValue = 0;
 	UCHAR		phy_mode = pAd->CommonCfg.DesiredPhyMode;
 #ifdef DOT1X_SUPPORT
-	/* BOOLEAN		bDot1xReload = FALSE; */
-#endif /* DOT1X_SUPPORT */
+	BOOLEAN		bDot1xReload = FALSE;
+#endif // DOT1X_SUPPORT //
 	
 	DBGPRINT(RT_DEBUG_TRACE, ("===> APStartUp\n"));
 
@@ -148,18 +165,18 @@ VOID APStartUp(
 	{
 		pAd->BulkOutDataSizeLimit[i]=24576;
 	}
-#endif /* INF_AMAZON_SE */
+#endif // INF_AMAZON_SE //
 		
 	AsicDisableSync(pAd);
 
 	TxPreamble = (pAd->CommonCfg.TxPreamble == Rt802_11PreambleLong ? 0 : 1);
 
 #ifdef A_BAND_SUPPORT
-	/* Decide the Capability information field */
-	/* In IEEE Std 802.1h-2003, the spectrum management bit is enabled in the 5 GHz band */
+	// Decide the Capability information field
+	// In IEEE Std 802.1h-2003, the spectrum management bit is enabled in the 5 GHz band 
 	if ((pAd->CommonCfg.Channel > 14) && pAd->CommonCfg.bIEEE80211H == TRUE)
 		SpectrumMgmt = TRUE;
-#endif /* A_BAND_SUPPORT */	
+#endif // A_BAND_SUPPORT //	
 			
 	for (apidx=0; apidx<pAd->ApCfg.BssidNum; apidx++)
 	{
@@ -190,7 +207,7 @@ VOID APStartUp(
 		}
 #else
 		pMbss->Bssid[5] += apidx;
-#endif /* NEW_MBSSID_MODE */
+#endif // NEW_MBSSID_MODE //
 
 		if (pMbss->MSSIDDev != NULL)
 		{
@@ -215,47 +232,43 @@ VOID APStartUp(
 				bit in the capability field of association, beacon and probe
 				management frames.
 			*/
-/*			pMbss->CapabilityInfo |= 0x0200; */
+//			pMbss->CapabilityInfo |= 0x0200;
 		} /* End of if */
 
-#ifdef UAPSD_SUPPORT
-/*        if (pAd->CommonCfg.bAPSDCapable == TRUE) */
-		if (pMbss->UapsdInfo.bAPSDCapable == TRUE)
+#ifdef UAPSD_AP_SUPPORT
+        if (pAd->CommonCfg.bAPSDCapable == TRUE)
 		{
-			/*
-				QAPs set the APSD subfield to 1 within the Capability
-				Information field when the MIB attribute
-				dot11APSDOptionImplemented is true and set it to 0 otherwise.
-				STAs always set this subfield to 0.
-			*/
+			/* QAPs set the APSD subfield to 1 within the Capability Information
+			   field when the MIB attribute dot11APSDOptionImplemented is true
+			   and set it to 0 otherwise. STAs always set this subfield to 0. */
             pMbss->CapabilityInfo |= 0x0800;
         } /* End of if */
-#endif /* UAPSD_SUPPORT */
+#endif // UAPSD_AP_SUPPORT //
 
 		
-		/* decide the mixed WPA cipher combination */
+		// decide the mixed WPA cipher combination  
 		if (pMbss->WepStatus == Ndis802_11Encryption4Enabled)
 		{
 			switch ((UCHAR)pMbss->AuthMode)
 			{
-				/* WPA mode */
+				// WPA mode
 				case Ndis802_11AuthModeWPA:
 				case Ndis802_11AuthModeWPAPSK:
 					pMbss->WpaMixPairCipher = WPA_TKIPAES_WPA2_NONE;
 					break;	
 
-				/* WPA2 mode */
+				// WPA2 mode
 				case Ndis802_11AuthModeWPA2:
 				case Ndis802_11AuthModeWPA2PSK:
 					pMbss->WpaMixPairCipher = WPA_NONE_WPA2_TKIPAES;
 					break;
 
-				/* WPA and WPA2 both mode */
+				// WPA and WPA2 both mode
 				case Ndis802_11AuthModeWPA1WPA2:
 				case Ndis802_11AuthModeWPA1PSKWPA2PSK:	
 
-					/* In WPA-WPA2 and TKIP-AES mixed mode, it shall use the maximum */
-					/* cipher capability unless users assign the desired setting. */
+					// In WPA-WPA2 and TKIP-AES mixed mode, it shall use the maximum 
+					// cipher capability unless users assign the desired setting.
 					if (pMbss->WpaMixPairCipher == MIX_CIPHER_NOTUSE || 
 						pMbss->WpaMixPairCipher == WPA_TKIPAES_WPA2_NONE || 
 						pMbss->WpaMixPairCipher == WPA_NONE_WPA2_TKIPAES)
@@ -267,23 +280,8 @@ VOID APStartUp(
 		else
 			pMbss->WpaMixPairCipher = MIX_CIPHER_NOTUSE;
 
-		/* Generate the corresponding RSNIE */
+		// Generate the corresponding RSNIE
 		RTMPMakeRSNIE(pAd, pMbss->AuthMode, pMbss->WepStatus, apidx);
-
-#ifdef WSC_V2_SUPPORT
-		if (pMbss->WscControl.WscV2Info.bEnableWpsV2)
-		{
-			/*
-				WPS V2 doesn't support WEP and WPA/WPAPSK-TKIP.
-			*/
-			if ((pMbss->WepStatus == Ndis802_11WEPEnabled) || 
-				(pMbss->WepStatus == Ndis802_11Encryption2Enabled) ||
-				(pMbss->bHideSsid))
-				WscOnOff(pAd, apidx, TRUE);
-			else
-				WscOnOff(pAd, apidx, FALSE);
-		}
-#endif /* WSC_V2_SUPPORT */
 
 	}
 
@@ -292,21 +290,22 @@ VOID APStartUp(
 		RTMPSetPhyMode(pAd, phy_mode);
 
 	SetCommonHT(pAd);
-#endif /* DOT11_N_SUPPORT */
+#endif // DOT11_N_SUPPORT //
 	
 	COPY_MAC_ADDR(pAd->CommonCfg.Bssid, pAd->CurrentAddress);
 
-	/* Select DAC according to HT or Legacy, write to BBP R1(bit4:3) */
-	/* In HT mode and two stream mode, both DACs are selected. */
-	/* In legacy mode or one stream mode, DAC-0 is selected. */
+	// Select DAC according to HT or Legacy, write to BBP R1(bit4:3)
+	// In HT mode and two stream mode, both DACs are selected.
+	// In legacy mode or one stream mode, DAC-0 is selected.
 #if defined(RT2883) || defined(RT3883)
-	if (IS_RT2883(pAd) || IS_RT3883(pAd))
+	if (((pAd->MACVersion >= 0x28830300 && pAd->MACVersion < RALINK_3070_VERSION)) 
+		|| (pAd->MACVersion >= RALINK_3883_VERSION)) // 3*3
 	{
-		/* reset Tx beamforming bit */
-		/* TODO: add bbpr1 tunning for eeprom value. */
+		// reset Tx beamforming bit
+		// TODO: add bbpr1 tunning for eeprom value.
 	}
 	else
-#endif /* defined(RT2883) || defined(RT3883) */
+#endif // defined(RT2883) || defined(RT3883) //
 	{
 #ifdef DOT11_N_SUPPORT
 		if ((pAd->CommonCfg.PhyMode >= PHY_11ABGN_MIXED) && (pAd->Antenna.field.TxPath == 2))
@@ -317,7 +316,7 @@ VOID APStartUp(
 			RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R1, BBPR1);
 		}
 		else
-#endif /* DOT11_N_SUPPORT */
+#endif // DOT11_N_SUPPORT //
 		{
 			RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R1, &BBPR1);
 			BBPR1 &= (~0x18);
@@ -325,7 +324,7 @@ VOID APStartUp(
 		}
 	}
 
-	/* Receiver Antenna selection, write to BBP R3(bit4:3) */
+	// Receiver Antenna selection, write to BBP R3(bit4:3)
 	RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R3, &BBPR3);
 	BBPR3 &= (~0x18);
 	if(pAd->Antenna.field.RxPath == 3)
@@ -344,7 +343,7 @@ VOID APStartUp(
 
 	if ((pAd->CommonCfg.PhyMode > PHY_11G) || bWmmCapable)
 	{
-		/* EDCA parameters used for AP's own transmission */
+		// EDCA parameters used for AP's own transmission
 		if (pAd->CommonCfg.APEdcaParm.bValid == FALSE)
 		{
 			pAd->CommonCfg.APEdcaParm.bValid = TRUE;
@@ -365,12 +364,12 @@ VOID APStartUp(
 
 			pAd->CommonCfg.APEdcaParm.Txop[0]  = 0;
 			pAd->CommonCfg.APEdcaParm.Txop[1]  = 0;
-			pAd->CommonCfg.APEdcaParm.Txop[2]  = 94;	/*96; */
-			pAd->CommonCfg.APEdcaParm.Txop[3]  = 47;	/*48; */
+			pAd->CommonCfg.APEdcaParm.Txop[2]  = 94;	//96;
+			pAd->CommonCfg.APEdcaParm.Txop[3]  = 47;	//48;
 		}
 		AsicSetEdcaParm(pAd, &pAd->CommonCfg.APEdcaParm);
 
-		/* EDCA parameters to be annouced in outgoing BEACON, used by WMM STA */
+		// EDCA parameters to be annouced in outgoing BEACON, used by WMM STA
 		if (pAd->ApCfg.BssEdcaParm.bValid == FALSE)
 		{
 			pAd->ApCfg.BssEdcaParm.bValid = TRUE;
@@ -391,8 +390,8 @@ VOID APStartUp(
 
 			pAd->ApCfg.BssEdcaParm.Txop[0]  = 0;
 			pAd->ApCfg.BssEdcaParm.Txop[1]  = 0;
-			pAd->ApCfg.BssEdcaParm.Txop[2]  = 94;	/*96; */
-			pAd->ApCfg.BssEdcaParm.Txop[3]  = 47;	/*48; */
+			pAd->ApCfg.BssEdcaParm.Txop[2]  = 94;	//96;
+			pAd->ApCfg.BssEdcaParm.Txop[3]  = 47;	//48;
 		}
 	}
 	else
@@ -401,11 +400,11 @@ VOID APStartUp(
 #ifdef DOT11_N_SUPPORT
 	if (pAd->CommonCfg.PhyMode < PHY_11ABGN_MIXED)
 	{
-		/* Patch UI */
+		// Patch UI
 		pAd->CommonCfg.HtCapability.HtCapInfo.ChannelWidth = BW_20;
 	}
 
-	/* init */
+	// init
 	if (pAd->CommonCfg.bRdg)
 	{	
 		RTMP_SET_FLAG(pAd, fRTMP_ADAPTER_RDG_ACTIVE);
@@ -415,7 +414,7 @@ VOID APStartUp(
 	{
 		RTMP_CLEAR_FLAG(pAd, fRTMP_ADAPTER_RDG_ACTIVE);
 		AsicDisableRDG(pAd);
-	}
+	}	
 
 	if (pAd->CommonCfg.bRalinkBurstMode)
 	{
@@ -427,21 +426,33 @@ VOID APStartUp(
 		RTMP_CLEAR_FLAG(pAd, fRTMP_ADAPTER_RALINK_BURST_MODE);
 		AsicDisableRalinkBurstMode(pAd);
 	}
-#endif /* DOT11_N_SUPPORT */
+#endif // DOT11_N_SUPPORT //
 
 	COPY_MAC_ADDR(pAd->ApCfg.MBSSID[BSS0].Bssid, pAd->CurrentAddress);
 	AsicSetBssid(pAd, pAd->CurrentAddress); 
 	AsicSetMcastWC(pAd);
-	/* In AP mode,  First WCID Table in ASIC will never be used. To prevent it's 0xff-ff-ff-ff-ff-ff, Write 0 here. */
-	/* p.s ASIC use all 0xff as termination of WCID table search. */
+	// In AP mode,  First WCID Table in ASIC will never be used. To prevent it's 0xff-ff-ff-ff-ff-ff, Write 0 here.
+	// p.s ASIC use all 0xff as termination of WCID table search.
 	RTMP_IO_WRITE32(pAd, MAC_WCID_BASE, 0x00);
 	RTMP_IO_WRITE32(pAd, MAC_WCID_BASE+4, 0x0);
 
 #ifdef FIFO_EXT_SUPPORT
-	AsicFifoExtSet(pAd)
-#endif /* FIFO_EXT_SUPPORT */
+	if (IS_RT3883(pAd))
+	{
+		RTMP_IO_WRITE32(pAd, WCID_MAPPING_0, 0x04030201);
+		RTMP_IO_WRITE32(pAd, WCID_MAPPING_1, 0x08070605);
+	}
+#endif // FIFO_EXT_SUPPORT //
 
-	/* reset WCID table */
+#ifdef DFS_SUPPORT
+#ifdef DFS_SOFTWARE_SUPPORT
+#if defined(RT2880) || defined(RT2860)
+	RTMPPrepareRadarDetectParams(pAd);
+#endif // defined(RT2880) || defined(RT2860) //
+#endif // DFS_SOFTWARE_SUPPORT //
+#endif // DFS_SUPPORT //
+
+	// reset WCID table 
 	for (i=1; i<255; i++)
 	{
 		offset = MAC_WCID_BASE + (i * HW_WCID_ENTRY_SIZE);	
@@ -449,7 +460,6 @@ VOID APStartUp(
 		RTMP_IO_WRITE32(pAd, offset+4, 0x0);
 	}
 
-	pAd->MacTab.MsduLifeTime = 5; /* default 5 seconds */
 	
 	pAd->MacTab.Content[0].Addr[0] = 0x01;
 	pAd->MacTab.Content[0].HTPhyMode.field.MODE = MODE_OFDM;
@@ -458,20 +468,20 @@ VOID APStartUp(
 	
 	AsicBBPAdjust(pAd);
 
-	/* Clear BG-Protection flag */
+	// Clear BG-Protection flag
 	OPSTATUS_CLEAR_FLAG(pAd, fOP_STATUS_BG_PROTECTION_INUSED);	
 	AsicSwitchChannel(pAd, pAd->CommonCfg.CentralChannel, FALSE);
 	AsicLockChannel(pAd, pAd->CommonCfg.CentralChannel);
- 	
+
 #ifdef DOT11_N_SUPPORT
 #ifdef GREENAP_SUPPORT
 	if (pAd->ApCfg.bGreenAPEnable == TRUE)
 	{
-		RTMP_CHIP_ENABLE_AP_MIMOPS(pAd,TRUE);
-		pAd->ApCfg.GreenAPLevel=GREENAP_WITHOUT_ANY_STAS_CONNECT;
+		EnableAPMIMOPS(pAd,TRUE);
+		pAd->ApCfg.GreenAPLevel = GREENAP_WITHOUT_ANY_STAS_CONNECT;
 	}
-#endif /* GREENAP_SUPPORT */
-#endif /* DOT11_N_SUPPORT */
+#endif // GREENAP_SUPPORT //
+#endif // DOT11_N_SUPPORT //
 
 	MlmeSetTxPreamble(pAd, (USHORT)pAd->CommonCfg.TxPreamble);	
 	for (apidx = 0; apidx < pAd->ApCfg.BssidNum; apidx++)
@@ -480,28 +490,108 @@ VOID APStartUp(
 #ifdef DOT11_N_SUPPORT
 		if (pAd->CommonCfg.PhyMode > PHY_11G)
 			MlmeUpdateHtTxRates(pAd, apidx);
-#endif /* DOT11_N_SUPPORT */
+#endif // DOT11_N_SUPPORT //
 	}
 	
-	/* Set the RadarDetect Mode as Normal, bc the APUpdateAllBeaconFram() will refer this parameter. */
-	pAd->CommonCfg.RDMode = RD_NORMAL_MODE;
+	// Set the RadarDetect Mode as Normal, bc the APUpdateAllBeaconFram() will refer this parameter.
+	pAd->CommonCfg.RadarDetect.RDMode = RD_NORMAL_MODE;
+	// start sending BEACON out
+	APMakeAllBssBeacon(pAd);
+	APUpdateAllBeaconFrame(pAd);
 
-	/* Disable Protection first. */
+	// Disable Protection first.
 	AsicUpdateProtect(pAd, 0, (ALLN_SETPROTECT|CCKSETPROTECT|OFDMSETPROTECT), TRUE, FALSE);
 	
 	APUpdateCapabilityAndErpIe(pAd);
 #ifdef DOT11_N_SUPPORT
 	APUpdateOperationMode(pAd);
-#endif /* DOT11_N_SUPPORT */
+#endif // DOT11_N_SUPPORT //
+
+#ifdef A_BAND_SUPPORT
+	if ( (pAd->CommonCfg.Channel > 14)
+		&& (pAd->CommonCfg.bIEEE80211H == 1)
+		&& RadarChannelCheck(pAd, pAd->CommonCfg.Channel))
+	{
+		pAd->CommonCfg.RadarDetect.RDMode = RD_SILENCE_MODE;
+		pAd->CommonCfg.RadarDetect.RDCount = 0;
+		pAd->CommonCfg.RadarDetect.InServiceMonitorCount = 0;
+#ifdef DFS_SUPPORT
+#ifdef DFS_HARDWARE_SUPPORT
+		if (pAd->CommonCfg.dfs_func >= HARDWARE_DFS_V1)
+		{
+			NewRadarDetectionStart(pAd);
+		}
+#endif // DFS_HARDWARE_SUPPORT //
+#ifdef DFS_SOFTWARE_SUPPORT
+		if (pAd->CommonCfg.dfs_func < HARDWARE_DFS_V1)
+			BbpRadarDetectionStart(pAd); // start Radar detection.
+#endif // DFS_SOFTWARE_SUPPORT //
+#endif // DFS_SUPPORT //
+	}
+	else
+#endif // A_BAND_SUPPORT //		
+	{
+		pAd->CommonCfg.RadarDetect.RDMode = RD_NORMAL_MODE;
+		AsicEnableBssSync(pAd);
+
+#ifdef CONFIG_AP_SUPPORT
+#ifdef CARRIER_DETECTION_SUPPORT
+#ifdef A_BAND_SUPPORT
+		if (pAd->CommonCfg.Channel > 14)
+		{
+			if ((pAd->CommonCfg.CarrierDetect.Enable == 0)
+				&& ((pAd->CommonCfg.RadarDetect.RDDurRegion == JAP)
+					|| (pAd->CommonCfg.RadarDetect.RDDurRegion == JAP_W53)
+					|| (pAd->CommonCfg.RadarDetect.RDDurRegion == JAP_W56)))
+			{
+				pAd->CommonCfg.CarrierDetect.Enable = 1;
+			}
+		}
+		else
+#endif // A_BAND_SUPPORT //			
+		{
+			if (pAd->CommonCfg.HtCapability.HtCapInfo.ChannelWidth  == BW_40)
+			{
+				if ((pAd->CommonCfg.CarrierDetect.Enable == 0)
+						&& ((pAd->CommonCfg.RadarDetect.RDDurRegion == JAP)
+							|| (pAd->CommonCfg.RadarDetect.RDDurRegion == JAP_W53)
+							|| (pAd->CommonCfg.RadarDetect.RDDurRegion == JAP_W56)))
+				{
+					pAd->CommonCfg.CarrierDetect.Enable = 1;
+				}
+			}
+		}
+
+		if (pAd->CommonCfg.CarrierDetect.Enable == TRUE)
+		{
+			// trun on Carrier-Detection. (Carrier-Detect with CTS protection).
+			CARRIER_DETECT_START(pAd, 1);
+		}
+#endif // CARRIER_DETECTION_SUPPORT //
+#endif // CONFIG_AP_SUPPORT //
+	}
+
+	// Pre-tbtt interrupt setting.
+	RTMP_IO_READ32(pAd, INT_TIMER_CFG, &Value);
+	Value &= 0xffff0000;
+	Value |= 6 << 4; // Pre-TBTT is 6ms before TBTT interrupt. 1~10 ms is reasonable.
+	RTMP_IO_WRITE32(pAd, INT_TIMER_CFG, Value);
+	// Enable pre-tbtt interrupt
+	RTMP_IO_READ32(pAd, INT_TIMER_EN, &Value);
+	Value |=0x1;
+	RTMP_IO_WRITE32(pAd, INT_TIMER_EN, Value);
 
 #ifdef DOT11_N_SUPPORT
-#endif /* DOT11_N_SUPPORT */
+#endif // DOT11_N_SUPPORT //
 
 #ifdef LED_CONTROL_SUPPORT
-	/* Set LED */
+	// Set LED
 	RTMPSetLED(pAd, LED_LINK_UP);
-#endif /* LED_CONTROL_SUPPORT */
+#endif // LED_CONTROL_SUPPORT //
 
+#ifdef WAPI_SUPPORT
+	RTMPStartWapiRekeyTimerAction(pAd, NULL);
+#endif // WAPI_SUPPORT //
 
 	/* Initialize security variable per entry, 
 		1. 	pairwise key table, re-set all WCID entry as NO-security mode.
@@ -513,7 +603,7 @@ VOID APStartUp(
 		AsicRemovePairwiseKeyEntry(pAd, (UCHAR)i);
 	}
 		
-	/* Init Security variables */
+	// Init Security variables
 	for (apidx = 0; apidx < pAd->ApCfg.BssidNum; apidx++)
 	{
 		USHORT		Wcid = 0;	
@@ -527,9 +617,9 @@ VOID APStartUp(
 		}
 
 		/* Get a specific WCID to record this MBSS key attribute */
-		GET_GroupKey_WCID(pAd, Wcid, apidx);
+		GET_GroupKey_WCID(Wcid, apidx);
 
-		/* When WEP, TKIP or AES is enabled, set group key info to Asic */
+		// When WEP, TKIP or AES is enabled, set group key info to Asic
 		if (pMbss->WepStatus == Ndis802_11WEPEnabled)
 		{
     		UCHAR	CipherAlg;
@@ -541,7 +631,7 @@ VOID APStartUp(
 
 				if (pAd->SharedKey[apidx][idx].KeyLen > 0)
 				{
-					/* Set key material to Asic */
+					// Set key material to Asic
     				AsicAddSharedKeyEntry(pAd, apidx, idx, &pAd->SharedKey[apidx][idx]);	
 		
 					if (idx == pMbss->DefaultKeyId)
@@ -583,8 +673,7 @@ VOID APStartUp(
 								pMbss->DefaultKeyId, 
 								Wcid,
 								TRUE,
-								pMbss->GTK,
-								LEN_TKIP_GTK);
+								pMbss->GTK);
 		
 		}
 #ifdef WAPI_SUPPORT
@@ -592,7 +681,7 @@ VOID APStartUp(
 		{	
 			INT	cnt;
 		
-			/* Initial the related variables */
+			// Initial the related variables
 			pMbss->DefaultKeyId = 0;
 			NdisMoveMemory(pMbss->key_announce_flag, AE_BCAST_PN, LEN_WAPI_TSC);
 			if (IS_HW_WAPI_SUPPORT(pAd))
@@ -600,7 +689,7 @@ VOID APStartUp(
 			else
 				pMbss->sw_wpi_encrypt = TRUE;
 
-			/* Generate NMK randomly */
+			// Generate NMK randomly
 			for (cnt = 0; cnt < LEN_WAPI_NMK; cnt++)
 				pMbss->NMK[cnt] = RandomByte(pAd);
 			
@@ -616,133 +705,88 @@ VOID APStartUp(
 								 pMbss->GTK);
 			
 		}
-#endif /* WAPI_SUPPORT */
+#endif // WAPI_SUPPORT //
 
 #ifdef DOT1X_SUPPORT
-		/* Send singal to daemon to indicate driver had restarted */
+		// Send singal to daemon to indicate driver had restarted
 		if ((pMbss->AuthMode == Ndis802_11AuthModeWPA) || (pMbss->AuthMode == Ndis802_11AuthModeWPA2)
         		|| (pMbss->AuthMode == Ndis802_11AuthModeWPA1WPA2) || (pMbss->IEEE8021X == TRUE))
 		{
-			;/*bDot1xReload = TRUE; */
+			;//bDot1xReload = TRUE;
     	}
-#endif /* DOT1X_SUPPORT */
+#endif // DOT1X_SUPPORT //
 
 		DBGPRINT(RT_DEBUG_TRACE, ("### BSS(%d) AuthMode(%d)=%s, WepStatus(%d)=%s , AccessControlList.Policy=%ld\n", apidx, pMbss->AuthMode, GetAuthMode(pMbss->AuthMode), 
 																  pMbss->WepStatus, GetEncryptType(pMbss->WepStatus), pMbss->AccessControlList.Policy));
 	}
 
+#ifdef DOT1X_SUPPORT
+	// Send internal command to DOT1X daemon for reloading configuration
+	if (bDot1xReload)
+		DOT1X_InternalCmdAction(pAd, NULL, DOT1X_RELOAD_CONFIG);
+#endif // DOT1X_SUPPORT //
 
-	/* Disable Protection first. */
-	/*AsicUpdateProtect(pAd, 0, (ALLN_SETPROTECT|CCKSETPROTECT|OFDMSETPROTECT), TRUE, FALSE); */
+	// Disable Protection first.
+	//AsicUpdateProtect(pAd, 0, (ALLN_SETPROTECT|CCKSETPROTECT|OFDMSETPROTECT), TRUE, FALSE);
 #ifdef PIGGYBACK_SUPPORT
 	RTMPSetPiggyBack(pAd, pAd->CommonCfg.bPiggyBackCapable);
-#endif /* PIGGYBACK_SUPPORT */
+#endif // PIGGYBACK_SUPPORT //
 
 	ApLogEvent(pAd, pAd->CurrentAddress, EVENT_RESET_ACCESS_POINT);
 	pAd->Mlme.PeriodicRound = 0;
 	pAd->Mlme.OneSecPeriodicRound = 0;
 
-	OPSTATUS_SET_FLAG(pAd, fOP_AP_STATUS_MEDIA_STATE_CONNECTED);
+	OPSTATUS_SET_FLAG(pAd, fOP_STATUS_MEDIA_STATE_CONNECTED);
 
-	RTMP_IndicateMediaState(pAd, NdisMediaStateConnected);
+	RTMP_IndicateMediaState(pAd);
 
 
 	RTMP_CLEAR_FLAG(pAd, fRTMP_ADAPTER_HALT_IN_PROGRESS);
-
-	/* start sending BEACON out */
-	APMakeAllBssBeacon(pAd);
-	APUpdateAllBeaconFrame(pAd);
-
-#ifdef A_BAND_SUPPORT
-	if ( (pAd->CommonCfg.Channel > 14)
-		&& (pAd->CommonCfg.bIEEE80211H == 1)
-		&& RadarChannelCheck(pAd, pAd->CommonCfg.Channel))
-	{
-		pAd->CommonCfg.RDMode = RD_SILENCE_MODE;
-		pAd->CommonCfg.RDCount = 0;
-		pAd->CommonCfg.InServiceMonitorCount = 0;
-#ifdef DFS_SUPPORT
-		if (pAd->CommonCfg.RadarDetect.dfs_func >= HARDWARE_DFS_V1)
-			NewRadarDetectionStart(pAd);
-#endif /* DFS_SUPPORT */
-	}
-	else
-#endif /* A_BAND_SUPPORT */		
-	{
-		pAd->CommonCfg.RDMode = RD_NORMAL_MODE;
-		AsicEnableBssSync(pAd);
-
-#ifdef CONFIG_AP_SUPPORT
-#ifdef CARRIER_DETECTION_SUPPORT
-#ifdef A_BAND_SUPPORT
-		if (pAd->CommonCfg.Channel > 14)
-		{
-			if ((pAd->CommonCfg.CarrierDetect.Enable == 0)
-				&& ((pAd->CommonCfg.RDDurRegion == JAP)
-					|| (pAd->CommonCfg.RDDurRegion == JAP_W53)
-					|| (pAd->CommonCfg.RDDurRegion == JAP_W56)))
-			{
-				pAd->CommonCfg.CarrierDetect.Enable = 1;
-			}
-		}
-		else
-#endif /* A_BAND_SUPPORT */			
-		{
-			if (pAd->CommonCfg.HtCapability.HtCapInfo.ChannelWidth  == BW_40)
-			{
-				if ((pAd->CommonCfg.CarrierDetect.Enable == 0)
-						&& ((pAd->CommonCfg.RDDurRegion == JAP)
-							|| (pAd->CommonCfg.RDDurRegion == JAP_W53)
-							|| (pAd->CommonCfg.RDDurRegion == JAP_W56)))
-				{
-					pAd->CommonCfg.CarrierDetect.Enable = 1;
-				}
-			}
-		}
-
-		if (pAd->CommonCfg.CarrierDetect.Enable == TRUE)
-		{
-			CarrierDetectionStart(pAd);
-		}
-#endif /* CARRIER_DETECTION_SUPPORT */
-#endif /* CONFIG_AP_SUPPORT */
-	}
-
-	/* Pre-tbtt interrupt setting. */
-	RTMP_IO_READ32(pAd, INT_TIMER_CFG, &Value);
-	Value &= 0xffff0000;
-	Value |= 6 << 4; /* Pre-TBTT is 6ms before TBTT interrupt. 1~10 ms is reasonable. */
-	RTMP_IO_WRITE32(pAd, INT_TIMER_CFG, Value);
-	/* Enable pre-tbtt interrupt */
-	RTMP_IO_READ32(pAd, INT_TIMER_EN, &Value);
-	Value |=0x1;
-	RTMP_IO_WRITE32(pAd, INT_TIMER_EN, Value);
-
-#ifdef WAPI_SUPPORT
-	RTMPStartWapiRekeyTimerAction(pAd, NULL);
-#endif /* WAPI_SUPPORT */
 
 	/* Set group re-key timer if necessary. 
 	   It must be processed after clear flag "fRTMP_ADAPTER_HALT_IN_PROGRESS" */
 	WPA_APSetGroupRekeyAction(pAd);
 
+#ifdef WDS_SUPPORT
+	// Prepare WEP key
+	WdsPrepareWepKeyFromMainBss(pAd);
+
+	// Add wds key infomation to ASIC	
+	AsicUpdateWdsRxWCIDTable(pAd);
+#endif // WDS_SUPPORT //
 
 #ifdef IDS_SUPPORT
-	/* Start IDS timer */
+	// Start IDS timer
 	if (pAd->ApCfg.IdsEnable)
 	{
 #ifdef SYSTEM_LOG_SUPPORT	
 		if (pAd->CommonCfg.bWirelessEvent == FALSE)
 			DBGPRINT(RT_DEBUG_WARN, ("!!! WARNING !!! The WirelessEvent parameter doesn't be enabled \n"));
-#endif /* SYSTEM_LOG_SUPPORT */
+#endif // SYSTEM_LOG_SUPPORT //
 		
 		RTMPIdsStart(pAd);
 	}
-#endif /* IDS_SUPPORT */
+#endif // IDS_SUPPORT //
 
 
 
 
+	{
+		UCHAR RFValue = 0;
+
+		RT30xxReadRFRegister(pAd, RF_R03, (PUCHAR)&RFValue);
+		RFValue = RFValue | 0x80; // bit 7=vcocal_en
+		RT30xxWriteRFRegister(pAd, RF_R03, (UCHAR)RFValue);
+		RTMPusecDelay(2000);
+// TODO: Is VCO calibration needed?
+#ifdef TXBF_SUPPORT
+		// Do a Divider Calibration and update BBP registers
+		if (pAd->CommonCfg.RegTransmitSetting.field.ITxBfEn &&
+			(pAd->CommonCfg.DebugFlags & DBF_DISABLE_CAL)==0) {
+			ITxBFDividerCalibration(pAd, 2, 0, NULL);
+		}
+#endif // TXBF_SUPPORT //
+	}
 
 	DBGPRINT(RT_DEBUG_TRACE, ("<=== APStartUp\n"));
 }
@@ -764,53 +808,65 @@ VOID APStop(
 	DBGPRINT(RT_DEBUG_TRACE, ("!!! APStop !!!\n"));
 
 #ifdef DFS_SUPPORT
-	if (pAd->CommonCfg.RadarDetect.dfs_func >= HARDWARE_DFS_V1)
+#ifdef DFS_HARDWARE_SUPPORT
+	if (pAd->CommonCfg.dfs_func >= HARDWARE_DFS_V1)
 		NewRadarDetectionStop(pAd);
-#endif /* DFS_SUPPORT */
+#endif // DFS_HARDWARE_SUPPORT //
+#ifdef DFS_SOFTWARE_SUPPORT
+	if (pAd->CommonCfg.dfs_func < HARDWARE_DFS_V1)
+	{
+		RadarDetectionStop(pAd);
+		BbpRadarDetectionStop(pAd);
+	}
+#endif // DFS_SOFTWARE_SUPPORT //
+#endif // DFS_SUPPORT //
 
 #ifdef CONFIG_AP_SUPPORT
 #ifdef CARRIER_DETECTION_SUPPORT
 		if (pAd->CommonCfg.CarrierDetect.Enable == TRUE)
 		{
-			/* make sure CarrierDetect wont send CTS */
-			CarrierDetectionStop(pAd);
+			// make sure CarrierDetect wont send CTS
+			CARRIER_DETECT_STOP(pAd);
 		}
-#endif /* CARRIER_DETECTION_SUPPORT */
-#endif /* CONFIG_AP_SUPPORT */
+#endif // CARRIER_DETECTION_SUPPORT //
+#endif // CONFIG_AP_SUPPORT //
 
 
+#ifdef WDS_SUPPORT
+	WdsDown(pAd);
+#endif // WDS_SUPPORT //
 
 #ifdef APCLI_SUPPORT
 	ApCliIfDown(pAd);
-#endif /* APCLI_SUPPORT */
+#endif // APCLI_SUPPORT //
 
 	MacTableReset(pAd);
 
 	RTMP_SET_FLAG(pAd, fRTMP_ADAPTER_HALT_IN_PROGRESS);
 
-	/* Disable pre-tbtt interrupt */
+	// Disable pre-tbtt interrupt
 	RTMP_IO_READ32(pAd, INT_TIMER_EN, &Value);
 	Value &=0xe;
 	RTMP_IO_WRITE32(pAd, INT_TIMER_EN, Value);
-	/* Disable piggyback */
+	// Disable piggyback
 	RTMPSetPiggyBack(pAd, FALSE);
 
    	AsicUpdateProtect(pAd, 0,  (ALLN_SETPROTECT|CCKSETPROTECT|OFDMSETPROTECT), TRUE, FALSE);
 
 	if (!RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_NIC_NOT_EXIST))
 	{
-		/*RTMP_ASIC_INTERRUPT_DISABLE(pAd); */
+		//RTMP_ASIC_INTERRUPT_DISABLE(pAd);
 		AsicDisableSync(pAd);
 
 #ifdef LED_CONTROL_SUPPORT
-		/* Set LED */
+		// Set LED
 		RTMPSetLED(pAd, LED_LINK_DOWN);
-#endif /* LED_CONTROL_SUPPORT */
+#endif // LED_CONTROL_SUPPORT //
 	}
 
 
 
-	for (apidx = 0; apidx < MAX_MBSSID_NUM(pAd); apidx++)
+	for (apidx = 0; apidx < MAX_MBSSID_NUM; apidx++)
 	{
 		if (pAd->ApCfg.MBSSID[apidx].REKEYTimerRunning == TRUE)
 		{
@@ -827,18 +883,17 @@ VOID APStop(
 	
 #ifdef WAPI_SUPPORT
 	RTMPCancelWapiRekeyTimerAction(pAd, NULL);
-#endif /* WAPI_SUPPORT */
+#endif // WAPI_SUPPORT //
 	
-	/* */
-	/* Cancel the Timer, to make sure the timer was not queued. */
-	/* */
-	OPSTATUS_CLEAR_FLAG(pAd, fOP_AP_STATUS_MEDIA_STATE_CONNECTED);
-	RTMP_IndicateMediaState(pAd, NdisMediaStateDisconnected);
+	//
+	// Cancel the Timer, to make sure the timer was not queued.
+	//
+	OPSTATUS_CLEAR_FLAG(pAd, fOP_STATUS_MEDIA_STATE_CONNECTED);
 
 #ifdef IDS_SUPPORT
-	/* if necessary, cancel IDS timer */
+	// if necessary, cancel IDS timer
 	RTMPIdsStop(pAd);
-#endif /* IDS_SUPPORT */
+#endif // IDS_SUPPORT //
 
 
 
@@ -866,7 +921,7 @@ VOID APCleanupPsQueue(
 					("APCleanupPsQueue %ld...\n",pQueue->Number));
 
 		pEntry = RemoveHeadQueue(pQueue);
-		/*pPacket = CONTAINING_RECORD(pEntry, NDIS_PACKET, MiniportReservedEx); */
+		//pPacket = CONTAINING_RECORD(pEntry, NDIS_PACKET, MiniportReservedEx);
 		pPacket = QUEUE_ENTRY_TO_PACKET(pEntry);
 		RELEASE_NDIS_PACKET(pAd, pPacket, NDIS_STATUS_FAILURE);
 	}
@@ -887,21 +942,21 @@ VOID MacTableMaintenance(
 {
 	int i;
 #ifdef DOT11_N_SUPPORT
-	ULONG MinimumAMPDUSize = pAd->CommonCfg.DesiredHtPhy.MaxRAmpduFactor; /*Default set minimum AMPDU Size to 2, i.e. 32K */
+	ULONG MinimumAMPDUSize = pAd->CommonCfg.DesiredHtPhy.MaxRAmpduFactor; //Default set minimum AMPDU Size to 2, i.e. 32K	
 	BOOLEAN	bRdgActive;
 	BOOLEAN bRalinkBurstMode;
-#endif /* DOT11_N_SUPPORT */
+#endif // DOT11_N_SUPPORT //
 #ifdef RTMP_MAC_PCI
 	unsigned long	IrqFlags;
-#endif /* RTMP_MAC_PCI */
-	UINT	fAnyStationPortSecured[HW_BEACON_MAX_NUM];
+#endif // RTMP_MAC_PCI //
+	UINT	fAnyStationPortSecured[MAX_MBSSID_NUM];
  	UINT 	bss_index;
 	MAC_TABLE *pMacTable;
 #ifdef RANGE_EXT_SUPPORT
 	int lastClient=0;
 #endif // RANGE_EXT_SUPPORT //
 
-	for (bss_index = BSS0; bss_index < MAX_MBSSID_NUM(pAd); bss_index++)
+	for (bss_index = BSS0; bss_index < MAX_MBSSID_NUM; bss_index++)
 		fAnyStationPortSecured[bss_index] = 0;
 
 	pMacTable = &pAd->MacTab;
@@ -915,43 +970,24 @@ VOID MacTableMaintenance(
 	pMacTable->fAnyStationIsLegacy = FALSE;
 	pMacTable->fAnyStationMIMOPSDynamic = FALSE;
 #ifdef GREENAP_SUPPORT
-	/*Support Green AP */
-	pMacTable->fAnyStationIsHT=FALSE;
-#endif /* GREENAP_SUPPORT */
+	//Support Green AP
+	pMacTable->fAnyStationIsHT = FALSE;
+#endif // GREENAP_SUPPORT //
 
 #ifdef DOT11N_DRAFT3
 	pMacTable->fAnyStaFortyIntolerant = FALSE;
-#endif /* DOT11N_DRAFT3 */
+#endif // DOT11N_DRAFT3 //
 	pMacTable->fAllStationGainGoodMCS = TRUE;
-#endif /* DOT11_N_SUPPORT */
+#endif // DOT11_N_SUPPORT //
 
 #ifdef WAPI_SUPPORT
 	pMacTable->fAnyWapiStation = FALSE;
-#endif /* WAPI_SUPPORT */
+#endif // WAPI_SUPPORT //
 
 	for (i = 1; i < MAX_LEN_OF_MAC_TABLE; i++) 
 	{
 		MAC_TABLE_ENTRY *pEntry = &pMacTable->Content[i];
 		BOOLEAN bDisconnectSta = FALSE;
-#ifdef APCLI_SUPPORT
-#ifdef APCLI_WPA_SUPPLICANT_SUPPORT
-		if(IS_ENTRY_APCLI(pEntry) && pEntry->PortSecured == WPA_802_1X_PORT_SECURED)
-		{
-			if ((pAd->Mlme.OneSecPeriodicRound % 10) == 8)
-			{
-				/* use Null or QoS Null to detect the ACTIVE station*/
-				BOOLEAN ApclibQosNull = FALSE;
-		
-				if (CLIENT_STATUS_TEST_FLAG(pEntry, fCLIENT_STATUS_WMM_CAPABLE))
-					ApclibQosNull = TRUE;
-				
-			       ApCliRTMPSendNullFrame(pAd,pEntry->CurrTxRate, ApclibQosNull, pEntry);
-
-				continue;
-			}
-		}
-#endif /*APCLI_WPA_SUPPLICANT_SUPPORT */
-#endif /* APCLI_SUPPORT */
 
 		if (!IS_ENTRY_CLIENT(pEntry))
 			continue;
@@ -962,22 +998,18 @@ VOID MacTableMaintenance(
 		pEntry->NoDataIdleCount ++;  
 		pEntry->StaConnectTime ++;
 
-		/* 0. STA failed to complete association should be removed to save MAC table space. */
+		// 0. STA failed to complete association should be removed to save MAC table space.
 		if ((pEntry->Sst != SST_ASSOC) && (pEntry->NoDataIdleCount >= pEntry->AssocDeadLine))
 		{
 			DBGPRINT(RT_DEBUG_TRACE, ("%02x:%02x:%02x:%02x:%02x:%02x fail to complete ASSOC in %d sec\n",
 					pEntry->Addr[0],pEntry->Addr[1],pEntry->Addr[2],pEntry->Addr[3],
 					pEntry->Addr[4],pEntry->Addr[5],MAC_TABLE_ASSOC_TIMEOUT));
-#ifdef WSC_AP_SUPPORT
-			if (NdisEqualMemory(pEntry->Addr, pAd->ApCfg.MBSSID[pEntry->apidx].WscControl.EntryAddr, MAC_ADDR_LEN))
-				NdisZeroMemory(pAd->ApCfg.MBSSID[pEntry->apidx].WscControl.EntryAddr, MAC_ADDR_LEN);
-#endif /* WSC_AP_SUPPORT */
 			MacTableDeleteEntry(pAd, pEntry->Aid, pEntry->Addr);
 			continue;
 		}
 
-		/* 1. check if there's any associated STA in power-save mode. this affects outgoing */
-		/*    MCAST/BCAST frames should be stored in PSQ till DtimCount=0 */
+		// 1. check if there's any associated STA in power-save mode. this affects outgoing
+		//    MCAST/BCAST frames should be stored in PSQ till DtimCount=0
 		if (pEntry->PsMode == PWR_SAVE)
 			pMacTable->fAnyStationInPsm = TRUE;
 
@@ -1000,21 +1032,21 @@ VOID MacTableMaintenance(
 #ifdef GREENAP_SUPPORT
 		else
 		{
-			pMacTable->fAnyStationIsHT=TRUE;
+			pMacTable->fAnyStationIsHT = TRUE;
 		}
-#endif /* GREENAP_SUPPORT */
+#endif // GREENAP_SUPPORT //
 
 #ifdef DOT11N_DRAFT3
 		if (pEntry->bForty_Mhz_Intolerant)
 			pMacTable->fAnyStaFortyIntolerant = TRUE;
-#endif /* DOT11N_DRAFT3 */
+#endif // DOT11N_DRAFT3 //
 
-		/* Get minimum AMPDU size from STA */
+		// Get minimum AMPDU size from STA		
 		if (MinimumAMPDUSize > pEntry->MaxRAmpduFactor) 
 		{
 			MinimumAMPDUSize = pEntry->MaxRAmpduFactor;						
 		}
-#endif /* DOT11_N_SUPPORT */
+#endif // DOT11_N_SUPPORT //
 		
 		if (pEntry->bIAmBadAtheros)
 		{
@@ -1022,18 +1054,22 @@ VOID MacTableMaintenance(
 #ifdef DOT11_N_SUPPORT
 			if (pAd->CommonCfg.IOTestParm.bRTSLongProtOn == FALSE)
 				AsicUpdateProtect(pAd, 8, ALLN_SETPROTECT, FALSE, pMacTable->fAnyStationNonGF);
-#endif /* DOT11_N_SUPPORT */
+#endif // DOT11_N_SUPPORT //
 
 #ifndef DOT11N_SS3_SUPPORT
 			if (pEntry->WepStatus != Ndis802_11EncryptionDisabled)
 			{
 				pMacTable->fAnyTxOPForceDisable = TRUE;
 			}
-#endif /* DOT11N_SS3_SUPPORT */
+#endif // DOT11N_SS3_SUPPORT //
 		}
 
-		/* detect the station alive status */
-		/* detect the station alive status */
+		// detect the station alive status
+#ifdef WMM_ACM_SUPPORT
+		/* WMM ACM: QAP can send any packet to QSTA even no any TSPEC is built */
+//		if (ACMP_IsAllACEnabled(pAd) == ACM_RTN_FAIL)
+#endif // WMM_ACM_SUPPORT //
+		// detect the station alive status
 		if ((pAd->ApCfg.MBSSID[pEntry->apidx].StationKeepAliveTime > 0) &&
 			(pEntry->NoDataIdleCount >= pAd->ApCfg.MBSSID[pEntry->apidx].StationKeepAliveTime))
 		{
@@ -1092,7 +1128,7 @@ VOID MacTableMaintenance(
 
 				3. Station in legacy UAPSD mode,
 
-				Currently we do not support the keep alive mechanism.
+				Currently we don¡¦t support the keep alive mechanism.
 				So if your station is in UAPSD mode, the station will be
 				kicked out after 300 seconds.
 
@@ -1104,12 +1140,12 @@ VOID MacTableMaintenance(
 			{
 				if (pEntry->PsMode == PWR_SAVE)
 				{
-					/* use TIM bit to detect the PS station */
+					// use TIM bit to detect the PS station
 					WLAN_MR_TIM_BIT_SET(pAd, pEntry->apidx, pEntry->Aid);
 				}
 				else
 				{
-					/* use Null or QoS Null to detect the ACTIVE station */
+					// use Null or QoS Null to detect the ACTIVE station
 					BOOLEAN bQosNull = FALSE;
 	
 					if (CLIENT_STATUS_TEST_FLAG(pEntry, fCLIENT_STATUS_WMM_CAPABLE))
@@ -1126,7 +1162,7 @@ VOID MacTableMaintenance(
 			}
 		}
 
-		/* 2. delete those MAC entry that has been idle for a long time */
+		// 2. delete those MAC entry that has been idle for a long time
 		if (pEntry->NoDataIdleCount >= pEntry->StaIdleTimeout)
 		{
 			bDisconnectSta = TRUE;
@@ -1135,6 +1171,9 @@ VOID MacTableMaintenance(
 					pEntry->Addr[4],pEntry->Addr[5],pEntry->StaIdleTimeout));
 			ApLogEvent(pAd, pEntry->Addr, EVENT_AGED_OUT);
 		}
+#ifdef DOT11N_PF_DEBUG
+		// TODO: is it a good way to consider if the STA is leaved!!!!
+#else
 		else if (pEntry->ContinueTxFailCnt >= pAd->ApCfg.EntryLifeCheck)
 		{
 			/*
@@ -1144,16 +1183,16 @@ VOID MacTableMaintenance(
 			if (pEntry->PsMode != PWR_SAVE)
 			{
 				bDisconnectSta = TRUE;
-				DBGPRINT(RT_DEBUG_WARN, ("STA-%02x:%02x:%02x:%02x:%02x:%02x had left (%d %lu)\n",
+				DBGPRINT(RT_DEBUG_WARN, ("STA-%02x:%02x:%02x:%02x:%02x:%02x had left\n",
 					pEntry->Addr[0],pEntry->Addr[1],pEntry->Addr[2],pEntry->Addr[3],
-					pEntry->Addr[4],pEntry->Addr[5],
-					pEntry->ContinueTxFailCnt, pAd->ApCfg.EntryLifeCheck));
+					pEntry->Addr[4],pEntry->Addr[5]));			
 			}
 		}
+#endif // DOT11N_PF_DEBUG //
 
 		if (bDisconnectSta)
 		{
-			/* send wireless event - for ageout */
+			// send wireless event - for ageout 
 			RTMPSendWirelessEvent(pAd, IW_AGEOUT_EVENT_FLAG, pEntry->Addr, 0, 0); 
 
 			if (pEntry->Sst == SST_ASSOC)
@@ -1164,22 +1203,18 @@ VOID MacTableMaintenance(
 				HEADER_802_11 DeAuthHdr;
 				USHORT      Reason;
 
-				/*  send out a DISASSOC request frame */
+				//  send out a DISASSOC request frame
 				NStatus = MlmeAllocateMemory(pAd, &pOutBuffer);
 				if (NStatus != NDIS_STATUS_SUCCESS) 
 				{
 					DBGPRINT(RT_DEBUG_TRACE, (" MlmeAllocateMemory fail  ..\n"));
-					/*NdisReleaseSpinLock(&pAd->MacTabLock); */
+					//NdisReleaseSpinLock(&pAd->MacTabLock);
 					continue;
 				}
 				Reason = REASON_DEAUTH_STA_LEAVING;
 				DBGPRINT(RT_DEBUG_WARN, ("Send DEAUTH - Reason = %d frame  TO %x %x %x %x %x %x \n",Reason,pEntry->Addr[0],
 										pEntry->Addr[1],pEntry->Addr[2],pEntry->Addr[3],pEntry->Addr[4],pEntry->Addr[5]));
-				MgtMacHeaderInit(pAd, &DeAuthHdr, SUBTYPE_DEAUTH, 0, pEntry->Addr, 
-#ifdef P2P_SUPPORT
-								pAd->ApCfg.MBSSID[pEntry->apidx].Bssid,
-#endif /* P2P_SUPPORT */
-								pAd->ApCfg.MBSSID[pEntry->apidx].Bssid);				
+				MgtMacHeaderInit(pAd, &DeAuthHdr, SUBTYPE_DEAUTH, 0, pEntry->Addr, pAd->ApCfg.MBSSID[pEntry->apidx].Bssid);				
 		    	MakeOutgoingFrame(pOutBuffer,            &FrameLen, 
 		    	                  sizeof(HEADER_802_11), &DeAuthHdr, 
 		    	                  2,                     &Reason, 
@@ -1192,7 +1227,7 @@ VOID MacTableMaintenance(
 			continue;
 		}
 
-		/* 3. garbage collect the PsQueue if the STA has being idle for a while */
+		// 3. garbage collect the PsQueue if the STA has being idle for a while
 		if (pEntry->PsQueue.Head)
 		{
 			pEntry->PsQIdleCount ++;  
@@ -1208,15 +1243,15 @@ VOID MacTableMaintenance(
 		else
 			pEntry->PsQIdleCount = 0;
 	
-#ifdef UAPSD_SUPPORT
+#ifdef UAPSD_AP_SUPPORT
         UAPSD_QueueMaintenance(pAd, pEntry);
-#endif /* UAPSD_SUPPORT */
+#endif // UAPSD_AP_SUPPORT //
 
-		/* check if this STA is Ralink-chipset */
+		// check if this STA is Ralink-chipset 
 		if (!CLIENT_STATUS_TEST_FLAG(pEntry, fCLIENT_STATUS_RALINK_CHIPSET))
 			pMacTable->fAllStationAsRalink = FALSE;
 
-		/* Check if the port is secured */
+		// Check if the port is secured
 		if (pEntry->PortSecured == WPA_802_1X_PORT_SECURED)
 			fAnyStationPortSecured[pEntry->apidx]++;
 #ifdef DOT11_N_SUPPORT
@@ -1228,16 +1263,16 @@ VOID MacTableMaintenance(
 		{
 			SendNotifyBWActionFrame(pAd, pEntry->Aid, pEntry->apidx);
 	}
-#endif /* DOT11N_DRAFT3 */
-#endif /* DOT11_N_SUPPORT */
+#endif // DOT11N_DRAFT3 //
+#endif // DOT11_N_SUPPORT //
 #ifdef WAPI_SUPPORT
 		if (pEntry->WepStatus == Ndis802_11EncryptionSMS4Enabled)
 			pMacTable->fAnyWapiStation = TRUE;
-#endif /* WAPI_SUPPORT */
+#endif // WAPI_SUPPORT //
 
 #ifdef RANGE_EXT_SUPPORT
 		lastClient = i;
-#endif /* RANGE_EXT_SUPPORT */
+#endif // RANGE_EXT_SUPPORT //
 
 		/* only apply burst when run in MCS0,1,8,9,16,17, not care about phymode */
 		if ((pEntry->HTPhyMode.field.MCS != 32) && 
@@ -1249,10 +1284,8 @@ VOID MacTableMaintenance(
 
 #ifdef RANGE_EXT_SUPPORT
 #if defined (RT2883) || defined (RT3883)
-	/*
-		Use antenna with best RSSI for packet detection. If PreAntSwitch==0 then don't
-		modify BBP R3 in case it was set manually
-	*/
+	// Use antenna with best RSSI for packet detection. If PreAntSwitch==0 then don't
+	//	modify BBP R3 in case it was set manually
 	if (pAd->CommonCfg.PreAntSwitch!=0 && pAd->Antenna.field.RxPath>1)
 	{
 		UCHAR antValue=0, r3Value=0;
@@ -1270,26 +1303,26 @@ VOID MacTableMaintenance(
 				antValue = (pAd->Antenna.field.RxPath==3 && pEntry->RssiSample.LastRssi2>pEntry->RssiSample.LastRssi1)? 2: 1;
 			else
 				antValue = (pAd->Antenna.field.RxPath==3 && pEntry->RssiSample.LastRssi2>pEntry->RssiSample.LastRssi0)? 2: 0;
-		}
+	}
 
 		RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R3, &r3Value);
 		if ((r3Value & 0x03) != antValue)
 			RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R3, (r3Value & ~0x03) | antValue);
 	}
-#endif /* defined (RT2883) || defined (RT3883) */
+#endif // defined (RT2883) || defined (RT3883) //
 
 #ifdef RT3883
-	/* CFO Tracking */
-	if (pMacTable->Size !=1 || pAd->CommonCfg.CFOTrack==0)
+	// CFO Tracking
+	if (pMacTable->Size!=1 || pAd->CommonCfg.CFOTrack==0)
 	{
-		/* Set to default */
-		RT3883_AsicSetFreqOffset(pAd, pAd->RfFreqOffset);
+		// Set to default
+		AsicSetFreqOffset(pAd, pAd->RfFreqOffset);
 	}
 	else if ((lastClient < MAX_LEN_OF_MAC_TABLE) && (lastClient >=1) && 
 		pAd->CommonCfg.CFOTrack < 8 && 
 		pMacTable->Content[lastClient].freqOffsetValid)
 	{
-		/* Track CFO */
+		// Track CFO
 		SHORT foValue;
 		SHORT offset = pMacTable->Content[lastClient].freqOffset;
 		UCHAR RFValue;
@@ -1309,19 +1342,19 @@ VOID MacTableMaintenance(
 			foValue = 0x5F;
 
 		if (foValue != RFValue)
-			RT3883_AsicSetFreqOffset(pAd, foValue);
+			AsicSetFreqOffset(pAd, foValue);
 
-		/* If CFOTrack!=1 then keep updating until CFOTrack==8 */
+		// If CFOTrack!=1 then keep updating until CFOTrack==8
 		if (pAd->CommonCfg.CFOTrack != 1)
 			pAd->CommonCfg.CFOTrack++;
 
 		pMacTable->Content[lastClient].freqOffsetValid = FALSE;
 	}
-#endif /* RT3883 */
-#endif /* RANGE_EXT_SUPPORT */
+#endif // RT3883 //
+#endif // RANGE_EXT_SUPPORT //
 
-	/* Update the state of port per MBSS */
-	for (bss_index = BSS0; bss_index < MAX_MBSSID_NUM(pAd); bss_index++)
+	// Update the state of port per MBSS
+	for (bss_index = BSS0; bss_index < MAX_MBSSID_NUM; bss_index++)
 	{
 		if (fAnyStationPortSecured[bss_index] > 0)
 			pAd->ApCfg.MBSSID[bss_index].PortSecured = WPA_802_1X_PORT_SECURED;
@@ -1333,9 +1366,9 @@ VOID MacTableMaintenance(
 #ifdef DOT11N_DRAFT3
 	if (pAd->CommonCfg.Bss2040CoexistFlag & BSS_2040_COEXIST_INFO_NOTIFY)
 		pAd->CommonCfg.Bss2040CoexistFlag &= (~BSS_2040_COEXIST_INFO_NOTIFY);
-#endif /* DOT11N_DRAFT3 */
+#endif // DOT11N_DRAFT3 //
 
-	/* If all associated STAs are Ralink-chipset, AP shall enable RDG. */
+	// If all associated STAs are Ralink-chipset, AP shall enable RDG.
 	if (pAd->CommonCfg.bRdg && pMacTable->fAllStationAsRalink)
 	{
 		bRdgActive = TRUE;
@@ -1355,29 +1388,41 @@ VOID MacTableMaintenance(
 	}
 #ifdef DOT11_N_SUPPORT
 #ifdef GREENAP_SUPPORT
-	if (pAd->CommonCfg.PhyMode>=PHY_11ABGN_MIXED)
+	if (pAd->CommonCfg.PhyMode >= PHY_11ABGN_MIXED)
 	{
-		if(pAd->MacTab.fAnyStationIsHT == FALSE
-			&& pAd->ApCfg.bGreenAPEnable == TRUE)
+		if((pAd->MacTab.fAnyStationIsHT == FALSE) &&
+			(pAd->ApCfg.bGreenAPEnable == TRUE))
 		{
 #ifdef RTMP_RBUS_SUPPORT
-#endif /* RTMP_RBUS_SUPPORT */
-			if (pAd->ApCfg.GreenAPLevel!=GREENAP_ONLY_11BG_STAS)
+#ifdef COC_SUPPORT
+			if ((pAd->MacTab.Size==0) &&
+				(pAd->ApCfg.GreenAPLevel != GREENAP_WITHOUT_ANY_STAS_CONNECT))
 			{
-				RTMP_CHIP_ENABLE_AP_MIMOPS(pAd,FALSE);
-				pAd->ApCfg.GreenAPLevel=GREENAP_ONLY_11BG_STAS;
+				EnableAPMIMOPS(pAd,TRUE);
+				pAd->ApCfg.GreenAPLevel = GREENAP_WITHOUT_ANY_STAS_CONNECT;
+				
 			}
+			else
+#endif // COC_SUPPORT //
+#endif // RTMP_RBUS_SUPPORT //
+			if (pAd->ApCfg.GreenAPLevel != GREENAP_ONLY_11BG_STAS)
+			{
+				EnableAPMIMOPS(pAd,FALSE);
+				pAd->ApCfg.GreenAPLevel = GREENAP_ONLY_11BG_STAS;
+			}
+			
+				
 		}
 		else
 		{
-			if (pAd->ApCfg.GreenAPLevel!=GREENAP_11BGN_STAS)
+			if (pAd->ApCfg.GreenAPLevel != GREENAP_11BGN_STAS)
 			{
-				RTMP_CHIP_DISABLE_AP_MIMOPS(pAd);
-				pAd->ApCfg.GreenAPLevel=GREENAP_11BGN_STAS;
+				DisableAPMIMOPS(pAd);
+				pAd->ApCfg.GreenAPLevel = GREENAP_11BGN_STAS;
 			}
 		}
 	}
-#endif /* GREENAP_SUPPORT */
+#endif // GREENAP_SUPPORT //
 
 	if (bRdgActive != RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_RDG_ACTIVE))
 	{
@@ -1406,22 +1451,47 @@ VOID MacTableMaintenance(
 			AsicDisableRalinkBurstMode(pAd);
 		}
 	}
-#endif /* DOT11_N_SUPPORT */
+#endif // DOT11_N_SUPPORT //
+
+#ifdef DOT11N_PF_DEBUG
+        if ((pMacTable->Size == 1) &&
+                (pAd->ApCfg.MBSSID[BSS0].DesiredTransmitSetting.field.MCS > 20) &&
+                (pAd->ApCfg.MBSSID[BSS0].DesiredTransmitSetting.field.MCS <= 23))
+        {
+                UINT32 fallBackReg;
+
+                /* For Hw rate fallback, we need to reset the following registers */
+                RTMP_IO_READ32(pAd, TX_RTY_CFG, &fallBackReg);
+                fallBackReg &= 0xffff0000;
+                fallBackReg |= 0x00007f7f;
+                RTMP_IO_WRITE32(pAd, TX_RTY_CFG, fallBackReg);
+        }
+        else
+        {
+                UINT32 fallBackReg;
+
+                /* For Hw rate fallback, we need to reset the following registers */
+                RTMP_IO_READ32(pAd, TX_RTY_CFG, &fallBackReg);
+                fallBackReg &= 0xffff0000;
+                fallBackReg |= 0x00001f0f;
+                RTMP_IO_WRITE32(pAd, TX_RTY_CFG, fallBackReg);
+        }
+#endif // DOT11N_PF_DEBUG //
 
 
 	if ((pMacTable->fAnyStationBadAtheros == FALSE) && (pAd->CommonCfg.IOTestParm.bRTSLongProtOn == TRUE))
 	{
 		AsicUpdateProtect(pAd, pAd->CommonCfg.AddHTInfo.AddHtInfo2.OperaionMode, ALLN_SETPROTECT, FALSE, pMacTable->fAnyStationNonGF);
 	}
-#endif /* DOT11_N_SUPPORT */
+#endif // DOT11_N_SUPPORT //
 
 #ifdef RTMP_MAC_PCI
 	RTMP_IRQ_LOCK(&pAd->irq_lock, IrqFlags);
-#endif /* RTMP_MAC_PCI */
-	/* 4. garbage collect pAd->MacTab.McastPsQueue if backlogged MCAST/BCAST frames */
-	/*    stale in queue. Since MCAST/BCAST frames always been sent out whenever */
-	/*    DtimCount==0, the only case to let them stale is surprise removal of the NIC, */
-	/*    so that ASIC-based Tbcn interrupt stops and DtimCount dead. */
+#endif // RTMP_MAC_PCI //
+	// 4. garbage collect pAd->MacTab.McastPsQueue if backlogged MCAST/BCAST frames
+	//    stale in queue. Since MCAST/BCAST frames always been sent out whenever 
+	//    DtimCount==0, the only case to let them stale is surprise removal of the NIC,
+	//    so that ASIC-based Tbcn interrupt stops and DtimCount dead.
 	if (pMacTable->McastPsQueue.Head)
 	{
 		UINT bss_index;
@@ -1430,14 +1500,14 @@ VOID MacTableMaintenance(
 		if (pMacTable->PsQIdleCount > 1)
 		{
 
-			/*NdisAcquireSpinLock(&pAd->MacTabLock); */
+			//NdisAcquireSpinLock(&pAd->MacTabLock);
 			APCleanupPsQueue(pAd, &pMacTable->McastPsQueue);
-			/*NdisReleaseSpinLock(&pAd->MacTabLock); */
+			//NdisReleaseSpinLock(&pAd->MacTabLock);
 			pMacTable->PsQIdleCount = 0;
 
 		        /* sanity check */
-			if (pAd->ApCfg.BssidNum > MAX_MBSSID_NUM(pAd))
-				pAd->ApCfg.BssidNum = MAX_MBSSID_NUM(pAd);
+			if (pAd->ApCfg.BssidNum > MAX_MBSSID_NUM)
+				pAd->ApCfg.BssidNum = MAX_MBSSID_NUM;
 		        /* End of if */
 	        
 		        /* clear MCAST/BCAST backlog bit for all BSS */
@@ -1450,7 +1520,7 @@ VOID MacTableMaintenance(
 		pMacTable->PsQIdleCount = 0;
 #ifdef RTMP_MAC_PCI
 	RTMP_IRQ_UNLOCK(&pAd->irq_lock, IrqFlags);
-#endif /* RTMP_MAC_PCI */
+#endif // RTMP_MAC_PCI //
 }
 
 
@@ -1494,14 +1564,14 @@ MAC_TABLE_ENTRY *APSsPsInquiry(
 {
 	MAC_TABLE_ENTRY *pEntry = NULL;
 	
-	if (MAC_ADDR_IS_GROUP(pAddr)) /* mcast & broadcast address */
+	if (MAC_ADDR_IS_GROUP(pAddr)) // mcast & broadcast address
 	{
 		*Sst        = SST_ASSOC;
-		*Aid        = MCAST_WCID;	/* Softap supports 1 BSSID and use WCID=0 as multicast Wcid index */
+		*Aid        = MCAST_WCID;	// Softap supports 1 BSSID and use WCID=0 as multicast Wcid index
 		*PsMode     = PWR_ACTIVE;
 		*Rate       = pAd->CommonCfg.MlmeRate; 
 	} 
-	else /* unicast address */
+	else // unicast address
 	{
 		pEntry = MacTableLookup(pAd, pAddr);
 		if (pEntry) 
@@ -1549,7 +1619,7 @@ BOOLEAN APPsIndicate(
 
 	pEntry = &pAd->MacTab.Content[Wcid];
 	old_psmode = pEntry->PsMode;
-/*	if (pEntry) */
+	if (pEntry)	
 	{
 		/*
 			Change power save mode first because we will call
@@ -1563,26 +1633,26 @@ BOOLEAN APPsIndicate(
 
 		if ((old_psmode == PWR_SAVE) && (Psm == PWR_ACTIVE))
 		{
-			/* TODO: For RT2870, how to handle about the BA when STA in PS mode???? */
+			// TODO: For RT2870, how to handle about the BA when STA in PS mode????
 #ifdef RTMP_MAC_PCI
 #ifdef DOT11_N_SUPPORT
-			/* When sta wake up, we send BAR to refresh the BA sequence. */
+			// When sta wake up, we send BAR to refresh the BA sequence.
 			SendRefreshBAR(pAd, pEntry);
-#endif /* DOT11_N_SUPPORT */
-#endif /* RTMP_MAC_PCI */
+#endif // DOT11_N_SUPPORT //
+#endif // RTMP_MAC_PCI //
 			DBGPRINT(RT_DEBUG_INFO, ("APPsIndicate - %02x:%02x:%02x:%02x:%02x:%02x wakes up, act like rx PS-POLL\n", pAddr[0],pAddr[1],pAddr[2],pAddr[3],pAddr[4],pAddr[5]));
-			/* sleep station awakes, move all pending frames from PSQ to TXQ if any */
+			// sleep station awakes, move all pending frames from PSQ to TXQ if any
 			APHandleRxPsPoll(pAd, pAddr, pEntry->Aid, TRUE);
 		}
 
 		/* move to above section */
-/*		pEntry->NoDataIdleCount = 0; */
-/*		pEntry->PsMode = Psm; */
+//		pEntry->NoDataIdleCount = 0;
+//		pEntry->PsMode = Psm;
 	} 
-/*	else */
-/*	{ */
-		/* not in table, try to learn it ???? why bother? */
-/*	} */
+	else 
+	{
+		// not in table, try to learn it ???? why bother?
+	}
 	return old_psmode;
 }
 
@@ -1611,7 +1681,7 @@ VOID ApLogEvent(
 		pAd->EventTab.Num += 1;
 	}
 }
-#endif /* SYSTEM_LOG_SUPPORT */
+#endif // SYSTEM_LOG_SUPPORT //
 
 
 #ifdef DOT11_N_SUPPORT
@@ -1633,14 +1703,14 @@ VOID APUpdateOperationMode(
 {
 	pAd->CommonCfg.AddHTInfo.AddHtInfo2.OperaionMode = 0;
 
-	if ((pAd->ApCfg.LastNoneHTOLBCDetectTime + (5 * OS_HZ)) > pAd->Mlme.Now32) /* non HT BSS exist within 5 sec */
+	if ((pAd->ApCfg.LastNoneHTOLBCDetectTime + (5 * OS_HZ)) > pAd->Mlme.Now32) // non HT BSS exist within 5 sec
 	{
 		pAd->CommonCfg.AddHTInfo.AddHtInfo2.OperaionMode = 1;
     	AsicUpdateProtect(pAd, pAd->CommonCfg.AddHTInfo.AddHtInfo2.OperaionMode, ALLN_SETPROTECT, FALSE, TRUE);
 	}
 
-   	/* If I am 40MHz BSS, and there exist HT-20MHz station. */
-	/* Update to 2 when it's zero.  Because OperaionMode = 1 or 3 has more protection. */
+   	// If I am 40MHz BSS, and there exist HT-20MHz station. 
+	// Update to 2 when it's zero.  Because OperaionMode = 1 or 3 has more protection.
 	if ((pAd->CommonCfg.AddHTInfo.AddHtInfo2.OperaionMode == 0) && (pAd->MacTab.fAnyStation20Only) && (pAd->CommonCfg.DesiredHtPhy.ChannelWidth == 1))
 	{
 		pAd->CommonCfg.AddHTInfo.AddHtInfo2.OperaionMode = 2;
@@ -1655,7 +1725,7 @@ VOID APUpdateOperationMode(
 	
 	pAd->CommonCfg.AddHTInfo.AddHtInfo2.NonGfPresent = pAd->MacTab.fAnyStationNonGF;
 }
-#endif /* DOT11_N_SUPPORT */
+#endif // DOT11_N_SUPPORT //
 
 /*
 	==========================================================================
@@ -1684,20 +1754,20 @@ VOID APUpdateCapabilityAndErpIe(
 		if (!IS_ENTRY_CLIENT(pEntry) || (pEntry->Sst != SST_ASSOC))
 			continue;
 
-		/* at least one 11b client associated, turn on ERP.NonERPPresent bit */
-		/* almost all 11b client won't support "Short Slot" time, turn off for maximum compatibility */
+		// at least one 11b client associated, turn on ERP.NonERPPresent bit
+		// almost all 11b client won't support "Short Slot" time, turn off for maximum compatibility
 		if (pEntry->MaxSupportedRate < RATE_FIRST_OFDM_RATE)
 		{
 			ShortSlotCapable = FALSE;
 			ErpIeContent |= 0x01;
 		}
 
-		/* at least one client can't support short slot */
+		// at least one client can't support short slot
 		if ((pEntry->CapabilityInfo & 0x0400) == 0)
 			ShortSlotCapable = FALSE;
 	}
 
-	/* legacy BSS exist within 5 sec */
+	// legacy BSS exist within 5 sec
 	if ((pAd->ApCfg.LastOLBCDetectTime + (5 * OS_HZ)) > pAd->Mlme.Now32) 
 	{
 		LegacyBssExist = TRUE;
@@ -1707,18 +1777,17 @@ VOID APUpdateCapabilityAndErpIe(
 		LegacyBssExist = FALSE;
 	}
 	
-	/* decide ErpIR.UseProtection bit, depending on pAd->CommonCfg.UseBGProtection
-		AUTO (0): UseProtection = 1 if any 11b STA associated
-		ON (1): always USE protection
-		OFF (2): always NOT USE protection
-	*/
+	// decide ErpIR.UseProtection bit, depending on pAd->CommonCfg.UseBGProtection
+	//    AUTO (0): UseProtection = 1 if any 11b STA associated
+	//    ON (1): always USE protection
+	//    OFF (2): always NOT USE protection
 	if (pAd->CommonCfg.UseBGProtection == 0)
 	{
 		ErpIeContent = (ErpIeContent)? 0x03 : 0x00;
-		/*if ((pAd->ApCfg.LastOLBCDetectTime + (5 * OS_HZ)) > pAd->Mlme.Now32) // legacy BSS exist within 5 sec */
+		//if ((pAd->ApCfg.LastOLBCDetectTime + (5 * OS_HZ)) > pAd->Mlme.Now32) // legacy BSS exist within 5 sec
 		if (LegacyBssExist)
 		{
-			ErpIeContent |= 0x02;                                     /* set Use_Protection bit */
+			ErpIeContent |= 0x02;                                     // set Use_Protection bit
 		}
 	}
 	else if (pAd->CommonCfg.UseBGProtection == 1)   
@@ -1726,14 +1795,14 @@ VOID APUpdateCapabilityAndErpIe(
 	else
 		;
 
-	bUseBGProtection = (pAd->CommonCfg.UseBGProtection == 1) ||    /* always use */
+	bUseBGProtection = (pAd->CommonCfg.UseBGProtection == 1) ||    // always use
 						((pAd->CommonCfg.UseBGProtection == 0) && ERP_IS_USE_PROTECTION(ErpIeContent));
 
 #ifdef A_BAND_SUPPORT
-	/* always no BG protection in A-band. falsely happened when switching A/G band to a dual-band AP */
+	// always no BG protection in A-band. falsely happened when switching A/G band to a dual-band AP
 	if (pAd->CommonCfg.Channel > 14) 
 		bUseBGProtection = FALSE;
-#endif /* A_BAND_SUPPORT */
+#endif // A_BAND_SUPPORT //
 
 	if (bUseBGProtection != OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_BG_PROTECTION_INUSED))
 	{
@@ -1743,7 +1812,7 @@ VOID APUpdateCapabilityAndErpIe(
 #ifdef DOT11_N_SUPPORT
 		OperationMode = pAd->CommonCfg.AddHTInfo.AddHtInfo2.OperaionMode;
 		bNonGFExist = pAd->MacTab.fAnyStationNonGF;
-#endif /* DOT11_N_SUPPORT */
+#endif // DOT11_N_SUPPORT //
 		if (bUseBGProtection)
 		{
 			OPSTATUS_SET_FLAG(pAd, fOP_STATUS_BG_PROTECTION_INUSED);
@@ -1756,28 +1825,30 @@ VOID APUpdateCapabilityAndErpIe(
 		}
 	}
 
-	/* Decide Barker Preamble bit of ERP IE */
+	// Decide Barker Preamble bit of ERP IE
 	if ((pAd->CommonCfg.TxPreamble == Rt802_11PreambleLong) || (ApCheckLongPreambleSTA(pAd) == TRUE))
 		pAd->ApCfg.ErpIeContent = (ErpIeContent | 0x04);
 	else
 		pAd->ApCfg.ErpIeContent = ErpIeContent;
 
 #ifdef A_BAND_SUPPORT
-	/* Force to use ShortSlotTime at A-band */
+	// Force to use ShortSlotTime at A-band
 	if (pAd->CommonCfg.Channel > 14)
 		ShortSlotCapable = TRUE;
-#endif /* A_BAND_SUPPORT */
+#endif // A_BAND_SUPPORT //
 	
-	/* deicide CapabilityInfo.ShortSlotTime bit */
+	//
+	// deicide CapabilityInfo.ShortSlotTime bit
+	//
     for (apidx=0; apidx<pAd->ApCfg.BssidNum; apidx++)
     {
 		USHORT *pCapInfo = &(pAd->ApCfg.MBSSID[apidx].CapabilityInfo);
 
-		/* In A-band, the ShortSlotTime bit should be ignored. */
+		// In A-band, the ShortSlotTime bit should be ignored. 
 		if (ShortSlotCapable 
 #ifdef A_BAND_SUPPORT
 			&& (pAd->CommonCfg.Channel <= 14)
-#endif /* A_BAND_SUPPORT */
+#endif // A_BAND_SUPPORT //
 			)
     		(*pCapInfo) |= 0x0400;
 		else
@@ -1839,14 +1910,14 @@ BOOLEAN ApCheckAccessControlList(
 {
 	BOOLEAN Result = TRUE;
 
-    if (pAd->ApCfg.MBSSID[Apidx].AccessControlList.Policy == 0)       /* ACL is disabled */
+    if (pAd->ApCfg.MBSSID[Apidx].AccessControlList.Policy == 0)       // ACL is disabled
         Result = TRUE;
     else
     {
         ULONG i;
-        if (pAd->ApCfg.MBSSID[Apidx].AccessControlList.Policy == 1)   /* ACL is a positive list */
+        if (pAd->ApCfg.MBSSID[Apidx].AccessControlList.Policy == 1)   // ACL is a positive list
             Result = FALSE;
-        else                                              /* ACL is a negative list */
+        else                                              // ACL is a negative list
             Result = TRUE;
         for (i=0; i<pAd->ApCfg.MBSSID[Apidx].AccessControlList.Num; i++)
         {
@@ -1860,8 +1931,8 @@ BOOLEAN ApCheckAccessControlList(
 
     if (Result == FALSE)
     {
-        DBGPRINT(RT_DEBUG_TRACE, ("%02x:%02x:%02x:%02x:%02x:%02x failed in ACL checking\n",
-        pAddr[0],pAddr[1],pAddr[2],pAddr[3],pAddr[4],pAddr[5]));
+        printk("RT3662 - Wireless MAC %02x:%02x:%02x:%02x:%02x:%02x failed in ACL checking!\n",
+        pAddr[0],pAddr[1],pAddr[2],pAddr[3],pAddr[4],pAddr[5]);
     }
 
     return Result;
@@ -1889,13 +1960,11 @@ VOID ApUpdateAccessControlList(
 	USHORT      Reason;
 
 	
-	/*Apidx = pObj->ioctl_if; */
-	ASSERT(Apidx < MAX_MBSSID_NUM(pAd));
-	if (Apidx >= MAX_MBSSID_NUM(pAd))
-		return;
+	//Apidx = pObj->ioctl_if;
+	ASSERT(Apidx < MAX_MBSSID_NUM);
 	DBGPRINT(RT_DEBUG_TRACE, ("ApUpdateAccessControlList : Apidx = %d\n", Apidx));
 	
-    /* ACL is disabled. Do nothing about the MAC table. */
+    // ACL is disabled. Do nothing about the MAC table.
     if (pAd->ApCfg.MBSSID[Apidx].AccessControlList.Policy == 0)
 		return;
 
@@ -1904,7 +1973,9 @@ VOID ApUpdateAccessControlList(
 		if (!IS_ENTRY_CLIENT(&pAd->MacTab.Content[MacIdx])) 
 			continue;
 
-		/* We only need to update associations related to ACL of MBSSID[Apidx]. */
+		//
+		// We only need to update associations related to ACL of MBSSID[Apidx].
+		//
 		if (pAd->MacTab.Content[MacIdx].apidx != Apidx) 
 			continue;
     
@@ -1925,10 +1996,10 @@ VOID ApUpdateAccessControlList(
 				pAd->ApCfg.MBSSID[Apidx].AccessControlList.Policy));
 			DBGPRINT(RT_DEBUG_TRACE, ("STA not on positive ACL. remove it...\n"));
 			
-			/* Before delete the entry from MacTable, send disassociation packet to client. */
+			// Before delete the entry from MacTable, send disassociation packet to client.
 			if (pAd->MacTab.Content[MacIdx].Sst == SST_ASSOC)
 			{
-				/*  send out a DISASSOC frame */
+				//  send out a DISASSOC frame
 				NStatus = MlmeAllocateMemory(pAd, &pOutBuffer);
 				if (NStatus != NDIS_STATUS_SUCCESS) 
 				{
@@ -1939,11 +2010,7 @@ VOID ApUpdateAccessControlList(
 				Reason = REASON_DECLINED;
 				DBGPRINT(RT_DEBUG_ERROR, ("ASSOC - Send DISASSOC  Reason = %d frame  TO %x %x %x %x %x %x \n",Reason,pAd->MacTab.Content[MacIdx].Addr[0],
 					pAd->MacTab.Content[MacIdx].Addr[1],pAd->MacTab.Content[MacIdx].Addr[2],pAd->MacTab.Content[MacIdx].Addr[3],pAd->MacTab.Content[MacIdx].Addr[4],pAd->MacTab.Content[MacIdx].Addr[5]));
-				MgtMacHeaderInit(pAd, &DisassocHdr, SUBTYPE_DISASSOC, 0, pAd->MacTab.Content[MacIdx].Addr, 
-#ifdef P2P_SUPPORT
-									pAd->ApCfg.MBSSID[pAd->MacTab.Content[MacIdx].apidx].Bssid,
-#endif /* P2P_SUPPORT */
-									pAd->ApCfg.MBSSID[pAd->MacTab.Content[MacIdx].apidx].Bssid);
+				MgtMacHeaderInit(pAd, &DisassocHdr, SUBTYPE_DISASSOC, 0, pAd->MacTab.Content[MacIdx].Addr, pAd->ApCfg.MBSSID[pAd->MacTab.Content[MacIdx].apidx].Bssid);
 				MakeOutgoingFrame(pOutBuffer, &FrameLen, sizeof(HEADER_802_11), &DisassocHdr, 2, &Reason, END_OF_ARGS);
 				MiniportMMRequest(pAd, 0, pOutBuffer, FrameLen);
 				MlmeFreeMemory(pAd, pOutBuffer);
@@ -1959,10 +2026,10 @@ VOID ApUpdateAccessControlList(
 				pAd->ApCfg.MBSSID[Apidx].AccessControlList.Policy));
 			DBGPRINT(RT_DEBUG_TRACE, ("STA on negative ACL. remove it...\n"));
 			
-			/* Before delete the entry from MacTable, send disassociation packet to client. */
+			// Before delete the entry from MacTable, send disassociation packet to client.
 			if (pAd->MacTab.Content[MacIdx].Sst == SST_ASSOC)
 			{
-				/* send out a DISASSOC frame */
+				// send out a DISASSOC frame
 				NStatus = MlmeAllocateMemory(pAd, &pOutBuffer);
 				if (NStatus != NDIS_STATUS_SUCCESS) 
 				{
@@ -1973,11 +2040,7 @@ VOID ApUpdateAccessControlList(
 				Reason = REASON_DECLINED;
 				DBGPRINT(RT_DEBUG_ERROR, ("ASSOC - Send DISASSOC  Reason = %d frame  TO %x %x %x %x %x %x \n",Reason,pAd->MacTab.Content[MacIdx].Addr[0],
 					pAd->MacTab.Content[MacIdx].Addr[1],pAd->MacTab.Content[MacIdx].Addr[2],pAd->MacTab.Content[MacIdx].Addr[3],pAd->MacTab.Content[MacIdx].Addr[4],pAd->MacTab.Content[MacIdx].Addr[5]));
-				MgtMacHeaderInit(pAd, &DisassocHdr, SUBTYPE_DISASSOC, 0, pAd->MacTab.Content[MacIdx].Addr, 
-#ifdef P2P_SUPPORT
-									pAd->ApCfg.MBSSID[pAd->MacTab.Content[MacIdx].apidx].Bssid,
-#endif /* P2P_SUPPORT */
-									pAd->ApCfg.MBSSID[pAd->MacTab.Content[MacIdx].apidx].Bssid);
+				MgtMacHeaderInit(pAd, &DisassocHdr, SUBTYPE_DISASSOC, 0, pAd->MacTab.Content[MacIdx].Addr, pAd->ApCfg.MBSSID[pAd->MacTab.Content[MacIdx].apidx].Bssid);
 				MakeOutgoingFrame(pOutBuffer, &FrameLen, sizeof(HEADER_802_11), &DisassocHdr, 2, &Reason, END_OF_ARGS);
 				MiniportMMRequest(pAd, 0, pOutBuffer, FrameLen);
 				MlmeFreeMemory(pAd, pOutBuffer);
@@ -2013,25 +2076,21 @@ VOID ApEnqueueNullFrame(
     ULONG		   Length;
 
 
-	/* since TxRate may change, we have to change Duration each time */
+	// since TxRate may change, we have to change Duration each time
 	NState = MlmeAllocateMemory(pAd, (PUCHAR *)&pFrame);
 	pNullFr = (PHEADER_802_11) pFrame;
     Length = sizeof(HEADER_802_11);
 
 	if (NState == NDIS_STATUS_SUCCESS) 
 	{
-/*		if ((PID & 0x3f) < WDS_PAIRWISE_KEY_OFFSET) // send to client */
+//		if ((PID & 0x3f) < WDS_PAIRWISE_KEY_OFFSET) // send to client
 		{
-			MgtMacHeaderInit(pAd, pNullFr, SUBTYPE_NULL_FUNC, 0, pAddr, 
-#ifdef P2P_SUPPORT
-								pAd->ApCfg.MBSSID[apidx].Bssid,
-#endif /* P2P_SUPPORT */
-								pAd->ApCfg.MBSSID[apidx].Bssid);
+			MgtMacHeaderInit(pAd, pNullFr, SUBTYPE_NULL_FUNC, 0, pAddr, pAd->ApCfg.MBSSID[apidx].Bssid);
 			pNullFr->FC.Type = BTYPE_DATA;
 			pNullFr->FC.FrDs = 1;
 			pNullFr->Duration = RTMPCalcDuration(pAd, TxRate, 14);
 
-#ifdef UAPSD_SUPPORT
+#ifdef UAPSD_AP_SUPPORT
             if (bQosNull)
 			{
                 UCHAR *qos_p = ((UCHAR *)pNullFr) + Length;
@@ -2043,7 +2102,7 @@ VOID ApEnqueueNullFrame(
 				qos_p[1] = 0;
 				Length += 2;
 			} /* End of if */
-#endif /* UAPSD_SUPPORT */
+#endif // UAPSD_AP_SUPPORT //
 
 			DBGPRINT(RT_DEBUG_INFO, ("send NULL Frame @%d Mbps to AID#%d...\n", RateIdToMbps[TxRate], PID & 0x3f));
             MiniportMMRequest(pAd, MapUserPriorityToAccessCategory[7], (PUCHAR)pNullFr, Length);
@@ -2125,10 +2184,10 @@ INT GetBssCoexEffectedChRange(
 
 	memset(pCoexChRange, 0, sizeof(BSS_COEX_CH_RANGE));
 	
-	/* Build the effected channel list, if something wrong, return directly. */
+	// Build the effected channel list, if something wrong, return directly.	
 #ifdef A_BAND_SUPPORT
 	if (pAd->CommonCfg.Channel > 14)
-	{	/* For 5GHz band */
+	{	// For 5GHz band
 		for (index = 0; index < pAd->ChannelListNum; index++)
 		{
 			if(pAd->ChannelList[index].Channel == pAd->CommonCfg.Channel)
@@ -2165,14 +2224,14 @@ INT GetBssCoexEffectedChRange(
 		}
 		else
 		{
-			/* It should not happened! */
+			// It should not happened!
 			DBGPRINT(RT_DEBUG_ERROR, ("5GHz: Cannot found the CtrlCh(%d) in ChList, something wrong?\n", 
 						pAd->CommonCfg.Channel));
 		}
 	}
 	else
-#endif /* A_BAND_SUPPORT */		
-	{	/* For 2.4GHz band */
+#endif // A_BAND_SUPPORT //		
+	{	// For 2.4GHz band 
 		for (index = 0; index < pAd->ChannelListNum; index++)
 		{
 			if(pAd->ChannelList[index].Channel == pAd->CommonCfg.Channel)
@@ -2217,7 +2276,7 @@ INT GetBssCoexEffectedChRange(
 			return TRUE;
 		}
 
-		/* It should not happened! */
+		// It should not happened!
 		DBGPRINT(RT_DEBUG_ERROR, ("2.4GHz: Didn't found valid channel range, Ch index=%d, ChListNum=%d, CtrlCh=%d\n", 
 									index, pAd->ChannelListNum, pAd->CommonCfg.Channel));
 	}
@@ -2235,10 +2294,12 @@ VOID APOverlappingBSSScan(
 	INT		chStartIdx, chEndIdx, index,curPriChIdx, curSecChIdx;
 
 
-	/* We just care BSS who operating in 40MHz N Mode. */
+	// We just care BSS who operating in 40MHz N Mode.
 	if ((pAd->CommonCfg.PhyMode < PHY_11ABGN_MIXED) || 
-		(pAd->CommonCfg.RegTransmitSetting.field.BW  == BW_20)
+		(pAd->CommonCfg.RegTransmitSetting.field.BW  == BW_20) 
+//#ifdef DOT11_PF_DEBUG
 		|| (pAd->CommonCfg.Channel > 14)
+//#endif // DOT11_PF_DEBUG //
 		)
 	{
 		DBGPRINT(RT_DEBUG_TRACE, ("The pAd->PhyMode=%d, BW=%d, didn't need channel adjustment!\n", 
@@ -2247,10 +2308,10 @@ VOID APOverlappingBSSScan(
 	}
 
 
-	/* Build the effected channel list, if something wrong, return directly. */
+	// Build the effected channel list, if something wrong, return directly.	
 #ifdef A_BAND_SUPPORT
 	if (pAd->CommonCfg.Channel > 14)
-	{	/* For 5GHz band */
+	{	// For 5GHz band
 		for (index = 0; index < pAd->ChannelListNum; index++)
 		{
 			if(pAd->ChannelList[index].Channel == pAd->CommonCfg.Channel)
@@ -2275,15 +2336,15 @@ VOID APOverlappingBSSScan(
 		}
 		else
 		{
-			/* It should not happened! */
+			// It should not happened!
 			DBGPRINT(RT_DEBUG_ERROR, ("5GHz: Cannot found the ControlChannel(%d) in ChannelList, something wrong?\n", 
 						pAd->CommonCfg.Channel));
 			return;
 		}
 	}
 	else
-#endif /* A_BAND_SUPPORT */		
-	{	/* For 2.4GHz band */
+#endif // A_BAND_SUPPORT //		
+	{	// For 2.4GHz band 
 		for (index = 0; index < pAd->ChannelListNum; index++)
 		{
 			if(pAd->ChannelList[index].Channel == pAd->CommonCfg.Channel)
@@ -2311,7 +2372,7 @@ VOID APOverlappingBSSScan(
 		}
 		else
 		{
-			/* It should not happened! */
+			// It should not happened!
 			DBGPRINT(RT_DEBUG_ERROR, ("2.4GHz: Cannot found the Control Channel(%d) in ChannelList, something wrong?\n", 
 						pAd->CommonCfg.Channel));
 			return;
@@ -2323,38 +2384,32 @@ VOID APOverlappingBSSScan(
 	GetBssCoexEffectedChRange(pAd, &coexChRange);
 }
 
-	/* Before we do the scanning, clear the bEffectedChannel as zero for latter use. */
+	// Before we do the scanning, clear the bEffectedChannel as zero for latter use.
 	for (index = 0; index < pAd->ChannelListNum; index++)
 		pAd->ChannelList[index].bEffectedChannel = 0;
 	
 	pAd->CommonCfg.BssCoexApCnt = 0;	
 		
-	/* If we are not ready for Tx/Rx Pakcet, enable it now for receiving Beacons. */
+	// If we are not ready for Tx/Rx Pakcet, enable it now for receiving Beacons.
 	if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_START_UP) == 0)
 	{
-#ifdef RTMP_MAC_PCI
-		unsigned long irqFlags=0;
-#endif // RTMP_MAC_PCI //
-
 		DBGPRINT(RT_DEBUG_TRACE, ("Card still not enable Tx/Rx, enable it now!\n"));
 #ifdef RTMP_MAC_PCI
-		/* Enable Interrupt */
-		RTMP_INT_LOCK(&pAd->irq_lock, irqFlags);
+		// Enable Interrupt
 		pAd->int_enable_reg = ((DELAYINTMASK)  | (RxINT|TxDataInt|TxMgmtInt)) & ~(0x03);
 		pAd->int_disable_mask = 0;
 		pAd->int_pending = 0;
-		RTMP_INT_UNLOCK(&pAd->irq_lock, irqFlags);
 	
-		RTMP_IO_WRITE32(pAd, INT_SOURCE_CSR, 0xffffffff);  /* clear garbage interrupts */
+		RTMP_IO_WRITE32(pAd, INT_SOURCE_CSR, 0xffffffff);  // clear garbage interrupts
 		RTMP_ASIC_INTERRUPT_ENABLE(pAd);
-#endif /* RTMP_MAC_PCI */
+#endif // RTMP_MAC_PCI //
 
 
-		/* Now Enable RxTx */
+		// Now Enable RxTx
 		RTMPEnableRxTx(pAd);
 
-		/* APRxDoneInterruptHandle API will check this flag to decide accept incoming packet or not. */
-		/* Set the flag be ready to receive Beacon frame for autochannel select. */
+		// APRxDoneInterruptHandle API will check this flag to decide accept incoming packet or not.
+		// Set the flag be ready to receive Beacon frame for autochannel select.
 		RTMP_SET_FLAG(pAd, fRTMP_ADAPTER_START_UP);
 	}
 
@@ -2362,7 +2417,7 @@ VOID APOverlappingBSSScan(
 	DBGPRINT(RT_DEBUG_TRACE, ("Ready to do passive scanning for Channel[%d] to Channel[%d]!\n", 
 			pAd->ChannelList[chStartIdx].Channel, pAd->ChannelList[chEndIdx].Channel));
 	
-	/* Now start to do the passive scanning. */
+	// Now start to do the passive scanning.
 	pAd->CommonCfg.bOverlapScanning = TRUE;
 	for (index = chStartIdx; index<=chEndIdx; index++)
 	{
@@ -2376,18 +2431,18 @@ VOID APOverlappingBSSScan(
 		BBPValue &= (~0x18);
 		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R4, BBPValue);
 		
-		/* Let BBP register at 20MHz to do scan */
+		// Let BBP register at 20MHz to do scan	
 		AsicSwitchChannel(pAd, Channel, TRUE);
 		AsicLockChannel(pAd, Channel);
 
 		DBGPRINT(RT_DEBUG_ERROR, ("SYNC - BBP R4 to 20MHz.l\n"));
-		/*DBGPRINT(RT_DEBUG_TRACE, ("Passive scanning for Channel %d.....\n", Channel)); */
-		OS_WAIT(300); /* wait for 200 ms at each channel. */
+		//DBGPRINT(RT_DEBUG_TRACE, ("Passive scanning for Channel %d.....\n", Channel));
+		OS_WAIT(300); // wait for 200 ms at each channel.
 	}
 	pAd->CommonCfg.bOverlapScanning = FALSE;	
 	
 
-	/* After scan all relate channels, now check the scan result to find out if we need fallback to 20MHz. */
+	// After scan all relate channels, now check the scan result to find out if we need fallback to 20MHz.
 	for (index = chStartIdx; index <= chEndIdx; index++)
 	{
 		DBGPRINT(RT_DEBUG_TRACE, ("Channel[Idx=%d, Ch=%d].bEffectedChannel=0x%x!\n", 
@@ -2403,8 +2458,9 @@ VOID APOverlappingBSSScan(
 			DBGPRINT(RT_DEBUG_TRACE, ("needFallBack=TRUE due to OS!\n"));
 		}
 	}
-	
-	/* If need fallback, now do it. */
+
+	pAd->CommonCfg.Bss2040NeedFallBack = 0;
+	// If need fallback, now do it.
 	if ((needFallBack == TRUE)
 		&& (pAd->CommonCfg.BssCoexApCnt > pAd->CommonCfg.BssCoexApCntThr)
 	)
@@ -2413,12 +2469,244 @@ VOID APOverlappingBSSScan(
 		pAd->CommonCfg.AddHTInfo.AddHtInfo.ExtChanOffset = 0;
 		pAd->CommonCfg.LastBSSCoexist2040.field.BSS20WidthReq = 1;
 		pAd->CommonCfg.Bss2040CoexistFlag |= BSS_2040_COEXIST_INFO_SYNC;
+		pAd->CommonCfg.Bss2040NeedFallBack = 1;
 	}
 
 	return;	
 }
-#endif /* DOT11N_DRAFT3 */
-#endif /* DOT11_N_SUPPORT */
+#endif // DOT11N_DRAFT3 //
+
+#ifdef GREENAP_SUPPORT
+#ifdef RT305x
+extern REG_PAIR   RT305x_RFRegTable[];
+#endif // RT305x //
+
+VOID EnableAPMIMOPS(
+	IN PRTMP_ADAPTER pAd,
+	IN BOOLEAN ReduceCorePower)
+{
+	UCHAR	BBPR3 = 0,BBPR1 = 0;
+	ULONG	TxPinCfg = 0x00050F0A;//Gary 2007/08/09 0x050A0A
+	UCHAR	BBPR4=0;
+
+	UCHAR	CentralChannel;
+	//UINT32	Value=0;
+
+
+#ifdef RT305x
+	UCHAR 	RFValue=0;
+		
+	RT30xxReadRFRegister(pAd, RF_R01, &RFValue);
+	RFValue &= 0x03;	//clear bit[7~2]
+	RFValue |= 0xF0;
+	// Turn off unused PA or LNA when only 1T or 1R
+#endif // RT305x //
+
+	if(pAd->CommonCfg.Channel>14)
+		TxPinCfg=0x00050F05;
+		
+	TxPinCfg &= 0xFFFFFFF3;
+	TxPinCfg &= 0xFFFFF3FF;
+	pAd->ApCfg.bGreenAPActive=TRUE;
+
+	CentralChannel = pAd->CommonCfg.CentralChannel;
+#ifdef RTMP_RBUS_SUPPORT
+#ifdef COC_SUPPORT
+#ifdef RT305x		
+	if( ReduceCorePower == TRUE)
+	{
+		/* Set Core Power to 1.1V */
+		DBGPRINT(RT_DEBUG_INFO, ("Set core power to 1.1V\n"));
+		RT30xxReadRFRegister(pAd, RF_R26, &RFValue);
+		RFValue &= 0x1F;        //clear bit[7~5]
+		RFValue |= 0xC0;
+		RT30xxWriteRFRegister(pAd, RF_R26, (UCHAR)RFValue);
+	}
+	else
+	{
+		DBGPRINT(RT_DEBUG_INFO, ("Set core power to default value\n"));
+		/* Set Core Power to default value */
+		RT30xxWriteRFRegister(pAd, RF_R26, RT305x_RFRegTable[RF_R26].Value);
+	}
+#endif // RT305x //
+#endif // COC_SUPPORT //
+#endif // RTMP_RBUS_SUPPORT //
+	DBGPRINT(RT_DEBUG_INFO, ("Run with BW_20\n"));
+	pAd->CommonCfg.CentralChannel = pAd->CommonCfg.Channel;
+	CentralChannel = pAd->CommonCfg.Channel;
+
+	/* Set BBP registers to BW20 */
+	RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R4, &BBPR4);
+	BBPR4 &= (~0x18);
+	RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R4, BBPR4);
+
+	/* RF Bandwidth related registers would be set in AsicSwitchChannel() */
+	pAd->CommonCfg.BBPCurrentBW = BW_20;
+	if (pAd->Antenna.field.RxPath>1||pAd->Antenna.field.TxPath>1)
+	{
+		//TX Stream
+		RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R1, &BBPR1);
+
+		//Rx Stream
+		RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R3, &BBPR3);
+				
+		BBPR3 &= (~0x18);
+		BBPR1 &= (~0x18);
+
+		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R1, BBPR1);
+		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R3, BBPR3);
+
+		RTMP_IO_WRITE32(pAd, TX_PIN_CFG, TxPinCfg);
+
+#ifdef RT305x
+		RT30xxWriteRFRegister(pAd, RF_R01, RFValue);
+#endif // RT305x //
+	}
+	AsicSwitchChannel(pAd, CentralChannel, FALSE);
+
+	DBGPRINT(RT_DEBUG_INFO, ("EnableAPMIMOPS, 305x/28xx changes the # of antenna to 1\n"));
+
+}
+
+VOID DisableAPMIMOPS(
+	IN PRTMP_ADAPTER pAd)
+{
+	UCHAR	BBPR3=0,BBPR1=0;
+	ULONG	TxPinCfg = 0x00050F0A;//Gary 2007/08/09 0x050A0A
+
+	UCHAR	CentralChannel;
+	UINT32	Value=0;
+
+
+#ifdef RT305x
+	UCHAR 	RFValue=0;
+
+	RT30xxReadRFRegister(pAd, RF_R01, &RFValue);
+	RFValue &= 0x03;	//clear bit[7~2]
+	if (pAd->Antenna.field.TxPath == 1)
+		RFValue |= 0xA0;
+	else if (pAd->Antenna.field.TxPath == 2)
+		RFValue |= 0x80;
+	if (pAd->Antenna.field.RxPath == 1)
+		RFValue |= 0x50;
+	else if (pAd->Antenna.field.RxPath == 2)
+		RFValue |= 0x40;
+#endif // RT305x //
+
+	if(pAd->CommonCfg.Channel>14)
+		TxPinCfg=0x00050F05;
+	// Turn off unused PA or LNA when only 1T or 1R
+	if (pAd->Antenna.field.TxPath == 1)
+	{
+		TxPinCfg &= 0xFFFFFFF3;
+	}
+	if (pAd->Antenna.field.RxPath == 1)
+	{
+		TxPinCfg &= 0xFFFFF3FF;
+	}
+
+
+	pAd->ApCfg.bGreenAPActive=FALSE;
+
+#ifdef RTMP_RBUS_SUPPORT
+#ifdef COC_SUPPORT
+#ifdef RT305x
+		DBGPRINT(RT_DEBUG_INFO, ("Set core power to default value\n"));
+		/* Set Core Power to default value */
+		RT30xxWriteRFRegister(pAd, RF_R26, RT305x_RFRegTable[RF_R26].Value);
+#endif // RT305x //
+#endif // COC_SUPPORT //
+#endif // RTMP_RBUS_SUPPORT //
+	if ((pAd->CommonCfg.HtCapability.HtCapInfo.ChannelWidth == BW_40) && (pAd->CommonCfg.Channel != 14))
+	{
+		DBGPRINT(RT_DEBUG_INFO, ("Run with BW_40\n"));
+		/* Set CentralChannel to work for BW40 */
+		if (pAd->CommonCfg.RegTransmitSetting.field.EXTCHA == EXTCHA_ABOVE)
+		{
+			pAd->CommonCfg.CentralChannel = pAd->CommonCfg.Channel + 2;
+	
+			//  TX : control channel at lower 
+			RTMP_IO_READ32(pAd, TX_BAND_CFG, &Value);
+			Value &= (~0x1);
+			RTMP_IO_WRITE32(pAd, TX_BAND_CFG, Value);
+			
+			//  RX : control channel at lower 
+			RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R3, &Value);
+			Value &= (~0x20);
+			RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R3, Value);
+		}
+		else if ((pAd->CommonCfg.Channel > 2) && (pAd->CommonCfg.RegTransmitSetting.field.EXTCHA == EXTCHA_BELOW)) 
+		{
+			pAd->CommonCfg.CentralChannel = pAd->CommonCfg.Channel - 2;
+			
+			//  TX : control channel at upper 
+			RTMP_IO_READ32(pAd, TX_BAND_CFG, &Value);
+			Value |= (0x1);		
+			RTMP_IO_WRITE32(pAd, TX_BAND_CFG, Value);
+
+			//  RX : control channel at upper 
+			RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R3, &Value);
+			Value |= (0x20);
+			RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R3, Value);
+		}
+		CentralChannel = pAd->CommonCfg.CentralChannel;
+
+		/* Set BBP registers to BW40 */
+		RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R4, &Value);
+		Value &= (~0x18);
+		Value |= 0x10;
+		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R4, Value);
+		/* RF Bandwidth related registers would be set in AsicSwitchChannel() */
+		pAd->CommonCfg.BBPCurrentBW = BW_40;
+		AsicSwitchChannel(pAd, CentralChannel, FALSE);
+
+	}
+
+	//Rx Stream
+	RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R1, &BBPR1);
+
+	//Tx Stream
+	RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R3, &BBPR3);
+	BBPR3 &= (~0x18);
+
+	//RX Stream
+	if(pAd->Antenna.field.RxPath == 3)
+	{
+		BBPR3 |= (0x10);
+	}
+	else if(pAd->Antenna.field.RxPath == 2)
+	{
+		BBPR3 |= (0x8);
+	}
+	else if(pAd->Antenna.field.RxPath == 1)
+	{
+		BBPR3 |= (0x0);
+	}
+
+	//Tx Stream
+	if ((pAd->CommonCfg.PhyMode >= PHY_11ABGN_MIXED) && (pAd->Antenna.field.TxPath >= 2))
+	{
+		BBPR1 &= (~0x18);
+		BBPR1 |= 0x10;
+	}
+	else
+	{
+		BBPR1 &= (~0x18);
+	}
+	RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R3, BBPR3);
+	RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R1, BBPR1);
+	RTMP_IO_WRITE32(pAd, TX_PIN_CFG, TxPinCfg);
+
+#ifdef RT305x
+	RT30xxWriteRFRegister(pAd, RF_R01, RFValue);
+#endif // RT305x //
+
+
+	DBGPRINT(RT_DEBUG_INFO, ("DisableAPMIMOPS, 305x/28xx reserve only one antenna\n"));
+
+}
+#endif // GREENAP_SUPPORT //
+#endif // DOT11_N_SUPPORT //
 
 #ifdef DOT1X_SUPPORT
 /*
@@ -2477,7 +2765,7 @@ BOOLEAN DOT1X_InternalCmdAction(
 	NdisMoveMemory(&FrameBuf[offset], RalinkIe, sizeof(RalinkIe));
 
 	/* Report to upper layer */
-	if (RTMP_L2_FRAME_TX_ACTION(pAd, apidx, FrameBuf, frame_len) == FALSE)
+	if (RTMPL2FrameTxAction(pAd, apidx, FrameBuf, frame_len) == FALSE)
 		return FALSE;	
 
 	DBGPRINT(RT_DEBUG_TRACE, ("%s done. (cmd=%d)\n", __FUNCTION__, cmd));
@@ -2525,7 +2813,7 @@ BOOLEAN DOT1X_EapTriggerAction(
 		NdisMoveMemory(&FrameBuf[offset], eapol_start_1x_hdr, sizeof(eapol_start_1x_hdr));
 
 		/* Report to upper layer */
-		if (RTMP_L2_FRAME_TX_ACTION(pAd, apidx, FrameBuf, frame_len) == FALSE)
+		if (RTMPL2FrameTxAction(pAd, apidx, FrameBuf, frame_len) == FALSE)
 			return FALSE;			
 
 		DBGPRINT(RT_DEBUG_TRACE, ("Notify 8021.x daemon to trigger EAP-SM for this sta(%02x:%02x:%02x:%02x:%02x:%02x)\n", PRINT_MAC(pEntry->Addr)));
@@ -2535,5 +2823,5 @@ BOOLEAN DOT1X_EapTriggerAction(
 	return TRUE;
 }
 
-#endif /* DOT1X_SUPPORT */
+#endif // DOT1X_SUPPORT //
 

@@ -33,12 +33,12 @@
 
 #define GNU_PACKED  __attribute__ ((packed))
 
-/* TDLS definitions */
-#define	PROTO_NAME_TDLS				3	/* <ANA> */
-#define	TDLS_AKM_SUITE_1X			5	/* <ANA> */
-#define	TDLS_AKM_SUITE_PSK			6	/* <ANA> */
+// TDLS definitions
+#define	PROTO_NAME_TDLS				3	// <ANA>
+#define	TDLS_AKM_SUITE_1X			5	// <ANA>
+#define	TDLS_AKM_SUITE_PSK			6	// <ANA>
 
-/* TDLS Action frame definition */
+// TDLS Action frame definition
 #define TDLS_ACTION_CODE_SETUP_REQUEST				0
 #define TDLS_ACTION_CODE_SETUP_RESPONSE				1
 #define TDLS_ACTION_CODE_SETUP_CONFIRM				2
@@ -73,7 +73,7 @@
 #define TDLS_ELM_LEN_AP_PHY_DATA_RATE		6
 #define TDLS_ELM_LEN_CHANNEL_SWITCH_TIMING	6
 
-#define TDLS_KEY_TIMEOUT			3600      /* unit: sec */
+#define TDLS_KEY_TIMEOUT			3600      // unit: sec
 
 typedef struct GNU_PACKED _TDLS_LINK_IDENTIFIER_IE
 {
@@ -102,5 +102,5 @@ typedef struct GNU_PACKED _TDLS_CHANNEL_SWITCH_TIMING_IE
 
 #endif /* __DOT11Z_TDLS_H */
 
-#endif /* DOT11Z_TDLS_SUPPORT */
+#endif // DOT11Z_TDLS_SUPPORT //
 

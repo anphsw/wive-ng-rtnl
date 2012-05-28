@@ -33,15 +33,13 @@
 
 
 BUILD_TIMER_FUNCTION(MlmePeriodicExec);
-/*BUILD_TIMER_FUNCTION(MlmeRssiReportExec);*/
+//BUILD_TIMER_FUNCTION(MlmeRssiReportExec);
 BUILD_TIMER_FUNCTION(AsicRxAntEvalTimeout);
 BUILD_TIMER_FUNCTION(APSDPeriodicExec);
 BUILD_TIMER_FUNCTION(EnqueueStartForPSKExec);
 #ifdef CONFIG_STA_SUPPORT
-#ifdef ADHOC_WPA2PSK_SUPPORT
 BUILD_TIMER_FUNCTION(Adhoc_WpaRetryExec);
-#endif /* ADHOC_WPA2PSK_SUPPORT */
-#endif /* CONFIG_STA_SUPPORT */
+#endif // CONFIG_STA_SUPPORT //
 
 #ifdef CONFIG_AP_SUPPORT
 extern VOID APDetectOverlappingExec(
@@ -54,20 +52,23 @@ BUILD_TIMER_FUNCTION(APDetectOverlappingExec);
 
 #ifdef DOT11N_DRAFT3
 BUILD_TIMER_FUNCTION(Bss2040CoexistTimeOut);
-#endif /* DOT11N_DRAFT3 */
+#endif // DOT11N_DRAFT3 //
 
 BUILD_TIMER_FUNCTION(GREKEYPeriodicExec);
 BUILD_TIMER_FUNCTION(CMTimerExec);
 BUILD_TIMER_FUNCTION(WPARetryExec);
 #ifdef AP_SCAN_SUPPORT
 BUILD_TIMER_FUNCTION(APScanTimeout);
-#endif /* AP_SCAN_SUPPORT */
+#endif // AP_SCAN_SUPPORT //
 BUILD_TIMER_FUNCTION(APQuickResponeForRateUpExec);
 #ifdef IDS_SUPPORT
 BUILD_TIMER_FUNCTION(RTMPIdsPeriodicExec);
-#endif /* IDS_SUPPORT */
+#endif // IDS_SUPPORT //
+#ifdef WSC_AP_SUPPORT
+BUILD_TIMER_FUNCTION(WscEnqueueEapolStart);
+#endif // WSC_AP_SUPPORT //
 
-#endif /* CONFIG_AP_SUPPORT */
+#endif // CONFIG_AP_SUPPORT //
 
 #ifdef CONFIG_STA_SUPPORT
 BUILD_TIMER_FUNCTION(BeaconTimeout);
@@ -82,25 +83,23 @@ BUILD_TIMER_FUNCTION(WpaDisassocApAndBlockAssoc);
 #ifdef PCIE_PS_SUPPORT
 BUILD_TIMER_FUNCTION(PsPollWakeExec);
 BUILD_TIMER_FUNCTION(RadioOnExec);
-#endif /* PCIE_PS_SUPPORT */
+#endif // PCIE_PS_SUPPORT //
 #ifdef QOS_DLS_SUPPORT
 BUILD_TIMER_FUNCTION(DlsTimeoutAction);
-#endif /* QOS_DLS_SUPPORT */
+#endif // QOS_DLS_SUPPORT //
 
 #ifdef DOT11Z_TDLS_SUPPORT
 BUILD_TIMER_FUNCTION(TDLS_TimeoutAction);
-#endif /* DOT11Z_TDLS_SUPPORT */
+#endif // DOT11Z_TDLS_SUPPORT //
 
 
-
-
-#endif /* CONFIG_STA_SUPPORT */
+#endif // CONFIG_STA_SUPPORT //
 
 #ifdef WSC_INCLUDED
 BUILD_TIMER_FUNCTION(WscEAPOLTimeOutAction);
 BUILD_TIMER_FUNCTION(Wsc2MinsTimeOutAction);
 BUILD_TIMER_FUNCTION(WscUPnPMsgTimeOutAction);
-BUILD_TIMER_FUNCTION(WscM2DTimeOutAction);
+BUILD_TIMER_FUNCTION(WscUPnPM2DTimeOutAction);
 
 BUILD_TIMER_FUNCTION(WscPBCTimeOutAction);
 BUILD_TIMER_FUNCTION(WscScanTimeOutAction);
@@ -108,37 +107,39 @@ BUILD_TIMER_FUNCTION(WscProfileRetryTimeout);
 #ifdef WSC_LED_SUPPORT
 BUILD_TIMER_FUNCTION(WscLEDTimer);
 BUILD_TIMER_FUNCTION(WscSkipTurnOffLEDTimer);
-#endif /* WSC_LED_SUPPORT */
-
+#endif // WSC_LED_SUPPORT //
 #ifdef CONFIG_AP_SUPPORT
 BUILD_TIMER_FUNCTION(WscUpdatePortCfgTimeout);
-#ifdef WSC_V2_SUPPORT
-BUILD_TIMER_FUNCTION(WscSetupLockTimeout);
-BUILD_TIMER_FUNCTION(WscPinAttackCountCheckTimeout);
-#endif /* WSC_V2_SUPPORT */
-#endif /* CONFIG_AP_SUPPORT */
-
-#endif /* WSC_INCLUDED */
+#endif // CONFIG_AP_SUPPORT //
+#endif // WSC_INCLUDED //
 
 
+#ifdef WLAN_LED
+extern void LedCtrlMain(
+	IN PVOID SystemSpecific1, 
+	IN PVOID FunctionContext, 
+	IN PVOID SystemSpecific2, 
+	IN PVOID SystemSpecific3);
+BUILD_TIMER_FUNCTION(LedCtrlMain);
+#endif // WLAN_LED //
+
+#ifdef WMM_ACM_SUPPORT
+BUILD_TIMER_FUNCTION(ACMP_TR_TC_ReqCheck);
+BUILD_TIMER_FUNCTION(ACMP_TR_STM_Check);
+BUILD_TIMER_FUNCTION(ACMP_TR_TC_General);
+BUILD_TIMER_FUNCTION(ACMP_CMD_Timer_Data_Simulation);
+#endif // WMM_ACM_SUPPORT //
 
 #ifdef TXBF_SUPPORT
 BUILD_TIMER_FUNCTION(eTxBfProbeTimerExec);
-#endif /* TXBF_SUPPORT */
-
-#ifdef P2P_SUPPORT
-BUILD_TIMER_FUNCTION(P2PCTWindowTimer);
-BUILD_TIMER_FUNCTION(P2pSwNoATimeOut);
-BUILD_TIMER_FUNCTION(P2pPreAbsenTimeOut);
-BUILD_TIMER_FUNCTION(P2pWscTimeOut);
-#endif /* P2P_SUPPORT */
+#endif // TXBF_SUPPORT //
 
 #ifdef RTMP_TIMER_TASK_SUPPORT
 static void RtmpTimerQHandle(RTMP_ADAPTER *pAd)
 {
-/*#ifndef KTHREAD_SUPPORT*/
+#ifndef KTHREAD_SUPPORT
 	int status;
-/*#endif*/
+#endif
 	RALINK_TIMER_STRUCT	*pTimer;
 	RTMP_TIMER_TASK_ENTRY	*pEntry;
 	unsigned long	irqFlag;
@@ -146,20 +147,20 @@ static void RtmpTimerQHandle(RTMP_ADAPTER *pAd)
 
 
 	pTask = &pAd->timerTask;
-	while(!RTMP_OS_TASK_IS_KILLED(pTask))
+	while(!pTask->task_killed)
 	{
 		pTimer = NULL;
 
-		if (RtmpOSTaskWait(pAd, pTask, &status) == FALSE)
-		{
-			RTMP_SET_FLAG(pAd, fRTMP_ADAPTER_HALT_IN_PROGRESS);
-			break;
-		}
+#ifdef KTHREAD_SUPPORT
+		RTMP_WAIT_EVENT_INTERRUPTIBLE(pAd, pTask);
+#else
+		RTMP_SEM_EVENT_WAIT(&(pTask->taskSema), status);
+#endif
 
 		if (pAd->TimerQ.status == RTMP_TASK_STAT_STOPED)
 			break;
 		
-		/* event happened.*/
+		// event happened.
 		while(pAd->TimerQ.pQHead)
 		{
 			RTMP_INT_LOCK(&pAd->TimerQLock, irqFlag);
@@ -168,12 +169,12 @@ static void RtmpTimerQHandle(RTMP_ADAPTER *pAd)
 			{
 				pTimer = pEntry->pRaTimer;
 
-				/* update pQHead*/
+				// update pQHead
 				pAd->TimerQ.pQHead = pEntry->pNext;
 				if (pEntry == pAd->TimerQ.pQTail)
 					pAd->TimerQ.pQTail = NULL;
 			
-				/* return this queue entry to timerQFreeList.*/
+				// return this queue entry to timerQFreeList.
 				pEntry->pNext = pAd->TimerQ.pQPollFreeList;
 				pAd->TimerQ.pQPollFreeList = pEntry;
 			}
@@ -188,14 +189,14 @@ static void RtmpTimerQHandle(RTMP_ADAPTER *pAd)
 			}
 		}
 		
-/*#ifndef KTHREAD_SUPPORT*/
+#ifndef KTHREAD_SUPPORT
 		if (status != 0)
 		{
 			pAd->TimerQ.status = RTMP_TASK_STAT_STOPED;
 			RTMP_SET_FLAG(pAd, fRTMP_ADAPTER_HALT_IN_PROGRESS);
 			break;
 		}
-/*#endif*/
+#endif
 	}
 }
 
@@ -204,23 +205,20 @@ INT RtmpTimerQThread(
 	IN ULONG Context)
 {
 	RTMP_OS_TASK	*pTask;
-	PRTMP_ADAPTER	pAd = NULL;
+	PRTMP_ADAPTER	pAd;
 
 
 	pTask = (RTMP_OS_TASK *)Context;
-	pAd = (PRTMP_ADAPTER)RTMP_OS_TASK_DATA_GET(pTask);
-
-	if (pAd == NULL)
-	{
-		DBGPRINT(RT_DEBUG_ERROR,( "%s:: pAd is NULL!\n",__FUNCTION__));
-		return 0;
-	}	
+	pAd = (PRTMP_ADAPTER)pTask->priv;
 
 	RtmpOSTaskCustomize(pTask);
-
+	
 	RtmpTimerQHandle(pAd);
 
 	DBGPRINT(RT_DEBUG_TRACE,( "<---%s\n",__FUNCTION__));
+#ifndef KTHREAD_SUPPORT
+	pTask->taskPID = THREAD_PID_INIT_VALUE;
+#endif
 	/* notify the exit routine that we're actually exiting now 
 	 *
 	 * complete()/wait_for_completion() is similar to up()/down(),
@@ -273,7 +271,11 @@ RTMP_TIMER_TASK_ENTRY *RtmpTimerQInsert(
 
 	if (pQNode)
 	{
-		RTMP_OS_TASK_WAKE_UP(pTask);
+#ifdef KTHREAD_SUPPORT
+		WAKE_UP(pTask);
+#else
+		RTMP_SEM_EVENT_UP(&pTask->taskSema);
+#endif
 	}
 
 	return pQNode;
@@ -299,7 +301,7 @@ BOOLEAN RtmpTimerQRemove(
 			pNode = pNode->pNext;
 		}
 
-		/* Now move it to freeList queue.*/
+		// Now move it to freeList queue.
 		if (pNode)
 		{	
 			if (pNode == pAd->TimerQ.pQHead)
@@ -309,7 +311,7 @@ BOOLEAN RtmpTimerQRemove(
 			if (pPrev != NULL)
 				pPrev->pNext = pNode->pNext;
 			
-			/* return this queue entry to timerQFreeList.*/
+			// return this queue entry to timerQFreeList.
 			pNode->pNext = pAd->TimerQ.pQPollFreeList;
 			pAd->TimerQ.pQPollFreeList = pNode;
 		}
@@ -330,17 +332,17 @@ void RtmpTimerQExit(RTMP_ADAPTER *pAd)
 	{
 		pTimerQ = pAd->TimerQ.pQHead;
 		pAd->TimerQ.pQHead = pTimerQ->pNext;
-		/* remove the timeQ*/
+		// remove the timeQ
 	}
 	pAd->TimerQ.pQPollFreeList = NULL;
 	os_free_mem(pAd, pAd->TimerQ.pTimerQPoll);
 	pAd->TimerQ.pQTail = NULL;
 	pAd->TimerQ.pQHead = NULL;
-/*#ifndef KTHREAD_SUPPORT*/
+#ifndef KTHREAD_SUPPORT
 	pAd->TimerQ.status = RTMP_TASK_STAT_STOPED;
-/*#endif*/
+#endif
 	RTMP_INT_UNLOCK(&pAd->TimerQLock, irqFlags);
-	NdisFreeSpinLock(&pAd->TimerQLock);
+	
 }
 
 
@@ -350,7 +352,7 @@ void RtmpTimerQInit(RTMP_ADAPTER *pAd)
 	RTMP_TIMER_TASK_ENTRY *pQNode, *pEntry;
 	unsigned long irqFlags;
 	
-	NdisAllocateSpinLock(pAd, &pAd->TimerQLock);
+	NdisAllocateSpinLock(&pAd->TimerQLock);
 	
 	NdisZeroMemory(&pAd->TimerQ, sizeof(pAd->TimerQ));
 
@@ -375,5 +377,5 @@ void RtmpTimerQInit(RTMP_ADAPTER *pAd)
 		RTMP_INT_UNLOCK(&pAd->TimerQLock, irqFlags);
 	}
 }
-#endif /* RTMP_TIMER_TASK_SUPPORT */
+#endif // RTMP_TIMER_TASK_SUPPORT //
 

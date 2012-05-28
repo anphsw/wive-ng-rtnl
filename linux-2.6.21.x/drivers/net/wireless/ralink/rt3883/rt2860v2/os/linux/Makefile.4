@@ -2,23 +2,23 @@ include $(RT28xx_DIR)/os/linux/config.mk
 
 #ifdef CONFIG_AP_SUPPORT
 ifeq ($(RT28xx_MODE),AP)
-MOD_NAME = rt$(MODULE)ap
-DAT_PATH = /etc/Wireless/RT$(MODULE_DAT)AP
-DAT_FILE_NAME = RT$(MODULE_DAT)AP.dat
+MOD_NAME = rt$(CHIPSET)ap
+DAT_PATH = /etc/Wireless/RT$(CHIPSET)AP
+DAT_FILE_NAME = RT$(CHIPSET)AP.dat
 endif
 #endif // CONFIG_AP_SUPPORT //
 
 #ifdef CONFIG_STA_SUPPORT
 ifeq ($(RT28xx_MODE), STA)
-MOD_NAME = rt$(MODULE)sta
-DAT_PATH = /etc/Wireless/RT$(MODULE_DAT)STA
-DAT_FILE_NAME = RT$(MODULE_DAT)STA.dat
+MOD_NAME = rt$(CHIPSET)sta
+DAT_PATH = /etc/Wireless/RT$(CHIPSET)STA
+DAT_FILE_NAME = RT$(CHIPSET)STA.dat
 endif
 #endif // CONFIG_STA_SUPPORT //
 
 #ifdef CONFIG_APSTA_SUPPORT
 ifeq ($(RT28xx_MODE), APSTA)
-MOD_NAME = rt$(MODULE)apsta
+MOD_NAME = rt$(CHIPSET)apsta
 endif
 #endif // CONFIG_APSTA_SUPPORT //
 
@@ -42,7 +42,6 @@ RT28XX_AP_OBJ := \
 	$(RT28xx_DIR)/common/action.o\
 	$(RT28xx_DIR)/common/cmm_data.o\
 	$(RT28xx_DIR)/common/rtmp_init.o\
-	$(RT28xx_DIR)/common/rtmp_init_inf.o\
 	$(RT28xx_DIR)/common/cmm_tkip.o\
 	$(RT28xx_DIR)/common/cmm_aes.o\
 	$(RT28xx_DIR)/common/cmm_sync.o\
@@ -58,11 +57,6 @@ RT28XX_AP_OBJ := \
 	$(RT28xx_DIR)/common/cmm_profile.o\
 	$(RT28xx_DIR)/common/cmm_asic.o\
 	$(RT28xx_DIR)/common/cmm_cmd.o\
-	$(RT28xx_DIR)/rate_ctrl/ra_ctrl.o\
-	$(RT28xx_DIR)/rate_ctrl/alg_legacy.o\
-	$(RT28xx_DIR)/os/linux/rt_profile.o\
-	$(RT28xx_DIR)/ap/ap_mbss.o\
-	$(RT28xx_DIR)/chips/rtmp_chip.o\
 	$(RT28xx_DIR)/ap/ap.o\
 	$(RT28xx_DIR)/ap/ap_assoc.o\
 	$(RT28xx_DIR)/ap/ap_auth.o\
@@ -72,67 +66,42 @@ RT28XX_AP_OBJ := \
 	$(RT28xx_DIR)/ap/ap_sync.o\
 	$(RT28xx_DIR)/ap/ap_wpa.o\
 	$(RT28xx_DIR)/ap/ap_data.o\
-	$(RT28xx_DIR)/common/uapsd.o\
+	$(RT28xx_DIR)/ap/ap_uapsd.o\
 	$(RT28xx_DIR)/ap/ap_autoChSel.o\
 	$(RT28xx_DIR)/ap/ap_qload.o\
 	$(RT28xx_DIR)/ap/ap_cfg.o
 
 ifeq ($(OSABL),NO)
-RT28XX_AP_OBJ := \
-	$(RT28xx_DIR)/ap/ap_mbss_inf.o\
-	$(RT28xx_DIR)/common/rt_os_util.o\
+RT28XX_AP_OBJ += \
+	$(RT28xx_DIR)/common/rtmp_init_inf.o\
+	$(RT28xx_DIR)/ap/ap_mbss.o\
+	$(RT28xx_DIR)/os/linux/rt_profile.o\
 	$(RT28xx_DIR)/os/linux/ap_ioctl.o\
 	$(RT28xx_DIR)/os/linux/rt_linux.o\
 	$(RT28xx_DIR)/os/linux/rt_main_dev.o
-else
-RT28XX_AP_OBJ := \
-	$(RT28xx_DIR)/os/linux/rt_symb.o
-endif
-
-ifeq ($(HAS_NEW_RATE_ADAPT_SUPPORT),y)
-RT28XX_AP_OBJS += $(RT28xx_DIR)/rate_ctrl/alg_grp.o
 endif
 
 #ifdef DOT11_N_SUPPORT
 ifeq ($(HAS_DOT11_N_SUPPORT),y)
 RT28XX_AP_OBJ += \
 	$(RT28xx_DIR)/common/ba_action.o
-
-#ifdef TXBF_SUPPORT
-ifeq ($(HAS_TXBF_SUPPORT),y)
-rt$(MODULE)ap-objs += \
-	$(RT28xx_DIR)/common/cmm_txbf.o\
-	$(RT28xx_DIR)/common/cmm_txbf_cal.o
-endif
-#endif // TXBF_SUPPORT //
 endif
 #endif // DOT11_N_SUPPORT //
 
 #ifdef BG_FT_SUPPORT
-ifeq ($(OSABL),NO)
 ifeq ($(HAS_BGFP_SUPPORT),y)
 RT28XX_AP_OBJ += \
-	$(RT28xx_DIR)/os/linux/br_ftph.o
-endif
+	$(RT28xx_DIR)/common/br_ftph.o
 endif
 #endif // BG_FT_SUPPORT //
 
-#ifdef LED_CONTROL_SUPPORT
-ifeq ($(HAS_LED_CONTROL_SUPPORT),y)
-RT28XX_AP_OBJ += \
-	$(RT28xx_DIR)/common/rt_led.o
-endif
-#endif // LED_CONTROL_SUPPORT //
-
 #ifdef RT2860
-ifneq ($(findstring 2860,$(CHIPSET)),)
+ifeq ($(CHIPSET),2860)
 RT28XX_AP_OBJ += \
 	$(RT28xx_DIR)/common/cmm_mac_pci.o\
 	$(RT28xx_DIR)/common/cmm_data_pci.o\
-	$(RT28xx_DIR)/os/linux/rt_rbus_pci_drv.o\
 	$(RT28xx_DIR)/common/rtmp_mcu.o\
-	$(RT28xx_DIR)/common/ee_prom.o\
-	$(RT28xx_DIR)/chips/rt28xx.o
+	$(RT28xx_DIR)/common/ee_prom.o
 
 ifeq ($(OSABL),NO)
 RT28XX_AP_OBJ += \
@@ -147,13 +116,13 @@ endif
 
 
 #ifdef RT2880
-ifneq ($(findstring 2880,$(CHIPSET)),)
+ifeq ($(CHIPSET),2880)
 RT28XX_AP_OBJ += \
 	$(RT28xx_DIR)/common/cmm_mac_pci.o\
 	$(RT28xx_DIR)/common/cmm_data_pci.o\
-	$(RT28xx_DIR)/os/linux/rt_rbus_pci_drv.o\
 	$(RT28xx_DIR)/common/ee_flash.o\
 	$(RT28xx_DIR)/common/rtmp_swmcu.o\
+	$(RT28xx_DIR)/common/led.o\
 	$(RT28xx_DIR)/chips/rt2880.o
 
 ifeq ($(HAS_DFS_SUPPORT),y)
@@ -173,18 +142,10 @@ endif
 
 
 
-
-
-
-#ifdef RTMP_MAC_PCI
-#endif // RTMP_MAC_PCI //
-
-
 ifeq ($(HAS_RT2880_RT2860_COEXIST),y)	
 RT28XX_AP_OBJ += \
-	$(RT28xx_DIR)/os/linux/rt_pci_rbus.o\
-	$(RT28xx_DIR)/os/linux/rt_rbus_pci_util.o\
 	$(RT28xx_DIR)/os/linux/pci_main_dev.o\
+	$(RT28xx_DIR)/os/linux/rt_rbus_pci_util.o\
 	$(RT28xx_DIR)/common/dfs.o
 endif
 
@@ -201,11 +162,7 @@ RT28XX_AP_OBJ += \
 	$(RT28xx_DIR)/common/crypt_biginteger.o\
 	$(RT28xx_DIR)/common/crypt_dh.o
 endif
-ifeq ($(HAS_WSC_V2),y)
-RT28XX_AP_OBJ += $(RT28xx_DIR)/common/wsc_v2.o
-endif
 #endif // WSC_INCLUDED //
-
 
 
 ifeq ($(HAS_WDS),y)
@@ -245,6 +202,13 @@ ifeq ($(HAS_IGMP_SNOOP_SUPPORT),y)
 RT28XX_AP_OBJ += $(RT28xx_DIR)/common/igmp_snoop.o
 endif
 
+#ifdef WMM_ACM_SUPPORT
+ifeq ($(HAS_WMM_ACM_SUPPORT),y)
+RT28XX_AP_OBJ += $(RT28xx_DIR)/common/acm_edca.o\
+	$(RT28xx_DIR)/common/acm_comm.o\
+	$(RT28xx_DIR)/common/acm_iocl.o
+endif
+#endif // WMM_ACM_SUPPORT //
 
 ifeq ($(HAS_QOS_DLS_SUPPORT),y)
 RT28XX_AP_OBJ += $(RT28xx_DIR)/ap/ap_dls.o
@@ -291,7 +255,6 @@ RT28XX_STA_OBJ := \
 	$(RT28xx_DIR)/common/action.o\
 	$(RT28xx_DIR)/common/cmm_data.o\
 	$(RT28xx_DIR)/common/rtmp_init.o\
-	$(RT28xx_DIR)/common/rtmp_init_inf.o\
 	$(RT28xx_DIR)/common/cmm_tkip.o\
 	$(RT28xx_DIR)/common/cmm_aes.o\
 	$(RT28xx_DIR)/common/cmm_sync.o\
@@ -300,6 +263,7 @@ RT28XX_STA_OBJ := \
 	$(RT28xx_DIR)/common/cmm_info.o\
 	$(RT28xx_DIR)/common/cmm_cfg.o\
 	$(RT28xx_DIR)/common/cmm_wpa.o\
+	$(RT28xx_DIR)/common/cmm_wpa_adhoc.o\
 	$(RT28xx_DIR)/common/dfs.o\
 	$(RT28xx_DIR)/common/spectrum.o\
 	$(RT28xx_DIR)/common/rtmp_timer.o\
@@ -307,11 +271,6 @@ RT28XX_STA_OBJ := \
 	$(RT28xx_DIR)/common/cmm_profile.o\
 	$(RT28xx_DIR)/common/cmm_asic.o\
 	$(RT28xx_DIR)/common/cmm_cmd.o\
-	$(RT28xx_DIR)/rate_ctrl/ra_ctrl.o\
-	$(RT28xx_DIR)/rate_ctrl/alg_legacy.o\
-	$(RT28xx_DIR)/rate_ctrl/alg_ags.o\
-	$(RT28xx_DIR)/os/linux/rt_profile.o\
-	$(RT28xx_DIR)/chips/rtmp_chip.o\
 	$(RT28xx_DIR)/sta/assoc.o\
 	$(RT28xx_DIR)/sta/auth.o\
 	$(RT28xx_DIR)/sta/auth_rsp.o\
@@ -324,31 +283,17 @@ RT28XX_STA_OBJ := \
 
 ifeq ($(OSABL),NO)
 RT28XX_STA_OBJ += \
-	$(RT28xx_DIR)/common/rt_os_util.o\
+	$(RT28xx_DIR)/common/rtmp_init_inf.o\
+	$(RT28xx_DIR)/os/linux/rt_profile.o\
 	$(RT28xx_DIR)/os/linux/sta_ioctl.o\
 	$(RT28xx_DIR)/os/linux/rt_linux.o\
 	$(RT28xx_DIR)/os/linux/rt_main_dev.o
-else
-RT28XX_STA_OBJ += \
-	$(RT28xx_DIR)/os/linux/rt_symb.o
-endif
-
-ifeq ($(HAS_NEW_RATE_ADAPT_SUPPORT),y)
-RT28XX_STA_OBJS += $(RT28xx_DIR)/rate_ctrl/alg_grp.o
 endif
 
 #ifdef DOT11_N_SUPPORT
 ifeq ($(HAS_DOT11_N_SUPPORT),y)
 RT28XX_STA_OBJ += \
 	$(RT28xx_DIR)/common/ba_action.o
-
-#ifdef TXBF_SUPPORT
-ifeq ($(HAS_TXBF_SUPPORT),y)
-rt$(MODULE)sta-objs += \
-	$(RT28xx_DIR)/common/cmm_txbf.o\
-	$(RT28xx_DIR)/common/cmm_txbf_cal.o
-endif
-#endif // TXBF_SUPPORT //
 endif
 #endif // DOT11_N_SUPPORT //
 
@@ -362,11 +307,6 @@ RT28XX_STA_OBJ += \
 endif
 #endif // ETH_CONVERT //
 
-#ifdef ADHOC_WPA2PSK_SUPPORT
-RT28XX_STA_OBJ += \
-	$(RT28xx_DIR)/common/cmm_wpa_adhoc.o
-#endif // ADHOC_WPA2PSK_SUPPORT //
-
 #ifdef WSC_INCLUDED
 ifeq ($(HAS_WSC),y)
 RT28XX_STA_OBJ += \
@@ -374,12 +314,14 @@ RT28XX_STA_OBJ += \
 	$(RT28xx_DIR)/common/wsc_tlv.o\
 	$(RT28xx_DIR)/common/crypt_biginteger.o\
 	$(RT28xx_DIR)/common/crypt_dh.o
+
+ifeq ($(HAS_SAMSUNG_EASY_CONFIG_SUPPORT),y)
+rt$(CHIPSET)sta-objs += \
+	$(RT28xx_DIR)/sta/sta_auto_provision.o
 endif
-ifeq ($(HAS_WSC_V2),y)
-RT28XX_STA_OBJ += $(RT28xx_DIR)/common/wsc_v2.o
+
 endif
 #endif // WSC_INCLUDED //
-
 
 ifeq ($(HAS_BLOCK_NET_IF),y)
 RT28XX_STA_OBJ += $(RT28xx_DIR)/common/netif_block.o
@@ -399,15 +341,8 @@ RT28XX_STA_OBJ += \
 endif
 #endif // DOT11Z_TDLS_SUPPORT //
 
-#ifdef LED_CONTROL_SUPPORT
-ifeq ($(HAS_LED_CONTROL_SUPPORT),y)
-RT28XX_STA_OBJ += \
-	$(RT28xx_DIR)/common/rt_led.o
-endif
-#endif // LED_CONTROL_SUPPORT //
-
 #ifdef RT2860
-ifneq ($(findstring 2860,$(CHIPSET)),)
+ifeq ($(CHIPSET),2860)
 RT28XX_STA_OBJ += \
 	$(RT28xx_DIR)/common/cmm_mac_pci.o\
 	$(RT28xx_DIR)/common/cmm_data_pci.o\
@@ -427,14 +362,12 @@ endif
 
 
 #ifdef RT2880
-ifneq ($(findstring 2880,$(CHIPSET)),)
-rt$(MODULE)sta-objs += \
+ifeq ($(CHIPSET),2880)
+rt$(CHIPSET)sta-objs += \
 	$(RT28xx_DIR)/os/linux/rbus_main_dev.o\
 	$(RT28xx_DIR)/os/linux/rt_pci_rbus.o\
-	$(RT28xx_DIR)/os/linux/rt_rbus_pci_util.o\
 	$(RT28xx_DIR)/common/cmm_mac_pci.o\
 	$(RT28xx_DIR)/common/cmm_data_pci.o\
-	$(RT28xx_DIR)/os/linux/rt_rbus_pci_drv.o\
 	$(RT28xx_DIR)/common/ee_flash.o\
 	$(RT28xx_DIR)/common/rtmp_swmcu.o\
 	$(RT28xx_DIR)/chips/rt2880.o
@@ -444,16 +377,17 @@ endif
 
 
 
-
-
-#ifdef RTMP_MAC_PCI
-#endif // RTMP_MAC_PCI //
-
-
 ifeq ($(HAS_ATE),y)
 RT28XX_STA_OBJ += $(RT28xx_DIR)/common/rt_ate.o
 endif
 
+#ifdef WMM_ACM_SUPPORT
+ifeq ($(HAS_WMM_ACM_SUPPORT),y)
+RT28XX_STA_OBJ += $(RT28xx_DIR)/common/acm_edca.o\
+	$(RT28xx_DIR)/common/acm_comm.o\
+	$(RT28xx_DIR)/common/acm_iocl.o
+endif
+#endif // WMM_ACM_SUPPORT //
 
 
 #ifdef WAPI_SUPPORT
@@ -464,83 +398,6 @@ endif
 #endif // WAPI_SUPPORT //
 
 
-
-#ifdef P2P_SUPPORT
-ifeq ($(OSABL),NO)
-ifeq ($(HAS_P2P_SUPPORT),y)
-RT28XX_STA_OBJ += \
-        $(RT28xx_DIR)/common/p2p_inf.o
-endif
-endif
-
-ifeq ($(HAS_P2P_SUPPORT),y)
-RT28XX_STA_OBJ += \
-	$(RT28xx_DIR)/ap/ap_mbss.o\
-	$(RT28xx_DIR)/ap/ap.o\
-	$(RT28xx_DIR)/ap/ap_assoc.o\
-	$(RT28xx_DIR)/ap/ap_auth.o\
-	$(RT28xx_DIR)/ap/ap_connect.o\
-	$(RT28xx_DIR)/ap/ap_mlme.o\
-	$(RT28xx_DIR)/ap/ap_sanity.o\
-	$(RT28xx_DIR)/ap/ap_sync.o\
-	$(RT28xx_DIR)/ap/ap_wpa.o\
-	$(RT28xx_DIR)/ap/ap_data.o\
-	$(RT28xx_DIR)/common/uapsd.o\
-	$(RT28xx_DIR)/ap/ap_autoChSel.o\
-	$(RT28xx_DIR)/ap/ap_qload.o\
-	$(RT28xx_DIR)/sta/p2pcli.o \
-	$(RT28xx_DIR)/sta/p2pcli_ctrl.o \
-	$(RT28xx_DIR)/sta/p2pcli_sync.o \
-	$(RT28xx_DIR)/sta/p2pcli_auth.o \
-	$(RT28xx_DIR)/sta/p2pcli_assoc.o \
-	$(RT28xx_DIR)/common/cmm_mat.o \
-	$(RT28xx_DIR)/common/cmm_mat_iparp.o \
-	$(RT28xx_DIR)/common/cmm_mat_pppoe.o \
-	$(RT28xx_DIR)/common/cmm_mat_ipv6.o \
-	$(RT28xx_DIR)/common/p2p_dbg.o\
-	$(RT28xx_DIR)/common/p2p.o\
-	$(RT28xx_DIR)/common/p2p_packet.o\
-	$(RT28xx_DIR)/common/p2p_action.o\
-	$(RT28xx_DIR)/common/p2p_table.o\
-	$(RT28xx_DIR)/common/p2p_ctrl.o\
-	$(RT28xx_DIR)/common/p2p_disc_mng.o\
-	$(RT28xx_DIR)/common/p2p_nego_mng.o\
-	$(RT28xx_DIR)/common/p2p_dbg.o\
-	$(RT28xx_DIR)/common/p2p.o\
-	$(RT28xx_DIR)/common/p2p_packet.o\
-	$(RT28xx_DIR)/common/p2p_action.o\
-	$(RT28xx_DIR)/common/p2p_table.o\
-	$(RT28xx_DIR)/common/p2p_ctrl.o\
-	$(RT28xx_DIR)/common/p2p_disc_mng.o\
-	$(RT28xx_DIR)/common/p2p_nego_mng.o\
-	$(RT28xx_DIR)/common/p2p_cfg.o\
-	$(RT28xx_DIR)/common/wsc.o\
-	$(RT28xx_DIR)/common/wsc_tlv.o\
-	$(RT28xx_DIR)/common/wsc_ufd.o\
-	$(RT28xx_DIR)/common/crypt_biginteger.o\
-	$(RT28xx_DIR)/common/crypt_dh.o	
-
-ifeq ($(HAS_QOS_DLS_SUPPORT),y)
-RT28XX_STA_OBJ += $(RT28xx_DIR)/ap/ap_dls.o
-endif
-
-endif
-
-ifeq ($(HAS_P2P_SUPPORT),y)
-ifeq ($(OSABL),NO)
-RT28XX_STA_OBJ += \
-        $(RT28xx_DIR)/ap/ap_mbss_inf.o\
-        $(RT28xx_DIR)/common/rt_os_util.o\
-        $(RT28xx_DIR)/os/linux/ap_ioctl.o\
-        $(RT28xx_DIR)/os/linux/sta_ioctl.o\
-        $(RT28xx_DIR)/os/linux/rt_linux.o\
-        $(RT28xx_DIR)/os/linux/rt_main_dev.o
-else
-rt$(MODULE)sta-objs += \
-        ../../os/linux/rt_symb.o
-endif
-endif
-#endif // P2P_SUPPORT //
 
 #endif // CONFIG_STA_SUPPORT //
 
@@ -572,8 +429,6 @@ RT28XX_APSTA_OBJ := \
 	$(RT28xx_DIR)/common/cmm_profile.o\
 	$(RT28xx_DIR)/common/cmm_asic.o\
 	$(RT28xx_DIR)/common/cmm_cmd.o\
-	$(RT28xx_DIR)/rate_ctrl/ra_ctrl.o\
-	$(RT28xx_DIR)/rate_ctrl/alg_legacy.o\
 	$(RT28xx_DIR)/ap/ap.o\
 	$(RT28xx_DIR)/ap/ap_assoc.o\
 	$(RT28xx_DIR)/ap/ap_auth.o\
@@ -583,7 +438,7 @@ RT28XX_APSTA_OBJ := \
 	$(RT28xx_DIR)/ap/ap_sync.o\
 	$(RT28xx_DIR)/ap/ap_wpa.o\
 	$(RT28xx_DIR)/ap/ap_data.o\
-	$(RT28xx_DIR)/common/uapsd.o\
+	$(RT28xx_DIR)/ap/ap_uapsd.o\
 	$(RT28xx_DIR)/sta/assoc.o\
 	$(RT28xx_DIR)/sta/auth.o\
 	$(RT28xx_DIR)/sta/auth_rsp.o\
@@ -608,35 +463,15 @@ RT28XX_APSTA_OBJ += \
 	$(RT28xx_DIR)/os/linux/rt_main_dev.o
 endif
 
-ifeq ($(HAS_NEW_RATE_ADAPT_SUPPORT),y)
-RT28XX_APSTA_OBJS += $(RT28xx_DIR)/rate_ctrl/alg_grp.o
-endif
-
 #ifdef DOT11_N_SUPPORT
 ifeq ($(HAS_DOT11_N_SUPPORT),y)
 RT28XX_APSTA_OBJ += \
-	$(RT28xx_DIR)/common/ba_action.o
-
-#ifdef TXBF_SUPPORT
-ifeq ($(HAS_TXBF_SUPPORT),y)
-rt$(MODULE)apsta-objs += \
-	$(RT28xx_DIR)/common/cmm_txbf.o\
-	$(RT28xx_DIR)/common/cmm_txbf_cal.o
-endif
-#endif // TXBF_SUPPORT //
+	../../common/ba_action.o
 endif
 #endif // DOT11_N_SUPPORT //
 
-
-#ifdef LED_CONTROL_SUPPORT
-ifeq ($(HAS_LED_CONTROL_SUPPORT),y)
-RT28XX_APSTA_OBJ += \
-	$(RT28xx_DIR)/common/rt_led.o
-endif
-#endif // LED_CONTROL_SUPPORT //
-
 #ifdef RT2860
-ifneq ($(findstring 2860,$(CHIPSET)),)
+ifeq ($(CHIPSET),2860)
 RT28XX_APSTA_OBJ += \
 	$(RT28xx_DIR)/common/cmm_mac_pci.o\
 	$(RT28xx_DIR)/common/cmm_data_pci.o\
@@ -657,69 +492,6 @@ endif
 
 
 
-
-ifneq ($(findstring 3573,$(CHIPSET)),)
-RT28XX_APSTA_OBJ += \
-	$(RT28xx_DIR)/common/cmm_mac_usb.o\
-	$(RT28xx_DIR)/common/rtusb_io.o\
-	$(RT28xx_DIR)/common/rtusb_data.o\
-	$(RT28xx_DIR)/common/cmm_data_usb.o\
-	$(RT28xx_DIR)/common/rtmp_mcu.o\
-	$(RT28xx_DIR)/common/ee_prom.o\
-	$(RT28xx_DIR)/common/ee_efuse.o\
-	$(RT28xx_DIR)/common/rt_rf.o\
-	$(RT28xx_DIR)/common/rtusb_bulk.o\
-	$(RT28xx_DIR)/common/frq_cal.o\
-	$(RT28xx_DIR)/os/linux/rt_usb.o\
-	$(RT28xx_DIR)/chips/rt28xx.o\
-	$(RT28xx_DIR)/chips/rt30xx.o\
-	$(RT28xx_DIR)/chips/rt35xx.o\
-	$(RT28xx_DIR)/chips/rt3593.o
-
-ifeq ($(OSABL),NO)
-RT28XX_APSTA_OBJ += \
-	$(RT28xx_DIR)/common/rtusb_dev_id.o\
-	$(RT28xx_DIR)/os/linux/rt_usb_util.o\
-	$(RT28xx_DIR)/os/linux/usb_main_dev.o
-endif
-ifeq ($(HAS_DFS_SUPPORT),y)
-RT28XX_APSTA_OBJ += \
-	$(RT28xx_DIR)/common/dfs_mcu.o
-endif
-endif
-
-ifneq ($(findstring 3593,$(CHIPSET)),)
-RT28XX_APSTA_OBJ += \
-	$(RT28xx_DIR)/common/cmm_mac_pci.o\
-	$(RT28xx_DIR)/common/cmm_data_pci.o\
-	$(RT28xx_DIR)/os/linux/rt_rbus_pci_drv.o\
-	$(RT28xx_DIR)/common/rtmp_mcu.o\
-	$(RT28xx_DIR)/common/ee_prom.o\
-	$(RT28xx_DIR)/common/ee_efuse.o\
-	$(RT28xx_DIR)/common/rt_rf.o\
-	$(RT28xx_DIR)/common/frq_cal.o\
-	$(RT28xx_DIR)/chips/rt30xx.o\
-	$(RT28xx_DIR)/chips/rt35xx.o\
-	$(RT28xx_DIR)/chips/rt28xx.o\
-	$(RT28xx_DIR)/chips/rt3593.o
-
-ifeq ($(OSABL),NO)
-RT28XX_APSTA_OBJ += \
-	$(RT28xx_DIR)/os/linux/rt_pci_rbus.o\
-	$(RT28xx_DIR)/os/linux/rt_rbus_pci_util.o\
-	$(RT28xx_DIR)/os/linux/pci_main_dev.o
-endif
-ifeq ($(HAS_DFS_SUPPORT),y)
-RT28XX_APSTA_OBJ += \
-	$(RT28xx_DIR)/common/dfs_mcu.o
-endif
-endif
-
-
-
-
-#ifdef RTMP_MAC_PCI
-#endif // RTMP_MAC_PCI //
 
 #ifdef WSC_INCLUDED
 ifeq ($(HAS_WSC),y)
@@ -806,13 +578,13 @@ PHONY := all release clean install uninstall
 
 all:$(OBJ)
 
-rt$(MODULE)sta.o: $(RT28XX_STA_OBJ)
+rt$(CHIPSET)sta.o: $(RT28XX_STA_OBJ)
 	$(LD) -r $^ -o $@
 
-rt$(MODULE)ap.o: $(RT28XX_AP_OBJ)
+rt$(CHIPSET)ap.o: $(RT28XX_AP_OBJ)
 	$(LD) -r $^ -o $@
 
-rt$(MODULE)apsta.o: $(RT28XX_APSTA_OBJ)
+rt$(CHIPSET)apsta.o: $(RT28XX_APSTA_OBJ)
 	$(LD) -r $^ -o $@
 
 release:

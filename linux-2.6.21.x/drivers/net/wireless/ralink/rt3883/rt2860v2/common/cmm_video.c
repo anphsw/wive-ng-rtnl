@@ -30,8 +30,6 @@
 
 #ifdef VIDEO_TURBINE_SUPPORT
 
-
-
 BOOLEAN UpdateFromGlobal = FALSE;
 
 void VideoTurbineUpdate(
@@ -52,104 +50,52 @@ void VideoTurbineUpdate(
 	}
 }
 
-
-VOID TxSwQDepthAdjust(IN RTMP_ADAPTER *pAd, IN UINT32 qLen)
-{
-	ULONG IrqFlags;
-	INT qIdx;
-	QUEUE_HEADER *pTxQ;
-	PQUEUE_ENTRY pEntry;
-	PNDIS_PACKET pPacket;
-	
-	RTMP_IRQ_LOCK(&pAd->irq_lock, IrqFlags);
-	pAd->TxSwQMaxLen = qLen;
-	for (qIdx = 0; qIdx < NUM_OF_TX_RING; qIdx++)
-	{
-		pTxQ = &pAd->TxSwQueue[qIdx];
-		while(pTxQ->Number >= pAd->TxSwQMaxLen)
-		{
-			pEntry = RemoveHeadQueue(pTxQ);
-			if (pEntry)
-			{
-				pPacket = QUEUE_ENTRY_TO_PACKET(pEntry);
-				RELEASE_NDIS_PACKET(pAd, pPacket, NDIS_STATUS_FAILURE);
-			}
-			else
-				break;
-		}
-	}
-	RTMP_IRQ_UNLOCK(&pAd->irq_lock, IrqFlags);
-	
-	DBGPRINT(RT_DEBUG_OFF, ("%s():Set TxSwQMaxLen as %d\n", 
-			__FUNCTION__, pAd->TxSwQMaxLen));
-}
-
-
 VOID VideoTurbineDynamicTune(
 	IN PRTMP_ADAPTER pAd)
 {
 	if (pAd->VideoTurbine.Enable == TRUE) 
 	{
-			UINT32 MacReg = 0;
+		UINT32 MacReg = 0;
 
 #ifdef RT3883
-		if (IS_RT3883(pAd))
-		{
-			RTMP_IO_READ32(pAd, TX_AC_RTY_LIMIT, &MacReg);
-			MacReg = 0x0f1f0f0f;
-			RTMP_IO_WRITE32(pAd, TX_AC_RTY_LIMIT, MacReg);
+		RTMP_IO_READ32(pAd, TX_AC_RTY_LIMIT, &MacReg);
+		MacReg = 0x0f1f0f0f;
+		RTMP_IO_WRITE32(pAd, TX_AC_RTY_LIMIT, MacReg);
 
-			RTMP_IO_READ32(pAd, TX_AC_FBK_SPEED, &MacReg);
-			MacReg = 0x06000003;
-			RTMP_IO_WRITE32(pAd, TX_AC_FBK_SPEED, MacReg);
-		}
-		else
-#endif /* RT3883 */
-		{
-			/* Tx retry limit = 2F,1F */
-			RTMP_IO_READ32(pAd, TX_RTY_CFG, &MacReg);
-			MacReg &= 0xFFFF0000;
-			MacReg |= GetAsicVideoRetry(pAd);
-			RTMP_IO_WRITE32(pAd, TX_RTY_CFG, MacReg);
-		}
+		RTMP_IO_READ32(pAd, TX_AC_FBK_SPEED, &MacReg);
+		MacReg = 0x06000003;
+		RTMP_IO_WRITE32(pAd, TX_AC_FBK_SPEED, MacReg);
+#else
+		/* Tx retry limit = 2F,1F */
+		RTMP_IO_READ32(pAd, TX_RTY_CFG, &MacReg);
+		MacReg &= 0xFFFF0000;
+		MacReg |= GetAsicVideoRetry(pAd);
+		RTMP_IO_WRITE32(pAd, TX_RTY_CFG, MacReg);
+#endif // RT3883 //
 
 		pAd->VideoTurbine.TxBASize = GetAsicVideoTxBA(pAd);
-
-		Set_RateAdaptInterval(pAd, "100:50");
-		TxSwQDepthAdjust(pAd, 1024);
-			
 	}
 	else 
 	{
-			UINT32 MacReg = 0;
+		UINT32 MacReg = 0;
 
 #ifdef RT3883
-		if (IS_RT3883(pAd))
-		{
-			RTMP_IO_READ32(pAd, TX_AC_RTY_LIMIT, &MacReg);
-			MacReg = 0x07070707;
-			RTMP_IO_WRITE32(pAd, TX_AC_RTY_LIMIT, MacReg);
+		RTMP_IO_READ32(pAd, TX_AC_RTY_LIMIT, &MacReg);
+		MacReg = 0x07070707;
+		RTMP_IO_WRITE32(pAd, TX_AC_RTY_LIMIT, MacReg);
 	
-			RTMP_IO_READ32(pAd, TX_AC_FBK_SPEED, &MacReg);
-			MacReg = 0x0;
-			RTMP_IO_WRITE32(pAd, TX_AC_FBK_SPEED, MacReg);
-		}
-#endif /* RT3883 */
+		RTMP_IO_READ32(pAd, TX_AC_FBK_SPEED, &MacReg);
+		MacReg = 0x0;
+		RTMP_IO_WRITE32(pAd, TX_AC_FBK_SPEED, MacReg);
+#endif // RT3883 //
 
 		/* Default Tx retry limit = 1F,0F */
 		RTMP_IO_READ32(pAd, TX_RTY_CFG, &MacReg);
 		MacReg &= 0xFFFF0000;
-			MacReg |= GetAsicDefaultRetry(pAd);
+		MacReg |= GetAsicDefaultRetry(pAd);
 		RTMP_IO_WRITE32(pAd, TX_RTY_CFG, MacReg);
 
 		pAd->VideoTurbine.TxBASize = GetAsicDefaultTxBA(pAd);
-
-		/* reset to default rate adaptation simping interval */
-		if ((pAd->ra_interval != DEF_RA_TIME_INTRVAL) || 
-			(pAd->ra_fast_interval != DEF_QUICK_RA_TIME_INTERVAL))
-			Set_RateAdaptInterval(pAd, "500:100");
-
-		TxSwQDepthAdjust(pAd, MAX_PACKETS_IN_QUEUE);
 	}
 }
 
@@ -189,6 +135,6 @@ VOID VideoConfigInit(
 	pAd->VideoTurbine.TxBASize = pAd->CommonCfg.TxBASize; 
 }
 
-#endif /* VIDEO_TURBINE_SUPPORT */
+#endif // VIDEO_TURBINE_SUPPORT //
 
 

@@ -343,9 +343,9 @@ TDLS_InsertEDCAParameterSetIE(
 
 		UCHAR WmeParmIe[26] = {IE_VENDOR_SPECIFIC, 24, 0x00, 0x50, 0xf2, 0x02, 0x01, 0x01, 0, 0}; 
 
-		/*  Reset EdcaParam */
+		//  Reset EdcaParam
 		NdisZeroMemory(&pTDLS->EdcaParm, sizeof(EDCA_PARM));
-		/* Enable EdcaParm used in non-QBSS. */
+		// Enable EdcaParm used in non-QBSS.
 		pTDLS->EdcaParm.bValid = TRUE;
 
 		pTDLS->EdcaParm.bQAck		   = FALSE;
@@ -365,7 +365,7 @@ TDLS_InsertEDCAParameterSetIE(
 			pTDLS->EdcaParm.bAPSDCapable = FALSE;
 		WmeParmIe[8] |= pTDLS->EdcaParm.bAPSDCapable << 7;
 
-		/* By hardcoded */
+		// By hardcoded 
 		pTDLS->EdcaParm.Aifsn[0] = 3;
 		pTDLS->EdcaParm.Aifsn[1] = 7;
 		pTDLS->EdcaParm.Aifsn[2] = 2;
@@ -388,13 +388,13 @@ TDLS_InsertEDCAParameterSetIE(
 
 		for (idx=QID_AC_BE; idx<=QID_AC_VO; idx++)
 		{
-			WmeParmIe[10+ (idx*4)] = (idx << 5)								+	  /* b5-6 is ACI */
-								   ((UCHAR)pTDLS->EdcaParm.bACM[idx] << 4) 	+	  /* b4 is ACM */
-								   (pTDLS->EdcaParm.Aifsn[idx] & 0x0f);			  /* b0-3 is AIFSN */
-			WmeParmIe[11+ (idx*4)] = (pTDLS->EdcaParm.Cwmax[idx] << 4)		+	  /* b5-8 is CWMAX */
-								   (pTDLS->EdcaParm.Cwmin[idx] & 0x0f);			  /* b0-3 is CWMIN */
-			WmeParmIe[12+ (idx*4)] = (UCHAR)(pTDLS->EdcaParm.Txop[idx] & 0xff);	  /* low byte of TXOP */
-			WmeParmIe[13+ (idx*4)] = (UCHAR)(pTDLS->EdcaParm.Txop[idx] >> 8);	  /* high byte of TXOP */
+			WmeParmIe[10+ (idx*4)] = (idx << 5)								+	  // b5-6 is ACI
+								   ((UCHAR)pTDLS->EdcaParm.bACM[idx] << 4) 	+	  // b4 is ACM
+								   (pTDLS->EdcaParm.Aifsn[idx] & 0x0f);			  // b0-3 is AIFSN
+			WmeParmIe[11+ (idx*4)] = (pTDLS->EdcaParm.Cwmax[idx] << 4)		+	  // b5-8 is CWMAX
+								   (pTDLS->EdcaParm.Cwmin[idx] & 0x0f);			  // b0-3 is CWMIN
+			WmeParmIe[12+ (idx*4)] = (UCHAR)(pTDLS->EdcaParm.Txop[idx] & 0xff);	  // low byte of TXOP
+			WmeParmIe[13+ (idx*4)] = (UCHAR)(pTDLS->EdcaParm.Txop[idx] >> 8);	  // high byte of TXOP
 		}
 
 		MakeOutgoingFrame(pFrameBuf,		&TempLen,
@@ -465,7 +465,7 @@ TDLS_InsertHtCapIE(
 	IRQL = PASSIVE_LEVEL
 ==========================================================================
 */
-/* 20/40 BSS Coexistence (7.3.2.61) */
+// 20/40 BSS Coexistence (7.3.2.61)
 VOID
 TDLS_InsertBSSCoexistenceIE(
 	IN	PRTMP_ADAPTER pAd,
@@ -490,8 +490,8 @@ TDLS_InsertBSSCoexistenceIE(
 
 	return;
 }
-#endif /* DOT11N_DRAFT3 */
-#endif /* DOT11_N_SUPPORT */
+#endif // DOT11N_DRAFT3 //
+#endif // DOT11_N_SUPPORT //
 
 /*
 ==========================================================================
@@ -596,5 +596,5 @@ VOID TDLS_InsertTimeoutIntervalIE(
 	*pFrameLen = *pFrameLen + TempLen;
 }
 
-#endif /* DOT11Z_TDLS_SUPPORT */
+#endif // DOT11Z_TDLS_SUPPORT //
 

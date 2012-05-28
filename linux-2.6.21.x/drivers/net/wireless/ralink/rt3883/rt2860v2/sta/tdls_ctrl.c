@@ -58,7 +58,7 @@ VOID TDLS_StateMachineInit(
 	
     StateMachineInit(Sm, (STATE_MACHINE_FUNC*)Trans, MAX_TDLS_STATE, MAX_TDLS_MSG, (STATE_MACHINE_FUNC)Drop, TDLS_IDLE, TDLS_MACHINE_BASE);
      
-    /* the first column */
+    // the first column
     StateMachineSetAction(Sm, TDLS_IDLE, MT2_MLME_TDLS_SETUP_REQ, (STATE_MACHINE_FUNC)TDLS_MlmeTdlsReqAction);
     StateMachineSetAction(Sm, TDLS_IDLE, MT2_PEER_TDLS_SETUP_REQ, (STATE_MACHINE_FUNC)TDLS_PeerTdlsReqAction);
     StateMachineSetAction(Sm, TDLS_IDLE, MT2_PEER_TDLS_SETUP_RSP, (STATE_MACHINE_FUNC)TDLS_PeerTdlsRspAction);
@@ -172,15 +172,15 @@ TDLS_PeerTdlsReqAction(
 
 	DBGPRINT(RT_DEBUG_TRACE, ("====> TDLS_PeerTdlsReqAction\n"));
 
-	/* Not TDLS Capable, ignore it */
+	// Not TDLS Capable, ignore it
 	if (!pAd->StaCfg.bTDLSCapable)
 		return;
 	
-	/* Not BSS mode, ignore it */
+	// Not BSS mode, ignore it
 	if (!INFRA_ON(pAd))
 		return;
 		
-	/* Init all kinds of fields within the packet */
+	// Init all kinds of fields within the packet
 	NdisZeroMemory(&CapabilityInfo, sizeof(CapabilityInfo));
 	NdisZeroMemory(&HtCap, sizeof(HtCap));
 	NdisZeroMemory(&ExtCap, sizeof(ExtCap));
@@ -246,7 +246,7 @@ TDLS_PeerTdlsReqAction(
 						pTDLS->Valid = FALSE;
 						NdisMoveMemory(pTDLS->MacAddr, PeerAddr, MAC_ADDR_LEN);
 						pTDLS->Status = TDLS_MODE_NONE;
-						/*pTDLS = pTmpTDLS; */
+						//pTDLS = pTmpTDLS;
 						DBGPRINT(RT_DEBUG_TRACE,("TDLS - PeerTdlsSetupReqAction() find the same entry \n"));
 					}
 					else
@@ -294,26 +294,26 @@ TDLS_PeerTdlsReqAction(
 
 		if (idx < 0)
 		{
-			/* Table full !!!!! */
+			// Table full !!!!!
 			StatusCode = MLME_REQUEST_DECLINED;
 			DBGPRINT(RT_DEBUG_ERROR,("TDLS - PeerTdlsSetupReqAction() TDLSEntry table full(only can support %d TDLS session) \n", MAX_NUM_OF_TDLS_ENTRY));
 		}
 		else if (pTDLS)
 		{	
-			/* */
-			/* Process TPK Handshake Message 1 here! */
-			/* */
+			//
+			// Process TPK Handshake Message 1 here!
+			//
 			if (((pAd->StaCfg.AuthMode == Ndis802_11AuthModeWPA2) || (pAd->StaCfg.AuthMode == Ndis802_11AuthModeWPA2PSK)) &&
 				((pAd->StaCfg.WepStatus == Ndis802_11Encryption2Enabled) || (pAd->StaCfg.WepStatus == Ndis802_11Encryption3Enabled)))
 			{
 				USHORT Result;
 
-				/* RSNIE (7.3.2.25), FTIE (7.3.2.48), Timeout Interval (7.3.2.49) */
+				// RSNIE (7.3.2.25), FTIE (7.3.2.48), Timeout Interval (7.3.2.49)
 				Result = TDLS_TPKMsg1Process(pAd, pTDLS, RsnIe, RsnLen, FTIe, FTLen, TIIe, TILen);
 				if (Result != MLME_SUCCESS)
 				{
 					DBGPRINT(RT_DEBUG_ERROR,("TDLS - TDLS_TPKMsg1Process() Failed, reason=%d \n", Result));
-					if (Result == MLME_REQUEST_DECLINED)	/* if mic error , ignore */
+					if (Result == MLME_REQUEST_DECLINED)	// if mic error , ignore
 					{
 						return;
 					}
@@ -324,21 +324,21 @@ TDLS_PeerTdlsReqAction(
 					}
 				}
 
-				/* Copy SNonce, Key lifetime */
+				// Copy SNonce, Key lifetime
 				pTDLS->KeyLifetime = le2cpu32(*((PULONG) (TIIe + 3)));
 				NdisMoveMemory(pTDLS->SNonce, &FTIe[52], 32);
 			}
 
 
-			/* */
-			/* Update temporarliy settings. Try to match Initiator's capabilities */
-			/* */
+			//
+			// Update temporarliy settings. Try to match Initiator's capabilities
+			//
 			pTDLS->Token = Token;
-			/* I am Responder.And peer are Initiator */
+			// I am Responder.And peer are Initiator
 			pTDLS->bInitiator = TRUE;
 			pTDLS->CapabilityInfo = CapabilityInfo & SUPPORTED_CAPABILITY_INFO;
 
-			/* Copy Initiator's supported rate and filter out not supported rate */
+			// Copy Initiator's supported rate and filter out not supported rate
 			pTDLS->SupRateLen = SupRateLen;
 			NdisMoveMemory(pTDLS->SupRate, SupRate, SupRateLen);
 			RTMPCheckRates(pAd, pTDLS->SupRate, &pTDLS->SupRateLen);
@@ -346,10 +346,10 @@ TDLS_PeerTdlsReqAction(
 			NdisMoveMemory(pTDLS->ExtRate, ExtRate, ExtRateLen);
 			RTMPCheckRates(pAd, pTDLS->ExtRate, &pTDLS->ExtRateLen);
 
-			/* Filter out un-supported ht rates */
+			// Filter out un-supported ht rates
 			if ((HtCapLen > 0) && (pAd->CommonCfg.PhyMode >= PHY_11ABGN_MIXED))
 			{
-				/* HtCapability carries Responder's capability, so not copy from Initiator here. */
+				// HtCapability carries Responder's capability, so not copy from Initiator here.
 				RTMPZeroMemory(&pTDLS->HtCapability, SIZE_HT_CAP_IE);
 				pTDLS->HtCapabilityLen = SIZE_HT_CAP_IE;
 				NdisMoveMemory(&pTDLS->HtCapability, &HtCap, SIZE_HT_CAP_IE);
@@ -360,10 +360,10 @@ TDLS_PeerTdlsReqAction(
 				RTMPZeroMemory(&pTDLS->HtCapability, SIZE_HT_CAP_IE);
 			}
 
-			/* Copy extended capability */
+			// Copy extended capability
 			NdisMoveMemory(&pTDLS->TdlsExtCap, &ExtCap, sizeof(EXT_CAP_INFO_ELEMENT));
 
-			/* Copy QOS related information */
+			// Copy QOS related information
 			pTDLS->QosCapability = QosCapability;
 			pTDLS->bWmmCapable = bWmmCapable;
 		}
@@ -425,17 +425,17 @@ TDLS_PeerTdlsRspAction(
 	UCHAR					TPK[LEN_PMK], TPKName[LEN_PMK_NAME];
 	PMAC_TABLE_ENTRY		pMacEntry = NULL;
 	
-	/* Not TDLS Capable, ignore it */
+	// Not TDLS Capable, ignore it
 	if (!pAd->StaCfg.bTDLSCapable)
 		return;
 	
-	/* Not BSS mode, ignore it */
+	// Not BSS mode, ignore it
 	if (!INFRA_ON(pAd))
 		return;
 
 	hex_dump("TDLS setup response receive pack", Elem->Msg, Elem->MsgLen);
 
-	/* Init all kinds of fields within the packet */
+	// Init all kinds of fields within the packet
 	NdisZeroMemory(&CapabilityInfo, sizeof(CapabilityInfo));
 	NdisZeroMemory(&HtCap, sizeof(HtCap));
 	NdisZeroMemory(&ExtCap, sizeof(ExtCap));
@@ -474,18 +474,18 @@ TDLS_PeerTdlsRspAction(
 
 	DBGPRINT(RT_DEBUG_TRACE,("TDLS - PeerTdlsSetupRspAction() received a response from %02x:%02x:%02x:%02x:%02x:%02x with StatusCode=%d\n", PeerAddr[0], PeerAddr[1], PeerAddr[2], PeerAddr[3], PeerAddr[4], PeerAddr[5], StatusCode));
 
-	/* Drop not within my TDLS Table that created before ! */
+	// Drop not within my TDLS Table that created before !
 	LinkId = TDLS_SearchLinkId(pAd, PeerAddr);
 	if (LinkId == -1 || LinkId == MAX_NUM_OF_TDLS_ENTRY)
 		return;
 
-	/* Point to the current Link ID */
+	// Point to the current Link ID
 	pTDLS = (PRT_802_11_TDLS)&pAd->StaCfg.TDLSEntry[LinkId];
-	/* Cancel the timer since the received packet to me. */
+	// Cancel the timer since the received packet to me.
 	RTMPCancelTimer(&pTDLS->Timer, &TimerCancelled);
 
-	/* Received a error code from the Peer TDLS. */
-	/* Let's terminate the setup procedure right now. */
+	// Received a error code from the Peer TDLS.
+	// Let's terminate the setup procedure right now.
 	if (StatusCode != MLME_SUCCESS)
 	{
 		pTDLS->Status = TDLS_MODE_NONE;
@@ -498,12 +498,12 @@ TDLS_PeerTdlsRspAction(
 	else
 		StatusCode = LocalStatusCode;
 	
-	/* */
-	/* Validate the content on Setup Response Frame */
-	/* */
+	// 
+	// Validate the content on Setup Response Frame
+	//
 	while (StatusCode == MLME_SUCCESS)
 	{		
-		/* Invalid TDLS State */
+		// Invalid TDLS State
 		if (pTDLS->Status != TDLS_MODE_WAIT_RESPONSE)
 		{
 			DBGPRINT(RT_DEBUG_ERROR,("TDLS - PeerTdlsSetupRspAction() Not in TDLS_MODE_WAIT_RESPONSE STATE\n"));
@@ -511,7 +511,7 @@ TDLS_PeerTdlsRspAction(
 			break;
 		}
 
-		/* Is the same Dialog Token? */
+		// Is the same Dialog Token?
 		if (pTDLS->Token != Token)
 		{
 			DBGPRINT(RT_DEBUG_ERROR,("TDLS - PeerTdlsSetupRspAction() Not match with Dialig Token my token = %d, peer token = %d\n", pTDLS->Token, Token));
@@ -520,18 +520,18 @@ TDLS_PeerTdlsRspAction(
 			break;
 		}
 		
-		/* Process TPK Handshake Message 2 here! */
+		// Process TPK Handshake Message 2 here!
 		if (((pAd->StaCfg.AuthMode == Ndis802_11AuthModeWPA2) || (pAd->StaCfg.AuthMode == Ndis802_11AuthModeWPA2PSK)) &&
 			((pAd->StaCfg.WepStatus == Ndis802_11Encryption2Enabled) || (pAd->StaCfg.WepStatus == Ndis802_11Encryption3Enabled)))
 		{	
 			USHORT Result;
 
-			/* RSNIE (7.3.2.25), FTIE (7.3.2.48), Timeout Interval (7.3.2.49) */
+			// RSNIE (7.3.2.25), FTIE (7.3.2.48), Timeout Interval (7.3.2.49)
 			Result = TDLS_TPKMsg2Process(pAd, pTDLS, RsnIe, RsnLen, FTIe, FTLen, TIIe, TILen, TPK, TPKName);
 			if (Result != MLME_SUCCESS)
 			{
 				DBGPRINT(RT_DEBUG_ERROR,("TDLS - TDLS_TPKMsg2Process() Failed, reason=%d \n", Result));
-				if (Result == MLME_REQUEST_DECLINED)	/* if mic error , ignore */
+				if (Result == MLME_REQUEST_DECLINED)	// if mic error , ignore
 				{
 					return;
 				}
@@ -541,25 +541,25 @@ TDLS_PeerTdlsRspAction(
 					goto send_out;
 				}
 			}
-			/* Copy ANonce, Key lifetime, TPK, TPK Name */
+			// Copy ANonce, Key lifetime, TPK, TPK Name
 			pTDLS->KeyLifetime =  le2cpu32(*((PULONG) (TIIe + 3)));
 			NdisMoveMemory(pTDLS->ANonce, &FTIe[20], 32);
 				NdisMoveMemory(pTDLS->TPK, TPK, LEN_PMK);
 			NdisMoveMemory(pTDLS->TPKName, TPKName, LEN_PMK_NAME);
 		}
 
-		/* Update parameters */
+		// Update parameters
 		if (StatusCode == MLME_SUCCESS)
 		{
-			/* I am Initiator. And peer are Responder */
+			// I am Initiator. And peer are Responder
 			pTDLS->bInitiator = FALSE;
-			/* Capabilities */
+			// Capabilities
 			pTDLS->CapabilityInfo = CapabilityInfo;
 
 			pTDLS->SupRateLen = SupRateLen;
 			pTDLS->ExtRateLen = ExtRateLen;
 			
-			/* Copy ht capabilities from the Peer TDLS */
+			// Copy ht capabilities from the Peer TDLS
 			if ((HtCapLen > 0) && (pAd->CommonCfg.PhyMode >= PHY_11ABGN_MIXED))
 			{
 				NdisMoveMemory(&pTDLS->HtCapability, &HtCap, HtCapLen);
@@ -571,18 +571,18 @@ TDLS_PeerTdlsRspAction(
 				RTMPZeroMemory(&pTDLS->HtCapability, SIZE_HT_CAP_IE);
 			}
 
-			/* Copy extended capability */
+			// Copy extended capability
 			NdisMoveMemory(&pTDLS->TdlsExtCap, &ExtCap, sizeof(EXT_CAP_INFO_ELEMENT));
 
-			/* Copy QOS related information */
+			// Copy QOS related information
 			pTDLS->QosCapability = QosCapability;
 			pTDLS->bWmmCapable = bWmmCapable;
 			
-			/* Copy TPK related information */
+			// Copy TPK related information
 			if (((pAd->StaCfg.AuthMode == Ndis802_11AuthModeWPA2) || (pAd->StaCfg.AuthMode == Ndis802_11AuthModeWPA2PSK)) &&
 				((pAd->StaCfg.WepStatus == Ndis802_11Encryption2Enabled) || (pAd->StaCfg.WepStatus == Ndis802_11Encryption3Enabled)))
 			{
-				/* SNonce, Key lifetime */
+				// SNonce, Key lifetime
 			}
 
 		}
@@ -591,18 +591,18 @@ TDLS_PeerTdlsRspAction(
 		break;
 	}
 
-	/* */
-	/* Insert into mac table */
-	/* */
+	//
+	// Insert into mac table
+	//
 	if (StatusCode == MLME_SUCCESS)
 	{
-		/* allocate one MAC entry */
+		// allocate one MAC entry
 		pMacEntry = MacTableLookup(pAd, pTDLS->MacAddr);
 
 		if (pMacEntry && IS_ENTRY_TDLS(pMacEntry))
 			DBGPRINT(RT_DEBUG_ERROR,("TDLS - MacTable Entry exist !!!\n"));
 		else
-			pMacEntry = MacTableInsertEntry(pAd, pTDLS->MacAddr, BSS0 + MIN_NET_DEVICE_FOR_TDLS, OPMODE_STA, TRUE);
+			pMacEntry = MacTableInsertEntry(pAd, pTDLS->MacAddr, BSS0 + MIN_NET_DEVICE_FOR_TDLS, TRUE);
 
 		if (pMacEntry)
 		{
@@ -614,7 +614,7 @@ TDLS_PeerTdlsRspAction(
 
 			DBGPRINT(RT_DEBUG_TRACE, ("MacTableInsertTDlsEntry - allocate entry #%d, Total= %d\n",pMacEntry->Aid, pAd->MacTab.Size));
 
-			/* Set WMM capability */
+			// Set WMM capability
 			if ((pAd->CommonCfg.PhyMode >= PHY_11ABGN_MIXED) || (pAd->CommonCfg.bWmmCapable))
 			{
 				CLIENT_STATUS_SET_FLAG(pMacEntry, fCLIENT_STATUS_WMM_CAPABLE);
@@ -633,13 +633,13 @@ TDLS_PeerTdlsRspAction(
 											HtCapLen,
 											&HtCap);
 
-			/* */
-			/* Install Peer Key if RSNA Enabled */
-			/* */
+			//
+			// Install Peer Key if RSNA Enabled
+			//
 			if (((pAd->StaCfg.AuthMode == Ndis802_11AuthModeWPA2) || (pAd->StaCfg.AuthMode == Ndis802_11AuthModeWPA2PSK)) &&
 				((pAd->StaCfg.WepStatus == Ndis802_11Encryption2Enabled) || (pAd->StaCfg.WepStatus == Ndis802_11Encryption3Enabled)))
 			{	
-				/* Write to ASIC on-chip table. */
+				// Write to ASIC on-chip table.
 				if ( pMacEntry->Aid > 1)
 				{
 					CIPHER_KEY		PairwiseKey;
@@ -649,7 +649,7 @@ TDLS_PeerTdlsRspAction(
 					else if (pAd->StaCfg.PairCipher == Ndis802_11Encryption3Enabled)
 						PairwiseKey.CipherAlg = CIPHER_AES;
 
-					/* Set Peer Key */
+					// Set Peer Key
 					PairwiseKey.KeyLen = LEN_TK;
 					NdisMoveMemory(PairwiseKey.Key, &pTDLS->TPK[16], LEN_TK);
 
@@ -721,17 +721,17 @@ TDLS_PeerTdlsConfAction(
 	UCHAR			RsnIe[64], FTIe[128], TIIe[7];
 	PMAC_TABLE_ENTRY pMacEntry = NULL;
 	
-	/* Not TDLS Capable, ignore it */
+	// Not TDLS Capable, ignore it
 	if (!pAd->StaCfg.bTDLSCapable)
 		return;
 	
-	/* Not BSS mode, ignore it */
+	// Not BSS mode, ignore it
 	if (!INFRA_ON(pAd))
 		return;
 
 	hex_dump("TDLS setup confirm receive pack", Elem->Msg, Elem->MsgLen);
 
-	/* Init all kinds of fields within the packet */
+	// Init all kinds of fields within the packet
 	NdisZeroMemory(&EdcaParm, sizeof(EdcaParm));
 	NdisZeroMemory(&CapabilityInfo, sizeof(CapabilityInfo));
 	NdisZeroMemory(RsnIe, sizeof(RsnIe));
@@ -761,20 +761,20 @@ TDLS_PeerTdlsConfAction(
 
 	DBGPRINT(RT_DEBUG_TRACE,("TDLS - PeerTdlsSetupConfAction() received a confirm from %02x:%02x:%02x:%02x:%02x:%02x with StatusCode=%d\n", PeerAddr[0], PeerAddr[1], PeerAddr[2], PeerAddr[3], PeerAddr[4], PeerAddr[5], StatusCode));
 
-	/* Drop not within my TDLS Table that created before ! */
+	// Drop not within my TDLS Table that created before !
 	LinkId = TDLS_SearchLinkId(pAd, PeerAddr);
 	if (LinkId == -1 || LinkId == MAX_NUM_OF_TDLS_ENTRY)
 		return;
 
-	/* Point to the current Link ID */
+	// Point to the current Link ID
 	pTDLS = (PRT_802_11_TDLS)&pAd->StaCfg.TDLSEntry[LinkId];
-	/* Cancel the timer since the received packet to me. */
+	// Cancel the timer since the received packet to me.
 	RTMPCancelTimer(&pTDLS->Timer, &TimerCancelled);
 
 
 
-	/* Received a error code from the Peer TDLS. */
-	/* Let's terminate the setup procedure right now. */
+	// Received a error code from the Peer TDLS.
+	// Let's terminate the setup procedure right now.
 	if (StatusCode != MLME_SUCCESS)
 	{
 		pTDLS->Status = TDLS_MODE_NONE;
@@ -787,12 +787,12 @@ TDLS_PeerTdlsConfAction(
 	else
 		StatusCode = LocalStatusCode;
 
-	/* */
-	/* Validate the content on Setup Confirm Frame */
-	/* */
+	// 
+	// Validate the content on Setup Confirm Frame
+	//
 	while (StatusCode == MLME_SUCCESS)
 	{		
-		/* Invalid TDLS State */
+		// Invalid TDLS State
 		if (pTDLS->Status != TDLS_MODE_WAIT_CONFIRM)
 		{
 			DBGPRINT(RT_DEBUG_ERROR,("TDLS - PeerTdlsSetupConfAction() Not in TDLS_MODE_WAIT_CONFIRM STATE\n"));		
@@ -800,7 +800,7 @@ TDLS_PeerTdlsConfAction(
 			break;
 		}
 
-		/* Is the same Dialog Token? */
+		// Is the same Dialog Token?
 		if (pTDLS->Token != Token)
 		{
 			DBGPRINT(RT_DEBUG_ERROR,("TDLS - PeerTdlsSetupConfAction() Not match with Dialig Token \n"));
@@ -808,12 +808,12 @@ TDLS_PeerTdlsConfAction(
 			break;
 		}
 		
-		/* Process TPK Handshake Message 3 here! */
+		// Process TPK Handshake Message 3 here!
 		if ((pAd->StaCfg.AuthMode == Ndis802_11AuthModeWPA2) || (pAd->StaCfg.AuthMode == Ndis802_11AuthModeWPA2PSK))
 		{		
 			USHORT Result;
 
-			/* RSNIE (7.3.2.25), FTIE (7.3.2.48), Timeout Interval (7.3.2.49) */
+			// RSNIE (7.3.2.25), FTIE (7.3.2.48), Timeout Interval (7.3.2.49)
 			Result = TDLS_TPKMsg3Process(pAd, pTDLS, RsnIe, RsnLen, FTIe, FTLen, TIIe, TILen);
 			if (Result != MLME_SUCCESS)
 			{
@@ -823,23 +823,23 @@ TDLS_PeerTdlsConfAction(
 			}
 		}
 
-		/* Update parameters */
+		// Update parameters
 		if (StatusCode == MLME_SUCCESS)
 		{
-			/* I am Responder.And peer are Initiator */
+			// I am Responder.And peer are Initiator
 			pTDLS->bInitiator = TRUE;
 			
-			/* Copy EDCA Parameters */
-			/*if ((pAd->CommonCfg.PhyMode >= PHY_11ABGN_MIXED) || (pAd->CommonCfg.bWmmCapable)) */
-				/*NdisMoveMemory(&pTDLS->EdcaParm, &EdcaParm, sizeof(QBSS_STA_EDCA_PARM)); */
-			/*else */
-				/*NdisZeroMemory(&pTDLS->EdcaParm, sizeof(EDCA_PARM)); */
+			// Copy EDCA Parameters
+			//if ((pAd->CommonCfg.PhyMode >= PHY_11ABGN_MIXED) || (pAd->CommonCfg.bWmmCapable))
+				//NdisMoveMemory(&pTDLS->EdcaParm, &EdcaParm, sizeof(QBSS_STA_EDCA_PARM));	
+			//else
+				//NdisZeroMemory(&pTDLS->EdcaParm, sizeof(EDCA_PARM));
 
-			/* Copy TPK related information */
+			// Copy TPK related information
 			if (((pAd->StaCfg.AuthMode == Ndis802_11AuthModeWPA2) || (pAd->StaCfg.AuthMode == Ndis802_11AuthModeWPA2PSK)) &&
 				((pAd->StaCfg.WepStatus == Ndis802_11Encryption2Enabled) || (pAd->StaCfg.WepStatus == Ndis802_11Encryption3Enabled)))
 			{
-				/* SNonce, Key lifetime */
+				// SNonce, Key lifetime
 			}
 
 		}
@@ -848,17 +848,17 @@ TDLS_PeerTdlsConfAction(
 		
 	}
 
-	/* */
-	/* Insert into mac table */
-	/* */
+	//
+	// Insert into mac table
+	//
 	if (StatusCode == MLME_SUCCESS)
 	{
-		/* allocate one MAC entry */
+		// allocate one MAC entry
 		pMacEntry = MacTableLookup(pAd, pTDLS->MacAddr);
 		if (pMacEntry && IS_ENTRY_TDLS(pMacEntry))
 			DBGPRINT(RT_DEBUG_ERROR,("TDLS - MacTable Entry exist !!!\n"));
 		else
-			pMacEntry = MacTableInsertEntry(pAd, pTDLS->MacAddr, BSS0 + MIN_NET_DEVICE_FOR_TDLS, OPMODE_STA, TRUE);
+			pMacEntry = MacTableInsertEntry(pAd, pTDLS->MacAddr, BSS0 + MIN_NET_DEVICE_FOR_TDLS, TRUE);
 
 		if (pMacEntry)
 		{
@@ -870,7 +870,7 @@ TDLS_PeerTdlsConfAction(
 
 			DBGPRINT(RT_DEBUG_TRACE, ("MacTableInsertTDlsEntry - allocate entry #%d, Total= %d\n",pMacEntry->Aid, pAd->MacTab.Size));
 
-			/* Set WMM capability */
+			// Set WMM capability
 			if ((pAd->CommonCfg.PhyMode >= PHY_11ABGN_MIXED) || (pAd->CommonCfg.bWmmCapable))
 			{
 				CLIENT_STATUS_SET_FLAG(pMacEntry, fCLIENT_STATUS_WMM_CAPABLE);
@@ -889,13 +889,13 @@ TDLS_PeerTdlsConfAction(
 											pTDLS->HtCapabilityLen,
 											&pTDLS->HtCapability);
 
-			/* */
-			/* Install Peer Key if RSNA Enabled */
-			/* */
+			//
+			// Install Peer Key if RSNA Enabled
+			//
 			if (((pAd->StaCfg.AuthMode == Ndis802_11AuthModeWPA2) || (pAd->StaCfg.AuthMode == Ndis802_11AuthModeWPA2PSK)) &&
 				((pAd->StaCfg.WepStatus == Ndis802_11Encryption2Enabled) || (pAd->StaCfg.WepStatus == Ndis802_11Encryption3Enabled)))
 			{	
-				/* Write to ASIC on-chip table. */
+				// Write to ASIC on-chip table.
 				if ( pMacEntry->Aid > 1)
 				{
 					CIPHER_KEY		PairwiseKey;
@@ -905,7 +905,7 @@ TDLS_PeerTdlsConfAction(
 					else if (pAd->StaCfg.PairCipher == Ndis802_11Encryption3Enabled)
 						PairwiseKey.CipherAlg = CIPHER_AES;
 
-					/* Set Peer Key */
+					// Set Peer Key
 					PairwiseKey.KeyLen = LEN_TK;
 					NdisMoveMemory(PairwiseKey.Key, &pTDLS->TPK[16], LEN_TK);
 
@@ -1005,21 +1005,21 @@ TDLS_PeerTdlsTearDownAction(
 	PRT_802_11_TDLS		pTDLS = NULL;
 	INT					LinkId = 0xff;
 	BOOLEAN				IsInitator;
-	/*UINT				i; */
+	//UINT				i;
 	BOOLEAN				TimerCancelled;
 	UCHAR				FTLen;
 	UCHAR				FTIe[128];
 	UCHAR	TdlsZeroSsid[32] = {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
 								0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 
-	/* Not TDLS Capable, ignore it */
+	// Not TDLS Capable, ignore it
 	if (!pAd->StaCfg.bTDLSCapable)
 		return;
 
 	if (!INFRA_ON(pAd))
 		return;
 
-	/* Init FTIe */
+	// Init FTIe
 	NdisZeroMemory(FTIe, sizeof(FTIe));
 	
 	if (!PeerTdlsTearDownSanity(pAd, Elem->Msg, Elem->MsgLen, SA, &IsInitator, &ReasonCode, &FTLen, FTIe))
@@ -1027,22 +1027,22 @@ TDLS_PeerTdlsTearDownAction(
 
 	DBGPRINT(RT_DEBUG_TRACE,("TDLS - PeerTdlsTearDownAction() from %02x:%02x:%02x:%02x:%02x:%02x with ReasonCode=%d\n", SA[0], SA[1], SA[2], SA[3], SA[4], SA[5], ReasonCode));
 
-	/* Drop not within my TDLS Table that created before ! */
+	// Drop not within my TDLS Table that created before !
 	LinkId = TDLS_SearchLinkId(pAd, SA);
 	if (LinkId == -1 || LinkId == MAX_NUM_OF_TDLS_ENTRY)
 		return;
 	
-	/* Point to the current Link ID */
+	// Point to the current Link ID
 	pTDLS = &pAd->StaCfg.TDLSEntry[LinkId];
 
-	/* Cancel the timer since the received packet to me. */
+	// Cancel the timer since the received packet to me.
 	RTMPCancelTimer(&pTDLS->Timer, &TimerCancelled);
 
-	/* Drop mismatched identifier. */
+	// Drop mismatched identifier.
 	if (pTDLS->bInitiator != IsInitator)
 		return;
 
-	/* Process FTIE here! */
+	// Process FTIE here!
 	if (((pAd->StaCfg.AuthMode == Ndis802_11AuthModeWPA2) || (pAd->StaCfg.AuthMode == Ndis802_11AuthModeWPA2PSK)) &&
 		((pAd->StaCfg.WepStatus == Ndis802_11Encryption2Enabled) || (pAd->StaCfg.WepStatus == Ndis802_11Encryption3Enabled)))
 	{	
@@ -1056,13 +1056,13 @@ TDLS_PeerTdlsTearDownAction(
 		UCHAR		mic[16];
 		UINT	tmp_aes_len = 0;
 		
-		/* FTIE (7.3.2.48) */
-		/* It's the same as that included in TPK Handshake Message3 with the exception of MIC field. */
+		// FTIE (7.3.2.48)
+		// It's the same as that included in TPK Handshake Message3 with the exception of MIC field.
 
-		/* Validate FTIE and its MIC */
-		/* */
+		// Validate FTIE and its MIC
+		//
 
-		/* point to the element of IE */
+		// point to the element of IE
 		ft = (PFT_FTIE)(FTIe + 2); 
 		
 		if ((FTLen != (sizeof(FT_FTIE) + 2)) || RTMPEqualMemory(&ft->MICCtr, TdlsZeroSsid, 2) == 0 || 
@@ -1072,14 +1072,14 @@ TDLS_PeerTdlsTearDownAction(
 			return;
 		}
 		
-		/* backup MIC from the peer TDLS */
+		// backup MIC from the peer TDLS
 		NdisMoveMemory(oldMic, ft->MIC, 16);
 
 		
-		/* set MIC field to zero before MIC calculation */
+		// set MIC field to zero before MIC calculation
 		NdisZeroMemory(ft->MIC, 16);
 
-		/* Construct LinkIdentifier (IE + Length + BSSID + Initiator MAC + Responder MAC) */
+		// Construct LinkIdentifier (IE + Length + BSSID + Initiator MAC + Responder MAC)
 		NdisZeroMemory(LinkIdentifier, 20);
 		LinkIdentifier[0] = IE_TDLS_LINK_IDENTIFIER;
 		LinkIdentifier[1] = 18;
@@ -1095,13 +1095,13 @@ TDLS_PeerTdlsTearDownAction(
 			NdisMoveMemory(&LinkIdentifier[14], pTDLS->MacAddr, 6);
 		}
 
-		/*////////////////////////////////////////////////////////////////////*/
-		/* The MIC field of FTIE shall be calculated on the concatenation, in the following order, of */
-		/* 1. Link Identifier (20 bytes) */
-		/* 2. Reason Code (2 bytes) */
-		/* 3. Dialog token (1 byte) */
-		/* 4. Transaction Sequence = 4 (1 byte) */
-		/* 5. FTIE with the MIC field of FTIE set to zero (84 bytes) */
+		////////////////////////////////////////////////////////////////////////
+		// The MIC field of FTIE shall be calculated on the concatenation, in the following order, of
+		// 1. Link Identifier (20 bytes)
+		// 2. Reason Code (2 bytes)
+		// 3. Dialog token (1 byte)
+		// 4. Transaction Sequence = 4 (1 byte)
+		// 5. FTIE with the MIC field of FTIE set to zero (84 bytes)	
 		
 		/* concatenate Link Identifier, Reason Code, Dialog token, Transaction Sequence */
 		MakeOutgoingFrame(content,            		&tmp_len,
@@ -1120,14 +1120,14 @@ TDLS_PeerTdlsTearDownAction(
 		
 		/* Calculate MIC */
 		NdisZeroMemory(mic, sizeof(mic));
-		/*AES_128_CMAC(pTDLS->TPK, content, c_len, mic); */
+		//AES_128_CMAC(pTDLS->TPK, content, c_len, mic);
 
 		/* Compute AES-128-CMAC over the concatenation */
 		tmp_aes_len = AES_KEY128_LENGTH;
     	AES_CMAC(content, c_len, pTDLS->TPK, 16, mic, &tmp_aes_len);
 
 
-		/*////////////////////////////////////////////////////////////////////*/
+		////////////////////////////////////////////////////////////////////////
 
 		if (RTMPEqualMemory(oldMic, mic, 16) == 0)
 		{
@@ -1138,7 +1138,7 @@ TDLS_PeerTdlsTearDownAction(
 	}
 	
 
-	/* clear tdls table entry */
+	// clear tdls table entry
 	if (pTDLS->Valid && MAC_ADDR_EQUAL(SA, pTDLS->MacAddr))
 	{
 		pTDLS->Status = TDLS_MODE_NONE;
@@ -1186,30 +1186,30 @@ BOOLEAN PeerTdlsSetupReqSanity(
 	UCHAR			Sanity;
 	ULONG			Length = 0;
 
-	/* Init output parameters */
+	// Init output parameters
 	*pSupRateLen = 0;
 	*pExtRateLen = 0;
 	*pCapabilityInfo = 0;
 	*pHtCapLen = 0;
 	*pTdlsExtCapLen = 0;
 	*pbWmmCapable = FALSE;
-	*pQosCapability = 0; /* default: no IE_QOS_CAPABILITY found */
+	*pQosCapability = 0; // default: no IE_QOS_CAPABILITY found
 	*pRsnLen = 0;
 	*pFTLen = 0;
 	*pTILen = 0;
 	
-	/* Message contains 802.11 header (24 bytes), LLC_SNAP (8 bytes), TDLS Action header(3 bytes) and Payload (variable) */
+	// Message contains 802.11 header (24 bytes), LLC_SNAP (8 bytes), TDLS Action header(3 bytes) and Payload (variable)
 	if (RemainLen < (LENGTH_802_11 + LENGTH_802_1_H + 3)) 
 	{
 		DBGPRINT_RAW(RT_DEBUG_WARN, ("PeerTdlsSetupReqSanity --> Invaild packet length - (action header) \n"));
 		return FALSE;	
 	}
 
-	/* Offset to Dialog Token */
+	// Offset to Dialog Token
 	Ptr	+= (LENGTH_802_11 + LENGTH_802_1_H + 3);
 	RemainLen -= (LENGTH_802_11 + LENGTH_802_1_H + 3);
 
-	/* Get the value of token from payload and advance the pointer */
+	// Get the value of token from payload and advance the pointer
 	if (RemainLen < 1)
 	{
 		DBGPRINT_RAW(RT_DEBUG_WARN, ("PeerTdlsSetupReqSanity --> Invaild packet length - (dialog token) \n"));
@@ -1217,11 +1217,11 @@ BOOLEAN PeerTdlsSetupReqSanity(
 	}	
 	*pToken = *Ptr;
 	
-	/* Offset to Link Identifier */
+	// Offset to Link Identifier
 	Ptr += 1;
 	RemainLen -= 1;
 
-	/* Get BSSID, SA and DA from payload and advance the pointer */
+	// Get BSSID, SA and DA from payload and advance the pointer
 	if (RemainLen < 20 || Ptr[0] != IE_TDLS_LINK_IDENTIFIER || Ptr[1] != 18)
 	{
 		DBGPRINT_RAW(RT_DEBUG_WARN, ("PeerTdlsSetupReqSanity --> Invaild packet length - (link identifier) \n"));
@@ -1240,11 +1240,11 @@ BOOLEAN PeerTdlsSetupReqSanity(
 
 	NdisMoveMemory(pSA, Ptr+8, MAC_ADDR_LEN);
 
-	/* Offset to Capability */
+	// Offset to Capability
 	Ptr += 20;
 	RemainLen -= 20;
 
-	/* Get capability info from payload and advance the pointer */
+	// Get capability info from payload and advance the pointer
 	if (RemainLen < 2) 
 	{
 		DBGPRINT_RAW(RT_DEBUG_WARN, ("PeerTdlsSetupReqSanity --> Invaild packet length - (capability) \n"));
@@ -1252,15 +1252,15 @@ BOOLEAN PeerTdlsSetupReqSanity(
 	}	
 	NdisMoveMemory((PUCHAR)pCapabilityInfo, Ptr, 2);
 
-	/* Offset to other elements */
+	// Offset to other elements
 	Ptr += 2;
 	RemainLen -= 2;
 
-	/* Add for 2 necessary EID field check */
+	// Add for 2 necessary EID field check
 	Sanity = 0;
 	pEid = (PEID_STRUCT) Ptr;
 
-	/* get variable fields from payload and advance the pointer */
+	// get variable fields from payload and advance the pointer
 	while ((Length + 2 + pEid->Len) <= RemainLen)	  
 	{	
 		switch(pEid->Eid)
@@ -1306,10 +1306,10 @@ BOOLEAN PeerTdlsSetupReqSanity(
 			case IE_HT_CAP:
 				if (pAd->CommonCfg.PhyMode >= PHY_11ABGN_MIXED)
 				{
-					if (pEid->Len >= SIZE_HT_CAP_IE)  /*Note: allow extension.!! */
+					if (pEid->Len >= SIZE_HT_CAP_IE)  //Note: allow extension.!!
 					{
 						NdisMoveMemory(pHtCap, pEid->Octet, sizeof(HT_CAPABILITY_IE));
-						*pHtCapLen = SIZE_HT_CAP_IE;	/* Nnow we only support 26 bytes. */
+						*pHtCapLen = SIZE_HT_CAP_IE;	// Nnow we only support 26 bytes.
 					}
 				}
 				break;
@@ -1350,7 +1350,7 @@ BOOLEAN PeerTdlsSetupReqSanity(
 				break;
 				
 			default:
-				/* Unknown IE, we have to pass it as variable IEs */
+				// Unknown IE, we have to pass it as variable IEs
 				DBGPRINT(RT_DEBUG_WARN, ("PeerTdlsSetupReqSanity - unrecognized EID = %d\n", pEid->Eid));
 				break;
 		}
@@ -1367,7 +1367,7 @@ BOOLEAN PeerTdlsSetupReqSanity(
 	}
 	else
 	{
-		/* Process in succeed */
+		// Process in succeed
 	    return TRUE;
 	}
 
@@ -1411,31 +1411,31 @@ BOOLEAN PeerTdlsSetupRspSanity(
 	UCHAR			Sanity;
 	ULONG			Length = 0;	
 
-	/* Init output parameters */
+	// Init output parameters
 	*pSupRateLen = 0;
 	*pExtRateLen = 0;
 	*pCapabilityInfo = 0;
 	*pHtCapLen = 0;
 	*pTdlsExtCapLen = 0;
 	*pbWmmCapable = FALSE;
-	*pQosCapability= 0; /* default: no IE_QOS_CAPABILITY found */
+	*pQosCapability= 0; // default: no IE_QOS_CAPABILITY found
 	*pStatusCode = MLME_SUCCESS;
 	*pRsnLen = 0;
 	*pFTLen = 0;
 	*pTILen = 0;
 
 	
-	/* Message contains 802.11 header (24 bytes), LLC_SNAP (8 bytes), TDLS Action header(3 bytes) and Payload (variable) */
+	// Message contains 802.11 header (24 bytes), LLC_SNAP (8 bytes), TDLS Action header(3 bytes) and Payload (variable)
 	if (RemainLen < (LENGTH_802_11 + LENGTH_802_1_H + 3))
 	{
 		DBGPRINT_RAW(RT_DEBUG_WARN, ("PeerTdlsSetupRspSanity --> Invaild packet length - (action header) \n"));
 		return FALSE;	
 	}
-	/* Offset to Status Code */
+	// Offset to Status Code
 	Ptr	+= (LENGTH_802_11 + LENGTH_802_1_H + 3);
 	RemainLen -= (LENGTH_802_11 + LENGTH_802_1_H + 3);
 	
-	/* Get the value of Status Code from payload and advance the pointer */
+	// Get the value of Status Code from payload and advance the pointer
 	if (RemainLen < 2)
 	{
 		DBGPRINT_RAW(RT_DEBUG_WARN, ("PeerTdlsSetupRspSanity --> Invaild packet length - (status code) \n"));
@@ -1443,11 +1443,11 @@ BOOLEAN PeerTdlsSetupRspSanity(
 	}	
 	*pStatusCode = (*((PUSHORT) Ptr));
 
-	/* Offset to Dialog Token */
+	// Offset to Dialog Token
 	Ptr	+= 2;
 	RemainLen -= 2;
 
-	/* Get the value of token from payload and advance the pointer */
+	// Get the value of token from payload and advance the pointer
 	if (RemainLen < 1)
 	{
 		DBGPRINT_RAW(RT_DEBUG_WARN, ("PeerTdlsSetupRspSanity --> Invaild packet length - (dialog token) \n"));
@@ -1456,13 +1456,13 @@ BOOLEAN PeerTdlsSetupRspSanity(
 	*pToken = *Ptr;
 
 	if (*pStatusCode != MLME_SUCCESS)
-		return TRUE;	/* in the end of Setup Response frame */
+		return TRUE;	// in the end of Setup Response frame
 		
-	/* Offset to Link Identifier */
+	// Offset to Link Identifier
 	Ptr += 1;
 	RemainLen -= 1;
 
-	/* Get BSSID, SA and DA from payload and advance the pointer */
+	// Get BSSID, SA and DA from payload and advance the pointer
 	if (RemainLen < 20 || Ptr[0] != IE_TDLS_LINK_IDENTIFIER || Ptr[1] != 18) 
 	{
 		DBGPRINT_RAW(RT_DEBUG_WARN, ("PeerTdlsSetupRspSanity --> Invaild packet length - (link identifier) \n"));
@@ -1481,25 +1481,25 @@ BOOLEAN PeerTdlsSetupRspSanity(
 
 	NdisMoveMemory(pSA, Ptr+14, MAC_ADDR_LEN);
 
-	/* Offset to Capability */
+	// Offset to Capability
 	Ptr += 20;
 	RemainLen -= 20;
 
-	/* Get capability info from payload and advance the pointer */
+	// Get capability info from payload and advance the pointer
 	if (RemainLen < 2) 
 		return FALSE;
 	NdisMoveMemory(pCapabilityInfo, Ptr, 2);
 
-	/* Offset to other elements */
+	// Offset to other elements
 	Ptr += 2;
 	RemainLen -= 2;
 
 
-	/* Add for 2 necessary EID field check */
+	// Add for 2 necessary EID field check
 	Sanity = 0;
 	pEid = (PEID_STRUCT) Ptr;
 
-	/* get variable fields from payload and advance the pointer */
+	// get variable fields from payload and advance the pointer
 	while ((Length + 2 + pEid->Len) <= RemainLen)	  
 	{	
 		switch(pEid->Eid)
@@ -1544,10 +1544,10 @@ BOOLEAN PeerTdlsSetupRspSanity(
 			case IE_HT_CAP:
 				if (pAd->CommonCfg.PhyMode >= PHY_11ABGN_MIXED)
 				{
-					if (pEid->Len >= SIZE_HT_CAP_IE)  /*Note: allow extension.!! */
+					if (pEid->Len >= SIZE_HT_CAP_IE)  //Note: allow extension.!!
 					{
 						NdisMoveMemory(pHtCap, pEid->Octet, sizeof(HT_CAPABILITY_IE));
-						*pHtCapLen = SIZE_HT_CAP_IE;	/* Nnow we only support 26 bytes. */
+						*pHtCapLen = SIZE_HT_CAP_IE;	// Nnow we only support 26 bytes.
 					}
 				}
 				
@@ -1589,7 +1589,7 @@ BOOLEAN PeerTdlsSetupRspSanity(
 				break;
 				
 			default:
-				/* Unknown IE, we have to pass it as variable IEs */
+				// Unknown IE, we have to pass it as variable IEs
 				DBGPRINT(RT_DEBUG_WARN, ("PeerTdlsSetupRspSanity - unrecognized EID = %d\n", pEid->Eid));
 				break;
 		}
@@ -1606,7 +1606,7 @@ BOOLEAN PeerTdlsSetupRspSanity(
 	}
 	else
 	{
-		/* Process in succeed */
+		// Process in succeed
 		*pStatusCode = MLME_SUCCESS;
 	    return TRUE;
 	}
@@ -1641,25 +1641,25 @@ BOOLEAN PeerTdlsSetupConfSanity(
 	PEID_STRUCT		pEid;
 	ULONG			Length = 0;	
 
-	/* Init output parameters */
+	// Init output parameters
 	*pCapabilityInfo = 0;
 	*pStatusCode = MLME_REQUEST_DECLINED;
-	 /*pEdcaParm = 0;      // default: no IE_EDCA_PARAMETER found */
+	 //pEdcaParm = 0;      // default: no IE_EDCA_PARAMETER found
 	*pRsnLen = 0;
 	*pFTLen = 0;
 	*pTILen = 0;
 	
-	/* Message contains 802.11 header (24 bytes), LLC_SNAP (8 bytes), TDLS Action header(3 bytes) and Payload (variable) */
+	// Message contains 802.11 header (24 bytes), LLC_SNAP (8 bytes), TDLS Action header(3 bytes) and Payload (variable)
 	if (RemainLen < (LENGTH_802_11 + LENGTH_802_1_H + 3))
 	{
 		DBGPRINT_RAW(RT_DEBUG_WARN, ("PeerTdlsSetupConfSanity --> Invaild packet length - (action header) \n"));
 		return FALSE;	
 	}
-	/* Offset to Status Code */
+	// Offset to Status Code
 	Ptr	+= (LENGTH_802_11 + LENGTH_802_1_H + 3);
 	RemainLen -= (LENGTH_802_11 + LENGTH_802_1_H + 3);
 	
-	/* Get the value of Status Code from payload and advance the pointer */
+	// Get the value of Status Code from payload and advance the pointer
 	if (RemainLen < 2)
 	{
 		DBGPRINT_RAW(RT_DEBUG_WARN, ("PeerTdlsSetupConfSanity --> Invaild packet length - (status code) \n"));
@@ -1668,11 +1668,11 @@ BOOLEAN PeerTdlsSetupConfSanity(
 	*pStatusCode = (*((PUSHORT) Ptr));
 
 
-	/* Offset to Dialog Token */
+	// Offset to Dialog Token
 	Ptr	+= 2;
 	RemainLen -= 2;
 
-	/* Get the value of token from payload and advance the pointer */
+	// Get the value of token from payload and advance the pointer
 	if (RemainLen < 1)
 	{
 		DBGPRINT_RAW(RT_DEBUG_WARN, ("PeerTdlsSetupConfSanity --> Invaild packet length - (dialog token) \n"));
@@ -1682,13 +1682,13 @@ BOOLEAN PeerTdlsSetupConfSanity(
 	*pToken = *Ptr;
 
 	if (*pStatusCode != MLME_SUCCESS)
-		return TRUE;	/* end of Setup Response frame */
+		return TRUE;	// end of Setup Response frame
 		
-	/* Offset to Link Identifier */
+	// Offset to Link Identifier
 	Ptr += 1;
 	RemainLen -= 1;
 
-	/* Get BSSID, SA and DA from payload and advance the pointer */
+	// Get BSSID, SA and DA from payload and advance the pointer
 	if (RemainLen < 20 || Ptr[0] != IE_TDLS_LINK_IDENTIFIER || Ptr[1] != 18)
 	{
 		DBGPRINT_RAW(RT_DEBUG_WARN, ("PeerTdlsSetupConfSanity --> Invaild packet length - (link identifier) \n"));
@@ -1708,47 +1708,47 @@ BOOLEAN PeerTdlsSetupConfSanity(
 
 	NdisMoveMemory(pSA, Ptr+8, MAC_ADDR_LEN);
 
-	/* Offset to other elements */
+	// Offset to other elements
 	Ptr += 20;
 	RemainLen -= 20;
 
 	pEid = (PEID_STRUCT) Ptr;
 
-	/* get variable fields from payload and advance the pointer */
+	// get variable fields from payload and advance the pointer
 	while ((Length + 2 + pEid->Len) <= RemainLen)	  
 	{	
 		switch(pEid->Eid)
 		{
 			case IE_EDCA_PARAMETER:
-				/*if (pEid->Len == 18) */
-					/*NdisMoveMemory(pEdcaParm, pEid->Octet, sizeof(QBSS_STA_EDCA_PARM)); */
+				//if (pEid->Len == 18)
+					//NdisMoveMemory(pEdcaParm, pEid->Octet, sizeof(QBSS_STA_EDCA_PARM));
 				break;
 
 			case IE_VENDOR_SPECIFIC:
-				/* handle WME PARAMTER ELEMENT */
+				// handle WME PARAMTER ELEMENT
 				if (NdisEqualMemory(pEid->Octet, WME_PARM_ELEM, 6) && (pEid->Len == 24))
 				{
 					PUCHAR ptr;
 					int i;
 
-					/* parsing EDCA parameters */
+					// parsing EDCA parameters
 					pEdcaParm->bValid		   = TRUE;
-					pEdcaParm->bQAck		   = FALSE; /* pEid->Octet[0] & 0x10; */
-					pEdcaParm->bQueueRequest   = FALSE; /* pEid->Octet[0] & 0x20; */
-					pEdcaParm->bTxopRequest    = FALSE; /* pEid->Octet[0] & 0x40; */
-					/*pEdcaParm->bMoreDataAck	 = FALSE; // pEid->Octet[0] & 0x80; */
+					pEdcaParm->bQAck		   = FALSE; // pEid->Octet[0] & 0x10;
+					pEdcaParm->bQueueRequest   = FALSE; // pEid->Octet[0] & 0x20;
+					pEdcaParm->bTxopRequest    = FALSE; // pEid->Octet[0] & 0x40;
+					//pEdcaParm->bMoreDataAck	 = FALSE; // pEid->Octet[0] & 0x80;
 					pEdcaParm->EdcaUpdateCount = pEid->Octet[6] & 0x0f;
 					pEdcaParm->bAPSDCapable    = (pEid->Octet[6] & 0x80) ? 1 : 0;
 					ptr = &pEid->Octet[8];
 					for (i=0; i<4; i++)
 					{
-						UCHAR aci = (*ptr & 0x60) >> 5; /* b5~6 is AC INDEX */
-						pEdcaParm->bACM[aci]  = (((*ptr) & 0x10) == 0x10);	 /* b5 is ACM */
-						pEdcaParm->Aifsn[aci] = (*ptr) & 0x0f;				 /* b0~3 is AIFSN */
-						pEdcaParm->Cwmin[aci] = *(ptr+1) & 0x0f;			 /* b0~4 is Cwmin */
-						pEdcaParm->Cwmax[aci] = *(ptr+1) >> 4;				 /* b5~8 is Cwmax */
-						pEdcaParm->Txop[aci]  = *(ptr+2) + 256 * (*(ptr+3)); /* in unit of 32-us */
-						ptr += 4; /* point to next AC */
+						UCHAR aci = (*ptr & 0x60) >> 5; // b5~6 is AC INDEX
+						pEdcaParm->bACM[aci]  = (((*ptr) & 0x10) == 0x10);	 // b5 is ACM
+						pEdcaParm->Aifsn[aci] = (*ptr) & 0x0f;				 // b0~3 is AIFSN
+						pEdcaParm->Cwmin[aci] = *(ptr+1) & 0x0f;			 // b0~4 is Cwmin
+						pEdcaParm->Cwmax[aci] = *(ptr+1) >> 4;				 // b5~8 is Cwmax
+						pEdcaParm->Txop[aci]  = *(ptr+2) + 256 * (*(ptr+3)); // in unit of 32-us
+						ptr += 4; // point to next AC
 					}
 				}
 				break;
@@ -1778,7 +1778,7 @@ BOOLEAN PeerTdlsSetupConfSanity(
 				break;
 				
 			default:
-				/* Unknown IE, we have to pass it as variable IEs */
+				// Unknown IE, we have to pass it as variable IEs
 				DBGPRINT(RT_DEBUG_WARN, ("PeerTdlsSetupConfSanity - unrecognized EID = %d\n", pEid->Eid));
 				break;
 		}
@@ -1788,7 +1788,7 @@ BOOLEAN PeerTdlsSetupConfSanity(
 	}
 
 
-	/* Process in succeed */
+	// Process in succeed
 	*pStatusCode = MLME_SUCCESS;
     return TRUE;
 
@@ -1814,23 +1814,23 @@ BOOLEAN PeerTdlsTearDownSanity(
 	ULONG			RemainLen = MsgLen;
 	CHAR			*Ptr =(CHAR *)Msg;
 	PEID_STRUCT		pEid;
-	/*ULONG			Length = 0; */
+	//ULONG			Length = 0;	
 
-	/* Init output parameters */
+	// Init output parameters
 	*pReasonCode = 0;
 	*pFTLen = 0 ;
 
-	/* Message contains 802.11 header (24 bytes), LLC_SNAP (8 bytes), TDLS Action header(3 bytes) and Payload (variable) */
+	// Message contains 802.11 header (24 bytes), LLC_SNAP (8 bytes), TDLS Action header(3 bytes) and Payload (variable)
 	if (RemainLen < (LENGTH_802_11 + LENGTH_802_1_H + 3))
 	{
 		DBGPRINT_RAW(RT_DEBUG_WARN, ("PeerTdlsTearDownSanity --> Invaild packet length - (cation header) \n"));
 		return FALSE;	
 	}
-	/* Offset to Reason Code */
+	// Offset to Reason Code
 	Ptr	+= (LENGTH_802_11 + LENGTH_802_1_H + 3);
 	RemainLen -= (LENGTH_802_11 + LENGTH_802_1_H + 3);
 	
-	/* Get the value of Reason Code from payload and advance the pointer */
+	// Get the value of Reason Code from payload and advance the pointer
 	if (RemainLen < 2) 
 	{
 		DBGPRINT_RAW(RT_DEBUG_WARN, ("PeerTdlsTearDownSanity --> Invaild packet length - (reason code) \n"));
@@ -1839,48 +1839,48 @@ BOOLEAN PeerTdlsTearDownSanity(
 	*pReasonCode = (*((PUSHORT) Ptr));
 
 
-	/* Offset to Link Identifier */
+	// Offset to Link Identifier
 	Ptr += 2;
 	RemainLen -= 2;
 
-	/* Get BSSID, SA and DA from payload and advance the pointer */
+	// Get BSSID, SA and DA from payload and advance the pointer
 	if (RemainLen < 20 || Ptr[0] != IE_TDLS_LINK_IDENTIFIER || Ptr[1] != 18) 
 	{
 		DBGPRINT_RAW(RT_DEBUG_WARN, ("PeerTdlsTearDownSanity --> Invaild packet length - (link identifier) \n"));
 		return FALSE;	
 	}
-	/* It's not my BSSID */
+	// It's not my BSSID
 	if (!MAC_ADDR_EQUAL(Ptr+2, pAd->CommonCfg.Bssid))
 	{
 		DBGPRINT_RAW(RT_DEBUG_WARN, ("PeerTdlsTearDownSanity --> It's not my BSSID\n"));
 		return FALSE;
 	}	
 
-	/* Check if my MAC address and then find out SA */
+	// Check if my MAC address and then find out SA
 	if (!MAC_ADDR_EQUAL(pAd->CurrentAddress, Ptr+8))
 	{
 		if (!MAC_ADDR_EQUAL(pAd->CurrentAddress, Ptr+14))
 			return FALSE;
 		else
 		{
-			*pIsInitator = TRUE;	/* peer are Initator. */
+			*pIsInitator = TRUE;	// peer are Initator.
 			NdisMoveMemory(pSA, Ptr+8, MAC_ADDR_LEN);
 		}
 	}
 	else
 	{
-		*pIsInitator = FALSE;	/* peer are not Initator. */
+		*pIsInitator = FALSE;	// peer are not Initator.
 		NdisMoveMemory(pSA, Ptr+14, MAC_ADDR_LEN);
 	}
 	
 	
-	/* Offset to other elements */
+	// Offset to other elements
 	Ptr += 20;
 	RemainLen -= 20;
 
 	pEid = (PEID_STRUCT) Ptr;
 
-	/* TPK Handshake if RSNA Enabled */
+	// TPK Handshake if RSNA Enabled
 	if ((pAd->StaCfg.AuthMode == Ndis802_11AuthModeWPA2) || (pAd->StaCfg.AuthMode == Ndis802_11AuthModeWPA2PSK))
 	{
 		if(RemainLen < ((UCHAR)(pEid->Len + 2)) || (pEid->Eid != IE_FT_FTIE))
@@ -1895,5 +1895,5 @@ BOOLEAN PeerTdlsTearDownSanity(
 
     return TRUE;
 }
-#endif /* DOT11Z_TDLS_SUPPORT */
+#endif // DOT11Z_TDLS_SUPPORT //
 

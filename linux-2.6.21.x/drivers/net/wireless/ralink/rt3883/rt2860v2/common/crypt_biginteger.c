@@ -170,9 +170,7 @@ VOID BigInteger_Init (
     if (*pBI != NULL)
         BigInteger_Free(pBI);
 
-	os_alloc_mem(NULL, (UCHAR **)pBI, sizeof(BIG_INTEGER));
-/*    if ((*pBI = (PBIG_INTEGER) kmalloc(sizeof(BIG_INTEGER), GFP_ATOMIC)) == NULL) { */
-    if (*pBI == NULL) {
+    if ((*pBI = (PBIG_INTEGER) kmalloc(sizeof(BIG_INTEGER), GFP_ATOMIC)) == NULL) {
         DEBUGPRINT("BigInteger_Init: allocate %d bytes memory failure.\n", (sizeof(BIG_INTEGER)));
         return;
     } /* End of if */
@@ -187,8 +185,7 @@ VOID BigInteger_Free_AllocSize (
     IN PBIG_INTEGER *pBI)
 {
     if ((*pBI != NULL) && ((*pBI)->pIntegerArray != NULL)) {
-/*        kfree((*pBI)->pIntegerArray); */
-		os_free_mem(NULL, (*pBI)->pIntegerArray);
+        kfree((*pBI)->pIntegerArray);
         NdisZeroMemory(*pBI, sizeof(BIG_INTEGER));
         (*pBI)->pIntegerArray = NULL;
         (*pBI)->Signed = 1;
@@ -201,8 +198,7 @@ VOID BigInteger_Free (
 {   
     if (*pBI != NULL) {
         BigInteger_Free_AllocSize(pBI);
-/*        kfree(*pBI); */
-		os_free_mem(NULL, *pBI);
+        kfree(*pBI);
     } /* End of if */ 
 
     *pBI = NULL;
@@ -230,9 +226,7 @@ VOID BigInteger_AllocSize (
         BigInteger_Free_AllocSize(pBI);
 
     if ((*pBI)->pIntegerArray == NULL) {        
-			os_alloc_mem(NULL, (UCHAR **)&((*pBI)->pIntegerArray), sizeof(UINT32)*ArrayLength);
-/*        if (((*pBI)->pIntegerArray = (UINT32 *) kmalloc(sizeof(UINT32)*ArrayLength, GFP_ATOMIC)) == NULL) { */
-        if ((*pBI)->pIntegerArray == NULL) {
+        if (((*pBI)->pIntegerArray = (UINT32 *) kmalloc(sizeof(UINT32)*ArrayLength, GFP_ATOMIC)) == NULL) {
             DEBUGPRINT("BigInteger_AllocSize: allocate %d bytes memory failure.\n", (sizeof(UINT32)*ArrayLength));
             return;
         } /* End of if */
@@ -265,9 +259,11 @@ VOID BigInteger_ClearHighBits (
             ShiftIndex--;
             value = UINT32_GETBYTE(pBI->pIntegerArray[BIArrayIndex], ShiftIndex);
     	} /* End of while */	
+    } else {
+    	BIArrayIndex = 0;
     } /* End of if */
 
-    if (BIArrayIndex < 0) {
+    if ((BIArrayIndex == -1) && (ShiftIndex == -1)) {
         pBI->IntegerLength = 1;
         pBI->ArrayLength = 1;
         pBI->Signed = 1;
@@ -1022,9 +1018,9 @@ VOID BigInteger_Montgomery_ExpMod (
     BigInteger_Init(&pBI_RR);
     BigInteger_Bin2BI(Value_1, 1, &pBI_1);
     BigInteger_AllocSize(&pBI_X, AllocLength);
-    BigInteger_AllocSize(&pBI_U, AllocLength); /* for BigInteger_Montgomery_Reduction */
-    BigInteger_AllocSize(&pBI_S, AllocLength); /* for BigInteger_Square */
-    BigInteger_AllocSize(&pBI_O, AllocLength); /* for BigInteger_Square */
+    BigInteger_AllocSize(&pBI_U, AllocLength); // for BigInteger_Montgomery_Reduction
+    BigInteger_AllocSize(&pBI_S, AllocLength); // for BigInteger_Square    
+    BigInteger_AllocSize(&pBI_O, AllocLength); // for BigInteger_Square
     
     for (Index = 0; Index < SLIDING_WINDOW; Index++) {
         pBI_A[Index] = NULL;
@@ -1042,8 +1038,7 @@ VOID BigInteger_Montgomery_ExpMod (
         } else {
             AllocLength = pBI_P->IntegerLength;
         } /* End of if */
-/*        pRValue = (UINT8 *) kmalloc(sizeof(UINT8)*AllocLength, GFP_ATOMIC); */
-		os_alloc_mem(NULL, (UCHAR **)&pRValue, sizeof(UINT8)*AllocLength);
+        pRValue = (UINT8 *) kmalloc(sizeof(UINT8)*AllocLength, GFP_ATOMIC);
 	if (pRValue == NULL)
 	{
 		DBGPRINT(RT_DEBUG_ERROR, ("%s():Alloc memory failed\n", __FUNCTION__));
@@ -1095,6 +1090,8 @@ VOID BigInteger_Montgomery_ExpMod (
     BigInteger_Montgomery_Reduction(pBI_X, pBI_P , pBI_R, pBI_Result);
 
     BigInteger_Free(&pBI_X);
+    BigInteger_Free(&pBI_R);
+    BigInteger_Free(&pBI_RR);
     BigInteger_Free(&pBI_1);
     BigInteger_Free(&pBI_U);
     BigInteger_Free(&pBI_S);
@@ -1102,12 +1099,9 @@ VOID BigInteger_Montgomery_ExpMod (
     for(Index = 0; Index < SLIDING_WINDOW; Index++)
 			BigInteger_Free(&pBI_A[Index]);			
     if (pRValue != NULL)    
-/*        kfree(pRValue); */
-		os_free_mem(NULL, pRValue);
+        kfree(pRValue);
 
 memory_free:
-    BigInteger_Free(&pBI_R);
-    BigInteger_Free(&pBI_RR);
     BigInteger_Free(&pBI_Temp1);
     BigInteger_Free(&pBI_Temp2);
 } /* End of BigInteger_Montgomery_ExpMod */

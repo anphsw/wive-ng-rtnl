@@ -33,18 +33,15 @@
 #ifdef RT2883
 REG_PAIR RT2883_BBPRegTable[] =
 {
-	{BBP_R4,	0x50}, /* 2883 need to */
-	{BBP_R65,	0x6C},		/* fix rssi issue and add Fine AGC */
+	{BBP_R4,	0x50}, 	// 2883 need to
+	{BBP_R65,	0x6C},		// fix rssi issue and add Fine AGC
 	{BBP_R103,	0xC0},
-	{BBP_R105,	0x04 /*0xbc ?*/},	/* RT2883 default is 0x4. Initialized R105 to enable saving of Explicit and Implicit profiles */
-	{BBP_R137,	0x0F},  /* julian suggest make the RF output more stable */
-	{BBP_R179,	0x02},	/* Set ITxBF timeout to 0x9C40=1000msec*/
-	{BBP_R180,	0x01},
-	{BBP_R182,	0x9C},
+	{BBP_R105,	0xbc},	// Initialized R105 to enable saving of Explicit and Implicit profiles
+	{BBP_R137,	0x0F},  // julian suggest make the RF output more stable
 };
 
 
-UCHAR RT2883_EeBuffer[EEPROM_SIZE] = {
+UCHAR EeBuffer[EEPROM_SIZE] = {
 	0x83, 0x28, 0x01, 0x00, 0x00, 0x0c, 0x43, 0x28, 0x83, 0x00, 0x83, 0x28, 0x14, 0x18, 0xff, 0xff,
 	0xff, 0xff, 0x83, 0x28, 0x14, 0x18, 0x00, 0x00, 0x01, 0x00, 0x6a, 0xff, 0x00, 0x02, 0xff, 0xff,
 	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x0c, 0x43, 0x28, 0x83, 0x01, 0x00, 0x0c,
@@ -79,110 +76,6 @@ UCHAR RT2883_EeBuffer[EEPROM_SIZE] = {
 	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
 	} ;
 
-UCHAR RT2883_NUM_BBP_REG_PARMS = (sizeof(RT2883_BBPRegTable) / sizeof(REG_PAIR));
-
-RTMP_REG_PAIR	RT2883_MACRegTable[] =	{
-	{TX_SW_CFG0,		0x0},     /* Gary,2008-12-15 for Intel 5300 (FIXME)*/
-	{TX_SW_CFG1,		0x0}, 	  /* Gary,2008-12-15 for Intel 5300 (FIXME)*/
-	{TX_SW_CFG2,		0x40000}, 	  /* Gary,2008-12-15 for Intel 5300 (FIXME)*/
-	{TX_TXBF_CFG_0,		0x8000FC21},	/* Force MCS0 for sounding response*/
-	{TX_TXBF_CFG_3,		0x00009c40},	/* ETxBF Timeout = 1 sec = 0x9c40*(25 usec)*/
-	{TX_FBK_CFG_3S_0,	0x12111008},	/* default value*/
-};
-
-UCHAR RT2883_NUM_MAC_REG_PARMS = (sizeof(RT2883_MACRegTable) / sizeof(RTMP_REG_PAIR));
-
-#ifdef CONFIG_AP_SUPPORT
-RTMP_REG_PAIR	RT2883_AP_MACRegTable[] =	{
-	{TX_CHAIN_ADDR0_L,	0xFFFFFFFF},	/* Broadcast frames are in stream mode*/
-	{TX_CHAIN_ADDR0_H,	0xFFFFF},
-};
-
-UCHAR RT2883_NUM_AP_MAC_REG_PARMS = (sizeof(RT2883_AP_MACRegTable) / sizeof(RTMP_REG_PAIR));
-#endif /* CONFIG_AP_SUPPORT */	
-
-/*
-========================================================================
-Routine Description:
-	Initialize specific MAC registers.
-
-Arguments:
-	pAd					- WLAN control block pointer
-
-Return Value:
-	None
-
-Note:
-========================================================================
-*/
-VOID NICInitRT2883MacRegisters(
-	IN	PRTMP_ADAPTER		pAd)
-{
-	UINT32 IdReg;
-
-
-	for (IdReg = 0; IdReg < RT2883_NUM_MAC_REG_PARMS; IdReg++)
-	{
-		/* if we want to change the full regiter content */
-		RTMP_IO_WRITE32(pAd, (USHORT)RT2883_MACRegTable[IdReg].Register,
-								RT2883_MACRegTable[IdReg].Value);
-	}
-
-#ifdef CONFIG_AP_SUPPORT
-	IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
-	{
-		for (IdReg = 0; IdReg < RT2883_NUM_AP_MAC_REG_PARMS; IdReg++)
-		{
-			RTMP_IO_WRITE32(pAd, (USHORT)RT2883_AP_MACRegTable[IdReg].Register, 
-								RT2883_AP_MACRegTable[IdReg].Value);
-		}
-	}
-#endif /* CONFIG_AP_SUPPORT */
-
-}
-
-
-/*
-========================================================================
-Routine Description:
-	Initialize specific BBP registers.
-
-Arguments:
-	pAd					- WLAN control block pointer
-
-Return Value:
-	None
-
-Note:
-========================================================================
-*/
-VOID NICInitRT2883BbpRegisters(
-	IN	PRTMP_ADAPTER pAd)
-{
-	UINT32 IdReg;
-
-	DBGPRINT(RT_DEBUG_TRACE, ("%s --->\n", __FUNCTION__));
-
-	for (IdReg = 0; IdReg < RT2883_NUM_BBP_REG_PARMS; IdReg++)
-	{
-		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, RT2883_BBPRegTable[IdReg].Register, 
-									RT2883_BBPRegTable[IdReg].Value);
-		DBGPRINT(RT_DEBUG_TRACE, ("BBP_R%d=%d\n", RT2883_BBPRegTable[IdReg].Register, 
-									RT2883_BBPRegTable[IdReg].Value));
-	}
-
-	/* Set ITxBF timeout to 0x9C40=1000msec*/
-	RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R179, 0x02);
-	RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R180, 0x00);
-	RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R182, 0x40);
-	RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R180, 0x01);
-	RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R182, 0x9C);
-	RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R179, 0x00);
-
-	DBGPRINT(RT_DEBUG_TRACE, ("%s <---\n", __FUNCTION__));
-	
-}
-
 
 /*
 	========================================================================
@@ -205,7 +98,7 @@ VOID NICInitRT2883BbpRegisters(
 VOID	RTMPRT2883ReadTxPwrPerRate(
 	IN	PRTMP_ADAPTER	pAd)
 {
-	/*ULONG		data; */
+	//ULONG		data;
 	USHORT		/*i,*/ value, value2;
 	
 	DBGPRINT(RT_DEBUG_TRACE, ("Txpower per Rate\n"));
@@ -335,14 +228,12 @@ VOID	RTMPRT2883ReadChannelPwr(
 	EEPROM_TX_PWR_STRUC	    Power2;
 	EEPROM_TX_PWR_STRUC	    Power3;
 	
-	/*
-		Read Tx power value for all channels
-			Value from 1 - 0x7f. Default value is 24.
-			Power value : 2.4G 0x00 (0) ~ 0x1F (31)
-						: 5.5G 0xF9 (-7) ~ 0x0F (15)
-	*/
+	// Read Tx power value for all channels
+	// Value from 1 - 0x7f. Default value is 24.
+	// Power value : 2.4G 0x00 (0) ~ 0x1F (31)
+	//             : 5.5G 0xF9 (-7) ~ 0x0F (15)
 	
-	/* 0. 11b/g, ch1 - ch 14 */
+	// 0. 11b/g, ch1 - ch 14
 	for (i = 0; i < 7; i++)
 	{
 		RT28xx_EEPROM_READ16(pAd, EEPROM_G_TX_PWR_OFFSET + i * 2, Power.word);
@@ -382,8 +273,8 @@ VOID	RTMPRT2883ReadChannelPwr(
 			pAd->TxPower[i * 2 + 1].Power3 = Power3.field.Byte1;
 	}
 	
-	/* 1. U-NII lower/middle band: 36, 38, 40; 44, 46, 48; 52, 54, 56; 60, 62, 64 (including central frequency in BW 40MHz) */
-	/* 1.1 Fill up channel */
+	// 1. U-NII lower/middle band: 36, 38, 40; 44, 46, 48; 52, 54, 56; 60, 62, 64 (including central frequency in BW 40MHz)
+	// 1.1 Fill up channel
 	choffset = 14;
 	for (i = 0; i < 4; i++)
 	{
@@ -403,11 +294,11 @@ VOID	RTMPRT2883ReadChannelPwr(
 		pAd->TxPower[3 * i + choffset + 2].Power3	= DEFAULT_RF_TX_POWER;
 	}
 
-	/* 1.2 Fill up power */
+	// 1.2 Fill up power
 	for (i = 0; i < 6; i++)
 	{
-/*		RT28xx_EEPROM_READ16(pAd, EEPROM_A_TX_PWR_OFFSET + i * 2, Power.word); */
-/*		RT28xx_EEPROM_READ16(pAd, EEPROM_A_TX2_PWR_OFFSET + i * 2, Power2.word); */
+//		Power.word = RTMP_EEPROM_READ16(pAd, EEPROM_A_TX_PWR_OFFSET + i * 2);
+//		Power2.word = RTMP_EEPROM_READ16(pAd, EEPROM_A_TX2_PWR_OFFSET + i * 2);
 		RT28xx_EEPROM_READ16(pAd, EEPROM_A_TX_PWR_OFFSET + i * 2, Power.word);
 		RT28xx_EEPROM_READ16(pAd, EEPROM_A_TX2_PWR_OFFSET + i * 2, Power2.word);
 		RT28xx_EEPROM_READ16(pAd, EEPROM_A_TX3_PWR_OFFSET + i * 2, Power3.word);
@@ -431,8 +322,8 @@ VOID	RTMPRT2883ReadChannelPwr(
 			pAd->TxPower[i * 2 + choffset + 1].Power3 = Power3.field.Byte1;			
 	}
 	
-	/* 2. HipperLAN 2 100, 102 ,104; 108, 110, 112; 116, 118, 120; 124, 126, 128; 132, 134, 136; 140 (including central frequency in BW 40MHz) */
-	/* 2.1 Fill up channel */
+	// 2. HipperLAN 2 100, 102 ,104; 108, 110, 112; 116, 118, 120; 124, 126, 128; 132, 134, 136; 140 (including central frequency in BW 40MHz)
+	// 2.1 Fill up channel
 	choffset = 14 + 12;
 	for (i = 0; i < 5; i++)
 	{
@@ -456,11 +347,11 @@ VOID	RTMPRT2883ReadChannelPwr(
 	pAd->TxPower[3 * 5 + choffset + 0].Power2		= DEFAULT_RF_TX_POWER;
 	pAd->TxPower[3 * 5 + choffset + 0].Power3		= DEFAULT_RF_TX_POWER;
 
-	/* 2.2 Fill up power */
+	// 2.2 Fill up power
 	for (i = 0; i < 8; i++)
 	{
-/*		RT28xx_EEPROM_READ16(pAd, EEPROM_A_TX_PWR_OFFSET + (choffset - 14) + i * 2, Power.word); */
-/*		RT28xx_EEPROM_READ16(pAd, EEPROM_A_TX2_PWR_OFFSET + (choffset - 14) + i * 2, Power2.word); */
+//		Power.word = RTMP_EEPROM_READ16(pAd, EEPROM_A_TX_PWR_OFFSET + (choffset - 14) + i * 2);
+//		Power2.word = RTMP_EEPROM_READ16(pAd, EEPROM_A_TX2_PWR_OFFSET + (choffset - 14) + i * 2);
 		RT28xx_EEPROM_READ16(pAd, EEPROM_A_TX_PWR_OFFSET + (choffset - 14) + i * 2, Power.word);
 		RT28xx_EEPROM_READ16(pAd, EEPROM_A_TX2_PWR_OFFSET + (choffset - 14) + i * 2, Power2.word);
 		RT28xx_EEPROM_READ16(pAd, EEPROM_A_TX3_PWR_OFFSET + (choffset - 14) + i * 2, Power3.word);
@@ -484,8 +375,8 @@ VOID	RTMPRT2883ReadChannelPwr(
 			pAd->TxPower[i * 2 + choffset + 1].Power3 = Power3.field.Byte1;			
 	}
 
-	/* 3. U-NII upper band: 149, 151, 153; 157, 159, 161; 165 (including central frequency in BW 40MHz) */
-	/* 3.1 Fill up channel */
+	// 3. U-NII upper band: 149, 151, 153; 157, 159, 161; 165 (including central frequency in BW 40MHz)
+	// 3.1 Fill up channel
 	choffset = 14 + 12 + 16;
 	for (i = 0; i < 2; i++)
 	{
@@ -509,11 +400,11 @@ VOID	RTMPRT2883ReadChannelPwr(
 	pAd->TxPower[3 * 2 + choffset + 0].Power2		= DEFAULT_RF_TX_POWER;
 	pAd->TxPower[3 * 2 + choffset + 0].Power3		= DEFAULT_RF_TX_POWER;
 
-	/* 3.2 Fill up power */
+	// 3.2 Fill up power
 	for (i = 0; i < 4; i++)
 	{
-/*		RT28xx_EEPROM_READ16(pAd, EEPROM_A_TX_PWR_OFFSET + (choffset - 14) + i * 2, Power.word); */
-/*		RT28xx_EEPROM_READ16(pAd, EEPROM_A_TX2_PWR_OFFSET + (choffset - 14) + i * 2, Power2.word); */
+//		Power.word = RTMP_EEPROM_READ16(pAd, EEPROM_A_TX_PWR_OFFSET + (choffset - 14) + i * 2);
+//		Power2.word = RTMP_EEPROM_READ16(pAd, EEPROM_A_TX2_PWR_OFFSET + (choffset - 14) + i * 2);
 		RT28xx_EEPROM_READ16(pAd, EEPROM_A_TX_PWR_OFFSET + (choffset - 14) + i * 2, Power.word);
 		RT28xx_EEPROM_READ16(pAd, EEPROM_A_TX2_PWR_OFFSET + (choffset - 14) + i * 2, Power2.word);
 		RT28xx_EEPROM_READ16(pAd, EEPROM_A_TX3_PWR_OFFSET + (choffset - 14) + i * 2, Power3.word);
@@ -537,11 +428,10 @@ VOID	RTMPRT2883ReadChannelPwr(
 			pAd->TxPower[i * 2 + choffset + 1].Power3 = Power3.field.Byte1;			
 	}
 
-	/* 4. Print and Debug */
+	// 4. Print and Debug
 	choffset = 14 + 12 + 16 + 7;
 	
 }
 
-
-#endif /* RT2883 */
+#endif // RT2883 //
 

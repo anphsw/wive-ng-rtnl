@@ -41,6 +41,7 @@
     8. The number of MBSS can be 1, 2, 4, or 8
 
 ***************************************************************************/
+
 #ifdef MBSS_SUPPORT
 
 #define MODULE_MBSS
@@ -67,9 +68,9 @@ Note:
 		it will not work! You must rmmod rt2860ap.ko and lsmod rt2860ap.ko again.
 ========================================================================
 */
-VOID MBSS_Init(
-	IN PRTMP_ADAPTER 				pAd,
-	IN RTMP_OS_NETDEV_OP_HOOK		*pNetDevOps)
+VOID RT28xx_MBSS_Init(
+	IN PRTMP_ADAPTER 		pAd,
+	IN PNET_DEV				pDevMain)
 {
 #define MBSS_MAX_DEV_NUM	32
 	PNET_DEV pDevNew;
@@ -77,44 +78,34 @@ VOID MBSS_Init(
 	INT status;
 	RTMP_OS_NETDEV_OP_HOOK	netDevHook;
 
-	/* sanity check to avoid redundant virtual interfaces are created */
-	if (pAd->FlgMbssInit != FALSE)
-		return;
-	/* End of if */
-
-
 	/* init */
 	MaxNumBss = pAd->ApCfg.BssidNum;
-	if (MaxNumBss > MAX_MBSSID_NUM(pAd))
-		MaxNumBss = MAX_MBSSID_NUM(pAd);
+	if (MaxNumBss > MAX_MBSSID_NUM)
+		MaxNumBss = MAX_MBSSID_NUM;
 	/* End of if */
 
+	if (!pAd->FlgMbssInit)
+	{
+		/* first IdBss must not be 0 (BSS0), must be 1 (BSS1) */
+		for(IdBss=FIRST_MBSSID; IdBss<MAX_MBSSID_NUM; IdBss++)
+			pAd->ApCfg.MBSSID[IdBss].MSSIDDev = NULL;
+		/* End of for */
+	}
 
-	/* first IdBss must not be 0 (BSS0), must be 1 (BSS1) */
-	for(IdBss=FIRST_MBSSID; IdBss<MAX_MBSSID_NUM(pAd); IdBss++)
-		pAd->ApCfg.MBSSID[IdBss].MSSIDDev = NULL;
-	/* End of for */
-
-    /* create virtual network interface */
+	/* create virtual network interface */
 	for(IdBss=FIRST_MBSSID; IdBss<MaxNumBss; IdBss++)
 	{
-		UINT32 MC_RowID = 0, IoctlIF = 0;
-#ifdef MULTIPLE_CARD_SUPPORT
-		MC_RowID = pAd->MC_RowID;
-#endif /* MULTIPLE_CARD_SUPPORT */
-#ifdef HOSTAPD_SUPPORT
-		IoctlIF = pAd->IoctlIF;
-#endif /* HOSTAPD_SUPPORT */
-		pDevNew = RtmpOSNetDevCreate(MC_RowID, &IoctlIF, INT_MBSSID, IdBss, sizeof(PRTMP_ADAPTER), INF_MBSSID_DEV_NAME);
-#ifdef HOSTAPD_SUPPORT
-		pAd->IoctlIF = IoctlIF;
-#endif /* HOSTAPD_SUPPORT */
+		if (pAd->ApCfg.MBSSID[IdBss].MSSIDDev)
+		{
+			continue;
+		}
+
+		pDevNew = RtmpOSNetDevCreate(pAd, INT_MBSSID, IdBss, sizeof(PRTMP_ADAPTER), INF_MBSSID_DEV_NAME);
 		if (pDevNew == NULL)
 		{
 			/* allocation fail, exit */
 			pAd->ApCfg.BssidNum = IdBss; /* re-assign new MBSS number */
-			DBGPRINT(RT_DEBUG_ERROR,
-                     ("Allocate network device fail (MBSS)...\n"));
+			DBGPRINT(RT_DEBUG_ERROR, ("Allocate network device fail (MBSS)...\n"));
 			break;
 		}
 		else
@@ -125,11 +116,14 @@ VOID MBSS_Init(
 		RTMP_OS_NETDEV_SET_PRIV(pDevNew, pAd);
 		
 		/* init operation functions and flags */
-		NdisCopyMemory(&netDevHook, pNetDevOps, sizeof(netDevHook));
+		NdisZeroMemory(&netDevHook, sizeof(netDevHook));
+		netDevHook.open = MBSS_VirtualIF_Open;	// device opem hook point
+		netDevHook.stop = MBSS_VirtualIF_Close;	// device close hook point
+		netDevHook.xmit = MBSS_VirtualIF_PacketSend;	// hard transmit hook point
+		netDevHook.ioctl = MBSS_VirtualIF_Ioctl;	// ioctl hook point
 
-		netDevHook.priv_flags = INT_MBSSID;			/* We are virtual interface */
+		netDevHook.priv_flags = INT_MBSSID;			// We are virtual interface
 		netDevHook.needProtcted = TRUE;
-
 		/* Init MAC address of virtual network interface */
 		NdisMoveMemory(&netDevHook.devAddr[0], &pAd->ApCfg.MBSSID[IdBss].Bssid[0], MAC_ADDR_LEN);
 
@@ -137,11 +131,43 @@ VOID MBSS_Init(
 		pAd->ApCfg.MBSSID[IdBss].MSSIDDev = pDevNew;
 		
 		/* register this device to OS */
-		status = RtmpOSNetDevAttach(pAd->OpMode, pDevNew, &netDevHook);
+		status = RtmpOSNetDevAttach(pDevNew, &netDevHook);
 
 	}
 
 	pAd->FlgMbssInit = TRUE;
+
+}
+
+
+/*
+========================================================================
+Routine Description:
+    Close Multi-BSS network interface.
+
+Arguments:
+	pAd				points to our adapter
+
+Return Value:
+    None
+
+Note:
+    FIRST_MBSSID = 1
+    Main BSS is not closed here.
+========================================================================
+*/
+VOID RT28xx_MBSS_Close(
+	IN PRTMP_ADAPTER 	pAd)
+{
+	UINT IdBss;
+
+
+
+	for(IdBss=FIRST_MBSSID; IdBss<MAX_MBSSID_NUM; IdBss++)
+	{
+		if (pAd->ApCfg.MBSSID[IdBss].MSSIDDev)
+			RtmpOSNetDevClose(pAd->ApCfg.MBSSID[IdBss].MSSIDDev);
+	}
 
 }
 
@@ -162,7 +188,7 @@ Note:
     Main BSS is not removed here.
 ========================================================================
 */
-VOID MBSS_Remove(
+VOID RT28xx_MBSS_Remove(
 	IN PRTMP_ADAPTER 	pAd)
 {
 	MULTISSID_STRUCT *pMbss;
@@ -170,7 +196,7 @@ VOID MBSS_Remove(
 
 
 
-	for(IdBss=FIRST_MBSSID; IdBss<MAX_MBSSID_NUM(pAd); IdBss++)
+	for(IdBss=FIRST_MBSSID; IdBss<MAX_MBSSID_NUM; IdBss++)
 	{
 		pMbss = &pAd->ApCfg.MBSSID[IdBss];
 
@@ -183,9 +209,12 @@ VOID MBSS_Remove(
 			pMbss->MSSIDDev = NULL;
 		}
 	}
+
 } /* End of RT28xx_MBSS_Remove */
 
 
+
+/* --------------------------------- Private -------------------------------- */
 /*
 ========================================================================
 Routine Description:
@@ -202,7 +231,7 @@ Return Value:
 Note:
 ========================================================================
 */
-INT32 RT28xx_MBSS_IdxGet(
+static INT32 RT28xx_MBSS_IdxGet(
 	IN PRTMP_ADAPTER	pAd,
 	IN PNET_DEV			pDev)
 {
@@ -238,11 +267,13 @@ Return Value:
 Note:
 ========================================================================
 */
-INT MBSS_Open(
-	IN	PNET_DEV		pDev)
+INT MBSS_VirtualIF_Open(
+	IN	PNET_DEV	pDev)
 {
 	PRTMP_ADAPTER pAd;
 	INT BssId;
+
+	DBGPRINT(RT_DEBUG_TRACE, ("%s: ===> MBSSVirtualIF_open\n", RTMP_OS_NETDEV_GET_DEVNAME(pDev)));
 
 	pAd = RTMP_OS_NETDEV_GET_PRIV(pDev);
 	BssId = RT28xx_MBSS_IdxGet(pAd, pDev);
@@ -250,8 +281,17 @@ INT MBSS_Open(
         return -1;
     
     pAd->ApCfg.MBSSID[BssId].bBcnSntReq = TRUE;
+
+	if (VIRTUAL_IF_UP(pAd) != 0)
+		return -1;
+
+	/* increase MODULE use count */
+	RT_MOD_INC_USE_COUNT();
+
+	RTMP_OS_NETDEV_START_QUEUE(pDev);
+
 	return 0;
-} /* End of MBSS_Open */
+} /* End of MBSS_VirtualIF_Open */
 
 
 /*
@@ -269,30 +309,32 @@ Return Value:
 Note:
 ========================================================================
 */
-INT MBSS_Close(
-	IN	PNET_DEV		pDev)
+INT MBSS_VirtualIF_Close(
+	IN	PNET_DEV	pDev)
 {
 	PRTMP_ADAPTER pAd;
 	INT BssId;
 
+	DBGPRINT(RT_DEBUG_TRACE, ("%s: ===> MBSSVirtualIF_close\n", RTMP_OS_NETDEV_GET_DEVNAME(pDev)));
 
 	pAd = RTMP_OS_NETDEV_GET_PRIV(pDev);
 	BssId = RT28xx_MBSS_IdxGet(pAd, pDev);
-    if (BssId < 0)
-        return -1;
-
+	
 	RTMP_OS_NETDEV_STOP_QUEUE(pDev);
 
 	/* kick out all stas behind the Bss */
 	MbssKickOutStas(pAd, BssId, REASON_DISASSOC_INACTIVE);
 
 	pAd->ApCfg.MBSSID[BssId].bBcnSntReq = FALSE;
-
 	APMakeAllBssBeacon(pAd);
 	APUpdateAllBeaconFrame(pAd);
 
+
+	VIRTUAL_IF_DOWN(pAd);
+
+	RT_MOD_DEC_USE_COUNT();
 	return 0;
-} /* End of MBSS_Close */
+} /* End of MBSS_VirtualIF_Close */
 
 
 /*
@@ -311,10 +353,9 @@ Return Value:
 Note:
 ========================================================================
 */
-int MBSS_PacketSend(
-	IN	PNDIS_PACKET				pPktSrc, 
-	IN	PNET_DEV					pDev,
-	IN	RTMP_NET_PACKET_TRANSMIT	Func)
+INT MBSS_VirtualIF_PacketSend(
+	IN PNDIS_PACKET			pPktSrc, 
+	IN PNET_DEV				pDev)
 {
     RTMP_ADAPTER     *pAd;
     MULTISSID_STRUCT *pMbss;
@@ -331,13 +372,20 @@ int MBSS_PacketSend(
         RELEASE_NDIS_PACKET(pAd, pPkt, NDIS_STATUS_FAILURE);
         return 0;
     } /* End of if */
-#endif /* RALINK_ATE */
+#endif // RALINK_ATE //
 
 	if ((RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_BSS_SCAN_IN_PROGRESS)) ||
 		(RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_RADIO_OFF))          ||
 		(RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_RESET_IN_PROGRESS)))
 	{
 		/* wlan is scanning/disabled/reset */
+		RELEASE_NDIS_PACKET(pAd, pPkt, NDIS_STATUS_FAILURE);
+		return 0;
+	} /* End of if */
+
+	if(!(RTMP_OS_NETDEV_STATE_RUNNING(pDev)))
+	{
+		/* the interface is down */
 		RELEASE_NDIS_PACKET(pAd, pPkt, NDIS_STATUS_FAILURE);
 		return 0;
 	} /* End of if */
@@ -352,24 +400,65 @@ int MBSS_PacketSend(
         /* find the device in our MBSS list */
         if (pMbss[IdBss].MSSIDDev == pDev)
 		{
-/*			NdisZeroMemory((PUCHAR)&(RTPKT_TO_OSPKT(pPktSrc))->cb[CB_OFF], 15); */
-			NdisZeroMemory((PUCHAR)(GET_OS_PKT_CB(pPktSrc) + CB_OFF), 15);
+			NdisZeroMemory((PUCHAR)&(RTPKT_TO_OSPKT(pPktSrc))->cb[CB_OFF], 15);
             RTMP_SET_PACKET_NET_DEVICE_MBSSID(pPktSrc, IdBss);
 			SET_OS_PKT_NETDEV(pPktSrc, pAd->net_dev);
 		 
 
             /* transmit the packet */
-            return Func(pPktSrc);
+            return rt28xx_packet_xmit(pPktSrc);
 		}
 	}
+
 
     /* can not find the BSS so discard the packet */
 	RELEASE_NDIS_PACKET(pAd, pPkt, NDIS_STATUS_FAILURE);
 
+	
     return 0;
-} /* End of MBSS_PacketSend */
+} /* End of MBSS_VirtualIF_PacketSend */
 
 
-#endif /* MBSS_SUPPORT */
+/*
+========================================================================
+Routine Description:
+    IOCTL to WLAN.
+
+Arguments:
+	pDev			which WLAN network interface
+	pIoCtrl			command information
+	Command			command ID
+
+Return Value:
+    0: IOCTL successfully
+    otherwise: IOCTL fail
+
+Note:
+    SIOCETHTOOL     8946    New drivers use this ETHTOOL interface to
+                            report link failure activity.
+========================================================================
+*/
+INT MBSS_VirtualIF_Ioctl(
+	IN PNET_DEV				pDev, 
+	IN OUT struct ifreq 	*pIoCtrl, 
+	IN INT 					Command)
+{
+	RTMP_ADAPTER *pAd;
+
+	pAd = RTMP_OS_NETDEV_GET_PRIV(pDev);
+	ASSERT(pAd);
+
+	if (!pAd)
+		return -EINVAL;
+	
+	if (!RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_INTERRUPT_IN_USE))
+		return -ENETDOWN;
+	/* End of if */
+
+	/* do real IOCTL */
+	return rt28xx_ioctl(pDev, pIoCtrl, Command);
+} /* End of MBSS_VirtualIF_Ioctl */
+
+#endif // MBSS_SUPPORT //
 
 /* End of ap_mbss.c */
