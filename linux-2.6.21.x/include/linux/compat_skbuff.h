@@ -12,7 +12,6 @@
 
 /* This macros replace some functions from new version of kernels for easy backport some code */
 #define ipv6_hdr(skb) skb->nh.ipv6h
-#define skb_transport_header(skb) skb->h.raw
 #define skb_network_header_len(skb) (skb->h.raw - skb->nh.raw)
 
 #endif /* COMPAT_SKBUFF_H */
