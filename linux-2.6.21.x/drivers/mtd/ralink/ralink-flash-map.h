@@ -33,7 +33,7 @@ static struct mtd_partition rt2880_partitions[] __maybe_unused = {
                 offset:         MTDPART_OFS_APPEND
 	}, {
                 name:           "RW-FS", /* mtdblock4 */
-                size:           MTD_RWFS_PART_SIZE, /* 128K */
+                size:           MTD_RWFS_PART_SIZE, /* 192K */
                 offset:         MTD_RWFS_PART_OFFSET,
 #ifdef CONFIG_DUAL_IMAGE
 	}, {

@@ -8,7 +8,7 @@
 # it under the terms of the GNU GPL v2 or later.
 
 # Maximum rwfs to write
-TGZfs_size=131072
+TGZfs_size=196608
 
 # mtd dev for rfs
 MTDRWFS=/dev/mtdblock5
