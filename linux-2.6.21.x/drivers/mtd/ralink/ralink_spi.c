@@ -1445,7 +1445,7 @@ int raspi_init(void)
 	return raspi_prob();
 }
 
-#ifdef CONFIG_RT2880_ROOTFS_IN_FLASH
+#if defined(CONFIG_RT2880_ROOTFS_IN_FLASH) || defined(CONFIG_RT2880_ROOTFS_IN_RAM)
 rootfs_initcall(raspi_init);
 #else
 fs_initcall(raspi_init);

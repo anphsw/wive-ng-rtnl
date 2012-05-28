@@ -393,7 +393,7 @@ int ra_mtd_read_nm(char *name, loff_t from, size_t len, u_char *buf)
 	return ret;
 }
 
-#ifdef CONFIG_RT2880_ROOTFS_IN_FLASH
+#if defined(CONFIG_RT2880_ROOTFS_IN_FLASH) || defined(CONFIG_RT2880_ROOTFS_IN_RAM)
 rootfs_initcall(rt2880_mtd_init);
 #else
 fs_initcall(rt2880_mtd_init);

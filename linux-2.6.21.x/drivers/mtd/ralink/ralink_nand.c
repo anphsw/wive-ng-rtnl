@@ -1869,10 +1869,10 @@ static void __devexit ra_nand_remove(void)
 	}
 }
 
-#ifndef CONFIG_RT2880_ROOTFS_IN_FLASH
-fs_initcall(ra_nand_init);
-#else
+#if defined(CONFIG_RT2880_ROOTFS_IN_FLASH) || defined(CONFIG_RT2880_ROOTFS_IN_RAM)
 rootfs_initcall(ra_nand_init);
+#else
+fs_initcall(ra_nand_init);
 #endif
 module_exit(ra_nand_remove);
 
