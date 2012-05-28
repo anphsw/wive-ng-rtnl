@@ -1,4 +1,4 @@
-/* $Id: ifacewatcher.c,v 1.4 2012/03/05 20:36:19 nanard Exp $ */
+/* $Id: ifacewatcher.c,v 1.5 2012/05/21 08:55:10 nanard Exp $ */
 /* Project MiniUPnP
  * web : http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * (c) 2011 Thomas BERNARD
@@ -13,6 +13,7 @@
 #include <net/if.h>
 #include <net/route.h>
 #include <syslog.h>
+#include <signal.h>
 
 #if !defined(SA_LEN)
 #define	SA_LEN(sa)	(sa)->sa_len
@@ -24,7 +25,7 @@
 #include "../upnputils.h"
 #include "../upnpglobalvars.h"
 
-extern volatile int should_send_public_address_change_notif;
+extern volatile sig_atomic_t should_send_public_address_change_notif;
 
 int
 OpenAndConfInterfaceWatchSocket(void)

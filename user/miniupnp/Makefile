@@ -167,7 +167,7 @@ testgetifaddr:	testgetifaddr.o getifaddr.o
 
 miniupnpdctl:	miniupnpdctl.o
 
-config.h:	genconfig.sh
+config.h:	genconfig.sh VERSION
 	./genconfig.sh $(CONFIG_OPTIONS)
 
 depend:	config.h
