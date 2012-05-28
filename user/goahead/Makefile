@@ -26,6 +26,12 @@ ifeq ("$(CONFIG_RT2860V2_STA_WSC)", "")
 	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/wps
 endif
 endif
+ifeq ("$(CONFIG_USER_CHILLISPOT)", "")
+	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/internet/hotspot.asp
+endif
+ifeq ("$(CONFIG_USER_GOAHEAD_LANG_ZHTW)", "")
+	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/lang/zhtw
+endif
 ifeq ("$(CONFIG_USB)", "")
 	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/usb
 else
@@ -45,11 +51,6 @@ endif
 ifeq ("$(CONFIG_USB_MODESWITCH)", "")
 	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/usb/USBmodem.asp
 endif
-ifeq ("$(CONFIG_USER_CHILLISPOT)", "")
-	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/internet/hotspot.asp
-endif
-ifneq ("$(CONFIG_USER_GOAHEAD_LANG_ZHTW)", "y")
-	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/lang/zhtw
 endif
 	for i in $(DIRS) ; do make -C $$i $@ ; done
 	rm -f $(ROMFSDIR)$(ROOT_DIRECTORY)/cgi-bin/.keep_me
