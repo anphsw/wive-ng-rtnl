@@ -109,8 +109,8 @@ shared: install
 	cp -vfra ./filesystem/include/*	$(ROOTDIR)/lib/include_shared
 
 clean : force
-	cd libcharset && $(MAKE) clean
-	$(RM) lib/charset.alias lib/libcharset.* lib/localcharset.h
+	-cd libcharset && $(MAKE) clean
+	$(RM) lib/charset.alias lib/libcharset.* lib/localcharset.h libcharset/configure
 	cd lib && $(MAKE) clean
 	cd srclib && $(MAKE) clean
 	cd src && $(MAKE) clean

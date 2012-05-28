@@ -51,7 +51,7 @@
 #define HAVE_WORKING_O_NOFOLLOW 0
 
 /* Define to the value of ${prefix}, as a string. */
-#define INSTALLPREFIX "/opt/Wive-RTNL/lib/libiconv/filesystem"
+#define INSTALLPREFIX "/opt/Wive-RTNL/lib/libiconv/libcharset/filesystem"
 
 /* Define to the sub-directory in which libtool stores uninstalled libraries.
    */

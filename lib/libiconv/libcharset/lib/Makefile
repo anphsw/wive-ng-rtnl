@@ -6,7 +6,7 @@
 srcdir = .
 
 # Directories used by "make install":
-prefix = /opt/Wive-RTNL/lib/libiconv/filesystem
+prefix = /opt/Wive-RTNL/lib/libiconv/libcharset/filesystem
 local_prefix = /usr/local
 exec_prefix = ${prefix}
 libdir = ${exec_prefix}/lib
@@ -38,7 +38,7 @@ mkinstalldirs = $(SHELL) ../build-aux/mkinstalldirs
 #### End of system configuration section. ####
 
 PACKAGE = 
-VERSION = 1.14
+VERSION = 0.9.28.3
 
 SHELL = /bin/sh
 

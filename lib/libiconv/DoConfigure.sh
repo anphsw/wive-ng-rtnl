@@ -16,3 +16,23 @@ CONFOPTS="--host=mipsel-linux --prefix=$APROOTDIR/filesystem --disable-debug-mod
 cp -f ./inc/*.h ./lib/
 
 ./configure $CONFOPTS
+
+echo "=====================CONFIGURE-LIBCHARSET===================="
+cd libcharset
+APROOTDIR=`pwd`
+
+if [ ! -f $APROOTDIR/configure ]; then
+    sh ./autogen.sh --skip-gnulib
+fi
+if [ ! -f $APROOTDIR/Makefile.in ]; then
+    automake
+fi
+
+CONFOPTS="--host=mipsel-linux --prefix=$APROOTDIR/filesystem --disable-debug-mode --disable-dependency-tracking"
+
+#this small workaround
+cp -f ./inc/*.h ./lib/
+
+./configure $CONFOPTS
+
+cd ..
