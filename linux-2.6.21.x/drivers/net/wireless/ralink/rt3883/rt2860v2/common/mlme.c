@@ -2635,11 +2635,9 @@ VOID MlmeOldRateAdapt(
 	IN ULONG			TrainDown,
 	IN ULONG			TxErrorRatio)
 			{
-#ifdef TXBF_SUPPORT
-	UCHAR *pTable = pEntry->pTable;
-#enif
 	BOOLEAN	bTrainUp = FALSE;
 #ifdef TXBF_SUPPORT
+	UCHAR *pTable = pEntry->pTable;
 	BOOLEAN invertTxBf = FALSE;
 #endif // TXBF_SUPPORT //
 			
