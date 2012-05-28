@@ -45,6 +45,8 @@ endif
 ifeq ("$(CONFIG_USB_MODESWITCH)", "")
 	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/usb/USBmodem.asp
 endif
+ifeq ("$(CONFIG_USER_CHILLISPOT)", "")
+	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/internet/hotspot.asp
 endif
 ifneq ("$(CONFIG_USER_GOAHEAD_LANG_ZHTW)", "y")
 	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/lang/zhtw
