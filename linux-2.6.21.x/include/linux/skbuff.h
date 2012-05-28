@@ -1177,13 +1177,12 @@ static inline void skb_set_mac_header(struct sk_buff *skb, const int offset)
  * NET_IP_ALIGN(2) + ethernet_header(14) + IP_header(20/40) + ports(8)
  */
 #ifndef NET_SKB_PAD
-#if defined (CONFIG_RALINK_RT2880) || \
-    defined (CONFIG_RALINK_RT2883) || \
-    defined (CONFIG_RALINK_RT3883) || \
-    defined (CONFIG_RALINK_RT3352) || \
-    defined (CONFIG_RALINK_RT3052) || \
-    defined (CONFIG_RALINK_RT5350)
-#if defined (CONFIG_PPPOL2TP) || defined (CONFIG_PPTP)
+
+#if defined (CONFIG_RALINK_RT2880) || defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3352) || \
+    defined (CONFIG_RALINK_RT2883) || defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT5350) || \
+    defined (CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_RT6352)
+/* ralink depended hacks */
+#if defined (CONFIG_PPTP) || defined (CONFIG_PPTP_MODULE) || defined(CONFIG_PPPOL2TP) || defined(CONFIG_PPPOL2TP_MODULE)
 #define NET_SKB_PAD	80 /* This is hack need for RalinkSOC with PPTP/L2TP kernel drivers */
 #else
 #define NET_SKB_PAD	16 /* This is hack need for RalinkSOC */
