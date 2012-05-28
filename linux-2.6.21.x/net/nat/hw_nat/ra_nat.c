@@ -2595,7 +2595,6 @@ void PpeSetDstPort(uint32_t Ebl)
 	}
 
 }
-EXPORT_SYMBOL(PpeSetDstPort);
 
 uint32_t SetGdmaFwd(uint32_t Ebl)
 {
@@ -2603,7 +2602,7 @@ uint32_t SetGdmaFwd(uint32_t Ebl)
 	uint32_t data = 0;
 
 	data = RegRead(GDM2_FWD_CFG);
-	
+
 	if (Ebl) {
 		data &= ~0x7777;
 		data |=  GDM1_OFRC_P_CPU;
