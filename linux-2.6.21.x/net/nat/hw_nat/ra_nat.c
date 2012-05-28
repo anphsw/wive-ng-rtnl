@@ -470,6 +470,11 @@ uint32_t PpeExtIfRxHandler(struct sk_buff * skb)
 	LAYER3_HEADER(skb) = skb->data;
 	skb_push(skb, ETH_HLEN);	//pointer to layer2 header before calling hard_start_xmit
 	skb = __vlan_put_tag(skb, VirIfIdx);
+	if (!skb) {
+	    NAT_PRINT("HNAT: not valid tag ? memleak ? (VirIfIdx=%d)\n", VirIfIdx);
+	    return 0;
+	}
+
 
 	//redirect to PPE
 	FOE_AI(skb) = UN_HIT;
