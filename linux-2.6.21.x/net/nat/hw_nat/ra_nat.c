@@ -316,7 +316,7 @@ uint32_t PpeExtIfRxHandler(struct sk_buff * skb)
 
 #if defined (CONFIG_RALINK_RT3052) || defined(HWNAT_SPKIP_MCAST_BCAST)
 	/* skip bcast/mcast traffic PPE. WiFi bug ? */
-	eth = eth_hdr(skb);
+	eth = (struct ethhdr *)LAYER2_HEADER(skb);
 	if(is_multicast_ether_addr(eth->h_dest))
 	    return 1;
 #endif

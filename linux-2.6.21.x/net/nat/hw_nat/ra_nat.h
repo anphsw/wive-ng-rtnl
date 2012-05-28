@@ -240,23 +240,10 @@ typedef struct {
 				    (FOE_MAGIC_TAG(skb) == FOE_MAGIC_WLAN))
 
 
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,21)
-#define LAYER2_HEADER(skb)		(skb)->mac_header
-#else
-#define LAYER2_HEADER(skb)		(skb)->mac.raw
-#endif
-
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,21)
-#define LAYER3_HEADER(skb)		(skb)->network_header
-#else
-#define LAYER3_HEADER(skb)		(skb)->nh.raw
-#endif
-
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,21)
-#define LAYER4_HEADER(skb)		(skb)->transport_header
-#else
-#define LAYER4_HEADER(skb)		(skb)->h.raw
-#endif
+/* use native linux functions */
+#define LAYER2_HEADER(skb)		skb_mac_header(skb)
+#define LAYER3_HEADER(skb)		skb_network_header(skb)
+#define LAYER4_HEADER(skb)		skb_transport_header(skb)
 
 
 /*
