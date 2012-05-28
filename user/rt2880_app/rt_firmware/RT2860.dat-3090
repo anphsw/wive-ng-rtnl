@@ -1,4 +1,6 @@
 #This file need be autogenerate ny ralink_init. Need fix. Only 3090 use!!!
+#The word of "Default" must not be removed
+Default
 RFICType=8
 CountryRegion=5
 CountryRegionABand=0
