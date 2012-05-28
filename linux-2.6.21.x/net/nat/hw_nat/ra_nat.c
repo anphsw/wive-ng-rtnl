@@ -144,6 +144,7 @@ static void FoeAllocTbl(uint32_t NumOfEntry)
 	memset(PpeFoeBase, 0, FoeTblSize);
 }
 
+#ifdef HWNAT_DEBUG
 static uint8_t *ShowCpuReason(struct sk_buff *skb)
 {
 	static uint8_t Buf[32];
@@ -300,6 +301,7 @@ uint32_t FoeDumpPkt(struct sk_buff * skb)
 	return 1;
 
 }
+#endif
 
 /* push different VID for WiFi pseudo interface or USB external NIC */
 uint32_t PpeExtIfRxHandler(struct sk_buff * skb)
@@ -460,7 +462,9 @@ uint32_t PpeExtIfRxHandler(struct sk_buff * skb)
 	}
 #endif
 	else {
+#ifdef HWNAT_DEBUG
 		NAT_PRINT("HNAT: The interface %s is unknown\n", skb->dev->name);
+#endif
 		return 1;
 	}
 
@@ -735,13 +739,16 @@ int32_t PpeRxHandler(struct sk_buff * skb)
 {
 	struct FoeEntry *foe_entry = &PpeFoeBase[FOE_ENTRY_NUM(skb)];
 
+#ifdef HWNAT_DEBUG
 	if (DebugLevel >= 3) {
 		FoeDumpPkt(skb);
 	}
-
+#endif
 	/* return trunclated packets to normal path */
 	if (!skb || (skb->len < ETH_HLEN)) {
+#ifdef HWNAT_DEBUG
 	    NAT_PRINT("HNAT: skb null or small len in rx path\n");
+#endif
 	    return 1;
 	}
 
@@ -807,6 +814,7 @@ GetPppoeSid(struct sk_buff * skb, uint32_t vlan_gap,
 
 	peh = (struct pppoe_hdr *)(skb->data + ETH_HLEN + vlan_gap);
 
+#ifdef HWNAT_DEBUG
 	if (DebugLevel >= 6) {
 		NAT_PRINT("\n==============\n");
 		NAT_PRINT(" Ver=%d\n", peh->ver);
@@ -818,7 +826,7 @@ GetPppoeSid(struct sk_buff * skb, uint32_t vlan_gap,
 		NAT_PRINT(" tag_len=%d\n", ntohs(peh->tag[0].tag_len));
 		NAT_PRINT("=================\n");
 	}
-
+#endif
 	*ppp_tag = peh->tag[0].tag_type;
 #if defined (CONFIG_RA_HW_NAT_IPV6)
 	if (peh->ver != 1 || peh->type != 1
@@ -1033,6 +1041,7 @@ int32_t PpeParseLayerInfo(struct sk_buff * skb)
 		return 1;
 	}
 
+#ifdef HWNAT_DEBUG
 	if (DebugLevel >= 6) {
 		printk("--------------\n");
 		printk("DMAC:%02X:%02X:%02X:%02X:%02X:%02X\n",
@@ -1109,6 +1118,7 @@ int32_t PpeParseLayerInfo(struct sk_buff * skb)
 		}
 #endif
 	}
+#endif
 
 	return 0;
 }
@@ -1119,8 +1129,6 @@ int32_t PpeFillInL2Info(struct sk_buff * skb, struct FoeEntry * foe_entry)
 	if (foe_entry->bfib1.state == BIND) {
 		return 1;
 	}
-
-
 
 	/* Set VLAN Info - VLAN1/VLAN2 */
 #if defined (CONFIG_HNAT_V2)
@@ -1792,14 +1800,18 @@ int32_t PpeTxHandler(struct sk_buff *skb, int gmac_no)
 	struct FoeEntry *foe_entry = &PpeFoeBase[FOE_ENTRY_NUM(skb)];
 
 	if (!skb) {
+#ifdef HWNAT_DEBUG
 	    NAT_PRINT("HNAT: skb is null ?\n");
+#endif
 	    return 1;
 	}
 
 	/* return trunclated packets to normal path with padding */
 	if (skb->len < ETH_HLEN) {
 	    memset(FOE_INFO_START_ADDR(skb), 0, FOE_INFO_LEN);
+#ifdef HWNAT_DEBUG
 	    NAT_PRINT("HNAT: skb null or small len in tx path\n");
+#endif
 	    return 1;
 	}
 
@@ -1855,10 +1867,12 @@ int32_t PpeTxHandler(struct sk_buff *skb, int gmac_no)
 		/* Enter binding state */
 		PpeSetEntryBind(skb, foe_entry);
 
+#ifdef HWNAT_DEBUG
 		/* Dump Binding Entry */
 		if (DebugLevel >= 1) {
 			FoeDumpEntry(FOE_ENTRY_NUM(skb));
 		}
+#endif
 #if defined (CONFIG_HNAT_V2)
 	} else if (IS_MAGIC_TAG_VALID(skb)
 		   && (FOE_AI(skb) == HIT_BIND_KEEPALIVE_MC_NEW_HDR
@@ -1878,9 +1892,11 @@ int32_t PpeTxHandler(struct sk_buff *skb, int gmac_no)
 #else
 	} else if (IS_MAGIC_TAG_VALID(skb) && (FOE_AI(skb) == HIT_UNBIND_RATE_REACH) && (FOE_ALG(skb) == 1)) {
 #endif
+#ifdef HWNAT_DEBUG
 		if (DebugLevel >= 2) {
 			NAT_PRINT ("FOE_ALG=1 (Entry=%d)\n", FOE_ENTRY_NUM(skb));
 		}
+#endif
 	}
 
 	return 1;

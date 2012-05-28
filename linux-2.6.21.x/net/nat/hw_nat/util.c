@@ -36,6 +36,7 @@ void MacReverse(uint8_t * Mac)
 	}
 }
 
+#ifdef HWNAT_DEBUG
 int GetNext(char *src, int separator, char *dest)
 {
 	char *c;
@@ -97,6 +98,7 @@ unsigned int Str2Ip(IN char *str)
 	c[3] = atoi(ptr);
 	return ((c[0] << 24) + (c[1] << 16) + (c[2] << 8) + c[3]);
 }
+#endif
 
 /* calculate ip address range */
 /* start_ip <= x < end_ip */
