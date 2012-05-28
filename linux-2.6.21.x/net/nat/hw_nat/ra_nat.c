@@ -314,7 +314,7 @@ uint32_t PpeExtIfRxHandler(struct sk_buff * skb)
 	    return 0;
 	}
 
-#if defined (CONFIG_RALINK_RT3052) || defined(HWNAT_SPKIP_MCAST_BCAST)
+#if defined (CONFIG_RALINK_RT3052) || defined(HWNAT_SKIP_MCAST_BCAST)
 	/* skip bcast/mcast traffic PPE. WiFi bug ? */
 	eth = (struct ethhdr *)LAYER2_HEADER(skb);
 	if(is_multicast_ether_addr(eth->h_dest))
@@ -1915,7 +1915,7 @@ void PpeSetFoeEbl(uint32_t FoeEbl)
 	/* FOE engine need to handle unicast/multicast/broadcast flow */
 	if (FoeEbl == 1) {
 		PpeFlowSet |= (BIT_IPV4_NAPT_EN | BIT_IPV4_NAT_EN);
-#if defined(HWNAT_SPKIP_MCAST_BCAST)
+#if defined(HWNAT_SKIP_MCAST_BCAST)
 		PpeFlowSet |= (BIT_FUC_FOE);
 #else
 		PpeFlowSet |= (BIT_FUC_FOE | BIT_FMC_FOE | BIT_FBC_FOE);
