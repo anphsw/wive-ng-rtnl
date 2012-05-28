@@ -854,12 +854,7 @@ MODULE_AUTHOR (DRIVER_AUTHOR);
 MODULE_DESCRIPTION (DRIVER_INFO);
 MODULE_LICENSE ("GPL");
 
-#if !defined (CONFIG_RALINK_RT2880) && \
-    !defined (CONFIG_RALINK_RT2883) && \
-    !defined (CONFIG_RALINK_RT3883) && \
-    !defined (CONFIG_RALINK_RT3352) && \
-    !defined (CONFIG_RALINK_RT3052) && \
-    !defined (CONFIG_RALINK_RT5350)
+#ifndef CONFIG_RT3XXX_OHCI
 #ifdef CONFIG_PCI
 #include "ohci-pci.c"
 #define PCI_DRIVER		ohci_pci_driver
@@ -921,9 +916,9 @@ MODULE_LICENSE ("GPL");
 #define PLATFORM_DRIVER		usb_hcd_pnx4008_driver
 #endif
 
-#if defined (CONFIG_RT3XXX_OHCI) || defined (CONFIG_RT3XXX_OHCI_MODULE)
+#ifdef CONFIG_RT3XXX_OHCI
 #include "ohci-rt3xxx.c"
-#define PLATFORM_DRIVER     ohci_hcd_rt3xxx_driver
+#define PLATFORM_DRIVER		ohci_hcd_rt3xxx_driver
 #endif
 
 #ifdef CONFIG_USB_OHCI_HCD_PPC_OF
