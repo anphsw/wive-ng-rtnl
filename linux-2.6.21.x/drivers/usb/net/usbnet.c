@@ -45,7 +45,7 @@
 
 #include "usbnet.h"
 
-#if defined (CONFIG_RA_HW_NAT) || defined (CONFIG_RA_HW_NAT_MODULE)
+#if defined(CONFIG_RA_HW_NAT_PCI) && (defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE))
 #include "../../../net/nat/hw_nat/ra_nat.h"
 extern int (*ra_sw_nat_hook_rx)(struct sk_buff *skb);
 extern int (*ra_sw_nat_hook_tx)(struct sk_buff *skb, int gmac_no);
@@ -248,7 +248,7 @@ void usbnet_skb_return (struct usbnet *dev, struct sk_buff *skb)
 		devdbg (dev, "< rx, len %zu, type 0x%x",
 			skb->len + sizeof (struct ethhdr), skb->protocol);
 	memset (skb->cb, 0, sizeof (struct skb_data));
-#if defined (CONFIG_RA_HW_NAT) || defined (CONFIG_RA_HW_NAT_MODULE)
+#if defined(CONFIG_RA_HW_NAT_PCI) && (defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE))
 	 /* ra_sw_nat_hook_rx return 1 --> continue
 	  * ra_sw_nat_hook_rx return 0 --> FWD & without netif_rx
 	  */
@@ -1033,7 +1033,7 @@ static int usbnet_start_xmit (struct sk_buff *skb, struct net_device *net)
 		goto drop;
 	}
 
-#if defined (CONFIG_RA_HW_NAT) || defined (CONFIG_RA_HW_NAT_MODULE)
+#if defined(CONFIG_RA_HW_NAT_PCI) && (defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE))
 	/* add tx hook point*/
 	if(ra_sw_nat_hook_tx != NULL) {
 		skb->data += 4; //pointer to DA
