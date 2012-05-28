@@ -67,6 +67,8 @@ MODULE_PARM_DESC(wifi_offload, "Enable/Disable wifi/external if PPE NAT Offload.
 
 extern int (*ra_sw_nat_hook_rx) (struct sk_buff * skb);
 extern int (*ra_sw_nat_hook_tx) (struct sk_buff * skb, int gmac_no);
+extern void (*ra_sw_nat_hook_rs) (uint32_t Ebl);
+
 extern uint8_t		bind_dir;
 extern uint32_t		DebugLevel;
 
@@ -2272,7 +2274,7 @@ static void PpeSetUserPriority(void)
 
 static void PpeSetHNATProtoType(void)
 {
-#ifndef CONFIG_RALINK_RT3052_MP
+#ifndef CONFIG_RALINK_RT3052_MP2
 	/* TODO: we should add exceptional case to register to point out the HNAT case here */
 #endif
 }
@@ -2355,7 +2357,7 @@ struct net_device *ra_dev_get_by_name(const char *name)
 #endif
 }
 
-static void PpeSetDstPort(uint32_t Ebl)
+void PpeSetDstPort(uint32_t Ebl)
 {
 	if (Ebl) {
 		DstPort[DP_RA0] = ra_dev_get_by_name("ra0");
@@ -2593,6 +2595,7 @@ static void PpeSetDstPort(uint32_t Ebl)
 	}
 
 }
+EXPORT_SYMBOL(PpeSetDstPort);
 
 uint32_t SetGdmaFwd(uint32_t Ebl)
 {
@@ -2752,6 +2755,7 @@ static int32_t PpeInitMod(void)
 	/* Register RX/TX hook point */
 	ra_sw_nat_hook_tx = PpeTxHandler;
 	ra_sw_nat_hook_rx = PpeRxHandler;
+	ra_sw_nat_hook_rs = PpeSetDstPort;
 
 	/* Set GMAC fowrards packet to PPE */
 	SetGdmaFwd(1);
@@ -2777,6 +2781,7 @@ static void PpeCleanupMod(void)
 	/* Unregister RX/TX hook point */
 	ra_sw_nat_hook_rx = NULL;
 	ra_sw_nat_hook_tx = NULL;
+	ra_sw_nat_hook_rs = NULL;
 
 	/* Restore PPE related register */
 	PpeEngStop();
