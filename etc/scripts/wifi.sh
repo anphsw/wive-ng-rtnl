@@ -56,7 +56,7 @@ if [ "$CONFIG_RT2860V2_AP_IGMP_SNOOP" != "" ]; then
     fi
 fi
 ########################################DFS Setup #############################
-if [ "$CONFIG_RT2860V2_AP_DFS" != "" ] && [ "$OperationMode" = "1" ]; then
+if [ "$CONFIG_RT2860V2_AP_DFS" != "" ] && [ "$OperationMode" = "1" ] && [ "$1" != "rai0" ]; then
     if [ "$DfsEnable" = "1" ]; then
 	iwpriv "$1" set RadarStart=1
     else
