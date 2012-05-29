@@ -48,7 +48,7 @@ if [ "$CONFIG_RT2860V2_AP_IGMP_SNOOP" != "" ]; then
 	    iwpriv "$1" set McastPhyMode=$McastPhyMode
 	fi
 	if [ "$McastMcs" != "" ]; then
-    	    iwpriv "$1" set  McastMcs="$McastMcs"
+    	    iwpriv "$1" set McastMcs="$McastMcs"
 	fi
     fi
     if [ "$M2UEnabled" != "" ]; then
@@ -89,7 +89,7 @@ if [ "$OperationMode" = "3" ]; then
     eval `nvram_buf_get 2860 ApCliClientOnly`
     if [ "$ApCliClientOnly" = "1" ]; then
 	echo "APCLI Only client mode enable shutdown $1..."
-	ip link set $1 down > /dev/null 2>&1
+	ip link set "$1" down > /dev/null 2>&1
     fi
 fi
 ###########################################ALWAYS END##########################
