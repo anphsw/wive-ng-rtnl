@@ -71,8 +71,10 @@ if [ "$AutoChannelSelect" = "1" ]; then
     # second select channel
     iwpriv "$1" set AutoChannelSel=1
 else
-    # set channel manual
-    iwpriv "$1" set Channel=$Channel
+    if [ "$1" != "rai0" ]; then
+	# set channel manual
+	iwpriv "$1" set Channel=$Channel
+    fi
 fi
 ########################################GREEN mode#############################
 if [ "$CONFIG_RT2860V2_AP_GREENAP" != "" ]; then
