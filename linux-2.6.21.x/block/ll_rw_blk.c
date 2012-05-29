@@ -3084,35 +3084,6 @@ static inline int should_fail_request(struct bio *bio)
 
 #endif /* CONFIG_FAIL_MAKE_REQUEST */
 
-/*
- * Check whether this bio extends beyond the end of the device.
- */
-static inline int bio_check_eod(struct bio *bio, unsigned int nr_sectors)
-{
-	sector_t maxsector;
-
-	if (!nr_sectors)
-		return 0;
-
-	/* Test device or partition size, when known. */
-	maxsector = bio->bi_bdev->bd_inode->i_size >> 9;
-	if (maxsector) {
-		sector_t sector = bio->bi_sector;
-
-		if (maxsector < nr_sectors || maxsector - nr_sectors < sector) {
-			/*
-			 * This may well happen - the kernel calls bread()
-			 * without checking the size of the device, e.g., when
-			 * mounting a device.
-			 */
-			handle_bad_sector(bio);
-			return 1;
-		}
-	}
-
-	return 0;
-}
-
 /**
  * generic_make_request: hand a buffer to its device driver for I/O
  * @bio:  The bio describing the location in memory and on the device.
@@ -3216,8 +3187,21 @@ end_io:
 		old_sector = bio->bi_sector;
 		old_dev = bio->bi_bdev->bd_dev;
 
-		if (bio_check_eod(bio, nr_sectors))
-			goto end_io;
+		maxsector = bio->bi_bdev->bd_inode->i_size >> 9;
+		if (maxsector) {
+			sector_t sector = bio->bi_sector;
+
+			if (maxsector < nr_sectors ||
+					maxsector - nr_sectors < sector) {
+				/*
+				 * This may well happen - partitions are not
+				 * checked to make sure they are within the size
+				 * of the whole device.
+				 */
+				handle_bad_sector(bio);
+				goto end_io;
+			}
+		}
 
 		ret = q->make_request_fn(q, bio);
 	} while (ret);
