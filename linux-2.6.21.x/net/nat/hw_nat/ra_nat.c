@@ -705,7 +705,7 @@ uint32_t PpeGetUpFromACLRule(struct sk_buff *skb)
 
 int32_t PpeRxHandler(struct sk_buff * skb)
 {
-	struct FoeEntry *foe_entry = &PpeFoeBase[FOE_ENTRY_NUM(skb)];
+	struct FoeEntry *foe_entry;
 	uint16_t eth_type=0;
 #if defined (CONFIG_RALINK_RT3052) || defined(HWNAT_SKIP_MCAST_BCAST)
 	struct ethhdr *eth = NULL;
@@ -743,10 +743,10 @@ int32_t PpeRxHandler(struct sk_buff * skb)
 		FoeDumpPkt(skb);
 	}
 #endif
+	foe_entry = &PpeFoeBase[FOE_ENTRY_NUM(skb)];
 
 	/* the incoming packet is from PCI or WiFi interface */
-	if (((FOE_MAGIC_TAG(skb) == FOE_MAGIC_PCI)
-	     || (FOE_MAGIC_TAG(skb) == FOE_MAGIC_WLAN))) {
+	if (((FOE_MAGIC_TAG(skb) == FOE_MAGIC_PCI) || (FOE_MAGIC_TAG(skb) == FOE_MAGIC_WLAN))) {
 #if defined (CONFIG_RA_HW_NAT_WIFI) || defined (CONFIG_RA_HW_NAT_PCI)
 	    if (wifi_offload && (eth_type != ETH_P_8021Q)) {
 		/* add tag to pkts from external ifaces before send to PPE */
@@ -757,11 +757,8 @@ int32_t PpeRxHandler(struct sk_buff * skb)
 #else
 		return 1; /* wifi offload not compiled */
 #endif
-
 	} else if ((FOE_AI(skb) == HIT_BIND_FORCE_TO_CPU)) {
-
 		return PpeHitBindForceToCpuHandler(skb, foe_entry);
-
 	/* handle the incoming packet which came back from PPE */
 #if defined (CONFIG_HNAT_V2)
 	} else if ((FOE_SP(skb) == 6) &&
@@ -2436,7 +2433,9 @@ void PpeSetDstPort(uint32_t Ebl)
 #ifdef CONFIG_RAETH_GMAC2
 		DstPort[DP_GMAC2] = ra_dev_get_by_name("eth3");
 #endif
+#ifdef CONFIG_RA_HW_NAT_PCI
 		DstPort[DP_PCI] = ra_dev_get_by_name("eth0");	// PCI interface name
+#endif
 	} else {
 		if (DstPort[DP_RA0] != NULL) {
 			dev_put(DstPort[DP_RA0]);
@@ -2594,11 +2593,12 @@ void PpeSetDstPort(uint32_t Ebl)
 			dev_put(DstPort[DP_GMAC2]);
 		}
 #endif
+#ifdef CONFIG_RA_HW_NAT_PCI
 		if (DstPort[DP_PCI] != NULL) {
 			dev_put(DstPort[DP_PCI]);
 		}
+#endif
 	}
-
 }
 
 uint32_t SetGdmaFwd(uint32_t Ebl)
