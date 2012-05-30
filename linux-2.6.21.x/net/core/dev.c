@@ -907,8 +907,8 @@ int dev_open(struct net_device *dev)
 		 */
 		raw_notifier_call_chain(&netdev_chain, NETDEV_UP, dev);
 
-#if defined (CONFIG_RA_HW_NAT) || defined (CONFIG_RA_HW_NAT_MODULE)
-		if(ra_sw_nat_hook_rs != NULL) {
+#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+		if((strncmp(dev->name, "eth", 3) == 0) && (ra_sw_nat_hook_rs != NULL)) {
 		    /* reconfigure dstif table in hw_nat module */
 		    ra_sw_nat_hook_rs(0);
 		    ra_sw_nat_hook_rs(1);
