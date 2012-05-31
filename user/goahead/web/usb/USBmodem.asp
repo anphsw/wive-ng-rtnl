@@ -68,11 +68,21 @@ function bodyOnLoad(form)
 		}
 
 		mtuChange(form);
+		modemSwitchClick(form);
 }
-
+  
+function modemSwitchClick(form)
+{
+	enableElements( [
+		form.modem_type, form.modem_port, form.modem_speed, form.modem_mtu, form.modem_mtu_type, form.modem_user,
+        form.modem_pass, form.modem_dialn, form.modem_apn, form.at_enabled, form.mdebug_enabled, form.modem_at1, form.modem_at2,
+		form.modem_at3 ], form.modem_enabled.checked );
+}
 function initializeForm(form)
 {
-var wmenabled     	 = '<% getCfgGeneral(1, "MODEMENABLED"); %>';
+var wmenabled     	     = '<% getCfgGeneral(1, "MODEMENABLED"); %>';
+var watmenabled			 = '<% getCfgGeneral(1, "MODEMATENABLED"); %>';
+var wmdebug				 = '<% getCfgGeneral(1, "MODEMDEBUG"); %>';
 form.modem_type.value    = '<% getCfgGeneral(1, "MODEMTYPE"); %>';
 form.modem_port.value    = '<% getCfgGeneral(1, "WMODEMPORT"); %>';
 form.modem_speed.value   = '<% getCfgGeneral(1, "MODEMSPEED"); %>';
@@ -81,15 +91,14 @@ form.modem_user.value    = '<% getCfgGeneral(1, "MODEMUSERNAME"); %>';
 form.modem_pass.value    = '<% getCfgGeneral(1, "MODEMPASSWORD"); %>';
 form.modem_dialn.value	 = '<% getCfgGeneral(1, "MODEMDIALNUMBER"); %>';
 form.modem_apn.value     = '<% getCfgGeneral(1, "APN"); %>';
+form.modem_at1.value     = '<% getCfgGeneral(1, "MODEMAT1"); %>';
+form.modem_at2.value     = '<% getCfgGeneral(1, "MODEMAT2"); %>';
+form.modem_at3.value     = '<% getCfgGeneral(1, "MODEMAT3"); %>';
 
-	if (wmenabled == "1")
-	{
-		document.usbmodem.modem_enabled[0].checked = true;
-	}
-	else
-	{
-		document.usbmodem.modem_enabled[1].checked = true;
-	}
+	form.modem_enabled.checked = (wmenabled == '1');
+	form.at_enabled.checked = (watmenabled == '1');
+	form.mdebug_enabled.checked = (wmdebug == '1');
+	
 }
 </script>
 </head>
@@ -107,23 +116,20 @@ form.modem_apn.value     = '<% getCfgGeneral(1, "APN"); %>';
 		<td class="title" colspan="2">USB Modem configuration</td>
 	</tr>
 	<tr id="modem_enable_row">
-	    <td class="head">USB Modem</td>
-    <td>
-      <input type="radio" name="modem_enabled" value="1"><font id="Enable">Enable</font>
-      <input type="radio" name="modem_enabled" value="0"><font id="Disable">Disable</font>
-    </td>
-	</tr>
+	    <td class="head">
+		<input name="modem_enabled" onclick="modemSwitchClick(this.form)" type="checkbox">&nbsp;Enable USB Modem</td>
+        </tr>
 	<tr id="modem_type_row">
   		<td class="head">Modem type:</td>
 		<td>
-			<select name="modem_type" class="mid" >
+			<select name="modem_type" class="mid">
 				<option value="0">WCDMA/UMTS/GPRS</option>
 				<option value="1">CDMA/EVDO</option>
 				</select>
 		</td>
 	</tr>
 	<tr id="modem_port_row">
-	<td class="head">Modem port:</td>
+	        <td class="head">Modem port:</td>
 		<td>
 		<select name="modem_port" class="mid">
 				<option value="AUTO">AUTO</option>
@@ -142,18 +148,18 @@ form.modem_apn.value     = '<% getCfgGeneral(1, "APN"); %>';
 		</td>
 	</tr>
 	<tr id ="modem_speed_row">
-	<td class="head">Modem port speed:</td>
-	<td><select name="modem_speed" class="mid">
+	        <td class="head">Modem port speed:</td>
+	        <td><select name="modem_speed" class="mid">
 				<option value="AUTO">AUTO</option>
 				<option value="57600">57600</option>
 				<option value="115200">115200</option>
 				<option value="230400">230400</option>
 				</select>
-	</td>
+	        </td>
 	</tr>
 	<tr id="modem_mtu_row">
-		<td class="head">Modem MTU/MRU:</td>
-		<td>
+		 <td class="head">Modem MTU/MRU:</td>
+		 <td>
 			<input id="modem_mtu_field" name="modem_mtu" maxlength="4" type="text" class="half" style="display:none; ">
 			<select id="modem_mtu_select" name="modem_mtu_type" onChange="mtuChange(this.form);" class="mid" >
 				<option value="AUTO">AUTO</option>
@@ -184,6 +190,30 @@ form.modem_apn.value     = '<% getCfgGeneral(1, "APN"); %>';
 	<tr id="modem_apn_row">
 		<td class="head">Access Point Name (APN):</td>
 		<td><input name="modem_apn" class="mid" size="25" maxlength="60" type="text"></td>
+	</tr>
+</table>
+	
+<table class="form">
+	<tr>
+		<td colspan="2" class="title">Additional options</td>
+	</tr>	
+	<tr id="at_anable_row">
+		<td class="head" width="50%">
+		<input name="mdebug_enabled" type="checkbox">&nbsp;Allow debug</td>
+		<td class="head" width="50%">
+		<input name="at_enabled" type="checkbox">&nbsp;Enable AT commands</td>
+	</tr>
+	<tr id="modem AT1_row">
+		<td class="head">Modem AT commands</td>
+		<td><input name="modem_at1" size="40" maxlength="60" type="text"></td>
+	</tr>
+	<tr id="modem AT2_row">
+		<td class="head" type="hidden"></td>
+		<td><input name="modem_at2" size="40" maxlength="60" type="text"></td>
+	</tr>
+	<tr id="modem AT3_row">
+		<td class="head" type="hidden"></td>
+		<td><input name="modem_at3" size="40" maxlength="60" type="text"></td>
 	</tr>
 </table>
 

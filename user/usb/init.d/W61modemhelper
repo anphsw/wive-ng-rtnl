@@ -18,35 +18,57 @@ start() {
 	# generate new chat scripts
 	if [ "$MODEMTYPE" = "0" ]; then
 	    $LOG "Prepare chat-file for WCDMA/UMTS/GPRS modems"
-	    echo "ABORT '~'
-	    ABORT 'BUSY'
-	    ABORT 'NO CARRIER'
-	    ABORT 'ERROR'
-	    REPORT 'CONNECT'
-	    '' 'ATZ'
-	    SAY 'Calling WCDMA/UMTS/GPRS'
-	    '' 'AT+CGDCONT=1,\"IP\",\"$APN\"'
-	    'OK' 'ATD$MODEMDIALNUMBER'
-	    'CONNECT' ''" > $PPPDIR/peers/chat
+	    echo "	ABORT '~'
+	ABORT 'BUSY'
+	ABORT 'NO CARRIER'
+	ABORT 'ERROR'
+	REPORT 'CONNECT'
+	'' 'ATZ'" >> $PPPDIR/peers/chat
+	if [ "$MODEMATENABLED" = "1" ]; then
+	if [ "$MODEMAT1" != "" ]; then
+        echo "	'' '$MODEMAT1'" >> $PPPDIR/peers/chat
+	fi
+	if [ "$MODEMAT2" != "" ]; then
+		echo "	'' '$MODEMAT2'" >> $PPPDIR/peers/chat
+	fi
+	if [ "$MODEMAT3" != "" ]; then
+		echo "	'' '$MODEMAT3'" >> $PPPDIR/peers/chat
+	fi
+	fi
+		echo "	SAY 'Calling WCDMA/UMTS/GPRS'
+	'' 'AT+CGDCONT=1,\"IP\",\"$APN\"'
+	'OK' 'ATD$MODEMDIALNUMBER'
+	'CONNECT' ''" >> $PPPDIR/peers/chat
 	elif [ "$MODEMTYPE" = "1" ]; then
 	    $LOG "Prepare chat-file for CDMA/EVDO modems"
-	    echo "ABORT '~'
-	    ABORT 'BUSY'
-	    ABORT 'NO CARRIER'
-	    ABORT 'ERROR'
-	    ABORT 'NO DIAL TONE'
-	    ABORT 'NO ANSWER'
-	    ABORT 'DELAYED'
-	    REPORT 'CONNECT'
-	    '' 'ATZ'
-	    SAY 'Calling CDMA/EVDO'
-	    '' 'ATDT#777'
-	    'CONNECT' 'ATO'
-	    '' ''" > $PPPDIR/peers/chat
+	    echo "	ABORT '~'
+	ABORT 'BUSY'
+	ABORT 'NO CARRIER'
+	ABORT 'ERROR'
+	ABORT 'NO DIAL TONE'
+	ABORT 'NO ANSWER'
+	ABORT 'DELAYED'
+	REPORT 'CONNECT'
+	'' 'ATZ'" >> $PPPDIR/peers/chat
+	if [ "$MODEMATENABLED" = "1" ]; then
+	if  [ "$MODEMAT1" != "" ]; then
+	    echo "	'' '$MODEMAT1'" >> $PPPDIR/peers/chat
+	fi
+	if  [ "$MODEMAT2" != "" ]; then
+	    echo "	'' '$MODEMAT2'" >> $PPPDIR/peers/chat
+	fi
+	if [ "$MODEMAT3" != "" ]; then
+	    echo "	'' '$MODEMAT3'" >> $PPPDIR/peers/chat
+	fi
+	fi
+	    echo "	SAY 'Calling CDMA/EVDO'
+	'' 'ATDT#777'
+	'CONNECT' 'ATO'
+	'' ''" >> $PPPDIR/peers/chat
 	fi
 
 	$LOG "Generate ppp options file"
-	echo "debug
+	echo "	debug
 	$MODEMPORT
 	$MODEMSPEED
 	crtscts
@@ -98,18 +120,20 @@ stop() {
 	done
 	rm -f /var/run/$MDEFIFN.pid
     fi
+	rm -f /etc/ppp/peers/chat
 }
 
 get_param() {
     # get local param always
-    eval `nvram_buf_get 2860 MODEMENABLED MODEMTYPE WMODEMPORT MODEMSPEED MODEMUSERNAME MODEMPASSWORD MODEMDIALNUMBER MODEMMTU APN`
+    eval `nvram_buf_get 2860 MODEMENABLED MODEMTYPE WMODEMPORT MODEMSPEED MODEMUSERNAME \
+	MODEMPASSWORD MODEMDIALNUMBER MODEMMTU APN MODEMATENABLED MODEMAT1 MODEMAT2 MODEMAT3`
 
     if [ "$MODEMTYPE" = "" ] || [ "$MODEMUSERNAME" = "" ] || [ "$MODEMPASSWORD" = "" ] || [ "$MODEMDIALNUMBER" = "" ]; then
 	$LOG "One or more parametrs is NULL. Need correct this"
     fi
 
     # corrects parametrs
-    if [ "$MODEMSPEED" = "" ]; then
+    if [ "$MODEMSPEED" = "AUTO" ]; then
 	MODEMSPEED=""
     fi
     if [ "$MODEMMTU" = "" ] || [ "$MODEMMTU" = "AUTO" ]; then
@@ -124,7 +148,7 @@ get_param() {
 	else
 		MODEMPORT="/dev/$WMODEMPORT"
 	fi
-    if [ "$MODEMDEBUG" != "" ]; then
+    if [ "$MODEMDEBUG" = "1" ]; then
         MODEMDEBUG="debug"
     else
 	MODEMDEBUG=""
