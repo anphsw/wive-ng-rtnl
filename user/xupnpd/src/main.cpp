@@ -41,6 +41,14 @@ int main(int argc,char** argv)
     if(root && *root)
         rc=chdir(root);        
 
+    {
+        FILE* fp=fopen("xupnpd.lua","r");
+        if(fp)
+            fclose(fp);
+        else
+            rc=chdir("/usr/share/xupnpd/");
+    }
+
     lua_State* L=lua_open();
     if(L)
     {

@@ -1154,6 +1154,7 @@
 20) HW_NAT: rework traffic filter code.<br>
 21) Increase RWFS size to 3_blocks(192kb).<br>
 22) Disable zebra for free flash.<br>
+23) Xupnpd updated to revision 306.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>

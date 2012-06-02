@@ -35,10 +35,10 @@
 // TODO: sendurl alarm?
 // TODO: XBox 360
 // TODO: RTSP/RTP, RTMP, MMS
-// !!! TODO: RTP to builtin udpxy
+// TODO: RTP to builtin udpxy
 // http://www.gupnp.org
-// !!! TODO: YouTube max-count>50
-// TODO: multicast with 2 devices over internal proxy?
+// TODO: YouTube max-count>50
+// TODO: sort(files)
 
 namespace core
 {
@@ -711,7 +711,10 @@ namespace core
                                 lua_pop(L,1);
 
                             alarm(0);                               // reset read timer
+
+                            fseek(fp,0,SEEK_END);                   // Solaris fix
                         }
+
                         if(lua_pcall(L,4,0,0))
                         {
                             if(!detached)
