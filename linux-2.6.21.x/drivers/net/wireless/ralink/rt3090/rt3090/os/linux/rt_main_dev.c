@@ -485,7 +485,7 @@ int rt28xx_open(IN PNET_DEV dev)
 	{
 	UINT32 reg = 0;
 	RTMP_IO_READ32(pAd, 0x1300, &reg);  // clear garbage interrupts
-	printk("0x1300 = %08x\n", reg);
+	DBGPRINT(RT_DEBUG_TRACE, ("0x1300 = %08x\n", reg));
 	}
 
 	{
@@ -638,7 +638,10 @@ int rt28xx_packet_xmit(struct sk_buff *skb)
         /* add tx hook point*/
         if(ra_sw_nat_hook_tx!= NULL)
         {
+		unsigned long flags;
+		RTMP_INT_LOCK(&pAd->page_lock, flags)
             ra_sw_nat_hook_tx(pPacket, 0);
+		RTMP_INT_UNLOCK(&pAd->page_lock, flags);
         }
 #endif
 

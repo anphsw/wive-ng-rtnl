@@ -2,6 +2,10 @@ config RT3090_AP
 	tristate "Ralink RT3090 802.11n AP support"
 	depends on NET_RADIO 
 	
+config  RT3090_AP_LED
+	bool "LED Support"
+	depends on RT3090_AP
+
 config  RT3090_AP_WSC
 	bool "WSC (WiFi Simple Config)"
 	depends on RT3090_AP
@@ -54,14 +58,24 @@ config  RT3090_AP_DLS
 #	bool "IDS (Intrusion Detection System) Support"
 #	depends on RT3090_AP
 
-config  RT3090_80211N_DRAFT3
-	bool "802.11n Draft3"
+config  RT3090_AP_AUTO_CH_SELECT_ENHANCE
+	bool "Auto Channel Selection Enhancement"
+	default y
 	depends on RT3090_AP
 
-config  RT3090_SET_MAC_FROM_EEPROM
-	bool "Read and set MAC from MTD/EEPROM."
-	default n
-	depends on RT2860V2_AP
+config  RT3090_80211N_DRAFT3
+	bool "802.11n Draft3"
+	default y
+	depends on RT3090_AP
+
+config  RT3090_AP_MCAST_RATE_SPECIFIC
+	bool "User specific TX rate of mcast packets"
+	default y
+	depends on RT3090_AP
+
+config  RT3090_AP_READ_MAC_FROM_MTD
+	bool "Read and set MAC from MTD/EEPROM"
+	depends on RT3090_AP
 
 config  RT3090_AP_BRIDGE_FASTPATH
 	bool "Bridge wlan2lan operation offload"
@@ -70,7 +84,7 @@ config  RT3090_AP_BRIDGE_FASTPATH
 config  RT3090_AP_ATE
 	bool "Provide ATE+QA testmode commands support"
 	depends on RT3090_AP
-	default y
+	default n
 
 config RALINK_RT3090_AP_DBG
         bool "Debug support for AP mode"

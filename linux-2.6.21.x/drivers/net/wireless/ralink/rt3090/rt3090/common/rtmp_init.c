@@ -1808,7 +1808,7 @@ VOID	NICReadEEPROMParameters(
 	EEPROM_VERSION_STRUC    Version;
 	EEPROM_ANTENNA_STRUC	Antenna;
 	EEPROM_NIC_CONFIG2_STRUC    NicConfig2;
-#ifdef CONFIG_RT3090_SET_MAC_FROM_EEPROM
+#ifdef READ_MAC_FROM_EEPROM
 	USHORT  Addr01,Addr23,Addr45 ;
 #endif
 	MAC_DW0_STRUC csr2;
@@ -1845,7 +1845,7 @@ VOID	NICReadEEPROMParameters(
 		pAd->EEPROMAddressNum = 8;     // 93C86
 	DBGPRINT(RT_DEBUG_TRACE, ("--> EEPROMAddressNum = %d\n", pAd->EEPROMAddressNum ));
 
-#ifdef CONFIG_RT3090_SET_MAC_FROM_EEPROM
+#ifdef READ_MAC_FROM_EEPROM
 	/* Read MAC setting from EEPROM and record as permanent MAC address */
 	DBGPRINT(RT_DEBUG_TRACE, ("Initialize MAC Address from E2PROM \n"));
 
@@ -1891,7 +1891,7 @@ VOID	NICReadEEPROMParameters(
 
 		DBGPRINT(RT_DEBUG_TRACE, ("Use the MAC address what is assigned from Moudle Parameter. \n"));
 	}
-#ifdef CONFIG_RT3090_SET_MAC_FROM_EEPROM
+#ifdef READ_MAC_FROM_EEPROM
 	else
 	{
 		COPY_MAC_ADDR(pAd->CurrentAddress, pAd->PermanentAddress);
@@ -5613,29 +5613,29 @@ VOID RTMP_BBP_IO_WRITE8(
 
 
 #ifdef RTMP_MAC_PCI
-VOID CMDHandler(                                                                                                                                                
-    IN PRTMP_ADAPTER pAd)                                                                                                                                       
-{                                                                                                                                                               
-	PCmdQElmt		cmdqelmt;                                                                                                                                       
-	PUCHAR			pData;                                                                                                                                          
-	NDIS_STATUS		NdisStatus = NDIS_STATUS_SUCCESS;                                                                                                               
+VOID CMDHandler(
+    IN PRTMP_ADAPTER pAd)
+{
+	PCmdQElmt		cmdqelmt;
+	PUCHAR			pData;
+	NDIS_STATUS		NdisStatus = NDIS_STATUS_SUCCESS;
 //	ULONG			Now = 0;
 //	NTSTATUS		ntStatus;
 //	unsigned long	IrqFlags;
-	
-	while (pAd && pAd->CmdQ.size > 0)	
-	{                                                                                                                                                           
+
+	while (pAd && pAd->CmdQ.size > 0)
+	{
 		NdisStatus = NDIS_STATUS_SUCCESS;
-		                                                                                                                      
+
 		NdisAcquireSpinLock(&pAd->CmdQLock);
 		RTThreadDequeueCmd(&pAd->CmdQ, &cmdqelmt);
 		NdisReleaseSpinLock(&pAd->CmdQLock);
-		                                                                                                        
-		if (cmdqelmt == NULL)                                                                                                                                   
-			break; 
-			                                                                                                                                             
-		pData = cmdqelmt->buffer;                                      
-		                                                                                         
+
+		if (cmdqelmt == NULL)
+			break;
+
+		pData = cmdqelmt->buffer;
+
 		if(!(RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_NIC_NOT_EXIST) || RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_HALT_IN_PROGRESS)))
 		{
 			switch (cmdqelmt->command)
