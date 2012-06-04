@@ -264,6 +264,7 @@ enum
 	HRTIMER_SOFTIRQ,
 #endif
 	BLOCK_SOFTIRQ,
+	RCU_SOFTIRQ,    /* Preferable RCU should always be the last softirq */
 };
 
 /* softirq mask and active fields moved to irq_cpustat_t in
