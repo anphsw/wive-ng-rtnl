@@ -1158,6 +1158,7 @@
 24) Update usb-modeswitch-data package to 2012-05-31.<br>
 25) HW_NAT: skip transit and ufo packet detag.<br>
 26) HW_NAT: dst port must be check before detag processing.<br>
+27) HW_NAT: drop UFO packet in LAN path.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>

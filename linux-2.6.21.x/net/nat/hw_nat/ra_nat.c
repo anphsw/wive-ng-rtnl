@@ -457,14 +457,23 @@ uint32_t PpeExtIfPingPongHandler(struct sk_buff * skb)
 
 	VirIfIdx = ntohs(veth->h_vlan_TCI);
 
-	/* something wrong: interface index must be < MAX_IF_NUM and exist, proto must be 802.11q
-			    don`t touch this packets and return to normal path before corrupt
+	/* something wrong: 1) interface index must be < MAX_IF_NUM and exist, proto must be 802.11q
+				don`t touch this packets and return to normal path before corrupt in detag code
+			    2) UFO packets in this case keep only in if DstPort != LAN i.e not to LAN path
 	*/
 	if ((VirIfIdx >= MAX_IF_NUM) || (DstPort[VirIfIdx] == NULL) || (veth->h_vlan_proto != htons(ETH_P_8021Q))) {
+	    if (VirIfIdx != LAN_PORT_VLAN_ID) {
 #ifdef HWNAT_DEBUG
-	    NAT_PRINT("HNAT: Reentry packet for untagged frame, transit vlan or interface (VirIfIdx=%d) not exist. Skip this packet.\n", VirIfIdx);
+		NAT_PRINT("HNAT: Reentry packet for untagged frame, transit vlan or interface (VirIfIdx=%d) not exist. Skip this packet.\n", VirIfIdx);
 #endif
-	    return 1;
+		return 1;
+	    } else {
+#ifdef HWNAT_DEBUG
+		NAT_PRINT("HNAT: Reentry UFO packet with LAN VID (VirIfIdx=%d). Drop this packet.\n", VirIfIdx);
+#endif
+		kfree_skb(skb);
+		return 0;
+	    }
 	}
 
 	/* make skb writable */
