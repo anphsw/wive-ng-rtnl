@@ -270,7 +270,7 @@ uint32_t FoeDumpPkt(struct sk_buff * skb)
 #endif
 
 #if defined  (CONFIG_RA_HW_NAT_WIFI) || defined (CONFIG_RA_HW_NAT_PCI)
-void RemoveVlanTag(struct sk_buff *skb)
+inline void RemoveVlanTag(struct sk_buff *skb)
 {
 	struct ethhdr *eth;
 
@@ -464,7 +464,8 @@ uint32_t PpeExtIfPingPongHandler(struct sk_buff * skb)
 	if ((VirIfIdx >= MAX_IF_NUM) || (DstPort[VirIfIdx] == NULL) || (veth->h_vlan_proto != htons(ETH_P_8021Q))) {
 	    if (VirIfIdx != LAN_PORT_VLAN_ID) {
 #ifdef HWNAT_DEBUG
-		NAT_PRINT("HNAT: Reentry packet for untagged frame, transit vlan or interface (VirIfIdx=%d) not exist. Skip this packet.\n", VirIfIdx);
+		if (DebugLevel >= 1)
+		    NAT_PRINT("HNAT: Reentry packet for untagged frame, transit vlan or interface (VirIfIdx=%d) not exist. Skip this packet.\n", VirIfIdx);
 #endif
 		return 1;
 	    } else {
