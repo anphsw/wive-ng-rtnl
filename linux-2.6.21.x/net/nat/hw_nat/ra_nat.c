@@ -473,7 +473,7 @@ uint32_t PpeExtIfPingPongHandler(struct sk_buff * skb)
 	    return 1;
 	}
 
-	/* remove vlan tag from currext packet */
+	/* remove vlan tag from current packet */
 	RemoveVlanTag(skb);
 
 	/* check dst interface exist */
