@@ -1156,6 +1156,7 @@
 22) Disable zebra for free flash.<br>
 23) Xupnpd updated to revision 306.<br>
 24) Update usb-modeswitch-data package to 2012-05-31.<br>
+25) HW_NAT: skip transit and ufo packet detag.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
