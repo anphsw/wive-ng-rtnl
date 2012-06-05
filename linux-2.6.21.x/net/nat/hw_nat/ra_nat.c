@@ -457,33 +457,24 @@ uint32_t PpeExtIfPingPongHandler(struct sk_buff * skb)
 
 	VirIfIdx = ntohs(veth->h_vlan_TCI);
 
-	/* something wrong: interface index must be < MAX_IF_NUM and proto must be 802.11q
+	/* something wrong: interface index must be < MAX_IF_NUM and exist, proto must be 802.11q
 			    don`t touch this packets and return to normal path before corrupt
 	*/
-	if ((VirIfIdx >= MAX_IF_NUM) || (veth->h_vlan_proto != htons(ETH_P_8021Q))) {
+	if ((VirIfIdx >= MAX_IF_NUM) || (DstPort[VirIfIdx] == NULL) || (veth->h_vlan_proto != htons(ETH_P_8021Q))) {
 #ifdef HWNAT_DEBUG
-	    NAT_PRINT("HNAT: Reentry packet is untagged frame or transit vlan? (VirIfIdx=%d)\n", VirIfIdx);
+	    NAT_PRINT("HNAT: Reentry packet for untagged frame, transit vlan or interface (VirIfIdx=%d) not exist. Skip this packet.\n", VirIfIdx);
 #endif
 	    return 1;
 	}
 
 	/* make skb writable */
 	if (!skb_make_writable(skb, 0)) {
-	    NAT_PRINT("HNAT: no mem for remove tag or corrupted packet? (VirIfIdx=%d)\n", VirIfIdx);
+	    NAT_PRINT("HNAT: No mem for remove tag or corrupted packet? (VirIfIdx=%d)\n", VirIfIdx);
 	    return 1;
 	}
 
 	/* remove vlan tag from current packet */
 	RemoveVlanTag(skb);
-
-	/* check dst interface exist */
-	if (DstPort[VirIfIdx] == NULL) {
-#ifdef HWNAT_DEBUG
-	    NAT_PRINT("HNAT: TX: interface (VirIfIdx=%d) not exist. Drop this packet.\n", VirIfIdx);
-#endif
-	    kfree_skb(skb);
-	    return 0;
-	}
 
 	/* set correct skb dest dev */
 	skb->dev = DstPort[VirIfIdx];
