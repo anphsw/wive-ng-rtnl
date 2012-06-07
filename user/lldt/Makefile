@@ -14,6 +14,6 @@ romfs:
 	$(ROMFSINST) -S -e CONFIG_USER_LLTD	/bin/lld2d
 	$(ROMFSINST) -S -e CONFIG_USER_LLTD	/bin/icon.ico
 	$(ROMFSINST) -S -e CONFIG_USER_LLTD	/bin/icon.large.ico
-	$(ROMFSINST)	lld2d.conf		/etc/lld2d.conf
+	$(ROMFSINST) -e CONFIG_USER_LLTD lld2d.conf /etc/lld2d.conf
 
 -include .depend
