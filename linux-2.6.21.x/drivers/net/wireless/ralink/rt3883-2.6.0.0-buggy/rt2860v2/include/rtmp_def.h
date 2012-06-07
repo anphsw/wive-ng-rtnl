@@ -402,14 +402,22 @@
 #ifdef MBSS_SUPPORT
 #undef	MAX_MBSSID_NUM
 
+#ifdef SPECIFIC_BCN_BUF_SUPPORT
 #define HW_BEACON_MAX_COUNT(__pAd)	((__pAd)->chipCap.BcnMaxHwNum)
 #define MAX_MBSSID_NUM(__pAd)		((__pAd)->chipCap.BcnMaxNum)
-
+#else
+#define HW_BEACON_MAX_COUNT(__pAd)	8
+#define MAX_MBSSID_NUM(__pAd)		8
+#endif
 #else
 #define HW_BEACON_MAX_COUNT(__pAd)	8
 #endif /* MBSS_SUPPORT */
 
-#define HW_BEACON_MAX_NUM			16
+#ifdef SPECIFIC_BCN_BUF_SUPPORT
+#define HW_BEACON_MAX_NUM		16
+#else
+#define HW_BEACON_MAX_NUM		8
+#endif
 
 /* sanity check for apidx */
 #define MBSS_MR_APIDX_SANITY_CHECK(__pAd, apidx) \

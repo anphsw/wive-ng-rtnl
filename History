@@ -1162,6 +1162,7 @@
 28) HW_NAT: In PpeSetForcePortInfo add lost check skb->dev not null before DstPort[DP_PCI].<br>
 29) RAETH: Remove old ugly workarounds for oversized packets.<br>
 30) Update dnsmasq to 2.62 version.<br>
+31) WiFi drivers: fixed out of range bug, disabled unused support 16 beacons with ShareMem context switch.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
