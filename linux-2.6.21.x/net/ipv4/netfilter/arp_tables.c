@@ -246,10 +246,7 @@ unsigned int arpt_do_table(struct sk_buff **pskb,
 	void *table_base;
 	struct xt_table_info *private;
 
-	/* ARP header, plus 2 device addresses, plus 2 IP addresses.  */
-	if (!pskb_may_pull((*pskb), (sizeof(struct arphdr) +
-				     (2 * (*pskb)->dev->addr_len) +
-				     (2 * sizeof(u32)))))
+	if (!pskb_may_pull(skb, arp_hdr_len(skb->dev)))
 		return NF_DROP;
 
 	indev = in ? in->name : nulldevname;
@@ -266,12 +263,8 @@ unsigned int arpt_do_table(struct sk_buff **pskb,
 	do {
 		if (arp_packet_match(arp, (*pskb)->dev, indev, outdev, &e->arp)) {
 			struct arpt_entry_target *t;
-			int hdr_len;
 
-			hdr_len = sizeof(*arp) + (2 * sizeof(struct in_addr)) +
-				(2 * (*pskb)->dev->addr_len);
-
-			ADD_COUNTER(e->counters, hdr_len, 1);
+			ADD_COUNTER(e->counters, arp_hdr_len(skb->dev), 1);
 
 			t = arpt_get_target(e);
 
