@@ -319,9 +319,6 @@ int vlan_dev_hard_header(struct sk_buff *skb, struct net_device *dev,
 		__FUNCTION__, skb, type, len, VLAN_DEV_INFO(dev)->vlan_id, daddr);
 #endif
 
-	if (WARN_ON(skb_headroom(skb) < dev->hard_header_len))
-		return -ENOSPC;
-
 	/* build vlan header only if re_order_header flag is NOT set.  This
 	 * fixes some programs that get confused when they see a VLAN device
 	 * sending a frame that is VLAN encoded (the consensus is that the VLAN
