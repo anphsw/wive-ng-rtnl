@@ -1164,6 +1164,7 @@
 30) Update dnsmasq to 2.62 version.<br>
 31) WiFi drivers: fixed out of range bug, disabled unused support 16 beacons with ShareMem context switch.<br>
 32) Apply post 1.20.1 busybox patches.<br>
+33) USB: fix detect some devices at boot.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
