@@ -362,7 +362,7 @@ static void arp_reply(struct sk_buff *skb)
 
 	skb_reset_network_header(skb);
 	skb_reset_transport_header(skb);
-	arp = skb->nh.arph;
+	arp = arp_hdr(skb);
 
 	if ((arp->ar_hrd != htons(ARPHRD_ETHER) &&
 	     arp->ar_hrd != htons(ARPHRD_IEEE802)) ||
