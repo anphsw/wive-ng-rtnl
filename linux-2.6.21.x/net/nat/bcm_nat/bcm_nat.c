@@ -84,8 +84,10 @@ static inline int bcm_fast_path_output(struct sk_buff *skb)
 	else if (dst->neighbour)
 		ret = dst->neighbour->output(skb);
 	else {
+#ifdef DEBUG
 		if (net_ratelimit())
 			printk(KERN_DEBUG "bcm_fast_path_output: No header cache and no neighbour!\n");
+#endif
 		kfree_skb(skb);
 		return -EINVAL;
 	}
