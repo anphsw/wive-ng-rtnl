@@ -344,8 +344,8 @@ CFLAGS		:= -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 
 AFLAGS          := -D__ASSEMBLY__
 
-# disable this for speedup
-#CFLAGS		+= -fno-strict-aliasing -fno-common -fno-delete-null-pointer-checks
+# disable this for speedup (WARNING not work with modules support)
+CFLAGS		+= -fno-strict-aliasing -fno-common
 
 # Read KERNELRELEASE from include/config/kernel.release (if it exists)
 KERNELRELEASE = $(shell cat include/config/kernel.release 2> /dev/null)
