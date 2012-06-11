@@ -118,7 +118,6 @@ no_igmp:
 	} else if ((dst = __br_fdb_get(br, dest)) && (dst->is_local || (atomic_read(&br->br_forward) == 0))) {
 		/* if packet not local dst need full drop procedure */
 		if (!dst->is_local) {
-		    //printk(KERN_INFO "BLOCKED BY PROCFS !!!\n");
 		    kfree_skb(skb);
 		    br_fdb_put(dst);
 		    goto out;
