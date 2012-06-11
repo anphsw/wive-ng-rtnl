@@ -340,7 +340,8 @@ LINUXINCLUDE    := -Iinclude \
 CPPFLAGS        := -D__KERNEL__ $(LINUXINCLUDE)
 
 CFLAGS		:= -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
-                   -Wno-format-security \
+                   -Wno-format-security -Wno-strict-aliasing
+
 AFLAGS          := -D__ASSEMBLY__
 
 # disable this for speedup
