@@ -1167,6 +1167,9 @@
 33) USB: fix detect some devices at boot.<br>
 34) NET: fix skb_allocate and headroom size calculation in some cases.<br>
 35) NATFastpath: Fix work with devices used headroom = 0(tun, tap, gre, etc...).<br>
+36) BRIDGE: fix br_handle_frame processing for host pkts and allow forwarding some link local frames.<br>
+37) TCP: reduce out_of_order memory use and speedup.<br>
+38) SK_FILTER: make sure filters dont read uninitialized memory and speedup.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
