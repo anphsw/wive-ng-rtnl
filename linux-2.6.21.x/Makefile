@@ -340,10 +340,11 @@ LINUXINCLUDE    := -Iinclude \
 CPPFLAGS        := -D__KERNEL__ $(LINUXINCLUDE)
 
 CFLAGS		:= -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
-                   -fno-strict-aliasing -fno-common \
                    -Wno-format-security \
-                   -fno-delete-null-pointer-checks
 AFLAGS          := -D__ASSEMBLY__
+
+# disable this for speedup
+#CFLAGS		+= -fno-strict-aliasing -fno-common -fno-delete-null-pointer-checks
 
 # Read KERNELRELEASE from include/config/kernel.release (if it exists)
 KERNELRELEASE = $(shell cat include/config/kernel.release 2> /dev/null)
