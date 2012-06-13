@@ -8,6 +8,7 @@ all:
 
 romfs:
 	$(ROMFSINST) $(ROOT_DIRECTORY)
+	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/storage
 ifeq ("$(CONFIG_RT2860V2_AP_MESH)", "")
 ifeq ("$(CONFIG_RT2860V2_STA_MESH)", "")
 	rm -f $(ROMFSDIR)$(ROOT_DIRECTORY)/wireless/mesh.asp
@@ -24,6 +25,16 @@ ifeq ("$(CONFIG_RT2860V2_AP_WSC)", "")
 ifeq ("$(CONFIG_RT2860V2_STA_WSC)", "")
 	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/adm/wps*
 	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/wps
+endif
+endif
+ifeq ("$(CONFIG_RT2860V2_RT3XXX_AP_ANTENNA_DIVERSITY)", "")
+ifeq ("$(CONFIG_RT2860V2_RT3XXX_STA_ANTENNA_DIVERSITY)", "")
+	rm -f $(ROMFSDIR)$(ROOT_DIRECTORY)/wireless/ant_diversity.asp
+endif
+endif
+ifeq ("$(CONFIG_RT2860V2_AP_WMM_ACM)", "")
+ifeq ("$(CONFIG_RT2860V2_STA_WMM_ACM)", "")
+	rm -f $(ROMFSDIR)$(ROOT_DIRECTORY)/wireless/wmm.asp
 endif
 endif
 ifeq ("$(CONFIG_USER_CHILLISPOT)", "")
