@@ -28,7 +28,7 @@ upmpm_net="239.0.0.0/8"
 
 # first get operation mode and wan mode  dns mode and relay mode vpn mode and type
 eval `nvram_buf_get 2860 OperationMode wanConnectionMode wan_ipaddr wan_static_dns \
-	WLAN_MAC_ADDR WAN_MAC_ADDR LAN_MAC_ADDR \
+	WLAN_MAC_ADDR WAN_MAC_ADDR LAN_MAC_ADDR APCLI_MAC_ADDR \
 	dnsPEnabled UDPXYMode igmpEnabled \
 	vpnEnabled vpnPurePPPOE vpnType \
 	IPv6_Enable QoSEnable simple_qos \
