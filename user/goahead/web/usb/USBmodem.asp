@@ -15,7 +15,6 @@
 
 <script language="javascript">
 
-
 function mtuChange(form)
 {
 	var modem_mtu_select = document.getElementById("modem_mtu_select");
@@ -54,6 +53,16 @@ function submitClick(form)
 		return true;
 }
 
+function selectModemType(form)
+{
+	var gsm_on = form.modem_type.value == '0';
+	var cdma_on = form.modem_type.value == '1';
+	
+	// Display mode-dependent elements
+	displayElement( 'modem_dialn_row', gsm_on);
+	
+}	
+
 function bodyOnLoad(form)
 {
 	initializeForm(form);
@@ -66,9 +75,11 @@ function bodyOnLoad(form)
 			form.modem_mtu_type.value = form.modem_mtu_select.options[i].value;
 			break;
 		}
-
-		mtuChange(form);
+		
 		modemSwitchClick(form);
+		selectModemType(form);
+		mtuChange(form);
+		
 }
   
 function modemSwitchClick(form)
@@ -99,6 +110,7 @@ form.modem_at3.value     = '<% getCfgGeneral(1, "MODEMAT3"); %>';
 	form.at_enabled.checked = (watmenabled == '1');
 	form.mdebug_enabled.checked = (wmdebug == '1');
 	
+	selectModemType(form);
 }
 </script>
 </head>
@@ -122,7 +134,7 @@ form.modem_at3.value     = '<% getCfgGeneral(1, "MODEMAT3"); %>';
 	<tr id="modem_type_row">
   		<td class="head">Modem type:</td>
 		<td>
-			<select name="modem_type" class="mid">
+			<select name="modem_type" onChange="selectModemType(this.form);"class="mid">
 				<option value="0">WCDMA/UMTS/GPRS</option>
 				<option value="1">CDMA/EVDO</option>
 				</select>
@@ -183,7 +195,7 @@ form.modem_at3.value     = '<% getCfgGeneral(1, "MODEMAT3"); %>';
 		<td class="head">Password:</td>
 		<td><input name="modem_pass" class="mid" size="25" maxlength="60" type="password"></td>
 	</tr>
-	<tr id="modem_dialn_row">
+	<tr id="modem_dialn_row"  style="display: none;">
 		<td class="head">Dial number:</td>
 		<td><input name="modem_dialn" class="mid" size="25" maxlength="60" type="text"></td>
 	</tr>
@@ -208,11 +220,11 @@ form.modem_at3.value     = '<% getCfgGeneral(1, "MODEMAT3"); %>';
 		<td><input name="modem_at1" size="40" maxlength="60" type="text"></td>
 	</tr>
 	<tr id="modem AT2_row">
-		<td class="head" type="hidden"></td>
+		<td class="head"</td>
 		<td><input name="modem_at2" size="40" maxlength="60" type="text"></td>
 	</tr>
 	<tr id="modem AT3_row">
-		<td class="head" type="hidden"></td>
+		<td class="head"></td>
 		<td><input name="modem_at3" size="40" maxlength="60" type="text"></td>
 	</tr>
 </table>

@@ -53,7 +53,7 @@ if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then
 	service snmpd restart
 	service inetd restart
     else
-	# exclude musc reply
+	# exclude misc reply
 	if [ -f /bin/pppoe-relay ]; then
 	    service pppoe-relay restart
 	fi
@@ -65,6 +65,9 @@ if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then
     service parprouted restart
     service igmp_proxy restart
     service udpxy restart
+    if [ -f /bin/transmission-daemon ]; then
+	service transmission restart
+    fi
 fi
 
 # renew /etc/udhcpd.conf and restart dhcp server
