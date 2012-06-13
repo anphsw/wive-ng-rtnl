@@ -12,7 +12,6 @@ AckPolicy=0;0;0;0
 AP2040Rescan=0
 APACM=0;0;0;0
 APAifsn=3;7;1;1
-APCLI_MAC_ADDR=00:0C:43:30:52:64
 ApCliAuthMode=OPEN
 ApCliBridgeOnly=0
 ApCliBssid=

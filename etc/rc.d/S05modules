@@ -45,7 +45,7 @@ start() {
 	    ifconfig ra0 txqueuelen	"$txqueuelen"
 	    ip link set ra0 up
 	    # apcli mode sta interface
-	    ifconfig apcli0 hw ether	"$APCLI_MAC_ADDR"
+	    # mac must be set driver use WLAN mac as source
 	    ifconfig apcli0 txqueuelen	"$txqueuelen"
 	    ip link set apcli0 up
 	else

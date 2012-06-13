@@ -838,7 +838,7 @@ VOID	NICReadEEPROMParameters(
 	//more conveninet to test mbssid, so ap's bssid &0xf1
 	if (pAd->PermanentAddress[0] == 0xff)
 		pAd->PermanentAddress[0] = RandomByte(pAd)&0xf8;
-			
+
 	DBGPRINT(RT_DEBUG_TRACE, ("E2PROM MAC: =%02x:%02x:%02x:%02x:%02x:%02x\n", PRINT_MAC(pAd->PermanentAddress)));
 
 	/* Assign the actually working MAC Address */
@@ -857,8 +857,8 @@ VOID	NICReadEEPROMParameters(
 		{
 			AtoH(macptr, &pAd->CurrentAddress[j], 1);
 			macptr=macptr+3;
-		}	
-		
+		}
+
 		DBGPRINT(RT_DEBUG_TRACE, ("Use the MAC address what is assigned from Moudle Parameter. \n"));
 	}
 #ifdef CONFIG_RT2860V2_SET_MAC_FROM_EEPROM
@@ -868,7 +868,24 @@ VOID	NICReadEEPROMParameters(
 	}
 #endif
 
-	/* Set the current MAC to ASIC */	
+/* FIX: For correct work APCLI/MBSSID need correct MAC */
+#if defined(MBSS_SUPPORT)
+	/* Test MAC[5] for 8 MAC support */
+	if ((pAd->CurrentAddress[5] % 8) != 0)
+	{
+	    pAd->CurrentAddress[0] |= 0x02;
+	    pAd->CurrentAddress[5] &= 0xf8;
+	}
+#elif defined(APCLI_SUPPORT)
+	/* Test MAC[5] for 2 MAC support */
+	if ((pAd->CurrentAddress[5] % 2) != 0)
+	{
+	    pAd->CurrentAddress[0] |= 0x02;
+	    pAd->CurrentAddress[5] &= 0xfe;
+        }
+#endif
+
+	/* Set the current MAC to ASIC */
 	csr2.field.Byte0 = pAd->CurrentAddress[0];
 	csr2.field.Byte1 = pAd->CurrentAddress[1];
 	csr2.field.Byte2 = pAd->CurrentAddress[2];
