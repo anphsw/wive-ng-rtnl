@@ -38,27 +38,24 @@ start() {
 	    modprobe -q rt3090_ap "$mac"
 	fi
 
+	# mac must be set driver use module param
 	if [ "$OperationMode" = "3" ]; then
 	    $LOG "WiFi interface up APCLI..."
 	    # apcli mode ap interface
-	    ifconfig ra0 hw ether	"$WLAN_MAC_ADDR"
 	    ifconfig ra0 txqueuelen	"$txqueuelen"
 	    ip link set ra0 up
 	    # apcli mode sta interface
-	    # mac must be set driver use WLAN mac as source
 	    ifconfig apcli0 txqueuelen	"$txqueuelen"
 	    ip link set apcli0 up
 	else
 	    $LOG "WiFi interface up..."
 	    # others modes
-	    ifconfig ra0 hw ether	"$WLAN_MAC_ADDR"
 	    ifconfig ra0 txqueuelen	"$txqueuelen"
 	    ip link set ra0 up
 	fi
 	if [ "$CONFIG_RT3090_AP" != "" ]; then
 	    $LOG "WiFi RT3090 interface up..."
 	    # others modes
-	    ifconfig rai0 hw ether	"$WLAN_MAC_ADDR"
 	    ifconfig rai0 txqueuelen	"$txqueuelen"
 	    ip link set rai0 up
 	fi

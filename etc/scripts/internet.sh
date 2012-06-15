@@ -22,7 +22,6 @@ addMesh() {
 		ip -6 addr flush dev mesh0 /dev/null 2>&1
 	    fi
 	    ip link set mesh0 down > /dev/null 2>&1
-	    ifconfig mesh0 hw ether $WLAN_MAC_ADDR
     	    brctl addif br0 mesh0
     	    ip link set mesh0 up
 	fi
@@ -40,7 +39,6 @@ addWds() {
     		    ip -6 addr flush dev wds$i /dev/null 2>&1
 		fi
 		ip link set wds$i down > /dev/null 2>&1
-		ifconfig wds$i hw ether $WLAN_MAC_ADDR
 		brctl addif br0 wds$i
     		ip link set wds$i up
     	    done
@@ -55,7 +53,6 @@ addWds() {
     		    ip -6 addr flush dev wdsi$i /dev/null 2>&1
 		fi
 		ip link set wdsi$i down > /dev/null 2>&1
-		ifconfig wdsi$i hw ether $WLAN_MAC_ADDR
 		brctl addif br0 wdsi$i
     		ip link set wdsi$i up
     	    done
@@ -75,7 +72,6 @@ addMBSSID() {
     		    ip -6 addr flush dev ra$i /dev/null 2>&1
 		fi
 		ip link set ra$i down > /dev/null 2>&1
-		ifconfig ra$i hw ether "$WLAN_MAC_ADDR"
 		brctl addif br0 ra$i
     		ip link set ra$i up
 	    done
@@ -91,7 +87,6 @@ addMBSSID() {
     		    ip -6 addr flush dev rai$i /dev/null 2>&1
 		fi
 		ip link set ra$i down > /dev/null 2>&1
-		ifconfig rai$i hw ether "$WLAN_MAC_ADDR"
 		brctl addif br0 rai$i
     		ip link set rai$i up
 	    done
