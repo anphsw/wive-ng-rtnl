@@ -14,6 +14,7 @@
 #include	<netinet/in.h>
 #include	<arpa/inet.h>
 
+#include	"oid.h"
 #include	"utils.h"
 #include	"internet.h"
 #include	"wireless.h"
@@ -1204,7 +1205,7 @@ void STFs(int nvram, int index, char *flash_key, char *value)
  */
 static int getStaDriverVer(int eid, webs_t wp, int argc, char_t **argv)
 {
-#ifdef CONFIG_RT2860V2_STA
+#if defined(CONFIG_RT2860V2_STA) || defined(CONFIG_RT2860V2_STA_MODULE)
 	unsigned char DriverVersionInfo[8];
 	int s;
 
@@ -1229,7 +1230,7 @@ static int getStaDriverVer(int eid, webs_t wp, int argc, char_t **argv)
  */
 static int getStaMacAddrw(int eid, webs_t wp, int argc, char_t **argv)
 {
-#ifdef CONFIG_RT2860V2_STA
+#if defined(CONFIG_RT2860V2_STA) || defined(CONFIG_RT2860V2_STA_MODULE)
 	unsigned char CurrentAddress[6];
 	int s;
 
