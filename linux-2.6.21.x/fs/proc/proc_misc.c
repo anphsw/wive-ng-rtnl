@@ -286,14 +286,14 @@ static int devinfo_show(struct seq_file *f, void *v)
 
 	if (i < CHRDEV_MAJOR_HASH_SIZE) {
 		if (i == 0)
-			seq_printf(f, "Character devices:\n");
+			seq_puts(f, "Character devices:\n");
 		chrdev_show(f, i);
 	}
 #ifdef CONFIG_BLOCK
 	else {
 		i -= CHRDEV_MAJOR_HASH_SIZE;
 		if (i == 0)
-			seq_printf(f, "\nBlock devices:\n");
+			seq_puts(f, "\nBlock devices:\n");
 		blkdev_show(f, i);
 	}
 #endif
@@ -465,6 +465,8 @@ static int show_stat(struct seq_file *p, void *v)
 	unsigned long jif;
 	cputime64_t user, nice, system, idle, iowait, irq, softirq, steal;
 	u64 sum = 0;
+	u64 sum_softirq = 0;
+	unsigned int per_softirq_sums[NR_SOFTIRQS] = {0};
 
 	user = nice = system = idle = iowait =
 		irq = softirq = steal = cputime64_zero;
@@ -485,6 +487,13 @@ static int show_stat(struct seq_file *p, void *v)
 		steal = cputime64_add(steal, kstat_cpu(i).cpustat.steal);
 		for (j = 0 ; j < NR_IRQS ; j++)
 			sum += kstat_cpu(i).irqs[j];
+
+		for (j = 0; j < NR_SOFTIRQS; j++) {
+			unsigned int softirq_stat = kstat_softirqs_cpu(j, i);
+
+			per_softirq_sums[j] += softirq_stat;
+			sum_softirq += softirq_stat;
+		}
 	}
 
 	seq_printf(p, "cpu  %llu %llu %llu %llu %llu %llu %llu %llu\n",
@@ -537,15 +546,24 @@ static int show_stat(struct seq_file *p, void *v)
 		nr_running(),
 		nr_iowait());
 
+	seq_printf(p, "softirq %llu", (unsigned long long)sum_softirq);
+
+	for (i = 0; i < NR_SOFTIRQS; i++)
+		seq_printf(p, " %u", per_softirq_sums[i]);
+	seq_putc(p, '\n');
+
 	return 0;
 }
 
 static int stat_open(struct inode *inode, struct file *file)
 {
-	unsigned size = 4096 * (1 + num_possible_cpus() / 32);
+	unsigned size = 1024 + 128 * num_possible_cpus();
 	char *buf;
 	struct seq_file *m;
 	int res;
+
+	/* minimum size to display an interrupt count : 2 bytes */
+	size += 2 * NR_IRQS;
 
 	/* don't ask for more than the kmalloc() max size, currently 128 KB */
 	if (size > 128 * 1024)
@@ -558,7 +576,7 @@ static int stat_open(struct inode *inode, struct file *file)
 	if (!res) {
 		m = file->private_data;
 		m->buf = buf;
-		m->size = size;
+		m->size = ksize(buf);
 	} else
 		kfree(buf);
 	return res;
