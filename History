@@ -1175,6 +1175,7 @@
 41) WebUi: cleanup and cosmetic fixes in Modem/Usb pages.<br>
 42) WiFi drivers: Add mac correction for apcli and mbssid mode.<br>
 43) WiFi: Set MAC only once on driver load by module param.<br>
+44) LAN: Fix one phy mode in RTL8367M.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
