@@ -44,7 +44,6 @@ done
 if [ -n "$NON_STRIPS_BIN" ]; then
     echo BIN: $NON_STRIPS_BIN
     $STRIP $NON_STRIPS_BIN
-    $STRIP -R .comment -R .note $NON_STRIPS_BIN
     $SSTRIP $NON_STRIPS_BIN
 fi
 echo -----------------------------------STRIP LIB----------------------------------
@@ -55,7 +54,6 @@ done
 if [ "$NON_STRIPS_LIB" != "" ]; then
     echo LIB: $NON_STRIPS_LIB
     $STRIP $NON_STRIPS_LIB
-    $STRIP -R .comment -R .note $NON_STRIPS_LIB
     $SSTRIP $NON_STRIPS_LIB
 fi
 echo -----------------------------------SYNC!!-------------------------------------
