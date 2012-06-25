@@ -259,5 +259,7 @@ case "$1" in
 	    fi
 	    $LOG "End renew procedure..."
 	fi
+	# reanable forward for paranoid users
+	echo 1 > "/proc/sys/net/ipv4/conf/$interface/forwarding"
     ;;
 esac
