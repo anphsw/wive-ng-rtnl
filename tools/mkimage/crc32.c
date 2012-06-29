@@ -140,11 +140,13 @@ local const uLongf crc_table[256] = {
 };
 #endif
 
+#if 0 /* allready exported in new zlib header */
 /* =========================================================================
  * This function can be used by asm versions of crc32()
  */
 #if 0
 const uLongf * ZEXPORT get_crc_table()
+ZEXTERN const uLongf * ZEXPORT get_crc_table    OF((void));
 #else
 const uLongf * get_crc_table()
 #endif
@@ -154,6 +156,7 @@ const uLongf * get_crc_table()
 #endif
   return (const uLongf *)crc_table;
 }
+#endif
 
 /* ========================================================================= */
 #define DO1(buf) crc = crc_table[((int)crc ^ (*buf++)) & 0xff] ^ (crc >> 8);
