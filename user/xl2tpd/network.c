@@ -483,9 +483,9 @@ void network_thread ()
         ptv = process_schedule(&tv);
         ret = select (max + 1, &readfds, NULL, NULL, ptv);
 
-#ifdef DEBUG_MORE
         if (ret <= 0)
         {
+#ifdef DEBUG_MORE
              if (ret == 0)
             {
                 if (gconfig.debug_network)
@@ -497,14 +497,12 @@ void network_thread ()
             {
                 if (gconfig.debug_network)
                 {
-                    l2tp_log (LOG_DEBUG,
-                        "%s: select returned error %d (%s)\n",
-                        __FUNCTION__, errno, strerror (errno));
+                    l2tp_log (LOG_DEBUG, "%s: select returned error %d (%s)\n", __FUNCTION__, errno, strerror (errno));
                 }
             }
+#endif
             continue;
         }
-#endif
 
         if (FD_ISSET (control_fd, &readfds))
         {
