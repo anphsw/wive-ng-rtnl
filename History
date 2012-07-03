@@ -1177,6 +1177,8 @@
 43) WiFi: Set MAC only once on driver load by module param.<br>
 44) LAN: Fix one phy mode in RTL8367M.<br>
 45) Reanable forward for paranoid users (after renew).<br>
+46) Fix infinitive loop in xl2tpd.<br>
+47) Update busybox to 1.20.2.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
