@@ -1179,6 +1179,7 @@
 45) Reanable forward for paranoid users (after renew).<br>
 46) Fix infinitive loop in xl2tpd.<br>
 47) Update busybox to 1.20.2.<br>
+48) PPTP: Accept packet with seq zero.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
