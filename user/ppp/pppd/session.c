@@ -180,6 +180,9 @@ session_start(flags, user, passwd, ttyName, msg)
     bool try_session = 0;
 #else /* #ifdef USE_PAM */
     struct passwd *pw;
+#ifndef NO_CRYPT_HACK
+    char *cbuf;
+#endif
 #ifdef HAS_SHADOW
     struct spwd *spwd;
     struct spwd *getspnam();
@@ -351,8 +354,10 @@ session_start(flags, user, passwd, ttyName, msg)
 	/*
 	 * If no passwd, don't let them login if we're authenticating.
 	 */
-        if (pw->pw_passwd == NULL || strlen(pw->pw_passwd) < 2
-            || strcmp(crypt(passwd, pw->pw_passwd), pw->pw_passwd) != 0)
+        if (pw->pw_passwd == NULL || strlen(pw->pw_passwd) < 2)
+            return SESSION_FAILED;
+	cbuf = crypt(passwd, pw->pw_passwd);
+	if (!cbuf || strcmp(cbuf, pw->pw_passwd) != 0)
 #endif
             return SESSION_FAILED;
     }
