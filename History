@@ -1181,6 +1181,7 @@
 47) Update busybox to 1.20.2.<br>
 48) PPTP: Accept packet with seq zero.<br>
 49) XUPNPD: Updated to revision 308.<br>
+50) HW_NAT: Fix PPPoE offload (RT3883 with 2xGMAC mode).<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
