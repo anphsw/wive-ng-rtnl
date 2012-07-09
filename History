@@ -1184,6 +1184,7 @@
 50) HW_NAT: Fix PPPoE offload (RT3883 with 2xGMAC mode).<br>
 51) Update transmission to 2.60 version.<br>
 52) xl2tpd: fix incoming ZLB after call closed, disable TRUST_PPPD_TO_DIE<br>
+53) pppd: sync with upstream patches (2012-05-20)<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
