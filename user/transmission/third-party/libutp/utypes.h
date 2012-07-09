@@ -43,4 +43,10 @@ typedef char * str;
 #include <stdbool.h>
 #endif
 
+#if 0
+#ifndef __cplusplus
+typedef uint8 bool;
+#endif
+#endif
+
 #endif //__UTYPES_H__

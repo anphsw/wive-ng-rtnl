@@ -1182,6 +1182,7 @@
 48) PPTP: Accept packet with seq zero.<br>
 49) XUPNPD: Updated to revision 308.<br>
 50) HW_NAT: Fix PPPoE offload (RT3883 with 2xGMAC mode).<br>
+51) Update transmission to 2.60 version.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
