@@ -32,7 +32,6 @@
 #include "misc.h"    /* for IPADDY macro */
 
 char hostname[256];
-struct sockaddr_in server, from;        /* Server and transmitter structs */
 int server_socket;              /* Server socket */
 #ifdef USE_KERNEL
 int kernel_support;             /* Kernel Support there or not? */
@@ -87,18 +86,22 @@ void modprobe() {
 int init_network (void)
 {
     long arg;
-    unsigned int length = sizeof (server);
+    struct sockaddr_in server;
+    unsigned int length;
+
     gethostname (hostname, sizeof (hostname));
+
+    /* create server socket only has lns */
+    length = sizeof (server);
     server.sin_family = AF_INET;
     server.sin_addr.s_addr = gconfig.listenaddr; 
     server.sin_port = htons (gconfig.port);
 
     if ((server_socket = socket (PF_INET, SOCK_DGRAM, 0)) < 0)
     {
-        l2tp_log (LOG_CRIT, "%s: Unable to allocate socket. Terminating.\n",
-             __FUNCTION__);
+        l2tp_log (LOG_CRIT, "%s: Unable to allocate socket. Terminating.\n", __FUNCTION__);
         return -EINVAL;
-    };
+    }
 
     arg=1;
     setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &arg, sizeof(arg));
@@ -107,14 +110,14 @@ int init_network (void)
     if (bind (server_socket, (struct sockaddr *) &server, sizeof (server)))
     {
         close (server_socket);
-        l2tp_log (LOG_CRIT, "%s: Unable to bind socket: %s. Terminating.\n",
-             __FUNCTION__, strerror(errno), errno);
+        l2tp_log (LOG_CRIT, "%s: Unable to bind socket: %s. Terminating.\n", __FUNCTION__, strerror(errno), errno);
         return -EINVAL;
-    };
+    }
+
     if (getsockname (server_socket, (struct sockaddr *) &server, &length))
     {
-        l2tp_log (LOG_CRIT, "%s: Unable to read socket name.Terminating.\n",
-             __FUNCTION__);
+        close (server_socket);
+        l2tp_log (LOG_CRIT, "%s: Unable to read socket name.Terminating.\n", __FUNCTION__);
         return -EINVAL;
     }
 
@@ -124,8 +127,7 @@ int init_network (void)
      * values.
      */
     arg=1;
-    if(setsockopt(server_socket, IPPROTO_IP, gconfig.sarefnum,
-		  &arg, sizeof(arg)) != 0) {
+    if(setsockopt(server_socket, IPPROTO_IP, gconfig.sarefnum, &arg, sizeof(arg)) != 0) {
 #ifdef DEBUG_MORE
 	    l2tp_log(LOG_CRIT, "setsockopt recvref[%d]: %s\n", gconfig.sarefnum, strerror(errno));
 #endif
@@ -133,8 +135,12 @@ int init_network (void)
     }
 #else
 	l2tp_log(LOG_INFO, "No attempt being made to use IPsec SAref's since we're not on a Linux machine.\n");
-
 #endif
+
+    arg = fcntl (server_socket, F_GETFL);
+    arg |= O_NONBLOCK;
+    fcntl (server_socket, F_SETFL, arg);
+    gconfig.port = ntohs (server.sin_port);
 
 #ifdef USE_KERNEL
     if (gconfig.forceuserspace)
@@ -163,10 +169,6 @@ int init_network (void)
 #else
     l2tp_log (LOG_INFO, "This binary does not support kernel L2TP.\n");
 #endif
-    arg = fcntl (server_socket, F_GETFL);
-    arg |= O_NONBLOCK;
-    fcntl (server_socket, F_SETFL, arg);
-    gconfig.port = ntohs (server.sin_port);
     return 0;
 }
 
@@ -366,7 +368,6 @@ void udp_xmit (struct buffer *buf, struct tunnel *t)
     msgh.msg_iovlen = 1;
     msgh.msg_flags = 0;
 
-
     /* Receive one packet. */
     if ((err = sendmsg(server_socket, &msgh, 0)) < 0) {
 	l2tp_log(LOG_ERR, "udp_xmit failed to %s:%d with err=%d:%s\n",
@@ -497,7 +498,9 @@ void network_thread ()
             {
                 if (gconfig.debug_network)
                 {
-                    l2tp_log (LOG_DEBUG, "%s: select returned error %d (%s)\n", __FUNCTION__, errno, strerror (errno));
+                    l2tp_log (LOG_DEBUG,
+                        "%s: select returned error %d (%s)\n",
+                        __FUNCTION__, errno, strerror (errno));
                 }
             }
 #endif
@@ -638,9 +641,8 @@ void network_thread ()
 		    if (gconfig.debug_tunnel)
 			l2tp_log (LOG_DEBUG,
 				  "%s: no such call %d on tunnel %d.  Sending special ZLB\n",
-				  __FUNCTION__);
-		    handle_special (buf, c, call);
-
+				  __FUNCTION__, call, tunnel);
+		    if (handle_special (buf, c, call) == 0)
 		    /* get a new buffer */
 		    buf = new_buf (MAX_RECV_SIZE);
 		}

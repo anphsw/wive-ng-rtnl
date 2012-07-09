@@ -620,7 +620,8 @@ struct call *get_call (int tunnel, int call,  struct in_addr addr, int port,
 			if (sc->ourcid == call) return sc;
                         sc = sc->next;
                     }
-                    l2tp_log (LOG_DEBUG, "%s: can't find call %d in tunnel %d\n (ref=%d/%d)",
+                    if (gconfig.debug_tunnel)
+			l2tp_log (LOG_DEBUG, "%s: can't find call %d in tunnel %d (ref=%d/%d)\n",
 			      __FUNCTION__, call, tunnel, refme, refhim);
                     return NULL;
                 }
