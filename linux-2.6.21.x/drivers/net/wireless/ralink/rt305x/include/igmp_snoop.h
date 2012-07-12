@@ -32,7 +32,7 @@
 #define IGMP_PROTOCOL_DESCRIPTOR	0x02
 #define IGMP_V1_MEMBERSHIP_REPORT	0x12
 #define IGMP_V2_MEMBERSHIP_REPORT	0x16
-#define IGMP_LEAVE_GROUP			0x17
+#define IGMP_LEAVE_GROUP		0x17
 #define IGMP_V3_MEMBERSHIP_REPORT	0x22
 
 #define MLD_V1_LISTENER_REPORT		131
@@ -58,7 +58,7 @@
 
 #define IGMP_NONE		0
 #define IGMP_PKT		1
-#define IGMP_IN_GROUP	2
+#define IGMP_IN_GROUP		2
 
 
 VOID MulticastFilterTableInit(
@@ -155,8 +155,7 @@ NDIS_STATUS IgmpPktClone(
 	IN INT IgmpPktInGroup,
 	IN PMULTICAST_FILTER_TABLE_ENTRY pGroupEntry,
 	IN UCHAR QueIdx,
-	IN UINT8 UserPriority,
-	IN PNET_DEV pNetDev);
+	IN UINT8 UserPriority);
 
 typedef struct rsv_table {
 	UINT32 addr;
@@ -164,3 +163,4 @@ typedef struct rsv_table {
 } rsv_table_t;
 
 #endif /* __RTMP_IGMP_SNOOP_H__ */
+

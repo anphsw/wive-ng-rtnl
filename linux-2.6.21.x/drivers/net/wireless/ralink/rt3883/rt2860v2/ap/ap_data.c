@@ -566,8 +566,7 @@ NDIS_STATUS APSendPacket(
 				&&  (IgmpMemberCnt(&pGroupEntry->MemberList) > 0))
 			|| (InIgmpGroup == IGMP_PKT))
 		{
-			NDIS_STATUS PktCloneResult = IgmpPktClone(pAd, pPacket, InIgmpGroup, 	pGroupEntry,
-												QueIdx, UserPriority, GET_OS_PKT_NETDEV(pPacket));
+			NDIS_STATUS PktCloneResult = IgmpPktClone(pAd, pPacket, InIgmpGroup, pGroupEntry, QueIdx, UserPriority);
 			RELEASE_NDIS_PACKET(pAd, pPacket, NDIS_STATUS_FAILURE);
 			if (PktCloneResult != NDIS_STATUS_SUCCESS)
 				return NDIS_STATUS_FAILURE;
