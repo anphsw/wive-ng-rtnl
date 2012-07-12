@@ -4369,3 +4369,66 @@ BOOLEAN APFowardWirelessStaToWirelessSta(
 	return bAnnounce;
 }
 
+/*
+	========================================================================
+	Routine Description:
+		This routine is used to do insert packet into power-saveing queue.
+	
+	Arguments:
+		pAd: Pointer to our adapter
+		pPacket: Pointer to send packet
+		pMacEntry: portint to entry of MacTab. the pMacEntry store attribute of client (STA).
+		QueIdx: Priority queue idex.
+
+	Return Value:
+		NDIS_STATUS_SUCCESS:If succes to queue the packet into TxSwQueue.
+		NDIS_STATUS_FAILURE: If failed to do en-queue.
+========================================================================
+*/
+NDIS_STATUS APInsertPsQueue(
+	IN PRTMP_ADAPTER pAd,
+	IN PNDIS_PACKET pPacket,
+	IN MAC_TABLE_ENTRY *pMacEntry,
+	IN UCHAR QueIdx)
+{
+	ULONG IrqFlags;
+#ifdef UAPSD_AP_SUPPORT
+	/* put the U-APSD packet to its U-APSD queue by AC ID */
+	UINT32 ac_id = QueIdx - QID_AC_BE; /* should be >= 0 */
+
+
+	if (UAPSD_MR_IS_UAPSD_AC(pMacEntry, ac_id))
+		UAPSD_PacketEnqueue(pAd, pMacEntry, pPacket, ac_id);
+	else
+#endif // UAPSD_AP_SUPPORT //
+	{
+		if (pMacEntry->PsQueue.Number >= MAX_PACKETS_IN_PS_QUEUE)
+		{
+			RELEASE_NDIS_PACKET(pAd, pPacket, NDIS_STATUS_FAILURE);			
+			return NDIS_STATUS_FAILURE;			
+		}
+		else
+		{
+			RTMP_IRQ_LOCK(&pAd->irq_lock, IrqFlags);
+			InsertTailQueue(&pMacEntry->PsQueue, PACKET_TO_QUEUE_ENTRY(pPacket));
+			RTMP_IRQ_UNLOCK(&pAd->irq_lock, IrqFlags);
+		}
+	}
+
+	// mark corresponding TIM bit in outgoing BEACON frame
+#ifdef UAPSD_AP_SUPPORT
+	if (UAPSD_MR_IS_NOT_TIM_BIT_NEEDED_HANDLED(pMacEntry, QueIdx))
+	{
+		/* 1. the station is UAPSD station;
+		2. one of AC is non-UAPSD (legacy) AC;
+		3. the destinated AC of the packet is UAPSD AC. */
+		/* So we can not set TIM bit due to one of AC is legacy AC */
+	}
+	else
+#endif // UAPSD_AP_SUPPORT //
+	{
+		WLAN_MR_TIM_BIT_SET(pAd, pMacEntry->apidx, pMacEntry->Aid);
+	}
+	return NDIS_STATUS_SUCCESS;
+}
+
