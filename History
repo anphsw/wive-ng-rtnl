@@ -1183,11 +1183,13 @@
 49) XUPNPD: Updated to revision 308.<br>
 50) HW_NAT: Fix PPPoE offload (RT3883 with 2xGMAC mode).<br>
 51) Update transmission to 2.60 version.<br>
-52) xl2tpd: fix incoming ZLB after call closed, disable TRUST_PPPD_TO_DIE<br>
-53) pppd: sync with upstream patches (2012-05-20)<br>
-54) WiFi drivers: fix multicast packet delivery to clients in PSM mode (casual ping delay issue)<br>
-55) SKB: Temp set skb_pad to 16<br>
-56) Add check wan ip adress get to udpxy/xupnpd init scripts<br>
+52) xl2tpd: fix incoming ZLB after call closed, disable TRUST_PPPD_TO_DIE.<br>
+53) pppd: sync with upstream patches (2012-05-20).<br>
+54) WiFi drivers: fix multicast packet delivery to clients in PSM mode (casual ping delay issue).<br>
+55) SKB: Temp set skb_pad to 16.<br>
+56) Add check wan ip adress get to udpxy/xupnpd init scripts.<br>
+57) Fix calculate hdrlen in current kernel.<br>
+58) Revert skbpad to 80.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>

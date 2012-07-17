@@ -1182,11 +1182,7 @@ static inline void skb_set_mac_header(struct sk_buff *skb, const int offset)
     defined (CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_RT6352)
 /* ralink depended hacks */
 #if defined (CONFIG_PPTP) || defined (CONFIG_PPTP_MODULE) || defined(CONFIG_PPPOL2TP) || defined(CONFIG_PPPOL2TP_MODULE)
-#ifndef CONFIG_PPP_MPPE
 #define NET_SKB_PAD	80 /* This is hack need for allow tranzit overheaded protocols to PPE and decrease allocs skbs in path */
-#else
-#define NET_SKB_PAD	16 /* This is temp hack need for RalinkSOC for work PPE with MMPE. PPPE skip crypto pkts */
-#endif /* CONFIG_PPP_MPPE */
 #else
 #define NET_SKB_PAD	16 /* This is hack need for RalinkSOC optimal pad for Ralink for no overheaded proto tcp/udp/etc */
 #endif /* CONFIG_PPTP || CONFIG_PPTP_MODULE || CONFIG_PPPOL2TP || CONFIG_PPPOL2TP_MODULE */

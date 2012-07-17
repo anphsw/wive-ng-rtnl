@@ -1838,9 +1838,9 @@ int pppol2tp_connect(struct socket *sock, struct sockaddr *uservaddr,
 	 * whether sequence numbers are enabled for the data channel.
 	 */
 	po->chan.hdrlen = PPPOL2TP_L2TP_HDR_SIZE_NOSEQ;
-	po->chan.hdrlen += NET_SKB_PAD + sizeof(struct iphdr) +
-		sizeof(struct udphdr) + 2;
-
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,18)
+	po->chan.hdrlen += NET_SKB_PAD + sizeof(struct iphdr) +	sizeof(struct udphdr) + 2;
+#endif
 	po->chan.private = sk;
 	po->chan.ops	 = &pppol2tp_chan_ops;
 	po->chan.mtu	 = session->mtu;
