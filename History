@@ -1190,6 +1190,8 @@
 56) Add check wan ip adress get to udpxy/xupnpd init scripts.<br>
 57) Fix calculate hdrlen in current kernel.<br>
 58) Revert skbpad to 80.<br>
+59) Fix hw_nat+pptp+mppe issue.<br>
+60) Avoid TX skb reallocation and speed-up TX path.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
