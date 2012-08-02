@@ -92,12 +92,10 @@ PATCHNO := `cat $(PATCHFILE)`
 CHANGEFILE := CHANGES
 READMEFILE := README
 
-DOCFILES := doc/udpxy-manual-RU.rtf
-
 INSTALLROOT := ./filesystem
 
 ARCDIR = ..
-ARCFILE := $(ARCDIR)/$(EXEC).$(VERSION).$(BUILDNO)-$(PATCHNO)-$(BTYPE).tgz
+ARCFILE := $(ARCDIR)/$(EXEC).$(VERSION).$(BUILDNO)-$(PATCHNO)-$(BTYPE).tar.gz
 
 ifneq (yes,$(NO_UDPXREC))
 COMMON_OPT := $(COMMON_OPT) -DUDPXREC_MOD
@@ -111,7 +109,9 @@ UTILDIR := util
 MKDEP_SRC := $(UTILDIR)/mkdep.c
 MKDEP_TOOL := $(UTILDIR)/mkdep
 
-SRC := udpxy.c rparse.c util.c prbuf.c ifaddr.c ctx.c mkpg.c \
+SLOOP_FILES := sloop_p.c sloop_s.c
+
+SRC := udpxy.c sloop.c rparse.c util.c prbuf.c ifaddr.c ctx.c mkpg.c \
 	  rtp.c uopt.c dpkt.c netop.c extrn.c main.c pselect.c
 ifneq (yes,$(NO_UDPXREC))
 SRC := $(SRC) udpxrec.c
@@ -129,22 +129,34 @@ CORES := core.* core
 
 release:
 	@echo -e "\nMaking a [release] version (use 'debug' target as an alternative)\n"
-	@$(MAKE) all "COPT=${PROD_OPT}"
+	@$(MAKE) all "COPT=${PROD_OPT}" "CFLAGS=${CFLAGS}"
 
 debug:
 	@echo -e "\nMaking a [debug] version (use 'release' target as an alternative)\n"
-	@$(MAKE) all "COPT=${DEBUG_OPT}"
+	@$(MAKE) all "COPT=${DEBUG_OPT}" "CFLAGS=${CFLAGS}"
 
 lean:
 	@echo -e "\nMaking a [lean] version (minimal size)\n"
-	@$(MAKE) all "COPT=${LEAN_OPT}"
+	@$(MAKE) all "COPT=${LEAN_OPT}" "CFLAGS=${CFLAGS}"
+
+ldebug:
+	@echo -e "\nMaking a [lean] version with debug info\n"
+	@$(MAKE) all "COPT=${LEAN_OPT} ${DEBUG_ON}" "CFLAGS=${CFLAGS}"
+
+rdebug:
+	@echo -e "\nMaking a [release] version with debug info\n"
+	@$(MAKE) all "COPT=${PROD_OPT} ${DEBUG_ON}"
 
 verify:
 	@echo -e "\nVerifying all build targets\n"
 	@$(MAKE) clean
+	@$(MAKE) release
+	@$(MAKE) clean
 	@$(MAKE) lean
 	@$(MAKE) clean
-	@$(MAKE) release
+	@$(MAKE) ldebug
+	@$(MAKE) clean
+	@$(MAKE) rdebug
 	@$(MAKE) clean
 	@$(MAKE) debug
 	@$(MAKE) clean
@@ -184,8 +196,8 @@ incbuild:
 	@$(MAKE) touch
 
 DISTRO_DIR := udpxy-$(VERSION).$(BUILDNO)-$(PATCHNO)
-DISTRO_FILES := $(SRC) *.h Makefile *.txt $(BUILDFILE) $(BTYPEFILE) \
-	$(VERSIONFILE) $(CHANGEFILE) $(READMEFILE) $(DOCFILES) $(PATCHFILE)
+DISTRO_FILES := $(SRC) $(SLOOP_FILES) *.h Makefile *.txt $(BUILDFILE) $(BTYPEFILE) \
+	$(VERSIONFILE) $(CHANGEFILE) $(READMEFILE) $(PATCHFILE)
 
 distro:
 	@rm -fr $(DISTRO_DIR)
