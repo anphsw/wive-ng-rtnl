@@ -13,6 +13,7 @@ ifdef UCLINUX_BUILD_USER
 	UCLINUX_COMMON_LIB = 1
 endif
 
+ifeq ($(UCLINUX_COMMON_LIB),1)
 	# Static versions of libraries
 	SLIBFLEX	=	-lfl
 	SLIBICONV	=	-liconv
@@ -108,3 +109,4 @@ endif
 		# Linker warnings are almost always a sign of badness
 		LDFLAGS  += -Wl,--fatal-warnings
 	endif
+endif

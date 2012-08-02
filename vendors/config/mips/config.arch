@@ -111,6 +111,9 @@ ifdef UCLINUX_BUILD_USER
 	CFLAGS  += -Dlinux -D__linux__ -Dunix -DEMBED
 	CFLAGS  += -I$(ROOTDIR)/lib/include
 	CFLAGS  += -I$(ROOTDIR)/lib/include_shared
+ifdef CONFIG_LIB_NFNETLINK
+	CFLAGS  += -I$(ROOTDIR)/lib/include_shared/nfnetlink
+endif
 ifdef CONFIG_LIB_CURL
 	CFLAGS  += -I$(ROOTDIR)/lib/include_shared/curl
 endif
