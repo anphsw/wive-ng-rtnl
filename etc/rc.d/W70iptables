@@ -55,7 +55,7 @@ start() {
 	    if [ "$RemoteManagement" = "1" ]; then
 		if [ "$OperationMode" != "0" ] && [ "$ApCliBridgeOnly" != "1" ]; then
     		    iptables -A servicelimit -i $wan_if $STATE_NEW -p tcp --dport $RemoteManagementPort -j DROP
-		    if [ "$vpnEnabled" = "on" ] && [ "$vpnType" != "6" ]; then
+		    if [ "$PPP_CONNECT" = "on" ]; then
     			iptables -A servicelimit -i ppp+ $STATE_NEW -p tcp --dport $RemoteManagementPort -j DROP
 		    fi
 		fi
@@ -75,7 +75,7 @@ start() {
 	    if [ "$RemoteSSH" = "1" ]; then
 		if [ "$OperationMode" != "0" ] && [ "$ApCliBridgeOnly" != "1" ]; then
     		    iptables -A servicelimit -i $wan_if $STATE_NEW -p tcp --dport 22 -j DROP
-		    if [ "$vpnEnabled" = "on" ] && [ "$vpnType" != "6" ]; then
+		    if [ "$PPP_CONNECT" = "on" ]; then
     			iptables -A servicelimit -i ppp+ $STATE_NEW -p tcp --dport 22 -j DROP
 		    fi
 		fi
@@ -95,7 +95,7 @@ start() {
 	    if [ "$RemoteTelnet" = "1" ]; then
 		if [ "$OperationMode" != "0" ] && [ "$ApCliBridgeOnly" != "1" ]; then
     		    iptables -A servicelimit -i $wan_if $STATE_NEW -p tcp --dport 23 -j DROP
-		    if [ "$vpnEnabled" = "on" ] && [ "$vpnType" != "6" ]; then
+		    if [ "$PPP_CONNECT" = "on" ]; then
     			iptables -A servicelimit -i ppp+ $STATE_NEW -p tcp --dport 23 -j DROP
 		    fi
 		fi
@@ -115,7 +115,7 @@ start() {
 	    if [ "$RemoteFTP" = "1" ]; then
 		if [ "$OperationMode" != "0" ] && [ "$ApCliBridgeOnly" != "1" ]; then
     		    iptables -A servicelimit -i $wan_if $STATE_NEW -p tcp --dport 20:21 -j DROP
-		    if [ "$vpnEnabled" = "on" ] && [ "$vpnType" != "6" ]; then
+		    if [ "$PPP_CONNECT" = "on" ]; then
     			iptables -A servicelimit -i ppp+ $STATE_NEW -p tcp --dport 20:21 -j DROP
 		    fi
 		fi
@@ -155,7 +155,7 @@ start() {
 	    if [ "$UDPXYMode" = "1" ]; then
 		if [ "$OperationMode" != "0" ] && [ "$ApCliBridgeOnly" != "1" ]; then
     		    iptables -A servicelimit -i $wan_if $STATE_NEW -p tcp --dport $UDPXYPort -j DROP
-		    if [ "$vpnEnabled" = "on" ] && [ "$vpnType" != "6" ]; then
+		    if [ "$PPP_CONNECT" = "on" ]; then
     			iptables -A servicelimit -i ppp+ $STATE_NEW -p tcp --dport $UDPXYPort -j DROP
 		    fi
 		fi
@@ -207,7 +207,7 @@ start() {
     		$LOG "icmp limit Drop ping from wan $wan_if"
     		iptables -A servicelimit -i $wan_if -p icmp --icmp-type echo-request -j DROP
     		iptables -A servicelimit -i $wan_if -p icmp --icmp-type echo-reply -j DROP
-		if [ "$vpnEnabled" = "on" ] && [ "$vpnType" != "6" ]; then
+		if [ "$PPP_CONNECT" = "on" ]; then
     		    iptables -A servicelimit -i ppp+ -p icmp --icmp-type echo-request -j DROP
     		    iptables -A servicelimit -i ppp+ -p icmp --icmp-type echo-reply -j DROP
 		fi
@@ -435,7 +435,14 @@ get_param() {
 	    natEnabled use_snat PortForwardEnable DMZEnable DMZIPAddress DMZNATLoopback DefaultFirewallPolicy \
 	    IPPortFilterEnable WANPingFilter RemoteSSH RemoteFTP RemoteTelnet RemoteManagement RemoteManagementPort \
 	    dhcpEnabled ipt_account upnpEnabled igmpEnabled xupnpd UDPXYPort SmbEnabled TransmissionEnabled snmpd \
-	    parproutedEnabled PrinterSrvEnabled chilli_net vpnType vpnNAT l2tp_srv_enabled store_ttl store_ttl_mcast`
+	    parproutedEnabled PrinterSrvEnabled chilli_net vpnType vpnNAT l2tp_srv_enabled MODEMENABLED store_ttl store_ttl_mcast`
+
+    # if ppp enabled and not pure pppoe mode (type6 is lanauth not real ppp)
+    if [ "$MODEMENABLED" = "1" ] || [ "$vpnEnabled" = "on" -a "$vpnType" != "6" ]; then
+	PPP_CONNECT="on"
+    else
+	PPP_CONNECT="off"
+    fi
 
     # if wan ip not get
     if [ "$wan_ipaddr" = "" ]; then
