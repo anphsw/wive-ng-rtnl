@@ -119,8 +119,8 @@ extern char     *send_buf;
 
 extern char     s1[];
 extern char     s2[];
-extern char     s3[];
-extern char     s4[];
+extern char		s3[];
+extern char		s4[];
 
 
 
@@ -239,7 +239,6 @@ struct Config *getCommonConfig();
 */
 extern uint32_t allhosts_group;
 extern uint32_t allrouters_group;
-extern uint32_t alligmp3_group;
 void initIgmp(void);
 void acceptIgmp(int);
 void sendIgmp (uint32_t, uint32_t, int, int, uint32_t,int);
