@@ -29,17 +29,17 @@ symlink_pcsc() {
 }
 
 if [ "$ACTION" = "add" ]; then
-    for path in $(find /sys/devices -name "$MDEV" 2>/dev/null); do
+    for path in $(find /sys/devices -name "$MDEV" | sort -r 2>/dev/null); do
         DEVPATH=${path#/sys}
     done
     [ -z "$DEVPATH" ] && $LOG "environment variable DEVPATH is unset" && exit 1
     if [ -d /sys${DEVPATH} ]; then
-	cd /sys${DEVPATH}/..
+	cd /sys${DEVPATH}/../..
 	for var in id[PV]*; do
 	    [ -r $var ] && eval "$var='$(cat $var)'"
 	done
-	bInterfaceNumber=$(cat /sys${DEVPATH}/bInterfaceNumber 2>/dev/null)
-	bInterfaceProtocol=$(cat /sys${DEVPATH}/bInterfaceProtocol 2>/dev/null)
+	bInterfaceNumber=$(cat /sys${DEVPATH}/../bInterfaceNumber 2>/dev/null)
+	bInterfaceProtocol=$(cat /sys${DEVPATH}/../bInterfaceProtocol 2>/dev/null)
 	if [ "${idVendor}" = "12d1" ]; then
 	    case "${idProduct}" in
 		"1001")
@@ -139,6 +139,22 @@ if [ "$ACTION" = "add" ]; then
 			*)
 			    $LOG "Oooops ${idVendor}:${idProduct} $bInterfaceNumber"
 			    ;;
+		    esac
+		    ;;
+		"1506")
+		    case "$bInterfaceNumber" in
+			"00")
+			    symlink_modem
+			    ;;
+			"01")
+			    symlink_ndis
+			    ;;
+			"02")
+			    symlink_pcui
+			    ;;
+                     *)
+                         $LOG "Oooops ${idVendor}:${idProduct} $bInterfaceNumber"
+                         ;;
 		    esac
 		    ;;
 		*)
