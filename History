@@ -1196,6 +1196,8 @@
 62) xl2tpd: fix defaults for bps speed and mandotary.<br>
 63) udpxy: up to 1.0.23-0-prod version.<br>
 64) xupnpd: up to revision 310.<br>
+65) miniupnpd: up to 1.7.20120711 version.<br>
+66) add libnfnetlink lib need for new miniupnpd.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>

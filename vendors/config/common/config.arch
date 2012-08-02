@@ -13,7 +13,6 @@ ifdef UCLINUX_BUILD_USER
 	UCLINUX_COMMON_LIB = 1
 endif
 
-ifeq ($(UCLINUX_COMMON_LIB),1)
 	# Static versions of libraries
 	SLIBFLEX	=	-lfl
 	SLIBICONV	=	-liconv
@@ -49,6 +48,7 @@ ifeq ($(UCLINUX_COMMON_LIB),1)
 	SLIBPCAP	=	-lpcap
 	SLIBEVENT	=	-levent
 	SLIBUSB		=	-lusb
+	SLIBNFNETLINK	=	-lnfnetlink
 	SLIBUPNP	=	-lupnp
 	SLIBZ		=	-lz
 
@@ -88,6 +88,7 @@ ifeq ($(UCLINUX_COMMON_LIB),1)
 	LIBUSB		=	$(SLIBUSB)
 	LIBCURL		=	$(SLIBCURL)
 	LIBPCAP		=	$(SLIBPCAP)
+	LIBNFNETLINK	=	$(SLIBNFNETLINK)
 	LIBUPNP		=	$(SLIBUPNP)
 	LIBZ		=	$(SLIBZ)
 	ifeq ($(findstring glibc,$(LIBCDIR)),glibc)
@@ -107,4 +108,3 @@ ifeq ($(UCLINUX_COMMON_LIB),1)
 		# Linker warnings are almost always a sign of badness
 		LDFLAGS  += -Wl,--fatal-warnings
 	endif
-endif

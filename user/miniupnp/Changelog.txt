@@ -1,4 +1,26 @@
-$Id: Changelog.txt,v 1.286 2012/05/27 22:35:10 nanard Exp $
+$Id: Changelog.txt,v 1.293 2012/06/29 19:59:24 nanard Exp $
+
+2012/06/29:
+  added DISABLE_CONFIG_FILE in options.h to disable miniupnpd.conf parsing
+  Add command line parsing for clean_ruleset_interval option
+
+2012/06/28:
+  Only activate -L option for PF and IPF
+  -a option takes two arguments with MULTIPLE_EXTERNAL_IP defined
+
+2012/06/23:
+  in UPNP_STRICT mode, the literal IPv6 address in "location:" of SSDP
+  messages is the source address used to send the message
+
+2012/06/08:
+  Disable -ansi CFLAGS in Makefile.linux because recent iptables headers
+  make use of typeof keywork which is a GCC extension.
+
+2012/05/31:
+  Improvements in autodetecting firewall under (Free)BSD
+
+2012/05/28:
+  Cleanup HTTP request handling. Answer 405 when relevant
 
 VERSION 1.7 : released the 2012/05/28
 

@@ -1,4 +1,4 @@
-/* $Id: miniupnpd.c,v 1.161 2012/05/21 15:50:03 nanard Exp $ */
+/* $Id: miniupnpd.c,v 1.165 2012/06/29 19:59:26 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * (c) 2006-2012 Thomas Bernard
@@ -644,12 +644,14 @@ init(int argc, char * * argv, struct runtime_vars * v)
 	int i;
 	int pid;
 	int debug_flag = 0;
-	int options_flag = 0;
 	int openlog_option;
 	struct sigaction sa;
 	/*const char * logfilename = 0;*/
 	const char * presurl = 0;
+#ifndef DISABLE_CONFIG_FILE
+	int options_flag = 0;
 	const char * optionsfile = DEFAULT_CONFIG;
+#endif /* DISABLE_CONFIG_FILE */
 	struct lan_addr_s * lan_addr;
 	struct lan_addr_s * lan_addr2;
 
@@ -659,6 +661,7 @@ init(int argc, char * * argv, struct runtime_vars * v)
 		if(0 == strcmp(argv[i], "-h"))
 			goto print_usage;
 	}
+#ifndef DISABLE_CONFIG_FILE
 	/* first check if "-f" option is used */
 	for(i=2; i<argc; i++)
 	{
@@ -669,16 +672,17 @@ init(int argc, char * * argv, struct runtime_vars * v)
 			break;
 		}
 	}
+#endif /* DISABLE_CONFIG_FILE */
 
 	/* set initial values */
-	SETFLAG(ENABLEUPNPMASK);
+	SETFLAG(ENABLEUPNPMASK);	/* UPnP is enabled by default */
 
 	LIST_INIT(&lan_addrs);
 	v->port = -1;
 	v->notify_interval = 30;	/* seconds between SSDP announces */
 	v->clean_ruleset_threshold = 20;
 	v->clean_ruleset_interval = 0;	/* interval between ruleset check. 0=disabled */
-
+#ifndef DISABLE_CONFIG_FILE
 	/* read options file first since
 	 * command line arguments have final say */
 	if(readoptionsfile(optionsfile) < 0)
@@ -745,10 +749,12 @@ init(int argc, char * * argv, struct runtime_vars * v)
 				if(strcmp(ary_options[i].value, "yes") == 0)
 					SETFLAG(SYSUPTIMEMASK);	/*sysuptime = 1;*/
 				break;
+#if defined(USE_PF) || defined(USE_IPF)
 			case UPNPPACKET_LOG:
 				if(strcmp(ary_options[i].value, "yes") == 0)
 					SETFLAG(LOGPACKETSMASK);	/*logpackets = 1;*/
 				break;
+#endif
 			case UPNPUUID:
 				strncpy(uuidvalue+5, ary_options[i].value,
 				        strlen(uuidvalue+5) + 1);
@@ -816,6 +822,7 @@ init(int argc, char * * argv, struct runtime_vars * v)
 			}
 		}
 	}
+#endif /* DISABLE_CONFIG_FILE */
 
 	/* command line arguments processing */
 	for(i=1; i<argc; i++)
@@ -835,6 +842,12 @@ init(int argc, char * * argv, struct runtime_vars * v)
 		case 't':
 			if(i+1 < argc)
 				v->notify_interval = atoi(argv[++i]);
+			else
+				fprintf(stderr, "Option -%c takes one argument.\n", argv[i][1]);
+			break;
+		case 'r':
+			if(i+1 < argc)
+				v->clean_ruleset_interval = atoi(argv[++i]);
 			else
 				fprintf(stderr, "Option -%c takes one argument.\n", argv[i][1]);
 			break;
@@ -871,10 +884,12 @@ init(int argc, char * * argv, struct runtime_vars * v)
 		/*case 'l':
 			logfilename = argv[++i];
 			break;*/
+#if defined(USE_PF) || defined(USE_IPF)
 		case 'L':
 			/*logpackets = 1;*/
 			SETFLAG(LOGPACKETSMASK);
 			break;
+#endif
 		case 'S':
 			SETFLAG(SECUREMODEMASK);
 			break;
@@ -951,6 +966,7 @@ init(int argc, char * * argv, struct runtime_vars * v)
 				fprintf(stderr, "Option -%c takes two arguments.\n", argv[i][1]);
 			break;
 		case 'a':
+#ifndef MULTIPLE_EXTERNAL_IP
 			if(i+1 < argc)
 			{
 				i++;
@@ -977,6 +993,46 @@ init(int argc, char * * argv, struct runtime_vars * v)
 			}
 			else
 				fprintf(stderr, "Option -%c takes one argument.\n", argv[i][1]);
+#else
+			if(i+2 < argc)
+			{
+				char *val=calloc((strlen(argv[i+1]) + strlen(argv[i+2]) + 1), sizeof(char));
+				if (val == NULL)
+				{
+					fprintf(stderr, "memory allocation error for listen address storage\n");
+					break;
+				}
+				sprintf(val, "%s %s", argv[i+1], argv[i+2]);
+
+				lan_addr = (struct lan_addr_s *) malloc(sizeof(struct lan_addr_s));
+				if (lan_addr == NULL)
+				{
+					fprintf(stderr, "malloc(sizeof(struct lan_addr_s)): %m");
+					free(val);
+					break;
+				}
+				if(parselanaddr(lan_addr, val) != 0)
+				{
+					fprintf(stderr, "can't parse \"%s\" as valid lan address\n", val);
+					free(lan_addr);
+					free(val);
+					break;
+				}
+				/* check if we already have this address */
+				for(lan_addr2 = lan_addrs.lh_first; lan_addr2 != NULL; lan_addr2 = lan_addr2->list.le_next)
+				{
+					if (0 == strncmp(lan_addr2->str, lan_addr->str, 15))
+						break;
+				}
+				if (lan_addr2 == NULL)
+					LIST_INSERT_HEAD(&lan_addrs, lan_addr, list);
+
+				free(val);
+				i+=2;
+			}
+			else
+				fprintf(stderr, "Option -%c takes two arguments.\n", argv[i][1]);
+#endif
 			break;
 		case 'f':
 			i++;	/* discarding, the config file is already read */
@@ -1091,16 +1147,29 @@ init(int argc, char * * argv, struct runtime_vars * v)
 	return 0;
 print_usage:
 	fprintf(stderr, "Usage:\n\t"
-	        "%s [-f config_file] [-i ext_ifname] [-o ext_ip]\n"
-#ifndef ENABLE_NATPMP
-			"\t\t[-a listening_ip] [-p port] [-d] [-L] [-U] [-S]\n"
-#else
-			"\t\t[-a listening_ip] [-p port] [-d] [-L] [-U] [-S] [-N]\n"
+	        "%s "
+#ifndef DISABLE_CONFIG_FILE
+			"[-f config_file] "
 #endif
+			"[-i ext_ifname] [-o ext_ip]\n"
+#ifndef MULTIPLE_EXTERNAL_IP
+			"\t\t[-a listening_ip]"
+#else
+			"\t\t[-a listening_ip ext_ip]"
+#endif
+			" [-p port] [-d]"
+#if defined(USE_PF) || defined(USE_IPF)
+			" [-L]"
+#endif
+			" [-U] [-S]"
+#ifdef ENABLE_NATPMP
+			" [-N]"
+#endif
+			"\n"
 			/*"[-l logfile] " not functionnal */
 			"\t\t[-u uuid] [-s serial] [-m model_number] \n"
 			"\t\t[-t notify_interval] [-P pid_filename]\n"
-			"\t\t[-B down up] [-w url]\n"
+			"\t\t[-B down up] [-w url] [-r clean_ruleset_interval]\n"
 #ifdef USE_PF
                         "\t\t[-q queue] [-T tag]\n"
 #endif
@@ -1112,7 +1181,9 @@ print_usage:
 			"\tDefault pid file is '%s'.\n"
 			"\tDefault config file is '%s'.\n"
 			"\tWith -d miniupnpd will run as a standard program.\n"
+#if defined(USE_PF) || defined(USE_IPF)
 			"\t-L sets packet log in pf and ipf on.\n"
+#endif
 			"\t-S sets \"secure\" mode : clients can only add mappings to their own ip\n"
 			"\t-U causes miniupnpd to report system uptime instead "
 			"of daemon uptime.\n"
@@ -1794,7 +1865,9 @@ shutdown:
 #endif
 	free(snotify);
 	closelog();
+#ifndef DISABLE_CONFIG_FILE
 	freeoptions();
+#endif
 
 	return 0;
 }

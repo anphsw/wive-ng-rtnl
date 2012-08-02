@@ -72,6 +72,9 @@ endif
 ifeq ($(CONFIG_LIB_ICONV),y)
     DIRS += libiconv
 endif
+ifeq ($(CONFIG_LIB_NFNETLINK),y)
+    DIRS += libnfnetlink
+endif
 ifeq ($(CONFIG_LIB_UPNP),y)
     DIRS += libupnp
 endif
@@ -149,6 +152,9 @@ ifeq ($(CONFIG_LIB_LIBNTFS3G_FORCE),y)
 endif
 ifeq ($(CONFIG_LIB_USB),y)
 	@$(MAKE) -C libusb shared
+endif
+ifeq ($(CONFIG_LIB_NFNETLINK),y)
+	@$(MAKE) -C libnfnetlink shared
 endif
 ifeq ($(CONFIG_LIB_UPNP),y)
 	@$(MAKE) -C libupnp shared
@@ -488,6 +494,7 @@ clean:
 	-$(MAKE) -C utils clean
 	-$(MAKE) -C extra clean
 	-$(MAKE) -C libnatpmp clean
+	-$(MAKE) -C libnfnetlink clean
 	-$(MAKE) -C libupnp clean
 	-$(MAKE) -C libevent clean
 	-$(MAKE) -C libcurl clean
