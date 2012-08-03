@@ -104,6 +104,9 @@ romfs
 /lib/libupnp/Makefile
 /lib/libupnp/aclocal.m4
 /lib/libupnp/Makefile.in
+/lib/libnfnetlink/configure
+/lib/libnfnetlink/Makefile
+/lib/libnfnetlink/Makefile.in
 /lib/libupnp/docs/dist/Makefile
 /lib/libupnp/docs/dist/Makefile.in
 /lib/libupnp/ixml/Makefile
