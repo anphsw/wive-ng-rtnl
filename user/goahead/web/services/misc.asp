@@ -159,9 +159,9 @@ function initValue()
 		form.rmtTelnet.value = defaultNumber("<% getCfgGeneral(1, "RemoteTelnet"); %>", "0");
 	else
 		displayElement('rmt_telnetd', false);
-	if (ftpd_built == '1')
+/*	if (ftpd_built == '1')
 		form.rmtFTP.value = defaultNumber("<% getCfgGeneral(1, "RemoteFTP"); %>", "0");
-	else
+	else */
 		displayElement('rmt_ftpd', false);
 
 	form.udpxyMode.value = defaultNumber("<% getCfgGeneral(1, "UDPXYMode"); %>", "0");

@@ -362,46 +362,38 @@ static void storageDiskPart(webs_t wp, char_t *path, char_t *query)
 }
 
 #ifdef CONFIG_FTPD
+// FTP setup
+const parameter_fetch_t ftp_server_args[] =
+{
+	{ T("ftp_port"), "FtpPort", 0, T("") },
+	{ T("ftp_rootdir"), "FtpRootDir", 0, T("") },
+	{ T("ftp_idle_timeout"), "FtpIdleTime", 0, T("") },
+	{ NULL, NULL, 0, NULL } // Terminator
+};
 /* goform/storageFtpSrv */
 static void storageFtpSrv(webs_t wp, char_t *path, char_t *query)
 {
-	char_t *ftp, *anonymous;
-	char_t *port, *max_users, *login_timeout, *stay_timeout;
-
-	// fetch from web input
-	ftp = websGetVar(wp, T("ftp_enabled"), T("0"));
-	anonymous = websGetVar(wp, T("ftp_anonymous"), T("0"));
-	port = websGetVar(wp, T("ftp_port"), T(""));
-	max_users = websGetVar(wp, T("ftp_max_users"), T(""));
-	login_timeout = websGetVar(wp, T("ftp_login_timeout"), T(""));
-	stay_timeout = websGetVar(wp, T("ftp_stay_timeout"), T(""));
-
-	// set to nvram
+	char_t *ftp_enable = websGetVar(wp, T("ftp_enabled"), T("0"));
+	if (ftp_enable == NULL)
+		ftp_enable = "0";
+		
 	nvram_init(RT2860_NVRAM);
+	nvram_bufset(RT2860_NVRAM, "RemoteFTP", ftp_enable);
 
-	nvram_bufset(RT2860_NVRAM, "FtpEnabled", ftp);
-	nvram_bufset(RT2860_NVRAM, "FtpAnonymous", anonymous);
-	nvram_bufset(RT2860_NVRAM, "FtpPort", port);
-	nvram_bufset(RT2860_NVRAM, "FtpMaxUsers", max_users);
-	nvram_bufset(RT2860_NVRAM, "FtpLoginTimeout", login_timeout);
-	nvram_bufset(RT2860_NVRAM, "FtpStayTimeout", stay_timeout);
+	if (CHK_IF_DIGIT(ftp_enable, 1) || CHK_IF_DIGIT(ftp_enable, 2))
+		setupParameters(wp, ftp_server_args, 0);
 
-	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
+	
+	//restart some services instead full reload
+	doSystem("service inetd restart");
+	doSystem("service iptables restart");
 
-	// setup device
-	doSystem("storage.sh ftp");
-
-	// debug print
-	websHeader(wp);
-	websWrite(wp, T("<h2>ftp_enabled: %s</h2><br>\n"), ftp);
-	websWrite(wp, T("ftp_anonymous: %s<br>\n"), anonymous);
-	websWrite(wp, T("ftp_port: %s<br>\n"), port);
-	websWrite(wp, T("ftp_max_users: %s<br>\n"), max_users);
-	websWrite(wp, T("ftp_login_timeout: %s<br>\n"), login_timeout);
-	websWrite(wp, T("ftp_stay_timeout: %s<br>\n"), stay_timeout);
-	websFooter(wp);
-	websDone(wp, 200);
+	char_t *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
+	if (submitUrl != NULL)
+		websRedirect(wp, submitUrl);
+	else
+		websDone(wp, 200);
 }
 #endif
 
