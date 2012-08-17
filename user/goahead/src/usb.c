@@ -43,6 +43,10 @@ static void printersrv(webs_t wp, char_t *path, char_t *query);
 #ifdef CONFIG_USB_MODESWITCH
 static void usbmodem(webs_t wp, char_t *path, char_t *query);
 #endif
+#ifdef CONFIG_USER_TRANSMISSION
+static void transmission(webs_t wp, char_t *path, char_t *query);
+#endif
+
 
 #define	LSDIR_INFO		"/tmp/lsdir"
 #define	MOUNT_INFO		"/proc/mounts"
@@ -81,6 +85,9 @@ void formDefineUSB(void) {
 #endif
 #ifdef CONFIG_USB_MODESWITCH
 	websFormDefine(T("usbmodem"), usbmodem);
+#endif
+#ifdef CONFIG_USER_TRANSMISSION
+websFormDefine(T("formTrans"), transmission);
 #endif
 }
 
@@ -655,27 +662,91 @@ const parameter_fetch_t usb_modem_args[] =
 static void usbmodem(webs_t wp, char_t *path, char_t *query)
 {
 	char *submitUrl;
-	nvram_init(RT2860_NVRAM);
+	char_t *submit;
 
-	char_t *modem_enabled = websGetVar(wp, T("modem_enabled"), T("off"));
-	if (CHK_IF_CHECKED(modem_enabled))
-	{
-		nvram_bufset(RT2860_NVRAM, "MODEMENABLED", "1");
-		setupParameters(wp, usb_modem_args, 0);
-	}
-	else
-		nvram_bufset(RT2860_NVRAM, "MODEMENABLED", "0");
-
-	nvram_commit(RT2860_NVRAM);
-	nvram_close(RT2860_NVRAM);	
-	//kill helpers first sigterm second sigkill	
-	doSystem("killall -q W61modemhelper");
-	doSystem("killall -q modemhelper");
-	doSystem("killall -q -SIGKILL W61modemhelper");
-	doSystem("killall -q -SIGKILL modemhelper");
-	doSystem("service modemhelper restart &");
+	submit = websGetVar(wp, T("hiddenButton"), T(""));
 	
+	if (0 == strcmp(submit, "apply"))
+		{
+			char_t *modem_enabled = websGetVar(wp, T("modem_enabled"), T("0"));
+			if (modem_enabled == NULL)
+				modem_enabled = "0";
+		
+			nvram_init(RT2860_NVRAM);
+			nvram_bufset(RT2860_NVRAM, "MODEMENABLED", modem_enabled);
+
+			if (CHK_IF_DIGIT(modem_enabled, 1))
+				setupParameters(wp, usb_modem_args, 0);
+
+			nvram_close(RT2860_NVRAM);
+		}
+	else if (0 == strcmp(submit, "connect"))
+		{
+			doSystem("service modemhelper start &");
+		}
+	else if (0 == strcmp(submit, "disconnect"))
+		{
+			doSystem("service modemhelper stop &");
+		}
+
 submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
+	if (submitUrl != NULL)
+		websRedirect(wp, submitUrl);
+	else
+		websDone(wp, 200);
+}	
+#endif
+
+#ifdef CONFIG_USER_TRANSMISSION
+
+const parameter_fetch_t transmission_args[] =
+{
+	{ T("transRPCPort"), "TransRPCPort", 0, T("") },
+	{ T("transAccess"), "TransAccess", 0, T("") },
+	{ T("transAuthor"), "TransAuthor", 0, T("") },
+	{ T("transLog"), "TransLogin", 0, T("") },
+	{ T("transPass"), "TransPass", 0, T("") },
+	{ T("transInPort"), "TransInPort", 0, T("") },
+	{ NULL, NULL, 0, NULL } // Terminator
+};
+
+static void transmission(webs_t wp, char_t *path, char_t *query)
+{
+	char *submitUrl;
+	char_t *submit;
+	
+	submit = websGetVar(wp, T("hiddenButton"), T(""));
+	
+	if (0 == strcmp(submit, "apply"))
+		{
+			char_t *trans_enabled = websGetVar(wp, T("TransEnabled"), T("0"));
+			if (trans_enabled == NULL)
+			trans_enabled = "0";
+		
+			nvram_init(RT2860_NVRAM);
+			nvram_bufset(RT2860_NVRAM, "TransmissionEnabled", trans_enabled);
+
+			if (CHK_IF_DIGIT(trans_enabled, 1))
+			setupParameters(wp, transmission_args, 0);
+
+			nvram_close(RT2860_NVRAM);
+			doSystem("service iptables restart");
+			doSystem("service transmission restart");
+		}
+	else if (0 == strcmp(submit, "start"))
+		{
+			doSystem("service transmission start");
+		}
+	else if (0 == strcmp(submit, "stop"))
+		{
+			doSystem("service transmission stop");
+		}	
+	else if (0 == strcmp(submit, "reload"))
+		{
+			doSystem("service transmission reload");
+		}		
+		
+	submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
 	if (submitUrl != NULL)
 		websRedirect(wp, submitUrl);
 	else

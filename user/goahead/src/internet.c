@@ -46,6 +46,7 @@ static int getMediaBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getWebCamBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getPrinterSrvBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getUSBModemBuilt(int eid, webs_t wp, int argc, char_t **argv);
+static int getTransmissionBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getIgmpProxyBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getVPNBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getDnsmasqBuilt(int eid, webs_t wp, int argc, char_t **argv);
@@ -140,6 +141,9 @@ void formDefineInternet(void) {
 	websFormDefine(T("setWan"), setWan);
 	websFormDefine(T("getMyMAC"), getMyMAC);
 	websFormDefine(T("editRouting"), editRouting);
+#ifdef CONFIG_USER_TRANSMISSION
+	websFormDefine(T("getTransmissionBuilt"), getTransmissionBuilt);
+#endif	
 #ifdef CONFIG_USER_ZEBRA
 	websFormDefine(T("dynamicRouting"), dynamicRouting);
 #endif
@@ -964,6 +968,15 @@ static int getPrinterSrvBuilt(int eid, webs_t wp, int argc, char_t **argv)
 static int getUSBModemBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
 #ifdef CONFIG_USB_MODESWITCH
+	return websWrite(wp, T("1"));
+#else
+	return websWrite(wp, T("0"));
+#endif
+}
+
+static int getTransmissionBuilt(int eid, webs_t wp, int argc, char_t **argv)
+{
+#ifdef CONFIG_USER_TRANSMISSION
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));

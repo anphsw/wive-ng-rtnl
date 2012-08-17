@@ -94,6 +94,7 @@ var usbmodemb = '<% getUSBModemBuilt(); %>';
 var syslogb = '<% getSysLogBuilt(); %>';
 var swqos = '<% getSWQoSBuilt(); %>';
 var ad = '<% isAntennaDiversityBuilt(); %>';
+var transb = '<% getTransmissionBuilt(); %>';
 
 a = new dTree('a');
 a.config.useStatusText=true;
@@ -193,10 +194,12 @@ if (usbb == "1")
 		a.add(852, 850, _("treeapp disk"),		"javascript:go('usb/STORAGEdisk_admin.asp');");
 		if (ftpb == "1")
 			a.add(853, 850, _("treeapp ftpsrv"),		"javascript:go('usb/STORAGEftpsrv.asp');");
+		if (transb == "1")
+			a.add(854, 850, _("treeapp transmission"),	"javascript:go('usb/Transmission.asp');");
 		if (smbb == "1")
-			a.add(854, 850, _("treeapp sambasrv"),		"javascript:go('usb/STORAGEsmbsrv.asp');");
+			a.add(855, 850, _("treeapp sambasrv"),		"javascript:go('usb/STORAGEsmbsrv.asp');");
 		if (mediab == "1")
-			a.add(855, 850, _("treeapp mediasrv"),		"javascript:go('usb/USHAREmediasrv.asp');");
+			a.add(856, 850, _("treeapp mediasrv"),		"javascript:go('usb/USHAREmediasrv.asp');");
 	}
 }
 

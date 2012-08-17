@@ -1,1 +1,1 @@
-<% getProcessList("udpxy", "xupnpd", "transmission-daemon", "lld2d", "crond", "snmpd", "igmpproxy", "miniupnpd", "snmpd", "dnsmasq", "cdp-send", "parprouted"); %>
+<% getProcessList("udpxy", "xupnpd", "lld2d", "crond", "snmpd", "igmpproxy", "miniupnpd", "dnsmasq", "cdp-send", "parprouted"); %>

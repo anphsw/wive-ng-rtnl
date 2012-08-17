@@ -35,18 +35,18 @@ function mtuChange(form)
 }
 
 
-function submitClick(form)
+function CheckValue(form)
 {
-	if (form.modem_pass.value.match(/[\s\$]/))
+	if (document.usbmodem.modem_pass.value.match(/[\s\$]/))
 	{
 		alert("Password can not contain spaces or dollar ('$') sign!");
-		form.modem_pass.focus();
+		document.usbmodem.modem_pass.focus();
 		return false;
 	}
-		if (form.modem_user.value.match(/[\s\$]/))
+		if (document.usbmodem.modem_user.value.match(/[\s\$]/))
 		{
 			alert("User name can not contain spaces or dollar ('$') sign!");
-			form.modem_user.focus();
+			document.usbmodem.modem_user.focus();
 			return false;
 		}
 
@@ -84,14 +84,29 @@ function bodyOnLoad(form)
   
 function modemSwitchClick(form)
 {
-	enableElements( [
-		form.modem_type, form.modem_port, form.modem_speed, form.modem_mtu, form.modem_mtu_type, form.modem_user,
+	disableElement( [
+		form.modem_type, form.modemstart, form.modemstop, form.modem_port, form.modem_speed, form.modem_mtu, form.modem_mtu_type, form.modem_user,
         form.modem_pass, form.modem_dialn, form.modem_apn, form.at_enabled, form.mdebug_enabled, form.modem_at1, form.modem_at2,
-		form.modem_at3 ], form.modem_enabled.checked );
+		form.modem_at3 ], form.modem_enabled.value != '1' );
 }
+
+function submit_apply(parm)
+{
+			if (parm == "apply")
+			{
+				if (CheckValue(this.form) != true)
+				{
+					return;
+				}
+			}
+		document.usbmodem.hiddenButton.value = parm;
+		document.usbmodem.submit();
+}
+
+
 function initializeForm(form)
 {
-var wmenabled     	     = '<% getCfgGeneral(1, "MODEMENABLED"); %>';
+var wmenabled     	     = defaultNumber("<% getCfgZero(1, "MODEMENABLED"); %>", '0');
 var watmenabled			 = '<% getCfgGeneral(1, "MODEMATENABLED"); %>';
 var wmdebug				 = '<% getCfgGeneral(1, "MODEMDEBUG"); %>';
 form.modem_type.value    = '<% getCfgGeneral(1, "MODEMTYPE"); %>';
@@ -106,7 +121,7 @@ form.modem_at1.value     = '<% getCfgGeneral(1, "MODEMAT1"); %>';
 form.modem_at2.value     = '<% getCfgGeneral(1, "MODEMAT2"); %>';
 form.modem_at3.value     = '<% getCfgGeneral(1, "MODEMAT3"); %>';
 
-	form.modem_enabled.checked = (wmenabled == '1');
+	form.modem_enabled.value = (wmenabled != '1') ? '0' : '1';
 	form.at_enabled.checked = (watmenabled == '1');
 	form.mdebug_enabled.checked = (wmdebug == '1');
 	
@@ -123,14 +138,20 @@ form.modem_at3.value     = '<% getCfgGeneral(1, "MODEMAT3"); %>';
 <hr>
 
 <form action="/goform/usbmodem" method="POST" name="usbmodem">
+<input type=hidden name="hiddenButton" value="">
 <table class="form">
 	<tr>
 		<td class="title" colspan="2">USB Modem configuration</td>
 	</tr>
 	<tr id="modem_enable_row">
-	    <td class="head">
-		<input name="modem_enabled" onclick="modemSwitchClick(this.form)" type="checkbox">&nbsp;Enable USB Modem</td>
-        </tr>
+	    <td class="head">USB Modem</td>
+		<td><select name="modem_enabled" class="half" onchange="modemSwitchClick(this.form);">
+			<option value="0">Disable</option>
+			<option value="1">Enable</option>
+		</select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		<input type="button" class="normal" value="Connect" name="modemstart" onClick="submit_apply('connect')">
+		<input type="button" class="normal" value="Disconnect" name="modemstop" onClick="submit_apply('disconnect')"></td>
+    </tr>
 	<tr id="modem_type_row">
   		<td class="head">Modem type:</td>
 		<td>
@@ -143,7 +164,7 @@ form.modem_at3.value     = '<% getCfgGeneral(1, "MODEMAT3"); %>';
 	<tr id="modem_port_row">
 	        <td class="head">Modem port:</td>
 		<td>
-		<select name="modem_port" class="mid">
+		<select name="modem_port" class="half">
 				<option value="AUTO">AUTO</option>
 				<option value="ttyUSB0">ttyUSB0</option>
 				<option value="ttyUSB1">ttyUSB1</option>
@@ -161,7 +182,7 @@ form.modem_at3.value     = '<% getCfgGeneral(1, "MODEMAT3"); %>';
 	</tr>
 	<tr id ="modem_speed_row">
 	        <td class="head">Modem port speed:</td>
-	        <td><select name="modem_speed" class="mid">
+	        <td><select name="modem_speed" class="half">
 				<option value="AUTO">AUTO</option>
 				<option value="57600">57600</option>
 				<option value="115200">115200</option>
@@ -207,25 +228,21 @@ form.modem_at3.value     = '<% getCfgGeneral(1, "MODEMAT3"); %>';
 	
 <table class="form">
 	<tr>
-		<td colspan="2" class="title">Additional options</td>
+		<td class="title" colspan="2">Additional options</th>
 	</tr>	
 	<tr id="at_anable_row">
-		<td class="head" width="50%">
-		<input name="mdebug_enabled" type="checkbox">&nbsp;Allow debug</td>
-		<td class="head" width="50%">
-		<input name="at_enabled" type="checkbox">&nbsp;Enable AT commands</td>
+		<td class="head" width="50%"><input name="at_enabled" type="checkbox">Enable AT commands</td>
+		<td class="head" width="50%"><input name="mdebug_enabled" type="checkbox">Allow debug</td>
 	</tr>
 	<tr id="modem AT1_row">
-		<td class="head">Modem AT commands</td>
-		<td><input name="modem_at1" size="40" maxlength="60" type="text"></td>
+		<td><input name="modem_at1" size="40" maxlength="40" type="text"></td>
+		<td rowspan=3 width="50%"></td>
 	</tr>
 	<tr id="modem AT2_row">
-		<td class="head"</td>
-		<td><input name="modem_at2" size="40" maxlength="60" type="text"></td>
+		<td width="50%"><input name="modem_at2" size="40" maxlength="40" type="text"></td>
 	</tr>
 	<tr id="modem AT3_row">
-		<td class="head"></td>
-		<td><input name="modem_at3" size="40" maxlength="60" type="text"></td>
+		<td width="50%"><input name="modem_at3" size="40" maxlength="40" type="text"></td>
 	</tr>
 </table>
 
@@ -233,10 +250,11 @@ form.modem_at3.value     = '<% getCfgGeneral(1, "MODEMAT3"); %>';
 	<tr>
 		<td>
 			<input value="/usb/USBmodem.asp" name="submit-url" type="hidden">
-			<input class="normal" value="Apply and connect" name="Apply" type="submit" onclick="return submitClick(this.form);" >&nbsp;&nbsp;
-			<input class="normal" value="Cancel" name="Cancel" onClick="window.location.reload()" type="button">
+			<input class="normal" value="Apply" name="Apply" type="button" onClick="submit_apply('apply')" >&nbsp;&nbsp;
+			<input class="normal" value="Cancel" name="Cancel" onClick="window.location.reload()" type="button">&nbsp;&nbsp;
 		</td>
 	</tr>
+
 
 </table>
 </form>

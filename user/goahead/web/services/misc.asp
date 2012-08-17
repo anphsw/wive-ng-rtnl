@@ -110,7 +110,6 @@ function initValue()
 	var lltd = "<% getCfgZero(1, "lltdEnabled"); %>";
 	var wpf = "<% getCfgGeneral(1, "WANPingFilter"); %>";
 	var arp_pt = "<% getCfgGeneral(1, "parproutedEnabled"); %>";
-	var transmb = "<% getTransmissionBuilt(); %>";
 	var cdpb = "<% getCdpBuilt(); %>";
 	var lltdb = "<% getLltdBuilt(); %>";
 	var igmpb = "<% getIgmpProxyBuilt(); %>";
@@ -123,7 +122,6 @@ function initValue()
 	var krnl_ipv6 = "<% getCfgZero(1, "ipv6_pass"); %>";
 	var pinger = "<% getCfgZero(1, "pinger_check_on"); %>";
 	var telnetd_built = "<% getTelnetdBuilt(); %>";
-	var ftpd_built = "<% getFTPDBuilt(); %>";
 	var store_ttl = '<% getCfgGeneral(1, "store_ttl"); %>';
 	var store_ttl_mcast = '<% getCfgGeneral(1, "store_ttl_mcast"); %>';
 	var mss_pmtu = '<% getCfgGeneral(1, "mss_use_pmtu"); %>';
@@ -159,10 +157,6 @@ function initValue()
 		form.rmtTelnet.value = defaultNumber("<% getCfgGeneral(1, "RemoteTelnet"); %>", "0");
 	else
 		displayElement('rmt_telnetd', false);
-/*	if (ftpd_built == '1')
-		form.rmtFTP.value = defaultNumber("<% getCfgGeneral(1, "RemoteFTP"); %>", "0");
-	else */
-		displayElement('rmt_ftpd', false);
 
 	form.udpxyMode.value = defaultNumber("<% getCfgGeneral(1, "UDPXYMode"); %>", "0");
 	form.udpxyPort.value = defaultNumber("<% getCfgGeneral(1, "UDPXYPort"); %>", "81");
@@ -173,7 +167,6 @@ function initValue()
 	form.CrondEnable.value = defaultNumber("<% getCfgGeneral(1, "CrondEnable"); %>", "0");
 	form.ForceRenewDHCP.value = defaultNumber("<% getCfgGeneral(1, "ForceRenewDHCP"); %>", "1");
 	form.SnmpdEnabled.value = defaultNumber("<% getCfgGeneral(1, "snmpd"); %>", "0");
-	form.transmission.value = defaultNumber("<% getCfgGeneral(1, "TransmissionEnabled"); %>", "0");
 	form.ttlStore.value = (store_ttl == '1') ? '1' : '0';
 	form.ttlMcastStore.value = (store_ttl_mcast == '1') ? '1' : '0';
 
@@ -185,8 +178,7 @@ function initValue()
 	displayElement('radvd', radvdb == '1');
 	displayElement('pppoerelay', pppoeb == '1');
 	displayElement('dnsproxy', dnsp == '1');
-	displayElement('transmission', transmb == '1');
-	
+		
 	// Set-up NAT fastpath
 	var qos_en = defaultNumber("<% getCfgGeneral(1, "QoSEnable"); %>", "0");
 	if (qos_en == '0')
@@ -291,7 +283,6 @@ function displayServiceHandler(response)
 	var services = [
 		// turned_on, row_id, daemon_id, url-finish, about
 		[ '<% getCfgGeneral(1, "UDPXYMode"); %>', 'udpxy', 'udpxy', '<% getCfgGeneral(1, "UDPXYPort"); %>/status/', 'udpxy.sourceforge.net/' ],
-		[ '<% getCfgGeneral(1, "TransmissionEnabled"); %>', 'transmission', 'transmission-daemon', '9091/', 'www.transmissionbt.com/' ],
 		[ '<% getCfgGeneral(1, "xupnpd"); %>', 'xupnpd', 'xupnpd', '4044/', 'xupnpd.org/' ],
 		[ '<% getCfgGeneral(1, "CrondEnable"); %>', 'crond', 'crond', null, 'crontab.org/' ],
 		[ '<% getCfgGeneral(1, "snmpd"); %>', 'snmpd', 'snmpd', null, 'www.net-snmp.org/docs/man/snmpd.html' ],
@@ -440,15 +431,6 @@ function displayServiceStatus()
 <td class="head">Remote Telnet</td>
 <td colspan="4">
 	<select name="rmtTelnet" class="half">
-		<option value="0">Disable</option>
-		<option value="1">Enable</option>
-	</select>
-</td>
-</tr>
-<tr id="rmt_ftpd">
-<td class="head">Remote FTP</td>
-<td colspan="4">
-	<select name="rmtFTP" class="half">
 		<option value="0">Disable</option>
 		<option value="1">Enable</option>
 	</select>
@@ -615,17 +597,6 @@ function displayServiceStatus()
 <td colspan="4">
 	<input name="udpxyPort" class="half">
 </td>
-</tr>
-
-<tr id="transmission">
-<td class="head">BitTorrent daemon</td>
-<td>
-	<select name="transmission" class="half">
-		<option value="0">Disable</option>
-		<option value="1">Enable</option>
-	</select>
-</td>
-<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
 </tr>
 
 <tr id="crond">

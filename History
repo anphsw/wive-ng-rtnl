@@ -1198,6 +1198,8 @@
 64) xupnpd: up to revision 310.<br>
 65) miniupnpd: up to 1.7.20120711 version.<br>
 66) add libnfnetlink lib need for new miniupnpd.<br>
+67) some webui fixes (transmission/ftp).<br>
+68) fix iptables logic for ftp port change support.<br>
 
 
 <br><br>

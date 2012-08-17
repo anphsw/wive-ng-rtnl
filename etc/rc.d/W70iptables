@@ -91,7 +91,7 @@ start() {
 	fi
 	if [ "$RemoteTelnet" != "0" ]; then
 	    $LOG "telnet limit"
-    	    iptables -A servicelimit $STATE_NEW -p tcp --dport 22 $CONNLIMIT 4 -j REJECT
+    	    iptables -A servicelimit $STATE_NEW -p tcp --dport 23 $CONNLIMIT 4 -j REJECT
 	    if [ "$RemoteTelnet" = "1" ]; then
 		if [ "$OperationMode" != "0" ] && [ "$ApCliBridgeOnly" != "1" ]; then
     		    iptables -A servicelimit -i $wan_if $STATE_NEW -p tcp --dport 23 -j DROP
@@ -198,9 +198,26 @@ start() {
 	if [ "$TransmissionEnabled" = "1" ]; then
 	    $LOG "transmission"
 	    # RPC
-	    iptables -A servicelimit -i $lan_if -p tcp --dport 9091 -j ACCEPT
-	    # Incoming peers
-	    iptables -A servicelimit -p tcp --dport 51413 -j ACCEPT
+		if [ "$TransAccess" = "1" ]; then
+		if [ "$OperationMode" != "0" ] && [ "$ApCliBridgeOnly" != "1" ]; then
+    		    iptables -A servicelimit -i $wan_if $STATE_NEW -p tcp --dport $TransRPCPort -j DROP
+		    if [ "$PPP_CONNECT" = "on" ]; then
+    			iptables -A servicelimit -i ppp+ $STATE_NEW -p tcp --dport $TransRPCPort -j DROP
+		    fi
+		fi
+			iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport $TransRPCPort -j ACCEPT
+		if [ "$Lan2Enabled" = "1" ]; then
+    		iptables -A servicelimit -i $lan2_if $STATE_NEW -p tcp --dport $TransRPCPort -j ACCEPT
+	    fi
+		elif [ "$TransAccess" = "2" ]; then
+    		iptables -A servicelimit $STATE_NEW -p tcp --dport $TransRPCPort -j ACCEPT
+	    fi
+		
+		# Incoming peers
+	    iptables -A servicelimit -p tcp --dport $TransInPort -j ACCEPT
+	
+	    		
+	    
 	fi
 	if [ "$WANPingFilter" = "0" ]; then
 	    if [ "$OperationMode" != "0" ] && [ "$ApCliBridgeOnly" != "1" ]; then
@@ -434,7 +451,8 @@ get_param() {
     eval `nvram_buf_get 2860 lan_ipaddr lan_netmask Lan2Enabled lan2_ipaddr lan2_netmask mss_use_pmtu \
 	    natEnabled use_snat PortForwardEnable DMZEnable DMZIPAddress DMZNATLoopback DefaultFirewallPolicy \
 	    IPPortFilterEnable WANPingFilter RemoteSSH RemoteFTP RemoteTelnet RemoteManagement RemoteManagementPort \
-	    dhcpEnabled ipt_account upnpEnabled igmpEnabled xupnpd UDPXYPort SmbEnabled TransmissionEnabled snmpd FtpPort\
+	    dhcpEnabled ipt_account upnpEnabled igmpEnabled xupnpd UDPXYPort SmbEnabled \
+		TransmissionEnabled TransRPCPort TransInPort TransAccess snmpd FtpPort\
 	    parproutedEnabled PrinterSrvEnabled chilli_net vpnType vpnNAT l2tp_srv_enabled MODEMENABLED store_ttl store_ttl_mcast`
 
     # if ppp enabled and not pure pppoe mode (type6 is lanauth not real ppp)
