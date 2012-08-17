@@ -1200,7 +1200,7 @@
 66) add libnfnetlink lib need for new miniupnpd.<br>
 67) some webui fixes (transmission/ftp).<br>
 68) fix iptables logic for ftp port change support.<br>
-
+69) fix detect some usb devices.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
