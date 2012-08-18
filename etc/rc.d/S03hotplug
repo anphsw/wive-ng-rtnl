@@ -16,14 +16,11 @@ start() {
 	    # @ Run after creating the device.
 	    # $ Run before removing the device.
 	    # * Run both after creating and before removing the device.\n" > /etc/mdev.conf
-	# usb devices
 	if [ -d /proc/bus/usb ]; then
-
-	    printf "
-	    usbdev([0-9]+).([0-9])    0:0     0660  =bus/usb/00%1/00%2
-	    usbdev([0-9]+).([0-9]{2}) 0:0     0660  =bus/usb/00%1/0%2
-	    usbdev([0-9]+).([0-9]{3}) 0:0     0660  =bus/usb/00%1/%2\n" >> /etc/mdev.conf
-
+		echo "# usb device" >> /etc/mdev.conf
+		echo "usbdev([0-9]+).([0-9])    0:0     0660  =bus/usb/00%1/00%2" >> /etc/mdev.conf
+		echo "usbdev([0-9]+).([0-9]{2}) 0:0     0660  =bus/usb/00%1/0%2" >> /etc/mdev.conf
+		echo "usbdev([0-9]+).([0-9]{3}) 0:0     0660  =bus/usb/00%1/%2" >> /etc/mdev.conf 
 	    if [ -f /etc/scripts/automount.sh ] && [ -f /bin/blkid ]; then
 		echo "sd[a-z][1-9] 0:0 0660 */etc/scripts/automount.sh" >> /etc/mdev.conf
 	    fi
