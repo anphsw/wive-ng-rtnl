@@ -85,9 +85,9 @@ case "$1" in
 
 	# Check subnets
 	lan_net=`ipcalc "$lan_ipaddr" "$lan_netmask" -ns | cut -f 2- -d =`
-	wan_net=`ipcalc "$NEW_IP "$NETMASK" -ns | cut -f 2- -d =`
+	wan_net=`ipcalc "$NEW_IP" "$NETMASK" -ns | cut -f 2- -d =`
 	if [ "$NEW_IP" = "$lan_ipaddr" ] || [ "$lan_net" = "$wan_net" ]; then
-	    $LOG "ERROR: WAN ip in lan subnet. Need change LAN_IP adress!!!"
+	    $LOG "ERROR: WAN ip in lan subnet. Need change LAN_IP address!!!"
 	fi
 
 	# MTU is default for all session time.

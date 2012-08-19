@@ -76,7 +76,7 @@ nvramreset() {
 }
 
 burnrf() {
-    echo "Erase wifi Factory part and write defults"
+    echo "Erase wifi Factory part and write defaults"
     mtd_write erase Factory
     mtd_write write $RWCONFIGS Factory
 }
