@@ -34,7 +34,6 @@
 #define HOSTSFILE "/etc/hosts"
 #define ETHERSFILE "/etc/ethers"
 #define RESOLVFILE "/etc/resolv.conf"
-#define RUNFILE "/var/run/dnsmasq.pid"
 #define LEASEFILE "/var/lib/misc/dnsmasq.leases"
 #define CONFFILE "/etc/dnsmasq.conf"
 #define DEFLEASE 3600 /* default lease time, 1 hour */
@@ -53,7 +52,7 @@
 #define EDNS0_OPTION_MAC 5 /* dyndns.org temporary assignment */
 
 /* DBUS interface specifics */
-#define DNSMASQ_SERVICE "uk.org.thekelleys.dnsmasq"
+#define DNSMASQ_SERVICE "uk.org.thekelleys.dnsmasq" /* Default - may be overridden by config */
 #define DNSMASQ_PATH "/uk/org/thekelleys/dnsmasq"
 
 /* Follows system specific switches. If you run on a 
@@ -136,7 +135,13 @@ NOTES:
 #undef HAVE_SCRIPT
 #endif
 
-
+#ifndef RUNFILE
+#   if defined(__ANDROID__)
+#      define RUNFILE "/data/dnsmasq.pid"
+#    else
+#      define RUNFILE "/var/run/dnsmasq.pid"
+#    endif
+#endif
 
 /* platform dependent options. */
 
