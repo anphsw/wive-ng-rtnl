@@ -1201,6 +1201,8 @@
 67) some webui fixes (transmission/ftp).<br>
 68) fix iptables logic for ftp port change support.<br>
 69) fix detect some usb devices.<br>
+70) fix iptables rules reapply at connect/disconnect 3G modem.<br>
+71) fix autocommect in 3g mode.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>

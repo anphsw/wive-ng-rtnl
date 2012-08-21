@@ -96,33 +96,35 @@ eval `nvram_buf_get 2860 lan_ipaddr lan_netmask Lan2Enabled lan2_ipaddr lan2_net
 	    service resolv start
 	fi
     fi
+    
+    PPP_FIREWALL="/tmp/ppp_firewall_${PPP_IFACE}"
 
     #########################GENERATE VPN NETFILTER SCRIPT########################################################################
-    echo "iptables -A FORWARD -o $PPP_IFACE -j ACCEPT" > /etc/ppp_firewall
+    echo "iptables -A FORWARD -o $PPP_IFACE -j ACCEPT" > $PPP_FIREWALL
     #NAT in vpn
     if [ "$vpnNAT" = "on" ] && [ "$OperationMode" != "0" ] && [ "$ApCliBridgeOnly" != "1" ]; then
 	if  [ "$use_snat" = "1" ] && [ "$PPP_LOCAL" != "" ] ; then
-	    echo "iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $lan_ipaddr/$lan_netmask -j SNAT --to-source $PPP_LOCAL" >> /etc/ppp_firewall
+	    echo "iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $lan_ipaddr/$lan_netmask -j SNAT --to-source $PPP_LOCAL" >> $PPP_FIREWALL
 	    if [ "$OperationMode" = 4 ]; then
-		echo "iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $chilli_net -j SNAT --to-source $PPP_LOCAL" >> /etc/ppp_firewall
+		echo "iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $chilli_net -j SNAT --to-source $PPP_LOCAL" >> $PPP_FIREWALL
 	    fi
 	    if [ "$Lan2Enabled" = "1" ]; then
-		echo "iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $lan2_ipaddr/$lan2_netmask -j SNAT --to-source $PPP_LOCAL" >> /etc/ppp_firewall
+		echo "iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $lan2_ipaddr/$lan2_netmask -j SNAT --to-source $PPP_LOCAL" >> $PPP_FIREWALL
 	    fi
 	else
-	    echo "iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $lan_ipaddr/$lan_netmask -j MASQUERADE" >> /etc/ppp_firewall
+	    echo "iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $lan_ipaddr/$lan_netmask -j MASQUERADE" >> $PPP_FIREWALL
 	    if [ "$OperationMode" = 4 ]; then
-		echo "iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $chilli_net -j MASQUERADE" >> /etc/ppp_firewall
+		echo "iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $chilli_net -j MASQUERADE" >> $PPP_FIREWALL
 	    fi
 	    if [ "$Lan2Enabled" = "1" ]; then
-		echo "iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE" >> /etc/ppp_firewall
+		echo "iptables -t nat -A POSTROUTING -o $PPP_IFACE -s $lan2_ipaddr/$lan2_netmask -j MASQUERADE" >> $PPP_FIREWALL
 	    fi
 	fi
-	if [ -f /etc/portforward_vpn ] && [ -f /etc/ppp_firewall ] && [ "$PortForwardEnable" = "1" ]; then
-	    echo "/etc/portforward_vpn A $PPP_IFACE $PPP_LOCAL" >> /etc/ppp_firewall
+	if [ -f /etc/portforward_vpn ] && [ -f $PPP_FIREWALL ] && [ "$PortForwardEnable" = "1" ]; then
+	    echo "/etc/portforward_vpn A $PPP_IFACE $PPP_LOCAL" >> $PPP_FIREWALL
         fi
     fi
-    chmod 755 /etc/ppp_firewall
+    chmod 755 $PPP_FIREWALL
 
     #########################CALL SERVICE HELPER##################################################################################
 

@@ -1,18 +1,39 @@
 #!/bin/sh
 
-# wait to start web and run from goahead code
-. /etc/scripts/web_wait.sh
-web_wait
+if [ -e /tmp/modem_helper ]; then
+    echo "Modemhelper already started!"
+    exit 1
+fi
+
+touch /tmp/modem_helper
+
+if [ "$1" != "modemremove" ]; then
+
+    # wait to start web and run from goahead code
+    . /etc/scripts/web_wait.sh
+    web_wait
+    sleep 5
+fi
+
 
 # constants
 LOG="logger -t modem helper"
 
 # default interface name
 MDEFIFN="ppp_modem"
+RETURN=0
 
 start() {
     # get local params
     get_param
+    
+    if [ -f /var/run/ppp-$MDEFIFN.pid -o -f /var/run/$MDEFIFN.pid ]; then
+        rm -f /tmp/modem_helper
+	echo "Modemhelper already started!"
+	RETURN=1
+	return
+    fi
+
     if [ "$MODEMENABLED" = "1" ]; then
       $LOG "Start Modemhelper"
 	# generate new chat scripts
@@ -23,7 +44,7 @@ start() {
 	ABORT 'NO CARRIER'
 	ABORT 'ERROR'
 	REPORT 'CONNECT'
-	'' 'ATZ'" >> $PPPDIR/peers/chat
+	'' 'ATZ'" > $PPPDIR/peers/chat
 	if [ "$MODEMATENABLED" = "1" ]; then
 	if [ "$MODEMAT1" != "" ]; then
         echo "	'' '$MODEMAT1'" >> $PPPDIR/peers/chat
@@ -71,6 +92,7 @@ start() {
 	echo "	debug
 	$MODEMPORT
 	$MODEMSPEED
+	linkname $MDEFIFN
 	crtscts
 	noipdefault
 	lock
@@ -96,20 +118,26 @@ start() {
 }
 
 stop() {
- $LOG "Stop Modemhelper"
+    $LOG "Stopping Modemhelper"
     # first send HUP for terminate connections and try some times
     # second send TERM for exit pppd process
     # if process not terminated send KILL
     # vpn client always use $vpn_if
-    if [ -f /var/run/$MDEFIFN.pid ]; then
-	pid=`cat /var/run/$MDEFIFN.pid`
-	if [ "$pid" != "" ]; then
-	    # close connection
-	    kill -SIGHUP "$pid"
-	fi
+    if [ -f /var/run/ppp-$MDEFIFN.pid ]; then
+	pid=`grep '^[0-9]\{1,\}$' /var/run/ppp-$MDEFIFN.pid`
+    else
+        pid=`ps w| awk '/pppd call dialup.*ppp_modem/ && !/awk/ { print $1; }'`
+    fi
+
+    if [ "$pid" != "" ]; then
+        # close connection
+	if [ "$1" != "modemremove" ]; then
+           kill -SIGHUP "$pid"
+        fi
+
 	# terminate pppd
 	count=0
-	while kill "$pid" > /dev/null 2>&1; do
+        while kill -0 $pid  > /dev/null 2>&1; do
 	    if [ "$count" = "2" ]; then
 		kill -SIGKILL "$pid"  > /dev/null 2>&1
 		count=0
@@ -118,9 +146,10 @@ stop() {
 	    count="$(($count+1))"
 	    sleep 2
 	done
+	rm -f /var/run/ppp-$MDEFIFN.pid
 	rm -f /var/run/$MDEFIFN.pid
-    fi
 	rm -f /etc/ppp/peers/chat
+    fi
 }
 
 get_param() {
@@ -137,8 +166,8 @@ get_param() {
 	MODEMSPEED=""
     fi
     if [ "$MODEMMTU" = "" ] || [ "$MODEMMTU" = "AUTO" ]; then
-        MODEMMRU=""
-        MODEMMTU=""
+        MODEMMRU="mru 1492"
+        MODEMMTU="mtu 1492"
     else
         MODEMMRU="mru $MODEMMTU"
         MODEMMTU="mtu $MODEMMTU"
@@ -173,8 +202,15 @@ case "$1" in
 	    stop
 	    start
 	    ;;
+	
+	modemremove)
+	    stop
+	    ;;
 
 	*)
 	    echo $"Usage: $0 {start|stop|restart}"
-	    exit 1
+	    RETURN=1
 esac
+
+rm -f /tmp/modem_helper
+exit $RETURN

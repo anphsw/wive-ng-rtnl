@@ -1,5 +1,14 @@
 #!/bin/sh
 
+while [ -e /tmp/iptables_runing ]; do
+    # Sleep until file does exists/is created
+    sleep 1
+done
+
+touch /tmp/iptables_runing
+
+RETURN=0
+
 #wait to start web and run from goahead code
 . /etc/scripts/web_wait.sh
 web_wait
@@ -366,9 +375,14 @@ start() {
 	    ###########################################################
 	fi
 ############################################VPNRULES#######################################
-	if [ -f /etc/ppp_firewall ] && [ "$vpnEnabled" = "on" ]; then
+	if [ "$PPP_CONNECT" = "on" ]; then
 	    $LOG "Call to add VPN netfilter rules."
-	    /etc/ppp_firewall
+	    PPPIFLIST=`ip addr list | awk '/[0-9].*\: ppp.*/ { sub (":","",$2); print $2; }'`
+	    for i in $PPPIFLIST; do
+		if [ -e /tmp/ppp_firewall_$i ]; then
+		    eval "/tmp/ppp_firewall_$i"
+		fi
+	    done
 	fi
 ############################################OTHERS########################################
 	if [ "$natEnabled" = "1" ] || [ "$vpnNAT" != "off" ]; then
@@ -566,5 +580,8 @@ case "$1" in
 
         *)
             echo $"Usage: $0 {start|stop|restart}"
-            exit 1
+            RETURN=1
 esac
+
+rm -f /tmp/iptables_runing
+exit $RETURN
