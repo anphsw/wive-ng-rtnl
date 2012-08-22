@@ -42,6 +42,7 @@ static void printersrv(webs_t wp, char_t *path, char_t *query);
 #endif
 #ifdef CONFIG_USB_MODESWITCH
 static void usbmodem(webs_t wp, char_t *path, char_t *query);
+static int modemShowStatus(int eid, webs_t wp, int argc, char_t **argv);
 #endif
 #ifdef CONFIG_USER_TRANSMISSION
 static void transmission(webs_t wp, char_t *path, char_t *query);
@@ -85,6 +86,7 @@ void formDefineUSB(void) {
 #endif
 #ifdef CONFIG_USB_MODESWITCH
 	websFormDefine(T("usbmodem"), usbmodem);
+	websAspDefine(T("modemShowStatus"), modemShowStatus);
 #endif
 #ifdef CONFIG_USER_TRANSMISSION
 websFormDefine(T("formTrans"), transmission);
@@ -694,7 +696,90 @@ submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
 		websRedirect(wp, submitUrl);
 	else
 		websDone(wp, 200);
-}	
+}
+
+/*** USB modem statuses ***/
+typedef struct modem_status_t
+{
+	const char_t *status;
+	long          color;
+} modem_status_t;
+
+/*** Modem statuses ***/
+const modem_status_t modem_statuses[] =
+{
+
+	{ "disabled",     0x808080        },
+	{ "offline",      0xff0000        },
+//	{ "connecting",   0xff8000        },
+	{ "online",       0x00ff00        }
+};
+/*** Show Modem Connect status ***/
+static int modemShowStatus(int eid, webs_t wp, int argc, char_t **argv)
+{
+	int status = 0; // Status is 'disabled'
+	const modem_status_t *st_table = modem_statuses;
+
+	// Get value
+	char *modem_enabled = nvram_get(RT2860_NVRAM, "MODEMENABLED");
+	
+	// Do not perform other checks if modem is turned off
+	if (strcmp(modem_enabled, "1")==0)
+	{
+
+			// Status is at least 'offline' now
+			status++;
+
+			// Try to find pppd
+			int found = procps_count("pppd");
+			
+			if (found>0)
+			{
+				// Now status is at least 'connecting'
+				//status++;
+
+				// Try to search for 'ppp_modem' device
+				FILE * fd = fopen(_PATH_PROCNET_DEV, "r");
+
+				if (fd != NULL)
+				{
+					//int ppp_id;
+					char_t line[256];
+
+					// Read all ifaces and check match
+					while (fgets(line, 255, fd)!=NULL)
+					{
+						if(strstr(line,"ppp_modem")!=NULL)
+						{
+							status++; // Status is set to 'connected'
+							break; // Do not search more
+						}
+					}
+					fclose(fd);
+				}
+				else
+				{
+					fprintf(stderr, "Warning: cannot open %s (%s).\n",
+						_PATH_PROCNET_DEV, strerror(errno));
+				}
+			}
+			else if (found<0)
+			{
+				fprintf(stderr, "Warning: cannot serach process 'pppd': %s\n",
+						strerror(-found));
+			}
+	}
+
+	// Output connection status
+	const modem_status_t *st = &st_table[status];
+	websWrite(
+		wp,
+		T("<b>Status: <font color=\"#%06x\">%s</font></b>\n"),
+		st->color, st->status
+	);
+
+	return 0;
+}
 #endif
 
 #ifdef CONFIG_USER_TRANSMISSION
