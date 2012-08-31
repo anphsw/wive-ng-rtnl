@@ -32,7 +32,7 @@ eval `nvram_buf_get 2860 OperationMode wanConnectionMode wan_ipaddr wan_static_d
 	dnsPEnabled UDPXYMode igmpEnabled \
 	vpnEnabled vpnPurePPPOE vpnType \
 	IPv6_Enable QoSEnable simple_qos \
-	ApCliBridgeOnly`
+	ApCliBridgeOnly MODEMENABLED`
 
 # LAN interface name -> $lan_if
 getLanIfName() {
@@ -102,7 +102,7 @@ getWanIfName() {
 	    wan_if="$phys_wan_if"
     fi
     # upnp wan name
-    if [ "$vpnEnabled" = "on" ]; then
+    if [ "$vpnEnabled" = "on" -o "$MODEMENABLED" = "1" ]; then
 	get_ppp_wan_if=`ls /proc/sys/net/ipv4/conf/ | grep ppp | tail -q -n1`
 	if [ "$get_ppp_wan_if" != "" ]; then
     	    real_wan_if="$get_ppp_wan_if"

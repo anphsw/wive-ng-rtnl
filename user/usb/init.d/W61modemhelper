@@ -7,15 +7,6 @@ fi
 
 touch /tmp/modem_helper
 
-if [ "$1" != "modemremove" ]; then
-
-    # wait to start web and run from goahead code
-    . /etc/scripts/web_wait.sh
-    web_wait
-    sleep 5
-fi
-
-
 # constants
 LOG="logger -t modem helper"
 
@@ -26,7 +17,7 @@ RETURN=0
 start() {
     # get local params
     get_param
-    
+
     if [ -f /var/run/ppp-$MDEFIFN.pid -o -f /var/run/$MDEFIFN.pid ]; then
         rm -f /tmp/modem_helper
 	echo "Modemhelper already started!"
@@ -35,7 +26,15 @@ start() {
     fi
 
     if [ "$MODEMENABLED" = "1" ]; then
-      $LOG "Start Modemhelper"
+        
+        while [ ! -e  /var/run/goahead.pid ]; do
+	    # Sleep until file does exists/is created
+	    sleep 1
+	done
+
+	sleep 15
+
+        $LOG "Start Modemhelper"
 	# generate new chat scripts
 	if [ "$MODEMTYPE" = "0" ]; then
 	    $LOG "Prepare chat-file for WCDMA/UMTS/GPRS modems"
@@ -131,10 +130,8 @@ stop() {
 
     if [ "$pid" != "" ]; then
         # close connection
-	if [ "$1" != "modemremove" ]; then
-           kill -SIGHUP "$pid"
-        fi
-
+        kill -SIGHUP "$pid"
+	
 	# terminate pppd
 	count=0
         while kill -0 $pid  > /dev/null 2>&1; do
@@ -203,10 +200,6 @@ case "$1" in
 	    start
 	    ;;
 	
-	modemremove)
-	    stop
-	    ;;
-
 	*)
 	    echo $"Usage: $0 {start|stop|restart}"
 	    RETURN=1

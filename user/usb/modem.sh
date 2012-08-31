@@ -10,14 +10,14 @@ LOG="logger -t 3G"
 
 symlink_modem() {
     if [ ! -e /dev/modem ]; then
-	ln -s /dev/$MDEV /dev/modem
+	ln -fs /dev/$MDEV /dev/modem
 	MODEMFINDED=1
     fi
 }
 
 symlink_pcui() {
     if [ ! -e /dev/pcui ]; then
-	ln -s /dev/$MDEV /dev/pcui
+	ln -fs /dev/$MDEV /dev/pcui
     fi
 }
 
@@ -95,6 +95,10 @@ if [ ! -e /etc/modems.conf ]; then
     create_conf
 fi
 
+if [ -z "$ACTION" ]; then
+    ACTION="add"
+fi
+
 if [ "$ACTION" = "add" -a ! -e "/dev/modem" ]; then
     for path in $(find /sys/devices -name "$MDEV" | sort -r 2>/dev/null); do
         DEVPATH=${path#/sys}
@@ -125,7 +129,7 @@ if [ "$ACTION" = "add" -a ! -e "/dev/modem" ]; then
 	$LOG "Modem added. Starting helper service -$MDEV-"
 	service modemhelper start
     fi
-else	
+elif [ "$ACTION" = "remove" ]; then
 	if [ -e "/dev/modem" ]; then
 	    DEVMODEMTTY=`ls -l  /dev/modem | cut -f 2 -d ">" | sed "s/ \/dev\///"`
 	fi
@@ -134,8 +138,11 @@ else
 	    DEVPCUITTY=`ls -l  /dev/pcui | cut -f 2 -d ">" | sed "s/ \/dev\///"`
 	fi
 
-	
-	PPPDTTY=`cat $OPTFILE | grep $MDEV | sed 's/^[ \t]*//;s/[ \t]*$//' `
+	if [ -e $OPTFILE ]; then
+	    PPPDTTY=`cat $OPTFILE | grep $MDEV | sed 's/^[ \t]*//;s/[ \t]*$//' `
+	else
+	    PPPDTTY=''
+	fi
 
 	if [ "$DEVPCUITTY" = "$MDEV" ]; then
 	    $LOG "Modem removed. Deleting symlink."
@@ -157,7 +164,7 @@ else
 
 	if [ "$NEEDSTOPHELPER" = "1" ]; then
 	    $LOG "Stopping helper service."
-	    service modemhelper modemremove
+	    service modemhelper stop
 	fi
 fi
 
