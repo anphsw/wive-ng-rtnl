@@ -51,10 +51,8 @@ if [ "$QoSEnable" != "" -a "$QoSEnable" != "0" ] || [ "$simple_qos" = "1" ]; the
     # call shaper helpers
     ######################################
     if [ "$QoSEnable" = "1" ]; then
-	$LOG "THIS IS NOT MORE SUPPORT PROPRIRETARY QOS MODE NEED REWRITE CODE"
-    elif [ "$QoSEnable" = "2" ]; then
 	/etc/scripts/config-qos-tc_prio.sh
-    elif [ "$QoSEnable" = "3" ]; then
+    elif [ "$QoSEnable" = "2" ]; then
 	/etc/scripts/config-qos-complex.sh
     fi
 fi

@@ -64,9 +64,8 @@ Please note that turning off <b>NAT Fastpath</b> will increase CPU usage up to 5
 	<td class="head" id="QoSStr">Type of QoS</td>
 	<td><select name="QoSSelect" onChange="QoSSelectChange(this.form);" class="mid">
 		<option value="0">Disable</option>
-		<option value="1">Ralink</option>
-		<option value="2">Priority-based</option>
-		<option value="3">Complex</option>
+		<option value="1">Simple priority based</option>
+		<option value="2">Complex with shaper</option>
 	</select>
 	</td>
 </tr>
