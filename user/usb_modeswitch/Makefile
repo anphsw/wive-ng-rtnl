@@ -1,5 +1,5 @@
 PROG        = usb_modeswitch
-VERS        = 1.2.3
+VERS        = 1.2.4
 LIBUSB      = $(ROOTDIR)/lib/libusb
 CFLAGS      += -Wall -I$(LIBUSB)
 LIBS        = -l usb
@@ -19,7 +19,7 @@ shared: $(PROG) dispatcher-dynamic
 
 static: $(PROG) dispatcher-static
 
-$(PROG): $(OBJS)
+$(PROG): $(OBJS) usb_modeswitch.h
 	$(CC) -o $(PROG) $(OBJS) $(CFLAGS) $(LIBS) $(LDFLAGS)
 
 dispatcher-static: dispatcher.c usb_modeswitch.tcl
@@ -44,7 +44,7 @@ distclean:
 	$(RM) usb_modeswitch.string
 	cd jim && $(MAKE) distclean
 
-install-common:
+install-common: all
 	install -D -s --mode=755 usb_modeswitch $(SBINDIR)/usb_modeswitch
 	install -D --mode=755 usb_modeswitch.sh $(UDEVDIR)/usb_modeswitch
 	install -D --mode=644 usb_modeswitch.conf $(ETCDIR)/usb_modeswitch.conf
@@ -63,14 +63,13 @@ install-script:
 	sed 's_!/usr/bin/tclsh_!'"$$SHELL"'_' <usb_modeswitch.tcl >usb_modeswitch_dispatcher
 	install -D --mode=755 usb_modeswitch_dispatcher $(SBINDIR)/usb_modeswitch_dispatcher
 
-install-binary:
+install: install-common install-script
+
+install-shared: dispatcher-dynamic install-common
 	install -D -s --mode=755 usb_modeswitch_dispatcher $(SBINDIR)/usb_modeswitch_dispatcher
 
-install: all install-common install-script
-
-install-shared: shared install-common install-binary
-
-install-static: static install-common install-binary
+install-static: dispatcher-static install-common
+	install -D -s --mode=755 usb_modeswitch_dispatcher $(SBINDIR)/usb_modeswitch_dispatcher
 
 uninstall:
 	$(RM) $(SBINDIR)/usb_modeswitch

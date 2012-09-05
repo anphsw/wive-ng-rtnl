@@ -1,5 +1,5 @@
 #!/bin/sh
-# part of usb_modeswitch 1.2.3
+# part of usb_modeswitch 1.2.4
 device_in()
 {
 	if [ ! -e /var/lib/usb_modeswitch/$1 ]; then
