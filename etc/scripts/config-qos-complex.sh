@@ -13,8 +13,8 @@ eval `nvram_buf_get 2860 lan_ipaddr vpnPurePPPOE igmpEnabled \
     QoS_rate_vpn_up QoS_rate_vpn_limit_up`
 
 # get users prio ports
-QoS_high_pp=`nvram_get 2860 QoS_high_pp`
-QoS_low_pp=`nvram_get 2860 QoS_low_pp`
+QoS_high_pp=`nvram_get 2860 QoS_high_pp | awk '{ gsub(" ",","); print }'`
+QoS_low_pp=`nvram_get 2860 QoS_low_pp | awk '{ gsub(" ",","); print }'`
 
 IPTSCR="/etc/qos_firewall"
 INCOMING="iptables -A shaper_pre -t mangle"
@@ -33,6 +33,9 @@ qos_lm() {
     fi
     if [ ! -d /sys/modules/xt_MARK ]; then
 	modprobe -q xt_MARK
+    fi
+    if [ ! -d /sys/modules/xt_length ]; then
+	modprobe -q xt_length
     fi
 }
 

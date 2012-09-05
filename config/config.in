@@ -213,7 +213,7 @@ if [ "$CONFIG_RALINKAPP_HWNAT" = "y" ]; then
     bool 'HW NAT ACL'			CONFIG_RALINKAPP_HWNAT_ACL
     bool 'HW NAT Up/Download Metr'	CONFIG_RALINKAPP_HWNAT_MTR
 fi
-bool 'SW_QOS'				CONFIG_RALINKAPP_SWQOS
+bool 'Software QOS support'		CONFIG_RALINKAPP_SWQOS
 bool 'Video Flow Classification cmd'	CONFIG_RALINKAPP_CLS
 bool 'iproute2 support'			CONFIG_USER_IPROUTE2
 bool 'iproute2 tc util support'		CONFIG_USER_IPROUTE2_TC

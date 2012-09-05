@@ -51,7 +51,7 @@ if [ "$QoSEnable" != "" -a "$QoSEnable" != "0" ] || [ "$simple_qos" = "1" ]; the
     # call shaper helpers
     ######################################
     if [ "$QoSEnable" = "1" ]; then
-	/etc/scripts/config-qos-ralink.sh
+	$LOG "THIS IS NOT MORE SUPPORT PROPRIRETARY QOS MODE NEED REWRITE CODE"
     elif [ "$QoSEnable" = "2" ]; then
 	/etc/scripts/config-qos-tc_prio.sh
     elif [ "$QoSEnable" = "3" ]; then
@@ -98,9 +98,6 @@ stop() {
 	tc qdisc del dev $i root > /dev/null 2>&1
 	tc qdisc del dev $i ingress > /dev/null 2>&1
     done
-    if [ "$QoSEnable" = "1" ]; then
-	qos_run c > /dev/null 2>&1
-    fi
     rm -f $IPTSCR
 }
 
