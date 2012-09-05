@@ -113,7 +113,7 @@ endif # ($(TESTIP6TC), 1)
 endif # ($(TEST), 1)
 endif # ifdef IPTABLESPATH
 
-LIBS += -lnfnetlink
+LIBS += $(ROOTDIR)/lib/lib/libnfnetlink.so
 
 TESTUPNPDESCGENOBJS = testupnpdescgen.o upnpdescgen.o
 
@@ -175,7 +175,7 @@ testupnppermissions:	testupnppermissions.o upnppermissions.o
 
 testgetifaddr:	testgetifaddr.o getifaddr.o
 
-testgetroute:	testgetroute.o linux/getroute.o upnputils.o -lnfnetlink
+testgetroute:	testgetroute.o linux/getroute.o upnputils.o $(ROOTDIR)/lib/lib/libnfnetlink.so
 
 miniupnpdctl:	miniupnpdctl.o
 
