@@ -1,4 +1,4 @@
-/* $Id: wingettimeofday.h,v 1.2 2011/07/15 08:30:11 nanard Exp $ */
+/* $Id: wingettimeofday.h,v 1.3 2012/03/05 19:38:37 nanard Exp $ */
 /* libnatpmp
 Copyright (c) 2007-2011, Thomas BERNARD 
 All rights reserved.

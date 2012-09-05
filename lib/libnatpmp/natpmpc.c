@@ -1,4 +1,4 @@
-/* $Id: natpmpc.c,v 1.10 2011/07/15 08:30:11 nanard Exp $ */
+/* $Id: natpmpc.c,v 1.13 2012/08/21 17:23:38 nanard Exp $ */
 /* libnatpmp
 Copyright (c) 2007-2011, Thomas BERNARD 
 All rights reserved.
@@ -79,6 +79,7 @@ int main(int argc, char * * argv)
 	int command = 0;
 	int forcegw = 0;
 	in_addr_t gateway = 0;
+	struct in_addr gateway_in_use;
 
 #ifdef WIN32
 	WSADATA wsaData;
@@ -107,7 +108,7 @@ int main(int argc, char * * argv)
 				break;
 			case 'a':
 				command = 'a';
-				if(argc < i + 3) {
+				if(argc < i + 4) {
 					fprintf(stderr, "Not enough arguments for option -%c\n", argv[i][1]);
 					return 1;
 				}
@@ -130,10 +131,11 @@ int main(int argc, char * * argv)
 					fprintf(stderr, "%s is not a valid protocol\n", argv[i]);
 					return 1;
 				}
-				if(argc >= i) {
-					i++;
-					if(1 != sscanf(argv[i], "%u", &lifetime)) {
+				if(argc > i + 1) {
+					if(1 != sscanf(argv[i+1], "%u", &lifetime)) {
 						fprintf(stderr, "%s is not a correct 32bits unsigned integer\n", argv[i]);
+					} else {
+						i++;
 					}
 				}
 				break;
@@ -155,7 +157,8 @@ int main(int argc, char * * argv)
 	if(r<0)
 		return 1;
 
-	printf("using gateway : %s\n", inet_ntoa(*((struct in_addr *)&natpmp.gateway)));
+	gateway_in_use.s_addr = natpmp.gateway;
+	printf("using gateway : %s\n", inet_ntoa(gateway_in_use));
 
 	/* sendpublicaddressrequest() */
 	r = sendpublicaddressrequest(&natpmp);

@@ -1,4 +1,4 @@
-/* $Id: testgetgateway.c,v 1.5 2011/07/15 08:30:11 nanard Exp $ */
+/* $Id: testgetgateway.c,v 1.7 2012/08/21 17:13:31 nanard Exp $ */
 /* libnatpmp
 Copyright (c) 2007-2011, Thomas BERNARD 
 All rights reserved.
@@ -37,6 +37,8 @@ POSSIBILITY OF SUCH DAMAGE.
 
 int main(int argc, char * * argv)
 {
+	(void)argc;
+	(void)argv;
 	struct in_addr gatewayaddr;
 	int r;
 #ifdef WIN32

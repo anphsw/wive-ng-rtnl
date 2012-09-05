@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.18 2011/06/22 21:32:30 nanard Exp $
+# $Id: Makefile,v 1.19 2012/08/21 17:24:07 nanard Exp $
 # This Makefile is designed for use with GNU make
 # libnatpmp
 # (c) 2007-2011 Thomas Bernard

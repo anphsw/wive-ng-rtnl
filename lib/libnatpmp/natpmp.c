@@ -1,4 +1,4 @@
-/* $Id: natpmp.c,v 1.14 2011/07/15 08:30:11 nanard Exp $ */
+/* $Id: natpmp.c,v 1.15 2012/03/05 19:38:37 nanard Exp $ */
 /* libnatpmp
 Copyright (c) 2007-2011, Thomas BERNARD 
 All rights reserved.

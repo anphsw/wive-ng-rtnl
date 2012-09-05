@@ -1,4 +1,4 @@
-/* $Id: libnatpmpmodule.c,v 1.6 2011/07/30 13:19:59 nanard Exp $ */
+/* $Id: libnatpmpmodule.c,v 1.7 2012/03/05 19:38:37 nanard Exp $ */
 /* libnatpmp
  * http://miniupnp.free.fr/libnatpmp.html
 Copyright (c) 2007-2011, Thomas BERNARD 
