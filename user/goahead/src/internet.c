@@ -141,9 +141,8 @@ void formDefineInternet(void) {
 	websFormDefine(T("setWan"), setWan);
 	websFormDefine(T("getMyMAC"), getMyMAC);
 	websFormDefine(T("editRouting"), editRouting);
-#ifdef CONFIG_USER_TRANSMISSION
-	websFormDefine(T("getTransmissionBuilt"), getTransmissionBuilt);
-#endif	
+	websAspDefine(T("getTransmissionBuilt"), getTransmissionBuilt);
+
 #ifdef CONFIG_USER_ZEBRA
 	websFormDefine(T("dynamicRouting"), dynamicRouting);
 #endif

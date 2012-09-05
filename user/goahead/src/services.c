@@ -62,9 +62,6 @@ static int iptStatList(int eid, webs_t wp, int argc, char_t **argv);
 
 static void l2tpConfig(webs_t wp, char_t *path, char_t *query);
 static int getL2TPUserList(int eid, webs_t wp, int argc, char_t **argv);
-
-static int getFTPDBuilt(int eid, webs_t wp, int argc, char_t **argv);
-static int getTransmissionBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getTelnetdBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getProcessList(int eid, webs_t wp, int argc, char_t **argv);
 
@@ -82,8 +79,6 @@ void formDefineServices(void)
 	websAspDefine(T("getDhcpCliList"), getDhcpCliList);
 	websAspDefine(T("getDhcpStaticList"), getDhcpStaticList);
 	websAspDefine(T("iptStatList"), iptStatList);
-	websAspDefine(T("getFTPDBuilt"), getFTPDBuilt);
-	websAspDefine(T("getTransmissionBuilt"), getTransmissionBuilt);
 	websAspDefine(T("getTelnetdBuilt"), getTelnetdBuilt);
 	websAspDefine(T("getProcessList"), getProcessList);
 }
@@ -95,7 +90,6 @@ static int getProcessList(int eid, webs_t wp, int argc, char_t **argv)
 
 	cmdline_t *proc_list = procps_list();
 	cmdline_t *curr = proc_list;
-	int count = 0;
 	
 	while (curr != NULL)
 	{
@@ -105,9 +99,7 @@ static int getProcessList(int eid, webs_t wp, int argc, char_t **argv)
 			// Check if name matches
 			if ((curr->argc > 0) && (strcmp(curr->argv[0], argv[i]) == 0))
 			{
-				if ((count++) > 0)
-					websWrite(wp, ",");
-				websWrite(wp, "%s", curr->argv[0]);
+				websWrite(wp, "%s,", curr->argv[0]);
 				break;
 			}
 			i++;
@@ -322,26 +314,6 @@ static void setDhcp(webs_t wp, char_t *path, char_t *query)
 		websDone(wp, 200);
 }
 
-static int getFTPDBuilt(int eid, webs_t wp, int argc, char_t **argv)
-{
-#ifdef CONFIG_FTPD
-	websWrite(wp, T("1"));
-#else
-	websWrite(wp, T("0"));
-#endif
-	return 0;
-}
-
-static int getTransmissionBuilt(int eid, webs_t wp, int argc, char_t **argv)
-{
-#ifdef CONFIG_USER_TRANSMISSION
-	websWrite(wp, T("1"));
-#else
-	websWrite(wp, T("0"));
-#endif
-	return 0;
-}
-
 static int getTelnetdBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
 #ifdef CONFIG_TELNETD
@@ -370,9 +342,6 @@ const parameter_fetch_t service_misc_flags[] =
 #ifdef CONFIG_TELNETD
 	{ T("rmtTelnet"), "RemoteTelnet", 0, T("0") },
 #endif
-#ifdef CONFIG_FTPD
-	{ T("rmtFTP"), "RemoteFTP", 0, T("0") },
-#endif
 	{ T("udpxyMode"), "UDPXYMode", 0, T("0") },
 	{ T("udpxyPort"), "UDPXYPort", 0, T("81") },
 	{ T("watchdogEnable"), "WatchdogEnabled", 0, T("0") },
@@ -394,7 +363,6 @@ const parameter_fetch_t service_misc_flags[] =
 	{ T("ttlMcastStore"), "store_ttl_mcast", 0, T("0") },
 	{ T("SnmpdEnabled"), "snmpd", 0, T("0") },
 	{ T("mssPmtu"), "mss_use_pmtu", 0, T("1") },
-	{ T("transmission"), "TransmissionEnabled", 0, T("0") },
 	{ NULL, NULL, 0, NULL } // Terminator
 };
 
