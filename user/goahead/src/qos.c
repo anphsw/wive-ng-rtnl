@@ -44,7 +44,7 @@ static void QoSSetup(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "QoSEnable", QoS_type);
 	nvram_bufset(RT2860_NVRAM, "simple_qos", simpleqos);
 
-	if (CHK_IF_DIGIT(QoS_type, 3))
+	if (CHK_IF_DIGIT(QoS_type, 2))
 		setupParameters(wp, QoS_args, 0);
 
 	nvram_close(RT2860_NVRAM);
