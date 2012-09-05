@@ -1,4 +1,4 @@
-/* $Id: miniupnpd.c,v 1.165 2012/06/29 19:59:26 nanard Exp $ */
+/* $Id: miniupnpd.c,v 1.168 2012/07/17 19:35:44 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * (c) 2006-2012 Thomas Bernard
@@ -382,7 +382,7 @@ write_option_list(int fd)
 {
 	char buffer[256];
 	int len;
-	int i;
+	unsigned int i;
 	write(fd, "Options :\n", 10);
 	for(i=0; i<num_options; i++)
 	{
@@ -857,6 +857,13 @@ init(int argc, char * * argv, struct runtime_vars * v)
 			else
 				fprintf(stderr, "Option -%c takes one argument.\n", argv[i][1]);
 			break;
+		case 'z':
+			if(i+1 < argc)
+				strncpy(friendly_name, argv[++i], FRIENDLY_NAME_MAX_LEN);
+			else
+				fprintf(stderr, "Option -%c takes one argument.\n", argv[i][1]);
+			friendly_name[FRIENDLY_NAME_MAX_LEN-1] = '\0';
+			break;
 		case 's':
 			if(i+1 < argc)
 				strncpy(serialnumber, argv[++i], SERIALNUMBER_MAX_LEN);
@@ -1034,6 +1041,23 @@ init(int argc, char * * argv, struct runtime_vars * v)
 				fprintf(stderr, "Option -%c takes two arguments.\n", argv[i][1]);
 #endif
 			break;
+		case 'A':
+			if(i+1 < argc) {
+				void * tmp;
+				tmp = realloc(upnppermlist, sizeof(struct upnpperm) * (num_upnpperm+1));
+				if(tmp == NULL) {
+					fprintf(stderr, "memory allocation error for permission\n");
+				} else {
+					upnppermlist = tmp;
+					if(read_permission_line(upnppermlist + num_upnpperm, argv[++i]) >= 0) {
+						num_upnpperm++;
+					} else {
+						fprintf(stderr, "Permission rule parsing error :\n%s\n", argv[i]);
+					}
+				}
+			} else
+				fprintf(stderr, "Option -%c takes one argument.\n", argv[i][1]);
+			break;
 		case 'f':
 			i++;	/* discarding, the config file is already read */
 			break;
@@ -1168,7 +1192,7 @@ print_usage:
 			"\n"
 			/*"[-l logfile] " not functionnal */
 			"\t\t[-u uuid] [-s serial] [-m model_number] \n"
-			"\t\t[-t notify_interval] [-P pid_filename]\n"
+			"\t\t[-t notify_interval] [-P pid_filename] [-z fiendly_name]\n"
 			"\t\t[-B down up] [-w url] [-r clean_ruleset_interval]\n"
 #ifdef USE_PF
                         "\t\t[-q queue] [-T tag]\n"
@@ -1176,6 +1200,7 @@ print_usage:
 #ifdef ENABLE_NFQUEUE
                         "\t\t[-Q queue] [-n name]\n"
 #endif
+			"\t\t[-A \"permission rule\"]\n"
 	        "\nNotes:\n\tThere can be one or several listening_ips.\n"
 	        "\tNotify interval is in seconds. Default is 30 seconds.\n"
 			"\tDefault pid file is '%s'.\n"
@@ -1200,6 +1225,11 @@ print_usage:
                         "\t-Q sets the queue number that is used by NFQUEUE.\n"
                         "\t-n sets the name of the interface(s) that packets will arrive on.\n"
 #endif
+			"\t-A use following syntax for permission rules :\n"
+			"\t  (allow|deny) (external port range) ip/mask (internal port range)\n"
+			"\texamples :\n"
+			"\t  \"allow 1024-65535 192.168.1.0/24 1024-65535\"\n"
+			"\t  \"deny 0-65535 0.0.0.0/0 0-65535\"\n"
 			"\t-h prints this help and quits.\n"
 	        "", argv[0], pidfilename, DEFAULT_CONFIG);
 	return 1;
