@@ -149,8 +149,8 @@ install:	miniupnpd miniupnpd.8 miniupnpd.conf genuuid \
 	$(INSTALL) --mode=0644 -b miniupnpd.conf $(ETCINSTALLDIR)
 	$(INSTALL) -d $(PREFIX)/etc/init.d
 	$(INSTALL) linux/miniupnpd.init.d.script $(PREFIX)/etc/init.d/miniupnpd
-	$(INSTALL) miniupnpd.8 $(MANINSTALLDIR)
-	gzip $(MANINSTALLDIR)/miniupnpd.8
+#	$(INSTALL) miniupnpd.8 $(MANINSTALLDIR)
+#	gzip $(MANINSTALLDIR)/miniupnpd.8
 
 romfs: install
 	$(ROMFSINST) -S filesystem/usr/sbin/miniupnpd /bin/miniupnpd
