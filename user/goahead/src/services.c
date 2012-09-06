@@ -62,7 +62,9 @@ static int iptStatList(int eid, webs_t wp, int argc, char_t **argv);
 
 static void l2tpConfig(webs_t wp, char_t *path, char_t *query);
 static int getL2TPUserList(int eid, webs_t wp, int argc, char_t **argv);
+static int getARPptBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getTelnetdBuilt(int eid, webs_t wp, int argc, char_t **argv);
+static int getSNMPDBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getProcessList(int eid, webs_t wp, int argc, char_t **argv);
 
 void formDefineServices(void)
@@ -79,7 +81,9 @@ void formDefineServices(void)
 	websAspDefine(T("getDhcpCliList"), getDhcpCliList);
 	websAspDefine(T("getDhcpStaticList"), getDhcpStaticList);
 	websAspDefine(T("iptStatList"), iptStatList);
+	websAspDefine(T("getARPptBuilt"), getARPptBuilt);
 	websAspDefine(T("getTelnetdBuilt"), getTelnetdBuilt);
+	websAspDefine(T("getSNMPDBuilt"), getSNMPDBuilt);
 	websAspDefine(T("getProcessList"), getProcessList);
 }
 
@@ -314,6 +318,28 @@ static void setDhcp(webs_t wp, char_t *path, char_t *query)
 		websDone(wp, 200);
 }
 
+
+
+static int getSNMPDBuilt(int eid, webs_t wp, int argc, char_t **argv)
+{
+#ifdef CONFIG_USER_SNMPD
+	websWrite(wp, T("1"));
+#else
+	websWrite(wp, T("0"));
+#endif
+	return 0;
+}
+
+static int getARPptBuilt(int eid, webs_t wp, int argc, char_t **argv)
+{
+#ifdef CONFIG_USER_PARPROUTED
+	websWrite(wp, T("1"));
+#else
+	websWrite(wp, T("0"));
+#endif
+	return 0;
+}
+
 static int getTelnetdBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
 #ifdef CONFIG_TELNETD
@@ -327,7 +353,9 @@ static int getTelnetdBuilt(int eid, webs_t wp, int argc, char_t **argv)
 const parameter_fetch_t service_misc_flags[] =
 {
 	{ T("stpEnbl"), "stpEnabled", 0, T("0") },
+#ifdef CONFIG_USER_CDP
 	{ T("cdpEnbl"), "cdpEnabled", 0, T("0") },
+#endif
 	{ T("lltdEnbl"), "lltdEnabled", 0, T("0") },
 	{ T("igmpEnbl"), "igmpEnabled", 0, T("0") },
 	{ T("igmpSnoop"), "igmpSnoopMode", 0, T("") },
@@ -355,13 +383,17 @@ const parameter_fetch_t service_misc_flags[] =
 	{ T("bridgeFastpath"), "bridgeFastpath", 0, T("1") },
 	{ T("CrondEnable"), "CrondEnable", 0, T("0") },
 	{ T("ForceRenewDHCP"), "ForceRenewDHCP", 0, T("1") },
+#ifdef CONFIG_USER_PARPROUTED
 	{ T("arpPT"), "parproutedEnabled", 0, T("0") },
+#endif
 	{ T("pingerEnable"), "pinger_check_on", 0, T("0") },
 	{ T("ping_check_time"), "ping_check_time", 0, T("0") },
 	{ T("ping_check_interval"), "ping_check_interval", 0, T("0") },
 	{ T("ttlStore"), "store_ttl", 0, T("0") },
 	{ T("ttlMcastStore"), "store_ttl_mcast", 0, T("0") },
+#ifdef CONFIG_USER_SNMPD
 	{ T("SnmpdEnabled"), "snmpd", 0, T("0") },
+#endif
 	{ T("mssPmtu"), "mss_use_pmtu", 0, T("1") },
 	{ NULL, NULL, 0, NULL } // Terminator
 };

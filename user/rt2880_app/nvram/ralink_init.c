@@ -208,6 +208,8 @@ int main(int argc, char *argv[])
 		return nvram_show(RT2860_NVRAM);
 	else if (!strncmp(cmd, "nvram_default", 14))
 		return nvram_load_default();
+	else if (!strncmp(cmd, "nvram_clear", 12))
+		return nvram_clear(RT2860_NVRAM);
 
 	if (argc == 2) {
 		if (!strncmp(argv[1], "rt2860_nvram_show", 18))

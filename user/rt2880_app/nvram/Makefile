@@ -32,3 +32,4 @@ romfs:
 	$(ROMFSINST) -s /bin/ralink_init /bin/nvram_set
 	$(ROMFSINST) -s /bin/ralink_init /bin/nvram_show
 	$(ROMFSINST) -s /bin/ralink_init /bin/nvram_default
+	$(ROMFSINST) -s /bin/ralink_init /bin/nvram_clear

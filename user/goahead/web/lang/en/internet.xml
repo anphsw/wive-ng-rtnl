@@ -53,8 +53,10 @@
   <message msgid="lan dhcp lease" msgstr="Lease Time" />
   <message msgid="lan dhcp static" msgstr="Statically Assigned" />
   <message msgid="lan stp" msgstr="802.1d Spanning Tree" />
+  <message msgid="lan arpp" msgstr="ARP Proxy (parprouted)" />
   <message msgid="lan cdp" msgstr="Cisco Discovery Protocol (CDP)" />
   <message msgid="lan lltd" msgstr="Link Layer Topology Discovery (LLTD)" />
+  <message msgid="lan snmp" msgstr="SNMP daemon (SNMPD)" />
   <message msgid="lan igmpp" msgstr="Multicast route (IGMP Proxy)" />
   <message msgid="lan upnp" msgstr="Auto portmap service (UPNP)" />
   <message msgid="lan radvd" msgstr="IPV6 Router Advertisement (RADVD)" />

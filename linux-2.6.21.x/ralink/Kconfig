@@ -5,7 +5,7 @@ menu "Ralink Module"
 ###########
 config RT_FULL_DEVICE_NAME
         string "Original device name"
-        default "Acorp WR-N"
+        default "Wive WR-NL"
 
 
 ###########

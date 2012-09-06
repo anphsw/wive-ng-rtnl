@@ -62,6 +62,10 @@ function initTranslation()
 	_TR("lStpD", "inet disable");
 	_TR("lStpE", "inet enable");
 
+	_TR("lArppt", "lan arpp");
+	_TR("lArpptD", "inet disable");
+	_TR("lArpptE", "inet enable");
+
 	_TR("lCdp", "lan cdp");
 	_TR("lCdpD", "inet disable");
 	_TR("lCdpE", "inet enable");
@@ -69,6 +73,10 @@ function initTranslation()
 	_TR("lLltd", "lan lltd");
 	_TR("lLltdD", "inet disable");
 	_TR("lLltdE", "inet enable");
+
+	_TR("lSnmp", "lan snmp");
+	_TR("lSnmpD", "inet disable");
+	_TR("lSnmpE", "inet enable");
 
 	_TR("lIgmpp", "lan igmpp");
 	_TR("lIgmppD", "inet disable");
@@ -109,7 +117,8 @@ function initValue()
 	var cdp = "<% getCfgZero(1, "cdpEnabled"); %>";
 	var lltd = "<% getCfgZero(1, "lltdEnabled"); %>";
 	var wpf = "<% getCfgGeneral(1, "WANPingFilter"); %>";
-	var arp_pt = "<% getCfgGeneral(1, "parproutedEnabled"); %>";
+	var arp_pt = "<% getCfgZero(1, "parproutedEnabled"); %>";
+	var arpptb = "<% getARPptBuilt(); %>";
 	var cdpb = "<% getCdpBuilt(); %>";
 	var lltdb = "<% getLltdBuilt(); %>";
 	var igmpb = "<% getIgmpProxyBuilt(); %>";
@@ -118,6 +127,7 @@ function initValue()
 	var radvdb = "<% getRadvdBuilt(); %>";
 	var pppoeb = "<% getPppoeRelayBuilt(); %>";
 	var dnsp = "<% getDnsmasqBuilt(); %>";
+	var snmpdb = "<% getSNMPDBuilt(); %>";
 	var krnl_pppoe = "<% getCfgZero(1, "pppoe_pass"); %>";
 	var krnl_ipv6 = "<% getCfgZero(1, "ipv6_pass"); %>";
 	var pinger = "<% getCfgZero(1, "pinger_check_on"); %>";
@@ -144,7 +154,7 @@ function initValue()
 	form.krnlPppoePass.options.selectedIndex = 1*krnl_pppoe;
 	form.krnlIpv6Pass.options.selectedIndex = 1*krnl_ipv6;
 	form.pingWANEnbl.options.selectedIndex = (wpf == '1') ? 1 : 0;
-	form.arpPT.options.selectedIndex = (arp_pt == '1') ? 1 : 0;
+	form.arpPT.options.selectedIndex = 1*arp_pt;
 	form.hw_nat_wifiPT.options.selectedIndex = (hw_nat_wifi_pt == "1") ? 1 : 0;
 	form.pingerEnable.value = (pinger == '1') ? '1' : '0';
 	form.mssPmtu.value = (mss_pmtu == '0') ? '0' : '1';
@@ -170,8 +180,10 @@ function initValue()
 	form.ttlStore.value = (store_ttl == '1') ? '1' : '0';
 	form.ttlMcastStore.value = (store_ttl_mcast == '1') ? '1' : '0';
 
+	displayElement('parprouted', arpptb == '1');
 	displayElement('cdp', cdpb == '1');
 	displayElement('lltd', lltdb == '1');
+	displayElement('snmpd', snmpdb == '1');
 	displayElement('igmpProxy', igmpb == '1');
 	displayElement('upnp', upnpb == '1');
 	displayElement('xupnpd', xupnpdb == '1');
@@ -439,12 +451,7 @@ function displayServiceStatus()
 
 <!-- Pass Through -->
 <tr>
-	<td class="title">Pass Through</td>
-	<td class="title">Value</td>
-	<td class="title" style="width: 88px;">Details</td>
-	<td class="title" style="width: 56px;">Status</td>
-	<td class="title" style="width: 80px;">Configure</td>
-</tr>
+	<td class="title" colspan="5">Pass Through</td>
 </tr>
 <tr>
 <td class="head">PPPOE pass through</td>
@@ -464,16 +471,6 @@ function displayServiceStatus()
 	</select>
 </td>
 </tr>
-<tr id="parprouted">
-<td class="head">ARP Proxy</td>
-<td>
-	<select name="arpPT" class="half">
-		<option value="0">Disable</option>
-		<option value="1">Enable</option>
-	</select>
-</td>
-<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
-</tr>
 
 <!-- Services -->
 <tr>
@@ -482,6 +479,17 @@ function displayServiceStatus()
 	<td class="title" style="width: 88px;">Details</td>
 	<td class="title" style="width: 56px;">Status</td>
 	<td class="title" style="width: 80px;">Configure</td>
+</tr>
+
+<tr id="parprouted">
+<td class="head" id="lArppt">ARP Proxy</td>
+<td>
+	<select name="arpPT" class="half">
+		<option value="0" id="lArpptD">Disable</option>
+		<option value="1" id="lArpptE">Enable</option>
+	</select>
+</td>
+<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
 </tr>
 
 <tr id="cdp">
@@ -505,11 +513,11 @@ function displayServiceStatus()
 <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
 </tr>
 <tr id="snmpd">
-<td class="head">SNMP daemon</td>
+<td class="head" id="lSnmp">SNMP daemon</td>
 <td>
 	<select name="SnmpdEnabled" class="half">
-		<option value="0">Disable</option>
-		<option value="1">Enable</option>
+		<option value="0" id="lSnmpD">Disable</option>
+		<option value="1" id="lSnmpE">Enable</option>
 	</select>
 </td>
 <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>

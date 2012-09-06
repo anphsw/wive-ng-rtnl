@@ -635,8 +635,8 @@ const mbss_param_t mbss_params[] =
 	{ "Key3Str", 0 },
 	{ "Key4Type", 1 },
 	{ "Key4Str", 0 },
-	{ "AccessPolicy", 1 },
-	{ "AccessControlList", 1},
+//	{ "AccessPolicy", 1 },
+//	{ "AccessControlList", 1},
 //	{ "NoForwarding", 1 }, // Is set up by MBSS logic
 	{ "IEEE8021X", 1 },
 	{ "TxRate", 1 },
@@ -1089,8 +1089,9 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 #endif
 #endif
 
-	if (NULL != nvram_get(RT2860_NVRAM, "BssidNum"))
-		ssid_num = atoi(nvram_get(RT2860_NVRAM, "BssidNum"));
+	char *num_s = nvram_get(RT2860_NVRAM, "BssidNum");
+	if (NULL != num_s)
+		ssid_num = atoi(num_s);
 	else
 		ssid_num = 1;
 	wlan_mode = atoi(nvram_get(RT2860_NVRAM, "WirelessMode"));
