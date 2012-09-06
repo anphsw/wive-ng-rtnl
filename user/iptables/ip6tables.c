@@ -747,7 +747,7 @@ parse_hostnetworkmask(const char *name, struct in6_addr **addrpp,
 	for (i = 0, j = 0; i < n; i++) {
 		int k;
 		for (k = 0; k < 4; k++)
-			addrp[j].in6_u.u6_addr32[k] &= maskp->in6_u.u6_addr32[k];
+			addrp[j].s6_addr32[k] &= maskp->s6_addr32[k];
 		j++;
 		for (k = 0; k < j - 1; k++) {
 			if (IN6_ARE_ADDR_EQUAL(&addrp[k], &addrp[j - 1])) {
@@ -1928,7 +1928,7 @@ int do_command6(int argc, char *argv[], char **table, ip6tc_handle_t *handle)
 	const char *jumpto = "";
 	char *protocol = NULL;
 	int proto_used = 0;
-	u_int64_t *cnt;
+	u_int64_t cnt;
 
 	memset(&fw, 0, sizeof(fw));
 

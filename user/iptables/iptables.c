@@ -1993,7 +1993,7 @@ int do_command(int argc, char *argv[], char **table, iptc_handle_t *handle)
 	const char *jumpto = "";
 	char *protocol = NULL;
 	int proto_used = 0;
-	u_int64_t *cnt;
+	u_int64_t cnt;
 
 	memset(&fw, 0, sizeof(fw));
 

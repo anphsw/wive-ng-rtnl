@@ -10,12 +10,11 @@ PF_EXT_SLIB:=ah addrtype comment connlimit connmark conntrack dscp ecn esp hashl
 PF_EXT_SLIB+=pkttype policy standard state tcp tcpmss tos webstr time ttl udp unclean string account
 PF_EXT_SLIB+=CLASSIFY CONNMARK DNAT DSCP ECN LOG MARK MASQUERADE MIRROR NETMAP NFQUEUE NOTRACK REDIRECT REJECT SAME SNAT TARPIT TCPMSS 
 PF_EXT_SLIB+=CONNLOG IMQ TOS TRACE TTL ULOG 
-
 #PF_EXT_SLIB+=owner physdev realm rpc sctp
 
-PF6_EXT_SLIB:=connmark eui64 hl icmpv6 length limit mac mark multiport owner physdev policy standard state tcp udp CONNMARK HL LOG 
+PF6_EXT_SLIB:=connmark eui64 hl length limit mac mark multiport policy standard state tcp udp CONNMARK HL LOG 
 PF6_EXT_SLIB+=NFQUEUE MARK TRACE
-
+#PF6_EXT_SLIB+=owner physdev
 
 ifeq ($(DO_SELINUX), 1)
 PF_EXT_SE_SLIB:=SECMARK CONNSECMARK
@@ -69,8 +68,7 @@ PF_EXT_SLIB:=$(PF_EXT_SLIB_BASE)
 PF_EXT_SLIB+=$(call lower,$(call TEST_CONFIG,$(PF_EXT_SLIB_CONFIG),IP_NF,MATCH))
 PF_EXT_SLIB+=$(call TEST_CONFIG,$(PF_EXT_SLIB_CONFIG),IP_NF,TARGET)
 
-#PF6_EXT_SLIB_BASE:=tcp udp icmpv6 standard
-PF6_EXT_SLIB_BASE:=tcp udp standard
+PF6_EXT_SLIB_BASE:=tcp udp icmp6 standard
 PF6_EXT_SLIB_CONFIG:=$(sort $(call upper,$(filter-out $(PF6_EXT_SLIB_BASE),$(PF6_EXT_SLIB))))
 PF6_EXT_SLIB:=$(PF6_EXT_SLIB_BASE)
 PF6_EXT_SLIB+=$(call lower,$(call TEST_CONFIG,$(PF6_EXT_SLIB_CONFIG),IP6_NF,MATCH))
@@ -83,7 +81,9 @@ endif
 ifneq ($(CONFUG_IP_NF_TARGET_NETMAP),)
 PF_EXT_SLIB+=NETMAP	# 1102 add
 endif
-PF_EXT_SLIB+=DNAT
+ifneq ($(CONFIG_NETFILTER_XT_TARGET_TCPMSS)$(CONFIG_NETFILTER_XT_TARGET_TCPMSS_MODULE),)
+PF6_EXT_SLIB+=TCPMSS
+endif
 endif
 
 ifndef NO_SHARED_LIBS
