@@ -1211,6 +1211,8 @@
 77) libnatpmp: update to 20120821 version.<br>
 78) xupnpd: up to Updated to revision 313.<br>
 79) add basic qos webui support.<br>
+80) fix iptbales support ipv6.<br>
+81) add support 6RD in kernel and fix sit.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
