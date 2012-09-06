@@ -17,7 +17,7 @@
 
 function QoSSelectChange(form)
 {
-	var complex_on = form.QoSSelect.value == '3';
+	var complex_on = form.QoSSelect.value == '2';
 
 	// Display mode-dependent elements
 	displayElement( [ 'BWSettings', 'PPortSettings', 'QoSUpBW', 'QoSUpBWL', 'QoSDownBW', 'QoSDownBWL', 'QoSUPVPNBW',
