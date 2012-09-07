@@ -1119,9 +1119,9 @@ NDIS_STATUS IgmpPktClone(
 	}
 
 	// check all members of the IGMP group.
-	pMacEntry = APSsPsInquiry(pAd, pMemberAddr, &Sst, &Aid, &PsMode, &Rate);
 	while(bContinue == TRUE)
 	{
+		pMacEntry = APSsPsInquiry(pAd, pMemberAddr, &Sst, &Aid, &PsMode, &Rate);
 		if (pMacEntry && (Sst == SST_ASSOC))
 		{
 			OS_PKT_CLONE(pAd, pPacket, pSkbClone, MEM_ALLOC_FLAG);
