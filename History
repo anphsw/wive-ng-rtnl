@@ -1214,6 +1214,7 @@
 80) fix iptbales support ipv6.<br>
 81) add support 6RD in kernel and fix sit.<br>
 82) RT3052 driver fix check igmpsnoop clients in group.<br>
+83) Add xt_time support in kernel.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
