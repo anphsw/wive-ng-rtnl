@@ -355,8 +355,7 @@ int MBSS_PacketSend(
 /*			NdisZeroMemory((PUCHAR)&(RTPKT_TO_OSPKT(pPktSrc))->cb[CB_OFF], 15); */
 			NdisZeroMemory((PUCHAR)(GET_OS_PKT_CB(pPktSrc) + CB_OFF), 15);
             RTMP_SET_PACKET_NET_DEVICE_MBSSID(pPktSrc, IdBss);
-			SET_OS_PKT_NETDEV(pPktSrc, pAd);
-		 
+	    SET_OS_PKT_NETDEV(pPktSrc, pAd->net_dev);
 
             /* transmit the packet */
             return Func(pPktSrc);
