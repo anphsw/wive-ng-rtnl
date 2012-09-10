@@ -1175,47 +1175,53 @@
 41) WebUi: cleanup and cosmetic fixes in Modem/Usb pages.<br>
 42) WiFi drivers: Add mac correction for apcli and mbssid mode.<br>
 43) WiFi: Set MAC only once on driver load by module param.<br>
-44) LAN: Fix one phy mode in RTL8367M.<br>
-45) Reenable forward for paranoid users (after renew).<br>
-46) Fix infinitive loop in xl2tpd.<br>
-47) Update busybox to 1.20.2.<br>
-48) PPTP: Accept packet with seq zero.<br>
-49) XUPNPD: Updated to revision 308.<br>
-50) HW_NAT: Fix PPPoE offload (RT3883 with 2xGMAC mode).<br>
-51) Update transmission to 2.60 version.<br>
-52) xl2tpd: fix incoming ZLB after call closed, disable TRUST_PPPD_TO_DIE.<br>
-53) pppd: sync with upstream patches (2012-05-20).<br>
-54) WiFi drivers: fix multicast packet delivery to clients in PSM mode (casual ping delay issue).<br>
-55) SKB: Temp set skb_pad to 16.<br>
-56) Add check wan ip adress get to udpxy/xupnpd init scripts.<br>
-57) Fix calculate hdrlen in current kernel.<br>
-58) Revert skbpad to 80.<br>
-59) Fix hw_nat+pptp+mppe issue.<br>
-60) Avoid TX skb reallocation and speed-up TX path.<br>
-61) If modemenabled need add mgmt rules in iptables to.<br>
-62) xl2tpd: fix defaults for bps speed and mandotary.<br>
-63) udpxy: up to 1.0.23-0-prod version.<br>
-64) xupnpd: up to revision 310.<br>
-65) miniupnpd: up to 1.7.20120711 version.<br>
-66) add libnfnetlink lib need for new miniupnpd.<br>
-67) some webui fixes (transmission/ftp).<br>
-68) fix iptables logic for ftp port change support.<br>
-69) fix detect some usb devices.<br>
-70) fix iptables rules reapply at connect/disconnect 3G modem.<br>
-71) fix autocommect in 3g mode.<br>
-72) dnsmasq up to 2.63 version.<br>
-73) xunpd up to revision 312.<br>
-74) Add usb modem connection status.<br>
-75) usb_modeswitch: up to 1.2.4 version and data files to 2012-08-15 version.<br>
-76) miniupnpd: update to 1.7.20120824 version.<br>
-77) libnatpmp: update to 20120821 version.<br>
-78) xupnpd: up to Updated to revision 313.<br>
-79) add basic qos webui support.<br>
-80) fix iptbales support ipv6.<br>
-81) add support 6RD in kernel and fix sit.<br>
-82) RT3052 driver fix check igmpsnoop clients in group.<br>
-83) Add xt_time support in kernel.<br>
-84) Fix mbssid with igmpsnooping work.<br>
+
+<br>
+<b>3.1.x</b><br>
+1) LAN: Fix one phy mode in RTL8367M.<br>
+2) Reenable forward for paranoid users (after renew).<br>
+3) Fix infinitive loop in xl2tpd.<br>
+4) Update busybox to 1.20.2.<br>
+5) PPTP: Accept packet with seq zero.<br>
+6) XUPNPD: Updated to revision 308.<br>
+7) HW_NAT: Fix PPPoE offload (RT3883 with 2xGMAC mode).<br>
+8) Update transmission to 2.60 version.<br>
+9) xl2tpd: fix incoming ZLB after call closed, disable TRUST_PPPD_TO_DIE.<br>
+10) pppd: sync with upstream patches (2012-05-20).<br>
+11) WiFi drivers: fix multicast packet delivery to clients in PSM mode (casual ping delay issue).<br>
+12) SKB: Temp set skb_pad to 16.<br>
+13) Add check wan ip adress get to udpxy/xupnpd init scripts.<br>
+14) Fix calculate hdrlen in current kernel.<br>
+15) Revert skbpad to 80.<br>
+16) Fix hw_nat+pptp+mppe issue.<br>
+17) Avoid TX skb reallocation and speed-up TX path.<br>
+18) If modemenabled need add mgmt rules in iptables to.<br>
+19) xl2tpd: fix defaults for bps speed and mandotary.<br>
+20) udpxy: up to 1.0.23-0-prod version.<br>
+21) xupnpd: up to revision 310.<br>
+22) miniupnpd: up to 1.7.20120711 version.<br>
+23) add libnfnetlink lib need for new miniupnpd.<br>
+
+<br>
+<b>3.2.x</b><br>
+1) some webui fixes (transmission/ftp).<br>
+2) fix iptables logic for ftp port change support.<br>
+3) fix detect some usb devices.<br>
+4) fix iptables rules reapply at connect/disconnect 3G modem.<br>
+5) fix autocommect in 3g mode.<br>
+6) dnsmasq up to 2.63 version.<br>
+7) xunpd up to revision 312.<br>
+8) Add usb modem connection status.<br>
+9) usb_modeswitch: up to 1.2.4 version and data files to 2012-08-15 version.<br>
+10) miniupnpd: update to 1.7.20120824 version.<br>
+11) libnatpmp: update to 20120821 version.<br>
+12) xupnpd: up to Updated to revision 313.<br>
+13) add basic qos webui support.<br>
+14) fix iptbales support ipv6.<br>
+15) add support 6RD in kernel and fix sit.<br>
+16) RT3052 driver fix check igmpsnoop clients in group.<br>
+17) Add xt_time support in kernel.<br>
+18) Fix mbssid with igmpsnooping work.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
