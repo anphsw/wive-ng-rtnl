@@ -402,7 +402,7 @@ INT MBSS_VirtualIF_PacketSend(
 		{
 			NdisZeroMemory((PUCHAR)&(RTPKT_TO_OSPKT(pPktSrc))->cb[CB_OFF], 15);
             RTMP_SET_PACKET_NET_DEVICE_MBSSID(pPktSrc, IdBss);
-	    SET_OS_PKT_NETDEV(pPktSrc, pAd->net_dev);
+	    SET_OS_PKT_NETDEV(pPktSrc, pDev);
 
             /* transmit the packet */
             return rt28xx_packet_xmit(pPktSrc);
