@@ -1,12 +1,12 @@
-/* $Id: upnputils.h,v 1.2 2012/02/06 16:21:24 nanard Exp $ */
+/* $Id: upnputils.h,v 1.3 2012/09/27 15:46:18 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * (c) 2011-2012 Thomas Bernard
  * This software is subject to the conditions detailed
  * in the LICENCE file provided within the distribution */
 
-#ifndef __UPNPUTILS_H__
-#define __UPNPUTILS_H__
+#ifndef UPNPUTILS_H_INCLUDED
+#define UPNPUTILS_H_INCLUDED
 
 /**
  * convert a struct sockaddr to a human readable string.

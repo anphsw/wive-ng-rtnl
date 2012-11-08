@@ -1,4 +1,4 @@
-/* $Id: miniupnpd.c,v 1.168 2012/07/17 19:35:44 nanard Exp $ */
+/* $Id: miniupnpd.c,v 1.171 2012/10/04 22:36:46 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * (c) 2006-2012 Thomas Bernard
@@ -377,6 +377,7 @@ write_ctlsockets_list(int fd, struct ctlelem * e)
 	}
 }
 
+#ifndef DISABLE_CONFIG_FILE
 static void
 write_option_list(int fd)
 {
@@ -392,6 +393,7 @@ write_option_list(int fd)
 		write(fd, buffer, len);
 	}
 }
+#endif
 
 static void
 write_command_line(int fd, int argc, char * * argv)
@@ -1316,6 +1318,15 @@ main(int argc, char * * argv)
 		return 0;
 	}
 
+	syslog(LOG_INFO, "Starting%s%swith external interface %s",
+#ifdef ENABLE_NATPMP
+	       GETFLAG(ENABLENATPMPMASK) ? " NAT-PMP " : " ",
+#else
+	       " ",
+#endif
+	       GETFLAG(ENABLEUPNPMASK) ? "UPnP-IGD " : "",
+	       ext_if_name);
+
 	if(GETFLAG(ENABLEUPNPMASK))
 	{
 
@@ -1350,7 +1361,7 @@ main(int argc, char * * argv)
 		sudp = OpenAndConfSSDPReceiveSocket(0);
 		if(sudp < 0)
 		{
-			syslog(LOG_INFO, "Failed to open socket for receiving SSDP. Trying to use MiniSSDPd");
+			syslog(LOG_NOTICE, "Failed to open socket for receiving SSDP. Trying to use MiniSSDPd");
 			if(SubmitServicesToMiniSSDPD(lan_addrs.lh_first->str, v.port) < 0) {
 				syslog(LOG_ERR, "Failed to connect to MiniSSDPd. EXITING");
 				return 1;
@@ -1360,7 +1371,7 @@ main(int argc, char * * argv)
 		sudpv6 = OpenAndConfSSDPReceiveSocket(1);
 		if(sudpv6 < 0)
 		{
-			syslog(LOG_INFO, "Failed to open socket for receiving SSDP (IP v6).");
+			syslog(LOG_WARNING, "Failed to open socket for receiving SSDP (IP v6).");
 		}
 #endif
 
@@ -1651,7 +1662,9 @@ main(int argc, char * * argv)
 				{
 					/*write(ectl->socket, buf, l);*/
 					write_command_line(ectl->socket, argc, argv);
+#ifndef DISABLE_CONFIG_FILE
 					write_option_list(ectl->socket);
+#endif
 					write_permlist(ectl->socket, upnppermlist, num_upnpperm);
 					write_upnphttp_details(ectl->socket, upnphttphead.lh_first);
 					write_ctlsockets_list(ectl->socket, ctllisthead.lh_first);
@@ -1682,7 +1695,7 @@ main(int argc, char * * argv)
 			struct sockaddr_un clientname;
 			struct ctlelem * tmp;
 			socklen_t clientnamelen = sizeof(struct sockaddr_un);
-			//syslog(LOG_DEBUG, "sctl!");
+			/*syslog(LOG_DEBUG, "sctl!");*/
 			s = accept(sctl, (struct sockaddr *)&clientname,
 			           &clientnamelen);
 			syslog(LOG_DEBUG, "sctl! : '%s'", clientname.sun_path);

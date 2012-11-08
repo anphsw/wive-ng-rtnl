@@ -1,4 +1,4 @@
-/* $Id: minissdp.c,v 1.40 2012/08/10 12:00:09 nanard Exp $ */
+/* $Id: minissdp.c,v 1.43 2012/10/03 15:21:48 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * (c) 2006-2012 Thomas Bernard
@@ -6,6 +6,7 @@
  * in the LICENCE file provided within the distribution */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <sys/socket.h>
@@ -367,22 +368,33 @@ SendSSDPAnnounce2(int s, const struct sockaddr * addr,
 	}
 }
 
-static const char * const known_service_types[] =
+#ifndef IGD_V2
+#define IGD_VER 1
+#define WANIPC_VER 1
+#else
+#define IGD_VER 2
+#define WANIPC_VER 2
+#endif
+
+static struct {
+	const char * s;
+	const int version;
+} const known_service_types[] =
 {
-	"upnp:rootdevice",
-	"urn:schemas-upnp-org:device:InternetGatewayDevice:",
-	"urn:schemas-upnp-org:device:WANConnectionDevice:",
-	"urn:schemas-upnp-org:device:WANDevice:",
-	"urn:schemas-upnp-org:service:WANCommonInterfaceConfig:",
-	"urn:schemas-upnp-org:service:WANIPConnection:",
-	"urn:schemas-upnp-org:service:WANPPPConnection:",
+	{"upnp:rootdevice", 0},
+	{"urn:schemas-upnp-org:device:InternetGatewayDevice:", IGD_VER},
+	{"urn:schemas-upnp-org:device:WANConnectionDevice:", 1},
+	{"urn:schemas-upnp-org:device:WANDevice:", 1},
+	{"urn:schemas-upnp-org:service:WANCommonInterfaceConfig:", 1},
+	{"urn:schemas-upnp-org:service:WANIPConnection:", WANIPC_VER},
+	{"urn:schemas-upnp-org:service:WANPPPConnection:", 1},
 #ifdef ENABLE_L3F_SERVICE
-	"urn:schemas-upnp-org:service:Layer3Forwarding:",
+	{"urn:schemas-upnp-org:service:Layer3Forwarding:", 1},
 #endif
 #ifdef ENABLE_6FC_SERVICE
-	"url:schemas-upnp-org:service:WANIPv6FirewallControl:",
+	{"url:schemas-upnp-org:service:WANIPv6FirewallControl:", 1},
 #endif
-	0
+	{0, 0}
 };
 
 static void
@@ -396,6 +408,7 @@ SendSSDPNotifies(int s, const char * host, unsigned short port,
 #endif
 	int l, n, i=0;
 	char bufr[512];
+	char ver_str[4];
 
 	memset(&sockname, 0, sizeof(sockname));
 #ifdef ENABLE_IPV6
@@ -415,8 +428,12 @@ SendSSDPNotifies(int s, const char * host, unsigned short port,
 		p->sin_addr.s_addr = inet_addr(SSDP_MCAST_ADDR);
 	}
 
-	while(known_service_types[i])
+	while(known_service_types[i].s)
 	{
+		if(i==0)
+			ver_str[0] = '\0';
+		else
+			snprintf(ver_str, sizeof(ver_str), "%d", known_service_types[i].version);
 		l = snprintf(bufr, sizeof(bufr),
 			"NOTIFY * HTTP/1.1\r\n"
 			"HOST: %s:%d\r\n"
@@ -435,8 +452,8 @@ SendSSDPNotifies(int s, const char * host, unsigned short port,
 			SSDP_PORT,
 			lifetime,
 			host, port,
-			known_service_types[i], (i==0?"":"1"),
-			uuidvalue, known_service_types[i], (i==0?"":"1"),
+			known_service_types[i].s, ver_str,
+			uuidvalue, known_service_types[i].s, ver_str,
 			upnp_bootid, upnp_bootid, upnp_configid );
 		if(l<0)
 		{
@@ -529,10 +546,14 @@ ProcessSSDPData(int s, const char *bufr, int n,
 	struct lan_addr_s * lan_addr = NULL;
 	const char * st = NULL;
 	int st_len = 0;
+	int st_ver = 0;
 	char sender_str[64];
+	char ver_str[4];
 	const char * announced_host = NULL;
+#ifdef ENABLE_IPV6
 #ifdef UPNP_STRICT
 	char announced_host_buf[64];
+#endif
 #endif
 
 	/* get the string representation of the sender address */
@@ -560,7 +581,11 @@ ProcessSSDPData(int s, const char *bufr, int n,
 				while(st[st_len]!='\r' && st[st_len]!='\n'
 				     && (st + st_len < bufr + n))
 					st_len++;
-				/*syslog(LOG_INFO, "ST: %.*s", st_len, st);*/
+				l = st_len;
+				while(l > 0 && st[l-1] != ':')
+					l--;
+				st_ver = atoi(st+l);
+				syslog(LOG_DEBUG, "ST: %.*s (ver=%d)", st_len, st, st_ver);
 				/*j = 0;*/
 				/*while(bufr[i+j]!='\r') j++;*/
 				/*syslog(LOG_INFO, "%.*s", j, bufr+i);*/
@@ -629,10 +654,15 @@ ProcessSSDPData(int s, const char *bufr, int n,
 			}
 #endif
 			/* Responds to request with a device as ST header */
-			for(i = 0; known_service_types[i]; i++)
+			for(i = 0; known_service_types[i].s; i++)
 			{
-				l = (int)strlen(known_service_types[i]);
-				if(l<=st_len && (0 == memcmp(st, known_service_types[i], l)))
+				l = (int)strlen(known_service_types[i].s);
+				if(l<=st_len && (0 == memcmp(st, known_service_types[i].s, l))
+#ifdef UPNP_STRICT
+				   && (st_ver <= known_service_types[i].version)
+		/* only answer for service version lower or equal of supported one */
+#endif
+				   )
 				{
 					syslog(LOG_INFO, "Single search found");
 					SendSSDPAnnounce2(s, sender,
@@ -646,13 +676,20 @@ ProcessSSDPData(int s, const char *bufr, int n,
 			if(st_len==8 && (0 == memcmp(st, "ssdp:all", 8)))
 			{
 				syslog(LOG_INFO, "ssdp:all found");
-				for(i=0; known_service_types[i]; i++)
+				for(i=0; known_service_types[i].s; i++)
 				{
-					l = (int)strlen(known_service_types[i]);
+					if(i==0)
+						ver_str[0] = '\0';
+					else
+						snprintf(ver_str, sizeof(ver_str), "%d", known_service_types[i].version);
+					l = (int)strlen(known_service_types[i].s);
 					SendSSDPAnnounce2(s, sender,
-					                  known_service_types[i], l, i==0?"":"1",
+					                  known_service_types[i].s, l, ver_str,
 					                  announced_host, port);
 				}
+				/* also answer for uuid */
+				SendSSDPAnnounce2(s, sender, uuidvalue, strlen(uuidvalue), "",
+				                  announced_host, port);
 			}
 			/* responds to request by UUID value */
 			l = (int)strlen(uuidvalue);
@@ -686,6 +723,7 @@ SendSSDPGoodbye(int * sockets, int n_sockets)
 	int n, l;
 	int i, j;
 	char bufr[512];
+	char ver_str[4];
 	int ret = 0;
 	int ipv6 = 0;
 
@@ -705,8 +743,12 @@ SendSSDPGoodbye(int * sockets, int n_sockets)
 #ifdef ENABLE_IPV6
 		ipv6 = j & 1;
 #endif
-	    for(i=0; known_service_types[i]; i++)
+	    for(i=0; known_service_types[i].s; i++)
 	    {
+			if(i==0)
+				ver_str[0] = '\0';
+			else
+				snprintf(ver_str, sizeof(ver_str), "%d", known_service_types[i].version);
 	        l = snprintf(bufr, sizeof(bufr),
                  "NOTIFY * HTTP/1.1\r\n"
                  "HOST: %s:%d\r\n"
@@ -720,8 +762,8 @@ SendSSDPGoodbye(int * sockets, int n_sockets)
                  "\r\n",
                  ipv6 ? "[" LL_SSDP_MCAST_ADDR "]" : SSDP_MCAST_ADDR,
 			     SSDP_PORT,
-				 known_service_types[i], (i==0?"":"1"),
-                 uuidvalue, known_service_types[i], (i==0?"":"1"),
+				 known_service_types[i].s, ver_str,
+                 uuidvalue, known_service_types[i].s, ver_str,
                  upnp_bootid, upnp_bootid, upnp_configid);
 	        n = sendto(sockets[j], bufr, l, 0,
 #ifdef ENABLE_IPV6
@@ -754,6 +796,7 @@ SubmitServicesToMiniSSDPD(const char * host, unsigned short port) {
 	char strbuf[256];
 	unsigned char * p;
 	int i, l, n;
+	char ver_str[4];
 
 	s = socket(AF_UNIX, SOCK_STREAM, 0);
 	if(s < 0) {
@@ -767,20 +810,24 @@ SubmitServicesToMiniSSDPD(const char * host, unsigned short port) {
 		close(s);
 		return -1;
 	}
-	for(i = 0; known_service_types[i]; i++) {
+	for(i = 0; known_service_types[i].s; i++) {
 		buffer[0] = 4;	/* request type 4 : submit service */
 		/* 4 strings following : ST (service type), USN, Server, Location */
 		p = buffer + 1;
-		l = (int)strlen(known_service_types[i]);
+		l = (int)strlen(known_service_types[i].s);
 		if(i > 0)
 			l++;
 		CODELENGTH(l, p);
-		memcpy(p, known_service_types[i], l);
+		memcpy(p, known_service_types[i].s, l);
 		if(i > 0)
 			p[l-1] = '1';
 		p += l;
+		if(i==0)
+			ver_str[0] = '\0';
+		else
+			snprintf(ver_str, sizeof(ver_str), "%d", known_service_types[i].version);
 		l = snprintf(strbuf, sizeof(strbuf), "%s::%s%s",
-		             uuidvalue, known_service_types[i], (i==0)?"":"1");
+		             uuidvalue, known_service_types[i].s, ver_str);
 		CODELENGTH(l, p);
 		memcpy(p, strbuf, l);
 		p += l;

@@ -1,4 +1,4 @@
-/* $Id: upnphttp.c,v 1.73 2012/05/28 13:26:58 nanard Exp $ */
+/* $Id: upnphttp.c,v 1.81 2012/10/04 22:09:34 nanard Exp $ */
 /* Project :  miniupnp
  * Website :  http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * Author :   Thomas Bernard
@@ -19,6 +19,9 @@
 #include <ctype.h>
 #include <errno.h>
 #include "config.h"
+#ifdef ENABLE_HTTP_DATE
+#include <time.h>
+#endif
 #include "upnphttp.h"
 #include "upnpdescgen.h"
 #include "miniupnpdpath.h"
@@ -111,6 +114,37 @@ ParseHttpHeaders(struct upnphttp * h)
 				h->req_soapActionOff = p - h->req_buf;
 				h->req_soapActionLen = n;
 			}
+			else if(strncasecmp(line, "accept-language", 15) == 0)
+			{
+				p = colon;
+				n = 0;
+				while(*p == ':' || *p == ' ' || *p == '\t')
+					p++;
+				while(p[n]>=' ')
+					n++;
+				syslog(LOG_DEBUG, "accept-language HTTP header : '%.*s'", n, p);
+				/* keep only the 1st accepted language */
+				n = 0;
+				while(p[n]>' ' && p[n] != ',')
+					n++;
+				if(n >= (int)sizeof(h->accept_language))
+					n = (int)sizeof(h->accept_language) - 1;
+				memcpy(h->accept_language, p, n);
+				h->accept_language[n] = '\0';
+			}
+			else if(strncasecmp(line, "expect", 6) == 0)
+			{
+				p = colon;
+				n = 0;
+				while(*p == ':' || *p == ' ' || *p == '\t')
+					p++;
+				while(p[n]>=' ')
+					n++;
+				if(strncasecmp(p, "100-continue", 12) == 0) {
+					h->respflags |= FLAG_CONTINUE;
+					syslog(LOG_DEBUG, "\"Expect: 100-Continue\" header detected");
+				}
+			}
 #ifdef ENABLE_EVENTS
 			else if(strncasecmp(line, "Callback", 8)==0)
 			{
@@ -150,6 +184,19 @@ intervening space) by either an integer or the keyword "infinite". */
 					h->req_Timeout = atoi(p+7);
 				}
 			}
+#ifdef UPNP_STRICT
+			else if(strncasecmp(line, "nt", 2)==0)
+			{
+				p = colon + 1;
+				while(isspace(*p))
+					p++;
+				n = 0;
+				while(!isspace(p[n]))
+					n++;
+				h->req_NTOff = p - h->req_buf;
+				h->req_NTLen = n;
+			}
+#endif
 #endif
 		}
 		while(!(line[0] == '\r' && line[1] == '\n'))
@@ -263,6 +310,7 @@ ProcessHTTPPOST_upnphttp(struct upnphttp * h)
 {
 	if((h->req_buflen - h->req_contentoff) >= h->req_contentlen)
 	{
+		/* the request body is received */
 		if(h->req_soapActionOff > 0)
 		{
 			/* we can process the request */
@@ -282,6 +330,20 @@ ProcessHTTPPOST_upnphttp(struct upnphttp * h)
 			                    err400str, sizeof(err400str) - 1);
 			SendRespAndClose_upnphttp(h);
 		}
+	}
+	else if(h->respflags & FLAG_CONTINUE)
+	{
+		/* Sending the 100 Continue response */
+		if(!h->res_buf) {
+			h->res_buf = malloc(256);
+			h->res_buf_alloclen = 256;
+		}
+		h->res_buflen = snprintf(h->res_buf, h->res_buf_alloclen,
+		                         "%s 100 Continue\r\n\r\n", h->HttpVer);
+		h->res_sent = 0;
+		h->state = ESendingContinue;
+		if(SendResp_upnphttp(h))
+			h->state = EWaitingForHttpContent;
 	}
 	else
 	{
@@ -378,6 +440,19 @@ ProcessHTTPSubscribe_upnphttp(struct upnphttp * h, const char * path)
 	/* Check that the callback URL is on the same IP as
 	 * the request, and not on the internet, nor on ourself (DOS attack ?) */
 		if(h->req_CallbackOff > 0) {
+#ifdef UPNP_STRICT
+			/* SID: and Callback: are incompatible */
+			if(h->req_SIDOff > 0) {
+				syslog(LOG_WARNING, "Both Callback: and SID: in SUBSCRIBE");
+				BuildResp2_upnphttp(h, 400, "Incompatible header fields", 0, 0);
+			/* "NT: upnp:event" header is mandatory */
+			} else if(h->req_NTOff <= 0 || h->req_NTLen != 10 ||
+			   0 != memcmp("upnp:event", h->req_buf + h->req_NTOff, 10)) {
+				syslog(LOG_WARNING, "Invalid NT in SUBSCRIBE %.*s",
+				       h->req_NTLen, h->req_buf + h->req_NTOff);
+				BuildResp2_upnphttp(h, 412, "Precondition Failed", 0, 0);
+			} else
+#endif
 			if(checkCallbackURL(h)) {
 				sid = upnpevents_addSubscriber(path, h->req_buf + h->req_CallbackOff,
 				                               h->req_CallbackLen, h->req_Timeout);
@@ -399,6 +474,13 @@ ProcessHTTPSubscribe_upnphttp(struct upnphttp * h, const char * path)
 412 Precondition Failed. If a SID does not correspond to a known,
 un-expired subscription, the publisher must respond
 with HTTP error 412 Precondition Failed. */
+#ifdef UPNP_STRICT
+			/* SID: and NT: headers are incompatibles */
+			if(h->req_NTOff > 0) {
+				syslog(LOG_WARNING, "Both NT: and SID: in SUBSCRIBE");
+				BuildResp2_upnphttp(h, 400, "Incompatible header fields", 0, 0);
+			} else
+#endif
 			if(renewSubscription(h->req_buf + h->req_SIDOff, h->req_SIDLen,
 			                     h->req_Timeout) < 0) {
 				BuildResp2_upnphttp(h, 412, "Precondition Failed", 0, 0);
@@ -417,6 +499,15 @@ ProcessHTTPUnSubscribe_upnphttp(struct upnphttp * h, const char * path)
 	syslog(LOG_DEBUG, "ProcessHTTPUnSubscribe %s", path);
 	syslog(LOG_DEBUG, "SID '%.*s'", h->req_SIDLen, h->req_buf + h->req_SIDOff);
 	/* Remove from the list */
+#ifdef UPNP_STRICT
+	if(h->req_SIDOff <= 0 || h->req_SIDLen == 0) {
+		/* SID: header missing or empty */
+		BuildResp2_upnphttp(h, 412, "Precondition Failed", 0, 0);
+	} else if(h->req_CallbackOff > 0 || h->req_NTOff > 0) {
+		/* no NT: or Callback: header must be present */
+		BuildResp2_upnphttp(h, 400, "Incompatible header fields", 0, 0);
+	} else
+#endif
 	if(upnpevents_removeSubscriber(h->req_buf + h->req_SIDOff, h->req_SIDLen) < 0) {
 		BuildResp2_upnphttp(h, 412, "Precondition Failed", 0, 0);
 	} else {
@@ -627,6 +718,10 @@ Process_upnphttp(struct upnphttp * h)
 			}
 		}
 		break;
+	case ESendingContinue:
+		if(SendResp_upnphttp(h))
+			h->state = EWaitingForHttpContent;
+		break;
 	case ESendingAndClosing:
 		SendRespAndClose_upnphttp(h);
 		break;
@@ -637,7 +732,6 @@ Process_upnphttp(struct upnphttp * h)
 
 static const char httpresphead[] =
 	"%s %d %s\r\n"
-	/*"Content-Type: text/xml; charset=\"utf-8\"\r\n"*/
 	"Content-Type: %s\r\n"
 	"Connection: close\r\n"
 	"Content-Length: %d\r\n"
@@ -661,23 +755,42 @@ BuildHeader_upnphttp(struct upnphttp * h, int respcode,
                      int bodylen)
 {
 	int templen;
-	if(!h->res_buf)
-	{
-		templen = sizeof(httpresphead) + 128 + bodylen;
+	if(!h->res_buf ||
+	   h->res_buf_alloclen < ((int)sizeof(httpresphead) + 256 + bodylen)) {
+		if(h->res_buf)
+			free(h->res_buf);
+		templen = sizeof(httpresphead) + 256 + bodylen;
 		h->res_buf = (char *)malloc(templen);
-		if(!h->res_buf)
-		{
+		if(!h->res_buf) {
 			syslog(LOG_ERR, "malloc error in BuildHeader_upnphttp()");
 			return;
 		}
 		h->res_buf_alloclen = templen;
 	}
+	h->res_sent = 0;
 	h->res_buflen = snprintf(h->res_buf, h->res_buf_alloclen,
 	                         httpresphead, h->HttpVer,
 	                         respcode, respmsg,
-	                         (h->respflags&FLAG_HTML)?"text/html":"text/xml",
+	                         (h->respflags&FLAG_HTML)?"text/html":"text/xml; charset=\"utf-8\"",
 							 bodylen);
+	/* Content-Type MUST be 'text/xml; charset="utf-8"' according to UDA v1.1 */
+	/* Content-Type MUST be 'text/xml' according to UDA v1.0 */
 	/* Additional headers */
+#ifdef ENABLE_HTTP_DATE
+	{
+		char http_date[64];
+		time_t t;
+		struct tm tm;
+		time(&t);
+		gmtime_r(&t, &tm);
+		/* %a and %b depend on locale */
+		strftime(http_date, sizeof(http_date),
+		         "%a, %d %b %Y %H:%M:%S GMT", &tm);
+		h->res_buflen += snprintf(h->res_buf + h->res_buflen,
+		                          h->res_buf_alloclen - h->res_buflen,
+		                          "Date: %s\r\n", http_date);
+	}
+#endif
 #ifdef ENABLE_EVENTS
 	if(h->respflags & FLAG_TIMEOUT) {
 		h->res_buflen += snprintf(h->res_buf + h->res_buflen,
@@ -707,6 +820,13 @@ BuildHeader_upnphttp(struct upnphttp * h, int respcode,
 		h->res_buflen += snprintf(h->res_buf + h->res_buflen,
 		                          h->res_buf_alloclen - h->res_buflen,
 		                          "Allow: %s\r\n", "SUBSCRIBE, UNSUBSCRIBE");
+	}
+	if(h->accept_language[0] != '\0') {
+		/* defaulting to "en" */
+		h->res_buflen += snprintf(h->res_buf + h->res_buflen,
+		                          h->res_buf_alloclen - h->res_buflen,
+		                          "Content-Language: %s\r\n",
+		                          h->accept_language[0] == '*' ? "en" : h->accept_language);
 	}
 	h->res_buf[h->res_buflen++] = '\r';
 	h->res_buf[h->res_buflen++] = '\n';
@@ -743,6 +863,41 @@ BuildResp_upnphttp(struct upnphttp * h,
                         const char * body, int bodylen)
 {
 	BuildResp2_upnphttp(h, 200, "OK", body, bodylen);
+}
+
+int
+SendResp_upnphttp(struct upnphttp * h)
+{
+	ssize_t n;
+
+	while (h->res_sent < h->res_buflen)
+	{
+		n = send(h->socket, h->res_buf + h->res_sent,
+		         h->res_buflen - h->res_sent, 0);
+		if(n<0)
+		{
+			if(errno == EINTR)
+				continue;	/* try again immediatly */
+			if(errno == EAGAIN || errno == EWOULDBLOCK)
+			{
+				/* try again later */
+				return 0;
+			}
+			syslog(LOG_ERR, "send(res_buf): %m");
+			break; /* avoid infinite loop */
+		}
+		else if(n == 0)
+		{
+			syslog(LOG_ERR, "send(res_buf): %d bytes sent (out of %d)",
+							h->res_sent, h->res_buflen);
+			break;
+		}
+		else
+		{
+			h->res_sent += n;
+		}
+	}
+	return 1;	/* finished */
 }
 
 void
