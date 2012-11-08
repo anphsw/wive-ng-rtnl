@@ -1225,6 +1225,10 @@
 19) Fix cone nat work with SNAT mode.<br>
 20) Fix skip hw_nat processing for webstr match.<br>
 21) Update xupnpd to 317 revision.<br>
+22) Rework high cpu policer in ppp.<br>
+23) miniupnpd: update to 1.7.20121005 version.<br>
+24) xupnp: update to revision 327.<br>
+25) busybox: sync with current stable patchsets.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
