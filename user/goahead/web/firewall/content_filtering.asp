@@ -6,6 +6,8 @@
 <meta http-equiv="Pragma" content="no-cache">
 
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
+<link rel="stylesheet" href="/style/controls.css" type="text/css">
+
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script type="text/javascript" src="/js/controls.js"></script>
 
@@ -144,7 +146,7 @@ function submitForm(form)
 <% checkIfUnderBridgeModeASP(); %>
 
 <p id="ContentFilterIntrodution">Here you can setup Content Filter to restrict access to unwanted content.</p>
-
+<hr>
 <form action="/goform/webContentFilterSetup" method="POST" name="websContentFilterSetup" onsubmit="return submitForm(this);">
 
 <!-- New content filtering -->

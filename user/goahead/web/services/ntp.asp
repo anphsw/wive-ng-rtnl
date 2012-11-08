@@ -41,6 +41,7 @@ function initValue()
 	var dateb = "<% getDATEBuilt(); %>";
 	var ena = "<% getCfgGeneral(1, "NTPEnabled"); %>";
 	var form = document.NTP;
+	var cTime = new Date();
 
 	initTranslation();
 
@@ -48,7 +49,8 @@ function initValue()
 	{
 		showElement('div_date');
 		form.ntpcurrenttime.disabled = false;
-	} 
+		form.ntpcurrenttime.value = sprintf('%02d:%02d:%02d %02d.%02d.%04d', cTime.getHours(), cTime.getMinutes(), cTime.getSeconds(), cTime.getDate(), cTime.getMonth()+1, cTime.getFullYear());
+	}
 	else
 	{
 		hideElement('div_date');
@@ -64,20 +66,17 @@ function initValue()
 function syncWithHost()
 {
 	var cTime = new Date();
-	
-	var tmp = sprintf('%04d%02d%02d%02d%02d.%02d',
-			cTime.getFullYear(), cTime.getMonth()+1, cTime.getDay(),
+
+	var tmp = sprintf('"%04d-%02d-%02d %02d:%02d:%02d"',
+			cTime.getFullYear(), cTime.getMonth()+1, cTime.getDate(),
 			cTime.getHours(), cTime.getMinutes(), cTime.getSeconds());
-	
+
 	ajaxPostRequest("/goform/NTPSyncWithHost", tmp, true);
 }
 
 function ntpChange(form)
 {
 	var dis = ! form.ntp_enabled.checked;
-	form.ntpcurrenttime.disabled = dis;
-	form.manNTPSyncWithHost.disabled = dis;
-	form.time_zone.disabled = dis;
 	form.NTPServerIP.disabled = dis;
 }
 
@@ -103,9 +102,9 @@ function ntpChange(form)
 	</td>
 </tr>
 <tr id="div_date">
-	<td class="head" id="manNTPCurrentTime">Current Time</td>
+	<td class="head" id="manNTPCurrentTime">Current Host Time</td>
 	<td>
-		<input class="wide" name="ntpcurrenttime" value="<% getCurrentTimeASP(); %>" type="text" readonly="1">
+		<input class="wide" name="ntpcurrenttime" type="text" readonly="1">
 		<input type="button" class="normal" value="Sync with host" id="manNTPSyncWithHost" name="manNTPSyncWithHost" onClick="syncWithHost()">
 	</td>
 </tr>

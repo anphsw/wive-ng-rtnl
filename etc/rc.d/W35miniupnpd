@@ -21,7 +21,7 @@ LOG="logger -t upnpd"
 start() {
  get_param
     if [ "$upnpEnabled" = "1" -a "$real_wan_ipaddr" != "" ] && [ "$OperationMode" != "0" -o "$vpnEnabled" = "on" ]; then
-	$LOG "Start upnp at $real_wan_ipaddr"
+	$LOG "Starting UPNP at $real_wan_ipaddr"
 	if [ ! -f /var/upnp_leases ]; then
 	    touch /var/upnp_leases
 	fi
@@ -60,7 +60,7 @@ get_param() {
 }
 
 stop() {
- $LOG "Stop upnp "
+ $LOG "Stoping UPNP"
     pid=`pidof miniupnpd`
     count=0
     # try 3 times for correct shutdown

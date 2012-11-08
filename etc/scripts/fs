@@ -65,8 +65,9 @@ save() {
 }
 
 restore() {
-    echo "Clear rwfs and reboot. Please go smoke..."
+    echo "Clear rwfs."
     mtd_write erase RW-FS
+    echo "Now reboot..."
     reboot
 }
 
@@ -91,6 +92,7 @@ fullreset() {
     burnrf
     echo "Clear Config partitions."
     nvram_clear 2860
+    echo "Now reboot..."
     reboot
 }
 

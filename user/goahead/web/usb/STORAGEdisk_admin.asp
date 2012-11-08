@@ -229,7 +229,7 @@ part_count = parseInt('<% getCount(1, "AllPart"); %>');
 <table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
   <tr align="right">
     <td>
-      <input type="button" style="{width:80px;}" value="RemoveDisk" id="storageDiskRemove" onClick="submit_apply('remove')">&nbsp;&nbsp;
+      <input type="button" style="{width:120px;}" value="Remove Disk" id="storageDiskRemove" onClick="submit_apply('remove')">&nbsp;&nbsp;
     </td>
   </tr>
 </table>

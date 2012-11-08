@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<TITLE>Wive-NG-RTNL - next generation routers firmware for Ralink based Wi-Fi CPE</TITLE>
+<TITLE>Wive-NG-RTNL</TITLE>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0">
 <meta http-equiv="Pragma" content="no-cache">

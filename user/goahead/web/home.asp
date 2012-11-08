@@ -3,7 +3,7 @@
 <!-- Copyright (c) Ralink (2004-2010) Tech Inc. All Rights Reserved. -->
 <!-- Copyright (c) Wive project (2010-2011). All Rights Reserved. -->
 <HEAD>
-<TITLE>Wive-NG-RTNL - next generation router firmware for Ralink based Wi-Fi CPE</TITLE>
+<TITLE>Wive-NG-RTNL</TITLE>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0">
 <meta http-equiv="Pragma" content="no-cache">
@@ -69,16 +69,15 @@ function onInit()
 
 </script>
 </HEAD>
-<FRAMESET id="homeFrameset" ROWS="70,1*" COLS="*" BORDER="0" FRAMESPACING="0" FRAMEBORDER="NO" onLoad="onInit()">
+<FRAMESET id="homeFrameset" ROWS="40,1*" COLS="*" BORDER="0" FRAMESPACING="0" FRAMEBORDER="NO" onLoad="onInit()">
 
   <FRAME SRC="title.htm" NAME="title" FRAMEBORDER="NO" SCROLLING="NO" MARGINWIDTH="0" MARGINHEIGHT="0">
 
-  <FRAMESET id="homeMenuFrameset" COLS="250,1*">
+  <FRAMESET id="homeMenuFrameset" COLS="200,1*">
 
     <FRAME SRC="treeapp.asp" NAME="menu" MARGINWIDTH="0" MARGINHEIGHT="0" scrolling="AUTO" FRAMEBORDER="NO" >
 
     <FRAME SRC="overview.asp" NAME="view" SCROLLING="AUTO" MARGINWIDTH="0" TOPMARGIN="0" MARGINHEIGHT="0" FRAMEBORDER="NO">
-
   </FRAMESET>
 </FRAMESET>
 

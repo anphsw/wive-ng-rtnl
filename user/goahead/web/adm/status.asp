@@ -109,7 +109,8 @@ function initTranslation()
 
 	_TR("statusSysInfo", "status system information");
 	_TR("statusSDKVersion", "status sdk version");
-	_TR("statusSysUpTime", "status system up time");
+	_TR("statusSysDateTime", "status system date time");
+    _TR("statusSysUpTime", "status system up time");
 	_TR("statusSysPlatform", "status system platform");
 
 	_TR("statusInternetConfig", "status internet config");
@@ -210,6 +211,7 @@ function setWanPort(form)
 <table class="body"><tr><td>
 <H1 id="statusTitle">Access Point Status</H1>
 <P id="statusIntroduction">Let's take a look at the status. </P>
+<hr>
 
 <div id="sysinfoTable">
 <table class="form">

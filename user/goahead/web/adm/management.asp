@@ -123,13 +123,13 @@ function onImportSettings(form)
 It takes about 1 minute to upload firmware &amp; upgrade flash. Please be patient.</p>
 <p style="color: #ff0000;">Caution! A corrupted image will hang up the system.</p>
 </div>
+<hr>
 
 <p id="loading" style="display: none; color: #ff0000; font-size: 16px;">
 	Uploading firmware <br><br> Please be patient and don't remove USB device if present...
 </p>
 
 <div id="staticControls">
-<hr>
 
 <!-- ================= Langauge Settings ================= -->
 <table class="form">

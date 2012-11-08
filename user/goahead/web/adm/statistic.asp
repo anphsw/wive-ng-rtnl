@@ -19,9 +19,10 @@ function initTranslation()
 	_TR("statisticTitle", "statistic title");
 	_TR("statisticIntroduction", "statistic introduction");
 
-	_TR("statisticMM", "statistic memory");
+	_TR("statisticMMCPU", "statistic memory and cpu");
 	_TR("statisticMMTotal", "statistic memory total");
 	_TR("statisticMMLeft", "statistic memory left");
+	_TR("statisticCpuUse", "statistic cpu usage");
 
 	_TR("statisticWANLAN", "statistic wanlan");
 	_TR("statisticWANRxPkt", "statistic wan rx pkt");
@@ -98,6 +99,7 @@ interfaces in '<b>Hardware NAT Fastpath</b>' mode is correct now.</p>
 <p>To get correct statistics you need to shut down '<b>Hardware NAT Fastpath</b>' option on
 <a href="/services/misc.asp#nat_fastpath_ref">MISC&nbsp;Services</a> configuration page.</p>
 </div>
+<hr>
 
 <div id="statistics_table" >
 </div>

@@ -733,9 +733,9 @@ void formVPNSetup(webs_t wp, char_t *path, char_t *query)
 
 	//kill helpers firt sigterm second sigkill
 	printf("Kill helpers\n");
-	system("killall -q S70vpnhelper");
+	system("killall -q W60vpnhelper");
 	system("killall -q vpnhelper");
-	system("killall -q -SIGKILL S70vpnhelper");
+	system("killall -q -SIGKILL W60vpnhelper");
 	system("killall -q -SIGKILL vpnhelper");
 	printf("Calling vpn helper...\n");
 	system("service vpnhelper restart &");
@@ -1171,7 +1171,7 @@ static int getSpotBuilt(int eid, webs_t wp, int argc, char_t **argv)
 #ifdef CONFIG_USER_CHILLISPOT
 	char* spot_en = nvram_get(RT2860_NVRAM, "HotspotEnabled");
 	fprintf(stderr, "goahead: spot_en = %s\n", spot_en);
-	if (strncmp(spot_en, "1", 2) != 0) 
+	if (strncmp(spot_en, "1", 2) != 0)
 	    spot_en = "0";
 	return websWrite(wp, T(spot_en));
 #else
@@ -1243,7 +1243,7 @@ static int getWanNetmask(int eid, webs_t wp, int argc, char_t **argv)
 	char if_net[16];
 	char *cm = nvram_get(RT2860_NVRAM, "wanConnectionMode");
 
-	if (!strncmp(cm, "PPPOE", 6) || !strncmp(cm, "L2TP", 5) || !strncmp(cm, "PPTP", 5)) { 
+	if (!strncmp(cm, "PPPOE", 6) || !strncmp(cm, "L2TP", 5) || !strncmp(cm, "PPTP", 5)) {
 		//fetch ip from vpn if
 		if (-1 == getIfNetmask(getPPPIfName(), if_net)) {
 			return websWrite(wp, T(""));
@@ -1788,8 +1788,8 @@ static int getRoutingTable(int eid, webs_t wp, int argc, char_t **argv)
 			websWrite(wp, T(",\n"));
 
 		websWrite(wp, T("[ '%s', '%s', '%s', '%s', 0, 0, 0, 0, %d, '%s', %d, '%s', 0 ]"),
-			ifname, dest_str, gw_str, netmask_str, index, interface, 
-			((strcmp(interface, "VPN")==0) ? isBridgeMode : 1), 
+			ifname, dest_str, gw_str, netmask_str, index, interface,
+			((strcmp(interface, "VPN")==0) ? isBridgeMode : 1),
 			comment);
 		nl++;
 	}
@@ -1809,7 +1809,7 @@ static void editRouting(webs_t wp, char_t *path, char_t *query)
 	int i=0, rebuild_vpn=0, iaction;
 
 	char_t *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
-	
+
 	websHeader(wp);
 	websWrite(wp, T("<h3>Edit routing table:</h3><br>\n"));
 
@@ -1890,7 +1890,7 @@ static void editRouting(webs_t wp, char_t *path, char_t *query)
 	// Write OK
 	websWrite(wp, T("<script language=\"JavaScript\" type=\"text/javascript\">ajaxReloadDelayedPage(10000, '/internet/routing.asp', true);</script>\n"));
 	websFooter(wp);
-	
+
 	if (submitUrl[0])
 		websRedirect(wp, submitUrl);
 	else
@@ -2194,8 +2194,8 @@ static void setWan(webs_t wp, char_t *path, char_t *query)
 	ctype = ip = nm = gw = eth = user = pass =
 	vpn_srv = vpn_mode = l2tp_srv = l2tp_mode = NULL;
 
-	ctype = websGetVar(wp, T("connectionType"), T("0")); 
-	req_ip = websGetVar(wp, T("dhcpReqIP"), T("")); 
+	ctype = websGetVar(wp, T("connectionType"), T("0"));
+	req_ip = websGetVar(wp, T("dhcpReqIP"), T(""));
 
 	if (!strncmp(ctype, "STATIC", 7) || !strcmp(opmode, "0"))
 	{

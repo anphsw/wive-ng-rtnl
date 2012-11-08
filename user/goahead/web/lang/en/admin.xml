@@ -59,7 +59,7 @@
   <message msgid="man ntp newzealand" msgstr="(GMT+12:00) New Zealand" />
   <message msgid="man ntp server" msgstr="NTP Server" />
   <message msgid="man ntp sync" msgstr="NTP synchronization(hours)" />
-  <message msgid="man ntp current time" msgstr="Current Time" />
+  <message msgid="man ntp current time" msgstr="Current Host Time" />
   <message msgid="man ntp sync with host" msgstr="Sync with host" />
   <message msgid="man gap title" msgstr="Green AP" />
   <message msgid="man gap time" msgstr="Duration" />
@@ -99,7 +99,8 @@
   <message msgid="status introduction" msgstr="Let's take a look at the status of Wive-NG-RTNL." />
   <message msgid="status system information" msgstr="System Info" />
   <message msgid="status sdk version" msgstr="Firmware Version" />
-  <message msgid="status system up time" msgstr="System Time" />
+  <message msgid="status system date time" msgstr="System Time" />
+  <message msgid="status system up time" msgstr="System Uptime" />
   <message msgid="status system platform" msgstr="System Platform" />
   <message msgid="status operate mode" msgstr="Operation Mode" />
   <message msgid="status internet config" msgstr="Internet Configurations" />
@@ -117,9 +118,11 @@
 
   <message msgid="statistic title" msgstr="Statistic" />
   <message msgid="statistic introduction" msgstr=" Take a look at the Wive-NG-RTNL statistics " />
-  <message msgid="statistic memory" msgstr="Memory" />
+  <message msgid="statistic memory and cpu" msgstr="Memory and CPU" />
   <message msgid="statistic memory total" msgstr="Memory total: " />
   <message msgid="statistic memory left" msgstr="Memory left: " />
+  <message msgid="statistic cpu usage" msgstr="CPU usage: " />
+
   <message msgid="statistic wanlan" msgstr="WAN/LAN" />
   <message msgid="statistic wan rx pkt" msgstr="WAN Rx packets: " />
   <message msgid="statistic wan rx bytes" msgstr="WAN Rx bytes: " />

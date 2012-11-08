@@ -22,7 +22,10 @@ function uploadLogField(str)
 		"Not support.\n(Busybox->\n  System Logging Utilitie ->\n    syslogd\n    Circular Buffer\n    logread"
 	}
 	else
+	{
 		document.getElementById("syslog").value = str;
+		document.getElementById("syslog").scrollTop = document.getElementById("syslog").scrollHeight;
+	}
 }
 
 function updateLog()
@@ -42,14 +45,14 @@ function initTranslation()
 function pageInit()
 {
 	initTranslation();
-	
+
 	var form = document.LogdSetup;
 	var klogd = '<% getCfgZero(1, "KLogd");%>';
 	var syslogd = '<% getCfgZero(1, "SysLogd");%>';
-	
+
 	form.KLogd.value = (klogd == '1') ? '1' : '0';
 	form.SysLogd.value = (syslogd == '1') ? '1' : '0';
-	
+
 	syslogdSelect(form);
 	updateLog();
 }
@@ -75,7 +78,7 @@ function checkSetupForm(form)
 			form.RemoteSysLogIP.focus();
 		}
 	}
-	
+
 	return true;
 }
 
@@ -91,6 +94,7 @@ function syslogdSelect(form)
 <table class="body"><tr><td>
 <h1 id="syslogTitle">System Log</h1>
 <p>Here you can configure system logging</p>
+<hr>
 
 <!-- ================= System log setup ================= -->
 <form method="post" name="LogdSetup" action="/goform/setuplog" onsubmit="checkSetupForm(this);">

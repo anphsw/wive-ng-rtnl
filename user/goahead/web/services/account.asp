@@ -50,7 +50,6 @@ function initValue()
 <p>To get correct statistics you need to shut down <b>NAT Fastpath</b> option on the
 <a href="/services/misc.asp#nat_fastpath_ref">MISC&nbsp;Services</a> configuration page.</p>
 <p>Please note that turning off <b>NAT Fastpath</b> will increase CPU usage up to 50%.</p>
-<p style="color: #000080; margin-top: 20px;"><a href="http://www.metallica.com/" target="_blank">Sad&nbsp;but&nbsp;true...</a></p>
 </div>
 
 <form action="/goform/formIptAccounting" method="POST" name="formIptAccounting" id="fastpath_form">

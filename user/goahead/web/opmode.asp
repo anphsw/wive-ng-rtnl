@@ -117,8 +117,7 @@ function msg()
 <p id="oIntroduction"></p>
 <hr>
 <p>Current Firmware Version: <% getSdkVersion(); %></p>
-<p style="display: none;" id="ram_caution"><span style="color: #ff0000;"><b>CAUTION!</b></span> Your device has less than 32 MB RAM, seems to have some working problems.</p>
-<p>Please select device operation mode:</p>
+<p>Select device operation mode:</p>
 
 <form method="POST" name="opmode" action="/goform/setOpMode">
 <dl>

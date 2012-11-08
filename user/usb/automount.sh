@@ -81,6 +81,7 @@ try_umount() {
 	$LOG "can not unmount $MOUNT_DST"
 	exit 1
       fi
+      mount_err
     fi
     mount_err
   fi

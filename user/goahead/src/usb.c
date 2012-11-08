@@ -313,6 +313,7 @@ static void storageDiskAdm(webs_t wp, char_t *path, char_t *query)
 		if (NULL == (fp_mount = fopen("/proc/mounts", "r")))
 		{
 			perror(__FUNCTION__);
+            websRedirect(wp, "usb/STORAGEdisk_admin.asp");          
 			return;
 		}
 		while(EOF != fscanf(fp_mount, "%s %s %*s %*s %*s %*s\n", part, path))
@@ -326,20 +327,8 @@ static void storageDiskAdm(webs_t wp, char_t *path, char_t *query)
 	}
 	else if (0 == strcmp(submit, "remove"))
 	{
-		FILE *fp_mount = NULL;
-		char part[30];
-
-		if (NULL == (fp_mount = fopen("/proc/mounts", "r")))
-		{
-			perror(__FUNCTION__);
-			return;
-		}
-		while(EOF != fscanf(fp_mount, "%s %*s %*s %*s %*s %*s\n", part))
-		{
-			if (NULL != strstr(part, "/dev/sd"))
-				doSystem("umount -lf %s", part);
-		}
-		fclose(fp_mount);
+		doSystem("storage.sh remove");
+		websRedirect(wp, "usb/STORAGEdisk_admin.asp");
 	}
 }
 

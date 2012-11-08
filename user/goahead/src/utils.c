@@ -1,6 +1,6 @@
 /* vi: set sw=4 ts=4 sts=4: */
 /*
- *	utils.c -- System Utilities 
+ *	utils.c -- System Utilities
  *
  *	Copyright (c) Ralink Technology Corporation All Rights Reserved.
  *
@@ -11,6 +11,7 @@
 #include	<sys/ioctl.h>
 #include	<sys/time.h>
 #include	<sys/socket.h>
+#include	<sys/sysinfo.h>
 #include	<netinet/in.h>
 #include	<arpa/inet.h>
 
@@ -36,6 +37,7 @@ static int  getStationBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int  getSdkVersion(int eid, webs_t wp, int argc, char_t **argv);
 static int  getMemAmount(int eid, webs_t wp, int argc, char_t **argv);
 static int  getSysUptime(int eid, webs_t wp, int argc, char_t **argv);
+static int  getSysDateTime(int eid, webs_t wp, int argc, char_t **argv);
 static int  getPortStatus(int eid, webs_t wp, int argc, char_t **argv);
 static int  getStaDriverVer(int eid, webs_t wp, int argc, char_t **argv);
 static int  getStaMacAddrw(int eid, webs_t wp, int argc, char_t **argv);
@@ -452,6 +454,7 @@ void formDefineUtilities(void)
 	websAspDefine(T("getSdkVersion"), getSdkVersion);
 	websAspDefine(T("getMemAmount"), getMemAmount);
 	websAspDefine(T("getSysUptime"), getSysUptime);
+	websAspDefine(T("getSysDateTime"), getSysDateTime);
 	websAspDefine(T("getPortStatus"), getPortStatus);
 	websAspDefine(T("getStaDriverVer"), getStaDriverVer);
 	websAspDefine(T("getStaMacAddrw"), getStaMacAddrw);
@@ -463,7 +466,7 @@ void formDefineUtilities(void)
 
 /*
  * arguments: type - 0 = return the configuration of 'field' (default)
- *                   1 = write the configuration of 'field' 
+ *                   1 = write the configuration of 'field'
  *            field - parameter name in nvram
  * description: read general configurations from nvram
  *              if value is NULL -> ""
@@ -954,25 +957,30 @@ static int getMemAmount(int eid, webs_t wp, int argc, char_t **argv)
  */
 static int getSysUptime(int eid, webs_t wp, int argc, char_t **argv)
 {
+    struct sysinfo sinf;
+
+	if (sysinfo(&sinf) == 0)
+    {
+		return websWrite(wp, T("%d day%s, %d hour%s, %d min%s, %d sec%s"),
+				sinf.uptime/(unsigned)86400, ((sinf.uptime/(unsigned)86400) == 1)? "" : "s",
+                (sinf.uptime%(unsigned)86400)/(unsigned)3600, (((sinf.uptime%(unsigned)86400)/(unsigned)3600) == 1)? "" : "s",
+				(sinf.uptime%(unsigned)3600)/(unsigned)60, (((sinf.uptime%(unsigned)3600)/(unsigned)60) == 1)? "" : "s",
+				sinf.uptime%(unsigned)60, ((sinf.uptime%(unsigned)60) == 1)? "" : "s");
+    }
+    else return 0;
+}
+
+static int getSysDateTime(int eid, webs_t wp, int argc, char_t **argv)
+{
 	struct tm *utime;
 	time_t usecs;
 
 	time(&usecs);
 	utime = localtime(&usecs);
 
-	if (utime->tm_hour > 0)
-		return websWrite(wp, T("%d hour%s, %d min%s, %d sec%s"),
-				utime->tm_hour, (utime->tm_hour == 1)? "" : "s",
-				utime->tm_min, (utime->tm_min == 1)? "" : "s",
-				utime->tm_sec, (utime->tm_sec == 1)? "" : "s");
-	else if (utime->tm_min > 0)
-		return websWrite(wp, T("%d min%s, %d sec%s"),
-				utime->tm_min, (utime->tm_min == 1)? "" : "s",
-				utime->tm_sec, (utime->tm_sec == 1)? "" : "s");
-	else
-		return websWrite(wp, T("%d sec%s"),
-				utime->tm_sec, (utime->tm_sec == 1)? "" : "s");
-	return 0;
+	return websWrite(wp, T("%02u:%02u:%02u %02u.%02u.%04u"),
+				utime->tm_hour, utime->tm_min, utime->tm_sec,
+                utime->tm_mday, (utime->tm_mon + 1), (1900 + utime->tm_year));
 }
 
 static int getPortStatus(int eid, webs_t wp, int argc, char_t **argv)
@@ -1110,7 +1118,7 @@ static void setOpMode(webs_t wp, char_t *path, char_t *query)
 	char_t	*mode;
 
 	int	need_commit = 0;
-	mode = websGetVar(wp, T("opMode"), T("0")); 
+	mode = websGetVar(wp, T("opMode"), T("0"));
 
 	nvram_init(RT2860_NVRAM);
 	char	*old_mode = nvram_bufget(RT2860_NVRAM, "OperationMode");

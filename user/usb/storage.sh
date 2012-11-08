@@ -3,6 +3,8 @@
 # Ralink SDK deprecated script for support storage webui
 # Need rewrite this webui and remove this script
 
+LOG="logger -t unmounter"
+
 addTransmissionConfig() {
     CONF_DIR="/media/$2/.config/torrent"
     [ ! -d "$CONF_DIR" ] && mkdir -p "$CONF_DIR"
@@ -25,45 +27,6 @@ addTransmissionConfig() {
     TRANSMISSION_HOME="$CONF_DIR"
     export TRANSMISSION_HOME
 }
-
-case $1 in
-    "addTransConf")
-	if mount | grep -q "/media/$2" ; then
-	    addTransmissionConfig
-	else
-	    echo "not found path /media/$2"
-	    exit 1
-	fi
-	;;
-
-# for old commands
-    *)
-	exit 0
-	;;
-esac
-
-exit 0
-
-#
-# usage: storage.sh
-#
-
-PART1=""
-
-echo "run storage.sh"
-for part in a b c d e f g h i j k l m n o p q r s t u v w x y z
-do
-	for index in 1 2 3 4 5 6 7 8 9
-	do
-		if [ -e "/media/sd$part$index" ]; then
-			PART1="/media/sd$part$index"
-			break;
-		fi
-	done
-	if [ "$PART1" != "" ]; then
-		break;
-	fi
-done
 
 setFtp()
 {
@@ -131,15 +94,37 @@ setSmb()
 }
 
 case $1 in
+	"remove")
+		$LOG "Unmount all discs and swap."
+		service samba stop
+		DiskApps="transmission-daemon ftpd wget minidlna mt-daapd xupnpd"
+		for app in $DiskApps; do
+			if [ `pidof -s $app` ]; then
+			killall -q $app
+			killall -q -SIGKILL $app
+        		fi
+		done
+		for mpoint in $(mount | grep "/dev/sd" | awk '{print $3}'); do
+			fuser -mks -TERM $mpoint
+			sync && umount $mpoint && sync
+			rmdir $mpoint
+		done
+		swp=`cat /proc/swaps | grep "/dev/sd" | awk '{print $1}'`
+		swapoff $swp
+		service samba start
+		$LOG "Unmount complite. Samba restart."
+		;;
 	"adddir")
 		if [ -n "$2" ]; then
 			mkdir -p "$2"
 			chmod 777 "$2"
+		$LOG "Add dir complete."
 		fi
 		;;
 	"deldir")
 		if [ -n "$2" ]; then
 			rm -rf "$2"
+		$LOG "Rem dir complete."
 		fi
 		;;
 	"reparted")
@@ -211,4 +196,39 @@ case $1 in
 			echo "ushare -D"
 		fi
 		;;
+	"addTransConf")
+		if mount | grep -q "/media/$2" ; then
+		addTransmissionConfig
+		else
+		echo "not found path /media/$2"
+		exit 1
+		fi
+		;;
+	*)
+		#
+		# usage: storage.sh
+		#
+
+		PART1=""
+
+		echo "run storage.sh"
+		for part in a b c d e f g h i j k l m n o p q r s t u v w x y z
+		do
+			for index in 1 2 3 4 5 6 7 8 9
+			do
+				if [ -e "/media/sd$part$index" ]; then
+					PART1="/media/sd$part$index"
+					break;
+				fi
+			done
+			if [ "$PART1" != "" ]; then
+				break;
+			fi
+		done
+		exit 0
+		;;
+
 esac
+
+exit 0
+

@@ -13,9 +13,9 @@
 	<td colspan="3"><% getStaMacAddrw(); %></td>
 </tr>
 
-<!-- =================  MEMORY  ================= -->
+<!-- ==============  MEMORY and CPU  =============== -->
 <tr>
-	<td class="title" colspan="6" id="statisticMM">Memory</td>
+	<td class="title" colspan="6" id="statisticMMCPU">Memory and CPU</td>
 </tr>
 <tr>
 	<td class="head" id="statisticMMTotal" colspan="3">Memory total: </td>
@@ -24,6 +24,10 @@
 <tr>
 	<td class="head" id="statisticMMLeft" colspan="3">Memory left: </td>
 	<td colspan="3"><% getMemLeftASP(); %></td>
+</tr>
+<tr>
+	<td class="head" id="statisticCpuUse" colspan="3">CPU usage: </td>
+	<td colspan="3"><% getCpuUsageASP(); %></td>
 </tr>
 <!-- =================  WAN/LAN  ================== -->
 <tr>

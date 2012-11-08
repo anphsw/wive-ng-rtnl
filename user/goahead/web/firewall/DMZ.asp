@@ -176,7 +176,7 @@ function dmzLoopbackWarning(element)
 <h1 id="dmzTitle"> DMZ Settings </h1>
 <% checkIfUnderBridgeModeASP(); %>
 <p id="dmzIntroduction"> Here you can setup the De-Militarized Zone (DMZ) to separate your external services from the rest of LAN.</p>
-<hr />
+<hr>
 
 <form method="POST" name="DMZ" action="/goform/DMZ">
 <table class="form">

@@ -8,6 +8,10 @@
 	<td><% getSdkVersion(); %></td>
 </tr>
 <tr>
+	<td class="head" id="statusSysDateTime">System Time</td>
+	<td><% getSysDateTime(); %></td>
+</tr>
+<tr>
 	<td class="head" id="statusSysUpTime">System Uptime</td>
 	<td><% getSysUptime(); %></td>
 </tr>
