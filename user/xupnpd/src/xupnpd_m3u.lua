@@ -40,7 +40,17 @@ function playlist_new_folder(parent,name)
     return child
 end
 
+function playlist_sort_elements(pls)
+    if cfg.sort_files~=true or pls==nil or pls.elements==nil then return end
+    table.sort(pls.elements,function(a,b) return string.lower(a.name)<string.lower(b.name) end)
+
+--    for i,j in ipairs(pls.elements) do
+--        print('* '..j.name)
+--    end
+end
+
 function playlist_fix_sub_tree(pls)
+    playlist_sort_elements(pls)
     for i,j in ipairs(pls.elements) do
 --        j.id=i
         j.objid=pls.objid..'/'..i

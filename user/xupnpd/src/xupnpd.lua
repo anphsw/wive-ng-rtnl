@@ -6,6 +6,12 @@ cfg.ssdp_interface='br0'
 -- 'cfg.ssdp_loop' enables multicast loop (if player and server in one host)
 cfg.ssdp_loop=0
 
+-- SSDP announcement interval
+cfg.ssdp_notify_interval=10
+
+-- SSDP announcement age
+cfg.ssdp_max_age=1800
+
 -- HTTP port for incoming connections
 cfg.http_port=4044
 
@@ -53,6 +59,9 @@ cfg.dlna_notify=true
 -- group by 'group-title'
 cfg.group=true
 
+-- sort files
+cfg.sort_files=false
+
 -- Device name
 cfg.name='Wive-NG'
 
@@ -88,6 +97,7 @@ feeds=
     { 'vimeo',          'channel/hdxs',         'HD Xtreme sports' },
     { 'vimeo',          'channel/mtb',          'Mountain Bike Channel' },
     { 'youtube',        'channel/top_rated',    'YouTube Top Rated' },
+--    { 'dreambox',       'http://192.168.0.1:8001/','Dreambox1' },
 --    { 'gametrailers',   'ps3/review',           'GT - PS3 - Review' },
 --    { 'gametrailers',   'ps3/preview',          'GT - PS3 - Preview' },
 --    { 'gametrailers',   'ps3/gameplay',         'GT - PS3 - Gameplay' },
@@ -97,7 +107,7 @@ feeds=
 }
 
 -- log ident, pid file end www root
-cfg.version='1.0-rc10'
+cfg.version='1.0-rc12'
 cfg.log_ident=arg[1] or 'xupnpd'
 cfg.pid_file='/var/run/'..cfg.log_ident..'.pid'
 cfg.tmp_path='/tmp/'

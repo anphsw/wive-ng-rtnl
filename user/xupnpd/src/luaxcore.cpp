@@ -30,21 +30,18 @@
 #include <ctype.h>
 #include "compat.h"
 
-// TODO: m3u tree by group-title (grp/subgrp1/subgrp2 => reload_playlists)
-// TODO: sendfile
-// TODO: sendurl alarm?
-// TODO: XBox 360
-// TODO: RTSP/RTP, RTMP, MMS
-// TODO: RTP to builtin udpxy
-// http://www.gupnp.org
-// TODO: YouTube max-count>50
-// TODO: sort(files)
+// TODO: prerender dev.xml tamplate for Content-Length
 // TODO: ivi.ru feeds fail
-// TODO: get_file_length_by_url
+// TODO: m3u tree by group-title (grp/subgrp1/subgrp2 => reload_playlists)
+// TODO: XBox 360
+// TODO: YouTube max-count>50
+// TODO: length to m3u when feed update
 
 namespace core
 {
     int http_timeout=15;
+    int http_sendurl_buf_size=16384;
+    int http_sendurl_wait_all=0;
 
     char user_agent[256]="xupnpd";
 
@@ -1582,6 +1579,25 @@ static int lua_http_get_url_data(const char* url,core::url_data* d)
     return 0;
 }
 
+static size_t lua_http_read_chunk(char* ptr,size_t size,FILE* fp)
+{
+    size_t l=0;
+
+    while(l<size)
+    {
+        size_t n=fread(ptr+l,1,size-l,fp);
+        if(!n)
+            break;
+        else
+            l+=n;
+
+        if(!core::http_sendurl_wait_all)
+            break;
+    }
+
+    return l;
+}
+
 static int lua_http_sendurl(lua_State* L)
 {
     const char* s=lua_tostring(L,1);
@@ -1589,7 +1605,7 @@ static int lua_http_sendurl(lua_State* L)
     const char* range=lua_gettop(L)>2?lua_tostring(L,3):0;
 
     int rc=0;
-    char location[512]="";
+    char location[1024]="";
 
     if(!s || !core::http_client_fp)
     {
@@ -1628,9 +1644,9 @@ static int lua_http_sendurl(lua_State* L)
 
     int status=0;
 
-    char tmp[1024];
+    char* tmp=(char*)malloc(core::http_sendurl_buf_size);
 
-    while(fgets(tmp,sizeof(tmp),fp))
+    while(fgets(tmp,core::http_sendurl_buf_size,fp))
     {
         char* p=strpbrk(tmp,"\r\n");
         if(p)
@@ -1693,11 +1709,15 @@ static int lua_http_sendurl(lua_State* L)
             lua_pushstring(L,location);
         else
             lua_pushnil(L);
+
+        if(tmp)
+            free(tmp);
+
         return 2;
     }else
         rc=1;
     
-    int n;
+    size_t n;
 
     if(extra_headers>0)
         fprintf(core::http_client_fp,"\r\n");
@@ -1706,11 +1726,20 @@ static int lua_http_sendurl(lua_State* L)
 
     int dfd=fileno(core::http_client_fp);
 
-    while((n=fread(tmp,1,sizeof(tmp),fp))>0)
-        if(write(dfd,tmp,n)!=n)
+    while((n=lua_http_read_chunk(tmp,core::http_sendurl_buf_size,fp))>0)
+    {
+        size_t ll=0;
+
+        while(ll<n)
+        {
+            ssize_t nn=write(dfd,tmp+ll,n-ll);
+            if(!nn || nn==(ssize_t)-1)
             break;
         else
+                ll+=nn;
+        }
             alarm(core::http_timeout);
+    }
 
     alarm(0);
 
@@ -1718,6 +1747,9 @@ static int lua_http_sendurl(lua_State* L)
 
     lua_pushinteger(L,rc);
 
+    if(tmp);
+        free(tmp);
+    
     return 1;
 }
 
@@ -1858,7 +1890,7 @@ static int lua_http_download(lua_State* L)
         post_data="";
 
     int len=0;
-    char location[512]="";
+    char location[1024]="";
 
     FILE* dfp=0;
 
@@ -2006,7 +2038,7 @@ static int lua_http_get_length(lua_State* L)
     const char* s=lua_tostring(L,1);
 
     int len=0;
-    char location[512]="";
+    char location[1024]="";
 
     if(s)
     {
@@ -2106,6 +2138,20 @@ static int lua_http_timeout(lua_State* L)
     return 0;
 }
 
+static int lua_http_sendurl_buffer_size(lua_State* L)
+{
+    int size=lua_tointeger(L,1);
+    int all=lua_tointeger(L,2);
+
+    if(size>0)
+        core::http_sendurl_buf_size=size;
+
+    if(all>=0)
+        core::http_sendurl_wait_all=all>0?1:0;
+
+    return 0;
+}
+
 static int lua_http_user_agent(lua_State* L)
 {
     const char* s=lua_tostring(L,1);
@@ -2161,6 +2207,7 @@ int luaopen_luaxcore(lua_State* L)
         {"download",lua_http_download},
         {"get_length",lua_http_get_length},
         {"timeout",lua_http_timeout},
+        {"sendurl_buffer_size",lua_http_sendurl_buffer_size},
         {"user_agent",lua_http_user_agent},
         {0,0}
     };
