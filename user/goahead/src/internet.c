@@ -1339,8 +1339,17 @@ static void removeRoutingRuleNvram(const char *iface, const char *dest, const ch
 	char rule[256];
 	char c_iface[32], c_dest[32], c_netmask[32], c_true_if[32], c_gw[32];
 	char *old = nvram_get(RT2860_NVRAM, "RoutingRules");
-	if (old == NULL) // Check that NVRAM contains variable
-		return;
+	// Check that NVRAM contains variable
+	if (old == NULL)
+	    return;
+
+	// Create temporary buffer
+	char *buf = (char *)calloc(1, strlen(old) + sizeof(char)*2);
+	if (buf == NULL)
+	    return;
+
+	char *p = buf;
+	buf[0] = '\0';
 
 	char *head = old;
 	char *tail = strchr(head, ';');
@@ -1372,30 +1381,17 @@ static void removeRoutingRuleNvram(const char *iface, const char *dest, const ch
 			if ((getNthValueSafe(4, rule, ',', c_true_if, sizeof(c_true_if)) == -1))
 				continue;
 
-			// Check if rule matches
-			if ((strcmp(iface, c_iface)==0) && (strcmp(dest, c_dest)==0) && (strcmp(netmask, c_netmask)==0) &&
-				(strcmp(gw, c_gw)==0) && (strcmp(true_if, c_true_if)==0))
-			{
-				// Create temporary buffer
-				char *buf = (char *)calloc(1, strlen(old) - count + sizeof(char));
-				if (buf == NULL)
-					return;
-				char *p = buf;
+			// Check if rule not matches
+			if (!((strcmp(iface, c_iface)==0) && (strcmp(dest, c_dest)==0) && (strcmp(netmask, c_netmask)==0) &&
+				(strcmp(gw, c_gw)==0) && (strcmp(true_if, c_true_if)==0))) {
+				// Store rule
+				if (strlen(buf) > 0)
+				    *(p++) = ';';
 
-				// Remove rule
-				if (old < head)
-				{
-					memcpy(p, old, head-old);
-					p += (head-old);
-				}
-
-				if (tail[0] == ';')
-					tail++;
-				strcpy(p, tail);
-				nvram_set(RT2860_NVRAM, "RoutingRules", buf);
-				free(buf);
-				return;
+				strcpy(p, rule);
+				p += strlen(rule);
 			}
+			// else skip adding rule
 		} while (0);
 
 		// Move pointer to next entry
@@ -1406,6 +1402,9 @@ static void removeRoutingRuleNvram(const char *iface, const char *dest, const ch
 		if (tail == NULL)
 			tail = head + strlen(head);
 	}
+	// Write new buffer to NVRAM
+	nvram_set(RT2860_NVRAM, "RoutingRules", buf);
+	free(buf);
 }
 
 static int addRoutingRule(char *buf, const char *dest, const char *netmask, const char *gw, const char *true_if)
