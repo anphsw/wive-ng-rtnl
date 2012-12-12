@@ -1847,13 +1847,15 @@ static int one_opt(int option, char *arg, char *errstr, char *gen_err, int comma
 	    if (newlist->flags & SERV_LITERAL_ADDRESS)
 	      ret_err(gen_err);
 	  }
+
+#ifdef HAVE_DHCP
 	else
 	  {
 	    char *err = parse_server(arg, &newlist->addr, &newlist->source_addr, newlist->interface, &newlist->flags);
 	    if (err)
 	      ret_err(err);
 	  }
-	
+#endif
 	serv = newlist;
 	while (serv->next)
 	  {
