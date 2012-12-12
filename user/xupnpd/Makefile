@@ -2,7 +2,7 @@
 -include ../../config.arch
 
 DIRLIST_ETC=playlists plugins
-DIRLIST_SHR=ui www
+DIRLIST_SHR=ui www profiles
 
 all:
 	make -C src embedded

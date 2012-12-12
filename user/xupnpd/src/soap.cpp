@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2011 Anton Burdinuk
+ * Copyright (C) 2011-2012 Anton Burdinuk
  * clark15b@gmail.com
  * https://tsdemuxer.googlecode.com/svn/trunk/xupnpd
  */
@@ -199,6 +199,8 @@ namespace soap
         if(name) { FREE(name); name=0; }
 
         if(data) { FREE(data); data=0; len=0; }
+
+        if(attr) { FREE(attr); attr=0; attr_len=0; }
     }
 
     node* node::find_child(const char* s,int l)
@@ -237,9 +239,9 @@ namespace soap
             printf("  ");
 
         if(node->len>0)
-            printf("<%s>=\"%s\" [%i]\n",node->name?node->name:"???",node->data,node->len);
+            printf("<%s>=\"%s\" [%i], attr=\"%s\"\n",node->name?node->name:"???",node->data,node->len,node->attr?node->attr:"");
         else
-            printf("<%s>\n",node->name?node->name:"???");
+            printf("<%s> , attr=\"%s\"\n",node->name?node->name:"???",node->attr?node->attr:"");
 
         for(soap::node* p=node->beg;p;p=p->next)
             dump(p,depth+1);
@@ -332,6 +334,25 @@ void soap::ctx::data_push(void)
         if(cur->data) FREE(cur->data);
         cur->data=s.ptr;
         cur->len=s.size;
+        s.ptr=0;
+        s.size=0;
+    }
+}
+
+void soap::ctx::attr_push(void)
+{
+    if(!attributes)
+        return;
+
+    string s;
+    data.swap(s);
+    s.trim_right();
+
+    if(s.size>0)
+    {
+        if(cur->attr) FREE(cur->attr);
+        cur->attr=s.ptr;
+        cur->attr_len=s.size;
         s.ptr=0;
         s.size=0;
     }
@@ -435,6 +456,10 @@ int soap::ctx::parse(const char* buf,int len)
                 err=1;
             break;
         case 30:
+            if(ch==' ')
+                continue;
+            st=31;
+        case 31:
             if(st_quot)
             {
                 if(ch=='\"')
@@ -444,10 +469,13 @@ int soap::ctx::parse(const char* buf,int len)
                 if(ch=='\"')
                     st_quot=1;
                 else if(ch=='/')
-                    st=40;
+                    { st=40; attr_push(); }
                 else if(ch=='>')
-                    st=0;
+                    { st=0; attr_push(); }
             }
+
+            if(attributes && st==31) ch_push(ch);
+
             break;
         case 40:
             if(ch!='>') err=1; else tok_push();
@@ -459,7 +487,7 @@ int soap::ctx::parse(const char* buf,int len)
             if(ch=='>') st=0; else if(ch!='?') st=50;
             break;
         case 60:
-            if(ch=='-') st=61; else err=1;
+            if(ch=='-') st=61; else if(ch=='[') st=100; else err=1;
             break;
         case 61:
             if(ch=='-') st=62; else err=1;
@@ -475,6 +503,22 @@ int soap::ctx::parse(const char* buf,int len)
                 st=0;
             else if(ch!='-')
                 st=62;
+            break;
+        case 100: if(ch=='C') st++; else err=1; break;
+        case 101: if(ch=='D') st++; else err=1; break;
+        case 102: if(ch=='A') st++; else err=1; break;
+        case 103: if(ch=='T') st++; else err=1; break;
+        case 104: if(ch=='A') st++; else err=1; break;
+        case 105: if(ch=='[') st++; else err=1; break;
+        case 106: if(ch==']') st=107; else ch_push(ch); break;
+        case 107: if(ch==']') st=108; else { ch_push(']'); ch_push(ch); st=106; } break;
+        case 108:
+            if(ch=='>')
+                { st=0; data_push(); }
+            else if(ch==']')
+                { ch_push(ch); }
+            else
+                { ch_push(']'); ch_push(']'); ch_push(ch); st=106; }
             break;
         }
     }
@@ -509,6 +553,7 @@ int main(void)
         "                       <staff/>\n"
         "                       <  staff2  />\n"
         "                       <staff3>Hello &lt;&gt;&aaa; World</staff3>\n"
+        "                       <staff4><![CDATA[Hello &lt;&gt;&aaa; World]]></staff4>\n"
         "               </u:Browse>\n"
         "       </s:Body>\n"
         "</s:Envelope>\n";
@@ -537,5 +582,3 @@ int main(void)
     return 0;
 }
 */
-
-

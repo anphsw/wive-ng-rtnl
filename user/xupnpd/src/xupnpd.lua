@@ -42,16 +42,7 @@ cfg.proxy=2
 cfg.user_agent='Mozilla/5.0'
 
 -- I/O timeout
-cfg.http_timeout=20
-
--- 'cfg.dlna_extras' enables DLNA extras
-cfg.dlna_extras=true
-
--- XBox360 compatible mode
-cfg.xbox360=false
-
--- WDTV Live compatible mode
-cfg.wdtv=false
+cfg.http_timeout=30
 
 -- enables UPnP/DLNA notify when reload playlist
 cfg.dlna_notify=true
@@ -74,40 +65,37 @@ cfg.cache_size=8
 -- url cache item ttl (sec)
 cfg.cache_ttl=900
 
--- default mime type (mpeg, mpeg1, mpeg2, ts)
+-- default mime type (mpeg, mpeg_ts, mpeg1, mpeg2, ts, ...)
 cfg.default_mime_type='mpeg'
 
 -- feeds update interval (seconds, 0 - disabled)
 cfg.feeds_update_interval=1800
 cfg.playlists_update_interval=0
 
--- fetch file length when feed update (slow!!!)
-cfg.feeds_fetch_length=false
-
 -- playlist (m3u file path or path with alias
 playlist=
 {
---    { './localmedia', 'Local Media Files', '127.0.0.1;192.168.1.1' }
+--    { './localmedia', 'Local Media Files' }
 }
 
 -- feeds list (plugin, feed name, feed type)
 feeds=
 {
-    { 'vimeo',          'channel/hd',           'Vimeo HD Channel' },
-    { 'vimeo',          'channel/hdxs',         'HD Xtreme sports' },
-    { 'vimeo',          'channel/mtb',          'Mountain Bike Channel' },
+--    { 'vimeo',          'channel/hd',           'Vimeo HD Channel' },
+--    { 'vimeo',          'channel/hdxs',         'Vimeo Xtreme sports' },
+--    { 'vimeo',          'channel/mtb',          'Vimeo MTB Channel' },
     { 'youtube',        'channel/top_rated',    'YouTube Top Rated' },
---    { 'dreambox',       'http://192.168.0.1:8001/','Dreambox1' },
---    { 'gametrailers',   'ps3/review',           'GT - PS3 - Review' },
---    { 'gametrailers',   'ps3/preview',          'GT - PS3 - Preview' },
---    { 'gametrailers',   'ps3/gameplay',         'GT - PS3 - Gameplay' },
---    { 'giantbomb',      'all',                  'GiantBomb - All' },
+--    { 'youtube',        'Drift0r',              'Drift0r' },
+--    { 'youtube',        'XboxAhoy',             'XboxAhoy' },
 --    { 'ag',             'videos',               'AG - New' },
 --    { 'ivi',            'new',                  'IVI - New' },
+--    { 'gametrailers',   'ps3,                   'GT - PS3' },
+--    { 'giantbomb',      'all',                  'GiantBomb - All' },
+--    { 'dreambox',       'http://192.168.0.1:8001/','Dreambox1' },
 }
 
 -- log ident, pid file end www root
-cfg.version='1.0-rc12'
+cfg.version='1.0.1'
 cfg.log_ident=arg[1] or 'xupnpd'
 cfg.pid_file='/var/run/'..cfg.log_ident..'.pid'
 cfg.tmp_path='/tmp/'
@@ -117,5 +105,7 @@ cfg.playlists_path='/etc/xupnpd/playlists/'
 cfg.feeds_path='/etc/xupnpd/xupnpd-feeds/'
 cfg.www_root='/usr/share/xupnpd/www/'
 cfg.ui_path='/usr/share/xupnpd/ui/'
+cfg.drive=''                    -- reload playlists only if drive state=active/idle, example: cfg.drive='/dev/sda'
+cfg.profiles='/usr/share/xupnpd/profiles/'      -- device profiles feature
 
 dofile('xupnpd_main.lua')

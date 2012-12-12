@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2011 Anton Burdinuk
+ * Copyright (C) 2011-2012 Anton Burdinuk
  * clark15b@gmail.com
  * https://tsdemuxer.googlecode.com/svn/trunk/xupnpd
  */
@@ -142,6 +142,7 @@ static void lua_push_soap_node(lua_State* L,soap::node* node)
     lua_rawset(L,-3);
 }
 
+
 static int lua_soap_parse(lua_State* L)
 {
     size_t l=0;
@@ -158,6 +159,81 @@ static int lua_soap_parse(lua_State* L)
     ctx.begin();
     if(!ctx.parse(s,l) && !ctx.end() && root.beg)
         lua_push_soap_node(L,root.beg);
+
+    root.clear();
+
+    return 1;
+}
+
+static void lua_push_xml_node(lua_State* L,soap::node* node)
+{
+    if(node->name)
+    {
+        lua_pushstring(L,"@name");
+        lua_pushstring(L,node->name);
+        lua_rawset(L,-3);
+    }
+
+    if(node->attr)
+    {
+        lua_pushstring(L,"@attr");
+        lua_pushlstring(L,node->attr,node->attr_len);
+        lua_rawset(L,-3);
+    }
+
+    if(!node->beg)
+    {
+        lua_pushstring(L,"@value");
+        lua_pushlstring(L,node->data,node->len);
+    }else
+    {
+        lua_pushstring(L,"@elements");
+        lua_newtable(L);
+
+        int idx=0;
+        for(soap::node* p=node->beg;p;p=p->next)
+        {
+            lua_pushinteger(L,++idx);
+            lua_newtable(L);
+            lua_push_xml_node(L,p);
+
+            if(node->name)
+            {
+                lua_pushstring(L,p->name);
+                lua_pushvalue(L,-2);
+                lua_rawset(L,-7);
+            }
+
+            lua_rawset(L,-3);
+        }
+    }
+
+    lua_rawset(L,-3);
+}
+
+static int lua_xml_decode(lua_State* L)
+{
+    size_t l=0;
+
+    const char* s=lua_tolstring(L,1,&l);
+    if(!s)
+        s="";
+
+    lua_newtable(L);
+
+    soap::node root;
+    soap::ctx ctx(&root);
+    ctx.attributes=1;
+
+    ctx.begin();
+
+    if(!ctx.parse(s,l) && !ctx.end() && root.beg)
+    {
+        lua_pushstring(L,root.beg->name?root.beg->name:"???");
+        lua_newtable(L);
+        lua_push_xml_node(L,root.beg);
+        lua_rawset(L,-3);
+    }
 
     root.clear();
 
@@ -418,7 +494,7 @@ static int lua_m3u_parse(lua_State* L)
         lua_pushstring(L,name);
         lua_rawset(L,-3);
 
-        char playlist_name[64]="";
+        char playlist_name[256]="";
 
         {
             const char* fname=strrchr(name,'/');
@@ -710,8 +786,6 @@ static int lua_m3u_scan(lua_State* L)
     return 1;
 }
 
-
-
 static int lua_util_geturlinfo(lua_State* L)
 {
     const char* www_root=lua_tostring(L,1);
@@ -723,7 +797,7 @@ static int lua_util_geturlinfo(lua_State* L)
     if(!www_url || *www_url!='/')
         return 0;
 
-    char url[512];
+    char url[1024];
     int n=snprintf(url,sizeof(url),"%s",www_url);
     if(n<0 || n>=sizeof(url))
         return 0;
@@ -826,6 +900,67 @@ static int lua_util_geturlinfo(lua_State* L)
 
     return 1;
 }
+
+
+static int lua_util_parse_post_data(lua_State* L)
+{
+    const char* s=lua_tostring(L,1);
+
+    lua_newtable(L);
+
+    if(!s)
+        return 1;
+
+    for(const char* p1=s,*p2;p1;p1=p2)
+    {
+        int l=0;
+
+        const char* p=0;
+
+        p2=0;
+        for(const char* pp=p1;*pp;pp++)
+        {
+            if(*pp=='&')
+                { p2=pp; break ;}
+            else if(*pp=='=')
+                p=pp;
+        }
+
+        if(p)
+        {
+            lua_pushlstring(L,p1,p-p1);
+
+            p++;
+
+            int l=p2?p2-p:strlen(p);
+
+            if(l>0)
+            {
+                char* buf=(char*)malloc(l+1);
+
+                if(buf)
+                {
+                    memcpy(buf,p,l);
+                    buf[l]=0;
+
+                    lua_pushstring(L,util::url_decode(buf));
+
+                    free(buf);
+            
+                }
+            }else
+                lua_pushnil(L);
+
+            lua_rawset(L,-3);
+        }
+
+        if(p2)
+            p2++;
+    }
+
+    return 1;
+}
+
 
 static int lua_util_getfext(lua_State* L)
 {
@@ -1281,6 +1416,13 @@ int luaopen_luaxlib(lua_State* L)
         {0,0}
     };
 
+    static const luaL_Reg lib_xml[]=
+    {
+        {"decode",lua_xml_decode},
+        {"find" ,lua_soap_find},
+        {0,0}
+    };
+
     static const luaL_Reg lib_m3u[]=
     {
         {"parse",lua_m3u_parse},
@@ -1305,10 +1447,12 @@ int luaopen_luaxlib(lua_State* L)
         {"md5_string_hash",lua_util_md5_string_hash},
         {"unlink",lua_util_unlink},
         {"win1251toUTF8",lua_util_win1251toUTF8},
+        {"parse_postdata",lua_util_parse_post_data},
         {0,0}
     };
 
     luaL_register(L,"soap",lib_soap);
+    luaL_register(L,"xml",lib_xml);
     luaL_register(L,"m3u",lib_m3u);
     luaL_register(L,"util",lib_util);
 

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2011 Anton Burdinuk
+ * Copyright (C) 2011-2012 Anton Burdinuk
  * clark15b@gmail.com
  * https://tsdemuxer.googlecode.com/svn/trunk/xupnpd
  */
@@ -30,18 +30,20 @@
 #include <ctype.h>
 #include "compat.h"
 
-// TODO: prerender dev.xml tamplate for Content-Length
-// TODO: ivi.ru feeds fail
+// TODO: profile by IP
+// TODO: RTSP, RTMP
+// TODO: sendurl - reopen after pause?
+// TODO: SQLite support
+// TODO: TS padding for WDTV?
 // TODO: m3u tree by group-title (grp/subgrp1/subgrp2 => reload_playlists)
-// TODO: XBox 360
-// TODO: YouTube max-count>50
-// TODO: length to m3u when feed update
 
 namespace core
 {
     int http_timeout=15;
     int http_sendurl_buf_size=16384;
     int http_sendurl_wait_all=0;
+
+    time_t start_time=0;
 
     char user_agent[256]="xupnpd";
 
@@ -511,6 +513,11 @@ namespace core
                 }
                 if(*pp1)
                 {
+                    if(nn==2)
+                    {
+                        while(*pp1 && pp1[1]=='/')
+                            pp1++;
+                    }
                     lua_pushinteger(L,nn++);
                     lua_pushstring(L,pp1);
                     lua_rawset(L,-3);
@@ -1113,15 +1120,17 @@ static int lua_core_mainloop(lua_State* L)
 {
     using namespace core;
 
+    start_time=time(0);
+
     if(__sig_quit)
         return 0;
 
     setsid();
 
     if(socketpair(PF_LOCAL,SOCK_STREAM,0,__sig_pipe))
-        return luaL_error(L,"socketpair fail, cna't create signal pipe");
+        return luaL_error(L,"socketpair fail, can't create signal pipe");
     if(socketpair(PF_LOCAL,SOCK_DGRAM,0,__event_pipe))
-        return luaL_error(L,"socketpair fail, cna't create event pipe");
+        return luaL_error(L,"socketpair fail, can't create event pipe");
 
 
     struct sigaction action;
@@ -1377,18 +1386,10 @@ static int lua_http_sendfile(lua_State* L)
     return 0;
 }
 
-static int lua_http_sendtfile(lua_State* L)
+static int lua_tmpl_process(lua_State* L,FILE* sfp,FILE* dfp)
 {
-    const char* s=lua_tostring(L,1);
-
-    if(!s || !core::http_client_fp)
+    if(!sfp || !dfp)
         return 0;
-
-    FILE* fp=fopen(s,"r");
-    if(!fp)
-        return 0;
-
-//printf("%i\n",lua_gettop(L));
 
     int st=0;
 
@@ -1397,7 +1398,7 @@ static int lua_http_sendtfile(lua_State* L)
 
     for(;;)
     {
-        int ch=fgetc(fp);
+        int ch=fgetc(sfp);
 
         if(ch==EOF)
             break;
@@ -1408,17 +1409,17 @@ static int lua_http_sendtfile(lua_State* L)
             if(ch=='$')
                 st=1;
             else
-                fputc(ch,core::http_client_fp);
+                fputc(ch,dfp);
             break;
         case 1:
             if(ch=='{')
                 st=2;
             else
             {
-                fputc('$',core::http_client_fp);
+                fputc('$',dfp);
                 if(ch!='$')
                 {
-                    fputc(ch,core::http_client_fp);
+                    fputc(ch,dfp);
                     st=0;
                 }
             }
@@ -1428,7 +1429,7 @@ static int lua_http_sendtfile(lua_State* L)
             {
                 var[nvar]=0;
 
-                lua_getfield(L,2,var);
+                lua_getfield(L,-1,var);
 
                 if(lua_type(L,-1)==LUA_TFUNCTION)
                 {
@@ -1445,7 +1446,7 @@ static int lua_http_sendtfile(lua_State* L)
                 if(!p)
                     p="";
 
-                fprintf(core::http_client_fp,"%s",p);
+                fprintf(dfp,"%s",p);
 
                 lua_pop(L,1);
 
@@ -1459,11 +1460,54 @@ static int lua_http_sendtfile(lua_State* L)
             break;
         }
     }
-//printf("%i\n",lua_gettop(L));
+
+    return 0;
+}
+
+
+static int lua_http_sendtfile(lua_State* L)
+{
+    const char* s=lua_tostring(L,1);
+
+    if(!s || !core::http_client_fp)
+        return 0;
+
+    FILE* fp=fopen(s,"r");
+    if(!fp)
+        return 0;
+
+    int rc=lua_tmpl_process(L,fp,core::http_client_fp);
 
     fclose(fp);
 
+    return rc;
+}
+
+static int lua_http_compile_template(lua_State* L)
+{
+    const char* s=lua_tostring(L,1);
+    const char* d=lua_tostring(L,2);
+
+    if(!s || !d)
+        return 0;
+
+    FILE* sfp=fopen(s,"r");
+    if(!sfp)
+        return 0;
+
+    FILE* dfp=fopen(d,"w");
+    if(!dfp)
+    {
+        fclose(sfp);
     return 0;
+}
+
+    int rc=lua_tmpl_process(L,sfp,dfp);
+
+    fclose(sfp);
+    fclose(dfp);
+
+    return rc;
 }
 
 FILE* core::connect(const char* s,int port)
@@ -2167,6 +2211,109 @@ static int lua_http_user_agent(lua_State* L)
 }
 
 
+static int lua_core_readpidfile(const char* path)
+{
+    FILE* fp=fopen(path,"r");
+    if(!fp)
+        return -1;
+
+    int pid=0;
+    int rc=fscanf(fp,"%i",&pid);
+
+    fclose(fp);
+
+    if(rc>0 && pid>0)
+        return pid;
+
+    return -1;    
+}
+
+static int lua_core_restart(lua_State* L)
+{
+    const char* pidfile=lua_tostring(L,1);
+    const char* cmd=lua_tostring(L,2);
+
+    if(pidfile && *pidfile && cmd && *cmd)
+    {
+        int main_pid=lua_core_readpidfile(pidfile);
+
+        if(main_pid>0)
+        {
+            pid_t pid=fork();
+
+            if(!pid)
+            {
+                close(fileno(core::http_client_fp));
+
+                signal(SIGHUP,SIG_IGN);
+                signal(SIGPIPE,SIG_IGN);
+                signal(SIGINT,SIG_IGN);
+                signal(SIGQUIT,SIG_IGN);
+                signal(SIGTERM,SIG_IGN);
+                signal(SIGALRM,SIG_IGN);
+                signal(SIGUSR1,SIG_IGN);
+                signal(SIGUSR2,SIG_IGN);
+                signal(SIGCHLD,SIG_IGN);
+
+                for(int i=0;i<3;i++)
+                    close(i);
+
+                sleep(1);
+
+                if(!kill(main_pid,SIGTERM))
+                {
+                    for(int i=0;i<5;i++)
+                    {
+                        main_pid=lua_core_readpidfile(pidfile);
+                        if(main_pid<0)
+                            break;
+
+                        sleep(1);
+                    }
+
+                    if(main_pid<0)
+                        int rc=system(cmd);
+
+                    exit(0);
+                }
+            }else if(pid>0)
+            {
+                lua_pushboolean(L,1);
+
+                return 1;
+            }
+        }
+    }
+
+    lua_pushboolean(L,0);
+
+    return 1;
+}
+
+static int lua_core_uptime(lua_State* L)
+{
+    time_t uptime=time(0)-core::start_time;
+
+    int days=uptime/86400;
+    uptime%=86400;
+
+    int hours=uptime/3600;
+    uptime%=3600;
+
+    int minutes=uptime/60;
+    uptime%=60;
+
+    char buf[256];
+    int n=snprintf(buf,sizeof(buf),"%i days, %i:%.2i:%.2i",days,hours,minutes,(int)uptime);
+    if(n==-1 || n>=sizeof(buf))
+        n=sizeof(buf)-1;
+
+    lua_pushlstring(L,buf,n);
+
+    return 1;
+}
+
+
 int luaopen_luaxcore(lua_State* L)
 {
     mcast::uuid_init();
@@ -2183,6 +2330,8 @@ int luaopen_luaxcore(lua_State* L)
         {"uuid",lua_core_uuid},
         {"sendevent",lua_core_sendevent},
         {"mainloop",lua_core_mainloop},
+        {"restart",lua_core_restart},
+        {"uptime",lua_core_uptime},
         {0,0}
     };
 
@@ -2200,6 +2349,7 @@ int luaopen_luaxcore(lua_State* L)
         {"send",lua_http_send},
         {"sendfile",lua_http_sendfile},
         {"sendtfile",lua_http_sendtfile},
+        {"compile_template",lua_http_compile_template},
         {"sendurl",lua_http_sendurl},
         {"sendmcasturl",lua_http_sendmcasturl},
         {"flush",lua_http_flush},
