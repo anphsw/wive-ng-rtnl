@@ -84,7 +84,8 @@ all : $(BUILDDIR)
 clean :
 	rm -rf filesystem
 	rm -f *~ $(BUILDDIR)/*.mo contrib/*/*~ */*~ $(BUILDDIR)/*.pot 
-	rm -f $(BUILDDIR)/*.o $(BUILDDIR)/dnsmasq.a $(BUILDDIR)/dnsmasq core */core
+	rm -f $(BUILDDIR)/.configured $(BUILDDIR)/*.o $(BUILDDIR)/dnsmasq.a $(BUILDDIR)/dnsmasq 
+	rm -rf core */core
 
 install : all install-common
 
@@ -122,7 +123,11 @@ $(BUILDDIR):
 	mkdir -p $(BUILDDIR)
 
 
-# rules below are targets in recusive makes with cwd=$(SRC)
+# rules below are targets in recusive makes with cwd=$(BUILDDIR)
+
+.configured: $(hdrs)
+	@rm -f *.o
+	@touch $@
 
 $(objs:.o=.c) $(hdrs):
 	ln -s $(top)/$(SRC)/$@ .
@@ -130,7 +135,7 @@ $(objs:.o=.c) $(hdrs):
 .c.o:
 	$(CC) $(CFLAGS) $(COPTS) $(i18n) $(build_cflags) $(RPM_OPT_FLAGS) -c $<	
 
-dnsmasq : $(hdrs) $(objs) 
+dnsmasq : .configured $(hdrs) $(objs) 
 	$(CC) $(LDFLAGS) -o $@ $(objs) $(build_libs) $(LIBS) 
 
 dnsmasq.pot : $(objs:.o=.c) $(hdrs)
