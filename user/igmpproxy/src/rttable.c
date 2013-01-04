@@ -637,8 +637,9 @@ int internUpdateKernelRoute(struct RouteTable *route, int activate) {
     struct   MRouteDesc     mrDesc;
     struct   IfDesc         *Dp;
     unsigned                Ix;
+    int i;
 
-    for (int i = 0; i < MAX_ORIGINS; i++) {
+    for (i = 0; i < MAX_ORIGINS; i++) {
         if (route->originAddrs[i] == 0) {
             continue;
         }
@@ -696,16 +697,17 @@ void logRouteTable(char *header) {
             do {
                 char st = 'I';
                 char src[MAX_ORIGINS * 30 + 1];
+		int i;
                 src[0] = '\0';
-                
-                for (int i = 0; i < MAX_ORIGINS; i++) {
+
+                for (i = 0; i < MAX_ORIGINS; i++) {
                     if (croute->originAddrs[i] == 0) {
                         continue;
                     }
                     st = 'A';
                     sprintf(src + strlen(src), "Src%d: %s, ", i, inetFmt(croute->originAddrs[i], s1));
                 }
-                
+
                 my_log(LOG_DEBUG, 0, "#%d: %sDst: %s, Age:%d, St: %c, OutVifs: 0x%08x",
                     rcount, src, inetFmt(croute->group, s2),
                     croute->ageValue, st,
