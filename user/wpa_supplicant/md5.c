@@ -297,8 +297,7 @@ void MD5Final(unsigned char digest[16], struct MD5Context *ctx)
     byteReverse(ctx->in, 14);
 
     /* Append length in bits and transform */
-    ((u32 *) ctx->in)[14] = ctx->bits[0];
-    ((u32 *) ctx->in)[15] = ctx->bits[1];
+    memcpy(ctx->in + 14 * sizeof(uint32), ctx->bits, sizeof(ctx->bits));
 
     MD5Transform(ctx->buf, (u32 *) ctx->in);
     byteReverse((unsigned char *) ctx->buf, 4);
