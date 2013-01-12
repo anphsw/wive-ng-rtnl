@@ -1234,6 +1234,7 @@
 28) xupnpd: up to 1.0.1 revision 365 version.<br>
 29) webui: fix route managment.<br>
 30) igmpproxy: Support multiple multicast sources.<br>
+31) ppp: tune lcp adaptive logic.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>

@@ -2339,15 +2339,32 @@ LcpSendEchoRequest (f)
      * no traffic was received since the last one.
      */
     if (lcp_echo_adaptive) {
-       static unsigned int last_pkts_in = 0;
+	static unsigned int last_pkts_in = 0;
+#ifdef LCP_ADAPTIVE_NEW_LOCIG
+	unsigned int pkts_diff;
+	struct pppd_stats now_stats;
 
-       update_link_stats(f->unit);
-       link_stats_valid = 0;
+	if (get_ppp_stats(f->unit, &now_stats)) {
+	    if (now_stats.pkts_in != last_pkts_in) {
+		if (now_stats.pkts_in > last_pkts_in)
+		    pkts_diff = (now_stats.pkts_in - last_pkts_in);
+		else
+		    pkts_diff = (last_pkts_in - now_stats.pkts_in);
 
-       if (link_stats.pkts_in != last_pkts_in) {
-           last_pkts_in = link_stats.pkts_in;
-           return;
-       }
+		last_pkts_in = now_stats.pkts_in;
+		if (pkts_diff > 25)
+		    return;
+	    }
+	}
+#else
+	update_link_stats(f->unit);
+	link_stats_valid = 0;
+
+	if (link_stats.pkts_in != last_pkts_in) {
+	    last_pkts_in = link_stats.pkts_in;
+	    return;
+	}
+#endif
     }
 
     /*
