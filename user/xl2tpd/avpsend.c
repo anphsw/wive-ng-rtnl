@@ -25,6 +25,7 @@ struct half_words {
 	_u16 s3;
 } __attribute__ ((packed));
 
+
 void add_nonmandatory_header(struct buffer *buf, _u8 length, _u16 type) {
 	struct avp_hdr *avp = (struct avp_hdr *) (buf->start + buf->len);
 	avp->length = htons (length);
