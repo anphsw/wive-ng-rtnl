@@ -898,8 +898,7 @@ xbsd_initlabel(struct partition *p)
 	pp->p_fstype = BSD_FS_UNUSED;
 #else
 	d->d_npartitions = 3;
-	pp = &d->d_partitions[2];             /* Partition C should be
-						   the whole disk */
+	pp = &d->d_partitions[2]; /* Partition C should be the whole disk */
 	pp->p_offset = 0;
 	pp->p_size   = d->d_secperunit;
 	pp->p_fstype = BSD_FS_UNUSED;

@@ -1129,8 +1129,7 @@ static void ife_print(struct interface *ptr)
 		printf("          ");
 		if (ptr->map.irq)
 			printf("Interrupt:%d ", ptr->map.irq);
-		if (ptr->map.base_addr >= 0x100)	/* Only print devices using it for
-											   I/O maps */
+		if (ptr->map.base_addr >= 0x100) /* Only print devices using it for I/O maps */
 			printf("Base address:0x%lx ",
 				   (unsigned long) ptr->map.base_addr);
 		if (ptr->map.mem_start) {

@@ -76,11 +76,11 @@
 //usage:       "mdev -s is to be run during boot to scan /sys and populate /dev.\n"
 //usage:       "\n"
 //usage:       "Bare mdev is a kernel hotplug helper. To activate it:\n"
-//usage:       " echo /sbin/mdev > /proc/sys/kernel/hotplug\n"
+//usage:       "	echo /sbin/mdev >/proc/sys/kernel/hotplug\n"
 //usage:	IF_FEATURE_MDEV_CONF(
 //usage:       "\n"
 //usage:       "It uses /etc/mdev.conf with lines\n"
-//usage:       "[-]DEVNAME UID:GID PERM"
+//usage:       "	[-]DEVNAME UID:GID PERM"
 //usage:			IF_FEATURE_MDEV_RENAME(" [>|=PATH]|[!]")
 //usage:			IF_FEATURE_MDEV_EXEC(" [@|$|*PROG]")
 //usage:       "\n"
@@ -430,7 +430,7 @@ static void make_device(char *path, int delete)
 #endif
 	for (;;) {
 		const char *str_to_match;
-			regmatch_t off[1 + 9 * ENABLE_FEATURE_MDEV_RENAME_REGEXP];
+		regmatch_t off[1 + 9 * ENABLE_FEATURE_MDEV_RENAME_REGEXP];
 		char *command;
 		char *alias;
 		char aliaslink = aliaslink; /* for compiler */
@@ -444,7 +444,7 @@ static void make_device(char *path, int delete)
 #if ENABLE_FEATURE_MDEV_CONF
 		if (rule->maj >= 0) {  /* @maj,min rule */
 			if (major != rule->maj)
-					continue;
+				continue;
 			if (minor < rule->min0 || minor > rule->min1)
 				continue;
 			memset(off, 0, sizeof(off));
@@ -453,32 +453,32 @@ static void make_device(char *path, int delete)
 		if (rule->envvar) { /* $envvar=regex rule */
 			str_to_match = getenv(rule->envvar);
 			dbg("getenv('%s'):'%s'", rule->envvar, str_to_match);
-				if (!str_to_match)
-					continue;
+			if (!str_to_match)
+				continue;
 		} else {
 			/* regex to match [subsystem/]device_name */
 			str_to_match = (rule->regex_has_slash ? path : device_name);
-			}
+		}
 
 		if (rule->regex_compiled) {
 			int regex_match = regexec(&rule->match, str_to_match, ARRAY_SIZE(off), off, 0);
 			dbg("regex_match for '%s':%d", str_to_match, regex_match);
-				//bb_error_msg("matches:");
-				//for (int i = 0; i < ARRAY_SIZE(off); i++) {
-				//	if (off[i].rm_so < 0) continue;
-				//	bb_error_msg("match %d: '%.*s'\n", i,
-				//		(int)(off[i].rm_eo - off[i].rm_so),
-				//		device_name + off[i].rm_so);
-				//}
+			//bb_error_msg("matches:");
+			//for (int i = 0; i < ARRAY_SIZE(off); i++) {
+			//	if (off[i].rm_so < 0) continue;
+			//	bb_error_msg("match %d: '%.*s'\n", i,
+			//		(int)(off[i].rm_eo - off[i].rm_so),
+			//		device_name + off[i].rm_so);
+			//}
 
 			if (regex_match != 0
 			/* regexec returns whole pattern as "range" 0 */
 			 || off[0].rm_so != 0
 			 || (int)off[0].rm_eo != (int)strlen(str_to_match)
-				) {
+			) {
 				continue; /* this rule doesn't match */
-				}
 			}
+		}
 		/* else: it's final implicit "match-all" rule */
  rule_matches:
 #endif
@@ -489,59 +489,59 @@ static void make_device(char *path, int delete)
 		if (ENABLE_FEATURE_MDEV_RENAME && rule->ren_mov) {
 			aliaslink = rule->ren_mov[0];
 			if (aliaslink == '!') {
-					/* "!": suppress node creation/deletion */
-					major = -2;
-				}
-				else if (aliaslink == '>' || aliaslink == '=') {
-					if (ENABLE_FEATURE_MDEV_RENAME_REGEXP) {
+				/* "!": suppress node creation/deletion */
+				major = -2;
+			}
+			else if (aliaslink == '>' || aliaslink == '=') {
+				if (ENABLE_FEATURE_MDEV_RENAME_REGEXP) {
 					char *s;
-						char *p;
+					char *p;
 					unsigned n;
 
-						/* substitute %1..9 with off[1..9], if any */
-						n = 0;
+					/* substitute %1..9 with off[1..9], if any */
+					n = 0;
 					s = rule->ren_mov;
-						while (*s)
-							if (*s++ == '%')
-								n++;
+					while (*s)
+						if (*s++ == '%')
+							n++;
 
 					p = alias = xzalloc(strlen(rule->ren_mov) + n * strlen(str_to_match));
 					s = rule->ren_mov + 1;
-						while (*s) {
-							*p = *s;
-							if ('%' == *s) {
+					while (*s) {
+						*p = *s;
+						if ('%' == *s) {
 							unsigned i = (s[1] - '0');
-								if (i <= 9 && off[i].rm_so >= 0) {
-									n = off[i].rm_eo - off[i].rm_so;
-									strncpy(p, str_to_match + off[i].rm_so, n);
-									p += n - 1;
-									s++;
-								}
+							if (i <= 9 && off[i].rm_so >= 0) {
+								n = off[i].rm_eo - off[i].rm_so;
+								strncpy(p, str_to_match + off[i].rm_so, n);
+								p += n - 1;
+								s++;
 							}
-							p++;
-							s++;
 						}
-					} else {
-					alias = xstrdup(rule->ren_mov + 1);
+						p++;
+						s++;
 					}
+				} else {
+					alias = xstrdup(rule->ren_mov + 1);
 				}
 			}
+		}
 		dbg("alias:'%s'", alias);
 
 		command = NULL;
 		IF_FEATURE_MDEV_EXEC(command = rule->r_cmd;)
 		if (command) {
-				const char *s = "$@*";
+			const char *s = "$@*";
 			const char *s2 = strchr(s, command[0]);
 
-				/* Are we running this command now?
-				 * Run $cmd on delete, @cmd on create, *cmd on both
+			/* Are we running this command now?
+			 * Run $cmd on delete, @cmd on create, *cmd on both
+			 */
+			if (s2 - s != delete) {
+				/* We are here if: '*',
+				 * or: '@' and delete = 0,
+				 * or: '$' and delete = 1
 				 */
-				if (s2 - s != delete) {
-					/* We are here if: '*',
-					 * or: '@' and delete = 0,
-					 * or: '$' and delete = 1
-					 */
 				command++;
 			} else {
 				command = NULL;
@@ -550,54 +550,54 @@ static void make_device(char *path, int delete)
 		dbg("command:'%s'", command);
 
 		/* "Execute" the line we found */
-			node_name = device_name;
+		node_name = device_name;
 		if (ENABLE_FEATURE_MDEV_RENAME && alias) {
-				node_name = alias = build_alias(alias, device_name);
+			node_name = alias = build_alias(alias, device_name);
 			dbg("alias2:'%s'", alias);
 		}
 
-			if (!delete && major >= 0) {
+		if (!delete && major >= 0) {
 			dbg("mknod('%s',%o,(%d,%d))", node_name, rule->mode | type, major, minor);
 			if (mknod(node_name, rule->mode | type, makedev(major, minor)) && errno != EEXIST)
-					bb_perror_msg("can't create '%s'", node_name);
-				if (major == G.root_major && minor == G.root_minor)
-					symlink(node_name, "root");
-				if (ENABLE_FEATURE_MDEV_CONF) {
+				bb_perror_msg("can't create '%s'", node_name);
+			if (major == G.root_major && minor == G.root_minor)
+				symlink(node_name, "root");
+			if (ENABLE_FEATURE_MDEV_CONF) {
 				chmod(node_name, rule->mode);
 				chown(node_name, rule->ugid.uid, rule->ugid.gid);
-				}
-				if (ENABLE_FEATURE_MDEV_RENAME && alias) {
+			}
+			if (ENABLE_FEATURE_MDEV_RENAME && alias) {
 				if (aliaslink == '>') {
 //TODO: on devtmpfs, device_name already exists and symlink() fails.
 //End result is that instead of symlink, we have two nodes.
 //What should be done?
-						symlink(node_name, device_name);
+					symlink(node_name, device_name);
 				}
 			}
 		}
 
-			if (ENABLE_FEATURE_MDEV_EXEC && command) {
-				/* setenv will leak memory, use putenv/unsetenv/free */
-				char *s = xasprintf("%s=%s", "MDEV", node_name);
-				char *s1 = xasprintf("%s=%s", "SUBSYSTEM", G.subsystem);
-				putenv(s);
-				putenv(s1);
-				if (system(command) == -1)
-					bb_perror_msg("can't run '%s'", command);
-				bb_unsetenv_and_free(s1);
-				bb_unsetenv_and_free(s);
-			}
+		if (ENABLE_FEATURE_MDEV_EXEC && command) {
+			/* setenv will leak memory, use putenv/unsetenv/free */
+			char *s = xasprintf("%s=%s", "MDEV", node_name);
+			char *s1 = xasprintf("%s=%s", "SUBSYSTEM", G.subsystem);
+			putenv(s);
+			putenv(s1);
+			if (system(command) == -1)
+				bb_perror_msg("can't run '%s'", command);
+			bb_unsetenv_and_free(s1);
+			bb_unsetenv_and_free(s);
+		}
 
-			if (delete && major >= -1) {
-				if (ENABLE_FEATURE_MDEV_RENAME && alias) {
-					if (aliaslink == '>')
-						unlink(device_name);
-				}
-				unlink(node_name);
+		if (delete && major >= -1) {
+			if (ENABLE_FEATURE_MDEV_RENAME && alias) {
+				if (aliaslink == '>')
+					unlink(device_name);
 			}
+			unlink(node_name);
+		}
 
-			if (ENABLE_FEATURE_MDEV_RENAME)
-				free(alias);
+		if (ENABLE_FEATURE_MDEV_RENAME)
+			free(alias);
 
 		/* We found matching line.
 		 * Stop unless it was prefixed with '-'

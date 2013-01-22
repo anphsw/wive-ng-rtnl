@@ -290,7 +290,8 @@
 #endif
 
 
-#define OPT_STRING "FIlnrdvxt:i:m:p:q:s:w:z:f:" \
+#define OPT_STRING \
+	"FIlnrdvxt:i:m:p:q:s:w:z:f:" \
 		    IF_FEATURE_TRACEROUTE_SOURCE_ROUTE("g:") \
 		    "4" IF_TRACEROUTE6("6")
 enum {

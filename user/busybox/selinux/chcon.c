@@ -181,7 +181,7 @@ int chcon_main(int argc UNUSED_PARAM, char **argv)
 #if ENABLE_FEATURE_CHCON_LONG_OPTIONS
 	if (option_mask32 & OPT_REFERENCE) {
 		/* FIXME: lgetfilecon() should be used when '-h' is specified.
-		   But current implementation follows the original one. */
+		 * But current implementation follows the original one. */
 		if (getfilecon(reference_file, &specified_context) < 0)
 			bb_perror_msg_and_die("getfilecon('%s') failed", reference_file);
 	} else

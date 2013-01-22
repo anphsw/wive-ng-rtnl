@@ -81,7 +81,9 @@ static int FAST_FUNC print_rule(const struct sockaddr_nl *who UNUSED_PARAM,
 			fputs(format_host(r->rtm_family,
 						       RTA_PAYLOAD(tb[RTA_SRC]),
 						       RTA_DATA(tb[RTA_SRC]),
-						       abuf, sizeof(abuf)), stdout);
+						abuf, sizeof(abuf)),
+				stdout
+			);
 		}
 	} else if (r->rtm_src_len) {
 		printf("0/%d", r->rtm_src_len);

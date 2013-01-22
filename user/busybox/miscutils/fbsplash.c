@@ -308,7 +308,7 @@ static void fb_drawprogressbar(unsigned percent)
 		while (i >= 0) {
 			// draw one-line thick "rectangle"
 			// top line will have gray lvl 200, bottom one 100
-			unsigned gray_level = 100 + i*100/height;
+			unsigned gray_level = 100 + i*100 / height;
 			fb_drawfullrectangle(
 					left_x, y, pos_x, y,
 					gray_level, gray_level, gray_level);

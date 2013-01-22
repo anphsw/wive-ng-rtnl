@@ -22,7 +22,8 @@ int setlogcons_main(int argc UNUSED_PARAM, char **argv)
 	struct {
 		char fn;
 		char subarg;
-	} arg = { 11, /* redirect kernel messages */
+	} arg = {
+		11, /* redirect kernel messages */
 			  0   /* to specified console (current as default) */
 			};
 

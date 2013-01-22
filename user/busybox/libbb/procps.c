@@ -425,7 +425,7 @@ procps_status_t* FAST_FUNC procps_scan(procps_status_t* sp, int flags)
 			if (n < 11)
 				continue; /* bogus data, get next /proc/XXX */
 # if ENABLE_FEATURE_TOP_SMP_PROCESS
-			if (n < 11+15)
+			if (n == 11)
 				sp->last_seen_on_cpu = 0;
 # endif
 
@@ -583,6 +583,8 @@ void FAST_FUNC read_cmdline(char *buf, int col, unsigned pid, const char *comm)
 		buf[sz] = '\0';
 		while (--sz >= 0 && buf[sz] == '\0')
 			continue;
+		/* Prevent basename("process foo/bar") = "bar" */
+		strchrnul(buf, ' ')[0] = '\0';
 		base = bb_basename(buf); /* before we replace argv0's NUL with space */
 		while (sz >= 0) {
 			if ((unsigned char)(buf[sz]) < ' ')

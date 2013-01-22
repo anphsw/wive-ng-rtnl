@@ -1,0 +1,14 @@
+#!/bin/sh
+
+PWD=`pwd`
+
+rm -rf $PWD/releases
+mkdir -p $PWD/releases
+
+./clear
+nice -19 ./compile 2T2R-5G-USB-IPV6
+cp -f $PWD/images/*.zip $PWD/releases
+
+./clear RELEASE
+nice -19 ./compile 2T2R-USB-IPV6
+cp -f $PWD/images/*.zip $PWD/releases

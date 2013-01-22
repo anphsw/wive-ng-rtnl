@@ -22,7 +22,6 @@
  * 16.11.91  -  More corrections (thanks to Mika Jalava). Most
  *		things seem to work now. Yeah, sure.
  *
- *
  * 19.04.92  -	Had to start over again from this old version, as a
  *		kernel bug ate my enhanced fsck in february.
  *

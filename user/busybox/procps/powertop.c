@@ -9,7 +9,7 @@
  * Licensed under GPLv2, see file LICENSE in this source tree.
  */
 
-//applet:IF_POWERTOP(APPLET(powertop, BB_DIR_BIN, BB_SUID_DROP))
+//applet:IF_POWERTOP(APPLET(powertop, BB_DIR_USR_SBIN, BB_SUID_DROP))
 
 //kbuild:lib-$(CONFIG_POWERTOP) += powertop.o
 
@@ -650,7 +650,7 @@ static void show_timerstats(void)
 	} else {
 		bb_putchar('\n');
 		bb_error_msg("no stats available; run as root or"
-				" enable the cpufreq_stats module");
+				" enable the timer_stats module");
 	}
 }
 

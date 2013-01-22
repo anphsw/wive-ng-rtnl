@@ -501,7 +501,8 @@ static int process_one(char *name)
 				     ACTION_RECURSE,
 				     apply_spec,
 				     apply_spec,
-				     NULL, 0) != TRUE) {
+				NULL, 0) != TRUE
+		) {
 			bb_error_msg("error while labeling %s", name);
 			goto err;
 		}
@@ -600,8 +601,8 @@ int setfiles_main(int argc UNUSED_PARAM, char **argv)
 		fclose(policystream);
 
 		/* Only process the specified file_contexts file, not
-		   any .homedirs or .local files, and do not perform
-		   context translations. */
+		 * any .homedirs or .local files, and do not perform
+		 * context translations. */
 		set_matchpathcon_flags(MATCHPATHCON_BASEONLY |
 				       MATCHPATHCON_NOTRANS |
 				       MATCHPATHCON_VALIDATE);
@@ -631,8 +632,8 @@ int setfiles_main(int argc UNUSED_PARAM, char **argv)
 
 	if (applet_name[0] == 's') { /* setfiles */
 		/* Use our own invalid context checking function so that
-		   we can support either checking against the active policy or
-		   checking against a binary policy file. */
+		 * we can support either checking against the active policy or
+		 * checking against a binary policy file. */
 		set_matchpathcon_canoncon(&canoncon);
 		if (!argv[0])
 			bb_show_usage();

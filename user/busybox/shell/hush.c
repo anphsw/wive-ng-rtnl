@@ -106,10 +106,6 @@
 # define PIPE_BUF 4096  /* amount of buffering in a pipe */
 #endif
 
-/* Not every libc has sighandler_t. Fix it */
-typedef void (*hush_sighandler_t)(int);
-#define sighandler_t hush_sighandler_t
-
 //config:config HUSH
 //config:	bool "hush"
 //config:	default y
@@ -8285,7 +8281,7 @@ static int FAST_FUNC builtin_exit(char **argv)
 	 * (if there are _stopped_ jobs, running ones don't count)
 	 * # exit
 	 * exit
-	 # EEE (then bash exits)
+	 * EEE (then bash exits)
 	 *
 	 * TODO: we can use G.exiting = -1 as indicator "last cmd was exit"
 	 */
