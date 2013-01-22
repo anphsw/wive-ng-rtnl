@@ -1231,7 +1231,7 @@
 25) busybox: sync with current stable patchsets.<br>
 26) webui: more fixes and functions fix.<br>
 27) dnsmasq: up to 2.65 version.<br>
-28) xupnpd: up to v1.02 (revision 368).<br>
+28) xupnpd: up to v1.02 (revision 375).<br>
 29) webui: fix route managment.<br>
 30) igmpproxy: Support multiple multicast sources.<br>
 31) ppp: tune lcp adaptive logic.<br>
