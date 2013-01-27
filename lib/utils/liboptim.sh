@@ -14,7 +14,7 @@ DIRUPNP=${CURRDIR}/libupnp
 if [ -n "$1" ]; then
 	CROSS=$1
 else
-	CROSS="mipsel-linux-"
+	CROSS="mipsel-linux-uclibc-"
 fi
 
 which python2.4 || exit 0

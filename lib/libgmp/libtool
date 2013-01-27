@@ -78,17 +78,17 @@ build_os=linux-gnu
 echo="echo"
 
 # The archiver.
-AR="/opt/buildroot-gdb/bin/mipsel-linux-ar"
+AR="mipsel-linux-uclibc-ar"
 AR_FLAGS="cq"
 
 # A C compiler.
-LTCC="/opt/buildroot-gdb/bin/mipsel-linux-gcc"
+LTCC="mipsel-linux-uclibc-gcc"
 
 # LTCC compiler flags.
 LTCFLAGS=" -Wall -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing  -mips1  -fno-builtin -nostdinc -D_LIBC -I../include -I.  -Os   -mno-split-addresses -isystem /opt/buildroot-gdb/lib/gcc-lib/mipsel-linux-uclibc/3.3.6/include -DNDEBUG -fPIC -D_DL_FINI_CRT_COMPAT"
 
 # A language-specific compiler.
-CC="/opt/buildroot-gdb/bin/mipsel-linux-gcc"
+CC="mipsel-linux-uclibc-gcc"
 
 # Is the compiler the GNU C compiler?
 with_gcc=yes

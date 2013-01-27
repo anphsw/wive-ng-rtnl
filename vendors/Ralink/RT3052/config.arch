@@ -56,13 +56,17 @@ OPTS	= -Os -pipe -mips32r2 -march=mips32r2
 
 ############################ WARN/ERROR ###################################
 # base flags for warnings
-CFLAGS	+= -Wall -Wno-trigraphs -Wno-long-long
+CFLAGS	+= -Wall -Wno-trigraphs -Wno-long-long -Wno-format-security
 
 # disable pointer signed / unsigned warnings in gcc 4.0
 CFLAGS	+= -Wno-pointer-sign
 
 # disable variable unused warnings in gcc 4.6.0
 #CFLAGS	+= -Wno-unused-but-set-variable
+
+# Defeat .eh_frame bloat (~20% smaller binary)
+CFLAGS += -fno-unwind-tables
+CFLAGS += -fno-asynchronous-unwind-tables
 
 ############################ BASE FLAGS ###################################
 CFLAGS  += $(OPTS) -I$(ROOTDIR)

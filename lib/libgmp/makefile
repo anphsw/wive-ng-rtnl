@@ -17,7 +17,7 @@ all: Makefile
 	cp .libs/$(LIBGMP_A) .
 
 Makefile:
-	AR=$(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-ar AS=$(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-as CC=$(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-gcc LD=$(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-ld OBJCOPY=$(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-objcopy RANLIB=$(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-ranlib STRIP=$(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-strip ./configure $(CONFOPTS)
+	AR=$(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-ar AS=$(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-as CC=$(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-gcc LD=$(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-ld OBJCOPY=$(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-objcopy RANLIB=$(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-ranlib STRIP=$(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-strip ./configure $(CONFOPTS)
 
 # the is a proxy section --YY
 all-recursive: Makefile
