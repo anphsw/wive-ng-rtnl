@@ -217,8 +217,6 @@ static void tcp_delack_timer(unsigned long data)
 		tcp_send_ack(sk);
 		NET_INC_STATS_BH(LINUX_MIB_DELAYEDACKS);
 	}
-	TCP_CHECK_TIMER(sk);
-
 out:
 	if (tcp_memory_pressure)
 		sk_stream_mem_reclaim(sk);
@@ -415,8 +413,6 @@ static void tcp_write_timer(unsigned long data)
 		tcp_probe_timer(sk);
 		break;
 	}
-	TCP_CHECK_TIMER(sk);
-
 out:
 	sk_stream_mem_reclaim(sk);
 out_unlock:
@@ -511,7 +507,6 @@ static void tcp_keepalive_timer (unsigned long data)
 		elapsed = keepalive_time_when(tp) - elapsed;
 	}
 
-	TCP_CHECK_TIMER(sk);
 	sk_stream_mem_reclaim(sk);
 
 resched:

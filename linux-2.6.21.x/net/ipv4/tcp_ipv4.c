@@ -1546,12 +1546,10 @@ int tcp_v4_do_rcv(struct sock *sk, struct sk_buff *skb)
 #endif
 
 	if (sk->sk_state == TCP_ESTABLISHED) { /* Fast path */
-		TCP_CHECK_TIMER(sk);
 		if (tcp_rcv_established(sk, skb, skb->h.th, skb->len)) {
 			rsk = sk;
 			goto reset;
 		}
-		TCP_CHECK_TIMER(sk);
 		return 0;
 	}
 
@@ -1572,12 +1570,10 @@ int tcp_v4_do_rcv(struct sock *sk, struct sk_buff *skb)
 		}
 	}
 
-	TCP_CHECK_TIMER(sk);
 	if (tcp_rcv_state_process(sk, skb, skb->h.th, skb->len)) {
 		rsk = sk;
 		goto reset;
 	}
-	TCP_CHECK_TIMER(sk);
 	return 0;
 
 reset:

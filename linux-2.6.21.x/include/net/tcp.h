@@ -1093,8 +1093,6 @@ static inline int tcp_paws_reject(const struct tcp_options_received *rx_opt,
 	return 1;
 }
 
-#define TCP_CHECK_TIMER(sk) do { } while (0)
-
 static inline void tcp_mib_init(void)
 {
 	/* See RFC 2012 */
