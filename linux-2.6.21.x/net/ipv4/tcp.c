@@ -531,8 +531,8 @@ struct sk_buff *sk_stream_alloc_skb(struct sock *sk, int size, gfp_t gfp)
 	return NULL;
 }
 
-static ssize_t do_tcp_sendpages(struct sock *sk, struct page **pages, int poffset,
-			 size_t psize, int flags)
+static ssize_t do_tcp_sendpages(struct sock *sk, struct page *page, int offset,
+				size_t size, int flags)
 {
 	struct tcp_sock *tp = tcp_sk(sk);
 	int mss_now, size_goal;
@@ -555,12 +555,9 @@ static ssize_t do_tcp_sendpages(struct sock *sk, struct page **pages, int poffse
 	if (sk->sk_err || (sk->sk_shutdown & SEND_SHUTDOWN))
 		goto do_error;
 
-	while (psize > 0) {
+	while (size > 0) {
 		struct sk_buff *skb = sk->sk_write_queue.prev;
-		struct page *page = pages[poffset / PAGE_SIZE];
 		int copy, i, can_coalesce;
-		int offset = poffset % PAGE_SIZE;
-		int size = min_t(size_t, psize, PAGE_SIZE - offset);
 
 		if (!sk->sk_send_head || (copy = size_goal - skb->len) <= 0) {
 new_segment:
@@ -608,8 +605,8 @@ new_segment:
 			TCP_SKB_CB(skb)->flags &= ~TCPHDR_PSH;
 
 		copied += copy;
-		poffset += copy;
-		if (!(psize -= copy))
+		offset += copy;
+		if (!(size -= copy))
 			goto out;
 
 		if (skb->len < size_goal || (flags & MSG_OOB))
@@ -659,7 +656,7 @@ ssize_t tcp_sendpage(struct socket *sock, struct page *page, int offset,
 
 	lock_sock(sk);
 	TCP_CHECK_TIMER(sk);
-	res = do_tcp_sendpages(sk, &page, offset, size, flags);
+	res = do_tcp_sendpages(sk, page, offset, size, flags);
 	TCP_CHECK_TIMER(sk);
 	release_sock(sk);
 	return res;
