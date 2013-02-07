@@ -1,7 +1,7 @@
-/* $Id: miniupnpd.c,v 1.171 2012/10/04 22:36:46 nanard Exp $ */
+/* $Id: miniupnpd.c,v 1.173 2013/02/06 10:50:04 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
- * (c) 2006-2012 Thomas Bernard
+ * (c) 2006-2013 Thomas Bernard
  * This software is subject to the conditions detailed
  * in the LICENCE file provided within the distribution */
 
@@ -1700,8 +1700,16 @@ main(int argc, char * * argv)
 			           &clientnamelen);
 			syslog(LOG_DEBUG, "sctl! : '%s'", clientname.sun_path);
 			tmp = malloc(sizeof(struct ctlelem));
+			if (tmp == NULL)
+			{
+				syslog(LOG_ERR, "Unable to allocate memory for ctlelem in main()");
+				close(s);
+			}
+			else
+			{
 			tmp->socket = s;
 			LIST_INSERT_HEAD(&ctllisthead, tmp, entries);
+		}
 		}
 #endif
 #ifdef ENABLE_EVENTS
@@ -1773,6 +1781,16 @@ main(int argc, char * * argv)
 
 				sockaddr_to_string((struct sockaddr *)&clientname, addr_str, sizeof(addr_str));
 				syslog(LOG_INFO, "HTTP connection from %s", addr_str);
+				if(get_lan_for_peer((struct sockaddr *)&clientname) == NULL)
+				{
+					/* The peer is not a LAN ! */
+					syslog(LOG_WARNING,
+					       "HTTP peer %s is not from a LAN, closing the connection",
+					       addr_str);
+					close(shttp);
+				}
+				else
+				{
 				/* Create a new upnphttp object and add it to
 				 * the active upnphttp object list */
 				tmp = New_upnphttp(shttp);
@@ -1811,6 +1829,7 @@ main(int argc, char * * argv)
 					close(shttp);
 				}
 			}
+		}
 		}
 #ifdef ENABLE_NFQUEUE
 		/* process NFQ packets */
