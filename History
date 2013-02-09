@@ -1244,10 +1244,10 @@
 
 <br>
 <b>3.4.x</b><br>
-1) kernel: arp: allow to invalidate specific ARP entries
-2) kernel: timers: Fix endless looping between cascade() and internal_add_timer()
-3) kernel: MIPS: use no-branch-likely compile option
-4) kernel: MIPS: Fix harmlessly missing else statement.
+1) kernel: arp: allow to invalidate specific ARP entries.<br>
+2) kernel: timers: Fix endless looping between cascade() and internal_add_timer().<br>
+3) kernel: MIPS: use no-branch-likely compile option.<br>
+4) kernel: MIPS: Fix harmlessly missing else statement.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
