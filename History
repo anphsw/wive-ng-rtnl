@@ -1225,20 +1225,29 @@
 19) Fix cone nat work with SNAT mode.<br>
 20) Fix skip hw_nat processing for webstr match.<br>
 21) Update xupnpd to 317 revision.<br>
-22) Rework high cpu policer in ppp.<br>
-23) miniupnpd: update to 1.8.20130207 version.<br>
-24) xupnp: update to revision 327.<br>
-25) busybox: sync with current stable patchsets.<br>
-26) webui: more fixes and functions fix.<br>
-27) dnsmasq: up to 2.65 version.<br>
-28) xupnpd: up to v1.02 (revision 375).<br>
-29) webui: fix route managment.<br>
-30) igmpproxy: Support multiple multicast sources.<br>
-31) ppp: tune lcp adaptive logic.<br>
-32) xl2tpd: code up to git version (Jan 11, 2013).<br>
-33) busybox: up to 1.21.0. version.<br>
-34) apply busybox-1.21.0-mdev.patch.<br>
 
+<br>
+<b>3.3.x</b><br>
+1) Rework high cpu policer in ppp.<br>
+2) miniupnpd: update to 1.8.20130207 version.<br>
+3) xupnp: update to revision 327.<br>
+4) busybox: sync with current stable patchsets.<br>
+5) webui: more fixes and functions fix.<br>
+6) dnsmasq: up to 2.65 version.<br>
+7) xupnpd: up to v1.02 (revision 375).<br>
+8) webui: fix route managment.<br>
+9) igmpproxy: Support multiple multicast sources.<br>
+10) ppp: tune lcp adaptive logic.<br>
+11) xl2tpd: code up to git version (Jan 11, 2013).<br>
+12) busybox: up to 1.21.0. version.<br>
+13) apply busybox-1.21.0-mdev.patch.<br>
+
+<br>
+<b>3.4.x</b><br>
+1) kernel: arp: allow to invalidate specific ARP entries
+2) kernel: timers: Fix endless looping between cascade() and internal_add_timer()
+3) kernel: MIPS: use no-branch-likely compile option
+4) kernel: MIPS: Fix harmlessly missing else statement.
 
 <br><br>
 <b>News and changes in Russian:</b><br>
