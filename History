@@ -1248,6 +1248,7 @@
 2) kernel: timers: Fix endless looping between cascade() and internal_add_timer().<br>
 3) kernel: MIPS: use no-branch-likely compile option.<br>
 4) kernel: MIPS: Fix harmlessly missing else statement.<br>
+5) kernel: tcp: frto should not set snd_cwnd to 0.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
