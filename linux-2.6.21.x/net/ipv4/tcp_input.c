@@ -2670,7 +2670,8 @@ static void tcp_process_frto(struct sock *sk, u32 prior_snd_una, int flag)
 	    !(flag&FLAG_FORWARD_PROGRESS))
 		return;
 
-	if (!before(tp->snd_una, tp->frto_highmark)) {
+	if (!before(tp->snd_una, tp->frto_highmark) ||
+	    !tcp_packets_in_flight(tp)) {
 		tcp_enter_frto_loss(sk, tp->frto_counter + 1, flag);
 		return;
 	}
