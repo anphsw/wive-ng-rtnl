@@ -1250,6 +1250,7 @@
 4) kernel: MIPS: Fix harmlessly missing else statement.<br>
 5) kernel: tcp: frto should not set snd_cwnd to 0.<br>
 6) iptables: add lost rule for 1900 udp port accept in upnp path.<br>
+7) xupnpd: up to v1.02 revision 376.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
