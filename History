@@ -1251,6 +1251,7 @@
 5) kernel: tcp: frto should not set snd_cwnd to 0.<br>
 6) iptables: add lost rule for 1900 udp port accept in upnp path.<br>
 7) xupnpd: up to v1.02 revision 376.<br>
+9) iptables: limit acces to 1900 udp port (upnp) only from lan.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>

@@ -143,24 +143,26 @@ start() {
 	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 8666 -j ACCEPT
 	    # not safe fix me later
 	    iptables -A servicelimit -i $lan_if -p udp --dport "$LOCAL_PRT" -j ACCEPT
+	    iptables -A servicelimit -i $lan_if -p udp --dport 1900 -j ACCEPT
 	    if [ "$Lan2Enabled" = "1" ]; then
 		iptables -A servicelimit -i $lan2_if $STATE_NEW -p tcp --dport 8666 -j ACCEPT
 		# not safe fix me later
 		iptables -A servicelimit -i $lan2_if -p udp --dport "$LOCAL_PRT" -j ACCEPT
+		iptables -A servicelimit -i $lan2_if -p udp --dport 1900 -j ACCEPT
 	    fi
-	    iptables -A servicelimit -p udp --dport 1900 -j ACCEPT
 	fi
 	if [ "$xupnpd" = "1" ]; then
 	    $LOG "xupnpd"
 	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 4044 -j ACCEPT
 	    # not safe fix me later
 	    iptables -A servicelimit -i $lan_if -p udp --dport "$LOCAL_PRT" -j ACCEPT
+	    iptables -A servicelimit -i $lan_if -p udp --dport 1900 -j ACCEPT
 	    if [ "$Lan2Enabled" = "1" ]; then
     		iptables -A servicelimit -i $lan2_if $STATE_NEW -p tcp --dport 4044 -j ACCEPT
 		# not safe fix me later
 		iptables -A servicelimit -i $lan2_if -p udp --dport "$LOCAL_PRT" -j ACCEPT
+		iptables -A servicelimit -i $lan2_if -p udp --dport 1900 -j ACCEPT
 	    fi
-	    iptables -A servicelimit -p udp --dport 1900 -j ACCEPT
 	else
     	    iptables -A servicelimit $STATE_NEW -p tcp --dport 4044 -j DROP
 	fi
