@@ -129,9 +129,9 @@ start() {
 		    fi
 		fi
     		iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp -m multiport --dport 20,$FtpPort -j ACCEPT
-	     if [ "$Lan2Enabled" = "1" ]; then
-    		iptables -A servicelimit -i $lan2_if $STATE_NEW -p tcp -m multiport --dport 20,$FtpPort -j ACCEPT
-	     fi
+	        if [ "$Lan2Enabled" = "1" ]; then
+    		    iptables -A servicelimit -i $lan2_if $STATE_NEW -p tcp -m multiport --dport 20,$FtpPort -j ACCEPT
+	        fi
 	    elif [ "$RemoteFTP" = "2" ]; then
     		iptables -A servicelimit $STATE_NEW -p tcp -m multiport --dport 20,$FtpPort -j ACCEPT
 	    fi
@@ -143,6 +143,12 @@ start() {
 	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 8666 -j ACCEPT
 	    # not safe fix me later
 	    iptables -A servicelimit -i $lan_if -p udp --dport "$LOCAL_PRT" -j ACCEPT
+	    if [ "$Lan2Enabled" = "1" ]; then
+		iptables -A servicelimit -i $lan2_if $STATE_NEW -p tcp --dport 8666 -j ACCEPT
+		# not safe fix me later
+		iptables -A servicelimit -i $lan2_if -p udp --dport "$LOCAL_PRT" -j ACCEPT
+	    fi
+	    iptables -A servicelimit -p udp --dport 1900 -j ACCEPT
 	fi
 	if [ "$xupnpd" = "1" ]; then
 	    $LOG "xupnpd"
