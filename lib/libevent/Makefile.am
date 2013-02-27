@@ -106,7 +106,7 @@ EXTRA_DIST = \
 	make-event-config.sed \
 	Doxyfile \
 	whatsnew-2.0.txt \
-	Makefile.nmake test/Makefile.nmake \
+	Makefile.nmake \
 	$(PLATFORM_DEPENDENT_SRC)
 
 LIBEVENT_LIBS_LA = libevent.la libevent_core.la libevent_extra.la
@@ -126,7 +126,7 @@ else
 noinst_LTLIBRARIES =  $(LIBEVENT_LIBS_LA)
 endif
 
-SUBDIRS = . include sample test
+SUBDIRS = . include
 
 if BUILD_WIN32
 
