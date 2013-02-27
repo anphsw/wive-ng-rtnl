@@ -3,7 +3,7 @@ LUA     = lua-5.2.0
 STATIC  = false
 CFLAGS  = -Os -fno-exceptions -fno-rtti -I$(LUA) -L$(LUA) -I$(ROOTDIR)/lib/include
 SRC     = main.cpp soap.cpp mem.cpp mcast.cpp luaxlib.cpp luaxcore.cpp luajson.cpp luajson_parser.cpp
-STAGING_DIR = /u01//home/shocker/staff/openwrt/staging_dir
+STAGING_DIR = /u01/home/shocker/staff/openwrt/staging_dir
 LUAMYCFLAGS = -DLUA_USE_LINUX
 
 ifeq ($(STATIC),true)
@@ -33,7 +33,7 @@ x86_bsd:
 
 # D-Link DIR-320/DD-WRT (mipsel)
 bcm947xx_ddwrt:
-	$(MAKE) embedded TARGET=bcm947xx-ddwrt SDK=/u01/home/shocker/staff/openwrt_8_09/staging_dir/toolchain-mipsel_gcc3.4.6/mipsel-linux/bin
+	$(MAKE) embedded TARGET=bcm947xx-ddwrt SDK=/u01/home/shocker/staff/openwrt_8_09/staging_dir/toolchain-mipsel_gcc3.4.6/mipsel-linux/bin PATH=$(PATH):/u01/home/shocker/staff/openwrt_8_09/staging_dir/toolchain-mipsel_gcc3.4.6/libexec/gcc/mipsel-linux-uclibc/3.4.6
 
 # OpenWrt Backfire
 bcm947xx:
