@@ -8,7 +8,7 @@ AC_PREREQ(2.53)
 
 AC_INIT(lib/zebra.h)
 AM_INIT_AUTOMAKE(zebra, 0.95)
-AM_CONFIG_HEADER(config.h)
+AС_CONFIG_HEADER(config.h)
 
 dnl -----------------------------------
 dnl Get hostname and other information.

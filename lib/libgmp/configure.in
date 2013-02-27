@@ -66,7 +66,7 @@ dnl  Note that there's a copy of these options in the top-level Makefile.am,
 dnl  so update there too if changing anything.
 dnl
 AM_INIT_AUTOMAKE([1.8 gnu no-dependencies $(top_builddir)/ansi2knr])
-AM_CONFIG_HEADER(config.h:config.in)
+AC_CONFIG_HEADER(config.h:config.in)
 AM_MAINTAINER_MODE
 
 

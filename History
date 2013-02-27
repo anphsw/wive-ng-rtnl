@@ -1253,6 +1253,7 @@
 7) xupnpd: up to v1.03 revision 381.<br>
 9) iptables: limit acces to 1900 udp port (upnp) only from lan.<br>
 10) kernel: arp: fix possible crash in arp_rcv().<br>
+11) libevent: update to 2.0.21 stable version.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>

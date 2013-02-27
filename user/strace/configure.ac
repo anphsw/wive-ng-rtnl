@@ -2,7 +2,7 @@ dnl Process this file with autoconf to create configure.  Use autoreconf.
 AC_PREREQ(2.57)
 AC_INIT([strace],[4.5.15])
 AC_CONFIG_SRCDIR([strace.c])
-AM_CONFIG_HEADER([config.h])
+AС_CONFIG_HEADER([config.h])
 AM_INIT_AUTOMAKE([foreign check-news dist-bzip2])
 AM_MAINTAINER_MODE
 AC_CANONICAL_HOST
