@@ -58,7 +58,7 @@ static inline int nf_conntrack_confirm(struct sk_buff **pskb)
 	struct nf_conn *ct = (struct nf_conn *)(*pskb)->nfct;
 	int ret = NF_ACCEPT;
 
-	if (ct && ct != &nf_conntrack_untracked) {
+	if (ct && !nf_ct_is_untracked(ct)) {
 		if (!nf_ct_is_confirmed(ct))
 			ret = __nf_conntrack_confirm(pskb);
 		nf_ct_deliver_cached_events(ct);

@@ -82,7 +82,7 @@ EXPORT_SYMBOL_GPL(nf_conntrack_max);
 struct list_head *nf_conntrack_hash __read_mostly;
 EXPORT_SYMBOL_GPL(nf_conntrack_hash);
 
-struct nf_conn nf_conntrack_untracked __read_mostly;
+struct nf_conn nf_conntrack_untracked;
 EXPORT_SYMBOL_GPL(nf_conntrack_untracked);
 
 unsigned int nf_ct_log_invalid __read_mostly;
@@ -1740,6 +1740,12 @@ s16 (*nf_ct_nat_offset)(const struct nf_conn *ct,
 			u32 seq);
 EXPORT_SYMBOL_GPL(nf_ct_nat_offset);
 
+void nf_ct_untracked_status_or(unsigned long bits)
+{
+	nf_conntrack_untracked.status |= bits;
+}
+EXPORT_SYMBOL_GPL(nf_ct_untracked_status_or);
+
 int __init nf_conntrack_init(void)
 {
 	unsigned int i;
@@ -1832,7 +1838,7 @@ int __init nf_conntrack_init(void)
 	    - to never be deleted, not in any hashes */
 	atomic_set(&nf_conntrack_untracked.ct_general.use, 1);
 	/*  - and look it like as a confirmed connection */
-	set_bit(IPS_CONFIRMED_BIT, &nf_conntrack_untracked.status);
+	nf_ct_untracked_status_or(IPS_CONFIRMED | IPS_UNTRACKED);
 
 	return ret;
 

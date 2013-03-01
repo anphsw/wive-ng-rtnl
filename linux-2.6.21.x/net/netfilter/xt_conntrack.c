@@ -39,11 +39,12 @@ match(const struct sk_buff *skb,
 
 #define FWINV(bool,invflg) ((bool) ^ !!(sinfo->invflags & invflg))
 
-	if (ct == &nf_conntrack_untracked)
-		statebit = XT_CONNTRACK_STATE_UNTRACKED;
-	else if (ct)
-		statebit = XT_CONNTRACK_STATE_BIT(ctinfo);
-	else
+	if (ct) {
+		if (nf_ct_is_untracked(ct))
+			statebit = XT_CONNTRACK_STATE_UNTRACKED;
+		else
+			statebit = XT_CONNTRACK_STATE_BIT(ctinfo);
+	} else
 		statebit = XT_CONNTRACK_STATE_INVALID;
 
 	if (sinfo->flags & XT_CONNTRACK_STATE) {
