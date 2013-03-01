@@ -1254,6 +1254,8 @@
 9) iptables: limit acces to 1900 udp port (upnp) only from lan.<br>
 10) kernel: arp: fix possible crash in arp_rcv().<br>
 11) libevent: update to 2.0.21 stable version.<br>
+12) kernel: netfilter: nf_conntrack: IPS_UNTRACKED bit.<br>
+13) kernel: softirq: reduce latencies.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
