@@ -242,10 +242,11 @@ extern s16 (*nf_ct_nat_offset)(const struct nf_conn *ct,
 /* Call me when a conntrack is destroyed. */
 extern void (*nf_conntrack_destroyed)(struct nf_conn *conntrack);
 
+extern struct nf_conn nf_conntrack_untracked;
+
 /* Fake conntrack entry for untracked connections */
 static inline struct nf_conn *nf_ct_untracked_get(void)
 {
-	extern struct nf_conn nf_conntrack_untracked;
 
 	return &nf_conntrack_untracked;
 }
