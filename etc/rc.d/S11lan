@@ -51,7 +51,7 @@ start() {
     # only not bridge mode enable forward
     if [ "$OperationMode" != "0" ] && [ -f /proc/sys/net/ipv4/conf/$lan_if/forwarding ] && [ "$ApCliBridgeOnly" != "1" ]; then
 	echo 1 > "/proc/sys/net/ipv4/conf/$lan_if/forwarding"
-	if [ "$IPv6_Enable" = "1" ] && [ -f /proc/sys/net/ipv6/conf/$lan_if/forwarding ]; then
+	if [ "$radvdEnabled" = "1" ] && [ -f /proc/sys/net/ipv6/conf/$lan_if/forwarding ]; then
 	    echo 1 > "/proc/sys/net/ipv6/conf/$lan_if/forwarding"
 	fi
     fi
@@ -62,7 +62,7 @@ addr_flush() {
     ip addr flush dev "$lan_if" > /dev/null 2>&1
     ip addr flush dev "$lan2_if" > /dev/null 2>&1
     ip addr flush dev "$phys_lan_if" > /dev/null 2>&1
-    if [ -d /proc/sys/net/ipv6 ] && [ "$IPv6_Enable" = "1" ]; then
+    if [ -d /proc/sys/net/ipv6 ] && [ "$radvdEnabled" = "1" ]; then
 	ip -6 addr flush dev "$lan_if" > /dev/null 2>&1
 	ip -6 addr flush dev "$lan2_if" > /dev/null 2>&1
 	ip -6 addr flush dev "$phys_lan_if" > /dev/null 2>&1

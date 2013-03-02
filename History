@@ -1261,7 +1261,8 @@
 16) kernel: Fix the prototype of call_netdevice_notifiers.<br>
 17) init.d: small fixes for ipv6 support in future.<br>
 18) radvd: up to 1.9.2 version with drop libdaemon use (need for save flash free size).<br>
-19) ipv6: full work ipv6 over TTK ISP. For 8Mb Flash devices need radvd enable in GUI and nvram_set IPv6_Enable 1 by ssh and reboot.<br>
+19) ipv6: use radvdEnabled variable for enable ipv6 (instead IPv6_Enable variable).<br>
+20) ipv6: full work ipv6 over TTK ISP. For 8Mb Flash devices need radvd enable in GUI.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>

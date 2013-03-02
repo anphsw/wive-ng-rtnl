@@ -31,7 +31,7 @@ eval `nvram_buf_get 2860 OperationMode wanConnectionMode wan_ipaddr wan_static_d
 	WLAN_MAC_ADDR WAN_MAC_ADDR LAN_MAC_ADDR \
 	dnsPEnabled UDPXYMode igmpEnabled \
 	vpnEnabled vpnPurePPPOE vpnType \
-	IPv6_Enable IPv6_6RD_Enable \
+	radvdEnabled IPv6_6RD_Enable \
 	ApCliBridgeOnly MODEMENABLED \
 	QoSEnable simple_qos`
 
@@ -182,7 +182,7 @@ udhcpc_opts() {
     else
 	wan_manual_mtu=""
     fi
-    if [ "$IPv6_Enable" = "1" ] && [ "$IPv6_6RD_Enable" = "1" ]; then
+    if [ "$radvdEnabled" = "1" ] && [ "$IPv6_6RD_Enable" = "1" ]; then
 	rd_support="-O ip6rd"
     else
 	rd_support=""

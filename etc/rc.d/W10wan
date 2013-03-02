@@ -98,12 +98,12 @@ wan_if_preconf() {
 	if [ "$vpnEnabled" = "on" ] && [ "$vpnType" = "0" ] && [ "$vpnPurePPPOE" = "1" ]; then
 	    # no need forward for phys wan
 	    echo 0 > "/proc/sys/net/ipv4/conf/$wan_if/forwarding"
-	    if [ "$IPv6_Enable" = "1" ]; then
+	    if [ "$radvdEnabled" = "1" ]; then
 		echo 0 > "/proc/sys/net/ipv6/conf/$wan_if/forwarding"
 	    fi
 	else
 	    echo 1 > "/proc/sys/net/ipv4/conf/$wan_if/forwarding"
-	    if [ "$IPv6_Enable" = "1" ]; then
+	    if [ "$radvdEnabled" = "1" ]; then
 		echo 1 > "/proc/sys/net/ipv6/conf/$wan_if/forwarding"
 	    fi
 	fi

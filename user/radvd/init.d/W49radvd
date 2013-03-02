@@ -20,7 +20,7 @@ LOG="logger -t radvd"
 
 start() {
     radvdEnabled=`nvram_get 2860 radvdEnabled`
-    if [ "$radvdEnabled" = "1" ] && [ "$IPv6_Enable" = "1" ]; then
+    if [ "$radvdEnabled" = "1" ]; then
 	#
         # use old style tunnel mode
 	use_sit=1;

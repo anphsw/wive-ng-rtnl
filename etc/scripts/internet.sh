@@ -18,7 +18,7 @@ addMesh() {
         meshenabled=`nvram_get 2860 MeshEnabled`
 	if [ "$meshenabled" = "1" ]; then
 	    ip addr flush dev mesh0 > /dev/null 2>&1
-	    if [ -d /proc/sys/net/ipv6 ] && [ "$IPv6_Enable" = "1" ]; then
+	    if [ -d /proc/sys/net/ipv6 ] && [ "$radvdEnabled" = "1" ]; then
 		ip -6 addr flush dev mesh0 /dev/null 2>&1
 	    fi
 	    ip link set mesh0 down > /dev/null 2>&1
@@ -35,7 +35,7 @@ addWds() {
 	if [ "$wds_en" != "0" ]; then
     	    for i in `seq 0 3`; do
     		ip addr flush dev wds$i > /dev/null 2>&1
-		if [ -d /proc/sys/net/ipv6 ] && [ "$IPv6_Enable" = "1" ]; then
+		if [ -d /proc/sys/net/ipv6 ] && [ "$radvdEnabled" = "1" ]; then
     		    ip -6 addr flush dev wds$i /dev/null 2>&1
 		fi
 		ip link set wds$i down > /dev/null 2>&1
@@ -49,7 +49,7 @@ addWds() {
 	if [ "$wds_en" != "0" ]; then
     	    for i in `seq 0 3`; do
     		ip addr flush dev wdsi$i > /dev/null 2>&1
-		if [ -d /proc/sys/net/ipv6 ] && [ "$IPv6_Enable" = "1" ]; then
+		if [ -d /proc/sys/net/ipv6 ] && [ "$radvdEnabled" = "1" ]; then
     		    ip -6 addr flush dev wdsi$i /dev/null 2>&1
 		fi
 		ip link set wdsi$i down > /dev/null 2>&1
@@ -68,7 +68,7 @@ addMBSSID() {
 	    let "bssrealnum=$bssidnum-1"
 	    for i in `seq 1 $bssrealnum`; do
     		ip addr flush dev ra$i > /dev/null 2>&1
-		if [ -d /proc/sys/net/ipv6 ] && [ "$IPv6_Enable" = "1" ]; then
+		if [ -d /proc/sys/net/ipv6 ] && [ "$radvdEnabled" = "1" ]; then
     		    ip -6 addr flush dev ra$i /dev/null 2>&1
 		fi
 		ip link set ra$i down > /dev/null 2>&1
@@ -83,7 +83,7 @@ addMBSSID() {
 	    let "bssrealnum=$bssidnum-1"
 	    for i in `seq 1 $bssrealnum`; do
     		ip addr flush dev rai$i > /dev/null 2>&1
-		if [ -d /proc/sys/net/ipv6 ] && [ "$IPv6_Enable" = "1" ]; then
+		if [ -d /proc/sys/net/ipv6 ] && [ "$radvdEnabled" = "1" ]; then
     		    ip -6 addr flush dev rai$i /dev/null 2>&1
 		fi
 		ip link set ra$i down > /dev/null 2>&1
