@@ -95,9 +95,10 @@ stop() {
     echo "0" > /proc/sys/net/ipv6/conf/all/forwarding
     killall -q radvd
     killall -q -SIGKILL radvd
+    ip -6 route flush dev tun6to4 > /dev/null 2>&1
+    ip -6 addr flush dev tun6to4  > /dev/null 2>&1
     ip -6 route flush dev sit0 > /dev/null 2>&1
     ip -6 addr flush dev sit0  > /dev/null 2>&1
-    ip link set dev sit0 down > /dev/null 2>&1
     ip link set dev tun6to4 down > /dev/null 2>&1
     ip link set dev sit0 down > /dev/null 2>&1
     ip tunnel del tun6to4 > /dev/null 2>&1
