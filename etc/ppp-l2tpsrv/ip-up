@@ -32,5 +32,8 @@ ip route replace default dev $PPP_IFACE metric 100$PPP_NUM via $PPP_REMOTE > /de
 
 $LOG "Enable forwarding for $PPP_IFACE interface"
 echo 1 > "/proc/sys/net/ipv4/conf/$PPP_IFACE/forwarding"
+if [ "$IPv6_Enable" = "1" ]; then
+    echo 1 > "/proc/sys/net/ipv6/conf/$PPP_IFACE/forwarding"
+fi
 
 export PPP_IFACE PPP_TTY PPP_SPEED PPP_LOCAL PPP_REMOTE PPP_IPPARAM

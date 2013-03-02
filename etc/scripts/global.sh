@@ -31,8 +31,9 @@ eval `nvram_buf_get 2860 OperationMode wanConnectionMode wan_ipaddr wan_static_d
 	WLAN_MAC_ADDR WAN_MAC_ADDR LAN_MAC_ADDR \
 	dnsPEnabled UDPXYMode igmpEnabled \
 	vpnEnabled vpnPurePPPOE vpnType \
-	IPv6_Enable QoSEnable simple_qos \
-	ApCliBridgeOnly MODEMENABLED`
+	IPv6_Enable IPv6_6RD_Enable \
+	ApCliBridgeOnly MODEMENABLED \
+	QoSEnable simple_qos`
 
 # LAN interface name -> $lan_if
 getLanIfName() {
@@ -181,10 +182,15 @@ udhcpc_opts() {
     else
 	wan_manual_mtu=""
     fi
+    if [ "$IPv6_Enable" = "1" ] && [ "$IPv6_6RD_Enable" = "1" ]; then
+	rd_support="-O ip6rd"
+    else
+	rd_support=""
+    fi
     UDHCPCOPTS="-i $wan_if $dhcpRequestIP -S -R -T 5 -a \
 		-s /bin/udhcpc.sh -p /var/run/udhcpc.pid \
 		-O routes -O staticroutes -O msstaticroutes -O wins \
-		$wan_manual_mtu -x hostname:$HostName -f &"
+		$rd_support $wan_manual_mtu -x hostname:$HostName -f &"
 }
 
 # configure and start zeroconf daemon

@@ -261,5 +261,8 @@ case "$1" in
 	fi
 	# reanable forward for paranoid users
 	echo 1 > "/proc/sys/net/ipv4/conf/$interface/forwarding"
+	if [ "$IPv6_Enable" = "1" ]; then
+	    echo 1 > "/proc/sys/net/ipv6/conf/$interface/forwarding"
+	fi
     ;;
 esac

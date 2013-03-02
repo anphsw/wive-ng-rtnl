@@ -137,6 +137,7 @@ igmpSnoopMode=
 IPPortFilterEnable=0
 IPPortFilterRules=
 IPv6_Enable=0
+IPv6_6RD_Enable=0
 ipv6_pass=0
 IS_WIVE=YES
 Key1Str1=

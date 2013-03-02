@@ -76,7 +76,7 @@ disable_net() {
 	is_eth21_in_br0=`brctl show | sed -n '/eth2\.1/p'`
 
 	# unload wifi driver
-	if [ "$is_ra0_in_br0" == "" ]; then
+	if [ "$is_ra0_in_br0" = "" ]; then
 	    unload_ra0
 	elif [ "$is_eth21_in_br0" != "" ]; then
 	    unload_ra0br0 "$phys_lan_if"
