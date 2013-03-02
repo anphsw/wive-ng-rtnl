@@ -1260,6 +1260,7 @@
 15) kernel: Rework hack by message leak network device if refcount is positive, do not stop work.<br>
 16) kernel: Fix the prototype of call_netdevice_notifiers.<br>
 17) init.d: small fixes for ipv6 support in future.<br>
+18) ipv6: full work ipv6 over TTK ISP. For 8Mb Flash devices need radvd enable in GUI and nvram_set IPv6_Enable 1 by ssh and reboot.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
