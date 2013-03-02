@@ -121,6 +121,8 @@
 #include <linux/ctype.h>
 #include <linux/prefetch.h>
 
+#define REFCNT_LEAK_HACK
+
 #ifdef CONFIG_NET_PPPOE_IPV6_PTHROUGH
 extern int private_pthrough(struct sk_buff *skb);
 extern int pthrough_create_proc_entry(void);
@@ -3215,7 +3217,7 @@ static void netdev_wait_allrefs(struct net_device *dev)
 		if (time_after(jiffies, warning_time + 10 * HZ)) {
 /* This is not clean hack. May be resource leak
     cardmap ppp module not touch refcnt and not need check this */
-#if 0
+#ifndef REFCNT_LEAK_HACK
 			printk(KERN_EMERG "unregister_netdevice: "
 			       "waiting for %s to become free. Usage "
 			       "count = %d\n",
@@ -3226,6 +3228,7 @@ static void netdev_wait_allrefs(struct net_device *dev)
 
 			if (count > 2) {
 			    refcnt = 0;
+			    printk(KERN_EMERG "unregister_netdevice %s refcnt leak. need fix.", dev->name);
 			    break;
 			}
 
@@ -3287,11 +3290,12 @@ void netdev_run_todo(void)
 		netdev_wait_allrefs(dev);
 
 		/* paranoia */
-		/* BUG_ON(atomic_read(&dev->refcnt)); */
+#ifndef REFCNT_LEAK_HACK
+		WARN_ON(atomic_read(&dev->refcnt));
 		WARN_ON((int)dev->ip_ptr);
 		WARN_ON((int)dev->ip6_ptr);
 		WARN_ON((int)dev->dn_ptr);
-
+#endif
 		if (dev->destructor)
 			dev->destructor(dev);
 
