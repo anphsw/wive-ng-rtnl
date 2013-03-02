@@ -80,6 +80,7 @@ start() {
 
 	$LOG "Enable ipv6 route"
         echo "1" > /proc/sys/net/ipv6/conf/all/forwarding
+        echo "1" > /proc/sys/net/ipv4/conf/all/forwarding
 
 	$LOG "Send NS(change $lan_if state) to pass RFC4862"
 	ip -6 addr del fe80::2e0:4cff:fe86:7001/64 dev $lan_if
