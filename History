@@ -1256,13 +1256,17 @@
 11) libevent: update to 2.0.21 stable version.<br>
 12) kernel: netfilter: nf_conntrack: IPS_UNTRACKED bit(speedup).<br>
 13) kernel: softirq: reduce latencies.<br>
-14) kernel: fix reconfigure dstif table in hw_nat module at down if to and in raX status.<br>
-15) kernel: Rework hack by message leak network device if refcount is positive, do not stop work.<br>
-16) kernel: Fix the prototype of call_netdevice_notifiers.<br>
-17) init.d: small fixes for ipv6 support in future.<br>
-18) radvd: up to 1.9.2 version with drop libdaemon use (need for save flash free size).<br>
-19) ipv6: use radvdEnabled variable for enable ipv6 (instead IPv6_Enable variable).<br>
-20) ipv6: full work ipv6 over TTK ISP. For 8Mb Flash devices need radvd enable in GUI.<br>
+
+<br>
+<b>3.5.x</b><br>
+1) kernel: fix reconfigure dstif table in hw_nat module at down if to and in raX status.<br>
+2) kernel: Rework hack by message leak network device if refcount is positive, do not stop work.<br>
+3) kernel: Fix the prototype of call_netdevice_notifiers.<br>
+4) init.d: small fixes for ipv6 support in future.<br>
+5) radvd: up to 1.9.2 version with drop libdaemon use (need for save flash free size).<br>
+6) ipv6: use radvdEnabled variable for enable ipv6 (instead IPv6_Enable variable).<br>
+7) ipv6: full work ipv6 over TTK ISP. For 8Mb Flash devices need radvd enable in GUI.<br>
+8) xl2tp: small fixups.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
