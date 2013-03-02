@@ -80,7 +80,6 @@ start() {
 
 	$LOG "Enable ipv6 route"
         echo "1" > /proc/sys/net/ipv6/conf/all/forwarding
-        echo "1" > /proc/sys/net/ipv4/conf/all/forwarding
 
 	$LOG "Send NS(change $lan_if state) to pass RFC4862"
 	ip -6 addr del fe80::2e0:4cff:fe86:7001/64 dev $lan_if
@@ -93,14 +92,15 @@ start() {
 
 stop() {
  $LOG  "Stop radvd daemon..."
+    echo "0" > /proc/sys/net/ipv6/conf/all/forwarding
     killall -q radvd
     killall -q -SIGKILL radvd
-    ip tunnel del tun6to4 > /dev/null 2>&1
-    ip link set dev tun6to4 down > /dev/null 2>&1
     ip -6 route flush dev sit0 > /dev/null 2>&1
     ip -6 addr flush dev sit0  > /dev/null 2>&1
-    ip -6 link set sit0 down > /dev/null 2>&1
-    echo "0" > /proc/sys/net/ipv6/conf/all/forwarding
+    ip link set dev sit0 down > /dev/null 2>&1
+    ip link set dev tun6to4 down > /dev/null 2>&1
+    ip link set dev sit0 down > /dev/null 2>&1
+    ip tunnel del tun6to4 > /dev/null 2>&1
 }
 
 case "$1" in
