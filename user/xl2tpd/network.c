@@ -87,12 +87,11 @@ int init_network (void)
 {
     long arg;
     struct sockaddr_in server;
-    unsigned int length;
+    unsigned int length = sizeof (server);
 
     gethostname (hostname, sizeof (hostname));
 
     /* create server socket only has lns */
-    length = sizeof (server);
     server.sin_family = AF_INET;
     server.sin_addr.s_addr = gconfig.listenaddr; 
     server.sin_port = htons (gconfig.port);
@@ -137,11 +136,6 @@ int init_network (void)
 	l2tp_log(LOG_INFO, "No attempt being made to use IPsec SAref's since we're not on a Linux machine.\n");
 #endif
 
-    arg = fcntl (server_socket, F_GETFL);
-    arg |= O_NONBLOCK;
-    fcntl (server_socket, F_SETFL, arg);
-    gconfig.port = ntohs (server.sin_port);
-
 #ifdef USE_KERNEL
     if (gconfig.forceuserspace)
     {
@@ -156,7 +150,7 @@ int init_network (void)
         int kernel_fd = socket(AF_PPPOX, SOCK_DGRAM, PX_PROTO_OL2TP);
         if (kernel_fd < 0)
         {
-            l2tp_log (LOG_INFO, "L2TP kernel support not detected.\n");
+	    l2tp_log (LOG_INFO, "L2TP kernel support not detected (try modprobing l2tp_ppp and pppol2tp)\n");;
             kernel_support = 0;
         }
         else
@@ -169,6 +163,11 @@ int init_network (void)
 #else
     l2tp_log (LOG_INFO, "This binary does not support kernel L2TP.\n");
 #endif
+
+    arg = fcntl (server_socket, F_GETFL);
+    arg |= O_NONBLOCK;
+    fcntl (server_socket, F_SETFL, arg);
+    gconfig.port = ntohs (server.sin_port);
     return 0;
 }
 
