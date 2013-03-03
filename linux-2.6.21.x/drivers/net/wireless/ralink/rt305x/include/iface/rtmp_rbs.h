@@ -96,7 +96,7 @@
   *	Device Tx/Rx related definitions.
   *
   ************************************************************************/
-#if !defined(CONFIG_RA_NAT_NONE)
+#ifndef CONFIG_RA_NAT_NONE
 /* bruce+ */
 extern int (*ra_sw_nat_hook_tx)(struct sk_buff *skb, int gmac_no);
 extern int (*ra_sw_nat_hook_rx)(struct sk_buff *skb);

@@ -79,7 +79,7 @@ static int rt2880_eth_recv(struct net_device* dev, int *work_done, int work_to_d
 static int rt2880_eth_recv(struct net_device* dev);
 #endif
 
-#if !defined(CONFIG_RA_NAT_NONE)
+#ifndef CONFIG_RA_NAT_NONE
 #ifdef CONFIG_RAETH_MODULE
 extern int (*ra_sw_nat_hook_rx)(struct sk_buff *skb);
 extern int (*ra_sw_nat_hook_tx)(struct sk_buff *skb, int gmac_no);
@@ -1315,7 +1315,7 @@ static int rt2880_eth_recv(struct net_device* dev)
 		}
 #endif
 
-#if !defined(CONFIG_RA_NAT_NONE)
+#ifndef CONFIG_RA_NAT_NONE
 /* bruce+
  * ra_sw_nat_hook_rx return 1 --> continue
  * ra_sw_nat_hook_rx return 0 --> FWD & without netif_rx
@@ -1829,7 +1829,7 @@ static int ei_start_xmit(struct sk_buff* skb, struct net_device *dev, int gmac_n
 		return 0;
 	}
 #endif
-#if !defined(CONFIG_RA_NAT_NONE)
+#ifndef CONFIG_RA_NAT_NONE
 /* bruce+
  */
          if(ra_sw_nat_hook_tx!= NULL)

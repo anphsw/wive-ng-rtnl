@@ -35,7 +35,7 @@
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 #include <linux/udp.h>
 #include "../nat/hw_nat/ra_nat.h"
-#if !defined(CONFIG_RA_NAT_NONE)
+#ifndef CONFIG_RA_NAT_NONE
 extern int (*ra_sw_nat_hook_rx)(struct sk_buff *skb);
 extern int (*ra_sw_nat_hook_tx)(struct sk_buff *skb, int gmac_no);
 #endif
@@ -866,13 +866,12 @@ __nf_conntrack_alloc(const struct nf_conntrack_tuple *orig,
 		goto out;
 	}
 
-	conntrack = kmem_cache_alloc(nf_ct_cache[features].cachep, GFP_ATOMIC);
+	conntrack = kmem_cache_zalloc(nf_ct_cache[features].cachep, GFP_ATOMIC);
 	if (conntrack == NULL) {
 		DEBUGP("nf_conntrack_alloc: Can't alloc conntrack from cache\n");
 		goto out;
 	}
 
-	memset(conntrack, 0, nf_ct_cache[features].size);
 	conntrack->features = features;
 	atomic_set(&conntrack->ct_general.use, 1);
 	conntrack->tuplehash[IP_CT_DIR_ORIGINAL].tuple = *orig;
@@ -1235,7 +1234,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 	NF_CT_ASSERT((*pskb)->nfct);
 
 	ret = l4proto->packet(ct, *pskb, dataoff, ctinfo, pf, hooknum);
-	if (ret < 0) {
+	if (ret <= 0) {
 		/* Invalid: inverse of the return code tells
 		 * the netfilter core what to do */
 		DEBUGP("nf_conntrack_in: Can't track with proto module\n");
@@ -1661,15 +1660,16 @@ i_see_dead_people:
 		}
 }
 
-static struct list_head *alloc_hashtable(int size, int *vmalloced)
+static struct list_head *alloc_hashtable(int *sizep, int *vmalloced)
 {
 	struct list_head *hash;
-	unsigned int i;
+	unsigned int size, i;
 
 	*vmalloced = 0;
+	size = *sizep = roundup(*sizep, PAGE_SIZE / sizeof(struct list_head));
 	hash = (void*)__get_free_pages(GFP_KERNEL|__GFP_NOWARN,
-				       get_order(sizeof(struct list_head)
-						 * size));
+ 				       get_order(sizeof(struct list_head)
+ 						 * size));
 	if (!hash) {
 		*vmalloced = 1;
 		printk(KERN_WARNING "nf_conntrack: falling back to vmalloc.\n");
@@ -1699,7 +1699,7 @@ int nf_conntrack_set_hashsize(const char *val, struct kernel_param *kp)
 	if (!hashsize)
 		return -EINVAL;
 
-	hash = alloc_hashtable(hashsize, &vmalloced);
+	hash = alloc_hashtable(&hashsize, &vmalloced);
 	if (!hash)
 		return -ENOMEM;
 
@@ -1770,6 +1770,7 @@ int __init nf_conntrack_init(void)
 		if (nf_conntrack_htable_size < 16)
 			nf_conntrack_htable_size = 16;
 	}
+
 	nf_conntrack_max = 8 * nf_conntrack_htable_size;
 #endif
 	 /* SpeedMod: Hashtable size: Limit ~2k records for 16Mb devices and ~4k for 32Mb.
@@ -1793,17 +1794,16 @@ int __init nf_conntrack_init(void)
 #ifdef CONFIG_NF_PRIVILEGE_CONNTRACK
 	nf_conntrack_max_general = nf_conntrack_max - 384;
 #endif
-
-	printk("nf_conntrack version %s (%u buckets, %d max)\n",
-	       NF_CONNTRACK_VERSION, nf_conntrack_htable_size,
-	       nf_conntrack_max);
-
-	nf_conntrack_hash = alloc_hashtable(nf_conntrack_htable_size,
+	nf_conntrack_hash = alloc_hashtable(&nf_conntrack_htable_size,
 					    &nf_conntrack_vmalloc);
 	if (!nf_conntrack_hash) {
 		printk(KERN_ERR "Unable to create nf_conntrack_hash\n");
 		goto err_out;
 	}
+
+	printk("nf_conntrack version %s (%u buckets, %d max)\n",
+	       NF_CONNTRACK_VERSION, nf_conntrack_htable_size,
+	       nf_conntrack_max);
 
 	ret = nf_conntrack_register_cache(NF_CT_F_BASIC, "nf_conntrack:basic",
 					  sizeof(struct nf_conn));

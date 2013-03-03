@@ -1266,6 +1266,8 @@
 5) ipv6: use radvdEnabled variable for enable ipv6 (instead IPv6_Enable variable).<br>
 6) ipv6: full work ipv6 over TTK ISP. For 8Mb Flash devices need radvd enable in GUI.<br>
 7) xl2tp: small fixups.<br>
+8) kernel: netfilter: fix conntrack cache memory allocate.<br>
+9) kernel: netfilter: xt_tcpudp: fix wrong struct in udp_checkentry.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
