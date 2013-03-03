@@ -1271,6 +1271,7 @@
 10) kernel: ipv6: use appropriate sock tclass setting for routing lookup.<br>
 11) kernel: ipv6: fix CoA check in RH2 input handler (mip6_rthdr_input()).<br>
 12) kernel: ipv6: ipv6: optimize inet6_hash_frag().<br>
+13) kernel: hash: update hash_32/64 functions.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
