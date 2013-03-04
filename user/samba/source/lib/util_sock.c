@@ -237,7 +237,7 @@ static ssize_t read_socket_with_timeout(int fd,char *buf,size_t mincnt,size_t ma
       }
 
       if (readret == -1) {
-        DEBUG(0,("read_socket_with_timeout: read error = %s.\n", strerror(errno) ));
+        DEBUG(5,("read_socket_with_timeout: read error = %s.\n", strerror(errno) ));
         smb_read_error = READ_ERROR;
         return -1;
       }
@@ -1012,7 +1012,7 @@ char *client_name(int fd)
 	}
 	
 	if (getpeername(fd, &sa, &length) < 0) {
-		DEBUG(0,("getpeername failed. Error was %s\n", strerror(errno) ));
+		DEBUG(5,("getpeername failed. Error was %s\n", strerror(errno) ));
 		return name_buf;
 	}
 	
@@ -1058,7 +1058,7 @@ char *client_addr(int fd)
 	}
 	
 	if (getpeername(fd, &sa, &length) < 0) {
-		DEBUG(0,("getpeername failed. Error was %s\n", strerror(errno) ));
+		DEBUG(3,("getpeername failed. Error was %s\n", strerror(errno) ));
 		return addr_buf;
 	}
 	
