@@ -2309,10 +2309,9 @@ static int32_t PpeEngStart(void)
 
 	if (phy_val > 0x53) { /* check hardware revision PPE module for prevent udp crc error */
 		has_fixed_udp_ppe = 1;
-		printk("Ralink PPE HW revision: %i, UDP offload enabled.\n", phy_val);
 	} else {
 		has_fixed_udp_ppe = 0;
-		printk("Ralink PPE HW revision: %i, UDP offload disabled.\n", phy_val);
+		printk("Ralink PPE HW revision: %i, UDP without CRC skip from PPE processing.\n", phy_val);
 	}
 #endif
 
