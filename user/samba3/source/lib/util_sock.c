@@ -619,7 +619,7 @@ static int get_socket_port(int fd)
 	}
 
 	if (getsockname(fd, (struct sockaddr *)&sa, &length) < 0) {
-		DEBUG(0,("getpeername failed. Error was %s\n",
+		DEBUG(5,("getpeername failed. Error was %s\n",
 			strerror(errno) ));
 		return -1;
 	}
@@ -937,12 +937,12 @@ NTSTATUS read_socket_with_timeout(int fd, char *buf,
 				if (fd == get_client_fd()) {
 					/* Try and give an error message
 					 * saying what client failed. */
-					DEBUG(0,("read_socket_with_timeout: "
+					DEBUG(5,("read_socket_with_timeout: "
 						"client %s read error = %s.\n",
 						get_peer_addr(fd,addr,sizeof(addr)),
 						strerror(errno) ));
 				} else {
-					DEBUG(0,("read_socket_with_timeout: "
+					DEBUG(5,("read_socket_with_timeout: "
 						"read error = %s.\n",
 						strerror(errno) ));
 				}
@@ -980,12 +980,12 @@ NTSTATUS read_socket_with_timeout(int fd, char *buf,
 			if (fd == get_client_fd()) {
 				/* Try and give an error message saying
 				 * what client failed. */
-				DEBUG(0,("read_socket_with_timeout: timeout "
+				DEBUG(5,("read_socket_with_timeout: timeout "
 				"read for client %s. select error = %s.\n",
 				get_peer_addr(fd,addr,sizeof(addr)),
 				strerror(errno) ));
 			} else {
-				DEBUG(0,("read_socket_with_timeout: timeout "
+				DEBUG(5,("read_socket_with_timeout: timeout "
 				"read. select error = %s.\n",
 				strerror(errno) ));
 			}
@@ -1013,12 +1013,12 @@ NTSTATUS read_socket_with_timeout(int fd, char *buf,
 			if (fd == get_client_fd()) {
 				/* Try and give an error message
 				 * saying what client failed. */
-				DEBUG(0,("read_socket_with_timeout: timeout "
+				DEBUG(5,("read_socket_with_timeout: timeout "
 					"read to client %s. read error = %s.\n",
 					get_peer_addr(fd,addr,sizeof(addr)),
 					strerror(errno) ));
 			} else {
-				DEBUG(0,("read_socket_with_timeout: timeout "
+				DEBUG(5,("read_socket_with_timeout: timeout "
 					"read. read error = %s.\n",
 					strerror(errno) ));
 			}
@@ -1683,7 +1683,7 @@ static const char *get_peer_addr_internal(int fd,
 	}
 
 	if (getpeername(fd, (struct sockaddr *)pss, plength) < 0) {
-		DEBUG(0,("getpeername failed. Error was %s\n",
+		DEBUG(5,("getpeername failed. Error was %s\n",
 					strerror(errno) ));
 		return addr_buf;
 	}

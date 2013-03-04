@@ -1273,6 +1273,7 @@
 12) kernel: ipv6: ipv6: optimize inet6_hash_frag().<br>
 13) kernel: hash: update hash_32/64 functions.<br>
 14) kernel: hw_nat: fix udp offload issue in some hardware RT305x chip revisions.<br>
+15) samba(3): decrease noise debug.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
