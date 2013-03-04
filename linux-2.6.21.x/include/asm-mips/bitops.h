@@ -38,8 +38,8 @@
 /*
  * clear_bit() doesn't provide any barrier for the compiler.
  */
-#define smp_mb__before_clear_bit()	smp_mb()
-#define smp_mb__after_clear_bit()	smp_mb()
+#define smp_mb__before_clear_bit()	smp_llsc_mb()
+#define smp_mb__after_clear_bit()	smp_llsc_mb()
 
 /*
  * set_bit - Atomically set a bit in memory
@@ -295,7 +295,7 @@ static inline int test_and_set_bit(unsigned long nr,
 		return retval;
 	}
 
-	smp_mb();
+	smp_llsc_mb();
 }
 
 /*
@@ -389,7 +389,7 @@ static inline int test_and_clear_bit(unsigned long nr,
 		return retval;
 	}
 
-	smp_mb();
+	smp_llsc_mb();
 }
 
 /*
@@ -460,7 +460,7 @@ static inline int test_and_change_bit(unsigned long nr,
 		return retval;
 	}
 
-	smp_mb();
+	smp_llsc_mb();
 }
 
 #include <asm-generic/bitops/non-atomic.h>
