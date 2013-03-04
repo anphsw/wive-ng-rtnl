@@ -77,6 +77,10 @@ dma_addr_t		PpePhyFoeBase;
 struct net_device	*DstPort[MAX_IF_NUM];
 PktParseResult		PpeParseResult;
 
+#if defined (CONFIG_RALINK_RT3052)
+static int has_fixed_udp_ppe;
+#endif
+
 #if 0
 void skb_dump(struct sk_buff* sk) {
         unsigned int i;
@@ -1381,10 +1385,6 @@ int32_t PpeFillInL3Info(struct sk_buff * skb, struct FoeEntry * foe_entry)
 int32_t PpeFillInL4Info(struct sk_buff * skb, struct FoeEntry * foe_entry)
 {
 
-#if defined (CONFIG_RALINK_RT3052)
-	uint32_t phy_val;
-#endif
-
 	if (PpeParseResult.pkt_type == IPV4_HNAPT) {
 #if defined (CONFIG_HNAT_V2)
 		// DS-LIte WAN->LAN
@@ -1414,10 +1414,7 @@ int32_t PpeFillInL4Info(struct sk_buff * skb, struct FoeEntry * foe_entry)
 				return 1;
 			}
 #elif defined (CONFIG_RALINK_RT3052)
-			rw_rf_reg(0, 0, &phy_val);
-			phy_val = phy_val & 0xFF;
-
-			if (phy_val > 0x53) {
+			if ((PpeParseResult.uh.check != 0) || (has_fixed_udp_ppe > 0)) {
 				foe_entry->ipv4_hnapt.new_sport = ntohs(PpeParseResult.uh.source);
 				foe_entry->ipv4_hnapt.new_dport = ntohs(PpeParseResult.uh.dest);
 				foe_entry->ipv4_hnapt.bfib1.udp = UDP;
@@ -2304,6 +2301,21 @@ static void FoeFreeTbl(uint32_t NumOfEntry)
 
 static int32_t PpeEngStart(void)
 {
+#if defined (CONFIG_RALINK_RT3052)
+	uint32_t phy_val;
+
+	rw_rf_reg(0, 0, &phy_val);
+	phy_val = phy_val & 0xFF;
+
+	if (phy_val > 0x53) { /* check hardware revision PPE module for prevent udp crc error */
+		has_fixed_udp_ppe = 1;
+		printk("Ralink PPE HW revision: %i, UDP offload enabled.\n", phy_val);
+	} else {
+		has_fixed_udp_ppe = 0;
+		printk("Ralink PPE HW revision: %i, UDP offload disabled.\n", phy_val);
+	}
+#endif
+
 	/* Set PPE Flow Set */
 	PpeSetFoeEbl(1);
 
