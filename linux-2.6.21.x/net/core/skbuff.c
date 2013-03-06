@@ -675,6 +675,9 @@ int pskb_expand_head(struct sk_buff *skb, int nhead, int ntail,
 
 	BUG_ON(nhead < 0);
 
+	if (skb_shared(skb))
+		BUG();
+
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 #if defined (HNAT_USE_TAILROOM)
 	if(ra_sw_nat_hook_rx!= NULL) {
@@ -683,10 +686,6 @@ int pskb_expand_head(struct sk_buff *skb, int nhead, int ntail,
 	}
 #endif
 #endif
-
-	if (skb_shared(skb))
-		BUG();
-
 	size = SKB_DATA_ALIGN(size);
 
 	data = kmalloc(size + SKB_DATA_ALIGN(sizeof(struct skb_shared_info)),
