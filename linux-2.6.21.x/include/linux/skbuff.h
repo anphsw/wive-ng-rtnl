@@ -1544,11 +1544,11 @@ static inline int pskb_trim_rcsum(struct sk_buff *skb, unsigned int len)
                      skb = tmp, tmp = skb->next)
 
 #define skb_queue_walk_from(queue, skb)                                                \
-               for (; prefetch(skb->next), (skb != (struct sk_buff *)(queue)); \
+		for (; (skb != (struct sk_buff *)(queue));			\
                     skb = skb->next)
 
 #define skb_queue_walk_from_safe(queue, skb, tmp)                              \
-               for (tmp = skb->next;                                           \
+		for (tmp = skb->next;                                           \
                     skb != (struct sk_buff *)(queue);                          \
                     skb = tmp, tmp = skb->next)
 
