@@ -1280,7 +1280,7 @@
 19) xl2tp: small fixups.<br>
 20) samba(3): decrease noise debug.<br>
 21) defaults: increase vpn cpuilimit to 4000.<br>
-22) defaults: enable hw_nat per default this is very old work stable.<br>
+22) defaults: enable wif_hw_nat per default this is very old work stable.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
