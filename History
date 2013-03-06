@@ -1271,12 +1271,13 @@
 10) kernel: hw_nat: fix udp offload issue in some hardware RT305x chip revisions.<br>
 11) kernel: backport mips optimized spinlocks and futex fixes.<br>
 12) kernel: tcp: fix double-counted receiver RTT when leaving receiver fast path.<br>
-13) kernel: net: guard tcp_set_keepalive() to tcp sockets.<br>
-14) ipv6: radvd: up to 1.9.2 version with drop libdaemon use (need for save flash free size).<br>
-15) ipv6: use radvdEnabled variable for enable ipv6 (instead IPv6_Enable variable).<br>
-16) ipv6: full work ipv6 over TTK ISP. For 8Mb Flash devices need radvd enable in GUI.<br>
-17) xl2tp: small fixups.<br>
-18) samba(3): decrease noise debug.<br>
+13) kernel: tcp: do_tcp_sendpages() must try to push data out on oom conditions.<br>
+14) kernel: net: guard tcp_set_keepalive() to tcp sockets.<br>
+15) ipv6: radvd: up to 1.9.2 version with drop libdaemon use (need for save flash free size).<br>
+16) ipv6: use radvdEnabled variable for enable ipv6 (instead IPv6_Enable variable).<br>
+17) ipv6: full work ipv6 over TTK ISP. For 8Mb Flash devices need radvd enable in GUI.<br>
+18) xl2tp: small fixups.<br>
+19) samba(3): decrease noise debug.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
