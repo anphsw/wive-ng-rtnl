@@ -1278,6 +1278,7 @@
 17) ipv6: full work ipv6 over TTK ISP. For 8Mb Flash devices need radvd enable in GUI.<br>
 18) xl2tp: small fixups.<br>
 19) samba(3): decrease noise debug.<br>
+20) defaults: increase vpn cpuilimit to 4000.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
