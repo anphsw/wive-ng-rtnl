@@ -1266,22 +1266,23 @@
 5) kernel: netfilter: xt_tcpudp: fix wrong struct in udp_checkentry.<br>
 6) kernel: ipv6: use appropriate sock tclass setting for routing lookup.<br>
 7) kernel: ipv6: fix CoA check in RH2 input handler (mip6_rthdr_input()).<br>
-8) kernel: ipv6: ipv6: optimize inet6_hash_frag().<br>
-9) kernel: hash: update hash_32/64 functions.<br>
-10) kernel: hw_nat: fix udp offload issue in some hardware RT305x chip revisions.<br>
-11) kernel: backport mips optimized spinlocks and futex fixes.<br>
-12) kernel: tcp: fix double-counted receiver RTT when leaving receiver fast path.<br>
-13) kernel: tcp: do_tcp_sendpages() must try to push data out on oom conditions.<br>
-14) kernel: net: guard tcp_set_keepalive() to tcp sockets.<br>
-15) kernel: inet: Remove unused sk_sndmsg_* from UFO.<br>
-16) ipv6: radvd: up to 1.9.2 version with drop libdaemon use (need for save flash free size).<br>
-17) ipv6: use radvdEnabled variable for enable ipv6 (instead IPv6_Enable variable).<br>
-18) ipv6: full work ipv6 over TTK ISP. For 8Mb Flash devices need radvd enable in GUI.<br>
-19) xl2tp: small fixups.<br>
-20) samba(3): decrease noise debug.<br>
-21) defaults: increase vpn cpuilimit to 4000.<br>
-22) defaults: enable wifi_hw_nat per default this is very old work stable.<br>
-23) init.d: always drop ipv4/6 adresses at reinit, not need check radvd enable/disable, chek only ipv6 compiled.<br>
+8) kernel: ipv6: optimize inet6_hash_frag().<br>
+9) kernel: ipv6: Don't purge default router if accept_ra=2.<br>
+10) kernel: hash: update hash_32/64 functions.<br>
+11) kernel: hw_nat: fix udp offload issue in some hardware RT305x chip revisions.<br>
+12) kernel: backport mips optimized spinlocks and futex fixes.<br>
+13) kernel: tcp: fix double-counted receiver RTT when leaving receiver fast path.<br>
+14) kernel: tcp: do_tcp_sendpages() must try to push data out on oom conditions.<br>
+15) kernel: net: guard tcp_set_keepalive() to tcp sockets.<br>
+16) kernel: inet: Remove unused sk_sndmsg_* from UFO.<br>
+17) ipv6: radvd: up to 1.9.2 version with drop libdaemon use (need for save flash free size).<br>
+18) ipv6: use radvdEnabled variable for enable ipv6 (instead IPv6_Enable variable).<br>
+19) ipv6: full work ipv6 over TTK ISP. For 8Mb Flash devices need radvd enable in GUI.<br>
+20) xl2tp: small fixups.<br>
+21) samba(3): decrease noise debug.<br>
+22) defaults: increase vpn cpuilimit to 4000.<br>
+23) defaults: enable wifi_hw_nat per default this is very old work stable.<br>
+24) init.d: always drop ipv4/6 adresses at reinit, not need check radvd enable/disable, chek only ipv6 compiled.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
