@@ -720,6 +720,8 @@ static int lua_m3u_scan(lua_State* L)
                 {
                     closedir(dd);
 
+                    if(strcmp(de->d_name,"lost+found"))
+                    {
                     lua_pushinteger(L,idx++);
 
                     lua_getglobal(L,"m3u");
@@ -729,6 +731,7 @@ static int lua_m3u_scan(lua_State* L)
                     lua_call(L,1,1);
 
                     lua_rawset(L,-3);       // element
+                    }
                 }else
                 {
                     char* p=strrchr(track_url,'/');
