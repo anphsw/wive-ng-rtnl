@@ -1281,6 +1281,7 @@
 20) samba(3): decrease noise debug.<br>
 21) defaults: increase vpn cpuilimit to 4000.<br>
 22) defaults: enable wifi_hw_nat per default this is very old work stable.<br>
+23) init.d: always drop ipv4/6 adresses at reinit, not need check radvd enable/disable, chek only ipv6 compiled.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>

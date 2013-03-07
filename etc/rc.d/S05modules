@@ -124,7 +124,7 @@ wlan_down_all() {
     # process iface shutdown
     for i in `seq 0 7`; do
 	ip addr flush dev ra$i > /dev/null 2>&1
-	if [ -d /proc/sys/net/ipv6 ] && [ "$radvdEnabled" = "1" ]; then
+	if [ -d /proc/sys/net/ipv6 ]; then
     	    ip -6 addr flush dev ra$i > /dev/null 2>&1
 	fi
 	ip link set ra$i down > /dev/null 2>&1
@@ -133,7 +133,7 @@ wlan_down_all() {
     if [ "$CONFIG_RT2860V2_AP_WDS" != "" ]; then
 	for i in `seq 0 3`; do
 	    ip addr flush dev wds$i > /dev/null 2>&1
-	    if [ -d /proc/sys/net/ipv6 ] && [ "$radvdEnabled" = "1" ]; then
+	    if [ -d /proc/sys/net/ipv6 ]; then
     		ip -6 addr flush dev wds$i > /dev/null 2>&1
 	    fi
     	    ip link set wds$i down > /dev/null 2>&1
@@ -142,7 +142,7 @@ wlan_down_all() {
     fi
     if [ "$CONFIG_RT2860V2_AP_APCLI" != "" ]; then
 	ip addr flush dev apcli0 > /dev/null 2>&1
-	if [ -d /proc/sys/net/ipv6 ] && [ "$radvdEnabled" = "1" ]; then
+	if [ -d /proc/sys/net/ipv6 ]; then
     	    ip -6 addr flush dev apcli0 > /dev/null 2>&1
 	fi
 	ip link set apcli0 down > /dev/null 2>&1
@@ -150,7 +150,7 @@ wlan_down_all() {
     fi
     if [ "$CONFIG_RT2860V2_STA_MESH" != "" ] || [ "$CONFIG_RT2860V2_AP_MESH" != "" ]; then
 	ip addr flush dev mesh0 > /dev/null 2>&1
-	if [ -d /proc/sys/net/ipv6 ] && [ "$radvdEnabled" = "1" ]; then
+	if [ -d /proc/sys/net/ipv6 ]; then
     	    ip -6 addr flush dev mesh0 > /dev/null 2>&1
 	fi
 	ip link set mesh0 down > /dev/null 2>&1
@@ -159,7 +159,7 @@ wlan_down_all() {
     if [ "$CONFIG_RT3090_AP" != "" ]; then
 	for i in `seq 0 7`; do
 	    ip addr flush dev rai$i > /dev/null 2>&1
-	    if [ -d /proc/sys/net/ipv6 ] && [ "$radvdEnabled" = "1" ]; then
+	    if [ -d /proc/sys/net/ipv6 ]; then
     		ip -6 addr flush dev rai$i > /dev/null 2>&1
 	    fi
 	    ip link set rai$i down > /dev/null 2>&1
