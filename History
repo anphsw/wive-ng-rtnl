@@ -1285,6 +1285,7 @@
 24) init.d: always drop ipv4/6 adresses at reinit, not need check radvd enable/disable, chek only ipv6 compiled.<br>
 25) xunpdp: up to 1.03 rev382 version.<br>
 26) usb-modeswitch: update to 1.2.5 version.<br>
+27) usbmodem: move modems pairs to /etc/modems.conf.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>

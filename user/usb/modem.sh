@@ -28,71 +28,10 @@ get_param() {
     OPTFILE="$PPPDIR/peers/dialup"
 }
 
-create_conf() {
-echo "
-# Modem configuration file
-# format of record - vid : pid : type : data port : UI port
-# vid - vendor id (four hex digits), pid - product id (four hex digits),
-# type - 'C' for CDMA or 'W' for WCDMA/HSPA/HSDPA/HSUPA/GSM
-# data port - main modem interface number (one digit from 0 to 9)
-# UI port - command interface number (one digit from 0 to 9)
-# samples - a12b:1001:W:0:2, 01fc:003b:C:3:N
-
-# HUAWEI Technology
-12d1:1001:W:0:2
-12d1:1003:W:0:1
-12d1:1004:W:0:2
-12d1:1401:W:3:2
-12d1:1402:W:0:2
-12d1:1436:W:0:4
-12d1:140c:W:0:3
-12d1:14ac:W:0:4
-12d1:1506:W:0:1
-
-# ZTE,Incorporated
-19d2:0001:W:0:2
-19d2:0002:W:2:4
-19d2:0003:C:0:1
-19d2:0004:C:0:1
-19d2:0005:C:0:1
-19d2:0006:C:0:1
-19d2:0007:C:0:1
-19d2:0008:C:0:1
-19d2:0009:C:0:1
-19d2:000a:C:0:1
-19d2:0012:W:2:4
-19d2:0015:W:1:3
-19d2:0016:W:2:1
-19d2:0017:W:2:1
-19d2:0018:W:2:1
-19d2:0019:W:2:1
-19d2:0021:W:3:1
-19d2:0024:W:2:4
-19d2:0025:W:2:4
-19d2:0030:W:1:3
-19d2:0031:W:3:1
-19d2:0033:W:4:1
-19d2:0037:W:3:1
-19d2:0042:W:3:1
-19d2:0043:W:3:2
-19d2:0048:W:4:2
-19d2:0049:W:4:2
-19d2:0052:W:3:1
-19d2:0055:W:2:4
-19d2:0061:W:3:1
-19d2:0063:W:3:1
-19d2:0064:W:2:0
-19d2:0066:W:3:1
-19d2:1218:W:2:4
-19d2:2002:W:3:1
-19d2:2003:W:3:1
-" > /etc/modems.conf
-
-}
-
 get_param
 if [ ! -e /etc/modems.conf ]; then
-    create_conf
+    $LOG "Error - modems.conf not found."
+    exit 1
 fi
 
 if [ -z "$ACTION" ]; then
