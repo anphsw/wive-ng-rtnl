@@ -1276,17 +1276,18 @@
 15) kernel: tcp: tcp_prequeue() cleanup and up.<br>
 16) kernel: net: guard tcp_set_keepalive() to tcp sockets.<br>
 17) kernel: inet: Remove unused sk_sndmsg_* from UFO.<br>
-18) ipv6: radvd: up to 1.9.2 version with drop libdaemon use (need for save flash free size).<br>
-19) ipv6: use radvdEnabled variable for enable ipv6 (instead IPv6_Enable variable).<br>
-20) ipv6: full work ipv6 over TTK ISP. For 8Mb Flash devices need radvd enable in GUI.<br>
-21) xl2tp: small fixups.<br>
-22) samba(3): decrease noise debug.<br>
-23) defaults: increase vpn cpuilimit to 4000.<br>
-24) defaults: enable wifi_hw_nat per default this is very old work stable.<br>
-25) init.d: always drop ipv4/6 adresses at reinit, not need check radvd enable/disable, chek only ipv6 compiled.<br>
-26) xunpdp: up to 1.03 rev382 version.<br>
-27) usb-modeswitch: update to 1.2.5 version.<br>
-28) usbmodem: move modems pairs to /etc/modems.conf.<br>
+18) kernel: sched: prevent exclusive waiter starvation.<br>
+19) ipv6: radvd: up to 1.9.2 version with drop libdaemon use (need for save flash free size).<br>
+20) ipv6: use radvdEnabled variable for enable ipv6 (instead IPv6_Enable variable).<br>
+21) ipv6: full work ipv6 over TTK ISP. For 8Mb Flash devices need radvd enable in GUI.<br>
+22) xl2tp: small fixups.<br>
+23) samba(3): decrease noise debug.<br>
+24) defaults: increase vpn cpuilimit to 4000.<br>
+25) defaults: enable wifi_hw_nat per default this is very old work stable.<br>
+26) init.d: always drop ipv4/6 adresses at reinit, not need check radvd enable/disable, chek only ipv6 compiled.<br>
+27) xunpdp: up to 1.03 rev382 version.<br>
+28) usb-modeswitch: update to 1.2.5 version.<br>
+29) usbmodem: move modems pairs to /etc/modems.conf.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>

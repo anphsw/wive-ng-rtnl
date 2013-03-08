@@ -3737,7 +3737,7 @@ EXPORT_SYMBOL(default_wake_function);
  * zero in this (rare) case, and we handle it by continuing to scan the queue.
  */
 static void __wake_up_common(wait_queue_head_t *q, unsigned int mode,
-			     int nr_exclusive, int sync, void *key)
+			int nr_exclusive, int sync, void *key)
 {
 	struct list_head *tmp, *next;
 
@@ -3777,11 +3777,17 @@ void fastcall __wake_up_locked(wait_queue_head_t *q, unsigned int mode)
 	__wake_up_common(q, mode, 1, 0, NULL);
 }
 
+void __wake_up_locked_key(wait_queue_head_t *q, unsigned int mode, void *key)
+{
+	__wake_up_common(q, mode, 1, 0, key);
+}
+
 /**
- * __wake_up_sync - wake up threads blocked on a waitqueue.
+ * __wake_up_sync_key - wake up threads blocked on a waitqueue.
  * @q: the waitqueue
  * @mode: which threads
  * @nr_exclusive: how many wake-one or wake-many threads to wake up
+ * @key: opaque value to be passed to wakeup targets
  *
  * The sync wakeup differs that the waker knows that it will schedule
  * away soon, so while the target thread will be woken up, it will not
@@ -3790,8 +3796,8 @@ void fastcall __wake_up_locked(wait_queue_head_t *q, unsigned int mode)
  *
  * On UP it can prevent extra preemption.
  */
-void fastcall
-__wake_up_sync(wait_queue_head_t *q, unsigned int mode, int nr_exclusive)
+void __wake_up_sync_key(wait_queue_head_t *q, unsigned int mode,
+			int nr_exclusive, void *key)
 {
 	unsigned long flags;
 	int sync = 1;
@@ -3803,8 +3809,17 @@ __wake_up_sync(wait_queue_head_t *q, unsigned int mode, int nr_exclusive)
 		sync = 0;
 
 	spin_lock_irqsave(&q->lock, flags);
-	__wake_up_common(q, mode, nr_exclusive, sync, NULL);
+	__wake_up_common(q, mode, nr_exclusive, sync, key);
 	spin_unlock_irqrestore(&q->lock, flags);
+}
+EXPORT_SYMBOL_GPL(__wake_up_sync_key);
+
+/*
+ * __wake_up_sync - see __wake_up_sync_key()
+ */
+void __wake_up_sync(wait_queue_head_t *q, unsigned int mode, int nr_exclusive)
+{
+	__wake_up_sync_key(q, mode, nr_exclusive, NULL);
 }
 EXPORT_SYMBOL_GPL(__wake_up_sync);	/* For internal use only */
 
