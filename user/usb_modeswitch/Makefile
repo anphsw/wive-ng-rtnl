@@ -1,5 +1,5 @@
 PROG        = usb_modeswitch
-VERS        = 1.2.4
+VERS        = 1.2.5
 LIBUSB      = $(ROOTDIR)/lib/libusb
 CFLAGS      += -Wall -I$(LIBUSB)
 LIBS        = -l usb
