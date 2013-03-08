@@ -1,7 +1,7 @@
 VERSION = 2
 PATCHLEVEL = 6
 SUBLEVEL = 21
-EXTRAVERSION = .23
+EXTRAVERSION = .24
 NAME = Nocturnal Monster Puppy
 
 # Default make flags
