@@ -929,7 +929,7 @@ static inline int tcp_prequeue(struct sock *sk, struct sk_buff *skb)
 	if (sysctl_tcp_low_latency || !tp->ucopy.task)
 		return 0;
 
-	if (skb->len <= tcp_hdrlen(skb) &&
+	if (skb->len <= (skb->h.th->doff << 2) &&
 	    skb_queue_len(&tp->ucopy.prequeue) == 0)
 		return 0;
 
