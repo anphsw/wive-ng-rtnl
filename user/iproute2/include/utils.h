@@ -120,11 +120,14 @@ void duparg2(const char *, const char *) __attribute__((noreturn));
 int matches(const char *arg, const char *pattern);
 extern int inet_addr_match(const inet_prefix *a, const inet_prefix *b, int bits);
 
+#ifdef DECNET
 const char *dnet_ntop(int af, const void *addr, char *str, size_t len);
 int dnet_pton(int af, const char *src, void *addr);
-
+#endif
+#ifdef IPX
 const char *ipx_ntop(int af, const void *addr, char *str, size_t len);
 int ipx_pton(int af, const char *src, void *addr);
+#endif
 
 extern int __iproute2_hz_internal;
 extern int __get_hz(void);

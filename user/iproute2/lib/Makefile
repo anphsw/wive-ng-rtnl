@@ -14,5 +14,5 @@ libutil.a: $(UTILOBJ) $(ADDLIB)
 install:
 
 clean:
-	rm -f $(NLOBJ) $(UTILOBJ) $(ADDLIB) libnetlink.a libutil.a
+	rm -f $(NLOBJ) $(UTILOBJ) $(ADDLIB) libnetlink.a libutil.a *.o
 

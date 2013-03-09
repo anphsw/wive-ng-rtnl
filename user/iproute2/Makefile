@@ -1,27 +1,27 @@
-
-
-DEFINES= -DRESOLVE_HOSTNAMES
+#DEFINES= -DRESOLVE_HOSTNAMES
 
 #options if you have a bind>=4.9.4 libresolv (or, maybe, glibc)
-LDLIBS=-lresolv
+#LDLIBS=-lresolv
 ADDLIB=
 
+#DEFINES+= -DDECNET
+
 #options for decnet
-ADDLIB+=dnet_ntop.o dnet_pton.o
+#ADDLIB+=dnet_ntop.o dnet_pton.o
 
 #options for ipx
-ADDLIB+=ipx_ntop.o ipx_pton.o
+#ADDLIB+=ipx_ntop.o ipx_pton.o
 
 HOSTCC = gcc
-CCOPTS = -D_GNU_SOURCE -Os -Wall -mips32r2 -march=mips32r2
-CFLAGS = $(CCOPTS) -I../include $(DEFINES)
+CCOPTS = -D_GNU_SOURCE -Os -Wall -mips32r2 -march=mips32r2 $(CFLAGS)
+CFLAGS := -I../include $(DEFINES) $(CCOPTS)
 
 LDLIBS += -L../lib -lnetlink -lutil
 
 #SUBDIRS=lib ip tc misc #netem genl
 SUBDIRS=lib tc misc
 
-LIBNETLINK=../lib/libnetlink.a 
+LIBNETLINK=../lib/libnetlink.a
 LIBUTIL=../lib/libutil.a
 
 all: Config
