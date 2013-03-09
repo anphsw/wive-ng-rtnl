@@ -131,9 +131,8 @@ static int tcf_pedit(struct sk_buff *skb, struct tc_action *a,
 
 	if (!(skb->tc_verd & TC_OK2MUNGE)) {
 		/* should we set skb->cloned? */
-		if (pskb_expand_head(skb, 0, 0, GFP_ATOMIC)) {
+		if (skb_unclone(skb, GFP_ATOMIC))
 			return p->tcf_action;
-		}
 	}
 
 	pptr = skb_network_header(skb);

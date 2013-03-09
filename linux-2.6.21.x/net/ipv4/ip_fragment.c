@@ -705,7 +705,7 @@ static int ip_frag_reasm(struct ipq *qp, struct sk_buff *prev,
 
 	/* Head of list must not be cloned. */
 	err = -ENOMEM;
-	if (skb_cloned(head) && pskb_expand_head(head, 0, 0, GFP_ATOMIC))
+	if (skb_unclone(head, GFP_ATOMIC))
 		goto out_nomem;
 
 	/* If the first fragment is fragmented itself, we split

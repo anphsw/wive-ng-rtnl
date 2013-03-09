@@ -1279,22 +1279,23 @@
 18) kernel: hw_nat: fix udp offload issue in some hardware RT305x chip revisions.<br>
 19) kernel: backport mips optimized spinlocks and futex fixes.<br>
 20) kernel: net: guard tcp_set_keepalive() to tcp sockets.<br>
-21) kernel: inet: Remove unused sk_sndmsg_* from UFO.<br>
-22) kernel: sched: prevent exclusive waiter starvation.<br>
-23) kernel: mm: memmap_init_zone() performance improvement.<br>
-24) kernel: tcp_read_sock: Allow recv_actor() return return negative error value.<br>
-25) kernel: lib/string.c: fix strim() semantics for strings that have only blanks.<br>
-26) ipv6: radvd: up to 1.9.2 version with drop libdaemon use (need for save flash free size).<br>
-27) ipv6: use radvdEnabled variable for enable ipv6 (instead IPv6_Enable variable).<br>
-28) ipv6: full work ipv6 over TTK ISP. For 8Mb Flash devices need radvd enable in GUI.<br>
-29) xl2tp: small fixups.<br>
-30) samba(3): decrease noise debug.<br>
-31) defaults: increase vpn cpuilimit to 4000.<br>
-32) defaults: enable wifi_hw_nat per default this is very old work stable.<br>
-33) init.d: always drop ipv4/6 adresses at reinit, not need check radvd enable/disable, chek only ipv6 compiled.<br>
-34) xunpdp: up to 1.03 rev382 version.<br>
-35) usb-modeswitch: update to 1.2.5 version.<br>
-36) usbmodem: move modems pairs to /etc/modems.conf.<br>
+21) kernel: net: add and use skb_unclone() helper function.<br>
+22) kernel: inet: Remove unused sk_sndmsg_* from UFO.<br>
+23) kernel: sched: prevent exclusive waiter starvation.<br>
+24) kernel: mm: memmap_init_zone() performance improvement.<br>
+25) kernel: tcp_read_sock: Allow recv_actor() return return negative error value.<br>
+26) kernel: lib/string.c: fix strim() semantics for strings that have only blanks.<br>
+27) ipv6: radvd: up to 1.9.2 version with drop libdaemon use (need for save flash free size).<br>
+28) ipv6: use radvdEnabled variable for enable ipv6 (instead IPv6_Enable variable).<br>
+29) ipv6: full work ipv6 over TTK ISP. For 8Mb Flash devices need radvd enable in GUI.<br>
+30) xl2tp: small fixups.<br>
+31) samba(3): decrease noise debug.<br>
+32) defaults: increase vpn cpuilimit to 4000.<br>
+33) defaults: enable wifi_hw_nat per default this is very old work stable.<br>
+34) init.d: always drop ipv4/6 adresses at reinit, not need check radvd enable/disable, chek only ipv6 compiled.<br>
+35) xunpdp: up to 1.03 rev382 version.<br>
+36) usb-modeswitch: update to 1.2.5 version.<br>
+37) usbmodem: move modems pairs to /etc/modems.conf.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>

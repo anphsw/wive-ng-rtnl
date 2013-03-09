@@ -109,8 +109,7 @@ static int xfrm4_tunnel_input(struct xfrm_state *x, struct sk_buff *skb)
 	if (!pskb_may_pull(skb, sizeof(struct iphdr)))
 		goto out;
 
-	if (skb_cloned(skb) &&
-	    (err = pskb_expand_head(skb, 0, 0, GFP_ATOMIC)))
+	if (err = skb_unclone(skb, GFP_ATOMIC))
 		goto out;
 
 	iph = skb->nh.iph;
