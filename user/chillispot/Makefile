@@ -16,3 +16,7 @@ romfs:
 	$(ROMFSINST) -S init.d/W48chillispot /etc/rc.d/W48chillispot
 	$(ROMFSINST) -s /etc/rc.d/W48chillispot /etc/init.d/chillispot
 	$(ROMFSINST) -S staging/usr/sbin/chilli /bin/chilli
+
+clean:
+	rm -rf chillispot/*
+	rm -rf staging/*
