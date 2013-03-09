@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -33,12 +33,12 @@ CMAKE_DIST = CMakeLists.txt curl_config.h.cmake
 EXTRA_DIST = Makefile.b32 Makefile.m32 Makefile.vc6 $(DSP)                 \
  vc6libcurl.dsw config-win32.h config-win32ce.h config-riscos.h            \
  config-mac.h curl_config.h.in makefile.dj config-dos.h libcurl.plist      \
- libcurl.rc config-amigaos.h amigaos.c amigaos.h makefile.amiga		   \
- Makefile.netware nwlib.c nwos.c libcurl.imp msvcproj.head msvcproj.foot   \
- config-win32ce.h config-os400.h setup-os400.h config-symbian.h		   \
- Makefile.Watcom config-tpf.h $(DOCS) $(VCPROJ) mk-ca-bundle.pl		   \
- mk-ca-bundle.vbs firefox-db2pem.sh $(CMAKE_DIST) config-vxworks.h	   \
- Makefile.vxworks config-vms.h checksrc.pl
+ libcurl.rc config-amigaos.h makefile.amiga Makefile.netware nwlib.c	\
+ nwos.c msvcproj.head msvcproj.foot config-win32ce.h config-os400.h	\
+ setup-os400.h config-symbian.h Makefile.Watcom config-tpf.h $(DOCS)	\
+ $(VCPROJ) mk-ca-bundle.pl mk-ca-bundle.vbs firefox-db2pem.sh		\
+ $(CMAKE_DIST) config-vxworks.h Makefile.vxworks checksrc.pl		\
+ objnames-test08.sh objnames-test10.sh objnames.inc
 
 CLEANFILES = $(DSP) $(VCPROJ)
 
@@ -48,21 +48,23 @@ LIBCURL_LIBS = @LIBCURL_LIBS@
 # This might hold -Werror
 CFLAGS += @CURL_CFLAG_EXTRAS@
 
+CFLAG_CURL_SYMBOL_HIDING = @CFLAG_CURL_SYMBOL_HIDING@
+
 # Specify our include paths here, and do it relative to $(top_srcdir) and
 # $(top_builddir), to ensure that these paths which belong to the library
 # being currently built and tested are searched before the library which
 # might possibly already be installed in the system.
 #
 # $(top_builddir)/include/curl for generated curlbuild.h included from curl.h
-# $(top_builddir)/include for generated curlbuild.h included from lib/setup.h
+# $(top_builddir)/include for generated curlbuild.h inc. from lib/curl_setup.h
 # $(top_srcdir)/include is for libcurl's external include files
 # $(top_builddir)/lib is for libcurl's generated lib/curl_config.h file
-# $(top_srcdir)/lib is for libcurl's lib/setup.h and other "private" files
+# $(top_srcdir)/lib for libcurl's lib/curl_setup.h and other "private" files
 # $(top_builddir)/ares is for in-tree c-ares's generated ares_build.h file
 # $(top_srcdir)/ares is for in-tree c-ares's external include files
 
 if USE_EMBEDDED_ARES
-INCLUDES = -I$(top_builddir)/include/curl \
+AM_CPPFLAGS = -I$(top_builddir)/include/curl \
            -I$(top_builddir)/include      \
            -I$(top_srcdir)/include        \
            -I$(top_builddir)/lib          \
@@ -70,11 +72,21 @@ INCLUDES = -I$(top_builddir)/include/curl \
            -I$(top_builddir)/ares         \
            -I$(top_srcdir)/ares
 else
-INCLUDES = -I$(top_builddir)/include/curl \
+AM_CPPFLAGS = -I$(top_builddir)/include/curl \
            -I$(top_builddir)/include      \
            -I$(top_srcdir)/include        \
            -I$(top_builddir)/lib          \
            -I$(top_srcdir)/lib
+endif
+
+# Mostly for Windows build targets, when building libcurl library
+if USE_CPPFLAG_BUILDING_LIBCURL
+AM_CPPFLAGS += -DBUILDING_LIBCURL
+endif
+
+# Mostly for Windows build targets, when building static libcurl
+if USE_CPPFLAG_CURL_STATICLIB
+AM_CPPFLAGS += -DCURL_STATICLIB
 endif
 
 if SONAME_BUMP
@@ -87,9 +99,9 @@ if SONAME_BUMP
 #
 # This conditional soname bump SHOULD be removed at next "proper" bump.
 #
-VERSIONINFO=-version-info 7:0:2
+VERSIONINFO=-version-info 8:0:3
 else
-VERSIONINFO=-version-info 6:0:2
+VERSIONINFO=-version-info 7:0:3
 endif
 
 # This flag accepts an argument of the form current[:revision[:age]]. So,
@@ -120,7 +132,18 @@ if VERSIONED_SYMBOLS
 VERSIONED_SYMBOLS = -Wl,--version-script=libcurl.vers
 endif
 
+# Prevent LIBS from being used for all link targets
+LIBS = $(BLANK_AT_MAKETIME)
+
 libcurl_la_LDFLAGS = $(UNDEF) $(VERSIONINFO) $(MIMPURE) $(VERSIONED_SYMBOLS) $(LIBCURL_LIBS)
+
+if DOING_CURL_SYMBOL_HIDING
+libcurl_la_CPPFLAGS = $(AM_CPPFLAGS) -DCURL_HIDDEN_SYMBOLS
+libcurl_la_CFLAGS = $(AM_CFLAGS) $(CFLAG_CURL_SYMBOL_HIDING)
+else
+libcurl_la_CPPFLAGS = $(AM_CPPFLAGS)
+libcurl_la_CFLAGS = $(AM_CFLAGS)
+endif
 
 # unit testing static library built only along with unit tests
 if BUILD_UNITTESTS
@@ -131,6 +154,7 @@ endif
 
 libcurlu_la_CPPFLAGS = $(AM_CPPFLAGS) -DUNITTESTS
 libcurlu_la_LDFLAGS = -static $(LIBCURL_LIBS)
+libcurlu_la_CFLAGS = $(AM_CFLAGS)
 
 # Makefile.inc provides the CSOURCES and HHEADERS defines
 include Makefile.inc

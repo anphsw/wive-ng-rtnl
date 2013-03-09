@@ -169,7 +169,7 @@ void ssdp_handle_device_request(http_message_t *hmsg, struct sockaddr_storage *d
  * \brief Works as a request handler which passes the HTTP request string
  * to multicast channel.
  *
- * \return 1 if successful else appropriate error.
+ * \return UPNP_E_SUCCESS if successful else appropriate error.
  */
 static int NewRequestHandler(
 	/*! [in] Ip address, to send the reply. */
@@ -186,7 +186,9 @@ static int NewRequestHandler(
 	unsigned long replyAddr = inet_addr(gIF_IPV4);
 	/* a/c to UPNP Spec */
 	int ttl = 4;
+#ifdef INET_IPV6
 	int hops = 1;
+#endif
 	char buf_ntop[INET6_ADDRSTRLEN];
 	int ret = UPNP_E_SUCCESS;
 
@@ -210,6 +212,7 @@ static int NewRequestHandler(
 			   (char *)&ttl, sizeof(int));
 		socklen = sizeof(struct sockaddr_in);
 		break;
+#ifdef INET_IPV6
 	case AF_INET6:
 		inet_ntop(AF_INET6,
 			  &((struct sockaddr_in6 *)DestAddr)->sin6_addr,
@@ -219,6 +222,7 @@ static int NewRequestHandler(
 		setsockopt(ReplySock, IPPROTO_IPV6, IPV6_MULTICAST_HOPS,
 			   (char *)&hops, sizeof(hops));
 		break;
+#endif
 	default:
 		UpnpPrintf(UPNP_CRITICAL, SSDP, __FILE__, __LINE__,
 			   "Invalid destination address specified.");
@@ -244,8 +248,7 @@ static int NewRequestHandler(
 	}
 
  end_NewRequestHandler:
-	ret = shutdown(ReplySock, SD_BOTH);
-	if (ret == -1) {
+	if (shutdown(ReplySock, SD_BOTH) == -1) {
 		strerror_r(errno, errorBuffer, ERROR_BUFFER_LEN);
 		UpnpPrintf(UPNP_INFO, SSDP, __FILE__, __LINE__,
 			   "Error in shutdown: %s\n", errorBuffer);

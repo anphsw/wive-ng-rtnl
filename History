@@ -1297,7 +1297,10 @@
 36) init.d: always drop ipv4/6 adresses at reinit, not need check radvd enable/disable, chek only ipv6 compiled.<br>
 37) xunpdp: up to 1.03 rev382 version.<br>
 38) usb-modeswitch: update to 1.2.5 version.<br>
-39) usbmodem: move modems pairs to /etc/modems.conf.<br>
+39) usbmodem: move modems pairs config to /etc/modems.conf.<br>
+40) openssl: update to 0.9.8y version.<br>
+41) libupnp: update to 1.6.18 version.<br>
+42) libcurl: update to 7.29.0 version.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>

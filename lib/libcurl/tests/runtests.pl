@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -56,7 +56,8 @@
 # These should be the only variables that might be needed to get edited:
 
 BEGIN {
-    @INC=(@INC, $ENV{'srcdir'}, ".");
+    push(@INC, $ENV{'srcdir'}) if(defined $ENV{'srcdir'});
+    push(@INC, ".");
     # run time statistics needs Time::HiRes
     eval {
         no warnings "all";
@@ -187,7 +188,6 @@ my $memanalyze="$perl $srcdir/memanalyze.pl";
 my $pwd = getcwd();          # current working directory
 
 my $start;
-my $forkserver=0;
 my $ftpchecktime=1; # time it took to verify our test FTP server
 
 my $stunnel = checkcmd("stunnel4") || checkcmd("stunnel");
@@ -211,6 +211,7 @@ my $has_ntlm;    # set if libcurl is built with NTLM support
 my $has_ntlm_wb; # set if libcurl is built with NTLM delegation to winbind
 my $has_charconv;# set if libcurl is built with CharConv support
 my $has_tls_srp; # set if libcurl is built with TLS-SRP support
+my $has_metalink;# set if curl is built with Metalink support
 
 my $has_openssl; # built with a lib using an OpenSSL-like API
 my $has_gnutls;  # built with GnuTLS
@@ -218,6 +219,7 @@ my $has_nss;     # built with NSS
 my $has_yassl;   # built with yassl
 my $has_polarssl;# built with polarssl
 my $has_axtls;   # built with axTLS
+my $has_winssl;  # built with WinSSL (Schannel/SSPI)
 
 my $has_shared = "unknown";  # built shared
 
@@ -261,6 +263,7 @@ my %oldenv;
 #
 
 my $short;
+my $automakestyle;
 my $verbose;
 my $debugprotocol;
 my $anyway;
@@ -1196,7 +1199,6 @@ sub runhttpserver {
 
     $logfile = server_logfilename($LOGDIR, $proto, $ipvnum, $idnum);
 
-    $flags .= "--fork " if($forkserver);
     $flags .= "--gopher " if($proto eq "gopher");
     $flags .= "--connect $HOSTIP " if($alt eq "proxy");
     $flags .= "--verbose " if($debugprotocol);
@@ -1362,8 +1364,8 @@ sub runhttptlsserver {
     $flags .= "--http ";
     $flags .= "--debug 1 " if($debugprotocol);
     $flags .= "--port $port ";
-    $flags .= "--srppasswd certs/srp-verifier-db ";
-    $flags .= "--srppasswdconf certs/srp-verifier-conf";
+    $flags .= "--srppasswd $srcdir/certs/srp-verifier-db ";
+    $flags .= "--srppasswdconf $srcdir/certs/srp-verifier-conf";
 
     my $cmd = "$httptlssrv $flags > $logfile 2>&1";
     my ($httptlspid, $pid2) = startnew($cmd, $pidfile, 10, 1); # fake pidfile
@@ -2148,17 +2150,24 @@ sub filteroff {
 #
 sub compare {
     # filter off patterns _before_ this comparison!
-    my ($subject, $firstref, $secondref)=@_;
+    my ($testnum, $testname, $subject, $firstref, $secondref)=@_;
 
     my $result = compareparts($firstref, $secondref);
 
     if($result) {
+        # timestamp test result verification end
+        $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
+
         if(!$short) {
-            logmsg "\n $subject FAILED:\n";
+            logmsg "\n $testnum: $subject FAILED:\n";
             logmsg showdiff($LOGDIR, $firstref, $secondref);
         }
-        else {
+        elsif(!$automakestyle) {
             logmsg "FAILED\n";
+        }
+        else {
+            # automakestyle
+            logmsg "FAIL: $testnum - $testname - $subject\n";
         }
     }
     return $result;
@@ -2202,44 +2211,10 @@ sub checksystem {
             $libcurl = $2;
             if($curl =~ /mingw32/) {
                 # This is a windows minw32 build, we need to translate the
-                # given path to the "actual" windows path.
-
-                my @m = `mount`;
-                my $matchlen;
-                my $bestmatch;
-                my $mount;
-
-# example mount output:
-# C:\DOCUME~1\Temp on /tmp type user (binmode,noumount)
-# c:\ActiveState\perl on /perl type user (binmode)
-# C:\msys\1.0\bin on /usr/bin type user (binmode,cygexec,noumount)
-# C:\msys\1.0\bin on /bin type user (binmode,cygexec,noumount)
-
-                foreach $mount (@m) {
-                    if( $mount =~ /(.*) on ([^ ]*) type /) {
-                        my ($mingw, $real)=($2, $1);
-                        if($pwd =~ /^$mingw/) {
-                            # the path we got from pwd starts with the path
-                            # we found on this line in the mount output
-
-                            my $len = length($real);
-                            if($len > $matchlen) {
-                                # we remember the match that is the longest
-                                $matchlen = $len;
-                                $bestmatch = $real;
-                            }
-                        }
-                    }
-                }
-                if(!$matchlen) {
-                    logmsg "Serious error, can't find our \"real\" path\n";
-                }
-                else {
-                    # now prepend the prefix from the mount command to build
-                    # our "actual path"
-                    $pwd = "$bestmatch$pwd";
-                }
-                $pwd =~ s#\\#/#g;
+                # given path to the "actual" windows path. The MSYS shell
+                # has a builtin 'pwd -W' command which converts the path.
+                $pwd = `sh -c "echo \$(pwd -W)"`;
+                chomp($pwd);
             }
             elsif ($curl =~ /win32/) {
                # Native Windows builds don't understand the
@@ -2255,6 +2230,10 @@ sub checksystem {
                # through a shell.
                chomp($pwd = `cygpath -m $pwd`);
            }
+           if ($libcurl =~ /winssl/i) {
+               $has_winssl=1;
+               $ssllib="WinSSL";
+           }
            elsif ($libcurl =~ /openssl/i) {
                $has_openssl=1;
                $ssllib="OpenSSL";
@@ -2269,12 +2248,10 @@ sub checksystem {
            }
            elsif ($libcurl =~ /yassl/i) {
                $has_yassl=1;
-               $has_openssl=1;
                $ssllib="yassl";
            }
            elsif ($libcurl =~ /polarssl/i) {
                $has_polarssl=1;
-               $has_openssl=1;
                $ssllib="polarssl";
            }
            elsif ($libcurl =~ /axtls/i) {
@@ -2340,6 +2317,10 @@ sub checksystem {
             if($feat =~ /TLS-SRP/i) {
                 # TLS-SRP enabled
                 $has_tls_srp=1;
+            }
+            if($feat =~ /Metalink/i) {
+                # Metalink enabled
+                $has_metalink=1;
             }
         }
         #
@@ -2696,6 +2677,11 @@ sub singletest {
                 next;
             }
         }
+        elsif($f eq "WinSSL") {
+            if($has_winssl) {
+                next;
+            }
+        }
         elsif($f eq "unittest") {
             if($debug_build) {
                 next;
@@ -2748,6 +2734,11 @@ sub singletest {
         }
         elsif($f eq "TLS-SRP") {
             if($has_tls_srp) {
+                next;
+            }
+        }
+        elsif($f eq "Metalink") {
+            if($has_metalink) {
                 next;
             }
         }
@@ -2883,13 +2874,16 @@ sub singletest {
         $teststat[$testnum]=$why; # store reason for this test case
 
         if(!$short) {
+            if($skipped{$why} <= 3) {
+                # show only the first three skips for each reason
             logmsg sprintf("test %03d SKIPPED: $why\n", $testnum);
+        }
         }
 
         timestampskippedevents($testnum);
         return -1;
     }
-    logmsg sprintf("test %03d...", $testnum);
+    logmsg sprintf("test %03d...", $testnum) if(!$automakestyle);
 
     # extract the reply data
     my @reply = getpart("reply", "data");
@@ -2931,12 +2925,9 @@ sub singletest {
 
     # name of the test
     my @testname= getpart("client", "name");
-
-    if(!$short) {
-        my $name = $testname[0];
-        $name =~ s/\n//g;
-        logmsg "[$name]\n";
-    }
+    my $testname = $testname[0];
+    $testname =~ s/\n//g;
+    logmsg "[$testname]\n" if(!$short);
 
     if($listonly) {
         timestampskippedevents($testnum);
@@ -3035,6 +3026,13 @@ sub singletest {
         $tool=$CMDLINE;
         $disablevalgrind=1;
     }
+    elsif($cmdtype eq "shell") {
+        # run the command line prepended with "/bin/sh"
+        $cmdargs ="$cmd";
+        $CMDLINE = "/bin/sh ";
+        $tool=$CMDLINE;
+        $disablevalgrind=1;
+    }
     elsif(!$tool) {
         # run curl, add --verbose for debug information output
         $cmd = "-1 ".$cmd if(exists $feature{"SSL"} && ($has_axtls));
@@ -3086,6 +3084,7 @@ sub singletest {
             my $valgrindcmd = "$valgrind ";
             $valgrindcmd .= "$valgrind_tool " if($valgrind_tool);
             $valgrindcmd .= "--leak-check=yes ";
+            $valgrindcmd .= "--suppressions=$srcdir/valgrind.supp ";
             $valgrindcmd .= "--num-callers=16 ";
             $valgrindcmd .= "${valgrind_logfile}=$LOGDIR/valgrind$testnum";
             $CMDLINE = "$valgrindcmd $CMDLINE";
@@ -3348,10 +3347,8 @@ sub singletest {
             chomp($validstdout[$#validstdout]);
         }
 
-        $res = compare("stdout", \@actual, \@validstdout);
+        $res = compare($testnum, $testname, "stdout", \@actual, \@validstdout);
         if($res) {
-            # timestamp test result verification end
-            $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
             return 1;
         }
         $ok .= "s";
@@ -3372,10 +3369,8 @@ sub singletest {
             map s/\r\n/\n/g, @out;
         }
 
-        $res = compare("data", \@out, \@reply);
+        $res = compare($testnum, $testname, "data", \@out, \@reply);
         if ($res) {
-            # timestamp test result verification end
-            $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
             return 1;
         }
         $ok .= "d";
@@ -3387,10 +3382,8 @@ sub singletest {
     if(@upload) {
         # verify uploaded data
         my @out = loadarray("$LOGDIR/upload.$testnum");
-        $res = compare("upload", \@out, \@upload);
+        $res = compare($testnum, $testname, "upload", \@out, \@upload);
         if ($res) {
-            # timestamp test result verification end
-            $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
             return 1;
         }
         $ok .= "u";
@@ -3434,10 +3427,8 @@ sub singletest {
             }
         }
 
-        $res = compare("protocol", \@out, \@protstrip);
+        $res = compare($testnum, $testname, "protocol", \@out, \@protstrip);
         if($res) {
-            # timestamp test result verification end
-            $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
             return 1;
         }
 
@@ -3484,10 +3475,8 @@ sub singletest {
             }
         }
 
-        $res = compare("proxy", \@out, \@protstrip);
+        $res = compare($testnum, $testname, "proxy", \@out, \@protstrip);
         if($res) {
-            # timestamp test result verification end
-            $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
             return 1;
         }
 
@@ -3498,14 +3487,17 @@ sub singletest {
         $ok .= "-"; # protocol not checked
     }
 
-    my @outfile=getpart("verify", "file");
-    if(@outfile) {
+    my $outputok;
+    for my $partsuffix (('', '1', '2', '3', '4')) {
+        my @outfile=getpart("verify", "file".$partsuffix);
+        if(@outfile || partexists("verify", "file".$partsuffix) ) {
         # we're supposed to verify a dynamically generated file!
-        my %hash = getpartattr("verify", "file");
+            my %hash = getpartattr("verify", "file".$partsuffix);
 
         my $filename=$hash{'name'};
         if(!$filename) {
-            logmsg "ERROR: section verify=>file has no name attribute\n";
+                logmsg "ERROR: section verify=>file$partsuffix ".
+                       "has no name attribute\n";
             stopservers($verbose);
             # timestamp test result verification end
             $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
@@ -3514,7 +3506,7 @@ sub singletest {
         my @generated=loadarray($filename);
 
         # what parts to cut off from the file
-        my @stripfile = getpart("verify", "stripfile");
+            my @stripfile = getpart("verify", "stripfile".$partsuffix);
 
         my $filemode=$hash{'mode'};
         if($filemode && ($filemode eq "text") && $has_textaware) {
@@ -3533,18 +3525,16 @@ sub singletest {
 
         @outfile = fixarray(@outfile);
 
-        $res = compare("output", \@generated, \@outfile);
+            $res = compare($testnum, $testname, "output ($filename)",
+                           \@generated, \@outfile);
         if($res) {
-            # timestamp test result verification end
-            $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
             return 1;
         }
 
-        $ok .= "o";
+            $outputok = 1; # output checked
     }
-    else {
-        $ok .= "-"; # output not checked
     }
+    $ok .= ($outputok) ? "o" : "-"; # output checked or not
 
     # accept multiple comma-separated error codes
     my @splerr = split(/ *, */, $errorcode);
@@ -3627,8 +3617,13 @@ sub singletest {
             }
             my @e = valgrindparse($srcdir, $feature{'SSL'}, "$LOGDIR/$vgfile");
             if(@e && $e[0]) {
+                if($automakestyle) {
+                    logmsg "FAIL: $testnum - $testname - valgrind\n";
+                }
+                else {
                 logmsg " valgrind ERROR ";
                 logmsg @e;
+                }
                 # timestamp test result verification end
                 $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
                 return 1;
@@ -3654,7 +3649,13 @@ sub singletest {
     my $left=sprintf("remaining: %02d:%02d",
                      $estleft/60,
                      $estleft%60);
+
+    if(!$automakestyle) {
     logmsg sprintf("OK (%-3d out of %-3d, %s)\n", $count, $total, $left);
+    }
+    else {
+        logmsg "PASS: $testnum - $testname\n";
+    }
 
     # the test succeeded, remove all log files
     if(!$keepoutfiles) {
@@ -4284,12 +4285,6 @@ while(@ARGV) {
         # have the servers display protocol output
         $debugprotocol=1;
     }
-    elsif ($ARGV[0] eq "-f") {
-        # run fork-servers, which makes the server fork for all new
-        # connections This is NOT what you wanna do without knowing exactly
-        # why and for what
-        $forkserver=1;
-    }
     elsif ($ARGV[0] eq "-g") {
         # run this test with gdb
         $gdbthis=1;
@@ -4302,6 +4297,11 @@ while(@ARGV) {
     elsif($ARGV[0] eq "-s") {
         # short output
         $short=1;
+    }
+    elsif($ARGV[0] eq "-am") {
+        # automake-style output
+        $short=1;
+        $automakestyle=1;
     }
     elsif($ARGV[0] eq "-n") {
         # no valgrind
@@ -4379,6 +4379,7 @@ Usage: runtests.pl [options] [test selection(s)]
   -r       run time statistics
   -rf      full run time statistics
   -s       short output
+  -am      automake style output PASS/FAIL: [number] [name]
   -t[N]    torture (simulate memory alloc failures); N means fail Nth alloc
   -v       verbose output
   [num]    like "5 6 9" or " 5 to 22 " to run those tests only
@@ -4760,13 +4761,19 @@ if($skipped && !$short) {
         # now show all test case numbers that had this reason for being
         # skipped
         my $c=0;
+        my $max = 9;
         for(0 .. scalar @teststat) {
             my $t = $_;
             if($teststat[$_] && ($teststat[$_] eq $r)) {
+                if($c < $max) {
                 logmsg ", " if($c);
                 logmsg $_;
+                }
                 $c++;
             }
+        }
+        if($c > $max) {
+            logmsg " and ".($c-$max)." more";
         }
         logmsg ")\n";
     }

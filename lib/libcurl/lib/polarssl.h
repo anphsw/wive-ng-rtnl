@@ -21,11 +21,15 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef USE_POLARSSL
 
 CURLcode Curl_polarssl_connect(struct connectdata *conn, int sockindex);
+
+CURLcode Curl_polarssl_connect_nonblocking(struct connectdata *conn,
+                                           int sockindex,
+                                           bool *done);
 
 /* tell PolarSSL to close down all open information regarding connections (and
    thus session ID caching etc) */
@@ -42,6 +46,7 @@ int Curl_polarssl_shutdown(struct connectdata *conn, int sockindex);
 #define curlssl_init() (1)
 #define curlssl_cleanup() Curl_nop_stmt
 #define curlssl_connect Curl_polarssl_connect
+#define curlssl_connect_nonblocking Curl_polarssl_connect_nonblocking
 #define curlssl_session_free(x)  Curl_polarssl_session_free(x)
 #define curlssl_close_all Curl_polarssl_close_all
 #define curlssl_close Curl_polarssl_close

@@ -39,7 +39,8 @@
 #
 
 BEGIN {
-    @INC=(@INC, $ENV{'srcdir'}, '.');
+    push(@INC, $ENV{'srcdir'}) if(defined $ENV{'srcdir'});
+    push(@INC, ".");
     # sub second timestamping needs Time::HiRes
     eval {
         no warnings "all";
@@ -138,6 +139,8 @@ my $nodataconn;    # set if ftp srvr doesn't establish or accepts data channel
 my $nodataconn425; # set if ftp srvr doesn't establish data ch and replies 425
 my $nodataconn421; # set if ftp srvr doesn't establish data ch and replies 421
 my $nodataconn150; # set if ftp srvr doesn't establish data ch and replies 150
+my $support_capa;  # set if server supports capability command
+my $support_auth;  # set if server supports authentication command
 my %customreply;   #
 my %customcount;   #
 my %delayreply;    #
@@ -555,6 +558,8 @@ sub protocolsetup {
     }
     elsif($proto eq 'pop3') {
         %commandfunc = (
+            'CAPA' => \&CAPA_pop3,
+            'AUTH' => \&AUTH_pop3,
             'RETR' => \&RETR_pop3,
             'LIST' => \&LIST_pop3,
         );
@@ -574,6 +579,7 @@ sub protocolsetup {
     }
     elsif($proto eq 'imap') {
         %commandfunc = (
+            'CAPABILITY' => \&CAPABILITY_imap,
             'FETCH'  => \&FETCH_imap,
             'SELECT' => \&SELECT_imap,
         );
@@ -597,7 +603,7 @@ sub protocolsetup {
             'RCPT' => \&RCPT_smtp,
         );
         %displaytext = (
-            'EHLO' => '230 We are happy you popped in!',
+            'EHLO' => "250-SIZE\r\n250 Welcome visitor, stay a while staaaaaay forever",
             'MAIL' => '200 Note taken',
             'RCPT' => '200 Receivers accepted',
             'QUIT' => '200 byebye',
@@ -754,6 +760,27 @@ my $cmdid;
 # what was picked by SELECT
 my $selected;
 
+sub CAPABILITY_imap {
+    my ($testno) = @_;
+    my $data;
+
+    if(!$support_capa) {
+        sendcontrol "$cmdid BAD Command\r\n";
+    }
+    else {
+        $data = "* CAPABILITY IMAP4";
+        if($support_auth) {
+            $data .= " AUTH=UNKNOWN";
+        }
+        $data .= " pingpong test server\r\n";
+
+        sendcontrol $data;
+        sendcontrol "$cmdid OK CAPABILITY completed\r\n";
+    }
+
+    return 0;
+}
+
 sub SELECT_imap {
     my ($testno) = @_;
     my @data;
@@ -765,7 +792,6 @@ sub SELECT_imap {
 
     return 0;
 }
-
 
 sub FETCH_imap {
      my ($testno) = @_;
@@ -820,6 +846,50 @@ sub FETCH_imap {
 ################
 ################ POP3 commands
 ################
+
+sub CAPA_pop3 {
+    my ($testno) = @_;
+    my @data = ();
+
+    if(!$support_capa) {
+        push @data, "-ERR Unsupported command: 'CAPA'\r\n";
+    }
+    else {
+        push @data, "+OK List of capabilities follows\r\n";
+        push @data, "USER\r\n";
+        if($support_auth) {
+            push @data, "SASL UNKNOWN\r\n";
+        }
+        push @data, "IMPLEMENTATION POP3 pingpong test server\r\n";
+        push @data, ".\r\n";
+    }
+
+    for my $d (@data) {
+        sendcontrol $d;
+    }
+
+    return 0;
+}
+
+sub AUTH_pop3 {
+    my ($testno) = @_;
+    my @data = ();
+
+    if(!$support_auth) {
+        push @data, "-ERR Unsupported command: 'AUTH'\r\n";
+    }
+    else {
+        push @data, "+OK List of supported mechanisms follows\r\n";
+        push @data, "UNKNOWN\r\n";
+        push @data, ".\r\n";
+    }
+
+    for my $d (@data) {
+        sendcontrol $d;
+    }
+
+    return 0;
+}
 
 sub RETR_pop3 {
      my ($testno) = @_;
@@ -1667,6 +1737,8 @@ sub customize {
     $nodataconn425 = 0; # default is to not send 425 without data channel
     $nodataconn421 = 0; # default is to not send 421 without data channel
     $nodataconn150 = 0; # default is to not send 150 without data channel
+    $support_capa = 0;  # default is to not support capability command
+    $support_auth = 0;  # default is to not support authentication command
     %customreply = ();  #
     %customcount = ();  #
     %delayreply = ();   #
@@ -1730,6 +1802,14 @@ sub customize {
             # applies to both active and passive FTP modes
             logmsg "FTPD: instructed to use NODATACONN\n";
             $nodataconn=1;
+        }
+        elsif($_ =~ /SUPPORTCAPA/) {
+            logmsg "FTPD: instructed to support CAPABILITY command\n";
+            $support_capa=1;
+        }
+        elsif($_ =~ /SUPPORTAUTH/) {
+            logmsg "FTPD: instructed to support AUTHENTICATION command\n";
+            $support_auth=1;
         }
         elsif($_ =~ /NOSAVE/) {
             # don't actually store the file we upload - to be used when
@@ -2050,7 +2130,15 @@ while(1) {
 
         if($check) {
             logmsg "$FTPCMD wasn't handled!\n";
+            if($proto eq 'pop3') {
+                sendcontrol "-ERR $FTPCMD is not dealt with!\r\n";
+            }
+            elsif($proto eq 'imap') {
+                sendcontrol "$cmdid BAD $FTPCMD is not dealt with!\r\n";
+            }
+            else {
             sendcontrol "500 $FTPCMD is not dealt with!\r\n";
+        }
         }
 
     } # while(1)

@@ -126,7 +126,7 @@ static int Check_Connect_And_Wait_Connection(
 #ifndef WIN32
 			} else {
 				int valopt = 0;
-				socklen_t len = 0;
+				socklen_t len = sizeof(valopt);
 				if (getsockopt(sock, SOL_SOCKET, SO_ERROR, (void *) &valopt, &len) < 0) {
 					/* failed to read delayed error */
 					return -1;
@@ -163,6 +163,18 @@ static int private_connect(
 	return connect(sockfd, serv_addr, addrlen);
 #endif /* UPNP_ENABLE_BLOCKING_TCP_CONNECTIONS */
 }
+
+#ifdef WIN32
+struct tm *http_gmtime_r(const time_t *clock, struct tm *result)
+{
+	if (clock == NULL || *clock < 0 || result == NULL)
+		return NULL;
+
+	/* gmtime in VC runtime is thread safe. */
+	*result = *gmtime(clock);
+	return result;
+}
+#endif
 
 int http_FixUrl(IN uri_type *url, OUT uri_type *fixed_url)
 {
@@ -363,27 +375,32 @@ ExitFunction:
 
 int http_SendMessage(SOCKINFO *info, int *TimeOut, const char *fmt, ...)
 {
+#if EXCLUDE_WEB_SERVER == 0
 	FILE *Fp;
-	va_list argp;
 	struct SendInstruction *Instr = NULL;
-	char *buf = NULL;
 	char *filename = NULL;
 	char *file_buf = NULL;
 	char *ChunkBuf = NULL;
+	/* 10 byte allocated for chunk header. */
 	char Chunk_Header[CHUNK_HEADER_SIZE];
+	size_t num_read;
+	size_t amount_to_be_read = (size_t)0;
+	size_t Data_Buf_Size = WEB_SERVER_BUF_SIZE;
+#endif /* EXCLUDE_WEB_SERVER */
+	va_list argp;
+	char *buf = NULL;
 	char c;
 	int nw;
 	int RetVal = 0;
 	size_t buf_length;
-	size_t num_read;
 	size_t num_written;
-	size_t amount_to_be_read = (size_t)0;
-	/* 10 byte allocated for chunk header. */
-	size_t Data_Buf_Size = WEB_SERVER_BUF_SIZE;
 
+#if EXCLUDE_WEB_SERVER == 0
 	memset(Chunk_Header, 0, sizeof(Chunk_Header));
+#endif /* EXCLUDE_WEB_SERVER */
 	va_start(argp, fmt);
 	while ((c = *fmt++)) {
+#if EXCLUDE_WEB_SERVER == 0
 		if (c == 'I') {
 			Instr = va_arg(argp, struct SendInstruction *);
 			if (Instr->ReadSendSize >= 0)
@@ -505,7 +522,9 @@ Cleanup_File:
 				fclose(Fp);
 			}
 			goto ExitFunction;
-		} else if (c == 'b') {
+		} else
+#endif /* EXCLUDE_WEB_SERVER */
+		if (c == 'b') {
 			/* memory buffer */
 			buf = va_arg(argp, char *);
 			buf_length = va_arg(argp, size_t);
@@ -527,7 +546,9 @@ Cleanup_File:
 
 ExitFunction:
 	va_end(argp);
+#if EXCLUDE_WEB_SERVER == 0
 	free(ChunkBuf);
+#endif /* EXCLUDE_WEB_SERVER */
 	return RetVal;
 }
 
@@ -1185,7 +1206,6 @@ static int ReadResponseLineAndHeaders(
 			return num_read;
 		}
 	}
-	done = 0;
 	status = parser_parse_headers(parser);
 	if ((status == (parse_status_t)PARSE_OK) &&
 		(parser->position == (parser_pos_t)POS_ENTITY))
@@ -1615,6 +1635,7 @@ int http_MakeMessage(membuffer *buf, int http_major_version,
 	size_t length;
 	time_t *loc_time;
 	time_t curr_time;
+	struct tm date_storage;
 	struct tm *date;
 	const char *start_str;
 	const char *end_str;
@@ -1702,7 +1723,7 @@ int http_MakeMessage(membuffer *buf, int http_major_version,
 				loc_time = (time_t *)va_arg(argp, time_t *);
 			}
 			assert(loc_time);
-			date = gmtime(loc_time);
+			date = http_gmtime_r(loc_time, &date_storage);
 			if (date == NULL)
 				goto error_handler;
 			rc = snprintf(tempbuf, sizeof(tempbuf),

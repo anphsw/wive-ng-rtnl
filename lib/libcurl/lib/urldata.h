@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -24,7 +24,7 @@
 
 /* This file is for lib internal stuff */
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #define PORT_FTP 21
 #define PORT_FTPS 990
@@ -112,6 +112,8 @@
 #endif
 
 #ifdef USE_CYASSL
+#undef OCSP_REQUEST  /* avoid cyassl/openssl/ssl.h clash with wincrypt.h */
+#undef OCSP_RESPONSE /* avoid cyassl/openssl/ssl.h clash with wincrypt.h */
 #include <cyassl/openssl/ssl.h>
 #endif
 
@@ -130,6 +132,19 @@
 #undef calloc
 #undef realloc
 #endif /* USE_AXTLS */
+
+#ifdef USE_SCHANNEL
+#include "curl_sspi.h"
+#include <schnlsp.h>
+#include <schannel.h>
+#endif
+
+#ifdef USE_DARWINSSL
+#include <Security/Security.h>
+/* For some reason, when building for iOS, the omnibus header above does
+ * not include SecureTransport.h as of iOS SDK 5.1. */
+#include <Security/SecureTransport.h>
+#endif
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -214,6 +229,20 @@ enum protection_level {
 };
 #endif
 
+#ifdef USE_SCHANNEL
+/* Structs to store Schannel handles */
+struct curl_schannel_cred {
+  CredHandle cred_handle;
+  TimeStamp time_stamp;
+  int refcount;
+};
+
+struct curl_schannel_ctxt {
+  CtxtHandle ctxt_handle;
+  TimeStamp time_stamp;
+};
+#endif
+
 /* enum for the nonblocking SSL connection state machine */
 typedef enum {
   ssl_connect_1,
@@ -261,6 +290,7 @@ struct ssl_connect_data {
   x509_cert clicert;
   x509_crl crl;
   rsa_context rsa;
+  ssl_connect_state connecting_state;
 #endif /* USE_POLARSSL */
 #ifdef USE_CYASSL
   SSL_CTX* ctx;
@@ -271,10 +301,8 @@ struct ssl_connect_data {
   PRFileDesc *handle;
   char *client_nickname;
   struct SessionHandle *data;
-#ifdef HAVE_PK11_CREATEGENERICOBJECT
   struct curl_llist *obj_list;
   PK11GenericObject *obj_clicert;
-#endif
 #endif /* USE_NSS */
 #ifdef USE_QSOSSL
   SSLHandle *handle;
@@ -283,15 +311,30 @@ struct ssl_connect_data {
   SSL_CTX* ssl_ctx;
   SSL*     ssl;
 #endif /* USE_AXTLS */
+#ifdef USE_SCHANNEL
+  struct curl_schannel_cred *cred;
+  struct curl_schannel_ctxt *ctxt;
+  SecPkgContext_StreamSizes stream_sizes;
+  ssl_connect_state connecting_state;
+  size_t encdata_length, decdata_length;
+  size_t encdata_offset, decdata_offset;
+  unsigned char *encdata_buffer, *decdata_buffer;
+  unsigned long req_flags, ret_flags;
+#endif /* USE_SCHANNEL */
+#ifdef USE_DARWINSSL
+  SSLContextRef ssl_ctx;
+  curl_socket_t ssl_sockfd;
+  ssl_connect_state connecting_state;
+  bool ssl_direction; /* true if writing, false if reading */
+#endif /* USE_DARWINSSL */
 };
 
 struct ssl_config_data {
   long version;          /* what version the client wants to use */
   long certverifyresult; /* result from the certificate verification */
-  long verifypeer;       /* set TRUE if this is desired */
-  long verifyhost;       /* 0: no verify
-                            1: check that CN exists
-                            2: CN must match hostname */
+
+  bool verifypeer;       /* set TRUE if this is desired */
+  bool verifyhost;       /* set TRUE if CN/SAN must match hostname */
   char *CApath;          /* certificate dir (doesn't work on windows) */
   char *CAfile;          /* certificate to verify peer against */
   const char *CRLfile;   /* CRL to check certificate revocation */
@@ -752,8 +795,8 @@ struct connectdata {
                  consideration (== only for pipelining). */
 
   /**** Fields set when inited and not modified again */
-  long connectindex; /* what index in the connection cache connects index this
-                        particular struct has */
+  long connection_id; /* Contains a unique number to make it easier to
+                         track the connections in the log output */
 
   /* 'dns_entry' is the particular host we use. This points to an entry in the
      DNS cache and it will not get pruned while locked. It gets unlocked in
@@ -881,7 +924,6 @@ struct connectdata {
                               handle */
   bool server_supports_pipelining; /* TRUE if server supports pipelining,
                                       set after first response */
-
   struct curl_llist *send_pipe; /* List of handles waiting to
                                    send on this pipeline */
   struct curl_llist *recv_pipe; /* List of handles waiting to read
@@ -891,7 +933,6 @@ struct connectdata {
   struct curl_llist *done_pipe; /* Handles that are finished, but
                                    still reference this connectdata */
 #define MAX_PIPELINE_LENGTH 5
-
   char* master_buffer; /* The master buffer allocated on-demand;
                           used for pipelining. */
   size_t read_pos; /* Current read position in the master buffer */
@@ -950,8 +991,8 @@ struct connectdata {
   int socks5_gssapi_enctype;
 #endif
 
-  long verifypeer;
-  long verifyhost;
+  bool verifypeer;
+  bool verifyhost;
 
   /* When this connection is created, store the conditions for the local end
      bind. This is stored before the actual bind and before any connection is
@@ -968,6 +1009,8 @@ struct connectdata {
     TUNNEL_CONNECT, /* CONNECT has been sent off */
     TUNNEL_COMPLETE /* CONNECT response received completely */
   } tunnel_state[2]; /* two separate ones to allow FTP */
+
+   struct connectbundle *bundle; /* The bundle we are member of */
 };
 
 /* The end of connectdata. */
@@ -987,8 +1030,8 @@ struct PureInfo {
                      thus made the document NOT get fetched */
   long header_size;  /* size of read header(s) in bytes */
   long request_size; /* the amount of bytes sent in the request(s) */
-  long proxyauthavail; /* what proxy auth types were announced */
-  long httpauthavail;  /* what host auth types were announced */
+  unsigned long proxyauthavail; /* what proxy auth types were announced */
+  unsigned long httpauthavail;  /* what host auth types were announced */
   long numconnects; /* how many new connection did libcurl created */
   char *contenttype; /* the content type of the object */
   char *wouldredirect; /* URL this would've been redirected to if asked to */
@@ -1090,11 +1133,11 @@ typedef enum {
 #define MAX_CURL_PASSWORD_LENGTH_TXT "255"
 
 struct auth {
-  long want;  /* Bitmask set to the authentication methods wanted by the app
-                 (with CURLOPT_HTTPAUTH or CURLOPT_PROXYAUTH). */
-  long picked;
-  long avail; /* bitmask for what the server reports to support for this
-                 resource */
+  unsigned long want;  /* Bitmask set to the authentication methods wanted by
+                          app (with CURLOPT_HTTPAUTH or CURLOPT_PROXYAUTH). */
+  unsigned long picked;
+  unsigned long avail; /* Bitmask for what the server reports to support for
+                          this resource */
   bool done;  /* TRUE when the auth phase is done and ready to do the *actual*
                  request */
   bool multi; /* TRUE if this is not yet authenticated but within the auth
@@ -1103,32 +1146,27 @@ struct auth {
                    be RFC compliant */
 };
 
-struct conncache {
-  /* 'connects' will be an allocated array with pointers. If the pointer is
-     set, it holds an allocated connection. */
-  struct connectdata **connects;
-  long num;           /* number of entries of the 'connects' array */
-  enum {
-    CONNCACHE_PRIVATE, /* used for an easy handle alone */
-    CONNCACHE_MULTI    /* shared within a multi handle */
-  } type;
-};
-
-
 struct UrlState {
-  enum {
-    Curl_if_none,
-    Curl_if_easy,
-    Curl_if_multi
-  } used_interface;
 
-  struct conncache *connc; /* points to the connection cache this handle
-                              uses */
+  /* Points to the connection cache */
+  struct conncache *conn_cache;
+
+  /* when curl_easy_perform() is called, the multi handle is "owned" by
+     the easy handle so curl_easy_cleanup() on such an easy handle will
+     also close the multi handle! */
+  bool multi_owned_by_easy;
 
   /* buffers to store authentication data in, as parsed from input options */
   struct timeval keeps_speed; /* for the progress meter really */
 
-  long lastconnect;  /* index of most recent connect or -1 if undefined */
+  struct connectdata *pending_conn; /* This points to the connection we want
+                                       to open when we are waiting in the
+                                       CONNECT_PEND state in the multi
+                                       interface. This to avoid recreating it
+                                       when we enter the CONNECT state again.
+                                    */
+
+  struct connectdata *lastconnect; /* The last connection, NULL if undefined */
 
   char *headerbuff; /* allocated buffer to store headers in */
   size_t headersize;   /* size of the allocation */
@@ -1207,14 +1245,6 @@ struct UrlState {
   /* for FTP downloads: how many CRLFs did we converted to LFs? */
   curl_off_t crlf_conversions;
 #endif
-  /* If set to non-NULL, there's a connection in a shared connection cache
-     that uses this handle so we can't kill this SessionHandle just yet but
-     must keep it around and add it to the list of handles to kill once all
-     its connections are gone */
-  void *shared_conn;
-  bool closed; /* set to TRUE when curl_easy_cleanup() has been called on this
-                  handle, but it is kept around as mentioned for
-                  shared_conn */
   char *pathbuffer;/* allocated buffer to store the URL's path part in */
   char *path;      /* path to use, points to somewhere within the pathbuffer
                       area */
@@ -1362,14 +1392,14 @@ struct UserDefined {
   void *writeheader; /* write the header to this if non-NULL */
   void *rtp_out;     /* write RTP to this if non-NULL */
   long use_port;     /* which port to use (when not using default) */
-  long httpauth;     /* what kind of HTTP authentication to use (bitmask) */
-  long proxyauth;    /* what kind of proxy authentication to use (bitmask) */
+  unsigned long httpauth;  /* kind of HTTP authentication to use (bitmask) */
+  unsigned long proxyauth; /* kind of proxy authentication to use (bitmask) */
   long followlocation; /* as in HTTP Location: */
   long maxredirs;    /* maximum no. of http(s) redirects to follow, set to -1
                         for infinity */
-  bool post301;      /* Obey RFC 2616/10.3.2 and keep POSTs as POSTs after a
-                        301 */
-  bool post302;      /* keep POSTs as POSTs after a 302 */
+
+  int keep_post;     /* keep POSTs as POSTs after a 30x request; each
+                        bit represents a request, from 301 to 303 */
   bool free_referer; /* set TRUE if 'referer' points to a string we
                         allocated */
   void *postfields;  /* if POST, set the fields' values here */
@@ -1550,13 +1580,14 @@ struct UserDefined {
   bool tcp_keepalive;    /* use TCP keepalives */
   long tcp_keepidle;     /* seconds in idle before sending keepalive probe */
   long tcp_keepintvl;    /* seconds between TCP keepalive probes */
+
+  size_t maxconnects;  /* Max idle connections in the connection cache */
 };
 
 struct Names {
   struct curl_hash *hostcache;
   enum {
     HCACHE_NONE,    /* not pointing to anything */
-    HCACHE_PRIVATE, /* points to our own */
     HCACHE_GLOBAL,  /* points to the (shrug) global one */
     HCACHE_MULTI,   /* points to a shared one in the multi handle */
     HCACHE_SHARED   /* points to a shared one in a shared object */
@@ -1576,7 +1607,11 @@ struct Names {
 struct SessionHandle {
   struct Names dns;
   struct Curl_multi *multi;    /* if non-NULL, points to the multi handle
-                                  struct to which this "belongs" */
+                                  struct to which this "belongs" when used by
+                                  the multi interface */
+  struct Curl_multi *multi_easy; /* if non-NULL, points to the multi handle
+                                    struct to which this "belongs" when used
+                                    by the easy interface */
   struct Curl_one_easy *multi_pos; /* if non-NULL, points to its position
                                       in multi controlling structure to assist
                                       in removal. */

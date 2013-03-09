@@ -1,4 +1,125 @@
 *******************************************************************************
+Version 1.6.18
+*******************************************************************************
+
+2012-12-06 Marcelo Roberto Jimenez <mroberto(at)users.sourceforge.net>
+
+	Security fix for CERT issue VU#922681
+
+	This patch addresses three possible buffer overflows in function
+	unique_service_name(). The three issues have the folowing CVE numbers:
+
+	CVE-2012-5958 Issue #2: Stack buffer overflow of Tempbuf
+	CVE-2012-5959 Issue #4: Stack buffer overflow of Event->UDN
+	CVE-2012-5960 Issue #8: Stack buffer overflow of Event->UDN
+
+	Notice that the following issues have already been dealt by previous
+	work:
+
+	CVE-2012-5961 Issue #1: Stack buffer overflow of Evt->UDN
+	CVE-2012-5962 Issue #3: Stack buffer overflow of Evt->DeviceType
+	CVE-2012-5963 Issue #5: Stack buffer overflow of Event->UDN
+	CVE-2012-5964 Issue #6: Stack buffer overflow of Event->DeviceType
+	CVE-2012-5965 Issue #7: Stack buffer overflow of Event->DeviceType
+
+2012-06-19 Yoichi NAKAYAMA <yoichi.nakayama(at)gmail.com>
+
+	Fix memory leak and access violation in UpnpSendAction(Ex)Async.
+
+	Free buffers after malloc or ixmlPrintNode failure.
+	Free Param->Header before destructing Param.
+
+2012-05-25 Anoop Mohan <anoop.anoop(at)gmail.com>
+
+	This patch fixes a bug in non blocking connect call where the sock
+	option length for SO_ERROR was passed as 0 instead of sizeof(int).
+
+2012-04-24 Yoichi NAKAYAMA <yoichi.nakayama(at)gmail.com>
+
+	Disable SetGenaCallback call if device is disabled.
+
+	If device is disabled, SetGenaCallback definition is disabled,
+	but its call remains. A link error will occur in Win32.
+
+2012-04-21 Yoichi NAKAYAMA <yoichi.nakayama(at)gmail.com>
+
+	Fix condition for allocation failure in get_content_type().
+
+	At the end of get_content_type() in webserver.c, it should check
+	return value of ixmlCloneDOMString().
+
+2012-04-21 Yoichi NAKAYAMA <yoichi.nakayama(at)gmail.com>
+
+	Fix problems detected as dead assignment warning by clang scan-build.
+
+	Wrong assignment by shutdown result hides the real error code
+	of NewRequestHandler() in ssdp_device.c.
+	Fix return code description of NewRequestHandler().
+	Handle return code from ithread_create in sample applications.
+	Remove unused assignments.
+
+2012-04-20 Yoichi NAKAYAMA <yoichi.nakayama(at)gmail.com>
+
+	Avoid dereference of null pointer in ixmlNode_setNodeProperties.
+
+	The problem can occur if one of the arguments is NULL.
+	Test argument and fix assertion.
+
+2012-04-17 Yoichi NAKAYAMA <yoichi.nakayama(at)gmail.com>
+
+	Create intermediate directory per project on vc9.
+
+	Sample applications share sample_util.c and collisions of
+	object file can occur in parallel build. Modify project files to
+	split intermediate directories against it.
+	Apply similar changes also to library projects, like vc10 projects.
+
+2012-04-11 Yoichi NAKAYAMA <yoichi.nakayama(at)gmail.com>
+
+	Avoid access violation after parser_parse_chunky_headers call.
+
+	In parser_parse_chunky_headers, parser->msg.msg.buf can be changed
+	by membuffer_delete call. Therefore if we save the pointer to
+	parser->msg.entity.buf before calling membuffer_delete, it will
+	induce access to released memory.
+
+2012-04-06 Yoichi NAKAYAMA <yoichi.nakayama(at)gmail.com>
+
+	Remove possibility of access violation.
+
+	1. Test Instr before dereference it in http_RecvPostMessage.
+	(Though it never becomes NULL because NULL is not passed to
+	the static method)
+	2. Avoid strdup(NULL) in ixmlElement_setAttributeNS.
+	Those are detected by llvm scan-build.
+
+2012-04-05 Yoichi NAKAYAMA <yoichi.nakayama(at)gmail.com>
+
+	SF Bug Tracker id 3507819 - Use of thread-unsafe gmtime() in httpreadwrite.c
+
+	Submitted: zephyrus ( zephyrus00jp ) - 2012-03-18 06:31:00 PDT
+
+	Define http_gmtime_r and web_server_asctime_r and use it.
+	Those prefix are added since pthread for Win32 already
+	has macro gmtime_r and asctime_r.
+
+2012-04-05 Yoichi NAKAYAMA <yoichi.nakayama(at)gmail.com>
+
+	Fix type of local variable stopSock in RunMiniServer()
+
+	The variable is declared as SOCKET, but it is used to
+	store return value of int receive_from_stopSock(...).
+	The type was changed in the commit
+	4b47e6a51d9c7049a862695b68de75699e023551 by mistake.
+
+2012-04-03 Fabrice Fontaine <fabrice.fontaine(at)orange.com>
+
+	Compilation optimisation
+
+	Do not compile the code related to the webserver in http_SendMessage
+	when --disable-webserver is set
+
+*******************************************************************************
 Version 1.6.17
 *******************************************************************************
 

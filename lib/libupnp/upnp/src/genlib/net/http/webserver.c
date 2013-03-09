@@ -132,6 +132,20 @@ static const char *gMediaTypes[] = {
 #define NUM_MEDIA_TYPES       69
 #define NUM_HTTP_HEADER_NAMES 33
 
+#define ASCTIME_R_BUFFER_SIZE 26
+#ifdef WIN32
+static char *web_server_asctime_r(const struct tm *tm, char *buf)
+{
+	if (tm == NULL || buf == NULL)
+		return NULL;
+
+	asctime_s(buf, ASCTIME_R_BUFFER_SIZE, tm);
+	return buf;
+}
+#else
+#define web_server_asctime_r asctime_r
+#endif
+
 /* sorted by file extension; must have 'NUM_MEDIA_TYPES' extensions */
 static const char *gEncodedMediaTypes =
 	"aif\0" AUDIO_STR "aiff\0"
@@ -330,7 +344,7 @@ static UPNP_INLINE int get_content_type(
 	}
 	(*content_type) = ixmlCloneDOMString(temp);
 	free(temp);
-	if (!content_type)
+	if (!(*content_type))
 		return UPNP_E_OUTOF_MEMORY;
 
 	return 0;
@@ -477,8 +491,6 @@ int web_server_init()
 
 void web_server_destroy(void)
 {
-	int ret;
-
 	if (bWebServerState == WEB_SERVER_ENABLED) {
 		membuffer_destroy(&gDocumentRootDir);
 		alias_release(&gAliasDoc);
@@ -487,8 +499,7 @@ void web_server_destroy(void)
 		memset(&gAliasDoc, 0, sizeof(struct xml_alias_t));
 		ithread_mutex_unlock(&gWebMutex);
 
-		ret = ithread_mutex_destroy(&gWebMutex);
-		assert(ret == 0);
+		ithread_mutex_destroy(&gWebMutex);
 		bWebServerState = WEB_SERVER_DISABLED;
 	}
 }
@@ -512,6 +523,8 @@ static int get_file_info(
 	struct stat s;
 	FILE *fp;
 	int rc = 0;
+	struct tm date;
+	char buffer[ASCTIME_R_BUFFER_SIZE];
 
 	ixmlFreeDOMString(info->content_type);	
 	info->content_type = NULL;
@@ -535,7 +548,8 @@ static int get_file_info(
 	UpnpPrintf(UPNP_INFO, HTTP, __FILE__, __LINE__,
 		"file info: %s, length: %lld, last_mod=%s readable=%d\n",
 		filename, (long long)info->file_length,
-		asctime(gmtime(&info->last_modified)), info->is_readable);
+		web_server_asctime_r(http_gmtime_r(&info->last_modified, &date), buffer),
+		info->is_readable);
 
 	return rc;
 }
@@ -1424,7 +1438,7 @@ static int http_RecvPostMessage(
 		       &parser->msg.msg.buf[parser->entity_start_position + entity_offset],
 		       Data_Buf_Size);
 		entity_offset += Data_Buf_Size;
-		if (Instr->IsVirtualFile) {
+		if (Instr && Instr->IsVirtualFile) {
 			int n = virtualDirCallback.write(Fp, Buf, Data_Buf_Size);
 			if (n < 0) {
 				ret_code = HTTP_INTERNAL_SERVER_ERROR;

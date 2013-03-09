@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -19,9 +19,7 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-#include "setup.h"
-
-#include <curl/curl.h>
+#include "tool_setup.h"
 
 #define ENABLE_CURLX_PRINTF
 /* use our own printf() functions */
@@ -108,6 +106,7 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
 
     switch(type) {
     case CURLINFO_HEADER_OUT:
+      if(size > 0) {
       for(i = 0; i < size - 1; i++) {
         if(data[i] == '\n') { /* LF */
           if(!newl) {
@@ -121,6 +120,7 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
       if(!newl)
         fprintf(output, "%s%s ", timebuf, s_infotype[type]);
       (void)fwrite(data + st, i - st + 1, 1, output);
+      }
       newl = (size && (data[size - 1] != '\n')) ? TRUE : FALSE;
       traced_data = FALSE;
       break;

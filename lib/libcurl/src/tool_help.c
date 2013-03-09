@@ -19,7 +19,7 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-#include "setup.h"
+#include "tool_setup.h"
 
 #include "tool_panykey.h"
 #include "tool_help.h"
@@ -125,6 +125,7 @@ static const char *const helptext[] = {
   "     --max-filesize BYTES  Maximum file size to download (H/F)",
   "     --max-redirs NUM  Maximum number of redirects allowed (H)",
   " -m, --max-time SECONDS  Maximum time allowed for the transfer",
+  "     --metalink      Process given URLs as metalink XML file",
   "     --negotiate     Use HTTP Negotiate Authentication (H)",
   " -n, --netrc         Must read .netrc for user name and password",
   "     --netrc-optional Use either .netrc or URL; overrides -n",
@@ -140,6 +141,8 @@ static const char *const helptext[] = {
   "Do not switch to GET after following a 301 redirect (H)",
   "     --post302       "
   "Do not switch to GET after following a 302 redirect (H)",
+  "     --post303       "
+  "Do not switch to GET after following a 303 redirect (H)",
   " -#, --progress-bar  Display transfer progress as a progress bar",
   "     --proto PROTOCOLS  Enable/disable specified protocols",
   "     --proto-redir PROTOCOLS  "

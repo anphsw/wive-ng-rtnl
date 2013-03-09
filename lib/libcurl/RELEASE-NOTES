@@ -1,49 +1,66 @@
-Curl and libcurl 7.25.0
+Curl and libcurl 7.29.0
 
- Public curl releases:         127
- Command line options:         151
+ Public curl releases:         131
+ Command line options:         152
  curl_easy_setopt() options:   199
  Public functions in libcurl:  58
  Known libcurl bindings:       39
- Contributors:                 929
+ Contributors:                 993
+
+This release includes the following securify fix:
+
+ o POP3/IMAP/SMTP SASL buffer overflow vulnerability [17]
 
 This release includes the following changes:
 
- o configure: add option disable --libcurl output [1]
- o --ssl-allow-beast and CURLOPT_SSL_OPTIONS added [2]
- o Added CURLOPT_TCP_KEEPALIVE, CURLOPT_TCP_KEEPIDLE, CURLOPT_TCP_KEEPINTVL [4]
- o curl: use new library-side TCP_KEEPALIVE options [5]
- o Added a new CURLOPT_MAIL_AUTH option [13]
- o Added support for --mail-auth [14]
- o --libcurl now also works with -F and more! [15]
+ o test: offer "automake" output and check for perl better
+ o always-multi: always use non-blocking internals [1]
+ o imap: Added support for sasl digest-md5 authentication
+ o imap: Added support for sasl cram-md5 authentication
+ o imap: Added support for sasl ntlm authentication
+ o imap: Added support for sasl login authentication
+ o imap: Added support for sasl plain text authentication
+ o imap: Added support for login disabled server capability
+ o mk-ca-bundle: add -f, support passing to stdout and more [5]
+ o writeout: -w now supports remote_ip/port and local_ip/port
 
 This release includes the following bugfixes:
 
- o --max-redirs: allow negative numbers as option value [3]
- o parse_proxy: bail out on zero-length proxy names [6]
- o configure: don't modify LD_LIBRARY_PATH for cross compiles [7]
- o curl_easy_reset: reset the referer string [8]
- o curl tool: don't abort glob-loop due to failures [9]
- o CONNECT: send correct Host: with IPv6 numerical address [10]
- o Explicitly link to the nettle/gcrypt libraries [11]
- o more resilient connection times among IP addresses [12]
- o winbuild: fix IPV6 and IDN options
- o SMTP: Fixed error when using CURLOPT_CONNECT_ONLY
- o cyassl: update to CyaSSL 2.0.x API
- o smtp: Fixed an issue with the EOB checking
- o pop3: Fixed drop of final CRLF in EOB checking [16]
- o smtp: Fixed an issue with writing postdata
- o smtp: Added support for returning SMTP response codes
- o CONNECT: fix ipv6 address in the Request-Line [17]
- o curl-config: only provide libraries with --libs
- o LWIP: don't consider HAVE_ERRNO_H to be winsock [19]
- o ssh: tunnel through HTTP proxy if requested
- o cookies: strip off [brackets] from numerical ipv6 host names [20]
- o libcurl docs: version corrections [18]
- o cmake: list_spaces_append_once failure [22]
- o resolve with c-ares: don't resolve IPv6 when not working [21]
- o smtp: changed error code for EHLO and HELO responses
- o parsedate: fix a numeric overflow
+ o nss: prevent NSS from crashing on client auth hook failure
+ o darwinssl: Fixed inability to disable peer verification on Snow Leopard
+   and Lion
+ o curl_multi_remove_handle: fix memory leak triggered with CURLOPT_RESOLVE
+ o SCP: relative path didn't work as documented [7]
+ o setup_once.h: HP-UX <sys/socket.h> issue workaround
+ o configure: fix cross pkg-config detection
+ o runtests: Do not add undefined values to @INC
+ o build: fix compilation with CURL_DISABLE_CRYPTO_AUTH flag
+ o multi: fix re-sending request on early connection close
+ o HTTP: remove stray CRLF in chunk-encoded content-free request bodies
+ o build: fix AIX compilation and usage of events/revents
+ o VC Makefiles: add missing hostcheck
+ o nss: clear session cache if a client certificate from file is used
+ o nss: fix error messages for CURLE_SSL_{CACERT,CRL}_BADFILE
+ o fix HTTP CONNECT tunnel establishment upon delayed response [2]
+ o --libcurl: fix for non-zero default options
+ o FTP: reject illegal port numbers in EPSV 229 responses
+ o build: use per-target '_CPPFLAGS' for those currently using default
+ o configure: fix automake 1.13 compatibility [6]
+ o curl: ignore SIGPIPE [4]
+ o pop3: Added support for non-blocking SSL upgrade
+ o pop3: Fixed default authentication detection
+ o imap: Fixed usernames and passwords that contain escape characters
+ o packages/DOS/common.dj: remove COFF debug info generation [3]
+ o imap/pop3/smtp: Fixed failure detection during TLS upgrade [8]
+ o pop3: Fixed no known authentication mechanism when fallback is required [9]
+ o formadd: reject trying to read a directory where a file is expected [10]
+ o formpost: support quotes, commas and semicolon in file names [11]
+ o docs: update the comments about loading CA certs with NSS [12]
+ o docs: fix typos in man pages [13]
+ o darwinssl: Fix bug where packets were sometimes transmitted twice [14]
+ o winbuild: include version info for .dll .exe [15]
+ o schannel: Removed extended error connection setup flag [16]
+ o VMS: fix and generate the VMS build config
 
 This release includes the following known bugs:
 
@@ -52,35 +69,32 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Colin Hogben, Alessandro Ghedini, Kamil Dudka, Rob Ward, Dave Reisner,
- Martin Storsjo, Pierre Ynard, Pierre Joye, Yang Tse, Dan Fandrich,
- Michael Day, Juan Barreto, Chandrakant Bagul, Steve Holme, Todd Ouska,
- Rich Gray, John Joseph Bachir, Armel Asselin, Andrei Cipu,
- Maxim Prohorov
+ Nick Zitzmann, Colin Watson, Fabian Keil, Kamil Dudka, Lijo Antony,
+ Linus Nielsen Feltzing, Marc Hoersken, Stanislav Ivochkin, Steve Holme,
+ Yang Tse, Balaji Parasuram, Dan Fandrich, Bob Relyea, Gisle Vanem,
+ Yves Arrouye, Kai Engert, Lluís Batlle i Rossell, Jirí Hruka,
+ John E. Malmberg, Tor Arntsen, Matt Arsenault, Sergei Nikulov,
+ Guenter Knauf, Craig Davison, Ulrich Doehner, Jiri Jaburek, Bruno de Carvalho,
+ Eldar Zaitov
  
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = http://curl.haxx.se/mail/lib-2012-02/0009.html
- [2] = http://curl.haxx.se/mail/lib-2012-02/0001.html
- [3] = http://curl.haxx.se/mail/lib-2012-02/0098.html
- [4] = http://curl.haxx.se/mail/lib-2012-01/0264.html
- [5] = http://curl.haxx.se/mail/lib-2012-01/0263.html
- [6] = http://curl.haxx.se/mail/lib-2012-02/0000.html
- [7] = http://curl.haxx.se/mail/lib-2012-02/0052.html
- [8] = http://curl.haxx.se/bug/view.cgi?id=3481551
- [9] = http://curl.haxx.se/bug/view.cgi?id=3481223
- [10] = http://curl.haxx.se/bug/view.cgi?id=3482093
- [11] = http://curl.haxx.se/mail/lib-2012-01/0303.html
- [12] = http://curl.haxx.se/mail/lib-2012-01/0190.html
- [13] = http://curl.haxx.se/libcurl/c/curl_easy_setopt.html#CURLOPTMAILAUTH
- [14] = http://curl.haxx.se/docs/manpage.html#--mail-auth
- [15] = http://curl.haxx.se/docs/manpage.html#--libcurl
- [16] = http://curl.haxx.se/mail/lib-2012-02/0051.html
- [17] = http://curl.haxx.se/bug/view.cgi?id=3493129
- [18] = http://curl.haxx.se/bug/view.cgi?id=3494091
- [19] = http://curl.haxx.se/mail/lib-2012-03/0046.html
- [20] = http://curl.haxx.se/mail/lib-2012-03/0036.html
- [21] = http://curl.haxx.se/mail/lib-2012-03/0045.html
- [22] = http://curl.haxx.se/bug/view.cgi?id=3494968
+ [1] = http://daniel.haxx.se/blog/2013/01/17/internally-were-all-multi-now/
+ [2] = http://curl.haxx.se/mail/lib-2013-01/0191.html
+ [3] = http://curl.haxx.se/mail/lib-2013-01/0130.html
+ [4] = http://curl.haxx.se/bug/view.cgi?id=1180
+ [5] = http://curl.haxx.se/mail/lib-2013-01/0045.html
+ [6] = http://curl.haxx.se/mail/lib-2012-12/0246.html
+ [7] = http://curl.haxx.se/bug/view.cgi?id=1173
+ [8] = http://curl.haxx.se/mail/lib-2013-01/0250.html
+ [9] = http://curl.haxx.se/mail/lib-2013-02/0004.html
+ [10] = http://curl.haxx.se/mail/archive-2013-01/0017.html
+ [11] = http://curl.haxx.se/bug/view.cgi?id=1171
+ [12] = https://bugzilla.redhat.com/696783
+ [13] = https://bugzilla.redhat.com/896544
+ [14] = http://curl.haxx.se/mail/lib-2013-01/0295.html
+ [15] = http://curl.haxx.se/bug/view.cgi?id=1186
+ [16] = http://curl.haxx.se/bug/view.cgi?id=1187
+ [17] = http://curl.haxx.se/docs/adv_20130206.html

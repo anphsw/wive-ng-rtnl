@@ -21,7 +21,7 @@
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 69
+# serial 72
 
 
 dnl CURL_INCLUDES_ARPA_INET
@@ -2020,6 +2020,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
   AC_REQUIRE([CURL_INCLUDES_STRING])dnl
   AC_REQUIRE([CURL_INCLUDES_SYS_SOCKET])dnl
   AC_REQUIRE([CURL_INCLUDES_NETDB])dnl
+  AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
   #
   tst_links_getaddrinfo="unknown"
   tst_proto_getaddrinfo="unknown"
@@ -2196,7 +2197,34 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
         tst_tsafe_getaddrinfo="yes"
         ;;
     esac
+    if test "$tst_tsafe_getaddrinfo" = "unknown" &&
+       test "$ac_cv_native_windows" = "yes"; then
+      tst_tsafe_getaddrinfo="yes"
+    fi
     if test "$tst_tsafe_getaddrinfo" = "unknown"; then
+      CURL_CHECK_DEF_CC([h_errno], [
+        $curl_includes_sys_socket
+        $curl_includes_netdb
+        ], [silent])
+      if test "$curl_cv_have_def_h_errno" = "yes"; then
+        tst_h_errno_macro="yes"
+      else
+        tst_h_errno_macro="no"
+      fi
+      AC_COMPILE_IFELSE([
+        AC_LANG_PROGRAM([[
+          $curl_includes_sys_socket
+          $curl_includes_netdb
+        ]],[[
+          h_errno = 2;
+          if(0 != h_errno)
+            return 1;
+        ]])
+      ],[
+        tst_h_errno_modifiable_lvalue="yes"
+      ],[
+        tst_h_errno_modifiable_lvalue="no"
+      ])
       AC_COMPILE_IFELSE([
         AC_LANG_PROGRAM([[
         ]],[[
@@ -2209,21 +2237,17 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
 #endif
         ]])
       ],[
-        tst_tsafe_getaddrinfo="yes"
+        tst_h_errno_sbs_issue_7="yes"
+      ],[
+        tst_h_errno_sbs_issue_7="no"
       ])
-    fi
-    if test "$tst_tsafe_getaddrinfo" = "unknown"; then
-      CURL_CHECK_DEF_CC([h_errno], [
-        $curl_includes_ws2tcpip
-        $curl_includes_sys_socket
-        $curl_includes_netdb
-        ], [silent])
-      if test "$curl_cv_have_def_h_errno" = "no"; then
+      if test "$tst_h_errno_macro" = "no" &&
+         test "$tst_h_errno_modifiable_lvalue" = "no" &&
+         test "$tst_h_errno_sbs_issue_7" = "no"; then
         tst_tsafe_getaddrinfo="no"
-      fi
-    fi
-    if test "$tst_tsafe_getaddrinfo" = "unknown"; then
+      else
       tst_tsafe_getaddrinfo="yes"
+    fi
     fi
     AC_MSG_RESULT([$tst_tsafe_getaddrinfo])
     if test "$tst_tsafe_getaddrinfo" = "yes"; then
@@ -2813,6 +2837,7 @@ dnl HAVE_GETHOSTNAME will be defined.
 AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
   AC_REQUIRE([CURL_INCLUDES_WINSOCK2])dnl
   AC_REQUIRE([CURL_INCLUDES_UNISTD])dnl
+  AC_REQUIRE([CURL_PREPROCESS_CALLCONV])dnl
   #
   tst_links_gethostname="unknown"
   tst_proto_gethostname="unknown"
@@ -2867,6 +2892,35 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
       AC_MSG_RESULT([no])
       tst_compi_gethostname="no"
     ])
+  fi
+  #
+  if test "$tst_compi_gethostname" = "yes"; then
+    AC_MSG_CHECKING([for gethostname arg 2 data type])
+    tst_gethostname_type_arg2="unknown"
+    for tst_arg1 in 'char *' 'unsigned char *' 'void *'; do
+      for tst_arg2 in 'int' 'unsigned int' 'size_t'; do
+        if test "$tst_gethostname_type_arg2" = "unknown"; then
+          AC_COMPILE_IFELSE([
+            AC_LANG_PROGRAM([[
+              $curl_includes_winsock2
+              $curl_includes_unistd
+              $curl_preprocess_callconv
+              extern int FUNCALLCONV gethostname($tst_arg1, $tst_arg2);
+            ]],[[
+              if(0 != gethostname(0, 0))
+                return 1;
+            ]])
+          ],[
+            tst_gethostname_type_arg2="$tst_arg2"
+          ])
+        fi
+      done
+    done
+    AC_MSG_RESULT([$tst_gethostname_type_arg2])
+    if test "$tst_gethostname_type_arg2" != "unknown"; then
+      AC_DEFINE_UNQUOTED(GETHOSTNAME_TYPE_ARG2, $tst_gethostname_type_arg2,
+        [Define to the type of arg 2 for gethostname.])
+    fi
   fi
   #
   if test "$tst_compi_gethostname" = "yes"; then
@@ -6158,8 +6212,8 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
         AC_COMPILE_IFELSE([
           AC_LANG_PROGRAM([[
             $curl_includes_string
-          ]],[[
             char *strerror_r(int errnum, char *workbuf, $arg3 bufsize);
+          ]],[[
             if(0 != strerror_r(0, 0, 0))
               return 1;
           ]])
@@ -6219,8 +6273,8 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
         AC_COMPILE_IFELSE([
           AC_LANG_PROGRAM([[
             $curl_includes_string
-          ]],[[
             int strerror_r(int errnum, char *resultbuf, $arg3 bufsize);
+          ]],[[
             if(0 != strerror_r(0, 0, 0))
               return 1;
           ]])

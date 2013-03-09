@@ -3,7 +3,9 @@
 <keywords>
 POP3
 RETR
+HTTP
 HTTP CONNECT
+HTTP proxy
 </keywords>
 </info>
 #
@@ -56,6 +58,7 @@ pop3://%HOSTIP:%POP3PORT/1319 -p -x %HOSTIP:%PROXYPORT -u user:secret
 ^User-Agent:
 </strip>
 <protocol>
+CAPA
 USER user
 PASS secret
 RETR 1319
