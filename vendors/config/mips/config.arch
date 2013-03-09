@@ -77,7 +77,7 @@ ifdef UCLINUX_BUILD_LIB
 ifdef CONFIG_LIB_DEBUG
 	CFLAGS  :=  $(if $(LOPT),$(LOPT),-O1) -g
 else
-	CFLAGS  :=  $(if $(LOPT),$(LOPT),-Os) -fomit-frame-pointer
+	CFLAGS  :=  $(if $(LOPT),$(LOPT),-Os) -fomit-frame-pointer -fno-stack-protector
 endif
 ifdef CONFIG_LIB_SMALLSIZE
 	# Defeat .eh_frame bloat (~25% smaller binary)
@@ -88,11 +88,11 @@ else
 ifdef CONFIG_RT2880_FLASH_4M
 	# This is ~5% speedup for result bynary before pure -Os
 	# and ~2% bigest unpacked rootfs size
-	CFLAGS += -ffast-math -fforce-addr -fno-stack-protector
+	CFLAGS += -ffast-math -fforce-addr
 else
 	# This is improve performance ~10% before pure -Os
 	# and ~5% bigest unpacked rootfs size
-	CFLAGS += -funit-at-a-time -membedded-data -muninit-const-in-rodata -ffast-math -fforce-addr -fno-stack-protector
+	CFLAGS += -funit-at-a-time -membedded-data -muninit-const-in-rodata -ffast-math -fforce-addr
 endif
 endif
 	CFLAGS  += -pipe
@@ -119,7 +119,7 @@ ifdef UCLINUX_BUILD_USER
 ifdef CONFIG_USER_DEBUG
 	CFLAGS  :=  $(if $(UOPT),$(UOPT),-O1) -g
 else
-	CFLAGS  :=  $(if $(UOPT),$(UOPT),-Os) -fomit-frame-pointer
+	CFLAGS  :=  $(if $(UOPT),$(UOPT),-Os) -fomit-frame-pointer -fno-stack-protector
 endif
 ifdef CONFIG_USER_SMALLSIZE
 	# Defeat .eh_frame bloat (~25% smaller binary)
@@ -130,11 +130,11 @@ else
 ifdef CONFIG_RT2880_FLASH_4M
 	# This is ~5% speedup for result bynary before pure -Os
 	# and ~2% bigest unpacked rootfs size
-	CFLAGS += -ffast-math -fforce-addr -fno-stack-protector
+	CFLAGS += -ffast-math -fforce-addr
 else
 	# This is improve performance ~10% before pure -Os
 	# and ~5% bigest unpacked rootfs size
-	CFLAGS += -funit-at-a-time -membedded-data -muninit-const-in-rodata -ffast-math -fforce-addr -fno-stack-protector
+	CFLAGS += -funit-at-a-time -membedded-data -muninit-const-in-rodata -ffast-math -fforce-addr
 endif
 endif
 	CFLAGS  += -pipe
