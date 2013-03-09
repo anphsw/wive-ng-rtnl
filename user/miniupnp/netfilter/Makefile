@@ -1,6 +1,6 @@
 # $Id: Makefile,v 1.6 2012/04/26 13:50:48 nanard Exp $
-CFLAGS?=-Wall -g -D_GNU_SOURCE -DDEBUG -Wstrict-prototypes -Wdeclaration-after-statement -ansi
-CC = gcc
+CFLAGS ?= -Wall -g -D_GNU_SOURCE -Wstrict-prototypes -Wdeclaration-after-statement -ansi
+CC ?= gcc
 
 #LIBS = -liptc
 LIBS = -lip4tc

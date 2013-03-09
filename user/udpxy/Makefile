@@ -26,9 +26,11 @@ UDPXREC := udpxrec
 NO_UDPXREC := yes
 
 MKDEPOPT := -M
+ifdef DEBUG
 DEBUG_ON := -g
+endif
+
 CFLAGS += --pedantic -W -Wall $(INCLUDES)
-# -Werror
 SYSTEM=$(shell uname 2>/dev/null)
 ifeq ($(SYSTEM), FreeBSD)
 MAKE := gmake
