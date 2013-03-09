@@ -1268,31 +1268,32 @@
 7) kernel: ipv6: fix CoA check in RH2 input handler (mip6_rthdr_input()).<br>
 8) kernel: ipv6: optimize inet6_hash_frag().<br>
 9) kernel: ipv6: Don't purge default router if accept_ra=2.<br>
-10) kernel: hash: update hash_32/64 functions.<br>
-11) kernel: hw_nat: fix udp offload issue in some hardware RT305x chip revisions.<br>
-12) kernel: backport mips optimized spinlocks and futex fixes.<br>
-13) kernel: tcp: fix double-counted receiver RTT when leaving receiver fast path.<br>
-14) kernel: tcp: do_tcp_sendpages() must try to push data out on oom conditions.<br>
-15) kernel: tcp: tcp_prequeue() cleanup and up.<br>
-16) kernel: net: guard tcp_set_keepalive() to tcp sockets.<br>
-17) kernel: inet: Remove unused sk_sndmsg_* from UFO.<br>
-18) kernel: sched: prevent exclusive waiter starvation.<br>
-19) kernel: mm: memmap_init_zone() performance improvement.<br>
-20) kernel: tcp_read_sock: Allow recv_actor() return return negative error value.<br>
-21) kernel: tcp: fix a size_t < 0 comparison in tcp_read_sock.<br>
-22) kernel: tcp: splice: fix an infinite loop in tcp_read_sock().<br>
-23) kernel: tcp: change default tcp hash size.<br>
-24) ipv6: radvd: up to 1.9.2 version with drop libdaemon use (need for save flash free size).<br>
-25) ipv6: use radvdEnabled variable for enable ipv6 (instead IPv6_Enable variable).<br>
-26) ipv6: full work ipv6 over TTK ISP. For 8Mb Flash devices need radvd enable in GUI.<br>
-27) xl2tp: small fixups.<br>
-28) samba(3): decrease noise debug.<br>
-29) defaults: increase vpn cpuilimit to 4000.<br>
-30) defaults: enable wifi_hw_nat per default this is very old work stable.<br>
-31) init.d: always drop ipv4/6 adresses at reinit, not need check radvd enable/disable, chek only ipv6 compiled.<br>
-32) xunpdp: up to 1.03 rev382 version.<br>
-33) usb-modeswitch: update to 1.2.5 version.<br>
-34) usbmodem: move modems pairs to /etc/modems.conf.<br>
+10) kernel: tcp: fix double-counted receiver RTT when leaving receiver fast path.<br>
+11) kernel: tcp: do_tcp_sendpages() must try to push data out on oom conditions.<br>
+12) kernel: tcp: tcp_prequeue() cleanup and up.<br>
+13) kernel: tcp: fix a size_t < 0 comparison in tcp_read_sock.<br>
+14) kernel: tcp: splice: fix an infinite loop in tcp_read_sock().<br>
+15) kernel: tcp: change default tcp hash size.<br>
+16) kernel: udp: Fix bogus UFO packet generation.<br>
+17) kernel: hash: update hash_32/64 functions.<br>
+18) kernel: hw_nat: fix udp offload issue in some hardware RT305x chip revisions.<br>
+19) kernel: backport mips optimized spinlocks and futex fixes.<br>
+20) kernel: net: guard tcp_set_keepalive() to tcp sockets.<br>
+21) kernel: inet: Remove unused sk_sndmsg_* from UFO.<br>
+22) kernel: sched: prevent exclusive waiter starvation.<br>
+23) kernel: mm: memmap_init_zone() performance improvement.<br>
+24) kernel: tcp_read_sock: Allow recv_actor() return return negative error value.<br>
+25) ipv6: radvd: up to 1.9.2 version with drop libdaemon use (need for save flash free size).<br>
+26) ipv6: use radvdEnabled variable for enable ipv6 (instead IPv6_Enable variable).<br>
+27) ipv6: full work ipv6 over TTK ISP. For 8Mb Flash devices need radvd enable in GUI.<br>
+28) xl2tp: small fixups.<br>
+29) samba(3): decrease noise debug.<br>
+30) defaults: increase vpn cpuilimit to 4000.<br>
+31) defaults: enable wifi_hw_nat per default this is very old work stable.<br>
+32) init.d: always drop ipv4/6 adresses at reinit, not need check radvd enable/disable, chek only ipv6 compiled.<br>
+33) xunpdp: up to 1.03 rev382 version.<br>
+34) usb-modeswitch: update to 1.2.5 version.<br>
+35) usbmodem: move modems pairs to /etc/modems.conf.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
