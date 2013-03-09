@@ -1303,6 +1303,7 @@
 42) libcurl: update to 7.29.0 version.<br>
 43) chillispot: fix build with new autoconf tool.<br>
 44) goahead: fix nat loopback logic if src port != dst port.<br>
+45) build_logic: add configure options for enable crazy minimize code size by gcc (save flash=speeddown).<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>

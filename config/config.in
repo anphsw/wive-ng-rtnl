@@ -238,3 +238,11 @@ if [ "$CONFIG_USB_MODESWITCH" = "y" ]; then
 	define_bool CONFIG_LIB_USB y
 fi
 endmenu
+
+##############################################################################
+
+mainmenu_option next_comment
+comment 'Optimization options.'
+bool 'Use -fno-caller-saves for libs (save flash and speeddown ~10%)'		CONFIG_LIB_SMALLSIZE
+bool 'Use -fno-caller-saves for user apps (save flash and speeddown ~10%)'	CONFIG_USER_SMALLSIZE
+endmenu

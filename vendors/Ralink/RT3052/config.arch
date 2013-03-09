@@ -51,9 +51,6 @@ STRIP	= $(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-strip
 ###########################################################################
 OPTS	= -Os -pipe -mips32r2 -march=mips32r2
 
-# save flash space, speed down ~10%
-# OPTS	+= -fno-caller-saves
-
 ############################ WARN/ERROR ###################################
 # base flags for warnings
 CFLAGS	+= -Wall -Wno-trigraphs -Wno-long-long -Wno-format-security
@@ -63,10 +60,6 @@ CFLAGS	+= -Wno-pointer-sign
 
 # disable variable unused warnings in gcc 4.6.0
 #CFLAGS	+= -Wno-unused-but-set-variable
-
-# Defeat .eh_frame bloat (~20% smaller binary)
-CFLAGS += -fno-unwind-tables
-CFLAGS += -fno-asynchronous-unwind-tables
 
 ############################ BASE FLAGS ###################################
 CFLAGS  += $(OPTS) -I$(ROOTDIR)

@@ -74,17 +74,23 @@ include $(ROOTDIR)/vendors/config/common/config.arch
 #
 
 ifdef UCLINUX_BUILD_LIB
-  ifdef CONFIG_LIB_DEBUG
+ifdef CONFIG_LIB_DEBUG
 	CFLAGS  :=  $(if $(LOPT),$(LOPT),-O1) -g
-  else
+else
 	CFLAGS  :=  $(if $(LOPT),$(LOPT),-Os) -fomit-frame-pointer
-  endif
+endif
+ifdef CONFIG_LIB_SMALLSIZE
+	# Defeat .eh_frame bloat (~25% smaller binary)
+	CFLAGS += -fno-caller-saves
+	CFLAGS += -fno-unwind-tables
+	CFLAGS += -fno-asynchronous-unwind-tables
+endif
 	CFLAGS  += -pipe
 	CFLAGS  += $(VENDOR_CFLAGS)
 	CFLAGS  += -fno-builtin
 	CFLAGS  += -DEMBED
 	CFLAGS  += $(CPUFLAGS)
-	CFLAGS  += -nostdinc 
+	CFLAGS  += -nostdinc
 
 	# don't want all the CFLAGS for uClibc/Config
 	ARCH_CFLAGS = $(CFLAGS)
@@ -100,12 +106,17 @@ endif
 
 ifdef UCLINUX_BUILD_USER
 
-  ifdef CONFIG_USER_DEBUG
+ifdef CONFIG_USER_DEBUG
 	CFLAGS  :=  $(if $(UOPT),$(UOPT),-O1) -g
-  else
+else
 	CFLAGS  :=  $(if $(UOPT),$(UOPT),-Os) -fomit-frame-pointer
-  endif
-
+endif
+ifdef CONFIG_USER_SMALLSIZE
+	# Defeat .eh_frame bloat (~25% smaller binary)
+	CFLAGS += -fno-caller-saves
+	CFLAGS += -fno-unwind-tables
+	CFLAGS += -fno-asynchronous-unwind-tables
+endif
 	CFLAGS  += -pipe
 	CFLAGS  += $(VENDOR_CFLAGS)
 	CFLAGS  += -Dlinux -D__linux__ -Dunix -DEMBED
