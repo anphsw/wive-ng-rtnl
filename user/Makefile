@@ -25,36 +25,6 @@ endif
 
 VEND=$(ROOTDIR)/vendors
 
-# Fix some apps for correct
-# ipv6 support enable/disable
-ifndef CONFIG_IPV6
-CFLAGS += -DNO_IPV6
-else
-CFLAGS += -DIPV6=1 -DINET6
-endif
-
-#######################################################
-# Userspace optimization for save mem/flash or speedup
-#######################################################
-
-ifdef CONFIG_RAETH_MEMORY_OPTIMIZATION
-# This is ~8% slowdown for result bynary before pure -Os
-# and ~10% smallest unpacked rootfs size
-CFLAGS += -fno-caller-saves -fno-stack-protector
-else
-ifdef CONFIG_RT2880_FLASH_4M
-# This is ~5% speedup for result bynary before pure -Os
-# and ~2% bigest unpacked rootfs size
-CFLAGS += -ffast-math -fforce-addr -fno-stack-protector
-else
-# This is improve performance ~10% before pure -Os
-# and ~5% bigest unpacked rootfs size
-CFLAGS += -funit-at-a-time -membedded-data -muninit-const-in-rodata -ffast-math -fforce-addr -fno-stack-protector
-endif
-endif
-
-export $(CFLAGS)
-
 #for all cleanap
 SUBDIRS_APP =  goahead iptables miniupnp  rt2880_app wpa_supplicant ethtool
 SUBDIRS_APP += igmpproxy lldt ppp strace wsc_upnp busybox inadyn pppoe-relay udpxy xl2tpd

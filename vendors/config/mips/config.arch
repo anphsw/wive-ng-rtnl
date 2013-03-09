@@ -84,6 +84,16 @@ ifdef CONFIG_LIB_SMALLSIZE
 	CFLAGS += -fno-caller-saves
 	CFLAGS += -fno-unwind-tables
 	CFLAGS += -fno-asynchronous-unwind-tables
+else
+ifdef CONFIG_RT2880_FLASH_4M
+	# This is ~5% speedup for result bynary before pure -Os
+	# and ~2% bigest unpacked rootfs size
+	CFLAGS += -ffast-math -fforce-addr -fno-stack-protector
+else
+	# This is improve performance ~10% before pure -Os
+	# and ~5% bigest unpacked rootfs size
+	CFLAGS += -funit-at-a-time -membedded-data -muninit-const-in-rodata -ffast-math -fforce-addr -fno-stack-protector
+endif
 endif
 	CFLAGS  += -pipe
 	CFLAGS  += $(VENDOR_CFLAGS)
@@ -116,6 +126,16 @@ ifdef CONFIG_USER_SMALLSIZE
 	CFLAGS += -fno-caller-saves
 	CFLAGS += -fno-unwind-tables
 	CFLAGS += -fno-asynchronous-unwind-tables
+else
+ifdef CONFIG_RT2880_FLASH_4M
+	# This is ~5% speedup for result bynary before pure -Os
+	# and ~2% bigest unpacked rootfs size
+	CFLAGS += -ffast-math -fforce-addr -fno-stack-protector
+else
+	# This is improve performance ~10% before pure -Os
+	# and ~5% bigest unpacked rootfs size
+	CFLAGS += -funit-at-a-time -membedded-data -muninit-const-in-rodata -ffast-math -fforce-addr -fno-stack-protector
+endif
 endif
 	CFLAGS  += -pipe
 	CFLAGS  += $(VENDOR_CFLAGS)
@@ -177,6 +197,14 @@ endif
 #
 # fall through,  do other config options perhaps
 #
+
+# Fix some apps for correct
+# ipv6 support enable/disable
+ifndef CONFIG_IPV6
+CFLAGS += -DNO_IPV6
+else
+CFLAGS += -DIPV6=1 -DINET6
+endif
 
 ifeq ($(UCLINUX_BUILD_SET),1)
 	EXTRA_CFLAGS := -Dlinux $(CPUFLAGS)
