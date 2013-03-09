@@ -2005,7 +2005,7 @@ job_done:
 static void net_rx_action(struct softirq_action *h)
 {
 	struct softnet_data *queue = &__get_cpu_var(softnet_data);
-	unsigned long start_time = jiffies;
+	unsigned long time_limit = jiffies + 2;
 	int budget = netdev_budget;
 	void *have __maybe_unused;
 
@@ -2014,7 +2014,11 @@ static void net_rx_action(struct softirq_action *h)
 	while (!list_empty(&queue->poll_list)) {
 		struct net_device *dev;
 
-		if (budget <= 0 || jiffies - start_time > 1)
+		/* If softirq window is exhuasted then punt.
+		 * Allow this to run for 2 jiffies since which will allow
+		 * an average latency of 1.5/HZ.
+		 */
+		if (unlikely(budget <= 0 || time_after_eq(jiffies, time_limit)))
 			goto softnet_break;
 
 		local_irq_enable();
