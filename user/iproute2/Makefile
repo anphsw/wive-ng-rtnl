@@ -1,15 +1,15 @@
-#DEFINES= -DRESOLVE_HOSTNAMES
-
-#options if you have a bind>=4.9.4 libresolv (or, maybe, glibc)
-#LDLIBS=-lresolv
+LDLIBS=
 ADDLIB=
 
-#DEFINES+= -DDECNET
+#DEFINES= -DRESOLVE_HOSTNAMES
+#LDLIBS+=-lresolv
 
 #options for decnet
+#DEFINES+= -DDECNET
 #ADDLIB+=dnet_ntop.o dnet_pton.o
 
 #options for ipx
+#DEFINES+= -DIPX
 #ADDLIB+=ipx_ntop.o ipx_pton.o
 
 HOSTCC = gcc
