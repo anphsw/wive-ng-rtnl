@@ -1302,6 +1302,7 @@
 41) libupnp: update to 1.6.18 version.<br>
 42) libcurl: update to 7.29.0 version.<br>
 43) chillispot: fix build with new autoconf tool.<br>
+44) goahead: fix nat loopback logic if src port != dst port.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>

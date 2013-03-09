@@ -317,7 +317,19 @@ static void makePortForwardRule(char *buf, int len, char *wan_name, char *ip_add
 			pos += rc;
 			len -= rc;
 		}
-		rc = snprintf(pos, len, "-j DNAT --to-destination %s  > /dev/null 2>&1\n", ip_address);
+		rc = snprintf(pos, len, "-j DNAT --to-destination %s", ip_address);
+		pos += rc;
+		len -= rc;
+		// write dst port
+		if (rprf_int != 0)
+		{
+			rc = (rprt_int != 0) ?
+				snprintf(pos, len, ":%d-%d ", rprf_int, rprt_int) :
+				snprintf(pos, len, ":%d ", rprf_int);
+			pos += rc;
+			len -= rc;
+		}
+		rc = snprintf(pos, len, "\n", ip_address);
 		pos += rc;
 		len -= rc;
 
@@ -337,13 +349,22 @@ static void makePortForwardRule(char *buf, int len, char *wan_name, char *ip_add
 		len -= rc;
 
 		// write dst port
-		if (prf_int != 0)
+		if (rprf_int != 0)
 		{
 			rc = (prt_int != 0) ?
-			snprintf(pos, len, "--dport %d:%d ", prf_int, prt_int) :
-			snprintf(pos, len, "--dport %d ", prf_int);
+			snprintf(pos, len, "--dport %d:%d ", rprf_int, rprt_int) :
+			snprintf(pos, len, "--dport %d ", rprf_int);
 			pos += rc;
 			len -= rc;
+		} else {
+			if (prf_int != 0)
+			{
+				rc = (prt_int != 0) ?
+				snprintf(pos, len, "--dport %d:%d ", prf_int, prt_int) :
+				snprintf(pos, len, "--dport %d ", prf_int);
+				pos += rc;
+				len -= rc;
+			}
 		}
 		rc = snprintf(pos, len, "-j MASQUERADE > /dev/null 2>&1\n");
 		pos += rc;
@@ -429,9 +450,23 @@ static void makePortForwardRuleVPN(char *buf, int len, char *wan_name, char *ip_
 			pos += rc;
 			len -= rc;
 		}
-		rc = snprintf(pos, len, "-j DNAT --to-destination %s  > /dev/null 2>&1\n", ip_address);
+		rc = snprintf(pos, len, "-j DNAT --to-destination %s", ip_address);
 		pos += rc;
 		len -= rc;
+		// write dst port
+		if (rprf_int != 0)
+		{
+			rc = (rprt_int != 0) ?
+				snprintf(pos, len, ":%d-%d ", rprf_int, rprt_int) :
+				snprintf(pos, len, ":%d ", rprf_int);
+			pos += rc;
+			len -= rc;
+		}
+		rc = snprintf(pos, len, "\n", ip_address);
+		pos += rc;
+		len -= rc;
+
+
 
 		//MASQ
 		rc = snprintf(pos, len, "iptables -t nat -$1 %s -s %s/%s -d %s ", PORT_FORWARD_POST_CHAIN_VPN, lan_ip, lan_nm, ip_address);
@@ -449,13 +484,22 @@ static void makePortForwardRuleVPN(char *buf, int len, char *wan_name, char *ip_
 		len -= rc;
 
 		// write dst port
-		if (prf_int != 0)
+		if (rprf_int != 0)
 		{
 			rc = (prt_int != 0) ?
-			snprintf(pos, len, "--dport %d:%d ", prf_int, prt_int) :
-			snprintf(pos, len, "--dport %d ", prf_int);
+			snprintf(pos, len, "--dport %d:%d ", rprf_int, rprt_int) :
+			snprintf(pos, len, "--dport %d ", rprf_int);
 			pos += rc;
 			len -= rc;
+		} else {
+			if (prf_int != 0)
+			{
+				rc = (prt_int != 0) ?
+				snprintf(pos, len, "--dport %d:%d ", prf_int, prt_int) :
+				snprintf(pos, len, "--dport %d ", prf_int);
+				pos += rc;
+				len -= rc;
+			}
 		}
 		rc = snprintf(pos, len, "-j MASQUERADE > /dev/null 2>&1\n");
 		pos += rc;
