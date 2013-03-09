@@ -14,10 +14,7 @@ UCLINUX_BUILD_USER=1
 -include $(ARCH_CONFIG)
 -include $(LINUX_CONFIG)
 -include $(CONFIG_CONFIG)
-
-ifdef CONFIG_RALINK_RT3052
 -include ../vendors/Ralink/RT3052/config.arch
-endif
 
 ifndef ROOTDIR
 ROOTDIR=..
