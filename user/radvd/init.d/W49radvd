@@ -20,8 +20,6 @@ LOG="logger -t radvd"
 
 start() {
     radvdEnabled=`nvram_get 2860 radvdEnabled`
-    # use old style tunnel mode
-    use_sit=1
     if [ "$radvdEnabled" = "1" ]; then
 	if [ "$use_sit" = "1" ]; then
 	    $LOG "Flush addres and route sit0 aninterface"
@@ -56,17 +54,14 @@ start() {
 	ip6tables -P INPUT   DROP > /dev/null 2>&1
 	ip6tables -P OUTPUT ACCEPT > /dev/null 2>&1
 
-	ip6tables -t mangle -A FORWARD -p tcp ! -o $lan_if --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
+	# wan accept and mss fix rules
         ip6tables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+	ip6tables -A FORWARD -t mangle -p tcp ! -o $lan_if --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
+        ip6tables -A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT
 
 	# temp rules need enchange in future
 	ip6tables -A INPUT -i $lan_if -j ACCEPT
 	ip6tables -A FORWARD -i $lan_if -j ACCEPT
-	if [ "$use_sit" = "1" ]; then
-	    ip6tables -A FORWARD -i sit0 -j ACCEPT
-	else
-	    ip6tables -A FORWARD -i tun6to4 -j ACCEPT
-	fi
 
 	$LOG "Tunel ipv6 in ipv4 configure and up..."
 	if [ "$IPv6_6RD_Enable" = "1" ]; then
@@ -78,17 +73,17 @@ start() {
 	ipv6subnet="2000"
 	if [ "$wan_ipaddr" != "" ]; then
 	    ipv6prefix=`echo $wan_ipaddr | awk -F. '{ printf "2002:%02x%02x:%02x%02x", $1, $2, $3, $4 }'`
-	    if [ "$use_sit" = "1" ]; then
-		$LOG "Up sit0 interface"
-		ip -6 link set sit0 up
-		ip -6 addr add ${ipv6prefix}::1/16 dev sit0
-		ip -6 route replace ${ipv6subnet}::/3 via ::${relay6to4} dev sit0 metric 1
-	    else
+	    if [ "$IPv6_6RD_Enable" = "1" ]; then
 		$LOG "Up tun6to4 interface"
 		ip tunnel add tun6to4 mode sit ttl 64 remote any local $wan_ipaddr
 		ip link set dev tun6to4 up
 		ip -6 addr add ${ipv6prefix}::1/16 dev tun6to4
 		ip -6 route replace ${ipv6subnet}::/3 via ::${relay6to4} dev tun6to4 metric 1
+	    else
+		$LOG "Up sit0 interface"
+		ip -6 link set sit0 up
+		ip -6 addr add ${ipv6prefix}::1/16 dev sit0
+		ip -6 route replace ${ipv6subnet}::/3 via ::${relay6to4} dev sit0 metric 1
 	    fi
 	else
 	    $LOG "No route to ip4v6 router..."
