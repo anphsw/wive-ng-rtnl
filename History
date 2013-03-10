@@ -1296,7 +1296,7 @@
 35) kernel: lib/string.c: fix strim() semantics for strings that have only blanks.<br>
 36) ipv6: radvd: up to 1.9.2 version with drop libdaemon use (need for save flash free size).<br>
 37) ipv6: use radvdEnabled variable for enable ipv6 (instead IPv6_Enable variable).<br>
-38) ipv6: full work ipv6 over TTK ISP. For 8Mb Flash devices need radvd enable in GUI.<br>
+38) ipv6: full work ipv6 over ipv4 (6to4) autoconfigure (as TTK ISP). For 8Mb Flash devices need radvd enable in GUI.<br>
 39) xl2tp: small fixups.<br>
 40) samba(3): decrease noise debug.<br>
 41) defaults: increase vpn cpuilimit to 4000.<br>
