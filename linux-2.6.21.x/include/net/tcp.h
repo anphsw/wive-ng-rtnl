@@ -759,7 +759,8 @@ static inline void tcp_enable_fack(struct tcp_sock *tp)
  */
 static inline unsigned int tcp_packets_in_flight(const struct tcp_sock *tp)
 {
-	return (tp->packets_out - tp->left_out + tp->retrans_out);
+	return tp->packets_out - (tp->sacked_out + tp->lost_out) +
+		tp->retrans_out;
 }
 
 #define TCP_INFINITE_SSTHRESH	0x7fffffff
@@ -789,7 +790,6 @@ static inline void tcp_sync_left_out(struct tcp_sock *tp)
 	if (tp->rx_opt.sack_ok &&
 	    (tp->sacked_out >= tp->packets_out - tp->lost_out))
 		tp->sacked_out = tp->packets_out - tp->lost_out;
-	tp->left_out = tp->sacked_out + tp->lost_out;
 }
 
 /*

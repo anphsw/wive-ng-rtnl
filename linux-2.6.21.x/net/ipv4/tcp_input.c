@@ -1260,8 +1260,6 @@ tcp_sacktag_write_queue(struct sock *sk, struct sk_buff *ack_skb, u32 prior_snd_
 		}
 	}
 
-	tp->left_out = tp->sacked_out + tp->lost_out;
-
 	if ((reord < tp->fackets_out) && icsk->icsk_ca_state != TCP_CA_Loss &&
 	    (!tp->frto_highmark || after(tp->snd_una, tp->frto_highmark)))
 		tcp_update_reordering(sk, ((tp->fackets_out + 1) - reord), 0);
@@ -1434,7 +1432,6 @@ static void tcp_enter_frto_loss(struct sock *sk, int allowed_segments, int flag)
 
 void tcp_clear_retrans(struct tcp_sock *tp)
 {
-	tp->left_out = 0;
 	tp->retrans_out = 0;
 
 	tp->fackets_out = 0;
@@ -1719,7 +1716,6 @@ static void tcp_remove_reno_sacks(struct sock *sk, int acked)
 static inline void tcp_reset_reno_sack(struct tcp_sock *tp)
 {
 	tp->sacked_out = 0;
-	tp->left_out = tp->lost_out;
 }
 
 /* Mark head of queue up as lost. */
@@ -1894,7 +1890,7 @@ static void DBGUNDO(struct sock *sk, const char *msg)
 	printk(KERN_DEBUG "Undo %s %u.%u.%u.%u/%u c%u l%u ss%u/%u p%u\n",
 	       msg,
 	       NIPQUAD(inet->daddr), ntohs(inet->dport),
-	       tp->snd_cwnd, tp->left_out,
+	       tp->snd_cwnd, tp->sacked_out + tp->lost_out,
 	       tp->snd_ssthresh, tp->prior_ssthresh,
 	       tp->packets_out);
 }
@@ -2025,7 +2021,6 @@ static int tcp_try_undo_loss(struct sock *sk)
 
 		DBGUNDO(sk, "partial loss");
 		tp->lost_out = 0;
-		tp->left_out = tp->sacked_out;
 		tcp_undo_cwr(sk, 1);
 		NET_INC_STATS_BH(LINUX_MIB_TCPLOSSUNDO);
 		inet_csk(sk)->icsk_retransmits = 0;
@@ -2062,8 +2057,6 @@ static void tcp_try_keep_open(struct sock *sk)
 static void tcp_try_to_open(struct sock *sk, int flag)
 {
 	struct tcp_sock *tp = tcp_sk(sk);
-
-	tp->left_out = tp->sacked_out;
 
 	if (!tp->frto_counter && tp->retrans_out == 0)
 		tp->retrans_stamp = 0;
