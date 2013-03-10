@@ -7,7 +7,7 @@
  * This exemption does not extend to derived works not owned by
  * the Transmission project.
  *
- * $Id: makemeta.c 12581 2011-07-24 20:18:33Z jordan $
+ * $Id: makemeta.c 13631 2012-12-07 01:53:31Z jordan $
  */
 
 #include <assert.h>

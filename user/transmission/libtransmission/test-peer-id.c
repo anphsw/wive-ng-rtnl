@@ -7,34 +7,12 @@
 #include "version.h"
 
 #undef VERBOSE
+#include "libtransmission-test.h"
 
-#ifdef VERBOSE
-  #define check( A ) \
-    { \
-        ++test; \
-        if( A ){ \
-            fprintf( stderr, "PASS test #%d (%s, %d)\n", test, __FILE__, __LINE__ ); \
-        } else { \
-            fprintf( stderr, "FAIL test #%d (%s, %d)\n", test, __FILE__, __LINE__ ); \
-            return test; \
-        } \
-    }
-#else
-  #define check( A ) \
-    { \
-        ++test; \
-        if( !( A ) ){ \
-            fprintf( stderr, "FAIL test #%d (%s, %d)\n", test, __FILE__, __LINE__ ); \
-            return test; \
-        } \
-    }
-#endif
-
-int
-main( void )
+static int
+testPeerId (void)
 {
     int i;
-    int test = 0;
     uint8_t peer_id[PEER_ID_LEN+1];
 
     for( i = 0; i < 100000; ++i )
@@ -59,3 +37,4 @@ main( void )
     return 0;
 }
 
+MAIN_SINGLE_TEST (testPeerId)

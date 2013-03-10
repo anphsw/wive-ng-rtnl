@@ -7,7 +7,7 @@
  * This exemption does not extend to derived works not owned by
  * the Transmission project.
  *
- * $Id: inout.c 12582 2011-07-25 17:48:14Z jordan $
+ * $Id: inout.c 13625 2012-12-05 17:29:46Z jordan $
  */
 
 #include <assert.h>
@@ -30,7 +30,10 @@
 *****  Low-level IO functions
 ****/
 
-enum { TR_IO_READ, TR_IO_PREFETCH,
+enum
+{
+  TR_IO_READ,
+  TR_IO_PREFETCH,
        /* Any operations that require write access must follow TR_IO_WRITE. */
        TR_IO_WRITE
 };
@@ -117,23 +120,30 @@ readOrWriteBytes( tr_session       * session,
 
     if( !err )
     {
-        if( ioMode == TR_IO_READ ) {
+      if (ioMode == TR_IO_READ)
+        {
             const int rc = tr_pread( fd, buf, buflen, fileOffset );
-            if( rc < 0 ) {
+          if (rc < 0)
+            {
                 err = errno;
-                tr_torerr( tor, "read failed for \"%s\": %s",
-                           file->name, tr_strerror( err ) );
+              tr_torerr (tor, "read failed for \"%s\": %s", file->name, tr_strerror (err));
             }
-        } else if( ioMode == TR_IO_WRITE ) {
+        }
+      else if (ioMode == TR_IO_WRITE)
+        {
             const int rc = tr_pwrite( fd, buf, buflen, fileOffset );
-            if( rc < 0 ) {
+          if (rc < 0)
+            {
                 err = errno;
-                tr_torerr( tor, "write failed for \"%s\": %s",
-                           file->name, tr_strerror( err ) );
+              tr_torerr (tor, "write failed for \"%s\": %s", file->name, tr_strerror (err));
             }
-        } else if( ioMode == TR_IO_PREFETCH ) {
+        }
+      else if (ioMode == TR_IO_PREFETCH)
+        {
             tr_prefetch( fd, fileOffset, buflen );
-        } else {
+        }
+      else
+        {
             abort();
         }
     }
@@ -147,8 +157,12 @@ compareOffsetToFile( const void * a, const void * b )
     const uint64_t  offset = *(const uint64_t*)a;
     const tr_file * file = b;
 
-    if( offset < file->offset ) return -1;
-    if( offset >= file->offset + file->length ) return 1;
+  if (offset < file->offset)
+    return -1;
+
+  if (offset >= file->offset + file->length)
+    return 1;
+
     return 0;
 }
 
@@ -207,7 +221,7 @@ readOrWritePiece( tr_torrent       * tor,
         err = readOrWriteBytes( tor->session, tor, ioMode, fileIndex, fileOffset, buf, bytesThisPass );
         buf += bytesThisPass;
         buflen -= bytesThisPass;
-        ++fileIndex;
+      fileIndex++;
         fileOffset = 0;
 
         if( ( err != 0 ) && (ioMode == TR_IO_WRITE ) && ( tor->error != TR_STAT_LOCAL_ERROR ) )
@@ -237,8 +251,7 @@ tr_ioPrefetch( tr_torrent       * tor,
                uint32_t           begin,
                uint32_t           len)
 {
-    return readOrWritePiece( tor, TR_IO_PREFETCH, pieceIndex, begin,
-                             NULL, len );
+  return readOrWritePiece (tor, TR_IO_PREFETCH, pieceIndex, begin, NULL, len);
 }
 
 int
@@ -248,9 +261,7 @@ tr_ioWrite( tr_torrent       * tor,
             uint32_t           len,
             const uint8_t    * buf )
 {
-    return readOrWritePiece( tor, TR_IO_WRITE, pieceIndex, begin,
-                             (uint8_t*)buf,
-                             len );
+  return readOrWritePiece (tor, TR_IO_WRITE, pieceIndex, begin, (uint8_t*)buf, len);
 }
 
 /****

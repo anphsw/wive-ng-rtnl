@@ -7,7 +7,7 @@
  * This exemption does not extend to derived works not owned by
  * the Transmission project.
  *
- * $Id: torrent.c 13362 2012-07-01 03:05:36Z jordan $
+ * $Id: torrent.c 13769 2013-01-05 17:46:12Z jordan $
  */
 
 #include <signal.h> /* signal() */
@@ -60,10 +60,12 @@
 ***/
 
 #define tr_deeplog_tor( tor, ... ) \
-    do { \
+  do \
+    { \
         if( tr_deepLoggingIsActive( ) ) \
             tr_deepLog( __FILE__, __LINE__, tr_torrentName( tor ), __VA_ARGS__ ); \
-    } while( 0 )
+    } \
+  while (0)
 
 /***
 ****
@@ -438,7 +440,7 @@ tr_torrentCheckSeedLimit( tr_torrent * tor )
 {
     assert( tr_isTorrent( tor ) );
 
-    if( !tor->isRunning || !tr_torrentIsSeed( tor ) )
+    if (!tor->isRunning || tor->isStopping || !tr_torrentIsSeed (tor))
         return;
 
     /* if we're seeding and reach our seed ratio limit, stop the torrent */
@@ -549,10 +551,18 @@ onTrackerResponse( tr_torrent * tor, const tr_tracker_event * event, void * unus
 static tr_piece_index_t
 getBytePiece( const tr_info * info, uint64_t byteOffset )
 {
+    tr_piece_index_t piece;
+
     assert( info );
     assert( info->pieceSize != 0 );
 
-    return byteOffset / info->pieceSize;
+    piece = byteOffset / info->pieceSize;
+
+    /* handle 0-byte files at the end of a torrent */
+    if (byteOffset == info->totalSize)
+      piece = info->pieceCount - 1;
+
+    return piece;
 }
 
 static void
@@ -1145,16 +1155,23 @@ tr_torrentIsStalled( const tr_torrent * tor )
 static double
 getVerifyProgress( const tr_torrent * tor )
 {
-    tr_piece_index_t i, n;
-    tr_piece_index_t checked = 0;
+    double d = 0;
 
     assert( tr_isTorrent( tor ) );
+
+    if (tr_torrentHasMetadata (tor))
+    {
+        tr_piece_index_t i, n;
+        tr_piece_index_t checked = 0;
 
     for( i=0, n=tor->info.pieceCount; i!=n; ++i )
         if( tor->info.pieces[i].timeChecked )
             ++checked;
 
-    return checked / (double)tor->info.pieceCount;
+        d = checked / (double)tor->info.pieceCount;
+    }
+
+    return d;
 }
 
 const tr_stat *
@@ -1241,7 +1258,7 @@ tr_torrentStat( tr_torrent * tor )
                 tor->etaDLSpeedCalculatedAt = now;
             }
 
-            if( s->leftUntilDone > s->desiredAvailable )
+            if ((s->leftUntilDone > s->desiredAvailable) && (tor->info.webseedCount < 1)) 
                 s->eta = TR_ETA_NOT_AVAIL;
             else if( tor->etaDLSpeed_KBps < 1 )
                 s->eta = TR_ETA_UNKNOWN;
@@ -1713,6 +1730,7 @@ torrentRecheckDoneCB( tr_torrent * tor )
 static void
 verifyTorrent( void * vtor )
 {
+    bool startAfter;
     tr_torrent * tor = vtor;
 
     tr_sessionLock( tor->session );
@@ -1720,13 +1738,12 @@ verifyTorrent( void * vtor )
     /* if the torrent's already being verified, stop it */
     tr_verifyRemove( tor );
 
-    /* if the torrent's running, stop it & set the restart-after-verify flag */
-    if( tor->startAfterVerify || tor->isRunning ) {
-        /* don't clobber isStopping */
-        const bool startAfter = tor->isStopping ? false : true;
+    startAfter = (tor->isRunning || tor->startAfterVerify) && !tor->isStopping;
+
+    if (tor->isRunning)
         tr_torrentStop( tor );
+
         tor->startAfterVerify = startAfter;
-    }
 
     if( setLocalErrorIfFilesDisappeared( tor ) )
         tor->startAfterVerify = false;
@@ -1999,7 +2016,8 @@ torrentCallScript( const tr_torrent * tor, const char * script )
         tr_torinf( tor, "Calling script \"%s\"", script );
 
 #ifdef WIN32
-        _spawnvpe( _P_NOWAIT, script, (const char*)cmd, env );
+        if (_spawnvpe (_P_NOWAIT, script, (const char*)cmd, env) == -1)
+          tr_torerr (tor, "error executing script \"%s\": %s", cmd[0], tr_strerror (errno));
 #else
         signal( SIGCHLD, onSigCHLD );
 
@@ -2007,7 +2025,10 @@ torrentCallScript( const tr_torrent * tor, const char * script )
         {
             for (i=0; env[i]; ++i)
                 putenv(env[i]);
-            execvp( script, cmd );
+
+            if (execvp (script, cmd) == -1)
+              tr_torerr (tor, "error executing script \"%s\": %s", cmd[0], tr_strerror (errno));
+
             _exit( 0 );
         }
 #endif
@@ -2044,6 +2065,8 @@ tr_torrentRecheckCompleteness( tr_torrent * tor )
         tor->completeness = completeness;
         tr_fdTorrentClose( tor->session, tor->uniqueId );
 
+        fireCompletenessChange (tor, completeness, wasRunning);
+
         if( tr_torrentIsSeed( tor ) )
         {
             if( recentChange )
@@ -2067,8 +2090,6 @@ tr_torrentRecheckCompleteness( tr_torrent * tor )
             if( tr_sessionIsTorrentDoneScriptEnabled( tor->session ) )
                 torrentCallScript( tor, tr_sessionGetTorrentDoneScript( tor->session ) );
         }
-
-        fireCompletenessChange( tor, completeness, wasRunning );
 
         tr_torrentSetDirty( tor );
     }

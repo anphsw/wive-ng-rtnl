@@ -7,7 +7,7 @@
  * This exemption does not extend to derived works not owned by
  * the Transmission project.
  *
- * $Id: natpmp.c 13263 2012-04-07 00:12:57Z jordan $
+ * $Id: natpmp.c 13631 2012-12-07 01:53:31Z jordan $
  */
 
 #include <errno.h>

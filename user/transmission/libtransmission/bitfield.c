@@ -7,7 +7,7 @@
  * This exemption does not extend to derived works not owned by
  * the Transmission project.
  *
- * $Id: bitfield.c 12932 2011-09-28 16:07:35Z jordan $
+ * $Id: bitfield.c 13637 2012-12-09 19:08:06Z jordan $
  */
 
 #include <assert.h>
@@ -47,10 +47,10 @@ static const int8_t trueBitCount[256] =
 static size_t
 countArray( const tr_bitfield * b )
 {
-    size_t i;
     size_t ret = 0;
+  ssize_t i = b->alloc_count;
 
-    for( i=0; i<b->alloc_count; ++i )
+  while (--i >= 0)
         ret += trueBitCount[b->bits[i]];
 
     return ret;
@@ -65,6 +65,7 @@ countRange( const tr_bitfield * b, size_t begin, size_t end )
 
     if( !b->bit_count )
         return 0;
+
     if( first_byte >= b->alloc_count )
         return 0;
 
@@ -89,6 +90,7 @@ countRange( const tr_bitfield * b, size_t begin, size_t end )
     {
         size_t i;
         uint8_t val;
+      const size_t walk_end = MIN (b->alloc_count, last_byte);
 
         /* first byte */
         i = begin - (first_byte * 8);
@@ -98,11 +100,12 @@ countRange( const tr_bitfield * b, size_t begin, size_t end )
         ret += trueBitCount[val];
 
         /* middle bytes */
-        for( i=first_byte+1; i<b->alloc_count && i<last_byte; ++i )
+      for (i=first_byte+1; i<walk_end; ++i)
             ret += trueBitCount[b->bits[i]];
 
         /* last byte */
-        if( last_byte < b->alloc_count ) {
+      if (last_byte < b->alloc_count)
+        {
             i = (last_byte+1)*8 - end;
             val = b->bits[last_byte];
             val >>= i;
@@ -137,6 +140,7 @@ tr_bitfieldIsValid( const tr_bitfield * b UNUSED )
     assert( b != NULL );
     assert( ( b->alloc_count == 0 ) == ( b->bits == 0 ) );
     assert( !b->bits || ( b->true_count == countArray ( b ) ) );
+
     return true;
 }
 
@@ -144,6 +148,7 @@ size_t
 tr_bitfieldCountTrueBits( const tr_bitfield * b )
 {
     tr_bitfieldIsValid( b );
+
     return b->true_count;
 }
 
@@ -158,7 +163,9 @@ set_all_true( uint8_t * array, size_t bit_count )
 {
     const uint8_t val = 0xFF;
     const size_t n = get_bytes_needed( bit_count );
+
     memset( array, val, n-1 );
+
     array[n-1] = val << (n*8 - bit_count);
 }
 
@@ -170,10 +177,13 @@ tr_bitfieldGetRaw( const tr_bitfield * b, size_t * byte_count )
 
     assert( b->bit_count > 0 );
 
-    if( b->alloc_count ) {
+  if (b->alloc_count)
+    {
         assert( b->alloc_count <= n );
         memcpy( bits, b->bits, b->alloc_count );
-    } else if( tr_bitfieldHasAll( b ) ) {
+    }
+  else if (tr_bitfieldHasAll (b))
+    {
         set_all_true( bits, b->bit_count );
     }
 
@@ -303,7 +313,8 @@ tr_bitfieldSetRaw( tr_bitfield * b, const void * bits, size_t byte_count, bool b
     b->bits = tr_memdup( bits, byte_count );
     b->alloc_count = byte_count;
 
-    if( bounded ) {
+  if (bounded)
+    {
         /* ensure the excess bits are set to '0' */
         const int excess_bit_count = byte_count*8 - b->bit_count;
         assert( excess_bit_count >= 0 );

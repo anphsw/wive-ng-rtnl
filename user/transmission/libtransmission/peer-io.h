@@ -7,7 +7,7 @@
  * This exemption does not extend to derived works not owned by
  * the Transmission project.
  *
- * $Id: peer-io.h 12365 2011-04-17 05:22:50Z jordan $
+ * $Id: peer-io.h 13630 2012-12-06 15:04:52Z jordan $
  */
 
 #ifndef __TRANSMISSION__
@@ -195,7 +195,7 @@ static inline bool tr_peerIoSupportsDHT( const tr_peerIo * io )
 
 static inline bool tr_peerIoSupportsUTP( const tr_peerIo * io )
 {
-    return io->dhtSupported;
+    return io->utpSupported;
 }
 
 /**

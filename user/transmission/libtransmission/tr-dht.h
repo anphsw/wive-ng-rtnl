@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  *
- * $Id: tr-dht.h 12204 2011-03-22 15:19:54Z jordan $
+ * $Id: tr-dht.h 13625 2012-12-05 17:29:46Z jordan $
  *
  */
 

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: main.c 13237 2012-02-24 19:52:50Z jordan $
+ * $Id: main.c 13958 2013-02-04 18:42:52Z jordan $
  *
  * Copyright (c) Transmission authors and contributors
  *
@@ -55,10 +55,11 @@
 #include "tr-prefs.h"
 #include "tr-window.h"
 #include "util.h"
-#include "ui.h"
 
 #define MY_CONFIG_NAME "transmission"
 #define MY_READABLE_NAME "transmission-gtk"
+
+#define TR_RESOURCE_PATH "/com/transmissionbt/transmission/"
 
 #define SHOW_LICENSE
 static const char * LICENSE =
@@ -72,6 +73,7 @@ struct cbdata
     char                      * config_dir;
     gboolean                    start_paused;
     gboolean                    is_iconified;
+  gboolean is_closing;
 
     guint                       activation_count;
     guint                       timer;
@@ -230,9 +232,11 @@ count_updatable_foreach( GtkTreeModel * model, GtkTreePath * path UNUSED,
 static gboolean
 refresh_actions( gpointer gdata )
 {
+  struct cbdata * data = gdata;
+  if (!data->is_closing)
+    {
     int canUpdate;
     struct counts_data sel_counts;
-    struct cbdata * data = gdata;
     const size_t total = gtr_core_get_torrent_count( data->core );
     const size_t active = gtr_core_get_active_torrent_count( data->core );
     const int torrent_count = gtk_tree_model_iter_n_children( gtr_core_model( data->core ), NULL );
@@ -264,9 +268,10 @@ refresh_actions( gpointer gdata )
     canUpdate = 0;
     gtk_tree_selection_selected_foreach( data->sel, count_updatable_foreach, &canUpdate );
     gtr_action_set_sensitive( "torrent-reannounce", canUpdate != 0 );
+    }
 
     data->refresh_actions_tag = 0;
-    return FALSE;
+  return G_SOURCE_REMOVE;
 }
 
 static void
@@ -274,7 +279,7 @@ refresh_actions_soon( gpointer gdata )
 {
     struct cbdata * data = gdata;
 
-    if( data->refresh_actions_tag == 0 )
+  if (!data->is_closing && !data->refresh_actions_tag)
         data->refresh_actions_tag = gdk_threads_add_idle( refresh_actions, data );
 }
 
@@ -414,8 +419,11 @@ on_rpc_changed( tr_session            * session,
                 bool changed;
                 tr_benc * oldval = tr_bencDictFind( oldvals, key );
                 if( !oldval )
+              {
                     changed = true;
-                else {
+              }
+            else
+              {
                     char * a = tr_bencToStr( oldval, TR_FMT_BENC, NULL );
                     char * b = tr_bencToStr( newval, TR_FMT_BENC, NULL );
                     changed = strcmp( a, b ) != 0;
@@ -440,6 +448,7 @@ on_rpc_changed( tr_session            * session,
         case TR_RPC_TORRENT_MOVED:
         case TR_RPC_TORRENT_STARTED:
         case TR_RPC_TORRENT_STOPPED:
+      case TR_RPC_SESSION_QUEUE_POSITIONS_CHANGED:
             /* nothing interesting to do here */
             break;
     }
@@ -475,11 +484,12 @@ signal_handler( int sig )
 *****
 ****/
 
-static void app_setup( TrWindow * wind, struct cbdata  * cbdata );
+static void app_setup (GtkWindow * wind, struct cbdata  * cbdata);
 
 static void
 on_startup( GApplication * application, gpointer user_data )
 {
+  GError * error;
     const char * str;
     GtkWindow * win;
     GtkUIManager * ui_manager;
@@ -505,13 +515,15 @@ on_startup( GApplication * application, gpointer user_data )
     cbdata->core = gtr_core_new( session );
 
     /* init the ui manager */
+  error = NULL;
     ui_manager = gtk_ui_manager_new ( );
     gtr_actions_init ( ui_manager, cbdata );
-    gtk_ui_manager_add_ui_from_string ( ui_manager, fallback_ui_file, -1, NULL );
+  gtk_ui_manager_add_ui_from_resource (ui_manager, TR_RESOURCE_PATH "transmission-ui.xml", &error);
+  g_assert_no_error (error);
     gtk_ui_manager_ensure_update ( ui_manager );
 
     /* create main window now to be a parent to any error dialogs */
-    win = GTK_WINDOW( gtr_window_new( ui_manager, cbdata->core ) );
+  win = GTK_WINDOW (gtr_window_new (GTK_APPLICATION (application), ui_manager, cbdata->core));
     g_signal_connect( win, "size-allocate", G_CALLBACK( on_main_window_size_allocated ), cbdata );
     g_application_hold( application );
     g_object_weak_ref( G_OBJECT( win ), (GWeakNotify)g_application_release, application );
@@ -519,8 +531,10 @@ on_startup( GApplication * application, gpointer user_data )
     tr_sessionSetRPCCallback( session, on_rpc_changed, cbdata );
 
     /* check & see if it's time to update the blocklist */
-    if( gtr_pref_flag_get( TR_PREFS_KEY_BLOCKLIST_ENABLED ) ) {
-	if( gtr_pref_flag_get( PREF_KEY_BLOCKLIST_UPDATES_ENABLED ) ) {
+  if (gtr_pref_flag_get (TR_PREFS_KEY_BLOCKLIST_ENABLED))
+    {
+      if (gtr_pref_flag_get (PREF_KEY_BLOCKLIST_UPDATES_ENABLED))
+        {
 	    const int64_t last_time = gtr_pref_int_get( "blocklist-date" );
 	    const int SECONDS_IN_A_WEEK = 7 * 24 * 60 * 60;
 	    const time_t now = time( NULL );
@@ -568,7 +582,7 @@ on_open (GApplication  * application UNUSED,
     int i;
     GSList * files = NULL;
 
-    for( i=0; i<file_count; ++i )
+  for (i=0; i<file_count; i++)
         files = g_slist_prepend( files, f[i] );
 
     open_files( files, gdata );
@@ -586,7 +600,7 @@ main( int argc, char ** argv )
     int ret;
     struct stat sb;
     char * application_id;
-    GApplication * app;
+  GtkApplication * app;
     GOptionContext * option_context;
     bool show_version = false;
     GError * error = NULL;
@@ -611,7 +625,6 @@ main( int argc, char ** argv )
     textdomain( MY_READABLE_NAME );
 
     /* init glib/gtk */
-    g_thread_init (NULL);
     g_type_init ();
     gtk_init (&argc, &argv);
     g_set_application_name (_( "Transmission" ));
@@ -621,7 +634,8 @@ main( int argc, char ** argv )
     option_context = g_option_context_new( _( "[torrent files or urls]" ) );
     g_option_context_add_main_entries( option_context, option_entries, GETTEXT_PACKAGE );
     g_option_context_set_translation_domain( option_context, GETTEXT_PACKAGE );
-    if( !g_option_context_parse( option_context, &argc, &argv, &error ) ) {
+  if (!g_option_context_parse (option_context, &argc, &argv, &error))
+    {
         g_print (_("%s\nRun '%s --help' to see a full list of available command line options.\n"), error->message, argv[0]);
         g_error_free (error);
         g_option_context_free (option_context);
@@ -630,7 +644,8 @@ main( int argc, char ** argv )
     g_option_context_free (option_context);
 
     /* handle the trivial "version" option */
-    if( show_version ) {
+  if (show_version)
+    {
         fprintf( stderr, "%s %s\n", MY_READABLE_NAME, LONG_VERSION_STRING );
         return 0;
     }
@@ -650,11 +665,11 @@ main( int argc, char ** argv )
     /* init the application for the specified config dir */
     stat( cbdata.config_dir, &sb );
     application_id = g_strdup_printf( "com.transmissionbt.transmission_%lu_%lu", (unsigned long)sb.st_dev, (unsigned long)sb.st_ino );
-    app = g_application_new( application_id, G_APPLICATION_HANDLES_OPEN );
+  app = gtk_application_new (application_id, G_APPLICATION_HANDLES_OPEN);
     g_signal_connect( app, "open", G_CALLBACK(on_open), &cbdata );
     g_signal_connect( app, "startup", G_CALLBACK(on_startup), &cbdata );
     g_signal_connect( app, "activate", G_CALLBACK(on_activate), &cbdata );
-    ret = g_application_run (app, argc, argv);
+  ret = g_application_run (G_APPLICATION (app), argc, argv);
     g_object_unref( app );
     g_free( application_id );
     return ret;
@@ -669,12 +684,12 @@ on_core_busy( TrCore * core UNUSED, gboolean busy, struct cbdata * c )
 static void on_core_error( TrCore *, guint, const char *, struct cbdata * );
 static void on_add_torrent( TrCore *, tr_ctor *, gpointer );
 static void on_prefs_changed( TrCore * core, const char * key, gpointer );
-static void main_window_setup( struct cbdata * cbdata, TrWindow * wind );
+static void main_window_setup (struct cbdata * cbdata, GtkWindow * wind);
 static gboolean update_model_loop( gpointer gdata );
 static gboolean update_model_once( gpointer gdata );
 
 static void
-app_setup( TrWindow * wind, struct cbdata * cbdata )
+app_setup (GtkWindow * wind, struct cbdata * cbdata)
 {
     if( cbdata->is_iconified )
         gtr_pref_flag_set( PREF_KEY_SHOW_TRAY_ICON, TRUE );
@@ -703,7 +718,9 @@ app_setup( TrWindow * wind, struct cbdata * cbdata )
 
     /* either show the window or iconify it */
     if( !cbdata->is_iconified )
+    {
         gtk_widget_show( GTK_WIDGET( wind ) );
+    }
     else
     {
         gtk_window_set_skip_taskbar_hint( cbdata->wind,
@@ -723,12 +740,14 @@ app_setup( TrWindow * wind, struct cbdata * cbdata )
         gtk_dialog_add_button( GTK_DIALOG( w ), GTK_STOCK_QUIT, GTK_RESPONSE_REJECT );
         gtk_dialog_add_button( GTK_DIALOG( w ), _( "I _Accept" ), GTK_RESPONSE_ACCEPT );
         gtk_dialog_set_default_response( GTK_DIALOG( w ), GTK_RESPONSE_ACCEPT );
-        switch( gtk_dialog_run( GTK_DIALOG( w ) ) ) {
+      switch (gtk_dialog_run (GTK_DIALOG (w)))
+        {
             case GTK_RESPONSE_ACCEPT:
                 /* only show it once */
                 gtr_pref_flag_set( PREF_KEY_USER_HAS_GIVEN_INFORMED_CONSENT, TRUE );
                 gtk_widget_destroy( w );
                 break;
+
             default:
                 exit( 0 );
         }
@@ -755,7 +774,9 @@ presentMainWindow( struct cbdata * cbdata )
                                  gtr_pref_int_get( PREF_KEY_MAIN_WINDOW_Y ) );
         gtr_widget_set_visible( GTK_WIDGET( window ), TRUE );
     }
+
     gtr_window_present( window );
+  gdk_window_raise (gtk_widget_get_window (GTK_WIDGET(window)));
 }
 
 static void
@@ -834,14 +855,14 @@ on_drag_data_received( GtkWidget         * widget          UNUSED,
 }
 
 static void
-main_window_setup( struct cbdata * cbdata, TrWindow * wind )
+main_window_setup (struct cbdata * cbdata, GtkWindow * wind)
 {
     GtkWidget * w;
     GtkTreeModel * model;
     GtkTreeSelection * sel;
 
     g_assert( NULL == cbdata->wind );
-    cbdata->wind = GTK_WINDOW( wind );
+  cbdata->wind = wind;
     cbdata->sel = sel = GTK_TREE_SELECTION( gtr_window_get_selection( cbdata->wind ) );
 
     g_signal_connect( sel, "changed", G_CALLBACK( on_selection_changed ), cbdata );
@@ -909,11 +930,20 @@ on_app_exit( gpointer vdata )
     GtkWidget *r, *p, *b, *w, *c;
     struct cbdata *cbdata = vdata;
 
+  cbdata->is_closing = true;
+
     /* stop the update timer */
     if( cbdata->timer )
     {
         g_source_remove( cbdata->timer );
         cbdata->timer = 0;
+    }
+
+  /* stop the refresh-actions timer */
+  if (cbdata->refresh_actions_tag)
+    {
+      g_source_remove (cbdata->refresh_actions_tag);
+      cbdata->refresh_actions_tag = 0;
     }
 
     c = GTK_WIDGET( cbdata->wind );
@@ -922,27 +952,27 @@ on_app_exit( gpointer vdata )
     r = gtk_alignment_new( 0.5, 0.5, 0.01, 0.01 );
     gtk_container_add( GTK_CONTAINER( c ), r );
 
-    p = gtk_table_new( 3, 2, FALSE );
-    gtk_table_set_col_spacings( GTK_TABLE( p ), GUI_PAD_BIG );
+  p = gtk_grid_new ();
+  gtk_grid_set_column_spacing (GTK_GRID (p), GUI_PAD_BIG);
     gtk_container_add( GTK_CONTAINER( r ), p );
 
     w = gtk_image_new_from_stock( GTK_STOCK_NETWORK, GTK_ICON_SIZE_DIALOG );
-    gtk_table_attach_defaults( GTK_TABLE( p ), w, 0, 1, 0, 2 );
+  gtk_grid_attach (GTK_GRID (p), w, 0, 0, 1, 2);
 
     w = gtk_label_new( NULL );
     gtk_label_set_markup( GTK_LABEL( w ), _( "<b>Closing Connections</b>" ) );
     gtk_misc_set_alignment( GTK_MISC( w ), 0.0, 0.5 );
-    gtk_table_attach_defaults( GTK_TABLE( p ), w, 1, 2, 0, 1 );
+  gtk_grid_attach (GTK_GRID (p), w, 1, 0, 1, 1);
 
     w = gtk_label_new( _( "Sending upload/download totals to tracker…" ) );
     gtk_misc_set_alignment( GTK_MISC( w ), 0.0, 0.5 );
-    gtk_table_attach_defaults( GTK_TABLE( p ), w, 1, 2, 1, 2 );
+  gtk_grid_attach (GTK_GRID (p), w, 1, 1, 1, 1);
 
     b = gtk_alignment_new( 0.0, 1.0, 0.01, 0.01 );
     w = gtk_button_new_with_mnemonic( _( "_Quit Now" ) );
     g_signal_connect( w, "clicked", G_CALLBACK( exit_now_cb ), NULL );
     gtk_container_add( GTK_CONTAINER( b ), w );
-    gtk_table_attach( GTK_TABLE( p ), b, 1, 2, 2, 3, GTK_FILL, GTK_FILL, 0, 10 );
+  gtk_grid_attach (GTK_GRID (p), b, 1, 2, 1, 1);
 
     gtk_widget_show_all( r );
     gtk_widget_grab_focus( w );
@@ -959,7 +989,7 @@ on_app_exit( gpointer vdata )
                                    gtr_pref_int_get( PREF_KEY_MAIN_WINDOW_Y ) );
 
     /* shut down libT */
-    g_thread_create( session_close_threadfunc, vdata, TRUE, NULL );
+  g_thread_new ("shutdown-thread", session_close_threadfunc, vdata);
 }
 
 static void
@@ -1016,8 +1046,7 @@ on_core_error( TrCore * core UNUSED, guint code, const char * msg, struct cbdata
     switch( code )
     {
         case TR_PARSE_ERR:
-            c->error_list =
-                g_slist_append( c->error_list, g_path_get_basename( msg ) );
+        c->error_list = g_slist_append (c->error_list, g_path_get_basename (msg));
             break;
 
         case TR_PARSE_DUPLICATE:
@@ -1043,6 +1072,7 @@ on_main_window_focus_in( GtkWidget      * widget UNUSED,
 
     if( cbdata->wind )
         gtk_window_set_urgency_hint( cbdata->wind, FALSE );
+
     return FALSE;
 }
 
@@ -1095,10 +1125,8 @@ on_prefs_changed( TrCore * core UNUSED, const char * key, gpointer data )
         const int show = gtr_pref_flag_get( key );
         if( show && !cbdata->icon )
             cbdata->icon = gtr_icon_new( cbdata->core );
-        else if( !show && cbdata->icon ) {
-            g_object_unref( cbdata->icon );
-            cbdata->icon = NULL;
-        }
+      else if (!show && cbdata->icon)
+        g_clear_object (&cbdata->icon);
     }
     else if( !strcmp( key, TR_PREFS_KEY_DSPEED_ENABLED ) )
     {
@@ -1419,7 +1447,8 @@ get_first_selected_torrent( struct cbdata * data )
     tr_torrent * tor = NULL;
     GtkTreeModel * m;
     GList * l = gtk_tree_selection_get_selected_rows( data->sel, &m );
-    if( l != NULL ) {
+  if (l != NULL)
+    {
         GtkTreePath * p = l->data;
         GtkTreeIter i;
         if( gtk_tree_model_get_iter( m, &i, p ) )
@@ -1455,8 +1484,8 @@ copy_magnet_link_to_clipboard( GtkWidget * w, tr_torrent * tor )
 void
 gtr_actions_handler( const char * action_name, gpointer user_data )
 {
-    struct cbdata * data = user_data;
     gboolean        changed = FALSE;
+  struct cbdata * data = user_data;
 
     if( !strcmp( action_name, "open-torrent-from-url" ) )
     {
@@ -1590,7 +1619,10 @@ gtr_actions_handler( const char * action_name, gpointer user_data )
     {
         presentMainWindow( data );
     }
-    else g_error ( "Unhandled action: %s", action_name );
+  else
+    {
+      g_error ("Unhandled action: %s", action_name);
+    }
 
     if( changed )
         update_model_soon( data );

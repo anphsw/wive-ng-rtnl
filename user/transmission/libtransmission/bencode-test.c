@@ -1,7 +1,6 @@
-#include <ctype.h>
-#include <errno.h>
-#include <stdio.h>
-#include <string.h>
+#include <ctype.h> /* isspace () */
+#include <errno.h> /* EILSEQ */
+#include <string.h> /* strlen (), strncmp () */
 
 #include <event2/buffer.h>
 
@@ -9,30 +8,13 @@
 #include "bencode.h"
 #include "utils.h" /* tr_free */
 
-/* #define VERBOSE */
+// #define VERBOSE
+#include "libtransmission-test.h"
 
-static int test = 0;
-
-#ifdef VERBOSE
-  #define check( A ) \
-    { \
-        ++test; \
-        if( A ){ \
-            fprintf( stderr, "PASS test #%d (%s, %d)\n", test, __FILE__, __LINE__ ); \
-        } else { \
-            fprintf( stderr, "FAIL test #%d (%s, %d)\n", test, __FILE__, __LINE__ ); \
-            return test; \
-        } \
-    }
+#ifndef WIN32
+#define STACK_SMASH_DEPTH (1 * 1000 * 1000)
 #else
-  #define check( A ) \
-    { \
-        ++test; \
-        if( !( A ) ){ \
-            fprintf( stderr, "FAIL test #%d (%s, %d)\n", test, __FILE__, __LINE__ ); \
-            return test; \
-        } \
-    }
+#define STACK_SMASH_DEPTH ( 100 * 1000)
 #endif
 
 static int
@@ -46,53 +28,53 @@ testInt( void )
     /* good int string */
     tr_snprintf( (char*)buf, sizeof( buf ), "i64e" );
     err = tr_bencParseInt( buf, buf + 4, &end, &val );
-    check( err == 0 );
-    check( val == 64 );
-    check( end == buf + 4 );
+    check_int_eq (0, err);
+    check_int_eq (64, val);
+    check ((buf + 4) ==  end);
 
     /* missing 'e' */
     end = NULL;
     val = 888;
     err = tr_bencParseInt( buf, buf + 3, &end, &val );
-    check( err == EILSEQ );
-    check( val == 888 );
+    check_int_eq (EILSEQ, err);
+    check_int_eq (888, val);
     check( end == NULL );
 
     /* empty buffer */
     err = tr_bencParseInt( buf, buf + 0, &end, &val );
-    check( err == EILSEQ );
-    check( val == 888 );
+    check_int_eq (EILSEQ, err);
+    check_int_eq (888, val);
     check( end == NULL );
 
     /* bad number */
     tr_snprintf( (char*)buf, sizeof( buf ), "i6z4e" );
     err = tr_bencParseInt( buf, buf + 5, &end, &val );
-    check( err == EILSEQ );
-    check( val == 888 );
+    check_int_eq (EILSEQ, err);
+    check_int_eq (888, val);
     check( end == NULL );
 
     /* negative number */
     tr_snprintf( (char*)buf, sizeof( buf ), "i-3e" );
     err = tr_bencParseInt( buf, buf + 4, &end, &val );
-    check( err == 0 );
-    check( val == -3 );
-    check( end == buf + 4 );
+    check_int_eq (0, err);
+    check_int_eq (-3, val);
+    check ((buf + 4) == end);
 
     /* zero */
     tr_snprintf( (char*)buf, sizeof( buf ), "i0e" );
     err = tr_bencParseInt( buf, buf + 4, &end, &val );
-    check( err == 0 );
-    check( val == 0 );
-    check( end == buf + 3 );
+    check_int_eq (0, err);
+    check_int_eq (0, val);
+    check ((buf + 3) == end);
 
     /* no leading zeroes allowed */
     val = 0;
     end = NULL;
     tr_snprintf( (char*)buf, sizeof( buf ), "i04e" );
     err = tr_bencParseInt( buf, buf + 4, &end, &val );
-    check( err == EILSEQ );
-    check( val == 0 );
-    check( end == NULL );
+    check_int_eq (EILSEQ, err);
+    check_int_eq (0, val);
+    check (NULL == end);
 
     return 0;
 }
@@ -109,9 +91,9 @@ testStr( void )
     /* good string */
     tr_snprintf( (char*)buf, sizeof( buf ), "4:boat" );
     err = tr_bencParseStr( buf, buf + 6, &end, &str, &len );
-    check( err == 0 );
+    check_int_eq (0, err);
+    check_int_eq (4, len);
     check( !strncmp( (char*)str, "boat", len ) );
-    check( len == 4 );
     check( end == buf + 6 );
     str = NULL;
     end = NULL;
@@ -119,7 +101,8 @@ testStr( void )
 
     /* string goes past end of buffer */
     err = tr_bencParseStr( buf, buf + 5, &end, &str, &len );
-    check( err == EILSEQ );
+    check_int_eq (EILSEQ, err);
+    check_int_eq (0, len);
     check( str == NULL );
     check( end == NULL );
     check( !len );
@@ -127,9 +110,9 @@ testStr( void )
     /* empty string */
     tr_snprintf( (char*)buf, sizeof( buf ), "0:" );
     err = tr_bencParseStr( buf, buf + 2, &end, &str, &len );
-    check( err == 0 );
+    check_int_eq (0, err);
+    check_int_eq (0, len);
     check( !*str );
-    check( !len );
     check( end == buf + 2 );
     str = NULL;
     end = NULL;
@@ -138,9 +121,9 @@ testStr( void )
     /* short string */
     tr_snprintf( (char*)buf, sizeof( buf ), "3:boat" );
     err = tr_bencParseStr( buf, buf + 6, &end, &str, &len );
-    check( err == 0 );
+    check_int_eq (0, err);
+    check_int_eq (3, len);
     check( !strncmp( (char*)str, "boa", len ) );
-    check( len == 3 );
     check( end == buf + 5 );
     str = NULL;
     end = NULL;
@@ -173,8 +156,8 @@ testString( const char * str,
 #endif
         check( end == (const uint8_t*)str + len );
         saved = tr_bencToStr( &val, TR_FMT_BENC, &savedLen );
-        check( !strcmp( saved, str ) );
-        check( len == (size_t)savedLen );
+        check_streq (str, saved);
+        check_int_eq (savedLen, len);
         tr_free( saved );
         tr_bencFree( &val );
     }
@@ -198,7 +181,7 @@ testParse( void )
     err = tr_bencParse( buf, buf + sizeof( buf ), &val, &end );
     check( !err );
     check( tr_bencGetInt( &val, &i ) );
-    check( i == 64 );
+    check_int_eq (64, i);
     check( end == buf + 4 );
     tr_bencFree( &val );
 
@@ -208,13 +191,13 @@ testParse( void )
     check( end == buf + strlen( (char*)buf ) );
     check( val.val.l.count == 3 );
     check( tr_bencGetInt( &val.val.l.vals[0], &i ) );
-    check( i == 64 );
+    check_int_eq (64, i);
     check( tr_bencGetInt( &val.val.l.vals[1], &i ) );
-    check( i == 32 );
+    check_int_eq (32, i);
     check( tr_bencGetInt( &val.val.l.vals[2], &i ) );
-    check( i == 16 );
+    check_int_eq (16, i);
     saved = tr_bencToStr( &val, TR_FMT_BENC, &len );
-    check( !strcmp( saved, (char*)buf ) );
+    check_streq ((char*)buf, saved);
     tr_free( saved );
     tr_bencFree( &val );
 
@@ -230,7 +213,7 @@ testParse( void )
     check( !err );
     check( end == buf + 2 );
     saved = tr_bencToStr( &val, TR_FMT_BENC, &len );
-    check( !strcmp( saved, "le" ) );
+    check_streq ("le", saved);
     tr_free( saved );
     tr_bencFree( &val );
 
@@ -273,7 +256,7 @@ testParse( void )
     check( ( child = tr_bencListChild( &val, 0 ) ) );
     check( ( child2 = tr_bencListChild( child, 0 ) ) );
     saved = tr_bencToStr( &val, TR_FMT_BENC, &len );
-    check( !strcmp( saved, "lld1:ai64e1:bi32eeee" ) );
+    check_streq ("lld1:ai64e1:bi32eeee", saved);
     tr_free( saved );
     tr_bencFree( &val );
 
@@ -284,7 +267,7 @@ testParse( void )
     check( !err );
     check( end == buf + 2 );
     saved = tr_bencToStr( &val, TR_FMT_BENC, &len );
-    check( !strcmp( saved, "le" ) );
+    check_streq ("le", saved);
     tr_free( saved );
     tr_bencFree( &val );
 
@@ -331,7 +314,7 @@ testJSONSnippet( const char * benc_str,
     fprintf( stderr, "json: %s\n", serialized );
     fprintf( stderr, "want: %s\n", expected );
 #endif
-    check( !strcmp( serialized, expected ) );
+    check_streq (expected, serialized);
     tr_bencFree( &top );
     evbuffer_free( buf );
     return 0;
@@ -401,21 +384,21 @@ testMerge( void )
     tr_bencMergeDicts( &dest, /*const*/ &src );
 
     check( tr_bencDictFindInt( &dest, "i1", &i ));
-    check( i == 1);
+    check_int_eq (1, i);
     check( tr_bencDictFindInt( &dest, "i2", &i ));
-    check( i == 4);
+    check_int_eq (4, i);
     check( tr_bencDictFindInt( &dest, "i3", &i ));
-    check( i == 3);
+    check_int_eq (3, i);
     check( tr_bencDictFindInt( &dest, "i4", &i ));
-    check( i == -35);
+    check_int_eq (-35, i);
     check( tr_bencDictFindStr( &dest, "s5", &s ));
-    check( strcmp( "abc", s ) == 0 );
+    check_streq ("abc", s);
     check( tr_bencDictFindStr( &dest, "s6", &s ));
-    check( strcmp( "xyz", s ) == 0 );
+    check_streq ("xyz", s);
     check( tr_bencDictFindStr( &dest, "s7", &s ));
-    check( strcmp( "127.0.0.1", s ) == 0 );
+    check_streq ("127.0.0.1", s);
     check( tr_bencDictFindStr( &dest, "s8", &s ));
-    check( strcmp( "ghi", s ) == 0 );
+    check_streq ("ghi", s);
 
     tr_bencFree( &dest );
     tr_bencFree( &src );
@@ -423,7 +406,7 @@ testMerge( void )
 }
 
 static int
-testStackSmash( int depth )
+testStackSmash (void)
 {
     int             i;
     int             len;
@@ -432,6 +415,7 @@ testStackSmash( int depth )
     const uint8_t * end;
     tr_benc         val;
     char *          saved;
+    const int       depth = STACK_SMASH_DEPTH;
 
     in = tr_new( uint8_t, depth * 2 + 1 );
     for( i = 0; i < depth; ++i )
@@ -444,7 +428,7 @@ testStackSmash( int depth )
     check( !err );
     check( end == in + ( depth * 2 ) );
     saved = tr_bencToStr( &val, TR_FMT_BENC, &len );
-    check( !strcmp( saved, (char*)in ) );
+    check_streq ((char*)in, saved);
     tr_free( in );
     tr_free( saved );
     tr_bencFree( &val );
@@ -465,22 +449,22 @@ testBool( void )
     tr_bencDictAddBool( &top, "key2", 0 );
     tr_bencDictAddInt ( &top, "key3", true );
     tr_bencDictAddInt ( &top, "key4", 1 );
-    check( tr_bencDictFindBool( &top, "key1", &boolVal ) )
-    check( !boolVal )
-    check( tr_bencDictFindBool( &top, "key2", &boolVal ) )
-    check( !boolVal )
-    check( tr_bencDictFindBool( &top, "key3", &boolVal ) )
-    check( boolVal )
-    check( tr_bencDictFindBool( &top, "key4", &boolVal ) )
-    check( boolVal )
-    check( tr_bencDictFindInt( &top, "key1", &intVal ) )
-    check( !intVal)
-    check( tr_bencDictFindInt( &top, "key2", &intVal ) )
-    check( !intVal )
-    check( tr_bencDictFindInt( &top, "key3", &intVal ) )
-    check( intVal )
-    check( tr_bencDictFindInt( &top, "key4", &intVal ) )
-    check( intVal )
+    check (tr_bencDictFindBool (&top, "key1", &boolVal));
+    check (!boolVal);
+    check (tr_bencDictFindBool (&top, "key2", &boolVal));
+    check (!boolVal);
+    check (tr_bencDictFindBool (&top, "key3", &boolVal));
+    check (boolVal);
+    check (tr_bencDictFindBool (&top, "key4", &boolVal));
+    check (boolVal);
+    check (tr_bencDictFindInt (&top, "key1", &intVal));
+    check (!intVal);
+    check (tr_bencDictFindInt (&top, "key2", &intVal));
+    check (!intVal);
+    check (tr_bencDictFindInt (&top, "key3", &intVal));
+    check (intVal);
+    check (tr_bencDictFindInt (&top, "key4", &intVal));
+    check (intVal);
 
     tr_bencFree( &top );
     return 0;
@@ -506,18 +490,18 @@ testParse2( void )
     tr_bencDictAddStr( &top, "this-is-a-string", "this-is-a-string" );
 
     benc = tr_bencToStr( &top, TR_FMT_BENC, &len );
-    check( !strcmp( benc, "d14:this-is-a-booli1e14:this-is-a-real8:0.50000016:this-is-a-string16:this-is-a-string14:this-is-an-inti1234ee" ) )
-    check( !tr_bencParse( benc, benc+len, &top2, &end ) )
-    check( (char*)end == benc + len )
-    check( tr_bencIsDict( &top2 ) )
-    check( tr_bencDictFindInt( &top, "this-is-an-int", &intVal ) )
-    check( intVal == 1234 )
-    check( tr_bencDictFindBool( &top, "this-is-a-bool", &boolVal ) )
-    check( boolVal == true )
-    check( tr_bencDictFindStr( &top, "this-is-a-string", &strVal ) )
-    check( !strcmp( strVal, "this-is-a-string" ) )
-    check( tr_bencDictFindReal( &top, "this-is-a-real", &realVal ) )
-    check( (int)(realVal*100) == 50 )
+    check_streq ("d14:this-is-a-booli1e14:this-is-a-real8:0.50000016:this-is-a-string16:this-is-a-string14:this-is-an-inti1234ee", benc);
+    check (!tr_bencParse (benc, benc+len, &top2, &end));
+    check ((char*)end == benc + len);
+    check (tr_bencIsDict (&top2));
+    check (tr_bencDictFindInt (&top, "this-is-an-int", &intVal));
+    check_int_eq (1234, intVal);
+    check (tr_bencDictFindBool (&top, "this-is-a-bool", &boolVal));
+    check (boolVal == true);
+    check (tr_bencDictFindStr (&top, "this-is-a-string", &strVal));
+    check_streq ("this-is-a-string", strVal);
+    check (tr_bencDictFindReal (&top, "this-is-a-real", &realVal));
+    check_int_eq (50, (int)(realVal*100));
 
     tr_bencFree( &top2 );
     tr_free( benc );
@@ -529,37 +513,10 @@ testParse2( void )
 int
 main( void )
 {
-    int i;
+    static const testFunc tests[] = {
+	testInt, testStr, testParse, testJSON, testMerge, testBool,
+	testParse2, testStackSmash,
+    };
 
-    if(( i = testInt( )))
-        return i;
-
-    if(( i = testStr( )))
-        return i;
-
-    if(( i = testParse( )))
-        return i;
-
-    if(( i = testJSON( )))
-        return i;
-
-    if(( i = testMerge( )))
-        return i;
-
-    if(( i = testBool( )))
-        return i;
-
-    if(( i = testParse2( )))
-        return i;
-
-#ifndef WIN32
-    i = testStackSmash( 1000000 );
-#else
-    i = testStackSmash( 100000 );
-#endif
-    if( i )
-        return i;
-
-    return 0;
+    return runTests (tests, NUM_TESTS (tests));
 }
-

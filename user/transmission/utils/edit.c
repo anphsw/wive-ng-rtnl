@@ -7,7 +7,7 @@
  *
  * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  *
- * $Id: edit.c 13191 2012-02-03 16:44:07Z jordan $
+ * $Id: edit.c 13625 2012-12-05 17:29:46Z jordan $
  */
 
 #include <stdio.h> /* fprintf() */
@@ -56,19 +56,32 @@ parseCommandLine( int argc, const char ** argv )
     {
         switch( c )
         {
-            case 'a': add = optarg;
+          case 'a':
+            add = optarg;
                       break;
-            case 'd': deleteme = optarg;
+
+          case 'd':
+            deleteme = optarg;
                       break;
-            case 'r': replace[0] = optarg;
+
+          case 'r':
+            replace[0] = optarg;
                       c = tr_getopt( getUsage( ), argc, argv, options, &optarg );
-                      if( c != TR_OPT_UNK ) return 1;
+            if (c != TR_OPT_UNK)
+              return 1;
                       replace[1] = optarg;
                       break;
-            case 'V': showVersion = true;
+
+          case 'V':
+            showVersion = true;
+            break;
+
+          case TR_OPT_UNK:
+            files[fileCount++] = optarg;
                       break;
-            case TR_OPT_UNK: files[fileCount++] = optarg; break;
-            default: return 1;
+
+          default:
+            return 1;
         }
     }
 
@@ -113,7 +126,10 @@ removeURL( tr_benc * metainfo, const char * url )
                 printf( "\tNo URLs left in tier #%d... removing tier\n", (tierIndex+1) );
                 tr_bencListRemove( announce_list, tierIndex );
             }
-            else ++tierIndex;
+          else
+            {
+              ++tierIndex;
+            }
         }
 
         if( tr_bencListSize( announce_list ) == 0 )
@@ -130,9 +146,12 @@ removeURL( tr_benc * metainfo, const char * url )
         tr_benc * tier;
         tr_benc * node;
 
-        if(( tier = tr_bencListChild( announce_list, 0 ))) {
-            if(( node = tr_bencListChild( tier, 0 ))) {
-                if( tr_bencGetStr( node, &str ) ) {
+      if ((tier = tr_bencListChild (announce_list, 0)))
+        {
+          if ((node = tr_bencListChild (tier, 0)))
+            {
+              if (tr_bencGetStr (node, &str))
+                {
                     tr_bencDictAddStr( metainfo, "announce", str );
                     printf( "\tAdded \"%s\" to announce\n", str );
                 }
@@ -210,7 +229,8 @@ announce_list_has_url( tr_benc * announce_list, const char * url )
 {
     tr_benc * tier;
     int tierCount = 0;
-    while(( tier = tr_bencListChild( announce_list, tierCount++ ))) {
+  while ((tier = tr_bencListChild (announce_list, tierCount++)))
+    {
         tr_benc * node;
         const char * str;
         int nodeCount = 0;
@@ -218,6 +238,7 @@ announce_list_has_url( tr_benc * announce_list, const char * url )
             if( tr_bencGetStr( node, &str ) && !strcmp( str, url ) )
                 return true;
     }
+
     return false;
 }
 
@@ -282,7 +303,7 @@ main( int argc, char * argv[] )
     if( showVersion )
     {
         fprintf( stderr, MY_NAME" "LONG_VERSION_STRING"\n" );
-        return 0;
+      return EXIT_SUCCESS;
     }
 
     if( fileCount < 1 )
@@ -336,5 +357,5 @@ main( int argc, char * argv[] )
     printf( "Changed %d files\n", changedCount );
 
     tr_free( files );
-    return 0;
+  return EXIT_SUCCESS;
 }

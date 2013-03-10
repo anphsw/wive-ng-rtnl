@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: AddMagnetWindowController.h 13251 2012-03-13 02:52:11Z livings124 $
+ * $Id: AddMagnetWindowController.h 13602 2012-10-30 00:22:10Z livings124 $
  *
  * Copyright (c) 2010-2012 Transmission authors and contributors
  *
@@ -23,6 +23,7 @@
  *****************************************************************************/
 
 #import <Cocoa/Cocoa.h>
+#import "Torrent.h"
 
 @class Controller;
 @class Torrent;
@@ -34,12 +35,20 @@
     IBOutlet NSButton * fStartCheck;
     IBOutlet NSPopUpButton * fGroupPopUp, * fPriorityPopUp;
     
+    //remove these when switching to auto layout
+    IBOutlet NSTextField * fMagnetLinkLabel;
+    IBOutlet NSTextField * fDownloadToLabel, * fGroupLabel, * fPriorityLabel;
+    IBOutlet NSButton * fChangeDestinationButton;
+    IBOutlet NSBox * fDownloadToBox;
+    IBOutlet NSButton * fAddButton, * fCancelButton;
+    
     Controller * fController;
     
     Torrent * fTorrent;
     NSString * fDestination;
     
     NSInteger fGroupValue;
+    TorrentDeterminationType fGroupDeterminationType;
 }
 
 - (id) initWithTorrent: (Torrent *) torrent destination: (NSString *) path controller: (Controller *) controller;

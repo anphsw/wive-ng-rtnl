@@ -7,7 +7,7 @@
  * This exemption does not extend to derived works not owned by
  * the Transmission project.
  *
- * $Id: handshake.h 12204 2011-03-22 15:19:54Z jordan $
+ * $Id: handshake.h 13625 2012-12-05 17:29:46Z jordan $
  */
 
 #ifndef __TRANSMISSION__

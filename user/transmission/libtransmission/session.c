@@ -7,7 +7,7 @@
  * This exemption does not extend to derived works not owned by
  * the Transmission project.
  *
- * $Id: session.c 13361 2012-07-01 02:17:35Z jordan $
+ * $Id: session.c 13638 2012-12-09 21:28:20Z jordan $
  */
 
 #include <assert.h>
@@ -69,10 +69,12 @@ enum
 
 
 #define dbgmsg( ... ) \
-    do { \
+  do \
+    { \
         if( tr_deepLoggingIsActive( ) ) \
             tr_deepLog( __FILE__, __LINE__, NULL, __VA_ARGS__ ); \
-    } while( 0 )
+    } \
+  while (0)
 
 static tr_port
 getRandomPort( tr_session * s )
@@ -305,7 +307,7 @@ tr_sessionGetDefaultSettings( tr_benc * d )
 {
     assert( tr_bencIsDict( d ) );
 
-    tr_bencDictReserve( d, 60 );
+    tr_bencDictReserve (d, 62);
     tr_bencDictAddBool( d, TR_PREFS_KEY_BLOCKLIST_ENABLED,               false );
     tr_bencDictAddStr ( d, TR_PREFS_KEY_BLOCKLIST_URL,                   "http://www.example.com/blocklist" );
     tr_bencDictAddInt ( d, TR_PREFS_KEY_MAX_CACHE_SIZE_MB,               DEFAULT_CACHE_SIZE_MB );
@@ -1321,15 +1323,11 @@ useAltSpeed( tr_session * s, struct tr_turtle_info * t,
 }
 
 /**
- * @param enabled whether turtle should be on/off according to the scheduler
- * @param changed whether that's different from the previous minute
+ * @return whether turtle should be on/off according to the scheduler
  */
-static void
-testTurtleTime( const struct tr_turtle_info * t,
-                bool * enabled,
-                bool * changed )
+static bool
+getInTurtleTime (const struct tr_turtle_info * t)
 {
-    bool e;
     struct tm tm;
     size_t minute_of_the_week;
     const time_t now = tr_time( );
@@ -1342,31 +1340,32 @@ testTurtleTime( const struct tr_turtle_info * t,
     if( minute_of_the_week >= MINUTES_PER_WEEK ) /* leap minutes? */
         minute_of_the_week = MINUTES_PER_WEEK - 1;
 
-    e = tr_bitfieldHas( &t->minutes, minute_of_the_week );
-    if( enabled != NULL )
-        *enabled = e;
-
-    if( changed != NULL )
-    {
-        const size_t prev = minute_of_the_week > 0 ? minute_of_the_week - 1
-                                                   : MINUTES_PER_WEEK - 1;
-        *changed = e != tr_bitfieldHas( &t->minutes, prev );
+    return tr_bitfieldHas (&t->minutes, minute_of_the_week);
     }
+
+static inline tr_auto_switch_state_t
+autoSwitchState (bool enabled)
+{
+    return enabled ? TR_AUTO_SWITCH_ON : TR_AUTO_SWITCH_OFF;
 }
 
 static void
 turtleCheckClock( tr_session * s, struct tr_turtle_info * t )
 {
     bool enabled;
-    bool changed;
+    bool alreadySwitched;
+    tr_auto_switch_state_t newAutoTurtleState;
 
     assert( t->isClockEnabled );
 
-    testTurtleTime( t, &enabled, &changed );
+    enabled = getInTurtleTime (t);
+    newAutoTurtleState = autoSwitchState (enabled);
+    alreadySwitched = (t->autoTurtleState == newAutoTurtleState);
 
-    if( changed )
+    if (!alreadySwitched)
     {
         tr_inf( "Time to turn %s turtle mode!", (enabled?"on":"off") );
+        t->autoTurtleState = newAutoTurtleState;
         useAltSpeed( s, t, enabled, false );
     }
 }
@@ -1378,15 +1377,20 @@ static void
 turtleBootstrap( tr_session * session, struct tr_turtle_info * turtle )
 {
     turtle->changedByUser = false;
+    turtle->autoTurtleState = TR_AUTO_SWITCH_UNUSED;
 
     tr_bitfieldConstruct( &turtle->minutes, MINUTES_PER_WEEK );
 
     turtleUpdateTable( turtle );
 
     if( turtle->isClockEnabled )
-        testTurtleTime( turtle, &turtle->isEnabled, NULL );
+    {
+        turtle->isEnabled = getInTurtleTime (turtle);
+        turtle->autoTurtleState = autoSwitchState (turtle->isEnabled);
+    }
 
     altSpeedToggled( session );
+
 }
 
 /***
@@ -1484,13 +1488,15 @@ userPokedTheClock( tr_session * s, struct tr_turtle_info * t )
 {
     tr_dbg( "Refreshing the turtle mode clock due to user changes" );
 
+    t->autoTurtleState = TR_AUTO_SWITCH_UNUSED;
+
     turtleUpdateTable( t );
 
     if( t->isClockEnabled )
     {
-        bool enabled, changed;
-        testTurtleTime( t, &enabled, &changed );
+        const bool enabled = getInTurtleTime (t);
         useAltSpeed( s, t, enabled, true );
+        t->autoTurtleState = autoSwitchState (enabled);
     }
 }
 

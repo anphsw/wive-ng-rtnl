@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: conf.h 12656 2011-08-09 02:30:31Z jordan $
+ * $Id: conf.h 13625 2012-12-05 17:29:46Z jordan $
  *
  * Copyright (c) Transmission authors and contributors
  *

@@ -7,7 +7,7 @@
  * This exemption does not extend to derived works not owned by
  * the Transmission project.
  *
- * $Id: bitfield.h 12921 2011-09-26 22:50:42Z jordan $
+ * $Id: bitfield.h 13625 2012-12-05 17:29:46Z jordan $
  */
 
 #ifndef __TRANSMISSION__
@@ -101,9 +101,15 @@ tr_bitfieldHasNone( const tr_bitfield * b )
 static inline bool
 tr_bitfieldHas( const tr_bitfield * b, size_t n )
 {
-    if( tr_bitfieldHasAll( b ) ) return true;
-    if( tr_bitfieldHasNone( b ) ) return false;
-    if( n>>3u >= b->alloc_count ) return false;
+  if (tr_bitfieldHasAll (b))
+    return true;
+
+  if (tr_bitfieldHasNone (b))
+    return false;
+
+  if (n>>3u >= b->alloc_count)
+    return false;
+
     return ( b->bits[n>>3u] << ( n & 7u ) & 0x80 ) != 0;
 }
 

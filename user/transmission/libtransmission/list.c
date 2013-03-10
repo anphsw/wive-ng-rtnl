@@ -7,7 +7,7 @@
  * This exemption does not extend to derived works not owned by
  * the Transmission project.
  *
- * $Id: list.c 12314 2011-04-05 00:59:49Z jordan $
+ * $Id: list.c 13625 2012-12-05 17:29:46Z jordan $
  */
 
 #include "transmission.h"
@@ -24,8 +24,11 @@ node_alloc( void )
     tr_list * ret;
 
     if( recycled_nodes == NULL )
+    {
         ret = tr_new( tr_list, 1 );
-    else {
+    }
+  else
+    {
         ret = recycled_nodes;
         recycled_nodes = recycled_nodes->next;
     }
@@ -83,11 +86,15 @@ tr_list_append( tr_list ** list,
     tr_list * node = node_alloc( );
 
     node->data = data;
+
     if( !*list )
+    {
         *list = node;
+    }
     else
     {
         tr_list * l = *list;
+
         while( l->next )
             l = l->next;
 
@@ -133,6 +140,7 @@ tr_list_pop_front( tr_list ** list )
         ret = ( *list )->data;
         tr_list_remove_node( list, *list );
     }
+
     return ret;
 }
 
@@ -179,10 +187,15 @@ tr_list_insert_sorted( tr_list            ** list,
     }
 
     if( l == NULL )
+    {
         tr_list_append( list, data );
+    }
     else if( l == *list )
+    {
         tr_list_prepend( list, data );
-    else {
+    }
+  else
+    {
         tr_list * node = node_alloc( );
         node->data = data;
         node->prev = l->prev;

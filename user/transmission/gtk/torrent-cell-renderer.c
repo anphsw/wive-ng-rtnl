@@ -7,7 +7,7 @@
  * This exemption does not extend to derived works not owned by
  * the Transmission project.
  *
- * $Id: torrent-cell-renderer.c 12827 2011-09-01 22:49:35Z jordan $
+ * $Id: torrent-cell-renderer.c 13921 2013-02-01 18:57:00Z jordan $
  */
 
 #include <gtk/gtk.h>
@@ -260,23 +260,38 @@ getStatusString( GString           * gstr,
 
         case TR_STATUS_DOWNLOAD:
         {
-            if( tr_torrentHasMetadata( tor ) )
+            if (!tr_torrentHasMetadata (tor))
             {
-                g_string_append_printf( gstr,
-                    ngettext( "Downloading from %1$'d of %2$'d connected peer",
-                              "Downloading from %1$'d of %2$'d connected peers",
-                              st->webseedsSendingToUs + st->peersSendingToUs ),
-                    st->webseedsSendingToUs + st->peersSendingToUs,
-                    st->webseedsSendingToUs + st->peersConnected );
+                /* Downloading metadata from 2 peer (s)(50% done) */
+                g_string_append_printf (gstr, _("Downloading metadata from %1$'d %2$s (%3$d%% done)"),
+                                        st->peersConnected,
+                                        ngettext ("peer","peers",st->peersConnected),
+                                      (int)(100.0*st->metadataPercentComplete));
+            }
+            else if (st->peersSendingToUs && st->webseedsSendingToUs)
+            {
+                /* Downloading from 2 of 3 peer (s) and 2 webseed (s) */
+                g_string_append_printf (gstr, _("Downloading from %1$'d of %2$'d %3$s and %4$'d %5$s"),
+                                        st->peersSendingToUs,
+                                        st->peersConnected,
+                                        ngettext ("peer","peers",st->peersConnected),
+                                        st->webseedsSendingToUs,
+                                        ngettext ("web seed","web seeds",st->webseedsSendingToUs));
+            }
+            else if (st->webseedsSendingToUs)
+            {
+                /* Downloading from 3 web seed (s) */
+                g_string_append_printf (gstr, _("Downloading from %1$'d %2$s"),
+                                        st->webseedsSendingToUs,
+                                        ngettext ("web seed","web seeds",st->webseedsSendingToUs));
             }
             else
             {
-                g_string_append_printf( gstr,
-                    ngettext( "Downloading metadata from %1$'d peer (%2$d%% done)",
-                              "Downloading metadata from %1$'d peers (%2$d%% done)",
-                              st->peersConnected + st->peersConnected ),
-                    st->peersConnected + st->webseedsSendingToUs,
-                    (int)(100.0*st->metadataPercentComplete) );
+                /* Downloading from 2 of 3 peer (s) */
+                g_string_append_printf (gstr, _("Downloading from %1$'d of %2$'d %3$s"),
+                                        st->peersSendingToUs,
+                                        st->peersConnected,
+                                        ngettext ("peer","peers",st->peersConnected));
             }
             break;
         }
@@ -362,18 +377,7 @@ gtr_cell_renderer_get_preferred_size( GtkCellRenderer  * renderer,
                                       GtkRequisition   * minimum_size,
                                       GtkRequisition   * natural_size )
 {
-#if GTK_CHECK_VERSION( 3,0,0 )
-
     gtk_cell_renderer_get_preferred_size( renderer, widget, minimum_size, natural_size );
-
-#else
-
-    GtkRequisition r;
-    gtk_cell_renderer_get_size( renderer, widget, NULL, NULL, NULL, &r.width, &r.height );
-    if( minimum_size ) *minimum_size = r;
-    if( natural_size ) *natural_size = r;
-
-#endif
 }
 
 static void
@@ -480,11 +484,7 @@ get_size_full( TorrentCellRenderer * cell,
 static void
 torrent_cell_renderer_get_size( GtkCellRenderer     * cell,
                                 GtkWidget           * widget,
-#if GTK_CHECK_VERSION( 3,0,0 )
                                 const GdkRectangle  * cell_area,
-#else
-                                GdkRectangle        * cell_area,
-#endif
                                 gint                * x_offset,
                                 gint                * y_offset,
                                 gint                * width,
@@ -519,19 +519,12 @@ torrent_cell_renderer_get_size( GtkCellRenderer     * cell,
     }
 }
 
-#if GTK_CHECK_VERSION( 3,0,0 )
     typedef GdkRGBA GtrColor;
     #define FOREGROUND_COLOR_KEY "foreground-rgba"
-#else
-    typedef GdkColor GtrColor;
-    #define FOREGROUND_COLOR_KEY "foreground-gdk"
-#endif
 
 static void
 get_text_color( GtkWidget * w, const tr_stat * st, GtrColor * setme )
 {
-#if GTK_CHECK_VERSION( 3,0,0 )
-
     static const GdkRGBA red = { 1.0, 0, 0, 0 };
     if( st->error )
         *setme = red;
@@ -539,18 +532,6 @@ get_text_color( GtkWidget * w, const tr_stat * st, GtrColor * setme )
         gtk_style_context_get_color( gtk_widget_get_style_context( w ), GTK_STATE_FLAG_INSENSITIVE, setme );
     else
         gtk_style_context_get_color( gtk_widget_get_style_context( w ), GTK_STATE_FLAG_NORMAL, setme );
-
-#else
-
-    static const GdkColor red = { 0, 65535, 0, 0 };
-    if( st->error )
-        *setme = red;
-    else if( st->activity == TR_STATUS_STOPPED )
-        *setme = gtk_widget_get_style(w)->text[GTK_STATE_INSENSITIVE];
-    else
-        *setme = gtk_widget_get_style(w)->text[GTK_STATE_NORMAL];
-
-#endif
 }
 
 
@@ -573,11 +554,7 @@ get_percent_done( const tr_torrent * tor, const tr_stat * st, bool * seed )
     return d;
 }
 
-#if GTK_CHECK_VERSION( 3,0,0 )
     typedef cairo_t GtrDrawable;
-#else
-    typedef GdkDrawable GtrDrawable;
-#endif
 
 static void
 gtr_cell_renderer_render( GtkCellRenderer       * renderer,
@@ -586,11 +563,7 @@ gtr_cell_renderer_render( GtkCellRenderer       * renderer,
                           const GdkRectangle    * area,
                           GtkCellRendererState    flags)
 {
-#if GTK_CHECK_VERSION( 3,0,0 )
     gtk_cell_renderer_render( renderer, drawable, widget, area, area, flags );
-#else
-    gtk_cell_renderer_render( renderer, drawable, widget, area, area, area, flags );
-#endif
 }
 
 static void
@@ -786,14 +759,8 @@ static void
 torrent_cell_renderer_render( GtkCellRenderer       * cell,
                               GtrDrawable           * window,
                               GtkWidget             * widget,
-#if GTK_CHECK_VERSION( 3,0,0 )
                               const GdkRectangle    * background_area,
                               const GdkRectangle    * cell_area,
-#else
-                              GdkRectangle          * background_area,
-                              GdkRectangle          * cell_area,
-                              GdkRectangle          * expose_area UNUSED,
-#endif
                               GtkCellRendererState    flags )
 {
     TorrentCellRenderer * self = TORRENT_CELL_RENDERER( cell );

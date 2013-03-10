@@ -7,7 +7,7 @@
  *
  * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  *
- * $Id: mainwin.cc 13264 2012-04-07 00:16:14Z jordan $
+ * $Id: mainwin.cc 13750 2013-01-04 00:00:55Z jordan $
  */
 
 #include <cassert>
@@ -45,6 +45,27 @@
 #include "ui_mainwin.h"
 
 #define PREFS_KEY "prefs-key";
+
+
+/**
+ * This is a proxy-style for that forces it to be always disabled.
+ * We use this to make our torrent list view behave consistently on
+ * both GTK and Qt implementations.
+ */
+class ListViewProxyStyle: public QProxyStyle
+{
+    public:
+        int styleHint(StyleHint hint,
+                      const QStyleOption *option = 0,
+                      const QWidget *widget = 0,
+                      QStyleHintReturn *returnData = 0) const
+        {
+            if (hint == QStyle::SH_ItemView_ActivateItemOnSingleClick)
+                return 0;
+            return QProxyStyle::styleHint(hint, option, widget, returnData);
+        }
+};
+
 
 QIcon
 TrMainWindow :: getStockIcon( const QString& name, int fallback )
@@ -105,6 +126,8 @@ TrMainWindow :: TrMainWindow( Session& session, Prefs& prefs, TorrentModel& mode
 
     int i = style->pixelMetric( QStyle::PM_SmallIconSize, 0, this );
     const QSize smallIconSize( i, i );
+
+    ui.listView->setStyle(new ListViewProxyStyle);
 
     // icons
     ui.action_OpenFile->setIcon( getStockIcon( "folder-open", QStyle::SP_DialogOpenButton ) );
@@ -171,6 +194,7 @@ TrMainWindow :: TrMainWindow( Session& session, Prefs& prefs, TorrentModel& mode
     connect( ui.action_SetLocation, SIGNAL(triggered()), this, SLOT(setLocation()));
     connect( ui.action_Properties, SIGNAL(triggered()), this, SLOT(openProperties()));
     connect( ui.action_SessionDialog, SIGNAL(triggered()), mySessionDialog, SLOT(show()));
+
     connect( ui.listView, SIGNAL(activated(const QModelIndex&)), ui.action_Properties, SLOT(trigger()));
 
     // signals
@@ -205,6 +229,10 @@ TrMainWindow :: TrMainWindow( Session& session, Prefs& prefs, TorrentModel& mode
     actionGroup->addAction( ui.action_SortBySize );
     actionGroup->addAction( ui.action_SortByState );
 
+    myAltSpeedAction = new QAction( tr( "Speed Limits" ), this );
+    myAltSpeedAction->setIcon( myPrefs.get<bool>(Prefs::ALT_SPEED_LIMIT_ENABLED) ? mySpeedModeOnIcon : mySpeedModeOffIcon );
+    connect( myAltSpeedAction, SIGNAL(triggered()), this, SLOT(toggleSpeedMode()) );
+
     QMenu * menu = new QMenu( );
     menu->addAction( ui.action_OpenFile );
     menu->addAction( ui.action_AddURL );
@@ -215,17 +243,18 @@ TrMainWindow :: TrMainWindow( Session& session, Prefs& prefs, TorrentModel& mode
     menu->addSeparator( );
     menu->addAction( ui.action_StartAll );
     menu->addAction( ui.action_PauseAll );
+    menu->addAction( myAltSpeedAction );
     menu->addSeparator( );
     menu->addAction( ui.action_Quit );
     myTrayIcon.setContextMenu( menu );
     myTrayIcon.setIcon( QApplication::windowIcon( ) );
 
     connect( &myPrefs, SIGNAL(changed(int)), this, SLOT(refreshPref(int)) );
-    connect( ui.action_ShowMainWindow, SIGNAL(toggled(bool)), this, SLOT(toggleWindows(bool)));
+    connect( ui.action_ShowMainWindow, SIGNAL(triggered(bool)), this, SLOT(toggleWindows(bool)));
     connect( &myTrayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
              this, SLOT(trayActivated(QSystemTrayIcon::ActivationReason)));
 
-    ui.action_ShowMainWindow->setChecked( !minimized );
+    toggleWindows( !minimized );
     ui.action_TrayIcon->setChecked( minimized || prefs.getBool( Prefs::SHOW_TRAY_ICON ) );
 
     ui.verticalLayout->addWidget( createStatusBar( ) );
@@ -277,23 +306,6 @@ TrMainWindow :: TrMainWindow( Session& session, Prefs& prefs, TorrentModel& mode
 
 TrMainWindow :: ~TrMainWindow( )
 {
-}
-
-/****
-*****
-****/
-
-void
-TrMainWindow :: closeEvent( QCloseEvent * event )
-{
-    // if they're using a tray icon, close to the tray
-    // instead of exiting
-    if( !myPrefs.getBool( Prefs :: SHOW_TRAY_ICON ) )
-        event->accept( );
-    else {
-        toggleWindows( false );
-        event->ignore( );
-    }
 }
 
 /****
@@ -531,6 +543,31 @@ void
 TrMainWindow :: setSortAscendingPref( bool b )
 {
     myPrefs.set( Prefs::SORT_REVERSED, b );
+}
+
+/****
+*****
+****/
+
+void
+TrMainWindow :: showEvent( QShowEvent * event )
+{
+    Q_UNUSED (event);
+
+    ui.action_ShowMainWindow->setChecked(true);
+}
+
+/****
+*****
+****/
+
+void
+TrMainWindow :: hideEvent( QHideEvent * event )
+{
+    Q_UNUSED (event);
+
+    if (!isVisible())
+        ui.action_ShowMainWindow->setChecked(false);
 }
 
 /****
@@ -913,7 +950,11 @@ TrMainWindow :: setCompactView( bool visible )
 void
 TrMainWindow :: toggleSpeedMode( )
 {
+    bool mode;
+    
     myPrefs.toggleBool( Prefs :: ALT_SPEED_LIMIT_ENABLED );
+    mode = myPrefs.get<bool>( Prefs::ALT_SPEED_LIMIT_ENABLED );
+    myAltSpeedAction->setIcon( mode ? mySpeedModeOnIcon : mySpeedModeOffIcon );
 }
 void
 TrMainWindow :: setToolbarVisible( bool visible )
@@ -960,7 +1001,7 @@ TrMainWindow :: trayActivated( QSystemTrayIcon::ActivationReason reason )
         if( isMinimized ( ) )
             toggleWindows( true );
         else
-            ui.action_ShowMainWindow->toggle( );
+            toggleWindows( !isVisible() );
     }
 }
 
@@ -1046,6 +1087,7 @@ TrMainWindow :: refreshPref( int key )
             b = myPrefs.getBool( key );
             ui.action_TrayIcon->setChecked( b );
             myTrayIcon.setVisible( b );
+            dynamic_cast<MyApp*>(QCoreApplication::instance())->setQuitOnLastWindowClosed(!b);
             refreshTrayIconSoon( );
             break;
 
@@ -1113,6 +1155,7 @@ TrMainWindow :: openTorrent( )
                                     myPrefs.getString( Prefs::OPEN_DIALOG_FOLDER ),
                                     tr( "Torrent Files (*.torrent);;All Files (*.*)" ) );
     myFileDialog->setFileMode( QFileDialog::ExistingFiles );
+    myFileDialog->setAttribute( Qt::WA_DeleteOnClose );
 
     QCheckBox * button = new QCheckBox( tr( "Show &options dialog" ) );
     button->setChecked( myPrefs.getBool( Prefs::OPTIONS_PROMPT ) );
@@ -1145,11 +1188,12 @@ TrMainWindow :: openURL( QString url )
 {
     bool ok;
     const QString key = QInputDialog::getText( this,
-                                               tr( "Open URL or Magnet Link" ),
+                                               tr( "Open Link" ),
                                                tr( "Open URL or Magnet Link" ),
                                                QLineEdit::Normal,
                                                url,
-                                               &ok );
+                                               &ok,
+                                               Qt::WindowStaysOnTopHint );
     if( ok && !key.isEmpty( ) )
         mySession.addTorrent( key );
 }
@@ -1336,7 +1380,8 @@ TrMainWindow :: dragEnterEvent( QDragEnterEvent * event )
     const QMimeData * mime = event->mimeData( );
 
     if( mime->hasFormat("application/x-bittorrent")
-            || mime->text().trimmed().endsWith(".torrent", Qt::CaseInsensitive) )
+            || mime->text().trimmed().endsWith(".torrent", Qt::CaseInsensitive)
+            || mime->text().startsWith("magnet:", Qt::CaseInsensitive) )
         event->acceptProposedAction();
 }
 

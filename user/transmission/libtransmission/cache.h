@@ -7,7 +7,7 @@
  * This exemption does not extend to derived works not owned by
  * the Transmission project.
  *
- * $Id: cache.h 11782 2011-01-29 18:56:53Z jordan $
+ * $Id: cache.h 13625 2012-12-05 17:29:46Z jordan $
  */
 
 #ifndef __TRANSMISSION__
@@ -60,6 +60,7 @@ int tr_cachePrefetchBlock( tr_cache         * cache,
 /***
 ****
 ***/
+
 int tr_cacheFlushDone( tr_cache * cache );
 
 int tr_cacheFlushTorrent( tr_cache    * cache,

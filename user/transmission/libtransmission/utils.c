@@ -7,7 +7,7 @@
  * This exemption does not extend to derived works not owned by
  * the Transmission project.
  *
- * $Id: utils.c 13362 2012-07-01 03:05:36Z jordan $
+ * $Id: utils.c 13631 2012-12-07 01:53:31Z jordan $
  */
 
 #ifdef HAVE_MEMMEM
@@ -519,13 +519,17 @@ tr_mkdtemp( char * template )
 #endif
 }
 
-int
-tr_mkdir( const char * path,
-          int permissions
-#ifdef WIN32
-                       UNUSED
-#endif
-        )
+/**
+ * @brief Portability wrapper for mkdir ()
+ *
+ * A portability wrapper around mkdir ().
+ * On WIN32, the `permissions' argument is unused.
+ *
+ * @return zero on success, or -1 if an error occurred
+ * (in which case errno is set appropriately).
+ */
+static int
+tr_mkdir (const char * path, int permissions UNUSED)
 {
 #ifdef WIN32
     if( path && isalpha( path[0] ) && path[1] == ':' && !path[2] )

@@ -7,7 +7,7 @@
  * This exemption does not extend to derived works not owned by
  * the Transmission project.
  *
- * $Id: announcer-udp.c 13310 2012-05-20 14:14:59Z jordan $
+ * $Id: announcer-udp.c 13631 2012-12-07 01:53:31Z jordan $
  */
 
 #define __LIBTRANSMISSION_ANNOUNCER_MODULE___

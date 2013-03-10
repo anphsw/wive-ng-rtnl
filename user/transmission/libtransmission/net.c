@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * $Id: net.c 13329 2012-05-30 17:47:29Z jordan $
+ * $Id: net.c 13631 2012-12-07 01:53:31Z jordan $
  *
  * Copyright (c) Transmission authors and contributors
  *
@@ -300,12 +300,16 @@ tr_netOpenPeerUTPSocket( tr_session        * session,
                          tr_port             port,
                          bool                clientIsSeed UNUSED )
 {
-    struct sockaddr_storage ss;
-    socklen_t sslen;
-    sslen = setup_sockaddr( addr, port, &ss );
+  struct UTPSocket * ret = NULL;
 
-    return UTP_Create( tr_utpSendTo, (void*)session,
-                       (struct sockaddr*)&ss, sslen );
+  if (tr_address_is_valid_for_peers (addr, port))
+    {
+    struct sockaddr_storage ss;
+      const socklen_t sslen = setup_sockaddr (addr, port, &ss);
+      ret = UTP_Create (tr_utpSendTo, session, (struct sockaddr*)&ss, sslen);
+    }
+
+  return ret;
 }
 
 static int

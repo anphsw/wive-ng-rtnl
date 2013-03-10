@@ -7,7 +7,7 @@
  * This exemption does not extend to derived works not owned by
  * the Transmission project.
  *
- * $Id: history.c 12328 2011-04-06 23:27:11Z jordan $
+ * $Id: history.c 13625 2012-12-05 17:29:46Z jordan $
  */
 
 #include <assert.h>
@@ -21,9 +21,13 @@ void
 tr_historyAdd( tr_recentHistory * h, time_t now, unsigned int n )
 {
     if( h->slices[h->newest].date == now )
+    {
         h->slices[h->newest].n += n;
-    else {
-        if( ++h->newest == TR_RECENT_HISTORY_PERIOD_SEC ) h->newest = 0;
+    }
+  else
+    {
+      if (++h->newest == TR_RECENT_HISTORY_PERIOD_SEC)
+        h->newest = 0;
         h->slices[h->newest].date = now;
         h->slices[h->newest].n = n;
     }
@@ -43,8 +47,11 @@ tr_historyGet( const tr_recentHistory * h, time_t now, unsigned int sec )
 
         n += h->slices[i].n;
 
-        if( --i == -1 ) i = TR_RECENT_HISTORY_PERIOD_SEC - 1; /* circular history */
-        if( i == h->newest ) break; /* we've come all the way around */
+      if (--i == -1)
+        i = TR_RECENT_HISTORY_PERIOD_SEC - 1; /* circular history */
+
+      if (i == h->newest)
+        break; /* we've come all the way around */
     }
 
     return n;

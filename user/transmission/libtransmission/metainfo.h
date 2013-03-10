@@ -7,7 +7,7 @@
  * This exemption does not extend to derived works not owned by
  * the Transmission project.
  *
- * $Id: metainfo.h 12204 2011-03-22 15:19:54Z jordan $
+ * $Id: metainfo.h 13632 2012-12-09 01:27:01Z jordan $
  */
 
 #ifndef __TRANSMISSION__
@@ -29,9 +29,6 @@ bool  tr_metainfoParse( const tr_session     * session,
 
 void tr_metainfoRemoveSaved( const tr_session * session,
                              const tr_info    * info );
-
-void tr_metainfoMigrate( tr_session * session,
-                         tr_info    * inf );
 
 char* tr_metainfoGetBasename( const tr_info * );
 

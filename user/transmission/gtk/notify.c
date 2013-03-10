@@ -7,7 +7,7 @@
  * This exemption does not extend to derived works not owned by
  * the Transmission project.
  *
- * $Id: notify.c 13265 2012-04-07 00:30:37Z jordan $
+ * $Id: notify.c 13626 2012-12-05 21:26:40Z jordan $
  */
 
 #include <string.h> /* strcmp() */
@@ -33,14 +33,17 @@ typedef struct _TrNotification
     guint    id;
     TrCore * core;
     int      torrent_id;
-} TrNotification;
+}
+TrNotification;
 
 static void
 tr_notification_free( gpointer data )
 {
     TrNotification * n = data;
+
     if( n->core )
         g_object_unref( G_OBJECT( n->core ) );
+
     g_free( n );
 }
 
@@ -49,9 +52,9 @@ get_capabilities_callback( GObject      * source,
                            GAsyncResult * res,
                            gpointer       user_data UNUSED )
 {
-    GVariant  *result;
-    char     **caps;
     int        i;
+  char ** caps;
+  GVariant * result;
 
     result = g_dbus_proxy_call_finish( G_DBUS_PROXY( source ), res, NULL );
     if( !result || !g_variant_is_of_type( result, G_VARIANT_TYPE( "(as)" ) ) )
@@ -70,6 +73,7 @@ get_capabilities_callback( GObject      * source,
             break;
         }
     }
+
     g_free( caps );
     g_variant_unref( result );
 }
@@ -81,8 +85,8 @@ g_signal_callback( GDBusProxy * proxy UNUSED,
                    GVariant   * params,
                    gpointer     user_data UNUSED )
 {
-    TrNotification * n;
     guint id;
+  TrNotification * n;
 
     g_return_if_fail( g_variant_is_of_type( params, G_VARIANT_TYPE( "(u*)" ) ) );
 
@@ -163,8 +167,8 @@ notify_callback( GObject      * source,
                  GAsyncResult * res,
                  gpointer       user_data )
 {
-    TrNotification * n = user_data;
     GVariant * result;
+  TrNotification * n = user_data;
 
     result = g_dbus_proxy_call_finish( G_DBUS_PROXY( source ), res, NULL );
     if( !result || !g_variant_is_of_type( result, G_VARIANT_TYPE( "(u)" ) ) )

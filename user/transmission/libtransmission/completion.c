@@ -7,7 +7,7 @@
  * This exemption does not extend to derived works not owned by
  * the Transmission project.
  *
- * $Id: completion.c 13113 2011-12-22 19:35:13Z jordan $
+ * $Id: completion.c 13625 2012-12-05 17:29:46Z jordan $
  */
 
 #include <assert.h>
@@ -271,8 +271,12 @@ void *
 tr_cpCreatePieceBitfield( const tr_completion * cp, size_t * byte_count )
 {
     void * ret;
+    tr_piece_index_t n;
     tr_bitfield pieces;
-    const tr_piece_index_t n = cp->tor->info.pieceCount;
+
+    assert (tr_torrentHasMetadata (cp->tor));
+
+    n = cp->tor->info.pieceCount;
     tr_bitfieldConstruct( &pieces, n );
 
     if( tr_cpHasAll( cp ) )

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: net.h 12229 2011-03-25 05:34:26Z jordan $
+ * $Id: net.h 13625 2012-12-05 17:29:46Z jordan $
  *
  * Copyright (c) Transmission authors and contributors
  *

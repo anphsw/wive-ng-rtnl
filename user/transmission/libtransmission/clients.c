@@ -7,7 +7,7 @@
  * This exemption does not extend to derived works not owned by
  * the Transmission project.
  *
- * $Id: clients.c 13099 2011-11-22 03:30:37Z livings124 $
+ * $Id: clients.c 13625 2012-12-05 17:29:46Z jordan $
  */
 
 /* thanks amc1! */
@@ -208,6 +208,7 @@ tr_clientForId( char * buf, size_t buflen, const void * id_in )
         else if( !memcmp( id+1, "BB", 2 ) ) four_digits( buf, buflen, "BitBuddy", id+3 );
         else if( !memcmp( id+1, "BE", 2 ) ) four_digits( buf, buflen, "BitTorrent SDK", id+3 );
         else if( !memcmp( id+1, "BG", 2 ) ) four_digits( buf, buflen, "BTGetit", id+3 );
+        else if (!memcmp (id+1, "BH", 2)) four_digits (buf, buflen, "BitZilla", id+3);
         else if( !memcmp( id+1, "BM", 2 ) ) four_digits( buf, buflen, "BitMagnet", id+3 );
         else if( !memcmp( id+1, "BP", 2 ) ) four_digits( buf, buflen, "BitTorrent Pro (Azureus + Spyware)", id+3 );
         else if( !memcmp( id+1, "BX", 2 ) ) four_digits( buf, buflen, "BittorrentX", id+3 );
@@ -258,6 +259,7 @@ tr_clientForId( char * buf, size_t buflen, const void * id_in )
         else if( !memcmp( id+1, "XT", 2 ) ) four_digits( buf, buflen, "XanTorrent", id+3 );
         else if( !memcmp( id+1, "XX", 2 ) ) four_digits( buf, buflen, "Xtorrent", id+3 );
         else if( !memcmp( id+1, "ZT", 2 ) ) four_digits( buf, buflen, "Zip Torrent", id+3 );
+        else if (!memcmp (id+1, "ZO", 2)) four_digits (buf, buflen, "Zona", id+3);
 
         else if( !memcmp( id+1, "AG", 2 ) ) three_digits( buf, buflen, "Ares", id+3 );
         else if( !memcmp( id+1, "A~", 2 ) ) three_digits( buf, buflen, "Ares", id+3 );
@@ -266,6 +268,7 @@ tr_clientForId( char * buf, size_t buflen, const void * id_in )
         else if( !memcmp( id+1, "LT", 2 ) ) three_digits( buf, buflen, "libtorrent (Rasterbar)", id+3 );
         else if( !memcmp( id+1, "lt", 2 ) ) three_digits( buf, buflen, "libTorrent (Rakshasa)", id+3 );
         else if( !memcmp( id+1, "MP", 2 ) ) three_digits( buf, buflen, "MooPolice", id+3 );
+        else if (!memcmp (id+1, "pb", 2)) three_digits (buf, buflen, "pbTorrent", id+3);
         else if( !memcmp( id+1, "TT", 2 ) ) three_digits( buf, buflen, "TuoTu", id+3 );
         else if( !memcmp( id+1, "qB", 2 ) ) three_digits( buf, buflen, "qBittorrent", id+3 );
 
@@ -298,6 +301,10 @@ tr_clientForId( char * buf, size_t buflen, const void * id_in )
                  if( !memcmp( &id[4], "A0B", 3 ) ) tr_snprintf( buf, buflen, "Bits on Wheels 1.0.5" );
             else if( !memcmp( &id[4], "A0C", 3 ) ) tr_snprintf( buf, buflen, "Bits on Wheels 1.0.6" );
             else                                   tr_snprintf( buf, buflen, "Bits on Wheels %c.%c.%c", id[4], id[5], id[5] );
+        }
+        else if (!memcmp (id+1, "MG", 2))
+        {
+            tr_snprintf (buf, buflen, "MediaGet %d.%02d", charint (id[3]), charint (id[4]));
         }
 
         if( *buf )

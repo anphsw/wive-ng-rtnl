@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: tr-core.c 12973 2011-10-11 20:32:15Z jordan $
+ * $Id: tr-core.c 13742 2013-01-03 23:45:38Z jordan $
  *
  * Copyright (c) Transmission authors and contributors
  *
@@ -318,58 +318,105 @@ is_valid_eta( int t )
 static int
 compare_eta( int a, int b )
 {
+  int ret;
+
     const gboolean a_valid = is_valid_eta( a );
     const gboolean b_valid = is_valid_eta( b );
 
-    if( !a_valid && !b_valid ) return 0;
-    if( !a_valid ) return -1;
-    if( !b_valid ) return 1;
-    return a < b ? 1 : -1;
+  if (!a_valid && !b_valid)
+    ret = 0;
+  else if (!a_valid)
+    ret = -1;
+  else if (!b_valid)
+    ret = 1;
+  else
+    ret = a < b ? 1 : -1;
+
+  return ret;
 }
 
 static int
 compare_double( double a, double b )
 {
-    if( a < b ) return -1;
-    if( a > b ) return 1;
-    return 0;
+  int ret;
+
+  if (a < b)
+    ret = -1;
+  else if (a > b)
+    ret = 1;
+  else
+    ret = 0;
+
+  return ret;
 }
 
 static int
 compare_uint64( uint64_t a, uint64_t b )
 {
-    if( a < b ) return -1;
-    if( a > b ) return 1;
-    return 0;
+  int ret;
+
+  if (a < b)
+    ret = -1;
+  else if (a > b)
+    ret = 1;
+  else
+    ret = 0;
+
+  return ret;
 }
 
 static int
 compare_int( int a, int b )
 {
-    if( a < b ) return -1;
-    if( a > b ) return 1;
-    return 0;
+  int ret;
+
+  if (a < b)
+    ret = -1;
+  else if (a > b)
+    ret = 1;
+  else
+    ret = 0;
+
+  return ret;
 }
 
 static int
 compare_ratio( double a, double b )
 {
-    if( (int)a == TR_RATIO_INF && (int)b == TR_RATIO_INF ) return 0;
-    if( (int)a == TR_RATIO_INF ) return 1;
-    if( (int)b == TR_RATIO_INF ) return -1;
-    return compare_double( a, b );
+  int ret;
+
+  if ((int)a == TR_RATIO_INF && (int)b == TR_RATIO_INF)
+    ret = 0;
+  else if ((int)a == TR_RATIO_INF)
+    ret = 1;
+  else if ((int)b == TR_RATIO_INF)
+    ret = -1;
+  else
+    ret = compare_double (a, b);
+
+  return ret;
 }
 
 static int
 compare_time( time_t a, time_t b )
 {
-    if( a < b ) return -1;
-    if( a > b ) return 1;
-    return 0;
+  int ret;
+
+  if (a < b)
+    ret = -1;
+  else if (a > b)
+    ret = 1;
+  else
+    ret = 0;
+
+  return ret;
 }
 
 static int
-compare_by_name( GtkTreeModel * m, GtkTreeIter * a, GtkTreeIter * b, gpointer user_data UNUSED )
+compare_by_name (GtkTreeModel * m,
+                 GtkTreeIter  * a,
+                 GtkTreeIter  * b,
+                 gpointer       user_data UNUSED)
 {
     const char *ca, *cb;
     gtk_tree_model_get( m, a, MC_NAME_COLLATED, &ca, -1 );
@@ -378,7 +425,10 @@ compare_by_name( GtkTreeModel * m, GtkTreeIter * a, GtkTreeIter * b, gpointer us
 }
 
 static int
-compare_by_queue( GtkTreeModel * m, GtkTreeIter * a, GtkTreeIter * b, gpointer user_data UNUSED )
+compare_by_queue (GtkTreeModel * m,
+                  GtkTreeIter  * a,
+                  GtkTreeIter  * b,
+                  gpointer       user_data UNUSED)
 {
     tr_torrent *ta, *tb;
     const tr_stat *sa, *sb;
@@ -403,13 +453,18 @@ compare_by_ratio( GtkTreeModel* m, GtkTreeIter * a, GtkTreeIter * b, gpointer us
     gtk_tree_model_get( m, b, MC_TORRENT, &tb, -1 );
     sb = tr_torrentStatCached( tb );
 
-    if( !ret ) ret = compare_ratio( sa->ratio, sb->ratio );
-    if( !ret ) ret = compare_by_queue( m, a, b, user_data );
+  if (!ret)
+    ret = compare_ratio (sa->ratio, sb->ratio);
+  if (!ret)
+    ret = compare_by_queue (m, a, b, user_data);
     return ret;
 }
 
 static int
-compare_by_activity( GtkTreeModel * m, GtkTreeIter * a, GtkTreeIter * b, gpointer user_data )
+compare_by_activity (GtkTreeModel * m,
+                     GtkTreeIter  * a,
+                     GtkTreeIter  * b,
+                     gpointer       user_data)
 {
     int ret = 0;
     tr_torrent *ta, *tb;
@@ -427,14 +482,21 @@ compare_by_activity( GtkTreeModel * m, GtkTreeIter * a, GtkTreeIter * b, gpointe
     sa = tr_torrentStatCached( ta );
     sb = tr_torrentStatCached( tb );
 
-    if( !ret ) ret = compare_double( aUp+aDown, bUp+bDown );
-    if( !ret ) ret = compare_uint64( sa->uploadedEver, sb->uploadedEver );
-    if( !ret ) ret = compare_by_queue( m, a, b, user_data );
+  if (!ret)
+    ret = compare_double (aUp+aDown, bUp+bDown);
+  if (!ret)
+    ret = compare_uint64 (sa->uploadedEver, sb->uploadedEver);
+  if (!ret)
+    ret = compare_by_queue (m, a, b, user_data);
+
     return ret;
 }
 
 static int
-compare_by_age( GtkTreeModel * m, GtkTreeIter * a, GtkTreeIter * b, gpointer u )
+compare_by_age (GtkTreeModel * m,
+                GtkTreeIter  * a,
+                GtkTreeIter  * b,
+                gpointer       u)
 {
     int ret = 0;
     tr_torrent *ta, *tb;
@@ -442,14 +504,21 @@ compare_by_age( GtkTreeModel * m, GtkTreeIter * a, GtkTreeIter * b, gpointer u )
     gtk_tree_model_get( m, a, MC_TORRENT, &ta, -1 );
     gtk_tree_model_get( m, b, MC_TORRENT, &tb, -1 );
 
-    if( !ret ) ret = compare_time( tr_torrentStatCached( ta )->addedDate,
+  if (!ret)
+    ret = compare_time (tr_torrentStatCached (ta)->addedDate,
                                    tr_torrentStatCached( tb )->addedDate );
-    if( !ret ) ret = compare_by_name( m, a, b, u );
+
+  if (!ret)
+    ret = compare_by_name (m, a, b, u);
+
     return ret;
 }
 
 static int
-compare_by_size( GtkTreeModel * m, GtkTreeIter * a, GtkTreeIter * b, gpointer u )
+compare_by_size (GtkTreeModel * m,
+                 GtkTreeIter  * a,
+                 GtkTreeIter  * b,
+                 gpointer       u)
 {
     int ret = 0;
     tr_torrent *t;
@@ -460,13 +529,19 @@ compare_by_size( GtkTreeModel * m, GtkTreeIter * a, GtkTreeIter * b, gpointer u 
     gtk_tree_model_get( m, b, MC_TORRENT, &t, -1 );
     ib = tr_torrentInfo( t );
 
-    if( !ret ) ret = compare_uint64( ia->totalSize, ib->totalSize );
-    if( !ret ) ret = compare_by_name( m, a, b, u );
+  if (!ret)
+    ret = compare_uint64 (ia->totalSize, ib->totalSize);
+  if (!ret)
+    ret = compare_by_name (m, a, b, u);
+
     return ret;
 }
 
 static int
-compare_by_progress( GtkTreeModel * m, GtkTreeIter * a, GtkTreeIter * b, gpointer u )
+compare_by_progress (GtkTreeModel * m,
+                     GtkTreeIter  * a,
+                     GtkTreeIter  * b,
+                     gpointer       u)
 {
     int ret = 0;
     tr_torrent * t;
@@ -477,14 +552,21 @@ compare_by_progress( GtkTreeModel * m, GtkTreeIter * a, GtkTreeIter * b, gpointe
     gtk_tree_model_get( m, b, MC_TORRENT, &t, -1 );
     sb = tr_torrentStatCached( t );
 
-    if( !ret ) ret = compare_double( sa->percentComplete, sb->percentComplete );
-    if( !ret ) ret = compare_double( sa->seedRatioPercentDone, sb->seedRatioPercentDone );
-    if( !ret ) ret = compare_by_ratio( m, a, b, u );
+  if (!ret)
+    ret = compare_double (sa->percentComplete, sb->percentComplete);
+  if (!ret)
+    ret = compare_double (sa->seedRatioPercentDone, sb->seedRatioPercentDone);
+  if (!ret)
+    ret = compare_by_ratio (m, a, b, u);
+
     return ret;
 }
 
 static int
-compare_by_eta( GtkTreeModel * m, GtkTreeIter  * a, GtkTreeIter  * b, gpointer u )
+compare_by_eta (GtkTreeModel * m,
+                GtkTreeIter  * a,
+                GtkTreeIter  * b,
+                gpointer       u)
 {
     int ret = 0;
     tr_torrent *ta, *tb;
@@ -492,14 +574,21 @@ compare_by_eta( GtkTreeModel * m, GtkTreeIter  * a, GtkTreeIter  * b, gpointer u
     gtk_tree_model_get( m, a, MC_TORRENT, &ta, -1 );
     gtk_tree_model_get( m, b, MC_TORRENT, &tb, -1 );
 
-    if( !ret ) ret = compare_eta( tr_torrentStatCached( ta )->eta,
+  if (!ret)
+    ret = compare_eta (tr_torrentStatCached (ta)->eta,
                                   tr_torrentStatCached( tb )->eta );
-    if( !ret ) ret = compare_by_name( m, a, b, u );
+
+  if (!ret)
+    ret = compare_by_name (m, a, b, u);
+
     return ret;
 }
 
 static int
-compare_by_state( GtkTreeModel * m, GtkTreeIter * a, GtkTreeIter * b, gpointer u )
+compare_by_state (GtkTreeModel * m,
+                  GtkTreeIter  * a,
+                  GtkTreeIter  * b,
+                  gpointer       u)
 {
     int ret = 0;
     int sa, sb;
@@ -508,8 +597,11 @@ compare_by_state( GtkTreeModel * m, GtkTreeIter * a, GtkTreeIter * b, gpointer u
     gtk_tree_model_get( m, a, MC_ACTIVITY, &sa, MC_TORRENT, &ta, -1 );
     gtk_tree_model_get( m, b, MC_ACTIVITY, &sb, MC_TORRENT, &tb, -1 );
 
-    if( !ret ) ret = compare_int( sa, sb );
-    if( !ret ) ret = compare_by_queue( m, a, b, u );
+  if (!ret)
+    ret = compare_int (sa, sb);
+  if (!ret)
+    ret = compare_by_queue (m, a, b, u);
+
     return ret;
 }
 
@@ -618,7 +710,6 @@ core_watchdir_idle( gpointer gcore )
         return TRUE;
     core->priv->monitor_idle_tag = 0;
     return FALSE;
-
 }
 
 /* If this file is a torrent, add it to our list */
@@ -637,7 +728,9 @@ core_watchdir_monitor_file( TrCore * core, GFile * file )
         for( l=p->monitor_files; l!=NULL; l=l->next )
             if( g_file_equal( file, l->data ) )
                 break;
-        if( l == NULL ) {
+
+      if (l == NULL)
+        {
             g_object_ref( file );
             p->monitor_files = g_slist_prepend( p->monitor_files, file );
             if( p->monitor_idle_tag == 0 )
@@ -724,8 +817,8 @@ core_watchdir_update( TrCore * core )
 static void
 on_pref_changed( TrCore * core, const char * key, gpointer data UNUSED )
 {
-    if( !strcmp( key, PREF_KEY_SORT_MODE )
-      || !strcmp( key, PREF_KEY_SORT_REVERSED ) )
+  if (!strcmp (key, PREF_KEY_SORT_MODE) ||
+      !strcmp (key, PREF_KEY_SORT_REVERSED))
     {
         const char * mode = gtr_pref_string_get( PREF_KEY_SORT_MODE );
         gboolean is_reversed = gtr_pref_flag_get( PREF_KEY_SORT_REVERSED );
@@ -875,10 +968,12 @@ on_torrent_metadata_changed_idle( gpointer gdata )
     tr_torrent * tor = tr_torrentFindFromId( session, data->torrent_id );
 
     /* update the torrent's collated name */
-    if( tor != NULL ) {
+  if (tor != NULL)
+    {
         GtkTreeIter iter;
         GtkTreeModel * model = core_raw_model( data->core );
-        if( find_row_from_torrent_id( model, data->torrent_id, &iter ) ) {
+      if (find_row_from_torrent_id (model, data->torrent_id, &iter))
+        {
             const char * collated = get_collated_name( data->core, tor );
             GtkListStore * store = GTK_LIST_STORE( model );
             gtk_list_store_set( store, &iter, MC_NAME_COLLATED, collated, -1 );
@@ -984,11 +1079,14 @@ core_create_new_torrent( TrCore * core, tr_ctor * ctor )
     {
         const char * config = tr_sessionGetConfigDir( session );
         const char * source = tr_ctorGetSourceFile( ctor );
-        const int is_internal = source && ( strstr( source, config ) == source );
 
+      if (source != NULL)
+        {
         /* #1294: don't delete the .torrent file if it's our internal copy */
+          const int is_internal = (strstr (source, config) == source);
         if( !is_internal )
             gtr_file_trash_or_remove( source );
+    }
     }
 
     return tor;
@@ -1018,8 +1116,11 @@ core_add_ctor( TrCore * core, tr_ctor * ctor,
 
         default:
             if( do_prompt )
+          {
                 g_signal_emit( core, signals[ADD_PROMPT_SIGNAL], 0, ctor );
-            else {
+          }
+        else
+          {
                 gtr_core_add_torrent( core, core_create_new_torrent( core, ctor ), do_notify );
                 tr_ctorFree( ctor );
             }
@@ -1037,16 +1138,13 @@ core_apply_defaults( tr_ctor * ctor )
         tr_ctorSetPaused( ctor, TR_FORCE, !gtr_pref_flag_get( TR_PREFS_KEY_START ) );
 
     if( tr_ctorGetDeleteSource( ctor, NULL ) )
-        tr_ctorSetDeleteSource( ctor,
-                               gtr_pref_flag_get( TR_PREFS_KEY_TRASH_ORIGINAL ) );
+    tr_ctorSetDeleteSource (ctor, gtr_pref_flag_get (TR_PREFS_KEY_TRASH_ORIGINAL));
 
     if( tr_ctorGetPeerLimit( ctor, TR_FORCE, NULL ) )
-        tr_ctorSetPeerLimit( ctor, TR_FORCE,
-                             gtr_pref_int_get( TR_PREFS_KEY_PEER_LIMIT_TORRENT ) );
+    tr_ctorSetPeerLimit (ctor, TR_FORCE, gtr_pref_int_get (TR_PREFS_KEY_PEER_LIMIT_TORRENT));
 
     if( tr_ctorGetDownloadDir( ctor, TR_FORCE, NULL ) )
-        tr_ctorSetDownloadDir( ctor, TR_FORCE,
-                               gtr_pref_string_get( TR_PREFS_KEY_DOWNLOAD_DIR ) );
+    tr_ctorSetDownloadDir (ctor, TR_FORCE, gtr_pref_string_get (TR_PREFS_KEY_DOWNLOAD_DIR));
 }
 
 void
@@ -1117,7 +1215,8 @@ add_file( TrCore      * core,
         tr_ctorSetPaused( ctor, TR_FORCE, !do_start );
 
         /* local files... */
-        if( !tried ) {
+      if (!tried)
+        {
             char * str = g_file_get_path( file );
             if(( tried = g_file_test( str, G_FILE_TEST_EXISTS )))
                loaded = !tr_ctorSetMetainfoFromFile( ctor, str );
@@ -1125,7 +1224,8 @@ add_file( TrCore      * core,
         }
 
         /* magnet links... */
-        if( !tried && g_file_has_uri_scheme( file, "magnet" ) ) {
+      if (!tried && g_file_has_uri_scheme (file, "magnet"))
+        {
             /* GFile mangles the original string with /// so we have to un-mangle */
             char * str = g_file_get_parse_name( file );
             char * magnet = g_strdup_printf( "magnet:%s", strchr( str, '?' ) );
@@ -1136,9 +1236,11 @@ add_file( TrCore      * core,
         }
 
         /* hashcodes that we can turn into magnet links... */
-        if( !tried ) {
+      if (!tried)
+        {
             char * str = g_file_get_basename( file );
-            if( gtr_is_hex_hashcode( str ) ) {
+          if (gtr_is_hex_hashcode (str))
+            {
                 char * magnet = g_strdup_printf( "magnet:?xt=urn:btih:%s", str );
                 tried = true;
                 loaded = !tr_ctorSetMetainfoFromMagnetLink( ctor, magnet );
@@ -1270,11 +1372,18 @@ gtr_core_clear( TrCore * self )
 static int
 gtr_compare_double( const double a, const double b, int decimal_places )
 {
+  int ret;
     const int64_t ia = (int64_t)(a * pow( 10, decimal_places ) );
     const int64_t ib = (int64_t)(b * pow( 10, decimal_places ) );
-    if( ia < ib ) return -1;
-    if( ia > ib ) return  1;
-    return 0;
+
+  if (ia < ib)
+    ret = -1;
+  else if (ia > ib)
+    ret = 1;
+  else
+    ret = 0;
+
+  return ret;
 }
 
 static void
@@ -1408,8 +1517,11 @@ gtr_inhibit_hibernation( guint * cookie )
 
     /* logging */
     if( success )
+    {
         tr_inf( "%s", _( "Inhibiting desktop hibernation" ) );
-    else {
+    }
+  else
+    {
         tr_err( _( "Couldn't inhibit desktop hibernation: %s" ), err->message );
         g_error_free( err );
     }
@@ -1443,8 +1555,11 @@ gtr_uninhibit_hibernation( guint inhibit_cookie )
 
     /* logging */
     if( err == NULL )
+    {
         tr_inf( "%s", _( "Allowing desktop hibernation" ) );
-    else {
+    }
+  else
+    {
         g_warning( "Couldn't uninhibit desktop hibernation: %s.", err->message );
         g_error_free( err );
     }
@@ -1468,8 +1583,7 @@ gtr_core_set_hibernation_allowed( TrCore * core, gboolean allowed )
         core->priv->have_inhibit_cookie = FALSE;
     }
 
-    if( !allowed
-      && !core->priv->have_inhibit_cookie
+  if (!allowed && !core->priv->have_inhibit_cookie
       && !core->priv->dbus_error )
     {
         if( gtr_inhibit_hibernation( &core->priv->inhibit_cookie ) )
@@ -1575,7 +1689,8 @@ core_read_rpc_response_idle( void * vresponse )
     {
         const int tag = (int)intVal;
         struct pending_request_data * data = g_hash_table_lookup( pendingRequests, &tag );
-        if( data ) {
+      if (data)
+        {
             if( data->response_func )
                 (*data->response_func)(data->core, &top, data->response_func_user_data );
             g_hash_table_remove( pendingRequests, &tag );
@@ -1754,9 +1869,13 @@ gtr_core_open_folder( TrCore * core, int torrent_id )
     {
         const gboolean single = tr_torrentInfo( tor )->fileCount == 1;
         const char * currentDir = tr_torrentGetCurrentDir( tor );
+
         if( single )
+        {
             gtr_open_file( currentDir );
-        else {
+        }
+      else
+        {
             char * path = g_build_filename( currentDir, tr_torrentName( tor ), NULL );
             gtr_open_file( path );
             g_free( path );

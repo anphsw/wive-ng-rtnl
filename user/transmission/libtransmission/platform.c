@@ -7,7 +7,7 @@
  * This exemption does not extend to derived works not owned by
  * the Transmission project.
  *
- * $Id: platform.c 12684 2011-08-15 00:10:06Z livings124 $
+ * $Id: platform.c 13743 2013-01-03 23:46:35Z jordan $
  */
 
 #ifdef WIN32
@@ -125,8 +125,7 @@ ThreadFunc( void * _t )
 }
 
 tr_thread *
-tr_threadNew( void   ( *func )(void *),
-              void * arg )
+tr_threadNew (void (*func)(void *), void * arg)
 {
     tr_thread * t = tr_new0( tr_thread, 1 );
 
@@ -136,15 +135,12 @@ tr_threadNew( void   ( *func )(void *),
 #ifdef WIN32
     {
         unsigned int id;
-        t->thread_handle =
-            (HANDLE) _beginthreadex( NULL, 0, &ThreadFunc, t, 0,
-                                     &id );
+    t->thread_handle = (HANDLE) _beginthreadex (NULL, 0, &ThreadFunc, t, 0, &id);
         t->thread = (DWORD) id;
     }
 #else
     pthread_create( &t->thread, NULL, (void*(*)(void*))ThreadFunc, t );
     pthread_detach( t->thread );
-
 #endif
 
     return t;
@@ -203,9 +199,9 @@ tr_lockLock( tr_lock * l )
 #else
     pthread_mutex_lock( &l->lock );
 #endif
+
     assert( l->depth >= 0 );
-    if( l->depth )
-        assert( tr_areThreadsEqual( l->lockThread, tr_getCurrentThread( ) ) );
+  assert (!l->depth || tr_areThreadsEqual (l->lockThread, tr_getCurrentThread ()));
     l->lockThread = tr_getCurrentThread( );
     ++l->depth;
 }
@@ -213,8 +209,8 @@ tr_lockLock( tr_lock * l )
 int
 tr_lockHave( const tr_lock * l )
 {
-    return ( l->depth > 0 )
-           && ( tr_areThreadsEqual( l->lockThread, tr_getCurrentThread( ) ) );
+  return (l->depth > 0) &&
+         (tr_areThreadsEqual (l->lockThread, tr_getCurrentThread ()));
 }
 
 void
@@ -337,8 +333,7 @@ getOldCacheDir( void )
 }
 
 static void
-moveFiles( const char * oldDir,
-           const char * newDir )
+moveFiles (const char * oldDir, const char * newDir)
 {
     if( oldDir && newDir && strcmp( oldDir, newDir ) )
     {
@@ -362,8 +357,8 @@ moveFiles( const char * oldDir,
             }
 
             if( count )
-                tr_inf( _( "Migrated %1$d files from \"%2$s\" to \"%3$s\"" ),
-                        count, oldDir, newDir );
+            tr_inf (_("Migrated %1$d files from \"%2$s\" to \"%3$s\""), count, oldDir, newDir);
+
             closedir( dirh );
         }
     }
@@ -384,6 +379,7 @@ migrateFiles( const tr_session * session )
     {
         const char * oldDir;
         const char * newDir;
+
         migrated = true;
 
         oldDir = getOldTorrentsDir( );
@@ -449,8 +445,7 @@ tr_getDefaultConfigDir( const char * appname )
         else
         {
 #ifdef SYS_DARWIN
-            s = tr_buildPath( getHomeDir( ), "Library", "Application Support",
-                              appname, NULL );
+          s = tr_buildPath (getHomeDir (), "Library", "Application Support", appname, NULL);
 #elif defined( WIN32 )
             char appdata[TR_PATH_MAX]; /* SHGetFolderPath() requires MAX_PATH */
             SHGetFolderPath( NULL, CSIDL_APPDATA, NULL, 0, appdata );
@@ -507,6 +502,8 @@ tr_getDefaultDownloadDir( void )
 
                     if( !memcmp( value, "$HOME/", 6 ) )
                         user_dir = tr_buildPath( getHomeDir( ), value+6, NULL );
+                  else if (!strcmp (value, "$HOME"))
+                    user_dir = tr_strdup (getHomeDir ());
                     else
                         user_dir = tr_strdup( value );
                 }
@@ -539,6 +536,7 @@ isWebClientDir( const char * path )
     const int ret = !stat( tmp, &sb );
     tr_inf( _( "Searching for web interface file \"%s\"" ), tmp );
     tr_free( tmp );
+
     return ret;
 }
 
@@ -565,7 +563,8 @@ tr_getWebClientDir( const tr_session * session UNUSED )
             /* Look in the Application Support folder */
             s = tr_buildPath( tr_sessionGetConfigDir( session ), "web", NULL );
 
-            if( !isWebClientDir( s ) ) {
+          if (!isWebClientDir (s))
+            {
                 tr_free( s );
 
                 CFURLRef appURL = CFBundleCopyBundleURL( CFBundleGetMainBundle( ) );
@@ -582,7 +581,8 @@ tr_getWebClientDir( const tr_session * session UNUSED )
 
                 /* Fallback to the app bundle */
                 s = tr_buildPath( appString, "Contents", "Resources", "web", NULL );
-                if( !isWebClientDir( s ) ) {
+              if (!isWebClientDir (s))
+                {
                     tr_free( s );
                     s = NULL;
                 }
@@ -598,31 +598,34 @@ tr_getWebClientDir( const tr_session * session UNUSED )
             /* Generally, Web interface should be stored in a Web subdir of
              * calling executable dir. */
 
-            if( s == NULL ) {
-                /* First, we should check personal AppData/Transmission/Web */
+          if (s == NULL) /* check personal AppData/Transmission/Web */
+            {
                 SHGetFolderPath( NULL, CSIDL_COMMON_APPDATA, NULL, 0, dir );
                 s = tr_buildPath( dir, "Transmission", "Web", NULL );
-                if( !isWebClientDir( s ) ) {
+              if (!isWebClientDir (s))
+                {
                     tr_free( s );
                     s = NULL;
                 }
             }
 
-            if( s == NULL ) {
-                /* check personal AppData */
+          if (s == NULL) /* check personal AppData */
+            {
                 SHGetFolderPath( NULL, CSIDL_APPDATA, NULL, 0, dir );
                 s = tr_buildPath( dir, "Transmission", "Web", NULL );
-                if( !isWebClientDir( s ) ) {
+              if (!isWebClientDir (s))
+                {
                     tr_free( s );
                     s = NULL;
                 }
             }
 
-            if( s == NULL) {
-                /* check calling module place */
+            if (s == NULL) /* check calling module place */
+              {
                 GetModuleFileName( GetModuleHandle( NULL ), dir, sizeof( dir ) );
                 s = tr_buildPath( dirname( dir ), "Web", NULL );
-                if( !isWebClientDir( s ) ) {
+                if (!isWebClientDir (s))
+                  {
                     tr_free( s );
                     s = NULL;
                 }
@@ -636,8 +639,11 @@ tr_getWebClientDir( const tr_session * session UNUSED )
             /* XDG_DATA_HOME should be the first in the list of candidates */
             tmp = getenv( "XDG_DATA_HOME" );
             if( tmp && *tmp )
+            {
                 tr_list_append( &candidates, tr_strdup( tmp ) );
-            else {
+            }
+          else
+            {
                 char * dhome = tr_buildPath( getHomeDir( ), ".local", "share", NULL );
                 tr_list_append( &candidates, dhome );
             }
@@ -649,13 +655,17 @@ tr_getWebClientDir( const tr_session * session UNUSED )
                 const char * fallback = "/usr/local/share:/usr/share";
                 char * buf = tr_strdup_printf( "%s:%s:%s", (pkg?pkg:""), (xdg?xdg:""), fallback );
                 tmp = buf;
-                while( tmp && *tmp ) {
+            while (tmp && *tmp)
+              {
                     const char * end = strchr( tmp, ':' );
-                    if( end ) {
+                if (end)
+                  {
                         if( ( end - tmp ) > 1 )
                             tr_list_append( &candidates, tr_strndup( tmp, end - tmp ) );
                         tmp = end + 1;
-                    } else if( tmp && *tmp ) {
+                  }
+                else if (tmp && *tmp)
+                  {
                         tr_list_append( &candidates, tr_strdup( tmp ) );
                         break;
                     }
@@ -664,10 +674,12 @@ tr_getWebClientDir( const tr_session * session UNUSED )
             }
 
             /* walk through the candidates & look for a match */
-            for( l=candidates; l; l=l->next ) {
+          for (l=candidates; l; l=l->next)
+            {
                 char * path = tr_buildPath( l->data, "transmission", "web", NULL );
                 const int found = isWebClientDir( path );
-                if( found ) {
+              if (found)
+                {
                     s = path;
                     break;
                 }
@@ -712,8 +724,7 @@ tr_getFreeSpace( const char * path )
 #ifdef WIN32
 
 /* The following mmap functions are by Joerg Walter, and were taken from
- * his paper at: http://www.genesys-e.de/jwalter/mix4win.htm
- */
+ * his paper at: http://www.genesys-e.de/jwalter/mix4win.htm */
 
 #if defined(_MSC_VER)
 __declspec( align( 4 ) ) static LONG volatile g_sl;
@@ -751,6 +762,7 @@ getpagesize( void )
         GetSystemInfo ( &system_info );
         g_pagesize = system_info.dwPageSize;
     }
+
     return g_pagesize;
 }
 
@@ -765,36 +777,33 @@ getregionsize( void )
         GetSystemInfo ( &system_info );
         g_regionsize = system_info.dwAllocationGranularity;
     }
+
     return g_regionsize;
 }
 
 void *
-mmap( void *ptr,
-      long  size,
-      long  prot,
-      long  type,
-      long  handle,
-      long  arg )
+mmap (void *ptr, long  size, long  prot, long  type, long  handle, long  arg)
 {
     static long g_pagesize;
     static long g_regionsize;
 
     /* Wait for spin lock */
     slwait ( &g_sl );
+
     /* First time initialization */
     if( !g_pagesize )
         g_pagesize = getpagesize ( );
     if( !g_regionsize )
         g_regionsize = getregionsize ( );
+
     /* Allocate this */
-    ptr = VirtualAlloc ( ptr, size,
-                         MEM_RESERVE | MEM_COMMIT | MEM_TOP_DOWN,
-                         PAGE_READWRITE );
+  ptr = VirtualAlloc (ptr, size, MEM_RESERVE | MEM_COMMIT | MEM_TOP_DOWN, PAGE_READWRITE);
     if( !ptr )
     {
         ptr = (void *) -1;
         goto mmap_exit;
     }
+
 mmap_exit:
     /* Release spin lock */
     slrelease ( &g_sl );
@@ -802,8 +811,7 @@ mmap_exit:
 }
 
 long
-munmap( void *ptr,
-        long  size )
+munmap (void *ptr, long size)
 {
     static long g_pagesize;
     static long g_regionsize;
@@ -811,16 +819,19 @@ munmap( void *ptr,
 
     /* Wait for spin lock */
     slwait ( &g_sl );
+
     /* First time initialization */
     if( !g_pagesize )
         g_pagesize = getpagesize ( );
     if( !g_regionsize )
         g_regionsize = getregionsize ( );
+
     /* Free this */
-    if( !VirtualFree ( ptr, 0,
-                       MEM_RELEASE ) )
+  if (!VirtualFree (ptr, 0, MEM_RELEASE))
         goto munmap_exit;
+
     rc = 0;
+
 munmap_exit:
     /* Release spin lock */
     slrelease ( &g_sl );

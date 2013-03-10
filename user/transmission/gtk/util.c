@@ -7,13 +7,13 @@
  * This exemption does not extend to derived works not owned by
  * the Transmission project.
  *
- * $Id: util.c 13195 2012-02-03 21:21:52Z jordan $
+ * $Id: util.c 13625 2012-12-05 17:29:46Z jordan $
  */
 
 #include <ctype.h> /* isxdigit() */
 #include <errno.h>
 #include <stdarg.h>
-#include <string.h> /* strchr(), strrchr(), strlen(), strncmp(), strstr() */
+#include <string.h> /* strchr (), strrchr (), strlen (), strstr () */
 
 #include <gtk/gtk.h>
 #include <glib/gi18n.h>
@@ -170,15 +170,17 @@ gtr_get_host_from_url( char * buf, size_t buflen, const char * url )
 static gboolean
 gtr_is_supported_url( const char * str )
 {
-    return !strncmp( str, "ftp://", 6 )
-        || !strncmp( str, "http://", 7 )
-        || !strncmp( str, "https://", 8 );
+    return ((str != NULL) &&
+           (g_str_has_prefix (str, "ftp://") ||
+               g_str_has_prefix (str, "http://") ||
+               g_str_has_prefix (str, "https://")));
 }
 
 gboolean
 gtr_is_magnet_link( const char * str )
 {
-    return !strncmp( str, "magnet:?", 8 );
+    return (str != NULL) &&
+         (g_str_has_prefix (str, "magnet:?"));
 }
 
 gboolean
@@ -299,8 +301,12 @@ on_tree_view_button_released( GtkWidget *      view,
 int
 gtr_file_trash_or_remove( const char * filename )
 {
+    GFile * file;
     gboolean trashed = FALSE;
-    GFile * file = g_file_new_for_path( filename );
+
+    g_return_val_if_fail (filename && *filename, 0);
+
+    file = g_file_new_for_path (filename);
 
     if( gtr_pref_flag_get( PREF_KEY_TRASH_CAN_ENABLED ) ) {
         GError * err = NULL;
@@ -472,26 +478,6 @@ gtr_priority_combo_new( void )
 ****
 ***/
 
-GtkWidget*
-gtr_hbox_new( gboolean homogenous UNUSED, gint spacing )
-{
-#if GTK_CHECK_VERSION( 3,2,0 )
-    return gtk_box_new( GTK_ORIENTATION_HORIZONTAL, spacing );
-#else
-    return gtk_hbox_new( homogenous, spacing );
-#endif
-}
-
-GtkWidget*
-gtr_vbox_new( gboolean homogenous UNUSED, gint spacing )
-{
-#if GTK_CHECK_VERSION( 3,2,0 )
-    return gtk_box_new( GTK_ORIENTATION_VERTICAL, spacing );
-#else
-    return gtk_vbox_new( homogenous, spacing );
-#endif
-}
-
 #define GTR_CHILD_HIDDEN "gtr-child-hidden"
 
 void
@@ -600,8 +586,8 @@ gtr_paste_clipboard_url_into_entry( GtkWidget * e )
   size_t i;
 
   char * text[] = {
-    gtk_clipboard_wait_for_text( gtk_clipboard_get( GDK_SELECTION_PRIMARY ) ),
-    gtk_clipboard_wait_for_text( gtk_clipboard_get( GDK_SELECTION_CLIPBOARD ) )
+    g_strstrip (gtk_clipboard_wait_for_text (gtk_clipboard_get (GDK_SELECTION_PRIMARY))),
+    g_strstrip (gtk_clipboard_wait_for_text (gtk_clipboard_get (GDK_SELECTION_CLIPBOARD)))
   };
 
   for( i=0; i<G_N_ELEMENTS(text); ++i ) {

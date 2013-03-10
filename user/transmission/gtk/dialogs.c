@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: dialogs.c 12412 2011-05-02 17:58:27Z jordan $
+ * $Id: dialogs.c 13625 2012-12-05 17:29:46Z jordan $
  *
  * Copyright (c) Transmission authors and contributors
  *

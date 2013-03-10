@@ -7,7 +7,7 @@
  * This exemption does not extend to derived works not owned by
  * the Transmission project.
  *
- * $Id: bencode.c 13198 2012-02-04 00:34:39Z jordan $
+ * $Id: bencode.c 13918 2013-02-01 18:45:23Z jordan $
  */
 
 #include <assert.h>
@@ -165,7 +165,7 @@ static int
 makeroom( tr_benc * val,
           size_t    count )
 {
-    assert( TR_TYPE_LIST == val->type || TR_TYPE_DICT == val->type );
+    assert (isContainer (val));
 
     if( val->val.l.count + count > val->val.l.alloc )
     {
@@ -1552,6 +1552,8 @@ tr_bencMergeDicts( tr_benc * target, const tr_benc * source )
     assert( tr_bencIsDict( target ) );
     assert( tr_bencIsDict( source ) );
 
+    tr_bencDictReserve (target, sourceCount + tr_bencDictSize(target));
+
     for( i=0; i<sourceCount; ++i )
     {
         const char * key;
@@ -1619,6 +1621,10 @@ struct evbuffer *
 tr_bencToBuf( const tr_benc * top, tr_fmt_mode mode )
 {
     struct evbuffer * buf = evbuffer_new( );
+    char lc_numeric[128];
+
+    tr_strlcpy (lc_numeric, setlocale (LC_NUMERIC, NULL), sizeof (lc_numeric));
+    setlocale (LC_NUMERIC, "C");
 
     evbuffer_expand( buf, 4096 ); /* alloc a little memory to start off with */
 
@@ -1641,6 +1647,7 @@ tr_bencToBuf( const tr_benc * top, tr_fmt_mode mode )
         }
     }
 
+    setlocale (LC_NUMERIC, lc_numeric);
     return buf;
 }
 

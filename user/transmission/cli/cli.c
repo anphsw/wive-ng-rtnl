@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cli.c 13195 2012-02-03 21:21:52Z jordan $
+ * $Id: cli.c 13794 2013-01-16 00:28:11Z jordan $
  *
  * Copyright (c) Transmission authors and contributors
  *
@@ -67,9 +67,9 @@
 #define MY_READABLE_NAME "transmission-cli"
 
 static bool showVersion              = false;
-static bool verify                   = 0;
-static sig_atomic_t gotsig           = 0;
-static sig_atomic_t manualUpdate     = 0;
+static bool verify                   = false;
+static sig_atomic_t gotsig           = false;
+static sig_atomic_t manualUpdate     = false;
 
 static const char * torrentPath  = NULL;
 
@@ -109,9 +109,7 @@ static int parseCommandLine( tr_benc*, int argc, const char ** argv );
 static void         sigHandler( int signal );
 
 static char*
-tr_strlratio( char * buf,
-              double ratio,
-              size_t buflen )
+tr_strlratio (char * buf, double ratio, size_t buflen)
 {
     if( (int)ratio == TR_RATIO_NA )
         tr_strlcpy( buf, _( "None" ), buflen );
@@ -123,6 +121,7 @@ tr_strlratio( char * buf,
         tr_snprintf( buf, buflen, "%.1f", ratio );
     else
         tr_snprintf( buf, buflen, "%.0f", ratio );
+
     return buf;
 }
 
@@ -146,18 +145,18 @@ getStatusStr( const tr_stat * st,
               char *          buf,
               size_t          buflen )
 {
-    if( st->activity & TR_STATUS_CHECK_WAIT )
+  if (st->activity == TR_STATUS_CHECK_WAIT)
     {
         tr_snprintf( buf, buflen, "Waiting to verify local files" );
     }
-    else if( st->activity & TR_STATUS_CHECK )
+  else if (st->activity == TR_STATUS_CHECK)
     {
         tr_snprintf( buf, buflen,
                      "Verifying local files (%.2f%%, %.2f%% valid)",
                      tr_truncd( 100 * st->recheckProgress, 2 ),
                      tr_truncd( 100 * st->percentDone, 2 ) );
     }
-    else if( st->activity & TR_STATUS_DOWNLOAD )
+  else if (st->activity == TR_STATUS_DOWNLOAD)
     {
         char upStr[80];
         char dnStr[80];
@@ -177,7 +176,7 @@ getStatusStr( const tr_stat * st,
             st->peersGettingFromUs, upStr,
             ratioStr );
     }
-    else if( st->activity & TR_STATUS_SEED )
+  else if (st->activity == TR_STATUS_SEED)
     {
         char upStr[80];
         char ratioStr[80];
@@ -189,7 +188,10 @@ getStatusStr( const tr_stat * st,
                      "Seeding, uploading to %d of %d peer(s), %s [%s]",
                      st->peersGettingFromUs, st->peersConnected, upStr, ratioStr );
     }
-    else *buf = '\0';
+  else
+    {
+      *buf = '\0';
+    }
 }
 
 static const char*
@@ -200,8 +202,10 @@ getConfigDir( int argc, const char ** argv )
     const char * optarg;
     const int ind = tr_optind;
 
-    while(( c = tr_getopt( getUsage( ), argc, argv, options, &optarg ))) {
-        if( c == 'g' ) {
+  while ((c = tr_getopt (getUsage (), argc, argv, options, &optarg)))
+    {
+      if (c == 'g')
+        {
             configDir = optarg;
             break;
         }
@@ -227,7 +231,6 @@ main( int argc, char ** argv )
     uint8_t     * fileContents;
     size_t        fileLength;
     const char  * str;
-    char          buf[TR_PATH_MAX];
 
     tr_formatter_mem_init( MEM_K, MEM_K_STR, MEM_M_STR, MEM_G_STR, MEM_T_STR );
     tr_formatter_size_init( DISK_K,DISK_K_STR, DISK_M_STR, DISK_G_STR, DISK_T_STR );
@@ -236,7 +239,8 @@ main( int argc, char ** argv )
     printf( "%s %s\n", MY_READABLE_NAME, LONG_VERSION_STRING );
 
     /* user needs to pass in at least one argument */
-    if( argc < 2 ) {
+  if (argc < 2)
+    {
         tr_getopt_usage( MY_READABLE_NAME, getUsage( ), options );
         return EXIT_FAILURE;
     }
@@ -251,22 +255,27 @@ main( int argc, char ** argv )
         return EXIT_FAILURE;
 
     if( showVersion )
-        return 0;
+    return EXIT_SUCCESS;
 
     /* Check the options for validity */
-    if( !torrentPath ) {
+  if (!torrentPath)
+    {
         fprintf( stderr, "No torrent specified!\n" );
         return EXIT_FAILURE;
     }
 
-    if( tr_bencDictFindStr( &settings, TR_PREFS_KEY_DOWNLOAD_DIR, &str ) ) {
-        str = tr_realpath( str, buf );
-        if( str != NULL ) {
-            tr_bencDictAddStr( &settings, TR_PREFS_KEY_DOWNLOAD_DIR, str );
-        } else {
-            fprintf( stderr, "Download directory does not exist!\n" );
+  if (tr_bencDictFindStr (&settings, TR_PREFS_KEY_DOWNLOAD_DIR, &str))
+    {
+      if (!tr_fileExists (str, NULL))
+        {
+          tr_mkdirp (str, 0700);
+
+          if (!tr_fileExists (str, NULL))
+            {
+              fprintf (stderr, "Unable to create download directory \"%s\"!\n", str);
             return EXIT_FAILURE;
         }
+    }
     }
 
     h = tr_sessionInit( "cli", configDir, false, &settings );
@@ -275,21 +284,30 @@ main( int argc, char ** argv )
 
     fileContents = tr_loadFile( torrentPath, &fileLength );
     tr_ctorSetPaused( ctor, TR_FORCE, false );
-    if( fileContents != NULL ) {
+  if (fileContents != NULL)
+    {
         tr_ctorSetMetainfo( ctor, fileContents, fileLength );
-    } else if( !memcmp( torrentPath, "magnet:?", 8 ) ) {
+    }
+  else if (!memcmp (torrentPath, "magnet:?", 8))
+    {
         tr_ctorSetMetainfoFromMagnetLink( ctor, torrentPath );
-    } else if( !memcmp( torrentPath, "http", 4 ) ) {
+    }
+  else if (!memcmp (torrentPath, "http", 4))
+    {
         tr_webRun( h, torrentPath, NULL, NULL, onTorrentFileDownloaded, ctor );
         waitingOnWeb = true;
-        while( waitingOnWeb ) tr_wait_msec( 1000 );
-    } else {
+      while (waitingOnWeb)
+        tr_wait_msec (1000);
+    }
+  else
+    {
         fprintf( stderr, "ERROR: Unrecognized torrent \"%s\".\n", torrentPath );
         fprintf( stderr, " * If you're trying to create a torrent, use transmission-create.\n" );
         fprintf( stderr, " * If you're trying to see a torrent's info, use transmission-show.\n" );
         tr_sessionClose( h );
         return EXIT_FAILURE;
     }
+
     tr_free( fileContents );
 
     tor = tr_torrentNew( ctor, &error );
@@ -309,7 +327,7 @@ main( int argc, char ** argv )
 
     if( verify )
     {
-        verify = 0;
+      verify = false;
         tr_torrentVerify( tor );
     }
 
@@ -325,22 +343,21 @@ main( int argc, char ** argv )
 
         if( gotsig )
         {
-            gotsig = 0;
+          gotsig = false;
             printf( "\nStopping torrent...\n" );
             tr_torrentStop( tor );
         }
 
         if( manualUpdate )
         {
-            manualUpdate = 0;
+          manualUpdate = false;
             if( !tr_torrentCanManualUpdate( tor ) )
-                fprintf(
-                    stderr,
-                    "\nReceived SIGHUP, but can't send a manual update now\n" );
+            {
+              fprintf (stderr, "\nReceived SIGHUP, but can't send a manual update now\n");
+            }
             else
             {
-                fprintf( stderr,
-                         "\nReceived SIGHUP: manual update scheduled\n" );
+              fprintf (stderr, "\nReceived SIGHUP: manual update scheduled\n");
                 tr_torrentManualUpdate( tor );
             }
         }
@@ -367,7 +384,6 @@ main( int argc, char ** argv )
 /***
 ****
 ****
-****
 ***/
 
 static int
@@ -380,50 +396,85 @@ parseCommandLine( tr_benc * d, int argc, const char ** argv )
     {
         switch( c )
         {
-            case 'b': tr_bencDictAddBool( d, TR_PREFS_KEY_BLOCKLIST_ENABLED, true );
+          case 'b':
+            tr_bencDictAddBool (d, TR_PREFS_KEY_BLOCKLIST_ENABLED, true);
                       break;
+
             case 'B': tr_bencDictAddBool( d, TR_PREFS_KEY_BLOCKLIST_ENABLED, false );
                       break;
-            case 'd': tr_bencDictAddInt ( d, TR_PREFS_KEY_DSPEED_KBps, atoi( optarg ) );
+
+          case 'd':
+            tr_bencDictAddInt (d, TR_PREFS_KEY_DSPEED_KBps, atoi (optarg));
                       tr_bencDictAddBool( d, TR_PREFS_KEY_DSPEED_ENABLED, true );
                       break;
+
             case 'D': tr_bencDictAddBool( d, TR_PREFS_KEY_DSPEED_ENABLED, false );
                       break;
-            case 'f': tr_bencDictAddStr( d, TR_PREFS_KEY_SCRIPT_TORRENT_DONE_FILENAME, optarg );
+
+          case 'f':
+            tr_bencDictAddStr (d, TR_PREFS_KEY_SCRIPT_TORRENT_DONE_FILENAME, optarg);
                       tr_bencDictAddBool( d, TR_PREFS_KEY_SCRIPT_TORRENT_DONE_ENABLED, true );
                       break;
+
             case 'g': /* handled above */
                       break;
-            case 'm': tr_bencDictAddBool( d, TR_PREFS_KEY_PORT_FORWARDING, true );
+
+          case 'm':
+            tr_bencDictAddBool (d, TR_PREFS_KEY_PORT_FORWARDING, true);
                       break;
-            case 'M': tr_bencDictAddBool( d, TR_PREFS_KEY_PORT_FORWARDING, false );
+
+          case 'M':
+            tr_bencDictAddBool (d, TR_PREFS_KEY_PORT_FORWARDING, false);
                       break;
-            case 'p': tr_bencDictAddInt( d, TR_PREFS_KEY_PEER_PORT, atoi( optarg ) );
+
+          case 'p':
+            tr_bencDictAddInt (d, TR_PREFS_KEY_PEER_PORT, atoi (optarg));
                       break;
-            case 't': tr_bencDictAddInt( d, TR_PREFS_KEY_PEER_SOCKET_TOS, atoi( optarg ) );
+
+          case 't':
+            tr_bencDictAddInt (d, TR_PREFS_KEY_PEER_SOCKET_TOS, atoi (optarg));
                       break;
-            case 'u': tr_bencDictAddInt( d, TR_PREFS_KEY_USPEED_KBps, atoi( optarg ) );
+
+          case 'u':
+            tr_bencDictAddInt (d, TR_PREFS_KEY_USPEED_KBps, atoi (optarg));
                       tr_bencDictAddBool( d, TR_PREFS_KEY_USPEED_ENABLED, true );
                       break;
-            case 'U': tr_bencDictAddBool( d, TR_PREFS_KEY_USPEED_ENABLED, false );
+
+          case 'U':
+            tr_bencDictAddBool (d, TR_PREFS_KEY_USPEED_ENABLED, false);
                       break;
-            case 'v': verify = true;
+
+          case 'v':
+            verify = true;
                       break;
-            case 'V': showVersion = true;
+
+          case 'V':
+            showVersion = true;
                       break;
-            case 'w': tr_bencDictAddStr( d, TR_PREFS_KEY_DOWNLOAD_DIR, optarg );
+
+          case 'w':
+            tr_bencDictAddStr (d, TR_PREFS_KEY_DOWNLOAD_DIR, optarg);
                       break;
-            case 910: tr_bencDictAddInt( d, TR_PREFS_KEY_ENCRYPTION, TR_ENCRYPTION_REQUIRED );
+
+          case 910:
+            tr_bencDictAddInt (d, TR_PREFS_KEY_ENCRYPTION, TR_ENCRYPTION_REQUIRED);
                       break;
-            case 911: tr_bencDictAddInt( d, TR_PREFS_KEY_ENCRYPTION, TR_ENCRYPTION_PREFERRED );
+
+          case 911:
+            tr_bencDictAddInt (d, TR_PREFS_KEY_ENCRYPTION, TR_ENCRYPTION_PREFERRED);
                       break;
-            case 912: tr_bencDictAddInt( d, TR_PREFS_KEY_ENCRYPTION, TR_CLEAR_PREFERRED );
+
+          case 912:
+            tr_bencDictAddInt (d, TR_PREFS_KEY_ENCRYPTION, TR_CLEAR_PREFERRED);
                       break;
+
             case TR_OPT_UNK:
                       if( torrentPath == NULL )
                           torrentPath = optarg;
                       break;
-            default: return 1;
+
+          default:
+            return 1;
         }
     }
 
@@ -436,11 +487,13 @@ sigHandler( int signal )
     switch( signal )
     {
         case SIGINT:
-            gotsig = 1; break;
+        gotsig = true;
+        break;
 
 #ifndef WIN32
         case SIGHUP:
-            manualUpdate = 1; break;
+        manualUpdate = true;
+        break;
 
 #endif
         default:

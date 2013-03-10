@@ -7,7 +7,7 @@
  * This exemption does not extend to derived works not owned by
  * the Transmission project.
  *
- * $Id: stats.h 11709 2011-01-19 13:48:47Z jordan $
+ * $Id: stats.h 13625 2012-12-05 17:29:46Z jordan $
  */
 
 #ifndef __TRANSMISSION__
@@ -18,17 +18,10 @@
 #define TR_STATS_H
 
 void tr_statsInit           ( tr_session  * session );
-
 void tr_statsClose          ( tr_session  * session );
-
 void tr_statsSaveDirty      ( tr_session  * session );
-
-void tr_statsAddUploaded    ( tr_session  * session,
-                              uint32_t      bytes );
-
-void tr_statsAddDownloaded  ( tr_session  * session,
-                              uint32_t      bytes );
-
+void tr_statsAddUploaded   (tr_session * session, uint32_t bytes);
+void tr_statsAddDownloaded (tr_session * session, uint32_t bytes);
 void tr_statsFileCreated    ( tr_session  * session );
 
 #endif

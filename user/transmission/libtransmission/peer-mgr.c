@@ -7,7 +7,7 @@
  * This exemption does not extend to derived works not owned by
  * the Transmission project.
  *
- * $Id: peer-mgr.c 13361 2012-07-01 02:17:35Z jordan $
+ * $Id: peer-mgr.c 13631 2012-12-07 01:53:31Z jordan $
  */
 
 #include <assert.h>
@@ -235,16 +235,20 @@ struct tr_peerMgr
 };
 
 #define tordbg( t, ... ) \
-    do { \
+  do \
+    { \
         if( tr_deepLoggingIsActive( ) ) \
             tr_deepLog( __FILE__, __LINE__, tr_torrentName( t->tor ), __VA_ARGS__ ); \
-    } while( 0 )
+    } \
+  while (0)
 
 #define dbgmsg( ... ) \
-    do { \
+  do \
+    { \
         if( tr_deepLoggingIsActive( ) ) \
             tr_deepLog( __FILE__, __LINE__, NULL, __VA_ARGS__ ); \
-    } while( 0 )
+    } \
+  while (0)
 
 /**
 ***
@@ -508,10 +512,27 @@ torrentFree( void * vt )
 
 static void peerCallbackFunc( tr_peer *, const tr_peer_event *, void * );
 
+static void
+rebuildWebseedArray (Torrent * t, tr_torrent * tor)
+{
+    int i;
+    const tr_info * inf = &tor->info;
+
+    /* clear the array */
+    tr_ptrArrayDestruct (&t->webseeds, (PtrArrayForeachFunc)tr_webseedFree);
+    t->webseeds = TR_PTR_ARRAY_INIT;
+
+    /* repopulate it */
+    for (i = 0; i < inf->webseedCount; ++i)
+    {
+        tr_webseed * w = tr_webseedNew (tor, inf->webseeds[i], peerCallbackFunc, t);
+        tr_ptrArrayAppend (&t->webseeds, w);
+    }
+}
+
 static Torrent*
 torrentNew( tr_peerMgr * manager, tr_torrent * tor )
 {
-    int       i;
     Torrent * t;
 
     t = tr_new0( Torrent, 1 );
@@ -522,12 +543,7 @@ torrentNew( tr_peerMgr * manager, tr_torrent * tor )
     t->webseeds = TR_PTR_ARRAY_INIT;
     t->outgoingHandshakes = TR_PTR_ARRAY_INIT;
 
-    for( i = 0; i < tor->info.webseedCount; ++i )
-    {
-        tr_webseed * w =
-            tr_webseedNew( tor, tor->info.webseeds[i], peerCallbackFunc, t );
-        tr_ptrArrayAppend( &t->webseeds, w );
-    }
+    rebuildWebseedArray (t, tor);
 
     return t;
 }
@@ -2517,13 +2533,19 @@ void
 tr_peerMgrOnTorrentGotMetainfo( tr_torrent * tor )
 {
     int i;
-    const int peerCount = tr_ptrArraySize( &tor->torrentPeers->peers );
-    tr_peer ** peers = (tr_peer**) tr_ptrArrayBase( &tor->torrentPeers->peers );
+    int peerCount;
+    tr_peer ** peers;
+
+    /* the webseed list may have changed... */
+    rebuildWebseedArray (tor->torrentPeers, tor);
 
     /* some peer_msgs' progress fields may not be accurate if we
        didn't have the metadata before now... so refresh them all... */
+    peerCount = tr_ptrArraySize (&tor->torrentPeers->peers);
+    peers = (tr_peer**) tr_ptrArrayBase (&tor->torrentPeers->peers);
     for( i=0; i<peerCount; ++i )
         tr_peerUpdateProgress( tor, peers[i] );
+
 }
 
 void

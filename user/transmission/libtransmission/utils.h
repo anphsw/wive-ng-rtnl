@@ -7,7 +7,7 @@
  * This exemption does not extend to derived works not owned by
  * the Transmission project.
  *
- * $Id: utils.h 13362 2012-07-01 03:05:36Z jordan $
+ * $Id: utils.h 13625 2012-12-05 17:29:46Z jordan $
  */
 
 #ifndef TR_UTILS_H
@@ -141,19 +141,19 @@ void tr_msg( const char * file, int line,
 #define tr_torerr( tor, ... ) \
     do { \
         if( tr_msgLoggingIsActive( TR_MSG_ERR ) ) \
-            tr_msg( __FILE__, __LINE__, TR_MSG_ERR, tor->info.name, __VA_ARGS__ ); \
+            tr_msg (__FILE__, __LINE__, TR_MSG_ERR, tr_torrentName (tor), __VA_ARGS__); \
     } while( 0 )
 
 #define tr_torinf( tor, ... ) \
     do { \
         if( tr_msgLoggingIsActive( TR_MSG_INF ) ) \
-            tr_msg( __FILE__, __LINE__, TR_MSG_INF, tor->info.name, __VA_ARGS__ ); \
+            tr_msg (__FILE__, __LINE__, TR_MSG_INF, tr_torrentName (tor), __VA_ARGS__); \
     } while( 0 )
 
 #define tr_tordbg( tor, ... ) \
     do { \
         if( tr_msgLoggingIsActive( TR_MSG_DBG ) ) \
-            tr_msg( __FILE__, __LINE__, TR_MSG_DBG, tor->info.name, __VA_ARGS__ ); \
+            tr_msg (__FILE__, __LINE__, TR_MSG_DBG, tr_torrentName (tor), __VA_ARGS__); \
     } while( 0 )
 
 #define tr_err( ... ) \
@@ -202,17 +202,6 @@ char* tr_basename( const char * path ) TR_GNUC_MALLOC;
 
 /** @brief Portability wrapper for dirname() that uses the system implementation if available */
 char* tr_dirname( const char * path ) TR_GNUC_MALLOC;
-
-/**
- * @brief Portability wrapper for mkdir()
- *
- * A portability wrapper around mkdir().
- * On WIN32, the `permissions' argument is unused.
- *
- * @return zero on success, or -1 if an error occurred
- * (in which case errno is set appropriately).
- */
-int tr_mkdir( const char * path, int permissions ) TR_GNUC_NONNULL(1);
 
 /**
  * Like mkdir, but makes parent directories as needed.

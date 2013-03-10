@@ -7,7 +7,7 @@
  *
  * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  *
- * $Id: create.c 12225 2011-03-24 22:57:39Z jordan $
+ * $Id: create.c 13625 2012-12-05 17:29:46Z jordan $
  */
 
 #include <errno.h>
@@ -58,18 +58,37 @@ parseCommandLine( int argc, const char ** argv )
     {
         switch( c )
         {
-            case 'V': showVersion = true; break;
-            case 'p': isPrivate = true; break;
-            case 'o': outfile = optarg; break;
-            case 'c': comment = optarg; break;
-            case 't': if( trackerCount + 1 < MAX_TRACKERS ) {
+          case 'V':
+            showVersion = true;
+            break;
+
+          case 'p':
+            isPrivate = true;
+            break;
+
+          case 'o':
+            outfile = optarg;
+            break;
+
+          case 'c':
+            comment = optarg;
+            break;
+
+          case 't':
+            if (trackerCount + 1 < MAX_TRACKERS)
+              {
                           trackers[trackerCount].tier = trackerCount;
                           trackers[trackerCount].announce = (char*) optarg;
                           ++trackerCount;
                       }
                       break;
-            case TR_OPT_UNK: infile = optarg; break;
-            default: return 1;
+
+          case TR_OPT_UNK:
+            infile = optarg;
+            break;
+
+          default:
+            return 1;
         }
     }
 
@@ -81,16 +100,19 @@ tr_getcwd( void )
 {
     char * result;
     char buf[2048];
+
 #ifdef WIN32
     result = _getcwd( buf, sizeof( buf ) );
 #else
     result = getcwd( buf, sizeof( buf ) );
 #endif
+
     if( result == NULL )
     {
         fprintf( stderr, "getcwd error: \"%s\"", tr_strerror( errno ) );
         *buf = '\0';
     }
+
     return tr_strdup( buf );
 }
 
@@ -105,9 +127,10 @@ main( int argc, char * argv[] )
     if( parseCommandLine( argc, (const char**)argv ) )
         return EXIT_FAILURE;
 
-    if( showVersion ) {
+  if (showVersion)
+    {
         fprintf( stderr, MY_NAME" "LONG_VERSION_STRING"\n" );
-        return 0;
+      return EXIT_SUCCESS;
     }
 
     if( !infile )
@@ -147,23 +170,39 @@ main( int argc, char * argv[] )
 
     b = tr_metaInfoBuilderCreate( infile );
     tr_makeMetaInfo( b, outfile, trackers, trackerCount, comment, isPrivate );
-    while( !b->isDone ) {
+  while (!b->isDone)
+    {
         tr_wait_msec( 500 );
         putc( '.', stdout );
         fflush( stdout );
     }
 
     putc( ' ', stdout );
-    switch( b->result ) {
-        case TR_MAKEMETA_OK:        printf( "done!" ); break;
-        case TR_MAKEMETA_URL:       printf( "bad announce URL: \"%s\"", b->errfile ); break;
-        case TR_MAKEMETA_IO_READ:   printf( "error reading \"%s\": %s", b->errfile, tr_strerror(b->my_errno) ); break;
-        case TR_MAKEMETA_IO_WRITE:  printf( "error writing \"%s\": %s", b->errfile, tr_strerror(b->my_errno) ); break;
-        case TR_MAKEMETA_CANCELLED: printf( "cancelled" ); break;
+  switch (b->result)
+    {
+      case TR_MAKEMETA_OK:
+        printf ("done!");
+        break;
+
+      case TR_MAKEMETA_URL:
+        printf ("bad announce URL: \"%s\"", b->errfile);
+        break;
+
+      case TR_MAKEMETA_IO_READ:
+        printf ("error reading \"%s\": %s", b->errfile, tr_strerror (b->my_errno));
+        break;
+
+      case TR_MAKEMETA_IO_WRITE:
+        printf ("error writing \"%s\": %s", b->errfile, tr_strerror (b->my_errno));
+        break;
+
+      case TR_MAKEMETA_CANCELLED:
+        printf ("cancelled");
+        break;
     }
     putc( '\n', stdout );
 
     tr_metaInfoBuilderFree( b );
     tr_free( out2 );
-    return 0;
+  return EXIT_SUCCESS;
 }

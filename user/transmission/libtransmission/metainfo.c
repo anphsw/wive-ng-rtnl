@@ -7,7 +7,7 @@
  * This exemption does not extend to derived works not owned by
  * the Transmission project.
  *
- * $Id: metainfo.c 13311 2012-05-20 14:47:18Z jordan $
+ * $Id: metainfo.c 13641 2012-12-09 22:05:31Z jordan $
  */
 
 #include <assert.h>
@@ -16,7 +16,6 @@
 #include <string.h> /* strlen() */
 
 #include <sys/types.h>
-#include <sys/stat.h>
 #include <unistd.h> /* unlink, stat */
 
 #include <event2/buffer.h>
@@ -44,7 +43,6 @@ tr_metainfoGetBasename( const tr_info * inf )
         if( ret[i] == '/' )
             ret[i] = '_';
 
-
     return ret;
 }
 
@@ -56,81 +54,6 @@ getTorrentFilename( const tr_session * session, const tr_info * inf )
                                         tr_getTorrentDir( session ), base );
     tr_free( base );
     return filename;
-}
-
-static char*
-getOldTorrentFilename( const tr_session * session, const tr_info * inf )
-{
-    int i;
-    char * path;
-    struct stat sb;
-    const int tagCount = 5;
-    const char * tags[] = { "beos", "cli", "daemon", "macosx", "wx" };
-
-    /* test the beos, cli, daemon, macosx, wx tags */
-    for( i=0; i<tagCount; ++i ) {
-        path = tr_strdup_printf( "%s%c%s-%s", tr_getTorrentDir( session ), '/', inf->hashString, tags[i] );
-        if( !stat( path, &sb ) && ( ( sb.st_mode & S_IFMT ) == S_IFREG ) )
-            return path;
-        tr_free( path );
-    }
-
-    /* test a non-tagged file */
-    path = tr_buildPath( tr_getTorrentDir( session ), inf->hashString, NULL );
-    if( !stat( path, &sb ) && ( ( sb.st_mode & S_IFMT ) == S_IFREG ) )
-        return path;
-    tr_free( path );
-
-    /* return the -gtk form by default, since that's the most common case.
-       don't bother testing stat() on it since this is the last candidate
-       and we don't want to return NULL anyway */
-    return tr_strdup_printf( "%s%c%s-%s", tr_getTorrentDir( session ), '/', inf->hashString, "gtk" );
-}
-
-/* this is for really old versions of T and will probably be removed someday */
-void
-tr_metainfoMigrate( tr_session * session,
-                    tr_info *   inf )
-{
-    struct stat new_sb;
-    char *      name = getTorrentFilename( session, inf );
-
-    if( stat( name, &new_sb ) || ( ( new_sb.st_mode & S_IFMT ) != S_IFREG ) )
-    {
-        char *    old_name = getOldTorrentFilename( session, inf );
-        size_t    contentLen;
-        uint8_t * content;
-
-        tr_mkdirp( tr_getTorrentDir( session ), 0777 );
-        if( ( content = tr_loadFile( old_name, &contentLen ) ) )
-        {
-            FILE * out;
-            errno = 0;
-            out = fopen( name, "wb+" );
-            if( !out )
-            {
-                tr_nerr( inf->name, _( "Couldn't create \"%1$s\": %2$s" ),
-                        name, tr_strerror( errno ) );
-            }
-            else
-            {
-                if( fwrite( content, sizeof( uint8_t ), contentLen, out )
-                    == contentLen )
-                {
-                    tr_free( inf->torrent );
-                    inf->torrent = tr_strdup( name );
-                    tr_sessionSetTorrentFile( session, inf->hashString, name );
-                    unlink( old_name );
-                }
-                fclose( out );
-            }
-        }
-
-        tr_free( content );
-        tr_free( old_name );
-    }
-
-    tr_free( name );
 }
 
 /***
@@ -156,9 +79,10 @@ getfile( char ** setme, const char * root, tr_benc * path, struct evbuffer * buf
 
         evbuffer_drain( buf, evbuffer_get_length( buf ) );
         evbuffer_add( buf, root, strlen( root ) );
-        for( i = 0; i < n; ++i )
+      for (i=0; i<n; i++)
         {
             const char * str;
+
             if( tr_bencGetStr( tr_bencListChild( path, i ), &str ) )
             {
                 evbuffer_add( buf, TR_PATH_DELIMITER_STR, 1 );
@@ -197,7 +121,7 @@ parseFiles( tr_info * inf, tr_benc * files, const tr_benc * length )
         inf->fileCount   = tr_bencListSize( files );
         inf->files       = tr_new0( tr_file, inf->fileCount );
 
-        for( i = 0; i < inf->fileCount; ++i )
+      for (i=0; i<inf->fileCount; i++)
         {
             tr_benc * file;
             tr_benc * path;
@@ -293,24 +217,27 @@ getannounce( tr_info * inf, tr_benc * meta )
         const int numTiers = tr_bencListSize( tiers );
 
         n = 0;
-        for( i = 0; i < numTiers; ++i )
+      for (i=0; i<numTiers; i++)
             n += tr_bencListSize( tr_bencListChild( tiers, i ) );
 
         trackers = tr_new0( tr_tracker_info, n );
 
-        for( i = 0, validTiers = 0; i < numTiers; ++i )
+      for (i=0, validTiers=0; i<numTiers; i++)
         {
             tr_benc * tier = tr_bencListChild( tiers, i );
             const int tierSize = tr_bencListSize( tier );
             bool anyAdded = false;
-            for( j = 0; j < tierSize; ++j )
+          for (j=0; j<tierSize; j++)
             {
                 if( tr_bencGetStr( tr_bencListChild( tier, j ), &str ) )
                 {
                     char * url = tr_strstrip( tr_strdup( str ) );
                     if( !tr_urlIsValidTracker( url ) )
+                    {
                         tr_free( url );
-                    else {
+                    }
+                  else
+                    {
                         tr_tracker_info * t = trackers + trackerCount;
                         t->tier = validTiers;
                         t->announce = url;
@@ -336,13 +263,15 @@ getannounce( tr_info * inf, tr_benc * meta )
     }
 
     /* Regular announce value */
-    if( !trackerCount
-      && tr_bencDictFindStr( meta, "announce", &str ) )
+  if (!trackerCount && tr_bencDictFindStr (meta, "announce", &str))
     {
         char * url = tr_strstrip( tr_strdup( str ) );
         if( !tr_urlIsValidTracker( url ) )
+        {
             tr_free( url );
-        else {
+        }
+      else
+        {
             trackers = tr_new0( tr_tracker_info, 1 );
             trackers[trackerCount].tier = 0;
             trackers[trackerCount].announce = url;
@@ -371,10 +300,15 @@ getannounce( tr_info * inf, tr_benc * meta )
  * trailing slash for multifile torrents if omitted by the end user.
  */
 static char*
-fix_webseed_url( const tr_info * inf, const char * url )
+fix_webseed_url (const tr_info * inf, const char * url_in)
 {
+  size_t len;
+  char * url;
     char * ret = NULL;
-    const size_t len = strlen( url );
+
+  url = tr_strdup (url_in);
+  tr_strstrip (url);
+  len = strlen (url);
 
     if( tr_urlIsValid( url, len ) )
     {
@@ -384,12 +318,12 @@ fix_webseed_url( const tr_info * inf, const char * url )
             ret = tr_strndup( url, len );
     }
 
+  tr_free (url);
     return ret;
 }
 
 static void
-geturllist( tr_info * inf,
-            tr_benc * meta )
+geturllist (tr_info * inf, tr_benc * meta)
 {
     tr_benc * urls;
     const char * url;
@@ -402,7 +336,7 @@ geturllist( tr_info * inf,
         inf->webseedCount = 0;
         inf->webseeds = tr_new0( char*, n );
 
-        for( i = 0; i < n; ++i )
+      for (i=0; i<n; i++)
         {
             if( tr_bencGetStr( tr_bencListChild( urls, i ), &url ) )
             {
@@ -449,6 +383,7 @@ tr_metainfoParseImpl( const tr_session  * session,
     b = tr_bencDictFindDict( meta, "info", &infoDict );
     if( hasInfoDict != NULL )
         *hasInfoDict = b;
+
     if( !b )
     {
         /* no info dictionary... is this a magnet link? */
@@ -465,7 +400,8 @@ tr_metainfoParseImpl( const tr_session  * session,
             tr_sha1_to_hex( inf->hashString, inf->hash );
 
             /* maybe get the display name */
-            if( tr_bencDictFindStr( d, "display-name", &str ) ) {
+          if (tr_bencDictFindStr (d, "display-name", &str))
+            {
                 tr_free( inf->name );
                 inf->name = tr_strdup( str );
             }
@@ -492,7 +428,8 @@ tr_metainfoParseImpl( const tr_session  * session,
     }
 
     /* name */
-    if( !isMagnet ) {
+  if (!isMagnet)
+    {
         if( !tr_bencDictFindStr( infoDict, "name.utf-8", &str ) )
             if( !tr_bencDictFindStr( infoDict, "name", &str ) )
                 str = "";
@@ -528,34 +465,38 @@ tr_metainfoParseImpl( const tr_session  * session,
     inf->isPrivate = i != 0;
 
     /* piece length */
-    if( !isMagnet ) {
+  if (!isMagnet)
+    {
         if( !tr_bencDictFindInt( infoDict, "piece length", &i ) || ( i < 1 ) )
             return "piece length";
         inf->pieceSize = i;
     }
 
     /* pieces */
-    if( !isMagnet ) {
+  if (!isMagnet)
+    {
         if( !tr_bencDictFindRaw( infoDict, "pieces", &raw, &raw_len ) )
             return "pieces";
         if( raw_len % SHA_DIGEST_LENGTH )
             return "pieces";
+
         inf->pieceCount = raw_len / SHA_DIGEST_LENGTH;
         inf->pieces = tr_new0( tr_piece, inf->pieceCount );
-        for( i = 0; i < inf->pieceCount; ++i )
-            memcpy( inf->pieces[i].hash, &raw[i * SHA_DIGEST_LENGTH],
-                    SHA_DIGEST_LENGTH );
+      for (i=0; i<inf->pieceCount; i++)
+        memcpy (inf->pieces[i].hash, &raw[i * SHA_DIGEST_LENGTH], SHA_DIGEST_LENGTH);
     }
 
     /* files */
-    if( !isMagnet ) {
+  if (!isMagnet)
+    {
         if( ( str = parseFiles( inf, tr_bencDictFind( infoDict, "files" ),
                                      tr_bencDictFind( infoDict, "length" ) ) ) )
             return str;
+
         if( !inf->fileCount || !inf->totalSize )
             return "files";
-        if( (uint64_t) inf->pieceCount !=
-           ( inf->totalSize + inf->pieceSize - 1 ) / inf->pieceSize )
+
+      if ((uint64_t) inf->pieceCount != (inf->totalSize + inf->pieceSize - 1) / inf->pieceSize)
             return "files";
     }
 
@@ -602,10 +543,10 @@ tr_metainfoFree( tr_info * inf )
     int i;
     tr_file_index_t ff;
 
-    for( i = 0; i < inf->webseedCount; ++i )
+  for (i=0; i<inf->webseedCount; i++)
         tr_free( inf->webseeds[i] );
 
-    for( ff = 0; ff < inf->fileCount; ++ff )
+  for (ff=0; ff<inf->fileCount; ff++)
         tr_free( inf->files[ff].name );
 
     tr_free( inf->webseeds );
@@ -616,7 +557,7 @@ tr_metainfoFree( tr_info * inf )
     tr_free( inf->torrent );
     tr_free( inf->name );
 
-    for( i = 0; i < inf->trackerCount; ++i )
+  for (i=0; i<inf->trackerCount; i++)
     {
         tr_free( inf->trackers[i].announce );
         tr_free( inf->trackers[i].scrape );
@@ -634,8 +575,5 @@ tr_metainfoRemoveSaved( const tr_session * session, const tr_info * inf )
     filename = getTorrentFilename( session, inf );
     unlink( filename );
     tr_free( filename );
-
-    filename = getOldTorrentFilename( session, inf );
-    unlink( filename );
-    tr_free( filename );
 }
+

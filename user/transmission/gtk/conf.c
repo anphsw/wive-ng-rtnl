@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: conf.c 13273 2012-04-08 16:02:48Z jordan $
+ * $Id: conf.c 13638 2012-12-09 21:28:20Z jordan $
  *
  * Copyright (c) Transmission authors and contributors
  *
@@ -71,10 +71,14 @@ tr_prefs_init_defaults( tr_benc * d )
 
     cf_check_older_configs( );
 
-    str = NULL;
-    if( !str ) str = g_get_user_special_dir( G_USER_DIRECTORY_DOWNLOAD );
-    if( !str ) str = g_get_user_special_dir( G_USER_DIRECTORY_DESKTOP );
-    if( !str ) str = tr_getDefaultDownloadDir( );
+  str = g_get_user_special_dir (G_USER_DIRECTORY_DOWNLOAD);
+  if (!str)
+    str = g_get_user_special_dir (G_USER_DIRECTORY_DESKTOP);
+  if (!str)
+    str = tr_getDefaultDownloadDir ();
+
+  tr_bencDictReserve (d, 29);
+
     tr_bencDictAddStr ( d, PREF_KEY_DIR_WATCH, str );
     tr_bencDictAddBool( d, PREF_KEY_DIR_WATCH_ENABLED, FALSE );
 
@@ -154,6 +158,7 @@ gtr_pref_int_get( const char * key )
     int64_t i = 0;
 
     tr_bencDictFindInt( getPrefs( ), key, &i );
+
     return i;
 }
 
@@ -167,7 +172,9 @@ double
 gtr_pref_double_get( const char * key )
 {
     double d = 0.0;
+
     tr_bencDictFindReal( getPrefs( ), key, &d );
+
     return d;
 }
 
@@ -185,7 +192,9 @@ gboolean
 gtr_pref_flag_get( const char * key )
 {
     bool boolVal;
+
     tr_bencDictFindBool( getPrefs( ), key, &boolVal );
+
     return boolVal != 0;
 }
 
@@ -203,7 +212,9 @@ const char*
 gtr_pref_string_get( const char * key )
 {
     const char * str = NULL;
+
     tr_bencDictFindStr( getPrefs( ), key, &str );
+
     return str;
 }
 
@@ -269,24 +280,27 @@ translate_keyfile_to_json( const char * old_file, const char * new_file )
     keys = g_key_file_get_keys( keyfile, "general", &length, NULL );
 
     tr_bencInitDict( &dict, length );
-    for( i = 0; i < length; ++i )
+  for (i=0; i<length; i++)
     {
         guint        j;
         const char * key = keys[i];
-        gchar *      val = g_key_file_get_value( keyfile, "general", key,
-                                                 NULL );
+      gchar * val = g_key_file_get_value (keyfile, "general", key, NULL);
 
-        for( j = 0; j < G_N_ELEMENTS( renamed ); ++j )
+      for (j=0; j<G_N_ELEMENTS (renamed); j++)
             if( !strcmp( renamed[j].oldkey, key ) )
                 key = renamed[j].newkey;
 
         if( !strcmp( val, "true" ) || !strcmp( val, "false" ) )
+        {
             tr_bencDictAddInt( &dict, key, !strcmp( val, "true" ) );
+        }
         else
         {
             char * end;
             long   l;
+
             errno = 0;
+
             l = strtol( val, &end, 10 );
             if( !errno && end && !*end )
                 tr_bencDictAddInt( &dict, key, l );

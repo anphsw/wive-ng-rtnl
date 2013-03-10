@@ -7,7 +7,7 @@
  * This exemption does not extend to derived works not owned by
  * the Transmission project.
  *
- * $Id: crypto.c 12885 2011-09-16 22:55:58Z jordan $
+ * $Id: crypto.c 13625 2012-12-05 17:29:46Z jordan $
  */
 
 #include <assert.h>

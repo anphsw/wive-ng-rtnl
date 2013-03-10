@@ -7,7 +7,7 @@
  * This exemption does not extend to derived works not owned by
  * the Transmission project.
  *
- * $Id: notify.h 13107 2011-12-10 19:00:50Z jordan $
+ * $Id: notify.h 13625 2012-12-05 17:29:46Z jordan $
  */
 
 #ifndef GTR_NOTIFY_H

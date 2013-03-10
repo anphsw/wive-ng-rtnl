@@ -7,7 +7,7 @@
  *
  * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  *
- * $Id: show.c 13195 2012-02-03 21:21:52Z jordan $
+ * $Id: show.c 13625 2012-12-05 17:29:46Z jordan $
  */
 
 #include <stdio.h> /* fprintf() */
@@ -52,6 +52,7 @@
 
 static tr_option options[] =
 {
+  { 'm', "magnet", "Give a magnet link for the specified torrent", "m", 0, NULL },
   { 's', "scrape", "Ask the torrent's trackers how many peers are in the torrent's swarm", "s", 0, NULL },
   { 'V', "version", "Show version number and exit", "V", 0, NULL },
   { 0, NULL, NULL, NULL, 0, NULL }
@@ -63,6 +64,7 @@ getUsage( void )
     return "Usage: " MY_NAME " [options] <.torrent file>";
 }
 
+static bool magnetFlag = false;
 static bool scrapeFlag = false;
 static bool showVersion = false;
 const char * filename = NULL;
@@ -77,14 +79,36 @@ parseCommandLine( int argc, const char ** argv )
     {
         switch( c )
         {
-            case 's': scrapeFlag = true; break;
-            case 'V': showVersion = true; break;
-            case TR_OPT_UNK: filename = optarg; break;
-            default: return 1;
+          case 'm':
+            magnetFlag = true;
+            break;
+
+          case 's':
+            scrapeFlag = true;
+            break;
+
+          case 'V':
+            showVersion = true;
+            break;
+
+          case TR_OPT_UNK:
+            filename = optarg;
+            break;
+
+          default:
+            return 1;
         }
     }
 
     return 0;
+}
+
+static void
+doShowMagnet (const tr_info * inf)
+{
+  char * str = tr_torrentInfoGetMagnetLink (inf);
+  printf ("%s", str);
+  tr_free (str);
 }
 
 static int
@@ -112,8 +136,11 @@ showInfo( const tr_info * inf )
     printf( "  Hash: %s\n", inf->hashString );
     printf( "  Created by: %s\n", inf->creator ? inf->creator : "Unknown" );
     if( !inf->dateCreated )
+    {
         printf( "  Created on: Unknown\n" );
-    else {
+    }
+  else
+    {
         struct tm tm = *localtime( &inf->dateCreated );
         printf( "  Created on: %s", asctime( &tm ) );
     }
@@ -295,7 +322,7 @@ main( int argc, char * argv[] )
     if( showVersion )
     {
         fprintf( stderr, MY_NAME" "LONG_VERSION_STRING"\n" );
-        return 0;
+      return EXIT_SUCCESS;
     }
 
     /* make sure the user specified a filename */
@@ -315,9 +342,15 @@ main( int argc, char * argv[] )
     if( err )
     {
         fprintf( stderr, "Error parsing .torrent file \"%s\"\n", filename );
-        return 1;
+      return EXIT_FAILURE;
     }
 
+  if (magnetFlag)
+    {
+      doShowMagnet (&inf);
+    }
+  else
+    {
     printf( "Name: %s\n", inf.name );
     printf( "File: %s\n", filename );
     printf( "\n" );
@@ -327,9 +360,10 @@ main( int argc, char * argv[] )
         doScrape( &inf );
     else
         showInfo( &inf );
+    }
 
     /* cleanup */
     putc( '\n', stdout );
     tr_metainfoFree( &inf );
-    return 0;
+  return EXIT_SUCCESS;
 }

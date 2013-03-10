@@ -531,27 +531,27 @@
 												<int key="NSPeriodicDelay">400</int>
 												<int key="NSPeriodicInterval">75</int>
 												<object class="NSMenuItem" key="NSMenuItem" id="347354464">
-															<reference key="NSMenu" ref="842244290"/>
+													<reference key="NSMenu" ref="842244290"/>
 													<string key="NSTitle">Normal</string>
-															<string key="NSKeyEquiv"/>
-															<int key="NSMnemonicLoc">2147483647</int>
+													<string key="NSKeyEquiv"/>
+													<int key="NSMnemonicLoc">2147483647</int>
 													<int key="NSState">1</int>
-															<object class="NSCustomResource" key="NSImage">
-																<string key="NSClassName">NSImage</string>
+													<object class="NSCustomResource" key="NSImage">
+														<string key="NSClassName">NSImage</string>
 														<string key="NSResourceName">PriorityNormalTemplate</string>
-															</object>
+													</object>
 													<object class="NSCustomResource" key="NSOnImage" id="575318760">
-																<string key="NSClassName">NSImage</string>
-																<string key="NSResourceName">NSMenuCheckmark</string>
-															</object>
+														<string key="NSClassName">NSImage</string>
+														<string key="NSResourceName">NSMenuCheckmark</string>
+													</object>
 													<object class="NSCustomResource" key="NSMixedImage" id="46478649">
-																<string key="NSClassName">NSImage</string>
-																<string key="NSResourceName">NSMenuMixedState</string>
-															</object>
-															<string key="NSAction">_popUpItemAction:</string>
+														<string key="NSClassName">NSImage</string>
+														<string key="NSResourceName">NSMenuMixedState</string>
+													</object>
+													<string key="NSAction">_popUpItemAction:</string>
 													<int key="NSTag">1</int>
-															<reference key="NSTarget" ref="664513336"/>
-														</object>
+													<reference key="NSTarget" ref="664513336"/>
+												</object>
 												<bool key="NSMenuItemRespectAlignment">YES</bool>
 												<object class="NSMenu" key="NSMenu" id="842244290">
 													<string key="NSTitle">OtherViews</string>

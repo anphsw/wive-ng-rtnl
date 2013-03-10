@@ -7,7 +7,7 @@
  * This exemption does not extend to derived works not owned by
  * the Transmission project.
  *
- * $Id: magnet.c 12915 2011-09-25 21:51:50Z jordan $
+ * $Id: magnet.c 13625 2012-12-05 17:29:46Z jordan $
  */
 
 #include <assert.h>
@@ -67,17 +67,23 @@ base32_to_sha1( uint8_t * out, const char * in, const int inlen )
         if( digit == 0xFF )
             continue;
 
-        if( index <= 3 ) {
+      if (index <= 3)
+        {
             index = (index + 5) % 8;
-            if( index == 0 ) {
+          if (index == 0)
+            {
                 out[offset] |= digit;
                 offset++;
                 if( offset >= outlen )
                     break;
-            } else {
+            }
+          else
+            {
                 out[offset] |= digit << (8 - index);
             }
-        } else {
+        }
+      else
+        {
             index = (index + 5) % 8;
             out[offset] |= (digit >> index);
             offset++;
@@ -139,11 +145,13 @@ tr_magnetParse( const char * uri )
                 const char * hash = val + 9;
                 const int hashlen = vallen - 9;
 
-                if( hashlen == 40 ) {
+              if (hashlen == 40)
+                {
                     tr_hex_to_sha1( sha1, hash );
                     got_checksum = true;
                 }
-                else if( hashlen == 32 ) {
+              else if (hashlen == 32)
+                {
                     base32_to_sha1( sha1, hash, hashlen );
                     got_checksum = true;
                 }
@@ -152,15 +160,16 @@ tr_magnetParse( const char * uri )
             if( ( vallen > 0 ) && ( keylen==2 ) && !memcmp( key, "dn", 2 ) )
                 displayName = tr_http_unescape( val, vallen );
 
-            if( ( vallen > 0 ) && ( trCount < MAX_TRACKERS ) ) {
+          if ((vallen > 0) && (trCount < MAX_TRACKERS))
+            {
                 int i;
                 if( ( keylen==2 ) && !memcmp( key, "tr", 2 ) )
                     tr[trCount++] = tr_http_unescape( val, vallen );
-                else if( ( sscanf( key, "tr.%d=", &i ) == 1 ) && ( i > 0 ) ) /* ticket #3341 */
+              else if ((sscanf (key, "tr.%d=", &i) == 1) && (i >= 0)) /* ticket #3341 and #5134 */
                     tr[trCount++] = tr_http_unescape( val, vallen );
             }
 
-            if( ( keylen==2 ) && !memcmp( key, "ws", 2 ) && ( wsCount < MAX_TRACKERS ) )
+          if ((vallen > 0) && (keylen==2) && !memcmp (key, "ws", 2) && (wsCount < MAX_WEBSEEDS))
                 ws[wsCount++] = tr_http_unescape( val, vallen );
 
             walk = next != NULL ? next + 1 : NULL;
@@ -210,15 +219,19 @@ tr_magnetCreateMetainfo( const tr_magnet_info * info, tr_benc * top )
 
     /* announce list */
     if( info->trackerCount == 1 )
+    {
         tr_bencDictAddStr( top, "announce", info->trackers[0] );
-    else {
+    }
+  else
+    {
         tr_benc * trackers = tr_bencDictAddList( top, "announce-list", info->trackerCount );
         for( i=0; i<info->trackerCount; ++i )
             tr_bencListAddStr( tr_bencListAddList( trackers, 1 ), info->trackers[i] );
     }
 
     /* webseeds */
-    if( info->webseedCount > 0 ) {
+  if (info->webseedCount > 0)
+    {
         tr_benc * urls = tr_bencDictAddList( top, "url-list", info->webseedCount );
         for( i=0; i<info->webseedCount; ++i )
             tr_bencListAddStr( urls, info->webseeds[i] );

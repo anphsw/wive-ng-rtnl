@@ -1308,10 +1308,11 @@
 47) openssl: update to 0.9.8y version.<br>
 48) libupnp: update to 1.6.18 version.<br>
 49) libcurl: update to 7.29.0 version.<br>
-50) chillispot: fix build with new autoconf tool.<br>
-51) goahead: fix nat loopback logic if src port != dst port.<br>
-52) build_system: add configure options for enable crazy minimize code size by gcc (save flash=speeddown).<br>
-53) build_system: rework for more acurate use gcc optimization options.<br>
+50) transmission: up to 2.77 version.<br>
+51) chillispot: fix build with new autoconf tool.<br>
+52) goahead: fix nat loopback logic if src port != dst port.<br>
+53) build_system: add configure options for enable crazy minimize code size by gcc (save flash=speeddown).<br>
+54) build_system: rework for more acurate use gcc optimization options.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>

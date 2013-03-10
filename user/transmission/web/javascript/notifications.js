@@ -11,6 +11,7 @@ $(document).ready(function () {
   toggle.show();
   updateMenuTitle();
   $(transmission).bind('downloadComplete seedingComplete', function (event, torrent) {
+  	if (notificationsEnabled) {
     var title = (event.type == 'downloadComplete' ? 'Download' : 'Seeding') + ' complete',
         content = torrent.getName(),
         notification;
@@ -20,6 +21,7 @@ $(document).ready(function () {
     setTimeout(function () {
       notification.cancel();
     }, 5000);
+	};
   });
 
   function updateMenuTitle() {

@@ -7,7 +7,7 @@
  * This exemption does not extend to derived works not owned by
  * the Transmission project.
  *
- * $Id: ptrarray.c 12606 2011-07-31 14:04:43Z jordan $
+ * $Id: ptrarray.c 13625 2012-12-05 17:29:46Z jordan $
  */
 
 #include <assert.h>

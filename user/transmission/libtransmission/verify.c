@@ -7,7 +7,7 @@
  * This exemption does not extend to derived works not owned by
  * the Transmission project.
  *
- * $Id: verify.c 12204 2011-03-22 15:19:54Z jordan $
+ * $Id: verify.c 13631 2012-12-07 01:53:31Z jordan $
  */
 
 #include <string.h> /* memcmp() */
@@ -87,9 +87,11 @@ verifyTorrent( tr_torrent * tor, bool * stopFlag )
         bytesThisPass = MIN( bytesThisPass, buflen );
 
         /* read a bit */
-        if( fd >= 0 ) {
+      if (fd >= 0)
+        {
             const ssize_t numRead = tr_pread( fd, buffer, bytesThisPass, filePos );
-            if( numRead > 0 ) {
+          if (numRead > 0)
+            {
                 bytesThisPass = (uint32_t)numRead;
                 SHA1_Update( &sha, buffer, bytesThisPass );
 #if defined HAVE_POSIX_FADVISE && defined POSIX_FADV_DONTNEED
@@ -114,31 +116,38 @@ verifyTorrent( tr_torrent * tor, bool * stopFlag )
             SHA1_Final( hash, &sha );
             hasPiece = !memcmp( hash, tor->info.pieces[pieceIndex].hash, SHA_DIGEST_LENGTH );
 
-            if( hasPiece || hadPiece ) {
+          if (hasPiece || hadPiece)
+            {
                 tr_torrentSetHasPiece( tor, pieceIndex, hasPiece );
                 changed |= hasPiece != hadPiece;
             }
+
             tr_torrentSetPieceChecked( tor, pieceIndex );
             now = tr_time( );
             tor->anyDate = now;
 
             /* sleeping even just a few msec per second goes a long
              * way towards reducing IO load... */
-            if( lastSleptAt != now ) {
+          if (lastSleptAt != now)
+            {
                 lastSleptAt = now;
                 tr_wait_msec( MSEC_TO_SLEEP_PER_SECOND_DURING_VERIFY );
             }
 
             SHA1_Init( &sha );
-            ++pieceIndex;
+          pieceIndex++;
             piecePos = 0;
         }
 
         /* if we're finishing a file... */
         if( leftInFile == 0 )
         {
-            if( fd >= 0 ) { tr_close_file( fd ); fd = -1; }
-            ++fileIndex;
+          if (fd >= 0)
+            {
+              tr_close_file (fd);
+              fd = -1;
+            }
+          fileIndex++;
             filePos = 0;
         }
     }
@@ -186,8 +195,10 @@ static tr_lock*
 getVerifyLock( void )
 {
     static tr_lock * lock = NULL;
+
     if( lock == NULL )
         lock = tr_lockNew( );
+
     return lock;
 }
 
@@ -246,8 +257,10 @@ compareVerifyByPriorityAndSize( const void * va, const void * vb )
         return pa > pb ? -1 : 1;
 
     /* smaller torrents come before larger ones because they verify faster */
-    if( a->current_size < b->current_size ) return -1;
-    if( a->current_size > b->current_size ) return  1;
+  if (a->current_size < b->current_size)
+    return -1;
+  if (a->current_size > b->current_size)
+    return  1;
     return 0;
 }
 
@@ -291,6 +304,7 @@ tr_verifyRemove( tr_torrent * tor )
     if( tor == currentNode.torrent )
     {
         stopCurrent = true;
+
         while( stopCurrent )
         {
             tr_lockUnlock( lock );
@@ -317,3 +331,4 @@ tr_verifyClose( tr_session * session UNUSED )
 
     tr_lockUnlock( getVerifyLock( ) );
 }
+

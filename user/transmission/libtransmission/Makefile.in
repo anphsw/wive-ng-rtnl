@@ -52,10 +52,11 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-TESTS = blocklist-test$(EXEEXT) bencode-test$(EXEEXT) \
-	clients-test$(EXEEXT) history-test$(EXEEXT) json-test$(EXEEXT) \
-	magnet-test$(EXEEXT) peer-msgs-test$(EXEEXT) rpc-test$(EXEEXT) \
-	test-peer-id$(EXEEXT) utils-test$(EXEEXT)
+TESTS = bitfield-test$(EXEEXT) blocklist-test$(EXEEXT) \
+	bencode-test$(EXEEXT) clients-test$(EXEEXT) \
+	history-test$(EXEEXT) json-test$(EXEEXT) magnet-test$(EXEEXT) \
+	metainfo-test$(EXEEXT) peer-msgs-test$(EXEEXT) \
+	rpc-test$(EXEEXT) test-peer-id$(EXEEXT) utils-test$(EXEEXT)
 noinst_PROGRAMS = $(am__EXEEXT_1)
 subdir = libtransmission
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
@@ -64,15 +65,17 @@ DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/acx-pthread.m4 \
 	$(top_srcdir)/m4/check-ssl.m4 $(top_srcdir)/m4/glib-gettext.m4 \
-	$(top_srcdir)/m4/intltool.m4 $(top_srcdir)/m4/pkg.m4 \
-	$(top_srcdir)/m4/zlib.m4 $(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/intltool.m4 $(top_srcdir)/m4/libtool.m4 \
+	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
+	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
+	$(top_srcdir)/m4/pkg.m4 $(top_srcdir)/m4/zlib.m4 \
+	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 LIBRARIES = $(noinst_LIBRARIES)
-AR = ar
 ARFLAGS = cru
 AM_V_AR = $(am__v_AR_@AM_V@)
 am__v_AR_ = $(am__v_AR_@AM_DEFAULT_V@)
@@ -86,76 +89,104 @@ am_libtransmission_a_OBJECTS = announcer.$(OBJEXT) \
 	blocklist.$(OBJEXT) cache.$(OBJEXT) clients.$(OBJEXT) \
 	completion.$(OBJEXT) ConvertUTF.$(OBJEXT) crypto.$(OBJEXT) \
 	fdlimit.$(OBJEXT) handshake.$(OBJEXT) history.$(OBJEXT) \
-	inout.$(OBJEXT) json.$(OBJEXT) JSON_parser.$(OBJEXT) \
-	list.$(OBJEXT) magnet.$(OBJEXT) makemeta.$(OBJEXT) \
-	metainfo.$(OBJEXT) natpmp.$(OBJEXT) net.$(OBJEXT) \
-	peer-io.$(OBJEXT) peer-mgr.$(OBJEXT) peer-msgs.$(OBJEXT) \
-	platform.$(OBJEXT) port-forwarding.$(OBJEXT) \
-	ptrarray.$(OBJEXT) resume.$(OBJEXT) rpcimpl.$(OBJEXT) \
-	rpc-server.$(OBJEXT) session.$(OBJEXT) stats.$(OBJEXT) \
-	torrent.$(OBJEXT) torrent-ctor.$(OBJEXT) \
+	inout.$(OBJEXT) json.$(OBJEXT) list.$(OBJEXT) magnet.$(OBJEXT) \
+	makemeta.$(OBJEXT) metainfo.$(OBJEXT) natpmp.$(OBJEXT) \
+	net.$(OBJEXT) peer-io.$(OBJEXT) peer-mgr.$(OBJEXT) \
+	peer-msgs.$(OBJEXT) platform.$(OBJEXT) \
+	port-forwarding.$(OBJEXT) ptrarray.$(OBJEXT) resume.$(OBJEXT) \
+	rpcimpl.$(OBJEXT) rpc-server.$(OBJEXT) session.$(OBJEXT) \
+	stats.$(OBJEXT) torrent.$(OBJEXT) torrent-ctor.$(OBJEXT) \
 	torrent-magnet.$(OBJEXT) tr-dht.$(OBJEXT) tr-lpd.$(OBJEXT) \
 	tr-udp.$(OBJEXT) tr-utp.$(OBJEXT) tr-getopt.$(OBJEXT) \
 	trevent.$(OBJEXT) upnp.$(OBJEXT) utils.$(OBJEXT) \
 	verify.$(OBJEXT) web.$(OBJEXT) webseed.$(OBJEXT) \
 	wildmat.$(OBJEXT)
 libtransmission_a_OBJECTS = $(am_libtransmission_a_OBJECTS)
-am__EXEEXT_1 = blocklist-test$(EXEEXT) bencode-test$(EXEEXT) \
-	clients-test$(EXEEXT) history-test$(EXEEXT) json-test$(EXEEXT) \
-	magnet-test$(EXEEXT) peer-msgs-test$(EXEEXT) rpc-test$(EXEEXT) \
-	test-peer-id$(EXEEXT) utils-test$(EXEEXT)
+am__EXEEXT_1 = bitfield-test$(EXEEXT) blocklist-test$(EXEEXT) \
+	bencode-test$(EXEEXT) clients-test$(EXEEXT) \
+	history-test$(EXEEXT) json-test$(EXEEXT) magnet-test$(EXEEXT) \
+	metainfo-test$(EXEEXT) peer-msgs-test$(EXEEXT) \
+	rpc-test$(EXEEXT) test-peer-id$(EXEEXT) utils-test$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
 am_bencode_test_OBJECTS = bencode-test.$(OBJEXT)
 bencode_test_OBJECTS = $(am_bencode_test_OBJECTS)
 am__DEPENDENCIES_1 = ./libtransmission.a
 bencode_test_DEPENDENCIES = $(am__DEPENDENCIES_1)
-bencode_test_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+AM_V_lt = $(am__v_lt_@AM_V@)
+am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
+am__v_lt_0 = --silent
+am__v_lt_1 = 
+bencode_test_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(bencode_test_LDFLAGS) $(LDFLAGS) -o $@
+am_bitfield_test_OBJECTS = bitfield-test.$(OBJEXT)
+bitfield_test_OBJECTS = $(am_bitfield_test_OBJECTS)
+bitfield_test_DEPENDENCIES = $(am__DEPENDENCIES_1)
+bitfield_test_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(bitfield_test_LDFLAGS) $(LDFLAGS) -o $@
 am_blocklist_test_OBJECTS = blocklist-test.$(OBJEXT)
 blocklist_test_OBJECTS = $(am_blocklist_test_OBJECTS)
 blocklist_test_DEPENDENCIES = $(am__DEPENDENCIES_1)
-blocklist_test_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(blocklist_test_LDFLAGS) $(LDFLAGS) -o $@
+blocklist_test_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) $(blocklist_test_LDFLAGS) $(LDFLAGS) -o \
+	$@
 am_clients_test_OBJECTS = clients-test.$(OBJEXT)
 clients_test_OBJECTS = $(am_clients_test_OBJECTS)
 clients_test_DEPENDENCIES = $(am__DEPENDENCIES_1)
-clients_test_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+clients_test_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(clients_test_LDFLAGS) $(LDFLAGS) -o $@
 am_history_test_OBJECTS = history-test.$(OBJEXT)
 history_test_OBJECTS = $(am_history_test_OBJECTS)
 history_test_DEPENDENCIES = $(am__DEPENDENCIES_1)
-history_test_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+history_test_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(history_test_LDFLAGS) $(LDFLAGS) -o $@
 am_json_test_OBJECTS = json-test.$(OBJEXT)
 json_test_OBJECTS = $(am_json_test_OBJECTS)
 json_test_DEPENDENCIES = $(am__DEPENDENCIES_1)
-json_test_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(json_test_LDFLAGS) \
-	$(LDFLAGS) -o $@
+json_test_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(json_test_LDFLAGS) $(LDFLAGS) -o $@
 am_magnet_test_OBJECTS = magnet-test.$(OBJEXT)
 magnet_test_OBJECTS = $(am_magnet_test_OBJECTS)
 magnet_test_DEPENDENCIES = $(am__DEPENDENCIES_1)
-magnet_test_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+magnet_test_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(magnet_test_LDFLAGS) $(LDFLAGS) -o $@
+am_metainfo_test_OBJECTS = metainfo-test.$(OBJEXT)
+metainfo_test_OBJECTS = $(am_metainfo_test_OBJECTS)
+metainfo_test_DEPENDENCIES = $(am__DEPENDENCIES_1)
+metainfo_test_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(metainfo_test_LDFLAGS) $(LDFLAGS) -o $@
 am_peer_msgs_test_OBJECTS = peer-msgs-test.$(OBJEXT)
 peer_msgs_test_OBJECTS = $(am_peer_msgs_test_OBJECTS)
 peer_msgs_test_DEPENDENCIES = $(am__DEPENDENCIES_1)
-peer_msgs_test_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(peer_msgs_test_LDFLAGS) $(LDFLAGS) -o $@
+peer_msgs_test_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) $(peer_msgs_test_LDFLAGS) $(LDFLAGS) -o \
+	$@
 am_rpc_test_OBJECTS = rpc-test.$(OBJEXT)
 rpc_test_OBJECTS = $(am_rpc_test_OBJECTS)
 rpc_test_DEPENDENCIES = $(am__DEPENDENCIES_1)
-rpc_test_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(rpc_test_LDFLAGS) \
-	$(LDFLAGS) -o $@
+rpc_test_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(rpc_test_LDFLAGS) $(LDFLAGS) -o $@
 am_test_peer_id_OBJECTS = test-peer-id.$(OBJEXT)
 test_peer_id_OBJECTS = $(am_test_peer_id_OBJECTS)
 test_peer_id_DEPENDENCIES = $(am__DEPENDENCIES_1)
-test_peer_id_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+test_peer_id_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(test_peer_id_LDFLAGS) $(LDFLAGS) -o $@
 am_utils_test_OBJECTS = utils-test.$(OBJEXT)
 utils_test_OBJECTS = $(am_utils_test_OBJECTS)
 utils_test_DEPENDENCIES = $(am__DEPENDENCIES_1)
-utils_test_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(utils_test_LDFLAGS) \
-	$(LDFLAGS) -o $@
+utils_test_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(utils_test_LDFLAGS) $(LDFLAGS) -o $@
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -174,26 +205,34 @@ am__depfiles_maybe = depfiles
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LTCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) \
+	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+	$(AM_CFLAGS) $(CFLAGS)
 AM_V_CC = $(am__v_CC_@AM_V@)
 am__v_CC_ = $(am__v_CC_@AM_DEFAULT_V@)
 am__v_CC_0 = @echo "  CC      " $@;
 am__v_CC_1 = 
 CCLD = $(CC)
-LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
 SOURCES = $(libtransmission_a_SOURCES) $(bencode_test_SOURCES) \
-	$(blocklist_test_SOURCES) $(clients_test_SOURCES) \
-	$(history_test_SOURCES) $(json_test_SOURCES) \
-	$(magnet_test_SOURCES) $(peer_msgs_test_SOURCES) \
+	$(bitfield_test_SOURCES) $(blocklist_test_SOURCES) \
+	$(clients_test_SOURCES) $(history_test_SOURCES) \
+	$(json_test_SOURCES) $(magnet_test_SOURCES) \
+	$(metainfo_test_SOURCES) $(peer_msgs_test_SOURCES) \
 	$(rpc_test_SOURCES) $(test_peer_id_SOURCES) \
 	$(utils_test_SOURCES)
 DIST_SOURCES = $(libtransmission_a_SOURCES) $(bencode_test_SOURCES) \
-	$(blocklist_test_SOURCES) $(clients_test_SOURCES) \
-	$(history_test_SOURCES) $(json_test_SOURCES) \
-	$(magnet_test_SOURCES) $(peer_msgs_test_SOURCES) \
+	$(bitfield_test_SOURCES) $(blocklist_test_SOURCES) \
+	$(clients_test_SOURCES) $(history_test_SOURCES) \
+	$(json_test_SOURCES) $(magnet_test_SOURCES) \
+	$(metainfo_test_SOURCES) $(peer_msgs_test_SOURCES) \
 	$(rpc_test_SOURCES) $(test_peer_id_SOURCES) \
 	$(utils_test_SOURCES)
 am__can_run_installinfo = \
@@ -430,6 +469,7 @@ ACLOCAL = @ACLOCAL@
 ALL_LINGUAS = @ALL_LINGUAS@
 AMTAR = @AMTAR@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
+AR = @AR@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
@@ -443,6 +483,7 @@ CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CURL_MINIMUM = @CURL_MINIMUM@
 CXX = @CXX@
+CXXCPP = @CXXCPP@
 CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
@@ -451,21 +492,24 @@ DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DHT_CFLAGS = @DHT_CFLAGS@
 DHT_LIBS = @DHT_LIBS@
+DLLTOOL = @DLLTOOL@
+DSYMUTIL = @DSYMUTIL@
+DUMPBIN = @DUMPBIN@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
+FGREP = @FGREP@
 GETTEXT_PACKAGE = @GETTEXT_PACKAGE@
 GIO_MINIMUM = @GIO_MINIMUM@
 GLIB_MINIMUM = @GLIB_MINIMUM@
 GMOFILES = @GMOFILES@
 GMSGFMT = @GMSGFMT@
 GREP = @GREP@
-GTK2_MINIMUM = @GTK2_MINIMUM@
-GTK3_MINIMUM = @GTK3_MINIMUM@
 GTK_CFLAGS = @GTK_CFLAGS@
 GTK_LIBS = @GTK_LIBS@
+GTK_MINIMUM = @GTK_MINIMUM@
 HAVE_CXX = @HAVE_CXX@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
@@ -482,6 +526,7 @@ INTLTOOL_V_MERGE = @INTLTOOL_V_MERGE@
 INTLTOOL_V_MERGE_OPTIONS = @INTLTOOL_V_MERGE_OPTIONS@
 INTLTOOL__v_MERGE_ = @INTLTOOL__v_MERGE_@
 INTLTOOL__v_MERGE_0 = @INTLTOOL__v_MERGE_0@
+LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBAPPINDICATOR_CFLAGS = @LIBAPPINDICATOR_CFLAGS@
 LIBAPPINDICATOR_LIBS = @LIBAPPINDICATOR_LIBS@
@@ -490,28 +535,37 @@ LIBCURL_CFLAGS = @LIBCURL_CFLAGS@
 LIBCURL_LIBS = @LIBCURL_LIBS@
 LIBEVENT_CFLAGS = @LIBEVENT_CFLAGS@
 LIBEVENT_LIBS = @LIBEVENT_LIBS@
-LIBEVENT_MINIUM = @LIBEVENT_MINIUM@
+LIBEVENT_MINIMUM = @LIBEVENT_MINIMUM@
 LIBNATPMP_CFLAGS = @LIBNATPMP_CFLAGS@
 LIBNATPMP_LIBS = @LIBNATPMP_LIBS@
 LIBNATPMP_LIBS_QT = @LIBNATPMP_LIBS_QT@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
+LIBTOOL = @LIBTOOL@
 LIBUPNP_CFLAGS = @LIBUPNP_CFLAGS@
 LIBUPNP_LIBS = @LIBUPNP_LIBS@
 LIBUPNP_LIBS_QT = @LIBUPNP_LIBS_QT@
 LIBUTP_CFLAGS = @LIBUTP_CFLAGS@
 LIBUTP_LIBS = @LIBUTP_LIBS@
 LIBUTP_LIBS_QT = @LIBUTP_LIBS_QT@
+LIPO = @LIPO@
+LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
 MAKEINFO = @MAKEINFO@
+MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
 MKINSTALLDIRS = @MKINSTALLDIRS@
 MSGFMT = @MSGFMT@
 MSGMERGE = @MSGMERGE@
+NM = @NM@
+NMEDIT = @NMEDIT@
+OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
 OPENSSL_CFLAGS = @OPENSSL_CFLAGS@
 OPENSSL_LIBS = @OPENSSL_LIBS@
 OPENSSL_MINIMUM = @OPENSSL_MINIMUM@
+OTOOL = @OTOOL@
+OTOOL64 = @OTOOL64@
 PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
 PACKAGE_NAME = @PACKAGE_NAME@
@@ -530,6 +584,7 @@ PTHREAD_CC = @PTHREAD_CC@
 PTHREAD_CFLAGS = @PTHREAD_CFLAGS@
 PTHREAD_LIBS = @PTHREAD_LIBS@
 RANLIB = @RANLIB@
+SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -545,8 +600,10 @@ abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
 abs_top_srcdir = @abs_top_srcdir@
+ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
+ac_ct_DUMPBIN = @ac_ct_DUMPBIN@
 acx_pthread_config = @acx_pthread_config@
 am__include = @am__include@
 am__leading_dot = @am__leading_dot@
@@ -631,7 +688,6 @@ libtransmission_a_SOURCES = \
     history.c \
     inout.c \
     json.c \
-    JSON_parser.c \
     list.c \
     magnet.c \
     makemeta.c \
@@ -681,8 +737,10 @@ noinst_HEADERS = \
     handshake.h \
     history.h \
     inout.h \
+    jsonsl.c \
+    jsonsl.h \
     json.h \
-    JSON_parser.h \
+    libtransmission-test.h \
     list.h \
     magnet.h \
     makemeta.h \
@@ -736,6 +794,9 @@ apps_ldadd = \
 bencode_test_SOURCES = bencode-test.c
 bencode_test_LDADD = ${apps_ldadd}
 bencode_test_LDFLAGS = ${apps_ldflags}
+bitfield_test_SOURCES = bitfield-test.c
+bitfield_test_LDADD = ${apps_ldadd}
+bitfield_test_LDFLAGS = ${apps_ldflags}
 blocklist_test_SOURCES = blocklist-test.c
 blocklist_test_LDADD = ${apps_ldadd}
 blocklist_test_LDFLAGS = ${apps_ldflags}
@@ -751,22 +812,25 @@ json_test_LDFLAGS = ${apps_ldflags}
 magnet_test_SOURCES = magnet-test.c
 magnet_test_LDADD = ${apps_ldadd}
 magnet_test_LDFLAGS = ${apps_ldflags}
+metainfo_test_SOURCES = metainfo-test.c
+metainfo_test_LDADD = ${apps_ldadd}
+metainfo_test_LDFLAGS = ${apps_ldflags}
+peer_msgs_test_SOURCES = peer-msgs-test.c
+peer_msgs_test_LDADD = ${apps_ldadd}
+peer_msgs_test_LDFLAGS = ${apps_ldflags}
 rpc_test_SOURCES = rpc-test.c
 rpc_test_LDADD = ${apps_ldadd}
 rpc_test_LDFLAGS = ${apps_ldflags}
 test_peer_id_SOURCES = test-peer-id.c
 test_peer_id_LDADD = ${apps_ldadd}
 test_peer_id_LDFLAGS = ${apps_ldflags}
-peer_msgs_test_SOURCES = peer-msgs-test.c
-peer_msgs_test_LDADD = ${apps_ldadd}
-peer_msgs_test_LDFLAGS = ${apps_ldflags}
 utils_test_SOURCES = utils-test.c
 utils_test_LDADD = ${apps_ldadd}
 utils_test_LDFLAGS = ${apps_ldflags}
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .c .log .o .obj .test .test$(EXEEXT) .trs
+.SUFFIXES: .c .lo .log .o .obj .test .test$(EXEEXT) .trs
 $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -806,10 +870,19 @@ libtransmission.a: $(libtransmission_a_OBJECTS) $(libtransmission_a_DEPENDENCIES
 	$(AM_V_at)$(RANLIB) libtransmission.a
 
 clean-noinstPROGRAMS:
-	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
+	@list='$(noinst_PROGRAMS)'; test -n "$$list" || exit 0; \
+	echo " rm -f" $$list; \
+	rm -f $$list || exit $$?; \
+	test -n "$(EXEEXT)" || exit 0; \
+	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
+	echo " rm -f" $$list; \
+	rm -f $$list
 bencode-test$(EXEEXT): $(bencode_test_OBJECTS) $(bencode_test_DEPENDENCIES) $(EXTRA_bencode_test_DEPENDENCIES) 
 	@rm -f bencode-test$(EXEEXT)
 	$(AM_V_CCLD)$(bencode_test_LINK) $(bencode_test_OBJECTS) $(bencode_test_LDADD) $(LIBS)
+bitfield-test$(EXEEXT): $(bitfield_test_OBJECTS) $(bitfield_test_DEPENDENCIES) $(EXTRA_bitfield_test_DEPENDENCIES) 
+	@rm -f bitfield-test$(EXEEXT)
+	$(AM_V_CCLD)$(bitfield_test_LINK) $(bitfield_test_OBJECTS) $(bitfield_test_LDADD) $(LIBS)
 blocklist-test$(EXEEXT): $(blocklist_test_OBJECTS) $(blocklist_test_DEPENDENCIES) $(EXTRA_blocklist_test_DEPENDENCIES) 
 	@rm -f blocklist-test$(EXEEXT)
 	$(AM_V_CCLD)$(blocklist_test_LINK) $(blocklist_test_OBJECTS) $(blocklist_test_LDADD) $(LIBS)
@@ -825,6 +898,9 @@ json-test$(EXEEXT): $(json_test_OBJECTS) $(json_test_DEPENDENCIES) $(EXTRA_json_
 magnet-test$(EXEEXT): $(magnet_test_OBJECTS) $(magnet_test_DEPENDENCIES) $(EXTRA_magnet_test_DEPENDENCIES) 
 	@rm -f magnet-test$(EXEEXT)
 	$(AM_V_CCLD)$(magnet_test_LINK) $(magnet_test_OBJECTS) $(magnet_test_LDADD) $(LIBS)
+metainfo-test$(EXEEXT): $(metainfo_test_OBJECTS) $(metainfo_test_DEPENDENCIES) $(EXTRA_metainfo_test_DEPENDENCIES) 
+	@rm -f metainfo-test$(EXEEXT)
+	$(AM_V_CCLD)$(metainfo_test_LINK) $(metainfo_test_OBJECTS) $(metainfo_test_LDADD) $(LIBS)
 peer-msgs-test$(EXEEXT): $(peer_msgs_test_OBJECTS) $(peer_msgs_test_DEPENDENCIES) $(EXTRA_peer_msgs_test_DEPENDENCIES) 
 	@rm -f peer-msgs-test$(EXEEXT)
 	$(AM_V_CCLD)$(peer_msgs_test_LINK) $(peer_msgs_test_OBJECTS) $(peer_msgs_test_LDADD) $(LIBS)
@@ -845,13 +921,13 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ConvertUTF.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/JSON_parser.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/announcer-http.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/announcer-udp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/announcer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bandwidth.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bencode-test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bencode.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bitfield-test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bitfield.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/blocklist-test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/blocklist.Po@am__quote@
@@ -871,6 +947,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/magnet-test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/magnet.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/makemeta.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/metainfo-test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/metainfo.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/natpmp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/net.Po@am__quote@
@@ -918,6 +995,19 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(COMPILE) -c `$(CYGPATH_W) '$<'`
+
+.c.lo:
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
+
+mostlyclean-libtool:
+	-rm -f *.lo
+
+clean-libtool:
+	-rm -rf .libs _libs
 
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique
@@ -1112,6 +1202,13 @@ recheck: all
 	        am__force_recheck=am--force-recheck \
 	        TEST_LOGS="$$log_list"; \
 	exit $$?
+bitfield-test.log: bitfield-test$(EXEEXT)
+	@p='bitfield-test$(EXEEXT)'; \
+	b='bitfield-test'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
 blocklist-test.log: blocklist-test$(EXEEXT)
 	@p='blocklist-test$(EXEEXT)'; \
 	b='blocklist-test'; \
@@ -1150,6 +1247,13 @@ json-test.log: json-test$(EXEEXT)
 magnet-test.log: magnet-test$(EXEEXT)
 	@p='magnet-test$(EXEEXT)'; \
 	b='magnet-test'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+metainfo-test.log: metainfo-test$(EXEEXT)
+	@p='metainfo-test$(EXEEXT)'; \
+	b='metainfo-test'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
@@ -1267,8 +1371,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-generic clean-noinstLIBRARIES clean-noinstPROGRAMS \
-	mostlyclean-am
+clean-am: clean-generic clean-libtool clean-noinstLIBRARIES \
+	clean-noinstPROGRAMS mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -1323,7 +1427,8 @@ maintainer-clean-am: distclean-am maintainer-clean-generic
 
 mostlyclean: mostlyclean-am
 
-mostlyclean-am: mostlyclean-compile mostlyclean-generic
+mostlyclean-am: mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool
 
 pdf: pdf-am
 
@@ -1338,18 +1443,19 @@ uninstall-am:
 .MAKE: check-am install-am install-strip
 
 .PHONY: CTAGS GTAGS TAGS all all-am check check-TESTS check-am clean \
-	clean-generic clean-noinstLIBRARIES clean-noinstPROGRAMS \
-	cscopelist-am ctags ctags-am distclean distclean-compile \
-	distclean-generic distclean-tags distdir dvi dvi-am html \
-	html-am info info-am install install-am install-data \
-	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic pdf pdf-am ps ps-am recheck tags tags-am \
-	uninstall uninstall-am
+	clean-generic clean-libtool clean-noinstLIBRARIES \
+	clean-noinstPROGRAMS cscopelist-am ctags ctags-am distclean \
+	distclean-compile distclean-generic distclean-libtool \
+	distclean-tags distdir dvi dvi-am html html-am info info-am \
+	install install-am install-data install-data-am install-dvi \
+	install-dvi-am install-exec install-exec-am install-html \
+	install-html-am install-info install-info-am install-man \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
+	pdf pdf-am ps ps-am recheck tags tags-am uninstall \
+	uninstall-am
 
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

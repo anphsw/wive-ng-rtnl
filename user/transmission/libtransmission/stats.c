@@ -7,7 +7,7 @@
  * This exemption does not extend to derived works not owned by
  * the Transmission project.
  *
- * $Id: stats.c 13363 2012-07-01 04:00:27Z jordan $
+ * $Id: stats.c 13625 2012-12-05 17:29:46Z jordan $
  */
 
 #include "transmission.h"
@@ -45,8 +45,7 @@ getFilename( const tr_session * session )
 }
 
 static void
-loadCumulativeStats( const tr_session * session,
-                     tr_session_stats * setme )
+loadCumulativeStats (const tr_session * session, tr_session_stats * setme)
 {
     tr_benc top;
     char * filename;
@@ -83,8 +82,7 @@ loadCumulativeStats( const tr_session * session,
 }
 
 static void
-saveCumulativeStats( const tr_session * session,
-                     const tr_session_stats * s )
+saveCumulativeStats (const tr_session * session, const tr_session_stats * s)
 {
     char * filename;
     tr_benc top;
@@ -129,6 +127,7 @@ void
 tr_statsSaveDirty( tr_session * session )
 {
     struct tr_stats_handle * h = getStats( session );
+
     if( ( h != NULL ) && h->isDirty )
     {
         tr_session_stats cumulative = STATS_INIT;
@@ -154,8 +153,7 @@ tr_statsClose( tr_session * session )
 static void
 updateRatio( tr_session_stats * setme )
 {
-    setme->ratio = tr_getRatio( setme->uploadedBytes,
-                                setme->downloadedBytes );
+  setme->ratio = tr_getRatio (setme->uploadedBytes, setme->downloadedBytes);
 }
 
 static void
@@ -172,10 +170,10 @@ addStats( tr_session_stats *       setme,
 }
 
 void
-tr_sessionGetStats( const tr_session * session,
-                    tr_session_stats * setme )
+tr_sessionGetStats (const tr_session * session, tr_session_stats * setme)
 {
     const struct tr_stats_handle * stats = getStats( session );
+
     if( stats )
     {
         *setme = stats->single;
@@ -220,8 +218,7 @@ tr_sessionClearStats( tr_session * session )
 **/
 
 void
-tr_statsAddUploaded( tr_session * session,
-                     uint32_t    bytes )
+tr_statsAddUploaded (tr_session * session, uint32_t bytes)
 {
     struct tr_stats_handle * s;
 
@@ -233,8 +230,7 @@ tr_statsAddUploaded( tr_session * session,
 }
 
 void
-tr_statsAddDownloaded( tr_session * session,
-                       uint32_t     bytes )
+tr_statsAddDownloaded (tr_session * session, uint32_t bytes)
 {
     struct tr_stats_handle * s;
 

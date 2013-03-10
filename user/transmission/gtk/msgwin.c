@@ -7,7 +7,7 @@
  * This exemption does not extend to derived works not owned by
  * the Transmission project.
  *
- * $Id: msgwin.c 13205 2012-02-04 23:59:42Z jordan $
+ * $Id: msgwin.c 13625 2012-12-05 17:29:46Z jordan $
  */
 
 #include <errno.h>
@@ -158,11 +158,21 @@ doSave( GtkWindow * parent, struct MsgData * data, const char * filename )
 
             gtk_tree_model_get( model, &iter, COL_TR_MSG, &node, -1 );
             date = gtr_localtime( node->when );
-            switch( node->level ) {
-                case TR_MSG_DBG: levelStr = "debug"; break;
-                case TR_MSG_ERR: levelStr = "error"; break;
-                default:         levelStr = "     "; break;
+          switch (node->level)
+           {
+             case TR_MSG_DBG:
+               levelStr = "debug";
+               break;
+
+             case TR_MSG_ERR:
+               levelStr = "error";
+               break;
+
+             default:
+               levelStr = "     ";
+               break;
             }
+
             fprintf( fp, "%s\t%s\t%s\t%s\n", date, levelStr,
                      ( node->name ? node->name : "" ),
                      ( node->message ? node->message : "" ) );
@@ -278,8 +288,7 @@ renderTime( GtkTreeViewColumn  * column UNUSED,
 }
 
 static void
-appendColumn( GtkTreeView * view,
-              int           col )
+appendColumn (GtkTreeView * view, int col)
 {
     GtkCellRenderer *   r;
     GtkTreeViewColumn * c;
@@ -288,15 +297,18 @@ appendColumn( GtkTreeView * view,
     switch( col )
     {
         case COL_SEQUENCE:
-            title = _( "Time" ); break;
+        title = _("Time");
+        break;
 
         /* noun. column title for a list */
         case COL_NAME:
-            title = _( "Name" ); break;
+        title = _("Name");
+        break;
 
         /* noun. column title for a list */
         case COL_MESSAGE:
-            title = _( "Message" ); break;
+        title = _("Message");
+        break;
 
         default:
             g_assert_not_reached( );
@@ -308,8 +320,7 @@ appendColumn( GtkTreeView * view,
             r = gtk_cell_renderer_text_new( );
             c = gtk_tree_view_column_new_with_attributes( title, r, NULL );
             gtk_tree_view_column_set_cell_data_func( c, r, renderText,
-                                                     GINT_TO_POINTER(
-                                                         col ), NULL );
+                                                 GINT_TO_POINTER (col), NULL);
             gtk_tree_view_column_set_sizing( c, GTK_TREE_VIEW_COLUMN_FIXED );
             gtk_tree_view_column_set_fixed_width( c, 200 );
             gtk_tree_view_column_set_resizable( c, TRUE );
@@ -319,8 +330,7 @@ appendColumn( GtkTreeView * view,
             r = gtk_cell_renderer_text_new( );
             c = gtk_tree_view_column_new_with_attributes( title, r, NULL );
             gtk_tree_view_column_set_cell_data_func( c, r, renderText,
-                                                     GINT_TO_POINTER(
-                                                         col ), NULL );
+                                                 GINT_TO_POINTER (col), NULL);
             gtk_tree_view_column_set_sizing( c, GTK_TREE_VIEW_COLUMN_FIXED );
             gtk_tree_view_column_set_fixed_width( c, 500 );
             gtk_tree_view_column_set_resizable( c, TRUE );
@@ -329,8 +339,7 @@ appendColumn( GtkTreeView * view,
         case COL_SEQUENCE:
             r = gtk_cell_renderer_text_new( );
             c = gtk_tree_view_column_new_with_attributes( title, r, NULL );
-            gtk_tree_view_column_set_cell_data_func( c, r, renderTime, NULL,
-                                                     NULL );
+        gtk_tree_view_column_set_cell_data_func (c, r, renderTime, NULL, NULL);
             gtk_tree_view_column_set_resizable( c, TRUE );
             break;
 
@@ -345,10 +354,11 @@ appendColumn( GtkTreeView * view,
 static gboolean
 isRowVisible( GtkTreeModel * model, GtkTreeIter * iter, gpointer gdata )
 {
-    const struct MsgData *     data = gdata;
     const struct tr_msg_list * node;
+  const struct MsgData * data = gdata;
 
     gtk_tree_model_get( model, iter, COL_TR_MSG, &node, -1 );
+
     return node->level <= data->maxLevel;
 }
 
@@ -358,6 +368,7 @@ onWindowDestroyed( gpointer gdata, GObject * deadWindow UNUSED )
     struct MsgData * data = gdata;
 
     g_source_remove( data->refresh_tag );
+
     g_free( data );
 }
 
@@ -456,7 +467,7 @@ gtr_message_log_window_new( GtkWindow * parent, TrCore * core )
     gtk_window_set_title( GTK_WINDOW( win ), _( "Message Log" ) );
     gtk_window_set_default_size( GTK_WINDOW( win ), 560, 350 );
     gtk_window_set_role( GTK_WINDOW( win ), "message-log" );
-    vbox = gtr_vbox_new( FALSE, 0 );
+  vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 
     /**
     ***  toolbar
@@ -464,10 +475,8 @@ gtr_message_log_window_new( GtkWindow * parent, TrCore * core )
 
     toolbar = gtk_toolbar_new( );
     gtk_toolbar_set_style( GTK_TOOLBAR( toolbar ), GTK_TOOLBAR_BOTH_HORIZ );
-#if GTK_CHECK_VERSION( 3,0,0 )
     gtk_style_context_add_class( gtk_widget_get_style_context( toolbar ),
                                  GTK_STYLE_CLASS_PRIMARY_TOOLBAR );
-#endif
 
     item = gtk_tool_button_new_from_stock( GTK_STOCK_SAVE_AS );
     g_object_set( G_OBJECT( item ), "is-important", TRUE, NULL );
@@ -512,22 +521,19 @@ gtr_message_log_window_new( GtkWindow * parent, TrCore * core )
                                       G_TYPE_UINT,       /* sequence */
                                       G_TYPE_POINTER,    /* category */
                                       G_TYPE_POINTER,    /* message */
-                                      G_TYPE_POINTER );   /* struct tr_msg_list
-                                                            */
+                                    G_TYPE_POINTER);   /* struct tr_msg_list */
 
     addMessages( data->store, myHead );
     onRefresh( data ); /* much faster to populate *before* it has listeners */
 
-    data->filter = gtk_tree_model_filter_new( GTK_TREE_MODEL(
-                                                  data->store ), NULL );
+  data->filter = gtk_tree_model_filter_new (GTK_TREE_MODEL (data->store), NULL);
     data->sort = gtk_tree_model_sort_new_with_model( data->filter );
     g_object_unref( data->filter );
     gtk_tree_sortable_set_sort_column_id( GTK_TREE_SORTABLE( data->sort ),
                                           COL_SEQUENCE,
                                           GTK_SORT_ASCENDING );
     data->maxLevel = gtr_pref_int_get( TR_PREFS_KEY_MSGLEVEL );
-    gtk_tree_model_filter_set_visible_func( GTK_TREE_MODEL_FILTER( data->
-                                                                   filter ),
+  gtk_tree_model_filter_set_visible_func (GTK_TREE_MODEL_FILTER (data->filter),
                                             isRowVisible, data, NULL );
 
 

@@ -7,7 +7,7 @@
  * This exemption does not extend to derived works not owned by
  * the Transmission project.
  *
- * $Id: handshake.c 12365 2011-04-17 05:22:50Z jordan $
+ * $Id: handshake.c 13625 2012-12-05 17:29:46Z jordan $
  */
 
 #include <assert.h>
@@ -91,8 +91,7 @@ enum
    these macros are to be used if both extended messaging and the
    azureus protocol is supported, they indicate which protocol is preferred */
 #define HANDSHAKE_GET_EXTPREF( reserved )      ( ( reserved )[5] & 0x03 )
-#define HANDSHAKE_SET_EXTPREF( reserved, val ) ( ( reserved )[5] |= 0x03 &\
-                                                                    ( val ) )
+#define HANDSHAKE_SET_EXTPREF(reserved, val)((reserved)[5] |= 0x03 & (val))
 
 typedef uint8_t handshake_state_t;
 
@@ -868,14 +867,19 @@ static int
 readPadC( tr_handshake *    handshake,
           struct evbuffer * inbuf )
 {
+    char       * padc;
     uint16_t     ia_len;
     const size_t needlen = handshake->pad_c_len + sizeof( uint16_t );
 
     if( evbuffer_get_length( inbuf ) < needlen )
         return READ_LATER;
 
-    evbuffer_drain( inbuf, handshake->pad_c_len );
+    /* read the throwaway padc */
+    padc = tr_new (char, handshake->pad_c_len);
+    tr_peerIoReadBytes (handshake->io, inbuf, padc, handshake->pad_c_len);
+    tr_free (padc);
 
+    /* read ia_len */
     tr_peerIoReadUint16( handshake->io, inbuf, &ia_len );
     dbgmsg( handshake, "ia_len is %d", (int)ia_len );
     handshake->ia_len = ia_len;

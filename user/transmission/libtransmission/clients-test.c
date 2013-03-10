@@ -1,40 +1,17 @@
-#include <stdio.h>
-#include <string.h>
 #include "transmission.h"
 #include "clients.h"
 
 #undef VERBOSE
+#include "libtransmission-test.h"
 
-#ifdef VERBOSE
-  #define check( A ) \
-    { \
-        ++test; \
-        if( A ){ \
-            fprintf( stderr, "PASS test #%d (%s, %d)\n", test, __FILE__, __LINE__ ); \
-        } else { \
-            fprintf( stderr, "FAIL test #%d (%s, %d)\n", test, __FILE__, __LINE__ ); \
-            return test; \
-        } \
-    }
-#else
-  #define check( A ) \
-    { \
-        ++test; \
-        if( !( A ) ){ \
-            fprintf( stderr, "FAIL test #%d (%s, %d)\n", test, __FILE__, __LINE__ ); \
-            return test; \
-        } \
-    }
-#endif
 
 #define TEST_CLIENT( A, B ) \
     tr_clientForId( buf, sizeof( buf ), A ); \
-    check( !strcmp( buf, B ) );
+    check_streq (B, buf);
 
 int
 main( void )
 {
-    int  test = 0;
     char buf[128];
 
     TEST_CLIENT( "-FC1013-", "FileCroc 1.0.1.3" );

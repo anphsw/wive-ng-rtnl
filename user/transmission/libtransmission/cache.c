@@ -7,7 +7,7 @@
  * This exemption does not extend to derived works not owned by
  * the Transmission project.
  *
- * $Id: cache.c 12653 2011-08-08 16:58:29Z jordan $
+ * $Id: cache.c 13625 2012-12-05 17:29:46Z jordan $
  */
 
 #include <stdlib.h> /* qsort() */
@@ -25,11 +25,12 @@
 #define MY_NAME "Cache"
 
 #define dbgmsg( ... ) \
-    do { \
+  do \
+    { \
         if( tr_deepLoggingIsActive( ) ) \
             tr_deepLog( __FILE__, __LINE__, MY_NAME, __VA_ARGS__ ); \
-    } while( 0 )
-
+    } \
+  while (0)
 
 /****
 *****
@@ -86,15 +87,20 @@ getBlockRun( const tr_cache * cache, int pos, struct run_info * info )
     const struct cache_block * ref = blocks[pos];
     tr_block_index_t block = ref->block;
 
-    for( i=pos; i<n; ++i, ++block ) {
+  for (i=pos; i<n; ++i, ++block)
+    {
         const struct cache_block * b = blocks[i];
-        if( b->block != block ) break;
-        if( b->tor != ref->tor ) break;
+      if (b->block != block)
+        break;
+      if (b->tor != ref->tor)
+        break;
 //fprintf( stderr, "pos %d tor %d block %zu time %zu\n", i, b->tor->uniqueId, (size_t)b->block, (size_t)b->time );
     }
 
 //fprintf( stderr, "run is %d long from [%d to %d)\n", (int)(i-pos), i, (int)pos );
-    if( info != NULL ) {
+
+  if (info != NULL)
+    {
         const struct cache_block * b = blocks[i-1];
         info->last_block_time = b->time;
         info->is_piece_done = tr_cpPieceIsComplete( &b->tor->completion, b->piece );
@@ -121,6 +127,7 @@ enum
     DONEFLAG    = 0x2000,
     SESSIONFLAG = 0x4000
 };
+
 /* Calculte runs
  *   - Stale runs, runs sitting in cache for a long time or runs not growing, get priority.
  *     Returns number of runs.
@@ -149,6 +156,7 @@ calcRuns( tr_cache * cache, struct run_info * runs )
         rank |= runs[i].is_multi_piece ? MULTIFLAG : 0;
 
         runs[i].rank = rank;
+
 //fprintf(stderr,"block run at pos %d of length %d and age %ld adjusted +%d\n",runs[i].pos,runs[i].len,now-runs[i].last_block_time,rank-runs[i].len);
     }
 
@@ -171,7 +179,8 @@ flushContiguous( tr_cache * cache, int pos, int n )
     const tr_piece_index_t piece = b->piece;
     const uint32_t offset        = b->offset;
 
-    for( i=pos; i<pos+n; ++i ) {
+  for (i=pos; i<pos+n; ++i)
+    {
         b = blocks[i];
         evbuffer_copyout( b->evbuf, walk, b->length );
         walk += b->length;
@@ -191,12 +200,16 @@ flushContiguous( tr_cache * cache, int pos, int n )
 static int
 flushRuns( tr_cache * cache, struct run_info * runs, int n )
 {
-    int i, j, err = 0;
+  int i;
+  int err = 0;
 
-    for( i = 0; !err && i < n; ++i )
+  for (i=0; !err && i<n; i++)
     {
+      int j;
+
         err = flushContiguous( cache, runs[i].pos, runs[i].len );
-        for( j = i + 1; j < n; ++j )
+
+      for (j=i+1; j<n; j++)
             if( runs[j].pos > runs[i].pos )
                 runs[j].pos -= runs[i].len;
     }
@@ -337,7 +350,7 @@ tr_cacheWriteBlock( tr_cache         * cache,
     evbuffer_drain( cb->evbuf, evbuffer_get_length( cb->evbuf ) );
     evbuffer_remove_buffer( writeme, cb->evbuf, cb->length );
 
-    ++cache->cache_writes;
+  cache->cache_writes++;
     cache->cache_write_bytes += cb->length;
 
     return cacheTrim( cache );
@@ -397,12 +410,16 @@ int tr_cacheFlushDone( tr_cache * cache )
 
     if( tr_ptrArraySize( &cache->blocks ) > 0 )
     {
-        struct run_info * runs = tr_new( struct run_info, tr_ptrArraySize( &cache->blocks ) );
-        int i = 0, n;
+      int i, n;
+      struct run_info * runs;
 
+      runs = tr_new (struct run_info, tr_ptrArraySize (&cache->blocks));
+      i = 0;
         n = calcRuns( cache, runs );
+
         while( i < n && ( runs[i].is_piece_done || runs[i].is_multi_piece ) )
             runs[i++].rank |= SESSIONFLAG;
+
         err = flushRuns( cache, runs, i );
         tr_free( runs );
     }
@@ -417,6 +434,7 @@ tr_cacheFlushFile( tr_cache * cache, tr_torrent * torrent, tr_file_index_t i )
     int err = 0;
     tr_block_index_t first;
     tr_block_index_t last;
+
     tr_torGetFileBlockRange( torrent, i, &first, &last );
     pos = findBlockPos( cache, torrent, first );
     dbgmsg( "flushing file %d from cache to disk: blocks [%zu...%zu]", (int)i, (size_t)first, (size_t)last );
@@ -425,8 +443,12 @@ tr_cacheFlushFile( tr_cache * cache, tr_torrent * torrent, tr_file_index_t i )
     while( !err && ( pos < tr_ptrArraySize( &cache->blocks ) ) )
     {
         const struct cache_block * b = tr_ptrArrayNth( &cache->blocks, pos );
-        if( b->tor != torrent ) break;
-        if( ( b->block < first ) || ( b->block > last ) ) break;
+
+      if (b->tor != torrent)
+        break;
+      if ((b->block < first) || (b->block > last))
+        break;
+
         err = flushContiguous( cache, pos, getBlockRun( cache, pos, NULL ) );
     }
 
@@ -443,7 +465,10 @@ tr_cacheFlushTorrent( tr_cache * cache, tr_torrent * torrent )
     while( !err && ( pos < tr_ptrArraySize( &cache->blocks ) ) )
     {
         const struct cache_block * b = tr_ptrArrayNth( &cache->blocks, pos );
-        if( b->tor != torrent ) break;
+
+      if (b->tor != torrent)
+        break;
+
         err = flushContiguous( cache, pos, getBlockRun( cache, pos, NULL ) );
     }
 

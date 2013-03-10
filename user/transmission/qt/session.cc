@@ -7,7 +7,7 @@
  *
  * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  *
- * $Id: session.cc 12661 2011-08-09 13:35:44Z jordan $
+ * $Id: session.cc 13919 2013-02-01 18:52:55Z jordan $
  */
 
 #include <cassert>
@@ -101,7 +101,7 @@ Session :: sessionSet( const char * key, const QVariant& value )
         case QVariant::Bool:   tr_bencDictAddBool ( args, key, value.toBool() ); break;
         case QVariant::Int:    tr_bencDictAddInt  ( args, key, value.toInt() ); break;
         case QVariant::Double: tr_bencDictAddReal ( args, key, value.toDouble() ); break;
-        case QVariant::String: tr_bencDictAddStr  ( args, key, value.toString().toUtf8() ); break;
+        case QVariant::String: tr_bencDictAddStr  ( args, key, value.toString().toUtf8().constData() ); break;
         default: assert( "unknown type" );
     }
     exec( &top );
@@ -167,6 +167,7 @@ Session :: updatePref( int key )
         case Prefs :: QUEUE_STALLED_MINUTES:
         case Prefs :: PEX_ENABLED:
         case Prefs :: PORT_FORWARDING:
+        case Prefs :: RENAME_PARTIAL_FILES:
         case Prefs :: SCRIPT_TORRENT_DONE_ENABLED:
         case Prefs :: SCRIPT_TORRENT_DONE_FILENAME:
         case Prefs :: START:
@@ -245,7 +246,7 @@ Session :: Session( const char * configDir, Prefs& prefs ):
     myBlocklistSize( -1 ),
     myPrefs( prefs ),
     mySession( 0 ),
-    myConfigDir( configDir ),
+    myConfigDir( QString::fromUtf8( configDir ) ),
     myNAM( 0 )
 {
     myStats.ratio = TR_RATIO_NA;
@@ -966,12 +967,13 @@ void
 Session :: addNewlyCreatedTorrent( const QString& filename, const QString& localPath )
 {
     const QByteArray b64 = AddData(filename).toBase64();
+    const QByteArray localPathUtf8 = localPath.toUtf8();
 
     tr_benc top, *args;
     tr_bencInitDict( &top, 2 );
     tr_bencDictAddStr( &top, "method", "torrent-add" );
     args = tr_bencDictAddDict( &top, "arguments", 3 );
-    tr_bencDictAddStr( args, "download-dir", qPrintable(localPath) );
+    tr_bencDictAddStr( args, "download-dir", localPathUtf8.constData() );
     tr_bencDictAddBool( args, "paused", !myPrefs.getBool( Prefs::START ) );
     tr_bencDictAddRaw( args, "metainfo", b64.constData(), b64.size() );
     exec( &top );
@@ -1033,8 +1035,12 @@ Session :: launchWebInterface( )
 {
     QUrl url;
     if( !mySession ) // remote session
+    {
         url = myUrl;
-    else { // local session
+        url.setPath( "/transmission/web/" );
+    }
+    else // local session
+    {
         url.setScheme( "http" );
         url.setHost( "localhost" );
         url.setPort( myPrefs.getInt( Prefs::RPC_PORT ) );

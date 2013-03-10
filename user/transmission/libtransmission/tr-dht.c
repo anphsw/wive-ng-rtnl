@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  *
- * $Id: tr-dht.c 12587 2011-07-25 21:30:46Z jch $
+ * $Id: tr-dht.c 13625 2012-12-05 17:29:46Z jordan $
  *
  */
 
@@ -352,9 +352,10 @@ tr_dhtUninit(tr_session *ss)
 
     /* Since we only save known good nodes, avoid erasing older data if we
        don't know enough nodes. */
-    if(tr_dhtStatus(ss, AF_INET, NULL) < TR_DHT_FIREWALLED)
+    if ((tr_dhtStatus (ss, AF_INET, NULL) < TR_DHT_FIREWALLED) &&
+      (tr_dhtStatus (ss, AF_INET6, NULL) < TR_DHT_FIREWALLED)) {
         tr_ninf( "DHT", "Not saving nodes, DHT not ready" );
-    else {
+    } else {
         tr_benc benc;
         struct sockaddr_in sins[300];
         struct sockaddr_in6 sins6[300];
