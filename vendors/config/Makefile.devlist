@@ -7,9 +7,6 @@
 # PRODUCTDIR=vendors/CyberGuard/SG300 make -f vendors/config/Makefile.devlist
 
 ROOTDIR=$(PRODUCTDIR)/../../..
-CONFIG_CONFIG=$(PRODUCTDIR)/config.device
-LINUX_CONFIG=$(PRODUCTDIR)/config.linux-2.4.x
-ARCH_CONFIG=$(PRODUCTDIR)/config.arch
 
 -include $(LINUX_CONFIG)
 -include $(CONFIG_CONFIG)
