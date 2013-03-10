@@ -171,8 +171,8 @@ struct udp_seq_afinfo {
 
 struct udp_iter_state {
 	sa_family_t		family;
-	struct hlist_head	*hashtable;
 	int			bucket;
+	struct hlist_head	*hashtable;
 };
 
 #ifdef CONFIG_PROC_FS
