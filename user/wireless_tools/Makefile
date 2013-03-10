@@ -104,15 +104,13 @@ ifdef BUILD_WE_ESSENTIAL
 endif
 
 # Other flags
-CFLAGS +=-Os -W -Wall -Wstrict-prototypes -Wmissing-prototypes -Wshadow \
-	-Wpointer-arith -Wcast-qual -Winline -I.
-#CFLAGS=-Os -W -Wall -Wstrict-prototypes -I.
+CFLAGS +=-Os -W -Wall -Wstrict-prototypes -Wmissing-prototypes -Wshadow -Wpointer-arith -Wcast-qual -Winline -I.
 DEPFLAGS=-MMD
 XCFLAGS=$(CFLAGS) $(DEPFLAGS) $(WARN) $(HEADERS) $(WELIB_FLAG) $(WEDEF_FLAG)
 PICFLAG=-fPIC
 
 # Standard compilation targets
-all:: $(STATIC) $(IWLIB) $(PROGS)
+all:: $(STATIC) $(IWLIB) $(PROGS) $(EXTRAPROGS)
 
 %: %.o
 	$(CC) $(LDFLAGS) $(STRIPFLAGS) $(XCFLAGS) -o $@ $^ $(LIBS)
@@ -139,7 +137,7 @@ macaddr: macaddr.o $(IWLIB)
 
 # Always do symbol stripping here
 iwmulticall: iwmulticall.o
-	$(CC) $(LDFLAGS) -Wl,-s $(XCFLAGS) -o $@ $^ $(LIBS)
+	$(CC) $(LDFLAGS) $(STRIPFLAGS) $(XCFLAGS) -o $@ $^ $(LIBS)
 
 # It's a kind of magic...
 wireless.h:
@@ -148,18 +146,6 @@ wireless.h:
 # Compilation of the dynamic library
 $(DYNAMIC): $(OBJS:.o=.so)
 	$(CC) -shared -o $@ -Wl,-soname,$@ $(STRIPFLAGS) $(LIBS) -lc $^
-romfs:
-	$(ROMFSINST) -S -e CONFIG_USER_WIRELESS_TOOLS_IWCONFIG /bin/iwconfig
-	$(ROMFSINST) -S -e CONFIG_USER_WIRELESS_TOOLS_IWLIST   /bin/iwlist
-	$(ROMFSINST) -S -e CONFIG_USER_WIRELESS_TOOLS_IWPRIV   /bin/iwpriv
-	$(ROMFSINST) -S -e CONFIG_USER_WIRELESS_TOOLS_IWSPY    /bin/iwspy
-	$(ROMFSINST) -S -e CONFIG_USER_WIRELESS_TOOLS_IWGETID  /bin/iwgetid
-	$(ROMFSINST) -S -e CONFIG_USER_WIRELESS_TOOLS_IWEVENT  /bin/iwevent
-ifndef BUILD_STATIC
-	$(ROMFSINST) -S /lib/$(IWLIB)
-	$(ROMFSINST) -s /lib/$(IWLIB) /lib/libiw.so
-	$(ROMFSINST) -s /lib/$(IWLIB) /lib/libiw.so.0
-endif
 
 # Compilation of the static library
 $(STATIC): $(OBJS:.o=.so)
@@ -215,12 +201,25 @@ install-iwmulticall:: iwmulticall
 	  ln -f -s iwconfig iwpriv ; \
 	  ln -f -s iwconfig iwgetid )
 
+romfs:
+	$(ROMFSINST) -S -e /bin/iwmulticall
+	$(ROMFSINST) -s -e /bin/iwmulticall /bin/iwconfig
+	$(ROMFSINST) -s -e /bin/iwmulticall /bin/iwlist
+	$(ROMFSINST) -s -e /bin/iwmulticall /bin/iwpriv
+	$(ROMFSINST) -s -e /bin/iwmulticall /bin/iwspy
+	$(ROMFSINST) -s -e /bin/iwmulticall /bin/iwgetid
+ifndef BUILD_STATIC
+	$(ROMFSINST) -S /lib/$(IWLIB)
+	$(ROMFSINST) -s /lib/$(IWLIB) /lib/libiw.so
+	$(ROMFSINST) -s /lib/$(IWLIB) /lib/libiw.so.0
+endif
+
 clean::
-	$(RM_CMD) 
+	$(RM_CMD)
 	$(RM) $(STATIC) $(DYNAMIC) $(PROGS) $(EXTRAPROGS) libiw* wireless.h
 
 realclean::
-	$(RM_CMD) 
+	$(RM_CMD)
 	$(RM) $(STATIC) $(DYNAMIC) $(PROGS) $(EXTRAPROGS) libiw* wireless.h
 
 uninstall::

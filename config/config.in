@@ -136,17 +136,7 @@ fi
 
 comment 'Wireless-tools'
 bool 'wireless_tools support'	CONFIG_USER_WIRELESS_TOOLS
-if [ "$CONFIG_USER_WIRELESS_TOOLS" = "y" ]; then
-	bool '  iwconfig'	CONFIG_USER_WIRELESS_TOOLS_IWCONFIG
-	bool '  iwgetid'	CONFIG_USER_WIRELESS_TOOLS_IWGETID
-	bool '  iwlist'		CONFIG_USER_WIRELESS_TOOLS_IWLIST
-	bool '  iwpriv'		CONFIG_USER_WIRELESS_TOOLS_IWPRIV
-	bool '  iwspy'		CONFIG_USER_WIRELESS_TOOLS_IWSPY
-	bool '  iwevent'	CONFIG_USER_WIRELESS_TOOLS_IWEVENT
-fi
-
 endmenu
-
 
 #############################################################################
 

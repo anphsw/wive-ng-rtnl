@@ -25,9 +25,11 @@ extern int
 extern int
 	main_iwlist(int	argc,
 		    char **	argv);
+#ifndef WE_ESSENTIAL
 extern int
 	main_iwspy(int	argc,
 		   char **	argv);
+#endif
 extern int
 	main_iwpriv(int	argc,
 		    char **	argv);
