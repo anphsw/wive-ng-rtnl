@@ -47,7 +47,6 @@ start() {
 	ip6tables -t mangle -F OUTPUT > /dev/null 2>&1
 	ip6tables -t mangle -F POSTROUTING > /dev/null 2>&1
 
-	ip6tables -t nat -Z > /dev/null 2>&1
 	ip6tables -t filter -Z > /dev/null 2>&1
 	ip6tables -t mangle -Z > /dev/null 2>&1
 	ip6tables -Z > /dev/null 2>&1
