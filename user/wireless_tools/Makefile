@@ -202,12 +202,12 @@ install-iwmulticall:: iwmulticall
 	  ln -f -s iwconfig iwgetid )
 
 romfs:
-	$(ROMFSINST) -S -e /bin/iwmulticall
-	$(ROMFSINST) -s -e /bin/iwmulticall /bin/iwconfig
-	$(ROMFSINST) -s -e /bin/iwmulticall /bin/iwlist
-	$(ROMFSINST) -s -e /bin/iwmulticall /bin/iwpriv
-	$(ROMFSINST) -s -e /bin/iwmulticall /bin/iwspy
-	$(ROMFSINST) -s -e /bin/iwmulticall /bin/iwgetid
+	$(ROMFSINST) -S /bin/iwmulticall
+	$(ROMFSINST) -s /bin/iwmulticall /bin/iwconfig
+	$(ROMFSINST) -s /bin/iwmulticall /bin/iwlist
+	$(ROMFSINST) -s /bin/iwmulticall /bin/iwpriv
+	$(ROMFSINST) -s /bin/iwmulticall /bin/iwspy
+	$(ROMFSINST) -s /bin/iwmulticall /bin/iwgetid
 ifndef BUILD_STATIC
 	$(ROMFSINST) -S /lib/$(IWLIB)
 	$(ROMFSINST) -s /lib/$(IWLIB) /lib/libiw.so
