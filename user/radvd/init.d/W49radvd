@@ -60,12 +60,12 @@ start() {
         ip6tables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
 
 	# temp rules need enchange in future
-	ip6tables -I INPUT -i $lan_if -j ACCEPT
-	ip6tables -I FORWARD -i $lan_if -j ACCEPT
+	ip6tables -A INPUT -i $lan_if -j ACCEPT
+	ip6tables -A FORWARD -i $lan_if -j ACCEPT
 	if [ "$use_sit" = "1" ]; then
-	    ip6tables -I FORWARD -i sit0 -j ACCEPT
+	    ip6tables -A FORWARD -i sit0 -j ACCEPT
 	else
-	    ip6tables -I FORWARD -i tun6to4 -j ACCEPT
+	    ip6tables -A FORWARD -i tun6to4 -j ACCEPT
 	fi
 
 	$LOG "Tunel ipv6 in ipv4 configure and up..."
