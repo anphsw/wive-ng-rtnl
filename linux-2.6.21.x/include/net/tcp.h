@@ -748,9 +748,6 @@ static inline unsigned int tcp_left_out(const struct tcp_sock *tp)
 	return tp->sacked_out + tp->lost_out;
 }
 
-/* Use define here intentionally to get WARN_ON location shown at the caller */
-#define tcp_verify_left_out(tp)	WARN_ON(tcp_left_out(tp) > tp->packets_out)
-
 /* This determines how many packets are "in the network" to the best
  * of our knowledge.  In many cases it is conservative, but where
  * detailed information is available from the receiver (via SACK
@@ -792,12 +789,8 @@ static inline __u32 tcp_current_ssthresh(const struct sock *sk)
 			    (tp->snd_cwnd >> 2)));
 }
 
-static inline void tcp_sync_left_out(struct tcp_sock *tp)
-{
-	WARN_ON(tp->rx_opt.sack_ok &&
- 	       (tp->sacked_out + tp->lost_out > tp->packets_out));
- 	tp->left_out = tp->sacked_out + tp->lost_out;
-}
+/* Use define here intentionally to get WARN_ON location shown at the caller */
+#define tcp_verify_left_out(tp)	WARN_ON(tcp_left_out(tp) > tp->packets_out)
 
 /*
  * Convert RFC 3390 larger initial window into an equivalent number of packets.

@@ -1364,7 +1364,7 @@ void tcp_enter_frto(struct sock *sk)
 		TCP_SKB_CB(skb)->sacked &= ~TCPCB_RETRANS;
 		tp->retrans_out -= tcp_skb_pcount(skb);
 	}
-	tcp_sync_left_out(tp);
+	tcp_verify_left_out(tp);
 
 	tcp_set_ca_state(sk, TCP_CA_Disorder);
 	tp->high_seq = tp->snd_nxt;
@@ -1415,7 +1415,7 @@ static void tcp_enter_frto_loss(struct sock *sk, int allowed_segments, int flag)
 			tp->fackets_out = cnt;
 		}
 	}
-	tcp_sync_left_out(tp);
+	tcp_verify_left_out(tp);
 
 	tp->snd_cwnd = tcp_packets_in_flight(tp) + allowed_segments;
 	tp->snd_cwnd_cnt = 0;
@@ -1488,7 +1488,7 @@ void tcp_enter_loss(struct sock *sk, int how)
 			tp->fackets_out = cnt;
 		}
 	}
-	tcp_sync_left_out(tp);
+	tcp_verify_left_out(tp);
 
 	tp->reordering = min_t(unsigned int, tp->reordering,
 					     sysctl_tcp_reordering);
@@ -1695,7 +1695,7 @@ static void tcp_add_reno_sack(struct sock *sk)
 	struct tcp_sock *tp = tcp_sk(sk);
 	tp->sacked_out++;
 	tcp_check_reno_reordering(sk, 0);
-	tcp_sync_left_out(tp);
+	tcp_verify_left_out(tp);
 }
 
 /* Account for ACK, ACKing some data in Reno Recovery phase. */
@@ -1712,7 +1712,7 @@ static void tcp_remove_reno_sacks(struct sock *sk, int acked)
 			tp->sacked_out -= acked-1;
 	}
 	tcp_check_reno_reordering(sk, acked);
-	tcp_sync_left_out(tp);
+	tcp_verify_left_out(tp);
 }
 
 static inline void tcp_reset_reno_sack(struct tcp_sock *tp)
@@ -1783,7 +1783,7 @@ static void tcp_mark_head_lost(struct sock *sk,
 			}
 		}
 	}
-	tcp_sync_left_out(tp);
+	tcp_verify_left_out(tp);
 }
 
 /* Account newly detected lost packet(s) */
@@ -1831,7 +1831,7 @@ static void tcp_update_scoreboard(struct sock *sk)
 
 		tp->scoreboard_skb_hint = skb;
 
-		tcp_sync_left_out(tp);
+		tcp_verify_left_out(tp);
 	}
 }
 
@@ -2150,8 +2150,8 @@ tcp_fastretrans_alert(struct sock *sk, u32 prior_snd_una,
 		NET_INC_STATS_BH(LINUX_MIB_TCPLOSS);
 	}
 
-	/* D. Synchronize left_out to current state. */
-	tcp_sync_left_out(tp);
+	/* D. Check consistency of the current state. */
+	tcp_verify_left_out(tp);
 
 	/* E. Check state exit conditions. State can be terminated
 	 *    when high_seq is ACKed. */
@@ -2660,7 +2660,7 @@ static void tcp_process_frto(struct sock *sk, u32 prior_snd_una, int flag)
 {
 	struct tcp_sock *tp = tcp_sk(sk);
 
-	tcp_sync_left_out(tp);
+	tcp_verify_left_out(tp);
 
 	/* Duplicate the behavior from Loss state (fastretrans_alert) */
 	if (flag&FLAG_DATA_ACKED)
