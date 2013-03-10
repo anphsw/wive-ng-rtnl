@@ -1297,23 +1297,24 @@
 36) ipv6: radvd: up to 1.9.2 version with drop libdaemon use (need for save flash free size).<br>
 37) ipv6: use radvdEnabled variable for enable ipv6 (instead IPv6_Enable variable).<br>
 38) ipv6: full work ipv6 over ipv4 (6to4) autoconfigure (as TTK ISP). For 8Mb Flash devices need radvd enable in GUI.<br>
-39) xl2tp: small fixups.<br>
-40) samba(3): decrease noise debug.<br>
-41) defaults: increase vpn cpuilimit to 4000.<br>
-42) defaults: enable wifi_hw_nat per default this is very old work stable.<br>
-43) init.d: always drop ipv4/6 adresses at reinit, not need check radvd enable/disable, chek only ipv6 compiled.<br>
-44) xunpdp: up to 1.03 rev382 version.<br>
-45) usb-modeswitch: update to 1.2.5 version.<br>
-46) usbmodem: move modems pairs config to /etc/modems.conf.<br>
-47) openssl: update to 0.9.8y version.<br>
-48) libupnp: update to 1.6.18 version.<br>
-49) libcurl: update to 7.29.0 version.<br>
-50) transmission: up to 2.77 version.<br>
-51) chillispot: fix build with new autoconf tool.<br>
-52) goahead: fix nat loopback logic if src port != dst port.<br>
-53) wireless_tool: use multicall binary (decrease code size).<br>
-54) build_system: add configure options for enable crazy minimize code size by gcc (save flash=speeddown).<br>
-55) build_system: rework for more acurate use gcc optimization options.<br>
+39) ipv6: more correct configure netfilter (some secure, need enchange in future).<br>
+40) xl2tp: small fixups.<br>
+41) samba(3): decrease noise debug.<br>
+42) defaults: increase vpn cpuilimit to 4000.<br>
+43) defaults: enable wifi_hw_nat per default this is very old work stable.<br>
+44) init.d: always drop ipv4/6 adresses at reinit, not need check radvd enable/disable, chek only ipv6 compiled.<br>
+45) xunpdp: up to 1.03 rev382 version.<br>
+46) usb-modeswitch: update to 1.2.5 version.<br>
+47) usbmodem: move modems pairs config to /etc/modems.conf.<br>
+48) openssl: update to 0.9.8y version.<br>
+49) libupnp: update to 1.6.18 version.<br>
+50) libcurl: update to 7.29.0 version.<br>
+51) transmission: up to 2.77 version.<br>
+52) chillispot: fix build with new autoconf tool.<br>
+53) goahead: fix nat loopback logic if src port != dst port.<br>
+54) wireless_tool: use multicall binary (decrease code size).<br>
+55) build_system: add configure options for enable crazy minimize code size by gcc (save flash=speeddown).<br>
+56) build_system: rework for more acurate use gcc optimization options.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
