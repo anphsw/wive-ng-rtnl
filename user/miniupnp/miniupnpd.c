@@ -110,6 +110,7 @@ OpenAndConfHTTPSocket(unsigned short port)
 	int i = 1;
 #ifdef ENABLE_IPV6
 	struct sockaddr_in6 listenname;
+	struct in6_addr in6addr = IN6ADDR_ANY_INIT;
 #else
 	struct sockaddr_in listenname;
 #endif
@@ -144,7 +145,7 @@ OpenAndConfHTTPSocket(unsigned short port)
 	memset(&listenname, 0, sizeof(struct sockaddr_in6));
 	listenname.sin6_family = AF_INET6;
 	listenname.sin6_port = htons(port);
-	listenname.sin6_addr = in6addr_any;
+	listenname.sin6_addr = in6addr; /* in6addr_any is not available with old uclibc */
 	listenname_len =  sizeof(struct sockaddr_in6);
 #else
 	listenname.sin_family = AF_INET;

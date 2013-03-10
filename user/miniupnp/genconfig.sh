@@ -31,6 +31,9 @@ done
 # replace defaults
 LEASEFILE=1
 
+# need move to new glibc version
+#IPV6=`cat ../../linux/.config | grep "CONFIG_IPV6=y" -c`
+
 RM="rm -f"
 CONFIGFILE="config.h"
 CONFIGMACRO="CONFIG_H_INCLUDED"

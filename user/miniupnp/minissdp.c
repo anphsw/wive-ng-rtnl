@@ -6,6 +6,8 @@
  * in the LICENCE file provided within the distribution */
 
 #include <stdio.h>
+#include <ctype.h>
+#include <sys/types.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -98,6 +100,9 @@ OpenAndConfSSDPReceiveSocket(int ipv6)
 	socklen_t sockname_len;
 	struct lan_addr_s * lan_addr;
 	int j = 1;
+#ifdef ENABLE_IPV6
+	struct in6_addr in6addr = IN6ADDR_ANY_INIT;
+#endif
 
 	if( (s = socket(ipv6 ? PF_INET6 : PF_INET, SOCK_DGRAM, 0)) < 0)
 	{
@@ -112,7 +117,7 @@ OpenAndConfSSDPReceiveSocket(int ipv6)
 		struct sockaddr_in6 * saddr = (struct sockaddr_in6 *)&sockname;
 		saddr->sin6_family = AF_INET6;
 		saddr->sin6_port = htons(SSDP_PORT);
-		saddr->sin6_addr = in6addr_any;
+		saddr->sin6_addr = in6addr; /* in6addr_any is not available with old uclibc */
 		sockname_len = sizeof(struct sockaddr_in6);
 	} else {
 #endif
