@@ -253,10 +253,9 @@ static int inet_create(struct socket *sock, int protocol)
 	int try_loading_module = 0;
 	int err;
 
-	if (sock->type != SOCK_RAW &&
-	    sock->type != SOCK_DGRAM &&
-	    !inet_ehash_secret)
-		build_ehash_secret();
+	if (unlikely(!inet_ehash_secret))
+		if (sock->type != SOCK_RAW && sock->type != SOCK_DGRAM)
+		    build_ehash_secret();
 
 	sock->state = SS_UNCONNECTED;
 
