@@ -21,7 +21,7 @@ function updateState()
 		'l2tp': '<% getCfgZero(1, "fwAlgL2TP"); %>',
 		'pptp': '<% getCfgZero(1, "fwAlgPPTP"); %>',
 		'sip': '<% getCfgZero(1, "fwAlgSIP"); %>',
-		'tftp': '<% getCfgZero(1, "fwAlgTFTP"); %>'
+		'rtsp': '<% getCfgZero(1, "fwAlgRTSP"); %>'
 	};
 
 	for (var field in st)
@@ -64,8 +64,8 @@ function updateState()
 	<td><input type="checkbox" id="alg_sip" name="alg_sip"></td>
 </tr>
 <tr>
-	<td class="head">TFTP</td>
-	<td><input type="checkbox" id="alg_tftp" name="alg_tftp"></td>
+	<td class="head">RTSP</td>
+	<td><input type="checkbox" id="alg_rtsp" name="alg_rtsp"></td>
 </tr>
 
 </table>

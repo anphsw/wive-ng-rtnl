@@ -75,7 +75,7 @@ start() {
 }
 
 get_param() {
-    eval `nvram_buf_get 2860 macCloneEnabled macCloneMac ipt_account`
+    eval `nvram_buf_get 2860 macCloneEnabled macCloneMac`
 }
 
 gen_wifi_config() {
@@ -87,10 +87,7 @@ load_nat_helpers() {
     # not load nf_nat helpers in bridge mode
     if [ "$OperationMode" != "0" ] && [ "$ApCliBridgeOnly" != "1" ]; then
 	# load conntrack helpers
-	eval `nvram_buf_get 2860 fwAlgTFTP fwAlgSIP fwAlgGRE fwAlgPPTP fwAlgH323 fwAlgFTP`
-	if [ "$fwAlgTFTP" != "0" ]; then
-	    modprobe -q nf_conntrack_tftp
-	fi
+	eval `nvram_buf_get 2860 fwAlgSIP fwAlgGRE fwAlgPPTP fwAlgH323 fwAlgFTP fwAlgRTSP ipt_account`
 	if [ "$fwAlgSIP" != "0" ]; then
 	    modprobe -q nf_conntrack_sip
 	    modprobe -q nf_nat_sip
@@ -109,6 +106,10 @@ load_nat_helpers() {
 	fi
 	if [ "$fwAlgFTP" != "0" ]; then
 	    modprobe -q nf_nat_ftp
+	fi
+	if [ "$fwAlgRTSP" != "0" ]; then
+	    modprobe -q nf_conntrack_rtsp
+	    modprobe -q nf_nat_rtsp
 	fi
     	if [ "$ipt_account" = "1" ]; then
 	    modprobe -q ipt_account

@@ -1575,7 +1575,7 @@ const parameter_fetch_t alg_params[] =
 	{ "alg_h323",		T("fwAlgH323"),			2,   T("") },
 	{ "alg_pptp",		T("fwAlgPPTP"),			2,   T("") },
 	{ "alg_sip",		T("fwAlgSIP"),			2,   T("") },
-	{ "alg_tftp",		T("fwAlgTFTP"),			2,   T("") },
+	{ "alg_rtsp",		T("fwAlgRTSP"),			2,   T("") },
 	{ NULL, NULL, 0, NULL } // Terminator
 };
 
