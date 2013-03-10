@@ -1,3 +1,13 @@
+<hr>
+<b>WIVE FIRMWARE FREE ONLY FOR NOT COMMERCIAL USE.</b>
+<br>
+<b>Conditions of commercial use are discussed individually.</b>
+<hr>
+<b>News and changes in Russian:</b><br>
+<a href="http://wive-ng.sf.net">wive-ng.sf.net - Development opensource routers firmware</a><br>
+<br>
+<b>Bug report please send sfstudio[at]mail.ru</b>
+<hr>
 <b>Changes:</b><br>
 <b>1.0.x</b><br>
 1) Fix configs scripts for support bash >=4 and change product name.<br>
@@ -1321,12 +1331,6 @@
 60) build_system: rework for more acurate use gcc optimization options.<br>
 61) goahead: remove unused tftp alg from UI and add RTSP alg.<br>
 
-<br><br>
-<b>News and changes in Russian:</b><br>
-<a href="http://wive-ng.sf.net">wive-ng.sf.net - Development opensource routers firmware</a><br>
-<br><br>
-<b>Bug report please send sfstudio[at]mail.ru</b>
 <br>
 <br>
 <br>
-
