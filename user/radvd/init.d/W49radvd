@@ -21,16 +21,6 @@ LOG="logger -t radvd"
 start() {
     radvdEnabled=`nvram_get 2860 radvdEnabled`
     if [ "$radvdEnabled" = "1" ]; then
-	if [ "$use_sit" = "1" ]; then
-	    $LOG "Flush addres and route sit0 aninterface"
-	    ip -6 addr flush dev sit0
-	    ip -6 route flush dev sit0
-	else
-	    $LOG "Flush addres and route sit0 aninterface"
-	    ip -6 addr flush dev tun6to4
-	    ip -6 route flush dev tun6to4
-	fi
-
 	$LOG "Add iptables rules fo ipv6"
 	ip6tables -F > /dev/null 2>&1
 	ip6tables -t filter -F > /dev/null 2>&1
@@ -63,48 +53,34 @@ start() {
 	ip6tables -A INPUT -i $lan_if -j ACCEPT
 	ip6tables -A FORWARD -i $lan_if -j ACCEPT
 
-	$LOG "Tunel ipv6 in ipv4 configure and up..."
-	if [ "$IPv6_6RD_Enable" = "1" ]; then
-	    relay6to4="192.88.99.127"
-	else
-	    relay6to4="192.88.99.1"
-	fi
-
 	ipv6subnet="2000"
 	if [ "$wan_ipaddr" != "" ]; then
+	    $LOG "Tunel ipv6 in ipv4 configure and up"
 	    ipv6prefix=`echo $wan_ipaddr | awk -F. '{ printf "2002:%02x%02x:%02x%02x", $1, $2, $3, $4 }'`
 	    if [ "$IPv6_6RD_Enable" = "1" ]; then
+		relay6to4="192.88.99.127"
+		$LOG "Flush addres and route tun6to4 interface"
+		ip -6 addr flush dev tun6to4					> /dev/null 2>&1
+		ip -6 route flush dev tun6to4					> /dev/null 2>&1
 		$LOG "Up tun6to4 interface"
 		ip tunnel add tun6to4 mode sit ttl 64 remote any local $wan_ipaddr
 		ip link set dev tun6to4 up
 		ip -6 addr add ${ipv6prefix}::1/16 dev tun6to4
 		ip -6 route replace ${ipv6subnet}::/3 via ::${relay6to4} dev tun6to4 metric 1
 	    else
+		relay6to4="192.88.99.1"
+		$LOG "Flush addres and route sit0 interface"
+		ip -6 addr flush dev sit0					> /dev/null 2>&1
+		ip -6 route flush dev sit0					> /dev/null 2>&1
 		$LOG "Up sit0 interface"
 		ip -6 link set sit0 up
 		ip -6 addr add ${ipv6prefix}::1/16 dev sit0
 		ip -6 route replace ${ipv6subnet}::/3 via ::${relay6to4} dev sit0 metric 1
 	    fi
 	else
-	    $LOG "No route to ip4v6 router..."
+	    $LOG "No ipv4 adress on wan, exit"
+	    exit 1
 	fi
-
-	$LOG "Configure radvd"
-	echo > /etc/radvd.conf
-	printf "
-        interface $lan_if
-	    {
-    		AdvSendAdvert on;
-    		MinRtrAdvInterval 30;
-    		MaxRtrAdvInterval 100;
-    		prefix ${ipv6prefix}:${ipv6subnet}::1/64
-    		{
-            		AdvOnLink on;
-            		AdvAutonomous on;
-            		AdvRouterAddr off;
-    		};
-	    };
-	" > /etc/radvd.conf
 
 	$LOG "Enable ipv6 route"
         echo "1" > /proc/sys/net/ipv6/conf/all/forwarding
@@ -120,6 +96,27 @@ start() {
 	$LOG "Set ${ipv6prefix}:${ipv6subnet}::1/64 to $lan_if"
 	ip -6 addr del ${ipv6prefix}:${ipv6subnet}::1/64 dev $lan_if		> /dev/null 2>&1
 	ip -6 addr add ${ipv6prefix}:${ipv6subnet}::1/64 dev $lan_if
+
+	$LOG "Configure radvd"
+	echo > /etc/radvd.conf
+	printf "
+        interface $lan_if
+	    {
+    		AdvSendAdvert on;
+    		MinRtrAdvInterval 30;
+    		MaxRtrAdvInterval 100;
+    		prefix ${ipv6prefix}:${ipv6subnet}::1/64
+    		{
+            		AdvOnLink on;
+            		AdvAutonomous on;
+            		AdvRouterAddr off;
+    		};
+		RDNSS ${ipv6prefix}:${ipv6subnet}::1 2001:4860:4860::8888
+                {
+                        AdvRDNSSLifetime 600;
+                };
+	    };
+	" > /etc/radvd.conf
 
 	$LOG "Starting radvd"
 	radvd -s -C /etc/radvd.conf -d 1 &
