@@ -1276,38 +1276,41 @@
 15) kernel: tcp: splice: fix an infinite loop in tcp_read_sock().<br>
 16) kernel: tcp: change default tcp hash size.<br>
 17) kernel: tcp: Fix inconsistency source (CA_Open only when !tcp_left_out(tp)).<br>
-18) kernel: udp: Fix bogus UFO packet generation.<br>
-19) kernel: net: guard tcp_set_keepalive() to tcp sockets.<br>
-20) kernel: net: add and use skb_unclone() helper function.<br>
-21) kernel: net: increase receive packet quantum.<br>
-22) kernel: net: reduce net_rx_action() latency to 2 HZ.<br>
-23) kernel: net: hash: reorder the tests about inet_ehash_secret generation (once only).<br>
-24) kernel: hash: update hash_32/64 functions.<br>
-25) kernel: hw_nat: fix udp offload issue in some hardware RT305x chip revisions.<br>
-26) kernel: backport mips optimized spinlocks and futex fixes.<br>
-27) kernel: inet: Remove unused sk_sndmsg_* from UFO.<br>
-28) kernel: sched: prevent exclusive waiter starvation.<br>
-29) kernel: mm: memmap_init_zone() performance improvement.<br>
-30) kernel: tcp_read_sock: Allow recv_actor() return return negative error value.<br>
-31) kernel: lib/string.c: fix strim() semantics for strings that have only blanks.<br>
-32) ipv6: radvd: up to 1.9.2 version with drop libdaemon use (need for save flash free size).<br>
-33) ipv6: use radvdEnabled variable for enable ipv6 (instead IPv6_Enable variable).<br>
-34) ipv6: full work ipv6 over TTK ISP. For 8Mb Flash devices need radvd enable in GUI.<br>
-35) xl2tp: small fixups.<br>
-36) samba(3): decrease noise debug.<br>
-37) defaults: increase vpn cpuilimit to 4000.<br>
-38) defaults: enable wifi_hw_nat per default this is very old work stable.<br>
-39) init.d: always drop ipv4/6 adresses at reinit, not need check radvd enable/disable, chek only ipv6 compiled.<br>
-40) xunpdp: up to 1.03 rev382 version.<br>
-41) usb-modeswitch: update to 1.2.5 version.<br>
-42) usbmodem: move modems pairs config to /etc/modems.conf.<br>
-43) openssl: update to 0.9.8y version.<br>
-44) libupnp: update to 1.6.18 version.<br>
-45) libcurl: update to 7.29.0 version.<br>
-46) chillispot: fix build with new autoconf tool.<br>
-47) goahead: fix nat loopback logic if src port != dst port.<br>
-48) build_system: add configure options for enable crazy minimize code size by gcc (save flash=speeddown).<br>
-49) build_system: rework for more acurate use gcc optimization options.<br>
+18) kernel: tcp: Tighten tcp_sock's belt, drop left_out.<br>
+19) kernel: tcp: Add tcp_left_out(tp) back to get cleaner looking lines.<br>
+20) kernel: tcp: Restore over-zealous tcp_sync_left_out-like removals.<br>
+21) kernel: udp: Fix bogus UFO packet generation.<br>
+22) kernel: net: guard tcp_set_keepalive() to tcp sockets.<br>
+23) kernel: net: add and use skb_unclone() helper function.<br>
+24) kernel: net: increase receive packet quantum.<br>
+25) kernel: net: reduce net_rx_action() latency to 2 HZ.<br>
+26) kernel: net: hash: reorder the tests about inet_ehash_secret generation (once only).<br>
+27) kernel: hash: update hash_32/64 functions.<br>
+28) kernel: hw_nat: fix udp offload issue in some hardware RT305x chip revisions.<br>
+29) kernel: backport mips optimized spinlocks and futex fixes.<br>
+30) kernel: inet: Remove unused sk_sndmsg_* from UFO.<br>
+31) kernel: sched: prevent exclusive waiter starvation.<br>
+32) kernel: mm: memmap_init_zone() performance improvement.<br>
+33) kernel: tcp_read_sock: Allow recv_actor() return return negative error value.<br>
+34) kernel: lib/string.c: fix strim() semantics for strings that have only blanks.<br>
+35) ipv6: radvd: up to 1.9.2 version with drop libdaemon use (need for save flash free size).<br>
+36) ipv6: use radvdEnabled variable for enable ipv6 (instead IPv6_Enable variable).<br>
+37) ipv6: full work ipv6 over TTK ISP. For 8Mb Flash devices need radvd enable in GUI.<br>
+38) xl2tp: small fixups.<br>
+39) samba(3): decrease noise debug.<br>
+40) defaults: increase vpn cpuilimit to 4000.<br>
+41) defaults: enable wifi_hw_nat per default this is very old work stable.<br>
+42) init.d: always drop ipv4/6 adresses at reinit, not need check radvd enable/disable, chek only ipv6 compiled.<br>
+43) xunpdp: up to 1.03 rev382 version.<br>
+44) usb-modeswitch: update to 1.2.5 version.<br>
+45) usbmodem: move modems pairs config to /etc/modems.conf.<br>
+46) openssl: update to 0.9.8y version.<br>
+47) libupnp: update to 1.6.18 version.<br>
+48) libcurl: update to 7.29.0 version.<br>
+49) chillispot: fix build with new autoconf tool.<br>
+50) goahead: fix nat loopback logic if src port != dst port.<br>
+51) build_system: add configure options for enable crazy minimize code size by gcc (save flash=speeddown).<br>
+52) build_system: rework for more acurate use gcc optimization options.<br>
 
 <br><br>
 <b>News and changes in Russian:</b><br>
