@@ -748,6 +748,9 @@ static inline unsigned int tcp_left_out(const struct tcp_sock *tp)
 	return tp->sacked_out + tp->lost_out;
 }
 
+/* Use define here intentionally to get WARN_ON location shown at the caller */
+#define tcp_verify_left_out(tp)	WARN_ON(tcp_left_out(tp) > tp->packets_out)
+
 /* This determines how many packets are "in the network" to the best
  * of our knowledge.  In many cases it is conservative, but where
  * detailed information is available from the receiver (via SACK
