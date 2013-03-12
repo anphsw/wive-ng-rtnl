@@ -42,7 +42,6 @@
 #include <linux/fs.h>
 #include <linux/file.h>
 #include <linux/jhash.h>
-#include <linux/sfhash.h>
 #include <linux/init.h>
 #include <linux/futex.h>
 #include <linux/mount.h>
@@ -141,7 +140,7 @@ static struct futex_hash_bucket futex_queues[1<<FUTEX_HASHBITS];
  */
 static struct futex_hash_bucket *hash_futex(union futex_key *key)
 {
-	u32 hash = HASH_2WORDS((u32*)&key->both.word,
+	u32 hash = jhash2((u32*)&key->both.word,
 			  (sizeof(key->both.word)+sizeof(key->both.ptr))/4,
 			  key->both.offset);
 	return &futex_queues[hash & ((1 << FUTEX_HASHBITS)-1)];
