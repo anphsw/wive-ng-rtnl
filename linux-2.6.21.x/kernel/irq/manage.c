@@ -29,12 +29,28 @@
 void synchronize_irq(unsigned int irq)
 {
 	struct irq_desc *desc = irq_desc + irq;
+	unsigned int status;
 
 	if (irq >= NR_IRQS)
 		return;
 
-	while (desc->status & IRQ_INPROGRESS)
-		cpu_relax();
+	do {
+		unsigned long flags;
+
+		/*
+		 * Wait until we're out of the critical section.  This might
+		 * give the wrong answer due to the lack of memory barriers.
+		 */
+		while (desc->status & IRQ_INPROGRESS)
+			cpu_relax();
+
+		/* Ok, that indicated we're done: double-check carefully. */
+		spin_lock_irqsave(&desc->lock, flags);
+		status = desc->status;
+		spin_unlock_irqrestore(&desc->lock, flags);
+
+		/* Oops, that failed? */
+	} while (status & IRQ_INPROGRESS);
 }
 EXPORT_SYMBOL(synchronize_irq);
 
@@ -133,6 +149,26 @@ void disable_irq(unsigned int irq)
 }
 EXPORT_SYMBOL(disable_irq);
 
+static void __enable_irq(struct irq_desc *desc, unsigned int irq)
+{
+	switch (desc->depth) {
+	case 0:
+		printk(KERN_WARNING "Unbalanced enable for IRQ %d\n", irq);
+		WARN_ON(1);
+		break;
+	case 1: {
+		unsigned int status = desc->status & ~IRQ_DISABLED;
+
+		/* Prevent probing on this irq: */
+		desc->status = status | IRQ_NOPROBE;
+		check_irq_resend(desc, irq);
+		/* fall-through */
+	}
+	default:
+		desc->depth--;
+	}
+}
+
 /**
  *	enable_irq - enable handling of an irq
  *	@irq: Interrupt to enable
@@ -152,22 +188,7 @@ void enable_irq(unsigned int irq)
 		return;
 
 	spin_lock_irqsave(&desc->lock, flags);
-	switch (desc->depth) {
-	case 0:
-		printk(KERN_WARNING "Unbalanced enable for IRQ %d\n", irq);
-		WARN_ON(1);
-		break;
-	case 1: {
-		unsigned int status = desc->status & ~IRQ_DISABLED;
-
-		/* Prevent probing on this irq: */
-		desc->status = status | IRQ_NOPROBE;
-		check_irq_resend(desc, irq);
-		/* fall-through */
-	}
-	default:
-		desc->depth--;
-	}
+	__enable_irq(desc, irq);
 	spin_unlock_irqrestore(&desc->lock, flags);
 }
 EXPORT_SYMBOL(enable_irq);
@@ -334,7 +355,7 @@ int setup_irq(unsigned int irq, struct irqaction *new)
 		}
 
 		desc->status &= ~(IRQ_AUTODETECT | IRQ_WAITING |
-				  IRQ_INPROGRESS);
+				  IRQ_INPROGRESS | IRQ_SPURIOUS_DISABLED);
 
 		if (!(desc->status & IRQ_NOAUTOEN)) {
 			desc->depth = 0;
@@ -350,6 +371,16 @@ int setup_irq(unsigned int irq, struct irqaction *new)
 	/* Reset broken irq detection when installing new handler */
 	desc->irq_count = 0;
 	desc->irqs_unhandled = 0;
+
+	/*
+	 * Check whether we disabled the irq via the spurious handler
+	 * before. Reenable it and give it another chance.
+	 */
+	if (shared && (desc->status & IRQ_SPURIOUS_DISABLED)) {
+		desc->status &= ~IRQ_SPURIOUS_DISABLED;
+		__enable_irq(desc, irq);
+	}
+
 	spin_unlock_irqrestore(&desc->lock, flags);
 
 	new->irq = irq;
@@ -508,15 +539,13 @@ int request_irq(unsigned int irq, irq_handler_t handler,
 	if (!handler)
 		return -EINVAL;
 
-	action = kmalloc(sizeof(struct irqaction), GFP_ATOMIC);
+	action = kzalloc(sizeof(struct irqaction), GFP_KERNEL);
 	if (!action)
 		return -ENOMEM;
 
 	action->handler = handler;
 	action->flags = irqflags;
-	cpus_clear(action->mask);
 	action->name = devname;
-	action->next = NULL;
 	action->dev_id = dev_id;
 
 	select_smp_affinity(irq);
