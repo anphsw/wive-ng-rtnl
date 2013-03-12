@@ -1309,30 +1309,31 @@
 38) kernel: lib/string.c: fix strim() semantics for strings that have only blanks.<br>
 39) kernel: conntrack: add support RTSP ALG for.<br>
 40) kernel: genirq: updates from upstream.<br>
-41) ipv6: radvd: up to 1.9.2 version with drop libdaemon use (need for save flash free size).<br>
-42) ipv6: use radvdEnabled variable for enable ipv6 (instead IPv6_Enable variable).<br>
-43) ipv6: full work ipv6 over ipv4 (6to4) autoconfigure (as TTK ISP). For 8Mb Flash devices need radvd enable in GUI.<br>
-44) ipv6: more correct configure netfilter (some secure, need enchange in future).<br>
-45) ipv6: kernel make some needed ipv6 netfilter modules as static.<br>
-46) ipv6: export RDNS by radvd (first=local, second=google).<br>
-47) xl2tp: small fixups.<br>
-48) samba(3): decrease noise debug.<br>
-49) defaults: increase vpn cpuilimit to 4000.<br>
-50) defaults: enable wifi_hw_nat per default this is very old work stable.<br>
-51) init.d: always drop ipv4/6 adresses at reinit, not need check radvd enable/disable, chek only ipv6 compiled.<br>
-52) xunpdp: up to 1.03 rev382 version.<br>
-53) usb-modeswitch: update to 1.2.5 version.<br>
-54) usbmodem: move modems pairs config to /etc/modems.conf.<br>
-55) openssl: update to 0.9.8y version.<br>
-56) libupnp: update to 1.6.18 version.<br>
-57) libcurl: update to 7.29.0 version.<br>
-58) transmission: up to 2.77 version.<br>
-59) chillispot: fix build with new autoconf tool.<br>
-60) goahead: fix nat loopback logic if src port != dst port.<br>
-61) wireless_tool: use multicall binary (decrease code size).<br>
-62) build_system: add configure options for enable crazy minimize code size by gcc (save flash=speeddown).<br>
-63) build_system: rework for more acurate use gcc optimization options.<br>
-64) goahead: remove unused tftp alg from UI and add RTSP alg.<br>
+41) kernel: net: always use sfhash instead jhash_3words.<br>
+42) ipv6: radvd: up to 1.9.2 version with drop libdaemon use (need for save flash free size).<br>
+43) ipv6: use radvdEnabled variable for enable ipv6 (instead IPv6_Enable variable).<br>
+44) ipv6: full work ipv6 over ipv4 (6to4) autoconfigure (as TTK ISP). For 8Mb Flash devices need radvd enable in GUI.<br>
+45) ipv6: more correct configure netfilter (some secure, need enchange in future).<br>
+46) ipv6: kernel make some needed ipv6 netfilter modules as static.<br>
+47) ipv6: export RDNS by radvd (first=local, second=google).<br>
+48) xl2tp: small fixups.<br>
+49) samba(3): decrease noise debug.<br>
+50) defaults: increase vpn cpuilimit to 4000.<br>
+51) defaults: enable wifi_hw_nat per default this is very old work stable.<br>
+52) init.d: always drop ipv4/6 adresses at reinit, not need check radvd enable/disable, chek only ipv6 compiled.<br>
+53) xunpdp: up to 1.03 rev382 version.<br>
+54) usb-modeswitch: update to 1.2.5 version.<br>
+55) usbmodem: move modems pairs config to /etc/modems.conf.<br>
+56) openssl: update to 0.9.8y version.<br>
+57) libupnp: update to 1.6.18 version.<br>
+58) libcurl: update to 7.29.0 version.<br>
+59) transmission: up to 2.77 version.<br>
+60) chillispot: fix build with new autoconf tool.<br>
+61) goahead: fix nat loopback logic if src port != dst port.<br>
+62) wireless_tool: use multicall binary (decrease code size).<br>
+63) build_system: add configure options for enable crazy minimize code size by gcc (save flash=speeddown).<br>
+64) build_system: rework for more acurate use gcc optimization options.<br>
+65) goahead: remove unused tftp alg from UI and add RTSP alg.<br>
 
 <br>
 <br>

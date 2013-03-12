@@ -41,8 +41,13 @@
 #include <linux/ipv6.h>
 #include <linux/icmpv6.h>
 #include <linux/random.h>
-#include <linux/jhash.h>
 #include <linux/skbuff.h>
+
+#ifdef CONFIG_NET_SFHASH
+#include <linux/sfhash.h>
+#else
+#include <linux/jhash.h>
+#endif
 
 #include <net/sock.h>
 #include <net/snmp.h>
@@ -123,6 +128,12 @@ static __inline__ void fq_unlink(struct frag_queue *fq)
 	write_unlock(&ip6_frag_lock);
 }
 
+#ifdef CONFIG_NET_SFHASH
+#define HASH_3WORDS(a,b,c,i)    sfhash_3words(a,b,c,i)
+#else
+#define HASH_3WORDS(a,b,c,i)    jhash_3words(a,b,c,i)
+#endif
+
 /*
  * callers should be careful not to use the hash value outside the ipfrag_lock
  * as doing so could race with ipfrag_hash_rnd being recalculated.
@@ -132,7 +143,7 @@ unsigned int inet6_hash_frag(__be32 id, const struct in6_addr *saddr,
 {
 	u32 c;
 
-	c = jhash_3words(ipv6_addr_hash(saddr), ipv6_addr_hash(daddr),
+	c = HASH_3WORDS(ipv6_addr_hash(saddr), ipv6_addr_hash(daddr),
 			 (__force u32)id, rnd);
 
 	return c & (INETFRAGS_HASHSZ - 1);
