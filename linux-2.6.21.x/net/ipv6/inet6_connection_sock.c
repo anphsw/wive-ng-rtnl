@@ -63,7 +63,7 @@ static u32 inet6_synq_hash(const struct in6_addr *raddr, const __be16 rport,
 			 (__force u32)raddr->s6_addr32[2],
 			 rnd);
 
-	c = HASH_3WORDS((__force u32)raddr->s6_addr32[3],
+	c = HASH_2WORDS((__force u32)raddr->s6_addr32[3],
 			 (__force u32)rport,
 			 c);
 
