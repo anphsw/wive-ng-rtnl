@@ -48,6 +48,7 @@
 #include <linux/notifier.h>
 #include <linux/security.h>
 #include <linux/jhash.h>
+#include <linux/sfhash.h>
 #include <linux/jiffies.h>
 #include <linux/random.h>
 #include <linux/bitops.h>
@@ -130,7 +131,7 @@ static u32 netlink_group_mask(u32 group)
 
 static struct hlist_head *nl_pid_hashfn(struct nl_pid_hash *hash, u32 pid)
 {
-	return &hash->table[jhash_1word(pid, hash->rnd) & hash->mask];
+	return &hash->table[HASH_1WORDS(pid, hash->rnd) & hash->mask];
 }
 
 static void netlink_sock_destruct(struct sock *sk)

@@ -21,6 +21,7 @@
 #include <linux/list.h>
 #include <linux/random.h>
 #include <linux/jhash.h>
+#include <linux/sfhash.h>
 #include <linux/bitops.h>
 #include <linux/skbuff.h>
 #include <linux/inet.h>
@@ -91,7 +92,7 @@ static unsigned int recent_entry_hash(__be32 addr)
 		get_random_bytes(&hash_rnd, 4);
 		hash_rnd_initted = 1;
 	}
-	return jhash_1word((__force u32)addr, hash_rnd) & (ip_list_hash_size - 1);
+	return HASH_1WORDS((__force u32)addr, hash_rnd) & (ip_list_hash_size - 1);
 }
 
 static struct recent_entry *

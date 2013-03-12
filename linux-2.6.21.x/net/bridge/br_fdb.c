@@ -20,6 +20,7 @@
 #include <linux/netdevice.h>
 #include <linux/etherdevice.h>
 #include <linux/jhash.h>
+#include <linux/sfhash.h>
 #include <linux/random.h>
 #include <asm/atomic.h>
 #include <asm/unaligned.h>
@@ -69,7 +70,7 @@ static inline int br_mac_hash(const unsigned char *mac)
 {
 	/* use 1 byte of OUI cnd 3 bytes of NIC */
 	u32 key = get_unaligned((u32 *)(mac + 2));
-	return jhash_1word(key, fdb_salt) & (BR_HASH_SIZE - 1);
+	return HASH_1WORDS(key, fdb_salt) & (BR_HASH_SIZE - 1);
 }
 
 static inline void fdb_delete(struct net_bridge_fdb_entry *f)
