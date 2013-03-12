@@ -226,15 +226,15 @@ static u_int32_t __hash_conntrack(const struct nf_conntrack_tuple *tuple,
 
 #ifdef CONFIG_NAT_CONE
 	if (nf_conntrack_nat_mode == NAT_MODE_FCONE) {
-	    a = jhash2(tuple->dst.u3.all, ARRAY_SIZE(tuple->dst.u3.all), tuple->dst.u.all); // dst ip, dst port
-	    b = jhash2(tuple->dst.u3.all, ARRAY_SIZE(tuple->dst.u3.all), tuple->dst.protonum); //dst ip, & dst ip protocol
+	    a = HASH_2WORDS(tuple->dst.u3.all, ARRAY_SIZE(tuple->dst.u3.all), tuple->dst.u.all); // dst ip, dst port
+	    b = HASH_2WORDS(tuple->dst.u3.all, ARRAY_SIZE(tuple->dst.u3.all), tuple->dst.protonum); //dst ip, & dst ip protocol
 	 } else if (nf_conntrack_nat_mode == NAT_MODE_RCONE) {
-	    a = jhash2(tuple->src.u3.all, ARRAY_SIZE(tuple->src.u3.all), (tuple->src.l3num << 16) | tuple->dst.protonum);
-	    b = jhash2(tuple->dst.u3.all, ARRAY_SIZE(tuple->dst.u3.all), (tuple->dst.u.all << 16) | tuple->dst.protonum);
+	    a = HASH_2WORDS(tuple->src.u3.all, ARRAY_SIZE(tuple->src.u3.all), (tuple->src.l3num << 16) | tuple->dst.protonum);
+	    b = HASH_2WORDS(tuple->dst.u3.all, ARRAY_SIZE(tuple->dst.u3.all), (tuple->dst.u.all << 16) | tuple->dst.protonum);
 	} else {
 #endif
-	a = jhash2(tuple->src.u3.all, ARRAY_SIZE(tuple->src.u3.all), ((tuple->src.l3num) << 16) | tuple->dst.protonum);
-	b = jhash2(tuple->dst.u3.all, ARRAY_SIZE(tuple->dst.u3.all), (tuple->src.u.all << 16) | tuple->dst.u.all);
+	a = HASH_2WORDS(tuple->src.u3.all, ARRAY_SIZE(tuple->src.u3.all), ((tuple->src.l3num) << 16) | tuple->dst.protonum);
+	b = HASH_2WORDS(tuple->dst.u3.all, ARRAY_SIZE(tuple->dst.u3.all), (tuple->src.u.all << 16) | tuple->dst.u.all);
 #ifdef CONFIG_NAT_CONE
 	}
 #endif

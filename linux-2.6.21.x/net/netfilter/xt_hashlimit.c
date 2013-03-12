@@ -11,6 +11,7 @@
 #include <linux/spinlock.h>
 #include <linux/random.h>
 #include <linux/jhash.h>
+#include <linux/sfhash.h>
 #include <linux/slab.h>
 #include <linux/vmalloc.h>
 #include <linux/proc_fs.h>
@@ -103,7 +104,7 @@ static inline bool dst_cmp(const struct dsthash_ent *ent,
 static u_int32_t
 hash_dst(const struct xt_hashlimit_htable *ht, const struct dsthash_dst *dst)
 {
-	u_int32_t hash = jhash2((const u32 *)dst,
+	u_int32_t hash = HASH_2WORDS((const u32 *)dst,
 				sizeof(*dst)/sizeof(u32),
 				ht->rnd);
 	/*
