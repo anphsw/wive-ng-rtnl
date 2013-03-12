@@ -102,7 +102,7 @@ static int match_one(char *s, char *p, substring_t args[])
  */
 int match_token(char *s, const match_table_t table, substring_t args[])
 {
-	struct match_token *p;
+	const struct match_token *p;
 
 	for (p = table; !match_one(s, p->pattern, args) ; p++)
 		;
