@@ -82,7 +82,7 @@ static inline u32 sfhash_2words(u32 a, u32 b, u32 initval)
 
 /* Special versions for hashing exactly 1 words.
  */
-static inline u32 sfhash_1word(u32 a, u32 initval)
+static inline u32 sfhash_1words(u32 a, u32 initval)
 {
 	return sfhash_3words(a, 0, 0, initval);
 }
