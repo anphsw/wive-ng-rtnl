@@ -1311,7 +1311,7 @@
 40) kernel: lib/string.c: fix strim() semantics for strings that have only blanks.<br>
 41) kernel: conntrack: add support RTSP ALG for.<br>
 42) kernel: genirq: updates from upstream.<br>
-43) kernel: net: always use sfhash instead jhash_*words.<br>
+43) kernel: net: more use sfhash instead jhash_*words.<br>
 44) ipv6: radvd: up to 1.9.2 version with drop libdaemon use (need for save flash free size).<br>
 45) ipv6: use radvdEnabled variable for enable ipv6 (instead IPv6_Enable variable).<br>
 46) ipv6: full work ipv6 over ipv4 (6to4) autoconfigure (as TTK ISP). For 8Mb Flash devices need radvd enable in GUI.<br>
