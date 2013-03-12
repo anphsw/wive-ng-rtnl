@@ -235,6 +235,9 @@ typedef struct {
 
 #endif
 
+/* fast clear FoE Info (magic_tag,entry_num) */
+#define DO_FAST_CLEAR_FOE(skb)	    (*(uint32_t *)(FOE_INFO_START_ADDR(skb)) = 0UL)
+
 #define IS_MAGIC_TAG_VALID(skb)	    ((FOE_MAGIC_TAG(skb) == FOE_MAGIC_PCI) || \
 				    (FOE_MAGIC_TAG(skb) == FOE_MAGIC_GE)   || \
 				    (FOE_MAGIC_TAG(skb) == FOE_MAGIC_WLAN))

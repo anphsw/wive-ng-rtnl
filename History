@@ -1302,39 +1302,40 @@
 31) kernel: hash: update hash_32/64 functions.<br>
 32) kernel: hw_nat: fix udp offload issue in some hardware RT305x chip revisions.<br>
 33) kernel: hw_nat: fix confusion wan/lan some pkts.<br>
-34) kernel: backport mips optimized spinlocks and futex fixes.<br>
-35) kernel: inet: Remove unused sk_sndmsg_* from UFO.<br>
-36) kernel: sched: prevent exclusive waiter starvation.<br>
-37) kernel: mm: memmap_init_zone() performance improvement.<br>
-38) kernel: tcp_read_sock: Allow recv_actor() return return negative error value.<br>
-39) kernel: lib/string.c: fix strim() semantics for strings that have only blanks.<br>
-40) kernel: conntrack: add support RTSP ALG for.<br>
-41) kernel: genirq: updates from upstream.<br>
-42) kernel: net: always use sfhash instead jhash_*words.<br>
-43) ipv6: radvd: up to 1.9.2 version with drop libdaemon use (need for save flash free size).<br>
-44) ipv6: use radvdEnabled variable for enable ipv6 (instead IPv6_Enable variable).<br>
-45) ipv6: full work ipv6 over ipv4 (6to4) autoconfigure (as TTK ISP). For 8Mb Flash devices need radvd enable in GUI.<br>
-46) ipv6: more correct configure netfilter (some secure, need enchange in future).<br>
-47) ipv6: kernel make some needed ipv6 netfilter modules as static.<br>
-48) ipv6: export RDNS by radvd (first=local, second=google).<br>
-49) xl2tp: small fixups.<br>
-50) samba(3): decrease noise debug.<br>
-51) defaults: increase vpn cpuilimit to 4000.<br>
-52) defaults: enable wifi_hw_nat per default this is very old work stable.<br>
-53) init.d: always drop ipv4/6 adresses at reinit, not need check radvd enable/disable, chek only ipv6 compiled.<br>
-54) xunpdp: up to 1.03 rev382 version.<br>
-55) usb-modeswitch: update to 1.2.5 version.<br>
-56) usbmodem: move modems pairs config to /etc/modems.conf.<br>
-57) openssl: update to 0.9.8y version.<br>
-58) libupnp: update to 1.6.18 version.<br>
-59) libcurl: update to 7.29.0 version.<br>
-60) transmission: up to 2.77 version.<br>
-61) chillispot: fix build with new autoconf tool.<br>
-62) goahead: fix nat loopback logic if src port != dst port.<br>
-63) wireless_tool: use multicall binary (decrease code size).<br>
-64) build_system: add configure options for enable crazy minimize code size by gcc (save flash=speeddown).<br>
-65) build_system: rework for more acurate use gcc optimization options.<br>
-66) goahead: remove unused tftp alg from UI and add RTSP alg.<br>
+34) kernel: hw_nat: fast clear FoE Info (magic_tag,entry_num) in _alloc_skb.<br>
+35) kernel: backport mips optimized spinlocks and futex fixes.<br>
+36) kernel: inet: Remove unused sk_sndmsg_* from UFO.<br>
+37) kernel: sched: prevent exclusive waiter starvation.<br>
+38) kernel: mm: memmap_init_zone() performance improvement.<br>
+39) kernel: tcp_read_sock: Allow recv_actor() return return negative error value.<br>
+40) kernel: lib/string.c: fix strim() semantics for strings that have only blanks.<br>
+41) kernel: conntrack: add support RTSP ALG for.<br>
+42) kernel: genirq: updates from upstream.<br>
+43) kernel: net: always use sfhash instead jhash_*words.<br>
+44) ipv6: radvd: up to 1.9.2 version with drop libdaemon use (need for save flash free size).<br>
+45) ipv6: use radvdEnabled variable for enable ipv6 (instead IPv6_Enable variable).<br>
+46) ipv6: full work ipv6 over ipv4 (6to4) autoconfigure (as TTK ISP). For 8Mb Flash devices need radvd enable in GUI.<br>
+47) ipv6: more correct configure netfilter (some secure, need enchange in future).<br>
+48) ipv6: kernel make some needed ipv6 netfilter modules as static.<br>
+49) ipv6: export RDNS by radvd (first=local, second=google).<br>
+50) xl2tp: small fixups.<br>
+51) samba(3): decrease noise debug.<br>
+52) defaults: increase vpn cpuilimit to 4000.<br>
+53) defaults: enable wifi_hw_nat per default this is very old work stable.<br>
+54) init.d: always drop ipv4/6 adresses at reinit, not need check radvd enable/disable, chek only ipv6 compiled.<br>
+55) xunpdp: up to 1.03 rev382 version.<br>
+56) usb-modeswitch: update to 1.2.5 version.<br>
+57) usbmodem: move modems pairs config to /etc/modems.conf.<br>
+58) openssl: update to 0.9.8y version.<br>
+59) libupnp: update to 1.6.18 version.<br>
+60) libcurl: update to 7.29.0 version.<br>
+61) transmission: up to 2.77 version.<br>
+62) chillispot: fix build with new autoconf tool.<br>
+63) goahead: fix nat loopback logic if src port != dst port.<br>
+64) wireless_tool: use multicall binary (decrease code size).<br>
+65) build_system: add configure options for enable crazy minimize code size by gcc (save flash=speeddown).<br>
+66) build_system: rework for more acurate use gcc optimization options.<br>
+67) goahead: remove unused tftp alg from UI and add RTSP alg.<br>
 
 <br>
 <br>
