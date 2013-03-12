@@ -25,9 +25,8 @@
  * any bugs present are surely my fault.  -DaveM
  */
 
-#ifdef CONFIG_NET_SFHASH
+#include <linux/jhash.h>
 #include <linux/sfhash.h>
-#endif
 
 /* NOTE: Arguments are modified. */
 #define __jhash_mix(a, b, c) \
@@ -138,12 +137,6 @@ static inline __u32 jhash_3words(__u32 a, __u32 b, __u32 c, __u32 initval)
 
 	return c;
 }
-
-#ifdef CONFIG_NET_SFHASH
-#define HASH_3WORDS(a,b,c,i)    sfhash_3words(a,b,c,i)
-#else
-#define HASH_3WORDS(a,b,c,i)    jhash_3words(a,b,c,i)
-#endif
 
 static inline __u32 jhash_2words(__u32 a, __u32 b, __u32 initval)
 {

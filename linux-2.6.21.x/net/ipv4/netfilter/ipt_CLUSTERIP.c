@@ -11,11 +11,8 @@
  */
 #include <linux/module.h>
 #include <linux/proc_fs.h>
-#ifdef CONFIG_NET_SFHASH
-#include <linux/sfhash.h>
-#else
 #include <linux/jhash.h>
-#endif
+#include <linux/sfhash.h>
 #include <linux/bitops.h>
 #include <linux/skbuff.h>
 #include <linux/ip.h>
@@ -238,12 +235,6 @@ clusterip_del_node(struct clusterip_config *c, u_int16_t nodenum)
 }
 #endif
 
-#ifdef CONFIG_NET_SFHASH
-#define HASH_3WORDS(a,b,c,i)    sfhash_3words(a,b,c,i)
-#else
-#define HASH_3WORDS(a,b,c,i)    jhash_3words(a,b,c,i)
-#endif
-
 static inline u_int32_t
 clusterip_hashfn(struct sk_buff *skb, struct clusterip_config *config)
 {
@@ -275,11 +266,11 @@ clusterip_hashfn(struct sk_buff *skb, struct clusterip_config *config)
 
 	switch (config->hash_mode) {
 	case CLUSTERIP_HASHMODE_SIP:
-		hashval = jhash_1word(ntohl(iph->saddr),
+		hashval = HASH_1WORDS(ntohl(iph->saddr),
 				      config->hash_initval);
 		break;
 	case CLUSTERIP_HASHMODE_SIP_SPT:
-		hashval = jhash_2words(ntohl(iph->saddr), sport,
+		hashval = HASH_2WORDS(ntohl(iph->saddr), sport,
 				       config->hash_initval);
 		break;
 	case CLUSTERIP_HASHMODE_SIP_SPT_DPT:

@@ -17,6 +17,7 @@
 #include <linux/in6.h>
 #include <linux/ipv6.h>
 #include <linux/jhash.h>
+#include <linux/sfhash.h>
 
 #include <net/addrconf.h>
 #include <net/inet_connection_sock.h>
@@ -57,12 +58,12 @@ static u32 inet6_synq_hash(const struct in6_addr *raddr, const __be16 rport,
 {
 	u32 c;
 
-	c = jhash_3words((__force u32)raddr->s6_addr32[0],
+	c = HASH_3WORDS((__force u32)raddr->s6_addr32[0],
 			 (__force u32)raddr->s6_addr32[1],
 			 (__force u32)raddr->s6_addr32[2],
 			 rnd);
 
-	c = jhash_2words((__force u32)raddr->s6_addr32[3],
+	c = HASH_3WORDS((__force u32)raddr->s6_addr32[3],
 			 (__force u32)rport,
 			 c);
 

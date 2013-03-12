@@ -19,11 +19,8 @@
 #include <net/tcp.h>  /* For tcp_prot in getorigdst */
 #include <linux/icmp.h>
 #include <linux/udp.h>
-#ifdef CONFIG_NET_SFHASH
-#include <linux/sfhash.h>
-#else
 #include <linux/jhash.h>
-#endif
+#include <linux/sfhash.h>
 
 #include <linux/netfilter_ipv4.h>
 #include <net/netfilter/nf_conntrack.h>
@@ -81,12 +78,6 @@ nf_nat_proto_put(const struct nf_nat_protocol *p)
 	module_put(p->me);
 }
 EXPORT_SYMBOL_GPL(nf_nat_proto_put);
-
-#ifdef CONFIG_NET_SFHASH
-#define HASH_3WORDS(a,b,c,i)    sfhash_3words(a,b,c,i)
-#else
-#define HASH_3WORDS(a,b,c,i)    jhash_3words(a,b,c,i)
-#endif
 
 /* We keep an extra hash for each conntrack, for fast searching. */
 static inline unsigned int
@@ -240,7 +231,7 @@ find_best_ips_proto(struct nf_conntrack_tuple *tuple,
 	 * like this), even across reboots. */
 	minip = ntohl(range->min_ip);
 	maxip = ntohl(range->max_ip);
-	j = jhash_2words((__force u32)tuple->src.u3.ip,
+	j = HASH_2WORDS((__force u32)tuple->src.u3.ip,
 			 range->flags & IP_NAT_RANGE_PERSISTENT ?
 				(__force u32)tuple->dst.u3.ip : 0, 0);
 	j = ((u64)j * (maxip - minip + 1)) >> 32;

@@ -42,12 +42,8 @@
 #include <linux/icmpv6.h>
 #include <linux/random.h>
 #include <linux/skbuff.h>
-
-#ifdef CONFIG_NET_SFHASH
-#include <linux/sfhash.h>
-#else
 #include <linux/jhash.h>
-#endif
+#include <linux/sfhash.h>
 
 #include <net/sock.h>
 #include <net/snmp.h>
@@ -127,12 +123,6 @@ static __inline__ void fq_unlink(struct frag_queue *fq)
 	__fq_unlink(fq);
 	write_unlock(&ip6_frag_lock);
 }
-
-#ifdef CONFIG_NET_SFHASH
-#define HASH_3WORDS(a,b,c,i)    sfhash_3words(a,b,c,i)
-#else
-#define HASH_3WORDS(a,b,c,i)    jhash_3words(a,b,c,i)
-#endif
 
 /*
  * callers should be careful not to use the hash value outside the ipfrag_lock

@@ -28,6 +28,7 @@
 #include <linux/seq_file.h>
 #include <linux/rcupdate.h>
 #include <linux/jhash.h>
+#include <linux/sfhash.h>
 #include <net/route.h> /* for struct rtable and routing */
 #include <net/icmp.h> /* icmp_send */
 #include <asm/param.h> /* for HZ */
@@ -320,7 +321,7 @@ static int clip_constructor(struct neighbour *neigh)
 
 static u32 clip_hash(const void *pkey, const struct net_device *dev)
 {
-	return jhash_2words(*(u32 *) pkey, dev->ifindex, clip_tbl.hash_rnd);
+	return HASH_2WORDS(*(u32 *) pkey, dev->ifindex, clip_tbl.hash_rnd);
 }
 
 static struct neigh_table clip_tbl = {

@@ -19,11 +19,8 @@
 
 #include <linux/string.h>
 #include <linux/types.h>
-#ifdef CONFIG_NET_SFHASH
-#include <linux/sfhash.h>
-#else
 #include <linux/jhash.h>
-#endif
+#include <linux/sfhash.h>
 
 #include <net/flow.h>
 #include <net/sock.h>
@@ -177,12 +174,6 @@ extern int inet_sk_rebuild_header(struct sock *sk);
 
 extern u32 inet_ehash_secret;
 extern void build_ehash_secret(void);
-
-#ifdef CONFIG_NET_SFHASH
-#define HASH_3WORDS(a,b,c,i)    sfhash_3words(a,b,c,i)
-#else
-#define HASH_3WORDS(a,b,c,i)    jhash_3words(a,b,c,i)
-#endif
 
 static inline unsigned int inet_ehashfn(const __be32 laddr, const __u16 lport,
 					const __be32 faddr, const __be16 fport)

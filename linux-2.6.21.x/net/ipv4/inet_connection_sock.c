@@ -15,6 +15,7 @@
 
 #include <linux/module.h>
 #include <linux/jhash.h>
+#include <linux/sfhash.h>
 
 #include <net/inet_connection_sock.h>
 #include <net/inet_hashtables.h>
@@ -347,7 +348,7 @@ EXPORT_SYMBOL_GPL(inet_csk_route_req);
 static inline u32 inet_synq_hash(const __be32 raddr, const __be16 rport,
 				 const u32 rnd, const u32 synq_hsize)
 {
-	return jhash_2words((__force u32)raddr, (__force u32)rport, rnd) & (synq_hsize - 1);
+	return HASH_2WORDS((__force u32)raddr, (__force u32)rport, rnd) & (synq_hsize - 1);
 }
 
 #if defined(CONFIG_IPV6) || defined(CONFIG_IPV6_MODULE)

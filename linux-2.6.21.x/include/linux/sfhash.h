@@ -1,6 +1,7 @@
 #ifndef _LINUX_SFHASH_H
 #define _LINUX_SFHASH_H
 
+#ifdef CONFIG_NET_SFHASH
 /* sfhash.h: SuperFastHash support.
  *
  * Copyright (C) 2004 by Paul Hsieh 
@@ -68,7 +69,31 @@ static inline u32 sfhash(const void * key, u32 len, u32 initval)
 static inline u32 sfhash_3words(u32 a, u32 b, u32 c, u32 initval)
 {
 	u32 data[3] = {a,b,c};
-	
+
 	return sfhash(data, 12, initval);
 }
+
+/* Special versions for hashing exactly 2 words.
+ */
+static inline u32 sfhash_2words(u32 a, u32 b, u32 initval)
+{
+	return sfhash_3words(a, b, 0, initval);
+}
+
+/* Special versions for hashing exactly 1 words.
+ */
+static inline u32 sfhash_1word(u32 a, u32 initval)
+{
+	return sfhash_3words(a, 0, 0, initval);
+}
+
+#define HASH_3WORDS(a,b,c,i)	sfhash_3words(a,b,c,i)
+#define HASH_2WORDS(a,b,i)	sfhash_2words(a,b,i)
+#define HASH_1WORDS(a,i)	sfhash_1words(a,i)
+#else
+#include <linux/jhash.h>
+#define HASH_3WORDS(a,b,c,i)	jhash_3words(a,b,c,i)
+#define HASH_2WORDS(a,b,i)	jhash_2words(a,b,i)
+#define HASH_1WORDS(a,i)	jhash_1words(a,i)
+#endif
 #endif

@@ -59,6 +59,8 @@
 #include <linux/route.h>
 #include <linux/init.h>
 #include <linux/rcupdate.h>
+#include <linux/jhash.h>
+#include <linux/sfhash.h>
 #ifdef CONFIG_SYSCTL
 #include <linux/sysctl.h>
 #endif
@@ -67,7 +69,6 @@
 #include <linux/if_arp.h>
 #include <linux/ipv6.h>
 #include <linux/icmpv6.h>
-#include <linux/jhash.h>
 
 #include <net/sock.h>
 #include <net/snmp.h>
@@ -357,7 +358,7 @@ static u32 ndisc_hash(const void *pkey, const struct net_device *dev)
 	for (i = 0; i < (sizeof(struct in6_addr) / sizeof(u32)); i++)
 		addr_hash ^= *p32++;
 
-	return jhash_2words(addr_hash, dev->ifindex, nd_tbl.hash_rnd);
+	return HASH_2WORDS(addr_hash, dev->ifindex, nd_tbl.hash_rnd);
 }
 
 static int ndisc_constructor(struct neighbour *neigh)

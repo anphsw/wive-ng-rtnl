@@ -99,6 +99,7 @@
 #include <linux/net.h>
 #include <linux/rcupdate.h>
 #include <linux/jhash.h>
+#include <linux/sfhash.h>
 #ifdef CONFIG_SYSCTL
 #include <linux/sysctl.h>
 #endif
@@ -239,7 +240,7 @@ static u32 arp_hash(const void *pkey, const struct net_device *dev)
 
 	return hash_val;
 #else
-	return jhash_2words(*(u32 *)pkey, dev->ifindex, arp_tbl.hash_rnd);
+	return HASH_2WORDS(*(u32 *)pkey, dev->ifindex, arp_tbl.hash_rnd);
 #endif
 }
 

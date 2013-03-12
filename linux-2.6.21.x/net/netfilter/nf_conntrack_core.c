@@ -21,6 +21,7 @@
 #include <linux/slab.h>
 #include <linux/random.h>
 #include <linux/jhash.h>
+#include <linux/sfhash.h>
 #include <linux/err.h>
 #include <linux/percpu.h>
 #include <linux/moduleparam.h>
@@ -237,7 +238,7 @@ static u_int32_t __hash_conntrack(const struct nf_conntrack_tuple *tuple,
 #ifdef CONFIG_NAT_CONE
 	}
 #endif
-	return ((u64)jhash_2words(a, b, rnd) * size) >> 32;
+	return ((u64)HASH_2WORDS(a, b, rnd) * size) >> 32;
 }
 
 static inline u_int32_t hash_conntrack(const struct nf_conntrack_tuple *tuple)

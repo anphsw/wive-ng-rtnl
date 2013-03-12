@@ -34,6 +34,7 @@
 #include <linux/if.h>
 #include <linux/if_vlan.h>
 #include <linux/jhash.h>
+#include <linux/sfhash.h>
 #include <net/neighbour.h>
 #include "common.h"
 #include "t3cdev.h"
@@ -66,7 +67,7 @@ static inline unsigned int vlan_prio(const struct l2t_entry *e)
 static inline unsigned int arp_hash(u32 key, int ifindex,
 				    const struct l2t_data *d)
 {
-	return jhash_2words(key, ifindex, 0) & (d->nentries - 1);
+	return HASH_2WORDS(key, ifindex, 0) & (d->nentries - 1);
 }
 
 static inline void neigh_replace(struct l2t_entry *e, struct neighbour *n)

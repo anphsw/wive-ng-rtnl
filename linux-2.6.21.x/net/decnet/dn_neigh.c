@@ -37,6 +37,7 @@
 #include <linux/seq_file.h>
 #include <linux/rcupdate.h>
 #include <linux/jhash.h>
+#include <linux/sfhash.h>
 #include <asm/atomic.h>
 #include <net/neighbour.h>
 #include <net/dst.h>
@@ -122,7 +123,7 @@ struct neigh_table dn_neigh_table = {
 
 static u32 dn_neigh_hash(const void *pkey, const struct net_device *dev)
 {
-	return jhash_2words(*(__u16 *)pkey, 0, dn_neigh_table.hash_rnd);
+	return HASH_2WORDS(*(__u16 *)pkey, 0, dn_neigh_table.hash_rnd);
 }
 
 static int dn_neigh_construct(struct neighbour *neigh)

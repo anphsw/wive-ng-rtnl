@@ -55,6 +55,7 @@
 #include <linux/security.h>
 #endif /* CONFIG_NFSD_V4 */
 #include <linux/jhash.h>
+#include <linux/sfhash.h>
 
 #include <asm/uaccess.h>
 
@@ -766,7 +767,7 @@ nfsd_get_raparms(dev_t dev, ino_t ino)
 	unsigned int hash;
 	struct raparm_hbucket *rab;
 
-	hash = jhash_2words(dev, ino, 0xfeedbeef) & RAPARM_HASH_MASK;
+	hash = HASH_2WORDS(dev, ino, 0xfeedbeef) & RAPARM_HASH_MASK;
 	rab = &raparm_hash[hash];
 
 	spin_lock(&rab->pb_lock);
