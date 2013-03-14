@@ -365,7 +365,6 @@ int ip_options_compile(struct ip_options * opt, struct sk_buff * skb)
 				}
 				switch (optptr[3]&0xF) {
 				      case IPOPT_TS_TSONLY:
-					opt->ts = optptr - iph;
 					if (skb)
 						timeptr = (__be32*)&optptr[optptr[2]-1];
 					opt->ts_needtime = 1;
@@ -376,7 +375,6 @@ int ip_options_compile(struct ip_options * opt, struct sk_buff * skb)
 						pp_ptr = optptr + 2;
 						goto error;
 					}
-					opt->ts = optptr - iph;
 					if (rt)  {
 						memcpy(&optptr[optptr[2]-1], &rt->rt_spec_dst, 4);
 						timeptr = (__be32*)&optptr[optptr[2]+3];
@@ -390,7 +388,6 @@ int ip_options_compile(struct ip_options * opt, struct sk_buff * skb)
 						pp_ptr = optptr + 2;
 						goto error;
 					}
-					opt->ts = optptr - iph;
 					{
 						__be32 addr;
 						memcpy(&addr, &optptr[optptr[2]-1], 4);
@@ -423,12 +420,12 @@ int ip_options_compile(struct ip_options * opt, struct sk_buff * skb)
 					pp_ptr = optptr + 3;
 					goto error;
 				}
-				opt->ts = optptr - iph;
 				if (skb) {
 					optptr[3] = (optptr[3]&0xF)|((overflow+1)<<4);
 					opt->is_changed = 1;
 				}
 			}
+			opt->ts = optptr - iph;
 			break;
 		      case IPOPT_RA:
 			if (optlen < 4) {
