@@ -105,8 +105,8 @@ load_nat_helpers() {
 	    modprobe -q nf_nat_h323
 	fi
 	if [ "$fwAlgFTP" != "0" ]; then
-	    modprobe -q nf_nat_ftp
 	    modprobe -q nf_conntrack_ftp
+	    modprobe -q nf_nat_ftp
 	fi
 	if [ "$fwAlgRTSP" != "0" ]; then
 	    modprobe -q nf_conntrack_rtsp
