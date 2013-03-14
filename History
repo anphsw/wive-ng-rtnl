@@ -1341,6 +1341,7 @@
 
 <br>
 <b>3.6.x</b><br>
+1) kernel: lib/int_sqrt.c: optimize square root algorithm.<br>
 
 <br>
 <br>
