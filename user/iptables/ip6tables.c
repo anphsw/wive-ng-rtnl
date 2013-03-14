@@ -739,7 +739,8 @@ parse_hostnetworkmask(const char *name, struct in6_addr **addrpp,
 	in6addrcpy(maskp, addrp);
 
 	/* if a null mask is given, the name is ignored, like in "any/0" */
-	if (!memcmp(maskp, &in6addr_any, sizeof(in6addr_any)))
+	struct in6_addr in6addr_ANY = IN6ADDR_ANY_INIT;
+	if (!memcmp(maskp, &in6addr_ANY, sizeof(in6addr_ANY)))
 		strcpy(buf, "::");
 
 	addrp = *addrpp = parse_hostnetwork(buf, naddrs);
@@ -1440,7 +1441,8 @@ print_firewall(const struct ip6t_entry *fw,
 	}
 
 	fputc(fw->ipv6.invflags & IP6T_INV_SRCIP ? '!' : ' ', stdout);
-	if (!memcmp(&fw->ipv6.smsk, &in6addr_any, sizeof in6addr_any) 
+	struct in6_addr in6addr_ANY = IN6ADDR_ANY_INIT; 
+	if (!memcmp(&fw->ipv6.smsk, &in6addr_ANY, sizeof in6addr_ANY) 
 	    && !(format & FMT_NUMERIC))
 		printf(FMT("%-19s ","%s "), "anywhere");
 	else {
@@ -1453,7 +1455,7 @@ print_firewall(const struct ip6t_entry *fw,
 	}
 
 	fputc(fw->ipv6.invflags & IP6T_INV_DSTIP ? '!' : ' ', stdout);
-	if (!memcmp(&fw->ipv6.dmsk, &in6addr_any, sizeof in6addr_any)
+	if (!memcmp(&fw->ipv6.dmsk, &in6addr_ANY, sizeof in6addr_ANY)
 	    && !(format & FMT_NUMERIC))
 		printf(FMT("%-19s ","-> %s"), "anywhere");
 	else {
