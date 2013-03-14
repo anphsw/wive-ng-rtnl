@@ -1336,6 +1336,9 @@
 65) build_system: add configure options for enable crazy minimize code size by gcc (save flash=speeddown).<br>
 66) build_system: rework for more acurate use gcc optimization options.<br>
 67) goahead: remove unused tftp alg from UI and add RTSP alg.<br>
+68) goahead: add stastus for radvd.<br>
+69) usb: add more modems support.<br>
+
 
 <br>
 <br>
