@@ -303,7 +303,8 @@ function displayServiceHandler(response)
 		[ '<% getCfgGeneral(1, "upnpEnabled"); %>', 'upnp', 'miniupnpd', null, 'miniupnp.free.fr/' ],
 		[ '<% getCfgGeneral(1, "cdpEnabled"); %>', 'cdp', 'cdp-send', null, 'freecode.com/projects/cdp-tools' ],
 		[ '<% getCfgGeneral(1, "dnsPEnabled"); %>', 'dnsproxy', 'dnsmasq', null, 'thekelleys.org.uk/dnsmasq/doc.html' ],
-		[ '<% getCfgGeneral(1, "parproutedEnabled"); %>', 'parprouted', 'parprouted', null, 'freecode.com/projects/parprouted' ]
+		[ '<% getCfgGeneral(1, "parproutedEnabled"); %>', 'parprouted', 'parprouted', null, 'freecode.com/projects/parprouted' ],
+		[ '<% getCfgGeneral(1, "radvdEnabled"); %>', 'radvd', 'radvd', null, 'www.litech.org/radvd/' ]
 	];
 	
 	// Create associative array
@@ -563,12 +564,13 @@ function displayServiceStatus()
 </tr>
 <tr id="radvd">
 <td class="head" id="lRadvd">Router Advertisement</td>
-<td colspan="4">
+<td>
 	<select name="radvdEnbl" class="half">
 		<option value="0" id="lRadvdD">Disable</option>
 		<option value="1" id="lRadvdE">Enable</option>
 	</select>
 </td>
+<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
 </tr>
 <tr id="pppoerelay">
 <td class="head" id="lPppoer">PPPOE relay</td>
