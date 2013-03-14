@@ -417,7 +417,7 @@ int ip_options_compile(struct ip_options * opt, struct sk_buff * skb)
 					memcpy(timeptr, &midtime, sizeof(__be32));
 					opt->is_changed = 1;
 				}
-			} else {
+			} else if ((optptr[3]&0xF) != IPOPT_TS_PRESPEC) {
 				unsigned overflow = optptr[3]>>4;
 				if (overflow == 15) {
 					pp_ptr = optptr + 3;
