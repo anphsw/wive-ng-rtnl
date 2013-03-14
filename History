@@ -1342,6 +1342,8 @@
 <br>
 <b>3.6.x</b><br>
 1) kernel: lib/int_sqrt.c: optimize square root algorithm.<br>
+2) kernel: net/ipv4: Timestamp option cannot overflow with prespecified addresses.<br>
+3) kernel: net/ipv4: Ensure that location of timestamp option is stored.<br>
 
 <br>
 <br>
