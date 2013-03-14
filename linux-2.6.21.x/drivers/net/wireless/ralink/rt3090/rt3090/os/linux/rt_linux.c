@@ -1,12 +1,11 @@
 #include "rt_config.h"
 
-#if defined (CONFIG_RA_HW_NAT)  || defined (CONFIG_RA_HW_NAT_MODULE)	// ASUS EXT
+#if defined (CONFIG_RA_HW_NAT)  || defined (CONFIG_RA_HW_NAT_MODULE)
 #include "../../../../../../../net/nat/hw_nat/ra_nat.h"
 #include "../../../../../../../net/nat/hw_nat/frame_engine.h"
 #endif
 
-#if !defined(CONFIG_RA_NAT_NONE)					// ASUS EXT
-
+#if !defined(CONFIG_RA_NAT_NONE)
 extern int (*ra_sw_nat_hook_rx)(struct sk_buff *skb);
 extern int (*ra_sw_nat_hook_tx)(struct sk_buff *skb, int gmac_no);
 #endif
@@ -829,12 +828,7 @@ void announce_802_3_packet(
 	}	  	
 #endif // INF_PPA_SUPPORT //
 
-//#ifdef CONFIG_5VT_ENHANCE
-//	*(int*)(pRxPkt->cb) = BRIDGE_TAG; 
-//#endif
-
-#if !defined(CONFIG_RA_NAT_NONE)	// ASUS EXT
-
+#if !defined(CONFIG_RA_NAT_NONE)
 #if defined (CONFIG_RA_HW_NAT)  || defined (CONFIG_RA_HW_NAT_MODULE)
 	FOE_MAGIC_TAG(pRxPkt)= FOE_MAGIC_WLAN;
 #endif

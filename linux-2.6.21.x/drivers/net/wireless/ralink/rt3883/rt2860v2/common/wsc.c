@@ -5783,8 +5783,8 @@ VOID	WscWriteSsidToDatFile(
 	UCHAR	apidx;
 #endif // CONFIG_AP_SUPPORT //
 	INT		offset = 0;
-	char tmpstr[128];				/* ASUS EXT by Jiahao */
-	UCHAR tmpstr2[32], tempRandomByte = 0, idx = 0;	/* ASUS EXT by Jiahao */
+	char tmpstr[128];
+	UCHAR tmpstr2[32], tempRandomByte = 0, idx = 0;
 
 	if (bNewFormat == FALSE)
 	{
@@ -7903,7 +7903,7 @@ void    WscWriteConfToDatFile(
 	STRING			WepKeyFormatName[10] = {0};
 	INT				tempStrLen = 0;
 
-	char tmpstr[128];	/* ASUS EXT by Jiahao */
+	char tmpstr[128];
 
 	DBGPRINT(RT_DEBUG_TRACE, ("-----> WscWriteConfToDatFile\n"));
 

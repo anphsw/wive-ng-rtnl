@@ -254,11 +254,17 @@
 #define WSC_SCSTATE_CONFIGURED		0x02
 
 // Common definition
-#define	WSC_MANUFACTURE		"ASUSTeK Computer Inc."
+// Common definition
+#define	WSC_MANUFACTURE		"Ralink Technology, Corp."
 #ifdef CONFIG_AP_SUPPORT
-#define	AP_WSC_MODEL_NAME		"2.4G Wireless Router"
-#define	AP_WSC_DEVICE_NAME		"ASUS 2.4G Wireless Router"
+#define	AP_WSC_MODEL_NAME		"Ralink Wireless Access Point"
+#define	AP_WSC_DEVICE_NAME		"RalinkAPS"
 #endif // CONFIG_AP_SUPPORT //
+#ifdef CONFIG_STA_SUPPORT
+#define	STA_WSC_MODEL_NAME		"Ralink Wireless Linux Client"
+#define	STA_WSC_DEVICE_NAME		"RalinkLinuxClient"
+#define	WSC_DEVICE_NAME_R	"Ralink EX-Registrar"
+#endif // CONFIG_STA_SUPPORT //
 #define	WSC_MODEL_NUMBER	"RT-N56U"
 #define	WSC_MODEL_SERIAL	"00000000"
 

@@ -5409,7 +5409,7 @@ VOID ATEAsicSwitchChannel(
 				// latch channel for future usage
 				pAd->LatchRfRegs.Channel = Channel;
 
- 				if (pAd->Antenna.field.RxPath >= 2)	// ASUS EXT
+ 				if (pAd->Antenna.field.RxPath >= 2)
 				{
 
 					  // antenna selection
@@ -5533,7 +5533,7 @@ VOID ATEAsicSwitchChannel(
 							}
 						}
 
-						if (pAd->Antenna.field.RxPath >= 2)	// ASUS EXT
+						if (pAd->Antenna.field.RxPath >= 2)
 						{
 							switch (pAd->ate.RxAntennaSel)
 							{

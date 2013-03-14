@@ -8861,15 +8861,15 @@ VOID RTMPIoctlGetSiteSurvey(
 	IN	struct iwreq	*wrq);
 #endif
 
-VOID	RTMPIoctlGetSTAINFO(	// ASUS EXT by Jiahao
+VOID	RTMPIoctlGetSTAINFO(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	struct iwreq	*wrq);
 
-VOID	RTMPIoctlGetSTAT(	// ASUS EXT by Jiahao
+VOID	RTMPIoctlGetSTAT(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	struct iwreq	*wrq);
 
-VOID    RTMPIoctlGetRSSI(       // ASUS EXT by Jiahao
+VOID    RTMPIoctlGetRSSI(
         IN      PRTMP_ADAPTER   pAd,
         IN      struct iwreq    *wrq);
 

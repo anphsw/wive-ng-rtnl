@@ -990,12 +990,12 @@ enum {
 #define RTPRIV_IOCTL_RADIUS_DATA                    (SIOCIWFIRSTPRIV + 0x0C)
 #define RTPRIV_IOCTL_GSITESURVEY					(SIOCIWFIRSTPRIV + 0x0D)
 
-#define RTPRIV_IOCTL_GSTAINFO                   (SIOCIWFIRSTPRIV + 0x1A)        // ASUS EXT by Jiahao
-#define RTPRIV_IOCTL_GSTAT                      (SIOCIWFIRSTPRIV + 0x1B)        // ASUS EXT by Jiahao
-#define RTPRIV_IOCTL_GRSSI			(SIOCIWFIRSTPRIV + 0x1C)        // ASUS EXT by Jiahao
+#define RTPRIV_IOCTL_GSTAINFO                   (SIOCIWFIRSTPRIV + 0x1A)
+#define RTPRIV_IOCTL_GSTAT                      (SIOCIWFIRSTPRIV + 0x1B)
+#define RTPRIV_IOCTL_GRSSI			(SIOCIWFIRSTPRIV + 0x1C)
 #ifdef TXBF_SUPPORT
 #ifdef RALINK_ATE
-#define RTPRIV_IOCTL_GTXBFCALP			(SIOCIWFIRSTPRIV + 0x1D)	// ASUS EXT by Jiahao
+#define RTPRIV_IOCTL_GTXBFCALP			(SIOCIWFIRSTPRIV + 0x1D)
 #endif
 #endif
 

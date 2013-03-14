@@ -1576,13 +1576,13 @@ VOID PeerPairMsg4Action(
 
 			// send wireless event - for set key done WPA2
 				RTMPSendWirelessEvent(pAd, IW_SET_KEY_DONE_WPA2_EVENT_FLAG, pEntry->Addr, pEntry->apidx, 0); 
-/*	ASUS EXT. noisy...
+#ifdef DBG
 	        DBGPRINT(RT_DEBUG_OFF, ("AP SETKEYS DONE - WPA2, AuthMode(%d)=%s, WepStatus(%d)=%s, GroupWepStatus(%d)=%s\n\n", 
 									pEntry->AuthMode, GetAuthMode(pEntry->AuthMode), 
 									pEntry->WepStatus, GetEncryptType(pEntry->WepStatus), 
 									group_cipher, 
 									GetEncryptType(group_cipher)));
-*/
+#endif
 		}
 		else
 		{
@@ -1966,30 +1966,30 @@ VOID PeerGroupMsg2Action(
 
 		RTMPCancelTimer(&pEntry->RetryTimer, &Cancelled);
         pEntry->GTKState = REKEY_ESTABLISHED;
-        
+
 		if ((pEntry->AuthMode == Ndis802_11AuthModeWPA2) || (pEntry->AuthMode == Ndis802_11AuthModeWPA2PSK))
 		{
 			// send wireless event - for set key done WPA2
 				RTMPSendWirelessEvent(pAd, IW_SET_KEY_DONE_WPA2_EVENT_FLAG, pEntry->Addr, pEntry->apidx, 0); 
-/*	ASUS EXT. noisy...
+#ifdef DBG
 			DBGPRINT(RT_DEBUG_OFF, ("AP SETKEYS DONE - WPA2, AuthMode(%d)=%s, WepStatus(%d)=%s, GroupWepStatus(%d)=%s\n\n", 
 										pEntry->AuthMode, GetAuthMode(pEntry->AuthMode), 
 										pEntry->WepStatus, GetEncryptType(pEntry->WepStatus), 
 										group_cipher, GetEncryptType(group_cipher)));
-*/
+#endif
 		}
 		else
 		{
 			// send wireless event - for set key done WPA
 				RTMPSendWirelessEvent(pAd, IW_SET_KEY_DONE_WPA1_EVENT_FLAG, pEntry->Addr, pEntry->apidx, 0); 
-/*	ASUS EXT. noisy...
+#ifdef DBG
         	DBGPRINT(RT_DEBUG_OFF, ("AP SETKEYS DONE - WPA1, AuthMode(%d)=%s, WepStatus(%d)=%s, GroupWepStatus(%d)=%s\n\n", 
 										pEntry->AuthMode, GetAuthMode(pEntry->AuthMode), 
 										pEntry->WepStatus, GetEncryptType(pEntry->WepStatus), 
 										group_cipher, GetEncryptType(group_cipher)));
-*/
-		}	
-    }while(FALSE);  
+#endif
+		}
+    }while(FALSE);
 }
 
 /*

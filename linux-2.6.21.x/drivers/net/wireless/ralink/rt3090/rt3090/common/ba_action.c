@@ -463,9 +463,9 @@ void ba_flush_reordering_timeout_mpdus(
     		{
     			pBAEntry->LastIndSeq = Sequence;
     		}
-
-//		DBGPRINT(RT_DEBUG_OFF, ("%x, flush one!\n", pBAEntry->LastIndSeq));	// ASUS EXT. noisy...
-
+#ifdef DBG
+		DBGPRINT(RT_DEBUG_OFF, ("%x, flush one!\n", pBAEntry->LastIndSeq));
+#endif
 	}
 }
 
@@ -702,9 +702,9 @@ BOOLEAN BARecSessionAdd(
 		pBAEntry->REC_BA_Status = Recipient_Accept;
 		// initial sequence number 
 		pBAEntry->LastIndSeq = RESET_RCV_SEQ; //pFrame->BaStartSeq.field.StartSeq;
-
-//		DBGPRINT(RT_DEBUG_OFF, ("Start Seq = %08x\n",  pFrame->BaStartSeq.field.StartSeq));	// ASUS EXT. noisy...
-
+#ifdef DBG
+		DBGPRINT(RT_DEBUG_OFF, ("Start Seq = %08x\n",  pFrame->BaStartSeq.field.StartSeq));
+#endif
 		if (pEntry->RXBAbitmap & (1<<TID))
 		{
 			RTMPCancelTimer(&pBAEntry->RECBATimer, &Cancelled);
@@ -1236,7 +1236,9 @@ VOID PeerAddBAReqAction(
 		if ((pAd->CommonCfg.bBADecline == FALSE) && IS_HT_STA(pMacEntry))
 		{
 			pAddreqFrame = (PFRAME_ADDBA_REQ)(&Elem->Msg[0]);
-//			DBGPRINT(RT_DEBUG_OFF, ("Rcv Wcid(%d) AddBAReq\n", Elem->Wcid));	// ASUS EXT. noisy...
+#ifdef DBG
+			DBGPRINT(RT_DEBUG_OFF, ("Rcv Wcid(%d) AddBAReq\n", Elem->Wcid));
+#endif
 			if (BARecSessionAdd(pAd, &pAd->MacTab.Content[Elem->Wcid], pAddreqFrame))
 				Status = 0;
 			else

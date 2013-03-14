@@ -28,8 +28,7 @@
 
 #include "rt_config.h"
 
-#if !defined(CONFIG_RA_NAT_NONE)	// ASUS EXT
-
+#if !defined(CONFIG_RA_NAT_NONE)
 extern int (*ra_sw_nat_hook_rx)(struct sk_buff *skb);
 extern int (*ra_sw_nat_hook_tx)(struct sk_buff *skb, int gmac_no);
 #endif
@@ -634,7 +633,7 @@ int rt28xx_packet_xmit(struct sk_buff *skb)
 		goto done;
 	}
 
-#if !defined(CONFIG_RA_NAT_NONE)	// ASUS EXT
+#if !defined(CONFIG_RA_NAT_NONE)
         /* add tx hook point*/
         if(ra_sw_nat_hook_tx!= NULL)
         {

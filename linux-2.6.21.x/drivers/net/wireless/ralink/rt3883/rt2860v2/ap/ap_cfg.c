@@ -6083,10 +6083,10 @@ INT	Show_MacTable_Proc(
 	return TRUE;
 }
 
-#define	MAX_BUFFER_SIZE 4096	// ASUS EXT by Jiahao
-CHAR msg[MAX_BUFFER_SIZE];	// ASUS EXT by Jiahao
+#define	MAX_BUFFER_SIZE 4096
+CHAR msg[MAX_BUFFER_SIZE];
 
-VOID	RTMPIoctlGetSTAINFO(	// ASUS EXT by Jiahao
+VOID	RTMPIoctlGetSTAINFO(
 	IN	PRTMP_ADAPTER	pAd, 
 	IN	struct iwreq	*wrq)
 {
@@ -6740,7 +6740,7 @@ INT	Show_Sat_Proc(
 	return TRUE;
 }
 
-VOID	RTMPIoctlGetSTAT(	// ASUS EXT by Jiahao
+VOID	RTMPIoctlGetSTAT(
 	IN	PRTMP_ADAPTER	pAd, 
 	IN	struct iwreq	*wrq)
 {
@@ -6761,7 +6761,7 @@ VOID	RTMPIoctlGetSTAT(	// ASUS EXT by Jiahao
 	sprintf(msg+strlen(msg), "FrameDuplicateCount = %d\n", pAd->WlanCounters.FrameDuplicateCount.u.LowPart);
 	sprintf(msg+strlen(msg), "ReceivedFragmentCount = %d\n", pAd->WlanCounters.ReceivedFragmentCount.u.LowPart);
 	sprintf(msg+strlen(msg), "MulticastReceivedFrameCount = %d\n", pAd->WlanCounters.MulticastReceivedFrameCount.u.LowPart);
-#ifdef DBG 		
+#ifdef DBG
 	sprintf(msg+strlen(msg), "RealFcsErrCount = %d\n", pAd->RalinkCounters.RealFcsErrCount.u.LowPart);
 #else
 	sprintf(msg+strlen(msg), "FCSErrorCount = %d\n", pAd->WlanCounters.FCSErrorCount.u.LowPart);
@@ -8551,7 +8551,7 @@ VOID RTMPIoctlStatistics(
     DBGPRINT(RT_DEBUG_TRACE, ("<==RTMPIoctlStatistics\n"));
 }
 
-VOID	RTMPIoctlGetRSSI(	// ASUS EXT by Jiahao
+VOID	RTMPIoctlGetRSSI(
 	IN PRTMP_ADAPTER pAd, 
 	IN struct iwreq *wrq)
 {

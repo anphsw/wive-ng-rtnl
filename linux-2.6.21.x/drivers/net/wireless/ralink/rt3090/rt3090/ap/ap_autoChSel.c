@@ -422,7 +422,6 @@ static inline UCHAR SelectClearChannelCCA(
 	 *		   by dirtyness
 	 */
 	candidate_ch = -1;
-#if 0	
 	for (channel_idx = 0; channel_idx < pAd->ChannelListNum; channel_idx++)
 	{
 		if (pChannelInfo->SkipList[channel_idx] == TRUE)
@@ -503,40 +502,6 @@ static inline UCHAR SelectClearChannelCCA(
 			}
 		}
 	}
-#else
-        // ASUS EXT
-	{
-		int channel_index_sp = pAd->ChannelListNum;
-
-		for (channel_idx=0 ; channel_idx < pAd->ChannelListNum ; channel_idx++)
-		{
-			if (pChannelInfo->dirtyness[channel_idx] < min_dirty)
-			{
-				min_dirty = pChannelInfo->dirtyness[channel_idx];
-				channel_index_sp = channel_idx;
-			}
-		}
-		
-		if (channel_index_sp < pAd->ChannelListNum)
-		{
-			candidate_ch = channel_index_sp;
-			
-			if (pAd->CommonCfg.RegTransmitSetting.field.BW == BW_40)
-			{
-				UCHAR ExChannel_idx = 0;
-				if (((candidate_ch - 4) >=0) && ((candidate_ch - 4) < pAd->ChannelListNum))
-				{
-					candidate_ExChannel[ExChannel_idx++] = pAd->ChannelList[candidate_ch - 4].Channel;
-				}
-				
-				if (((candidate_ch + 4) >=0) && ((candidate_ch + 4) < pAd->ChannelListNum))
-				{
-					candidate_ExChannel[ExChannel_idx++] = pAd->ChannelList[candidate_ch + 4].Channel;
-				}
-			}
-		}
-	}
-#endif
 	if (candidate_ch >= 0)
 	{
 		ch = pAd->ChannelList[candidate_ch].Channel;
