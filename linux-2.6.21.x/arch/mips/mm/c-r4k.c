@@ -31,17 +31,6 @@
 #include <asm/war.h>
 #include <asm/cacheflush.h> /* for run_uncached() */
 
-#if defined (CONFIG_RALINK_RT2880) || \
-    defined (CONFIG_RALINK_RT2883) || \
-    defined (CONFIG_RALINK_RT3883) || \
-    defined (CONFIG_RALINK_RT3352) || \
-    defined (CONFIG_RALINK_RT3052) || \
-    defined (CONFIG_RALINK_RT6855) || \
-    defined (CONFIG_RALINK_RT5350)
-#define IS_RALINK
-#endif
-
-
 /*
  * Special Variant of smp_call_function for use by cache functions:
  *

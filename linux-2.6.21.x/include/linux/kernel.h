@@ -18,6 +18,16 @@
 #include <asm/byteorder.h>
 #include <asm/bug.h>
 
+#if defined (CONFIG_RALINK_RT2880) || \
+    defined (CONFIG_RALINK_RT2883) || \
+    defined (CONFIG_RALINK_RT3883) || \
+    defined (CONFIG_RALINK_RT3352) || \
+    defined (CONFIG_RALINK_RT3052) || \
+    defined (CONFIG_RALINK_RT6855) || \
+    defined (CONFIG_RALINK_RT5350)
+#define IS_RALINK
+#endif
+
 extern const char linux_banner[];
 extern const char linux_proc_banner[];
 
