@@ -32,32 +32,30 @@ start() {
 	else
 	    $LOG "Load wifi AP module..."
     	    modprobe -q rt2860v2_ap  "$mac"
-	fi
-	if [ "$CONFIG_RT3090_AP" != "" ]; then
-	    $LOG "Load RT3090 external wifi AP module..."
-	    modprobe -q rt3090_ap "$mac"
+	    if [ "$CONFIG_RT3090_AP" != "" ]; then
+		$LOG "Load RT3090 external wifi AP module..."
+		modprobe -q rt3090_ap "$mac"
+	    fi
 	fi
 
-	# mac must be set driver use module param
+	# reload variables after wlan modules load
+	. /etc/scripts/global.sh
+
+	# root interfaces must be up first
+	$LOG "WiFi interfaces up..."
+	ifconfig ra0 txqueuelen	"$txqueuelen"
+	ip link set ra0 up
+	if [ "$second_wlan" != "" ]; then
+	    $LOG "WiFi $second_wlan interface up..."
+	    # others modes
+	    ifconfig ${second_wlan}0 txqueuelen	"$txqueuelen"
+	    ip link set ${second_wlan}0 up
+	fi
 	if [ "$OperationMode" = "3" ]; then
-	    $LOG "WiFi interface up APCLI..."
-	    # apcli mode ap interface
-	    ifconfig ra0 txqueuelen	"$txqueuelen"
-	    ip link set ra0 up
+	    $LOG "WiFi APCLI interface up..."
 	    # apcli mode sta interface
 	    ifconfig apcli0 txqueuelen	"$txqueuelen"
 	    ip link set apcli0 up
-	else
-	    $LOG "WiFi interface up..."
-	    # others modes
-	    ifconfig ra0 txqueuelen	"$txqueuelen"
-	    ip link set ra0 up
-	fi
-	if [ "$CONFIG_RT3090_AP" != "" ]; then
-	    $LOG "WiFi RT3090 interface up..."
-	    # others modes
-	    ifconfig rai0 txqueuelen	"$txqueuelen"
-	    ip link set rai0 up
 	fi
 	$LOG "Tune wifi modules."
 	retune_wifi
@@ -124,14 +122,7 @@ wlan_down_all() {
     # First clear conntrack and routes tables/caches
     flush_net_caches
     # process iface shutdown
-    for i in `seq 0 7`; do
-	ip addr flush dev ra$i > /dev/null 2>&1
-	if [ -d /proc/sys/net/ipv6 ]; then
-    	    ip -6 addr flush dev ra$i > /dev/null 2>&1
-	fi
-	ip link set ra$i down > /dev/null 2>&1
-	brctl delif br0 ra$i > /dev/null 2>&1
-    done
+    # first down vifs
     if [ "$CONFIG_RT2860V2_AP_WDS" != "" ]; then
 	for i in `seq 0 3`; do
 	    ip addr flush dev wds$i > /dev/null 2>&1
@@ -158,23 +149,32 @@ wlan_down_all() {
 	ip link set mesh0 down > /dev/null 2>&1
 	brctl delif br0 mesh0 > /dev/null 2>&1
     fi
-    if [ "$CONFIG_RT3090_AP" != "" ]; then
-	for i in `seq 0 7`; do
-	    ip addr flush dev rai$i > /dev/null 2>&1
+    # root interfaces must down end
+    for i in `seq 0 7`; do
+	ip addr flush dev ra$i > /dev/null 2>&1
+	if [ -d /proc/sys/net/ipv6 ]; then
+    	    ip -6 addr flush dev ra$i > /dev/null 2>&1
+	fi
+	ip link set ra$i down > /dev/null 2>&1
+	brctl delif br0 ra$i > /dev/null 2>&1
+	# second radio module down to
+	if [ "$second_wlan" != "" ]; then
+	    ip addr flush dev ${second_wlan}${i} > /dev/null 2>&1
 	    if [ -d /proc/sys/net/ipv6 ]; then
-    		ip -6 addr flush dev rai$i > /dev/null 2>&1
+    		ip -6 addr flush dev ${second_wlan}${i} > /dev/null 2>&1
 	    fi
-	    ip link set rai$i down > /dev/null 2>&1
-	    brctl delif br0 rai$i > /dev/null 2>&1
-	done
-    fi
+	    ip link set ${second_wlan}${i} down > /dev/null 2>&1
+	    brctl delif br0 ${second_wlan}${i} > /dev/null 2>&1
+	fi
+    done
 }
 
 retune_wifi() {
     # preconfigure wifi
     /etc/scripts/wifi.sh ra0
-    if [ "$CONFIG_RT3090_AP" != "" ]; then
-	/etc/scripts/wifi.sh rai0
+    if [ "$second_wlan" != "" ]; then
+	# preconfigure second wlan root interface to
+	/etc/scripts/wifi.sh ${second_wlan}0
     fi
 }
 

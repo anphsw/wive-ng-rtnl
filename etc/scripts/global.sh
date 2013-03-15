@@ -35,6 +35,15 @@ eval `nvram_buf_get 2860 OperationMode wanConnectionMode wan_ipaddr wan_static_d
 	ApCliBridgeOnly MODEMENABLED \
 	QoSEnable simple_qos`
 
+# this if flag say second physical wlan module exist
+getSecWlanIfName() {
+    if [ -d /sys/module/rt3090_ap ]; then
+	second_wlan="rai"
+    else
+	second_wlan=""
+    fi
+}
+
 # LAN interface name -> $lan_if
 getLanIfName() {
     # phys port names
@@ -264,5 +273,6 @@ killall_vpn() {
 getLanIfName
 getVpnIfName
 getWanIfName
+getSecWlanIfName
 getWanIpaddr
 get_txqlen

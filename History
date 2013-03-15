@@ -1349,6 +1349,7 @@
 6) kernel: mips: dsp: Fix DSP mask for registers.<br>
 7) kernel: mips: make __{,n,u}delay declarations match definitions and generic delay.h<br>
 8) kernel: pppoe: return ENOTTY on unknown ioctl requests.<br>
+9) init.d: rework second wlan module support and small fixes.<br>
 
 <br>
 <br>

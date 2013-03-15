@@ -77,18 +77,18 @@ addMBSSID() {
 	    done
 	fi
     fi
-    if [ "$CONFIG_RT3090_AP_MBSS" != "" ]; then
+    if [ "$CONFIG_RT3090_AP_MBSS" != "" ] && [ "$second_wlan" != "" ]; then
 	bssidnum=`nvram_get 2860 BssidNum`
 	if [ "$bssidnum" != "0" ] && [ "$bssidnum" != "1" ]; then
 	    let "bssrealnum=$bssidnum-1"
 	    for i in `seq 1 $bssrealnum`; do
-    		ip addr flush dev rai$i > /dev/null 2>&1
+    		ip addr flush dev ${second_wlan}${i} > /dev/null 2>&1
 		if [ -d /proc/sys/net/ipv6 ]; then
-    		    ip -6 addr flush dev rai$i /dev/null 2>&1
+    		    ip -6 addr flush dev ${second_wlan}${i} /dev/null 2>&1
 		fi
-		ip link set ra$i down > /dev/null 2>&1
-		brctl addif br0 rai$i
-    		ip link set rai$i up
+		ip link set ${second_wlan}${i} down > /dev/null 2>&1
+		brctl addif br0 ${second_wlan}${i}
+    		ip link set ${second_wlan}${i} up
 	    done
 	fi
     fi
@@ -106,11 +106,11 @@ bridge_config() {
 	    brctl delif br0 eth3 > /dev/null 2>&1
 	    brctl addif br0 eth3
 	fi
-	# add wifi interface
+	# add root wifi interface
 	brctl addif br0 ra0
-	if [ "$CONFIG_RT3090_AP" != "" ]; then
-	    # add wifi interface
-	    brctl addif br0 rai0
+	if [ "$second_wlan" != "" ]; then
+	    # add second root wifi interface
+	    brctl addif br0 ${second_wlan}0
 	fi
 	addMBSSID
         addWds
@@ -124,11 +124,11 @@ gate_config() {
 	brctl delif br0 "$phys_lan_if" > /dev/null 2>&1
 	# add lan interface
 	brctl addif br0 "$phys_lan_if"
-	# add wifi interface
+	# add root wifi interface
 	brctl addif br0 ra0
-	if [ "$CONFIG_RT3090_AP" != "" ]; then
-	    # add wifi interface
-	    brctl addif br0 rai0
+	if [ "$second_wlan" != "" ]; then
+	    # add second root wifi interface
+	    brctl addif br0 ${second_wlan}0
 	fi
 	addMBSSID
 	addWds
@@ -146,11 +146,11 @@ apcli_config() {
 	brctl delif br0 eth2 > /dev/null 2>&1
 	# in apcli mode add only eth2 NOT ADD "$phys_lan_if" or "$phys_wan_if"
 	brctl addif br0 eth2
-	# add ap wifi interface
+	# add root wifi interface
 	brctl addif br0 ra0
-	if [ "$CONFIG_RT3090_AP" != "" ]; then
-	    # add wifi interface
-	    brctl addif br0 rai0
+	if [ "$second_wlan" != "" ]; then
+	    # add second root wifi interface
+	    brctl addif br0 ${second_wlan}0
 	fi
 	if [ "$ApCliBridgeOnly" = "1" ]; then
 	    # add client wifi interface
@@ -166,11 +166,11 @@ spot_config() {
 	brctl delif br0 "$phys_lan_if" > /dev/null 2>&1
 	# add lan interface
 	brctl addif br0 "$phys_lan_if"
-	# add wifi interface
+	# add root wifi interface
 	brctl addif br0 ra0
-	if [ "$CONFIG_RT3090_AP" != "" ]; then
-	    # add wifi interface
-	    brctl addif br0 rai0
+	if [ "$second_wlan" != "" ]; then
+	    # add second root wifi interface
+	    brctl addif br0 ${second_wlan}0
 	fi
 	addMBSSID
 	addWds
