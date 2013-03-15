@@ -33,6 +33,8 @@ start() {
 	    $LOG "Load wifi AP module..."
     	    modprobe -q rt2860v2_ap  "$mac"
 	    if [ "$CONFIG_RT3090_AP" != "" ]; then
+		# second mac adress
+		mac="mac=$WLAN2_MAC_ADDR"
 		$LOG "Load RT3090 external wifi AP module..."
 		modprobe -q rt3090_ap "$mac"
 	    fi
