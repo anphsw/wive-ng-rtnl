@@ -96,6 +96,7 @@ hash_by_src(const struct nf_conntrack_tuple *tuple)
 static void nf_nat_cleanup_conntrack(struct nf_conn *conn)
 {
 	struct nf_conn_nat *nat;
+
 	if (!(conn->status & IPS_NAT_DONE_MASK))
 		return;
 
@@ -261,7 +262,14 @@ get_unique_tuple(struct nf_conntrack_tuple *tuple,
 	   So far, we don't do local source mappings, so multiple
 	   manips not an issue.  */
 	if (maniptype == IP_NAT_MANIP_SRC) {
-		if (find_appropriate_src(orig_tuple, tuple, range)) {
+		/* try the original tuple first */
+		if (in_range(orig_tuple, range)) {
+			if (!nf_nat_used_tuple(orig_tuple, ct)) {
+				*tuple = *orig_tuple;
+				return;
+			}
+		} else if (find_appropriate_src(orig_tuple, tuple,
+			   range)) {
 			DEBUGP("get_unique_tuple: Found current src map\n");
 			if (!(range->flags & IP_NAT_RANGE_PROTO_RANDOM))
 				if (!nf_nat_used_tuple(tuple, ct))
@@ -307,7 +315,6 @@ nf_nat_setup_info(struct nf_conn *ct,
 	struct nf_conntrack_tuple curr_tuple, new_tuple;
 	struct nf_conn_nat *nat = nfct_nat(ct);
 	struct nf_nat_info *info = &nat->info;
-	int have_to_hash = !(ct->status & IPS_NAT_DONE_MASK);
 	enum nf_nat_manip_type maniptype = HOOK2MANIP(hooknum);
 
 	NF_CT_ASSERT(hooknum == NF_IP_PRE_ROUTING ||
@@ -340,8 +347,7 @@ nf_nat_setup_info(struct nf_conn *ct,
 			ct->status |= IPS_DST_NAT;
 	}
 
-	/* Place in source hash if this is the first time. */
-	if (have_to_hash) {
+	if (maniptype == IP_NAT_MANIP_SRC) {
 		unsigned int srchash;
 
 		srchash = hash_by_src(&ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple);
