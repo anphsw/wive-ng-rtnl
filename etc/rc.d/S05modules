@@ -32,7 +32,7 @@ start() {
 	else
 	    $LOG "Load wifi AP module..."
     	    modprobe -q rt2860v2_ap  "$mac"
-	    if [ "$second_wlan" != "" ]; then
+	    if [ "$second_wlan_root_if" != "" ]; then
 		# second mac adress
 		mac="mac=$WLAN2_MAC_ADDR"
 		$LOG "Load RT3090 external wifi AP module..."
@@ -44,8 +44,8 @@ start() {
 	$LOG "WiFi interfaces up..."
 	ifconfig ra0 txqueuelen	"$txqueuelen"
 	ip link set ra0 up
-	if [ "$second_wlan" != "" ]; then
-	    $LOG "WiFi $second_wlan interface up..."
+	if [ "$second_wlan_root_if" != "" ]; then
+	    $LOG "WiFi $second_wlan_root_if interface up..."
 	    # others modes
 	    ifconfig $second_wlan_root_if txqueuelen	"$txqueuelen"
 	    ip link set $second_wlan_root_if up
@@ -122,6 +122,14 @@ wlan_down_all() {
     flush_net_caches
     # process iface shutdown
     # first down vifs
+    if [ "$CONFIG_RT2860V2_STA_MESH" != "" ] || [ "$CONFIG_RT2860V2_AP_MESH" != "" ]; then
+	ip addr flush dev mesh0 > /dev/null 2>&1
+	if [ -d /proc/sys/net/ipv6 ]; then
+    	    ip -6 addr flush dev mesh0 > /dev/null 2>&1
+	fi
+	ip link set mesh0 down > /dev/null 2>&1
+	brctl delif br0 mesh0 > /dev/null 2>&1
+    fi
     if [ "$CONFIG_RT2860V2_AP_WDS" != "" ]; then
 	for i in `seq 0 3`; do
 	    ip addr flush dev wds$i > /dev/null 2>&1
@@ -130,6 +138,14 @@ wlan_down_all() {
 	    fi
     	    ip link set wds$i down > /dev/null 2>&1
 	    brctl delif br0 wds$i > /dev/null 2>&1
+	    if [ "$second_wlan_wds" != "" ]; then
+		ip addr flush dev ${second_wlan_wds}${i} > /dev/null 2>&1
+		if [ -d /proc/sys/net/ipv6 ]; then
+    		    ip -6 addr flush dev ${second_wlan_wds}${i} > /dev/null 2>&1
+		fi
+		ip link set ${second_wlan_wds}${i} down > /dev/null 2>&1
+		brctl delif br0 ${second_wlan_wds}${i} > /dev/null 2>&1
+	    fi
 	done
     fi
     if [ "$CONFIG_RT2860V2_AP_APCLI" != "" ]; then
@@ -140,15 +156,7 @@ wlan_down_all() {
 	ip link set apcli0 down > /dev/null 2>&1
 	brctl delif br0 apcli0 > /dev/null 2>&1
     fi
-    if [ "$CONFIG_RT2860V2_STA_MESH" != "" ] || [ "$CONFIG_RT2860V2_AP_MESH" != "" ]; then
-	ip addr flush dev mesh0 > /dev/null 2>&1
-	if [ -d /proc/sys/net/ipv6 ]; then
-    	    ip -6 addr flush dev mesh0 > /dev/null 2>&1
-	fi
-	ip link set mesh0 down > /dev/null 2>&1
-	brctl delif br0 mesh0 > /dev/null 2>&1
-    fi
-    # root interfaces must down end
+    # root and mbssid interfaces must down end
     for i in `seq 0 7`; do
 	ip addr flush dev ra$i > /dev/null 2>&1
 	if [ -d /proc/sys/net/ipv6 ]; then
@@ -171,7 +179,7 @@ wlan_down_all() {
 retune_wifi() {
     # preconfigure wifi
     /etc/scripts/wifi.sh ra0
-    if [ "$second_wlan" != "" ]; then
+    if [ "$second_wlan_root_if" != "" ]; then
 	# preconfigure second wlan root interface to
 	/etc/scripts/wifi.sh $second_wlan_root_if
     fi

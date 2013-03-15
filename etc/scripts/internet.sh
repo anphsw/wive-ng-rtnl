@@ -44,17 +44,17 @@ addWds() {
     	    done
 	fi
     fi
-    if [ "$CONFIG_RT3090_AP_WDS" != "" ]; then
+    if [ "$second_wlan_wds" != "" ]; then
 	wds_en=`nvram_get 2860 WdsEnable`
 	if [ "$wds_en" != "0" ]; then
     	    for i in `seq 0 3`; do
-    		ip addr flush dev wdsi$i > /dev/null 2>&1
+    		ip addr flush dev ${second_wlan_wds}${i} > /dev/null 2>&1
 		if [ -d /proc/sys/net/ipv6 ]; then
-    		    ip -6 addr flush dev wdsi$i /dev/null 2>&1
+    		    ip -6 addr flush dev ${second_wlan_wds}${i} /dev/null 2>&1
 		fi
-		ip link set wdsi$i down > /dev/null 2>&1
-		brctl addif br0 wdsi$i
-    		ip link set wdsi$i up
+		ip link set ${second_wlan_wds}${i} down > /dev/null 2>&1
+		brctl addif br0 ${second_wlan_wds}${i}
+    		ip link set ${second_wlan_wds}${i} up
     	    done
 	fi
     fi
@@ -77,18 +77,18 @@ addMBSSID() {
 	    done
 	fi
     fi
-    if [ "$CONFIG_RT3090_AP_MBSS" != "" ] && [ "$second_wlan" != "" ]; then
+    if [ "$second_wlan_mbss" != "" ]; then
 	bssidnum=`nvram_get 2860 BssidNum`
 	if [ "$bssidnum" != "0" ] && [ "$bssidnum" != "1" ]; then
 	    let "bssrealnum=$bssidnum-1"
 	    for i in `seq 1 $bssrealnum`; do
-    		ip addr flush dev ${second_wlan}${i} > /dev/null 2>&1
+    		ip addr flush dev ${second_wlan_mbss}${i} > /dev/null 2>&1
 		if [ -d /proc/sys/net/ipv6 ]; then
-    		    ip -6 addr flush dev ${second_wlan}${i} /dev/null 2>&1
+    		    ip -6 addr flush dev ${second_wlan_mbss}${i} /dev/null 2>&1
 		fi
-		ip link set ${second_wlan}${i} down > /dev/null 2>&1
-		brctl addif br0 ${second_wlan}${i}
-    		ip link set ${second_wlan}${i} up
+		ip link set ${second_wlan_mbss}${i} down > /dev/null 2>&1
+		brctl addif br0 ${second_wlan_mbss}${i}
+    		ip link set ${second_wlan_mbss}${i} up
 	    done
 	fi
     fi
@@ -108,7 +108,7 @@ bridge_config() {
 	fi
 	# add root wifi interface
 	brctl addif br0 ra0
-	if [ "$second_wlan" != "" ]; then
+	if [ "$second_wlan_root_if" != "" ]; then
 	    # add second root wifi interface
 	    brctl addif br0 $second_wlan_root_if
 	fi
@@ -126,7 +126,7 @@ gate_config() {
 	brctl addif br0 "$phys_lan_if"
 	# add root wifi interface
 	brctl addif br0 ra0
-	if [ "$second_wlan" != "" ]; then
+	if [ "$second_wlan_root_if" != "" ]; then
 	    # add second root wifi interface
 	    brctl addif br0 $second_wlan_root_if
 	fi
@@ -148,7 +148,7 @@ apcli_config() {
 	brctl addif br0 eth2
 	# add root wifi interface
 	brctl addif br0 ra0
-	if [ "$second_wlan" != "" ]; then
+	if [ "$second_wlan_root_if" != "" ]; then
 	    # add second root wifi interface
 	    brctl addif br0 $second_wlan_root_if
 	fi
@@ -168,7 +168,7 @@ spot_config() {
 	brctl addif br0 "$phys_lan_if"
 	# add root wifi interface
 	brctl addif br0 ra0
-	if [ "$second_wlan" != "" ]; then
+	if [ "$second_wlan_root_if" != "" ]; then
 	    # add second root wifi interface
 	    brctl addif br0 $second_wlan_root_if
 	fi

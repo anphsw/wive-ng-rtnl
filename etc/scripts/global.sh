@@ -36,13 +36,17 @@ eval `nvram_buf_get 2860 OperationMode wanConnectionMode wan_ipaddr wan_static_d
 	QoSEnable simple_qos`
 
 # this if flag say second physical wlan module exist
+# and name/mask for second wlanmodule used in system logic
 getSecWlanIfName() {
     if [ "$CONFIG_RT3090_AP" != "" ]; then
-	second_wlan="rai"
-	second_wlan_root_if="rai0"
-    else
-	second_wlan=""
-	second_wlan_root_if=""
+	second_wlan_root_if="rai0"			# is root interface name
+	second_wlan="rai"				# this is mask name vifs for second wlan module
+	if [ "$CONFIG_RT3090_AP_MBSS" != "" ]; then
+	    second_wlan_mbss="rai"			# this is mask name vifs for second mbss wlan module
+	fi
+	if [ "$CONFIG_RT3090_AP_WDS" != "" ]; then
+	    second_wlan_wds="wdsi"			# this is mask name vifs for second wds wlan module
+	fi
     fi
 }
 
