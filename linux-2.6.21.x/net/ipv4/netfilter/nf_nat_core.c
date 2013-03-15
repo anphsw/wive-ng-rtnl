@@ -310,17 +310,14 @@ out:
 unsigned int
 nf_nat_setup_info(struct nf_conn *ct,
 		  const struct nf_nat_range *range,
-		  unsigned int hooknum)
+		  enum nf_nat_manip_type maniptype)
 {
 	struct nf_conntrack_tuple curr_tuple, new_tuple;
 	struct nf_conn_nat *nat = nfct_nat(ct);
 	struct nf_nat_info *info = &nat->info;
-	enum nf_nat_manip_type maniptype = HOOK2MANIP(hooknum);
 
-	NF_CT_ASSERT(hooknum == NF_IP_PRE_ROUTING ||
-		     hooknum == NF_IP_POST_ROUTING ||
-		     hooknum == NF_IP_LOCAL_IN ||
-		     hooknum == NF_IP_LOCAL_OUT);
+	NF_CT_ASSERT(maniptype == IP_NAT_MANIP_SRC ||
+		     maniptype == IP_NAT_MANIP_DST);
 	BUG_ON(nf_nat_initialized(ct, maniptype));
 
 	/* What we've got will look like inverse of reply. Normally

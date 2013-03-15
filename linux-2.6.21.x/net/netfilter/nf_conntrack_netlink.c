@@ -809,19 +809,17 @@ ctnetlink_change_status(struct nf_conn *ct, struct nfattr *cda[])
 			if (nfnetlink_parse_nat(cda[CTA_NAT_DST-1], ct,
 						&range) < 0)
 				return -EINVAL;
-			if (nf_nat_initialized(ct,
-					       HOOK2MANIP(NF_IP_PRE_ROUTING)))
+			if (nf_nat_initialized(ct, IP_NAT_MANIP_DST))
 				return -EEXIST;
-			nf_nat_setup_info(ct, &range, NF_IP_PRE_ROUTING);
+			nf_nat_setup_info(ct, &range, IP_NAT_MANIP_DST);
 		}
 		if (cda[CTA_NAT_SRC-1]) {
 			if (nfnetlink_parse_nat(cda[CTA_NAT_SRC-1], ct,
 						&range) < 0)
 				return -EINVAL;
-			if (nf_nat_initialized(ct,
-					       HOOK2MANIP(NF_IP_POST_ROUTING)))
+			if (nf_nat_initialized(ct, IP_NAT_MANIP_SRC))
 				return -EEXIST;
-			nf_nat_setup_info(ct, &range, NF_IP_POST_ROUTING);
+			nf_nat_setup_info(ct, &range, IP_NAT_MANIP_SRC);
 		}
 #endif
 	}

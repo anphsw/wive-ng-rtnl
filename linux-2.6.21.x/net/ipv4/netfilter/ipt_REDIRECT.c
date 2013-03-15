@@ -98,7 +98,7 @@ redirect_target(struct sk_buff **pskb,
 		  mr->range[0].min, mr->range[0].max });
 
 	/* Hand modified range to generic setup. */
-	return nf_nat_setup_info(ct, &newrange, hooknum);
+	return nf_nat_setup_info(ct, &newrange, IP_NAT_MANIP_DST);
 }
 
 static struct xt_target redirect_reg __read_mostly = {

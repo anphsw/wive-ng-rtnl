@@ -77,7 +77,7 @@ extern unsigned int ip_nat_route_input(unsigned int hooknum,
 /* Set up the info structure to map into this range. */
 extern unsigned int nf_nat_setup_info(struct nf_conn *ct,
 				      const struct nf_nat_range *range,
-				      unsigned int hooknum);
+				      enum nf_nat_manip_type maniptype);
 
 /* Is this tuple already taken? (not by us)*/
 extern int nf_nat_used_tuple(const struct nf_conntrack_tuple *tuple,
