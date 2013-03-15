@@ -16,7 +16,7 @@
 #ifndef __LINUX_IF_PPPOX_H
 #define __LINUX_IF_PPPOX_H
 
-
+#include <linux/compiler.h>
 #include <linux/types.h>
 #include <asm/byteorder.h>
 
@@ -37,17 +37,17 @@
 #define PF_PPPOX	AF_PPPOX
 #endif /* !(AF_PPPOX) */
 
-/************************************************************************ 
- * PPPoE addressing definition 
- */ 
+/************************************************************************
+ * PPPoE addressing definition
+ */
 typedef __be16 sid_t;
 struct pppoe_addr {
 	sid_t         sid;                    /* Session identifier */
 	unsigned char remote[ETH_ALEN];       /* Remote address */
 	char          dev[IFNAMSIZ];          /* Local device to use */
-}; 
- 
-/************************************************************************ 
+};
+
+/************************************************************************
  * PPTP addressing definition
  */
 struct pptp_addr {
@@ -81,13 +81,13 @@ struct sockaddr_pppoe {
 	sa_family_t     sa_family;	/* address family, AF_PPPOX */
 	unsigned int    sa_protocol;    /* protocol identifier */
 	struct pppoe_addr pppoe;
-}__attribute__ ((packed));
+} __attribute__((packed));
 
 struct sockaddr_pppol2tp {
 	sa_family_t     sa_family;      /* address family, AF_PPPOX */
 	unsigned int    sa_protocol;    /* protocol identifier */
 	struct pppol2tp_addr pppol2tp;
-}__attribute__ ((packed));
+} __attribute__((packed));
 
 /*********************************************************************
  *
@@ -110,7 +110,7 @@ struct pppoe_tag {
 	__be16 tag_type;
 	__be16 tag_len;
 	char tag_data[0];
-} __attribute__ ((packed));
+} __attribute__((packed));
 
 /* Tag identifiers */
 #define PTT_EOL		__cpu_to_be16(0x0000)
@@ -138,11 +138,14 @@ struct pppoe_hdr {
 	__be16 sid;
 	__be16 length;
 	struct pppoe_tag tag[0];
-} __attribute__ ((packed));
+} __attribute__((packed));
 
 /* Socket options */
 #define PPTP_SO_TIMEOUT 1
 #define PPTP_SO_WINDOW  2
+
+/* Length of entire PPPoE + PPP header */
+#define PPPOE_SES_HLEN	8
 
 /* Length of entire PPPoE + PPP header */
 #define PPPOE_SES_HLEN	8

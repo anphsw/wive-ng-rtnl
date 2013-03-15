@@ -22,6 +22,7 @@
 #include <config.h>
 #endif
 
+#include <linux/compiler.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/un.h>

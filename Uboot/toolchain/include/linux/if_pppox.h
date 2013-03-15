@@ -16,7 +16,7 @@
 #ifndef __LINUX_IF_PPPOX_H
 #define __LINUX_IF_PPPOX_H
 
-
+#include <linux/compiler.h>
 #include <asm/types.h>
 #include <asm/byteorder.h>
 
@@ -59,7 +59,7 @@ struct sockaddr_pppox {
        union{ 
                struct pppoe_addr       pppoe; 
        }sa_addr; 
-}__attribute__ ((packed)); 
+}__attribute__((packed)); 
 
 
 /*********************************************************************
@@ -110,7 +110,7 @@ struct pppoe_hdr {
 	__u16 sid;
 	__u16 length;
 	struct pppoe_tag tag[0];
-} __attribute__ ((packed));
+} __attribute__((packed));
 
 #ifdef __KERNEL__
 
