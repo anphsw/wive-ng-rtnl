@@ -242,7 +242,7 @@ killall_vpn() {
 	pid=`cat /var/run/xl2tpd/l2tpd.pid`
 	if [ "$pid" != "" ]; then
 	    #Kill daemons
-	    kill "$pid" > /dev/null 2>&1
+	    kill -SIGTERM "$pid" > /dev/null 2>&1
 	    sleep 2
 	    kill -SIGKILL "$pid" > /dev/null 2>&1
 	fi
@@ -256,15 +256,15 @@ killall_vpn() {
 	pid=`cat /var/run/$vpn_if.pid`
 	if [ "$pid" != "" ]; then
 	    # close connection
-	    kill -SIGHUP "$pid"
+	    kill -SIGHUP "$pid"  > /dev/null 2>&1
 	fi
 	# terminate pppd
 	count=0
-	while kill "$pid" > /dev/null 2>&1; do
-	    if [ "$count" = "2" ]; then
+	while kill -SIGTERM "$pid" > /dev/null 2>&1; do
+	    if [ "$count" = "3" ]; then
 		kill -SIGKILL "$pid"  > /dev/null 2>&1
 		count=0
-		sleep 2
+		sleep 1
 	    fi
 	    count="$(($count+1))"
 	    sleep 2
