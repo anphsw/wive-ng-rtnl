@@ -147,7 +147,7 @@ static unsigned int ipt_snat_target(struct sk_buff **pskb,
 			    ctinfo == IP_CT_RELATED_REPLY));
 	NF_CT_ASSERT(out);
 
-	return nf_nat_setup_info(ct, &mr->range[0], IP_NAT_MANIP_SRC);
+	return nf_nat_setup_info(ct, &mr->range[0], hooknum);
 }
 
 static unsigned int ipt_dnat_target(struct sk_buff **pskb,
@@ -169,7 +169,7 @@ static unsigned int ipt_dnat_target(struct sk_buff **pskb,
 	/* Connection must be valid and new. */
 	NF_CT_ASSERT(ct && (ctinfo == IP_CT_NEW || ctinfo == IP_CT_RELATED));
 
-	return nf_nat_setup_info(ct, &mr->range[0], IP_NAT_MANIP_DST);
+	return nf_nat_setup_info(ct, &mr->range[0], hooknum);
 }
 
 static int ipt_snat_checkentry(const char *tablename,
@@ -220,7 +220,7 @@ alloc_null_binding(struct nf_conn *ct, unsigned int hooknum)
 
 	DEBUGP("Allocating NULL binding for %p (%u.%u.%u.%u)\n",
 	       ct, NIPQUAD(ip));
-	return nf_nat_setup_info(ct, &range, HOOK2MANIP(hooknum));
+	return nf_nat_setup_info(ct, &range, hooknum);
 }
 
 unsigned int
@@ -239,7 +239,7 @@ alloc_null_binding_confirmed(struct nf_conn *ct, unsigned int hooknum)
 
 	DEBUGP("Allocating NULL binding for confirmed %p (%u.%u.%u.%u)\n",
 	       ct, NIPQUAD(ip));
-	return nf_nat_setup_info(ct, &range, HOOK2MANIP(hooknum));
+	return nf_nat_setup_info(ct, &range, hooknum);
 }
 
 int nf_nat_rule_find(struct sk_buff **pskb,

@@ -82,7 +82,7 @@ target(struct sk_buff **pskb,
 		  mr->range[0].min, mr->range[0].max });
 
 	/* Hand modified range to generic setup. */
-	return nf_nat_setup_info(ct, &newrange, HOOK2MANIP(hooknum));
+	return nf_nat_setup_info(ct, &newrange, hooknum);
 }
 
 static struct xt_target target_module __read_mostly = {

@@ -101,7 +101,8 @@ static void pptp_nat_expected(struct nf_conn *ct,
 		range.flags |= IP_NAT_RANGE_PROTO_SPECIFIED;
 		range.min = range.max = exp->saved_proto;
 	}
-	nf_nat_setup_info(ct, &range, IP_NAT_MANIP_SRC);
+	/* hook doesn't matter, but it has to do source manip */
+	nf_nat_setup_info(ct, &range, NF_IP_POST_ROUTING);
 
 	/* For DST manip, map port here to where it's expected. */
 	range.flags = IP_NAT_RANGE_MAP_IPS;
@@ -111,7 +112,8 @@ static void pptp_nat_expected(struct nf_conn *ct,
 		range.flags |= IP_NAT_RANGE_PROTO_SPECIFIED;
 		range.min = range.max = exp->saved_proto;
 	}
-	nf_nat_setup_info(ct, &range, IP_NAT_MANIP_DST);
+	/* hook doesn't matter, but it has to do destination manip */
+	nf_nat_setup_info(ct, &range, NF_IP_PRE_ROUTING);
 }
 
 /* outbound packets == from PNS to PAC */

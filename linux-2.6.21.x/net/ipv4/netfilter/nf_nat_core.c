@@ -263,14 +263,7 @@ get_unique_tuple(struct nf_conntrack_tuple *tuple,
 	   manips not an issue.  */
 	if (maniptype == IP_NAT_MANIP_SRC &&
 	    !(range->flags & IP_NAT_RANGE_PROTO_RANDOM)) {
-		/* try the original tuple first */
-		if (in_range(orig_tuple, range)) {
-			if (!nf_nat_used_tuple(orig_tuple, ct)) {
-				*tuple = *orig_tuple;
-				return;
-			}
-		} else if (find_appropriate_src(orig_tuple, tuple,
-			   range)) {
+		if (find_appropriate_src(orig_tuple, tuple, range)) {
 			DEBUGP("get_unique_tuple: Found current src map\n");
 			if (!nf_nat_used_tuple(tuple, ct))
 				return;
@@ -310,14 +303,18 @@ out:
 unsigned int
 nf_nat_setup_info(struct nf_conn *ct,
 		  const struct nf_nat_range *range,
-		  enum nf_nat_manip_type maniptype)
+		  unsigned int hooknum)
 {
 	struct nf_conntrack_tuple curr_tuple, new_tuple;
 	struct nf_conn_nat *nat = nfct_nat(ct);
 	struct nf_nat_info *info = &nat->info;
+	int have_to_hash = !(ct->status & IPS_NAT_DONE_MASK);
+	enum nf_nat_manip_type maniptype = HOOK2MANIP(hooknum);
 
-	NF_CT_ASSERT(maniptype == IP_NAT_MANIP_SRC ||
-		     maniptype == IP_NAT_MANIP_DST);
+	NF_CT_ASSERT(hooknum == NF_IP_PRE_ROUTING ||
+		     hooknum == NF_IP_POST_ROUTING ||
+		     hooknum == NF_IP_LOCAL_IN ||
+		     hooknum == NF_IP_LOCAL_OUT);
 	BUG_ON(nf_nat_initialized(ct, maniptype));
 
 	/* What we've got will look like inverse of reply. Normally
@@ -344,7 +341,8 @@ nf_nat_setup_info(struct nf_conn *ct,
 			ct->status |= IPS_DST_NAT;
 	}
 
-	if (maniptype == IP_NAT_MANIP_SRC) {
+	/* Place in source hash if this is the first time. */
+	if (have_to_hash) {
 		unsigned int srchash;
 
 		srchash = hash_by_src(&ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple);
