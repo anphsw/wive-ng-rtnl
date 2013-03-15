@@ -1345,7 +1345,8 @@
 2) kernel: net/ipv4: Timestamp option cannot overflow with prespecified addresses.<br>
 3) kernel: net/ipv4: Ensure that location of timestamp option is stored.<br>
 4) kernel: mips: Use CONFIG_CPU_MIPSR2 in csum_partial.S.<br>
-5) kernel: pppoe: return ENOTTY on unknown ioctl requests.<br>
+5) kernel: mips: Redefine value of BRK_BUG.<br>
+6) kernel: pppoe: return ENOTTY on unknown ioctl requests.<br>
 
 <br>
 <br>
