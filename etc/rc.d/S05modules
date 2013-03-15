@@ -40,9 +40,6 @@ start() {
 	    fi
 	fi
 
-	# reload variables after wlan modules load
-	. /etc/scripts/global.sh
-
 	# root interfaces must be up first
 	$LOG "WiFi interfaces up..."
 	ifconfig ra0 txqueuelen	"$txqueuelen"
