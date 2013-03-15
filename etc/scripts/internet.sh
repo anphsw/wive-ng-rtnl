@@ -110,7 +110,7 @@ bridge_config() {
 	brctl addif br0 ra0
 	if [ "$second_wlan" != "" ]; then
 	    # add second root wifi interface
-	    brctl addif br0 ${second_wlan}0
+	    brctl addif br0 $second_wlan_root_if
 	fi
 	addMBSSID
         addWds
@@ -128,7 +128,7 @@ gate_config() {
 	brctl addif br0 ra0
 	if [ "$second_wlan" != "" ]; then
 	    # add second root wifi interface
-	    brctl addif br0 ${second_wlan}0
+	    brctl addif br0 $second_wlan_root_if
 	fi
 	addMBSSID
 	addWds
@@ -150,7 +150,7 @@ apcli_config() {
 	brctl addif br0 ra0
 	if [ "$second_wlan" != "" ]; then
 	    # add second root wifi interface
-	    brctl addif br0 ${second_wlan}0
+	    brctl addif br0 $second_wlan_root_if
 	fi
 	if [ "$ApCliBridgeOnly" = "1" ]; then
 	    # add client wifi interface
@@ -170,7 +170,7 @@ spot_config() {
 	brctl addif br0 ra0
 	if [ "$second_wlan" != "" ]; then
 	    # add second root wifi interface
-	    brctl addif br0 ${second_wlan}0
+	    brctl addif br0 $second_wlan_root_if
 	fi
 	addMBSSID
 	addWds

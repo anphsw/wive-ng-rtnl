@@ -32,7 +32,7 @@ start() {
 	else
 	    $LOG "Load wifi AP module..."
     	    modprobe -q rt2860v2_ap  "$mac"
-	    if [ "$CONFIG_RT3090_AP" != "" ]; then
+	    if [ "$second_wlan" != "" ]; then
 		# second mac adress
 		mac="mac=$WLAN2_MAC_ADDR"
 		$LOG "Load RT3090 external wifi AP module..."
@@ -50,8 +50,8 @@ start() {
 	if [ "$second_wlan" != "" ]; then
 	    $LOG "WiFi $second_wlan interface up..."
 	    # others modes
-	    ifconfig ${second_wlan}0 txqueuelen	"$txqueuelen"
-	    ip link set ${second_wlan}0 up
+	    ifconfig $second_wlan_root_if txqueuelen	"$txqueuelen"
+	    ip link set $second_wlan_root_if up
 	fi
 	if [ "$OperationMode" = "3" ]; then
 	    $LOG "WiFi APCLI interface up..."
@@ -176,7 +176,7 @@ retune_wifi() {
     /etc/scripts/wifi.sh ra0
     if [ "$second_wlan" != "" ]; then
 	# preconfigure second wlan root interface to
-	/etc/scripts/wifi.sh ${second_wlan}0
+	/etc/scripts/wifi.sh $second_wlan_root_if
     fi
 }
 

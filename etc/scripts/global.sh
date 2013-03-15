@@ -37,10 +37,12 @@ eval `nvram_buf_get 2860 OperationMode wanConnectionMode wan_ipaddr wan_static_d
 
 # this if flag say second physical wlan module exist
 getSecWlanIfName() {
-    if [ -d /sys/module/rt3090_ap ]; then
+    if [ "$CONFIG_RT3090_AP" != "" ]; then
 	second_wlan="rai"
+	second_wlan_root_if="rai0"
     else
 	second_wlan=""
+	second_wlan_root_if=""
     fi
 }
 
