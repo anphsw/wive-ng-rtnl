@@ -207,6 +207,11 @@ if [ "$MODE" != "wifionly" ] && [ "$MODE" != "connect_sta" ]; then
     service wan restart
 fi
 
+if [ "$MODE" != "connect_sta" ]; then
+    $LOG "Tune wifi modules..."
+    service modules retune_wifi
+fi
+
 if [ "$OperationMode" = "0" -o "$OperationMode" = "3" ] && [ "$MODE" != "connect_sta" ]; then
     # this is workaround for internal ESW in some RT305x chips in config all lan ports in one bridge
     # for restore normal swich work after reconfigure wifi drivers

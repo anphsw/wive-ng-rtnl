@@ -56,8 +56,6 @@ start() {
 	    ifconfig $first_wlan_apcli txqueuelen	"$txqueuelen"
 	    ip link set $first_wlan_apcli up
 	fi
-	$LOG "Tune wifi modules."
-	retune_wifi
     else
 	# if goahead not started
 	# generate modules dep
