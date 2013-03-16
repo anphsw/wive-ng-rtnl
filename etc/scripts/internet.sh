@@ -205,7 +205,7 @@ fi
 if [ "$MODE" != "wifionly" ] && [ "$MODE" != "connect_sta" ]; then
     $LOG "Reconfigure wan..."
     service wan restart
-    if [ "$OperationMode" = "0" ]; then
+    if [ "$OperationMode" = "0" ] || [ "$OperationMode" = "3" ]; then
 	$LOG "Reconfigure switch..."
 	/etc/scripts/config-switch.sh
     fi
