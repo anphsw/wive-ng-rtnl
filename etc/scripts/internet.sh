@@ -74,7 +74,7 @@ bridge_config() {
 	    addWds $first_wlan_wds
 	fi
 	if [ "$second_wlan_wds" != "" ]; then
-	    addWds $first_wlan_wds
+	    addWds $second_wlan_wds
 	fi
         addMesh
 }
@@ -101,7 +101,7 @@ gate_config() {
 	    addWds $first_wlan_wds
 	fi
 	if [ "$second_wlan_wds" != "" ]; then
-	    addWds $first_wlan_wds
+	    addWds $second_wlan_wds
 	fi
 	addMesh
 }
@@ -156,7 +156,7 @@ spot_config() {
 	    addWds $first_wlan_wds
 	fi
 	if [ "$second_wlan_wds" != "" ]; then
-	    addWds $first_wlan_wds
+	    addWds $second_wlan_wds
 	fi
 	addMesh
 }
