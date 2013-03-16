@@ -35,6 +35,26 @@ eval `nvram_buf_get 2860 OperationMode wanConnectionMode wan_ipaddr wan_static_d
 	ApCliBridgeOnly MODEMENABLED \
 	QoSEnable simple_qos`
 
+# name/mask for first wlanmodule used in system logic
+getFirstWlanIfName() {
+    if [ "$CONFIG_RT3090_AP" != "" ]; then
+	first_wlan_root_if="ra0"			# is first root interface name
+	first_wlan="ra"					# this is mask name vifs for first wlan module
+	if [ "$CONFIG_RT2860V2_AP_MBSS" != "" ]; then
+	    first_wlan_mbss="ra"			# this is mask name vifs for first mbss wlan module
+	fi
+	if [ "$CONFIG_RT2860V2_AP_APCLI" != "" ]; then
+	    first_wlan_apcli="apcli0"			# this is name vif for first acli wlan module
+	fi
+	if [ "$CONFIG_RT2860V2_AP_WDS" != "" ]; then
+	    first_wlan_wds="wds"			# this is mask name vifs for first wds wlan module
+	fi
+	if [ "$CONFIG_RT2860V2_STA_MESH" != "" ] || [ "$CONFIG_RT2860V2_AP_MESH" != "" ]; then
+	    first_wlan_mesh="mesh0"			# this is name vif for first mesh wlan module
+	fi
+    fi
+}
+
 # this if flag say second physical wlan module exist
 # and name/mask for second wlanmodule used in system logic
 getSecWlanIfName() {
@@ -106,10 +126,10 @@ getWanIfName() {
     elif [ "$OperationMode" = "1" ] || [ "$OperationMode" = "4" ]; then
 	wan_if="$phys_wan_if"
     elif [ "$OperationMode" = "2" ]; then
-	wan_if="ra0"
+	wan_if="$first_wlan_root_if"
     elif [ "$OperationMode" = "3" ]; then
-	if [ "$CONFIG_RT2860V2_AP_APCLI" != "" ]; then
-	    wan_if="apcli0"
+	if [ "$first_wlan_apcli" != "" ]; then
+	    wan_if="$first_wlan_apcli"
 	else
 	    echo "Driver not support APCLI mode."
 	    wan_if="$phys_wan_if"
@@ -172,12 +192,12 @@ wait_connect() {
 	    staCur_SSID=`nvram_get 2860 staCur_SSID`
 	    if [ "$staCur_SSID" != "" ]; then
 		# Reconnect to STA
-		iwpriv ra0 set SSID="$staCur_SSID"
+		iwpriv $first_wlan_root_if set SSID="$staCur_SSID"
 		sleep 1
 	    fi
 	fi
 	# Get connection status
-	connected=`iwpriv ra0 connStatus | grep Connected -c`
+	connected=`iwpriv $first_wlan_root_if connStatus | grep Connected -c`
 	if [ "$connected" = "0" ] || [ ! -f /tmp/sta_connected ]; then
 	    exit 1
 	fi

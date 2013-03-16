@@ -14,33 +14,33 @@ LOG="logger -t reconfig"
 
 addMesh() {
     # if kernel build without MESH support - exit
-    if [ "$CONFIG_RT2860V2_STA_MESH" != "" ] || [ "$CONFIG_RT2860V2_AP_MESH" != "" ]; then
+    if [ "$first_wlan_mesh" != "" ]; then
         meshenabled=`nvram_get 2860 MeshEnabled`
 	if [ "$meshenabled" = "1" ]; then
-	    ip addr flush dev mesh0 > /dev/null 2>&1
+	    ip addr flush dev $first_wlan_mesh > /dev/null 2>&1
 	    if [ -d /proc/sys/net/ipv6 ]; then
-		ip -6 addr flush dev mesh0 /dev/null 2>&1
+		ip -6 addr flush dev $first_wlan_mesh > /dev/null 2>&1
 	    fi
-	    ip link set mesh0 down > /dev/null 2>&1
-    	    brctl addif br0 mesh0
-    	    ip link set mesh0 up
+	    ip link set $first_wlan_mesh down > /dev/null 2>&1
+    	    brctl addif br0 $first_wlan_mesh
+    	    ip link set $first_wlan_mesh up
 	fi
     fi
 }
 
 addWds() {
     # if kernel build without WDS support - exit
-    if [ "$CONFIG_RT2860V2_AP_WDS" != "" ]; then
+    if [ "$first_wlan_wds" != "" ]; then
 	wds_en=`nvram_get 2860 WdsEnable`
 	if [ "$wds_en" != "0" ]; then
     	    for i in `seq 0 3`; do
-    		ip addr flush dev wds$i > /dev/null 2>&1
+    		ip addr flush dev ${first_wlan_wds}${i} > /dev/null 2>&1
 		if [ -d /proc/sys/net/ipv6 ]; then
-    		    ip -6 addr flush dev wds$i /dev/null 2>&1
+    		    ip -6 addr flush dev ${first_wlan_wds}${i} > /dev/null 2>&1
 		fi
-		ip link set wds$i down > /dev/null 2>&1
-		brctl addif br0 wds$i
-    		ip link set wds$i up
+		ip link set ${first_wlan_wds}${i} down > /dev/null 2>&1
+		brctl addif br0 ${first_wlan_wds}${i}
+    		ip link set ${first_wlan_wds}${i} up
     	    done
 	fi
     fi
@@ -50,7 +50,7 @@ addWds() {
     	    for i in `seq 0 3`; do
     		ip addr flush dev ${second_wlan_wds}${i} > /dev/null 2>&1
 		if [ -d /proc/sys/net/ipv6 ]; then
-    		    ip -6 addr flush dev ${second_wlan_wds}${i} /dev/null 2>&1
+    		    ip -6 addr flush dev ${second_wlan_wds}${i} > /dev/null 2>&1
 		fi
 		ip link set ${second_wlan_wds}${i} down > /dev/null 2>&1
 		brctl addif br0 ${second_wlan_wds}${i}
@@ -62,18 +62,18 @@ addWds() {
 
 addMBSSID() {
     # if kernel build without Multiple SSID support - exit
-    if [ "$CONFIG_RT2860V2_AP_MBSS" != "" ]; then
+    if [ "$first_wlan_mbss" != "" ]; then
 	bssidnum=`nvram_get 2860 BssidNum`
 	if [ "$bssidnum" != "0" ] && [ "$bssidnum" != "1" ]; then
 	    let "bssrealnum=$bssidnum-1"
 	    for i in `seq 1 $bssrealnum`; do
-    		ip addr flush dev ra$i > /dev/null 2>&1
+    		ip addr flush dev ${first_wlan_mbss}${i} > /dev/null 2>&1
 		if [ -d /proc/sys/net/ipv6 ]; then
-    		    ip -6 addr flush dev ra$i /dev/null 2>&1
+    		    ip -6 addr flush dev ${first_wlan_mbss}${i} > /dev/null 2>&1
 		fi
-		ip link set ra$i down > /dev/null 2>&1
-		brctl addif br0 ra$i
-    		ip link set ra$i up
+		ip link set ${first_wlan_mbss}${i} down > /dev/null 2>&1
+		brctl addif br0 ${first_wlan_mbss}${i}
+    		ip link set ${first_wlan_mbss}${i} up
 	    done
 	fi
     fi
@@ -84,7 +84,7 @@ addMBSSID() {
 	    for i in `seq 1 $bssrealnum`; do
     		ip addr flush dev ${second_wlan_mbss}${i} > /dev/null 2>&1
 		if [ -d /proc/sys/net/ipv6 ]; then
-    		    ip -6 addr flush dev ${second_wlan_mbss}${i} /dev/null 2>&1
+    		    ip -6 addr flush dev ${second_wlan_mbss}${i} > /dev/null 2>&1
 		fi
 		ip link set ${second_wlan_mbss}${i} down > /dev/null 2>&1
 		brctl addif br0 ${second_wlan_mbss}${i}
@@ -107,7 +107,7 @@ bridge_config() {
 	    brctl addif br0 eth3
 	fi
 	# add root wifi interface
-	brctl addif br0 ra0
+	brctl addif br0 $first_wlan_root_if
 	if [ "$second_wlan_root_if" != "" ]; then
 	    # add second root wifi interface
 	    brctl addif br0 $second_wlan_root_if
@@ -125,7 +125,7 @@ gate_config() {
 	# add lan interface
 	brctl addif br0 "$phys_lan_if"
 	# add root wifi interface
-	brctl addif br0 ra0
+	brctl addif br0 $first_wlan_root_if
 	if [ "$second_wlan_root_if" != "" ]; then
 	    # add second root wifi interface
 	    brctl addif br0 $second_wlan_root_if
@@ -147,7 +147,7 @@ apcli_config() {
 	# in apcli mode add only eth2 NOT ADD "$phys_lan_if" or "$phys_wan_if"
 	brctl addif br0 eth2
 	# add root wifi interface
-	brctl addif br0 ra0
+	brctl addif br0 $first_wlan_root_if
 	if [ "$second_wlan_root_if" != "" ]; then
 	    # add second root wifi interface
 	    brctl addif br0 $second_wlan_root_if
@@ -167,7 +167,7 @@ spot_config() {
 	# add lan interface
 	brctl addif br0 "$phys_lan_if"
 	# add root wifi interface
-	brctl addif br0 ra0
+	brctl addif br0 $first_wlan_root_if
 	if [ "$second_wlan_root_if" != "" ]; then
 	    # add second root wifi interface
 	    brctl addif br0 $second_wlan_root_if

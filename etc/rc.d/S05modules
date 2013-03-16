@@ -42,8 +42,8 @@ start() {
 
 	# root interfaces must be up first
 	$LOG "WiFi interfaces up..."
-	ifconfig ra0 txqueuelen	"$txqueuelen"
-	ip link set ra0 up
+	ifconfig $first_wlan_root_if txqueuelen	"$txqueuelen"
+	ip link set $first_wlan_root_if up
 	if [ "$second_wlan_root_if" != "" ]; then
 	    $LOG "WiFi $second_wlan_root_if interface up..."
 	    # others modes
@@ -53,8 +53,8 @@ start() {
 	if [ "$OperationMode" = "3" ]; then
 	    $LOG "WiFi APCLI interface up..."
 	    # apcli mode sta interface
-	    ifconfig apcli0 txqueuelen	"$txqueuelen"
-	    ip link set apcli0 up
+	    ifconfig $first_wlan_apcli txqueuelen	"$txqueuelen"
+	    ip link set $first_wlan_apcli up
 	fi
 	$LOG "Tune wifi modules."
 	retune_wifi
@@ -121,40 +121,54 @@ wlan_down_all() {
     # First clear conntrack and routes tables/caches
     flush_net_caches
     # process iface shutdown
-    # first down vifs
-    if [ "$CONFIG_RT2860V2_STA_MESH" != "" ] || [ "$CONFIG_RT2860V2_AP_MESH" != "" ]; then
-	ip addr flush dev mesh0 > /dev/null 2>&1
+    # first down single vifs
+    if [ "$first_wlan_apcli" != "" ]; then
+	ip addr flush dev $first_wlan_apcli > /dev/null 2>&1
 	if [ -d /proc/sys/net/ipv6 ]; then
-    	    ip -6 addr flush dev mesh0 > /dev/null 2>&1
+    	    ip -6 addr flush dev $first_wlan_apcli > /dev/null 2>&1
 	fi
-	ip link set mesh0 down > /dev/null 2>&1
-	brctl delif br0 mesh0 > /dev/null 2>&1
+	ip link set $first_wlan_apcli down > /dev/null 2>&1
+	brctl delif br0 $first_wlan_apcli > /dev/null 2>&1
     fi
-    if [ "$CONFIG_RT2860V2_AP_WDS" != "" ]; then
+    if [ "$first_wlan_mesh" != "" ] || [ "$first_wlan_mesh" != "" ]; then
+	ip addr flush dev $first_wlan_mesh > /dev/null 2>&1
+	if [ -d /proc/sys/net/ipv6 ]; then
+    	    ip -6 addr flush dev $first_wlan_mesh > /dev/null 2>&1
+	fi
+	ip link set $first_wlan_mesh down > /dev/null 2>&1
+	brctl delif br0 $first_wlan_mesh > /dev/null 2>&1
+    fi
+    # second down multiple vifs
+    if [ "$first_wlan_wds" != "" ]; then
 	for i in `seq 0 3`; do
-	    ip addr flush dev wds$i > /dev/null 2>&1
+	    ip addr flush dev ${first_wlan_wds}${i} > /dev/null 2>&1
 	    if [ -d /proc/sys/net/ipv6 ]; then
-    		ip -6 addr flush dev wds$i > /dev/null 2>&1
+    		ip -6 addr flush dev ${first_wlan_wds}${i} > /dev/null 2>&1
 	    fi
-    	    ip link set wds$i down > /dev/null 2>&1
-	    brctl delif br0 wds$i > /dev/null 2>&1
-	    if [ "$second_wlan_wds" != "" ]; then
-		ip addr flush dev ${second_wlan_wds}${i} > /dev/null 2>&1
-		if [ -d /proc/sys/net/ipv6 ]; then
-    		    ip -6 addr flush dev ${second_wlan_wds}${i} > /dev/null 2>&1
-		fi
-		ip link set ${second_wlan_wds}${i} down > /dev/null 2>&1
-		brctl delif br0 ${second_wlan_wds}${i} > /dev/null 2>&1
-	    fi
+    	    ip link set ${first_wlan_wds}${i} down > /dev/null 2>&1
+	    brctl delif br0 ${first_wlan_wds}${i} > /dev/null 2>&1
 	done
     fi
-    if [ "$CONFIG_RT2860V2_AP_APCLI" != "" ]; then
-	ip addr flush dev apcli0 > /dev/null 2>&1
-	if [ -d /proc/sys/net/ipv6 ]; then
-    	    ip -6 addr flush dev apcli0 > /dev/null 2>&1
-	fi
-	ip link set apcli0 down > /dev/null 2>&1
-	brctl delif br0 apcli0 > /dev/null 2>&1
+    if [ "$second_wlan_wds" != "" ]; then
+	for i in `seq 0 3`; do
+	    ip addr flush dev ${second_wlan_wds}${i} > /dev/null 2>&1
+	    if [ -d /proc/sys/net/ipv6 ]; then
+    		ip -6 addr flush dev ${second_wlan_wds}${i} > /dev/null 2>&1
+	    fi
+	    ip link set ${second_wlan_wds}${i} down > /dev/null 2>&1
+	    brctl delif br0 ${second_wlan_wds}${i} > /dev/null 2>&1
+	done
+    fi
+    # next down second radio module to
+    if [ "$second_wlan" != "" ]; then
+	for i in `seq 7 -1 0`; do
+	    ip addr flush dev ${second_wlan}${i} > /dev/null 2>&1
+	    if [ -d /proc/sys/net/ipv6 ]; then
+    		ip -6 addr flush dev ${second_wlan}${i} > /dev/null 2>&1
+	    fi
+	    ip link set ${second_wlan}${i} down > /dev/null 2>&1
+	    brctl delif br0 ${second_wlan}${i} > /dev/null 2>&1
+	done
     fi
     # root and mbssid interfaces must down end
     for i in `seq 7 -1 0`; do
@@ -164,21 +178,12 @@ wlan_down_all() {
 	fi
 	ip link set ra$i down > /dev/null 2>&1
 	brctl delif br0 ra$i > /dev/null 2>&1
-	# second radio module down to
-	if [ "$second_wlan" != "" ]; then
-	    ip addr flush dev ${second_wlan}${i} > /dev/null 2>&1
-	    if [ -d /proc/sys/net/ipv6 ]; then
-    		ip -6 addr flush dev ${second_wlan}${i} > /dev/null 2>&1
-	    fi
-	    ip link set ${second_wlan}${i} down > /dev/null 2>&1
-	    brctl delif br0 ${second_wlan}${i} > /dev/null 2>&1
-	fi
     done
 }
 
 retune_wifi() {
     # preconfigure wifi
-    /etc/scripts/wifi.sh ra0
+    /etc/scripts/wifi.sh $first_wlan_root_if
     if [ "$second_wlan_root_if" != "" ]; then
 	# preconfigure second wlan root interface to
 	/etc/scripts/wifi.sh $second_wlan_root_if
