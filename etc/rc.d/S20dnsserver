@@ -15,7 +15,7 @@ start() {
   gen_hosts
     if [ "$dnsPEnabled" = "1" ] && [ -f $cname ]; then
 	$LOG "Starting DNSMASQ"
-	dnsmasq -N -c 64 --dns-forward-max=64 --no-poll --all-servers --clear-on-reload --leasefile-ro \
+	dnsmasq -N -c 128 --dns-forward-max=128 --no-poll --all-servers --clear-on-reload --leasefile-ro \
 	    -u nobody -g nobody -C "$cname" -r "$fname" -H "$hname" -f &
     fi
 }
