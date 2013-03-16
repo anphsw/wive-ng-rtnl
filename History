@@ -1360,6 +1360,7 @@
 17) init.d: refactoring wlan interfaces managment code - cleanup/unify.<br>
 18) init.d: in bridge and apcli mode need reconfigure switch always after reconfig device(workaround in some chips).<br>
 19) init.d: fix disable AP interface in apcli mode.<br>
+20) configs: enable apcli/wds for all chips.<br>
 
 <br>
 <br>
