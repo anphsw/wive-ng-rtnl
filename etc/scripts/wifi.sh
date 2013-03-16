@@ -6,20 +6,21 @@
 echo ">>>>> RECONFIGURE WIFI IF = $1 <<<<<<<<<<"
 
 ########################################ALLMODE param##########################
-eval `nvram_buf_get 2860 HiPower AutoConnect OperationMode`
+eval `nvram_buf_get 2860 HT_MIMOPSMode HiPower AutoConnect OperationMode`
 ########################################LNA param##############################
-if [ "$HiPower" = "1" ]; then
-# Disable MIMO PowerSave and increase LNA gain
-    if [ "$CONFIG_RALINK_RT3052_MP2" = "y" ]; then
+# Disable increase LNA gain
+if [ "$CONFIG_RALINK_RT3052_MP2" = "y" ]; then
+    if [ "$HiPower" = "1" ]; then
 	iwpriv "$1" set HiPower=1
-    fi
-    iwpriv "$1" set HtMimoPs=0
-else
-# Enable MIMO PowerSave and set LNA gain to default
-    if [ "$CONFIG_RALINK_RT3052_MP2" = "y" ]; then
+    else
 	iwpriv "$1" set HiPower=0
     fi
+fi
+# Enable MIMO PowerSave and set LNA gain to default
+if [ "$HT_MIMOPSMode" = "1" ]; then
     iwpriv "$1" set HtMimoPs=1
+else
+    iwpriv "$1" set HtMimoPs=0
 fi
 ########################################STAMODE param##########################
 if [ "$OperationMode" = "2" ]; then
