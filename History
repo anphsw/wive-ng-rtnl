@@ -1356,6 +1356,7 @@
 13) init.d: rework second wlan module support and small fixes.<br>
 14) init.d: use different mac adresses for ra/rai radio modules.<br>
 15) init.d: dnsmasq: use ddns_name=dmzip in hosts if dmz and ddns enable, instead allways use wap_ip.<br>
+16) init.d: move wscd init script to user/wscd/init.d - wscd not used in production builds(not security).<br>
 
 <br>
 <br>
