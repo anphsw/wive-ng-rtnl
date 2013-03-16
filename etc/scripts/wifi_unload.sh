@@ -18,8 +18,8 @@ kill_apps="transmission-daemon smbd nmbd pppd xl2tpd udhcpd udhcpc crond lld2d i
 rmmod_mod="hw_nat ppp_mppe pppol2tp pptp pppoe pppox ppp_generic imq ipt_account ipt_TTL ipt_IMQ ipt_tos \
 	    ipt_REDIRECT ipt_ttl ipt_TOS xt_string xt_webstr xt_connmark xt_CONNMARK xt_conntrack \
 	    act_gact act_police cls_tcindex em_cmp em_u32 sch_gred sch_red act_ipt cls_fw cls_u32 \
-	    nf_nat_ftp nf_nat_h323 nf_nat_pptp nf_nat_proto_gre nf_nat_sip \
-	    nf_conntrack_ftp nf_conntrack_proto_gre nf_conntrack_h323 nf_conntrack_sip nf_conntrack_pptp \
+	    nf_nat_ftp nf_nat_h323 nf_nat_pptp nf_nat_proto_gre nf_nat_sip nf_nat_rtsp \
+	    nf_conntrack_ftp nf_conntrack_proto_gre nf_conntrack_h323 nf_conntrack_sip nf_conntrack_pptp nf_conntrack_rtsp \
 	    em_nbyte sch_esfq sch_htb sch_sfq ts_fsm ts_kmp ts_bm \
 	    usblp usb-storage usbserial hso ext2 ext3 cifs"
 
