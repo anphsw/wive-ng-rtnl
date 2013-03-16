@@ -205,6 +205,8 @@ fi
 if [ "$MODE" != "wifionly" ] && [ "$MODE" != "connect_sta" ]; then
     $LOG "Reconfigure wan..."
     service wan restart
+    # this is workaround for internal ESW in some RT305x chips
+    # for restore normal swich work after reconfigure wifi drivers
     if [ "$OperationMode" = "0" ] || [ "$OperationMode" = "3" ]; then
 	$LOG "Reconfigure switch..."
 	/etc/scripts/config-switch.sh
