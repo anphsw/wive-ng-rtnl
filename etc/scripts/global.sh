@@ -253,7 +253,7 @@ delif_from_br() {
 }
 
 readdif_to_br() {
-    delif $1
+    delif_from_br $1
     brctl addif br0 $1
     ip link set $1 up
 }
