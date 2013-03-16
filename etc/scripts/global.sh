@@ -37,7 +37,7 @@ eval `nvram_buf_get 2860 OperationMode wanConnectionMode wan_ipaddr wan_static_d
 
 # name/mask for first wlanmodule used in system logic
 getFirstWlanIfName() {
-    if [ "$CONFIG_RT3090_AP" != "" ]; then
+    if [ "$CONFIG_RT2860V2_AP" != "" ]; then
 	first_wlan_root_if="ra0"			# is first root interface name
 	first_wlan="ra"					# this is mask name vifs for first wlan module
 	if [ "$CONFIG_RT2860V2_AP_MBSS" != "" ]; then

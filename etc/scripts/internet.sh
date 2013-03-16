@@ -61,7 +61,7 @@ bridge_config() {
 	$LOG "Readd $first_wlan_root_if in br0"
 	readdif_to_br $first_wlan_root_if
 	if [ "$second_wlan_root_if" != "" ]; then
-	    $LOG "Readd $first_wlan_root_if in br0"
+	    $LOG "Readd $second_wlan_root_if in br0"
 	    readdif_to_br $second_wlan_root_if
 	fi
 	if [ "$first_wlan_mbss" != "" ]; then
@@ -88,7 +88,7 @@ gate_config() {
 	$LOG "Readd $first_wlan_root_if in br0"
 	readdif_to_br $first_wlan_root_if
 	if [ "$second_wlan_root_if" != "" ]; then
-	    $LOG "Readd $first_wlan_root_if in br0"
+	    $LOG "Readd $second_wlan_root_if in br0"
 	    readdif_to_br $second_wlan_root_if
 	fi
 	if [ "$first_wlan_mbss" != "" ]; then
@@ -119,7 +119,7 @@ apcli_config() {
 	$LOG "Readd $first_wlan_root_if in br0"
 	readdif_to_br $first_wlan_root_if
 	if [ "$second_wlan_root_if" != "" ]; then
-	    $LOG "Readd $first_wlan_root_if in br0"
+	    $LOG "Readd $second_wlan_root_if in br0"
 	    readdif_to_br $second_wlan_root_if
 	fi
 	if [ "$ApCliBridgeOnly" = "1" ]; then
@@ -143,7 +143,7 @@ spot_config() {
 	$LOG "Readd $first_wlan_root_if in br0"
 	readdif_to_br $first_wlan_root_if
 	if [ "$second_wlan_root_if" != "" ]; then
-	    $LOG "Readd $first_wlan_root_if in br0"
+	    $LOG "Readd $second_wlan_root_if in br0"
 	    readdif_to_br $second_wlan_root_if
 	fi
 	if [ "$first_wlan_mbss" != "" ]; then
