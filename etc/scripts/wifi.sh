@@ -84,14 +84,6 @@ if [ "$CONFIG_RT2860V2_AP_GREENAP" != "" ]; then
 	iwpriv "$1" set GreenAP=0
     fi
 fi
-#######################################APCLIMODE param ########################
-if [ "$OperationMode" = "3" ]; then
-    eval `nvram_buf_get 2860 ApCliClientOnly`
-    if [ "$ApCliClientOnly" = "1" ]; then
-	echo "APCLI Only client mode enable shutdown $1..."
-	ip link set "$1" down > /dev/null 2>&1
-    fi
-fi
 ###########################################ALWAYS END##########################
 if [ "$AP2040Rescan" = "1" ]; then
     iwpriv "$1" set AP2040Rescan=1

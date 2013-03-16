@@ -1359,6 +1359,7 @@
 16) init.d: move wscd init script to user/wscd/init.d - wscd not used in production builds(not security).<br>
 17) init.d: refactoring wlan interfaces managment code - cleanup/unify.<br>
 18) init.d: in bridge and apcli mode need reconfigure switch always after reconfig device(workaround in some chips).<br>
+19) init.d: fix disable AP interface in apcli mode.<br>
 
 <br>
 <br>
