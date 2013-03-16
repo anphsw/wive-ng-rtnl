@@ -207,13 +207,13 @@ if [ "$MODE" != "wifionly" ] && [ "$MODE" != "connect_sta" ]; then
     service wan restart
 fi
 
-# this is workaround for internal ESW in some RT305x chips in config all lan ports in one bridge
-# for restore normal swich work after reconfigure wifi drivers
 if [ "$OperationMode" = "0" -o "$OperationMode" = "3" ] && [ "$MODE" != "connect_sta" ]; then
+    # this is workaround for internal ESW in some RT305x chips in config all lan ports in one bridge
+    # for restore normal swich work after reconfigure wifi drivers
     $LOG "Reconfigure switch..."
     /etc/scripts/config-switch.sh
 
-    # Disable AP interface if client only configured
+    # disable AP interface if client only configured
     eval `nvram_buf_get 2860 ApCliClientOnly`
     if [ "$ApCliClientOnly" = "1" ]; then
 	echo "APCLI Only client mode enable shutdown $first_wlan_root_if..."
