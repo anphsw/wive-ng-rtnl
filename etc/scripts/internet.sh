@@ -58,25 +58,14 @@ addWds() {
 
 addMBSSID() {
     # if kernel build without Multiple SSID support - exit
-    if [ "$first_wlan_mbss" != "" ]; then
-	bssidnum=`nvram_get 2860 BssidNum`
-	if [ "$bssidnum" != "0" ] && [ "$bssidnum" != "1" ]; then
-	    let "bssrealnum=$bssidnum-1"
-	    for i in `seq 1 $bssrealnum`; do
-		$LOG "Readd ${first_wlan_mbss}${i} in br0"
-		readdif ${first_wlan_mbss}${i}
-	    done
-	fi
-    fi
-    if [ "$second_wlan_mbss" != "" ]; then
-	bssidnum=`nvram_get 2860 BssidNum`
-	if [ "$bssidnum" != "0" ] && [ "$bssidnum" != "1" ]; then
-	    let "bssrealnum=$bssidnum-1"
-	    for i in `seq 1 $bssrealnum`; do
-		$LOG "Readd ${second_wlan_mbss}${i} in br0"
-		readdif ${second_wlan_mbss}${i}
-	    done
-	fi
+    bssidnum=`nvram_get 2860 BssidNum`
+    mbssidif="$1"
+    if [ "$bssidnum" != "0" ] && [ "$bssidnum" != "1" ]; then
+	let "bssrealnum=$bssidnum-1"
+	for i in `seq 1 $bssrealnum`; do
+	    $LOG "Readd ${mbssidif}${i} in br0"
+	    readdif ${mbssidif}${i}
+	done
     fi
 }
 
@@ -96,7 +85,12 @@ bridge_config() {
 	    $LOG "Readd $first_wlan_root_if in br0"
 	    readdif $second_wlan_root_if
 	fi
-	addMBSSID
+	if [ "$first_wlan_mbss" != "" ]; then
+	    addMBSSID $first_wlan_mbss
+	fi
+	if [ "$second_wlan_mbss" != "" ]; then
+	    addMBSSID $second_wlan_mbss
+	fi
         addWds
         addMesh
 }
@@ -113,7 +107,12 @@ gate_config() {
 	    $LOG "Readd $first_wlan_root_if in br0"
 	    readdif $second_wlan_root_if
 	fi
-	addMBSSID
+	if [ "$first_wlan_mbss" != "" ]; then
+	    addMBSSID $first_wlan_mbss
+	fi
+	if [ "$second_wlan_mbss" != "" ]; then
+	    addMBSSID $second_wlan_mbss
+	fi
 	addWds
 	addMesh
 }
@@ -138,7 +137,12 @@ apcli_config() {
 	    $LOG "Readd $first_wlan_apcli in br0"
 	    readdif $first_wlan_apcli
 	fi
-	addMBSSID
+	if [ "$first_wlan_mbss" != "" ]; then
+	    addMBSSID $first_wlan_mbss
+	fi
+	if [ "$second_wlan_mbss" != "" ]; then
+	    addMBSSID $second_wlan_mbss
+	fi
 }
 
 spot_config() {
@@ -153,7 +157,12 @@ spot_config() {
 	    $LOG "Readd $first_wlan_root_if in br0"
 	    readdif $second_wlan_root_if
 	fi
-	addMBSSID
+	if [ "$first_wlan_mbss" != "" ]; then
+	    addMBSSID $first_wlan_mbss
+	fi
+	if [ "$second_wlan_mbss" != "" ]; then
+	    addMBSSID $second_wlan_mbss
+	fi
 	addWds
 	addMesh
 }
