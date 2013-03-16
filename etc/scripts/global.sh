@@ -296,9 +296,10 @@ killall_vpn() {
 }
 
 # get params
-getLanIfName
-getVpnIfName
-getWanIfName
+getFirstWlanIfName
 getSecWlanIfName
+getLanIfName
+getWanIfName
+getVpnIfName
 getWanIpaddr
 get_txqlen
