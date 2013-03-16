@@ -123,62 +123,34 @@ wlan_down_all() {
     # process iface shutdown
     # first down single vifs
     if [ "$first_wlan_apcli" != "" ]; then
-	ip addr flush dev $first_wlan_apcli > /dev/null 2>&1
-	if [ -d /proc/sys/net/ipv6 ]; then
-    	    ip -6 addr flush dev $first_wlan_apcli > /dev/null 2>&1
-	fi
-	ip link set $first_wlan_apcli down > /dev/null 2>&1
-	brctl delif br0 $first_wlan_apcli > /dev/null 2>&1
+	delif_from_br $first_wlan_apcli
     fi
     if [ "$first_wlan_mesh" != "" ] || [ "$first_wlan_mesh" != "" ]; then
-	ip addr flush dev $first_wlan_mesh > /dev/null 2>&1
-	if [ -d /proc/sys/net/ipv6 ]; then
-    	    ip -6 addr flush dev $first_wlan_mesh > /dev/null 2>&1
-	fi
-	ip link set $first_wlan_mesh down > /dev/null 2>&1
-	brctl delif br0 $first_wlan_mesh > /dev/null 2>&1
+	delif_from_br $first_wlan_mesh
     fi
     # second down multiple vifs
     if [ "$first_wlan_wds" != "" ]; then
 	for i in `seq 0 3`; do
-	    ip addr flush dev ${first_wlan_wds}${i} > /dev/null 2>&1
-	    if [ -d /proc/sys/net/ipv6 ]; then
-    		ip -6 addr flush dev ${first_wlan_wds}${i} > /dev/null 2>&1
-	    fi
-    	    ip link set ${first_wlan_wds}${i} down > /dev/null 2>&1
-	    brctl delif br0 ${first_wlan_wds}${i} > /dev/null 2>&1
+	    delif_from_br ${first_wlan_wds}${i}
 	done
     fi
     if [ "$second_wlan_wds" != "" ]; then
 	for i in `seq 0 3`; do
-	    ip addr flush dev ${second_wlan_wds}${i} > /dev/null 2>&1
-	    if [ -d /proc/sys/net/ipv6 ]; then
-    		ip -6 addr flush dev ${second_wlan_wds}${i} > /dev/null 2>&1
-	    fi
-	    ip link set ${second_wlan_wds}${i} down > /dev/null 2>&1
-	    brctl delif br0 ${second_wlan_wds}${i} > /dev/null 2>&1
+	    delif_from_br ${second_wlan_wds}${i}
 	done
     fi
     # next down second radio module to
     if [ "$second_wlan" != "" ]; then
 	for i in `seq 7 -1 0`; do
-	    ip addr flush dev ${second_wlan}${i} > /dev/null 2>&1
-	    if [ -d /proc/sys/net/ipv6 ]; then
-    		ip -6 addr flush dev ${second_wlan}${i} > /dev/null 2>&1
-	    fi
-	    ip link set ${second_wlan}${i} down > /dev/null 2>&1
-	    brctl delif br0 ${second_wlan}${i} > /dev/null 2>&1
+	    delif_from_br ${second_wlan}${i}
 	done
     fi
     # root and mbssid interfaces must down end
-    for i in `seq 7 -1 0`; do
-	ip addr flush dev ra$i > /dev/null 2>&1
-	if [ -d /proc/sys/net/ipv6 ]; then
-    	    ip -6 addr flush dev ra$i > /dev/null 2>&1
-	fi
-	ip link set ra$i down > /dev/null 2>&1
-	brctl delif br0 ra$i > /dev/null 2>&1
-    done
+    if [ "$first_wlan" != "" ]; then
+	for i in `seq 7 -1 0`; do
+	    delif_from_br ${first_wlan}${i}
+	done
+    fi
 }
 
 retune_wifi() {

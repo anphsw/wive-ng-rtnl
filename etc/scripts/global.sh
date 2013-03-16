@@ -243,6 +243,22 @@ flush_net_caches() {
     echo 1 > /proc/sys/net/nf_conntrack_table_flush
 }
 
+delif_from_br() {
+    ip addr flush dev $1 > /dev/null 2>&1
+    if [ -d /proc/sys/net/ipv6 ]; then
+        ip -6 addr flush dev $1 > /dev/null 2>&1
+    fi
+    ip link set $1 down > /dev/null 2>&1
+    brctl delif br0 $1 > /dev/null 2>&1
+}
+
+readdif_to_br() {
+    delif $1
+    brctl addif br0 $1
+    ip link set $1 up
+}
+
+# close alll ppp based tuns and kill daemons
 killall_vpn() {
     # delete all routes to vpnnet
     # this prevent deadloop in kernel
