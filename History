@@ -1346,16 +1346,15 @@
 3) kernel: net/ipv4: Ensure that location of timestamp option is stored.<br>
 4) kernel: netfilter: nf_nat: place conntrack in source hash after SNAT is done.<br>
 5) kernel: netfilter: nf_nat: don't check if the tuple is unique when there is not any other choice.<br>
-6) kernel: netfilter: nf_nat: pass manip type instead of hook to nf_nat_setup_info.<br>
-7) kernel: netfilter: nf_nat_core: eliminate useless find_appropriate_src for IP_NAT_RANGE_PROTO_RANDOM.<br>
-8) kernel: netfilter: nf_nat: fix inverted logic for persistent NAT mappings.<br>
-9) kernel: mips: Use CONFIG_CPU_MIPSR2 in csum_partial.S.<br>
-10) kernel: mips: Redefine value of BRK_BUG.<br>
-11) kernel: mips: dsp: Fix DSP mask for registers.<br>
-12) kernel: mips: make __{,n,u}delay declarations match definitions and generic delay.h<br>
-13) kernel: pppoe: return ENOTTY on unknown ioctl requests.<br>
-14) init.d: rework second wlan module support and small fixes.<br>
-15) init.d: use different mac adresses for ra/rai radio modules.<br>
+6) kernel: netfilter: nf_nat_core: eliminate useless find_appropriate_src for IP_NAT_RANGE_PROTO_RANDOM.<br>
+7) kernel: netfilter: nf_nat: fix inverted logic for persistent NAT mappings.<br>
+8) kernel: mips: Use CONFIG_CPU_MIPSR2 in csum_partial.S.<br>
+9) kernel: mips: Redefine value of BRK_BUG.<br>
+10) kernel: mips: dsp: Fix DSP mask for registers.<br>
+11) kernel: mips: make __{,n,u}delay declarations match definitions and generic delay.h<br>
+12) kernel: pppoe: return ENOTTY on unknown ioctl requests.<br>
+13) init.d: rework second wlan module support and small fixes.<br>
+14) init.d: use different mac adresses for ra/rai radio modules.<br>
 
 <br>
 <br>

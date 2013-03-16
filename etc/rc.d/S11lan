@@ -101,6 +101,6 @@ case "$1" in
 	    ;;
 
 	*)
-	    echo $"Usage: $0 {start|stop|restart|set_mac_wan_lan}"
+	    echo $"Usage: $0 {start|stop|restart}"
 	    exit 1
 esac
