@@ -184,6 +184,7 @@ fi
 #   1 = Gateway Mode
 #   2 = Ethernet Converter Mode
 #   3 = AP Client
+#   4 = Hotspot Mode
 #
 if [ "$OperationMode" = "0" ]; then
     bridge_config
@@ -204,6 +205,10 @@ fi
 if [ "$MODE" != "wifionly" ] && [ "$MODE" != "connect_sta" ]; then
     $LOG "Reconfigure wan..."
     service wan restart
+    if [ "$OperationMode" = "0" ]; then
+	$LOG "Reconfigure switch..."
+	/etc/scripts/config-switch.sh
+    fi
 fi
 
 ##########################################################

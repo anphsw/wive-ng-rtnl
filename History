@@ -1358,6 +1358,7 @@
 15) init.d: dnsmasq: use ddns_name=dmzip in hosts if dmz and ddns enable, instead allways use wap_ip.<br>
 16) init.d: move wscd init script to user/wscd/init.d - wscd not used in production builds(not security).<br>
 17) init.d: refactoring wlan interfaces managment code - cleanup/unify.<br>
+18) init.d: need reconfigure switch always after reconfig device(ralink swith<->wifi issue workaround in some chips).<br>
 
 <br>
 <br>
