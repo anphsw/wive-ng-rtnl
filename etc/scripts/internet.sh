@@ -36,23 +36,13 @@ addMesh() {
 
 addWds() {
     # if kernel build without WDS support - exit
-    if [ "$first_wlan_wds" != "" ]; then
-	wds_en=`nvram_get 2860 WdsEnable`
-	if [ "$wds_en" != "0" ]; then
-    	    for i in `seq 0 3`; do
-		$LOG "Readd ${first_wlan_wds}${i} in br0"
-		readdif ${first_wlan_wds}${i}
-    	    done
-	fi
-    fi
-    if [ "$second_wlan_wds" != "" ]; then
-	wds_en=`nvram_get 2860 WdsEnable`
-	if [ "$wds_en" != "0" ]; then
-    	    for i in `seq 0 3`; do
-		$LOG "Readd ${second_wlan_wds}${i} in br0"
-		readdif ${second_wlan_wds}${i}
-    	    done
-	fi
+    wds_en=`nvram_get 2860 WdsEnable`
+    wdsif="$1"
+    if [ "$wds_en" != "0" ]; then
+        for i in `seq 0 3`; do
+	$LOG "Readd ${wdsif}${i} in br0"
+	readdif ${wdsif}${i}
+        done
     fi
 }
 
@@ -91,7 +81,12 @@ bridge_config() {
 	if [ "$second_wlan_mbss" != "" ]; then
 	    addMBSSID $second_wlan_mbss
 	fi
-        addWds
+	if [ "$first_wlan_wds" != "" ]; then
+	    addWds $first_wlan_wds
+	fi
+	if [ "$second_wlan_wds" != "" ]; then
+	    addWds $first_wlan_wds
+	fi
         addMesh
 }
 
@@ -113,7 +108,12 @@ gate_config() {
 	if [ "$second_wlan_mbss" != "" ]; then
 	    addMBSSID $second_wlan_mbss
 	fi
-	addWds
+	if [ "$first_wlan_wds" != "" ]; then
+	    addWds $first_wlan_wds
+	fi
+	if [ "$second_wlan_wds" != "" ]; then
+	    addWds $first_wlan_wds
+	fi
 	addMesh
 }
 
@@ -163,7 +163,12 @@ spot_config() {
 	if [ "$second_wlan_mbss" != "" ]; then
 	    addMBSSID $second_wlan_mbss
 	fi
-	addWds
+	if [ "$first_wlan_wds" != "" ]; then
+	    addWds $first_wlan_wds
+	fi
+	if [ "$second_wlan_wds" != "" ]; then
+	    addWds $first_wlan_wds
+	fi
 	addMesh
 }
 
