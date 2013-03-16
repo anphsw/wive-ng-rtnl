@@ -15,6 +15,7 @@
 #include <linux/module.h>
 #include <linux/types.h>
 #include <asm/uaccess.h>
+#include <asm/unaligned.h>
 #include <linux/skbuff.h>
 #include <linux/ip.h>
 #include <linux/icmp.h>
@@ -358,7 +359,7 @@ int ip_options_compile(struct ip_options * opt, struct sk_buff * skb)
 				goto error;
 			}
 			if (optptr[2] <= optlen) {
-				__be32 *timeptr = NULL;
+				unsigned char *timeptr = NULL;
 				if (optptr[2]+3 > optptr[1]) {
 					pp_ptr = optptr + 2;
 					goto error;
@@ -366,7 +367,7 @@ int ip_options_compile(struct ip_options * opt, struct sk_buff * skb)
 				switch (optptr[3]&0xF) {
 				      case IPOPT_TS_TSONLY:
 					if (skb)
-						timeptr = (__be32*)&optptr[optptr[2]-1];
+						timeptr = &optptr[optptr[2]-1];
 					opt->ts_needtime = 1;
 					optptr[2] += 4;
 					break;
@@ -377,7 +378,7 @@ int ip_options_compile(struct ip_options * opt, struct sk_buff * skb)
 					}
 					if (rt)  {
 						memcpy(&optptr[optptr[2]-1], &rt->rt_spec_dst, 4);
-						timeptr = (__be32*)&optptr[optptr[2]+3];
+						timeptr = &optptr[optptr[2]+3];
 					}
 					opt->ts_needaddr = 1;
 					opt->ts_needtime = 1;
@@ -394,7 +395,7 @@ int ip_options_compile(struct ip_options * opt, struct sk_buff * skb)
 						if (inet_addr_type(addr) == RTN_UNICAST)
 							break;
 						if (skb)
-							timeptr = (__be32*)&optptr[optptr[2]+3];
+							timeptr = &optptr[optptr[2]+3];
 					}
 					opt->ts_needtime = 1;
 					optptr[2] += 8;
@@ -408,10 +409,10 @@ int ip_options_compile(struct ip_options * opt, struct sk_buff * skb)
 				}
 				if (timeptr) {
 					struct timespec tv;
-					__be32  midtime;
+					u32  midtime;
 					getnstimeofday(&tv);
-					midtime = htonl((tv.tv_sec % 86400) * MSEC_PER_SEC + tv.tv_nsec / NSEC_PER_MSEC);
-					memcpy(timeptr, &midtime, sizeof(__be32));
+					midtime = (tv.tv_sec % 86400) * MSEC_PER_SEC + tv.tv_nsec / NSEC_PER_MSEC;
+					put_unaligned_be32(midtime, timeptr);
 					opt->is_changed = 1;
 				}
 			} else if ((optptr[3]&0xF) != IPOPT_TS_PRESPEC) {

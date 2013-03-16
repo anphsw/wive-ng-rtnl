@@ -1353,14 +1353,15 @@
 10) kernel: mips: dsp: Fix DSP mask for registers.<br>
 11) kernel: mips: make __{,n,u}delay declarations match definitions and generic delay.h<br>
 12) kernel: pppoe: return ENOTTY on unknown ioctl requests.<br>
-13) init.d: rework second wlan module support and small fixes.<br>
-14) init.d: use different mac adresses for ra/rai radio modules.<br>
-15) init.d: dnsmasq: use ddns_name=dmzip in hosts if dmz and ddns enable, instead allways use wap_ip.<br>
-16) init.d: move wscd init script to user/wscd/init.d - wscd not used in production builds(not security).<br>
-17) init.d: refactoring wlan interfaces managment code - cleanup/unify.<br>
-18) init.d: in bridge and apcli mode need reconfigure switch always after reconfig device(workaround in some chips).<br>
-19) init.d: fix disable AP interface in apcli mode.<br>
-20) configs: enable apcli/wds for all chips.<br>
+13) kernel: ip_options_compile: properly handle unaligned pointer.<br>
+14) init.d: rework second wlan module support and small fixes.<br>
+15) init.d: use different mac adresses for ra/rai radio modules.<br>
+16) init.d: dnsmasq: use ddns_name=dmzip in hosts if dmz and ddns enable, instead allways use wap_ip.<br>
+17) init.d: move wscd init script to user/wscd/init.d - wscd not used in production builds(not security).<br>
+18) init.d: refactoring wlan interfaces managment code - cleanup/unify.<br>
+19) init.d: in bridge and apcli mode need reconfigure switch always after reconfig device(workaround in some chips).<br>
+20) init.d: fix disable AP interface in apcli mode.<br>
+21) configs: enable apcli/wds for all chips.<br>
 
 <br>
 <br>
