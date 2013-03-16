@@ -12,18 +12,24 @@ MODE="$1"
 
 LOG="logger -t reconfig"
 
+readdif() {
+    ip addr flush dev $1 > /dev/null 2>&1
+    if [ -d /proc/sys/net/ipv6 ]; then
+        ip -6 addr flush dev $1 > /dev/null 2>&1
+    fi
+    ip link set $1 down > /dev/null 2>&1
+    brctl delif br0 $1 > /dev/null 2>&1
+    brctl addif br0 $1
+    ip link set $1 up
+}
+
 addMesh() {
     # if kernel build without MESH support - exit
     if [ "$first_wlan_mesh" != "" ]; then
         meshenabled=`nvram_get 2860 MeshEnabled`
 	if [ "$meshenabled" = "1" ]; then
-	    ip addr flush dev $first_wlan_mesh > /dev/null 2>&1
-	    if [ -d /proc/sys/net/ipv6 ]; then
-		ip -6 addr flush dev $first_wlan_mesh > /dev/null 2>&1
-	    fi
-	    ip link set $first_wlan_mesh down > /dev/null 2>&1
-    	    brctl addif br0 $first_wlan_mesh
-    	    ip link set $first_wlan_mesh up
+	    $LOG "Readd $first_wlan_mesh in br0"
+	    readdif $first_wlan_mesh
 	fi
     fi
 }
@@ -34,13 +40,8 @@ addWds() {
 	wds_en=`nvram_get 2860 WdsEnable`
 	if [ "$wds_en" != "0" ]; then
     	    for i in `seq 0 3`; do
-    		ip addr flush dev ${first_wlan_wds}${i} > /dev/null 2>&1
-		if [ -d /proc/sys/net/ipv6 ]; then
-    		    ip -6 addr flush dev ${first_wlan_wds}${i} > /dev/null 2>&1
-		fi
-		ip link set ${first_wlan_wds}${i} down > /dev/null 2>&1
-		brctl addif br0 ${first_wlan_wds}${i}
-    		ip link set ${first_wlan_wds}${i} up
+		$LOG "Readd ${first_wlan_wds}${i} in br0"
+		readdif ${first_wlan_wds}${i}
     	    done
 	fi
     fi
@@ -48,13 +49,8 @@ addWds() {
 	wds_en=`nvram_get 2860 WdsEnable`
 	if [ "$wds_en" != "0" ]; then
     	    for i in `seq 0 3`; do
-    		ip addr flush dev ${second_wlan_wds}${i} > /dev/null 2>&1
-		if [ -d /proc/sys/net/ipv6 ]; then
-    		    ip -6 addr flush dev ${second_wlan_wds}${i} > /dev/null 2>&1
-		fi
-		ip link set ${second_wlan_wds}${i} down > /dev/null 2>&1
-		brctl addif br0 ${second_wlan_wds}${i}
-    		ip link set ${second_wlan_wds}${i} up
+		$LOG "Readd ${second_wlan_wds}${i} in br0"
+		readdif ${second_wlan_wds}${i}
     	    done
 	fi
     fi
@@ -67,13 +63,8 @@ addMBSSID() {
 	if [ "$bssidnum" != "0" ] && [ "$bssidnum" != "1" ]; then
 	    let "bssrealnum=$bssidnum-1"
 	    for i in `seq 1 $bssrealnum`; do
-    		ip addr flush dev ${first_wlan_mbss}${i} > /dev/null 2>&1
-		if [ -d /proc/sys/net/ipv6 ]; then
-    		    ip -6 addr flush dev ${first_wlan_mbss}${i} > /dev/null 2>&1
-		fi
-		ip link set ${first_wlan_mbss}${i} down > /dev/null 2>&1
-		brctl addif br0 ${first_wlan_mbss}${i}
-    		ip link set ${first_wlan_mbss}${i} up
+		$LOG "Readd ${first_wlan_mbss}${i} in br0"
+		readdif ${first_wlan_mbss}${i}
 	    done
 	fi
     fi
@@ -82,13 +73,8 @@ addMBSSID() {
 	if [ "$bssidnum" != "0" ] && [ "$bssidnum" != "1" ]; then
 	    let "bssrealnum=$bssidnum-1"
 	    for i in `seq 1 $bssrealnum`; do
-    		ip addr flush dev ${second_wlan_mbss}${i} > /dev/null 2>&1
-		if [ -d /proc/sys/net/ipv6 ]; then
-    		    ip -6 addr flush dev ${second_wlan_mbss}${i} > /dev/null 2>&1
-		fi
-		ip link set ${second_wlan_mbss}${i} down > /dev/null 2>&1
-		brctl addif br0 ${second_wlan_mbss}${i}
-    		ip link set ${second_wlan_mbss}${i} up
+		$LOG "Readd ${second_wlan_mbss}${i} in br0"
+		readdif ${second_wlan_mbss}${i}
 	    done
 	fi
     fi
@@ -97,20 +83,18 @@ addMBSSID() {
 bridge_config() {
 	$LOG "Bridge OperationMode: $OperationMode"
 	# flush eth2 ip and remove from bridge
-        ip addr flush dev eth2 > /dev/null 2>&1
-	brctl delif br0 eth2 > /dev/null 2>&1
 	# in bridge mode add only eth2 NOT ADD "$phys_lan_if" or "$phys_wan_if"
-	brctl addif br0 eth2
+	$LOG "Readd eth2 in br0"
+	readdif eth2
 	if [ "$CONFIG_RAETH_GMAC2" != "" ]; then
-    	    ip addr flush dev eth3 > /dev/null 2>&1
-	    brctl delif br0 eth3 > /dev/null 2>&1
-	    brctl addif br0 eth3
+	    $LOG "Readd eth3 in br0"
+	    readdif eth3
 	fi
-	# add root wifi interface
-	brctl addif br0 $first_wlan_root_if
+	$LOG "Readd $first_wlan_root_if in br0"
+	readdif $first_wlan_root_if
 	if [ "$second_wlan_root_if" != "" ]; then
-	    # add second root wifi interface
-	    brctl addif br0 $second_wlan_root_if
+	    $LOG "Readd $first_wlan_root_if in br0"
+	    readdif $second_wlan_root_if
 	fi
 	addMBSSID
         addWds
@@ -120,15 +104,54 @@ bridge_config() {
 gate_config() {
 	$LOG "Gateway OperationMode: $OperationMode"
 	# flush "$phys_lan_if" ip and remove from bridge
-        ip addr flush dev "$phys_lan_if" > /dev/null 2>&1
-	brctl delif br0 "$phys_lan_if" > /dev/null 2>&1
 	# add lan interface
-	brctl addif br0 "$phys_lan_if"
-	# add root wifi interface
-	brctl addif br0 $first_wlan_root_if
+	$LOG "Readd $phys_lan_if in br0"
+	readdif $phys_lan_if
+	$LOG "Readd $first_wlan_root_if in br0"
+	readdif $first_wlan_root_if
 	if [ "$second_wlan_root_if" != "" ]; then
-	    # add second root wifi interface
-	    brctl addif br0 $second_wlan_root_if
+	    $LOG "Readd $first_wlan_root_if in br0"
+	    readdif $second_wlan_root_if
+	fi
+	addMBSSID
+	addWds
+	addMesh
+}
+
+apcli_config() {
+	$LOG "ApClient OperationMode: $OperationMode"
+	# flush eth2 ip and remove from bridge
+	# in bridge mode add only eth2 NOT ADD "$phys_lan_if" or "$phys_wan_if"
+	$LOG "Readd eth2 in br0"
+	readdif eth2
+	if [ "$CONFIG_RAETH_GMAC2" != "" ]; then
+	    $LOG "Readd eth3 in br0"
+	    readdif eth3
+	fi
+	$LOG "Readd $first_wlan_root_if in br0"
+	readdif $first_wlan_root_if
+	if [ "$second_wlan_root_if" != "" ]; then
+	    $LOG "Readd $first_wlan_root_if in br0"
+	    readdif $second_wlan_root_if
+	fi
+	if [ "$ApCliBridgeOnly" = "1" ]; then
+	    $LOG "Readd $first_wlan_apcli in br0"
+	    readdif $first_wlan_apcli
+	fi
+	addMBSSID
+}
+
+spot_config() {
+	$LOG "HotSpot OperationMode: $OperationMode"
+	# flush "$phys_lan_if" ip and remove from bridge
+	# add lan interface
+	$LOG "Readd $phys_lan_if in br0"
+	readdif $phys_lan_if
+	$LOG "Readd $first_wlan_root_if in br0"
+	readdif $first_wlan_root_if
+	if [ "$second_wlan_root_if" != "" ]; then
+	    $LOG "Readd $first_wlan_root_if in br0"
+	    readdif $second_wlan_root_if
 	fi
 	addMBSSID
 	addWds
@@ -137,44 +160,6 @@ gate_config() {
 
 ethcv_config() {
 	$LOG "Ethernet Converter OperationMode: $OperationMode"
-}
-
-apcli_config() {
-	$LOG "ApClient OperationMode: $OperationMode"
-	# flush eth2 ip and remove from bridge
-        ip addr flush dev eth2 > /dev/null 2>&1
-	brctl delif br0 eth2 > /dev/null 2>&1
-	# in apcli mode add only eth2 NOT ADD "$phys_lan_if" or "$phys_wan_if"
-	brctl addif br0 eth2
-	# add root wifi interface
-	brctl addif br0 $first_wlan_root_if
-	if [ "$second_wlan_root_if" != "" ]; then
-	    # add second root wifi interface
-	    brctl addif br0 $second_wlan_root_if
-	fi
-	if [ "$ApCliBridgeOnly" = "1" ]; then
-	    # add client wifi interface
-	    brctl addif br0 apcli0
-	fi
-	addMBSSID
-}
-
-spot_config() {
-	$LOG "HotSpot OperationMode: $OperationMode"
-	# flush "$phys_lan_if" ip and remove from bridge
-        ip addr flush dev "$phys_lan_if" > /dev/null 2>&1
-	brctl delif br0 "$phys_lan_if" > /dev/null 2>&1
-	# add lan interface
-	brctl addif br0 "$phys_lan_if"
-	# add root wifi interface
-	brctl addif br0 $first_wlan_root_if
-	if [ "$second_wlan_root_if" != "" ]; then
-	    # add second root wifi interface
-	    brctl addif br0 $second_wlan_root_if
-	fi
-	addMBSSID
-	addWds
-	addMesh
 }
 
 # WiFi modules reloand and reconfigure
