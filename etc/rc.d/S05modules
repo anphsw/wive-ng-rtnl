@@ -157,7 +157,7 @@ wlan_down_all() {
 	brctl delif br0 apcli0 > /dev/null 2>&1
     fi
     # root and mbssid interfaces must down end
-    for i in `seq 0 7`; do
+    for i in `seq 7 -1 0`; do
 	ip addr flush dev ra$i > /dev/null 2>&1
 	if [ -d /proc/sys/net/ipv6 ]; then
     	    ip -6 addr flush dev ra$i > /dev/null 2>&1
