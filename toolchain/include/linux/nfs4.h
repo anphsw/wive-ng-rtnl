@@ -16,6 +16,7 @@
 #include <linux/types.h>
 
 #define NFS4_VERIFIER_SIZE	8
+#define NFS4_STATEID_SIZE	16
 #define NFS4_FHSIZE		128
 #define NFS4_MAXPATHLEN		PATH_MAX
 #define NFS4_MAXNAMLEN		NAME_MAX

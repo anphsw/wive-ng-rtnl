@@ -19,8 +19,7 @@
 
 
 /* Structure used to bind() the socket to a particular socket & tunnel */
-struct pppol2tp_addr
-{
+struct pppol2tp_addr {
 	pid_t	pid;			/* pid that owns the fd.
 					 * 0 => current */
 	int	fd;			/* FD of UDP socket to use */

@@ -62,6 +62,7 @@
 #define IFF_MASTER_ALB	0x10		/* bonding master, balance-alb.	*/
 #define IFF_BONDING	0x20		/* bonding master or slave	*/
 #define IFF_SLAVE_NEEDARP 0x40		/* need ARPs for validation	*/
+#define IFF_ISATAP	0x80		/* ISATAP interface (RFC4214)	*/
 
 #define IF_GET_IFACE	0x0001		/* for querying only */
 #define IF_GET_PROTO	0x0002
@@ -117,8 +118,7 @@ enum {
  *	being very small might be worth keeping for clean configuration.
  */
 
-struct ifmap 
-{
+struct ifmap {
 	unsigned long mem_start;
 	unsigned long mem_end;
 	unsigned short base_addr; 
@@ -128,8 +128,7 @@ struct ifmap
 	/* 3 bytes spare */
 };
 
-struct if_settings
-{
+struct if_settings {
 	unsigned int type;	/* Type of physical device or protocol */
 	unsigned int size;	/* Size of the data allocated by the caller */
 	union {
@@ -153,8 +152,7 @@ struct if_settings
  * remainder may be interface specific.
  */
 
-struct ifreq 
-{
+struct ifreq {
 #define IFHWADDRLEN	6
 	union
 	{
@@ -203,11 +201,9 @@ struct ifreq
  * must know all networks accessible).
  */
 
-struct ifconf 
-{
+struct ifconf  {
 	int	ifc_len;			/* size of buffer	*/
-	union 
-	{
+	union {
 		char *ifcu_buf;
 		struct ifreq *ifcu_req;
 	} ifc_ifcu;

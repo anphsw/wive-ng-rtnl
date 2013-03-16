@@ -1,4 +1,4 @@
-/* Copyright (C) 1996-2002, 2003, 2004 Free Software Foundation, Inc.
+/* Copyright (C) 1996,1997,1998,1999,2000,2001 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -53,14 +53,8 @@
 
 __BEGIN_DECLS
 
-/* Error status for non-reentrant lookup functions.
-   We use a macro to access always the thread-specific `h_errno' variable.
-   We always need the extern int here in case internal libc code undefines 
-   the macro because it needs access to the underlying storage. */
+/* Error status for non-reentrant lookup functions.  */
 extern int h_errno;
-#ifdef __UCLIBC_HAS_THREADS__
-# define h_errno (*__h_errno_location ())
-#endif
 
 /* Function to get address of global `h_errno' variable.  */
 extern int *__h_errno_location (void) __THROW __attribute__ ((__const__));
@@ -68,6 +62,12 @@ extern int *__h_errno_location (void) __THROW __attribute__ ((__const__));
 #ifdef _LIBC
 # define __set_h_errno(x) (h_errno = (x))
 #endif
+
+#if defined __UCLIBC_HAS_THREADS__
+/* Use a macro to access always the thread specific `h_errno' variable.  */
+# define h_errno (*__h_errno_location ())
+#endif
+
 
 /* Possible values left in `h_errno'.  */
 #define	NETDB_INTERNAL	-1	/* See errno.  */
@@ -112,118 +112,79 @@ struct hostent
 };
 
 /* Open host data base files and mark them as staying open even after
-   a later search if STAY_OPEN is non-zero.
+   a later search if STAY_OPEN is non-zero.  */
+extern void sethostent (int __stay_open) __THROW;
 
-   This function is a possible cancellation point and therefore not
-   marked with __THROW.  */
-extern void sethostent (int __stay_open);
-
-/* Close host data base files and clear `stay open' flag.
-
-   This function is a possible cancellation point and therefore not
-   marked with __THROW.  */
-extern void endhostent (void);
+/* Close host data base files and clear `stay open' flag.  */
+extern void endhostent (void) __THROW;
 
 /* Get next entry from host data base file.  Open data base if
-   necessary.
-
-   This function is a possible cancellation point and therefore not
-   marked with __THROW.  */
-extern struct hostent *gethostent (void);
+   necessary.  */
+extern struct hostent *gethostent (void) __THROW;
 
 /* Return entry from host data base which address match ADDR with
-   length LEN and type TYPE.
-
-   This function is a possible cancellation point and therefore not
-   marked with __THROW.  */
+   length LEN and type TYPE.  */
 extern struct hostent *gethostbyaddr (__const void *__addr, __socklen_t __len,
-				      int __type);
+				      int __type) __THROW;
 
-/* Return entry from host data base for host with NAME.
-
-   This function is a possible cancellation point and therefore not
-   marked with __THROW.  */
-extern struct hostent *gethostbyname (__const char *__name);
+/* Return entry from host data base for host with NAME.  */
+extern struct hostent *gethostbyname (__const char *__name) __THROW;
 
 #ifdef __USE_MISC
 /* Return entry from host data base for host with NAME.  AF must be
    set to the address type which is `AF_INET' for IPv4 or `AF_INET6'
-   for IPv6.
-
-   This function is not part of POSIX and therefore no official
-   cancellation point.  But due to similarity with an POSIX interface
-   or due to the implementation it is a cancellation point and
-   therefore not marked with __THROW.  */
-extern struct hostent *gethostbyname2 (__const char *__name, int __af);
+   for IPv6.  */
+extern struct hostent *gethostbyname2 (__const char *__name, int __af) __THROW;
 
 /* Reentrant versions of the functions above.  The additional
    arguments specify a buffer of BUFLEN starting at BUF.  The last
    argument is a pointer to a variable which gets the value which
    would be stored in the global variable `herrno' by the
-   non-reentrant functions.
-
-   These functions are not part of POSIX and therefore no official
-   cancellation point.  But due to similarity with an POSIX interface
-   or due to the implementation they are cancellation points and
-   therefore not marked with __THROW.  */
+   non-reentrant functions.  */
 extern int gethostent_r (struct hostent *__restrict __result_buf,
 			 char *__restrict __buf, size_t __buflen,
 			 struct hostent **__restrict __result,
-			 int *__restrict __h_errnop);
+			 int *__restrict __h_errnop) __THROW;
 
 extern int gethostbyaddr_r (__const void *__restrict __addr, __socklen_t __len,
 			    int __type,
 			    struct hostent *__restrict __result_buf,
 			    char *__restrict __buf, size_t __buflen,
 			    struct hostent **__restrict __result,
-			    int *__restrict __h_errnop);
+			    int *__restrict __h_errnop) __THROW;
 
 extern int gethostbyname_r (__const char *__restrict __name,
 			    struct hostent *__restrict __result_buf,
 			    char *__restrict __buf, size_t __buflen,
 			    struct hostent **__restrict __result,
-			    int *__restrict __h_errnop);
+			    int *__restrict __h_errnop) __THROW;
 
 extern int gethostbyname2_r (__const char *__restrict __name, int __af,
 			     struct hostent *__restrict __result_buf,
 			     char *__restrict __buf, size_t __buflen,
 			     struct hostent **__restrict __result,
-			     int *__restrict __h_errnop);
+			     int *__restrict __h_errnop) __THROW;
 #endif	/* misc */
 
 
 /* Open network data base files and mark them as staying open even
-   after a later search if STAY_OPEN is non-zero.
+   after a later search if STAY_OPEN is non-zero.  */
+extern void setnetent (int __stay_open) __THROW;
 
-   This function is a possible cancellation point and therefore not
-   marked with __THROW.  */
-extern void setnetent (int __stay_open);
-
-/* Close network data base files and clear `stay open' flag.
-
-   This function is a possible cancellation point and therefore not
-   marked with __THROW.  */
-extern void endnetent (void);
+/* Close network data base files and clear `stay open' flag.  */
+extern void endnetent (void) __THROW;
 
 /* Get next entry from network data base file.  Open data base if
-   necessary.
-
-   This function is a possible cancellation point and therefore not
-   marked with __THROW.  */
-extern struct netent *getnetent (void);
+   necessary.  */
+extern struct netent *getnetent (void) __THROW;
 
 /* Return entry from network data base which address match NET and
-   type TYPE.
+   type TYPE.  */
+extern struct netent *getnetbyaddr (uint32_t __net, int __type)
+     __THROW;
 
-   This function is a possible cancellation point and therefore not
-   marked with __THROW.  */
-extern struct netent *getnetbyaddr (uint32_t __net, int __type);
-
-/* Return entry from network data base for network with NAME.
-
-   This function is a possible cancellation point and therefore not
-   marked with __THROW.  */
-extern struct netent *getnetbyname (__const char *__name);
+/* Return entry from network data base for network with NAME.  */
+extern struct netent *getnetbyname (__const char *__name) __THROW;
 
 #if 0
 /* FIXME */
@@ -232,28 +193,23 @@ extern struct netent *getnetbyname (__const char *__name);
    arguments specify a buffer of BUFLEN starting at BUF.  The last
    argument is a pointer to a variable which gets the value which
    would be stored in the global variable `herrno' by the
-   non-reentrant functions.
-
-   These functions are not part of POSIX and therefore no official
-   cancellation point.  But due to similarity with an POSIX interface
-   or due to the implementation they are cancellation points and
-   therefore not marked with __THROW.  */
+   non-reentrant functions.  */
 extern int getnetent_r (struct netent *__restrict __result_buf,
 			char *__restrict __buf, size_t __buflen,
 			struct netent **__restrict __result,
-			int *__restrict __h_errnop);
+			int *__restrict __h_errnop) __THROW;
 
 extern int getnetbyaddr_r (uint32_t __net, int __type,
 			   struct netent *__restrict __result_buf,
 			   char *__restrict __buf, size_t __buflen,
 			   struct netent **__restrict __result,
-			   int *__restrict __h_errnop);
+			   int *__restrict __h_errnop) __THROW;
 
 extern int getnetbyname_r (__const char *__restrict __name,
 			   struct netent *__restrict __result_buf,
 			   char *__restrict __buf, size_t __buflen,
 			   struct netent **__restrict __result,
-			   int *__restrict __h_errnop);
+			   int *__restrict __h_errnop) __THROW;
 #endif	/* misc */
 #endif
 
@@ -268,63 +224,44 @@ struct servent
 };
 
 /* Open service data base files and mark them as staying open even
-   after a later search if STAY_OPEN is non-zero.
+   after a later search if STAY_OPEN is non-zero.  */
+extern void setservent (int __stay_open) __THROW;
 
-   This function is a possible cancellation point and therefore not
-   marked with __THROW.  */
-extern void setservent (int __stay_open);
-
-/* Close service data base files and clear `stay open' flag.
-
-   This function is a possible cancellation point and therefore not
-   marked with __THROW.  */
-extern void endservent (void);
+/* Close service data base files and clear `stay open' flag.  */
+extern void endservent (void) __THROW;
 
 /* Get next entry from service data base file.  Open data base if
-   necessary.
-
-   This function is a possible cancellation point and therefore not
-   marked with __THROW.  */
-extern struct servent *getservent (void);
+   necessary.  */
+extern struct servent *getservent (void) __THROW;
 
 /* Return entry from network data base for network with NAME and
-   protocol PROTO.
-
-   This function is a possible cancellation point and therefore not
-   marked with __THROW.  */
+   protocol PROTO.  */
 extern struct servent *getservbyname (__const char *__name,
-				      __const char *__proto);
+				      __const char *__proto) __THROW;
 
 /* Return entry from service data base which matches port PORT and
-   protocol PROTO.
-
-   This function is a possible cancellation point and therefore not
-   marked with __THROW.  */
-extern struct servent *getservbyport (int __port, __const char *__proto);
+   protocol PROTO.  */
+extern struct servent *getservbyport (int __port, __const char *__proto)
+     __THROW;
 
 
 #ifdef	__USE_MISC
 /* Reentrant versions of the functions above.  The additional
-   arguments specify a buffer of BUFLEN starting at BUF.
-
-   These functions are not part of POSIX and therefore no official
-   cancellation point.  But due to similarity with an POSIX interface
-   or due to the implementation they are cancellation points and
-   therefore not marked with __THROW.  */
+   arguments specify a buffer of BUFLEN starting at BUF.  */
 extern int getservent_r (struct servent *__restrict __result_buf,
 			 char *__restrict __buf, size_t __buflen,
-			 struct servent **__restrict __result);
+			 struct servent **__restrict __result) __THROW;
 
 extern int getservbyname_r (__const char *__restrict __name,
 			    __const char *__restrict __proto,
 			    struct servent *__restrict __result_buf,
 			    char *__restrict __buf, size_t __buflen,
-			    struct servent **__restrict __result);
+			    struct servent **__restrict __result) __THROW;
 
 extern int getservbyport_r (int __port, __const char *__restrict __proto,
 			    struct servent *__restrict __result_buf,
 			    char *__restrict __buf, size_t __buflen,
-			    struct servent **__restrict __result);
+			    struct servent **__restrict __result) __THROW;
 #endif	/* misc */
 
 
@@ -337,110 +274,39 @@ struct protoent
 };
 
 /* Open protocol data base files and mark them as staying open even
-   after a later search if STAY_OPEN is non-zero.
+   after a later search if STAY_OPEN is non-zero.  */
+extern void setprotoent (int __stay_open) __THROW;
 
-   This function is a possible cancellation point and therefore not
-   marked with __THROW.  */
-extern void setprotoent (int __stay_open);
-
-/* Close protocol data base files and clear `stay open' flag.
-
-   This function is a possible cancellation point and therefore not
-   marked with __THROW.  */
-extern void endprotoent (void);
+/* Close protocol data base files and clear `stay open' flag.  */
+extern void endprotoent (void) __THROW;
 
 /* Get next entry from protocol data base file.  Open data base if
-   necessary.
+   necessary.  */
+extern struct protoent *getprotoent (void) __THROW;
 
-   This function is a possible cancellation point and therefore not
-   marked with __THROW.  */
-extern struct protoent *getprotoent (void);
+/* Return entry from protocol data base for network with NAME.  */
+extern struct protoent *getprotobyname (__const char *__name) __THROW;
 
-/* Return entry from protocol data base for network with NAME.
-
-   This function is a possible cancellation point and therefore not
-   marked with __THROW.  */
-extern struct protoent *getprotobyname (__const char *__name);
-
-/* Return entry from protocol data base which number is PROTO.
-
-   This function is a possible cancellation point and therefore not
-   marked with __THROW.  */
-extern struct protoent *getprotobynumber (int __proto);
+/* Return entry from protocol data base which number is PROTO.  */
+extern struct protoent *getprotobynumber (int __proto) __THROW;
 
 
 #ifdef	__USE_MISC
 /* Reentrant versions of the functions above.  The additional
-   arguments specify a buffer of BUFLEN starting at BUF.
-
-   These functions are not part of POSIX and therefore no official
-   cancellation point.  But due to similarity with an POSIX interface
-   or due to the implementation they are cancellation points and
-   therefore not marked with __THROW.  */
+   arguments specify a buffer of BUFLEN starting at BUF.  */
 extern int getprotoent_r (struct protoent *__restrict __result_buf,
 			  char *__restrict __buf, size_t __buflen,
-			  struct protoent **__restrict __result);
+			  struct protoent **__restrict __result) __THROW;
 
 extern int getprotobyname_r (__const char *__restrict __name,
 			     struct protoent *__restrict __result_buf,
 			     char *__restrict __buf, size_t __buflen,
-			     struct protoent **__restrict __result);
+			     struct protoent **__restrict __result) __THROW;
 
 extern int getprotobynumber_r (int __proto,
 			       struct protoent *__restrict __result_buf,
 			       char *__restrict __buf, size_t __buflen,
-			       struct protoent **__restrict __result);
-
-
-#ifdef __UCLIBC_HAS_NETGROUP__
-/* Establish network group NETGROUP for enumeration.
-
-   This function is not part of POSIX and therefore no official
-   cancellation point.  But due to similarity with an POSIX interface
-   or due to the implementation it is a cancellation point and
-   therefore not marked with __THROW.  */
-extern int setnetgrent (__const char *__netgroup);
-
-/* Free all space allocated by previous `setnetgrent' call.
-
-   This function is not part of POSIX and therefore no official
-   cancellation point.  But due to similarity with an POSIX interface
-   or due to the implementation it is a cancellation point and
-   therefore not marked with __THROW.  */
-extern void endnetgrent (void);
-
-/* Get next member of netgroup established by last `setnetgrent' call
-   and return pointers to elements in HOSTP, USERP, and DOMAINP.
-
-   This function is not part of POSIX and therefore no official
-   cancellation point.  But due to similarity with an POSIX interface
-   or due to the implementation it is a cancellation point and
-   therefore not marked with __THROW.  */
-extern int getnetgrent (char **__restrict __hostp,
-			char **__restrict __userp,
-			char **__restrict __domainp);
-
-
-/* Test whether NETGROUP contains the triple (HOST,USER,DOMAIN).
-
-   This function is not part of POSIX and therefore no official
-   cancellation point.  But due to similarity with an POSIX interface
-   or due to the implementation it is a cancellation point and
-   therefore not marked with __THROW.  */
-extern int innetgr (__const char *__netgroup, __const char *__host,
-		    __const char *__user, __const char *domain);
-
-/* Reentrant version of `getnetgrent' where result is placed in BUFFER.
-
-   This function is not part of POSIX and therefore no official
-   cancellation point.  But due to similarity with an POSIX interface
-   or due to the implementation it is a cancellation point and
-   therefore not marked with __THROW.  */
-extern int getnetgrent_r (char **__restrict __hostp,
-			  char **__restrict __userp,
-			  char **__restrict __domainp,
-			  char *__restrict __buffer, size_t __buflen);
-#endif	/* UCLIBC_HAS_NETGROUP */
+			       struct protoent **__restrict __result) __THROW;
 #endif	/* misc */
 
 
@@ -450,106 +316,68 @@ extern int getnetgrent_r (char **__restrict __hostp,
    executed as REMUSER.  In *FD2P the descriptor to the socket for the
    connection is returned.  The caller must have the right to use a
    reserved port.  When the function returns *AHOST contains the
-   official host name.
-
-   This function is not part of POSIX and therefore no official
-   cancellation point.  But due to similarity with an POSIX interface
-   or due to the implementation it is a cancellation point and
-   therefore not marked with __THROW.  */
+   official host name.  */
 extern int rcmd (char **__restrict __ahost, unsigned short int __rport,
 		 __const char *__restrict __locuser,
 		 __const char *__restrict __remuser,
-		 __const char *__restrict __cmd, int *__restrict __fd2p);
+		 __const char *__restrict __cmd, int *__restrict __fd2p)
+     __THROW;
 
 #if 0
 /* FIXME */
 /* This is the equivalent function where the protocol can be selected
-   and which therefore can be used for IPv6.
-
-   This function is not part of POSIX and therefore no official
-   cancellation point.  But due to similarity with an POSIX interface
-   or due to the implementation it is a cancellation point and
-   therefore not marked with __THROW.  */
+   and which therefore can be used for IPv6.  */
 extern int rcmd_af (char **__restrict __ahost, unsigned short int __rport,
 		    __const char *__restrict __locuser,
 		    __const char *__restrict __remuser,
 		    __const char *__restrict __cmd, int *__restrict __fd2p,
-		    sa_family_t __af);
+		    sa_family_t __af) __THROW;
 #endif
 
 /* Call `rexecd' at port RPORT on remote machine *AHOST to execute
    CMD.  The process runs at the remote machine using the ID of user
    NAME whose cleartext password is PASSWD.  In *FD2P the descriptor
    to the socket for the connection is returned.  When the function
-   returns *AHOST contains the official host name.
-
-   This function is not part of POSIX and therefore no official
-   cancellation point.  But due to similarity with an POSIX interface
-   or due to the implementation it is a cancellation point and
-   therefore not marked with __THROW.  */
+   returns *AHOST contains the official host name.  */
 extern int rexec (char **__restrict __ahost, int __rport,
 		  __const char *__restrict __name,
 		  __const char *__restrict __pass,
-		  __const char *__restrict __cmd, int *__restrict __fd2p);
+		  __const char *__restrict __cmd, int *__restrict __fd2p)
+     __THROW;
 
 /* This is the equivalent function where the protocol can be selected
-   and which therefore can be used for IPv6.
-
-   This function is not part of POSIX and therefore no official
-   cancellation point.  But due to similarity with an POSIX interface
-   or due to the implementation it is a cancellation point and
-   therefore not marked with __THROW.  */
+   and which therefore can be used for IPv6.  */
 extern int rexec_af (char **__restrict __ahost, int __rport,
 		     __const char *__restrict __name,
 		     __const char *__restrict __pass,
 		     __const char *__restrict __cmd, int *__restrict __fd2p,
-		     sa_family_t __af);
+		     sa_family_t __af) __THROW;
 
 /* Check whether user REMUSER on system RHOST is allowed to login as LOCUSER.
    If SUSER is not zero the user tries to become superuser.  Return 0 if
-   it is possible.
-
-   This function is not part of POSIX and therefore no official
-   cancellation point.  But due to similarity with an POSIX interface
-   or due to the implementation it is a cancellation point and
-   therefore not marked with __THROW.  */
+   it is possible.  */
 extern int ruserok (__const char *__rhost, int __suser,
-		    __const char *__remuser, __const char *__locuser);
+		    __const char *__remuser, __const char *__locuser) __THROW;
 
 #if 0
 /* FIXME */
 /* This is the equivalent function where the protocol can be selected
-   and which therefore can be used for IPv6.
-
-   This function is not part of POSIX and therefore no official
-   cancellation point.  But due to similarity with an POSIX interface
-   or due to the implementation it is a cancellation point and
-   therefore not marked with __THROW.  */
+   and which therefore can be used for IPv6.  */
 extern int ruserok_af (__const char *__rhost, int __suser,
 		       __const char *__remuser, __const char *__locuser,
-		       sa_family_t __af);
+		       sa_family_t __af) __THROW;
 #endif
 
 /* Try to allocate reserved port, returning a descriptor for a socket opened
    at this port or -1 if unsuccessful.  The search for an available port
-   will start at ALPORT and continues with lower numbers.
-
-   This function is not part of POSIX and therefore no official
-   cancellation point.  But due to similarity with an POSIX interface
-   or due to the implementation it is a cancellation point and
-   therefore not marked with __THROW.  */
-extern int rresvport (int *__alport);
+   will start at ALPORT and continues with lower numbers.  */
+extern int rresvport (int *__alport) __THROW;
 
 #if 0
 /* FIXME */
 /* This is the equivalent function where the protocol can be selected
-   and which therefore can be used for IPv6.
-
-   This function is not part of POSIX and therefore no official
-   cancellation point.  But due to similarity with an POSIX interface
-   or due to the implementation it is a cancellation point and
-   therefore not marked with __THROW.  */
-extern int rresvport_af (int *__alport, sa_family_t __af);
+   and which therefore can be used for IPv6.  */
+extern int rresvport_af (int *__alport, sa_family_t __af) __THROW;
 #endif
 #endif
 
@@ -573,21 +401,6 @@ struct addrinfo
 # define AI_PASSIVE	0x0001	/* Socket address is intended for `bind'.  */
 # define AI_CANONNAME	0x0002	/* Request for canonical name.  */
 # define AI_NUMERICHOST	0x0004	/* Don't use name resolution.  */
-# define AI_V4MAPPED	0x0008	/* IPv4 mapped addresses are acceptable.  */
-# define AI_ALL		0x0010	/* Return IPv4 mapped and IPv6 addresses.  */
-# define AI_ADDRCONFIG	0x0020	/* Use configuration of this host to choose
-				   returned address type..  */
-# ifdef __USE_GNU
-#  define AI_IDN	0x0040	/* IDN encode input (assuming it is encoded
-				   in the current locale's character set)
-				   before looking it up. */
-#  define AI_CANONIDN	0x0080	/* Translate canonical name from IDN format. */
-#  define AI_IDN_ALLOW_UNASSIGNED 0x0100 /* Don't reject unassigned Unicode
-					    code points.  */
-#  define AI_IDN_USE_STD3_ASCII_RULES 0x0200 /* Validate strings according to
-						STD3 rules.  */
-# endif
-# define AI_NUMERICSERV	0x0400	/* Don't use name resolution.  */
 
 /* Error values for `getaddrinfo' function.  */
 # define EAI_BADFLAGS	  -1	/* Invalid value for `ai_flags' field.  */
@@ -601,14 +414,12 @@ struct addrinfo
 # define EAI_ADDRFAMILY	  -9	/* Address family for NAME not supported.  */
 # define EAI_MEMORY	  -10	/* Memory allocation failure.  */
 # define EAI_SYSTEM	  -11	/* System error returned in `errno'.  */
-# define EAI_OVERFLOW	  -12	/* Argument buffer overflow.  */
 # ifdef __USE_GNU
 #  define EAI_INPROGRESS  -100	/* Processing request in progress.  */
 #  define EAI_CANCELED	  -101	/* Request canceled.  */
 #  define EAI_NOTCANCELED -102	/* Request not canceled.  */
 #  define EAI_ALLDONE	  -103	/* All requests done.  */
 #  define EAI_INTR	  -104	/* Interrupted by a signal.  */
-#  define EAI_IDN_ENCODE  -105	/* IDN encoding failed.  */
 # endif
 
 # define NI_MAXHOST      1025
@@ -619,23 +430,13 @@ struct addrinfo
 # define NI_NOFQDN	4	/* Only return nodename portion.  */
 # define NI_NAMEREQD	8	/* Don't return numeric addresses.  */
 # define NI_DGRAM	16	/* Look up UDP service rather than TCP.  */
-# ifdef __USE_GNU
-#  define NI_IDN	32	/* Convert name from IDN format.  */
-#  define NI_IDN_ALLOW_UNASSIGNED 64 /* Don't reject unassigned Unicode
-					code points.  */
-#  define NI_IDN_USE_STD3_ASCII_RULES 128 /* Validate strings according to
-					     STD3 rules.  */
-# endif
 
 /* Translate name of a service location and/or a service name to set of
-   socket addresses.
-
-   This function is a possible cancellation point and therefore not
-   marked with __THROW.  */
+   socket addresses.  */
 extern int getaddrinfo (__const char *__restrict __name,
 			__const char *__restrict __service,
 			__const struct addrinfo *__restrict __req,
-			struct addrinfo **__restrict __pai);
+			struct addrinfo **__restrict __pai) __THROW;
 
 /* Free `addrinfo' structure AI including associated storage.  */
 extern void freeaddrinfo (struct addrinfo *__ai) __THROW;
@@ -643,14 +444,12 @@ extern void freeaddrinfo (struct addrinfo *__ai) __THROW;
 /* Convert error return from getaddrinfo() to a string.  */
 extern __const char *gai_strerror (int __ecode) __THROW;
 
-/* Translate a socket address to a location and service name.
-
-   This function is a possible cancellation point and therefore not
-   marked with __THROW.  */
+/* Translate a socket address to a location and service name.  */
 extern int getnameinfo (__const struct sockaddr *__restrict __sa,
 			socklen_t __salen, char *__restrict __host,
 			socklen_t __hostlen, char *__restrict __serv,
-			socklen_t __servlen, unsigned int __flags);
+			socklen_t __servlen, unsigned int __flags) __THROW;
+
 #endif	/* POSIX */
 
 __END_DECLS

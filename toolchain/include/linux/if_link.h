@@ -4,8 +4,7 @@
 #include <linux/netlink.h>
 
 /* The struct should be in sync with struct net_device_stats */
-struct rtnl_link_stats
-{
+struct rtnl_link_stats {
 	__u32	rx_packets;		/* total packets received	*/
 	__u32	tx_packets;		/* total packets transmitted	*/
 	__u32	rx_bytes;		/* total bytes received 	*/
@@ -38,8 +37,7 @@ struct rtnl_link_stats
 };
 
 /* The struct should be in sync with struct ifmap */
-struct rtnl_link_ifmap
-{
+struct rtnl_link_ifmap {
 	__u64	mem_start;
 	__u64	mem_end;
 	__u64	base_addr;
@@ -48,8 +46,7 @@ struct rtnl_link_ifmap
 	__u8	port;
 };
 
-enum
-{
+enum {
 	IFLA_UNSPEC,
 	IFLA_ADDRESS,
 	IFLA_BROADCAST,
@@ -119,8 +116,7 @@ enum
  */
 
 /* Subtype attributes for IFLA_PROTINFO */
-enum
-{
+enum {
 	IFLA_INET6_UNSPEC,
 	IFLA_INET6_FLAGS,	/* link flags			*/
 	IFLA_INET6_CONF,	/* sysctl parameters		*/
@@ -133,16 +129,14 @@ enum
 
 #define IFLA_INET6_MAX	(__IFLA_INET6_MAX - 1)
 
-struct ifla_cacheinfo
-{
+struct ifla_cacheinfo {
 	__u32	max_reasm_len;
 	__u32	tstamp;		/* ipv6InterfaceTable updated timestamp */
 	__u32	reachable_time;
 	__u32	retrans_time;
 };
 
-enum
-{
+enum {
 	IFLA_INFO_UNSPEC,
 	IFLA_INFO_KIND,
 	IFLA_INFO_DATA,
@@ -154,8 +148,7 @@ enum
 
 /* VLAN section */
 
-enum
-{
+enum {
 	IFLA_VLAN_UNSPEC,
 	IFLA_VLAN_ID,
 	IFLA_VLAN_FLAGS,
@@ -171,8 +164,7 @@ struct ifla_vlan_flags {
 	__u32	mask;
 };
 
-enum
-{
+enum {
 	IFLA_VLAN_QOS_UNSPEC,
 	IFLA_VLAN_QOS_MAPPING,
 	__IFLA_VLAN_QOS_MAX
@@ -180,8 +172,7 @@ enum
 
 #define IFLA_VLAN_QOS_MAX	(__IFLA_VLAN_QOS_MAX - 1)
 
-struct ifla_vlan_qos_mapping
-{
+struct ifla_vlan_qos_mapping {
 	__u32 from;
 	__u32 to;
 };

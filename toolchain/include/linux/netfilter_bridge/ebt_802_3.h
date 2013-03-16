@@ -50,8 +50,7 @@ struct ebt_802_3_hdr {
 };
 
 
-struct ebt_802_3_info 
-{
+struct ebt_802_3_info {
 	uint8_t  sap;
 	__be16 type;
 	uint8_t  bitmask;

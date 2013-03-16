@@ -5,8 +5,7 @@
 
 #define TCA_ACT_PEDIT 7
 
-enum
-{
+enum {
 	TCA_PEDIT_UNSPEC,
 	TCA_PEDIT_TM,
 	TCA_PEDIT_PARMS,
@@ -14,8 +13,7 @@ enum
 };
 #define TCA_PEDIT_MAX (__TCA_PEDIT_MAX - 1)
                                                                                 
-struct tc_pedit_key
-{
+struct tc_pedit_key {
 	__u32           mask;  /* AND */
 	__u32           val;   /*XOR */
 	__u32           off;  /*offset */
@@ -24,8 +22,7 @@ struct tc_pedit_key
 	__u32           shift;
 };
                                                                                 
-struct tc_pedit_sel
-{
+struct tc_pedit_sel {
 	tc_gen;
 	unsigned char           nkeys;
 	unsigned char           flags;

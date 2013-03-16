@@ -55,7 +55,7 @@ extern void __assert __P((const char *, const char *, int, const char *));
 
 __END_DECLS
 
-# define assert(expr) \
+#define	assert(expr)							      \
   (__ASSERT_VOID_CAST ((expr) ? 0 :					      \
 		       (__assert (__STRING(expr), __FILE__, __LINE__,    \
 				       __ASSERT_FUNCTION), 0)))
@@ -67,7 +67,7 @@ __END_DECLS
    it demangles C++ function names.  */
 # if defined __cplusplus ? __GNUC_PREREQ (2, 6) : __GNUC_PREREQ (2, 4)
 #   define __ASSERT_FUNCTION	__PRETTY_FUNCTION__
-# else
+#  else
 #  if defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901L
 #   define __ASSERT_FUNCTION	__func__
 #  else
