@@ -90,7 +90,6 @@ DtimPeriod=1
 EncrypType=NONE
 FastConnect=0
 FixDfsLimit=0
-FixedTxMode=HT
 ForceRenewDHCP=1
 ForceTxBurst=0
 FragThreshold=2346
