@@ -1344,26 +1344,27 @@
 1) kernel: lib/int_sqrt.c: optimize square root algorithm.<br>
 2) kernel: net/ipv4: Timestamp option cannot overflow with prespecified addresses.<br>
 3) kernel: net/ipv4: Ensure that location of timestamp option is stored.<br>
-4) kernel: netfilter: nf_nat: place conntrack in source hash after SNAT is done.<br>
-5) kernel: netfilter: nf_nat: don't check if the tuple is unique when there is not any other choice.<br>
-6) kernel: netfilter: nf_nat_core: eliminate useless find_appropriate_src for IP_NAT_RANGE_PROTO_RANDOM.<br>
-7) kernel: netfilter: nf_nat: fix inverted logic for persistent NAT mappings.<br>
-8) kernel: mips: Use CONFIG_CPU_MIPSR2 in csum_partial.S.<br>
-9) kernel: mips: Redefine value of BRK_BUG.<br>
-10) kernel: mips: dsp: Fix DSP mask for registers.<br>
-11) kernel: mips: make __{,n,u}delay declarations match definitions and generic delay.h<br>
-12) kernel: pppoe: return ENOTTY on unknown ioctl requests.<br>
-13) kernel: ip_options_compile: properly handle unaligned pointer.<br>
-14) init.d: rework second wlan module support and small fixes.<br>
-15) init.d: use different mac adresses for ra/rai radio modules.<br>
-16) init.d: dnsmasq: use ddns_name=dmzip in hosts if dmz and ddns enable, instead allways use wap_ip.<br>
-17) init.d: move wscd init script to user/wscd/init.d - wscd not used in production builds(not security).<br>
-18) init.d: refactoring wlan interfaces managment code - cleanup/unify.<br>
-19) init.d: in bridge and apcli mode need reconfigure switch always after reconfig device(workaround in some chips).<br>
-20) init.d: fix disable AP interface in apcli mode.<br>
-21) init.d: fix MIMO PowerSave mode enable/disable.<br>
-22) configs: enable apcli/wds for all chips.<br>
-23) defaults: more compat with bcm/realtek devices.<br>
+4) kernel: net: tcp thin-stream detection.<br>
+5) kernel: netfilter: nf_nat: place conntrack in source hash after SNAT is done.<br>
+6) kernel: netfilter: nf_nat: don't check if the tuple is unique when there is not any other choice.<br>
+7) kernel: netfilter: nf_nat_core: eliminate useless find_appropriate_src for IP_NAT_RANGE_PROTO_RANDOM.<br>
+8) kernel: netfilter: nf_nat: fix inverted logic for persistent NAT mappings.<br>
+9) kernel: mips: Use CONFIG_CPU_MIPSR2 in csum_partial.S.<br>
+10) kernel: mips: Redefine value of BRK_BUG.<br>
+11) kernel: mips: dsp: Fix DSP mask for registers.<br>
+12) kernel: mips: make __{,n,u}delay declarations match definitions and generic delay.h<br>
+13) kernel: pppoe: return ENOTTY on unknown ioctl requests.<br>
+14) kernel: ip_options_compile: properly handle unaligned pointer.<br>
+15) init.d: rework second wlan module support and small fixes.<br>
+16) init.d: use different mac adresses for ra/rai radio modules.<br>
+17) init.d: dnsmasq: use ddns_name=dmzip in hosts if dmz and ddns enable, instead allways use wap_ip.<br>
+18) init.d: move wscd init script to user/wscd/init.d - wscd not used in production builds(not security).<br>
+19) init.d: refactoring wlan interfaces managment code - cleanup/unify.<br>
+20) init.d: in bridge and apcli mode need reconfigure switch always after reconfig device(workaround in some chips).<br>
+21) init.d: fix disable AP interface in apcli mode.<br>
+22) init.d: fix MIMO PowerSave mode enable/disable.<br>
+23) configs: enable apcli/wds for all chips.<br>
+24) defaults: more compat with bcm/realtek devices.<br>
 
 
 <br>
