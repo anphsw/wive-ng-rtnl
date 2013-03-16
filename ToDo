@@ -1,3 +1,2 @@
-) Add page for configure 2.4GHz wifi module in dual wan configuration
+) Add page for configure 2.4GHz wifi module in dual wlan configuration
 ) Rewrite usb managment in webui
-) Add /proc/rt3052/esw_cnt for traffic statistic per switch port.(need add in WebUI).
