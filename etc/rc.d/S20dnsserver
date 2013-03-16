@@ -28,12 +28,19 @@ gen_hosts() {
     echo "$lan_ipaddr	$HostName.lo"			>> /etc/hosts
     if [ "$real_wan_ipaddr" != "" ]; then
 	echo "$real_wan_ipaddr	wan.$HostName.lo"	>> /etc/hosts
-	if [ "$DDNS" != "" ]; then
-	    echo "$real_wan_ipaddr	$DDNS"		>> /etc/hosts
-	fi
     fi
     if [ -d /proc/sys/net/ipv6 ] && [ "$radvdEnabled" = "1" ]; then
 	echo "::1	localhost ipv6.$HostName.lo"	>> /etc/hosts
+    fi
+
+    # if dynamic dns and dmz enable - dnsmasq must set DDNS=DMZIP
+    # if dynamic dns and dmz disable - dnsmasq must set DDNS=WANIP
+    if [ "$DDNS" != "" ] && [ "$DDNSAccount" != "" ]; then
+	if [ "$DMZEnable" = "1" ] && [ "$DMZIPAddress" != "" ]; then
+	    echo "$DMZIPAddress		$DDNS"		>> /etc/hosts
+	elif [ "$real_wan_ipaddr" != "" ]; then
+	    echo "$real_wan_ipaddr	$DDNS"		>> /etc/hosts
+	fi
     fi
 
     # read for all write by root
@@ -41,7 +48,7 @@ gen_hosts() {
 }
 
 get_param() {
-    eval `nvram_buf_get 2860 dnsPEnabled HostName lan_ipaddr DDNS`
+    eval `nvram_buf_get 2860 dnsPEnabled HostName lan_ipaddr DDNS DDNSAccount DMZEnable DMZIPAddress`
     cname="/etc/dnsmasq.conf"
     fname="/etc/resolv.conf"
     hname="/etc/hosts"

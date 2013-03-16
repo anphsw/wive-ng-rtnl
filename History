@@ -1355,6 +1355,7 @@
 12) kernel: pppoe: return ENOTTY on unknown ioctl requests.<br>
 13) init.d: rework second wlan module support and small fixes.<br>
 14) init.d: use different mac adresses for ra/rai radio modules.<br>
+15) init.d: dnsmasq: use ddns_name=dmzip in hosts if dmz and ddns enable, instead allways use wap_ip.<br>
 
 <br>
 <br>
