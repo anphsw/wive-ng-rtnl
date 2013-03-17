@@ -404,8 +404,9 @@ out:
 static inline int udp6_csum_init(struct sk_buff *skb, struct udphdr *uh,
 				 int proto)
 {
+#ifndef CONFIG_UDP_LITE_DISABLE
 	int err;
-
+#endif
 	UDP_SKB_CB(skb)->partial_cov = 0;
 	UDP_SKB_CB(skb)->cscov = skb->len;
 
