@@ -208,6 +208,8 @@ extern UCHAR RateSwitchTableAdapt11N2S[];
 
 // ADAPT_RATE_TABLE - true if pTable is one of the Adaptive Rate Switch tables
 #define ADAPT_RATE_TABLE(pTable)	((pTable)==RateSwitchTableAdapt11N1S || (pTable)==RateSwitchTableAdapt11N2S || (pTable)==RateSwitchTable11N3S)
+#else
+#define ADAPT_RATE_TABLE(pTable)	false
 #endif // NEW_RATE_ADAPT_SUPPORT //
 
 
