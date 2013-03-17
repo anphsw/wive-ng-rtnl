@@ -4023,6 +4023,8 @@ static int tcp_copy_to_iovec(struct sock *sk, struct sk_buff *skb, int hlen)
 		tp->copied_seq += chunk;
 		tcp_rcv_space_adjust(sk);
 	}
+	/* This barrier is coupled with smp_rmb() in tcp_poll() */
+	smp_wmb();
 
 	local_bh_disable();
 	return err;
