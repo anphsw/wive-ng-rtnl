@@ -135,8 +135,8 @@ int udpv6_recvmsg(struct kiocb *iocb, struct sock *sk,
 	struct ipv6_pinfo *np = inet6_sk(sk);
 	struct inet_sock *inet = inet_sk(sk);
 	struct sk_buff *skb;
-	size_t copied;
-	int err, copy_only;
+	unsigned int ulen, copied;
+	int err;
 #ifndef CONFIG_UDP_LITE_DISABLE
 	int is_udplite = IS_UDPLITE(sk);
 #endif
@@ -152,28 +152,26 @@ try_again:
 	if (!skb)
 		goto out;
 
-	copied = skb->len - sizeof(struct udphdr);
-	if (copied > len) {
-		copied = len;
+	ulen = skb->len - sizeof(struct udphdr);
+	copied = len;
+	if (copied > ulen)
+		copied = ulen;
+	else if (copied < ulen)
+ 		msg->msg_flags |= MSG_TRUNC;
 		msg->msg_flags |= MSG_TRUNC;
-	}
 
 	/*
-	 * 	Decide whether to checksum and/or copy data.
+	 * If checksum is needed at all, try to do it while copying the
+	 * data.  If the data is truncated, or if we only want a partial
+	 * coverage checksum (UDP-Lite), do it before the copy.
 	 */
-	copy_only = (skb->ip_summed==CHECKSUM_UNNECESSARY);
 
-#ifndef CONFIG_UDP_LITE_DISABLE
-	if (is_udplite  ||  (!copy_only  &&  msg->msg_flags&MSG_TRUNC)) {
-#else
-	if (!copy_only  &&  msg->msg_flags&MSG_TRUNC) {
-#endif
-		if (__udp_lib_checksum_complete(skb))
+	if (copied < ulen || UDP_SKB_CB(skb)->partial_cov) {
+		if (udp_lib_checksum_complete(skb))
 			goto csum_copy_err;
-		copy_only = 1;
 	}
 
-	if (copy_only)
+	if (skb->ip_summed == CHECKSUM_UNNECESSARY)
 		err = skb_copy_datagram_iovec(skb, sizeof(struct udphdr),
 					      msg->msg_iov, copied       );
 	else {
@@ -216,7 +214,7 @@ try_again:
 
 	err = copied;
 	if (flags & MSG_TRUNC)
-		err = skb->len - sizeof(struct udphdr);
+		err = ulen;
 
 out_free:
 	skb_free_datagram_locked(sk, skb);
@@ -403,9 +401,22 @@ out:
 	return 0;
 }
 
-static inline int udp6_csum_init(struct sk_buff *skb, struct udphdr *uh)
-
+static inline int udp6_csum_init(struct sk_buff *skb, struct udphdr *uh,
+				 int proto)
 {
+	int err;
+
+	UDP_SKB_CB(skb)->partial_cov = 0;
+	UDP_SKB_CB(skb)->cscov = skb->len;
+
+#ifndef CONFIG_UDP_LITE_DISABLE
+	if (proto == IPPROTO_UDPLITE) {
+		err = udplite_checksum_init(skb, uh);
+		if (err)
+			return err;
+	}
+#endif
+
 	if (uh->check == 0) {
 		/* RFC 2460 section 8.1 says that we SHOULD log
 		   this error. Well, it is reasonable.
@@ -415,20 +426,19 @@ static inline int udp6_csum_init(struct sk_buff *skb, struct udphdr *uh)
 	}
 	if (skb->ip_summed == CHECKSUM_COMPLETE &&
 	    !csum_ipv6_magic(&skb->nh.ipv6h->saddr, &skb->nh.ipv6h->daddr,
-			     skb->len, IPPROTO_UDP, skb->csum             ))
+			     skb->len, proto, skb->csum))
 		skb->ip_summed = CHECKSUM_UNNECESSARY;
 
 	if (!skb_csum_unnecessary(skb))
 		skb->csum = ~csum_unfold(csum_ipv6_magic(&skb->nh.ipv6h->saddr,
 							 &skb->nh.ipv6h->daddr,
-							 skb->len, IPPROTO_UDP,
-							 0));
+							 skb->len, proto, 0));
 
-	return (UDP_SKB_CB(skb)->partial_cov = 0);
+	return 0;
 }
 
 int __udp6_lib_rcv(struct sk_buff **pskb, struct hlist_head udptable[],
-		   int is_udplite)
+		   int proto)
 {
 	struct sk_buff *skb = *pskb;
 	struct sock *sk;
@@ -448,9 +458,8 @@ int __udp6_lib_rcv(struct sk_buff **pskb, struct hlist_head udptable[],
 	if (ulen > skb->len)
 		goto short_packet;
 
-#ifndef CONFIG_UDP_LITE_DISABLE
-	if(! is_udplite ) {		/* UDP validates ulen. */
-#endif
+	if (proto == IPPROTO_UDP) {
+		/* UDP validates ulen. */
 		/* Check for jumbo payload */
 		if (ulen == 0)
 			ulen = skb->len;
@@ -465,16 +474,10 @@ int __udp6_lib_rcv(struct sk_buff **pskb, struct hlist_head udptable[],
 			daddr = &skb->nh.ipv6h->daddr;
 			uh = udp_hdr(skb);
 		}
-
-		if (udp6_csum_init(skb, uh))
-			goto discard;
-
-#ifndef CONFIG_UDP_LITE_DISABLE
-	} else 	{			/* UDP-Lite validates cscov. */
-		if (udplite6_csum_init(skb, uh))
-			goto discard;
 	}
-#endif
+
+	if (udp6_csum_init(skb, uh, proto))
+		goto discard;
 	/*
 	 *	Multicast receive code
 	 */
@@ -495,12 +498,10 @@ int __udp6_lib_rcv(struct sk_buff **pskb, struct hlist_head udptable[],
 
 		if (udp_lib_checksum_complete(skb))
 			goto discard;
-#ifndef CONFIG_UDP_LITE_DISABLE
-		UDP6_INC_STATS_BH(UDP_MIB_NOPORTS, is_udplite);
-#else
-		UDP6_INC_STATS_BH(UDP_MIB_NOPORTS, 0);
-#endif
 
+#ifndef CONFIG_UDP_LITE_DISABLE
+		UDP6_INC_STATS_BH(UDP_MIB_NOPORTS, proto == IPPROTO_UDPLITE);
+#endif
 		icmpv6_send(skb, ICMPV6_DEST_UNREACH, ICMPV6_PORT_UNREACH, 0, dev);
 
 		kfree_skb(skb);
@@ -516,16 +517,15 @@ int __udp6_lib_rcv(struct sk_buff **pskb, struct hlist_head udptable[],
 short_packet:
 	LIMIT_NETDEBUG(KERN_DEBUG "UDP%sv6: short packet: %d/%u\n",
 #ifndef CONFIG_UDP_LITE_DISABLE
-		       is_udplite? "-Lite" : "",  ulen, skb->len);
+		       proto == IPPROTO_UDPLITE ? "-Lite" : "",
 #else
-		       "",  ulen, skb->len);
+		       "",
 #endif
+		       ulen, skb->len);
 
 discard:
 #ifndef CONFIG_UDP_LITE_DISABLE
-	UDP6_INC_STATS_BH(UDP_MIB_INERRORS, is_udplite);
-#else
-	UDP6_INC_STATS_BH(UDP_MIB_INERRORS, 0);
+	UDP6_INC_STATS_BH(UDP_MIB_INERRORS, proto == IPPROTO_UDPLITE);
 #endif
 	kfree_skb(skb);
 	return(0);
@@ -533,7 +533,7 @@ discard:
 
 static __inline__ int udpv6_rcv(struct sk_buff **pskb)
 {
-	return __udp6_lib_rcv(pskb, udp_hash, 0);
+	return __udp6_lib_rcv(pskb, udp_hash, IPPROTO_UDP);
 }
 
 /*
