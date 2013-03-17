@@ -4749,12 +4749,12 @@ INT RtmpRaDevCtrlInit(
 	
 #ifdef CONFIG_STA_SUPPORT
 	pAd->OpMode = OPMODE_STA;
-	printk("RT3883/RT3662 STA Driver version: %s\n", STA_DRIVER_VERSION);
+	DBGPRINT(RT_DEBUG_TRACE, ("STA Driver version-%s\n", STA_DRIVER_VERSION));
 #endif // CONFIG_STA_SUPPORT //
 
 #ifdef CONFIG_AP_SUPPORT
 	pAd->OpMode = OPMODE_AP;
-	printk("RT3883/RT3662 AP Driver version: %s\n", AP_DRIVER_VERSION);
+	DBGPRINT(RT_DEBUG_TRACE, ("AP Driver version-%s\n", AP_DRIVER_VERSION));
 #endif // CONFIG_AP_SUPPORT //
 
 

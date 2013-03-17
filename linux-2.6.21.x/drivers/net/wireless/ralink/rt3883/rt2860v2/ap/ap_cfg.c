@@ -1534,7 +1534,7 @@ INT RTMPAPSetInformation(
     			{
 					RTMP_GET_OS_PID(pObj->IappPid, IappPid);
 					pObj->IappPid_nr = IappPid;
-					DBGPRINT(RT_DEBUG_TRACE, ("RT_SET_APD_PID::(IappPid=%lu(0x%lx))\n", IappPid, pObj->IappPid));
+					DBGPRINT(RT_DEBUG_TRACE, ("RT_SET_APD_PID::(IappPid=%lu(0x%x))\n", IappPid, pObj->IappPid));
 				}
     		}
 			break;
@@ -1551,7 +1551,7 @@ INT RTMPAPSetInformation(
     			{
 					RTMP_GET_OS_PID(pObj->apd_pid, apd_pid);
 					pObj->apd_pid_nr = apd_pid;
-					DBGPRINT(RT_DEBUG_TRACE, ("RT_SET_APD_PID::(ApdPid=%lu(0x%lx))\n", apd_pid, pObj->apd_pid));
+					DBGPRINT(RT_DEBUG_TRACE, ("RT_SET_APD_PID::(ApdPid=%lu(0x%x))\n", apd_pid, pObj->apd_pid));
 				}
     		}
 			break;
@@ -7761,7 +7761,7 @@ VOID RTMPAPIoctlMAC(
 					{
 						RTMP_IO_READ32(pAdapter, macAddr, &macValue);
 					    if (!bFromUI)
-						DBGPRINT(RT_DEBUG_OFF, ("MacAddr=0x%x, MacValue=0x%x\n", macAddr, macValue));
+						DBGPRINT(RT_DEBUG_TRACE, ("MacAddr=0x%x, MacValue=0x%x\n", macAddr, macValue));
 						sprintf(msg+strlen(msg), "[0x%08x]:%08x  ", macAddr , macValue);
 					}
 					else
@@ -7843,7 +7843,7 @@ VOID RTMPAPIoctlMAC(
 				return;
 					}
 				    if (!bFromUI)
-					DBGPRINT(RT_DEBUG_OFF, ("MacAddr=%02x, MacValue=0x%x\n", macAddr, macValue));
+					DBGPRINT(RT_DEBUG_TRACE, ("MacAddr=%02x, MacValue=0x%x\n", macAddr, macValue));
 					
 					RTMP_IO_WRITE32(pAdapter, macAddr, macValue);
 					sprintf(msg+strlen(msg), "[0x%08x]:%08x  ", macAddr, macValue);
@@ -7857,11 +7857,11 @@ VOID RTMPAPIoctlMAC(
 		{
 			if ((IdMac & 0x0f) == 0)
 			{
-				DBGPRINT(RT_DEBUG_OFF, ("\n0x%04x: ", IdMac));
+				DBGPRINT(RT_DEBUG_TRACE, ("\n0x%04x: ", IdMac));
 			}
 
 			RTMP_IO_READ32(pAdapter, IdMac, &macValue);
-			DBGPRINT(RT_DEBUG_OFF, ("%08x ", macValue));
+			DBGPRINT(RT_DEBUG_TRACE, ("%08x ", macValue));
 		}
 
 		bIsPrintAllMAC = TRUE;
