@@ -3414,6 +3414,8 @@ typedef struct _AP_ADMIN_CONFIG {
 	WSC_STA_PBC_PROBE_INFO	WscStaPbcProbeInfo;
 #endif // WSC_AP_SUPPORT //
 #endif // CONFIG_AP_SUPPORT //
+
+	UCHAR	EntryClientCount;
 } AP_ADMIN_CONFIG, *PAP_ADMIN_CONFIG;
 
 #ifdef IGMP_SNOOP_SUPPORT
@@ -7366,6 +7368,9 @@ VOID RTMP_OS_Del_Timer(
 VOID RTMPusecDelay(
 	IN	ULONG	usec);
 
+VOID RtmpOsMsDelay(
+	IN	ULONG	msec);
+
 NDIS_STATUS os_alloc_mem(
 	IN	RTMP_ADAPTER *pAd,
 	OUT	UCHAR **mem,
@@ -9649,7 +9654,7 @@ VOID	RTInitializeCmdQ(
 	IN	PCmdQ	cmdq);
 
 INT RTPCICmdThread(
-	IN ULONG Context);
+	IN VOID *Context);
 
 VOID CMDHandler(                                                                                                                                                
     IN PRTMP_ADAPTER pAd);

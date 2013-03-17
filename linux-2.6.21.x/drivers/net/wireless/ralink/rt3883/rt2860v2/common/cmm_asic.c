@@ -4878,23 +4878,35 @@ VOID AsicUpdateWAPIPN(
 VOID AsicVCORecalibration(
 	IN PRTMP_ADAPTER pAd)
 {
-	UCHAR BbpR49 = 0, Tssi = 0;
+	UCHAR BbpR49 = 0, Tssi = 0, RFValue = 0;
 
 #ifdef RALINK_ATE
 	if (ATE_ON(pAd))
 		return;
 #endif
+	if (pAd->EnableVCOReCal != TRUE)
+		return;
 
-	if (pAd->EnableVCOReCal == TRUE)
+	if (pAd->RefreshTssi == 0)
 	{
-		UCHAR RFValue = 0;
+		RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R49, &BbpR49);
+		Tssi = BbpR49 >> 1; // bit 0 is used for update flag
 
-		if (pAd->CommonCfg.DebugFlags & DBF_LOG_VCO_CAL)
-			DBGPRINT(RT_DEBUG_OFF, (" -VCO Cal- ") );
-
+		if (abs((pAd->LatchTssi) - Tssi) >= pAd->CommonCfg.VCORecalibrationThreshold)
+		{
 		RT30xxReadRFRegister(pAd, RF_R03, (PUCHAR)&RFValue);
 		RFValue = RFValue | 0x80; // bit 7=vcocal_en
 		RT30xxWriteRFRegister(pAd, RF_R03, (UCHAR)RFValue);
+
+			RTMPusecDelay(2000);
+			
+			RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R49, BbpR49 & 0xfe); // clear update flag
+			RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R49, &BbpR49);
+			pAd->RefreshTssi = 1;
+			
+			DBGPRINT(RT_DEBUG_TRACE, ("AsicVCORecalibration: vcocal_en=1, TSSI difference=%ld\n", abs((pAd->LatchTssi) - Tssi)));
+		}
+	}
 
 #ifdef TXBF_SUPPORT
 		// Do a Divider Calibration and update BBP registers
@@ -4910,14 +4922,11 @@ VOID AsicVCORecalibration(
 			for (idx = 1; idx < MAX_LEN_OF_MAC_TABLE; idx++)
 			{
 				MAC_TABLE_ENTRY		*pEntry;
-
 				pEntry = &pAd->MacTab.Content[idx];
 				if ((IS_ENTRY_CLIENT(pEntry)) && (pEntry->eTxBfEnCond))
 				{
 					BOOLEAN Cancelled;
-
 					RTMPCancelTimer(&pEntry->eTxBfProbeTimer, &Cancelled);
-
 					pEntry->bfState = READY_FOR_SNDG0;
 					eTxBFProbing(pAd, pEntry);
 				}
@@ -4925,22 +4934,6 @@ VOID AsicVCORecalibration(
 		}
 #endif // TXBF_SUPPORT //
 	}
-
-	if (pAd->RefreshTssi == 0)
-	{
-		RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R49, &BbpR49);
-		Tssi = BbpR49 >> 1; // bit 0 is used for update flag
-
-		if (abs((pAd->LatchTssi) - Tssi) >= pAd->CommonCfg.VCORecalibrationThreshold)
-		{
-			DBGPRINT(RT_DEBUG_TRACE, ("AsicVCORecalibration: vcocal_en=1, TSSI difference=%d\n", abs((pAd->LatchTssi) - Tssi)));
-
-			RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R49, BbpR49 & 0xfe); // clear update flag
-			RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R49, &BbpR49);
-			pAd->RefreshTssi = 1;
-		}
-	}
-}
 #endif // RT3883 //
 
 

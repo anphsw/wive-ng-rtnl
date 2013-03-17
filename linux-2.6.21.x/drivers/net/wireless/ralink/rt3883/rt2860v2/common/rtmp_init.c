@@ -894,7 +894,7 @@ VOID	NICReadEEPROMParameters(
 	EEPROM_VERSION_STRUC    Version;
 	EEPROM_ANTENNA_STRUC	Antenna;
 	EEPROM_NIC_CONFIG2_STRUC    NicConfig2;
-#ifdef CONFIG_RT2860V2_SET_MAC_FROM_EEPROM
+#ifdef READ_MAC_FROM_EEPROM
 	USHORT  Addr01,Addr23,Addr45 ;
 #endif
 	MAC_DW0_STRUC csr2;
@@ -917,7 +917,7 @@ VOID	NICReadEEPROMParameters(
 		pAd->EEPROMAddressNum = 8;     // 93C86
 	DBGPRINT(RT_DEBUG_TRACE, ("--> EEPROMAddressNum = %d\n", pAd->EEPROMAddressNum ));
 
-#ifdef CONFIG_RT2860V2_SET_MAC_FROM_EEPROM
+#ifdef READ_MAC_FROM_EEPROM
 	/* Read MAC setting from EEPROM and record as permanent MAC address */
 	DBGPRINT(RT_DEBUG_TRACE, ("Initialize MAC Address from E2PROM \n"));
 
@@ -958,32 +958,30 @@ VOID	NICReadEEPROMParameters(
 		
 		DBGPRINT(RT_DEBUG_TRACE, ("Use the MAC address what is assigned from Moudle Parameter. \n"));
 	}
-#ifdef CONFIG_RT2860V2_SET_MAC_FROM_EEPROM
+#ifdef READ_MAC_FROM_EEPROM
 	else {
 		COPY_MAC_ADDR(pAd->CurrentAddress, pAd->PermanentAddress);
 		DBGPRINT(RT_DEBUG_TRACE, ("Use the MAC address what is assigned from EEPROM. \n"));
 	}
 #endif
 
-/* FIX: For correct work APCLI/MBSSID need correct MAC */
 #ifndef NEW_MBSSID_MODE
 #if defined(MBSS_SUPPORT)
 	/* Test MAC[5] for 8 MAC support */
 	if ((pAd->CurrentAddress[5] % 8) != 0)
 	{
-	    pAd->CurrentAddress[0] |= 0x02;
+		pAd->CurrentAddress[0] |= 0x02; // diff from iNIC
 	    pAd->CurrentAddress[5] &= 0xf8;
 	}
 #elif defined(APCLI_SUPPORT)
 	/* Test MAC[5] for 2 MAC support */
 	if ((pAd->CurrentAddress[5] % 2) != 0)
 	{
-	    pAd->CurrentAddress[0] |= 0x02;
+		pAd->CurrentAddress[0] |= 0x02; // diff from iNIC
 	    pAd->CurrentAddress[5] &= 0xfe;
         }
 #endif
 #endif
-
 	/* Set the current MAC to ASIC */	
 	csr2.field.Byte0 = pAd->CurrentAddress[0];
 	csr2.field.Byte1 = pAd->CurrentAddress[1];
@@ -1644,7 +1642,15 @@ VOID	NICInitAsicFromEEPROM(
 	{
 		// Handle the difference when 1T
 		RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R1, &BBPR1);
-
+#ifdef RT3883
+		if (IS_RT3883(pAd))
+		{
+			BBPR1 &= ~0x18;
+			if (pAd->Antenna.field.TxPath >= 2)
+				BBPR1 |= 0x10;
+		}
+		else
+#endif /* RT3883 */
         {
 			if(pAd->Antenna.field.TxPath == 1)
 			{
@@ -1744,7 +1750,7 @@ retry:
 	pAd->BeaconOffset[13] = HW_BEACON_BASE13;
 	pAd->BeaconOffset[14] = HW_BEACON_BASE14;
 	pAd->BeaconOffset[15] = HW_BEACON_BASE15;
-#endif // SPECIFIC_BCN_BUF_SUPPORT //
+#endif // SPECIFIC_BCN_BUF_SUPPORT and MBSS_SUPPORT //
 
 	//
 	// write all shared Ring's base address into ASIC
@@ -3766,6 +3772,8 @@ VOID	UserCfgInit(
 			pAd->ApCfg.ApCliTab[j].DesiredTransmitSetting.field.MCS = MCS_AUTO;
 		}
 #endif // APCLI_SUPPORT //
+
+		pAd->ApCfg.EntryClientCount = 0;
 	}
 #endif // CONFIG_AP_SUPPORT //
 
@@ -4741,12 +4749,12 @@ INT RtmpRaDevCtrlInit(
 	
 #ifdef CONFIG_STA_SUPPORT
 	pAd->OpMode = OPMODE_STA;
-	DBGPRINT(RT_DEBUG_TRACE, ("STA Driver version-%s\n", STA_DRIVER_VERSION));
+	printk("RT3883/RT3662 STA Driver version: %s\n", STA_DRIVER_VERSION);
 #endif // CONFIG_STA_SUPPORT //
 
 #ifdef CONFIG_AP_SUPPORT
 	pAd->OpMode = OPMODE_AP;
-	DBGPRINT(RT_DEBUG_TRACE, ("AP Driver version-%s\n", AP_DRIVER_VERSION));
+	printk("RT3883/RT3662 AP Driver version: %s\n", AP_DRIVER_VERSION);
 #endif // CONFIG_AP_SUPPORT //
 
 

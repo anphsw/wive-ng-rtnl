@@ -3,12 +3,10 @@
 ULONG	RTDebugLevel = RT_DEBUG_ERROR;
 ULONG	RTDebugFunc = 0;
 
-#ifdef RTMP_RBUS_SUPPORT
-#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+#if defined (CONFIG_RA_HW_NAT)  || defined (CONFIG_RA_HW_NAT_MODULE)
 #include "../../../../../../../net/nat/hw_nat/ra_nat.h"
 #include "../../../../../../../net/nat/hw_nat/frame_engine.h"
 #endif
-#endif // RTMP_RBUS_SUPPORT //
 
 #ifdef VENDOR_FEATURE4_SUPPORT
 ULONG	OS_NumOfMemAlloc = 0, OS_NumOfMemFree = 0;
@@ -186,6 +184,12 @@ VOID RTMPusecDelay(
 
 	if (usec % 50)
 		udelay(usec % 50);
+}
+
+VOID RtmpOsMsDelay(
+	IN ULONG msec)
+{
+	mdelay(msec);
 }
 
 void RTMP_GetCurrentSystemTime(LARGE_INTEGER *time)
@@ -836,11 +840,7 @@ void announce_802_3_packet(
 #if defined(CONFIG_RA_CLASSIFIER)||defined(CONFIG_RA_CLASSIFIER_MODULE)
 	if(ra_classifier_hook_rx!= NULL)
 	{
-		unsigned int flags;
-		
-		RTMP_IRQ_LOCK(&pAd->page_lock, flags);
 		ra_classifier_hook_rx(pRxPkt, classifier_cur_cycle);
-		RTMP_IRQ_UNLOCK(&pAd->page_lock, flags);
 	}
 #endif // CONFIG_RA_CLASSIFIER //
 
@@ -856,16 +856,11 @@ void announce_802_3_packet(
 
 	if(ra_sw_nat_hook_rx!= NULL)
 	{
-		unsigned int flags;
 		pRxPkt->protocol = eth_type_trans(pRxPkt, pRxPkt->dev);
-		RTMP_IRQ_LOCK(&pAd->page_lock, flags);
-
 		if(ra_sw_nat_hook_rx(pRxPkt))
 		{
 			netif_rx(pRxPkt);
 		}
-
-		RTMP_IRQ_UNLOCK(&pAd->page_lock, flags);
 	}
 	else
 #else
@@ -1860,7 +1855,7 @@ INT RtmpOSNetDevDestory(
 void RtmpOSNetDevDetach(PNET_DEV pNetDev)
 {
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,31)
-	struct net_device_ops *pNetDevOps = pNetDev->netdev_ops;
+	struct net_device_ops *pNetDevOps = (struct net_device_ops *)pNetDev->netdev_ops;
 #endif
 
 	unregister_netdev(pNetDev);
@@ -1900,7 +1895,7 @@ int RtmpOSNetDevAttach(
 	int ret, rtnl_locked = FALSE;
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,31)
-	struct net_device_ops *pNetDevOps = pNetDev->netdev_ops;
+	struct net_device_ops *pNetDevOps = (struct net_device_ops *)pNetDev->netdev_ops;
 #endif
 
 	DBGPRINT(RT_DEBUG_TRACE, ("RtmpOSNetDevAttach()--->\n"));
@@ -1939,7 +1934,6 @@ int RtmpOSNetDevAttach(
 #endif
 
 		/* OS specific flags, here we used to indicate if we are virtual interface */
-		/* pNetDev->priv_flags = pDevOpHook->priv_flags; */		
 		RT_DEV_PRIV_FLAGS_SET(pNetDev, pDevOpHook->priv_flags);
 
 #if (WIRELESS_EXT < 21) && (WIRELESS_EXT >= 12)

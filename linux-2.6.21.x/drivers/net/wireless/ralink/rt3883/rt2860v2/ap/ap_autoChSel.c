@@ -947,12 +947,12 @@ void CheckPhyModeIsABand(
 	|| (pAd->CommonCfg.PhyMode == PHY_11ABGN_MIXED)
 	|| (pAd->CommonCfg.PhyMode == PHY_11AN_MIXED)
 	|| (pAd->CommonCfg.PhyMode == PHY_11AGN_MIXED)
+	|| (pAd->CommonCfg.PhyMode == PHY_11N_5G)
 #endif // DOT11_N_SUPPORT //
 	) ? TRUE : FALSE;
 
 	return;
 }
-
 
 UCHAR SelectBestChannel(
 	IN PRTMP_ADAPTER pAd,	

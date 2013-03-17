@@ -174,7 +174,7 @@ VOID NICInitRT3883RFRegisters(IN PRTMP_ADAPTER pAd)
 
 	// Init RF calibration
 	// Driver should toggle RF R02 bit7 before init RF registers
-	ULONG RfReg = 0;  
+	UCHAR RfReg = 0;
 	int i;
 
 	// Initialize RF register to default value
@@ -1082,8 +1082,8 @@ VOID	RTMPRT3883ReadChannelPwr(
 VOID	RTMPRT3883ABandSel(
 	IN	UCHAR	Channel)
 {
+#ifdef BOARD_EXT_SWITCH_LNA_2DOT4_5
 	UINT32 value;
-
 
 		//set GPIO2(gpio#25) to GPIO mode
 		value = le32_to_cpu(*(volatile u32 *)(0xb0000014));
@@ -1105,6 +1105,7 @@ VOID	RTMPRT3883ABandSel(
 			//2.4G band: set gpio#25 to 1
 			*((volatile uint32_t *)(0xb0000654)) = cpu_to_le32(0x2);
 		}
+#endif
 }
 
 #endif // RT3883 //

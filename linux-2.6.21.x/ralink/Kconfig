@@ -106,7 +106,6 @@ if RALINK_RT3052 || RALINK_RT3352
 endif
 if RALINK_RT3883
     source "drivers/net/wireless/ralink/rt3883/rt2860v2_ap/Kconfig"
-    source "drivers/net/wireless/ralink/rt3883/rt2860v2_sta/Kconfig"
 endif
 if HW_HAS_PCI
     menu "802.11 3090 AP pci-e wireless driver."

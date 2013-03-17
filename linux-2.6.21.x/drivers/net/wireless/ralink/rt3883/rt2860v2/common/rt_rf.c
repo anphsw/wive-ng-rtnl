@@ -54,7 +54,6 @@ NDIS_STATUS RT30xxWriteRFRegister(
 	RF_CSR_CFG_STRUC	rfcsr = { { 0 } };
 	UINT				i = 0;
 
-
 #ifdef RTMP_MAC_PCI
 	if ((pAd->bPCIclkOff == TRUE) || (pAd->LastMCUCmd == SLEEP_MCU_CMD))
 	{
@@ -63,7 +62,6 @@ NDIS_STATUS RT30xxWriteRFRegister(
 	}
 #endif // RTMP_MAC_PCI //
 
-	{
 		if (IS_RT3883(pAd))
 		{
 			ASSERT((regID <= 63)); // R0~R63
@@ -81,9 +79,9 @@ NDIS_STATUS RT30xxWriteRFRegister(
 				break;
 			i++;
 		}
-		while ((i < RETRY_LIMIT) && (!RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_NIC_NOT_EXIST)));
+	while ((i < MAX_BUSY_COUNT) && (!RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_NIC_NOT_EXIST)));
 
-		if ((i == RETRY_LIMIT) || (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_NIC_NOT_EXIST)))
+	if ((i == MAX_BUSY_COUNT) || (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_NIC_NOT_EXIST)))
 		{
 			DBGPRINT_RAW(RT_DEBUG_ERROR, ("Retry count exhausted or device removed!!!\n"));
 			return STATUS_UNSUCCESSFUL;
@@ -91,12 +89,32 @@ NDIS_STATUS RT30xxWriteRFRegister(
 
 		rfcsr.field.RF_CSR_WR = 1;
 		rfcsr.field.RF_CSR_KICK = 1;
-		rfcsr.field.TESTCSR_RFACC_REGNUM = regID; // R0~R31
-		rfcsr.field.RF_CSR_DATA = value;
+	rfcsr.field.TESTCSR_RFACC_REGNUM = regID;
 		
+	if (regID == RF_R17)
+	{
+		UCHAR IdRf;
+		UCHAR RfValue;
+		BOOLEAN beAdd;
+		
+		RT30xxReadRFRegister(pAd, RF_R17, &RfValue);
+		beAdd =  (RfValue < value) ? TRUE : FALSE;
+		IdRf = RfValue;
+		while(IdRf != value)
+		{
+			if (beAdd)
+				IdRf++;
+			else
+				IdRf--;
+			
+			rfcsr.field.RF_CSR_DATA = IdRf;
 		RTMP_IO_WRITE32(pAd, RF_CSR_CFG, rfcsr.word);
-		mdelay(2);
+			RtmpOsMsDelay(2);
+		}
 	}
+
+	rfcsr.field.RF_CSR_DATA = value;
+	RTMP_IO_WRITE32(pAd, RF_CSR_CFG, rfcsr.word);
 
 	return NDIS_STATUS_SUCCESS;
 }
@@ -125,8 +143,6 @@ NDIS_STATUS RT30xxReadRFRegister(
 	RF_CSR_CFG_STRUC	rfcsr = { { 0 } };
 	UINT				i=0, k=0;
 
-
-
 #ifdef RTMP_MAC_PCI
 	if ((pAd->bPCIclkOff == TRUE) || (pAd->LastMCUCmd == SLEEP_MCU_CMD))
 	{
@@ -135,7 +151,6 @@ NDIS_STATUS RT30xxReadRFRegister(
 	}
 #endif // RTMP_MAC_PCI //
 
-	{
 		if (IS_RT3883(pAd))
 		{
 			ASSERT((regID <= 63)); // R0~R63
@@ -147,24 +162,31 @@ NDIS_STATUS RT30xxReadRFRegister(
 
 		for (i=0; i<MAX_BUSY_COUNT; i++)
 		{
+		if(RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_NIC_NOT_EXIST))
+			return STATUS_UNSUCCESSFUL;
+
 			RTMP_IO_READ32(pAd, RF_CSR_CFG, &rfcsr.word);
 
 			if (rfcsr.field.RF_CSR_KICK == BUSY)									
-			{																
 				continue;													
-			}																
+
 			rfcsr.word = 0;
 			rfcsr.field.RF_CSR_WR = 0;
 			rfcsr.field.RF_CSR_KICK = 1;
 			rfcsr.field.TESTCSR_RFACC_REGNUM = regID;
 			RTMP_IO_WRITE32(pAd, RF_CSR_CFG, rfcsr.word);
+
 			for (k=0; k<MAX_BUSY_COUNT; k++)
 			{
+			if(RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_NIC_NOT_EXIST))
+				return STATUS_UNSUCCESSFUL;
+
 				RTMP_IO_READ32(pAd, RF_CSR_CFG, &rfcsr.word);
 
 				if (rfcsr.field.RF_CSR_KICK == IDLE)
 					break;
 			}
+
 			if ((rfcsr.field.RF_CSR_KICK == IDLE) &&
 				(rfcsr.field.TESTCSR_RFACC_REGNUM == regID))
 			{
@@ -172,12 +194,12 @@ NDIS_STATUS RT30xxReadRFRegister(
 				break;
 			}
 		}
+
 		if (rfcsr.field.RF_CSR_KICK == BUSY)
 		{																	
 			DBGPRINT_ERR(("RF read R%d=0x%X fail, i[%d], k[%d]\n", regID, rfcsr.word,i,k));
 			return STATUS_UNSUCCESSFUL;
 		}
-	}
 
 	return STATUS_SUCCESS;
 }

@@ -72,7 +72,6 @@ VOID RT28xx_MBSS_Init(
 	IN PRTMP_ADAPTER 		pAd,
 	IN PNET_DEV				pDevMain)
 {
-#define MBSS_MAX_DEV_NUM	32
 	PNET_DEV pDevNew;
 	INT32 IdBss, MaxNumBss;
 	INT status;
@@ -82,14 +81,12 @@ VOID RT28xx_MBSS_Init(
 	MaxNumBss = pAd->ApCfg.BssidNum;
 	if (MaxNumBss > MAX_MBSSID_NUM)
 		MaxNumBss = MAX_MBSSID_NUM;
-	/* End of if */
 
 	if (!pAd->FlgMbssInit)
 	{
 		/* first IdBss must not be 0 (BSS0), must be 1 (BSS1) */
 		for(IdBss=FIRST_MBSSID; IdBss<MAX_MBSSID_NUM; IdBss++)
 			pAd->ApCfg.MBSSID[IdBss].MSSIDDev = NULL;
-		/* End of for */
 	}
 
 	/* create virtual network interface */
@@ -132,11 +129,9 @@ VOID RT28xx_MBSS_Init(
 		
 		/* register this device to OS */
 		status = RtmpOSNetDevAttach(pDevNew, &netDevHook);
-
 	}
 
 	pAd->FlgMbssInit = TRUE;
-
 }
 
 
@@ -161,14 +156,11 @@ VOID RT28xx_MBSS_Close(
 {
 	UINT IdBss;
 
-
-
 	for(IdBss=FIRST_MBSSID; IdBss<MAX_MBSSID_NUM; IdBss++)
 	{
 		if (pAd->ApCfg.MBSSID[IdBss].MSSIDDev)
 			RtmpOSNetDevClose(pAd->ApCfg.MBSSID[IdBss].MSSIDDev);
 	}
-
 }
 
 
@@ -193,8 +185,6 @@ VOID RT28xx_MBSS_Remove(
 {
 	MULTISSID_STRUCT *pMbss;
 	UINT IdBss;
-
-
 
 	for(IdBss=FIRST_MBSSID; IdBss<MAX_MBSSID_NUM; IdBss++)
 	{
@@ -237,7 +227,6 @@ static INT32 RT28xx_MBSS_IdxGet(
 {
 	INT32 BssId = -1;
 	INT32 IdBss;
-
 
 	for(IdBss=0; IdBss<pAd->ApCfg.BssidNum; IdBss++)
 	{
@@ -329,7 +318,6 @@ INT MBSS_VirtualIF_Close(
 	APMakeAllBssBeacon(pAd);
 	APUpdateAllBeaconFrame(pAd);
 
-
 	VIRTUAL_IF_DOWN(pAd);
 
 	RT_MOD_DEC_USE_COUNT();
@@ -362,7 +350,6 @@ INT MBSS_VirtualIF_PacketSend(
     PNDIS_PACKET     pPkt = (PNDIS_PACKET)pPktSrc;
     INT              IdBss;
 
-
 	pAd = RTMP_OS_NETDEV_GET_PRIV(pDev);
 	ASSERT(pAd);
 
@@ -371,7 +358,7 @@ INT MBSS_VirtualIF_PacketSend(
     {
         RELEASE_NDIS_PACKET(pAd, pPkt, NDIS_STATUS_FAILURE);
         return 0;
-    } /* End of if */
+	}
 #endif // RALINK_ATE //
 
 	if ((RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_BSS_SCAN_IN_PROGRESS)) ||
@@ -381,15 +368,14 @@ INT MBSS_VirtualIF_PacketSend(
 		/* wlan is scanning/disabled/reset */
 		RELEASE_NDIS_PACKET(pAd, pPkt, NDIS_STATUS_FAILURE);
 		return 0;
-	} /* End of if */
+	}
 
 	if(!(RTMP_OS_NETDEV_STATE_RUNNING(pDev)))
 	{
 		/* the interface is down */
 		RELEASE_NDIS_PACKET(pAd, pPkt, NDIS_STATUS_FAILURE);
 		return 0;
-	} /* End of if */
-
+	}
 
     /* 0 is main BSS, dont handle it here */
     /* FIRST_MBSSID = 1 */
@@ -409,11 +395,9 @@ INT MBSS_VirtualIF_PacketSend(
 		}
 	}
 
-
     /* can not find the BSS so discard the packet */
 	RELEASE_NDIS_PACKET(pAd, pPkt, NDIS_STATUS_FAILURE);
 
-	
     return 0;
 } /* End of MBSS_VirtualIF_PacketSend */
 
@@ -452,7 +436,6 @@ INT MBSS_VirtualIF_Ioctl(
 	
 	if (!RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_INTERRUPT_IN_USE))
 		return -ENETDOWN;
-	/* End of if */
 
 	/* do real IOCTL */
 	return rt28xx_ioctl(pDev, pIoCtrl, Command);
@@ -460,4 +443,3 @@ INT MBSS_VirtualIF_Ioctl(
 
 #endif // MBSS_SUPPORT //
 
-/* End of ap_mbss.c */

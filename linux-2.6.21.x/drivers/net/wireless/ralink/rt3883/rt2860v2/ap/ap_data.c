@@ -334,7 +334,7 @@ NDIS_STATUS APSendPacket(
 
 		if (Wcid == MCAST_WCID)
 		{
-			if (pAd->MacTab.Size == 0)
+			if (pAd->ApCfg.EntryClientCount == 0)
 			{
 				RELEASE_NDIS_PACKET(pAd, pPacket, NDIS_STATUS_FAILURE);
 				return NDIS_STATUS_FAILURE;			
@@ -351,6 +351,8 @@ NDIS_STATUS APSendPacket(
 		}
 
 		// AP does not send packets before port secured.
+		if (pMbss != NULL)
+		{
 		if (((pMbss->AuthMode >= Ndis802_11AuthModeWPA)
 #ifdef DOT1X_SUPPORT
 			 || (pMbss->IEEE8021X == TRUE)
@@ -376,6 +378,7 @@ NDIS_STATUS APSendPacket(
 				return NDIS_STATUS_FAILURE;	
 			}
 		}
+	}
 	}
 	else
 	{
@@ -556,25 +559,19 @@ NDIS_STATUS APSendPacket(
 	// 3. otherwise, transmit the frame
 	else // (PsMode == PWR_ACTIVE) || (PsMode == PWR_UNKNOWN)
 	{
-
-
 #ifdef IGMP_SNOOP_SUPPORT
 		// if it's a mcast packet in igmp gourp.
 		// ucast clone it for all members in the gourp.
-		if (((InIgmpGroup == IGMP_IN_GROUP)
-				&& pGroupEntry
-				&&  (IgmpMemberCnt(&pGroupEntry->MemberList) > 0))
-			|| (InIgmpGroup == IGMP_PKT))
+		if (((InIgmpGroup == IGMP_IN_GROUP) && (pGroupEntry) && (IgmpMemberCnt(&pGroupEntry->MemberList) > 0)) ||
+		     (InIgmpGroup == IGMP_PKT))
 		{
-			NDIS_STATUS PktCloneResult = IgmpPktClone(pAd, pPacket, InIgmpGroup, pGroupEntry, QueIdx, UserPriority);
+			NDIS_STATUS PktCloneResult = IgmpPktClone(pAd, pSrcBufVA, pPacket, InIgmpGroup, pGroupEntry, QueIdx, UserPriority);
 			RELEASE_NDIS_PACKET(pAd, pPacket, NDIS_STATUS_FAILURE);
-			if (PktCloneResult != NDIS_STATUS_SUCCESS)
-				return NDIS_STATUS_FAILURE;
+			return PktCloneResult;
 		}
 		else
 #endif // IGMP_SNOOP_SUPPORT //
 		{
-
 			if (pAd->TxSwQueue[QueIdx].Number >= MAX_PACKETS_IN_QUEUE)
 			{
 #ifdef WMM_ACM_SUPPORT
@@ -617,7 +614,7 @@ NDIS_STATUS APSendPacket(
 #ifdef DOT11_N_SUPPORT
 	RTMP_BASetup(pAd, pMacEntry, UserPriority);
 #endif // DOT11_N_SUPPORT //
-//	pAd->RalinkCounters.OneSecOsTxCount[QueIdx]++; // TODO: for debug only. to be removed
+
 	return NDIS_STATUS_SUCCESS;
 }
 
@@ -3074,7 +3071,11 @@ VOID APHandleRxPsPoll(
         else
         {
 #ifdef UAPSD_AP_SUPPORT
+		/* deliver all queued UAPSD packets */
             UAPSD_AllPacketDeliver(pAd, pMacEntry);
+		
+		/* end the SP if exists */
+		UAPSD_MR_ENTRY_RESET(pAd, pMacEntry);
 #endif // UAPSD_AP_SUPPORT //
 
 			while(pMacEntry->PsQueue.Head)

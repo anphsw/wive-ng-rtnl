@@ -1638,7 +1638,6 @@ else
                                 }
                         }
 
-			//if (((pAd->Mlme.OneSecPeriodicRound % 10) == 0) && (pAd->RefreshTssi == 0))
                         if ((pAd->Mlme.OneSecPeriodicRound % 10) == 0)
                                 AsicVCORecalibration(pAd);
                 }
@@ -7345,7 +7344,8 @@ ULONG BssTableSetEntry(
 					BssEntrySet(pAd, &Tab->BssEntry[Idx], pBssid, Ssid, SsidLen, BssType, BeaconPeriod, CfParm, AtimWin, 
 						CapabilityInfo, SupRate, SupRateLen, ExtRate, ExtRateLen,pHtCapability, pAddHtInfo,HtCapabilityLen, AddHtInfoLen,
 						NewExtChanOffset, ChannelNo, Rssi, TimeStamp, CkipFlag, pEdcaParm, pQosCapability, pQbssLoad, LengthVIE, pVIE);
-                			Tab->BssOverlapNr = ((Tab->BssOverlapNr++) % MAX_LEN_OF_BSS_TABLE);
+					Tab->BssOverlapNr = Tab->BssOverlapNr + 1;
+					Tab->BssOverlapNr = Tab->BssOverlapNr % MAX_LEN_OF_BSS_TABLE;
 				}
 				return Idx;
 			}

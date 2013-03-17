@@ -295,14 +295,20 @@ VOID APStartUp(
 	COPY_MAC_ADDR(pAd->CommonCfg.Bssid, pAd->CurrentAddress);
 
 	// Select DAC according to HT or Legacy, write to BBP R1(bit4:3)
-	// In HT mode and two stream mode, both DACs are selected.
+	// In HT mode and 2/3 stream mode, both DACs are selected.
 	// In legacy mode or one stream mode, DAC-0 is selected.
 #if defined(RT2883) || defined(RT3883)
-	if (((pAd->MACVersion >= 0x28830300 && pAd->MACVersion < RALINK_3070_VERSION)) 
-		|| (pAd->MACVersion >= RALINK_3883_VERSION)) // 3*3
+	if (IS_RT2883(pAd) || IS_RT3883(pAd))
 	{
-		// reset Tx beamforming bit
-		// TODO: add bbpr1 tunning for eeprom value.
+		RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R1, &BBPR1);
+		BBPR1 &= (~0x18);
+#ifdef DOT11_N_SUPPORT
+		if ((pAd->CommonCfg.PhyMode >= PHY_11ABGN_MIXED) && (pAd->Antenna.field.TxPath >= 2))
+		{
+			BBPR1 |= 0x10;
+		}
+#endif /* DOT11_N_SUPPORT */
+		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R1, BBPR1);
 	}
 	else
 #endif // defined(RT2883) || defined(RT3883) //
@@ -1393,25 +1399,11 @@ VOID MacTableMaintenance(
 		if((pAd->MacTab.fAnyStationIsHT == FALSE) &&
 			(pAd->ApCfg.bGreenAPEnable == TRUE))
 		{
-#ifdef RTMP_RBUS_SUPPORT
-#ifdef COC_SUPPORT
-			if ((pAd->MacTab.Size==0) &&
-				(pAd->ApCfg.GreenAPLevel != GREENAP_WITHOUT_ANY_STAS_CONNECT))
-			{
-				EnableAPMIMOPS(pAd,TRUE);
-				pAd->ApCfg.GreenAPLevel = GREENAP_WITHOUT_ANY_STAS_CONNECT;
-				
-			}
-			else
-#endif // COC_SUPPORT //
-#endif // RTMP_RBUS_SUPPORT //
 			if (pAd->ApCfg.GreenAPLevel != GREENAP_ONLY_11BG_STAS)
 			{
 				EnableAPMIMOPS(pAd,FALSE);
 				pAd->ApCfg.GreenAPLevel = GREENAP_ONLY_11BG_STAS;
 			}
-			
-				
 		}
 		else
 		{
@@ -1931,7 +1923,7 @@ BOOLEAN ApCheckAccessControlList(
 
     if (Result == FALSE)
     {
-        printk("RT3662 - Wireless MAC %02x:%02x:%02x:%02x:%02x:%02x failed in ACL checking!\n",
+        printk("AP 5GHz - access denied for client MAC [%02x:%02x:%02x:%02x:%02x:%02x]!\n",
         pAddr[0],pAddr[1],pAddr[2],pAddr[3],pAddr[4],pAddr[5]);
     }
 
@@ -2486,12 +2478,11 @@ VOID EnableAPMIMOPS(
 	IN BOOLEAN ReduceCorePower)
 {
 	UCHAR	BBPR3 = 0,BBPR1 = 0;
-	ULONG	TxPinCfg = 0x00050F0A;//Gary 2007/08/09 0x050A0A
+	ULONG	TxPinCfg;
 	UCHAR	BBPR4=0;
 
 	UCHAR	CentralChannel;
 	//UINT32	Value=0;
-
 
 #ifdef RT305x
 	UCHAR 	RFValue=0;
@@ -2502,35 +2493,57 @@ VOID EnableAPMIMOPS(
 	// Turn off unused PA or LNA when only 1T or 1R
 #endif // RT305x //
 
-	if(pAd->CommonCfg.Channel>14)
-		TxPinCfg=0x00050F05;
+	if(pAd->CommonCfg.Channel <= 14)
+	{
+		TxPinCfg = 0x00050F0A;
 		
+		// Turn off unused PA or LNA when only 1T/1R
+#if defined(RT3593) || defined(RT2883) || defined(RT3883)
+		if (IS_RT3593(pAd) || IS_RT2883(pAd) || IS_RT3883(pAd))
+		{
+			TxPinCfg = 0x32050F0A;
+		
+			//Disable unused PA_PE
+			TxPinCfg = TxPinCfg & ~0x0300000D;
+			
+			//Disable unused LNA_PE
+			TxPinCfg = TxPinCfg & ~0x30000C00;
+		}
+		else
+#endif /* defined(RT3593) || defined(RT2883) || defined(RT3883) */
+		{
 	TxPinCfg &= 0xFFFFFFF3;
 	TxPinCfg &= 0xFFFFF3FF;
-	pAd->ApCfg.bGreenAPActive=TRUE;
-
-	CentralChannel = pAd->CommonCfg.CentralChannel;
-#ifdef RTMP_RBUS_SUPPORT
-#ifdef COC_SUPPORT
-#ifdef RT305x		
-	if( ReduceCorePower == TRUE)
-	{
-		/* Set Core Power to 1.1V */
-		DBGPRINT(RT_DEBUG_INFO, ("Set core power to 1.1V\n"));
-		RT30xxReadRFRegister(pAd, RF_R26, &RFValue);
-		RFValue &= 0x1F;        //clear bit[7~5]
-		RFValue |= 0xC0;
-		RT30xxWriteRFRegister(pAd, RF_R26, (UCHAR)RFValue);
+		}
 	}
 	else
 	{
-		DBGPRINT(RT_DEBUG_INFO, ("Set core power to default value\n"));
-		/* Set Core Power to default value */
-		RT30xxWriteRFRegister(pAd, RF_R26, RT305x_RFRegTable[RF_R26].Value);
+		TxPinCfg = 0x00050F05;
+
+		// Turn off unused PA or LNA when only 1T/1R
+#if defined(RT3593) || defined(RT2883) || defined(RT3883)
+		if (IS_RT3593(pAd) || IS_RT2883(pAd) || IS_RT3883(pAd))
+	{
+			TxPinCfg = 0x31050F05;
+			
+			//Disable unused PA_PE
+			TxPinCfg = TxPinCfg & ~0x0300000E;
+			
+			//Disable unused LNA_PE
+			TxPinCfg = TxPinCfg & ~0x30000C00;
 	}
-#endif // RT305x //
-#endif // COC_SUPPORT //
-#endif // RTMP_RBUS_SUPPORT //
+	else
+#endif /* defined(RT3593) || defined(RT2883) || defined(RT3883) */
+	{
+			TxPinCfg &= 0xFFFFFFF3;
+			TxPinCfg &= 0xFFFFF3FF;
+	}
+	}
+
+	pAd->ApCfg.bGreenAPActive=TRUE;
+
+	CentralChannel = pAd->CommonCfg.CentralChannel;
+
 	DBGPRINT(RT_DEBUG_INFO, ("Run with BW_20\n"));
 	pAd->CommonCfg.CentralChannel = pAd->CommonCfg.Channel;
 	CentralChannel = pAd->CommonCfg.Channel;
@@ -2542,6 +2555,9 @@ VOID EnableAPMIMOPS(
 
 	/* RF Bandwidth related registers would be set in AsicSwitchChannel() */
 	pAd->CommonCfg.BBPCurrentBW = BW_20;
+
+	AsicSwitchChannel(pAd, CentralChannel, FALSE);
+
 	if (pAd->Antenna.field.RxPath>1||pAd->Antenna.field.TxPath>1)
 	{
 		//TX Stream
@@ -2562,21 +2578,18 @@ VOID EnableAPMIMOPS(
 		RT30xxWriteRFRegister(pAd, RF_R01, RFValue);
 #endif // RT305x //
 	}
-	AsicSwitchChannel(pAd, CentralChannel, FALSE);
 
 	DBGPRINT(RT_DEBUG_INFO, ("EnableAPMIMOPS, 305x/28xx changes the # of antenna to 1\n"));
-
 }
 
 VOID DisableAPMIMOPS(
 	IN PRTMP_ADAPTER pAd)
 {
 	UCHAR	BBPR3=0,BBPR1=0;
-	ULONG	TxPinCfg = 0x00050F0A;//Gary 2007/08/09 0x050A0A
+	ULONG	TxPinCfg;
 
 	UCHAR	CentralChannel;
 	UINT32	Value=0;
-
 
 #ifdef RT305x
 	UCHAR 	RFValue=0;
@@ -2593,30 +2606,97 @@ VOID DisableAPMIMOPS(
 		RFValue |= 0x40;
 #endif // RT305x //
 
-	if(pAd->CommonCfg.Channel>14)
-		TxPinCfg=0x00050F05;
-	// Turn off unused PA or LNA when only 1T or 1R
+	if(pAd->CommonCfg.Channel <= 14)
+	{
+		TxPinCfg = 0x00050F0A;
+		
+		// Turn off unused PA or LNA when only 1T/1R, 2T/2R
+#if defined(RT3593) || defined(RT2883) || defined(RT3883)
+		if (IS_RT3593(pAd) || IS_RT2883(pAd) || IS_RT3883(pAd))
+		{
+			TxPinCfg = 0x32050F0A;
+			
+			// Disable unused PA_PE
+			if (pAd->Antenna.field.TxPath == 1)
+			{
+				TxPinCfg = TxPinCfg & ~0x0300000D;
+			}
+			else if (pAd->Antenna.field.TxPath == 2)
+			{
+				TxPinCfg = TxPinCfg & ~0x03000005;
+			}
+			
+			// Disable unused LNA_PE
+			if (pAd->Antenna.field.RxPath == 1)
+			{
+				TxPinCfg = TxPinCfg & ~0x30000C00;
+			}
+			else if (pAd->Antenna.field.RxPath == 2)
+			{
+				TxPinCfg = TxPinCfg & ~0x30000000;
+			}
+		}
+		else
+#endif /* defined(RT3593) || defined(RT2883) || defined(RT3883) */
+		{
 	if (pAd->Antenna.field.TxPath == 1)
 	{
 		TxPinCfg &= 0xFFFFFFF3;
 	}
+			
 	if (pAd->Antenna.field.RxPath == 1)
 	{
 		TxPinCfg &= 0xFFFFF3FF;
 	}
+		}
+	}
+	else
+	{
+		TxPinCfg = 0x00050F05;
 
+		// Turn off unused PA or LNA when only 1T/1R, 2T/2R
+#if defined(RT3593) || defined(RT2883) || defined(RT3883)
+		if (IS_RT3593(pAd) || IS_RT2883(pAd) || IS_RT3883(pAd))
+		{
+			TxPinCfg = 0x31050F05;
+			
+			//Disable unused PA_PE
+			if (pAd->Antenna.field.TxPath == 1)
+			{
+				TxPinCfg = TxPinCfg & ~0x0300000E;
+			}
+			else if (pAd->Antenna.field.TxPath == 2)
+			{
+				TxPinCfg = TxPinCfg & ~0x0300000A;
+			}
+			
+			//Disable unused LNA_PE
+			if (pAd->Antenna.field.RxPath == 1)
+			{
+				TxPinCfg = TxPinCfg & ~0x30000C00;
+			}
+			else if (pAd->Antenna.field.RxPath == 2)
+			{
+				TxPinCfg = TxPinCfg & ~0x30000000;
+			}
+		}
+		else
+#endif /* defined(RT3593) || defined(RT2883) || defined(RT3883) */
+		{
+			if (pAd->Antenna.field.TxPath == 1)
+			{
+				TxPinCfg &= 0xFFFFFFF3;
+			}
+			
+			if (pAd->Antenna.field.RxPath == 1)
+			{
+				TxPinCfg &= 0xFFFFF3FF;
+			}
+		}
+	}
 
 	pAd->ApCfg.bGreenAPActive=FALSE;
 
-#ifdef RTMP_RBUS_SUPPORT
-#ifdef COC_SUPPORT
-#ifdef RT305x
-		DBGPRINT(RT_DEBUG_INFO, ("Set core power to default value\n"));
-		/* Set Core Power to default value */
-		RT30xxWriteRFRegister(pAd, RF_R26, RT305x_RFRegTable[RF_R26].Value);
-#endif // RT305x //
-#endif // COC_SUPPORT //
-#endif // RTMP_RBUS_SUPPORT //
 	if ((pAd->CommonCfg.HtCapability.HtCapInfo.ChannelWidth == BW_40) && (pAd->CommonCfg.Channel != 14))
 	{
 		DBGPRINT(RT_DEBUG_INFO, ("Run with BW_40\n"));
@@ -2658,8 +2738,8 @@ VOID DisableAPMIMOPS(
 		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R4, Value);
 		/* RF Bandwidth related registers would be set in AsicSwitchChannel() */
 		pAd->CommonCfg.BBPCurrentBW = BW_40;
-		AsicSwitchChannel(pAd, CentralChannel, FALSE);
 
+		AsicSwitchChannel(pAd, CentralChannel, FALSE);
 	}
 
 	//Rx Stream
@@ -2700,7 +2780,6 @@ VOID DisableAPMIMOPS(
 #ifdef RT305x
 	RT30xxWriteRFRegister(pAd, RF_R01, RFValue);
 #endif // RT305x //
-
 
 	DBGPRINT(RT_DEBUG_INFO, ("DisableAPMIMOPS, 305x/28xx reserve only one antenna\n"));
 

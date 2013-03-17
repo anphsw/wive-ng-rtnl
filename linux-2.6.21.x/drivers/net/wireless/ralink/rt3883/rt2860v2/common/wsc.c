@@ -131,7 +131,7 @@ VOID WscSendNACK(
 	IN  MAC_TABLE_ENTRY *pEntry,
 	IN  PWSC_CTRL       pWscControl);
 
-static INT write_dat_file_thread(IN ULONG data);
+static INT write_dat_file_thread(IN VOID *Context);
 
 #ifdef CONFIG_STA_SUPPORT
 VOID WscLinkDown(
@@ -5783,8 +5783,6 @@ VOID	WscWriteSsidToDatFile(
 	UCHAR	apidx;
 #endif // CONFIG_AP_SUPPORT //
 	INT		offset = 0;
-	char tmpstr[128];
-	UCHAR tmpstr2[32], tempRandomByte = 0, idx = 0;
 
 	if (bNewFormat == FALSE)
 	{
@@ -7903,8 +7901,6 @@ void    WscWriteConfToDatFile(
 	STRING			WepKeyFormatName[10] = {0};
 	INT				tempStrLen = 0;
 
-	char tmpstr[128];
-
 	DBGPRINT(RT_DEBUG_TRACE, ("-----> WscWriteConfToDatFile\n"));
 
 #ifdef CONFIG_AP_SUPPORT
@@ -8601,8 +8597,8 @@ WriteFileOpenErr:
 	return;
 }
 #endif//CONFIG_AP_SUPPORT//
-static INT write_dat_file_thread (
-    IN ULONG Context)
+
+static INT write_dat_file_thread(IN VOID *Context)
 {
 	RTMP_OS_TASK *pTask;
 	RTMP_ADAPTER *pAd;
@@ -9044,7 +9040,6 @@ VOID WscUpdatePortCfgTimeout(
 {
 	PWSC_CTRL 		pWscControl = (PWSC_CTRL)FunctionContext;
 	PRTMP_ADAPTER 	pAd = (PRTMP_ADAPTER)pWscControl->pAd;
-	BOOLEAN			bRestart = TRUE;
 	PWSC_CREDENTIAL		pCredential = NULL;
 
 	if (pWscControl == NULL)

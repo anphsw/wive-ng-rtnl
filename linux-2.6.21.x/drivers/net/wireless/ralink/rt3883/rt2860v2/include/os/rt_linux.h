@@ -506,7 +506,7 @@ typedef	pid_t	THREAD_PID;
 #define KILL_THREAD_PID(_A, _B, _C)	kill_proc((_A), (_B), (_C))
 #endif
 
-typedef INT (*RTMP_OS_TASK_CALLBACK)(ULONG);
+typedef INT (*RTMP_OS_TASK_CALLBACK)(VOID*);
 typedef struct tasklet_struct  RTMP_NET_TASK_STRUCT;
 typedef struct tasklet_struct  *PRTMP_NET_TASK_STRUCT;
 
@@ -988,6 +988,7 @@ void linux_pci_unmap_single(void *handle, dma_addr_t dma_addr, size_t size, int 
 #define RTMP_OS_NETDEV_WAKE_QUEUE(_pNetDev)	netif_wake_queue((_pNetDev))
 #define RTMP_OS_NETDEV_CARRIER_OFF(_pNetDev)	netif_carrier_off((_pNetDev))
 
+
 #define QUEUE_ENTRY_TO_PACKET(pEntry) \
 	(PNDIS_PACKET)(pEntry)
 
@@ -1365,10 +1366,8 @@ extern int ra_mtd_read(int num, loff_t from, size_t len, u_char *buf);
 #define EEPROM_BIN_FILE_NAME  "/etc/Wireless/RT2860STA/e2p.bin"
 #endif // CONFIG_STA_SUPPORT //
 #endif // RTMP_MAC_PCI //
-
-
-
 #endif // RALINK_ATE //
+
 #define RTMP_OS_NETDEV_SET_PRIV		RtmpOsSetNetDevPriv
 #define RTMP_OS_NETDEV_GET_PRIV		RtmpOsGetNetDevPriv
 #define RT_DEV_PRIV_FLAGS_GET		RtmpDevPrivFlagsGet

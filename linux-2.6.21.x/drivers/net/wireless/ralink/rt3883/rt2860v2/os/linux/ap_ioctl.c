@@ -45,9 +45,11 @@ struct iw_priv_args ap_privtab[] = {
   IW_PRIV_TYPE_CHAR | 1024, IW_PRIV_TYPE_CHAR | 1024 ,
   "ar9_show"}, 
 #endif
+#ifdef WSC_AP_SUPPORT
   { RTPRIV_IOCTL_SET_WSCOOB,
   IW_PRIV_TYPE_CHAR | 1024, IW_PRIV_TYPE_CHAR | 1024 ,
   "set_wsc_oob"}, 
+#endif
 { RTPRIV_IOCTL_GET_MAC_TABLE,
   IW_PRIV_TYPE_CHAR | 1024, IW_PRIV_TYPE_CHAR | 1024 ,
   "get_mac_table"}, 
@@ -145,9 +147,8 @@ INT rt28xx_ap_ioctl(
     {
 		pObj->ioctl_if_type = INT_MAIN;
         pObj->ioctl_if = MAIN_MBSSID;
-//        DBGPRINT(RT_DEBUG_INFO, ("rt28xx_ioctl I/F(ra%d)(flags=%d): cmd = 0x%08x\n", pObj->ioctl_if, net_dev->priv_flags, cmd));
     }
-    if (RT_DEV_PRIV_FLAGS_GET(net_dev) == INT_MAIN)
+    else if (RT_DEV_PRIV_FLAGS_GET(net_dev) == INT_MBSSID)
     {
 		pObj->ioctl_if_type = INT_MBSSID;
 //    	if (!RTMPEqualMemory(net_dev->name, pAd->net_dev->name, 3))  // for multi-physical card, no MBSSID
@@ -159,7 +160,6 @@ INT rt28xx_ap_ioctl(
 	    	    {
 	    	        pObj->ioctl_if = index;
 	    	        
-//	    	        DBGPRINT(RT_DEBUG_INFO, ("rt28xx_ioctl I/F(ra%d)(flags=%d): cmd = 0x%08x\n", index, net_dev->priv_flags, cmd));
 	    	        break;
 	    	    }
 	    	}
