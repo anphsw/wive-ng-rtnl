@@ -121,7 +121,7 @@ config  RT2860V2_AP_80211N_DRAFT3
 #	bool "Single SKU"
 #	depends on RT2860V2_AP
 
-config  RT2860V2_MCAST_RATE_SPECIFIC
+config  RT2860V2_AP_MCAST_RATE_SPECIFIC
 	bool "User specific TX rate of mcast packets"
 	default y
 	depends on RT2860V2_AP

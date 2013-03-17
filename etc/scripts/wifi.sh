@@ -43,13 +43,11 @@ fi
 ########################################MULTICAST param######################################
 if [ "$CONFIG_RT2860V2_AP_IGMP_SNOOP" != "" ]; then
     eval `nvram_buf_get 2860 McastPhyMode McastMcs M2UEnabled`
-    if [ "$CONFIG_RT2860V2_MCAST_RATE_SPECIFIC" != "" ]; then
-        if [ "$McastPhyMode" != "" ]; then
-	    iwpriv "$1" set McastPhyMode=$McastPhyMode
-	fi
-	if [ "$McastMcs" != "" ]; then
-    	    iwpriv "$1" set McastMcs="$McastMcs"
-	fi
+    if [ "$McastPhyMode" != "" ]; then
+	iwpriv "$1" set McastPhyMode=$McastPhyMode
+    fi
+    if [ "$McastMcs" != "" ]; then
+        iwpriv "$1" set McastMcs="$McastMcs"
     fi
     if [ "$M2UEnabled" != "" ]; then
 	iwpriv "$1" set IgmpSnEnable="$M2UEnabled"
