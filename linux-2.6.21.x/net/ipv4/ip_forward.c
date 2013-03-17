@@ -113,14 +113,8 @@ int ip_forward(struct sk_buff *skb)
 	 * 2.To make sure vlan priority is the same in rx/tx packet
 	 * FIXME - Steven
 	 */
-#if !defined (CONFIG_RA_NAT_HW)
-	if(iph->tos != 0) {
+	if(iph->tos != 0)
 	    skb->priority = rt_tos2priority(iph->tos);
-	}
-#else
-	//For HW_NAT autobind need mark all packet
-	skb->priority = rt_tos2priority(iph->tos);
-#endif
 
 	return NF_HOOK(PF_INET, NF_IP_FORWARD, skb, skb->dev, rt->u.dst.dev,
 		       ip_forward_finish);

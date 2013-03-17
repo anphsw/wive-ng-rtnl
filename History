@@ -1365,18 +1365,19 @@
 22) kernel: rt3883/3662 driver up to 2.4.3.6 version.<br>
 23) kernel: rt305x: wifi driver fix IPv6 DAD issue.<br>
 24) kernel: hw_nat: disable extended debug.<br>
-25) init.d: rework second wlan module support and small fixes.<br>
-26) init.d: use different mac adresses for ra/rai radio modules.<br>
-27) init.d: dnsmasq: use ddns_name=dmzip in hosts if dmz and ddns enable, instead allways use wap_ip.<br>
-28) init.d: move wscd init script to user/wscd/init.d - wscd not used in production builds(not security).<br>
-29) init.d: refactoring wlan interfaces managment code - cleanup/unify.<br>
-30) init.d: in bridge and apcli mode need reconfigure switch always after reconfig device(workaround in some chips).<br>
-31) init.d: fix disable AP interface in apcli mode.<br>
-32) init.d: fix MIMO PowerSave mode enable/disable.<br>
-33) configs: enable apcli/wds for all chips.<br>
-34) defaults: more compat with bcm/realtek devices.<br>
-35) build_system: temp set test only in archive name.<br>
-36) goahead: remove very old dead code.<br>
+25) kernel: ip: remove old not needed hack for - remark all forward packets (~3% speedup).<br>
+26) init.d: rework second wlan module support and small fixes.<br>
+27) init.d: use different mac adresses for ra/rai radio modules.<br>
+28) init.d: dnsmasq: use ddns_name=dmzip in hosts if dmz and ddns enable, instead allways use wap_ip.<br>
+29) init.d: move wscd init script to user/wscd/init.d - wscd not used in production builds(not security).<br>
+30) init.d: refactoring wlan interfaces managment code - cleanup/unify.<br>
+31) init.d: in bridge and apcli mode need reconfigure switch always after reconfig device(workaround in some chips).<br>
+32) init.d: fix disable AP interface in apcli mode.<br>
+33) init.d: fix MIMO PowerSave mode enable/disable.<br>
+34) configs: enable apcli/wds for all chips.<br>
+35) defaults: more compat with bcm/realtek devices.<br>
+36) build_system: temp set test only in archive name.<br>
+37) goahead: remove very old dead code.<br>
 
 <br>
 <br>
