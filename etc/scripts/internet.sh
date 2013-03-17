@@ -123,8 +123,14 @@ apcli_config() {
 	    readdif_to_br $second_wlan_root_if
 	fi
 	if [ "$ApCliBridgeOnly" = "1" ]; then
-	    $LOG "Readd $first_wlan_apcli in br0"
-	    readdif_to_br $first_wlan_apcli
+	    if [ "$first_wlan_apcli" != "" ]; then
+		$LOG "Readd $first_wlan_apcli in br0"
+		readdif_to_br $first_wlan_apcli
+	    fi
+	    if [ "$second_wlan_apcli" != "" ]; then
+		$LOG "Readd $second_wlan_apcli in br0"
+		readdif_to_br $second_wlan_apcli
+	    fi
 	fi
 	if [ "$first_wlan_mbss" != "" ]; then
 	    addMBSSID $first_wlan_mbss

@@ -64,6 +64,9 @@ getSecWlanIfName() {
 	if [ "$CONFIG_RT3090_AP_MBSS" != "" ]; then
 	    second_wlan_mbss="rai"			# this is mask name vifs for second mbss wlan module
 	fi
+	if [ "$CONFIG_RT3090_AP_APCLI" != "" ]; then
+	    second_wlan_apcli="apclii0"			# this is name vif for first acli wlan module
+	fi
 	if [ "$CONFIG_RT3090_AP_WDS" != "" ]; then
 	    second_wlan_wds="wdsi"			# this is mask name vifs for second wds wlan module
 	fi
@@ -130,6 +133,8 @@ getWanIfName() {
     elif [ "$OperationMode" = "3" ]; then
 	if [ "$first_wlan_apcli" != "" ]; then
 	    wan_if="$first_wlan_apcli"
+	elif [ "$second_wlan_apcli" != "" ]; then
+	    wan_if="$second_wlan_apcli"
 	else
 	    echo "Driver not support APCLI mode."
 	    wan_if="$phys_wan_if"
