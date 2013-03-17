@@ -63,6 +63,11 @@ NDIS_STATUS APSendPacket(
     IN  PRTMP_ADAPTER   pAd,
     IN  PNDIS_PACKET    pPacket);
 
+NDIS_STATUS APInsertPsQueue(
+	IN PRTMP_ADAPTER pAd,
+	IN PNDIS_PACKET pPacket,
+	IN MAC_TABLE_ENTRY *pMacEntry,
+	IN UCHAR QueIdx);
 
 NDIS_STATUS APHardTransmit(
 	IN	PRTMP_ADAPTER	pAd,
@@ -531,8 +536,3 @@ VOID DisableAPMIMOPS(
 #endif // DOT11_N_SUPPORT //
 #endif  // __AP_H__
 
-NDIS_STATUS APInsertPsQueue(
-	IN PRTMP_ADAPTER pAd,
-	IN PNDIS_PACKET pPacket,
-	IN MAC_TABLE_ENTRY *pMacEntry,
-	IN UCHAR QueIdx);

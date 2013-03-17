@@ -32,6 +32,19 @@
 */
 #include "rt_config.h"
 
+#ifdef LINUX
+/* use native linux mcast/bcast adress checks. */
+#include <linux/etherdevice.h>
+
+#define IS_MULTICAST_MAC_ADDR(Addr)			(is_multicast_ether_addr(Addr) && ((Addr[0]) != 0xff))
+#define IS_IPV6_MULTICAST_MAC_ADDR(Addr)		(is_multicast_ether_addr(Addr) && ((Addr[0]) == 0x33))
+#define IS_BROADCAST_MAC_ADDR(Addr)			(is_broadcast_ether_addr(Addr))
+#else
+#define IS_MULTICAST_MAC_ADDR(Addr)			((((Addr[0]) & 0x01) == 0x01) && ((Addr[0]) != 0xff))
+#define IS_IPV6_MULTICAST_MAC_ADDR(Addr)		((((Addr[0]) & 0x01) == 0x01) && ((Addr[0]) == 0x33))
+#define IS_BROADCAST_MAC_ADDR(Addr)			((((Addr[0]) & 0xff) == 0xff))
+#endif
+
 static VOID APFindCipherAlgorithm(
 	IN	PRTMP_ADAPTER	pAd,
 	IN	TX_BLK			*pTxBlk);
@@ -308,7 +321,7 @@ NDIS_STATUS APSendPacket(
 
 		if (Wcid == MCAST_WCID)
 		{
-			if (pAd->MacTab.Size == 0)
+			if (pAd->ApCfg.EntryClientCount == 0)
 			{
 				RELEASE_NDIS_PACKET(pAd, pPacket, NDIS_STATUS_FAILURE);
 				return NDIS_STATUS_FAILURE;			
@@ -325,6 +338,8 @@ NDIS_STATUS APSendPacket(
 		}
 
 		// AP does not send packets before port secured.
+		if (pMbss != NULL)
+		{
 		if (((pMbss->AuthMode >= Ndis802_11AuthModeWPA)
 #ifdef DOT1X_SUPPORT
 			 || (pMbss->IEEE8021X == TRUE)
@@ -350,6 +365,7 @@ NDIS_STATUS APSendPacket(
 				return NDIS_STATUS_FAILURE;	
 			}
 		}
+	}
 	}
 	else
 	{
@@ -441,10 +457,6 @@ NDIS_STATUS APSendPacket(
 	RTMP_SET_PACKET_RTS(pPacket, RTSRequired);
 	RTMP_SET_PACKET_TXRATE(pPacket, Rate);
 	
-
-#ifdef LINUX
-#endif // LINUX //
-
 	//
 	// detect AC Category of trasmitting packets
 	// to tune AC0(BE) TX_OP (MAC reg 0x1300)
@@ -525,69 +537,26 @@ NDIS_STATUS APSendPacket(
 	else if ((PsMode == PWR_SAVE) && pMacEntry &&
 				IS_ENTRY_CLIENT(pMacEntry) && (Sst == SST_ASSOC))
 	{
-#ifdef UAPSD_AP_SUPPORT
-        /* put the U-APSD packet to its U-APSD queue by AC ID */
-        UINT32 ac_id = QueIdx - QID_AC_BE; /* should be >= 0 */
-
-
-        if (UAPSD_MR_IS_UAPSD_AC(pMacEntry, ac_id))
-            UAPSD_PacketEnqueue(pAd, pMacEntry, pPacket, ac_id);
-        else
-#endif // UAPSD_AP_SUPPORT //
-        {
-			if (pMacEntry->PsQueue.Number >= MAX_PACKETS_IN_PS_QUEUE)
-			{
-				RELEASE_NDIS_PACKET(pAd, pPacket, NDIS_STATUS_FAILURE);			
+		if (APInsertPsQueue(pAd, pPacket, pMacEntry, QueIdx)
+				!= NDIS_STATUS_SUCCESS)
 				return NDIS_STATUS_FAILURE;			
 			}
-            else
-            {
-			    RTMP_IRQ_LOCK(&pAd->irq_lock, IrqFlags);
-			    InsertTailQueue(&pMacEntry->PsQueue, PACKET_TO_QUEUE_ENTRY(pPacket));
-			    RTMP_IRQ_UNLOCK(&pAd->irq_lock, IrqFlags);
-            }
-        }
-
-		// mark corresponding TIM bit in outgoing BEACON frame
-#ifdef UAPSD_AP_SUPPORT
-        if (UAPSD_MR_IS_NOT_TIM_BIT_NEEDED_HANDLED(pMacEntry, QueIdx))
-        {
-            /* 1. the station is UAPSD station;
-               2. one of AC is non-UAPSD (legacy) AC;
-               3. the destinated AC of the packet is UAPSD AC. */
-            /* So we can not set TIM bit due to one of AC is legacy AC */
-        }
-        else
-        {
-#endif // UAPSD_AP_SUPPORT //
-
-			WLAN_MR_TIM_BIT_SET(pAd, apidx, Wcid);
-#ifdef UAPSD_AP_SUPPORT
-        }
-#endif // UAPSD_AP_SUPPORT //
-	}
 	// 3. otherwise, transmit the frame
 	else // (PsMode == PWR_ACTIVE) || (PsMode == PWR_UNKNOWN)
 	{
-
-
 #ifdef IGMP_SNOOP_SUPPORT
 		// if it's a mcast packet in igmp gourp.
 		// ucast clone it for all members in the gourp.
-		if (((InIgmpGroup == IGMP_IN_GROUP)
-				&& pGroupEntry
-				&&  (IgmpMemberCnt(&pGroupEntry->MemberList) > 0))
-			|| (InIgmpGroup == IGMP_PKT))
+		if (((InIgmpGroup == IGMP_IN_GROUP) && (pGroupEntry) && (IgmpMemberCnt(&pGroupEntry->MemberList) > 0)) ||
+		     (InIgmpGroup == IGMP_PKT))
 		{
-			NDIS_STATUS PktCloneResult = IgmpPktClone(pAd, pPacket, InIgmpGroup, pGroupEntry, QueIdx, UserPriority);
+			NDIS_STATUS PktCloneResult = IgmpPktClone(pAd, pSrcBufVA, pPacket, InIgmpGroup, pGroupEntry, QueIdx, UserPriority);
 			RELEASE_NDIS_PACKET(pAd, pPacket, NDIS_STATUS_FAILURE);
-			if (PktCloneResult != NDIS_STATUS_SUCCESS)
-				return NDIS_STATUS_FAILURE;
+			return PktCloneResult;
 		}
 		else
 #endif // IGMP_SNOOP_SUPPORT //
 		{
-
 			if (pAd->TxSwQueue[QueIdx].Number >= MAX_PACKETS_IN_QUEUE)
 			{
 #ifdef WMM_ACM_SUPPORT
@@ -630,7 +599,7 @@ NDIS_STATUS APSendPacket(
 #ifdef DOT11_N_SUPPORT
 	RTMP_BASetup(pAd, pMacEntry, UserPriority);
 #endif // DOT11_N_SUPPORT //
-//	pAd->RalinkCounters.OneSecOsTxCount[QueIdx]++; // TODO: for debug only. to be removed
+
 	return NDIS_STATUS_SUCCESS;
 }
 
@@ -1272,7 +1241,7 @@ VOID AP_AMPDU_Frame_Tx(
 
 		//
 		// build HTC+ 
-		// HTC control filed following QoS field
+		// HTC control field following QoS field
 		// 
 		if ((pAd->CommonCfg.bRdg == TRUE) 
 			&& (CLIENT_STATUS_TEST_FLAG(pTxBlk->pMacEntry, fCLIENT_STATUS_RDG_CAPABLE))
@@ -3240,7 +3209,7 @@ VOID APHandleRxMgmtFrame(
 		{
 			DBGPRINT(RT_DEBUG_TRACE, ("DataSize  = %d\n", pRxBlk->DataSize));
 			hex_dump("MGMT ???", (UCHAR *)pHeader, pRxBlk->pData - (UCHAR *) pHeader);
-			break;;
+			break;
 		}
 
 		if (pHeader->FC.SubType == SUBTYPE_ACTION)
@@ -3861,7 +3830,7 @@ VOID APHandleRxDataFrame(
 			}
 		}
 
-		// skip QOS contorl field
+		// skip QOS control field
 		pRxBlk->pData += 2;
 		pRxBlk->DataSize -=2;
 	}
@@ -3885,7 +3854,7 @@ VOID APHandleRxDataFrame(
 #endif
 		{
 			RX_BLK_SET_FLAG(pRxBlk, fRX_HTC);
-			// skip HTC contorl field
+			// skip HTC control field
 			pRxBlk->pData += 4;
 			pRxBlk->DataSize -= 4;
 		}

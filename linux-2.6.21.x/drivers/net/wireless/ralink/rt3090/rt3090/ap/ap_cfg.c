@@ -519,7 +519,7 @@ INT	Set_AP_WscPinCode_Proc(
 
 INT Set_AP_WscSecurityMode_Proc(    
 	IN  PRTMP_ADAPTER   pAdapter,     
-	IN  PUCHAR          arg);
+	IN  PSTRING         arg);
 #endif // WSC_AP_SUPPORT //
 
 #ifdef CONFIG_AP_SUPPORT
@@ -1151,7 +1151,7 @@ INT RTMPAPSetInformation(
     			{
 					RTMP_GET_OS_PID(pObj->IappPid, IappPid);
 					pObj->IappPid_nr = IappPid;
-					DBGPRINT(RT_DEBUG_TRACE, ("RT_SET_APD_PID::(IappPid=%lu(0x%x))\n", IappPid, pObj->IappPid));
+					DBGPRINT(RT_DEBUG_TRACE, ("RT_SET_APD_PID::(IappPid=%lu(0x%lx))\n", IappPid, pObj->IappPid));
 				}
     		}
 			break;
@@ -1306,7 +1306,7 @@ INT RTMPAPSetInformation(
     			{
 					RTMP_GET_OS_PID(pObj->apd_pid, apd_pid);
 					pObj->apd_pid_nr = apd_pid;
-					DBGPRINT(RT_DEBUG_TRACE, ("RT_SET_APD_PID::(ApdPid=%lu(0x%x))\n", apd_pid, pObj->apd_pid));
+					DBGPRINT(RT_DEBUG_TRACE, ("RT_SET_APD_PID::(ApdPid=%lu(0x%lx))\n", apd_pid, pObj->apd_pid));
 				}
     		}
 			break;
@@ -1317,13 +1317,11 @@ INT RTMPAPSetInformation(
 		}
     		else
     		{
-			UCHAR HashIdx;
 			MAC_TABLE_ENTRY *pEntry = NULL;
 			
 			DBGPRINT(RT_DEBUG_TRACE, ("RT_SET_DEL_MAC_ENTRY::(%02x:%02x:%02x:%02x:%02x:%02x)\n", Addr[0],Addr[1],Addr[2],Addr[3],Addr[4],Addr[5]));
 
-			HashIdx = MAC_ADDR_HASH_INDEX(Addr);
-			pEntry = pAd->MacTab.Hash[HashIdx];
+			pEntry = MacTableLookup(pAd, Addr);
 			
 			if (pEntry)
 			{
@@ -6460,7 +6458,7 @@ VOID RTMPAPIoctlMAC(
 					{
 						RTMP_IO_READ32(pAdapter, macAddr, &macValue);
 					    if (!bFromUI)
-						DBGPRINT(RT_DEBUG_TRACE, ("MacAddr=0x%x, MacValue=0x%x\n", macAddr, macValue));
+						DBGPRINT(RT_DEBUG_OFF, ("MacAddr=0x%x, MacValue=0x%x\n", macAddr, macValue));
 						sprintf(msg+strlen(msg), "[0x%08x]:%08x  ", macAddr , macValue);
 					}
 					else
@@ -6542,7 +6540,7 @@ VOID RTMPAPIoctlMAC(
 				return;
 					}
 				    if (!bFromUI)
-					DBGPRINT(RT_DEBUG_TRACE, ("MacAddr=%02x, MacValue=0x%x\n", macAddr, macValue));
+					DBGPRINT(RT_DEBUG_OFF, ("MacAddr=%02x, MacValue=0x%x\n", macAddr, macValue));
 					
 					RTMP_IO_WRITE32(pAdapter, macAddr, macValue);
 					sprintf(msg+strlen(msg), "[0x%08x]:%08x  ", macAddr, macValue);
@@ -6556,11 +6554,11 @@ VOID RTMPAPIoctlMAC(
 		{
 			if ((IdMac & 0x0f) == 0)
 			{
-				DBGPRINT(RT_DEBUG_TRACE, ("\n0x%04x: ", IdMac));
+				DBGPRINT(RT_DEBUG_OFF, ("\n0x%04x: ", IdMac));
 			}
 
 			RTMP_IO_READ32(pAdapter, IdMac, &macValue);
-			DBGPRINT(RT_DEBUG_TRACE, ("%08x ", macValue));
+			DBGPRINT(RT_DEBUG_OFF, ("%08x ", macValue));
 		}
 
 		bIsPrintAllMAC = TRUE;
@@ -8031,10 +8029,11 @@ INT	Set_WscStatus_Proc(
 	IN	PRTMP_ADAPTER	pAd, 
 	IN	PSTRING			arg)
 {
+#ifdef DEBUG
     POS_COOKIE  pObj = (POS_COOKIE) pAd->OS_Cookie;
     UCHAR	    apidx = pObj->ioctl_if;
-    
 	DBGPRINT(RT_DEBUG_TRACE, ("IF(ra%d) Set_WscStatus_Proc::(WscStatus=%d)\n", apidx, pAd->ApCfg.MBSSID[apidx].WscControl.WscStatus));
+#endif
 	return TRUE;
 }
 
@@ -8933,7 +8932,7 @@ VOID RTMPIoctlSetWSCOOB(
 */
 INT	Set_AP_WscSecurityMode_Proc(	
 	IN	PRTMP_ADAPTER	pAd, 	
-	IN	PUCHAR			arg)
+	IN	PSTRING		arg)
 {	
 	POS_COOKIE pObj = (POS_COOKIE) pAd->OS_Cookie;	
 	UCHAR		apidx = pObj->ioctl_if;	
@@ -8981,7 +8980,6 @@ INT	Set_DisConnectSta_Proc(
 	UCHAR					macAddr[MAC_ADDR_LEN];
 	PSTRING					value;
 	INT						i;
-	UCHAR HashIdx;
 	MAC_TABLE_ENTRY *pEntry = NULL;
 
 	if(strlen(arg) != 17)  //Mac address acceptable format 01:02:03:04:05:06 length 17
@@ -8995,9 +8993,7 @@ INT	Set_DisConnectSta_Proc(
 		AtoH(value, &macAddr[i++], 1);
 	}
 
-	HashIdx = MAC_ADDR_HASH_INDEX(macAddr);
-	pEntry = pAd->MacTab.Hash[HashIdx];
-
+	pEntry = MacTableLookup(pAd, macAddr);
 	if (pEntry)
 	{
 		MlmeDeAuthAction(pAd, pEntry, REASON_DISASSOC_STA_LEAVING, FALSE);

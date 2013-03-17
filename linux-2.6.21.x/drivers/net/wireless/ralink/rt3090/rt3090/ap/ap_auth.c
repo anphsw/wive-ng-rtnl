@@ -136,10 +136,9 @@ static VOID APMlmeDeauthReqAction(
         if (NStatus != NDIS_STATUS_SUCCESS) 
             return;
 
-        DBGPRINT(RT_DEBUG_TRACE,
-				("AUTH - Send DE-AUTH req to %02x:%02x:%02x:%02x:%02x:%02x\n",
+	printk("AP 2.4GHz - Send DE-AUTH req to %02x:%02x:%02x:%02x:%02x:%02x\n",
 				pInfo->Addr[0], pInfo->Addr[1], pInfo->Addr[2],
-				pInfo->Addr[3], pInfo->Addr[4], pInfo->Addr[5]));
+			pInfo->Addr[3], pInfo->Addr[4], pInfo->Addr[5]);
            		
         MgtMacHeaderInit(pAd, &Hdr, SUBTYPE_DEAUTH, 0, pInfo->Addr,
 						pAd->ApCfg.MBSSID[apidx].Bssid);

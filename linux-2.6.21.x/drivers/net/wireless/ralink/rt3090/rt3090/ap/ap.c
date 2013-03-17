@@ -193,18 +193,7 @@ VOID APStartUp(
 		   when re-open the ra0,
 		   i.e. ifconfig ra0 down, ifconfig ra0 up, ifconfig ra0 down, ifconfig up ... */
 		COPY_MAC_ADDR(pMbss->Bssid, pAd->CurrentAddress);
-#ifdef NEW_MBSSID_MODE
-		if (apidx > 0) 
-		{
-			/* new multipleBssid mode 	
-			 * extended multiple BSSIDs Byte0 bit 1 should be set to 1
-			 */
-			pMbss->Bssid.Bssid[0] += 2; 	
-			pMbss->Bssid.Bssid[0] += ((apidx - 1) << 2);
-		}
-#else
 		pMbss->Bssid[5] += apidx;
-#endif // NEW_MBSSID_MODE //
 
 		if (pMbss->MSSIDDev != NULL)
 		{
@@ -1264,8 +1253,6 @@ VOID MacTableMaintenance(
 					EnableAPMIMOPS(pAd,FALSE);
 					pAd->ApCfg.GreenAPLevel=GREENAP_ONLY_11BG_STAS;
 				}
-			
-				
 		}
 		else
 		{
@@ -1760,7 +1747,7 @@ BOOLEAN ApCheckAccessControlList(
 
     if (Result == FALSE)
     {
-        printk("RT3092 - Wireless MAC %02x:%02x:%02x:%02x:%02x:%02x failed in ACL checking!\n",
+        printk("AP 2.4GHz - access denied for client MAC [%02x:%02x:%02x:%02x:%02x:%02x]!\n",
         pAddr[0],pAddr[1],pAddr[2],pAddr[3],pAddr[4],pAddr[5]);
     }
 
@@ -2303,7 +2290,7 @@ VOID APOverlappingBSSScan(
 VOID EnableAPMIMOPS(
 	IN PRTMP_ADAPTER pAd, IN BOOLEAN ReduceCorePower)
 {
-	UCHAR	BBPR3 = 0,BBPR1 = 0;
+	UCHAR	BBPR3 = 0;
 #ifdef RT30xx
 	UINT32 	macdata=0;
 
@@ -2320,6 +2307,7 @@ VOID EnableAPMIMOPS(
 	DBGPRINT(RT_DEBUG_INFO, ("EnableAPMIMOPS, 30xx changes the # of antenna to 1\n"));
 #else
 	ULONG	TxPinCfg = 0x00050F0A;//Gary 2007/08/09 0x050A0A
+	UCHAR	BBPR1=0;
 	UCHAR	BBPR4=0;
 
 	UCHAR	CentralChannel;
@@ -2371,7 +2359,7 @@ VOID EnableAPMIMOPS(
 VOID DisableAPMIMOPS(
 	IN PRTMP_ADAPTER pAd)
 {
-	UCHAR	BBPR3=0,BBPR1=0;
+	UCHAR	BBPR3=0;
 #ifdef RT30xx
 	UINT32 	macdata=0;
 	RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R3, &BBPR3);
@@ -2386,7 +2374,7 @@ VOID DisableAPMIMOPS(
 	DBGPRINT(RT_DEBUG_INFO, ("DisableAPMIMOPS, 30xx reserve only one antenna\n"));
 #else
 	ULONG	TxPinCfg = 0x00050F0A;//Gary 2007/08/09 0x050A0A
-
+	UCHAR	BBPR1=0;
 	UCHAR	CentralChannel;
 	UINT32	Value=0;
 

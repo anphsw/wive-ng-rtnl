@@ -131,18 +131,22 @@ static VOID IGMPTableDisplay(
 	MULTICAST_FILTER_TABLE_ENTRY *pEntry = NULL;
 	PMULTICAST_FILTER_TABLE pMulticastFilterTable = pAd->pMulticastFilterTable;
 
+	printk("Multicast filter table: ");
+
 	if (pMulticastFilterTable == NULL)
 	{
-		DBGPRINT(RT_DEBUG_OFF, ("%s Multicase filter table is not ready.\n", __FUNCTION__));
+		printk("Table is not ready!\n");
 		return;
 	}
 
 	// if FULL, return
 	if (pMulticastFilterTable->Size == 0)
 	{
-		DBGPRINT(RT_DEBUG_ERROR, ("Table empty.\n"));
+		printk("Table is empty.\n");
 		return;
 	}
+
+	printk("\n");
 
 	// allocate one MAC entry
 	RTMP_SEM_LOCK(&pMulticastFilterTable->MulticastFilterTabLock);
@@ -155,16 +159,14 @@ static VOID IGMPTableDisplay(
 			PMEMBER_ENTRY pMemberEntry = NULL;
 			pEntry = &pMulticastFilterTable->Content[i];
 
-			DBGPRINT(RT_DEBUG_OFF, ("IF(%s) entry #%d, type=%s, GrpId=(%02x:%02x:%02x:%02x:%02x:%02x) memberCnt=%d\n",
+			printk("IF(%s) entry #%d, type=%s, GrpId=(%02x:%02x:%02x:%02x:%02x:%02x) memberCnt=%d\n",
 				RTMP_OS_NETDEV_GET_DEVNAME(pEntry->net_dev), i, (pEntry->type==0 ? "static":"dynamic"),
-				PRINT_MAC(pEntry->Addr), IgmpMemberCnt(&pEntry->MemberList)));
+				PRINT_MAC(pEntry->Addr), IgmpMemberCnt(&pEntry->MemberList));
 
 			pMemberEntry = (PMEMBER_ENTRY)pEntry->MemberList.pHead;
 			while (pMemberEntry)
 			{
-				DBGPRINT(RT_DEBUG_OFF, ("member mac=(%02x:%02x:%02x:%02x:%02x:%02x)\n",
-										PRINT_MAC(pMemberEntry->Addr)));
-
+				printk("  member MAC=(%02x:%02x:%02x:%02x:%02x:%02x)\n", PRINT_MAC(pMemberEntry->Addr));
 				pMemberEntry = pMemberEntry->pNext;
 			}
 		}
@@ -967,7 +969,6 @@ void rtmp_read_igmp_snoop_from_file(
 	}
 }
 
-
 inline BOOLEAN IPv4MulticastFilterExcluded(IN PUCHAR pDstMacAddr)
 {
 	UINT32 DstIpAddr;
@@ -975,24 +976,23 @@ inline BOOLEAN IPv4MulticastFilterExcluded(IN PUCHAR pDstMacAddr)
 	if(!isIgmpMacAddr(pDstMacAddr))
 		return FALSE;
 
-	// check IGMP packet
+	/* Check IGMP packet */
 	if(*(pDstMacAddr + 23) == IGMP_PROTOCOL_DESCRIPTOR)
 		return TRUE;
 
-	// Destination Ip address of IP header
+	/* Get destination Ip address of IP header */
 	DstIpAddr = ntohl(*((UINT32*)(pDstMacAddr + 30)));
 
-	// check SSDP packet (239.255.255.250)
-	if( DstIpAddr == 0xEFFFFFFA)
+	/* Check address is local multicast */
+	if ((DstIpAddr & 0xffffff00) == 0xe0000000)
 		return TRUE;
 
-	// check IANA reserved group 224.0.0.X (e.g. mDNS 224.0.0.251)
-	if( (DstIpAddr & 0xFFFFFF00) == 0xE0000000)
+	/* Check address is SSDP */
+	if (DstIpAddr == 0xeffffffa)
 		return TRUE;
 
 	return FALSE;
 }
-
 
 NDIS_STATUS IgmpPktInfoQuery(
 	IN PRTMP_ADAPTER pAd,
@@ -1048,6 +1048,7 @@ NDIS_STATUS IgmpPktInfoQuery(
 
 NDIS_STATUS IgmpPktClone(
 	IN PRTMP_ADAPTER pAd,
+	IN PUCHAR pSrcBufVA,
 	IN PNDIS_PACKET pPacket,
 	IN INT IgmpPktInGroup,
 	IN PMULTICAST_FILTER_TABLE_ENTRY pGroupEntry,
@@ -1066,6 +1067,7 @@ NDIS_STATUS IgmpPktClone(
 	INT MacEntryIdx;
 	BOOLEAN bContinue;
 	PUCHAR pMemberAddr = NULL;
+	PUCHAR pSrcMAC = NULL;
 
 	bContinue = FALSE;
 
@@ -1084,12 +1086,14 @@ NDIS_STATUS IgmpPktClone(
 	else if (IgmpPktInGroup == IGMP_PKT)
 	{
 		pNetDev = GET_OS_PKT_NETDEV(pPacket);
+		pSrcMAC = pSrcBufVA + 6;
 		
 		for(MacEntryIdx=1; MacEntryIdx<MAX_NUMBER_OF_MAC; MacEntryIdx++)
 		{
 			pMacEntry = &pAd->MacTab.Content[MacEntryIdx];
-			if (IS_ENTRY_CLIENT(pMacEntry)
-				&& get_netdev_from_bssid(pAd, pMacEntry->apidx) == pNetDev)
+			if ((pMacEntry && IS_ENTRY_CLIENT(pMacEntry)) &&
+			    (get_netdev_from_bssid(pAd, pMacEntry->apidx) == pNetDev) &&
+			    (!MAC_ADDR_EQUAL(pMacEntry->Addr, pSrcMAC))) /* DAD IPv6 issue */
 			{
 				pMemberAddr = pMacEntry->Addr;
 				bContinue = TRUE;
@@ -1112,7 +1116,7 @@ NDIS_STATUS IgmpPktClone(
 			if (!pSkbClone)
 				return NDIS_STATUS_FAILURE;
 			
-			RTMP_SET_PACKET_WCID(pSkbClone, (UCHAR)Aid);
+			RTMP_SET_PACKET_WCID(pSkbClone, (UCHAR)pMacEntry->Aid);
 			// Pkt type must set to PKTSRC_NDIS.
 			// It cause of the deason that APHardTransmit()
 			// doesn't handle PKTSRC_DRIVER pkt type in version 1.3.0.0.
@@ -1161,8 +1165,9 @@ NDIS_STATUS IgmpPktClone(
 			for(MacEntryIdx=pMacEntry->Aid + 1; MacEntryIdx<MAX_NUMBER_OF_MAC; MacEntryIdx++)
 			{
 				pMacEntry = &pAd->MacTab.Content[MacEntryIdx];
-				if (IS_ENTRY_CLIENT(pMacEntry)
-					&& get_netdev_from_bssid(pAd, pMacEntry->apidx) == pNetDev)
+				if ((pMacEntry && IS_ENTRY_CLIENT(pMacEntry)) && 
+				    (get_netdev_from_bssid(pAd, pMacEntry->apidx) == pNetDev) &&
+				    (!MAC_ADDR_EQUAL(pMacEntry->Addr, pSrcMAC)))
 				{
 					pMemberAddr = pMacEntry->Addr;
 					bContinue = TRUE;
@@ -1250,7 +1255,6 @@ BOOLEAN isMldPkt(
 
 BOOLEAN IPv6MulticastFilterExcluded(IN PUCHAR pDstMacAddr)
 {
-	BOOLEAN result = FALSE;
 	PUCHAR pIpHeader;
 	PRT_IPV6_HDR pIpv6Hdr;
 	PRT_IPV6_ADDR pIpv6DstAddr;
@@ -1274,14 +1278,9 @@ BOOLEAN IPv6MulticastFilterExcluded(IN PUCHAR pDstMacAddr)
 	for (idx = 0; idx < IPV6_MULTICAST_FILTER_EXCLUED_SIZE; idx++)
 	{
 		if (nextProtocol == IPv6MulticastFilterExclued[idx])
-		{
-			result = TRUE;
-			break;
-		}
+			return TRUE;
 	}
 	
-	if(result == FALSE)
-	{
 		// SSDP
 		// FF0x:0000:0000:0000:0000:0000:0000:000C
 		// mDNS
@@ -1293,12 +1292,10 @@ BOOLEAN IPv6MulticastFilterExcluded(IN PUCHAR pDstMacAddr)
 		            pIpv6DstAddr->ipv6_addr32[2] == 0 &&
 		     (ntohl(pIpv6DstAddr->ipv6_addr32[3]) == 0x0000000C ||
 		      ntohl(pIpv6DstAddr->ipv6_addr32[3]) == 0x000000FB ) )
-			result = TRUE;
-	}
+		return TRUE;
 
-	return result;
+	return FALSE;
 }
-
 
 /*  MLD v1 messages have the following format:
 	0                   1                   2                   3

@@ -2663,6 +2663,8 @@ typedef struct _AP_ADMIN_CONFIG {
 	ULONG MAX_PSDU_LEN; // Maximum PSDU length	
 #endif // RT3593 //
 #endif // DOT11_N_SUPPORT //
+
+	UCHAR	EntryClientCount;
 } AP_ADMIN_CONFIG, *PAP_ADMIN_CONFIG;
 
 #ifdef IGMP_SNOOP_SUPPORT
@@ -7950,7 +7952,7 @@ VOID	RTInitializeCmdQ(
 	IN	PCmdQ	cmdq);
 
 INT RTPCICmdThread(
-	IN ULONG Context);
+	IN VOID *Context);
 
 VOID CMDHandler(                                                                                                                                                
     IN PRTMP_ADAPTER pAd);

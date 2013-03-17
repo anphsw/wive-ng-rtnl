@@ -401,27 +401,15 @@
 
 #define MAX_MBSSID_NUM				1
 #ifdef MBSS_SUPPORT
-#undef	MAX_MBSSID_NUM
-#ifdef SPECIFIC_BCN_BUF_SUPPORT
+// TODO: HW_BEACON_MAX_COUNT is also defined in rtmp_mac.h, how to sync these two definitions???
+#if defined(RT3352) || defined(RT3883) && defined (CONFIG_16MBSSID_MODE)
 #define HW_BEACON_MAX_COUNT			16
+#else
+#define HW_BEACON_MAX_COUNT			8
+#endif // defined(RT3352) || defined(RT3883) && defined (CONFIG_16MBSSID_MODE) //
 
-/* 	In 16-MBSS support mode, if AP-Client is enabled, 
-	the last 8-MBSS would be occupied for AP-Client using. */
-#ifdef APCLI_SUPPORT
-#define MAX_MBSSID_NUM				(8 - MAX_MESH_NUM)
-#else
-#define MAX_MBSSID_NUM				(16 - MAX_MESH_NUM)
-#endif // APCLI_SUPPORT //
-#else
-#define HW_BEACON_MAX_COUNT			8
+#undef	MAX_MBSSID_NUM
 #define MAX_MBSSID_NUM				(HW_BEACON_MAX_COUNT - MAX_MESH_NUM - MAX_APCLI_NUM)
-#endif // SPECIFIC_BCN_BUF_SUPPORT //
-#else
-#ifdef SPECIFIC_BCN_BUF_SUPPORT
-#define HW_BEACON_MAX_COUNT			16
-#else
-#define HW_BEACON_MAX_COUNT			8
-#endif // SPECIFIC_BCN_BUF_SUPPORT //
 #endif // MBSS_SUPPORT //
 
 /* sanity check for apidx */

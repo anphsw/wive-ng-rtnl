@@ -227,13 +227,14 @@ int rt28xx_close(IN PNET_DEV dev)
 #endif // WMM_ACM_SUPPORT //
 
 
-
 #ifdef WDS_SUPPORT
 	WdsDown(pAd);
 #endif // WDS_SUPPORT //
 
 
 	RTMP_SET_FLAG(pAd, fRTMP_ADAPTER_HALT_IN_PROGRESS);
+
+	mdelay(20); /* wait for disconnect requests transmitted */
 
 	for (i = 0 ; i < NUM_OF_TX_RING; i++)
 	{
@@ -442,7 +443,7 @@ int rt28xx_open(IN PNET_DEV dev)
 #endif // CONFIG_APSTA_MIXED_SUPPORT //
 
 #if WIRELESS_EXT >= 12
-	if (net_dev->priv_flags == INT_MAIN) 
+	if (RT_DEV_PRIV_FLAGS_GET(net_dev) == INT_MAIN) 
 	{
 #ifdef CONFIG_APSTA_MIXED_SUPPORT
 		if (pAd->OpMode == OPMODE_AP)
@@ -721,7 +722,7 @@ struct iw_statistics *rt28xx_get_wireless_stats(
 	if (pAd->OpMode == OPMODE_AP)
 	{
 #ifdef APCLI_SUPPORT
-		if (net_dev->priv_flags == INT_APCLI)
+		if (RT_DEV_PRIV_FLAGS_GET(net_dev) == INT_APCLI)
 		{
 			INT ApCliIdx = ApCliIfLookUp(pAd, (PUCHAR)net_dev->dev_addr);
 			if ((ApCliIdx >= 0) && VALID_WCID(pAd->ApCfg.ApCliTab[ApCliIdx].MacTabWCID))
