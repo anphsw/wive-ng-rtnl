@@ -15,4 +15,4 @@ endif
 EXTRA_CFLAGS += -DHWNAT_SKIP_MCAST_BCAST
 
 #uncomment this flag if you want to set debug
-EXTRA_CFLAGS += -DHWNAT_DEBUG
+#EXTRA_CFLAGS += -DHWNAT_DEBUG
