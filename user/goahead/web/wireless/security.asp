@@ -297,7 +297,8 @@ function checkData()
 		if (keyvalue.length < 8){
 			alert('Please input at least 8 character of wpapsk key!');
 			return false;
-
+		}
+		
 		if(checkInjection(document.security_form.passphrase.value) == false){
 			alert('Invalid characters in Pass Phrase.');
 			return false;

@@ -225,11 +225,6 @@
   <message msgid="staadv bw" msgstr="BW" />
   <message msgid="staadv gi" msgstr="GI" />
 
-  <message msgid="qos title" msgstr="Station Advanced Configurations" />
-  <message msgid="qos introduction" msgstr="The Status page shows settings and current operation status of the Station." />
-  <message msgid="qos config" msgstr="Qos Configuration" />
-  <message msgid="qos second" msgstr=" sec" />
-
   <message msgid="11n title" msgstr="Station 11n Configurations" />
   <message msgid="11n introduction" msgstr="The Status page shows settings and current operation status of the Station." />
   <message msgid="11n config" msgstr="11n Configuration" />
