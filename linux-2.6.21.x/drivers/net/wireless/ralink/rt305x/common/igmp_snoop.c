@@ -1064,6 +1064,7 @@ NDIS_STATUS IgmpPktInfoQuery(
 
 NDIS_STATUS IgmpPktClone(
 	IN PRTMP_ADAPTER pAd,
+	IN PUCHAR pSrcBufVA,
 	IN PNDIS_PACKET pPacket,
 	IN INT IgmpPktInGroup,
 	IN PMULTICAST_FILTER_TABLE_ENTRY pGroupEntry,
@@ -1082,6 +1083,7 @@ NDIS_STATUS IgmpPktClone(
 	INT MacEntryIdx;
 	BOOLEAN bContinue;
 	PUCHAR pMemberAddr = NULL;
+	PUCHAR pSrcMAC = NULL;
 
 	bContinue = FALSE;
 
@@ -1100,12 +1102,14 @@ NDIS_STATUS IgmpPktClone(
 	else if (IgmpPktInGroup == IGMP_PKT)
 	{
 		pNetDev = GET_OS_PKT_NETDEV(pPacket);
+		pSrcMAC = pSrcBufVA + 6;
 		
 		for(MacEntryIdx=1; MacEntryIdx<MAX_NUMBER_OF_MAC; MacEntryIdx++)
 		{
 			pMacEntry = &pAd->MacTab.Content[MacEntryIdx];
-			if (IS_ENTRY_CLIENT(pMacEntry)
-				&& get_netdev_from_bssid(pAd, pMacEntry->apidx) == pNetDev)
+			if ((pMacEntry && IS_ENTRY_CLIENT(pMacEntry)) &&
+				(get_netdev_from_bssid(pAd, pMacEntry->apidx) == pNetDev) &&
+				(!MAC_ADDR_EQUAL(pMacEntry->Addr, pSrcMAC))) /* DAD IPv6 issue */
 			{
 				pMemberAddr = pMacEntry->Addr;
 				bContinue = TRUE;
@@ -1128,7 +1132,7 @@ NDIS_STATUS IgmpPktClone(
 			if (!pSkbClone)
 				return NDIS_STATUS_FAILURE;
 			
-			RTMP_SET_PACKET_WCID(pSkbClone, (UCHAR)Aid);
+			RTMP_SET_PACKET_WCID(pSkbClone, (UCHAR)pMacEntry->Aid);
 			// Pkt type must set to PKTSRC_NDIS.
 			// It cause of the deason that APHardTransmit()
 			// doesn't handle PKTSRC_DRIVER pkt type in version 1.3.0.0.
@@ -1178,8 +1182,9 @@ NDIS_STATUS IgmpPktClone(
 			for(MacEntryIdx=pMacEntry->Aid + 1; MacEntryIdx<MAX_NUMBER_OF_MAC; MacEntryIdx++)
 			{
 				pMacEntry = &pAd->MacTab.Content[MacEntryIdx];
-				if (IS_ENTRY_CLIENT(pMacEntry)
-					&& get_netdev_from_bssid(pAd, pMacEntry->apidx) == pNetDev)
+				if ((pMacEntry && IS_ENTRY_CLIENT(pMacEntry)) &&
+					(get_netdev_from_bssid(pAd, pMacEntry->apidx) == pNetDev) &&
+					(!MAC_ADDR_EQUAL(pMacEntry->Addr, pSrcMAC)))
 				{
 					pMemberAddr = pMacEntry->Addr;
 					bContinue = TRUE;
@@ -1267,7 +1272,6 @@ BOOLEAN isMldPkt(
 
 BOOLEAN IPv6MulticastFilterExcluded(IN PUCHAR pDstMacAddr)
 {
-	BOOLEAN result = FALSE;
 	PUCHAR pIpHeader;
 	PRT_IPV6_HDR pIpv6Hdr;
 	PRT_IPV6_ADDR pIpv6DstAddr;
@@ -1291,14 +1295,9 @@ BOOLEAN IPv6MulticastFilterExcluded(IN PUCHAR pDstMacAddr)
 	for (idx = 0; idx < IPV6_MULTICAST_FILTER_EXCLUED_SIZE; idx++)
 	{
 		if (nextProtocol == IPv6MulticastFilterExclued[idx])
-		{
-			result = TRUE;
-			break;
-		}
+			return TRUE;
 	}
 
-	if(result == FALSE)
-	{
 		// SSDP
 		// FF0x:0000:0000:0000:0000:0000:0000:000C
 		// mDNS
@@ -1310,10 +1309,9 @@ BOOLEAN IPv6MulticastFilterExcluded(IN PUCHAR pDstMacAddr)
 		            pIpv6DstAddr->ipv6_addr32[2] == 0 &&
 		     (ntohl(pIpv6DstAddr->ipv6_addr32[3]) == 0x0000000C ||
 		      ntohl(pIpv6DstAddr->ipv6_addr32[3]) == 0x000000FB ) )
-			result = TRUE;
-	}
+		return TRUE;
 
-	return result;
+	return FALSE;
 }
 
 /*  MLD v1 messages have the following format:
