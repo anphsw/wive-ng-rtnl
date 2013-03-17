@@ -1349,33 +1349,34 @@
 6) kernel: net/udp: clean up UDP(Lite) receive checksum.<br>
 7) kernel: net: compact sk_stream_mem_schedule() code.<br>
 8) kernel: net: move some core sock setup into sk_prot_alloc.<br>
-9) kernel: netfilter: nf_nat: place conntrack in source hash after SNAT is done.<br>
-10) kernel: netfilter: nf_nat: don't check if the tuple is unique when there is not any other choice.<br>
-11) kernel: netfilter: nf_nat_core: eliminate useless find_appropriate_src for IP_NAT_RANGE_PROTO_RANDOM.<br>
-12) kernel: netfilter: nf_nat: fix inverted logic for persistent NAT mappings.<br>
-13) kernel: netfilter: nf_conntrack_tcp: fix unaligned memory access in tcp_sack.<br>
-14) kernel: mips: Use CONFIG_CPU_MIPSR2 in csum_partial.S.<br>
-15) kernel: mips: Redefine value of BRK_BUG.<br>
-16) kernel: mips: dsp: Fix DSP mask for registers.<br>
-17) kernel: mips: make __{,n,u}delay declarations match definitions and generic delay.h<br>
-18) kernel: pppoe: return ENOTTY on unknown ioctl requests.<br>
-19) kernel: ip_options_compile: properly handle unaligned pointer.<br>
-20) kernel: rt309x driver up to 2.4.0.5 version.<br>
-21) kernel: rt3883/3662 driver up to 2.4.3.6 version.<br>
-22) kernel: rt305x: wifi driver fix IPv6 DAD issue.<br>
-23) kernel: hw_nat: disable extended debug.<br>
-24) init.d: rework second wlan module support and small fixes.<br>
-25) init.d: use different mac adresses for ra/rai radio modules.<br>
-26) init.d: dnsmasq: use ddns_name=dmzip in hosts if dmz and ddns enable, instead allways use wap_ip.<br>
-27) init.d: move wscd init script to user/wscd/init.d - wscd not used in production builds(not security).<br>
-28) init.d: refactoring wlan interfaces managment code - cleanup/unify.<br>
-29) init.d: in bridge and apcli mode need reconfigure switch always after reconfig device(workaround in some chips).<br>
-30) init.d: fix disable AP interface in apcli mode.<br>
-31) init.d: fix MIMO PowerSave mode enable/disable.<br>
-32) configs: enable apcli/wds for all chips.<br>
-33) defaults: more compat with bcm/realtek devices.<br>
-34) build_system: temp set test only in archive name.<br>
-35) goahead: remove very old dead code.<br>
+9) kernel: net: net: check the length of the socket address passed to connect(2).<br>
+10) kernel: netfilter: nf_nat: place conntrack in source hash after SNAT is done.<br>
+11) kernel: netfilter: nf_nat: don't check if the tuple is unique when there is not any other choice.<br>
+12) kernel: netfilter: nf_nat_core: eliminate useless find_appropriate_src for IP_NAT_RANGE_PROTO_RANDOM.<br>
+13) kernel: netfilter: nf_nat: fix inverted logic for persistent NAT mappings.<br>
+14) kernel: netfilter: nf_conntrack_tcp: fix unaligned memory access in tcp_sack.<br>
+15) kernel: mips: Use CONFIG_CPU_MIPSR2 in csum_partial.S.<br>
+16) kernel: mips: Redefine value of BRK_BUG.<br>
+17) kernel: mips: dsp: Fix DSP mask for registers.<br>
+18) kernel: mips: make __{,n,u}delay declarations match definitions and generic delay.h<br>
+19) kernel: pppoe: return ENOTTY on unknown ioctl requests.<br>
+20) kernel: ip_options_compile: properly handle unaligned pointer.<br>
+21) kernel: rt309x driver up to 2.4.0.5 version.<br>
+22) kernel: rt3883/3662 driver up to 2.4.3.6 version.<br>
+23) kernel: rt305x: wifi driver fix IPv6 DAD issue.<br>
+24) kernel: hw_nat: disable extended debug.<br>
+25) init.d: rework second wlan module support and small fixes.<br>
+26) init.d: use different mac adresses for ra/rai radio modules.<br>
+27) init.d: dnsmasq: use ddns_name=dmzip in hosts if dmz and ddns enable, instead allways use wap_ip.<br>
+28) init.d: move wscd init script to user/wscd/init.d - wscd not used in production builds(not security).<br>
+29) init.d: refactoring wlan interfaces managment code - cleanup/unify.<br>
+30) init.d: in bridge and apcli mode need reconfigure switch always after reconfig device(workaround in some chips).<br>
+31) init.d: fix disable AP interface in apcli mode.<br>
+32) init.d: fix MIMO PowerSave mode enable/disable.<br>
+33) configs: enable apcli/wds for all chips.<br>
+34) defaults: more compat with bcm/realtek devices.<br>
+35) build_system: temp set test only in archive name.<br>
+36) goahead: remove very old dead code.<br>
 
 <br>
 <br>
