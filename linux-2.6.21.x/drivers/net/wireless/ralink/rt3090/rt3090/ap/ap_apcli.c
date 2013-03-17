@@ -326,13 +326,14 @@ BOOLEAN ApCliLinkUp(
 	{
 		if (ifIndex < MAX_APCLI_NUM)
 		{
-			printk("!!! APCLI LINK UP - IF(%s%d) AuthMode(%d)=%s, WepStatus(%d)=%s !!!\n", INF_APCLI_DEV_NAME, ifIndex, 
+			DBGPRINT(RT_DEBUG_TRACE, ("!!! APCLI LINK UP - IF(apcli%d) AuthMode(%d)=%s, WepStatus(%d)=%s !!!\n", 
+										ifIndex, 
 										pAd->ApCfg.ApCliTab[ifIndex].AuthMode, GetAuthMode(pAd->ApCfg.ApCliTab[ifIndex].AuthMode),
-					pAd->ApCfg.ApCliTab[ifIndex].WepStatus, GetEncryptType(pAd->ApCfg.ApCliTab[ifIndex].WepStatus));
+										pAd->ApCfg.ApCliTab[ifIndex].WepStatus, GetEncryptType(pAd->ApCfg.ApCliTab[ifIndex].WepStatus)));			
 		}
 		else
 		{
-			DBGPRINT(RT_DEBUG_ERROR, ("!!! ERROR : APCLI LINK UP - IF(%s%d)!!!\n", INF_APCLI_DEV_NAME, ifIndex));
+			DBGPRINT(RT_DEBUG_ERROR, ("!!! ERROR : APCLI LINK UP - IF(apcli%d)!!!\n", ifIndex));
 			result = FALSE;
 			break;
 		}
@@ -342,7 +343,7 @@ BOOLEAN ApCliLinkUp(
 		// Sanity check: This link had existed. 
 		if (pApCliEntry->Valid)
 		{
-			DBGPRINT(RT_DEBUG_ERROR, ("!!! ERROR : This link had existed - IF(%s%d)!!!\n", INF_APCLI_DEV_NAME, ifIndex));
+			DBGPRINT(RT_DEBUG_ERROR, ("!!! ERROR : This link had existed - IF(apcli%d)!!!\n", ifIndex));
 			result = FALSE;
 			break;
 		}
@@ -533,8 +534,8 @@ BOOLEAN ApCliLinkUp(
 				 
 				if (pAd->ApCfg.ApCliTab[ifIndex].DesiredTransmitSetting.field.MCS != MCS_AUTO)
 				{
-					printk("IF-%s%d : Desired MCS = %d\n", INF_APCLI_DEV_NAME, ifIndex,
-						pAd->ApCfg.ApCliTab[ifIndex].DesiredTransmitSetting.field.MCS);
+					DBGPRINT(RT_DEBUG_TRACE, ("IF-apcli%d : Desired MCS = %d\n", ifIndex,
+						pAd->ApCfg.ApCliTab[ifIndex].DesiredTransmitSetting.field.MCS));
 
 					if (pAd->ApCfg.ApCliTab[ifIndex].DesiredTransmitSetting.field.MCS == 32)
 					{
@@ -580,7 +581,8 @@ BOOLEAN ApCliLinkUp(
 			else
 			{
 				pAd->MacTab.fAnyStationIsLegacy = TRUE;
-				printk("ApCliLinkUp - MaxSupRate=%d Mbps\n", RateIdToMbps[pMacEntry->MaxSupportedRate]);
+				DBGPRINT(RT_DEBUG_TRACE, ("ApCliLinkUp - MaxSupRate=%d Mbps\n",
+								  RateIdToMbps[pMacEntry->MaxSupportedRate]));
 			}				
 
 #endif // DOT11_N_SUPPORT //
@@ -701,11 +703,11 @@ VOID ApCliLinkDown(
 
 	if (ifIndex < MAX_APCLI_NUM)
 	{
-		printk("!!! APCLI LINK DOWN - IF(%s%d)!!!\n", INF_APCLI_DEV_NAME, ifIndex);
+		DBGPRINT(RT_DEBUG_TRACE, ("!!! APCLI LINK DOWN - IF(apcli%d)!!!\n", ifIndex));
 	}
 	else
 	{
-		DBGPRINT(RT_DEBUG_TRACE, ("!!! ERROR : APCLI LINK DOWN - IF(%s%d)!!!\n", INF_APCLI_DEV_NAME, ifIndex));
+		DBGPRINT(RT_DEBUG_TRACE, ("!!! ERROR : APCLI LINK DOWN - IF(apcli%d)!!!\n", ifIndex));
 		return;
 	}
     	
@@ -810,7 +812,7 @@ VOID ApCliIfMonitor(
 		if ((pApCliEntry->Valid == TRUE)
 			&& (RTMP_TIME_AFTER(pAd->Mlme.Now32 , (pApCliEntry->ApCliRcvBeaconTime + (4 * OS_HZ)))))
 		{
-			DBGPRINT(RT_DEBUG_TRACE, ("ApCliIfMonitor: IF(%s%d) - no Beancon is received from root-AP.\n", INF_APCLI_DEV_NAME, index));
+			DBGPRINT(RT_DEBUG_TRACE, ("ApCliIfMonitor: IF(apcli%d) - no Beancon is received from root-AP.\n", index));
 			DBGPRINT(RT_DEBUG_TRACE, ("ApCliIfMonitor: Reconnect the Root-Ap again.\n"));
 			MlmeEnqueue(pAd, APCLI_CTRL_STATE_MACHINE, APCLI_CTRL_DISCONNECT_REQ, 0, NULL, index);
 			RTMP_MLME_HANDLER(pAd);
