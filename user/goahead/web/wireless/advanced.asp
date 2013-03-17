@@ -22,7 +22,6 @@ var txBurst = '<% getCfgZero(1, "TxBurst"); %>';
 var pktAggregate = '<% getCfgZero(1, "PktAggregate"); %>';
 var m2uBuilt = '<% getWlanM2UBuilt(); %>';
 var m2uEnabled = '<% getCfgZero(1, "igmpEnabled"); %>';
-var carrierib = '<% getCarrierBuilt(); %>';
 var txPower = '<% getCfgZero(1, "TxPower"); %>';
 var mcastMcs = defaultNumber('<% getCfgZero(1, "McastMcs"); %>', '0');
 var video_turbine_built='<% getVideoTurbineBuilt(); %>';
@@ -75,10 +74,6 @@ function initTranslation()
 	_TR("advCountryCodeIE", "adv country code ie");
 	_TR("advCountryCodeHK", "adv country code hk");
 	_TR("advCountryCodeNONE", "wireless none");
-
-	_TR("advCarrierDetect", "adv carrier");
-	_TR("advCarrierDetectEnable", "wireless enable");
-	_TR("advCarrierDetectDisable", "wireless disable");
 
 	_TR("advMul2UniConver", "adv multicast2unicast converter");
 	_TR("advMul2Uni", "adv multicast2unicast");
@@ -133,31 +128,6 @@ function initValue()
 	{
 		form.pkt_aggregate[0].checked = false;
 		form.pkt_aggregate[1].checked = true;
-	}
-	
-	if (carrierib == '1')
-	{
-		document.getElementById("div_carrier_detect").style.visibility = "visible";
-		document.getElementById("div_carrier_detect").style.display = style_display_on();
-		form.carrier_detect.disabled = false;
-
-		var carrierebl = '<% getCfgZero(1, "CarrierDetect"); %>';
-		if (carrierebl == '1')
-		{
-			form.carrier_detect[0].checked = true;
-			form.carrier_detect[1].checked = false;
-		}
-		else
-		{
-			form.carrier_detect[0].checked = false;
-			form.carrier_detect[1].checked = true;
-		}
-	}
-	else
-	{
-		document.getElementById("div_carrier_detect").style.visibility = "hidden";
-		document.getElementById("div_carrier_detect").style.display = "none";
-		form.carrier_detect.disabled = true;
 	}
 
 	//multicase to unicast converter
@@ -438,14 +408,6 @@ function CheckValue(form)
 		</select>
 	</td>
 </tr>
-<tr id="div_carrier_detect" name="div_carrier_detect">
-	<td class="head" id="advCarrierDetect">Carrier Detect</td>
-	<td>
-		<input type="radio" name="carrier_detect" value="1"><font id="advCarrierDetectEnable">Enable</font>&nbsp;
-		<input type="radio" name="carrier_detect" value="0" checked><font id="advCarrierDetectDisable">Disable</font>
-	</td>
-</tr>
-
 </table>
 
 <input type="hidden" name="rebootAP" value="0">

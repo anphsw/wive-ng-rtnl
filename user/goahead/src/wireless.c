@@ -36,7 +36,6 @@ static int  getWlanApcliBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int  getWlanChannel(int eid, webs_t wp, int argc, char_t **argv);
 static int  getWlanCurrentMac(int eid, webs_t wp, int argc, char_t **argv);
 static int  getWlanStaInfo(int eid, webs_t wp, int argc, char_t **argv);
-static int  getCarrierBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int  getWlanM2UBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int  getGreenAPBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int  listCountryCodes(int eid, webs_t wp, int argc, char_t **argv);
@@ -193,7 +192,6 @@ void formDefineWireless(void)
 	websAspDefine(T("dumpBSS"), dumpBSS);
 	websAspDefine(T("get802_1XBuilt"), get802_1XBuilt);
 	websAspDefine(T("dumpBSSKeys"), dumpBSSKeys);
-	websAspDefine(T("getCarrierBuilt"), getCarrierBuilt);
 	websAspDefine(T("getWlanM2UBuilt"), getWlanM2UBuilt);
 	websAspDefine(T("getGreenAPBuilt"), getGreenAPBuilt);
 	websAspDefine(T("listCountryCodes"), listCountryCodes);
@@ -507,15 +505,6 @@ static int getWlanStaInfo(int eid, webs_t wp, int argc, char_t **argv)
 	}
 	close(s);
 	return 0;
-}
-
-static int getCarrierBuilt(int eid, webs_t wp, int argc, char_t **argv)
-{
-#ifdef CONFIG_RT2860V2_AP_CARRIER
-	return websWrite(wp, T("1"));
-#else
-	return websWrite(wp, T("0"));
-#endif
 }
 
 static int getWlanM2UBuilt(int eid, webs_t wp, int argc, char_t **argv)
@@ -989,7 +978,7 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 	char_t	*bg_protection, /**basic_rate,*/ *beacon, *dtim, *fragment, *rts,
 			*tx_power, *short_preamble, *short_slot, *tx_burst, *pkt_aggregate,
 			*countrycode, *country_region;
-	char_t	*rd_region, *carrier_detect, *lna_gain, *ht_noise_thresh, *ap2040_rescan, *ht_bss_coex;
+	char_t	*rd_region, *lna_gain, *ht_noise_thresh, *ap2040_rescan, *ht_bss_coex;
 	int		i, ssid_num, wlan_mode;
 	char *submitUrl;
 
@@ -1013,7 +1002,6 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 	tx_burst = websGetVar(wp, T("tx_burst"), T("0"));
 	pkt_aggregate = websGetVar(wp, T("pkt_aggregate"), T("0"));
 	rd_region = websGetVar(wp, T("rd_region"), T("CE"));
-	carrier_detect = websGetVar(wp, T("carrier_detect"), T("0"));
 	countrycode = websGetVar(wp, T("country_code"), T("NONE"));
 	country_region = websGetVar(wp, T("country_region"), T("0"));
 	lna_gain = websGetVar(wp, T("lnaGainEnable"), T("0"));
@@ -1054,7 +1042,6 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "TxBurst", tx_burst);
 	nvram_bufset(RT2860_NVRAM, "PktAggregate", pkt_aggregate);
 	nvram_bufset(RT2860_NVRAM, "RDRegion", rd_region);
-	nvram_bufset(RT2860_NVRAM, "CarrierDetect", carrier_detect);
 	nvram_bufset(RT2860_NVRAM, "HiPower", lna_gain);
 	nvram_bufset(RT2860_NVRAM, "HT_BSSCoexistence", ht_bss_coex);
 	if (strcmp(ht_bss_coex, "1") == 0)
@@ -1113,7 +1100,6 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 		websWrite(wp, T("tx_burst: %s<br>\n"), tx_burst);
 		websWrite(wp, T("pkt_aggregate: %s<br>\n"), pkt_aggregate);
 		websWrite(wp, T("rd_region: %s<br>\n"), rd_region);
-		websWrite(wp, T("carrier_detect: %s<br>\n"), carrier_detect);
 		websWrite(wp, T("countrycode: %s<br>\n"), countrycode);
 		websWrite(wp, T("lna_gain: %s<br>\n"), lna_gain);
 #ifdef CONFIG_RT2860V2_AP_IGMP_SNOOP

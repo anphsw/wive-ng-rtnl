@@ -92,7 +92,6 @@
   <message msgid="adv country code tw" msgstr="TW (Taiwan)" />
   <message msgid="adv country code ie" msgstr="IE (Ireland)" />
   <message msgid="adv country code hk" msgstr="HK (Hong Kong)" />
-  <message msgid="adv carrier" msgstr="Carrier Detect" />
 
   <message msgid="adv multicast2unicast converter" msgstr="Multicast-to-Unicast Converter (IGMP Snooping)" />
   <message msgid="adv multicast2unicast" msgstr="Multicast-to-Unicast" />
