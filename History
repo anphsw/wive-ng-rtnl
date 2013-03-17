@@ -1360,16 +1360,18 @@
 17) kernel: ip_options_compile: properly handle unaligned pointer.<br>
 18) kernel: rt309x driver up to 2.4.0.5 version.<br>
 19) kernel: rt3883/3662 driver up to 2.4.3.6 version.<br>
-20) init.d: rework second wlan module support and small fixes.<br>
-21) init.d: use different mac adresses for ra/rai radio modules.<br>
-22) init.d: dnsmasq: use ddns_name=dmzip in hosts if dmz and ddns enable, instead allways use wap_ip.<br>
-23) init.d: move wscd init script to user/wscd/init.d - wscd not used in production builds(not security).<br>
-24) init.d: refactoring wlan interfaces managment code - cleanup/unify.<br>
-25) init.d: in bridge and apcli mode need reconfigure switch always after reconfig device(workaround in some chips).<br>
-26) init.d: fix disable AP interface in apcli mode.<br>
-27) init.d: fix MIMO PowerSave mode enable/disable.<br>
-28) configs: enable apcli/wds for all chips.<br>
-29) defaults: more compat with bcm/realtek devices.<br>
+20) kernel: hw_nat: disable extended debug.<br>
+21) init.d: rework second wlan module support and small fixes.<br>
+22) init.d: use different mac adresses for ra/rai radio modules.<br>
+23) init.d: dnsmasq: use ddns_name=dmzip in hosts if dmz and ddns enable, instead allways use wap_ip.<br>
+24) init.d: move wscd init script to user/wscd/init.d - wscd not used in production builds(not security).<br>
+25) init.d: refactoring wlan interfaces managment code - cleanup/unify.<br>
+26) init.d: in bridge and apcli mode need reconfigure switch always after reconfig device(workaround in some chips).<br>
+27) init.d: fix disable AP interface in apcli mode.<br>
+28) init.d: fix MIMO PowerSave mode enable/disable.<br>
+29) configs: enable apcli/wds for all chips.<br>
+30) defaults: more compat with bcm/realtek devices.<br>
+31) build system temp set test only in archive name.<br>
 
 <br>
 <br>
