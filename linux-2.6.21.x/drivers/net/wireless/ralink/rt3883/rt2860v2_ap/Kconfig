@@ -77,7 +77,7 @@ config  RT2860V2_AP_IDS
 	bool "IDS (Intrusion Detection System) Support"
 	depends on RT2860V2_AP
 
-config  RT2860V2_AP_ANTENNA_DIVERSITY
+config  RT2860V2_RT3XXX_AP_ANTENNA_DIVERSITY
 	bool "Antenna Diversity Support"
 	depends on RT2860V2_AP
 
