@@ -1349,7 +1349,7 @@
 6) kernel: net/udp: clean up UDP(Lite) receive checksum.<br>
 7) kernel: net: compact sk_stream_mem_schedule() code.<br>
 8) kernel: net: move some core sock setup into sk_prot_alloc.<br>
-9) kernel: net: net: check the length of the socket address passed to connect(2).<br>
+9) kernel: net: check the length of the socket address passed to connect(2).<br>
 10) kernel: netfilter: nf_nat: place conntrack in source hash after SNAT is done.<br>
 11) kernel: netfilter: nf_nat: don't check if the tuple is unique when there is not any other choice.<br>
 12) kernel: netfilter: nf_nat_core: eliminate useless find_appropriate_src for IP_NAT_RANGE_PROTO_RANDOM.<br>
