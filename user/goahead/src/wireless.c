@@ -480,7 +480,6 @@ static int getWlanStaInfo(int eid, webs_t wp, int argc, char_t **argv)
 		return -1;
 	}
 
-#ifndef CONFIG_RT2860V2_AP_V24_DATA_STRUCTURE
 	if (ioctl(s, RTPRIV_IOCTL_GET_MAC_TABLE, &iwr) < 0) {
 		websError(wp, 500, "ioctl -> RTPRIV_IOCTL_GET_MAC_TABLE failed!");
 		close(s);
@@ -512,30 +511,6 @@ static int getWlanStaInfo(int eid, webs_t wp, int argc, char_t **argv)
 			pe->Addr[0], pe->Addr[1], pe->Addr[2], pe->Addr[3], pe->Addr[4], pe->Addr[5]);
 	    websWrite(wp, T("</tr>"));
 	}
-#else
-	if (ioctl(s, RTPRIV_IOCTL_GET_MAC_TABLE_STRUCT, &iwr) < 0) {
-		websError(wp, 500, "ioctl -> RTPRIV_IOCTL_GET_MAC_TABLE_STRUCT failed!");
-		close(s);
-		return -1;
-	}
-
-	for (i = 0; i < table.Num; i++) {
-		websWrite(wp, T("<tr><td>%02X:%02X:%02X:%02X:%02X:%02X</td>"),
-				table.Entry[i].Addr[0], table.Entry[i].Addr[1],
-				table.Entry[i].Addr[2], table.Entry[i].Addr[3],
-				table.Entry[i].Addr[4], table.Entry[i].Addr[5]);
-		websWrite(wp, T("<td>%d</td><td>%d</td><td>%d</td>"),
-				table.Entry[i].Aid, table.Entry[i].Psm, table.Entry[i].MimoPs);
-		websWrite(wp, T("<td>%d</td><td>%s</td><td>%d</td><td>%d</td></tr>"),
-				table.Entry[i].TxRate.field.MCS,
-				(table.Entry[i].TxRate.field.BW == 0)? "20M":"40M",
-				table.Entry[i].TxRate.field.ShortGI, table.Entry[i].TxRate.field.STBC);
-		websWrite(wp, T("<td><input type=\"button\" value=\"disconnect\" onclick=\"doDisconnectSta(this.form, '%02X:%02X:%02X:%02X:%02X:%02X')\"></td>"),
-				table.Entry[i].Addr[0], table.Entry[i].Addr[1],
-				table.Entry[i].Addr[2], table.Entry[i].Addr[3],
-				table.Entry[i].Addr[4], table.Entry[i].Addr[5]);
-	}
-#endif
 	close(s);
 	return 0;
 }
