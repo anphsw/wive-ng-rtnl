@@ -20,12 +20,6 @@ var shortPreamble = '<% getCfgZero(1, "TxPreamble"); %>';
 var shortSlot = '<% getCfgZero(1, "ShortSlot"); %>';
 var txBurst = '<% getCfgZero(1, "TxBurst"); %>';
 var pktAggregate = '<% getCfgZero(1, "PktAggregate"); %>';
-/*
-var wmmCapable = '<% getCfgZero(1, "WmmCapable"); %>';
-var APSDCapable = '<% getCfgZero(1, "APSDCapable"); %>';
-*/
-var DLSCapable = '<% getCfgZero(1, "DLSCapable"); %>';
-var DLSBuilt = '<% getDLSBuilt(); %>';
 var m2uBuilt = '<% getWlanM2UBuilt(); %>';
 var m2uEnabled = '<% getCfgZero(1, "igmpEnabled"); %>';
 var carrierib = '<% getCarrierBuilt(); %>';
@@ -81,22 +75,10 @@ function initTranslation()
 	_TR("advCountryCodeIE", "adv country code ie");
 	_TR("advCountryCodeHK", "adv country code hk");
 	_TR("advCountryCodeNONE", "wireless none");
+
 	_TR("advCarrierDetect", "adv carrier");
 	_TR("advCarrierDetectEnable", "wireless enable");
 	_TR("advCarrierDetectDisable", "wireless disable");
-
-	_TR("advWiFiMM", "adv wmm");
-	_TR("advWMM", "adv wmm capable");
-	_TR("advWMMEnable", "wireless enable");
-	_TR("advWMMDisable", "wireless disable");
-	_TR("advAPDS", "adv apds capable");
-	_TR("advAPDSEnable", "wireless enable");
-	_TR("advAPDSDisable", "wireless disable");
-	_TR("advDLS", "adv dls capable");
-	_TR("advDLSEnable", "wireless enable");
-	_TR("advDLSDisable", "wireless disable");
-	_TR("advWMMParameter", "adv wmm parameter");
-	_TRV("advWMMConf", "adv wmm configuration");
 
 	_TR("advMul2UniConver", "adv multicast2unicast converter");
 	_TR("advMul2Uni", "adv multicast2unicast");
@@ -176,44 +158,6 @@ function initValue()
 		document.getElementById("div_carrier_detect").style.visibility = "hidden";
 		document.getElementById("div_carrier_detect").style.display = "none";
 		form.carrier_detect.disabled = true;
-	}
-
-/*	if (wmmCapable.indexOf("1") >= 0)
-	{
-		form.wmm_capable[0].checked = true;
-		form.wmm_capable[1].checked = false;
-	}
-	else
-	{
-		form.wmm_capable[0].checked = false;
-		form.wmm_capable[1].checked = true;
-	}
-
-	wmm_capable_enable_switch();
-
-	if (APSDCapable == '1')
-	{
-		form.apsd_capable[0].checked = true;
-		form.apsd_capable[1].checked = false;
-	}
-	else
-	{
-		form.apsd_capable[0].checked = false;
-		form.apsd_capable[1].checked = true;
-	}
-*/
-	if (DLSBuilt == 1)
-	{
-		if (DLSCapable == '1')
-		{
-			form.dls_capable[0].checked = true;
-			form.dls_capable[1].checked = false;
-		}
-		else
-		{
-			form.dls_capable[0].checked = false;
-			form.dls_capable[1].checked = true;
-		}
 	}
 
 	//multicase to unicast converter
@@ -328,48 +272,7 @@ function CheckValue(form)
 		form.rts.select();
 		return false;
 	}
-/*
-	DLSBuilt = 1*DLSBuilt;
-	if (form.wmm_capable[0].checked)
-	{
-		if (1*wmmCapable == 0)
-			form.rebootAP.value = 1;
-	}
-	else
-	{
-		form.apsd_capable[1].checked = true;
-		if (DLSBuilt == 1)
-			form.dls_capable[1].checked = true;
 
-		if (1*wmmCapable == 1)
-			form.rebootAP.value = 1;
-	}
-
-	if (form.apsd_capable[0].checked == true)
-	{
-		if (1*APSDCapable == 0)
-			form.rebootAP.value = 1;
-	}
-	else
-	{
-		if (1*APSDCapable == 1)
-			form.rebootAP.value = 1;
-	}
-*/
-	if (DLSBuilt == 1)
-	{
-		if (form.dls_capable[0].checked == true)
-		{
-			if (1*DLSCapable == 0)
-				form.rebootAP.value = 1;
-		}
-		else
-		{
-			if (1*DLSCapable == 1)
-				form.rebootAP.value = 1;
-		}
-	}
-	
 	if (form.HT_BSSCoexistence[0].checked)
 	{
 		var v = form.HT_BSSCoexApCntThr.value;
@@ -383,35 +286,6 @@ function CheckValue(form)
 	}
 
 	return true;
-}
-
-function open_wmm_window()
-{
-	window.open("wmm.asp","WMM_Parameters_List","toolbar=no, location=yes, scrollbars=yes, resizable=no, width=640, height=480")
-}
-
-function wmm_capable_enable_switch()
-{
-	document.getElementById("div_apsd_capable").style.visibility = "hidden";
-	document.getElementById("div_apsd_capable").style.display = "none";
-	document.wireless_advanced.apsd_capable.disabled = true;
-	document.getElementById("div_dls_capable").style.visibility = "hidden";
-	document.getElementById("div_dls_capable").style.display = "none";
-	document.wireless_advanced.dls_capable.disabled = true;
-
-	DLSBuilt = 1*DLSBuilt;
-	if (document.wireless_advanced.wmm_capable[0].checked == true)
-	{
-		document.getElementById("div_apsd_capable").style.visibility = "visible";
-		document.getElementById("div_apsd_capable").style.display = style_display_on();
-		document.wireless_advanced.apsd_capable.disabled = false;
-		if (DLSBuilt == 1)
-		{
-			document.getElementById("div_dls_capable").style.visibility = "visible";
-			document.getElementById("div_dls_capable").style.display = style_display_on();
-			document.wireless_advanced.dls_capable.disabled = false;
-		}
-	}
 }
 
 </script>
@@ -574,37 +448,6 @@ function wmm_capable_enable_switch()
 
 </table>
 
-<!--  <table class="form">
-<tr> 
-	<td class="title" colspan="2" id="advWiFiMM">Wi-Fi Multimedia</td>
-</tr>
-<tr> 
-	<td class="head" id="advWMM">WMM Capable</td>
-	<td>
-		<input type="radio" name="wmm_capable" value="1" onClick="wmm_capable_enable_switch()" checked><font id="advWMMEnable">Enable</font>&nbsp;
-		<input type="radio" name="wmm_capable" value="0" onClick="wmm_capable_enable_switch()"><font id="advWMMDisable">Disable</font>
-	</td>
-</tr>
-<tr id="div_apsd_capable" name="div_apsd_capable">
-	<td class="head" id="advAPDS">APSD Capable</td>
-	<td>
-		<input type="radio" name="apsd_capable" value="1"><font id="advAPDSEnable">Enable</font>&nbsp;
-		<input type="radio" name="apsd_capable" value="0" checked><font id="advAPDSDisable">Disable</font>
-	</td>
-</tr>
-<tr id="div_dls_capable" name="div_dls_capable">
-	<td class="head" id="advDLS">DLS Capable</td>
-	<td>
-		<input type="radio" name="dls_capable" value="1"><font id="advDLSEnable">Enable</font>&nbsp;
-		<input type="radio" name="dls_capable" value="0" checked><font id="advDLSDisable">Disable</font>
-	</td>
-</tr>
-<tr> 
-	<td class="head" id="advWMMParameter">WMM Parameters</td>
-	<td>
-		<input type="button" name="wmm_list" class="normal" value="WMM Configuration" id="advWMMConf" onClick="open_wmm_window()">
-	</td>
-</tr> -->
 <input type="hidden" name="rebootAP" value="0">
 </table>
 

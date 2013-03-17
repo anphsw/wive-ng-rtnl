@@ -24,7 +24,7 @@ function connectionTypeSwitch(form)
 	displayElement('staticDHCP', conn_type == 'STATIC');
 	displayElement('dhcpReqIPRow', conn_type == 'DHCP');
 	displayElement('staticDNSAssignRow', conn_type != 'ZERO');
-	
+
 	dnsSwitchClick(form);
 }
 
@@ -50,9 +50,6 @@ function CheckValue(form)
 				form.staticGateway.focus();
 				return false;
 			}
-/*		if (form.macCloneEnbl.options.selectedIndex == 1)
-			if (!validateMAC(form.macCloneMac.value, true))
-				return false;*/
 	}
 	else if (c_type == 'DHCP')
 	{
@@ -81,7 +78,7 @@ function CheckValue(form)
 				return false;
 			}
 	}
-	
+
 	// Validate MTU
 	if (!validateNum(form.wan_mtu.value))
 	{
@@ -89,14 +86,14 @@ function CheckValue(form)
 		form.wan_mtu_type.focus();
 		return false;
 	}
-	
+
 	var wan_mtu = form.wan_mtu.value * 1;
 	if ((wan_mtu < 80) && (wan_mtu != 0))
 	{
 		alert("Invalid MTU value");
 		return false;
 	}
-	
+
 	return true;
 }
 
@@ -131,17 +128,17 @@ function initValue()
 	var static_dns = "<% getCfgZero(1, "wan_static_dns"); %>";
 	var wan_mtu = defaultNumber("<% getCfgGeneral(1, "wan_manual_mtu"); %>", '0');
 	var form = document.wanCfg;
-	
+
 	form.natEnabled.checked = (nat == "1");
 	var element = document.getElementById("natRowDisplay");
 	if (element!=null)
 		element.style.display = (opmode != "0") ? "" : "none";
-	
+
 	initTranslation();
-	
+
 	form.connectionType.value = mode;
 	form.wStaticDnsEnable.checked = (static_dns == "on");
-	
+
 	/* Check if option was set */
 	form.wan_mtu.value = wan_mtu;
 	for (var i=0; i < form.wan_mtu_type.options.length; i++)
@@ -150,7 +147,7 @@ function initValue()
 			form.wan_mtu_type.value = form.wan_mtu_type.options[i].value;
 			break;
 		}
-	
+
 	connectionTypeSwitch(form);
 	wanMtuChange(form);
 }

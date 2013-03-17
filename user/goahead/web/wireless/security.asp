@@ -286,7 +286,7 @@ function checkData()
 	{
 		if(! check_Wep(securitymode) )
 			return false;
-	}else if (securitymode == "WPAPSK" || securitymode == "WPA2PSK" || securitymode == "WPAPSKWPA2PSK" /* || security_mode == 5 */){
+	}else if (securitymode == "WPAPSK" || securitymode == "WPA2PSK" || securitymode == "WPAPSKWPA2PSK"){
 		var keyvalue = document.security_form.passphrase.value;
 
 		if (keyvalue.length == 0){
@@ -297,8 +297,7 @@ function checkData()
 		if (keyvalue.length < 8){
 			alert('Please input at least 8 character of wpapsk key!');
 			return false;
-		}
-		
+
 		if(checkInjection(document.security_form.passphrase.value) == false){
 			alert('Invalid characters in Pass Phrase.');
 			return false;
@@ -851,7 +850,7 @@ function selectMBSSIDChanged()
 
 /*
  * When user select the different SSID, this function would be called.
- */ 
+ */
 function MBSSIDChange(selected)
 {
 	// load wep/wpa/802.1x table for MBSSID[selected]
@@ -908,7 +907,7 @@ function initTranslation()
 	_TR("secureWEPKey2", "secure wep key2");
 	_TR("secureWEPKey3", "secure wep key3");
 	_TR("secureWEPKey4", "secure wep key4");
-	
+
 	_TR("secreWPA", "secure wpa");
 	_TR("secureWPAAlgorithm", "secure wpa algorithm");
 	_TR("secureWPAPassPhrase", "secure wpa pass phrase");
@@ -917,12 +916,12 @@ function initTranslation()
 	_TR("secureWPAPreAuth", "secure wpa preauth");
 	_TR("secureWPAPreAuthDisable", "wireless disable");
 	_TR("secureWPAPreAuthEnable", "wireless enable");
-	
+
 	_TR("secure8021XWEP", "secure 8021x wep");
 	_TR("secure1XWEP", "secure 1x wep");
 	_TR("secure1XWEPDisable", "wireless disable");
 	_TR("secure1XWEPEnable", "wireless enable");
-	
+
 	_TR("secureRadius", "secure radius");
 	_TR("secureRadiusIPAddr", "secure radius ipaddr");
 	_TR("secureRadiusPort", "secure radius port");
@@ -930,22 +929,13 @@ function initTranslation()
 	_TR("secureRadiusSessionTimeout", "secure radius session timeout");
 	_TR("secureRadiusIdleTimeout", "secure radius idle timeout");
 
-	/*
-	_TR("secureAccessPolicy", "secure access policy");
-	_TR("secureAccessPolicyCapable", "secure access policy capable");
-	_TR("secureAccessPolicyCapableDisable", "wireless disable");
-	_TR("secureAccessPolicyCapableAllow", "wireless allow");
-	_TR("secureAccessPolicyCapableReject", "wireless reject ");
-	_TR("secureAccessPolicyNew", "secure access policy new");
-	*/
-	
 	_TRV("secureApply", "wireless apply");
 	_TRV("secureCancel", "wireless cancel");
 }
 
 function initAll()
 {
-	initTranslation();	
+	initTranslation();
 	makeRequest("/goform/wirelessGetSecurity", "n/a", securityHandler);
 }
 

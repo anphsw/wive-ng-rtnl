@@ -46,13 +46,10 @@ function initValue()
 {
 	var lang_element = document.getElementById("langSelection");
 	var lang_en = "<% getLangBuilt("en"); %>";
-	var lang_zhtw = "<% getLangBuilt("zhtw"); %>";
 
 	lang_element.options.length = 0;
 	if (lang_en == "1")
 		lang_element.options[lang_element.length] = new Option('English', 'en');
-	if (lang_zhtw == "1")
-		lang_element.options[lang_element.length] = new Option('Traditional Chinese', 'zhtw');
 
 	if (document.cookie.length > 0)
 	{
@@ -75,7 +72,7 @@ function initValue()
 			}
 		}
 	}
-	
+
 	// Firmware
 	document.getElementById("loading").style.display="none";
 }

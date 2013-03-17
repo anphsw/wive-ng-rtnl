@@ -20,7 +20,6 @@ function initLanguage()
 		lang = "en";
 	var cook = "en";
 	var lang_en = "<% getLangBuilt("en"); %>";
-	var lang_zhtw = "<% getLangBuilt("zhtw"); %>";
 
 	if (document.cookie.length > 0) {
 		var s = document.cookie.indexOf("language=");
@@ -37,25 +36,7 @@ function initLanguage()
 		document.cookie="language=en; path=/";
 		if (cook != lang)
 			window.location.reload();
-		if (lang_en != "1") {
-			if (lang_zhtw == "1") {
-				document.cookie="language=zhtw; path=/";
-				window.location.reload();
-			}
-		}
-	}
-	else if (lang == "zhtw") {
-		document.cookie="language=zhtw; path=/";
-		if (cook != lang)
-			window.location.reload();
-		if (lang_zhtw != "1") {
-			if (lang_en == "1") {
-				document.cookie="language=en; path=/";
-				window.location.reload();
-			}
-		}
-	}
-	else {
+	} else {
 		document.cookie="language=en; path=/";
 		lang_en == "1";
 		window.location.reload();

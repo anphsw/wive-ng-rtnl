@@ -1,8 +1,0 @@
-<po>
-  <message msgid="services dhcp title" msgstr="DHCP Server" />
-  <message msgid="services dhcp introduction" msgstr="On this page you can configure DHCP server parameters." />
-  <message msgid="services dhcp setup" msgstr="DHCP Server Setup" />
-  <message msgid="services misc title" msgstr="Miscellaneous services" />
-  <message msgid="services misc introduction" msgstr="Here you can configure miscellaneous services." />
-  <message msgid="services misc setup" msgstr="Miscellaneous services setup" />
-</po>

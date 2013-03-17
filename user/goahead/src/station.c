@@ -25,7 +25,6 @@ static int	getStaAdhocChannel(int eid, webs_t wp, int argc, char_t **argv);
 static int	getStaBSSIDList(int eid, webs_t wp, int argc, char_t **argv);
 static int	getStaConnectedBSSID(int eid, webs_t wp, int argc, char_t **argv);
 static int	getStaDbm(int eid, webs_t wp, int argc, char_t **argv);
-static int	getStaDLSList(int eid, webs_t wp, int argc, char_t **argv);
 static int	getStaExtraInfo(int eid, webs_t wp, int argc, char_t **argv);
 static int	getLinkingMode(int eid, webs_t wp, int argc, char_t **argv);
 static int	getStaHT(int eid, webs_t wp, int argc, char_t **argv);
@@ -62,9 +61,6 @@ static void setStaDbm(webs_t wp, char_t *path, char_t *query);
 static void setStaProfile(webs_t wp, char_t *path, char_t *query);
 static void setStaOrgAdd(webs_t wp, char_t *path, char_t *query);
 static void setStaOrgDel(webs_t wp, char_t *path, char_t *query);
-static void setStaQoS(webs_t wp, char_t *path, char_t *query);
-static int getStaDLSTimeout(int eid, webs_t wp, int argc, char_t **argv);
-static int getStaDLSMacAddress(int eid, webs_t wp, int argc, char_t **argv);
 static int getActiveProfileStatus(int eid, webs_t wp, int argc, char_t **argv);
 
 void formDefineStation(void)
@@ -76,7 +72,6 @@ void formDefineStation(void)
 	websAspDefine(T("getStaBSSIDList"), getStaBSSIDList);
 	websAspDefine(T("getStaConnectedBSSID"), getStaConnectedBSSID);
 	websAspDefine(T("getStaDbm"), getStaDbm);
-	websAspDefine(T("getStaDLSList"), getStaDLSList);
 	websAspDefine(T("getStaExtraInfo"), getStaExtraInfo);
 	websAspDefine(T("getLinkingMode"), getLinkingMode);
 	websAspDefine(T("getStaHT"), getStaHT);
@@ -104,8 +99,6 @@ void formDefineStation(void)
 	websAspDefine(T("getStaStatsTx"), getStaStatsTx);
 	websAspDefine(T("getStaSuppAMode"), getStaSuppAMode);
 	websAspDefine(T("getStaWirelessMode"), getStaWirelessMode);
-	websAspDefine(T("getStaDLSTimeout"), getStaDLSTimeout);
-	websAspDefine(T("getStaDLSMacAddress"), getStaDLSMacAddress);
 	websAspDefine(T("getStaTrModes"), getStaTrModes);
 
 	websFormDefine(T("resetStaCounters"), resetStaCounters);
@@ -114,7 +107,6 @@ void formDefineStation(void)
 	websFormDefine(T("setStaProfile"), setStaProfile);
 	websFormDefine(T("setStaOrgAdd"), setStaOrgAdd);
 	websFormDefine(T("setStaOrgDel"), setStaOrgDel);
-	websFormDefine(T("setStaQoS"), setStaQoS);
 }
 
 
@@ -776,32 +768,6 @@ static int getStaConnectedBSSID(int eid, webs_t wp, int argc, char_t **argv)
 				BssidQuery[0], BssidQuery[1], BssidQuery[2],BssidQuery[3], BssidQuery[4], BssidQuery[5]);
 	}
 
-	close(s);
-	return 0;
-}
-
-/*
- * description: return G_bdBm_ischeck (displaying dbm or % type)
- */
-static int getStaDLSList(int eid, webs_t wp, int argc, char_t **argv)
-{
-	RT_802_11_DLS_INFO dls_info;
-	int s, i;
-
-	s = socket(AF_INET, SOCK_DGRAM, 0);
-
-	OidQueryInformation(RT_OID_802_11_QUERY_DLS_PARAM, s, "ra0", &dls_info, sizeof(dls_info));
-	for (i=0; i<MAX_NUM_OF_DLS_ENTRY; i++)
-	{
-		if (dls_info.Entry[i].Valid == 1 && dls_info.Entry[i].Status == DLS_FINISH)
-		{
-			websWrite(wp, "<tr><td><input type=\"radio\" name=\"selected_dls\" value=\"%d\">%02x-%02x-%02x-%02x-%02x-%02x</td><td>%d</td></tr>",
-					i+1,
-					dls_info.Entry[i].MacAddr[0], dls_info.Entry[i].MacAddr[1], dls_info.Entry[i].MacAddr[2],
-					dls_info.Entry[i].MacAddr[3], dls_info.Entry[i].MacAddr[4], dls_info.Entry[i].MacAddr[5],
-					dls_info.Entry[i].TimeOut);
-		}
-	}
 	close(s);
 	return 0;
 }
@@ -3079,208 +3045,6 @@ static void setStaOrgDel(webs_t wp, char_t *path, char_t *query)
 	char_t *button;
 
 	button = websGetVar(wp, T("hiddenButton"), T("0"));
-}
-
-/*
- * description: goform - set station QoS parameters - wmm, dls setup, tear down
- */
-static void setStaQoS(webs_t wp, char_t *path, char_t *query)
-{
-	int s;
-	char_t *button;
-
-	s = socket(AF_INET, SOCK_DGRAM, 0);
-	button = websGetVar(wp, T("button_type"), T("0"));
-
-	if (strncmp(button, "0", 2) == 0)
-	{
-		close(s);
-		websError(wp, 500, "unrecognized button type");
-		return;
-	}
-	else if (strncmp(button, "1", 2) == 0)
-	{
-		unsigned long apsd;
-		NDIS_802_11_SSID Ssid;
-		int wmm_en, ps_en, acbe, acbk, acvi, acvo, dls_en;
-		char apsdac[8];
-		char_t *mac0, *mac1, *mac2, *mac3, *mac4, *mac5;
-		RT_802_11_DLS_UI dls;
-		unsigned char mac[6];
-
-		wmm_en = websCompareVar(wp, T("wmm_enable"), T("on"));
-		ps_en = websCompareVar(wp, T("wmm_ps_enable"), T("on"));
-		acbe = websCompareVar(wp, T("wmm_ps_mode_acbe"), T("on"));
-		acbk = websCompareVar(wp, T("wmm_ps_mode_acbk"), T("on"));
-		acvi = websCompareVar(wp, T("wmm_ps_mode_acvi"), T("on"));
-		acvo = websCompareVar(wp, T("wmm_ps_mode_acvo"), T("on"));
-		dls_en = websCompareVar(wp, T("wmm_dls_enable"), T("on"));
-		mac0 = websGetVar(wp, T("mac0"), T("0"));
-		mac1 = websGetVar(wp, T("mac1"), T("1"));
-		mac2 = websGetVar(wp, T("mac2"), T("2"));
-		mac3 = websGetVar(wp, T("mac3"), T("3"));
-		mac4 = websGetVar(wp, T("mac4"), T("4"));
-		mac5 = websGetVar(wp, T("mac5"), T("5"));
-
-		dls.MacAddr[0] = (unsigned char)strtoul(mac0, (char **)NULL, 16);
-		dls.MacAddr[1] = (unsigned char)strtoul(mac1, (char **)NULL, 16);
-		dls.MacAddr[2] = (unsigned char)strtoul(mac2, (char **)NULL, 16);
-		dls.MacAddr[3] = (unsigned char)strtoul(mac3, (char **)NULL, 16);
-		dls.MacAddr[4] = (unsigned char)strtoul(mac4, (char **)NULL, 16);
-		dls.MacAddr[5] = (unsigned char)strtoul(mac5, (char **)NULL, 16);
-		dls.TimeOut = atoi(websGetVar(wp, T("timeout"), T("0")));
-
-		printf("wmm_en = %d, ps_en=%d, acbe=%d, acbk=%d, acvi=%d, acvo=%d, dls_en=%d, mac=%s:%s:%s:%s:%s:%s\n",
-			wmm_en, ps_en, acbe, acbk, acvi, acvo, dls_en, mac0, mac1, mac2, mac3, mac4, mac5);
-
-		// Check DLS
-		if (dls_en)
-		{
-			if (dls.MacAddr[0] == 0 && dls.MacAddr[1] == 0 && dls.MacAddr[2] == 0 &&
-				dls.MacAddr[3] == 0 && dls.MacAddr[4] == 0 && dls.MacAddr[5] == 0)
-			{
-				close(s);
-				websError(wp, 500, "invalid DLS MAC address (00s)");
-				return;
-			}
-			if (dls.MacAddr[0] == 0xff && dls.MacAddr[1] == 0xff && dls.MacAddr[2] == 0xff &&
-				dls.MacAddr[3] == 0xff && dls.MacAddr[4] == 0xff && dls.MacAddr[5] == 0xff)
-			{
-				close(s);
-				websError(wp, 500, "invalid DLS MAC address (FFs)");
-				return;
-			}
-			if (OidQueryInformation(OID_802_3_CURRENT_ADDRESS, s, "ra0", &mac, sizeof(mac)) >= 0)
-			{
-				if (dls.MacAddr[0] == mac[0] && dls.MacAddr[1] == mac[1] &&
-					dls.MacAddr[2] == mac[2] && dls.MacAddr[3] == mac[3] &&
-					dls.MacAddr[4] == mac[4] && dls.MacAddr[5] == mac[5]) {
-					close(s);
-					websError(wp, 500, "invalid DLS MAC address");
-					return;
-				}
-			}
-		}
-
-		// Store data in NVRAM
-		nvram_init(RT2860_NVRAM);
-		nvram_bufset(RT2860_NVRAM, "WmmCapable", wmm_en ? "1" : "0");
-		nvram_bufset(RT2860_NVRAM, "APSDCapable", ps_en ? "1" : "0");
-		nvram_bufset(RT2860_NVRAM, "DLSCapable", dls_en ? "1" : "0");
-		strcpy(apsdac, acbe ? "1" : "0");
-		strcat(apsdac, ";");
-		strcat(apsdac, acbk ? "1" : "0");
-		strcat(apsdac, ";");
-		strcat(apsdac, acvi ? "1" : "0");
-		strcat(apsdac, ";");
-		strcat(apsdac, acvo ? "1" : "0");
-		nvram_bufset(RT2860_NVRAM, "APSDAC", apsdac);
-		nvram_commit(RT2860_NVRAM);
-		nvram_close(RT2860_NVRAM);
-
-		if (wmm_en)
-		{
-			OidQueryInformation(RT_OID_802_11_QUERY_APSD_SETTING, s, "ra0", &apsd, sizeof(apsd));
-			if (ps_en) {
-				apsd |= 0x00000001;
-				if (acbk)
-					apsd |= 0x00000002;
-				if (acbe)
-					apsd |= 0x00000004;
-				if (acvi)
-					apsd |= 0x00000008;
-				if (acvo)
-					apsd |= 0x00000010;
-				apsd &= 0x0000007F;  //set apsd bit be zero (xxxxxxx1)
-			}
-			else
-				apsd &= 0x0000007E;  //set apsd bit be zero (xxxxxxx0)
-		}
-		else
-			apsd &= 0x0000007E;  //set apsd bit be zero (xxxxxxx0)
-
-		OidSetInformation(RT_OID_802_11_SET_APSD_SETTING, s, "ra0", &apsd, sizeof(apsd));
-		OidSetInformation(RT_OID_802_11_SET_WMM, s, "ra0", &wmm_en, sizeof(wmm_en));
-
-		OidQueryInformation(OID_802_11_SSID, s, "ra0", &Ssid, sizeof(Ssid));
-		OidSetInformation(OID_802_11_DISASSOCIATE, s, "ra0", NULL, 0);
-		Sleep(1);
-		OidSetInformation(OID_802_11_SSID, s, "ra0", &Ssid, sizeof(Ssid));
-
-		// Setup DLS
-		OidSetInformation(RT_OID_802_11_SET_DLS, s, "ra0", &dls_en, sizeof(unsigned long));
-		if (dls_en)
-		{
-			dls.Valid = 1;
-			OidSetInformation(RT_OID_802_11_SET_DLS_PARAM, s, "ra0", &dls, sizeof(dls));
-		}
-	}
-	else if (!strncmp(button, "3", 2))
-	{
-		RT_802_11_DLS_INFO dls_info;
-		int s_dls;
-
-		s_dls = atoi(websGetVar(wp, T("selected_dls"), T("0")));
-		if (s_dls != 0) {
-			OidQueryInformation(RT_OID_802_11_QUERY_DLS_PARAM, s, "ra0", &dls_info, sizeof(dls_info));
-			if (dls_info.Entry[s_dls-1].Valid == 1) {
-				dls_info.Entry[s_dls-1].Valid = 0;
-				dls_info.Entry[s_dls-1].Status = DLS_NONE;
-				OidSetInformation(RT_OID_802_11_SET_DLS_PARAM, s, "ra0", &dls_info.Entry[s_dls-1], sizeof(RT_802_11_DLS_UI));
-			}
-		}
-	}
-
-	close(s);
-
-	char *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
-	if (submitUrl[0])
-		websRedirect(wp, submitUrl);
-}
-
-/*
- * description: get DLS timeout
- */
-static int getStaDLSTimeout(int eid, webs_t wp, int argc, char_t **argv)
-{
-	RT_802_11_DLS_UI dls;
-	int s = socket(AF_INET, SOCK_DGRAM, 0);
-
-	// Frames Received Successfully
-	if (OidQueryInformation(RT_OID_802_11_SET_DLS_PARAM, s, "ra0", &dls, sizeof(dls)) >= 0)
-		websWrite(wp, "%ld", dls.TimeOut);
-	else
-		websWrite(wp, "0");
-
-	close(s);
-	return 0;
-}
-
-/*
- * description: get DLS MAC address
- */
-static int getStaDLSMacAddress(int eid, webs_t wp, int argc, char_t **argv)
-{
-	RT_802_11_DLS_UI dls;
-	int s = socket(AF_INET, SOCK_DGRAM, 0);
-
-	// Frames Received Successfully
-	if (OidQueryInformation(RT_OID_802_11_SET_DLS_PARAM, s, "ra0", &dls, sizeof(dls)) >= 0)
-	{
-		int index = 0;
-		if (argc > 0)
-		{
-			index = atoi(argv[0]);
-			if ((index<0) || (index>=6))
-				index = 0;
-		}
-		websWrite(wp, "%02x", dls.MacAddr[index]);
-	}
-	else
-		websWrite(wp, "00");
-
-	close(s);
-	return 0;
 }
 
 static int getStaTrModes(int eid, webs_t wp, int argc, char_t **argv)

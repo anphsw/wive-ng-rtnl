@@ -84,7 +84,6 @@
   <message msgid="adv pkt aggregate" msgstr="Pkt_Aggregate" />
   <message msgid="adv 80211h" msgstr="IEEE 802.11H Support" />
   <message msgid="adv 80211h disable describe" msgstr="(only in A band)" />
-  <message msgid="adv rdregion" msgstr="DFS RDRegion" />
   <message msgid="adv country code" msgstr="Country Code" />
   <message msgid="adv country code us" msgstr="US (United States)" />
   <message msgid="adv country code jp" msgstr="JP (Japan)" />
@@ -94,16 +93,9 @@
   <message msgid="adv country code ie" msgstr="IE (Ireland)" />
   <message msgid="adv country code hk" msgstr="HK (Hong Kong)" />
   <message msgid="adv carrier" msgstr="Carrier Detect" />
-  <message msgid="adv wmm" msgstr="Wi-Fi Multimedia" />
-  <message msgid="adv wmm capable" msgstr="WMM Capable" />
-  <message msgid="adv apds capable" msgstr="APSD Capable" />
-  <message msgid="adv dls capable" msgstr="DLS Capable" />
-  <message msgid="adv wmm parameter" msgstr="WMM Parameters" />
-  <message msgid="adv wmm configuration" msgstr="WMM Configuration" />
+
   <message msgid="adv multicast2unicast converter" msgstr="Multicast-to-Unicast Converter (IGMP Snooping)" />
   <message msgid="adv multicast2unicast" msgstr="Multicast-to-Unicast" />
-  <message msgid="wmm ap parameter" msgstr="WMM Parameters of Access Point" />
-  <message msgid="wmm sta parameter" msgstr="WMM Parameters of Station" />
 
   <message msgid="secure select ssid" msgstr="Select SSID" />
   <message msgid="secure ssid title" msgstr="Wireless Security/Encryption Settings" />
@@ -236,15 +228,7 @@
   <message msgid="qos title" msgstr="Station Advanced Configurations" />
   <message msgid="qos introduction" msgstr="The Status page shows settings and current operation status of the Station." />
   <message msgid="qos config" msgstr="Qos Configuration" />
-  <message msgid="qos wmm" msgstr="WMM" />
-  <message msgid="qos wmm power save" msgstr="WMM Power Saving" />
-  <message msgid="qos wmm ps mode" msgstr="PS Mode" />
-  <message msgid="qos dls" msgstr="Direct Link Setup" />
-  <message msgid="qos dls timeoutvalue" msgstr="Timeout Value" />
   <message msgid="qos second" msgstr=" sec" />
-  <message msgid="qos dls status" msgstr="DLS Status" />
-  <message msgid="qos dls timeout" msgstr="Timeout" />
-  <message msgid="qos teardown" msgstr="Teardown" />
 
   <message msgid="11n title" msgstr="Station 11n Configurations" />
   <message msgid="11n introduction" msgstr="The Status page shows settings and current operation status of the Station." />

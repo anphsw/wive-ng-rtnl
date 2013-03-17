@@ -58,15 +58,6 @@ function initValue()
 {
 	initTranslation();
 
-	/*
-	alert(ftpenabled);
-	alert(anonymous);
-	alert(port);
-	alert(maxusers);
-	alert(logintimeout);
-	alert(staytimeout);
-	*/
-
 	document.storage_ftp.ftp_anonymous[0].disabled = true;
 	document.storage_ftp.ftp_anonymous[1].disabled = true;
 	document.storage_ftp.ftp_port.disabled = true;

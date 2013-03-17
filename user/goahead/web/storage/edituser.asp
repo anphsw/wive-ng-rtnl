@@ -16,13 +16,6 @@ var user = opener.document.forms[0].hiddenUser.value;
 var pw = opener.document.forms[0].hiddenPassword.value;
 var max = opener.document.forms[0].hiddenMaxLogins.value;
 var mode = opener.document.forms[0].hiddenMode.value;
-/*
-var index = opener.document.storage_adm.hiddenIndex.value;
-var user = opener.document.storage_adm.hiddenUser.value;
-var pw = opener.document.storage_adm.hiddenPassword.value;
-var max = opener.document.storage_adm.hiddenMaxLogins.value;
-var mode = opener.document.storage_adm.hiddenMode.value;
-*/
 
 function initTranslation()
 {

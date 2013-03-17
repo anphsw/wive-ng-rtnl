@@ -862,13 +862,7 @@ static int getLangBuilt(int eid, webs_t wp, int argc, char_t **argv)
 #else
 		return websWrite(wp, T("0"));
 #endif
-	else if (!strncmp(lang, "zhtw", 5))
-#ifdef CONFIG_USER_GOAHEAD_LANG_ZHTW
-		return websWrite(wp, T("1"));
-#else
-		return websWrite(wp, T("0"));
-#endif
-	return websWrite(wp, T("0"));
+	else	return websWrite(wp, T("0"));
 }
 
 /*

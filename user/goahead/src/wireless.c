@@ -36,8 +36,6 @@ static int  getWlanApcliBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int  getWlanChannel(int eid, webs_t wp, int argc, char_t **argv);
 static int  getWlanCurrentMac(int eid, webs_t wp, int argc, char_t **argv);
 static int  getWlanStaInfo(int eid, webs_t wp, int argc, char_t **argv);
-static int  getDLSBuilt(int eid, webs_t wp, int argc, char_t **argv);
-static int  getDFSBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int  getCarrierBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int  getWlanM2UBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int  getGreenAPBuilt(int eid, webs_t wp, int argc, char_t **argv);
@@ -47,7 +45,6 @@ static void disconnectSta(webs_t wp, char_t *path, char_t *query);
 static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query);
 static void wirelessWds(webs_t wp, char_t *path, char_t *query);
 static void wirelessApcli(webs_t wp, char_t *path, char_t *query);
-static void wirelessWmm(webs_t wp, char_t *path, char_t *query);
 static void wirelessGetSecurity(webs_t wp, char_t *path, char_t *query);
 static void APSecurity(webs_t wp, char_t *path, char_t *query);
 static int  is3t3r(int eid, webs_t wp, int argc, char_t **argv);
@@ -193,8 +190,6 @@ void formDefineWireless(void)
 	websAspDefine(T("getWlanChannel"), getWlanChannel);
 	websAspDefine(T("getWlanCurrentMac"), getWlanCurrentMac);
 	websAspDefine(T("getWlanStaInfo"), getWlanStaInfo);
-	websAspDefine(T("getDLSBuilt"), getDLSBuilt);
-	websAspDefine(T("getDFSBuilt"), getDFSBuilt);
 	websAspDefine(T("dumpBSS"), dumpBSS);
 	websAspDefine(T("get802_1XBuilt"), get802_1XBuilt);
 	websAspDefine(T("dumpBSSKeys"), dumpBSSKeys);
@@ -218,7 +213,6 @@ void formDefineWireless(void)
 	websFormDefine(T("wirelessAdvanced"), wirelessAdvanced);
 	websFormDefine(T("wirelessWds"), wirelessWds);
 	websFormDefine(T("wirelessApcli"), wirelessApcli);
-	websFormDefine(T("wirelessWmm"), wirelessWmm);
 	websFormDefine(T("wirelessGetSecurity"), wirelessGetSecurity);
 	websFormDefine(T("APSecurity"), APSecurity);
 	websFormDefine(T("APDeleteAccessPolicyList"), APDeleteAccessPolicyList);
@@ -515,24 +509,6 @@ static int getWlanStaInfo(int eid, webs_t wp, int argc, char_t **argv)
 	return 0;
 }
 
-static int getDLSBuilt(int eid, webs_t wp, int argc, char_t **argv)
-{
-#ifdef CONFIG_RT2860V2_AP_DLS
-	return websWrite(wp, T("1"));
-#else
-	return websWrite(wp, T("0"));
-#endif
-}
-
-static int getDFSBuilt(int eid, webs_t wp, int argc, char_t **argv)
-{
-#ifdef CONFIG_RT2860V2_AP_DFS
-	return websWrite(wp, T("1"));
-#else
-	return websWrite(wp, T("0"));
-#endif
-}
-
 static int getCarrierBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
 #ifdef CONFIG_RT2860V2_AP_CARRIER
@@ -588,7 +564,6 @@ typedef struct mbss_param_t
 	   18.) TxRate,              int  TxRate;
 	   19.) HideSSID,            int  HideSSID;
 	   20.) PreAuth,             int  PreAuth;
-	   21.) WmmCapable
 	                             int  SecurityMode;
                              	 char VlanName[20];
 	                             int  VlanId;
@@ -610,14 +585,9 @@ const mbss_param_t mbss_params[] =
 	{ "Key3Str", 0 },
 	{ "Key4Type", 1 },
 	{ "Key4Str", 0 },
-//	{ "AccessPolicy", 1 },
-//	{ "AccessControlList", 1},
-//	{ "NoForwarding", 1 }, // Is set up by MBSS logic
 	{ "IEEE8021X", 1 },
 	{ "TxRate", 1 },
-//	{ "HideSSID", 1 }, // Is set by MBSS logic
 	{ "PreAuth", 1 },
-	{ "WmmCapable", 1 },
 	{ "RekeyInterval", 1 },
 	{ "RekeyMethod", 1 },
 	{ NULL, 0 }
@@ -1018,10 +988,9 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 {
 	char_t	*bg_protection, /**basic_rate,*/ *beacon, *dtim, *fragment, *rts,
 			*tx_power, *short_preamble, *short_slot, *tx_burst, *pkt_aggregate,
-			*wmm_capable, *apsd_capable, *dls_capable, *countrycode, *country_region;
+			*countrycode, *country_region;
 	char_t	*rd_region, *carrier_detect, *lna_gain, *ht_noise_thresh, *ap2040_rescan, *ht_bss_coex;
 	int		i, ssid_num, wlan_mode;
-	char	wmm_enable[16];
 	char *submitUrl;
 
 #ifdef CONFIG_RT2860V2_AP_IGMP_SNOOP
@@ -1045,9 +1014,6 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 	pkt_aggregate = websGetVar(wp, T("pkt_aggregate"), T("0"));
 	rd_region = websGetVar(wp, T("rd_region"), T("CE"));
 	carrier_detect = websGetVar(wp, T("carrier_detect"), T("0"));
-	wmm_capable = websGetVar(wp, T("wmm_capable"), T("0"));
-	apsd_capable = websGetVar(wp, T("apsd_capable"), T("0"));
-	dls_capable = websGetVar(wp, T("dls_capable"), T("0"));
 	countrycode = websGetVar(wp, T("country_code"), T("NONE"));
 	country_region = websGetVar(wp, T("country_region"), T("0"));
 	lna_gain = websGetVar(wp, T("lnaGainEnable"), T("0"));
@@ -1089,8 +1055,6 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "PktAggregate", pkt_aggregate);
 	nvram_bufset(RT2860_NVRAM, "RDRegion", rd_region);
 	nvram_bufset(RT2860_NVRAM, "CarrierDetect", carrier_detect);
-	nvram_bufset(RT2860_NVRAM, "APSDCapable", apsd_capable);
-	nvram_bufset(RT2860_NVRAM, "DLSCapable", dls_capable);
 	nvram_bufset(RT2860_NVRAM, "HiPower", lna_gain);
 	nvram_bufset(RT2860_NVRAM, "HT_BSSCoexistence", ht_bss_coex);
 	if (strcmp(ht_bss_coex, "1") == 0)
@@ -1104,21 +1068,6 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "VideoTurbine", video_turbine);
 #endif
 #endif
-
-	bzero(wmm_enable, sizeof(char)*16);
-	for (i = 0; i < ssid_num; i++)
-	{
-		sprintf(wmm_enable+strlen(wmm_enable), "%d", atoi(wmm_capable));
-		sprintf(wmm_enable+strlen(wmm_enable), "%c", ';');
-	}
-	wmm_enable[strlen(wmm_enable) - 1] = '\0';
-	nvram_bufset(RT2860_NVRAM, "WmmCapable", wmm_enable);
-
-	if (!strncmp(wmm_capable, "1", 2)) {
-		if (wlan_mode < 5)
-			nvram_bufset(RT2860_NVRAM, "TxBurst", "0");
-	}
-
 	nvram_bufset(RT2860_NVRAM, "CountryCode", countrycode);
 	if (!strncmp(countrycode, "US", 3)) {
 		nvram_bufset(RT2860_NVRAM, "CountryRegionABand", "0");
@@ -1165,9 +1114,6 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 		websWrite(wp, T("pkt_aggregate: %s<br>\n"), pkt_aggregate);
 		websWrite(wp, T("rd_region: %s<br>\n"), rd_region);
 		websWrite(wp, T("carrier_detect: %s<br>\n"), carrier_detect);
-		websWrite(wp, T("wmm_capable: %s<br>\n"), wmm_capable);
-		websWrite(wp, T("apsd_capable: %s<br>\n"), apsd_capable);
-		websWrite(wp, T("dls_capable: %s<br>\n"), dls_capable);
 		websWrite(wp, T("countrycode: %s<br>\n"), countrycode);
 		websWrite(wp, T("lna_gain: %s<br>\n"), lna_gain);
 #ifdef CONFIG_RT2860V2_AP_IGMP_SNOOP
@@ -1268,82 +1214,12 @@ static void wirelessApcli(webs_t wp, char_t *path, char_t *query)
 		websRedirect(wp, submitUrl);
 	else
 		websDone(wp, 200);
-	
+
 	//network configure
 	doSystem("internet.sh");
 }
 
-/* goform/wirelessWmm */
-static void wirelessWmm(webs_t wp, char_t *path, char_t *query)
-{
-	char_t	*ap_aifsn_all, *ap_cwmin_all, *ap_cwmax_all, *ap_txop_all,
-			*ap_acm_all, *ap_ackpolicy_all,
-			*sta_aifsn_all, *sta_cwmin_all, *sta_cwmax_all, *sta_txop_all,
-			*sta_acm_all;
-
-	ap_aifsn_all = websGetVar(wp, T("ap_aifsn_all"), T(""));
-	ap_cwmin_all = websGetVar(wp, T("ap_cwmin_all"), T(""));
-	ap_cwmax_all = websGetVar(wp, T("ap_cwmax_all"), T(""));
-	ap_txop_all = websGetVar(wp, T("ap_txop_all"), T(""));
-	ap_acm_all = websGetVar(wp, T("ap_acm_all"), T(""));
-	ap_ackpolicy_all = websGetVar(wp, T("ap_ackpolicy_all"), T(""));
-	sta_aifsn_all = websGetVar(wp, T("sta_aifsn_all"), T(""));
-	sta_cwmin_all = websGetVar(wp, T("sta_cwmin_all"), T(""));
-	sta_cwmax_all = websGetVar(wp, T("sta_cwmax_all"), T(""));
-	sta_txop_all = websGetVar(wp, T("sta_txop_all"), T(""));
-	sta_acm_all = websGetVar(wp, T("sta_acm_all"), T(""));
-
-	nvram_init(RT2860_NVRAM);
-	if (0 != strlen(ap_aifsn_all))
-		nvram_bufset(RT2860_NVRAM, "APAifsn", ap_aifsn_all);
-	if (0 != strlen(ap_cwmin_all))
-		nvram_bufset(RT2860_NVRAM, "APCwmin", ap_cwmin_all);
-	if (0 != strlen(ap_cwmax_all))
-		nvram_bufset(RT2860_NVRAM, "APCwmax", ap_cwmax_all);
-	if (0 != strlen(ap_txop_all))
-		nvram_bufset(RT2860_NVRAM, "APTxop", ap_txop_all);
-	if (0 != strlen(ap_acm_all))
-		nvram_bufset(RT2860_NVRAM, "APACM", ap_acm_all);
-	if (0 != strlen(ap_ackpolicy_all))
-		nvram_bufset(RT2860_NVRAM, "AckPolicy", ap_ackpolicy_all);
-	if (0 != strlen(sta_aifsn_all))
-		nvram_bufset(RT2860_NVRAM, "BSSAifsn", sta_aifsn_all);
-	if (0 != strlen(sta_cwmin_all))
-		nvram_bufset(RT2860_NVRAM, "BSSCwmin", sta_cwmin_all);
-	if (0 != strlen(sta_cwmax_all))
-		nvram_bufset(RT2860_NVRAM, "BSSCwmax", sta_cwmax_all);
-	if (0 != strlen(sta_txop_all))
-		nvram_bufset(RT2860_NVRAM, "BSSTxop", sta_txop_all);
-	if (0 != strlen(sta_acm_all))
-		nvram_bufset(RT2860_NVRAM, "BSSACM", sta_acm_all);
-	nvram_commit(RT2860_NVRAM);
-	nvram_close(RT2860_NVRAM);
-
-	websHeader(wp);
-	websWrite(wp, T("ap_aifsn_all: %s<br>\n"), ap_aifsn_all);
-	websWrite(wp, T("ap_cwmin_all: %s<br>\n"), ap_cwmin_all);
-	websWrite(wp, T("ap_cwmax_all: %s<br>\n"), ap_cwmax_all);
-	websWrite(wp, T("ap_txop_all: %s<br>\n"), ap_txop_all);
-	websWrite(wp, T("ap_acm_all: %s<br>\n"), ap_acm_all);
-	websWrite(wp, T("ap_ackpolicy_all: %s<br>\n"), ap_ackpolicy_all);
-	websWrite(wp, T("sta_aifsn_all: %s<br>\n"), sta_aifsn_all);
-	websWrite(wp, T("sta_cwmin_all: %s<br>\n"), sta_cwmin_all);
-	websWrite(wp, T("sta_cwmax_all: %s<br>\n"), sta_cwmax_all);
-	websWrite(wp, T("sta_txop_all: %s<br>\n"), sta_txop_all);
-	websWrite(wp, T("sta_acm_all: %s<br>\n"), sta_acm_all);
-	websFooter(wp);
-	websDone(wp, 200);
-
-	doSystem("ifconfig ra0 down");
-	gen_wifi_config(RT2860_NVRAM);
-	doSystem("ifconfig ra0 up");
-	//after ra0 down&up we must restore WPS status
-#if defined(CONFIG_RT2860V2_AP_WSC) || defined(CONFIG_RT2860V2_STA_WSC)
-	WPSRestart();
-#endif
-}
-
-#ifdef CONFIG_USER_802_1X 
+#ifdef CONFIG_USER_802_1X
 void restart8021XDaemon(int nvram)
 {
 	int i, num, apd_flag = 0;

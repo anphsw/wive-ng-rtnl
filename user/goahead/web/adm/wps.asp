@@ -211,13 +211,6 @@ function PINExternalRADIO()
 }
 
 function updateState(){
-/*
-	if(document.WPSUPNP.WPSUPnPEnabled.options.selectedIndex == 1){
-		enableTextField(document.WPSUPNP.WPSUPnPRole);
-	}else{
-		disableTextField(document.WPSUPNP.WPSUPnPRole);
-	}
-*/
 }
 
 function pageInit(){

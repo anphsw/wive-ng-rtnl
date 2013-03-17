@@ -31,16 +31,8 @@ ifeq ("$(CONFIG_RT2860V2_RT3XXX_STA_ANTENNA_DIVERSITY)", "")
 	rm -f $(ROMFSDIR)$(ROOT_DIRECTORY)/wireless/ant_diversity.asp
 endif
 endif
-ifeq ("$(CONFIG_RT2860V2_AP_WMM_ACM)", "")
-ifeq ("$(CONFIG_RT2860V2_STA_WMM_ACM)", "")
-	rm -f $(ROMFSDIR)$(ROOT_DIRECTORY)/wireless/wmm.asp
-endif
-endif
 ifeq ("$(CONFIG_USER_CHILLISPOT)", "")
 	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/internet/hotspot.asp
-endif
-ifeq ("$(CONFIG_USER_GOAHEAD_LANG_ZHTW)", "")
-	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/lang/zhtw
 endif
 ifeq ("$(CONFIG_USB)", "")
 	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/usb

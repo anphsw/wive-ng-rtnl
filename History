@@ -1371,7 +1371,8 @@
 28) init.d: fix MIMO PowerSave mode enable/disable.<br>
 29) configs: enable apcli/wds for all chips.<br>
 30) defaults: more compat with bcm/realtek devices.<br>
-31) build system temp set test only in archive name.<br>
+31) build_system: temp set test only in archive name.<br>
+32) goahead: remove very old dead code.<br>
 
 <br>
 <br>

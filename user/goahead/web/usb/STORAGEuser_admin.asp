@@ -79,20 +79,6 @@ var ftpenabled = '<% getCfgZero(1, "FtpEnabled"); %>';
 var smbenabled = '<% getCfgZero(1, "SmbEnabled"); %>';
 var count = 0;
 
-/*
-function style_display_on()
-{
-	if (window.ActiveXObject)
-	{ // IE
-		return "block";
-	}
-	else if (window.XMLHttpRequest)
-	{ // Mozilla, Safari,...
-		return "table-row";
-	}
-}
-*/
-
 function initTranslation()
 {
 	var e = document.getElementById("storageAdmTitle");
@@ -124,28 +110,12 @@ function initValue()
 	var tmp;
 
 	initTranslation();
-	/*
-	alert(ftpenabled);
-	alert(anonymous);
-	alert(port);
-	alert(maxusers);
-	alert(logintimeout);
-	alert(staytimeout);
-	*/
 	for (i=1;i<9;i++)
 	{
 		if (eval('user'+i) != "")
 			count++;
 	}
 }
-
-/*
-function CheckValue()
-{
-
-	return true;
-}
-*/
 
 function submit_apply(parm)
 {

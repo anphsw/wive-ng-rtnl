@@ -54,20 +54,6 @@ var upw8 = '<% getCfgGeneral(1, "Upw8"); %>';
 var umax8 = '<% getCfgGeneral(1, "Umax8"); %>';
 var umode8 = '<% getCfgGeneral(1, "Umode8"); %>';
 
-/*
-function style_display_on()
-{
-	if (window.ActiveXObject)
-	{ // IE
-		return "block";
-	}
-	else if (window.XMLHttpRequest)
-	{ // Mozilla, Safari,...
-		return "table-row";
-	}
-}
-*/
-
 function initTranslation()
 {
 	var e = document.getElementById("storageAdmTitle");
@@ -105,15 +91,6 @@ function initTranslation()
 function initValue()
 {
 	initTranslation();
-
-	/*
-	alert(ftpenabled);
-	alert(anonymous);
-	alert(port);
-	alert(maxusers);
-	alert(logintimeout);
-	alert(staytimeout);
-	*/
 }
 
 function CheckValue()

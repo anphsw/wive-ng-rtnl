@@ -127,15 +127,15 @@ function bodyOnLoad(form)
 			form.modem_mtu_type.value = form.modem_mtu_select.options[i].value;
 			break;
 		}
-		
+
 		modemSwitchClick(form);
 		selectModemType(form);
 		mtuChange(form);
-		
+
 		showModemStatus();
-		
+
 }
-  
+
 function modemSwitchClick(form)
 {
 	disableElement( [
