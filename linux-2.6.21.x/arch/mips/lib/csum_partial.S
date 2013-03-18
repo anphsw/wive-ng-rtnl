@@ -7,6 +7,7 @@
  *
  * Copyright (C) 1998, 1999 Ralf Baechle
  * Copyright (C) 1999 Silicon Graphics, Inc.
+ * Copyright (C) 2007  Maciej W. Rozycki
  */
 #include <linux/errno.h>
 #include <asm/asm.h>
@@ -38,12 +39,14 @@
 #ifdef USE_DOUBLE
 
 #define LOAD   ld
+#define LOAD32 lwu
 #define ADD    daddu
 #define NBYTES 8
 
 #else
 
 #define LOAD   lw
+#define LOAD32 lw
 #define ADD    addu
 #define NBYTES 4
 
@@ -54,7 +57,12 @@
 #define ADDC(sum,reg)						\
 	ADD	sum, reg;					\
 	sltu	v1, sum, reg;					\
-	ADD	sum, v1
+	ADD	sum, v1;					\
+
+#define ADDC32(sum,reg)						\
+	addu	sum, reg;					\
+	sltu	v1, sum, reg;					\
+	addu	sum, v1;					\
 
 #define CSUM_BIGCHUNK1(src, offset, sum, _t0, _t1, _t2, _t3)	\
 	LOAD	_t0, (offset + UNIT(0))(src);			\
@@ -128,7 +136,7 @@ LEAF(csum_partial)
 	beqz	t8, .Lqword_align
 	 andi	t8, src, 0x8
 
-	lw	t0, 0x00(src)
+	LOAD32	t0, 0x00(src)
 	LONG_SUBU	a1, a1, 0x4
 	ADDC(sum, t0)
 	PTR_ADDU	src, src, 0x4
@@ -178,8 +186,10 @@ LEAF(csum_partial)
 	CSUM_BIGCHUNK(src, 0x40, sum, t0, t1, t3, t4)
 	CSUM_BIGCHUNK(src, 0x60, sum, t0, t1, t3, t4)
 	LONG_SUBU	t8, t8, 0x01
-	bnez    t8, .Lmove_128bytes
+	.set	reorder				/* DADDI_WAR */
 	 PTR_ADDU	src, src, 0x80
+	bnez	t8, .Lmove_128bytes
+	.set	noreorder
 
 1:
 	beqz	t2, 1f
@@ -205,11 +215,13 @@ LEAF(csum_partial)
 	LONG_SRL	t8, t8, 0x2
 
 .Lend_words:
-	lw	t0, (src)
+	LOAD32	t0, (src)
 	LONG_SUBU	t8, t8, 0x1
 	ADDC(sum, t0)
-	bnez    t8, .Lend_words
+	.set	reorder				/* DADDI_WAR */
 	 PTR_ADDU	src, src, 0x4
+	bnez	t8, .Lend_words
+	.set	noreorder
 
 /* unknown src alignment and < 8 bytes to go  */
 .Lsmall_csumcpy:
@@ -222,6 +234,9 @@ LEAF(csum_partial)
 	/* Still a full word to go  */
 	ulw	t1, (src)
 	PTR_ADDIU	src, 4
+#ifdef USE_DOUBLE
+	dsll	t1, t1, 32			/* clear lower 32bit */
+#endif
 	ADDC(sum, t1)
 
 1:	move	t1, zero
@@ -271,7 +286,7 @@ LEAF(csum_partial)
 #endif
 	.set	reorder
 	/* Add the passed partial csum.  */
-	ADDC(sum, a2)
+	ADDC32(sum, a2)
 	jr	ra
 	.set	noreorder
 	END(csum_partial)
@@ -375,7 +390,11 @@ LEAF(csum_partial)
 
 #define ADDRMASK (NBYTES-1)
 
+#ifndef CONFIG_CPU_DADDI_WORKAROUNDS
 	.set	noat
+#else
+	.set	at=v1
+#endif
 
 LEAF(__csum_partial_copy_user)
 	PTR_ADDU	AT, src, len	/* See (1) above. */
@@ -443,8 +462,10 @@ EXC(	STORE	t6, UNIT(6)(dst),	.Ls_exc)
 	ADDC(sum, t6)
 EXC(	STORE	t7, UNIT(7)(dst),	.Ls_exc)
 	ADDC(sum, t7)
-	bgez	len, 1b
+	.set	reorder				/* DADDI_WAR */
 	 ADD	dst, dst, 8*NBYTES
+	bgez	len, 1b
+	.set	noreorder
 	ADD	len, 8*NBYTES		# revert len (see above)
 
 	/*
@@ -473,8 +494,10 @@ EXC(	STORE	t2, UNIT(2)(dst),	.Ls_exc)
 	ADDC(sum, t2)
 EXC(	STORE	t3, UNIT(3)(dst),	.Ls_exc)
 	ADDC(sum, t3)
-	beqz	len, .Ldone
+	.set	reorder				/* DADDI_WAR */
 	 ADD	dst, dst, 4*NBYTES
+	beqz	len, .Ldone
+	.set	noreorder
 .Lless_than_4units:
 	/*
 	 * rem = len % NBYTES
@@ -487,8 +510,10 @@ EXC(	LOAD	t0, 0(src),		.Ll_exc)
 	SUB	len, len, NBYTES
 EXC(	STORE	t0, 0(dst),		.Ls_exc)
 	ADDC(sum, t0)
-	bne	rem, len, 1b
+	.set	reorder				/* DADDI_WAR */
 	 ADD	dst, dst, NBYTES
+	bne	rem, len, 1b
+	.set	noreorder
 
 	/*
 	 * src and dst are aligned, need to copy rem bytes (rem < NBYTES)
@@ -574,8 +599,10 @@ EXC(	STORE	t2, UNIT(2)(dst),	.Ls_exc)
 	ADDC(sum, t2)
 EXC(	STORE	t3, UNIT(3)(dst),	.Ls_exc)
 	ADDC(sum, t3)
-	bne	len, rem, 1b
+	.set	reorder				/* DADDI_WAR */
 	 ADD	dst, dst, 4*NBYTES
+	bne	len, rem, 1b
+	.set	noreorder
 
 .Lcleanup_src_unaligned:
 	beqz	len, .Ldone
@@ -589,8 +616,10 @@ EXC(	LDREST	t0, REST(0)(src),	.Ll_exc_copy)
 	SUB	len, len, NBYTES
 EXC(	STORE	t0, 0(dst),		.Ls_exc)
 	ADDC(sum, t0)
-	bne	len, rem, 1b
+	.set	reorder				/* DADDI_WAR */
 	 ADD	dst, dst, NBYTES
+	bne	len, rem, 1b
+	.set	noreorder
 
 .Lcopy_bytes_checklen:
 	beqz	len, .Ldone
@@ -656,7 +685,7 @@ EXC(	sb	t0, NBYTES-2(dst), .Ls_exc)
 1:
 #endif
 	.set reorder
-	ADDC(sum, psum)
+	ADDC32(sum, psum)
 	jr	ra
 	.set noreorder
 
@@ -681,8 +710,10 @@ EXC(	lbu	t1, 0(src),	.Ll_exc)
 	SLLV	t1, t1, t2
 	addu	t2, SHIFT_INC
 	ADDC(sum, t1)
-	bne	src, t0, 1b
+	.set	reorder				/* DADDI_WAR */
 	 ADD	dst, dst, 1
+	bne	src, t0, 1b
+	.set	noreorder
 .Ll_exc:
 	LOAD	t0, TI_TASK($28)
 	 nop
@@ -700,12 +731,22 @@ EXC(	lbu	t1, 0(src),	.Ll_exc)
 	 * Clear len bytes starting at dst.  Can't call __bzero because it
 	 * might modify len.  An inefficient loop for these rare times...
 	 */
-	beqz	len, .Ldone
+	.set	reorder				/* DADDI_WAR */
 	 SUB	src, len, 1
+	beqz	len, .Ldone
+	.set	noreorder
 1:	sb	zero, 0(dst)
 	ADD	dst, dst, 1
+	.set	push
+	.set	noat
+#ifndef CONFIG_CPU_DADDI_WORKAROUNDS
 	bnez	src, 1b
 	 SUB	src, src, 1
+#else
+	li	v1, 1
+	bnez	src, 1b
+	 SUB	src, src, v1
+#endif
 	li	v1, -EFAULT
 	b	.Ldone
 	 sw	v1, (errptr)
@@ -715,4 +756,5 @@ EXC(	lbu	t1, 0(src),	.Ll_exc)
 	li	v1, -EFAULT
 	jr	ra
 	 sw	v1, (errptr)
+	.set	pop
 	END(__csum_partial_copy_user)
