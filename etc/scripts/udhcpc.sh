@@ -261,7 +261,7 @@ case "$1" in
 	fi
 	# reanable forward for paranoid users
 	echo 1 > "/proc/sys/net/ipv4/conf/$interface/forwarding"
-	if [ "$radvdEnabled" = "1" ]; then
+	if [ "$radvdEnabled" = "1" ] && [ -f /proc/sys/net/ipv4/conf/$interface/forwarding ]; then
 	    echo 1 > "/proc/sys/net/ipv6/conf/$interface/forwarding"
 	fi
     ;;
