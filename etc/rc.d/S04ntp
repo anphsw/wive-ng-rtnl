@@ -14,9 +14,6 @@ start() {
 
 TZ_generate() {
     TZ=`nvram_get 2860 TZ`
-    if [ "$TZ" = "" ]; then
-        tz="MSD-4"
-    fi
 
     echo "$TZ" > /etc/tmpTZ
     sed -e 's#.*_\(-*\)0*\(.*\)#GMT-\1\2#' /etc/tmpTZ > /etc/tmpTZ2

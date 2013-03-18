@@ -31,6 +31,16 @@ start() {
 	    get_param
 	    $LOG "Reset OK... Continue boot..."
     fi
+
+######################################## MINIMAL CONFIG FOR NORMAL START #########################################
+    #
+    # timezone
+    #
+    TZ=`nvram_get 2860 TZ`
+    if [ "$TZ" = "" ]; then
+        nvram_set 2860 "OMST-7"
+    fi
+
     #
     # user and password need set
     #

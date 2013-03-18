@@ -229,12 +229,8 @@ start() {
 		elif [ "$TransAccess" = "2" ]; then
     		iptables -A servicelimit $STATE_NEW -p tcp --dport $TransRPCPort -j ACCEPT
 	    fi
-		
-		# Incoming peers
+	    # Incoming peers
 	    iptables -A servicelimit -p tcp --dport $TransInPort -j ACCEPT
-	
-	    		
-	    
 	fi
 	if [ "$WANPingFilter" = "0" ]; then
 	    if [ "$OperationMode" != "0" ] && [ "$ApCliBridgeOnly" != "1" ]; then
