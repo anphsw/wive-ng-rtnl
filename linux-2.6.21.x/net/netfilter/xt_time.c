@@ -99,15 +99,8 @@ match(const struct sk_buff *skb,
 	struct timeval kerneltimeval;
 	time_t packet_local_time;
 
-	/* if kerneltime=1, we don't read the skb->timestamp but kernel time instead */
-	if (info->kerneltime)
-	{
-		do_gettimeofday(&kerneltimeval);
-		packet_local_time = kerneltimeval.tv_sec;
-	}
-	else
-		//packet_local_time = skb->stamp.tv_sec;
-		packet_local_time = skb->tstamp.tv.sec;
+	do_gettimeofday(&kerneltimeval);
+	packet_local_time = kerneltimeval.tv_sec;
 
 	/* Transform the timestamp of the packet, in a human readable form */
 	localtime(&packet_local_time, &currenttime);
@@ -137,7 +130,7 @@ static bool checkentry(const char *tablename,
 			void *matchinfo,
 			unsigned int hook_mask)
 {
-	struct ipt_time_info *info = matchinfo;   /* match info for rule */
+	const struct ipt_time_info *info = matchinfo;   /* match info for rule */
 
 	/* First, check that we are in the correct hook */
 	/* PRE_ROUTING, LOCAL_IN or FROWARD */
@@ -147,13 +140,6 @@ static bool checkentry(const char *tablename,
 		printk("ipt_time: error, only valid for PRE_ROUTING, LOCAL_IN, FORWARD and OUTPUT)\n");
 		return 0;
 	}
-
-	/* always use kerneltime */
-	info->kerneltime = 1;
-
-	/* Check the size */
-	//if (matchsize < IPT_ALIGN(sizeof(struct ipt_time_info)))
-	//	return 0;
 
 	/* Now check the coherence of the data ... */
 	if ((info->time_start > 86399) ||        /* 24*60*60-1 = 86399*/

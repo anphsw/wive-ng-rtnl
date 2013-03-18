@@ -52,7 +52,8 @@ match(const struct sk_buff *skb,
       unsigned int protoff,
       bool *hotdrop)
 {
-	struct ip_esp_hdr _esp, *eh;
+	const struct ip_esp_hdr *eh;
+	struct ip_esp_hdr _esp;
 	const struct xt_esp *espinfo = matchinfo;
 
 	/* Must not be a fragment. */

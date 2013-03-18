@@ -47,7 +47,8 @@ static void send_reset(struct sk_buff *oldskb)
 	struct tcphdr otcph, *tcph;
 	unsigned int otcplen, hh_len;
 	int tcphoff, needs_ack;
-	struct ipv6hdr *oip6h = oldskb->nh.ipv6h, *ip6h;
+	const struct ipv6hdr *oip6h = oldskb->nh.ipv6h;
+	struct ipv6hdr *ip6h;
 	struct dst_entry *dst = NULL;
 	u8 proto;
 	struct flowi fl;

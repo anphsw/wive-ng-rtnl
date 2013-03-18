@@ -42,7 +42,8 @@ tcp_find_option(u_int8_t option,
 		bool *hotdrop)
 {
 	/* tcp.doff is only 4 bits, ie. max 15 * 4 bytes */
-	u_int8_t _opt[60 - sizeof(struct tcphdr)], *op;
+	const u_int8_t *op;
+	u_int8_t _opt[60 - sizeof(struct tcphdr)];
 	unsigned int i;
 
 	duprintf("tcp_match: finding option\n");
@@ -77,7 +78,8 @@ tcp_match(const struct sk_buff *skb,
 	  unsigned int protoff,
 	  bool *hotdrop)
 {
-	struct tcphdr _tcph, *th;
+	const struct tcphdr *th;
+	struct tcphdr _tcph;
 	const struct xt_tcp *tcpinfo = matchinfo;
 
 	if (offset) {
@@ -156,7 +158,8 @@ udp_match(const struct sk_buff *skb,
 	  unsigned int protoff,
 	  bool *hotdrop)
 {
-	struct udphdr _udph, *uh;
+	const struct udphdr *uh;
+	struct udphdr _udph;
 	const struct xt_udp *udpinfo = matchinfo;
 
 	/* Must not be a fragment. */

@@ -50,7 +50,8 @@ match_packet(const struct sk_buff *skb,
 	     bool *hotdrop)
 {
 	u_int32_t chunkmapcopy[256 / sizeof (u_int32_t)];
-	sctp_chunkhdr_t _sch, *sch;
+	const sctp_chunkhdr_t *sch;
+	sctp_chunkhdr_t _sch;
 
 #ifdef DEBUG_SCTP
 	int i = 0;
@@ -130,7 +131,8 @@ match(const struct sk_buff *skb,
       bool *hotdrop)
 {
 	const struct xt_sctp_info *info = matchinfo;
-	sctp_sctphdr_t _sh, *sh;
+	const sctp_sctphdr_t *sh;
+	sctp_sctphdr_t _sh;
 
 	if (offset) {
 		duprintf("Dropping non-first fragment.. FIXME\n");

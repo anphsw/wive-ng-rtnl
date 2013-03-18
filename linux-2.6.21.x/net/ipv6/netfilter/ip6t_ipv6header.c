@@ -53,7 +53,8 @@ ipv6header_match(const struct sk_buff *skb,
 	temp = 0;
 
 	while (ip6t_ext_hdr(nexthdr)) {
-		struct ipv6_opt_hdr _hdr, *hp;
+		const struct ipv6_opt_hdr *hp;
+		struct ipv6_opt_hdr _hdr;
 		int hdrlen;
 
 		/* Is there enough space for the next ext header? */

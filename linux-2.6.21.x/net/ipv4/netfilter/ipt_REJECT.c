@@ -41,7 +41,8 @@ MODULE_DESCRIPTION("Xtables: packet \"rejection\" target for IPv4");
 static void send_reset(struct sk_buff *oldskb, int hook)
 {
 	struct sk_buff *nskb;
-	struct tcphdr _otcph, *oth, *tcph;
+	const struct tcphdr *oth;
+	struct tcphdr _otcph, *tcph;
 	__be16 tmp_port;
 	__be32 tmp_addr;
 	int needs_ack;
