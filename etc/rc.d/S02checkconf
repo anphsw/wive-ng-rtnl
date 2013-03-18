@@ -34,22 +34,7 @@ start() {
 
 ######################################## MINIMAL CONFIG FOR NORMAL START #########################################
     #
-    # timezone
-    #
-    TZ=`nvram_get 2860 TZ`
-    if [ "$TZ" = "" ]; then
-        nvram_set 2860 "OMST-7"
-    fi
-
-    #
-    # user and password need set
-    #
-    if [ "$Login" = "" ] || [ "$Password" = "" ]; then
-        nvram_set 2860 Login "Admin"
-        nvram_set 2860 Password "Admin"
-    fi
-    #
-    # if check mac in nvram set to not NO and web not start
+    # chech mac correct set if check mac in nvram set to not NO and web not start
     #
     if [ "$CHECKMAC" != "NO" ] && [ ! -f /var/run/goahead.pid ]; then
 	if [ $MAC_TEST = "0" ] || [ $WMAC_TEST = "0" ] || [ $WMAC2_TEST = "0" ] || [ $LANMAC_TEST = "0" ]; then
@@ -69,6 +54,7 @@ start() {
     	    nvram_set 2860 WLAN2_MAC_ADDR "$WMAC2"
 	fi
     fi
+
     #
     # OperationMode adjustment:
     #   if AP client was not compiled and operation mode was set "3" -> set $OperationMode "1"
@@ -84,14 +70,32 @@ start() {
 	nvram_set 2860 OperationMode 1
 	OperationMode="1"
     fi
+
+    #
+    #	drop apcli specific flags in not apcli enabled modes
+    #
     if [ "$OperationMode" != "3" ]; then
-	if [ "$ApCliBridgeOnly" != "0" ]; then
+	if [ "$ApCliBridgeOnly" != "0" ] || [ "$ApCliClientOnly" != "0" ]; then
 	    nvram_set ApCliBridgeOnly 0
-	fi
-	if [ "$ApCliClientOnly" != "0" ]; then
 	    nvram_set ApCliClientOnly 0
 	fi
     fi
+
+    #
+    # timezone
+    #
+    if [ "$TZ" = "" ]; then
+        nvram_set 2860 "OMST-7"
+    fi
+
+    #
+    # user and password need set
+    #
+    if [ "$Login" = "" ] || [ "$Password" = "" ]; then
+        nvram_set 2860 Login "Admin"
+        nvram_set 2860 Password "Admin"
+    fi
+
     #
     # dafault lan ip/mask
     #
@@ -109,6 +113,7 @@ start() {
     fi
     echo "$HostName" > /etc/hostname
     hostname -F /etc/hostname
+
     #
     # samba configs to
     #
@@ -122,12 +127,14 @@ start() {
 	    nvram_set 2860 SmbString "$SmbString"
 	fi
     fi
+
     #
     # Udpxy default port
     #
     if [ -f /bin/udpxy ] && [ "$UDPXYPort" = "" ]; then
 	nvram_set 2860 UDPXYPort 81
     fi
+
     #
     # WebUI default port
     #
@@ -141,7 +148,7 @@ start() {
 
 get_param() {
     # get parametrs
-    eval `nvram_buf_get 2860 IS_WIVE CHECKMAC Login Password OperationMode lan_ipaddr lan_netmask \
+    eval `nvram_buf_get 2860 IS_WIVE CHECKMAC Login Password OperationMode lan_ipaddr lan_netmask TZ \
 	    WorkGroup SmbNetBIOS SmbString HostName UDPXYPort RemoteManagementPort ApCliBridgeOnly ApCliClientOnly`
 
     # set mask for macs generate and vendor name
