@@ -32,7 +32,7 @@ ip route replace default dev $PPP_IFACE metric 100$PPP_NUM via $PPP_REMOTE > /de
 
 $LOG "Enable forwarding for $PPP_IFACE interface"
 echo 1 > "/proc/sys/net/ipv4/conf/$PPP_IFACE/forwarding"
-if [ "$radvdEnabled" = "1" ]; then
+if [ "$radvdEnabled" = "1" ] && [ -f /proc/sys/net/ipv6/conf/$PPP_IFACE/forwarding ]; then
     echo 1 > "/proc/sys/net/ipv6/conf/$PPP_IFACE/forwarding"
 fi
 
