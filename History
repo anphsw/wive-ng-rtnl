@@ -1385,6 +1385,7 @@
 42) build_system: temp set test only in archive name.<br>
 43) goahead: remove very old dead code.<br>
 44) igmpproxy: some fixups.<br>
+45) kernel: mips: dsp: Add assembler support for DSP ASEs.<br>
 
 <br>
 <br>

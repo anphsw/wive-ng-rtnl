@@ -70,4 +70,22 @@ obj-$(CONFIG_I8253)		+= i8253.o
 obj-$(CONFIG_KEXEC)		+= machine_kexec.o relocate_kernel.o
 obj-$(CONFIG_EARLY_PRINTK)	+= early_printk.o
 
+#
+# DSP ASE supported for MIPS32 or MIPS64 Release 2 cores only. It is not
+# safe to unconditionnaly use the assembler -mdsp / -mdspr2 switches
+# here because the compiler may use DSP ASE instructions (such as lwx) in
+# code paths where we cannot check that the CPU we are running on supports it.
+# Proper abstraction using HAVE_AS_DSP and macros is done in
+# arch/mips/include/asm/mipsregs.h.
+#
+ifeq ($(CONFIG_CPU_MIPSR2), y)
+CFLAGS_DSP 			= -DHAVE_AS_DSP
+
+CFLAGS_signal.o			= $(CFLAGS_DSP)
+CFLAGS_signal32.o		= $(CFLAGS_DSP)
+CFLAGS_process.o		= $(CFLAGS_DSP)
+CFLAGS_branch.o			= $(CFLAGS_DSP)
+CFLAGS_ptrace.o			= $(CFLAGS_DSP)
+endif
+
 CFLAGS_cpu-bugs64.o	= $(shell if $(CC) $(CFLAGS) -Wa,-mdaddi -c -o /dev/null -xc /dev/null >/dev/null 2>&1; then echo "-DHAVE_AS_SET_DADDI"; fi)
