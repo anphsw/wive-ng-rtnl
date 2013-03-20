@@ -1359,34 +1359,34 @@
 16) kernel: netfilter: nf_conntrack_tcp: fix unaligned memory access in tcp_sack.<br>
 17) kenrel: netfilter: annotate xtables targets with const and remove casts.<br>
 18) kernel: netfilter: nf_nat: don't use atomic bit operation.<br>
-19) kernel: mips: Use CONFIG_CPU_MIPSR2 in csum_partial.S.<br>
-20) kernel: mips: Redefine value of BRK_BUG.<br>
-21) kernel: mips: dsp: Fix DSP mask for registers.<br>
-22) kernel: mips: make __{,n,u}delay declarations match definitions and generic delay.h<br>
-23) kernel: pppoe: return ENOTTY on unknown ioctl requests.<br>
-24) kernel: ip_options_compile: properly handle unaligned pointer.<br>
-25) kernel: rt309x driver up to 2.4.0.5 version.<br>
-26) kernel: rt3883/3662 driver up to 2.4.3.6 version.<br>
-27) kernel: rt305x: wifi driver fix IPv6 DAD issue.<br>
-28) kernel: hw_nat: disable extended debug.<br>
-29) kernel: ip: remove old not needed hack for - remark all forward packets (~3% speedup).<br>
-30) kernel: ip: fix mc_loop checks for tunnels with multicast outer addresses.<br>
-31) kernel: usb: serial: add more support serial devies and modems support.<br>
-32) init.d: rework second wlan module support and small fixes.<br>
-33) init.d: use different mac adresses for ra/rai radio modules.<br>
-34) init.d: dnsmasq: use ddns_name=dmzip in hosts if dmz and ddns enable, instead allways use wap_ip.<br>
-35) init.d: move wscd init script to user/wscd/init.d - wscd not used in production builds(not security).<br>
-36) init.d: refactoring wlan interfaces managment code - cleanup/unify.<br>
-37) init.d: in bridge and apcli mode need reconfigure switch always after reconfig device(workaround in some chips).<br>
-38) init.d: fix disable AP interface in apcli mode.<br>
-39) init.d: fix MIMO PowerSave mode enable/disable.<br>
-40) configs: enable apcli/wds for all chips.<br>
-41) defaults: more compat with bcm/realtek devices.<br>
-42) build_system: temp set test only in archive name.<br>
-43) goahead: remove very old dead code.<br>
-44) igmpproxy: some fixups.<br>
-45) kernel: mips: dsp: Add assembler support for DSP ASEs.<br>
-46) kernel: netfilter: nf_conntrack: remove an atomic bit operation.<br>
+19) kernel: netfilter: nf_conntrack: remove an atomic bit operation.<br>
+20) kernel: mips: Use CONFIG_CPU_MIPSR2 in csum_partial.S.<br>
+21) kernel: mips: Redefine value of BRK_BUG.<br>
+22) kernel: mips: dsp: Fix DSP mask for registers.<br>
+23) kernel: mips: make __{,n,u}delay declarations match definitions and generic delay.h<br>
+24) kernel: pppoe: return ENOTTY on unknown ioctl requests.<br>
+25) kernel: mips: dsp: Add assembler support for DSP ASEs.<br>
+26) kernel: ip_options_compile: properly handle unaligned pointer.<br>
+27) kernel: rt309x driver up to 2.4.0.5 version.<br>
+28) kernel: rt3883/3662 driver up to 2.4.3.6 version.<br>
+29) kernel: rt305x: wifi driver fix IPv6 DAD issue.<br>
+30) kernel: hw_nat: disable extended debug.<br>
+31) kernel: ip: remove old not needed hack for - remark all forward packets (~3% speedup).<br>
+32) kernel: ip: fix mc_loop checks for tunnels with multicast outer addresses.<br>
+33) kernel: usb: serial: add more support serial devies and modems support.<br>
+34) init.d: rework second wlan module support and small fixes.<br>
+35) init.d: use different mac adresses for ra/rai radio modules.<br>
+36) init.d: dnsmasq: use ddns_name=dmzip in hosts if dmz and ddns enable, instead allways use wap_ip.<br>
+37) init.d: move wscd init script to user/wscd/init.d - wscd not used in production builds(not security).<br>
+38) init.d: refactoring wlan interfaces managment code - cleanup/unify.<br>
+39) init.d: in bridge and apcli mode need reconfigure switch always after reconfig device(workaround in some chips).<br>
+40) init.d: fix disable AP interface in apcli mode.<br>
+41) init.d: fix MIMO PowerSave mode enable/disable.<br>
+42) configs: enable apcli/wds for all chips.<br>
+43) defaults: more compat with bcm/realtek devices.<br>
+44) build_system: temp set test only in archive name.<br>
+45) goahead: remove very old dead code.<br>
+46) igmpproxy: some fixups.<br>
 
 <br>
 <br>
