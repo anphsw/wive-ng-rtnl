@@ -1386,6 +1386,7 @@
 43) goahead: remove very old dead code.<br>
 44) igmpproxy: some fixups.<br>
 45) kernel: mips: dsp: Add assembler support for DSP ASEs.<br>
+46) kernel: netfilter: nf_conntrack: remove an atomic bit operation.<br>
 
 <br>
 <br>

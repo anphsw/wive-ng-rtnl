@@ -736,7 +736,7 @@ __nf_conntrack_confirm(struct sk_buff **pskb)
 	ct->timeout.expires += jiffies;
 	add_timer(&ct->timeout);
 	atomic_inc(&ct->ct_general.use);
-	set_bit(IPS_CONFIRMED_BIT, &ct->status);
+	ct->status |= IPS_CONFIRMED;
 	NF_CT_STAT_INC(insert);
 	write_unlock_bh(&nf_conntrack_lock);
 	help = nfct_help(ct);
