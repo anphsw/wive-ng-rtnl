@@ -1016,7 +1016,7 @@ static void __init probe_pcache(void)
 
 	printk("Primary instruction cache %ldkB, %s, %s, linesize %d bytes.\n",
 	       icache_size >> 10,
-	       cpu_has_vtag_icache ? "virtually tagged" : "physically tagged",
+	       c->icache.flags & MIPS_CACHE_VTAG ? "VIVT" : "VIPT",
 	       way_string[c->icache.ways], c->icache.linesz);
 
 	printk("Primary data cache %ldkB, %s, linesize %d bytes.\n",
