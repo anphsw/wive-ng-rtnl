@@ -68,20 +68,6 @@ void logRouteTable(char *header);
 int  internAgeRoute(struct RouteTable*  croute);
 int internUpdateKernelRoute(struct RouteTable *route, int activate);
 
-// Socket for sending join or leave requests.
-int mcGroupSock = 0;
-
-
-/**
-*   Function for retrieving the Multicast Group socket.
-*/
-int getMcGroupSock() {
-    if( ! mcGroupSock ) {
-        mcGroupSock = openUdpSocket( INADDR_ANY, 0 );;
-    }
-    return mcGroupSock;
-}
- 
 /**
 *   Initializes the routing table.
 */
@@ -99,7 +85,7 @@ void initRouteTable() {
             my_log(LOG_DEBUG, 0, "Joining all-routers group %s on vif %s",
                          inetFmt(allrouters_group,s1),inetFmt(Dp->InAdr.s_addr,s2));
 
-            joinMcGroup( getMcGroupSock(), Dp, allrouters_group );
+	    joinMcGroup( MRouterFD, Dp, allrouters_group );
         }
     }
 }
@@ -144,7 +130,7 @@ void sendJoinLeaveUpstream(struct RouteTable* route, int join) {
                          inetFmt(upstrIf->InAdr.s_addr, s2));
 
             //k_join(route->group, upstrIf->InAdr.s_addr);
-            joinMcGroup( getMcGroupSock(), upstrIf, route->group );
+            joinMcGroup( MRouterFD, upstrIf, route->group );
 
             route->upstrState = ROUTESTATE_JOINED;
         } else {
@@ -160,7 +146,7 @@ void sendJoinLeaveUpstream(struct RouteTable* route, int join) {
                          inetFmt(upstrIf->InAdr.s_addr, s2));
 
             //k_leave(route->group, upstrIf->InAdr.s_addr);
-            leaveMcGroup( getMcGroupSock(), upstrIf, route->group );
+            leaveMcGroup( MRouterFD, upstrIf, route->group );
 
             route->upstrState = ROUTESTATE_NOTJOINED;
         }

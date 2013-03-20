@@ -262,10 +262,6 @@ void k_join(uint32_t grp, uint32_t ifa);
 void k_leave(uint32_t grp, uint32_t ifa);
 */
 
-/* udpsock.c
- */
-int openUdpSocket( uint32_t PeerInAdr, uint16_t PeerPort );
-
 /* mcgroup.c
  */
 int joinMcGroup( int UdpSock, struct IfDesc *IfDp, uint32_t mcastaddr );
