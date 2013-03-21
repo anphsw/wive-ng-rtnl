@@ -263,59 +263,6 @@ readdif_to_br() {
     ip link set $1 up
 }
 
-# close alll ppp based tuns and kill daemons
-killall_vpn() {
-    # delete all routes to vpnnet
-    # this prevent deadloop in kernel
-    ip route flush dev $vpn_if > /dev/null 2>&1
-
-    # correct terminate xl2tpd daemon
-    # first disconnect
-    if [ -f /var/run/xl2tpd/l2tp-control ] && [ ! -f /etc/ppp/l2tpd.conf ]; then
-	lac=`cat /etc/ppp/l2tpd.conf | grep lns | cut -f 2- -d =`
-	if [ "$lac" != "" ]; then
-	    echo "d $lac" > /var/run/xl2tpd/l2tp-control
-	    sleep 2
-	fi
-    fi
-    # second terminate
-    if [ -f /var/run/xl2tpd/l2tpd.pid ]; then
-	pid=`cat /var/run/xl2tpd/l2tpd.pid`
-	if [ "$pid" != "" ]; then
-	    #Kill daemons
-	    kill -SIGTERM "$pid" > /dev/null 2>&1
-	    sleep 2
-	    kill -SIGKILL "$pid" > /dev/null 2>&1
-	fi
-    fi
-
-    # first send HUP for terminate connections and try some times
-    # second send TERM for exit pppd process
-    # if process not terminated send KILL
-    # vpn client always use $vpn_if
-    if [ -f /var/run/$vpn_if.pid ]; then
-	pid=`cat /var/run/$vpn_if.pid`
-	if [ "$pid" != "" ]; then
-	    # close connection
-	    kill -SIGHUP "$pid"  > /dev/null 2>&1
-	fi
-	# terminate pppd
-	count=0
-	while kill -SIGTERM "$pid" > /dev/null 2>&1; do
-	    if [ "$count" = "3" ]; then
-		kill -SIGKILL "$pid"  > /dev/null 2>&1
-		count=0
-		sleep 1
-	    fi
-	    count="$(($count+1))"
-	    sleep 2
-	done
-	rm -f /var/run/$vpn_if.pid
-    fi
-    # Remove VPN server IP file
-    rm -f /tmp/vpnip
-}
-
 # get params
 getFirstWlanIfName
 getSecWlanIfName

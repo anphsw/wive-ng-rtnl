@@ -116,15 +116,13 @@ get_param() {
 }
 
 stop() {
+    # stop all vpn services
+    service vpnhelper stop_safe
     # stop dhcp and zeroconf client
     killall -q udhcpc
     killall -q zcip
     killall -q -SIGKILL udhcpc
     killall -q -SIGKILL zcip
-    # prevent infinitive route loop in kernel code
-    if [ "$OperationMode" != "0" ] && [ "$ApCliBridgeOnly" != "1" ] && [ "$vpnEnabled" = "on" ] && [ "$vpnType" != "0" ]; then
-	ip route flush dev "$vpn_if" > /dev/null 2>&1
-    fi
     # in gw/hotspot modes down wlan if not bridge and not ethconvert
     if [ "$OperationMode" = "1" ] || [ "$OperationMode" = "4" -a "$ApCliBridgeOnly" != "1" ]; then
 	# down wan iface

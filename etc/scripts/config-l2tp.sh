@@ -8,7 +8,7 @@
 . /etc/scripts/global.sh
 
 # stop all pppd/xl2tpd daemons
-killall_vpn
+service vpnhelper killall_vpn
 
 LOG="logger -t vpnhelper-l2tp"
 
