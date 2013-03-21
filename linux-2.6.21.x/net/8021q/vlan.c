@@ -407,6 +407,8 @@ static void vlan_setup(struct net_device *new_dev)
 	/* Make this thing known as a VLAN device */
 	new_dev->priv_flags |= IFF_802_1Q_VLAN;
 
+	new_dev->priv_flags &= ~IFF_XMIT_DST_RELEASE;
+
 	/* Set us up to have no queue, as the underlying Hardware device
 	 * can do all the queueing we could want.
 	 */

@@ -782,6 +782,7 @@ static void ipip_tunnel_setup(struct net_device *dev)
 	dev->flags		= IFF_NOARP;
 	dev->iflink		= 0;
 	dev->addr_len		= 4;
+	dev->priv_flags		&= ~IFF_XMIT_DST_RELEASE;
 }
 
 static int ipip_tunnel_init(struct net_device *dev)

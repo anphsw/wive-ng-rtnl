@@ -150,6 +150,7 @@ static void __init ifb_setup(struct net_device *dev)
 	dev->change_mtu = NULL;
 	dev->flags |= IFF_NOARP;
 	dev->flags &= ~IFF_MULTICAST;
+	dev->priv_flags &= ~IFF_XMIT_DST_RELEASE;
 	SET_MODULE_OWNER(dev);
 	random_ether_addr(dev->dev_addr);
 }

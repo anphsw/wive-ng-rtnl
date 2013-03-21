@@ -1085,6 +1085,7 @@ static void pvc_setup(struct net_device *dev)
 	dev->flags = IFF_POINTOPOINT;
 	dev->hard_header_len = 10;
 	dev->addr_len = 2;
+	dev->priv_flags &= ~IFF_XMIT_DST_RELEASE;
 }
 
 static int fr_add_pvc(struct net_device *frad, unsigned int dlci, int type)

@@ -1408,6 +1408,15 @@ int dev_hard_start_xmit(struct sk_buff *skb, struct net_device *dev)
 				goto gso;
 		}
 
+		/*
+		 * If device doesnt need skb->dst, release it right now while
+		 * its hot in this cpu cache
+		 */
+		if ((dev->priv_flags & IFF_XMIT_DST_RELEASE) && skb->dst) {
+			dst_release(skb->dst);
+			skb->dst = NULL;
+		}
+
 		return dev->hard_start_xmit(skb, dev);
 	}
 
@@ -3370,6 +3379,7 @@ struct net_device *alloc_netdev(int sizeof_priv, const char *name,
 		dev->priv = netdev_priv(dev);
 
 	dev->get_stats = internal_stats;
+	dev->priv_flags = IFF_XMIT_DST_RELEASE;
 	setup(dev);
 	strcpy(dev->name, name);
 	return dev;

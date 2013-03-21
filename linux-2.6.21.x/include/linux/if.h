@@ -64,6 +64,7 @@
 #define IFF_BONDING	0x20		/* bonding master or slave	*/
 #define IFF_SLAVE_NEEDARP 0x40		/* need ARPs for validation	*/
 #define IFF_ISATAP	0x80		/* ISATAP interface (RFC4214)	*/
+#define IFF_XMIT_DST_RELEASE 0x400	/* dev_hard_start_xmit() is allowed to release skb->dst  */
 
 #define IF_GET_IFACE	0x0001		/* for querying only */
 #define IF_GET_PROTO	0x0002

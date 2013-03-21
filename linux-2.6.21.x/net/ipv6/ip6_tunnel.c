@@ -1061,6 +1061,7 @@ static void ip6ip6_tnl_dev_setup(struct net_device *dev)
 	dev->mtu = ETH_DATA_LEN - sizeof (struct ipv6hdr);
 	dev->flags |= IFF_NOARP;
 	dev->addr_len = sizeof(struct in6_addr);
+	dev->priv_flags &= ~IFF_XMIT_DST_RELEASE;
 }
 
 
