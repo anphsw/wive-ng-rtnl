@@ -16,6 +16,7 @@ start() {
     if [ "$xupnpd" = "1" ]; then
 	# store feeds only in ram - not real rwfs
 	if [ ! -d /tmp/xupnpd-feeds ]; then
+	    rm -rf /etc/xupnpd/xupnpd-feeds
 	    mkdir -p /tmp/xupnpd-feeds
 	    ln -sf /tmp/xupnpd-feeds /etc/xupnpd/xupnpd-feeds
 	fi
