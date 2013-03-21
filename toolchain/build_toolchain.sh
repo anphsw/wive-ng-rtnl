@@ -59,19 +59,18 @@ cd $WDIR
 mkdir -p ${TARGET}-toolchain  && cd ${TARGET}-toolchain
 
 ##################################TUNE FOR CURRENT VERSION GCC BUILD####################################
-
-HOSTGCCVER=`gcc --version | grep "(GCC)" | awk {' print $3 '} | cut -f -2 -d .`
-if [ "$HOSTGCCVER" = "4.5" ] || [ "$HOSTGCCVER" = "4.6" ] || [ "$HOSTGCCVER" = "4.7" ]; then
-    export CFLAGS="-g -O2 -Wno-pointer-sign -Wno-unused-but-set-variable -Wno-trigraphs -Wno-format-security"
+HOSTGCCVER=`gcc -dumpversion | cut -f -2 -d .`
+if [ "$HOSTGCCVER" = "4.5" ] || [ "$HOSTGCCVER" = "4.6" ] || [ "$HOSTGCCVER" = "4.7" ] || [ "$HOSTGCCVER" = "4.8" ]; then
+    WARN_OPTS="-Wno-pointer-sign -Wno-unused-but-set-variable -Wno-trigraphs -Wno-format-security -Wno-long-long"
+    export CFLAGS="-O2 $WARN_OPTS"
+else
+    export CFLAGS="-O2 $WARN_OPTS"
 fi
 
-EXT_OPT="--disable-sanity-checks --disable-werror"
-EXT_OPT="$EXT_OPT --disable-lto --enable-ld=yes --enable-gold=no"
-if [ "$GCCVER" = "gcc-4.6.0" ] || [ "$GCCVER" = "gcc-4.6.1" ] || [ "$GCCVER" = "gcc-4.6.2" ] || [ "$GCCVER" = "gcc-4.6.3" ]; then
-    EXT_OPT="$EXT_OPT --disable-biendian --disable-softfloat"
-    EXT_OPT="$EXT_OPT --disable-libquadmath --disable-libquadmath-support"
+EXT_OPT="$EXT_OPT --disable-lto --enable-ld=yes --enable-gold=no --disable-sanity-checks --disable-werror"
+if [ "$GCCVER" = "gcc-4.6.3" ] || [ "$GCCVER" = "gcc-4.7.2" ] || [ "$GCCVER" = "gcc-4.8.0" ]; then
+    EXT_OPT="$EXT_OPT --disable-biendian --disable-softfloat --disable-libquadmath --disable-libquadmath-support"
 fi
-
 #########################################################################################################
 
 if [ "$UNPACK" = "YES" ]; then

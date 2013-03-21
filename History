@@ -1394,6 +1394,7 @@
 51) build_system: temp set test only in archive name.<br>
 52) goahead: remove very old dead code.<br>
 53) igmpproxy: some fixups.<br>
+54) toolchain: build script fix detect host gcc version and small cleanup.<br>
 
 <br>
 <br>
