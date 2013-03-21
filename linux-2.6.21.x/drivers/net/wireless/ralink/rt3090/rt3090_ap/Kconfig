@@ -1,9 +1,7 @@
 config RT3090_AP
 	tristate "Ralink RT309X 802.11n AP support"
 	select WIRELESS_EXT
-	select WEXT_SPY
-	select WEXT_PRIV
-	
+
 config  RT3090_AP_LED
 	bool "LED Support"
 	depends on RT3090_AP
