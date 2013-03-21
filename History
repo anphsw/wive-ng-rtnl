@@ -1389,6 +1389,7 @@
 46) goahead: remove very old dead code.<br>
 47) igmpproxy: some fixups.<br>
 48) kernel: configs: disable NET_CLS_ACT - ~10% speedup network operation without hw_nat.<br>
+90) kernel: configs: disable unused netsched modules - save flash.<br>
 
 <br>
 <br>
