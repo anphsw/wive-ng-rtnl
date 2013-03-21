@@ -16,31 +16,33 @@ GCC=YES
 UCLIB=YES
 GCCCPP=YES
 
+##################################USE ONLY ENGLESH LOCAGE FOR CORRECT BUILD####################################
 export LC_PAPER=en_EN.UTF-8
 export LC_ADDRESS=en_EN.UTF-8
 export LC_MONETARY=en_EN.UTF-8
 export LC_TELEPHONE=en_EN.UTF-8
 export LC_IDENTIFICATION=en_EN.UTF-8
 export LC_MEASUREMENT=en_EN.UTF-8
-export LANGUAGE=en_EN.UTF-8:en
 export LC_NAME=en_EN.UTF-8
-
 export LC_COLLATE=
 export LC_NUMERIC=
 export LC_MESSAGES=
 export LC_CTYPE=
 export LC_TIME=
+export LC_ALL=POSIX
 
 export LANG=en_US
-export LC_ALL=POSIX
+export LANGUAGE=en_EN.UTF-8:en
+###############################################################################################################
 
 export WDIR=$DIR/tmp
 export TARGET=mipsel-linux-uclibc
 export PREFIX=$DIR
 export ROOTDIR=$PREFIX
-export PATH="${PATH}":${PREFIX}/bin:${PREFIX}/lib
 export TARGET_DIR=$WDIR/$TARGET-toolchain
 export KERNEL_HEADERS=$TARGET_DIR/include
+export PATH="${PATH}":${PREFIX}/bin:${PREFIX}/lib:${PREFIX}/include:${KERNEL_HEADERS}
+
 export CC=gcc
 
 #install need lib`s
