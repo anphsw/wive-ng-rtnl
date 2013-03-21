@@ -3053,7 +3053,7 @@ int register_netdevice(struct net_device *dev)
 
 	if (!dev_valid_name(dev->name)) {
 		ret = -EINVAL;
-		goto out;
+		goto err_uninit;
 	}
 
 	dev->ifindex = dev_new_index();
@@ -3067,7 +3067,7 @@ int register_netdevice(struct net_device *dev)
 			= hlist_entry(p, struct net_device, name_hlist);
 		if (!strncmp(d->name, dev->name, IFNAMSIZ)) {
 			ret = -EEXIST;
-			goto out;
+			goto err_uninit;
 		}
 	}
 
@@ -3111,7 +3111,7 @@ int register_netdevice(struct net_device *dev)
 
 	ret = netdev_register_sysfs(dev);
 	if (ret)
-		goto out;
+		goto err_uninit;
 	dev->reg_state = NETREG_REGISTERED;
 
 	/*
@@ -3138,6 +3138,11 @@ int register_netdevice(struct net_device *dev)
 
 out:
 	return ret;
+
+err_uninit:
+	if (dev->uninit)
+		dev->uninit(dev);
+	goto out;
 }
 
 /**
