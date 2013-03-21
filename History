@@ -1386,11 +1386,12 @@
 43) init.d: fix disable AP interface in apcli mode.<br>
 44) init.d: fix MIMO PowerSave mode enable/disable.<br>
 45) init.d: rework stop/restart vpn logic (consolidate and cleanup).<br>
-46) configs: enable apcli/wds for all chips.<br>
-47) defaults: more compat with bcm/realtek devices.<br>
-48) build_system: temp set test only in archive name.<br>
-49) goahead: remove very old dead code.<br>
-50) igmpproxy: some fixups.<br>
+46) init.d: clear all connection in conntrack and route cache before and after vpn kill/down.<br>
+47) configs: enable apcli/wds for all chips.<br>
+48) defaults: more compat with bcm/realtek devices.<br>
+49) build_system: temp set test only in archive name.<br>
+50) goahead: remove very old dead code.<br>
+51) igmpproxy: some fixups.<br>
 
 <br>
 <br>

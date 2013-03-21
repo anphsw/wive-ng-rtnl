@@ -128,8 +128,6 @@ stop() {
 	# down wan iface
 	ip link set "$wan_if" down > /dev/null 2>&1
     fi
-    # clear conntrack and routes tables/caches
-    flush_net_caches
 }
 
 case "$1" in

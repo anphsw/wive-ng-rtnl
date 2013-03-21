@@ -61,6 +61,9 @@ start() {
 # close alll ppp based tuns and kill daemons
 killall_vpn() {
  $LOG "Killall ppp based tunnels and other."
+    # clear conntrack and routes tables/caches
+    flush_net_caches
+
     # delete all routes to vpnnet
     # this prevent deadloop in kernel
     ip route flush dev $vpn_if > /dev/null 2>&1
@@ -110,6 +113,9 @@ killall_vpn() {
     fi
     # Remove VPN server IP file
     rm -f /tmp/vpnip
+
+    # clear conntrack and routes tables/caches
+    flush_net_caches
 }
 
 stop() {
@@ -132,9 +138,6 @@ stop() {
     # stop all pppd/xl2tpd daemons
     killall_vpn
 
-    # prevent loop
-    flush_net_caches
-
     if [ -f /tmp/is_16ram_dev ] && [ "$l2tp_srv_enabled" != "1" ]; then
 	# At 16Mb devices remove modules for savemem.
 	mod="ppp_mppe blkcipher cryptomgr crypto_algapi pppoe pppol2tp pptp pppox ppp_generic"
@@ -147,14 +150,11 @@ stop() {
     rm -f /tmp/vpn_if_name
 }
 
-######################################################
-# L2TP and PPTP kernel route dead-loop workaround
-# PPPOE or not gateway mode no need this workaround
-# Clear all connection in conntrack and route cache
-######################################################
+#############################################################
+# Do`not stop pppoe connections and others vpn in some cases
+#############################################################
 stop_safe() {
     if [ "$OperationMode" != "0" ] && [ "$vpnEnabled" = "on" ] && [ "$vpnType" != "0" ] && [ "$ApCliBridgeOnly" != "1" ]; then
-	flush_net_caches
 	stop > /dev/null 2>&1
     fi
 }
