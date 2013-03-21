@@ -115,11 +115,11 @@ killall_vpn() {
     # fast kill all vpn processes
     if [ "$l2tp_srv_enabled" != "1" ]; then
 	$LOG "L2TP server not enabled - must force kill all pppd processes."
-	killall -1 -SIGTERM pppd
-	killall -1 -SIGTERM xl2tpd
+	killall -q -SIGTERM pppd
+	killall -q -SIGTERM xl2tpd
 	sleep 1
-	killall -1 -SIGKILL pppd
-	killall -1 -SIGKILL xl2tpd
+	killall -q -SIGKILL pppd
+	killall -q -SIGKILL xl2tpd
     fi
 
     # Remove VPN server IP file
