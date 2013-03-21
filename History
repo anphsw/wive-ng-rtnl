@@ -1388,6 +1388,7 @@
 45) build_system: temp set test only in archive name.<br>
 46) goahead: remove very old dead code.<br>
 47) igmpproxy: some fixups.<br>
+48) kernel: configs: disable NET_CLS_ACT - ~10% speedup network operation without hw_nat.<br>
 
 <br>
 <br>
