@@ -64,7 +64,7 @@ if [ "$HOSTGCCVER" = "4.5" ] || [ "$HOSTGCCVER" = "4.6" ] || [ "$HOSTGCCVER" = "
     WARN_OPTS="-Wno-pointer-sign -Wno-unused-but-set-variable -Wno-trigraphs -Wno-format-security -Wno-long-long"
     export CFLAGS="-O2 $WARN_OPTS"
 else
-    export CFLAGS="-O2 $WARN_OPTS"
+    export CFLAGS="-O2"
 fi
 
 EXT_OPT="$EXT_OPT --disable-lto --enable-ld=yes --enable-gold=no --disable-sanity-checks --disable-werror"
