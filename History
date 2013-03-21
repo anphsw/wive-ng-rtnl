@@ -1388,11 +1388,12 @@
 45) init.d: rework stop/restart vpn logic (consolidate and cleanup).<br>
 46) init.d: clear all connection in conntrack and route cache before and after vpn kill/down.<br>
 47) init.d: if L2TP server not enabled - must force kill all pppd processes.<br>
-48) configs: enable apcli/wds for all chips.<br>
-49) defaults: more compat with bcm/realtek devices.<br>
-50) build_system: temp set test only in archive name.<br>
-51) goahead: remove very old dead code.<br>
-52) igmpproxy: some fixups.<br>
+48) init.d: xupnpd store feeds only in ram - not real rwfs.<br>
+49) configs: enable apcli/wds for all chips.<br>
+50) defaults: more compat with bcm/realtek devices.<br>
+51) build_system: temp set test only in archive name.<br>
+52) goahead: remove very old dead code.<br>
+53) igmpproxy: some fixups.<br>
 
 <br>
 <br>

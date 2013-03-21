@@ -14,6 +14,11 @@ LOG="logger -t xupnpd "
 start() {
     get_param
     if [ "$xupnpd" = "1" ]; then
+	# store feeds only in ram - not real rwfs
+	if [ ! -d /tmp/xupnpd-feeds ]; then
+	    mkdir -p /tmp/xupnpd-feeds
+	    ln -sf /tmp/xupnpd-feeds /etc/xupnpd/xupnpd-feeds
+	fi
 	# check ip adress set at wan
 	wan_is_not_null=`ip -4 addr show $wan_if | grep inet -c`
 	if [ "$wan_is_not_null" = "0" ]; then
