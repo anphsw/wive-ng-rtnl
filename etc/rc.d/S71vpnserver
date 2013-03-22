@@ -147,7 +147,7 @@ stop() {
     # try firt disconnect all clients
     if [ -f $var/l2tp-control ] && [ -f $var/l2tpd.pid ]; then
 	echo "d default" > $var/l2tp-control
-	sleep 3
+	usleep 500000
     fi
     # stop vpn server
     if [ -f $var/l2tpd.pid ]; then
@@ -155,9 +155,9 @@ stop() {
 	count=0
 	# try 3 times for correct shutdown
 	while kill -SIGTERM "$pid" > /dev/null 2>&1; do
-	    usleep 300000
+	    usleep 500000
 	    count="$(($count+1))"
-	    if [ "$count" = "3" ]; then
+	    if [ "$count" = "5" ]; then
 		break
 	    fi
 	done

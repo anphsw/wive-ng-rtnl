@@ -43,12 +43,12 @@ get_vpn_ip() {
 		resolved=1
 		SERVER=$NS
 	    fi
-	    if [ "$count" = "5" ]; then
+	    if [ "$count" = "10" ]; then
 		resolved=1
     		SERVER=$vpnServer
     		$LOG "Not resolve adress for $SERVER"
 	    fi
-	    sleep 2
+	    usleep 500000
 	    count="$(($count+1))"
 	done
     else

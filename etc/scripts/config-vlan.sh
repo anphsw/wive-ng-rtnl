@@ -192,7 +192,7 @@ reset_all_phys() {
 
 	if [ "$OperationMode" != "0" ] && [ "$ApCliBridgeOnly" != "1" ]; then
 	  # force Windows clients to renew IP and update DNS server
-	  sleep 2
+	  sleep 3
 	fi
 
 	# enable ports

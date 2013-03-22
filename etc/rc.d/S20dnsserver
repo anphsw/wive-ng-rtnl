@@ -79,7 +79,7 @@ stop() {
 	if [ "$count" = "3" ] || [ "$pid" = "" ]; then
 	    break
 	fi
-	usleep 300000
+	usleep 500000
     done
     # if not correct terminate need kill
     if [ "$pid" != "" ]; then

@@ -25,7 +25,7 @@ start() {
 	if [ "$igmp_is_start" != "" ]; then
 	    killall -q igmpproxy
 	    killall -q -SIGKILL igmpproxy
-	    sleep 2
+	    usleep 500000
 	fi
 
 	# check ip adress set at wan

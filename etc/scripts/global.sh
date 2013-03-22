@@ -198,7 +198,7 @@ wait_connect() {
 	    if [ "$staCur_SSID" != "" ]; then
 		# Reconnect to STA
 		iwpriv $first_wlan_root_if set SSID="$staCur_SSID"
-		sleep 1
+		usleep 500000
 	    fi
 	fi
 	# Get connection status
