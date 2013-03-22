@@ -115,7 +115,6 @@ killall_vpn() {
 
     # fast kill all vpn processes
     if [ "$l2tp_srv_enabled" != "1" ]; then
-	$LOG "L2TP server not enabled - must force kill all pppd processes."
 	while killall -q -SIGKILL xl2tpd; do
 	    usleep 500000
 	done
