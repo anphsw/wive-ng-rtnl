@@ -1345,65 +1345,65 @@
 2) kernel: net/ipv4: Timestamp option cannot overflow with prespecified addresses.<br>
 3) kernel: net/ipv4: Ensure that location of timestamp option is stored.<br>
 4) kernel: net/ipv6: Fail with appropriate error code when setting not-applicable sockopt.<br>
-5) kernel: net/tcp: thin-stream detection.<br>
-6) kernel: net/tcp: tcp: fix race in tcp_poll.<br>
-7) kernel: net/udp: clean up UDP(Lite) receive checksum.<br>
-8) kernel: net: compact sk_stream_mem_schedule() code.<br>
-9) kernel: net: move some core sock setup into sk_prot_alloc.<br>
-10) kernel: net: check the length of the socket address passed to connect(2).<br>
-11) kernel: net: TCP_MSS_DEFAULT, TCP_MSS_DESIRED.<br>
-12) kernel: net: call uninit if necessary in register_netdevice.<br>
-13) kernel: net: release dst entry in dev_hard_start_xmit().<br>
-14) kernel: netfilter: nf_nat: place conntrack in source hash after SNAT is done.<br>
-15) kernel: netfilter: nf_nat: don't check if the tuple is unique when there is not any other choice.<br>
-16) kernel: netfilter: nf_nat_core: eliminate useless find_appropriate_src for IP_NAT_RANGE_PROTO_RANDOM.<br>
-17) kernel: netfilter: nf_nat: fix inverted logic for persistent NAT mappings.<br>
-18) kernel: netfilter: nf_conntrack_tcp: fix unaligned memory access in tcp_sack.<br>
-19) kenrel: netfilter: annotate xtables targets with const and remove casts.<br>
-20) kernel: netfilter: nf_nat: don't use atomic bit operation.<br>
-21) kernel: netfilter: nf_conntrack: remove an atomic bit operation.<br>
-22) kernel: mips: Use CONFIG_CPU_MIPSR2 in csum_partial.S.<br>
-23) kernel: mips: Redefine value of BRK_BUG.<br>
-24) kernel: mips: dsp: Fix DSP mask for registers.<br>
-25) kernel: mips: make __{,n,u}delay declarations match definitions and generic delay.h<br>
-26) kernel: mips: handle I-cache coherency in flush_cache_range().<br>
-27) kernel: pppoe: return ENOTTY on unknown ioctl requests.<br>
-28) kernel: mips: dsp: Add assembler support for DSP ASEs.<br>
-29) kernel: ip_options_compile: properly handle unaligned pointer.<br>
-30) kernel: rt309x driver up to 2.4.0.5 version.<br>
-31) kernel: rt3883/3662 driver up to 2.4.3.6 version.<br>
-32) kernel: rt305x: wifi driver fix IPv6 DAD issue.<br>
-33) kernel: hw_nat: disable extended debug.<br>
-34) kernel: ip: remove old not needed hack for - remark all forward packets (~3% speedup).<br>
-35) kernel: ip: fix mc_loop checks for tunnels with multicast outer addresses.<br>
-36) kernel: usb: serial: add more support serial devies and modems support.<br>
-37) kernel: configs: disable NET_CLS_ACT - ~10% speedup network operation without hw_nat.<br>
-38) kernel: configs: disable unused netsched modules - save flash.<br>
-39) init.d: rework second wlan module support and small fixes.<br>
-40) init.d: use different mac adresses for ra/rai radio modules.<br>
-41) init.d: dnsmasq: use ddns_name=dmzip in hosts if dmz and ddns enable, instead allways use wap_ip.<br>
-42) init.d: move wscd init script to user/wscd/init.d - wscd not used in production builds(not security).<br>
-43) init.d: refactoring wlan interfaces managment code - cleanup/unify.<br>
-44) init.d: in bridge and apcli mode need reconfigure switch always after reconfig device(workaround in some chips).<br>
-45) init.d: fix disable AP interface in apcli mode.<br>
-46) init.d: fix MIMO PowerSave mode enable/disable.<br>
-47) init.d: rework stop/restart vpn logic (consolidate and cleanup).<br>
-48) init.d: clear all connection in conntrack and route cache before and after vpn kill/down.<br>
-49) init.d: if L2TP server not enabled - must force kill all pppd processes.<br>
-50) init.d: xupnpd store feeds only in ram - not real rwfs.<br>
-51) init.d: tune logic timeouts.<br>
-52) configs: enable apcli/wds for all chips.<br>
-53) defaults: more compat with bcm/realtek devices.<br>
-54) build_system: temp set test only in archive name.<br>
-55) goahead: remove very old dead code.<br>
-56) igmpproxy: some fixups.<br>
-57) toolchain: build script fix detect host gcc version and small cleanup.<br>
-58) kernel: net: bridge_fastpath: fix and small optimize logic.<br>
-59) kernel: net/ipv6: inet6_dev on loopback should be kept until namespace stop.<br>
-60) init.d: make optional udpxy and lld2t.<br>
-61) init.d: drop support 16Mb RAM devies.<br>
-62) build_system: consolidate init scripts for optional apps to one dir for easy edit runlevels.<br>
-63) build_system: now all builds support ipv6 (6to4 autoconfig mode).<br>
+5) kernel: net/ipv6: inet6_dev on loopback should be kept until namespace stop.<br>
+6) kernel: net/tcp: thin-stream detection.<br>
+7) kernel: net/tcp: tcp: fix race in tcp_poll.<br>
+8) kernel: net/udp: clean up UDP(Lite) receive checksum.<br>
+9) kernel: net: bridge_fastpath: fix and small optimize logic.<br>
+10) kernel: net: compact sk_stream_mem_schedule() code.<br>
+11) kernel: net: move some core sock setup into sk_prot_alloc.<br>
+12) kernel: net: check the length of the socket address passed to connect(2).<br>
+13) kernel: net: TCP_MSS_DEFAULT, TCP_MSS_DESIRED.<br>
+14) kernel: net: call uninit if necessary in register_netdevice.<br>
+15) kernel: net: release dst entry in dev_hard_start_xmit().<br>
+16) kernel: netfilter: nf_nat: place conntrack in source hash after SNAT is done.<br>
+17) kernel: netfilter: nf_nat: don't check if the tuple is unique when there is not any other choice.<br>
+18) kernel: netfilter: nf_nat_core: eliminate useless find_appropriate_src for IP_NAT_RANGE_PROTO_RANDOM.<br>
+19) kernel: netfilter: nf_nat: fix inverted logic for persistent NAT mappings.<br>
+20) kernel: netfilter: nf_conntrack_tcp: fix unaligned memory access in tcp_sack.<br>
+21) kenrel: netfilter: annotate xtables targets with const and remove casts.<br>
+22) kernel: netfilter: nf_nat: don't use atomic bit operation.<br>
+23) kernel: netfilter: nf_conntrack: remove an atomic bit operation.<br>
+24) kernel: mips: Use CONFIG_CPU_MIPSR2 in csum_partial.S.<br>
+25) kernel: mips: Redefine value of BRK_BUG.<br>
+26) kernel: mips: dsp: Fix DSP mask for registers.<br>
+27) kernel: mips: make __{,n,u}delay declarations match definitions and generic delay.h<br>
+28) kernel: mips: handle I-cache coherency in flush_cache_range().<br>
+29) kernel: pppoe: return ENOTTY on unknown ioctl requests.<br>
+30) kernel: mips: dsp: Add assembler support for DSP ASEs.<br>
+31) kernel: ip_options_compile: properly handle unaligned pointer.<br>
+32) kernel: rt309x driver up to 2.4.0.5 version.<br>
+33) kernel: rt3883/3662 driver up to 2.4.3.6 version.<br>
+34) kernel: rt305x: wifi driver fix IPv6 DAD issue.<br>
+35) kernel: hw_nat: disable extended debug.<br>
+36) kernel: ip: remove old not needed hack for - remark all forward packets (~3% speedup).<br>
+37) kernel: ip: fix mc_loop checks for tunnels with multicast outer addresses.<br>
+38) kernel: usb: serial: add more support serial devies and modems support.<br>
+39) kernel: configs: disable NET_CLS_ACT - ~10% speedup network operation without hw_nat.<br>
+40) kernel: configs: disable unused netsched modules - save flash.<br>
+41) init.d: rework second wlan module support and small fixes.<br>
+42) init.d: use different mac adresses for ra/rai radio modules.<br>
+43) init.d: dnsmasq: use ddns_name=dmzip in hosts if dmz and ddns enable, instead allways use wap_ip.<br>
+44) init.d: move wscd init script to user/wscd/init.d - wscd not used in production builds(not security).<br>
+45) init.d: refactoring wlan interfaces managment code - cleanup/unify.<br>
+46) init.d: in bridge and apcli mode need reconfigure switch always after reconfig device(workaround in some chips).<br>
+47) init.d: fix disable AP interface in apcli mode.<br>
+48) init.d: fix MIMO PowerSave mode enable/disable.<br>
+49) init.d: rework stop/restart vpn logic (consolidate and cleanup).<br>
+50) init.d: clear all connection in conntrack and route cache before and after vpn kill/down.<br>
+51) init.d: if L2TP server not enabled - must force kill all pppd processes.<br>
+52) init.d: xupnpd store feeds only in ram - not real rwfs.<br>
+53) init.d: tune logic timeouts.<br>
+54) init.d: make optional udpxy and lld2t.<br>
+55) init.d: drop support 16Mb RAM devies.<br>
+56) build_system: temp set test only in archive name.<br>
+57) build_system: consolidate init scripts for optional apps to one dir for easy edit runlevels.<br>
+58) build_system: now all builds support ipv6 (6to4 autoconfig mode).<br>
+59) configs: enable apcli/wds for all chips.<br>
+60) defaults: more compat with bcm/realtek devices.<br>
+61) goahead: remove very old dead code.<br>
+62) igmpproxy: some fixups.<br>
+63) toolchain: build script fix detect host gcc version and small cleanup.<br>
 
 <br>
 <br>
