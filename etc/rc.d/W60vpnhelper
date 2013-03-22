@@ -60,7 +60,7 @@ start() {
 
 # close alll ppp based tuns and kill daemons
 killall_vpn() {
- $LOG "Killall ppp based tunnels and other."
+ $LOG "Disconnect from vpn servers and kill daemons."
     # delete all routes to vpnnet
     # this prevent deadloop in kernel
     ip route flush dev $vpn_if > /dev/null 2>&1
@@ -123,7 +123,7 @@ killall_vpn() {
 	    killall -q -SIGKILL xl2tpd
 	done
 	# try disconnect before kill
-	killall -SIGHUP pppd
+	killall -q -SIGHUP pppd
 	usleep 500000
 	# terminate pppd daeon
 	while killall -q pppd; do
@@ -146,7 +146,7 @@ killall_vpn() {
 }
 
 stop() {
- $LOG "Stop vpnhelper"
+ $LOG "Stop vpnhelpers"
     # Kill helpers
     killall -q config-pppoe.sh
     killall -q config-l2tp.sh
