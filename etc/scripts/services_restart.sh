@@ -61,10 +61,14 @@ if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then
 	    service chillispot restart
 	fi
     fi
-    service lld2d restart
     service parprouted restart
     service igmp_proxy restart
-    service udpxy restart
+    if [ -f /bin/lld2d ]; then
+	service lld2d restart
+    fi
+    if [ -f /bin/udpxy ]; then
+	service udpxy restart
+    fi
     if [ -f /bin/transmission-daemon ]; then
 	service transmission restart
     fi

@@ -11,6 +11,8 @@ depend:
 	$(CC) $(CFLAGS) -M $(DCFILES) >.depend
 
 romfs:
+	$(ROMFSINST) -S init.d/W19lld2d /etc/rc.d/W19lld2d
+	$(ROMFSINST) -s /etc/rc.d/W19lld2d /etc/init.d/lld2d
 	$(ROMFSINST) -S -e CONFIG_USER_LLTD	/bin/lld2d
 	$(ROMFSINST) -S -e CONFIG_USER_LLTD	/bin/icon.ico
 	$(ROMFSINST) -S -e CONFIG_USER_LLTD	/bin/icon.large.ico

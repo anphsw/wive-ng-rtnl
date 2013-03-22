@@ -1,0 +1,167 @@
+#!/bin/sh
+
+# if app not exist
+if [ ! -f /bin/radvd ] || [ ! -d /proc/sys/net/ipv6 ]; then
+    exit 0
+fi
+
+#wait to start web and run from goahead code
+. /etc/scripts/web_wait.sh
+web_wait
+
+#get params
+. /etc/scripts/global.sh
+
+if [ "$OperationMode" = "0" ]; then
+    exit 0
+fi
+
+LOG="logger -t radvd"
+
+start() {
+    radvdEnabled=`nvram_get 2860 radvdEnabled`
+    if [ "$radvdEnabled" = "1" ]; then
+	$LOG "Add iptables rules fo ipv6"
+	ip6tables -F > /dev/null 2>&1
+	ip6tables -t filter -F > /dev/null 2>&1
+	ip6tables -t mangle -F > /dev/null 2>&1
+	ip6tables -X > /dev/null 2>&1
+	ip6tables -t filter -X > /dev/null 2>&1
+	ip6tables -t mangle -X > /dev/null 2>&1
+
+	ip6tables -t mangle -F PREROUTING > /dev/null 2>&1
+	ip6tables -t mangle -F FORWARD > /dev/null 2>&1
+	ip6tables -t mangle -F INPUT > /dev/null 2>&1
+	ip6tables -t mangle -F OUTPUT > /dev/null 2>&1
+	ip6tables -t mangle -F POSTROUTING > /dev/null 2>&1
+
+	ip6tables -t filter -Z > /dev/null 2>&1
+	ip6tables -t mangle -Z > /dev/null 2>&1
+	ip6tables -Z > /dev/null 2>&1
+
+	# default actions
+	ip6tables -P FORWARD DROP > /dev/null 2>&1
+	ip6tables -P INPUT   DROP > /dev/null 2>&1
+	ip6tables -P OUTPUT ACCEPT > /dev/null 2>&1
+
+	# wan accept and mss fix rules
+        ip6tables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+	ip6tables -A FORWARD -t mangle -p tcp ! -o $lan_if --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
+        ip6tables -A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+	# temp rules need enchange in future
+	ip6tables -A INPUT -i $lan_if -j ACCEPT
+	ip6tables -A FORWARD -i $lan_if -j ACCEPT
+
+	ipv6subnet="2000"
+	if [ "$wan_ipaddr" != "" ]; then
+	    $LOG "Tunel ipv6 in ipv4 configure and up"
+	    ipv6prefix=`echo $wan_ipaddr | awk -F. '{ printf "2002:%02x%02x:%02x%02x", $1, $2, $3, $4 }'`
+	    if [ "$IPv6_6RD_Enable" = "1" ]; then
+		relay6to4="192.88.99.127"
+		tunif="tun6to4"
+		$LOG "Flush addres and route tun6to4 interface"
+		ip -6 addr flush dev $tunif					> /dev/null 2>&1
+		ip -6 route flush dev $tunif					> /dev/null 2>&1
+		$LOG "Up tun6to4 interface"
+		ip tunnel add $tunif mode sit ttl 64 remote any local $wan_ipaddr
+		ip link set dev $tunif up
+		ip -6 addr add ${ipv6prefix}::1/16 dev $tunif
+		ip -6 route replace ${ipv6subnet}::/3 via ::${relay6to4} dev $tunif metric 1
+
+	    else
+		relay6to4="192.88.99.1"
+		tunif="sit0"
+		$LOG "Flush addres and route sit0 interface"
+		ip -6 addr flush dev $tunif					> /dev/null 2>&1
+		ip -6 route flush dev $tunif					> /dev/null 2>&1
+		$LOG "Up sit0 interface"
+		ip -6 link set $tunif up
+		ip -6 addr add ${ipv6prefix}::1/16 dev $tunif
+		ip -6 route replace ${ipv6subnet}::/3 via ::${relay6to4} dev $tunif metric 1
+	    fi
+	else
+	    $LOG "No ipv4 adress on wan, exit"
+	    exit 1
+	fi
+
+	# allow mupnp to open connection from earth to local
+	if [ "$upnpEnabled" = "1" ]; then
+	    ip6tables -t filter -N MINIUPNPD
+	    ip6tables -t filter -A FORWARD -i $tunif ! -o $tunif -j MINIUPNPD
+	fi
+
+	$LOG "Enable ipv6 route"
+        echo "1" > /proc/sys/net/ipv6/conf/all/forwarding
+
+	$LOG "Send NS(change $lan_if state) to pass RFC4862"
+	ip -6 addr del fe80::2e0:4cff:fe86:7001/64 dev $lan_if			> /dev/null 2>&1
+	ip -6 addr add fe80::2e0:4cff:fe86:7001/64 dev $lan_if
+
+	$LOG "Set alias IP for $lan_if to pass RFC1981 and RFC4443"
+	ip -6 addr del 3ffe:501:ffff:100:2e0:4cff:fe86:7001/64 dev $lan_if	> /dev/null 2>&1
+	ip -6 addr add 3ffe:501:ffff:100:2e0:4cff:fe86:7001/64 dev $lan_if
+
+	$LOG "Set ${ipv6prefix}:${ipv6subnet}::1/64 to $lan_if"
+	ip -6 addr del ${ipv6prefix}:${ipv6subnet}::1/64 dev $lan_if		> /dev/null 2>&1
+	ip -6 addr add ${ipv6prefix}:${ipv6subnet}::1/64 dev $lan_if
+
+	$LOG "Configure radvd"
+	echo > /etc/radvd.conf
+	printf "
+        interface $lan_if
+	    {
+    		AdvSendAdvert on;
+    		MinRtrAdvInterval 30;
+    		MaxRtrAdvInterval 100;
+    		prefix ${ipv6prefix}:${ipv6subnet}::1/64
+    		{
+            		AdvOnLink on;
+            		AdvAutonomous on;
+            		AdvRouterAddr off;
+    		};
+		RDNSS ${ipv6prefix}:${ipv6subnet}::1 2001:4860:4860::8888
+                {
+                        AdvRDNSSLifetime 600;
+                };
+	    };
+	" > /etc/radvd.conf
+
+	$LOG "Starting radvd"
+	radvd -s -C /etc/radvd.conf -d 1 &
+
+    fi
+}
+
+stop() {
+ $LOG  "Stop radvd daemon..."
+    echo "0" > /proc/sys/net/ipv6/conf/all/forwarding
+    killall -q radvd
+    killall -q -SIGKILL radvd
+    ip -6 route flush dev tun6to4	> /dev/null 2>&1
+    ip -6 addr flush dev tun6to4	> /dev/null 2>&1
+    ip -6 route flush dev sit0		> /dev/null 2>&1
+    ip -6 addr flush dev sit0		> /dev/null 2>&1
+    ip link set dev tun6to4 down	> /dev/null 2>&1
+    ip link set dev sit0 down		> /dev/null 2>&1
+    ip tunnel del tun6to4		> /dev/null 2>&1
+}
+
+case "$1" in
+	start)
+	    start
+	    ;;
+
+	stop)
+	    stop
+	    ;;
+
+	restart)
+	    stop
+	    start
+	    ;;
+
+	*)
+	    echo $"Usage: $0 {start|stop|restart}"
+	    exit 1
+esac

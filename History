@@ -1400,6 +1400,8 @@
 57) toolchain: build script fix detect host gcc version and small cleanup.<br>
 58) kernel: net: bridge_fastpath: fix and small optimize logic.<br>
 59) kernel: net/ipv6: inet6_dev on loopback should be kept until namespace stop.<br>
+60) init.d: make optional udpxy and lld2t.<br>
+61) build_system: consolidate init scripts for optional apps to one dir for easy edit runlevels.<br>
 
 <br>
 <br>
