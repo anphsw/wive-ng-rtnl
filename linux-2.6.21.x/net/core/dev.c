@@ -132,12 +132,11 @@ extern void pthrough_remove_proc_entry(void);
 int config_raeth_mcast=1;
 EXPORT_SYMBOL(config_raeth_mcast);
 
-#ifdef CONFIG_BRIDGE_FASTPATH
-#ifndef CONFIG_BRIDGE_NETFILTER
+#if defined(CONFIG_BRIDGE_FASTPATH) && !defined(CONFIG_BRIDGE_NETFILTER)
 #include "../bridge/br_private.h"
 extern void br_fdb_update(struct net_bridge *br, struct net_bridge_port *source,  const unsigned char *addr);
 extern struct net_bridge_fdb_entry *br_fdb_get(struct net_bridge *br, unsigned char *addr);
-#endif
+extern int bridge_fast_path_enabled;
 #endif
 
 #if defined (CONFIG_RA_HW_NAT)  || defined (CONFIG_RA_HW_NAT_MODULE)
@@ -1644,32 +1643,32 @@ int netif_rx(struct sk_buff *skb)
 	struct softnet_data *queue;
 	unsigned long flags;
 
-#ifdef CONFIG_BRIDGE_FASTPATH
-#ifndef CONFIG_BRIDGE_NETFILTER
-	extern int bridge_fast_path_enabled;
-	struct net_bridge_port *p;
-	struct net_bridge *br = NULL;
-	struct net_bridge_fdb_entry *dst;
-	struct net_device *dev;
-	unsigned char *dest = eth_hdr(skb)->h_dest;
+#if defined(CONFIG_BRIDGE_FASTPATH) && !defined(CONFIG_BRIDGE_NETFILTER)
+	struct net_bridge_port *p = skb->dev->br_port;
 
-	p = skb->dev->br_port;
-	if ((bridge_fast_path_enabled) && ((p!=NULL) && (p->br!=NULL))) {
-		br=p->br;
+	if ((bridge_fast_path_enabled) && (p!=NULL)) {
+	    struct net_bridge *br = p->br;
+
+	    if (br != NULL) {
+		struct net_bridge_fdb_entry *dst;
+
 		br_fdb_update(br, p, eth_hdr(skb)->h_source);
-		dst = br_fdb_get(br, dest);
+		dst = br_fdb_get(br, eth_hdr(skb)->h_dest);
 
-		if((dst!=NULL) && (dst->dst->dev!=NULL) && !dst->is_local){
-		    skb->dev = dst->dst->dev;
-		    skb_push(skb, ETH_HLEN);
-		    dev = skb->dev;
-		    dev->hard_start_xmit(skb, dev);
-		    return NET_RX_SUCCESS;
+		if(dst != NULL && dst->dst->dev != NULL && !dst->is_local) {
+		    struct net_device *dev;
+
+	    	    skb->dev = dst->dst->dev;
+	    	    skb_push(skb, ETH_HLEN);
+
+	    	    dev = skb->dev;
+	    	    dev->hard_start_xmit(skb, dev);
+
+	    	    return NET_RX_SUCCESS;
 		}
+	    }
 	}
-#endif /* CONFIG_BRIDGE_NETFILTER */
-#endif /* CONFIG_BRIDGE_FASTPATH */
-
+#endif
 	/* if netpoll wants it, pretend we never saw it */
 	if (netpoll_rx(skb))
 		return NET_RX_DROP;

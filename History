@@ -1398,6 +1398,7 @@
 55) goahead: remove very old dead code.<br>
 56) igmpproxy: some fixups.<br>
 57) toolchain: build script fix detect host gcc version and small cleanup.<br>
+58) kernel: net: bridge_fastpath: fix and small optimize logic.<br>
 
 <br>
 <br>
