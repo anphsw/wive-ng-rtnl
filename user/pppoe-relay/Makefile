@@ -53,8 +53,8 @@ pppoe-relay: relay.o debug.o if.o common.o
 #	$(STRIP) $(INSTALLDIR)/usr/sbin/pppoe-relay
 
 romfs: all
-	$(ROMFSINST) -S init.d/W40pppoe-relay /etc/rc.d/W40pppoe-relay
-	$(ROMFSINST) -s /etc/rc.d/W40pppoe-relay /etc/init.d/pppoe-relay
+	$(ROMFSINST) -S init.d/W41pppoe-relay /etc/rc.d/W41pppoe-relay
+	$(ROMFSINST) -s /etc/rc.d/W41pppoe-relay /etc/init.d/pppoe-relay
 	$(ROMFSINST) -S /usr/sbin/pppoe-relay /bin/pppoe-relay
 
 clean:
