@@ -71,7 +71,7 @@ killall_vpn() {
     # if xl2tp configured correct terminate xl2tpd daemon
     if [ -f /etc/ppp/l2tpd.conf ]; then
 	# first disconnect
-	if [ -f /var/run/xl2tpd/l2tp-control ]; then
+	if [ -e /var/run/xl2tpd/l2tp-control ]; then
 	    lac=`cat /etc/ppp/l2tpd.conf | grep lns | cut -f 2- -d =`
 	    if [ "$lac" != "" ]; then
 		$LOG "xl2tpd: discobnnect from $lac."
