@@ -8,10 +8,10 @@ UCLIBCVER=uClibc-0.9.28
 GCCVER=gcc-4.8.0
 
 INSTALL_DEP=NO
-UNPACK=YES
-HEADERS=YES
-BINUTILS=YES
-GCC=YES
+UNPACK=NO
+HEADERS=NO
+BINUTILS=NO
+GCC=NO
 UCLIB=YES
 GCCCPP=YES
 
@@ -37,6 +37,7 @@ export LC_TIME=
 export WDIR=$DIR/tmp
 export TARGET=mipsel-linux-uclibc
 export PREFIX=$DIR
+export ROOTDIR=$DIR
 
 export TARGET_DIR=$WDIR/$TARGET-toolchain
 export KERNEL_HEADERS=$TARGET_DIR/include
@@ -72,6 +73,9 @@ fi
 EXT_OPT="$EXT_OPT --disable-lto --enable-ld=yes --enable-gold=no --disable-sanity-checks --disable-werror"
 if [ "$GCCVER" = "gcc-4.6.3" ] || [ "$GCCVER" = "gcc-4.7.2" ] || [ "$GCCVER" = "gcc-4.8.0" ]; then
     EXT_OPT="$EXT_OPT --disable-biendian --disable-softfloat --disable-libquadmath --disable-libquadmath-support"
+fi
+if [ "$GCCVER" = "gcc-4.8.0" ]; then
+    EXT_OPT="$EXT_OPT --disable-libatomic --with-pic"
 fi
 #########################################################################################################
 
