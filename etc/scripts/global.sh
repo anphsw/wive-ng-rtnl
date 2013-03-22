@@ -172,20 +172,9 @@ getWanIpaddr() {
 get_txqlen() {
     if [ "$QoSEnable" != "" -a "$QoSEnable" != "0" ] || [ "$simple_qos" = "1" ]; then
 	# QoS Enabled
-	# For memory save 16m device uses txqueuelen=100
-	if [ -f /tmp/is_16ram_dev ]; then
-	    txqueuelen="100"
-	else
-	    txqueuelen="1000"
-	fi
+	txqueuelen="1000"
     else
-	# QoS Disabled
-	# For memory save 16m device uses txqueuelen=50
-	if [ -f /tmp/is_16ram_dev ]; then
-	    txqueuelen="50"
-	else
-	    txqueuelen="500"
-	fi
+	txqueuelen="500"
     fi
 }
 

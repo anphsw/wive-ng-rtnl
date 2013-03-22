@@ -1401,7 +1401,9 @@
 58) kernel: net: bridge_fastpath: fix and small optimize logic.<br>
 59) kernel: net/ipv6: inet6_dev on loopback should be kept until namespace stop.<br>
 60) init.d: make optional udpxy and lld2t.<br>
-61) build_system: consolidate init scripts for optional apps to one dir for easy edit runlevels.<br>
+61) init.d: drop support 16Mb RAM devies.<br>
+62) build_system: consolidate init scripts for optional apps to one dir for easy edit runlevels.<br>
+63) build_system: now all builds support ipv6 (6to4 autoconfig mode).<br>
 
 <br>
 <br>

@@ -9,14 +9,6 @@ start() {
     $LOG "Tune kernel with sysctl."
     sysctl -w -p -n -e /etc/sysctl.conf > /dev/null 2>&1
 
-    # set reserved memory barrier
-    if [ -f /tmp/is_32ram_dev ]; then
-	MIN_FREE=1920
-    else
-	MIN_FREE=1024
-    fi
-    sysctl -w vm.min_free_kbytes="$MIN_FREE"
-
     # set domainname
     if [ "$dhcpDomain" != "" ]; then
 	krn_domain="$dhcpDomain"

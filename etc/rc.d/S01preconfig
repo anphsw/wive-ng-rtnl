@@ -38,7 +38,7 @@ start() {
     done
 
     web2ramfs=`nvram_get 2860 web2ramfs`
-    if [ -f /tmp/is_32ram_dev ] && [ "$web2ramfs" != "0" ]; then
+    if [ "$web2ramfs" != "0" ]; then
 	$LOG "Copy web pages to tmpfs."
         mkdir -p /tmp/web
         cp -rpf /web/* /tmp/web

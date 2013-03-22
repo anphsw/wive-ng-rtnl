@@ -69,21 +69,6 @@ unload_ra0br0() {
     fi
 }
 
-disable_net() {
-    if [ -f /tmp/is_16ram_dev ]; then
-	# check in bridge
-	is_ra0_in_br0=`brctl show | sed -n '/ra0/p'`
-	is_eth21_in_br0=`brctl show | sed -n '/eth2\.1/p'`
-
-	# unload wifi driver
-	if [ "$is_ra0_in_br0" = "" ]; then
-	    unload_ra0
-	elif [ "$is_eth21_in_br0" != "" ]; then
-	    unload_ra0br0 "$phys_lan_if"
-	fi
-    fi
-}
-
 unload_modules() {
     echo "Unload modules"
     # unload modules all unused
@@ -93,15 +78,13 @@ unload_modules() {
     do
         rmmod $mod > /dev/null 2>&1
     done
-    if [ -f /tmp/is_16ram_dev ]; then 
-	# unload wifi modules
-	service modules stop
-    fi
+
     # unload full
     rmmod_mod=`lsmod | awk {' print $1'}`
     for mod in $rmmod_mod
     do
-	if [ -f /tmp/is_32ram_dev ] && [ "$mod" = "rt2860v2_ap" -o "$mod" = "rt2860v2_sta" ]; then
+	if [ "$mod" = "rt2860v2_ap" -o "$mod" = "rt2860v2_sta" ]; then
+	    # skip wifi modules
 	    mod=
 	fi
 	if [ "$mod" != "" ]; then
@@ -144,9 +127,6 @@ unload_apps
 if [ -f /etc/scripts/umount_all.sh ]; then
     /etc/scripts/umount_all.sh
 fi
-
-# disable wan/wlan if mem=16Mb
-disable_net
 
 # unload all modules this is need after unmont
 unload_modules

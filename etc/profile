@@ -41,15 +41,6 @@ export LC_MEASUREMENT=ru_RU.UTF-8
 export LC_IDENTIFICATION=ru_RU.UTF-8
 export LC_ALL=
 
-#memory at system
-if [ -f /tmp/is_32ram_dev ]; then
-    #>=32
-    export MEM=32
-else
-    #<=16
-    export MEM=16
-fi
-
 #aliases
 [ -x /usr/bin/vim ] && alias vi=vim || alias vim=vi
 

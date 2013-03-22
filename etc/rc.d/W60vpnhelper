@@ -164,15 +164,6 @@ stop() {
 
     # stop all pppd/xl2tpd daemons
     killall_vpn
-
-    if [ -f /tmp/is_16ram_dev ] && [ "$l2tp_srv_enabled" != "1" ]; then
-	# At 16Mb devices remove modules for savemem.
-	mod="ppp_mppe blkcipher cryptomgr crypto_algapi pppoe pppol2tp pptp pppox ppp_generic"
-	for module in $mod
-	do
-	    rmmod $module > /dev/null 2>&1
-	done
-    fi
 }
 
 #############################################################

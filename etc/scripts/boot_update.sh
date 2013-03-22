@@ -10,16 +10,8 @@ url="http://wive-ng.sf.net/downloads/ralink/boots/"
 syst=`cat /proc/cpuinfo | grep "system type" | awk {' print $4 '}`
 flst=`cat /proc/cpuinfo | grep "flash type" | awk {' print $4 '}`
 
-# is 16mem dev ?
-# 16mb only 16bit - need make boot manual
-if [ -f /tmp/is_16ram_dev ]; then
-    mem="16"
-else
-    mem=
-fi
-
 # check system
-if [ "$syst" = "RT3052" ] && [ "$flst" = "NOR" ] && [ "$mem" != "16" ]; then
+if [ "$syst" = "RT3052" ] && [ "$flst" = "NOR" ]; then
     boot_file="uboot-3052-nor.bz2"
 else
     echo "You system not supported."
