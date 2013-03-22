@@ -1399,6 +1399,7 @@
 56) igmpproxy: some fixups.<br>
 57) toolchain: build script fix detect host gcc version and small cleanup.<br>
 58) kernel: net: bridge_fastpath: fix and small optimize logic.<br>
+59) kernel: net/ipv6: inet6_dev on loopback should be kept until namespace stop.<br>
 
 <br>
 <br>
