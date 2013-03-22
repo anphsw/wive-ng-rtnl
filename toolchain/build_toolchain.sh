@@ -1,14 +1,13 @@
 #!/bin/sh
 
 DIR=`pwd`
-ROOTDIR=$DIR
 
 KERNELHDRS=kernel-headers
 BINUTILVER=binutils-2.21
 UCLIBCVER=uClibc-0.9.28
-GCCVER=gcc-4.4.7
+GCCVER=gcc-4.8.0
 
-INSTALL_DEP=YES
+INSTALL_DEP=NO
 UNPACK=YES
 HEADERS=YES
 BINUTILS=YES
@@ -16,7 +15,8 @@ GCC=YES
 UCLIB=YES
 GCCCPP=YES
 
-##################################USE ONLY ENGLESH LOCAGE FOR CORRECT BUILD####################################
+export LANGUAGE=en_EN.UTF-8:en
+
 export LC_PAPER=en_EN.UTF-8
 export LC_ADDRESS=en_EN.UTF-8
 export LC_MONETARY=en_EN.UTF-8
@@ -24,25 +24,25 @@ export LC_TELEPHONE=en_EN.UTF-8
 export LC_IDENTIFICATION=en_EN.UTF-8
 export LC_MEASUREMENT=en_EN.UTF-8
 export LC_NAME=en_EN.UTF-8
-export LC_COLLATE=
+
+export LANG=C
+export LC_COLLATE=C
+export LC_MESSAGES=C
+export LC_ALL=C
+
 export LC_NUMERIC=
-export LC_MESSAGES=
 export LC_CTYPE=
 export LC_TIME=
-export LC_ALL=POSIX
-
-export LANG=en_US
-export LANGUAGE=en_EN.UTF-8:en
-###############################################################################################################
 
 export WDIR=$DIR/tmp
 export TARGET=mipsel-linux-uclibc
 export PREFIX=$DIR
-export ROOTDIR=$PREFIX
+
 export TARGET_DIR=$WDIR/$TARGET-toolchain
 export KERNEL_HEADERS=$TARGET_DIR/include
-export PATH="${PATH}":${PREFIX}/bin:${PREFIX}/lib:${PREFIX}/include:${KERNEL_HEADERS}
-
+export REALKRNINC=${PREFIX}/../linux-2.6.21.x/include
+export REALLIBINC=${PREFIX}/../lib/include
+export PATH="${PATH}":${PREFIX}/bin:${PREFIX}/lib:${KERNEL_HEADERS}:${REALLIBINC}:${REALKRNINC}
 export CC=gcc
 
 #install need lib`s
@@ -61,21 +61,15 @@ cd $WDIR
 mkdir -p ${TARGET}-toolchain  && cd ${TARGET}-toolchain
 
 ##################################TUNE FOR CURRENT VERSION GCC BUILD####################################
-#
-# disable some warn`s for build fixup
-#
 HOSTGCCVER=`gcc -dumpversion | cut -f -2 -d .`
 if [ "$HOSTGCCVER" = "4.5" ] || [ "$HOSTGCCVER" = "4.6" ] || [ "$HOSTGCCVER" = "4.7" ] || [ "$HOSTGCCVER" = "4.8" ]; then
     WARN_OPTS="-Wno-pointer-sign -Wno-unused-but-set-variable -Wno-trigraphs -Wno-format-security -Wno-long-long"
     export CFLAGS="-O2 $WARN_OPTS"
 else
-    export CFLAGS="-O2"
+    export CFLAGS="-O2 $WARN_OPTS"
 fi
 
-#
-# disable some futures not neded or/and not build correct
-#
-EXT_OPT="--disable-lto --enable-ld=yes --enable-gold=no --disable-sanity-checks --disable-werror"
+EXT_OPT="$EXT_OPT --disable-lto --enable-ld=yes --enable-gold=no --disable-sanity-checks --disable-werror"
 if [ "$GCCVER" = "gcc-4.6.3" ] || [ "$GCCVER" = "gcc-4.7.2" ] || [ "$GCCVER" = "gcc-4.8.0" ]; then
     EXT_OPT="$EXT_OPT --disable-biendian --disable-softfloat --disable-libquadmath --disable-libquadmath-support"
 fi
@@ -110,7 +104,7 @@ if [ "$BINUTILS" = "YES" ]; then
     mkdir -p build-binutils && cd build-binutils
     (../$BINUTILVER/configure --target=$TARGET --prefix=$PREFIX --includedir=$KERNEL_HEADERS \
 	--with-sysroot=$PREFIX --with-build-sysroot=$PREFIX && \
-    make -j3 KERNEL_HEADERS=$TARGET_DIR/include && \
+    make -j4 KERNEL_HEADERS=$KERNEL_HEADERS && \
     make install) || exit 1
     cd ..
 fi
@@ -122,11 +116,12 @@ if [ "$GCC" = "YES" ]; then
 	--target=$TARGET --prefix=$PREFIX --includedir=$KERNEL_HEADERS \
 	--with-gnu-ld --with-gnu-as \
 	--disable-shared \
-	--disable-tls --disable-libmudflap --disable-libssp $EXT_OPT \
+	--disable-tls --disable-libmudflap --disable-libssp \
 	--disable-libgomp --disable-threads \
 	--with-sysroot=$PREFIX \
-	--enable-version-specific-runtime-libs --enable-languages=c && \
-    make -j3 && \
+	--enable-version-specific-runtime-libs --enable-languages=c \
+	$EXT_OPT && \
+    make -j4 && \
     make install) || exit 1
     cd ..
 fi
@@ -136,7 +131,7 @@ if [ "$UCLIB" = "YES" ]; then
     cp -fv uclibc-config $UCLIBCVER/.config
     cd $UCLIBCVER
     (make oldconfig && \
-    make -j3 && \
+    make -j4 && \
     make install) || exit 1
     cd ..
 fi
@@ -147,11 +142,12 @@ if [ "$GCCCPP" = "YES" ]; then
     (../$GCCVER/configure \
 	--target=$TARGET --prefix=$PREFIX --includedir=$KERNEL_HEADERS \
 	--with-gnu-ld --with-gnu-as \
-	--disable-tls --disable-libmudflap --disable-libssp $EXT_OPT \
+	--disable-tls --disable-libmudflap --disable-libssp \
 	--disable-libgomp --disable-threads \
 	--with-sysroot=$PREFIX \
-	--enable-version-specific-runtime-libs --enable-languages=c++ && \
-    make -j3 all-host all-target-libgcc all-target-libstdc++-v3  && \
+	--enable-version-specific-runtime-libs --enable-languages=c++ \
+	$EXT_OPT && \
+    make -j4 all-host all-target-libgcc all-target-libstdc++-v3  && \
     make install-host install-target-libgcc install-target-libstdc++-v3) || exit 1
     cd ..
 fi
