@@ -154,7 +154,7 @@ stop() {
 	pid=`cat $var/l2tpd.pid`
 	count=0
 	# try 3 times for correct shutdown
-	while kill -SIGTERM "$pid" > /dev/null 2>&1; do
+	while kill "$pid" > /dev/null 2>&1; do
 	    usleep 500000
 	    count="$(($count+1))"
 	    if [ "$count" = "5" ]; then

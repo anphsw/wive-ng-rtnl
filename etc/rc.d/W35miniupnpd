@@ -64,7 +64,7 @@ stop() {
     pid=`pidof miniupnpd`
     count=0
     # try 3 times for correct shutdown
-    while kill -SIGTERM "$pid" > /dev/null 2>&1; do
+    while kill "$pid" > /dev/null 2>&1; do
 	pid=`pidof miniupnpd`
 	count="$(($count+1))"
 	if [ "$count" = "3" ] || [ "$pid" = "" ]; then
