@@ -552,11 +552,11 @@ endif
 CFLAGS += $(call cc-option,-ffast-math)
 CFLAGS += $(call cc-option,-fforce-addr)
 
+# disable new loop optimization mode in 4.8.0 and later - fix regressions
+CFLAGS += $(call cc-option,-fno-aggressive-loop-optimizations)
+
 # improves compression ratio for generated code
 #CFLAGS += $(call cc-option,-fno-caller-saves)
-
-# try fix performance regerssion in 4.6.0
-#CFLAGS += $(call cc-option,-fschedule-insns)
 
 # warn about C99 declaration after statement
 CFLAGS += $(call cc-option,-Wdeclaration-after-statement)
@@ -564,8 +564,8 @@ CFLAGS += $(call cc-option,-Wdeclaration-after-statement)
 # disable pointer signed / unsigned warnings in gcc 4.0
 CFLAGS += $(call cc-option,-Wno-pointer-sign)
 
-# disable variable unused warnings in gcc 4.6.0
-#CFLAGS += $(call cc-option,-Wno-unused-but-set-variable)
+# disable variable unused warnings in gcc 4.6.0 and later
+CFLAGS += $(call cc-option,-Wno-unused-but-set-variable)
 
 # arch Makefile may override CC so keep this after arch Makefile is included
 NOSTDINC_FLAGS += -nostdinc -isystem $(shell $(CC) -print-file-name=include)

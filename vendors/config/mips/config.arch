@@ -95,6 +95,8 @@ else
 	CFLAGS += -funit-at-a-time -membedded-data -muninit-const-in-rodata -ffast-math -fforce-addr
 endif
 endif
+	#disable new loop optimization mode in 4.8.0 and later - fix regressions
+	CFLAGS  += -fno-aggressive-loop-optimizations
 	CFLAGS  += -pipe
 	CFLAGS  += $(VENDOR_CFLAGS)
 	CFLAGS  += -fno-builtin
@@ -137,6 +139,8 @@ else
 	CFLAGS += -funit-at-a-time -membedded-data -muninit-const-in-rodata -ffast-math -fforce-addr
 endif
 endif
+	#disable new loop optimization mode in 4.8.0 and later - fix regressions
+	CFLAGS  += -fno-aggressive-loop-optimizations
 	CFLAGS  += -pipe
 	CFLAGS  += $(VENDOR_CFLAGS)
 	CFLAGS  += -Dlinux -D__linux__ -Dunix -DEMBED
