@@ -1409,6 +1409,7 @@
 1) toolchain: build script fix detect host gcc version and small cleanup.<br>
 2) kernel: mips: backport pathces for compat with new 4.x.x assembler.<br>
 3) kernel: tcp: fix splice() and tcp collapsing interaction.<br>
+4) kenrel: net: ipv6: fix array index in ip6_mc_add_src().<br>
 
 <br>
 <br>
