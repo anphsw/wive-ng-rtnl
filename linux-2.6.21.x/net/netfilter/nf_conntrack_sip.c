@@ -377,7 +377,7 @@ static int set_expected_rtp(struct sk_buff **pskb,
 	struct nf_conntrack_expect *exp;
 	enum ip_conntrack_dir dir = CTINFO2DIR(ctinfo);
 	int family = ct->tuplehash[!dir].tuple.src.l3num;
-	int ret;
+	int ret = NF_ACCEPT;
 	typeof(nf_nat_sdp_hook) nf_nat_sdp;
 
 	exp = nf_conntrack_expect_alloc(ct);
