@@ -4,8 +4,7 @@
 #define XT_STRING_MAX_PATTERN_SIZE 128
 #define XT_STRING_MAX_ALGO_NAME_SIZE 16
 
-struct xt_string_info
-{
+struct xt_string_info {
 	u_int16_t from_offset;
 	u_int16_t to_offset;
 	char	  algo[XT_STRING_MAX_ALGO_NAME_SIZE];

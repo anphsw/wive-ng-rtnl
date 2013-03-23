@@ -8,6 +8,7 @@
 #include <linux/if_ether.h>
 #include <linux/if_pppox.h>
 #include <linux/if_vlan.h>
+#include <linux/if_pppox.h>
 
 /* Bridge Hooks */
 /* After promisc drops, checksum checks. */

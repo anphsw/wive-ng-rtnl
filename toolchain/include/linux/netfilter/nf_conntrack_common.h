@@ -3,8 +3,7 @@
 /* Connection state tracking for netfilter.  This is separated from,
    but required by, the NAT layer; it can also be used by an iptables
    extension. */
-enum ip_conntrack_info
-{
+enum ip_conntrack_info {
 	/* Part of an established connection (either direction). */
 	IP_CT_ESTABLISHED,
 
@@ -76,11 +75,14 @@ enum ip_conntrack_status {
 	/* Connection has fixed timeout. */
 	IPS_FIXED_TIMEOUT_BIT = 10,
 	IPS_FIXED_TIMEOUT = (1 << IPS_FIXED_TIMEOUT_BIT),
+
+	/* Conntrack is a fake untracked entry */
+	IPS_UNTRACKED_BIT = 12,
+	IPS_UNTRACKED = (1 << IPS_UNTRACKED_BIT),
 };
 
 /* Connection tracking event bits */
-enum ip_conntrack_events
-{
+enum ip_conntrack_events {
 	/* New conntrack */
 	IPCT_NEW_BIT = 0,
 	IPCT_NEW = (1 << IPCT_NEW_BIT),

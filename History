@@ -1407,8 +1407,7 @@
 <br>
 <b>3.7.x</b><br>
 1) toolchain: build script fix detect host gcc version and small cleanup.<br>
-2) toolchain: gcc update to 4.8.0 version.<br>
-3) kernel: mips: backport pathces for compat with 4.8.x assembler.<br>
+2) kernel: mips: backport pathces for compat with new 4.x.x assembler.<br>
 
 <br>
 <br>

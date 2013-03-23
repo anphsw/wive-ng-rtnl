@@ -37,39 +37,13 @@
 #define NETDEV_TX_BUSY 1	/* driver tx path was busy*/
 #define NETDEV_TX_LOCKED -1	/* driver tx lock was already taken */
 
-/*
- *	Compute the worst case header length according to the protocols
- *	used.
- */
- 
-#if defined(CONFIG_WLAN_80211) || defined(CONFIG_AX25) || defined(CONFIG_AX25_MODULE)
-# if defined(CONFIG_MAC80211_MESH)
-#  define LL_MAX_HEADER 128
-# else
-#  define LL_MAX_HEADER 96
-# endif
-#elif defined(CONFIG_TR)
-# define LL_MAX_HEADER 48
-#else
-# define LL_MAX_HEADER 32
-#endif
-
-#if !defined(CONFIG_NET_IPIP) && !defined(CONFIG_NET_IPIP_MODULE) && \
-    !defined(CONFIG_NET_IPGRE) &&  !defined(CONFIG_NET_IPGRE_MODULE) && \
-    !defined(CONFIG_IPV6_SIT) && !defined(CONFIG_IPV6_SIT_MODULE) && \
-    !defined(CONFIG_IPV6_TUNNEL) && !defined(CONFIG_IPV6_TUNNEL_MODULE)
-#define MAX_HEADER LL_MAX_HEADER
-#else
-#define MAX_HEADER (LL_MAX_HEADER + 48)
-#endif
 
 /*
  *	Network device statistics. Akin to the 2.0 ether stats but
  *	with byte counters.
  */
  
-struct net_device_stats
-{
+struct net_device_stats {
 	unsigned long long	rx_packets;		/* total packets received	*/
 	unsigned long long	tx_packets;		/* total packets transmitted	*/
 	unsigned long long	rx_bytes;		/* total bytes received 	*/
@@ -95,7 +69,7 @@ struct net_device_stats
 	unsigned long	tx_fifo_errors;
 	unsigned long	tx_heartbeat_errors;
 	unsigned long	tx_window_errors;
-	
+
 	/* for cslip etc */
 	unsigned long	rx_compressed;
 	unsigned long	tx_compressed;

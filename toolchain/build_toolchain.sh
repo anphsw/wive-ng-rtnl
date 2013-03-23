@@ -5,7 +5,7 @@ DIR=`pwd`
 KERNELHDRS=kernel-headers
 BINUTILVER=binutils-2.21
 UCLIBCVER=uClibc-0.9.28
-GCCVER=gcc-4.8.0
+GCCVER=gcc-4.4.7
 
 INSTALL_DEP=NO
 UNPACK=NO

@@ -78,9 +78,14 @@ struct in_addr {
 #define IP_IPSEC_POLICY	16
 #define IP_XFRM_POLICY	17
 #define IP_PASSSEC	18
+#define IP_TRANSPARENT	19
 
 /* BSD compatibility */
 #define IP_RECVRETOPTS	IP_RETOPTS
+
+/* TProxy original addresses */
+#define IP_ORIGDSTADDR       20
+#define IP_RECVORIGDSTADDR   IP_ORIGDSTADDR
 
 /* IP_MTU_DISCOVER values */
 #define IP_PMTUDISC_DONT		0	/* Never send DF frames */
@@ -105,6 +110,7 @@ struct in_addr {
 #define MCAST_JOIN_SOURCE_GROUP		46
 #define MCAST_LEAVE_SOURCE_GROUP	47
 #define MCAST_MSFILTER			48
+#define IP_MULTICAST_ALL		49
 
 #define MCAST_EXCLUDE	0
 #define MCAST_INCLUDE	1
@@ -115,14 +121,12 @@ struct in_addr {
 
 /* Request struct for multicast socket ops */
 
-struct ip_mreq 
-{
+struct ip_mreq  {
 	struct in_addr imr_multiaddr;	/* IP multicast address of group */
 	struct in_addr imr_interface;	/* local IP address of interface */
 };
 
-struct ip_mreqn
-{
+struct ip_mreqn {
 	struct in_addr	imr_multiaddr;		/* IP multicast address of group */
 	struct in_addr	imr_address;		/* local IP address of interface */
 	int		imr_ifindex;		/* Interface index */
@@ -146,21 +150,18 @@ struct ip_msfilter {
 	(sizeof(struct ip_msfilter) - sizeof(__u32) \
 	+ (numsrc) * sizeof(__u32))
 
-struct group_req
-{
+struct group_req {
 	__u32				 gr_interface;	/* interface index */
 	struct __kernel_sockaddr_storage gr_group;	/* group address */
 };
 
-struct group_source_req
-{
+struct group_source_req {
 	__u32				 gsr_interface;	/* interface index */
 	struct __kernel_sockaddr_storage gsr_group;	/* group address */
 	struct __kernel_sockaddr_storage gsr_source;	/* source address */
 };
 
-struct group_filter
-{
+struct group_filter {
 	__u32				 gf_interface;	/* interface index */
 	struct __kernel_sockaddr_storage gf_group;	/* multicast address */
 	__u32				 gf_fmode;	/* filter mode */
@@ -172,8 +173,7 @@ struct group_filter
 	(sizeof(struct group_filter) - sizeof(struct __kernel_sockaddr_storage) \
 	+ (numsrc) * sizeof(struct __kernel_sockaddr_storage))
 
-struct in_pktinfo
-{
+struct in_pktinfo {
 	int		ipi_ifindex;
 	struct in_addr	ipi_spec_dst;
 	struct in_addr	ipi_addr;

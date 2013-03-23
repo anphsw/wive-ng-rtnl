@@ -6,11 +6,13 @@
 struct pt_regs;
 
 /*
- * MAX_ARG_PAGES defines the number of pages allocated for arguments
- * and envelope for the new program. 32 should suffice, this gives
- * a maximum env+arg of 128kB w/4KB pages!
+ * These are the maximum length and maximum number of strings passed to the
+ * execve() system call.  MAX_ARG_STRLEN is essentially random but serves to
+ * prevent the kernel from being unduly impacted by misaddressed pointers.
+ * MAX_ARG_STRINGS is chosen to fit in a signed 32-bit integer.
  */
-#define MAX_ARG_PAGES 32
+#define MAX_ARG_STRLEN (PAGE_SIZE * 32)
+#define MAX_ARG_STRINGS 0x7FFFFFFF
 
 /* sizeof(linux_binprm->buf) */
 #define BINPRM_BUF_SIZE 128
