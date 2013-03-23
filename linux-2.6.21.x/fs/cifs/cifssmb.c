@@ -3733,7 +3733,7 @@ getDFSRetry:
 		else {
 			__u16 data_offset = le16_to_cpu(pSMBr->t2.DataOffset); 
 			__u16 data_count = le16_to_cpu(pSMBr->t2.DataCount);
-
+#if 0
 			cFYI(1,
 			     ("Decoding GetDFSRefer response.  BCC: %d  Offset %d",
 			      pSMBr->ByteCount, data_offset));
@@ -3748,7 +3748,7 @@ getDFSRetry:
 			   data block so we could do safety check that DataBlock
 			   begins at address of pSMBr->NumberOfReferrals */
 			*number_of_UNC_in_array = le16_to_cpu(pSMBr->NumberOfReferrals);
-
+#endif
 			/* BB Fix below so can return more than one referral */
 			if(*number_of_UNC_in_array > 1)
 				*number_of_UNC_in_array = 1;
