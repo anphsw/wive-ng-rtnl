@@ -29,36 +29,6 @@
 #define cpu_is_r4600_v1_x()	((read_c0_prid() & 0xfffffff0) == 0x00002010)
 #define cpu_is_r4600_v2_x()	((read_c0_prid() & 0xfffffff0) == 0x00002020)
 
-
-/*
- * Maximum sizes:
- *
- * R4000 128 bytes S-cache:		0x58 bytes
- * R4600 v1.7:				0x5c bytes
- * R4600 v2.0:				0x60 bytes
- * With prefetching, 16 byte strides	0xa0 bytes
- */
-
-static unsigned int clear_page_array[0x130 / 4];
-
-void clear_page(void * page) __attribute__((alias("clear_page_array")));
-
-EXPORT_SYMBOL(clear_page);
-
-/*
- * Maximum sizes:
- *
- * R4000 128 bytes S-cache:		0x11c bytes
- * R4600 v1.7:				0x080 bytes
- * R4600 v2.0:				0x07c bytes
- * With prefetching, 16 byte strides	0x0b8 bytes
- */
-static unsigned int copy_page_array[0x148 / 4];
-
-void copy_page(void *to, void *from) __attribute__((alias("copy_page_array")));
-
-EXPORT_SYMBOL(copy_page);
-
 /*
  * This is suboptimal for 32-bit kernels; we assume that R10000 is only used
  * with 64-bit kernels.  The prefetch offsets have been experimentally tuned
@@ -343,13 +313,18 @@ static inline void build_jr_ra(void)
 	flush_delay_slot_or_nop();
 }
 
+extern u32 __clear_page_start;
+extern u32 __clear_page_end;
+extern u32 __copy_page_start;
+extern u32 __copy_page_end;
+
 void __init build_clear_page(void)
 {
 	unsigned int loop_start;
 	unsigned long off;
 	int i;
 
-	epc = (unsigned int *) &clear_page_array;
+	epc = &__clear_page_start;
 	instruction_pending = 0;
 	store_offset = 0;
 
@@ -434,15 +409,15 @@ dest = label();
 
 	build_jr_ra();
 
-	BUG_ON(epc > clear_page_array + ARRAY_SIZE(clear_page_array));
+	BUG_ON(epc > &__clear_page_start);
 
 	pr_info("Synthesized clear page handler (%u instructions).\n",
-		(unsigned int)(epc - clear_page_array));
+		(u32)(epc - &__clear_page_start));
 
 	pr_debug("\t.set push\n");
 	pr_debug("\t.set noreorder\n");
-	for (i = 0; i < (epc - clear_page_array); i++)
-		pr_debug("\t.word 0x%08x\n", clear_page_array[i]);
+	for (i = 0; i < (epc - &__clear_page_start); i++)
+		pr_debug("\t.word 0x%08x\n", (&__clear_page_start)[i]);
 	pr_debug("\t.set pop\n");
 }
 
@@ -452,7 +427,7 @@ void __init build_copy_page(void)
 	unsigned long off;
 	int i;
 
-	epc = (unsigned int *) &copy_page_array;
+	epc = &__copy_page_start;
 	store_offset = load_offset = 0;
 	instruction_pending = 0;
 
@@ -525,14 +500,17 @@ dest = label();
 
 	build_jr_ra();
 
-	BUG_ON(epc > copy_page_array + ARRAY_SIZE(copy_page_array));
+	BUG_ON(epc > &__copy_page_start);
 
 	pr_info("Synthesized copy page handler (%u instructions).\n",
-		(unsigned int)(epc - copy_page_array));
+		(u32)(epc - &__copy_page_start));
 
 	pr_debug("\t.set push\n");
 	pr_debug("\t.set noreorder\n");
-	for (i = 0; i < (epc - copy_page_array); i++)
-		pr_debug("\t.word 0x%08x\n", copy_page_array[i]);
+	for (i = 0; i < (epc - &__copy_page_start); i++)
+		pr_debug("\t.word 0x%08x\n", (&__copy_page_start)[i]);
 	pr_debug("\t.set pop\n");
 }
+
+extern void clear_page_cpu(void *page);
+extern void copy_page_cpu(void *to, void *from);
