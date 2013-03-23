@@ -401,7 +401,7 @@ static __be32 process_op(struct svc_rqst *rqstp,
  */
 static __be32 nfs4_callback_compound(struct svc_rqst *rqstp, void *argp, void *resp)
 {
-	struct cb_compound_hdr_arg hdr_arg;
+	struct cb_compound_hdr_arg uninitialized_var(hdr_arg);
 	struct cb_compound_hdr_res hdr_res;
 	struct xdr_stream xdr_in, xdr_out;
 	__be32 *p;
@@ -415,11 +415,15 @@ static __be32 nfs4_callback_compound(struct svc_rqst *rqstp, void *argp, void *r
 	p = (__be32*)((char *)rqstp->rq_res.head[0].iov_base + rqstp->rq_res.head[0].iov_len);
 	xdr_init_encode(&xdr_out, &rqstp->rq_res, p);
 
-	decode_compound_hdr_arg(&xdr_in, &hdr_arg);
+	status = decode_compound_hdr_arg(&xdr_in, &hdr_arg);
+	if (unlikely(status != 0))
+		return status;
 	hdr_res.taglen = hdr_arg.taglen;
 	hdr_res.tag = hdr_arg.tag;
 	hdr_res.nops = NULL;
-	encode_compound_hdr_res(&xdr_out, &hdr_res);
+	status = encode_compound_hdr_res(&xdr_out, &hdr_res);
+	if (unlikely(status != 0))
+		return status;
 
 	for (;;) {
 		status = process_op(rqstp, &xdr_in, argp, &xdr_out, resp);
