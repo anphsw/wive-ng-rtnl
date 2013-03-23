@@ -742,6 +742,8 @@ static void rtmp_read_ap_client_from_file(
 	ULONG		KeyLen;
 	//UCHAR		CipherAlg = CIPHER_WEP64;
 
+	KeyType[0]=0; /* help new gcc */
+
 	//ApCliEnable
 	if(RTMPGetKeyParameter("ApCliEnable", tmpbuf, 128, buffer, TRUE))
 	{
