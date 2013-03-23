@@ -54,9 +54,9 @@ start() {
 	ip6tables -A FORWARD -i $lan_if -j ACCEPT
 
 	ipv6subnet="2000"
-	if [ "$wan_ipaddr" != "" ]; then
+	if [ "$real_wan_ipaddr" != "" ]; then
 	    $LOG "Tunel ipv6 in ipv4 configure and up"
-	    ipv6prefix=`echo $wan_ipaddr | awk -F. '{ printf "2002:%02x%02x:%02x%02x", $1, $2, $3, $4 }'`
+	    ipv6prefix=`echo $real_wan_ipaddr | awk -F. '{ printf "2002:%02x%02x:%02x%02x", $1, $2, $3, $4 }'`
 	    if [ "$IPv6_6RD_Enable" = "1" ]; then
 		relay6to4="192.88.99.127"
 		tunif="tun6to4"
@@ -64,7 +64,7 @@ start() {
 		ip -6 addr flush dev $tunif					> /dev/null 2>&1
 		ip -6 route flush dev $tunif					> /dev/null 2>&1
 		$LOG "Up tun6to4 interface"
-		ip tunnel add $tunif mode sit ttl 64 remote any local $wan_ipaddr
+		ip tunnel add $tunif mode sit ttl 64 remote any local $real_wan_ipaddr
 		ip link set dev $tunif up
 		ip -6 addr add ${ipv6prefix}::1/16 dev $tunif
 		ip -6 route replace ${ipv6subnet}::/3 via ::${relay6to4} dev $tunif metric 1
