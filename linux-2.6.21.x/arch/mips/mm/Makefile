@@ -5,7 +5,8 @@
 obj-y				+= cache.o dma-default.o extable.o fault.o \
 				   init.o pgtable.o \
 				   tlbex.o tlbex-fault.o \
-	                           uasm.o page.o gup.o mmap.o
+	                           uasm.o page.o page-funcs.o \
+	                           gup.o mmap.o
 
 obj-$(CONFIG_32BIT)		+= ioremap.o pgtable-32.o
 obj-$(CONFIG_64BIT)		+= pgtable-64.o
