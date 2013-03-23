@@ -25,7 +25,7 @@ typedef int (*bcmNatBindHook)(struct nf_conn *ct, enum ip_conntrack_info ctinfo,
 extern int bcm_nat_hit_hook_func(bcmNatHitHook hook_func);
 extern int bcm_nat_bind_hook_func(bcmNatBindHook hook_func);
 
-extern inline int
+extern int
 manip_pkt(u_int16_t proto,
 	  struct sk_buff **pskb,
 	  unsigned int iphdroff,

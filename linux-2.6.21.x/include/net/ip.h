@@ -216,7 +216,7 @@ int ip_dont_fragment(struct sock *sk, struct dst_entry *dst)
 }
 
 /* ip_skb_dst_mtu need for external nat offload */
-extern inline int ip_skb_dst_mtu(struct sk_buff *skb);
+extern int ip_skb_dst_mtu(struct sk_buff *skb);
 
 extern void __ip_select_ident(struct iphdr *iph, struct dst_entry *dst, int more);
 

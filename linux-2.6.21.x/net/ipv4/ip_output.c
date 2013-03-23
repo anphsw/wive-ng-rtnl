@@ -202,7 +202,7 @@ inline int ip_finish_output2(struct sk_buff *skb)
 }
 EXPORT_SYMBOL_GPL(ip_finish_output2);
 
-inline int ip_skb_dst_mtu(struct sk_buff *skb)
+int ip_skb_dst_mtu(struct sk_buff *skb)
 {
 	struct inet_sock *inet = skb->sk ? inet_sk(skb->sk) : NULL;
 
