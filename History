@@ -1408,7 +1408,7 @@
 <b>3.7.x</b><br>
 1) toolchain: build script fix detect host gcc version and small cleanup.<br>
 2) toolchain: gcc update to 4.8.0 version.<br>
-3) kernel: mips: Refactor 'clear_page' and 'copy_page' functions.<br>
+3) kernel: mips: backport pathces for compat with 4.8.x assembler.<br>
 
 <br>
 <br>
