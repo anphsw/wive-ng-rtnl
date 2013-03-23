@@ -1410,6 +1410,7 @@
 2) kernel: mips: backport pathces for compat with new 4.x.x assembler.<br>
 3) kernel: tcp: fix splice() and tcp collapsing interaction.<br>
 4) kenrel: net: ipv6: fix array index in ip6_mc_add_src().<br>
+5) kernel: irq: Remove superfluous NULL pointer check in check_irq_resend().<br>
 
 <br>
 <br>
