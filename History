@@ -1403,10 +1403,11 @@
 60) defaults: more compat with bcm/realtek devices.<br>
 61) goahead: remove very old dead code.<br>
 62) igmpproxy: some fixups.<br>
-63) toolchain: build script fix detect host gcc version and small cleanup.<br>
 
 <br>
 <b>3.7.x</b><br>
+1) toolchain: build script fix detect host gcc version and small cleanup.<br>
+2) toolchain: gcc update to 4.8.0 version.<br>
 
 <br>
 <br>
