@@ -46,7 +46,7 @@ static unsigned long at91wdt_busy;
 /*
  * Disable the watchdog.
  */
-static void inline at91_wdt_stop(void)
+static inline void at91_wdt_stop(void)
 {
 	at91_sys_write(AT91_ST_WDMR, AT91_ST_EXTEN);
 }
@@ -54,7 +54,7 @@ static void inline at91_wdt_stop(void)
 /*
  * Enable and reset the watchdog.
  */
-static void inline at91_wdt_start(void)
+static inline void at91_wdt_start(void)
 {
 	at91_sys_write(AT91_ST_WDMR, AT91_ST_EXTEN | AT91_ST_RSTEN | (((65536 * wdt_time) >> 8) & AT91_ST_WDV));
 	at91_sys_write(AT91_ST_CR, AT91_ST_WDRST);
@@ -63,7 +63,7 @@ static void inline at91_wdt_start(void)
 /*
  * Reload the watchdog timer.  (ie, pat the watchdog)
  */
-static void inline at91_wdt_reload(void)
+static inline void at91_wdt_reload(void)
 {
 	at91_sys_write(AT91_ST_CR, AT91_ST_WDRST);
 }

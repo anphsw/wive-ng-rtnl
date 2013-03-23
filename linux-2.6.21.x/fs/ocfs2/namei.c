@@ -69,7 +69,7 @@
 #define NAMEI_RA_SIZE        (NAMEI_RA_CHUNKS * NAMEI_RA_BLOCKS)
 #define NAMEI_RA_INDEX(c,b)  (((c) * NAMEI_RA_BLOCKS) + (b))
 
-static int inline ocfs2_search_dirblock(struct buffer_head *bh,
+static inline int ocfs2_search_dirblock(struct buffer_head *bh,
 					struct inode *dir,
 					const char *name, int namelen,
 					unsigned long offset,
@@ -1926,7 +1926,7 @@ bail:
 /*
  * Returns 0 if not found, -1 on failure, and 1 on success
  */
-static int inline ocfs2_search_dirblock(struct buffer_head *bh,
+static inline int ocfs2_search_dirblock(struct buffer_head *bh,
 					struct inode *dir,
 					const char *name, int namelen,
 					unsigned long offset,

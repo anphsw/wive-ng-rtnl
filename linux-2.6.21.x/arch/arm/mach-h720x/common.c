@@ -71,7 +71,7 @@ static void unmask_global_irq (unsigned int irq )
  * ack GPIO irq's
  * Ack only for edge triggered int's valid
  */
-static void inline ack_gpio_irq(u32 irq)
+static inline void ack_gpio_irq(u32 irq)
 {
 	u32 reg_base = GPIO_VIRT(IRQ_TO_REGNO(irq));
 	u32 bit = IRQ_TO_BIT(irq);
@@ -82,7 +82,7 @@ static void inline ack_gpio_irq(u32 irq)
 /*
  * mask GPIO irq's
  */
-static void inline mask_gpio_irq(u32 irq)
+static inline void mask_gpio_irq(u32 irq)
 {
 	u32 reg_base = GPIO_VIRT(IRQ_TO_REGNO(irq));
 	u32 bit = IRQ_TO_BIT(irq);
@@ -92,7 +92,7 @@ static void inline mask_gpio_irq(u32 irq)
 /*
  * unmask GPIO irq's
  */
-static void inline unmask_gpio_irq(u32 irq)
+static inline void unmask_gpio_irq(u32 irq)
 {
 	u32 reg_base = GPIO_VIRT(IRQ_TO_REGNO(irq));
 	u32 bit = IRQ_TO_BIT(irq);

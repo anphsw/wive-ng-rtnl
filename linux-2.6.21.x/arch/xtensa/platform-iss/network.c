@@ -118,32 +118,32 @@ static int __simc (int a, int b, int c, int d, int e, int f)
 	return ret;
 }
 
-static int inline simc_open(char *file, int flags, int mode)
+static inline int simc_open(char *file, int flags, int mode)
 {
 	return __simc(SYS_open, (int) file, flags, mode, 0, 0);
 }
 
-static int inline simc_close(int fd)
+static inline int simc_close(int fd)
 {
 	return __simc(SYS_close, fd, 0, 0, 0, 0);
 }
 
-static int inline simc_ioctl(int fd, int request, void *arg)
+static inline int simc_ioctl(int fd, int request, void *arg)
 {
 	return __simc(SYS_ioctl, fd, request, (int) arg, 0, 0);
 }
 
-static int inline simc_read(int fd, void *buf, size_t count)
+static inline int simc_read(int fd, void *buf, size_t count)
 {
 	return __simc(SYS_read, fd, (int) buf, count, 0, 0);
 }
 
-static int inline simc_write(int fd, void *buf, size_t count)
+static inline int simc_write(int fd, void *buf, size_t count)
 {
 	return __simc(SYS_write, fd, (int) buf, count, 0, 0);
 }
 
-static int inline simc_poll(int fd)
+static inline int simc_poll(int fd)
 {
 	struct timeval tv = { .tv_sec = 0, .tv_usec = 0 };
 
@@ -222,7 +222,7 @@ static void dev_ip_addr(void *d, char *buf, char *bin_buf)
 
 /* Set Ethernet address of the specified device. */
 
-static void inline set_ether_mac(void *d, unsigned char *addr)
+static inline void set_ether_mac(void *d, unsigned char *addr)
 {
 	struct net_device *dev = d;
 	memcpy(dev->dev_addr, addr, ETH_ALEN);

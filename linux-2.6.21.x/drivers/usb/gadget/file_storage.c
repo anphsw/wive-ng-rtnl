@@ -713,13 +713,13 @@ struct fsg_dev {
 
 typedef void (*fsg_routine_t)(struct fsg_dev *);
 
-static int inline exception_in_progress(struct fsg_dev *fsg)
+static inline int exception_in_progress(struct fsg_dev *fsg)
 {
 	return (fsg->state > FSG_STATE_IDLE);
 }
 
 /* Make bulk-out requests be divisible by the maxpacket size */
-static void inline set_bulk_out_req_length(struct fsg_dev *fsg,
+static inline void set_bulk_out_req_length(struct fsg_dev *fsg,
 		struct fsg_buffhd *bh, unsigned int length)
 {
 	unsigned int	rem;
@@ -770,16 +770,16 @@ static void dump_msg(struct fsg_dev *fsg, const char *label,
 	}
 }
 
-static void inline dump_cdb(struct fsg_dev *fsg)
+static inline void dump_cdb(struct fsg_dev *fsg)
 {}
 
 #else
 
-static void inline dump_msg(struct fsg_dev *fsg, const char *label,
+static inline void dump_msg(struct fsg_dev *fsg, const char *label,
 		const u8 *buf, unsigned int length)
 {}
 
-static void inline dump_cdb(struct fsg_dev *fsg)
+static inline void dump_cdb(struct fsg_dev *fsg)
 {
 	int	i;
 	char	cmdbuf[3*MAX_COMMAND_SIZE + 1];
@@ -822,13 +822,13 @@ static u32 inline get_be32(u8 *buf)
 			((u32) buf[2] << 8) | ((u32) buf[3]);
 }
 
-static void inline put_be16(u8 *buf, u16 val)
+static inline void put_be16(u8 *buf, u16 val)
 {
 	buf[0] = val >> 8;
 	buf[1] = val;
 }
 
-static void inline put_be32(u8 *buf, u32 val)
+static inline void put_be32(u8 *buf, u32 val)
 {
 	buf[0] = val >> 24;
 	buf[1] = val >> 16;

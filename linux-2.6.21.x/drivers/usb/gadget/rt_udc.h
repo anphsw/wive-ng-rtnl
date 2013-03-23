@@ -298,7 +298,7 @@ struct PDMA_txdesc {
 
 #define FATAL_ERROR(fmt, args...)	do{ printk(fmt, ## args); printk("\n###############  ERROR  #####################\n %s %d\n###############  ERROR  #####################\n",  __FUNCTION__, __LINE__);  BUG(); } while(0)
 
-static void inline dump_usbirq(u32 irqreg)
+static inline void dump_usbirq(u32 irqreg)
 {
 	if(irqreg)
 		xprintk("U%s%s%s%s%s%s\n", 
@@ -316,7 +316,7 @@ static void inline dump_usbirq(u32 irqreg)
 
 }
 
-static void inline dump_epirq(u32 irqreg, u32 ienreg, int dir)
+static inline void dump_epirq(u32 irqreg, u32 ienreg, int dir)
 {
 	if(irqreg)
 	xprintk("%s%x\n", dir? "I" : "O", irqreg);

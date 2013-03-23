@@ -12,7 +12,7 @@ static int max_interrupt_work = 20;
    The RTL chips use a 64 element hash table based on the Ethernet CRC.  */
 static int multicast_filter_limit = 32;
 
-const static struct {
+static const struct {
 	const char *name;
 	u8 mcfg;		 /* depend on documents of Realtek */
 	u32 RxConfigMask; 	/* should clear the bits supported by this chip */

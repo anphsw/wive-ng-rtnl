@@ -113,7 +113,7 @@ void __init plat_timer_setup(struct irqaction *irq)
 static void markeins_board_init(void);
 extern void markeins_irq_setup(void);
 
-static void inline __init markeins_sio_setup(void)
+static inline void __init markeins_sio_setup(void)
 {
 #ifdef CONFIG_KGDB_8250
 	struct uart_port emma_port;

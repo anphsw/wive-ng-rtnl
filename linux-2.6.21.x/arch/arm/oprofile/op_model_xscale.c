@@ -296,7 +296,7 @@ static int xscale_setup_ctrs(void)
 	return 0;
 }
 
-static void inline __xsc1_check_ctrs(void)
+static inline void __xsc1_check_ctrs(void)
 {
 	int i;
 	u32 pmnc = read_pmnc();
@@ -319,7 +319,7 @@ static void inline __xsc1_check_ctrs(void)
 	}
 }
 
-static void inline __xsc2_check_ctrs(void)
+static inline void __xsc2_check_ctrs(void)
 {
 	int i;
 	u32 flag = 0, pmnc = read_pmnc();

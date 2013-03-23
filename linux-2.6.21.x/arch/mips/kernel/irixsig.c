@@ -128,7 +128,7 @@ segv_and_exit:
 	return 0;
 }
 
-static int inline
+static inline int
 setup_irix_rt_frame(struct k_sigaction * ka, struct pt_regs *regs,
                int signr, sigset_t *oldmask, siginfo_t *info)
 {

@@ -76,7 +76,7 @@ static const struct file_operations mmtimer_fops = {
  */
 #define NUM_COMPARATORS 3
 /* Check for an RTC interrupt pending */
-static int inline mmtimer_int_pending(int comparator)
+static inline int mmtimer_int_pending(int comparator)
 {
 	if (HUB_L((unsigned long *)LOCAL_MMR_ADDR(SH_EVENT_OCCURRED)) &
 			SH_EVENT_OCCURRED_RTC1_INT_MASK << comparator)
@@ -85,14 +85,14 @@ static int inline mmtimer_int_pending(int comparator)
 		return 0;
 }
 /* Clear the RTC interrupt pending bit */
-static void inline mmtimer_clr_int_pending(int comparator)
+static inline void mmtimer_clr_int_pending(int comparator)
 {
 	HUB_S((u64 *)LOCAL_MMR_ADDR(SH_EVENT_OCCURRED_ALIAS),
 		SH_EVENT_OCCURRED_RTC1_INT_MASK << comparator);
 }
 
 /* Setup timer on comparator RTC1 */
-static void inline mmtimer_setup_int_0(u64 expires)
+static inline void mmtimer_setup_int_0(u64 expires)
 {
 	u64 val;
 
@@ -122,7 +122,7 @@ static void inline mmtimer_setup_int_0(u64 expires)
 }
 
 /* Setup timer on comparator RTC2 */
-static void inline mmtimer_setup_int_1(u64 expires)
+static inline void mmtimer_setup_int_1(u64 expires)
 {
 	u64 val;
 
@@ -144,7 +144,7 @@ static void inline mmtimer_setup_int_1(u64 expires)
 }
 
 /* Setup timer on comparator RTC3 */
-static void inline mmtimer_setup_int_2(u64 expires)
+static inline void mmtimer_setup_int_2(u64 expires)
 {
 	u64 val;
 
@@ -170,7 +170,7 @@ static void inline mmtimer_setup_int_2(u64 expires)
  * in order to insure that the setup succeeds in a deterministic time frame.
  * It will check if the interrupt setup succeeded.
  */
-static int inline mmtimer_setup(int comparator, unsigned long expires)
+static inline int mmtimer_setup(int comparator, unsigned long expires)
 {
 
 	switch (comparator) {
@@ -195,7 +195,7 @@ static int inline mmtimer_setup(int comparator, unsigned long expires)
 	return mmtimer_int_pending(comparator);
 }
 
-static int inline mmtimer_disable_int(long nasid, int comparator)
+static inline int mmtimer_disable_int(long nasid, int comparator)
 {
 	switch (comparator) {
 	case 0:
@@ -397,7 +397,7 @@ static int sgi_clock_set(clockid_t clockid, struct timespec *tp)
  * exponentially in order to ensure that the next interrupt
  * can be properly scheduled..
  */
-static int inline reschedule_periodic_timer(mmtimer_t *x)
+static inline int reschedule_periodic_timer(mmtimer_t *x)
 {
 	int n;
 	struct k_itimer *t = x->timer;

@@ -56,7 +56,7 @@ static inline __u16	inet_getid(struct inet_peer *p, int more)
 
 #define inet_getpeer(a, b) (0)
 #define inet_putpeer(b)
-static void inline inet_initpeers(void) { }
+static inline void inet_initpeers(void) { }
 #define inet_getid(a, b) (0)
 
 #endif

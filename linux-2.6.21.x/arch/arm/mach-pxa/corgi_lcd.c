@@ -447,7 +447,7 @@ void spitz_lcd_power(int on, struct fb_var_screeninfo *var)
  */
 static unsigned long (*get_hsync_time)(struct device *dev);
 
-static void inline sharpsl_wait_sync(int gpio)
+static inline void sharpsl_wait_sync(int gpio)
 {
 	while((GPLR(gpio) & GPIO_bit(gpio)) == 0);
 	while((GPLR(gpio) & GPIO_bit(gpio)) != 0);

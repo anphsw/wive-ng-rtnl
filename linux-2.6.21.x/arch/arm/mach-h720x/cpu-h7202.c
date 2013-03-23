@@ -145,7 +145,7 @@ h7202_timer_interrupt(int irq, void *dev_id)
 /*
  * mask multiplexed timer irq's
  */
-static void inline mask_timerx_irq (u32 irq)
+static inline void mask_timerx_irq (u32 irq)
 {
 	unsigned int bit;
 	bit = 2 << ((irq == IRQ_TIMER64B) ? 4 : (irq - IRQ_TIMER1));
@@ -155,7 +155,7 @@ static void inline mask_timerx_irq (u32 irq)
 /*
  * unmask multiplexed timer irq's
  */
-static void inline unmask_timerx_irq (u32 irq)
+static inline void unmask_timerx_irq (u32 irq)
 {
 	unsigned int bit;
 	bit = 2 << ((irq == IRQ_TIMER64B) ? 4 : (irq - IRQ_TIMER1));

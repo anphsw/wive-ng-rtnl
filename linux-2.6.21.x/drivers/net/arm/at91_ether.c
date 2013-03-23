@@ -463,7 +463,7 @@ static int set_mac_address(struct net_device *dev, void* addr)
 	return 0;
 }
 
-static int inline hash_bit_value(int bitnr, __u8 *addr)
+static inline int hash_bit_value(int bitnr, __u8 *addr)
 {
 	if (addr[bitnr / 8] & (1 << (bitnr % 8)))
 		return 1;

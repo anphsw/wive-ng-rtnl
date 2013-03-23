@@ -105,7 +105,7 @@ static inline void __raw_spin_lock_flags(raw_spinlock_t *lock, unsigned long fla
 
 /* Multi-reader locks, these are much saner than the 32-bit Sparc ones... */
 
-static void inline __read_lock(raw_rwlock_t *lock)
+static inline void __read_lock(raw_rwlock_t *lock)
 {
 	unsigned long tmp1, tmp2;
 
@@ -130,7 +130,7 @@ static void inline __read_lock(raw_rwlock_t *lock)
 	: "memory");
 }
 
-static int inline __read_trylock(raw_rwlock_t *lock)
+static inline int __read_trylock(raw_rwlock_t *lock)
 {
 	int tmp1, tmp2;
 
@@ -152,7 +152,7 @@ static int inline __read_trylock(raw_rwlock_t *lock)
 	return tmp1;
 }
 
-static void inline __read_unlock(raw_rwlock_t *lock)
+static inline void __read_unlock(raw_rwlock_t *lock)
 {
 	unsigned long tmp1, tmp2;
 
@@ -169,7 +169,7 @@ static void inline __read_unlock(raw_rwlock_t *lock)
 	: "memory");
 }
 
-static void inline __write_lock(raw_rwlock_t *lock)
+static inline void __write_lock(raw_rwlock_t *lock)
 {
 	unsigned long mask, tmp1, tmp2;
 
@@ -196,7 +196,7 @@ static void inline __write_lock(raw_rwlock_t *lock)
 	: "memory");
 }
 
-static void inline __write_unlock(raw_rwlock_t *lock)
+static inline void __write_unlock(raw_rwlock_t *lock)
 {
 	__asm__ __volatile__(
 "	membar		#LoadStore | #StoreStore\n"
@@ -206,7 +206,7 @@ static void inline __write_unlock(raw_rwlock_t *lock)
 	: "memory");
 }
 
-static int inline __write_trylock(raw_rwlock_t *lock)
+static inline int __write_trylock(raw_rwlock_t *lock)
 {
 	unsigned long mask, tmp1, tmp2, result;
 

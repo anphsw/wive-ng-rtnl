@@ -125,7 +125,7 @@ u32 ir_extract_bits(u32 data, u32 mask)
 	return value;
 }
 
-static int inline getbit(u32 *samples, int bit)
+static inline int getbit(u32 *samples, int bit)
 {
 	return (samples[bit/32] & (1 << (31-(bit%32)))) ? 1 : 0;
 }

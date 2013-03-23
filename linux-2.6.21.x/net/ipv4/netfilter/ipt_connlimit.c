@@ -49,7 +49,7 @@ static int count_them(struct ipt_connlimit_data *data,
 		      struct nf_conn *ct)
 {
 #ifdef DEBUG
-	const static char *tcp[] = { "none", "established", "syn_sent", "syn_recv",
+	static const char *tcp[] = { "none", "established", "syn_sent", "syn_recv",
 				     "fin_wait", "time_wait", "close", "close_wait",
 				     "last_ack", "listen" };
 #endif

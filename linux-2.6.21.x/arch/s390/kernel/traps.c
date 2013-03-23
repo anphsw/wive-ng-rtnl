@@ -289,7 +289,7 @@ void die(const char * str, struct pt_regs * regs, long err)
         do_exit(SIGSEGV);
 }
 
-static void inline
+static inline void
 report_user_fault(long interruption_code, struct pt_regs *regs)
 {
 #if defined(CONFIG_SYSCTL)
