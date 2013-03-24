@@ -19,7 +19,7 @@ ROUTELIST_DGW=""
 ROUTELIST_FGW=""
 
 # Get MTU config and VPN DGW mode
-eval `nvram_buf_get 2860 wan_manual_mtu vpnDGW dhcpSwReset lan_ipaddr lan_netmask`
+eval `nvram_buf_get 2860 wan_manual_mtu vpnDGW dhcpSwReset RouteUpOnce lan_ipaddr lan_netmask`
 
 # Renew flag
 FULL_RENEW=1
@@ -173,32 +173,36 @@ case "$1" in
 	    done
 	fi
 
-	# first add stub for routesm next add static routes and
-	# default gateways need replace/add at end route parces
-	# replace dgw must be replaced only if ip selected
-	if [ "$REPLACE_DGW" = "1" ] && [ "$FULL_RENEW" = "1" ]; then
-	    ROUTELIST="$ROUTELIST_FGW $ROUTELIST $ROUTELIST_DGW"
-	    $LOG "Apply route list. And replace DGW."
-	else
-	    ROUTELIST="$ROUTELIST_FGW $ROUTELIST"
-	    $LOG "Apply route list without modify DGW."
-	fi
-	# aplly parsed route
-	for i in `echo $ROUTELIST | sed 's/ /\n/g' | sort | uniq`; do
+	# update routes if first exec script or new ip selected or not set RouteUpOnce=1
+	if [ "$RouteUpOnce" = "0" ] || [ "$FULL_RENEW" = "1" ] || [ ! -f /tmp/routes_applied ]; then
+	    # first add stub for routesm next add static routes and
+	    # default gateways need replace/add at end route parces
+	    # replace dgw must be replaced only if ip selected
+	    if [ "$REPLACE_DGW" = "1" ] && [ "$FULL_RENEW" = "1" ]; then
+		ROUTELIST="$ROUTELIST_FGW $ROUTELIST $ROUTELIST_DGW"
+		$LOG "Apply route list. And replace DGW."
+	    else
+		ROUTELIST="$ROUTELIST_FGW $ROUTELIST"
+		$LOG "Apply route list without modify DGW."
+	    fi
+	    # aplly parsed route
+	    for i in `echo $ROUTELIST | sed 's/ /\n/g' | sort | uniq`; do
 		IPCMD=`echo $i|awk '{split($0,a,":"); \
 		    printf " %s via %s dev %s", a[1], a[2], a[3]; \
 		    if (a[4]!="") printf " metric %s", a[4]}'`
 		ip route replace $IPCMD
-	done
-	# add routes configured in web
-	if [ -f /etc/routes_replace ]; then
-	    $LOG "Apply user routes."
-	    /etc/routes_replace replace $lan_if $interface
-	fi
-	# Add route to multicast subnet
-	if [ "$igmpEnabled" = "1" -o "$UDPXYMode" != "0" ]; then
-	    $LOG "Add route to multicast subnet."
-	    ip route replace "$mcast_net" dev "$interface"
+	    done
+	    # Add route to multicast subnet
+	    if [ "$igmpEnabled" = "1" -o "$UDPXYMode" != "0" ]; then
+		$LOG "Add route to multicast subnet."
+		ip route replace "$mcast_net" dev "$interface"
+	    fi
+	    # add routes configured in web
+	    if [ -f /etc/routes_replace ]; then
+		$LOG "Apply user routes."
+		/etc/routes_replace replace $lan_if $interface
+	    fi
+	    touch /tmp/routes_applied
 	fi
 
     ########################################################################################################

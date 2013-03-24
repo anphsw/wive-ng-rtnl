@@ -198,30 +198,6 @@ wait_connect() {
     fi
 }
 
-# configure and start dhcp client
-udhcpc_opts() {
-    eval `nvram_buf_get 2860 dhcpRequestIP wan_manual_mtu HostName`
-    if [ "$dhcpRequestIP" != "" ]; then
-	dhcpRequestIP="-r $dhcpRequestIP"
-    else
-	dhcpRequestIP=""
-    fi
-    if [ "$wan_manual_mtu" = "0" ]; then
-	wan_manual_mtu="-O mtu"
-    else
-	wan_manual_mtu=""
-    fi
-    if [ "$radvdEnabled" = "1" ] && [ "$IPv6_6RD_Enable" = "1" ]; then
-	rd_support="-O ip6rd"
-    else
-	rd_support=""
-    fi
-    UDHCPCOPTS="-i $wan_if $dhcpRequestIP -S -R -T 5 -a \
-		-s /bin/udhcpc.sh -p /var/run/udhcpc.pid \
-		-O routes -O staticroutes -O msstaticroutes -O wins \
-		$rd_support $wan_manual_mtu -x hostname:$HostName -f &"
-}
-
 # configure and start zeroconf daemon
 zero_conf() {
     wan_is_not_null=`ip -4 addr show $wan_if | grep inet -c`

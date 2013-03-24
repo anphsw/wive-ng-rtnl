@@ -9,6 +9,36 @@ web_wait
 
 LOG="logger -t wan"
 
+# configure and start dhcp client
+udhcpc_opts() {
+    # reload global
+    . /etc/scripts/global.sh
+
+    eval `nvram_buf_get 2860 dhcpRequestIP wan_manual_mtu HostName`
+    if [ "$dhcpRequestIP" != "" ]; then
+	dhcpRequestIP="-r $dhcpRequestIP"
+    else
+	dhcpRequestIP=""
+    fi
+    if [ "$wan_manual_mtu" = "0" ]; then
+	wan_manual_mtu="-O mtu"
+    else
+	wan_manual_mtu=""
+    fi
+    if [ "$radvdEnabled" = "1" ] && [ "$IPv6_6RD_Enable" = "1" ]; then
+	rd_support="-O ip6rd"
+    else
+	rd_support=""
+    fi
+    UDHCPCOPTS="-i $wan_if $dhcpRequestIP -S -R -T 5 -a \
+		-s /bin/udhcpc.sh -p /var/run/udhcpc.pid \
+		-O routes -O staticroutes -O msstaticroutes -O wins \
+		$rd_support $wan_manual_mtu -x hostname:$HostName -f &"
+
+    # remove routes updated flags
+    rm -f /tmp/routes_applied
+}
+
 start() {
  $LOG "Start WAN config"
     get_param
@@ -62,9 +92,6 @@ start() {
 	    fi
         fi
     elif [ "$wanConnectionMode" = "DHCP" ] && [ "$vpnPurePPPOE" != "1" ]; then
-	# reload global
-	. /etc/scripts/global.sh
-
 	# get udhcp param
 	udhcpc_opts
 
