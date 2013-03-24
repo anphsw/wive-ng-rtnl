@@ -1559,12 +1559,11 @@ void __init kmem_cache_init(void)
 		mutex_unlock(&cache_chain_mutex);
 	}
 
-	/* Annotate slab for lockdep -- annotate the malloc caches */
-	init_lock_keys();
-
-
 	/* Done! */
 	g_cpucache_up = FULL;
+
+	/* Annotate slab for lockdep -- annotate the malloc caches */
+	init_lock_keys();
 
 	/*
 	 * Register a cpu startup notifier callback that initializes
