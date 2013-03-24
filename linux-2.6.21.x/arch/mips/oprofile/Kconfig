@@ -3,6 +3,7 @@ menu "Profiling support"
 
 config PROFILING
 	bool "Profiling support"
+	default n
 	help
 	  Say Y here to enable the extended profiling support mechanisms used
 	  by profilers such as OProfile.
@@ -10,6 +11,7 @@ config PROFILING
 
 config OPROFILE
 	tristate "OProfile system profiling"
+	default n
 	depends on PROFILING && !MIPS_MT_SMTC
 	help
 	  OProfile is a profiling system capable of profiling the
