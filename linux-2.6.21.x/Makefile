@@ -559,13 +559,13 @@ CFLAGS += $(call cc-option,-fno-aggressive-loop-optimizations)
 #CFLAGS += $(call cc-option,-fno-caller-saves)
 
 # warn about C99 declaration after statement
-CFLAGS += $(call cc-option,-Wdeclaration-after-statement)
+CFLAGS += $(call cc-disable-warning, declaration-after-statement)
 
 # disable pointer signed / unsigned warnings in gcc 4.0
-CFLAGS += $(call cc-option,-Wno-pointer-sign)
+CFLAGS += $(call cc-disable-warning, pointer-sign)
 
 # disable variable unused warnings in gcc 4.6.0 and later
-CFLAGS += $(call cc-option,-Wno-unused-but-set-variable)
+CFLAGS += $(call cc-disable-warning, unused-but-set-variable)
 
 # arch Makefile may override CC so keep this after arch Makefile is included
 NOSTDINC_FLAGS += -nostdinc -isystem $(shell $(CC) -print-file-name=include)
