@@ -423,6 +423,9 @@ struct net_device {
 	int			quota;
 	int			weight;
 
+#ifdef CONFIG_BONDING
+	unsigned long           last_rx;        /* Time of last Rx      */
+#endif
 	/* Interface address info used in eth_type_trans() */
 	unsigned char		dev_addr[MAX_ADDR_LEN];	/* hw address, (before bcast 
 							because most packets are unicast) */

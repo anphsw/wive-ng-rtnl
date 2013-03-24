@@ -72,7 +72,7 @@ void softlockup_tick(void)
 
 		spin_lock(&print_lock);
 		printk(KERN_ERR "BUG: soft lockup - CPU#%d stuck for %lus! [%s:%d]\n",
-			this_cpu, now - touch_timestamp,
+			this_cpu, touch_timestamp,
 				current->comm, current->pid);
 		dump_stack();
 		spin_unlock(&print_lock);

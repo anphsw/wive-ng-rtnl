@@ -1757,10 +1757,6 @@ static inline void flush_unauthorized_files(struct files_struct * files)
 			}
 		}
 		file_list_unlock();
-
-		/* Reset controlling tty. */
-		if (drop_tty)
-			proc_set_tty(current, NULL);
 	}
 	mutex_unlock(&tty_mutex);
 

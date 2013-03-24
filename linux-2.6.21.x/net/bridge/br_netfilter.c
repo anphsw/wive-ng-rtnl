@@ -484,7 +484,7 @@ static unsigned int br_nf_pre_routing(unsigned int hook, struct sk_buff **pskb,
 {
 	struct iphdr *iph;
 	struct sk_buff *skb = *pskb;
-	__u32 len;
+	__u32 len = 0;
 
 	if ((skb = skb_share_check(skb, GFP_ATOMIC)) == NULL)
 		return NF_STOLEN;

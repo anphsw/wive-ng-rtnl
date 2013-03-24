@@ -104,7 +104,7 @@ static inline bool dst_cmp(const struct dsthash_ent *ent,
 static u_int32_t
 hash_dst(const struct xt_hashlimit_htable *ht, const struct dsthash_dst *dst)
 {
-	u_int32_t hash = HASH_2WORDS((const u32 *)dst,
+	u_int32_t hash = jhash2((const u32 *)dst,
 				sizeof(*dst)/sizeof(u32),
 				ht->rnd);
 	/*
@@ -429,7 +429,9 @@ hashlimit_init_dst(const struct xt_hashlimit_htable *hinfo,
 	switch (nexthdr) {
 	case IPPROTO_TCP:
 	case IPPROTO_UDP:
+#ifndef CONFIG_UDP_LITE_DISABLE
 	case IPPROTO_UDPLITE:
+#endif
 	case IPPROTO_SCTP:
 	case IPPROTO_DCCP:
 		ports = skb_header_pointer(skb, protoff, sizeof(_ports),

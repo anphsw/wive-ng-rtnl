@@ -73,6 +73,17 @@ struct dst_entry
 	struct  dst_ops	        *ops;
 
 	unsigned long		lastuse;
+	/*
+	 * Align __refcnt to a 64 bytes alignment
+	 * (L1_CACHE_SIZE would be too much)
+	 */
+#ifdef CONFIG_64BIT
+	long			__pad_to_align_refcnt[2];
+#endif
+	/*
+	 * __refcnt wants to be on a different cache line from
+	 * input/output/ops or performance tanks badly
+	 */
 	atomic_t		__refcnt;	/* client references	*/
 	int			__use;
 	union {
@@ -160,7 +171,9 @@ static inline void dst_hold(struct dst_entry * dst)
          * If your kernel compilation stops here, please check
          * __pad_to_align_refcnt declaration in struct dst_entry
          */
+#ifdef CONFIG_64BIT
         BUILD_BUG_ON(offsetof(struct dst_entry, __refcnt) & 63);
+#endif
 	atomic_inc(&dst->__refcnt);
 }
 

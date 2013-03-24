@@ -2398,7 +2398,7 @@ static struct sk_buff *fill_packet_ipv4(struct net_device *odev,
 	skb->dev = odev;
 	skb->pkt_type = PACKET_HOST;
 	skb->nh.iph = iph;
-	skb->h.uh = udph;
+	skb->h.raw = (unsigned char *)udph;
 
 	if (pkt_dev->nfrags <= 0)
 		pgh = (struct pktgen_hdr *)skb_put(skb, datalen);
@@ -2739,7 +2739,7 @@ static struct sk_buff *fill_packet_ipv6(struct net_device *odev,
 	skb->dev = odev;
 	skb->pkt_type = PACKET_HOST;
 	skb->nh.ipv6h = iph;
-	skb->h.uh = udph;
+	skb->h.raw = (unsigned char *)udph;
 
 	if (pkt_dev->nfrags <= 0)
 		pgh = (struct pktgen_hdr *)skb_put(skb, datalen);

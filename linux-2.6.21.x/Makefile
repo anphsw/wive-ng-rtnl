@@ -1,8 +1,16 @@
 VERSION = 2
 PATCHLEVEL = 6
 SUBLEVEL = 21
-EXTRAVERSION = .29
+EXTRAVERSION = .30
 NAME = Nocturnal Monster Puppy
+
+#########################################################################################################
+# tune locale to eng
+#########################################################################################################
+LANG=C
+LC_COLLATE=C
+LC_MESSAGES=C
+LC_ALL=C
 
 # Default make flags
 MAKEFLAGS     = -rR --no-print-directory

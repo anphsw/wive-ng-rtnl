@@ -190,7 +190,7 @@ int xfrm4_udp_encap_rcv(struct sock *sk, struct sk_buff *skb)
 		return 1;
 
 	/* Now we can get the pointers */
-	uh =  skb->h.uh;
+	uh = udp_hdr(skb);
 	udpdata = (__u8 *)uh + sizeof(struct udphdr);
 	udpdata32 = (__be32 *)udpdata;
 

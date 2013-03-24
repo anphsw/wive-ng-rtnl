@@ -515,8 +515,8 @@ __init void prom_init(void)
 
 #ifdef CONFIG_UBOOT_CMDLINE
 	prom_argc = fw_arg0;
-	_prom_argv = fw_arg1;
-	_prom_envp = fw_arg2;
+	_prom_argv = (int *)fw_arg1;
+	_prom_envp = (int *)fw_arg2;
 #endif
 	prom_init_cmdline();
 	prom_init_sysclk();

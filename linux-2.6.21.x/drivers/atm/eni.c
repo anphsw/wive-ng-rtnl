@@ -536,7 +536,6 @@ static int rx_aal0(struct atm_vcc *vcc)
 		return 0;
 	}
 	skb_put(skb,length);
-	skb_set_timestamp(skb, &eni_vcc->timestamp);
 	DPRINTK("got len %ld\n",length);
 	if (do_rx_dma(vcc,skb,1,length >> 2,length >> 2)) return 1;
 	eni_vcc->rxing++;
