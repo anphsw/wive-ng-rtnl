@@ -695,6 +695,7 @@ menu "Loadable module support"
 
 config MODULES
 	bool "Enable loadable module support"
+	default y
 	help
 	  Kernel modules are small pieces of compiled code which can
 	  be inserted in the running kernel, rather than being
@@ -715,6 +716,7 @@ config MODULES
 
 config MODULE_UNLOAD
 	bool "Module unloading"
+	default y
 	depends on MODULES
 	help
 	  Without this option you will not be able to unload any
@@ -757,6 +759,7 @@ config MODULE_SRCVERSION_ALL
 
 config KMOD
 	bool "Automatic kernel module loading"
+	default y
 	depends on MODULES
 	help
 	  Normally when you have selected some parts of the kernel to

@@ -2,6 +2,7 @@ menu "RALINK Flash Type support."
 
 config MTD_RALINK
        bool "Ralink MTD support"
+       default y
        depends on MTD
 
 config MTD_NOR_RALINK

@@ -468,7 +468,7 @@ static inline int emulate_load_store_insn(struct pt_regs *regs,
 		goto sigill;
 	}
 
-#ifdef CONFIG_PROC_FS
+#ifdef CONFIG_DEBUG_FS
 	unaligned_instructions++;
 #endif
 

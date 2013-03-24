@@ -6,6 +6,7 @@ menu "Networking"
 
 config NET
 	bool "Networking support"
+	default y
 	---help---
 	  Unless you really know what you are doing, you should say Y here.
 	  The reason is that some programs need kernel networking support even
@@ -34,6 +35,7 @@ source "net/iucv/Kconfig"
 
 config INET
 	bool "TCP/IP networking"
+	default y
 	---help---
 	  These are the protocols used on the Internet and on most local
 	  Ethernets. It is highly recommended to say Y here (this will enlarge

@@ -4,6 +4,7 @@ menu "Memory Technology Devices (MTD)"
 
 config MTD
 	tristate "Memory Technology Device (MTD) support"
+	default y
 	help
 	  Memory Technology Devices are flash, RAM and similar chips, often
 	  used for solid state file systems on embedded devices. This option
@@ -38,6 +39,7 @@ config MTD_CONCAT
 
 config MTD_PARTITIONS
 	bool "MTD partitioning support"
+	default y
 	depends on MTD
 	help
 	  If you have a device which needs to divide its flash chip(s) up
