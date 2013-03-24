@@ -1,6 +1,7 @@
 #
 # Automatically generated make config: don't edit
-# Linux kernel version: 2.6.21.28
+# Linux kernel version: 2.6.21.30
+# Mon Mar 25 00:27:19 2013
 #
 CONFIG_MIPS=y
 
@@ -794,11 +795,6 @@ CONFIG_PPTP=m
 CONFIG_RALINK_GPIO=y
 CONFIG_RALINK_GPIO_LED=y
 CONFIG_RALINK_GPIO_LED_VPN=y
-# CONFIG_RALINK_GPIOMODE_GE1 is not set
-# CONFIG_RALINK_GPIOMODE_GE2 is not set
-# CONFIG_RALINK_GPIOMODE_PCI is not set
-# CONFIG_RALINK_GPIOMODE_LNA_G is not set
-# CONFIG_RALINK_GPIOMODE_LNA_A is not set
 # CONFIG_RALINK_GPIOMODE_MDIO is not set
 # CONFIG_RALINK_GPIOMODE_JTAG is not set
 # CONFIG_RALINK_GPIOMODE_UARTL is not set
