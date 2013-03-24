@@ -16,12 +16,6 @@ if [ "$CONFIG_RALINK_RT3052_MP2" = "y" ]; then
 	iwpriv "$1" set HiPower=0
     fi
 fi
-# Enable MIMO PowerSave and set LNA gain to default
-if [ "$HT_MIMOPSMode" = "1" ]; then
-    iwpriv "$1" set HtMimoPs=1
-else
-    iwpriv "$1" set HtMimoPs=0
-fi
 ########################################STAMODE param########################################
 if [ "$OperationMode" = "2" ]; then
     if [ "$AutoConnect" = "1" ]; then
