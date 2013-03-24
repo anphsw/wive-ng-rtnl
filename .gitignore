@@ -220,3 +220,5 @@ romfs
 /toolchain/tmp/mipsel-linux-uclibc-toolchain/include/*
 /toolchain/tmp/mipsel-linux-uclibc-toolchain/uClibc-0.9.28/*
 /user/miniupnp/config.h
+/linux-2.6.21.x/include/linux/autoconf.h
+/linux-2.6.21.x/include/linux/utsrelease.h
