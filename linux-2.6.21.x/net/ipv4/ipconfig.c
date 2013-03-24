@@ -404,12 +404,12 @@ static struct packet_type rarp_packet_type __initdata = {
 	.func =	ic_rarp_recv,
 };
 
-static inline void ic_rarp_init(void)
+static inline void __init ic_rarp_init(void)
 {
 	dev_add_pack(&rarp_packet_type);
 }
 
-static inline void ic_rarp_cleanup(void)
+static inline void __init ic_rarp_cleanup(void)
 {
 	dev_remove_pack(&rarp_packet_type);
 }
@@ -660,7 +660,7 @@ static void __init ic_bootp_init_ext(u8 *e)
 /*
  *  Initialize the DHCP/BOOTP mechanism.
  */
-static inline void ic_bootp_init(void)
+static inline void __init ic_bootp_init(void)
 {
 	int i;
 
@@ -674,7 +674,7 @@ static inline void ic_bootp_init(void)
 /*
  *  DHCP/BOOTP cleanup.
  */
-static inline void ic_bootp_cleanup(void)
+static inline void __init ic_bootp_cleanup(void)
 {
 	dev_remove_pack(&bootp_packet_type);
 }
