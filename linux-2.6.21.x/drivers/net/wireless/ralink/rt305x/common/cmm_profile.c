@@ -2005,6 +2005,23 @@ static void HTParametersHook(
 	{
 		switch (simple_strtol(pValueStr, 0, 10))
 		{
+#ifdef CONFIG_RALINK_RT3052
+			case 1:
+				pAd->CommonCfg.TxStream = 1;
+				break;
+#ifdef CONFIG_RALINK_RT3052_2T2R
+			case 2:
+				pAd->CommonCfg.TxStream = 2;
+				break;
+#endif
+			default:
+				break;
+#ifdef CONFIG_RALINK_RT3052_2T2R
+				pAd->CommonCfg.TxStream = 2;
+#else
+				pAd->CommonCfg.TxStream = 1;
+#endif
+#else
 			case 1:
 				pAd->CommonCfg.TxStream = 1;
 				break;
@@ -2014,10 +2031,10 @@ static void HTParametersHook(
 			case 3: // 3*3
 			default:
 				pAd->CommonCfg.TxStream = 3;
-
 				if (pAd->MACVersion < RALINK_2883_VERSION)
 					pAd->CommonCfg.TxStream = 2; // only 2 tx streams for RT2860 series
 				break;
+#endif
 		}
 		DBGPRINT(RT_DEBUG_TRACE, ("HT: Tx Stream = %d\n", pAd->CommonCfg.TxStream));
 	}
@@ -2026,6 +2043,23 @@ static void HTParametersHook(
 	{
 		switch (simple_strtol(pValueStr, 0, 10))
 		{
+#ifdef CONFIG_RALINK_RT3052
+			case 1:
+				pAd->CommonCfg.RxStream = 1;
+				break;
+#ifdef CONFIG_RALINK_RT3052_2T2R
+			case 2:
+				pAd->CommonCfg.RxStream = 2;
+				break;
+#endif
+			default:
+#ifdef CONFIG_RALINK_RT3052_2T2R
+				pAd->CommonCfg.RxStream = 2;
+#else
+				pAd->CommonCfg.RxStream = 1;
+#endif
+				break;
+#else
 			case 1:
 				pAd->CommonCfg.RxStream = 1;
 				break;
@@ -2039,6 +2073,7 @@ static void HTParametersHook(
 				if (pAd->MACVersion < RALINK_2883_VERSION)
 					pAd->CommonCfg.RxStream = 2; // only 2 rx streams for RT2860 series
 				break;
+#endif
 		}
 		DBGPRINT(RT_DEBUG_TRACE, ("HT: Rx Stream = %d\n", pAd->CommonCfg.RxStream));
 	}
