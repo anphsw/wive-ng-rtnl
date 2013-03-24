@@ -77,7 +77,7 @@ ifdef UCLINUX_BUILD_LIB
 ifdef CONFIG_LIB_DEBUG
 	CFLAGS  :=  $(if $(LOPT),$(LOPT),-O1) -g
 else
-	CFLAGS  :=  $(if $(LOPT),$(LOPT),-Os) -fomit-frame-pointer -fno-stack-protector
+	CFLAGS  :=  $(if $(LOPT),$(LOPT),-Os) -fomit-frame-pointer -fno-stack-protector -fno-conserve-stack
 endif
 ifdef CONFIG_LIB_SMALLSIZE
 	# Defeat .eh_frame bloat (~25% smaller binary)
