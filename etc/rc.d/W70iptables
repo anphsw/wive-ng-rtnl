@@ -582,7 +582,7 @@ startv6() {
 	ip6tables -A FORWARD -i $lan_if -j ACCEPT
 }
 
-stoptv6() {
+stopv6() {
 	$LOG "Clear iptables rules fo ipv6 and set default actions."
 	ip6tables -F > /dev/null 2>&1
 	ip6tables -t filter -F > /dev/null 2>&1
