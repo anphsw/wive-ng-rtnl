@@ -93,10 +93,10 @@ function loadStatistics()
 
 <div style="display:none;" id="fastpath_warning">
 <p><span style="color: #ff0000;"><b>CAUTION!&nbsp;</b></span>
-NAT fastpath option is turned into '<b>Hardware NAT Fastpath</b>'.</p>
+NAT fastpath option is turned into '<b>Hardware NAT offload mode</b>'.</p>
 <p>For some technical and software reasons there is no guarantee that gathered statistics for
-interfaces in '<b>Hardware NAT Fastpath</b>' mode is correct now.</p>
-<p>To get correct statistics you need to shut down '<b>Hardware NAT Fastpath</b>' option on
+interfaces in '<b>Hardware NAT offload mode</b>' mode is correct now.</p>
+<p>To get correct statistics you need to shut down '<b>Hardware NAT offload mode</b>' option on
 <a href="/services/misc.asp#nat_fastpath_ref">MISC&nbsp;Services</a> configuration page.</p>
 </div>
 <hr>

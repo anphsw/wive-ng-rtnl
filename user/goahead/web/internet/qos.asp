@@ -51,8 +51,8 @@ function bodyOnLoad(form)
 <table class="body"><tr><td>
 <h1 id="QoSTitleStr">Quality of Service Settings </h1>
 <p id="QoSIntroStr"> Here you can setup rules to provide desired Quality of Service for specific applications.</p>
-<p>For correct operation of QoS (mode Ralink, Priority-Based and Complex) automatically turning off <b>NAT Fastpath</b>.
-Please note that turning off <b>NAT Fastpath</b> will increase CPU usage up to 50%.</p>
+<p>For correct operation of QoS (mode Ralink, Priority-Based and Complex) automatically turning off <b>NAT offload mode</b>.
+Please note that turning off <b>NAT offload mode</b> will increase CPU usage up to 50%.</p>
 <hr>
 
 <form method="post" name="QoSSetup" action="/goform/QoSSetup">

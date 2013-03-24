@@ -44,12 +44,12 @@ function initValue()
 
 <div style="display:none;" id="fastpath_warning">
 <p><span style="color: #ff0000;"><b>CAUTION!&nbsp;</b></span>
-<b>NAT Fastpath</b> option is turned on.</p>
-<p>Due to some technical reasons it's not possible to gather correct statistics for NAT Fastpath mode now.</p>
+<b>NAT offload mode</b> option is turned on.</p>
+<p>Due to some technical reasons it's not possible to gather correct statistics for NAT offload mode mode now.</p>
 <p>That's why IPT accounting configuration ability is now locked.</p>
-<p>To get correct statistics you need to shut down <b>NAT Fastpath</b> option on the
+<p>To get correct statistics you need to shut down <b>NAT offload mode</b> option on the
 <a href="/services/misc.asp#nat_fastpath_ref">MISC&nbsp;Services</a> configuration page.</p>
-<p>Please note that turning off <b>NAT Fastpath</b> will increase CPU usage up to 50%.</p>
+<p>Please note that turning off <b>NAT offload mode</b> will increase CPU usage up to 50%.</p>
 </div>
 
 <form action="/goform/formIptAccounting" method="POST" name="formIptAccounting" id="fastpath_form">
