@@ -1341,10 +1341,10 @@
 #define MCSFBK_MRQ	3	// response to both MRQ and unsolict mcs feedback
 
 // MIMO power safe 
-#define	MMPS_STATIC	0
+#define	MMPS_STATIC		0
 #define	MMPS_DYNAMIC		1
-#define   MMPS_RSV		2
-#define MMPS_ENABLE		3
+#define	MMPS_RSV		2
+#define	MMPS_ENABLE		3
 
 
 // A-MSDU size

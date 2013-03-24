@@ -96,9 +96,9 @@ CC = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc
 CCDEPMODE = depmode=none
 CFLAGS = -Os -Wno-system-headers
 CFLAG_CURL_SYMBOL_HIDING = -fvisibility=hidden
-CONFIGURE_OPTIONS = " '--host=mipsel-linux' '--build=i686-pc-linux-gnu' '--without-random' '--without-ssl' '--disable-debug' '--disable-curldebug' '--disable-manual' '--disable-dependency-tracking' '--disable-verbose' '--disable-rtsp' '--prefix=/opt/Wive-RTNL/lib/libcurl/filesystem' 'build_alias=i686-pc-linux-gnu' 'host_alias=mipsel-linux' 'CC=/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc' 'CFLAGS=-Os' 'LDFLAGS= -L/opt/Wive-RTNL/lib/zlib -L/opt/Wive-RTNL/user/openssl' 'CPPFLAGS= -Wall -Wstrict-prototypes -Wno-trigraphs  -mips32r2 -march=mips32r2 -fno-stack-protector -fno-builtin -nostdinc -D_LIBC -I./include -I.  -Os -funit-at-a-time  -ffast-math -fforce-addr -fno-stack-protector -isystem /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.4.7/include -DNDEBUG -fPIC -Os -I/opt/Wive-RTNL/linux/include -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL/lib/zlib -I/opt/Wive-RTNL/user/openssl'"
+CONFIGURE_OPTIONS = " '--host=mipsel-linux' '--build=i686-pc-linux-gnu' '--without-random' '--without-ssl' '--disable-debug' '--disable-curldebug' '--disable-manual' '--disable-dependency-tracking' '--disable-verbose' '--disable-rtsp' '--prefix=/opt/Wive-RTNL/lib/libcurl/filesystem' 'build_alias=i686-pc-linux-gnu' 'host_alias=mipsel-linux' 'CC=/opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc' 'CFLAGS=-Os' 'LDFLAGS= -L/opt/Wive-RTNL/lib/zlib -L/opt/Wive-RTNL/user/openssl' 'CPPFLAGS= -Wall -Wstrict-prototypes -Wno-trigraphs  -mips32r2 -march=mips32r2 -fno-stack-protector -fno-builtin -nostdinc -D_LIBC -I./include -I.  -Os -funit-at-a-time  -ffast-math -fforce-addr -fno-stack-protector -isystem /opt/Wive-RTNL/toolchain-4.8.0/bin/../lib/gcc/mipsel-linux-uclibc/4.8.0/include -DNDEBUG -fPIC -Os -I/opt/Wive-RTNL/linux/include -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL/lib/zlib -I/opt/Wive-RTNL/user/openssl'"
 CPP = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc -E
-CPPFLAGS = -Wall -Wstrict-prototypes -Wno-trigraphs -mips32r2 -march=mips32r2 -fno-stack-protector -fno-builtin -nostdinc -D_LIBC -isystem ./include -isystem . -Os -funit-at-a-time -ffast-math -fforce-addr -fno-stack-protector -isystem /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.4.7/include -DNDEBUG -fPIC -Os -isystem /opt/Wive-RTNL/linux/include -isystem /opt/Wive-RTNL/lib/include -isystem /opt/Wive-RTNL/lib/zlib -isystem /opt/Wive-RTNL/user/openssl
+CPPFLAGS = -Wall -Wstrict-prototypes -Wno-trigraphs -mips32r2 -march=mips32r2 -fno-stack-protector -fno-builtin -nostdinc -D_LIBC -isystem ./include -isystem . -Os -funit-at-a-time -ffast-math -fforce-addr -fno-stack-protector -isystem /opt/Wive-RTNL/toolchain-4.8.0/bin/../lib/gcc/mipsel-linux-uclibc/4.8.0/include -DNDEBUG -fPIC -Os -isystem /opt/Wive-RTNL/linux/include -isystem /opt/Wive-RTNL/lib/include -isystem /opt/Wive-RTNL/lib/zlib -isystem /opt/Wive-RTNL/user/openssl
 CPPFLAG_CURL_STATICLIB = 
 CURLVERSION = 7.29.0
 CURL_CA_BUNDLE = "/etc/pki/tls/certs/ca-bundle.crt"
@@ -135,7 +135,7 @@ FGREP = /bin/grep -F
 GREP = /bin/grep
 HAVE_GNUTLS_SRP = 
 HAVE_LDAP_SSL = 1
-HAVE_LIBZ = 
+HAVE_LIBZ = 1
 HAVE_NSS_INITCONTEXT = 
 HAVE_SSLEAY_SRP = 
 IDN_ENABLED = 
@@ -148,12 +148,12 @@ IPV6_ENABLED =
 KRB4_ENABLED = 
 LD = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-ld
 LDFLAGS = -L/opt/Wive-RTNL/lib/zlib -L/opt/Wive-RTNL/user/openssl
-LIBCURL_LIBS = 
+LIBCURL_LIBS = -lz
 LIBMETALINK_CPPFLAGS = 
 LIBMETALINK_LDFLAGS = 
 LIBMETALINK_LIBS = 
 LIBOBJS = 
-LIBS = 
+LIBS = -lz
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
 LIPO = 
 LN_S = ln -s
@@ -191,7 +191,7 @@ SET_MAKE =
 SHELL = /bin/sh
 SSL_ENABLED = 
 STRIP = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-strip
-SUPPORT_FEATURES = 
+SUPPORT_FEATURES = libz
 SUPPORT_PROTOCOLS = DICT FILE FTP GOPHER HTTP IMAP POP3 SMTP TELNET TFTP
 USE_ARES = 
 USE_AXTLS = 
@@ -210,7 +210,7 @@ USE_WINDOWS_SSPI =
 VERSION = -
 VERSIONED_FLAVOUR = 
 VERSIONNUM = 071d00
-ZLIB_LIBS = 
+ZLIB_LIBS = -lz
 abs_builddir = /opt/Wive-RTNL/lib/libcurl/tests/certs/scripts
 abs_srcdir = /opt/Wive-RTNL/lib/libcurl/tests/certs/scripts
 abs_top_builddir = /opt/Wive-RTNL/lib/libcurl

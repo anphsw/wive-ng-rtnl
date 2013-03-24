@@ -1520,19 +1520,17 @@ static void HTParametersHook(
         DBGPRINT(RT_DEBUG_TRACE, ("HT: Protection  = %s\n", (Value==0) ? "Disable" : "Enable"));
     }
 
-
     if (RTMPGetKeyParameter("HT_MIMOPSMode", pValueStr, 25, pInput, TRUE))
     {
         Value = simple_strtol(pValueStr, 0, 10);
-        if (Value > MMPS_ENABLE)
+	/* Current only always enable/disable support */
+        if ((Value == 0) || (Value > MMPS_ENABLE))
         {
-			pAd->CommonCfg.BACapability.field.MMPSmode = MMPS_ENABLE;
+	    pAd->CommonCfg.BACapability.field.MMPSmode = MMPS_STATIC;
         }
         else
         {
-            //TODO: add mimo power saving mechanism
             pAd->CommonCfg.BACapability.field.MMPSmode = MMPS_ENABLE;
-			//pAd->CommonCfg.BACapability.field.MMPSmode = Value;
         }
         DBGPRINT(RT_DEBUG_TRACE, ("HT: MIMOPS Mode  = %d\n", (INT) Value));
     }
