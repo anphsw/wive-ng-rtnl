@@ -104,77 +104,73 @@ case "$1" in
     ########################################################################################################
     # DGW/MSROUTES/STATICROUTES/CLASSFULLROUTES/USERROUTES
     ########################################################################################################
-
-	# Get default gateway
-	if [ -n "$router" ]; then
-	    # default route with metric 0 is through $iface?
-	    dgw_otherif=`ip route | grep "default" | grep -v "dev $interface " | sed 's,.*dev \([^ ]*\) .*,\1,g'`
-	    if [ -z "$dgw_otherif" ]; then
-		# if ip not changed not need delete old default route
-		# this is workaroud for ppp used tunnels up over not default routes
-		if [ "$FULL_RENEW" = "1" ] && [ "$REPLACE_DGW" = "1" ]; then
-		    $LOG "Deleting default route dev $interface"
-		    while ip route del default dev $interface ; do
-			:
+        #
+	# update routes if first exec script or new ip selected or not set RouteUpOnce=1
+	#
+	if [ "$RouteUpOnce" = "0" ] || [ "$FULL_RENEW" = "1" ] || [ ! -f /tmp/routes_applied ]; then
+	    # Get default gateway
+	    if [ -n "$router" ]; then
+		# default route with metric 0 is through $iface?
+		dgw_otherif=`ip route | grep "default" | grep -v "dev $interface " | sed 's,.*dev \([^ ]*\) .*,\1,g'`
+		if [ -z "$dgw_otherif" ]; then
+		    # if ip not changed not need delete old default route
+		    # this is workaroud for ppp used tunnels up over not default routes
+		    if [ "$FULL_RENEW" = "1" ] && [ "$REPLACE_DGW" = "1" ]; then
+			$LOG "Deleting default route dev $interface"
+			while ip route del default dev $interface ; do
+			    :
+			done
+		    fi
+		    # always parse router variable
+		    metric=0
+		    for i in $router ; do
+			$LOG "Add route $i/32:0.0.0.0 dev $interface metric $metric to route list."
+			ROUTELIST_FGW="$ROUTELIST_FGW $i/32:0.0.0.0:$interface:"
+			if [ "$REPLACE_DGW" = "1" ]; then
+			    $LOG "Add default:$i:$interface:$metric to route dgw list"
+			    ROUTELIST_DGW="$ROUTELIST_DGW default:$i:$interface:$metric"
+			    # save first dgw with metric=0 to use in corbina hack
+			    if [ "$metric" = "0" ]; then
+				echo $i > /tmp/default.gw
+				first_dgw="$i"
+			    fi
+			fi
+    			metric=`expr $metric + 1`
 		    done
 		fi
-
-		# always parse router variable
-		metric=0
-		for i in $router ; do
-		    $LOG "Add route $i/32:0.0.0.0 dev $interface metric $metric to route list."
-		    ROUTELIST_FGW="$ROUTELIST_FGW $i/32:0.0.0.0:$interface:"
-		    if [ "$REPLACE_DGW" = "1" ]; then
-			$LOG "Add default:$i:$interface:$metric to route dgw list"
-			ROUTELIST_DGW="$ROUTELIST_DGW default:$i:$interface:$metric"
-			# save first dgw with metric=0 to use in corbina hack
-			if [ "$metric" = "0" ]; then
-			    echo $i > /tmp/default.gw
-			    first_dgw="$i"
-			fi
+	    fi
+	    # classful routes
+	    if [ -n "$routes" ]; then
+		for i in $routes; do
+		    NW=`echo $i | sed 's,/.*,,'`
+		    GW=`echo $i | sed 's,.*/,,'`
+		    shift 1
+		    MASK=`echo $NW | awk '{w=32; split($0,a,"."); \
+			for (i=4; i>0; i--) {if (a[i]==0) w-=8; else {\
+			while (a[i]%2==0) {w--; a[i]=a[i]/2}; break}\
+			}; print w }'`
+		    if [ "$GW" = "0.0.0.0" ] || [ -z "$GW" ]; then
+			ip route replace $NW/$MASK dev $interface
+		    else
+			ROUTELIST="$ROUTELIST $NW/$MASK:$GW:$interface:"
 		    fi
-    		    metric=`expr $metric + 1`
 		done
 	    fi
-	fi
-
-	# classful routes
-	if [ -n "$routes" ]; then
-	    for i in $routes; do
-		NW=`echo $i | sed 's,/.*,,'`
-		GW=`echo $i | sed 's,.*/,,'`
-		shift 1
-		MASK=`echo $NW | awk '{w=32; split($0,a,"."); \
-		    for (i=4; i>0; i--) {if (a[i]==0) w-=8; else {\
-		    while (a[i]%2==0) {w--; a[i]=a[i]/2}; break}\
-		    }; print w }'`
-		if [ "$GW" = "0.0.0.0" ] || [ -z "$GW" ]; then
-		    ip route replace $NW/$MASK dev $interface
-		else
-		    ROUTELIST="$ROUTELIST $NW/$MASK:$GW:$interface:"
-		fi
-	    done
-	fi
-
-	# MSSTATIC ROUTES AND STATIC ROUTES (rfc3442)
-	ROUTES="$staticroutes $msstaticroutes"
-
-	if [ "$ROUTES" != " " ]; then
-	    set $ROUTES
-	    while [ -n "$1" ]; do
-		NW="$1"
-		GW="$2"
-		shift 2
-		if [ "$GW" = "0.0.0.0" ] || [ -z "$GW" ]; then
-		    ip route replace $NW dev $interface
-		else
-		    ROUTELIST="$ROUTELIST $NW:$GW:$interface:"
-		fi
-	    done
-	fi
-
-	# update routes if first exec script or new ip selected or not set RouteUpOnce=1
-	if [ "$RouteUpOnce" = "0" ] || [ "$FULL_RENEW" = "1" ] || [ ! -f /tmp/routes_applied ]; then
+	    # MSSTATIC ROUTES AND STATIC ROUTES (rfc3442)
+	    ROUTES="$staticroutes $msstaticroutes"
+	    if [ "$ROUTES" != " " ]; then
+		set $ROUTES
+		while [ -n "$1" ]; do
+		    NW="$1"
+		    GW="$2"
+		    shift 2
+		    if [ "$GW" = "0.0.0.0" ] || [ -z "$GW" ]; then
+			ip route replace $NW dev $interface
+		    else
+			ROUTELIST="$ROUTELIST $NW:$GW:$interface:"
+		    fi
+		done
+	    fi
 	    # first add stub for routesm next add static routes and
 	    # default gateways need replace/add at end route parces
 	    # replace dgw must be replaced only if ip selected
@@ -202,6 +198,7 @@ case "$1" in
 		$LOG "Apply user routes."
 		/etc/routes_replace replace $lan_if $interface
 	    fi
+	    # set routes applied flag
 	    touch /tmp/routes_applied
 	fi
 
