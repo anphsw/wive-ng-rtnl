@@ -9,7 +9,6 @@
 #ifndef _LINUX_SMB_FS_H
 #define _LINUX_SMB_FS_H
 
-#include <linux/jiffies.h>
 #include <linux/smb.h>
 
 /*
@@ -23,6 +22,7 @@
 
 
 #ifdef __KERNEL__
+#include <linux/jiffies.h>
 #include <linux/smb_fs_i.h>
 #include <linux/smb_fs_sb.h>
 

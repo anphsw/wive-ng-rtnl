@@ -150,8 +150,6 @@ struct arphdr {
 };
 
 #ifdef __KERNEL__
-#include <linux/skbuff.h>
-
 static inline struct arphdr *arp_hdr(const struct sk_buff *skb)
 {
 	return (struct arphdr *)skb_network_header(skb);
