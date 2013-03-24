@@ -595,7 +595,7 @@ startv6() {
 	ip6tables -P OUTPUT ACCEPT > /dev/null 2>&1
 }
 
-stop6() {
+stopv6() {
 	$LOG "Add iptables rules fo ipv6"
 	# wan accept and mss fix rules
         ip6tables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
