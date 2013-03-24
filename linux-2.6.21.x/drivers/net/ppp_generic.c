@@ -843,9 +843,7 @@ static int ppp_unattached_ioctl(struct ppp_file *pf, struct file *file,
 	case PPPIOCATTACH:
 		/* Attach to an existing ppp unit */
 		if (get_user(unit, p))
-		{
 			break;
-		}
 		mutex_lock(&all_ppp_mutex);
 		err = -ENXIO;
 		ppp = ppp_find_unit(unit);
@@ -967,12 +965,12 @@ ppp_start_xmit(struct sk_buff *skb, struct net_device *dev)
 
 	skb_queue_tail(&ppp->file.xq, skb);
 	ppp_xmit_process(ppp);
-	return 0;
+	return NETDEV_TX_OK;
 
  outf:
 	kfree_skb(skb);
 	++ppp->stats.tx_dropped;
-	return 0;
+	return NETDEV_TX_OK;
 }
 
 static struct net_device_stats *
@@ -1523,7 +1521,7 @@ static int ppp_mp_explode(struct ppp *ppp, struct sk_buff *skb)
 /*
  * Try to send data out on a channel.
  */
-static inline void
+static void
 ppp_channel_push(struct channel *pch)
 {
 	struct sk_buff *skb;
@@ -1587,7 +1585,7 @@ void
 ppp_input(struct ppp_channel *chan, struct sk_buff *skb)
 {
 	struct channel *pch = chan->ppp;
-	unsigned int proto;
+	int proto;
 
 	if (!pch) {
 		kfree_skb(skb);
@@ -1681,8 +1679,7 @@ ppp_receive_nonmp_frame(struct ppp *ppp, struct sk_buff *skb)
 	struct sk_buff *ns;
 	int len;
 #endif
-	int npi;
-	unsigned int proto;
+	int npi, proto;
 
 	/*
 	 * Decompress the frame, if compressed.

@@ -1190,17 +1190,9 @@ static inline void skb_set_mac_header(struct sk_buff *skb, const int offset)
     defined (CONFIG_RALINK_RT2883) || defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT5350) || \
     defined (CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_RT6352)
 /* ralink depended hacks */
-#if defined (CONFIG_PPTP) || defined (CONFIG_PPTP_MODULE) || defined(CONFIG_PPPOL2TP) || defined(CONFIG_PPPOL2TP_MODULE)
-/* This is hack need for allow tranzit overheaded protocols to PPE and decrease allocs skbs in path */
 #define NET_SKB_PAD		80
 #define NET_SKB_PAD_ORIG	max(32, L1_CACHE_BYTES)
 #else
-/* This is hack need for RalinkSOC optimal pad for Ralink for no overheaded proto tcp/udp/etc withot ppp based tuns support */
-#define NET_SKB_PAD		max(16, L1_CACHE_BYTES)
-#define NET_SKB_PAD_ORIG	NET_SKB_PAD
-#endif
-#else
-/* This is original */
 #define NET_SKB_PAD		max(32, L1_CACHE_BYTES)
 #define NET_SKB_PAD_ORIG	NET_SKB_PAD
 #endif
