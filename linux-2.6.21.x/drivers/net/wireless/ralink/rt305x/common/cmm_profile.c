@@ -1927,9 +1927,12 @@ static void HTParametersHook(
 		{
 			for (i = 0, Bufptr = rstrtok(pValueStr,";"); (Bufptr && i < MAX_MBSSID_NUM); Bufptr = rstrtok(NULL,";"), i++) 	
 			{
-				Value = simple_strtol(Bufptr, 0, 10);			
-//				if ((Value >= 0 && Value <= 15) || (Value == 32))
+				Value = simple_strtol(Bufptr, 0, 10);
+#ifdef CONFIG_RALINK_RT3050_1T1R /* 0 - xx or 32 - AUTO */
+				if ((Value >= 0 && Value <= 15) || (Value == 32))  // 1*1
+#else
 				if ((Value >= 0 && Value <= 23) || (Value == 32)) // 3*3
+#endi
 				{
 					pAd->ApCfg.MBSSID[i].DesiredTransmitSetting.field.MCS  = Value;
 					DBGPRINT(RT_DEBUG_TRACE, ("(IF-ra%d) HT: MCS = %d\n", i, pAd->ApCfg.MBSSID[i].DesiredTransmitSetting.field.MCS));							
@@ -1937,9 +1940,9 @@ static void HTParametersHook(
 				else
 				{
 					pAd->ApCfg.MBSSID[i].DesiredTransmitSetting.field.MCS  = MCS_AUTO;
-					DBGPRINT(RT_DEBUG_TRACE, ("(IF-ra%d) HT: MCS is AUTO\n", i));							
-				}		
-			}		
+					DBGPRINT(RT_DEBUG_TRACE, ("(IF-ra%d) HT: MCS is AUTO\n", i));
+				}
+			}
 		}
 #endif // CONFIG_AP_SUPPORT //
 

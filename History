@@ -1413,8 +1413,9 @@
 5) kenrel: net: ipv6: fix array index in ip6_mc_add_src().<br>
 6) kernel: irq: Remove superfluous NULL pointer check in check_irq_resend().<br>
 7) kernel: wifi drivers: fix enable/disable mimops mode.<br>
-8) init.d: radvd: use real_wan_if_ip for support 6to4 over ppp based tunnels.<br>
-9) init.d: iptables: consolidate v4/v6 rules in one script.<bt>
+8) kernel: wifi drivers: limit mcs selection for RT3050 based devices.<br>
+9) init.d: radvd: use real_wan_if_ip for support 6to4 over ppp based tunnels.<br>
+10) init.d: iptables: consolidate v4/v6 rules in one script.<bt>
 
 <br>
 <br>
