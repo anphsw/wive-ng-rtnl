@@ -1776,8 +1776,7 @@ ppp_receive_nonmp_frame(struct ppp *ppp, struct sk_buff *skb)
 		/* the filter instructions are constructed assuming
 		   a four-byte PPP header on each packet */
 		if (ppp->pass_filter || ppp->active_filter) {
-			if (skb_cloned(skb) &&
-			    pskb_expand_head(skb, 0, 0, GFP_ATOMIC))
+			if (skb_unclone(skb, GFP_ATOMIC))
 				goto err;
 
 			*skb_push(skb, 2) = 0;
@@ -2137,7 +2136,7 @@ ppp_mp_reconstruct(struct ppp *ppp)
 
 				skb->len += p->len;
 				skb->data_len += p->len;
-				skb->truesize += p->len;
+				skb->truesize += p->truesize;
 
 				if (p == tail)
 					break;
