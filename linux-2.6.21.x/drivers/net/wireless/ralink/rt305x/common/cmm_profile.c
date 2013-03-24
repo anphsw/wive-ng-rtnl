@@ -1956,7 +1956,6 @@ static void HTParametersHook(
 #else
 				if ((Value >= 0 && Value <= 23) || (Value == 32)) // 3*3
 #endif
-			if ((Value >= 0 && Value <= 23) || (Value == 32)) // 3*3
 		{
 				pAd->StaCfg.DesiredTransmitSetting.field.MCS  = Value;
 				pAd->StaCfg.bAutoTxRateSwitch = FALSE;
