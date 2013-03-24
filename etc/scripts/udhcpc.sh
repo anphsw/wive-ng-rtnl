@@ -192,7 +192,7 @@ case "$1" in
 	done
 	# add routes configured in web
 	if [ -f /etc/routes_replace ]; then
-	    $LOF "Apply user routes."
+	    $LOG "Apply user routes."
 	    /etc/routes_replace replace $lan_if $interface
 	fi
 	# Add route to multicast subnet
