@@ -70,9 +70,8 @@
 
 #include "kmap_skb.h"
 
-#if defined (CONFIG_RA_HW_NAT)  || defined (CONFIG_RA_HW_NAT_MODULE)
+#if defined (CONFIG_RA_HW_NAT) || defined (CONFIG_RA_HW_NAT_MODULE)
 #include "../net/nat/hw_nat/ra_nat.h"
-#include "../net/nat/hw_nat/frame_engine.h"
 extern int (*ra_sw_nat_hook_rx)(struct sk_buff *skb);
 #endif
 

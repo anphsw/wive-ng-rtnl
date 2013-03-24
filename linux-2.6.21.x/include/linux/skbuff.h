@@ -1186,18 +1186,23 @@ static inline void skb_set_mac_header(struct sk_buff *skb, const int offset)
  * NET_IP_ALIGN(2) + ethernet_header(14) + IP_header(20/40) + ports(8)
  */
 #ifndef NET_SKB_PAD
-
 #if defined (CONFIG_RALINK_RT2880) || defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3352) || \
     defined (CONFIG_RALINK_RT2883) || defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT5350) || \
     defined (CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_RT6352)
 /* ralink depended hacks */
 #if defined (CONFIG_PPTP) || defined (CONFIG_PPTP_MODULE) || defined(CONFIG_PPPOL2TP) || defined(CONFIG_PPPOL2TP_MODULE)
-#define NET_SKB_PAD	80 /* This is hack need for allow tranzit overheaded protocols to PPE and decrease allocs skbs in path */
+/* This is hack need for allow tranzit overheaded protocols to PPE and decrease allocs skbs in path */
+#define NET_SKB_PAD		80
+#define NET_SKB_PAD_ORIG	max(32, L1_CACHE_BYTES)
 #else
-#define NET_SKB_PAD	16 /* This is hack need for RalinkSOC optimal pad for Ralink for no overheaded proto tcp/udp/etc */
-#endif /* CONFIG_PPTP || CONFIG_PPTP_MODULE || CONFIG_PPPOL2TP || CONFIG_PPPOL2TP_MODULE */
+/* This is hack need for RalinkSOC optimal pad for Ralink for no overheaded proto tcp/udp/etc withot ppp based tuns support */
+#define NET_SKB_PAD		max(16, L1_CACHE_BYTES)
+#define NET_SKB_PAD_ORIG	NET_SKB_PAD
+#endif
 #else
-#define NET_SKB_PAD	max(32, L1_CACHE_BYTES)
+/* This is original */
+#define NET_SKB_PAD		max(32, L1_CACHE_BYTES)
+#define NET_SKB_PAD_ORIG	NET_SKB_PAD
 #endif
 #endif
 
@@ -1368,7 +1373,7 @@ static inline int __skb_cow(struct sk_buff *skb, unsigned int headroom,
                 delta = headroom - skb_headroom(skb);
 
         if (delta || cloned)
-                return pskb_expand_head(skb, ALIGN(delta, NET_SKB_PAD), 0,
+		return pskb_expand_head(skb, ALIGN(delta, NET_SKB_PAD_ORIG), 0,
                                         GFP_ATOMIC);
         return 0;
 }

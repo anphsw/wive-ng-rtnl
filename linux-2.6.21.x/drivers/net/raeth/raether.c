@@ -1253,7 +1253,7 @@ static int rt2880_eth_recv(struct net_device* dev)
 		}
 #endif /* CONFIG_RA_CLASSIFIER */
 
-#if defined (CONFIG_RA_HW_NAT)  || defined (CONFIG_RA_HW_NAT_MODULE)
+#if defined (CONFIG_RA_HW_NAT) || defined (CONFIG_RA_HW_NAT_MODULE)
 		FOE_MAGIC_TAG(rx_skb)= FOE_MAGIC_GE;
 		memcpy(FOE_INFO_START_ADDR(rx_skb)+2, &rx_ring[rx_dma_owner_idx].rxd_info4, sizeof(PDMA_RXD_INFO4_T));
 		FOE_ALG(rx_skb) = 0;

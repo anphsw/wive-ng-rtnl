@@ -69,8 +69,6 @@ static inline struct sppp *sppp_of(struct net_device *dev)
 #define PP_TIMO         0x04    /* cp_timeout routine active */
 #define PP_DEBUG	0x08
 
-#define PPP_MTU          1500    /* max. transmit unit */
-
 #define LCP_STATE_CLOSED        0       /* LCP state: closed (conf-req sent) */
 #define LCP_STATE_ACK_RCVD      1       /* LCP state: conf-ack received */
 #define LCP_STATE_ACK_SENT      2       /* LCP state: conf-ack sent */

@@ -63,9 +63,8 @@ extern int ralink_gpio_led_set(ralink_gpio_led_info ppp_led);
 static unsigned long ppp_prev_jiffies;
 #endif
 
-#if defined (CONFIG_RA_HW_NAT)  || defined (CONFIG_RA_HW_NAT_MODULE)
+#if defined (CONFIG_RA_HW_NAT) || defined (CONFIG_RA_HW_NAT_MODULE)
 #include "../../net/nat/hw_nat/ra_nat.h"
-#include "../../net/nat/hw_nat/frame_engine.h"
 extern int (*ra_sw_nat_hook_rx)(struct sk_buff *skb);
 #endif
 
@@ -861,8 +860,8 @@ static int ppp_unattached_ioctl(struct ppp_file *pf, struct file *file,
 	case PPPIOCATTCHAN:
 		if (get_user(unit, p))
 			break;
-		spin_lock_bh(&all_channels_lock);
 		err = -ENXIO;
+		spin_lock_bh(&all_channels_lock);
 		chan = ppp_find_channel(unit);
 		if (chan) {
 			atomic_inc(&chan->file.refcnt);
@@ -895,16 +894,23 @@ static const struct file_operations ppp_device_fops = {
 static int __init ppp_init(void)
 {
 	int err;
+
 	printk(KERN_INFO "PPP generic driver version " PPP_VERSION "\n");
 	err = register_chrdev(PPP_MAJOR, "ppp", &ppp_device_fops);
-	if (!err) {
-		ppp_class = class_create(THIS_MODULE, "ppp");
-		if (IS_ERR(ppp_class)) {
-			err = PTR_ERR(ppp_class);
-			goto out_chrdev;
-		}
-		device_create(ppp_class, NULL, MKDEV(PPP_MAJOR, 0), "ppp");
+	if (err) {
+	    printk(KERN_ERR "failed to register PPP device (%d)\n", err);
+	    goto out;
 	}
+
+	ppp_class = class_create(THIS_MODULE, "ppp");
+	if (IS_ERR(ppp_class)) {
+		err = PTR_ERR(ppp_class);
+		goto out_chrdev;
+	}
+
+	/* not a big deal if we fail here :-) */
+	device_create(ppp_class, NULL, MKDEV(PPP_MAJOR, 0), "ppp");
+
 #ifdef CONFIG_RALINK_GPIO_LED_VPN
 	printk(KERN_INFO "PPP vpn led has gpio %d\n", GPIO_VPN_LED1);
 	ppp_led.gpio = GPIO_VPN_LED1;
@@ -914,14 +920,13 @@ static int __init ppp_init(void)
 	ppp_led.rests = 1;
 	ppp_led.times = 1;
 #endif
-out:
-	if (err)
-		printk(KERN_ERR "failed to register PPP device (%d)\n", err);
-	return err;
+	return 0;
 
 out_chrdev:
 	unregister_chrdev(PPP_MAJOR, "ppp");
-	goto out;
+out:
+	return err;
+
 }
 
 /*
@@ -953,17 +958,9 @@ ppp_start_xmit(struct sk_buff *skb, struct net_device *dev)
 
 	/* Put the 2-byte PPP protocol number on the front,
 	   making sure there is room for the address and control fields. */
-	if (skb_headroom(skb) < PPP_HDRLEN) {
-		struct sk_buff *ns;
+	if (skb_cow_head(skb, PPP_HDRLEN))
+		goto outf;
 
-		ns = alloc_skb(skb->len + dev->hard_header_len, GFP_ATOMIC);
-		if (!ns)
-			goto outf;
-		skb_reserve(ns, dev->hard_header_len);
-		skb_copy_bits(skb, 0, skb_put(ns, skb->len), skb->len);
-		kfree_skb(skb);
-		skb = ns;
-	}
 	pp = skb_push(skb, 2);
 	proto = npindex_to_proto[npi];
 	put_unaligned_be16(proto, pp);
@@ -1032,7 +1029,7 @@ ppp_net_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 static void ppp_setup(struct net_device *dev)
 {
 	dev->hard_header_len = PPP_HDRLEN;
-	dev->mtu = PPP_MTU;
+	dev->mtu = PPP_MRU;
 	dev->addr_len = 0;
 	dev->tx_queue_len = 3;
 	dev->type = ARPHRD_PPP;
@@ -1048,19 +1045,20 @@ static void ppp_setup(struct net_device *dev)
  * Called to do any work queued up on the transmit side
  * that can now be done.
  */
-static void ppp_xmit_process(struct ppp *ppp)
+static void
+ppp_xmit_process(struct ppp *ppp)
 {
 	struct sk_buff *skb;
 
 	ppp_xmit_lock(ppp);
 	if (!ppp->closing) {
 		ppp_push(ppp);
-		while (ppp->xmit_pending == 0
-		       && (skb = skb_dequeue(&ppp->file.xq)) != 0)
+		while (!ppp->xmit_pending &&
+		       (skb = skb_dequeue(&ppp->file.xq)))
 			ppp_send_frame(ppp, skb);
 		/* If there's no work left to do, tell the core net
 		   code that we can accept some more. */
-		if (!(ppp->xmit_pending) && !(skb_peek(&ppp->file.xq)))
+		if (!ppp->xmit_pending && !skb_peek(&ppp->file.xq))
 			netif_wake_queue(ppp->dev);
 		else
 			netif_stop_queue(ppp->dev);
@@ -1073,9 +1071,11 @@ pad_compress_skb(struct ppp *ppp, struct sk_buff *skb)
 {
 	struct sk_buff *new_skb;
 	int len;
-	int new_skb_size = ppp->dev->mtu + ppp->xcomp->comp_extra;
-	int compressor_skb_size = new_skb_size + PPP_HDRLEN;
-	new_skb = alloc_skb(new_skb_size + ppp->dev->hard_header_len, GFP_ATOMIC);
+	int new_skb_size = ppp->dev->mtu +
+		ppp->xcomp->comp_extra + ppp->dev->hard_header_len;
+	int compressor_skb_size = ppp->dev->mtu +
+		ppp->xcomp->comp_extra + PPP_HDRLEN;
+	new_skb = alloc_skb(new_skb_size, GFP_ATOMIC);
 	if (!new_skb) {
 		if (net_ratelimit())
 			printk(KERN_ERR "PPP: no memory (comp pkt)\n");
@@ -1083,7 +1083,7 @@ pad_compress_skb(struct ppp *ppp, struct sk_buff *skb)
 	}
 	if (ppp->dev->hard_header_len > PPP_HDRLEN)
 		skb_reserve(new_skb, ppp->dev->hard_header_len - PPP_HDRLEN);
-	
+
 	/* compressor still expects A/C bytes in hdr */
 	len = ppp->xcomp->compress(ppp->xc_state, skb->data - 2,
 				   new_skb->data, skb->len + 2,
@@ -1123,7 +1123,7 @@ pad_compress_skb(struct ppp *ppp, struct sk_buff *skb)
 static void
 ppp_send_frame(struct ppp *ppp, struct sk_buff *skb)
 {
-	unsigned int proto = PPP_PROTO(skb);
+	int proto = PPP_PROTO(skb);
 #ifdef CONFIG_SLHC
 	struct sk_buff *new_skb;
 	int len;
@@ -1140,18 +1140,16 @@ ppp_send_frame(struct ppp *ppp, struct sk_buff *skb)
 		/* the filter instructions are constructed assuming
 		   a four-byte PPP header on each packet */
 		*skb_push(skb, 2) = 1;
-		if (ppp->pass_filter
-		    && sk_run_filter(skb, ppp->pass_filter,
-				     ppp->pass_len) == 0) {
+		if (ppp->pass_filter &&
+		    sk_run_filter(skb, ppp->pass_filter) == 0) {
 			if (ppp->debug & 1)
 				printk(KERN_DEBUG "PPP: outbound frame not passed\n");
 			kfree_skb(skb);
 			return;
 		}
 		/* if this packet passes the active filter, record the time */
-		if (!(ppp->active_filter
-		      && sk_run_filter(skb, ppp->active_filter,
-				       ppp->active_len) == 0))
+		if (!(ppp->active_filter &&
+		      sk_run_filter(skb, ppp->active_filter) == 0))
 			ppp->last_xmit = jiffies;
 		skb_pull(skb, 2);
 #else
@@ -1166,7 +1164,7 @@ ppp_send_frame(struct ppp *ppp, struct sk_buff *skb)
 	switch (proto) {
 	case PPP_IP:
 #ifdef CONFIG_SLHC
-		if (ppp->vj == 0 || (ppp->flags & SC_COMP_TCP) == 0)
+		if (!ppp->vj || (ppp->flags & SC_COMP_TCP) == 0)
 			break;
 		/* try to do VJ TCP header compression */
 		new_skb = alloc_skb(skb->len + ppp->dev->hard_header_len - 2,
@@ -1207,7 +1205,7 @@ ppp_send_frame(struct ppp *ppp, struct sk_buff *skb)
 	}
 
 	/* try to do packet compression */
-	if ((ppp->xstate & SC_COMP_RUN) && ppp->xc_state != 0 &&
+	if ((ppp->xstate & SC_COMP_RUN) && ppp->xc_state &&
 	    proto != PPP_LCP && proto != PPP_CCP) {
 		if (!(ppp->flags & SC_CCP_UP) && (ppp->flags & SC_MUST_COMP)) {
 			if (net_ratelimit())
@@ -1273,7 +1271,7 @@ ppp_send_frame(struct ppp *ppp, struct sk_buff *skb)
  * Try to send the frame in xmit_pending.
  * The caller should have the xmit path locked.
  */
-static inline void
+static void
 ppp_push(struct ppp *ppp)
 {
 	struct list_head *list;
@@ -1607,15 +1605,13 @@ ppp_input(struct ppp_channel *chan, struct sk_buff *skb)
 	}
 
 	proto = PPP_PROTO(skb);
-	if (pch->ppp == 0 || proto >= 0xc000 || proto == PPP_CCPFRAG) {
+	if (!pch->ppp || proto >= 0xc000 || proto == PPP_CCPFRAG) {
 		/* put it on the channel queue */
 		skb_queue_tail(&pch->file.rq, skb);
 		/* drop old frames if queue too long */
-		while (pch->file.rq.qlen > PPP_MAX_RQLEN
-		       && (skb = skb_dequeue(&pch->file.rq)) != 0)
-		{
+		while (pch->file.rq.qlen > PPP_MAX_RQLEN &&
+		       (skb = skb_dequeue(&pch->file.rq)))
 			kfree_skb(skb);
-		}
 		wake_up_interruptible(&pch->file.rwait);
 	} else {
 		ppp_do_recv(pch->ppp, skb, pch);
@@ -1693,8 +1689,8 @@ ppp_receive_nonmp_frame(struct ppp *ppp, struct sk_buff *skb)
 	 * Note that some decompressors need to see uncompressed frames
 	 * that come in as well as compressed frames.
 	 */
-	if (ppp->rc_state != 0 && (ppp->rstate & SC_DECOMP_RUN)
-	    && (ppp->rstate & (SC_DC_FERROR | SC_DC_ERROR)) == 0)
+	if (ppp->rc_state && (ppp->rstate & SC_DECOMP_RUN) &&
+	    (ppp->rstate & (SC_DC_FERROR | SC_DC_ERROR)) == 0)
 		skb = ppp_decompress_frame(ppp, skb);
 
 	if (ppp->flags & SC_MUST_COMP && ppp->rstate & SC_DC_FERROR)
@@ -1706,7 +1702,7 @@ ppp_receive_nonmp_frame(struct ppp *ppp, struct sk_buff *skb)
 	case PPP_VJC_COMP:
 #ifdef CONFIG_SLHC
 		/* decompress VJ compressed packets */
-		if (ppp->vj == 0 || (ppp->flags & SC_REJ_COMP_TCP))
+		if (!ppp->vj || (ppp->flags & SC_REJ_COMP_TCP))
 			goto err;
 
 		if (skb_tailroom(skb) < 124 || skb_cloned(skb)) {
@@ -1740,7 +1736,7 @@ ppp_receive_nonmp_frame(struct ppp *ppp, struct sk_buff *skb)
 
 	case PPP_VJC_UNCOMP:
 #ifdef CONFIG_SLHC
-		if (ppp->vj == 0 || (ppp->flags & SC_REJ_COMP_TCP))
+		if (!ppp->vj || (ppp->flags & SC_REJ_COMP_TCP))
 			goto err;
 
 		/* Until we fix the decompressor need to make sure
@@ -1769,8 +1765,8 @@ ppp_receive_nonmp_frame(struct ppp *ppp, struct sk_buff *skb)
 		/* control or unknown frame - pass it to pppd */
 		skb_queue_tail(&ppp->file.rq, skb);
 		/* limit queue length by dropping old frames */
-		while (ppp->file.rq.qlen > PPP_MAX_RQLEN
-		       && (skb = skb_dequeue(&ppp->file.rq)) != 0)
+		while (ppp->file.rq.qlen > PPP_MAX_RQLEN &&
+		       (skb = skb_dequeue(&ppp->file.rq)))
 			kfree_skb(skb);
 		/* wake up any process polling or blocking on read */
 		wake_up_interruptible(&ppp->file.rwait);
@@ -1783,12 +1779,13 @@ ppp_receive_nonmp_frame(struct ppp *ppp, struct sk_buff *skb)
 		/* the filter instructions are constructed assuming
 		   a four-byte PPP header on each packet */
 		if (ppp->pass_filter || ppp->active_filter) {
-			if (skb_unclone(skb, GFP_ATOMIC))
+			if (skb_cloned(skb) &&
+			    pskb_expand_head(skb, 0, 0, GFP_ATOMIC))
 				goto err;
 
 			*skb_push(skb, 2) = 0;
-			if (ppp->pass_filter
-			    && sk_run_filter(skb, ppp->pass_filter,
+			if (ppp->pass_filter &&
+			    sk_run_filter(skb, ppp->pass_filter) == 0) {
 					     ppp->pass_len) == 0) {
 				if (ppp->debug & 1)
 					printk(KERN_DEBUG "PPP: inbound frame "
@@ -1796,17 +1793,16 @@ ppp_receive_nonmp_frame(struct ppp *ppp, struct sk_buff *skb)
 				kfree_skb(skb);
 				return;
 			}
-			if (!(ppp->active_filter
-			      && sk_run_filter(skb, ppp->active_filter,
-					       ppp->active_len) == 0))
+			if (!(ppp->active_filter &&
+			      sk_run_filter(skb, ppp->active_filter) == 0))
 				ppp->last_recv = jiffies;
 			__skb_pull(skb, 2);
 		} else
 #endif /* CONFIG_PPP_FILTER */
 			ppp->last_recv = jiffies;
 
-		if ((ppp->dev->flags & IFF_UP) == 0
-		    || ppp->npmode[npi] != NPMODE_PASS) {
+		if ((ppp->dev->flags & IFF_UP) == 0 ||
+		    ppp->npmode[npi] != NPMODE_PASS) {
 			kfree_skb(skb);
 		} else {
 			/* chop off protocol */
@@ -1815,7 +1811,6 @@ ppp_receive_nonmp_frame(struct ppp *ppp, struct sk_buff *skb)
 			skb->protocol = htons(npindex_to_ethertype[npi]);
 			skb_reset_mac_header(skb);
 			netif_rx(skb);
-			ppp->dev->last_rx = jiffies;
 #ifdef CONFIG_RALINK_GPIO_LED_VPN
 			if ((jiffies - ppp_prev_jiffies) >= (HZ>>2)) {
 			    /* blink led */
@@ -1835,7 +1830,7 @@ ppp_receive_nonmp_frame(struct ppp *ppp, struct sk_buff *skb)
 static struct sk_buff *
 ppp_decompress_frame(struct ppp *ppp, struct sk_buff *skb)
 {
-	unsigned int proto = PPP_PROTO(skb);
+	int proto = PPP_PROTO(skb);
 	struct sk_buff *ns;
 	int len;
 
@@ -1856,16 +1851,13 @@ ppp_decompress_frame(struct ppp *ppp, struct sk_buff *skb)
 			obuff_size = ppp->mru + PPP_HDRLEN;
 			break;
 		}
-		
-		ns = alloc_skb(obuff_size + ppp->dev->hard_header_len, GFP_ATOMIC);
+
+		ns = dev_alloc_skb(obuff_size);
 		if (!ns) {
 			printk(KERN_ERR "ppp_decompress_frame: no memory\n");
 			goto err;
 		}
-		
-		if (ppp->dev->hard_header_len > PPP_HDRLEN)
-			skb_reserve(ns, ppp->dev->hard_header_len - PPP_HDRLEN);
-		
+
 		/* the decompressor still expects the A/C bytes in the hdr */
 		len = ppp->rcomp->decompress(ppp->rc_state, skb->data - 2,
 				skb->len + 2, ns->data, obuff_size);
@@ -1980,13 +1972,22 @@ ppp_receive_mp_frame(struct ppp *ppp, struct sk_buff *skb, struct channel *pch)
 
 	/* If the queue is getting long, don't wait any longer for packets
 	   before the start of the queue. */
-	if (skb_queue_len(&ppp->mrq) >= PPP_MP_MAX_QLEN
-	    && seq_before(ppp->minseq, ppp->mrq.next->sequence))
-		ppp->minseq = ppp->mrq.next->sequence;
+	if (skb_queue_len(&ppp->mrq) >= PPP_MP_MAX_QLEN) {
+		struct sk_buff *mskb = skb_peek(&ppp->mrq);
+		if (seq_before(ppp->minseq, PPP_MP_CB(mskb)->sequence))
+			ppp->minseq = PPP_MP_CB(mskb)->sequence;
+	}
 
 	/* Pull completed packets off the queue and receive them. */
-	while ((skb = ppp_mp_reconstruct(ppp)) != 0)
+	while ((skb = ppp_mp_reconstruct(ppp))) {
+		if (pskb_may_pull(skb, 2))
 		ppp_receive_nonmp_frame(ppp, skb);
+		else {
+			++ppp->dev->stats.rx_length_errors;
+			kfree_skb(skb);
+			ppp_receive_error(ppp);
+		}
+	}
 
 	return;
 
@@ -2020,7 +2021,7 @@ ppp_mp_insert(struct ppp *ppp, struct sk_buff *skb)
  * complete packet, or we get to the sequence number for a fragment
  * which hasn't arrived but might still do so.
  */
-struct sk_buff *
+static struct sk_buff *
 ppp_mp_reconstruct(struct ppp *ppp)
 {
 	u32 seq = ppp->nextseq;
@@ -2031,7 +2032,7 @@ ppp_mp_reconstruct(struct ppp *ppp)
 	struct sk_buff *skb = NULL;
 	int lost = 0, len = 0;
 
-	if (!ppp->mrru)	/* do nothing until mrru is set */
+	if (ppp->mrru == 0)     /* do nothing until mrru is set */
 		return NULL;
 	head = list->next;
 	tail = NULL;
@@ -2046,14 +2047,21 @@ ppp_mp_reconstruct(struct ppp *ppp)
 			continue;
 		}
 		if (p->sequence != seq) {
+			u32 oldseq;
 			/* Fragment `seq' is missing.  If it is after
 			   minseq, it might arrive later, so stop here. */
 			if (seq_after(seq, minseq))
 				break;
 			/* Fragment `seq' is lost, keep going. */
 			lost = 1;
-			seq = seq_before(minseq, p->sequence)?
-				minseq + 1: p->sequence;
+			oldseq = seq;
+			seq = seq_before(minseq, PPP_MP_CB(p)->sequence)?
+				minseq + 1: PPP_MP_CB(p)->sequence;
+
+			if (ppp->debug & 1)
+				netdev_printk(KERN_DEBUG, ppp->dev,
+					      "lost frag %u..%u\n",
+					      oldseq, seq-1);
 			goto again;
 		}
 
@@ -2198,7 +2206,7 @@ inline int ppp_channel_index(struct ppp_channel *chan)
 /*
  * Return the PPP unit number to which a channel is connected.
  */
-inline int ppp_unit_number(struct ppp_channel *chan)
+int ppp_unit_number(struct ppp_channel *chan)
 {
 	struct channel *pch = chan->ppp;
 	int unit = -1;
@@ -2210,6 +2218,23 @@ inline int ppp_unit_number(struct ppp_channel *chan)
 		read_unlock_bh(&pch->upl);
 	}
 	return unit;
+}
+
+/*
+ * Return the PPP device interface name of a channel.
+ */
+char *ppp_dev_name(struct ppp_channel *chan)
+{
+	struct channel *pch = chan->ppp;
+	char *name = NULL;
+
+	if (pch) {
+		read_lock_bh(&pch->upl);
+		if (pch->ppp && pch->ppp->dev)
+			name = pch->ppp->dev->name;
+		read_unlock_bh(&pch->upl);
+	}
+	return name;
 }
 
 /*
@@ -2273,13 +2298,13 @@ ppp_set_compress(struct ppp *ppp, unsigned long arg)
 	unsigned char ccp_option[CCP_MAX_OPTION_LENGTH];
 
 	err = -EFAULT;
-	if (copy_from_user(&data, (void __user *) arg, sizeof(data))
-	    || (data.length <= CCP_MAX_OPTION_LENGTH
-		&& copy_from_user(ccp_option, (void __user *) data.ptr, data.length)))
+	if (copy_from_user(&data, (void __user *) arg, sizeof(data)) ||
+	    (data.length <= CCP_MAX_OPTION_LENGTH &&
+	     copy_from_user(ccp_option, (void __user *) data.ptr, data.length)))
 		goto out;
 	err = -EINVAL;
-	if (data.length > CCP_MAX_OPTION_LENGTH
-	    || ccp_option[1] < 2 || ccp_option[1] > data.length)
+	if (data.length > CCP_MAX_OPTION_LENGTH ||
+	    ccp_option[1] < 2 || ccp_option[1] > data.length)
 		goto out;
 
 	cp = find_compressor(ccp_option[0]);
@@ -2480,7 +2505,7 @@ ppp_register_compressor(struct compressor *cp)
 	int ret;
 	spin_lock(&compressor_list_lock);
 	ret = -EEXIST;
-	if (find_comp_entry(cp->compress_proto) != 0)
+	if (find_comp_entry(cp->compress_proto))
 		goto out;
 	ret = -ENOMEM;
 	ce = kmalloc(sizeof(struct compressor_entry), GFP_ATOMIC);
@@ -2502,7 +2527,7 @@ ppp_unregister_compressor(struct compressor *cp)
 
 	spin_lock(&compressor_list_lock);
 	ce = find_comp_entry(cp->compress_proto);
-	if (ce != 0 && ce->comp == cp) {
+	if (ce && ce->comp == cp) {
 		list_del(&ce->list);
 		kfree(ce);
 	}
@@ -2970,6 +2995,7 @@ EXPORT_SYMBOL(ppp_register_channel);
 EXPORT_SYMBOL(ppp_unregister_channel);
 EXPORT_SYMBOL(ppp_channel_index);
 EXPORT_SYMBOL(ppp_unit_number);
+EXPORT_SYMBOL(ppp_dev_name);
 EXPORT_SYMBOL(ppp_input);
 EXPORT_SYMBOL(ppp_input_error);
 EXPORT_SYMBOL(ppp_output_wakeup);

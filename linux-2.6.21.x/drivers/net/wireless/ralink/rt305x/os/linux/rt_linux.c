@@ -850,7 +850,7 @@ void announce_802_3_packet(
 #endif // CONFIG_RT2880_BRIDGING_ONLY //
 
 #if !defined(CONFIG_RA_NAT_NONE)
-#if defined (CONFIG_RA_HW_NAT)  || defined (CONFIG_RA_HW_NAT_MODULE)
+#if defined (CONFIG_RA_HW_NAT) || defined (CONFIG_RA_HW_NAT_MODULE)
        FOE_MAGIC_TAG(pRxPkt)= FOE_MAGIC_WLAN;
 #endif // defined (CONFIG_RA_HW_NAT)  || defined (CONFIG_RA_HW_NAT_MODULE) //
 

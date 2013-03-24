@@ -3,7 +3,7 @@
 ULONG	RTDebugLevel = RT_DEBUG_ERROR;
 ULONG	RTDebugFunc = 0;
 
-#if defined (CONFIG_RA_HW_NAT)  || defined (CONFIG_RA_HW_NAT_MODULE)
+#if defined (CONFIG_RA_HW_NAT) || defined (CONFIG_RA_HW_NAT_MODULE)
 #include "../../../../../../../net/nat/hw_nat/ra_nat.h"
 #include "../../../../../../../net/nat/hw_nat/frame_engine.h"
 #endif
@@ -845,7 +845,7 @@ void announce_802_3_packet(
 #endif // CONFIG_RA_CLASSIFIER //
 
 #if !defined(CONFIG_RA_NAT_NONE)
-#if defined (CONFIG_RA_HW_NAT)  || defined (CONFIG_RA_HW_NAT_MODULE)
+#if defined (CONFIG_RA_HW_NAT) || defined (CONFIG_RA_HW_NAT_MODULE)
 	FOE_MAGIC_TAG(pRxPkt)= FOE_MAGIC_WLAN;
 #endif // defined (CONFIG_RA_HW_NAT)  || defined (CONFIG_RA_HW_NAT_MODULE) //
 

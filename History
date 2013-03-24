@@ -1415,9 +1415,11 @@
 7) kernel: wifi drivers: fix enable/disable mimops mode.<br>
 8) kernel: wifi drivers: limit mcs selection for RT3050 based devices.<br>
 9) kernel: wifi drivers: limit tx/rx streams selection for RT3050 based devices.<br>
-10) init.d: radvd: use real_wan_if_ip for support 6to4 over ppp based tunnels.<br>
-11) init.d: iptables: consolidate v4/v6 rules in one script.<br>
-12) defaults: set HT_MIMOPSMode=3 - need for multiple TX/RX streams compat.<br>
+10) kernel: backport ppp_generic fixes from last stable kernel.<br>
+11) kernel: skb/ppp: apply skb pad hack for l2tp/pptp speedup.<br>
+12) init.d: radvd: use real_wan_if_ip for support 6to4 over ppp based tunnels.<br>
+13) init.d: iptables: consolidate v4/v6 rules in one script.<br>
+14) defaults: set HT_MIMOPSMode=3 - need for multiple TX/RX streams compat.<br>
 
 <br>
 <br>

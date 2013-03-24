@@ -989,7 +989,7 @@ EXPORT_SYMBOL(sppp_reopen);
  
 static int sppp_change_mtu(struct net_device *dev, int new_mtu)
 {
-	if(new_mtu<128||new_mtu>PPP_MTU||(dev->flags&IFF_UP))
+	if(new_mtu<128||new_mtu>PPP_MRU||(dev->flags&IFF_UP))
 		return -EINVAL;
 	dev->mtu=new_mtu;
 	return 0;
@@ -1103,7 +1103,7 @@ void sppp_attach(struct ppp_device *pd)
 	dev->type = ARPHRD_HDLC;
 	dev->addr_len = 0;
 	dev->hard_header_len = sizeof(struct ppp_header);
-	dev->mtu = PPP_MTU;
+	dev->mtu = PPP_MRU;
 	/*
 	 *	These 4 are callers but MUST also call sppp_ functions
 	 */

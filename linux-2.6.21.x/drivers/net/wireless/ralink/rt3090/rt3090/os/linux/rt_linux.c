@@ -1,6 +1,6 @@
 #include "rt_config.h"
 
-#if defined (CONFIG_RA_HW_NAT)  || defined (CONFIG_RA_HW_NAT_MODULE)
+#if defined (CONFIG_RA_HW_NAT) || defined (CONFIG_RA_HW_NAT_MODULE)
 #include "../../../../../../../net/nat/hw_nat/ra_nat.h"
 #include "../../../../../../../net/nat/hw_nat/frame_engine.h"
 #endif
@@ -829,7 +829,7 @@ void announce_802_3_packet(
 #endif // INF_PPA_SUPPORT //
 
 #if !defined(CONFIG_RA_NAT_NONE)
-#if defined (CONFIG_RA_HW_NAT)  || defined (CONFIG_RA_HW_NAT_MODULE)
+#if defined (CONFIG_RA_HW_NAT) || defined (CONFIG_RA_HW_NAT_MODULE)
 	FOE_MAGIC_TAG(pRxPkt)= FOE_MAGIC_WLAN;
 #endif
 	/*
@@ -846,7 +846,7 @@ void announce_802_3_packet(
 	}
 	else
 #else
-#if defined (CONFIG_RA_HW_NAT)  || defined (CONFIG_RA_HW_NAT_MODULE)
+#if defined (CONFIG_RA_HW_NAT) || defined (CONFIG_RA_HW_NAT_MODULE)
 	FOE_AI(pRxPkt)=UN_HIT;
 #endif
 #endif
