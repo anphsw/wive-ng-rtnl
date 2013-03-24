@@ -605,7 +605,6 @@ static void irqrx_handler(struct net_device *dev)
 				skb->ip_summed = CHECKSUM_NONE;
 
 				/* bookkeeping */
-				dev->last_rx = jiffies;
 				priv->stat.rx_packets++;
 				priv->stat.rx_bytes += rda.length;
 

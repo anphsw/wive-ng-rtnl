@@ -180,8 +180,6 @@ static inline int __vlan_hwaccel_rx(struct sk_buff *skb,
 		return 0;
 	}
 
-	skb->dev->last_rx = jiffies;
-
 	stats = vlan_dev_get_stats(skb->dev);
 	stats->rx_packets++;
 	stats->rx_bytes += skb->len;

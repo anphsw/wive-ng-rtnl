@@ -881,7 +881,6 @@ receive_packet (struct net_device *dev)
 			}
 #endif
 			netif_rx (skb);
-			dev->last_rx = jiffies;
 		}
 		entry = (entry + 1) % RX_RING_SIZE;
 	}

@@ -2235,7 +2235,6 @@ static int nv_rx_process(struct net_device *dev, int limit)
 #else
 		netif_rx(skb);
 #endif
-		dev->last_rx = jiffies;
 		np->stats.rx_packets++;
 		np->stats.rx_bytes += len;
 next_pkt:
@@ -2351,7 +2350,6 @@ static int nv_rx_process_optimized(struct net_device *dev, int limit)
 				}
 			}
 
-			dev->last_rx = jiffies;
 			np->stats.rx_packets++;
 			np->stats.rx_bytes += len;
 		} else {

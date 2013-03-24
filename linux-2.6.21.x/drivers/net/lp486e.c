@@ -680,7 +680,6 @@ i596_rx_one(struct net_device *dev, struct i596_private *lp,
 
 		skb->protocol = eth_type_trans(skb,dev);
 		netif_rx(skb);
-		dev->last_rx = jiffies;
 		lp->stats.rx_packets++;
 	} else {
 #if 0

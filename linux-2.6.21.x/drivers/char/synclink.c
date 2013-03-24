@@ -8051,8 +8051,6 @@ static void hdlcdev_rx(struct mgsl_struct *info, char *buf, int size)
 	stats->rx_bytes += size;
 
 	netif_rx(skb);
-
-	info->netdev->last_rx = jiffies;
 }
 
 /**

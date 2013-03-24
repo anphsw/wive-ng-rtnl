@@ -1507,8 +1507,6 @@ int gfar_clean_rx_ring(struct net_device *dev, int rx_work_limit)
 			priv->rx_skbuff[priv->skb_currx] = NULL;
 		}
 
-		dev->last_rx = jiffies;
-
 		/* Clear the status flags for this buffer */
 		bdp->status &= ~RXBD_STATS;
 

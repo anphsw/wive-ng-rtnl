@@ -262,8 +262,6 @@ static int ep93xx_rx(struct net_device *dev, int *budget)
 			skb_put(skb, length);
 			skb->protocol = eth_type_trans(skb, dev);
 
-			dev->last_rx = jiffies;
-
 			netif_receive_skb(skb);
 
 			ep->stats.rx_packets++;

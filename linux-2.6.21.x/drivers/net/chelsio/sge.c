@@ -1379,8 +1379,6 @@ static void sge_rx(struct sge *sge, struct freelQ *fl, unsigned int len)
 		return;
 	}
 	__skb_pull(skb, sizeof(*p));
-
-	skb->dev->last_rx = jiffies;
 	st = per_cpu_ptr(sge->port_stats[p->iff], smp_processor_id());
 	st->rx_packets++;
 

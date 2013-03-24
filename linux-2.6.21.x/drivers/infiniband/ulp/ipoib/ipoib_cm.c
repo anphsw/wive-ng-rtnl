@@ -411,7 +411,6 @@ void ipoib_cm_handle_rx_wc(struct net_device *dev, struct ib_wc *wc)
 	skb_reset_mac_header(skb);
 	skb_pull(skb, IPOIB_ENCAP_LEN);
 
-	dev->last_rx = jiffies;
 	++priv->stats.rx_packets;
 	priv->stats.rx_bytes += skb->len;
 

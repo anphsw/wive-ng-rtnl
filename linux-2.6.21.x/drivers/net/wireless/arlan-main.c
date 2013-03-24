@@ -1535,7 +1535,6 @@ static void arlan_rx_interrupt(struct net_device *dev, u_char rxStatus, u_short 
 					printk(KERN_WARNING "arlan kernel pkt type trans %x \n", skb->protocol);
 				}
 			netif_rx(skb);
-			dev->last_rx = jiffies;
 			priv->stats.rx_packets++;
 			priv->stats.rx_bytes += pkt_len;
 		}

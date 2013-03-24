@@ -687,7 +687,6 @@ static irqreturn_t elp_interrupt(int irq, void *dev_id)
 					skb->protocol = eth_type_trans(skb,dev);
 					adapter->stats.rx_bytes += skb->len;
 					netif_rx(skb);
-					dev->last_rx = jiffies;
 				}
 			}
 			adapter->dmaing = 0;

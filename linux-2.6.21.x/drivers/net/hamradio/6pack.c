@@ -376,7 +376,6 @@ static void sp_bump(struct sixpack *sp, char cmd)
 	memcpy(ptr, sp->cooked_buf + 1, count);
 	skb->protocol = ax25_type_trans(skb, sp->dev);
 	netif_rx(skb);
-	sp->dev->last_rx = jiffies;
 	sp->stats.rx_packets++;
 
 	return;
@@ -397,7 +396,7 @@ out_mem:
  * use a single global rwlock for all ttys in ppp line discipline.
  */
 static DEFINE_RWLOCK(disc_data_lock);
-                                                                                
+
 static struct sixpack *sp_get(struct tty_struct *tty)
 {
 	struct sixpack *sp;

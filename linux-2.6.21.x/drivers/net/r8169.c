@@ -2592,7 +2592,6 @@ rtl8169_rx_interrupt(struct net_device *dev, struct rtl8169_private *tp,
 			if (rtl8169_rx_vlan_skb(tp, desc, skb) < 0)
 				rtl8169_rx_skb(skb);
 
-			dev->last_rx = jiffies;
 			tp->stats.rx_bytes += pkt_size;
 			tp->stats.rx_packets++;
 		}

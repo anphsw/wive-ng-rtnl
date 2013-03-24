@@ -114,9 +114,6 @@ static int ixpdev_rx(struct net_device *dev, int *budget)
 			eth_copy_and_sum(skb, buf, desc->pkt_length, 0);
 			skb_put(skb, desc->pkt_length);
 			skb->protocol = eth_type_trans(skb, nds[desc->channel]);
-
-			skb->dev->last_rx = jiffies;
-
 			netif_receive_skb(skb);
 		}
 

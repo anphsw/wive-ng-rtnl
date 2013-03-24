@@ -1656,8 +1656,6 @@ u32 TLan_HandleRxEOF( struct net_device *dev, u16 host_int )
 		}
 	}
 
-	dev->last_rx = jiffies;
-
 	return ack;
 
 } /* TLan_HandleRxEOF */

@@ -2522,7 +2522,6 @@ qeth_process_inbound_buffer(struct qeth_card *card,
 		else
 #endif
 			rxrc = netif_rx(skb);
-		card->dev->last_rx = jiffies;
 		card->stats.rx_packets++;
 		card->stats.rx_bytes += skb->len;
 	}

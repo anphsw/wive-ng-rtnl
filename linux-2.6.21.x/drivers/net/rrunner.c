@@ -1029,7 +1029,6 @@ static void rx_int(struct net_device *dev, u32 rxlimit, u32 index)
 
 			netif_rx(skb);		/* send it up */
 
-			dev->last_rx = jiffies;
 			rrpriv->stats.rx_packets++;
 			rrpriv->stats.rx_bytes += pkt_len;
 		}

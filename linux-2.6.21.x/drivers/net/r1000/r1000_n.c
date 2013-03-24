@@ -1288,7 +1288,6 @@ static void r1000_rx_interrupt (struct net_device *netdev, struct r1000_private 
 						rx_skb->protocol = eth_type_trans ( rx_skb, netdev );
 						ret = R1000_NETIF_RX (rx_skb);
 
-//						netdev->last_rx = jiffies;
 						priv->stats.rx_bytes += pkt_size;
 						priv->stats.rx_packets++;
 

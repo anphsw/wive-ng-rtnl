@@ -1300,7 +1300,6 @@ static int corkscrew_rx(struct net_device *dev)
 				outw(RxDiscard, ioaddr + EL3_CMD);	/* Pop top Rx packet. */
 				skb->protocol = eth_type_trans(skb, dev);
 				netif_rx(skb);
-				dev->last_rx = jiffies;
 				vp->stats.rx_packets++;
 				vp->stats.rx_bytes += pkt_len;
 				/* Wait a limited time to go to next packet. */
@@ -1387,7 +1386,6 @@ static int boomerang_rx(struct net_device *dev)
 			}
 			skb->protocol = eth_type_trans(skb, dev);
 			netif_rx(skb);
-			dev->last_rx = jiffies;
 			vp->stats.rx_packets++;
 		}
 		entry = (++vp->cur_rx) % RX_RING_SIZE;

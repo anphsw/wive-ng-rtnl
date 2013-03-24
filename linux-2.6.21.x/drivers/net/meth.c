@@ -422,7 +422,6 @@ static void meth_rx(struct net_device* dev, unsigned long int_status)
 					skb_put(skb_c, len);
 					priv->rx_skbs[priv->rx_write] = skb;
 					skb_c->protocol = eth_type_trans(skb_c, dev);
-					dev->last_rx = jiffies;
 					priv->stats.rx_packets++;
 					priv->stats.rx_bytes += len;
 					netif_rx(skb_c);

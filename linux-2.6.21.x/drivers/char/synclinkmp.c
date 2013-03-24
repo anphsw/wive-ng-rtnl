@@ -1960,8 +1960,6 @@ static void hdlcdev_rx(SLMP_INFO *info, char *buf, int size)
 	stats->rx_bytes += size;
 
 	netif_rx(skb);
-
-	info->netdev->last_rx = jiffies;
 }
 
 /**

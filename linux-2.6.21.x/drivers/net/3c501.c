@@ -743,7 +743,6 @@ static void el_receive(struct net_device *dev)
 		insb(DATAPORT, skb_put(skb,pkt_len), pkt_len);
 		skb->protocol=eth_type_trans(skb,dev);
 		netif_rx(skb);
-		dev->last_rx = jiffies;
 		lp->stats.rx_packets++;
 		lp->stats.rx_bytes+=pkt_len;
 	}

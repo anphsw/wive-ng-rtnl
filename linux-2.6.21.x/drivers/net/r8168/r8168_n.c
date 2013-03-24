@@ -4658,8 +4658,6 @@ rtl8168_rx_interrupt(struct net_device *dev,
 
 			if (rtl8168_rx_vlan_skb(tp, desc, skb) < 0)
 				rtl8168_rx_skb(skb);
-
-			dev->last_rx = jiffies;
 			RTLDEV->stats.rx_bytes += pkt_size;
 			RTLDEV->stats.rx_packets++;
 		}

@@ -805,7 +805,6 @@ static int ibmveth_poll(struct net_device *netdev, int *budget)
 				adapter->stats.rx_packets++;
 				adapter->stats.rx_bytes += length;
 				frames_processed++;
-				netdev->last_rx = jiffies;
 			}
 		} else {
 			more_work = 0;

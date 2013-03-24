@@ -717,13 +717,11 @@ static irqreturn_t bmac_rxdma_intr(int irq, void *dev_id)
 			skb_put(skb, nb);
 			skb->protocol = eth_type_trans(skb, dev);
 			netif_rx(skb);
-			dev->last_rx = jiffies;
 			++bp->stats.rx_packets;
 			bp->stats.rx_bytes += nb;
 		} else {
 			++bp->stats.rx_dropped;
 		}
-		dev->last_rx = jiffies;
 		if ((skb = bp->rx_bufs[i]) == NULL) {
 			bp->rx_bufs[i] = skb = dev_alloc_skb(RX_BUFLEN+2);
 			if (skb != NULL)

@@ -4269,8 +4269,6 @@ e1000_clean_rx_irq(struct e1000_adapter *adapter,
 			netif_rx(skb);
 		}
 #endif /* CONFIG_E1000_NAPI */
-		netdev->last_rx = jiffies;
-
 next_desc:
 		rx_desc->status = 0;
 
@@ -4453,8 +4451,6 @@ copydone:
 			netif_rx(skb);
 		}
 #endif /* CONFIG_E1000_NAPI */
-		netdev->last_rx = jiffies;
-
 next_desc:
 		rx_desc->wb.middle.status_error &= cpu_to_le32(~0xFF);
 		buffer_info->skb = NULL;

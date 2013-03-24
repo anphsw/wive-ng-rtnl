@@ -567,7 +567,6 @@ static inline void  smc_rcv(struct net_device *dev)
 
 		PRINT_PKT(data, packet_len - 4);
 
-		dev->last_rx = jiffies;
 		skb->protocol = eth_type_trans(skb, dev);
 		netif_rx(skb);
 		lp->stats.rx_packets++;

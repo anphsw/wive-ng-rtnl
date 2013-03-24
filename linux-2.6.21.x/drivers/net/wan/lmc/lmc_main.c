@@ -1642,7 +1642,6 @@ static int lmc_rx (struct net_device *dev) /*fold00*/
             goto skip_packet;
         }
         
-        dev->last_rx = jiffies;
         sc->stats.rx_packets++;
         sc->stats.rx_bytes += len;
 

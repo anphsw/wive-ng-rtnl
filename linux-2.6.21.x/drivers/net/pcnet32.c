@@ -1250,7 +1250,6 @@ static void pcnet32_rx_entry(struct net_device *dev,
 #else
 	netif_rx(skb);
 #endif
-	dev->last_rx = jiffies;
 	lp->stats.rx_packets++;
 	return;
 }

@@ -2048,8 +2048,6 @@ ixgb_clean_rx_irq(struct ixgb_adapter *adapter)
 			netif_rx(skb);
 		}
 #endif /* CONFIG_IXGB_NAPI */
-		netdev->last_rx = jiffies;
-
 rxdesc_done:
 		/* clean up descriptor, might be written over by hw */
 		rx_desc->status = 0;

@@ -178,7 +178,6 @@ static int imq_nf_queue(struct sk_buff *skb, struct nf_info *info, unsigned queu
 		nf_reinject(skb, info, NF_ACCEPT);
 		return 0;
 	}
-	dev->last_rx = jiffies;
 
 	if (skb->destructor) {
 		skb2 = skb;

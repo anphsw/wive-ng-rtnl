@@ -1518,7 +1518,6 @@ static int rhine_rx(struct net_device *dev, int limit)
 #else
 			netif_rx(skb);
 #endif
-			dev->last_rx = jiffies;
 			rp->stats.rx_bytes += pkt_len;
 			rp->stats.rx_packets++;
 		}

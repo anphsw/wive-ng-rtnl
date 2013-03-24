@@ -1568,8 +1568,6 @@ gt64240_rx(struct net_device *dev, u32 status)
 		// now we can release ownership of this desc back to device
 		cmdstat |= (u32) rxOwn;
 		rd->cmdstat = cmdstat;
-
-		dev->last_rx = jiffies;
 	}
 
 	if (gt64240_debug > 3 && nextOut == gp->rx_next_out)

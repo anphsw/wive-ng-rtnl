@@ -763,7 +763,6 @@ static int ariadne_rx(struct net_device *dev)
 #endif
 
 	    netif_rx(skb);
-	    dev->last_rx = jiffies;
 	    priv->stats.rx_packets++;
 	    priv->stats.rx_bytes += pkt_len;
 	}

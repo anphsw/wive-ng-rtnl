@@ -2141,8 +2141,6 @@ static int sky2_status_intr(struct sky2_hw *hw, int to_do)
 			skb->protocol = eth_type_trans(skb, dev);
 			sky2->net_stats.rx_packets++;
 			sky2->net_stats.rx_bytes += skb->len;
-			dev->last_rx = jiffies;
-
 #ifdef SKY2_VLAN_TAG_USED
 			if (sky2->vlgrp && (status & GMR_FS_VLAN)) {
 				vlan_hwaccel_receive_skb(skb,

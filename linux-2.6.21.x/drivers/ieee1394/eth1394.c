@@ -1277,8 +1277,6 @@ bad_proto:
 		netif_wake_queue(dev);
 	spin_unlock_irqrestore(&priv->lock, flags);
 
-	dev->last_rx = jiffies;
-
 	return 0;
 }
 
@@ -1348,8 +1346,6 @@ static void ether1394_iso(struct hpsb_iso *iso)
 	}
 
 	hpsb_iso_recv_release_packets(iso, i);
-
-	dev->last_rx = jiffies;
 }
 
 /******************************************

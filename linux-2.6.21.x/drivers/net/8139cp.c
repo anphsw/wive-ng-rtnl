@@ -471,7 +471,6 @@ static inline void cp_rx_skb (struct cp_private *cp, struct sk_buff *skb,
 
 	cp->net_stats.rx_packets++;
 	cp->net_stats.rx_bytes += skb->len;
-	cp->dev->last_rx = jiffies;
 
 #if CP_VLAN_TAG_USED
 	if (cp->vlgrp && (desc->opts2 & RxVlanTagged)) {

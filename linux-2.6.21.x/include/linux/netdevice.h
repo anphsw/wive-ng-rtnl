@@ -422,7 +422,7 @@ struct net_device {
 	int			(*poll) (struct net_device *dev, int *quota);
 	int			quota;
 	int			weight;
-	unsigned long		last_rx;	/* Time of last Rx	*/
+
 	/* Interface address info used in eth_type_trans() */
 	unsigned char		dev_addr[MAX_ADDR_LEN];	/* hw address, (before bcast 
 							because most packets are unicast) */

@@ -2196,7 +2196,6 @@ rx_start:
 				pMsg->protocol = eth_type_trans(pMsg,
 					pAC->dev[pRxPort->PortIndex]);
 				netif_rx(pMsg);
-				pAC->dev[pRxPort->PortIndex]->last_rx = jiffies;
 			}
 			else {
 				/* drop frame */
@@ -2248,7 +2247,6 @@ rx_start:
 				pMsg->protocol = eth_type_trans(pMsg,
 					pAC->dev[pRxPort->PortIndex]);
 				netif_rx(pMsg);
-				pAC->dev[pRxPort->PortIndex]->last_rx = jiffies;
 			}
 			else {
 				DEV_KFREE_SKB(pMsg);

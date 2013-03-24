@@ -1513,7 +1513,6 @@ static int __netdev_rx(struct net_device *dev, int *quota)
 		} else
 #endif /* VLAN_SUPPORT */
 			netdev_receive_skb(skb);
-		dev->last_rx = jiffies;
 		np->stats.rx_packets++;
 
 	next_rx:

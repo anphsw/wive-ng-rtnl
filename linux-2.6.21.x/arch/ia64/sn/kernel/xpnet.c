@@ -275,8 +275,6 @@ xpnet_receive(partid_t partid, int channel, struct xpnet_message *msg)
 		(void *) skb->head, (void *) skb->data, (void *) skb->tail,
 		(void *) skb->end, skb->len);
 
-
-	xpnet_device->last_rx = jiffies;
 	priv->stats.rx_packets++;
 	priv->stats.rx_bytes += skb->len + ETH_HLEN;
 

@@ -1170,8 +1170,6 @@ netxen_process_rcv(struct netxen_adapter *adapter, int ctxid,
 		break;
 	}
 
-	netdev->last_rx = jiffies;
-
 	rcv_desc->rcv_free++;
 	rcv_desc->rcv_pending--;
 

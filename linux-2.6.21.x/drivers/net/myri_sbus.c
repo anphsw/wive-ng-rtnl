@@ -519,8 +519,6 @@ static void myri_rx(struct myri_eth *mp, struct net_device *dev)
 		skb->protocol = myri_type_trans(skb, dev);
 		DRX(("prot[%04x] netif_rx ", skb->protocol));
 		netif_rx(skb);
-
-		dev->last_rx = jiffies;
 		mp->enet_stats.rx_packets++;
 		mp->enet_stats.rx_bytes += len;
 	next:

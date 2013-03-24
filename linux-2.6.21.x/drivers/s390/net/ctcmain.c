@@ -482,7 +482,6 @@ ctc_unpack_skb(struct channel *ch, struct sk_buff *pskb)
 		 * Successful rx; reset logflags
 		 */
 		ch->logflags = 0;
-		dev->last_rx = jiffies;
 		privptr->stats.rx_packets++;
 		privptr->stats.rx_bytes += skb->len;
 		if (len > 0) {

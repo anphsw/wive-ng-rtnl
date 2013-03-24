@@ -941,7 +941,6 @@ static irqreturn_t mace_rxdma_intr(int irq, void *dev_id)
 		skb->protocol = eth_type_trans(skb, dev);
 		mp->stats.rx_bytes += skb->len;
 		netif_rx(skb);
-		dev->last_rx = jiffies;
 		mp->rx_bufs[i] = NULL;
 		++mp->stats.rx_packets;
 	    }

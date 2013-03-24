@@ -528,7 +528,6 @@ static void c2_rx_interrupt(struct net_device *netdev)
 
 		netif_rx(skb);
 
-		netdev->last_rx = jiffies;
 		c2_port->netstats.rx_packets++;
 		c2_port->netstats.rx_bytes += buflen;
 	}

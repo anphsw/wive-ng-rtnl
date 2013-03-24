@@ -817,7 +817,6 @@ static int amd8111e_rx_poll(struct net_device *dev, int * budget)
 			lp->coal_conf.rx_packets++;
 			lp->coal_conf.rx_bytes += pkt_len;
 			num_rx_pkt++;
-			dev->last_rx = jiffies;
 
 		err_next_pkt:
 			lp->rx_ring[rx_index].buff_phy_addr
@@ -941,9 +940,6 @@ static int amd8111e_rx(struct net_device *dev)
 			/*COAL update rx coalescing parameters*/
 			lp->coal_conf.rx_packets++;
 			lp->coal_conf.rx_bytes += pkt_len;
-
-			dev->last_rx = jiffies;
-
 err_next_pkt:
 		lp->rx_ring[rx_index].buff_phy_addr
 			 = cpu_to_le32(lp->rx_dma_addr[rx_index]);

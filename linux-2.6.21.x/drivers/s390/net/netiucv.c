@@ -655,7 +655,6 @@ static void netiucv_unpack_skb(struct iucv_connection *conn,
 		 * we must use netif_rx_ni() instead of netif_rx()
 		 */
 		netif_rx_ni(skb);
-		dev->last_rx = jiffies;
 		privptr->stats.rx_packets++;
 		privptr->stats.rx_bytes += skb->len;
 		skb_pull(pskb, header->next);

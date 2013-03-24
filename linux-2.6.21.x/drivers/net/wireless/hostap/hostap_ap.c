@@ -1499,7 +1499,6 @@ static void handle_authen(local_info_t *local, struct sk_buff *skb,
 			 body, olen, hdr->addr2, ap->tx_callback_auth);
 
 	if (sta) {
-		sta->last_rx = jiffies;
 		atomic_dec(&sta->users);
 	}
 
@@ -1704,7 +1703,6 @@ static void handle_assoc(local_info_t *local, struct sk_buff *skb,
 
 	if (sta) {
 		if (resp == WLAN_STATUS_SUCCESS) {
-			sta->last_rx = jiffies;
 			/* STA will be marked associated from TX callback, if
 			 * AssocResp is ACKed */
 		}
@@ -2139,7 +2137,6 @@ static void handle_beacon(local_info_t *local, struct sk_buff *skb,
 	sta->u.ap.channel = channel;
 	sta->rx_packets++;
 	sta->rx_bytes += len;
-	sta->u.ap.last_beacon = sta->last_rx = jiffies;
 	sta->capability = capability;
 	sta->listen_interval = beacon_int;
 
@@ -2527,7 +2524,6 @@ static int prism2_hostapd_add_sta(struct ap_data *ap,
 		hostap_event_new_sta(sta->local->dev, sta);
 
 	sta->flags |= WLAN_STA_AUTH | WLAN_STA_ASSOC;
-	sta->last_rx = jiffies;
 	sta->aid = param->u.add_sta.aid;
 	sta->capability = param->u.add_sta.capability;
 	sta->tx_supp_rates = param->u.add_sta.tx_supp_rates;
@@ -3062,7 +3058,6 @@ ap_rx_ret hostap_handle_sta_rx(local_info_t *local, struct net_device *dev,
 
 		sta->rx_packets++;
 		sta->rx_bytes += skb->len;
-		sta->last_rx = jiffies;
 	}
 
 	if (local->ap->nullfunc_ack && stype == IEEE80211_STYPE_NULLFUNC &&

@@ -447,7 +447,6 @@ static int mv643xx_eth_receive_queue(struct net_device *dev, int budget)
 			netif_rx(skb);
 #endif
 		}
-		dev->last_rx = jiffies;
 	}
 	mv643xx_eth_rx_refill_descs(dev);	/* Fill RX ring with skb's */
 

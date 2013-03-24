@@ -443,7 +443,6 @@ static void qe_rx(struct sunqe *qep)
 						 len, 0);
 				skb->protocol = eth_type_trans(skb, qep->dev);
 				netif_rx(skb);
-				qep->dev->last_rx = jiffies;
 				qep->net_stats.rx_packets++;
 				qep->net_stats.rx_bytes += len;
 			}

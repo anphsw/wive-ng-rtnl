@@ -352,8 +352,6 @@ static void e1000_receive_skb(struct e1000_adapter *adapter,
 	else
 		netif_rx(skb);
 #endif
-
-	netdev->last_rx = jiffies;
 }
 
 /**

@@ -1094,7 +1094,6 @@ el3_rx(struct net_device *dev)
 				outw(RxDiscard, ioaddr + EL3_CMD); /* Pop top Rx packet. */
 				skb->protocol = eth_type_trans(skb,dev);
 				netif_rx(skb);
-				dev->last_rx = jiffies;
 				lp->stats.rx_packets++;
 				continue;
 			}

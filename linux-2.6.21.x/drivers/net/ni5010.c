@@ -576,7 +576,6 @@ static void ni5010_rx(struct net_device *dev)
 
 	skb->protocol = eth_type_trans(skb,dev);
 	netif_rx(skb);
-	dev->last_rx = jiffies;
 	lp->stats.rx_packets++;
 	lp->stats.rx_bytes += i_pkt_size;
 

@@ -774,7 +774,6 @@ static int sppp_rx_done(struct channel_data *chan)
 	chan->stats.rx_bytes += chan->cosa->rxsize;
 	netif_rx(chan->rx_skb);
 	chan->rx_skb = NULL;
-	chan->pppdev.dev->last_rx = jiffies;
 	return 0;
 }
 
