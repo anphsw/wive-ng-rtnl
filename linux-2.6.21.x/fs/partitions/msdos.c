@@ -449,7 +449,7 @@ int msdos_partition(struct parsed_partitions *state, struct block_device *bdev)
 			 */
 			fb = (struct fat_boot_sector *) data;
 			if (slot == 1 && fb->reserved && fb->fats
-				&& fat_valid_media(fb->media)) {
+				&& FAT_VALID_MEDIA(fb->media)) {
 				printk("\n");
 				put_dev_sector(sect);
 				return 1;

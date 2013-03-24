@@ -3621,6 +3621,27 @@ void end_dequeued_request(struct request *rq, int uptodate)
 }
 EXPORT_SYMBOL(end_dequeued_request);
 
+/**
+ * end_that_request_chunk - end I/O on a request
+ * @req:      the request being processed
+ * @uptodate: 1 for success, 0 for I/O error, < 0 for specific error
+ * @nr_bytes: number of bytes to complete
+ *
+ * Description:
+ *     Ends I/O on a number of bytes attached to @req, and sets it up
+ *     for the next range of segments (if any). Like end_that_request_first(),
+ *     but deals with bytes instead of sectors.
+ *
+ * Return:
+ *     0 - we are done with this request, call end_that_request_last()
+ *     1 - still buffers pending for this request
+ **/
+int end_that_request_chunk(struct request *req, int uptodate, int nr_bytes)
+{
+	return __end_that_request_first(req, uptodate, nr_bytes);
+}
+
+EXPORT_SYMBOL(end_that_request_chunk);
 
 /**
  * end_request - end I/O on the current segment of the request

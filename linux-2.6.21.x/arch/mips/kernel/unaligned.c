@@ -88,17 +88,16 @@
 #define STR(x)  __STR(x)
 #define __STR(x)  #x
 
-#ifdef CONFIG_PROC_FS
+#ifdef CONFIG_DEBUG_FS
 u32 unaligned_instructions;
-# ifdef CONFIG_DEBUG_FS
 enum {
 	UNALIGNED_ACTION_QUIET,
 	UNALIGNED_ACTION_SIGNAL,
 	UNALIGNED_ACTION_SHOW,
 };
 static u32 unaligned_action;
-# endif
 #endif
+
 extern void show_registers(struct pt_regs *regs);
 
 static inline int emulate_load_store_insn(struct pt_regs *regs,

@@ -3173,7 +3173,7 @@ ext4_reserve_inode_write(handle_t *handle, struct inode *inode,
 int ext4_mark_inode_dirty(handle_t *handle, struct inode *inode)
 {
 	struct ext4_iloc iloc;
-	int err, ret;
+	int err;
 	static int expand_message;
 
 	might_sleep();
@@ -3182,6 +3182,7 @@ int ext4_mark_inode_dirty(handle_t *handle, struct inode *inode)
 	if (EXT4_I(inode)->i_extra_isize <
 	    EXT4_SB(inode->i_sb)->s_want_extra_isize &&
 	    !(EXT4_I(inode)->i_state & EXT4_STATE_NO_EXPAND)) {
+		int ret;
 		/* We need extra buffer credits since we may write into EA block
 		 * with this same handle */
 		if ((jbd2_journal_extend(handle,
