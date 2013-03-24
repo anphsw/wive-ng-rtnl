@@ -198,15 +198,6 @@ wait_connect() {
     fi
 }
 
-# configure and start zeroconf daemon
-zero_conf() {
-    wan_is_not_null=`ip -4 addr show $wan_if | grep inet -c`
-    if [ "$wan_is_not_null" = "0" ]; then
-	zcip $wan_if /etc/scripts/zcip.script > /dev/null 2>&1
-	sleep 5
-    fi
-}
-
 # conntrack and route table/caches flush
 flush_net_caches() {
     ip route flush cache > /dev/null 2>&1
