@@ -389,13 +389,13 @@ struct pci_ops rt2880_pci_ops= {
 static struct resource rt2880_res_pci_mem1 = {
   .name = "PCI MEM1",
   .start = RALINK_PCI_MM_MAP_BASE,
-  .end = (RALINK_PCI_MM_MAP_BASE + (unsigned char *)0x0fffffff),
+  .end = (RALINK_PCI_MM_MAP_BASE + 0x0fffffff),
   .flags = IORESOURCE_MEM,
 };
 static struct resource rt2880_res_pci_io1 = {
   .name = "PCI I/O1",
   .start = RALINK_PCI_IO_MAP_BASE,
-  .end = (RALINK_PCI_IO_MAP_BASE + (unsigned char *)0x0ffff ),
+  .end = (RALINK_PCI_IO_MAP_BASE + 0x0ffff ),
   .flags = IORESOURCE_IO,
 };
 
