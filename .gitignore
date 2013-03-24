@@ -30,6 +30,7 @@ romfs
 /lib/.config
 /lib/lib
 /lib/include_shared
+/lib/libiconv/libcharset/lib/Makefile
 /lib/libcurl/curl-config
 /lib/libcurl/docs/examples/Makefile
 /lib/libcurl/docs/libcurl/Makefile
@@ -64,6 +65,7 @@ romfs
 /lib/libcurl/tests/Makefile
 /lib/libcurl/tests/server/Makefile
 /lib/libcurl/tests/unit/Makefile
+/lib/libcurl/tests/certs/scripts/Makefile
 /lib/libevent/autom4te.cache
 /lib/libevent/autom4te.cache/output.0
 /lib/libevent/autom4te.cache/output.1
