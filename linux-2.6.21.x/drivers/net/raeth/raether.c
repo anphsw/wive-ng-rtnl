@@ -1263,9 +1263,10 @@ static int rt2880_eth_recv(struct net_device* dev)
 		 * before pass the packet to cpu*/
 #if defined (CONFIG_RAETH_SKB_RECYCLE)
 		skb = __skb_dequeue_tail(&ei_local->rx0_recycle);
-		if (unlikely(skb==NULL)) {
+		if (!skb) {
 		    skb = __netdev_alloc_skb(dev, MAX_RX_LENGTH + NET_IP_ALIGN, GFP_ATOMIC);
 		}
+#else
 		skb = __netdev_alloc_skb(dev, MAX_RX_LENGTH + NET_IP_ALIGN , GFP_ATOMIC);
 #endif
 
