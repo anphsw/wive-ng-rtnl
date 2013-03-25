@@ -62,12 +62,6 @@ start() {
 	    $LOG "web limit"
     	    iptables -A servicelimit -p tcp --dport $RemoteManagementPort $CONNLIMIT 16 -j REJECT
 	    if [ "$RemoteManagement" = "1" ]; then
-		if [ "$OperationMode" != "0" ] && [ "$ApCliBridgeOnly" != "1" ]; then
-    		    iptables -A servicelimit -i $wan_if $STATE_NEW -p tcp --dport $RemoteManagementPort -j DROP
-		    if [ "$PPP_CONNECT" = "on" ]; then
-    			iptables -A servicelimit -i ppp+ $STATE_NEW -p tcp --dport $RemoteManagementPort -j DROP
-		    fi
-		fi
     		iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport $RemoteManagementPort -j ACCEPT
 	     if [ "$Lan2Enabled" = "1" ]; then
     		iptables -A servicelimit -i $lan2_if $STATE_NEW -p tcp --dport $RemoteManagementPort -j ACCEPT
@@ -75,19 +69,11 @@ start() {
 	    elif [ "$RemoteManagement" = "2" ]; then
     		iptables -A servicelimit $STATE_NEW -p tcp --dport $RemoteManagementPort -j ACCEPT
 	    fi
-	else
-    	    iptables -A servicelimit $STATE_NEW -p tcp --dport $RemoteManagementPort -j DROP
 	fi
 	if [ "$RemoteSSH" != "0" ]; then
 	    $LOG "ssh limit"
     	    iptables -A servicelimit $STATE_NEW -p tcp --dport 22 $CONNLIMIT 4 -j REJECT
 	    if [ "$RemoteSSH" = "1" ]; then
-		if [ "$OperationMode" != "0" ] && [ "$ApCliBridgeOnly" != "1" ]; then
-    		    iptables -A servicelimit -i $wan_if $STATE_NEW -p tcp --dport 22 -j DROP
-		    if [ "$PPP_CONNECT" = "on" ]; then
-    			iptables -A servicelimit -i ppp+ $STATE_NEW -p tcp --dport 22 -j DROP
-		    fi
-		fi
     		iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 22 -j ACCEPT
 	     if [ "$Lan2Enabled" = "1" ]; then
     		iptables -A servicelimit -i $lan2_if $STATE_NEW -p tcp --dport 22 -j ACCEPT
@@ -95,19 +81,11 @@ start() {
 	    elif [ "$RemoteSSH" = "2" ]; then
     		iptables -A servicelimit $STATE_NEW -p tcp --dport 22 -j ACCEPT
 	    fi
-	else
-    	    iptables -A servicelimit $STATE_NEW -p tcp --dport 22 -j DROP
 	fi
 	if [ "$RemoteTelnet" != "0" ]; then
 	    $LOG "telnet limit"
     	    iptables -A servicelimit $STATE_NEW -p tcp --dport 23 $CONNLIMIT 4 -j REJECT
 	    if [ "$RemoteTelnet" = "1" ]; then
-		if [ "$OperationMode" != "0" ] && [ "$ApCliBridgeOnly" != "1" ]; then
-    		    iptables -A servicelimit -i $wan_if $STATE_NEW -p tcp --dport 23 -j DROP
-		    if [ "$PPP_CONNECT" = "on" ]; then
-    			iptables -A servicelimit -i ppp+ $STATE_NEW -p tcp --dport 23 -j DROP
-		    fi
-		fi
     		iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 23 -j ACCEPT
 	     if [ "$Lan2Enabled" = "1" ]; then
     		iptables -A servicelimit -i $lan2_if $STATE_NEW -p tcp --dport 23 -j ACCEPT
@@ -115,19 +93,11 @@ start() {
 	    elif [ "$RemoteTelnet" = "2" ]; then
     		iptables -A servicelimit $STATE_NEW -p tcp --dport 23 -j ACCEPT
 	    fi
-	else
-    	    iptables -A servicelimit $STATE_NEW -p tcp --dport 23 -j DROP
 	fi
 	if [ "$RemoteFTP" != "0" ]; then
 	    $LOG "ftp limit"
     	    iptables -A servicelimit $STATE_NEW -p tcp -m multiport --dport 20,$FtpPort $CONNLIMIT 4 -j REJECT
 	    if [ "$RemoteFTP" = "1" ]; then
-		if [ "$OperationMode" != "0" ] && [ "$ApCliBridgeOnly" != "1" ]; then
-    		    iptables -A servicelimit -i $wan_if $STATE_NEW -p tcp -m multiport --dport 20,$FtpPort -j DROP
-		    if [ "$PPP_CONNECT" = "on" ]; then
-    			iptables -A servicelimit -i ppp+ $STATE_NEW -p tcp -m multiport --dport 20,$FtpPort -j DROP
-		    fi
-		fi
     		iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp -m multiport --dport 20,$FtpPort -j ACCEPT
 	        if [ "$Lan2Enabled" = "1" ]; then
     		    iptables -A servicelimit -i $lan2_if $STATE_NEW -p tcp -m multiport --dport 20,$FtpPort -j ACCEPT
@@ -135,8 +105,6 @@ start() {
 	    elif [ "$RemoteFTP" = "2" ]; then
     		iptables -A servicelimit $STATE_NEW -p tcp -m multiport --dport 20,$FtpPort -j ACCEPT
 	    fi
-	else
-    	    iptables -A servicelimit $STATE_NEW -p tcp -m multiport --dport 20,$FtpPort -j DROP
 	fi
 	if [ "$upnpEnabled" = "1" ] && [ "$OperationMode" != "0" ] && [ "$ApCliBridgeOnly" != "1" ]; then
 	    $LOG "upnp"
@@ -163,19 +131,11 @@ start() {
 		iptables -A servicelimit -i $lan2_if -p udp --dport "$LOCAL_PRT" -j ACCEPT
 		iptables -A servicelimit -i $lan2_if -p udp --dport 1900 -j ACCEPT
 	    fi
-	else
-    	    iptables -A servicelimit $STATE_NEW -p tcp --dport 4044 -j DROP
 	fi
 	if [ "$UDPXYMode" != "0" ]; then
 	    $LOG "udpxy limit"
     	    iptables -A servicelimit $STATE_NEW -p tcp --dport $UDPXYPort $CONNLIMIT 8 -j REJECT
 	    if [ "$UDPXYMode" = "1" ]; then
-		if [ "$OperationMode" != "0" ] && [ "$ApCliBridgeOnly" != "1" ]; then
-    		    iptables -A servicelimit -i $wan_if $STATE_NEW -p tcp --dport $UDPXYPort -j DROP
-		    if [ "$PPP_CONNECT" = "on" ]; then
-    			iptables -A servicelimit -i ppp+ $STATE_NEW -p tcp --dport $UDPXYPort -j DROP
-		    fi
-		fi
     		iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport $UDPXYPort -j ACCEPT
 	     if [ "$Lan2Enabled" = "1" ]; then
     		iptables -A servicelimit -i $lan2_if $STATE_NEW -p tcp --dport $UDPXYPort -j ACCEPT
@@ -183,8 +143,6 @@ start() {
 	    elif [ "$UDPXYMode" = "2" ]; then
     		iptables -A servicelimit $STATE_NEW -p tcp --dport $UDPXYPort -j ACCEPT
 	    fi
-	else
-    	    iptables -A servicelimit $STATE_NEW -p tcp --dport $UDPXYPort -j DROP
 	fi
 	if [ "$SmbEnabled" = "1" ]; then
 	    $LOG "samba"
@@ -192,17 +150,11 @@ start() {
 	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp -m multiport --dport 139,445 -j ACCEPT
 	    # not safe fix me later
 	    iptables -A servicelimit -i $lan_if -p udp --dport "$LOCAL_PRT" -j ACCEPT
-	else
-	    iptables -A servicelimit -i $lan_if -p udp --dport 137:138 -j DROP
-	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp -m multiport --dport 139,445 -j DROP
 	fi
 	if [ "$dnsPEnabled" = "1" ]; then
 	    $LOG "dnsproxy"
 	    iptables -A servicelimit -i $lan_if -p udp --dport 53 -j ACCEPT
 	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 53 -j ACCEPT
-	else
-	    iptables -A servicelimit -i $lan_if -p udp --dport 53 -j DROP
-	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 53 -j DROP
 	fi
 	if [ "$snmpd" = "1" ]; then
 	    $LOG "snmpd"
@@ -215,18 +167,12 @@ start() {
 	if [ "$TransmissionEnabled" = "1" ]; then
 	    $LOG "transmission"
 	    # RPC
-		if [ "$TransAccess" = "1" ]; then
-		if [ "$OperationMode" != "0" ] && [ "$ApCliBridgeOnly" != "1" ]; then
-    		    iptables -A servicelimit -i $wan_if $STATE_NEW -p tcp --dport $TransRPCPort -j DROP
-		    if [ "$PPP_CONNECT" = "on" ]; then
-    			iptables -A servicelimit -i ppp+ $STATE_NEW -p tcp --dport $TransRPCPort -j DROP
-		    fi
-		fi
-			iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport $TransRPCPort -j ACCEPT
+	    if [ "$TransAccess" = "1" ]; then
+		iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport $TransRPCPort -j ACCEPT
 		if [ "$Lan2Enabled" = "1" ]; then
-    		iptables -A servicelimit -i $lan2_if $STATE_NEW -p tcp --dport $TransRPCPort -j ACCEPT
-	    fi
-		elif [ "$TransAccess" = "2" ]; then
+    		    iptables -A servicelimit -i $lan2_if $STATE_NEW -p tcp --dport $TransRPCPort -j ACCEPT
+		fi
+	    elif [ "$TransAccess" = "2" ]; then
     		iptables -A servicelimit $STATE_NEW -p tcp --dport $TransRPCPort -j ACCEPT
 	    fi
 	    # Incoming peers
@@ -234,19 +180,20 @@ start() {
 	fi
 	if [ "$WANPingFilter" = "0" ]; then
 	    if [ "$OperationMode" != "0" ] && [ "$ApCliBridgeOnly" != "1" ]; then
-    		$LOG "icmp limit Drop ping from wan $wan_if"
+    		$LOG "icmp drop ping from wan $wan_if"
     		iptables -A servicelimit -i $wan_if -p icmp --icmp-type echo-request -j DROP
-    		iptables -A servicelimit -i $wan_if -p icmp --icmp-type echo-reply -j DROP
 		if [ "$PPP_CONNECT" = "on" ]; then
     		    iptables -A servicelimit -i ppp+ -p icmp --icmp-type echo-request -j DROP
-    		    iptables -A servicelimit -i ppp+ -p icmp --icmp-type echo-reply -j DROP
 		fi
 	    fi
 	else
 	    $LOG "Allow ping from wan $wan_if"
 	fi
+	# allow ratelimit ping request
 	iptables -A servicelimit -p icmp --icmp-type echo-request -m limit --limit 10/s -j ACCEPT
 	iptables -A servicelimit -p icmp --icmp-type echo-request -j DROP
+	# allow all others icmp messages (mtu probing and others)
+        iptables -A servicelimit  -p icmp ! --icmp-type echo-request -j ACCEPT
 ###########################################VPN-RULES##########################################
 	if [ "$vpnEnabled" = "on" ] || [ "$l2tp_srv_enabled" = "1" ]; then
 	    if [ "$vpnType" = "1" ]; then
