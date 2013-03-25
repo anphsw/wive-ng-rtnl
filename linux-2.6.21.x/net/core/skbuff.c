@@ -334,13 +334,6 @@ static void skb_release_all(struct sk_buff *skb)
 	skb->tc_verd = 0;
 #endif
 #endif
-#if defined(CONFIG_RAETH_SKB_RECYCLE_2K)
-	if (skb->skb_recycling_callback) {
-		if ((*skb->skb_recycling_callback)(skb))
-			return;
-	}
-	skb->skb_recycling_callback = NULL;
-#endif
 	skb_release_data(skb);
 }
 
@@ -356,6 +349,13 @@ static void skb_release_all(struct sk_buff *skb)
 void __kfree_skb(struct sk_buff *skb)
 {
 	skb_release_all(skb);
+#if defined(CONFIG_RAETH_SKB_RECYCLE_2K)
+	if (skb->skb_recycling_callback) {
+		if ((*skb->skb_recycling_callback)(skb))
+			return;
+	}
+	skb->skb_recycling_callback = NULL;
+#endif
 	kfree_skbmem(skb);
 }
 
@@ -413,6 +413,7 @@ static struct sk_buff *__skb_clone(struct sk_buff *n, struct sk_buff *skb)
 	n->destructor = NULL;
 #if defined(CONFIG_RAETH_SKB_RECYCLE_2K)
 	n->skb_recycling_callback = NULL;
+	skb->skb_recycling_callback = NULL;
 #endif
 	C(mark);
 	__nf_copy(n, skb);

@@ -1781,6 +1781,13 @@ static inline int skb_is_gso(const struct sk_buff *skb)
 	return skb_shinfo(skb)->gso_size;
 }
 
+static inline void skb_forward_csum(struct sk_buff *skb)
+{
+	/* Unfortunately we don't support this one.  Any brave souls? */
+	if (skb->ip_summed == CHECKSUM_COMPLETE)
+		skb->ip_summed = CHECKSUM_NONE;
+}
+
 #if defined(CONFIG_RAETH_SKB_RECYCLE_2K)
 struct sk_buff *skbmgr_alloc_skb2k(void);
 int skbmgr_recycling_callback(struct sk_buff *skb);
@@ -1803,15 +1810,7 @@ static inline struct sk_buff *skbmgr_dev_alloc_skb4k(void)
 		skb_reserve(skb, NET_SKB_PAD);
 	return skb;
 }
-
 #endif
-
-static inline void skb_forward_csum(struct sk_buff *skb)
-{
-	/* Unfortunately we don't support this one.  Any brave souls? */
-	if (skb->ip_summed == CHECKSUM_COMPLETE)
-		skb->ip_summed = CHECKSUM_NONE;
-}
 
 #endif	/* __KERNEL__ */
 #endif	/* _LINUX_SKBUFF_H */
