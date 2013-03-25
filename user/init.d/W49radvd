@@ -41,13 +41,15 @@ calculate_and_set_mtu() {
     let "sitmtu=$wanmtu - $overhead_sit"
     let "ipvmtu=$wanmtu - $overhead_all"
 
-    # set defaults
-    sysctl -wq net.ipv6.conf.all.mtu="$ipvmtu"
-    sysctl -wq net.ipv6.conf.default.mtu="$ipvmtu"
+    # set mtu for lan
+    sysctl -wq  net.ipv6.conf."$lan_if".mtu="$ipvmtu"
+    if [ "$Lan2Enabled" = "1" ]; then
+	sysctl -wq  net.ipv6.conf."$lan2_if".mtu="$ipvmtu"
+    fi
 }
 
 start() {
-    radvdEnabled=`nvram_get 2860 radvdEnabled`
+    radvdEnabled=`nvram_get 2860 radvdEnabled Lan2Enabled`
     if [ "$radvdEnabled" = "1" ]; then
 	ipv6subnet="2000"
 	if [ "$real_wan_ipaddr" != "" ]; then
