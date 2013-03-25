@@ -1,0 +1,153 @@
+﻿#EXTM3U cache=500 deinterlace=1 aspect-ratio=4:3 url-tvg="http://tv.adslclub.ru/jtv.zip" tvg-shift=0 m3uautoload=1 
+#EXTINF:-1 group-title="Эфир - Омск" ,Первый
+udp://@239.3.2.3:3000
+#EXTINF:-1,Россия 1
+udp://@239.3.2.6:3000
+#EXTINF:-1,ТВ Центр
+udp://@239.3.2.1:3000 
+#EXTINF:-1,ТНТ
+udp://@239.3.2.2:3000 
+#EXTINF:-1,НТВ
+udp://@239.3.2.4:3000 
+#EXTINF:-1,Домашний
+udp://@239.3.2.5:3000 
+#EXTINF:-1,MTV
+udp://@239.3.2.7:3000 
+#EXTINF:-1,СТС
+udp://@239.3.2.8:3000 
+#EXTINF:-1,ТВ3
+udp://@239.3.2.9:3000 
+#EXTINF:-1,РЕН-ТВ
+udp://@239.3.2.10:3000
+#EXTINF:-1,7 ТВ
+udp://@239.3.2.11:3000
+#EXTINF:-1,5 канал Санкт-Петербург
+udp://@239.3.2.12:3000
+#EXTINF:-1,Культура
+udp://@239.3.2.13:3000
+#EXTINF:-1,Перец
+udp://@239.3.2.14:3000
+#EXTINF:-1,Россия 2
+udp://@239.3.2.15:3000
+#EXTINF:-1,МузТВ
+udp://@239.3.2.16:3000
+#EXTINF:-1 tvg-logo="РБК" ,РБК Омск
+udp://@239.3.2.17:3000
+#EXTINF:-1 tvg-name="Эксперт_ТВ" crop=710x420+5+80 aspect-ratio=None group-title="Спутниковые каналы" ,Эксперт ТВ
+udp://@233.7.70.20:5000
+#EXTINF:-1 tvg-name="Amazing_Life"    crop=690x550+10+10 ,Amazing Life
+udp://@233.7.70.21:5000
+#EXTINF:-1 tvg-name="РБК"             crop=700x550+10+10 ,РБК
+udp://@233.7.70.22:5000
+#EXTINF:-1 tvg-name="СГУ_ТВ"          crop=690x550+10+10 ,СГУ ТВ
+udp://@233.7.70.23:5000
+#EXTINF:-1 tvg-name="Союз"            crop=700x550+10+10 ,Союз
+udp://@233.7.70.24:5000
+#EXTINF:-1 tvg-name="Drive"           crop=700x550+10+10 ,Драйв
+udp://@233.7.70.31:5000
+#EXTINF:-1 tvg-name="National_Geographic" crop=690x550+10+10 ,National Geographic
+udp://@233.7.70.32:5000
+#EXTINF:-1 tvg-name="TV_XXI"          crop=700x550+10+10 ,TVXXI
+udp://@233.7.70.35:5000
+#EXTINF:-1 tvg-name="КХЛ_ТВ"          crop=700x550+10+10 ,КХЛ
+udp://@233.7.70.37:5000
+#EXTINF:-1 tvg-name="Jetix"           crop=688x556+16+8  ,Disney Channel
+udp://@233.7.70.9:5000
+#EXTINF:-1 tvg-name="Бибигон"         crop=700x550+5+10  ,Карусель
+udp://@233.7.70.40:5000
+#EXTINF:-1 tvg-name="Мать_и_дитя"     crop=520x550+5+10  ,Мать и дитя
+udp://@233.7.70.41:5000
+#EXTINF:-1 tvg-name="Euronews" crop=700x550+10+10 aspect-ratio=16:9 ,Euronews
+udp://@233.7.70.42:5000
+#EXTINF:-1 tvg-name="2x2"             crop=700x550+10+10 ,2x2
+udp://@233.7.70.43:5000
+#EXTINF:-1 tvg-name="РетроТВ"         crop=700x550+10+10 ,Ретро ТВ
+udp://@233.7.70.44:5000
+#EXTINF:-1 tvg-name="Юмор_TV" tvg-logo="Юмор TV" crop=520x550+10+10 ,Humor Box
+udp://@233.7.70.46:5000
+#EXTINF:-1 tvg-name="Fashion_TV" crop=700x550+10+10 aspect-ratio=16:9 ,Fashion TV
+udp://@233.7.70.47:5000
+#EXTINF:-1 tvg-name="Охота_и_рыбалка" crop=700x550+10+10 ,Охота и рыбалка
+udp://@233.7.70.48:5000
+#EXTINF:-1 tvg-name="Здоровое_ТВ"     crop=700x550+10+10 ,Здоровое ТВ
+udp://@233.7.70.49:5000
+#EXTINF:-1 tvg-name="TDK"             crop=700x550+10+10 ,ТДК
+udp://@233.7.70.50:5000
+#EXTINF:-1 tvg-name="Усадьба"         crop=700x550+10+10 ,Усадьба ТВ
+udp://@233.7.70.51:5000
+#EXTINF:-1 tvg-name="A-One"           crop=700x550+10+10 ,A-One
+udp://@233.7.70.52:5000
+#EXTINF:-1 tvg-name="Music_Box_TV"    crop=520x550+5+10  ,Music Box TV
+udp://@233.7.70.53:5000
+#EXTINF:-1 tvg-name="Music_Box_Ru"    crop=520x550+5+10  ,Music Box RU
+udp://@233.7.70.54:5000
+#EXTINF:-1 tvg-name="O2TV"            crop=700x550+10+10 ,O2 TV
+udp://@233.7.70.55:5000
+#EXTINF:-1 tvg-name="TopShop_TV"      crop=700x550+10+10 ,TopShop TV
+udp://@233.7.70.56:5000
+#EXTINF:-1 tvg-name="Агро-ТВ"         crop=700x550+10+10 ,Агро-ТВ
+udp://@233.7.70.57:5000
+#EXTINF:-1 tvg-name="Мир"             crop=700x550+10+10 ,Мир
+udp://@233.7.70.58:5000
+#EXTINF:-1 tvg-name="Петербург_-_5_канал" crop=700x550+10+10 ,5 Канал Санкт-Петербург
+udp://@233.7.70.60:5000
+#EXTINF:-1 tvg-name="ТВ3"             crop=700x550+10+10 ,ТВ3
+udp://@233.7.70.65:5000
+#EXTINF:-1 tvg-name="Вести"           crop=504x545+15+10 ,Россия 24
+udp://@233.7.70.68:5000
+#EXTINF:-1 tvg-name="Звезда"          crop=690x550+10+10 ,Звезда
+udp://@233.7.70.69:5000
+#EXTINF:-1 tvg-name="Настоящее_Страшное_ТВ" crop=530x550+10+10 ,НСТ
+udp://@233.7.70.74:5000
+#EXTINF:-1 tvg-name="Спорт_1" crop=710x560+5+5 aspect-ratio=16:9 ,Спорт 1
+udp://@233.7.70.75:5000
+#EXTINF:-1 tvg-name="Russia_Today"    crop=700x550+10+10 ,Russia Today
+udp://@233.7.70.82:5000
+#EXTINF:-1 tvg-name="Ru_TV"           crop=700x550+10+10 ,RuTV
+udp://@233.7.70.83:5000
+#EXTINF:-1 tvg-name="Феникс_Кино" crop=700x550+10+10  group-title="Каналы на тестировании" ,Феникс+Кино
+udp://@233.7.70.86:5000
+#EXTINF:-1 tvg-name="Travel_Channel"  crop=700x550+10+10 ,Travel Channel
+udp://@233.7.70.87:5000
+#EXTINF:-1 tvg-name="24_Техно"        crop=520x550+15+10 ,24 Техно
+udp://@233.7.70.89:5000
+#EXTINF:-1 tvg-name="Домашние_животные" crop=700x550+10+10 ,Домашние животные
+udp://@233.7.70.91:5000
+#EXTINF:-1 tvg-name="Вопросы_и_Ответы" crop=700x550+10+10 ,Вопросы и Ответы
+udp://@233.7.70.92:5000
+#EXTINF:-1 tvg-name="Психология_21"    crop=700x550+10+10 ,Психология 21
+udp://@233.7.70.93:5000
+#EXTINF:-1 tvg-name="Ocean_TV"         crop=700x550+10+10 ,Ocean TV
+udp://@233.7.70.95:5000
+#EXTINF:-1 tvg-name="Englishclub_TV" crop=700x550+10+10 aspect-ratio=16:9 ,English Club TV
+udp://@233.7.70.96:5000
+#EXTINF:-1 tvg-name="Nickelodeon"      crop=700x550+10+10 ,Nickelodeon
+udp://@233.7.70.97:5000
+#EXTINF:-1 tvg-name="KidsCo" audio-track=1 crop=530x550+10+10 ,KidsCo
+udp://@233.7.70.98:5000
+#EXTINF:-1 tvg-name="Радость_моя"      crop=690x550+10+10 ,Радость моя
+udp://@233.7.70.100:5000
+#EXTINF:-1 tvg-name="Rap.Ru"           crop=700x550+10+10 ,RAP.RU
+udp://@233.7.70.103:5000
+#EXTINF:-1 tvg-name="Zee_TV"           crop=690x550+10+10 ,Zee TV
+udp://@233.7.70.104:5000
+#EXTINF:-1 tvg-name="Живи"             crop=700x550+10+10 ,Живи
+udp://@233.7.70.105:5000
+#EXTINF:-1 tvg-name="MCM_Top" crop=700x550+10+10 aspect-ratio=16:9 ,MCM Top
+udp://@233.7.70.109:5000
+#EXTINF:-1 tvg-name="Bridge_TV"        crop=700x550+10+10 ,Bridge TV
+udp://@233.7.70.110:5000
+#EXTINF:-1 tvg-name="Style_TV"         crop=690x550+10+10 ,Style TV
+udp://@233.7.70.140:5000
+#EXTINF:-1 tvg-name="World_Fashion_Channel" crop=700x550+10+10 ,World Fashion Channel
+udp://@233.7.70.141:5000
+#EXTINF:-1 tvg-name="ТРО"              crop=520x550+10+10 ,ТРО Союз
+udp://@233.7.70.143:5000
+#EXTINF:-1 tvg-name="Татарстан_-_Новый_Век" crop=520x550+10+10 ,Татарстан Новый Век
+udp://@233.7.70.144:5000
+#EXTINF:-1 tvg-name="France_24" crop=700x550+10+10 aspect-ratio=16:9 ,France 24
+udp://@233.7.70.149:5000
+#EXTINF:-1 tvg-name="VH1_European" tvg-logo="VH1" crop=700x550+10+10 ,VH1 European
+udp://@233.7.70.152:5000
+#EXTINF:-1 tvg-name="ТВ_АРМ"            crop=530x550+10+10 ,ТВ АРМ
+udp://@233.7.70.166:5000
