@@ -81,6 +81,7 @@ start() {
 		ip -6 route replace ${ipv6subnet}::/3 via ::${relay6to4} dev $tunif metric 1
 		# set mtu to sit
 		sysctl -wq net.ipv6.conf.sit0.mtu="$sitmtu"
+		ip link set mtu $sitmtu dev $tunif
 	    fi
 	else
 	    $LOG "No ipv4 adress on wan, exit"
