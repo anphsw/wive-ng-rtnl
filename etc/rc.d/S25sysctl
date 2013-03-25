@@ -15,7 +15,7 @@ start() {
     else
 	krn_domain="Wive-NG-RTNL"
     fi
-    sysctl -w kernel.domainname="$krn_domain"
+    sysctl -wq kernel.domainname="$krn_domain"
 
 ###################### SECTION FOR SAMBA AND TRANSMISION KERNEL TUNE ###################
     eval `nvram_buf_get 2860 SmbEnabled TransmissionEnabled xupnpd dhcpDomain`
@@ -29,11 +29,11 @@ start() {
 	# max memory size
 	ulimit -m unlimited
 	# always overommit
-	sysctl -w vm.overcommit_ratio=100
-	sysctl -w vm.overcommit_memory=2
+	sysctl -wq vm.overcommit_ratio=100
+	sysctl -wq vm.overcommit_memory=2
     else
 	# heruistic overcommit
-	sysctl -w vm.overcommit_memory=0
+	sysctl -wq vm.overcommit_memory=0
     fi
 
 #################################### SET PARANOID PARAMS###################################

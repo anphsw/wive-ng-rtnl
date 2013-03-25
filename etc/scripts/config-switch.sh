@@ -55,7 +55,7 @@ start_sw_config() {
 		$LOG "Double vlan tag and HW_NAT disabled. HW_VLAN offload enabled."
 		DOUBLE_TAG=0
 	    fi
-	    sysctl -w net.ipv4.vlan_double_tag="$DOUBLE_TAG"
+	    sysctl -wq net.ipv4.vlan_double_tag="$DOUBLE_TAG"
 	fi
     fi
 }
@@ -270,14 +270,14 @@ if [ "$CONFIG_RT_3052_ESW" != "" ]; then
     if [ "$CONFIG_RAETH_DHCP_TOUCH" != "" ]; then
         if [ "$OperationMode" = "0" ] || [ "$OperationMode" = "2" ] || [ "$ApCliBridgeOnly" = "1" ]; then
 	    # disable dhcp renew from driver
-	    sysctl -w net.ipv4.send_sigusr_dhcpc=9
+	    sysctl -wq net.ipv4.send_sigusr_dhcpc=9
 	else
 	    if [ "$ForceRenewDHCP" != "0" ] && [ "$wan_port" != "" ]; then
 		# configure event wait port
-		sysctl -w net.ipv4.send_sigusr_dhcpc=$wan_port
+		sysctl -wq net.ipv4.send_sigusr_dhcpc=$wan_port
 	    else
 		# disable dhcp renew from driver
-		sysctl -w net.ipv4.send_sigusr_dhcpc=9
+		sysctl -wq net.ipv4.send_sigusr_dhcpc=9
 	    fi
 	fi
     fi

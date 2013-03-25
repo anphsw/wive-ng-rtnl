@@ -27,13 +27,13 @@ start() {
 nat_mode() {
     eval `nvram_buf_get 2860 nat_mode`
     if [ "$nat_mode" = "0" ]; then
-	sysctl -w net.nf_conntrack_nat_mode=0
+	sysctl -wq net.nf_conntrack_nat_mode=0
 	$LOG "Nat mode Linux"
     elif [ "$nat_mode" = "2" ]; then
-	sysctl -w net.nf_conntrack_nat_mode=2
+	sysctl -wq net.nf_conntrack_nat_mode=2
 	$LOG "Nat mode Restricted Cone"
     else
-	sysctl -w net.nf_conntrack_nat_mode=1
+	sysctl -wq net.nf_conntrack_nat_mode=1
 	$LOG "Nat mode Full Cone"
     fi
 }
@@ -85,9 +85,9 @@ hw_nat_en() {
 	fi
 	# configure software nat offload
 	if [ "$sw_nat" = "1" ]; then
-	    sysctl -w net.nf_conntrack_fastnat=1
+	    sysctl -wq net.nf_conntrack_fastnat=1
 	else
-	    sysctl -w net.nf_conntrack_fastnat=0
+	    sysctl -wq net.nf_conntrack_fastnat=0
 	fi
 	# if any QoS/Shaper mode and hw_nat ebables need increase binding threshold
 	if [ "$QoSEnable" != "" ] && [ "$QoSEnable" != "0" ]; then
@@ -100,7 +100,7 @@ hw_nat_en() {
 	fi
     else
 	$LOG "NAT Offload mode DISABLE"
-	sysctl -w net.nf_conntrack_fastnat=0
+	sysctl -wq net.nf_conntrack_fastnat=0
 	if [ -d /sys/module/hw_nat ]; then
 	    rmmod hw_nat > /dev/null 2>&1
 	fi
@@ -138,9 +138,9 @@ vpn_limit() {
     vpnCpuLimit=`nvram_get 2860 vpnCpuLimit`
     if [ "$vpnCpuLimit" != "" ] && [ "$vpnCpuLimit" != "0" ]; then
 	$LOG "Limit cpu load for PPP to $vpnCpuLimit ticks"
-	sysctl -w net.ipv4.ppp_cpu_load_limit=$vpnCpuLimit
+	sysctl -wq net.ipv4.ppp_cpu_load_limit=$vpnCpuLimit
     else
-	sysctl -w net.ipv4.ppp_cpu_load_limit=0
+	sysctl -wq net.ipv4.ppp_cpu_load_limit=0
     fi
 }
 
@@ -149,9 +149,9 @@ bridge_fastpath() {
     bridgeFastpath=`nvram_get 2860 bridgeFastpath`
     if [ "$bridgeFastpath" != "0" ]; then
 	$LOG "Bridge fastpath enabled."
-	sysctl -w net.ipv4.bridge_fastpath=1
+	sysctl -wq net.ipv4.bridge_fastpath=1
     else
-	sysctl -w net.ipv4.bridge_fastpath=0
+	sysctl -wq net.ipv4.bridge_fastpath=0
     fi
 }
 

@@ -24,7 +24,7 @@ rmmod_mod="hw_nat ppp_mppe pppol2tp pptp pppoe pppox ppp_generic imq ipt_account
 	    usblp usb-storage usbserial hso ext2 ext3 cifs"
 
 # disable forward
-sysctl -w net.ipv4.ip_forward=0
+sysctl -wq net.ipv4.ip_forward=0
 echo 0 > /proc/sys/net/ipv4/conf/all/mc_forwarding
 echo 0 > /proc/sys/net/ipv4/conf/default/mc_forwarding
 
@@ -115,9 +115,9 @@ unload_apps() {
 
 free_mem_cahce() {
     # small workaround for defrag ane clean mem
-    sysctl -w vm.min_free_kbytes=2048
+    sysctl -wq vm.min_free_kbytes=2048
     sync
-    sysctl -w vm.min_free_kbytes=1024
+    sysctl -wq vm.min_free_kbytes=1024
 }
 
 # unload all applications

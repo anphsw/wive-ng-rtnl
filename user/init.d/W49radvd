@@ -42,8 +42,8 @@ calculate_and_set_mtu() {
     let "ipvmtu=$wanmtu-$overhead_all"
 
     # set defaults
-    sysctl -w net.ipv6.conf.all.mtu="$ipvmtu"
-    sysctl -w net.ipv6.conf.default.mtu="$ipvmtu"
+    sysctl -wq net.ipv6.conf.all.mtu="$ipvmtu"
+    sysctl -wq net.ipv6.conf.default.mtu="$ipvmtu"
 }
 
 start() {
@@ -80,7 +80,7 @@ start() {
 		ip -6 addr add ${ipv6prefix}::1/16 dev $tunif
 		ip -6 route replace ${ipv6subnet}::/3 via ::${relay6to4} dev $tunif metric 1
 		# set mtu to sit
-		sysctl -w net.ipv6.conf.sit0.mtu="$sitmtu"
+		sysctl -wq net.ipv6.conf.sit0.mtu="$sitmtu"
 	    fi
 	else
 	    $LOG "No ipv4 adress on wan, exit"
