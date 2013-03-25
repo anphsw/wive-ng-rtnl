@@ -21,9 +21,9 @@ MAKEFLAGS     = -rR --no-print-directory
 MOREOPTIMIZE  = -O2
 
 # Decrease modules size
-#ifdef CONFIG_RT2880_FLASH_4M
-#    MODULES_SMALL_SIZE = 1
-#endif
+ifdef CONFIG_RT2880_FLASH_4M
+    MODULES_SMALL_SIZE = 1
+endif
 
 # this flags for fast net debug enable
 #802.11
@@ -578,10 +578,11 @@ CFLAGS += $(call cc-disable-warning, unused-but-set-variable)
 
 ifdef MODULES_SMALL_SIZE
 # if flash size is small use optimize for size
-CFLAGS_MODULE   = $(MODFLAGS) $(CFLAGS) -Os
+CFLAGS_MODULE = $(MODFLAGS) $(CFLAGS) -Os
+CFLAGS_MODULE += $(call cc-option,-fno-caller-saves)
 else
 # if flash size big use full optimize for speed
-CFLAGS_MODULE   = $(MODFLAGS) $(CFLAGS) $(MOREOPTIMIZE)
+CFLAGS_MODULE = $(MODFLAGS) $(CFLAGS) $(MOREOPTIMIZE)
 endif
 
 # arch Makefile may override CC so keep this after arch Makefile is included
