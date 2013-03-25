@@ -338,6 +338,9 @@ static void skb_release_head_state(struct sk_buff *skb)
 	skb->tc_verd = 0;
 #endif
 #endif
+#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+	DO_FAST_CLEAR_FOE(skb); // fast clear FoE info header
+#endif
 }
 
 /* Free everything but the sk_buff shell. */
