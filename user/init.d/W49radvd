@@ -33,7 +33,7 @@ calculate_and_set_mtu() {
     else
 	overhead_sit="20"
     fi
-    let "overhead_all=$overhead_sit - 40"
+    let "overhead_all=$overhead_sit + 40"
 
     # get mtu from wan
     wanmtu=`ip link show $real_wan_if | grep mtu | awk {' print $5 '}`
