@@ -314,9 +314,6 @@ struct sk_buff {
 	__be16			protocol;
 
 	void			(*destructor)(struct sk_buff *skb);
-#if defined(CONFIG_RAETH_SKB_RECYCLE_2K)
-	int			(*skb_recycling_callback)(struct sk_buff *skb);
-#endif
 #ifdef CONFIG_NETFILTER
 	struct nf_conntrack	*nfct;
 #if defined(CONFIG_NF_CONNTRACK) || defined(CONFIG_NF_CONNTRACK_MODULE)
@@ -386,6 +383,10 @@ static inline struct sk_buff *alloc_skb_fclone(unsigned int size,
 	return __alloc_skb(size, priority, 1, -1);
 }
 
+#ifdef CONFIG_RAETH_SKB_RECYCLE
+extern bool skb_recycle_check(struct sk_buff *skb, int skb_size);
+#endif
+
 extern struct sk_buff *skb_morph(struct sk_buff *dst, struct sk_buff *src);
 extern struct sk_buff *skb_clone(struct sk_buff *skb,
 				 gfp_t priority);
@@ -429,6 +430,18 @@ extern void	      skb_abort_seq_read(struct skb_seq_state *st);
 extern unsigned int   skb_find_text(struct sk_buff *skb, unsigned int from,
 				    unsigned int to, struct ts_config *config,
 				    struct ts_state *state);
+
+#ifdef NET_SKBUFF_DATA_USES_OFFSET
+static inline unsigned char *skb_end_pointer(const struct sk_buff *skb)
+{
+	return skb->head + skb->end;
+}
+#else
+static inline unsigned char *skb_end_pointer(const struct sk_buff *skb)
+{
+	return skb->end;
+}
+#endif
 
 /* Internal */
 #define skb_shinfo(SKB)		((struct skb_shared_info *)((SKB)->end))
@@ -1787,30 +1800,6 @@ static inline void skb_forward_csum(struct sk_buff *skb)
 	if (skb->ip_summed == CHECKSUM_COMPLETE)
 		skb->ip_summed = CHECKSUM_NONE;
 }
-
-#if defined(CONFIG_RAETH_SKB_RECYCLE_2K)
-struct sk_buff *skbmgr_alloc_skb2k(void);
-int skbmgr_recycling_callback(struct sk_buff *skb);
-
-static inline struct sk_buff *skbmgr_dev_alloc_skb2k(void)
-{
-	struct sk_buff *skb = skbmgr_alloc_skb2k();
-	if (likely(skb))
-		skb_reserve(skb, NET_SKB_PAD);
-	return skb;
-}
-
-struct sk_buff *skbmgr_alloc_skb4k(void);
-int skbmgr_4k_recycling_callback(struct sk_buff *skb);
-
-static inline struct sk_buff *skbmgr_dev_alloc_skb4k(void)
-{
-	struct sk_buff *skb = skbmgr_alloc_skb4k();
-	if (likely(skb))
-		skb_reserve(skb, NET_SKB_PAD);
-	return skb;
-}
-#endif
 
 #endif	/* __KERNEL__ */
 #endif	/* _LINUX_SKBUFF_H */

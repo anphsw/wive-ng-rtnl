@@ -1266,9 +1266,6 @@ static int rt2880_eth_recv(struct net_device* dev)
 		if (unlikely(skb==NULL)) {
 		    skb = __netdev_alloc_skb(dev, MAX_RX_LENGTH + NET_IP_ALIGN, GFP_ATOMIC);
 		}
-#elif defined (CONFIG_RAETH_SKB_RECYCLE_2K)
-                skb = skbmgr_dev_alloc_skb2k();
-#else
 		skb = __netdev_alloc_skb(dev, MAX_RX_LENGTH + NET_IP_ALIGN , GFP_ATOMIC);
 #endif
 
@@ -2814,11 +2811,7 @@ int ei_open(struct net_device *dev)
         /* receiving packet buffer allocation - NUM_RX_DESC x MAX_RX_LENGTH */
         for ( i = 0; i < NUM_RX_DESC; i++)
         {
-#if defined (CONFIG_RAETH_SKB_RECYCLE_2K)
-                ei_local->netrx0_skbuf[i] = skbmgr_dev_alloc_skb2k();
-#else
                 ei_local->netrx0_skbuf[i] = netdev_alloc_skb(dev, MAX_RX_LENGTH + NET_IP_ALIGN);
-#endif
                 if (ei_local->netrx0_skbuf[i] == NULL ) {
                         printk("rx skbuff buffer allocation failed!");
 		} else {
