@@ -580,6 +580,13 @@ startv6() {
 	# temp rules need enchange in future
 	ip6tables -A INPUT -i $lan_if -j ACCEPT
 	ip6tables -A FORWARD -i $lan_if -j ACCEPT
+
+	# allow mupnp to open connection from earth to local
+	if [ "$upnpEnabled" = "1" ]; then
+	    ip6tables -t filter -N MINIUPNPD
+	    ip6tables -t filter -A FORWARD -i $tunif ! -o $tunif -j MINIUPNPD
+	fi
+
 }
 
 stopv6() {
