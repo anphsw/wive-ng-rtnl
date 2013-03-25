@@ -431,18 +431,6 @@ extern unsigned int   skb_find_text(struct sk_buff *skb, unsigned int from,
 				    unsigned int to, struct ts_config *config,
 				    struct ts_state *state);
 
-#ifdef NET_SKBUFF_DATA_USES_OFFSET
-static inline unsigned char *skb_end_pointer(const struct sk_buff *skb)
-{
-	return skb->head + skb->end;
-}
-#else
-static inline unsigned char *skb_end_pointer(const struct sk_buff *skb)
-{
-	return skb->end;
-}
-#endif
-
 /* Internal */
 #define skb_shinfo(SKB)		((struct skb_shared_info *)((SKB)->end))
 

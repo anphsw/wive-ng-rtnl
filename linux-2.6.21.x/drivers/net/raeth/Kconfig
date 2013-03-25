@@ -42,10 +42,6 @@ config RAETH_SKB_RECYCLE
         bool "SKB Recycle(Linux)"
         depends on RAETH
 
-config RAETH_SKB_RECYCLE_2K
-        bool "SKB Recycle_2K(Proprietary)"
-	depends on RAETH
-
 config RAETH_SPECIAL_TAG
         bool "Ralink Special Tag (0x810x)"
 	depends on RAETH && RT_3052_ESW
