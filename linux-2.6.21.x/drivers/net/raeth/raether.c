@@ -1254,7 +1254,7 @@ static int rt2880_eth_recv(struct net_device* dev)
 #endif /* CONFIG_RA_CLASSIFIER */
 
 #if defined (CONFIG_RA_HW_NAT) || defined (CONFIG_RA_HW_NAT_MODULE)
-		FOE_MAGIC_TAG(rx_skb)= FOE_MAGIC_GE;
+		FOE_MAGIC_TAG(rx_skb)=FOE_MAGIC_GE;
 		memcpy(FOE_INFO_START_ADDR(rx_skb)+2, &rx_ring[rx_dma_owner_idx].rxd_info4, sizeof(PDMA_RXD_INFO4_T));
 		FOE_ALG(rx_skb) = 0;
 #endif
@@ -1263,12 +1263,11 @@ static int rt2880_eth_recv(struct net_device* dev)
 		 * before pass the packet to cpu*/
 #if defined (CONFIG_RAETH_SKB_RECYCLE)
 		skb = __skb_dequeue_tail(&ei_local->rx0_recycle);
-		if (!skb) {
-		    skb = __netdev_alloc_skb(dev, MAX_RX_LENGTH + NET_IP_ALIGN, GFP_ATOMIC);
-		}
-#else
-		skb = __netdev_alloc_skb(dev, MAX_RX_LENGTH + NET_IP_ALIGN , GFP_ATOMIC);
+		if (likely(skb != NULL))
+		    skb->dst=NULL;
+		else
 #endif
+		skb = __netdev_alloc_skb(dev, MAX_RX_LENGTH + NET_IP_ALIGN , GFP_ATOMIC);
 
 		if (unlikely(skb == NULL))
 		{
