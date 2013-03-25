@@ -77,22 +77,23 @@ ifdef UCLINUX_BUILD_LIB
 ifdef CONFIG_LIB_DEBUG
 	CFLAGS  :=  $(if $(LOPT),$(LOPT),-O1) -g
 else
-	CFLAGS  :=  $(if $(LOPT),$(LOPT),-Os) -fomit-frame-pointer -fno-stack-protector -fno-conserve-stack
+	CFLAGS  :=  $(if $(LOPT),$(LOPT),-Os) -fomit-frame-pointer -fno-stack-protector
 endif
 ifdef CONFIG_LIB_SMALLSIZE
 	# Defeat .eh_frame bloat (~25% smaller binary)
 	CFLAGS += -fno-caller-saves
 	CFLAGS += -fno-unwind-tables
+	CFLAGS += -fno-conserve-stack
 	CFLAGS += -fno-asynchronous-unwind-tables
 else
 ifdef CONFIG_RT2880_FLASH_4M
 	# This is ~5% speedup for result bynary before pure -Os
 	# and ~2% bigest unpacked rootfs size
-	CFLAGS += -ffast-math -fforce-addr
+	CFLAGS += -ffast-math -fforce-addr -fno-conserve-stack
 else
 	# This is improve performance ~10% before pure -Os
 	# and ~5% bigest unpacked rootfs size
-	CFLAGS += -funit-at-a-time -membedded-data -muninit-const-in-rodata -ffast-math -fforce-addr
+	CFLAGS += -funit-at-a-time -membedded-data -muninit-const-in-rodata -ffast-math -fforce-addr -fconserve-stack
 endif
 endif
 	#disable new loop optimization mode in 4.8.0 and later - fix regressions
@@ -127,16 +128,17 @@ ifdef CONFIG_USER_SMALLSIZE
 	# Defeat .eh_frame bloat (~25% smaller binary)
 	CFLAGS += -fno-caller-saves
 	CFLAGS += -fno-unwind-tables
+	CFLAGS += -fno-conserve-stack
 	CFLAGS += -fno-asynchronous-unwind-tables
 else
 ifdef CONFIG_RT2880_FLASH_4M
 	# This is ~5% speedup for result bynary before pure -Os
 	# and ~2% bigest unpacked rootfs size
-	CFLAGS += -ffast-math -fforce-addr
+	CFLAGS += -ffast-math -fforce-addr -fno-conserve-stack
 else
 	# This is improve performance ~10% before pure -Os
 	# and ~5% bigest unpacked rootfs size
-	CFLAGS += -funit-at-a-time -membedded-data -muninit-const-in-rodata -ffast-math -fforce-addr
+	CFLAGS += -funit-at-a-time -membedded-data -muninit-const-in-rodata -ffast-math -fforce-addr -fconserve-stack
 endif
 endif
 	#disable new loop optimization mode in 4.8.0 and later - fix regressions
