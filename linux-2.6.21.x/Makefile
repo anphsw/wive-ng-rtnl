@@ -578,8 +578,9 @@ CFLAGS += $(call cc-disable-warning, unused-but-set-variable)
 
 ifdef MODULES_SMALL_SIZE
 # if flash size is small use optimize for size
-CFLAGS_MODULE = $(MODFLAGS) $(CFLAGS) -Os
+CFLAGS_MODULE = $(MODFLAGS) -Os
 CFLAGS_MODULE += $(call cc-option,-fno-caller-saves)
+CFLAGS_MODULE += $(call cc-option,-fno-conserve-stack)
 else
 # if flash size big use full optimize for speed
 CFLAGS_MODULE = $(MODFLAGS) $(CFLAGS) $(MOREOPTIMIZE)
