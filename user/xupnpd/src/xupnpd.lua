@@ -75,7 +75,7 @@ cfg.playlists_update_interval=0
 -- playlist (m3u file path or path with alias
 playlist=
 {
---    { './localmedia', 'Local Media Files' }
+--    { '/media', 'Local Media Files' }
 }
 
 -- feeds list (plugin, feed name, feed type)
@@ -84,7 +84,7 @@ feeds=
 --    { 'vimeo',          'channel/hd',           'Vimeo HD Channel' },
 --    { 'vimeo',          'channel/hdxs',         'Vimeo Xtreme sports' },
 --    { 'vimeo',          'channel/mtb',          'Vimeo MTB Channel' },
-    { 'youtube',        'channel/top_rated',    'YouTube Top Rated' },
+--    { 'youtube',        'channel/top_rated',    'YouTube Top Rated' },
 --    { 'youtube',        'Drift0r',              'Drift0r' },
 --    { 'youtube',        'XboxAhoy',             'XboxAhoy' },
 --    { 'ag',             'videos',               'AG - New' },
