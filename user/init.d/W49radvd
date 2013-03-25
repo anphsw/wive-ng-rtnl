@@ -17,6 +17,7 @@ if [ "$OperationMode" = "0" ]; then
 fi
 
 LOG="logger -t radvd"
+
 set_mtu() {
     if [ "$vpnEnabled" = "on" ] && [ "$vpnType" != "6" ]; then
 	if [ "$vpnType" != "0" ]; then
@@ -36,7 +37,7 @@ set_mtu() {
 
     # get mtu from wan
     wanmtu=`ip link show $real_wan_if | grep mtu | awk {' print $5 '}`
-    # calculate
+    # calculate mtu
     let "sitmtu=$wanmtu-$overhead_sit"
     let "ipvmtu=$wanmtu-$overhead_all"
 
@@ -49,12 +50,10 @@ set_mtu() {
 start() {
     radvdEnabled=`nvram_get 2860 radvdEnabled`
     if [ "$radvdEnabled" = "1" ]; then
-
-	# rebuild ipv6 rules
-	service iptables restartv6
-
 	ipv6subnet="2000"
 	if [ "$real_wan_ipaddr" != "" ]; then
+	    # rebuild ipv6 rules
+	    service iptables restartv6
 	    # calculate and set mtu
 	    set_mtu
 	    $LOG "Tunel ipv6 in ipv4 configure and up"
