@@ -20,13 +20,13 @@ LOG="logger -t radvd"
 
 calculate_and_set_mtu() {
     if [ "$vpnEnabled" = "on" ] && [ "$vpnType" != "6" ]; then
-	if [ "$vpnType" != "0" ]; then
+	if [ "$vpnType" = "0" ]; then
 	    # PPPOE
 	    overhead_sit="28"
-	elif [ "$vpnType" != "1" ]; then
+	elif [ "$vpnType" = "1" ]; then
 	    # PPTP
 	    overhead_sit="54"
-	elif [ "$vpnType" != "2" ]; then
+	elif [ "$vpnType" = "2" ]; then
 	    # L2TP
 	    overhead_sit="60"
 	fi
