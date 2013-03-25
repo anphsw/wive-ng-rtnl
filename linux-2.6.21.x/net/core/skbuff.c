@@ -526,7 +526,7 @@ bool skb_recycle_check(struct sk_buff *skb, int skb_size)
 	atomic_set(&shinfo->dataref, 1);
 
 	memset(skb, 0, offsetof(struct sk_buff, tail));
-	skb->data = skb->head + NET_SKB_PAD;
+	skb->data = skb->head + NET_SKB_PAD_ORIG;
 	skb_reset_tail_pointer(skb);
 
 	return true;
