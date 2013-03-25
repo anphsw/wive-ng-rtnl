@@ -1425,7 +1425,8 @@
 17) init.d: iptables: consolidate v4/v6 rules in one script.<br>
 18) init.d: prevent hot replace routes - fix tunnel restart at renew issue (set RouteUpOnce=0 for old mode).<br>
 19) init.d: full config dhcp client logic move to wan script.<br>
-20) defaults: set HT_MIMOPSMode=3 - need for multiple TX/RX streams compat.<br>
+20) init.d: transmission: auto make home dir and check disc mount before start.<br>
+21) defaults: set HT_MIMOPSMode=3 - need for multiple TX/RX streams compat.<br>
 
 <br>
 <br>
