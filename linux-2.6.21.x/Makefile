@@ -20,11 +20,6 @@ MAKEFLAGS     = -rR --no-print-directory
 # Use -O2 for kernel code. Route/NAT speed up ~15-20% more -Os.
 MOREOPTIMIZE  = -O2
 
-# Decrease modules size
-ifdef CONFIG_RT2880_FLASH_4M
-    MODULES_SMALL_SIZE = 1
-endif
-
 # this flags for fast net debug enable
 #802.11
 #MOREOPTIMIZE += -DWE_IOCTL_DEBUG -DWE_EVENT_DEBUG -DWE_SPY_DEBUG
@@ -576,7 +571,7 @@ CFLAGS += $(call cc-disable-warning, pointer-sign)
 # disable variable unused warnings in gcc 4.6.0 and later
 CFLAGS += $(call cc-disable-warning, unused-but-set-variable)
 
-ifdef MODULES_SMALL_SIZE
+ifdef CONFIG_RT2880_FLASH_4M
 # if flash size is small use optimize for size
 CFLAGS_MODULE = $(MODFLAGS) -Os
 CFLAGS_MODULE += $(call cc-option,-fno-caller-saves)
