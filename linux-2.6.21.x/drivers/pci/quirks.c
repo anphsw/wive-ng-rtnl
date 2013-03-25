@@ -879,7 +879,7 @@ DECLARE_PCI_FIXUP_HEADER(PCI_VENDOR_ID_ATI, PCI_DEVICE_ID_ATI_IXP600_SATA, quirk
 /*
  *	Serverworks CSB5 IDE does not fully support native mode
  */
-static void __devinit quirk_svwks_csb5ide(struct pci_dev *pdev)
+static void quirk_svwks_csb5ide(struct pci_dev *pdev)
 {
 	u8 prog;
 	pci_read_config_byte(pdev, PCI_CLASS_PROG, &prog);
@@ -895,7 +895,7 @@ DECLARE_PCI_FIXUP_EARLY(PCI_VENDOR_ID_SERVERWORKS, PCI_DEVICE_ID_SERVERWORKS_CSB
 /*
  *	Intel 82801CAM ICH3-M datasheet says IDE modes must be the same
  */
-static void __init quirk_ide_samemode(struct pci_dev *pdev)
+static void quirk_ide_samemode(struct pci_dev *pdev)
 {
 	u8 prog;
 
@@ -1743,7 +1743,7 @@ DECLARE_PCI_FIXUP_RESUME(PCI_VENDOR_ID_NVIDIA,  PCI_DEVICE_ID_NVIDIA_CK804_PCIE,
  * aware of it.  Instead of setting the flag on all busses in the
  * machine, simply disable MSI globally.
  */
-static void __init quirk_disable_all_msi(struct pci_dev *dev)
+static void quirk_disable_all_msi(struct pci_dev *dev)
 {
 	pci_no_msi();
 	printk(KERN_WARNING "PCI: MSI quirk detected. MSI deactivated.\n");
@@ -1791,7 +1791,7 @@ static int __devinit msi_ht_cap_enabled(struct pci_dev *dev)
 }
 
 /* Check the hypertransport MSI mapping to know whether MSI is enabled or not */
-static void __devinit quirk_msi_ht_cap(struct pci_dev *dev)
+static void quirk_msi_ht_cap(struct pci_dev *dev)
 {
 	if (dev->subordinate && !msi_ht_cap_enabled(dev)) {
 		printk(KERN_WARNING "PCI: MSI quirk detected. "
