@@ -17,6 +17,34 @@ if [ "$OperationMode" = "0" ]; then
 fi
 
 LOG="logger -t radvd"
+set_mtu() {
+    if [ "$vpnEnabled" = "on" ] && [ "$vpnType" != "6" ]; then
+	if [ "$vpnType" != "0" ]; then
+	    # PPPOE
+	    overhead_sit="28"
+	elif [ "$vpnType" != "1" ]; then
+	    # PPTP
+	    overhead_sit="54"
+	elif [ "$vpnType" != "2" ]; then
+	    # L2TP
+	    overhead_sit="60"
+	fi
+    else
+	overhead_sit="20"
+    fi
+    let "overhead_all=$overhead_sit-40"
+
+    # get mtu from wan
+    wanmtu=`ip link show $real_wan_if | grep mtu | awk {' print $5 '}`
+    # calculate
+    let "sitmtu=$wanmtu-$overhead_sit"
+    let "ipvmtu=$wanmtu-$overhead_all"
+
+    # set defaults
+    sysctl -w net.ipv6.conf.sit0.mtu="$sitmtu"
+    sysctl -w net.ipv6.conf.all.mtu="$ipvmtu"
+    sysctl -w net.ipv6.conf.default.mtu="$ipvmtu"
+}
 
 start() {
     radvdEnabled=`nvram_get 2860 radvdEnabled`
@@ -27,6 +55,8 @@ start() {
 
 	ipv6subnet="2000"
 	if [ "$real_wan_ipaddr" != "" ]; then
+	    # calculate and set mtu
+	    set_mtu
 	    $LOG "Tunel ipv6 in ipv4 configure and up"
 	    ipv6prefix=`echo $real_wan_ipaddr | awk -F. '{ printf "2002:%02x%02x:%02x%02x", $1, $2, $3, $4 }'`
 	    if [ "$IPv6_6RD_Enable" = "1" ]; then

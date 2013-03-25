@@ -1427,7 +1427,8 @@
 19) init.d: prevent hot replace routes - fix tunnel restart at renew issue (set RouteUpOnce=0 for old mode).<br>
 20) init.d: full config dhcp client logic move to wan script.<br>
 21) init.d: transmission: auto make home dir and check disc mount before start.<br>
-22) defaults: set HT_MIMOPSMode=3 - need for multiple TX/RX streams compat.<br>
+22) init.d: radvd: fix calculate mtu for sit/ipv6 ifaces (6to4 over ppp issue fix).<br>
+23) defaults: set HT_MIMOPSMode=3 - need for multiple TX/RX streams compat.<br>
 
 <br>
 <br>
