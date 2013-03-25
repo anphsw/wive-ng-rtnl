@@ -20,6 +20,11 @@ MAKEFLAGS     = -rR --no-print-directory
 # Use -O2 for kernel code. Route/NAT speed up ~15-20% more -Os.
 MOREOPTIMIZE  = -O2
 
+# Decrease modules size
+#ifdef CONFIG_RT2880_FLASH_4M
+#    MODULES_SMALL_SIZE = 1
+#endif
+
 # this flags for fast net debug enable
 #802.11
 #MOREOPTIMIZE += -DWE_IOCTL_DEBUG -DWE_EVENT_DEBUG -DWE_SPY_DEBUG
@@ -527,14 +532,6 @@ all: vmlinux
 
 include $(srctree)/arch/$(ARCH)/Makefile
 
-ifdef CONFIG_RT2880_FLASH_4M
-# if flash size is small use optimize for size
-CFLAGS_MODULE   = $(MODFLAGS) -Os
-else
-# if flash size big use full optimize for speed
-CFLAGS_MODULE   = $(MODFLAGS) $(MOREOPTIMIZE)
-endif
-
 ifdef CONFIG_FRAME_POINTER
 CFLAGS		+= -fno-omit-frame-pointer $(call cc-option,-fno-optimize-sibling-calls)
 else
@@ -551,24 +548,23 @@ ifdef CONFIG_DEBUG_SECTION_MISMATCH
 KBUILD_CFLAGS += $(call cc-option, -fno-inline-functions-called-once)
 endif
 
-# force gcc to behave correct even for buggy distributions
-CFLAGS          += $(call cc-option, -fno-stack-protector)
-
-# conserve stack if available on nonmips
-ifdef CONFIG_MIPS
-CFLAGS		+= $(call cc-option, -fno-conserve-stack)
-else
-CFLAGS		+= $(call cc-option, -fconserve-stack)
-endif
-
 # crazy optimizations
 CFLAGS += $(call cc-option,-ffast-math)
 CFLAGS += $(call cc-option,-fforce-addr)
 
+# force gcc to behave correct even for buggy distributions
+CFLAGS += $(call cc-option, -fno-stack-protector)
+
 # disable new loop optimization mode in 4.8.0 and later - fix regressions
 CFLAGS += $(call cc-option,-fno-aggressive-loop-optimizations)
 
-# improves compression ratio for generated code
+# disable invalid "can't wrap" optimizations for signed / pointers
+CFLAGS += $(call cc-option,-fno-strict-overflow)
+
+# conserve stack if available
+CFLAGS += $(call cc-option,-fconserve-stack)
+
+# improves compression ratio for generated code - save size - slow speed
 #CFLAGS += $(call cc-option,-fno-caller-saves)
 
 # warn about C99 declaration after statement
@@ -579,6 +575,14 @@ CFLAGS += $(call cc-disable-warning, pointer-sign)
 
 # disable variable unused warnings in gcc 4.6.0 and later
 CFLAGS += $(call cc-disable-warning, unused-but-set-variable)
+
+ifdef MODULES_SMALL_SIZE
+# if flash size is small use optimize for size
+CFLAGS_MODULE   = $(MODFLAGS) $(CFLAGS) -Os
+else
+# if flash size big use full optimize for speed
+CFLAGS_MODULE   = $(MODFLAGS) $(CFLAGS) $(MOREOPTIMIZE)
+endif
 
 # arch Makefile may override CC so keep this after arch Makefile is included
 NOSTDINC_FLAGS += -nostdinc -isystem $(shell $(CC) -print-file-name=include)
