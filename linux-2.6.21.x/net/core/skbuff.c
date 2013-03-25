@@ -521,13 +521,27 @@ bool skb_recycle_check(struct sk_buff *skb, int skb_size)
 
 	skb_release_head_state(skb);
 
+	/*
+	 * Only clear those fields we need to clear, not those that we will
+	 * actually initialise below. Hence, don't put any more fields after
+	 * the tail pointer in struct sk_buff!
+	 */
+	memset(skb, 0, offsetof(struct sk_buff, tail));
+	skb->truesize = skb_size + sizeof(struct sk_buff);
+	atomic_set(&skb->users, 1);
+	skb->head = data;
+	skb->data = data;
+	skb_reset_tail_pointer(skb);
+	skb->end  = skb->tail + skb_size;
+	skb->vlan_tci = 0;
+	/* make sure we initialize shinfo sequentially */
 	shinfo = skb_shinfo(skb);
-	memset(shinfo, 0, offsetof(struct skb_shared_info, dataref));
+	memset(shinfo, 0, offsetof(struct skb_shared_info, frags));
 	atomic_set(&shinfo->dataref, 1);
 
-	memset(skb, 0, offsetof(struct sk_buff, tail));
-	skb->data = skb->head + NET_SKB_PAD;
-	skb_reset_tail_pointer(skb);
+#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+	DO_FAST_CLEAR_FOE(skb); // fast clear FoE info header
+#endif
 
 	return true;
 }
