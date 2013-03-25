@@ -308,7 +308,7 @@ static void kfree_skbmem(struct sk_buff *skb)
 static void skb_release_head_state(struct sk_buff *skb)
 {
 	dst_release(skb->dst);
-	skb->dst = NULL;
+	skb->dst = NULL;  /* prevent races */
 #ifdef CONFIG_XFRM
 	secpath_put(skb->sp);
 #endif
