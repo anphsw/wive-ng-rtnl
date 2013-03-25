@@ -512,7 +512,7 @@ bool skb_recycle_check(struct sk_buff *skb, int skb_size)
 	if (skb_is_nonlinear(skb) || skb->fclone != SKB_FCLONE_UNAVAILABLE)
 		return false;
 
-	skb_size = SKB_DATA_ALIGN(skb_size + NET_SKB_PAD_ORIG);
+	skb_size = SKB_DATA_ALIGN(skb_size + NET_SKB_PAD);
 	if ((skb->end - skb->head) < skb_size)
 		return false;
 
@@ -526,7 +526,7 @@ bool skb_recycle_check(struct sk_buff *skb, int skb_size)
 	atomic_set(&shinfo->dataref, 1);
 
 	memset(skb, 0, offsetof(struct sk_buff, tail));
-	skb->data = skb->head + NET_SKB_PAD_ORIG;
+	skb->data = skb->head + NET_SKB_PAD;
 	skb_reset_tail_pointer(skb);
 
 	return true;
