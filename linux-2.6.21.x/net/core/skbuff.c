@@ -307,8 +307,16 @@ static void kfree_skbmem(struct sk_buff *skb)
 
 static void skb_release_head_state(struct sk_buff *skb)
 {
+	/* prevent use after free in buggy drivers */
+	if (unlikely(!skb))
+	    return;
+
 	dst_release(skb->dst);
-	skb->dst = NULL;  /* prevent races */
+
+	/* prevent races if reuse */
+	skb->dst = NULL;
+	skb->vlan_tci = 0;
+
 #ifdef CONFIG_XFRM
 	secpath_put(skb->sp);
 #endif
@@ -529,8 +537,6 @@ bool skb_recycle_check(struct sk_buff *skb, int skb_size)
 	memset(skb, 0, offsetof(struct sk_buff, tail));
 	skb->truesize = skb_size + sizeof(struct sk_buff);
 	atomic_set(&skb->users, 1);
-	skb->head = data;
-	skb->data = data;
 	skb_reset_tail_pointer(skb);
 	skb->end  = skb->tail + skb_size;
 	skb->vlan_tci = 0;
