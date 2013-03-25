@@ -18,7 +18,7 @@ fi
 
 LOG="logger -t radvd"
 
-set_mtu() {
+calculate_and_set_mtu() {
     if [ "$vpnEnabled" = "on" ] && [ "$vpnType" != "6" ]; then
 	if [ "$vpnType" != "0" ]; then
 	    # PPPOE
@@ -54,7 +54,7 @@ start() {
 	    # rebuild ipv6 rules
 	    service iptables restartv6
 	    # calculate and set mtu
-	    set_mtu
+	    calculate_and_set_mtu
 	    $LOG "Tunel ipv6 in ipv4 configure and up"
 	    ipv6prefix=`echo $real_wan_ipaddr | awk -F. '{ printf "2002:%02x%02x:%02x%02x", $1, $2, $3, $4 }'`
 	    if [ "$IPv6_6RD_Enable" = "1" ]; then
