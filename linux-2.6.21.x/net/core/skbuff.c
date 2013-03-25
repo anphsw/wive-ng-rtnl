@@ -512,8 +512,8 @@ bool skb_recycle_check(struct sk_buff *skb, int skb_size)
 	if (skb_is_nonlinear(skb) || skb->fclone != SKB_FCLONE_UNAVAILABLE)
 		return false;
 
-	skb_size = SKB_DATA_ALIGN(skb_size + NET_SKB_PAD);
-	if (skb_end_pointer(skb) - skb->head < skb_size)
+	skb_size = SKB_DATA_ALIGN(skb_size + NET_SKB_PAD_ORIG);
+	if ((skb->end - skb->head) < skb_size)
 		return false;
 
 	if (skb_shared(skb) || skb_cloned(skb))
