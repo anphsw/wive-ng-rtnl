@@ -1,4 +1,4 @@
-﻿#EXTM3U cache=500 deinterlace=1 aspect-ratio=4:3 url-tvg="http://tv.adslclub.ru/jtv.zip" tvg-shift=0 m3uautoload=1 
+#EXTM3U cache=500 deinterlace=1 aspect-ratio=4:3 url-tvg="http://tv.adslclub.ru/jtv.zip" tvg-shift=0 m3uautoload=1 
 #EXTINF:-1 group-title="Эфир - Омск" ,Первый
 udp://@239.3.2.3:3000
 #EXTINF:-1,Россия 1
