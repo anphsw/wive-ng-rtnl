@@ -1,17 +1,15 @@
+<!DOCTYPE html>
 <html>
 <head>
-
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0">
 <meta http-equiv="Pragma" content="no-cache">
-
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script type="text/javascript" src="/js/controls.js"></script>
 <script type="text/javascript" src="/js/validation.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <link rel="stylesheet" href="/style/controls.css" type="text/css">
 <title>Advanced Wireless Settings</title>
-
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("wireless");
 
@@ -262,217 +260,189 @@ function CheckValue(form)
 </head>
 
 <body onLoad="initValue()">
-<table class="body"><tr><td>
-
-
-<h1 id="advTitle">Advanced Wireless Settings </h1>
-<p id="advIntroduction">Here you can change advanced wireless settings, such as Beacon Interval, Control Tx Rates and Basic Data Rates. </p>
-<hr>
-
-
-<form method="post" name="wireless_advanced" action="/goform/wirelessAdvanced" onSubmit="return CheckValue(this)">
-<table class="form">
-<tr>
-	<td class="title" colspan="2" id="advWireless">Advanced Wireless</td>
-</tr>
-<tr>
-	<td class="head" id="advBGProtect">BG Protection Mode</td>
-	<td>
-		<select name="bg_protection" size="1" class="half">
-			<option value="0" selected id="advBGProAuto">Auto</option>
-			<option value="1" id="advBGProOn">On</option>
-			<option value="2" id="advBGProOff">Off</option>
-		</select>
-	</td>
-</tr>
-<tr> 
-	<td class="head" id="advBeaconInterval">Beacon Interval</td>
-	<td>
-		<input type="text" name="beacon" class="half" maxlength="3" value="<% getCfgZero(1, "BeaconPeriod"); %>"> ms <font color="#808080" id="advBeaconIntervalRange">(range 20 - 999)</font>
-	</td>
-</tr>
-<tr>
-	<td class="head" id="advDTIM">Data Beacon Rate (DTIM) </td>
-	<td>
-		<input type="text" name="dtim" class="half" maxlength="3" value="<% getCfgZero(1, "DtimPeriod"); %>"> ms <font color="#808080" id="advDTIMRange">(range 1 - 255)</font>
-	</td>
-</tr>
-<tr>
-	<td class="head" id="advFrag">Fragment Threshold</td>
-	<td>
-		<input type="text" name="fragment" class="half" maxlength="4" value="<% getCfgZero(1, "FragThreshold"); %>"> <font color="#808080" id="advFragRange">(range 256 - 2346)</font>
-	</td>
-</tr>
-<tr>
-	<td class="head" id="advRTS">RTS Threshold</td>
-	<td>
-		<input type="text" name="rts" class="half" maxlength="4" value="<% getCfgZero(1, "RTSThreshold"); %>"> <font color="#808080" id="advRTSRange">(range 1 - 2347)</font>
-	</td>
-</tr>
-<tr> 
-	<td class="head">Wi-Fi coexistence</td>
-	<td>
-		<input type="radio" name="HT_BSSCoexistence" value="1" onchange="wifiCoexThrChange(this.form);">Enable&nbsp;
-		<input type="radio" name="HT_BSSCoexistence" value="0" onchange="wifiCoexThrChange(this.form);" checked>Disable
-	</td>
-</tr>
-<tr id="wifi_coex_thr_row" style="display: none;">
-	<td class="head">40Mhz coexistence threshold</td>
-	<td>
-		<input name="HT_BSSCoexApCntThr" class="half" value=""><span style="color: #808080">&nbsp;(range 0 - 255, 0 = auto)</span>
-	</td>
-</tr>
-<tr>
-	<td class="head" id="advTxPW">TX Power</td>
-	<td>
-		<select name="tx_power" class="half">
-			<option value="5">5%</option>
-			<option value="10">10%</option>
-			<option value="20">20%</option>
-			<option value="30">30%</option>
-			<option value="35">35%</option>
-			<option value="40">40%</option>
-			<option value="45">45%</option>
-			<option value="50">50%</option>
-			<option value="60">60%</option>
-			<option value="70">70%</option>
-			<option value="80">80%</option>
-			<option value="90">90%</option>
-			<option value="100">100%</option>
-		</select>
-	</td>
-</tr>
-<tr> 
-	<td class="head" id="advShortPre">Short Preamble</td>
-	<td>
-		<input type="radio" name="short_preamble" value="1"><font id="advShortPreEnable">Enable</font>&nbsp;
-		<input type="radio" name="short_preamble" value="0"><font id="advShortPreDisable">Disable</font>
-	</td>
-</tr>
-<tr> 
-	<td class="head" id="advShortSlot">Short Slot</td>
-	<td>
-		<input type="radio" name="short_slot" value="1" checked><font id="advShortSlotEnable">Enable</font>&nbsp;
-		<input type="radio" name="short_slot" value="0"><font id="advShortSlotDisable">Disable</font>
-	</td>
-</tr>
-<tr> 
-	<td class="head" id="advTxBurst">Tx Burst</td>
-	<td>
-		<input type="radio" name="tx_burst" value="1" checked><font id="advTxBurstEnable">Enable</font>&nbsp;
-		<input type="radio" name="tx_burst" value="0"><font id="advTxBurstDisable">Disable</font>
-	</td>
-</tr>
-<tr> 
-	<td class="head" id="advPktAggr">Pkt_Aggregate</td>
-	<td>
-		<input type="radio" name="pkt_aggregate" value="1"><font id="advPktAggrEnable">Enable</font>&nbsp;
-		<input type="radio" name="pkt_aggregate" value="0" checked><font id="advPktAggrDisable">Disable</font>
-	</td>
-</tr>
-<tr>
-	<td class="head">Increase LNA gain</td>
-	<td>
-		<input type="radio" name="lnaGainEnable" value="1">Enable&nbsp;
-		<input type="radio" name="lnaGainEnable" value="0" checked>Disable
-	</td>
-</tr>
-<tr>
-	<td class="head">Rescan HT Mode</td>
-	<td>
-		<input type="radio" name="AP2040Rescan" value="1">Enable&nbsp;
-		<input type="radio" name="AP2040Rescan" value="0" checked>Disable
-	</td>
-</tr>
-<tr>
-	<td class="head" id="staadvCountry">Country Region Code</td>
-	<td>
-		<select id="country_region" name="country_region" class="mid">
-		<option value=0 <% var cr_bg = getCfgZero(0, "CountryRegion");
-			if (cr_bg == "0") write("selected"); %>>0: CH1-11 (FCC)</option>
-		<option value=1 <% if (cr_bg == "1") write("selected"); %>>1: CH1-13 (IC)</option>
-		<option value=2 <% if (cr_bg == "2") write("selected"); %>>2: CH10-11 (ETSI)</option>
-		<option value=3 <% if (cr_bg == "3") write("selected"); %>>3: CH10-13 (SPAIN)</option>
-		<option value=4 <% if (cr_bg == "4") write("selected"); %>>4: CH14 (France)</option>
-		<option value=5 <% if (cr_bg == "5") write("selected"); %>>5: CH1-14 (MKK)</option>
-		<option value=6 <% if (cr_bg == "6") write("selected"); %>>6: CH3-9 (MKK1)</option>
-		<option value=7 <% if (cr_bg == "7") write("selected"); %>>7: CH5-13 (Israel)</option>
-		</select>
-	</td>
-</tr>
-<tr>
-	<td class="head" class="mid" id="advCountryCode">Country Code</td>
-	<td>
-		<select name="country_code" class="mid">
-			<% listCountryCodes(); %>
-		</select>
-	</td>
-</tr>
+<table class="body">
+  <tr>
+    <td><h1 id="advTitle">Advanced Wireless Settings </h1>
+      <p id="advIntroduction">Here you can change advanced wireless settings, such as Beacon Interval, Control Tx Rates and Basic Data Rates. </p>
+      <hr>
+      <form method="post" name="wireless_advanced" action="/goform/wirelessAdvanced" onsubmit="return CheckValue(this)">
+        <table class="form">
+          <tr>
+            <td class="title" colspan="2" id="advWireless">Advanced Wireless</td>
+          </tr>
+          <tr>
+            <td class="head" id="advBGProtect">BG Protection Mode</td>
+            <td><select name="bg_protection" size="1" class="half">
+                <option value="0" selected id="advBGProAuto">Auto</option>
+                <option value="1" id="advBGProOn">On</option>
+                <option value="2" id="advBGProOff">Off</option>
+              </select></td>
+          </tr>
+          <tr>
+            <td class="head" id="advBeaconInterval">Beacon Interval</td>
+            <td><input type="text" name="beacon" class="half" maxlength="3" value="<% getCfgZero(1, "BeaconPeriod"); %>">
+              ms <font color="#808080" id="advBeaconIntervalRange">(range 20 - 999)</font></td>
+          </tr>
+          <tr>
+            <td class="head" id="advDTIM">Data Beacon Rate (DTIM) </td>
+            <td><input type="text" name="dtim" class="half" maxlength="3" value="<% getCfgZero(1, "DtimPeriod"); %>">
+              ms <font color="#808080" id="advDTIMRange">(range 1 - 255)</font></td>
+          </tr>
+          <tr>
+            <td class="head" id="advFrag">Fragment Threshold</td>
+            <td><input type="text" name="fragment" class="half" maxlength="4" value="<% getCfgZero(1, "FragThreshold"); %>">
+              <font color="#808080" id="advFragRange">(range 256 - 2346)</font></td>
+          </tr>
+          <tr>
+            <td class="head" id="advRTS">RTS Threshold</td>
+            <td><input type="text" name="rts" class="half" maxlength="4" value="<% getCfgZero(1, "RTSThreshold"); %>">
+              <font color="#808080" id="advRTSRange">(range 1 - 2347)</font></td>
+          </tr>
+          <tr>
+            <td class="head">Wi-Fi coexistence</td>
+            <td><input type="radio" name="HT_BSSCoexistence" value="1" onChange="wifiCoexThrChange(this.form);">
+              Enable&nbsp;
+              <input type="radio" name="HT_BSSCoexistence" value="0" onChange="wifiCoexThrChange(this.form);" checked>
+              Disable </td>
+          </tr>
+          <tr id="wifi_coex_thr_row" style="display: none;">
+            <td class="head">40Mhz coexistence threshold</td>
+            <td><input name="HT_BSSCoexApCntThr" class="half" value="">
+              <span style="color: #808080">&nbsp;(range 0 - 255, 0 = auto)</span></td>
+          </tr>
+          <tr>
+            <td class="head" id="advTxPW">TX Power</td>
+            <td><select name="tx_power" class="half">
+                <option value="5">5%</option>
+                <option value="10">10%</option>
+                <option value="20">20%</option>
+                <option value="30">30%</option>
+                <option value="35">35%</option>
+                <option value="40">40%</option>
+                <option value="45">45%</option>
+                <option value="50">50%</option>
+                <option value="60">60%</option>
+                <option value="70">70%</option>
+                <option value="80">80%</option>
+                <option value="90">90%</option>
+                <option value="100">100%</option>
+              </select></td>
+          </tr>
+          <tr>
+            <td class="head" id="advShortPre">Short Preamble</td>
+            <td><input type="radio" name="short_preamble" value="1">
+              <font id="advShortPreEnable">Enable</font>&nbsp;
+              <input type="radio" name="short_preamble" value="0">
+              <font id="advShortPreDisable">Disable</font></td>
+          </tr>
+          <tr>
+            <td class="head" id="advShortSlot">Short Slot</td>
+            <td><input type="radio" name="short_slot" value="1" checked>
+              <font id="advShortSlotEnable">Enable</font>&nbsp;
+              <input type="radio" name="short_slot" value="0">
+              <font id="advShortSlotDisable">Disable</font></td>
+          </tr>
+          <tr>
+            <td class="head" id="advTxBurst">Tx Burst</td>
+            <td><input type="radio" name="tx_burst" value="1" checked>
+              <font id="advTxBurstEnable">Enable</font>&nbsp;
+              <input type="radio" name="tx_burst" value="0">
+              <font id="advTxBurstDisable">Disable</font></td>
+          </tr>
+          <tr>
+            <td class="head" id="advPktAggr">Pkt_Aggregate</td>
+            <td><input type="radio" name="pkt_aggregate" value="1">
+              <font id="advPktAggrEnable">Enable</font>&nbsp;
+              <input type="radio" name="pkt_aggregate" value="0" checked>
+              <font id="advPktAggrDisable">Disable</font></td>
+          </tr>
+          <tr>
+            <td class="head">Increase LNA gain</td>
+            <td><input type="radio" name="lnaGainEnable" value="1">
+              Enable&nbsp;
+              <input type="radio" name="lnaGainEnable" value="0" checked>
+              Disable </td>
+          </tr>
+          <tr>
+            <td class="head">Rescan HT Mode</td>
+            <td><input type="radio" name="AP2040Rescan" value="1">
+              Enable&nbsp;
+              <input type="radio" name="AP2040Rescan" value="0" checked>
+              Disable </td>
+          </tr>
+          <tr>
+            <td class="head" id="staadvCountry">Country Region Code</td>
+            <td><select id="country_region" name="country_region" class="mid">
+                <option value=0 <% var cr_bg = getCfgZero(0, "CountryRegion"); if (cr_bg == "0") write("selected"); %> >0: CH1-11 (FCC)</option>
+                <option value=1 <% if (cr_bg == "1") write("selected"); %> >1: CH1-13 (IC)</option>
+                <option value=2 <% if (cr_bg == "2") write("selected"); %> >2: CH10-11 (ETSI)</option>
+                <option value=3 <% if (cr_bg == "3") write("selected"); %> >3: CH10-13 (SPAIN)</option>
+                <option value=4 <% if (cr_bg == "4") write("selected"); %> >4: CH14 (France)</option>
+                <option value=5 <% if (cr_bg == "5") write("selected"); %> >5: CH1-14 (MKK)</option>
+                <option value=6 <% if (cr_bg == "6") write("selected"); %> >6: CH3-9 (MKK1)</option>
+                <option value=7 <% if (cr_bg == "7") write("selected"); %> >7: CH5-13 (Israel)</option>
+              </select></td>
+          </tr>
+          <tr>
+            <td class="head" id="advCountryCode"> Country Code </td>
+            <td><select name="country_code" class="mid">
+                <% listCountryCodes(); %>
+              </select></td>
+          </tr>
+        </table>
+        <input type="hidden" name="rebootAP" value="0">
+        <table id="div_m2u" name="div_m2u" class="form">
+          <tr>
+            <td class="title" colspan="2" id="advMul2UniConver">Multicast-to-Unicast Converter (IGMP Snooping)</td>
+          </tr>
+          <tr>
+            <td class="head" id="advMul2Uni">Multicast-to-Unicast</td>
+            <td><input type="radio" name="m2u_enable" value="1">
+              <font id="advMul2UniEnable">Enable</font>&nbsp;
+              <input type="radio" name="m2u_enable" value="0">
+              <font id="advMul2UniDisable">Disable</font></td>
+          </tr>
+          <tr>
+            <td class="head">Multicast TX rate</td>
+            <td><select name="McastMcs" class="half">
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="12">12</option>
+                <option value="13">13</option>
+                <option value="14">14</option>
+                <option value="15">15</option>
+              </select></td>
+          </tr>
+          <tr id="video_turbine_row">
+            <td class="head">Video turbine</td>
+            <td><input type="radio" name="video_turbine" value="1">
+              Enable&nbsp;
+              <input type="radio" name="video_turbine" value="0">
+              Disable </td>
+          </tr>
+        </table>
+        <br>
+        <table class="buttons">
+          <tr align="center">
+            <td><input type="submit" class="normal" value="Apply" id="advApply">
+              &nbsp;&nbsp;
+              <input type="reset"  class="normal" value="Cancel" id="advCancel" onClick="window.location.reload()">
+              <input type="hidden" name="submit-url" value="/wireless/advanced.asp" ></td>
+          </tr>
+        </table>
+      </form>
+      <div class="whitespace">&nbsp;</div></td>
+  </tr>
 </table>
-
-<input type="hidden" name="rebootAP" value="0">
-</table>
-
-<table id="div_m2u" name="div_m2u" class="form">
-<tr>
-	<td class="title" colspan="2" id="advMul2UniConver">Multicast-to-Unicast Converter (IGMP Snooping)</td>
-</tr>
-<tr>
-	<td class="head" id="advMul2Uni">Multicast-to-Unicast</td>
-	<td>
-		<input type="radio" name="m2u_enable" value="1"><font id="advMul2UniEnable">Enable</font>&nbsp;
-		<input type="radio" name="m2u_enable" value="0"><font id="advMul2UniDisable">Disable</font>
-	</td>
-</tr>
-<tr>
-	<td class="head">Multicast TX rate</td>
-	<td>
-		<select name="McastMcs" class="half">
-			<option value="0">0</option>
-			<option value="1">1</option>
-			<option value="2">2</option>
-			<option value="3">3</option>
-			<option value="4">4</option>
-			<option value="5">5</option>
-			<option value="6">6</option>
-			<option value="7">7</option>
-			<option value="8">8</option>
-			<option value="9">9</option>
-			<option value="10">10</option>
-			<option value="11">11</option>
-			<option value="12">12</option>
-			<option value="13">13</option>
-			<option value="14">14</option>
-			<option value="15">15</option>
-		</select>
-	</td>
-</tr>
-<tr id="video_turbine_row">
-	<td class="head">Video turbine</td>
-	<td>
-		<input type="radio" name="video_turbine" value="1">Enable&nbsp;
-		<input type="radio" name="video_turbine" value="0">Disable
-	</td>
-</tr>
-
-</table>
-
-<br>
-
-<table class="buttons">
-<tr align="center">
-	<td>
-		<input type="submit" class="normal" value="Apply" id="advApply">&nbsp;&nbsp;
-		<input type="reset"  class="normal" value="Cancel" id="advCancel" onClick="window.location.reload()">
-		<input type="hidden" name="submit-url" value="/wireless/advanced.asp" >
-	</td>
-</tr>
-</table>
-
-</form>
-
-<div class="whitespace">&nbsp;</div>
-
-</td></tr></table>
 </body>
 </html>

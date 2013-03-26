@@ -1,14 +1,12 @@
+<!DOCTYPE html>
 <html>
 <head>
-
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0">
 <meta http-equiv="Pragma" content="no-cache">
-
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <title>Administration</title>
-
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("storage");
 var admin = '<% getCfgGeneral(1, "Login"); %>';
@@ -136,32 +134,32 @@ function open_useredit_window()
 </head>
 
 <body onLoad="initValue()">
-<table class="body"><tr><td>
-<h1 id="storageAdmTitle">Administration</h1>
-<p id="storageAdmIntroduction"></p>
-<hr />
-<form method=post name=storage_adm action="/goform/storageAdm" onSubmit="return CheckValue()">
-<input type=hidden name=hiddenButton value="">
-<input type=hidden name=hiddenIndex value="">
-<input type=hidden name=hiddenUser value="">
-<input type=hidden name=hiddenPassword value="">
-<input type=hidden name=hiddenMaxLogins value="">
-<input type=hidden name=hiddenMode value="">
-<table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
-  <tr> 
-    <td class="title" colspan="7"><font id="storageAdmUser">User Management</font>
-      </td>
-  </tr>
-  <tr align=center> 
-    <td bgcolor="#E8F8FF" width=15px id="storageAdmUserSelect">&nbsp;</td>
-    <td bgcolor="#E8F8FF" id="storageAdmUserName">User Name</td>
-    <td bgcolor="#E8F8FF" id="storageAdmUserMaxLogins">Max. Logins</td>
-    <td bgcolor="#E8F8FF" id="storageAdmUserDL">Download</td>
-    <td bgcolor="#E8F8FF" id="storageAdmUserUL">Upload</td>
-    <td bgcolor="#E8F8FF" id="storageAdmUserOW">Overwrite</td>
-    <td bgcolor="#E8F8FF" id="storageAdmUserER">Erase</td>
-  </tr>
-<script language="JavaScript" type="text/javascript">
+<table class="body">
+  <tr>
+    <td><h1 id="storageAdmTitle">Administration</h1>
+      <p id="storageAdmIntroduction"></p>
+      <hr />
+      <form method=post name=storage_adm action="/goform/storageAdm" onSubmit="return CheckValue()">
+        <input type=hidden name=hiddenButton value="">
+        <input type=hidden name=hiddenIndex value="">
+        <input type=hidden name=hiddenUser value="">
+        <input type=hidden name=hiddenPassword value="">
+        <input type=hidden name=hiddenMaxLogins value="">
+        <input type=hidden name=hiddenMode value="">
+        <table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+          <tr>
+            <td class="title" colspan="7"><font id="storageAdmUser">User Management</font></td>
+          </tr>
+          <tr align=center>
+            <td bgcolor="#E8F8FF" width=15px id="storageAdmUserSelect">&nbsp;</td>
+            <td bgcolor="#E8F8FF" id="storageAdmUserName">User Name</td>
+            <td bgcolor="#E8F8FF" id="storageAdmUserMaxLogins">Max. Logins</td>
+            <td bgcolor="#E8F8FF" id="storageAdmUserDL">Download</td>
+            <td bgcolor="#E8F8FF" id="storageAdmUserUL">Upload</td>
+            <td bgcolor="#E8F8FF" id="storageAdmUserOW">Overwrite</td>
+            <td bgcolor="#E8F8FF" id="storageAdmUserER">Erase</td>
+          </tr>
+          <script language="JavaScript" type="text/javascript">
 var TRDHeader = "<tr align=center><td>";
 var TDConneter = "</td><td>";
 var TDFooter = "</td><tr>";
@@ -233,19 +231,23 @@ for (var i=1;i<9;i++)
 	}
 }
 </script>
-</table>
-<hr />
-<br>
-<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
-  <tr align="center">
-    <td>
-      <input type="button" style="{width:80px;}" value="Add" id="storageAdmUserAdd" onClick="open_useradd_window()">&nbsp;&nbsp;
-      <input type="button" style="{width:80px;}" value="Add" id="storageAdmUserEdit" onClick="open_useredit_window()">&nbsp;&nbsp;
-      <input type="button" style="{width:80px;}" value="Delete" id="storageAdmUserDel" onClick="submit_apply('delete')"> &nbsp; &nbsp;
-      <input type="button" style="{width:80px;}" value="Apply" id="storageAdmApply" onClick="submit_apply('apply')"> &nbsp; &nbsp;
-      <input type="button"  style="{width:80px;}" value="Cancel" id="storageAdmCancel" onClick="window.location.reload()">
-    </td>
+        </table>
+        <hr />
+        <br>
+        <table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
+          <tr align="center">
+            <td><input type="button" style="{width:80px;}" value="Add" id="storageAdmUserAdd" onClick="open_useradd_window()">
+              &nbsp;&nbsp;
+              <input type="button" style="{width:80px;}" value="Add" id="storageAdmUserEdit" onClick="open_useredit_window()">
+              &nbsp;&nbsp;
+              <input type="button" style="{width:80px;}" value="Delete" id="storageAdmUserDel" onClick="submit_apply('delete')">
+              &nbsp; &nbsp;
+              <input type="button" style="{width:80px;}" value="Apply" id="storageAdmApply" onClick="submit_apply('apply')">
+              &nbsp; &nbsp;
+              <input type="button"  style="{width:80px;}" value="Cancel" id="storageAdmCancel" onClick="window.location.reload()"></td>
+          </tr>
+        </table>
+      </form></td>
   </tr>
 </table>
-</form>
 </body>

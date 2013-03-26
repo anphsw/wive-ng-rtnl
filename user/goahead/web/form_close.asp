@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 
 <!-- Copyright (c) Ralink (2004-2010) Tech Inc. All Rights Reserved. -->

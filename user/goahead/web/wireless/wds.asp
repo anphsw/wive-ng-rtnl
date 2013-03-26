@@ -1,15 +1,13 @@
+<!DOCTYPE html>
 <html>
 <head>
-
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0">
 <meta http-equiv="Pragma" content="no-cache">
-
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <link rel="stylesheet" href="/style/controls.css" type="text/css">
 <title>Wireless Distribution System</title>
-
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("wireless");
 
@@ -316,136 +314,121 @@ function CheckValue()
 </script>
 </head>
 
-
 <body onLoad="initValue()">
-<table class="body"><tr><td>
-
-<h1>Wireless Distribution System (WDS)</h1>
-<p>Wireless Distribution System Settings</p>
-<hr />
-
-<form method="post" name="wireless_wds" action="/goform/wirelessWds" onSubmit="return CheckValue()">
-<table class="form">
+<table class="body">
   <tr>
-    <td class="title" id="basicWDSTitle" colspan="2">Wireless Distribution System (WDS)</td>
-  </tr>
-  <tr>
-    <td class="head" id="basicWDSMode">WDS Mode</td>
-    <td>
-      <select name="wds_mode" id="wds_mode" class="mid" onchange="WdsModeOnChange()">
-	<option value=0 id="basicWDSDisable">Disable</option>
-	<option value=4>Lazy Mode</option>
-	<option value=2>Bridge Mode</option>
-	<option value=3>Repeater Mode</option>
-      </select>
-    </td>
-  </tr>
-  <tr id="div_wds_phy_mode" name="div_wds_phy_mode"> 
-    <td class="head" id="basicWDSPhyMode">Phy Mode</td>
-    <td>
-      <select name="wds_phy_mode" id="wds_phy_mode" class="half">
-	<option value="CCK;CCK;CCK;CCK">CCK</option>
-	<option value="OFDM;OFDM;OFDM;OFDM">OFDM</option>
-	<option value="HTMIX;HTMIX;HTMIX;HTMIX">HTMIX</option>
-	<!--
+    <td><h1>Wireless Distribution System (WDS)</h1>
+      <p>Wireless Distribution System Settings</p>
+      <hr />
+      <form method="post" name="wireless_wds" action="/goform/wirelessWds" onSubmit="return CheckValue()">
+        <table class="form">
+          <tr>
+            <td class="title" id="basicWDSTitle" colspan="2">Wireless Distribution System (WDS)</td>
+          </tr>
+          <tr>
+            <td class="head" id="basicWDSMode">WDS Mode</td>
+            <td><select name="wds_mode" id="wds_mode" class="mid" onChange="WdsModeOnChange()">
+                <option value=0 id="basicWDSDisable">Disable</option>
+                <option value=4>Lazy Mode</option>
+                <option value=2>Bridge Mode</option>
+                <option value=3>Repeater Mode</option>
+              </select></td>
+          </tr>
+          <tr id="div_wds_phy_mode" name="div_wds_phy_mode">
+            <td class="head" id="basicWDSPhyMode">Phy Mode</td>
+            <td><select name="wds_phy_mode" id="wds_phy_mode" class="half">
+                <option value="CCK;CCK;CCK;CCK">CCK</option>
+                <option value="OFDM;OFDM;OFDM;OFDM">OFDM</option>
+                <option value="HTMIX;HTMIX;HTMIX;HTMIX">HTMIX</option>
+                <!--
 	<option value="GREENFIELD;GREENFIELD;GREENFIELD;GREENFIELD">GREENFIELD</option>
 	-->
-      </select>
-    </td>
-  </tr>
-  <tr id="div_wds_encryp_type0" name="div_wds_encryp_type0">
-    <td class="head" id="basicWDSEncrypType">EncrypType</td>
-    <td>
-      <select name="wds_encryp_type0" id="wds_encryp_type0" class="half" onchange="WdsSecurityOnChange(0)">
-	<option value="NONE">NONE</option>
-	<option value="WEP">WEP</option>
-	<option value="TKIP">TKIP</option>
-	<option value="AES">AES</option>
-      </select>
-    </td>
-  </tr>
-  <tr id="div_wds_encryp_key0" name="div_wds_encryp_key0">
-    <td class="head" id="basicWDSEncrypKey">EncrypKey</td>
-    <td><input type="text" name="wds_encryp_key0" class="wide" value=""></td>
-  </tr>
-  <tr id="div_wds_encryp_type1" name="div_wds_encryp_type1">
-    <td class="head" id="basicWDSEncrypType">EncrypType</td>
-    <td>
-      <select name="wds_encryp_type1" id="wds_encryp_type1" class="half" onchange="WdsSecurityOnChange(1)">
-	<option value="NONE">NONE</option>
-	<option value="WEP">WEP</option>
-	<option value="TKIP">TKIP</option>
-	<option value="AES">AES</option>
-      </select>
-    <td>
-  </tr>
-  <tr id="div_wds_encryp_key1" name="div_wds_encryp_key1">
-    <td class="head" id="basicWDSEncrypKey">EncrypKey</td>
-    <td><input type="text" name="wds_encryp_key1" class="wide" value=""></td>
-  </tr>
-  <tr id="div_wds_encryp_type2" name="div_wds_encryp_type2">
-    <td class="head" id="basicWDSEncrypType">EncrypType</td>
-    <td>
-      <select name="wds_encryp_type2" id="wds_encryp_type2" class="half" onchange="WdsSecurityOnChange(2)">
-	<option value="NONE">NONE</option>
-	<option value="WEP">WEP</option>
-	<option value="TKIP">TKIP</option>
-	<option value="AES">AES</option>
-      </select>
-    <td>
-  </tr>
-  <tr id="div_wds_encryp_key2" name="div_wds_encryp_key2">
-    <td class="head" id="basicWDSEncrypKey">EncrypKey</td>
-    <td><input type="text" name="wds_encryp_key2" class="wide" value=""></td>
-  </tr>
-  <tr id="div_wds_encryp_type3" name="div_wds_encryp_type3">
-    <td class="head" id="basicWDSEncrypType">EncrypType</td>
-    <td>
-      <select name="wds_encryp_type3" id="wds_encryp_type3" class="half" onchange="WdsSecurityOnChange(3)">
-	<option value="NONE">NONE</option>
-	<option value="WEP">WEP</option>
-	<option value="TKIP">TKIP</option>
-	<option value="AES">AES</option>
-      </select>
-    <td>
-  </tr>
-  <tr id="div_wds_encryp_key3" name="div_wds_encryp_key3">
-    <td class="head" id="basicWDSEncrypKey">EncrypKey</td>
-    <td><input type="text" name="wds_encryp_key3" class="wide" value=""></td>
-  </tr>
-  <tr id="wds_mac_list_1" name="wds_mac_list_1">
-    <td class="head" id="basicWDSAPMacAddr">AP MAC Address</td>
-    <td><input type="text" name="wds_1" class="mid" value=""></td>
-  </tr>
-  <tr id="wds_mac_list_2" name="wds_mac_list_2">
-    <td class="head" id="basicWDSAPMacAddr">AP MAC Address</td>
-    <td><input type="text" name="wds_2" class="mid" value=""></td>
-  </tr>
-  <tr id="wds_mac_list_3" name="wds_mac_list_3">
-    <td class="head" id="basicWDSAPMacAddr">AP MAC Address</td>
-    <td><input type="text" name="wds_3" class="mid" value=""></td>
-  </tr>
-  <tr id="wds_mac_list_4" name="wds_mac_list_4">
-    <td class="head" id="basicWDSAPMacAddr">AP MAC Address</td>
-    <td><input type="text" name="wds_4" class="mid" value=""></td>
+              </select></td>
+          </tr>
+          <tr id="div_wds_encryp_type0" name="div_wds_encryp_type0">
+            <td class="head" id="basicWDSEncrypType">EncrypType</td>
+            <td><select name="wds_encryp_type0" id="wds_encryp_type0" class="half" onChange="WdsSecurityOnChange(0)">
+                <option value="NONE">NONE</option>
+                <option value="WEP">WEP</option>
+                <option value="TKIP">TKIP</option>
+                <option value="AES">AES</option>
+              </select></td>
+          </tr>
+          <tr id="div_wds_encryp_key0" name="div_wds_encryp_key0">
+            <td class="head" id="basicWDSEncrypKey">EncrypKey</td>
+            <td><input type="text" name="wds_encryp_key0" class="wide" value=""></td>
+          </tr>
+          <tr id="div_wds_encryp_type1" name="div_wds_encryp_type1">
+            <td class="head" id="basicWDSEncrypType">EncrypType</td>
+            <td><select name="wds_encryp_type1" id="wds_encryp_type1" class="half" onChange="WdsSecurityOnChange(1)">
+                <option value="NONE">NONE</option>
+                <option value="WEP">WEP</option>
+                <option value="TKIP">TKIP</option>
+                <option value="AES">AES</option>
+              </select>
+            <td>
+          </tr>
+          <tr id="div_wds_encryp_key1" name="div_wds_encryp_key1">
+            <td class="head" id="basicWDSEncrypKey">EncrypKey</td>
+            <td><input type="text" name="wds_encryp_key1" class="wide" value=""></td>
+          </tr>
+          <tr id="div_wds_encryp_type2" name="div_wds_encryp_type2">
+            <td class="head" id="basicWDSEncrypType">EncrypType</td>
+            <td><select name="wds_encryp_type2" id="wds_encryp_type2" class="half" onChange="WdsSecurityOnChange(2)">
+                <option value="NONE">NONE</option>
+                <option value="WEP">WEP</option>
+                <option value="TKIP">TKIP</option>
+                <option value="AES">AES</option>
+              </select>
+            <td>
+          </tr>
+          <tr id="div_wds_encryp_key2" name="div_wds_encryp_key2">
+            <td class="head" id="basicWDSEncrypKey">EncrypKey</td>
+            <td><input type="text" name="wds_encryp_key2" class="wide" value=""></td>
+          </tr>
+          <tr id="div_wds_encryp_type3" name="div_wds_encryp_type3">
+            <td class="head" id="basicWDSEncrypType">EncrypType</td>
+            <td><select name="wds_encryp_type3" id="wds_encryp_type3" class="half" onChange="WdsSecurityOnChange(3)">
+                <option value="NONE">NONE</option>
+                <option value="WEP">WEP</option>
+                <option value="TKIP">TKIP</option>
+                <option value="AES">AES</option>
+              </select>
+            <td>
+          </tr>
+          <tr id="div_wds_encryp_key3" name="div_wds_encryp_key3">
+            <td class="head" id="basicWDSEncrypKey">EncrypKey</td>
+            <td><input type="text" name="wds_encryp_key3" class="wide" value=""></td>
+          </tr>
+          <tr id="wds_mac_list_1" name="wds_mac_list_1">
+            <td class="head" id="basicWDSAPMacAddr">AP MAC Address</td>
+            <td><input type="text" name="wds_1" class="mid" value=""></td>
+          </tr>
+          <tr id="wds_mac_list_2" name="wds_mac_list_2">
+            <td class="head" id="basicWDSAPMacAddr">AP MAC Address</td>
+            <td><input type="text" name="wds_2" class="mid" value=""></td>
+          </tr>
+          <tr id="wds_mac_list_3" name="wds_mac_list_3">
+            <td class="head" id="basicWDSAPMacAddr">AP MAC Address</td>
+            <td><input type="text" name="wds_3" class="mid" value=""></td>
+          </tr>
+          <tr id="wds_mac_list_4" name="wds_mac_list_4">
+            <td class="head" id="basicWDSAPMacAddr">AP MAC Address</td>
+            <td><input type="text" name="wds_4" class="mid" value=""></td>
+          </tr>
+        </table>
+        <table class="buttons">
+          <tr>
+            <td><input type="hidden" name="wds_list" value="">
+              <input type="hidden" name="wds_encryp_type" value="">
+              <input type="submit" class="normal" value="Apply">
+              &nbsp; &nbsp;
+              <input type="reset"  class="normal" value="Cancel" onClick="window.location.reload()">
+              <input type="hidden" name="submit-url" value="/wireless/wds.asp"></td>
+          </tr>
+        </table>
+      </form></td>
   </tr>
 </table>
-
-<table class="buttons">
-<tr>
-	<td>
-		<input type="hidden" name="wds_list" value="">
-		<input type="hidden" name="wds_encryp_type" value="">
-		
-		<input type="submit" class="normal" value="Apply"> &nbsp; &nbsp;
-		<input type="reset"  class="normal" value="Cancel" onClick="window.location.reload()">
-		<input type="hidden" name="submit-url" value="/wireless/wds.asp">
-	</td>
-</tr>
-</table>
-</form>
-
-</td></tr></table>
 </body>
 </html>
-

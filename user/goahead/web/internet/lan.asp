@@ -1,16 +1,15 @@
+<!DOCTYPE html>
 <html>
 <head>
 <title>Local Area Network (LAN) Settings</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0">
 <meta http-equiv="Pragma" content="no-cache">
-
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <link rel="stylesheet" href="/style/controls.css" type="text/css">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script type="text/javascript" src="/js/validation.js"></script>
 <script type="text/javascript" src="/js/controls.js"></script>
-
 <script language="JavaScript" type="text/javascript">
 
 Butterlate.setTextDomain("internet");
@@ -140,77 +139,69 @@ function lan2_enable_switch(form)
 </script>
 </head>
 
-<body onload="initValue()">
+<body onLoad="initValue()">
 <table class="body">
-<tr><td>
-
-<h1 id="lTitle"></h1>
-<p id="lIntroduction"></p>
-<hr>
-
-<form method="POST" name="lanCfg" action="/goform/setLan" onSubmit="return CheckValue();">
-<table class="form">
-<tr>
-	<td class="title" colspan="2" id="lSetup">LAN Interface Setup</td>
-</tr>
-<tr <% var hashost = getHostSupp();
+  <tr>
+    <td><h1 id="lTitle"></h1>
+      <p id="lIntroduction"></p>
+      <hr>
+      <form method="POST" name="lanCfg" action="/goform/setLan" onSubmit="return CheckValue();">
+        <table class="form">
+          <tr>
+            <td class="title" colspan="2" id="lSetup">LAN Interface Setup</td>
+          </tr>
+          <tr <% var hashost = getHostSupp();
 	if (hashost != "1") write("style=\"visibility:hidden;display:none\""); %>>
-	<td class="head" id="lHostname">Hostname</td>
-	<td><input name="hostname" class="mid" value="<% getCfgGeneral(1, "HostName"); %>"></td>
-</tr>
-<tr>
-	<td class="head" id="lIp">IP Address</td>
-	<td><input name="lanIp" class="mid" value="<% getLanIp(); %>" ></td>
-</tr>
-<tr>
-	<td class="head" id="lNetmask">Subnet Mask</td>
-	<td><input name="lanNetmask" class="mid" value="<% getLanNetmask(); %>"></td>
-</tr>
-<tr>
-	<td class="head" id="lLan2">LAN2</td>
-	<td>
-		<select name="lan2enabled" onchange="lan2_enable_switch(this.form);" class="half">
-			<option value="1">Enabled</option>
-			<option value="0">Disabled</option>
-		</select>
-	</td>
-</tr>
-<tr>
-	<td class="head" id="lLan2Ip">LAN2 IP Address</td>
-	<td><input name="lan2Ip" class="mid" value=""></td>
-</tr>
-<tr>
-	<td class="head" id="lLan2Netmask">LAN2 Subnet Mask</td>
-	<td><input name="lan2Netmask" class="mid" value=""></td>
-</tr>
-<tr id="brGateway">
-	<td class="head" id="lGateway">Default Gateway</td>
-	<td><input name="lanGateway" class="mid" value="<% getCfgGeneral(1, "wan_gateway"); %>"></td>
-</tr>
-<tr id="brPriDns">
-	<td class="head" id="lPriDns">Primary DNS Server</td>
-	<td><input name="lanPriDns" class="mid" value="<% getDns(1); %>"></td>
-</tr>
-<tr id="brSecDns">
-	<td class="head" id="lSecDns">Secondary DNS Server</td>
-	<td><input name="lanSecDns" class="mid" value="<% getDns(2); %>"></td>
-</tr>
+            <td class="head" id="lHostname">Hostname</td>
+            <td><input name="hostname" class="mid" value="<% getCfgGeneral(1, "HostName"); %>"></td>
+          </tr>
+          <tr>
+            <td class="head" id="lIp">IP Address</td>
+            <td><input name="lanIp" class="mid" value="<% getLanIp(); %>" ></td>
+          </tr>
+          <tr>
+            <td class="head" id="lNetmask">Subnet Mask</td>
+            <td><input name="lanNetmask" class="mid" value="<% getLanNetmask(); %>"></td>
+          </tr>
+          <tr>
+            <td class="head" id="lLan2">LAN2</td>
+            <td><select name="lan2enabled" onChange="lan2_enable_switch(this.form);" class="half">
+                <option value="1">Enabled</option>
+                <option value="0">Disabled</option>
+              </select></td>
+          </tr>
+          <tr>
+            <td class="head" id="lLan2Ip">LAN2 IP Address</td>
+            <td><input name="lan2Ip" class="mid" value=""></td>
+          </tr>
+          <tr>
+            <td class="head" id="lLan2Netmask">LAN2 Subnet Mask</td>
+            <td><input name="lan2Netmask" class="mid" value=""></td>
+          </tr>
+          <tr id="brGateway">
+            <td class="head" id="lGateway">Default Gateway</td>
+            <td><input name="lanGateway" class="mid" value="<% getCfgGeneral(1, "wan_gateway"); %>"></td>
+          </tr>
+          <tr id="brPriDns">
+            <td class="head" id="lPriDns">Primary DNS Server</td>
+            <td><input name="lanPriDns" class="mid" value="<% getDns(1); %>"></td>
+          </tr>
+          <tr id="brSecDns">
+            <td class="head" id="lSecDns">Secondary DNS Server</td>
+            <td><input name="lanSecDns" class="mid" value="<% getDns(2); %>"></td>
+          </tr>
+        </table>
+        <table class="buttons">
+          <tr>
+            <td><input type="submit" class="normal" value="Apply" id="lApply" onClick="TimeoutReload(20);">
+              &nbsp;&nbsp;
+              <input type="reset"  class="normal" value="Cancel" id="lCancel" onClick="window.location.reload();">
+              <input type="hidden" value="/internet/lan.asp" name="submit-url" ></td>
+          </tr>
+        </table>
+      </form>
+      <div class="whitespace">&nbsp;</div></td>
+  </tr>
 </table>
-
-<table class="buttons">
-<tr>
-	<td>
-		<input type="submit" class="normal" value="Apply" id="lApply" onClick="TimeoutReload(20);">&nbsp;&nbsp;
-		<input type="reset"  class="normal" value="Cancel" id="lCancel" onClick="window.location.reload();">
-		<input type="hidden" value="/internet/lan.asp" name="submit-url" >
-	</td>
-</tr>
-</table>
-</form>
-
-<div class="whitespace">&nbsp;</div>
-
-</td></tr></table>
 </body>
 </html>
-

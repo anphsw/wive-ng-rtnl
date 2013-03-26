@@ -1,10 +1,10 @@
+<!DOCTYPE html>
 <html>
 <head>
 <title>Internet Services Settings</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0">
 <meta http-equiv="Pragma" content="no-cache">
-
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <link rel="stylesheet" href="/style/controls.css" type="text/css">
 <script type="text/javascript" src="/lang/b28n.js"></script>
@@ -334,82 +334,70 @@ function toggleDhcpTable(check)
 </head>
 
 <body onLoad="initValue();">
-<table class="body"><tr><td>
-
-<h1 id="lTitle"></h1>
-<p id="lIntroduction"></p>
-<hr>
-
-<div id="dhcpClientsTable">
-</div>
-
-<form method="POST" name="dhcpCfg" action="/goform/setDhcp" onSubmit="return CheckValue(this);">
-
-<table class="form">
-<tr>
-	<td class="title" colspan="2" id="lSetup">DHCP Server Setup</td>
-</tr>
-
-<tr>
-	<td class="head" id="lDhcpType">DHCP Server</td>
-	<td>
-		<select name="lanDhcpType" class="mid" onChange="dhcpTypeSwitch();">
-			<option value="DISABLE" id="lDhcpTypeD">Disabled</option>
-			<option value="SERVER" id="lDhcpTypeS">Enabled</option>
-		</select>
-	</td>
-</tr>
-<tr>
-	<td class="head">DHCP Domain</td>
-	<td><input name="dhcpDomain" class="mid" value="<% getCfgGeneral(1, "dhcpDomain"); %>"></td>
-</tr>
-<tr id="start">
-	<td class="head" id="lDhcpStart">DHCP Pool Start IP</td>
-	<td><input name="dhcpStart" class="mid" value="<% getCfgGeneral(1, "dhcpStart"); %>"></td>
-</tr>
-<tr id="end">
-	<td class="head" id="lDhcpEnd">DHCP Pool End IP</td>
-	<td><input name="dhcpEnd" class="mid" value="<% getCfgGeneral(1, "dhcpEnd"); %>"></td>
-</tr>
-<tr id="mask">
-	<td class="head" id="lDhcpNetmask">DHCP Subnet Mask</td>
-	<td><input name="dhcpMask" class="mid" value="<% getCfgGeneral(1, "dhcpMask"); %>"></td>
-</tr>
-<tr id="pridns">
-	<td class="head" id="lDhcpPriDns">DHCP Primary DNS</td>
-	<td><input name="dhcpPriDns" class="mid" value="<% getCfgGeneral(1, "dhcpPriDns"); %>"></td>
-</tr>
-<tr id="secdns">
-	<td class="head" id="lDhcpSecDns">DHCP Secondary DNS</td>
-	<td><input name="dhcpSecDns" class="mid" value="<% getCfgGeneral(1, "dhcpSecDns"); %>"></td>
-</tr>
-<tr id="gateway">
-	<td class="head" id="lDhcpGateway">DHCP Default Gateway</td>
-	<td><input name="dhcpGateway" class="mid" value="<% getCfgGeneral(1, "dhcpGateway"); %>"></td>
-</tr>
-<tr id="lease">
-	<td class="head" id="lDhcpLease">DHCP Lease Time (in seconds)</td>
-	<td><input name="dhcpLease" class="mid" value="<% getCfgGeneral(1, "dhcpLease"); %>"></td>
-</tr>
+<table class="body">
+  <tr>
+    <td><h1 id="lTitle"></h1>
+      <p id="lIntroduction"></p>
+      <hr>
+      <div id="dhcpClientsTable"> </div>
+      <form method="POST" name="dhcpCfg" action="/goform/setDhcp" onSubmit="return CheckValue(this);">
+        <table class="form">
+          <tr>
+            <td class="title" colspan="2" id="lSetup">DHCP Server Setup</td>
+          </tr>
+          <tr>
+            <td class="head" id="lDhcpType">DHCP Server</td>
+            <td><select name="lanDhcpType" class="mid" onChange="dhcpTypeSwitch();">
+                <option value="DISABLE" id="lDhcpTypeD">Disabled</option>
+                <option value="SERVER" id="lDhcpTypeS">Enabled</option>
+              </select></td>
+          </tr>
+          <tr>
+            <td class="head">DHCP Domain</td>
+            <td><input name="dhcpDomain" class="mid" value="<% getCfgGeneral(1, "dhcpDomain"); %>"></td>
+          </tr>
+          <tr id="start">
+            <td class="head" id="lDhcpStart">DHCP Pool Start IP</td>
+            <td><input name="dhcpStart" class="mid" value="<% getCfgGeneral(1, "dhcpStart"); %>"></td>
+          </tr>
+          <tr id="end">
+            <td class="head" id="lDhcpEnd">DHCP Pool End IP</td>
+            <td><input name="dhcpEnd" class="mid" value="<% getCfgGeneral(1, "dhcpEnd"); %>"></td>
+          </tr>
+          <tr id="mask">
+            <td class="head" id="lDhcpNetmask">DHCP Subnet Mask</td>
+            <td><input name="dhcpMask" class="mid" value="<% getCfgGeneral(1, "dhcpMask"); %>"></td>
+          </tr>
+          <tr id="pridns">
+            <td class="head" id="lDhcpPriDns">DHCP Primary DNS</td>
+            <td><input name="dhcpPriDns" class="mid" value="<% getCfgGeneral(1, "dhcpPriDns"); %>"></td>
+          </tr>
+          <tr id="secdns">
+            <td class="head" id="lDhcpSecDns">DHCP Secondary DNS</td>
+            <td><input name="dhcpSecDns" class="mid" value="<% getCfgGeneral(1, "dhcpSecDns"); %>"></td>
+          </tr>
+          <tr id="gateway">
+            <td class="head" id="lDhcpGateway">DHCP Default Gateway</td>
+            <td><input name="dhcpGateway" class="mid" value="<% getCfgGeneral(1, "dhcpGateway"); %>"></td>
+          </tr>
+          <tr id="lease">
+            <td class="head" id="lDhcpLease">DHCP Lease Time (in seconds)</td>
+            <td><input name="dhcpLease" class="mid" value="<% getCfgGeneral(1, "dhcpLease"); %>"></td>
+          </tr>
+        </table>
+        <div id="dhcpStaticIPList"> </div>
+        <table class="buttons">
+          <tr>
+            <td><input type="hidden" name="dhcpAssignIP" value="">
+              <input type="submit" class="normal" value="Apply" id="lApply" onClick="TimeoutReload(20);">
+              &nbsp;&nbsp;
+              <input type="reset"  class="normal" value="Cancel" id="lCancel" onClick="window.location.reload();">
+              <input type="hidden" value="/services/dhcp.asp" name="submit-url"></td>
+          </tr>
+        </table>
+      </form>
+      <div class="whitespace">&nbsp;</div></td>
+  </tr>
 </table>
-
-<div id="dhcpStaticIPList">
-</div>
-
-<table class="buttons">
-<tr>
-<td>
-	<input type="hidden" name="dhcpAssignIP" value="">
-	<input type="submit" class="normal" value="Apply" id="lApply" onClick="TimeoutReload(20);">&nbsp;&nbsp;
-	<input type="reset"  class="normal" value="Cancel" id="lCancel" onClick="window.location.reload();">
-	<input type="hidden" value="/services/dhcp.asp" name="submit-url">
-</td>
-</tr>
-</table>
-</form>
-
-<div class="whitespace">&nbsp;</div>
-
-</td></tr></table>
 </body>
 </html>

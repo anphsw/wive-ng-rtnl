@@ -1,13 +1,11 @@
+<!DOCTYPE html>
 <html>
 <head>
-
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0">
 <meta http-equiv="Pragma" content="no-cache">
-
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
-
 <title>Disk Partition</title>
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("usb");
@@ -148,67 +146,61 @@ function submit_apply()
 </head>
 
 <body onLoad="initValue()" onUnload="partedClose()">
-<table class="body"><tr><td>
-<form method=post name="disk_parted" action="/goform/storageDiskPart">
-<input type="hidden" name="max_vol" value="">
-<table width="540" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table class="body">
   <tr>
-    <td class="title" id="partedMaxVol" width="150px">Max. Availabled Volume</td>
-<script language="JavaScript" type="text/javascript">
+    <td><form method=post name="disk_parted" action="/goform/storageDiskPart">
+        <input type="hidden" name="max_vol" value="">
+        <table width="540" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+          <tr>
+            <td class="title" id="partedMaxVol" width="150px">Max. Availabled Volume</td>
+            <script language="JavaScript" type="text/javascript">
 document.write("<td>"+maxvol+" MB</td>");
 </script>
-  <tr>
-    <td class="title" id="partedNum" width="150px">Partition Number</td>
-    <td>
-      <select name="max_part" onChange="parted_count_switch()">
-        <option value="1" selected>1
-        <option value="2">2
-        <option value="3">3
-        <option value="4">4
-      </select>
-    </td>
-  </tr>
-  <tr>
-    <td class="title" id="partedIndex" width="150px">Partition</td>
-    <td class="title" id="partedVol">Volume</td>
-  </tr>
-  <tr>
-    <td align="center" bgcolor="#E8F8FF" width="150px">Partition 1</td>
-    <td>
-      <input type="text" size="5" maxlength="5" name="part1_vol">M
-    </td>
-  </tr>
-  <tr>
-    <td align="center" bgcolor="#E8F8FF" width="150px">Partition 2</td>
-    <td>
-      <input type="text" size="5" maxlength="5" name="part2_vol">M
-    </td>
-  </tr>
-  <tr>
-    <td align="center" bgcolor="#E8F8FF" width="150px">Partition 3</td>
-    <td>
-      <input type="text" size="5" maxlength="5" name="part3_vol">M
-    </td>
-  </tr>
-  <tr>
-    <td align="center" bgcolor="#E8F8FF" width="150px">Partition 4</td>
-    <td>
-      <input type="text" size="5" maxlength="5" name="part4_vol">M
-    </td>
-  </tr>
-</table>
-<hr />
-<br />
-<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
-  <tr align="center">
-    <td>
-      <input type=button style="{width:120px;}" value="Apply" id="partedApply" onClick="submit_apply()"> &nbsp; &nbsp;
-      <input type=reset  style="{width:120px;}" value="Cancel" id="partedCancel" onClick="window.close()">
-    </td>
+          <tr>
+            <td class="title" id="partedNum" width="150px">Partition Number</td>
+            <td><select name="max_part" onChange="parted_count_switch()">
+                <option value="1" selected>1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+              </select></td>
+          </tr>
+          <tr>
+            <td class="title" id="partedIndex" width="150px">Partition</td>
+            <td class="title" id="partedVol">Volume</td>
+          </tr>
+          <tr>
+            <td align="center" bgcolor="#E8F8FF" width="150px">Partition 1</td>
+            <td><input type="text" size="5" maxlength="5" name="part1_vol">
+              M </td>
+          </tr>
+          <tr>
+            <td align="center" bgcolor="#E8F8FF" width="150px">Partition 2</td>
+            <td><input type="text" size="5" maxlength="5" name="part2_vol">
+              M </td>
+          </tr>
+          <tr>
+            <td align="center" bgcolor="#E8F8FF" width="150px">Partition 3</td>
+            <td><input type="text" size="5" maxlength="5" name="part3_vol">
+              M </td>
+          </tr>
+          <tr>
+            <td align="center" bgcolor="#E8F8FF" width="150px">Partition 4</td>
+            <td><input type="text" size="5" maxlength="5" name="part4_vol">
+              M </td>
+          </tr>
+        </table>
+        <hr />
+        <br />
+        <table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
+          <tr align="center">
+            <td><input type=button style="{width:120px;}" value="Apply" id="partedApply" onClick="submit_apply()">
+              &nbsp; &nbsp;
+              <input type=reset  style="{width:120px;}" value="Cancel" id="partedCancel" onClick="window.close()"></td>
+          </tr>
+        </table>
+      </form></td>
   </tr>
 </table>
-</form>
 </body>
 </html>
-
-

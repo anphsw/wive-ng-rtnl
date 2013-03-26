@@ -1,14 +1,12 @@
+<!DOCTYPE html>
 <html>
 <head>
-
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0">
 <meta http-equiv="Pragma" content="no-cache">
-
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <title>Media Server Settings</title>
-
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("usb");
 var dir_count = 0;
@@ -164,71 +162,64 @@ function submit_apply(parm)
 </head>
 
 <body onLoad="initValue()">
-<table class="body"><tr><td>
-
-
-<h1 id="mediaSrvTitle">Media Server Settings </h1>
-<p id="mediaSrvIntroduction"></p>
-<hr />
-
-<form method=post name=storage_media action="/goform/storageMediaSrv">
-<input type=hidden name=hiddenButton value="">
-<table width="540" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
-  <tr> 
-    <td class="title" colspan="2" id="mediaSrvSet">Media Server Setup</td>
-  </tr>
-  <tr> 
-    <td class="head" id="mediaSrv">Media Server</td>
-    <td>
-      <input type=radio name=media_enabled value="1" onClick="media_enable_switch()"><font id="mediaSrvEnable">Enable</font>&nbsp;
-      <input type=radio name=media_enabled value="0" onClick="media_enable_switch()" checked><font id="mediaSrvDisable">Disable</font>
-    </td>
-  </tr>
+<table class="body">
   <tr>
-    <td class="head" id="mediaSrvName">Media Server Name</td>
-    <td>
-      <input type=text name=media_name size=16 maxlength=16 value="Wive-NG-RTNL">
-    </td>
-  </tr>
-</table>
-<hr />
-<br />
-<center>
-<table width="360" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
-  <tr align="center">
-    <td class="title" colspan="3" id="mediaSrvDir">Media Server Shared Directory</td>
-  </tr>
-  <tr align="center">
-    <td bgcolor="#E8F8FF" width=20%>&nbsp;</td>
-    <td align="center" bgcolor="#E8F8FF" width=80% id="mediaDirPath">Path</td>
-  </tr>
-  <% ShowMediaDir(); %>
-<script language="JavaScript" type="text/javascript">
+    <td><h1 id="mediaSrvTitle">Media Server Settings </h1>
+      <p id="mediaSrvIntroduction"></p>
+      <hr />
+      <form method=post name=storage_media action="/goform/storageMediaSrv">
+        <input type=hidden name=hiddenButton value="">
+        <table width="540" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+          <tr>
+            <td class="title" colspan="2" id="mediaSrvSet">Media Server Setup</td>
+          </tr>
+          <tr>
+            <td class="head" id="mediaSrv">Media Server</td>
+            <td><input type=radio name=media_enabled value="1" onClick="media_enable_switch()">
+              <font id="mediaSrvEnable">Enable</font>&nbsp;
+              <input type=radio name=media_enabled value="0" onClick="media_enable_switch()" checked>
+              <font id="mediaSrvDisable">Disable</font></td>
+          </tr>
+          <tr>
+            <td class="head" id="mediaSrvName">Media Server Name</td>
+            <td><input type=text name=media_name size=16 maxlength=16 value="Wive-NG-RTNL"></td>
+          </tr>
+        </table>
+        <hr />
+        <br />
+        <center>
+          <table width="360" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+            <tr align="center">
+              <td class="title" colspan="3" id="mediaSrvDir">Media Server Shared Directory</td>
+            </tr>
+            <tr align="center">
+              <td bgcolor="#E8F8FF" width=20%>&nbsp;</td>
+              <td align="center" bgcolor="#E8F8FF" width=80% id="mediaDirPath">Path</td>
+            </tr>
+            <% ShowMediaDir(); %>
+            <script language="JavaScript" type="text/javascript">
 dir_count = parseInt('<% getCount(1, "AllMediaDir"); %>');
 </script>
-</table>
-</center>
-<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
-  <tr align="center">
-    <td>
-      <input type=button style="{width:120px;}" value="Add" name="media_dir_add" id="mediaAdd" onClick="open_media_diradd_window()"> &nbsp; &nbsp;
-      <input type=button style="{width:120px;}" value="Delete" name="media_dir_del" id="mediaDel" onClick="submit_apply('delete')">
-    </td>
+          </table>
+        </center>
+        <table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
+          <tr align="center">
+            <td><input type=button style="{width:120px;}" value="Add" name="media_dir_add" id="mediaAdd" onClick="open_media_diradd_window()">
+              &nbsp; &nbsp;
+              <input type=button style="{width:120px;}" value="Delete" name="media_dir_del" id="mediaDel" onClick="submit_apply('delete')"></td>
+          </tr>
+        </table>
+        <hr />
+        <br />
+        <table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
+          <tr align="center">
+            <td><input type=button style="{width:120px;}" value="Apply" id="mediaApply" onClick="submit_apply('apply')">
+              &nbsp; &nbsp;
+              <input type=button style="{width:120px;}" value="Cancel" id="mediaReset" onClick="window.location.reload()"></td>
+          </tr>
+        </table>
+      </form></td>
   </tr>
 </table>
-<hr />
-<br />
-<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
-  <tr align="center">
-    <td>
-      <input type=button style="{width:120px;}" value="Apply" id="mediaApply" onClick="submit_apply('apply')"> &nbsp; &nbsp;
-      <input type=button style="{width:120px;}" value="Cancel" id="mediaReset" onClick="window.location.reload()">
-    </td>
-  </tr>
-</table>
-</form>
-
-</td></tr></table>
 </body>
 </html>
-

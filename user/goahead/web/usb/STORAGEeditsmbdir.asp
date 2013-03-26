@@ -1,13 +1,11 @@
+<!DOCTYPE html>
 <html>
 <head>
-
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0">
 <meta http-equiv="Pragma" content="no-cache">
-
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
-
 <title>Edit Directory</title>
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("usb");
@@ -50,37 +48,31 @@ function submit_apply()
 </head>
 
 <body onLoad="initValue()" onUnload="EditDirClose()">
-<table class="body"><tr><td>
-
-<form method=post name="smb_editdir" action="/goform/SmbDirEdit">
-<input type=hidden name=hidden_index value="">
-<table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
-  <tr> 
-    <td class="title" id="editdirName">Directory Name</td>
-    <td>
-      <script language="JavaScript" type="text/javascript">
-        document.write(dir_name);  
-      </script>
-    </td>
-  </tr>
-  <tr> 
-    <td class="title" id="editdirPath">Path</td>
-    <td>
-      <script language="JavaScript" type="text/javascript">
-        document.write(path);  
-      </script>
-    </td>
-  </tr>
-</table>
-
-<hr />
-<br />
-
-<table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table class="body">
   <tr>
-    <td class="title" colspan="2" id="editdirAccessUser">Access User</td>
-  </tr>
-  <script language="JavaScript" type="text/javascript">
+    <td><form method=post name="smb_editdir" action="/goform/SmbDirEdit">
+        <input type=hidden name=hidden_index value="">
+        <table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+          <tr>
+            <td class="title" id="editdirName">Directory Name</td>
+            <td><script language="JavaScript" type="text/javascript">
+        document.write(dir_name);  
+      </script></td>
+          </tr>
+          <tr>
+            <td class="title" id="editdirPath">Path</td>
+            <td><script language="JavaScript" type="text/javascript">
+        document.write(path);  
+      </script></td>
+          </tr>
+        </table>
+        <hr />
+        <br />
+        <table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+          <tr>
+            <td class="title" colspan="2" id="editdirAccessUser">Access User</td>
+          </tr>
+          <script language="JavaScript" type="text/javascript">
   var TRDHeader = "<tr class=head align=center><td>";
   var TDConneter = "</td><td>";
   var TDFooter = "</td><tr>";
@@ -102,22 +94,18 @@ function submit_apply()
     }
   }
 </script>
-</table>
-
-<hr />
-<br />
-
-<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
-  <tr align="center">
-    <td>
-      <input type=button style="{width:120px;}" value="Apply" id="editdirApply" onClick="submit_apply()"> &nbsp; &nbsp;
-      <input type=reset  style="{width:120px;}" value="Cancel" id="editdirCancel" onClick="window.close()">
-    </td>
+        </table>
+        <hr />
+        <br />
+        <table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
+          <tr align="center">
+            <td><input type=button style="{width:120px;}" value="Apply" id="editdirApply" onClick="submit_apply()">
+              &nbsp; &nbsp;
+              <input type=reset  style="{width:120px;}" value="Cancel" id="editdirCancel" onClick="window.close()"></td>
+          </tr>
+        </table>
+      </form></td>
   </tr>
 </table>
-</form>
-
-</td></tr></table>
 </body>
 </html>
-

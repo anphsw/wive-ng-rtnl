@@ -1,17 +1,16 @@
+<!DOCTYPE html>
 <html>
 <head>
 <title>Internet Services Settings</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0">
 <meta http-equiv="Pragma" content="no-cache">
-
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <link rel="stylesheet" href="/style/controls.css" type="text/css">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script type="text/javascript" src="/js/validation.js"></script>
 <script type="text/javascript" src="/js/controls.js"></script>
 <script type="text/javascript" src="/js/ajax.js"></script>
-
 <script language="JavaScript" type="text/javascript">
 
 Butterlate.setTextDomain("internet");
@@ -212,110 +211,91 @@ function mruChange(form)
 </head>
 
 <body onLoad="initValue();">
-<table class="body"><tr><td>
-
-<h1>L2TP Server Setup</h1>
-<p>Here you can configure L2TP server settings.</p>
-<hr>
-
-<div id="dhcpClientsTable">
-</div>
-
-<form method="POST" name="l2tpConfig" action="/goform/l2tpConfig" onSubmit="return CheckValue(this);">
-
-<table class="form">
-<tr>
-	<td class="title" colspan="2">L2TP Server Setup</td>
-</tr>
-
-<tr>
-	<td class="head" onmouseover="showHint('l2tp_enable')" onmouseout="hideHint('l2tp_enable')">
-		<input type="checkbox" name="l2tp_srv_enabled" onchange="l2tpEnableSwitch(this.form);">&nbsp;Enable L2TP server
-	</td>
-	<td>&nbsp;</td>
-</tr>
-<tr onmouseover="showHint('l2tp_ip')" onmouseout="hideHint('l2tp_ip')">
-	<td class="head">Our local IP to use</td>
-	<td><input name="l2tp_srv_ip_local" class="mid" value="<% getCfgGeneral(1, "l2tp_srv_ip_local"); %>"></td>
-</tr>
-<tr onmouseover="showHint('l2tp_ip_list')" onmouseout="hideHint('l2tp_ip_list')">
-	<td class="head">Allocate from this IP range</td>
-	<td><input name="l2tp_srv_ip_range" class="mid" value="<% getCfgGeneral(1, "l2tp_srv_ip_range"); %>"></td>
-</tr>
-<tr onmouseover="showHint('l2tp_mtu')" onmouseout="hideHint('l2tp_mtu')">
-	<td class="head"><acronym title="Maximum Transfer Unit">Tunnel MTU</acronym>:</td>
-	<td>
-		<input name="l2tp_srv_mtu_size" type="text" class="half" style="display:none;" value="<% getCfgGeneral(1, "l2tp_srv_mtu_size"); %>" >
-		<select name="l2tp_srv_mtu_sel" onChange="mtuChange(this.form);" class="mid" >
-			<option value="AUTO">AUTO</option>
-			<option value="1" selected="selected">Custom</option>
-			<option value="1500">1500</option>
-			<option value="1492">1492</option>
-			<option value="1440">1440</option>
-			<option value="1400">1400</option>
-			<option value="1300">1300</option>
-			<option value="1200">1200</option>
-			<option value="1100">1100</option>
-			<option value="1000">1000</option>
-		</select>
-	</td>
-</tr>
-<tr onmouseover="showHint('l2tp_mru')" onmouseout="hideHint('l2tp_mru')">
-	<td class="head"><acronym title="Maximum Receive Unit">Tunnel MRU</acronym>:</td>
-	<td>
-		<input name="l2tp_srv_mru_size" type="text" class="half" style="display:none;" value="<% getCfgGeneral(1, "l2tp_srv_mru_size"); %>" >
-		<select name="l2tp_srv_mru_sel" onChange="mruChange(this.form);" class="mid" >
-			<option value="AUTO">AUTO</option>
-			<option value="1" selected="selected">Custom</option>
-			<option value="1500">1500</option>
-			<option value="1492">1492</option>
-			<option value="1440">1440</option>
-			<option value="1400">1400</option>
-			<option value="1300">1300</option>
-			<option value="1200">1200</option>
-			<option value="1100">1100</option>
-			<option value="1000">1000</option>
-		</select>
-	</td>
-</tr>
+<table class="body">
+  <tr>
+    <td><h1>L2TP Server Setup</h1>
+      <p>Here you can configure L2TP server settings.</p>
+      <hr>
+      <div id="dhcpClientsTable"> </div>
+      <form method="POST" name="l2tpConfig" action="/goform/l2tpConfig" onSubmit="return CheckValue(this);">
+        <table class="form">
+          <tr>
+            <td class="title" colspan="2">L2TP Server Setup</td>
+          </tr>
+          <tr>
+            <td class="head" onMouseOver="showHint('l2tp_enable')" onMouseOut="hideHint('l2tp_enable')"><input type="checkbox" name="l2tp_srv_enabled" onChange="l2tpEnableSwitch(this.form);">
+              &nbsp;Enable L2TP server </td>
+            <td>&nbsp;</td>
+          </tr>
+          <tr onMouseOver="showHint('l2tp_ip')" onMouseOut="hideHint('l2tp_ip')">
+            <td class="head">Our local IP to use</td>
+            <td><input name="l2tp_srv_ip_local" class="mid" value="<% getCfgGeneral(1, "l2tp_srv_ip_local"); %>"></td>
+          </tr>
+          <tr onMouseOver="showHint('l2tp_ip_list')" onMouseOut="hideHint('l2tp_ip_list')">
+            <td class="head">Allocate from this IP range</td>
+            <td><input name="l2tp_srv_ip_range" class="mid" value="<% getCfgGeneral(1, "l2tp_srv_ip_range"); %>"></td>
+          </tr>
+          <tr onMouseOver="showHint('l2tp_mtu')" onMouseOut="hideHint('l2tp_mtu')">
+            <td class="head"><acronym title="Maximum Transfer Unit">Tunnel MTU</acronym>:</td>
+            <td><input name="l2tp_srv_mtu_size" type="text" class="half" style="display:none;" value="<% getCfgGeneral(1, "l2tp_srv_mtu_size"); %>" >
+              <select name="l2tp_srv_mtu_sel" onChange="mtuChange(this.form);" class="mid" >
+                <option value="AUTO">AUTO</option>
+                <option value="1" selected="selected">Custom</option>
+                <option value="1500">1500</option>
+                <option value="1492">1492</option>
+                <option value="1440">1440</option>
+                <option value="1400">1400</option>
+                <option value="1300">1300</option>
+                <option value="1200">1200</option>
+                <option value="1100">1100</option>
+                <option value="1000">1000</option>
+              </select></td>
+          </tr>
+          <tr onMouseOver="showHint('l2tp_mru')" onMouseOut="hideHint('l2tp_mru')">
+            <td class="head"><acronym title="Maximum Receive Unit">Tunnel MRU</acronym>:</td>
+            <td><input name="l2tp_srv_mru_size" type="text" class="half" style="display:none;" value="<% getCfgGeneral(1, "l2tp_srv_mru_size"); %>" >
+              <select name="l2tp_srv_mru_sel" onChange="mruChange(this.form);" class="mid" >
+                <option value="AUTO">AUTO</option>
+                <option value="1" selected="selected">Custom</option>
+                <option value="1500">1500</option>
+                <option value="1492">1492</option>
+                <option value="1440">1440</option>
+                <option value="1400">1400</option>
+                <option value="1300">1300</option>
+                <option value="1200">1200</option>
+                <option value="1100">1100</option>
+                <option value="1000">1000</option>
+              </select></td>
+          </tr>
+        </table>
+        <table class="form">
+          <tr>
+            <td class="title" colspan="2">Additional options</td>
+          </tr>
+          <tr>
+            <td style="width: 50%;" onMouseOver="showHint('l2tp_lcp')" onMouseOut="hideHint('l2tp_lcp')"><input name="l2tp_srv_lcp_adapt" type="checkbox">
+              &nbsp;<b>Adaptive LCP</b></td>
+            <td style="width: 50%;" onMouseOver="showHint('l2tp_debug')" onMouseOut="hideHint('l2tp_debug')"><input name="l2tp_srv_debug" type="checkbox">
+              &nbsp;<b>L2TP debugging</b></td>
+          </tr>
+          <tr>
+            <td style="width: 50%;" onMouseOver="showHint('l2tp_nat')" onMouseOut="hideHint('l2tp_nat')"><input name="l2tp_srv_nat_enabled" type="checkbox">
+              &nbsp;<b>Enable NAT</b></td>
+            <td>&nbsp;</td>
+          </tr>
+        </table>
+        <div id="l2tpUserList"> </div>
+        <table class="buttons">
+          <tr>
+            <td><input type="submit" class="normal" value="Apply">
+              &nbsp;&nbsp;
+              <input type="hidden" value="/services/l2tp.asp" name="submit-url"></td>
+          </tr>
+        </table>
+      </form>
+      <div id="l2tp_hint_row">&nbsp;</div>
+      <div class="whitespace">&nbsp;</div></td>
+  </tr>
 </table>
-
-<table class="form">
-<tr>
-	<td class="title" colspan="2">Additional options</td>
-</tr>
-<tr>
-	<td style="width: 50%;" onmouseover="showHint('l2tp_lcp')" onmouseout="hideHint('l2tp_lcp')">
-		<input name="l2tp_srv_lcp_adapt" type="checkbox">&nbsp;<b>Adaptive LCP</b>
-	</td>
-	<td style="width: 50%;" onmouseover="showHint('l2tp_debug')" onmouseout="hideHint('l2tp_debug')">
-		<input name="l2tp_srv_debug" type="checkbox">&nbsp;<b>L2TP debugging</b>
-	</td>
-</tr>
-<tr>
-	<td style="width: 50%;" onmouseover="showHint('l2tp_nat')" onmouseout="hideHint('l2tp_nat')">
-		<input name="l2tp_srv_nat_enabled" type="checkbox">&nbsp;<b>Enable NAT</b></td>
-	<td>&nbsp;</td>
-</tr>
-</table>
-
-<div id="l2tpUserList">
-</div>
-
-<table class="buttons">
-<tr>
-<td>
-	<input type="submit" class="normal" value="Apply">&nbsp;&nbsp;
-	<input type="hidden" value="/services/l2tp.asp" name="submit-url">
-</td>
-</tr>
-</table>
-</form>
-
-<div id="l2tp_hint_row">&nbsp;</div>
-
-<div class="whitespace">&nbsp;</div>
-
-</td></tr></table>
 </body>
 </html>

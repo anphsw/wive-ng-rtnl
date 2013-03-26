@@ -1,15 +1,14 @@
-<HTML>
+<!DOCTYPE html>
+<html>
 <!-- Copyright (c) Go Ahead Software Inc., 1994-2000. All Rights Reserved. -->
 <!-- Copyright (c) Ralink (2004-2010) Tech Inc. All Rights Reserved. -->
 <!-- Copyright (c) Wive project (2010-2011). All Rights Reserved. -->
-<HEAD>
-<TITLE>Wive-NG-RTNL</TITLE>
+<head>
+<title>Wive-NG-RTNL</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0">
 <meta http-equiv="Pragma" content="no-cache">
-
 <script type="text/javascript" src="/js/ajax.js"></script>
-
 <script language="JavaScript" type="text/javascript">
 function initLanguage()
 {
@@ -49,22 +48,16 @@ function onInit()
 }
 
 </script>
-</HEAD>
-<FRAMESET id="homeFrameset" ROWS="40,1*" COLS="*" BORDER="0" FRAMESPACING="0" FRAMEBORDER="NO" onLoad="onInit()">
-
-  <FRAME SRC="title.htm" NAME="title" FRAMEBORDER="NO" SCROLLING="NO" MARGINWIDTH="0" MARGINHEIGHT="0">
-
-  <FRAMESET id="homeMenuFrameset" COLS="200,1*">
-
-    <FRAME SRC="treeapp.asp" NAME="menu" MARGINWIDTH="0" MARGINHEIGHT="0" scrolling="AUTO" FRAMEBORDER="NO" >
-
-    <FRAME SRC="overview.asp" NAME="view" SCROLLING="AUTO" MARGINWIDTH="0" TOPMARGIN="0" MARGINHEIGHT="0" FRAMEBORDER="NO">
-  </FRAMESET>
-</FRAMESET>
-
-<NOFRAMES>
-<BODY BGCOLOR="#FFFFFF">
-</BODY>
-</NOFRAMES>
-
-</HTML>
+</head>
+<frameset id="homeFrameset" rows="40,1*" cols="*" border="0" framespacing="0" frameborder="NO" onLoad="onInit()">
+  <frame src="title.htm" name="title" frameborder="NO" scrolling="NO" marginwidth="0" marginheight="0">
+  <frameset id="homeMenuFrameset" cols="200,1*">
+    <frame src="treeapp.asp" name="menu" marginwidth="0" marginheight="0" scrolling="AUTO" frameborder="NO" >
+    <frame src="overview.asp" name="view" scrolling="AUTO" marginwidth="0" topmargin="0" marginheight="0" frameborder="NO">
+  </frameset>
+</frameset>
+<noframes>
+<body bgcolor="#FFFFFF">
+</body>
+</noframes>
+</html>

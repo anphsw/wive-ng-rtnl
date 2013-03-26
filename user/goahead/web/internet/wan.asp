@@ -1,19 +1,16 @@
+<!DOCTYPE html>
 <html>
 <head>
 <title>Wide Area Network (WAN) Settings</title>
-
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0">
 <meta http-equiv="Pragma" content="no-cache">
-
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <link rel="stylesheet" href="/style/controls.css" type="text/css">
-
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script type="text/javascript" src="/js/validation.js"></script>
 <script type="text/javascript" src="/js/share.js"></script>
 <script type="text/javascript" src="/js/controls.js"></script>
-
 <script language="JavaScript" type="text/javascript">
 var http_request = false;
 Butterlate.setTextDomain("internet");
@@ -179,111 +176,97 @@ function wanMtuChange(form)
 </head>
 
 <body onLoad="initValue()">
-
-<table class="body"><tr><td>
-
-<h1 id="wTitle"></h1>
-<p id="wIntroduction"></p>
-<hr>
-
-<form method="POST" name="wanCfg" action="/goform/setWan" onSubmit="return CheckValue(this);">
-
-<table class="form">
-<tr>
-	<td class="title" colspan="2">WAN connection type</td>
-</tr>
-<tr>
-	<td class="head"><b id="wConnectionType">Connection type</b></td>
-	<td>
-		<select name="connectionType" class="mid" onChange="connectionTypeSwitch(this.form);">
-			<option value="STATIC" id="wConnTypeStatic" selected="selected">Static Mode (fixed IP)</option>
-			<option value="DHCP" id="wConnTypeDhcp">DHCP (Auto Config)</option>
-			<option value="ZERO" id="wConnTypeDhcp">Zeroconf</option>
-		</select>
-	</td>
-</tr>
+<table class="body">
+  <tr>
+    <td><h1 id="wTitle"></h1>
+      <p id="wIntroduction"></p>
+      <hr>
+      <form method="POST" name="wanCfg" action="/goform/setWan" onSubmit="return CheckValue(this);">
+        <table class="form">
+          <tr>
+            <td class="title" colspan="2">WAN connection type</td>
+          </tr>
+          <tr>
+            <td class="head"><b id="wConnectionType">Connection type</b></td>
+            <td><select name="connectionType" class="mid" onChange="connectionTypeSwitch(this.form);">
+                <option value="STATIC" id="wConnTypeStatic" selected="selected">Static Mode (fixed IP)</option>
+                <option value="DHCP" id="wConnTypeDhcp">DHCP (Auto Config)</option>
+                <option value="ZERO" id="wConnTypeDhcp">Zeroconf</option>
+              </select></td>
+          </tr>
+        </table>
+        
+        <!-- ================= STATIC Mode ================= -->
+        <table id="staticDHCP" class="form">
+          <tr>
+            <td class="title" colspan="2" id="wStaticMode">Static Mode</td>
+          </tr>
+          <tr>
+            <td class="head" id="wStaticIp">IP Address</td>
+            <td><input name="staticIp" class="mid" value="<% getCfgZero(1, "wan_ipaddr"); %>"></td>
+          </tr>
+          <tr>
+            <td class="head" id="wStaticNetmask">Subnet Mask</td>
+            <td><input name="staticNetmask" class="mid" value="<% getCfgZero(1, "wan_netmask"); %>"></td>
+          </tr>
+          <tr>
+            <td class="head" id="wStaticGateway">Default Gateway</td>
+            <td><input name="staticGateway" class="mid" value="<% getCfgZero(1, "wan_gateway"); %>"></td>
+          </tr>
+        </table>
+        <table class="form">
+          <tr>
+            <td class="title" colspan="2">Additional Options</td>
+          </tr>
+          <tr id="dhcpReqIPRow">
+            <td class="head">Request IP from DHCP (optional)</td>
+            <td><input name="dhcpReqIP" class="mid" value="<% getCfgGeneral(1, "dhcpRequestIP"); %>"></td>
+          </tr>
+          <tr>
+            <td class="head">WAN MTU</td>
+            <td><input name="wan_mtu" type="text" class="half" style="display:none;">
+              <select name="wan_mtu_type" onChange="wanMtuChange(this.form);" class="half">
+                <option value="0">AUTO</option>
+                <option value="1" selected="selected">Custom</option>
+                <option value="1500">1500</option>
+                <option value="1492">1492</option>
+                <option value="1440">1440</option>
+                <option value="1400">1400</option>
+                <option value="1300">1300</option>
+                <option value="1200">1200</option>
+                <option value="1100">1100</option>
+                <option value="1000">1000</option>
+              </select></td>
+          </tr>
+          <tr id="staticDNSAssignRow">
+            <td class="head" id="wMacAddressClone">Assign static DNS Server</td>
+            <td><input name="wStaticDnsEnable" type="checkbox" onClick="dnsSwitchClick(this.form);" ></td>
+          </tr>
+          <tr id="priDNSrow" style="display:none;" >
+            <td class="head" id="wStaticPriDns">Primary DNS Server</td>
+            <td><input name="staticPriDns" class="mid" value="<% getDns(1); %>"></td>
+          </tr>
+          <tr id="secDNSrow" style="display:none;" >
+            <td class="head" id="wStaticSecDns">Secondary DNS Server</td>
+            <td><input name="staticSecDns" class="mid" value="<% getDns(2); %>"></td>
+          </tr>
+          <tr id="natRowDisplay">
+            <td class="head" id="wMacAddressClone">Enable NAT</td>
+            <td><input name="natEnabled" type="checkbox"></td>
+          </tr>
+        </table>
+        <br>
+        <table class="buttons">
+          <tr>
+            <td><input type="submit" class="normal" value="Apply" id="wApply">
+              &nbsp;&nbsp;
+              <input type="reset" class="normal" value="Cancel" id="wCancel" onClick="window.location.reload();">
+              <input type="hidden" value="/internet/wan.asp" name="submit-url"></td>
+          </tr>
+        </table>
+      </form>
+      <div class="whitespace">&nbsp;</div></td>
+  </tr>
 </table>
-
-<!-- ================= STATIC Mode ================= -->
-<table id="staticDHCP" class="form">
-<tr>
-	<td class="title" colspan="2" id="wStaticMode">Static Mode</td>
-</tr>
-<tr>
-	<td class="head" id="wStaticIp">IP Address</td>
-	<td><input name="staticIp" class="mid" value="<% getCfgZero(1, "wan_ipaddr"); %>"></td>
-</tr>
-<tr>
-	<td class="head" id="wStaticNetmask">Subnet Mask</td>
-	<td><input name="staticNetmask" class="mid" value="<% getCfgZero(1, "wan_netmask"); %>">
-</td>
-</tr>
-<tr>
-	<td class="head" id="wStaticGateway">Default Gateway</td>
-	<td><input name="staticGateway" class="mid" value="<% getCfgZero(1, "wan_gateway"); %>">
-</td>
-</tr>
-</table>
-
-<table class="form">
-<tr>
-	<td class="title" colspan="2">Additional Options</td>
-</tr>
-<tr id="dhcpReqIPRow">
-	<td class="head">Request IP from DHCP (optional)</td>
-	<td><input name="dhcpReqIP" class="mid" value="<% getCfgGeneral(1, "dhcpRequestIP"); %>"></td>
-</tr>
-<tr>
-	<td class="head">WAN MTU</td>
-	<td>
-		<input name="wan_mtu" type="text" class="half" style="display:none;">
-		<select name="wan_mtu_type" onChange="wanMtuChange(this.form);" class="half">
-			<option value="0">AUTO</option>
-			<option value="1" selected="selected">Custom</option>
-			<option value="1500">1500</option>
-			<option value="1492">1492</option>
-			<option value="1440">1440</option>
-			<option value="1400">1400</option>
-			<option value="1300">1300</option>
-			<option value="1200">1200</option>
-			<option value="1100">1100</option>
-			<option value="1000">1000</option>
-		</select>
-	</td>
-</tr>
-<tr id="staticDNSAssignRow">
-	<td class="head" id="wMacAddressClone">Assign static DNS Server</td>
-	<td><input name="wStaticDnsEnable" type="checkbox" onclick="dnsSwitchClick(this.form);" ></td>
-</tr>
-<tr id="priDNSrow" style="display:none;" >
-	<td class="head" id="wStaticPriDns">Primary DNS Server</td>
-	<td><input name="staticPriDns" class="mid" value="<% getDns(1); %>"></td>
-</tr>
-<tr id="secDNSrow" style="display:none;" >
-	<td class="head" id="wStaticSecDns">Secondary DNS Server</td>
-	<td><input name="staticSecDns" class="mid" value="<% getDns(2); %>"></td>
-</tr>
-<tr id="natRowDisplay">
-	<td class="head" id="wMacAddressClone">Enable NAT</td>
-	<td><input name="natEnabled" type="checkbox"></td>
-</tr>
-</table>
-<br>
-
-<table class="buttons">
-<tr>
-	<td>
-		<input type="submit" class="normal" value="Apply" id="wApply">&nbsp;&nbsp;
-		<input type="reset" class="normal" value="Cancel" id="wCancel" onClick="window.location.reload();">
-		<input type="hidden" value="/internet/wan.asp" name="submit-url">
-	</td>
-</tr>
-</table>
-</form>
-
-<div class="whitespace">&nbsp;</div>
-
-</td></tr></table>
 </body>
 </html>
-

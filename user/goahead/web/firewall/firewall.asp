@@ -1,13 +1,12 @@
+<!DOCTYPE html>
 <html>
 <head>
 <title>Port Forwarding Settings</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0">
 <meta http-equiv="Pragma" content="no-cache">
-
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <link rel="stylesheet" href="/style/controls.css" type="text/css">
-
 <script type="text/javascript" src="/js/controls.js"></script>
 <script type="text/javascript" src="/js/validation.js"></script>
 <script language="JavaScript" type="text/javascript">
@@ -493,93 +492,76 @@ function genTableData(rules, form)
 </script>
 </head>
 
-
-<body onload="initState();">
-
+<body onLoad="initState();">
 <table class="body">
-<tr>
-<td>
-
-<!-- Port forwarding -->
-<h1>Port Forwarding Settings</h1>
-<% checkIfUnderBridgeModeASP(); %>
-<p>Here you can setup port forwarding to provide services to the Internet.</p>
-<hr>
-
-<form method="POST" name="portForward" action="/goform/portForward" onsubmit="return submitForwardForm(this);">
-<table class="form">
-<tr>
-	<td class="title" colspan="2" id="forwardVirtualSrv">Port Forwarding Settings</td>
-</tr>
-<tr>
-	<td class="head" id="forwardVirtualSrvSet">
-		Port Forwarding Settings
-	</td>
-	<td>
-		<select onchange="updateForwardingState(this.form);" name="portForwardEnabled" class="half">
-			<option value="0" id="forwardVirtualSrvDisable" selected="selected">Disable</option>
-			<option value="1" id="forwardVirtualSrvEnable">Enable</option>
-		</select>
-	</td>
-</tr>
-<tr id="portForwardingRow">
-	<td colspan="2" id="portForwardingTable"></td>
-</tr>
+  <tr>
+    <td><!-- Port forwarding -->
+      
+      <h1>Port Forwarding Settings</h1>
+      <% checkIfUnderBridgeModeASP(); %>
+      <p>Here you can setup port forwarding to provide services to the Internet.</p>
+      <hr>
+      <form method="POST" name="portForward" action="/goform/portForward" onSubmit="return submitForwardForm(this);">
+        <table class="form">
+          <tr>
+            <td class="title" colspan="2" id="forwardVirtualSrv">Port Forwarding Settings</td>
+          </tr>
+          <tr>
+            <td class="head" id="forwardVirtualSrvSet"> Port Forwarding Settings </td>
+            <td><select onChange="updateForwardingState(this.form);" name="portForwardEnabled" class="half">
+                <option value="0" id="forwardVirtualSrvDisable" selected="selected">Disable</option>
+                <option value="1" id="forwardVirtualSrvEnable">Enable</option>
+              </select></td>
+          </tr>
+          <tr id="portForwardingRow">
+            <td colspan="2" id="portForwardingTable"></td>
+          </tr>
+        </table>
+        
+        <!-- Port forwarding rules -->
+        <table class="buttons">
+          <tr>
+            <td><input type="hidden" name="portForwardRules" value="">
+              <input type="submit" class="half" value="Apply">
+              <input type="hidden" name="submit-url" value="/firewall/firewall.asp" ></td>
+          </tr>
+        </table>
+      </form>
+      
+      <!-- MAC / IP / Port Filtering -->
+      
+      <h1>MAC/IP/Port Filtering Settings</h1>
+      <% checkIfUnderBridgeModeASP(); %>
+      <p>Here you can setup firewall rules to protect your network from malware and other security threats from the Internet.</p>
+      <hr>
+      <form method="POST" name="portFiltering" action="/goform/portFiltering" onSubmit="return submitFilterForm(this);">
+        <table class="form">
+          <tr>
+            <td class="title" colspan="2" id="portBasicSet">Basic Settings</td>
+          </tr>
+          <tr>
+            <td class="head" id="portBasicFilter"> MAC/IP/Port Filtering </td>
+            <td><select name="portFilterEnabled" class="half" onChange="updateFilteringState(this.form);">
+                <option value="0" selected="selected">Disable</option>
+                <option value="1">Enable</option>
+              </select></td>
+          </tr>
+          <tr id="portFilteringRow">
+            <td id="portFilteringTable" colspan="2"></td>
+          </tr>
+        </table>
+        
+        <!-- MAC / IP / Port filtering rules -->
+        <table class="buttons">
+          <tr>
+            <td><input type="hidden" name="portFilteringRules" value="">
+              <input type="hidden" name="defaultFirewallPolicy" value="">
+              <input type="submit" class="normal" value="Apply">
+              <input type="hidden" name="submit-url" value="/firewall/firewall.asp" ></td>
+          </tr>
+        </table>
+      </form></td>
+  </tr>
 </table>
-
-<!-- Port forwarding rules -->
-<table class="buttons">
-<tr><td>
-	<input type="hidden" name="portForwardRules" value="">
-	<input type="submit" class="half" value="Apply">
-	<input type="hidden" name="submit-url" value="/firewall/firewall.asp" >
-</td></tr>
-</table>
-
-</form>
-
-<!-- MAC / IP / Port Filtering -->
-<h1>MAC/IP/Port Filtering Settings</h1>
-<% checkIfUnderBridgeModeASP(); %>
-<p>Here you can setup firewall rules to protect your network from malware and other security threats from the Internet.</p>
-<hr>
-
-<form method="POST" name="portFiltering" action="/goform/portFiltering" onsubmit="return submitFilterForm(this);">
-<table class="form">
-<tr>
-	<td class="title" colspan="2" id="portBasicSet">Basic Settings</td>
-</tr>
-<tr>
-	<td class="head" id="portBasicFilter">
-		MAC/IP/Port Filtering
-	</td>
-	<td>
-		<select name="portFilterEnabled" class="half" onchange="updateFilteringState(this.form);">
-			<option value="0" selected="selected">Disable</option>
-			<option value="1">Enable</option>
-		</select>
-	</td>
-</tr>
-<tr id="portFilteringRow">
-	<td id="portFilteringTable" colspan="2">
-	</td>
-</tr>
-</table>
-
-<!-- MAC / IP / Port filtering rules -->
-<table class="buttons">
-<tr><td>
-	<input type="hidden" name="portFilteringRules" value="">
-	<input type="hidden" name="defaultFirewallPolicy" value="">
-	<input type="submit" class="normal" value="Apply">
-	<input type="hidden" name="submit-url" value="/firewall/firewall.asp" >
-</td></tr>
-</table>
-</form>
-
-</td>
-</tr>
-</table>
-
 </body>
 </html>

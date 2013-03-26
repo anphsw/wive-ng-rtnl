@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html>
 <html>
 
 <!-- !!! Dont forget to modify   2860 mode treeapp.asp !!! -->
@@ -8,7 +8,6 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0">
 <meta http-equiv="Pragma" content="no-cache">
-
 <link rel="stylesheet" href="/dtree/dtree.css" type="text/css" >
 <link rel="StyleSheet" href="dtree.css" type="text/css" >
 <link rel="stylesheet" href="/style/windows.css" type="text/css">
@@ -17,7 +16,7 @@
 <script type="text/javascript" src="/js/ajax.js"></script>
 </head>
 
-<body bgcolor="#FFFFFF" onLoad="initValue();">
+<body bgcolor="#FFFFFF" onload="initValue();">
 <script language="JavaScript">
 
 function rebootRouter(form, reloader)
@@ -68,14 +67,13 @@ function go(zz) {
 function refresh(){
 	window.location.reload(false);
 }
-</script>
+</script> 
 
 <!-- <p><a href="javascript: a.openAll();" id="openall">open</a> | <a href="javascript: a.closeAll();" id="closeall">close</a></p> -->
 
 <form name="rebootForm" style="display: none;" method="GET" action="/cgi-bin/reboot.sh" >
-	<iframe id="rebootReloader" name="rebootReloader" src="" style="width:0;height:0;border:0px solid #fff;"></iframe>
+  <iframe id="rebootReloader" name="rebootReloader" src="" style="width:0;height:0;border:0px solid #fff;"></iframe>
 </form>
-
 <script type="text/javascript">
 var opmode = '<% getCfgZero(1, "OperationMode"); %>';
 var vpnen = '<% getVPNBuilt(); %>';
@@ -216,7 +214,5 @@ a.add(909, 900, _("treeapp reboot"),                       "javascript:rebootRou
 document.write(a);
 
 </script>
-
 </body>
-
 </html>

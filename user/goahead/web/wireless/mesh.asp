@@ -1,16 +1,14 @@
+<!DOCTYPE html>
 <html>
 <head>
-
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0">
 <meta http-equiv="Pragma" content="no-cache">
-
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script type="text/javascript" src="/js/controls.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <link rel="stylesheet" href="/style/controls.css" type="text/css">
 <title>Wireless Mesh Settings</title>
-
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("wireless");
 
@@ -458,167 +456,148 @@ function web_refresh()
 </head>
 
 <body onLoad="initValue()">
-<table class="body"><tr><td>
-
-<h1 id="meshTitle">Mesh Network</h1>
-<p id="meshIntroduction">A Mesh network is an IEEE 802 LAN comprised of IEEE 802.11 links and control elements to forward
-frames among the network members.</p>
-<hr />
-<form method="post" name="wireless_mesh" action="/goform/wirelessMesh" onSubmit="return CheckValue()">
-<table width="90%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
+<table class="body">
   <tr>
-    <td class="title" colspan="2" id="meshMeshCapacity">Mesh Capacity</td>
-  </tr>
-  <tr>
-    <td class="head">Mesh</td>
-    <td>
-      <select name="MeshEnable" onChange="switch_mesh_capacity()">
-        <option value="0" checked id="meshMeshDisable">Disable</option>
-	<option value="1" id="meshMeshEnable">Enable</option>
-    </td>
+    <td><h1 id="meshTitle">Mesh Network</h1>
+      <p id="meshIntroduction">A Mesh network is an IEEE 802 LAN comprised of IEEE 802.11 links and control elements to forward
+        frames among the network members.</p>
+      <hr />
+      <form method="post" name="wireless_mesh" action="/goform/wirelessMesh" onSubmit="return CheckValue()">
+        <table width="90%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
+          <tr>
+            <td class="title" colspan="2" id="meshMeshCapacity">Mesh Capacity</td>
+          </tr>
+            <tr>
+          
+          <td class="head">Mesh</td>
+            <td>
+          
+            <select name="MeshEnable" onchange="switch_mesh_capacity()">
+          
+          <option value="0" checked id="meshMeshDisable">Disable</option>
+          <option value="1" id="meshMeshEnable">Enable</option>
+            </td>
+          
+            </tr>
+          
+        </table>
+        <br />
+        <table width="90%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD" id="div_mesh_settings">
+          <tr>
+            <td class="title" colspan="2" id="meshMeshSettings">Mesh Settings</td>
+          </tr>
+          <tr>
+            <td class="head" id="meshMID">Mesh ID (MID)</td>
+            <td><input type="text" name="MeshID" size="20" maxlength="32" value="<% getCfgGeneral(1, "MeshId"); %>"></td>
+          </tr>
+          <tr>
+            <td class="head" id="meshHostName">Host Name</td>
+            <td><input type="text" name="HostName" size="20" maxlength="32" value="<% getCfgGeneral(1, "MeshHostName"); %>"></td>
+          </tr>
+          <tr>
+            <td class="head" id="meshAutoLink">Auto Link</td>
+            <td><input type="radio" name="AutoLinkEnable" value="0" onClick="switch_autolink()" checked>
+              <font id="meshAutoLinkDisable">Disable&nbsp;</font>
+              <input type="radio" name="AutoLinkEnable" value="1" onClick="switch_autolink()">
+              <font id="meshAutoLinkEnable">Enable</font></td>
+          </tr>
+        </table>
+        <br />
+        <table border="1" bordercolor="#9babbd" cellpadding="3" cellspacing="1" hspace="2" vspace="2" width="90%">
+          <tr>
+            <td class="title" colspan="2" id="meshSecurePolicy"> Security Policy </td>
+          </tr>
+          <tr>
+            <td class="head" id="meshSecureMode">Security Mode</td>
+            <td><select name="security_mode" size="1" onChange="switch_security_mode()">
+                <option value="OPEN" selected>OPEN</option>
+                <option value="WPANONE">WPANONE</option>
+              </select></td>
+          </tr>
+          <tr id="div_open_secure_mode" name="div_open_secure_mode">
+            <td class="head" id="meshSecureEncrypType">Encrypt Type</td>
+            <td><select name="open_encrypt_type" size="1" onChange="switch_open_encrypt()">
+                <option value="NONE" selected>None</option>
+                <option value="WEP">WEP</option>
+              </select></td>
+          </tr>
+          <tr id="div_wpa_algorithms" name="div_wpa_algorithms">
+            <td class="head" id="meshSecureWPAAlgorithm">WPA Algorithms</td>
+            <td><input name="wpa_cipher" value="TKIP" type="radio" checked>
+              TKIP &nbsp;
+              <input name="wpa_cipher" value="AES" type="radio">
+              AES &nbsp; </td>
+          </tr>
+        </table>
+        <table id="div_wep" name="div_wep" border="1" bordercolor="#9babbd" cellpadding="3" cellspacing="1" hspace="2" vspace="2" width="90%">
+          <tr>
+            <td class="title" colspan="3" id="meshSecureWEP">Wired Equivalent Privacy (WEP)</td>
+          </tr>
+          <tr>
+            <td class="head" id="meshSecureWEPKey">WEP Key:</td>
+            <td><input name="wep_key" id="WEP" maxlength="26" value="<% getCfgGeneral(1, "MeshWEPKEY"); %>"></td>
+            <td><select name="wep_select" size="1">
+                <option value="1">ASCII</option>
+                <option value="0" selected>Hex</option>
+              </select></td>
+          </tr>
+        </table>
+        <table id="div_wpa" name="div_wpa" border="1" bordercolor="#9babbd" cellpadding="3" cellspacing="1" hspace="2" vspace="2" width="90%">
+          <tr>
+            <td class="title" colspan="2" id="meshSecreWPA">WPA</td>
+          </tr>
+          <tr>
+            <td class="head" id="meshSecureWPAPassPhrase">Pass Phrase</td>
+            <td><input name="passphrase" size="28" maxlength="64" value="<% getCfgGeneral(1,"MeshWPAKEY"); %>"></td>
+          </tr>
+        </table>
+        <br />
+        <table width ="540" border = "0" cellpadding = "2" cellspacing = "1">
+          <tr align="center">
+            <td><input type="submit" style="{width:120px;}" value="Apply" id="meshApply">
+              &nbsp; &nbsp;
+              <input type="reset"  style="{width:120px;}" value="Cancel" id="meshCancel" onClick="window.location.reload()"></td>
+          </tr>
+        </table>
+      </form>
+      <br />
+      <form method="post" name="mesh_manual_link" action="/goform/meshManualLink">
+        <input type="hidden" name="link_action" value="">
+        <table width="90%" id="manual_link" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
+          <tr>
+            <td class="title" colspan="3" id="meshMLink">Manual Mesh Link</td>
+          </tr>
+          <tr>
+            <td class="head" id="meshMPMAC">Mesh Point MAC Address</td>
+            <td><input type="text" name="mpmac" size=20 maxlength=17 value=""></td>
+            <td><input type="button" style="{width:120px;}" value="ADD" id="meshAddLink" onClick="mesh_link_submit('add')">
+              &nbsp;
+              <input type="button" style="{width:120px;}" value="DEL" id="meshDelLink" onClick="mesh_link_submit('del')"></td>
+          </tr>
+        </table>
+      </form>
+      <br />
+      <table width="90%" id="mesh_info" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
+        <tr>
+          <td class="title" colspan="7"><font id="meshMeshInfo">Mesh Network Infomation&nbsp;&nbsp;&nbsp;</font></td>
+        </tr>
+        <tr align="center">
+          <td class="head">&nbsp;&nbsp;</td>
+          <td class="head" id="meshNbrMacAddr">Neighbour MAC Address</td>
+          <td class="head" id="meshNbrRSSI">RSSI</td>
+          <td class="head" id="meshNbrMID">Mesh ID</td>
+          <td class="head" id="meshNbrHostName">Host Name</td>
+          <td class="head" id="meshNbrChannel">Channel</td>
+          <td class="head" id="meshNbrEncrypType">Encrypt Type</td>
+        </tr>
+        <% ShowMeshState(); %>
+      </table>
+      <table width ="540" border = "0" cellpadding = "2" cellspacing = "1">
+        <tr align="right">
+          <td><input type="button" style="{width:120px;}" name="refresh" value="Refresh" id="meshReresh" onClick="web_refresh()"></td>
+        </tr>
+      </table></td>
   </tr>
 </table>
-
-<br />
-
-<table width="90%" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD" id="div_mesh_settings">
-  <tr> 
-    <td class="title" colspan="2" id="meshMeshSettings">Mesh Settings</td>
-  </tr>
-  <tr> 
-    <td class="head" id="meshMID">Mesh ID (MID)</td>
-    <td><input type="text" name="MeshID" size="20" maxlength="32" value="<% getCfgGeneral(1, "MeshId"); %>"></td>
-  </tr>
-  <tr> 
-    <td class="head" id="meshHostName">Host Name</td>
-    <td><input type="text" name="HostName" size="20" maxlength="32" value="<% getCfgGeneral(1, "MeshHostName"); %>"></td>
-  </tr>
-  <tr>
-    <td class="head" id="meshAutoLink">Auto Link</td>
-    <td>
-      <input type="radio" name="AutoLinkEnable" value="0" onClick="switch_autolink()" checked><font id="meshAutoLinkDisable">Disable&nbsp;</font>
-      <input type="radio" name="AutoLinkEnable" value="1" onClick="switch_autolink()"><font id="meshAutoLinkEnable">Enable</font>
-    </td>
-  </tr>
-</table>
-
-<br />
-
-<table border="1" bordercolor="#9babbd" cellpadding="3" cellspacing="1" hspace="2" vspace="2" width="90%">
-  <tr>
-    <td class="title" colspan="2" id="meshSecurePolicy"> Security Policy </td>
-  </tr>
-  <tr> 
-    <td class="head" id="meshSecureMode">Security Mode</td>
-    <td>
-      <select name="security_mode" size="1" onchange="switch_security_mode()">
-        <option value="OPEN" selected>OPEN</option>
-        <option value="WPANONE">WPANONE</option>
-      </select>
-    </td>
-  </tr>
-  <tr id="div_open_secure_mode" name="div_open_secure_mode"> 
-    <td class="head" id="meshSecureEncrypType">Encrypt Type</td>
-    <td>
-      <select name="open_encrypt_type" size="1" onchange="switch_open_encrypt()">
-	<option value="NONE" selected>None</option>
-	<option value="WEP">WEP</option>
-      </select>
-    </td>
-  </tr>
-  <tr id="div_wpa_algorithms" name="div_wpa_algorithms"> 
-    <td class="head" id="meshSecureWPAAlgorithm">WPA Algorithms</td>
-    <td>
-      <input name="wpa_cipher" value="TKIP" type="radio" checked>TKIP &nbsp;
-      <input name="wpa_cipher" value="AES" type="radio">AES &nbsp;
-    </td>
-  </tr>
-</table>
-<table id="div_wep" name="div_wep" border="1" bordercolor="#9babbd" cellpadding="3" cellspacing="1" hspace="2" vspace="2" width="90%">
-  <tr> 
-    <td class="title" colspan="3" id="meshSecureWEP">Wired Equivalent Privacy (WEP)</td>
-  </tr>
-  <tr> 
-    <td class="head" id="meshSecureWEPKey">WEP Key:</td>
-    <td><input name="wep_key" id="WEP" maxlength="26" value="<% getCfgGeneral(1, "MeshWEPKEY"); %>"></td>
-    <td>
-      <select name="wep_select" size="1"> 
-        <option value="1">ASCII</option>
-	<option value="0" selected>Hex</option>
-      </select>
-    </td>
-  </tr>
-</table>
-<table id="div_wpa" name="div_wpa" border="1" bordercolor="#9babbd" cellpadding="3" cellspacing="1" hspace="2" vspace="2" width="90%">
-  <tr>
-    <td class="title" colspan="2" id="meshSecreWPA">WPA</td>
-  </tr>
-  <tr>
-    <td class="head" id="meshSecureWPAPassPhrase">Pass Phrase</td>
-    <td>
-      <input name="passphrase" size="28" maxlength="64" value="<% getCfgGeneral(1,"MeshWPAKEY"); %>">
-    </td>
-  </tr>
-</table>
-
-<br />
-
-<table width ="540" border = "0" cellpadding = "2" cellspacing = "1">
-  <tr align="center">
-    <td>
-      <input type="submit" style="{width:120px;}" value="Apply" id="meshApply"> &nbsp; &nbsp;
-      <input type="reset"  style="{width:120px;}" value="Cancel" id="meshCancel" onClick="window.location.reload()">
-    </td>
-  </tr>
-</table>
-</form>  
-
-<br />
-
-<form method="post" name="mesh_manual_link" action="/goform/meshManualLink">
-<input type="hidden" name="link_action" value="">
-<table width="90%" id="manual_link" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
-  <tr>
-    <td class="title" colspan="3" id="meshMLink">Manual Mesh Link</td>
-  </tr>
-  <tr>
-    <td class="head" id="meshMPMAC">Mesh Point MAC Address</td>
-    <td><input type="text" name="mpmac" size=20 maxlength=17 value=""></td>
-    <td>
-      <input type="button" style="{width:120px;}" value="ADD" id="meshAddLink" onClick="mesh_link_submit('add')">&nbsp;
-      <input type="button" style="{width:120px;}" value="DEL" id="meshDelLink" onClick="mesh_link_submit('del')">
-    </td>
-  </tr>
-</table>
-</form>  
-
-<br />
-
-<table width="90%" id="mesh_info" border="1" cellspacing="1" cellpadding="3" bordercolor="#9BABBD">
-  <tr>
-    <td class="title" colspan="7">
-      <font id="meshMeshInfo">Mesh Network Infomation&nbsp;&nbsp;&nbsp;</font>
-    </td>
-  </tr>
-  <tr align="center">
-    <td class="head">&nbsp;&nbsp;</td>
-    <td class="head" id="meshNbrMacAddr">Neighbour MAC Address</td>
-    <td class="head" id="meshNbrRSSI">RSSI</td>
-    <td class="head" id="meshNbrMID">Mesh ID</td>
-    <td class="head" id="meshNbrHostName">Host Name</td>
-    <td class="head" id="meshNbrChannel">Channel</td>
-    <td class="head" id="meshNbrEncrypType">Encrypt Type</td>
-  </tr>
-  <% ShowMeshState(); %>
-</table>
-<table width ="540" border = "0" cellpadding = "2" cellspacing = "1">
-  <tr align="right">
-    <td>
-      <input type="button" style="{width:120px;}" name="refresh" value="Refresh" id="meshReresh" onClick="web_refresh()">
-    </td>
-  </tr>
-</table>
-</td></tr></table>
 </body>
 </html>
-

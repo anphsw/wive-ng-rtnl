@@ -1,15 +1,14 @@
+<!DOCTYPE html>
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0">
 <meta http-equiv="Pragma" content="no-cache">
-
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script type="text/javascript" src="/js/share.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <link rel="stylesheet" href="/style/controls.css" type="text/css">
 <title>Dynamic DNS</title>
-
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("admin");
 Butterlate.setTextDomain("services");
@@ -107,59 +106,55 @@ function initValue()
 }
 
 </script>
-
 </head>
-<body onload="initValue()">
-<table class="body"><tr><td>
-<h1 id="manTitle">DDNS Settings</h1>
-<p id="manIntroduction">Here you can configure Dynamic DNS settings.</p>
-<hr>
-
-<!-- ================= DDNS  ================= -->
-<form method="post" name="DDNS" action="/goform/DDNS">
-<table id="div_ddns" class="form">
-<tr>
-	<td class="title" colspan="2" id="manDdnsSet">DDNS Settings</td>
-</tr>
-<tr>
-	<td class="head" id="DdnsProvider">Dynamic DNS Provider</td>
-	<td>
-		<select onChange="DDNSupdateState()" name="DDNSProvider">
-			<option value="none" id="manDdnsNone"> None </option>
-			<option value="dyndns.org"> dyndns.org </option>
-			<option value="freedns.afraid.org"> freedns.afraid.org </option>
-			<option value="zoneedit.com"> www.zoneedit.com </option>
-			<option value="no-ip.com"> www.no-ip.com </option>
-		</select>
-	</td>
-</tr>
-<tr>
-	<td class="head" id="manDdnsAccount">Login</td>
-	<td><input size="16" name="Account" value="<% getCfgGeneral(1, "DDNSAccount"); %>" type="text"> </td>
-</tr>
-<tr>
-	<td class="head" id="manDdnsPasswd">Password</td>
-	<td><input size="16" name="Password" value="<% getCfgGeneral(1, "DDNSPassword"); %>" type="password"> </td>
-</tr>
-<tr>
-	<td class="head" id="manDdns">Dynamic Name</td>
-	<td><input size="32" name="DDNS" value="<% getCfgGeneral(1, "DDNS"); %>" type="text"> </td>
-</tr>
+<body onLoad="initValue()">
+<table class="body">
+  <tr>
+    <td><h1 id="manTitle">DDNS Settings</h1>
+      <p id="manIntroduction">Here you can configure Dynamic DNS settings.</p>
+      <hr>
+      
+      <!-- ================= DDNS  ================= -->
+      
+      <form method="post" name="DDNS" action="/goform/DDNS">
+        <table id="div_ddns" class="form">
+          <tr>
+            <td class="title" colspan="2" id="manDdnsSet">DDNS Settings</td>
+          </tr>
+          <tr>
+            <td class="head" id="DdnsProvider">Dynamic DNS Provider</td>
+            <td><select onChange="DDNSupdateState()" name="DDNSProvider">
+                <option value="none" id="manDdnsNone"> None </option>
+                <option value="dyndns.org"> dyndns.org </option>
+                <option value="freedns.afraid.org"> freedns.afraid.org </option>
+                <option value="zoneedit.com"> www.zoneedit.com </option>
+                <option value="no-ip.com"> www.no-ip.com </option>
+              </select></td>
+          </tr>
+          <tr>
+            <td class="head" id="manDdnsAccount">Login</td>
+            <td><input size="16" name="Account" value="<% getCfgGeneral(1, "DDNSAccount"); %>" type="text"></td>
+          </tr>
+          <tr>
+            <td class="head" id="manDdnsPasswd">Password</td>
+            <td><input size="16" name="Password" value="<% getCfgGeneral(1, "DDNSPassword"); %>" type="password"></td>
+          </tr>
+          <tr>
+            <td class="head" id="manDdns">Dynamic Name</td>
+            <td><input size="32" name="DDNS" value="<% getCfgGeneral(1, "DDNS"); %>" type="text"></td>
+          </tr>
+        </table>
+        <table id="div_ddns_submit" class="buttons">
+          <tr>
+            <td><input type="hidden" name="submit-url" value="/services/ddns.asp" >
+              <input type="submit" class="normal" value="Apply" id="manDdnsApply" onClick="return DDNSFormCheck()">
+              &nbsp; &nbsp;
+              <input type="reset" class="normal" value="Cancel" id="manDdnsCancel" onClick="window.location.reload()"></td>
+          </tr>
+        </table>
+      </form>
+      <div class="whitespace">&nbsp;</div></td>
+  </tr>
 </table>
-
-<table id="div_ddns_submit" class="buttons">
-<tr>
-	<td>
-		<input type="hidden" name="submit-url" value="/services/ddns.asp" >
-		<input type="submit" class="normal" value="Apply" id="manDdnsApply" onClick="return DDNSFormCheck()"> &nbsp; &nbsp;
-		<input type="reset" class="normal" value="Cancel" id="manDdnsCancel" onClick="window.location.reload()">
-	</td>
-</tr>
-</table>
-
-</form>
-
-<div class="whitespace">&nbsp;</div>
-
-</td></tr></table>
-</body></html>
+</body>
+</html>

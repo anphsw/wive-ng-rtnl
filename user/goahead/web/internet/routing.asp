@@ -1,17 +1,16 @@
-<html><head><title>Static Routing Settings</title>
-
+<!DOCTYPE html>
+<html>
+<head>
+<title>Static Routing Settings</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0">
 <meta http-equiv="Pragma" content="no-cache">
-
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <link rel="stylesheet" href="/style/controls.css" type="text/css">
-
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script type="text/javascript" src="/js/controls.js"></script>
 <script type="text/javascript" src="/js/validation.js"></script>
 <script type="text/javascript" src="/js/ajax.js"></script>
-
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("internet");
 
@@ -241,104 +240,94 @@ function formRoutingTable(form)
 </script>
 </head>
 
-<body onload="onInit()">
-<table class="body"><tbody><tr><td>
-<h1 id="routingTitle">Static Routing  Settings </h1>
-<p id="routingIntroduction"> You may add or remote Internet routing rules here.</p>
-<hr>
-
-<form action="/goform/editRouting" method="post" name="editRouting" onsubmit="return formRoutingTable(this);">
-
-<!-- Rule adding -->
-<table class="form">
-<tr>
-	<td class="title" colspan="2" id="routingAddRule">Add a routing rule</td>
-</tr>
-<tr>
-	<td class="head" id="routingDest">Destination</td>
-	<td><input class="mid" name="dest" type="text"></td>
-</tr>
-<tr>
-	<td class="head" id="routingRange">Host/Net</td>
-	<td>
-		<select class="mid" name="hostnet" onChange="hostnetChange(this.form);">
-			<option selected="selected" value="host" id="routing host">Host</option>
-			<option value="net" id="routing net">Net</option>
-		</select>
-	</td>
-</tr>
-<tr id="routingNetmaskRow">
-	<td class="head" id="routingNetmask">Subnet Mask</td>
-	<td><input class="mid" name="netmask" type="text"></td>
-</tr>
-<tr>
-	<td class="head" id="routingGateway">Gateway</td>
-	<td><input class="mid" name="gateway" type="text"></td>
-</tr>
-<tr>
-	<td class="head" id="routingInterface">Interface</td>
-	<td><select class="mid" name="interface" onChange="interfaceChange(this.form);"></select></td>
-</tr>
-<tr id="customInterfaceRow" style="display: none;">
-	<td class="head">Interface Name</td>
-	<td><input alias="right" class="mid" name="custom_interface" type="text"></td>
-</tr>
-<tr>
-	<td class="head" id="routingComment">Comment</td>
-	<td><input name="comment" class="mid" type="text"></td>
-</tr>
-	<td class="head" id="routingComment">Add rule</td>
-	<td><input value="Add" class="normal" onclick="addRoutingRule(this.form);" type="button"></td>
-<tr>
-</tr>
+<body onLoad="onInit()">
+<table class="body">
+  <tbody>
+    <tr>
+      <td><h1 id="routingTitle">Static Routing  Settings </h1>
+        <p id="routingIntroduction"> You may add or remote Internet routing rules here.</p>
+        <hr>
+        <form action="/goform/editRouting" method="post" name="editRouting" onSubmit="return formRoutingTable(this);">
+          
+          <!-- Rule adding -->
+          <table class="form">
+            <tr>
+              <td class="title" colspan="2" id="routingAddRule">Add a routing rule</td>
+            </tr>
+            <tr>
+              <td class="head" id="routingDest">Destination</td>
+              <td><input class="mid" name="dest" type="text"></td>
+            </tr>
+            <tr>
+              <td class="head" id="routingRange">Host/Net</td>
+              <td><select class="mid" name="hostnet" onChange="hostnetChange(this.form);">
+                  <option selected="selected" value="host" id="routing host">Host</option>
+                  <option value="net" id="routing net">Net</option>
+                </select></td>
+            </tr>
+            <tr id="routingNetmaskRow">
+              <td class="head" id="routingNetmask">Subnet Mask</td>
+              <td><input class="mid" name="netmask" type="text"></td>
+            </tr>
+            <tr>
+              <td class="head" id="routingGateway">Gateway</td>
+              <td><input class="mid" name="gateway" type="text"></td>
+            </tr>
+            <tr>
+              <td class="head" id="routingInterface">Interface</td>
+              <td><select class="mid" name="interface" onChange="interfaceChange(this.form);">
+                </select></td>
+            </tr>
+            <tr id="customInterfaceRow" style="display: none;">
+              <td class="head">Interface Name</td>
+              <td><input alias="right" class="mid" name="custom_interface" type="text"></td>
+            </tr>
+            <tr>
+              <td class="head" id="routingComment">Comment</td>
+              <td><input name="comment" class="mid" type="text"></td>
+            </tr>
+            <tr>
+              <td class="head" id="addRule">Add rule</td>
+              <td><input value="Add" class="normal" onClick="addRoutingRule(this.form);" type="button"></td>
+            <tr> </tr>
+          </table>
+          
+          <!--  delete rules -->
+          
+          <div id="ajxCtxRoutingTable"></div>
+          <table class="buttons">
+            <tr>
+              <td><input type="hidden" name="routingTableDiff" >
+                <input value="Apply" class="normal" type="submit"></td>
+            </tr>
+          </table>
+        </form>
+        <div id="dynamicRoutingDiv" style="display:none;">
+          <form method="POST" name="dynamicRouting" action="/goform/dynamicRouting">
+            <table class="form">
+              <tr>
+                <td class="title" colspan="2" id="dynamicRoutingTitle2">Dynamic routing</td>
+              </tr>
+              <tr>
+                <td class="head" id="RIP">RIP</td>
+                <td><select name="RIPSelect" size="1">
+                    <option value="0" id="RIPDisable">Disable</option>
+                    <option value="1" id="RIPEnable">Enable</option>
+                  </select></td>
+              </tr>
+            </table>
+            <table class="buttons">
+              <tr>
+                <td><input type="submit" class="normal" value="Apply" id="dynamicRoutingApply" name="dynamicRoutingApply">
+                  <input type="reset" class="normal" value="Reset" id="dynamicRoutingReset" name="dynamicRoutingReset">
+                  <input type="hidden" value="/internet/routing.asp" name="submit-url"></td>
+              </tr>
+            </table>
+          </form>
+        </div>
+        <div class="whitespace">&nbsp;</div></td>
+    </tr>
+  </tbody>
 </table>
-
-<!--  delete rules -->
-
-<div id="ajxCtxRoutingTable"></div>
-
-<table class="buttons">
-<tr>
-<td>
-	<input type="hidden" name="routingTableDiff" >
-	<input value="Apply" class="normal" type="submit">
-</td>
-</tr>
-</table>
-</form>
-
-<div id="dynamicRoutingDiv" style="display:none;">
-
-<form method="POST" name="dynamicRouting" action="/goform/dynamicRouting">
-<table class="form">
-<tr>
-	<td class="title" colspan="2" id="dynamicRoutingTitle2">Dynamic routing</td>
-</tr>
-<tr>
-	<td class="head" id="RIP">RIP</td>
-	<td>
-		<select name="RIPSelect" size="1">
-			<option value="0" id="RIPDisable">Disable</option>
-			<option value="1" id="RIPEnable">Enable</option>
-		</select>
-	</td>
-</tr>
-</table>
-
-<table class="buttons">
-<tr>
-	<td>
-		<input type="submit" class="normal" value="Apply" id="dynamicRoutingApply" name="dynamicRoutingApply">
-		<input type="reset" class="normal" value="Reset" id="dynamicRoutingReset" name="dynamicRoutingReset">
-		<input type="hidden" value="/internet/routing.asp" name="submit-url">
-	</td>
-</tr>
-</table>
-</form>
-
-</div>
-
-<div class="whitespace">&nbsp;</div>
-
-</td></tr></tbody></table>
-</body></html>
+</body>
+</html>

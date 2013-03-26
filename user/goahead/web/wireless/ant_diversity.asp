@@ -1,29 +1,28 @@
-<html><head><title>Antenna Diversity</title>
-
+<!DOCTYPE html>
+<html>
+<head>
+<title>Antenna Diversity</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0">
 <meta http-equiv="Pragma" content="no-cache">
-
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <link rel="stylesheet" href="/style/controls.css" type="text/css">
-
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <style type="text/css">
 <!--
 #loading {
-       width: 250px;
-       height: 200px;
-       background-color: #3399ff;
-       position: absolute;
-       left: 50%;
-       top: 50%;
-       margin-top: -150px;
-       margin-left: -250px;
-       text-align: center;
+	width: 250px;
+	height: 200px;
+	background-color: #3399ff;
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	margin-top: -150px;
+	margin-left: -250px;
+	text-align: center;
 }
 -->
 </style>
-
 <script language="JavaScript" type="text/javascript">
 document.write('<div id="loading" style="display: none;"><br><br><br>Uploading firmware <br><br> Please be patient and don\'t remove usb device if it presented...</div>');
 Butterlate.setTextDomain("wireless");
@@ -136,35 +135,40 @@ function pageInit(){
 		document.AntennaDiversity.ADSelect.options.selectedIndex = 0;
 	}
 }
-</script></head><body onLoad="pageInit()">
-<table class="body"><tbody><tr><td>
-<h1 id="AntennaDiversityIntroStr">Antenna Diversity</h1>
-<p><font id="AntennaDiversityIntro2Str">Here you can configure Antenna Diversity setting to increase wireless performance. </font></p>
-
-<form method="post" name="AntennaDiversity" action="/goform/AntennaDiversity">
-<table border="1" cellpadding="2" cellspacing="1" width="95%">
-<tbody><tr>
-	<td class="title" colspan="2" id="AntennaDiversity">Antenna Diversity</td>
-</tr>
-<tr>
-	<td class="head" id="AntennaDiversityModeStr">Mode:</td>
-	<td>
-		<select id="ADSelect" name="ADSelect">
-			<option value="Disable">Disable</option>
-			<option value="Enable_Algorithm1">Enable Algorithm1 (BBP)</option>
-			<option value="Antenna0">fixed at Ant0</option>
-			<option value="Antenna2">fixed at Ant2</option>
-		</select>
-	</td>
-</tr>
-<tr>
-	<td class="head" id="AntennaDiversityAntennaStr">Antenna:</td>
-	<td id="UpdateAntenna"> &nbsp; </td>
-</tr>
-</tbody>
+</script>
+</head>
+<body onLoad="pageInit()">
+<table class="body">
+  <tbody>
+    <tr>
+      <td><h1 id="AntennaDiversityIntroStr">Antenna Diversity</h1>
+        <p><font id="AntennaDiversityIntro2Str">Here you can configure Antenna Diversity setting to increase wireless performance. </font></p>
+        <form method="post" name="AntennaDiversity" action="/goform/AntennaDiversity">
+          <table border="1" cellpadding="2" cellspacing="1" width="95%">
+            <tbody>
+              <tr>
+                <td class="title" colspan="2" id="AntennaDiversity">Antenna Diversity</td>
+              </tr>
+              <tr>
+                <td class="head" id="AntennaDiversityModeStr">Mode:</td>
+                <td><select id="ADSelect" name="ADSelect">
+                    <option value="Disable">Disable</option>
+                    <option value="Enable_Algorithm1">Enable Algorithm1 (BBP)</option>
+                    <option value="Antenna0">fixed at Ant0</option>
+                    <option value="Antenna2">fixed at Ant2</option>
+                  </select></td>
+              </tr>
+              <tr>
+                <td class="head" id="AntennaDiversityAntennaStr">Antenna:</td>
+                <td id="UpdateAntenna">&nbsp;</td>
+              </tr>
+            </tbody>
+          </table>
+          <input value="Apply" id="AntennaDiversitySubmitStr" name="AntennaDiversitySubmitStr" type="submit">
+          &nbsp;&nbsp;
+        </form></td>
+    </tr>
+  </tbody>
 </table>
-<input value="Apply" id="AntennaDiversitySubmitStr" name="AntennaDiversitySubmitStr" type="submit"> &nbsp;&nbsp;
-</form>
-
-</td></tr></tbody></table>
-</body></html>
+</body>
+</html>

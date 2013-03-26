@@ -1,13 +1,11 @@
+<!DOCTYPE html>
 <html>
 <head>
-
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0">
 <meta http-equiv="Pragma" content="no-cache">
-
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
-
 <title>Create New User Account</title>
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("storage");
@@ -183,73 +181,68 @@ function submit_apply()
 </head>
 
 <body onLoad="initValue()" onUnload="adduserClose()">
-<table class="body"><tr><td>
-
-
-<form method=post name="storage_adduser" action="/goform/StorageAddUser">
-<table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table class="body">
   <tr>
-    <td class="head" id="adduserName">User Name</td>
-    <td>
-      <input type=text name=adduser_name size=8 maxlength=8 value="">
-    </td>
-  </tr>
-  <tr>
-    <td class="head" id="adduserPW">Password</td>
-    <td><input type="password" name="adduser_pw" size="16" maxlength="16" value=""></td>
-  </tr>
-  <tr>
-    <td class="head" id="adduserMulLogins">Multiple Logins</td>
-    <td>
-      <input type=radio name=adduser_mullogins value="1" onClick="mullogins_enable_switch()"><font id="adduserMulLoginsEnable">Enable</font>&nbsp;
-      <input type=radio name=adduser_mullogins value="0" onClick="mullogins_enable_switch()" checked><font id="adduserMulLoginsDisable">Disable</font>
-    </td>
-  </tr>
-  <tr>
-    <td class="head" id="adduserMaxLogins">Max. Logins</td>
-    <td>
-      <input type=text name=adduser_maxlogins size=1 maxlength=1 value="3">
-    </td>
-  </tr>
-  <tr> 
-    <td class="head" id="adduserDL">Download Capabled</td>
-    <td>
-      <input type=radio name=adduser_download value="1"><font id="adduserDLEnable">Enable</font>&nbsp;
-      <input type=radio name=adduser_download value="0" checked><font id="adduserDLDisable">Disable</font>
-    </td>
-  </tr>
-  <tr> 
-    <td class="head" id="adduserUL">Upload Capabled</td>
-    <td>
-      <input type=radio name=adduser_upload value="1"><font id="adduserULEnable">Enable</font>&nbsp;
-      <input type=radio name=adduser_upload value="0" checked><font id="adduserULDisable">Disable</font>
-    </td>
-  </tr>
-  <tr> 
-    <td class="head" id="adduserOW">Overwrite Capabled</td>
-    <td>
-      <input type=radio name=adduser_overwrite value="1"><font id="adduserOWEnable">Enable</font>&nbsp;
-      <input type=radio name=adduser_overwrite value="0" checked><font id="adduserOWDisable">Disable</font>
-    </td>
-  </tr>
-  <tr> 
-    <td class="head" id="adduserER">Erase Capabled</td>
-    <td>
-      <input type=radio name=adduser_erase value="1"><font id="adduserEREnable">Enable</font>&nbsp;
-      <input type=radio name=adduser_erase value="0" checked><font id="adduserERDisable">Disable</font>
-    </td>
+    <td><form method=post name="storage_adduser" action="/goform/StorageAddUser">
+        <table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+          <tr>
+            <td class="head" id="adduserName">User Name</td>
+            <td><input type=text name=adduser_name size=8 maxlength=8 value=""></td>
+          </tr>
+          <tr>
+            <td class="head" id="adduserPW">Password</td>
+            <td><input type="password" name="adduser_pw" size="16" maxlength="16" value=""></td>
+          </tr>
+          <tr>
+            <td class="head" id="adduserMulLogins">Multiple Logins</td>
+            <td><input type=radio name=adduser_mullogins value="1" onClick="mullogins_enable_switch()">
+              <font id="adduserMulLoginsEnable">Enable</font>&nbsp;
+              <input type=radio name=adduser_mullogins value="0" onClick="mullogins_enable_switch()" checked>
+              <font id="adduserMulLoginsDisable">Disable</font></td>
+          </tr>
+          <tr>
+            <td class="head" id="adduserMaxLogins">Max. Logins</td>
+            <td><input type=text name=adduser_maxlogins size=1 maxlength=1 value="3"></td>
+          </tr>
+          <tr>
+            <td class="head" id="adduserDL">Download Capabled</td>
+            <td><input type=radio name=adduser_download value="1">
+              <font id="adduserDLEnable">Enable</font>&nbsp;
+              <input type=radio name=adduser_download value="0" checked>
+              <font id="adduserDLDisable">Disable</font></td>
+          </tr>
+          <tr>
+            <td class="head" id="adduserUL">Upload Capabled</td>
+            <td><input type=radio name=adduser_upload value="1">
+              <font id="adduserULEnable">Enable</font>&nbsp;
+              <input type=radio name=adduser_upload value="0" checked>
+              <font id="adduserULDisable">Disable</font></td>
+          </tr>
+          <tr>
+            <td class="head" id="adduserOW">Overwrite Capabled</td>
+            <td><input type=radio name=adduser_overwrite value="1">
+              <font id="adduserOWEnable">Enable</font>&nbsp;
+              <input type=radio name=adduser_overwrite value="0" checked>
+              <font id="adduserOWDisable">Disable</font></td>
+          </tr>
+          <tr>
+            <td class="head" id="adduserER">Erase Capabled</td>
+            <td><input type=radio name=adduser_erase value="1">
+              <font id="adduserEREnable">Enable</font>&nbsp;
+              <input type=radio name=adduser_erase value="0" checked>
+              <font id="adduserERDisable">Disable</font></td>
+          </tr>
+        </table>
+        <br />
+        <table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
+          <tr align="center">
+            <td><input type=button style="{width:120px;}" value="Apply" id="adduserApply" onClick="submit_apply()">
+              &nbsp; &nbsp;
+              <input type=reset  style="{width:120px;}" value="Cancel" id="adduserCancel" onClick="window.close()"></td>
+          </tr>
+        </table>
+      </form></td>
   </tr>
 </table>
-<br />
-
-<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
-  <tr align="center">
-    <td>
-      <input type=button style="{width:120px;}" value="Apply" id="adduserApply" onClick="submit_apply()"> &nbsp; &nbsp;
-      <input type=reset  style="{width:120px;}" value="Cancel" id="adduserCancel" onClick="window.close()">
-    </td>
-  </tr>
-</table>
-</form>
 </body>
 </html>

@@ -1,13 +1,11 @@
+<!DOCTYPE html>
 <html>
 <head>
-
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0">
 <meta http-equiv="Pragma" content="no-cache">
-
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
-
 <title>Create Directory</title>
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("usb");
@@ -98,20 +96,17 @@ function submit_apply()
 </head>
 
 <body onLoad="initValue()" onUnload="addDirClose()">
-<table class="body"><tr><td>
-
-<form method=post name="smb_adddir" action="/goform/SmbDirAdd">
-<table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
-  <tr> 
-    <td class="title" id="adddirName">Directory Name</td>
-    <td>
-      <input type=text name=dir_name size=16 maxlength=16 value="">
-    </td>
-  </tr>
+<table class="body">
   <tr>
-    <td class="title" id="adddirAccessUser">Access User</td>
-    <td>
-    <script language="JavaScript" type="text/javascript">
+    <td><form method=post name="smb_adddir" action="/goform/SmbDirAdd">
+        <table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+          <tr>
+            <td class="title" id="adddirName">Directory Name</td>
+            <td><input type=text name=dir_name size=16 maxlength=16 value=""></td>
+          </tr>
+          <tr>
+            <td class="title" id="adddirAccessUser">Access User</td>
+            <td><script language="JavaScript" type="text/javascript">
     for (i=1;i<=8;i++)
     {
       var user = eval('opener.document.forms[0].hidden_user'+i+'.value');
@@ -124,44 +119,36 @@ function submit_apply()
 	document.write("<br />");
       }
     }
-    </script>
-    </td>
-  </tr>
-</table>
-
-<hr />
-<br />
-
-<table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
-  <tr> 
-    <td class="title" colspan="3" id="adddirPath">Access Path</td>
-  </tr>
-  <tr> 
-    <td bgcolor="#E8F8FF" width=15px>&nbsp;</td>
-    <td align="center" bgcolor="#E8F8FF" id="adddirPath">Path</td>
-    <td align="center" bgcolor="#E8F8FF" id="adddirPartition">Partition</td>
-  </tr>
-  <% ShowAllDir(); %>
-<script language="JavaScript" type="text/javascript">
+    </script></td>
+          </tr>
+        </table>
+        <hr />
+        <br />
+        <table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+          <tr>
+            <td class="title" colspan="3" id="adddirPath">Access Path</td>
+          </tr>
+          <tr>
+            <td bgcolor="#E8F8FF" width=15px>&nbsp;</td>
+            <td align="center" bgcolor="#E8F8FF" id="adddirPath">Path</td>
+            <td align="center" bgcolor="#E8F8FF" id="adddirPartition">Partition</td>
+          </tr>
+          <% ShowAllDir(); %>
+          <script language="JavaScript" type="text/javascript">
 path_count = parseInt('<% getCount(1, "AllDir"); %>');
 </script>
-</table>
-
-<hr />
-<br />
-
-<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
-  <tr align="center">
-    <td>
-      <input type=button style="{width:120px;}" value="Apply" id="adddirApply" onClick="submit_apply()"> &nbsp; &nbsp;
-      <input type=reset  style="{width:120px;}" value="Cancel" id="adddirCancel" onClick="window.close()">
-    </td>
+        </table>
+        <hr />
+        <br />
+        <table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
+          <tr align="center">
+            <td><input type=button style="{width:120px;}" value="Apply" id="adddirApply" onClick="submit_apply()">
+              &nbsp; &nbsp;
+              <input type=reset  style="{width:120px;}" value="Cancel" id="adddirCancel" onClick="window.close()"></td>
+          </tr>
+        </table>
+      </form></td>
   </tr>
 </table>
-</form>
-
-</td></tr></table>
 </body>
 </html>
-
-

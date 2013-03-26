@@ -1,16 +1,14 @@
+<!DOCTYPE html>
 <html>
 <head>
 <title>Samba/CIFS setup</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0">
 <meta http-equiv="Pragma" content="no-cache">
-
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <link rel="stylesheet" href="/style/controls.css" type="text/css">
-
 <script type="text/javascript" src="/js/controls.js"></script>
 <script type="text/javascript" src="/js/validation.js"></script>
-
 <script language="Javascript">
 function initValue(form)
 {
@@ -64,61 +62,55 @@ function checkForm(form)
 </head>
 
 <body onLoad="initValue(document.formSamba);">
-<table class="body"><tr><td>
-
-<h1>Samba/CIFS Setup</h1>
-<p>Here you can configure Samba/CIFS service.</p>
-<hr>
-
-<form action="/goform/formSamba" method="POST" name="formSamba" onsubmit="return checkForm(this);" >
-<table class="form">
-<tr>
-	<td class="title" colspan="2">Samba/CIFS Settings</td>
-</tr>
-<tr>
-	<td class="head">Enable Samba</td>
-	<td>
-		<select name="SmbEnabled" class="half" onchange="smbEnabledSwitch(this.form);">
-			<option value="0">Disable</option>
-			<option value="1">Enable</option>
-		</select>
-	</td>
-</tr>
-<tr>
-	<td class="head">Workgroup</td>
-	<td><input name="WorkGroup" class="mid" value="<% getCfgGeneral(1, "WorkGroup"); %>" ></td>
-</tr>
-<tr>
-	<td class="head">Netbios name</td>
-	<td><input name="SmbNetBIOS" class="mid" value="<% getCfgGeneral(1, "SmbNetBIOS"); %>" ></td>
-</tr>
-<tr>
-	<td class="head">Server string</td>
-	<td><input name="SmbString" class="mid" value="<% getCfgGeneral(1, "SmbString"); %>" ></td>
-</tr>
-<tr>
-	<td class="head">OS level</td>
-	<td><input name="SmbOsLevel" class="half" value="<% getCfgGeneral(1, "SmbOsLevel"); %>" ></td>
-</tr>
-<tr>
-	<td class="head">Enable time server</td>
-	<td>
-		<select name="SmbTimeserver" class="half">
-			<option value="0">Disable</option>
-			<option value="1">Enable</option>
-		</select>
-	</td>
-</tr>
+<table class="body">
+  <tr>
+    <td><h1>Samba/CIFS Setup</h1>
+      <p>Here you can configure Samba/CIFS service.</p>
+      <hr>
+      <form action="/goform/formSamba" method="POST" name="formSamba" onSubmit="return checkForm(this);" >
+        <table class="form">
+          <tr>
+            <td class="title" colspan="2">Samba/CIFS Settings</td>
+          </tr>
+          <tr>
+            <td class="head">Enable Samba</td>
+            <td><select name="SmbEnabled" class="half" onChange="smbEnabledSwitch(this.form);">
+                <option value="0">Disable</option>
+                <option value="1">Enable</option>
+              </select></td>
+          </tr>
+          <tr>
+            <td class="head">Workgroup</td>
+            <td><input name="WorkGroup" class="mid" value="<% getCfgGeneral(1, "WorkGroup"); %>" ></td>
+          </tr>
+          <tr>
+            <td class="head">Netbios name</td>
+            <td><input name="SmbNetBIOS" class="mid" value="<% getCfgGeneral(1, "SmbNetBIOS"); %>" ></td>
+          </tr>
+          <tr>
+            <td class="head">Server string</td>
+            <td><input name="SmbString" class="mid" value="<% getCfgGeneral(1, "SmbString"); %>" ></td>
+          </tr>
+          <tr>
+            <td class="head">OS level</td>
+            <td><input name="SmbOsLevel" class="half" value="<% getCfgGeneral(1, "SmbOsLevel"); %>" ></td>
+          </tr>
+          <tr>
+            <td class="head">Enable time server</td>
+            <td><select name="SmbTimeserver" class="half">
+                <option value="0">Disable</option>
+                <option value="1">Enable</option>
+              </select></td>
+          </tr>
+        </table>
+        <br>
+        <input type="hidden" value="/services/samba.asp" name="submit-url">
+        <input type="submit" value="Apply">
+        <br>
+        <br>
+      </form>
+      <div class="whitespace">&nbsp;</div></td>
+  </tr>
 </table>
-
-<br>
-<input type="hidden" value="/services/samba.asp" name="submit-url">
-<input type="submit" value="Apply">
-<br><br>
-</form>
-
-<div class="whitespace">&nbsp;</div>
-
-</td></tr></table>
 </body>
 </html>

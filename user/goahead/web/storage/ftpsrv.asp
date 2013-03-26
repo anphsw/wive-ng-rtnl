@@ -1,14 +1,12 @@
+<!DOCTYPE html>
 <html>
 <head>
-
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0">
 <meta http-equiv="Pragma" content="no-cache">
-
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <title>FTP Settings</title>
-
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("storage");
 var ftpenabled = '<% getCfgZero(1, "FtpEnabled"); %>';
@@ -197,71 +195,58 @@ function ftp_enable_switch()
 </head>
 
 <body onLoad="initValue()">
-<table class="body"><tr><td>
-
-
-<h1 id="ftpTitle">FTP Settings </h1>
-<p id="ftpIntroduction"></p>
-<hr />
-
-<form method=post name=storage_ftp action="/goform/storageFtpSrv" onSubmit="return CheckValue()">
-<table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
-  <tr> 
-    <td class="title" colspan="2" id="ftpSrvSet">FTP Server Setup</td>
-  </tr>
-  <tr> 
-    <td class="head" id="ftpSrv">FTP Server</td>
-    <td>
-      <input type=radio name=ftp_enabled value="1" onClick="ftp_enable_switch()"><font id="ftpSrvEnable">Enable</font>&nbsp;
-      <input type=radio name=ftp_enabled value="0" onClick="ftp_enable_switch()" checked><font id="ftpSrvDisable">Disable</font>
-    </td>
-  </tr>
-  <tr> 
-    <td class="head" id="ftpSrvAnonymous">Anonymous Login</td>
-    <td>
-      <input type=radio name=ftp_anonymous value="1"><font id="ftpSrvAnonymousEnable">Enable</font>&nbsp;
-      <input type=radio name=ftp_anonymous value="0" checked><font id="ftpSrvAnonymousDisable">Disable</font>
-    </td>
-  </tr>
+<table class="body">
   <tr>
-    <td class="head" id="ftpSrvPort">FTP Port</td>
-    <td>
-      <input type=text name=ftp_port size=5 maxlength=5 value="21">
-    </td>
-  </tr>
-  <tr>
-    <td class="head" id="ftpSrvMaxUsers">Max. Users</td>
-    <td>
-      <input type=text name=ftp_max_users size=2 maxlength=2 value="10">
-    </td>
-  </tr>
-  <tr>
-    <td class="head" id="ftpSrvLoginTimeout">Login Timeout</td>
-    <td>
-      <input type=text name=ftp_login_timeout size=4 maxlength=4 value="120">
-    </td>
-  </tr>
-  <tr>
-    <td class="head" id="ftpSrvStayTimeout">Stay Timeout</td>
-    <td>
-      <input type=text name=ftp_stay_timeout size=4 maxlength=4 value="240">
-    </td>
+    <td><h1 id="ftpTitle">FTP Settings </h1>
+      <p id="ftpIntroduction"></p>
+      <hr />
+      <form method=post name=storage_ftp action="/goform/storageFtpSrv" onSubmit="return CheckValue()">
+        <table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+          <tr>
+            <td class="title" colspan="2" id="ftpSrvSet">FTP Server Setup</td>
+          </tr>
+          <tr>
+            <td class="head" id="ftpSrv">FTP Server</td>
+            <td><input type=radio name=ftp_enabled value="1" onClick="ftp_enable_switch()">
+              <font id="ftpSrvEnable">Enable</font>&nbsp;
+              <input type=radio name=ftp_enabled value="0" onClick="ftp_enable_switch()" checked>
+              <font id="ftpSrvDisable">Disable</font></td>
+          </tr>
+          <tr>
+            <td class="head" id="ftpSrvAnonymous">Anonymous Login</td>
+            <td><input type=radio name=ftp_anonymous value="1">
+              <font id="ftpSrvAnonymousEnable">Enable</font>&nbsp;
+              <input type=radio name=ftp_anonymous value="0" checked>
+              <font id="ftpSrvAnonymousDisable">Disable</font></td>
+          </tr>
+          <tr>
+            <td class="head" id="ftpSrvPort">FTP Port</td>
+            <td><input type=text name=ftp_port size=5 maxlength=5 value="21"></td>
+          </tr>
+          <tr>
+            <td class="head" id="ftpSrvMaxUsers">Max. Users</td>
+            <td><input type=text name=ftp_max_users size=2 maxlength=2 value="10"></td>
+          </tr>
+          <tr>
+            <td class="head" id="ftpSrvLoginTimeout">Login Timeout</td>
+            <td><input type=text name=ftp_login_timeout size=4 maxlength=4 value="120"></td>
+          </tr>
+          <tr>
+            <td class="head" id="ftpSrvStayTimeout">Stay Timeout</td>
+            <td><input type=text name=ftp_stay_timeout size=4 maxlength=4 value="240"></td>
+          </tr>
+        </table>
+        <hr />
+        <br>
+        <table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
+          <tr align="center">
+            <td><input type=submit style="{width:120px;}" value="Apply" id="ftpApply">
+              &nbsp; &nbsp;
+              <input type=reset  style="{width:120px;}" value="Reset" id="ftpReset" onClick="window.location.reload()"></td>
+          </tr>
+        </table>
+      </form></td>
   </tr>
 </table>
-<hr />
-<br>
-<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
-  <tr align="center">
-    <td>
-      <input type=submit style="{width:120px;}" value="Apply" id="ftpApply"> &nbsp; &nbsp;
-      <input type=reset  style="{width:120px;}" value="Reset" id="ftpReset" onClick="window.location.reload()">
-    </td>
-  </tr>
-</table>
-</form>
-
-
-</td></tr></table>
 </body>
 </html>
-

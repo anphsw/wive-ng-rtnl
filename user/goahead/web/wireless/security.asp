@@ -1,16 +1,14 @@
+<!DOCTYPE html>
 <html>
 <head>
-
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0">
 <meta http-equiv="Pragma" content="no-cache">
-
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script type="text/javascript" src="/js/controls.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <link rel="stylesheet" href="/style/controls.css" type="text/css">
 <title>Wireless Security Settings</title>
-
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("wireless");
 
@@ -986,202 +984,179 @@ function onPreAuthenticationClick(type)
 </script>
 </head>
 
-<body onload="initAll();">
-<table class="body"><tbody><tr><td>
-
-<h1 id="securityTitle">Wireless Security/Encryption Settings </h1>
-<p id="securityIntroduction">Here you can configure wireless security and encryption to prevent unauthorized access to the router.</p>
-<hr />
-
-
-<form method="post" name="security_form" action="/goform/APSecurity" onsubmit="return submit_apply();">
-
-<!-- ---------------------  MBSSID Selection  --------------------- -->
-<table class="form">
-<tr>
-	<td class="title" colspan="2" id="secureSelectSSID">Select SSID</td>
-</tr>
-<tr>
-	<td class="head" id="secureSSIDChoice">SSID choice</td>
-	<td>
-		<select name="ssidIndex" class="mid" onchange="selectMBSSIDChanged();">
-			<!-- ....Javascript will update options.... -->
-		</select>
-	</td>
-</tr>
-</table>
-
-<table class="form">
-<tr>
-	<td class="title" colspan="2"> <span id="sp_title">Security Policy </span></td>
-</tr>
-<tr id="div_security_infra_mode" name="div_security_infra_mode"> 
-	<td class="head" id="secureSecureMode">Security Mode</td>
-	<td>
-		<select name="security_mode" id="security_mode" class="mid" onchange="securityMode(1)">
-			<!-- ....Javascript will update options.... -->
-		</select>
-	</td>
-</tr>
-<tr id="div_security_shared_mode" name="div_security_shared_mode" style="visibility: hidden;"> 
-	<td class="head" id="secureEncrypType">Encrypt Type</td>
-	<td>
-		<select name="security_shared_mode" id="security_shared_mode" class="mid" onchange="securityMode(1)">
-			<option value=WEP>WEP</option>
-			<option value=None id="secureEncrypTypeNone">None</option>
-		</select>
-	</td>
-</tr>
-</table>
-
-<!-- WEP -->
-<table id="div_wep" name="div_wep" class="form" style="visibility: hidden;">
-<tr>
-	<td class="title" colspan="4" id="secureWEP">Wired Equivalent Privacy (WEP)</td>
-</tr>
-<tr> 
-	<td class="head" colspan="2" id="secureWEPDefaultKey">Default Key</td>
-	<td colspan="2">
-		<select name="wep_default_key" id="wep_default_key" class="half" onchange="setChange(1)">
-			<option value="1" id="secureWEPDefaultKey1">Key 1</option>
-			<option value="2" id="secureWEPDefaultKey2">Key 2</option>
-			<option value="3" id="secureWEPDefaultKey3">Key 3</option>
-			<option value="4" id="secureWEPDefaultKey4">Key 4</option>
-		</select>
-	</td>
-</tr>
-<tr>
-	<td class="head1" rowspan="4" id="secureWEPKey">WEP Keys</td>
-	<td class="head2" id="secureWEPKey1">WEP Key 1 :</td>
-	<td><input name="wep_key_1" id="WEP1" maxlength="26" value="" onKeyUp="setChange(1)"></td>
-	<td>
-		<select id="WEP1Select" class="half" name="WEP1Select" onchange="setChange(1)">
-			<option value="1">ASCII</option>
-			<option value="0">Hex</option>
-		</select>
-	</td>
-</tr>
-<tr>
-	<td class="head2" id="secureWEPKey2">WEP Key 2 : </td>
-	<td><input name="wep_key_2" id="WEP2" maxlength="26" value="" onKeyUp="setChange(1)"></td>
-	<td>
-		<select id="WEP2Select" name="WEP2Select" class="half" onchange="setChange(1)">
-			<option value="1">ASCII</option>
-			<option value="0">Hex</option>
-		</select>
-	</td>
-</tr>
-<tr>
-	<td class="head2" id="secureWEPKey3">WEP Key 3 : </td>
-	<td><input name="wep_key_3" id="WEP3" maxlength="26" value="" onKeyUp="setChange(1)"></td>
-	<td>
-		<select id="WEP3Select" name="WEP3Select" class="half" onchange="setChange(1)">
-			<option value="1">ASCII</option>
-			<option value="0">Hex</option>
-		</select>
-	</td>
-</tr>
-<tr>
-	<td class="head2" id="secureWEPKey4">WEP Key 4 : </td>
-	<td><input name="wep_key_4" id="WEP4" maxlength="26" value="" onKeyUp="setChange(1)"></td>
-	<td>
-		<select id="WEP4Select" name="WEP4Select" class="half" onchange="setChange(1)">
-			<option value="1">ASCII</option>
-			<option value="0">Hex</option>
-		</select>
-	</td>
-</tr>
-</table>
-
-<!-- <br> -->
-
-<!-- WPA -->
-<table id="div_wpa" name="div_wpa" class="form" style="visibility: hidden; display: none;">
-<tr>
-	<td class="title" colspan="2" id="secreWPA">WPA</td>
-</tr>
-<tr id="div_wpa_algorithms" name="div_wpa_algorithms" style="visibility: hidden;"> 
-	<td class="head" id="secureWPAAlgorithm">WPA Algorithms</td>
-	<td>
-		<input name="cipher" id="cipher" value="0" type="radio" onClick="onWPAAlgorithmsClick(0)">TKIP &nbsp;
-		<input name="cipher" id="cipher" value="1" type="radio" onClick="onWPAAlgorithmsClick(1)">AES &nbsp;
-		<input name="cipher" id="cipher" value="2" type="radio" onClick="onWPAAlgorithmsClick(2)">TKIPAES &nbsp;
-	</td>
-</tr>
-<tr id="wpa_passphrase" name="wpa_passphrase" style="visibility: hidden;">
-	<td class="head" id="secureWPAPassPhrase">Pass Phrase</td>
-	<td>
-		<input name="passphrase" id="passphrase" size="28" maxlength="64" value="" onKeyUp="setChange(1)">
-	</td>
-</tr>
-<tr id="wpa_key_renewal_interval" name="wpa_key_renewal_interval" style="visibility: hidden;">
-	<td class="head" id="secureWPAKeyRenewInterval">Key Renewal Interval</td>
-	<td>
-		<input name="keyRenewalInterval" id="keyRenewalInterval" size="4" maxlength="4" value="3600" onKeyUp="setChange(1)"> seconds
-	</td>
-</tr>
-<tr id="wpa_PMK_Cache_Period" name="wpa_PMK_Cache_Period" style="visibility: hidden;">
-	<td class="head" id="secureWPAPMKCachePeriod">PMK Cache Period</td>
-	<td>
-		<input name="PMKCachePeriod" id="PMKCachePeriod" size="4" maxlength="4" value="" onKeyUp="setChange(1)"> minute
-	</td>
-</tr>
-<tr id="wpa_preAuthentication" name="wpa_preAuthentication" style="visibility: hidden;">
-	<td class="head" id="secureWPAPreAuth">Pre-Authentication</td>
-	<td>
-		<input name="PreAuthentication" id="PreAuthentication" value="0" type="radio" onClick="onPreAuthenticationClick(0)"><font id="secureWPAPreAuthDisable">Disable &nbsp;</font>
-		<input name="PreAuthentication" id="PreAuthentication" value="1" type="radio" onClick="onPreAuthenticationClick(1)"><font id="secureWPAPreAuthEnable">Enable &nbsp;</font>
-	</td>
-</tr>
-</table>
-
-<!-- 802.1x -->
-<!-- WEP  -->
-<table id="div_8021x_wep" name="div_8021x_wep" class="form" style="visibility: hidden; display: none;">
-<tr>
-	<td class="title" colspan="2" id="secure8021XWEP">802.1x WEP</td>
-</tr>
-<tr>
-	<td class="head" id="secure1XWEP">WEP</td>
-	<td>
-		<input name="ieee8021x_wep" id="ieee8021x_wep" value="0" type="radio" onClick="onIEEE8021XWEPClick(0)"><span id="secure1XWEPDisable">Disable &nbsp;</span>
-		<input name="ieee8021x_wep" id="ieee8021x_wep" value="1" type="radio" onClick="onIEEE8021XWEPClick(1)"><span id="secure1XWEPEnable">Enable</span>
-	</td>
-</tr>
-</table>
-
-<table id="div_radius_server" name="div_radius_server" class="form" style="visibility: hidden; display: none;">
-<tr>
-	<td class="title" colspan="2" id="secureRadius">Radius Server</td>
-</tr>
-<tr>
-	<td class="head" id="secureRadiusIPAddr"> IP Address </td>
-	<td> <input name="RadiusServerIP" id="RadiusServerIP" size="16" maxlength="32" value="" onKeyUp="setChange(1)"> </td>
-</tr>
-<tr>
-	<td class="head" id="secureRadiusPort"> Port </td>
-	<td> <input name="RadiusServerPort" id="RadiusServerPort" size="5" maxlength="5" value="" onKeyUp="setChange(1)"> </td>
-</tr>
-<tr>
-	<td class="head" id="secureRadiusSharedSecret"> Shared Secret </td>
-	<td> <input name="RadiusServerSecret" id="RadiusServerSecret" size="16" maxlength="64" value="" onKeyUp="setChange(1)"> </td>
-</tr>
-<tr>
-	<td class="head" id="secureRadiusSessionTimeout"> Session Timeout </td>
-	<td> <input name="RadiusServerSessionTimeout" id="RadiusServerSessionTimeout" size="3" maxlength="4" value="0" onKeyUp="setChange(1)"> </td>
-</tr>
-<tr>
-	<td class="head" id="secureRadiusIdleTimeout"> Idle Timeout </td>
-	<td> <input name="RadiusServerIdleTimeout" id="RadiusServerIdleTimeout" size="3" maxlength="4" value="" onKeyUp="setChange(1)" readonly> </td>
-</tr>
-</table>
-
-
-<!--									-->
-<!--	AccessPolicy for mbssid 		-->
-<!--									-->
-
-<script language="JavaScript" type="text/javascript">
+<body onLoad="initAll();">
+<table class="body">
+  <tbody>
+    <tr>
+      <td><h1 id="securityTitle">Wireless Security/Encryption Settings </h1>
+        <p id="securityIntroduction">Here you can configure wireless security and encryption to prevent unauthorized access to the router.</p>
+        <hr />
+        <form method="post" name="security_form" action="/goform/APSecurity" onSubmit="return submit_apply();">
+          
+          <!-- ---------------------  MBSSID Selection  --------------------- -->
+          <table class="form">
+            <tr>
+              <td class="title" colspan="2" id="secureSelectSSID">Select SSID</td>
+            </tr>
+            <tr>
+              <td class="head" id="secureSSIDChoice">SSID choice</td>
+              <td><select name="ssidIndex" class="mid" onChange="selectMBSSIDChanged();">
+                  <!-- ....Javascript will update options.... -->
+                </select></td>
+            </tr>
+          </table>
+          <table class="form">
+            <tr>
+              <td class="title" colspan="2"><span id="sp_title">Security Policy </span></td>
+            </tr>
+            <tr id="div_security_infra_mode" name="div_security_infra_mode">
+              <td class="head" id="secureSecureMode">Security Mode</td>
+              <td><select name="security_mode" id="security_mode" class="mid" onChange="securityMode(1)">
+                  <!-- ....Javascript will update options.... -->
+                </select></td>
+            </tr>
+            <tr id="div_security_shared_mode" name="div_security_shared_mode" style="visibility: hidden;">
+              <td class="head" id="secureEncrypType">Encrypt Type</td>
+              <td><select name="security_shared_mode" id="security_shared_mode" class="mid" onChange="securityMode(1)">
+                  <option value=WEP>WEP</option>
+                  <option value=None id="secureEncrypTypeNone">None</option>
+                </select></td>
+            </tr>
+          </table>
+          
+          <!-- WEP -->
+          <table id="div_wep" name="div_wep" class="form" style="visibility: hidden;">
+            <tr>
+              <td class="title" colspan="4" id="secureWEP">Wired Equivalent Privacy (WEP)</td>
+            </tr>
+            <tr>
+              <td class="head" colspan="2" id="secureWEPDefaultKey">Default Key</td>
+              <td colspan="2"><select name="wep_default_key" id="wep_default_key" class="half" onChange="setChange(1)">
+                  <option value="1" id="secureWEPDefaultKey1">Key 1</option>
+                  <option value="2" id="secureWEPDefaultKey2">Key 2</option>
+                  <option value="3" id="secureWEPDefaultKey3">Key 3</option>
+                  <option value="4" id="secureWEPDefaultKey4">Key 4</option>
+                </select></td>
+            </tr>
+            <tr>
+              <td class="head1" rowspan="4" id="secureWEPKey">WEP Keys</td>
+              <td class="head2" id="secureWEPKey1">WEP Key 1 :</td>
+              <td><input name="wep_key_1" id="WEP1" maxlength="26" value="" onKeyUp="setChange(1)"></td>
+              <td><select id="WEP1Select" class="half" name="WEP1Select" onChange="setChange(1)">
+                  <option value="1">ASCII</option>
+                  <option value="0">Hex</option>
+                </select></td>
+            </tr>
+            <tr>
+              <td class="head2" id="secureWEPKey2">WEP Key 2 : </td>
+              <td><input name="wep_key_2" id="WEP2" maxlength="26" value="" onKeyUp="setChange(1)"></td>
+              <td><select id="WEP2Select" name="WEP2Select" class="half" onChange="setChange(1)">
+                  <option value="1">ASCII</option>
+                  <option value="0">Hex</option>
+                </select></td>
+            </tr>
+            <tr>
+              <td class="head2" id="secureWEPKey3">WEP Key 3 : </td>
+              <td><input name="wep_key_3" id="WEP3" maxlength="26" value="" onKeyUp="setChange(1)"></td>
+              <td><select id="WEP3Select" name="WEP3Select" class="half" onChange="setChange(1)">
+                  <option value="1">ASCII</option>
+                  <option value="0">Hex</option>
+                </select></td>
+            </tr>
+            <tr>
+              <td class="head2" id="secureWEPKey4">WEP Key 4 : </td>
+              <td><input name="wep_key_4" id="WEP4" maxlength="26" value="" onKeyUp="setChange(1)"></td>
+              <td><select id="WEP4Select" name="WEP4Select" class="half" onChange="setChange(1)">
+                  <option value="1">ASCII</option>
+                  <option value="0">Hex</option>
+                </select></td>
+            </tr>
+          </table>
+          
+          <!-- <br> --> 
+          
+          <!-- WPA -->
+          <table id="div_wpa" name="div_wpa" class="form" style="visibility: hidden; display: none;">
+            <tr>
+              <td class="title" colspan="2" id="secreWPA">WPA</td>
+            </tr>
+            <tr id="div_wpa_algorithms" name="div_wpa_algorithms" style="visibility: hidden;">
+              <td class="head" id="secureWPAAlgorithm">WPA Algorithms</td>
+              <td><input name="cipher" id="cipher" value="0" type="radio" onClick="onWPAAlgorithmsClick(0)">
+                TKIP &nbsp;
+                <input name="cipher" id="cipher" value="1" type="radio" onClick="onWPAAlgorithmsClick(1)">
+                AES &nbsp;
+                <input name="cipher" id="cipher" value="2" type="radio" onClick="onWPAAlgorithmsClick(2)">
+                TKIPAES &nbsp; </td>
+            </tr>
+            <tr id="wpa_passphrase" name="wpa_passphrase" style="visibility: hidden;">
+              <td class="head" id="secureWPAPassPhrase">Pass Phrase</td>
+              <td><input name="passphrase" id="passphrase" size="28" maxlength="64" value="" onKeyUp="setChange(1)"></td>
+            </tr>
+            <tr id="wpa_key_renewal_interval" name="wpa_key_renewal_interval" style="visibility: hidden;">
+              <td class="head" id="secureWPAKeyRenewInterval">Key Renewal Interval</td>
+              <td><input name="keyRenewalInterval" id="keyRenewalInterval" size="4" maxlength="4" value="3600" onKeyUp="setChange(1)">
+                seconds </td>
+            </tr>
+            <tr id="wpa_PMK_Cache_Period" name="wpa_PMK_Cache_Period" style="visibility: hidden;">
+              <td class="head" id="secureWPAPMKCachePeriod">PMK Cache Period</td>
+              <td><input name="PMKCachePeriod" id="PMKCachePeriod" size="4" maxlength="4" value="" onKeyUp="setChange(1)">
+                minute </td>
+            </tr>
+            <tr id="wpa_preAuthentication" name="wpa_preAuthentication" style="visibility: hidden;">
+              <td class="head" id="secureWPAPreAuth">Pre-Authentication</td>
+              <td><input name="PreAuthentication" id="PreAuthentication" value="0" type="radio" onClick="onPreAuthenticationClick(0)">
+                <font id="secureWPAPreAuthDisable">Disable &nbsp;</font>
+                <input name="PreAuthentication" id="PreAuthentication" value="1" type="radio" onClick="onPreAuthenticationClick(1)">
+                <font id="secureWPAPreAuthEnable">Enable &nbsp;</font></td>
+            </tr>
+          </table>
+          
+          <!-- 802.1x --> 
+          <!-- WEP  -->
+          <table id="div_8021x_wep" name="div_8021x_wep" class="form" style="visibility: hidden; display: none;">
+            <tr>
+              <td class="title" colspan="2" id="secure8021XWEP">802.1x WEP</td>
+            </tr>
+            <tr>
+              <td class="head" id="secure1XWEP">WEP</td>
+              <td><input name="ieee8021x_wep" id="ieee8021x_wep" value="0" type="radio" onClick="onIEEE8021XWEPClick(0)">
+                <span id="secure1XWEPDisable">Disable &nbsp;</span>
+                <input name="ieee8021x_wep" id="ieee8021x_wep" value="1" type="radio" onClick="onIEEE8021XWEPClick(1)">
+                <span id="secure1XWEPEnable">Enable</span></td>
+            </tr>
+          </table>
+          <table id="div_radius_server" name="div_radius_server" class="form" style="visibility: hidden; display: none;">
+            <tr>
+              <td class="title" colspan="2" id="secureRadius">Radius Server</td>
+            </tr>
+            <tr>
+              <td class="head" id="secureRadiusIPAddr"> IP Address </td>
+              <td><input name="RadiusServerIP" id="RadiusServerIP" size="16" maxlength="32" value="" onKeyUp="setChange(1)"></td>
+            </tr>
+            <tr>
+              <td class="head" id="secureRadiusPort"> Port </td>
+              <td><input name="RadiusServerPort" id="RadiusServerPort" size="5" maxlength="5" value="" onKeyUp="setChange(1)"></td>
+            </tr>
+            <tr>
+              <td class="head" id="secureRadiusSharedSecret"> Shared Secret </td>
+              <td><input name="RadiusServerSecret" id="RadiusServerSecret" size="16" maxlength="64" value="" onKeyUp="setChange(1)"></td>
+            </tr>
+            <tr>
+              <td class="head" id="secureRadiusSessionTimeout"> Session Timeout </td>
+              <td><input name="RadiusServerSessionTimeout" id="RadiusServerSessionTimeout" size="3" maxlength="4" value="0" onKeyUp="setChange(1)"></td>
+            </tr>
+            <tr>
+              <td class="head" id="secureRadiusIdleTimeout"> Idle Timeout </td>
+              <td><input name="RadiusServerIdleTimeout" id="RadiusServerIdleTimeout" size="3" maxlength="4" value="" onKeyUp="setChange(1)" readonly></td>
+            </tr>
+          </table>
+          
+          <!--									--> 
+          <!--	AccessPolicy for mbssid 		--> 
+          <!--									--> 
+          
+          <script language="JavaScript" type="text/javascript">
 var aptable;
 
 for (aptable = 0; aptable < MBSSID_MAX; aptable++)
@@ -1220,23 +1195,21 @@ for (aptable = 0; aptable < MBSSID_MAX; aptable++)
 	document.write("<tr><td class=\"head\">"+_("secure access policy new")+"</td>");
 	document.write("	<td><input name=\"newap_text_"+aptable+"\" id=\"newap_text_"+aptable+"\" size=\"16\" maxlength=\"20\"></td></tr></tbody></table>");
 }
-</script>
-
-<!-- <br> -->
-<table border="0" cellpadding="2" cellspacing="1" width="90%">
-<tr align="center">
-	<td>
-		<input style="width: 120px;" value="Apply" id="secureApply" type="submit"> &nbsp; &nbsp;
-		<input style="width: 120px;" value="Cancel" id="secureCancel" type="reset" onClick="window.location.reload();" >
-		<input type="hidden" name="submit-url" value="/wireless/security.asp" >
-	</td>
-</tr>
+</script> 
+          
+          <!-- <br> -->
+          <table border="0" cellpadding="2" cellspacing="1" width="90%">
+            <tr align="center">
+              <td><input style="width: 120px;" value="Apply" id="secureApply" type="submit">
+                &nbsp; &nbsp;
+                <input style="width: 120px;" value="Cancel" id="secureCancel" type="reset" onClick="window.location.reload();" >
+                <input type="hidden" name="submit-url" value="/wireless/security.asp" ></td>
+            </tr>
+          </table>
+        </form>
+        <div class="whitespace">&nbsp;</div></td>
+    </tr>
+  </tbody>
 </table>
-
-</form>
-
-<div class="whitespace">&nbsp;</div>
-
-</td></tr></tbody></table>
-</body></html>
-
+</body>
+</html>

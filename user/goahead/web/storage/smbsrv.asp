@@ -1,14 +1,12 @@
+<!DOCTYPE html>
 <html>
 <head>
-
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0">
 <meta http-equiv="Pragma" content="no-cache">
-
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <title>SAMBA Settings</title>
-
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("storage");
 var smbenabled = '<% getCfgZero(1, "SmbEnabled"); %>';
@@ -150,57 +148,47 @@ function smb_enable_switch()
 </head>
 
 <body onLoad="initValue()">
-<table class="body"><tr><td>
-
-
-<h1 id="smbTitle">SAMBA Settings </h1>
-<p id="smbIntroduction"></p>
-<hr />
-
-<form method=post name=storage_smb action="/goform/storageSmbSrv" onSubmit="return CheckValue()">
-<table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
-  <tr> 
-    <td class="title" colspan="2" id="smbSrvSet">SAMBA Server Setup</td>
-  </tr>
-  <tr> 
-    <td class="head" id="smbSrv">SAMBA Server</td>
-    <td>
-      <input type=radio name=smb_enabled value="1" onClick="smb_enable_switch()"><font id="smbSrvEnable">Enable</font>&nbsp;
-      <input type=radio name=smb_enabled value="0" onClick="smb_enable_switch()" checked><font id="smbSrvDisable">Disable</font>
-    </td>
-  </tr>
+<table class="body">
   <tr>
-    <td class="head" id="smbSrvWG">Workgroup</td>
-    <td>
-      <input type=text name=smb_workgroup size=16 maxlength=16 value="LOCALNET">
-    </td>
-  </tr>
-  <tr>
-    <td class="head" id="smbSrvNetBIOS">NetBIOS Name</td>
-    <td>
-      <input type=text name=smb_netbios size=16 maxlength=16 value="Wive-NG-RTNL">
-    </td>
-  </tr>
-  <tr>
-    <td class="head" id="smbSrvString">Server String</td>
-    <td>
-      <input type=text name=smb_string size=16 maxlength=16 value="SERVER">
-    </td>
+    <td><h1 id="smbTitle">SAMBA Settings </h1>
+      <p id="smbIntroduction"></p>
+      <hr />
+      <form method=post name=storage_smb action="/goform/storageSmbSrv" onSubmit="return CheckValue()">
+        <table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+          <tr>
+            <td class="title" colspan="2" id="smbSrvSet">SAMBA Server Setup</td>
+          </tr>
+          <tr>
+            <td class="head" id="smbSrv">SAMBA Server</td>
+            <td><input type=radio name=smb_enabled value="1" onClick="smb_enable_switch()">
+              <font id="smbSrvEnable">Enable</font>&nbsp;
+              <input type=radio name=smb_enabled value="0" onClick="smb_enable_switch()" checked>
+              <font id="smbSrvDisable">Disable</font></td>
+          </tr>
+          <tr>
+            <td class="head" id="smbSrvWG">Workgroup</td>
+            <td><input type=text name=smb_workgroup size=16 maxlength=16 value="LOCALNET"></td>
+          </tr>
+          <tr>
+            <td class="head" id="smbSrvNetBIOS">NetBIOS Name</td>
+            <td><input type=text name=smb_netbios size=16 maxlength=16 value="Wive-NG-RTNL"></td>
+          </tr>
+          <tr>
+            <td class="head" id="smbSrvString">Server String</td>
+            <td><input type=text name=smb_string size=16 maxlength=16 value="SERVER"></td>
+          </tr>
+        </table>
+        <hr />
+        <br />
+        <table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
+          <tr align="center">
+            <td><input type=submit style="{width:120px;}" value="Apply" id="smbApply">
+              &nbsp; &nbsp;
+              <input type=reset  style="{width:120px;}" value="Reset" id="smbReset" onClick="window.location.reload()"></td>
+          </tr>
+        </table>
+      </form></td>
   </tr>
 </table>
-<hr />
-<br>
-<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
-  <tr align="center">
-    <td>
-      <input type=submit style="{width:120px;}" value="Apply" id="smbApply"> &nbsp; &nbsp;
-      <input type=reset  style="{width:120px;}" value="Reset" id="smbReset" onClick="window.location.reload()">
-    </td>
-  </tr>
-</table>
-</form>
-
-</td></tr></table>
 </body>
 </html>
-

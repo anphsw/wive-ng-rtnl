@@ -1,14 +1,12 @@
+<!DOCTYPE html>
 <html>
 <head>
-
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0">
 <meta http-equiv="Pragma" content="no-cache">
-
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <title>Disk Managament</title>
-
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("usb");
 var dir_count = 0;
@@ -170,73 +168,69 @@ function open_diskrepart_window()
 </head>
 
 <body onLoad="initValue()">
-<table class="body"><tr><td>
-<h1 id="storageDiskAdmTitle">Disk Management</h1>
-<p id="storageDiskAdmIntroduction"></p>
-<hr />
-<form method=post name=storage_disk_adm action="/goform/storageDiskAdm">
-<input type=hidden name=hiddenButton value="">
-<input type=hidden name=selectDirIndex value="">
-<input type=hidden name=selectPartIndex value="">
-<table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
-  <tr> 
-    <td class="title" colspan="4"><font id="storageShowDisk">Disk Display</font></td>
-  </tr>
-  <tr align=center> 
-    <td bgcolor="#E8F8FF" width=15px>&nbsp;</td>
-    <td bgcolor="#E8F8FF" id="storageDirPath">Directory Path</td>
-    <td bgcolor="#E8F8FF" id="storageDirPart">Partition</td>
-  </tr>
-  <% ShowAllDir(); %>
-<script language="JavaScript" type="text/javascript">
+<table class="body">
+  <tr>
+    <td><h1 id="storageDiskAdmTitle">Disk Management</h1>
+      <p id="storageDiskAdmIntroduction"></p>
+      <hr />
+      <form method=post name=storage_disk_adm action="/goform/storageDiskAdm">
+        <input type=hidden name=hiddenButton value="">
+        <input type=hidden name=selectDirIndex value="">
+        <input type=hidden name=selectPartIndex value="">
+        <table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+          <tr>
+            <td class="title" colspan="4"><font id="storageShowDisk">Disk Display</font></td>
+          </tr>
+          <tr align=center>
+            <td bgcolor="#E8F8FF" width=15px>&nbsp;</td>
+            <td bgcolor="#E8F8FF" id="storageDirPath">Directory Path</td>
+            <td bgcolor="#E8F8FF" id="storageDirPart">Partition</td>
+          </tr>
+          <% ShowAllDir(); %>
+          <script language="JavaScript" type="text/javascript">
 dir_count = parseInt('<% getCount(1, "AllDir"); %>');
 </script>
-</table>
-<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
-  <tr align="center">
-    <td>
-      <input type="button" style="{width:80px;}" value="Add" id="storageDiskAdmAdd" onClick="open_diskadd_window()">&nbsp;&nbsp;
-      <input type="button" style="{width:80px;}" value="Delete" id="storageDiskAdmDel" onClick="submit_apply('delete')">
-    </td>
-  </tr>
-</table>
-<hr />
-<br />
-<table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
-  <tr> 
-    <td class="title" colspan="4"><font id="storageShowPart">Partition Display</font></td>
-  </tr>
-  <tr>
-    <td bgcolor="#E8F8FF" width=15px>&nbsp;</td>
-    <td align="center" bgcolor="#E8F8FF" width=150px id="storagePartition">Partition</td>
-    <td align="center" bgcolor="#E8F8FF" id="storagePartPath">Path</td>
-  </tr>
-  <% ShowPartition(); %>
-<script language="JavaScript" type="text/javascript">
+        </table>
+        <table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
+          <tr align="center">
+            <td><input type="button" style="{width:80px;}" value="Add" id="storageDiskAdmAdd" onClick="open_diskadd_window()">
+              &nbsp;&nbsp;
+              <input type="button" style="{width:80px;}" value="Delete" id="storageDiskAdmDel" onClick="submit_apply('delete')"></td>
+          </tr>
+        </table>
+        <hr />
+        <br />
+        <table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+          <tr>
+            <td class="title" colspan="4"><font id="storageShowPart">Partition Display</font></td>
+          </tr>
+          <tr>
+            <td bgcolor="#E8F8FF" width=15px>&nbsp;</td>
+            <td align="center" bgcolor="#E8F8FF" width=150px id="storagePartition">Partition</td>
+            <td align="center" bgcolor="#E8F8FF" id="storagePartPath">Path</td>
+          </tr>
+          <% ShowPartition(); %>
+          <script language="JavaScript" type="text/javascript">
 part_count = parseInt('<% getCount(1, "AllPart"); %>');
 </script>
-</table>
-<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
-  <tr align="center">
-    <td>
-      <input type="button" style="{width:80px;}" value="Format" id="storageDiskFormat" onClick="submit_apply('format')">&nbsp;&nbsp;
-      <input type="button" style="{width:80px;}" value="Re-allocate" name="realloc_parted" id="storageDiskPart" onClick="open_diskrepart_window()">
-    </td>
+        </table>
+        <table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
+          <tr align="center">
+            <td><input type="button" style="{width:80px;}" value="Format" id="storageDiskFormat" onClick="submit_apply('format')">
+              &nbsp;&nbsp;
+              <input type="button" style="{width:80px;}" value="Re-allocate" name="realloc_parted" id="storageDiskPart" onClick="open_diskrepart_window()"></td>
+          </tr>
+        </table>
+        <hr />
+        <br />
+        <table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
+          <tr align="right">
+            <td><input type="button" style="{width:120px;}" value="Remove Disk" id="storageDiskRemove" onClick="submit_apply('remove')">
+              &nbsp;&nbsp; </td>
+          </tr>
+        </table>
+      </form></td>
   </tr>
 </table>
-<hr />
-<br />
-<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
-  <tr align="right">
-    <td>
-      <input type="button" style="{width:120px;}" value="Remove Disk" id="storageDiskRemove" onClick="submit_apply('remove')">&nbsp;&nbsp;
-    </td>
-  </tr>
-</table>
-</form>
-
-</td></tr></table>
 </body>
 </html>
-
-

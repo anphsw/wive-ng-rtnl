@@ -1,12 +1,11 @@
-<HTML>
-<HEAD>
-<TITLE>Wive-NG-RTNL</TITLE>
+<!DOCTYPE html>
+<html>
+<head>
+<title>Wive-NG-RTNL</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0">
 <meta http-equiv="Pragma" content="no-cache">
-
-<LINK REL="stylesheet" HREF="style/normal_ws.css" TYPE="text/css">
-
+<link rel="stylesheet" href="style/normal_ws.css" type="text/css">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script type="text/javascript">
 Butterlate.setTextDomain("main");
@@ -59,31 +58,38 @@ function setLanguage()
 	return true;
 }
 </script>
-</HEAD>
+</head>
 
-<BODY onLoad="initValue()">
-<table class="body"><tr><td>
-
-<H1>Wive-NG-RTNL - firmware for Ralink based Wi-Fi CPE</H1>
-<p id="ovIntroduction" />
-
-<!-- ----------------- Langauge Settings ----------------- -->
-<form method="post" name="Lang" action="/goform/setSysLang">
-<blockquote><fieldset>
-<legend id="ovSelectLang">Select Language</legend>
-<select name="langSelection" id="langSelection">
-<!-- added by initValue -->
-</select>&nbsp;&nbsp;
-<input type="submit" style="{width:50px;}" value="Apply" id="ovLangApply" onClick="return setLanguage()">
-</fieldset></blockquote>
-</form>
-
-<blockquote><fieldset><p>
-<a href="/adm/status.asp" id="ovStatus">Status</a><br />
-<a href="/adm/statistic.asp" id="ovStatistic">Statistic</a><br />
-<a href="/adm/management.asp" id="ovManagement">Management</a><br />
-<br />
-</p></fieldset></blockquote>
-</td></tr></table>
-</BODY>
-</HTML>
+<body onLoad="initValue()">
+<table class="body">
+  <tr>
+    <td><h1>Wive-NG-RTNL - firmware for Ralink based Wi-Fi CPE</h1>
+      <p id="ovIntroduction" />
+      
+      <!-- ----------------- Langauge Settings ----------------- -->
+      
+      <form method="post" name="Lang" action="/goform/setSysLang">
+        <blockquote>
+          <fieldset>
+            <legend id="ovSelectLang">Select Language</legend>
+            <select name="langSelection" id="langSelection">
+              <!-- added by initValue -->
+            </select>
+            &nbsp;&nbsp;
+            <input type="submit" style="{width:50px;}" value="Apply" id="ovLangApply" onClick="return setLanguage()">
+          </fieldset>
+        </blockquote>
+      </form>
+      <blockquote>
+        <fieldset>
+          <p> <a href="/adm/status.asp" id="ovStatus">Status</a><br />
+            <a href="/adm/statistic.asp" id="ovStatistic">Statistic</a><br />
+            <a href="/adm/management.asp" id="ovManagement">Management</a><br />
+            <br />
+          </p>
+        </fieldset>
+      </blockquote></td>
+  </tr>
+</table>
+</body>
+</html>

@@ -1,14 +1,12 @@
+<!DOCTYPE html>
 <html>
 <head>
-
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0">
 <meta http-equiv="Pragma" content="no-cache">
-
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <title>Web Camera Settings</title>
-
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("usb");
 
@@ -145,66 +143,58 @@ function submit_apply(parm)
 </head>
 
 <body onLoad="initValue()">
-<table class="body"><tr><td>
-
-
-<h1 id="webcamTitle">Web Camera Settings </h1>
-<p id="webcamIntroduction"></p>
-<hr />
-
-<form method=post name=webcam action="/goform/webcamra">
-<table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
-  <tr> 
-    <td class="title" colspan="2" id="webcamSettings">Web Camera Setup</td>
-  </tr>
-  <tr> 
-    <td class="head" id="webcamCapability">Capability</td>
-    <td>
-      <input type="radio" name="enabled" value="1" id="webcamEnable" onclick="webcam_enable_switch()">Enable
-      <input type="radio" name="enabled" value="0" id="webcamDisable" onClick="webcam_enable_switch()">Disable
-    </td>
-  </tr>
-  <tr> 
-    <td class="head" id="webcamResolution">Resolution</td>
-    <td>
-      <select name="resolution">
-        <option value="160x120">160x120
-        <option value="320x240">320x240
-        <option value="640x480" selected>640x480
-      </select>
-    </td>
-  </tr>
+<table class="body">
   <tr>
-    <td class="head" id="webcamFPS">Frames Per Second</td>
-    <td>
-      <select name="fps">
-        <option value="5">5
-        <option value="10">10
-        <option value="15">15
-        <option value="20">20
-        <option value="25" selected>25
-        <option value="30">30
-      </select>
-    </td>
-  </tr>
-  <tr>
-    <td class="head" id="webcamPort">Port</td>
-    <td>
-      <input type="text" name="port" size="5" maxlength="5" value="8080">
-    </td>
+    <td><h1 id="webcamTitle">Web Camera Settings </h1>
+      <p id="webcamIntroduction"></p>
+      <hr />
+      <form method=post name=webcam action="/goform/webcamra">
+        <table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+          <tr>
+            <td class="title" colspan="2" id="webcamSettings">Web Camera Setup</td>
+          </tr>
+          <tr>
+            <td class="head" id="webcamCapability">Capability</td>
+            <td><input type="radio" name="enabled" value="1" id="webcamEnable" onClick="webcam_enable_switch()">
+              Enable
+              <input type="radio" name="enabled" value="0" id="webcamDisable" onClick="webcam_enable_switch()">
+              Disable </td>
+          </tr>
+          <tr>
+            <td class="head" id="webcamResolution">Resolution</td>
+            <td><select name="resolution">
+                <option value="160x120">160x120</option>
+                <option value="320x240">320x240</option>
+                <option value="640x480" selected>640x480</option>
+              </select></td>
+          </tr>
+          <tr>
+            <td class="head" id="webcamFPS">Frames Per Second</td>
+            <td><select name="fps">
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="15">15</option>
+                <option value="20">20</option>
+                <option value="25" selected>25</option>
+                <option value="30">30</option>
+              </select></td>
+          </tr>
+          <tr>
+            <td class="head" id="webcamPort">Port</td>
+            <td><input type="text" name="port" size="5" maxlength="5" value="8080"></td>
+          </tr>
+        </table>
+        <hr />
+        <br />
+        <table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
+          <tr align="center">
+            <td><input type=button style="{width:120px;}" value="Apply" id="webcamApply" onClick="submit_apply('apply')">
+              &nbsp; &nbsp;
+              <input type=button style="{width:120px;}" value="Cancel" id="webcamCancel" onClick="window.location.reload()"></td>
+          </tr>
+        </table>
+      </form></td>
   </tr>
 </table>
-<hr />
-<br />
-<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
-  <tr align="center">
-    <td>
-      <input type=button style="{width:120px;}" value="Apply" id="webcamApply" onClick="submit_apply('apply')"> &nbsp; &nbsp;
-      <input type=button style="{width:120px;}" value="Cancel" id="webcamCancel" onClick="window.location.reload()">
-    </td>
-  </tr>
-</table>
-</form>
 </body>
 </html>
-

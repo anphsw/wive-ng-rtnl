@@ -1,13 +1,12 @@
+<!DOCTYPE html>
 <html>
 <head>
 <title>Operation Mode</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0">
 <meta http-equiv="Pragma" content="no-cache">
-
 <link rel="stylesheet" href="style/normal_ws.css" type="text/css">
 <link rel="stylesheet" href="style/windows.css" type="text/css">
-
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script type="text/javascript" src="/js/controls.js"></script>
 <script type="text/javascript" src="/js/ajax.js"></script>
@@ -111,49 +110,47 @@ function msg()
 </head>
 
 <body onLoad="initValue()">
-<table class="body"><tr><td>
-
-<h1 id="oTitle"></h1>
-<p id="oIntroduction"></p>
-<hr>
-<p>Current Firmware Version: <% getSdkVersion(); %></p>
-<p>Select device operation mode:</p>
-
-<form method="POST" name="opmode" action="/goform/setOpMode">
-<dl>
-	<dt>
-		<input type="radio" name="opMode" id="opMode" value="0" onClick="changeMode()"><b id="oModeB">Bridge:</b>
-	</dt>
-	<dd id="oModeBIntro"></dd>
-	<dt id="gwdt">
-		<input type="radio" name="opMode" id="opMode" value="1" onClick="changeMode()"><b id="oModeG">Gateway:</b>
-	</dt>
-	<dd id="oModeGIntro"></dd>
-	<dt id="stadt">
-		<input type="radio" name="opMode" id="opMode" value="2" onClick="changeMode()"><b id="oModeE">Ethernet Converter:</b>
-	</dt>
-	<dd id="stadd"></dd>
-	<dt id="apclidt">
-		<input type="radio" name="opMode" id="opMode" value="3" onClick="changeMode()"><b id="oModeA">AP Client:</b>
-	</dt>
-	<dd id="apclidd"></dd>
-	<dt id="spotdt">
-		<input type="radio" name="opMode" id="opMode" value="4" onClick="changeMode()"><b id="oModeS">Hotspot:</b>
-	</dt>
-	<dd id="spotdd"></dd>
-</dl>
+<table class="body">
+  <tr>
+    <td><h1 id="oTitle"></h1>
+      <p id="oIntroduction"></p>
+      <hr>
+      <p>Current Firmware Version:
+        <% getSdkVersion(); %>
+      </p>
+      <p>Select device operation mode:</p>
+      <form method="POST" name="opmode" action="/goform/setOpMode">
+        <dl>
+          <dt>
+            <input type="radio" name="opMode" id="opMode" value="0" onClick="changeMode()">
+            <b id="oModeB">Bridge:</b> </dt>
+          <dd id="oModeBIntro"></dd>
+          <dt id="gwdt">
+            <input type="radio" name="opMode" id="opMode" value="1" onClick="changeMode()">
+            <b id="oModeG">Gateway:</b> </dt>
+          <dd id="oModeGIntro"></dd>
+          <dt id="stadt">
+            <input type="radio" name="opMode" id="opMode" value="2" onClick="changeMode()">
+            <b id="oModeE">Ethernet Converter:</b> </dt>
+          <dd id="stadd"></dd>
+          <dt id="apclidt">
+            <input type="radio" name="opMode" id="opMode" value="3" onClick="changeMode()">
+            <b id="oModeA">AP Client:</b> </dt>
+          <dd id="apclidd"></dd>
+          <dt id="spotdt">
+            <input type="radio" name="opMode" id="opMode" value="4" onClick="changeMode()">
+            <b id="oModeS">Hotspot:</b> </dt>
+          <dd id="spotdd"></dd>
+        </dl>
+        <p></p>
+        <center>
+          <input type="button" style="{width:120px;}" value="Apply" id="oApply" onClick="msg(); ajaxPostForm('Changing operation mode needs to reboot you router. Do you want to proceed?', this.form, 'setmodeReloader', '/messages/rebooting.asp', ajaxShowProgress);">
+          &nbsp;&nbsp;
+          <input type="reset" style="{width:120px;}" value="Reset" id="oCancel" onClick="window.location.reload()">
+          <iframe id="setmodeReloader" name="setmodeReloader" src="" style="width:0;height:0;border:0px solid #fff;"></iframe>
+        </center>
+      </form></td>
+  </tr>
 </table>
-
-<p></p>
-
-<center>
-	<input type="button" style="{width:120px;}" value="Apply" id="oApply" onClick="msg(); ajaxPostForm('Changing operation mode needs to reboot you router. Do you want to proceed?', this.form, 'setmodeReloader', '/messages/rebooting.asp', ajaxShowProgress);">
-	&nbsp;&nbsp;
-	<input type="reset" style="{width:120px;}" value="Reset" id="oCancel" onClick="window.location.reload()">
-	<iframe id="setmodeReloader" name="setmodeReloader" src="" style="width:0;height:0;border:0px solid #fff;"></iframe>
-</center>
-</form>
-
-</td></tr></table>
 </body>
 </html>

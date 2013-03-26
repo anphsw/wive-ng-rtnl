@@ -1,13 +1,11 @@
+<!DOCTYPE html>
 <html>
 <head>
-
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0">
 <meta http-equiv="Pragma" content="no-cache">
-
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
-
 <title>Edit User Account</title>
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("storage");
@@ -159,76 +157,71 @@ function submit_apply()
 </head>
 
 <body onLoad="initValue()" onUnload="edituserClose()">
-<table class="body"><tr><td>
-
-<form method=post name="storage_edituser" action="/goform/StorageEditUser">
-<input type=hidden name=hiddenIndex value="">
-<table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+<table class="body">
   <tr>
-    <td class="head" id="edituserName">User Name</td>
-    </td>
-    <td>
-    <script language="JavaScript" type="text/javascript">
-      document.write(user);
-    </script>
-    </td>
-  </tr>
-  <tr>
-    <td class="head" id="edituserPW">Password</td>
-    <td><input type="password" name="edituser_pw" size="16" maxlength="16" value=""></td>
-  </tr>
-  <tr>
-    <td class="head" id="edituserMulLogins">Multiple Logins</td>
-    <td>
-      <input type=radio name=edituser_mullogins value="1" onClick="mullogins_enable_switch()"><font id="edituserMulLoginsEnable">Enable</font>&nbsp;
-      <input type=radio name=edituser_mullogins value="0" onClick="mullogins_enable_switch()"><font id="edituserMulLoginsDisable">Disable</font>
-    </td>
-  </tr>
-  <tr>
-    <td class="head" id="edituserMaxLogins">Max. Logins</td>
-    <td>
-      <input type=text name=edituser_maxlogins size=1 maxlength=1 value="3">
-    </td>
-  </tr>
-  <tr> 
-    <td class="head" id="edituserDL">Download Capabled</td>
-    <td>
-      <input type=radio name=edituser_download value="1"><font id="edituserDLEnable">Enable</font>&nbsp;
-      <input type=radio name=edituser_download value="0"><font id="edituserDLDisable">Disable</font>
-    </td>
-  </tr>
-  <tr> 
-    <td class="head" id="edituserUL">Upload Capabled</td>
-    <td>
-      <input type=radio name=edituser_upload value="1"><font id="edituserULEnable">Enable</font>&nbsp;
-      <input type=radio name=edituser_upload value="0"><font id="edituserULDisable">Disable</font>
-    </td>
-  </tr>
-  <tr> 
-    <td class="head" id="edituserOW">Overwrite Capabled</td>
-    <td>
-      <input type=radio name=edituser_overwrite value="1"><font id="edituserOWEnable">Enable</font>&nbsp;
-      <input type=radio name=edituser_overwrite value="0"><font id="edituserOWDisable">Disable</font>
-    </td>
-  </tr>
-  <tr> 
-    <td class="head" id="edituserER">Erase Capabled</td>
-    <td>
-      <input type=radio name=edituser_erase value="1"><font id="edituserEREnable">Enable</font>&nbsp;
-      <input type=radio name=edituser_erase value="0"><font id="edituserERDisable">Disable</font>
-    </td>
+    <td><form method=post name="storage_edituser" action="/goform/StorageEditUser">
+        <input type=hidden name=hiddenIndex value="">
+        <table width="90%" border="1" cellspacing="1" cellpadding="3" vspace="2" hspace="2" bordercolor="#9BABBD">
+          <tr>
+            <td class="head" id="edituserName">User Name</td>
+            <td><script language="JavaScript" type="text/javascript">
+				  document.write(user);
+				</script></td>
+          </tr>
+          <tr>
+            <td class="head" id="edituserPW">Password</td>
+            <td><input type="password" name="edituser_pw" size="16" maxlength="16" value=""></td>
+          </tr>
+          <tr>
+            <td class="head" id="edituserMulLogins">Multiple Logins</td>
+            <td><input type=radio name=edituser_mullogins value="1" onClick="mullogins_enable_switch()">
+              <font id="edituserMulLoginsEnable">Enable</font>&nbsp;
+              <input type=radio name=edituser_mullogins value="0" onClick="mullogins_enable_switch()">
+              <font id="edituserMulLoginsDisable">Disable</font></td>
+          </tr>
+          <tr>
+            <td class="head" id="edituserMaxLogins">Max. Logins</td>
+            <td><input type=text name=edituser_maxlogins size=1 maxlength=1 value="3"></td>
+          </tr>
+          <tr>
+            <td class="head" id="edituserDL">Download Capabled</td>
+            <td><input type=radio name=edituser_download value="1">
+              <font id="edituserDLEnable">Enable</font>&nbsp;
+              <input type=radio name=edituser_download value="0">
+              <font id="edituserDLDisable">Disable</font></td>
+          </tr>
+          <tr>
+            <td class="head" id="edituserUL">Upload Capabled</td>
+            <td><input type=radio name=edituser_upload value="1">
+              <font id="edituserULEnable">Enable</font>&nbsp;
+              <input type=radio name=edituser_upload value="0">
+              <font id="edituserULDisable">Disable</font></td>
+          </tr>
+          <tr>
+            <td class="head" id="edituserOW">Overwrite Capabled</td>
+            <td><input type=radio name=edituser_overwrite value="1">
+              <font id="edituserOWEnable">Enable</font>&nbsp;
+              <input type=radio name=edituser_overwrite value="0">
+              <font id="edituserOWDisable">Disable</font></td>
+          </tr>
+          <tr>
+            <td class="head" id="edituserER">Erase Capabled</td>
+            <td><input type=radio name=edituser_erase value="1">
+              <font id="edituserEREnable">Enable</font>&nbsp;
+              <input type=radio name=edituser_erase value="0">
+              <font id="edituserERDisable">Disable</font></td>
+          </tr>
+        </table>
+        <br />
+        <table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
+          <tr align="center">
+            <td><input type=button style="{width:120px;}" value="Apply" id="edituserApply" onClick="submit_apply()">
+              &nbsp; &nbsp;
+              <input type=reset  style="{width:120px;}" value="Cancel" id="edituserCancel" onClick="window.close()"></td>
+          </tr>
+        </table>
+      </form></td>
   </tr>
 </table>
-<br />
-
-<table width = "90%" border = "0" cellpadding = "2" cellspacing = "1">
-  <tr align="center">
-    <td>
-      <input type=button style="{width:120px;}" value="Apply" id="edituserApply" onClick="submit_apply()"> &nbsp; &nbsp;
-      <input type=reset  style="{width:120px;}" value="Cancel" id="edituserCancel" onClick="window.close()">
-    </td>
-  </tr>
-</table>
-</form>
 </body>
 </html>

@@ -1,19 +1,15 @@
+<!DOCTYPE html>
 <html>
 <head>
-
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0">
 <meta http-equiv="Pragma" content="no-cache">
-
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <link rel="stylesheet" href="/style/controls.css" type="text/css">
-
 <script type="text/javascript" src="/js/controls.js"></script>
 <script type="text/javascript" src="/js/validation.js"></script>
-
 <title>Transmission Settings</title>
-
 <script language="Javascript" type="text/javascript">
 function initValue(form)
 {
@@ -103,75 +99,74 @@ function submit_apply(parm)
 </head>
 
 <body onLoad="initValue(document.formTrans)">
-<table class="body"><tr><td>
-
-<h1>Transmission settings</h1>
-<p>Here you can configure transmission-daemon service.</p>
-<hr>
-
-<form action="/goform/formTrans" method="POST" name="formTrans">
-<input type=hidden name="hiddenButton" value="">
-<table class="form">
-<tr>
-	<td class="title" colspan="2">Transsmission Settings</td>
-</tr>
-<tr>
-	<td class="head">Enable Transmission</td>
-	<td>
-		<select name="TransEnabled" class="half" onchange="TransEnabledSwitch(this.form);">
-			<option value="0">Disable</option>
-			<option value="1">Enable</option>
-			</select>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 
-		<input type="button" style="{width:80px;}" value="Start" name="transstart" onClick="submit_apply('start')">&nbsp;
-		<input type="button" style="{width:80px;}" value="Stop" name="transstop" onClick="submit_apply('stop')">&nbsp;
-		<input type="button" style="{width:80px;}" value="Reload" name="transreload" onClick="submit_apply('reload')"></td>
-	</td>
-</tr>
-<tr>
-	<td class="head">RPC port</td>
-	<td><input type=text name="transRPCPort" size=5 maxlength=5 value="<% getCfgGeneral(1, "TransRPCPort"); %>" ></td>
-</tr>
-<tr>
-	<td class="head">RPC port access</td>
-	<td><select name="transAccess" class="half">
-			<option value="0">Disable</option>
-			<option value="1">LAN</option>
-			<option value="2">LAN &amp; WAN</option>
-		</select>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-		<input type="button" style="{width:80px;}" onClick="location.href='http://<% getLanIp(); %>:<% getCfgGeneral(1, "TransRPCPort"); %>'" name="WebGUI" value="WebGUI"></td>
-</tr>
-<tr>
-	<td class="head">Authorisation access</td>
-	<td><select name="transAuthor" class="half">
-			<option value="0">Disable</option>
-			<option value="1">Enable</option>
-			</select></td>
-</tr>
-<tr>
-	<td class="head">Login</td>
-	<td><input type=text name="transLog" size=16 maxlength=16 value="<% getCfgGeneral(1, "TransLogin"); %>" ></td>
-</tr>
-<tr>
-	<td class="head">Password</td>
-	<td><input type=password name="transPass" size=16 maxlength=16 value="<% getCfgGeneral(1, "TransPass"); %>" ></td>
-</tr>
-<tr>
-	<td class="head">Incoming peer port</td>
-	<td><input type=text name="transInPort" size=5 maxlength=5 value="<% getCfgGeneral(1, "TransInPort"); %>" ></td>
-</tr>
-</table>
-
-<table class="buttons">
+<table class="body">
   <tr>
-    <td>
-	<input value="/usb/Transmission.asp" name="submit-url" type="hidden">
-      <input type="button" class="normal" value="Apply" id="TransApply" onClick="submit_apply('apply')"> &nbsp; &nbsp;
-      <input type="button"  class="normal" value="Reset" id="TransReset" onClick="window.location.reload()">
-    </td>
+    <td><h1>Transmission settings</h1>
+      <p>Here you can configure transmission-daemon service.</p>
+      <hr>
+      <form action="/goform/formTrans" method="POST" name="formTrans">
+        <input type=hidden name="hiddenButton" value="">
+        <table class="form">
+          <tr>
+            <td class="title" colspan="2">Transsmission Settings</td>
+          </tr>
+          <tr>
+            <td class="head">Enable Transmission</td>
+            <td><select name="TransEnabled" class="half" onChange="TransEnabledSwitch(this.form);">
+                <option value="0">Disable</option>
+                <option value="1">Enable</option>
+              </select>
+              &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+              <input type="button" style="{width:80px;}" value="Start" name="transstart" onClick="submit_apply('start')">
+              &nbsp;
+              <input type="button" style="{width:80px;}" value="Stop" name="transstop" onClick="submit_apply('stop')">
+              &nbsp;
+              <input type="button" style="{width:80px;}" value="Reload" name="transreload" onClick="submit_apply('reload')"></td>
+          </tr>
+          <tr>
+            <td class="head">RPC port</td>
+            <td><input type=text name="transRPCPort" size=5 maxlength=5 value="<% getCfgGeneral(1, "TransRPCPort"); %>" ></td>
+          </tr>
+          <tr>
+            <td class="head">RPC port access</td>
+            <td><select name="transAccess" class="half">
+                <option value="0">Disable</option>
+                <option value="1">LAN</option>
+                <option value="2">LAN &amp; WAN</option>
+              </select>
+              &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+              <input type="button" style="{width:80px;}" onClick="location.href='http://<% getLanIp(); %>:<% getCfgGeneral(1, "TransRPCPort"); %>'" name="WebGUI" value="WebGUI"></td>
+          </tr>
+          <tr>
+            <td class="head">Authorisation access</td>
+            <td><select name="transAuthor" class="half">
+                <option value="0">Disable</option>
+                <option value="1">Enable</option>
+              </select></td>
+          </tr>
+          <tr>
+            <td class="head">Login</td>
+            <td><input type=text name="transLog" size=16 maxlength=16 value="<% getCfgGeneral(1, "TransLogin"); %>" ></td>
+          </tr>
+          <tr>
+            <td class="head">Password</td>
+            <td><input type=password name="transPass" size=16 maxlength=16 value="<% getCfgGeneral(1, "TransPass"); %>" ></td>
+          </tr>
+          <tr>
+            <td class="head">Incoming peer port</td>
+            <td><input type=text name="transInPort" size=5 maxlength=5 value="<% getCfgGeneral(1, "TransInPort"); %>" ></td>
+          </tr>
+        </table>
+        <table class="buttons">
+          <tr>
+            <td><input value="/usb/Transmission.asp" name="submit-url" type="hidden">
+              <input type="button" class="normal" value="Apply" id="TransApply" onClick="submit_apply('apply')">
+              &nbsp; &nbsp;
+              <input type="button"  class="normal" value="Reset" id="TransReset" onClick="window.location.reload()"></td>
+          </tr>
+        </table>
+      </form></td>
   </tr>
-</table>
-</form>
-</tr></td>
 </table>
 </body>
 </html>

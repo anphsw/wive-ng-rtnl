@@ -1,18 +1,15 @@
+<!DOCTYPE html>
 <html>
 <head>
-
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0">
 <meta http-equiv="Pragma" content="no-cache">
-
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <link rel="stylesheet" href="/style/controls.css" type="text/css">
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script type="text/javascript" src="/js/ajax.js"></script>
 <script type="text/javascript" src="/js/controls.js"></script>
-
 <title>Station Profile</title>
-
 <script language="JavaScript" type="text/javascript">
 //Butterlate.setTextDomain("wireless");
 
@@ -917,111 +914,141 @@ function createSurveyProfile()
 </script>
 </head>
 
-
-<body onload="PageInit();">
-<table class="body"><tr><td>
-
-<h1 id="profTitle">Station Profile</h1>
-<p id="profIntroduction">The Status page shows the settings and current operation status of the Station.</p>
-<hr>
-
-<div id="staTabControl" class="tab_control">
-	<div id="profilesTab0" class="tab_sel" onclick="selectTab(0);">Profiles</div>
-	<div id="profilesTab1" class="tab" onclick="selectTab(1);">Site Survey</div>
-</div>
-
-<!-- Profiles -->
-<div id="profilesTabPage0" style="float:left;">
-	<table class="form">
-		<thead>
-			<tr>
-				<td class="title" colspan="8" id="profList">Profile List</td>
-			</tr>
-			<tr>
-				<th style="width: 15px;"><input type="radio" name="staActive" checked>&nbsp;</th>
-				<th>More</th>
-				<th>Profile</th>
-				<th>SSID</th>
-				<th>Channel</th>
-				<th>Authentication</th>
-				<th>Encryption</th>
-				<th>Network Type</th>
-			</tr>
-		</thead>
-		<tbody id="profileListTable">
-		</tbody>
-	</table>
-
-	<form method="POST" name="sta_profile" action="/goform/setStaProfile" onsubmit="return submitForm(this);">
-		<table class="buttons">
-			<tr>
-				<td>
-					<input type="button" value="Add profile" onclick="addProfile();" >
-					<input type="submit" value="Save &amp; Activate Profile" >
-				</td>
-			</tr>
-		</table>
-
-		<input type="hidden" name="staProfile" value="<% getCfgGeneralHTML(1, "staProfile"); %>" > <!-- Profile names -->
-		<input type="hidden" name="staSSID" value="<% getCfgGeneralHTML(1, "staSSID"); %>" > <!-- SSID -->
-		<input type="hidden" name="staNetworkType" value="<% getCfgGeneralHTML(1, "staNetworkType"); %>" > <!-- Network type -->
-		<input type="hidden" name="staPSMode" value="<% getCfgGeneralHTML(1, "staPSMode"); %>" > <!-- PSMode -->
-		<input type="hidden" name="staAdhocMode" value="<% getCfgGeneralHTML(1, "staAdhocMode"); %>" > <!-- AdHoc mode -->
-		<input type="hidden" name="staChannel" value="<% getCfgGeneralHTML(1, "staChannel"); %>" > <!-- Channel -->
-		<input type="hidden" name="staPreamType" value="<% getCfgGeneralHTML(1, "staPreamType"); %>" > <!-- PreamType -->
-		<input type="hidden" name="staRTSCheck" value="<% getCfgGeneralHTML(1, "staRTSCheck"); %>" > <!-- RTS Check -->
-		<input type="hidden" name="staFragmentCheck" value="<% getCfgGeneralHTML(1, "staFragmentCheck"); %>" > <!-- Fragment check -->
-		<input type="hidden" name="staRTS" value="<% getCfgGeneralHTML(1, "staRTS"); %>" > <!-- RTS -->
-		<input type="hidden" name="staFragment" value="<% getCfgGeneralHTML(1, "staFragment"); %>" > <!-- Fragment -->
-		<input type="hidden" name="staAuth" value="<% getCfgGeneralHTML(1, "staAuth"); %>" > <!-- Authentication -->
-		<input type="hidden" name="staEncrypt" value="<% getCfgGeneralHTML(1, "staEncrypt"); %>" > <!-- Encryption -->
-		<input type="hidden" name="staKeyDefaultId" value="<% getCfgGeneralHTML(1, "staKeyDefaultId"); %>" > <!-- Key default ID -->
-		<input type="hidden" name="staKey1Type" value="<% getCfgGeneralHTML(1, "staKey1Type"); %>" > <!-- Key 1 type -->
-		<input type="hidden" name="staKey2Type" value="<% getCfgGeneralHTML(1, "staKey2Type"); %>" > <!-- Key 2 type -->
-		<input type="hidden" name="staKey3Type" value="<% getCfgGeneralHTML(1, "staKey3Type"); %>" > <!-- Key 3 type -->
-		<input type="hidden" name="staKey4Type" value="<% getCfgGeneralHTML(1, "staKey4Type"); %>" > <!-- Key 4 type -->
-		<input type="hidden" name="staKey1Length" value="<% getCfgGeneralHTML(1, "staKey1Length"); %>" > <!-- Key 1 length -->
-		<input type="hidden" name="staKey2Length" value="<% getCfgGeneralHTML(1, "staKey2Length"); %>" > <!-- Key 2 length -->
-		<input type="hidden" name="staKey3Length" value="<% getCfgGeneralHTML(1, "staKey3Length"); %>" > <!-- Key 3 length -->
-		<input type="hidden" name="staKey4Length" value="<% getCfgGeneralHTML(1, "staKey4Length"); %>" > <!-- Key 4 length -->
-		<input type="hidden" name="staKey1" value="<% getCfgGeneralHTML(1, "staKey1"); %>" > <!-- Key 1 -->
-		<input type="hidden" name="staKey2" value="<% getCfgGeneralHTML(1, "staKey2"); %>" > <!-- Key 2 -->
-		<input type="hidden" name="staKey3" value="<% getCfgGeneralHTML(1, "staKey3"); %>" > <!-- Key 3 -->
-		<input type="hidden" name="staKey4" value="<% getCfgGeneralHTML(1, "staKey4"); %>" > <!-- Key 4 -->
-		<input type="hidden" name="staWpaPsk" value="<% getCfgGeneralHTML(1, "staWpaPsk"); %>" > <!-- WPA PSK -->
-		<input type="hidden" name="sta8021xKeyMgmt" value="<% getCfgGeneralHTML(1, "sta8021xKeyMgmt"); %>" > <!-- 802.1 key management -->
-		<input type="hidden" name="sta8021xEAP" value="<% getCfgGeneralHTML(1, "sta8021xEAP"); %>" > <!-- 802.1 EAP -->
-		<input type="hidden" name="sta8021xTunnel" value="<% getCfgGeneralHTML(1, "sta8021xTunnel"); %>" > <!-- 802.1 tunnel -->
-		<input type="hidden" name="sta8021xIdentity" value="<% getCfgGeneralHTML(1, "sta8021xIdentity"); %>" > <!-- 802.1 identity -->
-		<input type="hidden" name="sta8021xPassword" value="<% getCfgGeneralHTML(1, "sta8021xPassword"); %>" > <!-- 802.1 password -->
-		<input type="hidden" name="sta8021xClientCert" value="<% getCfgGeneralHTML(1, "sta8021xClientCert"); %>" > <!-- 802.1 Client cert path -->
-		<input type="hidden" name="sta8021xPrivateKey" value="<% getCfgGeneralHTML(1, "sta8021xPrivateKey"); %>" > <!-- 802.1 Private key -->
-		<input type="hidden" name="sta8021xPrivateKeyPassword" value="<% getCfgGeneralHTML(1, "sta8021xPrivateKeyPassword"); %>" > <!-- 802.1 Private key password -->
-		<input type="hidden" name="sta8021xCACert" value="<% getCfgGeneralHTML(1, "sta8021xCACert"); %>" > <!-- 802.1 CA Cert Path -->
-		<input type="hidden" name="staActive" value="<% getCfgGeneralHTML(1, "staActive"); %>" > <!-- STA active -->
-	</form>
-</div>
-
-<!-- Site survey -->
-<div id="profilesTabPage1" style="float:left; display: none;">
-	<form method="POST" name="sta_site_survey">
-		<div id="ajxCtxStaTable"></div>
-		<div id="ajxCtxStaGraph"></div>
-
-		<table class="buttons">
-		<tr>
-			<td>
-				<input type="button" class="normal" value="Scan" id="scanRescan" onClick="performStaScan();">&nbsp;
-				<input type="button" class="normal" name="addProfileButton" value="Create Profile" id="scanAddProfile" onClick="createSurveyProfile();">
-			</td>
-		</tr>
-		</table>
-	</form>
-</div>
-
-<div class="whitespace">&nbsp;</div>
-
-</td></tr></table>
+<body onLoad="PageInit();">
+<table class="body">
+  <tr>
+    <td><h1 id="profTitle">Station Profile</h1>
+      <p id="profIntroduction">The Status page shows the settings and current operation status of the Station.</p>
+      <hr>
+      <div id="staTabControl" class="tab_control">
+        <div id="profilesTab0" class="tab_sel" onClick="selectTab(0);">Profiles</div>
+        <div id="profilesTab1" class="tab" onClick="selectTab(1);">Site Survey</div>
+      </div>
+      
+      <!-- Profiles -->
+      
+      <div id="profilesTabPage0" style="float:left;">
+        <table class="form">
+          <thead>
+            <tr>
+              <td class="title" colspan="8" id="profList">Profile List</td>
+            </tr>
+            <tr>
+              <th style="width: 15px;"><input type="radio" name="staActive" checked>
+                &nbsp;</th>
+              <th>More</th>
+              <th>Profile</th>
+              <th>SSID</th>
+              <th>Channel</th>
+              <th>Authentication</th>
+              <th>Encryption</th>
+              <th>Network Type</th>
+            </tr>
+          </thead>
+          <tbody id="profileListTable">
+          </tbody>
+        </table>
+        <form method="POST" name="sta_profile" action="/goform/setStaProfile" onSubmit="return submitForm(this);">
+          <table class="buttons">
+            <tr>
+              <td><input type="button" value="Add profile" onClick="addProfile();" >
+                <input type="submit" value="Save &amp; Activate Profile" ></td>
+            </tr>
+          </table>
+          <input type="hidden" name="staProfile" value="<% getCfgGeneralHTML(1, "staProfile"); %>" >
+          <!-- Profile names -->
+          <input type="hidden" name="staSSID" value="<% getCfgGeneralHTML(1, "staSSID"); %>" >
+          <!-- SSID -->
+          <input type="hidden" name="staNetworkType" value="<% getCfgGeneralHTML(1, "staNetworkType"); %>" >
+          <!-- Network type -->
+          <input type="hidden" name="staPSMode" value="<% getCfgGeneralHTML(1, "staPSMode"); %>" >
+          <!-- PSMode -->
+          <input type="hidden" name="staAdhocMode" value="<% getCfgGeneralHTML(1, "staAdhocMode"); %>" >
+          <!-- AdHoc mode -->
+          <input type="hidden" name="staChannel" value="<% getCfgGeneralHTML(1, "staChannel"); %>" >
+          <!-- Channel -->
+          <input type="hidden" name="staPreamType" value="<% getCfgGeneralHTML(1, "staPreamType"); %>" >
+          <!-- PreamType -->
+          <input type="hidden" name="staRTSCheck" value="<% getCfgGeneralHTML(1, "staRTSCheck"); %>" >
+          <!-- RTS Check -->
+          <input type="hidden" name="staFragmentCheck" value="<% getCfgGeneralHTML(1, "staFragmentCheck"); %>" >
+          <!-- Fragment check -->
+          <input type="hidden" name="staRTS" value="<% getCfgGeneralHTML(1, "staRTS"); %>" >
+          <!-- RTS -->
+          <input type="hidden" name="staFragment" value="<% getCfgGeneralHTML(1, "staFragment"); %>" >
+          <!-- Fragment -->
+          <input type="hidden" name="staAuth" value="<% getCfgGeneralHTML(1, "staAuth"); %>" >
+          <!-- Authentication -->
+          <input type="hidden" name="staEncrypt" value="<% getCfgGeneralHTML(1, "staEncrypt"); %>" >
+          <!-- Encryption -->
+          <input type="hidden" name="staKeyDefaultId" value="<% getCfgGeneralHTML(1, "staKeyDefaultId"); %>" >
+          <!-- Key default ID -->
+          <input type="hidden" name="staKey1Type" value="<% getCfgGeneralHTML(1, "staKey1Type"); %>" >
+          <!-- Key 1 type -->
+          <input type="hidden" name="staKey2Type" value="<% getCfgGeneralHTML(1, "staKey2Type"); %>" >
+          <!-- Key 2 type -->
+          <input type="hidden" name="staKey3Type" value="<% getCfgGeneralHTML(1, "staKey3Type"); %>" >
+          <!-- Key 3 type -->
+          <input type="hidden" name="staKey4Type" value="<% getCfgGeneralHTML(1, "staKey4Type"); %>" >
+          <!-- Key 4 type -->
+          <input type="hidden" name="staKey1Length" value="<% getCfgGeneralHTML(1, "staKey1Length"); %>" >
+          <!-- Key 1 length -->
+          <input type="hidden" name="staKey2Length" value="<% getCfgGeneralHTML(1, "staKey2Length"); %>" >
+          <!-- Key 2 length -->
+          <input type="hidden" name="staKey3Length" value="<% getCfgGeneralHTML(1, "staKey3Length"); %>" >
+          <!-- Key 3 length -->
+          <input type="hidden" name="staKey4Length" value="<% getCfgGeneralHTML(1, "staKey4Length"); %>" >
+          <!-- Key 4 length -->
+          <input type="hidden" name="staKey1" value="<% getCfgGeneralHTML(1, "staKey1"); %>" >
+          <!-- Key 1 -->
+          <input type="hidden" name="staKey2" value="<% getCfgGeneralHTML(1, "staKey2"); %>" >
+          <!-- Key 2 -->
+          <input type="hidden" name="staKey3" value="<% getCfgGeneralHTML(1, "staKey3"); %>" >
+          <!-- Key 3 -->
+          <input type="hidden" name="staKey4" value="<% getCfgGeneralHTML(1, "staKey4"); %>" >
+          <!-- Key 4 -->
+          <input type="hidden" name="staWpaPsk" value="<% getCfgGeneralHTML(1, "staWpaPsk"); %>" >
+          <!-- WPA PSK -->
+          <input type="hidden" name="sta8021xKeyMgmt" value="<% getCfgGeneralHTML(1, "sta8021xKeyMgmt"); %>" >
+          <!-- 802.1 key management -->
+          <input type="hidden" name="sta8021xEAP" value="<% getCfgGeneralHTML(1, "sta8021xEAP"); %>" >
+          <!-- 802.1 EAP -->
+          <input type="hidden" name="sta8021xTunnel" value="<% getCfgGeneralHTML(1, "sta8021xTunnel"); %>" >
+          <!-- 802.1 tunnel -->
+          <input type="hidden" name="sta8021xIdentity" value="<% getCfgGeneralHTML(1, "sta8021xIdentity"); %>" >
+          <!-- 802.1 identity -->
+          <input type="hidden" name="sta8021xPassword" value="<% getCfgGeneralHTML(1, "sta8021xPassword"); %>" >
+          <!-- 802.1 password -->
+          <input type="hidden" name="sta8021xClientCert" value="<% getCfgGeneralHTML(1, "sta8021xClientCert"); %>" >
+          <!-- 802.1 Client cert path -->
+          <input type="hidden" name="sta8021xPrivateKey" value="<% getCfgGeneralHTML(1, "sta8021xPrivateKey"); %>" >
+          <!-- 802.1 Private key -->
+          <input type="hidden" name="sta8021xPrivateKeyPassword" value="<% getCfgGeneralHTML(1, "sta8021xPrivateKeyPassword"); %>" >
+          <!-- 802.1 Private key password -->
+          <input type="hidden" name="sta8021xCACert" value="<% getCfgGeneralHTML(1, "sta8021xCACert"); %>" >
+          <!-- 802.1 CA Cert Path -->
+          <input type="hidden" name="staActive" value="<% getCfgGeneralHTML(1, "staActive"); %>" >
+          <!-- STA active -->
+        </form>
+      </div>
+      
+      <!-- Site survey -->
+      
+      <div id="profilesTabPage1" style="float:left; display: none;">
+        <form method="POST" name="sta_site_survey">
+          <div id="ajxCtxStaTable"></div>
+          <div id="ajxCtxStaGraph"></div>
+          <table class="buttons">
+            <tr>
+              <td><input type="button" class="normal" value="Scan" id="scanRescan" onClick="performStaScan();">
+                &nbsp;
+                <input type="button" class="normal" name="addProfileButton" value="Create Profile" id="scanAddProfile" onClick="createSurveyProfile();"></td>
+            </tr>
+          </table>
+        </form>
+      </div>
+      <div class="whitespace">&nbsp;</div></td>
+  </tr>
+</table>
 </body>
 </html>
-

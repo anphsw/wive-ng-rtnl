@@ -1,16 +1,14 @@
+<!DOCTYPE html>
 <html>
 <head>
 <title>Content Filter Settings</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0">
 <meta http-equiv="Pragma" content="no-cache">
-
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <link rel="stylesheet" href="/style/controls.css" type="text/css">
-
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script type="text/javascript" src="/js/controls.js"></script>
-
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("firewall");
 
@@ -139,52 +137,47 @@ function submitForm(form)
 </head>
 
 <!--     body      -->
-<body onload="initValues();">
-<table class="body"><tr><td>
-<h1 id="ContentFilterTitle">Content Filter Settings </h1>
-
-<% checkIfUnderBridgeModeASP(); %>
-
-<p id="ContentFilterIntrodution">Here you can setup Content Filter to restrict access to unwanted content.</p>
-<hr>
-<form action="/goform/webContentFilterSetup" method="POST" name="websContentFilterSetup" onsubmit="return submitForm(this);">
-
-<!-- New content filtering -->
-<table class="form">
-<tr>
-	<td class="title" colspan="2" id="WebsContentFilter">Web Content Filter Setup</td>
-</tr>
-<tr>
-	<td class="head" id="WebsContentFilterFilter">
-		Filter:
-	</td>
-	<td>
-		<input type="checkbox" name="websFilterProxy" id="websFilter_proxy">&nbsp;Proxy&nbsp;
-		<input type="checkbox" name="websFilterJava" id="websFilter_java">&nbsp;Java&nbsp;
-		<input type="checkbox" name="websFilterActivex" id="websFilter_activex">&nbsp;ActiveX
-	</td>
-</tr>
-<tr>
-	<td class="title" colspan="2" id="WebsContentFilter">Web URL / Host blocking rules</td>
-</tr>
-<tr>
-	<td colspan="2" id="filteringRules"></td>
-</tr>
+<body onLoad="initValues();">
+<table class="body">
+  <tr>
+    <td><h1 id="ContentFilterTitle">Content Filter Settings </h1>
+      <% checkIfUnderBridgeModeASP(); %>
+      <p id="ContentFilterIntrodution">Here you can setup Content Filter to restrict access to unwanted content.</p>
+      <hr>
+      <form action="/goform/webContentFilterSetup" method="POST" name="websContentFilterSetup" onSubmit="return submitForm(this);">
+        
+        <!-- New content filtering -->
+        <table class="form">
+          <tr>
+            <td class="title" colspan="2" id="WebsContentFilter">Web Content Filter Setup</td>
+          </tr>
+          <tr>
+            <td class="head" id="WebsContentFilterFilter"> Filter: </td>
+            <td><input type="checkbox" name="websFilterProxy" id="websFilter_proxy">
+              &nbsp;Proxy&nbsp;
+              <input type="checkbox" name="websFilterJava" id="websFilter_java">
+              &nbsp;Java&nbsp;
+              <input type="checkbox" name="websFilterActivex" id="websFilter_activex">
+              &nbsp;ActiveX </td>
+          </tr>
+          <tr>
+            <td class="title" colspan="2" id="WebsContentFilter">Web URL / Host blocking rules</td>
+          </tr>
+          <tr>
+            <td colspan="2" id="filteringRules"></td>
+          </tr>
+        </table>
+        <table class="buttons">
+          <tr>
+            <td><input type="hidden" name="urlFiltering" />
+              <input type="hidden" name="hostFiltering" />
+              <input type="hidden" name="submit-url" value="/firewall/content_filtering.asp" />
+              <input type="submit" value="Apply"></td>
+          </tr>
+        </table>
+      </form>
+      <div class="whitespace">&nbsp;</div></td>
+  </tr>
 </table>
-
-<table class="buttons">
-<tr><td>
-	<input type="hidden" name="urlFiltering" />
-	<input type="hidden" name="hostFiltering" />
-	<input type="hidden" name="submit-url" value="/firewall/content_filtering.asp" />
-	<input type="submit" value="Apply">
-</td></tr>
-</table>
-
-</form>
-
-<div class="whitespace">&nbsp;</div>
-
-</td></tr></table>
 </body>
 </html>

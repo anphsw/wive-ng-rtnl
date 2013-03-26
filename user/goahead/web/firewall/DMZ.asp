@@ -1,13 +1,12 @@
+<!DOCTYPE html>
 <html>
 <head>
 <title>MAC Filtering Settings</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0">
 <meta http-equiv="Pragma" content="no-cache">
-
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <link rel="stylesheet" href="/style/controls.css" type="text/css">
-
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script type="text/javascript" src="/js/controls.js"></script>
 <script language="JavaScript" type="text/javascript">
@@ -169,63 +168,49 @@ function dmzLoopbackWarning(element)
 </script>
 </head>
 
-
 <!--     body      -->
-<body onload="pageInit()">
-<table class="body"><tr><td>
-<h1 id="dmzTitle"> DMZ Settings </h1>
-<% checkIfUnderBridgeModeASP(); %>
-<p id="dmzIntroduction"> Here you can setup the De-Militarized Zone (DMZ) to separate your external services from the rest of LAN.</p>
-<hr>
-
-<form method="POST" name="DMZ" action="/goform/DMZ">
-<table class="form">
-<tr>
-	<td class="title" colspan="2" id="dmzSetting">DMZ Settings</td>
-</tr>
-<tr>
-	<td class="head" id="dmzSet">
-		DMZ Settings
-	</td>
-	<td>
-	<select onChange="dmzEnableSwitch(this.form);" name="DMZEnabled" class="mid">
-		<option value="0" <% getDMZEnableASP(0); %> id="dmzDisable">Disable</option>
-		<option value="1" <% getDMZEnableASP(1); %> id="dmzEnable">Enable</option>
-	</select>
-	</td>
-</tr>
-<tr>
-	<td class="head" id="dmzIPAddr">
-		DMZ IP Address
-	</td>
-	<td>
-		<input type="text" class="mid" name="DMZIPAddress" value=<% showDMZIPAddressASP(); %> >
-	</td>
-</tr>
-<tr id="dmzLoopback">
-<td class="head" id="ldmzLoopback">DMZ NAT loopback</td>
-<td>
-	<select name="dmzLoopback" class="mid" onchange="dmzLoopbackWarning(this);">
-		<option value="0">Disable</option>
-		<option value="1">Enable</option>
-	</select>
-</td>
-</tr>
-
+<body onLoad="pageInit()">
+<table class="body">
+  <tr>
+    <td><h1 id="dmzTitle"> DMZ Settings </h1>
+      <% checkIfUnderBridgeModeASP(); %>
+      <p id="dmzIntroduction"> Here you can setup the De-Militarized Zone (DMZ) to separate your external services from the rest of LAN.</p>
+      <hr>
+      <form method="POST" name="DMZ" action="/goform/DMZ">
+        <table class="form">
+          <tr>
+            <td class="title" colspan="2" id="dmzSetting">DMZ Settings</td>
+          </tr>
+          <tr>
+            <td class="head" id="dmzSet"> DMZ Settings </td>
+            <td><select onChange="dmzEnableSwitch(this.form);" name="DMZEnabled" class="mid">
+                <option value="0" <% getDMZEnableASP(0); %> id="dmzDisable">Disable</option>
+                <option value="1" <% getDMZEnableASP(1); %> id="dmzEnable">Enable</option>
+              </select></td>
+          </tr>
+          <tr>
+            <td class="head" id="dmzIPAddr"> DMZ IP Address </td>
+            <td><input type="text" class="mid" name="DMZIPAddress" value='<% showDMZIPAddressASP(); %>' ></td>
+          </tr>
+          <tr id="dmzLoopback">
+            <td class="head" id="ldmzLoopback">DMZ NAT loopback</td>
+            <td><select name="dmzLoopback" class="mid" onChange="dmzLoopbackWarning(this);">
+                <option value="0">Disable</option>
+                <option value="1">Enable</option>
+              </select></td>
+          </tr>
+        </table>
+        <table class="buttons">
+          <tr>
+            <td><input type="submit" class="normal" value="Apply" id="dmzApply" name="addDMZ" onClick="return formCheck()">
+              &nbsp;&nbsp;
+              <input type="reset" class="normal" value="Reset" id="dmzReset" name="reset">
+              <input type="hidden" name="submit-url" value="/firewall/DMZ.asp" ></td>
+          </tr>
+        </table>
+      </form>
+      <div class="whitespace">&nbsp;</div></td>
+  </tr>
 </table>
-
-<table class="buttons">
-<tr><td>
-	<input type="submit" class="normal" value="Apply" id="dmzApply" name="addDMZ" onClick="return formCheck()"> &nbsp;&nbsp;
-	<input type="reset" class="normal" value="Reset" id="dmzReset" name="reset">
-	<input type="hidden" name="submit-url" value="/firewall/DMZ.asp" >
-</td></tr>
-</table>
-
-</form>
-
-<div class="whitespace">&nbsp;</div>
-
-</td></tr></table>
 </body>
 </html>
