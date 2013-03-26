@@ -48,7 +48,7 @@ CONFIG_CONFIG	= $(ROOTDIR)/config/.config
 STRIPOPT	= -R .comment -R .note -g --strip-unneeded
 
 #NUM MAKE PROCESS = CPU NUMBER IN THE SYSTEM * CPU_OVERLOAD
-CPU_OVERLOAD	= 1
+CPU_OVERLOAD	= 2
 HOST_NCPU	= $(shell if [ -f /proc/cpuinfo ]; then n=`grep -c processor /proc/cpuinfo`; if [ $$n -gt 1 ];then expr $$n \* ${CPU_OVERLOAD}; else echo $$n; fi; else echo 1; fi)
 
 BUILD_START_STRING ?= $(shell date "+%a, %d %b %Y %T %z")
