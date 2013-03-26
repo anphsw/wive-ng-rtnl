@@ -1793,9 +1793,6 @@ static inline bool skb_is_recycleable(struct sk_buff *skb, int skb_size)
 	if (irqs_disabled())
 		return false;
 
-	if (skb_shinfo(skb)->tx_flags & SKBTX_DEV_ZEROCOPY)
-		return false;
-
 	if (skb_is_nonlinear(skb) || skb->fclone != SKB_FCLONE_UNAVAILABLE)
 		return false;
 
