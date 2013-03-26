@@ -19,27 +19,11 @@ fi
 LOG="logger -t radvd"
 
 calculate_and_set_mtu() {
-    if [ "$vpnEnabled" = "on" ] && [ "$vpnType" != "6" ]; then
-	if [ "$vpnType" = "0" ]; then
-	    # PPPOE
-	    overhead_sit="28"
-	elif [ "$vpnType" = "1" ]; then
-	    # PPTP
-	    overhead_sit="54"
-	elif [ "$vpnType" = "2" ]; then
-	    # L2TP
-	    overhead_sit="60"
-	fi
-    else
-	overhead_sit="20"
-    fi
-    let "overhead_all=$overhead_sit + 40"
-
     # get mtu from wan
     wanmtu=`ip link show $real_wan_if | grep mtu | awk {' print $5 '}`
     # calculate mtu
-    let "sitmtu=$wanmtu - $overhead_sit"
-    let "ipvmtu=$wanmtu - $overhead_all"
+    let "sitmtu=$wanmtu - 20"
+    let "ipvmtu=$sitmtu - 40"
 
     # set mtu for lan
     sysctl -wq  net.ipv6.conf."$lan_if".mtu="$ipvmtu"
