@@ -1434,9 +1434,10 @@
 26) init.d: transmission: auto make home dir and check disc mount before start.<br>
 27) init.d: radvd: fix calculate mtu for sit/ipv6 ifaces (6to4 over ppp issue fix).<br>
 28) init.d: iptables: cleanup iptables rules. Remove drop target(allready dropped by default).<br>
-29) defaults: set HT_MIMOPSMode=3 - need for multiple TX/RX streams compat.<br>
-30) configs: 4Mb devices: disable lld2d/snmpd/cdp free flash for more opimized kenrel modules.<br>
-31) configs: now kernel modules for 8Mb and 4Mb devices use one full optimization flags at build(speedup 4Mb devices).<br>
+29) init.d: rework servies restart logic.<br>
+30) defaults: set HT_MIMOPSMode=3 - need for multiple TX/RX streams compat.<br>
+31) configs: 4Mb devices: disable lld2d/snmpd/cdp free flash for more opimized kenrel modules.<br>
+32) configs: now kernel modules for 8Mb and 4Mb devices use one full optimization flags at build(speedup 4Mb devices).<br>
 
 <br>
 <br>
