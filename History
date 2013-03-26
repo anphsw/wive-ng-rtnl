@@ -1432,6 +1432,7 @@
 24) init.d: radvd: fix calculate mtu for sit/ipv6 ifaces (6to4 over ppp issue fix).<br>
 25) init.d: iptables: cleanup iptables rules. Remove drop target(allready dropped by default).<br>
 26) defaults: set HT_MIMOPSMode=3 - need for multiple TX/RX streams compat.<br>
+27) kernel: ipv6: MTU discovery check in ip6_fragment().<br>
 
 <br>
 <br>
