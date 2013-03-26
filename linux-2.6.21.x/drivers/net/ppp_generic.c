@@ -1174,9 +1174,9 @@ ppp_send_frame(struct ppp *ppp, struct sk_buff *skb)
 	++ppp->stats.tx_packets;
 	ppp->stats.tx_bytes += skb->len - 2;
 
+#ifdef CONFIG_SLHC
 	switch (proto) {
 	case PPP_IP:
-#ifdef CONFIG_SLHC
 		if (!ppp->vj || (ppp->flags & SC_COMP_TCP) == 0)
 			break;
 		/* try to do VJ TCP header compression */
@@ -1208,14 +1208,17 @@ ppp_send_frame(struct ppp *ppp, struct sk_buff *skb)
 			cp[0] = 0;
 			cp[1] = proto;
 		}
-#endif
 		break;
-
 	case PPP_CCP:
 		/* peek at outbound CCP frames */
 		ppp_ccp_peek(ppp, skb, 0);
 		break;
 	}
+#else
+	if (proto == PPP_CCP)
+		/* peek at outbound CCP frames */
+		ppp_ccp_peek(ppp, skb, 0);
+#endif
 
 	/* try to do packet compression */
 	if ((ppp->xstate & SC_COMP_RUN) && ppp->xc_state &&
@@ -1242,34 +1245,37 @@ ppp_send_frame(struct ppp *ppp, struct sk_buff *skb)
 		return;
 	}
 
+	if (proto != PPP_LCP && proto != PPP_CCP) {
 #ifdef CONFIG_PPP_PREVENT_DROP_SESSION_ON_FULL_CPU_LOAD
-	/* this is simple cpu based policer need for prevent drop session at high cpu load */
-	if (ppp_cpu_load >= 2500 && proto != PPP_LCP && proto != PPP_CCP) {
+	    /* this is simple cpu based policer need for prevent drop session at high cpu load */
+	    if (ppp_cpu_load >= 2500) {
+		    /* skip all data in current time period */
+		    if (time_after(jiffies, prev_jiffies + (HZ>>1))) {
+			/* get cpu load */
+			load = weighted_cpuload(0);
+			/* store current jiffies */
+			prev_jiffies = jiffies;
+		    }
+		    /* drop if load high in current interval */
+		    if (load > ppp_cpu_load) {
+#ifdef DEBUG
+			if ((ppp->debug & 1) && net_ratelimit())
+			    printk(KERN_DEBUG "PPP: HIGH CPU LOAD %ld DROP PACKET\n", load);
 
-		/* skip all data in current time period */
-		if (time_after(jiffies, prev_jiffies + (HZ>>1))) {
-		    /* get cpu load */
-		    load = weighted_cpuload(0);
-		    /* store current jiffies */
-		    prev_jiffies = jiffies;
-		}
-
-		/* drop if load high in current interval */
-		if (load > ppp_cpu_load) {
-		    if ((ppp->debug & 1) && net_ratelimit())
-			printk(KERN_DEBUG "PPP: HIGH CPU LOAD %ld DROP PACKET\n", load);
-
-		goto drop;      /* drop packet ... */
+#endif
+			goto drop;      /* drop packet ... */
+		    }
 	    }
-	}
 #endif
 #ifdef CONFIG_RALINK_GPIO_LED_VPN
-	if ((jiffies - ppp_prev_jiffies) >= (HZ>>2)) {
-	    /* blink led */
-	    ralink_gpio_led_set(ppp_led);
-	    ppp_prev_jiffies = jiffies;
-	}
+	    if ((jiffies - ppp_prev_jiffies) >= (HZ>>2)) {
+		    /* blink led */
+		    ralink_gpio_led_set(ppp_led);
+		    ppp_prev_jiffies = jiffies;
+	    }
 #endif
+	} /* end !lcp/cpp if */
+
 	ppp->xmit_pending = skb;
 	ppp_push(ppp);
 
@@ -1822,13 +1828,6 @@ ppp_receive_nonmp_frame(struct ppp *ppp, struct sk_buff *skb)
 			skb->protocol = htons(npindex_to_ethertype[npi]);
 			skb_reset_mac_header(skb);
 			netif_rx(skb);
-#ifdef CONFIG_RALINK_GPIO_LED_VPN
-			if ((jiffies - ppp_prev_jiffies) >= (HZ>>2)) {
-			    /* blink led */
-			    ralink_gpio_led_set(ppp_led);
-			    ppp_prev_jiffies = jiffies;
-			}
-#endif
 		}
 	}
 	return;
