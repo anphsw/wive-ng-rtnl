@@ -355,9 +355,9 @@ static inline int ethertype_to_npindex(int ethertype)
 		return NP_IP;
 	case ETH_P_IPV6:
 		return NP_IPV6;
+#ifndef CONFIG_PPP_FASTPATH
 	case ETH_P_IPX:
 		return NP_IPX;
-#ifndef CONFIG_PPP_FASTPATH
 	case ETH_P_PPPTALK:
 	case ETH_P_ATALK:
 		return NP_AT;
