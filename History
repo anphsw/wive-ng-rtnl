@@ -1425,14 +1425,15 @@
 17) kernel: skbuff: prevent potential races in some situations.<br>
 18) kernel: skbuff: use skb_reset_network_header in skb_push cases.<br>
 19) kernel: ipv6: MTU discovery check in ip6_fragment().<br>
-20) init.d: radvd: use real_wan_if_ip for support 6to4 over ppp based tunnels.<br>
-21) init.d: iptables: consolidate v4/v6 rules in one script.<br>
-22) init.d: prevent hot replace routes - fix tunnel restart at renew issue (set RouteUpOnce=0 for old mode).<br>
-23) init.d: full config dhcp client logic move to wan script.<br>
-24) init.d: transmission: auto make home dir and check disc mount before start.<br>
-25) init.d: radvd: fix calculate mtu for sit/ipv6 ifaces (6to4 over ppp issue fix).<br>
-26) init.d: iptables: cleanup iptables rules. Remove drop target(allready dropped by default).<br>
-27) defaults: set HT_MIMOPSMode=3 - need for multiple TX/RX streams compat.<br>
+20) kernel: ppp: remove unsupported protocols parse (IPX/APPLETALK/MPLS) decrease cpu usage.<br>
+21) init.d: radvd: use real_wan_if_ip for support 6to4 over ppp based tunnels.<br>
+22) init.d: iptables: consolidate v4/v6 rules in one script.<br>
+23) init.d: prevent hot replace routes - fix tunnel restart at renew issue (set RouteUpOnce=0 for old mode).<br>
+24) init.d: full config dhcp client logic move to wan script.<br>
+25) init.d: transmission: auto make home dir and check disc mount before start.<br>
+26) init.d: radvd: fix calculate mtu for sit/ipv6 ifaces (6to4 over ppp issue fix).<br>
+27) init.d: iptables: cleanup iptables rules. Remove drop target(allready dropped by default).<br>
+28) defaults: set HT_MIMOPSMode=3 - need for multiple TX/RX streams compat.<br>
 
 <br>
 <br>

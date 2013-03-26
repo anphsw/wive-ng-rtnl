@@ -75,11 +75,18 @@ extern int (*ra_sw_nat_hook_rx)(struct sk_buff *skb);
  */
 #define NP_IP	0		/* Internet Protocol V4 */
 #define NP_IPV6	1		/* Internet Protocol V6 */
+#ifndef CONFIG_PPP_FASTPATH
 #define NP_IPX	2		/* IPX protocol */
 #define NP_AT	3		/* Appletalk protocol */
 #define NP_MPLS_UC 4		/* MPLS unicast */
 #define NP_MPLS_MC 5		/* MPLS multicast */
+#endif
+
+#ifndef CONFIG_PPP_FASTPATH
 #define NUM_NP	6		/* Number of NPs. */
+#else
+#define NUM_NP	2		/* Number of NPs. */
+#endif
 
 #ifdef CONFIG_PPP_MULTILINK
 #define MPHDRLEN	6	/* multilink protocol header length */
@@ -314,6 +321,7 @@ static inline int proto_to_npindex(int proto)
 		return NP_IP;
 	case PPP_IPV6:
 		return NP_IPV6;
+#ifndef CONFIG_PPP_FASTPATH
 	case PPP_IPX:
 		return NP_IPX;
 	case PPP_AT:
@@ -322,6 +330,7 @@ static inline int proto_to_npindex(int proto)
 		return NP_MPLS_UC;
 	case PPP_MPLS_MC:
 		return NP_MPLS_MC;
+#endif
 	}
 	return -EINVAL;
 }
@@ -330,10 +339,12 @@ static inline int proto_to_npindex(int proto)
 static const int npindex_to_proto[NUM_NP] = {
 	PPP_IP,
 	PPP_IPV6,
+#ifndef CONFIG_PPP_FASTPATH
 	PPP_IPX,
 	PPP_AT,
 	PPP_MPLS_UC,
 	PPP_MPLS_MC,
+#endif
 };
 
 /* Translates an ethertype into an NP index */
@@ -346,6 +357,7 @@ static inline int ethertype_to_npindex(int ethertype)
 		return NP_IPV6;
 	case ETH_P_IPX:
 		return NP_IPX;
+#ifndef CONFIG_PPP_FASTPATH
 	case ETH_P_PPPTALK:
 	case ETH_P_ATALK:
 		return NP_AT;
@@ -353,6 +365,7 @@ static inline int ethertype_to_npindex(int ethertype)
 		return NP_MPLS_UC;
 	case ETH_P_MPLS_MC:
 		return NP_MPLS_MC;
+#endif
 	}
 	return -1;
 }
@@ -361,10 +374,12 @@ static inline int ethertype_to_npindex(int ethertype)
 static const int npindex_to_ethertype[NUM_NP] = {
 	ETH_P_IP,
 	ETH_P_IPV6,
+#ifndef CONFIG_PPP_FASTPATH
 	ETH_P_IPX,
 	ETH_P_PPPTALK,
 	ETH_P_MPLS_UC,
 	ETH_P_MPLS_MC,
+#endif
 };
 
 /*
