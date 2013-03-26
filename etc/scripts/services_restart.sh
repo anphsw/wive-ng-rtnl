@@ -19,13 +19,14 @@ $LOG "Restart needed services and scripts. Mode $MODE"
 ##########################################################
 # This is services restart always                        #
 ##########################################################
-if [ -f /bin/radvd ] && [ -d /proc/sys/net/ipv6 ]; then
+if [ -f /etc/init.d/radvd ] && [ -d /proc/sys/net/ipv6 ]; then
     service radvd restart
 fi
-if [ -f /bin/zebra ]; then
+if [ -f /etc/init.d/zebra ]; then
     service ripd restart
     service zebra restart
 fi
+
     service dnsserver reload
 
 ##########################################################
