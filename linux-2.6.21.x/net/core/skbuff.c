@@ -307,16 +307,7 @@ static void kfree_skbmem(struct sk_buff *skb)
 
 static void skb_release_head_state(struct sk_buff *skb)
 {
-	/* prevent use after free in buggy drivers */
-	if (unlikely(!skb))
-	    return;
-
 	dst_release(skb->dst);
-
-	/* prevent races if reuse */
-	skb->dst = NULL;
-	skb->vlan_tci = 0;
-
 #ifdef CONFIG_XFRM
 	secpath_put(skb->sp);
 #endif
@@ -337,6 +328,11 @@ static void skb_release_head_state(struct sk_buff *skb)
 #ifdef CONFIG_NET_CLS_ACT
 	skb->tc_verd = 0;
 #endif
+#endif
+/* prevent races reuse if PPE confuses packets */
+	skb->dst = NULL;
+#ifdef CONFIG_VLAN_8021Q
+	skb->vlan_tci = 0;
 #endif
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 	DO_FAST_CLEAR_FOE(skb); // fast clear FoE info header
