@@ -48,28 +48,36 @@ fi
 ##########################################################
 if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then
     service kext start
+    # only misc reply
     if [ "$MODE" = "misc" ]; then
-	# only misc reply
-	service snmpd restart
-	service inetd restart
+	if [ -e /etc/init.d/snmpd ]; then
+	    service snmpd restart
+	fi
+	if [ -e /etc/init.d/inetd ]; then
+	    service inetd restart
+	fi
     else
 	# exclude misc reply
-	if [ -f /bin/pppoe-relay ]; then
+	if [ -e /etc/init.d/pppoe-relay ]; then
 	    service pppoe-relay restart
 	fi
-	if [ -f /bin/chilli ]; then
+	if [ -e /etc/init.d/chilli ]; then
 	    service chillispot restart
 	fi
     fi
-    service parprouted restart
-    service igmp_proxy restart
-    if [ -f /bin/lld2d ]; then
+    if [ -e /etc/init.d/parprouted ]; then
+	service parprouted restart
+    fi
+    if [ -e /etc/init.d/igmp_proxy ]; then
+        service igmp_proxy restart
+    fi
+    if [ -e /etc/init.d/lld2d ]; then
 	service lld2d restart
     fi
-    if [ -f /bin/udpxy ]; then
+    if [ -e /etc/init.d/udpxy ]; then
 	service udpxy restart
     fi
-    if [ -f /bin/transmission-daemon ]; then
+    if [ -e /etc/init.d/transmission-daemon ]; then
 	service transmission restart
     fi
 fi

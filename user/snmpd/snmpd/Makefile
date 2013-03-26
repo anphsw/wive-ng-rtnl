@@ -15,6 +15,8 @@ $(EXEC): $(OBJS) $(USELIBS)
 	$(CC) $(LDFLAGS) -static -o $@ $(OBJS) $(USELIBS) $(LDLIBS)
 
 romfs:
+	$(ROMFSINST) -S init.d/S23snmpd /etc/rc.d/S23snmpd
+	$(ROMFSINST) -s /etc/rc.d/S23snmpd /etc/init.d/snmpd
 	$(ROMFSINST) /bin/$(EXEC)
 
 clean:
