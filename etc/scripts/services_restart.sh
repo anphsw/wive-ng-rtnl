@@ -32,13 +32,13 @@ fi
 # Need restart this servieces only:                    	 #
 # 1) if not VPN enable                               	 #
 # 2) if VPN enable and this scripts called from ip-up	 #
-# 3) if restart mode = all				 #
+# 3) if DHCP full renew					 #
+# 4) if restart mode = all				 #
 ##########################################################
-if [ "$MODE" = "pppd" ] || [ "$MODE" = "all" ] || [ "$vpnEnabled" != "on" ]; then
+if [ "$MODE" = "pppd" ] || [ "$MODE" = "dhcp" ] || [ "$MODE" = "all" ] || [ "$vpnEnabled" != "on" ]; then
     service ddns restart
     service ntp restart
     service miniupnpd restart
-    service xupnpd restart
 fi
 
 ##########################################################
@@ -76,6 +76,9 @@ if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then
     fi
     if [ -e /etc/init.d/udpxy ]; then
 	service udpxy restart
+    fi
+    if [ -e /etc/init.d/xupnpd ]; then
+	service xupnpd restart
     fi
     if [ -e /etc/init.d/transmission-daemon ]; then
 	service transmission restart
