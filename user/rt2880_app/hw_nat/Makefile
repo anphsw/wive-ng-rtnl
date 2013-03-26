@@ -10,22 +10,22 @@ CFLAGS += -I$(ROOTDIR)/$(LINUXDIR)/net/nat/hw_nat
 all: $(EXEC)
 
 hw_nat: $(HWNAT_OBJS) $(CONF_H)
-	$(CC) $(LDFLAGS) -o $@ $(HWNAT_OBJS) 
+	$(CC) $(LDFLAGS) -o $@ $(HWNAT_OBJS)
 
 acl: $(ACL_OBJS)
-	$(CC) $(LDFLAGS) -o $@ $(ACL_OBJS) 
+	$(CC) $(LDFLAGS) -o $@ $(ACL_OBJS)
 
 ac: $(AC_OBJS)
-	$(CC) $(LDFLAGS) -o $@ $(AC_OBJS) 
+	$(CC) $(LDFLAGS) -o $@ $(AC_OBJS)
 
 mtr: $(MTR_OBJS)
-	$(CC) $(LDFLAGS) -o $@ $(MTR_OBJS) 
+	$(CC) $(LDFLAGS) -o $@ $(MTR_OBJS)
 
 romfs:
 	$(ROMFSINST) /bin/hw_nat
-	$(ROMFSINST) /bin/acl
-	$(ROMFSINST) /bin/ac
-	$(ROMFSINST) /bin/mtr
+#	$(ROMFSINST) /bin/acl
+#	$(ROMFSINST) /bin/ac
+#	$(ROMFSINST) /bin/mtr
 
 clean:
 	-rm -f $(EXEC) *.elf *.gdb *.o
