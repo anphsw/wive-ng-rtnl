@@ -33,14 +33,16 @@ start() {
 }
 
 stop() {
-    if [ "`pidof transmission-daemon`" ]; then
-	$LOG "Stop transmission daemon."
-	killall -q transmission-daemon
-	#wait before save files and connections stop
-	sleep 5
-	#kill if not stopped
-	killall -q -SIGKILL transmission-daemon
+    pid=`pidof transmission-daemon`
+    if [ "$pid" = "" ]; then
+	exit 0
     fi
+    $LOG "Stop transmission daemon."
+    killall -q transmission-daemon
+    #wait before save files and connections stop
+    sleep 2
+    #kill if not stopped
+    killall -q -SIGKILL transmission-daemon
 }
 
 get_param() {

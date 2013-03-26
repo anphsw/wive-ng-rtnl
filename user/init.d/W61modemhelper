@@ -199,7 +199,6 @@ case "$1" in
 	    stop
 	    start
 	    ;;
-	
 	*)
 	    echo $"Usage: $0 {start|stop|restart}"
 	    RETURN=1

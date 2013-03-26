@@ -31,7 +31,11 @@ get_param() {
 }
 
 stop() {
-  $LOG "Stopping LLD2D"
+    pid=`pidof lld2d`
+    if [ "$pid" = "" ]; then
+	exit 0
+    fi
+     $LOG "Stopping LLD2D"
     killall -q lld2d
     killall -q -SIGKILL lld2d
     rm -rf /var/run/lld2d-* > /dev/null 2>&1

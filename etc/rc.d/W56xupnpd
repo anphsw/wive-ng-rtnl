@@ -37,9 +37,12 @@ get_param() {
 }
 
 stop() {
-    killall -q xupnpd
-    killall -q -SIGKILL xupnpd
-    rm -f /var/run/xupnpd.pid
+    if [ -f /var/run/xupnpd.pid ]; then
+	$LOG "Stop xupnpd."
+	killall -q xupnpd
+	killall -q -SIGKILL xupnpd
+	rm -f /var/run/xupnpd.pid
+    fi
 }
 
 case "$1" in

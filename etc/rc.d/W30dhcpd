@@ -131,11 +131,13 @@ get_param() {
 }
 
 stop() {
-  $LOG "Stop dhcpserver "
-    killall -q udhcpd
-    killall -q dhcprelay
-    killall -q -SIGKILL udhcpd
-    killall -q -SIGKILL dhcprelay
+    if [ -f /var/run/udhcpd.pid ]; then
+	$LOG "Stop dhcpserver "
+	killall -q udhcpd
+	killall -q dhcprelay
+	killall -q -SIGKILL udhcpd
+	killall -q -SIGKILL dhcprelay
+    fi
 }
 
 case "$1" in

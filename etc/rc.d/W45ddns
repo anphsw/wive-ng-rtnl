@@ -37,7 +37,11 @@ get_param() {
 }
 
 stop() {
-  $LOG "Stopping DynDns"
+    pid=`pidof inadyn`
+    if [ "$pid" = "" ]; then
+	exit 0
+    fi
+    $LOG "Stopping DynDns"
     killall -q inadyn
     killall -q -SIGKILL inadyn
 }

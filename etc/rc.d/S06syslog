@@ -25,12 +25,14 @@ get_param() {
 }
 
 stop() {
- $LOG "Stop syslog and klog"
-    killall -q klogd
-    killall -q -SIGKILL klogd
-    killall -q syslogd
-    killall -q -SIGKILL syslogd
-    rm -f /var/log/messages > /dev/null 2>&1
+    if [ -f /var/run/klogd.pid ] || [ -f /var/run/syslogd.pid ]; then
+	$LOG "Stop syslog and klog"
+	killall -q klogd
+	killall -q -SIGKILL klogd
+	killall -q syslogd
+	killall -q -SIGKILL syslogd
+	rm -f /var/log/messages > /dev/null 2>&1
+    fi
 }
 
 case "$1" in

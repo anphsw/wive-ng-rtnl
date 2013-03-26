@@ -69,23 +69,25 @@ reload() {
 }
 
 stop() {
-  $LOG "Stopping DNSMASQ"
-    pid=`pidof dnsmasq`
-    count=0
-    # try 3 times for correct shutdown
-    while kill "$pid" > /dev/null 2>&1; do
+    if [ -f /var/run/dnsmasq.pid ]; then
+	$LOG "Stopping DNSMASQ"
 	pid=`pidof dnsmasq`
-	count="$(($count+1))"
-	if [ "$count" = "3" ] || [ "$pid" = "" ]; then
-	    break
-	fi
-	usleep 500000
-    done
-    # if not correct terminate need kill
-    if [ "$pid" != "" ]; then
-	kill -SIGKILL "$pid" > /dev/null 2>&1
-	if [ -f /var/run/dnsmasq.pid ]; then
-	    rm -f /var/run/dnsmasq.pid
+	count=0
+	# try 3 times for correct shutdown
+	while kill "$pid" > /dev/null 2>&1; do
+	    pid=`pidof dnsmasq`
+	    count="$(($count+1))"
+	    if [ "$count" = "3" ] || [ "$pid" = "" ]; then
+		break
+	    fi
+	    usleep 500000
+	done
+	# if not correct terminate need kill
+	if [ "$pid" != "" ]; then
+	    kill -SIGKILL "$pid" > /dev/null 2>&1
+	    if [ -f /var/run/dnsmasq.pid ]; then
+		rm -f /var/run/dnsmasq.pid
+	    fi
 	fi
     fi
 }

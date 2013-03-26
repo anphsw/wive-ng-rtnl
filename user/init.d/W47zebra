@@ -27,7 +27,11 @@ start() {
 }
 
 stop() {
-  $LOG "Stopping ZEBRA"
+    pid=`pidof zebra`
+    if [ "$pid" = "" ]; then
+	exit 0
+    fi
+    $LOG "Stopping ZEBRA"
     killall -q zebra
     killall -q -SIGKILL zebra
 }

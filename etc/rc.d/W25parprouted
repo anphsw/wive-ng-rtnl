@@ -29,7 +29,11 @@ start() {
 }
 
 stop() {
- $LOG "Stopping parprouted"
+    pid=`pidof parprouted`
+    if [ "$pid" = "" ]; then
+	exit 0
+    fi
+    $LOG "Stopping parprouted"
     echo 0 > "/proc/sys/net/ipv4/conf/$wan_if/proxy_arp"
     echo 0 > "/proc/sys/net/ipv4/conf/$lan_if/proxy_arp"
     killall -q parprouted

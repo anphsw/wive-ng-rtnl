@@ -27,7 +27,11 @@ start() {
 }
 
 stop() {
- $LOG "Stopping pppoe-relay"
+    pid=`pidof pppoe-relay`
+    if [ "$pid" = "" ]; then
+	exit 0
+    fi
+    $LOG "Stopping pppoe-relay"
     killall -q pppoe-relay
     killall -q -SIGKILL pppoe-relay
 }

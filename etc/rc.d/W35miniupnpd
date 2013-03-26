@@ -60,26 +60,27 @@ get_param() {
 }
 
 stop() {
- $LOG "Stoping UPNP"
-    pid=`pidof miniupnpd`
-    count=0
-    # try 3 times for correct shutdown
-    while kill "$pid" > /dev/null 2>&1; do
-	pid=`pidof miniupnpd`
-	count="$(($count+1))"
-	if [ "$count" = "3" ] || [ "$pid" = "" ]; then
-	    break
+    if [ -f /var/run/miniupnpd.pid ]; then
+	$LOG "Stoping UPNP"
+	count=0
+	# try 3 times for correct shutdown
+	while kill "$pid" > /dev/null 2>&1; do
+	    pid=`pidof miniupnpd`
+	    count="$(($count+1))"
+	    if [ "$count" = "3" ] || [ "$pid" = "" ]; then
+		break
+	    fi
+	    usleep 500000
+	done
+	# if not correct terminate need kill
+	if [ "$pid" != "" ]; then
+	    kill -SIGKILL "$pid" > /dev/null 2>&1
+	    if [ -f /var/run/miniupnpd.pid ]; then
+		rm -f /var/run/miniupnpd.pid
+	    fi
 	fi
-	usleep 500000
-    done
-    # if not correct terminate need kill
-    if [ "$pid" != "" ]; then
-	kill -SIGKILL "$pid" > /dev/null 2>&1
-	if [ -f /var/run/miniupnpd.pid ]; then
-	    rm -f /var/run/miniupnpd.pid
-	fi
+	ip route del "$upmpm_net" dev "$lan_if" > /dev/null 2>&1
     fi
-    ip route del "$upmpm_net" dev "$lan_if" > /dev/null 2>&1
 }
 
 case "$1" in

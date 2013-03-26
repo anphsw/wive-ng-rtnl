@@ -119,21 +119,24 @@ start() {
 }
 
 stop() {
- $LOG  "Stop radvd daemon..."
-    echo "0" > /proc/sys/net/ipv6/conf/all/forwarding
+    if [ -f /var/run/radvd.pid ]; then
+	$LOG  "Stop radvd daemon..."
+	echo "0" > /proc/sys/net/ipv6/conf/all/forwarding
 
-    # rebuild ipv6 rules
-    service iptables stopv6
+	# rebuild ipv6 rules
+	service iptables stopv6
 
-    killall -q radvd
-    killall -q -SIGKILL radvd
-    ip -6 route flush dev tun6to4	> /dev/null 2>&1
-    ip -6 addr flush dev tun6to4	> /dev/null 2>&1
-    ip -6 route flush dev sit0		> /dev/null 2>&1
-    ip -6 addr flush dev sit0		> /dev/null 2>&1
-    ip link set dev tun6to4 down	> /dev/null 2>&1
-    ip link set dev sit0 down		> /dev/null 2>&1
-    ip tunnel del tun6to4		> /dev/null 2>&1
+	killall -q radvd
+	killall -q -SIGKILL radvd
+
+	ip -6 route flush dev tun6to4	> /dev/null 2>&1
+	ip -6 addr flush dev tun6to4	> /dev/null 2>&1
+	ip -6 route flush dev sit0	> /dev/null 2>&1
+	ip -6 addr flush dev sit0	> /dev/null 2>&1
+	ip link set dev tun6to4 down	> /dev/null 2>&1
+	ip link set dev sit0 down	> /dev/null 2>&1
+	ip tunnel del tun6to4		> /dev/null 2>&1
+    fi
 }
 
 case "$1" in

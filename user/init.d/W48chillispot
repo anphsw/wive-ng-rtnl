@@ -29,7 +29,11 @@ start() {
 }
 
 stop() {
-  $LOG "Stopping ChilliSpot"
+    pid=`pidof chilli`
+    if [ "$pid" = "" ]; then
+	exit 0
+    fi
+    $LOG "Stopping ChilliSpot"
     killall -q chilli
     killall -q -SIGKILL chilli
 }
