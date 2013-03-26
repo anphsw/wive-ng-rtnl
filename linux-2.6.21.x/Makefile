@@ -571,7 +571,7 @@ CFLAGS += $(call cc-disable-warning, pointer-sign)
 # disable variable unused warnings in gcc 4.6.0 and later
 CFLAGS += $(call cc-disable-warning, unused-but-set-variable)
 
-ifdef CONFIG_RT2880_FLASH_4M
+ifdef CONFIG_MODULES_OPTIMIZE_FOR_SIZE
 # if flash size is small use optimize for size
 CFLAGS_MODULE = $(MODFLAGS) -Os
 CFLAGS_MODULE += $(call cc-option,-fno-caller-saves)
