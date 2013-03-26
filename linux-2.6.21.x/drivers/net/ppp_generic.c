@@ -734,18 +734,14 @@ static long ppp_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 		break;
 
 	case PPPIOCSMAXCID:
+#ifdef CONFIG_SLHC
 		if (get_user(val, p))
 			break;
-#ifdef CONFIG_SLHC
 		val2 = 15;
-#endif
 		if ((val >> 16) != 0) {
-#ifdef CONFIG_SLHC
 			val2 = val >> 16;
-#endif
 			val &= 0xffff;
 		}
-#ifdef CONFIG_SLHC
 		vj = slhc_init(val2+1, val+1);
 		if (!vj) {
 			printk(KERN_ERR "PPP: no memory (VJ compressor)\n");
@@ -1716,9 +1712,9 @@ ppp_receive_nonmp_frame(struct ppp *ppp, struct sk_buff *skb)
 
 	proto = PPP_PROTO(skb);
 
+#ifdef CONFIG_SLHC
 	switch (proto) {
 	case PPP_VJC_COMP:
-#ifdef CONFIG_SLHC
 		/* decompress VJ compressed packets */
 		if (!ppp->vj || (ppp->flags & SC_REJ_COMP_TCP))
 			goto err;
@@ -1749,11 +1745,9 @@ ppp_receive_nonmp_frame(struct ppp *ppp, struct sk_buff *skb)
 		else if (len < skb->len)
 			skb_trim(skb, len);
 		proto = PPP_IP;
-#endif
 		break;
 
 	case PPP_VJC_UNCOMP:
-#ifdef CONFIG_SLHC
 		if (!ppp->vj || (ppp->flags & SC_REJ_COMP_TCP))
 			goto err;
 
@@ -1767,13 +1761,16 @@ ppp_receive_nonmp_frame(struct ppp *ppp, struct sk_buff *skb)
 			goto err;
 		}
 		proto = PPP_IP;
-#endif
 		break;
 
 	case PPP_CCP:
 		ppp_ccp_peek(ppp, skb, 1);
 		break;
 	}
+#else
+	if (proto == PPP_CCP)
+		ppp_ccp_peek(ppp, skb, 1);
+#endif
 
 	++ppp->stats.rx_packets;
 	ppp->stats.rx_bytes += skb->len - 2;
@@ -1879,11 +1876,9 @@ ppp_decompress_frame(struct ppp *ppp, struct sk_buff *skb)
 			kfree_skb(ns);
 			goto err;
 		}
-
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-		if(ra_sw_nat_hook_rx!= NULL && IS_SPACE_AVAILABLED(skb)) {
+		if(ra_sw_nat_hook_rx!= NULL && IS_SPACE_AVAILABLED(skb))
 			memcpy(FOE_INFO_START_ADDR(ns), FOE_INFO_START_ADDR(skb), FOE_INFO_LEN); // copy FoE Info
-		}
 #endif
 		kfree_skb(skb);
 		skb = ns;
@@ -2590,8 +2585,6 @@ ppp_get_stats(struct ppp *ppp, struct ppp_stats *st)
 	st->vj.vjs_tossed = vj->sls_i_tossed;
 	st->vj.vjs_uncompressedin = vj->sls_i_uncompressed;
 	st->vj.vjs_compressedin = vj->sls_i_compressed;
-#else
-    return;
 #endif
 }
 
