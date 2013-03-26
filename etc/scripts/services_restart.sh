@@ -62,7 +62,7 @@ if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then
 	if [ -e /etc/init.d/pppoe-relay ]; then
 	    service pppoe-relay restart
 	fi
-	if [ -e /etc/init.d/chilli ]; then
+	if [ -e /etc/init.d/chillispot ]; then
 	    service chillispot restart
 	fi
     fi
@@ -81,7 +81,7 @@ if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then
     if [ -e /etc/init.d/xupnpd ]; then
 	service xupnpd restart
     fi
-    if [ -e /etc/init.d/transmission-daemon ]; then
+    if [ -e /etc/init.d/transmission ]; then
 	service transmission restart
     fi
 fi
