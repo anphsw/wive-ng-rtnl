@@ -1424,20 +1424,21 @@
 16) kernel: rework gcc optimizations modes.<br>
 17) kernel: skbuff: prevent potential races in some situations.<br>
 18) kernel: skbuff: use skb_reset_network_header in skb_push cases.<br>
-19) kernel: ipv6: MTU discovery check in ip6_fragment().<br>
-20) kernel: ppp: remove unsupported protocols parse (IPX/APPLETALK/MPLS) decrease cpu usage.<br>
-21) kernel: ppp: small optimization for decrease cpu overhead.<br>
-22) init.d: radvd: use real_wan_if_ip for support 6to4 over ppp based tunnels.<br>
-23) init.d: iptables: consolidate v4/v6 rules in one script.<br>
-24) init.d: prevent hot replace routes - fix tunnel restart at renew issue (set RouteUpOnce=0 for old mode).<br>
-25) init.d: full config dhcp client logic move to wan script.<br>
-26) init.d: transmission: auto make home dir and check disc mount before start.<br>
-27) init.d: radvd: fix calculate mtu for sit/ipv6 ifaces (6to4 over ppp issue fix).<br>
-28) init.d: iptables: cleanup iptables rules. Remove drop target(allready dropped by default).<br>
-29) init.d: rework servies restart logic.<br>
-30) defaults: set HT_MIMOPSMode=3 - need for multiple TX/RX streams compat.<br>
-31) configs: 4Mb devices: disable lld2d/snmpd/cdp free flash for more opimized kenrel modules.<br>
-32) configs: now kernel modules for 8Mb and 4Mb devices use one full optimization flags at build(speedup 4Mb devices).<br>
+19) kernel: skbuff: fix allocation alligment and truesize calc.<br>
+20) kernel: ipv6: MTU discovery check in ip6_fragment().<br>
+21) kernel: ppp: remove unsupported protocols parse (IPX/APPLETALK/MPLS) decrease cpu usage.<br>
+22) kernel: ppp: small optimization for decrease cpu overhead.<br>
+23) init.d: radvd: use real_wan_if_ip for support 6to4 over ppp based tunnels.<br>
+24) init.d: iptables: consolidate v4/v6 rules in one script.<br>
+25) init.d: prevent hot replace routes - fix tunnel restart at renew issue (set RouteUpOnce=0 for old mode).<br>
+26) init.d: full config dhcp client logic move to wan script.<br>
+27) init.d: transmission: auto make home dir and check disc mount before start.<br>
+28) init.d: radvd: fix calculate mtu for sit/ipv6 ifaces (6to4 over ppp issue fix).<br>
+29) init.d: iptables: cleanup iptables rules. Remove drop target(allready dropped by default).<br>
+30) init.d: rework servies restart logic.<br>
+31) defaults: set HT_MIMOPSMode=3 - need for multiple TX/RX streams compat.<br>
+32) configs: 4Mb devices: disable lld2d/snmpd/cdp free flash for more opimized kenrel modules.<br>
+33) configs: now kernel modules for 8Mb and 4Mb devices use one full optimization flags at build(speedup 4Mb devices).<br>
 
 <br>
 <br>
