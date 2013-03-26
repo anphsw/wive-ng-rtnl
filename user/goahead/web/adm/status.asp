@@ -1,19 +1,16 @@
+<!DOCTYPE html>
 <html>
 <head>
 <title>Access Point Status</title>
-
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0">
 <meta http-equiv="Pragma" content="no-cache">
-
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
 <link rel="stylesheet" href="/style/controls.css" type="text/css">
 <link rel="stylesheet" href="/style/windows.css" type="text/css">
-
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script type="text/javascript" src="/js/ajax.js"></script>
 <script type="text/javascript" src="/js/controls.js"></script>
-
 <style type="text/css">
 td.port_status {
 	background-position: center center;
@@ -25,7 +22,6 @@ td.port_status {
 	cursor: default;
 }
 </style>
-
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("admin");
 
@@ -207,105 +203,91 @@ function setWanPort(form)
 </script>
 </head>
 
-<body onload="PageInit();">
-<table class="body"><tr><td>
-<H1 id="statusTitle">Access Point Status</H1>
-<P id="statusIntroduction">Let's take a look at the status. </P>
-<hr>
-
-<div id="sysinfoTable">
-<table class="form">
-</table>
-</div>
-
-<form name="setWanForm" method="POST" action="/goform/setWanPort">
-<table class="form">
-<tr>
-	<td class="title" colspan="2">Port Management</td>
-</tr>
-<tr>
-	<td class="head">WAN port</td>
-	<td>
-		<select name="wan_port" onchange="showPortStatus();" class="short">
-			<option value="0">1</option>
-<!--			<option value="1">2</option>
+<body onLoad="PageInit();">
+<table class="body">
+  <tr>
+    <td><h1 id="statusTitle">Access Point Status</h1>
+      <p id="statusIntroduction">Let's take a look at the status. </p>
+      <hr>
+      <div id="sysinfoTable">
+        <table class="form">
+        </table>
+      </div>
+      <form name="setWanForm" method="POST" action="/goform/setWanPort">
+        <table class="form">
+          <tr>
+            <td class="title" colspan="2">Port Management</td>
+          </tr>
+          <tr>
+            <td class="head">WAN port</td>
+            <td><select name="wan_port" onChange="showPortStatus();" class="short">
+                <option value="0">1</option>
+                <!--			<option value="1">2</option>
 			<option value="2">3</option>
 			<option value="3">4</option> -->
-			<option value="4">5</option>
-		</select>
-		<iframe id="setwanReloader" name="setwanReloader" src="" style="width:0;height:0;border:0px solid #fff;"></iframe>
-	</td>
-</tr>
-<tr>
-	<td class="head" id="wMacAddressClone">TV/STB</td>
-	<td><input name="tv_stbEnabled" type="checkbox" onchange="showPortStatus();"></td>
-</tr>
-<tr>
-	<td class="head">Port 1 mode</td>
-	<td>
-		<select name="port1_swmode" class="mid">
-			<option value="auto">auto</option>
-			<option value="10h">10 mbit/s half duplex</option>
-			<option value="10f">10 mbit/s full duplex</option>
-			<option value="100h">100 mbit/s half duplex</option>
-			<option value="100f">100 mbit/s full duplex</option>
-		</select>
-	</td>
-</tr>
-<tr>
-	<td class="head">Port 2 mode</td>
-	<td>
-		<select name="port2_swmode" class="mid">
-			<option value="auto">auto</option>
-			<option value="10h">10 mbit/s half duplex</option>
-			<option value="10f">10 mbit/s full duplex</option>
-			<option value="100h">100 mbit/s half duplex</option>
-			<option value="100f">100 mbit/s full duplex</option>
-		</select>
-	</td>
-</tr>
-<tr>
-	<td class="head">Port 3 mode</td>
-	<td>
-		<select name="port3_swmode" class="mid">
-			<option value="auto">auto</option>
-			<option value="10h">10 mbit/s half duplex</option>
-			<option value="10f">10 mbit/s full duplex</option>
-			<option value="100h">100 mbit/s half duplex</option>
-			<option value="100f">100 mbit/s full duplex</option>
-		</select>
-	</td>
-</tr>
-<tr>
-	<td class="head">Port 4 mode</td>
-	<td>
-		<select name="port4_swmode" class="mid">
-			<option value="auto">auto</option>
-			<option value="10h">10 mbit/s half duplex</option>
-			<option value="10f">10 mbit/s full duplex</option>
-			<option value="100h">100 mbit/s half duplex</option>
-			<option value="100f">100 mbit/s full duplex</option>
-		</select>
-	</td>
-</tr>
-<tr>
-	<td class="head">Port 5 mode</td>
-	<td>
-		<select name="port5_swmode" class="mid">
-			<option value="auto">auto</option>
-			<option value="10h">10 mbit/s half duplex</option>
-			<option value="10f">10 mbit/s full duplex</option>
-			<option value="100h">100 mbit/s half duplex</option>
-			<option value="100f">100 mbit/s full duplex</option>
-		</select>
-	</td>
-</tr>
+                <option value="4">5</option>
+              </select>
+              <iframe id="setwanReloader" name="setwanReloader" src="" style="width:0;height:0;border:0px solid #fff;"></iframe></td>
+          </tr>
+          <tr>
+            <td class="head" id="wMacAddressClone">TV/STB</td>
+            <td><input name="tv_stbEnabled" type="checkbox" onChange="showPortStatus();"></td>
+          </tr>
+          <tr>
+            <td class="head">Port 1 mode</td>
+            <td><select name="port1_swmode" class="mid">
+                <option value="auto">auto</option>
+                <option value="10h">10 mbit/s half duplex</option>
+                <option value="10f">10 mbit/s full duplex</option>
+                <option value="100h">100 mbit/s half duplex</option>
+                <option value="100f">100 mbit/s full duplex</option>
+              </select></td>
+          </tr>
+          <tr>
+            <td class="head">Port 2 mode</td>
+            <td><select name="port2_swmode" class="mid">
+                <option value="auto">auto</option>
+                <option value="10h">10 mbit/s half duplex</option>
+                <option value="10f">10 mbit/s full duplex</option>
+                <option value="100h">100 mbit/s half duplex</option>
+                <option value="100f">100 mbit/s full duplex</option>
+              </select></td>
+          </tr>
+          <tr>
+            <td class="head">Port 3 mode</td>
+            <td><select name="port3_swmode" class="mid">
+                <option value="auto">auto</option>
+                <option value="10h">10 mbit/s half duplex</option>
+                <option value="10f">10 mbit/s full duplex</option>
+                <option value="100h">100 mbit/s half duplex</option>
+                <option value="100f">100 mbit/s full duplex</option>
+              </select></td>
+          </tr>
+          <tr>
+            <td class="head">Port 4 mode</td>
+            <td><select name="port4_swmode" class="mid">
+                <option value="auto">auto</option>
+                <option value="10h">10 mbit/s half duplex</option>
+                <option value="10f">10 mbit/s full duplex</option>
+                <option value="100h">100 mbit/s half duplex</option>
+                <option value="100f">100 mbit/s full duplex</option>
+              </select></td>
+          </tr>
+          <tr>
+            <td class="head">Port 5 mode</td>
+            <td><select name="port5_swmode" class="mid">
+                <option value="auto">auto</option>
+                <option value="10h">10 mbit/s half duplex</option>
+                <option value="10f">10 mbit/s full duplex</option>
+                <option value="100h">100 mbit/s half duplex</option>
+                <option value="100f">100 mbit/s full duplex</option>
+              </select></td>
+          </tr>
+        </table>
+        <input type="button" class="mid" value="Change port configuration" onClick="setWanPort(this.form);" />
+      </form>
+      <div class="whitespace">&nbsp;</div></td>
+  </tr>
 </table>
-<input type="button" class="mid" value="Change port configuration" onclick="setWanPort(this.form);" />
-</form>
-
-<div class="whitespace">&nbsp;</div>
-
-</td></tr></table>
 </body>
 </html>

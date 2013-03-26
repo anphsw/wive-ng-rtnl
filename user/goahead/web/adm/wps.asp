@@ -1,11 +1,11 @@
-<html><head><title>WPS</title>
-
+<!DOCTYPE html>
+<html>
+<head>
+<title>WPS</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0">
 <meta http-equiv="Pragma" content="no-cache">
-
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
-
 <script type="text/javascript" src="/adm/wps_timer.js"></script>
 <script language="JavaScript" type="text/javascript">
 
@@ -221,141 +221,93 @@ function pageInit(){
 }
 
 </script>
-
 </head>
-<body onload="pageInit()">
-<table class="body"><tr><td>
-<h1>Wi-Fi Protected Setup</h1>
-<p> Here you can setup security easily by choosing PIN or PBC method to have Wi-Fi Protected Setup.</p>
-<table class="form">
-
-<!-- =================  WPS Status  ================= -->
-<tr>
-  <td class="title" colspan="2">WPS Status</td>
-</tr>
-
-<tr>
-  <td class="head" >WPS Current Status: </td>
-  <td> <span id="WPSCurrentStatus"> </span> </td>
-</tr>
-
-<form method="post" name ="SubmitOOB" action="/goform/OOB">
-<tr>
-  <td class="head" >WPS Configured: </td>
-  <td> <span id="WPSConfigured"> </span> <input type="submit" value="Reset OOB" name="submitResetOOB" align="left"></td>
-</tr>
-</form>
-
-<tr>
-  <td class="head" >WPS SSID: </td>
-  <td> <span id="WPSSSID"> </span> </td>
-</tr>
-
-<tr>
-  <td class="head" >WPS Auth Mode: </td>
-  <td> <span id="WPSAuthMode"> </span> </td>
-</tr>
-
-<tr>
-  <td class="head" >WPS Encryption Type: </td>
-  <td> <span id="WPSEncryptype"> </span> </td> 
-</tr>
-
-<tr>
-  <td class="head" >WPS Default Key Index: </td>
-  <td> <span id="WPSDefaultKeyIndex"> </span> </td>
-</tr>
-
-<tr>
-  <td class="head" >WPS WPA Key: </td>
-  <td> <span id="WPSWPAKey"> </span> </td>
-</tr>
-
-<tr>
-  <td class="head" >AP PIN: </td>
-  <td> <% getPINASP(); %>  </td>
-</tr>
-
-
+<body onLoad="pageInit()">
+<table class="body">
+  <tr>
+    <td><h1>Wi-Fi Protected Setup</h1>
+      <p> Here you can setup security easily by choosing PIN or PBC method to have Wi-Fi Protected Setup.</p>
+      <table class="form">
+        
+        <!-- =================  WPS Status  ================= -->
+        <tr>
+          <td class="title" colspan="2">WPS Status</td>
+        </tr>
+        <tr>
+          <td class="head" >WPS Current Status: </td>
+          <td><span id="WPSCurrentStatus"> </span></td>
+        </tr>
+        <form method="post" name ="SubmitOOB" action="/goform/OOB">
+          <tr>
+            <td class="head" >WPS Configured: </td>
+            <td><span id="WPSConfigured"> </span>
+              <input type="submit" value="Reset OOB" name="submitResetOOB" align="left"></td>
+          </tr>
+        </form>
+        <tr>
+          <td class="head" >WPS SSID: </td>
+          <td><span id="WPSSSID"> </span></td>
+        </tr>
+        <tr>
+          <td class="head" >WPS Auth Mode: </td>
+          <td><span id="WPSAuthMode"> </span></td>
+        </tr>
+        <tr>
+          <td class="head" >WPS Encryption Type: </td>
+          <td><span id="WPSEncryptype"> </span></td>
+        </tr>
+        <tr>
+          <td class="head" >WPS Default Key Index: </td>
+          <td><span id="WPSDefaultKeyIndex"> </span></td>
+        </tr>
+        <tr>
+          <td class="head" >WPS WPA Key: </td>
+          <td><span id="WPSWPAKey"> </span></td>
+        </tr>
+        <tr>
+          <td class="head" >AP PIN: </td>
+          <td><% getPINASP(); %></td>
+        </tr>
+      </table>
+      <hr />
+      <form method="post" name="WPSBegin" action="/goform/WPSBegin">
+        <table class="form">
+          <!-- =================  PIN & PBC  ================= -->
+          <tr>
+            <td class="title" colspan="2">WPS Setup</td>
+          </tr>
+          <tr>
+            <td class="head" >Method</td>
+            <td><input type=radio name=PINPBCRADIO value="1" checked onClick="PINSelect()" >
+              PIN
+              <input type=radio name=PINPBCRADIO value="0" onClick="PBCSelect()">
+              PBC </td>
+          </tr>
+          <tr id="RegistrarSetting" >
+            <td class="head" >Registrar Setting:</td>
+            <td><input type=radio name=PINRegistrarRADIO value="1" checked onClick="PINInternalRADIO()" >
+              Internal
+              <input type=radio name=PINRegistrarRADIO value="0" onClick="PINExternalRADIO()">
+              External </td>
+          </tr>
+          <tr id="STAPIN">
+            <td class="head">STA PIN: </td>
+            <td><input type="text" name="sta_pin" size="8" maxlength="24">
+              <input type="checkbox" name="force_rekey">
+              force to generate new security settings.(Previous enrollees would be disconnected.)</td>
+          </tr>
+          <tr id="APPIN">
+            <td class="head">AP PIN: </td>
+            <td><input type="text" name="ap_pin" size="8" maxlength="24" value='<% getPINASP(); %>' readonly></td>
+          </tr>
+          <tr>
+            <td class="head">Press </td>
+            <td><input value="Begin WPS" name="WPSBeginSubmit" onClick="return PINPBCFormCheck()" type="submit"></td>
+          </tr>
+        </table>
+      </form>
+      <br></td>
+  </tr>
 </table>
-<hr />
-
-
-
-<!-- =================  WPS UPNP Daemon ================= -->
-<!-- 
-<form method="post" name="WPSUPNP" action="/goform/WPSUPNP">
-<table class="form">
-
-<tr>
-  <td class="title" colspan="2">WPS UPnP(Registrar on Ethernet support)</td>
-<tr>
-<tr>
-  <td class="head" > WPS UPnP Support: </td>
-  <td>
-	<select onChange="updateState()" name="WPSUPnPEnabled" size="1">
-	<option value=0 <% getWPSUPnPEnabledASP(0); %> >Disable</option>
-    <option value=1 <% getWPSUPnPEnabledASP(1); %> >Enable</option>
-  </td>
-</tr>
-<tr>
-  <td class="head" > Role:</td>
-  <td>
-	<select name="WPSUPnPRole" size="1">
-	<option value=1 <% getWPSUPnPRoleASP(1); %> >Enrollee</option>
-  </td>
-</tr>
-
-</table>
-<input type="submit" value="Apply" name="submitWPSUPnP">
-</form>
--->
-<hr />
-
-<form method="post" name="WPSBegin" action="/goform/WPSBegin">
-
-<table class="form">
-<!-- =================  PIN & PBC  ================= -->
-<tr>
-  <td class="title" colspan="2">WPS Setup</td>
-</tr>
-<tr>
-  <td class="head" >Method</td>
-  <td>
-		<input type=radio name=PINPBCRADIO value="1" checked onClick="PINSelect()" >PIN
-		<input type=radio name=PINPBCRADIO value="0" onClick="PBCSelect()">PBC
-  </td>
-</tr>
-
-<tr id="RegistrarSetting" >
-  <td class="head" >Registrar Setting:</td>
-  <td>
-		<input type=radio name=PINRegistrarRADIO value="1" checked onClick="PINInternalRADIO()" >Internal
-		<input type=radio name=PINRegistrarRADIO value="0" onClick="PINExternalRADIO()">External
-  </td>
-</tr>
-
-<tr id="STAPIN">
-  <td class="head">STA PIN: </td> <td>
-  <input type="text" name="sta_pin" size="8" maxlength="24">        <input type="checkbox" name="force_rekey"> force to generate new security settings.(Previous enrollees would be disconnected.)</td>
-</tr>
-
-<tr id="APPIN">
-  <td class="head">AP PIN: </td>
-  <td> <input type="text" name="ap_pin" size="8" maxlength="24" value=<% getPINASP(); %> readonly> </td>
-</tr>
-
-<tr>
-  <td class="head">Press </td>
-  <td>
-		<input value="Begin WPS" name="WPSBeginSubmit" onclick="return PINPBCFormCheck()" type="submit">
-<!--		<form method="post" name="WPSPBC" action="/goform/WPSPBC"> <input value="Begin WPS-PBC" name="WPSPBCSubmit" type="submit"> </form>   -->
-  </td>
-</tr>
-</table>
-
-</form>
-
-<br>
-</td></tr></table>
-</body></html>
+</body>
+</html>

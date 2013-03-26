@@ -1,16 +1,15 @@
-<html><head><title>Statistic</title>
-
+<!DOCTYPE html>
+<html>
+<head>
+<title>Statistic</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, post-check=0, pre-check=0">
 <meta http-equiv="Pragma" content="no-cache">
-
 <link rel="stylesheet" href="/style/normal_ws.css" type="text/css">
-
 <script type="text/javascript" src="/lang/b28n.js"></script>
 <script type="text/javascript" src="/js/controls.js"></script>
 <script type="text/javascript" src="/js/ajax.js"></script>
 <script type="text/javascript" src="/js/validation.js"></script>
-
 <script language="JavaScript" type="text/javascript">
 Butterlate.setTextDomain("admin");
 
@@ -83,29 +82,22 @@ function loadStatistics()
 }
 
 </script>
-
 </head>
-<body onload="PageInit()">
-<table class="body"><tr><td>
-
-<h1 id="statisticTitle">Statistics</h1>
-<p id="statisticIntroduction"> Take a look at the CPE statistics </p>
-
-<div style="display:none;" id="fastpath_warning">
-<p><span style="color: #ff0000;"><b>CAUTION!&nbsp;</b></span>
-NAT fastpath option is turned into '<b>Hardware NAT offload mode</b>'.</p>
-<p>For some technical and software reasons there is no guarantee that gathered statistics for
-interfaces in '<b>Hardware NAT offload mode</b>' mode is correct now.</p>
-<p>To get correct statistics you need to shut down '<b>Hardware NAT offload mode</b>' option on
-<a href="/services/misc.asp#nat_fastpath_ref">MISC&nbsp;Services</a> configuration page.</p>
-</div>
-<hr>
-
-<div id="statistics_table" >
-</div>
-
-<div class="whitespace">&nbsp;</div> 
-
-</td></tr></table>
-</body></html>
-
+<body onLoad="PageInit()">
+<table class="body">
+  <tr>
+    <td><h1 id="statisticTitle">Statistics</h1>
+      <p id="statisticIntroduction"> Take a look at the CPE statistics </p>
+      <div style="display:none;" id="fastpath_warning">
+        <p><span style="color: #ff0000;"><b>CAUTION!&nbsp;</b></span> NAT fastpath option is turned into '<b>Hardware NAT offload mode</b>'.</p>
+        <p>For some technical and software reasons there is no guarantee that gathered statistics for
+          interfaces in '<b>Hardware NAT offload mode</b>' mode is correct now.</p>
+        <p>To get correct statistics you need to shut down '<b>Hardware NAT offload mode</b>' option on <a href="/services/misc.asp#nat_fastpath_ref">MISC&nbsp;Services</a> configuration page.</p>
+      </div>
+      <hr>
+      <div id="statistics_table" > </div>
+      <div class="whitespace">&nbsp;</div></td>
+  </tr>
+</table>
+</body>
+</html>
