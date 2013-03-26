@@ -100,14 +100,13 @@ get_param() {
 
 stop() {
     pid=`pidof igmpproxy`
-    if [ "$pid" = "" ]; then
-	exit 0
+    if [ "$pid" != "" ]; then
+	$LOG "Stopping IGMPPROXY"
+	killall -q igmpproxy
+	killall -q -SIGKILL igmpproxy
+	echo 0 > /proc/sys/net/ipv4/conf/all/mc_forwarding
+	echo 0 > /proc/sys/net/ipv4/conf/default/mc_forwarding
     fi
-    $LOG "Stopping IGMPPROXY"
-    killall -q igmpproxy
-    killall -q -SIGKILL igmpproxy
-    echo 0 > /proc/sys/net/ipv4/conf/all/mc_forwarding
-    echo 0 > /proc/sys/net/ipv4/conf/default/mc_forwarding
 }
 
 case "$1" in

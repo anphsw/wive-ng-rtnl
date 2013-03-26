@@ -55,12 +55,11 @@ start() {
 
 stop() {
     pid=`pidof mdev`
-    if [ "$pid" = "" ]; then
-	exit 0
+    if [ "$pid" != "" ]; then
+	$LOG "Stop mdev."
+	killall -q mdev
+	killall -q -SIGKILL mdev
     fi
-    $LOG "Stop mdev."
-    killall -q mdev
-    killall -q -SIGKILL mdev
 }
 
 case "$1" in

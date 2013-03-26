@@ -30,12 +30,11 @@ start() {
 
 stop() {
     pid=`pidof chilli`
-    if [ "$pid" = "" ]; then
-	exit 0
+    if [ "$pid" != "" ]; then
+	$LOG "Stopping ChilliSpot"
+	killall -q chilli
+	killall -q -SIGKILL chilli
     fi
-    $LOG "Stopping ChilliSpot"
-    killall -q chilli
-    killall -q -SIGKILL chilli
 }
 
 get_params() {

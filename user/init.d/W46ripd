@@ -28,12 +28,11 @@ start() {
 
 stop() {
     pid=`pidof ripd`
-    if [ "$pid" = "" ]; then
-	exit 0
+    if [ "$pid" != "" ]; then
+	$LOG "Stopping RIPD"
+	killall -q ripd
+	killall -q -SIGKILL ripd
     fi
-    $LOG "Stopping RIPD"
-    killall -q ripd
-    killall -q -SIGKILL ripd
 }
 
 case "$1" in

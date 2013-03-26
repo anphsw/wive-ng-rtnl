@@ -34,12 +34,11 @@ get_param() {
 
 stop() {
     pid=`pidof udpxy`
-    if [ "$pid" = "" ]; then
-	exit 0
+    if [ "$pid" != "" ]; then
+	$LOG "UDPXY stop"
+	killall -q udpxy
+	killall -q -SIGKILL udpxy
     fi
-    $LOG "UDPXY stop"
-    killall -q udpxy
-    killall -q -SIGKILL udpxy
 }
 
 case "$1" in

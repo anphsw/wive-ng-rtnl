@@ -29,13 +29,12 @@ start() {
 
 stop() {
     pid=`pidof wscd`
-    if [ "$pid" = "" ]; then
-	exit 0
+    if [ "$pid" != "" ]; then
+	$LOG "Stopping WPS"
+	killall -q wscd
+	killall -q -SIGKILL wscd
+	route delete 239.255.255.250 > /dev/null 2>&1
     fi
-    $LOG "Stopping WPS"
-    killall -q wscd
-    killall -q -SIGKILL wscd
-    route delete 239.255.255.250 > /dev/null 2>&1
 }
 
 get_param() {

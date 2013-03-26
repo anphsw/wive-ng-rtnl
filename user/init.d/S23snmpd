@@ -21,12 +21,11 @@ get_param() {
 
 stop() {
     pid=`pidof snmpd`
-    if [ "$pid" = "" ]; then
-	exit 0
+    if [ "$pid" != "" ]; then
+	$LOG "Stopping SNMPD"
+	killall -q snmpd
+	killall -q -SIGKILL snmpd
     fi
-    $LOG "Stopping SNMPD"
-    killall -q snmpd
-    killall -q -SIGKILL snmpd
 }
 
 case "$1" in
