@@ -29,7 +29,7 @@ start() {
     		fs nvramreset
 	    fi
 	    get_param
-	    $LOG "Reset OK... Continue boot..."
+	    $LOG "Reset OK. Continue boot..."
     fi
 
 ######################################## MINIMAL CONFIG FOR NORMAL START #########################################

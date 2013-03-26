@@ -120,7 +120,7 @@ start() {
 
 stop() {
     if [ -f /var/run/radvd.pid ]; then
-	$LOG  "Stop radvd daemon..."
+	$LOG  "Stop radvd daemon."
 	echo "0" > /proc/sys/net/ipv6/conf/all/forwarding
 
 	# rebuild ipv6 rules

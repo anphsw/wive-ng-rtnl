@@ -3,7 +3,7 @@
 LOG="logger -t lo"
 
 start() {
- $LOG "Start loopback interface..."
+ $LOG "Start loopback interface."
     eval `nvram_buf_get 2860 radvdEnabled`
 
     ip link set lo up

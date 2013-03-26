@@ -16,7 +16,7 @@ start() {
 	flush_net_caches
 
 	# wifi reconfigure only after goahead start
-	$LOG "Prepare wifi config..."
+	$LOG "Prepare wifi config."
 	gen_wifi_config
 	if [ "$OperationMode" = "2" ] && [ "$macCloneEnabled" = "1" ] && [ "$macCloneMac" != "" ]; then
 	    WLAN_MAC_ADDR="$macCloneMac"
@@ -27,31 +27,31 @@ start() {
 	mac="mac=$WLAN_MAC_ADDR"
 
     	if [ "$OperationMode" = "2" ]; then
-	    $LOG "Load wifi STA module..."
+	    $LOG "Load wifi STA module."
     	    modprobe -q rt2860v2_sta "$mac"
 	else
-	    $LOG "Load wifi AP module..."
+	    $LOG "Load wifi AP module."
     	    modprobe -q rt2860v2_ap  "$mac"
 	    if [ "$second_wlan_root_if" != "" ]; then
 		# second mac adress
 		mac="mac=$WLAN2_MAC_ADDR"
-		$LOG "Load RT3090 external wifi AP module..."
+		$LOG "Load RT3090 external wifi AP module."
 		modprobe -q rt3090_ap "$mac"
 	    fi
 	fi
 
 	# root interfaces must be up first
-	$LOG "WiFi interfaces up..."
+	$LOG "WiFi interfaces up."
 	ifconfig $first_wlan_root_if txqueuelen	"$txqueuelen"
 	ip link set $first_wlan_root_if up
 	if [ "$second_wlan_root_if" != "" ]; then
-	    $LOG "WiFi $second_wlan_root_if interface up..."
+	    $LOG "WiFi $second_wlan_root_if interface up."
 	    # others modes
 	    ifconfig $second_wlan_root_if txqueuelen	"$txqueuelen"
 	    ip link set $second_wlan_root_if up
 	fi
 	if [ "$OperationMode" = "3" ]; then
-	    $LOG "WiFi APCLI interface up..."
+	    $LOG "WiFi APCLI interface up."
 	    # apcli mode sta interface
 	    if [ "$first_wlan_apcli" != "" ]; then
 		ifconfig $first_wlan_apcli txqueuelen	"$txqueuelen"
@@ -66,7 +66,7 @@ start() {
 	# if goahead not started
 	# generate modules dep
 	if [ ! -f /etc/modules.dep ]; then
-	    $LOG "Start modules.dep generate..."
+	    $LOG "Start modules.dep generate."
 	    depmod -a -n > /etc/modules.dep
 	fi
 	# not load this modules after goahead start
@@ -175,10 +175,10 @@ stop() {
 	$LOG "link wifi down first"
 	wlan_down_all
 	if [ -d /sys/module/hw_nat ]; then
-	    $LOG "Unload hw_nat and wireless modules..."
+	    $LOG "Unload hw_nat and wireless modules."
 	    mod="hw_nat rt2860v2_ap rt2860v2_sta rt3090_ap"
 	else
-	    $LOG "Unload wireless modules..."
+	    $LOG "Unload wireless modules."
 	    mod="rt2860v2_ap rt2860v2_sta rt3090_ap"
 	fi
 	for module in $mod

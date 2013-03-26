@@ -410,7 +410,7 @@ start() {
 #########################################ACCEPT_ESTABLISHED################################
     iptables -A FORWARD $STATE_EST -j ACCEPT
 ############################################ENDRULES#######################################
-    $LOG "Configure netfilter OK..."
+    $LOG "Configure netfilter OK."
 }
 
 get_param() {

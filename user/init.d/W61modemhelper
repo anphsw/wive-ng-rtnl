@@ -26,10 +26,9 @@ start() {
     fi
 
     if [ "$MODEMENABLED" = "1" ]; then
-        
         while [ ! -e  /var/run/goahead.pid ]; do
 	    # Sleep until file does exists/is created
-	    sleep 1
+	    sleep 2
 	done
 
 	sleep 15

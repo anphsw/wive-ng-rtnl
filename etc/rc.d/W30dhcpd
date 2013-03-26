@@ -108,7 +108,7 @@ start() {
     # if dnsmasq disabled need reset LAN ports for clients renew params
     if [ "$dnsPEnabled" = "0" -a "$wan_static_dns" != "on" ] || [ "$dhcpEnabled" = "2" ]; then
 	    if [ "$CONFIG_RT_3052_ESW" != "" ]; then
-		$LOG "Reinit LAN ports..."
+		$LOG "Reinit LAN ports."
 		config-vlan.sh 2 RRRRR > /dev/null 2>&1
 	    fi
     fi

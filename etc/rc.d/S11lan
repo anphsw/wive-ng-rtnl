@@ -6,7 +6,7 @@
 LOG="logger -t lan"
 
 start() {
-  $LOG "Start LAN network interfaces..."
+  $LOG "Start LAN network interfaces."
     get_param
 
     # flush ip from interfaces
@@ -74,7 +74,7 @@ get_param() {
 }
 
 stop() {
-  $LOG "Stop LAN network interfaces..."
+  $LOG "Stop LAN network interfaces."
     # flush ip from interfaces
     addr_flush
     ip link set "$lan2_if" down > /dev/null 2>&1

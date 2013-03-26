@@ -54,7 +54,11 @@ start() {
 }
 
 stop() {
- $LOG "Stop mdev generate..."
+    pid=`pidof mdev`
+    if [ "$pid" = "" ]; then
+	exit 0
+    fi
+    $LOG "Stop mdev."
     killall -q mdev
     killall -q -SIGKILL mdev
 }

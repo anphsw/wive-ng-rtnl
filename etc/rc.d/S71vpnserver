@@ -57,7 +57,7 @@ done
 
 #  Generate l2tp nad pppd config
 if [ "$configured" = "0" ]; then
-    $LOG "One or more users need be configured. Stop..."
+    $LOG "One or more users need be configured. Stop."
 else
 printf "
 [global]
