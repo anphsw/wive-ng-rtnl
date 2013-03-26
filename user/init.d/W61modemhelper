@@ -116,7 +116,6 @@ start() {
 }
 
 stop() {
-    $LOG "Stopping Modemhelper"
     # first send HUP for terminate connections and try some times
     # second send TERM for exit pppd process
     # if process not terminated send KILL
@@ -128,9 +127,11 @@ stop() {
     fi
 
     if [ "$pid" != "" ]; then
+	$LOG "Stopping modemhelper"
+
         # close connection
         kill -SIGHUP "$pid"
-	
+
 	# terminate pppd
 	count=0
         while kill -0 $pid  > /dev/null 2>&1; do

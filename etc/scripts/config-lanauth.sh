@@ -33,9 +33,12 @@ get_param() {
 }
 
 stop() {
-  $LOG "Stopping lanauth "
-    killall -q lanauth
-    killall -q -SIGKILL lanauth
+    pid=`pidof lanauth`
+    if [ "$pid" != "" ]; then
+	$LOG "Stopping lanauth "
+	killall -q lanauth
+	killall -q -SIGKILL lanauth
+    fi
 }
 
 case "$1" in

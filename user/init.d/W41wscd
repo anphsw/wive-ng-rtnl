@@ -33,7 +33,6 @@ stop() {
 	$LOG "Stopping WPS"
 	killall -q wscd
 	killall -q -SIGKILL wscd
-	route delete 239.255.255.250 > /dev/null 2>&1
     fi
 }
 
