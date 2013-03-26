@@ -16,9 +16,11 @@ start() {
 }
 
 stop() {
-  $LOG "Stopping crontab"
-    killall -q crond
-    killall -q -SIGKILL crond
+    if [ -f /var/run/crond.pid ]; then
+	$LOG "Stopping crontab"
+	killall -q crond
+	killall -q -SIGKILL crond
+    fi
 }
 
 case "$1" in

@@ -21,11 +21,14 @@ get_param() {
 }
 
 stop() {
- $LOG "Stop watchdog"
-    killall -q watchdog
-    killall -q -SIGKILL watchdog
-    killall -q pinger.sh
-    killall -q -SIGKILL pinger.sh
+
+    if [ -f /var/run/watchdog.pid ]; then
+	$LOG "Stop watchdog"
+	killall -q watchdog
+	killall -q -SIGKILL watchdog
+	killall -q pinger.sh
+	killall -q -SIGKILL pinger.sh
+    fi
 }
 
 case "$1" in
