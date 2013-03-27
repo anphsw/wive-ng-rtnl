@@ -53,7 +53,7 @@ start() {
     	    cp -rpf /etc/web/cgi-bin/* /tmp/web/cgi-bin/user
 	fi
     else
-	$LOG "Small mem or web2ramfs variable not set - creating symlink for web pages in tmpfs."
+	$LOG "web2ramfs variable not set - creating symlink for web pages in tmpfs."
         ln -sf /web /tmp/web
     fi
 
