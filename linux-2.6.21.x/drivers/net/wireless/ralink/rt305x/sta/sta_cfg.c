@@ -443,10 +443,11 @@ INT Set_NetworkType_Proc(
 				// Since calling this indicate user don't want to connect to that SSID anymore.
 				pAd->MlmeAux.AutoReconnectSsidLen= 32;
 				NdisZeroMemory(pAd->MlmeAux.AutoReconnectSsid, pAd->MlmeAux.AutoReconnectSsidLen);		
-				
+
+				printk("NDIS_STATUS_MEDIA_DISCONNECT Event BB!\n");
+
 				LinkDown(pAd, FALSE);
 
-				DBGPRINT(RT_DEBUG_TRACE, ("NDIS_STATUS_MEDIA_DISCONNECT Event BB!\n"));
 			}
 #ifdef DOT11_N_SUPPORT
 			SetCommonHT(pAd);

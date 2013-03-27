@@ -1336,7 +1336,7 @@ VOID PeerDisassocAction(
 	DBGPRINT(RT_DEBUG_TRACE, ("ASSOC - PeerDisassocAction()\n"));
 	if(PeerDisassocSanity(pAd, Elem->Msg, Elem->MsgLen, Addr2, &Reason)) 
 	{
-		DBGPRINT(RT_DEBUG_TRACE, ("ASSOC - PeerDisassocAction() Reason = %d\n", Reason));
+		printk("ASSOC - PeerDisassocAction() Reason = %d\n", Reason);
 		if (INFRA_ON(pAd) && MAC_ADDR_EQUAL(pAd->CommonCfg.Bssid, Addr2)) 
 		{
 #ifdef WMM_ACM_SUPPORT

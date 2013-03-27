@@ -703,11 +703,11 @@ VOID ApCliLinkDown(
 
 	if (ifIndex < MAX_APCLI_NUM)
 	{
-		DBGPRINT(RT_DEBUG_TRACE, ("!!! APCLI LINK DOWN - IF(apcli%d)!!!\n", ifIndex));
+		printk("!!! APCLI LINK DOWN - IF(apcli%d)!!!\n", ifIndex);
 	}
 	else
 	{
-		DBGPRINT(RT_DEBUG_TRACE, ("!!! ERROR : APCLI LINK DOWN - IF(apcli%d)!!!\n", ifIndex));
+		printk("!!! ERROR : APCLI LINK DOWN - IF(apcli%d)!!!\n", ifIndex);
 		return;
 	}
     	

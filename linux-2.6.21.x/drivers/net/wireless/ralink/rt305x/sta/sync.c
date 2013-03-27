@@ -1345,7 +1345,7 @@ VOID PeerBeacon(
 				CapabilityInfo) &
 				0x0010)
 			{
-				DBGPRINT(RT_DEBUG_TRACE, ("%s:AP privacy:%x is differenct from STA privacy:%x\n", __FUNCTION__, (CapabilityInfo & 0x0010) >> 4 , pAd->StaCfg.WepStatus != Ndis802_11WEPDisabled));
+				printk("%s:AP privacy:%x is differenct from STA privacy:%x\n", __FUNCTION__, (CapabilityInfo & 0x0010) >> 4 , pAd->StaCfg.WepStatus != Ndis802_11WEPDisabled);
 				if (INFRA_ON(pAd))
 				{
 					LinkDown(pAd,FALSE);

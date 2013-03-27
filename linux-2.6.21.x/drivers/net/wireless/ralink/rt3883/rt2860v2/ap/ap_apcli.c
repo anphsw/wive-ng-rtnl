@@ -704,7 +704,7 @@ VOID ApCliLinkDown(
 	}
 	else
 	{
-		DBGPRINT(RT_DEBUG_TRACE, ("!!! ERROR : APCLI LINK DOWN - IF(apcli%d)!!!\n", ifIndex));
+		printk("!!! ERROR : APCLI LINK DOWN - IF(apcli%d)!!!\n", ifIndex);
 		return;
 	}
     	

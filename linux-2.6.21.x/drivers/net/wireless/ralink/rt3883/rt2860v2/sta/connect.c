@@ -477,7 +477,7 @@ VOID CntlOidSsidProc(
 	{   
 		if (ADHOC_ON(pAd))
 		{
-			DBGPRINT(RT_DEBUG_TRACE, ("CntlOidSsidProc():CNTL - drop current ADHOC\n"));
+			printk("CntlOidSsidProc():CNTL - drop current ADHOC\n");
 			LinkDown(pAd, FALSE);
 			OPSTATUS_CLEAR_FLAG(pAd, fOP_STATUS_MEDIA_STATE_CONNECTED);
 			pAd->IndicateMediaState = NdisMediaStateDisconnected;
@@ -701,12 +701,12 @@ VOID CntlOidRTBssidProc(
 		{
 			if (ADHOC_ON(pAd))
 			{
-				DBGPRINT(RT_DEBUG_TRACE, ("CNTL - drop current ADHOC\n"));
+				printk("CNTL - drop current ADHOC\n");
 				LinkDown(pAd, FALSE);
 				OPSTATUS_CLEAR_FLAG(pAd, fOP_STATUS_MEDIA_STATE_CONNECTED);
 				pAd->IndicateMediaState = NdisMediaStateDisconnected;
 				RTMP_IndicateMediaState(pAd);
-                pAd->ExtraInfo = GENERAL_LINK_DOWN;
+            			pAd->ExtraInfo = GENERAL_LINK_DOWN;
 				DBGPRINT(RT_DEBUG_TRACE, ("NDIS_STATUS_MEDIA_DISCONNECT Event C!\n"));
 			}
 
@@ -920,7 +920,7 @@ VOID CntlWaitDisassocProc(
 
 	if (Elem->MsgType == MT2_DISASSOC_CONF) 
 	{
-		DBGPRINT(RT_DEBUG_TRACE, ("CNTL - Dis-associate successful\n"));
+		printk("CNTL - Dis-associate successful\n");
         
 			RTMPSendWirelessEvent(pAd, IW_DISASSOC_EVENT_FLAG, NULL, BSS0, 0); 
         		

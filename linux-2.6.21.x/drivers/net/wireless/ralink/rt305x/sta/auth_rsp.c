@@ -123,7 +123,7 @@ VOID PeerDeauthAction(
 			&& MAC_ADDR_EQUAL(Addr3, pAd->CommonCfg.Bssid)
 			)
         {
-            DBGPRINT(RT_DEBUG_TRACE,("AUTH_RSP - receive DE-AUTH from our AP (Reason=%d)\n", Reason));
+        		printk("AUTH_RSP - receive DE-AUTH from our AP (Reason=%d)\n", Reason);
 
 			if (Reason == REASON_4_WAY_TIMEOUT)
 				RTMPSendWirelessEvent(pAd, IW_PAIRWISE_HS_TIMEOUT_EVENT_FLAG, NULL, 0, 0); 

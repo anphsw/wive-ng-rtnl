@@ -766,10 +766,10 @@ static VOID ApCliCtrlDeAssocRspAction(
 	pApCliEntry = &pAd->ApCfg.ApCliTab[ifIndex];
 	if (Status == MLME_SUCCESS)
 	{
-		DBGPRINT(RT_DEBUG_TRACE, ("(%s) Receive DeAssoc Rsp Success.\n", __FUNCTION__));
+		printk("Receive DeAssoc Rsp Success.\n");
 	} else
 	{
-		DBGPRINT(RT_DEBUG_TRACE, ("(%s) Receive DeAssoc Rsp Failure.\n", __FUNCTION__));
+		printk("Receive DeAssoc Rsp Failure.\n");
 	}
 
 	if (pApCliEntry->Valid)
@@ -859,7 +859,7 @@ static VOID ApCliCtrlDisconnectReqAction(
 	PULONG pCurrState = &pAd->ApCfg.ApCliTab[ifIndex].CtrlCurrState;
 
 
-	DBGPRINT(RT_DEBUG_TRACE, ("(%s) MLME Request disconnect.\n", __FUNCTION__));
+	printk("MLME Request disconnect.\n");
 
 	if (ifIndex >= MAX_APCLI_NUM)
 		return;
@@ -897,7 +897,7 @@ static VOID ApCliCtrlPeerDeAssocReqAction(
 	PULONG pCurrState = &pAd->ApCfg.ApCliTab[ifIndex].CtrlCurrState;
 
 
-	DBGPRINT(RT_DEBUG_TRACE, ("(%s) Peer DeAssoc Req.\n", __FUNCTION__));
+	printk("Peer DeAssoc Req.\n");
 
 	if (ifIndex >= MAX_APCLI_NUM)
 		return;
@@ -956,7 +956,7 @@ static VOID ApCliCtrlDeAssocAction(
 	PULONG pCurrState = &pAd->ApCfg.ApCliTab[ifIndex].CtrlCurrState;
 
 
-	DBGPRINT(RT_DEBUG_TRACE, ("(%s) MLME Request Disconnect.\n", __FUNCTION__));
+	printk("MLME Request Disconnect.\n");
 
 	if (ifIndex >= MAX_APCLI_NUM)
 		return;
@@ -1001,7 +1001,7 @@ static VOID ApCliCtrlDeAuthAction(
 	PULONG pCurrState = &pAd->ApCfg.ApCliTab[ifIndex].CtrlCurrState;
 
 
-	DBGPRINT(RT_DEBUG_TRACE, ("(%s) MLME Request Disconnect.\n", __FUNCTION__));
+	printk("MLME Request Disconnect.\n");
 
 	if (ifIndex >= MAX_APCLI_NUM)
 		return;
