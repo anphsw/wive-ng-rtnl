@@ -1441,7 +1441,8 @@
 33) configs: now kernel modules for 8Mb and 4Mb devices use one full optimization flags at build(speedup 4Mb devices).<br>
 34) configs: add more modem support automatization logic.<br>
 35) goahead: rework samba WebUI, cleanup and more bug fixes.<br>
-36) dropbear: version up to 2013.56.<br>
+36) goahead: fix wifi igmpsnoop independed set.<br>
+37) dropbear: version up to 2013.56.<br>
 
 <br>
 <br>

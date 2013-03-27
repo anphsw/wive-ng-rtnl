@@ -6,7 +6,7 @@
 echo ">>>>> RECONFIGURE WIFI IF = $1 <<<<<<<<<<"
 
 ########################################ALLMODE param########################################
-eval `nvram_buf_get 2860 HT_MIMOPSMode HiPower AutoConnect OperationMode`
+eval `nvram_buf_get 2860 HiPower AutoConnect OperationMode`
 ########################################LNA param############################################
 # Disable increase LNA gain
 if [ "$CONFIG_RALINK_RT3052_MP2" = "y" ]; then

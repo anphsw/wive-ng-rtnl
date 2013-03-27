@@ -31,6 +31,7 @@ romfs
 /lib/lib
 /lib/include_shared
 /lib/libiconv/libcharset/lib/Makefile
+/lib/libiconv/preload/Makefile
 /lib/libcurl/curl-config
 /lib/libcurl/docs/examples/Makefile
 /lib/libcurl/docs/libcurl/Makefile
