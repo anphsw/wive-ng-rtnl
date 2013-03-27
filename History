@@ -1439,6 +1439,7 @@
 31) defaults: set HT_MIMOPSMode=3 - need for multiple TX/RX streams compat.<br>
 32) configs: now kernel modules for 8Mb and 4Mb devices use one full optimization flags at build(speedup 4Mb devices).<br>
 33) configs: add more modem support automatization logic.<br>
+34) goahead: rework samba WebUI, cleanup and more bug fixes.<br>
 
 <br>
 <br>

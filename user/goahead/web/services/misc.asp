@@ -628,7 +628,7 @@ function displayServiceStatus()
               </select></td>
           </tr>
           <tr>
-            <td class="head">DHCP renew lease at WAN port status change</td>
+            <td class="head">Force DHCP renew lease at WAN port status change</td>
             <td colspan="4"><select name="ForceRenewDHCP" class="half">
                 <option value="0">Disable</option>
                 <option value="1">Enable</option>

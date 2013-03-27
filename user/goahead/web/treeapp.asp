@@ -16,7 +16,7 @@
 <script type="text/javascript" src="/js/ajax.js"></script>
 </head>
 
-<body bgcolor="#FFFFFF" onload="initValue();">
+<body bgcolor="#FFFFFF" onLoad="initValue();">
 <script language="JavaScript">
 
 function rebootRouter(form, reloader)
@@ -85,6 +85,7 @@ var usbb = '<% getUSBBuilt(); %>';
 var storageb = '<% getStorageBuilt(); %>';
 var ftpb = '<% getFtpBuilt(); %>';
 var smbb = '<% getSmbBuilt(); %>';
+var smb3b = '<% getSmb3Built(); %>';
 var mediab = '<% getMediaBuilt(); %>';
 var webcamb = '<% getWebCamBuilt(); %>';
 var printersrvb = '<% getPrinterSrvBuilt(); %>';
@@ -169,7 +170,10 @@ if (opmode != '4')
 a.add(502, 500, _("treeapp l2tp server"),       "javascript:go('services/l2tp.asp');");
 a.add(503, 500, _("treeapp ntp settings"),      "javascript:go('services/ntp.asp');");
 a.add(504, 500, _("treeapp ddns settings"),     "javascript:go('services/ddns.asp');");
-a.add(505, 500, _("treeapp samba"),             "javascript:go('services/samba.asp');");
+if (smbb == "1")
+{
+	a.add(505, 500, _("treeapp samba"),             "javascript:go('services/samba.asp');");
+}
 a.add(506, 500, _("treeapp accounting"),        "javascript:go('services/account.asp');");
 a.add(510, 500, _("treeapp miscellaneous"),     "javascript:go('services/misc.asp');");
 
@@ -187,13 +191,11 @@ if (usbb == "1")
 	if (storageb == "1")
 	{
 		a.add(850,   0, _("treeapp storage"),		"javascript:a.oo(850);");
-		a.add(851, 850, _("treeapp useradmin"),	"javascript:go('usb/STORAGEuser_admin.asp');");
-		a.add(852, 850, _("treeapp disk"),		"javascript:go('usb/STORAGEdisk_admin.asp');");
 		if (ftpb == "1")
 			a.add(853, 850, _("treeapp ftpsrv"),		"javascript:go('usb/STORAGEftpsrv.asp');");
 		if (transb == "1")
 			a.add(854, 850, _("treeapp transmission"),	"javascript:go('usb/Transmission.asp');");
-		if (smbb == "1")
+		if (smb3b == "1")
 			a.add(855, 850, _("treeapp sambasrv"),		"javascript:go('usb/STORAGEsmbsrv.asp');");
 		if (mediab == "1")
 			a.add(856, 850, _("treeapp mediasrv"),		"javascript:go('usb/USHAREmediasrv.asp');");

@@ -38,12 +38,10 @@ ifeq ("$(CONFIG_USB)", "")
 	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/usb
 ifeq ("$(CONFIG_USER_STORAGE)", "")
 	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/usb/STORAGE*
-	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/storage
 endif
 else
 ifeq ("$(CONFIG_USER_STORAGE)", "")
 	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/usb/STORAGE*
-	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/storage
 endif
 ifeq ("$(CONFIG_USER_USHARE)", "")
 	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/usb/USHARE*
