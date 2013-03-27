@@ -1,6 +1,8 @@
 VPATH = src
 CFLAGS = -Os -pipe -fpack-struct -Wall -Wno-unused -fno-caller-saves -fno-aggressive-loop-optimizations
 LD= $(CC)
+
+CONF_H = $(ROOTDIR)/$(LINUXDIR)/include/linux/config.h
 OS_LAYER = osl-linux.c
 
 all: lld2d lld2test

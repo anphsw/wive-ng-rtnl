@@ -26,6 +26,8 @@
 #include <unistd.h>
 #include <assert.h>
 
+#include "linux/config.h" /* kernel config */
+
 #define	DECLARING_GLOBALS
 #include "globals.h"
 

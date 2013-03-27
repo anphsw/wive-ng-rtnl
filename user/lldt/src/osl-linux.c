@@ -31,6 +31,8 @@
 #include <netinet/in.h>
 #include <signal.h>
 
+#include "linux/config.h" /* kernel config */
+
 /* We use the POSIX.1e capability subsystem to drop all but
  * CAP_NET_ADMIN rights */
 //#define HAVE_CAPABILITIES
@@ -814,12 +816,14 @@ get_link_speed(void *data)
      * Since this is a bridged pair of interfaces (br0 = vlan0 + eth1), I am returning the
      * wireless speed (eth1), which is the lowest of the upper limits on the two interfaces... */
 
-#if defined(CONFIG_RALINK_RT3050_1T1R) || defined(CONFIG_RALINK_RT3051_1T2R)
+#if defined(CONFIG_RALINK_RT3050_1T1R) || defined(CONFIG_RALINK_RT3051_1T2R) || defined(CONFIG_RALINK_RT5350)
     speed = htonl(1500000);	// 150Mbit wireless...
-#elif defined(CONFIG_RALINK_RT3052_2T2R) || defined(CONFIG_RALINK_RT3352_2T2R)
+#elif defined(CONFIG_RALINK_RT3052_2T2R) || defined(CONFIG_RALINK_RT3352_2T2R) || defined(CONFIG_RALINK_RT3662_2T2R)
     speed = htonl(3000000);	// 300Mbit wireless...
+#elif defined(CONFIG_RALINK_RT3883_3T3R)
+    speed = htonl(4500000);	// 450Mbit wireless...
 #else
-    speed = htonl(540000);	// 54Mbit wireless... (540k x 100 = 54Mbs)
+    speed = htonl(3000000);	// 54Mbit wireless... (540k x 100 = 54Mbs)
 #endif
     memcpy(data, &speed, 4);
 
