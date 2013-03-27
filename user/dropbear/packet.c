@@ -133,6 +133,12 @@ void read_packet() {
 	/* Attempt to read the remainder of the packet, note that there
 	 * mightn't be any available (EAGAIN) */
 	maxlen = ses.readbuf->len - ses.readbuf->pos;
+	if (maxlen == 0) {
+		/* Occurs when the packet is only a single block long and has all
+		 * been read in read_packet_init().  Usually means that MAC is disabled
+		 */
+		len = 0;
+	} else {
 	len = read(ses.sock_in, buf_getptr(ses.readbuf, maxlen), maxlen);
 
 	if (len == 0) {
@@ -149,6 +155,7 @@ void read_packet() {
 	}
 
 	buf_incrpos(ses.readbuf, len);
+	}
 
 	if ((unsigned int)len == maxlen) {
 		/* The whole packet has been read */

@@ -85,6 +85,9 @@
 /* Define to 1 if you have the <fcntl.h> header file. */
 #define HAVE_FCNTL_H 1
 
+/* Define to 1 if you have the `fork' function. */
+#undef HAVE_FORK
+
 /* Define to 1 if you have the `freeaddrinfo' function. */
 #define HAVE_FREEADDRINFO 1
 
@@ -301,7 +304,7 @@
 /* Define to 1 if `ut_pid' is member of `struct utmp'. */
 #define HAVE_STRUCT_UTMP_UT_PID 1
 
-/* Define to 1 if `ut_time' is member of `struct utmp'. */
+/* Define to 1 if `ut_pid' is a member of `struct utmp'. */
 #define HAVE_STRUCT_UTMP_UT_TIME 1
 
 /* Define to 1 if `ut_tv' is member of `struct utmp'. */
@@ -373,6 +376,9 @@
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME ""
 
+/* Define to the home page for this package. */
+#undef PACKAGE_URL
+
 /* Define to the version of this package. */
 #define PACKAGE_VERSION ""
 
@@ -396,6 +402,11 @@
 
 /* Use /dev/ptmx */
 /* #undef USE_DEV_PTMX */
+
+/* Enable large inode numbers on Mac OS X 10.5.  */
+#ifndef _DARWIN_USE_64_BIT_INODE
+# define _DARWIN_USE_64_BIT_INODE 1
+#endif
 
 /* Number of bits in a file offset, on hosts where this is settable. */
 #define _FILE_OFFSET_BITS 64
