@@ -6,7 +6,7 @@
 echo ">>>>> RECONFIGURE WIFI IF = $1 <<<<<<<<<<"
 
 ########################################ALLMODE param########################################
-eval `nvram_buf_get 2860 HiPower AutoConnect OperationMode`
+eval `nvram_buf_get 2860 HiPower AutoConnect ApCliAutoConnect OperationMode`
 ########################################LNA param############################################
 # Disable increase LNA gain
 if [ "$CONFIG_RALINK_RT3052_MP2" = "y" ]; then
@@ -20,9 +20,19 @@ fi
 if [ "$OperationMode" = "2" ]; then
     if [ "$AutoConnect" = "1" ]; then
 	iwpriv "$1" set AutoReconnect=1
+    else
+	iwpriv "$1" set AutoReconnect=0
     fi
   # in sta mode exit
   exit 0
+fi
+########################################APCLI param########################################
+if [ "$OperationMode" = "3" ]; then
+    if [ "$ApCliAutoConnect" = "1" ]; then
+	iwpriv apcli0 set ApCliAutoConnect=1
+    else
+	iwpriv apcli0 set ApCliAutoConnect=0
+    fi
 fi
 ########################################APMODE param#########################################
 eval `nvram_buf_get 2860 AutoChannelSelect Channel AP2040Rescan RadioOff GreenAP HT_OpMode`

@@ -31,6 +31,7 @@ ApCliSsid=SF
 ApCliTxMcs=33
 ApCliTxMode=HT
 ApCliWPAPSK=
+ApCliAutoConnect=1
 APCwmax=6;10;4;3
 APCwmin=4;4;3;2
 APSDCapable=0
