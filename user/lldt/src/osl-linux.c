@@ -38,6 +38,8 @@
 # include <sys/capability.h>
 #endif
 
+#include <linux/if.h>
+
 /* Do you have wireless extensions available? (most modern kernels do) */
 #define HAVE_WIRELESS
 
