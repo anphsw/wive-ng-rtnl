@@ -26,14 +26,6 @@ if [ "$OperationMode" = "2" ]; then
   # in sta mode exit
   exit 0
 fi
-########################################APCLI param########################################
-if [ "$OperationMode" = "3" ]; then
-    if [ "$ApCliAutoConnect" = "1" ]; then
-	iwpriv apcli0 set ApCliAutoConnect=1
-    else
-	iwpriv apcli0 set ApCliAutoConnect=0
-    fi
-fi
 ########################################APMODE param#########################################
 eval `nvram_buf_get 2860 AutoChannelSelect Channel AP2040Rescan RadioOff GreenAP HT_OpMode`
 #########################################ON/OFF param########################################
@@ -70,7 +62,7 @@ else
 	iwpriv "$1" set Channel=$Channel
     fi
 fi
-########################################GREEN mode#############################
+########################################GREEN mode###########################################
 if [ "$CONFIG_RT2860V2_AP_GREENAP" != "" ]; then
     if [ "$HT_OpMode" = "1" ] || [ "$GreenAP" = "1" ]; then
 	iwpriv "$1" set GreenAP=1
@@ -78,7 +70,17 @@ if [ "$CONFIG_RT2860V2_AP_GREENAP" != "" ]; then
 	iwpriv "$1" set GreenAP=0
     fi
 fi
-###########################################ALWAYS END##########################
+###########################################ALWAYS END########################################
+# rescan coexist mode
 if [ "$AP2040Rescan" = "1" ]; then
     iwpriv "$1" set AP2040Rescan=1
+fi
+###########################################APCLI param#######################################
+# rescan and connect to ap (this must set after all params for rootinterface set)
+if [ "$OperationMode" = "3" ]; then
+    if [ "$ApCliAutoConnect" = "1" ]; then
+	iwpriv apcli0 set ApCliAutoConnect=1
+    else
+	iwpriv apcli0 set ApCliAutoConnect=0
+    fi
 fi
