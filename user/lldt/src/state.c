@@ -27,6 +27,10 @@
 #include "bandfuncs.h"
 #include "packetio.h"
 
+#ifndef UINT_MAX
+#define UINT_MAX        (~0U)
+#endif
+
 /****************************
  * Timeout handlers - 
  * these are the time-based entry points, which also clock the state machine.

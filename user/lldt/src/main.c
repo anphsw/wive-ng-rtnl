@@ -19,8 +19,6 @@
 
 //#define CHECKING_PACKING 1
 
-#include <linux/config.h>
-
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
@@ -267,6 +265,9 @@ main(int argc, char **argv)
     g_procnetdev = fopen("/proc/net/dev","r");
     if (g_procnetdev<0)
         die("fopen of /proc/net/dev failed\n");
+#ifdef USE_IPV6
+    g_procnetinet6 = fopen("/proc/net/if_inet6","r");
+#endif
 #endif
 
     /* Initialize the timers (inactivity timers are init'd when session is created) */
@@ -276,7 +277,7 @@ main(int argc, char **argv)
      * currently, v1.0, this only involves LTLV pointers... */
 
     init_from_conf_file();
-    get_machine_name();
+
     event_init();
     qos_init();
 
