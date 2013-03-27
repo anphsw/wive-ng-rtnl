@@ -1430,22 +1430,23 @@
 22) kernel: ipv4: add a missing rcu_assign_pointer() in routing cache.<br>
 23) kernel: ipv4: elide use of rt->rt_dst in ip_forward().<br>
 24) kernel: ipv4: remove rt->rt_dst reference from ip_forward_options().<br>
-25) kernel: ppp: remove unsupported protocols parse (IPX/APPLETALK/MPLS) decrease cpu usage.<br>
-26) kernel: ppp: small optimization for decrease cpu overhead.<br>
-27) init.d: radvd: use real_wan_if_ip for support 6to4 over ppp based tunnels.<br>
-28) init.d: iptables: consolidate v4/v6 rules in one script.<br>
-29) init.d: prevent hot replace routes - fix tunnel restart at renew issue (set RouteUpOnce=0 for old mode).<br>
-30) init.d: full config dhcp client logic move to wan script.<br>
-31) init.d: transmission: auto make home dir and check disc mount before start.<br>
-32) init.d: radvd: fix calculate mtu for sit/ipv6 ifaces (6to4 over ppp issue fix).<br>
-33) init.d: iptables: cleanup iptables rules. Remove drop target(allready dropped by default).<br>
-34) init.d: rework servies restart logic.<br>
-35) defaults: set HT_MIMOPSMode=3 - need for multiple TX/RX streams compat.<br>
-36) configs: now kernel modules for 8Mb and 4Mb devices use one full optimization flags at build(speedup 4Mb devices).<br>
-37) configs: add more modem support automatization logic.<br>
-38) goahead: rework samba WebUI, cleanup and more bug fixes.<br>
-39) goahead: fix wifi igmpsnoop independed set.<br>
-40) dropbear: version up to 2013.56.<br>
+25) kernel: ipv4: kill spurious write to iph->daddr in ip_forward_options().<br>
+26) kernel: ppp: remove unsupported protocols parse (IPX/APPLETALK/MPLS) decrease cpu usage.<br>
+27) kernel: ppp: small optimization for decrease cpu overhead.<br>
+28) init.d: radvd: use real_wan_if_ip for support 6to4 over ppp based tunnels.<br>
+29) init.d: iptables: consolidate v4/v6 rules in one script.<br>
+30) init.d: prevent hot replace routes - fix tunnel restart at renew issue (set RouteUpOnce=0 for old mode).<br>
+31) init.d: full config dhcp client logic move to wan script.<br>
+32) init.d: transmission: auto make home dir and check disc mount before start.<br>
+33) init.d: radvd: fix calculate mtu for sit/ipv6 ifaces (6to4 over ppp issue fix).<br>
+34) init.d: iptables: cleanup iptables rules. Remove drop target(allready dropped by default).<br>
+35) init.d: rework servies restart logic.<br>
+36) defaults: set HT_MIMOPSMode=3 - need for multiple TX/RX streams compat.<br>
+37) configs: now kernel modules for 8Mb and 4Mb devices use one full optimization flags at build(speedup 4Mb devices).<br>
+38) configs: add more modem support automatization logic.<br>
+39) goahead: rework samba WebUI, cleanup and more bug fixes.<br>
+40) goahead: fix wifi igmpsnoop independed set.<br>
+41) dropbear: version up to 2013.56.<br>
 
 <br>
 <br>

@@ -577,7 +577,6 @@ void ip_forward_options(struct sk_buff *skb)
 		}
 		if (srrptr + 3 <= srrspace) {
 			opt->is_changed = 1;
-			skb->nh.iph->daddr = rt->rt_dst;
 			ip_rt_get_source(&optptr[srrptr-1], rt);
 			optptr[2] = srrptr+4;
 		} else if (net_ratelimit())
