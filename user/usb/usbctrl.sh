@@ -55,7 +55,7 @@ case $TYPE in
 	else
 	    $LOG "${ACTION} ${idVendor}:${idProduct} may be storage"
 	    if [ ! -d /sys/module/usb-storage ]; then
-		$LOG "Load modeule usb-storage and wait initialization to complete"
+		$LOG "Load module usb-storage and wait initialization to complete"
 		modprobe -q usb-storage
 		while [ ! -d /sys/module/usb_storage ]; do
 		    sleep 1
@@ -83,6 +83,12 @@ case $TYPE in
 	    fi
 	    if [ ! -d /sys/module/option ]; then
 		modprobe -q option
+	    fi
+	    if [ ! -d /sys/module/cdc_acm ]; then
+		modprobe -q cdc_acm
+	    fi
+	    if [ ! -d /sys/module/pl2303 ]; then
+		modprobe -q pl2303
 	    fi
 	    if [ ! -d /sys/module/hso ]; then
 		modprobe -q hso
