@@ -48,6 +48,7 @@ config USB_STORAGE_DATAFAB
 
 config USB_STORAGE_FREECOM
 	bool "Freecom USB/ATAPI Bridge support"
+	default n
 	depends on USB_STORAGE
 	help
 	  Support for the Freecom USB to IDE/ATAPI adaptor.
@@ -156,6 +157,7 @@ config USB_STORAGE_KARMA
 
 config USB_LIBUSUAL
 	bool "The shared table of common (or usual) storage devices"
+	default n
 	depends on USB
 	help
 	  This module contains a table of common (or usual) devices
