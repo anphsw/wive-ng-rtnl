@@ -48,7 +48,7 @@ image:
 	##############CREATE IMAGE#################
 	$(CROSS_COMPILE)objcopy -O binary -R .note -R .comment -S $(ROOTDIR)/$(LINUXDIR)/vmlinux  $(KERNELZ)
 	cd $(IMAGEDIR) ; rm -f $(KERNELZ).*; \
-	$(ROOTDIR)/tools/bin/lzma_alone e -a1 -d$(CONFIG_LZMA_COMPRESS_LEVEL) $(KERNELZ) $(KERNELZ).$(COMP)
+	$(ROOTDIR)/tools/bin/lzma_alone e -a1 -lc1 -lp2 -pb2 -d$(CONFIG_LZMA_COMPRESS_LEVEL) $(KERNELZ) $(KERNELZ).$(COMP)
 ifeq    ($(CONFIG_BLK_DEV_INITRD),)
 ifeq    ($(CONFIG_ROOTFS_IN_FLASH_NO_PADDING),)
 	# Original Kernel Image Size
