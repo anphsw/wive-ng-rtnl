@@ -1,5 +1,5 @@
 VPATH = src
-CFLAGS = -Os -pipe -Wall -Wno-unused -s -fpack-struct -Wpadded
+CFLAGS = -Os -pipe -fpack-struct -Wall -Wno-unused -fno-caller-saves -fno-aggressive-loop-optimizations
 LD= $(CC)
 OS_LAYER = osl-linux.c
 
