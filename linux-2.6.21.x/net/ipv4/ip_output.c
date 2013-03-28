@@ -132,7 +132,7 @@ int ip_build_and_send_pkt(struct sk_buff *skb, struct sock *sk,
 	/* Build the IP header. */
 	skb_push(skb, sizeof(struct iphdr) + (opt ? opt->optlen : 0));
 	skb_reset_network_header(skb);
-	iph = skb->nh.iph;
+	iph = ip_hdr(skb);
 	iph->version  = 4;
 	iph->ihl      = 5;
 	iph->tos      = inet->tos;
@@ -448,7 +448,7 @@ int ip_fragment(struct sk_buff *skb, int (*output)(struct sk_buff*))
 	 *	Point into the IP datagram header.
 	 */
 
-	iph = skb->nh.iph;
+	iph = ip_hdr(skb);
 
 	if (unlikely((iph->frag_off & htons(IP_DF)) && !skb->local_df)) {
 		IP_INC_STATS(IPSTATS_MIB_FRAGFAILS);
@@ -527,7 +527,7 @@ int ip_fragment(struct sk_buff *skb, int (*output)(struct sk_buff*))
 				__skb_push(frag, hlen);
 				skb_reset_network_header(frag);
 				memcpy(skb_network_header(frag), iph, hlen);
-				iph = frag->nh.iph;
+				iph = ip_hdr(frag);
 				iph->tot_len = htons(frag->len);
 				ip_copy_metadata(frag, skb);
 				if (offset == 0)
@@ -576,6 +576,10 @@ slow_path_clean:
 	}
 
 slow_path:
+	/* for offloaded checksums cleanup checksum before fragmentation */
+	if ((skb->ip_summed == CHECKSUM_PARTIAL) && skb_checksum_help(skb))
+		goto fail;
+
 	left = skb->len - hlen;		/* Space per frame */
 	ptr = raw + hlen;		/* Where to start from */
 
