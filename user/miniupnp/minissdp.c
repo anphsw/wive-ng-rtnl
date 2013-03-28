@@ -610,8 +610,9 @@ ProcessSSDPData(int s, const char *bufr, int n,
 	lan_addr = get_lan_for_peer(sender);
 	if(lan_addr == NULL)
 	{
-		syslog(LOG_WARNING, "SSDP packet sender %s not from a LAN, ignoring",
+		/* syslog(LOG_WARNING, "SSDP packet sender %s not from a LAN, ignoring",
 		       sender_str);
+		*/
 		return;
 	}
 
