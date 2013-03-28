@@ -220,6 +220,13 @@ flush_net_caches() {
     echo 1 > /proc/sys/net/nf_conntrack_table_flush
 }
 
+# flush arp cache in switch
+flush_arp_cache() {
+    if [ -e /bin/switch ]; then
+	switch clear > /dev/null 2>&1
+    fi
+}
+
 delif_from_br() {
     ip addr flush dev $1 > /dev/null 2>&1
     if [ -d /proc/sys/net/ipv6 ]; then

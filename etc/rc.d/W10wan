@@ -152,6 +152,9 @@ get_param() {
 }
 
 stop() {
+    # before deconfigure
+    # this prevent flood/loop with ic+ aplink/downlink switches
+    flush_arp_cache
     # stop all vpn services
     service vpnhelper stop_safe
     # stop dhcp and zeroconf client

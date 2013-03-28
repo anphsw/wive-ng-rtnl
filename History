@@ -1449,12 +1449,13 @@
 41) init.d: rework servies restart logic.<br>
 42) init.d: fix apcli mode auto reconnect.<br>
 43) init.d: split wait_connect and wifi_reconnect.<br>
-44) defaults: set HT_MIMOPSMode=3 - need for multiple TX/RX streams compat.<br>
-45) configs: now kernel modules for 8Mb and 4Mb devices use one full optimization flags at build(speedup 4Mb devices).<br>
-46) configs: add more modem support automatization logic.<br>
-47) goahead: rework samba WebUI, cleanup and more bug fixes.<br>
-48) goahead: fix wifi igmpsnoop independed set.<br>
-49) dropbear: version up to 2013.56.<br>
+44) init.d: cleanup arp records in switch for prevent flood/deadloop with ic+ aplink/downlink switches.<br>
+45) defaults: set HT_MIMOPSMode=3 - need for multiple TX/RX streams compat.<br>
+46) configs: now kernel modules for 8Mb and 4Mb devices use one full optimization flags at build(speedup 4Mb devices).<br>
+47) configs: add more modem support automatization logic.<br>
+48) goahead: rework samba WebUI, cleanup and more bug fixes.<br>
+49) goahead: fix wifi igmpsnoop independed set.<br>
+50) dropbear: version up to 2013.56.<br>
 
 <br>
 <br>

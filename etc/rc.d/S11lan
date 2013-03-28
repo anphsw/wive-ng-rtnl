@@ -55,6 +55,10 @@ start() {
 	    echo 1 > "/proc/sys/net/ipv6/conf/$lan_if/forwarding"
 	fi
     fi
+
+    # after full configure cleaup arp records
+    # this prevent flood/loop with ic+ aplink/downlink switches
+    flush_arp_cache
 }
 
 addr_flush() {
