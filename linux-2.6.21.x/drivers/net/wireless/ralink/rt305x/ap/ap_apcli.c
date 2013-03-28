@@ -554,7 +554,7 @@ BOOLEAN ApCliLinkUp(
 						pMacEntry->MaxHTPhyMode.field.BW = 1;
 						pMacEntry->MaxHTPhyMode.field.MODE = MODE_HTMIX;
 						pMacEntry->MaxHTPhyMode.field.STBC = 0;
-						pMacEntry->MaxHTPhyMode.field.ShortGI = 0;
+						pMacEntry->MaxHTPhyMode.field.ShortGI = 1;
 						pMacEntry->MaxHTPhyMode.field.MCS = 32;
 					}
 					else if (pMacEntry->MaxHTPhyMode.field.MCS > pAd->ApCfg.ApCliTab[ifIndex].HTPhyMode.field.MCS)

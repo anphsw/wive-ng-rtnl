@@ -239,7 +239,7 @@ MAC_TABLE_ENTRY *MacTableInsertWDSEntry(
 						pEntry->MaxHTPhyMode.field.BW = 1;
 						pEntry->MaxHTPhyMode.field.MODE = MODE_HTMIX;
 						pEntry->MaxHTPhyMode.field.STBC = 0;
-						pEntry->MaxHTPhyMode.field.ShortGI = 0;
+						pEntry->MaxHTPhyMode.field.ShortGI = 1;
 						pEntry->MaxHTPhyMode.field.MCS = 32;
 					}
 					else if (pEntry->MaxHTPhyMode.field.MCS > pAd->WdsTab.WdsEntry[WdsTabIdx].HTPhyMode.field.MCS)

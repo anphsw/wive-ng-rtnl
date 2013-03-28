@@ -3820,7 +3820,7 @@ VOID	UserCfgInit(
 	pAd->ate.Payload = 0xA5;/* to be backward compatible */	
 	pAd->ate.IPG = 200;/* 200 : sync with QA */
 	pAd->ate.TxLength = 1024;
-	pAd->ate.TxWI.ShortGI = 0;// LONG GI : 800 ns
+	pAd->ate.TxWI.ShortGI = 1;// SHORT GI : 400 ns
 	pAd->ate.TxWI.PHYMODE = MODE_CCK;
 	pAd->ate.TxWI.MCS = 3;
 	pAd->ate.TxWI.BW = BW_20;
