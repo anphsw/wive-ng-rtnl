@@ -41,12 +41,12 @@ endif
 # First settings we always want for all build
 #
 
-ENDIAN        ?= little
-MACHINE       = mips
-ARCH          = mips
-CROSS_COMPILE = $(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-
-CROSS         = $(CROSS_COMPILE)
-CONFIGURE_HOST = $(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-
+ENDIAN		?= little
+MACHINE		= mips
+ARCH		= mips
+CROSS_COMPILE	= $(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-
+CROSS		= $(CROSS_COMPILE)
+CONFIGURE_HOST	= $(CROSS_COMPILE)
 
 CC        = $(CROSS_COMPILE)gcc $(CPUFLAGS)
 AS        = $(CROSS_COMPILE)as $(CPUFLAGS)
