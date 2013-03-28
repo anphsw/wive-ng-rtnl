@@ -1,3 +1,2 @@
 ) Add page for configure 2.4GHz wifi module in dual wlan configuration
 ) Rewrite usb managment in webui
-) ApCliAutoConnect need add in webui (AP Client menu page)
