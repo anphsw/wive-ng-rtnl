@@ -882,7 +882,7 @@ static VOID ApCliCtrlDisconnectReqAction(
 	return;
 }
 
-/* 
+/*
     ==========================================================================
     Description:
         APCLI MLME Peer DeAssoc Req state machine procedure
@@ -906,25 +906,6 @@ static VOID ApCliCtrlPeerDeAssocReqAction(
 	if (pApCliEntry->Valid)
 		ApCliLinkDown(pAd, ifIndex);
 
-#ifdef APCLI_AUTO_CONNECT_SUPPORT 
-	if (pAd->ApCfg.ApCliAutoConnectRunning == TRUE)
-	{
-		PMAC_TABLE_ENTRY pMacEntry;
-		pMacEntry = &pAd->MacTab.Content[pApCliEntry->MacTabWCID];
-		*pCurrState = APCLI_CTRL_SEARCHING;
-
-		/* Reset status here in case interfaces are called down in the progress */
-		pAd->ApCfg.ApCliAutoConnectRunning = FALSE;
-		NdisZeroMemory(pApCliEntry->CfgApCliBssid, MAC_ADDR_LEN);
-		DBGPRINT(RT_DEBUG_TRACE, ("(%s) Searching state: Enqueue cmd Switch Candidate.\n", __FUNCTION__));
-		MlmeEnqueue(pAd,
-					APCLI_CTRL_STATE_MACHINE,
-					APCLI_CTRL_SWITCH_CANDIDATE_AP_REQ,
-					0, NULL, ifIndex);
-	}
-	else
-#else
-	{
 	// set the apcli interface be invalid.
 	pApCliEntry->Valid = FALSE;
 
@@ -935,12 +916,11 @@ static VOID ApCliCtrlPeerDeAssocReqAction(
 	pAd->MlmeAux.Rssi = 0;
 
 	*pCurrState = APCLI_CTRL_DISCONNECTED;
-	}
-#endif /* APCLI_AUTO_CONNECT_SUPPORT */	
+
 	return;
 }
 
-/* 
+/*
     ==========================================================================
     Description:
         APCLI MLME Disconnect Req state machine procedure
