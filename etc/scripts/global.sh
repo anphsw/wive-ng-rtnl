@@ -188,6 +188,12 @@ wifi_reconnect() {
 	    iwpriv $first_wlan_root_if set SSID="$staCur_SSID"
 	    usleep 500000
 	fi
+    elif [ "$OperationMode" = "2" ]; then
+	# Reenable apcli for reconnect
+	iwpriv $first_wlan_apcli set ApCliEnable=0
+        usleep 100000
+	iwpriv $first_wlan_apcli set ApCliEnable=1
+	usleep 500000
     fi
 }
 
