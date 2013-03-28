@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # if app not exist
-if [ ! -f /bin/transmission-daemon ]; then
+if [ ! -f /bin/transmission-daemon ] || [ ! -d /proc/bus/usb ]; then
     exit 0
 fi
 
@@ -16,10 +16,6 @@ LOG="logger -t transmission"
 
 start() {
     get_param
-    if [ "$public" = "" ];then
-	$LOG "Disc not mounted... Please check USB connection."
-	exit 0
-    fi
     if [ "$TransmissionEnabled" = "1" ] && [ ! "`pidof transmission-daemon`" ]; then
 	$LOG "Start transmission daemon."
 	mkdir -p $TRANSMISSION_HOME
@@ -48,6 +44,19 @@ get_param() {
     eval `nvram_buf_get 2860 TransmissionEnabled TransRPCPort TransAuthor TransInPort TransLogin TransPass`
     #include profile variables
     . /etc/profile
+    count=0
+    # 10*20=200 seconds check media mount and exit
+    while [ "$public" = "" ]; do
+	count="$(($count+1))"
+	if [ "$count" != "20" ]; then
+	    $LOG "Disc not mounted... Please check USB connection. Wait 10sec and recheck. $count"
+	    sleep 10
+	    # recheck public set
+	    . /etc/profile
+	else
+	    exit 0
+	fi
+    done
 }
 
 case "$1" in
