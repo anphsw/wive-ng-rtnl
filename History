@@ -1405,7 +1405,7 @@
 62) igmpproxy: some fixups.<br>
 
 <br>
-<b>3.7.x</b><br>
+<b>4.0.x</b><br>
 1) toolchain: build script fix detect host gcc version and small cleanup.<br>
 2) toolchain: move to new 4.8.0 gcc (with disabled new loop optimization mode -fno-aggressive-loop-optimizations - fastnat issue).<br>
 3) kernel: mips: backport pathces for compat with new 4.x.x assembler.<br>
