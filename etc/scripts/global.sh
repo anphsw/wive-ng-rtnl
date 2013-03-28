@@ -32,7 +32,7 @@ eval `nvram_buf_get 2860 OperationMode wanConnectionMode wan_ipaddr wan_static_d
 	dnsPEnabled UDPXYMode igmpEnabled \
 	vpnEnabled vpnPurePPPOE vpnType \
 	radvdEnabled IPv6_6RD_Enable \
-	ApCliBridgeOnly ApCliAutoConnect \
+	ApCliBridgeOnly \
 	MODEMENABLED \
 	QoSEnable simple_qos`
 

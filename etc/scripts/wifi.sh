@@ -6,7 +6,7 @@
 echo ">>>>> RECONFIGURE WIFI IF = $1 <<<<<<<<<<"
 
 ########################################ALLMODE param########################################
-eval `nvram_buf_get 2860 HiPower AutoConnect ApCliAutoConnect OperationMode`
+eval `nvram_buf_get 2860 HiPower AutoConnect OperationMode`
 ########################################LNA param############################################
 # Disable increase LNA gain
 if [ "$CONFIG_RALINK_RT3052_MP2" = "y" ]; then
@@ -74,13 +74,4 @@ fi
 # rescan coexist mode
 if [ "$AP2040Rescan" = "1" ]; then
     iwpriv "$1" set AP2040Rescan=1
-fi
-###########################################APCLI param#######################################
-# rescan and connect to ap (this must set after all params for rootinterface set)
-if [ "$OperationMode" = "3" ]; then
-    if [ "$ApCliAutoConnect" = "1" ]; then
-	iwpriv apcli0 set ApCliAutoConnect=1
-    else
-	iwpriv apcli0 set ApCliAutoConnect=0
-    fi
 fi
