@@ -1388,18 +1388,7 @@ VOID PeerPairMsg3Action(
 
 			IfIndex = pEntry->MatchAPCLITabIdx;
 			if (IfIndex >= MAX_APCLI_NUM)
-				return;	
-			
-#ifdef APCLI_AUTO_CONNECT_SUPPORT
-			if(pAd->ApCfg.ApCliAutoConnectRunning == TRUE)
-				{
-					DBGPRINT(RT_DEBUG_TRACE, ("Apcli auto connected:PeerPairMsg3Action() \n"));
-					/*Clear the Bssid auto-configured during the process */
-					NdisZeroMemory(pAd->ApCfg.ApCliTab[IfIndex].CfgApCliBssid, MAC_ADDR_LENGTH);
-					pAd->ApCfg.ApCliAutoConnectRunning = FALSE;
-					RtmpOSWirelessEventSend(pAd, IWEVCUSTOM, IW_APCLI_AUTO_CONN_SUCCESS, NULL, NULL, 0);			
-				}
-#endif /*APCLI_AUTO_CONNECT_SUPPORT */
+				return;
 		}
 #endif /* APLCI_SUPPORT */
 	}
@@ -1781,18 +1770,7 @@ VOID	PeerGroupMsg1Action(
 
 			IfIndex = pEntry->MatchAPCLITabIdx;
 			if (IfIndex >= MAX_APCLI_NUM)
-				return;	
-			
-#ifdef APCLI_AUTO_CONNECT_SUPPORT
-			if(pAd->ApCfg.ApCliAutoConnectRunning == TRUE)
-				{
-					DBGPRINT(RT_DEBUG_TRACE, ("Apcli auto connected:PeerGroupMsg1Action() \n"));
-					/*Clear the Bssid auto-configured during the process */
-					NdisZeroMemory(pAd->ApCfg.ApCliTab[IfIndex].CfgApCliBssid, MAC_ADDR_LENGTH);
-					pAd->ApCfg.ApCliAutoConnectRunning = FALSE;
-					RtmpOSWirelessEventSend(pAd, IWEVCUSTOM, IW_APCLI_AUTO_CONN_SUCCESS, NULL, NULL, 0);
-				}
-#endif /*APCLI_AUTO_CONNECT_SUPPORT */
+				return;
 		}
 #endif /* APLCI_SUPPORT */
 	}

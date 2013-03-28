@@ -3205,9 +3205,6 @@ typedef struct _APCLI_STRUCT {
 	ULONG                   AssocCurrState;
 	ULONG					WpaPskCurrState;
 
-#ifdef APCLI_AUTO_CONNECT_SUPPORT
-	USHORT			ProbeReqCnt;
-#endif /* APCLI_AUTO_CONNECT_SUPPORT */
 	USHORT                  AuthReqCnt;
 	USHORT                  AssocReqCnt;
 
@@ -3282,9 +3279,6 @@ typedef struct _AP_ADMIN_CONFIG {
 	UCHAR				ApCliInfRunned;				// Number of  ApClient interface which was running. value from 0 to MAX_APCLI_INTERFACE
 	APCLI_STRUCT		ApCliTab[MAX_APCLI_NUM];		//AP-client 
 	RALINK_TIMER_STRUCT	ApCliScanTimer;
-#ifdef APCLI_AUTO_CONNECT_SUPPORT	
-	BOOLEAN					ApCliAutoConnectRunning;
-#endif /* APCLI_AUTO_CONNECT_SUPPORT */
 #endif /* APCLI_SUPPORT */
 
 	// for wpa

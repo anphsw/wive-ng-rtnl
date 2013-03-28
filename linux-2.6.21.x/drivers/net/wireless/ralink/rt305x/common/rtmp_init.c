@@ -3513,17 +3513,11 @@ pAd->StaCfg.PSControl.field.rt30xxFollowHostASPM=1;
 RTMP_SET_PSFLAG(pAd, fRTMP_PS_CAN_GO_SLEEP);
 #endif // CONFIG_STA_SUPPORT //
 
-#ifdef APCLI_SUPPORT
-#ifdef APCLI_AUTO_CONNECT_SUPPORT
-	pAd->ApCfg.ApCliAutoConnectRunning= FALSE;
-#endif /* APCLI_AUTO_CONNECT_SUPPORT */
-#endif /* APCLI_SUPPORT */
-
 #if defined(AP_SCAN_SUPPORT) || defined(CONFIG_STA_SUPPORT)
 	for (i = 0; i < MAX_LEN_OF_BSS_TABLE; i++) 
 	{
 		PBSS_ENTRY	pBssEntry = &pAd->ScanTab.BssEntry[i];
-		
+
 		if (pAd->ProbeRespIE[i].pIe)
 			pBssEntry->pVarIeFromProbRsp = pAd->ProbeRespIE[i].pIe;
 		else

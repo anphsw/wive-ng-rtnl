@@ -111,15 +111,6 @@ char const *pWirelessWscEventText[IW_WSC_EVENT_TYPE_NUM] = {
 	"Not only one candidate found"							/* IW_WSC_MANY_CANDIDATE */
 	};
 #endif // WSC_INCLUDED //
-
-#ifdef APCLI_AUTO_CONNECT_SUPPORT
-/* for ApCliAutoConnect to indicate operation success or not */
-char const *pWirelessApcliEventText[IW_APCLI_AUTO_CONN_TYPE_NUM] = {
-	"Auto-connect success!",								/*IW_APCLI_AUTO_CONN_SUCCESS*/
-	"Auto-connect fail!",									/*IW_APCLI_AUTO_CONN_FAIL*/
-	};
-#endif /* APCLI_AUTO_CONNECT_SUPPORT */
-
 #endif // SYSTEM_LOG_SUPPORT //
 
 /* timeout -- ms */

@@ -261,18 +261,6 @@ BOOLEAN APCliInstallSharedKey(
 	IN	UCHAR			DefaultKeyIdx,
 	IN  MAC_TABLE_ENTRY *pEntry);
 
-#ifdef APCLI_AUTO_CONNECT_SUPPORT
-BOOLEAN ApCliAutoConnectExec(
-	IN  PRTMP_ADAPTER   pAd);
-
-BOOLEAN ApcliCompareAuthEncryp(
-	IN PAPCLI_STRUCT 					pApCliEntry,
-	IN NDIS_802_11_AUTHENTICATION_MODE AuthMode,
-	IN NDIS_802_11_AUTHENTICATION_MODE AuthModeAux,
-	IN NDIS_802_11_WEP_STATUS			WEPstatus,
-	IN CIPHER_SUITE 						WPA);
-#endif /* APCLI_AUTO_CONNECT_SUPPORT */
-
 extern INT Set_ApCli_Enable_Proc(IN PRTMP_ADAPTER pAd, IN PSTRING arg);
 extern INT Set_ApCli_Ssid_Proc(IN PRTMP_ADAPTER pAd, IN PSTRING arg);
 extern INT Set_ApCli_Bssid_Proc(IN PRTMP_ADAPTER pAd, IN PSTRING arg);
@@ -284,9 +272,6 @@ extern INT Set_ApCli_Key3_Proc(IN PRTMP_ADAPTER pAd, IN PSTRING arg);
 extern INT Set_ApCli_Key4_Proc(IN PRTMP_ADAPTER pAd, IN PSTRING arg);
 extern INT Set_ApCli_TxMode_Proc(IN PRTMP_ADAPTER pAd, IN  PSTRING arg);
 extern INT Set_ApCli_TxMcs_Proc(IN PRTMP_ADAPTER pAd, IN  PSTRING arg);
-#ifdef APCLI_AUTO_CONNECT_SUPPORT
-extern INT Set_ApCli_AutoConnect_Proc(IN PRTMP_ADAPTER pAd,	IN PSTRING arg);
-#endif /* APCLI_AUTO_CONNECT_SUPPORT */
 #ifdef WSC_AP_SUPPORT
 extern INT Set_AP_WscSsid_Proc(IN PRTMP_ADAPTER	pAd, IN	PSTRING arg);
 #endif // WSC_AP_SUPPORT //

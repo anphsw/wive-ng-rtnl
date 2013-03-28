@@ -655,9 +655,6 @@ INT Set_ApCli_Key3_Proc(IN PRTMP_ADAPTER pAd, IN PSTRING arg);
 INT Set_ApCli_Key4_Proc(IN PRTMP_ADAPTER pAd, IN PSTRING arg);
 INT Set_ApCli_TxMode_Proc(IN PRTMP_ADAPTER pAd, IN  PSTRING arg);
 INT Set_ApCli_TxMcs_Proc(IN PRTMP_ADAPTER pAd, IN  PSTRING arg);
-#ifdef APCLI_AUTO_CONNECT_SUPPORT
-INT Set_ApCli_AutoConnect_Proc(IN PRTMP_ADAPTER pAd,	IN PSTRING arg);
-#endif /* APCLI_AUTO_CONNECT_SUPPORT */
 #ifdef WSC_AP_SUPPORT
 INT Set_AP_WscSsid_Proc(IN PRTMP_ADAPTER	pAd, IN	PSTRING arg);
 #endif // WSC_AP_SUPPORT //
@@ -1071,9 +1068,6 @@ static struct {
 	{"ApCliKey4",					Set_ApCli_Key4_Proc},
 	{"ApCliTxMode",					Set_ApCli_TxMode_Proc},
 	{"ApCliTxMcs",					Set_ApCli_TxMcs_Proc},	
-#ifdef APCLI_AUTO_CONNECT_SUPPORT	
-	{"ApCliAutoConnect", 			Set_ApCli_AutoConnect_Proc},
-#endif /* APCLI_AUTO_CONNECT_SUPPORT */
 #ifdef WSC_AP_SUPPORT	
 	{"ApCliWscSsid",				Set_AP_WscSsid_Proc},
 #endif // WSC_AP_SUPPORT //
@@ -8591,69 +8585,6 @@ INT Set_ApCli_TxMcs_Proc(
 
 	return TRUE;
 }
-
-#ifdef APCLI_AUTO_CONNECT_SUPPORT
-/* 
-    ==========================================================================
-    Description:
-        Trigger Apcli Auto connect to find the missed AP.
-    Return:
-        TRUE if all parameters are OK, FALSE otherwise
-    ==========================================================================
-*/
-INT Set_ApCli_AutoConnect_Proc(
-	IN PRTMP_ADAPTER pAd,
-	IN PSTRING arg)
-{
-	POS_COOKIE  		pObj= (POS_COOKIE) pAd->OS_Cookie;
-	UCHAR				ifIndex;
-	PAP_ADMIN_CONFIG	pApCfg;
-	PAPCLI_STRUCT		pApCliEntry;
-
-	if (pObj->ioctl_if_type != INT_APCLI)
-		return FALSE;
-	pApCfg = &pAd->ApCfg;
-	ifIndex = pObj->ioctl_if;
-	pApCliEntry = &pApCfg->ApCliTab[ifIndex];
-
-        if (!APCLI_IF_UP_CHECK(pAd, ifIndex))
-        {
-                DBGPRINT(RT_DEBUG_TRACE, ("apcli%u is down. Process stop.\n", ifIndex));
-                return TRUE;
-        }	
-
-	if (pApCliEntry->CfgApCliBssid[0] |
-		pApCliEntry->CfgApCliBssid[1] |
-		pApCliEntry->CfgApCliBssid[2] |
-		pApCliEntry->CfgApCliBssid[3] |
-		pApCliEntry->CfgApCliBssid[4] |
-		pApCliEntry->CfgApCliBssid[5])
-	{
-		DBGPRINT(RT_DEBUG_WARN, ("Bssid of apcli%u should not be pre-configured (should be zero). Process stop.\n", ifIndex));
-		return TRUE;
-	}
-	
-	if (pApCfg->ApCliAutoConnectRunning == FALSE)
-	{
-		Set_ApCli_Enable_Proc(pAd, "0");
-		pApCfg->ApCliAutoConnectRunning = TRUE;
-	}	
-	else
-	{
-		DBGPRINT(RT_DEBUG_TRACE, ("Set_ApCli_AutoConnect_Proc() is still running\n"));
-		return TRUE;
-	}
-	DBGPRINT(RT_DEBUG_TRACE, ("I/F(apcli%d) Set_ApCli_AutoConnect_Proc::(Len=%d,Ssid=%s)\n",
-			ifIndex, pApCfg->ApCliTab[ifIndex].CfgSsidLen, pApCfg->ApCliTab[ifIndex].CfgSsid));
-	/*
-		use site survey function to trigger auto connecting.
-	*/
-	Set_SiteSurvey_Proc(pAd, "");
-
-	return TRUE;
-}
-#endif  /* APCLI_AUTO_CONNECT_SUPPORT */
-
 
 #ifdef WSC_AP_SUPPORT
 INT Set_AP_WscSsid_Proc(
