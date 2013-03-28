@@ -32,7 +32,8 @@ eval `nvram_buf_get 2860 OperationMode wanConnectionMode wan_ipaddr wan_static_d
 	dnsPEnabled UDPXYMode igmpEnabled \
 	vpnEnabled vpnPurePPPOE vpnType \
 	radvdEnabled IPv6_6RD_Enable \
-	ApCliBridgeOnly MODEMENABLED \
+	ApCliBridgeOnly ApCliAutoConnect \
+	MODEMENABLED \
 	QoSEnable simple_qos`
 
 # name/mask for first wlanmodule used in system logic
@@ -178,21 +179,35 @@ get_txqlen() {
     fi
 }
 
+# reconnect to AP
+wifi_reconnect() {
+    if [ "$OperationMode" = "2" ]; then
+	staCur_SSID=`nvram_get 2860 staCur_SSID`
+	if [ "$staCur_SSID" != "" ]; then
+	    # Reconnect to STA
+	    iwpriv $first_wlan_root_if set SSID="$staCur_SSID"
+	    usleep 500000
+	fi
+    elif [ "$OperationMode" = "3" ]; then
+	if [ "$ApCliAutoConnect" = "1" ]; then
+	    iwpriv $first_wlan_apcli set ApCliAutoConnect=1
+	    usleep 500000
+	fi
+    fi
+}
+
 # wait connect to AP
 wait_connect() {
     if [ "$OperationMode" = "2" ]; then
-	# Reconnect to AP if need
-	if [ "$1" = "reconnect" ]; then
-	    staCur_SSID=`nvram_get 2860 staCur_SSID`
-	    if [ "$staCur_SSID" != "" ]; then
-		# Reconnect to STA
-		iwpriv $first_wlan_root_if set SSID="$staCur_SSID"
-		usleep 500000
-	    fi
-	fi
 	# Get connection status
 	connected=`iwpriv $first_wlan_root_if connStatus | grep Connected -c`
 	if [ "$connected" = "0" ] || [ ! -f /tmp/sta_connected ]; then
+	    exit 1
+	fi
+    elif [ "$OperationMode" = "3" ] && [ "$ApCliBridgeOnly" != "1" ]; then
+	# Get connection status
+	notconnected=`iwconfig $first_wlan_apcli | grep -c "Not-Associated"`
+	if [ "$noconnected" = "1" ]; then
 	    exit 1
 	fi
     fi

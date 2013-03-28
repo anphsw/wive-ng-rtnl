@@ -57,10 +57,10 @@ case "$1" in
 		$LOG "Restart WAN switch port."
 		/etc/scripts/config-vlan.sh WWWWW
 	    fi
-	elif [ "$OperationMode" = "2" ]; then
+	elif [ "$OperationMode" = "2" ] || [ "$OperationMode" = "3" ]; then
 	    # Try reconnect at lease failed
-	    $LOG "Wait connect and reconnect to AP if need."
-	    wait_connect reconnect
+	    $LOG "Reconnect to AP if need."
+	    wifi_reconnect
 	fi
 	rm -f $WINS_CONF
     ;;

@@ -1447,12 +1447,13 @@
 39) init.d: iptables: cleanup iptables rules. Remove drop target(allready dropped by default).<br>
 40) init.d: rework servies restart logic.<br>
 41) init.d: fix apcli mode auto reconnect.<br>
-42) defaults: set HT_MIMOPSMode=3 - need for multiple TX/RX streams compat.<br>
-43) configs: now kernel modules for 8Mb and 4Mb devices use one full optimization flags at build(speedup 4Mb devices).<br>
-44) configs: add more modem support automatization logic.<br>
-45) goahead: rework samba WebUI, cleanup and more bug fixes.<br>
-46) goahead: fix wifi igmpsnoop independed set.<br>
-47) dropbear: version up to 2013.56.<br>
+42) init.d: split wait_connect and wifi_reconnect.<br>
+43) defaults: set HT_MIMOPSMode=3 - need for multiple TX/RX streams compat.<br>
+44) configs: now kernel modules for 8Mb and 4Mb devices use one full optimization flags at build(speedup 4Mb devices).<br>
+45) configs: add more modem support automatization logic.<br>
+46) goahead: rework samba WebUI, cleanup and more bug fixes.<br>
+47) goahead: fix wifi igmpsnoop independed set.<br>
+48) dropbear: version up to 2013.56.<br>
 
 <br>
 <br>

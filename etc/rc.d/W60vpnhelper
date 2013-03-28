@@ -16,15 +16,10 @@ ppp=/etc/ppp
 
 start() {
     if [ "$vpnEnabled" = "on" ]; then
-
       # wait connetc to ap in sta mode
       # if VPN=PPPOE and vpnInterface=LAN no need wait
-      if [ "$vpnType" != "0" ]; then
-        wait_connect
-      else
-	if [ "$vpnInterface" != "LAN" ]; then
+      if [ "$vpnInterface" != "LAN" ] || [ "$vpnType" != "0" ]; then
     	    wait_connect
-	fi
       fi
 
       $LOG "Start vpnhelper"
