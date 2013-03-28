@@ -38,10 +38,10 @@ romfs
 /lib/libcurl/docs/Makefile
 /lib/libcurl/include/curl/Makefile
 /lib/libcurl/include/Makefile
-/lib/libcurl//lib/curl_config.h
 /lib/libcurl/lib/curl_config.h
+/lib/libcurl/include/curl/curlbuild.h
 /lib/libcurl/libcurl.pc
-/lib/libcurl//lib/Makefile
+/lib/libcurl/lib/Makefile
 /lib/libcurl/lib/stamp-h1
 /lib/libcurl/libtool
 /lib/libcurl/Makefile
