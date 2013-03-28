@@ -311,6 +311,7 @@ struct sk_buff {
 #if defined(CONFIG_IP_VS) || defined(CONFIG_IP_VS_MODULE)
 				ipvs_property:1,
 #endif
+				peeked:1,
 #if defined(CONFIG_NETFILTER_XT_TARGET_TRACE) || \
     defined(CONFIG_NETFILTER_XT_TARGET_TRACE_MODULE)
 				nf_trace:1,
@@ -1579,6 +1580,8 @@ static inline int pskb_trim_rcsum(struct sk_buff *skb, unsigned int len)
 		     skb != (struct sk_buff *)(queue);				\
 		     skb = tmp, tmp = skb->prev)
 
+extern struct sk_buff *__skb_recv_datagram(struct sock *sk, unsigned flags,
+					   int *peeked, int *err);
 extern struct sk_buff *skb_recv_datagram(struct sock *sk, unsigned flags,
 					 int noblock, int *err);
 extern unsigned int    datagram_poll(struct file *file, struct socket *sock,
