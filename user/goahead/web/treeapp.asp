@@ -100,42 +100,42 @@ a.config.useCookies=false;
 a.config.closeSameLevel=true;
 
 //  nodeID, parent nodeID,  Name,  URL
-a.add(000,  -1, _("treeapp router"),                "javascript:go('overview.asp');");
-a.add(200,   0, _("treeapp operation mode"),        "javascript:go('opmode.asp');");
-a.add(300,   0, _("treeapp internet settings"),     "javascript:a.oo(300);");
+a.add(000,  -1, _("treeapp router"),			"javascript:go('overview.asp');");
+a.add(200,   0, _("treeapp operation mode"),		"javascript:go('opmode.asp');");
+a.add(300,   0, _("treeapp network settings"),		"javascript:a.oo(300);");
 
-a.add(301, 300, _("treeapp lan"),                   "javascript:go('internet/lan.asp');");
-
-if (opmode != '0')
-	a.add(302, 300, _("treeapp wan"),                   "javascript:go('internet/wan.asp');");
-
-a.add(303, 300, _("treeapp vpn"),                   "javascript:go('internet/vpn.asp');");
+a.add(301, 300, _("treeapp lan"),			"javascript:go('internet/lan.asp');");
 
 if (opmode != '0')
-	a.add(304, 300, _("treeapp routing"),       "javascript:go('internet/routing.asp');");
+	a.add(302, 300, _("treeapp wan"),		"javascript:go('internet/wan.asp');");
+
+a.add(303, 300, _("treeapp vpn"),			"javascript:go('internet/vpn.asp');");
+
+if (opmode != '0')
+	a.add(304, 300, _("treeapp routing"),		"javascript:go('internet/routing.asp');");
 
 if (opmode == '4')
-	a.add(305, 300, _("treeapp hotspot"),       "javascript:go('internet/hotspot.asp');");
+	a.add(305, 300, _("treeapp hotspot"),		"javascript:go('internet/hotspot.asp');");
 
 if (swqos == '1')
 	a.add(306, 300, _("treeapp qos"),		"javascript:go('internet/qos.asp');");
 
 if (opmode == '2')
 {
-	a.add(400,   0, _("treeapp wireless settings"),     "javascript:a.oo(400);");
-	a.add(401, 400, _("treeapp profile"),               "javascript:go('station/profile.asp');");
-	a.add(402, 400, _("treeapp link status"),           "javascript:go('station/link_status.asp');");
-	a.add(403, 400, _("treeapp statistics"),            "javascript:go('station/statistics.asp');");
-	a.add(404, 400, _("treeapp advance"),               "javascript:go('station/advance.asp');");
+	a.add(400,   0, _("treeapp wireless settings"),		"javascript:a.oo(400);");
+	a.add(401, 400, _("treeapp profile"),			"javascript:go('station/profile.asp');");
+	a.add(402, 400, _("treeapp link status"),		"javascript:go('station/link_status.asp');");
+	a.add(403, 400, _("treeapp statistics"),		"javascript:go('station/statistics.asp');");
+	a.add(404, 400, _("treeapp advance"),			"javascript:go('station/advance.asp');");
 	if (stab == "1")
-		a.add(406, 400, _("treeapp wps"),                   "javascript:go('wps/wps_sta.asp');");
+		a.add(406, 400, _("treeapp wps"),		"javascript:go('wps/wps_sta.asp');");
 }
 else
 {
-	a.add(400,   0, _("treeapp wireless settings"),     "javascript:a.oo(400);");
-	a.add(401, 400, _("treeapp basic"),                 "javascript:go('wireless/basic.asp');");
-	a.add(402, 400, _("treeapp advanced"),              "javascript:go('wireless/advanced.asp');");
-	a.add(403, 400, _("treeapp security"),              "javascript:go('wireless/security.asp');");
+	a.add(400,   0, _("treeapp wireless settings"),		"javascript:a.oo(400);");
+	a.add(401, 400, _("treeapp basic"),			"javascript:go('wireless/basic.asp');");
+	a.add(402, 400, _("treeapp advanced"),			"javascript:go('wireless/advanced.asp');");
+	a.add(403, 400, _("treeapp security"),			"javascript:go('wireless/security.asp');");
 	if (wdsb == "1")
 	{
 		a.add(404, 400, _("treeapp wds"),                   "javascript:go('wireless/wds.asp');");

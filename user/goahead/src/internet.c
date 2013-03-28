@@ -1,6 +1,6 @@
 /* vi: set sw=4 ts=4 sts=4 fdm=marker: */
 /*
- *	internet.c -- Internet Settings
+ *	internet.c -- Network Settings
  *
  *	Copyright (c) Ralink Technology Corporation All Rights Reserved.
  *

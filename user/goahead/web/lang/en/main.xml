@@ -13,7 +13,7 @@
   <message msgid="treeapp closeall" msgstr="close all" />
   <message msgid="treeapp router" msgstr="Router" />
   <message msgid="treeapp operation mode" msgstr="Operation Mode" />
-  <message msgid="treeapp internet settings" msgstr="Internet Settings" />
+  <message msgid="treeapp network settings" msgstr="Network Settings" />
   <message msgid="treeapp wan" msgstr="WAN setup" />
   <message msgid="treeapp hotspot" msgstr="Hotspot setup" />
   <message msgid="treeapp lan" msgstr="LAN setup" />
