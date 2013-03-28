@@ -96,7 +96,7 @@ int ip_forward(struct sk_buff *skb)
 	/* We are about to mangle packet. Copy it! */
 	if (skb_cow(skb, LL_RESERVED_SPACE(rt->u.dst.dev)+rt->u.dst.header_len))
 		goto drop;
-	iph = skb->nh.iph;
+	iph = ip_hdr(skb);
 
 	/* Decrease ttl after skb cow done */
 	ip_decrease_ttl(iph);

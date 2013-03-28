@@ -46,7 +46,7 @@ static int xfrm4_tunnel_output(struct xfrm_state *x, struct sk_buff *skb)
 	struct iphdr *iph, *top_iph;
 	int flags;
 
-	iph = skb->nh.iph;
+	iph = ip_hdr(skb);
 	skb->h.ipiph = iph;
 
 	skb_push(skb, x->props.header_len);
@@ -93,7 +93,7 @@ static int xfrm4_tunnel_output(struct xfrm_state *x, struct sk_buff *skb)
 
 static int xfrm4_tunnel_input(struct xfrm_state *x, struct sk_buff *skb)
 {
-	struct iphdr *iph = skb->nh.iph;
+	struct iphdr *iph = ip_hdr(skb);
 	int err = -EINVAL;
 
 	switch (iph->protocol){
@@ -114,7 +114,7 @@ static int xfrm4_tunnel_input(struct xfrm_state *x, struct sk_buff *skb)
 	if (err)
 		goto out;
 
-	iph = skb->nh.iph;
+	iph = ip_hdr(skb);
 	if (iph->protocol == IPPROTO_IPIP) {
 		if (x->props.flags & XFRM_STATE_DECAP_DSCP)
 			ipv4_copy_dscp(iph, skb->h.ipiph);

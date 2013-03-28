@@ -32,7 +32,7 @@ match(const struct sk_buff *skb,
       int offset, unsigned int protoff, bool *hotdrop)
 {
 	const struct ipt_iprange_info *info = matchinfo;
-	const struct iphdr *iph = skb->nh.iph;
+	const struct iphdr *iph = ip_hdr(skb);
 
 	if (info->flags & IPRANGE_SRC) {
 		if (((ntohl(iph->saddr) < ntohl(info->src.min_ip))

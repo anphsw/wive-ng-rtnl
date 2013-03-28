@@ -566,7 +566,7 @@ static int ipgre_rcv(struct sk_buff *skb)
 	if (!pskb_may_pull(skb, 16))
 		goto drop_nolock;
 
-	iph = skb->nh.iph;
+	iph = ip_hdr(skb);
 	h = skb->data;
 	flags = *(__be16*)h;
 

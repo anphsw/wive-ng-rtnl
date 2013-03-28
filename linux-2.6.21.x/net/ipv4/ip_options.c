@@ -599,7 +599,7 @@ int ip_options_rcv_srr(struct sk_buff *skb)
 	struct ip_options *opt = &(IPCB(skb)->opt);
 	int srrspace, srrptr;
 	__be32 nexthop;
-	struct iphdr *iph = skb->nh.iph;
+	struct iphdr *iph = ip_hdr(skb);
 	unsigned char *optptr = skb_network_header(skb) + opt->srr;
 	struct rtable *rt = (struct rtable*)skb->dst;
 	struct rtable *rt2;

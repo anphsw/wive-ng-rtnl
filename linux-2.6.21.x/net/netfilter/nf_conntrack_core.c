@@ -1044,7 +1044,7 @@ resolve_normal_ct(struct sk_buff *skb,
 	struct nf_conntrack_tuple_hash *h;
 	struct nf_conn *ct;
 #ifdef CONFIG_NAT_CONE
-	struct iphdr *iph = skb->nh.iph;
+	struct iphdr *iph = ip_hdr(skb);
 #endif
 
 	if (!nf_ct_get_tuple(skb, skb_network_offset(skb),

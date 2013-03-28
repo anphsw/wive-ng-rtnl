@@ -765,7 +765,7 @@ out_fail:
 /* Process an incoming IP datagram fragment. */
 int ip_defrag(struct sk_buff *skb, u32 user)
 {
-	struct iphdr *iph = skb->nh.iph;
+	struct iphdr *iph = ip_hdr(skb);
 	struct ipq *qp;
 
 	IP_INC_STATS_BH(IPSTATS_MIB_REASMREQDS);

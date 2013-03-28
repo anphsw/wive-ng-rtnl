@@ -218,7 +218,7 @@ static int esp_input(struct xfrm_state *x, struct sk_buff *skb)
 
 	/* ... check padding bits here. Silly. :-) */
 
-	iph = skb->nh.iph;
+	iph = ip_hdr(skb);
 	ihl = iph->ihl * 4;
 
 	if (x->encap) {

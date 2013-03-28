@@ -1100,7 +1100,7 @@ static void ip_encap(struct sk_buff *skb, __be32 saddr, __be32 daddr)
 	skb_push(skb, sizeof(struct iphdr));
 	skb->h.ipiph = skb->nh.iph;
 	skb_reset_network_header(skb);
-	iph = skb->nh.iph;
+	iph = ip_hdr(skb);
 
 	iph->version	= 	4;
 	iph->tos	=	skb->nh.iph->tos;
@@ -1136,7 +1136,7 @@ static inline int ipmr_forward_finish(struct sk_buff *skb)
 
 static void ipmr_queue_xmit(struct sk_buff *skb, struct mfc_cache *c, int vifi)
 {
-	struct iphdr *iph = skb->nh.iph;
+	struct iphdr *iph = ip_hdr(skb);
 	struct vif_device *vif = &vif_table[vifi];
 	struct net_device *dev;
 	struct rtable *rt;
@@ -1202,7 +1202,7 @@ static void ipmr_queue_xmit(struct sk_buff *skb, struct mfc_cache *c, int vifi)
 
 	dst_release(skb->dst);
 	skb->dst = &rt->u.dst;
-	iph = skb->nh.iph;
+	iph = ip_hdr(skb);
 	ip_decrease_ttl(iph);
 
 	/* FIXME: forward and output firewalls used to be called here.

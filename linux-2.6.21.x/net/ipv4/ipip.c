@@ -470,7 +470,7 @@ static int ipip_rcv(struct sk_buff *skb)
 	struct iphdr *iph;
 	struct ip_tunnel *tunnel;
 
-	iph = skb->nh.iph;
+	iph = ip_hdr(skb);
 
 	read_lock(&ipip_lock);
 	if ((tunnel = ipip_tunnel_lookup(iph->saddr, iph->daddr)) != NULL) {

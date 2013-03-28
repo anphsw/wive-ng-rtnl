@@ -175,7 +175,7 @@ ip_vs_sched_persist(struct ip_vs_service *svc,
 		    __be16 ports[2])
 {
 	struct ip_vs_conn *cp = NULL;
-	struct iphdr *iph = skb->nh.iph;
+	struct iphdr *iph = ip_hdr(skb);
 	struct ip_vs_dest *dest;
 	struct ip_vs_conn *ct;
 	__be16  dport;	 /* destination port to forward */
@@ -344,7 +344,7 @@ struct ip_vs_conn *
 ip_vs_schedule(struct ip_vs_service *svc, const struct sk_buff *skb)
 {
 	struct ip_vs_conn *cp = NULL;
-	struct iphdr *iph = skb->nh.iph;
+	struct iphdr *iph = ip_hdr(skb);
 	struct ip_vs_dest *dest;
 	__be16 _ports[2], *pptr;
 
@@ -410,7 +410,7 @@ int ip_vs_leave(struct ip_vs_service *svc, struct sk_buff *skb,
 		struct ip_vs_protocol *pp)
 {
 	__be16 _ports[2], *pptr;
-	struct iphdr *iph = skb->nh.iph;
+	struct iphdr *iph = ip_hdr(skb);
 
 	pptr = skb_header_pointer(skb, iph->ihl*4,
 				  sizeof(_ports), _ports);
@@ -587,7 +587,7 @@ static int ip_vs_out_icmp(struct sk_buff **pskb, int *related)
 			return NF_STOLEN;
 	}
 
-	iph = skb->nh.iph;
+	iph = ip_hdr(skb);
 	offset = ihl = iph->ihl * 4;
 	ic = skb_header_pointer(skb, offset, sizeof(_icmph), &_icmph);
 	if (ic == NULL)
@@ -700,14 +700,14 @@ ip_vs_out(unsigned int hooknum, struct sk_buff **pskb,
 	if (skb->ipvs_property)
 		return NF_ACCEPT;
 
-	iph = skb->nh.iph;
+	iph = ip_hdr(skb);
 	if (unlikely(iph->protocol == IPPROTO_ICMP)) {
 		int related, verdict = ip_vs_out_icmp(pskb, &related);
 
 		if (related)
 			return verdict;
 		skb = *pskb;
-		iph = skb->nh.iph;
+		iph = ip_hdr(skb);
 	}
 
 	pp = ip_vs_proto_get(iph->protocol);
@@ -719,7 +719,7 @@ ip_vs_out(unsigned int hooknum, struct sk_buff **pskb,
 		     !pp->dont_defrag)) {
 		if (ip_vs_gather_frags(skb, IP_DEFRAG_VS_OUT))
 			return NF_STOLEN;
-		iph = skb->nh.iph;
+		iph = ip_hdr(skb);
 	}
 
 	ihl = iph->ihl << 2;
@@ -825,7 +825,7 @@ ip_vs_in_icmp(struct sk_buff **pskb, int *related, unsigned int hooknum)
 			return NF_STOLEN;
 	}
 
-	iph = skb->nh.iph;
+	iph = ip_hdr(skb);
 	offset = ihl = iph->ihl * 4;
 	ic = skb_header_pointer(skb, offset, sizeof(_icmph), &_icmph);
 	if (ic == NULL)
@@ -925,14 +925,14 @@ ip_vs_in(unsigned int hooknum, struct sk_buff **pskb,
 		return NF_ACCEPT;
 	}
 
-	iph = skb->nh.iph;
+	iph = ip_hdr(skb);
 	if (unlikely(iph->protocol == IPPROTO_ICMP)) {
 		int related, verdict = ip_vs_in_icmp(pskb, &related, hooknum);
 
 		if (related)
 			return verdict;
 		skb = *pskb;
-		iph = skb->nh.iph;
+		iph = ip_hdr(skb);
 	}
 
 	/* Protocol supported? */

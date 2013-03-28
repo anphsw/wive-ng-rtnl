@@ -156,7 +156,7 @@ ip_vs_bypass_xmit(struct sk_buff *skb, struct ip_vs_conn *cp,
 		  struct ip_vs_protocol *pp)
 {
 	struct rtable *rt;			/* Route to the other host */
-	struct iphdr  *iph = skb->nh.iph;
+	struct iphdr  *iph = ip_hdr(skb);
 	u8     tos = iph->tos;
 	int    mtu;
 	struct flowi fl = {
@@ -226,7 +226,7 @@ ip_vs_nat_xmit(struct sk_buff *skb, struct ip_vs_conn *cp,
 {
 	struct rtable *rt;		/* Route to the other host */
 	int mtu;
-	struct iphdr *iph = skb->nh.iph;
+	struct iphdr *iph = ip_hdr(skb);
 
 	EnterFunction(10);
 
@@ -436,7 +436,7 @@ ip_vs_dr_xmit(struct sk_buff *skb, struct ip_vs_conn *cp,
 	      struct ip_vs_protocol *pp)
 {
 	struct rtable *rt;			/* Route to the other host */
-	struct iphdr  *iph = skb->nh.iph;
+	struct iphdr  *iph = ip_hdr(skb);
 	int    mtu;
 
 	EnterFunction(10);

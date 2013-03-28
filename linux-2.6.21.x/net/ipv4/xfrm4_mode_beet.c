@@ -32,7 +32,7 @@ static int xfrm4_beet_output(struct xfrm_state *x, struct sk_buff *skb)
 	struct iphdr *iph, *top_iph = NULL;
 	int hdrlen, optlen;
 
-	iph = skb->nh.iph;
+	iph = ip_hdr(skb);
 	skb->h.ipiph = iph;
 
 	hdrlen = 0;
@@ -70,7 +70,7 @@ static int xfrm4_beet_output(struct xfrm_state *x, struct sk_buff *skb)
 
 static int xfrm4_beet_input(struct xfrm_state *x, struct sk_buff *skb)
 {
-	struct iphdr *iph = skb->nh.iph;
+	struct iphdr *iph = ip_hdr(skb);
 	int phlen = 0;
 	int optlen = 0;
 	__u8 ph_nexthdr = 0, protocol = 0;

@@ -26,7 +26,7 @@ static int xfrm4_transport_output(struct xfrm_state *x, struct sk_buff *skb)
 	struct iphdr *iph;
 	int ihl;
 
-	iph = skb->nh.iph;
+	iph = ip_hdr(skb);
 	skb->h.ipiph = iph;
 
 	ihl = iph->ihl * 4;

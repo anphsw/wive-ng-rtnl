@@ -608,7 +608,7 @@ int ip_vs_skb_replace(struct sk_buff *skb, gfp_t pri,
 	}
 
 	/* must update the iph total length here */
-	iph = skb->nh.iph;
+	iph = ip_hdr(skb);
 	iph->tot_len = htons(skb->len);
 
 	LeaveFunction(9);

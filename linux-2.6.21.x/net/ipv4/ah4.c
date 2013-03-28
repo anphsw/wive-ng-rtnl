@@ -151,7 +151,7 @@ static int ah_input(struct xfrm_state *x, struct sk_buff *skb)
 	skb->ip_summed = CHECKSUM_NONE;
 
 	ah = (struct ip_auth_hdr*)skb->data;
-	iph = skb->nh.iph;
+	iph = ip_hdr(skb);
 
 	ihl = skb->data - skb_network_header(skb);
 	memcpy(work_buf, iph, ihl);
