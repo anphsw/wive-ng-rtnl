@@ -1455,9 +1455,8 @@
 47) defaults: set HT_MIMOPSMode=3 - need for multiple TX/RX streams compat.<br>
 48) configs: now kernel modules for 8Mb and 4Mb devices use one full optimization flags at build(speedup 4Mb devices).<br>
 49) configs: add more modem support automatization logic.<br>
-50) goahead: rework samba WebUI, cleanup and more bug fixes.<br>
-51) goahead: fix wifi igmpsnoop independed set.<br>
-52) dropbear: version up to 2013.56.<br>
+50) goahead: fix wifi igmpsnoop independed set.<br>
+51) dropbear: version up to 2013.56.<br>
 
 <br>
 <br>

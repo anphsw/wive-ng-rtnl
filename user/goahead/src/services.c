@@ -53,9 +53,8 @@ struct dyn_lease {
 
 static void setDhcp(webs_t wp, char_t *path, char_t *query);
 static int getDhcpCliList(int eid, webs_t wp, int argc, char_t **argv);
-#ifdef CONFIG_USER_SAMBA
+
 static void setSamba(webs_t wp, char_t *path, char_t *query);
-#endif
 static void setMiscServices(webs_t wp, char_t *path, char_t *query);
 static void formIptAccounting(webs_t wp, char_t *path, char_t *query);
 static int getDhcpStaticList(int eid, webs_t wp, int argc, char_t **argv);
@@ -72,9 +71,7 @@ void formDefineServices(void)
 {
 	// Define forms
 	websFormDefine(T("setDhcp"), setDhcp);
-#ifdef CONFIG_USER_SAMBA
 	websFormDefine(T("formSamba"), setSamba);
-#endif
 	websFormDefine(T("setMiscServices"), setMiscServices);
 	websFormDefine(T("formIptAccounting"), formIptAccounting);
 	websFormDefine(T("l2tpConfig"), l2tpConfig);
@@ -491,7 +488,6 @@ static void setMiscServices(webs_t wp, char_t *path, char_t *query)
 	}
 }
 
-#ifdef CONFIG_USER_SAMBA
 //------------------------------------------------------------------------------
 // Samba/CIFS setup
 const parameter_fetch_t service_samba_flags[] =
@@ -521,7 +517,6 @@ static void setSamba(webs_t wp, char_t *path, char_t *query)
 	//restart some services instead full reload
 	doSystem("service sysctl restart");
 	doSystem("service dhcpd restart");
-	doSystem("service iptables restart");
 	doSystem("service samba restart");
 
 	char_t *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
@@ -530,8 +525,8 @@ static void setSamba(webs_t wp, char_t *path, char_t *query)
 	else
 		websDone(wp, 200);
 }
-#endif
 
+//------------------------------------------------------------------------------
 // IPT Accounting
 void formIptAccounting(webs_t wp, char_t *path, char_t *query)
 {
