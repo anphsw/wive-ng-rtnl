@@ -146,7 +146,8 @@ fi
 fs drop_caches
 
 if [ "$MDEV_LABEL" != "optware" ] && [ "$MDEV_TYPE" != "swap" ]; then
-    #regenerate config and restart samba
+    # restart HDD depended services
+    service xupnpd restart
     service samba restart
     service transmission restart
 fi
