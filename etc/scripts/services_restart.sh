@@ -66,20 +66,20 @@ if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then
 	    service chillispot restart
 	fi
     fi
+    if [ -e /etc/init.d/lld2d ]; then
+	service lld2d restart
+    fi
     if [ -e /etc/init.d/parprouted ]; then
 	service parprouted restart
     fi
     if [ -e /etc/init.d/igmp_proxy ]; then
         service igmp_proxy restart
     fi
-    if [ -e /etc/init.d/lld2d ]; then
-	service lld2d restart
+    if [ -e /etc/init.d/xupnpd ]; then
+	service xupnpd restart
     fi
     if [ -e /etc/init.d/udpxy ]; then
 	service udpxy restart
-    fi
-    if [ -e /etc/init.d/xupnpd ]; then
-	service xupnpd restart
     fi
     if [ -e /etc/init.d/transmission ]; then
 	service transmission restart
