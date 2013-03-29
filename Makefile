@@ -6,6 +6,25 @@
 # Copyright (c) 2001, Lineo
 #
 
+############################################################################
+#
+# Lets work out what the user wants, and if they have configured us yet
+#
+
+ifeq ($(ROOTDIR),)
+ROOTDIR=.
+endif
+
+ifeq (.config,$(wildcard .config))
+-include version
+-include .config
+all: tools linux lib_only uClibc++_only user_only romfs image
+else
+all: config_error
+endif
+
+VERSIONSTR = $(CONFIG_VENDOR)/$(CONFIG_PRODUCT) Version $(VERSIONPKG)
+
 #########################################################################################################
 # Tune locale to eng
 #
@@ -21,31 +40,6 @@ CFLAGS		:=
 CPPFLAGS	:=
 CXXFLAGS	:=
 LDFLAGS		:=
-
-#########################################################################################################
-# tune locale to eng
-#
-
--include version
-
-VERSIONSTR = $(CONFIG_VENDOR)/$(CONFIG_PRODUCT) Version $(VERSIONPKG)
-
-############################################################################
-#
-# Lets work out what the user wants, and if they have configured us yet
-#
-
-ifeq (.config,$(wildcard .config))
--include .config
-
-ifeq ($(ROOTDIR),)
-ROOTDIR=.
-endif
-
-all: tools linux lib_only uClibc++_only user_only romfs image
-else
-all: config_error
-endif
 
 ############################################################################
 #

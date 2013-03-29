@@ -53,7 +53,7 @@ LC_MESSAGES=C
 LC_ALL=C
 
 ###########################################################################
-OPTS	= -Os -pipe -mips32r2 -march=mips32r2
+OPTS	:= -Os -pipe -mips32r2 -march=mips32r2
 
 ############################ WARN/ERROR ###################################
 # base flags for warnings
