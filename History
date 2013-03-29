@@ -1453,7 +1453,7 @@
 45) init.d: fix apcli mode auto reconnect.<br>
 46) init.d: split wait_connect and wifi_reconnect.<br>
 47) init.d: cleanup arp records in switch for prevent flood/deadloop with ic+ aplink/downlink switches.<br>
-48) init.d: transmission: add 10*20=200 seconds check media mount and exit if not mounted.<br>
+48) init.d: transmission: add 10*10=100 seconds check media mount and exit if not mounted.<br>
 49) defaults: set HT_MIMOPSMode=3 - need for multiple TX/RX streams compat.<br>
 50) configs: now kernel modules for 8Mb and 4Mb devices use one full optimization flags at build(speedup 4Mb devices).<br>
 51) configs: add more modem support automatization logic.<br>

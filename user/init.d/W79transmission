@@ -17,11 +17,11 @@ LOG="logger -t transmission"
 start() {
     get_param
     if [ "$TransmissionEnabled" = "1" ] && [ ! "`pidof transmission-daemon`" ]; then
-	# 10*20=200 seconds check media mount and exit
+	# 10*10=200 seconds check media mount and exit
 	count=0
 	while [ "$public" = "" ]; do
 	    count="$(($count+1))"
-	    if [ "$count" != "20" ]; then
+	    if [ "$count" != "10" ]; then
 		$LOG "Disc not mounted... Please check USB connection. Wait 10sec and recheck. $count"
 	        sleep 10
 		# recheck public set
