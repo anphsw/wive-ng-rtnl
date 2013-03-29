@@ -6,6 +6,25 @@
 # Copyright (c) 2001, Lineo
 #
 
+#########################################################################################################
+# Tune locale to eng
+#
+LANG		:= C
+LC_COLLATE	:= C
+LC_MESSAGES	:= C
+LC_ALL		:= C
+
+#########################################################################################################
+# Cleanup CFLAGS/CPPFLAGS/LDFLAGS
+#
+CFLAGS		:=
+CPPFLAGS	:=
+LDFLAGS		:=
+
+#########################################################################################################
+# tune locale to eng
+#
+
 -include version
 
 VERSIONSTR = $(CONFIG_VENDOR)/$(CONFIG_PRODUCT) Version $(VERSIONPKG)
@@ -78,6 +97,8 @@ endif
 
 DIRS    =  $(ROOTDIR)/vendors $(ROOTDIR)/uClibc++ $(ROOTDIR)/user $(ROOTDIR)/lib
 
+export LANG LC_COLLATE LC_MESSAGES LC_ALL
+export CFLAGS CPPFLAGS LDFLAGS
 export VENDOR PRODUCT ROOTDIR LINUXDIR HOSTCC CONFIG_SHELL
 export CONFIG_CONFIG LINUX_CONFIG ROMFSDIR SCRIPTSDIR
 export RT288X_SDK_VERSION VERSIONPKG VERSIONSTR ROMFSINST PATH IMAGEDIR RELFILES TFTPDIR
