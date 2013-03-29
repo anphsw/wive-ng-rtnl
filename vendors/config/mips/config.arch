@@ -83,23 +83,20 @@ include $(ROOTDIR)/vendors/config/common/config.arch
 
 ############################ WARN/ERROR FLAGS ##############################
 # base flags for warnings
-LOPT	+= -Wall -Wno-trigraphs -Wno-long-long -Wno-format-security
-UOPT	+= -Wall -Wno-trigraphs -Wno-long-long -Wno-format-security
+WOPT	:= -Wall -Wno-trigraphs -Wno-long-long -Wno-format-security
 
 # disable pointer signed / unsigned warnings in gcc 4.0
-LOPT	+= -Wno-pointer-sign
-UOPT	+= -Wno-pointer-sign
+WOPT	+= -Wno-pointer-sign
 
 # disable variable unused warnings in gcc 4.6.0
-LOPT	+= -Wno-unused-but-set-variable
-UOPT	+= -Wno-unused-but-set-variable
+WOPT	+= -Wno-unused-but-set-variable
 
 ########################### BUILD FLAGS/OPTIONS##############################
 ifdef UCLINUX_BUILD_LIB
 ifdef CONFIG_LIB_DEBUG
-	CFLAGS  :=  $(if $(LOPT),$(LOPT),-O1) -g
+	CFLAGS  :=  $(if $(LOPT),$(LOPT),-O1) $(WOPT) -g
 else
-	CFLAGS  :=  $(if $(LOPT),$(LOPT),-Os) -fomit-frame-pointer -fno-stack-protector
+	CFLAGS  :=  $(if $(LOPT),$(LOPT),-Os) $(WOPT) -fomit-frame-pointer -fno-stack-protector
 endif
 ifdef CONFIG_LIB_SMALLSIZE
 	# Defeat .eh_frame bloat (~25% smaller binary)
@@ -141,9 +138,9 @@ endif
 ifdef UCLINUX_BUILD_USER
 
 ifdef CONFIG_USER_DEBUG
-	CFLAGS  :=  $(if $(UOPT),$(UOPT),-O1) -g
+	CFLAGS  :=  $(if $(UOPT),$(UOPT),-O1) $(WOPT) -g
 else
-	CFLAGS  :=  $(if $(UOPT),$(UOPT),-Os) -fomit-frame-pointer -fno-stack-protector
+	CFLAGS  :=  $(if $(UOPT),$(UOPT),-Os) $(WOPT) -fomit-frame-pointer -fno-stack-protector
 endif
 ifdef CONFIG_USER_SMALLSIZE
 	# Defeat .eh_frame bloat (~25% smaller binary)
