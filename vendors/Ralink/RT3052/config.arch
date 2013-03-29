@@ -15,9 +15,9 @@ HWH3			   = "0.0"
 HWL4			   = "0.0"
 HWH4			   = "0.0"
 
-include $(ROOTDIR)/vendors/config/mips/config.arch
-
 ############################ BASE FLAGS ###################################
+ROOTDIR ?= /opt/Wive-RTNL
+
 include $(ROOTDIR)/vendors/config/mips/config.arch
 
 CFLAGS  += -Os -pipe -mips32r2 -march=mips32r2
