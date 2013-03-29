@@ -21,9 +21,7 @@ ARCH		           = mips
 #########################################################################################################
 # crosscompile prepare
 #########################################################################################################
-ROOTDIR				?= /opt/Wive-RTNL
-include $(ROOTDIR)/vendors/config/mips/config.arch
-
+ROOTDIR                         ?= /opt/Wive-RTNL
 FIRMROOT			= $(ROOTDIR)
 LINUX_CONFIG			= $(FIRMROOT)/linux/.config
 TOOLCHAINDIR			= $(FIRMROOT)/toolchain
@@ -31,11 +29,10 @@ LINUXINCDIR			= $(FIRMROOT)/linux/include
 CONFIG_CROSS_COMPILER_PATH	= $(TOOLCHAINDIR)/bin
 CROSS_COMPILE			= $(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-
 CROSS				= $(CROSS_COMPILE)
-CONFIGURE_HOST			= $(CROSS_COMPILE)
 
-CC				= $(CROSS_COMPILE)gcc $(CPUFLAGS)
-AS				= $(CROSS_COMPILE)as $(CPUFLAGS)
-CXX				= $(CROSS_COMPILE)g++ $(CPUFLAGS)
+CC				= $(CROSS_COMPILE)gcc
+AS				= $(CROSS_COMPILE)as
+CXX				= $(CROSS_COMPILE)g++
 AR				= $(CROSS_COMPILE)ar
 LD				= $(CROSS_COMPILE)ld
 OBJCOPY				= $(CROSS_COMPILE)objcopy
@@ -43,6 +40,9 @@ RANLIB				= $(CROSS_COMPILE)ranlib
 ELF2FLT				= elf2flt
 STRIPTOOL			= $(CROSS_COMPILE)strip
 STRIP				= $(STRIPTOOL)
+
+GCC_DIR   = $(shell $(CC) -v 2>&1|grep specs|sed -e 's/.* \(.*\)specs/\1\./')
+MACH_DIR  = $(shell $(CC) -print-multi-directory)
 
 #########################################################################################################
 # tune locale to eng

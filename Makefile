@@ -34,12 +34,11 @@ LC_MESSAGES	:= C
 LC_ALL		:= C
 
 #########################################################################################################
-# Cleanup CFLAGS/CPPFLAGS/LDFLAGS
+# Cleanup CFLAGS/CPPFLAGS
 #
 CFLAGS		:=
 CPPFLAGS	:=
 CXXFLAGS	:=
-LDFLAGS		:=
 
 ############################################################################
 #
@@ -93,7 +92,6 @@ endif
 DIRS    =  $(ROOTDIR)/vendors $(ROOTDIR)/uClibc++ $(ROOTDIR)/user $(ROOTDIR)/lib
 
 export LANG LC_COLLATE LC_MESSAGES LC_ALL
-export CFLAGS CPPFLAGS CXXFLAGS LDFLAGS
 export VENDOR PRODUCT ROOTDIR LINUXDIR HOSTCC CONFIG_SHELL
 export CONFIG_CONFIG LINUX_CONFIG ROMFSDIR SCRIPTSDIR
 export RT288X_SDK_VERSION VERSIONPKG VERSIONSTR ROMFSINST PATH IMAGEDIR RELFILES TFTPDIR
