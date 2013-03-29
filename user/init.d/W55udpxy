@@ -17,14 +17,25 @@ LOG="logger -t udpxy"
 start() {
     get_param
     if [ "$UDPXYMode" != "0" ] && [ "$UDPXYPort" != "" ]; then
+      ( # send to background
 	# check ip adress set at wan
 	wan_is_not_null=`ip -4 addr show $wan_if | grep inet -c`
 	if [ "$wan_is_not_null" = "0" ]; then
     	    $LOG "Wait 10 sec before start..."
 	    sleep 10
 	fi
+
+	pid=`pidof udpxy`
+	if [ "$pid" != "" ]; then
+	    $LOG "UDPXY stop"
+	    killall -q udpxy
+	    killall -q -SIGKILL udpxy
+	    usleep 500000
+	fi
+
         $LOG "UDPXY start"
 	udpxy -m $wan_if -n-20 -c1 -H10 -R-1 -B64k -p"$UDPXYPort" -l /var/log/udpxy.log
+       ) & # send to background
     fi
 }
 

@@ -19,15 +19,7 @@ LOG="logger -t igmpproxy"
 start() {
   # if igmpproxy enable and mode not full bridge
     if [ "$igmpEnabled" = "1" ] && [ "$OperationMode" != "0" ] && [ "$ApCliBridgeOnly" != "1" ]; then
-
-	# if need kill igmpproxy
-	igmp_is_start=`pidof igmpproxy`
-	if [ "$igmp_is_start" != "" ]; then
-	    killall -q igmpproxy
-	    killall -q -SIGKILL igmpproxy
-	    usleep 500000
-	fi
-
+      ( # send to background
 	# check ip adress set at wan
 	wan_is_not_null=`ip -4 addr show $wan_if | grep inet -c`
 	if [ "$wan_is_not_null" = "0" ]; then
@@ -39,6 +31,15 @@ start() {
 	get_param
 	gen_config
 
+	# if need kill igmpproxy
+	igmp_is_start=`pidof igmpproxy`
+	if [ "$igmp_is_start" != "" ]; then
+	    $LOG "Stopping IGMPPROXY"
+	    killall -q igmpproxy
+	    killall -q -SIGKILL igmpproxy
+	    usleep 500000
+	fi
+
         $LOG "Starting IGMPPROXY"
     	igmpproxy $OPTS /etc/igmpproxy.conf &
 
@@ -46,6 +47,7 @@ start() {
 	echo 1 > "/proc/sys/net/ipv4/conf/$wan_if/forwarding"
 	echo 1 > "/proc/sys/net/ipv4/conf/all/mc_forwarding"
 	echo 1 > "/proc/sys/net/ipv4/conf/default/mc_forwarding"
+      ) & # send to background
     else
 	echo 0 > /proc/sys/net/ipv4/conf/all/mc_forwarding
 	echo 0 > /proc/sys/net/ipv4/conf/default/mc_forwarding

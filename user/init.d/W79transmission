@@ -42,6 +42,7 @@ start() {
 	    sleep 2
 	    #kill if not stopped
 	    killall -q -SIGKILL transmission-daemon
+	    usleep 500000
         fi
 
 	$LOG "Start transmission daemon."
