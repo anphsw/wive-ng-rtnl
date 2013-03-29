@@ -1087,7 +1087,7 @@ function onPreAuthenticationClick(type)
                 <input name="cipher" id="cipher" value="1" type="radio" onClick="onWPAAlgorithmsClick(1)">
                 AES &nbsp;
                 <input name="cipher" id="cipher" value="2" type="radio" onClick="onWPAAlgorithmsClick(2)">
-                TKIPAES &nbsp; </td>
+                TKIP/AES &nbsp; </td>
             </tr>
             <tr id="wpa_passphrase" name="wpa_passphrase" style="visibility: hidden;">
               <td class="head" id="secureWPAPassPhrase">Pass Phrase</td>
