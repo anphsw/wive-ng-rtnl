@@ -124,6 +124,10 @@ romfs
 /lib/libnfnetlink/configure
 /lib/libnfnetlink/Makefile
 /lib/libnfnetlink/Makefile.in
+/lib/libnfnetlink/src/Makefile
+/lib/libnfnetlink/utils/Makefile
+/lib/libnfnetlink/include/Makefile
+/lib/libnfnetlink/include/libnfnetlink/Makefile
 /lib/libgmp/stamp-h1
 /lib/libnet/Makefile
 /lib/libnet/Makefile.in
