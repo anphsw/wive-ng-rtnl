@@ -40,13 +40,14 @@ endif
 # First settings we always want for all build
 #
 
-ENDIAN		?= little
-MACHINE		= mips
-ARCH		= mips
+ENDIAN				?= little
+MACHINE				?= mips
+ARCH				?= mips
 
 #########################################################################################################
 # crosscompile prepare
 #########################################################################################################
+ROOTDIR				?= /opt/Wive-RTNL
 FIRMROOT			= $(ROOTDIR)
 LINUX_CONFIG			= $(FIRMROOT)/linux/.config
 TOOLCHAINDIR			= $(FIRMROOT)/toolchain
@@ -82,13 +83,16 @@ include $(ROOTDIR)/vendors/config/common/config.arch
 
 ############################ WARN/ERROR FLAGS ##############################
 # base flags for warnings
-CFLAGS	+= -Wall -Wno-trigraphs -Wno-long-long -Wno-format-security
+LOPT	+= -Wall -Wno-trigraphs -Wno-long-long -Wno-format-security
+UOPT	+= -Wall -Wno-trigraphs -Wno-long-long -Wno-format-security
 
 # disable pointer signed / unsigned warnings in gcc 4.0
-CFLAGS	+= -Wno-pointer-sign
+LOPT	+= -Wno-pointer-sign
+UOPT	+= -Wno-pointer-sign
 
 # disable variable unused warnings in gcc 4.6.0
-CFLAGS	+= -Wno-unused-but-set-variable
+LOPT	+= -Wno-unused-but-set-variable
+UOPT	+= -Wno-unused-but-set-variable
 
 ########################### BUILD FLAGS/OPTIONS##############################
 ifdef UCLINUX_BUILD_LIB
