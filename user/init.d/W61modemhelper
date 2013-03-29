@@ -134,7 +134,7 @@ stop() {
 
 	# terminate pppd
 	count=0
-        while kill -0 $pid  > /dev/null 2>&1; do
+        while kill $pid > /dev/null 2>&1; do
 	    if [ "$count" = "2" ]; then
 		kill -SIGKILL "$pid"  > /dev/null 2>&1
 		count=0
