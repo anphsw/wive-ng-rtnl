@@ -19,17 +19,6 @@ start() {
     if [ "$TransmissionEnabled" = "1" ]; then
       ( # send to background
 
-	# if need kill transmission-daemon
-	pid=`pidof transmission-daemon`
-	if [ "$pid" != "" ]; then
-	    $LOG "Stop transmission daemon."
-	    killall -q transmission-daemon
-	    #wait before save files and connections stop
-	    sleep 2
-	    #kill if not stopped
-	    killall -q -SIGKILL transmission-daemon
-        fi
-
 	# 10*10=100 seconds check media mount and exit
 	count=0
 	while [ "$public" = "" ]; do
@@ -43,6 +32,17 @@ start() {
 		exit 0
 	    fi
 	done
+
+	# if need kill transmission-daemon
+	pid=`pidof transmission-daemon`
+	if [ "$pid" != "" ]; then
+	    $LOG "Stop transmission daemon."
+	    killall -q transmission-daemon
+	    #wait before save files and connections stop
+	    sleep 2
+	    #kill if not stopped
+	    killall -q -SIGKILL transmission-daemon
+        fi
 
 	$LOG "Start transmission daemon."
 	mkdir -p $TRANSMISSION_HOME
