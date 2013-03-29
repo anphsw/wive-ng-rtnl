@@ -77,7 +77,6 @@ cat <<!EOF
 bool 'Customize Vendor/User Settings'		CONFIG_DEFAULTS_VENDOR
 bool 'Customize Busybox Settings'               CONFIG_DEFAULTS_BUSYBOX
 bool 'Customize uClibc Settings'                CONFIG_DEFAULTS_UCLIBC
-bool 'Customize uClibc++ Settings'              CONFIG_DEFAULTS_UCLIBC_PLUS_PLUS
 bool 'Update Default Vendor Settings'		CONFIG_DEFAULTS_VENDOR_UPDATE
 endmenu
 !EOF

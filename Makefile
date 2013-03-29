@@ -18,7 +18,7 @@ endif
 ifeq (.config,$(wildcard .config))
 -include version
 -include .config
-all: tools linux lib_only uClibc++_only user_only romfs image
+all: tools linux lib_only user_only romfs image
 else
 all: config_error
 endif
@@ -89,7 +89,7 @@ MAKEARCH = $(MAKE) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE)
 MAKEARCH_KERNEL = $(MAKEARCH)  ARCH=$(ARCH) CROSS_COMPILE=$(KERNEL_CROSS_COMPILE)
 endif
 
-DIRS    =  $(ROOTDIR)/vendors $(ROOTDIR)/uClibc++ $(ROOTDIR)/user $(ROOTDIR)/lib
+DIRS    =  $(ROOTDIR)/vendors $(ROOTDIR)/user $(ROOTDIR)/lib
 
 export LANG LC_COLLATE LC_MESSAGES LC_ALL
 export VENDOR PRODUCT ROOTDIR LINUXDIR HOSTCC CONFIG_SHELL
@@ -162,9 +162,6 @@ xconfig: config.tk
 	@if egrep "^CONFIG_DEFAULTS_UCLIBC=y" .config > /dev/null; then \
 		$(MAKE) -C lib menuconfig; \
 	 fi
-	@if egrep "^CONFIG_DEFAULTS_UCLIBC_PLUS_PLUS=y" .config > /dev/null; then \
-		$(MAKE) -C uClibc++ menuconfig; \
-	 fi
 	@config/setconfig final
 
 .PHONY: config
@@ -184,9 +181,6 @@ config: config.in
 	 fi
 	@if egrep "^CONFIG_DEFAULTS_UCLIBC=y" .config > /dev/null; then \
 		$(MAKE) -C lib menuconfig; \
-	 fi
-	@if egrep "^CONFIG_DEFAULTS_UCLIBC_PLUS_PLUS=y" .config > /dev/null; then \
-		$(MAKE) -C uClibc++ menuconfig; \
 	 fi
 	@config/setconfig final
 
@@ -214,9 +208,6 @@ menuconfig: config.in
 	 fi
 	@if egrep "^CONFIG_DEFAULTS_UCLIBC=y" .config > /dev/null; then \
 		$(MAKE) -C lib menuconfig; \
-	 fi
-	@if egrep "^CONFIG_DEFAULTS_UCLIBC_PLUS_PLUS=y" .config > /dev/null; then \
-		$(MAKE) -C uClibc++ menuconfig; \
 	 fi
 	@config/setconfig final
 
@@ -357,7 +348,7 @@ sparseall:
 	$(MAKEARCH_KERNEL) -C $(LINUXDIR) C=2 $(LINUXTARGET) || exit 1
 
 .PHONY: subdirs
-subdirs: lib uClibc++ linux
+subdirs: lib linux
 	for dir in $(DIRS) ; do [ ! -d $$dir ] || $(MAKEARCH) -C $$dir || exit 1 ; done
 
 dep:
@@ -388,7 +379,6 @@ clean:
 	touch $(ROOTDIR)/.config
 	#################CLEAN ALL SUBDIRS#############################
 	for dir in $(LINUXDIR) $(DIRS); do [ ! -d $$dir ] || $(MAKEARCH) -C $$dir clean ; done
-	make clean -C uClibc++/extra/config
 	make clean -C Uboot
 	make clean -C fulldump
 	make clean -C tools
@@ -437,7 +427,6 @@ mrproper: clean
 	rm -rf .config .config.old .oldconfig autoconf.h
 
 distclean: mrproper
-	make distclean -C uClibc++/extra/config
 	make -C linux distclean
 
 %_only:
