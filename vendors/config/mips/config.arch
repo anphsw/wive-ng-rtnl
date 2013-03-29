@@ -5,7 +5,6 @@
 #  to reduce the number of places that need to be edited when something
 #  common changes.  If you include this file you may provide:
 #
-#  CPUFLAGS            - cpu specific flags to pass to the compiler
 #  VENDOR_CFLAGS       - vendor specific flags to pass to the compiler
 #  LOPT                - library optimisation flags
 #  UOPT                - user optimisation flags
@@ -111,7 +110,6 @@ endif
 	CFLAGS  += $(VENDOR_CFLAGS)
 	CFLAGS  += -fno-builtin
 	CFLAGS  += -DEMBED
-	CFLAGS  += $(CPUFLAGS)
 	CFLAGS  += -nostdinc
 
 	# don't want all the CFLAGS for uClibc/Config
@@ -219,10 +217,6 @@ ifndef CONFIG_IPV6
 CFLAGS += -DNO_IPV6
 else
 CFLAGS += -DIPV6=1 -DINET6
-endif
-
-ifeq ($(UCLINUX_BUILD_SET),1)
-	EXTRA_CFLAGS := -Dlinux $(CPUFLAGS)
 endif
 
 ############################################################################

@@ -55,9 +55,6 @@ LC_ALL=C
 ###########################################################################
 OPTS	:= -Os -pipe -mips32r2 -march=mips32r2
 
-############################ MIPS SPECIFIC ###################################
-CPUFLAGS : = -mno-branch-likely
-
 ############################ WARN/ERROR ###################################
 # base flags for warnings
 CFLAGS	+= -Wall -Wno-trigraphs -Wno-long-long -Wno-format-security
