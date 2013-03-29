@@ -15,58 +15,12 @@ HWH3			   = "0.0"
 HWL4			   = "0.0"
 HWH4			   = "0.0"
 
-MACHINE			   = mips
-ARCH		           = mips
-
-#########################################################################################################
-# crosscompile prepare
-#########################################################################################################
-ROOTDIR                         ?= /opt/Wive-RTNL
-FIRMROOT			= $(ROOTDIR)
-LINUX_CONFIG			= $(FIRMROOT)/linux/.config
-TOOLCHAINDIR			= $(FIRMROOT)/toolchain
-LINUXINCDIR			= $(FIRMROOT)/linux/include
-CONFIG_CROSS_COMPILER_PATH	= $(TOOLCHAINDIR)/bin
-CROSS_COMPILE			= $(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-
-CROSS				= $(CROSS_COMPILE)
-
-CC				= $(CROSS_COMPILE)gcc
-AS				= $(CROSS_COMPILE)as
-CXX				= $(CROSS_COMPILE)g++
-AR				= $(CROSS_COMPILE)ar
-LD				= $(CROSS_COMPILE)ld
-OBJCOPY				= $(CROSS_COMPILE)objcopy
-RANLIB				= $(CROSS_COMPILE)ranlib
-ELF2FLT				= elf2flt
-STRIPTOOL			= $(CROSS_COMPILE)strip
-STRIP				= $(STRIPTOOL)
-
-GCC_DIR   = $(shell $(CC) -v 2>&1|grep specs|sed -e 's/.* \(.*\)specs/\1\./')
-MACH_DIR  = $(shell $(CC) -print-multi-directory)
-
-#########################################################################################################
-# tune locale to eng
-#########################################################################################################
-LANG=C
-LC_COLLATE=C
-LC_MESSAGES=C
-LC_ALL=C
-
-###########################################################################
-OPTS	:= -Os -pipe -mips32r2 -march=mips32r2
-
-############################ WARN/ERROR ###################################
-# base flags for warnings
-CFLAGS	+= -Wall -Wno-trigraphs -Wno-long-long -Wno-format-security
-
-# disable pointer signed / unsigned warnings in gcc 4.0
-CFLAGS	+= -Wno-pointer-sign
-
-# disable variable unused warnings in gcc 4.6.0
-CFLAGS	+= -Wno-unused-but-set-variable
+include $(ROOTDIR)/vendors/config/mips/config.arch
 
 ############################ BASE FLAGS ###################################
-CFLAGS  += $(OPTS) -I$(ROOTDIR)
+CFLAGS  += -Os -pipe -mips32r2 -march=mips32r2
+
+include $(ROOTDIR)/vendors/config/mips/config.arch
 
 ###########################################################################
 

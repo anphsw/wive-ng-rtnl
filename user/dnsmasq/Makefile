@@ -24,8 +24,8 @@ BINDIR        = $(PREFIX)/sbin
 MANDIR        = $(PREFIX)/share/man
 LOCALEDIR     = $(PREFIX)/share/locale
 BUILDDIR      = $(SRC)
-DESTDIR       = 
-RPM_OPT_FLAGS = 
+DESTDIR       =
+RPM_OPT_FLAGS =
 
 ifndef CONFIG_IPV6
 COPTS = -DHAVE_BROKEN_RTC -DNO_HAVE_DBUS -DNO_DHCP -DNO_TFTP -DNO_SCRIPT -DNO_IPV6 -DSRV_TRY_NEXT -Os -fPIC -fomit-frame-pointer -mno-memcpy

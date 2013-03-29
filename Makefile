@@ -49,7 +49,7 @@ ROOTDIR		:= $(shell pwd)
 HOSTCC		:= gcc
 ROMFSINST	:= romfs-inst.sh
 TFTPDIR		:= /tftpboot
-PATH		:= $(PATH):$(ROOTDIR)/tools:$(ROOTDIR)/toolchain/bin:$(ROOTDIR)/lib/lib
+PATH		:= $(PATH):$(ROOTDIR)/tools:$(ROOTDIR)/toolchain/bin:$(ROOTDIR)/lib/lib:$(ROOTDIR)/lib/include
 
 LINUXDIR	= $(CONFIG_LINUXDIR)
 LIBCDIR		= $(CONFIG_LIBCDIR)

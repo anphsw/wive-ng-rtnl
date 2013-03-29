@@ -47,7 +47,6 @@ ARCH		= mips
 #########################################################################################################
 # crosscompile prepare
 #########################################################################################################
-ROOTDIR                         ?= /opt/Wive-RTNL
 FIRMROOT			= $(ROOTDIR)
 LINUX_CONFIG			= $(FIRMROOT)/linux/.config
 TOOLCHAINDIR			= $(FIRMROOT)/toolchain
@@ -70,7 +69,7 @@ STRIP				= $(STRIPTOOL)
 GCC_DIR   = $(shell $(CC) -v 2>&1|grep specs|sed -e 's/.* \(.*\)specs/\1\./')
 MACH_DIR  = $(shell $(CC) -print-multi-directory)
 
-UCLINUX_BUILD_SET = 0					# have we set a special config below
+UCLINUX_BUILD_SET = 0		# have we set a special config below
 
 # Pull in common definitions
 include $(ROOTDIR)/vendors/config/common/config.arch
@@ -81,6 +80,17 @@ include $(ROOTDIR)/vendors/config/common/config.arch
 # possible
 #
 
+############################ WARN/ERROR FLAGS ##############################
+# base flags for warnings
+CFLAGS	+= -Wall -Wno-trigraphs -Wno-long-long -Wno-format-security
+
+# disable pointer signed / unsigned warnings in gcc 4.0
+CFLAGS	+= -Wno-pointer-sign
+
+# disable variable unused warnings in gcc 4.6.0
+CFLAGS	+= -Wno-unused-but-set-variable
+
+########################### BUILD FLAGS/OPTIONS##############################
 ifdef UCLINUX_BUILD_LIB
 ifdef CONFIG_LIB_DEBUG
 	CFLAGS  :=  $(if $(LOPT),$(LOPT),-O1) -g
@@ -164,14 +174,7 @@ endif
 ifdef CONFIG_LIB_EVENT
 	CFLAGS  += -I$(ROOTDIR)/lib/include_shared/event2
 endif
-ifdef CONFIG_LIB_LIBSTDC_PLUS_FORCE
-	CFLAGS  += -I$(ROOTDIR)/uClibc++/include
-endif
-
 	LDFLAGS  += -L$(ROOTDIR)/lib/lib
-ifdef CONFIG_LIB_LIBSTDC_PLUS_FORCE
-	LDFLAGS  += -L$(ROOTDIR)/uClibc++/src
-endif
 
 	CXXFLAGS = $(CFLAGS) $(INCCXX)
 
