@@ -18,15 +18,31 @@ HWH4			   = "0.0"
 MACHINE			   = mips
 ARCH		           = mips
 
-
-ROOTDIR			   ?= /opt/Wive-RTNL
+#########################################################################################################
+# crosscompile prepare
+#########################################################################################################
+ROOTDIR				?= /opt/Wive-RTNL
 include $(ROOTDIR)/vendors/config/mips/config.arch
 
-FIRMROOT        	   = $(ROOTDIR)
-LINUX_CONFIG		   = $(FIRMROOT)/linux/.config
-TOOLCHAINDIR          	   = $(FIRMROOT)/toolchain
-LINUXINCDIR                = $(FIRMROOT)/linux/include
-CONFIG_CROSS_COMPILER_PATH = $(TOOLCHAINDIR)/bin
+FIRMROOT			= $(ROOTDIR)
+LINUX_CONFIG			= $(FIRMROOT)/linux/.config
+TOOLCHAINDIR			= $(FIRMROOT)/toolchain
+LINUXINCDIR			= $(FIRMROOT)/linux/include
+CONFIG_CROSS_COMPILER_PATH	= $(TOOLCHAINDIR)/bin
+CROSS_COMPILE			= $(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-
+CROSS				= $(CROSS_COMPILE)
+CONFIGURE_HOST			= $(CROSS_COMPILE)
+
+CC				= $(CROSS_COMPILE)gcc $(CPUFLAGS)
+AS				= $(CROSS_COMPILE)as $(CPUFLAGS)
+CXX				= $(CROSS_COMPILE)g++ $(CPUFLAGS)
+AR				= $(CROSS_COMPILE)ar
+LD				= $(CROSS_COMPILE)ld
+OBJCOPY				= $(CROSS_COMPILE)objcopy
+RANLIB				= $(CROSS_COMPILE)ranlib
+ELF2FLT				= elf2flt
+STRIPTOOL			= $(CROSS_COMPILE)strip
+STRIP				= $(STRIPTOOL)
 
 #########################################################################################################
 # tune locale to eng
@@ -35,18 +51,6 @@ LANG=C
 LC_COLLATE=C
 LC_MESSAGES=C
 LC_ALL=C
-
-###########################################################################
-
-CC	= $(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-gcc
-GCC	= $(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-gcc
-CXX	= $(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-g++
-AR	= $(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-ar
-AS	= $(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-as
-LD	= $(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-ld
-NM	= $(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-nm
-RANLIB	= $(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-ranlib
-STRIP	= $(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-strip
 
 ###########################################################################
 OPTS	= -Os -pipe -mips32r2 -march=mips32r2
