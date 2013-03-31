@@ -1455,12 +1455,13 @@
 47) init.d: cleanup arp records in switch for prevent flood/deadloop with ic+ aplink/downlink switches.<br>
 48) init.d: transmission: add 10*10=100 seconds check media mount and exit if not mounted.<br>
 49) init.d: udpxy, increase client limits to 10(GI S8120 DVB receiver webtv plugin workaround).<br>
-50) defaults: set HT_MIMOPSMode=3 - need for multiple TX/RX streams compat.<br>
-51) goahead: fix wifi igmpsnoop independed set.<br>
-52) dropbear: version up to 2013.56.<br>
-53) configs: now kernel modules for 8Mb and 4Mb devices use one full optimization flags at build(speedup 4Mb devices).<br>
-54) configs: add more modem support automatization logic.<br>
-55) configs: disable snmpd and cdp support in 4Mb images.<br>
+50) init.d: add ipv6_mode variable to onfigure mode ipv6 acces(6RD/6TO4/NATIVE, default 6TO4).<br>
+51) defaults: set HT_MIMOPSMode=3 - need for multiple TX/RX streams compat.<br>
+52) goahead: fix wifi igmpsnoop independed set.<br>
+53) dropbear: version up to 2013.56.<br>
+54) configs: now kernel modules for 8Mb and 4Mb devices use one full optimization flags at build(speedup 4Mb devices).<br>
+55) configs: add more modem support automatization logic.<br>
+56) configs: disable snmpd and cdp support in 4Mb images.<br>
 
 <br>
 <br>

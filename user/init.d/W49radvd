@@ -46,11 +46,13 @@ start() {
 
 	# rebuild ipv6 rules
         service iptables restartv6
+
         # calculate and set mtu
         calculate_and_set_mtu
         $LOG "Tunel ipv6 in ipv4 configure and up"
         ipv6prefix=`echo $real_wan_ipaddr | awk -F. '{ printf "2002:%02x%02x:%02x%02x", $1, $2, $3, $4 }'`
-        if [ "$IPv6_6RD_Enable" = "1" ]; then
+        if [ "$ipv6_mode" = "6RD" ]; then
+	    # this section for 6RD tunnel mode
 	    relay6to4="192.88.99.127"
 	    tunif="tun6to4"
 	    $LOG "Flush addres and route tun6to4 interface"
@@ -61,7 +63,8 @@ start() {
 	    ip link set dev $tunif up
 	    ip -6 addr add ${ipv6prefix}::1/16 dev $tunif
 	    ip -6 route replace ${ipv6subnet}::/3 via ::${relay6to4} dev $tunif metric 1
-        else
+        elif [ "$ipv6_mode" = "6TO4" ]; then
+	    # this section for 6to4 tunnel mode
 	    relay6to4="192.88.99.1"
 	    tunif="sit0"
 	    $LOG "Flush addres and route sit0 interface"
@@ -74,6 +77,9 @@ start() {
 	    # set mtu to sit
 	    sysctl -wq net.ipv6.conf.sit0.mtu="$sitmtu"
 	    ip link set mtu $sitmtu dev $tunif
+        elif [ "$ipv6_mode" = "NATIVE" ]; then
+	    # this section for native/dualstack mode
+	    :
 	fi
 
 	$LOG "Enable ipv6 route"
