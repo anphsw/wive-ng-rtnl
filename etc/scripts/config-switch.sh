@@ -293,9 +293,6 @@ if [ "$CONFIG_RT_3052_ESW" != "" ]; then
 	# double vlan tag support enable/disable
 	switch reg w e4 $DOUBLE_TAG
     fi
-    ##########################################################################
-    $LOG '######### Clear switch mac table  ###########'
-    switch clear > /dev/null 2>&1
 ##############################################################################
 # VTSS OR RTL8367M external switch dual phy mode
 ##############################################################################
