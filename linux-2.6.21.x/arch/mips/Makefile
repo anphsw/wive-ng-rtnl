@@ -78,7 +78,7 @@ endif
 # machines may also.  Since BFD is incredibly buggy with respect to
 # crossformat linking we rely on the elf2ecoff tool for format conversion.
 #
-cflags-y                        += -G 0 -mno-abicalls -fno-pic -pipe -mno-branch-likely
+cflags-y                        += -G 0 -mno-abicalls -fno-pic -pipe
 cflags-y                        += -msoft-float
 LDFLAGS_vmlinux                 += -G 0 -static -n -nostdlib
 MODFLAGS                        += -mlong-calls

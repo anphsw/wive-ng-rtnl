@@ -205,7 +205,7 @@ static unsigned int is_local_svc(struct sk_buff **pskb, u_int8_t protonm)
 		hdr = (struct udphdr*)((*pskb)->data + (iph->ihl << 2));
 		if (unlikely(hdr != NULL)) {
 		    /* Packet with no checksum and Local L2TP*/
-		    if ((hdr->check == 0) || (hdr->dest == htons(1701) && hdr->source == htons(1701)))
+		    if ((hdr->check == 0) || hdr->dest == htons(1701) || hdr->source == htons(1701))
 			return 1;
 		}
 	    }

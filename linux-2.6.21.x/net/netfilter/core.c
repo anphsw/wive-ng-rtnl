@@ -193,17 +193,6 @@ int nf_hook_slow(int pf, unsigned int hook, struct sk_buff **pskb,
 next_hook:
 	verdict = nf_iterate(&nf_hooks[pf][hook], pskb, hook, indev,
 			     outdev, &elem, okfn, hook_thresh);
-
-#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-	if (verdict == NF_FAST_NAT) {
-		if (bcm_nat_hit_hook) {
-			ret = bcm_nat_hit_hook(*pskb);
-		} else {
-			kfree_skb(*pskb);
-			ret = -EPERM;
-		}
-	} else
-#endif
 	if (verdict == NF_ACCEPT || verdict == NF_STOP) {
 		ret = 1;
 	} else if ((verdict & NF_VERDICT_MASK) == NF_DROP) {
@@ -216,7 +205,17 @@ next_hook:
 			      verdict >> NF_VERDICT_QBITS))
 			goto next_hook;
 	}
-
+#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+	else if (verdict == NF_FAST_NAT) {
+		if (bcm_nat_hit_hook) {
+			ret = bcm_nat_hit_hook(*pskb);
+		}
+		else {
+			kfree_skb(*pskb);
+			ret = -EPERM;
+		}
+	}
+#endif
 	rcu_read_unlock();
 	return ret;
 }

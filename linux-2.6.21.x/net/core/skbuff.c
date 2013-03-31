@@ -308,6 +308,7 @@ static void kfree_skbmem(struct sk_buff *skb)
 static void skb_release_head_state(struct sk_buff *skb)
 {
 	dst_release(skb->dst);
+
 #ifdef CONFIG_XFRM
 	secpath_put(skb->sp);
 #endif
@@ -330,7 +331,7 @@ static void skb_release_head_state(struct sk_buff *skb)
 #endif
 #endif
 #ifdef CONFIG_VLAN_8021Q
-	skb->vlan_tci = 0;
+       skb->vlan_tci = 0;
 #endif
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 	DO_FAST_CLEAR_FOE(skb); // fast clear FoE info header
@@ -495,30 +496,6 @@ struct sk_buff *skb_clone(struct sk_buff *skb, gfp_t gfp_mask)
 }
 
 /**
- * 	skb_recycle - clean up an skb for reuse
- * 	@skb: buffer
- *
- * 	Recycles the skb to be reused as a receive buffer. This
- * 	function does any necessary reference count dropping, and
- * 	cleans up the skbuff as if it just came from __alloc_skb().
- */
-void skb_recycle(struct sk_buff *skb)
-{
-	struct skb_shared_info *shinfo;
-
-	skb_release_head_state(skb);
-
-	shinfo = skb_shinfo(skb);
-	memset(shinfo, 0, offsetof(struct skb_shared_info, dataref));
-	atomic_set(&shinfo->dataref, 1);
-
-	memset(skb, 0, offsetof(struct sk_buff, tail));
-	skb->data = skb->head + NET_SKB_PAD;
-	skb_reset_tail_pointer(skb);
-}
-EXPORT_SYMBOL(skb_recycle);
-
-/**
  *	skb_recycle_check - check if skb can be reused for receive
  *	@skb: buffer
  *	@skb_size: minimum receive buffer size
@@ -530,14 +507,33 @@ EXPORT_SYMBOL(skb_recycle);
  *	reference count dropping and cleans up the skbuff as if it
  *	just came from __alloc_skb().
  */
+#ifdef CONFIG_RAETH_SKB_RECYCLE
 bool skb_recycle_check(struct sk_buff *skb, int skb_size)
 {
-	if (!skb_is_recycleable(skb, skb_size))
+	struct skb_shared_info *shinfo;
+
+	if (irqs_disabled())
+		return false;
+
+	if (skb_is_nonlinear(skb) || skb->fclone != SKB_FCLONE_UNAVAILABLE)
+		return false;
+
+	skb_size = SKB_DATA_ALIGN(skb_size + NET_SKB_PAD);
+	if ((skb->end - skb->head) < skb_size)
+		return false;
+
+	if (skb_shared(skb) || skb_cloned(skb))
 		return false;
 
 	skb_release_head_state(skb);
 
-	skb_recycle(skb);
+	shinfo = skb_shinfo(skb);
+	memset(shinfo, 0, offsetof(struct skb_shared_info, dataref));
+	atomic_set(&shinfo->dataref, 1);
+
+	memset(skb, 0, offsetof(struct sk_buff, tail));
+	skb->data = skb->head + NET_SKB_PAD;
+	skb_reset_tail_pointer(skb);
 
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 	DO_FAST_CLEAR_FOE(skb); // fast clear FoE info header
@@ -545,6 +541,7 @@ bool skb_recycle_check(struct sk_buff *skb, int skb_size)
 	return true;
 }
 EXPORT_SYMBOL(skb_recycle_check);
+#endif
 
 static void copy_skb_header(struct sk_buff *new, const struct sk_buff *old)
 {
