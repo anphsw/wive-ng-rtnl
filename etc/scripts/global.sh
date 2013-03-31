@@ -156,6 +156,16 @@ getWanIfName() {
     fi
 }
 
+getTunIfName() {
+    if [ "$ipv6_mode" = "6RD" ]; then
+	tunif="tun6to4"
+    elif [ "$ipv6_mode" = "6TO4" ]; then
+	tunif="sit0"
+    elif [ "$ipv6_mode" = "NATIVE" ]; then
+	tunif="$real_wan_if"
+    fi
+}
+
 getWanIpaddr() {
     # always return physical wan ip
     if [ "$wanConnectionMode" != "STATIC" ] || [ "$wan_ipaddr" = "" ]; then
@@ -248,5 +258,6 @@ getSecWlanIfName
 getLanIfName
 getWanIfName
 getVpnIfName
+getTunIfName
 getWanIpaddr
 get_txqlen

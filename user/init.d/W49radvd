@@ -49,12 +49,12 @@ start() {
 
         # calculate and set mtu
         calculate_and_set_mtu
+
         $LOG "Tunel ipv6 in ipv4 configure and up"
         ipv6prefix=`echo $real_wan_ipaddr | awk -F. '{ printf "2002:%02x%02x:%02x%02x", $1, $2, $3, $4 }'`
         if [ "$ipv6_mode" = "6RD" ]; then
 	    # this section for 6RD tunnel mode
 	    relay6to4="192.88.99.127"
-	    tunif="tun6to4"
 	    $LOG "Flush addres and route tun6to4 interface"
 	    ip -6 addr flush dev $tunif					> /dev/null 2>&1
 	    ip -6 route flush dev $tunif					> /dev/null 2>&1
@@ -66,7 +66,6 @@ start() {
         elif [ "$ipv6_mode" = "6TO4" ]; then
 	    # this section for 6to4 tunnel mode
 	    relay6to4="192.88.99.1"
-	    tunif="sit0"
 	    $LOG "Flush addres and route sit0 interface"
 	    ip -6 addr flush dev $tunif					> /dev/null 2>&1
 	    ip -6 route flush dev $tunif					> /dev/null 2>&1
