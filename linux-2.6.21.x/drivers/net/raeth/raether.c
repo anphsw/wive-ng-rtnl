@@ -79,7 +79,7 @@ static int rt2880_eth_recv(struct net_device* dev, int *work_done, int work_to_d
 static int rt2880_eth_recv(struct net_device* dev);
 #endif
 
-#ifndef CONFIG_RA_NAT_NONE
+#if !defined(CONFIG_RA_NAT_NONE)
 #ifdef CONFIG_RAETH_MODULE
 extern int (*ra_sw_nat_hook_rx)(struct sk_buff *skb);
 extern int (*ra_sw_nat_hook_tx)(struct sk_buff *skb, int gmac_no);
@@ -1253,8 +1253,8 @@ static int rt2880_eth_recv(struct net_device* dev)
 		}
 #endif /* CONFIG_RA_CLASSIFIER */
 
-#if defined (CONFIG_RA_HW_NAT) || defined (CONFIG_RA_HW_NAT_MODULE)
-		FOE_MAGIC_TAG(rx_skb)=FOE_MAGIC_GE;
+#if defined (CONFIG_RA_HW_NAT)  || defined (CONFIG_RA_HW_NAT_MODULE)
+		FOE_MAGIC_TAG(rx_skb)= FOE_MAGIC_GE;
 		memcpy(FOE_INFO_START_ADDR(rx_skb)+2, &rx_ring[rx_dma_owner_idx].rxd_info4, sizeof(PDMA_RXD_INFO4_T));
 		FOE_ALG(rx_skb) = 0;
 #endif
@@ -1263,11 +1263,12 @@ static int rt2880_eth_recv(struct net_device* dev)
 		 * before pass the packet to cpu*/
 #if defined (CONFIG_RAETH_SKB_RECYCLE)
 		skb = __skb_dequeue_tail(&ei_local->rx0_recycle);
-		if (likely(skb != NULL))
-		    skb->dst=NULL;
-		else
-#endif
+		if (unlikely(skb==NULL)) {
+		    skb = __dev_alloc_skb(MAX_RX_LENGTH + NET_IP_ALIGN, GFP_ATOMIC);
+		}
+#else
 		skb = __netdev_alloc_skb(dev, MAX_RX_LENGTH + NET_IP_ALIGN , GFP_ATOMIC);
+#endif
 
 		if (unlikely(skb == NULL))
 		{
@@ -1312,7 +1313,7 @@ static int rt2880_eth_recv(struct net_device* dev)
 		}
 #endif
 
-#ifndef CONFIG_RA_NAT_NONE
+#if !defined(CONFIG_RA_NAT_NONE)
 /* bruce+
  * ra_sw_nat_hook_rx return 1 --> continue
  * ra_sw_nat_hook_rx return 0 --> FWD & without netif_rx
@@ -1826,7 +1827,7 @@ static int ei_start_xmit(struct sk_buff* skb, struct net_device *dev, int gmac_n
 		return 0;
 	}
 #endif
-#ifndef CONFIG_RA_NAT_NONE
+#if !defined(CONFIG_RA_NAT_NONE)
 /* bruce+
  */
          if(ra_sw_nat_hook_tx!= NULL)
