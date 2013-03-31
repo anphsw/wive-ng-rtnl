@@ -416,25 +416,25 @@ start() {
 startv6() {
     get_param
 
-	$LOG "Add netfiler rules for ipv6"
-	# default rules
-	ip6tables -I INPUT -i lo -j ACCEPT
-        ip6tables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+    $LOG "Add netfiler rules for ipv6"
+    # default rules
+    ip6tables -I INPUT -i lo -j ACCEPT
+    ip6tables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
 
-	# wan accept and mss fix rules
-	ip6tables -A FORWARD -t mangle -p tcp ! -o $lan_if --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
-        ip6tables -A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT
+    # wan accept and mss fix rules
+    ip6tables -A FORWARD -t mangle -p tcp ! -o $lan_if --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
+    ip6tables -A FORWARD -m state $STATE_EST -j ACCEPT
 
-	# temp rules need enchange in future
-	ip6tables -A INPUT -i $lan_if -j ACCEPT
-	ip6tables -A FORWARD -i $lan_if -j ACCEPT
+    # temp rules need enchange in future
+    ip6tables -A INPUT -i $lan_if -j ACCEPT
+    ip6tables -A FORWARD -i $lan_if -j ACCEPT
 
-	# allow mupnp to open connection from earth to local
-	if [ "$upnpEnabled" = "1" ]; then
-	    ip6tables -t filter -N MINIUPNPD
-	    ip6tables -t filter -A FORWARD -i $tunif ! -o $tunif -j MINIUPNPD
-	fi
-	$LOG "Configure netfilter for ipv6 OK."
+    # allow mupnp to open connection from earth to local
+    if [ "$upnpEnabled" = "1" ]; then
+	ip6tables -t filter -N MINIUPNPD
+	ip6tables -t filter -A FORWARD -i $tunif ! -o $tunif -j MINIUPNPD
+    fi
+    $LOG "Configure netfilter for ipv6 OK."
 }
 
 get_param() {
@@ -542,28 +542,28 @@ stop() {
 }
 
 stopv6() {
-	$LOG "Clear iptables rules fo ipv6 and set default actions."
-	ip6tables -F > /dev/null 2>&1
-	ip6tables -t filter -F > /dev/null 2>&1
-	ip6tables -t mangle -F > /dev/null 2>&1
-	ip6tables -X > /dev/null 2>&1
-	ip6tables -t filter -X > /dev/null 2>&1
-	ip6tables -t mangle -X > /dev/null 2>&1
+    $LOG "Clear iptables rules fo ipv6 and set default actions."
+    ip6tables -F > /dev/null 2>&1
+    ip6tables -t filter -F > /dev/null 2>&1
+    ip6tables -t mangle -F > /dev/null 2>&1
+    ip6tables -X > /dev/null 2>&1
+    ip6tables -t filter -X > /dev/null 2>&1
+    ip6tables -t mangle -X > /dev/null 2>&1
 
-	ip6tables -t mangle -F PREROUTING > /dev/null 2>&1
-	ip6tables -t mangle -F FORWARD > /dev/null 2>&1
-	ip6tables -t mangle -F INPUT > /dev/null 2>&1
-	ip6tables -t mangle -F OUTPUT > /dev/null 2>&1
-	ip6tables -t mangle -F POSTROUTING > /dev/null 2>&1
+    ip6tables -t mangle -F PREROUTING > /dev/null 2>&1
+    ip6tables -t mangle -F FORWARD > /dev/null 2>&1
+    ip6tables -t mangle -F INPUT > /dev/null 2>&1
+    ip6tables -t mangle -F OUTPUT > /dev/null 2>&1
+    ip6tables -t mangle -F POSTROUTING > /dev/null 2>&1
 
-	ip6tables -t filter -Z > /dev/null 2>&1
-	ip6tables -t mangle -Z > /dev/null 2>&1
-	ip6tables -Z > /dev/null 2>&1
+    ip6tables -t filter -Z > /dev/null 2>&1
+    ip6tables -t mangle -Z > /dev/null 2>&1
+    ip6tables -Z > /dev/null 2>&1
 
-	# default actions
-	ip6tables -P FORWARD DROP > /dev/null 2>&1
-	ip6tables -P INPUT   DROP > /dev/null 2>&1
-	ip6tables -P OUTPUT ACCEPT > /dev/null 2>&1
+    # default actions
+    ip6tables -P FORWARD DROP > /dev/null 2>&1
+    ip6tables -P INPUT   DROP > /dev/null 2>&1
+    ip6tables -P OUTPUT ACCEPT > /dev/null 2>&1
 }
 
 case "$1" in
