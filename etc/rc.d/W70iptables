@@ -419,11 +419,11 @@ startv6() {
     $LOG "Add netfiler rules for ipv6"
     # default rules
     ip6tables -I INPUT -i lo -j ACCEPT
-    ip6tables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+    ip6tables -A INPUT $STATE_EST -j ACCEPT
 
     # wan accept and mss fix rules
     ip6tables -A FORWARD -t mangle -p tcp ! -o $lan_if --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
-    ip6tables -A FORWARD -m state $STATE_EST -j ACCEPT
+    ip6tables -A FORWARD $STATE_EST -j ACCEPT
 
     # temp rules need enchange in future
     ip6tables -A INPUT -i $lan_if -j ACCEPT
