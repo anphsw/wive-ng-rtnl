@@ -2454,7 +2454,7 @@ static int addrconf_ifdown(struct net_device *dev, int how)
 
 	ASSERT_RTNL();
 
-	if ((dev->flags & IFF_LOOPBACK) && how == 1)
+	if (dev == &loopback_dev && how == 1)
 		how = 0;
 
 	rt6_ifdown(dev);

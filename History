@@ -1424,40 +1424,37 @@
 16) kernel: fix all section mismatches.<br>
 17) kernel: kbuild: fix section mismatch check for vmlinux.<br>
 18) kernel: rework gcc optimizations modes.<br>
-19) kernel: skbuff: prevent potential races in some situations.<br>
-20) kernel: skbuff: tcp: fix skb_availroom().<br>
-21) kernel: ipv6: mtu discovery check in ip6_fragment().<br>
-22) kernel: ipv6: tcp: preserve ACK clocking in TSO.<br>
-23) kernel: ipv4: add a missing rcu_assign_pointer() in routing cache.<br>
-24) kernel: ipv4: elide use of rt->rt_dst in ip_forward().<br>
-25) kernel: ipv4: remove rt->rt_dst reference from ip_forward_options().<br>
-26) kernel: ipv4: kill spurious write to iph->daddr in ip_forward_options().<br>
-27) kernel: ipv4: save nexthop address of LSRR/SSRR option to IPCB.<br>
-28) kernel: ipv4: fix forwarding for strict source routes.<br>
-29) kernel: ppp: remove unsupported protocols parse (IPX/APPLETALK/MPLS) decrease cpu usage.<br>
-30) kernel: ppp: small optimization for decrease cpu overhead.<br>
-31) kernel: conntrack: ipv4_conntrack_defrag: disable defrag if fastnat on (fragments allready gathered in nf_conntrack_in).<br>
-32) kernel: mips: all mips32 processors support64-bit physical addresses.<br>
-33) kernel: udp: Only increment counter on first peek/recv.<br>
-34) init.d: radvd: use real_wan_if_ip for support 6to4 over ppp based tunnels.<br>
-35) init.d: iptables: consolidate v4/v6 rules in one script.<br>
-36) init.d: prevent hot replace routes - fix tunnel restart at renew issue (set RouteUpOnce=0 for old mode).<br>
-37) init.d: full config dhcp client logic move to wan script.<br>
-38) init.d: transmission: auto make home dir and check disc mount before start.<br>
-39) init.d: radvd: fix calculate mtu for sit/ipv6 ifaces (6to4 over ppp issue fix).<br>
-40) init.d: iptables: cleanup iptables rules. Remove drop target(allready dropped by default).<br>
-41) init.d: rework servies restart logic.<br>
-42) init.d: fix apcli mode auto reconnect.<br>
-43) init.d: split wait_connect and wifi_reconnect.<br>
-44) init.d: cleanup arp records in switch for prevent flood/deadloop with ic+ aplink/downlink switches.<br>
-45) init.d: transmission: add 10*10=100 seconds check media mount and exit if not mounted.<br>
-46) defaults: set HT_MIMOPSMode=3 - need for multiple TX/RX streams compat.<br>
-47) goahead: fix wifi igmpsnoop independed set.<br>
-48) dropbear: version up to 2013.56.<br>
-49) configs: now kernel modules for 8Mb and 4Mb devices use one full optimization flags at build(speedup 4Mb devices).<br>
-50) configs: add more modem support automatization logic.<br>
-51) configs: disable snmpd and cdp support in 4Mb images.<br>
-52) fix dhcp regression added in 4.0.0.<br>
+19) kernel: ipv4: tcp: preserve ACK clocking in TSO.<br>
+20) kernel: ipv4: add a missing rcu_assign_pointer() in routing cache.<br>
+21) kernel: ipv4: elide use of rt->rt_dst in ip_forward().<br>
+22) kernel: ipv4: remove rt->rt_dst reference from ip_forward_options().<br>
+23) kernel: ipv4: kill spurious write to iph->daddr in ip_forward_options().<br>
+24) kernel: ipv4: save nexthop address of LSRR/SSRR option to IPCB.<br>
+25) kernel: ipv4: fix forwarding for strict source routes.<br>
+26) kernel: ppp: remove unsupported protocols parse (IPX/APPLETALK/MPLS) decrease cpu usage.<br>
+27) kernel: ppp: small optimization for decrease cpu overhead.<br>
+28) kernel: conntrack: ipv4_conntrack_defrag: disable defrag if fastnat on (fragments allready gathered in nf_conntrack_in).<br>
+29) kernel: mips: all mips32 processors support64-bit physical addresses.<br>
+30) kernel: udp: Only increment counter on first peek/recv.<br>
+31) init.d: radvd: use real_wan_if_ip for support 6to4 over ppp based tunnels.<br>
+32) init.d: iptables: consolidate v4/v6 rules in one script.<br>
+33) init.d: prevent hot replace routes - fix tunnel restart at renew issue (set RouteUpOnce=0 for old mode).<br>
+34) init.d: full config dhcp client logic move to wan script.<br>
+35) init.d: transmission: auto make home dir and check disc mount before start.<br>
+36) init.d: radvd: fix calculate mtu for sit/ipv6 ifaces (6to4 over ppp issue fix).<br>
+37) init.d: iptables: cleanup iptables rules. Remove drop target(allready dropped by default).<br>
+38) init.d: rework servies restart logic.<br>
+39) init.d: fix apcli mode auto reconnect.<br>
+40) init.d: split wait_connect and wifi_reconnect.<br>
+41) init.d: cleanup arp records in switch for prevent flood/deadloop with ic+ aplink/downlink switches.<br>
+42) init.d: transmission: add 10*10=100 seconds check media mount and exit if not mounted.<br>
+43) defaults: set HT_MIMOPSMode=3 - need for multiple TX/RX streams compat.<br>
+44) goahead: fix wifi igmpsnoop independed set.<br>
+45) dropbear: version up to 2013.56.<br>
+46) configs: now kernel modules for 8Mb and 4Mb devices use one full optimization flags at build(speedup 4Mb devices).<br>
+47) configs: add more modem support automatization logic.<br>
+49) configs: disable snmpd and cdp support in 4Mb images.<br>
+50) fix some regressions added in 4.0.0 version.<br>
 
 <br>
 <br>

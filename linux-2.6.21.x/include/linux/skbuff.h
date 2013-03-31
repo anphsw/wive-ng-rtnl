@@ -306,7 +306,6 @@ struct sk_buff {
 #if defined(CONFIG_IP_VS) || defined(CONFIG_IP_VS_MODULE)
 				ipvs_property:1,
 #endif
-				peeked:1,
 #if defined(CONFIG_NETFILTER_XT_TARGET_TRACE) || \
     defined(CONFIG_NETFILTER_XT_TARGET_TRACE_MODULE)
 				nf_trace:1,
@@ -345,7 +344,7 @@ struct sk_buff {
 	__u32			secmark;
 #endif
 	__u32			mark;
-	__u32			reserved_tailroom;
+	__u32			avail_size;
 
 	/* These elements must be at the end, see alloc_skb() for details.  */
 
@@ -1064,10 +1063,7 @@ static inline int skb_tailroom(const struct sk_buff *skb)
  */
 static inline int skb_availroom(const struct sk_buff *skb)
 {
-	if (skb_is_nonlinear(skb))
-		return 0;
-
-	return skb->end - skb->tail - skb->reserved_tailroom;
+	return skb_is_nonlinear(skb) ? 0 : skb->avail_size - skb->len;
 }
 
 /**
@@ -1578,8 +1574,6 @@ static inline int pskb_trim_rcsum(struct sk_buff *skb, unsigned int len)
 		     skb != (struct sk_buff *)(queue);				\
 		     skb = tmp, tmp = skb->prev)
 
-extern struct sk_buff *__skb_recv_datagram(struct sock *sk, unsigned flags,
-					   int *peeked, int *err);
 extern struct sk_buff *skb_recv_datagram(struct sock *sk, unsigned flags,
 					 int noblock, int *err);
 extern unsigned int    datagram_poll(struct file *file, struct socket *sock,
