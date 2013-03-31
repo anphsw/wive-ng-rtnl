@@ -17,6 +17,10 @@ start() {
 	/etc/scripts/config-switch.sh
     fi
 
+    # after switch configure cleaup arp records
+    # this prevent flood/loop with ic+ aplink/downlink switches
+    flush_arp_cache
+
     # bridge preconfigure if not ethernet converter mode
     brisup=`ip link show br0 up | grep -c ""` > /dev/null 2>&1
     if [ "$brisup" = "0" ] && [ "$OperationMode" != "2" ]; then
@@ -56,9 +60,6 @@ start() {
 	fi
     fi
 
-    # after full configure cleaup arp records
-    # this prevent flood/loop with ic+ aplink/downlink switches
-    flush_arp_cache
 }
 
 addr_flush() {
