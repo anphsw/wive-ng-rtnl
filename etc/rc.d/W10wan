@@ -37,7 +37,7 @@ udhcpc_opts() {
     else
 	wan_manual_mtu=""
     fi
-    if [ "$radvdEnabled" = "1" ] && [ "$IPv6_6RD_Enable" = "1" ]; then
+    if [ "$radvdEnabled" = "1" ] && [ "$ipv6_mode" = "6RD" ]; then
 	rd_support="-O ip6rd"
     else
 	rd_support=""

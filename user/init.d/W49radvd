@@ -33,7 +33,7 @@ calculate_and_set_mtu() {
 }
 
 start() {
-    eval `nvram_buf_get 2860 radvdEnabled Lan2Enabled`
+    eval `nvram_buf_get 2860 Lan2Enabled`
     if [ "$radvdEnabled" = "1" ]; then
 	# default subnet
 	ipv6subnet="2000"

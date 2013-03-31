@@ -31,7 +31,7 @@ eval `nvram_buf_get 2860 OperationMode wanConnectionMode wan_ipaddr wan_static_d
 	WLAN_MAC_ADDR WLAN2_MAC_ADDR WAN_MAC_ADDR LAN_MAC_ADDR \
 	dnsPEnabled UDPXYMode igmpEnabled \
 	vpnEnabled vpnPurePPPOE vpnType \
-	radvdEnabled IPv6_6RD_Enable \
+	radvdEnabled ipv6_mode \
 	ApCliBridgeOnly \
 	MODEMENABLED \
 	QoSEnable simple_qos`
