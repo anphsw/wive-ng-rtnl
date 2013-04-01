@@ -203,15 +203,10 @@ static unsigned int is_local_svc(struct sk_buff **pskb, u_int8_t protonm)
 	    iph	= (struct iphdr *)(*pskb)->nh.raw;
 	    if (iph != NULL) {
 		hdr = (struct udphdr*)((*pskb)->data + (iph->ihl << 2));
-		if (hdr != NULL) {
-		    /* Packet with no checksum */
-		    if (hdr->check == 0)
+		if (hdr != NULL)
+		    /* Packet with no checksum or Local L2TP */
+		    if (hdr->check == 0 || hdr->dest == htons(1701) || hdr->source == htons(1701))
 			return 1;
-
-		    /* Local L2TP */
-		    if (hdr->dest == htons(1701) && hdr->source == htons(1701))
-			return 1;
-		}
 	    }
 	}
 

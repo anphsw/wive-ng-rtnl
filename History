@@ -1432,6 +1432,7 @@
 24) configs: add more modem support automatization logic.<br>
 25) configs: disable snmpd and cdp support in 4Mb images.<br>
 26) kernel: temp suspend some some patch for fix two 4.0.0 regression (dhcp not work with W_XP and not work route in ipv6).<br>
+27) kernel: fastnat small optimizations.<br>
 
 <br>
 <br>
