@@ -1437,6 +1437,7 @@
 29) kernel: ipv4: tcp: preserve ACK clocking in TSO.<br>
 30) kernel: ipv4: Add a missing rcu_assign_pointer() in routing cache.<br>
 31) kernel: udp: Only increment counter on first peek/recv.<br>
+32) kernel: skbuff: fix calculate skb truesize in skb_alloc.<br>
 
 <br>
 <br>
