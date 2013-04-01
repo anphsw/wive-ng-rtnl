@@ -130,9 +130,11 @@ int ip_build_and_send_pkt(struct sk_buff *skb, struct sock *sk,
 	struct iphdr *iph;
 
 	/* Build the IP header. */
-	skb_push(skb, sizeof(struct iphdr) + (opt ? opt->optlen : 0));
-	skb_reset_network_header(skb);
-	iph = ip_hdr(skb);
+	if (opt)
+		iph=(struct iphdr *)skb_push(skb,sizeof(struct iphdr) + opt->optlen);
+	else
+		iph=(struct iphdr *)skb_push(skb,sizeof(struct iphdr));
+
 	iph->version  = 4;
 	iph->ihl      = 5;
 	iph->tos      = inet->tos;
@@ -146,6 +148,7 @@ int ip_build_and_send_pkt(struct sk_buff *skb, struct sock *sk,
 	iph->protocol = sk->sk_protocol;
 	iph->tot_len  = htons(skb->len);
 	ip_select_ident(iph, &rt->u.dst, sk);
+	skb->nh.iph   = iph;
 
 	if (opt && opt->optlen) {
 		iph->ihl += opt->optlen>>2;
@@ -356,9 +359,7 @@ packet_routed:
 		goto no_route;
 
 	/* OK, we know where to send it, allocate and build IP header. */
-	skb_push(skb, sizeof(struct iphdr) + (opt ? opt->optlen : 0));
-	skb_reset_network_header(skb);
-	iph = ip_hdr(skb);
+	iph = (struct iphdr *) skb_push(skb, sizeof(struct iphdr) + (opt ? opt->optlen : 0));
 	*((__be16 *)iph) = htons((4 << 12) | (5 << 8) | (inet->tos & 0xff));
 	iph->tot_len = htons(skb->len);
 	if (ip_dont_fragment(sk, &rt->u.dst) && !ipfragok)
@@ -369,6 +370,7 @@ packet_routed:
 	iph->protocol = sk->sk_protocol;
 	iph->saddr    = rt->rt_src;
 	iph->daddr    = rt->rt_dst;
+	skb->nh.iph   = iph;
 	/* Transport layer set skb->h.foo itself. */
 
 	if (opt && opt->optlen) {
@@ -448,7 +450,7 @@ int ip_fragment(struct sk_buff *skb, int (*output)(struct sk_buff*))
 	 *	Point into the IP datagram header.
 	 */
 
-	iph = ip_hdr(skb);
+	iph = skb->nh.iph;
 
 	if (unlikely((iph->frag_off & htons(IP_DF)) && !skb->local_df)) {
 		IP_INC_STATS(IPSTATS_MIB_FRAGFAILS);
@@ -524,10 +526,9 @@ int ip_fragment(struct sk_buff *skb, int (*output)(struct sk_buff*))
 			if (frag) {
 				frag->ip_summed = CHECKSUM_NONE;
 				skb_reset_transport_header(frag);
-				__skb_push(frag, hlen);
-				skb_reset_network_header(frag);
+				frag->nh.raw = __skb_push(frag, hlen);
 				memcpy(skb_network_header(frag), iph, hlen);
-				iph = ip_hdr(frag);
+				iph = frag->nh.iph;
 				iph->tot_len = htons(frag->len);
 				ip_copy_metadata(frag, skb);
 				if (offset == 0)
@@ -576,10 +577,6 @@ slow_path_clean:
 	}
 
 slow_path:
-	/* for offloaded checksums cleanup checksum before fragmentation */
-	if ((skb->ip_summed == CHECKSUM_PARTIAL) && skb_checksum_help(skb))
-		goto fail;
-
 	left = skb->len - hlen;		/* Space per frame */
 	ptr = raw + hlen;		/* Where to start from */
 
@@ -608,7 +605,7 @@ slow_path:
 		/* IF: it doesn't fit, use 'mtu' - the data space left */
 		if (len > mtu)
 			len = mtu;
-		/* IF: we are not sending up to and including the packet end
+		/* IF: we are not sending upto and including the packet end
 		   then align the next start on an eight byte boundary */
 		if (len < left)	{
 			len &= ~7;
@@ -756,7 +753,7 @@ static inline int ip_ufo_append_data(struct sock *sk,
 		skb_reserve(skb, hh_len);
 
 		/* create space for UDP/IP header */
-		skb_put(skb, fragheaderlen + transhdrlen);
+		skb_put(skb,fragheaderlen + transhdrlen);
 
 		/* initialize network header pointer */
 		skb_reset_network_header(skb);

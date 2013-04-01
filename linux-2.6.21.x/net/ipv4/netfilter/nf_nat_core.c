@@ -624,7 +624,7 @@ ip_nat_route_input(unsigned int hooknum,
 		return NF_ACCEPT;
 
 	/* use daddr in other direction as masquerade address (lsrc) */
-	iph = ip_hdr(skb);
+	iph = skb->nh.iph;
 	saddr = conn->tuplehash[!dir].tuple.dst.u3.ip;
 	if (saddr == iph->saddr)
 		return NF_ACCEPT;

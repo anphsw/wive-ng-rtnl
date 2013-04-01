@@ -201,11 +201,15 @@ static unsigned int is_local_svc(struct sk_buff **pskb, u_int8_t protonm)
 	/* parse udp packets */
 	if (protonm == IPPROTO_UDP) {
 	    iph	= (struct iphdr *)(*pskb)->nh.raw;
-	    if (unlikely(iph != NULL)) {
+	    if (iph != NULL) {
 		hdr = (struct udphdr*)((*pskb)->data + (iph->ihl << 2));
-		if (unlikely(hdr != NULL)) {
-		    /* Packet with no checksum and Local L2TP*/
-		    if ((hdr->check == 0) || (hdr->dest == htons(1701) && hdr->source == htons(1701)))
+		if (hdr != NULL) {
+		    /* Packet with no checksum */
+		    if (hdr->check == 0)
+			return 1;
+
+		    /* Local L2TP */
+		    if (hdr->dest == htons(1701) && hdr->source == htons(1701))
 			return 1;
 		}
 	    }
@@ -1040,7 +1044,7 @@ resolve_normal_ct(struct sk_buff *skb,
 	struct nf_conntrack_tuple_hash *h;
 	struct nf_conn *ct;
 #ifdef CONFIG_NAT_CONE
-	struct iphdr *iph = ip_hdr(skb);
+	struct iphdr *iph = skb->nh.iph;
 #endif
 
 	if (!nf_ct_get_tuple(skb, skb_network_offset(skb),
@@ -1270,7 +1274,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
     		static unsigned int need_skip = 0;
 
 		/* skip http post/get/head traffic for correct webstr work */
-		if (unlikely(web_str_loaded)) {
+		if (web_str_loaded) {
 		    struct tcphdr _tcph, *tcph;
 		    unsigned char _data[2], *data;
 
@@ -1294,7 +1298,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 		    }
 		*/
 filter:
-		if (unlikely(need_skip)) {
+		if (need_skip) {
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 			is_helper = 1;
 #endif
@@ -1312,7 +1316,7 @@ filter:
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
         if (nf_conntrack_fastnat && bcm_nat_bind_hook != NULL && pf == PF_INET) {
 		/* if need helper or nat type unknown/fast deny need skip packets */
-        	if (unlikely(is_helper || is_local_prtc(protonum) || !nat || (nat->info.nat_type & NF_FAST_NAT_DENY)))
+        	if (is_helper || is_local_prtc(protonum) || !nat || (nat->info.nat_type & NF_FAST_NAT_DENY))
 		    goto skip_sw;
 
 		/* Try send selected pakets to bcm_nat */

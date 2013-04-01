@@ -32,7 +32,7 @@ static int xfrm4_parse_spi(struct sk_buff *skb, u8 nexthdr, __be32 *spi, __be32 
 #ifdef CONFIG_NETFILTER
 static inline int xfrm4_rcv_encap_finish(struct sk_buff *skb)
 {
-	struct iphdr *iph = ip_hdr(skb);
+	struct iphdr *iph = skb->nh.iph;
 
 	if (skb->dst == NULL) {
 		if (ip_route_input(skb, iph->daddr, iph->saddr, iph->tos,
@@ -59,7 +59,7 @@ static int xfrm4_rcv_encap(struct sk_buff *skb, __u16 encap_type)
 		goto drop;
 
 	do {
-		struct iphdr *iph = ip_hdr(skb);
+		struct iphdr *iph = skb->nh.iph;
 
 		if (xfrm_nr == XFRM_MAX_DEPTH)
 			goto drop;

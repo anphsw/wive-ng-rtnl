@@ -129,7 +129,7 @@ static void nf_ip_saveroute(const struct sk_buff *skb, struct nf_info *info)
 	struct ip_rt_info *rt_info = nf_info_reroute(info);
 
 	if (info->hook == NF_IP_LOCAL_OUT) {
-		const struct iphdr *iph = ip_hdr(skb);
+		const struct iphdr *iph = skb->nh.iph;
 
 		rt_info->tos = iph->tos;
 		rt_info->daddr = iph->daddr;
@@ -155,7 +155,7 @@ static int nf_ip_reroute(struct sk_buff **pskb, const struct nf_info *info)
 __sum16 nf_ip_checksum(struct sk_buff *skb, unsigned int hook,
 			    unsigned int dataoff, u_int8_t protocol)
 {
-	struct iphdr *iph = ip_hdr(skb);
+	struct iphdr *iph = skb->nh.iph;
 	__sum16 csum = 0;
 
 	switch (skb->ip_summed) {

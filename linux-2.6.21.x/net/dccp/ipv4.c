@@ -422,7 +422,7 @@ EXPORT_SYMBOL_GPL(dccp_v4_request_recv_sock);
 static struct sock *dccp_v4_hnd_req(struct sock *sk, struct sk_buff *skb)
 {
 	const struct dccp_hdr *dh = dccp_hdr(skb);
-	const struct iphdr *iph = ip_hdr(skb);
+	const struct iphdr *iph = skb->nh.iph;
 	struct sock *nsk;
 	struct request_sock **prev;
 	/* Find possible connection requests. */

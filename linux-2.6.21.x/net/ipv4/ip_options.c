@@ -572,13 +572,13 @@ void ip_forward_options(struct sk_buff *skb)
 		     ) {
 			if (srrptr + 3 > srrspace)
 				break;
-			if (memcmp(&opt->nexthop, &optptr[srrptr-1], 4) == 0)
+			if (memcmp(&rt->rt_dst, &optptr[srrptr-1], 4) == 0)
 				break;
 		}
 		if (srrptr + 3 <= srrspace) {
 			opt->is_changed = 1;
+			skb->nh.iph->daddr = rt->rt_dst;
 			ip_rt_get_source(&optptr[srrptr-1], rt);
-			ip_hdr(skb)->daddr = opt->nexthop;
 			optptr[2] = srrptr+4;
 		} else if (net_ratelimit())
 			printk(KERN_CRIT "ip_forward(): Argh! Destination lost!\n");
@@ -599,7 +599,7 @@ int ip_options_rcv_srr(struct sk_buff *skb)
 	struct ip_options *opt = &(IPCB(skb)->opt);
 	int srrspace, srrptr;
 	__be32 nexthop;
-	struct iphdr *iph = ip_hdr(skb);
+	struct iphdr *iph = skb->nh.iph;
 	unsigned char *optptr = skb_network_header(skb) + opt->srr;
 	struct rtable *rt = (struct rtable*)skb->dst;
 	struct rtable *rt2;
@@ -644,7 +644,6 @@ int ip_options_rcv_srr(struct sk_buff *skb)
 	}
 	if (srrptr <= srrspace) {
 		opt->srr_is_hit = 1;
-		opt->nexthop = nexthop;
 		opt->is_changed = 1;
 	}
 	return 0;

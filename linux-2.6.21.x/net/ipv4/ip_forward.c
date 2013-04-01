@@ -82,7 +82,7 @@ int ip_forward(struct sk_buff *skb)
 
 	rt = (struct rtable*)skb->dst;
 
-	if (opt->is_strictroute && rt->rt_gateway)
+	if (opt->is_strictroute && rt->rt_dst != rt->rt_gateway)
 		goto sr_failed;
 
 	if (unlikely(skb->len > dst_mtu(&rt->u.dst) && !skb_is_gso(skb) &&
@@ -96,7 +96,7 @@ int ip_forward(struct sk_buff *skb)
 	/* We are about to mangle packet. Copy it! */
 	if (skb_cow(skb, LL_RESERVED_SPACE(rt->u.dst.dev)+rt->u.dst.header_len))
 		goto drop;
-	iph = ip_hdr(skb);
+	iph = skb->nh.iph;
 
 	/* Decrease ttl after skb cow done */
 	ip_decrease_ttl(iph);

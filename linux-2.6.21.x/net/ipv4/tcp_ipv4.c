@@ -512,7 +512,7 @@ int tcp_v4_gso_send_check(struct sk_buff *skb)
 	if (!pskb_may_pull(skb, sizeof(*th)))
 		return -EINVAL;
 
-	iph = ip_hdr(skb);
+	iph = skb->nh.iph;
 	th = skb->h.th;
 
 	th->check = 0;
@@ -1130,7 +1130,7 @@ static int tcp_v4_inbound_md5_hash(struct sock *sk, struct sk_buff *skb)
 	 */
 	__u8 *hash_location = NULL;
 	struct tcp_md5sig_key *hash_expected;
-	struct iphdr *iph = ip_hdr(skb);
+	struct iphdr *iph = skb->nh.iph;
 	struct tcphdr *th = skb->h.th;
 	int length = (th->doff << 2) - sizeof(struct tcphdr);
 	int genhash;
@@ -1474,7 +1474,7 @@ exit:
 static struct sock *tcp_v4_hnd_req(struct sock *sk, struct sk_buff *skb)
 {
 	struct tcphdr *th = skb->h.th;
-	struct iphdr *iph = ip_hdr(skb);
+	struct iphdr *iph = skb->nh.iph;
 	struct sock *nsk;
 	struct request_sock **prev;
 	/* Find possible connection requests. */

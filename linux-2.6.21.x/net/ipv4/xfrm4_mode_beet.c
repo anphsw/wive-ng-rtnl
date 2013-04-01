@@ -32,7 +32,7 @@ static int xfrm4_beet_output(struct xfrm_state *x, struct sk_buff *skb)
 	struct iphdr *iph, *top_iph = NULL;
 	int hdrlen, optlen;
 
-	iph = ip_hdr(skb);
+	iph = skb->nh.iph;
 	skb->h.ipiph = iph;
 
 	hdrlen = 0;
@@ -40,8 +40,7 @@ static int xfrm4_beet_output(struct xfrm_state *x, struct sk_buff *skb)
 	if (unlikely(optlen))
 		hdrlen += IPV4_BEET_PHMAXLEN - (optlen & 4);
 
-	skb_push(skb, x->props.header_len + hdrlen);
-	skb_reset_network_header(skb);
+	skb->nh.raw = skb_push(skb, x->props.header_len + hdrlen);
 	top_iph = skb->nh.iph;
 	skb->h.raw += sizeof(*iph) - hdrlen;
 
@@ -70,7 +69,7 @@ static int xfrm4_beet_output(struct xfrm_state *x, struct sk_buff *skb)
 
 static int xfrm4_beet_input(struct xfrm_state *x, struct sk_buff *skb)
 {
-	struct iphdr *iph = ip_hdr(skb);
+	struct iphdr *iph = skb->nh.iph;
 	int phlen = 0;
 	int optlen = 0;
 	__u8 ph_nexthdr = 0, protocol = 0;

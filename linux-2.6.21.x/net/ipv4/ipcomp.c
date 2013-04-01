@@ -90,7 +90,7 @@ static int ipcomp_input(struct xfrm_state *x, struct sk_buff *skb)
 	skb->ip_summed = CHECKSUM_NONE;
 
 	/* Remove ipcomp header and decompress original payload */
-	iph = ip_hdr(skb);
+	iph = skb->nh.iph;
 	ipch = (void *)skb->data;
 	iph->protocol = ipch->nexthdr;
 	skb->h.raw = skb->nh.raw + sizeof(*ipch);
@@ -104,7 +104,7 @@ out:
 static int ipcomp_compress(struct xfrm_state *x, struct sk_buff *skb)
 {
 	int err, plen, dlen, ihlen;
-	struct iphdr *iph = ip_hdr(skb);
+	struct iphdr *iph = skb->nh.iph;
 	struct ipcomp_data *ipcd = x->data;
 	u8 *start, *scratch;
 	struct crypto_comp *tfm;
@@ -147,7 +147,7 @@ static int ipcomp_output(struct xfrm_state *x, struct sk_buff *skb)
 	struct ipcomp_data *ipcd = x->data;
 	int hdr_len = 0;
 
-	iph = ip_hdr(skb);
+	iph = skb->nh.iph;
 	iph->tot_len = htons(skb->len);
 	hdr_len = iph->ihl * 4;
 	if ((skb->len - hdr_len) < ipcd->threshold) {
@@ -159,7 +159,7 @@ static int ipcomp_output(struct xfrm_state *x, struct sk_buff *skb)
 		goto out_ok;
 
 	err = ipcomp_compress(x, skb);
-	iph = ip_hdr(skb);
+	iph = skb->nh.iph;
 
 	if (err) {
 		goto out_ok;

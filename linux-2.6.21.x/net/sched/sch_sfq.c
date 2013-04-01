@@ -137,7 +137,7 @@ static unsigned sfq_hash(struct sfq_sched_data *q, struct sk_buff *skb)
 	switch (skb->protocol) {
 	case __constant_htons(ETH_P_IP):
 	{
-		struct iphdr *iph = ip_hdr(skb);
+		struct iphdr *iph = skb->nh.iph;
 		h = iph->daddr;
 		h2 = iph->saddr^iph->protocol;
 		if (!(iph->frag_off&htons(IP_MF|IP_OFFSET)) &&

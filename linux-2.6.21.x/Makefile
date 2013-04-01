@@ -538,15 +538,6 @@ CFLAGS		+= -g
 CFLAGS		+= -gdwarf-2
 endif
 
-# conserve stack if available on nonmips
-ifdef CONFIG_MIPS
-CFLAGS		+= $(call cc-option,-fno-conserve-stack)
-else
-CFLAGS		+= $(call cc-option,-fconserve-stack)
-# disable invalid "can't wrap" optimizations for signed / pointers
-CFLAGS		+= $(call cc-option,-fno-strict-overflow)
-endif
-
 # We trigger additional mismatches with less inlining
 ifdef CONFIG_DEBUG_SECTION_MISMATCH
 KBUILD_CFLAGS += $(call cc-option,-fno-inline-functions-called-once)
@@ -555,6 +546,12 @@ endif
 # crazy optimizations
 CFLAGS += $(call cc-option,-ffast-math)
 CFLAGS += $(call cc-option,-fforce-addr)
+
+# conserve stack if available
+CFLAGS += $(call cc-option,-fno-conserve-stack)
+
+# disable invalid "can't wrap" optimizations for signed / pointers
+CFLAGS += $(call cc-option,-fno-strict-overflow)
 
 # force gcc to behave correct even for buggy distributions
 CFLAGS += $(call cc-option,-fno-stack-protector)

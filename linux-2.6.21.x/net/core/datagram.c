@@ -127,10 +127,10 @@ out_noerr:
 }
 
 /**
- *	__skb_recv_datagram - Receive a datagram skbuff
+ *	skb_recv_datagram - Receive a datagram skbuff
  *	@sk: socket
  *	@flags: MSG_ flags
- *	@peeked: returns non-zero if this packet has been seen before
+ *	@noblock: blocking operation?
  *	@err: error code returned
  *
  *	Get a datagram skbuff, understands the peeking, nonblocking wakeups
@@ -155,8 +155,8 @@ out_noerr:
  *	quite explicitly by POSIX 1003.1g, don't change them without having
  *	the standard around please.
  */
-struct sk_buff *__skb_recv_datagram(struct sock *sk, unsigned flags,
-				    int *peeked, int *err)
+struct sk_buff *skb_recv_datagram(struct sock *sk, unsigned flags,
+				  int noblock, int *err)
 {
 	struct sk_buff *skb;
 	long timeo;
@@ -168,7 +168,7 @@ struct sk_buff *__skb_recv_datagram(struct sock *sk, unsigned flags,
 	if (error)
 		goto no_packet;
 
-	timeo = sock_rcvtimeo(sk, flags & MSG_DONTWAIT);
+	timeo = sock_rcvtimeo(sk, noblock);
 
 	do {
 		/* Again only user level code calls this function, so nothing
@@ -177,19 +177,18 @@ struct sk_buff *__skb_recv_datagram(struct sock *sk, unsigned flags,
 		 * Look at current nfs client by the way...
 		 * However, this function was corrent in any case. 8)
 		 */
-		unsigned long cpu_flags;
+		if (flags & MSG_PEEK) {
+			unsigned long cpu_flags;
 
-		spin_lock_irqsave(&sk->sk_receive_queue.lock, cpu_flags);
-		skb = skb_peek(&sk->sk_receive_queue);
-		if (skb) {
-			*peeked = skb->peeked;
-			if (flags & MSG_PEEK) {
-				skb->peeked = 1;
+			spin_lock_irqsave(&sk->sk_receive_queue.lock,
+					  cpu_flags);
+			skb = skb_peek(&sk->sk_receive_queue);
+			if (skb)
 				atomic_inc(&skb->users);
-			} else
-				__skb_unlink(skb, &sk->sk_receive_queue);
-		}
-		spin_unlock_irqrestore(&sk->sk_receive_queue.lock, cpu_flags);
+			spin_unlock_irqrestore(&sk->sk_receive_queue.lock,
+					       cpu_flags);
+		} else
+			skb = skb_dequeue(&sk->sk_receive_queue);
 
 		if (skb)
 			return skb;
@@ -206,16 +205,6 @@ struct sk_buff *__skb_recv_datagram(struct sock *sk, unsigned flags,
 no_packet:
 	*err = error;
 	return NULL;
-}
-EXPORT_SYMBOL(__skb_recv_datagram);
-
-struct sk_buff *skb_recv_datagram(struct sock *sk, unsigned flags,
-				  int noblock, int *err)
-{
-	int peeked;
-
-	return __skb_recv_datagram(sk, flags | (noblock ? MSG_DONTWAIT : 0),
-				   &peeked, err);
 }
 
 void skb_free_datagram(struct sock *sk, struct sk_buff *skb)

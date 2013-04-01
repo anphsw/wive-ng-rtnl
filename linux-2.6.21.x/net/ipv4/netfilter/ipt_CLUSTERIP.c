@@ -238,7 +238,7 @@ clusterip_del_node(struct clusterip_config *c, u_int16_t nodenum)
 static inline u_int32_t
 clusterip_hashfn(struct sk_buff *skb, struct clusterip_config *config)
 {
-	struct iphdr *iph = ip_hdr(skb);
+	struct iphdr *iph = skb->nh.iph;
 	unsigned long hashval;
 	u_int16_t sport, dport;
 	u_int16_t *ports;

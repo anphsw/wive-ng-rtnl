@@ -166,7 +166,7 @@ DEFINE_SNMP_STAT(struct ipstats_mib, ip_statistics) __read_mostly;
 int ip_call_ra_chain(struct sk_buff *skb)
 {
 	struct ip_ra_chain *ra;
-	u8 protocol = ip_hdr(skb)->protocol;
+	u8 protocol = skb->nh.iph->protocol;
 	struct sock *last = NULL;
 
 	for (ra = rcu_dereference(ip_ra_chain); ra; ra = rcu_dereference(ra->next)) {
@@ -294,7 +294,7 @@ static inline int ip_rcv_options(struct sk_buff *skb)
 		goto drop;
 	}
 
-	iph = ip_hdr(skb);
+	iph = skb->nh.iph;
 	opt = &(IPCB(skb)->opt);
 	opt->optlen = iph->ihl*4 - sizeof(struct iphdr);
 
@@ -305,7 +305,6 @@ static inline int ip_rcv_options(struct sk_buff *skb)
 
 	if (unlikely(opt->srr)) {
 		struct in_device *in_dev = in_dev_get(dev);
-
 		if (in_dev) {
 			if (!IN_DEV_SOURCE_ROUTE(in_dev)) {
 				if (IN_DEV_LOG_MARTIANS(in_dev) &&
@@ -332,7 +331,7 @@ drop:
 
 static inline int ip_rcv_finish(struct sk_buff *skb)
 {
-	struct iphdr *iph = ip_hdr(skb);
+	struct iphdr *iph = skb->nh.iph;
 
 	/*
 	 *	Initialise the virtual path cache for the packet. It describes
@@ -392,7 +391,7 @@ int ip_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type *pt, 
 	if (!pskb_may_pull(skb, sizeof(struct iphdr)))
 		goto inhdr_error;
 
-	iph = ip_hdr(skb);
+	iph = skb->nh.iph;
 
 	/*
 	 *	RFC1122: 3.1.2.2 MUST silently discard any IP frame that fails the checksum.
@@ -411,7 +410,7 @@ int ip_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type *pt, 
 	if (!pskb_may_pull(skb, iph->ihl*4))
 		goto inhdr_error;
 
-	iph = ip_hdr(skb);
+	iph = skb->nh.iph;
 
 	if (!ipv4_is_loopback(iph->daddr))
 		if (unlikely(ip_fast_csum((u8 *)iph, iph->ihl)))
@@ -435,9 +434,6 @@ int ip_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type *pt, 
 #endif
 	/* Remove any debris in the socket control block */
 	memset(IPCB(skb), 0, sizeof(struct inet_skb_parm));
-
-	/* Must drop socket now because of tproxy. */
-	skb_orphan(skb);
 
 	return NF_HOOK(PF_INET, NF_IP_PRE_ROUTING, skb, dev, NULL,
 		       ip_rcv_finish);

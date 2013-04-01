@@ -264,7 +264,7 @@ static int br_nf_pre_routing_finish_bridge(struct sk_buff *skb)
 static int br_nf_pre_routing_finish(struct sk_buff *skb)
 {
 	struct net_device *dev = skb->dev;
-	struct iphdr *iph = ip_hdr(skb);
+	struct iphdr *iph = skb->nh.iph;
 	struct nf_bridge_info *nf_bridge = skb->nf_bridge;
 	int err;
 
@@ -521,14 +521,14 @@ static unsigned int br_nf_pre_routing(unsigned int hook, struct sk_buff **pskb,
 	if (!pskb_may_pull(skb, sizeof(struct iphdr)))
 		goto inhdr_error;
 
-	iph = ip_hdr(skb);
+	iph = skb->nh.iph;
 	if (iph->ihl < 5 || iph->version != 4)
 		goto inhdr_error;
 
 	if (!pskb_may_pull(skb, 4 * iph->ihl))
 		goto inhdr_error;
 
-	iph = ip_hdr(skb);
+	iph = skb->nh.iph;
 	if (ip_fast_csum((__u8 *) iph, iph->ihl) != 0)
 		goto inhdr_error;
 

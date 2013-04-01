@@ -26,15 +26,13 @@ static int xfrm4_transport_output(struct xfrm_state *x, struct sk_buff *skb)
 	struct iphdr *iph;
 	int ihl;
 
-	iph = ip_hdr(skb);
+	iph = skb->nh.iph;
 	skb->h.ipiph = iph;
 
 	ihl = iph->ihl * 4;
 	skb->h.raw += ihl;
 
-	skb_push(skb, x->props.header_len);
-	skb_reset_network_header(skb);
-	memmove(skb->nh.raw, iph, ihl);
+	skb->nh.raw = memmove(skb_push(skb, x->props.header_len), iph, ihl);
 	return 0;
 }
 
