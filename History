@@ -1432,7 +1432,10 @@
 24) configs: add more modem support automatization logic.<br>
 25) configs: disable snmpd and cdp support in 4Mb images.<br>
 26) kernel: temp suspend some some patch for fix two 4.0.0 regression (dhcp not work with W_XP and not work route in ipv6).<br>
-27) kernel: fastnat small optimizations.<br>
+27) kernel: mips: all mips32 processors support64-bit physical addresses.<br>
+28) kernel: fastnat small optimizations.<br>
+29) kernel: ipv4: tcp: preserve ACK clocking in TSO.<br>
+30) kernel: ipv4: Add a missing rcu_assign_pointer() in routing cache.<br>
 
 <br>
 <br>
