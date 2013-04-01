@@ -172,7 +172,7 @@ static unsigned int ipv4_conntrack_defrag(unsigned int hooknum,
 	struct sock *sk = (*pskb)->sk;
 
 	/* if fastnat offload on - fragments allready gathered in nf_conntrack_in */
-	if (nf_conntrack_fastnat && sk && (sk->sk_family == PF_INET && (*pskb)->nh.iph->protocol == IPPROTO_TCP))
+	if (nf_conntrack_fastnat && sk && (sk->sk_family == PF_INET))
 		return NF_ACCEPT;
 #endif
 	/* Previously seen (loopback)?  Ignore.  Do this before fragment check. */

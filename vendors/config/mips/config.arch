@@ -94,21 +94,20 @@ WOPT	+= -Wno-unused-but-set-variable
 ########################### BUILD FLAGS/OPTIONS##############################
 ifdef UCLINUX_BUILD_LIB
 ifdef CONFIG_LIB_DEBUG
-	CFLAGS  :=  $(if $(LOPT),$(LOPT),-O1) $(WOPT) -g
+	CFLAGS  :=  $(if $(LOPT),$(LOPT),-O1) $(WOPT) -g -fno-conserve-stack
 else
-	CFLAGS  :=  $(if $(LOPT),$(LOPT),-Os) $(WOPT) -fomit-frame-pointer -fno-stack-protector
+	CFLAGS  :=  $(if $(LOPT),$(LOPT),-Os) $(WOPT) -fomit-frame-pointer -fno-stack-protector -fno-conserve-stack
 endif
 ifdef CONFIG_LIB_SMALLSIZE
 	# Defeat .eh_frame bloat (~25% smaller binary)
 	CFLAGS += -fno-caller-saves
 	CFLAGS += -fno-unwind-tables
-	CFLAGS += -fno-conserve-stack
 	CFLAGS += -fno-asynchronous-unwind-tables
 else
 ifdef CONFIG_RT2880_FLASH_4M
 	# This is ~5% speedup for result bynary before pure -Os
 	# and ~2% bigest unpacked rootfs size
-	CFLAGS += -ffast-math -fforce-addr -fno-conserve-stack
+	CFLAGS += -ffast-math -fforce-addr
 else
 	# This is improve performance ~10% before pure -Os
 	# and ~5% bigest unpacked rootfs size
@@ -138,21 +137,20 @@ endif
 ifdef UCLINUX_BUILD_USER
 
 ifdef CONFIG_USER_DEBUG
-	CFLAGS  :=  $(if $(UOPT),$(UOPT),-O1) $(WOPT) -g
+	CFLAGS  :=  $(if $(UOPT),$(UOPT),-O1) $(WOPT) -g -fno-conserve-stack
 else
-	CFLAGS  :=  $(if $(UOPT),$(UOPT),-Os) $(WOPT) -fomit-frame-pointer -fno-stack-protector
+	CFLAGS  :=  $(if $(UOPT),$(UOPT),-Os) $(WOPT) -fomit-frame-pointer -fno-stack-protector -fno-conserve-stack
 endif
 ifdef CONFIG_USER_SMALLSIZE
 	# Defeat .eh_frame bloat (~25% smaller binary)
 	CFLAGS += -fno-caller-saves
 	CFLAGS += -fno-unwind-tables
-	CFLAGS += -fno-conserve-stack
 	CFLAGS += -fno-asynchronous-unwind-tables
 else
 ifdef CONFIG_RT2880_FLASH_4M
 	# This is ~5% speedup for result bynary before pure -Os
 	# and ~2% bigest unpacked rootfs size
-	CFLAGS += -ffast-math -fforce-addr -fno-conserve-stack
+	CFLAGS += -ffast-math -fforce-addr
 else
 	# This is improve performance ~10% before pure -Os
 	# and ~5% bigest unpacked rootfs size

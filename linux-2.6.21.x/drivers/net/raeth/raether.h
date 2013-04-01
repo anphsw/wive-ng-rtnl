@@ -6,7 +6,7 @@
 #define DEFAULT_MTU	1500		/* default MTU set to device */
 
 /* mtu and rx sizes */
-#if defined (CONFIG_RAETH_JUMBOFRAME) || defined (CONFIG_RAETH_SKB_RECYCLE)
+#if defined (CONFIG_RAETH_JUMBOFRAME)
 #define	MAX_RX_LENGTH	4096		/* limit size for rx packets 1Gb */
 #else
 #define	MAX_RX_LENGTH	1536		/* limit size for rx packets 100Mb */

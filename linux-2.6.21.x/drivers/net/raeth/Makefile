@@ -20,11 +20,7 @@ raeth-objs += ra_netlink.o
 endif
 
 ifeq ($(CONFIG_RAETH_NAPI),y)
-EXTRA_CFLAGS   += -DCONFIG_RAETH_NAPI 
-endif
-
-ifeq ($(CONFIG_RAETH_SKB_RECYCLE),y)
-EXTRA_CFLAGS   += -DCONFIG_RAETH_SKB_RECYCLE
+EXTRA_CFLAGS   += -DCONFIG_RAETH_NAPI
 endif
 
 ifeq ($(CONFIG_RALINK_BRIDGING_ONLY),y)

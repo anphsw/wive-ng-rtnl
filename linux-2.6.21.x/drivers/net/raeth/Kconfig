@@ -38,10 +38,6 @@ choice
 
 endchoice
 
-config RAETH_SKB_RECYCLE
-        bool "SKB Recycle(Linux)"
-        depends on RAETH
-
 config RAETH_SPECIAL_TAG
         bool "Ralink Special Tag (0x810x)"
 	depends on RAETH && RT_3052_ESW

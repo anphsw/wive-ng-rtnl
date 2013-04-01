@@ -79,7 +79,7 @@ static int rt2880_eth_recv(struct net_device* dev, int *work_done, int work_to_d
 static int rt2880_eth_recv(struct net_device* dev);
 #endif
 
-#if !defined(CONFIG_RA_NAT_NONE)
+#ifndef CONFIG_RA_NAT_NONE
 #ifdef CONFIG_RAETH_MODULE
 extern int (*ra_sw_nat_hook_rx)(struct sk_buff *skb);
 extern int (*ra_sw_nat_hook_tx)(struct sk_buff *skb, int gmac_no);
@@ -684,11 +684,6 @@ static int fe_pdma_init(struct net_device *dev)
 	}
 	printk("\nphy_rx_ring1 = 0x%08x, rx_ring1 = 0x%p\n",ei_local->phy_rx_ring1,ei_local->rx_ring1);
 #endif
-
-#if defined (CONFIG_RAETH_SKB_RECYCLE)
-	skb_queue_head_init(&ei_local->rx0_recycle);
-#endif
-
 	regVal = sysRegRead(PDMA_GLO_CFG);
 	regVal &= 0x000000FF;
    	sysRegWrite(PDMA_GLO_CFG, regVal);
@@ -1253,22 +1248,15 @@ static int rt2880_eth_recv(struct net_device* dev)
 		}
 #endif /* CONFIG_RA_CLASSIFIER */
 
-#if defined (CONFIG_RA_HW_NAT)  || defined (CONFIG_RA_HW_NAT_MODULE)
-		FOE_MAGIC_TAG(rx_skb)= FOE_MAGIC_GE;
+#if defined (CONFIG_RA_HW_NAT) || defined (CONFIG_RA_HW_NAT_MODULE)
+		FOE_MAGIC_TAG(rx_skb)=FOE_MAGIC_GE;
 		memcpy(FOE_INFO_START_ADDR(rx_skb)+2, &rx_ring[rx_dma_owner_idx].rxd_info4, sizeof(PDMA_RXD_INFO4_T));
 		FOE_ALG(rx_skb) = 0;
 #endif
 
 		/* We have to check the free memory size is big enough
 		 * before pass the packet to cpu*/
-#if defined (CONFIG_RAETH_SKB_RECYCLE)
-		skb = __skb_dequeue_tail(&ei_local->rx0_recycle);
-		if (unlikely(skb==NULL)) {
-		    skb = __dev_alloc_skb(MAX_RX_LENGTH + NET_IP_ALIGN, GFP_ATOMIC);
-		}
-#else
 		skb = __netdev_alloc_skb(dev, MAX_RX_LENGTH + NET_IP_ALIGN , GFP_ATOMIC);
-#endif
 
 		if (unlikely(skb == NULL))
 		{
@@ -1313,7 +1301,7 @@ static int rt2880_eth_recv(struct net_device* dev)
 		}
 #endif
 
-#if !defined(CONFIG_RA_NAT_NONE)
+#ifndef CONFIG_RA_NAT_NONE
 /* bruce+
  * ra_sw_nat_hook_rx return 1 --> continue
  * ra_sw_nat_hook_rx return 0 --> FWD & without netif_rx
@@ -1827,7 +1815,7 @@ static int ei_start_xmit(struct sk_buff* skb, struct net_device *dev, int gmac_n
 		return 0;
 	}
 #endif
-#if !defined(CONFIG_RA_NAT_NONE)
+#ifndef CONFIG_RA_NAT_NONE
 /* bruce+
  */
          if(ra_sw_nat_hook_tx!= NULL)
@@ -2525,14 +2513,7 @@ inline void ei_xmit_housekeeping(unsigned long unused)
 	get_tx_desc_and_dtx_idx(ei_local, i, &tx_dtx_idx, &tx_desc);
 
 	while(tx_desc[skb_free_idx].txd_info2.DDONE_bit==1 && (ei_local->skb_free[i][skb_free_idx])!=0 ){
-
-#if defined (CONFIG_RAETH_SKB_RECYCLE)
-	    if (skb_queue_len(&ei_local->rx0_recycle) < NUM_RX_DESC && skb_recycle_check( ei_local->skb_free[i][skb_free_idx], MAX_RX_LENGTH )) {
-		__skb_queue_head(&ei_local->rx0_recycle, ei_local->skb_free[i][skb_free_idx]);
-	    }else
-#endif
-		dev_kfree_skb_any((ei_local->skb_free[i][skb_free_idx]));
-
+	    dev_kfree_skb_any((ei_local->skb_free[i][skb_free_idx]));
 	    ei_local->skb_free[i][skb_free_idx]=0;
 	    skb_free_idx = (skb_free_idx +1) % NUM_TX_DESC;
 	}
@@ -2545,21 +2526,10 @@ inline void ei_xmit_housekeeping(unsigned long unused)
 	if ((ei_local->skb_free[skb_free_idx]) != 0 && tx_desc[skb_free_idx].txd_info2.DDONE_bit==1) {
 		while(tx_desc[skb_free_idx].txd_info2.DDONE_bit==1 && (ei_local->skb_free[skb_free_idx])!=0 ){
 #if defined (CONFIG_RAETH_TSO)
-	    if(ei_local->skb_free[skb_free_idx]!=(struct  sk_buff *)0xFFFFFFFF) {
-#if defined (CONFIG_RAETH_SKB_RECYCLE)
-		if (skb_queue_len(&ei_local->rx0_recycle) < NUM_RX_DESC && skb_recycle_check(ei_local->skb_free[skb_free_idx], MAX_RX_LENGTH )) {
-		    __skb_queue_head(&ei_local->rx0_recycle,ei_local->skb_free[skb_free_idx]);
-		}else
-#endif
+	    if(ei_local->skb_free[skb_free_idx]!=(struct  sk_buff *)0xFFFFFFFF)
 		    dev_kfree_skb_any(ei_local->skb_free[skb_free_idx]);
-	    }
 #else
-#if defined (CONFIG_RAETH_SKB_RECYCLE)
-	    if (skb_queue_len(&ei_local->rx0_recycle) < NUM_RX_DESC && skb_recycle_check(ei_local->skb_free[skb_free_idx], MAX_RX_LENGTH )) {
-		__skb_queue_head(&ei_local->rx0_recycle,ei_local->skb_free[skb_free_idx]);
-	    }else
-#endif
-		dev_kfree_skb_any(ei_local->skb_free[skb_free_idx]);
+	    dev_kfree_skb_any(ei_local->skb_free[skb_free_idx]);
 #endif
 	    ei_local->skb_free[skb_free_idx]=0;
 	    skb_free_idx = (skb_free_idx +1) % NUM_TX_DESC;
@@ -2977,10 +2947,6 @@ int ei_close(struct net_device *dev)
 		}
 #endif
         }
-
-#if defined (CONFIG_RAETH_SKB_RECYCLE)
-	skb_queue_purge(&ei_local->rx0_recycle);
-#endif
 
 	/* TX Ring */
        if (ei_local->tx_ring0 != NULL) {

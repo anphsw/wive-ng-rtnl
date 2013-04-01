@@ -860,11 +860,6 @@ typedef struct end_device
     struct PDMA_rxdesc *rx_ring1;
     struct sk_buff     *netrx1_skbuf[NUM_RX_DESC];
 #endif
-
-#ifdef CONFIG_RAETH_SKB_RECYCLE
-    struct sk_buff_head rx0_recycle;
-#endif
-
 #ifdef CONFIG_RAETH_NAPI
     atomic_t irq_sem;
 #if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,35)

@@ -154,11 +154,21 @@ struct sk_buff *__alloc_skb(unsigned int size, gfp_t gfp_mask,
 		goto out;
 	prefetchw(skb);
 
-	/* Get the DATA. Size must match skb_add_mtu(). */
+	/* We do our best to align skb_shared_info on a separate cache
+	 * line. It usually works because kmalloc(X > SMP_CACHE_BYTES) gives
+	 * aligned memory blocks, unless SLUB/SLAB debug is enabled.
+	 * Both skb->head and skb_shared_info are cache line aligned.
+	 */
 	size = SKB_DATA_ALIGN(size);
+	size += SKB_DATA_ALIGN(sizeof(struct skb_shared_info));
 	data = kmalloc_node_track_caller(size + sizeof(struct skb_shared_info), gfp_mask, node);
 	if (!data)
 		goto nodata;
+	/* kmalloc(size) might give us more room than requested.
+	 * Put skb_shared_info exactly at the end of allocated zone,
+	 * to allow max possible filling before reallocation.
+	 */
+	size = SKB_WITH_OVERHEAD(ksize(data));
 	prefetchw(data + size);
 
 	/*
@@ -167,7 +177,8 @@ struct sk_buff *__alloc_skb(unsigned int size, gfp_t gfp_mask,
 	 * the tail pointer in struct sk_buff!
 	 */
 	memset(skb, 0, offsetof(struct sk_buff, tail));
-	skb->truesize = size + sizeof(struct sk_buff);
+	/* Account for allocated memory : skb + skb->head */
+	skb->truesize = SKB_TRUESIZE(size);
 	atomic_set(&skb->users, 1);
 	skb->head = data;
 	skb->data = data;
@@ -176,7 +187,7 @@ struct sk_buff *__alloc_skb(unsigned int size, gfp_t gfp_mask,
 	skb->vlan_tci = 0;
 	/* make sure we initialize shinfo sequentially */
 	shinfo = skb_shinfo(skb);
-	memset(shinfo, 0, offsetof(struct skb_shared_info, frags));
+	memset(shinfo, 0, offsetof(struct skb_shared_info, dataref));
 	atomic_set(&shinfo->dataref, 1);
 
 	if (fclone) {
@@ -188,11 +199,9 @@ struct sk_buff *__alloc_skb(unsigned int size, gfp_t gfp_mask,
 
 		child->fclone = SKB_FCLONE_UNAVAILABLE;
 	}
-
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 	DO_FAST_CLEAR_FOE(skb); // fast clear FoE info header
 #endif
-
 out:
 	return skb;
 nodata:
@@ -217,7 +226,7 @@ nodata:
 struct sk_buff *__netdev_alloc_skb(struct net_device *dev,
 		unsigned int length, gfp_t gfp_mask)
 {
-	struct sk_buff *skb;
+	struct sk_buff *skb = NULL;
 
 	skb = __alloc_skb(length + NET_SKB_PAD, gfp_mask, 0, NUMA_NO_NODE);
 	if (likely(skb)) {
@@ -269,6 +278,9 @@ static void skb_release_data(struct sk_buff *skb)
 
 		kfree(skb->head);
 	}
+#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+	DO_FAST_CLEAR_FOE(skb); // fast clear FoE info header
+#endif
 }
 
 /*
@@ -308,7 +320,6 @@ static void kfree_skbmem(struct sk_buff *skb)
 static void skb_release_head_state(struct sk_buff *skb)
 {
 	dst_release(skb->dst);
-
 #ifdef CONFIG_XFRM
 	secpath_put(skb->sp);
 #endif
@@ -330,11 +341,10 @@ static void skb_release_head_state(struct sk_buff *skb)
 	skb->tc_verd = 0;
 #endif
 #endif
+/* prevent races reuse if PPE confuses packets */
+	skb->dst = NULL;
 #ifdef CONFIG_VLAN_8021Q
-       skb->vlan_tci = 0;
-#endif
-#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-	DO_FAST_CLEAR_FOE(skb); // fast clear FoE info header
+	skb->vlan_tci = 0;
 #endif
 }
 
@@ -494,54 +504,6 @@ struct sk_buff *skb_clone(struct sk_buff *skb, gfp_t gfp_mask)
 
 	return __skb_clone(n, skb);
 }
-
-/**
- *	skb_recycle_check - check if skb can be reused for receive
- *	@skb: buffer
- *	@skb_size: minimum receive buffer size
- *
- *	Checks that the skb passed in is not shared or cloned, and
- *	that it is linear and its head portion at least as large as
- *	skb_size so that it can be recycled as a receive buffer.
- *	If these conditions are met, this function does any necessary
- *	reference count dropping and cleans up the skbuff as if it
- *	just came from __alloc_skb().
- */
-#ifdef CONFIG_RAETH_SKB_RECYCLE
-bool skb_recycle_check(struct sk_buff *skb, int skb_size)
-{
-	struct skb_shared_info *shinfo;
-
-	if (irqs_disabled())
-		return false;
-
-	if (skb_is_nonlinear(skb) || skb->fclone != SKB_FCLONE_UNAVAILABLE)
-		return false;
-
-	skb_size = SKB_DATA_ALIGN(skb_size + NET_SKB_PAD);
-	if ((skb->end - skb->head) < skb_size)
-		return false;
-
-	if (skb_shared(skb) || skb_cloned(skb))
-		return false;
-
-	skb_release_head_state(skb);
-
-	shinfo = skb_shinfo(skb);
-	memset(shinfo, 0, offsetof(struct skb_shared_info, dataref));
-	atomic_set(&shinfo->dataref, 1);
-
-	memset(skb, 0, offsetof(struct sk_buff, tail));
-	skb->data = skb->head + NET_SKB_PAD;
-	skb_reset_tail_pointer(skb);
-
-#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-	DO_FAST_CLEAR_FOE(skb); // fast clear FoE info header
-#endif
-	return true;
-}
-EXPORT_SYMBOL(skb_recycle_check);
-#endif
 
 static void copy_skb_header(struct sk_buff *new, const struct sk_buff *old)
 {
