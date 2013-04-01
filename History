@@ -1465,6 +1465,8 @@
 57) build_system: always use -fno-conserve-stack for MIPS (fix ipv6 regression in 4.0.0, may be fix dhcp regression in W_XP).<br>
 58) build_system: always disable no-strict-overflow option for MIPS (fix ipv6 regression in 4.0.0, may be fix dhcp regression in W_XP).<br>
 59) build_system: always disable no-branch-likely option for MIPS (fix ipv6 regression in 4.0.0, may be fix dhcp regression in W_XP).<br>
+60) kernel: conntrack: fix ipv4 defragment issue introdused in v4.0.0.<br>
+61) init.d: usb_storage: fix format/reparted commands.<br>
 
 <br>
 <br>

@@ -313,7 +313,7 @@ static void storageDiskAdm(webs_t wp, char_t *path, char_t *query)
 		if (NULL == (fp_mount = fopen("/proc/mounts", "r")))
 		{
 			perror(__FUNCTION__);
-            websRedirect(wp, "usb/STORAGEdisk_admin.asp");          
+        		websRedirect(wp, "usb/STORAGEdisk_admin.asp");
 			return;
 		}
 		while(EOF != fscanf(fp_mount, "%s %s %*s %*s %*s %*s\n", part, path))
