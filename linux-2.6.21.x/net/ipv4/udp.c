@@ -826,6 +826,7 @@ int udp_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 	struct sockaddr_in *sin = (struct sockaddr_in *)msg->msg_name;
 	struct sk_buff *skb;
 	unsigned int ulen, copied;
+	int peeked;
 	int err;
 #ifndef CONFIG_UDP_LITE_DISABLE
 	int is_udplite = IS_UDPLITE(sk);
@@ -841,7 +842,8 @@ int udp_recvmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 		return ip_recv_error(sk, msg, len);
 
 try_again:
-	skb = skb_recv_datagram(sk, flags, noblock, &err);
+	skb = __skb_recv_datagram(sk, flags | (noblock ? MSG_DONTWAIT : 0),
+				  &peeked, &err);
 	if (!skb)
 		goto out;
 
@@ -882,6 +884,9 @@ try_again:
 
 	if (err)
 		goto out_free;
+
+	if (!peeked)
+		UDP_INC_STATS_USER(UDP_MIB_INDATAGRAMS, is_udplite);
 
 	sock_recv_timestamp(msg, sk, skb);
 
@@ -1047,7 +1052,6 @@ udp:
 		goto drop;
 	}
 
-	UDP_INC_STATS_BH(UDP_MIB_INDATAGRAMS, up->pcflag);
 	return 0;
 
 drop:
