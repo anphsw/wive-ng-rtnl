@@ -341,11 +341,6 @@ static void skb_release_head_state(struct sk_buff *skb)
 	skb->tc_verd = 0;
 #endif
 #endif
-/* prevent races reuse if PPE confuses packets */
-	skb->dst = NULL;
-#ifdef CONFIG_VLAN_8021Q
-	skb->vlan_tci = 0;
-#endif
 }
 
 /* Free everything but the sk_buff shell. */
