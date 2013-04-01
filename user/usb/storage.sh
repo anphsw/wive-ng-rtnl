@@ -128,46 +128,56 @@ case $1 in
 		fi
 		;;
 	"reparted")
+		umount -l $2
 		fdisk -D /dev/sda
 		echo "fdisk -D /dev/sda"
 		sleep 1
 		if [ "$2" -gt "0" ]; then
-			fdisk /dev/sda -p 1 -v $2 
+			fdisk /dev/sda -p 1 -v $2
 			echo "fdisk /dev/sda -p 1 -v $2 "
 		fi
 		sleep 1
 		if [ "$3" -gt "0" ]; then
-			fdisk /dev/sda -p 2 -v $3 
+			fdisk /dev/sda -p 2 -v $3
 			echo "fdisk /dev/sda -p 2 -v $3"
 		fi
 		sleep 1
 		if [ "$4" -gt "0" ]; then
-			fdisk /dev/sda -p 3 -v $4 
+			fdisk /dev/sda -p 3 -v $4
 			echo "fdisk /dev/sda -p 3 -v $4"
 		fi
 		sleep 1
 		if [ "$5" -gt "0" ]; then
-			fdisk /dev/sda -p 4 -v $5 
+			fdisk /dev/sda -p 4 -v $5
 			echo "fdisk /dev/sda -p 4 -v $5"
 		fi
 		sleep 1
 		fdisk -r /dev/sda
 		echo "fdisk -r /dev/sda"
 		sleep 1
-		mkdosfs -F 32 /dev/sda1
-		echo "mkdosfs -F 32 /dev/sda1"
+		mke2fs -F -m1 /dev/sda1
+		echo "mke2fs -F -m1 /dev/sda1"
 		sleep 1
-		mkdosfs -F 32 /dev/sda2
-		echo "mkdosfs -F 32 /dev/sda2"
+		mke2fs -F -m1 /dev/sda2
+		echo "mke2fs -F -m1 /dev/sda2"
 		sleep 1
-		mkdosfs -F 32 /dev/sda3
-		echo "mkdosfs -F 32 /dev/sda3"
+		mke2fs -F -m1 /dev/sda3
+		echo "mke2fs -F -m1 /dev/sda3"
 		sleep 1
-		mkdosfs -F 32 /dev/sda4
-		echo "mkdosfs -F 32 /dev/sda4"
+		mke2fs -F -m1 /dev/sda4
+		echo "mke2fs -F -m1 /dev/sda4"
 		sleep 1
 		reboot
-		;;	
+		;;
+	"format")
+		umount -l $2 1>/dev/null 2>&1
+		mke2fs -F -m1 $2 $3 1>/dev/null 2>&1
+		;;
+	"restart")
+		reg s 0xb01c0000
+		reg w 440 5
+		reg w 440 1005
+		;;
 	"ftp")
 		killall -q stupid-ftpd
 		ftpenabled=`nvram_get 2860 FtpEnabled`
