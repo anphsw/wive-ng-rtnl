@@ -1463,6 +1463,8 @@
 55) configs: add more modem support automatization logic.<br>
 56) configs: disable snmpd and cdp support in 4Mb images.<br>
 57) build_system: always use -fno-conserve-stack for MIPS (fix ipv6 regression in 4.0.0, may be fix dhcp regression in W_XP).<br>
+58) build_system: always disable no-strict-overflow option for MIPS (fix ipv6 regression in 4.0.0, may be fix dhcp regression in W_XP).<br>
+59) build_system: always disable no-branch-likely option for MIPS (fix ipv6 regression in 4.0.0, may be fix dhcp regression in W_XP).<br>
 
 <br>
 <br>
