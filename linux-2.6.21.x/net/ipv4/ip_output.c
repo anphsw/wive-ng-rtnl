@@ -605,7 +605,7 @@ slow_path:
 		/* IF: it doesn't fit, use 'mtu' - the data space left */
 		if (len > mtu)
 			len = mtu;
-		/* IF: we are not sending upto and including the packet end
+		/* IF: we are not sending up to and including the packet end
 		   then align the next start on an eight byte boundary */
 		if (len < left)	{
 			len &= ~7;
@@ -753,7 +753,7 @@ static inline int ip_ufo_append_data(struct sock *sk,
 		skb_reserve(skb, hh_len);
 
 		/* create space for UDP/IP header */
-		skb_put(skb,fragheaderlen + transhdrlen);
+		skb_put(skb, fragheaderlen + transhdrlen);
 
 		/* initialize network header pointer */
 		skb_reset_network_header(skb);
