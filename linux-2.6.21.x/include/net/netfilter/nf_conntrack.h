@@ -296,6 +296,7 @@ extern unsigned int nf_conntrack_nat_mode;
 
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 extern int nf_conntrack_fastnat;
+extern int nf_ct_ipv4_gather_frags(struct sk_buff *skb, u_int32_t user);
 #endif
 
 DECLARE_PER_CPU(struct ip_conntrack_stat, nf_conntrack_stat);

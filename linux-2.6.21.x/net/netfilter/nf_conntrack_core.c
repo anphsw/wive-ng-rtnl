@@ -114,8 +114,6 @@ EXPORT_SYMBOL_GPL(nf_conntrack_table_flush);
 int nf_conntrack_fastnat __read_mostly;
 EXPORT_SYMBOL_GPL(nf_conntrack_fastnat);
 
-extern int nf_ct_ipv4_gather_frags(struct sk_buff *skb, u_int32_t user);
-
 typedef int (*bcmNatBindHook)(struct nf_conn *ct,
 	enum ip_conntrack_info ctinfo,
 	struct sk_buff **pskb,
