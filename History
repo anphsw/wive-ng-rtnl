@@ -1439,6 +1439,7 @@
 31) kernel: udp: Only increment counter on first peek/recv.<br>
 32) kernel: skbuff: fix calculate skb truesize in skb_alloc.<br>
 33) radvd: up to 1.9.3 version.<br>
+34) xupnpd: up to 1.03 rev 383 version.<br>
 
 <br>
 <br>
