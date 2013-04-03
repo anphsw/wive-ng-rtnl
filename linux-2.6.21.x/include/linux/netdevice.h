@@ -423,9 +423,8 @@ struct net_device {
 	int			quota;
 	int			weight;
 
-#ifdef CONFIG_BONDING
 	unsigned long           last_rx;        /* Time of last Rx      */
-#endif
+
 	/* Interface address info used in eth_type_trans() */
 	unsigned char		dev_addr[MAX_ADDR_LEN];	/* hw address, (before bcast 
 							because most packets are unicast) */
@@ -1089,7 +1088,6 @@ static inline int skb_bond_should_drop(struct sk_buff *skb)
 			if ((dev->priv_flags & IFF_SLAVE_NEEDARP) &&
 			    skb->protocol == __constant_htons(ETH_P_ARP))
 				return 0;
-
 			if (master->priv_flags & IFF_MASTER_ALB) {
 				if (skb->pkt_type != PACKET_BROADCAST &&
 				    skb->pkt_type != PACKET_MULTICAST)
