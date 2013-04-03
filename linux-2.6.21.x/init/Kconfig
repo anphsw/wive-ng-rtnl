@@ -574,7 +574,7 @@ config FILE_LOCKING
 	  This enables standard file locking support.
 
 config ETHTOOL
-	depends on NET
+	depends on NET && !RTL8367M
 	default y
 	bool "Enable ethtool support" if TINY
 	help

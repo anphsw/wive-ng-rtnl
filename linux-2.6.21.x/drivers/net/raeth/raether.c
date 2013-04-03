@@ -2671,6 +2671,7 @@ static const struct net_device_ops VirtualIF_netdev_ops = {
         .ndo_validate_addr      = eth_validate_addr,
 };
 #endif
+
 // Register pseudo interface
 void RAETH_Init_PSEUDO(pEND_DEVICE pAd, struct net_device *net_dev)
 {
