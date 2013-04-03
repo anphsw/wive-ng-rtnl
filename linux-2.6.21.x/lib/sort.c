@@ -9,6 +9,10 @@
 #include <linux/sort.h>
 #include <linux/slab.h>
 
+#ifdef swap
+#undef swap /* prevent macros replace logic */
+#endif
+
 static void u32_swap(void *a, void *b, int size)
 {
 	u32 t = *(u32 *)a;

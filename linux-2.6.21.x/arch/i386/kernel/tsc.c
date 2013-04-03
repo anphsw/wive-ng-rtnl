@@ -4,6 +4,7 @@
  * See comments there for proper credits.
  */
 
+#include <linux/sched.h>
 #include <linux/clocksource.h>
 #include <linux/workqueue.h>
 #include <linux/cpufreq.h>
@@ -26,6 +27,7 @@ static int tsc_enabled;
  * an extra value to store the TSC freq
  */
 unsigned int tsc_khz;
+EXPORT_SYMBOL_GPL(tsc_khz);
 
 int tsc_disable;
 
@@ -57,10 +59,11 @@ __setup("notsc", tsc_setup);
  */
 static int tsc_unstable;
 
-static inline int check_tsc_unstable(void)
+int check_tsc_unstable(void)
 {
 	return tsc_unstable;
 }
+EXPORT_SYMBOL_GPL(check_tsc_unstable);
 
 /* Accellerators for sched_clock()
  * convert from cycles(64bits) => nanoseconds (64bits)
@@ -83,7 +86,7 @@ static inline int check_tsc_unstable(void)
  *
  *			-johnstul@us.ibm.com "math is hard, lets go shopping!"
  */
-static unsigned long cyc2ns_scale __read_mostly;
+unsigned long cyc2ns_scale __read_mostly;
 
 #define CYC2NS_SCALE_FACTOR 10 /* 2^10, carefully chosen */
 
@@ -106,8 +109,13 @@ unsigned long long sched_clock(void)
 
 	/*
 	 * Fall back to jiffies if there's no TSC available:
+	 * ( But note that we still use it if the TSC is marked
+	 *   unstable. We do this because unlike Time Of Day,
+	 *   the scheduler clock tolerates small errors and it's
+	 *   very important for it to be as fast as the platform
+	 *   can achive it. )
 	 */
-	if (unlikely(!tsc_enabled))
+	if (unlikely(!tsc_enabled && !tsc_unstable))
 		/* No locking but a rare wrong value is not a big deal: */
 		return (jiffies_64 - INITIAL_JIFFIES) * (1000000000 / HZ);
 

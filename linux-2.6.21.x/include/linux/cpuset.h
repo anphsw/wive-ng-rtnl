@@ -146,6 +146,11 @@ static inline int cpuset_do_slab_mem_spread(void)
 
 static inline void cpuset_track_online_nodes(void) {}
 
+static inline cpumask_t cpuset_cpus_allowed_locked(struct task_struct *p)
+{
+	return cpu_possible_map;
+}
+
 #endif /* !CONFIG_CPUSETS */
 
 #endif /* _LINUX_CPUSET_H */

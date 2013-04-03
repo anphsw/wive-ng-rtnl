@@ -28,14 +28,16 @@ struct nsproxy {
 	struct ipc_namespace *ipc_ns;
 	struct mnt_namespace *mnt_ns;
 	struct pid_namespace *pid_ns;
+	struct user_namespace *user_ns;
 };
 extern struct nsproxy init_nsproxy;
 
-struct nsproxy *dup_namespaces(struct nsproxy *orig);
-int copy_namespaces(int flags, struct task_struct *tsk);
+int copy_namespaces(unsigned long flags, struct task_struct *tsk);
 void get_task_namespaces(struct task_struct *tsk);
 void free_nsproxy(struct nsproxy *ns);
 struct nsproxy *put_nsproxy(struct nsproxy *ns);
+int unshare_nsproxy_namespaces(unsigned long, struct nsproxy **,
+	struct fs_struct *);
 
 static inline void finalize_put_nsproxy(struct nsproxy *ns)
 {

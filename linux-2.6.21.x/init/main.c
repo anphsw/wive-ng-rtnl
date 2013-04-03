@@ -387,11 +387,6 @@ static void __init setup_per_cpu_areas(void)
 static void __init smp_init(void)
 {
 	unsigned int cpu;
-	unsigned highest = 0;
-
-	for_each_cpu_mask(cpu, cpu_possible_map)
-		highest = cpu;
-	nr_cpu_ids = highest + 1;
 
 	/* FIXME: This should be done in userspace --RR */
 	for_each_present_cpu(cpu) {
@@ -452,15 +447,16 @@ static void noinline __init_refok rest_init(void)
 
 	/*
 	 * The boot idle thread must execute schedule()
-	 * at least one to get things moving:
+	 * at least once to get things moving:
 	 */
+	init_idle_bootup_task(current);
 	preempt_enable_no_resched();
 	schedule();
 	preempt_disable();
 
 	/* Call into cpu_idle with preempt disabled */
 	cpu_idle();
-} 
+}
 
 /* Check for early params. */
 static int __init do_early_param(char *param, char *val)

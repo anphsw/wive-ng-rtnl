@@ -322,7 +322,7 @@ redo:
 
 	/* Signal writers asynchronously that there is more room. */
 	if (do_wakeup) {
-		wake_up_interruptible(&pipe->wait);
+		wake_up_interruptible_sync(&pipe->wait);
 		kill_fasync(&pipe->fasync_writers, SIGIO, POLL_OUT);
 	}
 #ifndef CONFIG_FS_ALL_NOATIME
@@ -497,7 +497,7 @@ redo2:
 out:
 	mutex_unlock(&inode->i_mutex);
 	if (do_wakeup) {
-		wake_up_interruptible(&pipe->wait);
+		wake_up_interruptible_sync(&pipe->wait);
 		kill_fasync(&pipe->fasync_readers, SIGIO, POLL_IN);
 	}
 	if (ret > 0)
@@ -589,7 +589,7 @@ pipe_release(struct inode *inode, int decr, int decw)
 	if (!pipe->readers && !pipe->writers) {
 		free_pipe_info(inode);
 	} else {
-		wake_up_interruptible(&pipe->wait);
+		wake_up_interruptible_sync(&pipe->wait);
 		kill_fasync(&pipe->fasync_readers, SIGIO, POLL_IN);
 		kill_fasync(&pipe->fasync_writers, SIGIO, POLL_OUT);
 	}

@@ -730,11 +730,6 @@ void blk_queue_hardsect_size(request_queue_t *q, unsigned short size)
 
 EXPORT_SYMBOL(blk_queue_hardsect_size);
 
-/*
- * Returns the minimum that is _not_ zero, unless both are zero.
- */
-#define min_not_zero(l, r) (l == 0) ? r : ((r == 0) ? l : min(l, r))
-
 /**
  * blk_queue_stack_limits - inherit underlying queue limits for stacked drivers
  * @t:	the stacking driver (top)

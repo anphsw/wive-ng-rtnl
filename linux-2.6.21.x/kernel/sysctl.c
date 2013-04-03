@@ -214,11 +214,109 @@ static ctl_table root_table[] = {
 		.mode		= 0555,
 		.child		= dev_table,
 	},
-
+/*
+ * NOTE: do not add new entries to this table unless you have read
+ * Documentation/sysctl/ctl_unnumbered.txt
+ */
 	{ .ctl_name = 0 }
 };
 
-static ctl_table kern_table[] = {
+#ifdef CONFIG_SCHED_DEBUG
+static unsigned long min_sched_granularity_ns = 100000;		/* 100 usecs */
+static unsigned long max_sched_granularity_ns = NSEC_PER_SEC;	/* 1 second */
+static unsigned long min_wakeup_granularity_ns;			/* 0 usecs */
+static unsigned long max_wakeup_granularity_ns = NSEC_PER_SEC;	/* 1 second */
+#endif
+
+static struct ctl_table kern_table[] = {
+#ifdef CONFIG_SCHED_DEBUG
+	{
+		.ctl_name	= CTL_UNNUMBERED,
+		.procname	= "sched_min_granularity_ns",
+		.data		= &sysctl_sched_min_granularity,
+		.maxlen		= sizeof(unsigned int),
+		.mode		= 0644,
+		.proc_handler	= &sched_nr_latency_handler,
+		.strategy	= &sysctl_intvec,
+		.extra1		= &min_sched_granularity_ns,
+		.extra2		= &max_sched_granularity_ns,
+	},
+	{
+		.ctl_name	= CTL_UNNUMBERED,
+		.procname	= "sched_latency_ns",
+		.data		= &sysctl_sched_latency,
+		.maxlen		= sizeof(unsigned int),
+		.mode		= 0644,
+		.proc_handler	= &sched_nr_latency_handler,
+		.strategy	= &sysctl_intvec,
+		.extra1		= &min_sched_granularity_ns,
+		.extra2		= &max_sched_granularity_ns,
+	},
+	{
+		.ctl_name	= CTL_UNNUMBERED,
+		.procname	= "sched_wakeup_granularity_ns",
+		.data		= &sysctl_sched_wakeup_granularity,
+		.maxlen		= sizeof(unsigned int),
+		.mode		= 0644,
+		.proc_handler	= &proc_dointvec_minmax,
+		.strategy	= &sysctl_intvec,
+		.extra1		= &min_wakeup_granularity_ns,
+		.extra2		= &max_wakeup_granularity_ns,
+	},
+	{
+		.ctl_name	= CTL_UNNUMBERED,
+		.procname	= "sched_batch_wakeup_granularity_ns",
+		.data		= &sysctl_sched_batch_wakeup_granularity,
+		.maxlen		= sizeof(unsigned int),
+		.mode		= 0644,
+		.proc_handler	= &proc_dointvec_minmax,
+		.strategy	= &sysctl_intvec,
+		.extra1		= &min_wakeup_granularity_ns,
+		.extra2		= &max_wakeup_granularity_ns,
+	},
+	{
+		.ctl_name	= CTL_UNNUMBERED,
+		.procname	= "sched_child_runs_first",
+		.data		= &sysctl_sched_child_runs_first,
+		.maxlen		= sizeof(unsigned int),
+		.mode		= 0644,
+		.proc_handler	= &proc_dointvec,
+	},
+	{
+		.ctl_name	= CTL_UNNUMBERED,
+		.procname	= "sched_features",
+		.data		= &sysctl_sched_features,
+		.maxlen		= sizeof(unsigned int),
+		.mode		= 0644,
+		.proc_handler	= &proc_dointvec,
+	},
+	{
+		.ctl_name	= CTL_UNNUMBERED,
+		.procname	= "sched_migration_cost",
+		.data		= &sysctl_sched_migration_cost,
+		.maxlen		= sizeof(unsigned int),
+		.mode		= 0644,
+		.proc_handler	= &proc_dointvec,
+	},
+#if defined(CONFIG_FAIR_GROUP_SCHED) && defined(CONFIG_SMP)
+	{
+		.ctl_name	= CTL_UNNUMBERED,
+		.procname	= "sched_nr_migrate",
+		.data		= &sysctl_sched_nr_migrate,
+		.maxlen		= sizeof(unsigned int),
+		.mode		= 644,
+		.proc_handler	= &proc_dointvec,
+	},
+#endif
+#endif
+	{
+		.ctl_name	= CTL_UNNUMBERED,
+		.procname	= "sched_compat_yield",
+		.data		= &sysctl_sched_compat_yield,
+		.maxlen		= sizeof(unsigned int),
+		.mode		= 0644,
+		.proc_handler	= &proc_dointvec,
+	},
 	{
 		.ctl_name	= KERN_PANIC,
 		.procname	= "panic",

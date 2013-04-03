@@ -707,9 +707,11 @@ static inline int copy_signal(unsigned long clone_flags, struct task_struct * ts
 	sig->tty_old_pgrp = NULL;
 
 	sig->utime = sig->stime = sig->cutime = sig->cstime = cputime_zero;
+	sig->gtime = cputime_zero;
+	sig->cgtime = cputime_zero;
 	sig->nvcsw = sig->nivcsw = sig->cnvcsw = sig->cnivcsw = 0;
 	sig->min_flt = sig->maj_flt = sig->cmin_flt = sig->cmaj_flt = 0;
-	sig->sched_time = 0;
+	sig->sum_sched_runtime = 0;
 	INIT_LIST_HEAD(&sig->cpu_timers[0]);
 	INIT_LIST_HEAD(&sig->cpu_timers[1]);
 	INIT_LIST_HEAD(&sig->cpu_timers[2]);
@@ -789,7 +791,7 @@ static struct task_struct *copy_process(unsigned long clone_flags,
 					unsigned long stack_size,
 					int __user *parent_tidptr,
 					int __user *child_tidptr,
-					int pid)
+					struct pid *pid)
 {
 	int retval;
 	struct task_struct *p;
@@ -831,7 +833,7 @@ static struct task_struct *copy_process(unsigned long clone_flags,
 	if (atomic_read(&p->user->processes) >=
 			p->signal->rlim[RLIMIT_NPROC].rlim_cur) {
 		if (!capable(CAP_SYS_ADMIN) && !capable(CAP_SYS_RESOURCE) &&
-				p->user != &root_user)
+		    p->user != current->nsproxy->user_ns->root_user)
 			goto bad_fork_free;
 	}
 
@@ -856,7 +858,7 @@ static struct task_struct *copy_process(unsigned long clone_flags,
 	p->did_exec = 0;
 	delayacct_tsk_init(p);	/* Must remain after dup_task_struct() */
 	copy_flags(clone_flags, p);
-	p->pid = pid;
+	p->pid = pid_nr(pid);
 	retval = -EFAULT;
 	if (clone_flags & CLONE_PARENT_SETTID)
 		if (put_user(p->pid, parent_tidptr))
@@ -872,7 +874,12 @@ static struct task_struct *copy_process(unsigned long clone_flags,
 
 	p->utime = cputime_zero;
 	p->stime = cputime_zero;
- 	p->sched_time = 0;
+	p->prev_utime = cputime_zero;
+	p->prev_stime = cputime_zero;
+	p->gtime = cputime_zero;
+	p->utimescaled = cputime_zero;
+	p->stimescaled = cputime_zero;
+
 #ifdef CONFIG_TASK_XACCT
 	p->rchar = 0;		/* I/O counter: bytes read */
 	p->wchar = 0;		/* I/O counter: bytes written */
@@ -1008,7 +1015,7 @@ static struct task_struct *copy_process(unsigned long clone_flags,
 	INIT_LIST_HEAD(&p->ptrace_list);
 
 	/* Perform scheduler related setup. Assign this task to a CPU. */
-	sched_fork(p);
+	sched_fork(p, clone_flags);
 
 	/* Need tasklist lock for parent etc handling! */
 	write_lock_irq(&tasklist_lock);
@@ -1087,13 +1094,13 @@ static struct task_struct *copy_process(unsigned long clone_flags,
 			p->signal->tty = current->signal->tty;
 			p->signal->pgrp = process_group(current);
 			set_signal_session(p->signal, process_session(current));
-			attach_pid(p, PIDTYPE_PGID, process_group(p));
-			attach_pid(p, PIDTYPE_SID, process_session(p));
+			attach_pid(p, PIDTYPE_PGID, task_pgrp(current));
+			attach_pid(p, PIDTYPE_SID, task_session(current));
 
 			list_add_tail_rcu(&p->tasks, &init_task.tasks);
 			__get_cpu_var(process_counts)++;
 		}
-		attach_pid(p, PIDTYPE_PID, p->pid);
+		attach_pid(p, PIDTYPE_PID, pid);
 		nr_threads++;
 	}
 
@@ -1157,7 +1164,8 @@ struct task_struct * __cpuinit fork_idle(int cpu)
 	struct task_struct *task;
 	struct pt_regs regs;
 
-	task = copy_process(CLONE_VM, 0, idle_regs(&regs), 0, NULL, NULL, 0);
+	task = copy_process(CLONE_VM, 0, idle_regs(&regs), 0, NULL, NULL,
+				&init_struct_pid);
 	if (!IS_ERR(task))
 		init_idle(task, cpu);
 
@@ -1207,7 +1215,7 @@ long do_fork(unsigned long clone_flags,
 			clone_flags |= CLONE_PTRACE;
 	}
 
-	p = copy_process(clone_flags, stack_start, regs, stack_size, parent_tidptr, child_tidptr, nr);
+	p = copy_process(clone_flags, stack_start, regs, stack_size, parent_tidptr, child_tidptr, pid);
 	/*
 	 * Do this prior waking up the new thread - the thread pointer
 	 * might get invalid after that point, if the thread exits quickly.
@@ -1229,7 +1237,7 @@ long do_fork(unsigned long clone_flags,
 		}
 
 		if (!(clone_flags & CLONE_STOPPED))
-			wake_up_new_task(p);
+			wake_up_new_task(p, clone_flags);
 		else
 			p->state = TASK_STOPPED;
 
@@ -1351,26 +1359,6 @@ static int unshare_fs(unsigned long unshare_flags, struct fs_struct **new_fsp)
 }
 
 /*
- * Unshare the mnt_namespace structure if it is being shared
- */
-static int unshare_mnt_namespace(unsigned long unshare_flags,
-		struct mnt_namespace **new_nsp, struct fs_struct *new_fs)
-{
-	struct mnt_namespace *ns = current->nsproxy->mnt_ns;
-
-	if ((unshare_flags & CLONE_NEWNS) && ns) {
-		if (!capable(CAP_SYS_ADMIN))
-			return -EPERM;
-
-		*new_nsp = dup_mnt_ns(current, new_fs ? new_fs : current->fs);
-		if (!*new_nsp)
-			return -ENOMEM;
-	}
-
-	return 0;
-}
-
-/*
  * Unsharing of sighand is not supported yet
  */
 static int unshare_sighand(unsigned long unshare_flags, struct sighand_struct **new_sighp)
@@ -1428,16 +1416,6 @@ static int unshare_semundo(unsigned long unshare_flags, struct sem_undo_list **n
 	return 0;
 }
 
-#ifndef CONFIG_IPC_NS
-static inline int unshare_ipcs(unsigned long flags, struct ipc_namespace **ns)
-{
-	if (flags & CLONE_NEWIPC)
-		return -EINVAL;
-
-	return 0;
-}
-#endif
-
 /*
  * unshare allows a process to 'unshare' part of the process
  * context which was originally shared using clone.  copy_*
@@ -1450,14 +1428,11 @@ asmlinkage long sys_unshare(unsigned long unshare_flags)
 {
 	int err = 0;
 	struct fs_struct *fs, *new_fs = NULL;
-	struct mnt_namespace *ns, *new_ns = NULL;
 	struct sighand_struct *new_sigh = NULL;
 	struct mm_struct *mm, *new_mm = NULL, *active_mm = NULL;
 	struct files_struct *fd, *new_fd = NULL;
 	struct sem_undo_list *new_ulist = NULL;
 	struct nsproxy *new_nsproxy = NULL, *old_nsproxy = NULL;
-	struct uts_namespace *uts, *new_uts = NULL;
-	struct ipc_namespace *ipc, *new_ipc = NULL;
 
 	check_unshare_flags(&unshare_flags);
 
@@ -1465,43 +1440,31 @@ asmlinkage long sys_unshare(unsigned long unshare_flags)
 	err = -EINVAL;
 	if (unshare_flags & ~(CLONE_THREAD|CLONE_FS|CLONE_NEWNS|CLONE_SIGHAND|
 				CLONE_VM|CLONE_FILES|CLONE_SYSVSEM|
-				CLONE_NEWUTS|CLONE_NEWIPC))
+				CLONE_NEWUTS|CLONE_NEWIPC|CLONE_NEWUSER))
 		goto bad_unshare_out;
 
 	if ((err = unshare_thread(unshare_flags)))
 		goto bad_unshare_out;
 	if ((err = unshare_fs(unshare_flags, &new_fs)))
 		goto bad_unshare_cleanup_thread;
-	if ((err = unshare_mnt_namespace(unshare_flags, &new_ns, new_fs)))
-		goto bad_unshare_cleanup_fs;
 	if ((err = unshare_sighand(unshare_flags, &new_sigh)))
-		goto bad_unshare_cleanup_ns;
+		goto bad_unshare_cleanup_fs;
 	if ((err = unshare_vm(unshare_flags, &new_mm)))
 		goto bad_unshare_cleanup_sigh;
 	if ((err = unshare_fd(unshare_flags, &new_fd)))
 		goto bad_unshare_cleanup_vm;
 	if ((err = unshare_semundo(unshare_flags, &new_ulist)))
 		goto bad_unshare_cleanup_fd;
-	if ((err = unshare_utsname(unshare_flags, &new_uts)))
+	if ((err = unshare_nsproxy_namespaces(unshare_flags, &new_nsproxy,
+			new_fs)))
 		goto bad_unshare_cleanup_semundo;
-	if ((err = unshare_ipcs(unshare_flags, &new_ipc)))
-		goto bad_unshare_cleanup_uts;
 
-	if (new_ns || new_uts || new_ipc) {
-		old_nsproxy = current->nsproxy;
-		new_nsproxy = dup_namespaces(old_nsproxy);
-		if (!new_nsproxy) {
-			err = -ENOMEM;
-			goto bad_unshare_cleanup_ipc;
-		}
-	}
-
-	if (new_fs || new_ns || new_mm || new_fd || new_ulist ||
-				new_uts || new_ipc) {
+	if (new_fs ||  new_mm || new_fd || new_ulist || new_nsproxy) {
 
 		task_lock(current);
 
 		if (new_nsproxy) {
+			old_nsproxy = current->nsproxy;
 			current->nsproxy = new_nsproxy;
 			new_nsproxy = old_nsproxy;
 		}
@@ -1510,12 +1473,6 @@ asmlinkage long sys_unshare(unsigned long unshare_flags)
 			fs = current->fs;
 			current->fs = new_fs;
 			new_fs = fs;
-		}
-
-		if (new_ns) {
-			ns = current->nsproxy->mnt_ns;
-			current->nsproxy->mnt_ns = new_ns;
-			new_ns = ns;
 		}
 
 		if (new_mm) {
@@ -1533,31 +1490,11 @@ asmlinkage long sys_unshare(unsigned long unshare_flags)
 			new_fd = fd;
 		}
 
-		if (new_uts) {
-			uts = current->nsproxy->uts_ns;
-			current->nsproxy->uts_ns = new_uts;
-			new_uts = uts;
-		}
-
-		if (new_ipc) {
-			ipc = current->nsproxy->ipc_ns;
-			current->nsproxy->ipc_ns = new_ipc;
-			new_ipc = ipc;
-		}
-
 		task_unlock(current);
 	}
 
 	if (new_nsproxy)
 		put_and_finalize_nsproxy(new_nsproxy);
-
-bad_unshare_cleanup_ipc:
-	if (new_ipc)
-		put_ipc_ns(new_ipc);
-
-bad_unshare_cleanup_uts:
-	if (new_uts)
-		put_uts_ns(new_uts);
 
 bad_unshare_cleanup_semundo:
 bad_unshare_cleanup_fd:
@@ -1572,10 +1509,6 @@ bad_unshare_cleanup_sigh:
 	if (new_sigh)
 		if (atomic_dec_and_test(&new_sigh->count))
 			kmem_cache_free(sighand_cachep, new_sigh);
-
-bad_unshare_cleanup_ns:
-	if (new_ns)
-		put_mnt_ns(new_ns);
 
 bad_unshare_cleanup_fs:
 	if (new_fs)

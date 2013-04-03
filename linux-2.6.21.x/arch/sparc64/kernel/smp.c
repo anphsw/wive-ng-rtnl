@@ -1295,41 +1295,6 @@ int setup_profiling_timer(unsigned int multiplier)
 	return 0;
 }
 
-static void __init smp_tune_scheduling(void)
-{
-	struct device_node *dp;
-	int instance;
-	unsigned int def, smallest = ~0U;
-
-	def = ((tlb_type == hypervisor) ?
-	       (3 * 1024 * 1024) :
-	       (4 * 1024 * 1024));
-
-	instance = 0;
-	while (!cpu_find_by_instance(instance, &dp, NULL)) {
-		unsigned int val;
-
-		val = of_getintprop_default(dp, "ecache-size", def);
-		if (val < smallest)
-			smallest = val;
-
-		instance++;
-	}
-
-	/* Any value less than 256K is nonsense.  */
-	if (smallest < (256U * 1024U))
-		smallest = 256 * 1024;
-
-	max_cache_size = smallest;
-
-	if (smallest < 1U * 1024U * 1024U)
-		printk(KERN_INFO "Using max_cache_size of %uKB\n",
-		       smallest / 1024U);
-	else
-		printk(KERN_INFO "Using max_cache_size of %uMB\n",
-		       smallest / 1024U / 1024U);
-}
-
 /* Constrain the number of cpus to max_cpus.  */
 void __init smp_prepare_cpus(unsigned int max_cpus)
 {
@@ -1365,7 +1330,6 @@ void __init smp_prepare_cpus(unsigned int max_cpus)
 	}
 
 	smp_store_cpu_info(boot_cpu_id);
-	smp_tune_scheduling();
 }
 
 /* Set this up early so that things like the scheduler can init

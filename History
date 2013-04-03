@@ -1443,7 +1443,7 @@
 35) kernel: ppp: small optimization for decrease cpu overhead.<br>
 36) kernel: conntrack: ipv4_conntrack_defrag: disable defrag if fastnat on (fragments allready gathered in nf_conntrack_in).<br>
 37) kernel: make kernel threads nonfreezable by default.<br>
-
+38) kernel: backport CFS cpu scheduller(this good news for l2tp/pptp users).<br>
 <br>
 <br>
 <br>

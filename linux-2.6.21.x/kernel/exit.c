@@ -110,11 +110,12 @@ static void __exit_signal(struct task_struct *tsk)
 		 */
 		sig->utime = cputime_add(sig->utime, tsk->utime);
 		sig->stime = cputime_add(sig->stime, tsk->stime);
+		sig->gtime = cputime_add(sig->gtime, tsk->gtime);
 		sig->min_flt += tsk->min_flt;
 		sig->maj_flt += tsk->maj_flt;
 		sig->nvcsw += tsk->nvcsw;
 		sig->nivcsw += tsk->nivcsw;
-		sig->sched_time += tsk->sched_time;
+		sig->sum_sched_runtime += tsk->se.sum_exec_runtime;
 		sig = NULL; /* Marker for below. */
 	}
 
@@ -172,7 +173,6 @@ repeat:
 		zap_leader = (leader->exit_signal == -1);
 	}
 
-	sched_exit(p);
 	write_unlock_irq(&tasklist_lock);
 	proc_flush_task(p);
 	release_thread(p);
@@ -302,12 +302,12 @@ void __set_special_pids(pid_t session, pid_t pgrp)
 	if (process_session(curr) != session) {
 		detach_pid(curr, PIDTYPE_SID);
 		set_signal_session(curr->signal, session);
-		attach_pid(curr, PIDTYPE_SID, session);
+		attach_pid(curr, PIDTYPE_SID, find_pid(session));
 	}
 	if (process_group(curr) != pgrp) {
 		detach_pid(curr, PIDTYPE_PGID);
 		curr->signal->pgrp = pgrp;
-		attach_pid(curr, PIDTYPE_PGID, pgrp);
+		attach_pid(curr, PIDTYPE_PGID, find_pid(pgrp));
 	}
 }
 
@@ -1208,6 +1208,11 @@ static int wait_task_zombie(struct task_struct *p, int noreap,
 			cputime_add(p->stime,
 			cputime_add(sig->stime,
 				    sig->cstime)));
+		psig->cgtime =
+			cputime_add(psig->cgtime,
+			cputime_add(p->gtime,
+			cputime_add(sig->gtime,
+				    sig->cgtime)));
 		psig->cmin_flt +=
 			p->min_flt + sig->min_flt + sig->cmin_flt;
 		psig->cmaj_flt +=
