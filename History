@@ -1442,6 +1442,7 @@
 34) kernel: ppp: remove unsupported protocols parse (IPX/APPLETALK/MPLS) decrease cpu usage.<br>
 35) kernel: ppp: small optimization for decrease cpu overhead.<br>
 36) kernel: conntrack: ipv4_conntrack_defrag: disable defrag if fastnat on (fragments allready gathered in nf_conntrack_in).<br>
+37) kernel: make kernel threads nonfreezable by default.<br>
 
 <br>
 <br>
