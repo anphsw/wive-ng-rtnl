@@ -1439,8 +1439,9 @@
 31) kernel: udp: Only increment counter on first peek/recv.<br>
 32) kernel: skbuff: fix calculate skb truesize in skb_alloc.<br>
 33) kernel: netpoll: fix netpoll_send_udp() bugs.<br>
-34) radvd: up to 1.9.3 version.<br>
-35) xupnpd: up to 1.03 rev 383 version.<br>
+34) kernel: net: Move last_rx update into bonding recv logic.<br>
+35) radvd: up to 1.9.3 version.<br>
+36) xupnpd: up to 1.03 rev 383 version.<br>
 
 <br>
 <br>
