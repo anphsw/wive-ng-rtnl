@@ -281,8 +281,8 @@ config CPUSETS
 
 config FAIR_GROUP_SCHED
 	bool "Fair group CPU scheduler"
-	default y
 	depends on EXPERIMENTAL
+	default y
 	help
 	  This feature lets CPU scheduler recognize task groups and control CPU
 	  bandwidth allocation to such task groups.
@@ -290,13 +290,7 @@ config FAIR_GROUP_SCHED
 choice
 	depends on FAIR_GROUP_SCHED
 	prompt "Basis for grouping tasks"
-	default FAIR_USER_SCHED
-
-config FAIR_USER_SCHED
-	bool "user id"
-	help
-	  This option will choose userid as the basis for grouping
-	  tasks, thus providing equal CPU bandwidth to each user.
+	default FAIR_GROUP_SCHED
 
 endchoice
 

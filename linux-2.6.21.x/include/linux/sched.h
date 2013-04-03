@@ -632,22 +632,9 @@ struct user_struct {
 	/* Hash table maintenance information */
 	struct hlist_node uidhash_node;
 	uid_t uid;
-
-#ifdef CONFIG_FAIR_USER_SCHED
-	struct task_group *tg;
-#ifdef CONFIG_SYSFS
-	struct kset kset;
-	struct subsys_attribute user_attr;
-	struct work_struct work;
-#endif
-#endif
 };
 
-#ifdef CONFIG_FAIR_USER_SCHED
-extern int uids_kobject_init(void);
-#else
 static inline int uids_kobject_init(void) { return 0; }
-#endif
 
 extern struct user_struct *find_user(uid_t);
 

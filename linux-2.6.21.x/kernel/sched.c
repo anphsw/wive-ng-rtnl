@@ -190,11 +190,7 @@ struct task_group init_task_group = {
 	.cfs_rq = init_cfs_rq_p,
 };
 
-#ifdef CONFIG_FAIR_USER_SCHED
-# define INIT_TASK_GRP_LOAD	2*NICE_0_LOAD
-#else
-# define INIT_TASK_GRP_LOAD	NICE_0_LOAD
-#endif
+#define INIT_TASK_GRP_LOAD	NICE_0_LOAD
 
 static int init_task_group_load = INIT_TASK_GRP_LOAD;
 
@@ -203,9 +199,7 @@ static inline struct task_group *task_group(struct task_struct *p)
 {
 	struct task_group *tg;
 
-#ifdef CONFIG_FAIR_USER_SCHED
-	tg = p->user->tg;
-#elif defined(CONFIG_FAIR_CGROUP_SCHED)
+#if defined(CONFIG_FAIR_CGROUP_SCHED)
 	tg = container_of(task_subsys_state(p, cpu_cgroup_subsys_id),
 				struct task_group, css);
 #else

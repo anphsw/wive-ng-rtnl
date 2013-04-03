@@ -50,9 +50,6 @@ struct user_struct root_user = {
 	.uid_keyring	= &root_user_keyring,
 	.session_keyring = &root_session_keyring,
 #endif
-#ifdef CONFIG_FAIR_USER_SCHED
-	.tg		= &init_task_group,
-#endif
 };
 
 /*
@@ -85,182 +82,6 @@ static inline struct user_struct *uid_hash_find(uid_t uid,
 	return NULL;
 }
 
-#ifdef CONFIG_FAIR_USER_SCHED
-
-static struct kobject uids_kobject; /* represents /sys/kernel/uids directory */
-static DEFINE_MUTEX(uids_mutex);
-
-static void sched_destroy_user(struct user_struct *up)
-{
-	sched_destroy_group(up->tg);
-}
-
-static int sched_create_user(struct user_struct *up)
-{
-	int rc = 0;
-
-	up->tg = sched_create_group();
-	if (IS_ERR(up->tg))
-		rc = -ENOMEM;
-
-	return rc;
-}
-
-static void sched_switch_user(struct task_struct *p)
-{
-	sched_move_task(p);
-}
-
-static inline void uids_mutex_lock(void)
-{
-	mutex_lock(&uids_mutex);
-}
-
-static inline void uids_mutex_unlock(void)
-{
-	mutex_unlock(&uids_mutex);
-}
-
-/* return cpu shares held by the user */
-ssize_t cpu_shares_show(struct subsystem *subs, char *buffer)
-{
-	struct kset *kset = &subs->kset;
-	struct user_struct *up = container_of(kset, struct user_struct, kset);
-
-	return sprintf(buffer, "%lu\n", sched_group_shares(up->tg));
-}
-
-/* modify cpu shares held by the user */
-ssize_t cpu_shares_store(struct subsystem *subs, const char *buffer, size_t size)
-{
-	struct kset *kset = &subs->kset;
-	struct user_struct *up = container_of(kset, struct user_struct, kset);
-	unsigned long shares;
-	int rc;
-
-	sscanf(buffer, "%lu", &shares);
-
-	rc = sched_group_set_shares(up->tg, shares);
-
-	return (rc ? rc : size);
-}
-
-static void user_attr_init(struct subsys_attribute *sa, char *name, int mode)
-{
-	sa->attr.name = name; sa->attr.owner = NULL;
-	sa->attr.mode = mode;
-	sa->show = cpu_shares_show;
-	sa->store = cpu_shares_store;
-}
-
-/* Create "/sys/kernel/uids/<uid>" directory and
- *  "/sys/kernel/uids/<uid>/cpu_share" file for this user.
- */
-static int user_kobject_create(struct user_struct *up)
-{
-	struct kset *kset = &up->kset;
-	struct kobject *kobj = &kset->kobj;
-	int error;
-
-	memset(kset, 0, sizeof(struct kset));
-	kobj->parent = &uids_kobject;	/* create under /sys/kernel/uids dir */
-	kobject_set_name(kobj, "%d", up->uid);
-	kset_init(kset);
-	user_attr_init(&up->user_attr, "cpu_share", 0644);
-
-	error = kobject_add(kobj);
-	if (error)
-		goto done;
-
-	error = sysfs_create_file(kobj, &up->user_attr.attr);
-	if (error)
-		kobject_del(kobj);
-
-	kobject_uevent(kobj, KOBJ_ADD);
-
-done:
-	return error;
-}
-
-/* create these in sysfs filesystem:
- * 	"/sys/kernel/uids" directory
- * 	"/sys/kernel/uids/0" directory (for root user)
- * 	"/sys/kernel/uids/0/cpu_share" file (for root user)
- */
-int __init uids_kobject_init(void)
-{
-	int error;
-
-	/* create under /sys/kernel dir */
-	uids_kobject.parent = &kernel_subsys.kset.kobj;
-	uids_kobject.kset = &kernel_subsys.kset;
-	kobject_set_name(&uids_kobject, "uids");
-	kobject_init(&uids_kobject);
-
-	error = kobject_add(&uids_kobject);
-	if (!error)
-		error = user_kobject_create(&root_user);
-
-	return error;
-}
-
-/* work function to remove sysfs directory for a user and free up
- * corresponding structures.
- */
-static void remove_user_sysfs_dir(struct work_struct *w)
-{
-	struct user_struct *up = container_of(w, struct user_struct, work);
-	struct kobject *kobj = &up->kset.kobj;
-	unsigned long flags;
-	int remove_user = 0;
-
-	/* Make uid_hash_remove() + sysfs_remove_file() + kobject_del()
-	 * atomic.
-	 */
-	uids_mutex_lock();
-
-	local_irq_save(flags);
-
-	if (atomic_dec_and_lock(&up->__count, &uidhash_lock)) {
-		uid_hash_remove(up);
-		remove_user = 1;
-		spin_unlock_irqrestore(&uidhash_lock, flags);
-	} else {
-		local_irq_restore(flags);
-	}
-
-	if (!remove_user)
-		goto done;
-
-	sysfs_remove_file(kobj, &up->user_attr.attr);
-	kobject_uevent(kobj, KOBJ_REMOVE);
-	kobject_del(kobj);
-
-	sched_destroy_user(up);
-	key_put(up->uid_keyring);
-	key_put(up->session_keyring);
-	kmem_cache_free(uid_cachep, up);
-
-done:
-	uids_mutex_unlock();
-}
-
-/* IRQs are disabled and uidhash_lock is held upon function entry.
- * IRQ state (as stored in flags) is restored and uidhash_lock released
- * upon function exit.
- */
-static inline void free_user(struct user_struct *up, unsigned long flags)
-{
-	/* restore back the count */
-	atomic_inc(&up->__count);
-	spin_unlock_irqrestore(&uidhash_lock, flags);
-
-	INIT_WORK(&up->work, remove_user_sysfs_dir);
-	schedule_work(&up->work);
-}
-
-#else	/* CONFIG_FAIR_USER_SCHED */
-
 static void sched_destroy_user(struct user_struct *up) { }
 static int sched_create_user(struct user_struct *up) { return 0; }
 static void sched_switch_user(struct task_struct *p) { }
@@ -281,8 +102,6 @@ static inline void free_user(struct user_struct *up, unsigned long flags)
 	key_put(up->session_keyring);
 	kmem_cache_free(uid_cachep, up);
 }
-
-#endif	/* CONFIG_FAIR_USER_SCHED */
 
 /*
  * Locate the user_struct for the passed UID.  If found, take a ref on it.  The
@@ -358,15 +177,6 @@ struct user_struct * alloc_uid(struct user_namespace *ns, uid_t uid)
 			key_put(new->uid_keyring);
 			key_put(new->session_keyring);
 			kmem_cache_free(uid_cachep, new);
-			return NULL;
-		}
-
-		if (user_kobject_create(new)) {
-			sched_destroy_user(new);
-			key_put(new->uid_keyring);
-			key_put(new->session_keyring);
-			kmem_cache_free(uid_cachep, new);
-			uids_mutex_unlock();
 			return NULL;
 		}
 
