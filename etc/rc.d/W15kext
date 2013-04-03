@@ -18,10 +18,6 @@ start() {
 	bridge_stp
 	bridge_fastpath
     fi
-    # Only if VPN enabled
-    if [ "$vpnEnabled" = "on" ]; then
-	vpn_limit
-    fi
 }
 
 nat_mode() {
@@ -131,16 +127,6 @@ pthrough() {
 	    echo "null,null" > /proc/pthrough/pppoe
 	    echo "null,null" > /proc/pthrough/ipv6
 	fi
-    fi
-}
-
-vpn_limit() {
-    vpnCpuLimit=`nvram_get 2860 vpnCpuLimit`
-    if [ "$vpnCpuLimit" != "" ] && [ "$vpnCpuLimit" != "0" ]; then
-	$LOG "Limit cpu load for PPP to $vpnCpuLimit ticks"
-	sysctl -wq net.ipv4.ppp_cpu_load_limit=$vpnCpuLimit
-    else
-	sysctl -wq net.ipv4.ppp_cpu_load_limit=0
     fi
 }
 

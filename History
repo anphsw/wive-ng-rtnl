@@ -1429,21 +1429,22 @@
 21) init.d: cleanup arp records in switch for prevent flood/deadloop with ic+ aplink/downlink switches.<br>
 22) init.d: transmission: add 10*10=100 seconds check media mount and exit if not mounted.<br>
 23) init.d: udpxy, increase client limits to 10(GI S8120 DVB receiver webtv plugin workaround).<br>
-24) init.d: add ipv6_mode variable to onfigure mode ipv6 acces(6RD/6TO4/NATIVE, default 6TO4).<br>
-25) kernel: temp suspend some some patch for fix two 4.0.0 regression (dhcp not work with W_XP and not work route in ipv6).<br>
-26) kernel: mips: all mips32 processors support64-bit physical addresses.<br>
-27) kernel: fastnat small optimizations.<br>
-28) kernel: ipv4: tcp: preserve ACK clocking in TSO.<br>
-29) kernel: ipv4: Add a missing rcu_assign_pointer() in routing cache.<br>
-30) kernel: udp: Only increment counter on first peek/recv.<br>
-31) kernel: skbuff: fix calculate skb truesize in skb_alloc.<br>
-32) kernel: netpoll: fix netpoll_send_udp() bugs.<br>
-33) kernel: net: Move last_rx update into bonding recv logic.<br>
-34) kernel: ppp: remove unsupported protocols parse (IPX/APPLETALK/MPLS) decrease cpu usage.<br>
-35) kernel: ppp: small optimization for decrease cpu overhead.<br>
-36) kernel: conntrack: ipv4_conntrack_defrag: disable defrag if fastnat on (fragments allready gathered in nf_conntrack_in).<br>
-37) kernel: make kernel threads nonfreezable by default.<br>
-38) kernel: backport CFS cpu scheduller(this good news for l2tp/pptp users).<br>
+24) init.d: set policer parametrs after click apply and connect (not more need reboot).<br>
+25) init.d: add ipv6_mode variable to onfigure mode ipv6 acces(6RD/6TO4/NATIVE, default 6TO4).<br>
+26) kernel: temp suspend some some patch for fix two 4.0.0 regression (dhcp not work with W_XP and not work route in ipv6).<br>
+27) kernel: mips: all mips32 processors support64-bit physical addresses.<br>
+28) kernel: fastnat small optimizations.<br>
+29) kernel: ipv4: tcp: preserve ACK clocking in TSO.<br>
+30) kernel: ipv4: Add a missing rcu_assign_pointer() in routing cache.<br>
+31) kernel: udp: Only increment counter on first peek/recv.<br>
+32) kernel: skbuff: fix calculate skb truesize in skb_alloc.<br>
+33) kernel: netpoll: fix netpoll_send_udp() bugs.<br>
+34) kernel: net: Move last_rx update into bonding recv logic.<br>
+35) kernel: ppp: remove unsupported protocols parse (IPX/APPLETALK/MPLS) decrease cpu usage.<br>
+36) kernel: ppp: small optimization for decrease cpu overhead.<br>
+37) kernel: conntrack: ipv4_conntrack_defrag: disable defrag if fastnat on (fragments allready gathered in nf_conntrack_in).<br>
+38) kernel: make kernel threads nonfreezable by default.<br>
+39) kernel: backport CFS cpu scheduller(this good news for l2tp/pptp users).<br>
 <br>
 <br>
 <br>
