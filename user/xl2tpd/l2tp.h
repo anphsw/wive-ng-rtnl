@@ -36,7 +36,6 @@ typedef unsigned long long _u64;
 #include "aaa.h"
 #include "common.h"
 #include "ipsecmast.h"
-#include <net/route.h>
 
 #define CONTROL_PIPE "/var/run/xl2tpd/l2tp-control"
 #define CONTROL_PIPE_MESSAGE_SIZE 1024
@@ -84,7 +83,6 @@ struct payload_hdr
     _u16 Ns;                    /* Optional next sent */
     _u16 Nr;                    /* Optional next received */
     _u16 o_size;                /* Optional offset size */
-//    _u16 o_pad;                 /* Optional offset padding */
 } __attribute__((packed));
 
 #define NZL_TIMEOUT_DIVISOR 4   /* Divide TIMEOUT by this and
@@ -173,7 +171,6 @@ struct tunnel
     struct call *self;
     struct lns *lns;            /* LNS that owns us */
     struct lac *lac;            /* LAC that owns us */
-    struct rtentry rt;		/* Route added to destination */
 };
 
 struct tunnel_list

@@ -463,7 +463,7 @@ void network_thread ()
 #ifdef HIGH_PRIO
     /* set high priority */
     if (setpriority(PRIO_PROCESS, 0, -20) < 0)
-	warn("xl2tpd: can't set priority to high: %m");
+	l2tp_log (LOG_INFO, "xl2tpd: can't set priority to high: %m");
 #endif
 
     /* This one buffer can be recycled for everything except control packets */
