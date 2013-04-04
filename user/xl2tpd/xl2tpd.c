@@ -50,8 +50,6 @@
 #include <fcntl.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <net/route.h>
-#include <sys/ioctl.h>
 #include "l2tp.h"
 
 struct tunnel_list tunnels;
