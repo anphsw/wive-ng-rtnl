@@ -166,12 +166,11 @@ int main(int argc, char *argv[])
 	}
 
 	if (idle) {
-		nice(19);
 		memset(&sa, 0, sizeof(sa));
 		sa.sa_flags = 0;
 		sa.sa_handler = alarm_handler;
 		sigaction(SIGALRM, &sa, NULL);
-	} 
+	}
 
 
 	for (c = 0; ((c < cnt) || repeat); c++) {
