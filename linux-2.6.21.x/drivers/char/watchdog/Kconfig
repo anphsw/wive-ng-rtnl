@@ -596,6 +596,11 @@ config RALINK_WATCHDOG
 config  RALINK_TIMER
 	tristate 'Ralink Hardware Timer0/Timer1'
 
+config RALINK_EXTERNAL_TIMER
+	bool "Ralink External Timer"
+	default n
+	depends on RALINK_RT3352 || RALINK_RT5350 || RALINK_RT6855
+
 config  RALINK_TIMER_DFS
         bool "Ralink Timer0 (Period/Free-Running/Timeout)"
         depends on RALINK_TIMER
