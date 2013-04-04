@@ -349,7 +349,7 @@ struct clocksource clocksource_mips = {
 #ifdef RALINK_16BIT_COUNT_CMP
 	.mask		= 0xffff,
 #else
-	.mask		= 0xffffffff,
+	.mask		= CLOCKSOURCE_MASK(32),
 #endif
 	.flags		= CLOCK_SOURCE_IS_CONTINUOUS,
 };
