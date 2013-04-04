@@ -367,9 +367,9 @@ static void __init init_mips_clocksource(void)
 	clocksource_mips.rating = 200 + mips_hpt_frequency / 10000000;
 	/* Find a shift value */
 	for (shift = 32; shift > 0; shift--) {
-		temp = (u64) clock << shift;
+		temp = (u64) NSEC_PER_SEC << shift;
 		clock = mips_hpt_frequency;
-		do_div(temp, NSEC_PER_SEC);
+		do_div(temp, clock);
 		if ((temp >> 32) == 0)
 			break;
 	}
