@@ -155,7 +155,7 @@ struct task_struct *kthread_create(int (*threadfn)(void *data),
 		 */
 		sched_setscheduler(create.result, SCHED_NORMAL, &param);
 		set_user_nice(create.result, KTHREAD_NICE_LEVEL);
-		set_cpus_allowed(create->result, CPU_MASK_ALL);
+		set_cpus_allowed(create.result, CPU_MASK_ALL);
 	}
 	return create.result;
 }
