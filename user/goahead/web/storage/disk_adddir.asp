@@ -85,7 +85,6 @@ function submit_apply()
 		document.disk_adddir.hiddenButton.value = "add";
 		document.disk_adddir.submit();
 		opener.location.reload();
-		window.close();
 	}
 }
 </script>

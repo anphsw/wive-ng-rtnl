@@ -156,12 +156,12 @@ function submit_apply(parm)
 
 function open_diskadd_window()
 {
-	window.open("STORAGEdisk_adddir.asp","storage_disk_add","toolbar=no, location=no, scrollbars=yes, resizable=no, width=640, height=640")
+	window.open("disk_adddir.asp","storage_disk_add","toolbar=no, location=no, scrollbars=yes, resizable=no, width=640, height=640")
 }
 
 function open_diskrepart_window()
 {
-	window.open("STORAGEdisk_part.asp","storage_disk_part","toolbar=no, location=no, scrollbars=yes, resizable=no, width=640, height=640")
+	window.open("disk_part.asp","storage_disk_part","toolbar=no, location=no, scrollbars=yes, resizable=no, width=640, height=640")
 }
 
 </script>
