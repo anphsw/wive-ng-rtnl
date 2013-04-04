@@ -231,6 +231,7 @@ int kthreadd(void *unused)
 	/* Setup a clean context for our children to inherit. */
 	set_task_comm(tsk, "kthreadd");
 	set_user_nice(tsk, KTHREAD_NICE_LEVEL);
+	set_cpus_allowed(tsk, CPU_MASK_ALL);
 
 	/* Block and flush all signals */
 	sigfillset(&blocked);
