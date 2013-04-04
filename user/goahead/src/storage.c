@@ -24,270 +24,406 @@
  */
 
 #include	<stdlib.h>
+#include	<dirent.h>
+#include	<arpa/inet.h>
 
-#include	"utils.h"
-#include	"storage.h"
+#include 	"utils.h"
+#include	"usb.h"
+#include 	"internet.h"
+#include	"helpers.h"
 
-static void storageAdm(webs_t wp, char_t *path, char_t *query);
-static void StorageAddUser(webs_t wp, char_t *path, char_t *query);
-static void StorageEditUser(webs_t wp, char_t *path, char_t *query);
+static void storageDiskAdm(webs_t wp, char_t *path, char_t *query);
+static void storageDiskPart(webs_t wp, char_t *path, char_t *query);
 static void storageFtpSrv(webs_t wp, char_t *path, char_t *query);
-static void storageSmbSrv(webs_t wp, char_t *path, char_t *query);
-static int GetNthNullUser();
+static int ShowPartition(int eid, webs_t wp, int argc, char_t **argv);
+static int ShowAllDir(int eid, webs_t wp, int argc, char_t **argv);
+static int getCount(int eid, webs_t wp, int argc, char_t **argv);
+static int getMaxVol(int eid, webs_t wp, int argc, char_t **argv);
+#ifdef CONFIG_USER_TRANSMISSION
+static void transmission(webs_t wp, char_t *path, char_t *query);
+#endif
+
+
+#define	LSDIR_INFO		"/tmp/lsdir"
+#define	MOUNT_INFO		"/proc/mounts"
+
+#define STORAGE_PATH	"/media"
+#define STORAGE_SIGN	"/media/sd"
 
 #define DEBUG(x) do{fprintf(stderr, #x); fprintf(stderr, ": %s\n", x); }while(0)
 
-void formDefineStorage(void) {
-	websFormDefine(T("storageAdm"), storageAdm);
-	websFormDefine(T("StorageAddUser"), StorageAddUser);
-	websFormDefine(T("StorageEditUser"), StorageEditUser);
+void formDefineSTORAGE(void) {
+	websAspDefine(T("ShowPartition"), ShowPartition);
+	websAspDefine(T("ShowAllDir"), ShowAllDir);
+	websAspDefine(T("getCount"), getCount);
+	websAspDefine(T("getMaxVol"), getMaxVol);
+#ifdef CONFIG_USER_USHARE
+	websAspDefine(T("ShowMediaDir"), ShowMediaDir);
+#endif
+	websFormDefine(T("storageDiskAdm"), storageDiskAdm);
+	websFormDefine(T("storageDiskPart"), storageDiskPart);
 #ifdef CONFIG_FTPD
 	websFormDefine(T("storageFtpSrv"), storageFtpSrv);
 #endif
-#if defined(CONFIG_USER_SAMBA) || defined(CONFIG_USER_SAMBA3)
-	websFormDefine(T("storageSmbSrv"), storageSmbSrv);
+#ifdef CONFIG_USER_TRANSMISSION
+	websFormDefine(T("formTrans"), transmission);
 #endif
 }
 
-/* goform/storageAdm */
-static void storageAdm(webs_t wp, char_t *path, char_t *query)
-{
-	char_t *user_select, *submit;
-	char field[32] = "";
+static int dir_count;
+static int part_count;
+static int media_dir_count;
+static char first_part[12];
 
-	user_select = websGetVar(wp, T("storage_user_select"), T(""));
+static void storageDiskAdm(webs_t wp, char_t *path, char_t *query)
+{
+	char_t *submit;
+
 	submit = websGetVar(wp, T("hiddenButton"), T(""));
 
-	if (strcmp(submit, "delete") == 0)
+	if (0 == strcmp(submit, "delete"))
 	{
-		nvram_init(RT2860_NVRAM);
-		sprintf(field, "User%s", user_select);
-		doSystem("storage.sh del \"%s\"", nvram_bufget(RT2860_NVRAM, field));
-		nvram_bufset(RT2860_NVRAM, field, "");
-		sprintf(field, "Upw%s", user_select);
-		nvram_bufset(RT2860_NVRAM, field, "");
-		sprintf(field, "Umax%s", user_select);
-		nvram_bufset(RT2860_NVRAM, field, "");
-		sprintf(field, "Umode%s", user_select);
-		nvram_bufset(RT2860_NVRAM, field, "");
-		nvram_commit(RT2860_NVRAM);
-		nvram_close(RT2860_NVRAM);
-
-		websRedirect(wp, "storage/management.asp");
+		char_t *dir_path = websGetVar(wp, T("dir_path"), T(""));
+		doSystem("storage.sh deldir \"%s\"", dir_path);
+		websRedirect(wp, "storage/disk_admin.asp");
 	}
-	else if (strcmp(submit, "apply") == 0)
+	else if (0 == strcmp(submit, "add"))
 	{
-#ifdef CONFIG_FTPD
-	    doSystem("storage.sh ftp");
-#endif
-#if defined(CONFIG_USER_SAMBA) || defined(CONFIG_USER_SAMBA3)
-    	    doSystem("service samba restart");
-#endif
+		char_t *dir_name, *disk_part;
+
+		dir_name = websGetVar(wp, T("adddir_name"), T(""));
+		disk_part = websGetVar(wp, T("disk_part"), T(""));
+		doSystem("storage.sh adddir \"%s/%s\"", disk_part, dir_name);
+		websRedirect(wp, "form_close.asp");
 	}
-}
-
-/* goform/StorageAddUser */
-static void StorageAddUser(webs_t wp, char_t *path, char_t *query)
-{
-	char_t *name, *password, *mul_logins, *max_logins,
-		   *download, *upload, *overwrite, *erase;
-	char mode[6] = "";
-	char field[20] = "";
-	int index; 
-
-	// fetch from web input
-	name = websGetVar(wp, T("adduser_name"), T(""));
-	password = websGetVar(wp, T("adduser_pw"), T(""));
-	mul_logins = websGetVar(wp, T("adduser_mullogins"), T(""));
-	max_logins = websGetVar(wp, T("adduser_maxlogins"), T("1"));
-	download = websGetVar(wp, T("adduser_download"), T(""));
-	upload = websGetVar(wp, T("adduser_upload"), T(""));
-	overwrite = websGetVar(wp, T("adduser_overwrite"), T(""));
-	erase = websGetVar(wp, T("adduser_erase"), T(""));
-	/*
-	DEBUG(name);
-	DEBUG(password);
-	DEBUG(mul_logins);
-	DEBUG(max_logins);
-	DEBUG(download);
-	DEBUG(upload);
-	DEBUG(overwrite);
-	DEBUG(erase);
-	*/
-	if (strcmp(mul_logins, "1") == 0)
-		sprintf(mode, "%sM", mode);
-	if (strcmp(download, "1") == 0)
-		sprintf(mode, "%sD", mode);
-	if (strcmp(upload, "1") == 0)
-		sprintf(mode, "%sU", mode);
-	if (strcmp(overwrite, "1") == 0)
-		sprintf(mode, "%sO", mode);
-	if (strcmp(erase, "1") == 0)
-		sprintf(mode, "%sE", mode);
-	// DEBUG(mode);
-	// get null user field form nvram
-	index = GetNthNullUser();
-	// fprintf(stderr, "index: %d\n", index);
-
-	// set to nvram
-	if (index != 0)
+	else if (0 == strcmp(submit, "format"))
 	{
-		nvram_init(RT2860_NVRAM);
+		char_t *disk_part = websGetVar(wp, T("disk_part"), T(""));
+		FILE *fp_mount = NULL;
+		char part[30], path[30];
 
-		sprintf(field, "User%d", index);
-		nvram_bufset(RT2860_NVRAM, field, name);
-		sprintf(field, "Upw%d", index);
-		nvram_bufset(RT2860_NVRAM, field, password);
-		sprintf(field, "Umax%d", index);
-		nvram_bufset(RT2860_NVRAM, field, max_logins);
-		sprintf(field, "Umode%d", index);
-		nvram_bufset(RT2860_NVRAM, field, mode);
-
-		nvram_commit(RT2860_NVRAM);
-		nvram_close(RT2860_NVRAM);
+		if (NULL == (fp_mount = fopen("/proc/mounts", "r")))
+		{
+			perror(__FUNCTION__);
+        		websRedirect(wp, "storage/disk_admin.asp");
+			return;
+		}
+		while(EOF != fscanf(fp_mount, "%s %s %*s %*s %*s %*s\n", part, path))
+		{
+			if (0 == strcmp(path, disk_part))
+				break;
+		}
+		fclose(fp_mount);
+		doSystem("storage.sh %s %s %s",submit, part, path);
+		websRedirect(wp, "storage/disk_admin.asp");
+	}
+	else if (0 == strcmp(submit, "remove"))
+	{
+		doSystem("storage.sh remove");
+		websRedirect(wp, "storage/disk_admin.asp");
 	}
 }
 
-/* goform/StorageEditUser */
-static void StorageEditUser(webs_t wp, char_t *path, char_t *query)
+static void storageDiskPart(webs_t wp, char_t *path, char_t *query)
 {
-	char_t *index, *password, *mul_logins, *max_logins,
-		   *download, *upload, *overwrite, *erase;
-	char mode[6] = "";
-	char field[20] = "";
+	char_t *part1_vol, *part2_vol, *part3_vol, *part4_vol;
+	FILE *fp_mount = NULL;
+	char part[30];
 
-	// fetch from web input
-	index = websGetVar(wp, T("hiddenIndex"), T(""));
-	password = websGetVar(wp, T("edituser_pw"), T(""));
-	mul_logins = websGetVar(wp, T("edituser_mullogins"), T(""));
-	max_logins = websGetVar(wp, T("edituser_maxlogins"), T("1"));
-	download = websGetVar(wp, T("edituser_download"), T(""));
-	upload = websGetVar(wp, T("edituser_upload"), T(""));
-	overwrite = websGetVar(wp, T("edituser_overwrite"), T(""));
-	erase = websGetVar(wp, T("edituser_erase"), T(""));
-	if (strcmp(mul_logins, "1") == 0)
-		sprintf(mode, "%sM", mode);
-	if (strcmp(download, "1") == 0)
-		sprintf(mode, "%sD", mode);
-	if (strcmp(upload, "1") == 0)
-		sprintf(mode, "%sU", mode);
-	if (strcmp(overwrite, "1") == 0)
-		sprintf(mode, "%sO", mode);
-	if (strcmp(erase, "1") == 0)
-		sprintf(mode, "%sE", mode);
+	if (NULL == (fp_mount = fopen("/proc/mounts", "r")))
+	{
+		perror(__FUNCTION__);
+		return;
+	}
+	while(EOF != fscanf(fp_mount, "%s %*s %*s %*s %*s %*s\n", part))
+	{
+		fprintf(stderr, "chhung part: %s\n", part);
+		if (NULL != strstr(part, "/dev/sd"))
+			doSystem("umount -fl %s", part);
+	}
+	part1_vol = websGetVar(wp, T("part1_vol"), T(""));
+	part2_vol = websGetVar(wp, T("part2_vol"), T(""));
+	part3_vol = websGetVar(wp, T("part3_vol"), T(""));
+	part4_vol = websGetVar(wp, T("part4_vol"), T(""));
 
-	// set to nvram
-	nvram_init(RT2860_NVRAM);
-
-	sprintf(field, "Upw%s", index);
-	nvram_bufset(RT2860_NVRAM, field, password);
-	sprintf(field, "Umax%s", index);
-	nvram_bufset(RT2860_NVRAM, field, max_logins);
-	sprintf(field, "Umode%s", index);
-	nvram_bufset(RT2860_NVRAM, field, mode);
-
-	nvram_commit(RT2860_NVRAM);
-	nvram_close(RT2860_NVRAM);
+	doSystem("storage.sh reparted %s %s %s %s", 
+			  part1_vol, part2_vol, part3_vol, part4_vol);
+	fclose(fp_mount);
 }
 
 #ifdef CONFIG_FTPD
+// FTP setup
+const parameter_fetch_t ftp_server_args[] =
+{
+	{ T("ftp_port"), "FtpPort", 0, T("") },
+	{ T("ftp_rootdir"), "FtpRootDir", 0, T("") },
+	{ T("ftp_idle_timeout"), "FtpIdleTime", 0, T("") },
+	{ NULL, NULL, 0, NULL } // Terminator
+};
 /* goform/storageFtpSrv */
 static void storageFtpSrv(webs_t wp, char_t *path, char_t *query)
 {
-	char_t *ftp, *anonymous;
-	char_t *port, *max_users, *login_timeout, *stay_timeout;
-
-	// fetch from web input
-	ftp = websGetVar(wp, T("ftp_enabled"), T(""));
-	anonymous = websGetVar(wp, T("ftp_anonymous"), T(""));
-	port = websGetVar(wp, T("ftp_port"), T(""));
-	max_users = websGetVar(wp, T("ftp_max_users"), T(""));
-	login_timeout = websGetVar(wp, T("ftp_login_timeout"), T(""));
-	stay_timeout = websGetVar(wp, T("ftp_stay_timeout"), T(""));
-
-	// set to nvram
+	char_t *ftp_enable = websGetVar(wp, T("ftp_enabled"), T("0"));
+	if (ftp_enable == NULL)
+		ftp_enable = "0";
+		
 	nvram_init(RT2860_NVRAM);
-	nvram_bufset(RT2860_NVRAM, "FtpEnabled", ftp);
-	nvram_bufset(RT2860_NVRAM, "FtpAnonymous", anonymous);
-	nvram_bufset(RT2860_NVRAM, "FtpPort", port);
-	nvram_bufset(RT2860_NVRAM, "FtpMaxUsers", max_users);
-	nvram_bufset(RT2860_NVRAM, "FtpLoginTimeout", login_timeout);
-	nvram_bufset(RT2860_NVRAM, "FtpStayTimeout", stay_timeout);
-	nvram_commit(RT2860_NVRAM);
+	nvram_bufset(RT2860_NVRAM, "RemoteFTP", ftp_enable);
+
+	if (CHK_IF_DIGIT(ftp_enable, 1) || CHK_IF_DIGIT(ftp_enable, 2))
+		setupParameters(wp, ftp_server_args, 0);
+
 	nvram_close(RT2860_NVRAM);
+	
+	//restart some services instead full reload
+	doSystem("service inetd restart");
+	doSystem("service iptables restart");
 
-	// setup device
-	doSystem("storage.sh ftp");
-
-	// debug print
-	websHeader(wp);
-	websWrite(wp, T("<h2>ftp_enabled: %s</h2><br>\n"), ftp);
-	websWrite(wp, T("ftp_anonymous: %s<br>\n"), anonymous);
-	websWrite(wp, T("ftp_port: %s<br>\n"), port);
-	websWrite(wp, T("ftp_max_users: %s<br>\n"), max_users);
-	websWrite(wp, T("ftp_login_timeout: %s<br>\n"), login_timeout);
-	websWrite(wp, T("ftp_stay_timeout: %s<br>\n"), stay_timeout);
-	websFooter(wp);
-	websDone(wp, 200);
+	char_t *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
+	if (submitUrl != NULL)
+		websRedirect(wp, submitUrl);
+	else
+		websDone(wp, 200);
 }
 #endif
 
-#if defined(CONFIG_USER_SAMBA) || defined(CONFIG_USER_SAMBA3)
-/* goform/storageSmbSrv */
-static void storageSmbSrv(webs_t wp, char_t *path, char_t *query)
+#ifdef CONFIG_USER_TRANSMISSION
+
+const parameter_fetch_t transmission_args[] =
 {
-	char_t *smb, *wg, *netbios, *str;
+	{ T("transRPCPort"), "TransRPCPort", 0, T("") },
+	{ T("transAccess"), "TransAccess", 0, T("") },
+	{ T("transAuthor"), "TransAuthor", 0, T("") },
+	{ T("transLog"), "TransLogin", 0, T("") },
+	{ T("transPass"), "TransPass", 0, T("") },
+	{ T("transInPort"), "TransInPort", 0, T("") },
+	{ NULL, NULL, 0, NULL } // Terminator
+};
 
-	// fetch from web input
-	smb = websGetVar(wp, T("smb_enabled"), T(""));
-	wg = websGetVar(wp, T("smb_workgroup"), T(""));
-	netbios = websGetVar(wp, T("smb_netbios"), T(""));
-	str = websGetVar(wp, T("smb_string"), T(""));
-
-	// set to nvram
-	nvram_init(RT2860_NVRAM);
-	nvram_bufset(RT2860_NVRAM, "SmbEnabled", smb);
-	nvram_bufset(RT2860_NVRAM, "WorkGroup", wg);
-	nvram_bufset(RT2860_NVRAM, "SmbNetBIOS", netbios);
-	nvram_bufset(RT2860_NVRAM, "SmbString", str);
-	nvram_commit(RT2860_NVRAM);
-	nvram_close(RT2860_NVRAM);
-
-	// restart samba service
-	doSystem("service samba restart");
-
-	// debug print
-	websHeader(wp);
-	websWrite(wp, T("<h2>smb_enabled: %s</h2><br>\n"), smb);
-	websWrite(wp, T("smb_workgroup: %s<br>\n"), wg);
-	websWrite(wp, T("smb_netbios: %s<br>\n"), netbios);
-	websWrite(wp, T("smb_string: %s<br>\n"), str);
-	websFooter(wp);
-	websDone(wp, 200);
-}
-#endif
-
-static int GetNthNullUser()
+static void transmission(webs_t wp, char_t *path, char_t *query)
 {
-	char *user_name;
-	char field[16];
-	int result = 0, index;
-
-	nvram_init(RT2860_NVRAM);
-
-	for (index = 1; index < 9; index++)
-	{
-		sprintf(field, "User%d", index);
-		user_name = nvram_bufget(RT2860_NVRAM, field);
-		if ( !strlen(user_name) )
+	char *submitUrl;
+	char_t *submit;
+	
+	submit = websGetVar(wp, T("hiddenButton"), T(""));
+	
+	if (0 == strcmp(submit, "apply"))
 		{
-			result = index;
-			break;
+			char_t *trans_enabled = websGetVar(wp, T("TransEnabled"), T("0"));
+			if (trans_enabled == NULL)
+			trans_enabled = "0";
+		
+			nvram_init(RT2860_NVRAM);
+			nvram_bufset(RT2860_NVRAM, "TransmissionEnabled", trans_enabled);
+
+			if (CHK_IF_DIGIT(trans_enabled, 1))
+			setupParameters(wp, transmission_args, 0);
+
+			nvram_close(RT2860_NVRAM);
+			doSystem("service iptables restart");
+			doSystem("service transmission restart");
+		}
+	else if (0 == strcmp(submit, "start"))
+		{
+			doSystem("service transmission start");
+		}
+	else if (0 == strcmp(submit, "stop"))
+		{
+			doSystem("service transmission stop");
+		}	
+	else if (0 == strcmp(submit, "reload"))
+		{
+			doSystem("service transmission reload");
+		}		
+		
+	submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
+	if (submitUrl != NULL)
+		websRedirect(wp, submitUrl);
+	else
+		websDone(wp, 200);
+}	
+#endif
+
+int initSTORAGE(void)
+{
+#ifdef CONFIG_USER_USHARE
+	fetchMediaConfig();
+	RunMediaSrv();
+#endif
+	return 0;
+}
+
+static int getCount(int eid, webs_t wp, int argc, char_t **argv)
+{
+	int type;
+	char_t *field;
+	char count[3];
+
+	if (2 > ejArgs(argc, argv, T("%d %s"), &type, &field)) 
+	{
+		return websWrite(wp, T("Insufficient args\n"));
+	}
+
+	if (0 == strcmp(field, "AllDir"))
+	{
+		sprintf(count, "%d", dir_count);
+		// fprintf(stderr,"AllDir: %s\n", count);
+	}
+	else if (0 == strcmp(field, "AllPart"))
+	{
+		sprintf(count, "%d", part_count);
+		// fprintf(stderr,"AllPart: %s\n", count);
+	}
+	else if (0 == strcmp(field, "AllMediaDir"))
+	{
+		sprintf(count, "%d", media_dir_count);
+		// fprintf(stderr,"AllPart: %s\n", count);
+	}
+
+	if (1 == type) {
+		if (!strcmp(count, ""))
+			return websWrite(wp, T("0"));
+		return websWrite(wp, T("%s"), count);
+	}
+	if (!strcmp(count, ""))
+		ejSetResult(eid, "0");
+	ejSetResult(eid, count);
+
+	return 0;
+}
+
+static int ShowAllDir(int eid, webs_t wp, int argc, char_t **argv)
+{
+	FILE *fp_mount = fopen(MOUNT_INFO, "r");
+	char part[50], path[30];
+	char dir_name[30];
+	int dir_len = 0;
+
+	if (NULL == fp_mount) {
+        perror(__FUNCTION__);
+		return -1;
+	}
+
+	dir_count = 0;
+
+	while(EOF != fscanf(fp_mount, "%s %s %*s %*s %*s %*s\n", part, path))
+	{
+		DIR *dp;
+		struct dirent *dirp;
+		struct stat statbuf;
+
+		if (0 != strncmp(path, "/media/sd", 9))
+		{
+			continue;
+		}
+		if (NULL == (dp = opendir(path)))
+		{
+			fprintf(stderr, "open %s error\n", path);
+			return -1;
+		}
+		chdir(path);
+		while(NULL != (dirp = readdir(dp)))
+		{
+			lstat(dirp->d_name, &statbuf);
+			if(S_ISDIR(statbuf.st_mode))
+			{
+				if (0 == strncmp(dirp->d_name, ".", 1) ||
+					0 == strcmp(dirp->d_name, "home"))
+					continue;
+				strcpy(dir_name, dirp->d_name);
+				dir_len = strlen(dir_name);
+				if (dir_len < 30 && dir_len > 0)
+				{
+					websWrite(wp, T("<tr><td><input type=\"radio\" name=\"dir_path\" value=\"%s/%s\"></td>"), 
+							  path, dir_name);
+					websWrite(wp, T("<td>%s/%s</td>"), path, dir_name);
+					websWrite(wp, T("<input type=\"hidden\" name=\"dir_part\" value=\"%s\">"), 
+							  part);
+					websWrite(wp, T("<td>%s</td>"), part);
+					websWrite(wp, T("</tr>"));
+					dir_count++;
+				}
+			}
+		}
+		chdir("/");
+		closedir(dp);
+	}
+	fclose(fp_mount);
+	// fprintf(stderr, "dir_count: %d\n", dir_count);
+
+	return 0;
+}
+
+static int ShowPartition(int eid, webs_t wp, int argc, char_t **argv)
+{
+	FILE *fp = fopen(MOUNT_INFO, "r");
+	char part[50], path[30]; 
+	if (NULL == fp) {
+        perror(__FUNCTION__);
+		return -1;
+	}
+	part_count = 0;
+
+	while(EOF != fscanf(fp, "%s %s %*s %*s %*s %*s\n", part, path))
+	{
+		// if (strncmp(path, "/var", 4) != 0)
+		if (0 != strncmp(path, "/media/sd", 9))
+		{
+			continue;
+		}
+		websWrite(wp, T("<tr align=center>"));
+		websWrite(wp, T("<td><input type=\"radio\" name=\"disk_part\" value=\"%s\"></td>"), 
+				  path);
+		websWrite(wp, T("<td>%s</td>"), part);
+		websWrite(wp, T("<td>%s</td>"), path);
+		websWrite(wp, T("</tr>"));
+		part_count++;
+	}
+	fclose(fp);
+	// fprintf(stderr, "part_count: %d\n", part_count);
+
+	return 0;
+}
+
+static int getMaxVol(int eid, webs_t wp, int argc, char_t **argv)
+{
+	FILE *pp = popen("fdisk -l /dev/sda", "r");
+	char maxvol[5], unit[5];
+	double transfer, result=0;
+
+	fscanf(pp, "%*s %*s %s %s %*s %*s\n", maxvol, unit);
+	pclose(pp);
+
+	transfer = atof(maxvol);
+	if (0 == strcmp(unit, "GB,"))
+	{
+		result = transfer*1000;
+	}
+	else if (0 == strcmp(unit, "MB,"))
+	{
+		result = transfer;
+	}
+
+	return websWrite(wp, T("%d"), result);
+}
+
+static int isStorageExist(void)
+{
+	char buf[256];
+	FILE *fp = fopen("/proc/mounts", "r");
+	if(!fp){
+		perror(__FUNCTION__);
+		return 0;
+	}
+
+	while(fgets(buf, sizeof(buf), fp)){
+		if(strstr(buf, STORAGE_SIGN)){
+			fclose(fp);
+			return 1;
 		}
 	}
 
-	nvram_commit(RT2860_NVRAM);
-	nvram_close(RT2860_NVRAM);
-
-	return result;
+	fclose(fp);
+	printf("no usb disk found\n.");
+	return 0;
 }

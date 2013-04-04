@@ -16,7 +16,7 @@
 <script type="text/javascript" src="/js/ajax.js"></script>
 </head>
 
-<body bgcolor="#FFFFFF" onload="initValue();">
+<body bgcolor="#FFFFFF" onLoad="initValue();">
 <script language="JavaScript">
 
 function rebootRouter(form, reloader)
@@ -85,8 +85,7 @@ var usbb = '<% getUSBBuilt(); %>';
 var storageb = '<% getStorageBuilt(); %>';
 var ftpb = '<% getFtpBuilt(); %>';
 var smbb = '<% getSmbBuilt(); %>';
-var mediab = '<% getMediaBuilt(); %>';
-var webcamb = '<% getWebCamBuilt(); %>';
+var smb3b = '<% getSmb3Built(); %>';
 var printersrvb = '<% getPrinterSrvBuilt(); %>';
 var usbmodemb = '<% getUSBModemBuilt(); %>';
 var syslogb = '<% getSysLogBuilt(); %>';
@@ -164,39 +163,29 @@ if (opmode != '0') {
 
 // Services
 a.add(500, 0,   _("treeapp services"),          "javascript:a.oo(500);");
-if (opmode != '4')
-	a.add(501, 500, _("treeapp dhcp server"),       "javascript:go('services/dhcp.asp');");
+if (opmode != '4')	a.add(501, 500, _("treeapp dhcp server"),       "javascript:go('services/dhcp.asp');");
 a.add(502, 500, _("treeapp l2tp server"),       "javascript:go('services/l2tp.asp');");
 a.add(503, 500, _("treeapp ntp settings"),      "javascript:go('services/ntp.asp');");
 a.add(504, 500, _("treeapp ddns settings"),     "javascript:go('services/ddns.asp');");
-a.add(505, 500, _("treeapp samba"),             "javascript:go('services/samba.asp');");
+if (smbb == "1") a.add(505, 500, _("treeapp samba"),             "javascript:go('services/samba.asp');");
 a.add(506, 500, _("treeapp accounting"),        "javascript:go('services/account.asp');");
 a.add(510, 500, _("treeapp miscellaneous"),     "javascript:go('services/misc.asp');");
 
-
 if (usbb == "1")
 {
-	if ((webcamb == "1") || (printersrvb == "1"))
-		a.add(800,   0, _("treeapp usb"),		"javascript:a.oo(800);");
-	if (webcamb == "1")
-		a.add(801, 800, _("treeapp webcam"),		"javascript:go('usb/UVCwebcam.asp');");
-	if (printersrvb == "1")
-		a.add(802, 800, _("treeapp printersrv"),	"javascript:go('usb/P910NDprintersrv.asp');");
-        if (usbmodemb == "1")	
-		a.add(803, 800, _("treeapp usbmodem"),		"javascript:go('usb/USBmodem.asp');");
+	a.add(800,   0, _("treeapp usb"),		"javascript:a.oo(800);");
+	if (printersrvb == "1")	a.add(802, 800, _("treeapp printersrv"),	"javascript:go('usb/P910NDprintersrv.asp');");
+    if (usbmodemb == "1")	a.add(803, 800, _("treeapp usbmodem"),		"javascript:go('usb/USBmodem.asp');");
 	if (storageb == "1")
 	{
 		a.add(850,   0, _("treeapp storage"),		"javascript:a.oo(850);");
-		a.add(851, 850, _("treeapp useradmin"),	"javascript:go('usb/STORAGEuser_admin.asp');");
-		a.add(852, 850, _("treeapp disk"),		"javascript:go('usb/STORAGEdisk_admin.asp');");
+		a.add(852, 850, _("treeapp disk"),		"javascript:go('storage/disk_admin.asp');");
 		if (ftpb == "1")
-			a.add(853, 850, _("treeapp ftpsrv"),		"javascript:go('usb/STORAGEftpsrv.asp');");
+			a.add(853, 850, _("treeapp ftpsrv"),		"javascript:go('storage/ftpsrv.asp');");
 		if (transb == "1")
-			a.add(854, 850, _("treeapp transmission"),	"javascript:go('usb/Transmission.asp');");
-		if (smbb == "1")
-			a.add(855, 850, _("treeapp sambasrv"),		"javascript:go('usb/STORAGEsmbsrv.asp');");
-		if (mediab == "1")
-			a.add(856, 850, _("treeapp mediasrv"),		"javascript:go('usb/USHAREmediasrv.asp');");
+			a.add(854, 850, _("treeapp transmission"),	"javascript:go('storage/Transmission.asp');");
+		if (smb3b == "1")
+			a.add(855, 850, _("treeapp sambasrv"),		"javascript:go('services/samba.asp');");
 	}
 }
 

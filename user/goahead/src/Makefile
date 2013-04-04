@@ -60,9 +60,9 @@ DEPEND_FILES += qos.o
 endif
 ifneq ("$(CONFIG_USB)", "")
 DEPEND_FILES += usb.o
+endif
 ifeq ("$(CONFIG_USER_STORAGE)", "y")
 DEPEND_FILES += storage.o
-endif
 endif
 
 CFLAGS	+= -DWEBS -DUEMF -DOS="LINUX" -DLINUX $(UMSW) $(DASW) $(SSLSW) $(IFMODSW)

@@ -33,6 +33,7 @@
 #include	"management.h"
 #include	"station.h"
 #include	"usb.h"
+#include	"storage.h"
 
 #ifdef WEBS_SSL_SUPPORT
 #include	"websSSL.h"
@@ -435,6 +436,9 @@ static int initWebs(void)
 #endif
 #ifdef CONFIG_USB
 	formDefineUSB();
+#endif
+#ifdef CONFIG_USER_STORAGE
+	formDefineSTORAGE();
 #endif
 	formDefineWireless();
 #if defined(CONFIG_RT2860V2_STA) || defined(CONFIG_RT2860V2_STA_MODULE)

@@ -36,27 +36,15 @@ ifeq ("$(CONFIG_USER_CHILLISPOT)", "")
 endif
 ifeq ("$(CONFIG_USB)", "")
 	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/usb
+endif
 ifeq ("$(CONFIG_USER_STORAGE)", "")
-	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/usb/STORAGE*
 	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/storage
-endif
-else
-ifeq ("$(CONFIG_USER_STORAGE)", "")
-	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/usb/STORAGE*
-	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/storage
-endif
-ifeq ("$(CONFIG_USER_USHARE)", "")
-	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/usb/USHARE*
-endif
-ifeq ("$(CONFIG_USER_UVC_STREAM)", "")
-	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/usb/UVC*
 endif
 ifeq ("$(CONFIG_USER_P910ND)", "")
 	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/usb/P910NDprintersrv.asp
 endif
 ifeq ("$(CONFIG_USB_MODESWITCH)", "")
 	rm -rf $(ROMFSDIR)$(ROOT_DIRECTORY)/usb/USBmodem.asp
-endif
 endif
 	for i in $(DIRS) ; do make -C $$i $@ ; done
 	rm -f $(ROMFSDIR)$(ROOT_DIRECTORY)/cgi-bin/.keep_me

@@ -42,8 +42,7 @@ static int getUSBBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getStorageBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getFtpBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getSmbBuilt(int eid, webs_t wp, int argc, char_t **argv);
-static int getMediaBuilt(int eid, webs_t wp, int argc, char_t **argv);
-static int getWebCamBuilt(int eid, webs_t wp, int argc, char_t **argv);
+static int getSmb3Built(int eid, webs_t wp, int argc, char_t **argv);
 static int getPrinterSrvBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getUSBModemBuilt(int eid, webs_t wp, int argc, char_t **argv);
 static int getTransmissionBuilt(int eid, webs_t wp, int argc, char_t **argv);
@@ -133,8 +132,7 @@ void formDefineInternet(void) {
 	websAspDefine(T("getStorageBuilt"), getStorageBuilt);
 	websAspDefine(T("getFtpBuilt"), getFtpBuilt);
 	websAspDefine(T("getSmbBuilt"), getSmbBuilt);
-	websAspDefine(T("getMediaBuilt"), getMediaBuilt);
-	websAspDefine(T("getWebCamBuilt"), getWebCamBuilt);
+	websAspDefine(T("getSmb3Built"), getSmb3Built);
 	websAspDefine(T("getPrinterSrvBuilt"), getPrinterSrvBuilt);
 	websAspDefine(T("getUSBModemBuilt"), getUSBModemBuilt);
 	websFormDefine(T("setLan"), setLan);
@@ -930,25 +928,16 @@ static int getFtpBuilt(int eid, webs_t wp, int argc, char_t **argv)
 
 static int getSmbBuilt(int eid, webs_t wp, int argc, char_t **argv)
 {
-#if defined(CONFIG_USER_SAMBA) || defined(CONFIG_USER_SAMBA3)
-	return websWrite(wp, T("1"));
+#ifdef CONFIG_USER_SAMBA
+       return websWrite(wp, T("1"));
 #else
-	return websWrite(wp, T("0"));
+       return websWrite(wp, T("0"));
 #endif
 }
 
-static int getMediaBuilt(int eid, webs_t wp, int argc, char_t **argv)
+static int getSmb3Built(int eid, webs_t wp, int argc, char_t **argv)
 {
-#ifdef CONFIG_USER_USHARE
-	return websWrite(wp, T("1"));
-#else
-	return websWrite(wp, T("0"));
-#endif
-}
-
-static int getWebCamBuilt(int eid, webs_t wp, int argc, char_t **argv)
-{
-#ifdef CONFIG_USER_UVC_STREAM
+#ifdef CONFIG_USER_SAMBA3
 	return websWrite(wp, T("1"));
 #else
 	return websWrite(wp, T("0"));

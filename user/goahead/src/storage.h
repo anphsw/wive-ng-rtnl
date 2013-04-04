@@ -23,3 +23,4 @@
  */
 
 void formDefineStorage(void);
+void initStorage(void);
