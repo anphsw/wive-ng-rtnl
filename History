@@ -1445,7 +1445,8 @@
 37) kernel: conntrack: ipv4_conntrack_defrag: disable defrag if fastnat on (fragments allready gathered in nf_conntrack_in).<br>
 38) kernel: make kernel threads nonfreezable by default.<br>
 39) kernel: backport CFS cpu scheduller(this good news for l2tp/pptp users).<br>
-40) xl2tpd: import fixes from upstream git.<br>
+40) kernel: kthread: always create the kernel threads with normal priority.<br>
+41) xl2tpd: import fixes from upstream git.<br>
 <br>
 <br>
 <br>

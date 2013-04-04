@@ -142,6 +142,7 @@ struct task_struct *kthread_create(int (*threadfn)(void *data),
 	wait_for_completion(&create.done);
 
 	if (!IS_ERR(create.result)) {
+		static struct sched_param param = { .sched_priority = 0 };
 		va_list args;
 
 		va_start(args, namefmt);
@@ -152,6 +153,7 @@ struct task_struct *kthread_create(int (*threadfn)(void *data),
 		 * root may have changed our (kthreadd's) priority or CPU mask.
 		 * The kernel thread should not inherit these properties.
 		 */
+		sched_setscheduler(create.result, SCHED_NORMAL, &param);
 		set_user_nice(create.result, KTHREAD_NICE_LEVEL);
 	}
 	return create.result;
@@ -227,6 +229,7 @@ int kthreadd(void *unused)
 
 	/* Setup a clean context for our children to inherit. */
 	set_task_comm(tsk, "kthreadd");
+	set_user_nice(tsk, KTHREAD_NICE_LEVEL);
 
 	/* Block and flush all signals */
 	sigfillset(&blocked);
