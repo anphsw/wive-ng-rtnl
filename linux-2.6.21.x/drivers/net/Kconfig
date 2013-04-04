@@ -2855,8 +2855,8 @@ config PPP_PREVENT_DROP_SESSION_ON_FULL_CPU_LOAD
 	 If cpu load > max allowed ppp must drop packets.
 
 config PPP_FASTPATH
-	bool "PPP decrease cpu usage.
-	default y"
+	bool "PPP decrease cpu usage."
+	default y
 	depends on PPP
 
 config PPP_MULTILINK
