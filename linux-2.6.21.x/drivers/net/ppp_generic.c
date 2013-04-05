@@ -1249,9 +1249,6 @@ ppp_send_frame(struct ppp *ppp, struct sk_buff *skb)
 			load = weighted_cpuload(0);
 			/* store current jiffies */
 			cpu_prev_jiffies = jiffies;
-
-			printk(KERN_DEBUG "PPP: CPU LOAD %lu \n", load);
-
 		    }
 		    /* drop if load high in current interval */
 		    if (load > ppp_cpu_load) {
