@@ -22,7 +22,6 @@
 #include <linux/net.h>
 #include <linux/string.h>
 #include <linux/types.h>
-#include <linux/random.h>
 #include <linux/percpu.h>
 #include <linux/init.h>
 #include <net/sock.h>
@@ -78,7 +77,6 @@ __be32 in_aton(const char *str)
 	}
 	return(htonl(l));
 }
-
 EXPORT_SYMBOL(in_aton);
 
 #define IN6PTON_XDIGIT		0x00010000
@@ -163,7 +161,6 @@ out:
 		*end = s;
 	return ret;
 }
-
 EXPORT_SYMBOL(in4_pton);
 
 int in6_pton(const char *src, int srclen,
@@ -281,7 +278,6 @@ out:
 		*end = s;
 	return ret;
 }
-
 EXPORT_SYMBOL(in6_pton);
 
 void inet_proto_csum_replace4(__sum16 *sum, struct sk_buff *skb,
