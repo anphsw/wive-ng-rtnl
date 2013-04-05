@@ -360,7 +360,7 @@ function formCheck(form)
 		form.vpn_pure_pppoe.checked = false;
 	
 	var vpn_cpu_limit = form.vpn_cpu_limit.value*1;
-	if ((vpn_cpu_limit != 0) && ((vpn_cpu_limit < 1000) || (vpn_cpu_limit > 4000)))
+	if ((vpn_cpu_limit != 0) && ((vpn_cpu_limit < 100000) || (vpn_cpu_limit > 900000)))
 		alert('Invalid CPU limit value!');
 }
 
