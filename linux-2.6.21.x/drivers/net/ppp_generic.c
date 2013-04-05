@@ -51,16 +51,18 @@
 #include <asm/atomic.h>
 
 #ifdef CONFIG_PPP_PREVENT_DROP_SESSION_ON_FULL_CPU_LOAD
-#include <linux/sched.h>
+#include <linux/kernel_stat.h>
 /* limit cpu load */
 extern int ppp_cpu_load;
+static unsigned long load;
+static unsigned long cpu_prev_jiffies;
 #endif
 
 #ifdef CONFIG_RALINK_GPIO_LED_VPN
 #include <linux/ralink_gpio.h>
 ralink_gpio_led_info ppp_led;
 extern int ralink_gpio_led_set(ralink_gpio_led_info ppp_led);
-static unsigned long ppp_prev_jiffies;
+static unsigned long led_prev_jiffies;
 #endif
 
 #if defined (CONFIG_RA_HW_NAT) || defined (CONFIG_RA_HW_NAT_MODULE)
@@ -1138,10 +1140,6 @@ ppp_send_frame(struct ppp *ppp, struct sk_buff *skb)
 	int len;
 	unsigned char *cp;
 #endif
-#ifdef CONFIG_PPP_PREVENT_DROP_SESSION_ON_FULL_CPU_LOAD
-	static unsigned long load;
-	static unsigned long prev_jiffies;
-#endif
 
 	if (proto < 0x8000) {
 #ifdef CONFIG_PPP_FILTER
@@ -1244,19 +1242,22 @@ ppp_send_frame(struct ppp *ppp, struct sk_buff *skb)
 	if (proto != PPP_LCP && proto != PPP_CCP) {
 #ifdef CONFIG_PPP_PREVENT_DROP_SESSION_ON_FULL_CPU_LOAD
 	    /* this is simple cpu based policer need for prevent drop session at high cpu load */
-	    if (ppp_cpu_load >= 2500) {
+	    if (ppp_cpu_load >= 200000) {
 		    /* skip all data in current time period */
-		    if (time_after(jiffies, prev_jiffies + (HZ>>1))) {
+		    if ((jiffies - cpu_prev_jiffies) >= (HZ>>1)) {
 			/* get cpu load */
 			load = weighted_cpuload(0);
 			/* store current jiffies */
-			prev_jiffies = jiffies;
+			cpu_prev_jiffies = jiffies;
+
+			printk(KERN_DEBUG "PPP: CPU LOAD %lu \n", load);
+
 		    }
 		    /* drop if load high in current interval */
 		    if (load > ppp_cpu_load) {
 #ifdef DEBUG
-			if ((ppp->debug & 1) && net_ratelimit())
-			    printk(KERN_DEBUG "PPP: HIGH CPU LOAD %ld DROP PACKET\n", load);
+			if (net_ratelimit())
+			    printk(KERN_DEBUG "PPP: HIGH CPU LOAD %lu DROP PACKET\n", load);
 
 #endif
 			goto drop;      /* drop packet ... */
@@ -1264,10 +1265,10 @@ ppp_send_frame(struct ppp *ppp, struct sk_buff *skb)
 	    }
 #endif
 #ifdef CONFIG_RALINK_GPIO_LED_VPN
-	    if ((jiffies - ppp_prev_jiffies) >= (HZ>>2)) {
+	    if ((jiffies - led_prev_jiffies) >= (HZ>>2)) {
 		    /* blink led */
 		    ralink_gpio_led_set(ppp_led);
-		    ppp_prev_jiffies = jiffies;
+		    led_prev_jiffies = jiffies;
 	    }
 #endif
 	} /* end !lcp/cpp if */
@@ -1277,7 +1278,10 @@ ppp_send_frame(struct ppp *ppp, struct sk_buff *skb)
 
 	return;
 
- drop:
+drop:
+#ifdef CONFIG_RALINK_GPIO_LED_VPN
+        ralink_gpio_led_set(ppp_led);
+#endif
 	kfree_skb(skb);
 	++ppp->stats.tx_errors;
 }
