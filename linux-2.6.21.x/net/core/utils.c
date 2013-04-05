@@ -25,6 +25,7 @@
 #include <linux/random.h>
 #include <linux/percpu.h>
 #include <linux/init.h>
+#include <net/sock.h>
 #include <linux/skbuff.h>
 
 #include <asm/byteorder.h>
@@ -90,17 +91,6 @@ EXPORT_SYMBOL(in_aton);
 #define IN6PTON_DELIM		0x10000000
 #define IN6PTON_NULL		0x20000000	/* first/tail */
 #define IN6PTON_UNKNOWN		0x40000000
-
-static inline int digit2bin(char c, int delim)
-{
-	if (c == delim || c == '\0')
-		return IN6PTON_DELIM;
-	if (c == '.')
-		return IN6PTON_DOT;
-	if (c >= '0' && c <= '9')
-		return (IN6PTON_DIGIT | (c - '0'));
-	return IN6PTON_UNKNOWN;
-}
 
 static inline int xdigit2bin(char c, int delim)
 {
