@@ -1447,8 +1447,9 @@
 39) kernel: backport CFS cpu scheduller(this good news for l2tp/pptp users).<br>
 40) kernel: kthread: always create the kernel threads with normal priority.<br>
 41) kernel: sched: fix invalid sched_class use.<br>
-42) goahead: rework usb storage UI.<br>
-43) xl2tpd: import fixes from upstream git.<br>
+42) kernel: ppp_generic: fix cpu policer.<br>
+43) goahead: rework usb storage UI.<br>
+44) xl2tpd: import fixes from upstream git.<br>
 <br>
 <br>
 <br>

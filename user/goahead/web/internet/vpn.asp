@@ -459,7 +459,7 @@ function formCheck(form)
               <option value="1">Enabled</option>
               </select></td>
           </tr>
-          
+
           <!-- VPN params -->
           <tr id="table_vpn_params01" onMouseOver="showHint('vpn_cpu_limit')" onMouseOut="hideHint('vpn_cpu_limit')">
             <td class="head"><b>CPU limitation:</b></td>
@@ -469,22 +469,22 @@ function formCheck(form)
               <select id="vpn_cpu_limit_select" disabled="disabled" name="vpn_cpu_limit_type" onChange="cpuLimitChange(this.form);" class="mid" >
                 <option value="0">Disabled</option>
                 <option value="1" selected="selected">Custom</option>
-                <option value="2500">2500</option>
-                <option value="2600">2600</option>
-                <option value="2700">2700</option>
-                <option value="2800">2800</option>
-                <option value="2900">2900</option>
-                <option value="3000">3000</option>
-                <option value="3100">3100</option>
-                <option value="3200">3200</option>
-                <option value="3300">3300</option>
-                <option value="3400">3400</option>
-                <option value="3500">3500</option>
-                <option value="3600">3600</option>
-                <option value="3700">3700</option>
-                <option value="3800">3800</option>
-                <option value="3900">3900</option>
-                <option value="4000">4000</option>
+                <option value="350000">350000</option>
+                <option value="360000">360000</option>
+                <option value="365000">365000</option>
+                <option value="370000">370000</option>
+                <option value="375000">375000</option>
+                <option value="380000">380000</option>
+                <option value="385000">385000</option>
+                <option value="390000">390000</option>
+                <option value="395000">395000</option>
+                <option value="400000">400000</option>
+                <option value="415000">415000</option>
+                <option value="420000">420000</option>
+                <option value="425000">425000</option>
+                <option value="430000">430000</option>
+                <option value="435000">430000</option>
+                <option value="440000">440000</option>
               </select></td>
           </tr>
           <tr id="table_vpn_params02" onMouseOver="showHint('vpn_lcp_interval')" onMouseOut="hideHint('vpn_lcp_interval')">
