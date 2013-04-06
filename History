@@ -1449,8 +1449,9 @@
 41) kernel: sched: fix invalid sched_class use.<br>
 42) kernel: sched: don't rebalance if attached on NULL domain.<br>
 43) kernel: ppp_generic: fix cpu policer.<br>
-44) goahead: rework usb storage UI.<br>
-45) xl2tpd: import fixes from upstream git.<br>
+44) kernel: unix: fix a race condition in unix_release().<br>
+45) goahead: rework usb storage UI.<br>
+46) xl2tpd: import fixes from upstream git.<br>
 <br>
 <br>
 <br>

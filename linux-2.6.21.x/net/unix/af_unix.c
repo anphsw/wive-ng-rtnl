@@ -357,7 +357,7 @@ static void unix_sock_destructor(struct sock *sk)
 #endif
 }
 
-static int unix_release_sock (struct sock *sk, int embrion)
+static void unix_release_sock(struct sock *sk, int embrion)
 {
 	struct unix_sock *u = unix_sk(sk);
 	struct dentry *dentry;
@@ -432,8 +432,6 @@ static int unix_release_sock (struct sock *sk, int embrion)
 
 	if (unix_tot_inflight)
 		unix_gc();		/* Garbage collect fds */
-
-	return 0;
 }
 
 static int unix_listen(struct socket *sock, int backlog)
@@ -640,9 +638,10 @@ static int unix_release(struct socket *sock)
 	if (!sk)
 		return 0;
 
+	unix_release_sock (sk, 0);
 	sock->sk = NULL;
 
-	return unix_release_sock (sk, 0);
+	return 0;
 }
 
 static int unix_autobind(struct socket *sock)
