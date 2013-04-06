@@ -88,7 +88,7 @@ function showHint(key)
 		else if (key=='vpn_pure_pppoe')
 			text += 'Enable pure WAN+PPPoE mode.';
 		else if (key=='vpn_cpu_limit')
-			text += 'This option prevents full CPU load by ppp_generic module. Minimum value is 1000, maximum value is 4000. Zero value disables this option.';
+			text += 'This option prevents full CPU load by ppp kernel thread.';
 		else if (key=='vpn_lcp_errors')
 			text += 'If this option is given, pppd will presume the peer to be dead if n LCP ' +
 				'echo-requests are sent without receiving a valid LCP echo-reply. If this happens, ' +
