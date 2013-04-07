@@ -1452,6 +1452,7 @@
 44) kernel: unix: fix a race condition in unix_release().<br>
 45) goahead: rework usb storage UI.<br>
 46) xl2tpd: import fixes from upstream git.<br>
+47) ralink_init: fix nvram_buf_get screening.<br>
 <br>
 <br>
 <br>

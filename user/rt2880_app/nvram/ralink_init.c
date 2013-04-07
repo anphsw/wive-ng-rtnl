@@ -143,7 +143,7 @@ int ra_nv_buf_get(int argc, char *argv[])
 	for (i = 2; i < argc; i++) {
 	    rc = nvram_bufget(index, argv[i]);
 	    if (rc) {
-		printf("%s=%s\n",argv[i], rc);
+		printf("%s=\"%s\"\n",argv[i], rc);
 	    } else {
 		fprintf(stderr, "nvram_buf_get return error or not return data!\n");
 		ret = -1;
