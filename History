@@ -1450,9 +1450,10 @@
 42) kernel: sched: don't rebalance if attached on NULL domain.<br>
 43) kernel: ppp_generic: fix cpu policer.<br>
 44) kernel: unix: fix a race condition in unix_release().<br>
-45) goahead: rework usb storage UI.<br>
-46) xl2tpd: import fixes from upstream git.<br>
-47) ralink_init: fix nvram_buf_get screening.<br>
+45) kernel: net: Fix race in dev_close().<br>
+46) goahead: rework usb storage UI.<br>
+47) xl2tpd: import fixes from upstream git.<br>
+48) ralink_init: fix nvram_buf_get screening.<br>
 <br>
 <br>
 <br>

@@ -941,8 +941,6 @@ int dev_close(struct net_device *dev)
 	 */
 	raw_notifier_call_chain(&netdev_chain, NETDEV_GOING_DOWN, dev);
 
-	dev_deactivate(dev);
-
 	clear_bit(__LINK_STATE_START, &dev->state);
 
 	/* Synchronize to scheduled poll. We cannot touch poll list,
@@ -956,6 +954,8 @@ int dev_close(struct net_device *dev)
 		/* No hurry. */
 		msleep(1);
 	}
+
+	dev_deactivate(dev);
 
 	/*
 	 *	Call the device specific close. This cannot fail.
@@ -3450,8 +3450,7 @@ void unregister_netdevice(struct net_device *dev)
 	BUG_ON(dev->reg_state != NETREG_REGISTERED);
 
 	/* If device is running, close it first. */
-	if (dev->flags & IFF_UP)
-		dev_close(dev);
+	dev_close(dev);
 
 	/* And unlink it from device chain. */
 	for (dp = &dev_base; (d = *dp) != NULL; dp = &d->next) {
