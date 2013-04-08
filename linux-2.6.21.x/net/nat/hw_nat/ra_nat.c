@@ -951,7 +951,7 @@ int32_t PpeParseLayerInfo(struct sk_buff * skb)
 			isSpecialTag(vh->h_vlan_encapsulated_proto)) {
 			PpeParseResult.vlan2_gap = VLAN_HLEN;
 			PpeParseResult.vlan_layer++;
-			vh = (struct vlan_hdr *)(skb->data + ETH_HLEN + VLAN_HLEN);
+			vh = (struct vlan_hdr *)(skb->data + ETH_HLEN + PpeParseResult.vlan1_gap);
 			PpeParseResult.vlan2 = vh->h_vlan_TCI;
 
 			/* VLAN + VLAN + PPPoE */
@@ -968,7 +968,7 @@ int32_t PpeParseLayerInfo(struct sk_buff * skb)
 			} else if (is8021Q(vh->h_vlan_encapsulated_proto)) {
 				/* VLAN + VLAN + VLAN */
 				PpeParseResult.vlan_layer++;
-				vh = (struct vlan_hdr *)(skb->data + ETH_HLEN + VLAN_HLEN + VLAN_HLEN);
+				vh = (struct vlan_hdr *)(skb->data + ETH_HLEN + PpeParseResult.vlan1_gap + VLAN_HLEN);
 
 				/* VLAN + VLAN + VLAN */
 				if (is8021Q(vh->h_vlan_encapsulated_proto)) {
@@ -982,6 +982,14 @@ int32_t PpeParseLayerInfo(struct sk_buff * skb)
 		} else {
 			/* VLAN + IP */
 			PpeParseResult.eth_type = vh->h_vlan_encapsulated_proto;
+		}
+	} else if (ntohs(PpeParseResult.eth_type) == ETH_P_PPP_SES) {
+		/* PPPoE + IP */
+		PpeParseResult.pppoe_gap = 8;
+		if (GetPppoeSid(skb, PpeParseResult.vlan1_gap,
+					&PpeParseResult.pppoe_sid,
+					&PpeParseResult.ppp_tag)) {
+			return 1;
 		}
 	}
 
