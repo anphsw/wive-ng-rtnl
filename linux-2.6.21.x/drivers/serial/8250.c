@@ -265,9 +265,9 @@ static const struct serial8250_config uart_config[] = {
 	},
 };
 
-#ifdef CONFIG_SERIAL_8250_AU1X00
+#if defined (CONFIG_SERIAL_8250_AU1X00) || defined (CONFIG_SERIAL_8250_RALINK)
 
-/* Au1x00 UART hardware has a weird register layout */
+/* Au1x00 and Ralink UART hardware has a weird register layout */
 static const u8 au_io_in_map[] = {
 	[UART_RX]  = 0,
 	[UART_IER] = 2,
@@ -325,7 +325,7 @@ static unsigned int serial_in(struct uart_8250_port *up, int offset)
 	case UPIO_MEM32:
 		return readl(up->port.membase + offset);
 
-#ifdef CONFIG_SERIAL_8250_AU1X00
+#if defined (CONFIG_SERIAL_8250_AU1X00) || defined (CONFIG_SERIAL_8250_RALINK)
 	case UPIO_AU:
 		return __raw_readl(up->port.membase + offset);
 #endif
@@ -338,18 +338,7 @@ static unsigned int serial_in(struct uart_8250_port *up, int offset)
 			return readb(up->port.membase + offset);
 
 	default:
-#if defined (CONFIG_RALINK_RT2880) || \
-    defined (CONFIG_RALINK_RT2883) || \
-    defined (CONFIG_RALINK_RT3883) || \
-    defined (CONFIG_RALINK_RT3352) || \
-    defined (CONFIG_RALINK_RT3052) || \
-    defined (CONFIG_RALINK_RT6855) || \
-    defined (CONFIG_RALINK_RT6352) || \
-    defined (CONFIG_RALINK_RT5350)
-		return (*(int*)(up->port.iobase + offset));
-#else
 		return inb(up->port.iobase + offset);
-#endif
 	}
 }
 
@@ -372,7 +361,7 @@ serial_out(struct uart_8250_port *up, int offset, int value)
 		writel(value, up->port.membase + offset);
 		break;
 
-#ifdef CONFIG_SERIAL_8250_AU1X00
+#if defined (CONFIG_SERIAL_8250_AU1X00) || defined (CONFIG_SERIAL_8250_RALINK)
 	case UPIO_AU:
 		__raw_writel(value, up->port.membase + offset);
 		break;
@@ -383,16 +372,7 @@ serial_out(struct uart_8250_port *up, int offset, int value)
 		break;
 
 	default:
-#if defined (CONFIG_RALINK_RT2880) || \
-    defined (CONFIG_RALINK_RT2883) || \
-    defined (CONFIG_RALINK_RT3883) || \
-    defined (CONFIG_RALINK_RT3352) || \
-    defined (CONFIG_RALINK_RT3052) || \
-    defined (CONFIG_RALINK_RT5350)
-		*(int*)(up->port.iobase + offset) = value;
-#else
 		outb(value, up->port.iobase + offset);
-#endif
 	}
 }
 
@@ -402,7 +382,7 @@ serial_out_sync(struct uart_8250_port *up, int offset, int value)
 	switch (up->port.iotype) {
 	case UPIO_MEM:
 	case UPIO_MEM32:
-#ifdef CONFIG_SERIAL_8250_AU1X00
+#if defined (CONFIG_SERIAL_8250_AU1X00) || defined (CONFIG_SERIAL_8250_RALINK)
 	case UPIO_AU:
 #endif
 		serial_out(up, offset, value);
@@ -435,21 +415,22 @@ static inline void _serial_dl_write(struct uart_8250_port *up, int value)
 	serial_outp(up, UART_DLM, value >> 8 & 0xff);
 }
 
-#if defined (CONFIG_RALINK_RT2880) || \
-    defined (CONFIG_RALINK_RT2883) || \
-    defined (CONFIG_RALINK_RT3883) || \
-    defined (CONFIG_RALINK_RT3352) || \
-    defined (CONFIG_RALINK_RT3052) || \
-    defined (CONFIG_RALINK_RT5350)
-/* Ralink haven't got a standard divisor latch */
+#if defined (CONFIG_SERIAL_8250_AU1X00) || defined (CONFIG_SERIAL_8250_RALINK)
+/* Au1x00 and Ralink haven't got a standard divisor latch */
 static int serial_dl_read(struct uart_8250_port *up)
 {
-	return serial_inp(up, UART_DLL);
+        if (up->port.iotype == UPIO_AU)
+                return __raw_readl(up->port.membase + 0x28);
+        else
+                return _serial_dl_read(up);
 }
 
 static void serial_dl_write(struct uart_8250_port *up, int value)
 {
-	serial_outp(up, UART_DLL, value);
+        if (up->port.iotype == UPIO_AU)
+                __raw_writel(value, up->port.membase + 0x28);
+        else
+                _serial_dl_write(up, value);
 }
 #else
 #define serial_dl_read(up) _serial_dl_read(up)
@@ -625,27 +606,8 @@ static int size_fifo(struct uart_8250_port *up)
 static unsigned int autoconfig_read_divisor_id(struct uart_8250_port *p)
 {
 	unsigned int id;
-
-#if defined (CONFIG_RALINK_RT2880) || \
-    defined (CONFIG_RALINK_RT2883) || \
-    defined (CONFIG_RALINK_RT3883) || \
-    defined (CONFIG_RALINK_RT3352) || \
-    defined (CONFIG_RALINK_RT3052) || \
-    defined (CONFIG_RALINK_RT5350)
-
-	unsigned char old_lcr;
-	unsigned short old_dl;
-
-	old_lcr = serial_inp(p, UART_LCR);
-	serial_outp(p, UART_LCR, UART_LCR_DLAB);
-
-	old_dl = serial_dl_read(p);
-	serial_dl_write(p, 0);
-	id = serial_dl_read(p);
-	serial_dl_write(p, old_dl);
-	serial_outp(p, UART_LCR, old_lcr);
-#else
 	unsigned char old_dll, old_dlm, old_lcr;
+
 	old_lcr = serial_inp(p, UART_LCR);
 	serial_outp(p, UART_LCR, UART_LCR_DLAB);
 
@@ -659,7 +621,6 @@ static unsigned int autoconfig_read_divisor_id(struct uart_8250_port *p)
 
 	serial_outp(p, UART_DLL, old_dll);
 	serial_outp(p, UART_DLM, old_dlm);
-#endif
 	serial_outp(p, UART_LCR, old_lcr);
 
 	return id;
@@ -1081,7 +1042,7 @@ static void autoconfig(struct uart_8250_port *up, unsigned int probeflags)
 	}
 #endif
 
-#ifdef CONFIG_SERIAL_8250_AU1X00
+#if defined (CONFIG_SERIAL_8250_AU1X00)
 	/* if access method is AU, it is a 16550 with a quirk */
 	if (up->port.type == PORT_16550A && up->port.iotype == UPIO_AU)
 		up->bugs |= UART_BUG_NOMSR;
@@ -2146,7 +2107,11 @@ static int serial8250_request_std_resource(struct uart_8250_port *up)
 
 	switch (up->port.iotype) {
 	case UPIO_AU:
+#if defined (CONFIG_SERIAL_8250_AU1X00)
 		size = 0x100000;
+#elif defined (CONFIG_SERIAL_8250_RALINK)
+		size = 256;
+#endif
 		/* fall thru */
 	case UPIO_TSI:
 	case UPIO_MEM32:
@@ -2183,7 +2148,11 @@ static void serial8250_release_std_resource(struct uart_8250_port *up)
 
 	switch (up->port.iotype) {
 	case UPIO_AU:
+#if defined (CONFIG_SERIAL_8250_AU1X00)
 		size = 0x100000;
+#elif defined (CONFIG_SERIAL_8250_RALINK)
+		size = 256;
+#endif
 		/* fall thru */
 	case UPIO_TSI:
 	case UPIO_MEM32:
