@@ -95,13 +95,16 @@ int rdm_ioctl (struct inode *inode, struct file *filp,
 		register_control = (*(int *)arg);
 		printk("switch register base addr to 0x%08x\n", register_control);
 	}
-	else //RT_RDM_CMD_WRITE or RT_RDM_CMD_WRITE_SILENT
+	else if (((cmd & 0xffff) == RT_RDM_CMD_WRITE) || ((cmd & 0xffff) == RT_RDM_CMD_WRITE_SILENT))
 	{
 		offset = cmd >> 16;
 		*(volatile u32 *)(baseaddr + offset) = cpu_to_le32((*(int *)arg));
 		if ((cmd & 0xffff) == RT_RDM_CMD_WRITE)
 			printk("write offset 0x%x, value 0x%x\n", offset, (unsigned int)(*(int *)arg));
+	}else {
+		return -EOPNOTSUPP;
 	}
+
 
 	return 0;
 }
