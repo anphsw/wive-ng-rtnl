@@ -117,7 +117,7 @@ void spi_master_init(void)
 #if defined(CONFIG_RALINK_VITESSE_SWITCH_CONNECT_SPI_CS1)||defined(CONFIG_RALINK_SLIC_CONNECT_SPI_CS1)
 	/* config ARB and set the low or high active correctly according to the device */
 	RT2880_REG(RT2880_SPI_ARB_REG) = SPIARB_ARB_EN|(SPIARB_SPI1_ACTIVE_MODE<<1)| SPIARB_SPI0_ACTIVE_MODE;
-#if defined(CONFIG_RALINK_RT6352)
+#if defined(CONFIG_RALINK_MT7620)
 	if (spich > 0) 
 	    RT2880_REG(RT2880_SPI_ARB_REG) |= SPIARB_CS1CTL;
 #endif
@@ -702,7 +702,7 @@ static int spidrv_init(void)
     //use normal(SPI) mode instead of GPIO mode
 #ifdef CONFIG_RALINK_RT2880
     RT2880_REG(RALINK_REG_GPIOMODE) &= ~(1 << 2);
-#elif defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT2883) || defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_RT6352) || defined (CONFIG_RALINK_RT71100)
+#elif defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT2883) || defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_MT7620) || defined (CONFIG_RALINK_MT7621)
     RT2880_REG(RALINK_REG_GPIOMODE) &= ~(1 << 1);
 #else
 #error Ralink Chip not defined
@@ -787,6 +787,13 @@ u8 spi_si3220_read8(int sid, unsigned char cid, unsigned char reg)
 	spi_chip_select(ENABLE);
 	value = spi_read();
 	spi_chip_select(DISABLE);
+
+#if defined(CONFIG_RALINK_VITESSE_SWITCH_CONNECT_SPI_CS1)||defined(CONFIG_RALINK_SLIC_CONNECT_SPI_CS1)
+	/* config ARB and set the low or high active correctly according to the device */
+	RT2880_REG(RT2880_SPI_ARB_REG) = SPIARB_ARB_EN|(SPIARB_SPI1_ACTIVE_MODE<<1)| SPIARB_SPI0_ACTIVE_MODE;
+	RT2880_REG(RT2880_SPI1_CTL_REG) = (~SPIARB_SPI1_ACTIVE_MODE)&0x1;
+#endif
+	RT2880_REG(RT2880_SPI0_CTL_REG) = (~SPIARB_SPI0_ACTIVE_MODE)&0x1;
 	return value;
 }
 
@@ -802,6 +809,13 @@ void spi_si3220_write8(int sid, unsigned char cid, unsigned char reg, unsigned c
 	spi_chip_select(ENABLE);
 	spi_write(value);
 	spi_chip_select(DISABLE);
+
+#if defined(CONFIG_RALINK_VITESSE_SWITCH_CONNECT_SPI_CS1)||defined(CONFIG_RALINK_SLIC_CONNECT_SPI_CS1)
+	/* config ARB and set the low or high active correctly according to the device */
+	RT2880_REG(RT2880_SPI_ARB_REG) = SPIARB_ARB_EN|(SPIARB_SPI1_ACTIVE_MODE<<1)| SPIARB_SPI0_ACTIVE_MODE;
+	RT2880_REG(RT2880_SPI1_CTL_REG) = (~SPIARB_SPI1_ACTIVE_MODE)&0x1;
+#endif
+	RT2880_REG(RT2880_SPI0_CTL_REG) = (~SPIARB_SPI0_ACTIVE_MODE)&0x1;
 }
 
 unsigned short spi_si3220_read16(int sid, unsigned char cid, unsigned char reg)
@@ -816,6 +830,14 @@ unsigned short spi_si3220_read16(int sid, unsigned char cid, unsigned char reg)
 	hi = spi_read();
 	lo = spi_read();
 	spi_chip_select(DISABLE);
+
+#if defined(CONFIG_RALINK_VITESSE_SWITCH_CONNECT_SPI_CS1)||defined(CONFIG_RALINK_SLIC_CONNECT_SPI_CS1)
+	/* config ARB and set the low or high active correctly according to the device */
+	RT2880_REG(RT2880_SPI_ARB_REG) = SPIARB_ARB_EN|(SPIARB_SPI1_ACTIVE_MODE<<1)| SPIARB_SPI0_ACTIVE_MODE;
+	RT2880_REG(RT2880_SPI1_CTL_REG) = (~SPIARB_SPI1_ACTIVE_MODE)&0x1;
+#endif
+	RT2880_REG(RT2880_SPI0_CTL_REG) = (~SPIARB_SPI0_ACTIVE_MODE)&0x1;
+
 	return SixteenBit(hi,lo);
 }
 
@@ -834,6 +856,14 @@ void spi_si3220_write16(int sid, unsigned char cid, unsigned char reg, unsigned 
 	spi_write(hi);
 	spi_write(lo);
 	spi_chip_select(DISABLE);
+
+#if defined(CONFIG_RALINK_VITESSE_SWITCH_CONNECT_SPI_CS1)||defined(CONFIG_RALINK_SLIC_CONNECT_SPI_CS1)
+	/* config ARB and set the low or high active correctly according to the device */
+	RT2880_REG(RT2880_SPI_ARB_REG) = SPIARB_ARB_EN|(SPIARB_SPI1_ACTIVE_MODE<<1)| SPIARB_SPI0_ACTIVE_MODE;
+	RT2880_REG(RT2880_SPI1_CTL_REG) = (~SPIARB_SPI1_ACTIVE_MODE)&0x1;
+#endif
+	RT2880_REG(RT2880_SPI0_CTL_REG) = (~SPIARB_SPI0_ACTIVE_MODE)&0x1;
+
 }
 
 void spi_si321x_master_init(int ch)

@@ -31,14 +31,18 @@
 #define Physical2NonCache(x)            (((int)x) | 0xa0000000)
 #define NonCache2Virtual(x)             (((int)x) & 0xDFFFFFFF)
 
-#define I2S_DEBUG_PRN
+//#define I2S_DEBUG_PRN
 #ifdef I2S_DEBUG_PRN
 #define MSG(fmt, args...) printk("I2S: " fmt, ## args)
 #else
 #define MSG(fmt, args...) { }
 #endif
 
+#ifdef I2S_DEBUG_PRN
 #define i2s_outw(address, value)	do{printk("0x%08X = 0x%08X\n",(u32)address,(u32)value);*((volatile uint32_t *)(address)) = cpu_to_le32(value);}while(0)
+#else
+#define i2s_outw(address, value)    *((volatile uint32_t *)(address)) = cpu_to_le32(value)
+#endif
 #define i2s_inw(address)			le32_to_cpu(*(volatile u32 *)(address))
 
 /* HW feature definiations */
@@ -53,7 +57,7 @@
 #endif
 
 #if defined(CONFIG_RALINK_RT3352)||defined(CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT6855) \
-	|| defined(CONFIG_RALINK_RT6855A) || defined(CONFIG_RALINK_RT6352)
+	|| defined(CONFIG_RALINK_RT6855A) || defined(CONFIG_RALINK_MT7620)
 #define CONFIG_I2S_TXRX			1
 //#define CONFIG_I2S_IN_MCLK		1
 //#define CONFIG_I2S_WS_EDGE		1
@@ -146,7 +150,7 @@
 
 /* Constant definition */
 #define NFF_THRES			4
-#define I2S_PAGE_SIZE		(4*4096)//(1152*2*2*2)
+#define I2S_PAGE_SIZE		(3*4096)//(1152*2*2*2)
 #define MAX_I2S_PAGE		8
 
 #define MAX_SRATE_HZ			96000
@@ -237,6 +241,8 @@ typedef struct i2s_config_t
 	int bSleep;
 	int bTxDMAEnable;
 	int bRxDMAEnable;
+	int nTxDMAStopped;
+	int nRxDMAStopped;
 #ifdef __KERNEL__		
 	spinlock_t lock;
 	wait_queue_head_t i2s_tx_qh, i2s_rx_qh;

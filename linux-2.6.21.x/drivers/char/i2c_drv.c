@@ -42,6 +42,7 @@
 #include <linux/types.h>    
 #include <linux/proc_fs.h>
 #include <linux/fcntl.h>    
+#include <linux/delay.h>
 #include <asm/system.h>     
 #include <linux/wireless.h>
 
@@ -67,8 +68,7 @@ void i2c_master_init(void)
 	RT2880_REG(RT2880_RSTCTRL_REG) = i;
 	RT2880_REG(RT2880_RSTCTRL_REG) = i & ~(RALINK_I2C_RST);
 
-	for(i = 0; i < 50000; i++);
-	// udelay(500);
+	udelay(500);
 	
 	RT2880_REG(RT2880_I2C_CONFIG_REG) = I2C_CFG_DEFAULT;
 
@@ -289,7 +289,6 @@ void i2c_eeprom_read_one(u32 address, u8 *data, u32 nbytes)
 
 static inline void random_write_block(u32 address, u8 *data)
 {
-	int i;
 	/* change page */
 	if (ADDRESS_BYTES == 1) {
 		int page;
@@ -301,13 +300,11 @@ static inline void random_write_block(u32 address, u8 *data)
 
 
 	i2c_write(address, data, WRITE_BLOCK);
-	// mdelay(5);
-	for(i = 0; i < 500000; i++);
+	udelay(5000);
 }
 
 static inline void random_write_one_byte(u32 address, u8 *data)
 {	
-	int i;
 	/* change page */
 	if (ADDRESS_BYTES == 1) {
 		int page;
@@ -318,8 +315,7 @@ static inline void random_write_one_byte(u32 address, u8 *data)
 	}
 
 	i2c_write(address, data, 1);
-	// mdelay(5);
-	for(i = 0; i < 500000; i++);
+	udelay(5000);
 }
 
 void i2c_eeprom_write(u32 address, u8 *data, u32 nbytes)
@@ -347,8 +343,24 @@ void i2c_read_config(char *data, unsigned int len)
 	i2c_eeprom_read(0, data, len);
 }
 
+void i2c_eeprom_dump(void)
+{
+	u32 a;
+	u8 v;
+
+	i2c_master_init();
+	for (a = 0; a < 128; a++) {
+		if (a % 16 == 0)
+			printk("%4x : ", a);
+		v = random_read_one_byte(a);
+		printk("%02x ", v);
+		if (a % 16 == 15)
+			printk("\n");
+	}
+}
+
 #if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,35)
-int i2cdrv_ioctl(struct file *filp, unsigned int cmd, 
+long i2cdrv_ioctl(struct file *filp, unsigned int cmd, 
 		unsigned long arg)
 #else
 int i2cdrv_ioctl(struct inode *inode, struct file *filp, \
@@ -361,6 +373,9 @@ int i2cdrv_ioctl(struct inode *inode, struct file *filp, \
 	I2C_WRITE *i2c_write;
 
 	switch (cmd) {
+	case RT2880_I2C_DUMP:
+		i2c_eeprom_dump();
+		break;
 	case RT2880_I2C_READ:
 		value = 0; address = 0;
 		address = (unsigned int)arg;

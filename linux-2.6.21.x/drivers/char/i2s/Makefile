@@ -42,7 +42,7 @@ ralink_i2s-objs += wm8750.o
 EXTRA_CFLAGS   +=-DCONFIG_I2S_WM8750
 endif
 
-ifeq ($(CONFIG_RALINK_RT6352),y)
+ifeq ($(CONFIG_RALINK_MT7620),y)
 ralink_i2s-objs += wm8750.o
 EXTRA_CFLAGS   +=-DCONFIG_I2S_WM8750
 endif
