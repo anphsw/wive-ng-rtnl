@@ -761,7 +761,7 @@ static int ip_frag_reasm(struct ipq *qp, struct sk_buff *prev,
 
 	iph = head->nh.iph;
 	/* max_size != 0 implies at least one fragment had IP_DF set */
-	iph->frag_off = qp->q.max_size ? htons(IP_DF) : 0;
+	iph->frag_off = qp->max_size ? htons(IP_DF) : 0;
 	iph->tot_len = htons(len);
 	IP_INC_STATS_BH(IPSTATS_MIB_REASMOKS);
 	qp->fragments = NULL;
