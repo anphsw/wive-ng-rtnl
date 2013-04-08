@@ -406,7 +406,7 @@ void forward_config(struct net_device *dev)
 	if (!vlan_double_tag)
 #endif
 	{
-    	    RAETH_PRINT("raeth: vlan hardware offload enabled\n");
+    	    printk("raeth: vlan hardware offload enabled\n");
 	    /* frame engine will push VLAN tag regarding to VIDX feild in Tx desc. */
 	    *(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0xa8) = 0x00010000;
 	    *(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0xac) = 0x00030002;
@@ -1771,7 +1771,7 @@ static irqreturn_t esw_interrupt(int irq, void *dev_id)
 			    RAETH_PRINT(KERN_INFO "RT305x_ESW: Link Status Changed\n");
 			    goto out;
 		    }
-		  RAETH_PRINT(KERN_INFO "RT305x_ESW: WAN Port Link Status Changed\n");
+		    printk(KERN_INFO "RT305x_ESW: WAN Port Link Status Changed\n");
 		}
 
 		/* send SIGUSR1 to dhcp client */
