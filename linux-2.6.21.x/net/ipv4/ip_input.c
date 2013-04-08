@@ -146,10 +146,6 @@
 #include <linux/mroute.h>
 #include <linux/netlink.h>
 
-#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-#include "../nat/hw_nat/ra_nat.h"
-#endif
-
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 extern int nf_conntrack_fastnat;
 #endif
@@ -264,13 +260,6 @@ inline int ip_local_deliver(struct sk_buff *skb)
 		if (ip_defrag(skb, IP_DEFRAG_LOCAL_DELIVER))
 			return 0;
 	}
-
-/* patch from Ralink to fix HW NAT LAN<->LAN binding */
-#if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-        if (IS_SPACE_AVAILABLED(skb) && IS_MAGIC_TAG_VALID(skb)) {
-                FOE_ALG(skb)=1;
-        }
-#endif
 
 	return NF_HOOK(PF_INET, NF_IP_LOCAL_IN, skb, skb->dev, NULL,
 		       ip_local_deliver_finish);

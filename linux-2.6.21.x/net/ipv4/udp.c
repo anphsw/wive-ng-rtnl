@@ -104,6 +104,10 @@
 #include <net/xfrm.h>
 #include "udp_impl.h"
 
+#if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+#include "../../net/nat/hw_nat/ra_nat.h"
+#endif
+
 /*
  *	Snmp MIB for the UDP layer
  */
@@ -1258,6 +1262,11 @@ drop:
 
 __inline__ int udp_rcv(struct sk_buff *skb)
 {
+#if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+        if (IS_SPACE_AVAILABLED(skb) && IS_MAGIC_TAG_VALID(skb)) {
+                FOE_ALG(skb)=1;
+        }
+#endif
 	return __udp4_lib_rcv(skb, udp_hash, IPPROTO_UDP);
 }
 

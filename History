@@ -1456,6 +1456,12 @@
 48) goahead: rework usb storage UI.<br>
 49) xl2tpd: import fixes from upstream git.<br>
 50) ralink_init: fix nvram_buf_get screening.<br>
+
+<br>
+<b>4.1.x</b><br>
+1) kernel: hw_nat: fix lan<->lan binding.<br>
+2) kernel: hw_nat: fix usbnet offload.<br>
+
 <br>
 <br>
 <br>

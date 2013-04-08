@@ -253,21 +253,20 @@ void usbnet_skb_return (struct usbnet *dev, struct sk_buff *skb)
 	  * ra_sw_nat_hook_rx return 0 --> FWD & without netif_rx
 	  */
 	FOE_MAGIC_TAG(skb)= FOE_MAGIC_PCI;
+	FOE_AI(skb)=UN_HIT;
 	if(ra_sw_nat_hook_rx!= NULL)
 	{
 		if(ra_sw_nat_hook_rx(skb)) {
 			status = netif_rx (skb);
-			if (status != NET_RX_SUCCESS) {
-				devdbg (dev, rx_err, dev->net, "netif_rx status %d\n", status);
-			}
+			if (status != NET_RX_SUCCESS && netif_msg_rx_err (dev))
+				devdbg (dev, "netif_rx status %d", status);
 		}
 	} else  {
-		FOE_AI(skb)=UN_HIT;
 		status = netif_rx (skb);
-		if (status != NET_RX_SUCCESS) {
-			devdbg (dev, rx_err, dev->net, "netif_rx status %d\n", status);
-		}
+		if (status != NET_RX_SUCCESS && netif_msg_rx_err (dev))
+			devdbg (dev, "netif_rx status %d", status);
 	}
+
 #else
 	status = netif_rx (skb);
 	if (status != NET_RX_SUCCESS && netif_msg_rx_err (dev))
@@ -377,15 +376,22 @@ static void rx_submit (struct usbnet *dev, struct urb *urb, gfp_t flags)
 	unsigned long		lockflags;
 	size_t			size = dev->rx_urb_size;
 
+#if defined(CONFIG_RA_HW_NAT_PCI) && (defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE))
+	if ((skb = alloc_skb (size + NET_IP_ALIGN + FOE_INFO_LEN, flags)) == NULL) {
+#else
 	if ((skb = alloc_skb (size + NET_IP_ALIGN, flags)) == NULL) {
+#endif
 		if (netif_msg_rx_err (dev))
 			devdbg (dev, "no rx skb");
 		usbnet_defer_kevent (dev, EVENT_RX_MEMORY);
 		usb_free_urb (urb);
 		return;
 	}
+#if defined(CONFIG_RA_HW_NAT_PCI) && (defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE))
+	skb_reserve (skb, NET_IP_ALIGN + FOE_INFO_LEN);
+#else
 	skb_reserve (skb, NET_IP_ALIGN);
-
+#endif
 	entry = (struct skb_data *) skb->cb;
 	entry->urb = urb;
 	entry->dev = dev;
@@ -1013,7 +1019,6 @@ static int usbnet_start_xmit (struct sk_buff *skb, struct net_device *net)
 	struct skb_data		*entry;
 	struct driver_info	*info = dev->driver_info;
 	unsigned long		flags;
-	
 
 	// some devices want funky USB-level framing, for
 	// win32 driver (usually) and/or hardware quirks
@@ -1034,12 +1039,12 @@ static int usbnet_start_xmit (struct sk_buff *skb, struct net_device *net)
 	}
 
 #if defined(CONFIG_RA_HW_NAT_PCI) && (defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE))
-	/* add tx hook point*/
-	if(ra_sw_nat_hook_tx != NULL) {
-		skb->data += 4; //pointer to DA
-		ra_sw_nat_hook_tx(skb, 1);
-		skb->data -= 4;
-	}
+        /* add tx hook point*/
+        if(ra_sw_nat_hook_tx != NULL) {
+                skb->data += 4; //pointer to DA
+                ra_sw_nat_hook_tx(skb, 1);
+                skb->data -= 4;
+        }
 #endif
 
 	entry = (struct skb_data *) skb->cb;
@@ -1293,7 +1298,7 @@ usbnet_probe (struct usb_interface *udev, const struct usb_device_id *prod)
 		if (status < 0)
 			goto out1;
 
-#if defined (CONFIG_RA_HW_NAT) || defined (CONFIG_RA_HW_NAT_MODULE)
+#if defined(CONFIG_RA_HW_NAT_PCI) && (defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE))
 		/* always use ethX names for ifaces */
 		strcpy (net->name, "eth%d");
 		fake_usb_class.name = "usbeth%d";
