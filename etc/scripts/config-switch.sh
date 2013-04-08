@@ -44,15 +44,11 @@ start_sw_config() {
     ##########################################################################
     if [ ! -f /var/run/goahead.pid ]; then
 	if [ -f /proc/sys/net/ipv4/vlan_double_tag ]; then
-	    if [ "$vlan_double_tag" = "1" ] || [ "$natFastpath" = "2" ] || [ "$natFastpath" = "3" ]; then
-		if [ "$natFastpath" = "2" ] || [ "$natFastpath" = "3" ]; then
-		    $LOG "Double vlan tag and HW_NAT enabled. HW_VLAN offload disabled."
-		else
-		    $LOG "Double vlan tag enabled. HW_VLAN and HW_NAT offload disabled."
-		fi
+	    if [ "$vlan_double_tag" = "1" ]; then
+		$LOG "Double vlan tag enabled. HW_VLAN offload disabled."
 		DOUBLE_TAG=1
 	    else
-		$LOG "Double vlan tag and HW_NAT disabled. HW_VLAN offload enabled."
+		$LOG "Double vlan tag disabled. HW_VLAN offload enabled."
 		DOUBLE_TAG=0
 	    fi
 	    sysctl -wq net.ipv4.vlan_double_tag="$DOUBLE_TAG"

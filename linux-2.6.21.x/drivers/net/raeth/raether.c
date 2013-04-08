@@ -385,28 +385,28 @@ void forward_config(struct net_device *dev)
 #endif
 
 #ifdef CONFIG_RAETH_HW_VLAN_TX
-#if defined(CONFIG_RALINK_RT6352)
-	/* frame engine will push VLAN tag regarding to VIDX feild in Tx desc. */
-	*(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0x430) = 0x00010000;
-	*(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0x434) = 0x00030002;
-	*(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0x438) = 0x00050004;
-	*(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0x43C) = 0x00070006;
-	*(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0x440) = 0x00090008;
-	*(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0x444) = 0x000b000a;
-	*(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0x448) = 0x000d000c;
-	*(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0x44C) = 0x000f000e;
-#else
-	/*
-	 * VLAN_IDX 0 = VLAN_ID 0
-	 * .........
-	 * VLAN_IDX 15 = VLAN ID 15
-	 *
-	 */
 #ifdef CONFIG_VLAN_8021Q_DOUBLE_TAG
 	if (!vlan_double_tag)
 #endif
 	{
     	    printk("raeth: vlan hardware offload enabled\n");
+#if defined(CONFIG_RALINK_RT6352)
+	    /* frame engine will push VLAN tag regarding to VIDX feild in Tx desc. */
+	    *(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0x430) = 0x00010000;
+	    *(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0x434) = 0x00030002;
+	    *(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0x438) = 0x00050004;
+	    *(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0x43C) = 0x00070006;
+	    *(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0x440) = 0x00090008;
+	    *(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0x444) = 0x000b000a;
+	    *(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0x448) = 0x000d000c;
+	    *(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0x44C) = 0x000f000e;
+#else
+	    /*
+	     * VLAN_IDX 0 = VLAN_ID 0
+	     * .........
+	     * VLAN_IDX 15 = VLAN ID 15
+	     *
+	     */
 	    /* frame engine will push VLAN tag regarding to VIDX feild in Tx desc. */
 	    *(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0xa8) = 0x00010000;
 	    *(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0xac) = 0x00030002;
@@ -416,8 +416,8 @@ void forward_config(struct net_device *dev)
 	    *(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0xbc) = 0x000b000a;
 	    *(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0xc0) = 0x000d000c;
 	    *(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0xc4) = 0x000f000e;
-	}
 #endif
+	}
 #endif
 
 	regVal = sysRegRead(GDMA1_FWD_CFG);
