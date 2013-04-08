@@ -4,18 +4,16 @@ config RAETH
           This driver supports Ralink gigabit ethernet family of
           adapters.
 
-	config PDMA_NEW
+config PDMA_NEW
         bool
 	default y if  (RALINK_MT7620 || RALINK_MT7621)
-        depends on RAETH
+        depends on RAETH && !(RALINK_RT3052 || RALINK_RT3352 || RALINK_RT5350)
 
 config RAETH_SCATTER_GATHER_RX_DMA
-        bool "Scatter-Gather RX DMA"
+        bool
 	default y if (RALINK_MT7620 || RALINK_MT7621)
+        depends on RAETH && !(RALINK_RT3052 || RALINK_RT3352 || RALINK_RT5350)
 
-config RAETH_NAPI
-        bool "Use Rx Polling (NAPI)"
-        depends on RAETH
 
 choice
 	prompt "Network BottomHalves"
@@ -29,6 +27,10 @@ choice
 	bool "Work Queue"
 
 endchoice
+
+config RAETH_NAPI
+        bool "Use Rx Polling (NAPI)"
+        depends on RAETH
 
 config RAETH_SPECIAL_TAG
         bool "Ralink Special Tag (0x810x)"
@@ -91,7 +93,7 @@ choice
 
 config  RAETH_QOS_DSCP_BASED
         bool "DSCP-based"
-        depends on RAETH_QOS 
+        depends on RAETH_QOS
 
 config  RAETH_QOS_VPRI_BASED
         bool "VPRI-based"

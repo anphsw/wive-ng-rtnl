@@ -288,8 +288,8 @@ config FAIR_GROUP_SCHED
 	  bandwidth allocation to such task groups.
 
 choice
-	depends on FAIR_GROUP_SCHED
 	prompt "Basis for grouping tasks"
+	depends on FAIR_GROUP_SCHED
 	default FAIR_GROUP_SCHED
 
 endchoice
