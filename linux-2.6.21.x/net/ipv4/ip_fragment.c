@@ -100,6 +100,8 @@ struct ipq {
 	int             iif;
 	unsigned int    rid;
 	struct inet_peer *peer;
+
+	u16		max_size;
 };
 
 /* Hash table. */
@@ -646,6 +648,10 @@ found:
 	if (offset == 0)
 		qp->last_in |= FIRST_IN;
 
+	if (ip_hdr(skb)->frag_off & htons(IP_DF) &&
+	    skb->len + ihl > qp->max_size)
+		qp->max_size = skb->len + ihl;
+
 	if (qp->last_in == (FIRST_IN | LAST_IN) && qp->meat == qp->len)
 		return ip_frag_reasm(qp, prev, dev);
 
@@ -751,9 +757,11 @@ static int ip_frag_reasm(struct ipq *qp, struct sk_buff *prev,
 	head->next = NULL;
 	head->dev = dev;
 	head->tstamp = qp->stamp;
+	IPCB(head)->frag_max_size = qp->max_size;
 
 	iph = head->nh.iph;
-	iph->frag_off = 0;
+	/* max_size != 0 implies at least one fragment had IP_DF set */
+	iph->frag_off = qp->q.max_size ? htons(IP_DF) : 0;
 	iph->tot_len = htons(len);
 	IP_INC_STATS_BH(IPSTATS_MIB_REASMOKS);
 	qp->fragments = NULL;

@@ -1452,9 +1452,10 @@
 44) kernel: unix: fix a race condition in unix_release().<br>
 45) kernel: net: Fix race in dev_close().<br>
 46) kernel: net: fragment: add fast path for in-order fragments.<br>
-47) goahead: rework usb storage UI.<br>
-48) xl2tpd: import fixes from upstream git.<br>
-49) ralink_init: fix nvram_buf_get screening.<br>
+47) kernel: net: ipv4: fix path MTU discovery with connection tracking.<br>
+48) goahead: rework usb storage UI.<br>
+49) xl2tpd: import fixes from upstream git.<br>
+50) ralink_init: fix nvram_buf_get screening.<br>
 <br>
 <br>
 <br>
