@@ -893,7 +893,7 @@ int32_t isHwVlanTx(struct sk_buff *skb)
 	return 0;
 #endif
 }
-#ebndif
+#endif
 
 int32_t PpeParseLayerInfo(struct sk_buff * skb)
 {
