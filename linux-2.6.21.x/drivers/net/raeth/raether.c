@@ -2861,7 +2861,7 @@ int ei_open(struct net_device *dev)
 
 	printk("Raeth %s (",RAETH_VERSION);
 #if defined (CONFIG_RAETH_NAPI)
-	printk("NAPI\n");
+	printk("NAPI");
 #elif defined (CONFIG_RA_NETWORK_TASKLET_BH)
 	printk("Tasklet");
 #elif defined (CONFIG_RA_NETWORK_WORKQUEUE_BH)
