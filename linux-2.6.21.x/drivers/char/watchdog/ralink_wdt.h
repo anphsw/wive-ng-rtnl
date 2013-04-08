@@ -14,15 +14,20 @@
 #define TMRSTAT     (RALINK_TIMER_BASE)  /* Timer Status Register */
 
 #if defined (CONFIG_RALINK_RT6855A)
-#define TIMERCTLR   (TMRSTAT + 0x0)  /* Timer1 Control */
-#define WDOGTHSLD   (TMRSTAT + 0x34) /* Watch Dog Threshold */
-#define TIMER3LVR   (TMRSTAT + 0x2C) /* Timer 3 Load Value Register */
-#define TIMER3CVR   (TMRSTAT + 0x30) /* Timer 3 Current Value Register */
-#define TMR1CTL     TIMERCTLR
-#define TMR1LOAD    TIMER3LVR
-#define TMR1VAL	    TIMER3CVR
+#define TMR1CTL     (TMRSTAT + 0x0)  /* WDG Timer Control */
+#define TMR1LOAD    (TMRSTAT + 0x2C) /* WDG Timer Load Value Register */
+#define TMR1VAL     (TMRSTAT + 0x30) /* WDG Timer Current Value Register */
 #define RLDWDOG     (TMRSTAT + 0x38) /* Reload Watchdog */
-
+#elif defined (CONFIG_RALINK_MT7621)
+#define TMR0CTL     (TMRSTAT + 0x10)  /* Timer0 Control */
+#define TMR0LOAD    (TMRSTAT + 0x14)  /* Timer0 Load Value */
+#define TMR0VAL     (TMRSTAT + 0x18)  /* Timer0 Counter Value */
+#define TMR1CTL     (TMRSTAT + 0x20)  /* WDG Timer Control */
+#define TMR1LOAD    (TMRSTAT + 0x24)  /* WDG Timer Load Value */
+#define TMR1VAL     (TMRSTAT + 0x28)  /* WDG Timer Counter Value */
+#define TMR2CTL     (TMRSTAT + 0x30)  /* Timer1 Control */
+#define TMR2LOAD    (TMRSTAT + 0x34)  /* Timer1 Load Value */
+#define TMR2VAL     (TMRSTAT + 0x38)  /* Timer1 Counter Value */
 #else
 #define TMR1CTL     (TMRSTAT + 0x28)  /* Timer1 Control */
 #define TMR1LOAD    (TMRSTAT + 0x20)  /* Timer1 Load Value */
@@ -30,14 +35,6 @@
 #endif
 
 #define INTENA      (RALINK_INTCL_BASE + 0x34)  /* Interrupt Enable */
-
-struct timer0_data {
-	unsigned long expires;
-	unsigned long data;
-	void (*tmr0_callback_function)(unsigned long);
-	spinlock_t      tmr0_lock;
-};
-
 
 enum timer_mode {
     FREE_RUNNING,
