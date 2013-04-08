@@ -209,6 +209,13 @@ cflags-$(CONFIG_RALINK_RT3883)	+= -march=mips32r2 -D__MIPSEL__
 load-$(CONFIG_RALINK_RT3883)	+= 0x80000000
 
 #
+# Ralink MT7620 board
+#
+core-$(CONFIG_RALINK_MT7620)	+= arch/mips/rt2880/
+cflags-$(CONFIG_RALINK_MT7620)	+= -Iinclude/asm-mips/rt2880
+load-$(CONFIG_RALINK_MT7620)	+= 0x80000000
+
+#
 # Acer PICA 61, Mips Magnum 4000 and Olivetti M700.
 #
 core-$(CONFIG_MACH_JAZZ)	+= arch/mips/jazz/

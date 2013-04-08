@@ -66,9 +66,19 @@ void set_wdg_timer_ebl(unsigned int timer, unsigned int ebl)
     result=sysRegRead(timer);
 
     if(ebl==1){
+#if defined (CONFIG_RALINK_RT6855A)
+	result |= (1<<25) | (1<<5);
+#else
 	result |= (1<<7);
+#endif
+
     }else {
+#if defined (CONFIG_RALINK_RT6855A)
+	result &= ~((1<<25)|(1<<5));
+#else
 	result &= ~(1<<7);
+#endif
+
     }
 
     sysRegWrite(timer,result);
@@ -152,51 +162,62 @@ void set_wdg_timer_ebl(unsigned int timer, unsigned int ebl)
         sysRegWrite(GPIOMODE,result);
 
     }
+#elif defined (CONFIG_RALINK_MT7620)
  if(timer==TMR1CTL) {
         result=sysRegRead(GPIOMODE);
-
-#if 1 //use SPI_CS1 as WDG reset output
         /*
-         * GPIOMODE[22:21]
-         * 2'b00:SPI_CS1
-         * 2'b01:WDG reset output
-         * 2'b11:REFCLK0
+         * GPIOMODE[22:21] WDT_GPIO_MODE
+         * 2'b00:Normal
+         * 2'b01:REFCLK0
+         * 2'b10:GPIO Mode
          */
         result &= ~(0x3<<21);
 
         if(ebl==1){
-            result |= (0x1<<21);
+            result |= (0x0<<21);
         }else {
-            result |= (0x0<<21); //SPI_CS1
-            //result |= (0x3<<21); //REFCLK0
+            result |= (0x2<<21); //GPIO
+            //result |= (0x1<<21); //REFCLK0
         }
-#else //use PERST as WDG reset output (QFP128 package)
+        sysRegWrite(GPIOMODE,result);
+        }
+#elif defined (CONFIG_RALINK_RT7621)
+    if(timer==TMR1CTL) {
+        result=sysRegRead(GPIOMODE);
         /*
-         * GPIOMODE[17:16]
-         * 2'b00:PERST
-         * 2'b01:WDG reset output
-         * 2'b10:GPIO mode
-         * 2'b11:REFCLK0
-         *
+         * GPIOMODE[22:21] WDT_GPIO_MODE
+         * 2'b00:Normal
+         * 2'b01:REFCLK0
+         * 2'b10:GPIO Mode
          */
-        result &= ~(0x3<<16);
+        result &= ~(0x3<<21);
 
         if(ebl==1){
-            result |= (0x1<<16);
+            result |= (0x0<<21);
         }else {
-            result |= (0x0<<16); //PERST
-            //result |= (0x2<<16); //GPIO mode
-            //result |= (0x3<<16); //REFCLK0
+            result |= (0x2<<21); //GPIO
+            //result |= (0x1<<21); //REFCLK0
         }
-#endif
         sysRegWrite(GPIOMODE,result);
     }
-
 #endif
 #endif 
 }
 
+#if defined (CONFIG_RALINK_MT7621)
+void set_wdg_timer_clock_prescale(int prescale)
+{
+     unsigned int result;
 
+     result =sysRegRead(TMR1CTL);
+     result &= 0x0000FFFF;
+     result |= (prescale << 16); //unit = 1u
+     sysRegWrite(TMR1CTL, result);
+}
+void set_wdg_timer_mode(unsigned int timer, enum timer_mode mode)
+{
+}
+#else
 void set_wdg_timer_clock_prescale(unsigned int timer, enum timer_clock_freq prescale)
 {
     unsigned int result;
@@ -218,6 +239,7 @@ void set_wdg_timer_mode(unsigned int timer, enum timer_mode mode)
     sysRegWrite(timer,result);
 
 }
+#endif
 
 void setup_wdg_timer(struct timer_list * timer,
 	void (*function)(unsigned long),
@@ -230,8 +252,13 @@ void setup_wdg_timer(struct timer_list * timer,
 
 void refresh_wdg_timer(unsigned long unused)
 {
+#if defined (CONFIG_RALINK_RT6855A)
+    sysRegWrite(RLDWDOG, 1);
+#elif defined (CONFIG_RALINK_MT7621)
+    sysRegWrite(TMRSTAT, (1 << 9)); //WDTRST
+#else
     sysRegWrite(TMR1LOAD, wdg_load_value);
-
+#endif
 
     wdg_timer.expires = jiffies + HZ * CONFIG_RALINK_WDG_REFRESH_INTERVAL;
     add_timer(&wdg_timer);
@@ -242,25 +269,37 @@ int32_t __init wdt_init_module(void)
 {
     printk("Load Kernel WDG Timer Module\n");
 
+    // initialize WDG timer (Timer1)
+    setup_wdg_timer(&wdg_timer, refresh_wdg_timer, 0);
+    set_wdg_timer_mode(TMR1CTL,WATCHDOG);
+#if defined (CONFIG_RALINK_RT2880) || defined (CONFIG_RALINK_RT2883) || \
+    defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3883)
     /* 
      * System Clock = CPU Clock/2
      * For user easy configuration, We assume the unit of watch dog timer is 1s, 
      * so we need to calculate the TMR1LOAD value.
-     *
      * Unit= 1/(SysClk/65536), 1 Sec = (SysClk)/65536 
-     *
      */
-
-    // initialize WDG timer (Timer1)
-    setup_wdg_timer(&wdg_timer, refresh_wdg_timer, 0);
-    set_wdg_timer_mode(TMR1CTL,WATCHDOG);
     set_wdg_timer_clock_prescale(TMR1CTL,SYS_CLK_DIV65536);
     wdg_load_value = CONFIG_RALINK_WDG_TIMER * (get_surfboard_sysclk()/65536);
-
-#if defined (CONFIG_RALINK_RT2880) || defined (CONFIG_RALINK_RT2883) || \
-    defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3883)
-    wdg_load_value =  CONFIG_RALINK_WDG_TIMER * (get_surfboard_sysclk()/65536);
+#elif defined (CONFIG_RALINK_RT6855A)
+    int hwconf = sysRegRead(RALINK_SYSCTL_BASE + 0x8c);
+    if( (hwconf >> 24) & 0x3 == 0) { //SDR
+	    wdg_load_value =  CONFIG_RALINK_WDG_TIMER * (140 * 1000 * 1000 / 2);
+    }else {
+	    if(hwconf >> 26 & 0x1 == 0) {
+		    wdg_load_value =  CONFIG_RALINK_WDG_TIMER * (233 * 1000 * 1000 / 2);
+	    }else {
+		    wdg_load_value =  CONFIG_RALINK_WDG_TIMER * (175 * 1000 * 1000 / 2);
+	    }
+    }
+    sysRegWrite(TMR1LOAD, wdg_load_value);
+#elif defined (CONFIG_RALINK_MT7621)
+    set_wdg_timer_clock_prescale(1000); //1ms
+    wdg_load_value =  CONFIG_RALINK_WDG_TIMER * 1000;
+    sysRegWrite(TMR1LOAD, wdg_load_value);
 #else
+    set_wdg_timer_clock_prescale(TMR1CTL,SYS_CLK_DIV65536);
     wdg_load_value =  CONFIG_RALINK_WDG_TIMER * (40000000/65536); //fixed at 40Mhz
 #endif
 

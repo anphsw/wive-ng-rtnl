@@ -55,13 +55,33 @@
 #define SYSCFG1     RALINK_SYSCTL_BASE + 0x14  /* System Configuration Register1 */
 #define GPIOMODE    RALINK_SYSCTL_BASE + 0x60  
 #define CLKCFG      RALINK_SYSCTL_BASE + 0x30  /* Clock Configuration Register */
+#define RSTSTAT     RALINK_SYSCTL_BASE + 0x38
 #define TMRSTAT     (RALINK_TIMER_BASE)  /* Timer Status Register */
+
+#if defined (CONFIG_RALINK_RT6855A)
+#define TMR1CTL     (TMRSTAT + 0x0)  /* WDG Timer Control */
+#define TMR1LOAD    (TMRSTAT + 0x2C) /* WDG Timer Load Value Register */
+#define TMR1VAL     (TMRSTAT + 0x30) /* WDG Timer Current Value Register */
+#define RLDWDOG     (TMRSTAT + 0x38) /* Reload Watchdog */
+#elif defined (CONFIG_RALINK_MT7621)
+#define TMR0LOAD    (TMRSTAT + 0x14)  /* Timer0 Load Value */
+#define TMR0VAL     (TMRSTAT + 0x18)  /* Timer0 Counter Value */
+#define TMR0CTL     (TMRSTAT + 0x10)  /* Timer0 Control */
+#define TMR1LOAD    (TMRSTAT + 0x24)  /* Timer1 Load Value */
+#define TMR1VAL     (TMRSTAT + 0x28)  /* Timer1 Counter Value */
+#define TMR1CTL     (TMRSTAT + 0x20)  /* Timer1 Control */
+#define TMR2LOAD    (TMRSTAT + 0x34)  /* Timer2 Load Value */
+#define TMR2VAL     (TMRSTAT + 0x38)  /* Timer2 Counter Value */
+#define TMR2CTL     (TMRSTAT + 0x30)  /* Timer2 Control */
+#else
 #define TMR0LOAD    (TMRSTAT + 0x10)  /* Timer0 Load Value */
 #define TMR0VAL     (TMRSTAT + 0x14)  /* Timer0 Counter Value */
 #define TMR0CTL     (TMRSTAT + 0x18)  /* Timer0 Control */
 #define TMR1LOAD    (TMRSTAT + 0x20)  /* Timer1 Load Value */
 #define TMR1VAL     (TMRSTAT + 0x24)  /* Timer1 Counter Value */
 #define TMR1CTL     (TMRSTAT + 0x28)  /* Timer1 Control */
+
+#endif
 
 #define INTENA      (RALINK_INTCL_BASE + 0x34)  /* Interrupt Enable */
 

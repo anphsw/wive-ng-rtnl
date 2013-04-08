@@ -127,13 +127,13 @@ static void prom_usbinit(void)
 #ifndef CONFIG_RALINK_RT3052
 	u32 reg=0;
 #endif
-#if defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_RT6352)
+#if defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_MT7620)
 	reg = *(volatile u32 *)KSEG1ADDR((RALINK_SYSCTL_BASE + 0x34));
 	reg = reg | RALINK_UDEV_RST | RALINK_UHST_RST;
 	*(volatile u32 *)KSEG1ADDR((RALINK_SYSCTL_BASE + 0x34))= reg;
 
 	reg = *(volatile u32 *)KSEG1ADDR((RALINK_SYSCTL_BASE + 0x30));
-#if defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_RT6352)
+#if defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_MT7620)
 	reg = reg & ~(RALINK_UPHY0_CLK_EN);
 #else
 	reg = reg & ~(RALINK_UPHY0_CLK_EN | RALINK_UPHY1_CLK_EN);
@@ -186,32 +186,32 @@ static void prom_init_sysclk(void)
         mips_cpu_feq = 40000000;
 #elif defined (CONFIG_RT6855_FPGA)
         mips_cpu_feq = 50000000;
-#elif defined (CONFIG_RT6352_FPGA)
+#elif defined (CONFIG_MT7620_FPGA)
         mips_cpu_feq = 50000000;
 #else
 	//get sysclc from reg
         reg = (*((volatile u32 *)(RALINK_SYSCTL_BASE + 0x10)));
 #if defined (CONFIG_RT2880_ASIC)
         clk_sel = (reg>>20) & 0x03;
-#elif defined (CONFIG_RT2883_ASIC) 
+#elif defined (CONFIG_RT2883_ASIC)
 	mips_cpu_feq = (380*1000*1000);
         clk_sel = (reg>>18) & 0x03;
-#elif defined (CONFIG_RT3052_ASIC) 
+#elif defined (CONFIG_RT3052_ASIC)
 	mips_cpu_feq = (320*1000*1000);
         clk_sel = (reg>>18) & 0x01;
-#elif defined (CONFIG_RT3352_ASIC) 
+#elif defined (CONFIG_RT3352_ASIC)
 	mips_cpu_feq = (384*1000*1000);
         clk_sel = (reg>>8) & 0x01;
 #elif defined (CONFIG_RT5350_ASIC)
         clk_sel = (reg>>8) & 0x01;
         clk_sel2 = (reg>>10) & 0x01;
         clk_sel |= (clk_sel2 << 1 );
-#elif defined (CONFIG_RT3883_ASIC) 
+#elif defined (CONFIG_RT3883_ASIC)
 	mips_cpu_feq = (250*1000*1000);
         clk_sel = (reg>>8) & 0x03;
 #elif defined (CONFIG_RT6855_ASIC)
 	clk_sel = 0;
-#elif defined (CONFIG_RT6352_ASIC)
+#elif defined (CONFIG_MT7620_ASIC)
         clk_sel = 0;
 #else
 #error Please Choice System Type
@@ -243,7 +243,7 @@ static void prom_init_sysclk(void)
 	case 3:
 		mips_cpu_feq = (420*1000*1000);
 		break;
-#elif defined (CONFIG_RALINK_RT3052) 
+#elif defined (CONFIG_RALINK_RT3052)
 #if defined (CONFIG_RALINK_RT3350)
 		// MA10 is floating
 	case 0:
@@ -295,7 +295,7 @@ static void prom_init_sysclk(void)
 	case 0:
 		mips_cpu_feq = (400*1000*100);
 		break;
-#elif defined (CONFIG_RALINK_RT6352)
+#elif defined (CONFIG_RALINK_MT7620)
 	case 0:
 		mips_cpu_feq = (400*1000*100);
 		break;
@@ -353,7 +353,7 @@ static void prom_init_sysclk(void)
 		surfboard_sysclk = (100*1000*1000);
 		break;
 	}
-#elif defined (CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_RT6352)
+#elif defined (CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_MT7620)
 	surfboard_sysclk = mips_cpu_feq/4;
 #elif defined (CONFIG_RALINK_RT2880)
 	surfboard_sysclk = mips_cpu_feq/2;
@@ -385,37 +385,36 @@ static int prom_init_serial_port(void)
   serial_req[0].type       = PORT_16550A;
   serial_req[0].line       = 0;
   serial_req[0].irq        = SURFBOARDINT_UART;
-  serial_req[0].flags      = STD_COM_FLAGS | UPF_SKIP_TEST | UPF_FIXED_TYPE;
-  serial_req[0].uartclk    = SURFBOARD_DEFAULT_BAUD *16;
-  serial_req[0].iotype     = SERIAL_IO_PORT;
-  serial_req[0].iobase	   = KSEG1ADDR(RALINK_UART_BASE);
+  serial_req[0].flags      = STD_COM_FLAGS;
+#if defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT3352) || \
+    defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT6855)
+  serial_req[0].uartclk    = 40000000;
+#else
+  serial_req[0].uartclk    = surfboard_sysclk;
+#endif
+  serial_req[0].iotype     = UPIO_AU;
+  serial_req[0].membase	   = KSEG1ADDR(RALINK_UART_BASE);
   serial_req[0].regshift   = 2;
   serial_req[0].mapbase    = KSEG1ADDR(RALINK_UART_BASE);
-#if defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_RT6352)
-  serial_req[0].custom_divisor = (40000000 / SURFBOARD_BAUD_DIV / SURFBOARD_DEFAULT_BAUD);
-#else
-  serial_req[0].custom_divisor = (surfboard_sysclk / SURFBOARD_BAUD_DIV / SURFBOARD_DEFAULT_BAUD);
-#endif
 
   serial_req[1].type       = PORT_16550A;
   serial_req[1].line       = 1;
   serial_req[1].irq        = SURFBOARDINT_UART1;
   serial_req[1].flags      = STD_COM_FLAGS;
-  serial_req[1].uartclk    = SURFBOARD_DEFAULT_BAUD *16;
-  serial_req[1].iotype     = SERIAL_IO_PORT;
-  serial_req[1].iobase	   = KSEG1ADDR(RALINK_UART_LITE_BASE);
+#if defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT3352) || \
+    defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT6855)
+  serial_req[1].uartclk    = 40000000;
+#else
+  serial_req[1].uartclk    = surfboard_sysclk;
+#endif
+  serial_req[1].iotype     = UPIO_AU;
+  serial_req[1].membase	   = KSEG1ADDR(RALINK_UART_LITE_BASE);
   serial_req[1].regshift   = 2;
   serial_req[1].mapbase    = KSEG1ADDR(RALINK_UART_LITE_BASE);
-#if defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_RT6352)
-  serial_req[1].custom_divisor = (40000000 / SURFBOARD_BAUD_DIV / SURFBOARD_DEFAULT_BAUD);
-#else
-  serial_req[1].custom_divisor = (surfboard_sysclk / SURFBOARD_BAUD_DIV / SURFBOARD_DEFAULT_BAUD);
-#endif
 #ifdef CONFIG_SERIAL_CORE
-	/* Switch UART LITE/UART BASE 
-	  mode must after prom_meminit	*/
-	early_serial_setup(&serial_req[0]);
-	early_serial_setup(&serial_req[1]);
+    /* Switch UART LITE/UART BASE mode must after prom_meminit	*/
+  early_serial_setup(&serial_req[0]);
+  early_serial_setup(&serial_req[1]);
 #endif
 
   return 0;
@@ -452,7 +451,7 @@ static void serial_setbrg(unsigned long wBaud)
  	*(volatile u32 *)(RALINK_SYSCTL_BASE + 0xC08)= 0;
         *(volatile u32 *)(RALINK_SYSCTL_BASE + 0xC10)= 0;
         *(volatile u32 *)(RALINK_SYSCTL_BASE + 0xC14)= 0x3;
-#if defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT3352) ||  defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_RT6352)
+#if defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT3352) ||  defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_MT7620)
         *(volatile u32 *)(RALINK_SYSCTL_BASE + 0xC28)= (40000000 / SURFBOARD_BAUD_DIV / SURFBOARD_DEFAULT_BAUD);
 #else
         *(volatile u32 *)(RALINK_SYSCTL_BASE + 0xC28)= (surfboard_sysclk / SURFBOARD_BAUD_DIV / SURFBOARD_DEFAULT_BAUD);
@@ -461,7 +460,7 @@ static void serial_setbrg(unsigned long wBaud)
  	*(volatile u32 *)(RALINK_SYSCTL_BASE + 0x508)= 0;
         *(volatile u32 *)(RALINK_SYSCTL_BASE + 0x510)= 0;
         *(volatile u32 *)(RALINK_SYSCTL_BASE + 0x514)= 0x3;
-#if defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_RT6352)
+#if defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT3352) ||  defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_MT7620)
         *(volatile u32 *)(RALINK_SYSCTL_BASE + 0x528)= (40000000 / SURFBOARD_BAUD_DIV / SURFBOARD_DEFAULT_BAUD);
 #else
         *(volatile u32 *)(RALINK_SYSCTL_BASE + 0x528)= (surfboard_sysclk / SURFBOARD_BAUD_DIV / SURFBOARD_DEFAULT_BAUD);

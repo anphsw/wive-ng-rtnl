@@ -39,6 +39,7 @@
     Who         When            What
     --------    ----------      ----------------------------------------------
     Name        Date            Modification logs
+    Steven Liu  2012-06-26      support MT7621 new timer
     Steven Liu  2011-07-06      support timer0/timer1 as free-running/periodic/timeout mode
     Steven Liu  2007-07-04      Initial version
 */
@@ -80,6 +81,33 @@ void set_timer_ebl(unsigned int timer, unsigned int ebl)
 }
 
 
+#if defined (CONFIG_RALINK_MT7621)
+void set_timer_clock_prescale(unsigned int timer, int prescale)
+{
+    unsigned int result;
+
+    result=sysRegRead(timer);
+    result &= 0x0000FFFF;
+    result |= (prescale << 16); //unit = 1u
+    sysRegWrite(timer, result);
+
+}
+
+void set_timer_mode(unsigned int timer, enum timer_mode mode)
+{
+    unsigned int result;
+
+    result=sysRegRead(timer);
+
+    if(mode==PERIODIC) {
+	    result |= (1 <<4);
+    } else {
+	    result &= ~(1 <<4);
+    }
+
+    sysRegWrite(timer,result);
+}
+#else
 void set_timer_clock_prescale(unsigned int timer, enum timer_clock_freq prescale)
 {
     unsigned int result;
@@ -101,6 +129,7 @@ void set_timer_mode(unsigned int timer, enum timer_mode mode)
     sysRegWrite(timer,result);
 
 }
+#endif
 
 int request_tmr_service(int interval, void (*function)(unsigned long), unsigned long data)
 {
@@ -111,18 +140,18 @@ int request_tmr_service(int interval, void (*function)(unsigned long), unsigned 
     //Set Callback function
     tmr0.data = data;
     tmr0.tmr_callback_function = function;
-    //Set Timer0 Mode
+
     set_timer_mode(TMR0CTL, PERIODIC);
-
-    //Set Period Interval
-    //Unit= SysClk/16384, 1ms = (SysClk/16384)/1000
-    set_timer_clock_prescale(TMR0CTL,SYS_CLK_DIV16384);
-
 #if defined (CONFIG_RALINK_RT2880) || defined (CONFIG_RALINK_RT2883) || \
     defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3883)
+    set_timer_clock_prescale(TMR0CTL,SYS_CLK_DIV16384);
     sysRegWrite(TMR0LOAD, interval* (get_surfboard_sysclk()/16384/1000));
-#else //RT3352/RT5350/RT6855
-    sysRegWrite(TMR0LOAD, interval* (40000000/16384/1000)); //fixed at 40MHz
+#elif defined (CONFIG_RALINK_MT7621)
+    set_timer_clock_prescale(TMR0CTL, 1000); //unit=1ms
+    sysRegWrite(TMR0LOAD, interval);
+#else //RT3352/RT5350/RT6855/MT7620
+    set_timer_clock_prescale(TMR0CTL,SYS_CLK_DIV16384);
+    sysRegWrite(TMR0LOAD, interval* (40000000/16384/1000));
 #endif
 
     //Enable Timer0
@@ -183,6 +212,7 @@ static irqreturn_t rt2880tmr_irq_handler(int irq, void *dev_id, struct pt_regs *
 int request_tmr1_service(int interval, void (*function)(unsigned long), unsigned long data)
 {
     unsigned long flags;
+    unsigned long reg;
 
     spin_lock_irqsave(&tmr1.tmr_lock, flags);
 
@@ -190,18 +220,22 @@ int request_tmr1_service(int interval, void (*function)(unsigned long), unsigned
     tmr1.data = data;
     tmr1.tmr_callback_function = function;
 
-    //Set Timer1 Mode
     set_timer_mode(TMR1CTL, PERIODIC);
-
-    //Set Period Interval
-    //Unit= SysClk/16384, 1ms = (SysClk/16384)/1000
-    set_timer_clock_prescale(TMR1CTL,SYS_CLK_DIV16384);
-
 #if defined (CONFIG_RALINK_RT2880) || defined (CONFIG_RALINK_RT2883) || \
     defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3883)
+    set_timer_clock_prescale(TMR1CTL,SYS_CLK_DIV16384);
     sysRegWrite(TMR1LOAD, interval* (get_surfboard_sysclk()/16384/1000));
+#elif defined (CONFIG_RALINK_MT7621)
+    //timer1 is used for periodic timer
+    reg = sysRegRead(RSTSTAT);
+    reg &= ~(1 << 31); // WDT2SYSRST_EN
+    sysRegWrite(RSTSTAT, reg);
+
+    set_timer_clock_prescale(TMR1CTL, 1000); //unit=1ms
+    sysRegWrite(TMR1LOAD, interval);
 #else //RT3352/RT5350/RT6855
-    sysRegWrite(TMR1LOAD, interval* (40000000/16384/1000)); //fixed at 40MHz
+    set_timer_clock_prescale(TMR1CTL,SYS_CLK_DIV16384);
+    sysRegWrite(TMR1LOAD, interval* (40000000/16384/1000));
 #endif
 
     //Enable Timer1
@@ -262,6 +296,10 @@ static irqreturn_t rt2880tmr1_irq_handler(int irq, void *dev_id, struct pt_regs 
 
 int32_t __init timer_init_module(void)
 {
+#if defined (CONFIG_RALINK_MT7621)
+    int reg_val;
+#endif
+
     printk("Load Ralink Timer0 Module\n");
     spin_lock_init(&tmr0.tmr_lock);
 
@@ -278,6 +316,12 @@ int32_t __init timer_init_module(void)
     if(request_irq(SURFBOARDINT_WDG, rt2880tmr1_irq_handler, IRQF_DISABLED, "rt2880_timer1", NULL)){
 	return 1;
     }
+
+#if defined (CONFIG_RALINK_MT7621)
+    reg_val = sysRegRead(RSTSTAT);
+    reg_val &= ~(0x1<<31);  // WDT2SYSRST_EN
+    sysRegWrite(RSTSTAT, reg_val);
+#endif
 #endif
 
     return 0;

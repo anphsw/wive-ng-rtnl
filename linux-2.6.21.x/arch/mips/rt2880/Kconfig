@@ -54,7 +54,7 @@ config PCIE_PCI_NONE
 endchoice
 
 endif
-#-----------------------------
+#---------------------------
 
 if RALINK_RT5350
 
@@ -68,6 +68,22 @@ endchoice
 
 endif
 
+#--------------------------
+
+if RALINK_MT7620
+
+choice
+        prompt "Soc Hardware Type"
+	default MT7620_ASIC
+
+config  MT7620_ASIC
+	bool "MT7620-ASIC"
+	select USB_ARCH_HAS_OHCI
+	select USB_ARCH_HAS_EHCI
+
+endchoice
+
+endif
 #--------------------------
 
 menu "Ram config."

@@ -599,7 +599,7 @@ config  RALINK_TIMER
 config RALINK_EXTERNAL_TIMER
 	bool "Ralink External Timer"
 	default n
-	depends on RALINK_RT3352 || RALINK_RT5350 || RALINK_RT6855
+	depends on RALINK_RT3352 || RALINK_RT5350
 
 config  RALINK_TIMER_DFS
         bool "Ralink Timer0 (Period/Free-Running/Timeout)"

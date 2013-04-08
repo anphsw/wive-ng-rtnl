@@ -8,7 +8,7 @@ config MTD_RALINK
 config MTD_NOR_RALINK
        bool "Ralink NOR support."
        default y
-       depends on MTD_RALINK && !RALINK_RT5350 && !RALINK_RT6855
+       depends on MTD_RALINK && !RALINK_RT5350
 
 config MTD_SPI_RALINK
        bool "Ralink SPI support."
@@ -18,7 +18,7 @@ config MTD_SPI_RALINK
 config MTD_NAND_RALINK
        bool "Ralink NAND support."
        default y
-       depends on !RALINK_RT3352 && !RALINK_RT2880 && !RALINK_RT5350 && !RALINK_RT6855
+       depends on !RALINK_RT3352 && !RALINK_RT2880 && !RALINK_RT5350
 
 choice
        prompt "Flash Size"
@@ -47,10 +47,8 @@ config MTD_PHYSMAP_START
        default 0xBF000000 if !FLASH_REMAP_NEED && RALINK_RT3052
        default 0x1C000000 if !FLASH_REMAP_NEED && RALINK_RT3352
        default 0x1C000000 if !FLASH_REMAP_NEED && RALINK_RT5350
-       default 0xBC000000 if !FLASH_REMAP_NEED && RALINK_RT2883
        default 0x1C000000 if !FLASH_REMAP_NEED && RALINK_RT3883
-       default 0x1C000000 if !FLASH_REMAP_NEED && RALINK_RT6855
-       default 0x1C000000 if !FLASH_REMAP_NEED && RALINK_RT6352
+       default 0x1C000000 if !FLASH_REMAP_NEED && RALINK_MT7620
        default 0xBFC00000 if RT2880_FLASH_2M && !RALINK_RT3052
        default 0xBFC00000 if RT2880_FLASH_4M && !RALINK_RT3052
        default 0xBF400000 if RT2880_FLASH_8M && !RALINK_RT3052
