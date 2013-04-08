@@ -393,7 +393,7 @@ static int prom_init_serial_port(void)
   serial_req[0].uartclk    = surfboard_sysclk;
 #endif
   serial_req[0].iotype     = UPIO_AU;
-  serial_req[0].membase	   = KSEG1ADDR(RALINK_UART_BASE);
+  serial_req[0].membase	   = (char *)KSEG1ADDR(RALINK_UART_BASE);
   serial_req[0].regshift   = 2;
   serial_req[0].mapbase    = KSEG1ADDR(RALINK_UART_BASE);
 
@@ -408,7 +408,7 @@ static int prom_init_serial_port(void)
   serial_req[1].uartclk    = surfboard_sysclk;
 #endif
   serial_req[1].iotype     = UPIO_AU;
-  serial_req[1].membase	   = KSEG1ADDR(RALINK_UART_LITE_BASE);
+  serial_req[1].membase	   = (char *)KSEG1ADDR(RALINK_UART_LITE_BASE);
   serial_req[1].regshift   = 2;
   serial_req[1].mapbase    = KSEG1ADDR(RALINK_UART_LITE_BASE);
 #ifdef CONFIG_SERIAL_CORE
