@@ -403,7 +403,7 @@ void forward_config(struct net_device *dev)
 	 *
 	 */
 #ifdef CONFIG_VLAN_8021Q_DOUBLE_TAG
-	if ((!vlan_double_tag) && (ra_sw_nat_hook_rx == NULL))
+	if (!vlan_double_tag)
 #endif
 	{
     	    RAETH_PRINT("raeth: vlan hardware offload enabled\n");
@@ -443,7 +443,7 @@ void forward_config(struct net_device *dev)
 
 #ifdef CONFIG_RAETH_HW_VLAN_TX
 #ifdef CONFIG_VLAN_8021Q_DOUBLE_TAG
-	if ((!vlan_double_tag) && (ra_sw_nat_hook_rx == NULL))
+	if (!vlan_double_tag)
 #endif
 	    dev->features |= NETIF_F_HW_VLAN_TX;
 #endif
@@ -792,7 +792,7 @@ static inline int rt2880_eth_send(struct net_device* dev, struct sk_buff *skb, i
 
 #ifdef CONFIG_RAETH_HW_VLAN_TX
 #ifdef CONFIG_VLAN_8021Q_DOUBLE_TAG
-	if ((!vlan_double_tag) && (ra_sw_nat_hook_rx == NULL))
+	if (!vlan_double_tag)
 #endif
 	{
 	    if(vlan_tx_tag_present(skb)) {
@@ -838,7 +838,7 @@ static inline int rt2880_eth_send(struct net_device* dev, struct sk_buff *skb, i
 
 #ifdef CONFIG_RAETH_HW_VLAN_TX
 #ifdef CONFIG_VLAN_8021Q_DOUBLE_TAG
-	if ((!vlan_double_tag) && (ra_sw_nat_hook_rx == NULL))
+	if (!vlan_double_tag)
 #endif
 	{
 	    if(vlan_tx_tag_present(skb)) {

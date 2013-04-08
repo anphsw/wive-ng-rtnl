@@ -879,6 +879,21 @@ int32_t is8021Q(uint16_t eth_type)
 	}
 }
 
+#ifndef CONFIG_RAETH_GMAC2
+int32_t isHwVlanTx(struct sk_buff *skb)
+{
+#ifdef CONFIG_RAETH_HW_VLAN_TX
+	if(vlan_tx_tag_present(skb)) {
+		PpeParseResult.vlan_tag = htons(ETH_P_8021Q);
+		return 1;
+	} else {
+		return 0;
+	}
+#else
+	return 0;
+#endif
+}
+#ebndif
 
 int32_t PpeParseLayerInfo(struct sk_buff * skb)
 {
@@ -889,7 +904,9 @@ int32_t PpeParseLayerInfo(struct sk_buff * skb)
 	struct ipv6hdr *ip6h = NULL;
 	struct tcphdr *th = NULL;
 	struct udphdr *uh = NULL;
-
+#if defined (CONFIG_RAETH_HW_VLAN_TX) && !defined (CONFIG_RAETH_GMAC2)
+	struct vlan_hdr pseudo_vhdr;
+#endif
 	memset(&PpeParseResult, 0, sizeof(PpeParseResult));
 
 	eth = (struct ethhdr *)skb->data;
@@ -898,7 +915,7 @@ int32_t PpeParseLayerInfo(struct sk_buff * skb)
 	PpeParseResult.eth_type = eth->h_proto;
 
 	/* PPPoE (RT3883 with 2xGMAC) */
-#if defined (CONFIG_RAETH_GMAC2)
+#ifdef CONFIG_RAETH_GMAC2
 	if (PpeParseResult.eth_type == htons(ETH_P_PPP_SES)) {
 	    PpeParseResult.pppoe_gap = 8;
 	    if (GetPppoeSid(skb, 0, &PpeParseResult.pppoe_sid, &PpeParseResult.ppp_tag))
@@ -906,10 +923,18 @@ int32_t PpeParseLayerInfo(struct sk_buff * skb)
 	}
 	else
 #endif
-	if (is8021Q(PpeParseResult.eth_type) || isSpecialTag(PpeParseResult.eth_type)) {
+	if (is8021Q(PpeParseResult.eth_type) || isSpecialTag(PpeParseResult.eth_type) || isHwVlanTx(skb)) {
+#ifdef CONFIG_RAETH_HW_VLAN_TX
+		PpeParseResult.vlan1_gap = 0;
+		PpeParseResult.vlan_layer++;
+		pseudo_vhdr.h_vlan_TCI = htons(vlan_tx_tag_get(skb));
+		pseudo_vhdr.h_vlan_encapsulated_proto = eth->h_proto;
+		vh = (struct vlan_hdr *)&pseudo_vhdr;
+#else
 		PpeParseResult.vlan1_gap = VLAN_HLEN;
 		PpeParseResult.vlan_layer++;
 		vh = (struct vlan_hdr *)(skb->data + ETH_HLEN);
+#endif
 		PpeParseResult.vlan1 = vh->h_vlan_TCI;
 
 		/* VLAN + PPPoE */
