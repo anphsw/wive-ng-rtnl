@@ -881,7 +881,7 @@ int32_t is8021Q(uint16_t eth_type)
 
 int32_t isHwVlanTx(struct sk_buff *skb)
 {
-#ifdef CONFIG_RAETH_HW_VLAN_TX
+#if defined(CONFIG_RAETH_HW_VLAN_TX) && !defined (CONFIG_RALINK_RT3052)
 	if(vlan_tx_tag_present(skb)) {
 		PpeParseResult.vlan_tag = htons(ETH_P_8021Q);
 		return 1;
@@ -912,17 +912,8 @@ int32_t PpeParseLayerInfo(struct sk_buff * skb)
 	memcpy(PpeParseResult.smac, eth->h_source, ETH_ALEN);
 	PpeParseResult.eth_type = eth->h_proto;
 
-	/* PPPoE (RT3883 with 2xGMAC) */
-#ifdef CONFIG_RAETH_GMAC2
-	if (PpeParseResult.eth_type == htons(ETH_P_PPP_SES)) {
-	    PpeParseResult.pppoe_gap = 8;
-	    if (GetPppoeSid(skb, 0, &PpeParseResult.pppoe_sid, &PpeParseResult.ppp_tag))
-		return 1;
-	}
-	else
-#endif
 	if (is8021Q(PpeParseResult.eth_type) || isSpecialTag(PpeParseResult.eth_type) || isHwVlanTx(skb)) {
-#ifdef CONFIG_RAETH_HW_VLAN_TX
+#if defined (CONFIG_RAETH_HW_VLAN_TX) && !defined (CONFIG_RAETH_GMAC2)
 		PpeParseResult.vlan1_gap = 0;
 		PpeParseResult.vlan_layer++;
 		pseudo_vhdr.h_vlan_TCI = htons(vlan_tx_tag_get(skb));
@@ -981,6 +972,7 @@ int32_t PpeParseLayerInfo(struct sk_buff * skb)
 			/* VLAN + IP */
 			PpeParseResult.eth_type = vh->h_vlan_encapsulated_proto;
 		}
+#ifdef CONFIG_RAETH_GMAC2 /* PPPoE (RT3883 with 2xGMAC) */
 	} else if (ntohs(PpeParseResult.eth_type) == ETH_P_PPP_SES) {
 		/* PPPoE + IP */
 		PpeParseResult.pppoe_gap = 8;
@@ -989,6 +981,7 @@ int32_t PpeParseLayerInfo(struct sk_buff * skb)
 					&PpeParseResult.ppp_tag)) {
 			return 1;
 		}
+#endif
 	}
 
 	/* set layer2 start addr */
