@@ -486,7 +486,7 @@ static int ip6_frag_queue(struct frag_queue *fq, struct sk_buff *skb,
 	 * in the chain of fragments so far.  We must know where to put
 	 * this fragment, right?
 	 */
-	prev = fq->q.fragments_tail;
+	prev = fq->fragments_tail;
 	if (!prev || FRAG6_CB(prev)->offset < offset) {
 		next = NULL;
 		goto found;
