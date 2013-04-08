@@ -24,12 +24,16 @@
 #include <linux/if_pppox.h>
 #endif
 
+#if defined (CONFIG_RAETH_LRO)
+#include <linux/inet_lro.h>
+#endif
+
 #if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,0)
 #include <asm/rt2880/rt_mmap.h>
 #else
 #include <linux/libata-compat.h>
 #endif
- 
+
 #include "ra2882ethreg.h"
 #include "raether.h"
 #include "ra_mac.h"
@@ -134,9 +138,16 @@ unsigned char eth_close=1; /* default disable rx/tx processing while init */
 #endif
 
 static int rx_dma_owner_idx; 
-static int rx_dma_owner_idx0;     /* Point to the next RXD DMA wants to use in RXD Ring#0.  */
+static int rx_dma_owner_idx0;
 #if defined (CONFIG_RAETH_MULTIPLE_RX_RING)
-static int rx_dma_owner_idx1;     /* Point to the next RXD DMA wants to use in RXD Ring#1.  */
+static int rx_dma_owner_idx1;
+#ifdef CONFIG_RAETH_RW_PDMAPTR_FROM_VAR
+static int rx_calc_idx1;
+#endif
+#endif
+#ifdef CONFIG_RAETH_RW_PDMAPTR_FROM_VAR
+static int rx_calc_idx0;
+static unsigned long tx_cpu_owner_idx0=0;
 #endif
 #if !defined(CONFIG_RAETH_NAPI)
 static int pending_recv;
@@ -155,6 +166,14 @@ extern struct ethtool_ops	ra_virt_ethtool_ops;
 #ifdef CONFIG_RALINK_VISTA_BASIC
 int is_switch_175c = 1;
 #endif
+
+#if defined (CONFIG_RAETH_LRO)
+unsigned int lan_ip;
+struct lro_para_struct lro_para; 
+int lro_flush_needed;
+extern char const *nvram_get(int index, char *name);
+#endif
+
 #if 0
 void skb_dump(struct sk_buff* sk) {
         unsigned int i;
@@ -184,6 +203,10 @@ void skb_dump(struct sk_buff* sk) {
 }
 #endif
 
+#if defined (TASKLET_WORKQUEUE_SW)
+int init_schedule;
+int working_schedule;
+#endif
 
 
 #if defined (CONFIG_GIGAPHY) || defined (CONFIG_P5_MAC_TO_PHY_MODE)
@@ -335,7 +358,7 @@ void set_fe_pdma_glo_cfg(void)
 
 #if defined (CONFIG_RALINK_RT6855) || defined(CONFIG_RALINK_RT6855A) 
 	pdma_glo_cfg = (TX_WB_DDONE | RX_DMA_EN | TX_DMA_EN | PDMA_BT_SIZE_32DWORDS);
-#elif defined (CONFIG_RALINK_RT6352)
+#elif defined (CONFIG_RALINK_MT7620)
 	pdma_glo_cfg = (TX_WB_DDONE | RX_DMA_EN | TX_DMA_EN | PDMA_BT_SIZE_16DWORDS);
 #else
 	pdma_glo_cfg = (TX_WB_DDONE | RX_DMA_EN | TX_DMA_EN | PDMA_BT_SIZE_4DWORDS);
@@ -343,6 +366,10 @@ void set_fe_pdma_glo_cfg(void)
 
 #if defined (CONFIG_RAETH_SCATTER_GATHER_RX_DMA)
 	pdma_glo_cfg |= (RX_2B_OFFSET);
+#endif
+
+#if defined (CONFIG_32B_DESC)
+	pdma_glo_cfg |= (DESC_32B_EN);
 #endif
 	sysRegWrite(PDMA_GLO_CFG, pdma_glo_cfg);
 
@@ -390,7 +417,7 @@ void forward_config(struct net_device *dev)
 #endif
 	{
     	    printk("raeth: vlan hardware offload enabled\n");
-#if defined(CONFIG_RALINK_RT6352)
+#if defined(CONFIG_RALINK_MT7620)
 	    /* frame engine will push VLAN tag regarding to VIDX feild in Tx desc. */
 	    *(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0x430) = 0x00010000;
 	    *(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0x434) = 0x00030002;
@@ -428,7 +455,7 @@ void forward_config(struct net_device *dev)
 #endif
 
 	//set unicast/multicast/broadcast frame to cpu
-#if defined (CONFIG_PDMA_NEW)
+#if defined (CONFIG_RALINK_MT7620)
 	/* GDMA1 frames destination port is port0 CPU*/
 	regVal &= ~0x7;
 #else
@@ -446,6 +473,9 @@ void forward_config(struct net_device *dev)
 	if (!vlan_double_tag)
 #endif
 	    dev->features |= NETIF_F_HW_VLAN_TX;
+#endif
+#ifdef CONFIG_RAETH_HW_VLAN_RX
+	dev->features |= NETIF_F_HW_VLAN_RX;
 #endif
 
 #ifdef CONFIG_RAETH_CHECKSUM_OFFLOAD
@@ -538,7 +568,7 @@ void forward_config(struct net_device *dev)
 	sysRegWrite(PSE_FQ_CFG, cpu_to_le32(INIT_VALUE_OF_RT2883_PSE_FQ_CFG));
 #elif defined(CONFIG_RALINK_RT3352) || defined(CONFIG_RALINK_RT5350) ||  \
       defined(CONFIG_RALINK_RT6855) || defined(CONFIG_RALINK_RT6855A) || \
-      defined(CONFIG_RALINK_RT6352) || defined(CONFIG_RALINK_RT71100)
+      defined(CONFIG_RALINK_MT7620) || defined(CONFIG_RALINK_MT7621)
         /*use default value*/
 #else
 	sysRegWrite(PSE_FQ_CFG, cpu_to_le32(INIT_VALUE_OF_PSE_FQFC_CFG));
@@ -654,7 +684,12 @@ static int fe_pdma_init(struct net_device *dev)
 #endif // CONFIG_RAETH_QOS
 
 	/* Initial RX Ring 0*/
+#ifdef CONFIG_32B_DESC
+    	ei_local->rx_ring0 = kmalloc(NUM_RX_DESC * sizeof(struct PDMA_rxdesc), GFP_KERNEL);
+	ei_local->phy_rx_ring0 = virt_to_phys(ei_local->rx_ring0);
+#else
 	ei_local->rx_ring0 = dma_alloc_coherent(NULL, NUM_RX_DESC * sizeof(struct PDMA_rxdesc), &ei_local->phy_rx_ring0, GFP_KERNEL);
+#endif
 	for (i = 0; i < NUM_RX_DESC; i++) {
 		memset(&ei_local->rx_ring0[i],0,sizeof(struct PDMA_rxdesc));
 	    	ei_local->rx_ring0[i].rxd_info2.DDONE_bit = 0;
@@ -670,7 +705,12 @@ static int fe_pdma_init(struct net_device *dev)
 
 #if defined (CONFIG_RAETH_MULTIPLE_RX_RING)
 	/* Initial RX Ring 1*/
+#ifdef CONFIG_32B_DESC
+    	ei_local->rx_ring1 = kmalloc(NUM_RX_DESC * sizeof(struct PDMA_rxdesc), GFP_KERNEL);
+	ei_local->phy_rx_ring1 = virt_to_phys(ei_local->rx_ring1);
+#else
 	ei_local->rx_ring1 = dma_alloc_coherent(NULL, NUM_RX_DESC * sizeof(struct PDMA_rxdesc), &ei_local->phy_rx_ring1, GFP_KERNEL);
+#endif
 	for (i = 0; i < NUM_RX_DESC; i++) {
 		memset(&ei_local->rx_ring1[i],0,sizeof(struct PDMA_rxdesc));
 	    	ei_local->rx_ring1[i].rxd_info2.DDONE_bit = 0;
@@ -694,25 +734,40 @@ static int fe_pdma_init(struct net_device *dev)
         sysRegWrite(TX_BASE_PTR0, phys_to_bus((u32) ei_local->phy_tx_ring0));
 	sysRegWrite(TX_MAX_CNT0, cpu_to_le32((u32) NUM_TX_DESC));
 	sysRegWrite(TX_CTX_IDX0, 0);
+#ifdef CONFIG_RAETH_RW_PDMAPTR_FROM_VAR
+	tx_cpu_owner_idx0 = 0;
+#endif
 	sysRegWrite(PDMA_RST_CFG, PST_DTX_IDX0);
 #endif
 
 	sysRegWrite(RX_BASE_PTR0, phys_to_bus((u32) ei_local->phy_rx_ring0));
 	sysRegWrite(RX_MAX_CNT0,  cpu_to_le32((u32) NUM_RX_DESC));
 	sysRegWrite(RX_CALC_IDX0, cpu_to_le32((u32) (NUM_RX_DESC - 1)));
+#ifdef CONFIG_RAETH_RW_PDMAPTR_FROM_VAR
+	rx_calc_idx0 = rx_dma_owner_idx0 =  sysRegRead(RX_CALC_IDX0);
+#endif
 	sysRegWrite(PDMA_RST_CFG, PST_DRX_IDX0);
 #if defined (CONFIG_RAETH_MULTIPLE_RX_RING)
 	sysRegWrite(RX_BASE_PTR1, phys_to_bus((u32) ei_local->phy_rx_ring1));
 	sysRegWrite(RX_MAX_CNT1,  cpu_to_le32((u32) NUM_RX_DESC));
 	sysRegWrite(RX_CALC_IDX1, cpu_to_le32((u32) (NUM_RX_DESC - 1)));
+#ifdef CONFIG_RAETH_RW_PDMAPTR_FROM_VAR
+	rx_calc_idx1 = rx_dma_owner_idx1 =  sysRegRead(RX_CALC_IDX1);
+#endif
 	sysRegWrite(PDMA_RST_CFG, PST_DRX_IDX1);
 #endif
 #if defined (CONFIG_RALINK_RT6855A)
 	regVal = sysRegRead(RX_DRX_IDX0);
 	regVal = (regVal == 0)? (NUM_RX_DESC - 1) : (regVal - 1);
 	sysRegWrite(RX_CALC_IDX0, cpu_to_le32(regVal));
+#ifdef CONFIG_RAETH_RW_PDMAPTR_FROM_VAR
+	rx_calc_idx0 = rx_dma_owner_idx0 =  sysRegRead(RX_CALC_IDX0);
+#endif
 	regVal = sysRegRead(TX_DTX_IDX0);
 	sysRegWrite(TX_CTX_IDX0, cpu_to_le32(regVal));
+#ifdef CONFIG_RAETH_RW_PDMAPTR_FROM_VAR
+	tx_cpu_owner_idx0 = regVal;
+#endif
 	ei_local->free_idx = regVal;
 #endif
 
@@ -731,19 +786,17 @@ static inline int rt2880_eth_send(struct net_device* dev, struct sk_buff *skb, i
 {
 	unsigned int	length=skb->len;
 	END_DEVICE*	ei_local = netdev_priv(dev);
+#ifndef CONFIG_RAETH_RW_PDMAPTR_FROM_VAR
 	unsigned long	tx_cpu_owner_idx0 = sysRegRead(TX_CTX_IDX0);
+#endif
 #if defined (CONFIG_RAETH_TSO)
-	struct ethhdr   *eth = (struct ethhdr *) skb->data;
-	unsigned short  eth_type = ntohs(eth->h_proto);
-	unsigned short  ppp_tag = 0;
-	struct vlan_hdr *vh = NULL;
+#ifdef CONFIG_RAETH_RW_PDMAPTR_FROM_VAR
+	unsigned long   ctx_idx_start_addr = tx_cpu_owner_idx0;
+#endif
         struct iphdr *iph = NULL;
         struct tcphdr *th = NULL;
-	struct pppoe_hdr *peh = NULL;
-	unsigned long vlan1_gap = 0;
-        unsigned long vlan2_gap = 0;
-        unsigned long pppoe_gap = 0;
 	struct skb_frag_struct *frag;
+	unsigned int nr_frags = skb_shinfo(skb)->nr_frags;
 	int i=0;
 #endif // CONFIG_RAETH_TSO //
 
@@ -758,7 +811,6 @@ static inline int rt2880_eth_send(struct net_device* dev, struct sk_buff *skb, i
 #endif
 	while(ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info2.DDONE_bit == 0)
 	{
-//		printk(KERN_ERR "%s: TX DMA is Busy !! TX desc is Empty!\n", dev->name);
 #ifdef CONFIG_PSEUDO_SUPPORT
 		if (gmac_no == 2) {
 			if (ei_local->PseudoDev != NULL) {
@@ -773,20 +825,23 @@ static inline int rt2880_eth_send(struct net_device* dev, struct sk_buff *skb, i
 #if !defined (CONFIG_RAETH_TSO)
 	ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info1.SDP0 = virt_to_phys(skb->data);
 	ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info2.SDL0 = length;
-#if defined (CONFIG_PDMA_NEW)
+#if defined (CONFIG_RALINK_MT7620)
 	ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.FP_BMAP = 0;
+#elif defined (CONFIG_RALINK_MT7621)
+	if (gmac_no == 1) {
+		ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.FPORT = 1;
+	}else {
+		ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.FPORT = 2;
+	}
 #else
 	ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.PN = gmac_no;
 	ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.QN = 3;
 #endif
-	ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info2.DDONE_bit = 0;
-	//printk("0.SDP0=%x SDL0=%d LS0_bit=%d\n",ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info1.SDP0, skb_headlen(skb), ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info2.LS0_bit);
-
-#ifdef CONFIG_RAETH_CHECKSUM_OFFLOAD
+#if defined (CONFIG_RAETH_CHECKSUM_OFFLOAD) && ! defined(CONFIG_RALINK_RT5350)
 	if (skb->ip_summed == CHECKSUM_PARTIAL){
-	ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.TCO = 1;
-	ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.UCO = 1;
-	ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.ICO = 1;
+	    ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.TUI_CO = 7;
+	}else {
+	    ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.TUI_CO = 0;
 	}
 #endif
 
@@ -796,43 +851,56 @@ static inline int rt2880_eth_send(struct net_device* dev, struct sk_buff *skb, i
 #endif
 	{
 	    if(vlan_tx_tag_present(skb)) {
-		ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.VIDX = (vlan_tx_tag_get(skb) & 0xFFF);
-		ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.VPRI = (vlan_tx_tag_get(skb) >> 13)& 0x7;
-		ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.INSV = 1;
-	    }else {
-		ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.INSV = 0;
+#if defined (CONFIG_RALINK_MT7621)
+		ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.VLAN_TAG = 0x10000 | vlan_tx_tag_get(skb);
+#else
+		ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.VPRI_VIDX = 0x80 | (vlan_tx_tag_get(skb) >> 13) << 4 | (vlan_tx_tag_get(skb) & 0xF);
+#endif
+	    } else {
+#if defined (CONFIG_RALINK_MT7621)
+		ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.VLAN_TAG = 0;
+#else
+		ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.VPRI_VIDX = 0;
+#endif
 	    }
 	}
 #endif
 
 #if defined (CONFIG_RA_HW_NAT) || defined (CONFIG_RA_HW_NAT_MODULE)
 	if(FOE_MAGIC_TAG(skb) == FOE_MAGIC_PPE) {
-#if defined (CONFIG_PDMA_NEW)
+#if defined (CONFIG_RALINK_MT7620)
 	    ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.FP_BMAP = (1 << 7); /* PPE */
+#elif defined (CONFIG_RALINK_MT7621)
+	    ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.FPORT = 4; /* PPE */
 #else
 	    ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.PN = 6; /* PPE */
 #endif
 	}
 #endif
-
+	ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info2.DDONE_bit = 0;
 #else
 	ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info1.SDP0 = virt_to_phys(skb->data);
-	ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info2.SDL0 = skb_headlen(skb);
-	ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info2.LS0_bit = (skb_shinfo(skb)->nr_frags > 0)? 0:1;
-#if defined (CONFIG_PDMA_NEW)
+	ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info2.SDL0 = (length - skb->data_len);
+	ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info2.LS0_bit = nr_frags ? 0:1;
+#if defined (CONFIG_RALINK_MT7620)
 	ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.FP_BMAP = 0;
+#elif defined (CONFIG_RALINK_MT7621)
+	if (gmac_no == 1) {
+		ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.FPORT = 1;
+	}else {
+		ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.FPORT = 2;
+	}
 #else
 	ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.PN = gmac_no;
 	ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.QN = 3;
 #endif
 	ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.TSO = 0;
-	//printk("1.SDP0=%x SDL0=%d LS0_bit=%d\n",ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info1.SDP0, skb_headlen(skb), ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info2.LS0_bit);
 
-#ifdef CONFIG_RAETH_CHECKSUM_OFFLOAD
+#if defined (CONFIG_RAETH_CHECKSUM_OFFLOAD) && ! defined(CONFIG_RALINK_RT5350)
 	if (skb->ip_summed == CHECKSUM_PARTIAL){
-	ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.TCO = 1;
-	ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.UCO = 1;
-	ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.ICO = 1;
+	    ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.TUI_CO = 7;
+	} else {
+	    ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.TUI_CO = 0;
 	}
 #endif
 
@@ -842,43 +910,35 @@ static inline int rt2880_eth_send(struct net_device* dev, struct sk_buff *skb, i
 #endif
 	{
 	    if(vlan_tx_tag_present(skb)) {
-		ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.VIDX = (vlan_tx_tag_get(skb) & 0xFFF);
-		ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.VPRI = (vlan_tx_tag_get(skb) >> 13)& 0x7;
-		ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.INSV = 1;
-	    }else {
-		ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.INSV = 0;
+		ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.VPRI_VIDX = 0x80 | (vlan_tx_tag_get(skb) >> 9) | (vlan_tx_tag_get(skb) & 0xF);
+	    } else {
+		ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.VPRI_VIDX = 0;
 	    }
 	}
 #endif
 
 #if defined (CONFIG_RA_HW_NAT) || defined (CONFIG_RA_HW_NAT_MODULE)
 	if(FOE_MAGIC_TAG(skb) == FOE_MAGIC_PPE) {
-#if defined (CONFIG_PDMA_NEW)
+#if defined (CONFIG_RALINK_MT7620)
 	    ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.FP_BMAP = (1 << 7); /* PPE */
+#elif defined (CONFIG_RALINK_MT7621)
+	    ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.FPORT = 4; /* PPE */
 #else
 	    ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info4.PN = 6; /* PPE */
 #endif
 	}
 #endif
 
-	if(skb_shinfo(skb)->nr_frags > 0) { 
+	if(nr_frags > 0) {
 
-		for(i=0;i<skb_shinfo(skb)->nr_frags;i++) {
+		for(i=0;i<nr_frags;i++) {
 			frag = &skb_shinfo(skb)->frags[i];
-
-			if(frag->size > 16383) {
-				printk("========================\n");
-				printk("frag->size=%d is too big\n",frag->size);
-				printk("========================\n");
-				BUG();
-			}
 
 			if(i%2) { //odd
 				tx_cpu_owner_idx0 = (tx_cpu_owner_idx0+1) % NUM_TX_DESC; //use next TXD to send packet
 
 				while(ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info2.DDONE_bit == 0)
 				{
-//					printk(KERN_ERR "%s: TXD=%lu TX DMA is Busy !! TX desc is Empty!\n", dev->name, tx_cpu_owner_idx0);
 #ifdef CONFIG_PSEUDO_SUPPORT
 					if (gmac_no == 2) {
 						if (ei_local->PseudoDev != NULL) {
@@ -892,147 +952,53 @@ static inline int rt2880_eth_send(struct net_device* dev, struct sk_buff *skb, i
 
 				ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info1.SDP0 = pci_map_page(NULL, frag->page, frag->page_offset, frag->size, PCI_DMA_TODEVICE);
 				ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info2.SDL0 = frag->size;
-				ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info2.LS0_bit = (i==skb_shinfo(skb)->nr_frags-1)?1:0;
+				ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info2.LS0_bit = (i==nr_frags-1)?1:0;
 				ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info2.DDONE_bit = 0;
-				//printk("2.SDP0=%x SDL0=%d LS0_bit=%d\n",ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info1.SDP0, frag->size, ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info2.LS0_bit);
-
 			}else { //even
 				ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info3.SDP1 = pci_map_page(NULL, frag->page, frag->page_offset, frag->size, PCI_DMA_TODEVICE);
 				ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info2.SDL1 = frag->size;
-				ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info2.LS1_bit = (i==skb_shinfo(skb)->nr_frags-1)?1:0;
-				//printk("3.SDP1=%x SDL1=%d LS1_bit=%d\n",ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info3.SDP1, frag->size, ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info2.LS1_bit);
+				ei_local->tx_ring0[tx_cpu_owner_idx0].txd_info2.LS1_bit = (i==nr_frags-1)?1:0;
 			}
 		}
 	}
 
 	/* fill in MSS info in tcp checksum field */
 	if( skb_shinfo(skb)->gso_segs > 1) {
-		
-	    if(eth_type==ETH_P_8021Q) {
-		vlan1_gap = VLAN_HLEN;
-		vh = (struct vlan_hdr *)(skb->data + ETH_HLEN);
-
-		/* VLAN + PPPoE */
-		if(ntohs(vh->h_vlan_encapsulated_proto)==ETH_P_PPP_SES)
-		{
-		    pppoe_gap = 8;
-		    eth_type = ntohs(vh->h_vlan_encapsulated_proto);
-
-		    /* TSO only support IPv4 over PPPoE */	    
-		    peh = (struct pppoe_hdr *) (skb->data + ETH_HLEN +  vlan1_gap);
-		    ppp_tag = ntohs(peh->tag[0].tag_type);
-
-		    /* Double VLAN = VLAN + VLAN */
-		}else if(ntohs(vh->h_vlan_encapsulated_proto)==ETH_P_8021Q){
-		    vlan2_gap = VLAN_HLEN;
-		    vh = (struct vlan_hdr *)(skb->data + ETH_HLEN + VLAN_HLEN);
-
-		    /* VLAN + VLAN + PPPoE */
-		    if(ntohs(vh->h_vlan_encapsulated_proto)==ETH_P_PPP_SES){
-			pppoe_gap = 8;
-			eth_type = ntohs(vh->h_vlan_encapsulated_proto);
-
-			/* TSO only support IPv4 over PPPoE */	    
-			peh = (struct pppoe_hdr *) (skb->data + ETH_HLEN +  vlan1_gap + vlan2_gap);
-			ppp_tag = ntohs(peh->tag[0].tag_type);
-
-		    }else {
-			/* VLAN + VLAN + IP */
-			eth_type = ntohs(vh->h_vlan_encapsulated_proto);
-		    }
-		}else {
-		    /* VLAN + IP */
-		    eth_type = ntohs(vh->h_vlan_encapsulated_proto);
+		/* TCP over IPv4 */
+		iph = (struct iphdr *)skb_network_header(skb);
+		if((iph->version == 4) && (iph->protocol == IPPROTO_TCP)) {
+			th = (struct tcphdr *)skb_transport_header(skb);
+#ifdef CONFIG_RAETH_RW_PDMAPTR_FROM_VAR
+			ei_local->tx_ring0[ctx_idx_start_addr].txd_info4.TSO = 1;
+#else
+				ei_local->tx_ring0[sysRegRead(TX_CTX_IDX0)].txd_info4.TSO = 1;
+#endif
+				th->check = htons(skb_shinfo(skb)->gso_size);
+				dma_cache_sync(NULL, th, sizeof(struct tcphdr), DMA_TO_DEVICE);
 		}
 	    }
 
-	    /* IPv4 or IPv4 over PPPoE */
-	    if( (eth_type == ETH_P_IP) || ((eth_type == ETH_P_PPP_SES) && (ppp_tag == PPP_IP))) {
-		iph = (struct iphdr *) (skb->data + ETH_HLEN + vlan1_gap + vlan2_gap + pppoe_gap);
-
-		/* TCP over IPv4 */
-		if(iph->protocol == IPPROTO_TCP) {
-				th = (struct tcphdr *) ((uint8_t *) iph + iph->ihl * 4);
-				ei_local->tx_ring0[sysRegRead(TX_CTX_IDX0)].txd_info4.TSO = 1;
-				//printk("frag->size=%d\n", frag->size);
-				th->check = htons(skb_shinfo(skb)->gso_size);
-				dma_cache_sync(NULL, th, sizeof(struct tcphdr), DMA_TO_DEVICE);
-#if 0
-
-				for(i=0;i<skb_shinfo(skb)->nr_frags;i++) {
-					frag = &skb_shinfo(skb)->frags[i];
-					printk("%d: frag->page=%p frag->size=%d offset=%d\n",i, frag->page, frag->size, frag->page_offset);
-				}
-
-				printk("IPv4: tot_len=%d id=0x%x\n", ntohs(iph->tot_len), ntohs(iph->id));
-				printk("TSO:TCP(sport=%d dport=%d seq=0x%X ack_seq=0x%X windows=%X) skb->len=%d MSS=%d Flag=",ntohs(th->source),
-					ntohs(th->dest), ntohl(th->seq), ntohl(th->ack_seq), ntohs(th->window), skb->len, skb_shinfo(skb)->gso_size);
-				if (th->cwr)
-				    printk("CWR ");
-				if (th->ece)
-				    printk("ECE ");
-				if (th->urg)
-				    printk("URG ");
-				if (th->ack)
-				    printk("ACK ");
-				if (th->psh)
-				    printk("PSH ");
-				if (th->rst)
-				    printk("RST ");
-				if (th->syn)
-				    printk("SYN ");
-				if (th->fin)
-				    printk("FIN ");
-				printk("\n");
-#endif
-		} 
-	    } 
-	    
 #if defined (CONFIG_RAETH_TSOV6)
-	    else if ((eth_type == ETH_P_IPV6) || ((eth_type == ETH_P_PPP_SES) && (ppp_tag == PPP_IPV6))) {
-		ip6h = (struct ipv6hdr  *) (skb->data + ETH_HLEN + vlan1_gap + vlan2_gap + pppoe_gap);
-
 		/* TCP over IPv6 */
-		if(ip6h->nexthdr == NEXTHDR_TCP) {
-				th = (struct tcphdr *) ((uint8_t *) ip6h + sizeof(struct ipv6hdr));
+		ip6h = (struct ipv6hdr *)skb_network_header(skb);
+		else if ((ip6h->version == 6) && (ip6h->nexthdr == NEXTHDR_TCP)) {
+			th = (struct tcphdr *)skb_transport_header(skb);
+#ifdef CONFIG_RAETH_RW_PDMAPTR_FROM_VAR
+			ei_local->tx_ring0[ctx_idx_start_addr].txd_info4.TSO = 1;
+#else
 				ei_local->tx_ring0[sysRegRead(TX_CTX_IDX0)].txd_info4.TSO = 1;
+#endif
 				th->check = htons(skb_shinfo(skb)->gso_size);
 				dma_cache_sync(NULL, th, sizeof(struct tcphdr), DMA_TO_DEVICE);
-#if 0
-
-				for(i=0;i<skb_shinfo(skb)->nr_frags;i++) {
-					frag = &skb_shinfo(skb)->frags[i];
-					printk("%d: frag->page=%p frag->size=%d offset=%d\n",i, frag->page, frag->size, frag->page_offset);
-				}
-
-				printk("IPv6: payload_len=%d hop_limit=%d\n", ntohs(ip6h->payload_len), ip6h->hop_limit);
-				printk("TSO:TCP(sport=%d dport=%d seq=0x%X ack_seq=0x%X windows=%X) skb->len=%d MSS=%d Flag=",ntohs(th->source), ntohs(th->dest), ntohl(th->seq), ntohl(th->ack_seq), ntohs(th->window), skb->len, skb_shinfo(skb)->gso_size);
-				if (th->cwr)
-				    printk("CWR ");
-				if (th->ece)
-				    printk("ECE ");
-				if (th->urg)
-				    printk("URG ");
-				if (th->ack)
-				    printk("ACK ");
-				if (th->psh)
-				    printk("PSH ");
-				if (th->rst)
-				    printk("RST ");
-				if (th->syn)
-				    printk("SYN ");
-				if (th->fin)
-				    printk("FIN ");
-				printk("\n");
-#endif
-		} else {
-		    printk("Next header in IPv6 header = %d (extension header is not supported)\n", ip6h->nexthdr);
-		} 
 	    }
 #endif // CONFIG_RAETH_TSOV6 //
 	}
 
+#ifdef CONFIG_RAETH_RW_PDMAPTR_FROM_VAR
+	ei_local->tx_ring0[ctx_idx_start_addr].txd_info2.DDONE_bit = 0;
+#else
 	ei_local->tx_ring0[sysRegRead(TX_CTX_IDX0)].txd_info2.DDONE_bit = 0;
+#endif
 #endif // CONFIG_RAETH_TSO //
 
     	tx_cpu_owner_idx0 = (tx_cpu_owner_idx0+1) % NUM_TX_DESC;
@@ -1082,6 +1048,40 @@ static inline int rt2880_eth_send(struct net_device* dev, struct sk_buff *skb, i
 }
 #endif
 
+#ifdef CONFIG_RAETH_LRO
+static int
+rt_get_skb_header(struct sk_buff *skb, void **iphdr, void **tcph,
+                       u64 *hdr_flags, void *priv)
+{
+        struct iphdr *iph = NULL;
+	int    vhdr_len = 0;
+
+        /*
+         * Make sure that this packet is Ethernet II, is not VLAN
+         * tagged, is IPv4, has a valid IP header, and is TCP.
+         */
+	if (skb->protocol == 0x0081) {
+		vhdr_len = VLAN_HLEN;
+	}
+
+	iph = (struct iphdr *)(skb->data + vhdr_len);
+	if (iph->daddr != lro_para.lan_ip1) {
+		return -1;
+	}
+
+	if(iph->protocol != IPPROTO_TCP) {
+		return -1;
+	} else {
+		*iphdr = iph;
+		*tcph = skb->data + (iph->ihl << 2) + vhdr_len;
+		*hdr_flags = LRO_IPV4 | LRO_TCP;
+
+		lro_flush_needed = 1;
+		return 0;
+	}
+}
+#endif // CONFIG_RAETH_LRO //
+
 #ifdef CONFIG_RAETH_NAPI
 static int rt2880_eth_recv(struct net_device* dev, int *work_done, int work_to_do)
 #else
@@ -1092,6 +1092,25 @@ static int rt2880_eth_recv(struct net_device* dev)
 	unsigned int	length = 0;
 #ifndef CONFIG_RAETH_NAPI
 	unsigned long	RxProcessed = 0;
+#endif
+#ifdef CONFIG_RAETH_RW_PDMAPTR_FROM_VAR
+	rx_dma_owner_idx0 = (rx_calc_idx0 + 1) % NUM_RX_DESC;
+#else
+	rx_dma_owner_idx0 = (sysRegRead(RX_CALC_IDX0) + 1) % NUM_RX_DESC;
+#endif
+
+#if defined (CONFIG_32B_DESC)
+	dma_cache_sync(NULL, &ei_local->rx_ring0[rx_dma_owner_idx0], sizeof(struct PDMA_rxdesc), DMA_FROM_DEVICE);
+#endif
+#if defined (CONFIG_RAETH_MULTIPLE_RX_RING)
+#ifdef CONFIG_RAETH_RW_PDMAPTR_FROM_VAR
+	rx_dma_owner_idx1 = (rx_calc_idx1 + 1) % NUM_RX_DESC;
+#else
+	rx_dma_owner_idx1 = (sysRegRead(RX_CALC_IDX1) + 1) % NUM_RX_DESC;
+#endif
+#if defined (CONFIG_32B_DESC)
+	dma_cache_sync(NULL, &ei_local->rx_ring1[rx_dma_owner_idx1], sizeof(struct PDMA_rxdesc), DMA_FROM_DEVICE);
+#endif
 #endif
 	int bReschedule = 0;
 	END_DEVICE* 	ei_local = netdev_priv(dev);
@@ -1130,13 +1149,7 @@ static int rt2880_eth_recv(struct net_device* dev)
 	struct ipv6hdr *ip6h = NULL;
 #endif
 
-		/* Update to Next packet point that was received.
-		 */
-
-		rx_dma_owner_idx0 = (sysRegRead(RX_CALC_IDX0) + 1) % NUM_RX_DESC;
 #if defined (CONFIG_RAETH_MULTIPLE_RX_RING)
-		rx_dma_owner_idx1 = (sysRegRead(RX_CALC_IDX1) + 1) % NUM_RX_DESC;
-
 		if (ei_local->rx_ring1[rx_dma_owner_idx1].rxd_info2.DDONE_bit == 1)  {
 		    rx_ring = ei_local->rx_ring1;
 		    rx_dma_owner_idx = rx_dma_owner_idx1;
@@ -1160,6 +1173,9 @@ static int rt2880_eth_recv(struct net_device* dev)
 		}
 #endif
 
+#if defined (CONFIG_32B_DESC)
+		prefetch(&rx_ring[(rx_dma_owner_idx + 1) % NUM_RX_DESC]);
+#endif
 		/* skb processing */
 		length = rx_ring[rx_dma_owner_idx].rxd_info2.PLEN0;
 #if defined (CONFIG_RAETH_MULTIPLE_RX_RING)
@@ -1221,18 +1237,18 @@ static int rt2880_eth_recv(struct net_device* dev)
 #if defined (CONFIG_PDMA_NEW)
 		if(rx_ring[rx_dma_owner_idx].rxd_info4.L4VLD) {
 			rx_skb->ip_summed = CHECKSUM_UNNECESSARY;
-		}else
+		}else {
+		    rx_skb->ip_summed = CHECKSUM_NONE;
+		}
 #else
 		if(rx_ring[rx_dma_owner_idx].rxd_info4.IPFVLD_bit) {
 			rx_skb->ip_summed = CHECKSUM_UNNECESSARY;
-		}else
+		}else {
+		    rx_skb->ip_summed = CHECKSUM_NONE;
+		}
 #endif
-#endif
+#else
 			rx_skb->ip_summed = CHECKSUM_NONE;
-
-
-#ifdef CONFIG_RALINK_BRIDGING_ONLY
-		rx_skb->cb[22]=0xa8;
 #endif
 
 #if defined(CONFIG_RA_CLASSIFIER)||defined(CONFIG_RA_CLASSIFIER_MODULE)
@@ -1249,9 +1265,11 @@ static int rt2880_eth_recv(struct net_device* dev)
 #endif /* CONFIG_RA_CLASSIFIER */
 
 #if defined (CONFIG_RA_HW_NAT) || defined (CONFIG_RA_HW_NAT_MODULE)
+		if(ra_sw_nat_hook_rx != NULL) {
 		FOE_MAGIC_TAG(rx_skb)=FOE_MAGIC_GE;
-		memcpy(FOE_INFO_START_ADDR(rx_skb)+2, &rx_ring[rx_dma_owner_idx].rxd_info4, sizeof(PDMA_RXD_INFO4_T));
+		    *(uint32_t *)(FOE_INFO_START_ADDR(rx_skb)+2) = *(uint32_t *)&rx_ring[rx_dma_owner_idx].rxd_info4;
 		FOE_ALG(rx_skb) = 0;
+		}
 #endif
 
 		/* We have to check the free memory size is big enough
@@ -1301,86 +1319,44 @@ static int rt2880_eth_recv(struct net_device* dev)
 		}
 #endif
 
-#ifndef CONFIG_RA_NAT_NONE
-/* bruce+
- * ra_sw_nat_hook_rx return 1 --> continue
+/* ra_sw_nat_hook_rx return 1 --> continue
  * ra_sw_nat_hook_rx return 0 --> FWD & without netif_rx
  */
-         if(ra_sw_nat_hook_rx!= NULL)
+#if !defined(CONFIG_RA_NAT_NONE)
+         if((ra_sw_nat_hook_rx == NULL) || 
+	    (ra_sw_nat_hook_rx!= NULL && ra_sw_nat_hook_rx(rx_skb)))
+#endif
          {
-           if(ra_sw_nat_hook_rx(rx_skb)) {
 #if defined (CONFIG_RALINK_RT3052_MP2)
 	       if(mcast_rx(rx_skb)==0) {
 		   kfree_skb(rx_skb);
 	       }else
 #endif
-#ifdef CONFIG_RAETH_NAPI
-                netif_receive_skb(rx_skb);
-#else
-                netif_rx(rx_skb);
-#endif
-	   }
-         } else {
-#if defined (CONFIG_RALINK_RT3052_MP2)
-	     if(mcast_rx(rx_skb)==0) {
-		 kfree_skb(rx_skb);
+#if defined (CONFIG_RAETH_LRO)
+	       if (rx_skb->ip_summed == CHECKSUM_UNNECESSARY) {
+		       lro_receive_skb(&ei_local->lro_mgr, rx_skb, NULL);
+		       //LroStatsUpdate(&ei_local->lro_mgr,0);
 	     }else
 #endif
 #ifdef CONFIG_RAETH_NAPI
                 netif_receive_skb(rx_skb);
 #else
+#ifdef CONFIG_RAETH_HW_VLAN_RX
+	        if(ei_local->vlgrp && rx_ring[rx_dma_owner_idx].rxd_info2.TAG) {
+			vlan_hwaccel_rx(rx_skb, ei_local->vlgrp, rx_ring[rx_dma_owner_idx].rxd_info3.VID);
+		} else {
                 netif_rx(rx_skb);
-#endif // CONFIG_RAETH_NAPI //
 	 }
 #else
-
-#if defined (CONFIG_RALINK_RT3052_MP2)
-	if(mcast_rx(rx_skb)==0) {
-		kfree_skb(rx_skb);
-	}else
-#endif // CONFIG_RALINK_RT3052_MP2 //
-#ifdef CONFIG_RAETH_NAPI
-                netif_receive_skb(rx_skb);
-#else
                 netif_rx(rx_skb);
-#endif // CONFIG_RAETH_NAPI //
-
-
-#endif  // CONFIG_RA_NAT_NONE //
-
-#if defined (CONFIG_RAETH_SCATTER_GATHER_RX_DMA)
-		rx_ring[rx_dma_owner_idx].rxd_info2.PLEN0 = MAX_RX_LENGTH;
-		rx_ring[rx_dma_owner_idx].rxd_info2.LS0 = 0;
 #endif
-		rx_ring[rx_dma_owner_idx].rxd_info2.DDONE_bit = 0;
-		rx_ring[rx_dma_owner_idx].rxd_info1.PDP0 = dma_map_single(NULL, skb->data, MAX_RX_LENGTH, PCI_DMA_FROMDEVICE);
-		dma_cache_sync(NULL, &rx_ring[rx_dma_owner_idx], sizeof(struct PDMA_rxdesc), DMA_FROM_DEVICE);
-
-		/*  Move point to next RXD which wants to alloc*/
-#if defined (CONFIG_RAETH_MULTIPLE_RX_RING)
-		if(rx_ring_no==0) {
-		    sysRegWrite(RX_CALC_IDX0, rx_dma_owner_idx);
-		    ei_local->netrx0_skbuf[rx_dma_owner_idx] = skb;
-		}else {
-		    sysRegWrite(RX_CALC_IDX1, rx_dma_owner_idx);
-		    ei_local->netrx1_skbuf[rx_dma_owner_idx] = skb;
-		}
-#else
-		sysRegWrite(RX_CALC_IDX0, rx_dma_owner_idx);
-		ei_local->netrx0_skbuf[rx_dma_owner_idx] = skb;
 #endif
+         }
 
 #ifdef CONFIG_PSEUDO_SUPPORT
 		if (rx_ring[rx_dma_owner_idx].rxd_info4.SP == 2) {
 			if (ei_local->PseudoDev != NULL) {
 				pAd = netdev_priv(ei_local->PseudoDev);
-#ifdef CONFIG_RALINK_GPIO_LED_WAN
-			if ((jiffies - wan_prev_jiffies) >= (HZ>>3)) {
-			    /* blink led */
-			    ralink_gpio_led_set(wan_led);
-			    wan_prev_jiffies = jiffies;
-			}
-#endif
 				pAd->stat.rx_packets++;
 				pAd->stat.rx_bytes += length;
 			}
@@ -1390,8 +1366,72 @@ static int rt2880_eth_recv(struct net_device* dev)
 			ei_local->stat.rx_packets++;
 			ei_local->stat.rx_bytes += length;
 		}
-	}	/* for */
 
+
+#if defined (CONFIG_RAETH_SCATTER_GATHER_RX_DMA)
+		rx_ring[rx_dma_owner_idx].rxd_info2.PLEN0 = MAX_RX_LENGTH;
+		rx_ring[rx_dma_owner_idx].rxd_info2.LS0 = 0;
+#endif
+		rx_ring[rx_dma_owner_idx].rxd_info2.DDONE_bit = 0;
+		rx_ring[rx_dma_owner_idx].rxd_info1.PDP0 = dma_map_single(NULL, skb->data, MAX_RX_LENGTH, PCI_DMA_FROMDEVICE);
+#ifdef CONFIG_32B_DESC
+		dma_cache_sync(NULL, &rx_ring[rx_dma_owner_idx], sizeof(struct PDMA_rxdesc), DMA_TO_DEVICE);
+#endif
+
+		/*  Move point to next RXD which wants to alloc*/
+#if defined (CONFIG_RAETH_MULTIPLE_RX_RING)
+		if(rx_ring_no==0) {
+		    sysRegWrite(RX_CALC_IDX0, rx_dma_owner_idx);
+		    ei_local->netrx0_skbuf[rx_dma_owner_idx] = skb;
+#ifdef CONFIG_RAETH_RW_PDMAPTR_FROM_VAR
+		    rx_calc_idx0 = rx_dma_owner_idx;
+#endif
+		}else {
+		    sysRegWrite(RX_CALC_IDX1, rx_dma_owner_idx);
+		    ei_local->netrx1_skbuf[rx_dma_owner_idx] = skb;
+#ifdef CONFIG_RAETH_RW_PDMAPTR_FROM_VAR
+		    rx_calc_idx1 = rx_dma_owner_idx;
+#endif
+		}
+#else
+		sysRegWrite(RX_CALC_IDX0, rx_dma_owner_idx);
+		ei_local->netrx0_skbuf[rx_dma_owner_idx] = skb;
+#ifdef CONFIG_RAETH_RW_PDMAPTR_FROM_VAR
+		rx_calc_idx0 = rx_dma_owner_idx;
+#endif
+#endif
+
+		/* Update to Next packet point that was received.
+		 */
+#if defined (CONFIG_RAETH_MULTIPLE_RX_RING)
+		if(rx_ring_no==0) {
+#ifdef CONFIG_RAETH_RW_PDMAPTR_FROM_VAR
+			rx_dma_owner_idx0 = (rx_dma_owner_idx + 1) % NUM_RX_DESC;
+#else
+			rx_dma_owner_idx0 = (sysRegRead(RX_CALC_IDX0) + 1) % NUM_RX_DESC;
+#endif
+		}else {
+#ifdef CONFIG_RAETH_RW_PDMAPTR_FROM_VAR
+			rx_dma_owner_idx1 = (rx_dma_owner_idx + 1) % NUM_RX_DESC;
+#else
+			rx_dma_owner_idx1 = (sysRegRead(RX_CALC_IDX1) + 1) % NUM_RX_DESC;
+#endif
+		}
+#else
+#ifdef CONFIG_RAETH_RW_PDMAPTR_FROM_VAR
+		rx_dma_owner_idx0 = (rx_dma_owner_idx + 1) % NUM_RX_DESC;
+#else
+		rx_dma_owner_idx0 = (sysRegRead(RX_CALC_IDX0) + 1) % NUM_RX_DESC;
+#endif
+#endif
+	}	/* for */
+#if defined (CONFIG_RAETH_LRO)
+	if (lro_flush_needed) {
+		//LroStatsUpdate(&ei_local->lro_mgr,1);
+		lro_flush_all(&ei_local->lro_mgr);
+		lro_flush_needed = 0;
+	}
+#endif
 #ifdef CONFIG_RALINK_WATCHDOG
         /* Refresh Ralink hardware watchdog timer */
 	RaWdgReload();
@@ -1464,7 +1504,7 @@ void kill_sig_workq(struct work_struct *work)
 ///////////////////////////////////////////////////////////////////
 
 #ifndef CONFIG_RAETH_NAPI
-#ifdef WORKQUEUE_BH
+#if defined WORKQUEUE_BH || defined (TASKLET_WORKQUEUE_SW)
 void ei_receive_workq(struct work_struct *work)
 #else
 void ei_receive(unsigned long unused)  // device structure
@@ -1483,6 +1523,11 @@ void ei_receive(unsigned long unused)  // device structure
 #ifdef WORKQUEUE_BH
 			schedule_work(&ei_local->rx_wq);
 #else
+#if defined (TASKLET_WORKQUEUE_SW)
+			if (working_schedule == 1)
+				schedule_work(&ei_local->rx_wq);
+			else
+#endif
 			tasklet_hi_schedule(&ei_local->rx_tasklet);
 #endif // WORKQUEUE_BH //
 		}else{
@@ -1497,6 +1542,11 @@ void ei_receive(unsigned long unused)  // device structure
 #ifdef WORKQUEUE_BH
                 schedule_work(&ei_local->rx_wq);
 #else
+#if defined (TASKLET_WORKQUEUE_SW)
+		if (working_schedule == 1)
+			schedule_work(&ei_local->rx_wq);
+		else
+#endif
                 tasklet_schedule(&ei_local->rx_tasklet);
 #endif // WORKQUEUE_BH //
 	}
@@ -1663,6 +1713,11 @@ static irqreturn_t ei_interrupt(int irq, void *dev_id, struct pt_regs * regs)
 #ifdef WORKQUEUE_BH
 		schedule_work(&ei_local->rx_wq);
 #else
+#if defined (TASKLET_WORKQUEUE_SW)
+		if (working_schedule == 1)
+			schedule_work(&ei_local->rx_wq);
+		else
+#endif
 		tasklet_hi_schedule(&ei_local->rx_tasklet);
 #endif // WORKQUEUE_BH //
 	}
@@ -1678,7 +1733,7 @@ static irqreturn_t ei_interrupt(int irq, void *dev_id, struct pt_regs * regs)
 }
 
 #if defined (CONFIG_RALINK_RT6855) || defined(CONFIG_RALINK_RT6855A) || \
-    defined(CONFIG_RALINK_RT6352) || defined(CONFIG_RALINK_RT71100)
+    defined(CONFIG_RALINK_MT7620)
 static void esw_link_status_changed(int port_no, void *dev_id)
 {
     unsigned long reg_val;
@@ -1710,7 +1765,7 @@ static irqreturn_t esw_interrupt(int irq, void *dev_id)
 	unsigned long flags;
 	unsigned long reg_int_val;
 #if defined (CONFIG_RALINK_RT6855) || defined(CONFIG_RALINK_RT6855A) || \
-    defined(CONFIG_RALINK_RT6352) || defined(CONFIG_RALINK_RT71100)
+    defined(CONFIG_RALINK_MT7620)
 	unsigned long acl_int_val;
 #else
 	static unsigned long stat;
@@ -1729,7 +1784,7 @@ static irqreturn_t esw_interrupt(int irq, void *dev_id)
 	reg_int_val = (*((volatile u32 *)(ESW_ISR))); //Interrupt Status Register
 
 #if defined (CONFIG_RALINK_RT6855) || defined(CONFIG_RALINK_RT6855A) || \
-    defined(CONFIG_RALINK_RT6352) || defined(CONFIG_RALINK_RT71100)
+    defined(CONFIG_RALINK_MT7620)
 	if (reg_int_val & P5_LINK_CH) {
 	    esw_link_status_changed(5, dev_id);
 	}
@@ -1798,6 +1853,9 @@ static int ei_start_xmit(struct sk_buff* skb, struct net_device *dev, int gmac_n
 	unsigned long tx_cpu_owner_idx;
 	unsigned int tx_cpu_owner_idx_next;
 	unsigned int num_of_txd;
+#if defined (CONFIG_RAETH_TSO)
+	unsigned int nr_frags = skb_shinfo(skb)->nr_frags;
+#endif
 #if	!defined(CONFIG_RAETH_QOS)
 	unsigned int tx_cpu_owner_idx_next2;
 #else
@@ -1848,7 +1906,7 @@ static int ei_start_xmit(struct sk_buff* skb, struct net_device *dev, int gmac_n
 	mcast_tx(skb);
 #endif
 #if !defined (CONFIG_RALINK_RT6855) && !defined (CONFIG_RALINK_RT6855A) && \
-    !defined(CONFIG_RALINK_RT6352) && !defined(CONFIG_RALINK_RT71100)
+    !defined(CONFIG_RALINK_MT7620) && !defined(CONFIG_RALINK_MT7621)
 	 if (skb->len < ETH_ZLEN) {
 	     if (skb_padto(skb, ETH_ZLEN)) {
 		if (net_ratelimit())
@@ -1861,17 +1919,7 @@ static int ei_start_xmit(struct sk_buff* skb, struct net_device *dev, int gmac_n
 #endif
 	dev->trans_start = jiffies;	/* save the timestamp */
 	spin_lock_irqsave(&ei_local->page_lock, flags);
-#if defined( CONFIG_RALINK_ENHANCE) || defined (CONFIG_RALINK_BRIDGING_ONLY)
-	if ((unsigned char)skb->cb[22] == 0xa9)
-		dma_cache_sync(dev, skb->data, 60, DMA_TO_DEVICE);
-	else if ((unsigned char)skb->cb[22] == 0xa8) {
-		dma_cache_sync(dev, skb->data, 16, DMA_TO_DEVICE);
-	}
-	else
-		dma_cache_sync(dev, skb->data, skb->len, DMA_TO_DEVICE);
-#else
 	dma_cache_sync(NULL, skb->data, skb->len, DMA_TO_DEVICE);
-#endif
 
 #ifdef CONFIG_RALINK_VISTA_BASIC
 	veth = (struct vlan_ethhdr *)(skb->data);
@@ -1896,9 +1944,14 @@ static int ei_start_xmit(struct sk_buff* skb, struct net_device *dev, int gmac_n
 	  }
 	}
 #else
+#ifdef CONFIG_RAETH_RW_PDMAPTR_FROM_VAR
+	tx_cpu_owner_idx = tx_cpu_owner_idx0;
+#else
 	tx_cpu_owner_idx = sysRegRead(TX_CTX_IDX0);
+#endif
 #if defined (CONFIG_RAETH_TSO)
-	num_of_txd = (skb_shinfo(skb)->nr_frags > 0) ? (skb_shinfo(skb)->nr_frags + 1)/2: 1;
+	num_of_txd = (nr_frags==0) ? 1 : ((nr_frags>>1) + 1);
+//	NumOfTxdUpdate(num_of_txd);
 #else
 	num_of_txd = 1;
 #endif
@@ -1907,10 +1960,6 @@ static int ei_start_xmit(struct sk_buff* skb, struct net_device *dev, int gmac_n
 	if(((ei_local->skb_free[tx_cpu_owner_idx]) ==0) && (ei_local->skb_free[tx_cpu_owner_idx_next]==0)){
 		rt2880_eth_send(dev, skb, gmac_no);
 
-#if defined (CONFIG_RAETH_TSO)
-		/* get first TXD index since we might use multiple TXD in previous function */
-		tx_cpu_owner_idx_next = sysRegRead(TX_CTX_IDX0);
-#endif
 		tx_cpu_owner_idx_next2 = (tx_cpu_owner_idx_next + 1) % NUM_TX_DESC;
 
 		if(ei_local->skb_free[tx_cpu_owner_idx_next2]!=0){
@@ -1940,10 +1989,8 @@ static int ei_start_xmit(struct sk_buff* skb, struct net_device *dev, int gmac_n
 #if defined (CONFIG_RAETH_TSO)
 	/* SG: use multiple TXD to send the packet (only have one skb) */
 	ei_local->skb_free[tx_cpu_owner_idx] = skb;
-	tx_cpu_owner_idx = (tx_cpu_owner_idx+1) % NUM_TX_DESC;
-	while(tx_cpu_owner_idx_next - tx_cpu_owner_idx > 0) {
-		ei_local->skb_free[tx_cpu_owner_idx] = (struct  sk_buff *)0xFFFFFFFF; //MAGIC ID
-		tx_cpu_owner_idx = (tx_cpu_owner_idx+1) % NUM_TX_DESC;
+	while(--num_of_txd) {
+		ei_local->skb_free[(tx_cpu_owner_idx + num_of_txd) % NUM_TX_DESC] = (struct  sk_buff *)0xFFFFFFFF; //MAGIC ID
 	}
 #else
 	ei_local->skb_free[tx_cpu_owner_idx] = skb;
@@ -2039,10 +2086,10 @@ int ei_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 #endif
 #if defined(CONFIG_RALINK_RT3352) || defined(CONFIG_RALINK_RT5350) || \
     defined (CONFIG_RALINK_RT6855) || defined(CONFIG_RALINK_RT6855A) || \
-    defined(CONFIG_RALINK_RT6352) || defined(CONFIG_RALINK_RT71100)
+    defined(CONFIG_RALINK_MT7620)
         esw_rate ratelimit;
 #endif
-#if !defined(CONFIG_RALINK_RT3883) && !defined (CONFIG_RALINK_RT2880)
+#if defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350)
 	unsigned int offset = 0;
 #endif
 #if !defined (CONFIG_RALINK_RT3052) && !defined (CONFIG_RALINK_RT3883) && !defined (CONFIG_RALINK_RT2880)
@@ -2129,7 +2176,11 @@ int ei_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 			    }
 
 			if (reg.val ==32 ) {//dump all phy register
-			    for(offset=0;offset<5;offset++) { //local register port 0-port4
+#if !defined (CONFIG_RAETH_HAS_PORT4)
+				for(offset=0;offset<5;offset++) { //local register port 0-port4
+#else
+				for(offset=0;offset<4;offset++) { //local register port 0-port3
+#endif
 				dump_phy_reg(offset, 16, 31, 1, 0); //dump local page 0
 				dump_phy_reg(offset, 16, 31, 1, 1); //dump local page 1
 				dump_phy_reg(offset, 16, 31, 1, 2); //dump local page 2
@@ -2143,7 +2194,7 @@ int ei_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 			}
 #endif
 			break;
-#endif // CONFIG_RT_3052_ESW
+
 #if defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350)
 #define _ESW_REG(x)	(*((volatile u32 *)(RALINK_ETH_SW_BASE + x)))
 		case RAETH_ESW_INGRESS_RATE:
@@ -2204,7 +2255,7 @@ int ei_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 			_ESW_REG(offset) = value;
 			break;
 #elif  defined (CONFIG_RALINK_RT6855) || defined(CONFIG_RALINK_RT6855A) || \
-       defined(CONFIG_RALINK_RT6352) || defined(CONFIG_RALINK_RT71100)
+       defined(CONFIG_RALINK_MT7620)
 #define _ESW_REG(x)	(*((volatile u32 *)(RALINK_ETH_SW_BASE + x)))
 		case RAETH_ESW_INGRESS_RATE:
 			copy_from_user(&ratelimit, ifr->ifr_data, sizeof(ratelimit));
@@ -2242,6 +2293,7 @@ int ei_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 			_ESW_REG(offset) = value;
 			break;
 #endif
+#endif // CONFIG_RT_3052_ESW
 		default:
 			return -EOPNOTSUPP;
 
@@ -2277,6 +2329,18 @@ static int ei_change_mtu(struct net_device *dev, int new_mtu)
 	return 0;
 }
 
+#ifdef CONFIG_RAETH_HW_VLAN_RX
+static void ei_vlan_rx_register(struct net_device *dev, struct vlan_group *grp)
+{
+	END_DEVICE *ei_local = netdev_priv(dev);
+	
+	ei_local->vlgrp = grp;
+
+	/* enable HW VLAN RX */
+	sysRegWrite(CDMP_EG_CTRL, 1);
+
+}
+#endif
 
 #if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,35)
 static const struct net_device_ops ei_netdev_ops = {
@@ -2292,7 +2356,9 @@ static const struct net_device_ops ei_netdev_ops = {
         .ndo_change_mtu         = ei_change_mtu,
         .ndo_do_ioctl           = ei_ioctl,
         .ndo_validate_addr      = eth_validate_addr,
-
+#ifdef CONFIG_RAETH_HW_VLAN_RX
+	.ndo_vlan_rx_register   = ei_vlan_rx_register,
+#endif
 #ifdef CONFIG_NET_POLL_CONTROLLER
         .ndo_poll_controller    = raeth_clean,
 #endif
@@ -2350,7 +2416,7 @@ void fe_reset(void)
 	val = val | RALINK_FE_RST;
 #endif
 	sysRegWrite(RSTCTRL, val);
-#if defined (CONFIG_RALINK_RT5350)
+#if defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_MT7620)
 	val = val & ~(RALINK_FE_RST | RALINK_ESW_RST);
 #else
 	val = val & ~(RALINK_FE_RST);
@@ -2467,6 +2533,18 @@ int __init rather_probe(struct net_device *dev)
 		addr.sa_data[5] = net_random()&0xFF;
 	}
 
+#ifdef CONFIG_RAETH_LRO
+	ei_local->lro_mgr.dev = dev;
+        memset(&ei_local->lro_mgr.stats, 0, sizeof(ei_local->lro_mgr.stats));
+        ei_local->lro_mgr.features = LRO_F_NAPI;
+        ei_local->lro_mgr.ip_summed = CHECKSUM_UNNECESSARY;
+        ei_local->lro_mgr.ip_summed_aggr = CHECKSUM_UNNECESSARY;
+        ei_local->lro_mgr.max_desc = ARRAY_SIZE(ei_local->lro_arr);
+        ei_local->lro_mgr.max_aggr = 64;
+        ei_local->lro_mgr.frag_align_pad = 0;
+        ei_local->lro_mgr.lro_arr = ei_local->lro_arr;
+        ei_local->lro_mgr.get_skb_header = rt_get_skb_header;
+#endif
 
 	ei_set_mac_addr(dev, &addr);
 #endif /* CONFIG_RAETH_READ_MAC_FROM_MTD */
@@ -2761,6 +2839,16 @@ int ei_open(struct net_device *dev)
 	int i, err;
 	unsigned long flags;
 	END_DEVICE *ei_local;
+
+#ifdef CONFIG_RAETH_LRO
+	const char *lan_ip_tmp; 
+#ifdef CONFIG_DUAL_IMAGE
+#define RT2860_NVRAM	1
+#else
+#define RT2860_NVRAM	0
+#endif
+#endif // CONFIG_RAETH_LRO //
+
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,0)
 	if (!try_module_get(THIS_MODULE))
 	{
@@ -2770,6 +2858,21 @@ int ei_open(struct net_device *dev)
 #else
 	MOD_INC_USE_COUNT;
 #endif
+
+	printk("Raeth %s (",RAETH_VERSION);
+#if defined (CONFIG_RAETH_NAPI)
+	printk("NAPI\n");
+#elif defined (CONFIG_RA_NETWORK_TASKLET_BH)
+	printk("Tasklet");
+#elif defined (CONFIG_RA_NETWORK_WORKQUEUE_BH)
+	printk("Workqueue");
+#endif
+
+#if defined (CONFIG_RAETH_SKB_RECYCLE_2K)
+	printk(",SkbRecycle");
+#endif
+	printk(")\n");
+
 
   	ei_local = netdev_priv(dev); // get device pointer from System
 	// unsigned int flags;
@@ -2853,11 +2956,15 @@ int ei_open(struct net_device *dev)
 #ifndef CONFIG_RAETH_NAPI
  	INIT_WORK(&ei_local->rx_wq, ei_receive_workq);
 #endif // CONFIG_RAETH_NAPI //
-	INIT_WORK(&ei_local->tx_wq, ei_xmit_housekeeping);
 #else
-	tasklet_init(&ei_local->tx_tasklet, ei_xmit_housekeeping , 0);
 #ifndef CONFIG_RAETH_NAPI
+#if defined (TASKLET_WORKQUEUE_SW)
+	working_schedule = init_schedule;
+ 	INIT_WORK(&ei_local->rx_wq, ei_receive_workq);
+	tasklet_init(&ei_local->rx_tasklet, ei_receive_workq, 0);
+#else
 	tasklet_init(&ei_local->rx_tasklet, ei_receive, 0);
+#endif
 #endif // CONFIG_RAETH_NAPI //
 #endif // WORKQUEUE_BH //
 
@@ -2880,6 +2987,13 @@ int ei_open(struct net_device *dev)
 
 	VirtualIF_open(ei_local->PseudoDev);
 #endif
+
+#ifdef CONFIG_RAETH_LRO
+	lan_ip_tmp = nvram_get(RT2860_NVRAM, "lan_ipaddr");
+	str_to_ip(&lan_ip, lan_ip_tmp);
+	lro_para.lan_ip1 = lan_ip = htonl(lan_ip);
+#endif // CONFIG_RAETH_LRO //
+
 	forward_config(dev);
 
 #ifdef CONFIG_RAETH_INIT_PROTECT
@@ -2921,10 +3035,14 @@ int ei_close(struct net_device *dev)
 
 #ifdef WORKQUEUE_BH
 #if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,35)
-	cancel_work_sync(&ei_local->tx_wq);
 	cancel_work_sync(&ei_local->rx_wq);
 #endif
 #else
+#if defined (TASKLET_WORKQUEUE_SW)
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,35)
+	cancel_work_sync(&ei_local->rx_wq);
+#endif
+#endif
 	tasklet_kill(&ei_local->tx_tasklet);
 	tasklet_kill(&ei_local->rx_tasklet);
 #endif // WORKQUEUE_BH //
@@ -2970,11 +3088,18 @@ int ei_close(struct net_device *dev)
 #endif
 #endif
 	/* RX Ring */
-        dma_free_coherent(NULL, NUM_RX_DESC*sizeof(struct PDMA_rxdesc), ei_local->rx_ring0, ei_local->phy_rx_ring0);
-#if defined (CONFIG_RAETH_MULTIPLE_RX_RING)
-        dma_free_coherent(NULL, NUM_RX_DESC*sizeof(struct PDMA_rxdesc), ei_local->rx_ring1, ei_local->phy_rx_ring1);
+#ifdef CONFIG_32B_DESC
+	kfree(ei_local->rx_ring0);
+#else
+	dma_free_coherent(NULL, NUM_RX_DESC*sizeof(struct PDMA_rxdesc), ei_local->rx_ring0, ei_local->phy_rx_ring0);
 #endif
-
+#if defined (CONFIG_RAETH_MULTIPLE_RX_RING)
+#ifdef CONFIG_32B_DESC
+	kfree(ei_local->rx_ring1);
+#else
+	dma_free_coherent(NULL, NUM_RX_DESC*sizeof(struct PDMA_rxdesc), ei_local->rx_ring1, ei_local->phy_rx_ring1);
+#endif
+#endif
 	printk("Free TX/RX Ring Memory!\n");
 
 #ifdef CONFIG_RAETH_NAPI
@@ -2997,7 +3122,7 @@ int ei_close(struct net_device *dev)
 	return 0;
 }
 
-#if defined (RT6855A_FPGA_BOARD)
+#if defined (CONFIG_RT6855A_FPGA)
 void rt6855A_eth_gpio_reset(void)
 {
 	u8 ether_gpio = 12;
@@ -3022,7 +3147,7 @@ void rt6855A_gsw_init(void)
 	u32 phy_val=0;
 	u32 rev=0;
 
-#if defined (RT6855A_FPGA_BOARD)
+#if defined (CONFIG_RT6855A_FPGA)
     /*keep dump switch mode */
     rt6855A_eth_gpio_reset();
 
@@ -3169,21 +3294,19 @@ void rt6855A_gsw_init(void)
 
 
 
-#if defined(CONFIG_RALINK_RT6855) || defined(CONFIG_RALINK_RT6352)  || \
-    defined(CONFIG_RALINK_RT71100)
+#if defined(CONFIG_RALINK_RT6855) || defined(CONFIG_RALINK_MT7620)
 void rt_gsw_init(void)
 {
+#if defined (CONFIG_P4_MAC_TO_PHY_MODE) || defined (CONFIG_P5_MAC_TO_PHY_MODE)
 	u32 phy_val=0;
-#if  defined (RT6855A_FPGA_BOARD) || defined (CONFIG_RT6855_FPGA) || defined (CONFIG_RT6352_FPGA)
+#endif
+#if defined (CONFIG_RT6855_FPGA) || defined (CONFIG_MT7620_FPGA)
 	u32 i=0;
+#elif defined (CONFIG_MT7620_ASIC)
+	u32 is_BGA=0;
 #endif
 
-    /*reset switch*/
-    printk("Reset Switch!!\n\r");
-    *(unsigned long *)(0xb0000034) = 0x800000;
-    *(unsigned long *)(0xb0000034) = 0x0;
-
-#if defined (CONFIG_RT6855_FPGA) || defined (CONFIG_RT6352_FPGA)
+#if defined (CONFIG_RT6855_FPGA) || defined (CONFIG_MT7620_FPGA)
     /*keep dump switch mode */
     *(unsigned long *)(RALINK_ETH_SW_BASE+0x3000) = 0x5e333;//(P0, Force mode, Link Up, 10Mbps, Full-Duplex, FC ON)
     *(unsigned long *)(RALINK_ETH_SW_BASE+0x3100) = 0x5e333;//(P1, Force mode, Link Up, 10Mbps, Full-Duplex, FC ON)
@@ -3194,11 +3317,7 @@ void rt_gsw_init(void)
 #else
     *(unsigned long *)(RALINK_ETH_SW_BASE+0x3400) = 0x5e333;//(P4, Force mode, Link Up, 10Mbps, Full-Duplex, FC ON)
 #endif
-
     *(unsigned long *)(RALINK_ETH_SW_BASE+0x3500) = 0x5e337;//(P5, Force mode, Link Up, 100Mbps, Full-Duplex, FC ON)
-    *(unsigned long *)(RALINK_ETH_SW_BASE+0x3600) = 0x5e33b;//CPU Port6 Force Link 1G, FC ON
-
-    *(unsigned long *)(RALINK_ETH_SW_BASE+0x0010) = 0x7f7f7fe0;//Set Port6 CPU Port
 
     /* In order to use 10M/Full on FPGA board. We configure phy capable to
      * 10M Full/Half duplex, so we can use auto-negotiation on PC side */
@@ -3217,8 +3336,89 @@ void rt_gsw_init(void)
     *(unsigned long *)(SYSCFG1) |= (0x1 << 8); //PCIE_RC_MODE=1
 #endif
 
-/* FIXME: RT6352_ASIC to do*/    
-#if defined (CONFIG_RT6352_FPGA)|| defined (CONFIG_RT6352_ASIC)
+
+#if defined (CONFIG_MT7620_ASIC)
+    is_BGA = (sysRegRead(RALINK_SYSCTL_BASE + 0xc) >> 16) & 0x1;
+    /*
+    * Reg 31: Page Control
+    * Bit 15     => PortPageSel, 1=local, 0=global
+    * Bit 14:12  => PageSel, local:0~3, global:0~4
+    *
+    * Reg16~30:Local/Global registers
+    *
+    */
+    /*correct  PHY  setting L3.0 BGA*/
+    mii_mgr_write(1, 31, 0x4000); //global, page 4
+  
+    mii_mgr_write(1, 17, 0x7444);
+    if(is_BGA){
+	mii_mgr_write(1, 19, 0x0114);
+    }else{
+	mii_mgr_write(1, 19, 0x0117);
+    }
+
+    mii_mgr_write(1, 22, 0x10cf);
+    mii_mgr_write(1, 25, 0x6212);
+    mii_mgr_write(1, 26, 0x0777);
+    mii_mgr_write(1, 29, 0x4000);
+    mii_mgr_write(1, 28, 0xc077);
+    mii_mgr_write(1, 24, 0x0000);
+    
+    mii_mgr_write(1, 31, 0x3000); //global, page 3
+    mii_mgr_write(1, 17, 0x4838);
+
+    mii_mgr_write(1, 31, 0x2000); //global, page 2
+    if(is_BGA){
+	mii_mgr_write(1, 21, 0x0515);
+	mii_mgr_write(1, 22, 0x0053);
+	mii_mgr_write(1, 23, 0x00bf);
+	mii_mgr_write(1, 24, 0x0aaf);
+	mii_mgr_write(1, 25, 0x0fad);
+	mii_mgr_write(1, 26, 0x0fc1);
+    }else{
+	mii_mgr_write(1, 21, 0x0517);
+	mii_mgr_write(1, 22, 0x0fd2);
+	mii_mgr_write(1, 23, 0x00bf);
+	mii_mgr_write(1, 24, 0x0aab);
+	mii_mgr_write(1, 25, 0x00ae);
+	mii_mgr_write(1, 26, 0x0fff);
+    }
+    mii_mgr_write(1, 31, 0x1000); //global, page 1
+    mii_mgr_write(1, 17, 0xe7f8);
+    
+    mii_mgr_write(1, 31, 0x8000); //local, page 0
+    mii_mgr_write(0, 30, 0xa000);
+    mii_mgr_write(1, 30, 0xa000);
+    mii_mgr_write(2, 30, 0xa000);
+    mii_mgr_write(3, 30, 0xa000);
+#if !defined (CONFIG_RAETH_HAS_PORT4)   
+    mii_mgr_write(4, 30, 0xa000);
+#endif
+
+    mii_mgr_write(0, 4, 0x05e1);
+    mii_mgr_write(1, 4, 0x05e1);
+    mii_mgr_write(2, 4, 0x05e1);
+    mii_mgr_write(3, 4, 0x05e1);
+#if !defined (CONFIG_RAETH_HAS_PORT4)   
+    mii_mgr_write(4, 4, 0x05e1);
+#endif
+
+    mii_mgr_write(1, 31, 0xa000); //local, page 2
+    mii_mgr_write(0, 16, 0x1111);
+    mii_mgr_write(1, 16, 0x1010);
+    mii_mgr_write(2, 16, 0x1515);
+    mii_mgr_write(3, 16, 0x0f0f);
+#if !defined (CONFIG_RAETH_HAS_PORT4)   
+    mii_mgr_write(4, 16, 0x1313);
+#endif
+
+#endif
+
+
+
+#if defined (CONFIG_MT7620_FPGA)|| defined (CONFIG_MT7620_ASIC)
+	*(unsigned long *)(RALINK_ETH_SW_BASE+0x3600) = 0x5e33b;//CPU Port6 Force Link 1G, FC ON
+	*(unsigned long *)(RALINK_ETH_SW_BASE+0x0010) = 0x7f7f7fe0;//Set Port6 CPU Port
 
 #if defined (CONFIG_P5_RGMII_TO_MAC_MODE)
         *(unsigned long *)(RALINK_ETH_SW_BASE+0x3500) = 0x5e33b;//(P5, Force mode, Link Up, 1000Mbps, Full-Duplex, FC ON)
@@ -3247,10 +3447,8 @@ void rt_gsw_init(void)
 		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 0, &phy_val);
 		phy_val |= 1<<9; //restart AN
 		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 0, phy_val);
-	}
-
- 	if (isMarvellGigaPHY(1)) {
-#if defined (CONFIG_RT6352_FPGA)
+	}else if (isMarvellGigaPHY(1)) {
+#if defined (CONFIG_MT7620_FPGA)
 		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 9, &phy_val);
 		phy_val &= ~(3<<8); //turn off 1000Base-T Advertisement  (9.9=1000Full, 9.8=1000Half)
 		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 9, phy_val);
@@ -3263,8 +3461,7 @@ void rt_gsw_init(void)
 		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 0, &phy_val);
 		phy_val |= 1<<15; //PHY Software Reset
 	 	mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 0, phy_val);
-        }
-	if (isVtssGigaPHY(1)) {
+        }else if (isVtssGigaPHY(1)) {
 		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 31, 0x0001); //extended page
 		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 28, &phy_val);
 		printk("Vitesse phy skew: %x --> ", phy_val);
@@ -3284,6 +3481,7 @@ void rt_gsw_init(void)
 
 #else // Port 5 Disabled //
     *(unsigned long *)(RALINK_ETH_SW_BASE+0x3500) = 0x8000;//link down
+	*(unsigned long *)(0xb0000060) |= (1 << 9); //set RGMII to GPIO mode
 #endif
 #endif
 
@@ -3302,16 +3500,21 @@ void rt_gsw_init(void)
 	*(unsigned long *)(0xb0000060) &= ~(3 << 7); //set MDIO to Normal mode
 	*(unsigned long *)(SYSCFG1) &= ~(0x3 << 14); //GE2_MODE=RGMii Mode
 
-	//modify PHY skew
-	*(unsigned long *)(RALINK_ETH_SW_BASE+0x7014) = 0xc;//need to improve!
-	
 	enable_auto_negotiate(1);
 
- 	if (isMarvellGigaPHY(2)) {
-#if defined (CONFIG_RT6352_FPGA)
-		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR-1, 9, &phy_val);
+	if (isICPlusGigaPHY(2)) {
+		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 4, &phy_val);
+		phy_val |= 1<<10; //enable pause ability
+		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 4, phy_val);
+
+		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 0, &phy_val);
+		phy_val |= 1<<9; //restart AN
+		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 0, phy_val);
+	}else if (isMarvellGigaPHY(2)) {
+#if defined (CONFIG_MT7620_FPGA)
+		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 9, &phy_val);
 		phy_val &= ~(3<<8); //turn off 1000Base-T Advertisement  (9.9=1000Full, 9.8=1000Half)
-		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR-1, 9, phy_val);
+		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 9, phy_val);
 #endif
 		printk("Reset MARVELL phy2\n");
 		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 20, &phy_val);
@@ -3340,6 +3543,7 @@ void rt_gsw_init(void)
 
 #else // Port 4 Disabled //
     *(unsigned long *)(SYSCFG1) |= (0x3 << 14); //GE2_MODE=RJ45 Mode
+	*(unsigned long *)(0xb0000060) |= (1 << 10); //set RGMII2 to GPIO mode
 #endif
 
 }
@@ -3703,6 +3907,7 @@ int __init ra2882eth_init(void)
 		return -ENXIO;
 	}
 
+
 #ifdef CONFIG_RAETH_NETLINK
 	csr_netlink_init();
 #endif
@@ -3782,7 +3987,7 @@ void fe_sw_init(void)
 
 	// Case3: RT305x/RT335x/RT6855/RT6855A + EmbeddedSW
 #if defined (CONFIG_RT_3052_ESW)
-#if defined (CONFIG_RALINK_RT6855) || defined(CONFIG_RALINK_RT6352) || defined(CONFIG_RALINK_RT71100)
+#if defined (CONFIG_RALINK_RT6855) || defined(CONFIG_RALINK_MT7620)
 	rt_gsw_init();
 #elif defined(CONFIG_RALINK_RT6855A)
 	rt6855A_gsw_init();
@@ -3845,6 +4050,80 @@ void fe_sw_init(void)
 #endif
 
 #endif // defined (CONFIG_RAETH_ROUTER) || defined (CONFIG_100PHY) //
+
+	// Case7: MT7621 GE1/GE2
+#if defined (CONFIG_RALINK_MT7621)
+#if defined (CONFIG_GE1_MII_FORCE_100) || defined (CONFIG_GE1_RVMII_FORCE_100)
+	sysRegWrite(RALINK_ETH_SW_BASE+0x100, 0x5e337);//(P0, Force mode, Link Up, 100Mbps, Full-Duplex, FC ON)
+#elif defined (CONFIG_GE1_MII_AN) || defined (CONFIG_GE1_RGMII_AN)
+	enable_auto_negotiate(1);
+	if (isMarvellGigaPHY(1)) {
+#if defined (CONFIG_MT7621_FPGA)
+		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 9, &regValue);
+		regValue &= ~(3<<8); //turn off 1000Base-T Advertisement (9.9=1000Full, 9.8=1000Half)
+		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 9, regValue);
+#endif
+
+		printk("\n GMAC1 Reset MARVELL phy\n");
+		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 20, &regValue);
+		regValue |= 1<<7; //Add delay to RX_CLK for RXD Outputs
+		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 20, regValue);
+
+		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 0, &regValue);
+		regValue |= 1<<15; //PHY Software Reset
+		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 0, regValue);
+
+	}
+	if (isVtssGigaPHY(1)) {
+		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 31, 1);
+		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 28, &regValue);
+		printk("Vitesse phy skew: %x --> ", regValue);
+		regValue |= (0x3<<12);
+		regValue &= ~(0x3<<14);
+		printk("%x\n", regValue);
+		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 28, regValue);
+		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 31, 0);
+	}
+	sysRegWrite(RALINK_ETH_SW_BASE+0x100, 0x56300);//(P0, Auto mode)
+#elif defined (CONFIG_GE1_RGMII_FORCE_1000)
+	sysRegWrite(RALINK_ETH_SW_BASE+0x100, 0x5633b);//(P0, Force mode, Link Up, 1000Mbps, Full-Duplex, FC ON)
+#endif
+
+#if defined (CONFIG_GE2_MII_FORCE_100) || defined (CONFIG_GE2_RVMII_FORCE_100)
+	sysRegWrite(RALINK_ETH_SW_BASE+0x200, 0x5e337);//(P0, Force mode, Link Up, 100Mbps, Full-Duplex, FC ON)
+#elif defined (CONFIG_GE2_MII_AN) || defined (CONFIG_GE2_RGMII_AN)
+	enable_auto_negotiate(2);
+	if (isMarvellGigaPHY(2)) {
+#if defined (CONFIG_MT7621_FPGA)
+		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 9, &regValue);
+		regValue &= ~(3<<8); //turn off 1000Base-T Advertisement (9.9=1000Full, 9.8=1000Half)
+		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 9, regValue);
+#endif		
+		printk("\n GMAC2 Reset MARVELL phy\n");
+		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 20, &regValue);
+		regValue |= 1<<7; //Add delay to RX_CLK for RXD Outputs
+		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 20, regValue);
+
+		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 0, &regValue);
+		regValue |= 1<<15; //PHY Software Reset
+		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 0, regValue);
+
+	}
+	if (isVtssGigaPHY(2)) {
+		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 31, 1);
+		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 28, &regValue);
+		printk("Vitesse phy skew: %x --> ", regValue);
+		regValue |= (0x3<<12);
+		regValue &= ~(0x3<<14);
+		printk("%x\n", regValue);
+		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 28, regValue);
+		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 31, 0);
+	}
+        sysRegWrite(RALINK_ETH_SW_BASE+0x200, 0x56300);//(P1, Auto mode)
+#elif defined (CONFIG_GE2_RGMII_FORCE_1000)
+	sysRegWrite(RALINK_ETH_SW_BASE+0x200, 0x5633b);//(P0, Force mode, Link Up, 1000Mbps, Full-Duplex, FC ON)
+#endif
+#endif
 
 }
 

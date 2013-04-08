@@ -1463,7 +1463,8 @@
 2) kernel: hw_nat: fix usbnet offload.<br>
 3) kernel: hw_nat: fix work with hw_vlan_offload.<br>
 4) kernel: arch: update from new sdk.<br>
-5) init.d: fix hw_nat+hw_vlan offloads support.<br>
+5) kernel: raeth: update driver to 3.0 version.<br>
+6) init.d: fix hw_nat+hw_vlan offloads support.<br>
 <br>
 <br>
 <br>

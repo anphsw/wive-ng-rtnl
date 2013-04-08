@@ -65,7 +65,7 @@
 #endif
 
 #ifndef CONFIG_RAETH_NAPI
-#if defined(CONFIG_RALINK_RT3883) || defined(CONFIG_RALINK_RT6352)
+#if defined(CONFIG_RALINK_RT3883) || defined(CONFIG_RALINK_MT7620)
 #define NUM_RX_MAX_PROCESS 2
 #else
 #define NUM_RX_MAX_PROCESS 16
