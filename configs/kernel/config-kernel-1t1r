@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # Linux kernel version: 2.6.21.30
-# Mon Mar 25 00:27:19 2013
+# Tue Apr  9 15:40:52 2013
 #
 CONFIG_MIPS=y
 
@@ -1169,10 +1169,9 @@ CONFIG_RT_FULL_DEVICE_NAME="Wive_WR-150N"
 # Ethernet Ralink RT3xx/RT28xx wire driver.
 #
 CONFIG_RAETH=y
-# CONFIG_RAETH_SCATTER_GATHER_RX_DMA is not set
-CONFIG_RAETH_NAPI=y
-CONFIG_RA_NETWORK_TASKLET_BH=y
+# CONFIG_RA_NETWORK_TASKLET_BH is not set
 # CONFIG_RA_NETWORK_WORKQUEUE_BH is not set
+CONFIG_RAETH_NAPI=y
 # CONFIG_RAETH_SPECIAL_TAG is not set
 CONFIG_RAETH_CHECKSUM_OFFLOAD=y
 CONFIG_RAETH_HW_VLAN_TX=y

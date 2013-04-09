@@ -2867,12 +2867,7 @@ int ei_open(struct net_device *dev)
 #elif defined (CONFIG_RA_NETWORK_WORKQUEUE_BH)
 	printk("Workqueue");
 #endif
-
-#if defined (CONFIG_RAETH_SKB_RECYCLE_2K)
-	printk(",SkbRecycle");
-#endif
 	printk(")\n");
-
 
   	ei_local = netdev_priv(dev); // get device pointer from System
 	// unsigned int flags;

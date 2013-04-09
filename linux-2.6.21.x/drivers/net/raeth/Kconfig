@@ -26,11 +26,10 @@ choice
 	config RA_NETWORK_WORKQUEUE_BH
 	bool "Work Queue"
 
-endchoice
+	config RAETH_NAPI
+    	bool "Use Rx Polling (NAPI)"
 
-config RAETH_NAPI
-        bool "Use Rx Polling (NAPI)"
-        depends on RAETH
+endchoice
 
 config RAETH_SPECIAL_TAG
         bool "Ralink Special Tag (0x810x)"
