@@ -483,7 +483,7 @@ function formCheck(form)
                 <option value="420000">420000</option>
                 <option value="425000">425000</option>
                 <option value="430000">430000</option>
-                <option value="435000">430000</option>
+                <option value="435000">435000</option>
                 <option value="440000">440000</option>
               </select></td>
           </tr>
