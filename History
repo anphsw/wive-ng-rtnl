@@ -1464,7 +1464,7 @@
 3) kernel: arch: update from new sdk.<br>
 4) kernel: raeth: update driver to 3.0 version.<br>
 5) kernel: sock: sk_stamp: should be initialized to ktime_set(-1L, 0).<br>
-6) kernel: ipv6: Don't send packet to big messages to self.<br>
+6) kernel: ipv6: don't send packet to big messages to self.<br>
 <br>
 <br>
 <br>
