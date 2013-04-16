@@ -12,11 +12,12 @@ local:
 else
 EXTRA_DEPENDS+=libiptc/libip4tc.d
 
-libiptc/libiptc.a: libiptc/libiptc.a(libiptc/libip4tc.o)
 
 ifeq ($(DO_IPV6), 1)
 EXTRA_DEPENDS+= libiptc/libip6tc.d
-libiptc/libiptc.a: libiptc/libiptc.a(libiptc/libip6tc.o)
+libiptc/libiptc.a: libiptc/libiptc.a(libiptc/libip6tc.o) libiptc/libiptc.a(libiptc/libip4tc.o)
+else
+libiptc/libiptc.a: libiptc/libiptc.a(libiptc/libip4tc.o)
 endif
 
 libiptc/libip4tc.d libiptc/libip6tc.d: %.d: %.c
