@@ -1,4 +1,4 @@
-/* dnsmasq is Copyright (c) 2000-2012 Simon Kelley
+/* dnsmasq is Copyright (c) 2000-2013 Simon Kelley
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -233,6 +233,29 @@ char *cache_get_name(struct crec *crecp)
     return crecp->name.namep;
   
   return crecp->name.sname;
+}
+
+struct crec *cache_enumerate(int init)
+{
+  static int bucket;
+  static struct crec *cache;
+
+  if (init)
+    {
+      bucket = 0;
+      cache = NULL;
+    }
+  else if (cache && cache->hash_next)
+    cache = cache->hash_next;
+  else
+    {
+       cache = NULL; 
+       while (bucket < hash_size)
+	 if ((cache = hash_table[bucket++]))
+	   break;
+    }
+  
+  return cache;
 }
 
 static int is_outdated_cname_pointer(struct crec *crecp)
@@ -665,7 +688,7 @@ static void add_hosts_cname(struct crec *target)
 	add_hosts_cname(crec); /* handle chains */
       }
 }
-
+  
 static void add_hosts_entry(struct crec *cache, struct all_addr *addr, int addrlen, 
 			    int index, struct crec **rhash, int hashsz)
 {
@@ -1083,9 +1106,9 @@ void cache_add_dhcp_entry(char *host_name, int prot,
     }
   
   /* if in hosts, don't need DHCP record */
-   if (in_hosts)
+  if (in_hosts)
     return;
-
+  
   /* Name in hosts, address doesn't match */
   if (fail_crec)
     {
@@ -1098,18 +1121,18 @@ void cache_add_dhcp_entry(char *host_name, int prot,
       return;
     }	  
   
-   if ((crec = cache_find_by_addr(NULL, (struct all_addr *)host_address, 0, flags)))
-     {
-       if (crec->flags & F_NEG)
-	 {
-	   flags |= F_REVERSE;
-	   cache_scan_free(NULL, (struct all_addr *)host_address, 0, flags);
-	 }
-     }
-   else
-      flags |= F_REVERSE;
-   
-   if ((crec = dhcp_spare))
+  if ((crec = cache_find_by_addr(NULL, (struct all_addr *)host_address, 0, flags)))
+    {
+      if (crec->flags & F_NEG)
+	{
+	  flags |= F_REVERSE;
+	  cache_scan_free(NULL, (struct all_addr *)host_address, 0, flags);
+	}
+    }
+  else
+    flags |= F_REVERSE;
+  
+  if ((crec = dhcp_spare))
     dhcp_spare = dhcp_spare->next;
   else /* need new one */
     crec = whine_malloc(sizeof(struct crec));
@@ -1248,14 +1271,14 @@ char *record_source(int index)
   return "<unknown>";
 }
 
-void querystr(char *str, unsigned short type)
+void querystr(char *desc, char *str, unsigned short type)
 {
   unsigned int i;
   
-  sprintf(str, "query[type=%d]", type); 
+  sprintf(str, "%s[type=%d]", desc, type); 
   for (i = 0; i < (sizeof(typestr)/sizeof(typestr[0])); i++)
     if (typestr[i].type == type)
-      sprintf(str,"query[%s]", typestr[i].name);
+      sprintf(str,"%s[%s]", desc, typestr[i].name);
 }
 
 void log_query(unsigned int flags, char *name, struct all_addr *addr, char *arg)
@@ -1316,6 +1339,8 @@ void log_query(unsigned int flags, char *name, struct all_addr *addr, char *arg)
     source = arg;
   else if (flags & F_UPSTREAM)
     source = "reply";
+  else if (flags & F_AUTH)
+    source = "auth";
   else if (flags & F_SERVER)
     {
       source = "forwarded";

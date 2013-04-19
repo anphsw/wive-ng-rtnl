@@ -1,4 +1,4 @@
-/* dnsmasq is Copyright (c) 2000-2012 Simon Kelley
+/* dnsmasq is Copyright (c) 2000-2013 Simon Kelley
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -91,16 +91,19 @@ static dbus_bool_t add_watch(DBusWatch *watch, void *data)
 
 static void remove_watch(DBusWatch *watch, void *data)
 {
-  struct watch **up, *w;  
+  struct watch **up, *w, *tmp;  
   
-  for (up = &(daemon->watches), w = daemon->watches; w; w = w->next)
-    if (w->watch == watch)
-      {
-        *up = w->next;
-        free(w);
-      }
-    else
-      up = &(w->next);
+  for (up = &(daemon->watches), w = daemon->watches; w; w = tmp)
+    {
+      tmp = w->next;
+      if (w->watch == watch)
+	{
+	  *up = tmp;
+	  free(w);
+	}
+      else
+	up = &(w->next);
+    }
 
   w = data; /* no warning */
 }
@@ -214,9 +217,9 @@ static void dbus_read_servers(DBusMessage *message)
   char *domain;
   
   dbus_message_iter_init(message, &iter);
-  
+
   mark_dbus();
-  
+
   while (1)
     {
       int skip = 0;
@@ -296,7 +299,7 @@ static void dbus_read_servers(DBusMessage *message)
 }
 
 static DBusMessage* dbus_read_servers_ex(DBusMessage *message, int strings)
-	  {
+{
   DBusMessageIter iter, array_iter, string_iter;
   DBusMessage *error = NULL;
   const char *addr_err;
@@ -305,7 +308,7 @@ static DBusMessage* dbus_read_servers_ex(DBusMessage *message, int strings)
   my_syslog(LOG_INFO, _("setting upstream servers from DBus"));
   
   if (!dbus_message_iter_init(message, &iter))
-		{
+    {
       return dbus_message_new_error(message, DBUS_ERROR_INVALID_ARGS,
                                     "Failed to initialize dbus message iter");
     }
@@ -313,7 +316,7 @@ static DBusMessage* dbus_read_servers_ex(DBusMessage *message, int strings)
   /* check that the message contains an array of arrays */
   if ((dbus_message_iter_get_arg_type(&iter) != DBUS_TYPE_ARRAY) ||
       (dbus_message_iter_get_element_type(&iter) != (strings ? DBUS_TYPE_STRING : DBUS_TYPE_ARRAY)))
-		    {
+    {
       return dbus_message_new_error(message, DBUS_ERROR_INVALID_ARGS,
                                     strings ? "Expected array of string" : "Expected array of string arrays");
      }
@@ -336,13 +339,15 @@ static DBusMessage* dbus_read_servers_ex(DBusMessage *message, int strings)
 	    {
 	      error = dbus_message_new_error(message, DBUS_ERROR_INVALID_ARGS,
 					     "Empty string");
-		      break;
-		    }
+	      break;
+	    }
 	  
 	  /* dup the string because it gets modified during parsing */
+	  if (dup)
+	    free(dup);
 	  if (!(dup = str_domain = whine_malloc(strlen(str)+1)))
 	    break;
-
+	  
 	  strcpy(str_domain, str);
 
 	  /* point to address part of old string for error message */
@@ -350,36 +355,36 @@ static DBusMessage* dbus_read_servers_ex(DBusMessage *message, int strings)
 	    str = str_addr+1;
 	  
 	  if ((str_addr = strrchr(str_domain, '/')))
-		    {
+	    {
 	      if (*str_domain != '/' || str_addr == str_domain)
 		{
 		  error = dbus_message_new_error_printf(message,
 							DBUS_ERROR_INVALID_ARGS,
 							"No domain terminator '%s'",
 							str);
-		      break;
-		    }
+		  break;
+		}
 	      *str_addr++ = 0;
 	      str_domain++;
-		}
+	    }
 	  else
-	      {
+	    {
 	      str_addr = str_domain;
 	      str_domain = NULL;
 	    }
-		
-		
-		  }
-		else
-		  {
+
+	  
+	}
+      else
+	{
 	  /* check the types of the struct and its elements */
 	  if ((dbus_message_iter_get_arg_type(&array_iter) != DBUS_TYPE_ARRAY) ||
 	      (dbus_message_iter_get_element_type(&array_iter) != DBUS_TYPE_STRING))
-		      {
+	    {
 	      error = dbus_message_new_error(message, DBUS_ERROR_INVALID_ARGS,
 					     "Expected inner array of strings");
 	      break;
-		  }
+	    }
 	  
 	  /* string_iter points to each "s" element in the inner array */
 	  dbus_message_iter_recurse(&array_iter, &string_iter);
@@ -389,22 +394,24 @@ static DBusMessage* dbus_read_servers_ex(DBusMessage *message, int strings)
 	      error = dbus_message_new_error(message, DBUS_ERROR_INVALID_ARGS,
 					     "Expected IP address");
 	      break;
-	      }
-
+	    }
+	  
 	  dbus_message_iter_get_basic(&string_iter, &str);
 	  if (!str || !strlen (str))
-		  {
+	    {
 	      error = dbus_message_new_error(message, DBUS_ERROR_INVALID_ARGS,
 					     "Empty IP address");
 	      break;
-	      }
+	    }
 	  
 	  /* dup the string because it gets modified during parsing */
+	  if (dup)
+	    free(dup);
 	  if (!(dup = str_addr = whine_malloc(strlen(str)+1)))
 	    break;
-	   
+	  
 	  strcpy(str_addr, str);
-	  }
+	}
 
       memset(&addr, 0, sizeof(addr));
       memset(&source_addr, 0, sizeof(source_addr));
@@ -419,19 +426,19 @@ static DBusMessage* dbus_read_servers_ex(DBusMessage *message, int strings)
                                                 "Invalid IP address '%s': %s",
                                                 str, addr_err);
           break;
-    }
-  
+        }
+
       if (strings)
-    {
+	{
 	  char *p;
 	  
 	  do {
 	    if (str_domain)
-	{
+	      {
 		if ((p = strchr(str_domain, '/')))
 		  *p++ = 0;
-	}
-      else 
+	      }
+	    else 
 	      p = NULL;
 	    
 	    add_update_server(&addr, &source_addr, interface, str_domain);
@@ -451,8 +458,8 @@ static DBusMessage* dbus_read_servers_ex(DBusMessage *message, int strings)
 	    
 	    add_update_server(&addr, &source_addr, interface, str);
 	  } while (dbus_message_iter_get_arg_type(&string_iter) == DBUS_TYPE_STRING);
-    }
-
+	}
+	 
       /* jump to next element in outer array */
       dbus_message_iter_next(&array_iter);
     }
@@ -471,7 +478,7 @@ DBusHandlerResult message_handler(DBusConnection *connection,
 {
   char *method = (char *)dbus_message_get_member(message);
   DBusMessage *reply = NULL;
-   
+    
   if (dbus_message_is_method_call(message, DBUS_INTERFACE_INTROSPECTABLE, "Introspect"))
     {
       /* string length: "%s" provides space for termination zero */
@@ -482,9 +489,8 @@ DBusHandlerResult message_handler(DBusConnection *connection,
       if (introspection_xml)
 	{
 	  reply = dbus_message_new_method_return(message);
-
-      dbus_message_append_args(reply, DBUS_TYPE_STRING, &introspection_xml, DBUS_TYPE_INVALID);
-    }
+	  dbus_message_append_args(reply, DBUS_TYPE_STRING, &introspection_xml, DBUS_TYPE_INVALID);
+	}
     }
   else if (strcmp(method, "GetVersion") == 0)
     {
@@ -519,7 +525,7 @@ DBusHandlerResult message_handler(DBusConnection *connection,
   /* If no reply or no error, return nothing */
   if (!reply)
     reply = dbus_message_new_method_return(message);
- 
+
   if (reply)
     {
       dbus_connection_send (connection, reply, NULL);

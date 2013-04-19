@@ -1,4 +1,4 @@
-/* dnsmasq is Copyright (c) 2000-2012 Simon Kelley
+/* dnsmasq is Copyright (c) 2000-2013 Simon Kelley
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -39,6 +39,7 @@ static struct iovec iov;
 static u32 netlink_pid;
 
 static int nl_async(struct nlmsghdr *h);
+static void nl_newaddress(time_t now);
 
 void netlink_init(void)
 {
@@ -50,10 +51,14 @@ void netlink_init(void)
   addr.nl_pid = 0; /* autobind */
   addr.nl_groups = RTMGRP_IPV4_ROUTE;
   if (option_bool(OPT_CLEVERBIND))
-    addr.nl_groups |= RTMGRP_IPV4_IFADDR;
+    addr.nl_groups |= RTMGRP_IPV4_IFADDR;  
 #ifdef HAVE_IPV6
   addr.nl_groups |= RTMGRP_IPV6_ROUTE;
-  if (daemon->ra_contexts || option_bool(OPT_CLEVERBIND))
+  if (option_bool(OPT_CLEVERBIND))
+    addr.nl_groups |= RTMGRP_IPV6_IFADDR;
+#endif
+#ifdef HAVE_DHCP6
+  if (daemon->doing_ra || daemon->doing_dhcp6)
     addr.nl_groups |= RTMGRP_IPV6_IFADDR;
 #endif
   
@@ -187,7 +192,7 @@ int iface_enumerate(int family, void *parm, int (*callback)())
 	if (h->nlmsg_seq != seq || h->nlmsg_pid != netlink_pid || h->nlmsg_type == NLMSG_ERROR)
 	  {
 	    /* May be multicast arriving async */
-	    if (nl_async(h) && option_bool(OPT_CLEVERBIND))
+	    if (nl_async(h))
 	      newaddr = 1; 
 	  }
 	else if (h->nlmsg_type == NLMSG_DONE)
@@ -195,12 +200,9 @@ int iface_enumerate(int family, void *parm, int (*callback)())
 	    /* handle async new interface address arrivals, these have to be done
 	       after we complete as we're not re-entrant */
 	    if (newaddr) 
-	      {
-		enumerate_interfaces();
-		create_bound_listeners(0);
-	      }
-	    
-	  return callback_ok;
+	      nl_newaddress(dnsmasq_time());
+		
+	    return callback_ok;
 	  }
 	else if (h->nlmsg_type == RTM_NEWADDR && family != AF_UNSPEC && family != AF_LOCAL)
 	  {
@@ -236,17 +238,32 @@ int iface_enumerate(int family, void *parm, int (*callback)())
 		else if (ifa->ifa_family == AF_INET6)
 		  {
 		    struct in6_addr *addrp = NULL;
+		    u32 valid = 0, preferred = 0;
+		    int flags = 0;
+		    
 		    while (RTA_OK(rta, len1))
 		      {
 			if (rta->rta_type == IFA_ADDRESS)
 			  addrp = ((struct in6_addr *)(rta+1)); 
-			
+			else if (rta->rta_type == IFA_CACHEINFO)
+			  {
+			    struct ifa_cacheinfo *ifc = (struct ifa_cacheinfo *)(rta+1);
+			    preferred = ifc->ifa_prefered;
+			    valid = ifc->ifa_valid;
+			  }
 			rta = RTA_NEXT(rta, len1);
 		      }
 		    
+		    if (ifa->ifa_flags & IFA_F_TENTATIVE)
+		      flags |= IFACE_TENTATIVE;
+		    
+		    if (ifa->ifa_flags & IFA_F_DEPRECATED)
+		      flags |= IFACE_DEPRECATED;
+		    
 		    if (addrp && callback_ok)
 		      if (!((*callback)(addrp, (int)(ifa->ifa_prefixlen), (int)(ifa->ifa_scope), 
-					(int)(ifa->ifa_index), (int)(ifa->ifa_flags & IFA_F_TENTATIVE), parm)))
+					(int)(ifa->ifa_index), flags, 
+					(int) preferred, (int)valid, parm)))
 			callback_ok = 0;
 		  }
 #endif
@@ -305,7 +322,7 @@ int iface_enumerate(int family, void *parm, int (*callback)())
     }
 }
 
-void netlink_multicast(void)
+void netlink_multicast(time_t now)
 {
   ssize_t len;
   struct nlmsghdr *h;
@@ -317,78 +334,83 @@ void netlink_multicast(void)
     return;
   
   if ((len = netlink_recv()) != -1)
-      for (h = (struct nlmsghdr *)iov.iov_base; NLMSG_OK(h, (size_t)len); h = NLMSG_NEXT(h, len))
-      if (nl_async(h) && option_bool(OPT_CLEVERBIND))
+    for (h = (struct nlmsghdr *)iov.iov_base; NLMSG_OK(h, (size_t)len); h = NLMSG_NEXT(h, len))
+      if (nl_async(h))
 	newaddr = 1;
-
+  
   /* restore non-blocking status */
-  fcntl(daemon->netlinkfd, F_SETFL, flags); 
-
+  fcntl(daemon->netlinkfd, F_SETFL, flags);
+  
   if (newaddr) 
-    {
-      enumerate_interfaces();
-      create_bound_listeners(0);
-    }
+    nl_newaddress(now);
 }
 
 static int nl_async(struct nlmsghdr *h)
 {
   if (h->nlmsg_type == NLMSG_ERROR)
-{
-    struct nlmsgerr *err = NLMSG_DATA(h);
-    if (err->error != 0)
-    my_syslog(LOG_ERR, _("netlink returns error: %s"), strerror(-(err->error)));
-    return 0;
-}
-  else if (h->nlmsg_pid == 0 && h->nlmsg_type == RTM_NEWROUTE) 
     {
-/* We arrange to receive netlink multicast messages whenever the network route is added.
-   If this happens and we still have a DNS packet in the buffer, we re-send it.
-   This helps on DoD links, where frequently the packet which triggers dialling is
-   a DNS query, which then gets lost. By re-sending, we can avoid the lookup
-	 failing. */ 
-      struct rtmsg *rtm = NLMSG_DATA(h);
-
-      if (rtm->rtm_type == RTN_UNICAST && rtm->rtm_scope == RT_SCOPE_LINK)
-	{
-      /* Force re-reading resolv file right now, for luck. */
-      daemon->last_resolv = 0;
-      
-      if (daemon->srv_save)
-	{
-	      int fd;
-
-	  if (daemon->srv_save->sfd)
-	    fd = daemon->srv_save->sfd->fd;
-	  else if (daemon->rfd_save && daemon->rfd_save->refcount != 0)
-	    fd = daemon->rfd_save->fd;
-	  else
-		return 0;
-	  
-	  while(sendto(fd, daemon->packet, daemon->packet_len, 0,
-		       &daemon->srv_save->addr.sa, sa_len(&daemon->srv_save->addr)) == -1 && retry_send()); 
-	}
-    }
+      struct nlmsgerr *err = NLMSG_DATA(h);
+      if (err->error != 0)
+	my_syslog(LOG_ERR, _("netlink returns error: %s"), strerror(-(err->error)));
       return 0;
     }
-  else if (h->nlmsg_type == RTM_NEWADDR) 
+  else if (h->nlmsg_pid == 0 && h->nlmsg_type == RTM_NEWROUTE) 
     {
-#ifdef HAVE_DHCP6
-      /* force RAs to sync new network and pick up new interfaces.  */
-      if (daemon->ra_contexts)
+      /* We arrange to receive netlink multicast messages whenever the network route is added.
+	 If this happens and we still have a DNS packet in the buffer, we re-send it.
+	 This helps on DoD links, where frequently the packet which triggers dialling is
+	 a DNS query, which then gets lost. By re-sending, we can avoid the lookup
+	 failing. */ 
+      struct rtmsg *rtm = NLMSG_DATA(h);
+      
+      if (rtm->rtm_type == RTN_UNICAST && rtm->rtm_scope == RT_SCOPE_LINK)
 	{
-	  schedule_subnet_map();
-	  ra_start_unsolicted(dnsmasq_time(), NULL);
-	  /* cause lease_update_file to run after we return, in case we were called from
-	     iface_enumerate and can't re-enter it now */
-	  send_alarm(0, 0);
+  	  /* Force re-reading resolv file right now, for luck. */
+	  daemon->last_resolv = 0;
+	  
+	  if (daemon->srv_save)
+	    {
+	      int fd;
+
+	      if (daemon->srv_save->sfd)
+		fd = daemon->srv_save->sfd->fd;
+	      else if (daemon->rfd_save && daemon->rfd_save->refcount != 0)
+		fd = daemon->rfd_save->fd;
+	      else
+		return 0;
+	      
+	      while(sendto(fd, daemon->packet, daemon->packet_len, 0,
+			   &daemon->srv_save->addr.sa, sa_len(&daemon->srv_save->addr)) == -1 && retry_send()); 
+	    }
 	}
-#endif	 
-      return 1; /* clever bind mode - rescan */
+      return 0;
     }
+  else if (h->nlmsg_type == RTM_NEWADDR || h->nlmsg_type == RTM_DELADDR) 
+    return 1; /* clever bind mode - rescan */
   
   return 0;
 }
+  	
+static void nl_newaddress(time_t now)
+{
+  if (option_bool(OPT_CLEVERBIND) || daemon->doing_dhcp6 || daemon->doing_ra)
+    enumerate_interfaces();
+  
+  if (option_bool(OPT_CLEVERBIND))
+    create_bound_listeners(0);
+  
+#ifdef HAVE_DHCP6
+  if (daemon->doing_dhcp6 || daemon->doing_ra)
+    {
+      join_multicast(0);
+      dhcp_construct_contexts(now);
+    }
+  
+  if (daemon->doing_dhcp6)
+    lease_find_interfaces(now);
+#endif
+}
+
 
 #endif
 

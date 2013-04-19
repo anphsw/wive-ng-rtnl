@@ -1,4 +1,4 @@
-/* dnsmasq is Copyright (c) 2000-2012 Simon Kelley
+/* dnsmasq is Copyright (c) 2000-2013 Simon Kelley
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -54,6 +54,11 @@
 /* DBUS interface specifics */
 #define DNSMASQ_SERVICE "uk.org.thekelleys.dnsmasq" /* Default - may be overridden by config */
 #define DNSMASQ_PATH "/uk/org/thekelleys/dnsmasq"
+#define AUTH_TTL 600 /* default TTL for auth DNS */
+#define SOA_REFRESH 1200 /* SOA refresh default */
+#define SOA_RETRY 180 /* SOA retry default */
+#define SOA_EXPIRY 1209600 /* SOA expiry default */
+#define RA_INTERVAL 600 /* Send unsolicited RA's this often when not provoked. */
 
 /* Follows system specific switches. If you run on a 
    new system, you may want to edit these. 
@@ -95,6 +100,14 @@ HAVE_CONNTRACK
    incoming DNS queries to the corresponding upstream queries. This adds
    a build-dependency on libnetfilter_conntrack, but the resulting binary will
    still run happily on a kernel without conntrack support.
+
+HAVE_IPSET
+    define this to include the ability to selectively add resolved ip addresses
+    to given ipsets.
+
+HAVE_AUTH
+   define this to include the facility to act as an authoritative DNS
+   server for one or more zones.
 
 NOTES:
    For Linux you should define 
@@ -280,6 +293,13 @@ NOTES:
 #define HAVE_SCRIPT
 #endif
 
+#ifdef NO_AUTH
+#undef HAVE_AUTH
+#endif
+
+#if defined(NO_IPSET) || !defined(HAVE_LINUX_NETWORK)
+#undef HAVE_IPSET
+#endif
 
 /* Define a string indicating which options are in use.
    DNSMASQP_COMPILE_OPTS is only defined in dnsmasq.c */
@@ -338,6 +358,14 @@ static char *compile_opts =
 #ifndef HAVE_CONNTRACK
 "no-"
 #endif
-"conntrack";
+"conntrack "
+#ifndef HAVE_IPSET
+"no-"
+#endif
+"ipset "
+#ifndef HAVE_AUTH
+"no-"
+#endif
+  "auth";
 
 #endif

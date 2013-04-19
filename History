@@ -1466,6 +1466,7 @@
 5) kernel: sock: sk_stamp: should be initialized to ktime_set(-1L, 0).<br>
 6) kernel: ipv6: don't send packet to big messages to self.<br>
 7) kernel: ipv4: replace ip_fast_csum with csum_replace2 to save cpu cycles.<br>
+8) dnsmasq: up to 2.66 version.<br>
 <br>
 <br>
 <br>
