@@ -63,8 +63,10 @@
 /* you don't need to touch this block */
 #ifdef DEBUG_TRACE
 #define TRACE(X) dropbear_trace X;
+#define TRACE2(X) dropbear_trace2 X;
 #else /*DEBUG_TRACE*/
 #define TRACE(X)
+#define TRACE2(X)
 #endif /*DEBUG_TRACE*/
 
 /* To debug with GDB it is easier to run with no forking of child processes.

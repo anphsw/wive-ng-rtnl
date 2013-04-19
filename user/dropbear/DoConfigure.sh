@@ -7,7 +7,7 @@ if [ ! -f $APROOTDIR/configure ]; then
     aclocal
     autoconf
 fi
-if [ ! -f $APROOTDIR/Makefile.in ]; then
+if [ ! -f $APROOTDIR/Makefile ]; then
     automake
 fi
 

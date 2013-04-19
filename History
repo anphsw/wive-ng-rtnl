@@ -1467,6 +1467,7 @@
 6) kernel: ipv6: don't send packet to big messages to self.<br>
 7) kernel: ipv4: replace ip_fast_csum with csum_replace2 to save cpu cycles.<br>
 8) dnsmasq: up to 2.66 version.<br>
+9) dropbear: version up to 2013.58.<br>
 <br>
 <br>
 <br>

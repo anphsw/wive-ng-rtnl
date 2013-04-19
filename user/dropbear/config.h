@@ -1,4 +1,5 @@
 /* config.h.  Generated from config.h.in by configure.  */
+/* config.h.  Generated from config.h.in by configure.  */
 /* config.h.in.  Generated from configure.in by autoheader.  */
 
 /* Using AIX */
@@ -8,7 +9,7 @@
 /* #undef BROKEN_GETADDRINFO */
 
 /* Use bundled libtom */
-#undef BUNDLED_LIBTOM
+#define BUNDLED_LIBTOM /**/
 
 /* lastlog file location */
 /* #undef CONF_LASTLOG_FILE */
@@ -26,34 +27,34 @@
 /* #undef CONF_WTMP_FILE */
 
 /* Disable use of lastlog() */
-#define DISABLE_LASTLOG 
+#define DISABLE_LASTLOG /**/
 
 /* Use PAM */
-#define DISABLE_PAM 
+#define DISABLE_PAM /**/
 
 /* Disable use of pututline() */
-#define DISABLE_PUTUTLINE 
+#define DISABLE_PUTUTLINE /**/
 
 /* Disable use of pututxline() */
-#define DISABLE_PUTUTXLINE 
+#define DISABLE_PUTUTXLINE /**/
 
 /* Using syslog */
 /* #undef DISABLE_SYSLOG */
 
 /* Disable use of utmp */
-#define DISABLE_UTMP 
+#define DISABLE_UTMP /**/
 
 /* Disable use of utmpx */
 #define DISABLE_UTMPX 1
 
 /* Disable use of wtmp */
-#define DISABLE_WTMP 
+#define DISABLE_WTMP /**/
 
 /* Disable use of wtmpx */
 #define DISABLE_WTMPX 1
 
 /* Use zlib */
-#define DISABLE_ZLIB 
+#define DISABLE_ZLIB /**/
 
 /* Define to 1 if you have the `basename' function. */
 #define HAVE_BASENAME 1
@@ -86,7 +87,7 @@
 #define HAVE_FCNTL_H 1
 
 /* Define to 1 if you have the `fork' function. */
-#undef HAVE_FORK
+#define HAVE_FORK 1
 
 /* Define to 1 if you have the `freeaddrinfo' function. */
 #define HAVE_FREEADDRINFO 1
@@ -140,10 +141,10 @@
 /* #undef HAVE_LIBPAM */
 
 /* Define to 1 if you have the `tomcrypt' library (-ltomcrypt). */
-#undef HAVE_LIBTOMCRYPT
+/* #undef HAVE_LIBTOMCRYPT */
 
 /* Define to 1 if you have the `tommath' library (-ltommath). */
-#undef HAVE_LIBTOMMATH
+/* #undef HAVE_LIBTOMMATH */
 
 /* Define to 1 if you have the <libutil.h> header file. */
 /* #undef HAVE_LIBUTIL_H */
@@ -185,7 +186,7 @@
 /* #undef HAVE_OPENPTY */
 
 /* Define to 1 if you have the `pam_fail_delay' function. */
-#undef HAVE_PAM_FAIL_DELAY
+/* #undef HAVE_PAM_FAIL_DELAY */
 
 /* Define to 1 if you have the <pam/pam_appl.h> header file. */
 /* #undef HAVE_PAM_PAM_APPL_H */
@@ -248,13 +249,13 @@
 #define HAVE_STROPTS_H 1
 
 /* Have struct addrinfo */
-#define HAVE_STRUCT_ADDRINFO 
+#define HAVE_STRUCT_ADDRINFO /**/
 
 /* Have struct in6_addr */
-#define HAVE_STRUCT_IN6_ADDR 
+#define HAVE_STRUCT_IN6_ADDR /**/
 
 /* Have struct sockaddr_in6 */
-#define HAVE_STRUCT_SOCKADDR_IN6 
+#define HAVE_STRUCT_SOCKADDR_IN6 /**/
 
 /* Define to 1 if the system has the type `struct sockaddr_storage'. */
 #define HAVE_STRUCT_SOCKADDR_STORAGE 1
@@ -329,7 +330,7 @@
 #define HAVE_SYS_TYPES_H 1
 
 /* Define to 1 if you have the <sys/uio.h> header file. */
-#undef HAVE_SYS_UIO_H
+#define HAVE_SYS_UIO_H 1
 
 /* Define to 1 if you have <sys/wait.h> that is POSIX.1 compatible. */
 #define HAVE_SYS_WAIT_H 1
@@ -365,7 +366,7 @@
 #define HAVE_U_INT16_T 1
 
 /* Define to 1 if you have the `writev' function. */
-#undef HAVE_WRITEV
+#define HAVE_WRITEV 1
 
 /* Define to 1 if you have the `_getpty' function. */
 /* #undef HAVE__GETPTY */
@@ -383,7 +384,7 @@
 #define PACKAGE_TARNAME ""
 
 /* Define to the home page for this package. */
-#undef PACKAGE_URL
+#define PACKAGE_URL ""
 
 /* Define to the version of this package. */
 #define PACKAGE_VERSION ""
