@@ -2,6 +2,8 @@
 
 all: $(SHARED_LIBS) $(SHARED_SE_LIBS) $(EXTRAS)
 
+$(STATIC_LIBS): libiptc/libiptc.a
+
 experimental: $(EXTRAS_EXP)
 
 # Have to handle extensions which no longer exist.

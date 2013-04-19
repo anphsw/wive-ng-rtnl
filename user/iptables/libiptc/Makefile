@@ -13,12 +13,15 @@ else
 EXTRA_DEPENDS+=libiptc/libip4tc.d
 
 
+OBJS:=libiptc/libip4tc.o
 ifeq ($(DO_IPV6), 1)
 EXTRA_DEPENDS+= libiptc/libip6tc.d
-libiptc/libiptc.a: libiptc/libiptc.a(libiptc/libip6tc.o) libiptc/libiptc.a(libiptc/libip4tc.o)
+OBJS+= libiptc/libip6tc.o
 else
-libiptc/libiptc.a: libiptc/libiptc.a(libiptc/libip4tc.o)
 endif
+
+libiptc/libiptc.a: $(OBJS)
+	$(AR) rv $@ $?
 
 libiptc/libip4tc.d libiptc/libip6tc.d: %.d: %.c
 	@-$(CC) -M -MG $(CFLAGS) $< | sed -e 's@^.*\.o:@$*.d libiptc/libiptc.a($*.o):@' > $@
