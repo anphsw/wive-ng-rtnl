@@ -27,7 +27,7 @@ fi
 #------------------------------------#
 #WR-N for full and WR-NL for ligth HW
 if [ "$MODE" = "2T2R-5G-USB" ]; then
-    DEVNAME="Wive_WR-5G-300NU"
+    DEVNAME="Wive_WR-300NUH"
 elif [ "$MODE" = "2T2R-USB" ]; then
     DEVNAME="Wive_WR-300NU"
 elif [ "$MODE" = "2T2R" ]; then
