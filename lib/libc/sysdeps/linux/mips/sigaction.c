@@ -48,25 +48,17 @@ int __libc_sigaction (int sig, const struct sigaction *act, struct sigaction *oa
     int result;
     struct kernel_sigaction kact, koact;
 
-#ifdef SIGCANCEL
-    if (sig == SIGCANCEL) {
-	__set_errno (EINVAL);
-	return -1;
-    }
-#endif
-
     if (act) {
 	kact.k_sa_handler = act->sa_handler;
 	memcpy (&kact.sa_mask, &act->sa_mask, sizeof (kact.sa_mask));
 	kact.sa_flags = act->sa_flags;
-
-#ifdef HAVE_SA_RESTORER
+# ifdef HAVE_SA_RESTORER
 #  if _MIPS_SIM == _ABIO32
 	kact.sa_restorer = act->sa_restorer;
 #  else
 	kact.sa_restorer = &restore_rt;
 #  endif
-#endif
+# endif
     }
 
     /* XXX The size argument hopefully will have to be changed to the
@@ -78,9 +70,9 @@ int __libc_sigaction (int sig, const struct sigaction *act, struct sigaction *oa
 	oact->sa_handler = koact.k_sa_handler;
 	memcpy (&oact->sa_mask, &koact.sa_mask, sizeof (oact->sa_mask));
 	oact->sa_flags = koact.sa_flags;
-#ifdef HAVE_SA_RESTORER
+# ifdef HAVE_SA_RESTORER
 	oact->sa_restorer = koact.sa_restorer;
-#endif
+# endif
     }
     return result;
 }
@@ -96,23 +88,17 @@ int __libc_sigaction (int sig, const struct sigaction *act, struct sigaction *oa
     int result;
     struct old_kernel_sigaction kact, koact;
 
-#ifdef SIGCANCEL
-    if (sig == SIGCANCEL) {
-	__set_errno (EINVAL);
-	return -1;
-    }
-#endif
-
     if (act) {
 	kact.k_sa_handler = act->sa_handler;
 	kact.sa_mask = act->sa_mask.__val[0];
-#ifdef HAVE_SA_RESTORER
+	kact.sa_flags = act->sa_flags;
+# ifdef HAVE_SA_RESTORER
 #  if _MIPS_SIM == _ABIO32
 	kact.sa_restorer = act->sa_restorer;
 #  else
 	kact.sa_restorer = &restore_rt;
 #  endif
-#endif
+# endif
     }
 
     result = __syscall_sigaction(sig, act ? __ptrvalue (&kact) : NULL,
