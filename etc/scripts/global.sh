@@ -25,6 +25,7 @@ phys_wan_if="eth2.2"
 # set some constatns
 mcast_net="224.0.0.0/4"
 upmpm_net="239.0.0.0/8"
+txqueuelen="1000"
 
 # first get operation mode and wan mode  dns mode and relay mode vpn mode and type
 eval `nvram_buf_get 2860 OperationMode wanConnectionMode wan_ipaddr wan_static_dns \
@@ -180,15 +181,6 @@ getWanIpaddr() {
 
 }
 
-get_txqlen() {
-    if [ "$QoSEnable" != "" -a "$QoSEnable" != "0" ] || [ "$simple_qos" = "1" ]; then
-	# QoS Enabled
-	txqueuelen="1000"
-    else
-	txqueuelen="500"
-    fi
-}
-
 # reconnect to AP
 wifi_reconnect() {
     if [ "$OperationMode" = "2" ]; then
@@ -260,4 +252,3 @@ getWanIfName
 getVpnIfName
 getTunIfName
 getWanIpaddr
-get_txqlen
