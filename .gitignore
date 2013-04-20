@@ -227,3 +227,6 @@ romfs
 /user/miniupnp/config.h
 /linux-2.6.21.x/include/linux/autoconf.h
 /linux-2.6.21.x/include/linux/utsrelease.h
+/linux-2.6.21.x/arch/mips/kernel/vmlinux.lds
+/linux-2.6.21.x/include/asm-mips/asm-offsets.h
+/linux-2.6.21.x/include/linux/compile.h
