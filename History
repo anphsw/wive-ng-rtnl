@@ -1467,11 +1467,12 @@
 6) kernel: ipv6: don't send packet to big messages to self.<br>
 7) kernel: ipv4: replace ip_fast_csum with csum_replace2 to save cpu cycles.<br>
 8) kernel: pci: make pci_bus a struct device.<br>
-9) kenrel: pci: fix up error messages for pci_bus registering
+9) kenrel: pci: fix up error messages for pci_bus registering.<br>
 10) kernel: fix gcc >= 4.6.x support.<br>
 11) dnsmasq: up to 2.66 version.<br>
 12) dropbear: version up to 2013.58.<br>
 13) xupnpd: lua: up to 5.2.2 version.<br>
+14) init.d: udpxy: tune options for compat with amlogic based tabs/players.<br>
 <br>
 <br>
 <br>
