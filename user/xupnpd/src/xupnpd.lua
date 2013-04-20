@@ -32,7 +32,7 @@ cfg.debug=0
 -- cfg.udpxy_url='http://192.168.1.1:4022'
 
 -- downstream interface for builtin multicast proxy (comment 'cfg.udpxy_url' for processing 'udp://@...' playlists)
-cfg.mcast_interface='eth2.2'
+-- cfg.mcast_interface='eth2.2'
 
 -- 'cfg.proxy' enables proxy for injection DLNA headers to stream
 -- 0-off, 1-radio, 2-radio/TV
@@ -51,7 +51,7 @@ cfg.dlna_notify=true
 cfg.group=true
 
 -- sort files
-cfg.sort_files=false
+cfg.sort_files=true
 
 -- Device name
 cfg.name='Wive-NG'
