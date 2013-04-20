@@ -24,7 +24,7 @@ LDSHARED= $(CC) -shared -Wl,-soname,libz.so.1,--version-script,zlib.map
 
 STATICLIB=libz.a
 SHAREDLIB=libz.so
-SHAREDLIBV=libz.so.1.2.6
+SHAREDLIBV=libz.so.1.2.7
 SHAREDLIBM=libz.so.1
 LIBS=$(STATICLIB) $(SHAREDLIBV)
 

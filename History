@@ -1473,7 +1473,8 @@
 12) dropbear: version up to 2013.58.<br>
 13) xupnpd: lua: up to 5.2.2 version.<br>
 14) uclibc: small update for compat with new userspace apps.<br>
-15) init.d: udpxy: tune options for compat with amlogic based tabs/players.<br>
+15) zlib: update to 1.2.7 version.<br>
+16) init.d: udpxy: tune options for compat with amlogic based tabs/players.<br>
 <br>
 <br>
 <br>
