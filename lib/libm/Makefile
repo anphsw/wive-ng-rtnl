@@ -50,31 +50,42 @@ LIBM_SHARED=libm.so
 LIBM_SHARED_FULLNAME=libm-$(MAJOR_VERSION).$(MINOR_VERSION).$(SUBLEVEL).so
 CFLAGS+=-D_IEEE_LIBM -D_ISOC99_SOURCE -D_SVID_SOURCE
 FL_MSRC = float_wrappers.c
+LD_MSRC = ldouble_wrappers.c
 
 ifeq ($(strip $(DO_C99_MATH)),y)
 CSRC =   e_acos.c e_acosh.c e_asin.c e_atan2.c e_atanh.c e_cosh.c\
          e_exp.c e_fmod.c e_gamma.c e_gamma_r.c e_hypot.c e_j0.c\
-         e_j1.c e_jn.c e_lgamma.c e_lgamma_r.c e_log.c e_log10.c\
+         e_j1.c e_jn.c e_lgamma.c e_lgamma_r.c e_log.c e_log2.c e_log10.c\
          e_pow.c e_remainder.c e_rem_pio2.c e_scalb.c e_sinh.c\
          e_sqrt.c k_cos.c k_rem_pio2.c k_sin.c k_standard.c k_tan.c\
          s_asinh.c s_atan.c s_cbrt.c s_ceil.c s_copysign.c s_cos.c\
-         s_erf.c s_expm1.c s_fabs.c s_finite.c s_floor.c s_frexp.c\
-         s_ilogb.c s_ldexp.c s_lib_version.c s_log1p.c s_logb.c\
-         s_matherr.c s_modf.c s_nextafter.c s_rint.c s_scalbn.c\
-         s_signgam.c s_significand.c s_sin.c s_tan.c s_tanh.c\
+         s_erf.c s_expm1.c s_fabs.c s_fdim.c s_fma.c s_fmax.c s_fmin.c\
+	 s_finite.c s_floor.c s_frexp.c s_ilogb.c s_ldexp.c\
+         s_lib_version.c s_llrint.c s_llround.c s_log1p.c s_logb.c\
+	 s_lrint.c s_lround.c s_matherr.c s_modf.c s_nearbyint.c s_nextafter.c\
+         s_remquo.c s_rint.c s_round.c s_scalbln.c s_scalbn.c\
+         s_signgam.c s_significand.c s_sin.c s_tan.c s_tanh.c s_trunc.c\
          w_acos.c w_acosh.c w_asin.c w_atan2.c w_atanh.c w_cabs.c\
-         w_cosh.c w_drem.c w_exp.c w_fmod.c w_gamma.c w_gamma_r.c\
+         w_cosh.c w_drem.c w_exp.c w_exp2.c w_fmod.c w_gamma.c w_gamma_r.c\
          w_hypot.c w_j0.c w_j1.c w_jn.c w_lgamma.c w_lgamma_r.c\
-         w_log.c w_log10.c w_pow.c w_remainder.c w_scalb.c w_sinh.c\
-         w_sqrt.c fpmacros.c nan.c s_ceilf.c s_floorf.c
+         w_log.c w_log2.c w_log10.c w_nexttoward.c w_pow.c w_remainder.c\
+         w_scalb.c w_sinh.c w_sqrt.c w_tgamma.c fpmacros.c nan.c
 FL_MOBJ = acosf.o acoshf.o asinf.o asinhf.o atan2f.o atanf.o atanhf.o cbrtf.o \
 	ceilf.o copysignf.o cosf.o coshf.o erfcf.o erff.o exp2f.o expf.o \
 	expm1f.o fabsf.o fdimf.o floorf.o fmaf.o fmaxf.o fminf.o fmodf.o \
-	frexpf.o hypotf.o ilogbf.o ldexpf.o lgammaf.o log10f.o log1pf.o \
-	log2f.o logbf.o logf.o lrintf.o lroundf.o modff.o nearbyintf.o \
-	nextafterf.o powf.o remainderf.o remquof.o rintf.o roundf.o \
+	frexpf.o gammaf.o hypotf.o ilogbf.o ldexpf.o lgammaf.o llrintf.o llroundf.o \
+	log10f.o log1pf.o log2f.o logbf.o logf.o lrintf.o lroundf.o modff.o nearbyintf.o \
+	nextafterf.o nexttowardf.o powf.o remainderf.o remquof.o rintf.o roundf.o \
 	scalblnf.o scalbnf.o sinf.o sinhf.o sqrtf.o tanf.o tanhf.o \
 	tgammaf.o truncf.o
+LD_MOBJ = acoshl.o acosl.o asinhl.o asinl.o atan2l.o atanhl.o atanl.o cbrtl.o \
+	ceill.o copysignl.o coshl.o cosl.o erfcl.o erfl.o exp2l.o expl.o \
+	expm1l.o fabsl.o fdiml.o floorl.o fmal.o fmaxl.o fminl.o fmodl.o \
+	frexpl.o gammal.o hypotl.o ilogbl.o ldexpl.o lgammal.o llrintl.o llroundl.o \
+	log10l.o log1pl.o log2l.o logbl.o logl.o lrintl.o lroundl.o modfl.o nearbyintl.o \
+	nextafterl.o nexttowardl.o powl.o remainderl.o remquol.o rintl.o roundl.o \
+	scalblnl.o scalbnl.o sinhl.o sinl.o sqrtl.o tanhl.o tanl.o \
+	tgammal.o truncl.o
 else
 # This list of math functions was taken from POSIX/IEEE 1003.1b-1993
 CSRC =   w_acos.c w_asin.c s_atan.c w_atan2.c s_ceil.c s_cos.c \
@@ -90,7 +101,11 @@ FL_MOBJ = sqrtf.o
 endif
 
 COBJS=$(patsubst %.c,%.o, $(CSRC))
+ifeq ($(strip $(UCLIBC_HAS_LONG_DOUBLE_MATH)),y)
+OBJS=$(COBJS) $(FL_MOBJ) $(LD_MOBJ)
+else
 OBJS=$(COBJS) $(FL_MOBJ)
+endif
 
 
 ifneq ($(strip $(UCLIBC_HAS_FLOATS)),y)
@@ -128,6 +143,10 @@ $(COBJS): %.o : %.c
 	$(STRIPTOOL) -x -R .note -R .comment $*.o
 
 $(FL_MOBJ): $(FL_MSRC)
+	$(CC) $(CFLAGS) -DL_$* $< -c -o $*.o
+	$(STRIPTOOL) -x -R .note -R .comment $*.o
+
+$(LD_MOBJ): $(LD_MSRC)
 	$(CC) $(CFLAGS) -DL_$* $< -c -o $*.o
 	$(STRIPTOOL) -x -R .note -R .comment $*.o
 

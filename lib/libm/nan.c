@@ -35,7 +35,7 @@ float nanf (const char *tagp)
     return NAN;
 }
 
-#if 0
+#ifdef __UCLIBC_HAS_LONG_DOUBLE_MATH__
 long double nanl (const char *tagp)
 {
     if (tagp[0] != '\0') {

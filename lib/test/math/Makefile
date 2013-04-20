@@ -18,7 +18,7 @@
 
 include ../Rules.mak
 
-CFLAGS+=-D_GNU_SOURCE -DNO_LONG_DOUBLE
+CFLAGS+=-D_GNU_SOURCE
 EXTRA_LIBS=-lm
 PERL=/usr/bin/perl
 
@@ -26,8 +26,10 @@ TARGETS:=
 libm-tests=libm-test.c
 libm-tests+= test-double test-idouble
 libm-tests+= diff
-#libm-tests+= test-float test-ifloat
-#libm-tests+= test-ldouble test-ildouble
+libm-tests+= test-float test-ifloat
+ifeq ($(strip $(UCLIBC_HAS_LONG_DOUBLE_MATH)),y)
+libm-tests+= test-ldouble test-ildouble
+endif
 libm-tests.o = $(addsuffix .o,$(libm-tests))
 
 libm-tests-generated = libm-test-ulps.h libm-test.c

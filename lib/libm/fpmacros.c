@@ -107,6 +107,12 @@ int __fpclassify ( double arg )
 		}
 }
 
+#ifdef __UCLIBC_HAS_LONG_DOUBLE_MATH__
+int __fpclassifyl ( long double arg )
+{
+	return (long double) __fpclassify( (double)arg );
+}
+#endif
 
 /***********************************************************************
    int __isnormalf(float x) returns nonzero if and only if x is a
@@ -166,6 +172,14 @@ int __finite ( double x )
 }
 weak_alias (__finite, finite)
 
+#ifdef __UCLIBC_HAS_LONG_DOUBLE_MATH__
+int __finitel ( long double x )
+{
+	return ( __fpclassifyl ( x ) >= FP_ZERO );
+}
+weak_alias (__finitel, finitel)
+#endif
+
 
 /***********************************************************************
    int __signbitf(float x) returns nonzero if and only if the sign
@@ -209,6 +223,13 @@ int __signbit ( double arg )
       return sign;
 }
 
+#ifdef __UCLIBC_HAS_LONG_DOUBLE_MATH__
+int __signbitl ( long double arg )
+{
+	return (long double) __signbit( (double)arg );
+}
+#endif
+
 
 /***********************************************************************
 * int __isinff(float x) returns -1 if value represents  negative
@@ -237,10 +258,10 @@ int __isinf ( double x )
 }
 weak_alias (__isinf, isinf)
 
-#if 0
+#ifdef __UCLIBC_HAS_LONG_DOUBLE_MATH__
 int __isinfl ( long double x )
 {
-    int class = __fpclassify(x);
+    int class = __fpclassifyl(x);
     if ( class == FP_INFINITE ) {
 	return ( (__signbit(x)) ? -1 : 1);
     }
@@ -278,10 +299,10 @@ int __isnan ( double x )
 }
 weak_alias (__isnan, isnan);
 
-#if 0
+#ifdef __UCLIBC_HAS_LONG_DOUBLE_MATH__
 int __isnanl ( long double x )
 {
-	int class = __fpclassify(x);
+	int class = __fpclassifyl(x);
 	return ( class == FP_NAN );
 }
 weak_alias (__isnanl, isnanl);

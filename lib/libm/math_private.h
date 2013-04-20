@@ -153,37 +153,38 @@ do {								\
 } while (0)
 
 /* ieee style elementary functions */
-extern double __ieee754_sqrt __P((double));
 extern double __ieee754_acos __P((double));
 extern double __ieee754_acosh __P((double));
-extern double __ieee754_log __P((double));
-extern double __ieee754_atanh __P((double));
 extern double __ieee754_asin __P((double));
 extern double __ieee754_atan2 __P((double,double));
-extern double __ieee754_exp __P((double));
+extern double __ieee754_atanh __P((double));
 extern double __ieee754_cosh __P((double));
+extern double __ieee754_exp __P((double));
 extern double __ieee754_fmod __P((double,double));
-extern double __ieee754_pow __P((double,double));
-extern double __ieee754_lgamma_r __P((double,int *));
-extern double __ieee754_gamma_r __P((double,int *));
-extern double __ieee754_lgamma __P((double));
 extern double __ieee754_gamma __P((double));
-extern double __ieee754_log10 __P((double));
-extern double __ieee754_sinh __P((double));
+extern double __ieee754_gamma_r __P((double,int *));
 extern double __ieee754_hypot __P((double,double));
 extern double __ieee754_j0 __P((double));
 extern double __ieee754_j1 __P((double));
-extern double __ieee754_y0 __P((double));
-extern double __ieee754_y1 __P((double));
 extern double __ieee754_jn __P((int,double));
-extern double __ieee754_yn __P((int,double));
-extern double __ieee754_remainder __P((double,double));
+extern double __ieee754_lgamma __P((double));
+extern double __ieee754_lgamma_r __P((double,int *));
+extern double __ieee754_log __P((double));
+extern double __ieee754_log10 __P((double));
+extern double __ieee754_log2 __P((double));
+extern double __ieee754_pow __P((double,double));
 extern int    __ieee754_rem_pio2 __P((double,double*));
+extern double __ieee754_remainder __P((double,double));
 #if defined(_SCALB_INT)
 extern double __ieee754_scalb __P((double,int));
 #else
 extern double __ieee754_scalb __P((double,double));
 #endif
+extern double __ieee754_sinh __P((double));
+extern double __ieee754_sqrt __P((double));
+extern double __ieee754_y0 __P((double));
+extern double __ieee754_y1 __P((double));
+extern double __ieee754_yn __P((int,double));
 
 /* fdlibm kernel function */
 extern double __kernel_standard __P((double,double,int));
@@ -191,41 +192,5 @@ extern double __kernel_sin __P((double,double,int));
 extern double __kernel_cos __P((double,double));
 extern double __kernel_tan __P((double,double,int));
 extern int    __kernel_rem_pio2 __P((double*,double*,int,int,int,const int*));
-
-
-/* ieee style elementary float functions */
-extern float __ieee754_sqrtf __P((float));
-extern float __ieee754_acosf __P((float));
-extern float __ieee754_acoshf __P((float));
-extern float __ieee754_logf __P((float));
-extern float __ieee754_atanhf __P((float));
-extern float __ieee754_asinf __P((float));
-extern float __ieee754_atan2f __P((float,float));
-extern float __ieee754_expf __P((float));
-extern float __ieee754_coshf __P((float));
-extern float __ieee754_fmodf __P((float,float));
-extern float __ieee754_powf __P((float,float));
-extern float __ieee754_lgammaf_r __P((float,int *));
-extern float __ieee754_gammaf_r __P((float,int *));
-extern float __ieee754_lgammaf __P((float));
-extern float __ieee754_gammaf __P((float));
-extern float __ieee754_log10f __P((float));
-extern float __ieee754_sinhf __P((float));
-extern float __ieee754_hypotf __P((float,float));
-extern float __ieee754_j0f __P((float));
-extern float __ieee754_j1f __P((float));
-extern float __ieee754_y0f __P((float));
-extern float __ieee754_y1f __P((float));
-extern float __ieee754_jnf __P((int,float));
-extern float __ieee754_ynf __P((int,float));
-extern float __ieee754_remainderf __P((float,float));
-extern int   __ieee754_rem_pio2f __P((float,float*));
-extern float __ieee754_scalbf __P((float,float));
-
-/* float versions of fdlibm kernel functions */
-extern float __kernel_sinf __P((float,float,int));
-extern float __kernel_cosf __P((float,float));
-extern float __kernel_tanf __P((float,float,int));
-extern int   __kernel_rem_pio2f __P((float*,float*,int,int,int,const int*));
 
 #endif /* _MATH_PRIVATE_H_ */
