@@ -872,7 +872,7 @@ static int arp_process(struct sk_buff *skb)
 
 	n = __neigh_lookup(&arp_tbl, &sip, dev, 0);
 
-	if (IPV4_DEVCONF_ALL(ARP_ACCEPT)) {
+	if (ipv4_devconf.arp_accept) {
 		/* Unsolicited ARP is not accepted by default.
 		   It is possible, that this option should be enabled for some
 		   devices (strip is candidate)
@@ -981,11 +981,11 @@ static int arp_req_set(struct arpreq *r, struct net_device * dev)
 			return 0;
 		}
 		if (dev == NULL) {
-			IPV4_DEVCONF_ALL(PROXY_ARP) = 1;
+			ipv4_devconf.proxy_arp = 1;
 			return 0;
 		}
 		if (__in_dev_get_rtnl(dev)) {
-			IN_DEV_CONF_SET(__in_dev_get_rtnl(dev), PROXY_ARP, 1);
+			__in_dev_get_rtnl(dev)->cnf.proxy_arp = 1;
 			return 0;
 		}
 		return -ENXIO;
@@ -1103,12 +1103,11 @@ static int arp_req_delete(struct arpreq *r, struct net_device * dev)
 			return pneigh_delete(&arp_tbl, &ip, dev);
 		if (mask == 0) {
 			if (dev == NULL) {
-				IPV4_DEVCONF_ALL(PROXY_ARP) = 0;
+				ipv4_devconf.proxy_arp = 0;
 				return 0;
 			}
 			if (__in_dev_get_rtnl(dev)) {
-				IN_DEV_CONF_SET(__in_dev_get_rtnl(dev),
-						PROXY_ARP, 0);
+				__in_dev_get_rtnl(dev)->cnf.proxy_arp = 0;
 				return 0;
 			}
 			return -ENXIO;

@@ -1470,13 +1470,12 @@
 9) kenrel: pci: fix up error messages for pci_bus registering.<br>
 10) kernel: tcp: tcp_tso_segment() small optimization.<br>
 11) kernel: fix gcc >= 4.6.x support.<br>
-12) kernel: convert IPv4 devconf to an array.<br>
-13) dnsmasq: up to 2.66 version.<br>
-14) dropbear: version up to 2013.58.<br>
-15) xupnpd: lua: up to 5.2.2 version.<br>
-16) uclibc: small update for compat with new userspace apps.<br>
-17) zlib: update to 1.2.7 version.<br>
-18) init.d: udpxy: tune options for compat with amlogic based tabs/players.<br>
+12) dnsmasq: up to 2.66 version.<br>
+13) dropbear: version up to 2013.58.<br>
+14) xupnpd: lua: up to 5.2.2 version.<br>
+15) uclibc: small update for compat with new userspace apps.<br>
+16) zlib: update to 1.2.7 version.<br>
+17) init.d: udpxy: tune options for compat with amlogic based tabs/players.<br>
 <br>
 <br>
 <br>
