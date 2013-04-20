@@ -1471,6 +1471,7 @@
 10) kernel: fix gcc >= 4.6.x support.<br>
 11) dnsmasq: up to 2.66 version.<br>
 12) dropbear: version up to 2013.58.<br>
+13) xupnpd: lua: up to 5.2.2 version.<br>
 <br>
 <br>
 <br>
