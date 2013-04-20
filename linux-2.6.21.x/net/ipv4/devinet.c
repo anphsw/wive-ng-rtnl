@@ -148,7 +148,7 @@ void in_dev_finish_destroy(struct in_device *idev)
 	}
 }
 
-struct in_device *inetdev_init(struct net_device *dev)
+static struct in_device *inetdev_init(struct net_device *dev)
 {
 	struct in_device *in_dev;
 
@@ -407,12 +407,10 @@ static int inet_set_ifa(struct net_device *dev, struct in_ifaddr *ifa)
 	ASSERT_RTNL();
 
 	if (!in_dev) {
-		in_dev = inetdev_init(dev);
-		if (!in_dev) {
-			inet_free_ifa(ifa);
-			return -ENOBUFS;
-		}
+		inet_free_ifa(ifa);
+		return -ENOBUFS;
 	}
+	ipv4_devconf_setall(in_dev);
 	if (ifa->ifa_dev != in_dev) {
 		WARN_ON(ifa->ifa_dev);
 		in_dev_hold(in_dev);
@@ -522,12 +520,11 @@ static struct in_ifaddr *rtm_to_ifaddr(struct nlmsghdr *nlh)
 
 	in_dev = __in_dev_get_rtnl(dev);
 	if (in_dev == NULL) {
-		in_dev = inetdev_init(dev);
-		if (in_dev == NULL) {
-			err = -ENOBUFS;
-			goto errout;
-		}
+		err = -ENOBUFS;
+		goto errout;
 	}
+
+	ipv4_devconf_setall(in_dev);
 
 	ifa = inet_alloc_ifa();
 	if (ifa == NULL) {
