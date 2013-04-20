@@ -1259,7 +1259,7 @@ static void devinet_copy_dflt_conf(int i)
 	struct net_device *dev;
 
 	read_lock(&dev_base_lock);
-	for_each_netdev(dev) {
+	for (dev = dev_base; dev; dev = dev->next) {
 		struct in_device *in_dev;
 		rcu_read_lock();
 		in_dev = __in_dev_get_rcu(dev);
