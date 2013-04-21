@@ -1459,23 +1459,24 @@
 
 <br>
 <b>4.1.x</b><br>
-1) kernel: hw_nat: fix lan<->lan binding.<br>
-2) kernel: hw_nat: fix usbnet offload.<br>
-3) kernel: arch: update from new sdk.<br>
-4) kernel: raeth: update driver to 3.0 version.<br>
-5) kernel: sock: sk_stamp: should be initialized to ktime_set(-1L, 0).<br>
-6) kernel: ipv6: don't send packet to big messages to self.<br>
-7) kernel: ipv4: replace ip_fast_csum with csum_replace2 to save cpu cycles.<br>
-8) kernel: pci: make pci_bus a struct device.<br>
-9) kenrel: pci: fix up error messages for pci_bus registering.<br>
-10) kernel: tcp: tcp_tso_segment() small optimization.<br>
-11) kernel: fix gcc >= 4.6.x support.<br>
-12) dnsmasq: up to 2.66 version.<br>
-13) dropbear: version up to 2013.58.<br>
-14) xupnpd: lua: up to 5.2.2 version.<br>
-15) uclibc: small update for compat with new userspace apps.<br>
-16) zlib: update to 1.2.7 version.<br>
-17) init.d: udpxy: tune options for compat with amlogic based tabs/players.<br>
+1) dnsmasq: up to 2.66 version.<br>
+2) dropbear: version up to 2013.58.<br>
+3) xupnpd: lua: up to 5.2.2 version.<br>
+4) uclibc: small update for compat with new userspace apps.<br>
+5) zlib: update to 1.2.7 version.<br>
+6) init.d: udpxy: tune options for compat with amlogic based tabs/players.<br>
+7) kernel: hw_nat: fix lan<->lan binding.<br>
+8) kernel: hw_nat: fix usbnet offload.<br>
+9) kernel: arch: update from new sdk.<br>
+10) kernel: raeth: update driver to 3.0 version.<br>
+11) kernel: sock: sk_stamp: should be initialized to ktime_set(-1L, 0).<br>
+12) kernel: ipv6: don't send packet to big messages to self.<br>
+13) kernel: ipv4: replace ip_fast_csum with csum_replace2 to save cpu cycles.<br>
+14) kernel: pci: make pci_bus a struct device.<br>
+15) kenrel: pci: fix up error messages for pci_bus registering.<br>
+16) kernel: tcp: tcp_tso_segment() small optimization.<br>
+17) kernel: fix gcc >= 4.6.x support.<br>
+18) kernel: mips: sanitize restart logics.<br>
 <br>
 <br>
 <br>
