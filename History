@@ -1477,6 +1477,7 @@
 16) kernel: tcp: tcp_tso_segment() small optimization.<br>
 17) kernel: fix gcc >= 4.6.x support.<br>
 18) kernel: mips: sanitize restart logics.<br>
+19) kernel: net: build_ehash_secret() and rt_bind_peer() cleanups.<br>
 <br>
 <br>
 <br>
