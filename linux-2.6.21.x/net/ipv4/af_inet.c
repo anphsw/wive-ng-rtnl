@@ -1017,8 +1017,6 @@ void inet_unregister_protosw(struct inet_protosw *p)
 		spin_lock_bh(&inetsw_lock);
 		list_del_rcu(&p->list);
 		spin_unlock_bh(&inetsw_lock);
-
-		synchronize_net();
 	}
 }
 
