@@ -326,8 +326,8 @@ struct ipv6_pinfo {
 	struct {
 		struct ipv6_txoptions *opt;
 		struct rt6_info	*rt;
-		int hop_limit;
-		int tclass;
+		u8 hop_limit;
+		u8 tclass;
 	} cork;
 };
 
