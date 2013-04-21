@@ -1475,9 +1475,10 @@
 14) kernel: pci: make pci_bus a struct device.<br>
 15) kenrel: pci: fix up error messages for pci_bus registering.<br>
 16) kernel: tcp: tcp_tso_segment() small optimization.<br>
-17) kernel: fix gcc >= 4.6.x support.<br>
-18) kernel: mips: sanitize restart logics.<br>
-19) kernel: net: build_ehash_secret() and rt_bind_peer() cleanups.<br>
+17) kernel: tcp: fix three tcp sysctls tuning.<br>
+18) kernel: fix gcc >= 4.6.x support.<br>
+19) kernel: mips: sanitize restart logics.<br>
+20) kernel: net: build_ehash_secret() and rt_bind_peer() cleanups.<br>
 <br>
 <br>
 <br>
