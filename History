@@ -1478,6 +1478,7 @@
 17) kernel: fix gcc >= 4.6.x support.<br>
 18) kernel: mips: sanitize restart logics.<br>
 19) kernel: net: build_ehash_secret() and rt_bind_peer() cleanups.<br>
+20) kernel: ipv4: fix byte value boundary check in do_ip_getsockopt().<br>
 <br>
 <br>
 <br>
