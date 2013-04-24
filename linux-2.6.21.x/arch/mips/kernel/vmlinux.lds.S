@@ -144,7 +144,6 @@ SECTIONS
     defined (CONFIG_RALINK_RT6855) || \
     defined (CONFIG_RALINK_RT5350)
 #ifdef CONFIG_MTD_SPI_RALINK
-#ifdef CONFIG_RT2880_FLASH_4M
   /* This hack need for SPI devices work only */
   /* init need start > 0x80220000 */
   /* (memory hole for spi IO) */
@@ -153,7 +152,6 @@ SECTIONS
   _init_start_h = ABSOLUTE(.);
   /* Segment started below end of hle and ends after end of hole? Yes - move */
   . = (_init_start_h <= 0x80220000 && _init_start_h + INITSIZE > 0x80200000) ? 0x80220000 : .;
-#endif
 #endif
 #endif
   .init.text : {
