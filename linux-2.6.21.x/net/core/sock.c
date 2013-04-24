@@ -1318,6 +1318,7 @@ static void __release_sock(struct sock *sk)
 		do {
 			struct sk_buff *next = skb->next;
 
+			prefetch(next);
 			skb->next = NULL;
 			sk->sk_backlog_rcv(sk, skb);
 
