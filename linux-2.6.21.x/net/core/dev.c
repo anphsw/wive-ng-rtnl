@@ -1955,17 +1955,19 @@ out:
 }
 
 /* Network device is going away, flush any packets still pending  */
-static void flush_backlog(void *arg)
+static void flush_backlog(struct net_device *dev, int cpu)
 {
-	struct net_device *dev = arg;
-	struct softnet_data *queue = &__get_cpu_var(softnet_data);
+	struct softnet_data *queue = &per_cpu(softnet_data, cpu);
 	struct sk_buff *skb, *tmp;
+	unsigned long flags;
 
+	spin_lock_irqsave(&queue->input_pkt_queue.lock, flags);
 	skb_queue_walk_safe(&queue->input_pkt_queue, skb, tmp)
 		if (skb->dev == dev) {
 			__skb_unlink(skb, &queue->input_pkt_queue);
 			kfree_skb(skb);
 		}
+	spin_unlock_irqrestore(&queue->input_pkt_queue.lock, flags);
 }
 
 static int process_backlog(struct net_device *backlog_dev, int *budget)
@@ -3303,6 +3305,7 @@ void netdev_run_todo(void)
 	while (!list_empty(&list)) {
 		struct net_device *dev
 			= list_entry(list.next, struct net_device, todo_list);
+		int i;
 		list_del(&dev->todo_list);
 
 		if (unlikely(dev->reg_state != NETREG_UNREGISTERING)) {
@@ -3314,7 +3317,8 @@ void netdev_run_todo(void)
 
 		dev->reg_state = NETREG_UNREGISTERED;
 
-		on_each_cpu(flush_backlog, dev, 1, 1);
+		for_each_online_cpu(i)
+			flush_backlog(dev, i);
 
 		netdev_wait_allrefs(dev);
 
