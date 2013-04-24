@@ -1482,6 +1482,7 @@
 21) kernel: net: add a prefetch in socket backlog processing.<br>
 22) kernel: net: fix locking in flush_backlog.<br>
 23) kernel: af_unix: Fix deadlock on connecting to shutdown socket.<br>
+24) kernel: keep sk_backlog near sk_lock.<br>
 <br>
 <br>
 <br>

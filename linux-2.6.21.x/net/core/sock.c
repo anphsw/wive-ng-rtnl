@@ -961,6 +961,7 @@ struct sock *sk_clone(const struct sock *sk, const gfp_t priority)
 		sk_node_init(&newsk->sk_node);
 		sock_lock_init(newsk);
 		bh_lock_sock(newsk);
+		newsk->sk_backlog.head	= newsk->sk_backlog.tail = NULL;
 
 		atomic_set(&newsk->sk_rmem_alloc, 0);
 		/*
@@ -983,7 +984,6 @@ struct sock *sk_clone(const struct sock *sk, const gfp_t priority)
 		newsk->sk_wmem_queued	= 0;
 		newsk->sk_forward_alloc = 0;
 		newsk->sk_send_head	= NULL;
-		newsk->sk_backlog.head	= newsk->sk_backlog.tail = NULL;
 		newsk->sk_userlocks	= sk->sk_userlocks & ~SOCK_BINDPORT_LOCK;
 
 		sock_reset_flag(newsk, SOCK_DONE);
