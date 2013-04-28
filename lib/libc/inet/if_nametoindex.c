@@ -141,6 +141,10 @@ struct if_nameindex * if_nameindex (void)
     idx[i].if_index = 0;
     idx[i].if_name = NULL;
 
+    if (ifc.ifc_buf != NULL) {
+	free(ifc.ifc_buf);
+    }
+
     close(fd);
     return idx;
 #endif
