@@ -1484,7 +1484,7 @@
 23) kernel: af_unix: Fix deadlock on connecting to shutdown socket.<br>
 24) kernel: keep sk_backlog near sk_lock.<br>
 25) kernel: mtd update.<br>
-26) ppp: first try MS-V2 chap.<br>
+26) ppp: first try MSCHAP-V2 per auth.<br>
 <br>
 <br>
 <br>
