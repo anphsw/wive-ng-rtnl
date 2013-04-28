@@ -1,6 +1,6 @@
 /* 
  * Distributed under the terms of the GNU General Public License v2
- * $Header: /home/cvsroot/RT288x_SDK/source/lib/libc/sysdeps/linux/common/xattr.c,v 1.1.1.1 2007-01-09 06:46:10 steven Exp $
+ * $Header: //WIFI_SOC/release/SDK_4_1_0_0/source/lib/libc/sysdeps/linux/common/xattr.c#1 $
  *
  * This file provides the following Extended Attribute system calls to uClibc.
  *

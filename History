@@ -1465,26 +1465,27 @@
 4) uclibc: small update for compat with new userspace apps.<br>
 5) zlib: update to 1.2.7 version.<br>
 6) init.d: udpxy: tune options for compat with amlogic based tabs/players.<br>
-7) kernel: hw_nat: fix lan<->lan binding.<br>
-8) kernel: hw_nat: fix usbnet offload.<br>
-9) kernel: arch: update from new sdk.<br>
-10) kernel: raeth: update driver to 3.0 version.<br>
-11) kernel: sock: sk_stamp: should be initialized to ktime_set(-1L, 0).<br>
-12) kernel: ipv6: don't send packet to big messages to self.<br>
-13) kernel: ipv4: replace ip_fast_csum with csum_replace2 to save cpu cycles.<br>
-14) kernel: pci: make pci_bus a struct device.<br>
-15) kenrel: pci: fix up error messages for pci_bus registering.<br>
-16) kernel: tcp: tcp_tso_segment() small optimization.<br>
-17) kernel: fix gcc >= 4.6.x support.<br>
-18) kernel: mips: sanitize restart logics.<br>
-19) kernel: net: build_ehash_secret() and rt_bind_peer() cleanups.<br>
-20) kernel: ipv4: fix byte value boundary check in do_ip_getsockopt().<br>
-21) kernel: net: add a prefetch in socket backlog processing.<br>
-22) kernel: net: fix locking in flush_backlog.<br>
-23) kernel: af_unix: Fix deadlock on connecting to shutdown socket.<br>
-24) kernel: keep sk_backlog near sk_lock.<br>
-25) kernel: mtd update.<br>
-26) ppp: first try MSCHAP-V2 per auth.<br>
+7) ppp: first try MSCHAP-V2 per auth.<br>
+8) libc: fix memleak and some updates.<br>
+9) kernel: hw_nat: fix lan<->lan binding.<br>
+10) kernel: hw_nat: fix usbnet offload.<br>
+11) kernel: arch: update from new sdk.<br>
+12) kernel: raeth: update driver to 3.0 version.<br>
+13) kernel: sock: sk_stamp: should be initialized to ktime_set(-1L, 0).<br>
+14) kernel: ipv6: don't send packet to big messages to self.<br>
+15) kernel: ipv4: replace ip_fast_csum with csum_replace2 to save cpu cycles.<br>
+16) kernel: pci: make pci_bus a struct device.<br>
+17) kenrel: pci: fix up error messages for pci_bus registering.<br>
+18) kernel: tcp: tcp_tso_segment() small optimization.<br>
+19) kernel: fix gcc >= 4.6.x support.<br>
+20) kernel: mips: sanitize restart logics.<br>
+21) kernel: net: build_ehash_secret() and rt_bind_peer() cleanups.<br>
+22) kernel: ipv4: fix byte value boundary check in do_ip_getsockopt().<br>
+23) kernel: net: add a prefetch in socket backlog processing.<br>
+24) kernel: net: fix locking in flush_backlog.<br>
+25) kernel: af_unix: Fix deadlock on connecting to shutdown socket.<br>
+26) kernel: keep sk_backlog near sk_lock.<br>
+27) kernel: mtd update.<br>
 <br>
 <br>
 <br>
