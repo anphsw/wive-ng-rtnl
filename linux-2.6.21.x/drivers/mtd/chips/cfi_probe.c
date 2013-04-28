@@ -42,7 +42,7 @@ static int isSST;
 #define xip_allowed(base, map) \
 do { \
 	(void) map_read(map, base); \
-	asm volatile (".rep 8; nop; .endr"); \
+	xip_iprefetch(); \
 	local_irq_enable(); \
 } while (0)
 
