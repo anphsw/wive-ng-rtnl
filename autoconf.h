@@ -1,1 +1,0 @@
-/opt/Wive-RTNL/config/autoconf.h
