@@ -72,7 +72,8 @@ char resolved_path[];
 	/* If it's a relative pathname use getcwd for starters. */
 	if (*path != '/') {
 		/* Ohoo... */
-		getcwd(new_path, PATH_MAX - 1);
+		if (getcwd(new_path, PATH_MAX - 1) == NULL)
+			return NULL;
 		new_path += strlen(new_path);
 		if (new_path[-1] != '/')
 			*new_path++ = '/';
