@@ -1486,6 +1486,7 @@
 25) kernel: af_unix: Fix deadlock on connecting to shutdown socket.<br>
 26) kernel: keep sk_backlog near sk_lock.<br>
 27) kernel: mtd update.<br>
+28) kernel: af_unix: if we don't care about credentials coallesce all messages.<br>
 <br>
 <br>
 <br>

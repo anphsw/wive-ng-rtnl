@@ -1851,7 +1851,7 @@ static int unix_stream_recvmsg(struct kiocb *iocb, struct socket *sock,
 				sk->sk_data_ready(sk, skb->len);
 				break;
 			}
-		} else {
+		} else if (test_bit(SOCK_PASSCRED, &sock->flags)) {
 			/* Copy credentials */
 			siocb->scm->creds = *UNIXCREDS(skb);
 			check_creds = 1;
