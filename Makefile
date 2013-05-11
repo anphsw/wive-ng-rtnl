@@ -61,7 +61,7 @@ CONFIG_CONFIG	= $(ROOTDIR)/config/.config
 STRIPOPT	= -R .comment -R .note -g --strip-unneeded
 
 #NUM MAKE PROCESS = CPU NUMBER IN THE SYSTEM * CPU_OVERLOAD
-CPU_OVERLOAD	= 2
+CPU_OVERLOAD	= 4
 HOST_NCPU	= $(shell if [ -f /proc/cpuinfo ]; then n=`grep -c processor /proc/cpuinfo`; if [ $$n -gt 1 ];then expr $$n \* ${CPU_OVERLOAD}; else echo $$n; fi; else echo 1; fi)
 
 BUILD_START_STRING ?= $(shell date "+%a, %d %b %Y %T %z")
@@ -316,7 +316,7 @@ linux:
 	# In linux-2.6, it do not support VPATH in Makefile.
 	# But we need to use drivers/net/wireless/rt2860v2 to build ap and sta driver.
 	# Workaround: Don't build ap and sta driver at the same time.
-ifeq ($(CONFIG_VENDOR),Ralink)
+ifeq ($(CONFIG_VENDOR),NRalink)
 	$(MAKEARCH_KERNEL) -j1 -C $(LINUXDIR) $(LINUXTARGET) || exit 1
 else
 	$(MAKEARCH_KERNEL) -j$(HOST_NCPU) -C $(LINUXDIR) $(LINUXTARGET) || exit 1
