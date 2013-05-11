@@ -213,10 +213,10 @@ endif
 #rt3090_ap-objs += ../rt3090/common/rrm.o
 #endif
 
-ifeq ($(CONFIG_RT3090_AP_DFS),y)
-rt3090_ap-objs += ../rt3090/common/cmm_dfs.o
-rt3090_ap-objs += ../rt3090/common/cmm_radar.o
-endif
+#ifeq ($(CONFIG_RT3090_AP_DFS),y)
+#rt3090_ap-objs += ../rt3090/common/cmm_dfs.o
+#rt3090_ap-objs += ../rt3090/common/cmm_radar.o
+#endif
 
 ifeq ($(CONFIG_RT3090_AP_CARRIER),y)
 rt3090_ap-objs += ../rt3090/common/cmm_cs.o
@@ -235,7 +235,7 @@ EXTRA_CFLAGS += -DRT_SOC_SUPPORT
 EXTRA_CFLAGS += -DRSSI_FEEDBACK
 
 # provide roaming
-EXTRA_CFLAGS += -DIAPP_SUPPORT
+# EXTRA_CFLAGS += -DIAPP_SUPPORT
 
 ### RT309X
 EXTRA_CFLAGS += -DRT30xx -DRT3090
