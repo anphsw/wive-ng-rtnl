@@ -1481,15 +1481,16 @@
 20) kernel: tcp: tcp_tso_segment() small optimization.<br>
 21) kernel: fix gcc >= 4.6.x support.<br>
 22) kernel: mips: sanitize restart logics.<br>
-23) kernel: net: build_ehash_secret() and rt_bind_peer() cleanups.<br>
-24) kernel: ipv4: fix byte value boundary check in do_ip_getsockopt().<br>
+23) kernel: ipv4: fix byte value boundary check in do_ip_getsockopt().<br>
+24) kernel: net: build_ehash_secret() and rt_bind_peer() cleanups.<br>
 25) kernel: net: add a prefetch in socket backlog processing.<br>
 26) kernel: net: fix locking in flush_backlog.<br>
-27) kernel: af_unix: Fix deadlock on connecting to shutdown socket.<br>
-28) kernel: keep sk_backlog near sk_lock.<br>
-29) kernel: mtd update.<br>
-30) kernel: af_unix: if we don't care about credentials coallesce all messages.<br>
-31) kernel: rt309x: update driver to 2.7.1.5 version.<br>
+27) kernel: net: Added ASSERT_RTNL() to dev_open() and dev_close().<br>
+28) kernel: af_unix: Fix deadlock on connecting to shutdown socket.<br>
+39) kernel: af_unix: if we don't care about credentials coallesce all messages.<br>
+30) kernel: keep sk_backlog near sk_lock.<br>
+31) kernel: mtd update.<br>
+32) kernel: rt309x: update driver to 2.7.1.5 version.<br>
 <br>
 <br>
 <br>
