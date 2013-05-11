@@ -494,7 +494,7 @@ void dump_cp0(void)
 }
 
 struct proc_dir_entry *procRegDir;
-#ifdef
+#if defined(CONFIG_RT3090_AP) || defined(CONFIG_RT3090_AP_MODULE)
 struct proc_dir_entry *procRegDir3090;
 #endif
 static struct proc_dir_entry *procGmac, *procSysCP0, *procTxRing, *procRxRing, *procSkbFree;
