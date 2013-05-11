@@ -1469,28 +1469,28 @@
 8) init.d: udpxy: tune options for compat with amlogic based tabs/players.<br>
 9) ppp: first try MSCHAP-V2 per auth.<br>
 10) libc: fix memleak and some updates.<br>
-11) kernel: hw_nat: fix lan<->lan binding.<br>
-12) kernel: hw_nat: fix usbnet offload.<br>
-13) kernel: arch: update from new sdk.<br>
-14) kernel: raeth: update driver to 3.0 version.<br>
-15) kernel: sock: sk_stamp: should be initialized to ktime_set(-1L, 0).<br>
-16) kernel: ipv6: don't send packet to big messages to self.<br>
-17) kernel: ipv4: replace ip_fast_csum with csum_replace2 to save cpu cycles.<br>
-18) kernel: pci: make pci_bus a struct device.<br>
-19) kenrel: pci: fix up error messages for pci_bus registering.<br>
-20) kernel: tcp: tcp_tso_segment() small optimization.<br>
-21) kernel: fix gcc >= 4.6.x support.<br>
-22) kernel: mips: sanitize restart logics.<br>
-23) kernel: ipv4: fix byte value boundary check in do_ip_getsockopt().<br>
-24) kernel: net: build_ehash_secret() and rt_bind_peer() cleanups.<br>
-25) kernel: net: add a prefetch in socket backlog processing.<br>
-26) kernel: net: fix locking in flush_backlog.<br>
-27) kernel: net: Added ASSERT_RTNL() to dev_open() and dev_close().<br>
-28) kernel: af_unix: Fix deadlock on connecting to shutdown socket.<br>
-39) kernel: af_unix: if we don't care about credentials coallesce all messages.<br>
-30) kernel: keep sk_backlog near sk_lock.<br>
-31) kernel: mtd update.<br>
-32) kernel: rt309x: update driver to 2.7.1.5 version.<br>
+11) kernel: mtd update.<br>
+12) kernel: fix gcc >= 4.6.x support.<br>
+13) kernel: hw_nat: fix lan<->lan binding.<br>
+14) kernel: hw_nat: fix usbnet offload.<br>
+15) kernel: arch: update from new sdk.<br>
+16) kernel: raeth: update driver to 3.0 version.<br>
+17) kernel: rt309x: update driver to 2.7.1.5 version.<br>
+18) kernel: mips: sanitize restart logics.<br>
+19) kernel: pci: make pci_bus a struct device.<br>
+20) kenrel: pci: fix up error messages for pci_bus registering.<br>
+21) kernel: net: build_ehash_secret() and rt_bind_peer() cleanups.<br>
+22) kernel: net: add a prefetch in socket backlog processing.<br>
+23) kernel: net: fix locking in flush_backlog.<br>
+24) kernel: net: Added ASSERT_RTNL() to dev_open() and dev_close().<br>
+25) kernel: sock: keep sk_backlog near sk_lock.<br>
+26) kernel: sock: sk_stamp: should be initialized to ktime_set(-1L, 0).<br>
+27) kernel: tcp: tcp_tso_segment() small optimization.<br>
+28) kernel: ipv6: don't send packet to big messages to self.<br>
+29) kernel: ipv4: replace ip_fast_csum with csum_replace2 to save cpu cycles.<br>
+30) kernel: ipv4: fix byte value boundary check in do_ip_getsockopt().<br>
+31) kernel: af_unix: Fix deadlock on connecting to shutdown socket.<br>
+32) kernel: af_unix: if we don't care about credentials coallesce all messages.<br>
 <br>
 <br>
 <br>
