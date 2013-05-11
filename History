@@ -1478,7 +1478,7 @@
 18) kernel: raeth: update driver to 3.0 version.<br>
 19) kernel: rt309x: update driver to 2.7.1.5 version.<br>
 20) kernel: rt309x: allow video turbine support for all supported chips.<br>
-21) kernel: rt309x: disable IAPP per default.<br>
+21) kernel: rt309x/rt3883/rt3662: disable IAPP per default.<br>
 22) kernel: rt309x: fix path name for procdir.<br>
 23) kernel: mips: sanitize restart logics.<br>
 24) kernel: pci: make pci_bus a struct device.<br>
