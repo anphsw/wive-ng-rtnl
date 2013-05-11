@@ -58,7 +58,7 @@ int wl_proc_exit(void);
 #endif // PROCREG_DIR //
 
 #ifdef CONFIG_PROC_FS
-extern struct proc_dir_entry *procRegDir3x5x;
+extern struct proc_dir_entry *procRegDir;
 
 #ifdef VIDEO_TURBINE_SUPPORT
 AP_VIDEO_STRUCT GLOBAL_AP_VIDEO_CONFIG;
@@ -350,7 +350,7 @@ int wl_video_proc_init(void)
 	GLOBAL_AP_VIDEO_CONFIG.TxLifeTime = 0;
 	GLOBAL_AP_VIDEO_CONFIG.TxRetryLimit = 0x2f1f;
 
-		proc_ralink_wl = proc_mkdir("wl", procRegDir3x5x);
+		proc_ralink_wl = proc_mkdir("wl", procRegDir);
 
 	if (proc_ralink_wl)
 		proc_ralink_wl_video = proc_mkdir("VideoTurbine", proc_ralink_wl);
@@ -462,10 +462,10 @@ int wl_video_proc_exit(void)
 int wl_proc_init(void)
 {
 #ifdef VIDEO_TURBINE_SUPPORT
-	if (procRegDir3x5x == NULL)
-		procRegDir3x5x = proc_mkdir(PROCREG_DIR, NULL);
+	if (procRegDir == NULL)
+		procRegDir = proc_mkdir(PROCREG_DIR, NULL);
 
-	if (procRegDir3x5x) {
+	if (procRegDir) {
 		wl_video_proc_init();
 	}
 #endif // VIDEO_TURBINE_SUPPORT //
@@ -480,7 +480,7 @@ int wl_proc_exit(void)
 		remove_proc_entry("Video", proc_ralink_wl);
 	}
 	if (proc_ralink_wl)
-		remove_proc_entry("wl", procRegDir3x5x);
+		remove_proc_entry("wl", procRegDir);
 #endif // VIDEO_TURBINE_SUPPORT //
 
 	
