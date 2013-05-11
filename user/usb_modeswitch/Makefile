@@ -1,7 +1,8 @@
 PROG        = usb_modeswitch
 VERS        = 1.2.5
 LIBUSB      = $(ROOTDIR)/lib/libusb
-CFLAGS      += -Wall -I$(LIBUSB)
+CFLAGS      += -Wall -I$(LIBUSB) -ffunction-sections -fdata-sections
+LDFLAGS	    += -Wl,--gc-sections
 LIBS        = -l usb
 OBJS        = usb_modeswitch.c
 PREFIX      = $(DESTDIR)/usr

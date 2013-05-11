@@ -31,6 +31,9 @@ DEBUG_ON := -g
 endif
 
 CFLAGS += --pedantic -W -Wall $(INCLUDES)
+CFLAGS += -ffunction-sections -fdata-sections
+LDFLAGS += -Wl,--gc-sections
+
 SYSTEM=$(shell uname 2>/dev/null)
 ifeq ($(SYSTEM), FreeBSD)
 MAKE := gmake

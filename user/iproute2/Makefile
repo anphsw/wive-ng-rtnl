@@ -4,6 +4,8 @@ ADDLIB=
 #DEFINES= -DRESOLVE_HOSTNAMES
 #LDLIBS+=-lresolv
 
+SHARED_LIBS = n
+
 #options for decnet
 #DEFINES+= -DDECNET
 #ADDLIB+=dnet_ntop.o dnet_pton.o
@@ -13,10 +15,11 @@ ADDLIB=
 #ADDLIB+=ipx_ntop.o ipx_pton.o
 
 HOSTCC = gcc
-CCOPTS = -D_GNU_SOURCE -Os -Wall -mips32r2 -march=mips32r2 $(CFLAGS)
-CFLAGS := -I../include $(DEFINES) $(CCOPTS)
+CCOPTS = -D_GNU_SOURCE -Os -Wall -ffunction-sections -fdata-sections
+CFLAGS += -I../include $(DEFINES) $(CCOPTS)
 
 LDLIBS += -L../lib -lnetlink -lutil
+LDFLAGS += -Wl,--gc-sections
 
 #SUBDIRS=lib ip tc misc #netem genl
 SUBDIRS=lib tc misc

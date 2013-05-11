@@ -27,12 +27,15 @@ BUILDDIR      = $(SRC)
 DESTDIR       =
 RPM_OPT_FLAGS =
 
+COPTS := -Os -fPIC -fomit-frame-pointer -mno-memcpy
+COPTS += -ffunction-sections -fdata-sections
 ifndef CONFIG_IPV6
-COPTS = -DHAVE_BROKEN_RTC -DNO_HAVE_DBUS -DNO_DHCP -DNO_TFTP -DNO_SCRIPT -DNO_IPV6 -DSRV_TRY_NEXT -Os -fPIC -fomit-frame-pointer -mno-memcpy
-CFLAGS += -DNO_IPV6
+COPTS += -DHAVE_BROKEN_RTC -DNO_HAVE_DBUS -DNO_DHCP -DNO_TFTP -DNO_SCRIPT -DSRV_TRY_NEXT -DNO_IPV6
 else
-COPTS = -DHAVE_BROKEN_RTC -DNO_HAVE_DBUS -DNO_DHCP -DNO_TFTP -DNO_SCRIPT -DSRV_TRY_NEXT -Os -fPIC -fomit-frame-pointer -mno-memcpy
+COPTS += -DHAVE_BROKEN_RTC -DNO_HAVE_DBUS -DNO_DHCP -DNO_TFTP -DNO_SCRIPT -DSRV_TRY_NEXT
 endif
+
+LDFLAGS += -Wl,--gc-sections
 
 #################################################################
 
