@@ -1467,30 +1467,31 @@
 6) uclibc: small update for compat with new userspace apps.<br>
 7) zlib: update to 1.2.7 version.<br>
 8) init.d: udpxy: tune options for compat with amlogic based tabs/players.<br>
-9) ppp: first try MSCHAP-V2 per auth.<br>
-10) libc: fix memleak and some updates.<br>
-11) kernel: mtd update.<br>
-12) kernel: fix gcc >= 4.6.x support.<br>
-13) kernel: hw_nat: fix lan<->lan binding.<br>
-14) kernel: hw_nat: fix usbnet offload.<br>
-15) kernel: arch: update from new sdk.<br>
-16) kernel: raeth: update driver to 3.0 version.<br>
-17) kernel: rt309x: update driver to 2.7.1.5 version.<br>
-18) kernel: mips: sanitize restart logics.<br>
-19) kernel: pci: make pci_bus a struct device.<br>
-20) kenrel: pci: fix up error messages for pci_bus registering.<br>
-21) kernel: net: build_ehash_secret() and rt_bind_peer() cleanups.<br>
-22) kernel: net: add a prefetch in socket backlog processing.<br>
-23) kernel: net: fix locking in flush_backlog.<br>
-24) kernel: net: added ASSERT_RTNL() to dev_open() and dev_close().<br>
-25) kernel: sock: keep sk_backlog near sk_lock.<br>
-26) kernel: sock: sk_stamp: should be initialized to ktime_set(-1L, 0).<br>
-27) kernel: tcp: tcp_tso_segment() small optimization.<br>
-28) kernel: ipv6: don't send packet to big messages to self.<br>
-29) kernel: ipv4: replace ip_fast_csum with csum_replace2 to save cpu cycles.<br>
-30) kernel: ipv4: fix byte value boundary check in do_ip_getsockopt().<br>
-31) kernel: af_unix: fix deadlock on connecting to shutdown socket.<br>
-32) kernel: af_unix: if we don't care about credentials coallesce all messages.<br>
+9) init.d: fix export variables for correct transmission home set.<br>
+10) ppp: first try MSCHAP-V2 per auth.<br>
+12) libc: fix memleak and some updates.<br>
+13) kernel: mtd update.<br>
+14) kernel: fix gcc >= 4.6.x support.<br>
+15) kernel: hw_nat: fix lan<->lan binding.<br>
+16) kernel: hw_nat: fix usbnet offload.<br>
+17) kernel: arch: update from new sdk.<br>
+18) kernel: raeth: update driver to 3.0 version.<br>
+19) kernel: rt309x: update driver to 2.7.1.5 version.<br>
+20) kernel: mips: sanitize restart logics.<br>
+21) kernel: pci: make pci_bus a struct device.<br>
+22) kenrel: pci: fix up error messages for pci_bus registering.<br>
+23) kernel: net: build_ehash_secret() and rt_bind_peer() cleanups.<br>
+24) kernel: net: add a prefetch in socket backlog processing.<br>
+25) kernel: net: fix locking in flush_backlog.<br>
+26) kernel: net: added ASSERT_RTNL() to dev_open() and dev_close().<br>
+27) kernel: sock: keep sk_backlog near sk_lock.<br>
+28) kernel: sock: sk_stamp: should be initialized to ktime_set(-1L, 0).<br>
+29) kernel: tcp: tcp_tso_segment() small optimization.<br>
+30) kernel: ipv6: don't send packet to big messages to self.<br>
+31) kernel: ipv4: replace ip_fast_csum with csum_replace2 to save cpu cycles.<br>
+32) kernel: ipv4: fix byte value boundary check in do_ip_getsockopt().<br>
+33) kernel: af_unix: fix deadlock on connecting to shutdown socket.<br>
+34) kernel: af_unix: if we don't care about credentials coallesce all messages.<br>
 <br>
 <br>
 <br>
