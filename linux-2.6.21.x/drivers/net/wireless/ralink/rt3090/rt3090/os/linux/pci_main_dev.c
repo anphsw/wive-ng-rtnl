@@ -34,6 +34,10 @@
 #include "rt_os_net.h"
 #include <linux/pci.h>
 
+extern int wl_proc_init(void);
+extern int wl_proc_exit(void);
+
+
 /* */
 /* Function declarations */
 /* */
