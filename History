@@ -1488,6 +1488,7 @@
 27) kernel: mtd update.<br>
 28) kernel: af_unix: if we don't care about credentials coallesce all messages.<br>
 29) busybox: apply post 1.21.0 pathces.<br>
+30) miniupnpd: update to 1.8.20130503.<br>
 <br>
 <br>
 <br>

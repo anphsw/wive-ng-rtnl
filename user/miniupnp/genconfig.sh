@@ -1,5 +1,5 @@
 #! /bin/sh
-# $Id: genconfig.sh,v 1.61 2012/10/03 21:07:29 nanard Exp $
+# $Id: genconfig.sh,v 1.63 2013/05/03 09:30:10 nanard Exp $
 # miniupnp daemon
 # http://miniupnp.free.fr or http://miniupnp.tuxfamily.org/
 # (c) 2006-2012 Thomas Bernard
@@ -35,7 +35,9 @@ LEASEFILE=1
 #IPV6=`cat ../../linux/.config | grep "CONFIG_IPV6=y" -c`
 
 RM="rm -f"
-CONFIGFILE="config.h"
+MV="mv"
+CONFIGFILE="config.h.tmp"
+CONFIGFILE_FINAL="config.h"
 CONFIGMACRO="CONFIG_H_INCLUDED"
 
 # version reported in XML descriptions
@@ -210,6 +212,10 @@ case $OS_NAME in
 					;;
 				Gentoo)
 					OS_URL=http://www.gentoo.org/
+					;;
+				arch)
+					OS_URL=http://www.archlinux.org/
+					OS_VERSION=`uname -r`
 					;;
 			esac
 		fi
@@ -411,5 +417,7 @@ echo "/*#define DISABLE_CONFIG_FILE*/" >> ${CONFIGFILE}
 echo "" >> ${CONFIGFILE}
 
 echo "#endif" >> ${CONFIGFILE}
+
+${MV} ${CONFIGFILE} ${CONFIGFILE_FINAL}
 
 exit 0
