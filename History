@@ -1480,21 +1480,22 @@
 20) kernel: rt309x: allow video turbine support for all supported chips.<br>
 21) kernel: rt309x/rt3883/rt3662: disable IAPP per default.<br>
 22) kernel: rt309x: fix path name for procdir.<br>
-23) kernel: mips: sanitize restart logics.<br>
-24) kernel: pci: make pci_bus a struct device.<br>
-25) kenrel: pci: fix up error messages for pci_bus registering.<br>
-26) kernel: net: build_ehash_secret() and rt_bind_peer() cleanups.<br>
-27) kernel: net: add a prefetch in socket backlog processing.<br>
-28) kernel: net: fix locking in flush_backlog.<br>
-29) kernel: net: added ASSERT_RTNL() to dev_open() and dev_close().<br>
-30) kernel: sock: keep sk_backlog near sk_lock.<br>
-31) kernel: sock: sk_stamp: should be initialized to ktime_set(-1L, 0).<br>
-32) kernel: tcp: tcp_tso_segment() small optimization.<br>
-33) kernel: ipv6: don't send packet to big messages to self.<br>
-34) kernel: ipv4: replace ip_fast_csum with csum_replace2 to save cpu cycles.<br>
-35) kernel: ipv4: fix byte value boundary check in do_ip_getsockopt().<br>
-36) kernel: af_unix: fix deadlock on connecting to shutdown socket.<br>
-37) kernel: af_unix: if we don't care about credentials coallesce all messages.<br>
+23) kernel: rt309x: fix wl_proc_init/exit call.<br>
+24) kernel: mips: sanitize restart logics.<br>
+25) kernel: pci: make pci_bus a struct device.<br>
+26) kenrel: pci: fix up error messages for pci_bus registering.<br>
+27) kernel: net: build_ehash_secret() and rt_bind_peer() cleanups.<br>
+28) kernel: net: add a prefetch in socket backlog processing.<br>
+29) kernel: net: fix locking in flush_backlog.<br>
+30) kernel: net: added ASSERT_RTNL() to dev_open() and dev_close().<br>
+31) kernel: sock: keep sk_backlog near sk_lock.<br>
+32) kernel: sock: sk_stamp: should be initialized to ktime_set(-1L, 0).<br>
+33) kernel: tcp: tcp_tso_segment() small optimization.<br>
+34) kernel: ipv6: don't send packet to big messages to self.<br>
+35) kernel: ipv4: replace ip_fast_csum with csum_replace2 to save cpu cycles.<br>
+36) kernel: ipv4: fix byte value boundary check in do_ip_getsockopt().<br>
+37) kernel: af_unix: fix deadlock on connecting to shutdown socket.<br>
+38) kernel: af_unix: if we don't care about credentials coallesce all messages.<br>
 <br>
 <br>
 <br>

@@ -323,7 +323,7 @@ static INT __devinit   rt2860_probe(
 	RTMP_OS_NETDEV_OP_HOOK	netDevHook;
 	ULONG					OpMode;
 
-	DBGPRINT(RT_DEBUG_TRACE, ("===> rt2860_probe\n"));
+	DBGPRINT(RT_DEBUG_TRACE, ("===> rt3090_probe\n"));
 
 /*PCIDevInit============================================== */
 	/* wake up and enable device */
@@ -439,6 +439,8 @@ static INT __devinit   rt2860_probe(
 	RtmpOSNetDevAddrSet(OpMode, net_dev, &PermanentAddress[0], NULL);
 #endif /* PRE_ASSIGN_MAC_ADDR */
 
+	wl_proc_init();
+
 	DBGPRINT(RT_DEBUG_TRACE, ("<=== rt2860_probe\n"));
 
 	return 0; /* probe ok */
@@ -511,8 +513,10 @@ static VOID __devexit rt2860_remove_one(
 
 	/* Free the root net_device */
 	RtmpOSNetDevFree(net_dev);
+
+	wl_proc_exit();
 }
- 
+
 
 
 
