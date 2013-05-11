@@ -1,7 +1,5 @@
 GENLOBJ=genl.o
 
-include ../Config
-
 GENLMODULES :=
 GENLMODULES += ctrl.o
 

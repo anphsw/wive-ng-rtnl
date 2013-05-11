@@ -3,8 +3,6 @@ LNSTATOBJ=lnstat.o lnstat_util.o
 
 TARGETS=ss nstat ifstat rtacct lnstat 
 
-include ../Config
-
 all: $(TARGETS)
 
 ss: $(SSOBJ) $(LIBUTIL)

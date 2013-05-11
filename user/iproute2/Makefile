@@ -27,13 +27,10 @@ SUBDIRS=lib tc misc
 LIBNETLINK=../lib/libnetlink.a
 LIBUTIL=../lib/libutil.a
 
-all: Config
+all:
 	@set -e; \
 	for i in $(SUBDIRS); \
 	do $(MAKE) $(MFLAGS) -C $$i; done
-
-Config:
-	sh configure $(KERNEL_INCLUDE)
 
 snapshot:
 	echo "static const char SNAPSHOT[] = \""`date +%y%m%d`"\";" \
@@ -47,11 +44,5 @@ romfs:
 clean:
 	@for i in $(SUBDIRS) doc; \
 	do $(MAKE) $(MFLAGS) -C $$i clean; done
-
-clobber: clean
-	rm -f Config
-
-distclean: clobber
-
 
 .EXPORT_ALL_VARIABLES:

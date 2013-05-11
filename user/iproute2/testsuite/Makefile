@@ -1,7 +1,5 @@
-## -- Config --
 DEV := lo
 PREFIX := sudo
-## -- End Config --
 
 TESTS := $(patsubst tests/%,%,$(wildcard tests/*.t))
 IPVERS := $(filter-out iproute2/Makefile,$(wildcard iproute2/*))

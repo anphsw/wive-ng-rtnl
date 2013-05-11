@@ -1,8 +1,6 @@
 TCOBJ= tc.o tc_qdisc.o tc_class.o tc_filter.o tc_util.o \
        tc_monitor.o m_police.o m_estimator.o m_action.o 
 
-include ../Config
-
 TCMODULES :=
 TCMODULES += q_fifo.o
 TCMODULES += q_sfq.o
