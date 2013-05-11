@@ -27,54 +27,128 @@
 
 #include "rt_config.h"
 
+
 #ifdef VIDEO_TURBINE_SUPPORT
+
+
+
+BOOLEAN UpdateFromGlobal = FALSE;
+
 void VideoTurbineUpdate(
 	IN PRTMP_ADAPTER pAd)
 {
-	pAd->VideoTurbine.Enable = GLOBAL_AP_VIDEO_CONFIG.Enable;
-	pAd->VideoTurbine.ClassifierEnable = GLOBAL_AP_VIDEO_CONFIG.ClassifierEnable;
-	pAd->VideoTurbine.HighTxMode = GLOBAL_AP_VIDEO_CONFIG.HighTxMode;
-	pAd->VideoTurbine.TxPwr = GLOBAL_AP_VIDEO_CONFIG.TxPwr;
-	pAd->VideoTurbine.VideoMCSEnable = GLOBAL_AP_VIDEO_CONFIG.VideoMCSEnable;
-	pAd->VideoTurbine.VideoMCS = GLOBAL_AP_VIDEO_CONFIG.VideoMCS;
-	pAd->VideoTurbine.TxBASize = GLOBAL_AP_VIDEO_CONFIG.TxBASize;
-	pAd->VideoTurbine.TxLifeTimeMode = GLOBAL_AP_VIDEO_CONFIG.TxLifeTimeMode;
-	pAd->VideoTurbine.TxLifeTime = GLOBAL_AP_VIDEO_CONFIG.TxLifeTime;
-	pAd->VideoTurbine.TxRetryLimit = GLOBAL_AP_VIDEO_CONFIG.TxRetryLimit;
+	if (UpdateFromGlobal == TRUE) 
+	{
+		pAd->VideoTurbine.Enable = GLOBAL_AP_VIDEO_CONFIG.Enable;
+		pAd->VideoTurbine.ClassifierEnable = GLOBAL_AP_VIDEO_CONFIG.ClassifierEnable;
+		pAd->VideoTurbine.HighTxMode = GLOBAL_AP_VIDEO_CONFIG.HighTxMode;
+		pAd->VideoTurbine.TxPwr = GLOBAL_AP_VIDEO_CONFIG.TxPwr;
+		pAd->VideoTurbine.VideoMCSEnable = GLOBAL_AP_VIDEO_CONFIG.VideoMCSEnable;
+		pAd->VideoTurbine.VideoMCS = GLOBAL_AP_VIDEO_CONFIG.VideoMCS;
+		pAd->VideoTurbine.TxBASize = GLOBAL_AP_VIDEO_CONFIG.TxBASize;
+		pAd->VideoTurbine.TxLifeTimeMode = GLOBAL_AP_VIDEO_CONFIG.TxLifeTimeMode;
+		pAd->VideoTurbine.TxLifeTime = GLOBAL_AP_VIDEO_CONFIG.TxLifeTime;
+		pAd->VideoTurbine.TxRetryLimit = GLOBAL_AP_VIDEO_CONFIG.TxRetryLimit;
+	}
 }
+
+
+VOID TxSwQDepthAdjust(IN RTMP_ADAPTER *pAd, IN UINT32 qLen)
+{
+	ULONG IrqFlags;
+	INT qIdx;
+	QUEUE_HEADER *pTxQ, *pEntry;
+	PNDIS_PACKET pPacket;
+	
+	RTMP_IRQ_LOCK(&pAd->irq_lock, IrqFlags);
+	pAd->TxSwQMaxLen = qLen;
+	for (qIdx = 0; qIdx < NUM_OF_TX_RING; qIdx++)
+	{
+		pTxQ = &pAd->TxSwQueue[qIdx];
+		while(pTxQ->Number >= pAd->TxSwQMaxLen)
+		{
+			pEntry = RemoveHeadQueue(pTxQ);
+			if (pEntry)
+			{
+				pPacket = QUEUE_ENTRY_TO_PACKET(pEntry);
+				RELEASE_NDIS_PACKET(pAd, pPacket, NDIS_STATUS_FAILURE);
+			}
+			else
+				break;
+		}
+	}
+	RTMP_IRQ_UNLOCK(&pAd->irq_lock, IrqFlags);
+	
+	DBGPRINT(RT_DEBUG_OFF, ("%s():Set TxSwQMaxLen as %d\n", 
+			__FUNCTION__, pAd->TxSwQMaxLen));
+}
+
 
 VOID VideoTurbineDynamicTune(
 	IN PRTMP_ADAPTER pAd)
 {
 	if (pAd->VideoTurbine.Enable == TRUE) 
 	{
-		if (pAd->VideoTurbine.TxLifeTimeMode == 0) 
-		{
 			UINT32 MacReg = 0;
 
-			/* Tx retry limit = 2f,1f */
-			RTMP_IO_READ32(pAd, TX_RTS_CFG, &MacReg);
-			MacReg &= 0xFFFFFF00;
+#if defined(RT3883) || defined(RT3593)
+		if (IS_RT3883(pAd) || IS_RT3593(pAd))
+		{
+			RTMP_IO_READ32(pAd, TX_AC_RTY_LIMIT, &MacReg);
+			MacReg = 0x0f1f0f0f;
+			RTMP_IO_WRITE32(pAd, TX_AC_RTY_LIMIT, MacReg);
+
+			RTMP_IO_READ32(pAd, TX_AC_FBK_SPEED, &MacReg);
+			MacReg = 0x06000003;
+			RTMP_IO_WRITE32(pAd, TX_AC_FBK_SPEED, MacReg);
+		}
+		else
+#endif /* defined(RT3883) || defined(RT3593) */
+		{
+			/* Tx retry limit = 2F,1F */
+			RTMP_IO_READ32(pAd, TX_RTY_CFG, &MacReg);
+			MacReg &= 0xFFFF0000;
 			MacReg |= GetAsicVideoRetry(pAd);
-			//RTMP_IO_WRITE32(pAd, TX_RTS_CFG, MacReg);
+			RTMP_IO_WRITE32(pAd, TX_RTY_CFG, MacReg);
 		}
 
 		pAd->VideoTurbine.TxBASize = GetAsicVideoTxBA(pAd);
+
+		Set_RateAdaptInterval(pAd, "100:50");
+		TxSwQDepthAdjust(pAd, 1024);
+			
 	}
 	else 
 	{
-		if (pAd->VideoTurbine.TxLifeTimeMode == 0) 
-		{
 			UINT32 MacReg = 0;
 
-			/* Tx retry limit = 2f,1f */
-			RTMP_IO_READ32(pAd, TX_RTS_CFG, &MacReg);
-			MacReg &= 0xFFFFFF00;
-			MacReg |= GetAsicDefaultRetry(pAd);
-			RTMP_IO_WRITE32(pAd, TX_RTS_CFG, MacReg);
+#if defined(RT3883) || defined(RT3593)
+		if (IS_RT3883(pAd) || IS_RT3593(pAd))
+		{
+			RTMP_IO_READ32(pAd, TX_AC_RTY_LIMIT, &MacReg);
+			MacReg = 0x07070707;
+			RTMP_IO_WRITE32(pAd, TX_AC_RTY_LIMIT, MacReg);
+	
+			RTMP_IO_READ32(pAd, TX_AC_FBK_SPEED, &MacReg);
+			MacReg = 0x0;
+			RTMP_IO_WRITE32(pAd, TX_AC_FBK_SPEED, MacReg);
 		}
+#endif /* defined(RT3883) || defined(RT3593) */
+
+		/* Default Tx retry limit = 1F,0F */
+		RTMP_IO_READ32(pAd, TX_RTY_CFG, &MacReg);
+		MacReg &= 0xFFFF0000;
+			MacReg |= GetAsicDefaultRetry(pAd);
+		RTMP_IO_WRITE32(pAd, TX_RTY_CFG, MacReg);
 
 		pAd->VideoTurbine.TxBASize = GetAsicDefaultTxBA(pAd);
+
+		/* reset to default rate adaptation simping interval */
+		if ((pAd->ra_interval != DEF_RA_TIME_INTRVAL) || 
+			(pAd->ra_interval != DEF_QUICK_RA_TIME_INTERVAL))
+			Set_RateAdaptInterval(pAd, "500:100");
+
+		TxSwQDepthAdjust(pAd, MAX_PACKETS_IN_QUEUE);
 	}
 }
 
@@ -83,78 +157,37 @@ UINT32 GetAsicDefaultRetry(
 {
 	UINT32 RetryLimit;
 
-	/*
-	if (pAd->MACVersion == )
-	 */
-		RetryLimit = 0x1f0f;
+	RetryLimit = 0x1F0F;
 
 	return RetryLimit;
 }
 
-UINT32 GetAsicDefaultTxBA(
+UCHAR GetAsicDefaultTxBA(
 	IN PRTMP_ADAPTER pAd)
 {
-	UINT32 BASize;
-
-        BASize = pAd->CommonCfg.TxBASize;
-	if (pAd->MACVersion == 0x28720200) {
-		if (BASize > 13)
-			BASize = 13;
-	}
-	else {
-		if (BASize > 7)
-			BASize = 7;
-	}
-
-	return BASize;
+        return pAd->CommonCfg.TxBASize;
 }
 
 UINT32 GetAsicVideoRetry(
 	IN PRTMP_ADAPTER pAd)
 {
-	UINT32 RetryLimit;
-
-	/*
-	if (pAd->MACVersion == )
-	 */
-		RetryLimit = 0x2f1f;
-
-	return RetryLimit;
+	return pAd->VideoTurbine.TxRetryLimit;
 }
 
-UINT32 GetAsicVideoTxBA(
+UCHAR GetAsicVideoTxBA(
 	IN PRTMP_ADAPTER pAd)
 {
-	UINT32 BASize;
-
-        BASize = pAd->CommonCfg.TxBASize;
-	if (pAd->MACVersion == 0x28720200) {
-		if (BASize > 13)
-			BASize = 13;
-	}
-	else {
-		if (BASize > 7)
-			BASize = 7;
-	}
-
-	return BASize;
+	return pAd->VideoTurbine.TxBASize;
 }
 
 VOID VideoConfigInit(
 	IN PRTMP_ADAPTER pAd)
 {
-	pAd->VideoTurbine.Enable = GLOBAL_AP_VIDEO_CONFIG.Enable;
-	pAd->VideoTurbine.ClassifierEnable = GLOBAL_AP_VIDEO_CONFIG.ClassifierEnable;
-	pAd->VideoTurbine.HighTxMode = GLOBAL_AP_VIDEO_CONFIG.HighTxMode;
-	pAd->VideoTurbine.TxPwr = GLOBAL_AP_VIDEO_CONFIG.TxPwr;
-	pAd->VideoTurbine.VideoMCSEnable = GLOBAL_AP_VIDEO_CONFIG.VideoMCSEnable;
-	pAd->VideoTurbine.VideoMCS = GLOBAL_AP_VIDEO_CONFIG.VideoMCS;
-	pAd->VideoTurbine.TxBASize = GLOBAL_AP_VIDEO_CONFIG.TxBASize;
-	pAd->VideoTurbine.TxLifeTimeMode = GLOBAL_AP_VIDEO_CONFIG.TxLifeTimeMode;
-	pAd->VideoTurbine.TxLifeTime = GLOBAL_AP_VIDEO_CONFIG.TxLifeTime;
-	pAd->VideoTurbine.TxRetryLimit = GLOBAL_AP_VIDEO_CONFIG.TxRetryLimit;
+	pAd->VideoTurbine.Enable = FALSE;
+	pAd->VideoTurbine.TxRetryLimit = 0x2F1F;
+	pAd->VideoTurbine.TxBASize = pAd->CommonCfg.TxBASize; 
 }
 
-#endif // VIDEO_TURBINE_SUPPORT //
+#endif /* VIDEO_TURBINE_SUPPORT */
 
 

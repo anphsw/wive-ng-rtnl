@@ -116,7 +116,7 @@ VOID EnqueueChSwAnn(
 	IN PUCHAR pDA, 
 	IN UINT8 ChSwMode,
 	IN UINT8 NewCh);
-#endif // WDS_SUPPORT //
+#endif /* WDS_SUPPORT */
 
 /*
 	==========================================================================
@@ -155,11 +155,6 @@ INT Set_PwrConstraint(
 	IN	PRTMP_ADAPTER	pAd, 
 	IN	PSTRING			arg);
 
-#ifdef DOT11K_RRM_SUPPORT
-INT Set_VoPwrConsTest(
-	IN	PRTMP_ADAPTER	pAd,
-	IN	PSTRING			arg);
-#endif // DOT11K_RRM_SUPPORT //
 
 NDIS_STATUS	MeasureReqTabInit(
 	IN PRTMP_ADAPTER pAd);
@@ -216,5 +211,5 @@ VOID RguClass_BuildBcnChList(
 	IN PRTMP_ADAPTER pAd,
 	OUT PUCHAR pBuf,
 	OUT	PULONG pBufLen);
-#endif // __SPECTRUM_H__ //
+#endif /* __SPECTRUM_H__ */
 

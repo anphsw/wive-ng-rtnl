@@ -30,20 +30,25 @@
 #include	"rt_config.h"
 #include 	"firmware.h"
 
-//#define BIN_IN_FILE /* use *.bin firmware */
 
 
-// New 8k byte firmware size for RT3071/RT3072
+/* New 8k byte firmware size for RT3071/RT3072*/
 #define FIRMWAREIMAGE_MAX_LENGTH	0x2000
+#ifdef WOW_SUPPORT 
+#define FIRMWAREIMAGE_WOW_LENGTH	0x3000 /* WOW support firmware(12KB) */
+#endif/*WOW_SUPPORT*/
 #define FIRMWAREIMAGE_LENGTH			(sizeof (FirmwareImage) / sizeof(UCHAR))
 #define FIRMWARE_MAJOR_VERSION		0
 
 #define FIRMWAREIMAGEV1_LENGTH		0x1000
 #define FIRMWAREIMAGEV2_LENGTH		0x1000
+#ifdef WOW_SUPPORT 
+#define FIRMWAREIMAGEV3_LENGTH		0x2000 /* WOW support firmware */
+#endif/*WOW_SUPPORT*/
 
 #ifdef RTMP_MAC_PCI
 #define FIRMWARE_MINOR_VERSION		2
-#endif // RTMP_MAC_PCI //
+#endif /* RTMP_MAC_PCI */
 
 const unsigned short ccitt_16Table[] = {
 	0x0000, 0x1021, 0x2042, 0x3063, 0x4084, 0x50A5, 0x60C6, 0x70E7,
@@ -120,7 +125,59 @@ INT RtmpAsicEraseFirmware(
 
 	return 0;
 }
+NDIS_STATUS isMCUNeedToLoadFIrmware(
+	IN PRTMP_ADAPTER pAd)
+{
+	NDIS_STATUS		Status = NDIS_STATUS_SUCCESS;
+	ULONG			Index;
+	UINT32			MacReg;
+	
+	Index = 0;
 
+	do {
+		if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_NIC_NOT_EXIST))			
+			return NDIS_STATUS_FAILURE;
+		
+		RTMP_IO_READ32(pAd, PBF_SYS_CTRL, &MacReg);
+
+		if (MacReg & 0x100) /* check bit 8*/
+			break;
+		
+		RTMPusecDelay(1000);
+	} while (Index++ < 100);
+
+	if (Index >= 100)
+		Status = NDIS_STATUS_FAILURE;
+
+	return Status;
+}
+
+NDIS_STATUS isMCUnotReady(
+	IN PRTMP_ADAPTER pAd)
+{
+	NDIS_STATUS		Status = NDIS_STATUS_SUCCESS;
+	ULONG			Index;
+	UINT32			MacReg;
+	
+	Index = 0;
+
+	do {
+		if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_NIC_NOT_EXIST))			
+			return NDIS_STATUS_FAILURE;
+		
+		RTMP_IO_READ32(pAd, PBF_SYS_CTRL, &MacReg);
+
+		if (MacReg & 0x80) /* check bit 7*/
+			break;
+		
+		RTMPusecDelay(1000);
+	} while (Index++ < 1000);
+
+	if (Index >= 1000)
+		Status = NDIS_STATUS_FAILURE;
+
+	return Status;
+}
 /*
 	========================================================================
 	
@@ -171,7 +228,8 @@ NDIS_STATUS RtmpAsicLoadFirmware(
 
 
 	/* allocate firmware buffer */
-	pFirmwareImage = kmalloc(MAX_FIRMWARE_IMAGE_SIZE, MEM_ALLOC_FLAG);
+/*	pFirmwareImage = kmalloc(MAX_FIRMWARE_IMAGE_SIZE, MEM_ALLOC_FLAG);*/
+	os_alloc_mem(pAd, (UCHAR **)&pFirmwareImage, MAX_FIRMWARE_IMAGE_SIZE);
 	if (pFirmwareImage == NULL)
 	{
 		/* allocate fail, use default firmware array in firmware.h */
@@ -281,7 +339,8 @@ NDIS_STATUS RtmpAsicLoadFirmware(
 	{
 		/* use default fimeware, free allocated buffer */
 		if (pFirmwareImage != NULL)
-			kfree(pFirmwareImage);
+/*			kfree(pFirmwareImage);*/
+			os_free_mem(NULL, pFirmwareImage);
 		/* End of if */
 
 		/* use default *.bin array */
@@ -313,7 +372,8 @@ NDIS_STATUS RtmpAsicLoadFirmware(
 	{
 		/* use file firmware, free allocated buffer */
 		if (pFirmwareImage != NULL)
-			kfree(pFirmwareImage);
+/*			kfree(pFirmwareImage);*/
+			os_free_mem(NULL, pFirmwareImage);
 		/* End of if */
 	} /* End of if */
 
@@ -322,55 +382,66 @@ NDIS_STATUS RtmpAsicLoadFirmware(
 
 	NDIS_STATUS		Status = NDIS_STATUS_SUCCESS;
 	PUCHAR			pFirmwareImage;
-	ULONG			FileLength, Index;
-	//ULONG			firm;
-	UINT32			MacReg = 0;
+	ULONG			FileLength;
+	/*ULONG			firm;*/
 	UINT32			Version = (pAd->MACVersion >> 16);
+
 
 	pFirmwareImage = FirmwareImage;
 	FileLength = sizeof(FirmwareImage);
 
-	// New 8k byte firmware size for RT3071/RT3072
-	//DBGPRINT(RT_DEBUG_TRACE, ("Usb Chip\n"));
+
+	/* New 8k byte firmware size for RT3071/RT3072*/
+	/*DBGPRINT(RT_DEBUG_TRACE, ("Usb Chip\n"));*/
 	if (FIRMWAREIMAGE_LENGTH == FIRMWAREIMAGE_MAX_LENGTH)
-	//The firmware image consists of two parts. One is the origianl and the other is the new.
-	//Use Second Part
+	/*The firmware image consists of two parts. One is the origianl and the other is the new.*/
+	/*Use Second Part*/
 	{
 #ifdef RTMP_MAC_PCI
-		if ((Version == 0x2860) || (Version == 0x3572) || IS_RT3090(pAd)||IS_RT3390(pAd) || IS_RT3593(pAd))
+		if ((Version == 0x2860) || (Version == 0x3572) || IS_RT3090(pAd) 
+			|| IS_RT3390(pAd) || IS_RT3593(pAd) || IS_RT5390(pAd) || IS_RT5392(pAd))
 		{
 			pFirmwareImage = FirmwareImage;
 			FileLength = FIRMWAREIMAGE_LENGTH;
 		}
-#endif // RTMP_MAC_PCI //
+#endif /* RTMP_MAC_PCI */
 	}
 	else
 	{
-		DBGPRINT(RT_DEBUG_ERROR, ("KH: bin file should be 8KB.\n"));
-		Status = NDIS_STATUS_FAILURE;
-	}
+#if defined(WOW_SUPPORT) && defined(RTMP_MAC_USB)
+		/* WOW firmware is 12KB */
+		if ((Version != 0x2860) && (Version != 0x2872) && (Version != 0x3070))
+		{
+			if (FIRMWAREIMAGE_LENGTH == FIRMWAREIMAGE_WOW_LENGTH) /* size 0x3000 */
+			{
+				if (pAd->WOW_Cfg.bWOWFirmware == TRUE)
+				{
+					pFirmwareImage = (PUCHAR)&FirmwareImage[FIRMWAREIMAGEV3_LENGTH]; /* WOW offset: 0x2000 */
+					FileLength = FIRMWAREIMAGEV1_LENGTH; /* 0x1000 */
+					DBGPRINT(RT_DEBUG_OFF, ("%s: Load WOW firmware!!\n", __FUNCTION__));
+				}
+				else
+				{
+					pFirmwareImage = (PUCHAR)&FirmwareImage[FIRMWAREIMAGEV2_LENGTH]; /* normal offset: 0x1000 */
+					FileLength = FIRMWAREIMAGEV1_LENGTH; /* 0x1000 */
+					DBGPRINT(RT_DEBUG_OFF, ("%s: Load normal firmware!!\n", __FUNCTION__));
+				}
 
+			}
+		}
+		else
+#endif /* defined(WOW_SUPPORT) && defined(RTMP_MAC_USB) */
+		{
+			DBGPRINT(RT_DEBUG_ERROR, ("KH: bin file should be 8KB.\n"));
+			Status = NDIS_STATUS_FAILURE;
+		}
+	}
 
 	RTMP_WRITE_FIRMWARE(pAd, pFirmwareImage, FileLength);
 
 #endif
 
-	/* check if MCU is ready */
-	Index = 0;
-	do
-	{
-		if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_NIC_NOT_EXIST))			
-			return NDIS_STATUS_FAILURE;
-		
-		RTMP_IO_READ32(pAd, PBF_SYS_CTRL, &MacReg);
-
-		if (MacReg & 0x80)
-			break;
-		
-		RTMPusecDelay(1000);
-	} while (Index++ < 1000);
-
-    if (Index >= 1000)
+	if (isMCUnotReady(pAd))
 	{
 		DBGPRINT(RT_DEBUG_ERROR, ("NICLoadFirmware: MCU is not ready\n\n\n"));
 		Status = NDIS_STATUS_FAILURE;
@@ -383,96 +454,116 @@ NDIS_STATUS RtmpAsicLoadFirmware(
 
 
 INT RtmpAsicSendCommandToMcu(
-	IN PRTMP_ADAPTER pAd,
-	IN UCHAR		 Command,
-	IN UCHAR		 Token,
-	IN UCHAR		 Arg0,
-	IN UCHAR		 Arg1)
+	IN PRTMP_ADAPTER	pAd,
+	IN UCHAR			Command,
+	IN UCHAR			Token,
+	IN UCHAR			Arg0,
+	IN UCHAR			Arg1,
+	IN BOOLEAN			FlgIsNeedLocked)
 {
 	HOST_CMD_CSR_STRUC	H2MCmd;
 	H2M_MAILBOX_STRUC	H2MMailbox;
-	ULONG				i = 0;
+	INT i = 0;
+	int ret;
+
+
 #ifdef RTMP_MAC_PCI
-#ifdef RALINK_ATE
-	static UINT32 j = 0;
-#endif // RALINK_ATE //
-#endif // RTMP_MAC_PCI //
-	{
-	do
-	{
-		RTMP_IO_READ32(pAd, H2M_MAILBOX_CSR, &H2MMailbox.word);
-		if (H2MMailbox.field.Owner == 0)
-			break;
+#ifdef SPECIFIC_BCN_BUF_SUPPORT
+	ULONG	IrqFlags = 0;
+#endif /* SPECIFIC_BCN_BUF_SUPPORT */
+#endif /* RTMP_MAC_PCI */
 
-		if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_NIC_NOT_EXIST))				
-			return FALSE;
 
-		RTMPusecDelay(2);
-	} while(i++ < 100);
 
-	if (i >= 100)
 	{
 #ifdef RTMP_MAC_PCI
-#ifdef RALINK_ATE
-		if (pAd->ate.bFWLoading == TRUE)
+#ifdef SPECIFIC_BCN_BUF_SUPPORT
+		if (FlgIsNeedLocked == TRUE)
 		{
-			/* reloading firmware when received iwpriv cmd "ATE=ATESTOP" */
-			if (j > 0)
-			{
-				if (j % 64 != 0)
-				{
-					DBGPRINT(RT_DEBUG_ERROR, ("#"));
-				}
-				else
-				{
-					DBGPRINT(RT_DEBUG_ERROR, ("\n"));
-				}
-				++j;
-			}
-			else if (j == 0)
-			{
-				DBGPRINT(RT_DEBUG_ERROR, ("Loading firmware. Please wait for a moment...\n"));
-				++j;
-			}
+		           RTMP_MAC_SHR_MSEL_PROTECT_LOCK(pAd, IrqFlags);
 		}
-		else
-#endif // RALINK_ATE //
-#endif // RTMP_MAC_PCI //
-		{
-		DBGPRINT_ERR(("H2M_MAILBOX still hold by MCU. command fail\n"));
-		}
-		return FALSE;
-	}
+#endif /* SPECIFIC_BCN_BUF_SUPPORT */
+#endif /* RTMP_MAC_PCI */
 
+
+		ret = FALSE;
+		do
+		{
+			RTMP_IO_READ32(pAd, H2M_MAILBOX_CSR, &H2MMailbox.word);
+			if (H2MMailbox.field.Owner == 0)
+				break;
+
+			if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_NIC_NOT_EXIST))
+			{
+#ifdef RTMP_MAC_PCI
+#ifdef SPECIFIC_BCN_BUF_SUPPORT	
+				if (FlgIsNeedLocked == TRUE)
+					RTMP_MAC_SHR_MSEL_PROTECT_UNLOCK(pAd, IrqFlags);
+#endif /* SPECIFIC_BCN_BUF_SUPPORT */
+#endif /* RTMP_MAC_PCI */
+				goto done;
+			}
+			RTMPusecDelay(2);
+		} while(i++ < 100);
+
+		if (i >= 100)
+		{
 #ifdef RTMP_MAC_PCI
 #ifdef RALINK_ATE
-	else if (pAd->ate.bFWLoading == TRUE)
-	{
-		/* reloading of firmware is completed */
-		pAd->ate.bFWLoading = FALSE;
-		DBGPRINT(RT_DEBUG_ERROR, ("\n"));
-		j = 0;
-	}
-#endif // RTMP_RBUS_SUPPORT //
-#endif // RTMP_MAC_PCI //
+			if (IS_PCI_INF(pAd) && (pAd->ate.bFWLoading == TRUE))
+			{
+			; /* wait for firmware loading */
+			}
+			else
+#endif /* RALINK_ATE */
+#endif /* RTMP_MAC_PCI */
+			{
+				DBGPRINT_ERR(("H2M_MAILBOX still hold by MCU. command fail\n"));
+			}
+#ifdef RTMP_MAC_PCI
+#ifdef SPECIFIC_BCN_BUF_SUPPORT	
+			if (FlgIsNeedLocked == TRUE)
+				RTMP_MAC_SHR_MSEL_PROTECT_UNLOCK(pAd, IrqFlags);
+#endif /* SPECIFIC_BCN_BUF_SUPPORT */
+#endif /* RTMP_MAC_PCI */
+			goto done;
+		}
+#ifdef RTMP_MAC_PCI
+#ifdef RALINK_ATE
+		else if (IS_PCI_INF(pAd) && (pAd->ate.bFWLoading == TRUE))
+		{
+		/* mail box is not busy anymore */
+			/* reloading of firmware is completed */
+			pAd->ate.bFWLoading = FALSE;
+		}
+#endif /* RALINK_ATE */
+#endif /* RTMP_MAC_PCI */
 
-	H2MMailbox.field.Owner	  = 1;	   // pass ownership to MCU
-	H2MMailbox.field.CmdToken = Token;
-	H2MMailbox.field.HighByte = Arg1;
-	H2MMailbox.field.LowByte  = Arg0;
-	RTMP_IO_WRITE32(pAd, H2M_MAILBOX_CSR, H2MMailbox.word);
+		H2MMailbox.field.Owner = 1;	   /* pass ownership to MCU*/
+		H2MMailbox.field.CmdToken = Token;
+		H2MMailbox.field.HighByte = Arg1;
+		H2MMailbox.field.LowByte  = Arg0;
+		RTMP_IO_WRITE32(pAd, H2M_MAILBOX_CSR, H2MMailbox.word);
 
-	H2MCmd.word 			  = 0;
-	H2MCmd.field.HostCommand  = Command;
-	RTMP_IO_WRITE32(pAd, HOST_CMD_CSR, H2MCmd.word);
-
-	if (Command != 0x80)
-	{
-	}
+		H2MCmd.word = 0;
+		H2MCmd.field.HostCommand  = Command;
+		RTMP_IO_WRITE32(pAd, HOST_CMD_CSR, H2MCmd.word);
+#ifdef RTMP_MAC_PCI
+#ifdef SPECIFIC_BCN_BUF_SUPPORT
+			if (FlgIsNeedLocked == TRUE)
+				RTMP_MAC_SHR_MSEL_PROTECT_UNLOCK(pAd, IrqFlags);
+#endif // SPECIFIC_BCN_BUF_SUPPORT //
+#endif /* RTMP_MAC_PCI */
 }
+
 
 	if (Command == WAKE_MCU_CMD)
 		pAd->LastMCUCmd = Command;
 
-	return TRUE;
+	ret = TRUE;
+
+done:
+
+	return ret;
 }
+

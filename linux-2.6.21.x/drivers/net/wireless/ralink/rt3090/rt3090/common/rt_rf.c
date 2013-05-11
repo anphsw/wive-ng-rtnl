@@ -34,6 +34,68 @@
 /*
 	========================================================================
 	
+	Routine Description: Read RF register through MAC with specified bit mask
+
+	Arguments:
+		pAd		- pointer to the adapter structure
+		regID	- RF register ID
+		pValue1	- (RF value & BitMask)
+		pValue2	- (RF value & (~BitMask))
+		BitMask	- bit wise mask
+
+	Return Value:
+	
+	Note:
+	
+	========================================================================
+*/
+VOID RTMP_ReadRF(
+	IN	PRTMP_ADAPTER	pAd,
+	IN	UCHAR			RegID,
+	OUT	PUCHAR			pValue1,
+	OUT PUCHAR			pValue2,
+	IN	UCHAR			BitMask)
+{	
+	UCHAR RfReg = 0;									
+	RT30xxReadRFRegister(pAd, RegID, &RfReg);		
+	if (pValue1 != NULL)								
+		*pValue1 = RfReg & BitMask;			
+	if (pValue2 != NULL)								
+		*pValue2 = RfReg & (~BitMask);		
+}
+
+/*
+	========================================================================
+	
+	Routine Description: Write RF register through MAC with specified bit mask
+
+	Arguments:
+		pAd		- pointer to the adapter structure
+		regID	- RF register ID
+		Value	- only write the part of (Value & BitMask) to RF register
+		BitMask	- bit wise mask
+
+	Return Value:
+	
+	Note:
+	
+	========================================================================
+*/
+VOID RTMP_WriteRF(
+	IN	PRTMP_ADAPTER	pAd,
+	IN	UCHAR			RegID,
+	IN	UCHAR			Value,
+	IN	UCHAR			BitMask)
+{
+	UCHAR RfReg = 0;	
+	RTMP_ReadRF(pAd, RegID, NULL, &RfReg, BitMask);
+	RfReg |= ((Value) & BitMask);
+	RT30xxWriteRFRegister(pAd, RegID, RfReg);
+}
+
+/*
+	========================================================================
+	
 	Routine Description: Write RT30xx RF register through MAC
 
 	Arguments:
@@ -53,9 +115,7 @@ NDIS_STATUS RT30xxWriteRFRegister(
 {
 	RF_CSR_CFG_STRUC	rfcsr = { { 0 } };
 	UINT				i = 0;
-#ifdef RT3593
-	RF_CSR_CFG_EXT_STRUC RfCsrCfgExt = { { 0 } };
-#endif // RT3593 //
+	NDIS_STATUS	 ret;
 
 
 #ifdef RTMP_MAC_PCI
@@ -64,70 +124,62 @@ NDIS_STATUS RT30xxWriteRFRegister(
 		DBGPRINT_ERR(("RT30xxWriteRFRegister. Not allow to write RF 0x%x : fail\n",  regID));	
 		return STATUS_UNSUCCESSFUL;
 	}
-#endif // RTMP_MAC_PCI //
+#endif /* RTMP_MAC_PCI */
 
-#ifdef RT3593
-	if (IS_RT3593(pAd))
+	ASSERT((regID <= pAd->chipCap.MaxNumOfRfId));
+
+
+	ret = STATUS_UNSUCCESSFUL;
+	do
 	{
-		ASSERT((regID <= 63)); // R0~R63
+		RTMP_IO_READ32(pAd, RF_CSR_CFG, &rfcsr.word);
 
-		do
+		if (!rfcsr.field.RF_CSR_KICK)
+			break;
+		i++;
+	}
+	while ((i < MAX_BUSY_COUNT) && (!RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_NIC_NOT_EXIST)));
+
+	if ((i == MAX_BUSY_COUNT) || (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_NIC_NOT_EXIST)))
+	{
+		DBGPRINT_RAW(RT_DEBUG_ERROR, ("Retry count exhausted or device removed!!!\n"));
+		goto done;
+	}
+
+	rfcsr.field.RF_CSR_WR = 1;
+	rfcsr.field.RF_CSR_KICK = 1;
+	rfcsr.field.TESTCSR_RFACC_REGNUM = regID;
+
+	if ((pAd->chipCap.RfReg17WtMethod == RF_REG_WT_METHOD_STEP_ON) && (regID == RF_R17))
+	{
+		UCHAR IdRf;
+		UCHAR RfValue;
+		BOOLEAN beAdd;
+
+		RT30xxReadRFRegister(pAd, RF_R17, &RfValue);
+		beAdd =  (RfValue < value) ? TRUE : FALSE;
+		IdRf = RfValue;
+		while(IdRf != value)
 		{
-			RTMP_IO_READ32(pAd, RF_CSR_CFG, &RfCsrCfgExt.word);
-
-			if (!RfCsrCfgExt.field.RF_CSR_KICK)
-			{
-				break;
-			}
+			if (beAdd)
+				IdRf++;
+			else
+				IdRf--;
 			
-			i++;
+				rfcsr.field.RF_CSR_DATA = IdRf;
+				RTMP_IO_WRITE32(pAd, RF_CSR_CFG, rfcsr.word);
+				RtmpOsMsDelay(1);
 		}
-		
-		while ((i < MAX_BUSY_COUNT) && (!RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_NIC_NOT_EXIST)))
-			; // Do nothing
-
-		if ((i == MAX_BUSY_COUNT) || (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_NIC_NOT_EXIST)))
-		{
-			DBGPRINT_RAW(RT_DEBUG_ERROR, ("Retry count exhausted or device removed!!!\n"));
-			return STATUS_UNSUCCESSFUL;
-		}
-
-		RfCsrCfgExt.field.RF_CSR_WR = 1;
-		RfCsrCfgExt.field.RF_CSR_KICK = 1;
-		RfCsrCfgExt.field.TESTCSR_RFACC_REGNUM = regID; // R0~R63
-		RfCsrCfgExt.field.RF_CSR_DATA = value;
-		
-		RTMP_IO_WRITE32(pAd, RF_CSR_CFG, RfCsrCfgExt.word);
-	}
-	else
-#endif // RT3593 //
-	{
-		ASSERT((regID <= 31)); // R0~R31
-		do
-		{
-			RTMP_IO_READ32(pAd, RF_CSR_CFG, &rfcsr.word);
-
-			if (!rfcsr.field.RF_CSR_KICK)
-				break;
-			i++;
-		}
-		while ((i < RETRY_LIMIT) && (!RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_NIC_NOT_EXIST)));
-
-		if ((i == RETRY_LIMIT) || (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_NIC_NOT_EXIST)))
-		{
-			DBGPRINT_RAW(RT_DEBUG_ERROR, ("Retry count exhausted or device removed!!!\n"));
-			return STATUS_UNSUCCESSFUL;
-		}
-
-		rfcsr.field.RF_CSR_WR = 1;
-		rfcsr.field.RF_CSR_KICK = 1;
-		rfcsr.field.TESTCSR_RFACC_REGNUM = regID; // R0~R31
-		rfcsr.field.RF_CSR_DATA = value;
-		
-		RTMP_IO_WRITE32(pAd, RF_CSR_CFG, rfcsr.word);
 	}
 
-	return NDIS_STATUS_SUCCESS;
+	rfcsr.field.RF_CSR_DATA = value;
+	RTMP_IO_WRITE32(pAd, RF_CSR_CFG, rfcsr.word);
+
+	ret = NDIS_STATUS_SUCCESS;
+
+done:
+
+	return ret;
 }
 
 
@@ -153,11 +205,7 @@ NDIS_STATUS RT30xxReadRFRegister(
 {
 	RF_CSR_CFG_STRUC	rfcsr = { { 0 } };
 	UINT				i=0, k=0;
-
-#ifdef RT3593
-	RF_CSR_CFG_EXT_STRUC RfCsrCfgExt = { { 0 } };
-#endif // RT3593 //
-
+	NDIS_STATUS	 ret = STATUS_UNSUCCESSFUL;
 
 #ifdef RTMP_MAC_PCI
 	if ((pAd->bPCIclkOff == TRUE) || (pAd->LastMCUCmd == SLEEP_MCU_CMD))
@@ -165,99 +213,56 @@ NDIS_STATUS RT30xxReadRFRegister(
 		DBGPRINT_ERR(("RT30xxReadRFRegister. Not allow to read RF 0x%x : fail\n",  regID));	
 		return STATUS_UNSUCCESSFUL;
 	}
-#endif // RTMP_MAC_PCI //
+#endif /* RTMP_MAC_PCI */
 
-#ifdef RT3593
-	if (IS_RT3593(pAd))
+	ASSERT((regID <= pAd->chipCap.MaxNumOfRfId));
+
+
+	for (i=0; i<MAX_BUSY_COUNT; i++)
 	{
-		ASSERT((regID <= 63)); // R0~R63
+		if(RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_NIC_NOT_EXIST))
+			goto done;
+			
+		RTMP_IO_READ32(pAd, RF_CSR_CFG, &rfcsr.word);
+
+		if (rfcsr.field.RF_CSR_KICK == BUSY)
+				continue;
 		
-		for (i = 0; i < MAX_BUSY_COUNT; i++)
+		rfcsr.word = 0;
+		rfcsr.field.RF_CSR_WR = 0;
+		rfcsr.field.RF_CSR_KICK = 1;
+		rfcsr.field.TESTCSR_RFACC_REGNUM = regID;
+		RTMP_IO_WRITE32(pAd, RF_CSR_CFG, rfcsr.word);
+		
+		for (k=0; k<MAX_BUSY_COUNT; k++)
 		{
 			if(RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_NIC_NOT_EXIST))
-				return STATUS_UNSUCCESSFUL;
-			
-			RTMP_IO_READ32(pAd, RF_CSR_CFG, &RfCsrCfgExt.word);
-
-			if (RfCsrCfgExt.field.RF_CSR_KICK == BUSY)
-			{
-				continue;
-			}
-			
-			RfCsrCfgExt.word = 0;
-			RfCsrCfgExt.field.RF_CSR_WR = 0;
-			RfCsrCfgExt.field.RF_CSR_KICK = 1;
-			RfCsrCfgExt.field.TESTCSR_RFACC_REGNUM = regID; // R0~R63
-			
-			RTMP_IO_WRITE32(pAd, RF_CSR_CFG, RfCsrCfgExt.word);
-			
-			for (k = 0; k < MAX_BUSY_COUNT; k++)
-			{
-				if(RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_NIC_NOT_EXIST))
-					return STATUS_UNSUCCESSFUL;
+				goto done;
 				
-				RTMP_IO_READ32(pAd, RF_CSR_CFG, &RfCsrCfgExt.word);
-
-				if (RfCsrCfgExt.field.RF_CSR_KICK == IDLE)
-				{
-					break;
-				}
-			}
-			
-			if ((RfCsrCfgExt.field.RF_CSR_KICK == IDLE) && 
-			     (RfCsrCfgExt.field.TESTCSR_RFACC_REGNUM == regID))
-			{
-				*pValue = (UCHAR)(RfCsrCfgExt.field.RF_CSR_DATA);
-				break;
-			}
-		}
-
-		if (RfCsrCfgExt.field.RF_CSR_KICK == BUSY)
-		{																	
-			DBGPRINT_ERR(("RF read R%d = 0x%X fail, i[%d], k[%d]\n", regID, (UINT32)RfCsrCfgExt.word, i, k));
-			return STATUS_UNSUCCESSFUL;
-		}
-	}
-	else
-#endif // RT3593 //
-	{
-		ASSERT((regID <= 31)); // R0~R31
-
-		for (i=0; i<MAX_BUSY_COUNT; i++)
-		{
 			RTMP_IO_READ32(pAd, RF_CSR_CFG, &rfcsr.word);
 
-			if (rfcsr.field.RF_CSR_KICK == BUSY)									
-			{																
-				continue;													
-			}																
-			rfcsr.word = 0;
-			rfcsr.field.RF_CSR_WR = 0;
-			rfcsr.field.RF_CSR_KICK = 1;
-			rfcsr.field.TESTCSR_RFACC_REGNUM = regID;
-			RTMP_IO_WRITE32(pAd, RF_CSR_CFG, rfcsr.word);
-			for (k=0; k<MAX_BUSY_COUNT; k++)
-			{
-				RTMP_IO_READ32(pAd, RF_CSR_CFG, &rfcsr.word);
-
-				if (rfcsr.field.RF_CSR_KICK == IDLE)
-					break;
-			}
-			if ((rfcsr.field.RF_CSR_KICK == IDLE) &&
-				(rfcsr.field.TESTCSR_RFACC_REGNUM == regID))
-			{
-				*pValue = (UCHAR)(rfcsr.field.RF_CSR_DATA);
+			if (rfcsr.field.RF_CSR_KICK == IDLE)
 				break;
-			}
 		}
-		if (rfcsr.field.RF_CSR_KICK == BUSY)
-		{																	
-			DBGPRINT_ERR(("RF read R%d=0x%X fail, i[%d], k[%d]\n", regID, rfcsr.word,i,k));
-			return STATUS_UNSUCCESSFUL;
+		
+		if ((rfcsr.field.RF_CSR_KICK == IDLE) &&
+			(rfcsr.field.TESTCSR_RFACC_REGNUM == regID))
+		{
+			*pValue = (UCHAR)(rfcsr.field.RF_CSR_DATA);
+			break;
 		}
 	}
 
-	return STATUS_SUCCESS;
+	if (rfcsr.field.RF_CSR_KICK == BUSY)
+	{																	
+		DBGPRINT_ERR(("RF read R%d=0x%X fail, i[%d], k[%d]\n", regID, rfcsr.word,i,k));
+		goto done;
+	}
+	ret = STATUS_SUCCESS;
+	
+done:
+	
+	return ret;
 }
 
 
@@ -268,74 +273,47 @@ VOID NICInitRFRegisters(
 		pAd->chipOps.AsicRfInit(pAd);
 }
 
-
-VOID RtmpChipOpsRFHook(
-	IN RTMP_ADAPTER *pAd)
+/*
+    ========================================================================
+    Routine Description:
+        Adjust frequency offset when do channel switching or frequency calabration.
+        
+    Arguments:
+        pAd         		- Adapter pointer
+        pRefFreqOffset	in: referenced Frequency offset   out: adjusted frequency offset
+        
+    Return Value:
+        None
+        
+    ========================================================================
+*/
+BOOLEAN RTMPAdjustFrequencyOffset(
+	IN PRTMP_ADAPTER    pAd,
+	INOUT PUCHAR pRefFreqOffset)
 {
-	RTMP_CHIP_OP *pChipOps = &pAd->chipOps;
-
-	pChipOps->pRFRegTable = NULL;
-	pChipOps->pBBPRegTable = NULL;
-	pChipOps->bbpRegTbSize = 0;
-	pChipOps->AsicRfInit = NULL;
-	pChipOps->AsicRfTurnOn = NULL;
-	pChipOps->AsicRfTurnOff = NULL;
-	pChipOps->AsicReverseRfFromSleepMode = NULL;
-	pChipOps->AsicHaltAction = NULL;
+	BOOLEAN RetVal = TRUE;
+	UCHAR RFValue = 0; 
+	UCHAR PreRFValue = 0; 
+	UCHAR FreqOffset = 0;
+	UCHAR HighCurrentBit = 0;
 	
-	/* We depends on RfICType and MACVersion to assign the corresponding operation callbacks. */
-
-
-#ifdef RT3883
-        if (IS_RT3883(pAd) && (pAd->infType == RTMP_DEV_INF_RBUS))
-        {
-		pChipOps->pRFRegTable = RT3883_RFRegTable;
-		pChipOps->pBBPRegTable = RT3883_BBPRegTable;
-		pChipOps->bbpRegTbSize = (sizeof(RT3883_BBPRegTable) / sizeof(REG_PAIR));
-		pChipOps->AsicRfInit = NICInitRT3883RFRegisters;
-		pChipOps->AsicHaltAction = RT3883HaltAction;
-		pChipOps->AsicRfTurnOff = RT3883LoadRFSleepModeSetup;
-		pChipOps->AsicReverseRfFromSleepMode = RT3883ReverseRFSleepModeSetup;
-	}
-#endif // RT3883 //
-
-
-#ifdef RT30xx
-
-#ifdef RT3593
-	if (IS_RT3593(pAd))
+	RTMP_ReadRF(pAd, RF_R17, &FreqOffset, &HighCurrentBit, 0x7F);
+	PreRFValue =  HighCurrentBit | FreqOffset;
+	FreqOffset = min((*pRefFreqOffset & 0x7F), 0x5F);
+	RFValue = HighCurrentBit | FreqOffset;
+	if (PreRFValue != RFValue)
 	{
-		pChipOps->AsicRfTurnOff = RT30xxLoadRFSleepModeSetup;
-		pChipOps->pRFRegTable = RF3053RegTable;
-		pChipOps->AsicRfInit = NICInitRT3593RFRegisters;
-		pChipOps->AsicReverseRfFromSleepMode = RT30xxReverseRFSleepModeSetup;
-		pChipOps->AsicHaltAction = RT30xxHaltAction;
+		RetVal = (RT30xxWriteRFRegister(pAd, RF_R17, RFValue) == STATUS_SUCCESS ? TRUE:FALSE);
 	}
-#endif // RT3593 //
 
-	if (IS_RT30xx(pAd))
-	{
-		/* 
-			WARNING: 
-				Currently following table are shared by all RT30xx based IC, change it carefully when you add a new IC here.
-		*/
-		pChipOps->pRFRegTable = RT3020_RFRegTable;
-		pChipOps->AsicHaltAction = RT30xxHaltAction;
-		pChipOps->AsicRfTurnOff = RT30xxLoadRFSleepModeSetup;
-		pChipOps->AsicReverseRfFromSleepMode = RT30xxReverseRFSleepModeSetup;
-		
-#ifdef RT3090
-		if (IS_RT3090(pAd) && (pAd->infType == RTMP_DEV_INF_PCIE))
-		{
-			pChipOps->AsicRfInit = NICInitRT3090RFRegisters;
-		}
-#endif // RT3090 //
-	}
-#endif // RT30xx //
+	if (RetVal == FALSE)
+		DBGPRINT(RT_DEBUG_TRACE, ("%s(): Error in tuning frequency offset !!\n", __FUNCTION__));
+	else
+		*pRefFreqOffset = FreqOffset;
 
-	DBGPRINT(RT_DEBUG_TRACE, ("Chip specific bbpRegTbSize=%d!\n", pChipOps->bbpRegTbSize));
-	
+	return RetVal;
+
 }
 
-#endif // RTMP_RF_RW_SUPPORT //
+#endif /* RTMP_RF_RW_SUPPORT */
 

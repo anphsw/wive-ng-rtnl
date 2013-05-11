@@ -41,8 +41,8 @@
  *  For shorter udelay().
  *  (ripped from rtmp.h)
  */
-//#define RTMP_BBP_IO_READ8_BY_REG_ID(_A, _I, _pV)    {}
-// Read BBP register by register's ID. Generate PER to test BA
+/*#define RTMP_BBP_IO_READ8_BY_REG_ID(_A, _I, _pV)    {} */
+/* Read BBP register by register's ID. Generate PER to test BA */
 #define RTMP_BBP_IO_READ8_BY_REG_ID_SHORT_DELAY(_A, _I, _pV)		\
 {									\
 	BBP_CSR_CFG_STRUC  BbpCsr;					\
@@ -60,7 +60,7 @@
 			BbpCsr.field.Busy = 1;                          \
 			BbpCsr.field.RegNum = _I;                       \
 			RTMP_IO_WRITE32(_A, H2M_BBP_AGENT, BbpCsr.word);\
-			AsicSendCommandToMcu(_A, 0x80, 0xff, 0x0, 0x0);	\
+			AsicSendCommandToMcu(_A, 0x80, 0xff, 0x0, 0x0, FALSE);	\
 			RTMPusecDelay(10);				\
 			for (k=0; k<MAX_BUSY_COUNT; k++)		\
 			{                                               \

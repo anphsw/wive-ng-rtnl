@@ -44,28 +44,12 @@
 #error "For RT3090, you should define the compile flag -DRT30xx"
 #endif
 
-#ifdef CARRIER_DETECTION_SUPPORT
-#define TONE_RADAR_DETECT_SUPPORT
-#define TONE_RADAR_DETECT_V1
-#define TONE_RADAR_DETECT_V2
-#endif // CARRIER_DETECTION_SUPPORT //
-
-#include "chip/mac_pci.h"
 #include "chip/rt30xx.h"
-#ifdef RTMP_FLASH_SUPPORT
-#define EEPROM_DEFAULT_FILE_PATH                     "/etc/Wireless/iNIC/RT3092_PCIe_LNA_2T2R_ALC_V1_2.bin"
-#define RF_OFFSET					0x48000
-extern void RtmpFlashWrite(UCHAR * p, ULONG a, ULONG b);
-extern void RtmpFlashRead(UCHAR * p, ULONG a, ULONG b);
-#endif // RTMP_FLASH_SUPPORT //
-//
-// Device ID & Vendor ID, these values should match EEPROM value
-//
-#define NIC3090_PCIe_DEVICE_ID  0x3090		// 1T/1R miniCard
-#define NIC3091_PCIe_DEVICE_ID  0x3091		// 1T/2R miniCard
-#define NIC3092_PCIe_DEVICE_ID  0x3092		// 2T/2R miniCard
+/*
+  Device ID & Vendor ID, these values should match EEPROM value
+*/
 
-#endif // RT3090 //
+#endif /* RT3090 */
 
-#endif //__RT3090_H__ //
+#endif /*__RT3090_H__ */
 

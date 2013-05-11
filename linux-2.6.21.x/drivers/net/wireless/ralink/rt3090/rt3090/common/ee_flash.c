@@ -25,34 +25,44 @@
 	Who         When          What
 	--------    ----------    ----------------------------------------------
 */
+#ifdef RTMP_FLASH_SUPPORT
 
+#include "rt_config.h"
 
-#include	"rt_config.h"
-
-/* The definition of the EeBuffer[] located in chips/rtxxxx.c */
-extern UCHAR EeBuffer[EEPROM_SIZE];
+#define EEPROM_DEFAULT_FILE_PATH		"/etc/Wireless/iNIC/RT3092_PCIe_LNA_2T2R_ALC_V1_2.bin"
+#define RF_OFFSET				0x48000
 
 static NDIS_STATUS rtmp_ee_flash_init(PRTMP_ADAPTER pAd, PUCHAR start);
 
 
-static UCHAR init_flag = 0;
-static PUCHAR nv_ee_start = 0;
-
 static USHORT EE_FLASH_ID_LIST[]={
-#ifdef RT3883
-	0x3662,
-	0x3883,
-#endif // RT3883 //
-#ifdef RTMP_FLASH_SUPPORT
+#ifdef RT35xx
+	0x3572,
+#endif /* RT35xx */
+#ifdef RT3090
 	0x3090,
 	0x3091,
 	0x3092,
-#endif // RTMP_FLASH_SUPPORT //
+#endif /* RT3090 */
+#ifdef RT5390
+	0x5390,
+	0x5392,
+#endif /* RT5390 */
+#ifdef RT5592
+#ifdef RTMP_MAC_PCI
+	0x5592,
+#endif /* RTMP_MAC_PCI */
+
+#endif /* RT5592 */
+
+#ifdef RT3593
+#ifdef RTMP_MAC_PCI
+	0x3593,
+#endif /* RTMP_MAC_PCI */
+#endif /* RT3593 */
 };
 
 #define EE_FLASH_ID_NUM  (sizeof(EE_FLASH_ID_LIST) / sizeof(USHORT))
-
-
 
 /*******************************************************************************
   *
@@ -66,13 +76,13 @@ int rtmp_ee_flash_read(
 	IN USHORT Offset,
 	OUT USHORT *pValue)
 {	
-	if (!init_flag)
+	if (!pAd->chipCap.ee_inited)
 	{
 		*pValue = 0xffff;
 	}
 	else
 	{
-		memcpy(pValue, nv_ee_start+ Offset, 2);
+		memcpy(pValue, pAd->eebuf + Offset, 2);
 	}
 	return (*pValue);
 }
@@ -80,12 +90,19 @@ int rtmp_ee_flash_read(
 
 int rtmp_ee_flash_write(PRTMP_ADAPTER pAd, USHORT Offset, USHORT Data)
 {
-	if (init_flag)
+	if (pAd->chipCap.ee_inited)
 	{
-		memcpy(nv_ee_start+ Offset, &Data, 2);
-		//rt_nv_commit();
-		//rt_cfg_commit();
-		RtmpFlashWrite(EeBuffer, RF_OFFSET, EEPROM_SIZE);
+		memcpy(pAd->eebuf + Offset, &Data, 2);
+		/*rt_nv_commit();*/
+		/*rt_cfg_commit();*/
+#ifdef MULTIPLE_CARD_SUPPORT
+		DBGPRINT(RT_DEBUG_TRACE, ("rtmp_ee_flash_write:pAd->MC_RowID = %d\n", pAd->MC_RowID));
+		DBGPRINT(RT_DEBUG_TRACE, ("E2P_OFFSET = 0x%08x\n", pAd->E2P_OFFSET_IN_FLASH[pAd->MC_RowID]));
+		if ((pAd->E2P_OFFSET_IN_FLASH[pAd->MC_RowID]==0x48000) || (pAd->E2P_OFFSET_IN_FLASH[pAd->MC_RowID]==0x40000))
+			RtmpFlashWrite(pAd->eebuf, pAd->E2P_OFFSET_IN_FLASH[pAd->MC_RowID], EEPROM_SIZE);
+#else
+		RtmpFlashWrite(pAd->eebuf, RF_OFFSET, EEPROM_SIZE);
+#endif /* MULTIPLE_CARD_SUPPORT */
 	}
 	return 0;
 }
@@ -93,30 +110,56 @@ int rtmp_ee_flash_write(PRTMP_ADAPTER pAd, USHORT Offset, USHORT Data)
 
 VOID rtmp_ee_flash_read_all(PRTMP_ADAPTER pAd, USHORT *Data)
 {	
-	if (!init_flag)
+	if (!pAd->chipCap.ee_inited)
 		return;
 		
-	memcpy(Data, nv_ee_start, EEPROM_SIZE);
+	memcpy(Data, pAd->eebuf, EEPROM_SIZE);
 }
 
 
 VOID rtmp_ee_flash_write_all(PRTMP_ADAPTER pAd, USHORT *Data)
 {
-	if (!init_flag)
+	if (!pAd->chipCap.ee_inited)
 		return;
-	memcpy(nv_ee_start, Data, EEPROM_SIZE);
-	RtmpFlashWrite(EeBuffer, RF_OFFSET, EEPROM_SIZE);
+	memcpy(pAd->eebuf, Data, EEPROM_SIZE);
+#ifdef MULTIPLE_CARD_SUPPORT
+	DBGPRINT(RT_DEBUG_TRACE, ("rtmp_ee_flash_write_all:pAd->MC_RowID = %d\n", pAd->MC_RowID));
+	DBGPRINT(RT_DEBUG_TRACE, ("E2P_OFFSET = 0x%08x\n", pAd->E2P_OFFSET_IN_FLASH[pAd->MC_RowID]));
+	if ((pAd->E2P_OFFSET_IN_FLASH[pAd->MC_RowID]==0x48000) || (pAd->E2P_OFFSET_IN_FLASH[pAd->MC_RowID]==0x40000))
+		RtmpFlashWrite(pAd->eebuf, pAd->E2P_OFFSET_IN_FLASH[pAd->MC_RowID], EEPROM_SIZE);
+#else
+	RtmpFlashWrite(pAd->eebuf, RF_OFFSET, EEPROM_SIZE);
+#endif /* MULTIPLE_CARD_SUPPORT */
 }
 
 
-static NDIS_STATUS rtmp_ee_flash_reset(PUCHAR start)
+static NDIS_STATUS rtmp_ee_flash_reset(
+	IN RTMP_ADAPTER *pAd, 
+	IN PUCHAR start)
 {
 	PUCHAR				src;
 	RTMP_OS_FS_INFO		osFsInfo;
 	RTMP_OS_FD			srcf;
 	INT 					retval;
 
-	src = EEPROM_DEFAULT_FILE_PATH;
+#ifdef MULTIPLE_CARD_SUPPORT
+	STRING	BinFilePath[128];
+	PSTRING	pBinFileName = NULL;
+	UINT32	ChipVerion = (pAd->MACVersion >> 16);
+
+	if (rtmp_get_default_bin_file_by_chip(pAd, ChipVerion, &pBinFileName) == TRUE)
+	{
+		if (pAd->MC_RowID > 0)
+			sprintf(BinFilePath, "%s%s", EEPROM_2ND_FILE_DIR, pBinFileName);
+		else
+			sprintf(BinFilePath, "%s%s", EEPROM_1ST_FILE_DIR, pBinFileName);
+
+		src = BinFilePath;
+		DBGPRINT(RT_DEBUG_TRACE, ("%s(): src = %s\n", __FUNCTION__, src));
+	}
+	else
+#endif /* MULTIPLE_CARD_SUPPORT */
+		src = EEPROM_DEFAULT_FILE_PATH;
 
 	RtmpOSFSInfoChange(&osFsInfo, TRUE);
 
@@ -130,7 +173,7 @@ static NDIS_STATUS rtmp_ee_flash_reset(PUCHAR start)
 		}
 		else 
 		{
-			// The object must have a read method
+			/* The object must have a read method*/
 			NdisZeroMemory(start, EEPROM_SIZE);
 			
 			retval = RtmpOSFileRead(srcf, start, EEPROM_SIZE);
@@ -187,13 +230,13 @@ int	Set_EECMD_Proc(
 			{
 				DBGPRINT(RT_DEBUG_OFF, ("EEPROM reset to default......\n"));
 				DBGPRINT(RT_DEBUG_OFF, ("The last byte of MAC address will be re-generated...\n"));
-				if (rtmp_ee_flash_reset(nv_ee_start) != NDIS_STATUS_SUCCESS)
+				if (rtmp_ee_flash_reset(pAd, pAd->eebuf) != NDIS_STATUS_SUCCESS)
 				{
 					DBGPRINT(RT_DEBUG_ERROR, ("Set_EECMD_Proc: rtmp_ee_flash_reset() failed\n"));
 					return FALSE;
 				}
 			
-				// Random number for the last bytes of MAC address
+				/* Random number for the last bytes of MAC address*/
 				{
 					USHORT  Addr45;
 
@@ -238,7 +281,7 @@ int	Set_EECMD_Proc(
 
 	return TRUE;
 }
-#endif // LINUX //
+#endif /* LINUX */
 
 
 static BOOLEAN  validFlashEepromID(RTMP_ADAPTER *pAd)
@@ -247,6 +290,7 @@ static BOOLEAN  validFlashEepromID(RTMP_ADAPTER *pAd)
 	int listIdx;
 	
 	rtmp_ee_flash_read(pAd, 0, &eeFlashId);
+
 	for(listIdx =0 ; listIdx < EE_FLASH_ID_NUM; listIdx++)
 	{
 		if (eeFlashId == EE_FLASH_ID_LIST[listIdx])
@@ -258,25 +302,24 @@ static BOOLEAN  validFlashEepromID(RTMP_ADAPTER *pAd)
 
 static NDIS_STATUS rtmp_ee_flash_init(PRTMP_ADAPTER pAd, PUCHAR start)
 {
-	init_flag = 1;
-	nv_ee_start = start;
-
+	pAd->chipCap.ee_inited = 1;
+	
 	if (validFlashEepromID(pAd) == FALSE)
 	{
-		if (rtmp_ee_flash_reset(start) != NDIS_STATUS_SUCCESS)
+		if (rtmp_ee_flash_reset(pAd, start) != NDIS_STATUS_SUCCESS)
 		{
 			DBGPRINT(RT_DEBUG_ERROR, ("rtmp_ee_init(): rtmp_ee_flash_init() failed\n"));
 			return NDIS_STATUS_FAILURE;
 		}
 
-		// Random number for the last bytes of MAC address
+		/* Random number for the last bytes of MAC address*/
 		{
 			USHORT  Addr45;
-
+			
 			rtmp_ee_flash_read(pAd, 0x08, &Addr45);
 			Addr45 = Addr45 & 0xff;
 			Addr45 = Addr45 | (RandomByte(pAd)&0xf8) << 8;
-
+			
 			rtmp_ee_flash_write(pAd, 0x08, Addr45);
 			DBGPRINT(RT_DEBUG_ERROR, ("The EEPROM in Flash is wrong, use default\n"));
 		}
@@ -287,14 +330,51 @@ static NDIS_STATUS rtmp_ee_flash_init(PRTMP_ADAPTER pAd, PUCHAR start)
 			return NDIS_STATUS_FAILURE;
 		}
 	}
-
+	
 	return NDIS_STATUS_SUCCESS;
 }
 
 
 NDIS_STATUS rtmp_nv_init(PRTMP_ADAPTER pAd)
 {
+#ifdef MULTIPLE_CARD_SUPPORT
+	UCHAR *eepromBuf;
+#endif /* MULTIPLE_CARD_SUPPORT */
+
 	DBGPRINT(RT_DEBUG_TRACE, ("--> rtmp_nv_init\n"));
-	RtmpFlashRead(EeBuffer, RF_OFFSET, EEPROM_SIZE);
-	return rtmp_ee_flash_init(pAd, EeBuffer);
+
+
+	if (pAd->chipCap.eebuf == NULL)
+	{
+		DBGPRINT(RT_DEBUG_ERROR, ("pAd->chipCap.eebuf == NULL!!!\n"));
+		return NDIS_STATUS_FAILURE;
+	}
+	
+/*	ASSERT((pAd->eebuf == NULL)); */
+	pAd->eebuf = pAd->chipCap.eebuf;
+#ifdef MULTIPLE_CARD_SUPPORT
+	/* specific for RT6855/RT6856 */
+	pAd->E2P_OFFSET_IN_FLASH[0] = 0x40000;
+	pAd->E2P_OFFSET_IN_FLASH[1] = 0x48000;
+
+	DBGPRINT(RT_DEBUG_OFF, ("rtmp_nv_init:pAd->MC_RowID = %d\n", pAd->MC_RowID));
+	os_alloc_mem(pAd, &eepromBuf, EEPROM_SIZE);
+	if (eepromBuf)
+	{	
+		pAd->eebuf = eepromBuf;
+		NdisMoveMemory(pAd->eebuf, pAd->chipCap.eebuf, EEPROM_SIZE);
+		}
+	else
+	{
+		DBGPRINT(RT_DEBUG_ERROR,("rtmp_nv_init:Alloc memory for pAd->MC_RowID[%d] failed! used default one!\n", pAd->MC_RowID));
+	}
+	DBGPRINT(RT_DEBUG_OFF, ("E2P_OFFSET = 0x%08x\n", pAd->E2P_OFFSET_IN_FLASH[pAd->MC_RowID]));
+	RtmpFlashRead(pAd->eebuf, pAd->E2P_OFFSET_IN_FLASH[pAd->MC_RowID], EEPROM_SIZE);
+#else
+	RtmpFlashRead(pAd->eebuf, RF_OFFSET, EEPROM_SIZE);
+#endif /* MULTIPLE_CARD_SUPPORT */
+
+	return rtmp_ee_flash_init(pAd, pAd->eebuf);
 }
+
+#endif /* RTMP_FLASH_SUPPORT */

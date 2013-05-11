@@ -30,15 +30,11 @@
 
 extern UCHAR  ZeroSsid[32];
 
+
 static VOID ReservedAction(
 	IN PRTMP_ADAPTER pAd, 
 	IN MLME_QUEUE_ELEM *Elem);
 
-#ifdef WMM_ACM_SUPPORT
-VOID PeerWMMAction(
-	IN PRTMP_ADAPTER pAd,
-	IN MLME_QUEUE_ELEM *Elem);
-#endif // WMM_ACM_SUPPORT //
 
 /*  
     ==========================================================================
@@ -70,7 +66,7 @@ VOID ActionStateMachineInit(
 	StateMachineSetAction(S, ACT_IDLE, MT2_PEER_DLS_CATE, (STATE_MACHINE_FUNC)ReservedAction);
 #ifdef QOS_DLS_SUPPORT
 		StateMachineSetAction(S, ACT_IDLE, MT2_PEER_DLS_CATE, (STATE_MACHINE_FUNC)PeerDLSAction);
-#endif // QOS_DLS_SUPPORT //
+#endif /* QOS_DLS_SUPPORT */
 
 #ifdef DOT11_N_SUPPORT
 	StateMachineSetAction(S, ACT_IDLE, MT2_PEER_BA_CATE, (STATE_MACHINE_FUNC)PeerBAAction);
@@ -78,7 +74,7 @@ VOID ActionStateMachineInit(
 	StateMachineSetAction(S, ACT_IDLE, MT2_MLME_ADD_BA_CATE, (STATE_MACHINE_FUNC)MlmeADDBAAction);
 	StateMachineSetAction(S, ACT_IDLE, MT2_MLME_ORI_DELBA_CATE, (STATE_MACHINE_FUNC)MlmeDELBAAction);
 	StateMachineSetAction(S, ACT_IDLE, MT2_MLME_REC_DELBA_CATE, (STATE_MACHINE_FUNC)MlmeDELBAAction);
-#endif // DOT11_N_SUPPORT //
+#endif /* DOT11_N_SUPPORT */
 
 	StateMachineSetAction(S, ACT_IDLE, MT2_PEER_PUBLIC_CATE, (STATE_MACHINE_FUNC)PeerPublicAction);
 	StateMachineSetAction(S, ACT_IDLE, MT2_PEER_RM_CATE, (STATE_MACHINE_FUNC)PeerRMAction);
@@ -87,17 +83,9 @@ VOID ActionStateMachineInit(
 	StateMachineSetAction(S, ACT_IDLE, MT2_MLME_DLS_CATE, (STATE_MACHINE_FUNC)MlmeDLSAction);
 	StateMachineSetAction(S, ACT_IDLE, MT2_ACT_INVALID, (STATE_MACHINE_FUNC)MlmeInvalidAction);
 
-#ifdef WMM_ACM_SUPPORT
-	StateMachineSetAction(S, ACT_IDLE, MT2_PEER_RESV_15, (STATE_MACHINE_FUNC)MlmeInvalidAction);
-	StateMachineSetAction(S, ACT_IDLE, MT2_PEER_RESV_16, (STATE_MACHINE_FUNC)MlmeInvalidAction);
-	StateMachineSetAction(S, ACT_IDLE, MT2_PEER_WMM, (STATE_MACHINE_FUNC)PeerWMMAction);
-#endif // WMM_ACM_SUPPORT //
 
 #ifdef CONFIG_AP_SUPPORT
-#ifdef DOT11R_FT_SUPPORT
-	StateMachineSetAction(S, ACT_IDLE, FT_CATEGORY_BSS_TRANSITION, (STATE_MACHINE_FUNC)FT_FtAction);
-#endif // DOT11R_FT_SUPPORT //
-#endif // CONFIG_AP_SUPPORT //
+#endif /* CONFIG_AP_SUPPORT */
 
 
 
@@ -119,20 +107,21 @@ VOID MlmeADDBAAction(
 	BA_ORI_ENTRY			*pBAEntry = NULL;
 #ifdef CONFIG_AP_SUPPORT
 	UCHAR			apidx;
-#endif // CONFIG_AP_SUPPORT //
+#endif /* CONFIG_AP_SUPPORT */
 
 	pInfo = (MLME_ADDBA_REQ_STRUCT *)Elem->Msg;
 	NdisZeroMemory(&Frame, sizeof(FRAME_ADDBA_REQ));
 	
-	if(MlmeAddBAReqSanity(pAd, Elem->Msg, Elem->MsgLen, Addr)) 
+	if(MlmeAddBAReqSanity(pAd, Elem->Msg, Elem->MsgLen, Addr) &&
+		VALID_WCID(pInfo->Wcid)) 
 	{
-		NStatus = MlmeAllocateMemory(pAd, &pOutBuffer);  //Get an unused nonpaged memory
+		NStatus = MlmeAllocateMemory(pAd, &pOutBuffer);  /* Get an unused nonpaged memory*/
 		if(NStatus != NDIS_STATUS_SUCCESS) 
 		{
 			DBGPRINT(RT_DEBUG_TRACE,("BA - MlmeADDBAAction() allocate memory failed \n"));
 			return;
 		}
-		// 1. find entry
+		/* 1. find entry */
 		Idx = pAd->MacTab.Content[pInfo->Wcid].BAOriWcidArray[pInfo->TID];
 		if (Idx == 0)
 		{
@@ -155,13 +144,13 @@ VOID MlmeADDBAAction(
 				ActHeaderInit(pAd, &Frame.Hdr, pInfo->pAddr, pAd->ApCfg.ApCliTab[apidx].CurrentAddress, pInfo->pAddr);		
 			}
 			else
-#endif // APCLI_SUPPORT //
+#endif /* APCLI_SUPPORT */
 			{
 				apidx = pAd->MacTab.Content[pInfo->Wcid].apidx;
 				ActHeaderInit(pAd, &Frame.Hdr, pInfo->pAddr, pAd->ApCfg.MBSSID[apidx].Bssid, pAd->ApCfg.MBSSID[apidx].Bssid);
 			}
 		}
-#endif // CONFIG_AP_SUPPORT //
+#endif /* CONFIG_AP_SUPPORT */
 
 		Frame.Category = CATEGORY_BA;
 		Frame.Action = ADDBA_REQ;
@@ -174,7 +163,18 @@ VOID MlmeADDBAAction(
 		Frame.BaStartSeq.field.FragNum = 0;
 		Frame.BaStartSeq.field.StartSeq = pAd->MacTab.Content[pInfo->Wcid].TxSeq[pInfo->TID];
 
-		*(USHORT *)(&Frame.BaParm) = cpu2le16(*(USHORT *)(&Frame.BaParm));
+#ifdef UNALIGNMENT_SUPPORT
+		{
+			BA_PARM		tmpBaParm;
+
+			NdisMoveMemory((PUCHAR)(&tmpBaParm), (PUCHAR)(&Frame.BaParm), sizeof(BA_PARM));
+			*(USHORT *)(&tmpBaParm) = cpu2le16(*(USHORT *)(&tmpBaParm));
+			NdisMoveMemory((PUCHAR)(&Frame.BaParm), (PUCHAR)(&tmpBaParm), sizeof(BA_PARM));
+		}
+#else
+		*(USHORT *)(&(Frame.BaParm)) = cpu2le16((*(USHORT *)(&(Frame.BaParm))));
+#endif /* UNALIGNMENT_SUPPORT */
+
 		Frame.TimeOutValue = cpu2le16(Frame.TimeOutValue);
 		Frame.BaStartSeq.word = cpu2le16(Frame.BaStartSeq.word);
 
@@ -215,31 +215,32 @@ VOID MlmeDELBAAction(
 	FRAME_BAR	FrameBar;
 #ifdef CONFIG_AP_SUPPORT
 	UCHAR		apidx;
-#endif // CONFIG_AP_SUPPORT //
+#endif /* CONFIG_AP_SUPPORT */
 	
 	pInfo = (MLME_DELBA_REQ_STRUCT *)Elem->Msg;	
-	// must send back DELBA 
+	/* must send back DELBA */
 	NdisZeroMemory(&Frame, sizeof(FRAME_DELBA_REQ));
 	DBGPRINT(RT_DEBUG_TRACE, ("==> MlmeDELBAAction(), Initiator(%d) \n", pInfo->Initiator));
 	
-	if(MlmeDelBAReqSanity(pAd, Elem->Msg, Elem->MsgLen)) 
+	if(MlmeDelBAReqSanity(pAd, Elem->Msg, Elem->MsgLen) &&
+		VALID_WCID(pInfo->Wcid))
 	{
-		NStatus = MlmeAllocateMemory(pAd, &pOutBuffer);  //Get an unused nonpaged memory
-		if(NStatus != NDIS_STATUS_SUCCESS) 
+		NStatus = MlmeAllocateMemory(pAd, &pOutBuffer);  /*Get an unused nonpaged memory*/
+		if(NStatus != NDIS_STATUS_SUCCESS)
 		{
 			DBGPRINT(RT_DEBUG_ERROR,("BA - MlmeDELBAAction() allocate memory failed 1. \n"));
 			return;
 		}
 
-		NStatus = MlmeAllocateMemory(pAd, &pOutBuffer2);  //Get an unused nonpaged memory
-		if(NStatus != NDIS_STATUS_SUCCESS) 
+		NStatus = MlmeAllocateMemory(pAd, &pOutBuffer2);  /*Get an unused nonpaged memory*/
+		if(NStatus != NDIS_STATUS_SUCCESS)
 		{
 			MlmeFreeMemory(pAd, pOutBuffer);
 			DBGPRINT(RT_DEBUG_ERROR, ("BA - MlmeDELBAAction() allocate memory failed 2. \n"));
 			return;
 		}
 
-		// SEND BAR (Send BAR to refresh peer reordering buffer.)
+		/* SEND BAR (Send BAR to refresh peer reordering buffer.) */
 		Idx = pAd->MacTab.Content[pInfo->Wcid].BAOriWcidArray[pInfo->TID];
 #ifdef CONFIG_AP_SUPPORT
 		IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
@@ -251,21 +252,21 @@ VOID MlmeDELBAAction(
 				BarHeaderInit(pAd, &FrameBar, pAd->MacTab.Content[pInfo->Wcid].Addr, pAd->ApCfg.ApCliTab[apidx].CurrentAddress);
 			}	
 			else
-#endif // APCLI_SUPPORT //
+#endif /* APCLI_SUPPORT */
 			{
 				apidx = pAd->MacTab.Content[pInfo->Wcid].apidx;
 				BarHeaderInit(pAd, &FrameBar, pAd->MacTab.Content[pInfo->Wcid].Addr, pAd->ApCfg.MBSSID[apidx].Bssid);
 			}
 		}
-#endif // CONFIG_AP_SUPPORT //
+#endif /* CONFIG_AP_SUPPORT */
 
 
-		FrameBar.StartingSeq.field.FragNum = 0; // make sure sequence not clear in DEL funciton.
-		FrameBar.StartingSeq.field.StartSeq = pAd->MacTab.Content[pInfo->Wcid].TxSeq[pInfo->TID]; // make sure sequence not clear in DEL funciton.
-		FrameBar.BarControl.TID = pInfo->TID; // make sure sequence not clear in DEL funciton.
-		FrameBar.BarControl.ACKPolicy = IMMED_BA; // make sure sequence not clear in DEL funciton.
-		FrameBar.BarControl.Compressed = 1; // make sure sequence not clear in DEL funciton.
-		FrameBar.BarControl.MTID = 0; // make sure sequence not clear in DEL funciton.
+		FrameBar.StartingSeq.field.FragNum = 0; /* make sure sequence not clear in DEL funciton.*/
+		FrameBar.StartingSeq.field.StartSeq = pAd->MacTab.Content[pInfo->Wcid].TxSeq[pInfo->TID]; /* make sure sequence not clear in DEL funciton.*/
+		FrameBar.BarControl.TID = pInfo->TID; /* make sure sequence not clear in DEL funciton.*/
+		FrameBar.BarControl.ACKPolicy = IMMED_BA; /* make sure sequence not clear in DEL funciton.*/
+		FrameBar.BarControl.Compressed = 1; /* make sure sequence not clear in DEL funciton.*/
+		FrameBar.BarControl.MTID = 0; /* make sure sequence not clear in DEL funciton.*/
 
 		MakeOutgoingFrame(pOutBuffer2,				&FrameLen,
 					  sizeof(FRAME_BAR),	  &FrameBar,
@@ -274,7 +275,7 @@ VOID MlmeDELBAAction(
 		MlmeFreeMemory(pAd, pOutBuffer2);
 		DBGPRINT(RT_DEBUG_TRACE,("BA - MlmeDELBAAction() . Send BAR to refresh peer reordering buffer \n"));
 
-		// SEND DELBA FRAME
+		/* SEND DELBA FRAME*/
 		FrameLen = 0;
 #ifdef CONFIG_AP_SUPPORT
 		IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
@@ -286,18 +287,19 @@ VOID MlmeDELBAAction(
 				ActHeaderInit(pAd, &Frame.Hdr, pAd->MacTab.Content[pInfo->Wcid].Addr, pAd->ApCfg.ApCliTab[apidx].CurrentAddress, pAd->MacTab.Content[pInfo->Wcid].Addr);		
 			}
 			else
-#endif // APCLI_SUPPORT //
+#endif /* APCLI_SUPPORT */
 			{
 				apidx = pAd->MacTab.Content[pInfo->Wcid].apidx;
 				ActHeaderInit(pAd, &Frame.Hdr,  pAd->MacTab.Content[pInfo->Wcid].Addr, pAd->ApCfg.MBSSID[apidx].Bssid, pAd->ApCfg.MBSSID[apidx].Bssid);
 			}
 		}
-#endif // CONFIG_AP_SUPPORT //
+#endif /* CONFIG_AP_SUPPORT */
+
 		Frame.Category = CATEGORY_BA;
 		Frame.Action = DELBA;
 		Frame.DelbaParm.Initiator = pInfo->Initiator;
 		Frame.DelbaParm.TID = pInfo->TID;
-		Frame.ReasonCode = 39; // Time Out
+		Frame.ReasonCode = 39; /* Time Out*/
 		*(USHORT *)(&Frame.DelbaParm) = cpu2le16(*(USHORT *)(&Frame.DelbaParm));
 		Frame.ReasonCode = cpu2le16(Frame.ReasonCode);
 		
@@ -309,7 +311,7 @@ VOID MlmeDELBAAction(
 		DBGPRINT(RT_DEBUG_TRACE, ("BA - MlmeDELBAAction() . 3 DELBA sent. Initiator(%d)\n", pInfo->Initiator));
     	}
 }
-#endif // DOT11_N_SUPPORT //
+#endif /* DOT11_N_SUPPORT */
 
 VOID MlmeQOSAction(
     IN PRTMP_ADAPTER pAd, 
@@ -327,8 +329,8 @@ VOID MlmeInvalidAction(
     IN PRTMP_ADAPTER pAd, 
     IN MLME_QUEUE_ELEM *Elem) 
 {
-	//PUCHAR		   pOutBuffer = NULL;
-	//Return the receiving frame except the MSB of category filed set to 1.  7.3.1.11
+	/*PUCHAR		   pOutBuffer = NULL;*/
+	/*Return the receiving frame except the MSB of category filed set to 1.  7.3.1.11*/
 }
 
 VOID PeerQOSAction(
@@ -350,50 +352,26 @@ VOID PeerDLSAction(
 #ifdef CONFIG_AP_SUPPORT
 			IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
 				APPeerDlsReqAction(pAd, Elem);
-#endif // CONFIG_AP_SUPPORT //
+#endif /* CONFIG_AP_SUPPORT */
 			break;
 
 		case ACTION_DLS_RESPONSE:
 #ifdef CONFIG_AP_SUPPORT
 			IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
 				APPeerDlsRspAction(pAd, Elem);
-#endif // CONFIG_AP_SUPPORT //
+#endif /* CONFIG_AP_SUPPORT */
 			break;
 
 		case ACTION_DLS_TEARDOWN:
 #ifdef CONFIG_AP_SUPPORT
 			IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
 				APPeerDlsTearDownAction(pAd, Elem);
-#endif // CONFIG_AP_SUPPORT //
+#endif /* CONFIG_AP_SUPPORT */
 			break;
 	}
 }
-#endif // QOS_DLS_SUPPORT //
+#endif /* QOS_DLS_SUPPORT */
 
-#ifdef WMM_ACM_SUPPORT
-VOID PeerWMMAction(
-	IN PRTMP_ADAPTER pAd,
-	IN MLME_QUEUE_ELEM *Elem)
-{
-	MAC_TABLE_ENTRY	*pEntry;
-#ifdef CONFIG_AP_SUPPORT
-	PFRAME_802_11 Fr = (PFRAME_802_11)Elem->Msg;
-	UCHAR Addr2[MAC_ADDR_LEN];
-
-	COPY_MAC_ADDR(Addr2, &Fr->Hdr.Addr2);
-	pEntry = MacTableLookup(pAd, Addr2);
-//	if (pEntry == NULL)
-//		return; // entry can be NULL when this is a bw ann frame
-#endif // CONFIG_AP_SUPPORT //
-
-
-	DBGPRINT(RT_DEBUG_TRACE,
-				("11e_msg> Receive a action frame from a device!\n"));
-
-	ACMP_ManagementHandle(pAd, pEntry, ACMR_SUBTYPE_ACTION,
-						Elem->Msg, Elem->MsgLen, 1000000);
-}
-#endif // WMM_ACM_SUPPORT //
 
 
 #ifdef DOT11_N_SUPPORT
@@ -429,7 +407,7 @@ VOID ApPublicAction(
 	UCHAR	Action = Elem->Msg[LENGTH_802_11+1];
 	BSS_2040_COEXIST_IE		BssCoexist;
 	
-	// Format as in IEEE 7.4.7.2
+	/* Format as in IEEE 7.4.7.2*/
 	if (Action == ACTION_BSS_2040_COEXIST)
 	{
 		BssCoexist.word = Elem->Msg[LENGTH_802_11+2];
@@ -464,7 +442,7 @@ VOID SendBSS2040CoexistMgmtAction(
 	BssIntolerantInfo.Len = 1;
 	BssIntolerantInfo.RegulatoryClass = get_regulatory_class(pAd);
 
-	NStatus = MlmeAllocateMemory(pAd, &pOutBuffer);  //Get an unused nonpaged memory
+	NStatus = MlmeAllocateMemory(pAd, &pOutBuffer);  /*Get an unused nonpaged memory*/
 	if(NStatus != NDIS_STATUS_SUCCESS) 
 	{
 		DBGPRINT(RT_DEBUG_ERROR,("ACT - SendBSS2040CoexistMgmtAction() allocate memory failed \n"));
@@ -493,7 +471,7 @@ VOID SendBSS2040CoexistMgmtAction(
 	
 }
 
-#endif // CONFIG_AP_SUPPORT //
+#endif /* CONFIG_AP_SUPPORT */
 
 
 
@@ -514,7 +492,7 @@ BOOLEAN ChannelSwitchSanityCheck(
 	if ((NewChannel < 5) && (Secondary == 3))
 		return FALSE;
 
-	// 0. Check if new channel is in the channellist.
+	/* 0. Check if new channel is in the channellist.*/
 	for (i = 0;i < pAd->ChannelListNum;i++)
 	{
 		if (pAd->ChannelList[i].Channel == NewChannel)
@@ -537,14 +515,14 @@ VOID ChannelSwitchAction(
 	IN    UCHAR  Secondary) 
 {
 	UCHAR		BBPValue = 0;
-	ULONG		MACValue;
+	INT32		MACValue;
 	
 	DBGPRINT(RT_DEBUG_TRACE,("SPECTRUM - ChannelSwitchAction(NewChannel = %d , Secondary = %d)  \n", NewChannel, Secondary));
 
 	if (ChannelSwitchSanityCheck(pAd, Wcid, NewChannel, Secondary) == FALSE)
 		return;
 	
-	// 1.  Switches to BW = 20.
+	/* 1.  Switches to BW = 20.*/
 	if (Secondary == 0)
 	{
 		RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R4, &BBPValue);
@@ -563,16 +541,23 @@ VOID ChannelSwitchAction(
 		AsicSwitchChannel(pAd, pAd->CommonCfg.Channel,FALSE);
 		AsicLockChannel(pAd, pAd->CommonCfg.Channel);
 		pAd->MacTab.Content[Wcid].HTPhyMode.field.BW = 0;
+		pAd->CommonCfg.AddHTInfo.AddHtInfo.RecomWidth = 0;
+		pAd->CommonCfg.AddHTInfo.AddHtInfo.ExtChanOffset = 0;		
 		DBGPRINT(RT_DEBUG_TRACE, ("!!!20MHz   !!! \n" ));
 	}
-	// 1.  Switches to BW = 40 And Station supports BW = 40.
+	/* 1.  Switches to BW = 40 And Station supports BW = 40.*/
 	else if (((Secondary == 1) || (Secondary == 3)) && (pAd->CommonCfg.HtCapability.HtCapInfo.ChannelWidth == 1))
 	{
 		pAd->CommonCfg.Channel = NewChannel;
 
 		if (Secondary == 1)
 		{
-			// Secondary above.
+#ifdef GREENAP_SUPPORT
+			if (pAd->ApCfg.bGreenAPActive == 1)
+				pAd->CommonCfg.CentralChannel = pAd->CommonCfg.Channel;
+			else
+#endif /* GREENAP_SUPPORT */
+			/* Secondary above.*/
 			pAd->CommonCfg.CentralChannel = pAd->CommonCfg.Channel + 2;
 			RTMP_IO_READ32(pAd, TX_BAND_CFG, &MACValue);
 			MACValue &= 0xfe;
@@ -580,6 +565,9 @@ VOID ChannelSwitchAction(
 			RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R4, &BBPValue);
 			BBPValue&= (~0x18);
 
+#ifdef GREENAP_SUPPORT
+			if (pAd->ApCfg.bGreenAPActive == 0)
+#endif /* GREENAP_SUPPORT */
 			BBPValue|= (0x10);
 			RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R4, BBPValue);
 			RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R3, &BBPValue);
@@ -589,7 +577,13 @@ VOID ChannelSwitchAction(
 		}
 		else
 		{
-			// Secondary below.
+#ifdef GREENAP_SUPPORT
+			if (pAd->ApCfg.bGreenAPActive == 1)
+				pAd->CommonCfg.CentralChannel = pAd->CommonCfg.Channel;
+			else
+#endif /* GREENAP_SUPPORT */
+
+			/* Secondary below.*/
 			pAd->CommonCfg.CentralChannel = pAd->CommonCfg.Channel - 2;
 			RTMP_IO_READ32(pAd, TX_BAND_CFG, &MACValue);
 			MACValue &= 0xfe;
@@ -597,6 +591,9 @@ VOID ChannelSwitchAction(
 			RTMP_IO_WRITE32(pAd, TX_BAND_CFG, MACValue);
 			RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R4, &BBPValue);
 			BBPValue&= (~0x18);
+#ifdef GREENAP_SUPPORT
+			if (pAd->ApCfg.bGreenAPActive == 0)
+#endif /* GREENAP_SUPPORT */
 			BBPValue|= (0x10);
 			RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R4, BBPValue);
 			RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R3, &BBPValue);
@@ -605,34 +602,37 @@ VOID ChannelSwitchAction(
 			RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R3, BBPValue);
 			DBGPRINT(RT_DEBUG_TRACE, ("!!!40MHz Upper LINK UP !!! Control Channel at UpperCentral = %d \n", pAd->CommonCfg.CentralChannel ));
 		}
+#ifdef GREENAP_SUPPORT
+			if (pAd->ApCfg.bGreenAPActive == 1)
+			pAd->CommonCfg.BBPCurrentBW = BW_20;
+		else
+#endif /* GREENAP_SUPPORT */
 		pAd->CommonCfg.BBPCurrentBW = BW_40;
 		AsicSwitchChannel(pAd, pAd->CommonCfg.CentralChannel, FALSE);
 		AsicLockChannel(pAd, pAd->CommonCfg.CentralChannel);
 		pAd->MacTab.Content[Wcid].HTPhyMode.field.BW = 1;
 	}
 }
-#endif // DOT11N_DRAFT3 //
-#endif // DOT11_N_SUPPORT //
+#endif /* DOT11N_DRAFT3 */
+#endif /* DOT11_N_SUPPORT */
 
 VOID PeerPublicAction(
 	IN PRTMP_ADAPTER pAd, 
 	IN MLME_QUEUE_ELEM *Elem) 
 {
-#ifdef DOT11_N_SUPPORT
-#ifdef DOT11N_DRAFT3
 	UCHAR	Action = Elem->Msg[LENGTH_802_11+1];
-#endif // DOT11N_DRAFT3 //
-#endif // DOT11_N_SUPPORT //	
-	if (Elem->Wcid >= MAX_LEN_OF_MAC_TABLE)
+	if ((Elem->Wcid >= MAX_LEN_OF_MAC_TABLE)
+		)
 		return;
 
-#ifdef DOT11_N_SUPPORT
-#ifdef DOT11N_DRAFT3
+
 	switch(Action)
 	{
-		case ACTION_BSS_2040_COEXIST:	// Format defined in IEEE 7.4.7a.1 in 11n Draf3.03
+#ifdef DOT11_N_SUPPORT
+#ifdef DOT11N_DRAFT3
+		case ACTION_BSS_2040_COEXIST:	/* Format defined in IEEE 7.4.7a.1 in 11n Draf3.03*/
 			{
-				//UCHAR	BssCoexist;
+				/*UCHAR	BssCoexist;*/
 				BSS_2040_COEXIST_ELEMENT		*pCoexistInfo;
 				BSS_2040_COEXIST_IE 			*pBssCoexistIe;
 				BSS_2040_INTOLERANT_CH_REPORT	*pIntolerantReport = NULL;
@@ -647,12 +647,12 @@ VOID PeerPublicAction(
 
 				
 				pCoexistInfo = (BSS_2040_COEXIST_ELEMENT *) &Elem->Msg[LENGTH_802_11+2];
-				//hex_dump("CoexistInfo", (PUCHAR)pCoexistInfo, sizeof(BSS_2040_COEXIST_ELEMENT));
+				/*hex_dump("CoexistInfo", (PUCHAR)pCoexistInfo, sizeof(BSS_2040_COEXIST_ELEMENT));*/
 				if (Elem->MsgLen >= (LENGTH_802_11 + sizeof(BSS_2040_COEXIST_ELEMENT) + sizeof(BSS_2040_INTOLERANT_CH_REPORT)))
 				{
 					pIntolerantReport = (BSS_2040_INTOLERANT_CH_REPORT *)((PUCHAR)pCoexistInfo + sizeof(BSS_2040_COEXIST_ELEMENT));
 				}
-				//hex_dump("IntolerantReport ", (PUCHAR)pIntolerantReport, sizeof(BSS_2040_INTOLERANT_CH_REPORT));
+				/*hex_dump("IntolerantReport ", (PUCHAR)pIntolerantReport, sizeof(BSS_2040_INTOLERANT_CH_REPORT));*/
 				
 				if(pAd->CommonCfg.bBssCoexEnable == FALSE || (pAd->CommonCfg.bForty_Mhz_Intolerant == TRUE))
 				{
@@ -668,7 +668,7 @@ VOID PeerPublicAction(
 				{
 					BOOLEAN		bNeedFallBack = FALSE;
 									
-					//ApPublicAction(pAd, Elem);
+					/*ApPublicAction(pAd, Elem);*/
 					if ((pBssCoexistIe->field.BSS20WidthReq ==1) || (pBssCoexistIe->field.Intolerant40 == 1))
 					{	
 						bNeedFallBack = TRUE;
@@ -737,14 +737,14 @@ VOID PeerPublicAction(
 									pAd->CommonCfg.Dot11BssWidthChanTranDelay));
 
 							pAd->CommonCfg.Bss2040CoexistFlag |= BSS_2040_COEXIST_TIMER_FIRED;
-							// More 5 sec for the scan report of STAs.
+							/* More 5 sec for the scan report of STAs.*/
 							RTMPSetTimer(&pAd->CommonCfg.Bss2040CoexistTimer,  (pAd->CommonCfg.Dot11BssWidthChanTranDelay + 5) * 1000);
 
 						}
 						else
 						{
 							DBGPRINT(RT_DEBUG_TRACE, ("Already fallback to 20MHz, Extend the timeout of Bss2040CoexistTimer!\n"));
-							// More 5 sec for the scan report of STAs.
+							/* More 5 sec for the scan report of STAs.*/
 							RTMPModTimer(&pAd->CommonCfg.Bss2040CoexistTimer, (pAd->CommonCfg.Dot11BssWidthChanTranDelay + 5) * 1000);
 						}
 
@@ -754,15 +754,21 @@ VOID PeerPublicAction(
 					}
 						
 				}
-#endif // CONFIG_AP_SUPPORT //
-
+#endif /* CONFIG_AP_SUPPORT */
 
 			}
 			break;
-	}
+#endif /* DOT11N_DRAFT3 */
+#endif /* DOT11_N_SUPPORT */
 
-#endif // DOT11N_DRAFT3 //
-#endif // DOT11_N_SUPPORT //
+		case ACTION_WIFI_DIRECT:
+
+			break;
+
+
+		default:
+			break;
+	}
 
 }	
 
@@ -789,34 +795,7 @@ VOID PeerRMAction(
 
 {
 #ifdef CONFIG_AP_SUPPORT
-#ifdef DOT11K_RRM_SUPPORT
-	UCHAR	Action = Elem->Msg[LENGTH_802_11+1];
-	PMAC_TABLE_ENTRY pEntry = NULL;
-
-	if (VALID_WCID(Elem->Wcid))
-		pEntry = &pAd->MacTab.Content[Elem->Wcid];
-	else
-		return;
-
-	if ((pEntry->apidx < pAd->ApCfg.BssidNum) &&
-		!IS_RRM_ENABLE(pAd, pEntry->apidx))
-		return;
-
-	switch(Action)
-	{
-		case RRM_MEASURE_REP:
-			DBGPRINT(RT_DEBUG_TRACE, ("%s: Get RRM Measure report.\n",
-				__FUNCTION__));
-
-			RRM_PeerMeasureRepAction(pAd, Elem);
-			break;
-
-		case RRM_NEIGHTBOR_REQ:
-			RRM_PeerNeighborReqAction(pAd, Elem);
-			break;
-	}
-#endif // DOT11K_RRM_SUPPORT //
-#endif // CONFIG_AP_SUPPORT //
+#endif /* CONFIG_AP_SUPPORT */
 	return;
 }
 
@@ -830,13 +809,13 @@ static VOID respond_ht_information_exchange_action(
 	ULONG			FrameLen;
 #ifdef CONFIG_AP_SUPPORT
 	INT         	apidx;
-#endif // CONFIG_AP_SUPPORT //
+#endif /* CONFIG_AP_SUPPORT */
 	FRAME_HT_INFO	HTINFOframe, *pFrame;
 	UCHAR   		*pAddr;
 
 
-	// 2. Always send back ADDBA Response 
-	NStatus = MlmeAllocateMemory(pAd, &pOutBuffer);	 //Get an unused nonpaged memory
+	/* 2. Always send back ADDBA Response */
+	NStatus = MlmeAllocateMemory(pAd, &pOutBuffer);	 /*Get an unused nonpaged memory*/
 
 	if (NStatus != NDIS_STATUS_SUCCESS)
 	{
@@ -844,12 +823,12 @@ static VOID respond_ht_information_exchange_action(
 		return;
 	}
 
-	// get RA
+	/* get RA */
 	pFrame = (FRAME_HT_INFO *) &Elem->Msg[0];
 	pAddr = pFrame->Hdr.Addr2;
 
 	NdisZeroMemory(&HTINFOframe, sizeof(FRAME_HT_INFO));
-	// 2-1. Prepare ADDBA Response frame.
+	/* 2-1. Prepare ADDBA Response frame.*/
 #ifdef CONFIG_AP_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
 	{
@@ -860,13 +839,13 @@ static VOID respond_ht_information_exchange_action(
 			ActHeaderInit(pAd, &HTINFOframe.Hdr, pAddr, pAd->ApCfg.ApCliTab[apidx].CurrentAddress, pAddr);		
 		}
 		else
-#endif // APCLI_SUPPORT //
+#endif /* APCLI_SUPPORT */
 		{
 			apidx = pAd->MacTab.Content[Elem->Wcid].apidx;
 			ActHeaderInit(pAd, &HTINFOframe.Hdr, pAddr, pAd->ApCfg.MBSSID[apidx].Bssid, pAd->ApCfg.MBSSID[apidx].Bssid);
 		}
 	}
-#endif // CONFIG_AP_SUPPORT //
+#endif /* CONFIG_AP_SUPPORT */
 
 	HTINFOframe.Category = CATEGORY_HT;
 	HTINFOframe.Action = HT_INFO_EXCHANGE;
@@ -897,7 +876,7 @@ VOID SendNotifyBWActionFrame(
 	PUCHAR			pAddr1;
 
 	
-	NStatus = MlmeAllocateMemory(pAd, &pOutBuffer);  //Get an unused nonpaged memory
+	NStatus = MlmeAllocateMemory(pAd, &pOutBuffer);  /*Get an unused nonpaged memory*/
 	if(NStatus != NDIS_STATUS_SUCCESS) 
 	{
 		DBGPRINT(RT_DEBUG_ERROR,("ACT - SendNotifyBWAction() allocate memory failed \n"));
@@ -927,8 +906,8 @@ VOID SendNotifyBWActionFrame(
 	DBGPRINT(RT_DEBUG_TRACE,("ACT - SendNotifyBWAction(NotifyBW= %d)!\n", pAd->CommonCfg.AddHTInfo.AddHtInfo.RecomWidth));
 
 }
-#endif // DOT11N_DRAFT3 //
-#endif // CONFIG_AP_SUPPORT //
+#endif /* DOT11N_DRAFT3 */
+#endif /* CONFIG_AP_SUPPORT */
 
 
 VOID PeerHTAction(
@@ -945,7 +924,7 @@ VOID PeerHTAction(
 		case NOTIFY_BW_ACTION:
 			DBGPRINT(RT_DEBUG_TRACE,("ACTION - HT Notify Channel bandwidth action----> \n"));
 
-			if (Elem->Msg[LENGTH_802_11+2] == 0)	// 7.4.8.2. if value is 1, keep the same as supported channel bandwidth. 
+			if (Elem->Msg[LENGTH_802_11+2] == 0)	/* 7.4.8.2. if value is 1, keep the same as supported channel bandwidth. */
 				pAd->MacTab.Content[Elem->Wcid].HTPhyMode.field.BW = 0;
 			else 
 			{
@@ -956,7 +935,7 @@ VOID PeerHTAction(
 			break;
 
 		case SMPS_ACTION:
-			// 7.3.1.25
+			/* 7.3.1.25*/
  			DBGPRINT(RT_DEBUG_TRACE,("ACTION - SMPS action----> \n"));
 			if (((Elem->Msg[LENGTH_802_11+2]&0x1) == 0))
 			{
@@ -972,7 +951,7 @@ VOID PeerHTAction(
 			}
 
 			DBGPRINT(RT_DEBUG_TRACE,("Aid(%d) MIMO PS = %d\n", Elem->Wcid, pAd->MacTab.Content[Elem->Wcid].MmpsMode));
-			// rt2860c : add something for smps change.
+			/* rt2860c : add something for smps change.*/
 			break;
  
 		case SETPCO_ACTION:
@@ -986,7 +965,7 @@ VOID PeerHTAction(
 				HT_INFORMATION_OCTET	*pHT_info;
 
 				pHT_info = (HT_INFORMATION_OCTET *) &Elem->Msg[LENGTH_802_11+2];
-    				// 7.4.8.10
+    				/* 7.4.8.10*/
     				DBGPRINT(RT_DEBUG_TRACE,("ACTION - HT Information Exchange action----> \n"));
     				if (pHT_info->Request)
     				{
@@ -1000,7 +979,7 @@ VOID PeerHTAction(
 	    					Handle_BSS_Width_Trigger_Events(pAd);
 	    				}
 				}
-#endif // CONFIG_AP_SUPPORT //
+#endif /* CONFIG_AP_SUPPORT */
 			}
     		break;
 	}
@@ -1026,17 +1005,17 @@ VOID ORIBATimerTimeout(
 {
 	MAC_TABLE_ENTRY	*pEntry;
 	INT			i, total;
-//	FRAME_BAR			FrameBar;
-//	ULONG			FrameLen;
-//	NDIS_STATUS 	NStatus;
-//	PUCHAR			pOutBuffer = NULL;
-//	USHORT			Sequence;
+/*	FRAME_BAR			FrameBar;*/
+/*	ULONG			FrameLen;*/
+/*	NDIS_STATUS 	NStatus;*/
+/*	PUCHAR			pOutBuffer = NULL;*/
+/*	USHORT			Sequence;*/
 	UCHAR			TID;
 
 #ifdef RALINK_ATE
 	if (ATE_ON(pAd))
 		return;
-#endif // RALINK_ATE //
+#endif /* RALINK_ATE */
 
 	total = pAd->MacTab.Size * NUM_OF_TID;
 
@@ -1082,7 +1061,7 @@ VOID SendRefreshBAR(
 
 			ASSERT(pBAEntry->Wcid < MAX_LEN_OF_MAC_TABLE);
 
-			NStatus = MlmeAllocateMemory(pAd, &pOutBuffer);  //Get an unused nonpaged memory
+			NStatus = MlmeAllocateMemory(pAd, &pOutBuffer);  /*Get an unused nonpaged memory*/
 			if(NStatus != NDIS_STATUS_SUCCESS) 
 			{
 				DBGPRINT(RT_DEBUG_ERROR,("BA - MlmeADDBAAction() allocate memory failed \n"));
@@ -1098,23 +1077,23 @@ VOID SendRefreshBAR(
 				if (IS_ENTRY_APCLI(pEntry))		
 					BarHeaderInit(pAd, &FrameBar, pEntry->Addr, pAd->ApCfg.ApCliTab[pEntry->MatchAPCLITabIdx].CurrentAddress);			
 				else
-#endif // APCLI_SUPPORT //
+#endif /* APCLI_SUPPORT */
 					BarHeaderInit(pAd, &FrameBar, pEntry->Addr, pAd->ApCfg.MBSSID[pEntry->apidx].Bssid);					
 			}
-#endif // CONFIG_AP_SUPPORT //
+#endif /* CONFIG_AP_SUPPORT */
 
 
-			FrameBar.StartingSeq.field.FragNum = 0; // make sure sequence not clear in DEL function.
-			FrameBar.StartingSeq.field.StartSeq = Sequence; // make sure sequence not clear in DEL funciton.
-			FrameBar.BarControl.TID = TID; // make sure sequence not clear in DEL funciton.
+			FrameBar.StartingSeq.field.FragNum = 0; /* make sure sequence not clear in DEL function.*/
+			FrameBar.StartingSeq.field.StartSeq = Sequence; /* make sure sequence not clear in DEL funciton.*/
+			FrameBar.BarControl.TID = TID; /* make sure sequence not clear in DEL funciton.*/
 
 			MakeOutgoingFrame(pOutBuffer,				&FrameLen,
 							  sizeof(FRAME_BAR),	  &FrameBar,
 							  END_OF_ARGS);
-			//if (!(CLIENT_STATUS_TEST_FLAG(pEntry, fCLIENT_STATUS_RALINK_CHIPSET)))
-			if (1)	// Now we always send BAR.
+			/*if (!(CLIENT_STATUS_TEST_FLAG(pEntry, fCLIENT_STATUS_RALINK_CHIPSET)))*/
+			if (1)	/* Now we always send BAR.*/
 			{
-				//MiniportMMRequestUnlock(pAd, 0, pOutBuffer, FrameLen);
+				/*MiniportMMRequestUnlock(pAd, 0, pOutBuffer, FrameLen);*/
 				MiniportMMRequest(pAd, (MGMT_USE_QUEUE_FLAG | MapUserPriorityToAccessCategory[TID]), pOutBuffer, FrameLen);				
 
 			}
@@ -1122,7 +1101,7 @@ VOID SendRefreshBAR(
 		}
 	}
 }
-#endif // DOT11_N_SUPPORT //
+#endif /* DOT11_N_SUPPORT */
 
 VOID ActHeaderInit(
     IN	PRTMP_ADAPTER	pAd, 
@@ -1146,7 +1125,7 @@ VOID BarHeaderInit(
 	IN PUCHAR pDA,
 	IN PUCHAR pSA) 
 {
-//	USHORT	Duration;
+/*	USHORT	Duration;*/
 
 	NdisZeroMemory(pCntlBar, sizeof(FRAME_BAR));
 	pCntlBar->FC.Type = BTYPE_CNTL;

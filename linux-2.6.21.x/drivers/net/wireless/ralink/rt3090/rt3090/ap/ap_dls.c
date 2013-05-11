@@ -94,7 +94,7 @@ VOID APPeerDlsReqAction(
 	HEADER_802_11		DlsRspHdr;
 	UCHAR				Category = CATEGORY_DLS;
 	UCHAR				Action = ACTION_DLS_RESPONSE;
-    UCHAR				SupportedRatesLen;
+    UCHAR				SupportedRatesLen = 0;
     UCHAR				SupportedRates[MAX_LEN_OF_SUPPORTED_RATES];
 	HT_CAPABILITY_IE	HtCapability;
 	UCHAR				HtCapabilityLen;
@@ -125,7 +125,7 @@ VOID APPeerDlsReqAction(
 	else if (pDAEntry && !CLIENT_STATUS_TEST_FLAG(pDAEntry, fCLIENT_STATUS_WMM_CAPABLE))
 		Status = MLME_DEST_STA_IS_NOT_A_QSTA;
 	else if (pDAEntry->WepStatus != pSAEntry->WepStatus)
-		Status = MLME_QOS_UNSPECIFY; // different security algorithm
+		Status = MLME_QOS_UNSPECIFY; /* different security algorithm */
 	else if (!pAd->ApCfg.MBSSID[pSAEntry->apidx].bDLSCapable)
 		Status = MLME_DLS_NOT_ALLOW_IN_QBSS;
 	else
@@ -137,7 +137,8 @@ VOID APPeerDlsReqAction(
 	/* forward DLS-Request to real destination */
 	Fr = (PFRAME_802_11)pElem->Msg;
 
-	pOutBuffer = kmalloc(MAX_LEN_OF_MLME_BUFFER, MEM_ALLOC_FLAG);
+/*	pOutBuffer = kmalloc(MAX_LEN_OF_MLME_BUFFER, MEM_ALLOC_FLAG); */
+	os_alloc_mem(pAd, (UCHAR **)&pOutBuffer, MAX_LEN_OF_MLME_BUFFER);
 	if(pOutBuffer == NULL)
 		return;
 
@@ -175,7 +176,8 @@ VOID APPeerDlsReqAction(
 
 	/* transmit the frame */
 	MiniportMMRequest(pAd, QID_AC_BE, pOutBuffer, FrameLen);
-	kfree(pOutBuffer);
+/*	kfree(pOutBuffer); */
+	os_free_mem(NULL, pOutBuffer);
 
 	DBGPRINT(RT_DEBUG_TRACE,
 			("DLS - APPeerDlsReqAction() from %02x:%02x:%02x:%02x:%02x:%02x "
@@ -210,7 +212,7 @@ VOID APPeerDlsRspAction(
 	PUCHAR				pOutBuffer = NULL;
 	PFRAME_802_11		Fr;
 	UINT32				FrameLen = 0;
-    UCHAR				SupportedRatesLen;
+    UCHAR				SupportedRatesLen = 0;
     UCHAR				SupportedRates[MAX_LEN_OF_SUPPORTED_RATES];
 	UCHAR				HtCapabilityLen;
 	HT_CAPABILITY_IE	HtCapability;
@@ -247,7 +249,8 @@ VOID APPeerDlsRspAction(
 	/* forward DLS-Request to real destination */
 	Fr = (PFRAME_802_11)pElem->Msg;
 
-	pOutBuffer = kmalloc(MAX_LEN_OF_MLME_BUFFER, MEM_ALLOC_FLAG);
+/*	pOutBuffer = kmalloc(MAX_LEN_OF_MLME_BUFFER, MEM_ALLOC_FLAG); */
+	os_alloc_mem(pAd, (UCHAR **)&pOutBuffer, MAX_LEN_OF_MLME_BUFFER);
 	if (pOutBuffer == NULL)
 		return; /* fatal error, no available memory */
 
@@ -260,7 +263,8 @@ VOID APPeerDlsRspAction(
 
 	/* transmit the response frame */
 	MiniportMMRequest(pAd, QID_AC_BE, pOutBuffer, FrameLen);
-	kfree(pOutBuffer);
+/*	kfree(pOutBuffer); */
+	os_free_mem(NULL, pOutBuffer);
 }
 
 
@@ -318,7 +322,8 @@ VOID APPeerDlsTearDownAction(
     /* forward Tear-down to real destination */
     Fr = (PFRAME_802_11)pElem->Msg;
 
-	pOutBuffer = kmalloc(MAX_LEN_OF_MLME_BUFFER, MEM_ALLOC_FLAG);
+/*	pOutBuffer = kmalloc(MAX_LEN_OF_MLME_BUFFER, MEM_ALLOC_FLAG); */
+	os_alloc_mem(pAd, (UCHAR **)&pOutBuffer, MAX_LEN_OF_MLME_BUFFER);
 	if (pOutBuffer == NULL)
 		return; /* fatal error, no available memory */
 
@@ -331,9 +336,10 @@ VOID APPeerDlsTearDownAction(
 
 	/* transmit the tear down frame */
 	MiniportMMRequest(pAd, QID_AC_BE, pOutBuffer, FrameLen);
-	kfree(pOutBuffer);
+/*	kfree(pOutBuffer); */
+	os_free_mem(NULL, pOutBuffer);
 }
 
-#endif // QOS_DLS_SUPPORT //
+#endif /* QOS_DLS_SUPPORT */
 
 /* End of ap_dls.c */

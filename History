@@ -1489,6 +1489,7 @@
 28) kernel: keep sk_backlog near sk_lock.<br>
 29) kernel: mtd update.<br>
 30) kernel: af_unix: if we don't care about credentials coallesce all messages.<br>
+31) kernel: rt309x: update driver to 2.7.1.5 version.<br>
 <br>
 <br>
 <br>

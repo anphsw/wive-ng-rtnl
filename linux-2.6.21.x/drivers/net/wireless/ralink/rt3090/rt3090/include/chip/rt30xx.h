@@ -27,12 +27,42 @@
 #define __RT30XX_H__
 
 #ifdef RT30xx
+
+struct _RTMP_ADAPTER;
+
 #include "rtmp_type.h"
 
 extern REG_PAIR RT3020_RFRegTable[];
 extern UCHAR NUM_RF_3020_REG_PARMS;
 
-#endif // RT30xx //
+VOID RT30xx_Init(
+	IN struct _RTMP_ADAPTER		*pAd);
 
-#endif //__RT30XX_H__ //
+VOID RT30xx_ChipSwitchChannel(
+	IN struct _RTMP_ADAPTER		*pAd,
+	IN UCHAR					Channel,
+	IN BOOLEAN					bScan);
+
+VOID RT30xx_ChipBBPAdjust(
+	IN struct _RTMP_ADAPTER	*pAd);
+
+VOID RT30xx_ChipAGCInit(
+	IN struct _RTMP_ADAPTER		*pAd,
+	IN UCHAR					BandWidth);
+
+#ifdef MICROWAVE_OVEN_SUPPORT
+VOID RT30xx_AsicMitigateMicrowave(
+	IN struct _RTMP_ADAPTER *pAd);
+
+VOID RT30xx_AsicMeasureFalseCCA(
+	IN struct _RTMP_ADAPTER *pAd);
+#endif /* MICROWAVE_OVEN_SUPPORT */
+
+#ifdef RTMP_EFUSE_SUPPORT
+VOID RtmpEfuseSupportCheck(
+	IN struct _RTMP_ADAPTER 	*pAd);
+#endif /* RTMP_EFUSE_SUPPORT */
+#endif /* RT30xx */
+
+#endif /*__RT30XX_H__ */
 

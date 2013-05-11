@@ -70,6 +70,7 @@ VOID StopNetIfQueue(
 	UCHAR IfIdx = 0;
 	BOOLEAN valid = FALSE;
 
+
 #ifdef APCLI_SUPPORT
 	if (RTMP_GET_PACKET_NET_DEVICE(pPacket) >= MIN_NET_DEVICE_FOR_APCLI)
 	{
@@ -77,7 +78,7 @@ VOID StopNetIfQueue(
 		NetDev = pAd->ApCfg.ApCliTab[IfIdx].dev;
 	}
 	else
-#endif // APCLI_SUPPORT //
+#endif /* APCLI_SUPPORT */
 #ifdef WDS_SUPPORT
 	if (RTMP_GET_PACKET_NET_DEVICE(pPacket) >= MIN_NET_DEVICE_FOR_WDS)
 	{
@@ -85,12 +86,12 @@ VOID StopNetIfQueue(
 		NetDev = pAd->WdsTab.WdsEntry[IfIdx].dev;
 	}
 	else
-#endif // WDS_SUPPORT //
+#endif /* WDS_SUPPORT */
 	{
 #ifdef MBSS_SUPPORT
 		if (pAd->OpMode == OPMODE_AP)
 		{
-			IfIdx = (RTMP_GET_PACKET_NET_DEVICE(pPacket) - MIN_NET_DEVICE_FOR_MBSSID) % MAX_MBSSID_NUM;
+			IfIdx = (RTMP_GET_PACKET_NET_DEVICE(pPacket) - MIN_NET_DEVICE_FOR_MBSSID) % MAX_MBSSID_NUM(pAd);
 			NetDev = pAd->ApCfg.MBSSID[IfIdx].MSSIDDev;
 		}
 		else
@@ -104,17 +105,17 @@ VOID StopNetIfQueue(
 #endif
 	}
 
-	// WMM support 4 software queues.
-	// One software queue full doesn't mean device have no capbility to transmit packet.
-	// So disable block Net-If queue function while WMM enable.
+	/* WMM support 4 software queues.*/
+	/* One software queue full doesn't mean device have no capbility to transmit packet.*/
+	/* So disable block Net-If queue function while WMM enable.*/
 #ifdef CONFIG_AP_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
 		valid = (pAd->ApCfg.MBSSID[IfIdx].bWmmCapable == TRUE) ? FALSE : TRUE;
-#endif // CONFIG_AP_SUPPORT //
+#endif /* CONFIG_AP_SUPPORT */
 
 	if (valid)
 		blockNetIf(&pAd->blockQueueTab[QueIdx], NetDev);
 	return;
 }
 
-#endif // BLOCK_NET_IF //
+#endif /* BLOCK_NET_IF */

@@ -83,7 +83,7 @@ static VOID QBSS_LoadAlarm(
 static VOID QBSS_LoadAlarmBusyTimeThresholdReset(
  	IN		RTMP_ADAPTER	*pAd,
 	IN		UINT32			TimePeriod);
-#endif // QLOAD_FUNC_BUSY_TIME_ALARM //
+#endif /* QLOAD_FUNC_BUSY_TIME_ALARM */
 
 
 
@@ -152,7 +152,7 @@ static VOID QBSS_LoadAlarm(
 
 			if (bDisconnectSta)
 			{
-				// send wireless event - for ageout 
+				/* send wireless event - for ageout */
 				RTMPSendWirelessEvent(pAd, IW_AGEOUT_EVENT_FLAG, pEntry->Addr, 0, 0); 
 
 				{
@@ -162,12 +162,12 @@ static VOID QBSS_LoadAlarm(
 					HEADER_802_11 DeAuthHdr;
 					USHORT      Reason;
 
-					//  send out a DISASSOC request frame
+					/*  send out a DISASSOC request frame */
 					NStatus = MlmeAllocateMemory(pAd, &pOutBuffer);
 					if (NStatus != NDIS_STATUS_SUCCESS)
 					{
 						DBGPRINT(RT_DEBUG_TRACE, (" MlmeAllocateMemory fail  ..\n"));
-						//NdisReleaseSpinLock(&pAd->MacTabLock);
+						/*NdisReleaseSpinLock(&pAd->MacTabLock); */
 						continue;
 					}
 
@@ -207,8 +207,8 @@ static VOID QBSS_LoadAlarm(
 		QBSS_LoadAlarmResume(pAd);
 	}
 	else
-#endif // DOT11N_DRAFT3 //
-#endif // DOT11_N_SUPPORT //
+#endif /* DOT11N_DRAFT3 */
+#endif /* DOT11_N_SUPPORT */
 	{
 		/* we are in 20MHz bandwidth so try to switch channel */
 		DBGPRINT(RT_DEBUG_TRACE, ("qbss> Alarm! Switch channel...\n"));
@@ -244,7 +244,7 @@ static VOID QBSS_LoadAlarmBusyTimeThresholdReset(
 	pAd->QloadBusyTimeThreshold /= 100;
 	pAd->QloadBusyTimeThreshold <<= 10; /* translate mini-sec to micro-sec */
 } /* End of QBSS_LoadAlarmBusyTimeThresholdReset */
-#endif // QLOAD_FUNC_BUSY_TIME_ALARM //
+#endif /* QLOAD_FUNC_BUSY_TIME_ALARM */
 
 
 
@@ -276,9 +276,6 @@ VOID QBSS_LoadInit(
 	for(IdBss=0; IdBss<pAd->ApCfg.BssidNum; IdBss++)
 	{
 		if ((pAd->ApCfg.MBSSID[IdBss].bWmmCapable)
-#ifdef DOT11K_RRM_SUPPORT
-			|| (IS_RRM_ENABLE(pAd, IdBss))
-#endif // DOT11K_RRM_SUPPORT //
 			)
 		{
 			pAd->FlgQloadEnable = TRUE;
@@ -310,7 +307,7 @@ VOID QBSS_LoadInit(
 	/* clear busy time statistics */
 	NdisZeroMemory(pAd->QloadBusyCountPri, sizeof(pAd->QloadBusyCountPri));
 	NdisZeroMemory(pAd->QloadBusyCountSec, sizeof(pAd->QloadBusyCountSec));
-#endif // QLOAD_FUNC_BUSY_TIME_STATS //
+#endif /* QLOAD_FUNC_BUSY_TIME_STATS */
 
 #ifdef QLOAD_FUNC_BUSY_TIME_ALARM
 	/* init threshold before QBSS_LoadAlarmReset */
@@ -318,7 +315,7 @@ VOID QBSS_LoadInit(
 	pAd->QloadAlarmBusyNumThreshold = QBSS_LOAD_ALRAM_BUSY_NUM_THRESHOLD;
 
 	QBSS_LoadAlarmReset(pAd);
-#endif // QLOAD_FUNC_BUSY_TIME_ALARM //
+#endif /* QLOAD_FUNC_BUSY_TIME_ALARM */
 } /* End of QBSS_LoadInit */
 
 
@@ -347,7 +344,7 @@ VOID QBSS_LoadAlarmReset(
 	pAd->FlgQloadAlarmIsSuspended = FALSE;
 
 	QBSS_LoadAlarmBusyTimeThresholdReset(pAd, pAd->CommonCfg.BeaconPeriod);
-#endif // QLOAD_FUNC_BUSY_TIME_ALARM //
+#endif /* QLOAD_FUNC_BUSY_TIME_ALARM */
 } /* End of QBSS_LoadAlarmReset */
 
 
@@ -370,7 +367,7 @@ VOID QBSS_LoadAlarmResume(
 {
 #ifdef QLOAD_FUNC_BUSY_TIME_ALARM
 	pAd->FlgQloadAlarmIsSuspended = FALSE;
-#endif // QLOAD_FUNC_BUSY_TIME_ALARM //
+#endif /* QLOAD_FUNC_BUSY_TIME_ALARM */
 } /* End of QBSS_LoadAlarmResume */
 
 
@@ -393,7 +390,7 @@ static VOID QBSS_LoadAlarmSuspend(
 {
 #ifdef QLOAD_FUNC_BUSY_TIME_ALARM
 	pAd->FlgQloadAlarmIsSuspended = TRUE;
-#endif // QLOAD_FUNC_BUSY_TIME_ALARM //
+#endif /* QLOAD_FUNC_BUSY_TIME_ALARM */
 } /* End of QBSS_LoadAlarmSuspend */
 
 
@@ -449,7 +446,7 @@ BOOLEAN QBSS_LoadIsAlarmIssued(
 #else
 
 	return FALSE;
-#endif // QLOAD_FUNC_BUSY_TIME_ALARM //
+#endif /* QLOAD_FUNC_BUSY_TIME_ALARM */
 } /* End of QBSS_LoadIsAlarmIssued */
 
 
@@ -480,7 +477,7 @@ BOOLEAN QBSS_LoadIsBusyTimeAccepted(
 	if (BusyTime >= pAd->QloadBusyTimeThreshold)
 		return FALSE;
 	/* End of if */
-#endif // QLOAD_FUNC_BUSY_TIME_ALARM //
+#endif /* QLOAD_FUNC_BUSY_TIME_ALARM */
 
 	return TRUE;
 } /* End of QBSS_LoadIsAlarmIssued */
@@ -520,15 +517,12 @@ UINT32 QBSS_LoadElementAppend(
 	pLoad->ElementId = ELM_QBSS_LOAD_ID;
 	pLoad->Length = ELM_QBSS_LOAD_LEN;
 
-	pLoad->StationCount = MacTableAssocStaNumGet(pAd);
+	pLoad->StationCount = le2cpu16(MacTableAssocStaNumGet(pAd));
 	pLoad->ChanUtil = pAd->QloadChanUtil;
 
 	/* because no ACM is supported, the available bandwidth is 1 sec */
-	pLoad->AvalAdmCap = 0x7a12; /* 0x7a12 * 32us = 1 second */
+	pLoad->AvalAdmCap = le2cpu16(0x7a12); /* 0x7a12 * 32us = 1 second */
 	
-#ifdef WMM_ACM_SUPPORT
-	pLoad->AvalAdmCap = pAd->AcmAvalCap;
-#endif // WMM_ACM_SUPPORT //
 
 	/* copy the element to the frame */
     MakeOutgoingFrame(pBeaconBuf, &ElmLen,
@@ -575,13 +569,15 @@ VOID QBSS_LoadUpdate(
 #ifdef QLOAD_FUNC_BUSY_TIME_ALARM
 	BOOLEAN FlgIsBusyOverThreshold = FALSE;
 	BOOLEAN FlgIsAlarmNeeded = FALSE;
-#endif // QLOAD_FUNC_BUSY_TIME_ALARM //
+#endif /* QLOAD_FUNC_BUSY_TIME_ALARM */
 
 
 	/* check whether channel busy time calculation is enabled */
-	if (pAd->FlgQloadEnable == 0)
+	if ((pAd->FlgQloadEnable == 0) ||
+		(pAd->FlgQloadAlarmIsSuspended == TRUE))
+	{
 		return;
-	/* End of if */
+	} /* End of if */
 
 	/* calculate new time period if needed */
 	if ((UpTime > 0) &&
@@ -599,9 +595,9 @@ VOID QBSS_LoadUpdate(
 		if (TimePeriod != pAd->QloadTimePeriodLast)
 			QBSS_LoadAlarmBusyTimeThresholdReset(pAd, TimePeriod);
 		/* End of if */
-#endif // QLOAD_FUNC_BUSY_TIME_ALARM //
 
 		pAd->QloadTimePeriodLast = TimePeriod;
+#endif /* QLOAD_FUNC_BUSY_TIME_ALARM */
 	} /* End of if */
 
 	/* update up time */
@@ -626,7 +622,7 @@ VOID QBSS_LoadUpdate(
 			BusyTimeId = QLOAD_BUSY_INTERVALS - 1;
 		/* End of if */
 		pAd->QloadBusyCountSec[BusyTimeId] ++;
-#endif // QLOAD_FUNC_BUSY_TIME_STATS //
+#endif /* QLOAD_FUNC_BUSY_TIME_STATS */
 
 #ifdef QLOAD_FUNC_BUSY_TIME_ALARM
 		if ((pAd->FlgQloadAlarmIsSuspended == FALSE) &&
@@ -640,9 +636,9 @@ VOID QBSS_LoadUpdate(
 				FlgIsBusyOverThreshold = TRUE;
 			} /* End of if */
 		} /* End of if */
-#endif // QLOAD_FUNC_BUSY_TIME_ALARM //
+#endif /* QLOAD_FUNC_BUSY_TIME_ALARM */
 	} /* End of if */
-#endif // DOT11_N_SUPPORT //
+#endif /* DOT11_N_SUPPORT */
 
 	/* do busy time statistics for primary channel */
 	RTMP_IO_READ32(pAd, CH_BUSY_STA, &BusyTime);
@@ -658,7 +654,7 @@ VOID QBSS_LoadUpdate(
 		BusyTimeId = QLOAD_BUSY_INTERVALS - 1;
 	/* End of if */
 	pAd->QloadBusyCountPri[BusyTimeId] ++;
-#endif // QLOAD_FUNC_BUSY_TIME_STATS //
+#endif /* QLOAD_FUNC_BUSY_TIME_STATS */
 
 #ifdef QLOAD_FUNC_BUSY_TIME_ALARM
 	if ((pAd->FlgQloadAlarmIsSuspended == FALSE) &&
@@ -672,7 +668,7 @@ VOID QBSS_LoadUpdate(
 			FlgIsBusyOverThreshold = TRUE;
 		} /* End of if */
 	} /* End of if */
-#endif // QLOAD_FUNC_BUSY_TIME_ALARM //
+#endif /* QLOAD_FUNC_BUSY_TIME_ALARM */
 
 	/* accumulate channel busy time for primary channel */
 	pAd->QloadChanUtilTotal += BusyTime;
@@ -756,7 +752,7 @@ VOID QBSS_LoadUpdate(
 		pAd->QloadAlarmDuration = 0;
 		pAd->FlgQloadAlarm = FALSE;
 	} /* End of if */
-#endif // QLOAD_FUNC_BUSY_TIME_ALARM //
+#endif /* QLOAD_FUNC_BUSY_TIME_ALARM */
 } /* End of QBSS_LoadUpdate */
 
 
@@ -781,14 +777,14 @@ VOID QBSS_LoadStatusClear(
 	/* clear busy time statistics */
 	NdisZeroMemory(pAd->QloadBusyCountPri, sizeof(pAd->QloadBusyCountPri));
 	NdisZeroMemory(pAd->QloadBusyCountSec, sizeof(pAd->QloadBusyCountSec));
-#endif // QLOAD_FUNC_BUSY_TIME_STATS //
+#endif /* QLOAD_FUNC_BUSY_TIME_STATS */
 
 #ifdef QLOAD_FUNC_BUSY_TIME_ALARM
 	/* clear alarm function variables */
 	pAd->QloadChanUtilTotal = 0;
 	pAd->FlgQloadAlarm = FALSE;
 	pAd->QloadAlarmBusyNum = 0;
-#endif // QLOAD_FUNC_BUSY_TIME_ALARM //
+#endif /* QLOAD_FUNC_BUSY_TIME_ALARM */
 } /* End of QBSS_LoadStatusClear */
 
 
@@ -818,30 +814,31 @@ INT	Show_QoSLoad_Proc(
 
 	Time = pAd->CommonCfg.BeaconPeriod / QLOAD_BUSY_INTERVALS;
 
-	printk("\n\tPrimary Busy Time\tTimes\n");
+	DBGPRINT(RT_DEBUG_TRACE, ("\n\tPrimary Busy Time\tTimes\n"));
 
 	for(BusyTimeId=0; BusyTimeId<QLOAD_BUSY_INTERVALS; BusyTimeId++)
 	{
-		printk("\t%dms ~ %dms\t\t%d\n",
+		DBGPRINT(RT_DEBUG_TRACE, ("\t%dms ~ %dms\t\t%d\n",
 				BusyTimeId*Time,
 				(BusyTimeId+1)*Time,
-				pAd->QloadBusyCountPri[BusyTimeId]);
+				pAd->QloadBusyCountPri[BusyTimeId]));
 	} /* End of for */
 
-	printk("\n\tSecondary Busy Time\tTimes\n");
+	DBGPRINT(RT_DEBUG_TRACE, ("\n\tSecondary Busy Time\tTimes\n"));
 
 	for(BusyTimeId=0; BusyTimeId<QLOAD_BUSY_INTERVALS; BusyTimeId++)
 	{
-		printk("\t%dms ~ %dms\t\t%d\n",
+		DBGPRINT(RT_DEBUG_TRACE, ("\t%dms ~ %dms\t\t%d\n",
 				BusyTimeId*Time,
 				(BusyTimeId+1)*Time,
-				pAd->QloadBusyCountSec[BusyTimeId]);
+				pAd->QloadBusyCountSec[BusyTimeId]));
 	} /* End of for */
-	printk("\n");
 #else
-	DBGPRINT(RT_DEBUG_TRACE, ("\tBusy time statistics is not included into the driver!\n"));
-#endif // QLOAD_FUNC_BUSY_TIME_STATS //
 
+	DBGPRINT(RT_DEBUG_TRACE, ("\tBusy time statistics is not included into the driver!\n"));
+#endif /* QLOAD_FUNC_BUSY_TIME_STATS */
+
+	DBGPRINT(RT_DEBUG_TRACE, ("\n"));
 	return TRUE;
 } /* End of Show_QoSLoad_Proc */
 
@@ -895,7 +892,7 @@ INT	Set_QloadAlarmTimeThreshold_Proc(
 	QBSS_LoadAlarmReset(pAd);
 
 	pAd->QloadTimePeriodLast = pAd->CommonCfg.BeaconPeriod;
-#endif // QLOAD_FUNC_BUSY_TIME_ALARM //
+#endif /* QLOAD_FUNC_BUSY_TIME_ALARM */
 
 	return TRUE;
 } /* End of Set_QloadAlarmTimeThreshold_Proc */
@@ -922,11 +919,11 @@ INT	Set_QloadAlarmNumThreshold_Proc(
 {
 #ifdef QLOAD_FUNC_BUSY_TIME_ALARM
 	pAd->QloadAlarmBusyNumThreshold = (UCHAR)simple_strtol(Arg, 0, 10);
-#endif // QLOAD_FUNC_BUSY_TIME_ALARM //
+#endif /* QLOAD_FUNC_BUSY_TIME_ALARM */
 
 	return TRUE;
 } /* End of Set_QloadAlarmNumThreshold_Proc */
 
-#endif // AP_QLOAD_SUPPORT //
+#endif /* AP_QLOAD_SUPPORT */
 
 /* End of ap_qload.c */

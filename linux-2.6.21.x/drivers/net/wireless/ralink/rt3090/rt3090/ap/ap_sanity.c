@@ -37,10 +37,8 @@ extern UCHAR	WME_PARM_ELEM[];
 extern UCHAR	RALINK_OUI[];
 
 extern UCHAR 	BROADCOM_OUI[]; 
-
-#ifdef WSC_AP_SUPPORT
 extern UCHAR    WPS_OUI[];
-#endif // WSC_AP_SUPPORT //
+
 /* 
     ==========================================================================
     Description:
@@ -67,16 +65,10 @@ BOOLEAN PeerAssocReqCmmSanity(
     OUT UCHAR *pRSNLen,
     OUT BOOLEAN *pbWmmCapable,
 #ifdef WSC_AP_SUPPORT
-    OUT BOOLEAN *pWscCapable,
-#endif // WSC_AP_SUPPORT //
-    OUT ULONG  *pRalinkIe,
-    OUT EXT_CAP_INFO_ELEMENT *pExtCapInfo,
-#ifdef DOT11R_FT_SUPPORT
-	OUT PFT_INFO pFtInfo,
-#endif // DOT11R_FT_SUPPORT //
-#ifdef DOT11K_RRM_SUPPORT
-	OUT PRRM_EN_CAP_IE pRrmEnCap,
-#endif // DOT11K_RRM_SUPPORT //
+	OUT BOOLEAN *pWscCapable,
+#endif /* WSC_AP_SUPPORT */
+	OUT ULONG  *pRalinkIe,
+	OUT EXT_CAP_INFO_ELEMENT *pExtCapInfo,
     OUT UCHAR		 *pHtCapabilityLen,
     OUT HT_CAPABILITY_IE *pHtCapability)
 {
@@ -88,8 +80,7 @@ BOOLEAN PeerAssocReqCmmSanity(
     UCHAR			WPA2_OUI[3] = { 0x00, 0x0F, 0xAC };
     MAC_TABLE_ENTRY *pEntry = (MAC_TABLE_ENTRY *)NULL;
 
-
-    // to prevent caller from using garbage output value
+    /* to prevent caller from using garbage output value */
 	*pSsidLen     = 0;
     *pRatesLen    = 0;
     *pRSNLen      = 0;
@@ -104,13 +95,7 @@ BOOLEAN PeerAssocReqCmmSanity(
 		return FALSE;
 
 
-#ifdef DOT11R_FT_SUPPORT
-    NdisZeroMemory(pFtInfo, sizeof(FT_INFO));
-#endif // DOT11R_FT_SUPPORT //
 
-#ifdef DOT11K_RRM_SUPPORT
-	NdisZeroMemory(pRrmEnCap, sizeof(RRM_EN_CAP_IE));
-#endif // DOT11K_RRM_SUPPORT //
 
     Ptr = (PCHAR)Fr->Octet;
 
@@ -128,7 +113,7 @@ BOOLEAN PeerAssocReqCmmSanity(
 	}
 
 
-    // get variable fields from payload and advance the pointer
+    /* get variable fields from payload and advance the pointer */
     while (((UCHAR *)eid_ptr + eid_ptr->Len + 1) < ((UCHAR *)Fr + MsgLen))
     {
         switch(eid_ptr->Eid)
@@ -176,8 +161,8 @@ BOOLEAN PeerAssocReqCmmSanity(
 					UCHAR RateDefault[8] = \
 							{ 0x82, 0x84, 0x8b, 0x96, 0x12, 0x24, 0x48, 0x6c };
 
-                	// HT rate not ready yet. return true temporarily. rt2860c
-                    //DBGPRINT(RT_DEBUG_TRACE, ("PeerAssocReqSanity - wrong IE_SUPP_RATES\n"));
+                	/* HT rate not ready yet. return true temporarily. rt2860c */
+                    /*DBGPRINT(RT_DEBUG_TRACE, ("PeerAssocReqSanity - wrong IE_SUPP_RATES\n")); */
                     Sanity |= 0x02;
                     *pRatesLen = 8;
 					NdisMoveMemory(Rates, RateDefault, 8);
@@ -222,7 +207,7 @@ BOOLEAN PeerAssocReqCmmSanity(
 #else				
 				*(USHORT *)(&pHtCapability->ExtHtCapInfo) = \
 							cpu2le16(*(USHORT *)(&pHtCapability->ExtHtCapInfo));
-#endif // UNALIGNMENT_SUPPORT //
+#endif /* UNALIGNMENT_SUPPORT */
 
 				*pHtCapabilityLen = SIZE_HT_CAP_IE;
 				Sanity |= 0x10;
@@ -243,30 +228,20 @@ BOOLEAN PeerAssocReqCmmSanity(
 
 			break;
 
-            case IE_WPA:    // same as IE_VENDOR_SPECIFIC
+            case IE_WPA:    /* same as IE_VENDOR_SPECIFIC */
             case IE_WPA2:
-#ifdef DOT11R_FT_SUPPORT
-#ifdef WMM_ACM_SUPPORT
-				if (ACM_WME_ELM_Check((UCHAR *)eid_ptr,
-					ACM_WME_OUI_SUBTYPE_TSPEC) == ACM_RTN_OK)
-				{
-					if ((pFtInfo->RicInfo.RicIEsLen + eid_ptr->Len + 2) < MAX_RICIES_LEN)
-					{
-						NdisMoveMemory(&pFtInfo->RicInfo.RicIEs[pFtInfo->RicInfo.RicIEsLen],
-										&eid_ptr->Eid, eid_ptr->Len + 2);
-						pFtInfo->RicInfo.RicIEsLen += eid_ptr->Len + 2;
-					}
-				}
-#endif // WMM_ACM_SUPPORT //
-#endif // DOT11R_FT_SUPPORT //
 
-#ifdef WSC_AP_SUPPORT                
 				if (NdisEqualMemory(eid_ptr->Octet, WPS_OUI, 4))
 				{
+#ifdef WSC_AP_SUPPORT
+#ifdef WSC_V2_SUPPORT
+					if ((pAd->ApCfg.MBSSID[pEntry->apidx].WscControl.WscV2Info.bWpsEnable) ||
+						(pAd->ApCfg.MBSSID[pEntry->apidx].WscControl.WscV2Info.bEnableWpsV2 == FALSE))
+#endif /* WSC_V2_SUPPORT */
 				    *pWscCapable = TRUE;
+#endif /* WSC_AP_SUPPORT */
 				    break;
 				}
-#endif // WSC_AP_SUPPORT //
 
 				/* Handle Atheros and Broadcom draft 11n STAs */
 				if (NdisEqualMemory(eid_ptr->Octet, BROADCOM_OUI, 3))
@@ -289,36 +264,42 @@ BOOLEAN PeerAssocReqCmmSanity(
 								}
 #else				
 								*(USHORT *)(&pHtCapability->ExtHtCapInfo) = cpu2le16(*(USHORT *)(&pHtCapability->ExtHtCapInfo));
-#endif // UNALIGNMENT_SUPPORT //
+#endif /* UNALIGNMENT_SUPPORT */
 
 								*pHtCapabilityLen = SIZE_HT_CAP_IE;
 							}
 							break;
 						
 						default:
-							// ignore other cases 
+							/* ignore other cases */
 							break;
 					}
 				}
 
                 if (NdisEqualMemory(eid_ptr->Octet, RALINK_OUI, 3) && (eid_ptr->Len == 7))
                 {
-                    //*pRalinkIe = eid_ptr->Octet[3];
+                    /**pRalinkIe = eid_ptr->Octet[3]; */
 					if (eid_ptr->Octet[3] != 0)
                     	*pRalinkIe = eid_ptr->Octet[3];
         			else
-        				*pRalinkIe = 0xf0000000; // Set to non-zero value (can't set bit0-2) to represent this is Ralink Chip. So at linkup, we will set ralinkchip flag.
+        				*pRalinkIe = 0xf0000000; /* Set to non-zero value (can't set bit0-2) to represent this is Ralink Chip. So at linkup, we will set ralinkchip flag. */
                     break;
                 }
                 
-                // WMM_IE
+                /* WMM_IE */
                 if (NdisEqualMemory(eid_ptr->Octet, WME_INFO_ELEM, 6) && (eid_ptr->Len == 7))
                 {
                     *pbWmmCapable = TRUE;
 
-#ifdef UAPSD_AP_SUPPORT
-                    UAPSD_AssocParse(pAd, pEntry, (UINT8 *)&eid_ptr->Octet[6]);
-#endif // UAPSD_AP_SUPPORT //
+#ifdef UAPSD_SUPPORT
+					if (pEntry)
+					{
+						UAPSD_AssocParse(pAd,
+									pEntry, (UINT8 *)&eid_ptr->Octet[6],
+									pAd->ApCfg.MBSSID[\
+										pEntry->apidx].UapsdInfo.bAPSDCapable);
+					}
+#endif /* UAPSD_SUPPORT */
 
                     break;
                 }
@@ -335,22 +316,14 @@ BOOLEAN PeerAssocReqCmmSanity(
                     break;                          
                 }
                 
-//                if (/*(eid_ptr->Len <= MAX_LEN_OF_RSNIE) &&*/ (eid_ptr->Len > MIN_LEN_OF_RSNIE))
-		if (/*(eid_ptr->Len <= MAX_LEN_OF_RSNIE) &&*/ (eid_ptr->Len >= MIN_LEN_OF_RSNIE))	// Xbox 360 IOT patch
+                if (/*(eid_ptr->Len <= MAX_LEN_OF_RSNIE) &&*/ (eid_ptr->Len >= MIN_LEN_OF_RSNIE))
                 {
-                    if (!pEntry)
-                        return FALSE;
-
 					hex_dump("Received RSNIE in Assoc-Req", (UCHAR *)eid_ptr, eid_ptr->Len + 2);
                     
-					// Copy whole RSNIE context
+					/* Copy whole RSNIE context */
                     NdisMoveMemory(RSN, eid_ptr, eid_ptr->Len + 2);
 					*pRSNLen=eid_ptr->Len + 2;
 
-#ifdef DOT11R_FT_SUPPORT
-					NdisMoveMemory(pFtInfo->RSN_IE, eid_ptr, eid_ptr->Len + 2);
-					pFtInfo->RSNIE_Len = eid_ptr->Len + 2;
-#endif // DOT11R_FT_SUPPORT //					
                 }
                 else
                 {
@@ -366,52 +339,17 @@ BOOLEAN PeerAssocReqCmmSanity(
 					(pAd->ApCfg.MBSSID[pEntry->apidx].AuthMode != Ndis802_11AuthModeWAIPSK))
                     break;				
 
-				// Sanity check the validity of WIE
-				// Todo - AlbertY
+				/* Sanity check the validity of WIE */
+				/* Todo - AlbertY */
 				
-				// Copy whole WAPI-IE context                    
+				/* Copy whole WAPI-IE context */
                 NdisMoveMemory(RSN, eid_ptr, eid_ptr->Len + 2);
 				*pRSNLen=eid_ptr->Len + 2;		
 				DBGPRINT(RT_DEBUG_TRACE, ("PeerAssocReqSanity - IE_WAPI(%d)\n",eid_ptr->Len));
 				break;
-#endif // WAPI_SUPPORT //				
+#endif /* WAPI_SUPPORT */				
 
-#ifdef DOT11R_FT_SUPPORT
-			case IE_FT_MDIE:
-				FT_FillMdIeInfo(eid_ptr, &pFtInfo->MdIeInfo);
-				break;
 
-			case IE_FT_FTIE:
-				FT_FillFtIeInfo(eid_ptr, &pFtInfo->FtIeInfo);
-				break;
-
-			case IE_FT_RIC_DATA:
-				/* record the pointer of first RDIE. */
-				if (pFtInfo->RicInfo.pRicInfo == NULL)
-				{
-					pFtInfo->RicInfo.pRicInfo = &eid_ptr->Eid;
-					pFtInfo->RicInfo.Len = ((UCHAR*)Fr + MsgLen)
-											- (UCHAR*)eid_ptr + 1;
-				}
-			case IE_FT_RIC_DESCRIPTOR:
-				if ((pFtInfo->RicInfo.RicIEsLen + eid_ptr->Len + 2) < MAX_RICIES_LEN)
-				{
-					NdisMoveMemory(&pFtInfo->RicInfo.RicIEs[pFtInfo->RicInfo.RicIEsLen],
-									&eid_ptr->Eid, eid_ptr->Len + 2);
-					pFtInfo->RicInfo.RicIEsLen += eid_ptr->Len + 2;
-				}
-				break;
-#endif // DOT11R_FT_SUPPORT //
-
-#ifdef DOT11K_RRM_SUPPORT
-			case IE_RRM_EN_CAP:
-				{
-					UINT64 value;
-					NdisMoveMemory(&value, eid_ptr->Octet, sizeof(UINT64));
-					pRrmEnCap->word = le2cpu64(value);
-				}
-				break;
-#endif // DOT11K_RRM_SUPPORT //
 
             default:
                 break;
@@ -505,15 +443,12 @@ BOOLEAN APPeerAuthSanity(
     OUT USHORT *Seq, 
     OUT USHORT *Status, 
     CHAR *ChlgText
-#ifdef DOT11R_FT_SUPPORT
-	,PFT_INFO pFtInfo
-#endif // DOT11R_FT_SUPPORT //
     ) 
 {
     PFRAME_802_11 Fr = (PFRAME_802_11)Msg;
 
-	COPY_MAC_ADDR(pAddr1,  &Fr->Hdr.Addr1);		// BSSID 
-    COPY_MAC_ADDR(pAddr2,  &Fr->Hdr.Addr2);		// SA
+	COPY_MAC_ADDR(pAddr1,  &Fr->Hdr.Addr1);		/* BSSID */
+    COPY_MAC_ADDR(pAddr2,  &Fr->Hdr.Addr2);		/* SA */
     NdisMoveMemory(Alg,    &Fr->Octet[0], 2);
     NdisMoveMemory(Seq,    &Fr->Octet[2], 2);
     NdisMoveMemory(Status, &Fr->Octet[4], 2);
@@ -547,87 +482,6 @@ BOOLEAN APPeerAuthSanity(
             return FALSE;
         }
     } 
-#ifdef DOT11R_FT_SUPPORT
-	else if (*Alg == AUTH_MODE_FT)
-	{
-		PEID_STRUCT eid_ptr;
-		UCHAR *Ptr;
-		UCHAR WPA2_OUI[3]={0x00,0x0F,0xAC};
-
-		NdisZeroMemory(pFtInfo, sizeof(FT_INFO));
-
-		Ptr = &Fr->Octet[6];
-		eid_ptr = (PEID_STRUCT) Ptr;
-
-	    // get variable fields from payload and advance the pointer
-		while(((UCHAR*)eid_ptr + eid_ptr->Len + 1) < ((UCHAR*)Fr + MsgLen))
-		{
-			switch(eid_ptr->Eid)
-			{
-				case IE_FT_MDIE:
-					FT_FillMdIeInfo(eid_ptr, &pFtInfo->MdIeInfo);
-					break;
-
-				case IE_FT_FTIE:
-					FT_FillFtIeInfo(eid_ptr, &pFtInfo->FtIeInfo);
-					break;
-
-				case IE_FT_RIC_DATA:
-					/* record the pointer of first RDIE. */
-					if (pFtInfo->RicInfo.pRicInfo == NULL)
-					{
-						pFtInfo->RicInfo.pRicInfo = &eid_ptr->Eid;
-						pFtInfo->RicInfo.Len = ((UCHAR*)Fr + MsgLen)
-												- (UCHAR*)eid_ptr + 1;
-					}
-
-					if ((pFtInfo->RicInfo.RicIEsLen + eid_ptr->Len + 2) < MAX_RICIES_LEN)
-					{
-						NdisMoveMemory(&pFtInfo->RicInfo.RicIEs[pFtInfo->RicInfo.RicIEsLen],
-										&eid_ptr->Eid, eid_ptr->Len + 2);
-						pFtInfo->RicInfo.RicIEsLen += eid_ptr->Len + 2;
-					}
-					break;
-
-#ifdef WMM_ACM_SUPPORT
-				case IE_VENDOR_SPECIFIC:
-					if (ACM_WME_ELM_Check((UCHAR *)eid_ptr,
-						ACM_WME_OUI_SUBTYPE_TSPEC) == ACM_RTN_OK)
-					{
-						if ((pFtInfo->RicInfo.RicIEsLen + eid_ptr->Len + 2) < MAX_RICIES_LEN)
-						{
-							NdisMoveMemory(&pFtInfo->RicInfo.RicIEs[pFtInfo->RicInfo.RicIEsLen],
-											&eid_ptr->Eid, eid_ptr->Len + 2);
-							pFtInfo->RicInfo.RicIEsLen += eid_ptr->Len + 2;
-						}
-					}
-					break;
-#endif // WMM_ACM_SUPPORT //
-					
-				case IE_FT_RIC_DESCRIPTOR:
-					if ((pFtInfo->RicInfo.RicIEsLen + eid_ptr->Len + 2) < MAX_RICIES_LEN)
-					{
-						NdisMoveMemory(&pFtInfo->RicInfo.RicIEs[pFtInfo->RicInfo.RicIEsLen],
-										&eid_ptr->Eid, eid_ptr->Len + 2);
-						pFtInfo->RicInfo.RicIEsLen += eid_ptr->Len + 2;
-					}
-					break;
-
-				case IE_RSN:
-					if (NdisEqualMemory(&eid_ptr->Octet[2], WPA2_OUI, sizeof(WPA2_OUI)))
-					{
-	                    NdisMoveMemory(pFtInfo->RSN_IE, eid_ptr, eid_ptr->Len + 2);
-						pFtInfo->RSNIE_Len = eid_ptr->Len + 2;
-					}
-					break;
-
-				default:
-					break;
-			}
-	        eid_ptr = (PEID_STRUCT)((UCHAR*)eid_ptr + 2 + eid_ptr->Len);        
-		}
-	}
-#endif // DOT11R_FT_SUPPORT //
     else 
     {
         DBGPRINT(RT_DEBUG_TRACE, ("APPeerAuthSanity fail - wrong algorithm (=%d)\n", *Alg));

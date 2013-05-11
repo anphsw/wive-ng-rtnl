@@ -331,7 +331,7 @@ BOOLEAN WscGetXmlKeyIndex(
 	return TRUE;
 }
 
-//
+
 
 BOOLEAN	WscReadProfileFromUfdFile(
 	IN	PRTMP_ADAPTER		pAd,
@@ -343,6 +343,7 @@ BOOLEAN	WscReadProfileFromUfdFile(
 	RTMP_OS_FD			file_r;
 	ssize_t				rv, fileLen = 0;
 	PSTRING				pXmlData = NULL;
+	BOOLEAN				RV = TRUE;
 
 	if (pUfdFileName == NULL)
 	{
@@ -365,7 +366,7 @@ BOOLEAN	WscReadProfileFromUfdFile(
 		{
 			fileLen += rv;
 		}
-		pXmlData = kmalloc(fileLen+1, MEM_ALLOC_FLAG);
+		os_alloc_mem(pAd, (UCHAR **)&pXmlData, fileLen+1);
 		if (pXmlData == NULL)
 		{
 			RtmpOSFileClose(file_r);
@@ -379,7 +380,7 @@ BOOLEAN	WscReadProfileFromUfdFile(
 		RtmpOSFileClose(file_r);
 		if (rv != fileLen)
 		{
-			DBGPRINT(RT_DEBUG_TRACE, ("pXmlData kmalloc fail, fileLen = %d\n", fileLen));
+			DBGPRINT(RT_DEBUG_TRACE, ("RtmpOSFileRead fail, fileLen = %d\n", fileLen));
 			RtmpOSFSInfoChange(&osFSInfo, FALSE);
 			goto ReadErr;
 		}
@@ -395,21 +396,30 @@ BOOLEAN	WscReadProfileFromUfdFile(
 			DBGPRINT(RT_DEBUG_TRACE, ("SSID = %s(%d)\n", pCredential->SSID.Ssid, pCredential->SSID.SsidLength));
 		}
 		else
-			return FALSE;
+		{
+			RV = FALSE;
+			goto FreeXmlData;
+		}
 
 		if (WscGetXmlAuth(pXmlData, &pCredential->AuthType))
 		{
 			DBGPRINT(RT_DEBUG_TRACE, ("Credential.AuthType = 0x%04x\n", pCredential->AuthType));
 		}
 		else
-			return FALSE;
+		{
+			RV = FALSE;
+			goto FreeXmlData;
+		}
 
 		if (WscGetXmlEncr(pXmlData, &pCredential->EncrType))
 		{
 			DBGPRINT(RT_DEBUG_TRACE, ("Credential.EncrType = 0x%04x\n", pCredential->EncrType));
 		}
 		else
-			return FALSE;
+		{
+			RV = FALSE;
+			goto FreeXmlData;
+		}
 
 		pCredential->KeyLength = 0;
 		RTMPZeroMemory(pCredential->Key, 64);
@@ -418,7 +428,10 @@ BOOLEAN	WscReadProfileFromUfdFile(
 			DBGPRINT(RT_DEBUG_TRACE, ("Credential.Key = %s (%d)\n", pCredential->Key, pCredential->KeyLength));
 		}
 		else
-			return FALSE;
+		{
+			RV = FALSE;
+			goto FreeXmlData;
+		}
 
 		/*
 			If we cannot find keyIndex in .wfc file, use default value 1.
@@ -430,24 +443,24 @@ BOOLEAN	WscReadProfileFromUfdFile(
 		
 		DBGPRINT(RT_DEBUG_TRACE, ("WscReadProfileFromUfdFile OK\n"));
 
-		WscWriteConfToPortCfg(pAd, &pAd->ApCfg.MBSSID[ApIdx].WscControl, TRUE);
+		WscWriteConfToPortCfg(pAd, 
+							  &pAd->ApCfg.MBSSID[ApIdx].WscControl, 
+							  &pAd->ApCfg.MBSSID[ApIdx].WscControl.WscProfile.Profile[0], TRUE);
 
 		pAd->WriteWscCfgToDatFile = ApIdx;
-		
-#ifdef KTHREAD_SUPPORT
-		WAKE_UP(&(pAd->wscCfgWriteTask));
-#else
-		RTMP_SEM_EVENT_UP(&(pAd->wscCfgWriteTask.taskSema));
-#endif
+
+		RtmpOsTaskWakeUp(&(pAd->wscTask));
+
+FreeXmlData:
 		if (pXmlData)
-			kfree(pXmlData);
-		
-		return TRUE;
+			os_free_mem(NULL, pXmlData);
+
+		return RV;
 	}
 
 ReadErr:
 	if (pXmlData)
-		kfree(pXmlData);
+		os_free_mem(NULL, pXmlData);
 	return FALSE;
 }
 
@@ -563,7 +576,7 @@ BOOLEAN	WscWriteProfileToUfdFile(
 			{
 				RtmpOSFileWrite(file_w, (PSTRING)XML_ENCR_END, (int)strlen(XML_ENCR_END));
 				RtmpOSFileWrite(file_w, (PSTRING)"\n", (int)1);
-				pXmlTemplate = offset + strlen(XML_KEY_MARK) + strlen(XML_KEY_END) + 1; // 1: '\n'
+				pXmlTemplate = offset + strlen(XML_KEY_MARK) + strlen(XML_KEY_END) + 1; /* 1: '\n' */
 			}			
 		}
 		RtmpOSFileWrite(file_w, (PSTRING)pXmlTemplate, (int)strlen(pXmlTemplate));
@@ -577,4 +590,4 @@ out:
 }
 
 
-#endif // WSC_INCLUDED //
+#endif /* WSC_INCLUDED */

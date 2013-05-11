@@ -45,7 +45,7 @@ BOOLEAN BeaconTransmitRequired(
 {
 #ifdef WDS_SUPPORT
 	UCHAR idx;
-#endif // WDS_SUPPORT //
+#endif /* WDS_SUPPORT */
 	BOOLEAN result = FALSE;
 
 	do
@@ -53,20 +53,13 @@ BOOLEAN BeaconTransmitRequired(
 #ifdef WDS_SUPPORT
 		if (pAd->WdsTab.Mode == WDS_BRIDGE_MODE)
 			break;
-#endif // WDS_SUPPORT //
+#endif /* WDS_SUPPORT */
 
 #ifdef CARRIER_DETECTION_SUPPORT
 		if (isCarrierDetectExist(pAd) == TRUE)
 			break;
-#endif // CARRIER_DETECTION_SUPPORT //
+#endif /* CARRIER_DETECTION_SUPPORT */
 
-#ifdef DOT11K_RRM_SUPPORT
-#ifdef QUIET_SUPPORT
-	if ((apidx < pAd->ApCfg.BssidNum)
-		&& IS_RRM_QUIET(pAd, apidx))
-		break;
-#endif // QUIET_SUPPORT //
-#endif // DOT11K_RRM_SUPPORT //
 
 		if (apidx == MAIN_MBSSID)
 		{
@@ -85,7 +78,7 @@ BOOLEAN BeaconTransmitRequired(
 					break;
 				}
 			}
-#endif // WDS_SUPPORT //
+#endif /* WDS_SUPPORT */
 		}
 		else
 		{
@@ -108,9 +101,9 @@ VOID APMakeBssBeacon(
 	IN PRTMP_ADAPTER	pAd,
 	IN INT				apidx)
 {
-	UCHAR         DsLen = 1, SsidLen;//, TimLen = 4,
-				  //BitmapControl = 0, VirtualBitmap = 0, EmptySsidLen = 0, SsidLen;
-//	UCHAR         RSNIe=IE_WPA, RSNIe2=IE_WPA2;
+	UCHAR         DsLen = 1, SsidLen;/*, TimLen = 4, */
+				  /*BitmapControl = 0, VirtualBitmap = 0, EmptySsidLen = 0, SsidLen; */
+/*	UCHAR         RSNIe=IE_WPA, RSNIe2=IE_WPA2; */
 	HEADER_802_11 BcnHdr;
 	LARGE_INTEGER FakeTimestamp;
 	ULONG         FrameLen = 0;
@@ -119,21 +112,29 @@ VOID APMakeBssBeacon(
 	UCHAR  *ptr;
 	UINT  i;
 	UINT32 longValue;
-	HTTRANSMIT_SETTING	BeaconTransmit;   // MGMT frame PHY rate setting when operatin at Ht rate.
+	HTTRANSMIT_SETTING	BeaconTransmit;   /* MGMT frame PHY rate setting when operatin at Ht rate. */
+	UCHAR PhyMode, SupRateLen;
+	UINT8 TXWISize = pAd->chipCap.TXWISize;
 
 	if(!BeaconTransmitRequired(pAd, apidx, &pAd->ApCfg.MBSSID[apidx]))
 		return;
 
+	PhyMode = pAd->ApCfg.MBSSID[apidx].PhyMode;
 
 	if (pAd->ApCfg.MBSSID[apidx].bHideSsid)
 		SsidLen = 0;
 	else
 		SsidLen = pAd->ApCfg.MBSSID[apidx].SsidLen;
 
-	MgtMacHeaderInit(pAd, &BcnHdr, SUBTYPE_BEACON, 0, BROADCAST_ADDR, pAd->ApCfg.MBSSID[apidx].Bssid);
+	MgtMacHeaderInit(pAd, &BcnHdr, SUBTYPE_BEACON, 0, BROADCAST_ADDR, 
+						pAd->ApCfg.MBSSID[apidx].Bssid);
 
 	
-	// for update framelen to TxWI later.
+	/* for update framelen to TxWI later. */
+	SupRateLen = pAd->CommonCfg.SupRateLen;
+	if (PhyMode == PHY_11B)
+		SupRateLen = 4;
+
 	MakeOutgoingFrame(pBeaconFrame,                  &FrameLen,
 					sizeof(HEADER_802_11),           &BcnHdr, 
 					TIMESTAMP_LEN,                   &FakeTimestamp,
@@ -143,14 +144,14 @@ VOID APMakeBssBeacon(
 					1,                               &SsidLen, 
 					SsidLen,                         pAd->ApCfg.MBSSID[apidx].Ssid,
 					1,                               &SupRateIe, 
-					1,                               &pAd->CommonCfg.SupRateLen,
-					pAd->CommonCfg.SupRateLen,       pAd->CommonCfg.SupRate, 
+					1,                               &SupRateLen,
+					SupRateLen,                      pAd->CommonCfg.SupRate, 
 					1,                               &DsIe, 
 					1,                               &DsLen, 
 					1,                               &pAd->CommonCfg.Channel,
 					END_OF_ARGS);
 
-	if (pAd->CommonCfg.ExtRateLen)
+	if ((pAd->CommonCfg.ExtRateLen) && (PhyMode != PHY_11B))
 	{
 		ULONG TmpLen;
 		MakeOutgoingFrame(pBeaconFrame+FrameLen,         &TmpLen,
@@ -162,100 +163,81 @@ VOID APMakeBssBeacon(
 	}
 
 
-    // add country IE, power constraint IE
+    /* add country IE, power constraint IE */
 	if (pAd->CommonCfg.bCountryFlag)
 	{
 		ULONG TmpLen, TmpLen2=0;
-		UCHAR TmpFrame[256];
+/*		UCHAR TmpFrame[256]; */
+		UCHAR *TmpFrame = NULL;
 		UCHAR CountryIe = IE_COUNTRY;
 
-		NdisZeroMemory(TmpFrame, sizeof(TmpFrame));
+		os_alloc_mem(NULL, (UCHAR **)&TmpFrame, 256);
+		if (TmpFrame != NULL)
+		{
+			NdisZeroMemory(TmpFrame, 256);
 
-		// prepare channel information
+			/* prepare channel information */
 #ifdef EXT_BUILD_CHANNEL_LIST
-		BuildBeaconChList(pAd, TmpFrame, &TmpLen2);
+			BuildBeaconChList(pAd, TmpFrame, &TmpLen2);
 #else
-		{
-			UCHAR MaxTxPower = GetCuntryMaxTxPwr(pAd, pAd->CommonCfg.Channel);
-			MakeOutgoingFrame(TmpFrame+TmpLen2,     &TmpLen,
-								1,                 	&pAd->ChannelList[0].Channel,
-								1,                 	&pAd->ChannelListNum,
-								1,                 	&MaxTxPower,
-								END_OF_ARGS);
-			TmpLen2 += TmpLen;
-		}
-#endif // EXT_BUILD_CHANNEL_LIST //
+			{
+				UCHAR MaxTxPower = GetCuntryMaxTxPwr(pAd, pAd->CommonCfg.Channel);
+				MakeOutgoingFrame(TmpFrame+TmpLen2,     &TmpLen,
+									1,                 	&pAd->ChannelList[0].Channel,
+									1,                 	&pAd->ChannelListNum,
+									1,                 	&MaxTxPower,
+									END_OF_ARGS);
+				TmpLen2 += TmpLen;
+			}
+#endif /* EXT_BUILD_CHANNEL_LIST */
 
-#ifdef DOT11K_RRM_SUPPORT
-		if (IS_RRM_ENABLE(pAd, apidx)
-			&& (pAd->CommonCfg.RegulatoryClass[0] != 0))
-		{
-			TmpLen2 = 0;
-			NdisZeroMemory(TmpFrame, sizeof(TmpFrame));
-			RguClass_BuildBcnChList(pAd, TmpFrame, &TmpLen2);
-		}		
-#endif // DOT11K_RRM_SUPPORT //
 
-		// need to do the padding bit check, and concatenate it
-		if ((TmpLen2%2) == 0)
-		{
-			UCHAR	TmpLen3 = TmpLen2+4;
-			MakeOutgoingFrame(pBeaconFrame+FrameLen,&TmpLen,
-			                  1,                 	&CountryIe,
-			                  1,                 	&TmpLen3,
-			                  3,                 	pAd->CommonCfg.CountryCode,
-			                  TmpLen2+1,				TmpFrame,
-			                  END_OF_ARGS);
+			/* need to do the padding bit check, and concatenate it */
+			if ((TmpLen2%2) == 0)
+			{
+				UCHAR	TmpLen3 = TmpLen2+4;
+				MakeOutgoingFrame(pBeaconFrame+FrameLen,&TmpLen,
+				                  1,                 	&CountryIe,
+				                  1,                 	&TmpLen3,
+				                  3,                 	pAd->CommonCfg.CountryCode,
+				                  TmpLen2+1,				TmpFrame,
+				                  END_OF_ARGS);
+			}
+			else
+			{
+				UCHAR	TmpLen3 = TmpLen2+3;
+				MakeOutgoingFrame(pBeaconFrame+FrameLen,&TmpLen,
+				                  1,                 	&CountryIe,
+				                  1,                 	&TmpLen3,
+				                  3,                 	pAd->CommonCfg.CountryCode,
+				                  TmpLen2,				TmpFrame,
+				                  END_OF_ARGS);
+			}
+			FrameLen += TmpLen;
+
+			os_free_mem(NULL, TmpFrame);
 		}
 		else
-		{
-			UCHAR	TmpLen3 = TmpLen2+3;
-			MakeOutgoingFrame(pBeaconFrame+FrameLen,&TmpLen,
-			                  1,                 	&CountryIe,
-			                  1,                 	&TmpLen3,
-			                  3,                 	pAd->CommonCfg.CountryCode,
-			                  TmpLen2,				TmpFrame,
-			                  END_OF_ARGS);
-		}
-		FrameLen += TmpLen;
+			DBGPRINT(RT_DEBUG_ERROR, ("%s: Allocate memory fail!!!\n", __FUNCTION__));
 	}
 
-#ifdef DOT11K_RRM_SUPPORT
-	if (IS_RRM_ENABLE(pAd, apidx))
-	{
-		InsertTpcReportIE(pAd, pBeaconFrame+FrameLen, &FrameLen,
-			RTMP_GetTxPwr(pAd, pAd->CommonCfg.MlmeTransmit), 0);
-		RRM_InsertRRMEnCapIE(pAd, pBeaconFrame+FrameLen, &FrameLen, apidx);
-	}
-#endif // DOT11K_RRM_SUPPORT //
 
 #ifdef DOT11_N_SUPPORT
-	// AP Channel Report
-#ifdef DOT11K_RRM_SUPPORT
-	for (i=0; i<MAX_NUM_OF_REGULATORY_CLASS; i++)
-	{
-		if (pAd->CommonCfg.RegulatoryClass[i] == 0)
-			break;
-
-		InsertChannelRepIE(pAd, pBeaconFrame+FrameLen, &FrameLen,
-							(PSTRING)pAd->CommonCfg.CountryCode,
-							pAd->CommonCfg.RegulatoryClass[i]);
-
-	}
-#else
+	/* AP Channel Report */
 	{
 		UCHAR APChannelReportIe = IE_AP_CHANNEL_REPORT;
 		ULONG	TmpLen;
 
-		// 802.11n D2.0 Annex J
-		// USA
-		// regulatory class 32, channel set 1~7
-		// regulatory class 33, channel set 5-11
+		/*
+			802.11n D2.0 Annex J, USA regulatory 
+				class 32, channel set 1~7
+				class 33, channel set 5-11
+		*/
 
 		UCHAR rclass32[]={32, 1, 2, 3, 4, 5, 6, 7};
         UCHAR rclass33[]={33, 5, 6, 7, 8, 9, 10, 11};
-		UCHAR rclasslen = 8; //sizeof(rclass32);
-		if (pAd->CommonCfg.PhyMode == PHY_11BGN_MIXED)
+		UCHAR rclasslen = 8; /*sizeof(rclass32); */
+		if (PhyMode == PHY_11BGN_MIXED)
 		{
 			MakeOutgoingFrame(pBeaconFrame+FrameLen,&TmpLen,
 							  1,                    &APChannelReportIe,
@@ -268,113 +250,43 @@ VOID APMakeBssBeacon(
 			FrameLen += TmpLen;		
 		}
 	}
-#endif
 
-#endif // DOT11_N_SUPPORT //
+#endif /* DOT11_N_SUPPORT */
 
-#ifdef WSC_AP_SUPPORT
-    // add Simple Config Information Element
-    if (((pAd->ApCfg.MBSSID[apidx].WscControl.WscConfMode >= 1) && (pAd->ApCfg.MBSSID[apidx].WscIEBeacon.ValueLen))
-#ifdef HOSTAPD_SUPPORT
-		|| pAd->ApCfg.HostapdWPS
-#endif
-		)
-    {
-		ULONG WscTmpLen = 0;
-        
-		MakeOutgoingFrame(pBeaconFrame+FrameLen,                            &WscTmpLen,
-						  pAd->ApCfg.MBSSID[apidx].WscIEBeacon.ValueLen,    pAd->ApCfg.MBSSID[apidx].WscIEBeacon.Value,
-                              END_OF_ARGS);
-		FrameLen += WscTmpLen;		  
-    }
-
-    if ((pAd->ApCfg.MBSSID[apidx].WscControl.WscConfMode != WSC_DISABLE) &&
-#ifdef DOT1X_SUPPORT
-        (pAd->ApCfg.MBSSID[apidx].IEEE8021X == FALSE) && 
-#endif // DOT1X_SUPPORT //		
-        (pAd->ApCfg.MBSSID[apidx].WepStatus == Ndis802_11WEPEnabled))
-    {
-        /*
-            Non-WPS Windows XP and Vista PCs are unable to determine if a WEP enalbed network is static key based 
-            or 802.1X based. If the legacy station gets an EAP-Rquest/Identity from the AP, it assume the WEP
-            network is 802.1X enabled & will prompt the user for 802.1X credentials. If the legacy station doesn't
-            receive anything after sending an EAPOL-Start, it will assume the WEP network is static key based and
-            prompt user for the WEP key. <<from "WPS and Static Key WEP Networks">>
-            A WPS enabled AP should include this IE in the beacon when the AP is hosting a static WEP key network.  
-            The IE would be 7 bytes long with the Extended Capability field set to 0 (all bits zero)
-            http://msdn.microsoft.com/library/default.asp?url=/library/en-us/randz/protocol/securing_public_wi-fi_hotspots.asp
-        */
-        ULONG TempLen = 0;
-        UCHAR PROVISION_SERVICE_IE[7] = {0xDD, 0x05, 0x00, 0x50, 0xF2, 0x05, 0x00};
-        MakeOutgoingFrame(pBeaconFrame+FrameLen,        &TempLen,
-						  7,                            PROVISION_SERVICE_IE,
-                          END_OF_ARGS);
-        FrameLen += TempLen;
-    }
-#endif // WSC_AP_SUPPORT //
-    
-#ifdef DOT11R_FT_SUPPORT
-	/* The Mobility Domain information element (MDIE) is present in Beacon
-	** frame when dot11FastBssTransitionEnable is set to true. */
-	if (pAd->ApCfg.MBSSID[apidx].FtCfg.FtCapFlag.Dot11rFtEnable)
-	{
-		PFT_CFG pFtCfg = &pAd->ApCfg.MBSSID[apidx].FtCfg;
-		FT_CAP_AND_POLICY FtCap;
-		NdisZeroMemory(&FtCap, sizeof(FT_CAP_AND_POLICY));
-		FtCap.field.FtOverDs = pFtCfg->FtCapFlag.FtOverDs;
-		FtCap.field.RsrReqCap = pFtCfg->FtCapFlag.RsrReqCap;
-		FT_InsertMdIE(pAd, pBeaconFrame + FrameLen, &FrameLen,
-						pFtCfg->FtMdId, FtCap);
-	}
-#endif // DOT11R_FT_SUPPORT //
 
 	BeaconTransmit.word = 0;
 	RTMPWriteTxWI(pAd, pTxWI, FALSE, FALSE, TRUE, FALSE, FALSE, TRUE, 0, BSS0Mcast_WCID, 
 		FrameLen, PID_MGMT, 0, 0,IFS_HTTXOP, FALSE, &BeaconTransmit);
 
-#ifdef RT3593
 	/*
-		Shared memory access selection (higher 8KB shared memory)
+		step 6. move BEACON TXD and frame content to on-chip memory
 	*/
-	RTMP_RF33_SHARED_MEM_SELECT(pAd);
-#endif // RT3593 //
-
-	//
-	// step 6. move BEACON TXD and frame content to on-chip memory
-	//
 	ptr = (PUCHAR)&pAd->BeaconTxWI;
 #ifdef RT_BIG_ENDIAN
-    RTMPWIEndianChange(ptr, TYPE_TXWI);
+    RTMPWIEndianChange(pAd, ptr, TYPE_TXWI);
 #endif
 
-	for (i=0; i<TXWI_SIZE; i+=4)  // 16-byte TXWI field
+
+	for (i=0; i < TXWISize; i+=4)
 	{
 		longValue =  *ptr + (*(ptr+1)<<8) + (*(ptr+2)<<16) + (*(ptr+3)<<24);
-		RTMP_IO_WRITE32(pAd, pAd->BeaconOffset[pAd->ApCfg.MBSSID[apidx].BcnBufIdx] + i, longValue);
+		RTMP_CHIP_UPDATE_BEACON(pAd, pAd->BeaconOffset[pAd->ApCfg.MBSSID[apidx].BcnBufIdx] + i, longValue, 4);
 		ptr += 4;
 	}
 
-	// update BEACON frame content. start right after the 16-byte TXWI field.
+	/* update BEACON frame content. start right after the TXWI field. */
 	ptr = (PUCHAR)pAd->ApCfg.MBSSID[apidx].BeaconBuf;
 #ifdef RT_BIG_ENDIAN
     RTMPFrameEndianChange(pAd, ptr, DIR_WRITE, FALSE);
 #endif
 
-
 	for (i= 0; i< FrameLen; i+=4)
 	{
 		longValue =  *ptr + (*(ptr+1)<<8) + (*(ptr+2)<<16) + (*(ptr+3)<<24);
-		RTMP_IO_WRITE32(pAd, pAd->BeaconOffset[pAd->ApCfg.MBSSID[apidx].BcnBufIdx] + TXWI_SIZE + i, longValue);
+		RTMP_CHIP_UPDATE_BEACON(pAd, pAd->BeaconOffset[pAd->ApCfg.MBSSID[apidx].BcnBufIdx] + TXWISize + i, longValue, 4);
 		ptr += 4;
 	}
 
-#ifdef RT3593
-	/*
-		Set the beacon offset (higher 8KB shared memory)
-		Shared memory access selection (lower 8KB shared memory)
-	*/
-	RTMP_RF33_SHARED_MEM_DESELECT(pAd);
-#endif // RT3593 //
 
 	pAd->ApCfg.MBSSID[apidx].TimIELocationInBeacon = (UCHAR)FrameLen; 
 	pAd->ApCfg.MBSSID[apidx].CapabilityInfoLocationInBeacon = sizeof(HEADER_802_11) + TIMESTAMP_LEN + 2;
@@ -396,39 +308,41 @@ VOID APUpdateBeaconFrame(
 	IN PRTMP_ADAPTER	pAd,
 	IN INT				apidx) 
 {
-	//PTXWI_STRUC    	pTxWI = &pAd->BeaconTxWI;
+	/*PTXWI_STRUC    	pTxWI = &pAd->BeaconTxWI; */
 	PUCHAR        	pBeaconFrame = (PUCHAR)pAd->ApCfg.MBSSID[apidx].BeaconBuf;
 	UCHAR  			*ptr;
 	ULONG 			FrameLen = pAd->ApCfg.MBSSID[apidx].TimIELocationInBeacon;
 	ULONG 			UpdatePos = pAd->ApCfg.MBSSID[apidx].TimIELocationInBeacon;
-	//ULONG			CapInfoPos = pAd->ApCfg.MBSSID[apidx].CapabilityInfoLocationInBeacon;
+	/*ULONG			CapInfoPos = pAd->ApCfg.MBSSID[apidx].CapabilityInfoLocationInBeacon; */
 	UCHAR         	RSNIe=IE_WPA, RSNIe2=IE_WPA2;
 	UCHAR 			ID_1B, TimFirst, TimLast, *pTim;
 	MULTISSID_STRUCT *pMbss;
 	COMMON_CONFIG *pComCfg;
-
+	UCHAR PhyMode;
+	BOOLEAN			bHasWpsIE = FALSE;
 
 	UINT  i;
-	HTTRANSMIT_SETTING	BeaconTransmit;   // MGMT frame PHY rate setting when operatin at Ht rate.
+	HTTRANSMIT_SETTING	BeaconTransmit;   /* MGMT frame PHY rate setting when operatin at Ht rate. */
 
 	pMbss = &pAd->ApCfg.MBSSID[apidx];
 	pComCfg = &pAd->CommonCfg;
+	PhyMode = pMbss->PhyMode;
 
 	if(!BeaconTransmitRequired(pAd, apidx, pMbss))
 		return;
 
-	//
-	// step 1 - update BEACON's Capability
-	//
+	/* */
+	/* step 1 - update BEACON's Capability */
+	/* */
 	ptr = pBeaconFrame + pMbss->CapabilityInfoLocationInBeacon;
 	*ptr = (UCHAR)(pMbss->CapabilityInfo & 0x00ff);
 	*(ptr+1) = (UCHAR)((pMbss->CapabilityInfo & 0xff00) >> 8);
 
-	//
-	// step 2 - update TIM IE
-	// TODO: enlarge TIM bitmap to support up to 64 STAs
-	// TODO: re-measure if RT2600 TBTT interrupt happens faster than BEACON sent out time
-	//
+	/* */
+	/* step 2 - update TIM IE */
+	/* TODO: enlarge TIM bitmap to support up to 64 STAs */
+	/* TODO: re-measure if RT2600 TBTT interrupt happens faster than BEACON sent out time */
+	/* */
 
 	ptr = pBeaconFrame + pMbss->TimIELocationInBeacon;
 	*ptr = IE_TIM;
@@ -473,200 +387,17 @@ VOID APUpdateBeaconFrame(
 		*(ptr + 5 + i - TimFirst) = pTim[i];
 	/* End of for */
 
-	// bit0 means backlogged mcast/bcast
+	/* bit0 means backlogged mcast/bcast */
     if (pAd->ApCfg.DtimCount == 0)
 	*(ptr + 4) |= (pMbss->TimBitmaps[WLAN_CT_TIM_BCMC_OFFSET] & 0x01); 
 
-	// adjust BEACON length according to the new TIM
+	/* adjust BEACON length according to the new TIM */
 	FrameLen += (2 + *(ptr+1)); 
 
-	// Update ERP
-    if (pComCfg->ExtRateLen)
-    {
-		//
-        // fill ERP IE
-        // 
-        ptr = (UCHAR *)pBeaconFrame + FrameLen; // pTxD->DataByteCnt;
-        *ptr = IE_ERP;
-        *(ptr + 1) = 1;
-        *(ptr + 2) = pAd->ApCfg.ErpIeContent;
-		FrameLen += 3;
-	}
-
-#ifdef A_BAND_SUPPORT
-	//
-	// fill up Channel Switch Announcement Element
-	//
-	if ((pComCfg->Channel > 14)
-		&& (pComCfg->bIEEE80211H == 1)
-		&& (pComCfg->RadarDetect.RDMode == RD_SWITCHING_MODE))
-	{
-		ptr = pBeaconFrame + FrameLen;
-		*ptr = IE_CHANNEL_SWITCH_ANNOUNCEMENT;
-		*(ptr + 1) = 3;
-		*(ptr + 2) = 1;
-		*(ptr + 3) = pComCfg->Channel;
-		*(ptr + 4) = (pComCfg->RadarDetect.CSPeriod - pComCfg->RadarDetect.CSCount - 1);
-		ptr      += 5;
-		FrameLen += 5;
-
-#ifdef DOT11_N_SUPPORT
-		// Extended Channel Switch Announcement Element
-		if (pComCfg->bExtChannelSwitchAnnouncement)
-		{
-			HT_EXT_CHANNEL_SWITCH_ANNOUNCEMENT_IE	HtExtChannelSwitchIe;
-			build_ext_channel_switch_ie(pAd, &HtExtChannelSwitchIe);
-			NdisMoveMemory(ptr, &HtExtChannelSwitchIe, sizeof(HT_EXT_CHANNEL_SWITCH_ANNOUNCEMENT_IE));
-			ptr += sizeof(HT_EXT_CHANNEL_SWITCH_ANNOUNCEMENT_IE);
-			FrameLen += sizeof(HT_EXT_CHANNEL_SWITCH_ANNOUNCEMENT_IE);
-		}
-#endif // DOT11_N_SUPPORT //
-	}
-#endif // A_BAND_SUPPORT //
-
-#ifdef DOT11_N_SUPPORT
-	//
-	// step 5. Update HT. Since some fields might change in the same BSS.
-	//
-	if ((pComCfg->PhyMode >= PHY_11ABGN_MIXED) && (pMbss->DesiredHtPhyInfo.bHtEnable))
-	{
-		ULONG TmpLen;
-		UCHAR HtLen, HtLen1;
-		//UCHAR i;
-
-#ifdef RT_BIG_ENDIAN
-		HT_CAPABILITY_IE HtCapabilityTmp;
-		ADD_HT_INFO_IE	addHTInfoTmp;
-		USHORT	b2lTmp, b2lTmp2;
+#ifdef HOSTAPD_SUPPORT
+	if ( pAd->ApCfg.MBSSID[apidx].HostapdWPS && (pAd->ApCfg.MBSSID[apidx].WscIEBeacon.ValueLen))
+		bHasWpsIE = TRUE;
 #endif
-
-		// add HT Capability IE 
-		HtLen = sizeof(pComCfg->HtCapability);
-		HtLen1 = sizeof(pComCfg->AddHTInfo);
-#ifndef RT_BIG_ENDIAN
-		MakeOutgoingFrame(pBeaconFrame+FrameLen,         &TmpLen,
-								  1,                                &HtCapIe,
-								  1,                                &HtLen,
-								 HtLen,          &pComCfg->HtCapability, 
-								  1,                                &AddHtInfoIe,
-								  1,                                &HtLen1,
-								 HtLen1,          &pComCfg->AddHTInfo, 
-						  END_OF_ARGS);
-#else
-		NdisMoveMemory(&HtCapabilityTmp, &pComCfg->HtCapability, HtLen);
-		*(USHORT *)(&HtCapabilityTmp.HtCapInfo) = SWAP16(*(USHORT *)(&HtCapabilityTmp.HtCapInfo));
-#ifdef UNALIGNMENT_SUPPORT
-		{
-			EXT_HT_CAP_INFO extHtCapInfo;
-
-			NdisMoveMemory((PUCHAR)(&extHtCapInfo), (PUCHAR)(&HtCapabilityTmp.ExtHtCapInfo), sizeof(EXT_HT_CAP_INFO));
-			*(USHORT *)(&extHtCapInfo) = cpu2le16(*(USHORT *)(&extHtCapInfo));
-			NdisMoveMemory((PUCHAR)(&HtCapabilityTmp.ExtHtCapInfo), (PUCHAR)(&extHtCapInfo), sizeof(EXT_HT_CAP_INFO));		
-		}
-#else
-		*(USHORT *)(&HtCapabilityTmp.ExtHtCapInfo) = SWAP16(*(USHORT *)(&HtCapabilityTmp.ExtHtCapInfo));
-#endif // UNALIGNMENT_SUPPORT //
-
-		NdisMoveMemory(&addHTInfoTmp, &pComCfg->AddHTInfo, HtLen1);
-		*(USHORT *)(&addHTInfoTmp.AddHtInfo2) = SWAP16(*(USHORT *)(&addHTInfoTmp.AddHtInfo2));
-		*(USHORT *)(&addHTInfoTmp.AddHtInfo3) = SWAP16(*(USHORT *)(&addHTInfoTmp.AddHtInfo3));
-
-		MakeOutgoingFrame(pBeaconFrame+FrameLen,         &TmpLen,
-								  1,                                &HtCapIe,
-								  1,                                &HtLen,
-								 HtLen,                   &HtCapabilityTmp, 
-								  1,                                &AddHtInfoIe,
-								  1,                                &HtLen1,
-								 HtLen1,                   &addHTInfoTmp, 
-						  END_OF_ARGS);
-#endif
-		FrameLen += TmpLen;
-
-
-	}
-
- 
-#ifdef DOT11N_DRAFT3
- 	// P802.11n_D3.03
- 	// 7.3.2.60 Overlapping BSS Scan Parameters IE
- 	if ((pComCfg->PhyMode >= PHY_11ABGN_MIXED) && 
-		(pMbss->DesiredHtPhyInfo.bHtEnable) &&
-		(pComCfg->HtCapability.HtCapInfo.ChannelWidth == 1))
- 	{
-		OVERLAP_BSS_SCAN_IE  OverlapScanParam;
-		ULONG	TmpLen;
-		UCHAR	OverlapScanIE, ScanIELen;
-
-		OverlapScanIE = IE_OVERLAPBSS_SCAN_PARM;
-		ScanIELen = 14;
-		OverlapScanParam.ScanPassiveDwell = cpu2le16(pComCfg->Dot11OBssScanPassiveDwell);
-		OverlapScanParam.ScanActiveDwell = cpu2le16(pComCfg->Dot11OBssScanActiveDwell);
-		OverlapScanParam.TriggerScanInt = cpu2le16(pComCfg->Dot11BssWidthTriggerScanInt);
-		OverlapScanParam.PassiveTalPerChannel = cpu2le16(pComCfg->Dot11OBssScanPassiveTotalPerChannel);
-		OverlapScanParam.ActiveTalPerChannel = cpu2le16(pComCfg->Dot11OBssScanActiveTotalPerChannel);
-		OverlapScanParam.DelayFactor = cpu2le16(pComCfg->Dot11BssWidthChanTranDelayFactor);
-		OverlapScanParam.ScanActThre = cpu2le16(pComCfg->Dot11OBssScanActivityThre);
-		
-		MakeOutgoingFrame(pBeaconFrame + FrameLen, &TmpLen,
-							1,			&OverlapScanIE,
-							1,			&ScanIELen,
-							ScanIELen,	&OverlapScanParam,
-							END_OF_ARGS);
-		
-		FrameLen += TmpLen;
- 	}
-#endif // DOT11N_DRAFT3 //
-#endif // DOT11_N_SUPPORT //
-
-#if defined(DOT11N_DRAFT3) || defined(DOT11V_WNM_SUPPORT)
-	// 7.3.2.27 Extended Capabilities IE
-	{
-		ULONG TmpLen, infoPos;
-		PUCHAR pInfo;
-		UCHAR extInfoLen;
-		BOOLEAN	bNeedAppendExtIE = FALSE;
-		EXT_CAP_INFO_ELEMENT	extCapInfo;
-
-
-		extInfoLen = sizeof(EXT_CAP_INFO_ELEMENT);
-		NdisZeroMemory(&extCapInfo, extInfoLen);
-
-#ifdef DOT11_N_SUPPORT
-#ifdef DOT11N_DRAFT3
-		// P802.11n_D1.10 
-		// HT Information Exchange Support	
-		if ((pComCfg->PhyMode >= PHY_11ABGN_MIXED) && (pComCfg->Channel <= 14) && 
-			(pMbss->DesiredHtPhyInfo.bHtEnable) && (pComCfg->bBssCoexEnable == TRUE)
-		)
-		{
-			extCapInfo.BssCoexistMgmtSupport = 1;
-		}
-#endif // DOT11N_DRAFT3 //
-#endif // DOT11_N_SUPPORT //
-
-
-		pInfo = (PUCHAR)(&extCapInfo);
-		for (infoPos = 0; infoPos < extInfoLen; infoPos++)
-		{
-			if (pInfo[infoPos] != 0)
-			{
-				bNeedAppendExtIE = TRUE;
-				break;
-			}
-		}
-
-		if (bNeedAppendExtIE == TRUE)
-		{
-			MakeOutgoingFrame(pBeaconFrame+FrameLen, &TmpLen,
-							1, &ExtCapIe,
-							1, &extInfoLen,
-							extInfoLen, &extCapInfo,
-							END_OF_ARGS);
-			FrameLen += TmpLen;
-		}
-	}
-#endif // defined(DOT11N_DRAFT3) || defined(DOT11V_WNM_SUPPORT) //
-
 
 	if ((pMbss->AuthMode == Ndis802_11AuthModeWPA) || 
 		(pMbss->AuthMode == Ndis802_11AuthModeWPAPSK))
@@ -678,9 +409,9 @@ VOID APUpdateBeaconFrame(
 	else if ((pMbss->AuthMode == Ndis802_11AuthModeWAICERT) || 
 		(pMbss->AuthMode == Ndis802_11AuthModeWAIPSK))
 		RSNIe = IE_WAPI;
-#endif // WAPI_SUPPORT //
+#endif /* WAPI_SUPPORT */
 
-	// Append RSN_IE when  WPA OR WPAPSK, 
+	/* Append RSN_IE when  WPA OR WPAPSK, */
 	if ((pMbss->AuthMode == Ndis802_11AuthModeWPA1WPA2) || 
 		(pMbss->AuthMode == Ndis802_11AuthModeWPA1PSKWPA2PSK))
 	{
@@ -706,7 +437,235 @@ VOID APUpdateBeaconFrame(
 		FrameLen += TmpLen;
 	}
 
-	// add WMM IE here
+#ifdef WSC_AP_SUPPORT
+    /* add Simple Config Information Element */
+    if (((pAd->ApCfg.MBSSID[apidx].WscControl.WscConfMode >= 1) && (pAd->ApCfg.MBSSID[apidx].WscIEBeacon.ValueLen)))
+    {
+    	bHasWpsIE = TRUE;
+    }
+#endif /* WSC_AP_SUPPORT */
+
+	if (bHasWpsIE)
+    {
+		ULONG WscTmpLen = 0;
+        
+		MakeOutgoingFrame(pBeaconFrame+FrameLen,                            &WscTmpLen,
+						  pAd->ApCfg.MBSSID[apidx].WscIEBeacon.ValueLen,    pAd->ApCfg.MBSSID[apidx].WscIEBeacon.Value,
+                              END_OF_ARGS);
+		FrameLen += WscTmpLen;		  
+    }
+
+#ifdef WSC_AP_SUPPORT
+    if ((pAd->ApCfg.MBSSID[apidx].WscControl.WscConfMode != WSC_DISABLE) &&
+#ifdef DOT1X_SUPPORT
+        (pAd->ApCfg.MBSSID[apidx].IEEE8021X == FALSE) && 
+#endif /* DOT1X_SUPPORT */		
+        (pAd->ApCfg.MBSSID[apidx].WepStatus == Ndis802_11WEPEnabled))
+    {
+        /*
+            Non-WPS Windows XP and Vista PCs are unable to determine if a WEP enalbed network is static key based 
+            or 802.1X based. If the legacy station gets an EAP-Rquest/Identity from the AP, it assume the WEP
+            network is 802.1X enabled & will prompt the user for 802.1X credentials. If the legacy station doesn't
+            receive anything after sending an EAPOL-Start, it will assume the WEP network is static key based and
+            prompt user for the WEP key. <<from "WPS and Static Key WEP Networks">>
+            A WPS enabled AP should include this IE in the beacon when the AP is hosting a static WEP key network.  
+            The IE would be 7 bytes long with the Extended Capability field set to 0 (all bits zero)
+            http:msdn.microsoft.com/library/default.asp?url=/library/en-us/randz/protocol/securing_public_wi-fi_hotspots.asp
+        */
+        ULONG TempLen = 0;
+        UCHAR PROVISION_SERVICE_IE[7] = {0xDD, 0x05, 0x00, 0x50, 0xF2, 0x05, 0x00};
+        MakeOutgoingFrame(pBeaconFrame+FrameLen,        &TempLen,
+						  7,                            PROVISION_SERVICE_IE,
+                          END_OF_ARGS);
+        FrameLen += TempLen;
+    }
+#endif /* WSC_AP_SUPPORT */
+    	
+
+	/* Update ERP */
+    if ((pComCfg->ExtRateLen) && (PhyMode != PHY_11B))
+    {
+        /* fill ERP IE */
+        ptr = (UCHAR *)pBeaconFrame + FrameLen; /* pTxD->DataByteCnt; */
+        *ptr = IE_ERP;
+        *(ptr + 1) = 1;
+        *(ptr + 2) = pAd->ApCfg.ErpIeContent;
+		FrameLen += 3;
+	}
+
+#ifdef A_BAND_SUPPORT
+	/* fill up Channel Switch Announcement Element */
+	if ((pComCfg->Channel > 14)
+		&& (pComCfg->bIEEE80211H == 1)
+		&& (pAd->Dot11_H.RDMode == RD_SWITCHING_MODE))
+	{
+		ptr = pBeaconFrame + FrameLen;
+		*ptr = IE_CHANNEL_SWITCH_ANNOUNCEMENT;
+		*(ptr + 1) = 3;
+		*(ptr + 2) = 1;
+		*(ptr + 3) = pComCfg->Channel;
+		*(ptr + 4) = (pAd->Dot11_H.CSPeriod - pAd->Dot11_H.CSCount - 1);
+		ptr      += 5;
+		FrameLen += 5;
+
+#ifdef DOT11_N_SUPPORT
+		/* Extended Channel Switch Announcement Element */
+		if (pComCfg->bExtChannelSwitchAnnouncement)
+		{
+			HT_EXT_CHANNEL_SWITCH_ANNOUNCEMENT_IE	HtExtChannelSwitchIe;
+			build_ext_channel_switch_ie(pAd, &HtExtChannelSwitchIe);
+			NdisMoveMemory(ptr, &HtExtChannelSwitchIe, sizeof(HT_EXT_CHANNEL_SWITCH_ANNOUNCEMENT_IE));
+			ptr += sizeof(HT_EXT_CHANNEL_SWITCH_ANNOUNCEMENT_IE);
+			FrameLen += sizeof(HT_EXT_CHANNEL_SWITCH_ANNOUNCEMENT_IE);
+		}
+#endif /* DOT11_N_SUPPORT */
+	}
+#endif /* A_BAND_SUPPORT */
+
+#ifdef DOT11_N_SUPPORT
+	/* step 5. Update HT. Since some fields might change in the same BSS. */
+	if ((PhyMode >= PHY_11ABGN_MIXED) && (pMbss->DesiredHtPhyInfo.bHtEnable))
+	{
+		ULONG TmpLen;
+		UCHAR HtLen, HtLen1;
+		/*UCHAR i; */
+
+#ifdef RT_BIG_ENDIAN
+		HT_CAPABILITY_IE HtCapabilityTmp;
+		ADD_HT_INFO_IE	addHTInfoTmp;
+/*		USHORT	b2lTmp, b2lTmp2; // no use */
+#endif
+
+		/* add HT Capability IE */
+		HtLen = sizeof(pComCfg->HtCapability);
+		HtLen1 = sizeof(pComCfg->AddHTInfo);
+#ifndef RT_BIG_ENDIAN
+		MakeOutgoingFrame(pBeaconFrame+FrameLen,         &TmpLen,
+								  1,                                &HtCapIe,
+								  1,                                &HtLen,
+								 HtLen,          &pComCfg->HtCapability, 
+								  1,                                &AddHtInfoIe,
+								  1,                                &HtLen1,
+								 HtLen1,          &pComCfg->AddHTInfo, 
+						  END_OF_ARGS);
+#else
+		NdisMoveMemory(&HtCapabilityTmp, &pComCfg->HtCapability, HtLen);
+		*(USHORT *)(&HtCapabilityTmp.HtCapInfo) = SWAP16(*(USHORT *)(&HtCapabilityTmp.HtCapInfo));
+#ifdef UNALIGNMENT_SUPPORT
+		{
+			EXT_HT_CAP_INFO extHtCapInfo;
+
+			NdisMoveMemory((PUCHAR)(&extHtCapInfo), (PUCHAR)(&HtCapabilityTmp.ExtHtCapInfo), sizeof(EXT_HT_CAP_INFO));
+			*(USHORT *)(&extHtCapInfo) = cpu2le16(*(USHORT *)(&extHtCapInfo));
+			NdisMoveMemory((PUCHAR)(&HtCapabilityTmp.ExtHtCapInfo), (PUCHAR)(&extHtCapInfo), sizeof(EXT_HT_CAP_INFO));		
+		}
+#else
+		*(USHORT *)(&HtCapabilityTmp.ExtHtCapInfo) = SWAP16(*(USHORT *)(&HtCapabilityTmp.ExtHtCapInfo));
+#endif /* UNALIGNMENT_SUPPORT */
+
+		NdisMoveMemory(&addHTInfoTmp, &pComCfg->AddHTInfo, HtLen1);
+		*(USHORT *)(&addHTInfoTmp.AddHtInfo2) = SWAP16(*(USHORT *)(&addHTInfoTmp.AddHtInfo2));
+		*(USHORT *)(&addHTInfoTmp.AddHtInfo3) = SWAP16(*(USHORT *)(&addHTInfoTmp.AddHtInfo3));
+
+		MakeOutgoingFrame(pBeaconFrame+FrameLen,         &TmpLen,
+								  1,                                &HtCapIe,
+								  1,                                &HtLen,
+								 HtLen,                   &HtCapabilityTmp, 
+								  1,                                &AddHtInfoIe,
+								  1,                                &HtLen1,
+								 HtLen1,                   &addHTInfoTmp, 
+						  END_OF_ARGS);
+#endif
+		FrameLen += TmpLen;
+
+
+	}
+
+ 
+#ifdef DOT11N_DRAFT3
+ 	/*
+		P802.11n_D3.03, 7.3.2.60 Overlapping BSS Scan Parameters IE
+	*/
+ 	if ((PhyMode >= PHY_11ABGN_MIXED) && 
+		(pComCfg->Channel <= 14) &&
+		(pMbss->DesiredHtPhyInfo.bHtEnable) &&
+		(pComCfg->HtCapability.HtCapInfo.ChannelWidth == 1))
+ 	{
+		OVERLAP_BSS_SCAN_IE  OverlapScanParam;
+		ULONG	TmpLen;
+		UCHAR	OverlapScanIE, ScanIELen;
+
+		OverlapScanIE = IE_OVERLAPBSS_SCAN_PARM;
+		ScanIELen = 14;
+		OverlapScanParam.ScanPassiveDwell = cpu2le16(pComCfg->Dot11OBssScanPassiveDwell);
+		OverlapScanParam.ScanActiveDwell = cpu2le16(pComCfg->Dot11OBssScanActiveDwell);
+		OverlapScanParam.TriggerScanInt = cpu2le16(pComCfg->Dot11BssWidthTriggerScanInt);
+		OverlapScanParam.PassiveTalPerChannel = cpu2le16(pComCfg->Dot11OBssScanPassiveTotalPerChannel);
+		OverlapScanParam.ActiveTalPerChannel = cpu2le16(pComCfg->Dot11OBssScanActiveTotalPerChannel);
+		OverlapScanParam.DelayFactor = cpu2le16(pComCfg->Dot11BssWidthChanTranDelayFactor);
+		OverlapScanParam.ScanActThre = cpu2le16(pComCfg->Dot11OBssScanActivityThre);
+		
+		MakeOutgoingFrame(pBeaconFrame + FrameLen, &TmpLen,
+							1,			&OverlapScanIE,
+							1,			&ScanIELen,
+							ScanIELen,	&OverlapScanParam,
+							END_OF_ARGS);
+		
+		FrameLen += TmpLen;
+ 	}
+#endif /* DOT11N_DRAFT3 */
+#endif /* DOT11_N_SUPPORT */
+
+#if defined(DOT11N_DRAFT3) || defined(DOT11V_WNM_SUPPORT)
+	/* 7.3.2.27 Extended Capabilities IE */
+	{
+		ULONG TmpLen, infoPos;
+		PUCHAR pInfo;
+		UCHAR extInfoLen;
+		BOOLEAN	bNeedAppendExtIE = FALSE;
+		EXT_CAP_INFO_ELEMENT	extCapInfo;
+
+
+		extInfoLen = sizeof(EXT_CAP_INFO_ELEMENT);
+		NdisZeroMemory(&extCapInfo, extInfoLen);
+
+#ifdef DOT11_N_SUPPORT
+#ifdef DOT11N_DRAFT3
+		/* P802.11n_D1.10, HT Information Exchange Support */
+		if ((PhyMode >= PHY_11ABGN_MIXED) && (pComCfg->Channel <= 14) && 
+			(pMbss->DesiredHtPhyInfo.bHtEnable) && (pComCfg->bBssCoexEnable == TRUE)
+		)
+		{
+			extCapInfo.BssCoexistMgmtSupport = 1;
+		}
+#endif /* DOT11N_DRAFT3 */
+#endif /* DOT11_N_SUPPORT */
+
+
+		pInfo = (PUCHAR)(&extCapInfo);
+		for (infoPos = 0; infoPos < extInfoLen; infoPos++)
+		{
+			if (pInfo[infoPos] != 0)
+			{
+				bNeedAppendExtIE = TRUE;
+				break;
+			}
+		}
+
+		if (bNeedAppendExtIE == TRUE)
+		{
+			MakeOutgoingFrame(pBeaconFrame+FrameLen, &TmpLen,
+							1, &ExtCapIe,
+							1, &extInfoLen,
+							extInfoLen, &extCapInfo,
+							END_OF_ARGS);
+			FrameLen += TmpLen;
+		}
+	}
+#endif /* defined(DOT11N_DRAFT3) || defined(DOT11V_WNM_SUPPORT) */
+
+
+	/* add WMM IE here */
 	if (pMbss->bWmmCapable)
 	{
 		ULONG TmpLen;
@@ -716,28 +675,22 @@ VOID APUpdateBeaconFrame(
 
 		WmeParmIe[8] = pAd->ApCfg.BssEdcaParm.EdcaUpdateCount & 0x0f;
 
-#ifdef UAPSD_AP_SUPPORT
-        UAPSD_MR_IE_FILL(WmeParmIe[8], pAd);
-#endif // UAPSD_AP_SUPPORT //
+#ifdef UAPSD_SUPPORT
+        UAPSD_MR_IE_FILL(WmeParmIe[8], &pMbss->UapsdInfo);
+#endif /* UAPSD_SUPPORT */
 
 		NdisMoveMemory(AIFSN, pAd->ApCfg.BssEdcaParm.Aifsn, sizeof(AIFSN));
 
-#ifdef WMM_ACM_SUPPORT
-		ACM_TG_CMT_WMMAC_SUPPORT_SIGNALLING;
-
-		ACMP_NullTspecSupportSignal(pAd, WmeParmIe);
-		ACMP_NonAcmAdjustParamUpdate(pAd, AIFSN);
-#endif // WMM_ACM_SUPPORT //
 
 		for (i=QID_AC_BE; i<=QID_AC_VO; i++)
 		{
-			WmeParmIe[10+ (i*4)] = (i << 5)                                         +     // b5-6 is ACI
-								   ((UCHAR)pAd->ApCfg.BssEdcaParm.bACM[i] << 4)     +     // b4 is ACM
-								   (AIFSN[i] & 0x0f);              // b0-3 is AIFSN
-			WmeParmIe[11+ (i*4)] = (pAd->ApCfg.BssEdcaParm.Cwmax[i] << 4)           +     // b5-8 is CWMAX
-								   (pAd->ApCfg.BssEdcaParm.Cwmin[i] & 0x0f);              // b0-3 is CWMIN
-			WmeParmIe[12+ (i*4)] = (UCHAR)(pAd->ApCfg.BssEdcaParm.Txop[i] & 0xff);        // low byte of TXOP
-			WmeParmIe[13+ (i*4)] = (UCHAR)(pAd->ApCfg.BssEdcaParm.Txop[i] >> 8);          // high byte of TXOP
+			WmeParmIe[10+ (i*4)] = (i << 5)                                         +     /* b5-6 is ACI */
+								   ((UCHAR)pAd->ApCfg.BssEdcaParm.bACM[i] << 4)     +     /* b4 is ACM */
+								   (AIFSN[i] & 0x0f);              /* b0-3 is AIFSN */
+			WmeParmIe[11+ (i*4)] = (pAd->ApCfg.BssEdcaParm.Cwmax[i] << 4)           +     /* b5-8 is CWMAX */
+								   (pAd->ApCfg.BssEdcaParm.Cwmin[i] & 0x0f);              /* b0-3 is CWMIN */
+			WmeParmIe[12+ (i*4)] = (UCHAR)(pAd->ApCfg.BssEdcaParm.Txop[i] & 0xff);        /* low byte of TXOP */
+			WmeParmIe[13+ (i*4)] = (UCHAR)(pAd->ApCfg.BssEdcaParm.Txop[i] >> 8);          /* high byte of TXOP */
 		}
 
 		MakeOutgoingFrame(pBeaconFrame+FrameLen,         &TmpLen,
@@ -751,15 +704,14 @@ VOID APUpdateBeaconFrame(
 	{
 		FrameLen += QBSS_LoadElementAppend(pAd, pBeaconFrame+FrameLen);
 	}
-#endif // AP_QLOAD_SUPPORT //
+#endif /* AP_QLOAD_SUPPORT */
 
 #ifdef A_BAND_SUPPORT
-	// Only 802.11a APs that comply with 802.11h are required to include a Power Constrint Element(IE=32) 
-	// in beacons and probe response frames
+	/* 
+		Only 802.11a APs that comply with 802.11h are required to include a 
+		Power Constrint Element(IE=32) in beacons and probe response frames
+	*/
 	if (((pComCfg->Channel > 14) && pComCfg->bIEEE80211H == TRUE)
-#ifdef DOT11K_RRM_SUPPORT
-		|| IS_RRM_ENABLE(pAd, apidx)
-#endif // DOT11K_RRM_SUPPORT //
 		)
 	{
 		ULONG TmpLen;
@@ -767,7 +719,7 @@ VOID APUpdateBeaconFrame(
 		UINT8 PwrConstraintLen = 1;
 		UINT8 PwrConstraint = pComCfg->PwrConstraint;
 
-		// prepare power constraint IE
+		/* prepare power constraint IE */
 		MakeOutgoingFrame(pBeaconFrame+FrameLen,	&TmpLen,
 						1,							&PwrConstraintIE,
 						1,							&PwrConstraintLen,
@@ -775,37 +727,22 @@ VOID APUpdateBeaconFrame(
 						END_OF_ARGS);
 		FrameLen += TmpLen;
 	}
-#endif // A_BAND_SUPPORT //
+#endif /* A_BAND_SUPPORT */
 
-#ifdef DOT11K_RRM_SUPPORT
-	if (IS_RRM_ENABLE(pAd, apidx))
-	{
-		PRRM_QUIET_CB pQuietCB = &pAd->ApCfg.MBSSID[apidx].RrmCfg.QuietCB;
-		RRM_InsertQuietIE(pAd, pBeaconFrame+FrameLen, &FrameLen,
-				pQuietCB->QuietCnt ,pQuietCB->QuietPeriod,
-				pQuietCB->QuietDuration, pQuietCB->QuietOffset);
-
-		/* Insert BSS AC Access Delay IE. */
-		RRM_InsertBssACDelayIE(pAd, pBeaconFrame+FrameLen, &FrameLen);
-
-		/* Insert BSS Available Access Capacity IE. */
-		RRM_InsertBssAvailableACIE(pAd, pBeaconFrame+FrameLen, &FrameLen);
-	}
-#endif // DOT11K_RRM_SUPPORT //
 
 #ifdef DOT11_N_SUPPORT
-	if ((pComCfg->PhyMode >= PHY_11ABGN_MIXED) && 
+	if ((PhyMode >= PHY_11ABGN_MIXED) && 
 		(pMbss->DesiredHtPhyInfo.bHtEnable))
 	{
 		ULONG TmpLen;
 		UCHAR HtLen, HtLen1;
-		//UCHAR i;
+		/*UCHAR i; */
 #ifdef RT_BIG_ENDIAN
 		HT_CAPABILITY_IE HtCapabilityTmp;
 		ADD_HT_INFO_IE	addHTInfoTmp;
-		USHORT	b2lTmp, b2lTmp2;
+/*		USHORT	b2lTmp, b2lTmp2;*/ /* no use */
 #endif
-		// add HT Capability IE 
+		/* add HT Capability IE */
 		HtLen = sizeof(pComCfg->HtCapability);
 		HtLen1 = sizeof(pComCfg->AddHTInfo);
 
@@ -837,7 +774,7 @@ VOID APUpdateBeaconFrame(
 		}
 #else
 			*(USHORT *)(&HtCapabilityTmp.ExtHtCapInfo) = SWAP16(*(USHORT *)(&HtCapabilityTmp.ExtHtCapInfo));
-#endif // UNALIGNMENT_SUPPORT //
+#endif /* UNALIGNMENT_SUPPORT */
 
 			MakeOutgoingFrame(pBeaconFrame + FrameLen,       &TmpLen,
 						1,                               &WpaIe,
@@ -873,10 +810,9 @@ VOID APUpdateBeaconFrame(
 		}
 
 	}
-#endif // DOT11_N_SUPPORT //
+#endif /* DOT11_N_SUPPORT */
 
-   	// add Ralink-specific IE here - Byte0.b0=1 for aggregation, Byte0.b1=1 for piggy-back
-
+   	/* add Ralink-specific IE here - Byte0.b0=1 for aggregation, Byte0.b1=1 for piggy-back */
 {
 	ULONG TmpLen;
 	UCHAR RalinkSpecificIe[9] = {IE_VENDOR_SPECIFIC, 7, 0x00, 0x0c, 0x43, 0x00, 0x00, 0x00, 0x00};
@@ -888,29 +824,29 @@ VOID APUpdateBeaconFrame(
 #ifdef DOT11_N_SUPPORT
 	if (pComCfg->bRdg)
 		RalinkSpecificIe[5] |= 0x4;
-#endif // DOT11_N_SUPPORT //
+#endif /* DOT11_N_SUPPORT */
 	MakeOutgoingFrame(pBeaconFrame+FrameLen, &TmpLen,
 						9,                   RalinkSpecificIe,
 						END_OF_ARGS);
 	FrameLen += TmpLen;
+
 }
 
-	//
-	// step 6. Since FrameLen may change, update TXWI.
-	//
+	/* step 6. Since FrameLen may change, update TXWI. */
 #ifdef A_BAND_SUPPORT
 	if (pAd->CommonCfg.Channel > 14)
 		BeaconTransmit.word = 0x4000;
 	else
-#endif // A_BAND_SUPPORT //		
+#endif /* A_BAND_SUPPORT */		
 		BeaconTransmit.word = 0;
 	
+
 	RTMPWriteTxWI(pAd, &pAd->BeaconTxWI, FALSE, FALSE, TRUE, FALSE, FALSE, TRUE, 0, 0xff, 
 		FrameLen, PID_MGMT, QID_MGMT, 0, IFS_HTTXOP, FALSE, &BeaconTransmit);
 
-	//
-	// step 7. move BEACON TXWI and frame content to on-chip memory
-	//
+	/* */
+	/* step 7. move BEACON TXWI and frame content to on-chip memory */
+	/* */
 	RT28xx_UpdateBeaconToAsic(pAd, apidx, FrameLen, UpdatePos);
 
 }
@@ -949,8 +885,9 @@ VOID APMakeAllBssBeacon(
 	UINT32	regValue;
 	UCHAR	NumOfMacs;
 	UCHAR	NumOfBcns;
+	UINT8 TXWISize = pAd->chipCap.TXWISize;
 
-	// before MakeBssBeacon, clear all beacon TxD's valid bit
+	/* before MakeBssBeacon, clear all beacon TxD's valid bit */
     /* Note: can not use MAX_MBSSID_NUM here, or
 			 1. when MBSS_SUPPORT is enabled;
              2. MAX_MBSSID_NUM will be 8;
@@ -958,14 +895,14 @@ VOID APMakeAllBssBeacon(
              we will overwrite other shared memory SRAM of chip */
 	/* use pAd->ApCfg.BssidNum to avoid the case is best */
 
-	// choose the Beacon number
+	/* choose the Beacon number */
 	NumOfBcns = GetBcnNum(pAd);
 
-	for (i=0; i<HW_BEACON_MAX_COUNT; i++)
+	for (i=0; i<HW_BEACON_MAX_COUNT(pAd); i++)
 	{
-		for (j=0; j<TXWI_SIZE; j+=4)  // 16-bytes TXWI field
+		for (j=0; j < TXWISize; j+=4)
 	    {
-	        RTMP_IO_WRITE32(pAd, pAd->BeaconOffset[i] + j, 0);
+			RTMP_CHIP_UPDATE_BEACON(pAd, pAd->BeaconOffset[i] + j, 0, 4);
 	    }
 	}
 
@@ -979,21 +916,26 @@ VOID APMakeAllBssBeacon(
 	regValue &= 0x0000FFFF;
 
 	
-	// Note: 1.	The MAC address of Mesh and AP-Client link are different from Main BSSID.
-	//		 2	If the Mesh link is included, its MAC address shall follow the last MBSSID's MAC by increasing 1.
-	//		 3. If the AP-Client link is included, its MAC address shall follow the Mesh interface MAC by increasing 1.		
+	/* 
+		Note:
+			1.The MAC address of Mesh and AP-Client link are different from Main BSSID.
+			2.If the Mesh link is included, its MAC address shall follow the last MBSSID's MAC by increasing 1.
+			3.If the AP-Client link is included, its MAC address shall follow the Mesh interface MAC by increasing 1.
+	*/
 	NumOfMacs = pAd->ApCfg.BssidNum + MAX_MESH_NUM + MAX_APCLI_NUM;
 
 
-	// set Multiple BSSID mode
+
+	/* set Multiple BSSID mode */
 	if (NumOfMacs <= 1)
 	{
 		pAd->ApCfg.MacMask = ~(1-1);
-		;//regValue |= 0x0;
+		/*regValue |= 0x0; */
 	}	
 	else if (NumOfMacs <= 2)
 	{
-		if (pAd->CurrentAddress[5] % 2 != 0)
+		if ((pAd->CurrentAddress[5] % 2 != 0)
+		)
 			DBGPRINT(RT_DEBUG_ERROR, ("The 2-BSSID mode is enabled, the BSSID byte5 MUST be the multiple of 2\n"));
 		
 		regValue |= (1<<16);
@@ -1015,12 +957,34 @@ VOID APMakeAllBssBeacon(
 		regValue |= (3<<16);
 		pAd->ApCfg.MacMask = ~(8-1);
 	}
+#ifdef SPECIFIC_BCN_BUF_SUPPORT
+	else if (NumOfMacs <= 16)
+	{
+		/* Set MULTI_BSSID_MODE_BIT4 in MAC register 0x1014 */
+		regValue |= (1<<22);
+		pAd->ApCfg.MacMask = ~(16-1);
+	}
+#endif /* SPECIFIC_BCN_BUF_SUPPORT */
 
-	// set Multiple BSSID Beacon number
+	/* set Multiple BSSID Beacon number */
 	if (NumOfBcns > 1)
-		regValue |= ((NumOfBcns - 1)<<18);	
+	{
+#ifdef SPECIFIC_BCN_BUF_SUPPORT	
+		if (NumOfBcns > 8)
+			regValue |= (((NumOfBcns - 1) >> 3) << 23);
+#endif /* SPECIFIC_BCN_BUF_SUPPORT */
+		regValue |= (((NumOfBcns - 1) & 0x7)  << 18);	
+	}
 	
+	/* 	set as 0/1 bit-21 of MAC_BSSID_DW1(offset: 0x1014) 
+		to disable/enable the new MAC address assignment.  */
+	if (pAd->chipCap.MBSSIDMode == MBSSID_MODE1)
+	regValue |= (1 << 21);
+
+
 	RTMP_IO_WRITE32(pAd, MAC_BSSID_DW1, regValue);
+
+
 }
 
 
@@ -1037,8 +1001,8 @@ VOID APUpdateAllBeaconFrame(
 #ifdef DOT11_N_SUPPORT
 #ifdef DOT11N_DRAFT3
 	BOOLEAN FlgQloadIsAlarmIssued = FALSE;
-#endif // DOT11N_DRAFT3 //
-#endif // DOT11_N_SUPPORT //
+#endif /* DOT11N_DRAFT3 */
+#endif /* DOT11_N_SUPPORT */
 	
 	if (pAd->ApCfg.DtimCount == 0)
 		pAd->ApCfg.DtimCount = pAd->ApCfg.DtimPeriod - 1;
@@ -1049,7 +1013,7 @@ VOID APUpdateAllBeaconFrame(
 	/* QLOAD ALARM */
 #ifdef AP_QLOAD_SUPPORT
 	FlgQloadIsAlarmIssued = QBSS_LoadIsAlarmIssued(pAd);
-#endif // AP_QLOAD_SUPPORT //
+#endif /* AP_QLOAD_SUPPORT */
 
 	if ((pAd->ApCfg.DtimCount == 0) && 
 		(((pAd->CommonCfg.Bss2040CoexistFlag & BSS_2040_COEXIST_INFO_SYNC) && 
@@ -1082,8 +1046,8 @@ VOID APUpdateAllBeaconFrame(
 				prevBW, prevExtChOffset));
 		pAd->CommonCfg.Bss2040CoexistFlag |= BSS_2040_COEXIST_INFO_NOTIFY;
 	}
-#endif // DOT11N_DRAFT3 //
-#endif // DOT11_N_SUPPORT //
+#endif /* DOT11N_DRAFT3 */
+#endif /* DOT11_N_SUPPORT */
 
 	for(i=0; i<pAd->ApCfg.BssidNum; i++)
 	{		

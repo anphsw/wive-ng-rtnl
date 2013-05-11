@@ -1,5 +1,5 @@
 config RT3090_AP
-	tristate "Ralink RT309X 802.11n AP support"
+	tristate "Ralink RT309X/RT339X/RT539X/RT5592/RT359X 802.11n AP support"
 	select WIRELESS_EXT
 
 config  RT3090_AP_LED
@@ -10,6 +10,11 @@ config  RT3090_AP_WSC
 	bool "WSC (WiFi Simple Config)"
 	depends on RT3090_AP
 
+config  RT3090_AP_WSC_V2
+	bool "WSC V2 (WiFi Simple Config Version 2)"
+	default n
+	depends on RT3090_AP_WSC
+
 config  RT3090_AP_LLTD
 	bool "LLTD (Link Layer Topology Discovery Protocol)"
 	depends on RT3090_AP
@@ -18,13 +23,14 @@ config  RT3090_AP_WDS
 	bool "WDS"
 	depends on RT3090_AP
 
-config  RT3090_AP_WMM_ACM
-	bool "WMM ACM"
-	depends on RT3090_AP
-
 config  RT3090_AP_MBSS
 	bool "MBSSID"
 	depends on RT3090_AP
+
+#config  RT3090_AP_MBSS_NEW_MBSSID_MODE
+#	bool "New MBSSID mode support"
+#	default n
+#	depends on RT5392_AP_MBSS || RT5592_AP_MBSS || RT3593_AP_MBSS
 
 config  RT3090_AP_APCLI
 	bool "AP-CLient Support"
@@ -39,6 +45,32 @@ config  RT3090_AP_NETIF_BLOCK
 	depends on RT3090_AP
 	help
 	Support Net interface block while Tx-Sw queue full
+
+#config  RT3090_AP_DFS
+#	bool "DFS support"
+#	depends on RT5592_AP || RT3593_AP
+#	select RALINK_TIMER_DFS
+
+#config  RT3090_AP_CARRIER
+#	bool "Carrier Detection support"
+#	depends on  RT5592_AP || RT3593_AP
+#	select RALINK_TIMER_DFS
+
+#config  RT3090_AP_EXT_CHANNEL_LIST
+#	bool "Extension Channel List"
+#	depends on  RT5592_AP || RT3593_AP
+
+#config  RT3090_AP_HIGH_POWER
+#	bool "High Power Support"
+#	depends on RT3593_AP
+
+#config  RT3090_AP_VIDEO_TURBINE
+#	bool "Video Turbine support"
+#	depends on RT3593_AP
+
+#config  RT3090_AP_TXBF_SUPPORT
+#	bool "TX Beam Forming support"
+#	depends on RT3593_AP
 
 #config  RT3090_AP_DFS
 #	bool "DFS"
@@ -78,18 +110,28 @@ config  RT3090_AP_MCAST_RATE_SPECIFIC
 
 config  RT3090_AP_READ_MAC_FROM_MTD
 	bool "Read and set MAC from MTD/EEPROM"
+	default n
 	depends on RT3090_AP
 
 config  RT3090_AP_BRIDGE_FASTPATH
 	bool "Bridge wlan2lan operation offload"
 	depends on RT3090_AP
 
-config  RT3090_AP_ATE
-	bool "Provide ATE+QA testmode commands support"
-	depends on RT3090_AP
-	default n
+#config  RT3090_AP_MC_SUPPORT
+#	bool "Multiple Card Support"
+#	depends on RT3090_AP
 
-config RALINK_RT3090_AP_DBG
-        bool "Debug support for AP mode"
+config  RT3090_AP_ATE
+	bool "Provide ATE testmode commands support"
+	default n
+	depends on RT3090_AP
+
+config  RT3090_AP_QA
+	bool "QA tool support"
+	default n
+	depends on RT3090_AP_ATE
+
+config  RT3090_AP_DBG
+	bool "Debug support for AP mode"
 	default n
 	depends on RT3090_AP

@@ -32,7 +32,7 @@
 #define IGMP_PROTOCOL_DESCRIPTOR	0x02
 #define IGMP_V1_MEMBERSHIP_REPORT	0x12
 #define IGMP_V2_MEMBERSHIP_REPORT	0x16
-#define IGMP_LEAVE_GROUP		0x17
+#define IGMP_LEAVE_GROUP			0x17
 #define IGMP_V3_MEMBERSHIP_REPORT	0x22
 
 #define MLD_V1_LISTENER_REPORT		131
@@ -43,24 +43,17 @@
 
 #define MULTICAST_ADDR_HASH_INDEX(Addr)      (MAC_ADDR_HASH(Addr) & (MAX_LEN_OF_MULTICAST_FILTER_HASH_TABLE - 1))
 
-#ifdef LINUX
-/* use native linux mcast/bcast adress checks. */
-#include <linux/etherdevice.h>
-
-#define IS_MULTICAST_MAC_ADDR(Addr)			(is_multicast_ether_addr(Addr) && ((Addr[0]) != 0xff))
-#define IS_IPV6_MULTICAST_MAC_ADDR(Addr)		(is_multicast_ether_addr(Addr) && ((Addr[0]) == 0x33))
-#define IS_BROADCAST_MAC_ADDR(Addr)			(is_broadcast_ether_addr(Addr))
-#else
 #define IS_MULTICAST_MAC_ADDR(Addr)			((((Addr[0]) & 0x01) == 0x01) && ((Addr[0]) != 0xff))
-#define IS_IPV6_MULTICAST_MAC_ADDR(Addr)		((((Addr[0]) & 0x01) == 0x01) && ((Addr[0]) == 0x33))
+#define IS_IPV6_MULTICAST_MAC_ADDR(Addr)	((((Addr[0]) & 0x01) == 0x01) && ((Addr[0]) == 0x33))
 #define IS_BROADCAST_MAC_ADDR(Addr)			((((Addr[0]) & 0xff) == 0xff))
-#endif
 
 #define IGMP_NONE		0
 #define IGMP_PKT		1
-#define IGMP_IN_GROUP		2
+#define IGMP_IN_GROUP	2
+
 
 VOID MulticastFilterTableInit(
+	IN PRTMP_ADAPTER pAd,
 	IN PMULTICAST_FILTER_TABLE *ppMulticastFilterTable);
 
 VOID MultiCastFilterTableReset(

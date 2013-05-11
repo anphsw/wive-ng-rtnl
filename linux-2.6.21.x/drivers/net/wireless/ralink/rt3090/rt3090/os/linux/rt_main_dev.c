@@ -26,23 +26,31 @@
     --------    ----------      ----------------------------------------------
 */
 
-#include "rt_config.h"
 
-#if !defined(CONFIG_RA_NAT_NONE)
-extern int (*ra_sw_nat_hook_rx)(struct sk_buff *skb);
-extern int (*ra_sw_nat_hook_tx)(struct sk_buff *skb, int gmac_no);
+#define RTMP_MODULE_OS
+
+/*#include "rt_config.h" */
+#include "rtmp_comm.h"
+#include "rt_os_util.h"
+#include "rt_os_net.h"
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24)
+#ifndef SA_SHIRQ
+#define SA_SHIRQ IRQF_SHARED
+#endif
 #endif
 
+
 #ifdef CONFIG_APSTA_MIXED_SUPPORT
-UINT32 CW_MAX_IN_BITS;
-#endif // CONFIG_APSTA_MIXED_SUPPORT //
+/*UINT32 CW_MAX_IN_BITS;*/
+#endif /* CONFIG_APSTA_MIXED_SUPPORT */
 
 /*---------------------------------------------------------------------*/
 /* Private Variables Used                                              */
 /*---------------------------------------------------------------------*/
 
-PSTRING mac = "";		   // default 00:00:00:00:00:00
-PSTRING hostname = "";		   // default CMPC
+PSTRING mac = "";		   /* default 00:00:00:00:00:00 */
+PSTRING hostname = "";		   /* default CMPC */
 #if LINUX_VERSION_CODE <= KERNEL_VERSION(2,6,12)
 MODULE_PARM (mac, "s");
 #else
@@ -51,31 +59,28 @@ module_param (mac, charp, 0);
 MODULE_PARM_DESC (mac, "rt28xx: wireless mac addr");
 
 #ifdef OS_ABL_SUPPORT
-
-UCHAR ZERO_MAC_ADDR[MAC_ADDR_LEN]  = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-#endif // OS_ABL_SUPPORT //
+RTMP_DRV_ABL_OPS RtmpDrvOps, *pRtmpDrvOps = &RtmpDrvOps;
+RTMP_NET_ABL_OPS RtmpDrvNetOps, *pRtmpDrvNetOps = &RtmpDrvNetOps;
+#endif /* OS_ABL_SUPPORT */
 
 
 /*---------------------------------------------------------------------*/
 /* Prototypes of Functions Used                                        */
 /*---------------------------------------------------------------------*/
 
-// public function prototype
-int rt28xx_close(IN struct net_device *net_dev);
-int rt28xx_open(struct net_device *net_dev);
+/* public function prototype */
+int rt28xx_close(VOID *net_dev);
+int rt28xx_open(VOID *net_dev);
 
-// private function prototype
+/* private function prototype */
 static INT rt28xx_send_packets(IN struct sk_buff *skb_p, IN struct net_device *net_dev);
 
-#ifdef HW_COEXISTENCE_SUPPORT
-VOID InitHWCoexistence(
-	IN PRTMP_ADAPTER pAd);
-#endif // HW_COEXISTENCE_SUPPORT //
 
 
 
-static struct net_device_stats *RT28xx_get_ether_stats(
+struct net_device_stats *RT28xx_get_ether_stats(
     IN  struct net_device *net_dev);
+
 
 /*
 ========================================================================
@@ -99,38 +104,28 @@ Note:
 */
 int MainVirtualIF_close(IN struct net_device *net_dev)
 {
-    RTMP_ADAPTER *pAd = NULL;
+    VOID *pAd = NULL;
 
 	GET_PAD_FROM_NET_DEV(pAd, net_dev);	
 
-	// Sanity check for pAd
+	/* Sanity check for pAd */
 	if (pAd == NULL)
-		return 0; // close ok
+		return 0; /* close ok */
 
-	netif_carrier_off(pAd->net_dev);
-	netif_stop_queue(pAd->net_dev);
+	netif_carrier_off(net_dev);
+	netif_stop_queue(net_dev);
 
-#ifdef CONFIG_AP_SUPPORT
-	pAd->ApCfg.MBSSID[MAIN_MBSSID].bBcnSntReq = FALSE;
-
-	IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
-	{
-		// kick out all STAs behind the bss.
-		MbssKickOutStas(pAd, MAIN_MBSSID, REASON_DISASSOC_INACTIVE);
-	}
-
-	APMakeAllBssBeacon(pAd);
-	APUpdateAllBeaconFrame(pAd);
-#endif // CONFIG_AP_SUPPORT //
+	RTMPInfClose(pAd);
 
 
-
-
+#ifdef IFUP_IN_PROBE
+#else
 	VIRTUAL_IF_DOWN(pAd);
+#endif /* IFUP_IN_PROBE */
 
 	RT_MOD_DEC_USE_COUNT();
 
-	return 0; // close ok
+	return 0; /* close ok */
 }
 
 /*
@@ -155,21 +150,31 @@ Note:
 */
 int MainVirtualIF_open(IN struct net_device *net_dev)
 {
-    RTMP_ADAPTER *pAd = NULL;
+    VOID *pAd = NULL;
 
 	GET_PAD_FROM_NET_DEV(pAd, net_dev);	
 
-	// Sanity check for pAd
+	/* Sanity check for pAd */
 	if (pAd == NULL)
-		return 0; // close ok
+		return 0; /* close ok */
 
 #ifdef CONFIG_AP_SUPPORT
-	pAd->ApCfg.MBSSID[MAIN_MBSSID].bBcnSntReq = TRUE;
-#endif // CONFIG_AP_SUPPORT //
+/*	pAd->ApCfg.MBSSID[MAIN_MBSSID].bBcnSntReq = TRUE; */
+	RTMP_DRIVER_AP_MAIN_OPEN(pAd);
+#endif /* CONFIG_AP_SUPPORT */
+
+#ifdef IFUP_IN_PROBE	
+	while (RTMP_DRIVER_IOCTL_SANITY_CHECK(pAd, NULL) != NDIS_STATUS_SUCCESS)
+	{
+		OS_WAIT(10);
+		DBGPRINT(RT_DEBUG_TRACE, ("Card not ready, NDIS_STATUS_SUCCESS!\n"));
+	}
+#else
 	if (VIRTUAL_IF_UP(pAd) != 0)
 		return -1;
+#endif /* IFUP_IN_PROBE */	
 
-	// increase MODULE use count
+	/* increase MODULE use count */
 	RT_MOD_INC_USE_COUNT();
 
 	netif_start_queue(net_dev);
@@ -199,203 +204,25 @@ Note:
 		(3) BA Reordering: 				ba_reordering_resource_release()
 ========================================================================
 */
-int rt28xx_close(IN PNET_DEV dev)
+int rt28xx_close(VOID *dev)
 {
 	struct net_device * net_dev = (struct net_device *)dev;
-    RTMP_ADAPTER	*pAd = NULL;
-	BOOLEAN 		Cancelled;
-	UINT32			i = 0;
-
+    VOID	*pAd = NULL;
+/*	BOOLEAN 		Cancelled; */
+/*	UINT32			i = 0; */
 	GET_PAD_FROM_NET_DEV(pAd, net_dev);	
 
 	DBGPRINT(RT_DEBUG_TRACE, ("===> rt28xx_close\n"));
 
-#ifdef CONFIG_AP_SUPPORT
-#ifdef BG_FT_SUPPORT
-	BG_FTPH_Remove();
-#endif // BG_FT_SUPPORT //
-#endif // CONFIG_AP_SUPPORT //
-
-	Cancelled = FALSE;
-	// Sanity check for pAd
+	/* Sanity check for pAd */
 	if (pAd == NULL)
-		return 0; // close ok
+		return 0; /* close ok */
 
-#ifdef WMM_ACM_SUPPORT
-	/* must call first */
-	ACMP_Release(pAd);
-#endif // WMM_ACM_SUPPORT //
+	RTMPDrvClose(pAd, net_dev);
 
-
-#ifdef WDS_SUPPORT
-	WdsDown(pAd);
-#endif // WDS_SUPPORT //
-
-
-	RTMP_SET_FLAG(pAd, fRTMP_ADAPTER_HALT_IN_PROGRESS);
-
-	mdelay(20); /* wait for disconnect requests transmitted */
-
-	for (i = 0 ; i < NUM_OF_TX_RING; i++)
-	{
-		while (pAd->DeQueueRunning[i] == TRUE)
-		{
-			DBGPRINT(RT_DEBUG_TRACE, ("Waiting for TxQueue[%d] done..........\n", i));
-			RTMPusecDelay(1000);
-		}
-	}
-	
-
-#ifdef CONFIG_AP_SUPPORT
-
-	IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
-	{
-
-#ifdef DOT11N_DRAFT3
-		if (pAd->CommonCfg.Bss2040CoexistFlag & BSS_2040_COEXIST_TIMER_FIRED)
-		{
-			RTMPCancelTimer(&pAd->CommonCfg.Bss2040CoexistTimer, &Cancelled);
-			pAd->CommonCfg.Bss2040CoexistFlag  = 0;
-		}
-#endif // DOT11N_DRAFT3 //
-
-		// PeriodicTimer already been canceled by MlmeHalt() API.
-		//RTMPCancelTimer(&pAd->PeriodicTimer,	&Cancelled);
-	}
-#endif // CONFIG_AP_SUPPORT //
-
-	// Stop Mlme state machine
-	MlmeHalt(pAd);
-	
-	// Close net tasklets
-	RtmpNetTaskExit(pAd);
-
-
-
-#ifdef CONFIG_AP_SUPPORT
-	IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
-	{
-#ifdef MAT_SUPPORT
-		MATEngineExit(pAd);
-#endif // MAT_SUPPORT //
-
-#ifdef CLIENT_WDS
-		CliWds_ProxyTabDestory(pAd);
-#endif // CLIENT_WDS //
-		// Shutdown Access Point function, release all related resources 
-		APShutdown(pAd);
-
-#ifdef AUTO_CH_SELECT_ENHANCE
-		// Free BssTab & ChannelInfo tabbles.
-		AutoChBssTableDestroy(pAd);
-		ChannelInfoDestroy(pAd);
-#endif // AUTO_CH_SELECT_ENHANCE //
-	}
-#endif // CONFIG_AP_SUPPORT //
-
-	MeasureReqTabExit(pAd);
-	TpcReqTabExit(pAd);
-
-#ifdef WSC_INCLUDED
-#ifdef CONFIG_AP_SUPPORT
-	IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
-	{
-		INT ap_idx;
-		for (ap_idx = 0; ap_idx < pAd->ApCfg.BssidNum; ap_idx++)
-			WscStop(pAd, FALSE, &pAd->ApCfg.MBSSID[ap_idx].WscControl);
-#ifdef APCLI_SUPPORT
-		WscStop(pAd, TRUE, &pAd->ApCfg.ApCliTab[BSS0].WscControl);
-#endif // APCLI_SUPPORT //
-	}
-#endif // CONFIG_AP_SUPPORT //
-
-#ifdef OLD_DH_KEY
-#ifdef CONFIG_AP_SUPPORT
-	IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
-	    	WSC_VFREE_KEY_MEM(pAd->ApCfg.MBSSID[0].WscControl.pPubKeyMem, pAd->ApCfg.MBSSID[0].WscControl.pSecKeyMem);
-#endif // CONFIG_AP_SUPPORT //
-#endif // OLD_DH_KEY //
-
-	/* WSC hardware push button function 0811 */
-	WSC_HDR_BTN_Stop(pAd);
-#endif // WSC_INCLUDED //
-
-	// Close kernel threads
-	RtmpMgmtTaskExit(pAd);
-
-#ifdef RTMP_MAC_PCI
-	{
-			BOOLEAN brc;
-			//	ULONG			Value;
-
-			if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_INTERRUPT_ACTIVE))
-			{
-				RTMP_ASIC_INTERRUPT_DISABLE(pAd);
-			}
-
-			// Receive packets to clear DMA index after disable interrupt. 
-			//RTMPHandleRxDoneInterrupt(pAd);
-			// put to radio off to save power when driver unload.  After radiooff, can't write /read register.  So need to finish all 
-			// register access before Radio off.
-
-
-			brc=RT28xxPciAsicRadioOff(pAd, RTMP_HALT, 0);
-
-//In  solution 3 of 3090F, the bPCIclkOff will be set to TRUE after calling RT28xxPciAsicRadioOff
-#ifdef PCIE_PS_SUPPORT
-			pAd->bPCIclkOff = FALSE;    
-#endif // PCIE_PS_SUPPORT //
-
-			if (brc==FALSE)
-			{
-				DBGPRINT(RT_DEBUG_ERROR,("%s call RT28xxPciAsicRadioOff fail !!\n", __FUNCTION__)); 
-			}
-	}
-	
-
-/*
-	if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_INTERRUPT_ACTIVE))
-	{
-		RTMP_ASIC_INTERRUPT_DISABLE(pAd);
-	}
-
-	// Disable Rx, register value supposed will remain after reset
-	NICIssueReset(pAd);
-*/
-#endif // RTMP_MAC_PCI //
-
-	// Free IRQ
-	if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_INTERRUPT_IN_USE))
-	{
-#ifdef RTMP_MAC_PCI
-		// Deregister interrupt function
-		RtmpOSIRQRelease(net_dev);
-#endif // RTMP_MAC_PCI //
-		RTMP_CLEAR_FLAG(pAd, fRTMP_ADAPTER_INTERRUPT_IN_USE);
-	}
-
-	// Free Ring or USB buffers
-	RTMPFreeTxRxRingMemory(pAd);
-
-	RTMP_CLEAR_FLAG(pAd, fRTMP_ADAPTER_HALT_IN_PROGRESS);
-
-#ifdef DOT11_N_SUPPORT
-	// Free BA reorder resource
-	ba_reordering_resource_release(pAd);
-#endif // DOT11_N_SUPPORT //
-	
-
-	RTMP_CLEAR_FLAG(pAd, fRTMP_ADAPTER_START_UP);
-
-/*+++Modify by woody to solve the bulk fail+++*/
-
-#ifdef VENDOR_FEATURE2_SUPPORT
-	printk("Number of Packet Allocated = %d\n", pAd->NumOfPktAlloc);
-	printk("Number of Packet Freed = %d\n", pAd->NumOfPktFree);
-#endif // VENDOR_FEATURE2_SUPPORT //
 
 	DBGPRINT(RT_DEBUG_TRACE, ("<=== rt28xx_close\n"));
-	return 0; // close ok
+	return 0; /* close ok */
 } /* End of rt28xx_close */
 
 
@@ -414,16 +241,22 @@ Return Value:
 Note:
 ========================================================================
 */
-int rt28xx_open(IN PNET_DEV dev)
+int rt28xx_open(VOID *dev)
 {				 
 	struct net_device * net_dev = (struct net_device *)dev;
-	PRTMP_ADAPTER pAd = NULL;
+	VOID *pAd = NULL;
 	int retval = 0;
- 	//POS_COOKIE pObj;
+	ULONG OpMode;
+
+
+
+	/* sanity check */
+	if (sizeof(ra_dma_addr_t) < sizeof(dma_addr_t))
+		DBGPRINT(RT_DEBUG_ERROR, ("Fatal error for DMA address size!!!\n"));
 
 	GET_PAD_FROM_NET_DEV(pAd, net_dev);	
 
-	// Sanity check for pAd
+	/* Sanity check for pAd */
 	if (pAd == NULL)
 	{
 		/* if 1st open fail, pAd will be free;
@@ -431,112 +264,109 @@ int rt28xx_open(IN PNET_DEV dev)
 		return -1;
 	}
 
+	RTMP_DRIVER_OP_MODE_GET(pAd, &OpMode);
+
+
+
 #ifdef CONFIG_APSTA_MIXED_SUPPORT
-	if (pAd->OpMode == OPMODE_AP)
+	if (OpMode == OPMODE_AP)
 	{
-		CW_MAX_IN_BITS = 6;
+		/*CW_MAX_IN_BITS = 6; */
+		RTMP_DRIVER_MAX_IN_BITS_SET(pAd, 6);
 	}
-	else if (pAd->OpMode == OPMODE_STA)
+	else if (OpMode == OPMODE_STA)
 	{
-		CW_MAX_IN_BITS = 10;
+		/*CW_MAX_IN_BITS = 10; */
+		RTMP_DRIVER_MAX_IN_BITS_SET(pAd, 10);
 	}
-#endif // CONFIG_APSTA_MIXED_SUPPORT //
+#endif /* CONFIG_APSTA_MIXED_SUPPORT */
 
 #if WIRELESS_EXT >= 12
-	if (RT_DEV_PRIV_FLAGS_GET(net_dev) == INT_MAIN) 
+	if (RTMP_DRIVER_MAIN_INF_CHECK(pAd, RT_DEV_PRIV_FLAGS_GET(net_dev)) == NDIS_STATUS_SUCCESS)
 	{
 #ifdef CONFIG_APSTA_MIXED_SUPPORT
-		if (pAd->OpMode == OPMODE_AP)
+		if (OpMode == OPMODE_AP)
 			net_dev->wireless_handlers = (struct iw_handler_def *) &rt28xx_ap_iw_handler_def;
-#endif // CONFIG_APSTA_MIXED_SUPPORT //
+#endif /* CONFIG_APSTA_MIXED_SUPPORT */
 	}
-#endif // WIRELESS_EXT >= 12 //
+#endif /* WIRELESS_EXT >= 12 */
 
-	// Request interrupt service routine for PCI device
-	// register the interrupt routine with the os
+	/* Request interrupt service routine for PCI device */
+	/* register the interrupt routine with the os */
 	/*
 		AP Channel auto-selection will be run in rt28xx_init(),
 		so we must reqister IRQ hander here.
 	*/
 	RtmpOSIRQRequest(net_dev);
 
-	// Init IRQ parameters stored in pAd
-	RTMP_IRQ_INIT(pAd);
-	
-	// Chip & other init
+	/* Init IRQ parameters stored in pAd */
+/*	RTMP_IRQ_INIT(pAd); */
+	RTMP_DRIVER_IRQ_INIT(pAd);
+
+	/* Chip & other init */
 	if (rt28xx_init(pAd, mac, hostname) == FALSE)
 		goto err;
 
+#ifdef MBSS_SUPPORT
+	/* the function can not be moved to RT2860_probe() even register_netdev()
+	   is changed as register_netdevice().
+	   Or in some PC, kernel will panic (Fedora 4) */
+	RT28xx_MBSS_Init(pAd, net_dev);
+#endif /* MBSS_SUPPORT */
+
+#ifdef WDS_SUPPORT
+	RT28xx_WDS_Init(pAd, net_dev);
+#endif /* WDS_SUPPORT */
+
+#ifdef APCLI_SUPPORT
+	RT28xx_ApCli_Init(pAd, net_dev);
+#endif /* APCLI_SUPPORT */
+
+
+
 #ifdef LINUX
 #ifdef RT_CFG80211_SUPPORT
-	RT_CFG80211_REINIT(pAd);
-	RT_CFG80211_CRDA_REG_RULE_APPLY(pAd);
-#endif // RT_CFG80211_SUPPORT //
-#endif // LINUX //
+/*	RT_CFG80211_REINIT(pAd); */
+/*	RT_CFG80211_CRDA_REG_RULE_APPLY(pAd); */
+	RTMP_DRIVER_CFG80211_START(pAd);
+#endif /* RT_CFG80211_SUPPORT */
+#endif /* LINUX */
 
+	RTMPDrvOpen(pAd);
 
-	// Enable Interrupt
-	RTMP_IRQ_ENABLE(pAd);
-
-	// Now Enable RxTx
-	RTMPEnableRxTx(pAd);
-	RTMP_SET_FLAG(pAd, fRTMP_ADAPTER_START_UP);
-
-	{
-	UINT32 reg = 0;
-	RTMP_IO_READ32(pAd, 0x1300, &reg);  // clear garbage interrupts
-	DBGPRINT(RT_DEBUG_TRACE, ("0x1300 = %08x\n", reg));
-	}
-
-	{
-//	u32 reg;
-//	UINT8  byte;
-//	u16 tmp;
-
-//	RTMP_IO_READ32(pAd, XIFS_TIME_CFG, &reg);
-
-//	tmp = 0x0805;
-//	reg  = (reg & 0xffff0000) | tmp;
-//	RTMP_IO_WRITE32(pAd, XIFS_TIME_CFG, reg);
-
-	}
-
-
-
-#ifdef CONFIG_AP_SUPPORT
-#ifdef BG_FT_SUPPORT
-	BG_FTPH_Init();
-#endif // BG_FT_SUPPORT //
-#endif // CONFIG_AP_SUPPORT //
-
-#ifdef HW_COEXISTENCE_SUPPORT
-	InitHWCoexistence(pAd);
-#endif // HW_COEXISTENCE_SUPPORT //
 
 #ifdef VENDOR_FEATURE2_SUPPORT
-	printk("Number of Packet Allocated in open = %d\n", pAd->NumOfPktAlloc);
-	printk("Number of Packet Freed in open = %d\n", pAd->NumOfPktFree);
-#endif // VENDOR_FEATURE2_SUPPORT //
+	printk("Number of Packet Allocated in open = %lu\n", OS_NumOfPktAlloc);
+	printk("Number of Packet Freed in open = %lu\n", OS_NumOfPktFree);
+#endif /* VENDOR_FEATURE2_SUPPORT */
 
 	return (retval);
 
 err:
-//+++Add by shiang, move from rt28xx_init() to here.
-	RtmpOSIRQRelease(net_dev);
-//---Add by shiang, move from rt28xx_init() to here.
+/*+++move from rt28xx_init() to here. */
+/*	RtmpOSIRQRelease(net_dev); */
+	RTMP_DRIVER_IRQ_RELEASE(pAd);
+/*---move from rt28xx_init() to here. */
 
 	return (-1);
 } /* End of rt28xx_open */
 
 
 PNET_DEV RtmpPhyNetDevInit(
-	IN RTMP_ADAPTER *pAd,
-	IN RTMP_OS_NETDEV_OP_HOOK *pNetDevHook)
+	IN VOID						*pAd,
+	IN RTMP_OS_NETDEV_OP_HOOK	*pNetDevHook)
 {
 	struct net_device	*net_dev = NULL;
-//	NDIS_STATUS		Status;
-	
-	net_dev = RtmpOSNetDevCreate(pAd, INT_MAIN, 0, sizeof(PRTMP_ADAPTER), INF_MAIN_DEV_NAME);
+/*	NDIS_STATUS		Status; */
+	ULONG InfId, OpMode;
+#ifdef CONFIG_TSO_SUPPORT
+	UCHAR TSOFlag;
+#endif /* CONFIG_TSO_SUPPORT */
+
+	RTMP_DRIVER_MAIN_INF_GET(pAd, &InfId);
+
+/*	net_dev = RtmpOSNetDevCreate(pAd, INT_MAIN, 0, sizeof(PRTMP_ADAPTER), INF_MAIN_DEV_NAME); */
+	RTMP_DRIVER_MAIN_INF_CREATE(pAd, &net_dev);
 	if (net_dev == NULL)
 	{
 		printk("RtmpPhyNetDevInit(): creation failed for main physical net device!\n");
@@ -549,9 +379,9 @@ PNET_DEV RtmpPhyNetDevInit(
 	pNetDevHook->xmit = rt28xx_send_packets;
 #ifdef IKANOS_VX_1X0
 	pNetDevHook->xmit = IKANOS_DataFramesTx;
-#endif // IKANOS_VX_1X0 //
+#endif /* IKANOS_VX_1X0 */
 	pNetDevHook->ioctl = rt28xx_ioctl;
-	pNetDevHook->priv_flags = INT_MAIN;
+	pNetDevHook->priv_flags = InfId; /*INT_MAIN; */
 	pNetDevHook->get_stats = RT28xx_get_ether_stats;
 
 	pNetDevHook->needProtcted = FALSE;
@@ -560,32 +390,83 @@ PNET_DEV RtmpPhyNetDevInit(
 	pNetDevHook->get_wstats = rt28xx_get_wireless_stats;
 #endif
 
+	RTMP_DRIVER_OP_MODE_GET(pAd, &OpMode);
+
 
 #ifdef CONFIG_APSTA_MIXED_SUPPORT
 #if WIRELESS_EXT >= 12
-	if (pAd->OpMode == OPMODE_AP)
+	if (OpMode == OPMODE_AP)
 	{
 		pNetDevHook->iw_handler = &rt28xx_ap_iw_handler_def;
 	}
-#endif //WIRELESS_EXT >= 12
-#endif // CONFIG_APSTA_MIXED_SUPPORT //
+#endif /*WIRELESS_EXT >= 12 */
+#endif /* CONFIG_APSTA_MIXED_SUPPORT */
 
+	/* put private data structure */
 	RTMP_OS_NETDEV_SET_PRIV(net_dev, pAd);
-	pAd->net_dev = net_dev;
-	
-#ifdef CONFIG_AP_SUPPORT
-	pAd->ApCfg.MBSSID[MAIN_MBSSID].MSSIDDev = net_dev;
-#endif // CONFIG_AP_SUPPORT //
 
+	/* double-check if pAd is associated with the net_dev */
+	if (RTMP_OS_NETDEV_GET_PRIV(net_dev) == NULL)
+	{
+		RtmpOSNetDevFree(net_dev);
+		return NULL;
+	}
+/*	pAd->net_dev = net_dev; */
+
+	RTMP_DRIVER_NET_DEV_SET(pAd, net_dev);
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24)
 	SET_MODULE_OWNER(net_dev);
 #endif 
 
-	netif_stop_queue(net_dev);
+#ifdef CONFIG_TSO_SUPPORT
+		RTMP_DRIVER_ADAPTER_TSO_SUPPORT_TEST(pAd, &TSOFlag);
+		if (TSOFlag)
+			net_dev->features |= NETIF_F_HW_CSUM;
+#endif /* CONFIG_TSO_SUPPORT */
 
 	return net_dev;
 	
+}
+
+
+VOID *RtmpNetEthConvertDevSearch(
+	IN	VOID			*net_dev_,
+	IN	UCHAR			*pData)
+{
+	struct net_device *pNetDev;
+
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,26)
+	struct net_device *net_dev = (struct net_device *)net_dev_;
+	struct net *net;
+	net = dev_net(net_dev);
+	
+	BUG_ON(!net);
+	for_each_netdev(net, pNetDev)
+#else
+	struct net *net;
+
+	struct net_device *net_dev = (struct net_device *)net_dev_;
+	BUG_ON(!net_dev->nd_net);
+	net = net_dev->nd_net;
+	for_each_netdev(net, pNetDev)
+#endif
+#else
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,22)
+		for_each_netdev(pNetDev)
+#else 
+	for (pNetDev = dev_base; pNetDev; pNetDev = pNetDev->next)
+#endif
+#endif
+	{
+		if ((pNetDev->type == ARPHRD_ETHER)
+			&& NdisEqualMemory(pNetDev->dev_addr, &pData[6], pNetDev->addr_len))
+			break;
+	}
+
+	return (VOID *)pNetDev;
 }
 
 
@@ -606,64 +487,19 @@ Note:
 	in here.
 ========================================================================
 */
-int rt28xx_packet_xmit(struct sk_buff *skb)
+int rt28xx_packet_xmit(void *skbsrc)
 {
+	struct sk_buff *skb = (struct sk_buff *)skbsrc;
 	struct net_device *net_dev = skb->dev;
-	PRTMP_ADAPTER pAd = NULL;
-	int status = 0;
+	VOID *pAd = NULL;
+/*	int status = 0; */
 	PNDIS_PACKET pPacket = (PNDIS_PACKET) skb;
 
 	GET_PAD_FROM_NET_DEV(pAd, net_dev);	
 
-	/* RT2870STA does this in RTMPSendPackets() */
-#ifdef RALINK_ATE
-	if (ATE_ON(pAd))
-	{
-		RELEASE_NDIS_PACKET(pAd, pPacket, NDIS_STATUS_RESOURCES);
-		return 0;
-	}
-#endif // RALINK_ATE //
+	return RTMPSendPackets((NDIS_HANDLE)pAd, (PPNDIS_PACKET) &pPacket, 1,
+							skb->len, RtmpNetEthConvertDevSearch);
 
-
-        // EapolStart size is 18
-	if (skb->len < 14)
-	{
-		//printk("bad packet size: %d\n", pkt->len);
-		hex_dump("bad packet", skb->data, skb->len);
-		RELEASE_NDIS_PACKET(pAd, pPacket, NDIS_STATUS_FAILURE);
-		goto done;
-	}
-
-#if !defined(CONFIG_RA_NAT_NONE)
-        /* add tx hook point*/
-        if(ra_sw_nat_hook_tx!= NULL)
-        {
-		unsigned long flags;
-		RTMP_INT_LOCK(&pAd->page_lock, flags)
-            ra_sw_nat_hook_tx(pPacket, 0);
-		RTMP_INT_UNLOCK(&pAd->page_lock, flags);
-        }
-#endif
-
-	RTMP_SET_PACKET_5VT(pPacket, 0);
-//	MiniportMMRequest(pAd, pkt->data, pkt->len);
-#ifdef CONFIG_5VT_ENHANCE
-    if (*(int*)(skb->cb) == BRIDGE_TAG) {
-		RTMP_SET_PACKET_5VT(pPacket, 1);
-    }
-#endif
-
-
-#ifdef CONFIG_AP_SUPPORT
-	IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
-		APSendPackets((NDIS_HANDLE)pAd, (PPNDIS_PACKET) &pPacket, 1);
-#endif // CONFIG_AP_SUPPORT //
-
-
-	status = 0;
-done:
-			   
-	return status;
 }
 
 
@@ -687,210 +523,75 @@ static int rt28xx_send_packets(
 	IN struct sk_buff 		*skb_p, 
 	IN struct net_device 	*net_dev)
 {
-	RTMP_ADAPTER *pAd = NULL;
+/*	RTMP_ADAPTER *pAd = NULL; */
 
-	GET_PAD_FROM_NET_DEV(pAd, net_dev);	
+/*	GET_PAD_FROM_NET_DEV(pAd, net_dev); */
 
 	if (!(RTMP_OS_NETDEV_STATE_RUNNING(net_dev)))
 	{
-		RELEASE_NDIS_PACKET(pAd, (PNDIS_PACKET)skb_p, NDIS_STATUS_FAILURE);
+		RELEASE_NDIS_PACKET(NULL, (PNDIS_PACKET)skb_p, NDIS_STATUS_FAILURE);
 		return 0;
 	}
 
 	NdisZeroMemory((PUCHAR)&skb_p->cb[CB_OFF], 15);
 	RTMP_SET_PACKET_NET_DEVICE_MBSSID(skb_p, MAIN_MBSSID);
-
-	MEM_DBG_PKT_ALLOC_INC(pAd);
+	MEM_DBG_PKT_ALLOC_INC(skb_p);
 
 	return rt28xx_packet_xmit(skb_p);
 }
 
 
 #if WIRELESS_EXT >= 12
-// This function will be called when query /proc
+/* This function will be called when query /proc */
 struct iw_statistics *rt28xx_get_wireless_stats(
     IN struct net_device *net_dev)
 {
-	PRTMP_ADAPTER pAd = NULL;
-#ifdef CONFIG_AP_SUPPORT 
-	PMAC_TABLE_ENTRY pMacEntry = NULL;
-#endif // CONFIG_AP_SUPPORT //
+	VOID *pAd = NULL;
+	struct iw_statistics *pStats;
+	RT_CMD_IW_STATS DrvIwStats, *pDrvIwStats = &DrvIwStats;
+
 
 	GET_PAD_FROM_NET_DEV(pAd, net_dev);	
 
-#ifdef CONFIG_AP_SUPPORT
-	if (pAd->OpMode == OPMODE_AP)
-	{
-#ifdef APCLI_SUPPORT
-		if (RT_DEV_PRIV_FLAGS_GET(net_dev) == INT_APCLI)
-		{
-			INT ApCliIdx = ApCliIfLookUp(pAd, (PUCHAR)net_dev->dev_addr);
-			if ((ApCliIdx >= 0) && VALID_WCID(pAd->ApCfg.ApCliTab[ApCliIdx].MacTabWCID))
-				pMacEntry = &pAd->MacTab.Content[pAd->ApCfg.ApCliTab[ApCliIdx].MacTabWCID];
-		}
-		else
-#endif // APCLI_SUPPORT //
-		{
-			/*
-				only AP client support wireless stats function.
-				return NULL pointer for all other cases.
-			*/
-			pMacEntry = &pAd->MacTab.Content[0];
-		}
-	}
-#endif // CONFIG_AP_SUPPORT //
 
 	DBGPRINT(RT_DEBUG_TRACE, ("rt28xx_get_wireless_stats --->\n"));
 
-	//check if the interface is down
-	if(!RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_INTERRUPT_IN_USE))
-		return NULL;	
-	
-	pAd->iw_stats.status = 0; // Status - device dependent for now
 
-	// link quality
-#ifdef CONFIG_AP_SUPPORT
-	if (pAd->OpMode == OPMODE_AP)
-	{
-		if (pMacEntry != NULL)
-			pAd->iw_stats.qual.qual = ((pMacEntry->ChannelQuality * 12)/10 + 10);
-	}
-#endif // CONFIG_AP_SUPPORT //
+	pDrvIwStats->priv_flags = RT_DEV_PRIV_FLAGS_GET(net_dev);
+	pDrvIwStats->dev_addr = (PUCHAR)net_dev->dev_addr;
 
-	if(pAd->iw_stats.qual.qual > 100)
-		pAd->iw_stats.qual.qual = 100;
+	if (RTMP_DRIVER_IW_STATS_GET(pAd, pDrvIwStats) != NDIS_STATUS_SUCCESS)
+		return NULL;
 
-#ifdef CONFIG_AP_SUPPORT
-	if (pAd->OpMode == OPMODE_AP)
-	{
-		if (pMacEntry != NULL)
-			pAd->iw_stats.qual.level =
-				RTMPMaxRssi(pAd, pMacEntry->RssiSample.LastRssi0,
-								pMacEntry->RssiSample.LastRssi1,
-								pMacEntry->RssiSample.LastRssi2);
-	}
-#endif // CONFIG_AP_SUPPORT //
+	pStats = (struct iw_statistics *)(pDrvIwStats->pStats);
+	pStats->status = 0; /* Status - device dependent for now */
 
-	pAd->iw_stats.qual.noise = pAd->BbpWriteLatch[66]; // noise level (dBm)
-	
-	pAd->iw_stats.qual.noise += 256 - 143;
-	pAd->iw_stats.qual.updated = 1;     // Flags to know if updated
+
+	pStats->qual.updated = 1;     /* Flags to know if updated */
 #ifdef IW_QUAL_DBM
-	pAd->iw_stats.qual.updated |= IW_QUAL_DBM;	// Level + Noise are dBm
-#endif // IW_QUAL_DBM //
-
-	pAd->iw_stats.discard.nwid = 0;     // Rx : Wrong nwid/essid
-	pAd->iw_stats.miss.beacon = 0;      // Missed beacons/superframe
+	pStats->qual.updated |= IW_QUAL_DBM;	/* Level + Noise are dBm */
+#endif /* IW_QUAL_DBM */
+	pStats->qual.qual = pDrvIwStats->qual;
+	pStats->qual.level = pDrvIwStats->level;
+	pStats->qual.noise = pDrvIwStats->noise;
+	pStats->discard.nwid = 0;     /* Rx : Wrong nwid/essid */
+	pStats->miss.beacon = 0;      /* Missed beacons/superframe */
 	
 	DBGPRINT(RT_DEBUG_TRACE, ("<--- rt28xx_get_wireless_stats\n"));
-	return &pAd->iw_stats;
+	return pStats;
 }
-#endif // WIRELESS_EXT //
+#endif /* WIRELESS_EXT */
 
 
-#ifdef WORKQUEUE_BH
-void tbtt_workq(struct work_struct *work)
-#else
-void tbtt_tasklet(unsigned long data)
-#endif // WORKQUEUE_BH //
-{
-//#define MAX_TX_IN_TBTT		(16)
-
-#ifdef CONFIG_AP_SUPPORT
-#ifdef WORKQUEUE_BH
-	POS_COOKIE pObj = container_of(work, struct os_cookie, tbtt_work);
-	PRTMP_ADAPTER pAd = pObj->pAd_va;
-#else
-		PRTMP_ADAPTER pAd = (PRTMP_ADAPTER) data;
-#endif // WORKQUEUE_BH //
-
-#ifdef RTMP_MAC_PCI
-	if (pAd->OpMode == OPMODE_AP)
-	{
-#ifdef AP_QLOAD_SUPPORT
-		/* update channel utilization */
-		QBSS_LoadUpdate(pAd, 0);
-#endif // AP_QLOAD_SUPPORT //
-
-#ifdef DOT11K_RRM_SUPPORT
-		RRM_QuietUpdata(pAd);
-#endif // DOT11K_RRM_SUPPORT //
-	}
-#endif // RTMP_MAC_PCI //
-
-	if (pAd->OpMode == OPMODE_AP)
-	{
-		//
-		// step 7 - if DTIM, then move backlogged bcast/mcast frames from PSQ to TXQ whenever DtimCount==0
-#ifdef RTMP_MAC_PCI
-		// NOTE: This updated BEACON frame will be sent at "next" TBTT instead of at cureent TBTT. The reason is
-		//       because ASIC already fetch the BEACON content down to TX FIFO before driver can make any
-		//       modification. To compenstate this effect, the actual time to deilver PSQ frames will be
-		//       at the time that we wrapping around DtimCount from 0 to DtimPeriod-1
-		if (pAd->ApCfg.DtimCount == 0)
-#endif // RTMP_MAC_PCI //
-		{
-			PQUEUE_ENTRY    pEntry;
-			BOOLEAN			bPS = FALSE;
-			UINT 			count = 0;
-			unsigned long 		IrqFlags;
-
-//			NdisAcquireSpinLock(&pAd->MacTabLock);
-//			NdisAcquireSpinLock(&pAd->TxSwQueueLock);
-			
-			RTMP_IRQ_LOCK(&pAd->irq_lock, IrqFlags);
-			while (pAd->MacTab.McastPsQueue.Head)
-			{
-				bPS = TRUE;
-				if (pAd->TxSwQueue[QID_AC_BE].Number <= (MAX_PACKETS_IN_QUEUE + MAX_PACKETS_IN_MCAST_PS_QUEUE))
-				{
-					pEntry = RemoveHeadQueue(&pAd->MacTab.McastPsQueue);
-					//if(pAd->MacTab.McastPsQueue.Number)
-					if (count)
-					{
-						RTMP_SET_PACKET_MOREDATA(pEntry, TRUE);
-					}
-					InsertHeadQueue(&pAd->TxSwQueue[QID_AC_BE], pEntry);
-					count++;
-				}
-				else
-				{
-					break;
-				}
-			}
-			RTMP_IRQ_UNLOCK(&pAd->irq_lock, IrqFlags);
-			
-			
-//			NdisReleaseSpinLock(&pAd->TxSwQueueLock);
-//			NdisReleaseSpinLock(&pAd->MacTabLock);
-			if (pAd->MacTab.McastPsQueue.Number == 0)
-			{			
-                UINT bss_index;
-
-                /* clear MCAST/BCAST backlog bit for all BSS */
-                for(bss_index=BSS0; bss_index<pAd->ApCfg.BssidNum; bss_index++)
-					WLAN_MR_TIM_BCMC_CLEAR(bss_index);
-                /* End of for */
-			}
-			pAd->MacTab.PsQIdleCount = 0;
-
-			// Dequeue outgoing framea from TxSwQueue0..3 queue and process it
-            if (bPS == TRUE) 
-			{
-				RTMPDeQueuePacket(pAd, FALSE, NUM_OF_TX_RING, /*MAX_TX_IN_TBTT*/MAX_PACKETS_IN_MCAST_PS_QUEUE);
-			}
-		}
-	}
-#endif // CONFIG_AP_SUPPORT //
-}
 
 INT rt28xx_ioctl(
 	IN	PNET_DEV	net_dev, 
 	IN	OUT	struct ifreq	*rq, 
 	IN	INT					cmd)
 {
-	RTMP_ADAPTER	*pAd = NULL;
+	VOID			*pAd = NULL;
 	INT				ret = 0;
+	ULONG			OpMode;
 
 	GET_PAD_FROM_NET_DEV(pAd, net_dev);	
 
@@ -901,12 +602,15 @@ INT rt28xx_ioctl(
 		return -ENETDOWN;
 	}
 
+	RTMP_DRIVER_OP_MODE_GET(pAd, &OpMode);
+
 #ifdef CONFIG_AP_SUPPORT
-	IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
+/*	IF_DEV_CONFIG_OPMODE_ON_AP(pAd) */
+	RT_CONFIG_IF_OPMODE_ON_AP(OpMode)
 	{
 		ret = rt28xx_ap_ioctl(net_dev, rq, cmd);
 	}
-#endif // CONFIG_AP_SUPPORT //
+#endif /* CONFIG_AP_SUPPORT */
 
 
 	return ret;
@@ -929,51 +633,59 @@ INT rt28xx_ioctl(
 
     ========================================================================
 */
-static struct net_device_stats *RT28xx_get_ether_stats(
+struct net_device_stats *RT28xx_get_ether_stats(
     IN  struct net_device *net_dev)
 {
-    RTMP_ADAPTER *pAd = NULL;
+    VOID *pAd = NULL;
+	struct net_device_stats *pStats;
 
 	if (net_dev)
 		GET_PAD_FROM_NET_DEV(pAd, net_dev);	
 
 	if (pAd)
 	{
+		RT_CMD_STATS DrvStats, *pDrvStats = &DrvStats;
+ 
 
-		pAd->stats.rx_packets = pAd->WlanCounters.ReceivedFragmentCount.QuadPart;
-		pAd->stats.tx_packets = pAd->WlanCounters.TransmittedFragmentCount.QuadPart;
+		//assign net device for RTMP_DRIVER_INF_STATS_GET()
+		pDrvStats->pNetDev = net_dev;
+		RTMP_DRIVER_INF_STATS_GET(pAd, pDrvStats);
 
-		pAd->stats.rx_bytes = pAd->RalinkCounters.ReceivedByteCount;
-		pAd->stats.tx_bytes = pAd->RalinkCounters.TransmittedByteCount;
+		pStats = (struct net_device_stats *)(pDrvStats->pStats);
+		pStats->rx_packets = pDrvStats->rx_packets;
+		pStats->tx_packets = pDrvStats->tx_packets;
 
-		pAd->stats.rx_errors = pAd->Counters8023.RxErrors;
-		pAd->stats.tx_errors = pAd->Counters8023.TxErrors;
+		pStats->rx_bytes = pDrvStats->rx_bytes;
+		pStats->tx_bytes = pDrvStats->tx_bytes;
 
-		pAd->stats.rx_dropped = 0;
-		pAd->stats.tx_dropped = 0;
+		pStats->rx_errors = pDrvStats->rx_errors;
+		pStats->tx_errors = pDrvStats->tx_errors;
 
-	    pAd->stats.multicast = pAd->WlanCounters.MulticastReceivedFrameCount.QuadPart;   // multicast packets received
-	    pAd->stats.collisions = pAd->Counters8023.OneCollision + pAd->Counters8023.MoreCollisions;  // Collision packets
+		pStats->rx_dropped = 0;
+		pStats->tx_dropped = 0;
 
-	    pAd->stats.rx_length_errors = 0;
-	    pAd->stats.rx_over_errors = pAd->Counters8023.RxNoBuffer;                   // receiver ring buff overflow
-	    pAd->stats.rx_crc_errors = 0;//pAd->WlanCounters.FCSErrorCount;     // recved pkt with crc error
-	    pAd->stats.rx_frame_errors = pAd->Counters8023.RcvAlignmentErrors;          // recv'd frame alignment error
-	    pAd->stats.rx_fifo_errors = pAd->Counters8023.RxNoBuffer;                   // recv'r fifo overrun
-	    pAd->stats.rx_missed_errors = 0;                                            // receiver missed packet
+	    pStats->multicast = pDrvStats->multicast;
+	    pStats->collisions = pDrvStats->collisions;
 
-	    // detailed tx_errors
-	    pAd->stats.tx_aborted_errors = 0;
-	    pAd->stats.tx_carrier_errors = 0;
-	    pAd->stats.tx_fifo_errors = 0;
-	    pAd->stats.tx_heartbeat_errors = 0;
-	    pAd->stats.tx_window_errors = 0;
+	    pStats->rx_length_errors = 0;
+	    pStats->rx_over_errors = pDrvStats->rx_over_errors;
+	    pStats->rx_crc_errors = 0;/*pAd->WlanCounters.FCSErrorCount;     // recved pkt with crc error */
+	    pStats->rx_frame_errors = pDrvStats->rx_frame_errors;
+	    pStats->rx_fifo_errors = pDrvStats->rx_fifo_errors;
+	    pStats->rx_missed_errors = 0;                                            /* receiver missed packet */
 
-	    // for cslip etc
-	    pAd->stats.rx_compressed = 0;
-	    pAd->stats.tx_compressed = 0;
+	    /* detailed tx_errors */
+	    pStats->tx_aborted_errors = 0;
+	    pStats->tx_carrier_errors = 0;
+	    pStats->tx_fifo_errors = 0;
+	    pStats->tx_heartbeat_errors = 0;
+	    pStats->tx_window_errors = 0;
+
+	    /* for cslip etc */
+	    pStats->rx_compressed = 0;
+	    pStats->tx_compressed = 0;
 		
-		return &pAd->stats;
+		return pStats;
 	}
 	else
     	return NULL;
@@ -981,38 +693,34 @@ static struct net_device_stats *RT28xx_get_ether_stats(
 
 
 BOOLEAN RtmpPhyNetDevExit(
-	IN RTMP_ADAPTER *pAd, 
-	IN PNET_DEV net_dev)
+	IN VOID			*pAd, 
+	IN PNET_DEV		net_dev)
 {
 
 
 #ifdef CONFIG_AP_SUPPORT
 #ifdef APCLI_SUPPORT
-	// remove all AP-client virtual interfaces.
+	/* remove all AP-client virtual interfaces. */
 	RT28xx_ApCli_Remove(pAd);
-#endif // APCLI_SUPPORT //
+#endif /* APCLI_SUPPORT */
 
 #ifdef WDS_SUPPORT
-	// remove all WDS virtual interfaces.
+	/* remove all WDS virtual interfaces. */
 	RT28xx_WDS_Remove(pAd);
-#endif // WDS_SUPPORT //
+#endif /* WDS_SUPPORT */
 
 #ifdef MBSS_SUPPORT
 	RT28xx_MBSS_Remove(pAd);
-#endif // MBSS_SUPPORT //
-#endif // CONFIG_AP_SUPPORT //
+#endif /* MBSS_SUPPORT */
+#endif /* CONFIG_AP_SUPPORT */
+
 
 #ifdef INF_PPA_SUPPORT
-	if (ppa_hook_directpath_register_dev_fn && pAd->PPAEnable==TRUE) 
-	{
-		UINT status;
-		status=ppa_hook_directpath_register_dev_fn(&pAd->g_if_id, pAd->net_dev, NULL, PPA_F_DIRECTPATH_REGISTER);
-		DBGPRINT(RT_DEBUG_TRACE, ("unregister PPA:g_if_id=%d status=%d\n",pAd->g_if_id,status));
-	}
-	kfree(pAd->pDirectpathCb); 
-#endif // INF_PPA_SUPPORT //
 
-	// Unregister network device
+	RTMP_DRIVER_INF_PPA_EXIT(pAd);
+#endif /* INF_PPA_SUPPORT */
+
+	/* Unregister network device */
 	if (net_dev != NULL)
 	{
 		printk("RtmpOSNetDevDetach(): RtmpOSNetDeviceDetach(), dev->name=%s!\n", net_dev->name);
@@ -1031,118 +739,122 @@ BOOLEAN RtmpPhyNetDevExit(
  *******************************************************************************/
 int RtmpOSIRQRequest(IN PNET_DEV pNetDev)
 {
+#if defined(RTMP_PCI_SUPPORT) || defined(RTMP_RBUS_SUPPORT)
 	struct net_device *net_dev = pNetDev;
-	PRTMP_ADAPTER pAd = NULL;
+#endif
+	ULONG infType;
+	VOID *pAd = NULL;
 	int retval = 0;
 	
 	GET_PAD_FROM_NET_DEV(pAd, pNetDev);	
 	
 	ASSERT(pAd);
-	
+
+	RTMP_DRIVER_INF_TYPE_GET(pAd, &infType);
+
 #ifdef RTMP_PCI_SUPPORT
-	if (pAd->infType == RTMP_DEV_INF_PCI || pAd->infType == RTMP_DEV_INF_PCIE)
+	if (infType == RTMP_DEV_INF_PCI || infType == RTMP_DEV_INF_PCIE)
 	{
-		POS_COOKIE _pObj = (POS_COOKIE)(pAd->OS_Cookie);
-		RTMP_MSI_ENABLE(pAd);	
-		retval = request_irq(_pObj->pci_dev->irq,  rt2860_interrupt, SA_SHIRQ, (net_dev)->name, (net_dev));
+		struct pci_dev *pci_dev;
+/*		POS_COOKIE _pObj = (POS_COOKIE)(pAd->OS_Cookie); */
+/*		RTMP_MSI_ENABLE(pAd); */
+		RTMP_DRIVER_PCI_MSI_ENABLE(pAd, &pci_dev);
+
+		retval = request_irq(pci_dev->irq,  rt2860_interrupt, SA_SHIRQ, (net_dev)->name, (net_dev));
 		if (retval != 0) 
 			printk("RT2860: request_irq  ERROR(%d)\n", retval);
 	}
-#endif // RTMP_PCI_SUPPORT //
+#endif /* RTMP_PCI_SUPPORT */
 
 
 	return retval; 
 	
 }
 
+#ifdef WDS_SUPPORT
+/*
+    ========================================================================
 
-int RtmpOSIRQRelease(IN PNET_DEV pNetDev)
+    Routine Description:
+        return ethernet statistics counter
+
+    Arguments:
+        net_dev                     Pointer to net_device
+
+    Return Value:
+        net_device_stats*
+
+    Note:
+
+    ========================================================================
+*/
+struct net_device_stats *RT28xx_get_wds_ether_stats(
+    IN PNET_DEV net_dev)
 {
-	struct net_device *net_dev = pNetDev;
-	PRTMP_ADAPTER pAd = NULL;
+    VOID *pAd = NULL;
+/*	INT WDS_apidx = 0,index; */
+	struct net_device_stats *pStats;
+	RT_CMD_STATS WdsStats, *pWdsStats = &WdsStats;
 
-	GET_PAD_FROM_NET_DEV(pAd, net_dev);	
-	
-	ASSERT(pAd);
-	
-#ifdef RTMP_PCI_SUPPORT
-	if (pAd->infType == RTMP_DEV_INF_PCI || pAd->infType == RTMP_DEV_INF_PCIE)
-	{ 
-		POS_COOKIE pObj = (POS_COOKIE)(pAd->OS_Cookie);
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,0)
-		synchronize_irq(pObj->pci_dev->irq);
-#endif
-		free_irq(pObj->pci_dev->irq, (net_dev));
-		RTMP_MSI_DISABLE(pAd);
-	}
-#endif // RTMP_PCI_SUPPORT //
-
-
-	return 0;
-}
-
-#ifdef HW_COEXISTENCE_SUPPORT
-VOID InitHWCoexistence(
-	IN PRTMP_ADAPTER pAd)
-{
-	ULONG				GPIO = 0;
-	US_CYC_CNT_STRUC	USCycCnt;
-	
-	if (pAd == NULL)
-	{
-		return;
+	if (net_dev) {
+		GET_PAD_FROM_NET_DEV(pAd, net_dev);
 	}
 
-	DBGPRINT(RT_DEBUG_TRACE,("In InitHWCoexistence ...\n"));	
-	
-	if ((
-#ifdef BT_COEXISTENCE_SUPPORT
-		((pAd->bBTCoexistenceOn == TRUE) && 
-		(pAd->NicConfig2.field.BTCoexist == TRUE)) || 
-#endif // BT_COEXISTENCE_SUPPORT //
-		(pAd->bWiMaxCoexistenceOn == TRUE)) && 
-#ifdef RTMP_PCI_SUPPORT
-		IS_RT3090A(pAd)
-#endif // RTMP_PCI_SUPPORT //
-		)
+/*	if (RT_DEV_PRIV_FLAGS_GET(net_dev) == INT_WDS) */
 	{
-		DBGPRINT(RT_DEBUG_TRACE,("Coexistence Initialize Hardware\n"));
-		
-		RTMP_IO_READ32(pAd, US_CYC_CNT, &USCycCnt.word);
-#ifdef BT_COEXISTENCE_SUPPORT
-		if (IS_ENABLE_BT_WIFI_ACTIVE_PULL_LOW_BY_FORCE(pAd))
-			USCycCnt.field.BtModeEn = 0; /* Wireless active disable, gpio1 always pull low */
-		else
-#endif // BT_COEXISTENCE_SUPPORT //
-		USCycCnt.field.BtModeEn = 1;  /* Wireless active enable, gpio1 pull high when Tx */
-		RTMP_IO_WRITE32(pAd, US_CYC_CNT, USCycCnt.word);
-
-		/* Set bit 0 & 1 to zero to use GPIO 0 & 1 */
-		RTMP_IO_READ32(pAd, GPIO_SWITCH, &GPIO);
-		GPIO = (GPIO & 0xfffffffc);	
-		RTMP_IO_WRITE32(pAd, GPIO_SWITCH, GPIO);
-
-#ifdef BT_COEXISTENCE_SUPPORT
-		if (IS_ENABLE_BT_WIFI_ACTIVE_PULL_LOW_BY_FORCE(pAd))
+		if (pAd)
 		{
-			ULONG Value = 0;
-			
-			RTMP_IO_READ32( pAd, GPIO_CTRL_CFG, &Value);
-			Value &= ~(0x0202);
-			Value |= 0x0;
-			RTMP_IO_WRITE32( pAd, GPIO_CTRL_CFG, Value);
+
+			pWdsStats->pNetDev = net_dev;
+			if (RTMP_COM_IoctlHandle(pAd, NULL, CMD_RTPRIV_IOCTL_WDS_STATS_GET,
+					0, pWdsStats, RT_DEV_PRIV_FLAGS_GET(net_dev)) != NDIS_STATUS_SUCCESS)
+				return NULL;
+
+			pStats = (struct net_device_stats *)pWdsStats->pStats; /*pAd->stats; */
+
+			pStats->rx_packets = pWdsStats->rx_packets; /*pAd->WdsTab.WdsEntry[WDS_apidx].WdsCounter.ReceivedFragmentCount.QuadPart; */
+			pStats->tx_packets = pWdsStats->tx_packets; /*pAd->WdsTab.WdsEntry[WDS_apidx].WdsCounter.TransmittedFragmentCount.QuadPart; */
+
+			pStats->rx_bytes = pWdsStats->rx_bytes; /*pAd->WdsTab.WdsEntry[WDS_apidx].WdsCounter.ReceivedByteCount; */
+			pStats->tx_bytes = pWdsStats->tx_bytes; /*pAd->WdsTab.WdsEntry[WDS_apidx].WdsCounter.TransmittedByteCount; */
+
+			pStats->rx_errors = pWdsStats->rx_errors; /*pAd->WdsTab.WdsEntry[WDS_apidx].WdsCounter.RxErrors; */
+			pStats->tx_errors = pWdsStats->tx_errors; /*pAd->WdsTab.WdsEntry[WDS_apidx].WdsCounter.TxErrors; */
+
+			pStats->rx_dropped = 0;
+			pStats->tx_dropped = 0;
+
+	  		pStats->multicast = pWdsStats->multicast; /*pAd->WdsTab.WdsEntry[WDS_apidx].WdsCounter.MulticastReceivedFrameCount.QuadPart;   // multicast packets received */
+	  		pStats->collisions = pWdsStats->collisions; /*pAd->WdsTab.WdsEntry[WDS_apidx].WdsCounter.OneCollision + pAd->WdsTab.WdsEntry[index].WdsCounter.MoreCollisions;  // Collision packets */
+	  
+	  		pStats->rx_length_errors = 0;
+	  		pStats->rx_over_errors = pWdsStats->rx_over_errors; /*pAd->WdsTab.WdsEntry[WDS_apidx].WdsCounter.RxNoBuffer;                   // receiver ring buff overflow */
+	  		pStats->rx_crc_errors = 0;/*pAd->WlanCounters.FCSErrorCount;     // recved pkt with crc error */
+	  		pStats->rx_frame_errors = pWdsStats->rx_frame_errors; /*pAd->WdsTab.WdsEntry[WDS_apidx].WdsCounter.RcvAlignmentErrors;          // recv'd frame alignment error */
+	  		pStats->rx_fifo_errors = pWdsStats->rx_fifo_errors; /*pAd->WdsTab.WdsEntry[WDS_apidx].WdsCounter.RxNoBuffer;                   // recv'r fifo overrun */
+	  		pStats->rx_missed_errors = 0;                                            /* receiver missed packet */
+	  
+	  		    /* detailed tx_errors */
+	  		pStats->tx_aborted_errors = 0;
+	  		pStats->tx_carrier_errors = 0;
+	  		pStats->tx_fifo_errors = 0;
+	  		pStats->tx_heartbeat_errors = 0;
+	  		pStats->tx_window_errors = 0;
+	  
+	  		    /* for cslip etc */
+	  		pStats->rx_compressed = 0;
+	  		pStats->tx_compressed = 0;
+
+			return pStats;
 		}
-#endif // BT_COEXISTENCE_SUPPORT //
-
-		
-#ifdef BT_COEXISTENCE_SUPPORT
-		BtCoexistInit(pAd);
-#endif // BT_COEXISTENCE_SUPPORT //
-
-		pAd->bHWCoexistenceInit = TRUE;
-		
-		DBGPRINT(RT_DEBUG_TRACE,("Hardware Coexistence Initialized\n"));			
+		else
+			return NULL;
 	}
+/*	else */
+/*    		return NULL; */
 }
-#endif // HW_COEXISTENCE_SUPPORT //
+#endif /* WDS_SUPPORT */
+
+
+
 
