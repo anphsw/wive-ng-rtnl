@@ -146,7 +146,7 @@ static int rt2860_suspend(
 	INT32 retval = 0;
 
 
-	DBGPRINT(RT_DEBUG_TRACE, ("===> rt2860_suspend()\n"));
+	DBGPRINT(RT_DEBUG_TRACE, ("===> rt3090_suspend()\n"));
 
 	if (net_dev == NULL)
 	{
@@ -198,7 +198,7 @@ static int rt2860_suspend(
 	retval = pci_set_power_state(pci_dev, pci_choose_state(pci_dev, state));
 #endif
 
-	DBGPRINT(RT_DEBUG_TRACE, ("<=== rt2860_suspend()\n"));
+	DBGPRINT(RT_DEBUG_TRACE, ("<=== rt3090_suspend()\n"));
 	return retval;
 }
 
@@ -235,7 +235,7 @@ static int rt2860_resume(
 	}
 #endif
 
-	DBGPRINT(RT_DEBUG_TRACE, ("===> rt2860_resume()\n"));
+	DBGPRINT(RT_DEBUG_TRACE, ("===> rt3090_resume()\n"));
 
 	if (net_dev == NULL)
 	{
@@ -261,7 +261,7 @@ static int rt2860_resume(
 			if (rt28xx_open((PNET_DEV)net_dev) != 0)
 			{
 				/* open fail */
-				DBGPRINT(RT_DEBUG_TRACE, ("<=== rt2860_resume()\n"));
+				DBGPRINT(RT_DEBUG_TRACE, ("<=== rt3090_resume()\n"));
 				return 0;
 			}
 
@@ -278,7 +278,7 @@ static int rt2860_resume(
 		}
 	}
 
-	DBGPRINT(RT_DEBUG_TRACE, ("<=== rt2860_resume()\n"));
+	DBGPRINT(RT_DEBUG_TRACE, ("<=== rt3090_resume()\n"));
 	return 0;
 }
 #endif /* CONFIG_PM */
@@ -441,7 +441,7 @@ static INT __devinit   rt2860_probe(
 
 	wl_proc_init();
 
-	DBGPRINT(RT_DEBUG_TRACE, ("<=== rt2860_probe\n"));
+	DBGPRINT(RT_DEBUG_TRACE, ("<=== rt3090_probe\n"));
 
 	return 0; /* probe ok */
 
@@ -464,7 +464,7 @@ err_out_free_res:
 err_out:
 	pci_disable_device(pci_dev);
 
-	DBGPRINT(RT_DEBUG_ERROR, ("<=== rt2860_probe failed with rv = %d!\n", rv));
+	DBGPRINT(RT_DEBUG_ERROR, ("<=== rt3090_probe failed with rv = %d!\n", rv));
 
 	return -ENODEV; /* probe fail */
 }
@@ -479,7 +479,7 @@ static VOID __devexit rt2860_remove_one(
 	
 	GET_PAD_FROM_NET_DEV(pAd, net_dev);
 	
-    DBGPRINT(RT_DEBUG_TRACE, ("===> rt2860_remove_one\n"));
+    DBGPRINT(RT_DEBUG_TRACE, ("===> rt3090_remove_one\n"));
 
 	if (pAd != NULL)
 	{
