@@ -1459,36 +1459,36 @@
 
 <br>
 <b>4.1.x</b><br>
-1) dnsmasq: up to 2.66 version.<br>
-2) dropbear: version up to 2013.58.<br>
-3) xupnpd: lua: up to 5.2.2 version.<br>
-4) uclibc: small update for compat with new userspace apps.<br>
-5) zlib: update to 1.2.7 version.<br>
-6) init.d: udpxy: tune options for compat with amlogic based tabs/players.<br>
-7) ppp: first try MSCHAP-V2 per auth.<br>
-8) libc: fix memleak and some updates.<br>
-9) kernel: hw_nat: fix lan<->lan binding.<br>
-10) kernel: hw_nat: fix usbnet offload.<br>
-11) kernel: arch: update from new sdk.<br>
-12) kernel: raeth: update driver to 3.0 version.<br>
-13) kernel: sock: sk_stamp: should be initialized to ktime_set(-1L, 0).<br>
-14) kernel: ipv6: don't send packet to big messages to self.<br>
-15) kernel: ipv4: replace ip_fast_csum with csum_replace2 to save cpu cycles.<br>
-16) kernel: pci: make pci_bus a struct device.<br>
-17) kenrel: pci: fix up error messages for pci_bus registering.<br>
-18) kernel: tcp: tcp_tso_segment() small optimization.<br>
-19) kernel: fix gcc >= 4.6.x support.<br>
-20) kernel: mips: sanitize restart logics.<br>
-21) kernel: net: build_ehash_secret() and rt_bind_peer() cleanups.<br>
-22) kernel: ipv4: fix byte value boundary check in do_ip_getsockopt().<br>
-23) kernel: net: add a prefetch in socket backlog processing.<br>
-24) kernel: net: fix locking in flush_backlog.<br>
-25) kernel: af_unix: Fix deadlock on connecting to shutdown socket.<br>
-26) kernel: keep sk_backlog near sk_lock.<br>
-27) kernel: mtd update.<br>
-28) kernel: af_unix: if we don't care about credentials coallesce all messages.<br>
-29) busybox: apply post 1.21.0 pathces.<br>
-30) miniupnpd: update to 1.8.20130503.<br>
+1) busybox: apply post 1.21.0 pathces.<br>
+2) miniupnpd: update to 1.8.20130503.<br>
+3) dnsmasq: up to 2.66 version.<br>
+4) dropbear: version up to 2013.58.<br>
+5) xupnpd: lua: up to 5.2.2 version.<br>
+6) uclibc: small update for compat with new userspace apps.<br>
+7) zlib: update to 1.2.7 version.<br>
+8) init.d: udpxy: tune options for compat with amlogic based tabs/players.<br>
+9) ppp: first try MSCHAP-V2 per auth.<br>
+10) libc: fix memleak and some updates.<br>
+11) kernel: hw_nat: fix lan<->lan binding.<br>
+12) kernel: hw_nat: fix usbnet offload.<br>
+13) kernel: arch: update from new sdk.<br>
+14) kernel: raeth: update driver to 3.0 version.<br>
+15) kernel: sock: sk_stamp: should be initialized to ktime_set(-1L, 0).<br>
+16) kernel: ipv6: don't send packet to big messages to self.<br>
+17) kernel: ipv4: replace ip_fast_csum with csum_replace2 to save cpu cycles.<br>
+18) kernel: pci: make pci_bus a struct device.<br>
+19) kenrel: pci: fix up error messages for pci_bus registering.<br>
+20) kernel: tcp: tcp_tso_segment() small optimization.<br>
+21) kernel: fix gcc >= 4.6.x support.<br>
+22) kernel: mips: sanitize restart logics.<br>
+23) kernel: net: build_ehash_secret() and rt_bind_peer() cleanups.<br>
+24) kernel: ipv4: fix byte value boundary check in do_ip_getsockopt().<br>
+25) kernel: net: add a prefetch in socket backlog processing.<br>
+26) kernel: net: fix locking in flush_backlog.<br>
+27) kernel: af_unix: Fix deadlock on connecting to shutdown socket.<br>
+28) kernel: keep sk_backlog near sk_lock.<br>
+29) kernel: mtd update.<br>
+30) kernel: af_unix: if we don't care about credentials coallesce all messages.<br>
 <br>
 <br>
 <br>
