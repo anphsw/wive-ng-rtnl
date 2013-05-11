@@ -16,7 +16,7 @@ SHARED_LIBS = n
 
 HOSTCC = gcc
 CCOPTS = -D_GNU_SOURCE -Os -Wall -ffunction-sections -fdata-sections
-CFLAGS += -I../include $(DEFINES) $(CCOPTS)
+CFLAGS = -I../include $(DEFINES) $(CCOPTS)
 
 LDLIBS += -L../lib -lnetlink -lutil
 LDFLAGS += -Wl,--gc-sections
