@@ -45,7 +45,8 @@ int wl_proc_exit(void);
 #endif /* PROCREG_DIR */
 
 #ifdef CONFIG_PROC_FS
-extern struct proc_dir_entry *procRegDir3090;
+struct proc_dir_entry *procRegDir3090;
+EXPORT_SYMBOL(procRegDir3090);
 
 #ifdef VIDEO_TURBINE_SUPPORT
 extern BOOLEAN UpdateFromGlobal;
