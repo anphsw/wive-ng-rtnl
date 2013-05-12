@@ -716,7 +716,7 @@ static inline UCHAR SelectClearChannelApCnt(
 		printk("=====================================================\n");
    for (channel_index=0 ; channel_index < pAd->ChannelListNum ; channel_index++)
    // debug messages //
-		printk(RT_DEBUG_TRACE, ("Channel %d : Dirty = %ld, ApCnt=%ld, Busy Time = %d, Skip Channel = %s\n", 
+		printk("Channel %d : Dirty = %ld, ApCnt=%ld, Busy Time = %d, Skip Channel = %s\n", 
 				pAd->ChannelList[channel_index].Channel,
 				pChannelInfo->dirtyness[channel_index], 
 				pChannelInfo->ApCnt[channel_index],

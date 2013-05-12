@@ -716,10 +716,10 @@ static inline UCHAR SelectClearChannelApCnt(
 
 	AutoChannelSkipListSetDirty(pAd);
 	
-   DBGPRINT(RT_DEBUG_TRACE, ("=====================================================\n"));
+   printk("=====================================================\n");
    for (channel_index=0 ; channel_index < pAd->ChannelListNum ; channel_index++)
    // debug messages //
-		DBGPRINT(RT_DEBUG_TRACE, ("Channel %d : Dirty = %ld, ApCnt=%ld, Busy Time = %d, Skip Channel = %s\n", 
+		printk("Channel %d : Dirty = %ld, ApCnt=%ld, Busy Time = %d, Skip Channel = %s\n", 
 				pAd->ChannelList[channel_index].Channel,
 				pChannelInfo->dirtyness[channel_index], 
 				pChannelInfo->ApCnt[channel_index],
@@ -728,8 +728,8 @@ static inline UCHAR SelectClearChannelApCnt(
 #else
 				0,
 #endif // AP_QLOAD_SUPPORT //
-				(pChannelInfo->SkipList[channel_index] == TRUE) ? "TRUE" : "FALSE"));
-   DBGPRINT(RT_DEBUG_TRACE, ("=====================================================\n"));
+				(pChannelInfo->SkipList[channel_index] == TRUE) ? "TRUE" : "FALSE");
+    printk("=====================================================\n");
    
    pAd->ApCfg.AutoChannel_Channel = 0;
 	
