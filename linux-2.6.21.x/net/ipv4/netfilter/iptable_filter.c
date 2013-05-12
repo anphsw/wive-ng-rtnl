@@ -102,12 +102,8 @@ ipt_local_out_hook(unsigned int hook,
 {
 	/* root is playing with raw sockets. */
 	if ((*pskb)->len < sizeof(struct iphdr)
-	    || ip_hdrlen(*pskb) < sizeof(struct iphdr)) {
-		if (net_ratelimit())
-			printk("iptable_filter: ignoring short SOCK_RAW "
-			       "packet.\n");
+	    || ip_hdrlen(*pskb) < sizeof(struct iphdr))
 		return NF_ACCEPT;
-	}
 
 	return ipt_do_table(pskb, hook, in, out, &packet_filter);
 }

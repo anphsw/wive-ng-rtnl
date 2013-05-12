@@ -205,11 +205,9 @@ static unsigned int ipv4_conntrack_local(unsigned int hooknum,
 {
 	/* root is playing with raw sockets. */
 	if ((*pskb)->len < sizeof(struct iphdr)
-	    || ip_hdrlen(*pskb) < sizeof(struct iphdr)) {
-		if (net_ratelimit())
-			printk("ipt_hook: happy cracking.\n");
+	    || ip_hdrlen(*pskb) < sizeof(struct iphdr))
 		return NF_ACCEPT;
-	}
+
 	return nf_conntrack_in(PF_INET, hooknum, pskb);
 }
 
