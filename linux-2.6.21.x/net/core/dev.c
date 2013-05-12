@@ -1545,6 +1545,12 @@ gso:
 #ifdef CONFIG_NET_CLS_ACT
 	skb->tc_verd = SET_TC_AT(skb->tc_verd,AT_EGRESS);
 #endif
+	if (!q) { /* skip processing for skb if iface not exist */
+	    kfree_skb(skb);
+	    rc = -ENETDOWN;
+	    goto out;
+	}
+
 	if (q->enqueue) {
 		/* Grab device queue */
 		spin_lock(&dev->queue_lock);
