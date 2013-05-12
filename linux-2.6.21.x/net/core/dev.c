@@ -3255,13 +3255,11 @@ static void netdev_wait_allrefs(struct net_device *dev)
 
 			warning_time = jiffies;
 
-			/* refcnt freed ok ? - break without warn or reread refcnt and repeat wait */
-                        if (!refcnt) {
+			/* refcnt freed ok ? - break without warn or increase count */
+                        if (!refcnt)
 			    break;
-			} else {
-			    refcnt = atomic_read(&dev->refcnt);
+			else
 			    count++;
-			}
 
 			/* wait count exeed - break and warn of leak */
 			if (count > 3) {
@@ -3269,6 +3267,9 @@ static void netdev_wait_allrefs(struct net_device *dev)
 			    printk(KERN_EMERG "unregister_netdevice %s refcnt leak. need fix. Usage count = %d\n", dev->name, refcnt);
 			    break;
 			}
+
+			/* reread refcnt and repeat wait */
+			refcnt = atomic_read(&dev->refcnt);
 		}
 #endif
 	}
