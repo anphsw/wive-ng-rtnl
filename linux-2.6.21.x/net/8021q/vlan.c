@@ -269,8 +269,10 @@ static int unregister_vlan_dev(struct net_device *real_dev,
 			 * interlock with HW accelerating devices or SW vlan
 			 * input packet processing.
 			 */
-			if (real_dev->features & NETIF_F_HW_VLAN_FILTER)
+			if (real_dev->features &
+			    (NETIF_F_HW_VLAN_RX | NETIF_F_HW_VLAN_FILTER)) {
 				real_dev->vlan_rx_kill_vid(real_dev, vlan_id);
+			}
 
 			vlan_group_set_device(grp, vlan_id, NULL);
 			synchronize_net();
@@ -479,14 +481,16 @@ static struct net_device *register_vlan_device(const char *eth_IF_name,
 	}
 
 	if ((real_dev->features & NETIF_F_HW_VLAN_RX) &&
-	    !real_dev->vlan_rx_register) {
+	    (real_dev->vlan_rx_register == NULL ||
+	     real_dev->vlan_rx_kill_vid == NULL)) {
 		printk(VLAN_DBG "%s: Device %s has buggy VLAN hw accel.\n",
 			__FUNCTION__, real_dev->name);
 		goto out_put_dev;
 	}
 
 	if ((real_dev->features & NETIF_F_HW_VLAN_FILTER) &&
-	    (!real_dev->vlan_rx_add_vid || !real_dev->vlan_rx_kill_vid)) {
+	    (real_dev->vlan_rx_add_vid == NULL ||
+	     real_dev->vlan_rx_kill_vid == NULL)) {
 		printk(VLAN_DBG "%s: Device %s has buggy VLAN hw accel.\n",
 			__FUNCTION__, real_dev->name);
 		goto out_put_dev;
