@@ -101,8 +101,8 @@ ipt_local_out_hook(unsigned int hook,
 		   int (*okfn)(struct sk_buff *))
 {
 	/* root is playing with raw sockets. */
-	if ((*pskb)->len < sizeof(struct iphdr)
-	    || ip_hdrlen(*pskb) < sizeof(struct iphdr))
+	if ((*pskb)->len < sizeof(struct iphdr) ||
+	    ip_hdrlen(*pskb) < sizeof(struct iphdr))
 		return NF_ACCEPT;
 
 	return ipt_do_table(pskb, hook, in, out, &packet_filter);

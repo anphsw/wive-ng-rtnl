@@ -100,8 +100,8 @@ ip6t_local_out_hook(unsigned int hook,
 {
 #if 0
 	/* root is playing with raw sockets. */
-	if ((*pskb)->len < sizeof(struct iphdr)
-	    || ip_hdrlen(*pskb) < sizeof(struct iphdr))
+	if ((*pskb)->len < sizeof(struct iphdr) ||
+	    ip_hdrlen(*pskb) < sizeof(struct iphdr))
 		return NF_ACCEPT;
 #endif
 

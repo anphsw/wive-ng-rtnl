@@ -133,8 +133,8 @@ ipt_local_hook(unsigned int hook,
 	u_int32_t mark;
 
 	/* root is playing with raw sockets. */
-	if ((*pskb)->len < sizeof(struct iphdr)
-	    || ip_hdrlen(*pskb) < sizeof(struct iphdr))
+	if ((*pskb)->len < sizeof(struct iphdr) ||
+	    ip_hdrlen(*pskb) < sizeof(struct iphdr))
 		return NF_ACCEPT;
 
 	/* Save things which could affect route */
