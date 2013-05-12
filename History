@@ -1498,7 +1498,7 @@
 38) kernel: af_unix: fix deadlock on connecting to shutdown socket.<br>
 39) kernel: af_unix: if we don't care about credentials coallesce all messages.<br>
 40) kernel: net/core: fix refcount leak hack.<br>
-41) kernel: net/core: fix potential null pointer dereferene.<br>
+41) kernel: net/core: fix potential null pointer dereferene(qdis/brfastpath).<br>
 42) kernel: conntrack: fix one way voice issue if SIP ALG enabled.<br>
 <br>
 <br>

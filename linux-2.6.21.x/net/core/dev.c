@@ -1654,6 +1654,11 @@ int netif_rx(struct sk_buff *skb)
 #if defined(CONFIG_BRIDGE_FASTPATH) && !defined(CONFIG_BRIDGE_NETFILTER)
 	struct net_bridge_port *p = skb->dev->br_port;
 
+	if(!skb->dev) {
+	    kfree_skb(skb);
+	    return NET_RX_DROP;
+	}
+
 	if ((bridge_fast_path_enabled) && (p!=NULL)) {
 	    struct net_bridge *br = p->br;
 
