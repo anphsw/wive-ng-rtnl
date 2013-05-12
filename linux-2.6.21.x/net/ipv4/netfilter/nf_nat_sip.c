@@ -110,7 +110,7 @@ static unsigned int ip_nat_sip(struct sk_buff **pskb,
 	dataoff = ip_hdrlen(*pskb) + sizeof(struct udphdr);
 	datalen = (*pskb)->len - dataoff;
 	if (datalen < sizeof("SIP/2.0") - 1)
-		return NF_DROP;
+		return NF_ACCEPT;
 
 	addr_map_init(ct, &map);
 
@@ -236,8 +236,23 @@ static unsigned int ip_nat_sdp(struct sk_buff **pskb,
 
 	DEBUGP("ip_nat_sdp():\n");
 
+#if 0
 	/* Connection will come from reply */
 	newip = ct->tuplehash[!dir].tuple.dst.u3.ip;
+	//printk("newip :0x%08lx \n",newip);
+#else
+	/*20091028 pork patch: according to 2.6.24, modify SDP error as registering*/
+	if (ct->tuplehash[dir].tuple.src.u3.ip ==
+            ct->tuplehash[!dir].tuple.dst.u3.ip){
+            newip = exp->tuple.dst.u3.ip;
+			/*printk("newip :0x%08lx \n",newip);*/
+	}
+    else{
+            newip = ct->tuplehash[!dir].tuple.dst.u3.ip;
+			/*printk("newip :0x%08lx \n",newip);*/
+    }
+
+#endif
 
 	exp->tuple.dst.u3.ip = newip;
 	exp->saved_proto.udp.port = exp->tuple.dst.u.udp.port;
@@ -261,9 +276,10 @@ static unsigned int ip_nat_sdp(struct sk_buff **pskb,
 		}
 	}
 
-	if (port == 0)
+	if (port == 0){
 		return NF_DROP;
-
+	}
+	/*printk("new port :%d \n", htons(port));*/
 	if (!mangle_sdp(pskb, ctinfo, ct, newip, port, dptr)) {
 		nf_conntrack_unexpect_related(exp);
 		return NF_DROP;
