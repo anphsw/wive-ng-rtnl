@@ -63,6 +63,8 @@
 #include <net/ipip.h>
 #include <net/checksum.h>
 
+#define FIND_MULTICAST_SOURCE_ZERO 	1
+
 #if defined(CONFIG_IP_PIMSM_V1) || defined(CONFIG_IP_PIMSM_V2)
 #define CONFIG_IP_PIMSM	1
 #endif
@@ -471,6 +473,16 @@ static struct mfc_cache *ipmr_cache_find(__be32 origin, __be32 mcastgrp)
 		if (c->mfc_origin==origin && c->mfc_mcastgrp==mcastgrp)
 			break;
 	}
+#ifdef FIND_MULTICAST_SOURCE_ZERO
+	if (!c) {
+		line=MFC_HASH(mcastgrp,0);
+
+		for (c=mfc_cache_array[line]; c; c = c->next) {
+			if (c->mfc_mcastgrp==mcastgrp)
+				break;
+		}
+	}
+#endif
 	return c;
 }
 
