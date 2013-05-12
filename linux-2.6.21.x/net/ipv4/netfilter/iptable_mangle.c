@@ -145,7 +145,7 @@ ipt_local_hook(unsigned int hook,
 
 	ret = ipt_do_table(pskb, hook, in, out, &packet_mangler);
 	/* Reroute for ANY change. */
-	if (ret != NF_DROP && ret != NF_STOLEN && ret != NF_QUEUE
+	if (ret != NF_DROP && ret != NF_STOLEN
 	    && ((*pskb)->nh.iph->saddr != saddr
 		|| (*pskb)->nh.iph->daddr != daddr
 		|| (*pskb)->mark != mark
