@@ -3241,11 +3241,7 @@ static void netdev_wait_allrefs(struct net_device *dev)
 			rebroadcast_time = jiffies;
 		}
 
-#ifndef REFCNT_LEAK_HACK
-		msleep(250);
-#else
 		msleep(100);
-#endif
 
 		refcnt = atomic_read(&dev->refcnt);
 
