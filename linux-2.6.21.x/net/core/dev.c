@@ -3245,23 +3245,26 @@ static void netdev_wait_allrefs(struct net_device *dev)
 
 		refcnt = atomic_read(&dev->refcnt);
 
-		if (time_after(jiffies, warning_time + 10 * HZ)) {
-/* This is not clean hack. May be resource leak
-    cardmap ppp module not touch refcnt and not need check this */
 #ifndef REFCNT_LEAK_HACK
-			printk(KERN_EMERG "unregister_netdevice: "
-			       "waiting for %s to become free. Usage "
-			       "count = %d\n",
-			       dev->name, refcnt);
-			warning_time = jiffies;
+		printk(KERN_EMERG "unregister_netdevice: waiting for %s to become free. Usage count = %d\n", dev->name, refcnt);
 #else
+		/*
+		 *This is not clean hack. May be resource leak cardmap ppp module not touch refcnt and not need check this
+		*/
+		if (time_after(jiffies, warning_time + 10 * HZ)) {
 			warning_time = jiffies;
-
+			/* wait count exeed - break and warn of leak */
 			if (count > 2) {
 			    refcnt = 0;
 			    printk(KERN_EMERG "unregister_netdevice %s refcnt leak. need fix.", dev->name);
 			    break;
 			}
+
+			/* refcnt freed ok ? - break without warn or reread refcnt and repeat wait */
+                        if (!refcnt)
+			    break;
+			else
+			    refcnt = atomic_read(&dev->refcnt);
 
 			count++;
 #endif

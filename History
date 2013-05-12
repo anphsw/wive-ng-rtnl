@@ -1497,6 +1497,7 @@
 37) kernel: ipv4: fix byte value boundary check in do_ip_getsockopt().<br>
 38) kernel: af_unix: fix deadlock on connecting to shutdown socket.<br>
 39) kernel: af_unix: if we don't care about credentials coallesce all messages.<br>
+40) kernel: net/core: fix refcount leak hack.<br>
 <br>
 <br>
 <br>
