@@ -1534,6 +1534,7 @@ static __sum16 tcp_v4_checksum_init(struct sk_buff *skb)
 int tcp_v4_do_rcv(struct sock *sk, struct sk_buff *skb)
 {
 	struct sock *rsk;
+	
 #ifdef CONFIG_TCP_MD5SIG
 	/*
 	 * We really want to reject the packet as early as possible
@@ -1666,8 +1667,11 @@ process:
 			if (!tcp_prequeue(sk, skb))
 			ret = tcp_v4_do_rcv(sk, skb);
 		}
-	} else
-		sk_add_backlog(sk, skb);
+	} else if (sk_add_backlog(sk, skb)) {
+		bh_unlock_sock(sk);
+		goto discard_and_relse;
+	}
+
 	bh_unlock_sock(sk);
 
 	sock_put(sk);

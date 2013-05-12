@@ -214,6 +214,7 @@ struct sock {
 	struct {
 		struct sk_buff *head;
 		struct sk_buff *tail;
+		int len;
 	} sk_backlog;
 	wait_queue_head_t	*sk_sleep;
 	struct dst_entry	*sk_dst_cache;
@@ -474,7 +475,14 @@ static inline void sk_stream_free_skb(struct sock *sk, struct sk_buff *skb)
 }
 
 /* The per-socket spinlock must be held here. */
-static inline void sk_add_backlog(struct sock *sk, struct sk_buff *skb)
+static inline bool sk_rcvqueues_full(const struct sock *sk, const struct sk_buff *skb)
+{
+	unsigned int qsize = sk->sk_backlog.len + atomic_read(&sk->sk_rmem_alloc);
+
+	return ((qsize + skb->truesize > sk->sk_rcvbuf));
+}
+
+static inline void __sk_add_backlog(struct sock *sk, struct sk_buff *skb)
 {
 	if (!sk->sk_backlog.tail) {
 		sk->sk_backlog.head = sk->sk_backlog.tail = skb;
@@ -483,6 +491,16 @@ static inline void sk_add_backlog(struct sock *sk, struct sk_buff *skb)
 		sk->sk_backlog.tail = skb;
 	}
 	skb->next = NULL;
+}
+
+static inline int sk_add_backlog(struct sock *sk, struct sk_buff *skb)
+{
+	if (sk_rcvqueues_full(sk, skb))
+		return -ENOBUFS;
+
+	__sk_add_backlog(sk, skb);
+	sk->sk_backlog.len += skb->truesize;
+	return 0;
 }
 
 #define sk_wait_event(__sk, __timeo, __condition)			\

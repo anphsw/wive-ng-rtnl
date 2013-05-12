@@ -1489,17 +1489,19 @@
 29) kernel: net: add a prefetch in socket backlog processing.<br>
 30) kernel: net: fix locking in flush_backlog.<br>
 31) kernel: net: added ASSERT_RTNL() to dev_open() and dev_close().<br>
-32) kernel: sock: keep sk_backlog near sk_lock.<br>
-33) kernel: sock: sk_stamp: should be initialized to ktime_set(-1L, 0).<br>
-34) kernel: tcp: tcp_tso_segment() small optimization.<br>
-35) kernel: ipv6: don't send packet to big messages to self.<br>
-36) kernel: ipv4: replace ip_fast_csum with csum_replace2 to save cpu cycles.<br>
-37) kernel: ipv4: fix byte value boundary check in do_ip_getsockopt().<br>
-38) kernel: af_unix: fix deadlock on connecting to shutdown socket.<br>
-39) kernel: af_unix: if we don't care about credentials coallesce all messages.<br>
-40) kernel: net/core: fix refcount leak hack.<br>
-41) kernel: net/core: fix potential null pointer dereferene(qdis/brfastpath).<br>
-42) kernel: conntrack: fix one way voice issue if SIP ALG enabled.<br>
+32) kernel: net: sk_add_backlog() take rmem_alloc into account.<br>
+33) kernel: net: add a limit parameter to sk_add_backlog().<br>
+34) kernel: sock: keep sk_backlog near sk_lock.<br>
+35) kernel: sock: sk_stamp: should be initialized to ktime_set(-1L, 0).<br>
+36) kernel: tcp: tcp_tso_segment() small optimization.<br>
+37) kernel: ipv6: don't send packet to big messages to self.<br>
+38) kernel: ipv4: replace ip_fast_csum with csum_replace2 to save cpu cycles.<br>
+39) kernel: ipv4: fix byte value boundary check in do_ip_getsockopt().<br>
+40) kernel: af_unix: fix deadlock on connecting to shutdown socket.<br>
+41) kernel: af_unix: if we don't care about credentials coallesce all messages.<br>
+42) kernel: net/core: fix refcount leak hack.<br>
+43) kernel: net/core: fix potential null pointer dereferene(qdis/brfastpath).<br>
+44) kernel: conntrack: fix one way voice issue if SIP ALG enabled.<br>
 <br>
 <br>
 <br>
