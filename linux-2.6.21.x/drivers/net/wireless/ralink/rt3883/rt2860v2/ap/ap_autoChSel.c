@@ -400,10 +400,10 @@ static inline UCHAR SelectClearChannelCCA(
 			
 	AutoChannelSkipListSetDirty(pAd);	
 	
-	DBGPRINT(RT_DEBUG_TRACE, ("=====================================================\n"));
+	printk("======================RT3883=========================\n");
 	for (channel_idx = 0; channel_idx < pAd->ChannelListNum; channel_idx++)
 	{
-		DBGPRINT(RT_DEBUG_TRACE, ("Channel %d : Dirty = %ld, False CCA = %u, Busy Time = %u, Skip Channel = %s\n",
+		printk("Channel %d : Dirty = %ld, False CCA = %u, Busy Time = %u, Skip Channel = %s\n",
 					pAd->ChannelList[channel_idx].Channel,
 					pChannelInfo->dirtyness[channel_idx],
 					pChannelInfo->FalseCCA[channel_idx],
@@ -412,9 +412,9 @@ static inline UCHAR SelectClearChannelCCA(
 #else
 					0,
 #endif // AP_QLOAD_SUPPORT //
-					(pChannelInfo->SkipList[channel_idx] == TRUE) ? "TRUE" : "FALSE"));
+					(pChannelInfo->SkipList[channel_idx] == TRUE) ? "TRUE" : "FALSE");
 	}
-	DBGPRINT(RT_DEBUG_TRACE, ("=====================================================\n"));
+	printk("=====================================================\n");
 
 	min_dirty = min_falsecca = 0xFFFFFFFF;
 
@@ -713,10 +713,10 @@ static inline UCHAR SelectClearChannelApCnt(
 
 	AutoChannelSkipListSetDirty(pAd);
 	
-   DBGPRINT(RT_DEBUG_TRACE, ("=====================================================\n"));
+		printk("=====================================================\n");
    for (channel_index=0 ; channel_index < pAd->ChannelListNum ; channel_index++)
    // debug messages //
-		DBGPRINT(RT_DEBUG_TRACE, ("Channel %d : Dirty = %ld, ApCnt=%ld, Busy Time = %d, Skip Channel = %s\n", 
+		printk(RT_DEBUG_TRACE, ("Channel %d : Dirty = %ld, ApCnt=%ld, Busy Time = %d, Skip Channel = %s\n", 
 				pAd->ChannelList[channel_index].Channel,
 				pChannelInfo->dirtyness[channel_index], 
 				pChannelInfo->ApCnt[channel_index],
@@ -725,8 +725,8 @@ static inline UCHAR SelectClearChannelApCnt(
 #else
 				0,
 #endif // AP_QLOAD_SUPPORT //
-				(pChannelInfo->SkipList[channel_index] == TRUE) ? "TRUE" : "FALSE"));
-   DBGPRINT(RT_DEBUG_TRACE, ("=====================================================\n"));
+				(pChannelInfo->SkipList[channel_index] == TRUE) ? "TRUE" : "FALSE");
+		printk("=====================================================\n");
    
    pAd->ApCfg.AutoChannel_Channel = 0;
 	
@@ -814,8 +814,8 @@ static inline UCHAR SelectClearChannelApCnt(
 			}
 			if (final_channel != 0)
 			{				
-				DBGPRINT(RT_DEBUG_TRACE,("Rule 2 APCnt : minimum APCnt with  minimum interference(dirtiness: 30~32) ==> Select Channel %d\n", final_channel));
-				DBGPRINT(RT_DEBUG_TRACE,(" Dirtiness = %d ,  Min ApCnt = %d\n", dirty, min_ApCnt));
+				printk("Rule 2 APCnt : minimum APCnt with  minimum interference(dirtiness: 30~32) ==> Select Channel %d\n", final_channel);
+				printk(" Dirtiness = %d ,  Min ApCnt = %d\n", dirty, min_ApCnt);
 				return final_channel;
 			}
 		}
