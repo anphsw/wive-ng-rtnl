@@ -1650,16 +1650,17 @@ int netif_rx(struct sk_buff *skb)
 {
 	struct softnet_data *queue;
 	unsigned long flags;
+#if defined(CONFIG_BRIDGE_FASTPATH) && !defined(CONFIG_BRIDGE_NETFILTER)
+	struct net_bridge_port *p;
+#endif
+        /* if dev not set - must drop this packet */
+	if(unlikely(!skb->dev))
+	    goto drop;
 
 #if defined(CONFIG_BRIDGE_FASTPATH) && !defined(CONFIG_BRIDGE_NETFILTER)
-	struct net_bridge_port *p = skb->dev->br_port;
+	p = skb->dev->br_port;
 
-	if(!skb->dev) {
-	    kfree_skb(skb);
-	    return NET_RX_DROP;
-	}
-
-	if ((bridge_fast_path_enabled) && (p!=NULL)) {
+	if (bridge_fast_path_enabled && (p!=NULL)) {
 	    struct net_bridge *br = p->br;
 
 	    if (br != NULL) {
@@ -1682,10 +1683,11 @@ int netif_rx(struct sk_buff *skb)
 	    }
 	}
 #endif
+#ifdef CONFIG_NETPOLL
 	/* if netpoll wants it, pretend we never saw it */
 	if (netpoll_rx(skb))
 		return NET_RX_DROP;
-
+#endif
 	if (!skb->tstamp.tv64)
 		net_timestamp(skb);
 
@@ -1712,7 +1714,7 @@ enqueue:
 
 	__get_cpu_var(netdev_rx_stat).dropped++;
 	local_irq_restore(flags);
-
+drop:
 	kfree_skb(skb);
 	return NET_RX_DROP;
 }
