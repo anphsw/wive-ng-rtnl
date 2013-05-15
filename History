@@ -1503,6 +1503,7 @@
 43) kernel: net/core: fix potential null pointer dereferene(qdisc/br_fastpath).<br>
 44) kernel: conntrack: fix one way voice issue if SIP ALG enabled.<br>
 45) kernel: 8021q: fix vlan processing devices with HW accelerating.<br>
+46) kernel: net: sock_close() couldn't have been called with NULL inode since at least 2.1.early.<br>
 <br>
 <br>
 <br>
