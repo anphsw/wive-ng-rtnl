@@ -106,38 +106,36 @@ case "$1" in
     ########################################################################################################
         #
 	# update routes if first exec script or new ip selected or not set RouteUpOnce=1
+	# default route with metric 0 is through $iface?
 	#
-	if [ "$RouteUpOnce" = "0" ] || [ "$FULL_RENEW" = "1" ] || [ ! -f /tmp/routes_applied ]; then
+	dgw_otherif=`ip route | grep "default" | grep -v "dev $interface " | sed 's,.*dev \([^ ]*\) .*,\1,g'`
+	if [ "$dgw_otherif" =! "" ] || [ "$RouteUpOnce" = "0" ] || [ "$FULL_RENEW" = "1" ] || [ ! -f /tmp/routes_applied ]; then
 	    # Get default gateway
 	    if [ -n "$router" ]; then
-		# default route with metric 0 is through $iface?
-		dgw_otherif=`ip route | grep "default" | grep -v "dev $interface " | sed 's,.*dev \([^ ]*\) .*,\1,g'`
-		if [ -z "$dgw_otherif" ]; then
-		    # if ip not changed not need delete old default route
-		    # this is workaroud for ppp used tunnels up over not default routes
-		    if [ "$FULL_RENEW" = "1" ] && [ "$REPLACE_DGW" = "1" ]; then
-			$LOG "Deleting default route dev $interface"
-			while ip route del default dev $interface ; do
-			    :
-			done
-		    fi
-		    # always parse router variable
-		    metric=0
-		    for i in $router ; do
-			$LOG "Add route $i/32:0.0.0.0 dev $interface metric $metric to route list."
-			ROUTELIST_FGW="$ROUTELIST_FGW $i/32:0.0.0.0:$interface:"
-			if [ "$REPLACE_DGW" = "1" ]; then
-			    $LOG "Add default:$i dev $interface metric $metric to route dgw list"
-			    ROUTELIST_DGW="$ROUTELIST_DGW default:$i:$interface:$metric"
-			    # save first dgw with metric=0 to use in corbina hack
-			    if [ "$metric" = "0" ]; then
-				echo $i > /tmp/default.gw
-				first_dgw="$i"
-			    fi
-			fi
-    			metric=`expr $metric + 1`
+		# if ip not changed not need delete old default route
+		# this is workaroud for ppp used tunnels up over not default routes
+		if [ "$FULL_RENEW" = "1" ] && [ "$REPLACE_DGW" = "1" ]; then
+		    $LOG "Deleting default route dev $interface"
+		    while ip route del default dev $interface ; do
+		        :
 		    done
 		fi
+		# always parse router variable
+		metric=0
+		for i in $router ; do
+		    $LOG "Add route $i/32:0.0.0.0 dev $interface metric $metric to route list."
+		    ROUTELIST_FGW="$ROUTELIST_FGW $i/32:0.0.0.0:$interface:"
+		    if [ "$REPLACE_DGW" = "1" ]; then
+		        $LOG "Add default $i dev $interface metric $metric to route dgw list"
+		        ROUTELIST_DGW="$ROUTELIST_DGW default:$i:$interface:$metric"
+		        # save first dgw with metric=0 to use in corbina hack
+		        if [ "$metric" = "0" ]; then
+			    echo $i > /tmp/default.gw
+			    first_dgw="$i"
+			fi
+		    fi
+    		    metric=`expr $metric + 1`
+		done
 	    fi
 	    # classful routes
 	    if [ -n "$routes" ]; then
