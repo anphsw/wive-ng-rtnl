@@ -224,7 +224,6 @@ endif
 
 ############################################################################
 # fix crosscompile for some apps
-export pkg-config /bin/false
-export PKG_CONFIG /bin/false
+# export PKG_CONFIG /bin/false
 
 ############################################################################
