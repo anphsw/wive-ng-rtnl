@@ -77,24 +77,31 @@ case "$1" in
     # IP/NETMASK/MTU
     ########################################################################################################
 
-	# Small check
+	# check ip/netmask
 	if [ "$NEW_IP" = "" ] || [ "$NETMASK" = "" ]; then
 	    $LOG "ERROR: DHCP not send IP/MASK.... Call you provider support!!!"
 	    exit 1
 	fi
 
-	# Check subnets
+	# check subnets
 	lan_net=`ipcalc "$lan_ipaddr" "$lan_netmask" -ns | cut -f 2- -d =`
 	wan_net=`ipcalc "$NEW_IP" "$NETMASK" -ns | cut -f 2- -d =`
 	if [ "$NEW_IP" = "$lan_ipaddr" ] || [ "$lan_net" = "$wan_net" ]; then
 	    $LOG "ERROR: WAN ip in lan subnet. Need change LAN_IP address!!!"
 	fi
 
-	# MTU is default for all session time.
+	# if dgw iface changed need fullrenew procedure
+	DGW_IF_CHANGED=`ip route | grep "default" | grep -v "dev $interface " | sed 's,.*dev \([^ ]*\) .*,\1,g'`
+	if [ "$DGW_IF_CHANGED" =! "" ]; then
+	    FULL_RENEW=1
+	fi
+
+	# set ip/netmask
 	if [ "$FULL_RENEW" = "1" ]; then
 	    $LOG "Renew ip adress $NEW_IP and $NETMASK for $interface from dhcp"
 	    ifconfig $interface $NEW_IP $BROADCAST $NETMASK
-	    # Get MTU from dhcp server
+	    # MTU is default for all session time.
+	    # Get MTU from dhcp server and set
 	    if [ "$mtu" ] && [ "$wan_manual_mtu" = "0" ]; then
 		$LOG "Set MTU to $mtu bytes from dhcp server"
 		ip link set mtu $mtu dev $interface
@@ -108,8 +115,7 @@ case "$1" in
 	# update routes if first exec script or new ip selected or not set RouteUpOnce=1
 	# default route with metric 0 is through $iface?
 	#
-	dgw_otherif=`ip route | grep "default" | grep -v "dev $interface " | sed 's,.*dev \([^ ]*\) .*,\1,g'`
-	if [ "$FULL_RENEW" = "1" ] || [ "$dgw_otherif" =! "" ] || [ "$RouteUpOnce" = "0" ] || [ ! -f /tmp/routes_applied ]; then
+	if [ "$FULL_RENEW" = "1" ] || [ "$RouteUpOnce" = "0" ] || [ ! -f /tmp/routes_applied ]; then
 	    # Get default gateway
 	    if [ -n "$router" ]; then
 		# if ip not changed not need delete old default route
