@@ -52,7 +52,7 @@ NETFILTEROBJS = netfilter/iptcrdr.o netfilter/iptpinhole.o
 
 ALLOBJS = $(BASEOBJS) $(LNXOBJS) $(NETFILTEROBJS)
 
-PCFILE_FOUND := $(shell pkg-config --exists libiptc; echo $$?)
+PCFILE_FOUND :=
 
 ifeq (${PCFILE_FOUND},0)
 
