@@ -127,7 +127,7 @@ case "$1" in
 			$LOG "Add route $i/32:0.0.0.0 dev $interface metric $metric to route list."
 			ROUTELIST_FGW="$ROUTELIST_FGW $i/32:0.0.0.0:$interface:"
 			if [ "$REPLACE_DGW" = "1" ]; then
-			    $LOG "Add default:$i:$interface:$metric to route dgw list"
+			    $LOG "Add default:$i dev $interface metric $metric to route dgw list"
 			    ROUTELIST_DGW="$ROUTELIST_DGW default:$i:$interface:$metric"
 			    # save first dgw with metric=0 to use in corbina hack
 			    if [ "$metric" = "0" ]; then
