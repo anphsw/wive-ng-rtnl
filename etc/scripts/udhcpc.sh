@@ -109,7 +109,7 @@ case "$1" in
 	# default route with metric 0 is through $iface?
 	#
 	dgw_otherif=`ip route | grep "default" | grep -v "dev $interface " | sed 's,.*dev \([^ ]*\) .*,\1,g'`
-	if [ "$dgw_otherif" =! "" ] || [ "$RouteUpOnce" = "0" ] || [ "$FULL_RENEW" = "1" ] || [ ! -f /tmp/routes_applied ]; then
+	if [ "$FULL_RENEW" = "1" ] || [ "$dgw_otherif" =! "" ] || [ "$RouteUpOnce" = "0" ] || [ ! -f /tmp/routes_applied ]; then
 	    # Get default gateway
 	    if [ -n "$router" ]; then
 		# if ip not changed not need delete old default route
