@@ -90,13 +90,6 @@
 
 int sysctl_ip_default_ttl __read_mostly = IPDEFTTL;
 
-/* Generate a checksum for an outgoing IP datagram. */
-__inline__ void ip_send_check(struct iphdr *iph)
-{
-	iph->check = 0;
-	iph->check = ip_fast_csum((unsigned char *)iph, iph->ihl);
-}
-
 /* dev_loopback_xmit for use with netfilter. */
 static int ip_dev_loopback_xmit(struct sk_buff *newskb)
 {
@@ -1456,4 +1449,3 @@ EXPORT_SYMBOL(ip_flush_pending_frames);
 EXPORT_SYMBOL(ip_append_data);
 EXPORT_SYMBOL(ip_generic_getfrag);
 EXPORT_SYMBOL(ip_queue_xmit);
-EXPORT_SYMBOL(ip_send_check);

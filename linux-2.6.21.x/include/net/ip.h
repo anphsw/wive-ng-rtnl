@@ -107,7 +107,6 @@ extern int		ip_output(struct sk_buff *skb);
 extern int		ip_mc_output(struct sk_buff *skb);
 extern int		ip_fragment(struct sk_buff *skb, int (*output)(struct sk_buff *));
 extern int		ip_do_nat(struct sk_buff *skb);
-extern void		ip_send_check(struct iphdr *ip);
 extern int		ip_queue_xmit(struct sk_buff *skb, int ipfragok);
 extern void		ip_init(void);
 extern int		ip_append_data(struct sock *sk,
@@ -198,6 +197,14 @@ extern void ipfrag_init(void);
 
 #ifdef CONFIG_INET
 #include <net/dst.h>
+
+/* Generate a checksum for an outgoing IP datagram. */
+static inline
+void ip_send_check(struct iphdr *iph)
+{
+	iph->check = 0;
+	iph->check = ip_fast_csum((unsigned char *)iph, iph->ihl);
+}
 
 /* The function in 2.2 was invalid, producing wrong result for
  * check=0xFEFF. It was noticed by Arthur Skawina _year_ ago. --ANK(000625) */
