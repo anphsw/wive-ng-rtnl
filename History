@@ -1507,6 +1507,7 @@
 46) kernel: net: sock_close() couldn't have been called with NULL inode since at least 2.1.early.<br>
 47) kernel: ipv4: make ip_send_check available for inline.<br>
 48) kernel: af_unix: fix a fatal race with bit fields.<br>
+49) kernel: mips: avoid overoptimization by GCC.<br>
 <br>
 <br>
 <br>

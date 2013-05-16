@@ -1116,9 +1116,8 @@ unsigned long vi_handlers[64];
 void *set_except_vector(int n, void *addr)
 {
 	unsigned long handler = (unsigned long) addr;
-	unsigned long old_handler = exception_handlers[n];
+	unsigned long old_handler = xchg(&exception_handlers[n], handler);
 
-	exception_handlers[n] = handler;
 	if (n == 0 && cpu_has_divec) {
 		*(u32 *)(ebase + 0x200) = 0x08000000 |
 					  (0x03ffffff & (handler >> 2));
