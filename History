@@ -1511,6 +1511,7 @@
 50) kernel: mips: avoid overoptimization by GCC.<br>
 51) kernel: mips: Remove redundant instructions from arch_spin_{,try}lock.<br>
 52) kernel: mips: Remove further use of .subsection.<br>
+53) kernel: kfifo: updates from upstream.<br>
 <br>
 <br>
 <br>
