@@ -1468,7 +1468,8 @@
 7) zlib: update to 1.2.7 version.<br>
 8) init.d: udpxy: tune options for compat with amlogic based tabs/players.<br>
 9) init.d: fix export variables for correct transmission home set.<br>
-10) ppp: first try MSCHAP-V2 per auth.<br>
+10) init.d: udhcpc: replace default route if current iface not correct.<br>
+11) ppp: first try MSCHAP-V2 per auth.<br>
 12) libc: fix memleak and some updates.<br>
 13) buildsystem: add gc-sections flag for iproute2/udpxy/dnsmasq/usb_modeswitch (shrink image size).<br>
 14) kernel: mtd update.<br>
@@ -1505,7 +1506,7 @@
 45) kernel: 8021q: fix vlan processing devices with HW accelerating.<br>
 46) kernel: net: sock_close() couldn't have been called with NULL inode since at least 2.1.early.<br>
 47) kernel: ipv4: make ip_send_check available for inline.<br>
-48) init.d: udhcpc: replace default route if current iface not correct.<br>
+48) kernel: af_unix: fix a fatal race with bit fields.<br>
 <br>
 <br>
 <br>
