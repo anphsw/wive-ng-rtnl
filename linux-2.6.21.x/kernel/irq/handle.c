@@ -134,9 +134,6 @@ irqreturn_t handle_IRQ_event(unsigned int irq, struct irqaction *action)
 
 	handle_dynamic_tick(action);
 
-	if (!(action->flags & IRQF_DISABLED))
-		local_irq_enable_in_hardirq();
-
 	do {
 		ret = action->handler(irq, action->dev_id);
 		if (ret == IRQ_HANDLED)
