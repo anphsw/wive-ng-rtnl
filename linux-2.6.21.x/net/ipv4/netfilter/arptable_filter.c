@@ -188,11 +188,8 @@ static int __init arptable_filter_init(void)
 
 	ret = nf_register_hooks(arpt_ops, ARRAY_SIZE(arpt_ops));
 	if (ret < 0)
-		goto cleanup_table;
-	return ret;
+		arpt_unregister_table(&packet_filter);
 
-cleanup_table:
-	arpt_unregister_table(&packet_filter);
 	return ret;
 }
 

@@ -134,12 +134,8 @@ static int __init ip6table_raw_init(void)
 	/* Register hooks */
 	ret = nf_register_hooks(ip6t_ops, ARRAY_SIZE(ip6t_ops));
 	if (ret < 0)
-		goto cleanup_table;
+		ip6t_unregister_table(&packet_raw);
 
-	return ret;
-
- cleanup_table:
-	ip6t_unregister_table(&packet_raw);
 	return ret;
 }
 
