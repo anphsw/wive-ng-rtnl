@@ -201,23 +201,28 @@ static inline void ipv6_addr_all_routers(struct in6_addr *addr)
 		      __constant_htonl(0x2));
 }
 
-static inline int ipv6_addr_is_multicast(const struct in6_addr *addr)
+static inline bool ipv6_addr_is_multicast(const struct in6_addr *addr)
 {
 	return (addr->s6_addr32[0] & __constant_htonl(0xFF000000)) == __constant_htonl(0xFF000000);
 }
 
-static inline int ipv6_addr_is_ll_all_nodes(const struct in6_addr *addr)
+static inline bool ipv6_addr_is_ll_all_nodes(const struct in6_addr *addr)
 {
 	return (((addr->s6_addr32[0] ^ htonl(0xff020000)) |
 		addr->s6_addr32[1] | addr->s6_addr32[2] |
 		(addr->s6_addr32[3] ^ htonl(0x00000001))) == 0);
 }
 
-static inline int ipv6_addr_is_ll_all_routers(const struct in6_addr *addr)
+static inline bool ipv6_addr_is_ll_all_routers(const struct in6_addr *addr)
 {
 	return (((addr->s6_addr32[0] ^ htonl(0xff020000)) |
 		addr->s6_addr32[1] | addr->s6_addr32[2] |
 		(addr->s6_addr32[3] ^ htonl(0x00000002))) == 0);
+}
+
+static inline bool ipv6_addr_is_isatap(const struct in6_addr *addr)
+{
+	return ((addr->s6_addr32[2] | htonl(0x02000000)) == htonl(0x02005EFE));
 }
 
 static inline int ipv6_isatap_eui64(u8 *eui, __be32 addr)
@@ -233,11 +238,6 @@ static inline int ipv6_isatap_eui64(u8 *eui, __be32 addr)
 	eui[3] = 0xFE;
 	memcpy (eui+4, &addr, 4);
 	return 0;
-}
-
-static inline int ipv6_addr_is_isatap(const struct in6_addr *addr)
-{
-	return ((addr->s6_addr32[2] | htonl(0x02000000)) == htonl(0x02005EFE));
 }
 
 #ifdef CONFIG_PROC_FS
