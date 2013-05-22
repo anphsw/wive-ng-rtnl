@@ -1516,6 +1516,7 @@
 55) kernel: eth: declare an optimized compare_ether_addr_64bits() function.<br>
 56) kernel: ipv6: don't accept node local multicast traffic from the wire.<br>
 57) kernel: net: IP_MULTICAST_IF setsockopt now recognizes struct mreq.<br>
+58) kernel: ipv6: Fix for adding multicast route for loopback device automatically.<br>
 <br>
 <br>
 <br>
