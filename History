@@ -1514,6 +1514,7 @@
 53) kernel: kfifo: updates from upstream.<br>
 54) kernel: shmem: fix division by zero.<br>
 55) kernel: eth: declare an optimized compare_ether_addr_64bits() function.<br>
+56) kernel: ipv6: don't accept node local multicast traffic from the wire.<br>
 <br>
 <br>
 <br>
