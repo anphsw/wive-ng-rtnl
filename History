@@ -1513,6 +1513,7 @@
 52) kernel: mips: Remove further use of .subsection.<br>
 53) kernel: kfifo: updates from upstream.<br>
 54) kernel: shmem: fix division by zero.<br>
+55) kernel: eth: declare an optimized compare_ether_addr_64bits() function.<br>
 <br>
 <br>
 <br>
