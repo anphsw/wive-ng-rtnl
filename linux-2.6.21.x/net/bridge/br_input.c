@@ -161,9 +161,9 @@ static int br_handle_local_finish(struct sk_buff *skb)
 /* Does address match the link local multicast address.
  * 01:80:c2:00:00:0X
  */
-static inline int is_link_local(const unsigned char *dest)
+static inline bool is_link_local_ether_addr(const u8 *addr)
 {
-        __be16 *a = (__be16 *)dest;
+	__be16 *a = (__be16 *)addr;
         static const __be16 *b = (const __be16 *)br_group_address;
         static const __be16 m = __constant_cpu_to_be16(0xfff0);
 
@@ -189,7 +189,7 @@ struct sk_buff *br_handle_frame(struct net_bridge_port *p, struct sk_buff *skb)
     if (!skb)
 	return NULL;
 
-    if (unlikely(is_link_local(dest))) {
+    if (unlikely(is_link_local_ether_addr(dest))) {
 	/*
 	 * See IEEE 802.1D Table 7-10 Reserved addresses
 	 *
