@@ -1423,7 +1423,7 @@ packet_setsockopt(struct socket *sock, int level, int optname, char __user *optv
 			ret = packet_mc_drop(sk, &mreq);
 		return ret;
 	}
-#endif
+
 	case PACKET_RX_RING:
 	{
 		struct tpacket_req req;
