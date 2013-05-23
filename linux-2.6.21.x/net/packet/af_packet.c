@@ -86,20 +86,6 @@
 #endif
 
 /*
-   Proposed replacement for SIOC{ADD,DEL}MULTI and
-   IFF_PROMISC, IFF_ALLMULTI flags.
-
-   It is more expensive, but I believe,
-   it is really correct solution: reentereble, safe and fault tolerant.
-
-   IFF_PROMISC/IFF_ALLMULTI/SIOC{ADD/DEL}MULTI are faked by keeping
-   reference count and global flag, so that real status is
-   (gflag|(count != 0)), so that we can use obsolete faulty interface
-   not harming clever users.
- */
-#define CONFIG_PACKET_MULTICAST	1
-
-/*
    Assumptions:
    - if device has no dev->hard_header routine, it adds and removes ll header
      inside itself. In this case ll header is invisible outside of device,
@@ -159,7 +145,6 @@ static atomic_t packet_socks_nr;
 
 /* Private packet socket structures. */
 
-#ifdef CONFIG_PACKET_MULTICAST
 struct packet_mclist
 {
 	struct packet_mclist	*next;
@@ -179,7 +164,7 @@ struct packet_mreq_max
 	unsigned short	mr_alen;
 	unsigned char	mr_address[MAX_ADDR_LEN];
 };
-#endif
+
 static int packet_set_ring(struct sock *sk, struct tpacket_req *req, int closing);
 
 static void packet_flush_mclist(struct sock *sk);
@@ -202,9 +187,9 @@ struct packet_sock {
 				origdev:1;
 	int			ifindex;	/* bound device		*/
 	__be16			num;
-#ifdef CONFIG_PACKET_MULTICAST
+
 	struct packet_mclist	*mclist;
-#endif
+
 	atomic_t		mapped;
 	unsigned int            pg_vec_order;
 	unsigned int		pg_vec_pages;
@@ -926,9 +911,7 @@ static int packet_release(struct socket *sock)
 		__sock_put(sk);
 	}
 
-#ifdef CONFIG_PACKET_MULTICAST
 	packet_flush_mclist(sk);
-#endif
 
 	if (po->pg_vec) {
 		struct tpacket_req req;
@@ -1281,7 +1264,6 @@ static int packet_getname(struct socket *sock, struct sockaddr *uaddr,
 	return 0;
 }
 
-#ifdef CONFIG_PACKET_MULTICAST
 static void packet_dev_mc(struct net_device *dev, struct packet_mclist *i, int what)
 {
 	switch (i->type) {
@@ -1409,7 +1391,6 @@ static void packet_flush_mclist(struct sock *sk)
 	}
 	rtnl_unlock();
 }
-#endif
 
 static int
 packet_setsockopt(struct socket *sock, int level, int optname, char __user *optval, int optlen)
@@ -1422,7 +1403,6 @@ packet_setsockopt(struct socket *sock, int level, int optname, char __user *optv
 		return -ENOPROTOOPT;
 
 	switch(optname)	{
-#ifdef CONFIG_PACKET_MULTICAST
 	case PACKET_ADD_MEMBERSHIP:
 	case PACKET_DROP_MEMBERSHIP:
 	{
@@ -1632,11 +1612,9 @@ static int packet_notifier(struct notifier_block *this, unsigned long msg, void 
 
 		switch (msg) {
 		case NETDEV_UNREGISTER:
-#ifdef CONFIG_PACKET_MULTICAST
 			if (po->mclist)
 				packet_dev_mclist(dev, po->mclist, -1);
-#endif
-		// fallthrough
+		/* fallthrough */
 		case NETDEV_DOWN:
 			if (dev->ifindex == po->ifindex) {
 				spin_lock(&po->bind_lock);
