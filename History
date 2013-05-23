@@ -1518,6 +1518,7 @@
 57) kernel: net: IP_MULTICAST_IF setsockopt now recognizes struct mreq.<br>
 58) kernel: ipv6: Fix for adding multicast route for loopback device automatically.<br>
 59) kernel: inet6: prevent network storms caused by linux IPv6 routers.<br>
+60) kernel: net: ipv6 bind to device issue.<br>
 <br>
 <br>
 <br>
