@@ -1520,6 +1520,7 @@
 59) kernel: inet6: prevent network storms caused by linux IPv6 routers.<br>
 60) kernel: net: ipv6 bind to device issue.<br>
 61) kernel: udp: fix udp short packet false positive.<br>
+62) dhcpc: if dhcp server not send DNS use google dns.<br>
 <br>
 <br>
 <br>

@@ -216,9 +216,9 @@ case "$1" in
 		$LOG "Use static DNS."
 		# resolv.conf allready generated in internet.sh
 	    else
+		rm -f $RESOLV_CONF
 		if [ "$dns" ]; then
 		    $LOG "Renew DNS from dhcp $dns $domain"
-		    rm -f $RESOLV_CONF
         	    # get domain name
     		    [ -n "$domain" ] && echo domain $domain >> $RESOLV_CONF
 		    # parce dnsservers
@@ -232,7 +232,9 @@ case "$1" in
 			fi
 		    done
 		else
-		    $LOG "Server not send DNS. Please manual set DNS in wan config."
+		    $LOG "Server not send DNS. Please manual set DNS in wan config. Temp use google dns."
+	    	    echo nameserver 8.8.8.8 >> $RESOLV_CONF
+	    	    echo nameserver 8.8.4.4 >> $RESOLV_CONF
 		fi
 	    fi
 	    if [ "$wins" ]; then
