@@ -37,7 +37,8 @@ fi
 if [ "$broadcast" != "" ]; then
     BROADCAST="broadcast $broadcast"
 fi
-if [ "$subnet" != "" ]
+
+if [ "$subnet" != "" ]; then
     NETMASK="netmask $subnet"
 fi
 
