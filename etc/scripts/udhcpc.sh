@@ -11,10 +11,12 @@ LOG="logger -t udhcpc"
 RESOLV_CONF="/etc/resolv.conf"
 WINS_CONF="/tmp/wins.dhcp"
 
-# all route list
+# All route list
 ROUTELIST=""
 # Static route list
 ROUTELIST_ST=""
+# Static classful route list
+ROUTELIST_CS=""
 # Default gateway list
 ROUTELIST_DGW=""
 # Stub for first hop`s dgw
