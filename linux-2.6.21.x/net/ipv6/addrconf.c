@@ -2330,6 +2330,9 @@ static int addrconf_notify(struct notifier_block *this, unsigned long event,
 		break;
 	case NETDEV_UP:
 	case NETDEV_CHANGE:
+		if (dev->flags & IFF_SLAVE)
+			break;
+
 		if (event == NETDEV_UP) {
 			if (!addrconf_qdisc_ok(dev)) {
 				/* device is not ready yet. */
