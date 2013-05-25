@@ -19,7 +19,7 @@ ROUTELIST_DGW=""
 ROUTELIST_FGW=""
 
 # Get MTU config and VPN DGW mode
-eval `nvram_buf_get 2860 wan_manual_mtu vpnDGW dhcpSwReset RouteUpOnce lan_ipaddr lan_netmask`
+eval `nvram_buf_get 2860 wan_manual_mtu vpnDGW dhcpSwReset RouteUpOnce HostName lan_ipaddr lan_netmask`
 
 # Renew flag
 FULL_RENEW=1
@@ -217,10 +217,14 @@ case "$1" in
 		# resolv.conf allready generated in internet.sh
 	    else
 		rm -f $RESOLV_CONF
+        	# set domain name from DHCP/NVRAM
+    		if [ -n "$domain" ]; then
+		    echo "domain $domain" >> $RESOLV_CONF
+		else
+		    echo "domain $HostName.lo" >> $RESOLV_CONF
+		fi
 		if [ "$dns" ]; then
 		    $LOG "Renew DNS from dhcp $dns $domain"
-        	    # get domain name
-    		    [ -n "$domain" ] && echo domain $domain >> $RESOLV_CONF
 		    # parce dnsservers
 		    for i in $dns ; do
 	    		echo nameserver $i >> $RESOLV_CONF

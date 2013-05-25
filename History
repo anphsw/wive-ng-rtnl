@@ -1521,6 +1521,7 @@
 60) kernel: net: ipv6 bind to device issue.<br>
 61) kernel: udp: fix udp short packet false positive.<br>
 62) dhcpc: if dhcp server not send DNS use google dns.<br>
+63) dhcpc: always add domain name to resolv.conf from DHCP/NVRAM.<br>
 <br>
 <br>
 <br>
