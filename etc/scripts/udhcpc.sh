@@ -11,8 +11,10 @@ LOG="logger -t udhcpc"
 RESOLV_CONF="/etc/resolv.conf"
 WINS_CONF="/tmp/wins.dhcp"
 
-# Full route list
+# all route list
 ROUTELIST=""
+# Static route list
+ROUTELIST_ST=""
 # Default gateway list
 ROUTELIST_DGW=""
 # Stub for first hop`s dgw
@@ -30,8 +32,12 @@ if [ "$vpnEnabled" = "on" ] && [ "$vpnDGW" = "1" ] && [ "$vpnType" = "0" ]; then
     REPLACE_DGW=0
 fi
 
-[ -n "$broadcast" ] && BROADCAST="broadcast $broadcast"
-[ -n "$subnet" ] && NETMASK="netmask $subnet"
+if [ "$broadcast" != "" ]; then
+    BROADCAST="broadcast $broadcast"
+fi
+if [ "$subnet" != "" ]
+    NETMASK="netmask $subnet"
+fi
 
 case "$1" in
     deconfig)
@@ -117,7 +123,7 @@ case "$1" in
 	#
 	if [ "$FULL_RENEW" = "1" ] || [ "$RouteUpOnce" = "0" ] || [ ! -f /tmp/routes_applied ]; then
 	    # Get default gateway
-	    if [ -n "$router" ]; then
+	    if [ "$router" != "" ]; then
 		# if ip not changed not need delete old default route
 		# this is workaroud for ppp used tunnels up over not default routes
 		if [ "$FULL_RENEW" = "1" ] && [ "$REPLACE_DGW" = "1" ]; then
@@ -144,7 +150,7 @@ case "$1" in
 		done
 	    fi
 	    # classful routes
-	    if [ -n "$routes" ]; then
+	    if [ "$routes" != "" ]; then
 		for i in $routes; do
 		    NW=`echo $i | sed 's,/.*,,'`
 		    GW=`echo $i | sed 's,.*/,,'`
@@ -156,14 +162,14 @@ case "$1" in
 		    if [ "$GW" = "0.0.0.0" ] || [ -z "$GW" ]; then
 			ip route replace $NW/$MASK dev $interface
 		    else
-			ROUTELIST="$ROUTELIST $NW/$MASK:$GW:$interface:"
+			ROUTELIST_CS="$ROUTELIST_CS $NW/$MASK:$GW:$interface:"
 		    fi
 		done
 	    fi
 	    # MSSTATIC ROUTES AND STATIC ROUTES (rfc3442)
-	    ROUTES="$staticroutes $msstaticroutes"
-	    if [ "$ROUTES" != " " ]; then
-		set $ROUTES
+	    STATICROUTES="$staticroutes $msstaticroutes"
+	    if [ "$STATICROUTES" != " " ]; then
+		set $STATICROUTES
 		while [ -n "$1" ]; do
 		    NW="$1"
 		    GW="$2"
@@ -171,18 +177,18 @@ case "$1" in
 		    if [ "$GW" = "0.0.0.0" ] || [ -z "$GW" ]; then
 			ip route replace $NW dev $interface
 		    else
-			ROUTELIST="$ROUTELIST $NW:$GW:$interface:"
+			ROUTELIST_ST="$ROUTELIST_ST $NW:$GW:$interface:"
 		    fi
 		done
 	    fi
-	    # first add stub for routesm next add static routes and
+	    # first add stub for routes next add static routes and
 	    # default gateways need replace/add at end route parces
 	    # replace dgw must be replaced only if ip selected
 	    if [ "$REPLACE_DGW" = "1" ] && [ "$FULL_RENEW" = "1" ]; then
-		ROUTELIST="$ROUTELIST_FGW $ROUTELIST $ROUTELIST_DGW"
+		ROUTELIST="$ROUTELIST_FGW $ROUTELIST_ST $ROUTELIST_CS $ROUTELIST_DGW"
 		$LOG "Apply route list. And replace DGW."
 	    else
-		ROUTELIST="$ROUTELIST_FGW $ROUTELIST"
+		ROUTELIST="$ROUTELIST_FGW $ROUTELIST_ST $ROUTELIST_CS"
 		$LOG "Apply route list without modify DGW."
 	    fi
 	    # aplly parsed route
@@ -218,12 +224,12 @@ case "$1" in
 	    else
 		rm -f $RESOLV_CONF
         	# set domain name from DHCP/NVRAM
-    		if [ -n "$domain" ]; then
+    		if [ "$domain" != "" ]; then
 		    echo "domain $domain" >> $RESOLV_CONF
 		else
 		    echo "domain $HostName.lo" >> $RESOLV_CONF
 		fi
-		if [ "$dns" ]; then
+		if [ "$dns" != "" ]; then
 		    $LOG "Renew DNS from dhcp $dns $domain"
 		    # parce dnsservers
 		    for i in $dns ; do
@@ -241,7 +247,7 @@ case "$1" in
 	    	    echo nameserver 8.8.4.4 >> $RESOLV_CONF
 		fi
 	    fi
-	    if [ "$wins" ]; then
+	    if [ "$wins" != "" ]; then
 		echo "$wins" > $WINS_CONF
 		chmod 644 "$WINS_CONF" > /dev/null 2>&1
 	    fi
