@@ -1523,6 +1523,7 @@
 62) dhcpc: if dhcp server not send DNS use google dns.<br>
 63) dhcpc: always add domain name to resolv.conf from DHCP/NVRAM.<br>
 64) kernel: ipv6: Add IFA_F_DADFAILED flag.<br>
+65) kernel: ipv6: Send netlink notification when DAD fails.<br>
 <br>
 <br>
 <br>
