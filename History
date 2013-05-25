@@ -1522,6 +1522,7 @@
 61) kernel: udp: fix udp short packet false positive.<br>
 62) dhcpc: if dhcp server not send DNS use google dns.<br>
 63) dhcpc: always add domain name to resolv.conf from DHCP/NVRAM.<br>
+64) kernel: ipv6: Add IFA_F_DADFAILED flag.<br>
 <br>
 <br>
 <br>

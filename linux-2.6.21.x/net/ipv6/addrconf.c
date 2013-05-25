@@ -1272,12 +1272,14 @@ int ipv6_rcv_saddr_equal(const struct sock *sk, const struct sock *sk2)
 
 /* Gets referenced address, destroys ifaddr */
 
-static void addrconf_dad_stop(struct inet6_ifaddr *ifp)
+static void addrconf_dad_stop(struct inet6_ifaddr *ifp, int dad_failed)
 {
 	if (ifp->flags&IFA_F_PERMANENT) {
 		spin_lock_bh(&ifp->lock);
 		addrconf_del_timer(ifp);
 		ifp->flags |= IFA_F_TENTATIVE;
+		if (dad_failed)
+			ifp->flags |= IFA_F_DADFAILED;
 		spin_unlock_bh(&ifp->lock);
 		in6_ifa_put(ifp);
 #ifdef CONFIG_IPV6_PRIVACY
@@ -1303,7 +1305,7 @@ void addrconf_dad_failure(struct inet6_ifaddr *ifp)
 {
 	if (net_ratelimit())
 		printk(KERN_INFO "%s: duplicate address detected!\n", ifp->idev->dev->name);
-	addrconf_dad_stop(ifp);
+	addrconf_dad_stop(ifp, 1);
 }
 
 /* Join to solicited addr multicast group. */
@@ -2659,7 +2661,7 @@ static void addrconf_dad_start(struct inet6_ifaddr *ifp, u32 flags)
 	if (dev->flags&(IFF_NOARP|IFF_LOOPBACK) ||
 	    !(ifp->flags&IFA_F_TENTATIVE) ||
 	    ifp->flags & IFA_F_NODAD) {
-		ifp->flags &= ~(IFA_F_TENTATIVE|IFA_F_OPTIMISTIC);
+		ifp->flags &= ~(IFA_F_TENTATIVE|IFA_F_OPTIMISTIC|IFA_F_DADFAILED);
 		spin_unlock_bh(&ifp->lock);
 		read_unlock_bh(&idev->lock);
 
@@ -2676,7 +2678,7 @@ static void addrconf_dad_start(struct inet6_ifaddr *ifp, u32 flags)
 		 * - otherwise, kill it.
 		 */
 		in6_ifa_hold(ifp);
-		addrconf_dad_stop(ifp);
+		addrconf_dad_stop(ifp, 0);
 		return;
 	}
 
@@ -2711,7 +2713,7 @@ static void addrconf_dad_timer(unsigned long data)
 		 * DAD was successful
 		 */
 
-		ifp->flags &= ~(IFA_F_TENTATIVE|IFA_F_OPTIMISTIC);
+		ifp->flags &= ~(IFA_F_TENTATIVE|IFA_F_OPTIMISTIC|IFA_F_DADFAILED);
 		spin_unlock_bh(&ifp->lock);
 		read_unlock_bh(&idev->lock);
 
