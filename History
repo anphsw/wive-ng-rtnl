@@ -1529,6 +1529,7 @@
 <b>4.2.x</b><br>
 1) init.d: resolv: add domain option at resolv generate to.<br>
 2) init.d: resolv: do not backup old resolv at static dns use.<br>
+3) miniupnpd: update to 1.8.20130521 version.<br>
 <br>
 <br>
 <br>
