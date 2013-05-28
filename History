@@ -1524,8 +1524,11 @@
 63) dhcpc: always add domain name to resolv.conf from DHCP/NVRAM.<br>
 64) kernel: ipv6: Add IFA_F_DADFAILED flag.<br>
 65) kernel: ipv6: Send netlink notification when DAD fails.<br>
-66) init.d: resolv: add domain option at resolv generate to.<br>
-67) init.d: resolv: do not bakup old resolv at static dns use.<br>
+
+<br>
+<b>4.2.x</b><br>
+1) init.d: resolv: add domain option at resolv generate to.<br>
+2) init.d: resolv: do not backup old resolv at static dns use.<br>
 <br>
 <br>
 <br>
