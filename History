@@ -1534,6 +1534,7 @@
 5) kernel: ipv4: force_igmp_version ignored when a IGMPv3 query received.<br>
 6) kernel: vlan: kill useless check.<br>
 7) kernel: net: kernel: fix use accurate skb truesize.<br>
+8) kernel: tcp: use TCP_DEFAULT_INIT_RCVWND in tcp_fixup_rcvbuf().<br>
 <br>
 <br>
 <br>
