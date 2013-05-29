@@ -32,7 +32,7 @@ udhcpc_opts() {
     else
 	dhcpRequestIP=""
     fi
-    if [ "$wan_manual_mtu" = "0" ]; then
+    if [ "$wan_manual_mtu" = "0" ] || [ "$wan_manual_mtu" = "" ]; then
 	wan_manual_mtu="-O mtu"
     else
 	wan_manual_mtu=""
@@ -68,6 +68,10 @@ start() {
     if [ "$wanConnectionMode" = "STATIC" ] || [ "$OperationMode" = "0" ] || [ "$ApCliBridgeOnly" = "1" ]; then
 	if [ "$OperationMode" != "0" ] && [ "$ApCliBridgeOnly" != "1" ]; then
 	    # lan and wan ip should not be the same except in bridge mode
+	    if [ "$wan_ipaddr" = "" ] || [ "$wan_netmask" = "" ]; then
+		$LOG "ERROR: WAN's IP address/nemask not set. Need set this in WAN config!!!"
+		exit 0
+	    fi
 	    if [ "$wan_ipaddr" = "$lan_ipaddr" ]; then
 		$LOG "ERROR: WAN's IP address is set identical to LAN. Need change LAN_IP adress!!!"
 		exit 0

@@ -111,7 +111,7 @@ case "$1" in
 	    ifconfig $interface $NEW_IP $BROADCAST $NETMASK
 	    # MTU is default for all session time.
 	    # Get MTU from dhcp server and set
-	    if [ "$mtu" ] && [ "$wan_manual_mtu" = "0" ]; then
+	    if [ "$mtu" ] && [ "$wan_manual_mtu" = "0" -o "$wan_manual_mtu" = "" ]; then
 		$LOG "Set MTU to $mtu bytes from dhcp server"
 		ip link set mtu $mtu dev $interface
 	    fi
