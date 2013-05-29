@@ -1533,6 +1533,7 @@
 4) busybox: sync with stable 1.21.0+ version.<br>
 5) kernel: ipv4: force_igmp_version ignored when a IGMPv3 query received.<br>
 6) kernel: vlan: kill useless check.<br>
+7) kernel: net: kernel: fix use accurate skb truesize.<br>
 <br>
 <br>
 <br>

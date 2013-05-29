@@ -1031,8 +1031,7 @@ void __init icmp_init(void)
 		/* Enough space for 2 64K ICMP packets, including
 		 * sk_buff struct overhead.
 		 */
-		per_cpu(__icmp_socket, i)->sk->sk_sndbuf =
-			(2 * ((64 * 1024) + sizeof(struct sk_buff)));
+		per_cpu(__icmp_socket, i)->sk->sk_sndbuf =  2 * SKB_TRUESIZE(64 * 1024);
 
 		inet = inet_sk(per_cpu(__icmp_socket, i)->sk);
 		inet->uc_ttl = -1;

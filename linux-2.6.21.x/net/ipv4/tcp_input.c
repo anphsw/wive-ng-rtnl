@@ -210,7 +210,7 @@ static void tcp_fixup_sndbuf(struct sock *sk)
 	if (mss > 1460)
 		icwnd = max_t(u32, (1460 * TCP_DEFAULT_INIT_RCVWND) / mss, 2);
 
-	rcvmem = tcp_sk(sk)->rx_opt.mss_clamp + MAX_TCP_HEADER + 16 + sizeof(struct sk_buff);
+	rcvmem = SKB_TRUESIZE(tcp_sk(sk)->rx_opt.mss_clamp + MAX_TCP_HEADER);
 	while (tcp_win_from_space(rcvmem) < mss)
 		rcvmem += 128;
 
@@ -295,7 +295,7 @@ static void tcp_grow_window(struct sock *sk,
 static void tcp_fixup_rcvbuf(struct sock *sk)
 {
 	struct tcp_sock *tp = tcp_sk(sk);
-	int rcvmem = tp->advmss + MAX_TCP_HEADER + 16 + sizeof(struct sk_buff);
+	int rcvmem = SKB_TRUESIZE(tp->advmss + MAX_TCP_HEADER);
 
 	/* Try to select rcvbuf so that 4 mss-sized segments
 	 * will fit to window and corresponding skbs will fit to our rcvbuf.
@@ -489,8 +489,7 @@ void tcp_rcv_space_adjust(struct sock *sk)
 			space /= tp->advmss;
 			if (!space)
 				space = 1;
-			rcvmem = (tp->advmss + MAX_TCP_HEADER +
-				  16 + sizeof(struct sk_buff));
+			rcvmem = SKB_TRUESIZE(tp->advmss + MAX_TCP_HEADER);
 			while (tcp_win_from_space(rcvmem) < tp->advmss)
 				rcvmem += 128;
 			space *= rcvmem;
@@ -3843,10 +3842,12 @@ static void tcp_new_space(struct sock *sk)
 	struct tcp_sock *tp = tcp_sk(sk);
 
 	if (tcp_should_expand_sndbuf(sk)) {
-		int sndmem = max_t(u32, tp->rx_opt.mss_clamp, tp->mss_cache) +
-			MAX_TCP_HEADER + 16 + sizeof(struct sk_buff),
-		    demanded = max_t(unsigned int, tp->snd_cwnd,
-						   tp->reordering + 1);
+		int sndmem = SKB_TRUESIZE(max_t(u32,
+						tp->rx_opt.mss_clamp,
+						tp->mss_cache) +
+					  MAX_TCP_HEADER);
+		int demanded = max_t(unsigned int, tp->snd_cwnd,
+				     tp->reordering + 1);
 		sndmem *= 2*demanded;
 		if (sndmem > sk->sk_sndbuf)
 			sk->sk_sndbuf = min(sndmem, sysctl_tcp_wmem[2]);
