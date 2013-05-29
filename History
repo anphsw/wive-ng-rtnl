@@ -1531,6 +1531,7 @@
 2) init.d: resolv: do not backup old resolv at static dns use.<br>
 3) miniupnpd: update to 1.8.20130521 version.<br>
 4) busybox: sync with stable 1.21.0+ version.<br>
+5) kernel: ipv4: force_igmp_version ignored when a IGMPv3 query received.<br>
 <br>
 <br>
 <br>
