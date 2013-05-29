@@ -26,10 +26,9 @@ struct hlist_node;
 #include <linux/netdevice.h>
 #include <linux/etherdevice.h>
 
-#define VLAN_HLEN	4		/* The additional bytes (on top of the Ethernet header)
-					 * that VLAN requires.
+#define VLAN_HLEN	4		/* The additional bytes required by VLAN
+					 * (in addition to the Ethernet header)
 					 */
-#define VLAN_ETH_ALEN	6		/* Octets in one ethernet addr	 */
 #define VLAN_ETH_HLEN	18		/* Total octets in header.	 */
 #define VLAN_ETH_ZLEN	64		/* Min. octets in frame sans FCS */
 
@@ -243,7 +242,7 @@ static inline struct sk_buff *__vlan_put_tag(struct sk_buff *skb, unsigned short
 	veth = (struct vlan_ethhdr *)skb_push(skb, VLAN_HLEN);
 
 	/* Move the mac addresses to the beginning of the new header. */
-	memmove(skb->data, skb->data + VLAN_HLEN, 2 * VLAN_ETH_ALEN);
+	memmove(skb->data, skb->data + VLAN_HLEN, 2 * ETH_ALEN);
 
 	/* first, the ethernet type */
 	veth->h_vlan_proto = htons(ETH_P_8021Q);
