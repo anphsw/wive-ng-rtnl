@@ -188,7 +188,7 @@ case "$1" in
 	    # default gateways need replace/add at end route parces
 	    # replace dgw must be replaced only if ip selected
 	    if [ "$REPLACE_DGW" = "1" ] && [ "$FULL_RENEW" = "1" ]; then
-		ROUTELIST="$ROUTELIST_FGW $ROUTELIST_ST $ROUTELIST_CS $ROUTELIST_DGW"
+		ROUTELIST="$ROUTELIST_DGW $ROUTELIST_FGW $ROUTELIST_ST $ROUTELIST_CS"
 		$LOG "Apply route list. And replace DGW."
 	    else
 		ROUTELIST="$ROUTELIST_FGW $ROUTELIST_ST $ROUTELIST_CS"
@@ -201,7 +201,12 @@ case "$1" in
 		    if (a[4]!="") printf " metric %s", a[4]}'`
 		ip route replace $IPCMD
 	    done
-	    # Add route to multicast subnet
+	    # workaround for some buggy ISP
+	    if [ "$REPLACE_DGW" = "1" ] && [ "$FULL_RENEW" = "1" ] && [ "$first_dgw" != "" ]; then
+		$LOG "Default Gateway $first_dgw dev $interface"
+		ip route replace default dev "$interface" via "$first_dgw"
+	    fi
+	    # add route to multicast subnet
 	    if [ "$igmpEnabled" = "1" -o "$UDPXYMode" != "0" ]; then
 		$LOG "Add route to multicast subnet."
 		ip route replace "$mcast_net" dev "$interface"
