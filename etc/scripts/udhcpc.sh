@@ -203,7 +203,7 @@ case "$1" in
 	    done
 	    # workaround for some buggy ISP
 	    if [ "$REPLACE_DGW" = "1" ] && [ "$FULL_RENEW" = "1" ] && [ "$first_dgw" != "" ]; then
-		$LOG "Default Gateway $first_dgw dev $interface"
+		$LOG "Set default gateway $first_dgw dev $interface"
 		ip route replace default dev "$interface" via "$first_dgw"
 	    fi
 	    # add route to multicast subnet
