@@ -1527,15 +1527,16 @@
 
 <br>
 <b>4.2.x</b><br>
-1) init.d: resolv: add domain option at resolv generate to.<br>
-2) init.d: resolv: do not backup old resolv at static dns use.<br>
+1) udpxy: up to 1.0.23-9 version (from udpxy.com).<br>
+2) busybox: sync with stable 1.21.0+ version.<br>
 3) miniupnpd: update to 1.8.20130521 version.<br>
-4) busybox: sync with stable 1.21.0+ version.<br>
-5) kernel: ipv4: force_igmp_version ignored when a IGMPv3 query received.<br>
-6) kernel: vlan: kill useless check.<br>
-7) kernel: net: kernel: fix use accurate skb truesize.<br>
-8) kernel: tcp: use TCP_DEFAULT_INIT_RCVWND in tcp_fixup_rcvbuf().<br>
-9) kernel: tcp: speedup tcp_fixup_rcvbuf().<br>
+4) init.d: resolv: add domain option at resolv generate to.<br>
+5) init.d: resolv: do not backup old resolv at static dns use.<br>
+6) kernel: ipv4: force_igmp_version ignored when a IGMPv3 query received.<br>
+7) kernel: vlan: kill useless check.<br>
+8) kernel: net: kernel: fix use accurate skb truesize.<br>
+9) kernel: tcp: use TCP_DEFAULT_INIT_RCVWND in tcp_fixup_rcvbuf().<br>
+10) kernel: tcp: speedup tcp_fixup_rcvbuf().<br>
 <br>
 <br>
 <br>
