@@ -195,7 +195,7 @@ case "$1" in
 		$LOG "Apply route list without modify DGW."
 	    fi
 	    # aplly parsed route
-	    for i in `echo $ROUTELIST | sed 's/ /\n/g' | sort | uniq`; do
+	    for i in `echo $ROUTELIST | sed 's/ /\n/g'`; do
 		IPCMD=`echo $i|awk '{split($0,a,":"); \
 		    printf " %s via %s dev %s", a[1], a[2], a[3]; \
 		    if (a[4]!="") printf " metric %s", a[4]}'`
@@ -203,8 +203,8 @@ case "$1" in
 	    done
 	    # workaround for some buggy ISP
 	    if [ "$REPLACE_DGW" = "1" ] && [ "$FULL_RENEW" = "1" ] && [ "$first_dgw" != "" ]; then
-		$LOG "Set default gateway $first_dgw dev $interface"
-		ip route replace default dev "$interface" via "$first_dgw"
+		$LOG "Set fist default gateway $first_dgw dev $interface metric 0"
+		ip route replace default dev "$interface" via "$first_dgw" metric 0
 	    fi
 	    # add route to multicast subnet
 	    if [ "$igmpEnabled" = "1" -o "$UDPXYMode" != "0" ]; then
