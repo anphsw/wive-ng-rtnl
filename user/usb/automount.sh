@@ -138,7 +138,7 @@ if [ "$ACTION" = "add" ]; then
       ;;
   esac
 elif [ "$ACTION" = "mount" ]; then
-  $LOG "Mount OK"
+  $LOG "device $MDEV_PATH mount OK"
   exit 0
 else
   $LOG "remove $MDEV_PATH"
