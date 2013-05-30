@@ -200,6 +200,7 @@ case "$1" in
 		    printf " %s via %s dev %s", a[1], a[2], a[3]; \
 		    if (a[4]!="") printf " metric %s", a[4]}'`
 		ip route replace $IPCMD
+		$LOG "ip route replace $IPCMD"
 	    done
 	    # workaround for some buggy ISP
 	    if [ "$REPLACE_DGW" = "1" ] && [ "$FULL_RENEW" = "1" ] && [ "$first_dgw" != "" ]; then
