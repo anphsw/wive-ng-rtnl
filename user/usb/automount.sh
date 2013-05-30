@@ -138,7 +138,8 @@ if [ "$ACTION" = "add" ]; then
       ;;
   esac
 elif [ "$ACTION" = "mount" ]; then
-    $LOG "Mount OK"
+  $LOG "Mount OK"
+  exit 0
 else
   $LOG "remove $MDEV_PATH"
   try_umount
