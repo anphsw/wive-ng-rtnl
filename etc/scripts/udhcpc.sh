@@ -138,10 +138,10 @@ case "$1" in
 		# always parse router variable
 		metric=0
 		for i in $router ; do
-		    $LOG "Add route $i/32:0.0.0.0 dev $interface metric $metric to route list."
+		    # add route $i/32:0.0.0.0 dev $interface metric $metric to route list
 		    ROUTELIST_FGW="$ROUTELIST_FGW $i/32:0.0.0.0:$interface:"
 		    if [ "$REPLACE_DGW" = "1" ]; then
-		        $LOG "Add default $i dev $interface metric $metric to route dgw list"
+		        # add default $i dev $interface metric $metric to route dgw list
 		        ROUTELIST_DGW="$ROUTELIST_DGW default:$i:$interface:$metric"
 		        # save first dgw with metric=0 to use in corbina hack
 		        if [ "$metric" = "0" ]; then
@@ -188,7 +188,7 @@ case "$1" in
 	    # default gateways need replace/add at end route parces
 	    # replace dgw must be replaced only if ip selected
 	    if [ "$REPLACE_DGW" = "1" ] && [ "$FULL_RENEW" = "1" ]; then
-		ROUTELIST="$ROUTELIST_DGW $ROUTELIST_FGW $ROUTELIST_ST $ROUTELIST_CS"
+		ROUTELIST="$ROUTELIST_FGW $ROUTELIST_DGW $ROUTELIST_ST $ROUTELIST_CS"
 		$LOG "Apply route list. And replace DGW."
 	    else
 		ROUTELIST="$ROUTELIST_FGW $ROUTELIST_ST $ROUTELIST_CS"
