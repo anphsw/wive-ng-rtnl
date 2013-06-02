@@ -59,10 +59,11 @@ fi
 }
 
 set_def() {
-    tc qdisc del dev $real_wan_if root > /dev/null 2>&1
-    tc qdisc del dev $real_wan_if ingress > /dev/null 2>&1
-    tc qdisc del dev $lan_if root  > /dev/null 2>&1
-    tc qdisc del dev $lan_if ingress > /dev/null 2>&1
+    INTERFACES=`ls /proc/sys/net/ipv4/conf/ | grep -vE "lo|all|default"`
+    for i in $INTERFACES; do
+	tc qdisc del dev $i root > /dev/null 2>&1
+	tc qdisc del dev $i ingress > /dev/null 2>&1
+    done
 }
 
 show() {
@@ -91,11 +92,6 @@ stop() {
  $LOG "Stopping SHAPER"
     # Drop all QoS rules
     set_def
-    INTERFACES=`ls /proc/sys/net/ipv4/conf/ | grep -vE "lo|all|default"`
-    for i in $INTERFACES; do
-	tc qdisc del dev $i root > /dev/null 2>&1
-	tc qdisc del dev $i ingress > /dev/null 2>&1
-    done
     rm -f $IPTSCR
 }
 
