@@ -149,7 +149,7 @@ case "$1" in
 			    first_dgw="$i"
 			fi
 		    fi
-    		    metric=`expr $metric + 1`
+		    : $(( metric += 1 ))
 		done
 	    fi
 	    # classful routes
