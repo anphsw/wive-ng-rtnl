@@ -96,8 +96,9 @@
 /*
  * Networking Support
  */
-#undef __UCLIBC_HAS_IPV6__
-#undef __UCLIBC_HAS_RPC__
+#define __UCLIBC_HAS_IPV6__ 1
+#define __UCLIBC_HAS_RPC__ 1
+#define __UCLIBC_HAS_FULL_RPC__ 1
 
 /*
  * String and Stdio Support
