@@ -148,8 +148,9 @@ case "$1" in
 			    echo $i > /tmp/default.gw
 			    first_dgw="$i"
 			fi
+			# increase metric only for dgw
+			: $(( metric += 1 ))
 		    fi
-		    : $(( metric += 1 ))
 		done
 	    fi
 	    # classful routes
