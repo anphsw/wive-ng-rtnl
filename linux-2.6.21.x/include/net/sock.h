@@ -1458,8 +1458,6 @@ static inline int siocdevprivate_ioctl(unsigned int fd, unsigned int cmd, unsign
 }
 #endif
 
-extern void sk_init(void);
-
 #ifdef CONFIG_SYSCTL
 extern struct ctl_table core_table[];
 #endif
