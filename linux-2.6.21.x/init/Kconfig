@@ -618,14 +618,6 @@ config MAX_SWAPFILES_SHIFT
 	help
 	  Select the maximum number of swapfiles (0 for default).
 
-config NR_LDISCS
-	int "Number of tty line disciplines (1~16)" if TINY
-	range 1 16
-	default 16
-	help
-	  Select the maximum number of tty line disciplines. Embedded systems
-	  can probably get by with only a few of these.
-
 config MAX_USER_RT_PRIO
 	int "Number of realtime priority levels (5~100)" if TINY
 	range 5 100
