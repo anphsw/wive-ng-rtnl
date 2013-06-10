@@ -38,8 +38,6 @@
 
 #include "../options.h"
 
-extern unsigned long crc32 (unsigned long, const unsigned char *, unsigned int);
-
 void *memmem(const void *buf, size_t buf_len, const void *byte_line, size_t byte_line_len)
 {
 	unsigned char *bl = (unsigned char *)byte_line;

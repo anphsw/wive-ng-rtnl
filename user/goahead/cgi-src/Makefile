@@ -9,7 +9,6 @@
 
 CONF	= $(ROOTDIR)/$(LINUXDIR)
 CONF_H  = $(CONF)/include/linux/config.h
-CRC_L	= $(ROOTDIR)/lib/libnvram/crc32.o
 
 # system cgi scripts must be static
 LDFLAGS += -static
@@ -22,7 +21,7 @@ ALL_EXE = $(UPLOAD_CGI) $(UPLOAD_SETTINGS)
 all: $(ALL_EXE)
 
 $(UPLOAD_CGI): upload.cgi.o 
-	$(CC) $(CFLAGS) $(CRC_L) upload.cgi.o -o $@ $(LDFLAGS)
+	$(CC) $(CFLAGS) upload.cgi.o -o $@ $(LDFLAGS)
 	$(STRIP) --remove-section=.note --remove-section=.comment $@
 
 $(UPLOAD_SETTINGS): upload_settings.cgi.o
