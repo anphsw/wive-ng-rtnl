@@ -13,6 +13,9 @@ CONF_H  = $(CONF)/include/linux/config.h
 # system cgi scripts must be static
 LDFLAGS += -static
 
+# system cgi scripts always optimize for size
+CFLAGS  += -Os
+
 UPLOAD_CGI 		= upload.cgi
 UPLOAD_SETTINGS		= upload_settings.cgi
 
@@ -22,11 +25,11 @@ all: $(ALL_EXE)
 
 $(UPLOAD_CGI): upload.cgi.o 
 	$(CC) $(CFLAGS) upload.cgi.o -o $@ $(LDFLAGS)
-	$(STRIP) --remove-section=.note --remove-section=.comment $@
+	$(STRIP) -R .comment -R .note -g --strip-unneeded $@
 
 $(UPLOAD_SETTINGS): upload_settings.cgi.o
 	$(CC) $(CFLAGS) upload_settings.cgi.o -o $@ $(LDFLAGS)
-	$(STRIP) --remove-section=.note --remove-section=.comment $@
+	$(STRIP) -R .comment -R .note -g --strip-unneeded $@
 
 romfs:
 	$(ROMFSINST) $(ROOT_DIRECTORY)/cgi-bin/$(UPLOAD_CGI)
