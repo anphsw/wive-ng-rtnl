@@ -1140,7 +1140,6 @@ static void setOpMode(webs_t wp, char_t *path, char_t *query)
 
 	outputTimerForReload(wp, 50000);
 
-final:
 	sleep(2);	/* wait for websDone() to finish tcp http session(close socket) */
 
 #ifdef CONFIG_USER_802_1X
