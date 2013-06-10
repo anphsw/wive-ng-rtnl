@@ -1,5 +1,5 @@
 /* gzwrite.c -- zlib functions for writing gzip files
- * Copyright (C) 2004, 2005, 2010, 2011, 2012 Mark Adler
+ * Copyright (C) 2004, 2005, 2010, 2011, 2012, 2013 Mark Adler
  * For conditions of distribution and use, see copyright notice in zlib.h
  */
 
@@ -19,7 +19,7 @@ local int gz_init(state)
     z_streamp strm = &(state->strm);
 
     /* allocate input buffer */
-    state->in = malloc(state->want);
+    state->in = (unsigned char *)malloc(state->want);
     if (state->in == NULL) {
         gz_error(state, Z_MEM_ERROR, "out of memory");
         return -1;
@@ -28,25 +28,25 @@ local int gz_init(state)
     /* only need output buffer and deflate state if compressing */
     if (!state->direct) {
         /* allocate output buffer */
-    state->out = malloc(state->want);
+        state->out = (unsigned char *)malloc(state->want);
         if (state->out == NULL) {
             free(state->in);
-        gz_error(state, Z_MEM_ERROR, "out of memory");
-        return -1;
-    }
+            gz_error(state, Z_MEM_ERROR, "out of memory");
+            return -1;
+        }
 
-    /* allocate deflate memory, set up for gzip compression */
-    strm->zalloc = Z_NULL;
-    strm->zfree = Z_NULL;
-    strm->opaque = Z_NULL;
-    ret = deflateInit2(strm, state->level, Z_DEFLATED,
+        /* allocate deflate memory, set up for gzip compression */
+        strm->zalloc = Z_NULL;
+        strm->zfree = Z_NULL;
+        strm->opaque = Z_NULL;
+        ret = deflateInit2(strm, state->level, Z_DEFLATED,
                            MAX_WBITS + 16, DEF_MEM_LEVEL, state->strategy);
-    if (ret != Z_OK) {
+        if (ret != Z_OK) {
             free(state->out);
-        free(state->in);
-        gz_error(state, Z_MEM_ERROR, "out of memory");
-        return -1;
-    }
+            free(state->in);
+            gz_error(state, Z_MEM_ERROR, "out of memory");
+            return -1;
+        }
     }
 
     /* mark state as initialized */
@@ -54,8 +54,8 @@ local int gz_init(state)
 
     /* initialize write buffer if compressing */
     if (!state->direct) {
-    strm->avail_out = state->size;
-    strm->next_out = state->out;
+        strm->avail_out = state->size;
+        strm->next_out = state->out;
         state->x.next = strm->next_out;
     }
     return 0;
@@ -168,7 +168,6 @@ int ZEXPORT gzwrite(file, buf, len)
     unsigned len;
 {
     unsigned put = len;
-    unsigned n;
     gz_statep state;
     z_streamp strm;
 
@@ -208,16 +207,19 @@ int ZEXPORT gzwrite(file, buf, len)
     if (len < state->size) {
         /* copy to input buffer, compress when full */
         do {
+            unsigned have, copy;
+
             if (strm->avail_in == 0)
                 strm->next_in = state->in;
-            n = state->size - strm->avail_in;
-            if (n > len)
-                n = len;
-            memcpy(strm->next_in + strm->avail_in, buf, n);
-            strm->avail_in += n;
-            state->x.pos += n;
-            buf = (char *)buf + n;
-            len -= n;
+            have = (unsigned)((strm->next_in + strm->avail_in) - state->in);
+            copy = state->size - have;
+            if (copy > len)
+                copy = len;
+            memcpy(state->in + have, buf, copy);
+            strm->avail_in += copy;
+            state->x.pos += copy;
+            buf = (const char *)buf + copy;
+            len -= copy;
             if (len && gz_comp(state, Z_NO_FLUSH) == -1)
                 return 0;
         } while (len);
@@ -229,7 +231,7 @@ int ZEXPORT gzwrite(file, buf, len)
 
         /* directly compress user buffer to file */
         strm->avail_in = len;
-        strm->next_in = (voidp)buf;
+        strm->next_in = (z_const Bytef *)buf;
         state->x.pos += len;
         if (gz_comp(state, Z_NO_FLUSH) == -1)
             return 0;
@@ -244,6 +246,7 @@ int ZEXPORT gzputc(file, c)
     gzFile file;
     int c;
 {
+    unsigned have;
     unsigned char buf[1];
     gz_statep state;
     z_streamp strm;
@@ -267,12 +270,16 @@ int ZEXPORT gzputc(file, c)
 
     /* try writing to input buffer for speed (state->size == 0 if buffer not
        initialized) */
-    if (strm->avail_in < state->size) {
+    if (state->size) {
         if (strm->avail_in == 0)
             strm->next_in = state->in;
-        strm->next_in[strm->avail_in++] = c;
-        state->x.pos++;
-        return c & 0xff;
+        have = (unsigned)((strm->next_in + strm->avail_in) - state->in);
+        if (have < state->size) {
+            state->in[have] = c;
+            strm->avail_in++;
+            state->x.pos++;
+            return c & 0xff;
+        }
     }
 
     /* no room in buffer or not initialized, use gz_write() */
@@ -300,12 +307,11 @@ int ZEXPORT gzputs(file, str)
 #include <stdarg.h>
 
 /* -- see zlib.h -- */
-int ZEXPORTVA gzprintf (gzFile file, const char *format, ...)
+int ZEXPORTVA gzvprintf(gzFile file, const char *format, va_list va)
 {
     int size, len;
     gz_statep state;
     z_streamp strm;
-    va_list va;
 
     /* get internal structure */
     if (file == NULL)
@@ -335,25 +341,20 @@ int ZEXPORTVA gzprintf (gzFile file, const char *format, ...)
     /* do the printf() into the input buffer, put length in len */
     size = (int)(state->size);
     state->in[size - 1] = 0;
-    va_start(va, format);
 #ifdef NO_vsnprintf
 #  ifdef HAS_vsprintf_void
     (void)vsprintf((char *)(state->in), format, va);
-    va_end(va);
     for (len = 0; len < size; len++)
         if (state->in[len] == 0) break;
 #  else
     len = vsprintf((char *)(state->in), format, va);
-    va_end(va);
 #  endif
 #else
 #  ifdef HAS_vsnprintf_void
     (void)vsnprintf((char *)(state->in), size, format, va);
-    va_end(va);
     len = strlen((char *)(state->in));
 #  else
     len = vsnprintf((char *)(state->in), size, format, va);
-    va_end(va);
 #  endif
 #endif
 
@@ -366,6 +367,17 @@ int ZEXPORTVA gzprintf (gzFile file, const char *format, ...)
     strm->next_in = state->in;
     state->x.pos += len;
     return len;
+}
+
+int ZEXPORTVA gzprintf(gzFile file, const char *format, ...)
+{
+    va_list va;
+    int ret;
+
+    va_start(va, format);
+    ret = gzvprintf(file, format, va);
+    va_end(va);
+    return ret;
 }
 
 #else /* !STDC && !Z_HAVE_STDARG_H */
@@ -422,7 +434,7 @@ int ZEXPORTVA gzprintf (file, format, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10,
         if (state->in[len] == 0) break;
 #  else
     len = sprintf((char *)(state->in), format, a1, a2, a3, a4, a5, a6, a7, a8,
-                a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20);
+                  a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20);
 #  endif
 #else
 #  ifdef HAS_snprintf_void
@@ -547,14 +559,14 @@ int ZEXPORT gzclose_w(file)
     }
 
     /* flush, free memory, and close file */
-    if (state->size) {
     if (gz_comp(state, Z_FINISH) == -1)
         ret = state->err;
-    if (!state->direct) {
-    (void)deflateEnd(&(state->strm));
-    free(state->out);
-    }
-    free(state->in);
+    if (state->size) {
+        if (!state->direct) {
+            (void)deflateEnd(&(state->strm));
+            free(state->out);
+        }
+        free(state->in);
     }
     gz_error(state, Z_OK, NULL);
     free(state->path);

@@ -1531,18 +1531,19 @@
 2) udpxy: up to 1.0.23-9 version (from udpxy.com).<br>
 3) busybox: sync with stable 1.21.0+ version.<br>
 4) miniupnpd: update to 1.8.20130607 version.<br>
-5) init.d: resolv: add domain option at resolv generate to.<br>
-6) init.d: resolv: do not backup old resolv at static dns use.<br>
-7) init.d: automount.sh: at mount action say mount ok to log end exit.<br>
-8) init.d: udhcp: add workaround get dgw for some ISP.<br>
-9) kernel: ipv4: force_igmp_version ignored when a IGMPv3 query received.<br>
-10) kernel: vlan: kill useless check.<br>
-11) kernel: net: kernel: fix use accurate skb truesize.<br>
-12) kernel: tcp: use TCP_DEFAULT_INIT_RCVWND in tcp_fixup_rcvbuf().<br>
-13) kernel: tcp: speedup tcp_fixup_rcvbuf().<br>
-14) kernel: ipv4: 16 slots in initial fib_info hash table.<br>
-15) kernel: net: remove sk_init() helper.<br>
-16) kernel: arp: send bcast ARP in neighbours to update arp tables only netdev status change.<br>
+5) zlib: up version to 1.2.8.<br>
+6) init.d: resolv: add domain option at resolv generate to.<br>
+7) init.d: resolv: do not backup old resolv at static dns use.<br>
+8) init.d: automount.sh: at mount action say mount ok to log end exit.<br>
+9) init.d: udhcp: add workaround get dgw for some ISP.<br>
+10) kernel: ipv4: force_igmp_version ignored when a IGMPv3 query received.<br>
+11) kernel: vlan: kill useless check.<br>
+12) kernel: net: kernel: fix use accurate skb truesize.<br>
+13) kernel: tcp: use TCP_DEFAULT_INIT_RCVWND in tcp_fixup_rcvbuf().<br>
+14) kernel: tcp: speedup tcp_fixup_rcvbuf().<br>
+15) kernel: ipv4: 16 slots in initial fib_info hash table.<br>
+16) kernel: net: remove sk_init() helper.<br>
+17) kernel: arp: send bcast ARP in neighbours to update arp tables only netdev status change.<br>
 
 <br>
 <br>
