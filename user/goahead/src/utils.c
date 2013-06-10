@@ -44,6 +44,7 @@ static int  getStaMacAddrw(int eid, webs_t wp, int argc, char_t **argv);
 static void setOpMode(webs_t wp, char_t *path, char_t *query);
 static void setWanPort(webs_t wp, char_t *path, char_t *query);
 static int  gigaphy(int eid, webs_t wp, int argc, char_t **argv);
+int OidQueryInformation(unsigned long OidQueryCode, int socket_id, char *DeviceName, void *ptr, unsigned long PtrLength);
 
 /*********************************************************************
  * System Utilities

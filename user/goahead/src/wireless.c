@@ -979,7 +979,7 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 			*tx_power, *short_preamble, *short_slot, *tx_burst, *pkt_aggregate,
 			*countrycode, *country_region;
 	char_t	*rd_region, *lna_gain, *ht_noise_thresh, *ap2040_rescan, *ht_bss_coex;
-	int		i, ssid_num, wlan_mode;
+	int ssid_num, wlan_mode;
 	char *submitUrl;
 
 #ifdef CONFIG_RT2860V2_AP_IGMP_SNOOP
