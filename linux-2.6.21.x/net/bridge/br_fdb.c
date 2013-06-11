@@ -412,6 +412,17 @@ void br_fdb_update(struct net_bridge *br, struct net_bridge_port *source,
 
 	fdb = fdb_find_rcu(head, addr);
 	if (likely(fdb)) {
+#if defined(CONFIG_BRIDGE_FASTPATH) && !defined(CONFIG_BRIDGE_NETFILTER)
+		/*
+		 * bridge fastpath + wifi nat offload always update fdb entry
+		 * without any messages (this normal case).
+		*/
+		if (likely(!fdb->is_local)) {
+			/* fastpath: update of existing entry */
+			fdb->dst = source;
+			fdb->ageing_timer = jiffies;
+		}
+#else
 		/* attempt to update an entry for a local interface */
 		if (unlikely(fdb->is_local)) {
 			if (net_ratelimit())
@@ -423,6 +434,7 @@ void br_fdb_update(struct net_bridge *br, struct net_bridge_port *source,
 			fdb->dst = source;
 			fdb->ageing_timer = jiffies;
 		}
+#endif
 	} else {
 		spin_lock(&br->hash_lock);
 		if (likely(!fdb_find(head, addr)))
