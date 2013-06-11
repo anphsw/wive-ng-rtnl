@@ -1546,6 +1546,7 @@
 17) kernel: net: remove sk_init() helper.<br>
 18) kernel: arp: send bcast ARP in neighbours to update arp tables only netdev status change.<br>
 19) kernel: bridge: fastpath + wifi nat offload always update fdb entry without any messages (this normal case).<br>
+20) kernel: bridge: prevent bridging wrong device.<br>
 
 <br>
 <br>
