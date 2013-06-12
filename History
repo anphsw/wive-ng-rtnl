@@ -1549,7 +1549,7 @@
 20) kernel: bridge: fastpath + wifi nat offload always update fdb entry without any messages (this normal case).<br>
 21) kernel: bridge: prevent bridging wrong device.<br>
 22) kernel: bridge: avoid ethtool on non running interface.<br>
-
+23) kernel: bridge: respect RFC2863 operational state.<br>
 
 <br>
 <br>

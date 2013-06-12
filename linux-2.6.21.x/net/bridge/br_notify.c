@@ -75,7 +75,7 @@ static int br_device_event(struct notifier_block *unused, unsigned long event, v
 
 	case NETDEV_UP:
 		spin_lock_bh(&br->lock);
-		if (netif_carrier_ok(dev) && (br->dev->flags & IFF_UP))
+		if (netif_running(br->dev) && netif_oper_up(dev)) {
 			br_stp_enable_port(p);
 		spin_unlock_bh(&br->lock);
 		break;
