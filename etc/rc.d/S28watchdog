@@ -7,12 +7,12 @@ start() {
     ###############SYSTEM_DOG################################################
     if [ "$WatchdogEnabled" = "1" ]; then
 	$LOG "Start watchdog"
-	nice --19 watchdog -T 120 -t 10 -F /dev/watchdog > /dev/null 2>&1 &
+	nice -n -10 watchdog -T 120 -t 10 -F /dev/watchdog > /dev/null 2>&1 &
     fi
     ###############PINGER_DOG################################################
     if [ "$pinger_check_on" = "1" ]; then
 	$LOG "Start pinger"
-	nice --19 /etc/scripts/pinger.sh &
+	nice -n -10 /etc/scripts/pinger.sh &
     fi
 }
 

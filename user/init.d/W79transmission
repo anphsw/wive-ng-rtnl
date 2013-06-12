@@ -52,7 +52,7 @@ start() {
 	else
 		authory="-T"
 	fi
-	nice -15 /bin/transmission-daemon -p $TransRPCPort -P $TransInPort $authory -x /var/run/transmission-daemon.pid
+	nice -n 15 /bin/transmission-daemon -p $TransRPCPort -P $TransInPort $authory -x /var/run/transmission-daemon.pid
       ) & # send to background
     fi
 }
