@@ -1548,6 +1548,8 @@
 19) kernel: arp: send bcast ARP in neighbours to update arp tables only netdev status change.<br>
 20) kernel: bridge: fastpath + wifi nat offload always update fdb entry without any messages (this normal case).<br>
 21) kernel: bridge: prevent bridging wrong device.<br>
+22) kernel: bridge: avoid ethtool on non running interface.<br>
+
 
 <br>
 <br>
