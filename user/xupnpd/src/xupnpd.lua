@@ -29,7 +29,7 @@ cfg.embedded=false
 cfg.debug=0
 
 -- external 'udpxy' url for multicast playlists (udp://@...)
--- cfg.udpxy_url='http://192.168.1.1:4022'
+-- cfg.udpxy_url='http://gateway.lo:4022'
 
 -- downstream interface for builtin multicast proxy (comment 'cfg.udpxy_url' for processing 'udp://@...' playlists)
 -- cfg.mcast_interface='eth2.2'

@@ -26,6 +26,7 @@ gen_hosts() {
     hostname -F /etc/hostname
     echo "127.0.0.1	localhost $HostName.lo"		> /etc/hosts
     echo "$lan_ipaddr	$HostName.lo"			>> /etc/hosts
+    echo "$lan_ipaddr	gateway.lo"			>> /etc/hosts
     if [ "$real_wan_ipaddr" != "" ]; then
 	echo "$real_wan_ipaddr	wan.$HostName.lo"	>> /etc/hosts
     fi
