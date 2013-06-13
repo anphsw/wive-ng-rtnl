@@ -127,7 +127,7 @@ int rtnl_dump_type(struct rtnl_handle *rtnl_handle, unsigned int type)
 	req.nlh.nlmsg_seq = rtnl_handle->rtnl_dump = ++(rtnl_handle->rtnl_seq);
 	req.g.rtgen_family = AF_INET;
 
-	return sendto(rtnl_handle->rtnl_fd, (void*)&req, sizeof(req), 0, 
+	return sendto(rtnl_handle->rtnl_fd, &req, sizeof(req), 0,
 		      (struct sockaddr*)&nladdr, sizeof(nladdr));
 }
 
@@ -141,10 +141,10 @@ int rtnl_receive(struct rtnl_handle *rtnl_handle)
 	struct nlmsghdr *h;
 
 	struct msghdr msg = {
-		(void *)&nladdr, sizeof(nladdr),
-		&iov, 1,
-		NULL, 0,
-		0
+		.msg_name    = &nladdr,
+		.msg_namelen = sizeof(nladdr),
+		.msg_iov     = &iov,
+		.msg_iovlen  = 1,
 	};
 
 	status = recvmsg(rtnl_handle->rtnl_fd, &msg, 0);
@@ -177,7 +177,7 @@ int rtnl_receive(struct rtnl_handle *rtnl_handle)
 			return 0;
 		}
 		if (h->nlmsg_type == NLMSG_ERROR) { 
-			struct nlmsgerr *err = (struct nlmsgerr *)NLMSG_DATA(h);
+			struct nlmsgerr *err = NLMSG_DATA(h);
 			if (h->nlmsg_len>=NLMSG_LENGTH(sizeof(struct nlmsgerr)))
 				errno = -err->error;
 			rtnl_log(LOG_ERROR, "NLMSG_ERROR, errnp=%d",
@@ -189,6 +189,15 @@ int rtnl_receive(struct rtnl_handle *rtnl_handle)
 			rtnl_log(LOG_NOTICE, "unhandled nlmsg_type %u",
 				 h->nlmsg_type);
 		h = NLMSG_NEXT(h, status);
+	}
+	return 1;
+}
+
+int rtnl_receive_multi(struct rtnl_handle *rtnl_handle)
+{
+	while (1) {
+		if (rtnl_receive(rtnl_handle) <= 0)
+			break;
 	}
 	return 1;
 }

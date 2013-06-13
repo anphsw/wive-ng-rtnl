@@ -1,14 +1,15 @@
 /* libnfnetlink.c: generic library for communication with netfilter
  *
  * (C) 2002-2006 by Harald Welte <laforge@gnumonks.org>
- * (C) 2006 by Pablo Neira Ayuso <pablo@netfilter.org>
+ * (C) 2006-2011 by Pablo Neira Ayuso <pablo@netfilter.org>
  *
  * Based on some original ideas from Jay Schulist <jschlst@samba.org>
  *
  * Development of this code funded by Astaro AG (http://www.astaro.com)
  *
- * this software may be used and distributed according to the terms
- * of the gnu general public license, incorporated herein by reference.
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 as published
+ * by the Free Software Foundation.
  *
  * 2005-09-14 Pablo Neira Ayuso <pablo@netfilter.org>: 
  * 	Define structure nfnlhdr
@@ -173,7 +174,6 @@ struct nfnl_handle *nfnl_open(void)
 {
 	struct nfnl_handle *nfnlh;
 	unsigned int addr_len;
-	int err;
 
 	nfnlh = malloc(sizeof(*nfnlh));
 	if (!nfnlh)
@@ -188,8 +188,7 @@ struct nfnl_handle *nfnl_open(void)
 	nfnlh->peer.nl_family = AF_NETLINK;
 
 	addr_len = sizeof(nfnlh->local);
-	err = getsockname(nfnlh->fd, (struct sockaddr *)&nfnlh->local, 
-			  &addr_len);
+	getsockname(nfnlh->fd, (struct sockaddr *)&nfnlh->local, &addr_len);
 	if (addr_len != sizeof(nfnlh->local)) {
 		errno = EINVAL;
 		goto err_close;
@@ -210,8 +209,7 @@ struct nfnl_handle *nfnl_open(void)
 
 	/* use getsockname to get the netlink pid that the kernel assigned us */
 	addr_len = sizeof(nfnlh->local);
-	err = getsockname(nfnlh->fd, (struct sockaddr *)&nfnlh->local, 
-			  &addr_len);
+	getsockname(nfnlh->fd, (struct sockaddr *)&nfnlh->local, &addr_len);
 	if (addr_len != sizeof(nfnlh->local)) {
 		errno = EINVAL;
 		goto err_close;
@@ -445,8 +443,7 @@ void nfnl_fill_hdr(struct nfnl_subsys_handle *ssh,
 	assert(ssh);
 	assert(nlh);
 
-	struct nfgenmsg *nfg = (struct nfgenmsg *) 
-					((void *)nlh + sizeof(*nlh));
+	struct nfgenmsg *nfg = (void *)nlh + sizeof(*nlh);
 
 	nlh->nlmsg_len = NLMSG_LENGTH(len+sizeof(*nfg));
 	nlh->nlmsg_type = (ssh->subsys_id<<8)|msg_type;
@@ -478,14 +475,14 @@ nfnl_parse_hdr(const struct nfnl_handle *nfnlh,
 
 	if (nlh->nlmsg_len == NLMSG_LENGTH(sizeof(struct nfgenmsg))) {
 		if (genmsg)
-			*genmsg = (struct nfgenmsg *)((void *)nlh+sizeof(nlh));
+			*genmsg = (void *)nlh + sizeof(*nlh);
 		return NULL;
 	}
 
 	if (genmsg)
-		*genmsg = (struct nfgenmsg *)((void *)nlh + sizeof(nlh));
+		*genmsg = (void *)nlh + sizeof(*nlh);
 
-	return ((void *)nlh + NLMSG_LENGTH(sizeof(struct nfgenmsg)));
+	return (void *)nlh + NLMSG_LENGTH(sizeof(struct nfgenmsg));
 }
 
 /**
@@ -575,10 +572,10 @@ int nfnl_listen(struct nfnl_handle *nfnlh,
 	int quit=0;
 
 	struct msghdr msg = {
-		(void *)&nladdr, sizeof(nladdr),
-		&iov, 1,
-		NULL, 0,
-		0
+		.msg_name    = &nladdr,
+		.msg_namelen = sizeof(nladdr),
+		.msg_iov     = &iov,
+		.msg_iovlen  = 1,
 	};
 
 	memset(&nladdr, 0, sizeof(nladdr));
@@ -682,13 +679,13 @@ int nfnl_talk(struct nfnl_handle *nfnlh, struct nlmsghdr *n, pid_t peer,
 	unsigned int seq;
 	int status;
 	struct iovec iov = {
-		(void *)n, n->nlmsg_len
+		n, n->nlmsg_len
 	};
 	struct msghdr msg = {
-		(void *)&nladdr, sizeof(nladdr),
-		&iov, 1,
-		NULL, 0,
-		0
+		.msg_name    = &nladdr,
+		.msg_namelen = sizeof(nladdr),
+		.msg_iov     = &iov,
+		.msg_iovlen  = 1,
 	};
 
 	memset(&nladdr, 0, sizeof(nladdr));
@@ -780,10 +777,8 @@ cont:
 			nfnl_error("Messages truncated\n");
 			continue;
 		}
-		if (status) {
+		if (status)
 			nfnl_error("Remnant of size %d\n", status);
-			exit(1);
-		}
 	}
 }
 
