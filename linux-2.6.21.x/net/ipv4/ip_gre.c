@@ -519,7 +519,7 @@ drop:
 	read_unlock(&ipgre_lock);
 drop_nolock:
 	kfree_skb(skb);
-	return(0);
+	return 0;
 }
 
 static int ipgre_tunnel_xmit(struct sk_buff *skb, struct net_device *dev)

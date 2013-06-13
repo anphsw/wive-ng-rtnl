@@ -117,7 +117,7 @@ void tipc_printbuf_reset(struct print_buf *pb)
 
 int tipc_printbuf_empty(struct print_buf *pb)
 {
-	return (!pb->buf || (pb->crs == pb->buf));
+	return !pb->buf || (pb->crs == pb->buf);
 }
 
 /**
@@ -152,7 +152,7 @@ int tipc_printbuf_validate(struct print_buf *pb)
 			tipc_printf(pb, err);
 		}
 	}
-	return (pb->crs - pb->buf + 1);
+	return pb->crs - pb->buf + 1;
 }
 
 /**

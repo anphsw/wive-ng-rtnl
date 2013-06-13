@@ -234,7 +234,7 @@ irnet_ias_to_tsap(irnet_socket *	self,
   DEXIT(IRDA_SR_TRACE, "\n");
 
   /* Return the TSAP */
-  return(dtsap_sel);
+  return dtsap_sel;
 }
 
 /*------------------------------------------------------------------*/
@@ -297,7 +297,7 @@ irnet_connect_tsap(irnet_socket *	self)
     {
       clear_bit(0, &self->ttp_connect);
       DERROR(IRDA_SR_ERROR, "connect aborted!\n");
-      return(err);
+      return err;
     }
 
   /* Connect to remote device */
@@ -308,7 +308,7 @@ irnet_connect_tsap(irnet_socket *	self)
     {
       clear_bit(0, &self->ttp_connect);
       DERROR(IRDA_SR_ERROR, "connect aborted!\n");
-      return(err);
+      return err;
     }
 
   /* The above call is non-blocking.
@@ -317,7 +317,7 @@ irnet_connect_tsap(irnet_socket *	self)
    * See you there ;-) */
 
   DEXIT(IRDA_SR_TRACE, "\n");
-  return(err);
+  return err;
 }
 
 /*------------------------------------------------------------------*/
@@ -358,10 +358,10 @@ irnet_discover_next_daddr(irnet_socket *	self)
       /* The above request is non-blocking.
        * After a while, IrDA will call us back in irnet_discovervalue_confirm()
        * We will then call irnet_ias_to_tsap() and come back here again... */
-      return(0);
+      return 0;
     }
   else
-    return(1);
+    return 1;
 }
 
 /*------------------------------------------------------------------*/
@@ -432,7 +432,7 @@ irnet_discover_daddr_and_lsap_sel(irnet_socket *	self)
   /* Follow me in irnet_discovervalue_confirm() */
 
   DEXIT(IRDA_SR_TRACE, "\n");
-  return(0);
+  return 0;
 }
 
 /*------------------------------------------------------------------*/
@@ -481,7 +481,7 @@ irnet_dname_to_daddr(irnet_socket *	self)
   /* No luck ! */
   DEBUG(IRDA_SR_INFO, "cannot discover device ``%s'' !!!\n", self->rname);
   kfree(discoveries);
-  return(-EADDRNOTAVAIL);
+  return -EADDRNOTAVAIL;
 }
 
 
@@ -523,7 +523,7 @@ irda_irnet_create(irnet_socket *	self)
   INIT_WORK(&self->disconnect_work, irnet_ppp_disconnect);
 
   DEXIT(IRDA_SOCK_TRACE, "\n");
-  return(0);
+  return 0;
 }
 
 /*------------------------------------------------------------------*/
@@ -597,7 +597,7 @@ irda_irnet_connect(irnet_socket *	self)
    * We will finish the connection procedure in irnet_connect_tsap().
    */
   DEXIT(IRDA_SOCK_TRACE, "\n");
-  return(0);
+  return 0;
 }
 
 /*------------------------------------------------------------------*/
@@ -730,7 +730,7 @@ irnet_daddr_to_dname(irnet_socket *	self)
   /* No luck ! */
   DEXIT(IRDA_SERV_INFO, ": cannot discover device 0x%08x !!!\n", self->daddr);
   kfree(discoveries);
-  return(-EADDRNOTAVAIL);
+  return -EADDRNOTAVAIL;
 }
 
 /*------------------------------------------------------------------*/

@@ -274,7 +274,7 @@ static inline void msg_set_destnode(struct tipc_msg *m, u32 a)
 
 static inline int msg_is_dest(struct tipc_msg *m, u32 d)
 {
-	return(msg_short(m) || (msg_destnode(m) == d));
+	return msg_short(m) || (msg_destnode(m) == d);
 }
 
 static inline u32 msg_routed(struct tipc_msg *m)
@@ -629,7 +629,7 @@ static inline void msg_set_bcast_tag(struct tipc_msg *m, u32 n)
 
 static inline u32 msg_max_pkt(struct tipc_msg *m)
 {
-	return (msg_bits(m, 9, 16, 0xffff) * 4);
+	return msg_bits(m, 9, 16, 0xffff) * 4;
 }
 
 static inline void msg_set_max_pkt(struct tipc_msg *m, u32 n)

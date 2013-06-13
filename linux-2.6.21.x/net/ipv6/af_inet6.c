@@ -437,7 +437,7 @@ int inet6_getname(struct socket *sock, struct sockaddr *uaddr,
 	if (ipv6_addr_type(&sin->sin6_addr) & IPV6_ADDR_LINKLOCAL)
 		sin->sin6_scope_id = sk->sk_bound_dev_if;
 	*uaddr_len = sizeof(*sin);
-	return(0);
+	return 0;
 }
 
 int inet6_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
@@ -466,7 +466,7 @@ int inet6_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
 		return sk->sk_prot->ioctl(sk, cmd, arg);
 	}
 	/*NOTREACHED*/
-	return(0);
+	return 0;
 }
 
 const struct proto_ops inet6_stream_ops = {

@@ -279,12 +279,12 @@ static inline int between(u32 lower, u32 upper, u32 n)
 
 static inline int less_eq(u32 left, u32 right)
 {
-	return (mod(right - left) < 32768u);
+	return mod(right - left) < 32768u;
 }
 
 static inline int less(u32 left, u32 right)
 {
-	return (less_eq(left, right) && (mod(right) != mod(left)));
+	return less_eq(left, right) && (mod(right) != mod(left));
 }
 
 static inline u32 lesser(u32 left, u32 right)

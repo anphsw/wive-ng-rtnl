@@ -171,7 +171,7 @@ static void bclink_set_gap(struct node *n_ptr)
 
 static int bclink_ack_allowed(u32 n)
 {
-	return((n % TIPC_MIN_LINK_WIN) == tipc_own_tag);
+	return (n % TIPC_MIN_LINK_WIN) == tipc_own_tag;
 }
 
 

@@ -109,7 +109,7 @@ static int rose_send_frame(struct sk_buff *skb, struct rose_neigh *neigh)
 
 	neigh->ax25 = ax25_send_frame(skb, 260, rose_call, &neigh->callsign, neigh->digipeat, neigh->dev);
 
-	return (neigh->ax25 != NULL);
+	return neigh->ax25 != NULL;
 }
 
 /*
@@ -128,7 +128,7 @@ static int rose_link_up(struct rose_neigh *neigh)
 
 	neigh->ax25 = ax25_find_cb(rose_call, &neigh->callsign, neigh->digipeat, neigh->dev);
 
-	return (neigh->ax25 != NULL);
+	return neigh->ax25 != NULL;
 }
 
 /*

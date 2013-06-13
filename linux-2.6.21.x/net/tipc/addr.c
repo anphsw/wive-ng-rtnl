@@ -89,6 +89,6 @@ int tipc_addr_domain_valid(u32 addr)
 
 int tipc_addr_node_valid(u32 addr)
 {
-	return (tipc_addr_domain_valid(addr) && tipc_node(addr));
+	return tipc_addr_domain_valid(addr) && tipc_node(addr);
 }
 

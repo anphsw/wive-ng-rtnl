@@ -589,6 +589,6 @@ int tipc_ispublished(struct tipc_name const *name)
 {
 	u32 domain = 0;
 
-	return(tipc_nametbl_translate(name->type, name->instance,&domain) != 0);
+	return tipc_nametbl_translate(name->type, name->instance, &domain) != 0;
 }
 

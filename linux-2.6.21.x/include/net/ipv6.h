@@ -299,7 +299,7 @@ static inline int ipv6_addr_scope(const struct in6_addr *addr)
 
 static inline int __ipv6_addr_src_scope(int type)
 {
-	return (type == IPV6_ADDR_ANY ? __IPV6_ADDR_SCOPE_INVALID : (type >> 16));
+	return (type == IPV6_ADDR_ANY) ? __IPV6_ADDR_SCOPE_INVALID : (type >> 16);
 }
 
 static inline int ipv6_addr_src_scope(const struct in6_addr *addr)
@@ -316,10 +316,10 @@ static inline int
 ipv6_masked_addr_cmp(const struct in6_addr *a1, const struct in6_addr *m,
 		     const struct in6_addr *a2)
 {
-	return (!!(((a1->s6_addr32[0] ^ a2->s6_addr32[0]) & m->s6_addr32[0]) |
-		   ((a1->s6_addr32[1] ^ a2->s6_addr32[1]) & m->s6_addr32[1]) |
-		   ((a1->s6_addr32[2] ^ a2->s6_addr32[2]) & m->s6_addr32[2]) |
-		   ((a1->s6_addr32[3] ^ a2->s6_addr32[3]) & m->s6_addr32[3])));
+	return !!(((a1->s6_addr32[0] ^ a2->s6_addr32[0]) & m->s6_addr32[0]) |
+		  ((a1->s6_addr32[1] ^ a2->s6_addr32[1]) & m->s6_addr32[1]) |
+		  ((a1->s6_addr32[2] ^ a2->s6_addr32[2]) & m->s6_addr32[2]) |
+		  ((a1->s6_addr32[3] ^ a2->s6_addr32[3]) & m->s6_addr32[3]));
 }
 
 static inline void ipv6_addr_copy(struct in6_addr *a1, const struct in6_addr *a2)
@@ -359,10 +359,10 @@ static inline void ipv6_addr_set(struct in6_addr *addr,
 static inline int ipv6_addr_equal(const struct in6_addr *a1,
 				  const struct in6_addr *a2)
 {
-	return (((a1->s6_addr32[0] ^ a2->s6_addr32[0]) |
-		 (a1->s6_addr32[1] ^ a2->s6_addr32[1]) |
-		 (a1->s6_addr32[2] ^ a2->s6_addr32[2]) |
-		 (a1->s6_addr32[3] ^ a2->s6_addr32[3])) == 0);
+	return ((a1->s6_addr32[0] ^ a2->s6_addr32[0]) |
+		(a1->s6_addr32[1] ^ a2->s6_addr32[1]) |
+		(a1->s6_addr32[2] ^ a2->s6_addr32[2]) |
+		(a1->s6_addr32[3] ^ a2->s6_addr32[3])) == 0;
 }
 
 static inline int __ipv6_prefix_equal(const __be32 *a1, const __be32 *a2,
@@ -464,7 +464,7 @@ static inline int __ipv6_addr_diff(const void *token1, const void *token2, int a
 	 *	if returned value is greater than prefix length.
 	 *					--ANK (980803)
 	 */
-	return (addrlen << 5);
+	return addrlen << 5;
 }
 
 static inline int ipv6_addr_diff(const struct in6_addr *a1, const struct in6_addr *a2)

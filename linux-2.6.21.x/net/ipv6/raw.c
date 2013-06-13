@@ -705,7 +705,7 @@ static int rawv6_sendmsg(struct kiocb *iocb, struct sock *sk,
 			return -EINVAL;
 
 		if (sin6->sin6_family && sin6->sin6_family != AF_INET6)
-			return(-EAFNOSUPPORT);
+			return -EAFNOSUPPORT;
 
 		/* port is the proto value [0..255] carried in nexthdr */
 		proto = ntohs(sin6->sin6_port);
@@ -920,7 +920,7 @@ static int do_rawv6_setsockopt(struct sock *sk, int level, int optname,
 			/* You may get strange result with a positive odd offset;
 			   RFC2292bis agrees with me. */
 			if (val > 0 && (val&1))
-				return(-EINVAL);
+				return -EINVAL;
 			if (val < 0) {
 				rp->checksum = 0;
 			} else {
@@ -932,7 +932,7 @@ static int do_rawv6_setsockopt(struct sock *sk, int level, int optname,
 			break;
 
 		default:
-			return(-ENOPROTOOPT);
+			return -ENOPROTOOPT;
 	}
 }
 
@@ -1113,7 +1113,7 @@ static int rawv6_init_sk(struct sock *sk)
 	default:
 		break;
 	}
-	return(0);
+	return 0;
 }
 
 struct proto rawv6_prot = {
