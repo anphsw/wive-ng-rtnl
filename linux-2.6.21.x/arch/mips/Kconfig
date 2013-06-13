@@ -2,7 +2,6 @@ config MIPS
 	bool
 	default y
 	select EMBEDDED
-	select HAVE_GENERIC_DMA_COHERENT
         select GENERIC_IRQ_PROBE
 	select HAVE_GET_USER_PAGES_FAST
 
