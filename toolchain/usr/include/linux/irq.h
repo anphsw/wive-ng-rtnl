@@ -25,7 +25,7 @@
 #include <asm/irq_regs.h>
 
 struct irq_desc;
-typedef	void fastcall (*irq_flow_handler_t)(unsigned int irq,
+typedef	void (*irq_flow_handler_t)(unsigned int irq,
 					    struct irq_desc *desc);
 
 
@@ -61,6 +61,7 @@ typedef	void fastcall (*irq_flow_handler_t)(unsigned int irq,
 #define IRQ_WAKEUP		0x00100000	/* IRQ triggers system wakeup */
 #define IRQ_MOVE_PENDING	0x00200000	/* need to re-target IRQ destination */
 #define IRQ_NO_BALANCING	0x00400000	/* IRQ is excluded from balancing */
+#define IRQ_SPURIOUS_DISABLED	0x00800000	/* IRQ was disabled by the spurious trap */
 
 #ifdef CONFIG_IRQ_PER_CPU
 # define CHECK_IRQ_PER_CPU(var) ((var) & IRQ_PER_CPU)
@@ -139,6 +140,7 @@ struct irq_chip {
  * @depth:		disable-depth, for nested irq_disable() calls
  * @wake_depth:		enable depth, for multiple set_irq_wake() callers
  * @irq_count:		stats field to detect stalled irqs
+ * @last_unhandled:	aging timer for unhandled count
  * @irqs_unhandled:	stats field for spurious unhandled interrupts
  * @lock:		locking for SMP
  * @affinity:		IRQ affinity on SMP
@@ -162,6 +164,7 @@ struct irq_desc {
 	unsigned int		depth;		/* nested irq disables */
 	unsigned int		wake_depth;	/* nested wake enables */
 	unsigned int		irq_count;	/* For detecting broken IRQs */
+	unsigned long		last_unhandled;	/* Aging timer for unhandled count */
 	unsigned int		irqs_unhandled;
 	spinlock_t		lock;
 #ifdef CONFIG_SMP
@@ -266,19 +269,19 @@ extern int handle_IRQ_event(unsigned int irq, struct irqaction *action);
  * Built-in IRQ handlers for various IRQ types,
  * callable via desc->chip->handle_irq()
  */
-extern void fastcall handle_level_irq(unsigned int irq, struct irq_desc *desc);
-extern void fastcall handle_fasteoi_irq(unsigned int irq, struct irq_desc *desc);
-extern void fastcall handle_edge_irq(unsigned int irq, struct irq_desc *desc);
-extern void fastcall handle_simple_irq(unsigned int irq, struct irq_desc *desc);
-extern void fastcall handle_percpu_irq(unsigned int irq, struct irq_desc *desc);
-extern void fastcall handle_bad_irq(unsigned int irq, struct irq_desc *desc);
+extern void handle_level_irq(unsigned int irq, struct irq_desc *desc);
+extern void handle_fasteoi_irq(unsigned int irq, struct irq_desc *desc);
+extern void handle_edge_irq(unsigned int irq, struct irq_desc *desc);
+extern void handle_simple_irq(unsigned int irq, struct irq_desc *desc);
+extern void handle_percpu_irq(unsigned int irq, struct irq_desc *desc);
+extern void handle_bad_irq(unsigned int irq, struct irq_desc *desc);
 
 /*
  * Monolithic do_IRQ implementation.
  * (is an explicit fastcall, because i386 4KSTACKS calls it from assembly)
  */
 #ifndef CONFIG_GENERIC_HARDIRQS_NO__DO_IRQ
-extern fastcall unsigned int __do_IRQ(unsigned int irq);
+extern unsigned int __do_IRQ(unsigned int irq);
 #endif
 
 /*
@@ -330,6 +333,13 @@ set_irq_chip_and_handler_name(unsigned int irq, struct irq_chip *chip,
 extern void
 __set_irq_handler(unsigned int irq, irq_flow_handler_t handle, int is_chained,
 		  const char *name);
+
+/* caller has locked the irq_desc and both params are valid */
+static inline void __set_irq_handler_unlocked(int irq,
+					      irq_flow_handler_t handler)
+{
+	irq_desc[irq].handle_irq = handler;
+}
 
 /*
  * Set a highlevel flow handler for a given IRQ:

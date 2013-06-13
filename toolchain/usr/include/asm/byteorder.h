@@ -8,13 +8,14 @@
 #ifndef _ASM_BYTEORDER_H
 #define _ASM_BYTEORDER_H
 
+#include <linux/compiler.h>
 #include <asm/types.h>
 
 #ifdef __GNUC__
 
 #ifdef CONFIG_CPU_MIPSR2
 
-static __inline__ __u16 ___arch__swab16(__u16 x)
+static __inline__ __attribute_const__ __u16 ___arch__swab16(__u16 x)
 {
 	__asm__(
 	"	.set	mips32r2		\n"
@@ -27,7 +28,7 @@ static __inline__ __u16 ___arch__swab16(__u16 x)
 }
 #define __arch__swab16(x)	___arch__swab16(x)
 
-static __inline__ __u32 ___arch__swab32(__u32 x)
+static __inline__ __attribute_const__ __u32 ___arch__swab32(__u32 x)
 {
 	__asm__(
 	"	.set	mips32r2		\n"
@@ -43,7 +44,7 @@ static __inline__ __u32 ___arch__swab32(__u32 x)
 
 #ifdef CONFIG_CPU_MIPS64_R2
 
-static __inline__ __u64 ___arch__swab64(__u64 x)
+static __inline__ __attribute_const__ __u64 ___arch__swab64(__u64 x)
 {
 	__asm__(
 	"	dsbh	%0, %1			\n"

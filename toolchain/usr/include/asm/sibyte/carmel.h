@@ -18,17 +18,18 @@
 #ifndef __ASM_SIBYTE_CARMEL_H
 #define __ASM_SIBYTE_CARMEL_H
 
+
 #include <asm/sibyte/sb1250.h>
 #include <asm/sibyte/sb1250_int.h>
 
 #define SIBYTE_BOARD_NAME "Carmel"
 
-#define GPIO_PHY_INTERRUPT      2 
-#define GPIO_NONMASKABLE_INT    3 
-#define GPIO_CF_INSERTED        6 
-#define GPIO_MONTEREY_RESET     7 
-#define GPIO_QUADUART_INT       8 
-#define GPIO_CF_INT             9 
+#define GPIO_PHY_INTERRUPT      2
+#define GPIO_NONMASKABLE_INT    3
+#define GPIO_CF_INSERTED        6
+#define GPIO_MONTEREY_RESET     7
+#define GPIO_QUADUART_INT       8
+#define GPIO_CF_INT             9
 #define GPIO_FPGA_CCLK          10
 #define GPIO_FPGA_DOUT          11
 #define GPIO_FPGA_DIN           12

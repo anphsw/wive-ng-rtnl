@@ -67,10 +67,13 @@
 				/* mark "facility" */
 #define	INTERNAL_MARK	LOG_MAKEPRI(LOG_NFACILITIES, 0)
 typedef struct _code {
-	char	*c_name;
-	int	c_val;
+	const char      *c_name;
+	int             c_val;
 } CODE;
 
+#ifdef SYSLOG_NAMES_CONST
+const
+#endif
 CODE prioritynames[] =
   {
     { "alert", LOG_ALERT },
@@ -119,6 +122,9 @@ CODE prioritynames[] =
 #define	LOG_FAC(p)	(((p) & LOG_FACMASK) >> 3)
 
 #ifdef SYSLOG_NAMES
+#ifdef SYSLOG_NAMES_CONST
+const
+#endif
 CODE facilitynames[] =
   {
     { "auth", LOG_AUTH },
@@ -168,37 +174,24 @@ CODE facilitynames[] =
 
 __BEGIN_DECLS
 
-/* Close descriptor used to write to system logger.
+/* Close desriptor used to write to system logger.  */
+extern void closelog (void) __THROW;
 
-   This function is a possible cancellation point and therefore not
-   marked with __THROW.  */
-extern void closelog (void);
-
-/* Open connection to system logger.
-
-   This function is a possible cancellation point and therefore not
-   marked with __THROW.  */
-extern void openlog (__const char *__ident, int __option, int __facility);
+/* Open connection to system logger.  */
+extern void openlog (__const char *__ident, int __option, int __facility)
+     __THROW;
 
 /* Set the log mask level.  */
 extern int setlogmask (int __mask) __THROW;
 
-/* Generate a log message using FMT string and option arguments.
-
-   This function is a possible cancellation point and therefore not
-   marked with __THROW.  */
-extern void syslog (int __pri, __const char *__fmt, ...)
-     __attribute__ ((__format__ (__printf__, 2, 3)));
+/* Generate a log message using FMT string and option arguments.  */
+extern void syslog (int __pri, __const char *__fmt, ...) __THROW
+     __attribute__ ((__format__(__printf__, 2, 3)));
 
 #ifdef __USE_BSD
-/* Generate a log message using FMT and using arguments pointed to by AP.
-
-   This function is not part of POSIX and therefore no official
-   cancellation point.  But due to similarity with an POSIX interface
-   or due to the implementation it is a cancellation point and
-   therefore not marked with __THROW.  */
+/* Generate a log message using FMT and using arguments pointed to by AP.  */
 extern void vsyslog (int __pri, __const char *__fmt, __gnuc_va_list __ap)
-     __attribute__ ((__format__ (__printf__, 2, 0)));
+     __THROW __attribute__ ((__format__(__printf__, 2, 0)));
 #endif
 
 __END_DECLS

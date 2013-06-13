@@ -58,6 +58,9 @@ struct ipv6_opt_hdr {
 #define ipv6_destopt_hdr ipv6_opt_hdr
 #define ipv6_hopopt_hdr  ipv6_opt_hdr
 
+#ifdef __KERNEL__
+#define ipv6_optlen(p)  (((p)->hdrlen+1) << 3)
+#endif
 
 /*
  *	routing header type 0 (used in cmsghdr struct)
@@ -175,6 +178,9 @@ struct ipv6_devconf {
 #endif
 	__s32		proxy_ndp;
 	__s32		accept_source_route;
+#ifdef CONFIG_IPV6_OPTIMISTIC_DAD
+	__s32		optimistic_dad;
+#endif
 	void		*sysctl;
 };
 
@@ -205,8 +211,278 @@ enum {
 	DEVCONF_PROXY_NDP,
 	__DEVCONF_OPTIMISTIC_DAD,
 	DEVCONF_ACCEPT_SOURCE_ROUTE,
+	DEVCONF_OPTIMISTIC_DAD,
 	DEVCONF_MAX
 };
 
+#ifdef __KERNEL__
+#include <linux/icmpv6.h>
+#include <linux/tcp.h>
+#include <linux/udp.h>
+
+#include <net/if_inet6.h>       /* struct ipv6_mc_socklist */
+#include <net/inet_sock.h>
+
+/* 
+   This structure contains results of exthdrs parsing
+   as offsets from skb->nh.
+ */
+
+struct inet6_skb_parm {
+	int			iif;
+	__u16			ra;
+	__u16			hop;
+	__u16			dst0;
+	__u16			srcrt;
+	__u16			dst1;
+	__u16			lastopt;
+	__u32			nhoff;
+	__u16			flags;
+#ifdef CONFIG_IPV6_MIP6
+	__u16			dsthao;
+#endif
+
+#define IP6SKB_XFRM_TRANSFORMED	1
+};
+
+#define IP6CB(skb)	((struct inet6_skb_parm*)((skb)->cb))
+
+static inline int inet6_iif(const struct sk_buff *skb)
+{
+	return IP6CB(skb)->iif;
+}
+
+struct inet6_request_sock {
+	struct in6_addr		loc_addr;
+	struct in6_addr		rmt_addr;
+	struct sk_buff		*pktopts;
+	int			iif;
+};
+
+struct tcp6_request_sock {
+	struct tcp_request_sock	  tcp6rsk_tcp;
+	struct inet6_request_sock tcp6rsk_inet6;
+};
+
+/**
+ * struct ipv6_pinfo - ipv6 private area
+ *
+ * In the struct sock hierarchy (tcp6_sock, upd6_sock, etc)
+ * this _must_ be the last member, so that inet6_sk_generic
+ * is able to calculate its offset from the base struct sock
+ * by using the struct proto->slab_obj_size member. -acme
+ */
+struct ipv6_pinfo {
+	struct in6_addr 	saddr;
+	struct in6_addr 	rcv_saddr;
+	struct in6_addr		daddr;
+	struct in6_pktinfo	sticky_pktinfo;
+	struct in6_addr		*daddr_cache;
+#ifdef CONFIG_IPV6_SUBTREES
+	struct in6_addr		*saddr_cache;
+#endif
+
+	__be32			flow_label;
+	__u32			frag_size;
+	__s16			hop_limit;
+	__s16			mcast_hops;
+	int			mcast_oif;
+
+	/* pktoption flags */
+	union {
+		struct {
+			__u16	srcrt:2,
+				osrcrt:2,
+			        rxinfo:1,
+			        rxoinfo:1,
+				rxhlim:1,
+				rxohlim:1,
+				hopopts:1,
+				ohopopts:1,
+				dstopts:1,
+				odstopts:1,
+                                rxflow:1,
+				rxtclass:1;
+		} bits;
+		__u16		all;
+	} rxopt;
+
+	/* sockopt flags */
+	__u8			mc_loop:1,
+	                        recverr:1,
+	                        sndflow:1,
+				pmtudisc:2,
+				ipv6only:1;
+	__u8			tclass;
+
+	__u32			dst_cookie;
+
+	struct ipv6_mc_socklist	*ipv6_mc_list;
+	struct ipv6_ac_socklist	*ipv6_ac_list;
+	struct ipv6_fl_socklist *ipv6_fl_list;
+
+	struct ipv6_txoptions	*opt;
+	struct sk_buff		*pktoptions;
+	struct {
+		struct ipv6_txoptions *opt;
+		struct rt6_info	*rt;
+		u8 hop_limit;
+		u8 tclass;
+	} cork;
+};
+
+/* WARNING: don't change the layout of the members in {raw,udp,tcp}6_sock! */
+struct raw6_sock {
+	/* inet_sock has to be the first member of raw6_sock */
+	struct inet_sock	inet;
+	__u32			checksum;	/* perform checksum */
+	__u32			offset;		/* checksum offset  */
+	struct icmp6_filter	filter;
+	/* ipv6_pinfo has to be the last member of raw6_sock, see inet6_sk_generic */
+	struct ipv6_pinfo	inet6;
+};
+
+struct udp6_sock {
+	struct udp_sock	  udp;
+	/* ipv6_pinfo has to be the last member of udp6_sock, see inet6_sk_generic */
+	struct ipv6_pinfo inet6;
+};
+
+struct tcp6_sock {
+	struct tcp_sock	  tcp;
+	/* ipv6_pinfo has to be the last member of tcp6_sock, see inet6_sk_generic */
+	struct ipv6_pinfo inet6;
+};
+
+extern int inet6_sk_rebuild_header(struct sock *sk);
+
+#if defined(CONFIG_IPV6) || defined(CONFIG_IPV6_MODULE)
+static inline struct ipv6_pinfo * inet6_sk(const struct sock *__sk)
+{
+	return inet_sk(__sk)->pinet6;
+}
+
+static inline struct inet6_request_sock *
+			inet6_rsk(const struct request_sock *rsk)
+{
+	return (struct inet6_request_sock *)(((u8 *)rsk) +
+					     inet_rsk(rsk)->inet6_rsk_offset);
+}
+
+static inline u32 inet6_rsk_offset(struct request_sock *rsk)
+{
+	return rsk->rsk_ops->obj_size - sizeof(struct inet6_request_sock);
+}
+
+static inline struct request_sock *inet6_reqsk_alloc(struct request_sock_ops *ops)
+{
+	struct request_sock *req = reqsk_alloc(ops);
+
+	if (req != NULL)
+		inet_rsk(req)->inet6_rsk_offset = inet6_rsk_offset(req);
+
+	return req;
+}
+
+static inline struct raw6_sock *raw6_sk(const struct sock *sk)
+{
+	return (struct raw6_sock *)sk;
+}
+
+static inline void inet_sk_copy_descendant(struct sock *sk_to,
+					   const struct sock *sk_from)
+{
+	int ancestor_size = sizeof(struct inet_sock);
+
+	if (sk_from->sk_family == PF_INET6)
+		ancestor_size += sizeof(struct ipv6_pinfo);
+
+	__inet_sk_copy_descendant(sk_to, sk_from, ancestor_size);
+}
+
+#define __ipv6_only_sock(sk)	(inet6_sk(sk)->ipv6only)
+#define ipv6_only_sock(sk)	((sk)->sk_family == PF_INET6 && __ipv6_only_sock(sk))
+
+struct inet6_timewait_sock {
+	struct in6_addr tw_v6_daddr;
+	struct in6_addr	tw_v6_rcv_saddr;
+};
+
+struct tcp6_timewait_sock {
+	struct tcp_timewait_sock   tcp6tw_tcp;
+	struct inet6_timewait_sock tcp6tw_inet6;
+};
+
+static inline u16 inet6_tw_offset(const struct proto *prot)
+{
+	return prot->twsk_prot->twsk_obj_size -
+			sizeof(struct inet6_timewait_sock);
+}
+
+static inline struct inet6_timewait_sock *inet6_twsk(const struct sock *sk)
+{
+	return (struct inet6_timewait_sock *)(((u8 *)sk) +
+					      inet_twsk(sk)->tw_ipv6_offset);
+}
+
+static inline struct in6_addr *__inet6_rcv_saddr(const struct sock *sk)
+{
+	return likely(sk->sk_state != TCP_TIME_WAIT) ?
+		&inet6_sk(sk)->rcv_saddr : &inet6_twsk(sk)->tw_v6_rcv_saddr;
+}
+
+static inline struct in6_addr *inet6_rcv_saddr(const struct sock *sk)
+{
+	return sk->sk_family == AF_INET6 ? __inet6_rcv_saddr(sk) : NULL;
+}
+
+static inline int inet_v6_ipv6only(const struct sock *sk)
+{
+	return likely(sk->sk_state != TCP_TIME_WAIT) ?
+		ipv6_only_sock(sk) : inet_twsk(sk)->tw_ipv6only;
+}
+#else
+#define __ipv6_only_sock(sk)	0
+#define ipv6_only_sock(sk)	0
+
+static inline struct ipv6_pinfo * inet6_sk(const struct sock *__sk)
+{
+	return NULL;
+}
+
+static inline struct inet6_request_sock *
+			inet6_rsk(const struct request_sock *rsk)
+{
+	return NULL;
+}
+
+static inline struct raw6_sock *raw6_sk(const struct sock *sk)
+{
+	return NULL;
+}
+
+#define __inet6_rcv_saddr(__sk)	NULL
+#define inet6_rcv_saddr(__sk)	NULL
+#define tcp_twsk_ipv6only(__sk)		0
+#define inet_v6_ipv6only(__sk)		0
+#endif /* defined(CONFIG_IPV6) || defined(CONFIG_IPV6_MODULE) */
+
+#define INET6_MATCH(__sk, __hash, __saddr, __daddr, __ports, __dif)\
+	(((__sk)->sk_hash == (__hash))				&& \
+	 ((*((__portpair *)&(inet_sk(__sk)->dport))) == (__ports))  	&& \
+	 ((__sk)->sk_family		== AF_INET6)		&& \
+	 ipv6_addr_equal(&inet6_sk(__sk)->daddr, (__saddr))	&& \
+	 ipv6_addr_equal(&inet6_sk(__sk)->rcv_saddr, (__daddr))	&& \
+	 (!((__sk)->sk_bound_dev_if) || ((__sk)->sk_bound_dev_if == (__dif))))
+
+#define INET6_TW_MATCH(__sk, __hash, __saddr, __daddr, __ports, __dif) \
+	(((__sk)->sk_hash == (__hash))					&& \
+	 (*((__portpair *)&(inet_twsk(__sk)->tw_dport)) == (__ports))	&& \
+	 ((__sk)->sk_family	       == PF_INET6)			&& \
+	 (ipv6_addr_equal(&inet6_twsk(__sk)->tw_v6_daddr, (__saddr)))	&& \
+	 (ipv6_addr_equal(&inet6_twsk(__sk)->tw_v6_rcv_saddr, (__daddr))) && \
+	 (!((__sk)->sk_bound_dev_if) || ((__sk)->sk_bound_dev_if == (__dif))))
+
+#endif /* __KERNEL__ */
 
 #endif /* _IPV6_H */

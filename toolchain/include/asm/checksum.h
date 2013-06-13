@@ -3,10 +3,15 @@
  * License.  See the file "COPYING" in the main directory of this archive
  * for more details.
  *
- * Copyright (C) 1995, 1996, 1997, 1998, 2001 by Ralf Baechle
+ * Copyright (C) 1995, 96, 97, 98, 99, 2001 by Ralf Baechle
+ * Copyright (C) 1999 Silicon Graphics, Inc.
+ * Copyright (C) 2001 Thiemo Seufer.
+ * Copyright (C) 2002 Maciej W. Rozycki
  */
 #ifndef _ASM_CHECKSUM_H
 #define _ASM_CHECKSUM_H
+
+#include <linux/in6.h>
 
 #include <asm/uaccess.h>
 
@@ -22,67 +27,68 @@
  *
  * it's best to have buff aligned on a 32-bit boundary
  */
-unsigned int csum_partial(const unsigned char *buff, int len, unsigned int sum);
+__wsum csum_partial(const void *buff, int len, __wsum sum);
+
+__wsum __csum_partial_copy_user(const void *src, void *dst,
+				int len, __wsum sum, int *err_ptr);
 
 /*
  * this is a new version of the above that records errors it finds in *errp,
  * but continues and zeros the rest of the buffer.
  */
-#define csum_partial_copy_nocheck csum_partial_copy
-
-/*
- * this is a new version of the above that records errors it finds in *errp,
- * but continues and zeros the rest of the buffer.
- */
-unsigned int csum_partial_copy_from_user(const char *src, char *dst, int len,
-                                         unsigned int sum, int *errp);
+static inline
+__wsum csum_partial_copy_from_user(const void __user *src, void *dst, int len,
+				   __wsum sum, int *err_ptr)
+{
+	might_sleep();
+	return __csum_partial_copy_user((__force void *)src, dst,
+					len, sum, err_ptr);
+}
 
 /*
  * Copy and checksum to user
  */
 #define HAVE_CSUM_COPY_USER
-static inline unsigned int csum_and_copy_to_user (const char *src, char *dst,
-						  int len, int sum,
-						  int *err_ptr)
+static inline
+__wsum csum_and_copy_to_user(const void *src, void __user *dst, int len,
+			     __wsum sum, int *err_ptr)
 {
-	sum = csum_partial(src, len, sum);
-
-	if (copy_to_user(dst, src, len)) {
+	might_sleep();
+	if (access_ok(VERIFY_WRITE, dst, len))
+		return __csum_partial_copy_user(src, (__force void *)dst,
+						len, sum, err_ptr);
+	if (len)
 		*err_ptr = -EFAULT;
-		return -1;
-	}
 
-	return sum;
+	return (__force __wsum)-1; /* invalid checksum */
 }
 
 /*
  * the same as csum_partial, but copies from user space (but on MIPS
  * we have just one address space, so this is identical to the above)
- *
- * this is obsolete and will go away.
  */
-#define csum_partial_copy_fromuser csum_partial_copy
-unsigned int csum_partial_copy(const char *src, char *dst, int len,
-			       unsigned int sum);
+__wsum csum_partial_copy_nocheck(const void *src, void *dst,
+				       int len, __wsum sum);
 
 /*
  *	Fold a partial checksum without adding pseudo headers
  */
-static inline unsigned short int csum_fold(unsigned int sum)
+static inline __sum16 csum_fold(__wsum sum)
 {
 	__asm__(
-	".set\tnoat\t\t\t# csum_fold\n\t"
-	"sll\t$1,%0,16\n\t"
-	"addu\t%0,$1\n\t"
-	"sltu\t$1,%0,$1\n\t"
-	"srl\t%0,%0,16\n\t"
-	"addu\t%0,$1\n\t"
-	"xori\t%0,0xffff\n\t"
-	".set\tat"
+	"	.set	push		# csum_fold\n"
+	"	.set	noat		\n"
+	"	sll	$1, %0, 16	\n"
+	"	addu	%0, $1		\n"
+	"	sltu	$1, %0, $1	\n"
+	"	srl	%0, %0, 16	\n"
+	"	addu	%0, $1		\n"
+	"	xori	%0, 0xffff	\n"
+	"	.set	pop"
 	: "=r" (sum)
 	: "0" (sum));
 
-	return sum;
+	return (__force __sum16)sum;
 }
 
 /*
@@ -92,10 +98,10 @@ static inline unsigned short int csum_fold(unsigned int sum)
  *	By Jorge Cwik <jorge@laser.satlink.net>, adapted for linux by
  *	Arnt Gulbrandsen.
  */
-static inline unsigned short ip_fast_csum(unsigned char *iph, unsigned int ihl)
+static inline __sum16 ip_fast_csum(const void *iph, unsigned int ihl)
 {
-	unsigned int *word = (unsigned int *) iph;
-	unsigned int *stop = word + ihl;
+	const unsigned int *word = iph;
+	const unsigned int *stop = word + ihl;
 	unsigned int csum;
 	int carry;
 
@@ -123,34 +129,44 @@ static inline unsigned short ip_fast_csum(unsigned char *iph, unsigned int ihl)
 	return csum_fold(csum);
 }
 
-static inline unsigned long csum_tcpudp_nofold(unsigned long saddr,
-                                               unsigned long daddr,
-                                               unsigned short len,
-                                               unsigned short proto,
-                                               unsigned int sum)
+static inline __wsum csum_tcpudp_nofold(__be32 saddr,
+	__be32 daddr, unsigned short len, unsigned short proto,
+	__wsum sum)
 {
 	__asm__(
-	".set\tnoat\t\t\t# csum_tcpudp_nofold\n\t"
-	"addu\t%0, %2\n\t"
-	"sltu\t$1, %0, %2\n\t"
-	"addu\t%0, $1\n\t"
+	"	.set	push		# csum_tcpudp_nofold\n"
+	"	.set	noat		\n"
+#ifdef CONFIG_32BIT
+	"	addu	%0, %2		\n"
+	"	sltu	$1, %0, %2	\n"
+	"	addu	%0, $1		\n"
 
-	"addu\t%0, %3\n\t"
-	"sltu\t$1, %0, %3\n\t"
-	"addu\t%0, $1\n\t"
+	"	addu	%0, %3		\n"
+	"	sltu	$1, %0, %3	\n"
+	"	addu	%0, $1		\n"
 
-	"addu\t%0, %4\n\t"
-	"sltu\t$1, %0, %4\n\t"
-	"addu\t%0, $1\n\t"
-	".set\tat"
-	: "=r" (sum)
-	: "0" (daddr), "r"(saddr),
-#ifdef __MIPSEL__
-	  "r" ((ntohs(len)<<16)+proto*256),
-#else
-	  "r" (((proto)<<16)+len),
+	"	addu	%0, %4		\n"
+	"	sltu	$1, %0, %4	\n"
+	"	addu	%0, $1		\n"
 #endif
-	  "r" (sum));
+#ifdef CONFIG_64BIT
+	"	daddu	%0, %2		\n"
+	"	daddu	%0, %3		\n"
+	"	daddu	%0, %4		\n"
+	"	dsll32	$1, %0, 0	\n"
+	"	daddu	%0, $1		\n"
+	"	dsra32	%0, %0, 0	\n"
+#endif
+	"	.set	pop"
+	: "=r" (sum)
+	: "0" ((__force unsigned long)daddr),
+	  "r" ((__force unsigned long)saddr),
+#ifdef __MIPSEL__
+	  "r" ((proto + len) << 8),
+#else
+	  "r" (proto + len),
+#endif
+	  "r" ((__force unsigned long)sum));
 
 	return sum;
 }
@@ -159,11 +175,10 @@ static inline unsigned long csum_tcpudp_nofold(unsigned long saddr,
  * computes the checksum of the TCP/UDP pseudo-header
  * returns a 16-bit checksum, already complemented
  */
-static inline unsigned short int csum_tcpudp_magic(unsigned long saddr,
-						   unsigned long daddr,
+static inline __sum16 csum_tcpudp_magic(__be32 saddr, __be32 daddr,
 						   unsigned short len,
 						   unsigned short proto,
-						   unsigned int sum)
+						   __wsum sum)
 {
 	return csum_fold(csum_tcpudp_nofold(saddr, daddr, len, proto, sum));
 }
@@ -172,70 +187,69 @@ static inline unsigned short int csum_tcpudp_magic(unsigned long saddr,
  * this routine is used for miscellaneous IP-like checksums, mainly
  * in icmp.c
  */
-static inline unsigned short ip_compute_csum(unsigned char * buff, int len)
+static inline __sum16 ip_compute_csum(const void *buff, int len)
 {
 	return csum_fold(csum_partial(buff, len, 0));
 }
 
 #define _HAVE_ARCH_IPV6_CSUM
-static __inline__ unsigned short int csum_ipv6_magic(struct in6_addr *saddr,
-						     struct in6_addr *daddr,
-						     __u32 len,
-						     unsigned short proto,
-						     unsigned int sum)
+static __inline__ __sum16 csum_ipv6_magic(const struct in6_addr *saddr,
+				          const struct in6_addr *daddr,
+					  __u32 len, unsigned short proto,
+					  __wsum sum)
 {
 	__asm__(
-	".set\tpush\t\t\t# csum_ipv6_magic\n\t"
-	".set\tnoreorder\n\t"
-	".set\tnoat\n\t"
-	"addu\t%0, %5\t\t\t# proto (long in network byte order)\n\t"
-	"sltu\t$1, %0, %5\n\t"
-	"addu\t%0, $1\n\t"
+	"	.set	push		# csum_ipv6_magic\n"
+	"	.set	noreorder	\n"
+	"	.set	noat		\n"
+	"	addu	%0, %5		# proto (long in network byte order)\n"
+	"	sltu	$1, %0, %5	\n"
+	"	addu	%0, $1		\n"
 
-	"addu\t%0, %6\t\t\t# csum\n\t"
-	"sltu\t$1, %0, %6\n\t"
-	"lw\t%1, 0(%2)\t\t\t# four words source address\n\t"
-	"addu\t%0, $1\n\t"
-	"addu\t%0, %1\n\t"
-	"sltu\t$1, %0, %1\n\t"
+	"	addu	%0, %6		# csum\n"
+	"	sltu	$1, %0, %6	\n"
+	"	lw	%1, 0(%2)	# four words source address\n"
+	"	addu	%0, $1		\n"
+	"	addu	%0, %1		\n"
+	"	sltu	$1, %0, %1	\n"
 
-	"lw\t%1, 4(%2)\n\t"
-	"addu\t%0, $1\n\t"
-	"addu\t%0, %1\n\t"
-	"sltu\t$1, %0, %1\n\t"
+	"	lw	%1, 4(%2)	\n"
+	"	addu	%0, $1		\n"
+	"	addu	%0, %1		\n"
+	"	sltu	$1, %0, %1	\n"
 
-	"lw\t%1, 8(%2)\n\t"
-	"addu\t%0, $1\n\t"
-	"addu\t%0, %1\n\t"
-	"sltu\t$1, %0, %1\n\t"
+	"	lw	%1, 8(%2)	\n"
+	"	addu	%0, $1		\n"
+	"	addu	%0, %1		\n"
+	"	sltu	$1, %0, %1	\n"
 
-	"lw\t%1, 12(%2)\n\t"
-	"addu\t%0, $1\n\t"
-	"addu\t%0, %1\n\t"
-	"sltu\t$1, %0, %1\n\t"
+	"	lw	%1, 12(%2)	\n"
+	"	addu	%0, $1		\n"
+	"	addu	%0, %1		\n"
+	"	sltu	$1, %0, %1	\n"
 
-	"lw\t%1, 0(%3)\n\t"
-	"addu\t%0, $1\n\t"
-	"addu\t%0, %1\n\t"
-	"sltu\t$1, %0, %1\n\t"
+	"	lw	%1, 0(%3)	\n"
+	"	addu	%0, $1		\n"
+	"	addu	%0, %1		\n"
+	"	sltu	$1, %0, %1	\n"
 
-	"lw\t%1, 4(%3)\n\t"
-	"addu\t%0, $1\n\t"
-	"addu\t%0, %1\n\t"
-	"sltu\t$1, %0, %1\n\t"
+	"	lw	%1, 4(%3)	\n"
+	"	addu	%0, $1		\n"
+	"	addu	%0, %1		\n"
+	"	sltu	$1, %0, %1	\n"
 
-	"lw\t%1, 8(%3)\n\t"
-	"addu\t%0, $1\n\t"
-	"addu\t%0, %1\n\t"
-	"sltu\t$1, %0, %1\n\t"
+	"	lw	%1, 8(%3)	\n"
+	"	addu	%0, $1		\n"
+	"	addu	%0, %1		\n"
+	"	sltu	$1, %0, %1	\n"
 
-	"lw\t%1, 12(%3)\n\t"
-	"addu\t%0, $1\n\t"
-	"addu\t%0, %1\n\t"
-	"sltu\t$1, %0, %1\n\t"
+	"	lw	%1, 12(%3)	\n"
+	"	addu	%0, $1		\n"
+	"	addu	%0, %1		\n"
+	"	sltu	$1, %0, %1	\n"
 
-	"addu\t%0, $1\t\t\t# Add final carry\n\t"
-	".set\tpop"
+	"	addu	%0, $1		# Add final carry\n"
+	"	.set	pop"
 	: "=r" (sum), "=r" (proto)
 	: "r" (saddr), "r" (daddr),
 	  "0" (htonl(len)), "1" (htonl(proto)), "r" (sum));

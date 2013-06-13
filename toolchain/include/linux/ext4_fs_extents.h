@@ -125,6 +125,19 @@ struct ext4_ext_path {
 #define EXT4_EXT_CACHE_EXTENT	2
 
 /*
+ * Macro-instructions to handle (mark/unmark/check/create) unitialized
+ * extents. Applications can issue an IOCTL for preallocation, which results
+ * in assigning unitialized extents to the file.
+ */
+#define ext4_ext_mark_uninitialized(ext)	((ext)->ee_len |= \
+							cpu_to_le16(0x8000))
+#define ext4_ext_is_uninitialized(ext)  	((le16_to_cpu((ext)->ee_len))& \
+									0x8000)
+#define ext4_ext_get_actual_len(ext)		((le16_to_cpu((ext)->ee_len))& \
+									0x7FFF)
+
+
+/*
  * to be called by ext4_ext_walk_space()
  * negative retcode - error
  * positive retcode - signal for ext4_ext_walk_space(), see below
@@ -151,8 +164,8 @@ typedef int (*ext_prepare_callback)(struct inode *, struct ext4_ext_path *,
 	((struct ext4_extent_idx *) (((char *) (__hdr__)) +	\
 				     sizeof(struct ext4_extent_header)))
 #define EXT_HAS_FREE_INDEX(__path__) \
-        (le16_to_cpu((__path__)->p_hdr->eh_entries) \
-	                             < le16_to_cpu((__path__)->p_hdr->eh_max))
+	(le16_to_cpu((__path__)->p_hdr->eh_entries) \
+				     < le16_to_cpu((__path__)->p_hdr->eh_max))
 #define EXT_LAST_EXTENT(__hdr__) \
 	(EXT_FIRST_EXTENT((__hdr__)) + le16_to_cpu((__hdr__)->eh_entries) - 1)
 #define EXT_LAST_INDEX(__hdr__) \
@@ -190,9 +203,12 @@ ext4_ext_invalidate_cache(struct inode *inode)
 
 extern int ext4_extent_tree_init(handle_t *, struct inode *);
 extern int ext4_ext_calc_credits_for_insert(struct inode *, struct ext4_ext_path *);
+extern int ext4_ext_try_to_merge(struct inode *, struct ext4_ext_path *, struct ext4_extent *);
+extern unsigned int ext4_ext_check_overlap(struct inode *, struct ext4_extent *, struct ext4_ext_path *);
 extern int ext4_ext_insert_extent(handle_t *, struct inode *, struct ext4_ext_path *, struct ext4_extent *);
 extern int ext4_ext_walk_space(struct inode *, unsigned long, unsigned long, ext_prepare_callback, void *);
 extern struct ext4_ext_path * ext4_ext_find_extent(struct inode *, int, struct ext4_ext_path *);
+int ext4_ext_calc_metadata_amount(struct inode *inode, int blocks);
 
 #endif /* _LINUX_EXT4_EXTENTS */
 

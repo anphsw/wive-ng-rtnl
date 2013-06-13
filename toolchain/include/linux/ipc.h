@@ -49,6 +49,81 @@ struct ipc_perm
 #define IPC_64  0x0100  /* New version (support 32-bit UIDs, bigger
 			   message sizes, etc. */
 
+#ifdef __KERNEL__
+
+#include <linux/kref.h>
+
+#define IPCMNI 32768  /* <= MAX_INT limit for ipc arrays (including sysctl changes) */
+
+/* used by in-kernel data structures */
+struct kern_ipc_perm
+{
+	spinlock_t	lock;
+	int		deleted;
+	key_t		key;
+	uid_t		uid;
+	gid_t		gid;
+	uid_t		cuid;
+	gid_t		cgid;
+	mode_t		mode; 
+	unsigned long	seq;
+	void		*security;
+};
+
+struct ipc_ids;
+struct ipc_namespace {
+	struct kref	kref;
+	struct ipc_ids	*ids[3];
+
+	int		sem_ctls[4];
+	int		used_sems;
+
+	int		msg_ctlmax;
+	int		msg_ctlmnb;
+	int		msg_ctlmni;
+
+	size_t		shm_ctlmax;
+	size_t		shm_ctlall;
+	int		shm_ctlmni;
+	int		shm_tot;
+};
+
+extern struct ipc_namespace init_ipc_ns;
+
+#ifdef CONFIG_SYSVIPC
+#define INIT_IPC_NS(ns)		.ns		= &init_ipc_ns,
+extern struct ipc_namespace *copy_ipcs(unsigned long flags,
+						struct ipc_namespace *ns);
+#else
+#define INIT_IPC_NS(ns)
+static inline struct ipc_namespace *copy_ipcs(unsigned long flags,
+						struct ipc_namespace *ns)
+{
+	return ns;
+}
+#endif
+
+#ifdef CONFIG_IPC_NS
+extern void free_ipc_ns(struct kref *kref);
+#endif
+
+static inline struct ipc_namespace *get_ipc_ns(struct ipc_namespace *ns)
+{
+#ifdef CONFIG_IPC_NS
+	if (ns)
+		kref_get(&ns->kref);
+#endif
+	return ns;
+}
+
+static inline void put_ipc_ns(struct ipc_namespace *ns)
+{
+#ifdef CONFIG_IPC_NS
+	kref_put(&ns->kref, free_ipc_ns);
+#endif
+}
+
+#endif /* __KERNEL__ */
 
 #endif /* _LINUX_IPC_H */
 

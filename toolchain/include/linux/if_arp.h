@@ -130,8 +130,7 @@ struct arpreq_old {
  *	This structure defines an ethernet arp header.
  */
 
-struct arphdr
-{
+struct arphdr {
 	__be16		ar_hrd;		/* format of hardware address	*/
 	__be16		ar_pro;		/* format of protocol address	*/
 	unsigned char	ar_hln;		/* length of hardware address	*/
@@ -149,5 +148,18 @@ struct arphdr
 #endif
 
 };
+
+#ifdef __KERNEL__
+static inline struct arphdr *arp_hdr(const struct sk_buff *skb)
+{
+	return (struct arphdr *)skb_network_header(skb);
+}
+
+static inline int arp_hdr_len(struct net_device *dev)
+{
+	/* ARP header, plus 2 device addresses, plus 2 IP addresses. */
+	return sizeof(struct arphdr) + (dev->addr_len + sizeof(u32)) * 2;
+}
+#endif
 
 #endif	/* _LINUX_IF_ARP_H */

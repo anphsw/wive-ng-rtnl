@@ -7,7 +7,7 @@
  * Copyright (C) 2000 Silicon Graphics, Inc.
  * Modified for further R[236]000 support by Paul M. Antoine, 1996.
  * Kevin D. Kissell, kevink@mips.com and Carsten Langgaard, carstenl@mips.com
- * Copyright (C) 2000 MIPS Technologies, Inc.  All rights reserved.
+ * Copyright (C) 2000, 07 MIPS Technologies, Inc.
  * Copyright (C) 2003, 2004  Maciej W. Rozycki
  */
 #ifndef _ASM_MIPSREGS_H
@@ -533,6 +533,9 @@
 #define MIPS_CONF3_VEIC		(_ULCAST_(1) <<  6)
 #define MIPS_CONF3_LPA		(_ULCAST_(1) <<  7)
 #define MIPS_CONF3_DSP		(_ULCAST_(1) << 10)
+#define MIPS_CONF3_ULRI		(_ULCAST_(1) << 13)
+
+#define MIPS_CONF7_WII		(_ULCAST_(1) << 31)
 
 /*
  * Bits in the MIPS32/64 coprocessor 1 (FPU) revision register.
@@ -770,6 +773,9 @@ do {									\
 #define read_c0_context()	__read_ulong_c0_register($4, 0)
 #define write_c0_context(val)	__write_ulong_c0_register($4, 0, val)
 
+#define read_c0_userlocal()	__read_ulong_c0_register($4, 2)
+#define write_c0_userlocal(val)	__write_ulong_c0_register($4, 2, val)
+
 #define read_c0_pagemask()	__read_32bit_c0_register($5, 0)
 #define write_c0_pagemask(val)	__write_32bit_c0_register($5, 0, val)
 
@@ -971,7 +977,7 @@ do {									\
 #define write_c0_errorepc(val)	__write_ulong_c0_register($30, 0, val)
 
 /* MIPSR2 */
-#define read_c0_hwrena()	__read_32bit_c0_register($7,0)
+#define read_c0_hwrena()	__read_32bit_c0_register($7, 0)
 #define write_c0_hwrena(val)	__write_32bit_c0_register($7, 0, val)
 
 #define read_c0_intctl()	__read_32bit_c0_register($12, 1)
@@ -983,7 +989,7 @@ do {									\
 #define read_c0_srsmap()	__read_32bit_c0_register($12, 3)
 #define write_c0_srsmap(val)	__write_32bit_c0_register($12, 3, val)
 
-#define read_c0_ebase()		__read_32bit_c0_register($15,1)
+#define read_c0_ebase()		__read_32bit_c0_register($15, 1)
 #define write_c0_ebase(val)	__write_32bit_c0_register($15, 1, val)
 
 /*
@@ -998,6 +1004,219 @@ do {									\
 	".set\tpop"						\
         : "=r" (__res));                                        \
         __res;})
+
+#ifdef HAVE_AS_DSP
+#define rddsp(mask)							\
+({									\
+	unsigned int __dspctl;						\
+									\
+	__asm__ __volatile__(						\
+	"	.set push					\n"	\
+	"	.set dsp					\n"	\
+	"	rddsp	%0, %x1					\n"	\
+	"	.set pop					\n"	\
+	: "=r" (__dspctl)						\
+	: "i" (mask));							\
+	__dspctl;							\
+})
+
+#define wrdsp(val, mask)						\
+do {									\
+	__asm__ __volatile__(						\
+	"	.set push					\n"	\
+	"	.set dsp					\n"	\
+	"	wrdsp	%0, %x1					\n"	\
+	"	.set pop					\n"	\
+	:								\
+	: "r" (val), "i" (mask));					\
+} while (0)
+
+#define mflo0()								\
+({									\
+	long mflo0;							\
+	__asm__(							\
+	"	.set push					\n"	\
+	"	.set dsp					\n"	\
+	"	mflo %0, $ac0					\n"	\
+	"	.set pop					\n" 	\
+	: "=r" (mflo0)); 						\
+	mflo0;								\
+})
+
+#define mflo1()								\
+({									\
+	long mflo1;							\
+	__asm__(							\
+	"	.set push					\n"	\
+	"	.set dsp					\n"	\
+	"	mflo %0, $ac1					\n"	\
+	"	.set pop					\n" 	\
+	: "=r" (mflo1)); 						\
+	mflo1;								\
+})
+
+#define mflo2()								\
+({									\
+	long mflo2;							\
+	__asm__(							\
+	"	.set push					\n"	\
+	"	.set dsp					\n"	\
+	"	mflo %0, $ac2					\n"	\
+	"	.set pop					\n" 	\
+	: "=r" (mflo2)); 						\
+	mflo2;								\
+})
+
+#define mflo3()								\
+({									\
+	long mflo3;							\
+	__asm__(							\
+	"	.set push					\n"	\
+	"	.set dsp					\n"	\
+	"	mflo %0, $ac3					\n"	\
+	"	.set pop					\n" 	\
+	: "=r" (mflo3)); 						\
+	mflo3;								\
+})
+
+#define mfhi0()								\
+({									\
+	long mfhi0;							\
+	__asm__(							\
+	"	.set push					\n"	\
+	"	.set dsp					\n"	\
+	"	mfhi %0, $ac0					\n"	\
+	"	.set pop					\n" 	\
+	: "=r" (mfhi0)); 						\
+	mfhi0;								\
+})
+
+#define mfhi1()								\
+({									\
+	long mfhi1;							\
+	__asm__(							\
+	"	.set push					\n"	\
+	"	.set dsp					\n"	\
+	"	mfhi %0, $ac1					\n"	\
+	"	.set pop					\n" 	\
+	: "=r" (mfhi1)); 						\
+	mfhi1;								\
+})
+
+#define mfhi2()								\
+({									\
+	long mfhi2;							\
+	__asm__(							\
+	"	.set push					\n"	\
+	"	.set dsp					\n"	\
+	"	mfhi %0, $ac2					\n"	\
+	"	.set pop					\n" 	\
+	: "=r" (mfhi2)); 						\
+	mfhi2;								\
+})
+
+#define mfhi3()								\
+({									\
+	long mfhi3;							\
+	__asm__(							\
+	"	.set push					\n"	\
+	"	.set dsp					\n"	\
+	"	mfhi %0, $ac3					\n"	\
+	"	.set pop					\n" 	\
+	: "=r" (mfhi3)); 						\
+	mfhi3;								\
+})
+
+
+#define mtlo0(x)							\
+({									\
+	__asm__(							\
+	"	.set push					\n"	\
+	"	.set dsp					\n"	\
+	"	mtlo %0, $ac0					\n"	\
+	"	.set pop					\n"	\
+	:								\
+	: "r" (x));							\
+})
+
+#define mtlo1(x)							\
+({									\
+	__asm__(							\
+	"	.set push					\n"	\
+	"	.set dsp					\n"	\
+	"	mtlo %0, $ac1					\n"	\
+	"	.set pop					\n"	\
+	:								\
+	: "r" (x));							\
+})
+
+#define mtlo2(x)							\
+({									\
+	__asm__(							\
+	"	.set push					\n"	\
+	"	.set dsp					\n"	\
+	"	mtlo %0, $ac2					\n"	\
+	"	.set pop					\n"	\
+	:								\
+	: "r" (x));							\
+})
+
+#define mtlo3(x)							\
+({									\
+	__asm__(							\
+	"	.set push					\n"	\
+	"	.set dsp					\n"	\
+	"	mtlo %0, $ac3					\n"	\
+	"	.set pop					\n"	\
+	:								\
+	: "r" (x));							\
+})
+
+#define mthi0(x)							\
+({									\
+	__asm__(							\
+	"	.set push					\n"	\
+	"	.set dsp					\n"	\
+	"	mthi %0, $ac0					\n"	\
+	"	.set pop					\n"	\
+	:								\
+	: "r" (x));							\
+})
+
+#define mthi1(x)							\
+({									\
+	__asm__(							\
+	"	.set push					\n"	\
+	"	.set dsp					\n"	\
+	"	mthi %0, $ac1					\n"	\
+	"	.set pop					\n"	\
+	:								\
+	: "r" (x));							\
+})
+
+#define mthi2(x)							\
+({									\
+	__asm__(							\
+	"	.set push					\n"	\
+	"	.set dsp					\n"	\
+	"	mthi %0, $ac2					\n"	\
+	"	.set pop					\n"	\
+	:								\
+	: "r" (x));							\
+})
+
+#define mthi3(x)							\
+({									\
+	__asm__(							\
+	"	.set push					\n"	\
+	"	.set dsp					\n"	\
+	"	mthi %0, $ac3					\n"	\
+	"	.set pop					\n"	\
+	:								\
+	: "r" (x));							\
+})
+
+#else
 
 #define rddsp(mask)							\
 ({									\
@@ -1027,29 +1246,6 @@ do {									\
         :								\
 	: "r" (val), "i" (mask));					\
 } while (0)
-
-#if 0	/* Need DSP ASE capable assembler ... */
-#define mflo0() ({ long mflo0; __asm__("mflo %0, $ac0" : "=r" (mflo0)); mflo0;})
-#define mflo1() ({ long mflo1; __asm__("mflo %0, $ac1" : "=r" (mflo1)); mflo1;})
-#define mflo2() ({ long mflo2; __asm__("mflo %0, $ac2" : "=r" (mflo2)); mflo2;})
-#define mflo3() ({ long mflo3; __asm__("mflo %0, $ac3" : "=r" (mflo3)); mflo3;})
-
-#define mfhi0() ({ long mfhi0; __asm__("mfhi %0, $ac0" : "=r" (mfhi0)); mfhi0;})
-#define mfhi1() ({ long mfhi1; __asm__("mfhi %0, $ac1" : "=r" (mfhi1)); mfhi1;})
-#define mfhi2() ({ long mfhi2; __asm__("mfhi %0, $ac2" : "=r" (mfhi2)); mfhi2;})
-#define mfhi3() ({ long mfhi3; __asm__("mfhi %0, $ac3" : "=r" (mfhi3)); mfhi3;})
-
-#define mtlo0(x) __asm__("mtlo %0, $ac0" ::"r" (x))
-#define mtlo1(x) __asm__("mtlo %0, $ac1" ::"r" (x))
-#define mtlo2(x) __asm__("mtlo %0, $ac2" ::"r" (x))
-#define mtlo3(x) __asm__("mtlo %0, $ac3" ::"r" (x))
-
-#define mthi0(x) __asm__("mthi %0, $ac0" ::"r" (x))
-#define mthi1(x) __asm__("mthi %0, $ac1" ::"r" (x))
-#define mthi2(x) __asm__("mthi %0, $ac2" ::"r" (x))
-#define mthi3(x) __asm__("mthi %0, $ac3" ::"r" (x))
-
-#else
 
 #define mfhi0()								\
 ({									\

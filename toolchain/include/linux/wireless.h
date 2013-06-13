@@ -72,6 +72,11 @@
 /* This header is used in user-space, therefore need to be sanitised
  * for that purpose. Those includes are usually not compatible with glibc.
  * To know which includes to use in user-space, check iwlib.h. */
+#ifdef __KERNEL__
+#include <linux/types.h>		/* for "caddr_t" et al		*/
+#include <linux/socket.h>		/* for "struct sockaddr" et al	*/
+#include <linux/if.h>			/* for IFNAMSIZ and co... */
+#endif	/* __KERNEL__ */
 
 /***************************** VERSION *****************************/
 /*
@@ -684,7 +689,7 @@ struct	iw_param
  */
 struct	iw_point
 {
-  void *pointer;	/* Pointer to the data  (in user space) */
+  void __user	*pointer;	/* Pointer to the data  (in user space) */
   __u16		length;		/* number of fields or size in bytes */
   __u16		flags;		/* Optional params */
 };

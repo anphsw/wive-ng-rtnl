@@ -10,9 +10,8 @@
 #ifndef __ASM_TX3927_IRQ_H
 #define __ASM_TX3927_IRQ_H
 
-#include <linux/config.h>
-
 #ifndef __ASSEMBLY__
+
 #include <asm/irq.h>
 
 struct tb_irq_space {
@@ -45,10 +44,6 @@ toshibaboards_get_irq_action(int irq);
 extern int
 toshibaboards_setup_irq(int irq, struct irqaction * new);
 
-
-#ifdef CONFIG_TX_BRANCH_LIKELY_BUG_WORKAROUND
-extern void tx_branch_likely_bug_fixup(struct pt_regs *regs);
-#endif
 
 extern int (*toshibaboards_gen_iack)(void);
 

@@ -111,7 +111,7 @@ extern void __mutex_init(struct mutex *lock, const char *name,
  *
  * Returns 1 if the mutex is locked, 0 if unlocked.
  */
-static inline int fastcall mutex_is_locked(struct mutex *lock)
+static inline int mutex_is_locked(struct mutex *lock)
 {
 	return atomic_read(&lock->count) != 1;
 }
@@ -120,8 +120,8 @@ static inline int fastcall mutex_is_locked(struct mutex *lock)
  * See kernel/mutex.c for detailed documentation of these APIs.
  * Also see Documentation/mutex-design.txt.
  */
-extern void fastcall mutex_lock(struct mutex *lock);
-extern int fastcall mutex_lock_interruptible(struct mutex *lock);
+extern void mutex_lock(struct mutex *lock);
+extern int mutex_lock_interruptible(struct mutex *lock);
 
 #ifdef CONFIG_DEBUG_LOCK_ALLOC
 extern void mutex_lock_nested(struct mutex *lock, unsigned int subclass);
@@ -135,7 +135,7 @@ extern int mutex_lock_interruptible_nested(struct mutex *lock, unsigned int subc
  * NOTE: mutex_trylock() follows the spin_trylock() convention,
  *       not the down_trylock() convention!
  */
-extern int fastcall mutex_trylock(struct mutex *lock);
-extern void fastcall mutex_unlock(struct mutex *lock);
+extern int mutex_trylock(struct mutex *lock);
+extern void mutex_unlock(struct mutex *lock);
 
 #endif

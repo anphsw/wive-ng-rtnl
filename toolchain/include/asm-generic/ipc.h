@@ -6,7 +6,7 @@
  * See architecture code for ugly details..
  */
 struct ipc_kludge {
-	struct msgbuf *msgp;
+	struct msgbuf __user *msgp;
 	long msgtyp;
 };
 

@@ -59,7 +59,7 @@ struct gfs2_inum_host {
 	__u64 no_addr;
 };
 
-static __inline__ int gfs2_inum_equal(const struct gfs2_inum_host *ino1,
+static inline int gfs2_inum_equal(const struct gfs2_inum_host *ino1,
 				  const struct gfs2_inum_host *ino2)
 {
 	return ino1->no_formal_ino == ino2->no_formal_ino &&
@@ -507,5 +507,33 @@ struct gfs2_quota_change_host {
 	__u32 qc_id;
 };
 
+#ifdef __KERNEL__
+/* Translation functions */
+
+extern void gfs2_inum_in(struct gfs2_inum_host *no, const void *buf);
+extern void gfs2_inum_out(const struct gfs2_inum_host *no, void *buf);
+extern void gfs2_sb_in(struct gfs2_sb_host *sb, const void *buf);
+extern void gfs2_rindex_in(struct gfs2_rindex_host *ri, const void *buf);
+extern void gfs2_rindex_out(const struct gfs2_rindex_host *ri, void *buf);
+extern void gfs2_rgrp_in(struct gfs2_rgrp_host *rg, const void *buf);
+extern void gfs2_rgrp_out(const struct gfs2_rgrp_host *rg, void *buf);
+extern void gfs2_quota_in(struct gfs2_quota_host *qu, const void *buf);
+struct gfs2_inode;
+extern void gfs2_dinode_out(const struct gfs2_inode *ip, void *buf);
+extern void gfs2_ea_header_in(struct gfs2_ea_header *ea, const void *buf);
+extern void gfs2_ea_header_out(const struct gfs2_ea_header *ea, void *buf);
+extern void gfs2_log_header_in(struct gfs2_log_header_host *lh, const void *buf);
+extern void gfs2_inum_range_in(struct gfs2_inum_range_host *ir, const void *buf);
+extern void gfs2_inum_range_out(const struct gfs2_inum_range_host *ir, void *buf);
+extern void gfs2_statfs_change_in(struct gfs2_statfs_change_host *sc, const void *buf);
+extern void gfs2_statfs_change_out(const struct gfs2_statfs_change_host *sc, void *buf);
+extern void gfs2_quota_change_in(struct gfs2_quota_change_host *qc, const void *buf);
+
+/* Printing functions */
+
+extern void gfs2_rindex_print(const struct gfs2_rindex_host *ri);
+extern void gfs2_dinode_print(const struct gfs2_inode *ip);
+
+#endif /* __KERNEL__ */
 
 #endif /* __GFS2_ONDISK_DOT_H__ */

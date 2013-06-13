@@ -13,6 +13,7 @@
 
 #include <linux/cpumask.h>
 #include <linux/threads.h>
+#include <linux/prefetch.h>
 
 #include <asm/cachectl.h>
 #include <asm/cpu.h>
@@ -34,6 +35,11 @@ extern void (*cpu_wait)(void);
 extern unsigned int vced_count, vcei_count;
 
 /*
+ * MIPS does have an arch_pick_mmap_layout()
+ */
+#define HAVE_ARCH_PICK_MMAP_LAYOUT 1
+
+/*
  * A special page (the vdso) is mapped into all processes at the very
  * top of the virtual memory space.
  */
@@ -51,7 +57,10 @@ extern unsigned int vced_count, vcei_count;
  * This decides where the kernel will search for a free chunk of vm
  * space during mmap's.
  */
-#define TASK_UNMAPPED_BASE	(PAGE_ALIGN(TASK_SIZE / 3))
+#define TASK_UNMAPPED_BASE	((TASK_SIZE / 3) & ~(PAGE_SIZE))
+
+#define TASK_IS_32BIT_ADDR 1
+
 #endif
 
 #ifdef CONFIG_64BIT
@@ -74,7 +83,13 @@ extern unsigned int vced_count, vcei_count;
  */
 #define TASK_UNMAPPED_BASE	((current->thread.mflags & MF_32BIT_ADDR) ? \
 	PAGE_ALIGN(TASK_SIZE32 / 3) : PAGE_ALIGN(TASK_SIZE / 3))
+#define TASK_SIZE_OF(tsk)						\
+	(test_tsk_thread_flag(tsk, TIF_32BIT_ADDR) ? TASK_SIZE32 : TASK_SIZE)
+
+#define TASK_IS_32BIT_ADDR test_thread_flag(TIF_32BIT_ADDR)
+
 #endif
+#define STACK_TOP_MAX  TASK_SIZE
 
 #define NUM_FPU_REGS	32
 
@@ -246,16 +261,13 @@ unsigned long get_wchan(struct task_struct *p);
 #ifdef CONFIG_CPU_HAS_PREFETCH
 
 #define ARCH_HAS_PREFETCH
+#define prefetch(x) __builtin_prefetch((x), 0, 1)
 
-extern inline void prefetch(const void *addr)
-{
-	__asm__ __volatile__(
-	"	.set	mips4		\n"
-	"	pref	%0, (%1)	\n"
-	"	.set	mips0		\n"
-	:
-	: "i" (Pref_Load), "r" (addr));
-}
+#define ARCH_HAS_PREFETCHW
+#define prefetchw(x) __builtin_prefetch((x), 1, 1)
+
+#define ARCH_HAS_SPINLOCK_PREFETCH
+#define spin_lock_prefetch(x)   prefetchw(x)
 
 #endif
 

@@ -78,15 +78,29 @@
 #define EXT3_MIN_BLOCK_SIZE		1024
 #define	EXT3_MAX_BLOCK_SIZE		4096
 #define EXT3_MIN_BLOCK_LOG_SIZE		  10
+#ifdef __KERNEL__
+# define EXT3_BLOCK_SIZE(s)		((s)->s_blocksize)
+#else
 # define EXT3_BLOCK_SIZE(s)		(EXT3_MIN_BLOCK_SIZE << (s)->s_log_block_size)
+#endif
 #define	EXT3_ADDR_PER_BLOCK(s)		(EXT3_BLOCK_SIZE(s) / sizeof (__u32))
+#ifdef __KERNEL__
+# define EXT3_BLOCK_SIZE_BITS(s)	((s)->s_blocksize_bits)
+#else
 # define EXT3_BLOCK_SIZE_BITS(s)	((s)->s_log_block_size + 10)
+#endif
+#ifdef __KERNEL__
+#define	EXT3_ADDR_PER_BLOCK_BITS(s)	(EXT3_SB(s)->s_addr_per_block_bits)
+#define EXT3_INODE_SIZE(s)		(EXT3_SB(s)->s_inode_size)
+#define EXT3_FIRST_INO(s)		(EXT3_SB(s)->s_first_ino)
+#else
 #define EXT3_INODE_SIZE(s)	(((s)->s_rev_level == EXT3_GOOD_OLD_REV) ? \
 				 EXT3_GOOD_OLD_INODE_SIZE : \
 				 (s)->s_inode_size)
 #define EXT3_FIRST_INO(s)	(((s)->s_rev_level == EXT3_GOOD_OLD_REV) ? \
 				 EXT3_GOOD_OLD_FIRST_INO : \
 				 (s)->s_first_ino)
+#endif
 
 /*
  * Macro-instructions used to manage fragments
@@ -94,8 +108,13 @@
 #define EXT3_MIN_FRAG_SIZE		1024
 #define	EXT3_MAX_FRAG_SIZE		4096
 #define EXT3_MIN_FRAG_LOG_SIZE		  10
+#ifdef __KERNEL__
+# define EXT3_FRAG_SIZE(s)		(EXT3_SB(s)->s_frag_size)
+# define EXT3_FRAGS_PER_BLOCK(s)	(EXT3_SB(s)->s_frags_per_block)
+#else
 # define EXT3_FRAG_SIZE(s)		(EXT3_MIN_FRAG_SIZE << (s)->s_log_frag_size)
 # define EXT3_FRAGS_PER_BLOCK(s)	(EXT3_BLOCK_SIZE(s) / EXT3_FRAG_SIZE(s))
+#endif
 
 /*
  * Structure of a blocks group descriptor
@@ -115,9 +134,16 @@ struct ext3_group_desc
 /*
  * Macro-instructions used to manage group descriptors
  */
+#ifdef __KERNEL__
+# define EXT3_BLOCKS_PER_GROUP(s)	(EXT3_SB(s)->s_blocks_per_group)
+# define EXT3_DESC_PER_BLOCK(s)		(EXT3_SB(s)->s_desc_per_block)
+# define EXT3_INODES_PER_GROUP(s)	(EXT3_SB(s)->s_inodes_per_group)
+# define EXT3_DESC_PER_BLOCK_BITS(s)	(EXT3_SB(s)->s_desc_per_block_bits)
+#else
 # define EXT3_BLOCKS_PER_GROUP(s)	((s)->s_blocks_per_group)
 # define EXT3_DESC_PER_BLOCK(s)		(EXT3_BLOCK_SIZE(s) / sizeof (struct ext3_group_desc))
 # define EXT3_INODES_PER_GROUP(s)	((s)->s_inodes_per_group)
+#endif
 
 /*
  * Constants relative to the data blocks
@@ -468,10 +494,32 @@ struct ext3_super_block {
 	__u32	s_reserved[190];	/* Padding to the end of the block */
 };
 
+#ifdef __KERNEL__
+#include <linux/ext3_fs_i.h>
+#include <linux/ext3_fs_sb.h>
+static inline struct ext3_sb_info * EXT3_SB(struct super_block *sb)
+{
+	return sb->s_fs_info;
+}
+static inline struct ext3_inode_info *EXT3_I(struct inode *inode)
+{
+	return container_of(inode, struct ext3_inode_info, vfs_inode);
+}
+
+static inline int ext3_valid_inum(struct super_block *sb, unsigned long ino)
+{
+	return ino == EXT3_ROOT_INO ||
+		ino == EXT3_JOURNAL_INO ||
+		ino == EXT3_RESIZE_INO ||
+		(ino >= EXT3_FIRST_INO(sb) &&
+		 ino <= le32_to_cpu(EXT3_SB(sb)->s_es->s_inodes_count));
+}
+#else
 /* Assume that user mode programs are passing in an ext3fs superblock, not
  * a kernel struct super_block.  This will allow us to call the feature-test
  * macros from user land. */
 #define EXT3_SB(sb)	(sb)
+#endif
 
 #define NEXT_ORPHAN(inode) EXT3_I(inode)->i_dtime
 
@@ -635,5 +683,203 @@ struct ext3_dir_entry_2 {
 #define DX_HASH_HALF_MD4	1
 #define DX_HASH_TEA		2
 
+#ifdef __KERNEL__
+
+/* hash info structure used by the directory hash */
+struct dx_hash_info
+{
+	u32		hash;
+	u32		minor_hash;
+	int		hash_version;
+	u32		*seed;
+};
+
+#define EXT3_HTREE_EOF	0x7fffffff
+
+/*
+ * Control parameters used by ext3_htree_next_block
+ */
+#define HASH_NB_ALWAYS		1
+
+
+/*
+ * Describe an inode's exact location on disk and in memory
+ */
+struct ext3_iloc
+{
+	struct buffer_head *bh;
+	unsigned long offset;
+	unsigned long block_group;
+};
+
+static inline struct ext3_inode *ext3_raw_inode(struct ext3_iloc *iloc)
+{
+	return (struct ext3_inode *) (iloc->bh->b_data + iloc->offset);
+}
+
+/*
+ * This structure is stuffed into the struct file's private_data field
+ * for directories.  It is where we put information so that we can do
+ * readdir operations in hash tree order.
+ */
+struct dir_private_info {
+	struct rb_root	root;
+	struct rb_node	*curr_node;
+	struct fname	*extra_fname;
+	loff_t		last_pos;
+	__u32		curr_hash;
+	__u32		curr_minor_hash;
+	__u32		next_hash;
+};
+
+/* calculate the first block number of the group */
+static inline ext3_fsblk_t
+ext3_group_first_block_no(struct super_block *sb, unsigned long group_no)
+{
+	return group_no * (ext3_fsblk_t)EXT3_BLOCKS_PER_GROUP(sb) +
+		le32_to_cpu(EXT3_SB(sb)->s_es->s_first_data_block);
+}
+
+/*
+ * Special error return code only used by dx_probe() and its callers.
+ */
+#define ERR_BAD_DX_DIR	-75000
+
+/*
+ * Function prototypes
+ */
+
+/*
+ * Ok, these declarations are also in <linux/kernel.h> but none of the
+ * ext3 source programs needs to include it so they are duplicated here.
+ */
+# define NORET_TYPE    /**/
+# define ATTRIB_NORET  __attribute__((noreturn))
+# define NORET_AND     noreturn,
+
+/* balloc.c */
+extern int ext3_bg_has_super(struct super_block *sb, int group);
+extern unsigned long ext3_bg_num_gdb(struct super_block *sb, int group);
+extern ext3_fsblk_t ext3_new_block (handle_t *handle, struct inode *inode,
+			ext3_fsblk_t goal, int *errp);
+extern ext3_fsblk_t ext3_new_blocks (handle_t *handle, struct inode *inode,
+			ext3_fsblk_t goal, unsigned long *count, int *errp);
+extern void ext3_free_blocks (handle_t *handle, struct inode *inode,
+			ext3_fsblk_t block, unsigned long count);
+extern void ext3_free_blocks_sb (handle_t *handle, struct super_block *sb,
+				 ext3_fsblk_t block, unsigned long count,
+				unsigned long *pdquot_freed_blocks);
+extern ext3_fsblk_t ext3_count_free_blocks (struct super_block *);
+extern void ext3_check_blocks_bitmap (struct super_block *);
+extern struct ext3_group_desc * ext3_get_group_desc(struct super_block * sb,
+						    unsigned int block_group,
+						    struct buffer_head ** bh);
+extern int ext3_should_retry_alloc(struct super_block *sb, int *retries);
+extern void ext3_init_block_alloc_info(struct inode *);
+extern void ext3_rsv_window_add(struct super_block *sb, struct ext3_reserve_window_node *rsv);
+
+/* dir.c */
+extern int ext3_check_dir_entry(const char *, struct inode *,
+				struct ext3_dir_entry_2 *,
+				struct buffer_head *, unsigned long);
+extern int ext3_htree_store_dirent(struct file *dir_file, __u32 hash,
+				    __u32 minor_hash,
+				    struct ext3_dir_entry_2 *dirent);
+extern void ext3_htree_free_dir_info(struct dir_private_info *p);
+
+/* fsync.c */
+extern int ext3_sync_file (struct file *, struct dentry *, int);
+
+/* hash.c */
+extern int ext3fs_dirhash(const char *name, int len, struct
+			  dx_hash_info *hinfo);
+
+/* ialloc.c */
+extern struct inode * ext3_new_inode (handle_t *, struct inode *, int);
+extern void ext3_free_inode (handle_t *, struct inode *);
+extern struct inode * ext3_orphan_get (struct super_block *, unsigned long);
+extern unsigned long ext3_count_free_inodes (struct super_block *);
+extern unsigned long ext3_count_dirs (struct super_block *);
+extern void ext3_check_inodes_bitmap (struct super_block *);
+extern unsigned long ext3_count_free (struct buffer_head *, unsigned);
+
+
+/* inode.c */
+int ext3_forget(handle_t *handle, int is_metadata, struct inode *inode,
+		struct buffer_head *bh, ext3_fsblk_t blocknr);
+struct buffer_head * ext3_getblk (handle_t *, struct inode *, long, int, int *);
+struct buffer_head * ext3_bread (handle_t *, struct inode *, int, int, int *);
+int ext3_get_blocks_handle(handle_t *handle, struct inode *inode,
+	sector_t iblock, unsigned long maxblocks, struct buffer_head *bh_result,
+	int create, int extend_disksize);
+
+extern void ext3_read_inode (struct inode *);
+extern int  ext3_write_inode (struct inode *, int);
+extern int  ext3_setattr (struct dentry *, struct iattr *);
+extern void ext3_delete_inode (struct inode *);
+extern int  ext3_sync_inode (handle_t *, struct inode *);
+extern void ext3_discard_reservation (struct inode *);
+extern void ext3_dirty_inode(struct inode *);
+extern int ext3_change_inode_journal_flag(struct inode *, int);
+extern int ext3_get_inode_loc(struct inode *, struct ext3_iloc *);
+extern void ext3_truncate (struct inode *);
+extern void ext3_set_inode_flags(struct inode *);
+extern void ext3_set_aops(struct inode *inode);
+
+/* ioctl.c */
+extern int ext3_ioctl (struct inode *, struct file *, unsigned int,
+		       unsigned long);
+extern long ext3_compat_ioctl (struct file *, unsigned int, unsigned long);
+
+/* namei.c */
+extern int ext3_orphan_add(handle_t *, struct inode *);
+extern int ext3_orphan_del(handle_t *, struct inode *);
+extern int ext3_htree_fill_tree(struct file *dir_file, __u32 start_hash,
+				__u32 start_minor_hash, __u32 *next_hash);
+
+/* resize.c */
+extern int ext3_group_add(struct super_block *sb,
+				struct ext3_new_group_data *input);
+extern int ext3_group_extend(struct super_block *sb,
+				struct ext3_super_block *es,
+				ext3_fsblk_t n_blocks_count);
+
+/* super.c */
+extern void ext3_error (struct super_block *, const char *, const char *, ...)
+	__attribute__ ((format (printf, 3, 4)));
+extern void __ext3_std_error (struct super_block *, const char *, int);
+extern void ext3_abort (struct super_block *, const char *, const char *, ...)
+	__attribute__ ((format (printf, 3, 4)));
+extern void ext3_warning (struct super_block *, const char *, const char *, ...)
+	__attribute__ ((format (printf, 3, 4)));
+extern void ext3_update_dynamic_rev (struct super_block *sb);
+
+#define ext3_std_error(sb, errno)				\
+do {								\
+	if ((errno))						\
+		__ext3_std_error((sb), __FUNCTION__, (errno));	\
+} while (0)
+
+/*
+ * Inodes and files operations
+ */
+
+/* dir.c */
+extern const struct file_operations ext3_dir_operations;
+
+/* file.c */
+extern const struct inode_operations ext3_file_inode_operations;
+extern const struct file_operations ext3_file_operations;
+
+/* namei.c */
+extern const struct inode_operations ext3_dir_inode_operations;
+extern const struct inode_operations ext3_special_inode_operations;
+
+/* symlink.c */
+extern const struct inode_operations ext3_symlink_inode_operations;
+extern const struct inode_operations ext3_fast_symlink_inode_operations;
+
+
+#endif	/* __KERNEL__ */
 
 #endif	/* _LINUX_EXT3_FS_H */

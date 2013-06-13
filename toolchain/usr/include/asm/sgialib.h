@@ -29,22 +29,16 @@ extern int prom_flags;
 #define PROM_FLAG_USE_AS_CONSOLE	2
 #define PROM_FLAG_DONT_FREE_TEMP	4
 
-/* Init the PROM library and it's internal data structures. */
-extern void prom_init(int argc, char **argv, char **envp, int *prom_vec);
-
 /* Simple char-by-char console I/O. */
 extern void prom_putchar(char c);
 extern char prom_getchar(void);
-
-/* Generic printf() using ARCS console I/O. */
-extern void prom_printf(char *fmt, ...);
 
 /* Memory descriptor management. */
 #define PROM_MAX_PMEMBLOCKS    32
 struct prom_pmemblock {
 	LONG	base;		/* Within KSEG0 or XKPHYS. */
-	ULONG size;		/* In bytes. */
-	ULONG type;		/* free or prom memory */
+	ULONG	size;		/* In bytes. */
+	ULONG	type;		/* free or prom memory */
 };
 
 /* Get next memory descriptor after CURR, returns first descriptor
@@ -125,5 +119,6 @@ extern VOID ArcEnterInteractiveMode(VOID) __attribute__((noreturn));
 extern long prom_cfgsave(VOID);
 extern struct linux_sysid *prom_getsysid(VOID);
 extern VOID ArcFlushAllCaches(VOID);
+extern DISPLAY_STATUS *ArcGetDisplayStatus(ULONG FileID);
 
 #endif /* _ASM_SGIALIB_H */

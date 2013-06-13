@@ -34,11 +34,26 @@ struct device;
 struct device_driver;
 struct class;
 struct class_device;
+struct bus_type;
+
+struct bus_attribute {
+	struct attribute	attr;
+	ssize_t (*show)(struct bus_type *, char * buf);
+	ssize_t (*store)(struct bus_type *, const char * buf, size_t count);
+};
+
+#define BUS_ATTR(_name,_mode,_show,_store)	\
+struct bus_attribute bus_attr_##_name = __ATTR(_name,_mode,_show,_store)
+
+extern int __must_check bus_create_file(struct bus_type *,
+					struct bus_attribute *);
+extern void bus_remove_file(struct bus_type *, struct bus_attribute *);
 
 struct bus_type {
 	const char		* name;
+	struct module		* owner;
 
-	struct subsystem	subsys;
+	struct kset		subsys;
 	struct kset		drivers;
 	struct kset		devices;
 	struct klist		klist_devices;
@@ -49,6 +64,8 @@ struct bus_type {
 	struct bus_attribute	* bus_attrs;
 	struct device_attribute	* dev_attrs;
 	struct driver_attribute	* drv_attrs;
+	struct bus_attribute drivers_autoprobe_attr;
+	struct bus_attribute drivers_probe_attr;
 
 	int		(*match)(struct device * dev, struct device_driver * drv);
 	int		(*uevent)(struct device *dev, char **envp,
@@ -61,6 +78,9 @@ struct bus_type {
 	int (*suspend_late)(struct device * dev, pm_message_t state);
 	int (*resume_early)(struct device * dev);
 	int (*resume)(struct device * dev);
+
+	unsigned int drivers_autoprobe:1;
+	unsigned int multithread_probe:1;
 };
 
 extern int __must_check bus_register(struct bus_type * bus);
@@ -102,21 +122,6 @@ extern int bus_unregister_notifier(struct bus_type *bus,
 #define BUS_NOTIFY_UNBIND_DRIVER	0x00000004 /* driver about to be
 						      unbound */
 
-/* sysfs interface for exporting bus attributes */
-
-struct bus_attribute {
-	struct attribute	attr;
-	ssize_t (*show)(struct bus_type *, char * buf);
-	ssize_t (*store)(struct bus_type *, const char * buf, size_t count);
-};
-
-#define BUS_ATTR(_name,_mode,_show,_store)	\
-struct bus_attribute bus_attr_##_name = __ATTR(_name,_mode,_show,_store)
-
-extern int __must_check bus_create_file(struct bus_type *,
-					struct bus_attribute *);
-extern void bus_remove_file(struct bus_type *, struct bus_attribute *);
-
 struct device_driver {
 	const char		* name;
 	struct bus_type		* bus;
@@ -135,8 +140,6 @@ struct device_driver {
 	void	(*shutdown)	(struct device * dev);
 	int	(*suspend)	(struct device * dev, pm_message_t state);
 	int	(*resume)	(struct device * dev);
-
-	unsigned int multithread_probe:1;
 };
 
 
@@ -177,13 +180,12 @@ struct class {
 	const char		* name;
 	struct module		* owner;
 
-	struct subsystem	subsys;
+	struct kset		subsys;
 	struct list_head	children;
 	struct list_head	devices;
 	struct list_head	interfaces;
+	struct kset		class_dirs;
 	struct semaphore	sem;	/* locks both the children and interfaces lists */
-
-	struct kobject		*virtual_dir;
 
 	struct class_attribute		* class_attrs;
 	struct class_device_attribute	* class_dev_attrs;
@@ -547,8 +549,8 @@ extern void device_shutdown(void);
 
 
 /* drivers/base/firmware.c */
-extern int __must_check firmware_register(struct subsystem *);
-extern void firmware_unregister(struct subsystem *);
+extern int __must_check firmware_register(struct kset *);
+extern void firmware_unregister(struct kset *);
 
 /* debugging and troubleshooting/diagnostic helpers. */
 extern const char *dev_driver_string(struct device *dev);

@@ -30,25 +30,41 @@
 /*
  * Atlas RTC-device indirect register access.
  */
-#define ATLAS_RTC_ADR_REG       (KSEG1ADDR(0x1f000800))
-#define ATLAS_RTC_DAT_REG       (KSEG1ADDR(0x1f000808))
-
+#define ATLAS_RTC_ADR_REG       0x1f000800
+#define ATLAS_RTC_DAT_REG       0x1f000808
 
 /*
  * Atlas interrupt controller register base.
  */
-#define ATLAS_ICTRL_REGS_BASE   (KSEG1ADDR(0x1f000000))
+#define ATLAS_ICTRL_REGS_BASE   0x1f000000
+
+/*
+ * Atlas registers are memory mapped on 64-bit aligned boundaries and
+ * only word access are allowed.
+ */
+struct atlas_ictrl_regs {
+	volatile unsigned int intraw;
+	int dummy1;
+	volatile unsigned int intseten;
+	int dummy2;
+	volatile unsigned int intrsten;
+	int dummy3;
+	volatile unsigned int intenable;
+	int dummy4;
+	volatile unsigned int intstatus;
+	int dummy5;
+};
 
 /*
  * Atlas UART register base.
  */
-#define ATLAS_UART_REGS_BASE    (0x1f000900)
+#define ATLAS_UART_REGS_BASE    0x1f000900
 #define ATLAS_BASE_BAUD ( 3686400 / 16 )
 
 /*
  * Atlas PSU standby register.
  */
-#define ATLAS_PSUSTBY_REG       (KSEG1ADDR(0x1f000600))
+#define ATLAS_PSUSTBY_REG       0x1f000600
 #define ATLAS_GOSTBY            0x4d
 
 /*
@@ -57,6 +73,8 @@
  * This is not ideal, but is needed for setting up remote debugging as
  * soon as possible.
  */
-#define ATLAS_SAA9730_REG  (KSEG1ADDR(0x08800000))
+#define ATLAS_SAA9730_REG	0x10800000
+
+#define ATLAS_SAA9730_BAUDCLOCK	3692300
 
 #endif /* !(_MIPS_ATLAS_H) */

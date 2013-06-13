@@ -12,6 +12,9 @@
 #ifndef LINUX_NUBUS_H
 #define LINUX_NUBUS_H
 
+#ifdef __KERNEL__
+#include <asm/nubus.h>
+#endif
 
 enum nubus_category {
 	NUBUS_CAT_BOARD          = 0x0001,
@@ -323,7 +326,7 @@ void nubus_get_rsrc_str(void* dest,
 			int maxlen);
 
 /* We'd like to get rid of this eventually.  Only daynaport.c uses it now. */
-static __inline__ void *nubus_slot_addr(int slot)
+static inline void *nubus_slot_addr(int slot)
 {
 	return (void *)(0xF0000000|(slot<<24));
 }

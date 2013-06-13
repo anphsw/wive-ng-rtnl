@@ -27,6 +27,7 @@
 
 #include <linux/kernel.h>
 #include <linux/types.h>
+#include <linux/compiler.h>
 
 struct file;
 struct completion;
@@ -37,11 +38,11 @@ struct completion;
 				   member of a struct __sysctl_args to have? */
 
 struct __sysctl_args {
-	int *name;
+	int __user *name;
 	int nlen;
-	void *oldval;
-	size_t *oldlenp;
-	void *newval;
+	void __user *oldval;
+	size_t __user *oldlenp;
+	void __user *newval;
 	size_t newlen;
 	unsigned long __unused[4];
 };
@@ -51,6 +52,10 @@ struct __sysctl_args {
 /* Top-level names: */
 
 /* For internal pattern-matching use only: */
+#ifdef __KERNEL__
+#define CTL_NONE	0
+#define CTL_UNNUMBERED	CTL_NONE	/* sysctl without a binary number */
+#endif
 
 enum
 {
@@ -448,17 +453,18 @@ enum
 	NET_CIPSOV4_RBM_STRICTVALID=121,
 	NET_TCP_AVAIL_CONG_CONTROL=122,
 	NET_TCP_ALLOWED_CONG_CONTROL=123,
+	NET_TCP_MAX_SSTHRESH=124,
 #ifdef CONFIG_BRIDGE_FASTPATH
-	NET_TCP_ALLOWED_BRIDGE_FASTPATH=124,
+	NET_TCP_ALLOWED_BRIDGE_FASTPATH=125,
 #endif
 #ifdef CONFIG_RAETH_DHCP_TOUCH
-	NET_TCP_SEND_SIGUSR_DHCPC=125,
+	NET_TCP_SEND_SIGUSR_DHCPC=126,
 #endif
 #ifdef CONFIG_VLAN_8021Q_DOUBLE_TAG
-	NET_TCP_8021Q_DOUBLE_TAG=126,
+	NET_TCP_8021Q_DOUBLE_TAG=127,
 #endif
 #ifdef CONFIG_PPP_PREVENT_DROP_SESSION_ON_FULL_CPU_LOAD
-	NET_TCP_PPP_CPU_LOAD=127,
+	NET_TCP_PPP_CPU_LOAD=128,
 #endif
 };
 
@@ -811,6 +817,7 @@ enum {
 	NET_BRIDGE_NF_CALL_IPTABLES = 2,
 	NET_BRIDGE_NF_CALL_IP6TABLES = 3,
 	NET_BRIDGE_NF_FILTER_VLAN_TAGGED = 4,
+	NET_BRIDGE_NF_FILTER_PPPOE_TAGGED = 5,
 };
 
 /* CTL_FS names: */
@@ -950,6 +957,125 @@ enum
 	ABI_FAKE_UTSNAME=6,	/* fake target utsname information */
 };
 
+#ifdef __KERNEL__
+#include <linux/list.h>
 
+/* For the /proc/sys support */
+struct ctl_table;
+extern struct ctl_table_header *sysctl_head_next(struct ctl_table_header *prev);
+extern void sysctl_head_finish(struct ctl_table_header *prev);
+extern int sysctl_perm(struct ctl_table *table, int op);
+
+typedef struct ctl_table ctl_table;
+
+typedef int ctl_handler (ctl_table *table, int __user *name, int nlen,
+			 void __user *oldval, size_t __user *oldlenp,
+			 void __user *newval, size_t newlen);
+
+typedef int proc_handler (ctl_table *ctl, int write, struct file * filp,
+			  void __user *buffer, size_t *lenp, loff_t *ppos);
+
+extern int proc_dostring(ctl_table *, int, struct file *,
+			 void __user *, size_t *, loff_t *);
+extern int proc_dointvec(ctl_table *, int, struct file *,
+			 void __user *, size_t *, loff_t *);
+extern int proc_dointvec_bset(ctl_table *, int, struct file *,
+			      void __user *, size_t *, loff_t *);
+extern int proc_dointvec_minmax(ctl_table *, int, struct file *,
+				void __user *, size_t *, loff_t *);
+extern int proc_dointvec_jiffies(ctl_table *, int, struct file *,
+				 void __user *, size_t *, loff_t *);
+extern int proc_dointvec_userhz_jiffies(ctl_table *, int, struct file *,
+					void __user *, size_t *, loff_t *);
+extern int proc_dointvec_ms_jiffies(ctl_table *, int, struct file *,
+				    void __user *, size_t *, loff_t *);
+extern int proc_doulongvec_minmax(ctl_table *, int, struct file *,
+				  void __user *, size_t *, loff_t *);
+extern int proc_doulongvec_ms_jiffies_minmax(ctl_table *table, int,
+				      struct file *, void __user *, size_t *, loff_t *);
+extern int do_sysctl_strategy (ctl_table *table, 
+			       int __user *name, int nlen,
+			       void __user *oldval, size_t __user *oldlenp,
+			       void __user *newval, size_t newlen);
+
+extern ctl_handler sysctl_string;
+extern ctl_handler sysctl_intvec;
+extern ctl_handler sysctl_jiffies;
+extern ctl_handler sysctl_ms_jiffies;
+
+
+/*
+ * Register a set of sysctl names by calling register_sysctl_table
+ * with an initialised array of ctl_table's.  An entry with zero
+ * ctl_name and NULL procname terminates the table.  table->de will be
+ * set up by the registration and need not be initialised in advance.
+ *
+ * sysctl names can be mirrored automatically under /proc/sys.  The
+ * procname supplied controls /proc naming.
+ *
+ * The table's mode will be honoured both for sys_sysctl(2) and
+ * proc-fs access.
+ *
+ * Leaf nodes in the sysctl tree will be represented by a single file
+ * under /proc; non-leaf nodes will be represented by directories.  A
+ * null procname disables /proc mirroring at this node.
+ *
+ * sysctl entries with a zero ctl_name will not be available through
+ * the binary sysctl interface.
+ *
+ * sysctl(2) can automatically manage read and write requests through
+ * the sysctl table.  The data and maxlen fields of the ctl_table
+ * struct enable minimal validation of the values being written to be
+ * performed, and the mode field allows minimal authentication.
+ * 
+ * More sophisticated management can be enabled by the provision of a
+ * strategy routine with the table entry.  This will be called before
+ * any automatic read or write of the data is performed.
+ * 
+ * The strategy routine may return:
+ * <0: Error occurred (error is passed to user process)
+ * 0:  OK - proceed with automatic read or write.
+ * >0: OK - read or write has been done by the strategy routine, so 
+ *     return immediately.
+ * 
+ * There must be a proc_handler routine for any terminal nodes
+ * mirrored under /proc/sys (non-terminals are handled by a built-in
+ * directory handler).  Several default handlers are available to
+ * cover common cases.
+ */
+
+/* A sysctl table is an array of struct ctl_table: */
+struct ctl_table 
+{
+	int ctl_name;			/* Binary ID */
+	const char *procname;		/* Text ID for /proc/sys, or zero */
+	void *data;
+	int maxlen;
+	mode_t mode;
+	ctl_table *child;
+	ctl_table *parent;		/* Automatically set */
+	proc_handler *proc_handler;	/* Callback for text formatting */
+	ctl_handler *strategy;		/* Callback function for all r/w */
+	void *extra1;
+	void *extra2;
+};
+
+/* struct ctl_table_header is used to maintain dynamic lists of
+   ctl_table trees. */
+struct ctl_table_header
+{
+	ctl_table *ctl_table;
+	struct list_head ctl_entry;
+	int used;
+	struct completion *unregistering;
+};
+
+struct ctl_table_header * register_sysctl_table(ctl_table * table);
+
+void unregister_sysctl_table(struct ctl_table_header * table);
+
+#else /* __KERNEL__ */
+
+#endif /* __KERNEL__ */
 
 #endif /* _LINUX_SYSCTL_H */

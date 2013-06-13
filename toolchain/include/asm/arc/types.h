@@ -9,7 +9,6 @@
 #ifndef _ASM_ARC_TYPES_H
 #define _ASM_ARC_TYPES_H
 
-#include <linux/config.h>
 
 #ifdef CONFIG_ARC32
 
@@ -68,5 +67,20 @@ typedef UCHAR		*PUCHAR;
 typedef USHORT		*PUSHORT;
 typedef ULONG		*PULONG;
 typedef VOID		*PVOID;
+
+/*
+ * Return type of ArcGetDisplayStatus()
+ */
+typedef struct {
+	USHORT	CursorXPosition;
+	USHORT	CursorYPosition;
+	USHORT	CursorMaxXPosition;
+	USHORT	CursorMaxYPosition;
+	USHORT	ForegroundColor;
+	USHORT	BackgroundColor;
+	UCHAR	HighIntensity;
+	UCHAR	Underscored;
+	UCHAR	ReverseVideo;
+} DISPLAY_STATUS;
 
 #endif /* _ASM_ARC_TYPES_H */

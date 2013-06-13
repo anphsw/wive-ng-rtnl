@@ -79,7 +79,7 @@ extern void paging_init(void);
 #define pmd_page(pmd)		(pfn_to_page(pmd_phys(pmd) >> PAGE_SHIFT))
 #define pmd_page_vaddr(pmd)	pmd_val(pmd)
 
-#if defined(CONFIG_64BIT_PHYS_ADDR) && defined(CONFIG_CPU_MIPS32_R1)
+#if defined(CONFIG_64BIT_PHYS_ADDR) && defined(CONFIG_CPU_MIPS32)
 
 #define pte_none(pte)		(!(((pte).pte_low | (pte).pte_high) & ~_PAGE_GLOBAL))
 #define pte_present(pte)	((pte).pte_low & _PAGE_PRESENT)
@@ -103,7 +103,7 @@ static inline void set_pte(pte_t *ptep, pte_t pte)
 		}
 	}
 }
-#define set_pte_at(mm,addr,ptep,pteval) set_pte(ptep,pteval)
+#define set_pte_at(mm, addr, ptep, pteval) set_pte(ptep, pteval)
 
 static inline void pte_clear(struct mm_struct *mm, unsigned long addr, pte_t *ptep)
 {
@@ -140,7 +140,7 @@ static inline void set_pte(pte_t *ptep, pte_t pteval)
 	}
 #endif
 }
-#define set_pte_at(mm,addr,ptep,pteval) set_pte(ptep,pteval)
+#define set_pte_at(mm, addr, ptep, pteval) set_pte(ptep, pteval)
 
 static inline void pte_clear(struct mm_struct *mm, unsigned long addr, pte_t *ptep)
 {
@@ -153,6 +153,8 @@ static inline void pte_clear(struct mm_struct *mm, unsigned long addr, pte_t *pt
 		set_pte_at(mm, addr, ptep, __pte(0));
 }
 #endif
+
+static inline int pte_special(pte_t pte) { return 0; }
 
 /*
  * (pmds are folded into puds so this doesn't get actually called,
@@ -172,14 +174,18 @@ static inline void pte_clear(struct mm_struct *mm, unsigned long addr, pte_t *pt
 #define PMD_T_LOG2      (__builtin_ffs(sizeof(pmd_t)) - 1)
 #define PTE_T_LOG2      (__builtin_ffs(sizeof(pte_t)) - 1)
 
-extern pgd_t swapper_pg_dir[PTRS_PER_PGD];
+/*
+ * We used to declare this array with size but gcc 3.3 and older are not able
+ * to find that this expression is a constant, so the size is dropped.
+ */
+extern pgd_t swapper_pg_dir[];
 
 /*
  * The following only work if pte_present() is true.
  * Undefined behaviour if not..
  */
 static inline int pte_user(pte_t pte)	{ BUG(); return 0; }
-#if defined(CONFIG_64BIT_PHYS_ADDR) && defined(CONFIG_CPU_MIPS32_R1)
+#if defined(CONFIG_64BIT_PHYS_ADDR) && defined(CONFIG_CPU_MIPS32)
 static inline int pte_read(pte_t pte)	{ return pte.pte_low & _PAGE_READ; }
 static inline int pte_write(pte_t pte)	{ return pte.pte_low & _PAGE_WRITE; }
 static inline int pte_dirty(pte_t pte)	{ return pte.pte_low & _PAGE_MODIFIED; }
@@ -340,7 +346,7 @@ static inline pgprot_t pgprot_noncached(pgprot_t _prot)
  */
 #define mk_pte(page, pgprot)	pfn_pte(page_to_pfn(page), (pgprot))
 
-#if defined(CONFIG_64BIT_PHYS_ADDR) && defined(CONFIG_CPU_MIPS32_R1)
+#if defined(CONFIG_64BIT_PHYS_ADDR) && defined(CONFIG_CPU_MIPS32)
 static inline pte_t pte_modify(pte_t pte, pgprot_t newprot)
 {
 	pte.pte_low  &= _PAGE_CHG_MASK;
@@ -399,6 +405,7 @@ static inline int io_remap_pfn_range(struct vm_area_struct *vma,
  * constraints placed on us by the cache architecture.
  */
 #define HAVE_ARCH_UNMAPPED_AREA
+#define HAVE_ARCH_UNMAPPED_AREA_TOPDOWN
 
 /*
  * No page table caches to initialise

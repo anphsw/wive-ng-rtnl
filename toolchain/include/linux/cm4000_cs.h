@@ -57,4 +57,10 @@ typedef struct ptsreq {
 #define	CM_BAD_CARD			0x20
 
 
+#ifdef __KERNEL__
+
+#define	DEVICE_NAME		"cmm"
+#define	MODULE_NAME		"cm4000_cs"
+
+#endif	/* __KERNEL__ */
 #endif	/* _CM4000_H_ */

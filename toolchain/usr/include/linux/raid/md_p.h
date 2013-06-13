@@ -192,7 +192,7 @@ typedef struct mdp_superblock_s {
 
 } mdp_super_t;
 
-static __inline__ __u64 md_event(mdp_super_t *sb) {
+static inline __u64 md_event(mdp_super_t *sb) {
 	__u64 ev = sb->events_hi;
 	return (ev<<32)| sb->events_lo;
 }

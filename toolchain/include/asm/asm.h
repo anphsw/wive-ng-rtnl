@@ -14,19 +14,18 @@
  * away by gas in -O mode. These nops are however required to fill delay
  * slots in noreorder mode.
  */
-#ifndef	__ASM_ASM_H
-#define	__ASM_ASM_H
+#ifndef __ASM_ASM_H
+#define __ASM_ASM_H
 
-#include <linux/config.h>
 #include <asm/sgidefs.h>
 
 #ifndef CAT
 #ifdef __STDC__
-#define __CAT(str1,str2) str1##str2
+#define __CAT(str1, str2) str1##str2
 #else
-#define __CAT(str1,str2) str1/**/str2
+#define __CAT(str1, str2) str1/**/str2
 #endif
-#define CAT(str1,str2) __CAT(str1,str2)
+#define CAT(str1, str2) __CAT(str1, str2)
 #endif
 
 /*
@@ -52,9 +51,9 @@
 #define	LEAF(symbol)                                    \
 		.globl	symbol;                         \
 		.align	2;                              \
-		.type	symbol,@function;               \
-		.ent	symbol,0;                       \
-symbol:		.frame	sp,0,ra
+		.type	symbol, @function;              \
+		.ent	symbol, 0;                      \
+symbol:		.frame	sp, 0, ra
 
 /*
  * NESTED - declare nested routine entry point
@@ -62,8 +61,8 @@ symbol:		.frame	sp,0,ra
 #define	NESTED(symbol, framesize, rpc)                  \
 		.globl	symbol;                         \
 		.align	2;                              \
-		.type	symbol,@function;               \
-		.ent	symbol,0;                       \
+		.type	symbol, @function;              \
+		.ent	symbol, 0;                       \
 symbol:		.frame	sp, framesize, rpc
 
 /*
@@ -71,7 +70,7 @@ symbol:		.frame	sp, framesize, rpc
  */
 #define	END(function)                                   \
 		.end	function;		        \
-		.size	function,.-function
+		.size	function, .-function
 
 /*
  * EXPORT - export definition of symbol
@@ -85,7 +84,7 @@ symbol:
  */
 #define FEXPORT(symbol)					\
 		.globl	symbol;				\
-		.type	symbol,@function;		\
+		.type	symbol, @function;		\
 symbol:
 
 /*
@@ -98,7 +97,7 @@ symbol		=	value
 #define	PANIC(msg)                                      \
 		.set	push;				\
 		.set	reorder;                        \
-		PTR_LA	a0,8f;                          \
+		PTR_LA	a0, 8f;                          \
 		jal	panic;                          \
 9:		b	9b;                             \
 		.set	pop;				\
@@ -107,13 +106,17 @@ symbol		=	value
 /*
  * Print formatted string
  */
+#ifdef CONFIG_PRINTK
 #define PRINT(string)                                   \
 		.set	push;				\
 		.set	reorder;                        \
-		PTR_LA	a0,8f;                          \
+		PTR_LA	a0, 8f;                          \
 		jal	printk;                         \
 		.set	pop;				\
 		TEXT(string)
+#else
+#define PRINT(string)
+#endif
 
 #define	TEXT(msg)                                       \
 		.pushsection .data;			\
@@ -143,19 +146,19 @@ symbol		=	value
 #define PREF(hint,addr)                                 \
 		.set	push;				\
 		.set	mips4;				\
-		pref	hint,addr;			\
+		pref	hint, addr;			\
 		.set	pop
 
 #define PREFX(hint,addr)                                \
 		.set	push;				\
 		.set	mips4;				\
-		prefx	hint,addr;			\
+		prefx	hint, addr;			\
 		.set	pop
 
 #else /* !CONFIG_CPU_HAS_PREFETCH */
 
-#define PREF(hint,addr)
-#define PREFX(hint,addr)
+#define PREF(hint, addr)
+#define PREFX(hint, addr)
 
 #endif /* !CONFIG_CPU_HAS_PREFETCH */
 
@@ -163,43 +166,43 @@ symbol		=	value
  * MIPS ISA IV/V movn/movz instructions and equivalents for older CPUs.
  */
 #if (_MIPS_ISA == _MIPS_ISA_MIPS1)
-#define MOVN(rd,rs,rt)                                  \
+#define MOVN(rd, rs, rt)                                \
 		.set	push;				\
 		.set	reorder;			\
-		beqz	rt,9f;                          \
-		move	rd,rs;                          \
+		beqz	rt, 9f;                         \
+		move	rd, rs;                         \
 		.set	pop;				\
 9:
-#define MOVZ(rd,rs,rt)                                  \
+#define MOVZ(rd, rs, rt)                                \
 		.set	push;				\
 		.set	reorder;			\
-		bnez	rt,9f;                          \
-		move	rd,rs;                          \
+		bnez	rt, 9f;                         \
+		move	rd, rs;                         \
 		.set	pop;				\
 9:
 #endif /* _MIPS_ISA == _MIPS_ISA_MIPS1 */
 #if (_MIPS_ISA == _MIPS_ISA_MIPS2) || (_MIPS_ISA == _MIPS_ISA_MIPS3)
-#define MOVN(rd,rs,rt)                                  \
+#define MOVN(rd, rs, rt)                                \
 		.set	push;				\
 		.set	noreorder;			\
-		bnezl	rt,9f;                          \
-		 move	rd,rs;                          \
+		bnezl	rt, 9f;                         \
+		 move	rd, rs;                         \
 		.set	pop;				\
 9:
-#define MOVZ(rd,rs,rt)                                  \
+#define MOVZ(rd, rs, rt)                                \
 		.set	push;				\
 		.set	noreorder;			\
-		beqzl	rt,9f;                          \
-		 move	rd,rs;                          \
+		beqzl	rt, 9f;                         \
+		 move	rd, rs;                         \
 		.set	pop;				\
 9:
 #endif /* (_MIPS_ISA == _MIPS_ISA_MIPS2) || (_MIPS_ISA == _MIPS_ISA_MIPS3) */
 #if (_MIPS_ISA == _MIPS_ISA_MIPS4 ) || (_MIPS_ISA == _MIPS_ISA_MIPS5) || \
     (_MIPS_ISA == _MIPS_ISA_MIPS32) || (_MIPS_ISA == _MIPS_ISA_MIPS64)
-#define MOVN(rd,rs,rt)                                  \
-		movn	rd,rs,rt
-#define MOVZ(rd,rs,rt)                                  \
-		movz	rd,rs,rt
+#define MOVN(rd, rs, rt)                                \
+		movn	rd, rs, rt
+#define MOVZ(rd, rs, rt)                                \
+		movz	rd, rs, rt
 #endif /* MIPS IV, MIPS V, MIPS32 or MIPS64 */
 
 /*
@@ -209,7 +212,7 @@ symbol		=	value
 #define ALSZ	7
 #define ALMASK	~7
 #endif
-#if (_MIPS_SIM == _MIPS_SIM_ABIN32) || (_MIPS_SIM == _MIPS_SIM_ABI64)
+#if (_MIPS_SIM == _MIPS_SIM_NABI32) || (_MIPS_SIM == _MIPS_SIM_ABI64)
 #define ALSZ	15
 #define ALMASK	~15
 #endif
@@ -237,7 +240,7 @@ symbol		=	value
 #define REG_SUBU	subu
 #define REG_ADDU	addu
 #endif
-#if (_MIPS_SIM == _MIPS_SIM_ABIN32) || (_MIPS_SIM == _MIPS_SIM_ABI64)
+#if (_MIPS_SIM == _MIPS_SIM_NABI32) || (_MIPS_SIM == _MIPS_SIM_ABI64)
 #define REG_S		sd
 #define REG_L		ld
 #define REG_SUBU	dsubu
@@ -299,6 +302,11 @@ symbol		=	value
 #define LONG_SRLV	srlv
 #define LONG_SRA	sra
 #define LONG_SRAV	srav
+
+#define LONG		.word
+#define LONGSIZE	4
+#define LONGMASK	3
+#define LONGLOG		2
 #endif
 
 #if (_MIPS_SZLONG == 64)
@@ -316,6 +324,11 @@ symbol		=	value
 #define LONG_SRLV	dsrlv
 #define LONG_SRA	dsra
 #define LONG_SRAV	dsrav
+
+#define LONG		.dword
+#define LONGSIZE	8
+#define LONGMASK	7
+#define LONGLOG		3
 #endif
 
 /*
@@ -331,6 +344,7 @@ symbol		=	value
 #define PTR_L		lw
 #define PTR_S		sw
 #define PTR_LA		la
+#define PTR_LI		li
 #define PTR_SLL		sll
 #define PTR_SLLV	sllv
 #define PTR_SRL		srl
@@ -355,6 +369,7 @@ symbol		=	value
 #define PTR_L		ld
 #define PTR_S		sd
 #define PTR_LA		dla
+#define PTR_LI		dli
 #define PTR_SLL		dsll
 #define PTR_SLLV	dsllv
 #define PTR_SRL		dsrl
@@ -376,11 +391,11 @@ symbol		=	value
 #define MFC0		mfc0
 #define MTC0		mtc0
 #endif
-#if (_MIPS_SIM == _MIPS_SIM_ABIN32) || (_MIPS_SIM == _MIPS_SIM_ABI64)
+#if (_MIPS_SIM == _MIPS_SIM_NABI32) || (_MIPS_SIM == _MIPS_SIM_ABI64)
 #define MFC0		dmfc0
 #define MTC0		dmtc0
 #endif
 
-#define SSNOP		sll zero,zero,1
+#define SSNOP		sll zero, zero, 1
 
 #endif /* __ASM_ASM_H */

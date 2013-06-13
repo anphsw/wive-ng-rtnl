@@ -22,6 +22,21 @@
 #include <linux/mtd/compatmac.h>
 #include <mtd/mtd-abi.h>
 
+/* For autodetect flash type */
+#if defined (CONFIG_RALINK_RT2880) || \
+    defined (CONFIG_RALINK_RT2883) || \
+    defined (CONFIG_RALINK_RT3883) || \
+    defined (CONFIG_RALINK_RT3352) || \
+    defined (CONFIG_RALINK_RT3052) || \
+    defined (CONFIG_RALINK_RT5350)
+
+    #define BOOT_FROM_NOR   0
+    #define BOOT_FROM_NAND  2
+    #define BOOT_FROM_SPI   3
+    extern int boot_from;
+    extern int ra_check_flash_type(void);
+#endif
+
 #define MTD_CHAR_MAJOR 90
 #define MTD_BLOCK_MAJOR 31
 #define MAX_MTD_DEVICES 32
@@ -32,8 +47,10 @@
 #define MTD_ERASE_DONE          0x08
 #define MTD_ERASE_FAILED        0x10
 
+#define MTD_FAIL_ADDR_UNKNOWN 0xffffffff
+
 /* If the erase fails, fail_addr might indicate exactly which block failed.  If
-   fail_addr = 0xffffffff, the failure was not at the device level or was not
+   fail_addr = MTD_FAIL_ADDR_UNKNOWN, the failure was not at the device level or was not
    specific to any particular block. */
 struct erase_info {
 	struct mtd_info *mtd;
@@ -243,6 +260,8 @@ int default_mtd_writev(struct mtd_info *mtd, const struct kvec *vecs,
 int default_mtd_readv(struct mtd_info *mtd, struct kvec *vecs,
 		      unsigned long count, loff_t from, size_t *retlen);
 
+void *mtd_kmalloc_up_to(const struct mtd_info *mtd, size_t *size);
+
 #ifdef CONFIG_MTD_PARTITIONS
 void mtd_erase_callback(struct erase_info *instr);
 #else
@@ -260,6 +279,10 @@ static inline void mtd_erase_callback(struct erase_info *instr)
 #define MTD_DEBUG_LEVEL1	(1)	/* Audible */
 #define MTD_DEBUG_LEVEL2	(2)	/* Loud    */
 #define MTD_DEBUG_LEVEL3	(3)	/* Noisy   */
+
+#ifdef DEBUG
+#undef DEBUG
+#endif
 
 #ifdef CONFIG_MTD_DEBUG
 #define DEBUG(n, args...)				\

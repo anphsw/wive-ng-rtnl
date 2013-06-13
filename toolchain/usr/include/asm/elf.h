@@ -239,6 +239,95 @@ typedef elf_fpreg_t elf_fpregset_t[ELF_NFPREG];
 
 #endif /* !defined(ELF_ARCH) */
 
+#ifdef __KERNEL__
+
+struct mips_abi;
+
+extern struct mips_abi mips_abi;
+extern struct mips_abi mips_abi_32;
+extern struct mips_abi mips_abi_n32;
+
+#ifdef CONFIG_32BIT
+
+#define SET_PERSONALITY(ex, ibcs2)					\
+do {									\
+	if (ibcs2)							\
+		set_personality(PER_SVR4);				\
+	set_personality(PER_LINUX);					\
+									\
+	current->thread.abi = &mips_abi;				\
+} while (0)
+
+#endif /* CONFIG_32BIT */
+
+#ifdef CONFIG_64BIT
+
+#ifdef CONFIG_MIPS32_N32
+#define __SET_PERSONALITY32_N32()					\
+	do {								\
+		current->thread.mflags |= MF_N32;			\
+		current->thread.abi = &mips_abi_n32;			\
+	} while (0)
+#else
+#define __SET_PERSONALITY32_N32()					\
+	do { } while (0)
+#endif
+
+#ifdef CONFIG_MIPS32_O32
+#define __SET_PERSONALITY32_O32()					\
+	do {								\
+		current->thread.mflags |= MF_O32;			\
+		current->thread.abi = &mips_abi_32;			\
+	} while (0)
+#else
+#define __SET_PERSONALITY32_O32()					\
+	do { } while (0)
+#endif
+
+#ifdef CONFIG_MIPS32_COMPAT
+#define __SET_PERSONALITY32(ex)						\
+do {									\
+	if ((((ex).e_flags & EF_MIPS_ABI2) != 0) &&			\
+	     ((ex).e_flags & EF_MIPS_ABI) == 0)				\
+		__SET_PERSONALITY32_N32();				\
+	else								\
+		__SET_PERSONALITY32_O32();				\
+} while (0)
+#else
+#define __SET_PERSONALITY32(ex)	do { } while (0)
+#endif
+
+#define SET_PERSONALITY(ex, ibcs2)					\
+do {									\
+	current->thread.mflags &= ~MF_ABI_MASK;				\
+	if ((ex).e_ident[EI_CLASS] == ELFCLASS32)			\
+		__SET_PERSONALITY32(ex);				\
+	else {								\
+		current->thread.mflags |= MF_N64;			\
+		current->thread.abi = &mips_abi;			\
+	}								\
+									\
+	if (ibcs2)							\
+		set_personality(PER_SVR4);				\
+	else if (current->personality != PER_LINUX32)			\
+		set_personality(PER_LINUX);				\
+} while (0)
+
+#endif /* CONFIG_64BIT */
+
+struct task_struct;
+
+extern void elf_dump_regs(elf_greg_t *, struct pt_regs *regs);
+extern int dump_task_regs(struct task_struct *, elf_gregset_t *);
+extern int dump_task_fpu(struct task_struct *, elf_fpregset_t *);
+
+#define ELF_CORE_COPY_REGS(elf_regs, regs)			\
+	elf_dump_regs((elf_greg_t *)&(elf_regs), regs);
+#define ELF_CORE_COPY_TASK_REGS(tsk, elf_regs) dump_task_regs(tsk, elf_regs)
+#define ELF_CORE_COPY_FPREGS(tsk, elf_fpregs)			\
+	dump_task_fpu(tsk, elf_fpregs)
+
+#endif /* __KERNEL__ */
 
 #define USE_ELF_CORE_DUMP
 #define ELF_EXEC_PAGESIZE	PAGE_SIZE

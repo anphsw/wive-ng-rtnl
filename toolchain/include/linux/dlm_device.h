@@ -29,11 +29,11 @@ struct dlm_lock_params {
 	__u16 flags;
 	__u32 lkid;
 	__u32 parent;
-        void *castparam;
-	void *castaddr;
-	void *bastparam;
-        void *bastaddr;
-	struct dlm_lksb *lksb;
+        void __user *castparam;
+	void __user *castaddr;
+	void __user *bastparam;
+        void __user *bastaddr;
+	struct dlm_lksb __user *lksb;
 	char lvb[DLM_USER_LVB_LEN];
 	char name[0];
 };
@@ -60,9 +60,9 @@ struct dlm_write_request {
    consists mainly of userspace pointers for the library to use */
 struct dlm_lock_result {
 	__u32 length;
-	void * user_astaddr;
-	void * user_astparam;
-	struct dlm_lksb * user_lksb;
+	void __user * user_astaddr;
+	void __user * user_astparam;
+	struct dlm_lksb __user * user_lksb;
 	struct dlm_lksb lksb;
 	__u8 bast_mode;
 	__u8 unused[3];

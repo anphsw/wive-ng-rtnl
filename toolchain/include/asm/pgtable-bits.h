@@ -10,7 +10,6 @@
 #ifndef _ASM_PGTABLE_BITS_H
 #define _ASM_PGTABLE_BITS_H
 
-#include <linux/config.h>
 
 /*
  * Note that we shift the lower 32bits of each EntryLo[01] entry
@@ -33,13 +32,14 @@
  * unpredictable things.  The code (when it is written) to deal with
  * this problem will be in the update_mmu_cache() code for the r4k.
  */
-#if defined(CONFIG_CPU_MIPS32) && defined(CONFIG_64BIT_PHYS_ADDR)
+#if defined(CONFIG_64BIT_PHYS_ADDR) && defined(CONFIG_CPU_MIPS32)
 
 #define _PAGE_PRESENT               (1<<6)  /* implemented in software */
 #define _PAGE_READ                  (1<<7)  /* implemented in software */
 #define _PAGE_WRITE                 (1<<8)  /* implemented in software */
 #define _PAGE_ACCESSED              (1<<9)  /* implemented in software */
 #define _PAGE_MODIFIED              (1<<10) /* implemented in software */
+#define _PAGE_FILE                  (1<<10)  /* set:pagecache unset:swap */
 
 #define _PAGE_R4KBUG                (1<<0)  /* workaround for r4k bug  */
 #define _PAGE_GLOBAL                (1<<0)
@@ -49,15 +49,12 @@
 #define _PAGE_SILENT_WRITE          (1<<2)
 #define _CACHE_MASK                 (7<<3)
 
-#ifdef CONFIG_SOC_AU1X00
-#define _CACHE_CACHABLE_COW         (3<<3)
-#endif
-
 /* MIPS32 defines only values 2 and 3. The rest are implementation
  * dependent.
  */
-#define _CACHE_UNCACHED             (2<<3)  
-#define _CACHE_CACHABLE_NONCOHERENT (3<<3) 
+#define _CACHE_UNCACHED             (2<<3)
+#define _CACHE_CACHABLE_NONCOHERENT (3<<3)
+#define _CACHE_CACHABLE_COW         (3<<3)  /* Au1x                    */
 
 #else
 
@@ -66,6 +63,7 @@
 #define _PAGE_WRITE                 (1<<2)  /* implemented in software */
 #define _PAGE_ACCESSED              (1<<3)  /* implemented in software */
 #define _PAGE_MODIFIED              (1<<4)  /* implemented in software */
+#define _PAGE_FILE                  (1<<4)  /* set:pagecache unset:swap */
 
 #if defined(CONFIG_CPU_R3000) || defined(CONFIG_CPU_TX39XX)
 
@@ -87,7 +85,7 @@
 #define _PAGE_SILENT_WRITE          (1<<8)
 #define _CACHE_MASK                 (7<<9)
 
-#if defined(CONFIG_CPU_SB1)
+#ifdef CONFIG_CPU_SB1
 
 /* No penalty for being coherent on the SB1, so just
    use it for "noncoherent" spaces, too.  Shouldn't hurt. */
@@ -96,6 +94,20 @@
 #define _CACHE_CACHABLE_COW         (5<<9)
 #define _CACHE_CACHABLE_NONCOHERENT (5<<9)
 #define _CACHE_UNCACHED_ACCELERATED (7<<9)
+
+#elif defined(CONFIG_CPU_RM9000)
+
+#define _CACHE_WT			(0 << 9)
+#define _CACHE_WTWA			(1 << 9)
+#define _CACHE_UC_B			(2 << 9)
+#define _CACHE_WB			(3 << 9)
+#define _CACHE_CWBEA			(4 << 9)
+#define _CACHE_CWB			(5 << 9)
+#define _CACHE_UCNB			(6 << 9)
+#define _CACHE_FPC			(7 << 9)
+
+#define _CACHE_UNCACHED			_CACHE_UC_B
+#define _CACHE_CACHABLE_NONCOHERENT	_CACHE_WB
 
 #else
 
@@ -110,7 +122,7 @@
 
 #endif
 #endif
-#endif /* defined(CONFIG_CPU_MIPS32) && defined(CONFIG_64BIT_PHYS_ADDR) */
+#endif /* defined(CONFIG_64BIT_PHYS_ADDR) && defined(CONFIG_CPU_MIPS32) */
 
 #define __READABLE	(_PAGE_READ | _PAGE_SILENT_READ | _PAGE_ACCESSED)
 #define __WRITEABLE	(_PAGE_WRITE | _PAGE_SILENT_WRITE | _PAGE_MODIFIED)
@@ -119,13 +131,15 @@
 
 #ifdef CONFIG_MIPS_UNCACHED
 #define PAGE_CACHABLE_DEFAULT	_CACHE_UNCACHED
-#elif defined(CONFIG_NONCOHERENT_IO)
+#elif defined(CONFIG_DMA_NONCOHERENT)
 #define PAGE_CACHABLE_DEFAULT	_CACHE_CACHABLE_NONCOHERENT
+#elif defined(CONFIG_CPU_RM9000)
+#define PAGE_CACHABLE_DEFAULT	_CACHE_CWB
 #else
 #define PAGE_CACHABLE_DEFAULT	_CACHE_CACHABLE_COW
 #endif
 
-#if defined(CONFIG_CPU_MIPS32) && defined(CONFIG_64BIT_PHYS_ADDR)
+#if defined(CONFIG_64BIT_PHYS_ADDR) && defined(CONFIG_CPU_MIPS32)
 #define CONF_CM_DEFAULT		(PAGE_CACHABLE_DEFAULT >> 3)
 #else
 #define CONF_CM_DEFAULT		(PAGE_CACHABLE_DEFAULT >> 9)

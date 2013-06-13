@@ -11,8 +11,9 @@
 #include <linux/compiler.h>
 #include <asm/uaccess.h>
 #include <linux/gfp.h>
+#include <linux/bitops.h>
 
-/*                                                                                                                                          
+/*
  * Bits in mapping->flags.  The lower __GFP_BITS_SHIFT bits are the page
  * allocation mode flags.
  */
@@ -29,6 +30,16 @@ enum mapping_flags {
  */
 #define	AS_EIO		(__GFP_BITS_SHIFT + 0)	/* IO error on async write */
 #define AS_ENOSPC	(__GFP_BITS_SHIFT + 1)	/* ENOSPC on async write */
+
+static inline void mapping_set_error(struct address_space *mapping, int error)
+{
+	if (error) {
+		if (error == -ENOSPC)
+			set_bit(AS_ENOSPC, &mapping->flags);
+		else
+			set_bit(AS_EIO, &mapping->flags);
+	}
+}
 
 static inline gfp_t mapping_gfp_mask(struct address_space * mapping)
 {
@@ -84,11 +95,11 @@ static inline struct page *page_cache_alloc_cold(struct address_space *x)
 typedef int filler_t(void *, struct page *);
 
 extern struct page * find_get_page(struct address_space *mapping,
-				unsigned long index);
+				pgoff_t index);
 extern struct page * find_lock_page(struct address_space *mapping,
-				unsigned long index);
+				pgoff_t index);
 extern struct page * find_or_create_page(struct address_space *mapping,
-				unsigned long index, gfp_t gfp_mask);
+				pgoff_t index, gfp_t gfp_mask);
 unsigned find_get_pages(struct address_space *mapping, pgoff_t start,
 			unsigned int nr_pages, struct page **pages);
 unsigned find_get_pages_contig(struct address_space *mapping, pgoff_t start,
@@ -99,30 +110,42 @@ unsigned find_get_pages_tag(struct address_space *mapping, pgoff_t *index,
 /*
  * Returns locked page at given index in given cache, creating it if needed.
  */
-static inline struct page *grab_cache_page(struct address_space *mapping, unsigned long index)
+static inline struct page *grab_cache_page(struct address_space *mapping,
+								pgoff_t index)
 {
 	return find_or_create_page(mapping, index, mapping_gfp_mask(mapping));
 }
 
 extern struct page * grab_cache_page_nowait(struct address_space *mapping,
-				unsigned long index);
+				pgoff_t index);
+extern struct page * read_cache_page_async(struct address_space *mapping,
+				pgoff_t index, filler_t *filler,
+				void *data);
 extern struct page * read_cache_page(struct address_space *mapping,
-				unsigned long index, filler_t *filler,
+				pgoff_t index, filler_t *filler,
 				void *data);
 extern int read_cache_pages(struct address_space *mapping,
 		struct list_head *pages, filler_t *filler, void *data);
 
+static inline struct page *read_mapping_page_async(
+						struct address_space *mapping,
+						     pgoff_t index, void *data)
+{
+	filler_t *filler = (filler_t *)mapping->a_ops->readpage;
+	return read_cache_page_async(mapping, index, filler, data);
+}
+
 static inline struct page *read_mapping_page(struct address_space *mapping,
-					     unsigned long index, void *data)
+					     pgoff_t index, void *data)
 {
 	filler_t *filler = (filler_t *)mapping->a_ops->readpage;
 	return read_cache_page(mapping, index, filler, data);
 }
 
 int add_to_page_cache(struct page *page, struct address_space *mapping,
-				unsigned long index, gfp_t gfp_mask);
+				pgoff_t index, gfp_t gfp_mask);
 int add_to_page_cache_lru(struct page *page, struct address_space *mapping,
-				unsigned long index, gfp_t gfp_mask);
+				pgoff_t index, gfp_t gfp_mask);
 extern void remove_from_page_cache(struct page *page);
 extern void __remove_from_page_cache(struct page *page);
 
@@ -143,6 +166,7 @@ static inline pgoff_t linear_page_index(struct vm_area_struct *vma,
 }
 
 extern void FASTCALL(__lock_page(struct page *page));
+extern int FASTCALL(__lock_page_killable(struct page *page));
 extern void FASTCALL(__lock_page_nosync(struct page *page));
 extern void FASTCALL(unlock_page(struct page *page));
 
@@ -154,6 +178,19 @@ static inline void lock_page(struct page *page)
 	might_sleep();
 	if (TestSetPageLocked(page))
 		__lock_page(page);
+}
+
+/*
+ * lock_page_killable is like lock_page but can be interrupted by fatal
+ * signals.  It returns 0 if it locked the page and -EINTR if it was
+ * killed while waiting.
+ */
+static inline int lock_page_killable(struct page *page)
+{
+	might_sleep();
+	if (TestSetPageLocked(page))
+		return __lock_page_killable(page);
+	return 0;
 }
 
 /*
@@ -238,6 +275,7 @@ static inline void fault_in_pages_readable(const char __user *uaddr, int size)
 		if (((unsigned long)uaddr & PAGE_MASK) !=
 				((unsigned long)end & PAGE_MASK))
 		 	__get_user(c, end);
+			(void)c;
 	}
 }
 

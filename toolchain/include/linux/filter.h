@@ -5,8 +5,12 @@
 #ifndef __LINUX_FILTER_H__
 #define __LINUX_FILTER_H__
 
+#include <linux/compiler.h>
 #include <linux/types.h>
 
+#ifdef __KERNEL__
+#include <asm/atomic.h>
+#endif
 
 /*
  * Current version of the filter code architecture.
@@ -19,20 +23,32 @@
  *	the BPF code definitions which need to match so you can share filters
  */
  
-struct sock_filter	/* Filter block */
-{
+struct sock_filter {	/* Filter block */
 	__u16	code;   /* Actual filter code */
 	__u8	jt;	/* Jump true */
 	__u8	jf;	/* Jump false */
 	__u32	k;      /* Generic multiuse field */
 };
 
-struct sock_fprog	/* Required for SO_ATTACH_FILTER. */
-{
+struct sock_fprog {	/* Required for SO_ATTACH_FILTER. */
 	unsigned short		len;	/* Number of filter blocks */
-	struct sock_filter *filter;
+	struct sock_filter __user *filter;
 };
 
+#ifdef __KERNEL__
+struct sk_filter
+{
+	atomic_t		refcnt;
+	unsigned int         	len;	/* Number of filter blocks */
+	struct rcu_head		rcu;
+	struct sock_filter     	insns[0];
+};
+
+static inline unsigned int sk_filter_len(struct sk_filter *fp)
+{
+	return fp->len*sizeof(struct sock_filter) + sizeof(*fp);
+}
+#endif
 
 /*
  * Instruction classes
@@ -170,5 +186,20 @@ enum {
 #define SKF_NET_OFF   (-0x100000)
 #define SKF_LL_OFF    (-0x200000)
 
+#ifdef __KERNEL__
+#ifdef CONFIG_NET_SK_FILTER
+struct sk_buff;
+struct sock;
+
+extern unsigned int sk_run_filter(struct sk_buff *skb, struct sock_filter *filter, int flen);
+extern int sk_attach_filter(struct sock_fprog *fprog, struct sock *sk);
+extern int sk_detach_filter(struct sock *sk);
+extern int sk_chk_filter(struct sock_filter *filter, unsigned int flen);
+#else
+#define sk_run_filter(a, b, c) (0)
+#define sk_attach_filter(a, b) (-EINVAL)
+#define sk_chk_filter(a, b) (-EINVAL)
+#endif /* NET_SK_FILTER */
+#endif /* __KERNEL__ */
 
 #endif /* __LINUX_FILTER_H__ */

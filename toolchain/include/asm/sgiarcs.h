@@ -12,7 +12,6 @@
 #ifndef _ASM_SGIARCS_H
 #define _ASM_SGIARCS_H
 
-#include <linux/config.h>
 #include <asm/types.h>
 #include <asm/arc/types.h>
 
@@ -236,6 +235,8 @@ struct linux_romvec {
 
 	/* Miscellaneous. */
 	LONG	cache_flush;
+	LONG	TestUnicodeCharacter;		/* ARC; not sure if ARCS too */
+	LONG	GetDisplayStatus;
 };
 
 /* The SGI ARCS parameter block is in a fixed location for standalone
@@ -365,11 +366,11 @@ struct linux_smonblock {
  * Macros for calling a 32-bit ARC implementation from 64-bit code
  */
 
-#if defined(CONFIG_MIPS64) && defined(CONFIG_ARC32)
+#if defined(CONFIG_64BIT) && defined(CONFIG_ARC32)
 
 #define __arc_clobbers							\
-	"$2","$3" /* ... */, "$8","$9","$10","$11",			\
-	"$12","$13","$14","$15","$16","$24","$25","$31"
+	"$2", "$3" /* ... */, "$8", "$9", "$10", "$11", 			\
+	"$12", "$13", "$14", "$15", "$16", "$24", "$25", "$31"
 
 #define ARC_CALL0(dest)							\
 ({	long __res;							\
@@ -381,11 +382,11 @@ struct linux_smonblock {
 	"move\t%0, $2"							\
 	: "=r" (__res), "=r" (__vec)					\
 	: "1" (__vec)							\
-	: __arc_clobbers, "$4","$5","$6","$7");				\
+	: __arc_clobbers, "$4", "$5", "$6", "$7");			\
 	(unsigned long) __res;						\
 })
 
-#define ARC_CALL1(dest,a1)						\
+#define ARC_CALL1(dest, a1)						\
 ({	long __res;							\
 	register signed int __a1 __asm__("$4") = (int) (long) (a1);	\
 	long __vec = (long) romvec->dest;				\
@@ -396,11 +397,11 @@ struct linux_smonblock {
 	"move\t%0, $2"							\
 	: "=r" (__res), "=r" (__vec)					\
 	: "1" (__vec), "r" (__a1)					\
-	: __arc_clobbers, "$5","$6","$7");				\
+	: __arc_clobbers, "$5", "$6", "$7");				\
 	(unsigned long) __res;						\
 })
 
-#define ARC_CALL2(dest,a1,a2)						\
+#define ARC_CALL2(dest, a1, a2)						\
 ({	long __res;							\
 	register signed int __a1 __asm__("$4") = (int) (long) (a1);	\
 	register signed int __a2 __asm__("$5") = (int) (long) (a2);	\
@@ -412,11 +413,11 @@ struct linux_smonblock {
 	"move\t%0, $2"							\
 	: "=r" (__res), "=r" (__vec)					\
 	: "1" (__vec), "r" (__a1), "r" (__a2)				\
-	: __arc_clobbers, "$6","$7");					\
+	: __arc_clobbers, "$6", "$7");					\
 	__res;								\
 })
 
-#define ARC_CALL3(dest,a1,a2,a3)					\
+#define ARC_CALL3(dest, a1, a2, a3)					\
 ({	long __res;							\
 	register signed int __a1 __asm__("$4") = (int) (long) (a1);	\
 	register signed int __a2 __asm__("$5") = (int) (long) (a2);	\
@@ -433,7 +434,7 @@ struct linux_smonblock {
 	__res;								\
 })
 
-#define ARC_CALL4(dest,a1,a2,a3,a4)					\
+#define ARC_CALL4(dest, a1, a2, a3, a4)					\
 ({	long __res;							\
 	register signed int __a1 __asm__("$4") = (int) (long) (a1);	\
 	register signed int __a2 __asm__("$5") = (int) (long) (a2);	\
@@ -452,13 +453,13 @@ struct linux_smonblock {
 	__res;								\
 })
 
-#define ARC_CALL5(dest,a1,a2,a3,a4,a5)					\
+#define ARC_CALL5(dest, a1, a2, a3, a4, a5)					\
 ({	long __res;							\
 	register signed int __a1 __asm__("$4") = (int) (long) (a1);	\
 	register signed int __a2 __asm__("$5") = (int) (long) (a2);	\
 	register signed int __a3 __asm__("$6") = (int) (long) (a3);	\
 	register signed int __a4 __asm__("$7") = (int) (long) (a4);	\
-	register signed int __a5 = (a5);				\
+	register signed int __a5 = (int) (long) (a5);			\
 	long __vec = (long) romvec->dest;				\
 	__asm__ __volatile__(						\
 	"dsubu\t$29, 32\n\t"						\
@@ -467,17 +468,17 @@ struct linux_smonblock {
 	"daddu\t$29, 32\n\t"						\
 	"move\t%0, $2"							\
 	: "=r" (__res), "=r" (__vec)					\
-	: "1" (__vec),							\
-	  "r" (__a1), "r" (__a2), "r" (__a3), "r" (__a4),		\
+	: "1" (__vec), 							\
+	  "r" (__a1), "r" (__a2), "r" (__a3), "r" (__a4), 		\
 	  "r" (__a5)							\
 	: __arc_clobbers);						\
 	__res;								\
 })
 
-#endif /* defined(CONFIG_MIPS64) && defined(CONFIG_ARC32) */
+#endif /* defined(CONFIG_64BIT) && defined(CONFIG_ARC32) */
 
-#if (defined(CONFIG_MIPS32) && defined(CONFIG_ARC32)) ||		\
-    (defined(CONFIG_MIPS64) && defined(CONFIG_ARC64))
+#if (defined(CONFIG_32BIT) && defined(CONFIG_ARC32)) ||		\
+    (defined(CONFIG_64BIT) && defined(CONFIG_ARC64))
 
 #define ARC_CALL0(dest)							\
 ({	long __res;							\
@@ -487,7 +488,7 @@ struct linux_smonblock {
 	__res;								\
 })
 
-#define ARC_CALL1(dest,a1)						\
+#define ARC_CALL1(dest, a1)						\
 ({	long __res;							\
 	long __a1 = (long) (a1);					\
 	long (*__vec)(long) = (void *) romvec->dest;			\
@@ -496,7 +497,7 @@ struct linux_smonblock {
 	__res;								\
 })
 
-#define ARC_CALL2(dest,a1,a2)						\
+#define ARC_CALL2(dest, a1, a2)						\
 ({	long __res;							\
 	long __a1 = (long) (a1);					\
 	long __a2 = (long) (a2);					\
@@ -506,7 +507,7 @@ struct linux_smonblock {
 	__res;								\
 })
 
-#define ARC_CALL3(dest,a1,a2,a3)					\
+#define ARC_CALL3(dest, a1, a2, a3)					\
 ({	long __res;							\
 	long __a1 = (long) (a1);					\
 	long __a2 = (long) (a2);					\
@@ -517,7 +518,7 @@ struct linux_smonblock {
 	__res;								\
 })
 
-#define ARC_CALL4(dest,a1,a2,a3,a4)					\
+#define ARC_CALL4(dest, a1, a2, a3, a4)					\
 ({	long __res;							\
 	long __a1 = (long) (a1);					\
 	long __a2 = (long) (a2);					\
@@ -529,7 +530,7 @@ struct linux_smonblock {
 	__res;								\
 })
 
-#define ARC_CALL5(dest,a1,a2,a3,a4,a5)					\
+#define ARC_CALL5(dest, a1, a2, a3, a4, a5)				\
 ({	long __res;							\
 	long __a1 = (long) (a1);					\
 	long __a2 = (long) (a2);					\

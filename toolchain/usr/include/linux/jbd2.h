@@ -408,6 +408,16 @@ struct handle_s
 };
 
 
+/*
+ * Some stats for checkpoint phase
+ */
+struct transaction_chp_stats_s {
+	unsigned long		cs_chp_time;
+	unsigned long		cs_forced_to_close;
+	unsigned long		cs_written;
+	unsigned long		cs_dropped;
+};
+
 /* The transaction_t type is the guts of the journaling mechanism.  It
  * tracks a compound transaction through its various states:
  *
@@ -543,6 +553,21 @@ struct transaction_s
 	spinlock_t		t_handle_lock;
 
 	/*
+	 * Longest time some handle had to wait for running transaction
+	 */
+	unsigned long		t_max_wait;
+
+	/*
+	 * When transaction started
+	 */
+	unsigned long		t_start;
+
+	/*
+	 * Checkpointing stats [j_checkpoint_sem]
+	 */
+	struct transaction_chp_stats_s t_chp_stats;
+
+	/*
 	 * Number of outstanding updates running on this transaction
 	 * [t_handle_lock]
 	 */
@@ -572,6 +597,57 @@ struct transaction_s
 	int t_handle_count;
 
 };
+
+struct transaction_run_stats_s {
+	unsigned long		rs_wait;
+	unsigned long		rs_running;
+	unsigned long		rs_locked;
+	unsigned long		rs_flushing;
+	unsigned long		rs_logging;
+
+	unsigned long		rs_handle_count;
+	unsigned long		rs_blocks;
+	unsigned long		rs_blocks_logged;
+};
+
+struct transaction_stats_s
+{
+	int 			ts_type;
+	unsigned long		ts_tid;
+	union {
+		struct transaction_run_stats_s run;
+		struct transaction_chp_stats_s chp;
+	} u;
+};
+
+#define JBD2_STATS_RUN		1
+#define JBD2_STATS_CHECKPOINT	2
+
+#define ts_wait			u.run.rs_wait
+#define ts_running		u.run.rs_running
+#define ts_locked		u.run.rs_locked
+#define ts_flushing		u.run.rs_flushing
+#define ts_logging		u.run.rs_logging
+#define ts_handle_count		u.run.rs_handle_count
+#define ts_blocks		u.run.rs_blocks
+#define ts_blocks_logged	u.run.rs_blocks_logged
+
+#define ts_chp_time		u.chp.cs_chp_time
+#define ts_forced_to_close	u.chp.cs_forced_to_close
+#define ts_written		u.chp.cs_written
+#define ts_dropped		u.chp.cs_dropped
+
+#define CURRENT_MSECS		(jiffies_to_msecs(jiffies))
+
+static inline unsigned int
+jbd2_time_diff(unsigned int start, unsigned int end)
+{
+	if (unlikely(start > end))
+		end = end + (~0UL - start);
+	else
+		end -= start;
+	return end;
+}
 
 /**
  * struct journal_s - The journal_s type is the concrete type associated with
@@ -634,6 +710,12 @@ struct transaction_s
  * @j_wbufsize: maximum number of buffer_heads allowed in j_wbuf, the
  *	number that will fit in j_blocksize
  * @j_last_sync_writer: most recent pid which did a synchronous write
+ * @j_history: Buffer storing the transactions statistics history
+ * @j_history_max: Maximum number of transactions in the statistics history
+ * @j_history_cur: Current number of transactions in the statistics history
+ * @j_history_lock: Protect the transactions statistics history
+ * @j_proc_entry: procfs entry for the jbd statistics directory
+ * @j_stats: Overall statistics
  * @j_private: An opaque pointer to fs-private information.
  */
 
@@ -824,6 +906,16 @@ struct journal_s
 	int			j_wbufsize;
 
 	pid_t			j_last_sync_writer;
+
+	/*
+	 * Journal statistics
+	 */
+	struct transaction_stats_s *j_history;
+	int			j_history_max;
+	int			j_history_cur;
+	spinlock_t		j_history_lock;
+	struct proc_dir_entry	*j_proc_entry;
+	struct transaction_stats_s j_stats;
 
 	/*
 	 * An opaque pointer to fs-private information.  ext3 puts its

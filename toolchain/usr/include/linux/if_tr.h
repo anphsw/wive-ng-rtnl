@@ -42,6 +42,17 @@ struct trh_hdr {
 	__be16 rseg[8];			/* routing registers */
 };
 
+#ifdef __KERNEL__
+#include <linux/skbuff.h>
+
+static inline struct trh_hdr *tr_hdr(const struct sk_buff *skb)
+{
+	return (struct trh_hdr *)skb_mac_header(skb);
+}
+#ifdef CONFIG_SYSCTL
+extern struct ctl_table tr_table[];
+#endif
+#endif
 
 /* This is an Token-Ring LLC structure */
 struct trllc {

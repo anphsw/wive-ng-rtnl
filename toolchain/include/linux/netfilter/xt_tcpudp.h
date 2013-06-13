@@ -2,8 +2,7 @@
 #define _XT_TCPUDP_H
 
 /* TCP matching stuff */
-struct xt_tcp
-{
+struct xt_tcp {
 	u_int16_t spts[2];			/* Source port range. */
 	u_int16_t dpts[2];			/* Destination port range. */
 	u_int8_t option;			/* TCP Option iff non-zero*/
@@ -20,8 +19,7 @@ struct xt_tcp
 #define XT_TCP_INV_MASK		0x0F	/* All possible flags. */
 
 /* UDP matching stuff */
-struct xt_udp
-{
+struct xt_udp {
 	u_int16_t spts[2];			/* Source port range. */
 	u_int16_t dpts[2];			/* Destination port range. */
 	u_int8_t invflags;			/* Inverse flags */

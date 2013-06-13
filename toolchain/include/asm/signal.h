@@ -95,6 +95,15 @@ typedef unsigned long old_sigset_t;		/* at least 32 bits */
 #define MINSIGSTKSZ    2048
 #define SIGSTKSZ       8192
 
+#ifdef __KERNEL__
+
+#ifdef CONFIG_TRAD_SIGNALS
+#define sig_uses_siginfo(ka)	((ka)->sa.sa_flags & SA_SIGINFO)
+#else
+#define sig_uses_siginfo(ka)	(1)
+#endif
+
+#endif /* __KERNEL__ */
 
 #define SIG_BLOCK	1	/* for blocking signals */
 #define SIG_UNBLOCK	2	/* for unblocking signals */
@@ -117,10 +126,17 @@ struct k_sigaction {
 
 /* IRIX compatible stack_t  */
 typedef struct sigaltstack {
-	void *ss_sp;
+	void __user *ss_sp;
 	size_t ss_size;
 	int ss_flags;
 } stack_t;
 
+#ifdef __KERNEL__
+#include <asm/sigcontext.h>
+#include <asm/siginfo.h>
+
+#define ptrace_signal_deliver(regs, cookie) do { } while (0)
+
+#endif /* __KERNEL__ */
 
 #endif /* _ASM_SIGNAL_H */

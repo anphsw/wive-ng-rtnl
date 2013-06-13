@@ -24,8 +24,6 @@
 
 #include <asm/addrspace.h>
 
-
-
 /*
  * Surfboard system clock.
  * This is the default value and maybe overidden by System Clock passed on the
@@ -41,14 +39,5 @@
 #define SURFBOARD_BAUD_DIV	(16)
 #define SURFBOARD_DEFAULT_BAUD	(57600)
 #define SURFBOARD_BASE_BAUD	(SURFBOARD_SYSTEM_CLOCK / SURFBOARD_BAUD_DIV)
-
-/*
- * Maximum number of IDE Controllers
- * Surfboard only has one ide (ide0), so only 2 drives are
- * possible.  (no need to check for more hwifs.)
- */
-//#define MAX_IDE_HWIFS		(1)	/* Surfboard/Wakeboard */
-#define MAX_IDE_HWIFS		(2)	/* Graphite board */
-
 
 #endif /* !(_SURFBOARD_H) */

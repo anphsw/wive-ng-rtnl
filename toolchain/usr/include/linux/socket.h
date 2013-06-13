@@ -22,8 +22,15 @@ struct __kernel_sockaddr_storage {
 #include <linux/sockios.h>		/* the SIOCxxx I/O controls	*/
 #include <linux/uio.h>			/* iovec support		*/
 #include <linux/types.h>		/* pid_t			*/
+#include <linux/compiler.h>		/* __user			*/
 
 extern int sysctl_somaxconn;
+#ifdef __KERNEL__
+# ifdef CONFIG_PROC_FS
+struct seq_file;
+extern void socket_seq_show(struct seq_file *seq);
+# endif
+#endif /* __KERNEL__ */ 
 
 typedef unsigned short	sa_family_t;
 
@@ -98,7 +105,9 @@ struct cmsghdr {
  *	This mess will go away with glibc
  */
  
-#if    defined(__GNUC__) 
+#ifdef __KERNEL__
+#define __KINLINE static inline
+#elif  defined(__GNUC__) 
 #define __KINLINE static __inline__
 #elif defined(__cplusplus)
 #define __KINLINE static inline
@@ -287,5 +296,21 @@ struct ucred {
 /* IPX options */
 #define IPX_TYPE	1
 
+#ifdef __KERNEL__
+extern int memcpy_fromiovec(unsigned char *kdata, struct iovec *iov, int len);
+extern int memcpy_fromiovecend(char *kdata, struct iovec *iov, 
+				int offset, int len);
+extern int csum_partial_copy_fromiovecend(char *kdata, 
+					  struct iovec *iov, 
+					  int offset, 
+					  unsigned int len, __wsum *csump);
+
+extern int verify_iovec(struct msghdr *m, struct iovec *iov, char *address, int mode);
+extern int memcpy_toiovec(struct iovec *v, unsigned char *kdata, int len);
+extern int move_addr_to_user(void *kaddr, int klen, void __user *uaddr, int __user *ulen);
+extern int move_addr_to_kernel(void __user *uaddr, int ulen, void *kaddr);
+extern int put_cmsg(struct msghdr*, int level, int type, int len, void *data);
+
+#endif
 #endif /* not kernel and not glibc */
 #endif /* _LINUX_SOCKET_H */

@@ -97,5 +97,120 @@ struct rtc_pll_info {
 #define RTC_AF 0x20
 #define RTC_UF 0x10
 
+#ifdef __KERNEL__
+
+#include <linux/interrupt.h>
+
+extern int rtc_month_days(unsigned int month, unsigned int year);
+extern int rtc_year_days(unsigned int day, unsigned int month, unsigned int year);
+extern int rtc_valid_tm(struct rtc_time *tm);
+extern int rtc_tm_to_time(struct rtc_time *tm, unsigned long *time);
+extern void rtc_time_to_tm(unsigned long time, struct rtc_time *tm);
+extern void rtc_merge_alarm(struct rtc_time *now, struct rtc_time *alarm);
+
+#include <linux/device.h>
+#include <linux/seq_file.h>
+#include <linux/cdev.h>
+#include <linux/poll.h>
+#include <linux/mutex.h>
+
+extern struct class *rtc_class;
+
+struct rtc_class_ops {
+	int (*open)(struct device *);
+	void (*release)(struct device *);
+	int (*ioctl)(struct device *, unsigned int, unsigned long);
+	int (*read_time)(struct device *, struct rtc_time *);
+	int (*set_time)(struct device *, struct rtc_time *);
+	int (*read_alarm)(struct device *, struct rtc_wkalrm *);
+	int (*set_alarm)(struct device *, struct rtc_wkalrm *);
+	int (*proc)(struct device *, struct seq_file *);
+	int (*set_mmss)(struct device *, unsigned long secs);
+	int (*irq_set_state)(struct device *, int enabled);
+	int (*irq_set_freq)(struct device *, int freq);
+	int (*read_callback)(struct device *, int data);
+};
+
+#define RTC_DEVICE_NAME_SIZE 20
+struct rtc_task;
+
+struct rtc_device
+{
+	struct class_device class_dev;
+	struct module *owner;
+
+	int id;
+	char name[RTC_DEVICE_NAME_SIZE];
+
+	const struct rtc_class_ops *ops;
+	struct mutex ops_lock;
+
+	struct class_device *rtc_dev;
+	struct cdev char_dev;
+	struct mutex char_lock;
+
+	unsigned long irq_data;
+	spinlock_t irq_lock;
+	wait_queue_head_t irq_queue;
+	struct fasync_struct *async_queue;
+
+	struct rtc_task *irq_task;
+	spinlock_t irq_task_lock;
+	int irq_freq;
+	int max_user_freq;
+#ifdef CONFIG_RTC_INTF_DEV_UIE_EMUL
+	struct work_struct uie_task;
+	struct timer_list uie_timer;
+	/* Those fields are protected by rtc->irq_lock */
+	unsigned int oldsecs;
+	unsigned int irq_active:1;
+	unsigned int stop_uie_polling:1;
+	unsigned int uie_task_active:1;
+	unsigned int uie_timer_active:1;
+#endif
+};
+#define to_rtc_device(d) container_of(d, struct rtc_device, class_dev)
+
+extern struct rtc_device *rtc_device_register(const char *name,
+					struct device *dev,
+					const struct rtc_class_ops *ops,
+					struct module *owner);
+extern void rtc_device_unregister(struct rtc_device *rdev);
+extern int rtc_interface_register(struct class_interface *intf);
+
+extern int rtc_read_time(struct class_device *class_dev, struct rtc_time *tm);
+extern int rtc_set_time(struct class_device *class_dev, struct rtc_time *tm);
+extern int rtc_set_mmss(struct class_device *class_dev, unsigned long secs);
+extern int rtc_read_alarm(struct class_device *class_dev,
+			struct rtc_wkalrm *alrm);
+extern int rtc_set_alarm(struct class_device *class_dev,
+				struct rtc_wkalrm *alrm);
+extern void rtc_update_irq(struct class_device *class_dev,
+			unsigned long num, unsigned long events);
+
+extern struct class_device *rtc_class_open(char *name);
+extern void rtc_class_close(struct class_device *class_dev);
+
+extern int rtc_irq_register(struct class_device *class_dev,
+				struct rtc_task *task);
+extern void rtc_irq_unregister(struct class_device *class_dev,
+				struct rtc_task *task);
+extern int rtc_irq_set_state(struct class_device *class_dev,
+				struct rtc_task *task, int enabled);
+extern int rtc_irq_set_freq(struct class_device *class_dev,
+				struct rtc_task *task, int freq);
+
+typedef struct rtc_task {
+	void (*func)(void *private_data);
+	void *private_data;
+} rtc_task_t;
+
+int rtc_register(rtc_task_t *task);
+int rtc_unregister(rtc_task_t *task);
+int rtc_control(rtc_task_t *t, unsigned int cmd, unsigned long arg);
+void rtc_get_rtc_time(struct rtc_time *rtc_tm);
+irqreturn_t rtc_interrupt(int irq, void *dev_id);
+
+#endif /* __KERNEL__ */
 
 #endif /* _LINUX_RTC_H_ */

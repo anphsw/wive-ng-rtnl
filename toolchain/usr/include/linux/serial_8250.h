@@ -28,6 +28,7 @@ struct plat_serial8250_port {
 	unsigned char	iotype;		/* UPIO_* */
 	unsigned char	hub6;
 	upf_t		flags;		/* UPF_* flags */
+	unsigned int    type;           /* If UPF_FIXED_TYPE */
 };
 
 /*
@@ -60,5 +61,9 @@ int serial8250_register_port(struct uart_port *);
 void serial8250_unregister_port(int line);
 void serial8250_suspend_port(int line);
 void serial8250_resume_port(int line);
+
+extern int serial8250_find_port(struct uart_port *p);
+extern int serial8250_find_port_for_earlycon(void);
+extern int setup_early_serial8250_console(char *cmdline);
 
 #endif

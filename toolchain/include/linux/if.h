@@ -21,6 +21,7 @@
 
 #include <linux/types.h>		/* for "__kernel_caddr_t" et al	*/
 #include <linux/socket.h>		/* for "struct sockaddr" et al	*/
+#include <linux/compiler.h>		/* for "__user" et al           */
 
 #define	IFNAMSIZ	16
 #include <linux/hdlc/ioctl.h>
@@ -62,6 +63,9 @@
 #define IFF_MASTER_ALB	0x10		/* bonding master, balance-alb.	*/
 #define IFF_BONDING	0x20		/* bonding master or slave	*/
 #define IFF_SLAVE_NEEDARP 0x40		/* need ARPs for validation	*/
+#define IFF_ISATAP	0x80		/* ISATAP interface (RFC4214)	*/
+#define IFF_MASTER_ARPMON 0x100		/* bonding master, ARP mon in use */
+#define IFF_XMIT_DST_RELEASE 0x400	/* dev_hard_start_xmit() is allowed to release skb->dst  */
 
 #define IF_GET_IFACE	0x0001		/* for querying only */
 #define IF_GET_PROTO	0x0002
@@ -117,8 +121,7 @@ enum {
  *	being very small might be worth keeping for clean configuration.
  */
 
-struct ifmap 
-{
+struct ifmap {
 	unsigned long mem_start;
 	unsigned long mem_end;
 	unsigned short base_addr; 
@@ -128,21 +131,20 @@ struct ifmap
 	/* 3 bytes spare */
 };
 
-struct if_settings
-{
+struct if_settings {
 	unsigned int type;	/* Type of physical device or protocol */
 	unsigned int size;	/* Size of the data allocated by the caller */
 	union {
 		/* {atm/eth/dsl}_settings anyone ? */
-		raw_hdlc_proto	 *raw_hdlc;
-		cisco_proto	 *cisco;
-		fr_proto	 *fr;
-		fr_proto_pvc	 *fr_pvc;
-		fr_proto_pvc_info *fr_pvc_info;
+		raw_hdlc_proto		__user *raw_hdlc;
+		cisco_proto		__user *cisco;
+		fr_proto		__user *fr;
+		fr_proto_pvc		__user *fr_pvc;
+		fr_proto_pvc_info	__user *fr_pvc_info;
 
 		/* interface settings */
-		sync_serial_settings *sync;
-		te1_settings	 *te1;
+		sync_serial_settings	__user *sync;
+		te1_settings		__user *te1;
 	} ifs_ifsu;
 };
 
@@ -153,8 +155,7 @@ struct if_settings
  * remainder may be interface specific.
  */
 
-struct ifreq 
-{
+struct ifreq {
 #define IFHWADDRLEN	6
 	union
 	{
@@ -173,7 +174,7 @@ struct ifreq
 		struct  ifmap ifru_map;
 		char	ifru_slave[IFNAMSIZ];	/* Just fits the size */
 		char	ifru_newname[IFNAMSIZ];
-		void *	ifru_data;
+		void __user *	ifru_data;
 		struct	if_settings ifru_settings;
 	} ifr_ifru;
 };
@@ -203,13 +204,11 @@ struct ifreq
  * must know all networks accessible).
  */
 
-struct ifconf 
-{
+struct ifconf  {
 	int	ifc_len;			/* size of buffer	*/
-	union 
-	{
-		char *ifcu_buf;
-		struct ifreq *ifcu_req;
+	union {
+		char __user *ifcu_buf;
+		struct ifreq __user *ifcu_req;
 	} ifc_ifcu;
 };
 #define	ifc_buf	ifc_ifcu.ifcu_buf		/* buffer address	*/

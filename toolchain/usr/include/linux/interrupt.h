@@ -264,6 +264,9 @@ enum
 	HRTIMER_SOFTIRQ,
 #endif
 	BLOCK_SOFTIRQ,
+	RCU_SOFTIRQ,    /* Preferable RCU should always be the last softirq */
+
+	NR_SOFTIRQS
 };
 
 /* softirq mask and active fields moved to irq_cpustat_t in
@@ -273,11 +276,10 @@ enum
 struct softirq_action
 {
 	void	(*action)(struct softirq_action *);
-	void	*data;
 };
 
 asmlinkage void do_softirq(void);
-extern void open_softirq(int nr, void (*action)(struct softirq_action*), void *data);
+extern void open_softirq(int nr, void (*action)(struct softirq_action*));
 extern void softirq_init(void);
 #define __raise_softirq_irqoff(nr) do { or_softirq_pending(1UL << (nr)); } while (0)
 extern void FASTCALL(raise_softirq_irqoff(unsigned int nr));

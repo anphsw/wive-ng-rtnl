@@ -100,10 +100,14 @@ typedef unsigned long long u_quad_t;
 #if defined(__linux__)
 #include <linux/time.h>
 #define cdev_t u_quad_t
+#ifndef __KERNEL__
 #if !defined(_UQUAD_T_) && (!defined(__GLIBC__) || __GLIBC__ < 2)
 #define _UQUAD_T_ 1
 typedef unsigned long long u_quad_t;
 #endif
+#else /*__KERNEL__ */
+typedef unsigned long long u_quad_t;
+#endif /* __KERNEL__ */
 #else
 #define cdev_t dev_t
 #endif
@@ -656,6 +660,9 @@ struct coda_open_by_fd_out {
     struct coda_out_hdr oh;
     int fd;
 
+#ifdef __KERNEL__
+    struct file *fh; /* not passed from userspace but used in-kernel only */
+#endif
 };
 
 /* coda_open_by_path: */
@@ -751,14 +758,14 @@ union coda_downcalls {
 
 #define PIOCPARM_MASK 0x0000ffff
 struct ViceIoctl {
-        void *in;        /* Data to be transferred in */
-        void *out;       /* Data to be transferred out */
+        void __user *in;        /* Data to be transferred in */
+        void __user *out;       /* Data to be transferred out */
         u_short in_size;        /* Size of input buffer <= 2K */
         u_short out_size;       /* Maximum size of output buffer, <= 2K */
 };
 
 struct PioctlData {
-        const char *path;
+        const char __user *path;
         int follow;
         struct ViceIoctl vi;
 };

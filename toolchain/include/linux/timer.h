@@ -36,7 +36,8 @@ extern struct tvec_t_base_s boot_tvec_bases;
 	struct timer_list _name =				\
 		TIMER_INITIALIZER(_function, _expires, _data)
 
-void fastcall init_timer(struct timer_list * timer);
+void init_timer_deferrable(struct timer_list *timer);
+void init_timer(struct timer_list * timer);
 
 static inline void setup_timer(struct timer_list * timer,
 				void (*function)(unsigned long),
@@ -167,5 +168,10 @@ unsigned long __round_jiffies_relative(unsigned long j, int cpu);
 unsigned long round_jiffies(unsigned long j);
 unsigned long round_jiffies_relative(unsigned long j);
 
+
+unsigned long __round_jiffies_up(unsigned long j, int cpu);
+unsigned long __round_jiffies_up_relative(unsigned long j, int cpu);
+unsigned long round_jiffies_up(unsigned long j);
+unsigned long round_jiffies_up_relative(unsigned long j);
 
 #endif

@@ -8,8 +8,7 @@
 #include <linux/rcupdate.h>
 #include <linux/timer.h>
 
-struct ipv4_devconf
-{
+struct ipv4_devconf {
 	int	accept_redirects;
 	int	send_redirects;
 	int	secure_redirects;
@@ -36,8 +35,7 @@ struct ipv4_devconf
 
 extern struct ipv4_devconf ipv4_devconf;
 
-struct in_device
-{
+struct in_device {
 	struct net_device	*dev;
 	atomic_t		refcnt;
 	int			dead;
@@ -86,8 +84,7 @@ struct in_device
 #define IN_DEV_ARP_ANNOUNCE(in_dev)	(max(ipv4_devconf.arp_announce, (in_dev)->cnf.arp_announce))
 #define IN_DEV_ARP_IGNORE(in_dev)	(max(ipv4_devconf.arp_ignore, (in_dev)->cnf.arp_ignore))
 
-struct in_ifaddr
-{
+struct in_ifaddr {
 	struct in_ifaddr	*ifa_next;
 	struct in_device	*ifa_dev;
 	struct rcu_head		rcu_head;

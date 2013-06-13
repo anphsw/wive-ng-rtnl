@@ -35,12 +35,12 @@
 #ifndef _IF_PPP_H_
 #define _IF_PPP_H_
 
+#include <linux/compiler.h>
 
 /*
  * Packet sizes
  */
 
-#define	PPP_MTU		1500	/* Default MTU (size of Info field) */
 #define PPP_MAXMRU	65000	/* Largest MRU we allow */
 #define PROTO_IPX	0x002b	/* protocol numbers */
 #define PROTO_DNA_RT    0x0027  /* DNA Routing */
@@ -94,7 +94,7 @@ struct npioctl {
 
 /* Structure describing a CCP configuration option, for PPPIOCSCOMPRESS */
 struct ppp_option_data {
-	__u8 *ptr;
+	__u8	__user *ptr;
 	__u32	length;
 	int	transmit;
 };

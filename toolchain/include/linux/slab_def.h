@@ -15,6 +15,18 @@
 #include <asm/cache.h>		/* kmalloc_sizes.h needs L1_CACHE_BYTES */
 #include <linux/compiler.h>
 
+/*
+ * The largest kmalloc size supported by the slab allocators is
+ * 32 megabyte (2^25) or the maximum allocatable page order if that is
+ * less than 32 MB.
+ *
+ * WARNING: Its not easy to increase this value since the allocators have
+ * to do various tricks to work around compiler limitations in order to
+ * ensure proper constant folding.
+ */
+#define KMALLOC_SHIFT_HIGH	((MAX_ORDER + PAGE_SHIFT - 1) <= 25 ? \
+				(MAX_ORDER + PAGE_SHIFT - 1) : 25)
+
 /* Size description struct for general caches. */
 struct cache_sizes {
 	size_t		 	cs_size;
@@ -34,7 +46,7 @@ static inline void *kmalloc(size_t size, gfp_t flags)
 			goto found; \
 		else \
 			i++;
-#include "kmalloc_sizes.h"
+#include <linux/kmalloc_sizes.h>
 #undef CACHE
 		{
 			extern void __you_cannot_kmalloc_that_much(void);
@@ -89,7 +101,7 @@ static inline void *kmalloc_node(size_t size, gfp_t flags, int node)
 			goto found; \
 		else \
 			i++;
-#include "kmalloc_sizes.h"
+#include <linux/kmalloc_sizes.h>
 #undef CACHE
 		{
 			extern void __you_cannot_kmalloc_that_much(void);

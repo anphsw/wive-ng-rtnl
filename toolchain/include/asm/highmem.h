@@ -14,7 +14,6 @@
  *
  * Copyright (C) 1999 Ingo Molnar <mingo@redhat.com>
  */
-
 #ifndef _ASM_HIGHMEM_H
 #define _ASM_HIGHMEM_H
 
@@ -22,11 +21,11 @@
 
 #include <linux/init.h>
 #include <linux/interrupt.h>
+#include <linux/uaccess.h>
 #include <asm/kmap_types.h>
-#include <asm/pgtable.h>
 
 /* undef for production */
-#define HIGHMEM_DEBUG 1
+/* #define HIGHMEM_DEBUG 1 */
 
 /* declarations for highmem.c */
 extern unsigned long highstart_pfn, highend_pfn;
@@ -40,61 +39,70 @@ extern pte_t *pkmap_page_table;
  * easily, subsequent pte tables have to be allocated in one physical
  * chunk of RAM.
  */
-#define PKMAP_BASE (0xfe000000UL)
 #define LAST_PKMAP 1024
 #define LAST_PKMAP_MASK (LAST_PKMAP-1)
 #define PKMAP_NR(virt)  ((virt-PKMAP_BASE) >> PAGE_SHIFT)
 #define PKMAP_ADDR(nr)  (PKMAP_BASE + ((nr) << PAGE_SHIFT))
 
-extern void * kmap_high(struct page *page, int nonblocking);
+extern void * kmap_high(struct page *page);
 extern void kunmap_high(struct page *page);
 
-static inline void *__kmap(struct page *page, int nonblocking)
-{
-	if (in_interrupt())
-		out_of_line_bug();
-	if (page < highmem_start_page)
-		return page_address(page);
-	return kmap_high(page, nonblocking);
-}
+/*
+ * CONFIG_LIMITED_DMA is for systems with DMA limitations such as Momentum's
+ * Jaguar ATX.  This option exploits the highmem code in the kernel so is
+ * always enabled together with CONFIG_HIGHMEM but at this time doesn't
+ * actually add highmem functionality.
+ */
 
-#define kmap(page)		__kmap(page, 0)
-#define kmap_nonblock(page)	__kmap(page, 1)
-
-static inline void kunmap(struct page *page)
-{
-	if (in_interrupt())
-		out_of_line_bug();
-	if (page < highmem_start_page)
-		return;
-	kunmap_high(page);
-}
+#ifdef CONFIG_LIMITED_DMA
 
 /*
- * The use of kmap_atomic/kunmap_atomic is discouraged - kmap/kunmap
- * gives a more generic (and caching) interface. But kmap_atomic can
- * be used in IRQ contexts, so in some (very limited) cases we need
- * it.
+ * These are the default functions for the no-highmem case from
+ * <linux/highmem.h>
  */
+static inline void *kmap(struct page *page)
+{
+	might_sleep();
+	return page_address(page);
+}
+
+#define kunmap(page) do { (void) (page); } while (0)
+
 static inline void *kmap_atomic(struct page *page, enum km_type type)
 {
-	enum fixed_addresses idx;
-	unsigned long vaddr;
-
-	if (page < highmem_start_page)
-		return page_address(page);
-
-	idx = type + KM_TYPE_NR*smp_processor_id();
-	vaddr = __fix_to_virt(FIX_KMAP_BEGIN + idx);
-	set_pte(kmap_pte-idx, mk_pte(page, kmap_prot));
-	local_flush_tlb_one(vaddr);
-
-	return (void*) vaddr;
+	pagefault_disable();
+	return page_address(page);
 }
 
 static inline void kunmap_atomic(void *kvaddr, enum km_type type)
 {
+	pagefault_enable();
 }
+
+#define kmap_atomic_pfn(pfn, idx) kmap_atomic(pfn_to_page(pfn), (idx))
+
+#define kmap_atomic_to_page(ptr) virt_to_page(ptr)
+
+#define flush_cache_kmaps()	do { } while (0)
+
+#else /* LIMITED_DMA */
+
+extern void *__kmap(struct page *page);
+extern void __kunmap(struct page *page);
+extern void *__kmap_atomic(struct page *page, enum km_type type);
+extern void __kunmap_atomic(void *kvaddr, enum km_type type);
+extern void *kmap_atomic_pfn(unsigned long pfn, enum km_type type);
+extern struct page *__kmap_atomic_to_page(void *ptr);
+
+#define kmap			__kmap
+#define kunmap			__kunmap
+#define kmap_atomic		__kmap_atomic
+#define kunmap_atomic		__kunmap_atomic
+#define kmap_atomic_to_page	__kmap_atomic_to_page
+
+#define flush_cache_kmaps()	flush_cache_all()
+
+#endif /* LIMITED_DMA */
 
 #endif /* __KERNEL__ */
 

@@ -91,4 +91,86 @@ struct cn_ctl_msg {
 	__u8 data[0];
 };
 
+#ifdef __KERNEL__
+
+#include <asm/atomic.h>
+
+#include <linux/list.h>
+#include <linux/workqueue.h>
+
+#include <net/sock.h>
+
+#define CN_CBQ_NAMELEN		32
+
+struct cn_queue_dev {
+	atomic_t refcnt;
+	unsigned char name[CN_CBQ_NAMELEN];
+
+	struct workqueue_struct *cn_queue;
+
+	struct list_head queue_list;
+	spinlock_t queue_lock;
+
+	int netlink_groups;
+	struct sock *nls;
+};
+
+struct cn_callback_id {
+	unsigned char name[CN_CBQ_NAMELEN];
+	struct cb_id id;
+};
+
+struct cn_callback_data {
+	void (*destruct_data) (void *);
+	void *ddata;
+	
+	void *callback_priv;
+	void (*callback) (void *);
+
+	void *free;
+};
+
+struct cn_callback_entry {
+	struct list_head callback_entry;
+	struct cn_callback *cb;
+	struct work_struct work;
+	struct cn_queue_dev *pdev;
+
+	struct cn_callback_id id;
+	struct cn_callback_data data;
+
+	int seq, group;
+	struct sock *nls;
+};
+
+struct cn_ctl_entry {
+	struct list_head notify_entry;
+	struct cn_ctl_msg *msg;
+};
+
+struct cn_dev {
+	struct cb_id id;
+
+	u32 seq, groups;
+	struct sock *nls;
+	void (*input) (struct sock * sk, int len);
+
+	struct cn_queue_dev *cbdev;
+};
+
+int cn_add_callback(struct cb_id *, char *, void (*callback) (void *));
+void cn_del_callback(struct cb_id *);
+int cn_netlink_send(struct cn_msg *, u32, gfp_t);
+
+int cn_queue_add_callback(struct cn_queue_dev *dev, char *name, struct cb_id *id, void (*callback)(void *));
+void cn_queue_del_callback(struct cn_queue_dev *dev, struct cb_id *id);
+
+struct cn_queue_dev *cn_queue_alloc_dev(char *name, struct sock *);
+void cn_queue_free_dev(struct cn_queue_dev *dev);
+
+int cn_cb_equal(struct cb_id *, struct cb_id *);
+
+void cn_queue_wrapper(struct work_struct *work);
+
+#endif				/* __KERNEL__ */
 #endif				/* __CONNECTOR_H */

@@ -96,6 +96,10 @@
 #define PPP_INITFCS	0xffff	/* Initial FCS value */
 #define PPP_GOODFCS	0xf0b8	/* Good final FCS value */
 
+#ifdef __KERNEL__
+#include <linux/crc-ccitt.h>
+#define PPP_FCS(fcs, c) crc_ccitt_byte(fcs, c)
+#endif
 
 /*
  * Extended asyncmap - allows any character to be escaped.

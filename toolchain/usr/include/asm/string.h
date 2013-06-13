@@ -3,13 +3,21 @@
  * License.  See the file "COPYING" in the main directory of this archive
  * for more details.
  *
- * Copyright (c) 1994, 1995, 1996, 1997, 1998, 2001 Ralf Baechle
+ * Copyright (c) 1994, 95, 96, 97, 98, 2000, 01 Ralf Baechle
+ * Copyright (c) 2000 by Silicon Graphics, Inc.
  * Copyright (c) 2001 MIPS Technologies, Inc.
  */
-#ifndef __ASM_STRING_H
-#define __ASM_STRING_H
+#ifndef _ASM_STRING_H
+#define _ASM_STRING_H
 
-#include <linux/config.h>
+
+/*
+ * Most of the inline functions are rather naive implementations so I just
+ * didn't bother updating them for 64-bit ...
+ */
+#ifdef CONFIG_32BIT
+
+#ifndef IN_STRING_C
 
 #define __HAVE_ARCH_STRCPY
 static __inline__ char *strcpy(char *__dest, __const__ char *__src)
@@ -89,6 +97,8 @@ static __inline__ int strcmp(__const__ char *__cs, __const__ char *__ct)
   return __res;
 }
 
+#endif /* !defined(IN_STRING_C) */
+
 #define __HAVE_ARCH_STRNCMP
 static __inline__ int
 strncmp(__const__ char *__cs, __const__ char *__ct, size_t __count)
@@ -98,8 +108,9 @@ strncmp(__const__ char *__cs, __const__ char *__ct, size_t __count)
 	__asm__ __volatile__(
 	".set\tnoreorder\n\t"
 	".set\tnoat\n"
-	"1:\tlbu\t%3,(%0)\n\t"
-	"beqz\t%2,2f\n\t"
+	"1:\tbeqz\t%2,2f\n\t"
+	"nop\n\t"
+	"lbu\t%3,(%0)\n\t"
 	"lbu\t$1,(%1)\n\t"
 	"subu\t%2,1\n\t"
 	"bne\t$1,%3,3f\n\t"
@@ -119,37 +130,48 @@ strncmp(__const__ char *__cs, __const__ char *__ct, size_t __count)
 
 	return __res;
 }
+#endif /* CONFIG_32BIT */
 
 #define __HAVE_ARCH_MEMSET
 extern void *memset(void *__s, int __c, size_t __count);
+#define memset(__s, __c, len)					\
+({								\
+	size_t __len = (len);					\
+	void *__ret;						\
+	if (__builtin_constant_p(len) && __len >= 64)		\
+		__ret = memset((__s), (__c), __len);		\
+	else							\
+		__ret = __builtin_memset((__s), (__c), __len);	\
+	__ret;							\
+})
 
 #define __HAVE_ARCH_MEMCPY
 extern void *memcpy(void *__to, __const__ void *__from, size_t __n);
+#define memcpy(dst, src, len)					\
+({								\
+	size_t __len = (len);					\
+	void *__ret;						\
+	if (__builtin_constant_p(len) && __len >= 64)		\
+		__ret = memcpy((dst), (src), __len);		\
+	else							\
+		__ret = __builtin_memcpy((dst), (src), __len);	\
+	__ret;							\
+})
 
 #define __HAVE_ARCH_MEMMOVE
 extern void *memmove(void *__dest, __const__ void *__src, size_t __n);
+#define memmove(dst, src, len)					\
+({								\
+	size_t __len = (len);					\
+	void *__ret;						\
+	if (__builtin_constant_p(len) && __len >= 64)		\
+		__ret = memmove((dst), (src), __len);		\
+	else							\
+		__ret = __builtin_memmove((dst), (src), __len);	\
+	__ret;							\
+})
 
-/* Don't build bcopy at all ...  */
-#define __HAVE_ARCH_BCOPY
+#define __HAVE_ARCH_MEMCMP
+#define memcmp(src1, src2, len) __builtin_memcmp((src1), (src2), (len))
 
-#define __HAVE_ARCH_MEMSCAN
-static __inline__ void *memscan(void *__addr, int __c, size_t __size)
-{
-	char *__end = (char *)__addr + __size;
-	unsigned char __uc = (unsigned char) __c;
-
-	__asm__(".set\tpush\n\t"
-		".set\tnoat\n\t"
-		".set\treorder\n\t"
-		"1:\tbeq\t%0,%1,2f\n\t"
-		"addiu\t%0,1\n\t"
-		"lbu\t$1,-1(%0)\n\t"
-		"bne\t$1,%z4,1b\n"
-		"2:\t.set\tpop"
-		: "=r" (__addr), "=r" (__end)
-		: "0" (__addr), "1" (__end), "Jr" (__uc));
-
-	return __addr;
-}
-
-#endif /* __ASM_STRING_H */
+#endif /* _ASM_STRING_H */

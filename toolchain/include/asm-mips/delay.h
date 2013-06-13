@@ -12,9 +12,12 @@
 
 #include <linux/param.h>
 
-extern void __delay(unsigned int loops);
-extern void __ndelay(unsigned int ns);
-extern void __udelay(unsigned int us);
+#include <asm/compiler.h>
+#include <asm/war.h>
+
+extern void __delay(unsigned long loops);
+extern void __ndelay(unsigned long ns);
+extern void __udelay(unsigned long us);
 
 #define ndelay(ns) __ndelay(ns)
 #define udelay(us) __udelay(us)

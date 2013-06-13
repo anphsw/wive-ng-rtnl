@@ -24,7 +24,7 @@ struct venus_comm {
 };
 
 
-static __inline__ struct coda_sb_info *coda_sbp(struct super_block *sb)
+static inline struct coda_sb_info *coda_sbp(struct super_block *sb)
 {
     return ((struct coda_sb_info *)((sb)->s_fs_info));
 }

@@ -29,7 +29,7 @@ typedef struct { volatile int counter; } atomic_t;
  *
  * Atomically reads the value of @v.
  */
-#define atomic_read(v)		((v)->counter)
+#define atomic_read(v)          (*(volatile int *)&(v)->counter)
 
 /*
  * atomic_set - set atomic variable
@@ -38,7 +38,7 @@ typedef struct { volatile int counter; } atomic_t;
  *
  * Atomically sets the value of @v to @i.
  */
-#define atomic_set(v,i)		((v)->counter = (i))
+#define atomic_set(v, i)		((v)->counter = (i))
 
 /*
  * atomic_add - add integer to atomic variable
@@ -137,7 +137,7 @@ static __inline__ int atomic_add_return(int i, atomic_t * v)
 {
 	unsigned long result;
 
-	smp_mb();
+	smp_llsc_mb();
 
 	if (cpu_has_llsc && R10000_LLSC_WAR) {
 		unsigned long temp;
@@ -180,7 +180,7 @@ static __inline__ int atomic_add_return(int i, atomic_t * v)
 		raw_local_irq_restore(flags);
 	}
 
-	smp_mb();
+	smp_llsc_mb();
 
 	return result;
 }
@@ -189,7 +189,7 @@ static __inline__ int atomic_sub_return(int i, atomic_t * v)
 {
 	unsigned long result;
 
-	smp_mb();
+	smp_llsc_mb();
 
 	if (cpu_has_llsc && R10000_LLSC_WAR) {
 		unsigned long temp;
@@ -232,7 +232,7 @@ static __inline__ int atomic_sub_return(int i, atomic_t * v)
 		raw_local_irq_restore(flags);
 	}
 
-	smp_mb();
+	smp_llsc_mb();
 
 	return result;
 }
@@ -249,7 +249,7 @@ static __inline__ int atomic_sub_if_positive(int i, atomic_t * v)
 {
 	unsigned long result;
 
-	smp_mb();
+	smp_llsc_mb();
 
 	if (cpu_has_llsc && R10000_LLSC_WAR) {
 		unsigned long temp;
@@ -301,7 +301,7 @@ static __inline__ int atomic_sub_if_positive(int i, atomic_t * v)
 		raw_local_irq_restore(flags);
 	}
 
-	smp_mb();
+	smp_llsc_mb();
 
 	return result;
 }
@@ -328,8 +328,8 @@ static __inline__ int atomic_sub_if_positive(int i, atomic_t * v)
 })
 #define atomic_inc_not_zero(v) atomic_add_unless((v), 1, 0)
 
-#define atomic_dec_return(v) atomic_sub_return(1,(v))
-#define atomic_inc_return(v) atomic_add_return(1,(v))
+#define atomic_dec_return(v) atomic_sub_return(1, (v))
+#define atomic_inc_return(v) atomic_add_return(1, (v))
 
 /*
  * atomic_sub_and_test - subtract value from variable and test result
@@ -340,7 +340,7 @@ static __inline__ int atomic_sub_if_positive(int i, atomic_t * v)
  * true if the result is zero, or false for all
  * other cases.
  */
-#define atomic_sub_and_test(i,v) (atomic_sub_return((i), (v)) == 0)
+#define atomic_sub_and_test(i, v) (atomic_sub_return((i), (v)) == 0)
 
 /*
  * atomic_inc_and_test - increment and test
@@ -374,7 +374,7 @@ static __inline__ int atomic_sub_if_positive(int i, atomic_t * v)
  *
  * Atomically increments @v by 1.
  */
-#define atomic_inc(v) atomic_add(1,(v))
+#define atomic_inc(v) atomic_add(1, (v))
 
 /*
  * atomic_dec - decrement and test
@@ -382,7 +382,7 @@ static __inline__ int atomic_sub_if_positive(int i, atomic_t * v)
  *
  * Atomically decrements @v by 1.
  */
-#define atomic_dec(v) atomic_sub(1,(v))
+#define atomic_dec(v) atomic_sub(1, (v))
 
 /*
  * atomic_add_negative - add and test if negative
@@ -393,7 +393,7 @@ static __inline__ int atomic_sub_if_positive(int i, atomic_t * v)
  * if the result is negative, or false when
  * result is greater than or equal to zero.
  */
-#define atomic_add_negative(i,v) (atomic_add_return(i, (v)) < 0)
+#define atomic_add_negative(i, v) (atomic_add_return(i, (v)) < 0)
 
 #ifdef CONFIG_64BIT
 
@@ -406,14 +406,14 @@ typedef struct { volatile long counter; } atomic64_t;
  * @v: pointer of type atomic64_t
  *
  */
-#define atomic64_read(v)	((v)->counter)
+#define atomic64_read(v)       (*(volatile long *)&(v)->counter)
 
 /*
  * atomic64_set - set atomic variable
  * @v: pointer of type atomic64_t
  * @i: required value
  */
-#define atomic64_set(v,i)	((v)->counter = (i))
+#define atomic64_set(v, i)	((v)->counter = (i))
 
 /*
  * atomic64_add - add integer to atomic variable
@@ -512,7 +512,7 @@ static __inline__ long atomic64_add_return(long i, atomic64_t * v)
 {
 	unsigned long result;
 
-	smp_mb();
+	smp_llsc_mb();
 
 	if (cpu_has_llsc && R10000_LLSC_WAR) {
 		unsigned long temp;
@@ -555,7 +555,7 @@ static __inline__ long atomic64_add_return(long i, atomic64_t * v)
 		raw_local_irq_restore(flags);
 	}
 
-	smp_mb();
+	smp_llsc_mb();
 
 	return result;
 }
@@ -564,7 +564,7 @@ static __inline__ long atomic64_sub_return(long i, atomic64_t * v)
 {
 	unsigned long result;
 
-	smp_mb();
+	smp_llsc_mb();
 
 	if (cpu_has_llsc && R10000_LLSC_WAR) {
 		unsigned long temp;
@@ -607,7 +607,7 @@ static __inline__ long atomic64_sub_return(long i, atomic64_t * v)
 		raw_local_irq_restore(flags);
 	}
 
-	smp_mb();
+	smp_llsc_mb();
 
 	return result;
 }
@@ -624,7 +624,7 @@ static __inline__ long atomic64_sub_if_positive(long i, atomic64_t * v)
 {
 	unsigned long result;
 
-	smp_mb();
+	smp_llsc_mb();
 
 	if (cpu_has_llsc && R10000_LLSC_WAR) {
 		unsigned long temp;
@@ -676,13 +676,13 @@ static __inline__ long atomic64_sub_if_positive(long i, atomic64_t * v)
 		raw_local_irq_restore(flags);
 	}
 
-	smp_mb();
+	smp_llsc_mb();
 
 	return result;
 }
 
-#define atomic64_dec_return(v) atomic64_sub_return(1,(v))
-#define atomic64_inc_return(v) atomic64_add_return(1,(v))
+#define atomic64_dec_return(v) atomic64_sub_return(1, (v))
+#define atomic64_inc_return(v) atomic64_add_return(1, (v))
 
 /*
  * atomic64_sub_and_test - subtract value from variable and test result
@@ -693,7 +693,7 @@ static __inline__ long atomic64_sub_if_positive(long i, atomic64_t * v)
  * true if the result is zero, or false for all
  * other cases.
  */
-#define atomic64_sub_and_test(i,v) (atomic64_sub_return((i), (v)) == 0)
+#define atomic64_sub_and_test(i, v) (atomic64_sub_return((i), (v)) == 0)
 
 /*
  * atomic64_inc_and_test - increment and test
@@ -727,7 +727,7 @@ static __inline__ long atomic64_sub_if_positive(long i, atomic64_t * v)
  *
  * Atomically increments @v by 1.
  */
-#define atomic64_inc(v) atomic64_add(1,(v))
+#define atomic64_inc(v) atomic64_add(1, (v))
 
 /*
  * atomic64_dec - decrement and test
@@ -735,7 +735,7 @@ static __inline__ long atomic64_sub_if_positive(long i, atomic64_t * v)
  *
  * Atomically decrements @v by 1.
  */
-#define atomic64_dec(v) atomic64_sub(1,(v))
+#define atomic64_dec(v) atomic64_sub(1, (v))
 
 /*
  * atomic64_add_negative - add and test if negative
@@ -746,7 +746,7 @@ static __inline__ long atomic64_sub_if_positive(long i, atomic64_t * v)
  * if the result is negative, or false when
  * result is greater than or equal to zero.
  */
-#define atomic64_add_negative(i,v) (atomic64_add_return(i, (v)) < 0)
+#define atomic64_add_negative(i, v) (atomic64_add_return(i, (v)) < 0)
 
 #endif /* CONFIG_64BIT */
 
@@ -754,10 +754,11 @@ static __inline__ long atomic64_sub_if_positive(long i, atomic64_t * v)
  * atomic*_return operations are serializing but not the non-*_return
  * versions.
  */
-#define smp_mb__before_atomic_dec()	smp_mb()
-#define smp_mb__after_atomic_dec()	smp_mb()
-#define smp_mb__before_atomic_inc()	smp_mb()
-#define smp_mb__after_atomic_inc()	smp_mb()
+#define smp_mb__before_atomic_dec()	smp_llsc_mb()
+#define smp_mb__after_atomic_dec()	smp_llsc_mb()
+#define smp_mb__before_atomic_inc()	smp_llsc_mb()
+#define smp_mb__after_atomic_inc()	smp_llsc_mb()
 
 #include <asm-generic/atomic.h>
+
 #endif /* _ASM_ATOMIC_H */

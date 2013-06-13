@@ -731,12 +731,12 @@ static inline ulong div_up(ulong n, ulong size)
 }
 
 /* FIXME: nasty capital letters */
-static int inline LVM_GET_COW_TABLE_CHUNKS_PER_PE(vg_t * vg, lv_t * lv)
+static inline int LVM_GET_COW_TABLE_CHUNKS_PER_PE(vg_t * vg, lv_t * lv)
 {
 	return vg->pe_size / lv->lv_chunk_size;
 }
 
-static int inline LVM_GET_COW_TABLE_ENTRIES_PER_PE(vg_t * vg, lv_t * lv)
+static inline int LVM_GET_COW_TABLE_ENTRIES_PER_PE(vg_t * vg, lv_t * lv)
 {
 	ulong chunks = vg->pe_size / lv->lv_chunk_size;
 	ulong entry_size = sizeof(lv_COW_table_disk_t);

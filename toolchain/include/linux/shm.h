@@ -72,5 +72,43 @@ struct shm_info {
 	unsigned long swap_successes;
 };
 
+#ifdef __KERNEL__
+struct shmid_kernel /* private to the kernel */
+{	
+	struct kern_ipc_perm	shm_perm;
+	struct file *		shm_file;
+	int			id;
+	unsigned long		shm_nattch;
+	unsigned long		shm_segsz;
+	time_t			shm_atim;
+	time_t			shm_dtim;
+	time_t			shm_ctim;
+	pid_t			shm_cprid;
+	pid_t			shm_lprid;
+	struct user_struct	*mlock_user;
+};
+
+/* shm_mode upper byte flags */
+#define	SHM_DEST	01000	/* segment will be destroyed on last detach */
+#define SHM_LOCKED      02000   /* segment will not be swapped */
+#define SHM_HUGETLB     04000   /* segment will use huge TLB pages */
+#define SHM_NORESERVE   010000  /* don't check for reservations */
+
+#ifdef CONFIG_SYSVIPC
+long do_shmat(int shmid, char __user *shmaddr, int shmflg, unsigned long *addr);
+extern int is_file_shm_hugepages(struct file *file);
+#else
+static inline long do_shmat(int shmid, char __user *shmaddr,
+				int shmflg, unsigned long *addr)
+{
+	return -ENOSYS;
+}
+static inline int is_file_shm_hugepages(struct file *file)
+{
+	return 0;
+}
+#endif
+
+#endif /* __KERNEL__ */
 
 #endif /* _LINUX_SHM_H_ */

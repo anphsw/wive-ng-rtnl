@@ -15,7 +15,14 @@
 #ifndef _IPTABLES_H
 #define _IPTABLES_H
 
+#ifdef __KERNEL__
+#include <linux/if.h>
+#include <linux/in.h>
+#include <linux/ip.h>
+#include <linux/skbuff.h>
+#endif
 #include <linux/types.h>
+#include <linux/compiler.h>
 #include <linux/netfilter_ipv4.h>
 
 #include <linux/netfilter/x_tables.h>
@@ -72,8 +79,7 @@ struct ipt_ip {
 /* This structure defines each of the firewall rules.  Consists of 3
    parts which are 1) general IP header stuff 2) match specific
    stuff 3) the target to perform if the rule matches */
-struct ipt_entry
-{
+struct ipt_entry {
 	struct ipt_ip ip;
 
 	/* Mark with fields that we care about. */
@@ -131,8 +137,7 @@ struct ipt_entry
 #define IPT_UDP_INV_MASK	XT_UDP_INV_MASK
 
 /* ICMP matching stuff */
-struct ipt_icmp
-{
+struct ipt_icmp {
 	u_int8_t type;				/* type to match */
 	u_int8_t code[2];			/* range of code */
 	u_int8_t invflags;			/* Inverse flags */
@@ -142,8 +147,7 @@ struct ipt_icmp
 #define IPT_ICMP_INV	0x01	/* Invert the sense of type/code test */
 
 /* The argument to IPT_SO_GET_INFO */
-struct ipt_getinfo
-{
+struct ipt_getinfo {
 	/* Which table: caller fills this in. */
 	char name[IPT_TABLE_MAXNAMELEN];
 
@@ -165,8 +169,7 @@ struct ipt_getinfo
 };
 
 /* The argument to IPT_SO_SET_REPLACE. */
-struct ipt_replace
-{
+struct ipt_replace {
 	/* Which table. */
 	char name[IPT_TABLE_MAXNAMELEN];
 
@@ -190,7 +193,7 @@ struct ipt_replace
 	/* Number of counters (must be equal to current number of entries). */
 	unsigned int num_counters;
 	/* The old entries' counters. */
-	struct xt_counters *counters;
+	struct xt_counters __user *counters;
 
 	/* The entries (hang off end: not really an array). */
 	struct ipt_entry entries[0];
@@ -200,8 +203,7 @@ struct ipt_replace
 #define ipt_counters_info xt_counters_info
 
 /* The argument to IPT_SO_GET_ENTRIES. */
-struct ipt_get_entries
-{
+struct ipt_get_entries {
 	/* Which table: user fills this in. */
 	char name[IPT_TABLE_MAXNAMELEN];
 
@@ -240,4 +242,54 @@ ipt_get_target(struct ipt_entry *e)
 /*
  *	Main firewall chains definitions and global var's definitions.
  */
+#ifdef __KERNEL__
+
+#include <linux/init.h>
+extern void ipt_init(void) __init;
+
+extern int ipt_register_table(struct xt_table *table,
+			      const struct ipt_replace *repl);
+extern void ipt_unregister_table(struct xt_table *table);
+
+/* Standard entry. */
+struct ipt_standard {
+	struct ipt_entry entry;
+	struct ipt_standard_target target;
+};
+
+struct ipt_error_target {
+	struct ipt_entry_target target;
+	char errorname[IPT_FUNCTION_MAXNAMELEN];
+};
+
+struct ipt_error {
+	struct ipt_entry entry;
+	struct ipt_error_target target;
+};
+
+extern unsigned int ipt_do_table(struct sk_buff **pskb,
+				 unsigned int hook,
+				 const struct net_device *in,
+				 const struct net_device *out,
+				 struct xt_table *table);
+
+#define IPT_ALIGN(s) XT_ALIGN(s)
+
+#ifdef CONFIG_COMPAT
+#include <net/compat.h>
+
+struct compat_ipt_entry {
+	struct ipt_ip ip;
+	compat_uint_t nfcache;
+	u_int16_t target_offset;
+	u_int16_t next_offset;
+	compat_uint_t comefrom;
+	struct compat_xt_counters counters;
+	unsigned char elems[0];
+};
+
+#define COMPAT_IPT_ALIGN(s) 	COMPAT_XT_ALIGN(s)
+
+#endif /* CONFIG_COMPAT */
+#endif /*__KERNEL__*/
 #endif /* _IPTABLES_H */

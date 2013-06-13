@@ -20,6 +20,13 @@
 #include <linux/types.h>
 #include <asm/byteorder.h>
 
+#ifdef  __KERNEL__
+#include <linux/if_ether.h>
+#include <linux/if.h>
+#include <linux/netdevice.h>
+#include <linux/in.h>
+#include <linux/ppp_channel.h>
+#endif /* __KERNEL__ */
 #include <linux/if_pppol2tp.h>
 
 /* For user-space programs to pick up these definitions
@@ -30,17 +37,17 @@
 #define PF_PPPOX	AF_PPPOX
 #endif /* !(AF_PPPOX) */
 
-/************************************************************************ 
- * PPPoE addressing definition 
- */ 
+/************************************************************************
+ * PPPoE addressing definition
+ */
 typedef __be16 sid_t;
 struct pppoe_addr {
 	sid_t         sid;                    /* Session identifier */
 	unsigned char remote[ETH_ALEN];       /* Remote address */
 	char          dev[IFNAMSIZ];          /* Local device to use */
-}; 
- 
-/************************************************************************ 
+};
+
+/************************************************************************
  * PPTP addressing definition
  */
 struct pptp_addr {
@@ -74,13 +81,13 @@ struct sockaddr_pppoe {
 	sa_family_t     sa_family;	/* address family, AF_PPPOX */
 	unsigned int    sa_protocol;    /* protocol identifier */
 	struct pppoe_addr pppoe;
-}__attribute__((packed));
+} __attribute__((packed));
 
 struct sockaddr_pppol2tp {
 	sa_family_t     sa_family;      /* address family, AF_PPPOX */
 	unsigned int    sa_protocol;    /* protocol identifier */
 	struct pppol2tp_addr pppol2tp;
-}__attribute__((packed));
+} __attribute__((packed));
 
 /*********************************************************************
  *
@@ -140,5 +147,86 @@ struct pppoe_hdr {
 /* Length of entire PPPoE + PPP header */
 #define PPPOE_SES_HLEN	8
 
+/* Length of entire PPPoE + PPP header */
+#define PPPOE_SES_HLEN	8
+
+#ifdef __KERNEL__
+#include <linux/skbuff.h>
+static inline struct pppoe_hdr *pppoe_hdr(const struct sk_buff *skb)
+{
+	return (struct pppoe_hdr *)skb_network_header(skb);
+}
+
+struct pppoe_opt {
+	struct net_device	*dev;	  /* device associated with socket*/
+	int			ifindex;  /* ifindex of device associated with socket */
+	struct pppoe_addr	pa;	  /* what this socket is bound to*/
+	struct sockaddr_pppox	relay;	  /* what socket data will be
+					     relayed to (PPPoE relaying) */
+};
+
+struct pptp_opt {
+	struct pptp_addr	src_addr;
+	struct pptp_addr	dst_addr;
+	__u32 ack_sent, ack_recv;
+	__u32 seq_sent, seq_recv;
+	int ppp_flags;
+};
+
+#define PPTP_FLAG_PAUSE 0
+#define PPTP_FLAG_PROC 1
+
+#include <net/sock.h>
+struct pppox_sock {
+	/* struct sock must be the first member of pppox_sock */
+	struct sock		sk;
+	struct ppp_channel	chan;
+	struct pppox_sock	*next;	  /* for hash table */
+	union {
+		struct pppoe_opt pppoe;
+		struct pptp_opt pptp;
+	} proto;
+	__be16		num;
+};
+#define pppoe_dev	proto.pppoe.dev
+#define pppoe_ifindex	proto.pppoe.ifindex
+#define pppoe_pa	proto.pppoe.pa
+#define pppoe_relay	proto.pppoe.relay
+
+static inline struct pppox_sock *pppox_sk(struct sock *sk)
+{
+	return (struct pppox_sock *)sk;
+}
+
+static inline struct sock *sk_pppox(struct pppox_sock *po)
+{
+	return (struct sock *)po;
+}
+
+struct module;
+
+struct pppox_proto {
+	int		(*create)(struct socket *sock);
+	int		(*ioctl)(struct socket *sock, unsigned int cmd,
+				 unsigned long arg);
+	struct module	*owner;
+};
+
+extern int register_pppox_proto(int proto_num, const struct pppox_proto *pp);
+extern void unregister_pppox_proto(int proto_num);
+extern void pppox_unbind_sock(struct sock *sk);/* delete ppp-channel binding */
+extern int pppox_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg);
+
+/* PPPoX socket states */
+enum {
+    PPPOX_NONE		= 0,  /* initial state */
+    PPPOX_CONNECTED	= 1,  /* connection established ==TCP_ESTABLISHED */
+    PPPOX_BOUND		= 2,  /* bound to ppp device */
+    PPPOX_RELAY		= 4,  /* forwarding is enabled */
+    PPPOX_ZOMBIE	= 8,  /* dead, but still bound to ppp device */
+    PPPOX_DEAD		= 16  /* dead, useless, please clean me up!*/
+};
+
+#endif /* __KERNEL__ */
 
 #endif /* !(__LINUX_IF_PPPOX_H) */

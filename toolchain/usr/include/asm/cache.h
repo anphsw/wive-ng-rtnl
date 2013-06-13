@@ -9,15 +9,14 @@
 #ifndef _ASM_CACHE_H
 #define _ASM_CACHE_H
 
-#include <linux/config.h>
+#include <kmalloc.h>
 
-#if defined(CONFIG_CPU_R3000) || defined(CONFIG_CPU_R6000) || \
-    defined(CONFIG_CPU_TX39XX)
-#define L1_CACHE_BYTES		16
-#else
-#define L1_CACHE_BYTES 		32	/* A guess */
-#endif
+#define L1_CACHE_SHIFT		CONFIG_MIPS_L1_CACHE_SHIFT
+#define L1_CACHE_BYTES		(1 << L1_CACHE_SHIFT)
 
+#define SMP_CACHE_SHIFT		L1_CACHE_SHIFT
 #define SMP_CACHE_BYTES		L1_CACHE_BYTES
+
+#define __read_mostly __attribute__((__section__(".data.read_mostly")))
 
 #endif /* _ASM_CACHE_H */

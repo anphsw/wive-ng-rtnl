@@ -60,6 +60,11 @@ struct rcu_head {
 } while (0)
 
 
+/*
+ * rcu_read_lock_bh_held() is defined out of line to avoid #include-file
+ * hell.
+ */
+extern int rcu_read_lock_bh_held(void);
 
 /* Global control variables for rcupdate callback mechanism. */
 struct rcu_ctrlblk {
@@ -231,21 +236,72 @@ extern struct lockdep_map rcu_lock_map;
 		local_bh_enable(); \
 	} while(0)
 
+#ifdef CONFIG_PROVE_LOCKING
+
 /**
- * rcu_dereference - fetch an RCU-protected pointer in an
- * RCU read-side critical section.  This pointer may later
- * be safely dereferenced.
+ * rcu_dereference_check - rcu_dereference with debug checking
+ *
+ * Do an rcu_dereference(), but check that the context is correct.
+ * For example, rcu_dereference_check(gp, rcu_read_lock_held()) to
+ * ensure that the rcu_dereference_check() executes within an RCU
+ * read-side critical section.  It is also possible to check for
+ * locks being held, for example, by using lockdep_is_held().
+ */
+#define rcu_dereference_check(p, c) \
+	({ \
+		if (debug_lockdep_rcu_enabled() && !(c)) \
+			lockdep_rcu_dereference(__FILE__, __LINE__); \
+		rcu_dereference_raw(p); \
+	})
+
+#else
+
+#define rcu_dereference_check(p, c)	rcu_dereference_raw(p)
+
+#endif /* CONFIG_PROVE_LOCKING */
+
+/**
+ * rcu_dereference_raw - fetch an RCU-protected pointer
+ *
+ * The caller must be within some flavor of RCU read-side critical
+ * section, or must be otherwise preventing the pointer from changing,
+ * for example, by holding an appropriate lock.  This pointer may later
+ * be safely dereferenced.  It is the caller's responsibility to have
+ * done the right thing, as this primitive does no checking of any kind.
  *
  * Inserts memory barriers on architectures that require them
  * (currently only the Alpha), and, more importantly, documents
  * exactly which pointers are protected by RCU.
  */
+#define rcu_dereference_raw(p)	({ \
+				typeof(p) _________p1 = ACCESS_ONCE(p); \
+ 				smp_read_barrier_depends(); \
+ 				(_________p1); \
+ 				})
 
-#define rcu_dereference(p)     ({ \
-				typeof(p) _________p1 = p; \
-				smp_read_barrier_depends(); \
-				(_________p1); \
-				})
+/**
+ * rcu_dereference - fetch an RCU-protected pointer, checking for RCU
+ *
+ * Makes rcu_dereference_check() do the dirty work.
+ */
+#define rcu_dereference(p) \
+	rcu_dereference_check(p, rcu_read_lock_held())
+
+/**
+ * rcu_dereference_bh - fetch an RCU-protected pointer, checking for RCU-bh
+ *
+ * Makes rcu_dereference_check() do the dirty work.
+ */
+#define rcu_dereference_bh(p) \
+		rcu_dereference_check(p, rcu_read_lock_bh_held())
+
+/**
+ * rcu_dereference_sched - fetch RCU-protected pointer, checking for RCU-sched
+ *
+ * Makes rcu_dereference_check() do the dirty work.
+ */
+#define rcu_dereference_sched(p) \
+		rcu_dereference_check(p, rcu_read_lock_sched_held())
 
 /**
  * rcu_assign_pointer - assign (publicize) a pointer to a newly
@@ -295,7 +351,6 @@ extern void FASTCALL(call_rcu(struct rcu_head *head,
 extern void FASTCALL(call_rcu_bh(struct rcu_head *head,
 				void (*func)(struct rcu_head *head)));
 extern void synchronize_rcu(void);
-void synchronize_idle(void);
 extern void rcu_barrier(void);
 
 #endif /* __KERNEL__ */

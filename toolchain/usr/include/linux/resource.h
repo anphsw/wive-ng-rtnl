@@ -69,6 +69,6 @@ struct rlimit {
  */
 #include <asm/resource.h>
 
-int getrusage(struct task_struct *p, int who, struct rusage *ru);
+int getrusage(struct task_struct *p, int who, struct rusage __user *ru);
 
 #endif

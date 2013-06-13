@@ -1,6 +1,7 @@
 #ifndef __LINUX_UIO_H
 #define __LINUX_UIO_H
 
+#include <linux/compiler.h>
 #include <linux/types.h>
 
 /*
@@ -18,10 +19,18 @@
 
 struct iovec
 {
-	void *iov_base;	/* BSD uses caddr_t (1003.1g requires void *) */
+	void __user *iov_base;	/* BSD uses caddr_t (1003.1g requires void *) */
 	__kernel_size_t iov_len; /* Must be size_t (1003.1g) */
 };
 
+#ifdef __KERNEL__
+
+struct kvec {
+	void *iov_base; /* and that should *never* hold a userland pointer */
+	size_t iov_len;
+};
+
+#endif
 
 /*
  *	UIO_MAXIOV shall be at least 16 1003.1g (5.4.1.1)
@@ -42,7 +51,7 @@ struct iovec
  * segment lengths have been validated.  Because the individual lengths can
  * overflow a size_t when added together.
  */
-static __inline__ size_t iov_length(const struct iovec *iov, unsigned long nr_segs)
+static inline size_t iov_length(const struct iovec *iov, unsigned long nr_segs)
 {
 	unsigned long seg;
 	size_t ret = 0;

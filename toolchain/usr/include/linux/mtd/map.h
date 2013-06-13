@@ -303,6 +303,7 @@ static inline map_word map_word_load(struct map_info *map, const void *ptr)
 {
 	map_word r;
 
+	memset(r.x, 0, sizeof(r.x));
 	if (map_bankwidth_is_1(map))
 		r.x[0] = *(unsigned char *)ptr;
 	else if (map_bankwidth_is_2(map))
@@ -364,7 +365,7 @@ static inline map_word map_word_ff(struct map_info *map)
 
 static inline map_word inline_map_read(struct map_info *map, unsigned long ofs)
 {
-	map_word r;
+	map_word r = { { 0 } };
 
 	if (map_bankwidth_is_1(map))
 		r.x[0] = __raw_readb(map->virt + ofs);
@@ -378,6 +379,8 @@ static inline map_word inline_map_read(struct map_info *map, unsigned long ofs)
 #endif
 	else if (map_bankwidth_is_large(map))
 		memcpy_fromio(r.x, map->virt+ofs, map->bankwidth);
+	else
+		BUG();
 
 	return r;
 }

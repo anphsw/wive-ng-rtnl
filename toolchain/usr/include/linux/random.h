@@ -44,5 +44,62 @@ struct rnd_state {
 
 /* Exported functions */
 
+#ifdef __KERNEL__
+
+extern void rand_initialize_irq(int irq);
+
+extern void add_input_randomness(unsigned int type, unsigned int code,
+				 unsigned int value);
+extern void add_interrupt_randomness(int irq);
+
+extern void get_random_bytes(void *buf, int nbytes);
+void generate_random_uuid(unsigned char uuid_out[16]);
+
+extern __u32 secure_ip_id(__be32 daddr);
+extern u32 secure_ipv4_port_ephemeral(__be32 saddr, __be32 daddr, __be16 dport);
+extern u32 secure_ipv6_port_ephemeral(const __be32 *saddr, const __be32 *daddr,
+				      __be16 dport);
+extern __u32 secure_tcp_sequence_number(__be32 saddr, __be32 daddr,
+					__be16 sport, __be16 dport);
+extern __u32 secure_tcpv6_sequence_number(__be32 *saddr, __be32 *daddr,
+					  __be16 sport, __be16 dport);
+extern u64 secure_dccp_sequence_number(__be32 saddr, __be32 daddr,
+				       __be16 sport, __be16 dport);
+
+#ifndef MODULE
+extern const struct file_operations random_fops, urandom_fops;
+#endif
+
+unsigned int get_random_int(void);
+unsigned long randomize_range(unsigned long start, unsigned long end, unsigned long len);
+
+u32 random32(void);
+void srandom32(u32 seed);
+
+u32 prandom32(struct rnd_state *);
+
+/*
+ * Handle minimum values for seeds
+ */
+static inline u32 __seed(u32 x, u32 m)
+{
+	return (x < m) ? x + m : x;
+}
+
+/**
+ * prandom32_seed - set seed for prandom32().
+ * @state: pointer to state structure to receive the seed.
+ * @seed: arbitrary 64-bit value to use as a seed.
+ */
+static inline void prandom32_seed(struct rnd_state *state, u64 seed)
+{
+	u32 i = (seed >> 32) ^ (seed << 10) ^ seed;
+
+	state->s1 = __seed(i, 1);
+	state->s2 = __seed(i, 7);
+	state->s3 = __seed(i, 15);
+}
+
+#endif /* __KERNEL___ */
 
 #endif /* _LINUX_RANDOM_H */

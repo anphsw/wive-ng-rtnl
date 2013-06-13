@@ -55,17 +55,11 @@ extern int add_temporary_entry(unsigned long entrylo0, unsigned long entrylo1,
  * Entries per page directory level: we use two-level, so
  * we don't really have any PUD/PMD directory physically.
  */
-#ifdef CONFIG_64BIT_PHYS_ADDR
-#define PGD_ORDER	1
+#define __PGD_ORDER	(32 - 3 * PAGE_SHIFT + PGD_T_LOG2 + PTE_T_LOG2)
+#define PGD_ORDER	(__PGD_ORDER >= 0 ? __PGD_ORDER : 0)
 #define PUD_ORDER	aieeee_attempt_to_allocate_pud
 #define PMD_ORDER	1
 #define PTE_ORDER	0
-#else
-#define PGD_ORDER	0
-#define PUD_ORDER	aieeee_attempt_to_allocate_pud
-#define PMD_ORDER	1
-#define PTE_ORDER	0
-#endif
 
 #define PTRS_PER_PGD	((PAGE_SIZE << PGD_ORDER) / sizeof(pgd_t))
 #define PTRS_PER_PTE	((PAGE_SIZE << PTE_ORDER) / sizeof(pte_t))
@@ -74,6 +68,8 @@ extern int add_temporary_entry(unsigned long entrylo0, unsigned long entrylo1,
 #define FIRST_USER_ADDRESS	0
 
 #define VMALLOC_START     MAP_BASE
+
+#define PKMAP_BASE		(0xfe000000UL)
 
 #ifdef CONFIG_HIGHMEM
 # define VMALLOC_END	(PKMAP_BASE-2*PAGE_SIZE)
@@ -115,7 +111,7 @@ static inline void pmd_clear(pmd_t *pmdp)
 	pmd_val(*pmdp) = ((unsigned long) invalid_pte_table);
 }
 
-#if defined(CONFIG_64BIT_PHYS_ADDR) && defined(CONFIG_CPU_MIPS32_R1)
+#if defined(CONFIG_64BIT_PHYS_ADDR) && defined(CONFIG_CPU_MIPS32)
 #define pte_page(x)		pfn_to_page(pte_pfn(x))
 #define pte_pfn(x)		((unsigned long)((x).pte_high >> 6))
 static inline pte_t
@@ -138,7 +134,7 @@ pfn_pte(unsigned long pfn, pgprot_t prot)
 #define pte_pfn(x)		((unsigned long)((x).pte >> PAGE_SHIFT))
 #define pfn_pte(pfn, prot)	__pte(((unsigned long long)(pfn) << PAGE_SHIFT) | pgprot_val(prot))
 #endif
-#endif /* defined(CONFIG_64BIT_PHYS_ADDR) && defined(CONFIG_CPU_MIPS32_R1) */
+#endif /* defined(CONFIG_64BIT_PHYS_ADDR) && defined(CONFIG_CPU_MIPS32) */
 
 #define __pgd_offset(address)	pgd_index(address)
 #define __pud_offset(address)	(((address) >> PUD_SHIFT) & (PTRS_PER_PUD-1))
@@ -150,7 +146,7 @@ pfn_pte(unsigned long pfn, pgprot_t prot)
 #define pgd_index(address)	(((address) >> PGDIR_SHIFT) & (PTRS_PER_PGD-1))
 
 /* to find an entry in a page-table-directory */
-#define pgd_offset(mm,addr)	((mm)->pgd + pgd_index(addr))
+#define pgd_offset(mm, addr)	((mm)->pgd + pgd_index(addr))
 
 /* Find an entry in the third-level page table.. */
 #define __pte_offset(address)						\

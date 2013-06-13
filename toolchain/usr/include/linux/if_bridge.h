@@ -55,8 +55,7 @@
 #define BR_STATE_FORWARDING 3
 #define BR_STATE_BLOCKING 4
 
-struct __bridge_info
-{
+struct __bridge_info {
 	__u64 designated_root;
 	__u64 bridge_id;
 	__u32 root_path_cost;
@@ -78,8 +77,7 @@ struct __bridge_info
 	__u32 gc_timer_value;
 };
 
-struct __port_info
-{
+struct __port_info {
 	__u64 designated_root;
 	__u64 designated_bridge;
 	__u16 port_id;
@@ -95,8 +93,7 @@ struct __port_info
 	__u32 hold_timer_value;
 };
 
-struct __fdb_entry
-{
+struct __fdb_entry {
 	__u8 mac_addr[6];
 	__u8 port_no;
 	__u8 is_local;
@@ -104,5 +101,15 @@ struct __fdb_entry
 	__u32 unused;
 };
 
+#ifdef __KERNEL__
+
+#include <linux/netdevice.h>
+
+extern void brioctl_set(int (*ioctl_hook)(unsigned int, void __user *));
+extern struct sk_buff *(*br_handle_frame_hook)(struct net_bridge_port *p,
+					       struct sk_buff *skb);
+extern int (*br_should_route_hook)(struct sk_buff **pskb);
+
+#endif
 
 #endif

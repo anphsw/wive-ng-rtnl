@@ -134,5 +134,14 @@ struct JS_DATA_SAVE_TYPE_64 {
 	struct JS_DATA_TYPE JS_CORR;
 };
 
+#ifdef __KERNEL__
+#if BITS_PER_LONG == 64
+#define JS_DATA_SAVE_TYPE JS_DATA_SAVE_TYPE_64
+#elif BITS_PER_LONG == 32
+#define JS_DATA_SAVE_TYPE JS_DATA_SAVE_TYPE_32
+#else
+#error Unexpected BITS_PER_LONG
+#endif
+#endif
 
 #endif /* _LINUX_JOYSTICK_H */

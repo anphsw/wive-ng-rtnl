@@ -121,5 +121,11 @@
 
 #define EDQUOT		1133	/* Quota exceeded */
 
+#ifdef __KERNEL__
+
+/* The biggest error number defined here or in <linux/errno.h>. */
+#define EMAXERRNO	1133
+
+#endif /* __KERNEL__ */
 
 #endif /* _ASM_ERRNO_H */

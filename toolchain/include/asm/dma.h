@@ -9,10 +9,9 @@
  * as the R4030 on Jazz boards behave totally different!
  */
 
-#ifndef __ASM_MIPS_DMA_H
-#define __ASM_MIPS_DMA_H
+#ifndef _ASM_DMA_H
+#define _ASM_DMA_H
 
-#include <linux/config.h>
 #include <asm/io.h>			/* need byte IO */
 #include <linux/spinlock.h>		/* And spinlocks */
 #include <linux/delay.h>
@@ -75,7 +74,9 @@
  *
  */
 
+#ifndef CONFIG_GENERIC_ISA_DMA_SUPPORT_BROKEN
 #define MAX_DMA_CHANNELS	8
+#endif
 
 /*
  * The maximum address in KSEG0 that we can perform a DMA transfer to on this
@@ -90,6 +91,7 @@
 #else
 #define MAX_DMA_ADDRESS		(PAGE_OFFSET + 0x01000000)
 #endif
+#define MAX_DMA_PFN		PFN_DOWN(virt_to_phys((void *)MAX_DMA_ADDRESS))
 
 /* 8237 DMA controllers */
 #define IO_DMA1_BASE	0x00	/* 8 bit slave DMA, channels 0..3 */
@@ -302,10 +304,12 @@ static __inline__ int get_dma_residue(unsigned int dmanr)
 extern int request_dma(unsigned int dmanr, const char * device_id);	/* reserve a DMA channel */
 extern void free_dma(unsigned int dmanr);	/* release it again */
 
+/* From PCI */
+
 #ifdef CONFIG_PCI
 extern int isa_dma_bridge_buggy;
 #else
-#define isa_dma_bridge_buggy 	(0)
+#define isa_dma_bridge_buggy	(0)
 #endif
 
-#endif /* __ASM_MIPS_DMA_H */
+#endif /* _ASM_DMA_H */

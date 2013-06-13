@@ -97,6 +97,9 @@ enum {
 	RTM_SETNEIGHTBL,
 #define RTM_SETNEIGHTBL	RTM_SETNEIGHTBL
 
+	RTM_NEWNDUSEROPT = 68,
+#define RTM_NEWNDUSEROPT RTM_NEWNDUSEROPT
+
 	__RTM_MAX,
 #define RTM_MAX		(((__RTM_MAX + 3) & ~3) - 1)
 };
@@ -111,8 +114,7 @@ enum {
    with attribute type.
  */
 
-struct rtattr
-{
+struct rtattr {
 	unsigned short	rta_len;
 	unsigned short	rta_type;
 };
@@ -138,8 +140,7 @@ struct rtattr
  *		Definitions used in routing table administration.
  ****/
 
-struct rtmsg
-{
+struct rtmsg {
 	unsigned char		rtm_family;
 	unsigned char		rtm_dst_len;
 	unsigned char		rtm_src_len;
@@ -155,8 +156,7 @@ struct rtmsg
 
 /* rtm_type */
 
-enum
-{
+enum {
 	RTN_UNSPEC,
 	RTN_UNICAST,		/* Gateway or direct route	*/
 	RTN_LOCAL,		/* Accept locally		*/
@@ -213,8 +213,7 @@ enum
    could be assigned a value between UNIVERSE and LINK.
 */
 
-enum rt_scope_t
-{
+enum rt_scope_t {
 	RT_SCOPE_UNIVERSE=0,
 /* User defined values  */
 	RT_SCOPE_SITE=200,
@@ -232,8 +231,7 @@ enum rt_scope_t
 
 /* Reserved table identifiers */
 
-enum rt_class_t
-{
+enum rt_class_t {
 	RT_TABLE_UNSPEC=0,
 /* User defined values */
 	RT_TABLE_DEFAULT=253,
@@ -245,8 +243,7 @@ enum rt_class_t
 
 /* Routing message attributes */
 
-enum rtattr_type_t
-{
+enum rtattr_type_t {
 	RTA_UNSPEC,
 	RTA_DST,
 	RTA_SRC,
@@ -280,8 +277,7 @@ enum rtattr_type_t
  * and rtt for different paths from multipath.
  */
 
-struct rtnexthop
-{
+struct rtnexthop {
 	unsigned short		rtnh_len;
 	unsigned char		rtnh_flags;
 	unsigned char		rtnh_hops;
@@ -309,8 +305,7 @@ struct rtnexthop
 
 /* RTM_CACHEINFO */
 
-struct rta_cacheinfo
-{
+struct rta_cacheinfo {
 	__u32	rta_clntref;
 	__u32	rta_lastuse;
 	__s32	rta_expires;
@@ -325,8 +320,7 @@ struct rta_cacheinfo
 
 /* RTM_METRICS --- array of struct rtattr with types of RTAX_* */
 
-enum
-{
+enum {
 	RTAX_UNSPEC,
 #define RTAX_UNSPEC RTAX_UNSPEC
 	RTAX_LOCK,
@@ -349,7 +343,7 @@ enum
 #define RTAX_REORDERING RTAX_REORDERING
 	RTAX_HOPLIMIT,
 #define RTAX_HOPLIMIT RTAX_HOPLIMIT
-        RTAX_RTO_MIN,                                                                                                         
+        RTAX_RTO_MIN,
 #define RTAX_RTO_MIN RTAX_RTO_MIN 
 	RTAX_INITCWND,
 #define RTAX_INITCWND RTAX_INITCWND
@@ -365,8 +359,7 @@ enum
 #define RTAX_FEATURE_TIMESTAMP	0x00000004
 #define RTAX_FEATURE_ALLFRAG	0x00000008
 
-struct rta_session
-{
+struct rta_session {
 	__u8	proto;
 	__u8	pad1;
 	__u16	pad2;
@@ -391,8 +384,7 @@ struct rta_session
  *		General form of address family dependent message.
  ****/
 
-struct rtgenmsg
-{
+struct rtgenmsg {
 	unsigned char		rtgen_family;
 };
 
@@ -405,8 +397,7 @@ struct rtgenmsg
  * on network protocol.
  */
 
-struct ifinfomsg
-{
+struct ifinfomsg {
 	unsigned char	ifi_family;
 	unsigned char	__ifi_pad;
 	unsigned short	ifi_type;		/* ARPHRD_* */
@@ -419,8 +410,7 @@ struct ifinfomsg
  *		prefix information 
  ****/
 
-struct prefixmsg
-{
+struct prefixmsg {
 	unsigned char	prefix_family;
 	unsigned char	prefix_pad1;
 	unsigned short	prefix_pad2;
@@ -441,8 +431,7 @@ enum
 
 #define PREFIX_MAX	(__PREFIX_MAX - 1)
 
-struct prefix_cacheinfo
-{
+struct prefix_cacheinfo {
 	__u32	preferred_time;
 	__u32	valid_time;
 };
@@ -452,8 +441,7 @@ struct prefix_cacheinfo
  *		Traffic control messages.
  ****/
 
-struct tcmsg
-{
+struct tcmsg {
 	unsigned char	tcm_family;
 	unsigned char	tcm__pad1;
 	unsigned short	tcm__pad2;
@@ -463,8 +451,7 @@ struct tcmsg
 	__u32		tcm_info;
 };
 
-enum
-{
+enum {
 	TCA_UNSPEC,
 	TCA_KIND,
 	TCA_OPTIONS,
@@ -481,6 +468,31 @@ enum
 #define TCA_RTA(r)  ((struct rtattr*)(((char*)(r)) + NLMSG_ALIGN(sizeof(struct tcmsg))))
 #define TCA_PAYLOAD(n) NLMSG_PAYLOAD(n,sizeof(struct tcmsg))
 
+/********************************************************************
+ *		Neighbor Discovery userland options
+ ****/
+
+struct nduseroptmsg
+{
+	unsigned char	nduseropt_family;
+	unsigned char	nduseropt_pad1;
+	unsigned short	nduseropt_opts_len;	/* Total length of options */
+	__u8		nduseropt_icmp_type;
+	__u8		nduseropt_icmp_code;
+	unsigned short	nduseropt_pad2;
+	/* Followed by one or more ND options */
+};
+
+enum
+{
+	NDUSEROPT_UNSPEC,
+	NDUSEROPT_SRCADDR,
+	__NDUSEROPT_MAX
+};
+
+#define NDUSEROPT_MAX	(__NDUSEROPT_MAX - 1)
+
+#ifndef __KERNEL__
 /* RTnetlink multicast groups - backwards compatibility for userspace */
 #define RTMGRP_LINK		1
 #define RTMGRP_NOTIFY		2
@@ -501,6 +513,7 @@ enum
 #define RTMGRP_DECnet_ROUTE     0x4000
 
 #define RTMGRP_IPV6_PREFIX	0x20000
+#endif
 
 /* RTnetlink multicast groups */
 enum rtnetlink_groups {
@@ -542,24 +555,196 @@ enum rtnetlink_groups {
 #define RTNLGRP_IPV6_PREFIX	RTNLGRP_IPV6_PREFIX
 	RTNLGRP_IPV6_RULE,
 #define RTNLGRP_IPV6_RULE	RTNLGRP_IPV6_RULE
+	RTNLGRP_ND_USEROPT,
+#define RTNLGRP_ND_USEROPT	RTNLGRP_ND_USEROPT
 	__RTNLGRP_MAX
 };
 #define RTNLGRP_MAX	(__RTNLGRP_MAX - 1)
 
 /* TC action piece */
-struct tcamsg
-{
+struct tcamsg {
 	unsigned char	tca_family;
 	unsigned char	tca__pad1;
 	unsigned short	tca__pad2;
 };
 #define TA_RTA(r)  ((struct rtattr*)(((char*)(r)) + NLMSG_ALIGN(sizeof(struct tcamsg))))
 #define TA_PAYLOAD(n) NLMSG_PAYLOAD(n,sizeof(struct tcamsg))
-#define TCA_ACT_TAB 1 /* attr type must be >=1 */	
+#define TCA_ACT_TAB 1 /* attr type must be >=1 */
 #define TCAA_MAX 1
 
 /* End of information exported to user level */
 
+#ifdef __KERNEL__
+
+#include <linux/mutex.h>
+
+extern size_t rtattr_strlcpy(char *dest, const struct rtattr *rta, size_t size);
+static __inline__ int rtattr_strcmp(const struct rtattr *rta, const char *str)
+{
+	int len = strlen(str) + 1;
+	return len > rta->rta_len || memcmp(RTA_DATA(rta), str, len);
+}
+
+extern int rtattr_parse(struct rtattr *tb[], int maxattr, struct rtattr *rta, int len);
+
+#define rtattr_parse_nested(tb, max, rta) \
+	rtattr_parse((tb), (max), RTA_DATA((rta)), RTA_PAYLOAD((rta)))
+
+struct rtnetlink_link
+{
+	int (*doit)(struct sk_buff *, struct nlmsghdr*, void *attr);
+	int (*dumpit)(struct sk_buff *, struct netlink_callback *cb);
+};
+
+extern struct rtnetlink_link * rtnetlink_links[NPROTO];
+extern int rtnetlink_send(struct sk_buff *skb, u32 pid, u32 group, int echo);
+extern int rtnl_unicast(struct sk_buff *skb, u32 pid);
+extern int rtnl_notify(struct sk_buff *skb, u32 pid, u32 group,
+		       struct nlmsghdr *nlh, gfp_t flags);
+extern void rtnl_set_sk_err(u32 group, int error);
+extern int rtnetlink_put_metrics(struct sk_buff *skb, u32 *metrics);
+extern int rtnl_put_cacheinfo(struct sk_buff *skb, struct dst_entry *dst,
+			      u32 id, u32 ts, u32 tsage, long expires,
+			      u32 error);
+
+extern void __rta_fill(struct sk_buff *skb, int attrtype, int attrlen, const void *data);
+
+#define RTA_PUT(skb, attrtype, attrlen, data) \
+({	if (unlikely(skb_tailroom(skb) < (int)RTA_SPACE(attrlen))) \
+		 goto rtattr_failure; \
+   	__rta_fill(skb, attrtype, attrlen, data); }) 
+
+#define RTA_APPEND(skb, attrlen, data) \
+({	if (unlikely(skb_tailroom(skb) < (int)(attrlen))) \
+		goto rtattr_failure; \
+	memcpy(skb_put(skb, attrlen), data, attrlen); })
+
+#define RTA_PUT_NOHDR(skb, attrlen, data) \
+({	RTA_APPEND(skb, RTA_ALIGN(attrlen), data); \
+	memset(skb->tail - (RTA_ALIGN(attrlen) - attrlen), 0, \
+	       RTA_ALIGN(attrlen) - attrlen); })
+
+#define RTA_PUT_U8(skb, attrtype, value) \
+({	u8 _tmp = (value); \
+	RTA_PUT(skb, attrtype, sizeof(u8), &_tmp); })
+
+#define RTA_PUT_U16(skb, attrtype, value) \
+({	u16 _tmp = (value); \
+	RTA_PUT(skb, attrtype, sizeof(u16), &_tmp); })
+
+#define RTA_PUT_U32(skb, attrtype, value) \
+({	u32 _tmp = (value); \
+	RTA_PUT(skb, attrtype, sizeof(u32), &_tmp); })
+
+#define RTA_PUT_U64(skb, attrtype, value) \
+({	u64 _tmp = (value); \
+	RTA_PUT(skb, attrtype, sizeof(u64), &_tmp); })
+
+#define RTA_PUT_SECS(skb, attrtype, value) \
+	RTA_PUT_U64(skb, attrtype, (value) / HZ)
+
+#define RTA_PUT_MSECS(skb, attrtype, value) \
+	RTA_PUT_U64(skb, attrtype, jiffies_to_msecs(value))
+
+#define RTA_PUT_STRING(skb, attrtype, value) \
+	RTA_PUT(skb, attrtype, strlen(value) + 1, value)
+
+#define RTA_PUT_FLAG(skb, attrtype) \
+	RTA_PUT(skb, attrtype, 0, NULL);
+
+#define RTA_NEST(skb, type) \
+({	struct rtattr *__start = (struct rtattr *) (skb)->tail; \
+	RTA_PUT(skb, type, 0, NULL); \
+	__start;  })
+
+#define RTA_NEST_END(skb, start) \
+({	(start)->rta_len = ((skb)->tail - (unsigned char *) (start)); \
+	(skb)->len; })
+
+#define RTA_NEST_CANCEL(skb, start) \
+({	if (start) \
+		skb_trim(skb, (unsigned char *) (start) - (skb)->data); \
+	-1; })
+
+#define RTA_GET_U8(rta) \
+({	if (!rta || RTA_PAYLOAD(rta) < sizeof(u8)) \
+		goto rtattr_failure; \
+	*(u8 *) RTA_DATA(rta); })
+
+#define RTA_GET_U16(rta) \
+({	if (!rta || RTA_PAYLOAD(rta) < sizeof(u16)) \
+		goto rtattr_failure; \
+	*(u16 *) RTA_DATA(rta); })
+
+#define RTA_GET_U32(rta) \
+({	if (!rta || RTA_PAYLOAD(rta) < sizeof(u32)) \
+		goto rtattr_failure; \
+	*(u32 *) RTA_DATA(rta); })
+
+#define RTA_GET_U64(rta) \
+({	u64 _tmp; \
+	if (!rta || RTA_PAYLOAD(rta) < sizeof(u64)) \
+		goto rtattr_failure; \
+	memcpy(&_tmp, RTA_DATA(rta), sizeof(_tmp)); \
+	_tmp; })
+
+#define RTA_GET_FLAG(rta) (!!(rta))
+
+#define RTA_GET_SECS(rta) ((unsigned long) RTA_GET_U64(rta) * HZ)
+#define RTA_GET_MSECS(rta) (msecs_to_jiffies((unsigned long) RTA_GET_U64(rta)))
+
+static inline struct rtattr *
+__rta_reserve(struct sk_buff *skb, int attrtype, int attrlen)
+{
+	struct rtattr *rta;
+	int size = RTA_LENGTH(attrlen);
+
+	rta = (struct rtattr*)skb_put(skb, RTA_ALIGN(size));
+	rta->rta_type = attrtype;
+	rta->rta_len = size;
+	memset(RTA_DATA(rta) + attrlen, 0, RTA_ALIGN(size) - size);
+	return rta;
+}
+
+#define __RTA_PUT(skb, attrtype, attrlen) \
+({ 	if (unlikely(skb_tailroom(skb) < (int)RTA_SPACE(attrlen))) \
+		goto rtattr_failure; \
+   	__rta_reserve(skb, attrtype, attrlen); })
+
+extern void rtmsg_ifinfo(int type, struct net_device *dev, unsigned change);
+
+/* RTNL is used as a global lock for all changes to network configuration  */
+extern void rtnl_lock(void);
+extern void rtnl_unlock(void);
+extern int rtnl_trylock(void);
+
+extern void rtnetlink_init(void);
+extern void __rtnl_unlock(void);
+
+#define ASSERT_RTNL() do { \
+	if (unlikely(rtnl_trylock())) { \
+		rtnl_unlock(); \
+		printk(KERN_ERR "RTNL: assertion failed at %s (%d)\n", \
+		       __FILE__,  __LINE__); \
+		dump_stack(); \
+	} \
+} while(0)
+
+#define BUG_TRAP(x) do { \
+	if (unlikely(!(x))) { \
+		printk(KERN_ERR "KERNEL: assertion (%s) failed at %s (%d)\n", \
+			#x,  __FILE__ , __LINE__); \
+	} \
+} while(0)
+
+static inline u32 rtm_get_table(struct rtattr **rta, u8 table)
+{
+	return RTA_GET_U32(rta[RTA_TABLE-1]);
+rtattr_failure:
+	return table;
+}
+
+#endif /* __KERNEL__ */
 
 
 #endif	/* __LINUX_RTNETLINK_H */

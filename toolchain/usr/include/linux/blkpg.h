@@ -24,6 +24,7 @@
  *
  * For today, only the partition stuff - aeb, 990515
  */
+#include <linux/compiler.h>
 #include <linux/ioctl.h>
 
 #define BLKPG      _IO(0x12,105)
@@ -33,7 +34,7 @@ struct blkpg_ioctl_arg {
         int op;
         int flags;
         int datalen;
-        void *data;
+        void __user *data;
 };
 
 /* The subfunctions (for the op field) */

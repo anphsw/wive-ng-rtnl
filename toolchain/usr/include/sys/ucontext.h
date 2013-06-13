@@ -23,6 +23,7 @@
 
 #include <features.h>
 #include <signal.h>
+#include <sgidefs.h>
 
 /* Type for general register.  */
 #if _MIPS_SIM == _MIPS_SIM_ABI32

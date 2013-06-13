@@ -30,8 +30,8 @@
 
 #include <features.h>
 #include <bits/sysnum.h>
-#if defined _LIBC && (defined IS_IN_libc || defined NOT_IN_libc)
-# include <bits/syscalls.h>
+#if defined _LIBC
+#include <bits/syscalls.h>
 #endif
 
 #endif

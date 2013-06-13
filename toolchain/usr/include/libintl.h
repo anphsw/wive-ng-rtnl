@@ -1,5 +1,5 @@
 /* Message catalogs for internationalization.
-   Copyright (C) 1995-2002, 2004, 2005 Free Software Foundation, Inc.
+   Copyright (C) 1995-1999, 2000-2002 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    This file is derived from the file libgettext.h in the GNU gettext package.
 
@@ -34,31 +34,30 @@
 
 __BEGIN_DECLS
 
+#if 0
+#warning "mjn3 FIXME: gettext has a prototype but isn't defined."
+#warning "mjn3 FIXME: __OPTIMIZE__ is never defined."
+#endif
+
 /* Look up MSGID in the current default message catalog for the current
    LC_MESSAGES locale.  If not found, returns MSGID itself (the default
    text).  */
-extern char *gettext (__const char *__msgid)
-     __THROW __attribute_format_arg__ (1);
+extern char *gettext (__const char *__msgid) __THROW;
 
 /* Look up MSGID in the DOMAINNAME message catalog for the current
    LC_MESSAGES locale.  */
 extern char *dgettext (__const char *__domainname, __const char *__msgid)
-     __THROW __attribute_format_arg__ (2);
-#if 0 /* uClibc: disabled */
+     __THROW;
 extern char *__dgettext (__const char *__domainname, __const char *__msgid)
      __THROW __attribute_format_arg__ (2);
-#endif
 
 /* Look up MSGID in the DOMAINNAME message catalog for the current CATEGORY
    locale.  */
 extern char *dcgettext (__const char *__domainname,
-			__const char *__msgid, int __category)
-     __THROW __attribute_format_arg__ (2);
-#if 0 /* uClibc: disabled */
+			__const char *__msgid, int __category) __THROW;
 extern char *__dcgettext (__const char *__domainname,
 			  __const char *__msgid, int __category)
      __THROW __attribute_format_arg__ (2);
-#endif
 
 
 /* Similar to `gettext' but select the plural form corresponding to the
@@ -98,7 +97,7 @@ extern char *bind_textdomain_codeset (__const char *__domainname,
 
 
 /* Optimized version of the function above.  */
-#if defined __OPTIMIZE__ && !defined __cplusplus
+#if defined __OPTIMIZE__
 
 /* We need NULL for `gettext'.  */
 # define __need_NULL

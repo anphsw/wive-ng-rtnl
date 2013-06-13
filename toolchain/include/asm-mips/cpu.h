@@ -89,6 +89,8 @@
 #define PRID_IMP_34K		0x9500
 #define PRID_IMP_24KE		0x9600
 #define PRID_IMP_74K		0x9700
+#define PRID_IMP_LOONGSON1      0x4200
+#define PRID_IMP_LOONGSON2      0x6300
 
 /*
  * These are the PRID's for when 23:16 == PRID_COMP_SIBYTE
@@ -123,6 +125,17 @@
 #define PRID_REV_VR4122		0x0070
 #define PRID_REV_VR4181A	0x0070	/* Same as VR4122 */
 #define PRID_REV_VR4130		0x0080
+
+/*
+ * Older processors used to encode processor version and revision in two
+ * 4-bit bitfields, the 4K seems to simply count up and even newer MTI cores
+ * have switched to use the 8-bits as 3:3:2 bitfield with the last field as
+ * the patch number.  *ARGH*
+ */
+#define PRID_REV_ENCODE_44(ver, rev)					\
+	((ver) << 4 | (rev))
+#define PRID_REV_ENCODE_332(ver, rev, patch)				\
+	((ver) << 5 | (rev) << 2 | (patch))
 
 /*
  * FPU implementation/revision register (CP1 control register 0).
@@ -200,7 +213,10 @@
 #define CPU_SB1A		62
 #define CPU_74K			63
 #define CPU_R14000		64
-#define CPU_LAST		64
+#define CPU_LOONGSON1           65
+#define CPU_LOONGSON2           66
+
+#define CPU_LAST		66
 
 /*
  * ISA Level encodings
@@ -229,23 +245,23 @@
 #define MIPS_CPU_3K_CACHE	0x00000004 /* R3000-style caches */
 #define MIPS_CPU_4K_CACHE	0x00000008 /* R4000-style caches */
 #define MIPS_CPU_TX39_CACHE	0x00000010 /* TX3900-style caches */
-#define MIPS_CPU_SB1_CACHE	0x00000020 /* SB1-style caches */
-#define MIPS_CPU_FPU		0x00000040 /* CPU has FPU */
-#define MIPS_CPU_32FPR		0x00000080 /* 32 dbl. prec. FP registers */
-#define MIPS_CPU_COUNTER	0x00000100 /* Cycle count/compare */
-#define MIPS_CPU_WATCH		0x00000200 /* watchpoint registers */
-#define MIPS_CPU_DIVEC		0x00000400 /* dedicated interrupt vector */
-#define MIPS_CPU_VCE		0x00000800 /* virt. coherence conflict possible */
-#define MIPS_CPU_CACHE_CDEX_P	0x00001000 /* Create_Dirty_Exclusive CACHE op */
-#define MIPS_CPU_CACHE_CDEX_S	0x00002000 /* ... same for seconary cache ... */
-#define MIPS_CPU_MCHECK		0x00004000 /* Machine check exception */
-#define MIPS_CPU_EJTAG		0x00008000 /* EJTAG exception */
-#define MIPS_CPU_NOFPUEX	0x00010000 /* no FPU exception */
-#define MIPS_CPU_LLSC		0x00020000 /* CPU has ll/sc instructions */
-#define MIPS_CPU_INCLUSIVE_CACHES	0x00040000 /* P-cache subset enforced */
-#define MIPS_CPU_PREFETCH	0x00080000 /* CPU has usable prefetch */
-#define MIPS_CPU_VINT		0x00100000 /* CPU supports MIPSR2 vectored interrupts */
-#define MIPS_CPU_VEIC		0x00200000 /* CPU supports MIPSR2 external interrupt controller mode */
+#define MIPS_CPU_FPU		0x00000020 /* CPU has FPU */
+#define MIPS_CPU_32FPR		0x00000040 /* 32 dbl. prec. FP registers */
+#define MIPS_CPU_COUNTER	0x00000080 /* Cycle count/compare */
+#define MIPS_CPU_WATCH		0x00000100 /* watchpoint registers */
+#define MIPS_CPU_DIVEC		0x00000200 /* dedicated interrupt vector */
+#define MIPS_CPU_VCE		0x00000400 /* virt. coherence conflict possible */
+#define MIPS_CPU_CACHE_CDEX_P	0x00000800 /* Create_Dirty_Exclusive CACHE op */
+#define MIPS_CPU_CACHE_CDEX_S	0x00001000 /* ... same for seconary cache ... */
+#define MIPS_CPU_MCHECK		0x00002000 /* Machine check exception */
+#define MIPS_CPU_EJTAG		0x00004000 /* EJTAG exception */
+#define MIPS_CPU_NOFPUEX	0x00008000 /* no FPU exception */
+#define MIPS_CPU_LLSC		0x00010000 /* CPU has ll/sc instructions */
+#define MIPS_CPU_INCLUSIVE_CACHES	0x00020000 /* P-cache subset enforced */
+#define MIPS_CPU_PREFETCH	0x00040000 /* CPU has usable prefetch */
+#define MIPS_CPU_VINT		0x00080000 /* CPU supports MIPSR2 vectored interrupts */
+#define MIPS_CPU_VEIC		0x00100000 /* CPU supports MIPSR2 external interrupt controller mode */
+#define MIPS_CPU_ULRI		0x00200000 /* CPU has ULRI feature */
 
 /*
  * CPU ASE encodings

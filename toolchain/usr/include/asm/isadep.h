@@ -1,11 +1,10 @@
 /*
- * Various ISA level dependant constants.
+ * Various ISA level dependent constants.
  * Most of the following constants reflect the different layout
  * of Coprocessor 0 registers.
  *
  * Copyright (c) 1998 Harald Koerfgen
  */
-#include <linux/config.h>
 
 #ifndef __ASM_ISADEP_H
 #define __ASM_ISADEP_H

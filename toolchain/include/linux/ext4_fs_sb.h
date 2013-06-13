@@ -24,6 +24,8 @@
 #endif
 #include <linux/rbtree.h>
 
+struct ext4_reservation_slot;
+
 /*
  * third extended-fs super-block data in memory
  */
@@ -65,6 +67,9 @@ struct ext4_sb_info {
 	struct rb_root s_rsv_window_root;
 	struct ext4_reserve_window_node s_rsv_window_head;
 
+	/* global reservation structures */
+	struct ext4_reservation_slot *s_reservation_slots;
+
 	/* Journaling */
 	struct inode * s_journal_inode;
 	struct journal_s * s_journal;
@@ -79,6 +84,7 @@ struct ext4_sb_info {
 	char *s_qf_names[MAXQUOTAS];		/* Names of quota files with journalled quota */
 	int s_jquota_fmt;			/* Format of quota to use */
 #endif
+	unsigned int s_want_extra_isize; /* New inodes should reserve # bytes */
 
 #ifdef EXTENTS_STATS
 	/* ext4 extents stats */
@@ -89,6 +95,17 @@ struct ext4_sb_info {
 	unsigned long s_ext_blocks;
 	unsigned long s_ext_extents;
 #endif
+
+	atomic_t s_wb_congested;
+	atomic_t s_wb_single_pages;
+	atomic_t s_wb_collisions_sp;
+	atomic_t s_wb_allocated;
+	atomic_t s_wb_reqs;
+	atomic_t s_wb_nr_to_write;
+	atomic_t s_wb_collisions;
+	atomic_t s_wb_blocks;
+	atomic_t s_wb_extents;
+	atomic_t s_wb_dropped;
 };
 
 #endif	/* _LINUX_EXT4_FS_SB */

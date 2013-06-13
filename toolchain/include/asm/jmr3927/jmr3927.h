@@ -166,22 +166,18 @@ static inline int jmr3927_have_isac(void)
 	unsigned char idt;
 	unsigned long flags;
 	unsigned long romcr3;
-	save_and_cli(flags);
+
+	local_irq_save(flags);
 	romcr3 = tx3927_romcptr->cr[3];
 	tx3927_romcptr->cr[3] &= 0xffffefff;	/* do not wait infinitely */
 	idt = jmr3927_isac_reg_in(JMR3927_ISAC_REV_ADDR) & JMR3927_IDT_MASK;
 	tx3927_romcptr->cr[3] = romcr3;
-	restore_flags(flags);
+	local_irq_restore(flags);
+
 	return idt == JMR3927_ISAC_IDT;
 }
 #define jmr3927_have_nvram() \
 	((jmr3927_ioc_reg_in(JMR3927_IOC_REV_ADDR) & JMR3927_IDT_MASK) == JMR3927_IOC_IDT)
-
-/* NVRAM macro */
-#define jmr3927_nvram_in(ofs) \
-	jmr3927_ioc_reg_in(JMR3927_IOC_NVRAMB_ADDR + ((ofs) << 1))
-#define jmr3927_nvram_out(d, ofs) \
-	jmr3927_ioc_reg_out(d, JMR3927_IOC_NVRAMB_ADDR + ((ofs) << 1))
 
 /* LED macro */
 #define jmr3927_led_set(n/*0-16*/)	jmr3927_ioc_reg_out(~(n), JMR3927_IOC_LED_ADDR)
@@ -198,20 +194,6 @@ static inline int jmr3927_have_isac(void)
 
 
 #endif /* !__ASSEMBLY__ */
-
-/*
- * UART defines for serial.h
- */
-
-/* use Pre-scaler T0 (1/2) */
-#define JMR3927_BASE_BAUD (JMR3927_IMCLK / 2 / 16)
-
-#define UART0_ADDR   0xfffef300
-#define UART1_ADDR   0xfffef400
-#define UART0_INT    JMR3927_IRQ_IRC_SIO0
-#define UART1_INT    JMR3927_IRQ_IRC_SIO1
-#define UART0_FLAGS  ASYNC_BOOT_AUTOCONF
-#define UART1_FLAGS  0
 
 /*
  * IRQ mappings

@@ -232,7 +232,7 @@ typedef elf_fpreg_t elf_fpregset_t[ELF_NFPREG];
  */
 #ifdef __MIPSEB__
 #define ELF_DATA	ELFDATA2MSB
-#elif __MIPSEL__
+#elif defined(__MIPSEL__)
 #define ELF_DATA	ELFDATA2LSB
 #endif
 #define ELF_ARCH	EM_MIPS
@@ -318,7 +318,7 @@ do {									\
 struct task_struct;
 
 extern void elf_dump_regs(elf_greg_t *, struct pt_regs *regs);
-extern int dump_task_regs (struct task_struct *, elf_gregset_t *);
+extern int dump_task_regs(struct task_struct *, elf_gregset_t *);
 extern int dump_task_fpu(struct task_struct *, elf_fpregset_t *);
 
 #define ELF_CORE_COPY_REGS(elf_regs, regs)			\

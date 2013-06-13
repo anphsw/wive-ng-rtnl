@@ -7,6 +7,8 @@
 #ifndef _ASM_POSIX_TYPES_H
 #define _ASM_POSIX_TYPES_H
 
+#include <bits/wordsize.h>
+
 # if __WORDSIZE == 64
 typedef unsigned int	__kernel_dev_t;
 typedef unsigned int	__kernel_ino_t;

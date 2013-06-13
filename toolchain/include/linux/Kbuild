@@ -90,7 +90,6 @@ header-y += in_route.h
 header-y += ioctl.h
 header-y += ip.h
 header-y += ipmi_msgdefs.h
-header-y += ip_mp_alg.h
 header-y += ipsec.h
 header-y += ipx.h
 header-y += irda.h

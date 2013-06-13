@@ -27,18 +27,13 @@
 #define _MIPS_PROM_H
 
 extern char *prom_getcmdline(void);
-extern char *prom_getenv(char *name);
-extern void setup_prom_printf(int tty_no);
-extern void prom_setup_printf(int tty_no);
-extern void prom_printf(char *fmt, ...);
+extern unsigned char *prom_getenv(char *name);
 extern void prom_init_cmdline(void);
 extern void prom_meminit(void);
-extern void prom_fixup_mem_map(unsigned long start_mem, unsigned long end_mem);
-extern void prom_free_prom_memory (void);
-extern void mips_display_message(const char *str);
-extern void mips_display_word(unsigned int num);
-extern int get_ethernet_addr(char *ethernet_addr);
+extern void prom_free_prom_memory(void);
+extern int get_ethernet_addr(unsigned char *ethernet_addr);
 
+#ifdef DEBUG
 /* Memory descriptor management. */
 #define PROM_MAX_PMEMBLOCKS    32
 struct prom_pmemblock {
@@ -46,5 +41,6 @@ struct prom_pmemblock {
         unsigned int size;  /* In bytes. */
         unsigned int type;  /* free or prom memory */
 };
+#endif
 
 #endif /* !(_MIPS_PROM_H) */

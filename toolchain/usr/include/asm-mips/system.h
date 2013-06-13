@@ -61,6 +61,8 @@ do {									\
 #define switch_to(prev,next,last)					\
 do {									\
 	(last) = resume(prev, next, task_thread_info(next));		\
+	if (cpu_has_userlocal)						\
+		write_c0_userlocal(task_thread_info(current)->tp_value);\
 } while(0)
 #endif
 
@@ -120,7 +122,7 @@ static __always_inline unsigned long __xchg_u32(volatile int * m, unsigned int v
 		raw_local_irq_restore(flags);	/* implies memory barrier  */
 	}
 
-	smp_mb();
+	smp_llsc_mb();
 
 	return retval;
 }
@@ -168,7 +170,7 @@ static inline __u64 __xchg_u64(volatile __u64 * m, __u64 val)
 		raw_local_irq_restore(flags);	/* implies memory barrier  */
 	}
 
-	smp_mb();
+	smp_llsc_mb();
 
 	return retval;
 }
@@ -250,7 +252,7 @@ static inline unsigned long __cmpxchg_u32(volatile int * m, unsigned long old,
 		raw_local_irq_restore(flags);	/* implies memory barrier  */
 	}
 
-	smp_mb();
+	smp_llsc_mb();
 
 	return retval;
 }
@@ -304,7 +306,7 @@ static inline unsigned long __cmpxchg_u64(volatile int * m, unsigned long old,
 		raw_local_irq_restore(flags);	/* implies memory barrier  */
 	}
 
-	smp_mb();
+	smp_llsc_mb();
 
 	return retval;
 }
@@ -332,7 +334,10 @@ static inline unsigned long __cmpxchg(volatile void * ptr, unsigned long old,
 
 extern void set_handler (unsigned long offset, void *addr, unsigned long len);
 extern void set_uncached_handler (unsigned long offset, void *addr, unsigned long len);
-extern void *set_vi_handler (int n, void *addr);
+
+typedef void (*vi_handler_t)(void);
+extern void *set_vi_handler (int n, vi_handler_t addr);
+
 extern void *set_except_vector(int n, void *addr);
 extern unsigned long ebase;
 extern void per_cpu_trap_init(void);

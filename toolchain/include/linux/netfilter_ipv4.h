@@ -8,6 +8,7 @@
 #include <linux/netfilter.h>
 
 /* only for userspace compatibility */
+#ifndef __KERNEL__
 /* IP Cache bits. */
 /* Src IP address. */
 #define NFC_IP_SRC		0x0001
@@ -35,6 +36,7 @@
 #define NFC_IP_DST_PT		0x0400
 /* Something else about the proto */
 #define NFC_IP_PROTO_UNKNOWN	0x2000
+#endif /* ! __KERNEL__ */
 
 /* IP Hooks */
 /* After promisc drops, checksum checks. */
@@ -75,5 +77,11 @@ enum nf_ip_hook_priorities {
 /* 2.4 firewalling went 64 through 67. */
 #define SO_ORIGINAL_DST 80
 
+#ifdef __KERNEL__
+extern int ip_route_me_harder(struct sk_buff **pskb, unsigned addr_type);
+extern int ip_xfrm_me_harder(struct sk_buff **pskb);
+extern __sum16 nf_ip_checksum(struct sk_buff *skb, unsigned int hook,
+				   unsigned int dataoff, u_int8_t protocol);
+#endif /*__KERNEL__*/
 
 #endif /*__LINUX_IP_NETFILTER_H*/

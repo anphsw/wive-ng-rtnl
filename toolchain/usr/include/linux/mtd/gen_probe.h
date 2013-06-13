@@ -12,6 +12,10 @@
 #include <linux/mtd/cfi.h>
 #include <linux/bitops.h>
 
+#ifdef CONFIG_CPU_HAS_WB
+#include <asm-mips/wbflush.h>
+#endif
+
 struct chip_probe {
 	char *name;
 	int (*probe_chip)(struct map_info *map, __u32 base,

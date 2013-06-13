@@ -4,11 +4,72 @@
  * for more details.
  *
  * Copyright (C) 2002, 2004 by Ralf Baechle
+ * Copyright (C) 2007  Maciej W. Rozycki
  */
 #ifndef _ASM_WAR_H
 #define _ASM_WAR_H
 
-#include <linux/config.h>
+
+/*
+ * Work around certain R4000 CPU errata (as implemented by GCC):
+ *
+ * - A double-word or a variable shift may give an incorrect result
+ *   if executed immediately after starting an integer division:
+ *   "MIPS R4000PC/SC Errata, Processor Revision 2.2 and 3.0",
+ *   erratum #28
+ *   "MIPS R4000MC Errata, Processor Revision 2.2 and 3.0", erratum
+ *   #19
+ *
+ * - A double-word or a variable shift may give an incorrect result
+ *   if executed while an integer multiplication is in progress:
+ *   "MIPS R4000PC/SC Errata, Processor Revision 2.2 and 3.0",
+ *   errata #16 & #28
+ *
+ * - An integer division may give an incorrect result if started in
+ *   a delay slot of a taken branch or a jump:
+ *   "MIPS R4000PC/SC Errata, Processor Revision 2.2 and 3.0",
+ *   erratum #52
+ */
+#ifdef CONFIG_CPU_R4000_WORKAROUNDS
+#define R4000_WAR 1
+#else
+#define R4000_WAR 0
+#endif
+
+/*
+ * Work around certain R4400 CPU errata (as implemented by GCC):
+ *
+ * - A double-word or a variable shift may give an incorrect result
+ *   if executed immediately after starting an integer division:
+ *   "MIPS R4400MC Errata, Processor Revision 1.0", erratum #10
+ *   "MIPS R4400MC Errata, Processor Revision 2.0 & 3.0", erratum #4
+ */
+#ifdef CONFIG_CPU_R4400_WORKAROUNDS
+#define R4400_WAR 1
+#else
+#define R4400_WAR 0
+#endif
+
+/*
+ * Work around the "daddi" and "daddiu" CPU errata:
+ *
+ * - The `daddi' instruction fails to trap on overflow.
+ *   "MIPS R4000PC/SC Errata, Processor Revision 2.2 and 3.0",
+ *   erratum #23
+ *
+ * - The `daddiu' instruction can produce an incorrect result.
+ *   "MIPS R4000PC/SC Errata, Processor Revision 2.2 and 3.0",
+ *   erratum #41
+ *   "MIPS R4000MC Errata, Processor Revision 2.2 and 3.0", erratum
+ *   #15
+ *   "MIPS R4400PC/SC Errata, Processor Revision 1.0", erratum #7
+ *   "MIPS R4400MC Errata, Processor Revision 1.0", erratum #5
+ */
+#ifdef CONFIG_CPU_DADDI_WORKAROUNDS
+#define DADDI_WAR 1
+#else
+#define DADDI_WAR 0
+#endif
 
 /*
  * Another R4600 erratum.  Due to the lack of errata information the exact
@@ -77,7 +138,7 @@
 /*
  * But the RM200C seems to have been shipped only with V2.0 R4600s
  */
-#ifdef CONFIG_SNI_RM200_PCI
+#ifdef CONFIG_SNI_RM
 
 #define R4600_V2_HIT_CACHEOP_WAR	1
 
@@ -113,7 +174,7 @@
  */
 #define BCM1250_M3_WAR 1
 
-/* 
+/*
  * This is a DUART workaround related to glitches around register accesses
  */
 #define SIBYTE_1956_WAR 1
@@ -122,7 +183,7 @@
 
 /*
  * Fill buffers not flushed on CACHE instructions
- * 
+ *
  * Hit_Invalidate_I cacheops invalidate an icache line but the refill
  * for that line can get stale data from the fill buffer instead of
  * accessing memory if the previous icache miss was also to that line.
@@ -172,13 +233,36 @@
  * On the RM9000 there is a problem which makes the CreateDirtyExclusive
  * cache operation unusable on SMP systems.
  */
-#if defined(CONFIG_MOMENCO_JAGUAR_ATX) || defined(CONFIG_PMC_YOSEMITE)
+#if defined(CONFIG_MOMENCO_JAGUAR_ATX) || defined(CONFIG_PMC_YOSEMITE) || \
+    defined(CONFIG_BASLER_EXCITE)
 #define  RM9000_CDEX_SMP_WAR		1
+#endif
+
+/*
+ * The RM9000 has a bug (though PMC-Sierra opposes it being called that)
+ * where invalid instructions in the same I-cache line worth of instructions
+ * being fetched may case spurious exceptions.
+ */
+#if defined(CONFIG_MOMENCO_JAGUAR_ATX) || defined(CONFIG_MOMENCO_OCELOT_3) || \
+    defined(CONFIG_PMC_YOSEMITE) || defined(CONFIG_BASLER_EXCITE)
+#define ICACHE_REFILLS_WORKAROUND_WAR	1
+#endif
+
+
+/*
+ * ON the R10000 upto version 2.6 (not sure about 2.7) there is a bug that
+ * may cause ll / sc and lld / scd sequences to execute non-atomically.
+ */
+#ifdef CONFIG_SGI_IP27
+#define R10000_LLSC_WAR 1
 #endif
 
 /*
  * Workarounds default to off
  */
+#ifndef ICACHE_REFILLS_WORKAROUND_WAR
+#define ICACHE_REFILLS_WORKAROUND_WAR	0
+#endif
 #ifndef R4600_V1_INDEX_ICACHEOP_WAR
 #define R4600_V1_INDEX_ICACHEOP_WAR	0
 #endif
@@ -208,6 +292,9 @@
 #endif
 #ifndef RM9000_CDEX_SMP_WAR
 #define RM9000_CDEX_SMP_WAR		0
+#endif
+#ifndef R10000_LLSC_WAR
+#define R10000_LLSC_WAR			0
 #endif
 
 #endif /* _ASM_WAR_H */
