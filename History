@@ -1530,15 +1530,15 @@
 1) toolchain: update gcc to 4.8.1 version.<br>
 2) udpxy: up to 1.0.23-9 version (from udpxy.com).<br>
 3) udpxy: tune for correct stream HD to RTD1186D and GI decvies.<br>
-4) busybox: sync with stable 1.21.0+ version.<br>
-5) miniupnpd: update to 1.8.20130607 version.<br>
-6) zlib: up version to 1.2.8.<br>
-7) libnvram: cleanup crc32 code and not build crc32 if kernel nvram enabled.<br>
-8) usb_modeswitch/data: up to 1.2.6-20130610 version.<br>
-9) libcurl: up to 7.30.0 version.<br>
-10) libnfnetlink: version up to 1.0.1.<br>
-11) pppd: small fix adaptive lcp logic.<br>
-12) xupnpd: set subscribe ttl=60 (old 1800sec) for fix RTL media players unsubscrive issue.<br>
+4) xupnpd: set subscribe ttl=60 (old 1800sec) for fix RTL media players unsubscribe issue.<br>
+5) busybox: sync with stable 1.21.0+ version.<br>
+6) miniupnpd: update to 1.8.20130607 version.<br>
+7) zlib: up version to 1.2.8.<br>
+8) libnvram: cleanup crc32 code and not build crc32 if kernel nvram enabled.<br>
+9) usb_modeswitch/data: up to 1.2.6-20130610 version.<br>
+10) libcurl: up to 7.30.0 version.<br>
+11) libnfnetlink: version up to 1.0.1.<br>
+12) pppd: small fix adaptive lcp logic.<br>
 13) init.d: resolv: add domain option at resolv generate to.<br>
 14) init.d: resolv: do not backup old resolv at static dns use.<br>
 15) init.d: automount.sh: at mount action say mount ok to log end exit.<br>
