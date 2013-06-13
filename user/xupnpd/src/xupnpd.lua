@@ -7,10 +7,10 @@ cfg.ssdp_interface='br0'
 cfg.ssdp_loop=0
 
 -- SSDP announcement interval
-cfg.ssdp_notify_interval=10
+cfg.ssdp_notify_interval=5
 
 -- SSDP announcement age
-cfg.ssdp_max_age=1800
+cfg.ssdp_max_age=600
 
 -- HTTP port for incoming connections
 cfg.http_port=4044
@@ -42,13 +42,13 @@ cfg.proxy=2
 cfg.user_agent='Mozilla/5.0'
 
 -- I/O timeout
-cfg.http_timeout=30
+cfg.http_timeout=15
 
 -- enables UPnP/DLNA notify when reload playlist
 cfg.dlna_notify=true
 
 -- group by 'group-title'
-cfg.group=true
+cfg.group=false
 
 -- sort files
 cfg.sort_files=true
@@ -60,10 +60,10 @@ cfg.name='Wive-NG'
 cfg.uuid='60bd2fb3-dabe-cb14-c766-0e114b52c22a'
 
 -- max url cache size
-cfg.cache_size=8
+cfg.cache_size=4
 
 -- url cache item ttl (sec)
-cfg.cache_ttl=900
+cfg.cache_ttl=600
 
 -- default mime type (mpeg, mpeg_ts, mpeg1, mpeg2, ts, ...)
 cfg.default_mime_type='mpeg'

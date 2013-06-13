@@ -348,7 +348,7 @@ function http_handler(what,from,port,msg)
     elseif url=='event' then
 
         if msg.reqline[1]=='SUBSCRIBE' then
-        local ttl=80
+        local ttl=60
         local sid=core.uuid()
 
             if object~='' and msg.callback then
