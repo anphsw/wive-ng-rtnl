@@ -64,7 +64,9 @@ static const char rcsid[] = RCSID;
  * configure-requests.  We do this by delaying the fsm_lowerup call.
  */
 /* steal a bit in fsm flags word */
+
 #define DELAYED_UP	0x100
+#define ABS(x)		(x >= 0 ? x : (-x))
 
 static void lcp_delayed_up __P((void *));
 
@@ -2341,15 +2343,11 @@ LcpSendEchoRequest (f)
     if (lcp_echo_adaptive) {
 	static unsigned int last_pkts_in = 0;
 #ifdef LCP_ADAPTIVE_NEW_LOCIG
-	unsigned int pkts_diff;
 	struct pppd_stats now_stats;
 
 	if (get_ppp_stats(f->unit, &now_stats)) {
 	    if (now_stats.pkts_in != last_pkts_in) {
-		if (now_stats.pkts_in > last_pkts_in)
-		    pkts_diff = (now_stats.pkts_in - last_pkts_in);
-		else
-		    pkts_diff = (last_pkts_in - now_stats.pkts_in);
+		unsigned int pkts_diff = ABS((int)(now_stats.pkts_in - last_pkts_in));
 
 		last_pkts_in = now_stats.pkts_in;
 		if (pkts_diff > 25)
