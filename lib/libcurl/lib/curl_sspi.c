@@ -77,7 +77,7 @@ CURLcode Curl_sspi_global_init(void)
     /* Find out Windows version */
     memset(&osver, 0, sizeof(osver));
     osver.dwOSVersionInfoSize = sizeof(osver);
-    if(! GetVersionEx(&osver))
+    if(!GetVersionEx(&osver))
       return CURLE_FAILED_INIT;
 
     /* Security Service Provider Interface (SSPI) functions are located in
@@ -90,18 +90,18 @@ CURLcode Curl_sspi_global_init(void)
       s_hSecDll = LoadLibrary(TEXT("security.dll"));
     else
       s_hSecDll = LoadLibrary(TEXT("secur32.dll"));
-    if(! s_hSecDll)
+    if(!s_hSecDll)
       return CURLE_FAILED_INIT;
 
     /* Get address of the InitSecurityInterfaceA function from the SSPI dll */
     pInitSecurityInterface = (INITSECURITYINTERFACE_FN)
       GetProcAddress(s_hSecDll, SECURITYENTRYPOINT);
-    if(! pInitSecurityInterface)
+    if(!pInitSecurityInterface)
       return CURLE_FAILED_INIT;
 
     /* Get pointer to Security Service Provider Interface dispatch table */
     s_pSecFn = pInitSecurityInterface();
-    if(! s_pSecFn)
+    if(!s_pSecFn)
       return CURLE_FAILED_INIT;
   }
 

@@ -64,11 +64,11 @@
 char *curl_version(void)
 {
   static char version[200];
-  char *ptr=version;
+  char *ptr = version;
   size_t len;
   size_t left = sizeof(version);
 
-  strcpy(ptr, LIBCURL_NAME "/" LIBCURL_VERSION );
+  strcpy(ptr, LIBCURL_NAME "/" LIBCURL_VERSION);
   len = strlen(ptr);
   left -= len;
   ptr += len;

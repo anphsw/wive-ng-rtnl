@@ -22,6 +22,14 @@
 
 #include "curl_setup.h"
 
+/*
+ * See comment in curl_memory.h for the explanation of this sanity check.
+ */
+
+#ifdef CURLX_NO_MEMORY_CALLBACKS
+#error "libcurl shall not ever be built with CURLX_NO_MEMORY_CALLBACKS defined"
+#endif
+
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -189,6 +197,9 @@ curl_free_callback Curl_cfree = (curl_free_callback)free;
 curl_realloc_callback Curl_crealloc = (curl_realloc_callback)realloc;
 curl_strdup_callback Curl_cstrdup = (curl_strdup_callback)system_strdup;
 curl_calloc_callback Curl_ccalloc = (curl_calloc_callback)calloc;
+#ifdef WIN32
+curl_wcsdup_callback Curl_cwcsdup = (curl_wcsdup_callback)wcsdup;
+#endif
 #else
 /*
  * Symbian OS doesn't support initialization to code in writeable static data.
@@ -220,6 +231,9 @@ CURLcode curl_global_init(long flags)
   Curl_crealloc = (curl_realloc_callback)realloc;
   Curl_cstrdup = (curl_strdup_callback)system_strdup;
   Curl_ccalloc = (curl_calloc_callback)calloc;
+#ifdef WIN32
+  Curl_cwcsdup = (curl_wcsdup_callback)wcsdup;
+#endif
 
   if(flags & CURL_GLOBAL_SSL)
     if(!Curl_ssl_init()) {
@@ -261,6 +275,9 @@ CURLcode curl_global_init(long flags)
     return CURLE_FAILED_INIT;
   }
 #endif
+
+  if(flags & CURL_GLOBAL_ACK_EINTR)
+    Curl_ack_eintr = 1;
 
   init_flags  = flags;
 
@@ -420,11 +437,14 @@ CURLcode curl_easy_perform(CURL *easy)
   if(data->multi_easy)
     multi = data->multi_easy;
   else {
-  multi = curl_multi_init();
-  if(!multi)
-    return CURLE_OUT_OF_MEMORY;
+    multi = curl_multi_init();
+    if(!multi)
+      return CURLE_OUT_OF_MEMORY;
     data->multi_easy = multi;
   }
+
+  /* Copy the MAXCONNECTS option to the multi handle */
+  curl_multi_setopt(multi, CURLMOPT_MAXCONNECTS, data->set.maxconnects);
 
   mcode = curl_multi_add_handle(multi, easy);
   if(mcode) {
@@ -441,19 +461,27 @@ CURLcode curl_easy_perform(CURL *easy)
 
   while(!done && !mcode) {
     int still_running;
+    int ret;
 
-    mcode = curl_multi_wait(multi, NULL, 0, 1000, NULL);
+    mcode = curl_multi_wait(multi, NULL, 0, 1000, &ret);
 
-    if(mcode == CURLM_OK)
+    if(mcode == CURLM_OK) {
+      if(ret == -1) {
+        /* poll() failed not on EINTR, indicate a network problem */
+        code = CURLE_RECV_ERROR;
+        break;
+      }
+
       mcode = curl_multi_perform(multi, &still_running);
+    }
 
     /* only read 'still_running' if curl_multi_perform() return OK */
     if((mcode == CURLM_OK) && !still_running) {
-  msg = curl_multi_info_read(multi, &rc);
+      msg = curl_multi_info_read(multi, &rc);
       if(msg) {
-    code = msg->data.result;
+        code = msg->data.result;
         done = TRUE;
-}
+      }
     }
   }
 

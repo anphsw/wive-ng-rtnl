@@ -329,11 +329,11 @@ static CURLcode handshake(struct connectdata *conn,
       return CURLE_SSL_CONNECT_ERROR;
     }
 
-      /* Reset our connect state machine */
-      connssl->connecting_state = ssl_connect_1;
-      return CURLE_OK;
-    }
+    /* Reset our connect state machine */
+    connssl->connecting_state = ssl_connect_1;
+    return CURLE_OK;
   }
+}
 
 static gnutls_x509_crt_fmt do_file_type(const char *type)
 {

@@ -45,7 +45,7 @@ WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
   if (mem->memory == NULL) {
     /* out of memory! */
     printf("not enough memory (realloc returned NULL)\n");
-    exit(EXIT_FAILURE);
+    return 0;
   }
 
   memcpy(&(mem->memory[mem->size]), contents, realsize);
@@ -59,6 +59,7 @@ WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
 int main(void)
 {
   CURL *curl_handle;
+  CURLcode res;
 
   struct MemoryStruct chunk;
 
@@ -84,11 +85,14 @@ int main(void)
   curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, "libcurl-agent/1.0");
 
   /* get it! */
-  curl_easy_perform(curl_handle);
+  res = curl_easy_perform(curl_handle);
 
-  /* cleanup curl stuff */
-  curl_easy_cleanup(curl_handle);
-
+  /* check for errors */
+  if(res != CURLE_OK) {
+    fprintf(stderr, "curl_easy_perform() failed: %s\n",
+            curl_easy_strerror(res));
+  }
+  else {
   /*
    * Now, our chunk.memory points to a memory block that is chunk.size
    * bytes big and contains the remote file.
@@ -101,6 +105,10 @@ int main(void)
    */
 
   printf("%lu bytes retrieved\n", (long)chunk.size);
+  }
+
+  /* cleanup curl stuff */
+  curl_easy_cleanup(curl_handle);
 
   if(chunk.memory)
     free(chunk.memory);

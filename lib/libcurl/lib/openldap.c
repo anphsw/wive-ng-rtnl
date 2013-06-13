@@ -213,10 +213,10 @@ static CURLcode ldap_connect(struct connectdata *conn, bool *done)
 #ifdef USE_SSL
   if(conn->handler->flags & PROTOPT_SSL) {
     CURLcode res;
-      res = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &li->ssldone);
-      if(res)
-        return res;
-    }
+    res = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, &li->ssldone);
+    if(res)
+      return res;
+  }
 #endif
 
   return CURLE_OK;
@@ -252,7 +252,7 @@ static CURLcode ldap_connecting(struct connectdata *conn, bool *done)
   }
 #endif
 
-    tvp = &tv;
+  tvp = &tv;
 
 retry:
   if(!li->didbind) {

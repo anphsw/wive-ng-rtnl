@@ -328,7 +328,7 @@ static CURLcode file_upload(struct connectdata *conn)
     return CURLE_FILE_COULDNT_READ_FILE; /* fix: better error code */
 
   if(!dir[1])
-     return CURLE_FILE_COULDNT_READ_FILE; /* fix: better error code */
+    return CURLE_FILE_COULDNT_READ_FILE; /* fix: better error code */
 
 #ifdef O_BINARY
 #define MODE_DEFAULT O_WRONLY|O_CREAT|O_BINARY

@@ -121,7 +121,7 @@
 #endif
 
 #ifndef O_RDONLY
-# define O_RDONLY 0x0000
+#  define O_RDONLY 0x0000
 #endif
 
 #ifndef LONG_MAX

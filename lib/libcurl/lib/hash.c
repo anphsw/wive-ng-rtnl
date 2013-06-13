@@ -212,12 +212,12 @@ Curl_hash_pick(struct curl_hash *h, void *key, size_t key_len)
 
   if(h) {
     l = FETCH_LIST(h, key, key_len);
-  for(le = l->head; le; le = le->next) {
-    he = le->ptr;
-    if(h->comp_func(he->key, he->key_len, key, key_len)) {
-      return he->ptr;
+    for(le = l->head; le; le = le->next) {
+      he = le->ptr;
+      if(h->comp_func(he->key, he->key_len, key, key_len)) {
+        return he->ptr;
+      }
     }
-  }
   }
 
   return NULL;
@@ -368,7 +368,7 @@ void Curl_hash_print(struct curl_hash *h,
                      void (*func)(void *))
 {
   struct curl_hash_iterator iter;
-  struct curl_hash_element  *he;
+  struct curl_hash_element *he;
   int last_index = -1;
 
   if(!h)
@@ -388,13 +388,13 @@ void Curl_hash_print(struct curl_hash *h,
       last_index = iter.slot_index;
     }
 
-        if(func)
-          func(he->ptr);
-        else
-          fprintf(stderr, " [%p]", he->ptr);
+    if(func)
+      func(he->ptr);
+    else
+      fprintf(stderr, " [%p]", he->ptr);
 
     he = Curl_hash_next_element(&iter);
-      }
-      fprintf(stderr, "\n");
-    }
+  }
+  fprintf(stderr, "\n");
+}
 #endif

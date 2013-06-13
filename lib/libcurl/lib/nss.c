@@ -1237,12 +1237,6 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
     goto error;
   model = SSL_ImportFD(NULL, model);
 
-  /* make the socket nonblocking */
-  sock_opt.option = PR_SockOpt_Nonblocking;
-  sock_opt.value.non_blocking = PR_TRUE;
-  if(PR_SetSocketOption(model, &sock_opt) != PR_SUCCESS)
-    goto error;
-
   if(SSL_OptionSet(model, SSL_SECURITY, PR_TRUE) != SECSuccess)
     goto error;
   if(SSL_OptionSet(model, SSL_HANDSHAKE_AS_SERVER, PR_FALSE) != SECSuccess)
@@ -1415,6 +1409,12 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
     goto error;
   }
 
+  /* switch the SSL socket into non-blocking mode */
+  sock_opt.option = PR_SockOpt_Nonblocking;
+  sock_opt.value.non_blocking = PR_TRUE;
+  if(PR_SetSocketOption(connssl->handle, &sock_opt) != PR_SUCCESS)
+    goto error;
+
   connssl->state = ssl_connection_complete;
   conn->recv[sockindex] = nss_recv;
   conn->send[sockindex] = nss_send;
@@ -1448,9 +1448,9 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
 
   if(is_nss_error(curlerr)) {
     /* read NSPR error code */
-  err = PR_GetError();
+    err = PR_GetError();
     if(is_cc_error(err))
-    curlerr = CURLE_SSL_CERTPROBLEM;
+      curlerr = CURLE_SSL_CERTPROBLEM;
 
     /* print the error number and error string */
     infof(data, "NSS error %d (%s)\n", err, nss_error_to_name(err));

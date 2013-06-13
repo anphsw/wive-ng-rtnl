@@ -318,7 +318,7 @@ static LIBSSH2_FREE_FUNC(my_libssh2_free)
 {
   (void)abstract; /* arg not used */
   if(ptr) /* ssh2 agent sometimes call free with null ptr */
-  free(ptr);
+    free(ptr);
 }
 
 /*
@@ -933,7 +933,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           break;
         if(rc < 0) {
           infof(data, "Failure connecting to agent\n");
-      state(conn, SSH_AUTH_KEY_INIT);
+          state(conn, SSH_AUTH_KEY_INIT);
         }
         else {
           state(conn, SSH_AUTH_AGENT_LIST);
@@ -1323,8 +1323,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
     break;
 
     case SSH_SFTP_NEXT_QUOTE:
-        Curl_safefree(sshc->quote_path1);
-        Curl_safefree(sshc->quote_path2);
+      Curl_safefree(sshc->quote_path1);
+      Curl_safefree(sshc->quote_path2);
 
       sshc->quote_item = sshc->quote_item->next;
 
@@ -2635,7 +2635,7 @@ static CURLcode ssh_multi_statemach(struct connectdata *conn, bool *done)
   return result;
 }
 
-static CURLcode ssh_easy_statemach(struct connectdata *conn,
+static CURLcode ssh_block_statemach(struct connectdata *conn,
                                    bool duringconnect)
 {
   struct ssh_conn *sshc = &conn->proto.sshc;
@@ -2793,7 +2793,7 @@ static CURLcode ssh_connect(struct connectdata *conn, bool *done)
 
   state(conn, SSH_INIT);
 
-    result = ssh_multi_statemach(conn, done);
+  result = ssh_multi_statemach(conn, done);
 
   return result;
 }
@@ -2822,7 +2822,7 @@ CURLcode scp_perform(struct connectdata *conn,
   state(conn, SSH_SCP_TRANS_INIT);
 
   /* run the state-machine */
-    result = ssh_multi_statemach(conn, dophase_done);
+  result = ssh_multi_statemach(conn, dophase_done);
 
   *connected = conn->bits.tcpconnect[FIRSTSOCKET];
 
@@ -2902,7 +2902,7 @@ static CURLcode scp_disconnect(struct connectdata *conn, bool dead_connection)
 
     state(conn, SSH_SESSION_DISCONNECT);
 
-    result = ssh_easy_statemach(conn, FALSE);
+    result = ssh_block_statemach(conn, FALSE);
   }
 
   return result;
@@ -2923,7 +2923,7 @@ static CURLcode ssh_done(struct connectdata *conn, CURLcode status)
        non-blocking DONE operations, not in the multi state machine and with
        Curl_done() invokes on several places in the code!
     */
-    result = ssh_easy_statemach(conn, FALSE);
+    result = ssh_block_statemach(conn, FALSE);
   }
   else
     result = status;
@@ -3026,7 +3026,7 @@ CURLcode sftp_perform(struct connectdata *conn,
   state(conn, SSH_SFTP_QUOTE_INIT);
 
   /* run the state-machine */
-    result = ssh_multi_statemach(conn, dophase_done);
+  result = ssh_multi_statemach(conn, dophase_done);
 
   *connected = conn->bits.tcpconnect[FIRSTSOCKET];
 
@@ -3065,7 +3065,7 @@ static CURLcode sftp_disconnect(struct connectdata *conn, bool dead_connection)
   if(conn->proto.sshc.ssh_session) {
     /* only if there's a session still around to use! */
     state(conn, SSH_SFTP_SHUTDOWN);
-    result = ssh_easy_statemach(conn, FALSE);
+    result = ssh_block_statemach(conn, FALSE);
   }
 
   DEBUGF(infof(conn->data, "SSH DISCONNECT is done\n"));

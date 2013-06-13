@@ -284,10 +284,10 @@ cyassl_connect_step2(struct connectdata *conn,
 #endif
     }
     else {
-    failf(data, "SSL_connect failed with error %d: %s", detail,
+      failf(data, "SSL_connect failed with error %d: %s", detail,
           ERR_error_string(detail, error_buffer));
-    return CURLE_SSL_CONNECT_ERROR;
-  }
+      return CURLE_SSL_CONNECT_ERROR;
+    }
   }
 
   conssl->connecting_state = ssl_connect_3;

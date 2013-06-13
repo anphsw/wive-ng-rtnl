@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -179,10 +179,11 @@ static unsigned int readint_le(unsigned char *buf)
 /*
  * Curl_ntlm_decode_type2_message()
  *
- * This is used to decode a ntlm type-2 message received from a: HTTP, SMTP
- * or POP3 server. The message is first decoded from a base64 string into a
- * raw ntlm message and checked for validity before the appropriate data for
- * creating a type-3 message is written to the given ntlm data structure.
+ * This is used to decode a ntlm type-2 message received from a HTTP or SASL
+ * based (such as SMTP, POP3 or IMAP) server. The message is first decoded
+ * from a base64 string into a raw ntlm message and checked for validity
+ * before the appropriate data for creating a type-3 message is written to
+ * the given ntlm data structure.
  *
  * Parameters:
  *
@@ -305,9 +306,9 @@ static void unicodecpy(unsigned char *dest,
 /*
  * Curl_ntlm_create_type1_message()
  *
- * This is used to generate an already encoded NTLM type-1 message ready
- * for sending to the recipient, be it a: HTTP, SMTP or POP3 server,
- * using the appropriate compile time crypo API.
+ * This is used to generate an already encoded NTLM type-1 message ready for
+ * sending to the recipient, be it a HTTP or SASL based (such as SMTP, POP3
+ * or IMAP) server, using the appropriate compile time crypo API.
  *
  * Parameters:
  *
@@ -378,12 +379,12 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
       domain.tchar_ptr = useranddomain.tchar_ptr;
       domlen = user.tchar_ptr - useranddomain.tchar_ptr;
       user.tchar_ptr++;
-  }
-  else {
+    }
+    else {
       user.tchar_ptr = useranddomain.tchar_ptr;
       domain.const_tchar_ptr = TEXT("");
-    domlen = 0;
-  }
+      domlen = 0;
+    }
 
     /* setup ntlm identity's user and length */
     dup_user.tchar_ptr = _tcsdup(user.tchar_ptr);
@@ -433,9 +434,9 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
 
   status = s_pSecFn->AcquireCredentialsHandle(NULL,
                                               (TCHAR *) TEXT("NTLM"),
-                                               SECPKG_CRED_OUTBOUND, NULL,
-                                               ntlm->p_identity, NULL, NULL,
-                                               &ntlm->handle, &tsDummy);
+                                              SECPKG_CRED_OUTBOUND, NULL,
+                                              ntlm->p_identity, NULL, NULL,
+                                              &ntlm->handle, &tsDummy);
   if(status != SEC_E_OK)
     return CURLE_OUT_OF_MEMORY;
 
@@ -448,13 +449,13 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
 
   status = s_pSecFn->InitializeSecurityContext(&ntlm->handle, NULL,
                                                (TCHAR *) TEXT(""),
-                                                ISC_REQ_CONFIDENTIALITY |
-                                                ISC_REQ_REPLAY_DETECT |
-                                                ISC_REQ_CONNECTION,
-                                                0, SECURITY_NETWORK_DREP,
-                                                NULL, 0,
-                                                &ntlm->c_handle, &desc,
-                                                &attrs, &tsDummy);
+                                               ISC_REQ_CONFIDENTIALITY |
+                                               ISC_REQ_REPLAY_DETECT |
+                                               ISC_REQ_CONNECTION,
+                                               0, SECURITY_NETWORK_DREP,
+                                               NULL, 0,
+                                               &ntlm->c_handle, &desc,
+                                               &attrs, &tsDummy);
 
   if(status == SEC_I_COMPLETE_AND_CONTINUE ||
      status == SEC_I_CONTINUE_NEEDED)
@@ -552,9 +553,9 @@ CURLcode Curl_ntlm_create_type1_message(const char *userp,
 /*
  * Curl_ntlm_create_type3_message()
  *
- * This is used to generate an already encoded NTLM type-3 message ready
- * for sending to the recipient, be it a: HTTP, SMTP or POP3 server,
- * using the appropriate compile time crypo API.
+ * This is used to generate an already encoded NTLM type-3 message ready for
+ * sending to the recipient, be it a HTTP or SASL based (such as SMTP, POP3
+ * or IMAP) server, using the appropriate compile time crypo API.
  *
  * Parameters:
  *
@@ -622,16 +623,16 @@ CURLcode Curl_ntlm_create_type3_message(struct SessionHandle *data,
   type_3.cbBuffer   = NTLM_BUFSIZE;
 
   status = s_pSecFn->InitializeSecurityContext(&ntlm->handle,
-                                                &ntlm->c_handle,
+                                               &ntlm->c_handle,
                                                (TCHAR *) TEXT(""),
-                                                ISC_REQ_CONFIDENTIALITY |
-                                                ISC_REQ_REPLAY_DETECT |
-                                                ISC_REQ_CONNECTION,
-                                                0, SECURITY_NETWORK_DREP,
-                                                &type_2_desc,
-                                                0, &ntlm->c_handle,
-                                                &type_3_desc,
-                                                &attrs, &tsDummy);
+                                               ISC_REQ_CONFIDENTIALITY |
+                                               ISC_REQ_REPLAY_DETECT |
+                                               ISC_REQ_CONNECTION,
+                                               0, SECURITY_NETWORK_DREP,
+                                               &type_2_desc,
+                                               0, &ntlm->c_handle,
+                                               &type_3_desc,
+                                               &attrs, &tsDummy);
   if(status != SEC_E_OK)
     return CURLE_RECV_ERROR;
 
