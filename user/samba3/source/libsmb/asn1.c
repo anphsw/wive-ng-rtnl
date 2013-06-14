@@ -273,6 +273,36 @@ bool asn1_check_tag(ASN1_DATA *data, uint8 tag)
 	return (tag == data->data[data->ofs]);
 }
 
+/* peek to see if a tag is present */
+/* this was not ported from samba and may not be identical to libsmb mainline */
+BOOL asn1_peek_tag(ASN1_DATA *data, uint8 tag)
+{
+  uint8 curtag;
+
+  if (data->has_error)
+    return False;
+
+  // overflow checking
+  if (data->ofs + 1 < data->ofs || data->ofs + 1 < 1) {
+    return False;
+  }
+
+  // boundary checking
+  if (data->ofs + 1 > data->length) {
+    return False;
+  }
+
+  memcpy( (void*)&curtag, data->data + data->ofs, 1);
+
+  // don't move cursor
+  // don't set error
+
+  if( tag != curtag )
+    return False;
+
+  return True;
+}
+
 /* start reading a nested asn1 structure */
 bool asn1_start_tag(ASN1_DATA *data, uint8 tag)
 {
