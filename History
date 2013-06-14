@@ -1560,6 +1560,7 @@
 31) kernel: bridge: avoid ethtool on non running interface.<br>
 32) kernel: bridge: respect RFC2863 operational state.<br>
 33) kernel: tun: use NET_SKB_PAD_ORIG for aligin instead of NET_SKB_PAD(fix regression after speedup l2tp hack).<br>
+34) kernel: usb: fix limited_power setting mistake in hub.c.<br>
 
 <br>
 <br>
