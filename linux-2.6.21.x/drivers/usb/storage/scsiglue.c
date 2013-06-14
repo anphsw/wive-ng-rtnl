@@ -492,7 +492,7 @@ struct scsi_host_template usb_stor_host_template = {
 	/* lots of sg segments can be handled */
 	.sg_tablesize =			SG_ALL,
 
-#ifdef CONFIG_DWC_OTG
+#if defined(CONFIG_DWC_OTG) || defined(CONFIG_RT3XXX_OHCI)
 	/* limit the total size of a transfer to 120 KB ,kaiker_240*/
 	.max_sectors =                  1024,
 #else
