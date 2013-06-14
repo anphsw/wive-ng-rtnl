@@ -1557,6 +1557,7 @@
 28) kernel: bridge: prevent bridging wrong device.<br>
 29) kernel: bridge: avoid ethtool on non running interface.<br>
 30) kernel: bridge: respect RFC2863 operational state.<br>
+31) kernel: tun: use NET_SKB_PAD_ORIG for aligin instead of NET_SKB_PAD(fix regression after speedup l2tp hack).<br>
 
 <br>
 <br>
