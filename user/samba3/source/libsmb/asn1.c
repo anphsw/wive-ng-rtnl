@@ -275,7 +275,7 @@ bool asn1_check_tag(ASN1_DATA *data, uint8 tag)
 
 /* peek to see if a tag is present */
 /* this was not ported from samba and may not be identical to libsmb mainline */
-BOOL asn1_peek_tag(ASN1_DATA *data, uint8 tag)
+bool asn1_peek_tag(ASN1_DATA *data, uint8 tag)
 {
   uint8 curtag;
 
