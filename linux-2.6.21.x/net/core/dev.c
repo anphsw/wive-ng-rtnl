@@ -137,6 +137,10 @@ extern struct net_bridge_fdb_entry *br_fdb_get(struct net_bridge *br, unsigned c
 extern int bridge_fast_path_enabled;
 #endif
 
+#ifdef CONFIG_RALINK_WATCHDOG
+extern void RaWdgReload(void);
+#endif
+
 #if defined (CONFIG_RA_HW_NAT) || defined (CONFIG_RA_HW_NAT_MODULE)
 #include "../net/nat/hw_nat/ra_nat.h"
 extern void (*ra_sw_nat_hook_rs) (uint32_t Ebl);
@@ -1713,6 +1717,10 @@ enqueue:
 		goto enqueue;
 	}
 
+#ifdef CONFIG_RALINK_WATCHDOG
+        /* Refresh Ralink hardware watchdog timer, prevent reboot in big traffic */
+	RaWdgReload();
+#endif
 	__get_cpu_var(netdev_rx_stat).dropped++;
 	local_irq_restore(flags);
 drop:
@@ -2044,8 +2052,13 @@ static void net_rx_action(struct softirq_action *h)
 		 * Allow this to run for 2 jiffies since which will allow
 		 * an average latency of 1.5/HZ.
 		 */
-		if (unlikely(budget <= 0 || time_after_eq(jiffies, time_limit)))
+		if (unlikely(budget <= 0 || time_after_eq(jiffies, time_limit))) {
+#ifdef CONFIG_RALINK_WATCHDOG
+    			/* Refresh Ralink hardware watchdog timer, prevent reboot in big traffic */
+			RaWdgReload();
+#endif
 			goto softnet_break;
+		}
 
 		local_irq_enable();
 

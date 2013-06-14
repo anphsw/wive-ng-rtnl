@@ -67,10 +67,6 @@ extern int send_sigusr_dhcpc;
 extern int vlan_double_tag;
 #endif
 
-#ifdef CONFIG_RALINK_WATCHDOG
-extern void RaWdgReload(void);
-#endif
-
 #ifdef CONFIG_RAETH_NAPI
 #if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,35)
 static int raeth_clean(struct napi_struct *napi, int budget);
@@ -1431,10 +1427,6 @@ static int rt2880_eth_recv(struct net_device* dev)
 		lro_flush_all(&ei_local->lro_mgr);
 		lro_flush_needed = 0;
 	}
-#endif
-#ifdef CONFIG_RALINK_WATCHDOG
-        /* Refresh Ralink hardware watchdog timer */
-	RaWdgReload();
 #endif
 	return bReschedule;
 }
