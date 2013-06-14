@@ -249,19 +249,15 @@ void control_xmit (void *b)
         return;
     }
 
-    t = buf->tunnel;
-#ifdef DEBUG_CONTROL_XMIT
-    if(t) {
-	    l2tp_log (LOG_DEBUG,
-		      "trying to send control packet to %d\n",
-		      t->ourtid);
-    }
-#endif
-
-    buf->retries++;
     ns = ntohs (((struct control_hdr *) (buf->start))->Ns);
+
+    t = buf->tunnel;
     if (t)
     {
+#ifdef DEBUG_CONTROL_XMIT
+        l2tp_log (LOG_DEBUG,
+                    "trying to send control packet %d to %d\n", ns, t->ourtid);
+#endif
         if (ns < t->cLr)
         {
 #ifdef DEBUG_CONTROL_XMIT
@@ -272,6 +268,8 @@ void control_xmit (void *b)
             return;
         }
     }
+
+    buf->retries++;
     if (buf->retries > DEFAULT_MAX_RETRIES)
     {
         /*
@@ -308,15 +306,20 @@ void control_xmit (void *b)
     }
     else
     {
-        /*
-           * FIXME:  How about adaptive timeouts?
-         */
         tv.tv_sec = 1;
         tv.tv_usec = 0;
+
+        if (buf->retries > 1)
+        {
+            tv.tv_sec = (time_t)((buf->retries-1) * 2);
+            if (tv.tv_sec > 8)
+                tv.tv_sec = 8;
+        }
+
         schedule (tv, control_xmit, buf);
 #ifdef DEBUG_CONTROL_XMIT
-        l2tp_log (LOG_DEBUG, "%s: Scheduling and transmitting packet %d\n",
-             __FUNCTION__, ns);
+        l2tp_log (LOG_DEBUG, "%s: Scheduling and transmitting packet %d, retries: %d\n",
+             __FUNCTION__, ns, buf->retries);
 #endif
         udp_xmit (buf, t);
     }
