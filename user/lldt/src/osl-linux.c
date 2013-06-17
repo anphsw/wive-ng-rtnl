@@ -16,7 +16,6 @@
  * Copyright (c) Microsoft Corporation 2005.  All rights reserved.
  * This software is provided with NO WARRANTY.
  */
-
 #include <stdio.h>
 #include <ctype.h>
 #include <sys/socket.h>
