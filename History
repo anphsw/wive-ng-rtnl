@@ -1563,7 +1563,6 @@
 34) kernel: usb: fix limited_power setting mistake in hub.c.<br>
 35) kernel: watchdog: move call watchdog from raeth to net/core/dev, for prevent reboot in big traffic at wifi to.<br>
 36) lld2d: decrease debug and fix regresssion (crash at reqest/load icon file).<br>
-37) buildsystem: always use -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 flags if UCLIBC_HAS_FOPEN_LARGEFILE_MODE selected.<br>
 
 <br>
 <br>

@@ -174,9 +174,6 @@ endif
 ifdef CONFIG_LIB_EVENT
 	CFLAGS  += -I$(ROOTDIR)/lib/include_shared/event2
 endif
-	# always use large file mode
-	CFLAGS += -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64
-
 	LDFLAGS  += -L$(ROOTDIR)/lib/lib
 
 	CXXFLAGS = $(CFLAGS) $(INCCXX)
