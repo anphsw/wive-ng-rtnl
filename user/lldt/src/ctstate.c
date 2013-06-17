@@ -215,6 +215,7 @@ state_process_packet()
     session_t           *this_session;
     enum sm_Status       smStatus;
 
+#ifdef  __DEBUG__
     IF_TRACED((TRC_STATE|TRC_PACKET))
         printf("state_process_packet: Entered with event %s",smEvent_names[g_this_event.evtType]);
         if (g_this_event.evtType==evtPacketRcvd)
@@ -224,6 +225,7 @@ state_process_packet()
             puts("");
         }
     END_TRACE
+#endif
 
     if (g_opcode == Opcode_Hello  &&  ETHERADDR_IS_ZERO(&uutMAC))
     {
@@ -248,10 +250,12 @@ state_process_timeout()
 {
     enum sm_Status         smStatus;
 
+#ifdef  __DEBUG__
     IF_TRACED(TRC_STATE)
         if (g_this_event.evtType!=evtBlockTimeout)
             printf("state_process_timeout: Entered with event %s\n",smEvent_names[g_this_event.evtType]);
     END_TRACE
+#endif
 
     return 0;	/* Success! */
 }

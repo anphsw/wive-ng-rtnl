@@ -31,8 +31,6 @@
 #include <netinet/in.h>
 #include <signal.h>
 
-#include "linux/config.h" /* kernel config */
-
 /* We use the POSIX.1e capability subsystem to drop all but
  * CAP_NET_ADMIN rights */
 //#define HAVE_CAPABILITIES
@@ -40,19 +38,21 @@
 # include <sys/capability.h>
 #endif
 
-#include <linux/if.h>
-
 /* Do you have wireless extensions available? (most modern kernels do) */
 #define HAVE_WIRELESS
 
 #ifdef HAVE_WIRELESS
+
+#include <linux/version.h>
   /* for get access-point address (BSSID) and infrastructure mode */
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,0))
+#include <linux/if.h>
+#endif
 #include <linux/wireless.h>
 #else /* ! HAVE_WIRELESS */
   /* still want struct ifreq and friends */
 #include <net/if.h>
 #endif /* ! HAVE_WIRELESS */
-
 
 /* for uname: */
 #include <sys/utsname.h>
@@ -604,14 +604,18 @@ get_wireless_mode(void *data)
 	/* this is a wireless device that is probably acting
 	 * as a listen-only monitor; we can't express its features like
 	 * this, so we'll not return a wireless mode TLV. */
+#ifdef  __DEBUG__
         IF_TRACED(TRC_TLVINFO)
             printf("get_wireless_mode(): mode (%d) unrecognizable - FAILING the get...\n", req.u.mode);
         END_TRACE
+#endif
 	return TLV_GET_FAILED;
     }
+#ifdef  __DEBUG__
     IF_TRACED(TRC_TLVINFO)
         printf("get_wireless_mode(): wireless_mode=%d\n", *wl_mode);
     END_TRACE
+#endif
 
     return TLV_GET_SUCCEEDED;
 }
@@ -655,9 +659,11 @@ get_bssid(void *data)
 
     memcpy(bssid, req.u.ap_addr.sa_data, sizeof(etheraddr_t));
 
+#ifdef  __DEBUG__
     IF_TRACED(TRC_TLVINFO)
         printf("get_bssid(): bssid=" ETHERADDR_FMT "\n", ETHERADDR_PRINT(bssid));
     END_TRACE
+#endif
 
     return TLV_GET_SUCCEEDED;
 }
@@ -703,6 +709,7 @@ get_ipv4addr(void *data)
 	return TLV_GET_FAILED;
     }
     close(rqfd);
+#ifdef __DEBUG__
     IF_DEBUG
         /* Interestingly, the ioctl to get the ipv4 address returns that
            address offset by 2 bytes into the buf. Leaving this in case
@@ -712,17 +719,19 @@ get_ipv4addr(void *data)
         /* Dump out the whole 14-byte buffer */
         printf("get_ipv4addr: sa_data = 0x%02x-0x%02x-0x%02x-0x%02x-0x%02x-0x%02x-0x%02x-0x%02x-0x%02x-0x%02x-0x%02x-0x%02x-0x%02x-0x%02x\n",d[0],d[1],d[2],d[3],d[4],d[5],d[6],d[7],d[8],d[9],d[10],d[11],d[12],d[13]);
     END_DEBUG
+#endif
 
     memcpy(ipv4addr,&req.ifr_addr.sa_data[2],sizeof(ipv4addr_t));
+#ifdef __DEBUG__
     IF_DEBUG
         printf("get_ipv4addr: returning %d.%d.%d.%d as ipv4addr\n", \
                 *((uint8_t*)ipv4addr),*((uint8_t*)ipv4addr +1), \
                 *((uint8_t*)ipv4addr +2),*((uint8_t*)ipv4addr +3));
     END_DEBUG
+#endif
 
     return TLV_GET_SUCCEEDED;
 }
-
 
 int
 get_ipv6addr(void *data)
@@ -738,6 +747,9 @@ get_ipv6addr(void *data)
     int plen, scope, dad_status, if_idx;
     char addr6p[8][5];
     int found = 0;
+
+    if (get_ipv6_type() == IPV6_DISABLED)
+	return TLV_GET_FAILED;
 
 #if CAN_FOPEN_IN_SELECT_LOOP
     netinet6 = fopen("/proc/net/if_inet6", "r");
@@ -775,15 +787,12 @@ get_ipv6addr(void *data)
     return TLV_GET_FAILED;
 }
 
-
 int
 get_max_op_rate(void *data)
 {
-/*    TLVDEF( uint16_t,         max_op_rate,         ,   9,  Access_unset ) units of 0.5 Mbs */
-
     uint16_t	morate;
+    morate = htons(MAXWIFISPEED);
 
-    morate = htons(108);	/* (OpenWRT, 802.11g) 54 Mbs / 0.5 Mbs = 108 */
     memcpy(data, &morate, 2);
 
     return TLV_GET_SUCCEEDED;
@@ -816,15 +825,9 @@ get_link_speed(void *data)
      * Since this is a bridged pair of interfaces (br0 = vlan0 + eth1), I am returning the
      * wireless speed (eth1), which is the lowest of the upper limits on the two interfaces... */
 
-#if defined(CONFIG_RALINK_RT3050_1T1R) || defined(CONFIG_RALINK_RT3051_1T2R) || defined(CONFIG_RALINK_RT5350)
-    speed = htonl(1500000);	// 150Mbit wireless...
-#elif defined(CONFIG_RALINK_RT3052_2T2R) || defined(CONFIG_RALINK_RT3352_2T2R) || defined(CONFIG_RALINK_RT3662_2T2R)
-    speed = htonl(3000000);	// 300Mbit wireless...
-#elif defined(CONFIG_RALINK_RT3883_3T3R)
-    speed = htonl(4500000);	// 450Mbit wireless...
-#else
-    speed = htonl(3000000);	// 54Mbit wireless... (540k x 100 = 54Mbs)
-#endif
+
+    speed = htonl(WIFISPEED);
+
     memcpy(data, &speed, 4);
 
     return TLV_GET_SUCCEEDED;
@@ -891,10 +894,12 @@ get_icon_image(void *data)
             /* Finally! SUCCESS! */
             icon->sz_iconfile = filestats.st_size;
             icon->fd_icon = fd;
+#ifdef  __DEBUG__
             IF_TRACED(TRC_TLVINFO)
                 printf("get_icon_image: stat\'ing iconfile %s returned length=" FMT_SIZET "\n",
                        g_icon_path, icon->sz_iconfile);
             END_TRACE
+#endif
         }
         if (icon->sz_iconfile <= 0 || icon->sz_iconfile >= 32768)
             return TLV_GET_FAILED;
@@ -1042,7 +1047,7 @@ get_accesspt_assns(void *data)
      */
     gettimeofday(&now, NULL);
 
-    if ((now.tv_sec - assns->collection_time.tv_sec) > 2)
+    if ((now.tv_sec - assns->collection_time.tv_sec) > 5)
     {
         assns->assn_cnt = 0;
     }
@@ -1115,10 +1120,12 @@ get_jumbo_icon(void *data)
             /* Finally! SUCCESS! */
             jumbo->sz_iconfile = filestats.st_size;
             jumbo->fd_icon = fd;
+#ifdef  __DEBUG__
             IF_TRACED(TRC_TLVINFO)
                 printf("get_jumbo_icon: stat\'ing iconfile %s returned length=" FMT_SIZET "\n",
                        g_jumbo_icon_path, jumbo->sz_iconfile);
             END_TRACE
+#endif
         }
         if (jumbo->sz_iconfile <= 0 || jumbo->sz_iconfile > 262144)
             return TLV_GET_FAILED;

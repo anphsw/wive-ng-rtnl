@@ -118,11 +118,15 @@ get_raw_samples(void)
         warn("get_raw_samples: failed opening /proc/dev for device statistics!\n");
         g_rbytes = g_rpkts = g_tbytes = g_tpkts  = 0;
     }
+#ifdef  __DEBUG__
+#ifdef  __DEBUG__
     IF_TRACED(TRC_QOS)
 	dbgprintf("qos perf-cntr: g_rbytes=" FMT_UINT32 "; g_rpkts=" FMT_UINT32 \
 	          "; g_tbytes=" FMT_UINT32 "; g_tpkts=" FMT_UINT32 "\n",
 	          g_rbytes, g_rpkts, g_tbytes, g_tpkts);
     END_TRACE
+#endif
+#endif
 }
 
 
@@ -228,35 +232,45 @@ interface_counter_recorder(void *state)
         get_raw_samples();      // get current values for g_rbytes, g_rpkts, g_tbytes, g_tpkts
 
         delta = (g_rbytes-rbytes > 0)? (g_rbytes-rbytes) : 0;
+#ifdef  __DEBUG__
         IF_TRACED(TRC_QOS)
             dbgprintf("qos perf-cntr: delta-rbytes=" FMT_UINT32, delta);
         END_TRACE
+#endif
         thisSample->bytes_rcvd = delta / BYTE_SCALE_FACTOR;
 
         delta = (g_rpkts-rpkts > 0)?   (g_rpkts-rpkts) : 0;
+#ifdef  __DEBUG__
         IF_TRACED(TRC_QOS)
             dbgprintf("  delta-rpkts=" FMT_UINT32, delta);
         END_TRACE
+#endif
         thisSample->pkts_rcvd  = delta / PKT_SCALE_FACTOR;
 
         delta = (g_tbytes-tbytes > 0)? (g_tbytes-tbytes) : 0;
+#ifdef  __DEBUG__
         IF_TRACED(TRC_QOS)
             dbgprintf("  delta-tbytes=" FMT_UINT32, delta);
         END_TRACE
+#endif
         thisSample->bytes_sent = delta / BYTE_SCALE_FACTOR;
 
         delta = (g_tpkts-tpkts > 0)?   (g_tpkts-tpkts) : 0;
+#ifdef  __DEBUG__
         IF_TRACED(TRC_QOS)
             dbgprintf("  delta-tpkts=" FMT_UINT32 "\n", delta);
         END_TRACE
+#endif
         thisSample->pkts_sent  = delta / PKT_SCALE_FACTOR;
 
         stamp_time(&g_perf_timestamp);
 
+#ifdef  __DEBUG__
         IF_TRACED(TRC_QOS)
             dbgprintf("qos perf-cntr: sample-rbytes=%d; sample-rpkts=%d; sample-tbytes=%d; sample-tpkts=%d\n",
                    thisSample->bytes_rcvd, thisSample->pkts_rcvd, thisSample->bytes_sent, thisSample->pkts_sent);
         END_TRACE
+#endif
 
         g_next_sample++;
         g_next_sample = g_next_sample % 60;
@@ -271,9 +285,11 @@ interface_counter_recorder(void *state)
         now.tv_sec += 1;
         g_qos_CTA_timer = event_add(&now, interface_counter_recorder, /*state:*/NULL);
     } else {
+#ifdef  __DEBUG__
         IF_TRACED(TRC_QOS)
             dbgprintf("qos perf-cntr: lease has run out - zero'ing counters, and stopping the timer...\n");
         END_TRACE
+#endif
 
         g_next_sample = 0;
         g_sample_count = 0;
@@ -361,9 +377,11 @@ qos_initsink(void)
 
         tx_write(g_txbuf, nbytes);
 
+#ifdef  __DEBUG__
         IF_TRACED(TRC_PACKET)
             dbgprintf("qos_initsink: unsupported interrupt moderation request (intmod=0x%02x)\n", g_qinit_hdr->init_intmod_ctrl);
         END_TRACE
+#endif
 
         return;
     }
@@ -394,10 +412,12 @@ qos_initsink(void)
 
             tx_write(g_txbuf, nbytes);
 
+#ifdef  __DEBUG__
             IF_TRACED(TRC_PACKET)
                 dbgprintf("qos_initsink: tx_error_Busy, seq=%d -> " ETHERADDR_FMT "\n",
                           g_sequencenum, ETHERADDR_PRINT(&g_base_hdr->tbh_realsrc));
             END_TRACE
+#endif
             return;
         }
     }
@@ -424,10 +444,12 @@ qos_initsink(void)
 
     tx_write(g_txbuf, nbytes);
 
+#ifdef  __DEBUG__
     IF_TRACED(TRC_PACKET)
 	dbgprintf("qos_initsink: tx_ready, seq=%d -> " ETHERADDR_FMT "\n",
 		g_sequencenum, ETHERADDR_PRINT(&pThisSsn->qssn_ctrlr_real));
     END_TRACE
+#endif
 }
 
 
@@ -459,10 +481,12 @@ qos_reset(void)
 
     tx_write(g_txbuf, nbytes);
 
+#ifdef  __DEBUG__
     IF_TRACED(TRC_PACKET)
 	dbgprintf("qos_reset: tx_ack, seq=%d -> " ETHERADDR_FMT "\n",
 		g_sequencenum, ETHERADDR_PRINT(&pThisSsn->qssn_ctrlr_real));
     END_TRACE
+#endif
 }
 
 
@@ -481,9 +505,11 @@ qos_probe(void)
 
     if (pThisSsn == NULL)
     {
+#ifdef  __DEBUG__
         IF_TRACED(TRC_QOS)
             dbgprintf("qos_probe: no matching session found; ignoring.\n");
         END_TRACE
+#endif
         return;
     }
 
@@ -514,10 +540,12 @@ qos_probe(void)
             /* and return the packet - do not save in re_txbuf! */
             tx_write(g_rxbuf, g_rcvd_pkt_len);
 
+#ifdef  __DEBUG__
             IF_TRACED(TRC_PACKET)
                 dbgprintf("qos_probegap: reflecting, no 802.1p, seq=%d -> " ETHERADDR_FMT "\n",
                           g_sequencenum, ETHERADDR_PRINT(&pThisSsn->qssn_ctrlr_real));
             END_TRACE
+#endif
         } else {
             /* there is a valid 802.1p field, so the reflected packet must be tagged. */
             qos_ether_header_t     *ethr_hdr;   /* pointer to qos ethernet-header in txbuf */
@@ -566,11 +594,13 @@ qos_probe(void)
             /* and return the packet (4 bytes longer due to tags) - do not save in re_txbuf! */
             tx_write(g_txbuf, g_rcvd_pkt_len+4);
 
+#ifdef  __DEBUG__
             IF_TRACED(TRC_PACKET)
                 dbgprintf("qos_probegap: reflecting, with 802.1p priority of: %d, seq=%d -> " ETHERADDR_FMT "\n",
                           (g_qprb_hdr->probe_pqval & 0x7f), g_sequencenum,
                            ETHERADDR_PRINT(&pThisSsn->qssn_ctrlr_real));
             END_TRACE
+#endif
         }
     } else if (g_qprb_hdr->probe_testtype == 0) { /* timed probe */
         qosEventDescr_t* evt;
@@ -618,10 +648,12 @@ qos_probe(void)
             evt->evt_reserved = 0;
         } while (FALSE);
 
+#ifdef  __DEBUG__
         IF_TRACED(TRC_PACKET)
             dbgprintf("qos_timedprobe processed: seq=" FMT_UINT16 ", evtcount=" FMT_UINT32 "\n",
                       g_sequencenum, bucket->evt_numEvts);
         END_TRACE
+#endif
     }
 }
 
@@ -666,10 +698,12 @@ qos_query(void)
     /* And send it... */
     tx_write(g_txbuf, nbytes);
 
+#ifdef  __DEBUG__
     IF_TRACED(TRC_PACKET)
         dbgprintf("qos_query_response: sending " FMT_UINT32 " events, seq=" FMT_UINT16 " -> " ETHERADDR_FMT "\n",
                   numEvts, g_sequencenum, ETHERADDR_PRINT(&pThisSsn->qssn_ctrlr_real));
     END_TRACE
+#endif
 }
 
 
@@ -679,9 +713,11 @@ qos_counterlease(void)
 {
     struct timeval	now;
 
+#ifdef  __DEBUG__
     IF_TRACED(TRC_QOS)
         dbgprintf("qos_counter_lease: timeout was: " FMT_UINT32 ", now: 300",g_samples_remaining);
     END_TRACE
+#endif
 
     if (g_samples_remaining == 0)
     {
@@ -689,9 +725,11 @@ qos_counterlease(void)
         gettimeofday(&now, NULL);
         now.tv_sec += 1;
         g_qos_CTA_timer = event_add(&now, interface_counter_recorder, /*state:*/NULL);
+#ifdef  __DEBUG__
         IF_TRACED(TRC_QOS)
              dbgprintf("qos_counter_lease: 1-sec timer started\n");
         END_TRACE
+#endif
     }
     g_samples_remaining = 300;
 }
@@ -721,9 +759,11 @@ qos_snapshot(void)
     sample_cnt = (g_snap_hdr->cnt_rqstd <= (uint8_t)g_sample_count) ? g_snap_hdr->cnt_rqstd : (uint8_t)g_sample_count;
     pMsg[nbytes++] = sample_cnt;
 
+#ifdef  __DEBUG__
     IF_TRACED(TRC_QOS)
         dbgprintf("qos_snapshot: subsec: %d; sample-cnt: " FMT_UINT32 "\n",(int)pMsg[32], g_sample_count);
     END_TRACE
+#endif
 
     /* Now copy the samples to the QosCounterResult msg */
     next = (g_next_sample + (60 - sample_cnt)) % 60;
@@ -736,10 +776,12 @@ qos_snapshot(void)
         pSample->pkts_rcvd  = htons(thisSample->pkts_rcvd);
         pSample->bytes_sent = htons(thisSample->bytes_sent);
         pSample->pkts_sent  = htons(thisSample->pkts_sent);
+#ifdef  __DEBUG__
         IF_TRACED(TRC_QOS)
             dbgprintf("  sample: rcvd: %d; r-pkts: %d;  sent: %d; s-pkts: %d\n",
                       thisSample->bytes_rcvd,thisSample->pkts_rcvd,thisSample->bytes_sent,thisSample->pkts_sent);
         END_TRACE
+#endif
         pSample++;
         nbytes += sizeof(qos_perf_sample);
     }
@@ -765,11 +807,13 @@ qos_snapshot(void)
         delta4 = (g_tpkts-tpkts > 0)?   (g_tpkts-tpkts) : 0;
         pSample->pkts_sent  = htons(delta4 / PKT_SCALE_FACTOR);
 
+#ifdef  __DEBUG__
         IF_TRACED(TRC_QOS)
             dbgprintf("  sub-sec sample: rcvd: " FMT_UINT32 "; r-pkts: " FMT_UINT32 \
                       ";  sent: " FMT_UINT32 "; s-pkts: " FMT_UINT32 "\n",
                       delta1, delta2, delta3, delta4);
         END_TRACE
+#endif
 
         /* restore the saved counters */
         g_rbytes = rbytes; g_rpkts = rpkts; g_tbytes = tbytes; g_tpkts = tpkts;
@@ -781,11 +825,13 @@ qos_snapshot(void)
     /* And send it... */
     tx_write( g_txbuf, nbytes );
 
+#ifdef  __DEBUG__
     IF_TRACED(TRC_PACKET)
         dbgprintf("qos_counter_result: sending " FMT_UINT32 " perf-samples + sub-sec-sample, seq=" FMT_UINT16 \
                   " -> " ETHERADDR_FMT "\n",
                   g_sample_count, g_sequencenum, ETHERADDR_PRINT(&g_base_hdr->tbh_realsrc));
     END_TRACE
+#endif
 }
 
 
@@ -806,9 +852,11 @@ qosrcvpkt(void)
     	warn("qospktrcv: g_opcode=%d is out of range for QoS msg; ignoring\n", g_opcode);
     	return;
     }
+#ifdef  __DEBUG__
     IF_TRACED(TRC_PACKET)
         dbgprintf("QOS: g_opcode=%d\n",g_opcode);
     END_TRACE
+#endif
 
     thisSeqnum = ntohs(g_base_hdr->tbh_seqnum);
 
@@ -846,11 +894,13 @@ qosrcvpkt(void)
     }
 
     /* print the frame */
+#ifdef  __DEBUG__
     IF_TRACED(TRC_PACKET)
 	dbgprintf(" [" ETHERADDR_FMT "] -> [" ETHERADDR_FMT "] %s (seq=%d)\n",
 		ETHERADDR_PRINT(&g_ethernet_hdr->eh_src), ETHERADDR_PRINT(&g_ethernet_hdr->eh_dst),
 		Qos_opcode_names[g_opcode], thisSeqnum);
     END_TRACE
+#endif
 
     /* By this time, we are pretty sure the sequence number is valid, so save a global copy... */
     g_sequencenum = thisSeqnum;

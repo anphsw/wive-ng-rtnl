@@ -148,6 +148,7 @@ state_process_packet()
     session_t           *this_session;
     enum sm_Status       smStatus;
 
+#ifdef  __DEBUG__
     IF_TRACED((TRC_STATE|TRC_PACKET))
         printf("state_process_packet: Entered with event %s",smEvent_names[g_this_event.evtType]);
         if (g_this_event.evtType==evtPacketRcvd)
@@ -157,6 +158,7 @@ state_process_packet()
             puts("");
         }
     END_TRACE
+#endif
 
     g_this_event.isInternalEvt = FALSE;	// It's a real event, not internally generated
 
@@ -187,6 +189,7 @@ state_process_packet()
             this_session->ssn_mapper_real    = g_base_hdr->tbh_realsrc;
             this_session->ssn_mapper_current = g_ethernet_hdr->eh_src;
             this_session->ssn_TypeOfSvc      = g_base_hdr->tbh_tos;
+#ifdef  __DEBUG__
             IF_TRACED(TRC_STATE)
                 printf("New Session:\n\tXID = %X\n\treal address: " ETHERADDR_FMT \
                        "\n",this_session->ssn_XID, \
@@ -196,6 +199,7 @@ state_process_packet()
                        ETHERADDR_PRINT(&this_session->ssn_mapper_current),
                        Lld2_tos_names[this_session->ssn_TypeOfSvc] );
             END_TRACE
+#endif
             g_this_event.ssn = this_session;
 
         }   /*** end of if (g_opcode == Opcode_Discover) ***/
@@ -229,9 +233,11 @@ state_process_packet()
     /* Remove any "new-session" marking */
     g_this_event.isNewSession = FALSE;
 
+#ifdef  __DEBUG__
     IF_TRACED(TRC_PACKET)
         printf("state_process_packet: Leaving - done with event %s\n",smEvent_names[g_this_event.evtType]);
     END_TRACE
+#endif
     return 0;	/* Success! */
 }
 
@@ -249,10 +255,12 @@ state_process_timeout()
 {
     enum sm_Status         smStatus;
 
+#ifdef  __DEBUG__
     IF_TRACED(TRC_STATE)
         if (g_this_event.evtType!=evtBlockTimeout)
             printf("state_process_timeout: Entered with event %s\n",smEvent_names[g_this_event.evtType]);
     END_TRACE
+#endif
 
     g_rcvd_pkt_len = 0;
 

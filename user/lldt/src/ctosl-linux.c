@@ -38,8 +38,6 @@
 # include <sys/capability.h>
 #endif
 
-#include <linux/if.h>
-
 /* Do you have wireless extensions available? (most modern kernels do) */
 #define HAVE_WIRELESS
 
@@ -597,14 +595,18 @@ get_wireless_mode(void *data)
 	/* this is a pretty complex wireless device (probably acting
 	 * as an AP); we can't express its features just like this, so
 	 * we'll not return a wireless mode TLV. */
+#ifdef  __DEBUG__
         IF_TRACED(TRC_TLVINFO)
             printf("get_wireless_mode(): mode (%d) unrecognizable - FAILING the get...\n", req.u.mode);
         END_TRACE
+#endif
 	return TLV_GET_FAILED;
     }
+#ifdef  __DEBUG__
     IF_TRACED(TRC_TLVINFO)
         printf("get_wireless_mode(): wireless_mode=%d\n", *wl_mode);
     END_TRACE
+#endif
 
     return TLV_GET_SUCCEEDED;
 }
@@ -649,9 +651,11 @@ get_bssid(void *data)
 
     memcpy(bssid, req.u.ap_addr.sa_data, sizeof(etheraddr_t));
 
+#ifdef  __DEBUG__
     IF_TRACED(TRC_TLVINFO)
         printf("get_bssid(): bssid=" ETHERADDR_FMT "\n", ETHERADDR_PRINT(bssid));
     END_TRACE
+#endif
 
     return TLV_GET_SUCCEEDED;
 #else
@@ -700,6 +704,7 @@ get_ipv4addr(void *data)
 	return TLV_GET_FAILED;
     }
     close(rqfd);
+#ifdef __DEBUG__
     IF_DEBUG
         /* Interestingly, the ioctl to get the ipv4 address returns that
            address offset by 2 bytes into the buf. Leaving this in case
@@ -709,13 +714,16 @@ get_ipv4addr(void *data)
         /* Dump out the whole 14-byte buffer */
         printf("get_ipv4addr: sa_data = 0x%02x-0x%02x-0x%02x-0x%02x-0x%02x-0x%02x-0x%02x-0x%02x-0x%02x-0x%02x-0x%02x-0x%02x-0x%02x-0x%02x\n",d[0],d[1],d[2],d[3],d[4],d[5],d[6],d[7],d[8],d[9],d[10],d[11],d[12],d[13]);
     END_DEBUG
+#endif
 
     memcpy(ipv4addr,&req.ifr_addr.sa_data[2],sizeof(uint32_t));
+#ifdef __DEBUG__
     IF_DEBUG
         printf("get_ipv4addr: returning %d.%d.%d.%d as ipv4addr\n", \
                 *((uint8_t*)ipv4addr),*((uint8_t*)ipv4addr +1), \
                 *((uint8_t*)ipv4addr +2),*((uint8_t*)ipv4addr +3));
     END_DEBUG
+#endif
 
     return TLV_GET_SUCCEEDED;
 }
@@ -739,7 +747,8 @@ get_max_op_rate(void *data)
 
     uint16_t* morate = (uint16_t*) data;
 
-    *morate = htons(108);	/* 54 Mbs / 0.5 Mbs = 108 */
+
+    *morate = htons(MAXWIFISPEED);
 
     return TLV_GET_SUCCEEDED;
 }
@@ -775,7 +784,8 @@ get_link_speed(void *data)
     /* Since this is a bridged pair of interfaces (br0 = eth1 + wl0), I am returning the
      * wireless speed, which is the lowest of the upper limits on the two interfaces... */
 
-    *speed = htonl(540000); // 54Mbit wireless... (540k x 100 = 54Mbs)
+
+    *speed = htonl(WIFISPEED);
 
     return TLV_GET_SUCCEEDED;
 }
@@ -789,7 +799,8 @@ get_rssi(void *data)
 
     uint32_t* rssi = (uint32_t*) data;
 
-    return TLV_GET_FAILED;
+    return TLV_GET_SUCCEEDED;
+
 }
 
 
@@ -843,9 +854,11 @@ get_icon_image(void *data)
             /* Finally! SUCCESS! */
             icon->sz_iconfile = filestats.st_size;
             icon->fd_icon = fd;
+#ifdef  __DEBUG__
             IF_TRACED(TRC_TLVINFO)
                 printf("get_icon_image: stat\'ing iconfile %s returned length=%d\n",g_icon_path, icon->sz_iconfile);
             END_TRACE
+#endif
         }
     }
     return TLV_GET_SUCCEEDED;
@@ -877,16 +890,20 @@ get_machine_name(void *data)
          * element directly, there is an unnecessary declaration here... */
         tlv_info_t* fool;
 	util_copy_ascii_to_ucs2(name, sizeof(fool->machine_name), unamebuf.nodename);
+#ifdef  __DEBUG__
         IF_TRACED(TRC_TLVINFO)
             dbgprintf("get_machine_name(): space= %d, len=%d, machine name = %s\n",
                        sizeof(fool->machine_name), namelen, unamebuf.nodename);
         END_TRACE
+#endif
         return TLV_GET_SUCCEEDED;
     }
 
+#ifdef  __DEBUG__
     IF_TRACED(TRC_TLVINFO)
         dbgprintf("get_machine_name(): uname() FAILED, returning %d\n", ret);
     END_TRACE
+#endif
 
     return TLV_GET_FAILED;
 }

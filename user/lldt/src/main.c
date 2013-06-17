@@ -26,8 +26,6 @@
 #include <unistd.h>
 #include <assert.h>
 
-#include "linux/config.h" /* kernel config */
-
 #define	DECLARING_GLOBALS
 #include "globals.h"
 
@@ -124,9 +122,9 @@ init_from_conf_file()
             }
         } else {
             warn("line ignored - var or val was missing or no equals\n");
-        }
+        }	// assignments not found!
+    }	// while
 
-    }
     if (line!=NULL)  free(line);
     fclose(conf_file);
 }
@@ -223,6 +221,8 @@ main(int argc, char **argv)
         }
     }
 
+    init_from_conf_file();
+
 #ifdef CHECKING_PACKING
     printf("etherHdr: " FMT_SIZET "   baseHdr: " FMT_SIZET "    discoverHdr: " \
             FMT_SIZET "    helloHdr: " FMT_SIZET "    qltlvHdr: " FMT_SIZET "\n",
@@ -278,18 +278,18 @@ main(int argc, char **argv)
     /* initialize things from the parameter file, /etc/lld2d.conf
      * currently, v1.0, this only involves LTLV pointers... */
 
-    init_from_conf_file();
-
     event_init();
     qos_init();
 
     osl_interface_open(g_osl, g_interface, NULL);
     osl_get_hwaddr(g_osl, &g_hwaddr);
 
+#ifdef __DEBUG__
     IF_DEBUG
         printf("%s: listening at address: " ETHERADDR_FMT "\n",
 	    g_Progname, ETHERADDR_PRINT(&g_hwaddr));
     END_DEBUG
+#endif
     if (!opt_debug)
     {
         DEBUG({printf("%s: Using syslog\n", g_Progname);})

@@ -70,12 +70,14 @@ validate_hello()
 	return INVALID_PACKET;
     }
 
+#ifdef  __DEBUG__
     IF_TRACED(TRC_PACKET)
 	uint16_t gen = ntohs(g_hello_hdr->hh_gen);
 
 	dbgprintf("hello-rcvd: gen=%d mapper=" ETHERADDR_FMT "\n",
 		gen, ETHERADDR_PRINT(&g_hello_hdr->hh_curmapraddr));
     END_TRACE
+#endif
 
     g_this_event.evtType =  evtPacketRcvd;
     return VALID_PACKET;
@@ -94,9 +96,11 @@ validate_queryltlv()
 	return INVALID_PACKET;
     }
 
+#ifdef  __DEBUG__
     IF_TRACED(TRC_PACKET)
 	dbgprintf("query-ltlv-rcvd: tlv# %d  offset: %d\n", g_qltlv_hdr->qh_type, g_qltlv_hdr->qh_offset);
     END_TRACE
+#endif
 
     g_this_event.evtType =  evtPacketRcvd;
     return VALID_PACKET;
@@ -150,17 +154,21 @@ validate_emit()
     /* check the emitee_descs are asking for reasonable transmissions */
     first_desc = (topo_emitee_desc_t*)(emit + 1);
 
+#ifdef  __DEBUG__
     IF_TRACED(TRC_PACKET)
 	dbgprintf("numdescs=%d EmiteeDescs=[", numdescs);
     END_TRACE
+#endif
 
     for (i=0, ed=first_desc; ed+1 <= limit && i < numdescs; ed++, i++)
     {
+#ifdef  __DEBUG__
 	IF_TRACED(TRC_PACKET)
 	    dbgprintf("{%s: %dms " ETHERADDR_FMT " -> " ETHERADDR_FMT "} ",
 		    ed_type2name(ed->ed_type), ed->ed_pause,
 		    ETHERADDR_PRINT(&ed->ed_src), ETHERADDR_PRINT(&ed->ed_dst));
         END_TRACE
+#endif
 
 	g_totalPause += ed->ed_pause;
 
@@ -196,12 +204,14 @@ validate_emit()
 	g_neededBytes += sizeof(topo_ether_header_t) + sizeof(topo_base_header_t);
     }
 
+#ifdef  __DEBUG__
     IF_TRACED(TRC_PACKET)
 	dbgprintf("]");
 	if (i != numdescs)
 	    dbgprintf(" (numdescs too big!)");
 	dbgprintf("\n");
     END_TRACE
+#endif
 
     if (g_totalPause > TOPO_TOTALPAUSE_MAX)
     {
@@ -246,11 +256,13 @@ void *
 fmt_base(uint8_t *buf, const etheraddr_t *srchw, const etheraddr_t *dsthw, lld2_tos_t tos,
 	 topo_opcode_t g_opcode, uint16_t seqnum, bool_t use_broadcast)
 {
+#ifdef  __DEBUG__
     IF_TRACED(TRC_PACKET)
         printf("fmt_base: src=" ETHERADDR_FMT "\n", ETHERADDR_PRINT(srchw));
         printf("fmt_base: dst=" ETHERADDR_FMT "\n", ETHERADDR_PRINT(dsthw));
         printf("fmt_base: tos=%d g_opcode=%d seq=%d bcast=%s\n", tos, g_opcode, seqnum, use_broadcast?"true":"false");
     END_TRACE
+#endif
 
     topo_ether_header_t *ehdr = (topo_ether_header_t*) buf;
     topo_base_header_t *bhdr = (topo_base_header_t*)(ehdr + 1);
@@ -314,9 +326,11 @@ static void
 tx_rtxpacket(void)
 {
     assert(g_rtxseqnum != 0);
+#ifdef  __DEBUG__
     IF_TRACED(TRC_PACKET)
 	dbgprintf("packetio_recv_handler: retranmitting response with seqnum=%d\n", g_rtxseqnum);
     END_TRACE
+#endif
 
     tx_write(g_re_txbuf, g_re_tx_len);    
 }
@@ -365,12 +379,14 @@ packetio_tx_emitee(topo_emitee_desc_t *ed)
     bhdr->tbh_realdst = ed->ed_dst;
     bhdr->tbh_seqnum = htons(0);
 
+#ifdef  __DEBUG__
     IF_TRACED(TRC_PACKET)
 	printf("tx_emitee: %s " ETHERADDR_FMT " -> " ETHERADDR_FMT "\n", Topo_opcode_names[Opcode],
 		ETHERADDR_PRINT(&ed->ed_src), ETHERADDR_PRINT(&ed->ed_dst));
         printf("tx_emitee: real-src=" ETHERADDR_FMT "\n", ETHERADDR_PRINT(&bhdr->tbh_realsrc));
         printf("tx_emitee: tos=%d g_opcode=%d seq=%d bcast=%s\n", bhdr->tbh_tos, Opcode, bhdr->tbh_seqnum, "false");
     END_TRACE
+#endif
 
     nbytes = sizeof(topo_ether_header_t) + sizeof(topo_base_header_t);
 
@@ -389,10 +405,12 @@ packetio_tx_ack(uint16_t thisSeqNum)
 
     tx_sendpacket(nbytes, thisSeqNum);
 
+#ifdef  __DEBUG__
     IF_TRACED(TRC_PACKET)
 	dbgprintf("tx_ack: %d -> " ETHERADDR_FMT "\n",
 		thisSeqNum, ETHERADDR_PRINT(&g_topo_session->ssn_mapper_real));
     END_TRACE
+#endif
 }
 
 
@@ -430,9 +448,11 @@ packetio_send_discover(uint16_t thisSeqNum, bool_t sendAck)
 
     tx_sendpacket(nbytes, thisSeqNum);
 
+#ifdef  __DEBUG__
     IF_TRACED(TRC_PACKET)
         dbgprintf("tx_discover: seqnum = %d\n", thisSeqNum);
     END_TRACE
+#endif
 }
 
 void
@@ -446,10 +466,12 @@ packetio_send_query(uint16_t thisSeqNum, etheraddr_t* pDst)
 
     tx_sendpacket(nbytes, thisSeqNum);
 
+#ifdef  __DEBUG__
     IF_TRACED(TRC_PACKET)
         dbgprintf("tx_query: seqnum = %d, dst= " ETHERADDR_FMT "\n",
                    thisSeqNum, ETHERADDR_PRINT(pDst));
     END_TRACE
+#endif
 }
 
 
@@ -464,10 +486,12 @@ packetio_send_emit(uint16_t thisSeqNum, etheraddr_t* pDst, uint16_t emiteeCnt)
 
     uint	count = emiteeCnt;
 
+#ifdef  __DEBUG__
     IF_TRACED(TRC_PACKET)
         dbgprintf("tx_emit: seqnum = %d, dst= " ETHERADDR_FMT ", numEmitees=%d\n",
                    thisSeqNum, ETHERADDR_PRINT(pDst), count);
     END_TRACE
+#endif
 
 //					    buf,    src-addr, dst,  service-type,        g_opcode,       seq,     B'cast
     emithdr = (topo_emit_header_t*)fmt_base(g_txbuf,&g_hwaddr,pDst,ToS_TopologyDiscovery,Opcode_Emit,thisSeqNum,FALSE);
@@ -501,10 +525,12 @@ packetio_send_charge(uint16_t thisSeqNum, etheraddr_t* pDst)
 
     tx_sendpacket(nbytes, thisSeqNum);
 
+#ifdef  __DEBUG__
     IF_TRACED(TRC_PACKET)
         dbgprintf("tx_charge: seqnum = %d, dst= " ETHERADDR_FMT "\n",
                    thisSeqNum, ETHERADDR_PRINT(pDst));
     END_TRACE
+#endif
 }
 
 
@@ -519,9 +545,11 @@ packetio_send_reset(etheraddr_t* pDst)
 
     tx_sendpacket(nbytes, 0);
 
+#ifdef  __DEBUG__
     IF_TRACED(TRC_PACKET)
         dbgprintf("tx_reset: dst= " ETHERADDR_FMT "\n", ETHERADDR_PRINT(pDst));
     END_TRACE
+#endif
 }
 
 
@@ -586,9 +614,11 @@ packetio_recv_handler(int fd, void *state)
     }
 
     thisSeqnum = ntohs(g_base_hdr->tbh_seqnum);
+#ifdef __DEBUG__
     IF_DEBUG
         printf("rcvd seqnum=%X\n",g_base_hdr->tbh_seqnum);
     END_DEBUG
+#endif
 
 
     /* Is this frame intended for us?
@@ -603,11 +633,13 @@ packetio_recv_handler(int fd, void *state)
 
 
     /* print the frame */
+#ifdef  __DEBUG__
     IF_TRACED(TRC_PACKET)
 	dbgprintf(ETHERADDR_FMT " " ETHERADDR_FMT " %s (seq=%d)\n",
 		ETHERADDR_PRINT(&g_ethernet_hdr->eh_src), ETHERADDR_PRINT(&g_ethernet_hdr->eh_dst),
 		Topo_opcode_names[g_opcode], thisSeqnum);
     END_TRACE
+#endif
 
     /* check for illegal or malformed packets */
 

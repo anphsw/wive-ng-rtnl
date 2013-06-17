@@ -31,6 +31,15 @@ typedef struct in6_addr ipv6addr_t;
 /* our own (hopefully portable) 2-byte char type */
 typedef uint16_t ucs2char_t;
 
+typedef struct {
+    uint8_t ssid[32];
+    uint8_t ssidLen;
+} __attribute__ ((packed)) ssid_t;
+
+typedef struct {
+    etheraddr_t bssid[6];
+    uint8_t     count;
+} __attribute__ ((packed)) aplineage_t;
 
 /* Process-level event management structure for io & timers */
 

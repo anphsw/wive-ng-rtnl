@@ -42,10 +42,12 @@ write_lg_icon_t(int number, void *data, uint8_t *buf, int bytes_free, bool_t isH
     off_t        curOffset;
     int          remaining;
 
+#ifdef  __DEBUG__
     IF_TRACED(TRC_TLVINFO)
         printf("write-lg_icon: tlvnum:%d  isHello:%s  isLarge:%s  offset:" FMT_SIZET "\n",
                number, isHello==TRUE?"true":"false", isLarge==TRUE?"true":"false", offset);
     END_TRACE
+#endif
 
     if (icon->fd_icon < 0)
     {
@@ -88,10 +90,12 @@ write_lg_icon_t(int number, void *data, uint8_t *buf, int bytes_free, bool_t isH
     /* write header in QueryLargeTlvResp large-TLV format */
     remaining = read(icon->fd_icon, buf, 1);	// Check for more...
 
+#ifdef  __DEBUG__
     IF_TRACED(TRC_TLVINFO)
         printf("writing jumbo-tlv of %d bytes, with %s remaining\n",
                 num_read+2, remaining<=0?"none":"some");
     END_TRACE
+#endif
 
     if (remaining <= 0)
     {
@@ -105,9 +109,11 @@ write_lg_icon_t(int number, void *data, uint8_t *buf, int bytes_free, bool_t isH
         g_short_reorder_buffer = htons((uint16_t)(0x8000) | (uint16_t)num_read);
         memcpy(buf, &g_short_reorder_buffer, 2);
     }
+#ifdef  __DEBUG__
     IF_TRACED(TRC_TLVINFO)
         printf("txbuf: %02X, %02X, %02X, %02X\n",buf[0],buf[1],buf[2],buf[3]);
     END_TRACE
+#endif
     close(icon->fd_icon);
     icon->fd_icon = -1;
     return num_read + 2;
@@ -121,10 +127,12 @@ write_icon_file_t(int number, void *data, uint8_t *buf, int bytes_free, bool_t i
     int          num_read;
     off_t        curOffset;
 
+#ifdef  __DEBUG__
     IF_TRACED(TRC_TLVINFO)
         printf("write-icon-file: tlvnum:%d  isHello:%s  isLarge:%s  offset:" FMT_SIZET "\n",
                number, isHello==TRUE?"true":"false", isLarge==TRUE?"true":"false", offset);
     END_TRACE
+#endif
 
     if (icon->fd_icon < 0)
     {
@@ -136,11 +144,13 @@ write_icon_file_t(int number, void *data, uint8_t *buf, int bytes_free, bool_t i
     {
         if ((icon->sz_iconfile > (size_t)255) || (bytes_free < 2 + (int)icon->sz_iconfile) || isLarge==TRUE)
         {
+#ifdef  __DEBUG__
             IF_TRACED(TRC_TLVINFO)
                 printf("write_icon_file: not enuff room - bytes_free=%d, and icon_sz=" FMT_SIZET "\n",
                        bytes_free, icon->sz_iconfile);
                 printf("writing small-tlv of 0 bytes to notify of large-tlv value\n");
             END_TRACE
+#endif
             /* Not enough room - force to a large-TLV */
             /* write header in Hello's small-TLV format */
             *buf++ = (uint8_t)number;
@@ -175,19 +185,23 @@ write_icon_file_t(int number, void *data, uint8_t *buf, int bytes_free, bool_t i
     if (isHello==TRUE)
     {
         /* write header in Hello's small-TLV format */
+#ifdef  __DEBUG__
         IF_TRACED(TRC_TLVINFO)
             printf("writing small-tlv of %d bytes\n",num_read+2);
         END_TRACE
+#endif
         *buf++ = (uint8_t)number;
         *buf-- = (uint8_t)num_read;
     } else {
         /* write header in QueryLargeTlvResp large-TLV format */
         int remaining = read(icon->fd_icon, buf, 1);	// Check for more...
 
+#ifdef  __DEBUG__
         IF_TRACED(TRC_TLVINFO)
             printf("writing large-tlv of %d bytes, with %s remaining\n",
                     num_read+2, remaining<=0?"none":"some");
         END_TRACE
+#endif
 
         if (remaining <= 0)
         {
@@ -202,9 +216,11 @@ write_icon_file_t(int number, void *data, uint8_t *buf, int bytes_free, bool_t i
             memcpy(buf, &g_short_reorder_buffer, 2);
         }
     }
+#ifdef  __DEBUG__
     IF_TRACED(TRC_TLVINFO)
         printf("txbuf: %02X, %02X, %02X, %02X\n",buf[0],buf[1],buf[2],buf[3]);
     END_TRACE
+#endif
     close(icon->fd_icon);
     icon->fd_icon = -1;
     return num_read + 2;
@@ -217,10 +233,12 @@ write_etheraddr_t(int number, void *data, uint8_t *buf, int bytes_free, bool_t i
     if (bytes_free < (int)(2 + sizeof(etheraddr_t)))
 	return 0;
 
+#ifdef  __DEBUG__
     IF_TRACED(TRC_TLVINFO)
         dbgprintf("write_etheraddr_t(%s): addr=" ETHERADDR_FMT "\n", isLarge?"LTLV":"TLV",
                   ETHERADDR_PRINT(((etheraddr_t*)data)));
     END_TRACE
+#endif
 
     if (isHello)
     {
@@ -438,10 +456,12 @@ write_assns_t(int number, void *data, uint8_t *buf, int bytes_free, bool_t isHel
     int         bytes_used, copy_cnt;
     uint16_t    ltlv_length;
 
+#ifdef  __DEBUG__
     IF_TRACED(TRC_TLVINFO)
         printf("write-assns-list: tlvnum:%d  isHello:%s  isLarge:%s  offset:" FMT_SIZET "\n",
                number, isHello==TRUE?"true":"false", isLarge==TRUE?"true":"false", offset);
     END_TRACE
+#endif
 
     if (isHello==TRUE)
     {
@@ -487,9 +507,11 @@ write_assns_t(int number, void *data, uint8_t *buf, int bytes_free, bool_t isHel
     memcpy(buf, &ltlv_length, 2);
     buf += 2;
 
+#ifdef  __DEBUG__
     IF_TRACED(TRC_TLVINFO)
         printf("writing assn-list as large-tlv of %d bytes\n", bytes_used);
     END_TRACE
+#endif
 
     {
         /* Copy the assn entries to the packet buffer, packed */
@@ -516,10 +538,12 @@ write_comptbl_t(int number, void *data, uint8_t *buf, int bytes_free, bool_t isH
     uint8_t    *length = buf;
     int         bytes_used;
 
+#ifdef  __DEBUG__
     IF_TRACED(TRC_TLVINFO)
         printf("write-component-table: tlvnum:%d  isHello:%s  isLarge:%s  offset:" FMT_SIZET "\n",
                number, isHello==TRUE?"true":"false", isLarge==TRUE?"true":"false", offset);
     END_TRACE
+#endif
 
     if (isHello==TRUE)
     {
@@ -545,9 +569,11 @@ write_comptbl_t(int number, void *data, uint8_t *buf, int bytes_free, bool_t isH
         *buf++ = (uint8_t) Bridge_Component;        // type
         *buf++ = 1;                                 // length
         *buf++ = ctbl->bridge_behavior;             // value
+#ifdef  __DEBUG__
         IF_TRACED(TRC_TLVINFO)
             printf("w-c-t: version:%d  bridge behavior: %d\n",ctbl->version,ctbl->bridge_behavior);
         END_TRACE
+#endif
     }
 
     /* for each radio band, add a component */
@@ -564,10 +590,12 @@ write_comptbl_t(int number, void *data, uint8_t *buf, int bytes_free, bool_t isH
             *buf++ = rb->mode;
             memcpy(buf, &rb->BSSID, 6);    buf += 6;
 
+#ifdef  __DEBUG__
             IF_TRACED(TRC_TLVINFO)
                 printf("w-c-t: radio band: %d  MOR: %d  PHY: %d  Mode: %d  BSSID: " ETHERADDR_FMT "\n",
                        i, ntohs(rb->MOR), rb->PHYtype, rb->mode, ETHERADDR_PRINT(&(rb->BSSID)) );
             END_TRACE
+#endif
         }
     }
 
@@ -579,9 +607,11 @@ write_comptbl_t(int number, void *data, uint8_t *buf, int bytes_free, bool_t isH
         memcpy(buf, &ctbl->link_speed, 4);          // value
         buf += 4;
 
+#ifdef  __DEBUG__
         IF_TRACED(TRC_TLVINFO)
             printf("w-c-t: switch link speed: %d\n",ntohl(ctbl->link_speed));
         END_TRACE
+#endif
     }
 
     /* Now, once the total length is known, put it in the reserved location at the front */
@@ -618,10 +648,12 @@ tlv_write_info(uint8_t *buf, int bytes_free)
     tlv_desc_t *tlv = Tlvs;
     int nb, total;
 
+#ifdef  __DEBUG__
     IF_TRACED(TRC_TLVINFO)
         printf("tlv_write_info: entering with tracing set to \'%s\', interface = %s\n",
                g_trace_flags?"true":"false", g_osl->responder_if);
     END_TRACE
+#endif
     total = 0;
     while (tlv->write != NULL && bytes_free > 1)
     {
@@ -643,19 +675,23 @@ tlv_write_tlv(tlv_desc_t *tlv, uint8_t *buf, int bytes_free, bool_t isHello, siz
     int    nb = 0;
     int    getfn_returned = -1;
 
+#ifdef  __DEBUG__
     IF_TRACED(TRC_TLVINFO)
         printf("tlv_write_tlv: Building TLV # %d (%d bytes available in send-buffer\n",
                tlv->number,bytes_free);
     END_TRACE
+#endif
     switch (tlv->access)
     {
       case  Access_unset:
         if (tlv->get != NULL)
         {
             tlv->access = Access_static;
+#ifdef  __DEBUG__
             IF_TRACED(TRC_TLVINFO)
                 printf("tlv_write_tlv: initializing 'unset' TLV %d to 'static'\n", tlv->number);
             END_TRACE
+#endif
         } else {
             warn("tlv_write_tlv: FAILED initializing 'unset' TLV %d (NULL get_fn)\n", tlv->number);
             break;
@@ -666,10 +702,12 @@ tlv_write_tlv(tlv_desc_t *tlv, uint8_t *buf, int bytes_free, bool_t isHello, siz
         if (tlv->get != NULL)
         {   /* call the tlv_get_fn for this tlv */
             getfn_returned = tlv->get((void*)(infobase + tlv->offset));
+#ifdef  __DEBUG__
             IF_TRACED(TRC_TLVINFO)
                 printf("tlv_write_tlv: getting value for TLV %d returned \'%s\'\n",
                       tlv->number, getfn_returned == TLV_GET_SUCCEEDED ? "SUCCESS" : "FAILURE");
             END_TRACE
+#endif
 
             if (getfn_returned != TLV_GET_SUCCEEDED)
             {
@@ -688,10 +726,12 @@ tlv_write_tlv(tlv_desc_t *tlv, uint8_t *buf, int bytes_free, bool_t isHello, siz
                         isHello,		   /* write in Hello format if isHello; else in LTLV format */
                         (tlv->inHello==FALSE),     /* force those not inHello to be LTLVs */
                         LtlvOffset);		   /* must be 0 in Hello format; <= 32k in LTLV format */
+#ifdef  __DEBUG__
         IF_TRACED(TRC_TLVINFO)
             dbgprintf("tlv_write_tlv: wrote %d bytes of TLV %d (%d bytes were free)\n", nb,
                          tlv->number, bytes_free);
         END_TRACE
+#endif
         break;
 
       case  Access_invalid:

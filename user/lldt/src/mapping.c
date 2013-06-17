@@ -43,11 +43,13 @@ static
 int
 SufficientChargeAvailable()
 {
+#ifdef __DEBUG__
     IF_DEBUG
         dbgprintf("SCA: ctc_pkts=" FMT_UINT32 "   pkts_needed=" FMT_UINT32 \
                   "    ctc_bytes=" FMT_UINT32 "   bytes_needed=" FMT_UINT32 "\n",
                   g_ctc_packets, g_neededPackets, g_ctc_bytes, g_neededBytes);
     END_DEBUG
+#endif
 
     if ((g_ctc_packets >= g_neededPackets) && (g_ctc_bytes >= g_neededBytes))
         return TRUE;
@@ -89,10 +91,12 @@ ChargeAdd(int pktlen)
     if (g_ctc_bytes > TOPO_CTC_BYTES_MAX)
 	g_ctc_bytes = TOPO_CTC_BYTES_MAX;
 
+#ifdef  __DEBUG__
     IF_TRACED(TRC_CHARGE)
 	dbgprintf("ChargeAdd: CTC now has bytes=" FMT_UINT32 " & packets=" FMT_UINT32 "\n",
 		g_ctc_bytes, g_ctc_packets);
     END_TRACE
+#endif
 
     /* Reset charge timer */
     gettimeofday(&now, NULL);
@@ -114,10 +118,12 @@ ChargeConsume(int pktlen)
     if (g_ctc_bytes)
         g_ctc_bytes -= pktlen;
 
+#ifdef  __DEBUG__
     IF_TRACED(TRC_CHARGE)
 	dbgprintf("ChargeConsume: CTC now has bytes=" FMT_UINT32 " & packets=" FMT_UINT32 "\n",
 		g_ctc_bytes, g_ctc_packets);
     END_TRACE
+#endif
 
     /* Reset charge timer */
 
@@ -134,6 +140,7 @@ static
 enum sm_Status
 smT_QuiescentHandler( protocol_event_t* evt )
 {
+#ifdef  __DEBUG__
     IF_TRACED(TRC_STATE)
         if (evt->evtType != evtBlockTimeout)
         {
@@ -146,6 +153,7 @@ smT_QuiescentHandler( protocol_event_t* evt )
             }
         }
     END_TRACE
+#endif
 
     switch (evt->evtType)
     {
@@ -156,9 +164,11 @@ smT_QuiescentHandler( protocol_event_t* evt )
           case Opcode_Probe:
           case Opcode_Query:
           case Opcode_QueryLargeTlv:
+#ifdef  __DEBUG__
             IF_TRACED(TRC_PACKET)
                 printf("smT (Quiescent): Hoisting packet ignored.\n");
             END_TRACE
+#endif
             break;
           case Opcode_Emit:	// should never occur - explicit event
           case Opcode_Reset:	// should never occur - explicit event
@@ -169,10 +179,12 @@ smT_QuiescentHandler( protocol_event_t* evt )
           case Opcode_QueryResp:
           case Opcode_Flat:
           case Opcode_QueryLargeTlvResp:
+#ifdef  __DEBUG__
             IF_TRACED(TRC_STATE)
                 printf("smT (Quiescent): Ignored packet w/ known opcode: %s\n",
                        Topo_opcode_names[g_opcode]);
             END_TRACE
+#endif
             break;
 
           default:
@@ -189,9 +201,11 @@ smT_QuiescentHandler( protocol_event_t* evt )
                 gen != 0                     &&  // has a non-zero gen,
                 g_generation != gen)             // that differs from ours,
             {   g_generation = gen;   }   // then save it for future Hellos.
+#ifdef  __DEBUG__
             IF_TRACED(TRC_STATE)
                 printf("smT (Quiescent): Leaving for Command state\n");
             END_TRACE
+#endif
             g_smT_state = smT_Command;
         }
         break;
@@ -210,9 +224,11 @@ smT_QuiescentHandler( protocol_event_t* evt )
         break;
 
       case evtEmitRcvd:
+#ifdef  __DEBUG__
         IF_TRACED(TRC_PACKET)
             printf("smT (Quiescent): Hoisting packet (Emit) ignored.\n");
         END_TRACE
+#endif
         break;
 
       case evtBlockTimeout:
@@ -222,9 +238,11 @@ smT_QuiescentHandler( protocol_event_t* evt )
       case evtEmitTimeout:
       case evtHelloDelayTimeout:
       default:
+#ifdef __DEBUG__
         IF_DEBUG
             printf("smT (Quiescent): Ignored event %s\n",smEvent_names[evt->evtType]);
         END_DEBUG
+#endif
         break;
     }   /*** end of switch (eventType) ***/
 
@@ -237,6 +255,7 @@ static
 enum sm_Status
 smT_CommandHandler( protocol_event_t* evt )
 {
+#ifdef  __DEBUG__
     IF_TRACED(TRC_STATE)
         if (evt->evtType != evtBlockTimeout)
         {
@@ -249,6 +268,7 @@ smT_CommandHandler( protocol_event_t* evt )
             }
         }
     END_TRACE
+#endif
 
     switch (evt->evtType)
     {
@@ -265,16 +285,20 @@ smT_CommandHandler( protocol_event_t* evt )
             break;
 
           case Opcode_Probe:
+#ifdef  __DEBUG__
             IF_TRACED(TRC_PACKET)
                 printf("smT (Command): Logging Probe from " ETHERADDR_FMT "\n",ETHERADDR_PRINT(&g_base_hdr->tbh_realsrc));
             END_TRACE
+#endif
             seeslist_enqueue(FALSE, &g_base_hdr->tbh_realsrc);
             break;
 
           case Opcode_Query:
+#ifdef  __DEBUG__
             IF_TRACED(TRC_PACKET)
                 printf("smT (Command): Sending query-Resp\n");
             END_TRACE
+#endif
             packetio_tx_queryresp();
             break;
 
@@ -289,9 +313,11 @@ smT_CommandHandler( protocol_event_t* evt )
                     {
                         size_t    offset;
 
+#ifdef  __DEBUG__
                         IF_TRACED(TRC_PACKET)
                             printf("smT (Command): Sending qltlv-Resp with LTLV # 0x%X\n", tlvDescr->number);
                         END_TRACE
+#endif
                         
                         offset = ntohs(g_qltlv_hdr->qh_offset) + (g_qltlv_hdr->qh_rsvd1 << 16);
                         packetio_tx_qltlvResp(g_sequencenum, tlvDescr, offset);
@@ -311,15 +337,19 @@ smT_CommandHandler( protocol_event_t* evt )
           case Opcode_ACK:
           case Opcode_QueryResp:
           case Opcode_Flat:
+#ifdef  __DEBUG__
             IF_TRACED(TRC_PACKET)
                 printf("smT (Command): Ignored packet w/ known opcode: %s\n",Topo_opcode_names[g_opcode]);
             END_TRACE
+#endif
             break;
 
           default:
+#ifdef  __DEBUG__
             IF_TRACED(TRC_PACKET)
                 printf("smT (Command): Ignored packet w/ unknown opcode: %d\n",g_opcode);
             END_TRACE
+#endif
             return PROCESSING_ABORTED;
         }   /*** end of switch (g_opcode) ***/
         break;
@@ -327,17 +357,21 @@ smT_CommandHandler( protocol_event_t* evt )
       case evtInactivityTimeout:
       case evtResetRcvd:
         /* If the Topo-session timed out, or was Reset, */
+#ifdef  __DEBUG__
         IF_TRACED(TRC_PACKET)
             printf("smT (Command): ResetRcvd, %s for topo-session\n",evt->ssn == g_topo_session?"is":"is not");
         END_TRACE
+#endif
         if (evt->ssn == g_topo_session)
         {
             /* zero the credits, clear the charge-timer, and NULL out the topo-session ptr */
+#ifdef __DEBUG__
             IF_DEBUG
                 puts("zero -> ctc, ctc-timer is cancelled");
                 puts("NULL -> g_topo_session");
                 puts("clearing seeslist");
             END_DEBUG
+#endif
             g_ctc_packets = g_ctc_bytes = 0;
             CANCEL(g_charge_timer);
             /* clear the sees-list, */
@@ -345,9 +379,11 @@ smT_CommandHandler( protocol_event_t* evt )
             /* NULL -> g_topo_session marks the topo-session as completely invalid */
             g_topo_session = NULL;
             /* and return to Quiescent state. */
+#ifdef  __DEBUG__
             IF_TRACED(TRC_PACKET)
                 printf("smT (Command): Leaving for Quiescent (Inactive or Reset).\n");
             END_TRACE
+#endif
             g_smT_state = smT_Quiescent;
         }
         break;
@@ -385,17 +421,21 @@ smT_CommandHandler( protocol_event_t* evt )
             {
                 bool_t  pausing;
 
+#ifdef  __DEBUG__
                 IF_TRACED(TRC_STATE)
                     printf("smT (Command): Leaving for Emit\n");
                 END_TRACE
+#endif
                 g_smT_state = smT_Emit;
                 pausing = set_emit_timer();
                 if (pausing!=TRUE)
                 {
                     g_this_event.evtType = evtEmitTimeout;
+#ifdef  __DEBUG__
                     IF_TRACED(TRC_STATE)
                         printf("smT (Command): No Pause in 1st emitee: Inject an EmitTimeout immediately.\n");
                     END_TRACE
+#endif
                     return KEEP_GOING;
                 }
             } else {
@@ -430,9 +470,11 @@ smT_CommandHandler( protocol_event_t* evt )
       case evtEmitTimeout:
       case evtHelloDelayTimeout:
       default :
+#ifdef  __DEBUG__
         IF_TRACED(TRC_STATE)
             printf("smT (Command): Ignored event %s\n",smEvent_names[evt->evtType]);
         END_TRACE
+#endif
         break;
     }
 
@@ -445,6 +487,7 @@ static
 enum sm_Status
 smT_EmitHandler( protocol_event_t* evt )
 {
+#ifdef  __DEBUG__
     IF_TRACED(TRC_STATE)
         printf("smT (Emit): Entered with event %s",smEvent_names[evt->evtType]);
         if (g_this_event.evtType==evtPacketRcvd)
@@ -454,6 +497,7 @@ smT_EmitHandler( protocol_event_t* evt )
             puts("");
         }
     END_TRACE
+#endif
 
     switch (evt->evtType)
     {
@@ -461,9 +505,11 @@ smT_EmitHandler( protocol_event_t* evt )
         switch (g_opcode)
         {
           case Opcode_Probe:
+#ifdef  __DEBUG__
             IF_TRACED(TRC_PACKET)
                 printf("smT (Command): Logging Probe from " ETHERADDR_FMT "\n",ETHERADDR_PRINT(&g_base_hdr->tbh_realsrc));
             END_TRACE
+#endif
             seeslist_enqueue(FALSE, &g_base_hdr->tbh_realsrc);
             break;
 
@@ -479,15 +525,19 @@ smT_EmitHandler( protocol_event_t* evt )
           case Opcode_Flat:
           case Opcode_QueryLargeTlv:
           case Opcode_QueryLargeTlvResp:
+#ifdef  __DEBUG__
             IF_TRACED(TRC_PACKET)
                 printf("smT (Emit): Ignored packet w/ known opcode: %s\n",Topo_opcode_names[g_opcode]);
             END_TRACE
+#endif
             break;
 
           default:
+#ifdef  __DEBUG__
             IF_TRACED(TRC_PACKET)
                 printf("smT (Emit): Ignored packet w/ unknown opcode: %d\n",g_opcode);
             END_TRACE
+#endif
             return PROCESSING_ABORTED;
         }   /*** end of switch (g_opcode) ***/
         break;
@@ -506,9 +556,11 @@ smT_EmitHandler( protocol_event_t* evt )
             /* NULL -> g_topo_session marks the topo-session as completely invalid */
             g_topo_session = NULL;
             /* and return to Quiescent state. */
+#ifdef  __DEBUG__
             IF_TRACED(TRC_STATE)
                 printf("smT (Emit): Leaving for Quiescent (Reset or Inactive)\n");
             END_TRACE
+#endif
             g_smT_state = smT_Quiescent;
         }
         break;
@@ -520,10 +572,12 @@ smT_EmitHandler( protocol_event_t* evt )
         /* any more? */
         if (g_emit_remaining == 0)
         {
+#ifdef  __DEBUG__
             /* go back to Command state (possibly sending ACK as we leave) */
             IF_TRACED(TRC_STATE)
                 printf("smT (Emit): Leaving for Command\n");
             END_TRACE
+#endif
             g_smT_state = smT_Command;
             CANCEL(g_emit_timer);
             if (g_emit_seqnum)
@@ -545,9 +599,11 @@ smT_EmitHandler( protocol_event_t* evt )
       case evtChargeTimeout:
       case evtHelloDelayTimeout:
       default :
+#ifdef  __DEBUG__
         IF_TRACED(TRC_STATE)
             printf("smT (Emit): Ignored event %s\n",smEvent_names[evt->evtType]);
         END_TRACE
+#endif
         break;
     }
 
@@ -575,15 +631,19 @@ smT_process_event( protocol_event_t* evt )
         return PROCESSING_ABORTED;	                /* Fail with an Abort */
     }
 
+#ifdef __DEBUG__
     IF_DEBUG
 //*/    printf("smT_process_event: Entered with event %s\n",smEvent_names[evt->evtType]);
     END_DEBUG
+#endif
 
     /* allow this state machine to autoclock itself, and request further processing */
     do {
+#ifdef __DEBUG__
         IF_DEBUG
 //*/        printf("smT_process_event: Processing event %s\n",smEvent_names[evt->evtType]);
         END_DEBUG
+#endif
         switch (g_smT_state)
         {
           case smT_Quiescent:
@@ -602,9 +662,11 @@ smT_process_event( protocol_event_t* evt )
             ClockControl = PROCESSING_ABORTED;	/* Stop! smT in unknown state! */
             break;
         }
+#ifdef  __DEBUG__
         IF_TRACED(TRC_STATE)
             if (ClockControl == KEEP_GOING) puts("smT: auto-clocking...");
         END_TRACE
+#endif
     } while (ClockControl == KEEP_GOING);
 
     return ClockControl;

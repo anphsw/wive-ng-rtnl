@@ -383,10 +383,12 @@ main(int argc, char **argv)
     osl_interface_open(g_osl, g_interface, NULL);
     osl_get_hwaddr(g_osl, &g_hwaddr);
 
+#ifdef __DEBUG__
     IF_DEBUG
         printf("%s: sending from address: " ETHERADDR_FMT "\n",
 	    g_Progname, ETHERADDR_PRINT(&g_hwaddr));
     END_DEBUG
+#endif
     if (!opt_debug)
     {
 	util_use_syslog();

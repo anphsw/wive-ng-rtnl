@@ -34,7 +34,9 @@ is_acking_me(void)
     etheraddr_t             *p  = (etheraddr_t*)(g_discover_hdr + 1);
     etheraddr_t          *limit = (etheraddr_t*)(((char*)g_ethernet_hdr) + g_rcvd_pkt_len);
 
+#ifdef  __DEBUG__
     uint16_t                gen = ntohs(g_discover_hdr->mh_gen);
+#endif
     uint16_t        numstations = ntohs(g_discover_hdr->mh_numstations);
 
     bool_t               acking = FALSE;
@@ -42,17 +44,21 @@ is_acking_me(void)
 
     if (g_this_event.isAckingMe == TRUE)  return TRUE;
 
+#ifdef  __DEBUG__
     IF_TRACED(TRC_PACKET)
 	dbgprintf("gen=%d, numsta=%d, stations=[", gen, numstations);
     END_TRACE
+#endif
 
     /* parse seenlist, and decide if we are acked in this frame */
 
     for (i=0; p+1 <= limit && i<numstations; i++, p++)
     {
+#ifdef  __DEBUG__
         IF_TRACED(TRC_PACKET)
 	    dbgprintf(ETHERADDR_FMT " ", ETHERADDR_PRINT(p));
         END_TRACE
+#endif
 
 	if (ETHERADDR_EQUALS(p, &g_hwaddr))
 	{
@@ -62,9 +68,11 @@ is_acking_me(void)
 	     * acked addresses */
 	}
     }
+#ifdef  __DEBUG__
     IF_TRACED(TRC_PACKET)
 	dbgprintf("]\n");
     END_TRACE
+#endif
 
     if (i != numstations)
 	warn("rx_discover: truncated frame: ended at station %d, "
@@ -97,6 +105,7 @@ static
 enum sm_Status
 smS_NascentHandler  ( protocol_event_t *evt )
 {
+#ifdef  __DEBUG__
     IF_TRACED(TRC_STATE)
         printf("smS (Nascent): Entered with event %s",smEvent_names[evt->evtType]);
         if (g_this_event.evtType==evtPacketRcvd)
@@ -106,6 +115,7 @@ smS_NascentHandler  ( protocol_event_t *evt )
             puts("");
         }
     END_TRACE
+#endif
 
     switch (evt->evtType)
     {
@@ -128,17 +138,21 @@ smS_NascentHandler  ( protocol_event_t *evt )
             {
 /**/            DEBUG({puts("is acking me....");})
                 evt->isAckingMe = TRUE;
+#ifdef  __DEBUG__
                 IF_TRACED(TRC_STATE)
                     printf("smS[%X] (Nascent): Leaving for Complete.\n", (uint)evt->ssn);
                 END_TRACE
+#endif
                 evt->ssn->ssn_state = smS_Complete;
                 restart_inactivity_timer((evt->ssn->ssn_TypeOfSvc == ToS_TopologyDiscovery) ? TOPO_CMD_ACTIVITYTIMEOUT : TOPO_GENERAL_ACTIVITYTIMEOUT);
             } else {
 /**/            DEBUG({puts("is NOT acking me....");})
                 evt->isAckingMe = FALSE;
+#ifdef  __DEBUG__
                 IF_TRACED(TRC_STATE)
                     printf("smS[%X] (Nascent): Leaving for Pending.\n", (uint)evt->ssn);
                 END_TRACE
+#endif
                 evt->ssn->ssn_state = smS_Pending;
                 restart_inactivity_timer(TOPO_HELLO_ACTIVITYTIMEOUT);
             }
@@ -155,9 +169,11 @@ smS_NascentHandler  ( protocol_event_t *evt )
       case evtHelloDelayTimeout:
       case evtInactivityTimeout:
       default :
+#ifdef  __DEBUG__
         IF_TRACED(TRC_STATE)
             printf("smS: Nascent handler ignored event %s\n",smEvent_names[evt->evtType]);
         END_TRACE
+#endif
         break;
     }
 
@@ -170,6 +186,7 @@ static
 enum sm_Status
 smS_PendingHandler  ( protocol_event_t *evt )
 {
+#ifdef  __DEBUG__
     IF_TRACED(TRC_STATE)
         printf("smS[%p%s] (Pending): Entered with event %s", evt->ssn,
                (evt->ssn == g_topo_session)?"-T":"", smEvent_names[evt->evtType]);
@@ -180,6 +197,7 @@ smS_PendingHandler  ( protocol_event_t *evt )
             puts("");
         }
     END_TRACE
+#endif
 
      switch (evt->evtType)
     {
@@ -202,26 +220,32 @@ smS_PendingHandler  ( protocol_event_t *evt )
             {
                 bool_t  isActuallyInternal = g_this_event.isInternalEvt;
 
+#ifdef  __DEBUG__
                 IF_TRACED(TRC_PACKET)
                     printf("smS (Pending): Discover-ack, new XID (%d) != old XID (%d); resetting topo session....\n",
                            g_sequencenum, evt->ssn->ssn_XID);
                 END_TRACE
+#endif
                 g_this_event.evtType = evtResetRcvd;
                 g_this_event.isInternalEvt = TRUE;
                 smT_process_event( &g_this_event );
                 g_this_event.evtType = evtDiscoverRcvd;
                 g_this_event.isInternalEvt = isActuallyInternal;
+#ifdef  __DEBUG__
                 IF_TRACED(TRC_PACKET)
                     printf("smS (Pending): After topo reset, re-creating the topo-session ptr....\n");
                 END_TRACE
+#endif
                 g_topo_session = evt->ssn;
                 /* Regardless of whether this is acking or not, we must accept the new XID, unless it's zero */
                 evt->ssn->ssn_XID = g_sequencenum;
             }
 
+#ifdef  __DEBUG__
             IF_TRACED(TRC_STATE)
                 printf("smS[%X] (Pending): Leaving for Complete.\n", (uint)evt->ssn);
             END_TRACE
+#endif
             evt->ssn->ssn_state = smS_Complete;
             restart_inactivity_timer((evt->ssn->ssn_TypeOfSvc == ToS_TopologyDiscovery) ? TOPO_CMD_ACTIVITYTIMEOUT : TOPO_GENERAL_ACTIVITYTIMEOUT);
         } else {
@@ -232,18 +256,22 @@ smS_PendingHandler  ( protocol_event_t *evt )
             {
                 bool_t  isActuallyInternal = g_this_event.isInternalEvt;
 
+#ifdef  __DEBUG__
                 IF_TRACED(TRC_PACKET)
                     printf("smS (Pending): Discover-noack, new XID (%d) != old XID (%d); resetting topo session....\n",
                            g_sequencenum, evt->ssn->ssn_XID);
                 END_TRACE
+#endif
                 g_this_event.evtType = evtResetRcvd;
                 g_this_event.isInternalEvt = TRUE;
                 smT_process_event( &g_this_event );
                 g_this_event.evtType = evtDiscoverRcvd;
                 g_this_event.isInternalEvt = isActuallyInternal;
+#ifdef  __DEBUG__
                 IF_TRACED(TRC_PACKET)
                     printf("smS (Pending): After topo reset, re-creating the topo-session ptr....\n");
                 END_TRACE
+#endif
                 g_topo_session = evt->ssn;
                 /* Regardless of whether this is acking or not, we must accept the new XID, unless it's zero */
                 evt->ssn->ssn_XID = g_sequencenum;
@@ -264,9 +292,11 @@ smS_PendingHandler  ( protocol_event_t *evt )
             {
                 if ( (ssn->ssn_is_valid) && (ssn->ssn_state==smS_Temporary) )
                 {
+#ifdef  __DEBUG__
                     IF_TRACED(TRC_STATE)
                         printf("smS[%X] (Temporary): Leaving for Nascent.\n", (uint)ssn);
                     END_TRACE
+#endif
                     ssn->ssn_state = smS_Nascent;
                     CANCEL(ssn->ssn_InactivityTimer);
                     ssn->ssn_is_valid = FALSE;
@@ -274,9 +304,11 @@ smS_PendingHandler  ( protocol_event_t *evt )
             }
         }
         /* In any case, reset (invalidate) this session */
+#ifdef  __DEBUG__
         IF_TRACED(TRC_STATE)
             printf("smS[%X] (Pending): Leaving for Nascent.\n", (uint)evt->ssn);
         END_TRACE
+#endif
         evt->ssn->ssn_state = smS_Nascent;
         CANCEL(evt->ssn->ssn_InactivityTimer);
         evt->ssn->ssn_is_valid = FALSE;
@@ -287,9 +319,11 @@ smS_PendingHandler  ( protocol_event_t *evt )
 	if (--(evt->ssn->ssn_count) == 0)
 	{
             evt->ssn->ssn_state = smS_Complete;
+#ifdef  __DEBUG__
             IF_TRACED(TRC_STATE)
               printf("smS[%X] (Pending): Leaving for Complete.\n", (uint)evt->ssn);
             END_TRACE
+#endif
 	}
 	break;
 
@@ -299,9 +333,11 @@ smS_PendingHandler  ( protocol_event_t *evt )
       case evtChargeTimeout:
       case evtEmitTimeout:
       default :
+#ifdef  __DEBUG__
         IF_TRACED(TRC_STATE)
             printf("smS (Pending): Ignored event %s\n", smEvent_names[evt->evtType]);
         END_TRACE
+#endif
         break;
     }
 
@@ -314,6 +350,7 @@ static
 enum sm_Status
 smS_TemporaryHandler( protocol_event_t *evt )
 {
+#ifdef  __DEBUG__
     IF_TRACED(TRC_STATE)
         printf("smS (Temporary): Entered with event %s",smEvent_names[evt->evtType]);
         if (g_this_event.evtType==evtPacketRcvd)
@@ -323,15 +360,18 @@ smS_TemporaryHandler( protocol_event_t *evt )
             puts("");
         }
     END_TRACE
+#endif
 
     switch (evt->evtType)
     {
       case evtInactivityTimeout:
       case evtResetRcvd:
       case evtHelloDelayTimeout:
+#ifdef  __DEBUG__
         IF_TRACED(TRC_STATE)
             printf("smS[%X] (Temporary): Leaving for Nascent.\n", (uint)evt->ssn);
         END_TRACE
+#endif
         evt->ssn->ssn_state = smS_Nascent;
         CANCEL(evt->ssn->ssn_InactivityTimer);
         evt->ssn->ssn_is_valid = FALSE;
@@ -345,9 +385,11 @@ smS_TemporaryHandler( protocol_event_t *evt )
       case evtChargeTimeout:
       case evtEmitTimeout:
       default:
+#ifdef  __DEBUG__
         IF_TRACED(TRC_STATE)
             printf("smS (Temporary): Ignored event %s\n",smEvent_names[evt->evtType]);
         END_TRACE
+#endif
         break;
     }
 
@@ -360,6 +402,7 @@ static
 enum sm_Status
 smS_CompleteHandler ( protocol_event_t *evt )
 {
+#ifdef  __DEBUG__
     IF_TRACED(TRC_STATE)
         printf("smS (Complete): Entered with event %s",smEvent_names[evt->evtType]);
         if (g_this_event.evtType==evtPacketRcvd)
@@ -369,6 +412,7 @@ smS_CompleteHandler ( protocol_event_t *evt )
             puts("");
         }
     END_TRACE
+#endif
 
     switch (evt->evtType)
     {
@@ -384,9 +428,11 @@ smS_CompleteHandler ( protocol_event_t *evt )
             {
                 if ( (ssn->ssn_is_valid) && (ssn->ssn_state==smS_Temporary) )
                 {
+#ifdef  __DEBUG__
                     IF_TRACED(TRC_STATE)
                         printf("smS[%X] (Temporary): Leaving for Nascent.\n", (uint)ssn);
                     END_TRACE
+#endif
                     ssn->ssn_state = smS_Nascent;
                     CANCEL(ssn->ssn_InactivityTimer);
                     ssn->ssn_is_valid = FALSE;
@@ -396,9 +442,11 @@ smS_CompleteHandler ( protocol_event_t *evt )
 //!!            osl_set_arprx(FALSE, ts);
         }
         /* In any case, reset (invalidate) this session */
+#ifdef  __DEBUG__
         IF_TRACED(TRC_STATE)
             printf("smS[%X] (Complete): Leaving for Nascent.\n", (uint)evt->ssn);
         END_TRACE
+#endif
         evt->ssn->ssn_state = smS_Nascent;
         CANCEL(evt->ssn->ssn_InactivityTimer);
         evt->ssn->ssn_is_valid = FALSE;
@@ -419,18 +467,22 @@ smS_CompleteHandler ( protocol_event_t *evt )
             {
                 bool_t  isActuallyInternal = g_this_event.isInternalEvt;
 
+#ifdef  __DEBUG__
                 IF_TRACED(TRC_PACKET)
                     printf("smS (Complete): Discover-ack, new XID (%d) != old XID (%d); resetting topo session....\n",
                            g_sequencenum, evt->ssn->ssn_XID);
                 END_TRACE
+#endif
                 g_this_event.evtType = evtResetRcvd;
                 g_this_event.isInternalEvt = TRUE;
                 smT_process_event( &g_this_event );
                 g_this_event.evtType = evtDiscoverRcvd;
                 g_this_event.isInternalEvt = isActuallyInternal;
+#ifdef  __DEBUG__
                 IF_TRACED(TRC_PACKET)
                     printf("smS (Complete): After topo reset, re-creating the topo-session ptr....\n");
                 END_TRACE
+#endif
                 g_topo_session = evt->ssn;
                 /* Regardless of whether this is acking or not, we must accept the new XID, unless it's zero */
                 evt->ssn->ssn_XID = g_sequencenum;
@@ -444,24 +496,30 @@ smS_CompleteHandler ( protocol_event_t *evt )
             {
                 bool_t  isActuallyInternal = g_this_event.isInternalEvt;
 
+#ifdef  __DEBUG__
                 IF_TRACED(TRC_PACKET)
                     printf("smS (Complete): Discover-noack, new XID (%d) != old XID (%d); resetting topo session....\n",
                            g_sequencenum, evt->ssn->ssn_XID);
                 END_TRACE
+#endif
                 g_this_event.evtType = evtResetRcvd;
                 g_this_event.isInternalEvt = TRUE;
                 smT_process_event( &g_this_event );
                 g_this_event.evtType = evtDiscoverRcvd;
                 g_this_event.isInternalEvt = isActuallyInternal;
+#ifdef  __DEBUG__
                 IF_TRACED(TRC_PACKET)
                     printf("smS (Complete): After topo reset, re-creating the topo-session ptr....\n");
                 END_TRACE
+#endif
                 g_topo_session = evt->ssn;
                 /* Regardless of whether this is acking or not, we must accept the new XID, unless it's zero */
                 evt->ssn->ssn_XID = g_sequencenum;
+#ifdef  __DEBUG__
                 IF_TRACED(TRC_STATE)
                     printf("smS[%X] (Complete): Leaving for Pending (No-ack, changed XID).\n", (uint)evt->ssn);
                 END_TRACE
+#endif
                 evt->ssn->ssn_state = smS_Pending;
                 restart_inactivity_timer(TOPO_HELLO_ACTIVITYTIMEOUT);
             } else {
@@ -480,9 +538,11 @@ smS_CompleteHandler ( protocol_event_t *evt )
       case evtEmitTimeout:
       case evtHelloDelayTimeout:
       default :
+#ifdef  __DEBUG__
         IF_TRACED(TRC_STATE)
 //*/            printf("smS (Complete): Ignored event %s\n",smEvent_names[evt->evtType]);
         END_TRACE
+#endif
         break;
     }
 
@@ -498,12 +558,15 @@ smS_CompleteHandler ( protocol_event_t *evt )
 enum sm_Status
 smS_process_event( protocol_event_t *evt )
 {
+#ifdef  __DEBUG__
     IF_TRACED(TRC_STATE)
 //*/        printf("smS_process_event: Entered with event %s\n",smEvent_names[evt->evtType]);
     END_TRACE
+#endif
 
     if (evt->ssn == NULL)
     {
+#ifdef  __DEBUG__
         IF_TRACED(TRC_STATE)
             printf("smS (no-state): Not dispatching - no session associated with event %s",
                    smEvent_names[evt->evtType]);
@@ -514,6 +577,7 @@ smS_process_event( protocol_event_t *evt )
                 puts("");
             }
         END_TRACE
+#endif
         return PROCESSING_COMPLETED;
     }
     switch (evt->ssn->ssn_state)

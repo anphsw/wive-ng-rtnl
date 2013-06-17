@@ -49,6 +49,7 @@ static
 enum sm_Status
 smE_QuiescentHandler( protocol_event_t* evt )
 {
+#ifdef  __DEBUG__
     IF_TRACED(TRC_STATE)
         if (evt->evtType != evtBlockTimeout)
         {
@@ -61,6 +62,7 @@ smE_QuiescentHandler( protocol_event_t* evt )
             }
         }
     END_TRACE
+#endif
 
     switch (evt->evtType)
     {
@@ -71,9 +73,11 @@ smE_QuiescentHandler( protocol_event_t* evt )
             {
                 CANCEL(g_block_timer);
                 g_smE_state = smE_Wait;
+#ifdef __DEBUG__
                 IF_DEBUG
                     printf("smE (Quiescent): Leaving for Wait state\n");
                 END_DEBUG
+#endif
             } else {
                 band_InitStats();
                 band_ChooseHelloTime();
@@ -83,9 +87,11 @@ smE_QuiescentHandler( protocol_event_t* evt )
                 }
 //!!            osl_set_arprx(g_osl, TRUE);
                 g_smE_state = smE_Pausing;
+#ifdef __DEBUG__
                 IF_DEBUG
                     printf("smE (Quiescent):  Leaving for Pausing state\n");
                 END_DEBUG
+#endif
             }
         } else {
             /* We are in Quiescent - there should be NO existing sessions, and each should be NEW */
@@ -107,9 +113,11 @@ smE_QuiescentHandler( protocol_event_t* evt )
       case evtHelloDelayTimeout:
       case evtInactivityTimeout:
       default :
+#ifdef __DEBUG__
         IF_DEBUG
 //*/        printf("smE (Quiescent): Ignored event %s\n",smEvent_names[evt->evtType]);
         END_DEBUG
+#endif
         break;
     }
 
@@ -123,6 +131,7 @@ static
 enum sm_Status
 smE_PausingHandler( protocol_event_t* evt )
 {
+#ifdef  __DEBUG__
     IF_TRACED(TRC_STATE)
         if (evt->evtType != evtBlockTimeout)
         {
@@ -136,6 +145,7 @@ smE_PausingHandler( protocol_event_t* evt )
             }
         }
     END_TRACE
+#endif
 
     switch (evt->evtType)
     {
@@ -150,9 +160,11 @@ smE_PausingHandler( protocol_event_t* evt )
         {
             CANCEL(g_block_timer);
 	    g_smE_state = smE_Wait;
+#ifdef __DEBUG__
 	    IF_DEBUG
               printf("smE (Pausing): Leaving for Wait state\n");
 	    END_DEBUG
+#endif
 	}
         break;
 
@@ -177,9 +189,11 @@ smE_PausingHandler( protocol_event_t* evt )
             CANCEL(g_hello_timer);
             CANCEL(g_block_timer);
             g_smE_state = smE_Wait;
+#ifdef __DEBUG__
             IF_DEBUG
                 printf("smE (Pausing): Leaving for Wait state (Only-completed-sessions arc)\n");
             END_DEBUG
+#endif
         }
         break;
 
@@ -196,10 +210,12 @@ smE_PausingHandler( protocol_event_t* evt )
         {
             CANCEL(g_block_timer);
             CANCEL(g_hello_timer);
+#ifdef __DEBUG__
             IF_DEBUG
                 printf("smE (Pausing): Killing the Block- and Hello-timers after getting reset.\n");
                 printf("smE (Pausing): Leaving for Quiescent state\n");
             END_DEBUG
+#endif
             g_smE_state = smE_Quiescent;
         }
         break;
@@ -208,9 +224,11 @@ smE_PausingHandler( protocol_event_t* evt )
       case evtChargeTimeout:
       case evtEmitTimeout:
       default :
+#ifdef __DEBUG__
         IF_DEBUG
 //*/        printf("smE: Pausing state got ignored event %s\n",smEvent_names[evt->evtType]);
         END_DEBUG
+#endif
         break;
     }
 
@@ -224,6 +242,7 @@ static
 enum sm_Status
 smE_WaitHandler( protocol_event_t* evt )
 {
+#ifdef  __DEBUG__
     IF_TRACED(TRC_STATE)
         if (evt->evtType != evtBlockTimeout)
         {
@@ -236,6 +255,7 @@ smE_WaitHandler( protocol_event_t* evt )
             }
         }
     END_TRACE
+#endif
 
     switch (evt->evtType)
     {
@@ -250,9 +270,11 @@ smE_WaitHandler( protocol_event_t* evt )
                 band_InitStats();
                 band_ChooseHelloTime();
                 g_smE_state = smE_Pausing;
+#ifdef __DEBUG__
                 IF_DEBUG
                     printf("smE (Wait): Leaving for Pausing state\n");
                 END_DEBUG
+#endif
             } else {
                 /* just stay here */
             }
@@ -265,9 +287,11 @@ smE_WaitHandler( protocol_event_t* evt )
         if (SessionTableIsEmpty()==TRUE)
         {
             g_smE_state = smE_Quiescent;
+#ifdef __DEBUG__
             IF_DEBUG
                 printf("smE (Wait): Leaving for Quiescent state\n");
             END_DEBUG
+#endif
         }
         break;
 
@@ -279,9 +303,11 @@ smE_WaitHandler( protocol_event_t* evt )
       case evtEmitTimeout:
       case evtHelloDelayTimeout:
       default :
+#ifdef __DEBUG__
         IF_DEBUG
 //*/            printf("smE (Wait): Ignored event %s\n",smEvent_names[evt->evtType]);
         END_DEBUG
+#endif
         break;
     }
 
@@ -300,9 +326,11 @@ smE_WaitHandler( protocol_event_t* evt )
 enum sm_Status
 smE_process_event( protocol_event_t* evt )
 {
+#ifdef __DEBUG__
     IF_DEBUG
 //*/        printf("smE_process_event: Entered with event %s\n",smEvent_names[evt->evtType]);
     END_DEBUG
+#endif
     switch (g_smE_state)
     {
       case smE_Quiescent:
