@@ -75,13 +75,6 @@ UCLINUX_BUILD_SET = 0		# have we set a special config below
 # Pull in common definitions
 include $(ROOTDIR)/vendors/config/common/config.arch
 
-# Get lib config
-include $(ROOTDIR)/lib/.config
-
-# Cleanup TARGET_ARCH variable - workaround for build
-# some apps after include uclib config
-TARGET_ARCH=
-
 ############################################################################
 #
 # General purpose lib building rules,  uClibc.config uses these when
@@ -104,9 +97,6 @@ ifdef CONFIG_LIB_DEBUG
 	CFLAGS  :=  $(if $(LOPT),$(LOPT),-O1) $(WOPT) -g -fno-conserve-stack
 else
 	CFLAGS  :=  $(if $(LOPT),$(LOPT),-Os) $(WOPT) -fomit-frame-pointer -fno-stack-protector -fno-conserve-stack
-endif
-ifdef UCLIBC_HAS_FOPEN_LARGEFILE_MODE
-	CFLAGS += -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64
 endif
 ifdef CONFIG_LIB_SMALLSIZE
 	# Defeat .eh_frame bloat (~25% smaller binary)
@@ -132,6 +122,9 @@ endif
 	CFLAGS  += -DEMBED
 	CFLAGS  += -nostdinc
 
+	# always use large file mode
+	CFLAGS += -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64
+
 	# don't want all the CFLAGS for uClibc/Config
 	ARCH_CFLAGS = $(CFLAGS)
 	CFLAGS  += -Dlinux -D__linux__ -Dunix
@@ -150,9 +143,6 @@ ifdef CONFIG_USER_DEBUG
 	CFLAGS  :=  $(if $(UOPT),$(UOPT),-O1) $(WOPT) -g -fno-conserve-stack
 else
 	CFLAGS  :=  $(if $(UOPT),$(UOPT),-Os) $(WOPT) -fomit-frame-pointer -fno-stack-protector -fno-conserve-stack
-endif
-ifdef UCLIBC_HAS_FOPEN_LARGEFILE_MODE
-	CFLAGS += -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64
 endif
 ifdef CONFIG_USER_SMALLSIZE
 	# Defeat .eh_frame bloat (~25% smaller binary)
@@ -187,6 +177,9 @@ endif
 ifdef CONFIG_LIB_EVENT
 	CFLAGS  += -I$(ROOTDIR)/lib/include_shared/event2
 endif
+	# always use large file mode
+	CFLAGS += -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64
+
 	LDFLAGS  += -L$(ROOTDIR)/lib/lib
 
 	CXXFLAGS = $(CFLAGS) $(INCCXX)

@@ -38,7 +38,7 @@ INCDIR:=$(PREFIX)/include
 # directory for new iptables releases
 RELEASE_DIR:=/tmp
 
-CFLAGS := 
+CFLAGS :=
 CFLAGS += -I$(ROOTDIR)/linux/include  -Iinclude/ 
 CFLAGS += -DIPTABLES_VERSION=\"$(IPTABLES_VERSION)\"
 CFLAGS += -Os -std=gnu99
