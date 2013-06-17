@@ -76,7 +76,7 @@ UCLINUX_BUILD_SET = 0		# have we set a special config below
 include $(ROOTDIR)/vendors/config/common/config.arch
 
 # Get lib config
-include $(ROOTDIR)/config/.config
+include $(ROOTDIR)/lib/.config
 
 ############################################################################
 #
