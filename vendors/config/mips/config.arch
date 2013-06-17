@@ -122,9 +122,6 @@ endif
 	CFLAGS  += -DEMBED
 	CFLAGS  += -nostdinc
 
-	# always use large file mode
-	CFLAGS += -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64
-
 	# don't want all the CFLAGS for uClibc/Config
 	ARCH_CFLAGS = $(CFLAGS)
 	CFLAGS  += -Dlinux -D__linux__ -Dunix
