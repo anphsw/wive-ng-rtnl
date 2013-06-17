@@ -75,6 +75,9 @@ UCLINUX_BUILD_SET = 0		# have we set a special config below
 # Pull in common definitions
 include $(ROOTDIR)/vendors/config/common/config.arch
 
+# Get lib config
+include $(ROOTDIR)/config/.config
+
 ############################################################################
 #
 # General purpose lib building rules,  uClibc.config uses these when
@@ -97,6 +100,9 @@ ifdef CONFIG_LIB_DEBUG
 	CFLAGS  :=  $(if $(LOPT),$(LOPT),-O1) $(WOPT) -g -fno-conserve-stack
 else
 	CFLAGS  :=  $(if $(LOPT),$(LOPT),-Os) $(WOPT) -fomit-frame-pointer -fno-stack-protector -fno-conserve-stack
+endif
+ifdef UCLIBC_HAS_FOPEN_LARGEFILE_MODE
+	CFLAGS += -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64
 endif
 ifdef CONFIG_LIB_SMALLSIZE
 	# Defeat .eh_frame bloat (~25% smaller binary)
@@ -140,6 +146,9 @@ ifdef CONFIG_USER_DEBUG
 	CFLAGS  :=  $(if $(UOPT),$(UOPT),-O1) $(WOPT) -g -fno-conserve-stack
 else
 	CFLAGS  :=  $(if $(UOPT),$(UOPT),-Os) $(WOPT) -fomit-frame-pointer -fno-stack-protector -fno-conserve-stack
+endif
+ifdef UCLIBC_HAS_FOPEN_LARGEFILE_MODE
+	CFLAGS += -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64
 endif
 ifdef CONFIG_USER_SMALLSIZE
 	# Defeat .eh_frame bloat (~25% smaller binary)
