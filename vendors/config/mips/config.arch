@@ -78,6 +78,10 @@ include $(ROOTDIR)/vendors/config/common/config.arch
 # Get lib config
 include $(ROOTDIR)/lib/.config
 
+# Cleanup TARGET_ARCH variable - workaround for build
+# some apps after include uclib config
+TARGET_ARCH=
+
 ############################################################################
 #
 # General purpose lib building rules,  uClibc.config uses these when
