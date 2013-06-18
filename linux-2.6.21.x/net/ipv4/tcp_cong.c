@@ -283,6 +283,7 @@ int tcp_set_congestion_control(struct sock *sk, const char *name)
 void tcp_slow_start(struct tcp_sock *tp)
 {
 	int cnt = 0;
+	unsigned int delta = 0;
 
 	if (sysctl_tcp_abc) {
 		/* RFC3465: Slow Start
@@ -308,9 +309,9 @@ void tcp_slow_start(struct tcp_sock *tp)
 	tp->snd_cwnd_cnt += cnt;
 	while (tp->snd_cwnd_cnt >= tp->snd_cwnd) {
 		tp->snd_cwnd_cnt -= tp->snd_cwnd;
-		if (tp->snd_cwnd < tp->snd_cwnd_clamp)
-			tp->snd_cwnd++;
+		delta++;
 	}
+	tp->snd_cwnd = min(tp->snd_cwnd + delta, tp->snd_cwnd_clamp);
 }
 EXPORT_SYMBOL_GPL(tcp_slow_start);
 
