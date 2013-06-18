@@ -1538,9 +1538,9 @@
 9) usb_modeswitch/data: up to 1.2.6-20130610 version.<br>
 10) xl2tpd: use adaptive retransmission interval.<br>
 11) pppd: workaround for negotiated bad peer addresses.<br>
-12) libcurl: up to 7.30.0 version.<br>
-13) libnfnetlink: version up to 1.0.1.<br>
-14) pppd: small fix adaptive lcp logic.<br>
+12) pppd: small fix adaptive lcp logic.<br>
+13) libcurl: up to 7.30.0 version.<br>
+14) libnfnetlink: version up to 1.0.1.<br>
 15) lld2d: decrease debug and fix regresssion (crash at reive request after load icon file).<br>
 16) init.d: resolv: add domain option at resolv generate to.<br>
 17) init.d: resolv: do not backup old resolv at static dns use.<br>
