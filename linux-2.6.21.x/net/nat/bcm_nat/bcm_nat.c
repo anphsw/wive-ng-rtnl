@@ -129,7 +129,7 @@ bcm_do_bindings(struct nf_conn *ct,
 	unsigned int i = 1;
 
 	/* This check prevent corrupt conntrack data */
-	if(!nat_is_ready(ct) || !skb_is_ready(*pskb)) {
+	if(unlikely(!nat_is_ready(ct) || !skb_is_ready(*pskb))) {
 #ifdef DEBUG
 		if (net_ratelimit())
 		    printk(KERN_DEBUG "bcm_fast_path: SKB or CT not ready for offload\n");
