@@ -1559,15 +1559,16 @@
 30) kernel: tcp: fix ABC in tcp_slow_start().<br>
 31) kernel: tcp: skip empty hash buckets faster in /proc/net/tcp.<br>
 32) kernel: tcp: fix an infinite loop in tcp_slow_start().<br>
-33) kernel: arp: send bcast ARP in neighbours to update arp tables only netdev status change.<br>
-34) kernel: bridge: fastpath + wifi nat offload always update fdb entry without any messages (this normal case).<br>
-35) kernel: bridge: prevent bridging wrong device.<br>
-36) kernel: bridge: avoid ethtool on non running interface.<br>
-37) kernel: bridge: respect RFC2863 operational state.<br>
-38) kernel: tun: use NET_SKB_PAD_ORIG for aligin instead of NET_SKB_PAD(fix regression after speedup l2tp hack).<br>
-39) kernel: usb: fix limited_power setting mistake in hub.c.<br>
-40) kernel: watchdog: move call watchdog from raeth to net/core/dev, for prevent reboot in big traffic at wifi to.<br>
-41) kernel: l2tp: Fix PPP header erasure and memory leak.<br>
+33) kernel: tcp: make snd_cwnd_cnt and snd_cwnd_clamp 32-bit.<br>
+34) kernel: arp: send bcast ARP in neighbours to update arp tables only netdev status change.<br>
+35) kernel: bridge: fastpath + wifi nat offload always update fdb entry without any messages (this normal case).<br>
+36) kernel: bridge: prevent bridging wrong device.<br>
+37) kernel: bridge: avoid ethtool on non running interface.<br>
+38) kernel: bridge: respect RFC2863 operational state.<br>
+39) kernel: tun: use NET_SKB_PAD_ORIG for aligin instead of NET_SKB_PAD(fix regression after speedup l2tp hack).<br>
+40) kernel: usb: fix limited_power setting mistake in hub.c.<br>
+41) kernel: watchdog: move call watchdog from raeth to net/core/dev, for prevent reboot in big traffic at wifi to.<br>
+42) kernel: l2tp: Fix PPP header erasure and memory leak.<br>
 <br>
 <br>
 <br>
