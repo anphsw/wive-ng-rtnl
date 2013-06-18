@@ -284,6 +284,14 @@ void tcp_slow_start(struct tcp_sock *tp)
 {
 	int cnt = 0;
 	unsigned int delta = 0;
+	u32 snd_cwnd = tp->snd_cwnd;
+
+	if (unlikely(!snd_cwnd)) {
+#ifdef DEBUG
+		printk(KERN_ERR "snd_cwnd is nul, please report this bug.\n");
+#endif
+		snd_cwnd = 1U;
+	}
 
 	if (sysctl_tcp_abc) {
 		/* RFC3465: Slow Start
@@ -297,9 +305,9 @@ void tcp_slow_start(struct tcp_sock *tp)
 
 	if (sysctl_tcp_max_ssthresh > 0 &&
 	    tp->snd_cwnd > sysctl_tcp_max_ssthresh)
-		cnt += sysctl_tcp_max_ssthresh>>1;
+		cnt = sysctl_tcp_max_ssthresh>>1;
 	else
-		cnt += tp->snd_cwnd;
+		cnt = snd_cwnd;
 
 	/* RFC3465: We MAY increase by 2 if discovered delayed ack */
 	if (sysctl_tcp_abc > 1 && tp->bytes_acked >= 2*tp->mss_cache)
@@ -307,11 +315,11 @@ void tcp_slow_start(struct tcp_sock *tp)
 	tp->bytes_acked = 0;
 
 	tp->snd_cwnd_cnt += cnt;
-	while (tp->snd_cwnd_cnt >= tp->snd_cwnd) {
-		tp->snd_cwnd_cnt -= tp->snd_cwnd;
+	while (tp->snd_cwnd_cnt >= snd_cwnd) {
+		tp->snd_cwnd_cnt -= snd_cwnd;
 		delta++;
 	}
-	tp->snd_cwnd = min(tp->snd_cwnd + delta, tp->snd_cwnd_clamp);
+	tp->snd_cwnd = min(snd_cwnd + delta, tp->snd_cwnd_clamp);
 }
 EXPORT_SYMBOL_GPL(tcp_slow_start);
 
