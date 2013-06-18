@@ -1004,12 +1004,12 @@ static int pppol2tp_sendmsg(struct kiocb *iocb, struct socket *sock, struct msgh
 	skb_put(skb, 2);
 
 	/* Copy user data into skb */
-	error = memcpy_fromiovec(skb->data, m->msg_iov, total_len);
+	error = memcpy_fromiovec(skb_put(skb, total_len), m->msg_iov,
+				 total_len);
 	if (error < 0) {
 		kfree_skb(skb);
 		goto end;
 	}
-	skb_put(skb, total_len);
 
 	/* Calculate UDP checksum if configured to do so */
 	skb->ip_summed = CHECKSUM_NONE;
