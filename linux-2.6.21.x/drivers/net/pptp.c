@@ -69,7 +69,7 @@ static int pptp_ppp_ioctl(struct ppp_channel *chan, unsigned int cmd,
 			   unsigned long arg);
 static int pptp_rcv_core(struct sock *sk,struct sk_buff *skb);
 
-static struct ppp_channel_ops pptp_chan_ops= {
+static const struct ppp_channel_ops pptp_chan_ops = {
 	.start_xmit = pptp_xmit,
 	.ioctl=pptp_ppp_ioctl,
 };
@@ -825,7 +825,7 @@ static int pptp_ppp_ioctl(struct ppp_channel *chan, unsigned int cmd,
 }
 
 
-static struct pppox_proto pppox_pptp_proto = {
+static const struct pppox_proto pppox_pptp_proto = {
     .create	= pptp_create,
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,15)
     .owner	= THIS_MODULE,
@@ -833,7 +833,7 @@ static struct pppox_proto pppox_pptp_proto = {
 };
 
 #if defined(CONFIG_NET_IPGRE_DEMUX) || defined(CONFIG_NET_IPGRE_DEMUX_MODULE)
-static struct gre_protocol gre_pptp_protocol = {
+static const struct gre_protocol gre_pptp_protocol = {
 	.handler	= pptp_rcv,
 };
 #else
