@@ -3,7 +3,7 @@ VPATH = src
 CFLAGS := -Os -pipe -fpack-struct -Wall -Wno-unused -fno-caller-saves -fno-aggressive-loop-optimizations
 CFLAGS += -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64
 
-ifdef IPV6
+ifdef CONFIG_IPV6
 CFLAGS += -DUSE_IPV6
 endif
 
