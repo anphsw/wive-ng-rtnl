@@ -276,8 +276,6 @@ static inline struct sk_buff *__vlan_hwaccel_put_tag(struct sk_buff *skb, u16 vl
 	return skb;
 }
 
-#define HAVE_VLAN_PUT_TAG
-
 /**
  * vlan_put_tag - inserts VLAN tag according to device features
  * @skb: skbuff to tag
