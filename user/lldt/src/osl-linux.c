@@ -736,7 +736,6 @@ int
 get_ipv6addr(void *data)
 {
 /*    TLVDEF( ipv6addr_t,       ipv6addr,            ,   8,  Access_unset ) */
-
 #ifdef USE_IPV6
     ipv6addr_t* ipv6addr = (ipv6addr_t*) data;
     char	dflt_if[] = {"br0"};
@@ -746,9 +745,6 @@ get_ipv6addr(void *data)
     int plen, scope, dad_status, if_idx;
     char addr6p[8][5];
     int found = 0;
-
-    if (get_ipv6_type() == IPV6_DISABLED)
-	return TLV_GET_FAILED;
 
 #if CAN_FOPEN_IN_SELECT_LOOP
     netinet6 = fopen("/proc/net/if_inet6", "r");
