@@ -1,6 +1,12 @@
 VPATH = src
+
 CFLAGS := -Os -pipe -fpack-struct -Wall -Wno-unused -fno-caller-saves -fno-aggressive-loop-optimizations
 CFLAGS += -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64
+
+ifdef IPV6
+CFLAGS += -DUSE_IPV6
+endif
+
 LD= $(CC)
 
 CONF_H = $(ROOTDIR)/$(LINUXDIR)/include/linux/config.h
@@ -20,5 +26,3 @@ romfs:
 	$(ROMFSINST) -S -e CONFIG_USER_LLTD	/bin/icon.ico
 	$(ROMFSINST) -S -e CONFIG_USER_LLTD	/bin/icon.large.ico
 	$(ROMFSINST) -e CONFIG_USER_LLTD lld2d.conf /etc/lld2d.conf
-
--include .depend
