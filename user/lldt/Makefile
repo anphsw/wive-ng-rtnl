@@ -16,9 +16,6 @@ all: lld2d lld2test
 
 include src/common.mk
 
-depend:
-	$(CC) $(CFLAGS) -M $(DCFILES) >.depend
-
 romfs:
 	$(ROMFSINST) -S init.d/W19lld2d /etc/rc.d/W19lld2d
 	$(ROMFSINST) -s /etc/rc.d/W19lld2d /etc/init.d/lld2d
