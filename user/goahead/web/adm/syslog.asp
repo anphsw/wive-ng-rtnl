@@ -103,7 +103,7 @@ function syslogdSelect(form)
             <td class="title" colspan="2" id="syslogSysLog">System Log Setup:</td>
           </tr>
           <tr>
-            <td class="head">System logging deamon:</td>
+            <td class="head">System logging daemon:</td>
             <td><select name="SysLogd" onChange="syslogdSelect(this.form);">
                 <option value="0">Disable</option>
                 <option value="1">Enable</option>
