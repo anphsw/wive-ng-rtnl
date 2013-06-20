@@ -1572,6 +1572,7 @@
 43) kernel: l2tp: fix PPP header erasure and memory leak.<br>
 44) kernel: l2tp: fix return value in pppol2tp_sendmsg.<br>
 45) kernel: pptp: pptp_rcv_core() misses pskb_may_pull() call.<br>
+46) kernel: pptp: fix skb leak in pptp_xmit.<br>
 <br>
 <br>
 <br>
