@@ -355,8 +355,10 @@ static int pptp_xmit(struct ppp_channel *chan, struct sk_buff *skb)
 #else
  	err = ip_local_out(skb);
 #endif
+	return 1;
 
 tx_error:
+	kfree_skb(skb);
 	return 1;
 }
 
