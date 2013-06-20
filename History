@@ -1571,6 +1571,7 @@
 42) kernel: watchdog: move call watchdog from raeth to net/core/dev, for prevent reboot in big traffic at wifi to.<br>
 43) kernel: l2tp: fix PPP header erasure and memory leak.<br>
 44) kernel: l2tp: fix return value in pppol2tp_sendmsg.<br>
+45) kernel: pptp: pptp_rcv_core() misses pskb_may_pull() call.<br>
 <br>
 <br>
 <br>

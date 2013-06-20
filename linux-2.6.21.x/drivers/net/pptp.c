@@ -375,17 +375,28 @@ static int pptp_rcv_core(struct sock *sk,struct sk_buff *skb)
 	}
 	
 	header = (struct pptp_gre_header *)(skb->data);
+	headersize  = sizeof(*header);
 
 	/* test if acknowledgement present */
 	if (PPTP_GRE_IS_A(header->ver)){
-			u32 ack = (PPTP_GRE_IS_S(header->flags))?
-					header->ack:header->seq; /* ack in different place if S = 0 */
+		__u32 ack;
 
-			ack = ntohl( ack);
+		if (!pskb_may_pull(skb, headersize))
+			goto drop;
+		header = (struct pptp_gre_header *)(skb->data);
 
-			if (ack > opt->ack_recv) opt->ack_recv = ack;
-			/* also handle sequence number wrap-around  */
-			if (WRAPPED(ack,opt->ack_recv)) opt->ack_recv = ack;
+		/* ack in different place if S = 0 */
+		ack = PPTP_GRE_IS_S(header->flags) ? header->ack : header->seq;
+
+		ack = ntohl( ack);
+
+		if (ack > opt->ack_recv)
+		    opt->ack_recv = ack;
+		/* also handle sequence number wrap-around  */
+		if (WRAPPED(ack,opt->ack_recv))
+		    opt->ack_recv = ack;
+	} else {
+		headersize -= sizeof(header->ack);
 	}
 
 	/* test if payload present */
@@ -393,21 +404,12 @@ static int pptp_rcv_core(struct sock *sk,struct sk_buff *skb)
 		goto drop;
 	}
 
-	headersize  = sizeof(*header);
 	payload_len = ntohs(header->payload_len);
 	seq         = ntohl(header->seq);
 
-	/* no ack present? */
-	if (!PPTP_GRE_IS_A(header->ver)) headersize -= sizeof(header->ack);
 	/* check for incomplete packet (length smaller than expected) */
-	if (skb->len - headersize < payload_len){
-#ifdef DEBUG
-		if (log_level>=1)
-			printk(KERN_INFO"PPTP: discarding truncated packet (expected %d, got %d bytes)\n",
-						payload_len, skb->len - headersize);
-#endif
+	if (!pskb_may_pull(skb, headersize + payload_len))
 		goto drop;
-	}
 
 	payload=skb->data+headersize;
 	/* check for expected sequence number */
