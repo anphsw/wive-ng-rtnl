@@ -1047,17 +1047,20 @@ static int pppol2tp_sendmsg(struct kiocb *iocb, struct socket *sock, struct msgh
 	len = skb->len;
 	error = ip_queue_xmit(skb, 1);
 	error = net_xmit_eval(error);
-
-	/* Update stats */
-	if (error >= 0) {
-		tunnel->stats.tx_packets++;
-		tunnel->stats.tx_bytes += len;
-		session->stats.tx_packets++;
-		session->stats.tx_bytes += len;
-	} else {
+	if (error < 0) {
 		tunnel->stats.tx_errors++;
 		session->stats.tx_errors++;
+		goto end;
 	}
+
+	/* Update stats */
+	tunnel->stats.tx_packets++;
+	tunnel->stats.tx_bytes += len;
+	session->stats.tx_packets++;
+	session->stats.tx_bytes += len;
+
+	EXIT_FUNCTION;
+	return total_len;
 
 end:
 	EXIT_FUNCTION;
@@ -1188,7 +1191,6 @@ static int pppol2tp_xmit(struct ppp_channel *chan, struct sk_buff *skb)
 		}
 		printk("\n");
 	}
-
 
 	/* Reset skb netfilter state */
 	memset(&(IPCB(skb)->opt), 0, sizeof(IPCB(skb)->opt));

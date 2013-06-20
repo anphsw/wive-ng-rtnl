@@ -1569,7 +1569,8 @@
 40) kernel: tun: use NET_SKB_PAD_ORIG for aligin instead of NET_SKB_PAD(fix regression after speedup l2tp hack).<br>
 41) kernel: usb: fix limited_power setting mistake in hub.c.<br>
 42) kernel: watchdog: move call watchdog from raeth to net/core/dev, for prevent reboot in big traffic at wifi to.<br>
-43) kernel: l2tp: Fix PPP header erasure and memory leak.<br>
+43) kernel: l2tp: fix PPP header erasure and memory leak.<br>
+44) kernel: l2tp: fix return value in pppol2tp_sendmsg.<br>
 <br>
 <br>
 <br>
