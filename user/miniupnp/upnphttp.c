@@ -685,7 +685,7 @@ Process_upnphttp(struct upnphttp * h)
 		}
 		else if(n==0)
 		{
-			syslog(LOG_WARNING, "HTTP Connection closed unexpectedly");
+			syslog(LOG_DEBUG, "HTTP Connection closed unexpectedly");
 			h->state = EToDelete;
 		}
 		else
