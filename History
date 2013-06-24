@@ -1574,6 +1574,7 @@
 45) kernel: l2tp: fix return value in pppol2tp_sendmsg.<br>
 46) kernel: pptp: pptp_rcv_core() misses pskb_may_pull() call.<br>
 47) kernel: pptp: fix skb leak in pptp_xmit.<br>
+48) kernel: pppoe: avoid reallocation skb.<br>
 <br>
 <br>
 <br>
