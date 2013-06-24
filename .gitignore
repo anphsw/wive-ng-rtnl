@@ -103,6 +103,8 @@ romfs
 /lib/libiconv/libcharset/libtool
 /lib/libiconv/libcharset/Makefile
 /lib/libiconv/libcharset/configure
+/lib/libiconv/libcharset/config.h.in
+/lib/libiconv/libcharset/include/localcharset.h.build.in
 /lib/libupnp/configure
 /lib/libupnp/Makefile
 /lib/libupnp/aclocal.m4
