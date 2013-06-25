@@ -1556,27 +1556,29 @@
 27) kernel: net: constify some ppp/pptp structs.<br>
 28) kernel: net: remove sk_init() helper.<br>
 29) kernel: net: sock: adapt SOCK_MIN_RCVBUF and SOCK_MIN_SNDBUF.<br>
-30) kernel: net: unmap fragment page once iterator is done.<br>
-31) kernel: tcp: use TCP_DEFAULT_INIT_RCVWND in tcp_fixup_rcvbuf().<br>
-32) kernel: tcp: speedup tcp_fixup_rcvbuf().<br>
-33) kernel: tcp: fix ABC in tcp_slow_start().<br>
-34) kernel: tcp: skip empty hash buckets faster in /proc/net/tcp.<br>
-35) kernel: tcp: fix an infinite loop in tcp_slow_start().<br>
-36) kernel: tcp: make snd_cwnd_cnt and snd_cwnd_clamp 32-bit.<br>
-37) kernel: arp: send bcast ARP in neighbours to update arp tables only netdev status change.<br>
-38) kernel: bridge: fastpath + wifi nat offload always update fdb entry without any messages (this normal case).<br>
-39) kernel: bridge: prevent bridging wrong device.<br>
-40) kernel: bridge: avoid ethtool on non running interface.<br>
-41) kernel: bridge: respect RFC2863 operational state.<br>
-42) kernel: tun: use NET_SKB_PAD_ORIG for aligin instead of NET_SKB_PAD(fix regression after speedup l2tp hack).<br>
-43) kernel: usb: fix limited_power setting mistake in hub.c.<br>
-44) kernel: watchdog: move call watchdog from raeth to net/core/dev, for prevent reboot in big traffic at wifi to.<br>
-45) kernel: l2tp: fix PPP header erasure and memory leak.<br>
-46) kernel: l2tp: fix return value in pppol2tp_sendmsg.<br>
-47) kernel: pptp: pptp_rcv_core() misses pskb_may_pull() call.<br>
-48) kernel: pptp: fix skb leak in pptp_xmit.<br>
-49) kernel: pppoe: avoid reallocation skb.<br>
-50) kernel: arp: tune params to resolve arp entry timeout issue.<br>
+30) kernel: tcp: use TCP_DEFAULT_INIT_RCVWND in tcp_fixup_rcvbuf().<br>
+31) kernel: tcp: speedup tcp_fixup_rcvbuf().<br>
+32) kernel: tcp: fix ABC in tcp_slow_start().<br>
+33) kernel: tcp: skip empty hash buckets faster in /proc/net/tcp.<br>
+34) kernel: tcp: fix an infinite loop in tcp_slow_start().<br>
+35) kernel: tcp: make snd_cwnd_cnt and snd_cwnd_clamp 32-bit.<br>
+36) kernel: arp: send bcast ARP in neighbours to update arp tables only netdev status change.<br>
+37) kernel: bridge: fastpath + wifi nat offload always update fdb entry without any messages (this normal case).<br>
+38) kernel: bridge: prevent bridging wrong device.<br>
+39) kernel: bridge: avoid ethtool on non running interface.<br>
+40) kernel: bridge: respect RFC2863 operational state.<br>
+41) kernel: tun: use NET_SKB_PAD_ORIG for aligin instead of NET_SKB_PAD(fix regression after speedup l2tp hack).<br>
+42) kernel: usb: fix limited_power setting mistake in hub.c.<br>
+43) kernel: watchdog: move call watchdog from raeth to net/core/dev, for prevent reboot in big traffic at wifi to.<br>
+44) kernel: l2tp: fix PPP header erasure and memory leak.<br>
+45) kernel: l2tp: fix return value in pppol2tp_sendmsg.<br>
+46) kernel: pptp: pptp_rcv_core() misses pskb_may_pull() call.<br>
+47) kernel: pptp: fix skb leak in pptp_xmit.<br>
+48) kernel: pppoe: avoid reallocation skb.<br>
+49) kernel: arp: tune params to resolve arp entry timeout issue.<br>
+50) kernel: net/core: allow receive on active slaves.<br>
+51) kernel: net/core: allow certain receives on inactive slave.<br>
+52) kernel: net/core: uninline skb_bond().<br>
 <br>
 <br>
 <br>
