@@ -1579,6 +1579,7 @@
 50) kernel: net/core: allow receive on active slaves.<br>
 51) kernel: net/core: allow certain receives on inactive slave.<br>
 52) kernel: net/core: uninline skb_bond().<br>
+53) kernel: mips: fix get_user_page_fast() for mips with cache alias.<br>
 <br>
 <br>
 <br>
