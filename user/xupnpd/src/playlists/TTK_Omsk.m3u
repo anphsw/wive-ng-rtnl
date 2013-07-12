@@ -87,7 +87,7 @@ udp://@239.54.7.72:1224
 udp://@239.54.5.45:1224
 #EXTINF:-1 tvg-shift=3 tvg-logo="Спорт" tvg-name="Спорт_2" ,Спорт
 udp://239.54.5.54:1224
-#EXTINF:-1 tvg-shift=+3 tvg-logo="Первый Канал HD" tvg-name="Первый_канал" , Первый
+#EXTINF:-1 tvg-shift=+3 tvg-logo="Первый Канал HD" tvg-name="Первый-HD" , Первый-HD
 udp://@239.54.5.61:1224
 #EXTINF:-1 tvg-shift=3 tvg-logo="Россия 2" tvg-name="Россия_2_(Спорт)" ,Россия 2
 udp://@239.54.5.77:1224
