@@ -15,14 +15,13 @@ SHARED_LIBS = n
 #ADDLIB+=ipx_ntop.o ipx_pton.o
 
 HOSTCC = gcc
-CCOPTS = -D_GNU_SOURCE -Os -Wall -ffunction-sections -fdata-sections
-CFLAGS = -I../include $(DEFINES) $(CCOPTS)
+CCOPTS = -D_GNU_SOURCE -Os -Wall -fno-aggressive-loop-optimizations -fno-caller-saves
+CFLAGS = -I$(ROOTDIR)/lib/include -I../include $(DEFINES) $(CCOPTS)
 
 LDLIBS += -L../lib -lnetlink -lutil
-LDFLAGS += -Wl,--gc-sections
 
-#SUBDIRS=lib ip tc misc #netem genl
-SUBDIRS=lib tc misc
+#SUBDIRS=lib ip tc misc netem genl
+SUBDIRS=lib tc
 
 LIBNETLINK=../lib/libnetlink.a
 LIBUTIL=../lib/libutil.a
