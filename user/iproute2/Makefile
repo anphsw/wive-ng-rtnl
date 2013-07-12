@@ -4,7 +4,7 @@ ADDLIB=
 #DEFINES= -DRESOLVE_HOSTNAMES
 #LDLIBS+=-lresolv
 
-SHARED_LIBS = n
+#NO_SHARED_LIBS = y
 
 #options for decnet
 #DEFINES+= -DDECNET
