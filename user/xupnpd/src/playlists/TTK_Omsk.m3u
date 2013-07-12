@@ -13,7 +13,7 @@ udp://@239.0.23.14:1224
 udp://@239.0.23.8:1224
 #EXTINF:-1 tvg-shift=0 tvg-logo="ТНТ" tvg-name="ТНТ" crop=688x556+16+8 ,ТНТ
 udp://@239.0.23.13:1224
-#EXTINF:-1 tvg-shift=0 tvg-logo="MTV" tvg-name="MTV-Russia" crop=688x556+16+8 ,MTV
+#EXTINF:-1 tvg-shift=0 tvg-logo="Пятница" tvg-name="Пятница" crop=688x556+16+8 ,Пятница
 udp://@239.54.5.65:1224
 #EXTINF:-1 tvg-shift=0 tvg-logo="ОТР" tvg-name="ОТР" crop=688x556+16+8, ОТР
 udp://@239.54.5.146:1224
