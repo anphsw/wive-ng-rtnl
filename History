@@ -1582,7 +1582,11 @@
 53) kernel: mips: fix get_user_page_fast() for mips with cache alias.<br>
 54) kernel: net: sock: fix TCP_SKB_MIN_TRUESIZE.<br>
 55) shaper: tc: fix regression.<br>
-56) xl2tpd: import upstream fixes (17.06.2013).<br>
+
+<br>
+<b>4.3.x</b><br>
+1) pppd: import upstream fixes from git (10.06.2013).<br>
+3) xl2tpd: import upstream fixes from git (17.06.2013).<br>
 <br>
 <br>
 <br>

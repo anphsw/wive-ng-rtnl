@@ -562,7 +562,7 @@ link_required(unit)
 void start_link(unit)
     int unit;
 {
-    status = EXIT_NEGOTIATION_FAILED;
+    status = EXIT_CONNECT_FAILED;
     new_phase(PHASE_SERIALCONN);
 
     hungup = 0;
@@ -674,9 +674,11 @@ link_terminated(unit)
 	(*the_channel->cleanup)();
 
     if (doing_multilink && multilink_master) {
-	if (!bundle_terminating)
+	if (!bundle_terminating) {
 	    new_phase(PHASE_MASTER);
-	else
+	    if (master_detach && !detached)
+		detach();
+	} else
 	    mp_bundle_terminated();
     } else
 	new_phase(PHASE_DEAD);

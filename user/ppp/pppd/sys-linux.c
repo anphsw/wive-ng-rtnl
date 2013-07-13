@@ -2119,6 +2119,7 @@ ppp_registered(void)
     return ret;
 }
 
+#ifndef HAVE_LOGWTMP
 /********************************************************************
  *
  * ppp_available - check whether the system has any ppp interfaces
@@ -2582,7 +2583,7 @@ int sif6addr (int unit, eui64_t our_eui64, eui64_t his_eui64)
 
     return 1;
 }
-
+#endif /* HAVE_LOGWTMP */
 
 /********************************************************************
  *

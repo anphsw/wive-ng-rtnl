@@ -71,6 +71,9 @@ USE_BUILTIN_CRYPTO=y
 # Enable EAP SRP-SHA1 authentication (requires libsrp)
 #USE_SRP=y
 
+# Use libutil
+#USE_LIBUTIL=y
+
 MAXOCTETS=y
 LONGCOUNTER=y
 LCP_ADAPTIVE_NEW_LOCIG=y
@@ -156,6 +159,11 @@ ifneq ($(wildcard /usr/include/crypt.h),)
 CFLAGS  += -DHAVE_CRYPT_H=1
 LIBS	+= -lcrypt
 endif
+endif
+
+ifdef USE_LIBUTIL
+CFLAGS	+= -DHAVE_LOGWTMP=1
+LIBS	+= -lutil
 endif
 
 ifdef NEEDDES
