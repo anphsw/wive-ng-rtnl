@@ -121,6 +121,20 @@ the gateway, when IPCP negotiation is successfully completed.
 This entry is removed when the PPP connection is broken.  This option
 is privileged if the \fInodefaultroute\fR option has been specified.
 .TP
+.B multipledefaultroutes
+This option is a flag to the defaultroute option. If defaultroute is
+set and this flag is also set, pppd will add the new default route
+even if there is already a default route, allowing multiple default
+routes.
+.TP
+.B replacedefaultroute
+This option is a flag to the defaultroute option. If defaultroute is
+set and this flag is also set, pppd replaces an existing default route
+with the new default route.
+.TP
+.B defaultmetric \fIn
+The metric of the default route configured by pppd; default is 0.
+.TP
 .B disconnect \fIscript
 Execute the command specified by \fIscript\fR, by passing it to a
 shell, after
@@ -192,6 +206,9 @@ this option, pppd
 will not accept a different value from the peer in the IPCP
 negotiation, unless the \fIipcp\-accept\-local\fR and/or
 \fIipcp\-accept\-remote\fR options are given, respectively.
+.TP
+.B +ipv6
+Enable the IPv6CP and IPv6 protocols.
 .TP
 .B +ipv6
 Enable the IPv6CP and IPv6 protocols.
@@ -295,6 +312,20 @@ logged through syslog with facility \fIdaemon\fR and level
 \fIdebug\fR.  This information can be directed to a file by setting up
 /etc/syslog.conf appropriately (see syslog.conf(5)).
 .TP
+.B noext-traffic
+Do not count incoming traffic against the idle time set with the idle
+option.  The default idle option behavior is to count both outgoing
+and incoming traffic.  This can be very helpful when remote hosts
+keeping sending unwanted traffic, thereby keeping the connection up.
+
+Note that this \fIcannot\fR prevent programs from responding to incoming
+requests and in doing so defeat the idle option.  The route program
+\fIreject\fR parameter might help in that case when enough is known about
+IP address space of the site generating the unwanted requests.  If you
+initiated contact with the site generating the requests, say with a
+web browser, then denying ingress with the "reject" parameter probably
+won't be a viable option.
+.
 .B default\-asyncmap
 Disable asyncmap negotiation, forcing all control characters to be
 escaped for both the transmit and the receive direction.
@@ -458,6 +489,14 @@ With this option, pppd will accept the peer's idea of our local IPv6
 interface identifier, even if the local IPv6 interface identifier
 was specified in an option.
 .TP
+.B ipv6cp\-accept\-local
+With this option, pppd will accept the peer's idea of our local IPv6
+address, even if the local IPv6 address was specified in an option.
+.TP
+.B ipv6cp\-accept\-remote
+With this option, pppd will accept the peer's idea of its (remote) IPv6
+address, even if the remote IPv6 address was specified in an option.
+.TP
 .B ipv6cp\-max\-configure \fIn
 Set the maximum number of IPv6CP configure-request transmissions to
 \fIn\fR (default 10).
@@ -557,6 +596,11 @@ pppd will enable IP forwarding (i.e. set /proc/sys/net/ipv4/ip_forward
 to 1) if the \fIproxyarp\fR option is used, and will enable the
 dynamic IP address option (i.e. set /proc/sys/net/ipv4/ip_dynaddr to
 1) in demand mode if the local address changes.
+.TP
+.B lcp\-echo\-adaptive
+If this option is used with the \fIlcp\-echo\-failure\fR option then
+pppd will send LCP echo\-request frames only if no traffic was received
+from the peer since the last echo\-request was sent.
 .TP
 .B lcp\-echo\-failure \fIn
 If this option is given, pppd will presume the peer to be dead
