@@ -1655,25 +1655,24 @@ int netif_rx(struct sk_buff *skb)
 {
 	struct softnet_data *queue;
 	unsigned long flags;
-#if defined(CONFIG_BRIDGE_FASTPATH) && !defined(CONFIG_BRIDGE_NETFILTER)
-	struct net_bridge_port *p;
-#endif
+
         /* if dev not set - must drop this packet */
 	if(unlikely(!skb->dev))
 	    goto drop;
 
 #if defined(CONFIG_BRIDGE_FASTPATH) && !defined(CONFIG_BRIDGE_NETFILTER)
-	p = skb->dev->br_port;
-
-	if (bridge_fast_path_enabled && (p!=NULL)) {
-	    struct net_bridge *br = p->br;
-
-	    if (br != NULL) {
+	/* fast bridge forward */
+	if (bridge_fast_path_enabled && (skb->dev->br_port != NULL)) {
+	    struct net_bridge_port *p = skb->dev->br_port;
+	    /* switch src<->dst brige port */
+	    if (p->br != NULL) {
+		struct net_bridge *br = p->br;
 		struct net_bridge_fdb_entry *dst;
 
 		br_fdb_update(br, p, eth_hdr(skb)->h_source);
 		dst = br_fdb_get(br, eth_hdr(skb)->h_dest);
 
+		/* fast xmit */
 		if(dst != NULL && dst->dst->dev != NULL && !dst->is_local) {
 		    struct net_device *dev;
 

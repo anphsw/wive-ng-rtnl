@@ -1587,6 +1587,7 @@
 <b>4.3.x</b><br>
 1) pppd: import upstream fixes from git (10.06.2013).<br>
 3) xl2tpd: import upstream fixes from git (17.06.2013).<br>
+4) kernel: bridge_fastpath: small rework.<br>
 <br>
 <br>
 <br>
