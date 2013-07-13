@@ -1661,28 +1661,29 @@ int netif_rx(struct sk_buff *skb)
 	    goto drop;
 
 #if defined(CONFIG_BRIDGE_FASTPATH) && !defined(CONFIG_BRIDGE_NETFILTER)
-	/* fast bridge forward */
-	if (bridge_fast_path_enabled && (skb->dev->br_port != NULL)) {
+	if (bridge_fast_path_enabled && skb->pkt_type != PACKET_LOOPBACK) {
 	    struct net_bridge_port *p = skb->dev->br_port;
-	    /* switch src<->dst brige port */
-	    if (p->br != NULL) {
-		struct net_bridge *br = p->br;
-		struct net_bridge_fdb_entry *dst;
+	    if (p != NULL) {
+		/* switch src<->dst brige port */
+	        if (p->br != NULL) {
+		    struct net_bridge *br = p->br;
+		    struct net_bridge_fdb_entry *dst;
 
-		br_fdb_update(br, p, eth_hdr(skb)->h_source);
-		dst = br_fdb_get(br, eth_hdr(skb)->h_dest);
+		    br_fdb_update(br, p, eth_hdr(skb)->h_source);
+		    dst = br_fdb_get(br, eth_hdr(skb)->h_dest);
 
-		/* fast xmit */
-		if(dst != NULL && dst->dst->dev != NULL && !dst->is_local) {
-		    struct net_device *dev;
+		    /* fast xmit */
+		    if(dst != NULL && dst->dst->dev != NULL && !dst->is_local) {
+			struct net_device *dev;
 
-	    	    skb->dev = dst->dst->dev;
-	    	    skb_push(skb, ETH_HLEN);
+	    		skb->dev = dst->dst->dev;
+	    		skb_push(skb, ETH_HLEN);
 
-	    	    dev = skb->dev;
-	    	    dev->hard_start_xmit(skb, dev);
+	    		dev = skb->dev;
+	    		dev->hard_start_xmit(skb, dev);
 
-	    	    return NET_RX_SUCCESS;
+	    		return NET_RX_SUCCESS;
+		    }
 		}
 	    }
 	}
