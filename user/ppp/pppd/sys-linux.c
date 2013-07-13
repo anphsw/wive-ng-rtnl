@@ -2533,6 +2533,7 @@ int cifaddr (int unit, u_int32_t our_adr, u_int32_t his_adr)
 
     return 1;
 }
+#endif /* HAVE_LOGWTMP */
 
 #ifdef INET6
 /********************************************************************
@@ -2583,7 +2584,6 @@ int sif6addr (int unit, eui64_t our_eui64, eui64_t his_eui64)
 
     return 1;
 }
-#endif /* HAVE_LOGWTMP */
 
 /********************************************************************
  *
