@@ -70,6 +70,8 @@ get_param() {
 }
 
 reload() {
+    get_param
+    gen_hosts
     is_run=`pidof dnsmasq`
     if [ "$is_run" != "" ]; then
 	$LOG "Send HUP to dnsmasq."
