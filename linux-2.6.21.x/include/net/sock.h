@@ -225,7 +225,9 @@ struct sock {
 	atomic_t		sk_omem_alloc;
 	struct sk_buff_head	sk_receive_queue;
 	struct sk_buff_head	sk_write_queue;
+#ifdef CONFIG_NET_DMA
 	struct sk_buff_head	sk_async_wait_queue;
+#endif
 	int			sk_wmem_queued;
 	int			sk_forward_alloc;
 	gfp_t			sk_allocation;

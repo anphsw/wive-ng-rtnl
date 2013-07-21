@@ -1590,6 +1590,7 @@
 3) init.d: dns suffix recived by dhcp must used as wan domain suffix.<br>
 4) xupnpd: up to 1.03 rev 385 version.<br>
 5) kernel: bridge_fastpath: small rework.<br>
+6) kernel: net: ifdef struct sock::sk_async_wait_queue.<br>
 <br>
 <br>
 <br>
