@@ -74,47 +74,36 @@ extern int (*ra_sw_nat_hook_rx)(struct sk_buff *skb);
 static struct kmem_cache *skbuff_head_cache __read_mostly;
 static struct kmem_cache *skbuff_fclone_cache __read_mostly;
 
-/*
- *	Keep out-of-line to prevent kernel bloat.
- *	__builtin_return_address is not used because it is not always
- *	reliable.
- */
-
 /**
- *	skb_over_panic	- 	private function
- *	@skb: buffer
- *	@sz: size
- *	@here: address
+ *	skb_panic - private function for out-of-line support
+ *	@skb:	buffer
+ *	@sz:	size
+ *	@addr:	address
+ *	@msg:	skb_over_panic or skb_under_panic
  *
- *	Out of line support code for skb_put(). Not user callable.
+ *	Out-of-line support for skb_put() and skb_push().
+ *	Called via the wrapper skb_over_panic() or skb_under_panic().
+ *	Keep out of line to prevent kernel bloat.
+ *	__builtin_return_address is not used because it is not always reliable.
  */
-static void skb_over_panic(struct sk_buff *skb, int sz, void *here)
+static void skb_panic(struct sk_buff *skb, unsigned int sz, void *addr,
+		      const char msg[])
 {
-	printk(KERN_EMERG "skb_over_panic: text:%p len:%d put:%d head:%p "
-			  "data:%p tail:%#lx end:%#lx dev:%s\n",
-	       here, skb->len, sz, skb->head, skb->data,
-	       (unsigned long)skb->tail, (unsigned long)skb->end,
-	       skb->dev ? skb->dev->name : "<NULL>");
+	pr_emerg("%s: text:%p len:%d put:%d head:%p data:%p tail:%#lx end:%#lx dev:%s\n",
+		 msg, addr, skb->len, sz, skb->head, skb->data,
+		 (unsigned long)skb->tail, (unsigned long)skb->end,
+		 skb->dev ? skb->dev->name : "<NULL>");
 	BUG();
 }
 
-/**
- *	skb_under_panic	- 	private function
- *	@skb: buffer
- *	@sz: size
- *	@here: address
- *
- *	Out of line support code for skb_push(). Not user callable.
- */
-
-static void skb_under_panic(struct sk_buff *skb, int sz, void *here)
+static void skb_over_panic(struct sk_buff *skb, unsigned int sz, void *addr)
 {
-	printk(KERN_EMERG "skb_under_panic: text:%p len:%d put:%d head:%p "
-			  "data:%p tail:%#lx end:%#lx dev:%s\n",
-	       here, skb->len, sz, skb->head, skb->data,
-	       (unsigned long)skb->tail, (unsigned long)skb->end,
-	       skb->dev ? skb->dev->name : "<NULL>");
-	BUG();
+	skb_panic(skb, sz, addr, __func__);
+}
+
+static void skb_under_panic(struct sk_buff *skb, unsigned int sz, void *addr)
+{
+	skb_panic(skb, sz, addr, __func__);
 }
 
 /* 	Allocate a new skbuff. We do this ourselves so we can fill in a few
@@ -2115,7 +2104,6 @@ EXPORT_SYMBOL(skb_copy_and_csum_bits);
 EXPORT_SYMBOL(skb_copy_and_csum_dev);
 EXPORT_SYMBOL(skb_copy_bits);
 EXPORT_SYMBOL(skb_copy_expand);
-EXPORT_SYMBOL(skb_over_panic);
 EXPORT_SYMBOL(skb_pad);
 EXPORT_SYMBOL(skb_put);
 EXPORT_SYMBOL(skb_push);
@@ -2124,7 +2112,6 @@ EXPORT_SYMBOL(skb_segment);
 EXPORT_SYMBOL(skb_store_bits);
 EXPORT_SYMBOL(skb_pull_rcsum);
 EXPORT_SYMBOL(skb_realloc_headroom);
-EXPORT_SYMBOL(skb_under_panic);
 EXPORT_SYMBOL(skb_dequeue);
 EXPORT_SYMBOL(skb_dequeue_tail);
 EXPORT_SYMBOL(skb_insert);
