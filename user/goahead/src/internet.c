@@ -1323,11 +1323,12 @@ int findRoutingRule(char *rrs, char *buf, const char *dest, const char *netmask,
 	return -1;
 }
 
-static void removeRoutingRuleNvram(const char *iface, const char *dest, const char *netmask, const char *gw, const char *true_if)
+static void removeRoutingRuleNvram(const char *iface, const char *dest, const char *netmask, const char *gw)
 {
 	char rule[256];
-	char c_iface[32], c_dest[32], c_netmask[32], c_true_if[32], c_gw[32];
+	char c_iface[32], c_dest[32], c_netmask[32], c_gw[32];
 	char *old = nvram_get(RT2860_NVRAM, "RoutingRules");
+
 	// Check that NVRAM contains variable
 	if (old == NULL)
 	    return;
@@ -1366,13 +1367,10 @@ static void removeRoutingRuleNvram(const char *iface, const char *dest, const ch
 			// Get interface
 			if ((getNthValueSafe(3, rule, ',', c_iface, sizeof(c_iface)) == -1))
 				continue;
-			// Get true interface name
-			if ((getNthValueSafe(4, rule, ',', c_true_if, sizeof(c_true_if)) == -1))
-				continue;
 
 			// Check if rule not matches
-			if (!((strcmp(iface, c_iface)==0) && (strcmp(dest, c_dest)==0) && (strcmp(netmask, c_netmask)==0) &&
-				(strcmp(gw, c_gw)==0) && (strcmp(true_if, c_true_if)==0))) {
+			if (!((strcmp(iface, c_iface)==0) && (strcmp(dest, c_dest)==0) &&
+			    (strcmp(netmask, c_netmask)==0) && (strcmp(gw, c_gw)==0))) {
 				// Store rule
 				if (strlen(buf) > 0)
 				    *(p++) = ';';
@@ -1863,8 +1861,8 @@ static void editRouting(webs_t wp, char_t *path, char_t *query)
 		}
 		else if (iaction == 2) // Remove route
 		{
-			removeRoutingRuleNvram(iface, destination, netmask, gateway, true_iface);
-			websWrite(wp, T("Delete route: %s, %s, %s, %s, %s<br>\n"), iface, destination, netmask, gateway, true_iface);
+			removeRoutingRuleNvram(iface, destination, netmask, gateway);
+			websWrite(wp, T("Delete route: %s, %s, %s, %s<br>\n"), iface, destination, netmask, gateway);
 		}
 	}
 
