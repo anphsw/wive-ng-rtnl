@@ -103,7 +103,7 @@ start() {
 	    {
     		AdvSendAdvert on;
     		MinRtrAdvInterval 30;
-    		MaxRtrAdvInterval 100;
+    		MaxRtrAdvInterval 1800;
     		prefix ${ipv6prefix}:${ipv6subnet}::1/64
     		{
             		AdvOnLink on;
@@ -112,7 +112,7 @@ start() {
     		};
 		RDNSS ${ipv6prefix}:${ipv6subnet}::1 2001:4860:4860::8888
                 {
-                        AdvRDNSSLifetime 600;
+                        AdvRDNSSLifetime 1800;
                 };
 	    };
 	" > /etc/radvd.conf
