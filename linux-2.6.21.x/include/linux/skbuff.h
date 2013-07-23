@@ -1041,7 +1041,7 @@ static inline int pskb_may_pull(struct sk_buff *skb, unsigned int len)
  *
  *	Return the number of bytes of free space at the head of an &sk_buff.
  */
-static inline int skb_headroom(const struct sk_buff *skb)
+static inline unsigned int skb_headroom(const struct sk_buff *skb)
 {
 	return skb->data - skb->head;
 }
@@ -1387,7 +1387,7 @@ static inline struct sk_buff *pskb_copy(struct sk_buff *skb,
  *	Returns true if modifying the header part of the cloned buffer
  *	does not requires the data to be copied.
  */
-static inline int skb_clone_writable(struct sk_buff *skb, int len)
+static inline int skb_clone_writable(struct sk_buff *skb, unsigned int len)
 {
 	return !skb_header_cloned(skb) &&
 	       skb_headroom(skb) + len <= skb->hdr_len;

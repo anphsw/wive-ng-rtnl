@@ -670,7 +670,7 @@ ip6ip6_tnl_xmit(struct sk_buff *skb, struct net_device *dev)
 	struct dst_entry *dst;
 	struct net_device *tdev;
 	int mtu;
-	int max_headroom = sizeof(struct ipv6hdr);
+	unsigned int max_headroom = sizeof(struct ipv6hdr);
 	u8 proto;
 	int err;
 	int pkt_len;

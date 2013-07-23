@@ -166,7 +166,7 @@ inline int ip_finish_output2(struct sk_buff *skb)
 {
 	struct dst_entry *dst = skb->dst;
 	struct net_device *dev = dst->dev;
-	int hh_len = LL_RESERVED_SPACE(dev);
+	unsigned int hh_len = LL_RESERVED_SPACE(dev);
 
 	/* Be paranoid, rather than too clever. */
 	if (unlikely(skb_headroom(skb) < hh_len && dev->hard_header)) {
