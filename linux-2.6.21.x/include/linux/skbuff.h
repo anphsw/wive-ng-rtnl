@@ -1554,7 +1554,7 @@ static inline int pskb_trim_rcsum(struct sk_buff *skb, unsigned int len)
                      skb = tmp, tmp = skb->next)
 
 #define skb_queue_walk_from(queue, skb)                                                \
-		for (; (skb != (struct sk_buff *)(queue));			\
+		for (; skb != (struct sk_buff *)(queue);			\
                     skb = skb->next)
 
 #define skb_queue_walk_from_safe(queue, skb, tmp)                              \
@@ -1669,7 +1669,7 @@ static inline int skb_csum_unnecessary(const struct sk_buff *skb)
  *	if skb->ip_summed is CHECKSUM_UNNECESSARY which indicates that the
  *	hardware has already verified the correctness of the checksum.
  */
-static inline unsigned int skb_checksum_complete(struct sk_buff *skb)
+static inline __sum16 skb_checksum_complete(struct sk_buff *skb)
 {
 	return skb_csum_unnecessary(skb) ?
 	       0 : __skb_checksum_complete(skb);
