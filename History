@@ -1598,6 +1598,7 @@
 11) kernel: net: ifdef struct sock::sk_async_wait_queue.<br>
 12) kernel: net: treat the sign of the result of skb_headroom() consistently.<br>
 13) kernel: bridge: fix race with topology change timer.<br>
+14) kernel: bridge: set priority of STP packets.<br>
 <br>
 <br>
 <br>
