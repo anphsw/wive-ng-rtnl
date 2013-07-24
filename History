@@ -1588,15 +1588,15 @@
 1) pppd: import upstream fixes from git (10.06.2013).<br>
 2) xl2tpd: import upstream fixes from git (17.06.2013).<br>
 3) init.d: dns suffix recived by dhcp must used as wan domain suffix.<br>
-4) xupnpd: up to 1.03 rev 385 version.<br>
+4) xupnpd: up to 1.03 rev 387 version.<br>
 5) goahead: fix remove routes in some situations.<br>
 6) kernel: bridge_fastpath: small rework.<br>
-7) kernel: net: ifdef struct sock::sk_async_wait_queue.<br>
-8) kernel: DIV_ROUND_UP cleanup.<br>
-9) kernel: skbuff: nf_conntrack_put_reasm: fix lost skb not  NULL check.<br>
-10) kernel: fix return type of skb_checksum_complete().<br>
-11) kernel: net: Treat the sign of the result of skb_headroom() consistently.<br>
-12) kernel: nf_bridge: remove holes in struct nf_bridge_info.<br>
+7) kernel: DIV_ROUND_UP cleanup.<br>
+8) kernel: skbuff: nf_conntrack_put_reasm: fix lost skb not  NULL check.<br>
+9) kernel: fix return type of skb_checksum_complete().<br>
+10) kernel: nf_bridge: remove holes in struct nf_bridge_info.<br>
+11) kernel: net: ifdef struct sock::sk_async_wait_queue.<br>
+12) kernel: net: treat the sign of the result of skb_headroom() consistently.<br>
 <br>
 <br>
 <br>
