@@ -97,8 +97,6 @@ void br_stp_disable_port(struct net_bridge_port *p)
 	int wasroot;
 
 	br = p->br;
-	printk(KERN_INFO "%s: port %i(%s) entering %s state\n",
-	       br->dev->name, p->port_no, p->dev->name, "disabled");
 
 	br_ifinfo_notify(RTM_DELLINK, p);
 
@@ -111,6 +109,8 @@ void br_stp_disable_port(struct net_bridge_port *p)
         p->accumulation = 0;
         del_timer(&p->bwctrl_timer);
 #endif
+	printk(KERN_INFO "%s: port %i(%s) entering %s state\n",
+	       br->dev->name, p->port_no, p->dev->name, "disabled");
 
 	del_timer(&p->message_age_timer);
 	del_timer(&p->forward_delay_timer);
