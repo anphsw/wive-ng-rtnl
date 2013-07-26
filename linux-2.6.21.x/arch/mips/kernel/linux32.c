@@ -363,7 +363,7 @@ sys32_ipc(u32 call, int first, int second, int third, u32 ptr, u32 fifth)
 		err = compat_sys_shmctl(first, second, compat_ptr(ptr));
 		break;
 	default:
-		err = -EINVAL;
+		err = -ENOSYS;
 		break;
 	}
 

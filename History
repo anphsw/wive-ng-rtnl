@@ -1600,6 +1600,7 @@
 13) kernel: net: treat the sign of the result of skb_headroom() consistently.<br>
 14) kernel: bridge: fix race with topology change timer.<br>
 15) kernel: bridge: set priority of STP packets.<br>
+16) kernel: mips: compat: return same error ENOSYS as native for invalid operation.<br>
 <br>
 <br>
 <br>
