@@ -307,7 +307,6 @@ WdsKey=
 WdsList=
 WdsPhyMode=HTMIX;HTMIX;HTMIX;HTMIX
 WdsTxMcs=33;33;33;33
-web2ramfs=1
 WebInit=1
 WirelessMode=8
 WmmCapable=0

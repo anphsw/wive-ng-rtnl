@@ -37,24 +37,18 @@ start() {
 	mkdir -p "$dir" > /dev/null 2>&1
     done
 
-    web2ramfs=`nvram_get 2860 web2ramfs`
-    if [ "$web2ramfs" != "0" ]; then
-	$LOG "Copy web pages to tmpfs."
-        mkdir -p /tmp/web
-        cp -rpf /web/* /tmp/web
-	if [ -d /etc/web/html ]; then
-	    $LOG "Copy user web pages to tmpfs."
-	    mkdir -p /tmp/web/user
-    	    cp -rpf /etc/web/html/* /tmp/web/user
-	fi
-	if [ -d /etc/web/cgi-bin ]; then
-	    $LOG "Copy user cgi-scrips to tmpfs."
-	    mkdir -p /tmp/web/cgi-bin/user
-    	    cp -rpf /etc/web/cgi-bin/* /tmp/web/cgi-bin/user
-	fi
-    else
-	$LOG "web2ramfs variable not set - creating symlink for web pages in tmpfs."
-        ln -sf /web /tmp/web
+    $LOG "Copy web pages to tmpfs."
+    mkdir -p /tmp/web
+    cp -rpf /web/* /tmp/web
+    if [ -d /etc/web/html ]; then
+	$LOG "Copy user web pages to tmpfs."
+	mkdir -p /tmp/web/user
+    	cp -rpf /etc/web/html/* /tmp/web/user
+    fi
+    if [ -d /etc/web/cgi-bin ]; then
+	$LOG "Copy user cgi-scrips to tmpfs."
+	mkdir -p /tmp/web/cgi-bin/user
+    	cp -rpf /etc/web/cgi-bin/* /tmp/web/cgi-bin/user
     fi
 
     # this may be need for some apps
