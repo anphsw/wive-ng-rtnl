@@ -236,29 +236,31 @@ case "$1" in
 		$LOG "Use static DNS."
 		# resolv.conf allready generated in internet.sh
 	    else
-		rm -f $RESOLV_CONF
-        	# set domain name from DHCP/NVRAM
-    		if [ "$domain" != "" ]; then
-		    echo "domain $domain" >> $RESOLV_CONF
-		else
-		    echo "domain $HostName.lo" >> $RESOLV_CONF
-		fi
-		if [ "$dns" != "" ] && [ "$REPLACE_DNS" = "1" ]; then
-		    $LOG "Renew DNS from dhcp $dns $domain"
-		    # parce dnsservers
-		    for i in $dns ; do
-	    		echo nameserver $i >> $RESOLV_CONF
-			ROUTE_NS=`ip route get "$i" | grep dev | cut -f -3 -d " "`
-			if [ "$ROUTE_NS" != "" ] && [ "$i" != "$first_dgw" ]; then
-			    $LOG "Add static route to DNS $ROUTE_NS dev $interface"
-			    REPLACE="ip route replace $ROUTE_NS dev $interface"
-			    $REPLACE
-			fi
-		    done
-		else
-		    $LOG "Server not send DNS. Please manual set DNS in wan config. Temp use google dns."
-	    	    echo nameserver 8.8.8.8 >> $RESOLV_CONF
-	    	    echo nameserver 8.8.4.4 >> $RESOLV_CONF
+		if [ "$REPLACE_DNS" = "1" ]; then
+		    rm -f $RESOLV_CONF
+        	    # set domain name from DHCP/NVRAM
+    		    if [ "$domain" != "" ]; then
+			echo "domain $domain" >> $RESOLV_CONF
+		    else
+			echo "domain $HostName.lo" >> $RESOLV_CONF
+		    fi
+		    if [ "$dns" != "" ]; then
+			$LOG "Renew DNS from dhcp $dns $domain"
+			# parce dnsservers
+			for i in $dns ; do
+	    		    echo nameserver $i >> $RESOLV_CONF
+			    ROUTE_NS=`ip route get "$i" | grep dev | cut -f -3 -d " "`
+			    if [ "$ROUTE_NS" != "" ] && [ "$i" != "$first_dgw" ]; then
+				$LOG "Add static route to DNS $ROUTE_NS dev $interface"
+				REPLACE="ip route replace $ROUTE_NS dev $interface"
+				$REPLACE
+			    fi
+			done
+		    else
+			$LOG "Server not send DNS. Please manual set DNS in wan config. Temp use google dns."
+	    		echo nameserver 8.8.8.8 >> $RESOLV_CONF
+	    		echo nameserver 8.8.4.4 >> $RESOLV_CONF
+		    fi
 		fi
 	    fi
 	    if [ "$wins" != "" ]; then
