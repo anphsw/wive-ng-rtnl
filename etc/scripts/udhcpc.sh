@@ -262,13 +262,14 @@ case "$1" in
 	    		echo nameserver 8.8.4.4 >> $RESOLV_CONF
 		    fi
 		fi
+		# read for all write by root
+		chmod 644 "$RESOLV_CONF" > /dev/null 2>&1
 	    fi
+	    # get wins servers
 	    if [ "$wins" != "" ]; then
 		echo "$wins" > $WINS_CONF
 		chmod 644 "$WINS_CONF" > /dev/null 2>&1
 	    fi
-	    # read for all write by root
-	    chmod 644 "$RESOLV_CONF" > /dev/null 2>&1
 	    # restart some external services depended by wan ip
 	    $LOG "Restart needed services"
 	    services_restart.sh dhcp
