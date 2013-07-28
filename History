@@ -1589,18 +1589,19 @@
 2) xl2tpd: import upstream fixes from git (17.06.2013).<br>
 3) init.d: dns suffix recived by dhcp must used as wan domain suffix.<br>
 4) init.d: radvd: tune config for correct support 6to4 mode.<br>
-5) xupnpd: up to 1.03 rev 387 version.<br>
-6) goahead: fix remove routes in some situations.<br>
-7) kernel: bridge_fastpath: small rework.<br>
-8) kernel: DIV_ROUND_UP cleanup.<br>
-9) kernel: skbuff: nf_conntrack_put_reasm: fix lost skb not  NULL check.<br>
-10) kernel: fix return type of skb_checksum_complete().<br>
-11) kernel: nf_bridge: remove holes in struct nf_bridge_info.<br>
-12) kernel: net: ifdef struct sock::sk_async_wait_queue.<br>
-13) kernel: net: treat the sign of the result of skb_headroom() consistently.<br>
-14) kernel: bridge: fix race with topology change timer.<br>
-15) kernel: bridge: set priority of STP packets.<br>
-16) kernel: mips: compat: return same error ENOSYS as native for invalid operation.<br>
+5) udhcpc: prevent replace PPPOE DNS from udhcp renew.<br>
+6) xupnpd: up to 1.03 rev 387 version.<br>
+7) goahead: fix remove routes in some situations.<br>
+8) kernel: bridge_fastpath: small rework.<br>
+9) kernel: DIV_ROUND_UP cleanup.<br>
+10) kernel: skbuff: nf_conntrack_put_reasm: fix lost skb not  NULL check.<br>
+11) kernel: fix return type of skb_checksum_complete().<br>
+12) kernel: nf_bridge: remove holes in struct nf_bridge_info.<br>
+13) kernel: net: ifdef struct sock::sk_async_wait_queue.<br>
+14) kernel: net: treat the sign of the result of skb_headroom() consistently.<br>
+15) kernel: bridge: fix race with topology change timer.<br>
+16) kernel: bridge: set priority of STP packets.<br>
+17) kernel: mips: compat: return same error ENOSYS as native for invalid operation.<br>
 <br>
 <br>
 <br>

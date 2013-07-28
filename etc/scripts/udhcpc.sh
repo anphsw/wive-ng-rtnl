@@ -23,15 +23,19 @@ ROUTELIST_DGW=""
 ROUTELIST_FGW=""
 
 # Get MTU config and VPN DGW mode
-eval `nvram_buf_get 2860 wan_manual_mtu vpnDGW dhcpSwReset RouteUpOnce HostName lan_ipaddr lan_netmask`
+eval `nvram_buf_get 2860 wan_manual_mtu vpnDGW vpnPeerDNS dhcpSwReset RouteUpOnce HostName lan_ipaddr lan_netmask`
 
 # Renew flag
 FULL_RENEW=1
 
-# If pppoe mode and dgw in pppoe no need replace default gw
+# If pppoe mode and dgw in pppoe no need replace default gw and dns at lease renew
 REPLACE_DGW=1
+REPLACE_DNS=1
 if [ "$vpnEnabled" = "on" ] && [ "$vpnDGW" = "1" ] && [ "$vpnType" = "0" ]; then
     REPLACE_DGW=0
+fi
+if [ "$vpnEnabled" = "on" ] && [ "$vpnPeerDNS" = "on" ] && [ "$vpnType" = "0" ]; then
+    REPLACE_DNS=0
 fi
 
 if [ "$broadcast" != "" ]; then
@@ -239,7 +243,7 @@ case "$1" in
 		else
 		    echo "domain $HostName.lo" >> $RESOLV_CONF
 		fi
-		if [ "$dns" != "" ]; then
+		if [ "$dns" != "" ] && [ "$REPLACE_DNS" = "1" ]; then
 		    $LOG "Renew DNS from dhcp $dns $domain"
 		    # parce dnsservers
 		    for i in $dns ; do
