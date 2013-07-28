@@ -106,8 +106,6 @@ getVpnIfName() {
 	if [ "$if_tmp" != "" ]; then
 	    vpn_if="$if_tmp"
 	fi
-    else
-	vpn_if=""
     fi
 }
 

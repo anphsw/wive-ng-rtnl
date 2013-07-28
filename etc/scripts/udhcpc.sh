@@ -31,7 +31,7 @@ REPLACE_DGW=1
 REPLACE_DNS=1
 
 # If mode = pppoe, dgw need in pppoe, dns get from pppoe and pppoe is up - no need replace default gw and dns at lease renew
-if [ "$vpnEnabled" = "on" ] && [ "$vpnType" = "0" ] && [ "$vpn_if" != "" ]; then
+if [ "$vpnEnabled" = "on" ] && [ "$vpnType" = "0" ] && [ -f /tmp/vpn_if_name ]; then
     if  [ "$vpnDGW" = "1" ]; then
 	REPLACE_DGW=0
     fi
