@@ -28,14 +28,16 @@ eval `nvram_buf_get 2860 wan_manual_mtu vpnDGW vpnPeerDNS dhcpSwReset RouteUpOnc
 # Renew flag
 FULL_RENEW=1
 
-# If pppoe mode and dgw in pppoe no need replace default gw and dns at lease renew
+# If mode = pppoe, dgw need in pppoe, dns get from pppoe and pppoe is up - no need replace default gw and dns at lease renew
 REPLACE_DGW=1
 REPLACE_DNS=1
-if [ "$vpnEnabled" = "on" ] && [ "$vpnDGW" = "1" ] && [ "$vpnType" = "0" ]; then
-    REPLACE_DGW=0
-fi
-if [ "$vpnEnabled" = "on" ] && [ "$vpnPeerDNS" = "on" ] && [ "$vpnType" = "0" ]; then
-    REPLACE_DNS=0
+if [ "$vpnEnabled" = "on" ] && [ "$vpnType" = "0" ] && [ "$vpn_if" != "" ]; then
+    if  [ "$vpnDGW" = "1" ]; then
+	REPLACE_DGW=0
+    fi
+    if [ "$vpnPeerDNS" = "on" ]; then
+	REPLACE_DNS=0
+    fi
 fi
 
 if [ "$broadcast" != "" ]; then
