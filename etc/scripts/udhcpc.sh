@@ -23,7 +23,7 @@ ROUTELIST_DGW=""
 ROUTELIST_FGW=""
 
 # Get MTU config and VPN DGW mode
-eval `nvram_buf_get 2860 wan_manual_mtu vpnDGW vpnPeerDNS dhcpSwReset RouteUpOnce HostName lan_ipaddr lan_netmask`
+eval `nvram_buf_get 2860 wan_manual_mtu vpnDGW vpnPeerDNS dhcpSwReset HostName lan_ipaddr lan_netmask`
 
 # Renew flags
 FULL_RENEW=1
@@ -129,10 +129,10 @@ case "$1" in
     # DGW/MSROUTES/STATICROUTES/CLASSFULLROUTES/USERROUTES
     ########################################################################################################
         #
-	# update routes if first exec script or new ip selected or not set RouteUpOnce=1
+	# update routes if first exec script or new ip selected
 	# default route with metric 0 is through $iface?
 	#
-	if [ "$FULL_RENEW" = "1" ] || [ "$RouteUpOnce" = "0" ] || [ ! -f /tmp/routes_applied ]; then
+	if [ "$FULL_RENEW" = "1" ] || [ ! -f /tmp/routes_applied ]; then
 	    # Get default gateway
 	    if [ "$router" != "" ]; then
 		# if ip not changed not need delete old default route
