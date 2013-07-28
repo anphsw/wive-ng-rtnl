@@ -229,9 +229,8 @@ case "$1" in
     ########################################################################################################
     # DNS/WINS and services
     ########################################################################################################
-
         if [ "$FULL_RENEW" = "1" ]; then
-	    # Get DNS servers
+	    # get DNS servers
 	    if [ "$wan_static_dns" = "on" ]; then
 		$LOG "Use static DNS."
 		# resolv.conf allready generated in internet.sh
@@ -261,9 +260,9 @@ case "$1" in
 	    		echo nameserver 8.8.8.8 >> $RESOLV_CONF
 	    		echo nameserver 8.8.4.4 >> $RESOLV_CONF
 		    fi
+		    # read for all write by root
+		    chmod 644 "$RESOLV_CONF" > /dev/null 2>&1
 		fi
-		# read for all write by root
-		chmod 644 "$RESOLV_CONF" > /dev/null 2>&1
 	    fi
 	    # get wins servers
 	    if [ "$wins" != "" ]; then
