@@ -269,9 +269,6 @@ case "$1" in
 		echo "$wins" > $WINS_CONF
 		chmod 644 "$WINS_CONF" > /dev/null 2>&1
 	    fi
-	    # restart some external services depended by wan ip
-	    $LOG "Restart needed services"
-	    services_restart.sh dhcp
 	fi
 
     ########################################################################################################
@@ -280,6 +277,9 @@ case "$1" in
 	# if dhcp disables restart must from internet.sh
 	# this is restart vpn and others if need
     	if [ "$FULL_RENEW" = "1" ]; then
+	    # restart some external services depended by wan ip
+	    $LOG "Restart needed services"
+	    services_restart.sh dhcp
 	    # send Cisco Discovery request
 	    if [ -f /bin/cdp-send ] && [ -f /etc/scripts/config-cdp.sh ]; then
 		/etc/scripts/config-cdp.sh &
