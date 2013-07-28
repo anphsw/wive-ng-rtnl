@@ -175,7 +175,6 @@ function initValue()
 	form.bridgeFastpath.value = defaultNumber("<% getCfgGeneral(1, "bridgeFastpath"); %>", "1");
 	form.CrondEnable.value = defaultNumber("<% getCfgGeneral(1, "CrondEnable"); %>", "0");
 	form.ForceRenewDHCP.value = defaultNumber("<% getCfgGeneral(1, "ForceRenewDHCP"); %>", "1");
-	form.RouteUpOnce.value = defaultNumber("<% getCfgGeneral(1, "RouteUpOnce"); %>", "1");
 	form.SnmpdEnabled.value = defaultNumber("<% getCfgGeneral(1, "snmpd"); %>", "0");
 	form.ttlStore.value = (store_ttl == '1') ? '1' : '0';
 	form.ttlMcastStore.value = (store_ttl_mcast == '1') ? '1' : '0';
@@ -635,15 +634,6 @@ function displayServiceStatus()
                 <option value="1">Enable</option>
               </select></td>
           </tr>
-          <tr>
-	    <td class="head">Always update routes at DHCP renew lease</td>
-	    <td colspan="4">
-		<select name="RouteUpOnce" class="half">
-		    <option value="1">Disable</option>
-		    <option value="0">Enable</option>
-		</select>
-	    </td>
-	    </tr>
           <tr>
             <td class="head" id="sysfwPingFrmWANFilterHead">Accept ping from WAN</td>
             <td colspan="4"><select name="pingWANEnbl" class="half">

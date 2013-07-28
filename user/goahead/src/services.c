@@ -383,7 +383,6 @@ const parameter_fetch_t service_misc_flags[] =
 	{ T("bridgeFastpath"), "bridgeFastpath", 0, T("1") },
 	{ T("CrondEnable"), "CrondEnable", 0, T("0") },
 	{ T("ForceRenewDHCP"), "ForceRenewDHCP", 0, T("1") },
-	{ T("RouteUpOnce"), "RouteUpOnce", 0, T("1") },
 #ifdef CONFIG_USER_PARPROUTED
 	{ T("arpPT"), "parproutedEnabled", 0, T("0") },
 #endif
