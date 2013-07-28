@@ -211,8 +211,6 @@ static void RaWdgStart(void)
     int HwConf;
 #endif
 
-    printk(KERN_INFO "Started WatchDog Timer.\n");
-
     SetTimerMode(TMR1CTL,WATCHDOG);
 #if defined (CONFIG_RALINK_RT2880) || defined (CONFIG_RALINK_RT2883) || \
     defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3883)
@@ -250,7 +248,7 @@ static void RaWdgStart(void)
     sysRegWrite(TMR1LOAD, WdgLoadValue);
     SetWdgTimerEbl(TMR1CTL,1);
 
-    printk(KERN_INFO "Started WatchDog Timer.\n");
+    printk(KERN_INFO "WatchDog timer started.\n");
 
 }
 
@@ -258,7 +256,7 @@ static void RaWdgStop(void)
 {
 	SetWdgTimerEbl(TMR1CTL,0);
 
-	printk(KERN_INFO "Stopped WatchDog Timer.\n");
+	printk(KERN_INFO "WatchDog timer stopped.\n");
 }
 
 void RaWdgReload(void)
