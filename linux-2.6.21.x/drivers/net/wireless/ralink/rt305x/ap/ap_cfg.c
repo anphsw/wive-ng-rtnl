@@ -7843,7 +7843,7 @@ VOID RTMPAPIoctlE2PROM(
 		{
 			RT28xx_EEPROM_READ16(pAdapter, eepAddr, eepValue);
 			sprintf(msg+strlen(msg), "[0x%04X]:%04X  ", eepAddr , eepValue);
-			if ((eepAddr & 0x7) == 0x7)
+			if ((eepAddr & 0x6) == 0x6)
 				sprintf(msg+strlen(msg), "\n");
 		}
 	}
