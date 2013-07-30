@@ -958,8 +958,6 @@ VOID APMlmeDynamicTxRateSwitchingAdapt(
 				TxRateIdx = MCS5;
 			else if (MCS4 && (Rssi > -82))
 				TxRateIdx = MCS4;
-			else if (MCS4 == 0)							// for B-only mode
-				TxRateIdx = MCS3;
 			else if (MCS3 && (Rssi > -85))
 				TxRateIdx = MCS3;
 			else if (MCS2 && (Rssi > -87))
