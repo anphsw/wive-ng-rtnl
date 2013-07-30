@@ -5746,9 +5746,9 @@ INT Set_AutoChannelSel_Proc(
 	IN	PSTRING		arg)
 {
 	NDIS_802_11_SSID Ssid;
+	NdisZeroMemory(&Ssid, sizeof(NDIS_802_11_SSID));
 	if (strlen(arg) <= MAX_LEN_OF_SSID)
 	{
-		NdisZeroMemory(&Ssid, sizeof(NDIS_802_11_SSID));
 		if (strlen(arg) != 0)
 		{
 			NdisMoveMemory(Ssid.Ssid, arg, strlen(arg));
