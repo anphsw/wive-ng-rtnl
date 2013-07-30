@@ -2104,6 +2104,9 @@ VOID APQuickResponeForRateUpExec(
 #endif // WDS_SUPPORT //
 
 
+		bTxRateChanged = TRUE;
+		pNextTxRate = NULL;
+
 		APMlmeSelectTxRateTable(pAd, pEntry, &pTable, &TableSize, &InitTxRateIdx);
 
 #ifdef NEW_RATE_ADAPT_SUPPORT
