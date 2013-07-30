@@ -253,9 +253,6 @@ static inline UCHAR SelectClearChannelRandom(
 				break;
 			}
 
-			if (RadarChannelCheck(pAd, ch))
-				continue;
-
 			for (i=0; i<pAd->ChannelListNum; i++)
 			{
 				if (pAd->ChannelList[i].Channel == ch)
