@@ -1526,8 +1526,8 @@ USHORT APBuildAssociation(
 				}
 
 				pEntry->MaxHTPhyMode.field.STBC = (pHtCapability->HtCapInfo.RxSTBC & (pAd->CommonCfg.DesiredHtPhy.TxSTBC));
-				if (pHtCapability->HtCapParm.MpduDensity < 4)
-					pEntry->MpduDensity = 4;
+				if (pHtCapability->HtCapParm.MpduDensity < 5)
+					pEntry->MpduDensity = 5;
 				else
 				pEntry->MpduDensity = pHtCapability->HtCapParm.MpduDensity;
 				pEntry->MaxRAmpduFactor = pHtCapability->HtCapParm.MaxRAmpduFactor;
