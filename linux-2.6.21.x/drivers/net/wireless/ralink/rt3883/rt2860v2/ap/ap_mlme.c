@@ -1412,9 +1412,6 @@ VOID APQuickResponeForRateUpExec(
 		)
 			continue;
 
-		bTxRateChanged = TRUE;
-		pNextTxRate = NULL;
-
 		APMlmeSelectTxRateTable(pAd, pEntry, &pTable, &TableSize, &InitTxRateIdx);
 		pEntry->pTable = pTable;
 
