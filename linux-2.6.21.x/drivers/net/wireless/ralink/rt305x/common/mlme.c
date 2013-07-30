@@ -5030,6 +5030,9 @@ VOID MlmeCalculateChannelQuality(
 	}
 #endif // CONFIG_AP_SUPPORT //
 
+	if (pRssiSample == NULL)
+		return;
+
 	MaxRssi = RTMPMaxRssi(pAd, pRssiSample->LastRssi0,
 								pRssiSample->LastRssi1,
 								pRssiSample->LastRssi2);
