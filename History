@@ -1602,6 +1602,7 @@
 15) kernel: bridge: fix race with topology change timer.<br>
 16) kernel: bridge: set priority of STP packets.<br>
 17) kernel: mips: compat: return same error ENOSYS as native for invalid operation.<br>
+18) kernel: rt305x: some backports and fix some issue (exemple MT6620 client compat).<br>
 <br>
 <br>
 <br>
