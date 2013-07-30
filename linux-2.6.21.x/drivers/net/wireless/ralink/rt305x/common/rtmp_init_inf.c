@@ -42,6 +42,9 @@ int rt28xx_init(
 	NDIS_STATUS				Status;
 	UINT32 					MacCsr0 = 0;
 
+	if (pAd == NULL)
+		return FALSE;
+
 #ifdef CONFIG_STA_SUPPORT
 #ifdef PCIE_PS_SUPPORT
 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
