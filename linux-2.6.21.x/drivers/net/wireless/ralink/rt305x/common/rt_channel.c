@@ -1298,7 +1298,8 @@ UINT8 GetCuntryMaxTxPwr(
 			/* FCC should maintain 20/40 Bandwidth, and without antenna gain */
 #ifdef DOT11_N_SUPPORT
 			if ((pAd->CommonCfg.PhyMode >= PHY_11ABGN_MIXED) &&
-				(pAd->CommonCfg.RegTransmitSetting.field.BW == BW_40))
+				(pAd->CommonCfg.RegTransmitSetting.field.BW == BW_40) &&
+				(channel == 1 || channel == 11))
 				return (pAd->ChannelList[i].MaxTxPwr - pAd->CommonCfg.BandedgeDelta - deltaTxStreamPwr);
 			else
 #endif // DOT11_N_SUPPORT //
@@ -1308,7 +1309,8 @@ UINT8 GetCuntryMaxTxPwr(
 		{
 			return (pAd->ChannelList[i].MaxTxPwr - pAd->CommonCfg.AntGain - deltaTxStreamPwr);
 		}
-		else ;
+		else
+		    return 0xff;
 	}
 	else
 #endif // SINGLE_SKU //
