@@ -212,7 +212,7 @@ REG_PAIR   RT305x_RFRegTable[] = {
 	{RF_R24,		0x08},
 	{RF_R25,		0x3F},
 	{RF_R26,	 	0x0D},
-	{RF_R27, 		0x71},
+	{RF_R27, 		0x75},
    	{RF_R28, 		0x10},
 	{RF_R29,		0x07},
 	{RF_R30,		0x00},
