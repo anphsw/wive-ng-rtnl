@@ -516,7 +516,7 @@ VOID AsicUpdateAutoFallBackTable(
 	RTMP_IO_WRITE32(pAd, LG_FBK_CFG1, LgCfg1.word);
 
 #ifdef AGS_SUPPORT
-	if(bUseAGS)
+	if(bUseAGS == TRUE)
 	{
 		Ht3SSCfg0.field.HTMCS16FBK = 0x00; // MCS 16 (BW40, 45Mbps) ==> MCS 0 (BW40, 15Mbps)
 		
@@ -614,10 +614,25 @@ VOID 	AsicUpdateProtect(
 	ProtCfg.field.RTSThEn = 1;
 	ProtCfg.field.ProtectNav = ASIC_SHORTNAV;
 
-	// update PHY mode and rate
-	if (pAd->CommonCfg.Channel > 14)
+	/* update PHY mode and rate*/
+	if (pAd->OpMode == OPMODE_AP) {
+	    /* update PHY mode and rate*/
+	    if (pAd->CommonCfg.Channel > 14)
 		ProtCfg.field.ProtectRate = 0x4000;
-	ProtCfg.field.ProtectRate |= pAd->CommonCfg.RtsRate;	
+	    ProtCfg.field.ProtectRate |= pAd->CommonCfg.RtsRate;
+	} else if (pAd->OpMode == OPMODE_STA) {
+		// Decide Protect Rate for Legacy packet
+		if (pAd->CommonCfg.Channel > 14)
+		{
+			ProtCfg.field.ProtectRate = 0x4000; // OFDM 6Mbps
+		}
+		else
+		{
+			ProtCfg.field.ProtectRate = 0x0000; // CCK 1Mbps
+			if (pAd->CommonCfg.MinTxRate > RATE_11)
+				ProtCfg.field.ProtectRate |= 0x4000; // OFDM 6Mbps
+		}
+	}
 
 	// Handle legacy(B/G) protection
 	if (bDisableBGProtect)
