@@ -1604,6 +1604,7 @@
 17) kernel: bridge: set priority of STP packets.<br>
 18) kernel: mips: compat: return same error ENOSYS as native for invalid operation.<br>
 19) kernel: rt305x: some backports and fix some issue (exemple MT6620 client compat).<br>
+20) kernel: rt3883: some backports and fix some issue (port from rt305x tree).<br>
 <br>
 <br>
 <br>

@@ -905,7 +905,7 @@ VOID APMlmeDynamicTxRateSwitching(
 #ifdef DOT11_N_SUPPORT
 		//when Rssi > -65, there is a lot of interference usually. therefore, the algorithm tends to choose the mcs lower than the optimal one.
 		//by increasing the thresholds, the chosen mcs will be closer to the optimal mcs
-		if ((Rssi > -65) && (pCurrTxRate->Mode >= MODE_HTMIX))
+		if (Rssi > -65)
 		{
 			TrainUp		= (pCurrTxRate->TrainUp + (pCurrTxRate->TrainUp >> 1));
 			TrainDown	= (pCurrTxRate->TrainDown + (pCurrTxRate->TrainDown >> 1));
@@ -1412,6 +1412,9 @@ VOID APQuickResponeForRateUpExec(
 		)
 			continue;
 
+		bTxRateChanged = TRUE;
+		pNextTxRate = NULL;
+
 		APMlmeSelectTxRateTable(pAd, pEntry, &pTable, &TableSize, &InitTxRateIdx);
 		pEntry->pTable = pTable;
 
@@ -1499,7 +1502,7 @@ VOID APQuickResponeForRateUpExec(
 		pCurrTxRate = PTX_RATE_SWITCH_ENTRY(pTable, CurrRateIdx);
 
 #ifdef DOT11_N_SUPPORT
-		if ((Rssi > -65) && (pCurrTxRate->Mode >= MODE_HTMIX))
+		if (Rssi > -65)
 		{
 			TrainUp		= (pCurrTxRate->TrainUp + (pCurrTxRate->TrainUp >> 1));
 			TrainDown	= (pCurrTxRate->TrainDown + (pCurrTxRate->TrainDown >> 1));
