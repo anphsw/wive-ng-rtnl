@@ -6192,6 +6192,8 @@ VOID BssEntrySet(
 		NdisMoveMemory(pBss->SupRate, SupRate, MAX_LEN_OF_SUPPORTED_RATES);	
 	pBss->SupRateLen = SupRateLen;
 	ASSERT(ExtRateLen <= MAX_LEN_OF_SUPPORTED_RATES);
+	if (ExtRateLen > MAX_LEN_OF_SUPPORTED_RATES)
+		ExtRateLen = MAX_LEN_OF_SUPPORTED_RATES;
 	NdisMoveMemory(pBss->ExtRate, ExtRate, ExtRateLen);
 	pBss->NewExtChanOffset = NewExtChanOffset;
 	pBss->ExtRateLen = ExtRateLen;
