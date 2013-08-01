@@ -1608,8 +1608,7 @@
 21) kernel: rt3883: some backports and fix some issue (port from rt305x tree).<br>
 22) kernel: net: loopback: set default mtu to 64K.<br>
 23) kernel: sched: tune cfs param for more correct cpu planning.<br>
-24) kernel: tcp: Don't set SKB owner in tcp_transmit_skb().<br>
-25) kernel: ipv6: Change IPv6 unspecified destination address to ::1 for raw and un-connected sockets.<br>
+24) kernel: ipv6: Change IPv6 unspecified destination address to ::1 for raw and un-connected sockets.<br>
 <br>
 <br>
 <br>
