@@ -1606,6 +1606,7 @@
 19) kernel: mips: compat: return same error ENOSYS as native for invalid operation.<br>
 20) kernel: rt305x: some backports and fix some issue (exemple MT6620 client compat).<br>
 21) kernel: rt3883: some backports and fix some issue (port from rt305x tree).<br>
+22) kernel: net: loopback: set default mtu to 64K.<br>
 <br>
 <br>
 <br>
