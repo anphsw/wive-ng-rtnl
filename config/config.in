@@ -19,6 +19,7 @@ bool 'Build libcurl'		CONFIG_LIB_CURL
 bool 'Build libpcap'		CONFIG_LIB_PCAP
 bool 'Build libiconv'		CONFIG_LIB_ICONV
 bool 'Build libnet'		CONFIG_LIB_NET
+bool 'Build libnl'		CONFIG_LIB_NL
 bool 'Build libnfnetlink'	CONFIG_LIB_NFNETLINK
 bool 'Build libupnp'		CONFIG_LIB_UPNP
 
@@ -136,6 +137,10 @@ fi
 
 comment 'Wireless-tools'
 bool 'wireless_tools support'	CONFIG_USER_WIRELESS_TOOLS
+bool 'iw wireless_tool support'	CONFIG_USER_WIRELESS_IW_TOOL
+if [ "$CONFIG_USER_WIRELESS_IW_TOOL" = "y" ]; then
+	define_bool CONFIG_LIB_NL y
+fi
 endmenu
 
 #############################################################################
