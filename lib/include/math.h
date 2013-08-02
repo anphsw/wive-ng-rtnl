@@ -115,7 +115,7 @@ extern int signgam;
 
 
 /* ISO C99 defines some generic macros which work on any data type.  */
-#if defined(__USE_ISOC99) || defined(__USE_BSD)
+#ifdef __USE_ISOC99
 
 /* Get the architecture specific values describing the floating-point
    evaluation.  The following symbols will get defined:
@@ -234,11 +234,6 @@ enum
 # define MATH_ERREXCEPT	2	/* Exceptions raised by math functions.  */
 
 #endif /* Use ISO C99.  */
-
-/* BSD compat */
-#define finite(x) __finite(x)
-#define finitef(x) __finitef(x)
-#define finitel(x) __finitel(x)
 
 #ifdef	__USE_MISC
 /* Support for various different standard error handling behaviors.  */
