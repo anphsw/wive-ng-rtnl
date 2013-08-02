@@ -58,8 +58,9 @@ struct cpu_workqueue_struct {
  */
 struct workqueue_struct {
 	struct cpu_workqueue_struct *cpu_wq;
+	struct list_head list;
 	const char *name;
-	struct list_head list; 	/* Empty if single thread */
+	int singlethread;
 	int freezeable;		/* Freeze threads during suspend */
 };
 
@@ -69,31 +70,48 @@ static DEFINE_MUTEX(workqueue_mutex);
 static LIST_HEAD(workqueues);
 
 static int singlethread_cpu __read_mostly;
+static cpumask_t cpu_singlethread_map __read_mostly;
 /* optimization, we could use cpu_possible_map */
 static cpumask_t cpu_populated_map __read_mostly;
 
 /* If it's single threaded, it isn't in the list of workqueues. */
 static inline int is_single_threaded(struct workqueue_struct *wq)
 {
-	return list_empty(&wq->list);
+	return wq->singlethread;
+}
+
+static const cpumask_t *wq_cpu_map(struct workqueue_struct *wq)
+{
+	return is_single_threaded(wq)
+		? &cpu_singlethread_map : &cpu_populated_map;
+}
+
+static
+struct cpu_workqueue_struct *wq_per_cpu(struct workqueue_struct *wq, int cpu)
+{
+	if (unlikely(is_single_threaded(wq)))
+		cpu = singlethread_cpu;
+	return per_cpu_ptr(wq->cpu_wq, cpu);
 }
 
 /*
  * Set the workqueue on which a work item is to be run
  * - Must *only* be called if the pending flag is set
  */
-static inline void set_wq_data(struct work_struct *work, void *wq)
+static inline void set_wq_data(struct work_struct *work,
+				struct cpu_workqueue_struct *cwq)
 {
 	unsigned long new;
 
 	BUG_ON(!work_pending(work));
 
-	new = (unsigned long) wq | (1UL << WORK_STRUCT_PENDING);
+	new = (unsigned long) cwq | (1UL << WORK_STRUCT_PENDING);
 	new |= WORK_STRUCT_FLAG_MASK & *work_data_bits(work);
 	atomic_long_set(&work->data, new);
 }
 
-static inline void *get_wq_data(struct work_struct *work)
+static inline
+struct cpu_workqueue_struct *get_wq_data(struct work_struct *work)
 {
 	return (void *) (atomic_long_read(&work->data) & WORK_STRUCT_WQ_DATA_MASK);
 }
@@ -132,16 +150,14 @@ static void __queue_work(struct cpu_workqueue_struct *cwq,
  */
 int fastcall queue_work(struct workqueue_struct *wq, struct work_struct *work)
 {
-	int ret = 0, cpu = get_cpu();
+	int ret = 0;
 
 	if (!test_and_set_bit(WORK_STRUCT_PENDING, work_data_bits(work))) {
-		if (unlikely(is_single_threaded(wq)))
-			cpu = singlethread_cpu;
 		BUG_ON(!list_empty(&work->entry));
-		__queue_work(per_cpu_ptr(wq->cpu_wq, cpu), work);
+		__queue_work(wq_per_cpu(wq, get_cpu()), work);
+		put_cpu();
 		ret = 1;
 	}
-	put_cpu();
 	return ret;
 }
 EXPORT_SYMBOL_GPL(queue_work);
@@ -149,13 +165,10 @@ EXPORT_SYMBOL_GPL(queue_work);
 void delayed_work_timer_fn(unsigned long __data)
 {
 	struct delayed_work *dwork = (struct delayed_work *)__data;
-	struct workqueue_struct *wq = get_wq_data(&dwork->work);
-	int cpu = smp_processor_id();
+	struct cpu_workqueue_struct *cwq = get_wq_data(&dwork->work);
+	struct workqueue_struct *wq = cwq->wq;
 
-	if (unlikely(is_single_threaded(wq)))
-		cpu = singlethread_cpu;
-
-	__queue_work(per_cpu_ptr(wq->cpu_wq, cpu), &dwork->work);
+	__queue_work(wq_per_cpu(wq, smp_processor_id()), &dwork->work);
 }
 
 /**
@@ -169,27 +182,11 @@ void delayed_work_timer_fn(unsigned long __data)
 int fastcall queue_delayed_work(struct workqueue_struct *wq,
 			struct delayed_work *dwork, unsigned long delay)
 {
-	int ret = 0;
-	struct timer_list *timer = &dwork->timer;
-	struct work_struct *work = &dwork->work;
-
-	timer_stats_timer_set_start_info(timer);
+	timer_stats_timer_set_start_info(&dwork->timer);
 	if (delay == 0)
-		return queue_work(wq, work);
+		return queue_work(wq, &dwork->work);
 
-	if (!test_and_set_bit(WORK_STRUCT_PENDING, work_data_bits(work))) {
-		BUG_ON(timer_pending(timer));
-		BUG_ON(!list_empty(&work->entry));
-
-		/* This stores wq for the moment, for the timer_fn */
-		set_wq_data(work, wq);
-		timer->expires = jiffies + delay;
-		timer->data = (unsigned long)dwork;
-		timer->function = delayed_work_timer_fn;
-		add_timer(timer);
-		ret = 1;
-	}
-	return ret;
+	return queue_delayed_work_on(-1, wq, dwork, delay);
 }
 EXPORT_SYMBOL_GPL(queue_delayed_work);
 
@@ -213,12 +210,16 @@ int queue_delayed_work_on(int cpu, struct workqueue_struct *wq,
 		BUG_ON(timer_pending(timer));
 		BUG_ON(!list_empty(&work->entry));
 
-		/* This stores wq for the moment, for the timer_fn */
-		set_wq_data(work, wq);
+		/* This stores cwq for the moment, for the timer_fn */
+		set_wq_data(work, wq_per_cpu(wq, raw_smp_processor_id()));
 		timer->expires = jiffies + delay;
 		timer->data = (unsigned long)dwork;
 		timer->function = delayed_work_timer_fn;
-		add_timer_on(timer, cpu);
+
+		if (unlikely(cpu >= 0))
+			add_timer_on(timer, cpu);
+		else
+			add_timer(timer);
 		ret = 1;
 	}
 	return ret;
@@ -245,8 +246,7 @@ static void run_workqueue(struct cpu_workqueue_struct *cwq)
 		spin_unlock_irq(&cwq->lock);
 
 		BUG_ON(get_wq_data(work) != cwq);
-		if (!test_bit(WORK_STRUCT_NOAUTOREL, work_data_bits(work)))
-			work_release(work);
+		work_clear_pending(work);
 		f(work);
 
 		if (unlikely(in_atomic() || lockdep_depth(current) > 0)) {
@@ -290,18 +290,11 @@ static int worker_thread(void *__cwq)
 	struct cpu_workqueue_struct *cwq = __cwq;
 	DEFINE_WAIT(wait);
 	struct k_sigaction sa;
-	sigset_t blocked;
 
 	if (!cwq->wq->freezeable)
 		current->flags |= PF_NOFREEZE;
 
 	set_user_nice(current, -5);
-
-	/* Block and flush all signals */
-	sigfillset(&blocked);
-	sigprocmask(SIG_BLOCK, &blocked, NULL);
-	flush_signals(current);
-
 	/*
 	 * We inherited MPOL_INTERLEAVE from the booting kernel.
 	 * Set MPOL_DEFAULT to insure node local allocations.
@@ -315,13 +308,13 @@ static int worker_thread(void *__cwq)
 	do_sigaction(SIGCHLD, &sa, (struct k_sigaction *)0);
 
 	for (;;) {
-		if (cwq->wq->freezeable)
-			try_to_freeze();
-
 		prepare_to_wait(&cwq->more_work, &wait, TASK_INTERRUPTIBLE);
-		if (!cwq->should_stop && list_empty(&cwq->worklist))
+		if (!freezing(current) && !cwq->should_stop
+		    && list_empty(&cwq->worklist))
 			schedule();
 		finish_wait(&cwq->more_work, &wait);
+
+		try_to_freeze();
 
 		if (cwq_should_stop(cwq))
 			break;
@@ -393,16 +386,12 @@ static void flush_cpu_workqueue(struct cpu_workqueue_struct *cwq)
  */
 void fastcall flush_workqueue(struct workqueue_struct *wq)
 {
+	const cpumask_t *cpu_map = wq_cpu_map(wq);
+	int cpu;
+
 	might_sleep();
-
-	if (is_single_threaded(wq))
-		flush_cpu_workqueue(per_cpu_ptr(wq->cpu_wq, singlethread_cpu));
-	else {
-		int cpu;
-
-		for_each_cpu_mask(cpu, cpu_populated_map)
-			flush_cpu_workqueue(per_cpu_ptr(wq->cpu_wq, cpu));
-	}
+	for_each_cpu_mask(cpu, *cpu_map)
+		flush_cpu_workqueue(per_cpu_ptr(wq->cpu_wq, cpu));
 }
 EXPORT_SYMBOL_GPL(flush_workqueue);
 
@@ -424,22 +413,24 @@ static void wait_on_work(struct cpu_workqueue_struct *cwq,
 }
 
 /**
- * flush_work - block until a work_struct's callback has terminated
- * @wq: the workqueue on which the work is queued
+ * cancel_work_sync - block until a work_struct's callback has terminated
  * @work: the work which is to be flushed
  *
- * flush_work() will attempt to cancel the work if it is queued.  If the work's
- * callback appears to be running, flush_work() will block until it has
- * completed.
+ * cancel_work_sync() will attempt to cancel the work if it is queued. If the
+ * work's callback appears to be running, cancel_work_sync() will block until
+ * it has completed.
  *
- * flush_work() is designed to be used when the caller is tearing down data
- * structures which the callback function operates upon.  It is expected that,
- * prior to calling flush_work(), the caller has arranged for the work to not
- * be requeued.
+ * cancel_work_sync() is designed to be used when the caller is tearing down
+ * data structures which the callback function operates upon. It is expected
+ * that, prior to calling cancel_work_sync(), the caller has arranged for the
+ * work to not be requeued.
  */
-void flush_work(struct workqueue_struct *wq, struct work_struct *work)
+void cancel_work_sync(struct work_struct *work)
 {
 	struct cpu_workqueue_struct *cwq;
+	struct workqueue_struct *wq;
+	const cpumask_t *cpu_map;
+	int cpu;
 
 	might_sleep();
 
@@ -454,19 +445,16 @@ void flush_work(struct workqueue_struct *wq, struct work_struct *work)
 	 */
 	spin_lock_irq(&cwq->lock);
 	list_del_init(&work->entry);
-	work_release(work);
+	work_clear_pending(work);
 	spin_unlock_irq(&cwq->lock);
 
-	if (is_single_threaded(wq))
-		wait_on_work(per_cpu_ptr(wq->cpu_wq, singlethread_cpu), work);
-	else {
-		int cpu;
+	wq = cwq->wq;
+	cpu_map = wq_cpu_map(wq);
 
-		for_each_cpu_mask(cpu, cpu_populated_map)
-			wait_on_work(per_cpu_ptr(wq->cpu_wq, cpu), work);
-	}
+	for_each_cpu_mask(cpu, *cpu_map)
+		wait_on_work(per_cpu_ptr(wq->cpu_wq, cpu), work);
 }
-EXPORT_SYMBOL_GPL(flush_work);
+EXPORT_SYMBOL_GPL(cancel_work_sync);
 
 
 static struct workqueue_struct *keventd_wq;
@@ -555,36 +543,25 @@ void flush_scheduled_work(void)
 }
 EXPORT_SYMBOL(flush_scheduled_work);
 
-void flush_work_keventd(struct work_struct *work)
-{
-	flush_work(keventd_wq, work);
-}
-EXPORT_SYMBOL(flush_work_keventd);
-
 /**
- * cancel_rearming_delayed_workqueue - reliably kill off a delayed work whose handler rearms the delayed work.
- * @wq:   the controlling workqueue structure
+ * cancel_rearming_delayed_work - kill off a delayed work whose handler rearms the delayed work.
  * @dwork: the delayed work struct
- */
-void cancel_rearming_delayed_workqueue(struct workqueue_struct *wq,
-				       struct delayed_work *dwork)
-{
-	/* Was it ever queued ? */
-	if (!get_wq_data(&dwork->work))
-		return;
-
-	while (!cancel_delayed_work(dwork))
-		flush_workqueue(wq);
-}
-EXPORT_SYMBOL(cancel_rearming_delayed_workqueue);
-
-/**
- * cancel_rearming_delayed_work - reliably kill off a delayed keventd work whose handler rearms the delayed work.
- * @dwork: the delayed work struct
+ *
+ * Note that the work callback function may still be running on return from
+ * cancel_delayed_work(). Run flush_workqueue() or cancel_work_sync() to wait
+ * on it.
  */
 void cancel_rearming_delayed_work(struct delayed_work *dwork)
 {
-	cancel_rearming_delayed_workqueue(keventd_wq, dwork);
+	struct cpu_workqueue_struct *cwq = get_wq_data(&dwork->work);
+
+	/* Was it ever queued ? */
+	if (cwq != NULL) {
+		struct workqueue_struct *wq = cwq->wq;
+
+		while (!cancel_delayed_work(dwork))
+			flush_workqueue(wq);
+	}
 }
 EXPORT_SYMBOL(cancel_rearming_delayed_work);
 
@@ -668,13 +645,19 @@ static int create_workqueue_thread(struct cpu_workqueue_struct *cwq, int cpu)
 
 	cwq->thread = p;
 	cwq->should_stop = 0;
-	if (!is_single_threaded(wq))
-		kthread_bind(p, cpu);
-
-	if (is_single_threaded(wq) || cpu_online(cpu))
-		wake_up_process(p);
 
 	return 0;
+}
+
+static void start_workqueue_thread(struct cpu_workqueue_struct *cwq, int cpu)
+{
+	struct task_struct *p = cwq->thread;
+
+	if (p != NULL) {
+		if (cpu >= 0)
+			kthread_bind(p, cpu);
+		wake_up_process(p);
+	}
 }
 
 struct workqueue_struct *__create_workqueue(const char *name,
@@ -695,12 +678,14 @@ struct workqueue_struct *__create_workqueue(const char *name,
 	}
 
 	wq->name = name;
+	wq->singlethread = singlethread;
 	wq->freezeable = freezeable;
+	INIT_LIST_HEAD(&wq->list);
 
 	if (singlethread) {
-		INIT_LIST_HEAD(&wq->list);
 		cwq = init_cpu_workqueue(wq, singlethread_cpu);
 		err = create_workqueue_thread(cwq, singlethread_cpu);
+		start_workqueue_thread(cwq, -1);
 	} else {
 		mutex_lock(&workqueue_mutex);
 		list_add(&wq->list, &workqueues);
@@ -710,6 +695,7 @@ struct workqueue_struct *__create_workqueue(const char *name,
 			if (err || !cpu_online(cpu))
 				continue;
 			err = create_workqueue_thread(cwq, cpu);
+			start_workqueue_thread(cwq, cpu);
 		}
 		mutex_unlock(&workqueue_mutex);
 	}
@@ -757,22 +743,17 @@ static void cleanup_workqueue_thread(struct cpu_workqueue_struct *cwq, int cpu)
  */
 void destroy_workqueue(struct workqueue_struct *wq)
 {
+	const cpumask_t *cpu_map = wq_cpu_map(wq);
 	struct cpu_workqueue_struct *cwq;
+	int cpu;
 
-	if (is_single_threaded(wq)) {
-		cwq = per_cpu_ptr(wq->cpu_wq, singlethread_cpu);
-		cleanup_workqueue_thread(cwq, singlethread_cpu);
-	} else {
-		int cpu;
+	mutex_lock(&workqueue_mutex);
+	list_del(&wq->list);
+	mutex_unlock(&workqueue_mutex);
 
-		mutex_lock(&workqueue_mutex);
-		list_del(&wq->list);
-		mutex_unlock(&workqueue_mutex);
-
-		for_each_cpu_mask(cpu, cpu_populated_map) {
-			cwq = per_cpu_ptr(wq->cpu_wq, cpu);
-			cleanup_workqueue_thread(cwq, cpu);
-		}
+	for_each_cpu_mask(cpu, *cpu_map) {
+		cwq = per_cpu_ptr(wq->cpu_wq, cpu);
+		cleanup_workqueue_thread(cwq, cpu);
 	}
 
 	free_percpu(wq->cpu_wq);
@@ -812,12 +793,11 @@ static int __devinit workqueue_cpu_callback(struct notifier_block *nfb,
 			return NOTIFY_BAD;
 
 		case CPU_ONLINE:
-			wake_up_process(cwq->thread);
+			start_workqueue_thread(cwq, cpu);
 			break;
 
 		case CPU_UP_CANCELED:
-			if (cwq->thread)
-				wake_up_process(cwq->thread);
+			start_workqueue_thread(cwq, -1);
 		case CPU_DEAD:
 			cleanup_workqueue_thread(cwq, cpu);
 			break;
@@ -827,10 +807,11 @@ static int __devinit workqueue_cpu_callback(struct notifier_block *nfb,
 	return NOTIFY_OK;
 }
 
-void init_workqueues(void)
+void __init init_workqueues(void)
 {
 	cpu_populated_map = cpu_online_map;
 	singlethread_cpu = first_cpu(cpu_possible_map);
+	cpu_singlethread_map = cpumask_of_cpu(singlethread_cpu);
 	hotcpu_notifier(workqueue_cpu_callback, 0);
 	keventd_wq = create_workqueue("events");
 	BUG_ON(!keventd_wq);
