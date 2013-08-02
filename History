@@ -1612,6 +1612,7 @@
 25) kernel: sched: tune cfs param for more correct cpu planning.<br>
 26) kernel: ipv6: Change IPv6 unspecified destination address to ::1 for raw and un-connected sockets.<br>
 27) kernel: workqueue: backport fixes from upstream(for compat with new drivers code).<br>
+28) kernel: ipv6: netfilter: ip6table_mangle: don't reroute in LOCAL_IN.<br>
 <br>
 <br>
 <br>
