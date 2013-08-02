@@ -1609,7 +1609,6 @@
 22) kernel: net: loopback: set default mtu to 64K.<br>
 23) kernel: sched: tune cfs param for more correct cpu planning.<br>
 24) kernel: ipv6: Change IPv6 unspecified destination address to ::1 for raw and un-connected sockets.<br>
-25) kernel: ipv4: Add ip_local_out.<br>
 <br>
 <br>
 <br>

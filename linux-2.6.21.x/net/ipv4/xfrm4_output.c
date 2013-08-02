@@ -106,7 +106,8 @@ static int xfrm4_output_finish2(struct sk_buff *skb)
 	while (likely((err = xfrm4_output_one(skb)) == 0)) {
 		nf_reset(skb);
 
-		err = __ip_local_out(skb);
+		err = nf_hook(PF_INET, NF_IP_LOCAL_OUT, &skb, NULL,
+			      skb->dst->dev, dst_output);
 		if (unlikely(err != 1))
 			break;
 

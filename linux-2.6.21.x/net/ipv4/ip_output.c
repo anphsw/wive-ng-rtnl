@@ -90,28 +90,6 @@
 
 int sysctl_ip_default_ttl __read_mostly = IPDEFTTL;
 
-int __ip_local_out(struct sk_buff *skb)
-{
-	struct iphdr *iph = ip_hdr(skb);
-
-	iph->tot_len = htons(skb->len);
-	ip_send_check(iph);
-	return nf_hook(PF_INET, NF_IP_LOCAL_OUT, skb, NULL, skb->dst->dev,
-		       dst_output);
-}
-
-int ip_local_out(struct sk_buff *skb)
-{
-	int err;
-
-	err = __ip_local_out(skb);
-	if (likely(err == 1))
-		err = dst_output(skb);
-
-	return err;
-}
-EXPORT_SYMBOL_GPL(ip_local_out);
-
 /* dev_loopback_xmit for use with netfilter. */
 static int ip_dev_loopback_xmit(struct sk_buff *newskb)
 {
@@ -161,6 +139,7 @@ int ip_build_and_send_pkt(struct sk_buff *skb, struct sock *sk,
 	iph->daddr    = rt->rt_dst;
 	iph->saddr    = rt->rt_src;
 	iph->protocol = sk->sk_protocol;
+	iph->tot_len  = htons(skb->len);
 	ip_select_ident(iph, &rt->u.dst, sk);
 	skb->nh.iph   = iph;
 
@@ -168,6 +147,7 @@ int ip_build_and_send_pkt(struct sk_buff *skb, struct sock *sk,
 		iph->ihl += opt->optlen>>2;
 		ip_options_build(skb, opt, daddr, rt, 0);
 	}
+	ip_send_check(iph);
 
 	skb->priority = sk->sk_priority;
 
@@ -176,7 +156,8 @@ int ip_build_and_send_pkt(struct sk_buff *skb, struct sock *sk,
 #endif
 
 	/* Send it out. */
-	return ip_local_out(skb);
+	return NF_HOOK(PF_INET, NF_IP_LOCAL_OUT, skb, NULL, rt->u.dst.dev,
+		       dst_output);
 }
 
 EXPORT_SYMBOL_GPL(ip_build_and_send_pkt);
@@ -373,6 +354,7 @@ packet_routed:
 	/* OK, we know where to send it, allocate and build IP header. */
 	iph = (struct iphdr *) skb_push(skb, sizeof(struct iphdr) + (opt ? opt->optlen : 0));
 	*((__be16 *)iph) = htons((4 << 12) | (5 << 8) | (inet->tos & 0xff));
+	iph->tot_len = htons(skb->len);
 	if (ip_dont_fragment(sk, &rt->u.dst) && !ipfragok)
 		iph->frag_off = htons(IP_DF);
 	else
@@ -392,13 +374,17 @@ packet_routed:
 	ip_select_ident_more(iph, &rt->u.dst, sk,
 			     (skb_shinfo(skb)->gso_segs ?: 1) - 1);
 
+	/* Add an IP checksum. */
+	ip_send_check(iph);
+
 	skb->priority = sk->sk_priority;
 
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 	FOE_AI(skb) = UN_HIT;
 #endif
 
-	return ip_local_out(skb);
+	return NF_HOOK(PF_INET, NF_IP_LOCAL_OUT, skb, NULL, rt->u.dst.dev,
+		       dst_output);
 
 no_route:
 	IP_INC_STATS(IPSTATS_MIB_OUTNOROUTES);
@@ -1311,12 +1297,14 @@ int ip_push_pending_frames(struct sock *sk)
 		ip_options_build(skb, opt, inet->cork.addr, rt, 0);
 	}
 	iph->tos = inet->tos;
+	iph->tot_len = htons(skb->len);
 	iph->frag_off = df;
 	iph->ttl = ttl;
 	iph->protocol = sk->sk_protocol;
 	iph->saddr = rt->rt_src;
 	iph->daddr = rt->rt_dst;
 	ip_select_ident(iph, &rt->u.dst, sk);
+	ip_send_check(iph);
 
 	skb->priority = sk->sk_priority;
 	skb->dst = dst_clone(&rt->u.dst);
@@ -1326,7 +1314,8 @@ int ip_push_pending_frames(struct sock *sk)
 #endif
 
 	/* Netfilter gets whole the not fragmented skb. */
-	err = ip_local_out(skb);
+	err = NF_HOOK(PF_INET, NF_IP_LOCAL_OUT, skb, NULL,
+		      skb->dst->dev, dst_output);
 	if (err) {
 		if (err > 0)
 			err = inet->recverr ? net_xmit_errno(err) : 0;
