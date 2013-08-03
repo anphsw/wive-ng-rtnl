@@ -331,7 +331,7 @@ static int genl_rcv_msg(struct sk_buff *skb, struct nlmsghdr *nlh,
 		goto errout;
 	}
 
-	if (nlh->nlmsg_flags & NLM_F_DUMP) {
+	if ((nlh->nlmsg_flags & NLM_F_DUMP) == NLM_F_DUMP) {
 		if (ops->dumpit == NULL) {
 			err = -EOPNOTSUPP;
 			goto errout;
