@@ -1614,7 +1614,8 @@
 27) kernel: workqueue: backport fixes from upstream(for compat with new drivers code).<br>
 28) kernel: ipv6: netfilter: ip6table_mangle: don't reroute in LOCAL_IN.<br>
 29) kernel: genetlink: fix usage of NLM_F_EXCL or NLM_F_REPLACE.<br>
-30) kernel: netlink: Ignore !NLM_F_REQUEST messages directly in netlink_run_queue().<br>
+30) kernel: netlink: ignore !NLM_F_REQUEST messages directly in netlink_run_queue().<br>
+31) kernel: netlink: ignore control messages directly in netlink_run_queue().<br>
 <br>
 <br>
 <br>
