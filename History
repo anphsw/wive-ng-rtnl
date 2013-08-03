@@ -1616,6 +1616,7 @@
 29) kernel: genetlink: fix usage of NLM_F_EXCL or NLM_F_REPLACE.<br>
 30) kernel: netlink: ignore !NLM_F_REQUEST messages directly in netlink_run_queue().<br>
 31) kernel: netlink: ignore control messages directly in netlink_run_queue().<br>
+32) kernel: tcp: accept socket after TCP_DEFER_ACCEPT period.<br>
 <br>
 <br>
 <br>
