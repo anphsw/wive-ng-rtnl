@@ -1484,9 +1484,10 @@ static int netlink_rcv_skb(struct sk_buff *skb, int (*cb)(struct sk_buff *,
 			 */
 			if (err == 0)
 				return -1;
+		}
+skip:
+		if (nlh->nlmsg_flags & NLM_F_ACK || err)
 			netlink_ack(skb, nlh, err);
-		} else if (nlh->nlmsg_flags & NLM_F_ACK)
-			netlink_ack(skb, nlh, 0);
 
 		netlink_queue_skip(nlh, skb);
 	}
