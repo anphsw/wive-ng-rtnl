@@ -369,7 +369,6 @@ static INT __devinit   rt2860_probe(
 
 /*RtmpDevInit============================================== */
 	/* Allocate RTMP_ADAPTER adapter structure */
-/*	handle = kmalloc(sizeof(struct os_cookie), GFP_KERNEL); */
 	os_alloc_mem(NULL, (UCHAR **)&handle, sizeof(struct os_cookie));
 	if (handle == NULL)
 	{
@@ -393,10 +392,8 @@ static INT __devinit   rt2860_probe(
 	if (rv != NDIS_STATUS_SUCCESS) 
 		goto err_out_iounmap;
 	/* Here are the RTMP_ADAPTER structure with pci-bus specific parameters. */
-/*	pAd->CSRBaseAddress = (PUCHAR)csr_addr; */
 	RTMP_DRIVER_PCI_CSR_SET(pAd, csr_addr);
 
-/*	RTMPInitPCIeDevice(pci_dev, pAd); */
 	RTMP_DRIVER_PCIE_INIT(pAd, pci_dev);
 
 /*NetDevInit============================================== */
@@ -521,6 +518,4 @@ static VOID __devexit rt2860_remove_one(
 	wl_proc_exit();
 }
 
-
-
-
+MODULE_LICENSE("Proprietary");

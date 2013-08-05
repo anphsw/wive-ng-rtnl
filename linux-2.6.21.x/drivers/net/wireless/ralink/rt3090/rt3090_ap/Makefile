@@ -23,7 +23,6 @@ rt3090_ap-objs += ../rt3090/common/cmm_sanity.o
 rt3090_ap-objs += ../rt3090/common/cmm_info.o
 rt3090_ap-objs += ../rt3090/common/cmm_cfg.o
 rt3090_ap-objs += ../rt3090/common/cmm_wpa.o
-#rt3090_ap-objs += ../rt3090/common/dfs.o
 rt3090_ap-objs += ../rt3090/common/spectrum.o
 rt3090_ap-objs += ../rt3090/common/rtmp_timer.o
 rt3090_ap-objs += ../rt3090/common/rt_channel.o
@@ -233,6 +232,9 @@ EXTRA_CFLAGS += -DSTATS_COUNT_SUPPORT
 EXTRA_CFLAGS += -DRESOURCE_PRE_ALLOC
 EXTRA_CFLAGS += -DRT_SOC_SUPPORT
 EXTRA_CFLAGS += -DRSSI_FEEDBACK
+
+# do not lock CountryRegion from EEPROM
+EXTRA_CFLAGS += -DEEPROM_COUNTRY_UNLOCK
 
 # provide external Flash memory support
 EXTRA_CFLAGS += -DRTMP_FLASH_SUPPORT
