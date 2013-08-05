@@ -174,3 +174,4 @@ VOID rt2880_module_exit(VOID)
 	wl_proc_exit();
 }
 
+MODULE_LICENSE("Proprietary");

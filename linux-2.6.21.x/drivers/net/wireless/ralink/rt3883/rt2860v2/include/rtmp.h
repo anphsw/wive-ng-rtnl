@@ -8866,18 +8866,6 @@ VOID RTMPIoctlGetSiteSurvey(
 	IN	struct iwreq	*wrq);
 #endif
 
-VOID	RTMPIoctlGetSTAINFO(
-	IN	PRTMP_ADAPTER	pAd,
-	IN	struct iwreq	*wrq);
-
-VOID	RTMPIoctlGetSTAT(
-	IN	PRTMP_ADAPTER	pAd,
-	IN	struct iwreq	*wrq);
-
-VOID    RTMPIoctlGetRSSI(
-        IN      PRTMP_ADAPTER   pAd,
-        IN      struct iwreq    *wrq);
-
 #ifdef CONFIG_AP_SUPPORT
 #ifdef APCLI_SUPPORT
 INT Set_ApCli_AuthMode_Proc(

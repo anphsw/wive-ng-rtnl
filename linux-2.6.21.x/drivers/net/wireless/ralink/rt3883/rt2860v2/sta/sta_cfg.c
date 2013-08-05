@@ -482,9 +482,9 @@ INT Set_NetworkType_Proc(
 				pAd->MlmeAux.AutoReconnectSsidLen= 32;
 				NdisZeroMemory(pAd->MlmeAux.AutoReconnectSsid, pAd->MlmeAux.AutoReconnectSsidLen);		
 				
-				printk("NDIS_STATUS_MEDIA_DISCONNECT Event BB!\n");
-
 				LinkDown(pAd, FALSE);
+
+				DBGPRINT(RT_DEBUG_TRACE, ("NDIS_STATUS_MEDIA_DISCONNECT Event BB!\n"));
 			}
 		}			
 		pAd->StaCfg.BssType = BSS_ADHOC;
