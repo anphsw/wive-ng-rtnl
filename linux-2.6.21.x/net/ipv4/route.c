@@ -1419,7 +1419,12 @@ unsigned short ip_rt_frag_needed(struct iphdr *iph, unsigned short new_mtu)
 
 static void ip_rt_update_pmtu(struct dst_entry *dst, u32 mtu)
 {
-	if (dst_mtu(dst) > mtu && mtu >= 68 &&
+	u32 dstmtu = dst_mtu(dst);
+
+	if (dstmtu == mtu && time_before(jiffies, dst->expires - ip_rt_mtu_expires / 2))
+		return;
+
+	if (dstmtu > mtu && mtu >= 68 &&
 	    !(dst_metric_locked(dst, RTAX_MTU))) {
 		if (mtu < ip_rt_min_pmtu) {
 			mtu = ip_rt_min_pmtu;
