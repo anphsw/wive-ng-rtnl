@@ -989,4 +989,4 @@ VOID RTMPrt3xSetPCIePowerLinkCtrl(
 #endif // PCIE_PS_SUPPORT //
 #endif // CONFIG_STA_SUPPORT //
 
-
+MODULE_LICENSE("Proprietary");

@@ -791,7 +791,10 @@ VOID	NICReadEEPROMParameters(
 	IN	PSTRING			mac_addr)
 {
 	UINT32			data = 0;
-	USHORT			i = 0 , value, value2;
+	USHORT			i = 0 , value;
+#if !defined(EEPROM_COUNTRY_UNLOCK)
+	USHORT			value2;
+#endif
 	UCHAR			TmpPhy;
 	EEPROM_TX_PWR_STRUC	    Power;
 	EEPROM_VERSION_STRUC    Version;
@@ -983,7 +986,7 @@ VOID	NICReadEEPROMParameters(
 			pAd->CommonCfg.RxStream = 2;
 		}
 	}
-
+#endif
 
 	/* EEPROM offset 0x36 - NIC Configuration 1 */
 	NicConfig2.word = pAd->EEPROMDefaultValue[EEPROM_NIC_CFG2_OFFSET];
@@ -1186,6 +1189,7 @@ VOID	NICReadEEPROMParameters(
 
 	DBGPRINT(RT_DEBUG_TRACE, ("E2PROM: RF FreqOffset=0x%lx \n", pAd->RfFreqOffset));
 
+#if !defined(EEPROM_COUNTRY_UNLOCK)
 	//CountryRegion byte offset (38h)
 	value = pAd->EEPROMDefaultValue[EEPROM_COUNTRY_REG_OFFSET] >> 8;		// 2.4G band
 	value2 = pAd->EEPROMDefaultValue[EEPROM_COUNTRY_REG_OFFSET] & 0x00FF;	// 5G band
