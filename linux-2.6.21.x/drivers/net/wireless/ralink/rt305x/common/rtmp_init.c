@@ -794,8 +794,8 @@ VOID	NICReadEEPROMParameters(
 	USHORT			i = 0 , value;
 #if !defined(EEPROM_COUNTRY_UNLOCK)
 	USHORT			value2;
-#endif
 	UCHAR			TmpPhy;
+#endif
 	EEPROM_TX_PWR_STRUC	    Power;
 	EEPROM_VERSION_STRUC    Version;
 	EEPROM_ANTENNA_STRUC	Antenna;
@@ -986,8 +986,6 @@ VOID	NICReadEEPROMParameters(
 			pAd->CommonCfg.RxStream = 2;
 		}
 	}
-#endif
-
 	/* EEPROM offset 0x36 - NIC Configuration 1 */
 	NicConfig2.word = pAd->EEPROMDefaultValue[EEPROM_NIC_CFG2_OFFSET];
 
@@ -1205,7 +1203,7 @@ VOID	NICReadEEPROMParameters(
 		SetCommonHT(pAd);
 #endif // DOT11_N_SUPPORT //
 	}
-
+#endif
 	//
 	// Get RSSI Offset on EEPROM 0x9Ah & 0x9Ch.
 	// The valid value are (-10 ~ 10) 
