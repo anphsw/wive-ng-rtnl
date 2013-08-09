@@ -16,7 +16,7 @@ if [ "$OperationMode" = "0" ]; then
     exit 0
 fi
 
-LOG="logger -t radvd"
+LOG="logger -t ipv6"
 
 calculate_and_set_mtu() {
     # get mtu from wan
@@ -119,8 +119,7 @@ start() {
         " > /etc/radvd.conf
 
 	$LOG "Starting radvd"
-	radvd -s -C /etc/radvd.conf -d 1 &
-
+	radvd -s -C /etc/radvd.conf --debug=5 --facility=5 --logmethod=syslog &
     fi
 }
 
