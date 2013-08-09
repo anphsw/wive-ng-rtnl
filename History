@@ -1621,6 +1621,7 @@
 34) kernel: netlink: ignore control messages directly in netlink_run_queue().<br>
 35) kernel: tcp: accept socket after TCP_DEFER_ACCEPT period.<br>
 36) kernel: ipv4: avoid a test in ip_rt_put().<br>
+37) kernel: icmpv6_filter: allow ICMPv6 messages with bodies < 4 bytes.<br>
 <br>
 <br>
 <br>
