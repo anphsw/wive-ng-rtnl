@@ -1,17 +1,16 @@
 #!/bin/sh
 
+#wait to start web and run from goahead code
+. /etc/scripts/web_wait.sh
+web_wait
+
+# prevent double startiptables configure in one time
 while [ -e /tmp/iptables_runing ]; do
     # Sleep until file does exists/is created
     usleep 500000
 done
-
+CRETURN=0
 touch /tmp/iptables_runing
-
-RETURN=0
-
-#wait to start web and run from goahead code
-. /etc/scripts/web_wait.sh
-web_wait
 
 #include global config
 . /etc/scripts/global.sh
@@ -595,8 +594,8 @@ case "$1" in
 
         *)
             echo $"Usage: $0 {start|stop|restart|startv6|stopv6|restartv6}"
-            RETURN=1
+            CRETURN=1
 esac
 
 rm -f /tmp/iptables_runing
-exit $RETURN
+exit $CRETURN
