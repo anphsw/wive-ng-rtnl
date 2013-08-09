@@ -9,6 +9,8 @@ start() {
     $LOG "Tune kernel with sysctl."
     sysctl -w -p -n -e /etc/sysctl.conf > /dev/null 2>&1
 
+    get_param
+
     # set domainname
     if [ "$dhcpDomain" != "" ]; then
 	krn_domain="$dhcpDomain"
@@ -18,8 +20,7 @@ start() {
     sysctl -wq kernel.domainname="$krn_domain"
 
 ###################### SECTION FOR SAMBA AND TRANSMISION KERNEL TUNE ###################
-    eval `nvram_buf_get 2860 SmbEnabled TransmissionEnabled xupnpd dhcpDomain`
-    if [ "$SmbEnabled" = "1" ] || [ "$TransmissionEnabled" = "1" ] || [ "$xupnpd" = "1" ]; then
+    if [ "$SmbEnabled" = "1" ] || [ "$TransmissionEnabled" = "1" ] || [ "$xupnpd" = "1" ] || [ "$UDPXYMode" != "0" ]; then
 	# banish core dump files to /dev/null
 	ulimit -c 0
 	# increase file descriptors
@@ -44,6 +45,10 @@ start() {
 
 stop() {
     :
+}
+
+get_param() {
+    eval `nvram_buf_get 2860 dhcpDomain SmbEnabled TransmissionEnabled xupnpd UDPXYMode`
 }
 
 case "$1" in
