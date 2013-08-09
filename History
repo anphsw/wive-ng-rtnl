@@ -1598,28 +1598,29 @@
 11) lib: add libnl 1.1.4.<br>
 12) wireless tool: add iw tool.<br>
 13) pppd: add wins request support.<br>
-14) kernel: bridge_fastpath: small rework.<br>
-15) kernel: DIV_ROUND_UP cleanup.<br>
-16) kernel: skbuff: nf_conntrack_put_reasm: fix lost skb not  NULL check.<br>
-17) kernel: fix return type of skb_checksum_complete().<br>
-18) kernel: nf_bridge: remove holes in struct nf_bridge_info.<br>
-19) kernel: net: ifdef struct sock::sk_async_wait_queue.<br>
-20) kernel: net: treat the sign of the result of skb_headroom() consistently.<br>
-21) kernel: bridge: fix race with topology change timer.<br>
-22) kernel: bridge: set priority of STP packets.<br>
-23) kernel: mips: compat: return same error ENOSYS as native for invalid operation.<br>
-24) kernel: rt305x: some backports and fix some issue (exemple MT6620 client compat).<br>
-25) kernel: rt3883: some backports and fix some issue (port from rt305x tree).<br>
-26) kernel: net: loopback: set default mtu to 64K.<br>
-27) kernel: sched: tune cfs param for more correct cpu planning.<br>
-28) kernel: ipv6: Change IPv6 unspecified destination address to ::1 for raw and un-connected sockets.<br>
-29) kernel: workqueue: backport fixes from upstream(for compat with new drivers code).<br>
-30) kernel: ipv6: netfilter: ip6table_mangle: don't reroute in LOCAL_IN.<br>
-31) kernel: genetlink: fix usage of NLM_F_EXCL or NLM_F_REPLACE.<br>
-32) kernel: netlink: ignore !NLM_F_REQUEST messages directly in netlink_run_queue().<br>
-33) kernel: netlink: ignore control messages directly in netlink_run_queue().<br>
-34) kernel: tcp: accept socket after TCP_DEFER_ACCEPT period.<br>
-35) kernel: ipv4: avoid a test in ip_rt_put().<br>
+14) usb-modeswitch: up to 1.2.7 version and usb-modeswitch-data up to 20130807.<br>
+15) kernel: bridge_fastpath: small rework.<br>
+16) kernel: DIV_ROUND_UP cleanup.<br>
+17) kernel: skbuff: nf_conntrack_put_reasm: fix lost skb not  NULL check.<br>
+18) kernel: fix return type of skb_checksum_complete().<br>
+19) kernel: nf_bridge: remove holes in struct nf_bridge_info.<br>
+20) kernel: net: ifdef struct sock::sk_async_wait_queue.<br>
+21) kernel: net: treat the sign of the result of skb_headroom() consistently.<br>
+22) kernel: bridge: fix race with topology change timer.<br>
+23) kernel: bridge: set priority of STP packets.<br>
+24) kernel: mips: compat: return same error ENOSYS as native for invalid operation.<br>
+25) kernel: rt305x: some backports and fix some issue (exemple MT6620 client compat).<br>
+26) kernel: rt3883: some backports and fix some issue (port from rt305x tree).<br>
+27) kernel: net: loopback: set default mtu to 64K.<br>
+28) kernel: sched: tune cfs param for more correct cpu planning.<br>
+29) kernel: ipv6: Change IPv6 unspecified destination address to ::1 for raw and un-connected sockets.<br>
+30) kernel: workqueue: backport fixes from upstream(for compat with new drivers code).<br>
+31) kernel: ipv6: netfilter: ip6table_mangle: don't reroute in LOCAL_IN.<br>
+32) kernel: genetlink: fix usage of NLM_F_EXCL or NLM_F_REPLACE.<br>
+33) kernel: netlink: ignore !NLM_F_REQUEST messages directly in netlink_run_queue().<br>
+34) kernel: netlink: ignore control messages directly in netlink_run_queue().<br>
+35) kernel: tcp: accept socket after TCP_DEFER_ACCEPT period.<br>
+36) kernel: ipv4: avoid a test in ip_rt_put().<br>
 <br>
 <br>
 <br>
