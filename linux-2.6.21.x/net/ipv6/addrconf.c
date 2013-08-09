@@ -2036,11 +2036,6 @@ static int inet6_addr_del(int ifindex, struct in6_addr *pfx, int plen)
 
 			ipv6_del_addr(ifp);
 
-			/* If the last address is deleted administratively,
-			   disable IPv6 on this interface.
-			 */
-			if (idev->addr_list == NULL)
-				addrconf_ifdown(idev->dev, 1);
 			return 0;
 		}
 	}
