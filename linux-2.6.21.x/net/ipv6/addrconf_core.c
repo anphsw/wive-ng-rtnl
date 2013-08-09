@@ -4,6 +4,7 @@
  */
 
 #include <net/ipv6.h>
+#include <net/addrconf.h>
 
 #define IPV6_ADDR_SCOPE_TYPE(scope)	((scope) << 16)
 
