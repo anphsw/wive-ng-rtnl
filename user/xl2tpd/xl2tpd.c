@@ -860,7 +860,7 @@ struct tunnel *new_tunnel ()
     unsigned char entropy_buf[2] = "\0";
     if (!tmp)
         return NULL;
-    tmp->debug = -1;
+    tmp->debug = 0;
     tmp->tid = -1;
 #ifndef TESTING
 /*      while(get_call((tmp->ourtid = rand() & 0xFFFF),0,0,0)); */
