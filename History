@@ -1623,7 +1623,8 @@
 36) kernel: ipv4: avoid a test in ip_rt_put().<br>
 37) kernel: icmpv6_filter: allow ICMPv6 messages with bodies < 4 bytes.<br>
 38) kernel: ipv6: don't disable interface if last ipv6 address is removed.<br>
-38) kernel: ipv4: Kill ip_rt_frag_needed().<br>
+39) kernel: ipv4: Kill ip_rt_frag_needed().<br>
+40) kernel: ipv4: properly update pmtu.<br>
 <br>
 <br>
 <br>

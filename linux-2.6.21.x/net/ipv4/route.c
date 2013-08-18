@@ -1377,7 +1377,7 @@ static void ip_rt_update_pmtu(struct dst_entry *dst, u32 mtu)
 			dst->metrics[RTAX_LOCK-1] |= (1 << RTAX_MTU);
 		}
 		dst->metrics[RTAX_MTU-1] = mtu;
-		dst_set_expires(dst, ip_rt_mtu_expires);
+		dst_set_expires(dst, max(1UL, jiffies + ip_rt_mtu_expires));
 	}
 }
 
