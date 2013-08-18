@@ -1631,6 +1631,7 @@
 44) kernel: bridge: Always flood broadcast packets.<br>
 45) kernel: ipv6: create temporary address if none exists.<br>
 46) kernel: ipv6: temp addresses are immediately deleted.<br>
+47) kernel: ipv6: preferred lifetime of address not getting updated.<br>
 <br>
 <br>
 <br>
