@@ -1363,60 +1363,6 @@ static inline unsigned short guess_mtu(unsigned short old_mtu)
 	return 68;
 }
 
-unsigned short ip_rt_frag_needed(struct iphdr *iph, unsigned short new_mtu)
-{
-	int i;
-	unsigned short old_mtu = ntohs(iph->tot_len);
-	struct rtable *rth;
-	__be32  skeys[2] = { iph->saddr, 0, };
-	__be32  daddr = iph->daddr;
-	unsigned short est_mtu = 0;
-
-	for (i = 0; i < 2; i++) {
-		unsigned hash = rt_hash(daddr, skeys[i], 0);
-
-		rcu_read_lock();
-		for (rth = rcu_dereference(rt_hash_table[hash].chain); rth;
-		     rth = rcu_dereference(rth->u.dst.rt_next)) {
-			if (rth->fl.fl4_dst == daddr &&
-			    rth->fl.fl4_src == skeys[i] &&
-			    rth->rt_dst  == daddr &&
-			    rth->rt_src  == iph->saddr &&
-			    rt_is_output_route(rth) &&
-			    !(dst_metric_locked(&rth->u.dst, RTAX_MTU))) {
-				unsigned short mtu = new_mtu;
-
-				if (new_mtu < 68 || new_mtu >= old_mtu) {
-
-					/* BSD 4.2 compatibility hack :-( */
-					if (mtu == 0 &&
-					    old_mtu >= dst_mtu(&rth->u.dst) &&
-					    old_mtu >= 68 + (iph->ihl << 2))
-						old_mtu -= iph->ihl << 2;
-
-					mtu = guess_mtu(old_mtu);
-				}
-				if (mtu <= dst_mtu(&rth->u.dst)) {
-					if (mtu < dst_mtu(&rth->u.dst)) {
-						dst_confirm(&rth->u.dst);
-						if (mtu < ip_rt_min_pmtu) {
-							mtu = ip_rt_min_pmtu;
-							rth->u.dst.metrics[RTAX_LOCK-1] |=
-								(1 << RTAX_MTU);
-						}
-						rth->u.dst.metrics[RTAX_MTU-1] = mtu;
-						dst_set_expires(&rth->u.dst,
-							ip_rt_mtu_expires);
-					}
-					est_mtu = mtu;
-				}
-			}
-		}
-		rcu_read_unlock();
-	}
-	return est_mtu ? : new_mtu;
-}
-
 static void ip_rt_update_pmtu(struct dst_entry *dst, u32 mtu)
 {
 	u32 dstmtu = dst_mtu(dst);
