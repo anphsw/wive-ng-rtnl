@@ -1626,6 +1626,7 @@
 39) kernel: ipv4: Kill ip_rt_frag_needed().<br>
 40) kernel: ipv4: properly update pmtu.<br>
 41) kernel: ipv6: updates to privacy addresses per RFC 4941.<br>
+42) kernel: ipv6: do not leave router anycast address for /127 prefixes.<br>
 <br>
 <br>
 <br>
