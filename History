@@ -1628,6 +1628,7 @@
 41) kernel: ipv6: updates to privacy addresses per RFC 4941.<br>
 42) kernel: ipv6: do not leave router anycast address for /127 prefixes.<br>
 43) kenrel: ipv6: disable router anycast address for /127 prefixes.<br>
+44) kernel: bridge: Always flood broadcast packets.<br>
 <br>
 <br>
 <br>
