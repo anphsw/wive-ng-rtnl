@@ -722,7 +722,7 @@ static int ipv6_create_tempaddr(struct inet6_ifaddr *ifp, struct inet6_ifaddr *i
 {
 	struct inet6_dev *idev = ifp->idev;
 	struct in6_addr addr, *tmpaddr;
-	unsigned long tmp_prefered_lft, tmp_valid_lft, tmp_tstamp, ag;
+	unsigned long tmp_prefered_lft, tmp_valid_lft, tmp_tstamp, age;
 	int tmp_plen;
 	int ret = 0;
 	int max_addresses;
