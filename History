@@ -1630,6 +1630,7 @@
 43) kenrel: ipv6: disable router anycast address for /127 prefixes.<br>
 44) kernel: bridge: Always flood broadcast packets.<br>
 45) kernel: ipv6: create temporary address if none exists.<br>
+46) kernel: ipv6: temp addresses are immediately deleted.<br>
 <br>
 <br>
 <br>
