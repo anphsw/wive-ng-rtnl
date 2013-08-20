@@ -2531,17 +2531,6 @@ INT	SetCommonHT(
 
 	RTMPSetHT(pAd, &SetHT);
 
-#ifdef DOT11N_DRAFT3
-	if(pAd->CommonCfg.bBssCoexEnable && pAd->CommonCfg.Bss2040NeedFallBack)
-	{
-		pAd->CommonCfg.AddHTInfo.AddHtInfo.RecomWidth = 0;
-		pAd->CommonCfg.AddHTInfo.AddHtInfo.ExtChanOffset = 0;
-		pAd->CommonCfg.LastBSSCoexist2040.field.BSS20WidthReq = 1;
-		pAd->CommonCfg.Bss2040CoexistFlag |= BSS_2040_COEXIST_INFO_SYNC;
-		pAd->CommonCfg.Bss2040NeedFallBack = 1;
-	}
-#endif // DOT11N_DRAFT3 //
-
 	return TRUE;
 }
 

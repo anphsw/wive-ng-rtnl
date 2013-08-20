@@ -2451,7 +2451,6 @@ VOID APOverlappingBSSScan(
 		}
 	}
 
-	pAd->CommonCfg.Bss2040NeedFallBack = 0;
 	// If need fallback, now do it.
 	if ((needFallBack == TRUE)
 		&& (pAd->CommonCfg.BssCoexApCnt > pAd->CommonCfg.BssCoexApCntThr)
@@ -2461,7 +2460,6 @@ VOID APOverlappingBSSScan(
 		pAd->CommonCfg.AddHTInfo.AddHtInfo.ExtChanOffset = 0;
 		pAd->CommonCfg.LastBSSCoexist2040.field.BSS20WidthReq = 1;
 		pAd->CommonCfg.Bss2040CoexistFlag |= BSS_2040_COEXIST_INFO_SYNC;
-		pAd->CommonCfg.Bss2040NeedFallBack = 1;
 	}
 
 	return;	

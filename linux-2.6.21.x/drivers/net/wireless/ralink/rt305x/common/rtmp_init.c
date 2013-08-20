@@ -3031,9 +3031,8 @@ if ((pAd->MACVersion == 0x28720200) && (pAd->CommonCfg.CID == 0x200))
 	pAd->CommonCfg.Dot11OBssScanActivityThre = dot11BSSScanActivityThreshold;	// Unit : percentage
 	pAd->CommonCfg.Dot11BssWidthChanTranDelay = (pAd->CommonCfg.Dot11BssWidthTriggerScanInt * pAd->CommonCfg.Dot11BssWidthChanTranDelayFactor);
 
-	pAd->CommonCfg.bBssCoexEnable = TRUE; // by default, we enable this feature, you can disable it via the profile or ioctl command
+	pAd->CommonCfg.bBssCoexEnable = FALSE; // by default, we enable this feature, you can disable it via the profile or ioctl command
 	pAd->CommonCfg.BssCoexApCntThr = 0;
-	pAd->CommonCfg.Bss2040NeedFallBack = 0;
 #endif  // DOT11N_DRAFT3 //
 
 	NdisZeroMemory(&pAd->CommonCfg.AddHTInfo, sizeof(pAd->CommonCfg.AddHTInfo));

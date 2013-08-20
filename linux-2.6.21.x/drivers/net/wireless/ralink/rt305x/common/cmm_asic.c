@@ -1848,7 +1848,7 @@ VOID AsicGetAutoAgcOffset(
 	UCHAR		TssiRef, *pTssiMinusBoundary, *pTssiPlusBoundary, TxAgcStep;
 //	UCHAR		BbpR49 = 0, idx;
 	UCHAR		idx;
-	PCHAR		pTxAgcCompensate;
+	PCHAR		pTxAgcCompensate = NULL;
 	BBP_R49_STRUC BbpR49;
 	CHAR		TotalDeltaPower = 0; // (non-positive number) including the transmit power controlled by the MAC and the BBP R1
 #ifdef RTMP_INTERNAL_TX_ALC

@@ -2027,7 +2027,6 @@ typedef struct _COMMON_CONFIG {
 	
 	UCHAR					Bss2040CoexistFlag;	// bit 0: bBssCoexistTimerRunning, bit 1: NeedSyncAddHtInfo.
 	RALINK_TIMER_STRUCT	Bss2040CoexistTimer;
-	UCHAR					Bss2040NeedFallBack; 	// 1: Need Fall back to 20MHz
 
 	//This IE is used for 20/40 BSS Coexistence.
 	BSS_2040_COEXIST_IE		BSS2040CoexistInfo;

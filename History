@@ -1633,6 +1633,7 @@
 46) kernel: ipv6: temp addresses are immediately deleted.<br>
 47) kernel: ipv6: preferred lifetime of address not getting updated.<br>
 48) kernel: ipv6: ignore route option with ROUTER_PREF_INVALID.<br>
+49) kernel: rt*** drivers: fix fallback 20/40 procedure.<br>
 <br>
 <br>
 <br>
