@@ -873,19 +873,17 @@ VOID	NICReadEEPROMParameters(
 
 /* FIX: For correct work APCLI/MBSSID need correct MAC */
 #if defined(MBSS_SUPPORT)
-	/* Test MAC[5] for 8 MAC support */
-	if ((pAd->CurrentAddress[5] % 8) != 0)
+	/* Test MAC[5] for 4 MAC support */
+	if ((pAd->CurrentAddress[5] % 4) != 0)
 	{
-	    pAd->CurrentAddress[0] |= 0x02;
-	    pAd->CurrentAddress[5] &= 0xf8;
+		pAd->CurrentAddress[5] &= 0xfc; // Max 4 MBSSID
 	}
 #elif defined(APCLI_SUPPORT)
 	/* Test MAC[5] for 2 MAC support */
 	if ((pAd->CurrentAddress[5] % 2) != 0)
 	{
-	    pAd->CurrentAddress[0] |= 0x02;
-	    pAd->CurrentAddress[5] &= 0xfe;
-        }
+		pAd->CurrentAddress[5] &= 0xfe; // Max 2 MBSSID
+	}
 #endif
 
 	/* Set the current MAC to ASIC */
