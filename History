@@ -1636,7 +1636,7 @@
 49) kernel: rt*** drivers: fix fallback 20/40 procedure.<br>
 50) busybox: fix udhcp packet size logic.<br>
 51) busybox: udhcpc: more RFC(1542) compatable.<br>
-52) init.d: vpn: fix select auth type in pptp vlient mode.<br>
+52) init.d: vpn: fix select auth type in pptp client mode.<br>
 <br>
 <br>
 <br>
