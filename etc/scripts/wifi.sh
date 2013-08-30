@@ -6,22 +6,22 @@
 echo ">>>>> RECONFIGURE WIFI IF = $1 <<<<<<<<<<"
 
 ########################################ALLMODE param########################################
-eval `nvram_buf_get 2860 HiPower AutoConnect OperationMode`
+eval `nvram_buf_get 2860 HiPower AutoConnect OperationMode TxPower`
 ########################################LNA param############################################
 # Disable increase LNA gain
 if [ "$CONFIG_RALINK_RT3052_MP2" = "y" ]; then
-    if [ "$HiPower" = "1" ]; then
-	iwpriv "$1" set HiPower=1
-    else
-	iwpriv "$1" set HiPower=0
+    if [ "$HiPower" != "" ]; then
+	iwpriv "$1" set HiPower="$HiPower"
     fi
+fi
+# Recalibrate txpower after HiPower set
+if [ "$TxPower" != "" ]; then
+    iwpriv "$1" set TxPower="$TxPower"
 fi
 ########################################STAMODE param########################################
 if [ "$OperationMode" = "2" ]; then
-    if [ "$AutoConnect" = "1" ]; then
-	iwpriv "$1" set AutoReconnect=1
-    else
-	iwpriv "$1" set AutoReconnect=0
+    if [ "$AutoConnect" != "" ]; then
+	iwpriv "$1" set AutoReconnect="$AutoReconnect"
     fi
   # in sta mode exit
   exit 0

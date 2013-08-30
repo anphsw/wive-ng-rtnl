@@ -1637,6 +1637,7 @@
 50) busybox: fix udhcp packet size logic.<br>
 51) busybox: udhcpc: more RFC(1542) compatable.<br>
 52) init.d: vpn: fix select auth type in pptp client mode.<br>
+53) init.d: wifi.sh: need recalibrate txpower after HiPower set(fix issue power select at RT3350).<br>
 <br>
 <br>
 <br>
