@@ -47,7 +47,7 @@ tcpmss_mangle_packet(struct sk_buff **pskb,
 		     const struct xt_tcpmss_info *info,
 		     unsigned int in_mtu,
 		     unsigned int tcphoff,
-		     unsigned int minlen)
+		     unsigned int minlen, u16 newminmss)
 {
 	struct tcphdr *tcph;
 	unsigned int tcplen, i;
@@ -126,11 +126,11 @@ tcpmss_mangle_packet(struct sk_buff **pskb,
 
 	skb_put((*pskb), TCPOLEN_MSS);
 
-	/* RFC 879 states that the default MSS is 536 without specific
+	/* RFC 879 states that the default MSS is 536/1220(IPV6) without specific
 	 * knowledge that the destination host is prepared to accept larger.
-	 * Since no MSS was provided, we MUST NOT set a value > 536.
+	 * Since no MSS was provided, we MUST NOT set a value > 536/1220(IPV6).
 	 */
-	newmss = min(newmss, (u16)536);
+	newmss = min(newmss, newminmss);
 
 	opt = (u_int8_t *)tcph + sizeof(struct tcphdr);
 	memmove(opt + TCPOLEN_MSS, opt, tcplen - sizeof(struct tcphdr));
@@ -194,7 +194,7 @@ xt_tcpmss_target4(struct sk_buff **pskb,
 	ret = tcpmss_mangle_packet(pskb, targinfo,
 				   tcpmss_reverse_mtu(*pskb, PF_INET),
 				   iph->ihl * 4,
-				   sizeof(*iph) + sizeof(struct tcphdr));
+				   sizeof(*iph) + sizeof(struct tcphdr), (u16)536);
 	if (ret < 0)
 		return NF_DROP;
 	if (ret > 0) {
@@ -227,7 +227,7 @@ xt_tcpmss_target6(struct sk_buff **pskb,
 	ret = tcpmss_mangle_packet(pskb, targinfo,
 				   tcpmss_reverse_mtu(*pskb, PF_INET6),
 				   tcphoff,
-				   sizeof(*ipv6h) + sizeof(struct tcphdr));
+				   sizeof(*ipv6h) + sizeof(struct tcphdr), (u16)1220);
 	if (ret < 0)
 		return NF_DROP;
 	if (ret > 0) {
