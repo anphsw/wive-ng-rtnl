@@ -1635,10 +1635,11 @@
 48) kernel: ipv6: ignore route option with ROUTER_PREF_INVALID.<br>
 49) kernel: rt*** drivers: fix fallback 20/40 procedure.<br>
 50) kernel: conntrack: if module hw_nat loaded must full skip conntrack tcp_in_window function else restore full original logic.<br>
-51) busybox: fix udhcp packet size logic.<br>
-52) busybox: udhcpc: more RFC(1542) compatable.<br>
-53) init.d: vpn: fix select auth type in pptp client mode.<br>
-54) init.d: wifi.sh: need recalibrate txpower after HiPower set(fix issue power select at RT3350).<br>
+51) kernel: netfilter: xt_TCPMSS: Fix violation of RFC879 in absence of MSS option.<br>
+52) busybox: fix udhcp packet size logic.<br>
+53) busybox: udhcpc: more RFC(1542) compatable.<br>
+54) init.d: vpn: fix select auth type in pptp client mode.<br>
+55) init.d: wifi.sh: need recalibrate txpower after HiPower set(fix issue power select at RT3350).<br>
 <br>
 <br>
 <br>
