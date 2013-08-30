@@ -40,7 +40,7 @@ fi
 if [ "$CONFIG_RT2860V2_AP_IGMP_SNOOP" != "" ]; then
     eval `nvram_buf_get 2860 McastPhyMode McastMcs M2UEnabled`
     if [ "$McastPhyMode" != "" ]; then
-	iwpriv "$1" set McastPhyMode=$McastPhyMode
+	iwpriv "$1" set McastPhyMode="$McastPhyMode"
     fi
     if [ "$McastMcs" != "" ]; then
         iwpriv "$1" set McastMcs="$McastMcs"
@@ -59,7 +59,7 @@ if [ "$AutoChannelSelect" = "1" ]; then
 else
     if [ "$1" != "rai0" ]; then
 	# set channel manual
-	iwpriv "$1" set Channel=$Channel
+	iwpriv "$1" set Channel="$Channel"
     fi
 fi
 ########################################GREEN mode###########################################
