@@ -339,3 +339,8 @@ config  RA_HW_NAT_WIFI
 	depends on RA_HW_NAT
 	default n
 	bool "Speed up WiFi traffic by HNAT"
+
+config  HNAT_EXTENTIONS
+	depends on RA_HW_NAT && !HNAT_V2
+	default n
+	bool "MTR/ACL/AC extenions in PPE"

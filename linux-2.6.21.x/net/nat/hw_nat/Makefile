@@ -5,7 +5,7 @@ ifeq ($(CONFIG_RALINK_RT3052),y)
 hw_nat-objs += sys_rfrw.o
 endif
 
-ifneq ($(CONFIG_HNAT_V2),y)
+ifneq ($(CONFIG_HNAT_EXTENTIONS),y)
 hw_nat-objs += acl_policy.o acl_ioctl.o
 hw_nat-objs += ac_policy.o ac_ioctl.o
 hw_nat-objs += mtr_policy.o mtr_ioctl.o
