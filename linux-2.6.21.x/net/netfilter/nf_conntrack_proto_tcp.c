@@ -536,6 +536,10 @@ static int tcp_in_window(struct nf_conn *ct,
 	__u32 swin;
 	int res;
 
+#if defined (CONFIG_RA_HW_NAT) || defined (CONFIG_RA_HW_NAT_MODULE)
+	if(ra_sw_nat_hook_rx != NULL)
+		return 1;
+#endif
 #ifdef CONFIG_IPTABLES_SPEEDUP
 	if (nf_ct_tcp_no_window_check)
 		return 1;
@@ -673,7 +677,6 @@ static int tcp_in_window(struct nf_conn *ct,
 		before(sack, receiver->td_end + 1),
 		after(sack, receiver->td_end - MAXACKWINDOW(sender) - 1));
 
-#ifdef CONFIG_RA_NAT_NONE
 	if (before(seq, sender->td_maxend + 1) &&
 	    after(end, sender->td_end - receiver->td_maxwin - 1) &&
 	    before(sack, receiver->td_end + 1) &&
@@ -750,9 +753,6 @@ static int tcp_in_window(struct nf_conn *ct,
 			: "SEQ is under the lower bound (already ACKed data retransmitted)"
 			: "SEQ is over the upper bound (over the window of the receiver)");
 	}
-#else
-	res = 1;
-#endif
 
 	DEBUGP("tcp_in_window: res=%i sender end=%u maxend=%u maxwin=%u "
 	       "receiver end=%u maxend=%u maxwin=%u\n",
