@@ -44,18 +44,18 @@ get_vpn_ip() {
 	    NS=`ipget $vpnServer | tail -q -n1`
 	    if [ "$NS" != "" ]; then
 		resolved=1
-		SERVER=$NS
+		SERVER="$NS"
 	    fi
 	    if [ "$count" = "10" ]; then
 		resolved=1
-    		SERVER=$vpnServer
+    		SERVER="$vpnServer"
     		$LOG "Not resolve adress for $SERVER"
 	    fi
 	    usleep 500000
 	    count="$(($count+1))"
 	done
     else
-		SERVER=$vpnServer
+		SERVER="$vpnServer"
     fi
 
     $LOG "Server adress is $SERVER"

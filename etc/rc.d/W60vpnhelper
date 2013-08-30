@@ -34,7 +34,7 @@ start() {
       vpnCpuLimit=`nvram_get 2860 vpnCpuLimit`
       if [ "$vpnCpuLimit" != "" ] && [ "$vpnCpuLimit" != "0" ]; then
 	    $LOG "Limit cpu load for PPP to $vpnCpuLimit ticks"
-	    sysctl -wq net.ipv4.ppp_cpu_load_limit=$vpnCpuLimit
+	    sysctl -wq net.ipv4.ppp_cpu_load_limit="$vpnCpuLimit"
       else
 	    sysctl -wq net.ipv4.ppp_cpu_load_limit=0
       fi

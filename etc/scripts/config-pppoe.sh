@@ -41,11 +41,11 @@ check_param
 load_modules
 
 if [ "$vpnInterface" = "WAN" ]; then
-    vpnInterface=$wan_if
+    vpnInterface="$wan_if"
 elif [ "$vpnInterface" = "LAN" ]; then
-    vpnInterface=$lan_if
+    vpnInterface="$lan_if"
 else
-    vpnInterface=br0
+    vpnInterface="br0"
 fi
 
 IN_BR=`brctl show | grep $vpnInterface -c`

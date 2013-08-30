@@ -153,7 +153,7 @@ getWanIfName() {
     	    real_wan_if="$vpn_if"
 	fi
     else
-        real_wan_if=$wan_if
+        real_wan_if="$wan_if"
     fi
 }
 
@@ -176,7 +176,7 @@ getWanIpaddr() {
     # return vpn or physical wan ip
     real_wan_ipaddr=`ip -4 addr show dev $real_wan_if | awk '/inet / {print $2}' | cut -f1 -d"/"` > /dev/null 2>&1
     if [ "$real_wan_ipaddr" = "" ]; then
-	real_wan_ipaddr=$wan_ipaddr
+	real_wan_ipaddr="$wan_ipaddr"
     fi
 
 }

@@ -274,7 +274,7 @@ if [ "$CONFIG_RT_3052_ESW" != "" ]; then
 	else
 	    if [ "$ForceRenewDHCP" != "0" ] && [ "$wan_port" != "" ]; then
 		# configure event wait port
-		sysctl -wq net.ipv4.send_sigusr_dhcpc=$wan_port
+		sysctl -wq net.ipv4.send_sigusr_dhcpc="$wan_port"
 	    else
 		# disable dhcp renew from driver
 		sysctl -wq net.ipv4.send_sigusr_dhcpc=9
