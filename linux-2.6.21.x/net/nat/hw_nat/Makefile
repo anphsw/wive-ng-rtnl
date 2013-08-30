@@ -1,11 +1,11 @@
 obj-$(CONFIG_RA_HW_NAT) += hw_nat.o
 hw_nat-objs := ra_nat.o foe_fdb.o util.o hwnat_ioctl.o
 
-ifeq ($(CONFIG_RALINK_RT3052),y)
+ifdef CONFIG_RALINK_RT3052_MP2
 hw_nat-objs += sys_rfrw.o
 endif
 
-ifneq ($(CONFIG_HNAT_EXTENTIONS),y)
+ifdef CONFIG_HNAT_EXTENTIONS
 hw_nat-objs += acl_policy.o acl_ioctl.o
 hw_nat-objs += ac_policy.o ac_ioctl.o
 hw_nat-objs += mtr_policy.o mtr_ioctl.o

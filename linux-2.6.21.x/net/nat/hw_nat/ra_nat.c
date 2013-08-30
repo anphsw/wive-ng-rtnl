@@ -48,7 +48,7 @@
 #include "policy.h"
 #include "util.h"
 
-#if !defined (CONFIG_HNAT_V2)
+#ifdef CONFIG_HNAT_EXTENTIONS
 #include "acl_ioctl.h"
 #include "ac_ioctl.h"
 #include "acl_policy.h"
@@ -2236,9 +2236,9 @@ static void PpeSetFoeGloCfgEbl(uint32_t Ebl)
  * -----+------+-----+--------+--------+--------+----+--------
  *
  */
+#ifdef CONFIG_HNAT_EXTENTIONS
 static void PpeSetUserPriority(void)
 {
-#if !defined (CONFIG_HNAT_V2)
 	/* Set weight of decision in resolution */
 	RegWrite(UP_RES, DFL_UP_RES);
 
@@ -2291,8 +2291,8 @@ static void PpeSetUserPriority(void)
 	RegModifyBits(UP_MAP_AC, DFL_UP5_AC, 10, 2);
 	RegModifyBits(UP_MAP_AC, DFL_UP6_AC, 12, 2);
 	RegModifyBits(UP_MAP_AC, DFL_UP7_AC, 14, 2);
-#endif
 }
+#endif
 
 static void PpeSetHNATProtoType(void)
 {
@@ -2332,7 +2332,7 @@ static int32_t PpeEngStart(void)
 	/* Set PPE FOE Hash Mode */
 	PpeSetFoeHashMode(DFL_FOE_HASH_MODE);
 
-#if !defined (CONFIG_HNAT_V2)
+#ifdef CONFIG_HNAT_EXTENTIONS
 	/* Set default index in policy table */
 	PpeSetPreAclEbl(0);
 	PpeSetPreMtrEbl(0);
@@ -2353,9 +2353,10 @@ static int32_t PpeEngStart(void)
 	/* Set PPE Global Configuration */
 	PpeSetFoeGloCfgEbl(1);
 
+#ifdef CONFIG_HNAT_EXTENTIONS
 	/* Set User Priority related register */
 	PpeSetUserPriority();
-
+#endif
 	/* which protocol type should be handle by HNAT not HNAPT */
 	PpeSetHNATProtoType();
 	return 0;
@@ -2369,7 +2370,7 @@ static int32_t PpeEngStop(void)
 	/* Set PPE Flow Set */
 	PpeSetFoeEbl(0);
 
-#if !defined (CONFIG_HNAT_V2)
+#ifdef CONFIG_HNAT_EXTENTIONS
 	/* Set default index in policy table */
 	PpeSetPreAclEbl(0);
 	PpeSetPreMtrEbl(0);
@@ -2766,11 +2767,13 @@ static int32_t PpeInitMod(void)
 	PpeRegIoctlHandler();
 
 #if !defined (CONFIG_HNAT_V2)
+#ifdef CONFIG_HNAT_EXTENTIONS
 	PpeSetRuleSize(PRE_ACL_SIZE, PRE_MTR_SIZE, PRE_AC_SIZE,
 		       POST_MTR_SIZE, POST_AC_SIZE);
 	AclRegIoctlHandler();
 	AcRegIoctlHandler();
 	MtrRegIoctlHandler();
+#endif
 #else
 	PpeSetFpBMAP();
 	PpeSetIpProt();
@@ -2826,7 +2829,7 @@ static void PpeCleanupMod(void)
 
 	/* Unregister ioctl handler */
 	PpeUnRegIoctlHandler();
-#if !defined (CONFIG_HNAT_V2)
+#ifdef CONFIG_HNAT_EXTENTIONS
 	AclUnRegIoctlHandler();
 	AcUnRegIoctlHandler();
 	MtrUnRegIoctlHandler();
