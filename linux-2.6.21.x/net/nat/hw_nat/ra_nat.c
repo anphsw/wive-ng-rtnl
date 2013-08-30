@@ -2767,9 +2767,9 @@ static int32_t PpeInitMod(void)
 	PpeRegIoctlHandler();
 
 #if !defined (CONFIG_HNAT_V2)
-#ifdef CONFIG_HNAT_EXTENTIONS
 	PpeSetRuleSize(PRE_ACL_SIZE, PRE_MTR_SIZE, PRE_AC_SIZE,
 		       POST_MTR_SIZE, POST_AC_SIZE);
+#ifdef CONFIG_HNAT_EXTENTIONS
 	AclRegIoctlHandler();
 	AcRegIoctlHandler();
 	MtrRegIoctlHandler();
