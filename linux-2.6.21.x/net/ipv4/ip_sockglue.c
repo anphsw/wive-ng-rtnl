@@ -566,11 +566,6 @@ static int do_ip_setsockopt(struct sock *sk, int level,
 				val &= ~INET_ECN_MASK;
 				val |= inet->tos & INET_ECN_MASK;
 			}
-			if (IPTOS_PREC(val) >= IPTOS_PREC_CRITIC_ECP &&
-			    !capable(CAP_NET_ADMIN)) {
-				err = -EPERM;
-				break;
-			}
 			if (inet->tos != val) {
 				inet->tos = val;
 				sk->sk_priority = rt_tos2priority(val);
