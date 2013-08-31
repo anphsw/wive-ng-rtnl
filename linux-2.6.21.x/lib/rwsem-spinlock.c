@@ -216,7 +216,7 @@ void fastcall __sched __down_write_nested(struct rw_semaphore *sem, int subclass
 		/* granted */
 		sem->activity = -1;
 		spin_unlock_irq(&sem->wait_lock);
-		goto out;
+		return;
 	}
 
 	tsk = current;
@@ -241,7 +241,6 @@ void fastcall __sched __down_write_nested(struct rw_semaphore *sem, int subclass
 	}
 
 	tsk->state = TASK_RUNNING;
-out:
 }
 
 void fastcall __sched __down_write(struct rw_semaphore *sem)
