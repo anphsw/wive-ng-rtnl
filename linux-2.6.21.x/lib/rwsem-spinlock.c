@@ -241,8 +241,7 @@ void fastcall __sched __down_write_nested(struct rw_semaphore *sem, int subclass
 	}
 
 	tsk->state = TASK_RUNNING;
- out:
-	;
+out:
 }
 
 void fastcall __sched __down_write(struct rw_semaphore *sem)

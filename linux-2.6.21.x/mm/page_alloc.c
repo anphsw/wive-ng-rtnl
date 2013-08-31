@@ -759,7 +759,7 @@ int move_freepages_block(struct zone *zone, struct page *page, int migratetype)
 static struct page *min_page(struct list_head *list)
 {
 	unsigned long min_pfn = -1UL;
-	struct page *min_page = NULL, *page;;
+	struct page *min_page = NULL, *page;
 
 	list_for_each_entry(page, list, lru) {
 		unsigned long pfn = page_to_pfn(page);
