@@ -1380,6 +1380,11 @@ void tcp_enter_frto(struct sock *sk)
 	tp->frto_counter = 1;
 }
 
+static inline void tcp_reset_reno_sack(struct tcp_sock *tp)
+{
+	tp->sacked_out = 0;
+}
+
 /* Enter Loss state after F-RTO was applied. Dupack arrived after RTO,
  * which indicates that we should follow the traditional RTO recovery,
  * i.e. mark everything lost and do go-back-N retransmission.
@@ -1391,7 +1396,7 @@ static void tcp_enter_frto_loss(struct sock *sk, int allowed_segments, int flag)
 
 	tp->lost_out = 0;
 	tp->retrans_out = 0;
-	if (IsReno(tp))
+	if (tcp_is_reno(tp))
 		tcp_reset_reno_sack(tp);
 
 	sk_stream_for_retrans_queue(skb, sk) {
@@ -1712,11 +1717,6 @@ static void tcp_remove_reno_sacks(struct sock *sk, int acked)
 	}
 	tcp_check_reno_reordering(sk, acked);
 	tcp_verify_left_out(tp);
-}
-
-static inline void tcp_reset_reno_sack(struct tcp_sock *tp)
-{
-	tp->sacked_out = 0;
 }
 
 /* Mark head of queue up as lost. */
