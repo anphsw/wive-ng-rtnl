@@ -11,7 +11,7 @@
 #CC = $(CROSS)gcc
 STRIP = $(CROSS)strip
 
-CFLAGS += -Os  -Wall
+CFLAGS += -Os -Wall
 
 ifneq ("$(LIBWRAP)", "")
 LIBWRAP += -DUSE_LIBWRAP

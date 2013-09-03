@@ -12,6 +12,7 @@ all: $(EXEC)
 hw_nat: $(HWNAT_OBJS) $(CONF_H)
 	$(CC) $(LDFLAGS) -o $@ $(HWNAT_OBJS)
 
+ifdef CONFIG_HNAT_EXTENTIONS
 acl: $(ACL_OBJS)
 	$(CC) $(LDFLAGS) -o $@ $(ACL_OBJS)
 
@@ -20,12 +21,15 @@ ac: $(AC_OBJS)
 
 mtr: $(MTR_OBJS)
 	$(CC) $(LDFLAGS) -o $@ $(MTR_OBJS)
+endif
 
 romfs:
 	$(ROMFSINST) /bin/hw_nat
-#	$(ROMFSINST) /bin/acl
-#	$(ROMFSINST) /bin/ac
-#	$(ROMFSINST) /bin/mtr
+ifdef CONFIG_HNAT_EXTENTIONS
+	$(ROMFSINST) /bin/acl
+	$(ROMFSINST) /bin/ac
+	$(ROMFSINST) /bin/mtr
+endif
 
 clean:
 	-rm -f $(EXEC) *.elf *.gdb *.o

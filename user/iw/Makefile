@@ -9,8 +9,7 @@ MKDIR ?= mkdir -p
 INSTALL ?= install
 CC ?= "gcc"
 
-CFLAGS ?= -Os -g
-CFLAGS += -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing -fno-common -Werror-implicit-function-declaration
+CFLAGS += -Os -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing -fno-common -Werror-implicit-function-declaration
 
 OBJS = iw.o genl.o event.o info.o phy.o \
 	interface.o ibss.o station.o survey.o util.o \

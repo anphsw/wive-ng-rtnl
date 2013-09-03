@@ -1,6 +1,8 @@
 #stupid ISP (as kabinet) auth daemon
 
 LDFLAGS += -s
+CFLAGS  += -Os
+
 LIBS = md5.o rmd160.o
 lanauth: lanauth.o $(LIBS)
 	$(CC) $(CFLAGS) $(LDFLAGS) lanauth.o -o lanauth $(LIBS)

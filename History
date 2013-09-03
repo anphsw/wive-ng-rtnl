@@ -1649,6 +1649,7 @@
 63) usb_modeswitch: update to 2.0.0 version.<br>
 64) libusb: up to 1.0.15 version.<br>
 65) libcurl: up to 7.32.0 version.<br>
+66) rt_utils: allways agressive optimize for size(save flash space).<br>
 <br>
 <br>
 <br>
