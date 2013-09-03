@@ -4,6 +4,7 @@
 *.orig
 *.rej
 *.lo
+*.gdb
 .sgbuilt_user
 .libs
 libtool
