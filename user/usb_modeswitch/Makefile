@@ -1,16 +1,20 @@
 PROG        = usb_modeswitch
-VERS        = 1.2.7
-LIBUSB      = $(ROOTDIR)/lib/libusb
-CFLAGS      += -Wall -I$(LIBUSB) -ffunction-sections -fdata-sections
+VERS        = 2.0.0
+LIBDIR	    = $(ROOTDIR)/lib/
+INCDIR	    = $(ROOTDIR)/lib/include_shared/libusb-1.0
+LIBUSB      = $(LIBDIR)/libusb
+CFLAGS      += -Wall -I$(INCDIR) -ffunction-sections -fdata-sections
 LDFLAGS	    += -Wl,--gc-sections
-LIBS        = -l usb
+LIBS        = -L$(LIBDIR) -lusb-1.0
 OBJS        = usb_modeswitch.c
 PREFIX      = $(DESTDIR)/usr
 ETCDIR      = $(DESTDIR)/etc
+SYSDIR      = $(ETCDIR)/systemd/system
+UPSDIR      = $(ETCDIR)/init
 UDEVDIR     = $(DESTDIR)/lib/udev
 SBINDIR     = $(PREFIX)/sbin
 MANDIR      = $(PREFIX)/share/man/man1
-VPATH		= jimtcl
+VPATH	    = jimtcl
 HOST_TCL   := $(shell cd jim && ./autosetup/find-tclsh)
 ifeq (,$(findstring jimsh0,$(HOST_TCL)))
 TCL        ?= $(HOST_TCL)
@@ -71,13 +75,19 @@ ums-clean:
 	$(RM) usb_modeswitch_dispatcher
 	$(RM) usb_modeswitch.string
 
+# If the systemd folder is present, install the service for starting the dispatcher
+# If not, use the dispatcher directly from the udev rule as in previous versions
+
 install-common: $(PROG) usb_modeswitch_dispatcher
 	install -D --mode=755 usb_modeswitch $(SBINDIR)/usb_modeswitch
 	install -D --mode=755 usb_modeswitch.sh $(UDEVDIR)/usb_modeswitch
 	install -D --mode=644 usb_modeswitch.conf $(ETCDIR)/usb_modeswitch.conf
 	install -D --mode=644 usb_modeswitch.1 $(MANDIR)/usb_modeswitch.1
+	install -D --mode=644 usb_modeswitch_dispatcher.1 $(MANDIR)/usb_modeswitch_dispatcher.1
 	install -D --mode=755 usb_modeswitch_dispatcher $(SBINDIR)/usb_modeswitch_dispatcher
 	install -d $(DESTDIR)/var/lib/usb_modeswitch
+	test -d $(UPSDIR) -a -e /sbin/initctl && install --mode=644 usb-modeswitch-upstart.conf $(UPSDIR) || test 1
+	test -d $(SYSDIR) -a -e /usr/bin/systemctl && install --mode=644 usb_modeswitch@.service $(SYSDIR) || test 1
 
 install: install-script
 
@@ -94,6 +104,7 @@ uninstall:
 	$(RM) $(ETCDIR)/usb_modeswitch.conf
 	$(RM) $(MANDIR)/usb_modeswitch.1
 	$(RM) -R $(DESTDIR)/var/lib/usb_modeswitch
+	$(RM) $(SYSDIR)/usb_modeswitch@.service
 
 romfs:
 	$(ROMFSINST) -S /bin/$(PROG)

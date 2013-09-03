@@ -5,7 +5,7 @@ APROOTDIR=`pwd`
 LIBDIR=$FIRMROOT/lib
 BACKUPCFLAGS=$CFLAGS
 BACKUPLDFLAGS=$LDFLAGS
-ZLIB=$LIBDIR/zlib
+ZLIB=$LIBDIR/include_shared
 LIBSSL=$FIRMROOT/user/openssl
 
 if [ ! -f $APROOTDIR/configure ]; then

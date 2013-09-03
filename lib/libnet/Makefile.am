@@ -17,4 +17,4 @@ bin_SCRIPTS = libnet-config
 shared: install
 	cp -vfa ./filesystem/lib/*.*    $(ROOTDIR)/lib/lib
 	cp -vfra ./filesystem/include/* $(ROOTDIR)/lib/include_shared
-
+	rm -rf ./filesystem

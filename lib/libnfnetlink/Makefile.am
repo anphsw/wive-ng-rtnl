@@ -18,3 +18,4 @@ dist-hook:
 shared: install
 	cp -vfa ./filesystem/lib/*.*    $(ROOTDIR)/lib/lib
 	cp -vfra ./filesystem/include/* $(ROOTDIR)/lib/include_shared
+	rm -rf ./filesystem
