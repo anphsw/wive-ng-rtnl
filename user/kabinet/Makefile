@@ -1,7 +1,7 @@
-#stupid ISP (as kabinet) auth daemon
-
-LDFLAGS += -s
-CFLAGS  += -Os
+#allways agressive optimize for size
+CFLAGS	+= -Os -fno-caller-saves -fno-unwind-tables -fno-asynchronous-unwind-tables
+CFLAGS	+= -ffunction-sections -fdata-sections
+LDFLAGS	+= -Wl,--gc-sections
 
 LIBS = md5.o rmd160.o
 lanauth: lanauth.o $(LIBS)

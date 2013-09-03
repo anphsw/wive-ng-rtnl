@@ -4,7 +4,11 @@
 #UTILSLIST = ader cpu mcprobe ipget#
 ####################################
 UTILSLIST = cpu mcprobe ipget
-CFLAGS += -Os
+
+#allways agressive optimize for size
+CFLAGS	+= -Os -fno-caller-saves -fno-unwind-tables -fno-asynchronous-unwind-tables
+CFLAGS	+= -ffunction-sections -fdata-sections
+LDFLAGS	+= -Wl,--gc-sections
 
 all:
 	@set -e;
