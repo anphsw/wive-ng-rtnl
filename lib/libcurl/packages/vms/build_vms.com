@@ -22,7 +22,8 @@ $!		Note, you must match the pointer size that the OpenSSL
 $!		shared image expects.
 $!		Currently curl is not building properly with 64 bit pointers
 $!		on VMS because it is trying to cast pointers to 32 bit
-$!		integers.
+$!              integers and some OpenVMS library routines called by curl
+$!              do not yet support 64 bit pointers.
 $!    CCQUAL=x  Add "x" to the C compiler qualifiers.
 $!		Default qualifiers are:
 $!		/standard=relaxed
@@ -35,7 +36,7 @@ $!    DEBUG     Compile debug and nooptimize
 $!		Alpha/IA64 always compiles /debug.
 $!		Always link a debug image.
 $!    NOIEEE    Do not use IEEE floating point.  (Alpha/I64)
-$!		VAX must use DFLOAT
+$!              VAX must always use DFLOAT
 $!    NOLARGE   Disable large-file support if large file support available.
 $!		(Non-VAX, VMS >= V7.2.)
 $!    NOLDAP    Disable LDAP support if LDAP is available.
@@ -52,6 +53,8 @@ $!    NOSSL     Don't use any SSL, even if available.
 $!    OSSLOLB   Use OpenSSL object libraries (.OLB), even if shared
 $!              images (.EXE) are available.
 $!    NOZLIB	Don't use GNV$ZLIB shared image even if available.
+$!    REALCLEAN Delete product files for all host architectures.  (No
+$!              build done.)  Alias for CLEAN_ALL
 $!
 $! DCL Symbols:
 $!
@@ -133,6 +136,18 @@ $!                   symbol tool_main needs to be quoted when parse style is
 $!                   set to exended in versions of VMS greater than 7.3-1.
 $!                   Remove curlbuild.h generation as it should be pre-built
 $!                   in the curl release or daily tarball.
+$! 12-Jul-2013, John Malmberg
+$!                   Adjust to find and use ZLIB from the Jean-Francois
+$!                   Pieronne shared image and newer GNV ZLIB kit that
+$!                   is upward compatible with Jean-Francois's kit.
+$!                   Remove tabs from file.
+$!                   Fixed DCL formatting as follows:
+$!                      * Labels have no space after leading $.
+$!                      * 1 space after $ for first level.
+$!                      * 3 spaces after $ for second level.  Line start + 4.
+$!                      * 7 spaces after $ for third level.  Line start + 8.
+$!                      * Each level after that indents 4 characters.
+$!                      * then/else/endif same indentation as if statement.
 $!
 $!===========================================================================
 $!
@@ -296,8 +311,25 @@ $!
 $ args_len = f$length(args)
 $ args_lower_len = f$length(args_lower)
 $!
+$ clean = 0
 $ if f$locate(",clean,", args_lower) .lt. args_lower_len
 $    then
+$   clean = 1
+$ endif
+$ clean_all = 0
+$ if f$locate(",clean_all,", args_lower) .lt. args_lower_len
+$ then
+$    clean = 1
+$    clean_all = 1
+$ endif
+$ if f$locate(",realclean,", args_lower) .lt. args_lower_len
+$ then
+$    clean = 1
+$    clean_all = 1
+$ endif
+$!
+$ if clean .ne. 0
+$ then
 $       prods = "''exedir'*.*;*"
 $       if (f$search( prods) .nes. "") then delete /log 'prods'
 $       prods = proc_dev_dir+ arch_name+ ".DIR;1"
@@ -305,13 +337,66 @@ $   if (f$search(prods) .nes. "") then set prot=o:rwed 'prods'
 $       if (f$search( prods) .nes. "") then delete /log 'prods'
 $   file = "[]config_vms.h"
 $   if f$search(file) .nes. "" then delete/log 'file';*
+$   file = "[]config.h"
+$   if f$search(file) .nes. "" then delete/log 'file';*
+$   file = "[]curl-config."
+$   if f$search(file) .nes. "" then delete/log 'file';*
+$   file = "[]libcurl.pc"
+$   if f$search(file) .nes. "" then delete/log 'file';*
+$   file = "[.lib.cxx_repository]cxx$demangler_db."
+$   if f$search(file) .nes. "" then delete/log 'file';*
+$   file = "[.src.cxx_repository]cxx$demangler_db."
+$   if f$search(file) .nes. "" then delete/log 'file';*
 $   file = "[.lib]config_vms.h"
 $   if f$search(file) .nes. "" then delete/log 'file';*
-$       goto Common_Exit
+$   file = "[...]curl_crtl_init"
+$   if f$search("''file'.lis") .nes. "" then delete/log 'file'.lis;*
+$   if f$search("''file'.obj") .nes. "" then delete/log 'file'.obj;*
+$   file = "[...]gnv$curlmsg"
+$   if f$search("''file'.lis") .nes. "" then delete/log 'file'.lis;*
+$   if f$search("''file'.obj") .nes. "" then delete/log 'file'.obj;*
+$   if f$search("''file'.exe") .nes. "" then delete/log 'file'.exe;*
+$   file = "[...]curlmsg"
+$   if f$search("''file'.lis") .nes. "" then delete/log 'file'.lis;*
+$   if f$search("''file'.obj") .nes. "" then delete/log 'file'.obj;*
+$   if f$search("''file'.exe") .nes. "" then delete/log 'file'.exe;*
+$   file = "[...]report_openssl_version"
+$   if f$search("''file'.lis") .nes. "" then delete/log 'file'.lis;*
+$   if f$search("''file'.obj") .nes. "" then delete/log 'file'.obj;*
+$   if f$search("''file'.exe") .nes. "" then delete/log 'file'.exe;*
+$   file = "[...]hp_ssl_release_info.txt"
+$   if f$search(file) .nes. "" then delete/log 'file';*
+$   file = "[...]gnv_libcurl_xfer.mar_exact"
+$   if f$search(file) .nes. "" then delete/log 'file';*
+$   file = "[...]gnv_libcurl_xfer"
+$   if f$search("''file'.lis") .nes. "" then delete/log 'file'.lis;*
+$   if f$search("''file'.obj") .nes. "" then delete/log 'file'.obj;*
+$   if f$search("''file'.opt") .nes. "" then delete/log 'file'.opt;*
+$   file = "[...]curl-*_original_src.bck"
+$   if f$search(file) .nes. "" then delete/log 'file';*
+$   file = "[...]curl-*_vms_src.bck"
+$   if f$search(file) .nes. "" then delete/log 'file';*
+$   file = "[...]curl-*.release_notes"
+$   if f$search(file) .nes. "" then delete/log 'file';*
+$   file = "[...]*curl*.pcsi$desc"
+$   if f$search(file) .nes. "" then delete/log 'file';*
+$   file = "[...]*curl*.pcsi$text"
+$   if f$search(file) .nes. "" then delete/log 'file';*
+$!
+$   if clean_all .eq. 0 then goto Common_Exit
 $    endif
 $!
-$ if f$locate(",clean_all,", args_lower) .lt. args_lower_len
+$!
+$ if clean_all .ne. 0
 $    then
+$   file = "[...]gnv$libcurl"
+$   if f$search("''file'.exe") .nes. "" then delete/log 'file'.exe;*
+$   if f$search("''file'.map") .nes. "" then delete/log 'file'.map;*
+$   if f$search("''file'.dsf") .nes. "" then delete/log 'file'.dsf;*
+$   file = "[.src]curl"
+$   if f$search("''file'.exe") .nes. "" then delete/log 'file'.exe;*
+$   if f$search("''file'.map") .nes. "" then delete/log 'file'.map;*
+$   if f$search("''file'.dsf") .nes. "" then delete/log 'file'.dsf;*
 $   prods = proc_dev_dir - delim + ".ALPHA" + delim + "*.*;*"
 $       if (f$search( prods) .nes. "") then delete /log 'prods'
 $       prods = proc_dev_dir+ "ALPHA"+ ".DIR;1"
@@ -350,7 +435,6 @@ $! by default.
 $ if f$locate(",debug,", args_lower) .lt. args_lower_len
 $    then
 $   cc_debug = "/debug/nooptimize"
-$       goto arg_loop_end
 $    endif
 $!
 $! We normally want IEEE float if it is available.  Programs that are
@@ -360,7 +444,6 @@ $!
 $ if f$locate(",noieee,", args_lower) .lt. args_lower_len
 $    then
 $   cc_float = ""
-$       goto arg_loop_end
 $    endif
 $!
 $! Normally we want large file if it is available.
@@ -536,6 +619,28 @@ $!
 $! LIBZ
 $ libzshr_line = ""
 $ try_shr = "gnv$libzshr"
+$ if build_64
+$ then
+$!  First look for 64 bit
+$   if f$search("''try_shr'64") .eqs. ""
+$   then
+$!      Second look for the J.F. Pieronne 64 bit shared image
+$       try_shr = "LIBZ_SHR64"
+$       if f$search(try_shr) .eqs. "" then nozlib = 1
+$   endif
+$ else
+$!  First look for 32 bit
+$   if f$search("''try_shr'32") .eqs. ""
+$   then
+$!      Second look for old 32 bit image
+$       if f$search(try_shr) .eqs. ""
+$       then
+$!          Third look for the J.F. Pieronne 32 bit shared image
+$           try_shr = "LIBZ_SHR32"
+$           if f$search(try_shr) .eqs. "" then nozlib = 1
+$       endif
+$   endif
+$ endif
 $ if f$search(try_shr) .eqs. ""
 $ then
 $   nozlib = 1
@@ -543,11 +648,16 @@ $ endif
 $ curl_sys_zlibinc = ""
 $ if nozlib .eq. 0
 $ then
-$   'vo_c' "%CURL-I-BLDGNVLIBZ, building with GNV LIBZ support"
 $   libzshr_line = "''try_shr'/share"
+$   if f$locate("LIBZ", try_shr) .eq. 0
+$   then
+$       'vo_c' "%CURL-I-BLDJFPLIBZ, building with JFP LIBZ support"
+$       curl_sys_zlibinc = "LIBZ:"
+$   else
+$       'vo_c' "%CURL-I-BLDGNVLIBZ, building with GNV LIBZ support"
 $   curl_sys_zlibinc = "GNV$ZLIB_INCLUDE:"
 $ endif
-$!
+$ endif
 $!
 $! Form CC qualifiers.
 $!

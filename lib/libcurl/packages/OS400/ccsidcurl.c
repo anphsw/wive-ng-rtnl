@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -33,6 +33,7 @@
 
 #include "curl.h"
 #include "mprintf.h"
+#include "slist.h"
 #include "urldata.h"
 #include "url.h"
 #include "getinfo.h"
@@ -207,6 +208,24 @@ dynconvert(int dccsid, const char * s, int slen, int sccsid)
     }
 
   return d;
+}
+
+
+static struct curl_slist *
+slist_convert(int dccsid, struct curl_slist * from, int sccsid)
+
+{
+  struct curl_slist * to = (struct curl_slist *) NULL;
+  char * cp;
+
+  for (; from; from = from->next) {
+    if(!(cp = dynconvert(dccsid, from->data, -1, sccsid))) {
+      curl_slist_free_all(to);
+      return (struct curl_slist *) NULL;
+    }
+    to = Curl_slist_append_nodup(to, cp);
+  }
+  return to;
 }
 
 
@@ -565,6 +584,24 @@ curl_multi_strerror_ccsid(CURLMcode error, unsigned int ccsid)
 }
 
 
+void
+curl_certinfo_free_all(struct curl_certinfo *info)
+
+{
+  int i;
+
+  /* Free all memory used by certificate info. */
+  if(info) {
+    if(info->certinfo) {
+      for (i = 0; i < info->num_of_certs; i++)
+        curl_slist_free_all(info->certinfo[i]);
+      free((char *) info->certinfo);
+    }
+    free((char *) info);
+  }
+}
+
+
 CURLcode
 curl_easy_getinfo_ccsid(CURL * curl, CURLINFO info, ...)
 
@@ -577,6 +614,10 @@ curl_easy_getinfo_ccsid(CURL * curl, CURLINFO info, ...)
   char * s;
   char * d;
   struct SessionHandle * data;
+  struct curl_slist * * slp;
+  struct curl_certinfo * cipf;
+  struct curl_certinfo * cipt;
+  int i;
 
   /* WARNING: unlike curl_easy_get_info(), the strings returned by this
      procedure have to be free'ed. */
@@ -586,25 +627,66 @@ curl_easy_getinfo_ccsid(CURL * curl, CURLINFO info, ...)
   paramp = va_arg(arg, void *);
   ret = Curl_getinfo(data, info, paramp);
 
-  if (ret != CURLE_OK || ((int) info & CURLINFO_TYPEMASK) != CURLINFO_STRING) {
-    va_end(arg);
-    return ret;
-    }
+  if(ret == CURLE_OK)
+    switch ((int) info & CURLINFO_TYPEMASK) {
 
+    case CURLINFO_STRING:
   ccsid = va_arg(arg, unsigned int);
-  va_end(arg);
   cpp = (char * *) paramp;
   s = *cpp;
 
-  if (!s)
-    return ret;
-
+      if(s) {
   d = dynconvert(ccsid, s, -1, ASCII_CCSID);
   *cpp = d;
 
   if (!d)
-    return CURLE_OUT_OF_MEMORY;
+          ret = CURLE_OUT_OF_MEMORY;
+      }
 
+      break;
+
+    case CURLINFO_SLIST:
+      ccsid = va_arg(arg, unsigned int);
+      if(info == CURLINFO_CERTINFO) {
+        cipf = *(struct curl_certinfo * *) paramp;
+        if(cipf) {
+          if(!(cipt = (struct curl_certinfo *) malloc(sizeof *cipt)))
+            ret = CURLE_OUT_OF_MEMORY;
+          else {
+            cipt->certinfo = (struct curl_slist * *) calloc(cipf->num_of_certs +
+                             1, sizeof(struct curl_slist *));
+            if(!cipt->certinfo)
+              ret = CURLE_OUT_OF_MEMORY;
+            else {
+              cipt->num_of_certs = cipf->num_of_certs;
+              for (i = 0; i < cipf->num_of_certs; i++)
+                if(cipf->certinfo[i])
+                  if(!(cipt->certinfo[i] = slist_convert(ccsid,
+                                                          cipf->certinfo[i],
+                                                          ASCII_CCSID))) {
+                    ret = CURLE_OUT_OF_MEMORY;
+                    break;
+                  }
+              }
+            }
+
+          if(ret != CURLE_OK) {
+            curl_certinfo_free_all(cipt);
+            cipt = (struct curl_certinfo *) NULL;
+          }
+
+          *(struct curl_certinfo * *) paramp = cipt;
+        }
+      }
+      else {
+        slp = (struct curl_slist * *) paramp;
+        if(*slp)
+          if(!(*slp = slist_convert(ccsid, *slp, ASCII_CCSID)))
+            ret = CURLE_OUT_OF_MEMORY;
+      }
+    }
+
+  va_end(arg);
   return ret;
 }
 

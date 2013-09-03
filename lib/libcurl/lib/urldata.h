@@ -134,6 +134,10 @@
 #include <qsossl.h>
 #endif
 
+#ifdef USE_GSKIT
+#include <gskssl.h>
+#endif
+
 #ifdef USE_AXTLS
 #include <axTLS/ssl.h>
 #undef malloc
@@ -184,6 +188,7 @@
 #include "http.h"
 #include "rtsp.h"
 #include "wildcard.h"
+#include "multihandle.h"
 
 #ifdef HAVE_GSSAPI
 # ifdef HAVE_GSSGNU
@@ -243,6 +248,7 @@ struct curl_schannel_cred {
   CredHandle cred_handle;
   TimeStamp time_stamp;
   int refcount;
+  bool cached;
 };
 
 struct curl_schannel_ctxt {
@@ -321,9 +327,15 @@ struct ssl_connect_data {
 #ifdef USE_QSOSSL
   SSLHandle *handle;
 #endif /* USE_QSOSSL */
+#ifdef USE_GSKIT
+  gsk_handle handle;
+  int iocport;
+  ssl_connect_state connecting_state;
+#endif
 #ifdef USE_AXTLS
   SSL_CTX* ssl_ctx;
   SSL*     ssl;
+  ssl_connect_state connecting_state;
 #endif /* USE_AXTLS */
 #ifdef USE_SCHANNEL
   struct curl_schannel_cred *cred;
@@ -565,7 +577,7 @@ struct Curl_async {
 /* These function pointer types are here only to allow easier typecasting
    within the source when we need to cast between data pointers (such as NULL)
    and function pointers. */
-typedef CURLcode (*Curl_do_more_func)(struct connectdata *, bool *);
+typedef CURLcode (*Curl_do_more_func)(struct connectdata *, int *);
 typedef CURLcode (*Curl_done_func)(struct connectdata *, CURLcode, bool);
 
 
@@ -859,6 +871,7 @@ struct connectdata {
 
   char *user;    /* user name string, allocated */
   char *passwd;  /* password string, allocated */
+  char *options; /* options string, allocated */
 
   char *proxyuser;    /* proxy user name string, allocated */
   char *proxypasswd;  /* proxy password string, allocated */
@@ -1136,8 +1149,7 @@ typedef enum {
  * Session-data MUST be put in the connectdata struct and here.  */
 #define MAX_CURL_USER_LENGTH 256
 #define MAX_CURL_PASSWORD_LENGTH 256
-#define MAX_CURL_USER_LENGTH_TXT "255"
-#define MAX_CURL_PASSWORD_LENGTH_TXT "255"
+#define MAX_CURL_OPTIONS_LENGTH 256
 
 struct auth {
   unsigned long want;  /* Bitmask set to the authentication methods wanted by
@@ -1283,8 +1295,6 @@ struct UrlState {
     struct POP3 *pop3;
     struct SMTP *smtp;
   } proto;
-  /* current user of this SessionHandle instance, or NULL */
-  struct connectdata *current_conn;
 
   /* if true, force SSL connection retry (workaround for certain servers) */
   bool ssl_connect_retry;
@@ -1317,7 +1327,7 @@ struct DynamicStatic {
  * the 'DynamicStatic' struct.
  * Character pointer fields point to dynamic storage, unless otherwise stated.
  */
-struct Curl_one_easy; /* declared and used only in multi.c */
+
 struct Curl_multi;    /* declared and used only in multi.c */
 
 enum dupstring {
@@ -1352,6 +1362,7 @@ enum dupstring {
   STRING_SSL_ISSUERCERT,  /* issuer cert file to check certificate */
   STRING_USERNAME,        /* <username>, if used */
   STRING_PASSWORD,        /* <password>, if used */
+  STRING_OPTIONS,         /* <options>, if used */
   STRING_PROXYUSERNAME,   /* Proxy <username>, if used */
   STRING_PROXYPASSWORD,   /* Proxy <password>, if used */
   STRING_NOPROXY,         /* List of hosts which should not use the proxy, if
@@ -1416,7 +1427,8 @@ struct UserDefined {
   curl_read_callback fread_func;     /* function that reads the input */
   int is_fread_set; /* boolean, has read callback been set to non-NULL? */
   int is_fwrite_set; /* boolean, has write callback been set to non-NULL? */
-  curl_progress_callback fprogress;  /* function for progress information */
+  curl_progress_callback fprogress; /* OLD and deprecated progress callback  */
+  curl_xferinfo_callback fxferinfo; /* progress callback */
   curl_debug_callback fdebug;      /* function that write informational data */
   curl_ioctl_callback ioctl_func;  /* function for I/O control */
   curl_sockopt_callback fsockopt;  /* function for setting socket options */
@@ -1477,12 +1489,6 @@ struct UserDefined {
   long dns_cache_timeout; /* DNS cache timeout */
   long buffer_size;      /* size of receive buffer to use */
   void *private_data; /* application-private data */
-
-  struct Curl_one_easy *one_easy; /* When adding an easy handle to a multi
-                                     handle, an internal 'Curl_one_easy'
-                                     struct is created and this is a pointer
-                                     to the particular struct associated with
-                                     this SessionHandle */
 
   struct curl_slist *http200aliases; /* linked list of aliases for http200 */
 
@@ -1562,6 +1568,7 @@ struct UserDefined {
   long socks5_gssapi_nec; /* flag to support nec socks5 server */
 #endif
   struct curl_slist *mail_rcpt; /* linked list of mail recipients */
+  bool sasl_ir;         /* Enable/disable SASL initial response */
   /* Common RTSP header options */
   Curl_RtspReq rtspreq; /* RTSP request type */
   long rtspversion; /* like httpversion, for RTSP */
@@ -1605,6 +1612,24 @@ struct Names {
  */
 
 struct SessionHandle {
+  /* first, two fields for the linked list of these */
+  struct SessionHandle *next;
+  struct SessionHandle *prev;
+
+  struct connectdata *easy_conn;     /* the "unit's" connection */
+
+  CURLMstate mstate;  /* the handle's state */
+  CURLcode result;   /* previous result */
+
+  struct Curl_message msg; /* A single posted message. */
+
+  /* Array with the plain socket numbers this handle takes care of, in no
+     particular order. Note that all sockets are added to the sockhash, where
+     the state etc are also kept. This array is mostly used to detect when a
+     socket is to be removed from the hash. See singlesocket(). */
+  curl_socket_t sockets[MAX_SOCKSPEREASYHANDLE];
+  int numsocks;
+
   struct Names dns;
   struct Curl_multi *multi;    /* if non-NULL, points to the multi handle
                                   struct to which this "belongs" when used by
@@ -1612,9 +1637,6 @@ struct SessionHandle {
   struct Curl_multi *multi_easy; /* if non-NULL, points to the multi handle
                                     struct to which this "belongs" when used
                                     by the easy interface */
-  struct Curl_one_easy *multi_pos; /* if non-NULL, points to its position
-                                      in multi controlling structure to assist
-                                      in removal. */
   struct Curl_share *share;    /* Share, handles global variable mutexing */
   struct SingleRequest req;    /* Request-specific data */
   struct UserDefined set;      /* values set by the libcurl user */

@@ -877,6 +877,7 @@ LTLIBOBJS
 LIBOBJS
 SUPPORT_PROTOCOLS
 SUPPORT_FEATURES
+ENABLE_STATIC
 ENABLE_SHARED
 CROSSCOMPILING_FALSE
 CROSSCOMPILING_TRUE
@@ -3535,8 +3536,8 @@ CURLVERSION=`$SED -ne 's/^#define LIBCURL_VERSION "\(.*\)"/\1/p' ${srcdir}/inclu
   if test $xc_bad_var_libs = yes; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: using LIBS: $LIBS" >&5
 $as_echo "$as_me: using LIBS: $LIBS" >&6;}
-    { $as_echo "$as_me:${as_lineno-$LINENO}: LIBS error: LIBS may only be used to specify libraries (-lname)." >&5
-$as_echo "$as_me: LIBS error: LIBS may only be used to specify libraries (-lname)." >&6;}
+    { $as_echo "$as_me:${as_lineno-$LINENO}: LIBS note: LIBS should only be used to specify libraries (-lname)." >&5
+$as_echo "$as_me: LIBS note: LIBS should only be used to specify libraries (-lname)." >&6;}
   fi
 
 
@@ -3560,7 +3561,7 @@ $as_echo "$as_me: LIBS error: LIBS may only be used to specify libraries (-lname
   if test $xc_bad_var_ldflags = yes; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: using LDFLAGS: $LDFLAGS" >&5
 $as_echo "$as_me: using LDFLAGS: $LDFLAGS" >&6;}
-    xc_bad_var_msg="LDFLAGS error: LDFLAGS may only be used to specify linker flags, not"
+    xc_bad_var_msg="LDFLAGS note: LDFLAGS should only be used to specify linker flags, not"
     for xc_word in $LDFLAGS; do
       case "$xc_word" in
         -D*)
@@ -3601,7 +3602,7 @@ $as_echo "$as_me: $xc_bad_var_msg libraries. Use LIBS for: $xc_word" >&6;}
   if test $xc_bad_var_cppflags = yes; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: using CPPFLAGS: $CPPFLAGS" >&5
 $as_echo "$as_me: using CPPFLAGS: $CPPFLAGS" >&6;}
-    xc_bad_var_msg="CPPFLAGS error: CPPFLAGS may only be used to specify C preprocessor flags, not"
+    xc_bad_var_msg="CPPFLAGS note: CPPFLAGS should only be used to specify C preprocessor flags, not"
     for xc_word in $CPPFLAGS; do
       case "$xc_word" in
         -rpath*)
@@ -3647,7 +3648,7 @@ $as_echo "$as_me: $xc_bad_var_msg libraries. Use LIBS for: $xc_word" >&6;}
   if test $xc_bad_var_cflags = yes; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: using CFLAGS: $CFLAGS" >&5
 $as_echo "$as_me: using CFLAGS: $CFLAGS" >&6;}
-    xc_bad_var_msg="CFLAGS error: CFLAGS may only be used to specify C compiler flags, not"
+    xc_bad_var_msg="CFLAGS note: CFLAGS should only be used to specify C compiler flags, not"
     for xc_word in $CFLAGS; do
       case "$xc_word" in
         -D*)
@@ -3682,7 +3683,8 @@ $as_echo "$as_me: $xc_bad_var_msg libraries. Use LIBS for: $xc_word" >&6;}
      test $xc_bad_var_cflags = yes ||
      test $xc_bad_var_ldflags = yes ||
      test $xc_bad_var_cppflags = yes; then
-     as_fn_error $? "Can not continue. Fix errors mentioned immediately above this line." "$LINENO" 5
+     { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Continuing even with errors mentioned immediately above this line." >&5
+$as_echo "$as_me: WARNING: Continuing even with errors mentioned immediately above this line." >&2;}
   fi
 
 ac_aux_dir=
@@ -5288,6 +5290,10 @@ else
 fi
 AM_BACKSLASH='\'
 
+## --------------------------------------- ##
+##  Start of automake initialization code  ##
+## --------------------------------------- ##
+
 if test "`cd $srcdir && pwd`" != "`pwd`"; then
   # Use -I$(srcdir) only when $(srcdir) != ., so that make's output
   # is not polluted with repeated "-I."
@@ -5350,7 +5356,12 @@ mkdir_p='$(MKDIR_P)'
 # in the wild :-(  We should find a proper way to deprecate it ...
 AMTAR='$${TAR-tar}'
 
+
+# We'll loop over all known methods to create a tar archive until one works.
+_am_tools='gnutar  pax cpio none'
+
 am__tar='$${TAR-tar} chof - "$$tardir"' am__untar='$${TAR-tar} xf -'
+
 
 
 
@@ -5482,6 +5493,11 @@ else
   am__fastdepCC_FALSE=
 fi
 
+
+
+## ------------------------------------- ##
+##  End of automake initialization code  ##
+## ------------------------------------- ##
 
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking curl version" >&5
@@ -24100,8 +24116,9 @@ fi
     fi
     capath="$want_capath"
     ca="no"
-  else
-                ca="no"
+  elif test "x$cross_compiling" != "xyes"; then
+
+            ca="no"
     capath="no"
     if test "x$want_ca" = "xunset"; then
                         if test "x$prefix" != xNONE; then
@@ -24131,9 +24148,10 @@ fi
         fi
       done
     fi
+  else
+        { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: skipped the ca-cert path detection when cross-compiling" >&5
+$as_echo "$as_me: WARNING: skipped the ca-cert path detection when cross-compiling" >&2;}
   fi
-
-
 
   if test "x$ca" != "xno"; then
     CURL_CA_BUNDLE='"'$ca'"'
@@ -38669,6 +38687,15 @@ if test "x$ac_cv_header_pthread_h" = xyes; then :
 $as_echo "#define HAVE_PTHREAD_H 1" >>confdefs.h
 
       save_CFLAGS="$CFLAGS"
+
+            ac_fn_c_check_func "$LINENO" "pthread_create" "ac_cv_func_pthread_create"
+if test "x$ac_cv_func_pthread_create" = xyes; then :
+  USE_THREADS_POSIX=1
+fi
+
+
+            if test "$USE_THREADS_POSIX" != "1"
+      then
       CFLAGS="$CFLAGS -pthread"
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking for pthread_create in -lpthread" >&5
 $as_echo_n "checking for pthread_create in -lpthread... " >&6; }
@@ -38704,17 +38731,21 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_pthread_pthread_create" >&5
 $as_echo "$ac_cv_lib_pthread_pthread_create" >&6; }
 if test "x$ac_cv_lib_pthread_pthread_create" = xyes; then :
-   { $as_echo "$as_me:${as_lineno-$LINENO}: using POSIX threaded DNS lookup" >&5
-$as_echo "$as_me: using POSIX threaded DNS lookup" >&6;}
-
-$as_echo "#define USE_THREADS_POSIX 1" >>confdefs.h
-
-          USE_THREADS_POSIX=1
-          curl_res_msg="threaded"
-
+  USE_THREADS_POSIX=1
 else
    CFLAGS="$save_CFLAGS"
 fi
+
+      fi
+
+      if test "x$USE_THREADS_POSIX" = "x1"
+      then
+
+$as_echo "#define USE_THREADS_POSIX 1" >>confdefs.h
+
+        curl_res_msg="POSIX threaded"
+      fi
+
 
 
 fi
@@ -39002,6 +39033,10 @@ fi
 ENABLE_SHARED="$enable_shared"
 
 
+ENABLE_STATIC="$enable_static"
+
+
+
 
 if test "x$USE_SSLEAY" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES SSL"
@@ -39141,8 +39176,8 @@ squeeze SUPPORT_PROTOCOLS
   if test $xc_bad_var_libs = yes; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: using LIBS: $LIBS" >&5
 $as_echo "$as_me: using LIBS: $LIBS" >&6;}
-    { $as_echo "$as_me:${as_lineno-$LINENO}: LIBS error: LIBS may only be used to specify libraries (-lname)." >&5
-$as_echo "$as_me: LIBS error: LIBS may only be used to specify libraries (-lname)." >&6;}
+    { $as_echo "$as_me:${as_lineno-$LINENO}: LIBS note: LIBS should only be used to specify libraries (-lname)." >&5
+$as_echo "$as_me: LIBS note: LIBS should only be used to specify libraries (-lname)." >&6;}
   fi
 
 
@@ -39166,7 +39201,7 @@ $as_echo "$as_me: LIBS error: LIBS may only be used to specify libraries (-lname
   if test $xc_bad_var_ldflags = yes; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: using LDFLAGS: $LDFLAGS" >&5
 $as_echo "$as_me: using LDFLAGS: $LDFLAGS" >&6;}
-    xc_bad_var_msg="LDFLAGS error: LDFLAGS may only be used to specify linker flags, not"
+    xc_bad_var_msg="LDFLAGS note: LDFLAGS should only be used to specify linker flags, not"
     for xc_word in $LDFLAGS; do
       case "$xc_word" in
         -D*)
@@ -39207,7 +39242,7 @@ $as_echo "$as_me: $xc_bad_var_msg libraries. Use LIBS for: $xc_word" >&6;}
   if test $xc_bad_var_cppflags = yes; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: using CPPFLAGS: $CPPFLAGS" >&5
 $as_echo "$as_me: using CPPFLAGS: $CPPFLAGS" >&6;}
-    xc_bad_var_msg="CPPFLAGS error: CPPFLAGS may only be used to specify C preprocessor flags, not"
+    xc_bad_var_msg="CPPFLAGS note: CPPFLAGS should only be used to specify C preprocessor flags, not"
     for xc_word in $CPPFLAGS; do
       case "$xc_word" in
         -rpath*)
@@ -39253,7 +39288,7 @@ $as_echo "$as_me: $xc_bad_var_msg libraries. Use LIBS for: $xc_word" >&6;}
   if test $xc_bad_var_cflags = yes; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: using CFLAGS: $CFLAGS" >&5
 $as_echo "$as_me: using CFLAGS: $CFLAGS" >&6;}
-    xc_bad_var_msg="CFLAGS error: CFLAGS may only be used to specify C compiler flags, not"
+    xc_bad_var_msg="CFLAGS note: CFLAGS should only be used to specify C compiler flags, not"
     for xc_word in $CFLAGS; do
       case "$xc_word" in
         -D*)
@@ -41048,7 +41083,7 @@ $as_echo X"$mf" |
     DEPDIR=`sed -n 's/^DEPDIR = //p' < "$mf"`
     test -z "$DEPDIR" && continue
     am__include=`sed -n 's/^am__include = //p' < "$mf"`
-    test -z "am__include" && continue
+    test -z "$am__include" && continue
     am__quote=`sed -n 's/^am__quote = //p' < "$mf"`
     # Find all dependency output files, they are included files with
     # $(DEPDIR) in their names.  We invoke sed twice because it is the
@@ -41936,6 +41971,8 @@ use vars qw(
 
 1;
 _EOF
+
+
 
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: Configured to build curl/libcurl:

@@ -494,7 +494,9 @@ sub checktestcmd {
 #
 sub runclient {
     my ($cmd)=@_;
-    return system($cmd);
+    my $ret = system($cmd);
+    print "CMD ($ret): $cmd\n" if($verbose);
+    return $ret;
 
 # This is one way to test curl on a remote machine
 #    my $out = system("ssh $CLIENTIP cd \'$pwd\' \\; \'$cmd\'");
@@ -3173,6 +3175,13 @@ sub singletest {
 
     if(@stdintest) {
         my $stdinfile="$LOGDIR/stdin-for-$testnum";
+
+        my %hash = getpartattr("client", "stdin");
+        if($hash{'nonewline'}) {
+            # cut off the final newline from the final line of the stdin data
+            chomp($stdintest[$#stdintest]);
+        }
+
         writearray($stdinfile, \@stdintest);
 
         $cmdargs .= " <$stdinfile";

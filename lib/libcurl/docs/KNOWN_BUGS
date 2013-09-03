@@ -3,6 +3,25 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+83. curl is unable to load non-default openssl engines, because openssl isn't
+  initialized properly. This seems to require OpenSSL_config() or
+  CONF_modules_load_file() to be used by libcurl but the first seems to not
+  work and we've gotten not reports from tests with the latter. Possibly we
+  need to discuss with OpenSSL developers how this is supposed to be done. We
+  need users with actual external openssl engines for testing to work on this.
+  http://curl.haxx.se/bug/view.cgi?id=1208
+
+82. When building with the Windows Borland compiler, it fails because the
+  "tlib" tool doesn't support hyphens (minus signs) in file names and we have
+  such in the build.
+  http://curl.haxx.se/bug/view.cgi?id=1222
+
+81. When using -J (with -O), automaticly resumed downloading together with "-C
+  -" fails. Without -J the same command line works! This happens because the
+  resume logic is worked out before the target file name (and thus its
+  pre-transfer size) has been figured out!
+  http://curl.haxx.se/bug/view.cgi?id=1169
+
 80. Curl doesn't recognize certificates in DER format in keychain, but it
   works with PEM.
   http://curl.haxx.se/bug/view.cgi?id=3439999
@@ -85,13 +104,6 @@ may have been fixed since this was written!
   CURLOPT_FAILONERROR with FTP to detect if a file exists or not, but it is
   not working: http://curl.haxx.se/mail/lib-2008-07/0295.html
 
-57. On VMS-Alpha: When using an http-file-upload the file is not sent to the
-  Server with the correct content-length.  Sending a file with 511 or less
-  bytes, content-length 512 is used.  Sending a file with 513 - 1023 bytes,
-  content-length 1024 is used.  Files with a length of a multiple of 512 Bytes
-  show the correct content-length. Only these files work for upload.
-  http://curl.haxx.se/bug/view.cgi?id=2057858
-
 56. When libcurl sends CURLOPT_POSTQUOTE commands when connected to a SFTP
   server using the multi interface, the commands are not being sent correctly
   and instead the connection is "cancelled" (the operation is considered done)
@@ -168,12 +180,6 @@ may have been fixed since this was written!
 
   We probably have even more bugs and lack of features when a SOCKS proxy is
   used.
-
-22. Sending files to a FTP server using curl on VMS, might lead to curl
-  complaining on "unaligned file size" on completion. The problem is related
-  to VMS file structures and the perceived file sizes stat() returns. A
-  possible fix would involve sending a "STRU VMS" command.
-  http://curl.haxx.se/bug/view.cgi?id=1156287
 
 21. FTP ASCII transfers do not follow RFC959. They don't convert the data
    accordingly (not for sending nor for receiving). RFC 959 section 3.1.1.1
