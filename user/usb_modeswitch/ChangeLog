@@ -2,6 +2,9 @@
 History of USB_ModeSwitch
 =========================
 
+Version 2.0.1, 2013/09/03
+    Fixed stupid string size bug which could lead to memory corruption
+    (thanks to Leonid Myravjev)
 Version 2.0.0, 2013/09/01
     Switched to libusb1.0, with much help from folks of the wl500g project
     (http://wl500g.googlecode.com): Vladislav Grishenko, Leonid Lisovskiy,

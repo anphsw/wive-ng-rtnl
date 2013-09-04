@@ -2,7 +2,7 @@
   This file is part of usb_modeswitch, a mode switching tool for controlling
   flip flop (multiple device) USB gear
 
-  Version 2.0.0, 2013/09/01
+  Version 2.0.1, 2013/09/03
   Copyright (C) 2007 - 2013  Josua Dietze
 
   Config file parsing stuff borrowed from Guillaume Dargaud

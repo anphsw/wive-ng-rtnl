@@ -1646,7 +1646,7 @@
 59) busybox: udhcpc: more RFC(1542) compatable.<br>
 60) init.d: vpn: fix select auth type in pptp client mode.<br>
 61) init.d: wifi.sh: need recalibrate txpower after HiPower set(fix issue power select at RT3350).<br>
-63) usb_modeswitch: update to 2.0.0 version.<br>
+63) usb_modeswitch: update to 2.0.1 version.<br>
 64) libusb: up to 1.0.15 version.<br>
 65) libcurl: up to 7.32.0 version.<br>
 66) rt_utils: allways agressive optimize for size(save flash space).<br>

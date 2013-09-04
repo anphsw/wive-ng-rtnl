@@ -1,6 +1,6 @@
 /*
   Mode switching tool for controlling flip flop (multiple device) USB gear
-  Version 2.0.0, 2013/09/01
+  Version 2.0.1, 2013/09/03
 
   Copyright (C) 2007 - 2013 Josua Dietze (mail to "usb_admin" at the domain
   of the home page; or write a personal message through the forum to "Josh".
@@ -45,7 +45,7 @@
 
 /* Recommended tab size: 4 */
 
-#define VERSION "2.0.0"
+#define VERSION "2.0.1"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -145,7 +145,7 @@ char MessageContent[LINE_DIM];
 char MessageContent2[LINE_DIM];
 char MessageContent3[LINE_DIM];
 char TargetProductList[LINE_DIM];
-char DefaultProductList[4];
+char DefaultProductList[5];
 char ByteString[LINE_DIM/2];
 char buffer[BUF_SIZE];
 
@@ -314,7 +314,6 @@ void printConfig()
 		fprintf (output,"Success check enabled, max. wait time %d seconds\n", CheckSuccess);
 	if ( sysmode )
 		fprintf (output,"System integration mode enabled\n");
-//	fprintf (output,"\n");
 }
 
 

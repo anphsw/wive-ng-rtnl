@@ -1,5 +1,5 @@
 PROG        = usb_modeswitch
-VERS        = 2.0.0
+VERS        = 2.0.1
 LIBDIR	    = $(ROOTDIR)/lib/
 INCDIR	    = $(ROOTDIR)/lib/include_shared/libusb-1.0
 LIBUSB      = $(LIBDIR)/libusb

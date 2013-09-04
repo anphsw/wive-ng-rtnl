@@ -9,7 +9,7 @@
 # the mode switching program with the matching parameter
 # file from /usr/share/usb_modeswitch
 #
-# Part of usb-modeswitch-2.0.0 package
+# Part of usb-modeswitch-2.0.1 package
 # (C) Josua Dietze 2009-2013
 
 set arg0 [lindex $argv 0]
