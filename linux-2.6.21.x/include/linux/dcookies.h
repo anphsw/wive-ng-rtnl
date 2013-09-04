@@ -13,6 +13,7 @@
 #ifdef CONFIG_PROFILING
  
 #include <linux/types.h>
+#include <linux/path.h>
  
 struct dcookie_user;
  
@@ -42,8 +43,7 @@ void dcookie_unregister(struct dcookie_user * user);
  *
  * Returns 0 on success, with *cookie filled in
  */
-extern int get_dcookie(struct dentry * dentry, struct vfsmount * vfsmnt,
-	unsigned long * cookie);
+int get_dcookie(struct path *path, unsigned long *cookie);
 
 #else
 
@@ -56,13 +56,12 @@ static inline void dcookie_unregister(struct dcookie_user * user)
 {
 	return;
 }
- 
-static inline int get_dcookie(struct dentry * dentry,
-	struct vfsmount * vfsmnt, unsigned long * cookie)
+
+static inline int get_dcookie(struct path *path, unsigned long *cookie)
 {
 	return -ENOSYS;
-} 
- 
+}
+
 #endif /* CONFIG_PROFILING */
- 
+
 #endif /* DCOOKIES_H */

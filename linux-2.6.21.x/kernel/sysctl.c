@@ -86,6 +86,7 @@ extern int oom_reconfigure_wanted;
 #ifdef CONFIG_DETECT_SOFTLOCKUP
 static int one = 1;
 static int sixty = 60;
+extern int softlockup_thresh;
 #endif
 
 static int zero;

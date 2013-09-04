@@ -22,6 +22,7 @@ static DEFINE_PER_CPU(struct task_struct *, watchdog_task);
 
 static int did_panic;
 int softlockup_thresh = 10;
+EXPORT_SYMBOL(softlockup_thresh);
 
 static int
 softlock_panic(struct notifier_block *this, unsigned long event, void *ptr)

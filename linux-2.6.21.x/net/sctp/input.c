@@ -73,7 +73,7 @@ static struct sctp_association *__sctp_lookup_association(
 					const union sctp_addr *peer,
 					struct sctp_transport **pt);
 
-static void sctp_add_backlog(struct sock *sk, struct sk_buff *skb);
+static int sctp_add_backlog(struct sock *sk, struct sk_buff *skb);
 
 
 /* Calculate the SCTP checksum of an SCTP packet.  */
@@ -357,7 +357,7 @@ done:
 	return 0;
 }
 
-static void sctp_add_backlog(struct sock *sk, struct sk_buff *skb)
+static int sctp_add_backlog(struct sock *sk, struct sk_buff *skb)
 {
 	struct sctp_chunk *chunk = SCTP_INPUT_CB(skb)->chunk;
 	struct sctp_ep_common *rcvr = chunk->rcvr;

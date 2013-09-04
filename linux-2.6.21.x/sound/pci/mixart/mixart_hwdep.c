@@ -23,6 +23,7 @@
 #include <sound/driver.h>
 #include <linux/interrupt.h>
 #include <linux/pci.h>
+#include <linux/vmalloc.h>
 #include <linux/firmware.h>
 #include <asm/io.h>
 #include <sound/core.h>
