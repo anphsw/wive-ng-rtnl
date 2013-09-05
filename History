@@ -1643,14 +1643,15 @@
 56) kernel: ipv4: Remove IP_TOS setting privilege checks.<br>
 57) kernel: tcp: missing check ACK flag of received segment in FIN-WAIT-2 state.<br>
 58) kernel: rt3052: enable rssi feedback support.<br>
-59) busybox: fix udhcp packet size logic.<br>
-60) busybox: udhcpc: more RFC(1542) compatable.<br>
-61) init.d: vpn: fix select auth type in pptp client mode.<br>
-62) init.d: wifi.sh: need recalibrate txpower after HiPower set(fix issue power select at RT3350).<br>
-63) usb_modeswitch: update to 2.0.1 version.<br>
-64) libusb: up to 1.0.15 version.<br>
-65) libcurl: up to 7.32.0 version.<br>
-66) rt_utils: allways agressive optimize for size(save flash space).<br>
+59) kernel: rt3052: fix ajust power procedure.<br>
+60) busybox: fix udhcp packet size logic.<br>
+61) busybox: udhcpc: more RFC(1542) compatable.<br>
+62) init.d: vpn: fix select auth type in pptp client mode.<br>
+63) init.d: wifi.sh: need recalibrate txpower after HiPower set(fix issue power select at RT3350).<br>
+64) usb_modeswitch: update to 2.0.1 version.<br>
+65) libusb: up to 1.0.15 version.<br>
+66) libcurl: up to 7.32.0 version.<br>
+67) rt_utils: allways agressive optimize for size(save flash space).<br>
 <br>
 <br>
 <br>
