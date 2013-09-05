@@ -2499,12 +2499,15 @@ VOID AsicAdjustTxPower(
 	CHAR		Value;
 	CHAR		DeltaPowerByBbpR1 = 0; // non-positive number
 	CHAR		TotalDeltaPower = 0; // (non-positive number) including the transmit power controlled by the MAC and the BBP R1	
-	CONFIGURATION_OF_TX_POWER_CONTROL_OVER_MAC CfgOfTxPwrCtrlOverMAC = {0};
+	CONFIGURATION_OF_TX_POWER_CONTROL_OVER_MAC CfgOfTxPwrCtrlOverMAC;
+
 
 #ifdef CONFIG_STA_SUPPORT
 	CHAR		Rssi = -127;
 #endif // CONFIG_STA_SUPPORT //
 	
+	NdisZeroMemory(&CfgOfTxPwrCtrlOverMAC, sizeof(CONFIGURATION_OF_TX_POWER_CONTROL_OVER_MAC));
+
 #ifdef CONFIG_STA_SUPPORT
 	if (OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_DOZE) || 
 #ifdef RTMP_MAC_PCI
@@ -2585,11 +2588,14 @@ VOID AsicAdjustTxPower(
 	{
 		DeltaPowerByBbpR1 -= 12; // -12 dBm
 	}
+	RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R1, BbpR1);
+
 
 	TotalDeltaPower += DeltaPowerByBbpR1; // the transmit power controlled by the BBP R1
 	TotalDeltaPower += DeltaPwr; // the transmit power controlled by the MAC	
 
 	// The BBP R1 controls the transmit power for all rates
+	RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R1, &BbpR1);
 	BbpR1 &= ~MDSM_BBP_R1_STATIC_TX_POWER_CONTROL_MASK;
 
 	if (TotalDeltaPower <= -12)
@@ -2789,9 +2795,9 @@ VOID AsicAdjustTxPower(
 					{
 						Value = 0; /* min */
 					}
-					else if ((Value + TotalDeltaPower) > 0xC)
+					else if ((Value + TotalDeltaPower) > 0xF)
 					{
-						Value = 0xC; /* max */
+						Value = 0xF; /* max */
 					}
 					else
 					{
