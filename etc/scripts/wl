@@ -1,0 +1,12 @@
+#!/bin/sh
+
+##############################################################################
+# Template to wl command - onsole script tool for fast acces to AP/STA info
+##############################################################################
+
+iwpriv ra0 show stainfo
+iwpriv ra0 show stacountinfo
+iwpriv ra0 show stasecinfo
+iwpriv ra0 show descinfo
+iwpriv ra0 show wdsinfo
+iwpriv ra0 show bainfo
