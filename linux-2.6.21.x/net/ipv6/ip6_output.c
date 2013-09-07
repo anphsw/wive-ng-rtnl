@@ -224,6 +224,7 @@ int ip6_xmit(struct sock *sk, struct sk_buff *skb, struct flowi *fl,
 	ipv6_addr_copy(&hdr->saddr, &fl->fl6_src);
 	ipv6_addr_copy(&hdr->daddr, first_hop);
 
+	skb->protocol = htons(ETH_P_IPV6);
 	skb->priority = sk->sk_priority;
 
 	mtu = ip6_skb_dst_mtu(skb);
@@ -992,6 +993,7 @@ static inline int ip6_ufo_append_data(struct sock *sk,
 		/* initialize protocol header pointer */
 		skb->h.raw = skb->nh.raw + fragheaderlen;
 
+		skb->protocol = htons(ETH_P_IPV6);
 		skb->ip_summed = CHECKSUM_PARTIAL;
 		skb->csum = 0;
 	}
@@ -1201,6 +1203,7 @@ alloc_new_skb:
 			/*
 			 *	Fill in the control structures
 			 */
+			skb->protocol = htons(ETH_P_IPV6);
 			skb->ip_summed = csummode;
 			skb->csum = 0;
 			/* reserve for fragmentation */
