@@ -870,6 +870,7 @@ romfs: install
 	$(ROMFSINST) -s /etc/rc.d/W47zebra /etc/init.d/zebra
 	$(ROMFSINST) -S filesystem/sbin/zebra /bin/zebra
 	$(ROMFSINST) -S filesystem/sbin/ripd /bin/ripd
+	rm -rf filesystem
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

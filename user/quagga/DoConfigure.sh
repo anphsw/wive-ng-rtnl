@@ -13,8 +13,8 @@ fi
 
 CONFOPTS="--host=mipsel-linux"
 CONFOPTS="$CONFOPTS --prefix=$APROOTDIR/filesystem"
-CONFOPTS="$CONFOPTS --disable-bgpd --disable-babeld --disable-ripngd "
-CONFOPTS="$CONFOPTS --disable-ospfapi --disable-ospfclient--disable-ospf6d --disable-ospfd"
+CONFOPTS="$CONFOPTS --disable-bgpd --disable-babeld --disable-ripngd"
+CONFOPTS="$CONFOPTS --disable-ospfapi --disable-ospfclient --disable-ospfd --disable-ospf6d"
 CONFOPTS="$CONFOPTS --disable-dependency-tracking"
 
 ./configure $CONFOPTS
