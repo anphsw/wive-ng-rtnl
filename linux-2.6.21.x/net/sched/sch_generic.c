@@ -81,6 +81,7 @@ static inline int qdisc_restart(struct net_device *dev)
 {
 	struct Qdisc *q = dev->qdisc;
 	struct sk_buff *skb;
+	int running;
 
 	/* Dequeue packet */
 	if (((skb = dev->gso_skb)) || ((skb = q->dequeue(q)))) {
@@ -550,12 +551,31 @@ void dev_deactivate(struct net_device *dev)
 
 	dev_watchdog_down(dev);
 
-	/* Wait for outstanding dev_queue_xmit calls. */
+	/* Wait for outstanding qdisc-less dev_queue_xmit calls. */
 	synchronize_rcu();
 
 	/* Wait for outstanding qdisc_run calls. */
-	while (test_bit(__LINK_STATE_QDISC_RUNNING, &dev->state))
-		yield();
+	do {
+		while (test_bit(__LINK_STATE_QDISC_RUNNING, &dev->state))
+			yield();
+
+		/*
+		 * Double-check inside queue lock to ensure that all effects
+		 * of the queue run are visible when we return.
+		 */
+		spin_lock_bh(&dev->queue_lock);
+		running = test_bit(__LINK_STATE_QDISC_RUNNING, &dev->state);
+		spin_unlock_bh(&dev->queue_lock);
+
+		/*
+		 * The running flag should never be set at this point because
+		 * we've already set dev->qdisc to noop_qdisc *inside* the same
+		 * pair of spin locks.  That is, if any qdisc_run starts after
+		 * our initial test it should see the noop_qdisc and then
+		 * clear the RUNNING bit before dropping the queue lock.  So
+		 * if it is set here then we've found a bug.
+		 */
+	} while (WARN_ON_ONCE(running));
 
 	if (dev->gso_skb) {
 		kfree_skb(dev->gso_skb);
