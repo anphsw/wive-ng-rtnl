@@ -517,7 +517,6 @@ void dev_activate(struct net_device *dev)
 	   virtual interfaces
 	 */
 
-#ifndef CONFIG_NET_USE_NOOP
 	if (dev->qdisc_sleeping == &noop_qdisc) {
 		struct Qdisc *qdisc;
 		if (dev->tx_queue_len) {
@@ -537,7 +536,7 @@ void dev_activate(struct net_device *dev)
 		dev->qdisc_sleeping = qdisc;
 		write_unlock(&qdisc_tree_lock);
 	}
-#endif
+
 	if (!netif_carrier_ok(dev))
 		/* Delay activation until next carrier-on event */
 		return;
