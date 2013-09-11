@@ -273,3 +273,8 @@ config RAETH_INIT_PROTECT
 	bool "Disable packet recive/transmit before init/reinit."
 	depends on RAETH
 	default y
+
+config RAETH_ESW_DISABLE
+	bool "Link down ethernet switch port during kernel initial."
+	depends on RT_3052_ESW
+	default y

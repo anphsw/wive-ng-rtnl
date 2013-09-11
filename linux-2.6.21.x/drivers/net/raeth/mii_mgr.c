@@ -310,8 +310,20 @@ u32 mii_mgr_write(u32 phy_addr, u32 phy_register, u32 write_data)
 
 #endif
 
+#ifdef CONFIG_RAETH_ESW_DISABLE
+int __init ralink_esw_port_init(void)
+{
+	int i;
 
+	printk("raeth: disable ESW ports before kernel init.\n");
+	for (i = 0; i < 5; i++)
+		mii_mgr_write(i, 0x0, 0x3900);
 
+	return 0;
+}
+
+module_init(ralink_esw_port_init);
+#endif
 
 EXPORT_SYMBOL(mii_mgr_write);
 EXPORT_SYMBOL(mii_mgr_read);

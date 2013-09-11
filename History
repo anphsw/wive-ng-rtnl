@@ -1658,6 +1658,7 @@
 71) defaults: set HT_MIMOPSMode to static.<br>
 72) kernel: net_sched: eliminate qdisc_tree_lock.<br>
 73) kernel: tcp: fix timestamp in syn packets issue with some OS.<br>
+74) kernel: raeth: link down ethernet switch port during kernel initial.<br>
 <br>
 <br>
 <br>
