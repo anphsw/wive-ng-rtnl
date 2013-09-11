@@ -132,11 +132,11 @@ EXTRA_CFLAGS += -DRSSI_FEEDBACK
 # do not lock CountryRegion from EEPROM
 EXTRA_CFLAGS += -DEEPROM_COUNTRY_UNLOCK
 
-#provide ATE testmode support
+# provide ATE testmode support
 #EXTRA_CFLAGS += -DRALINK_ATE -DRALINK_QA -DCONFIG_RT2880_ATE_CMD_NEW -DNEW_TXCONT
 
-#provide some debug messages
-#EXTRA_CFLAGS += -DRELASE_EXCLUDE
+# provide some debug messages
+EXTRA_CFLAGS += -DRELASE_EXCLUDE
 
 ifdef RALINK_ATE
 rt2860v2_sta-y += ../common/rt_ate.o

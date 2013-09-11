@@ -176,15 +176,25 @@ EXTRA_CFLAGS += -DRSSI_FEEDBACK
 # do not lock CountryRegion from EEPROM
 EXTRA_CFLAGS += -DEEPROM_COUNTRY_UNLOCK
 
+# provide external Flash memory support
+EXTRA_CFLAGS += -DRTMP_FLASH_SUPPORT
+
+ifneq ($(CONFIG_RA_HW_NAT_WIFI),y)
+EXTRA_CFLAGS += -DCONFIG_RA_NAT_NONE
+endif
+
 #provide ATE testmode
 ifeq ($(CONFIG_RT2860V2_AP_ATE),y)
 EXTRA_CFLAGS += -DRALINK_ATE -DRALINK_QA -DCONFIG_RT2880_ATE_CMD_NEW -DNEW_TXCON
 endif
 
-#provide some debug messages and iapp roaming daemon support
-#EXTRA_CFLAGS += -DRELASE_EXCLUDE -DIAPP_SUPPORT
+# and iapp roaming daemon support
+#EXTRA_CFLAGS += -DIAPP_SUPPORT
 
-#provide busy time statistics for every TBTT
+# provide some debug messages
+EXTRA_CFLAGS += -DRELASE_EXCLUDE
+
+# provide busy time statistics for every TBTT
 #EXTRA_CFLAGS += -DQLOAD_FUNC_BUSY_TIME_STATS
 
 # provide busy time alarm mechanism
