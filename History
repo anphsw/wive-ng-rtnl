@@ -1657,6 +1657,7 @@
 70) libnatpmp: update to 20130911 version.<br>
 71) defaults: set HT_MIMOPSMode to static.<br>
 72) kernel: net_sched: eliminate qdisc_tree_lock.<br>
+73) kernel: tcp: fix timestamp in syn packets issue with some OS.<br>
 <br>
 <br>
 <br>

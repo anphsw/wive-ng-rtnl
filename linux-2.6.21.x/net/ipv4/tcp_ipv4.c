@@ -1301,10 +1301,16 @@ int tcp_v4_conn_request(struct sock *sk, struct sk_buff *skb)
 
 	tcp_parse_options(skb, &tmp_opt, 0);
 
-	if (want_cookie) {
+	if (want_cookie && !tmp_opt.saw_tstamp)
 		tcp_clear_options(&tmp_opt);
+
+	/* Some OSes (unknown ones, but I see them on web server, which
+	* contains information interesting only for windows'
+	* users) do not send their stamp in SYN. It is easy case.
+	* We simply do not advertise TS support.
+	*/
+	if (tmp_opt.saw_tstamp && !tmp_opt.rcv_tsval)
 		tmp_opt.saw_tstamp = 0;
-	}
 
 	tmp_opt.tstamp_ok = tmp_opt.saw_tstamp;
 
