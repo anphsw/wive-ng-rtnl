@@ -1,6 +1,6 @@
-/* $Id: natpmp.c,v 1.15 2012/03/05 19:38:37 nanard Exp $ */
+/* $Id: natpmp.c,v 1.17 2013/09/11 07:22:25 nanard Exp $ */
 /* libnatpmp
-Copyright (c) 2007-2011, Thomas BERNARD 
+Copyright (c) 2007-2013, Thomas BERNARD
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #define EWOULDBLOCK WSAEWOULDBLOCK
 #define ECONNREFUSED WSAECONNREFUSED
 #include "wingettimeofday.h"
+#define gettimeofday natpmp_gettimeofday
 #else
 #include <errno.h>
 #include <unistd.h>
@@ -52,6 +53,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #endif
 #include "natpmp.h"
 #include "getgateway.h"
+#include <stdio.h>
 
 LIBSPEC int initnatpmp(natpmp_t * p, int forcegw, in_addr_t forcedgw)
 {
@@ -194,7 +196,11 @@ LIBSPEC int readnatpmpresponse(natpmp_t * p, natpmpresp_t * response)
 	n = recvfrom(p->s, buf, sizeof(buf), 0,
 	             (struct sockaddr *)&addr, &addrlen);
 	if(n<0)
+#ifdef WIN32
+		switch(WSAGetLastError()) {
+#else
 		switch(errno) {
+#endif
 		/*case EAGAIN:*/
 		case EWOULDBLOCK:
 			n = NATPMP_TRYAGAIN;
