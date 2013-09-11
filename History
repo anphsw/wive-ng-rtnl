@@ -1660,6 +1660,7 @@
 73) kernel: tcp: fix timestamp in syn packets issue with some OS.<br>
 74) kernel: raeth: link down ethernet switch port during kernel initial.<br>
 75) kernel: netfilter: nf_conntrack: TCP conntrack reopening fix.<br>
+76) zeba replaed to quagga 0.99.22 version and enable for 8Mb devices.<br>
 <br>
 <br>
 <br>
