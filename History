@@ -1659,6 +1659,7 @@
 72) kernel: net_sched: eliminate qdisc_tree_lock.<br>
 73) kernel: tcp: fix timestamp in syn packets issue with some OS.<br>
 74) kernel: raeth: link down ethernet switch port during kernel initial.<br>
+75) kernel: netfilter: nf_conntrack: TCP conntrack reopening fix.<br>
 <br>
 <br>
 <br>
