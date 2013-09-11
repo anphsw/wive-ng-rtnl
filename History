@@ -1656,6 +1656,7 @@
 69) rt_utils: allways agressive optimize for size(save flash space).<br>
 70) libnatpmp: update to 20130911 version.<br>
 71) defaults: set HT_MIMOPSMode to static.<br>
+72) kernel: net_sched: eliminate qdisc_tree_lock.<br>
 <br>
 <br>
 <br>
