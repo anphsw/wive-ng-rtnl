@@ -553,6 +553,9 @@ config NET_CLS_IND
 	  classification based on the incoming device. This option is
 	  likely to disappear in favour of the metadata ematch.
 
+config NET_USE_NOOP
+	bool "Netsched use noop sched as default."
+
 endif # NET_SCHED
 
 endmenu
