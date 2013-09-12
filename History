@@ -1663,6 +1663,7 @@
 76) rip: zeba replaced to quagga 0.99.22 version and enable for 8Mb devices.<br>
 77) kernel: netfilter: nf_conntrack: fix event flooding in GRE protocol tracker.<br>
 78) kernel: netfilter: nf_conntrack_reasm: properly handle packets fragmented into a single fragment.<br>
+79) kernel: align the skb_orig padding to power of two.<br>
 <br>
 <br>
 <br>
