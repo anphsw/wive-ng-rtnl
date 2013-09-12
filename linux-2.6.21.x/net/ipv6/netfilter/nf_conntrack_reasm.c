@@ -633,7 +633,7 @@ nf_ct_frag6_reasm(struct nf_ct_frag6_queue *fq, struct net_device *dev)
 
 	/* all original skbs are linked into the NFCT_FRAG6_CB(head).orig */
 	fp = skb_shinfo(head)->frag_list;
-	if (NFCT_FRAG6_CB(fp)->orig == NULL)
+	if (fp && NFCT_FRAG6_CB(fp)->orig == NULL)
 		/* at above code, head skb is divided into two skbs. */
 		fp = fp->next;
 
@@ -758,12 +758,6 @@ struct sk_buff *nf_ct_frag6_gather(struct sk_buff *skb)
 	skb_set_transport_header(clone, fhoff);
 	hdr = clone->nh.ipv6h;
 	fhdr = (struct frag_hdr *)clone->h.raw;
-
-	if (!(fhdr->frag_off & htons(0xFFF9))) {
-		DEBUGP("Invalid fragment offset\n");
-		/* It is not a fragmented frame */
-		goto ret_orig;
-	}
 
 	if (atomic_read(&nf_ct_frag6_mem) > nf_ct_frag6_high_thresh)
 		nf_ct_frag6_evictor();
