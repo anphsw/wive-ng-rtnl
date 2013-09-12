@@ -1191,7 +1191,7 @@ static inline void skb_set_mac_header(struct sk_buff *skb, const int offset)
 #ifndef NET_SKB_PAD
 #if defined (CONFIG_RALINK_RT2880) || defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3352) || \
     defined (CONFIG_RALINK_RT2883) || defined (CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT5350) || \
-    defined (CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_RT6352)
+    defined (CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_RT6352) || defined (CONFIG_RALINK_MT7620)
 /* ralink depended hacks */
 #define NET_SKB_PAD		80
 #define NET_SKB_PAD_ORIG	max(64, L1_CACHE_BYTES)
