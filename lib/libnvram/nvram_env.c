@@ -1324,6 +1324,7 @@ int gen_wifi_config(int mode)
 		FPRINT_NUM(ApCliTxMode);
 		FPRINT_NUM(ApCliTxMcs);
 #endif
+		FPRINT_NUM(UseNewRateAdapt);
 
 		//Radio On/Off
 		if (atoi(nvram_bufget(mode, "RadioOff")) == 1)
