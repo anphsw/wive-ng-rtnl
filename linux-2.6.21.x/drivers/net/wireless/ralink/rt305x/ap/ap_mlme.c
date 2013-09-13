@@ -158,6 +158,12 @@ VOID APMlmePeriodicExec(
 #endif // TONE_RADAR_DETECT_SUPPORT //
 #endif // CARRIER_DETECTION_SUPPORT //
 
+#ifdef RTMP_RBUS_SUPPORT
+#ifdef RT305x
+       RT305x_PowerHighPatchAP(pAd);
+#endif
+#endif
+
 	// Disable Adjust Tx Power for WPA WiFi-test. 
 	// Because high TX power results in the abnormal disconnection of Intel BG-STA.  
 //#ifndef WIFI_TEST    
