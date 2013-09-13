@@ -1467,6 +1467,4 @@ typedef enum _AuthState {
 } AUTH_STATE;
 
 // ====================== end of AP mlme.h ============================
-
-
 #endif	// MLME_H__

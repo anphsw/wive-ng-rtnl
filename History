@@ -1665,6 +1665,7 @@
 79) kernel: wifi_drivers: disable video turbine for test issue with rtl8188CU clients.<br>
 80) kernel: tcp: skip cwnd moderation in TCP_CA_Open in tcp_try_to_open.<br>
 81) kernel: hw_nat: mcast/bcast check optimization for RX path (hook_rx always called after eth_type_trans).<br>
+82) kernel: rt305x: backport auto tune B27-28 registers and HiPower workaround.<br>
 <br>
 <br>
 <br>

@@ -158,59 +158,8 @@ VOID APMlmePeriodicExec(
 #endif // TONE_RADAR_DETECT_SUPPORT //
 #endif // CARRIER_DETECTION_SUPPORT //
 
-#if defined(RT305x)||defined(RT3070)
-	// request by Gary, if Rssi0 > -42, BBP 82 need to be changed from 0x62 to 0x42, , bbp 67 need to be changed from 0x20 to 0x18
-	if (!pAd->CommonCfg.HighPowerPatchDisabled)
-	{
-//#ifdef RT305x
-#ifndef RT3350
-	UCHAR RFValue;
-#endif // #ifndef RT3350 //
-//#endif // RT305x //
+	RT305x_PowerHighPatchAP(pAd);
 
-
-#ifdef RT305x
-		// TODO: shiang, need to check chip version here!!!
-#ifndef RT3350
-		if ((pAd->ApCfg.RssiSample.AvgRssi0 != 0) && (pAd->ApCfg.RssiSample.AvgRssi0 > (pAd->BbpRssiToDbmDelta - 35) ))
-		{ 
-		    RT30xxReadRFRegister(pAd, RF_R27, (PUCHAR)&RFValue);
-		    RFValue &= ~0x3;
-		    RT30xxWriteRFRegister(pAd, RF_R27, (UCHAR)RFValue);
-
-		    RT30xxReadRFRegister(pAd, RF_R28, (PUCHAR)&RFValue);
-		    RFValue &= ~0x3;
-		    RT30xxWriteRFRegister(pAd, RF_R28, (UCHAR)RFValue);
-		}
-        else
-		{
-		    RT30xxReadRFRegister(pAd, RF_R27, (PUCHAR)&RFValue);
-		    RFValue |= 0x3;
-		    RT30xxWriteRFRegister(pAd, RF_R27, (UCHAR)RFValue);
-
-		    RT30xxReadRFRegister(pAd, RF_R28, (PUCHAR)&RFValue);
-		    RFValue |= 0x3;
-		    RT30xxWriteRFRegister(pAd, RF_R28, (UCHAR)RFValue);
-		}
-#endif // RT3350 //
-
-		// request by Gary, if Rssi0 > -42, BBP 82 need to be changed from 0x62 to 0x42,
-		// bbp 67 need to be changed from 0x20 to 0x18 (Only 2R have High Power issue)
-		if (pAd->Antenna.field.RxPath == 2)
-		{
-			if ((pAd->ApCfg.RssiSample.AvgRssi0 != 0) && (pAd->ApCfg.RssiSample.AvgRssi0 > (pAd->BbpRssiToDbmDelta - 42) ))
-			{
-				RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R82, 0x42);
-				RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R67, 0x18);
-			}
-			else
-			{
-				RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R82, 0x62);
-				RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R67, 0x20);
-			}
-		}
-#endif // RT305x //
-	}
 #ifdef RTMP_RBUS_SUPPORT
 #ifdef RT305x
 #ifndef RT3350
@@ -222,7 +171,6 @@ VOID APMlmePeriodicExec(
 #endif // RT3350 //
 #endif // RT305x //
 #endif // RTMP_RBUS_SUPPORT //
-#endif // defined(RT305x)||defined(RT3070) //
 
 	// Disable Adjust Tx Power for WPA WiFi-test. 
 	// Because high TX power results in the abnormal disconnection of Intel BG-STA.  

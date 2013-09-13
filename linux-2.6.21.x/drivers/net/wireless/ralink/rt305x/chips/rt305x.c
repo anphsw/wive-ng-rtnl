@@ -260,6 +260,37 @@ REG_PAIR   RT305x_RFRegTable[] = {
 
 UCHAR NUM_RF_REG_PARMS = (sizeof(RT305x_RFRegTable) / sizeof(REG_PAIR));
 
+static VOID NICInitRT305xRF_R27_R28(IN PRTMP_ADAPTER pAd)
+{
+	if ((pAd->CommonCfg.CN >> 16) == 0x3033)
+	{
+		if (pAd->CommonCfg.CID < 0x103)
+		{
+			RT30xxWriteRFRegister(pAd, RF_R27, 0x23);
+			RT30xxWriteRFRegister(pAd, RF_R28, 0x13);
+		}
+		else
+		{
+			RT30xxWriteRFRegister(pAd, RF_R27, 0x20);
+			RT30xxWriteRFRegister(pAd, RF_R28, 0x10);
+		}
+	}
+	else
+	{
+		if (pAd->RfIcType == RFIC_3320)
+		{
+			RT30xxWriteRFRegister(pAd, RF_R27, 0x75);
+			RT30xxWriteRFRegister(pAd, RF_R28, 0x10);
+		}
+
+		if (pAd->RfIcType == RFIC_3020)
+		{
+			RT30xxWriteRFRegister(pAd, RF_R27, 0x21);
+			RT30xxWriteRFRegister(pAd, RF_R28, 0x10);
+		}
+	}
+
+}
 
 VOID NICInitRT305xRFRegisters(IN PRTMP_ADAPTER pAd)
 {
@@ -294,8 +325,63 @@ VOID NICInitRT305xRFRegisters(IN PRTMP_ADAPTER pAd)
 	}
 #endif // RT3350 //
 #endif // RTMP_RBUS_SUPPORT //
+
+	NICInitRT305xRF_R27_R28(pAd);
 }
 
+/* --------------------------- local functions ------------------------------ */
+VOID RT305x_PowerHighPatchAP(
+	IN PRTMP_ADAPTER 			pAd)
+{
+#ifdef CONFIG_AP_SUPPORT
+	/*
+		request by Gary, if Rssi0 > -42,
+		BBP 82 need to be changed from 0x62 to 0x42,
+		and bbp 67 need to be changed from 0x20 to 0x18
+	*/
+	if (!pAd->CommonCfg.HighPowerPatchDisabled)
+	{
+		UCHAR RFValue;
+
+		if (IS_RT3052B(pAd))
+		{
+			if ((pAd->ApCfg.RssiSample.AvgRssi0 != 0) && (pAd->ApCfg.RssiSample.AvgRssi0 > (pAd->BbpRssiToDbmDelta - 35) ))
+			{ 
+			    RT30xxReadRFRegister(pAd, RF_R27, (PUCHAR)&RFValue);
+			    RFValue &= ~0x3;
+			    RT30xxWriteRFRegister(pAd, RF_R27, (UCHAR)RFValue);
+
+			    RT30xxReadRFRegister(pAd, RF_R28, (PUCHAR)&RFValue);
+			    RFValue &= ~0x3;
+			    RT30xxWriteRFRegister(pAd, RF_R28, (UCHAR)RFValue);
+			}
+	        else
+			{
+			    RT30xxReadRFRegister(pAd, RF_R27, (PUCHAR)&RFValue);
+			    RFValue |= 0x3;
+			    RT30xxWriteRFRegister(pAd, RF_R27, (UCHAR)RFValue);
+
+			    RT30xxReadRFRegister(pAd, RF_R28, (PUCHAR)&RFValue);
+			    RFValue |= 0x3;
+			    RT30xxWriteRFRegister(pAd, RF_R28, (UCHAR)RFValue);
+			}
+		}
+
+		if ((pAd->Antenna.field.RxPath == 2) && (IS_RT3052(pAd)))
+		{
+			if ((pAd->ApCfg.RssiSample.AvgRssi0 != 0) && (pAd->ApCfg.RssiSample.AvgRssi0 > (pAd->BbpRssiToDbmDelta - 42) ))
+			{
+				RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R82, 0x42);
+				RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R67, 0x18);
+			}
+			else
+			{
+				RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R82, 0x62);
+				RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R67, 0x20);
+			}
+		}
+	}
+#endif /* CONFIG_AP_SUPPORT */
+}
 
 #endif // RT305x //
-

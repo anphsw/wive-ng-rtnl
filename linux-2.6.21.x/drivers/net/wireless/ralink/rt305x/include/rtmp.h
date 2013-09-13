@@ -9733,5 +9733,7 @@ void RtmpFlashWrite(
 	ULONG a,
 	ULONG b);
 #endif // RTMP_RBUS_SUPPORT //
-#endif  // __RTMP_H__
 
+VOID RT305x_PowerHighPatchAP(IN PRTMP_ADAPTER pAd);
+
+#endif  // __RTMP_H__
