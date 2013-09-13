@@ -2806,11 +2806,6 @@ VOID AsicAdjustTxPower(
 				}
 				/* fill new value to CSR offset */
 				CfgOfTxPwrCtrlOverMAC.TxPwrCtrlOverMAC[i].RegisterValue = (CfgOfTxPwrCtrlOverMAC.TxPwrCtrlOverMAC[i].RegisterValue & ~(0x0000000F << j*4)) | (Value << j*4);
-				else
-				{
-					/* TX0 ALC only */
-					CfgOfTxPwrCtrlOverMAC.TxPwrCtrlOverMAC[i].RegisterValue = (CfgOfTxPwrCtrlOverMAC.TxPwrCtrlOverMAC[i].RegisterValue & ~(0x0000000F << j*4)) | (Value << j*4);
-				}
 			}
 
 			/* write tx power value to CSR */
