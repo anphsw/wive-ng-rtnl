@@ -34,8 +34,8 @@
 #include "rt_os_net.h"
 #include <linux/pci.h>
 
-extern int wl_proc_init(void);
-extern int wl_proc_exit(void);
+extern int 3090_wl_proc_init(void);
+extern int 3090_wl_proc_exit(void);
 
 
 /* */
@@ -440,7 +440,7 @@ static INT __devinit   rt2860_probe(
 	RtmpOSNetDevAddrSet(OpMode, net_dev, &PermanentAddress[0], NULL);
 #endif /* PRE_ASSIGN_MAC_ADDR */
 
-	wl_proc_init();
+	3090_wl_proc_init();
 
 	DBGPRINT(RT_DEBUG_TRACE, ("<=== rt3090_probe\n"));
 
@@ -515,7 +515,7 @@ static VOID __devexit rt2860_remove_one(
 	/* Free the root net_device */
 	RtmpOSNetDevFree(net_dev);
 
-	wl_proc_exit();
+	3090_wl_proc_exit();
 }
 
 MODULE_LICENSE("Proprietary");

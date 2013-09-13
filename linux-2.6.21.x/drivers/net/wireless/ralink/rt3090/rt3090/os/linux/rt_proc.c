@@ -33,8 +33,8 @@
 
 #include "rt_config.h"
 
-int wl_proc_init(void);
-int wl_proc_exit(void);
+int 3090_wl_proc_init(void);
+int 3090_wl_proc_exit(void);
 
 #ifdef CONFIG_RT3090_AP
 #define PROCREG_DIR             "rt3090"
@@ -480,44 +480,46 @@ int wl_video_proc_exit(void)
 }
 #endif /* VIDEO_TURBINE_SUPPORT */
 
-int wl_proc_init(void)
+int 3090_wl_proc_init(void)
 {
 	if (procRegDir3090 == NULL)
 		procRegDir3090 = proc_mkdir(PROCREG_DIR, NULL);
 
-	if (procRegDir3090) {
 #ifdef VIDEO_TURBINE_SUPPORT
+	if (procRegDir3090) {
 		wl_video_proc_init();
-#endif /* VIDEO_TURBINE_SUPPORT */
 	}
+#endif /* VIDEO_TURBINE_SUPPORT */
 
 	return 0;
 }
 
-int wl_proc_exit(void)
+int 3090_wl_proc_exit(void)
 {
 #ifdef VIDEO_TURBINE_SUPPORT
 	if (proc_ralink_wl_video) {
 		wl_video_proc_exit();
 		remove_proc_entry("Video", proc_ralink_wl);
 	}
+#endif /* VIDEO_TURBINE_SUPPORT */
 	if (proc_ralink_wl)
 		remove_proc_entry("wl", procRegDir3090);
-#endif /* VIDEO_TURBINE_SUPPORT */
 
 	
 	return 0;
 }
 #else
-int wl_proc_init(void)
+int 3090_wl_proc_init(void)
 {
 	return 0;
 }
 
-int wl_proc_exit(void)
+int 3090_wl_proc_exit(void)
 {
 
 	return 0;
 }
+EXPORT_SYMBOL(3090_wl_proc_init);
+EXPORT_SYMBOL(3090_wl_proc_exit);
 #endif /* CONFIG_PROC_FS */
 
