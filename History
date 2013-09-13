@@ -1662,6 +1662,7 @@
 76) kernel: netfilter: nf_conntrack: fix event flooding in GRE protocol tracker.<br>
 77) kernel: netfilter: nf_conntrack_reasm: properly handle packets fragmented into a single fragment.<br>
 78) kernel: align the skb_orig padding to power of two.<br>
+79) kernel: wifi_drivers: disable video turbine for test issue with rtl8188CU clients.<br>
 <br>
 <br>
 <br>
