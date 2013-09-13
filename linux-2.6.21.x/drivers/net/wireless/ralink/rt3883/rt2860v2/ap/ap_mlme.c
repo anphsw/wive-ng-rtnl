@@ -228,7 +228,7 @@ VOID APMlmePeriodicExec(
 //#ifndef WIFI_TEST    
 //	if (pAd->CommonCfg.bWiFiTest == FALSE)
 	/* for SmartBit 64-byte stream test */
-	if (pAd->MacTab.Size > 0)
+	//if (pAd->MacTab.Size > 0)
 		AsicAdjustTxPower(pAd);
 //#endif // WIFI_TEST //
 

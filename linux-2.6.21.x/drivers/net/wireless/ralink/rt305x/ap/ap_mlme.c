@@ -158,19 +158,12 @@ VOID APMlmePeriodicExec(
 #endif // TONE_RADAR_DETECT_SUPPORT //
 #endif // CARRIER_DETECTION_SUPPORT //
 
-#ifdef RTMP_RBUS_SUPPORT
-#ifdef RT305x
-	RT305x_PowerHighPatchAP(pAd);
-	NICInitRT305xRFRegisters(pAd);
-#endif // RT305x //
-#endif // RTMP_RBUS_SUPPORT //
-
 	// Disable Adjust Tx Power for WPA WiFi-test. 
 	// Because high TX power results in the abnormal disconnection of Intel BG-STA.  
 //#ifndef WIFI_TEST    
 //	if (pAd->CommonCfg.bWiFiTest == FALSE)
 	/* for SmartBit 64-byte stream test */
-	if (pAd->MacTab.Size > 0)
+	//if (pAd->MacTab.Size > 0)
 		AsicAdjustTxPower(pAd);
 //#endif // WIFI_TEST //
 
