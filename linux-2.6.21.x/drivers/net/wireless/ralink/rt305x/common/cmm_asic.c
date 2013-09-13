@@ -2505,26 +2505,30 @@ VOID AsicAdjustTxPower(
 #ifdef CONFIG_STA_SUPPORT
 	CHAR		Rssi = -127;
 #endif // CONFIG_STA_SUPPORT //
-	
+
 	NdisZeroMemory(&CfgOfTxPwrCtrlOverMAC, sizeof(CONFIGURATION_OF_TX_POWER_CONTROL_OVER_MAC));
 
 #ifdef CONFIG_STA_SUPPORT
-	if (OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_DOZE) || 
+
+	if(RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_IDLE_RADIO_OFF))
+		return;
+
+	if (OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_DOZE) ||
 #ifdef RTMP_MAC_PCI
 		(pAd->bPCIclkOff == TRUE) ||
 		RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_IDLE_RADIO_OFF) ||
-#endif // RTMP_MAC_PCI //
+#endif /* RTMP_MAC_PCI */
 		RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_BSS_SCAN_IN_PROGRESS))
 	{
 		return;
 	}
 
 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
-		Rssi = RTMPMaxRssi(pAd, 
+		Rssi = RTMPMaxRssi(pAd,
 						   pAd->StaCfg.RssiSample.AvgRssi0, 
 						   pAd->StaCfg.RssiSample.AvgRssi1, 
 						   pAd->StaCfg.RssiSample.AvgRssi2);
-#endif // CONFIG_STA_SUPPORT //
+#endif /* CONFIG_STA_SUPPORT */
 
 #ifdef SINGLE_SKU
 	if (pAd->CommonCfg.bSKUMode == TRUE)
@@ -2532,14 +2536,14 @@ VOID AsicAdjustTxPower(
 		AsicAdjustSingleSkuTxPower(pAd);
 		return;
 	}
-#endif // SINGLE_SKU //
+#endif /* SINGLE_SKU */
 
 	/* Get Tx Rate Offset Table which from eeprom 0xDEh ~ 0xEFh */
-//	AsicGetTxPowerOffset(pAd, (PULONG) &TxPwr);
+/*	AsicGetTxPowerOffset(pAd, (PULONG) &TxPwr);*/
 	AsicGetTxPowerOffset(pAd, (PULONG) &CfgOfTxPwrCtrlOverMAC);
 	/* Get temperature compensation Delta Power Value */
 	AsicGetAutoAgcOffset(pAd, &DeltaPwr, &TotalDeltaPower, &TxAgcCompensate, &BbpR49);
-
+	/* The BBP R1 controls the transmit power for all rates */
 	RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R1, &BbpR1);
 	BbpR1 &= 0xFC;
 
