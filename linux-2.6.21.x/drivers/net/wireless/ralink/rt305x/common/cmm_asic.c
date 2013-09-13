@@ -2814,13 +2814,7 @@ VOID AsicAdjustTxPower(
 											TX power for CCK5.5M/11M
 											TX power for CCK1M/2M */
 			/* TX_PWR_CFG_1 ~ TX_PWR_CFG_4 */
-
-			{
-//				RTMP_IO_WRITE32(pAd, TX_PWR_CFG_0 + i*4, TxPwr[i]);
-				RTMP_IO_WRITE32(pAd, CfgOfTxPwrCtrlOverMAC.TxPwrCtrlOverMAC[i].MACRegisterOffset, CfgOfTxPwrCtrlOverMAC.TxPwrCtrlOverMAC[i].RegisterValue);
-			}
-
-
+			RTMP_IO_WRITE32(pAd, CfgOfTxPwrCtrlOverMAC.TxPwrCtrlOverMAC[i].MACRegisterOffset, CfgOfTxPwrCtrlOverMAC.TxPwrCtrlOverMAC[i].RegisterValue);
 		}
 	}
 
