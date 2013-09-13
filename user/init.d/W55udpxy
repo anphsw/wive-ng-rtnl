@@ -33,6 +33,13 @@ start() {
 	    usleep 500000
 	fi
 
+	export UDPXY_RCV_TMOUT=20
+	export UDPXY_DHOLD_TMOUT=10
+	export UDPXY_SREAD_TMOUT=10
+	export UDPXY_SWRITE_TMOUT=10
+	export UDPXY_SSEL_TMOUT=10
+        export UDPXY_ALLOW_PAUSES=1
+
         $LOG "UDPXY start"
 	udpxy -m $wan_if -n -20 -c 5 -B 2Mb -H 5 -p "$UDPXYPort" -l /var/log/udpxy.log
        ) & # send to background
