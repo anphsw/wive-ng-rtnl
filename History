@@ -1663,6 +1663,7 @@
 77) kernel: netfilter: nf_conntrack_reasm: properly handle packets fragmented into a single fragment.<br>
 78) kernel: align the skb_orig padding to power of two.<br>
 79) kernel: wifi_drivers: disable video turbine for test issue with rtl8188CU clients.<br>
+80) kernel: tcp: skip cwnd moderation in TCP_CA_Open in tcp_try_to_open.<br>
 <br>
 <br>
 <br>
