@@ -118,8 +118,9 @@ endif
 
 ifeq ($(CONFIG_RT3090_AP_VIDEO_TURBINE),y)
 rt3090_ap-objs += ../rt3090/common/cmm_video.o
-rt3090_ap-objs += ../rt3090/os/linux/rt_proc.o
 endif
+
+rt3090_ap-objs += ../rt3090/os/linux/rt_proc.o
 
 rt3090_ap-objs += ../rt3090/os/linux/ap_ioctl.o
 rt3090_ap-objs += ../rt3090/os/linux/rt_main_dev.o

@@ -33,8 +33,8 @@
 
 #include "rt_config.h"
 
-int 3090_wl_proc_init(void);
-int 3090_wl_proc_exit(void);
+int wl_proc_3090_init(void);
+int wl_proc_3090_exit(void);
 
 #ifdef CONFIG_RT3090_AP
 #define PROCREG_DIR             "rt3090"
@@ -47,11 +47,12 @@ int 3090_wl_proc_exit(void);
 #ifdef CONFIG_PROC_FS
 struct proc_dir_entry *procRegDir3090;
 
+/*struct proc_dir_entry *proc_ralink_platform, *proc_ralink_wl, *proc_ralink_wl_video; */
+struct proc_dir_entry *proc_ralink_wl, *proc_ralink_wl_video;
+
 #ifdef VIDEO_TURBINE_SUPPORT
 extern BOOLEAN UpdateFromGlobal;
 AP_VIDEO_STRUCT GLOBAL_AP_VIDEO_CONFIG;
-/*struct proc_dir_entry *proc_ralink_platform, *proc_ralink_wl, *proc_ralink_wl_video; */
-struct proc_dir_entry *proc_ralink_wl, *proc_ralink_wl_video;
 static struct proc_dir_entry *entry_wl_video_Update, *entry_wl_video_Enable, *entry_wl_video_ClassifierEnable, *entry_wl_video_HighTxMode, *entry_wl_video_TxPwr, *entry_wl_video_VideoMCSEnable, *entry_wl_video_VideoMCS, *entry_wl_video_TxBASize, *entry_wl_video_TxLifeTimeMode, *entry_wl_video_TxLifeTime, *entry_wl_video_TxRetryLimit;
 
 
@@ -480,7 +481,7 @@ int wl_video_proc_exit(void)
 }
 #endif /* VIDEO_TURBINE_SUPPORT */
 
-int 3090_wl_proc_init(void)
+int wl_proc_3090_init(void)
 {
 	if (procRegDir3090 == NULL)
 		procRegDir3090 = proc_mkdir(PROCREG_DIR, NULL);
@@ -494,7 +495,7 @@ int 3090_wl_proc_init(void)
 	return 0;
 }
 
-int 3090_wl_proc_exit(void)
+int wl_proc_3090_exit(void)
 {
 #ifdef VIDEO_TURBINE_SUPPORT
 	if (proc_ralink_wl_video) {
@@ -509,17 +510,17 @@ int 3090_wl_proc_exit(void)
 	return 0;
 }
 #else
-int 3090_wl_proc_init(void)
+int wl_proc_3090_init(void)
 {
 	return 0;
 }
 
-int 3090_wl_proc_exit(void)
+int wl_proc_3090_exit(void)
 {
 
 	return 0;
 }
-EXPORT_SYMBOL(3090_wl_proc_init);
-EXPORT_SYMBOL(3090_wl_proc_exit);
+EXPORT_SYMBOL(wl_proc_3090_init);
+EXPORT_SYMBOL(wl_proc_3090_exit);
 #endif /* CONFIG_PROC_FS */
 
