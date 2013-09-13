@@ -2592,14 +2592,10 @@ VOID AsicAdjustTxPower(
 	{
 		DeltaPowerByBbpR1 -= 12; // -12 dBm
 	}
-	RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R1, BbpR1);
-
 
 	TotalDeltaPower += DeltaPowerByBbpR1; // the transmit power controlled by the BBP R1
 	TotalDeltaPower += DeltaPwr; // the transmit power controlled by the MAC	
 
-	// The BBP R1 controls the transmit power for all rates
-	RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R1, &BbpR1);
 	BbpR1 &= ~MDSM_BBP_R1_STATIC_TX_POWER_CONTROL_MASK;
 
 	if (TotalDeltaPower <= -12)
@@ -2810,6 +2806,11 @@ VOID AsicAdjustTxPower(
 				}
 				/* fill new value to CSR offset */
 				CfgOfTxPwrCtrlOverMAC.TxPwrCtrlOverMAC[i].RegisterValue = (CfgOfTxPwrCtrlOverMAC.TxPwrCtrlOverMAC[i].RegisterValue & ~(0x0000000F << j*4)) | (Value << j*4);
+				else
+				{
+					/* TX0 ALC only */
+					CfgOfTxPwrCtrlOverMAC.TxPwrCtrlOverMAC[i].RegisterValue = (CfgOfTxPwrCtrlOverMAC.TxPwrCtrlOverMAC[i].RegisterValue & ~(0x0000000F << j*4)) | (Value << j*4);
+				}
 			}
 
 			/* write tx power value to CSR */
