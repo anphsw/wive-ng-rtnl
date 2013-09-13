@@ -1186,7 +1186,7 @@ CH_DESP Country_RO_ChDesp[] =
 /*Russian Federation*/		
 CH_DESP Country_RU_ChDesp[] =
 {
-	{ 1,   13, 20, BOTH, FALSE},	/* 2.4 G, ch 1~13*/
+	{ 1,   14, 20, BOTH, FALSE},	/* 2.4 G, ch 1~14*/
 	{ 36,   4, 17, BOTH, FALSE},	/* 5G band 1, ch 36~48*/
 	{ 149,	5, 22, BOTH, FALSE},	/* 5G band 4, ch 149~165*/
 	{ 0},               	    	/* end*/
