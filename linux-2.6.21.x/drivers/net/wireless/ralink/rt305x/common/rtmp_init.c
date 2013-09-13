@@ -913,23 +913,6 @@ VOID	NICReadEEPROMParameters(
 	if (Version.field.Version > VALID_EEPROM_VERSION)
 	{
 		DBGPRINT_ERR(("E2PROM: WRONG VERSION 0x%x, should be %d\n",Version.field.Version, VALID_EEPROM_VERSION));
-		/*pAd->SystemErrorBitmap |= 0x00000001;
-
-		// hard-code default value when no proper E2PROM installed
-		pAd->bAutoTxAgcA = FALSE;
-		pAd->bAutoTxAgcG = FALSE;
-
-		// Default the channel power
-		for (i = 0; i < MAX_NUM_OF_CHANNELS; i++)
-			pAd->TxPower[i].Power = DEFAULT_RF_TX_POWER;
-
-		// Default the channel power
-		for (i = 0; i < MAX_NUM_OF_11JCHANNELS; i++)
-			pAd->TxPower11J[i].Power = DEFAULT_RF_TX_POWER;
-		
-		for(i = 0; i < NUM_EEPROM_BBP_PARMS; i++)
-			pAd->EEPROMDefaultValue[i] = 0xffff;
-		return;  */
 	}
 
 	// Read BBP default value from EEPROM and store to array(EEPROMDefaultValue) in pAd
