@@ -33,9 +33,6 @@ start() {
 	    usleep 500000
 	fi
 
-	echo 524288 > /proc/sys/net/core/rmem_max
-	echo 524288 > /proc/sys/net/core/wmem_max
-
 	export UDPXY_RCV_TMOUT=10
 	export UDPXY_DHOLD_TMOUT=5
 	export UDPXY_SREAD_TMOUT=5

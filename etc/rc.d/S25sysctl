@@ -32,6 +32,10 @@ start() {
 	# always overommit
 	sysctl -wq vm.overcommit_ratio=100
 	sysctl -wq vm.overcommit_memory=2
+
+	# inrease network buffers
+	echo 2097152 > /proc/sys/net/core/wmem_max
+	echo 4194304 > /proc/sys/net/core/rmem_max
     else
 	# heruistic overcommit
 	sysctl -wq vm.overcommit_memory=0
