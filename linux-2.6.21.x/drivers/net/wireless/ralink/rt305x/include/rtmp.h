@@ -6819,8 +6819,8 @@ VOID AsicSetRxAnt(
 
 
 #ifdef RT305x
-VOID NICInitRT305xRFRegisters(
-	IN PRTMP_ADAPTER pAd);
+VOID RT305x_PowerHighPatchAP(IN PRTMP_ADAPTER pAd);
+VOID NICInitRT305xRFRegisters(IN PRTMP_ADAPTER pAd);
 #endif // RT305x //
 
 VOID AsicEvaluateRxAnt(
@@ -9733,7 +9733,5 @@ void RtmpFlashWrite(
 	ULONG a,
 	ULONG b);
 #endif // RTMP_RBUS_SUPPORT //
-
-VOID RT305x_PowerHighPatchAP(IN PRTMP_ADAPTER pAd);
 
 #endif  // __RTMP_H__

@@ -158,17 +158,10 @@ VOID APMlmePeriodicExec(
 #endif // TONE_RADAR_DETECT_SUPPORT //
 #endif // CARRIER_DETECTION_SUPPORT //
 
-	RT305x_PowerHighPatchAP(pAd);
-
 #ifdef RTMP_RBUS_SUPPORT
 #ifdef RT305x
-#ifndef RT3350
-	if ((pAd->CommonCfg.CID == 0x103) || ((pAd->CommonCfg.CN >> 16) == 0x3333))
-	{
-	    RT30xxWriteRFRegister(pAd, RF_R27, 0x21);		    	
-	    RT30xxWriteRFRegister(pAd, RF_R28, 0x10);	
-	}
-#endif // RT3350 //
+	RT305x_PowerHighPatchAP(pAd);
+	NICInitRT305xRFRegisters(pAd);
 #endif // RT305x //
 #endif // RTMP_RBUS_SUPPORT //
 
