@@ -1186,8 +1186,9 @@ CH_DESP Country_RO_ChDesp[] =
 /*Russian Federation*/		
 CH_DESP Country_RU_ChDesp[] =
 {
-	{ 1,   13, 20, BOTH, FALSE},	/*2402~2482MHz, Ch 1~13,   Max BW: 40 */
-	{ 149,  5, 30, BOTH, FALSE},	/*5735~5835MHz, Ch 149~165, Max BW: 20 */		
+	{ 1,   13, 20, BOTH, FALSE},	/* 2.4 G, ch 1~13*/
+	{ 36,   4, 17, BOTH, FALSE},	/* 5G band 1, ch 36~48*/
+	{ 149,	5, 22, BOTH, FALSE},	/* 5G band 4, ch 149~165*/
 	{ 0},               	    	/* end*/
 };
 /*Saint Barth'elemy*/		
