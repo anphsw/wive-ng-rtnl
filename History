@@ -1667,6 +1667,7 @@
 81) kernel: hw_nat: mcast/bcast check optimization for RX path (hook_rx always called after eth_type_trans).<br>
 82) kernel: rt305x: backport auto tune B27-28 registers and HiPower workaround and support 3052 revB.<br>
 83) kernel: rt3883: backport default reg tables init.<br>
+84) kernel: optimize neigh_hh_output() for the common ethernet case.<br>
 <br>
 <br>
 <br>
