@@ -65,19 +65,43 @@
 #define IS_RT2872(_pAd)		(((_pAd)->MACVersion & 0xffff0000) == 0x28720000)
 
 #define IS_RT30xx(_pAd)		(((_pAd)->MACVersion & 0xfff00000) == 0x30700000||IS_RT3090A(_pAd)||IS_RT3390(_pAd))
-//#define IS_RT305X(_pAd)		((_pAd)->MACVersion == 0x28720200)
+
+#define IS_RT3052B(_pAd)	(((_pAd)->CommonCfg.CID == 0x102) && (((_pAd)->CommonCfg.CN >> 16) == 0x3033)) 
+#define IS_RT3052(_pAd)		(((_pAd)->MACVersion == 0x28720200) && (_pAd->Antenna.field.TxPath == 2))
+#define IS_RT3050(_pAd)		(((_pAd)->MACVersion == 0x28720200) && ((_pAd)->RfIcType == RFIC_3020))
+#define IS_RT3350(_pAd)		(((_pAd)->MACVersion == 0x28720200) && ((_pAd)->RfIcType == RFIC_3320))
+#define IS_RT3352(_pAd)		(((_pAd)->MACVersion & 0xffff0000) == 0x33520000)
+#define IS_RT5350(_pAd)		(((_pAd)->MACVersion & 0xffff0000) == 0x53500000)
+#define IS_RT3050_3052_3350(_pAd) (\
+	((_pAd)->MACVersion == 0x28720200) && \
+	((((_pAd)->CommonCfg.CN >> 16) == 0x3333) || (((_pAd)->CommonCfg.CN >> 16) == 0x3033)) \
+)
+
 
 /* RT3572, 3592, 3562, 3062 share the same MAC version */
 #define IS_RT3572(_pAd)		(((_pAd)->MACVersion & 0xffff0000) == 0x35720000)
 
+/* Check if it is RT3xxx, or Specified ID in registry for debug */
+#define IS_DEV_RT3xxx(_pAd)( \
+	(_pAd->DeviceID == NIC3090_PCIe_DEVICE_ID) || \
+	(_pAd->DeviceID == NIC3091_PCIe_DEVICE_ID) || \
+	(_pAd->DeviceID == NIC3092_PCIe_DEVICE_ID) || \
+	(_pAd->DeviceID == NIC3592_PCIe_DEVICE_ID) || \
+	((_pAd->DeviceID == NIC3593_PCI_OR_PCIe_DEVICE_ID) && (RT3593OverPCIe(_pAd))) \
+)
+
 #define IS_RT2883(_pAd)		(((_pAd)->MACVersion & 0xffff0000) == 0x28830000)
 #define IS_RT3883(_pAd)		(((_pAd)->MACVersion & 0xffff0000) == 0x38830000)
 #define IS_VERSION_BEFORE_F(_pAd)			(((_pAd)->MACVersion&0xffff) <= 0x0211)
-// F version is 0x0212, E version is 0x0211. 309x can save more power after F version.
+/* F version is 0x0212, E version is 0x0211. 309x can save more power after F version. */
 #define IS_VERSION_AFTER_F(_pAd)			((((_pAd)->MACVersion&0xffff) >= 0x0212) || (((_pAd)->b3090ESpecialChip == TRUE)))
 
 /* 3593 */
 #define IS_RT3593(_pAd) (((_pAd)->MACVersion & 0xFFFF0000) == 0x35930000)
+
+/* RT5390 and RT5370 */
+#define IS_RT5392(_pAd)   ((_pAd->MACVersion & 0xFFFF0000) == 0x53920000)
+#define IS_RT5390(_pAd)   ((((_pAd)->MACVersion & 0xFFFF0000) == 0x53900000) ||IS_RT5392(_pAd))	/* Include RT5390 and RT5370 */
 
 /* RT3593 over PCIe bus */
 #define RT3593OverPCIe(_pAd) (IS_RT3593(_pAd) && (_pAd->CommonCfg.bPCIeBus == TRUE))
@@ -85,12 +109,12 @@
 /* RT3593 over PCI bus */
 #define RT3593OverPCI(_pAd) (IS_RT3593(_pAd) && (_pAd->CommonCfg.bPCIeBus == FALSE))
 
-//RT3390,RT3370
+/*RT3390,RT3370 */
 #define IS_RT3390(_pAd)				(((_pAd)->MACVersion & 0xFFFF0000) == 0x33900000)
 
-// ------------------------------------------------------
-// PCI registers - base address 0x0000
-// ------------------------------------------------------
+/* ------------------------------------------------------ */
+/* PCI registers - base address 0x0000 */
+/* ------------------------------------------------------ */
 #define CHIP_PCI_CFG		0x0000
 #define CHIP_PCI_EECTRL		0x0004
 #define CHIP_PCI_MCUCTRL	0x0008

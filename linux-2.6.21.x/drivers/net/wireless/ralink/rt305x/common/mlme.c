@@ -1391,7 +1391,7 @@ else
 			MlmeResetRalinkCounters(pAd);
 #if defined(RT305x)||defined(RT3070)
 	// request by Gary, if Rssi0 > -42, BBP 82 need to be changed from 0x62 to 0x42, , bbp 67 need to be changed from 0x20 to 0x18
-	if (!pAd->CommonCfg.HighPowerPatchDisabled)
+	if ((!pAd->CommonCfg.HighPowerPatchDisabled) && (IS_RT3052B(pAd))
 	{
                 {
 		   		if ((pAd->ate.AvgRssi0 != 0) && (pAd->ate.AvgRssi0 > (pAd->BbpRssiToDbmDelta - 35))) 
