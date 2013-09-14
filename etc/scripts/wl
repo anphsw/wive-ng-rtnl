@@ -13,7 +13,7 @@ usage() {
   echo " wl showstat  ra0 - show statistic of wireless interface ra0" >&2
   echo " wl showcalib ra0 - show fabric calibrations for wireless interface ra0" >&2
   echo " wl setmaxpwr ra0 0E0E 0E0E 0E0E 0E0E 0E0E 0E0E 0E0E  - set maximum power 0E for wireless interface ra0, default 0C" >&2
-  echo " wl setbasetxpower ra0 AAAA - set base power AA for wireless interface ra0, default 66" >&2
+  echo " wl setbasetxpower ra0 AAAA - set base power AA for wireless interface ra0, default 6666" >&2
   echo " wl flashdefaults - write default calirations to flash." >&2
   echo "_____________________________________________________________________________________________________________________" >&2
  exit 1
