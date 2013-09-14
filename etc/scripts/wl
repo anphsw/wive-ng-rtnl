@@ -4,6 +4,8 @@
 # Template to wl command - onsole script tool for fast acces to AP/STA info
 ########################################################################################################################
 
+RWCONFIGS=/etc/Wireless/rf.bin
+
 usage() {
   echo "Usage: $0 | showstat | showcalib | setmaxpwr " >&2
   echo "_____________________________________________________________________________________________________________________" >&2
@@ -12,6 +14,7 @@ usage() {
   echo " wl showcalib ra0 - show fabric calibrations for wireless interface ra0" >&2
   echo " wl setmaxpwr ra0 0E0E 0E0E 0E0E 0E0E 0E0E 0E0E 0E0E  - set maximum power 0E for wireless interface ra0, default 0C" >&2
   echo " wl setbasetxpower ra0 AAAA - set base power AA for wireless interface ra0, default 66" >&2
+  echo " wl flashdefaults - write default calirations to flash." >&2
   echo "_____________________________________________________________________________________________________________________" >&2
  exit 1
 }
@@ -77,6 +80,16 @@ setbasetxpower()
     echo "After set - need reboot."
 }
 
+flashdefaults()
+{
+    echo "Erase wifi Factory part and write defaults"
+    mtd_write erase Factory
+    mtd_write write $RWCONFIGS Factory
+    sync
+
+    echo "After write - need reboot."
+}
+
 main() {
   local cmd="$1"
   [ -z "$cmd" ] && usage
@@ -93,6 +106,9 @@ main() {
       ;;
     setbasetxpower)
       setbasetxpower $@
+      ;;
+    flashdefaults)
+      flashdefaults $@
       ;;
     *)
       usage $@
