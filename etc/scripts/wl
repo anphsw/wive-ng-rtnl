@@ -73,6 +73,8 @@ setbasetxpower()
     iwpriv $2 e2p EA=$3
     iwpriv $2 e2p EC=$3
     iwpriv $2 e2p EE=$3
+
+    echo "After set - need reboot."
 }
 
 main() {
