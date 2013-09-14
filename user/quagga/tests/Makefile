@@ -235,7 +235,7 @@ BUILD_TESTS = tests
 CC = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc
 CCDEPMODE = depmode=none
 CFLAGS = -Os -pipe -mips32r2 -march=mips32r2 -Wall -Wno-trigraphs -Wno-long-long -Wno-format-security -Wno-pointer-sign -Wno-unused-but-set-variable -fomit-frame-pointer -fno-stack-protector -fno-conserve-stack -funit-at-a-time -membedded-data -muninit-const-in-rodata -ffast-math -fforce-addr -fconserve-stack -fno-aggressive-loop-optimizations -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -I/opt/Wive-RTNL -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL/lib/include_shared -I/opt/Wive-RTNL/lib/include_shared/nfnetlink -I/opt/Wive-RTNL/lib/include_shared/curl -I/opt/Wive-RTNL/lib/include_shared/event2 -DIPV6=1 -DINET6
-CONFDATE = 20130913
+CONFDATE = 20130914
 CPP = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc -E
 CPPFLAGS = 
 CURSES = 

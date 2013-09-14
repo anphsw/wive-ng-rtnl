@@ -130,7 +130,7 @@ BUILD_TESTS = tests
 CC = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc
 CCDEPMODE = depmode=none
 CFLAGS = -Os -pipe -mips32r2 -march=mips32r2 -Wall -Wno-trigraphs -Wno-long-long -Wno-format-security -Wno-pointer-sign -Wno-unused-but-set-variable -fomit-frame-pointer -fno-stack-protector -fno-conserve-stack -funit-at-a-time -membedded-data -muninit-const-in-rodata -ffast-math -fforce-addr -fconserve-stack -fno-aggressive-loop-optimizations -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -I/opt/Wive-RTNL -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL/lib/include_shared -I/opt/Wive-RTNL/lib/include_shared/nfnetlink -I/opt/Wive-RTNL/lib/include_shared/curl -I/opt/Wive-RTNL/lib/include_shared/event2 -DIPV6=1 -DINET6
-CONFDATE = 20130913
+CONFDATE = 20130914
 CPP = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc -E
 CPPFLAGS = 
 CURSES = 
@@ -292,7 +292,7 @@ top_srcdir = ..
 # derived variables.
 pkg_names = daemons dev doc libs smf
 pkg_quagga_daemons = zebra bgpd ospfd ospf6d ripd ripngd
-pkg_name_rev = 0.99.22-20130913-linux-gnu-mipsel
+pkg_name_rev = 0.99.22-20130914-linux-gnu-mipsel
 pkg_depends = $(pkg_names:%=depend.%)
 pkg_packages = $(pkg_names:%=quagga-%-$(pkg_name_rev).pkg)
 pkg_pkginfos = $(pkg_names:%=pkginfo.%.full)
@@ -324,7 +324,7 @@ edit = $(SED) \
  	-e 's,[@]PACKAGE_TARNAME[@],quagga,g' \
  	-e 's,[@]PACKAGE_VERSION[@],0.99.22,g' \
  	-e 's,[@]PACKAGE_BUGREPORT[@],https://bugzilla.quagga.net,g' \
-  	-e 's,[@]CONFDATE[@],20130913,g' \
+  	-e 's,[@]CONFDATE[@],20130914,g' \
  	-e 's,[@]target_cpu[@],$(target_cpu),g' \
  	-e 's,[@]target_host[@],$(target_host),g' \
  	-e 's,[@]target_os[@],$(target_os),g'
