@@ -424,7 +424,12 @@ static inline void ipip6_ecn_decapsulate(struct iphdr *iph, struct sk_buff *skb)
 static int ipip6_rcv(struct sk_buff *skb)
 {
 	struct iphdr *iph;
-	struct ip_tunnel *tunnel = ip_hdr(skb);
+	struct ip_tunnel *tunnel;
+
+	if (!pskb_may_pull(skb, sizeof(struct ipv6hdr)))
+		goto out;
+
+	iph = ip_hdr(skb);
 
 	read_lock(&ipip6_lock);
 	if ((tunnel = ipip6_tunnel_lookup(iph->saddr, iph->daddr)) != NULL) {
