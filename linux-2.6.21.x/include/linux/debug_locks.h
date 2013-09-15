@@ -3,6 +3,7 @@
 
 struct task_struct;
 
+#ifdef CONFIG_DEBUG_KERNEL
 extern int debug_locks;
 extern int debug_locks_silent;
 
@@ -10,6 +11,22 @@ extern int debug_locks_silent;
  * Generic 'turn off all lock debugging' function:
  */
 extern int debug_locks_off(void);
+
+#else
+
+#define debug_locks	0
+#define debug_locks_silent	0
+
+static inline int __debug_locks_off(void)
+{
+	return 0;
+}
+
+static inline int debug_locks_off(void)
+{
+	return 0;
+}
+#endif /* CONFIG_DEBUG_KERNEL */
 
 /*
  * In the debug case we carry the caller's instruction pointer into
