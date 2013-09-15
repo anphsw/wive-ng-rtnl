@@ -1668,6 +1668,7 @@
 82) kernel: rt305x: backport auto tune B27-28 registers and HiPower workaround and support 3052 revB.<br>
 83) kernel: rt3883: backport default reg tables init.<br>
 84) kernel: optimize neigh_hh_output() for the common ethernet case.<br>
+85) kernel: ipv6: remove max_addresses check from ipv6_create_tempaddr.<br>
 <br>
 <br>
 <br>
