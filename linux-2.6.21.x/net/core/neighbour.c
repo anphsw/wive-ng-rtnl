@@ -34,6 +34,7 @@
 #include <linux/random.h>
 #include <linux/string.h>
 #include <linux/if_ether.h>
+#include <linux/log2.h>
 
 #define NEIGH_DEBUG 0
 
@@ -327,7 +328,7 @@ static void neigh_hash_grow(struct neigh_table *tbl, unsigned long new_entries)
 
 	NEIGH_CACHE_STAT_INC(tbl, hash_grows);
 
-	BUG_ON(new_entries & (new_entries - 1));
+	BUG_ON(!is_power_of_2(new_entries));
 	new_hash = neigh_hash_alloc(new_entries);
 	if (!new_hash)
 		return;
