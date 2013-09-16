@@ -556,8 +556,11 @@ CFLAGS += $(call cc-option,-fno-strict-overflow)
 # force gcc to behave correct even for buggy distributions
 CFLAGS += $(call cc-option,-fno-stack-protector)
 
-# disable new loop optimization mode in 4.8.0 and later - fix regressions
+# disable new loop optimization mode in 4.8.x and later - fix regressions
 CFLAGS += $(call cc-option,-fno-aggressive-loop-optimizations)
+
+# fix ~10% performance regression at 4.8.x and 4.7.x gcc
+CFLAGS += $(call cc-option,-fno-tree-slsr)
 
 # improves compression ratio for generated code - save size - slow speed
 #CFLAGS += $(call cc-option,-fno-caller-saves)

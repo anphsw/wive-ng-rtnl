@@ -141,6 +141,8 @@ ifdef CONFIG_USER_DEBUG
 else
 	CFLAGS  :=  $(if $(UOPT),$(UOPT),-Os) $(WOPT) -fomit-frame-pointer -fno-stack-protector -fno-conserve-stack
 endif
+	fix ~10% performance regression at 4.8.x and 4.7.x gcc
+	CFLAGS  += -fno-tree-slsr
 ifdef CONFIG_USER_SMALLSIZE
 	# Defeat .eh_frame bloat (~25% smaller binary)
 	CFLAGS += -fno-caller-saves
