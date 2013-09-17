@@ -151,7 +151,11 @@ romfs
 /lib/libnet/src/Makefile
 /lib/libnet/version.h
 /lib/libnet/win32/Makefile
-/uClibc++/.config
+/lib/libusb-1.0/Makefile
+/lib/libusb-1.0/doc/Makefile
+/lib/libusb-1.0/examples/Makefile
+/lib/libusb-1.0/libusb/Makefile
+/lib/libusb-1.0/tests/Makefile/uClibc++/.config
 /uClibc++/.config.cmd
 /uClibc++/include/system_configuration.h
 /user/busybox/*/Config.in
