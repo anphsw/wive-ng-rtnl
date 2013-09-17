@@ -12,13 +12,14 @@ config HAVE_ELF
 
 config ARCH_CFLAGS
 	string
-	default "-ffast-math -fforce-addr -fno-stack-protector"
+	default "-ffast-math -fforce-addr -fno-stack-protector -fno-aggressive-loop-optimizations -fno-tree-slsr"
 
 config ARCH_LDFLAGS
 	string
 
 config LIBGCC_CFLAGS
 	string
+	default "-Wall"
 
 config ARCH_SUPPORTS_BIG_ENDIAN
 	bool

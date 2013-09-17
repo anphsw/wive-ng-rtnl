@@ -174,7 +174,7 @@ AUTOMAKE = automake-1.13
 AWK = gawk
 CC = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc
 CCDEPMODE = depmode=none
-CFLAGS =  -Wall -Wstrict-prototypes -Wno-trigraphs  -mips32r2 -march=mips32r2 -fno-stack-protector -fno-builtin -nostdinc -D_LIBC -I./include -I.  -Os -funit-at-a-time  -ffast-math -fforce-addr -fno-stack-protector -isystem /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.8.1/include -DNDEBUG -fPIC -Os -I/opt/Wive-RTNL/linux/include -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL/lib/include_shared
+CFLAGS =  -Wall -Wstrict-prototypes -Wno-trigraphs  -mips32r2 -march=mips32r2 -fno-stack-protector -fno-builtin -nostdinc -D_LIBC -I./include -I.  -Os -funit-at-a-time  -ffast-math -fforce-addr -fno-stack-protector -fno-aggressive-loop-optimizations -fno-tree-slsr -isystem /opt/Wive-RTNL/toolchain/lib/gcc/mipsel-linux-uclibc/4.8.1/include -DNDEBUG -fPIC -Os -I/opt/Wive-RTNL/linux/include -I/opt/Wive-RTNL/lib/include -I/opt/Wive-RTNL/lib/include_shared
 CPP = /opt/Wive-RTNL/toolchain/bin/mipsel-linux-uclibc-gcc -E
 CPPFLAGS = 
 CYGPATH_W = echo
