@@ -155,9 +155,7 @@ romfs
 /lib/libusb-1.0/doc/Makefile
 /lib/libusb-1.0/examples/Makefile
 /lib/libusb-1.0/libusb/Makefile
-/lib/libusb-1.0/tests/Makefile/uClibc++/.config
-/uClibc++/.config.cmd
-/uClibc++/include/system_configuration.h
+/lib/libusb-1.0/tests/Makefile
 /user/busybox/*/Config.in
 /user/busybox/docs/busybox.net/BusyBox.html
 /user/busybox/include/bbconfigopts_bz2.h
