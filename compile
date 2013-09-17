@@ -71,7 +71,6 @@ ln -sf  $ROOTDIR/linux-2.6.21.x $ROOTDIR/linux
 
 echo --------------------------------COPY-CONFIG-----------------------------
 ##############################FOR-ALL-DEVICES#########################
-cp -fv $ROOTDIR/configs/all/config-cpp		$ROOTDIR/uClibc++/.config
 cp -fv $ROOTDIR/configs/all/config-all		$ROOTDIR/.config
 #######################################################################
 ln -fs $ROOTDIR/vendors/Ralink/RT3052/config.arch config.arch

@@ -1670,6 +1670,7 @@
 84) kernel: optimize neigh_hh_output() for the common ethernet case.<br>
 85) kernel: ipv6: remove max_addresses check from ipv6_create_tempaddr.<br>
 86) kernel: netfilter: possible unaligned packet header in ip_route_me_harder.<br>
+87) build system: gcc: fix small speed regression introdused in 4.6.x tree and not fixed in 4.8.x.<br>
 <br>
 <br>
 <br>

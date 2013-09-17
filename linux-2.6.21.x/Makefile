@@ -576,7 +576,7 @@ CFLAGS += $(call cc-disable-warning, unused-but-set-variable)
 
 ifdef CONFIG_RT2880_FLASH_4M
 # if flash size is small use optimize for size
-CFLAGS_MODULE = $(MODFLAGS) -Os
+CFLAGS_MODULE = $(MODFLAGS) -Os -fno-aggressive-loop-optimizations -fno-tree-slsr
 CFLAGS_MODULE += $(call cc-option,-fno-caller-saves)
 else
 # if flash size big use full optimize for speed
