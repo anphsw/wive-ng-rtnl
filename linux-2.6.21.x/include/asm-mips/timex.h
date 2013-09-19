@@ -12,7 +12,7 @@
 
 #include <asm/cpu-features.h>
 #include <asm/mipsregs.h>
-#include <asm/cpu-type.h>
+#include <asm/cpu.h>
 
 /*
  * This is the frequency of the timer used for Linux's timer interrupt.
