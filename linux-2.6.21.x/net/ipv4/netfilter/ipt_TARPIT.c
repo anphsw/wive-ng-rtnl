@@ -163,7 +163,7 @@ static void tarpit_tcp(struct sk_buff *oskb,struct rtable *ort,int local)
 
 	fl.nl_u.ip4_u.daddr = nskb->nh.iph->daddr;
 	fl.nl_u.ip4_u.saddr = local ? nskb->nh.iph->saddr : 0;
-	fl.nl_u.ip4_u.tos = RT_TOS(nskb->nh.iph->tos) | RTO_CONN;
+	fl.nl_u.ip4_u.tos = RT_TOS(nskb->nh.iph->tos);
 	fl.oif = 0;
 
 	if (ip_route_output_key(&nrt, &fl))

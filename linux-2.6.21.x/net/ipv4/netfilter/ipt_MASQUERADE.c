@@ -89,8 +89,7 @@ masquerade_target(struct sk_buff **pskb,
 	{
 		struct flowi fl = { .nl_u = { .ip4_u =
 					      { .daddr = (*pskb)->nh.iph->daddr,
-						.tos = (RT_TOS((*pskb)->nh.iph->tos) |
-							RTO_CONN),
+						.tos = (RT_TOS((*pskb)->nh.iph->tos)),
 						.gw = ((struct rtable *) (*pskb)->dst)->rt_gateway,
 					      } },
 				    .mark = (*pskb)->mark,
