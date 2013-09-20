@@ -1289,7 +1289,7 @@ int ip_push_pending_frames(struct sock *sk)
 	else
 		ttl = ip_select_ttl(inet, &rt->u.dst);
 
-	iph = (struct iphdr *)skb->data;
+	iph = ip_hdr(skb);
 	iph->version = 4;
 	iph->ihl = 5;
 	if (opt) {
