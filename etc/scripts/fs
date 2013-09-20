@@ -90,8 +90,7 @@ fullreset() {
     killall -q -SIGKILL goahead
     wifi_unload.sh
     burnrf
-    echo "Clear Config partitions."
-    nvram_clear 2860
+    nvramreset
     echo "Generate new MACS."
     service checkconf genmac
     echo "Erase RW-FS partitions"
