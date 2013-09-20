@@ -17,27 +17,29 @@ start() {
     echo "Check firmware update or clean boot."
     if [ "$IS_WIVE" = "YES" ]; then
 	$LOG ">>>> NORMAL BOOT <<<<"
+	FORCE_REBUILD_MAC="NO"
     else
 	$LOG "Burn RF template to flash"
 	fs burnrf
 	$LOG ">>>> RESTORE NVRAM <<<<"
-	    if [ -f /etc/backup/nvram_backup.dat ]; then
-		$LOG "Load backuped setting to nvram."
-    		fs load_nvram
-	    else
-		$LOG "Clear and load defaults to nvram."
-    		fs nvramreset
-	    fi
-	    get_param
-	    $LOG "Reset OK. Continue boot..."
+	if [ -f /etc/backup/nvram_backup.dat ]; then
+	    $LOG "Load backuped setting to nvram."
+    	    fs load_nvram
+	else
+	    $LOG "Clear and load defaults to nvram."
+    	    fs nvramreset
+	fi
+	get_param
+	$LOG "Reset OK. Continue boot..."
+	FORCE_REBUILD_MAC="YES"
     fi
 
 ######################################## MINIMAL CONFIG FOR NORMAL START #########################################
     #
     # chech mac correct set if check mac in nvram set to not NO and web not start
     #
-    if [ "$CHECKMAC" != "NO" ] && [ ! -f /var/run/goahead.pid ]; then
-	if [ $MAC_TEST = "0" ] || [ $WMAC_TEST = "0" ] || [ $WMAC2_TEST = "0" ] || [ $LANMAC_TEST = "0" ]; then
+    if [ "$CHECKMAC" != "NO" ] || [ "$FORCE_REBUILD_MAC" = "YES" ]; then
+        if [ $MAC_TEST = "0" -o $WMAC_TEST = "0" -o $WMAC2_TEST = "0" -o $LANMAC_TEST = "0" ] || [ "$FORCE_REBUILD_MAC" = "YES" ]; then
 	    $LOG "MAC is not $VENDNAME range - start MAC generate"
 	    mac_wan=`cat /dev/urandom | hexdump | head -n1 | cut -f 2- -d " " | sed ':BEGIN;s/^\([^ ]\{0,29\}\) /\1/;tBEGIN' | sed 's/\(..\)/\1:/g; s/.$//' | tail -q -c 9`
 	    mac_lan=`cat /dev/urandom | hexdump | head -n1 | cut -f 2- -d " " | sed ':BEGIN;s/^\([^ ]\{0,29\}\) /\1/;tBEGIN' | sed 's/\(..\)/\1:/g; s/.$//' | tail -q -c 9`

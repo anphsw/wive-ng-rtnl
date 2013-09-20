@@ -1678,6 +1678,7 @@
 3) kernel: mips: reimplement get_cycles().<br>
 4) build system: gcc: fix small speed regression introdused in 4.6.x tree and not fixed in 4.8.x.<br>
 5) defaults: enable 802.11h support by default (need for some apple products).<br>
+6) init.d: add force macs rebuild logic for prevent dupe mac after some wive clones install.<br>
 <br>
 <br>
 <br>
