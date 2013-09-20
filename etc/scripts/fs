@@ -92,6 +92,8 @@ fullreset() {
     burnrf
     echo "Clear Config partitions."
     nvram_clear 2860
+    echo "Generate new MAC."
+    service checkconf genmac
     echo "Erase RW-FS partitions"
     mtd_write erase RW-FS
     echo "Now reboot..."
