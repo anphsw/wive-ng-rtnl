@@ -41,19 +41,7 @@ start() {
     if [ "$CHECKMAC" != "NO" ] || [ "$FORCE_REBUILD_MAC" = "YES" ]; then
         if [ $MAC_TEST = "0" -o $WMAC_TEST = "0" -o $WMAC2_TEST = "0" -o $LANMAC_TEST = "0" ] || [ "$FORCE_REBUILD_MAC" = "YES" ]; then
 	    $LOG "MAC is not $VENDNAME range - start MAC generate"
-	    mac_wan=`cat /dev/urandom | hexdump | head -n1 | cut -f 2- -d " " | sed ':BEGIN;s/^\([^ ]\{0,29\}\) /\1/;tBEGIN' | sed 's/\(..\)/\1:/g; s/.$//' | tail -q -c 9`
-	    mac_lan=`cat /dev/urandom | hexdump | head -n1 | cut -f 2- -d " " | sed ':BEGIN;s/^\([^ ]\{0,29\}\) /\1/;tBEGIN' | sed 's/\(..\)/\1:/g; s/.$//' | tail -q -c 9`
-	    mac_wlan=`cat /dev/urandom | hexdump | head -n1 | cut -f 2- -d " " | sed ':BEGIN;s/^\([^ ]\{0,29\}\) /\1/;tBEGIN' | sed 's/\(..\)/\1:/g; s/.$//' | tail -q -c 9`
-	    mac_wlan2=`cat /dev/urandom | hexdump | head -n1 | cut -f 2- -d " " | sed ':BEGIN;s/^\([^ ]\{0,29\}\) /\1/;tBEGIN' | sed 's/\(..\)/\1:/g; s/.$//' | tail -q -c 9`
-	    echo "Set new mac!"
-	    MAC="$VENDMASK:$mac_wan"
-	    LANMAC="$VENDMASK:$mac_lan"
-	    WMAC="$VENDMASK:$mac_wlan"
-	    WMAC2="$VENDMASK:$mac_wlan2"
-    	    nvram_set 2860 WAN_MAC_ADDR   "$MAC"
-    	    nvram_set 2860 LAN_MAC_ADDR   "$LANMAC"
-    	    nvram_set 2860 WLAN_MAC_ADDR  "$WMAC"
-    	    nvram_set 2860 WLAN2_MAC_ADDR "$WMAC2"
+	    genmac
 	fi
     fi
 
@@ -164,6 +152,22 @@ get_param() {
     LANMAC_TEST=`nvram_get 2860 LAN_MAC_ADDR | grep "$VENDMASK" -c`
 }
 
+genmac() {
+    mac_wan=`cat /dev/urandom | hexdump | head -n1 | cut -f 2- -d " " | sed ':BEGIN;s/^\([^ ]\{0,29\}\) /\1/;tBEGIN' | sed 's/\(..\)/\1:/g; s/.$//' | tail -q -c 9`
+    mac_lan=`cat /dev/urandom | hexdump | head -n1 | cut -f 2- -d " " | sed ':BEGIN;s/^\([^ ]\{0,29\}\) /\1/;tBEGIN' | sed 's/\(..\)/\1:/g; s/.$//' | tail -q -c 9`
+    mac_wlan=`cat /dev/urandom | hexdump | head -n1 | cut -f 2- -d " " | sed ':BEGIN;s/^\([^ ]\{0,29\}\) /\1/;tBEGIN' | sed 's/\(..\)/\1:/g; s/.$//' | tail -q -c 9`
+    mac_wlan2=`cat /dev/urandom | hexdump | head -n1 | cut -f 2- -d " " | sed ':BEGIN;s/^\([^ ]\{0,29\}\) /\1/;tBEGIN' | sed 's/\(..\)/\1:/g; s/.$//' | tail -q -c 9`
+    echo "Set new mac!"
+    MAC="$VENDMASK:$mac_wan"
+    LANMAC="$VENDMASK:$mac_lan"
+    WMAC="$VENDMASK:$mac_wlan"
+    WMAC2="$VENDMASK:$mac_wlan2"
+    nvram_set 2860 WAN_MAC_ADDR   "$MAC"
+    nvram_set 2860 LAN_MAC_ADDR   "$LANMAC"
+    nvram_set 2860 WLAN_MAC_ADDR  "$WMAC"
+    nvram_set 2860 WLAN2_MAC_ADDR "$WMAC2"
+}
+
 stop() {
     :
 }
@@ -171,6 +175,10 @@ stop() {
 case "$1" in
 	start)
 	    start
+	    ;;
+
+	genmac)
+	    genmac
 	    ;;
 
 	stop)
