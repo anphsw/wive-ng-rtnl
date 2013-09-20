@@ -42,25 +42,25 @@ usage() {
 }
 
 load() {
-  local dst=/ 
-  echo "Loading TGZfs"
-  bzcat $MTDRWFS | tar xf - -C $dst>>/dev/null
+    local dst=/
+    echo "Loading TGZfs"
+    bzcat $MTDRWFS | tar xf - -C $dst>>/dev/null
 }
 
 save() {
-  echo "Save curent date and current time to rwfs"
-  date +%Y%m%d%H%M > /etc/compile-date
-  echo "Compress config files"
-  tmp="/tmp/tgzfs"
-  tar cf - /etc | bzip2 -9 > $tmp
-  if [ "$(get_size $tmp)" -lt $(($TGZfs_size/1024)) ]; then
-    echo "Write RW-FS to flash"
-    mtd_write write $tmp RW-FS
-    echo "Config saved. OK."
-  else
-    echo "Error: File $tmp too big: $(get_size $tmp)k"
-  fi
-  rm -f $tmp
+    echo "Save curent date and current time to rwfs"
+    date +%Y%m%d%H%M > /etc/compile-date
+    echo "Compress config files"
+    tmp="/tmp/tgzfs"
+    tar cf - /etc | bzip2 -9 > $tmp
+    if [ "$(get_size $tmp)" -lt $(($TGZfs_size/1024)) ]; then
+	echo "Write RW-FS to flash"
+	mtd_write write $tmp RW-FS
+	echo "Config saved. OK."
+    else
+	echo "Error: File $tmp too big: $(get_size $tmp)k"
+    fi
+    rm -f $tmp
 }
 
 restore() {
@@ -92,7 +92,7 @@ fullreset() {
     burnrf
     echo "Clear Config partitions."
     nvram_clear 2860
-    echo "Generate new MAC."
+    echo "Generate new MACS."
     service checkconf genmac
     echo "Erase RW-FS partitions"
     mtd_write erase RW-FS
