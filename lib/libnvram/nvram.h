@@ -106,7 +106,6 @@ int nvram_bufset(int index, char *name, char *value);
 char *nvram_get(int index, char *name);
 char *nvram_bufget(int index, char *name);
 
-void nvram_buflist(int index);
 int nvram_commit(int index);
 int nvram_clear(int index);
 
@@ -119,5 +118,7 @@ void toggleNvramDebug(void);
 int renew_nvram(int mode, char *fname);
 int nvram_show(int mode);
 
+#ifndef CONFIG_KERNEL_NVRAM
 extern unsigned long  crc32      (unsigned long, const unsigned char *, unsigned);
+#endif
 #endif

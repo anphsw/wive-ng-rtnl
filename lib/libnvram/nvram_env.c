@@ -475,27 +475,11 @@ int nvram_bufset(int index, char *name, char *value)
 	return 0;
 }
 
-void nvram_buflist(int index)
-{
-	int i;
-
-	//LIBNV_PRINT("--> nvram_buflist %d\n", index);
-	LIBNV_CHECK_INDEX();
-	LIBNV_CHECK_VALID();
-
-	for (i = 0; i < MAX_CACHE_ENTRY; i++) {
-		if (!fb[index].cache[i].name)
-			break;
-		printf("  '%s'='%s'\n", fb[index].cache[i].name, fb[index].cache[i].value);
-	}
-}
-
 /*
  * write flash from cache
  */
 int nvram_commit(int index)
 {
-
 #ifdef CONFIG_KERNEL_NVRAM
 	int fd;
 	nvram_ioctl_t nvr;
@@ -728,7 +712,6 @@ int renew_nvram(int mode, char *fname)
 		}
 		buf[strlen(buf) - 1] = '\0'; //remove carriage return
 		*p++ = '\0'; //seperate the string
-		//printf("bufset %d '%s'='%s'\n", mode, buf, p);
 		nvram_bufset(mode, buf, p);
 		need_commit = 1;
 	}
