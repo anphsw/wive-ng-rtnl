@@ -93,8 +93,8 @@ fullreset() {
     echo "Generate new MAC"
     service checkconf genmac
     echo "Drop CHECKMAC and IS_WIVE flags - full reinit."
-    nvarm_set 2860 CHECKMAC YES
-    nvarm_set 2860 IS_WIVE NO
+    nvram_set 2860 CHECKMAC YES
+    nvram_set 2860 IS_WIVE NO
     echo "Erase RW-FS partitions"
     mtd_write erase RW-FS
     echo "Now reboot..."
