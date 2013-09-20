@@ -21,25 +21,25 @@ usage() {
 
 showstat()
 {
-    if [ "$2" = "" ]; then
+    if [ "$1" = "" ]; then
 	echo "Need iface name as argument."
 	exit 1
     fi
-    iwpriv $2 show stainfo
-    iwpriv $2 show stacountinfo
-    iwpriv $2 show stasecinfo
-    iwpriv $2 show descinfo
-    iwpriv $2 show wdsinfo
-    iwpriv $2 show bainfo
+    iwpriv $1 show stainfo
+    iwpriv $1 show stacountinfo
+    iwpriv $1 show stasecinfo
+    iwpriv $1 show descinfo
+    iwpriv $1 show wdsinfo
+    iwpriv $1 show bainfo
 }
 
 showcalib()
 {
-    if [ "$2" = "" ]; then
+    if [ "$1" = "" ]; then
 	echo "Need iface name as argument."
 	exit 1
     fi
-    iwpriv $2 e2p
+    iwpriv $1 e2p
 }
 
 setmaxpwr()
@@ -50,32 +50,32 @@ setmaxpwr()
 	exit 1
     fi
 
-    iwpriv $2 e2p 52=$3
-    iwpriv $2 e2p 54=$4
-    iwpriv $2 e2p 56=$5
-    iwpriv $2 e2p 58=$6
-    iwpriv $2 e2p 5A=$7
-    iwpriv $2 e2p 5C=$8
-    iwpriv $2 e2p 5E=$9
+    iwpriv $1 e2p 52=$2
+    iwpriv $1 e2p 54=$3
+    iwpriv $1 e2p 56=$4
+    iwpriv $1 e2p 58=$5
+    iwpriv $1 e2p 5A=$6
+    iwpriv $1 e2p 5C=$7
+    iwpriv $1 e2p 5E=$8
 
     echo "After set - need reboot."
 }
 
 setbasetxpower()
 {
-    if [ "$3" = "" ]; then
+    if [ "$2" = "" ]; then
 	echo "Need iface name as argument and value."
 	exit 1
     fi
-    iwpriv $2 e2p DE=$3
-    iwpriv $2 e2p E0=$3
-    iwpriv $2 e2p E2=$3
-    iwpriv $2 e2p E4=$3
-    iwpriv $2 e2p E6=$3
-    iwpriv $2 e2p E8=$3
-    iwpriv $2 e2p EA=$3
-    iwpriv $2 e2p EC=$3
-    iwpriv $2 e2p EE=$3
+    iwpriv $1 e2p DE=$2
+    iwpriv $1 e2p E0=$2
+    iwpriv $1 e2p E2=$2
+    iwpriv $1 e2p E4=$2
+    iwpriv $1 e2p E6=$2
+    iwpriv $1 e2p E8=$2
+    iwpriv $1 e2p EA=$2
+    iwpriv $1 e2p EC=$2
+    iwpriv $1 e2p EE=$2
 
     echo "After set - need reboot."
 }
