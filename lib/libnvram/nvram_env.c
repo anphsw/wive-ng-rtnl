@@ -3,6 +3,16 @@
 #include "flash_api.h"
 #include <errno.h>
 
+//#define DEBUG
+
+#ifdef DEBUG
+static char libnvram_debug = 1;
+#else
+static char libnvram_debug = 0;
+#endif
+#define LIBNV_PRINT(x, ...) do { if (libnvram_debug) printf("%s %d: " x, __FILE__, __LINE__, ## __VA_ARGS__); } while(0)
+#define LIBNV_ERROR(x, ...) do { fprintf(stderr,"%s %d: ERROR! " x, __FILE__, __LINE__, ## __VA_ARGS__); } while(0)
+
 static block_t fb[FLASH_BLOCK_NUM] =
 {
 #ifdef CONFIG_DUAL_IMAGE

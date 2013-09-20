@@ -10,16 +10,6 @@
 #include <unistd.h>
 #include <sys/ioctl.h>
 
-//#define DEBUG
-
-#ifdef DEBUG
-static char libnvram_debug = 1;
-#else
-static char libnvram_debug = 0;
-#endif
-#define LIBNV_PRINT(x, ...) do { if (libnvram_debug) printf("%s %d: " x, __FILE__, __LINE__, ## __VA_ARGS__); } while(0)
-#define LIBNV_ERROR(x, ...) do { fprintf(stderr,"%s %d: ERROR! " x, __FILE__, __LINE__, ## __VA_ARGS__); } while(0)
-
 /* use nutex only  if kernel
     nvram support disabled */
 #ifndef CONFIG_KERNEL_NVRAM
