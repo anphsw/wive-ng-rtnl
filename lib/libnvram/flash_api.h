@@ -2,6 +2,7 @@
 #define __FLASH_API
 
 int flash_read(char *buf, off_t from, size_t len);
+#ifndef CONFIG_KERNEL_NVRAM
 int flash_write(char *buf, off_t to, size_t len);
-int flash_read_NicConf(char *buf);
+#endif
 #endif

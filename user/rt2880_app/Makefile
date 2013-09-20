@@ -1,6 +1,6 @@
 .EXPORT_ALL_VARIABLES:
 
-SUBDIRS_APP = ated flash i2ccmd mii_mgr nvram reg switch csr_test gpio i2scmd mem_usage mtd pcmcmd spicmd mtd_verifier hw_nat switch_rtl
+SUBDIRS_APP = ated i2ccmd mii_mgr nvram reg switch csr_test gpio i2scmd mem_usage mtd pcmcmd spicmd mtd_verifier hw_nat switch_rtl
 
 -include $(LINUX_CONFIG)
 -include $(CONFIG_CONFIG)
@@ -15,7 +15,6 @@ LDFLAGS	+= -Wl,--gc-sections
 ra_dir_$(CONFIG_RT2880_REG_RW)      += reg
 ra_dir_$(CONFIG_RT2880_ATED)        += ated
 ra_dir_$(CONFIG_RT2880_CSR_TEST)    += csr_test
-ra_dir_$(CONFIG_RT2880_FLASH_TEST)  += flash
 ra_dir_$(CONFIG_RALINKAPP_HWNAT)    += hw_nat
 ra_dir_$(CONFIG_RT2880_MII_MGR)     += mii_mgr
 ra_dir_$(CONFIG_RT2880_NVRAM)       += nvram

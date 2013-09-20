@@ -8,7 +8,6 @@
 #include "nvram.h"
 
 /* cleanup and build config part */
-#define AUTO_REBUILD_NVRAM
 #define NEED_REINIT 0xFDEAD
 
 extern int ra_mtd_write_nm(char *name, loff_t to, size_t len, const u_char *buf);
@@ -181,14 +180,14 @@ int ralink_nvram_ioctl(struct inode *inode, struct file *file, unsigned int req,
 		break;
 	case RALINK_NVRAM_IOCTL_SET:
 		nvr = (nvram_ioctl_t *)arg;
-		len = ((nvr->size + MAX_VALUE_LEN) / MAX_VALUE_LEN) * MAX_VALUE_LEN; // Align size+1 bytes to MAX_VALUE_LEN boundary
+		len = ((nvr->size + MAX_VALUE_LEN) / MAX_VALUE_LEN) * MAX_VALUE_LEN; /* Align size+1 bytes to MAX_VALUE_LEN boundary */
 		if ((len > MAX_PERMITTED_VALUE_LEN) || (len < 0))
 			return -EOVERFLOW;
-		
+
 		value = (char *)kzalloc(len, GFP_KERNEL);
 		if (!value)
 			return -ENOMEM;
-		
+
 		if (copy_from_user(value, nvr->value, nvr->size)) {
 			KFREE(value);
 			return -EFAULT;
@@ -236,21 +235,14 @@ int ra_nvram_init(void)
 	}
 
 	init_MUTEX(&nvram_sem);
-
-#ifdef AUTO_REBUILD_NVRAM
 reinit:
-#endif
 	down(&nvram_sem);
 	for (i = 0; i < FLASH_BLOCK_NUM; i++)
 		ret=init_nvram_block(i);
-#ifdef AUTO_REBUILD_NVRAM
 		if (ret == NEED_REINIT) {  /* try flash cleanup */
 		    goto reinit;
 		}
-#endif
 	up(&nvram_sem);
-
-
 	return 0;
 }
 
@@ -268,12 +260,12 @@ static int init_nvram_block(int index)
 	if (fb[index].valid)
 		return -EINVAL;
 
-		//read crc from flash
+		/* read crc from flash */
 		from = fb[i].flash_offset;
 		len = sizeof(fb[i].env.crc);
 		ra_mtd_read_nm(RALINK_NVRAM_MTDNAME, from, len, (unsigned char *)&fb[i].env.crc);
 
-		//read data from flash
+		/* read data from flash */
 		from = from + len;
 		len = fb[i].flash_max_len - len;
 		fb[i].env.data = (char *)kzalloc(len, GFP_KERNEL);
@@ -282,50 +274,43 @@ static int init_nvram_block(int index)
 
 		ra_mtd_read_nm(RALINK_NVRAM_MTDNAME, from, len, (unsigned char *)fb[i].env.data);
 
-		//check crc
+		/* check crc */
 		if (nv_crc32(0, fb[i].env.data, len) != fb[i].env.crc) {
 			printk("NVRAM: Particion %x Bad CRC %x, start cleanup.\n", i, (unsigned int)fb[i].env.crc);
 			memset(fb[index].env.data, 0, len);
 			fb[i].valid = 0;
 			fb[i].dirty = 1;
-#ifdef AUTO_REBUILD_NVRAM
 			up(&nvram_sem); /* unlock before clear */
 			nvram_clear(i);
 			printk("NVRAM: Particion %x cleanup OK. Reinit.\n", i);
 			return NEED_REINIT;
-#else
-			return -1;
-#endif
 		}
 
-		//parse env to cache
+		/* parse env to cache */
 		p = fb[i].env.data;
 		for (j = 0; j < MAX_CACHE_ENTRY; j++) {
 			if (NULL == (q = strchr(p, '='))) {
 				RANV_PRINT("NVRAM: Parsed failed - cannot find '='\n");
 				break;
 			}
-			*q = '\0'; //strip '='
-			fb[i].cache[j].name = kstrdup(p, GFP_KERNEL);
-			//printk("  %d '%s'->", i, p);
 
-			p = q + 1; //value
+			*q = '\0';	/* strip '=' */
+			fb[i].cache[j].name = kstrdup(p, GFP_KERNEL);
+			p = q + 1;	/* next entry */
+
 			if (NULL == (q = strchr(p, '\0'))) {
 				RANV_PRINT("NVRAM: Parsed failed - cannot find '\\0'\n");
 				break;
 			}
-			fb[i].cache[j].value = kstrdup(p, GFP_KERNEL);
-			//printk("'%s'\n", p);
 
-			p = q + 1; //next entry
-			if (p - fb[i].env.data + 1 >= len) {
-				//end of block
-				break;
-			}
-			if (*p == '\0') {
-				//end of env
-				break;
-			}
+			fb[i].cache[j].value = kstrdup(p, GFP_KERNEL);
+			p = q + 1;	/* next entry */
+
+			if (p - fb[i].env.data + 1 >= len)
+				break;	/* end of block */
+
+			if (*p == '\0')
+				break;	/* end of env */
 		}
 		if (j == MAX_CACHE_ENTRY)
 			RANV_PRINT("NVRAM: Run out of env cache, please increase MAX_CACHE_ENTRY\n");
@@ -346,10 +331,7 @@ static void ra_nvram_exit(void)
 			nvram_commit(index);
 
 		ra_nvram_close(index);
-
 		fb[index].valid = 0;
-
-		//free env
 		kfree(fb[index].env.data);
 	}
 
@@ -367,7 +349,6 @@ static int ra_nvram_close(int index)
 		return 0;
 	down(&nvram_sem);
 
-	//free cache
 	for (i = 0; i < MAX_CACHE_ENTRY; i++) {
 		if (fb[index].cache[i].name) {
 			kfree(fb[index].cache[i].name);
@@ -378,7 +359,7 @@ static int ra_nvram_close(int index)
 			fb[index].cache[i].value = NULL;
 		}
 	}
-	
+
 	up(&nvram_sem);
 	return 0;
 }
@@ -415,7 +396,7 @@ int nvram_clear(int index)
 
 	down(&nvram_sem);
 
-	//construct all 1s env block
+	/* construct all 1s env block */
 	len = fb[index].flash_max_len - sizeof(fb[index].env.crc);
 	if (!fb[index].env.data) {
 		fb[index].env.data = (char *)kmalloc(len, GFP_KERNEL);
@@ -424,15 +405,15 @@ int nvram_clear(int index)
 	}
 	memset(fb[index].env.data, 0xFF, len);
 
-	//calculate crc
+	/* calculate crc */
 	fb[index].env.crc = (unsigned long)nv_crc32(0, (unsigned char *)fb[index].env.data, len);
 
-        //write crc to flash
+        /* write crc to flash */
 	to = fb[index].flash_offset;
 	len = sizeof(fb[index].env.crc);
 	ra_mtd_write_nm(RALINK_NVRAM_MTDNAME, to, len, (unsigned char *)&fb[index].env.crc);
 
-	//write all 1s data to flash
+	/* write all 1s data to flash */
 	to = to + len;
 	len = fb[index].flash_max_len - len;
 	ra_mtd_write_nm(RALINK_NVRAM_MTDNAME, to, len, (unsigned char *)fb[index].env.data);
@@ -464,7 +445,7 @@ int nvram_commit(int index)
 		return 0;
 	}
 
-	//construct env block
+	/* construct env block */
 	len = fb[index].flash_max_len - sizeof(fb[index].env.crc);
 	if (!fb[index].env.data) {
 		fb[index].env.data = (char *)kmalloc(len, GFP_KERNEL);
@@ -488,17 +469,17 @@ int nvram_commit(int index)
 		p += l;
 	}
 
-	*p = '\0'; //ending null
+	*p = '\0'; /* ending null */
 
-	//calculate crc
+	/* calculate crc */
 	fb[index].env.crc = (unsigned long)nv_crc32(0, (unsigned char *)fb[index].env.data, len);
 
-	//write crc to flash
+	/* write crc to flash */
 	to = fb[index].flash_offset;
 	len = sizeof(fb[index].env.crc);
 	ra_mtd_write_nm(RALINK_NVRAM_MTDNAME, to, len, (unsigned char *)&fb[index].env.crc);
 
-	//write data to flash
+	/* write data to flash */
 	to = to + len;
 	len = fb[index].flash_max_len - len;
 	ra_mtd_write_nm(RALINK_NVRAM_MTDNAME, to, len, (unsigned char *)fb[index].env.data);
@@ -524,13 +505,13 @@ int nvram_set(int index, char *name, char *value)
 	idx = cache_idx(index, name);
 
 	if (-1 == idx) {
-		//find the first empty room
+		/* find the first empty room */
 		for (idx = 0; idx < MAX_CACHE_ENTRY; idx++) {
 			if (!fb[index].cache[idx].name) {
 				break;
 			}
 		}
-		//no any empty room
+		/* no any empty room */
 		if (idx == MAX_CACHE_ENTRY) {
 			RANV_ERROR("run out of env cache, please increase MAX_CACHE_ENTRY\n");
 			up(&nvram_sem);
@@ -540,7 +521,7 @@ int nvram_set(int index, char *name, char *value)
 		fb[index].cache[idx].value = kstrdup(value, GFP_KERNEL);
 	}
 	else {
-		//abandon the previous value
+		/* abandon the previous value */
 		KFREE(fb[index].cache[idx].value);
 		fb[index].cache[idx].value = kstrdup(value, GFP_KERNEL);
 	}
@@ -566,20 +547,14 @@ char const *nvram_get(int index, char *name)
 	idx = cache_idx(index, name);
 	if (-1 != idx) {
 		if (fb[index].cache[idx].value) {
-			//duplicate the value in case caller modify it
-			//ret = strdup(fb[index].cache[idx].value);
+			/* duplicate the value in case caller modify it */
 			ret = fb[index].cache[idx].value;
 			up(&nvram_sem);
 			return ret;
 		}
 	}
 
-	//printk("nvram_get: not found\n");
-	//no default value set?
-	//btw, we don't return NULL anymore!
-
 	up(&nvram_sem);
-
 	return NULL;
 }
 
@@ -615,7 +590,7 @@ int const nvram_getall(int index, char *buf)
 		snprintf(p, l, "%s=%s", fb[index].cache[i].name, fb[index].cache[i].value);
 		p += l;
 	}
-	*p = '\0'; //ending null
+	*p = '\0'; /* ending null */
 
 	up(&nvram_sem);
 

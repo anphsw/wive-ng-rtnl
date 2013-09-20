@@ -52,29 +52,6 @@ int mtd_open(const char *name, int flags)
 	return -1;
 }
 
-#ifndef CONFIG_RALINK_RT3052
-int flash_read_mac(char *buf)
-{
-	int fd, ret;
-
-	if (!buf)
-		return -1;
-	fd = mtd_open("Factory", O_RDONLY | O_NONBLOCK);
-	if (fd < 0) {
-		fprintf(stderr, "Could not open mtd device\n");
-		return -1;
-	}
-#if ! defined (NO_WIFI_SOC)
-	lseek(fd, 0x2E, SEEK_SET);
-#else
-	lseek(fd, 0xE006, SEEK_SET);
-#endif
-	ret = read(fd, buf, 6);
-	close(fd);
-	return ret;
-}
-#endif
-
 int flash_read(char *buf, off_t from, size_t len)
 {
 	int fd, ret;
@@ -116,6 +93,7 @@ out:
 
 #define min(x,y) ({ typeof(x) _x = (x); typeof(y) _y = (y); (void) (&_x == &_y); _x < _y ? _x : _y; })
 
+#ifndef CONFIG_KERNEL_NVRAM
 int flash_write(char *buf, off_t to, size_t len)
 {
 	int fd, ret = 0;
@@ -218,4 +196,4 @@ out:
 	close(fd);
 	return ret;
 }
-
+#endif
