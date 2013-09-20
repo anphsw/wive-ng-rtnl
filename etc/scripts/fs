@@ -72,6 +72,7 @@ restore() {
 
 nvramreset() {
     echo "Load user defaults."
+    nvram_clear 2860
     nvram_default 2860
 }
 
@@ -88,7 +89,7 @@ fullreset() {
     wifi_unload.sh
     burnrf
     echo "Clear Config partitions."
-    nvram_clear 2860
+    nvramreset
     echo "Generate new MAC"
     service checkconf genmac
     echo "Drop CHECKMAC and IS_WIVE flags - full reinit."
