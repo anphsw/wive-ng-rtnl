@@ -72,7 +72,6 @@ restore() {
 
 nvramreset() {
     echo "Load user defaults."
-    nvram_clear 2860
     nvram_default 2860
 }
 
@@ -89,12 +88,7 @@ fullreset() {
     wifi_unload.sh
     burnrf
     echo "Clear Config partitions."
-    nvramreset
-    echo "Generate new MAC"
-    service checkconf genmac
-    echo "Drop CHECKMAC and IS_WIVE flags - full reinit."
-    nvram_set 2860 CHECKMAC YES
-    nvram_set 2860 IS_WIVE NO
+    nvram_clear 2860
     echo "Erase RW-FS partitions"
     mtd_write erase RW-FS
     echo "Now reboot..."

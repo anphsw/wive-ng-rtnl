@@ -177,18 +177,18 @@ static int nvram_load_default(void)
 	/* default macs is OK */
 	int mac_ok=1;
 
-	printf("Store macs...");
+	printf("Store MACS...\n");
 	char *WLAN_MAC_ADDR	= nvram_get(RT2860_NVRAM, "WLAN_MAC_ADDR");
         char *WAN_MAC_ADDR	= nvram_get(RT2860_NVRAM, "WAN_MAC_ADDR");
         char *LAN_MAC_ADDR	= nvram_get(RT2860_NVRAM, "LAN_MAC_ADDR");
         char *CHECKMAC		= nvram_get(RT2860_NVRAM, "CHECKMAC");
 
-	printf("Clear nvram...");
+	printf("Clear nvram...\n");
 	nvram_clear(RT2860_NVRAM);
-	printf("Load defaults nvram...");
+	printf("Load defaults nvram...\n");
 	renew_nvram(RT2860_NVRAM, "/etc/default/nvram_default");
 
-	printf("Renew nvram...");
+	printf("Renew nvram...\n");
 
 	/* reinit nvram before commit */
 	if ( nvram_init(RT2860_NVRAM) == -1 )
@@ -206,7 +206,7 @@ static int nvram_load_default(void)
 #else
         nvram_bufset(RT2860_NVRAM, "RFICType", "5");
 #endif
-	printf("Restore old macs...");
+	printf("Restore old macs...\n");
 	if ((strlen(WLAN_MAC_ADDR) > 0) && isMacValid(WLAN_MAC_ADDR))
 	    nvram_bufset(RT2860_NVRAM, "WLAN_MAC_ADDR", WLAN_MAC_ADDR);
 	else
@@ -222,10 +222,10 @@ static int nvram_load_default(void)
 
 	/* all restore ok ? */
 	if ( mac_ok == 1 ) {
-	    printf("Restore checkmac atribute.");
+	    printf("Restore checkmac atribute.\n");
     	    nvram_bufset(RT2860_NVRAM, "CHECKMAC", CHECKMAC);
 	} else {
-	    printf("Set checkmac atribute.");
+	    printf("Set checkmac atribute.\n");
     	    nvram_bufset(RT2860_NVRAM, "CHECKMAC", "YES");
 	}
 
