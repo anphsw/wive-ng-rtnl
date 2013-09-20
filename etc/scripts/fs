@@ -71,6 +71,9 @@ restore() {
 }
 
 nvramreset() {
+    ###############################################################
+    # cleanup with skip clean macs and is_wive and checkmacs flags
+    ###############################################################
     echo "Load user defaults."
     nvram_default 2860
 }
