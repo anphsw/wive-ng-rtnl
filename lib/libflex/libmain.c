@@ -21,7 +21,7 @@
 /*  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR */
 /*  PURPOSE. */
 
-extern int yylex ();
+extern int yylex (void);
 
 int     main (argc, argv)
      int     argc;

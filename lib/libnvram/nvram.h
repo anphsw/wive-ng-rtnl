@@ -10,6 +10,16 @@
 #include <unistd.h>
 #include <sys/ioctl.h>
 
+//#define DEBUG
+
+#ifdef DEBUG
+static char libnvram_debug = 1;
+#else
+static char libnvram_debug = 0;
+#endif
+#define LIBNV_PRINT(x, ...) do { if (libnvram_debug) printf("%s %d: " x, __FILE__, __LINE__, ## __VA_ARGS__); } while(0)
+#define LIBNV_ERROR(x, ...) do { fprintf(stderr,"%s %d: ERROR! " x, __FILE__, __LINE__, ## __VA_ARGS__); } while(0)
+
 /* use nutex only  if kernel
     nvram support disabled */
 #ifndef CONFIG_KERNEL_NVRAM
@@ -109,7 +119,6 @@ char *nvram_bufget(int index, char *name);
 void nvram_buflist(int index);
 int nvram_commit(int index);
 int nvram_clear(int index);
-int nvram_erase(int index);
 
 int getNvramNum(void);
 unsigned int getNvramOffset(int index);
@@ -119,6 +128,6 @@ unsigned int getNvramIndex(char *name);
 void toggleNvramDebug(void);
 int renew_nvram(int mode, char *fname);
 int nvram_show(int mode);
-int nvram_load_default(void);
-int gen_wifi_config(int mode);
+
+extern unsigned long  crc32      (unsigned long, const unsigned char *, unsigned);
 #endif

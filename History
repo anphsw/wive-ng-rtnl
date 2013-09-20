@@ -1670,9 +1670,14 @@
 84) kernel: optimize neigh_hh_output() for the common ethernet case.<br>
 85) kernel: ipv6: remove max_addresses check from ipv6_create_tempaddr.<br>
 86) kernel: netfilter: possible unaligned packet header in ip_route_me_harder.<br>
-87) kernel: mips: reimplement get_cycles().<br>
-88) build system: gcc: fix small speed regression introdused in 4.6.x tree and not fixed in 4.8.x.<br>
-89) defaults: enable 802.11h support by default (need for some apple products).<br>
+
+<br>
+<b>4.4.x</b><br>
+1) libnvram: move some code to ralink_init daemon.<br>
+2) goahead: more use init.d instead direct call libnvram functions.<br>
+3) kernel: mips: reimplement get_cycles().<br>
+4) build system: gcc: fix small speed regression introdused in 4.6.x tree and not fixed in 4.8.x.<br>
+5) defaults: enable 802.11h support by default (need for some apple products).<br>
 <br>
 <br>
 <br>

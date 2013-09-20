@@ -1661,7 +1661,7 @@ void Security(int nvram, webs_t wp, char_t *path, char_t *query)
 	mbssid_num = atoi(nvram_get(nvram, "BssidNum"));
 	for (i=0; i<mbssid_num; i++)
 		doSystem("ifconfig ra%d down", i);
-	gen_wifi_config(RT2860_NVRAM);
+	system("service modules gen_wifi_config");
 	for (i=0; i<mbssid_num; i++)
 		doSystem("ifconfig ra%d up", i);
 

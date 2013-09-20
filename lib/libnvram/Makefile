@@ -37,7 +37,7 @@ OBJS	:= nvram_env.o flash_api.o
 ifneq ("$(CONFIG_KERNEL_NVRAM)", "")
 OBJS	+= crc32.o
 endif
-HEADERS := nvram_env.h nvram.h flash_api.h $(ROOTDIR)/$(LINUXDIR)/include/linux/config.h
+HEADERS := nvram.h flash_api.h $(ROOTDIR)/$(LINUXDIR)/include/linux/config.h
 
 ifneq ("$(CONFIG_RALINK_RT6855A)", "")
 CFLAGS += -DNO_WIFI_SOC

@@ -784,8 +784,7 @@ int getCpuUsageASP(int eid, webs_t wp, int argc, char_t **argv)
 
 static void LoadDefaultSettings(webs_t wp, char_t *path, char_t *query)
 {
-    nvram_load_default();
-    //crash rwfs. restore at load
+    system("fs nvramreset");
     system("fs restore");
 }
 

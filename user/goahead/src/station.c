@@ -2906,7 +2906,7 @@ static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 	initStaProfile();
 
 	//push wifi config to config mtd part and config generate
-	gen_wifi_config(RT2860_NVRAM);
+	system("service modules gen_wifi_config");
 
 	// reconnect to AP and renew dhcp, pppoe etc
 	initInternet();

@@ -296,7 +296,7 @@ static void fs_nvram_reset_handler (int signum)
 {
 	printf("fs_nvram_reset_handler: load nvram default and restore original rwfs...");
 
-	nvram_load_default();
+        system("fs nvramreset");
         system("fs restore");
 }
 #endif

@@ -208,6 +208,10 @@ case "$1" in
 	    retune_wifi
 	    ;;
 
+	gen_wifi_config)
+	    gen_wifi_config
+	    ;;
+
 	restart)
 	    stop
 	    start

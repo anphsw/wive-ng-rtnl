@@ -18,7 +18,7 @@ if [ "$first_wlan_mesh" != "" ]; then
 		brctl delif br0 $first_wlan_mesh
 		ip link set $first_wlan_mesh down > /dev/null 2>&1
 		ip link set $first_wlan_root_if down > /dev/null 2>&1
-		ralink_init make_wireless_config 2860
+		service modules gen_wifi_config
 		ip link set $first_wlan_root_if up
 		meshenabled=`nvram_get 2860 MeshEnabled`
 		if [ "$meshenabled" = "1" ]; then
