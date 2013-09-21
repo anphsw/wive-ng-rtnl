@@ -1680,6 +1680,7 @@
 5) init.d: add force macs rebuild logic for prevent dupe mac after some wive clones install.<br>
 6) kernel: mips: reimplement get_cycles().<br>
 7) kernel: wifi_drivers: backport fixses from 2.7.x.x drivers.<br>
+8) libpcap: update to 1.4.0 version.<br>
 <br>
 <br>
 <br>

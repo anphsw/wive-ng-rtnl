@@ -20,7 +20,7 @@
  */
 #ifndef lint
 static const char rcsid[] _U_ =
-    "@(#) $Header: /usr/local/dslrepos/uClinux-dist/user/libpcap/pcap-null.c,v 1.1 2009/10/08 07:30:58 kaohj Exp $ (LBL)";
+    "@(#) $Header: /tcpdump/master/libpcap/pcap-null.c,v 1.22 2008-04-04 19:37:45 guy Exp $ (LBL)";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -40,8 +40,7 @@ static const char rcsid[] _U_ =
 static char nosup[] = "live packet capture not supported on this system";
 
 pcap_t *
-pcap_open_live(const char *device, int snaplen, int promisc, int to_ms,
-    char *ebuf)
+pcap_create_interface(const char *device, char *ebuf)
 {
 	(void)strlcpy(ebuf, nosup, PCAP_ERRBUF_SIZE);
 	return (NULL);

@@ -34,7 +34,7 @@
 
 #ifndef lint
 static const char rcsid[] _U_ =
-    "@(#) $Header: /usr/local/dslrepos/uClinux-dist/user/libpcap/fad-getad.c,v 1.1 2009/10/08 07:30:57 kaohj Exp $ (LBL)";
+    "@(#) $Header: /tcpdump/master/libpcap/fad-getad.c,v 1.12 2007-09-14 00:44:55 guy Exp $ (LBL)";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -52,7 +52,7 @@ static const char rcsid[] _U_ =
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "ifaddrs.h"
+#include <ifaddrs.h>
 
 #include "pcap-int.h"
 
@@ -61,12 +61,21 @@ static const char rcsid[] _U_ =
 #endif
 
 #ifdef AF_PACKET
+# ifdef HAVE_NETPACKET_PACKET_H
+/* Solaris 11 and later, Linux distributions with newer glibc */
+#  include <netpacket/packet.h>
+# else /* HAVE_NETPACKET_PACKET_H */
+/* LynxOS, Linux distributions with older glibc */
 # ifdef __Lynx__
-#  include <netpacket/if_packet.h>	/* LynxOS */
-# else
-#  include <linux/if_packet.h>		/* Linux */
-# endif
-#endif
+/* LynxOS */
+#  include <netpacket/if_packet.h>
+# else /* __Lynx__ */
+/* Linux */
+#  include <linux/types.h>
+#  include <linux/if_packet.h>
+# endif /* __Lynx__ */
+# endif /* HAVE_NETPACKET_PACKET_H */
+#endif /* AF_PACKET */
 
 /*
  * This is fun.
@@ -132,11 +141,9 @@ get_sa_len(struct sockaddr *addr)
  * Returns -1 on error, 0 otherwise.
  * The list, as returned through "alldevsp", may be null if no interfaces
  * were up and could be opened.
- *
- * This is the implementation used on platforms that have "getifaddrs()".
  */
 int
-pcap_findalldevs(pcap_if_t **alldevsp, char *errbuf)
+pcap_findalldevs_interfaces(pcap_if_t **alldevsp, char *errbuf)
 {
 	pcap_if_t *devlist = NULL;
 	struct ifaddrs *ifap, *ifa;
@@ -263,15 +270,6 @@ pcap_findalldevs(pcap_if_t **alldevsp, char *errbuf)
 	}
 
 	freeifaddrs(ifap);
-
-	if (ret != -1) {
-		/*
-		 * We haven't had any errors yet; do any platform-specific
-		 * operations to add devices.
-		 */
-		if (pcap_platform_finddevs(&devlist, errbuf) < 0)
-			ret = -1;
-	}
 
 	if (ret == -1) {
 		/*
