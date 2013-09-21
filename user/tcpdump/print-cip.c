@@ -22,7 +22,7 @@
 
 #ifndef lint
 static const char rcsid[] _U_ =
-    "@(#) $Header: /usr/local/dslrepos/uClinux-dist/user/tcpdump_web/print-cip.c,v 1.1 2009/10/08 07:41:51 kaohj Exp $ (LBL)";
+    "@(#) $Header: /tcpdump/master/tcpdump/print-cip.c,v 1.26 2005-07-07 01:22:17 guy Exp $ (LBL)";
 #endif
 
 #ifdef HAVE_CONFIG_H

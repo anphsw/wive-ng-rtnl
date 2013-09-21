@@ -1,4 +1,4 @@
-/* @(#) $Header: /usr/local/dslrepos/uClinux-dist/user/tcpdump_web/pmap_prot.h,v 1.1 2009/10/08 07:41:51 kaohj Exp $ (LBL) */
+/* @(#) $Header: /tcpdump/master/tcpdump/pmap_prot.h,v 1.3 2005-04-27 21:43:48 guy Exp $ (LBL) */
 /*
  * Sun RPC is a product of Sun Microsystems, Inc. and is provided for
  * unrestricted use provided that this legend is included on all tape

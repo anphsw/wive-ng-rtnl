@@ -18,7 +18,7 @@
  * WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  *
- * @(#) $Header: /usr/local/dslrepos/uClinux-dist/user/tcpdump_web/lbl/os-sunos4.h,v 1.1 2009/10/08 07:41:52 kaohj Exp $ (LBL)
+ * @(#) $Header: /tcpdump/master/tcpdump/lbl/os-sunos4.h,v 1.32 1999-10-07 23:47:13 mcr Exp $ (LBL)
  */
 
 /* Prototypes missing in SunOS 4 */

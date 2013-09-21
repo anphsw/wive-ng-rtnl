@@ -27,7 +27,7 @@
  * SUCH DAMAGE.
  */
 /*
- * $Header: /usr/local/dslrepos/uClinux-dist/user/tcpdump_web/route6d.h,v 1.1 2009/10/08 07:41:52 kaohj Exp $
+ * $Header: /tcpdump/master/tcpdump/route6d.h,v 1.5 2002-12-11 07:14:10 guy Exp $
  */
 
 #define	RIP6_VERSION	1

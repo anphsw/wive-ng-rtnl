@@ -1,4 +1,4 @@
-/* @(#) $Header: /usr/local/dslrepos/uClinux-dist/user/tcpdump_web/sctpConstants.h,v 1.1 2009/10/08 07:41:52 kaohj Exp $ (LBL) */
+/* @(#) $Header: /tcpdump/master/tcpdump/sctpConstants.h,v 1.4 2003-06-03 23:49:23 guy Exp $ (LBL) */
 
 /* SCTP reference Implementation Copyright (C) 1999 Cisco And Motorola
  *

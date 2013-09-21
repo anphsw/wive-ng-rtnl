@@ -1,4 +1,4 @@
-/* @(#) $Header: /usr/local/dslrepos/uClinux-dist/user/tcpdump_web/nameser.h,v 1.1 2009/10/08 07:41:51 kaohj Exp $ (LBL) */
+/* @(#) $Header: /tcpdump/master/tcpdump/nameser.h,v 1.16 2006-11-10 03:18:21 guy Exp $ (LBL) */
 /*
  * Copyright (c) 1983, 1989, 1993
  *	The Regents of the University of California.  All rights reserved.

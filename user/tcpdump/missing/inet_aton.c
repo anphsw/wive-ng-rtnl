@@ -36,11 +36,11 @@
  * SUCH DAMAGE.
  */
 
-/* $Id: inet_aton.c,v 1.1 2009/10/08 07:41:52 kaohj Exp $ */
+/* $Id: inet_aton.c,v 1.6 2003-11-16 09:36:49 guy Exp $ */
 
 #ifndef lint
 static const char rcsid[] _U_ =
-     "@(#) $Header: /usr/local/dslrepos/uClinux-dist/user/tcpdump_web/missing/inet_aton.c,v 1.1 2009/10/08 07:41:52 kaohj Exp $";
+     "@(#) $Header: /tcpdump/master/tcpdump/missing/inet_aton.c,v 1.6 2003-11-16 09:36:49 guy Exp $";
 #endif
 
 #include <tcpdump-stdinc.h>

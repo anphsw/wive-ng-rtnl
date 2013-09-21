@@ -1,7 +1,7 @@
 /*
  * Definitions for tcp compression routines.
  *
- * @(#) $Header: /usr/local/dslrepos/uClinux-dist/user/tcpdump_web/slcompress.h,v 1.1 2009/10/08 07:41:52 kaohj Exp $ (LBL)
+ * @(#) $Header: /tcpdump/master/tcpdump/slcompress.h,v 1.2 2000-10-09 02:03:44 guy Exp $ (LBL)
  *
  * Copyright (c) 1989, 1990, 1992, 1993 Regents of the University of
  * California. All rights reserved.

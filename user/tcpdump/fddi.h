@@ -18,7 +18,7 @@
  * WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  *
- * @(#) $Header: /usr/local/dslrepos/uClinux-dist/user/tcpdump_web/fddi.h,v 1.1 2009/10/08 07:41:51 kaohj Exp $ (LBL)
+ * @(#) $Header: /tcpdump/master/tcpdump/fddi.h,v 1.11 2002-12-11 07:13:51 guy Exp $ (LBL)
  */
 
 /*

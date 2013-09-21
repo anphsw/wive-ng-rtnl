@@ -1,4 +1,4 @@
-/* @(#) $Header: /usr/local/dslrepos/uClinux-dist/user/tcpdump_web/nfsfh.h,v 1.1 2009/10/08 07:41:51 kaohj Exp $ (LBL) */
+/* @(#) $Header: /tcpdump/master/tcpdump/nfsfh.h,v 1.13 2002-04-24 06:27:05 guy Exp $ (LBL) */
 
 /*
  * Copyright (c) 1993, 1994 Jeffrey C. Mogul, Digital Equipment Corporation,

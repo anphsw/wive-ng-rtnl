@@ -18,7 +18,7 @@
  * WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  *
- * @(#) $Header: /usr/local/dslrepos/uClinux-dist/user/tcpdump_web/setsignal.h,v 1.1 2009/10/08 07:41:52 kaohj Exp $ (LBL)
+ * @(#) $Header: /tcpdump/master/tcpdump/setsignal.h,v 1.2 1999-10-07 23:47:13 mcr Exp $ (LBL)
  */
 #ifndef setsignal_h
 #define setsignal_h

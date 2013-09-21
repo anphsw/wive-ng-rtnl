@@ -33,7 +33,7 @@
 
 #ifndef lint
 static const char rcsid[] _U_ =
-    "@(#) $Header: /usr/local/dslrepos/uClinux-dist/user/tcpdump_web/missing/datalinks.c,v 1.1 2009/10/08 07:41:52 kaohj Exp $ (LBL)";
+    "@(#) $Header: /tcpdump/master/tcpdump/missing/datalinks.c,v 1.3 2003-11-16 09:36:47 guy Exp $ (LBL)";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -51,8 +51,6 @@ static const char rcsid[] _U_ =
 /*
  * Stub versions for platforms that don't support them.
  */
-// by ricky
-#if 0
 int
 pcap_list_datalinks(pcap_t *p, int **dlt_buffer)
 {
@@ -67,4 +65,3 @@ pcap_list_datalinks(pcap_t *p, int **dlt_buffer)
 	**dlt_buffer = pcap_datalink(p);
 	return (1);
 }
-#endif

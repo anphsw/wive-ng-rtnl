@@ -212,6 +212,11 @@ romfs
 /user/quagga/ospfd/Makefile
 /user/quagga/ripngd/Makefile
 /user/quagga/vtysh/Makefile
+/user/tcpdump/Makefile
+/user/tcpdump/Mkaefile.in
+/user/tcpdump/configure
+/user/tcpdump/autom4te.cache
+/user/tcpdump/autom4te.cache/*
 /toolchain/tmp/mipsel-linux-uclibc-toolchain/binutils-2.21/*
 /toolchain/tmp/mipsel-linux-uclibc-toolchain/build-binutils/*
 /toolchain/tmp/mipsel-linux-uclibc-toolchain/build-gcc-bootstrap/*

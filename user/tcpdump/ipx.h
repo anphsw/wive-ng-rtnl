@@ -1,7 +1,7 @@
 /*
  * IPX protocol formats
  *
- * @(#) $Header: /usr/local/dslrepos/uClinux-dist/user/tcpdump_web/ipx.h,v 1.1 2009/10/08 07:41:51 kaohj Exp $
+ * @(#) $Header: /tcpdump/master/tcpdump/ipx.h,v 1.8 2002-12-11 07:13:54 guy Exp $
  */
 
 /* well-known sockets */

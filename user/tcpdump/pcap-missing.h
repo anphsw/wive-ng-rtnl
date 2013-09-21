@@ -18,7 +18,7 @@
  * WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  *
- * @(#) $Header: /usr/local/dslrepos/uClinux-dist/user/tcpdump_web/pcap-missing.h,v 1.1 2009/10/08 07:41:51 kaohj Exp $ (LBL)
+ * @(#) $Header: /tcpdump/master/tcpdump/pcap-missing.h,v 1.3 2005-06-03 22:08:52 guy Exp $ (LBL)
  */
 
 #ifndef tcpdump_pcap_missing_h

@@ -23,7 +23,7 @@
 /*
  * Rx protocol format
  *
- * $Id: rx.h,v 1.1 2009/10/08 07:41:52 kaohj Exp $
+ * $Id: rx.h,v 1.8 2002-12-11 07:14:11 guy Exp $
  */
 
 #define FS_RX_PORT	7000

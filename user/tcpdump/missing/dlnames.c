@@ -33,7 +33,7 @@
 
 #ifndef lint
 static const char rcsid[] _U_ =
-    "@(#) $Header: /usr/local/dslrepos/uClinux-dist/user/tcpdump_web/missing/dlnames.c,v 1.1 2009/10/08 07:41:52 kaohj Exp $ (LBL)";
+    "@(#) $Header: /tcpdump/master/tcpdump/missing/dlnames.c,v 1.5 2003-11-18 23:09:43 guy Exp $ (LBL)";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -136,8 +136,6 @@ static struct dlt_choice dlt_choices[] = {
 };
 
 #ifndef HAVE_PCAP_DATALINK_NAME_TO_VAL
-// by ricky
-/*
 int
 pcap_datalink_name_to_val(const char *name)
 {
@@ -162,9 +160,8 @@ pcap_datalink_val_to_name(int dlt)
 	}
 	return (NULL);
 }
-*/
 #endif
-/*
+
 const char *
 pcap_datalink_val_to_description(int dlt)
 {
@@ -176,4 +173,3 @@ pcap_datalink_val_to_description(int dlt)
 	}
 	return (NULL);
 }
-*/

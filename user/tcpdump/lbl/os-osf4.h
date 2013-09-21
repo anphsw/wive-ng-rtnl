@@ -18,7 +18,7 @@
  * WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  *
- * @(#) $Header: /usr/local/dslrepos/uClinux-dist/user/tcpdump_web/lbl/os-osf4.h,v 1.1 2009/10/08 07:41:52 kaohj Exp $ (LBL)
+ * @(#) $Header: /tcpdump/master/tcpdump/lbl/os-osf4.h,v 1.1 2002-12-11 05:03:13 guy Exp $ (LBL)
  */
 
 /* Prototypes missing in Digital UNIX 4.x */

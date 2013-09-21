@@ -22,7 +22,7 @@
 
 #ifndef lint
 static const char rcsid[] _U_ =
-    "@(#) $Header: /usr/local/dslrepos/uClinux-dist/user/tcpdump_web/print-zephyr.c,v 1.1 2009/10/08 07:41:52 kaohj Exp $";
+    "@(#) $Header: /tcpdump/master/tcpdump/print-zephyr.c,v 1.10 2007-08-09 18:47:27 hannes Exp $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -139,6 +139,15 @@ zephyr_print(const u_char *cp, int length)
     int parselen = length;
     char *s;
     int lose = 0;
+
+    /* squelch compiler warnings */
+
+    z.kind = 0;
+    z.class = 0;
+    z.inst = 0;
+    z.opcode = 0;
+    z.sender = 0;
+    z.recipient = 0;
 
 #define PARSE_STRING				\
 	s = parse_field(&parse, &parselen);	\

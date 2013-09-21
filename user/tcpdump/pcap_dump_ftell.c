@@ -21,18 +21,16 @@
 
 #ifndef lint
 static const char rcsid[] _U_ =
-    "@(#) $Header: /usr/local/dslrepos/uClinux-dist/user/tcpdump_web/pcap_dump_ftell.c,v 1.1 2009/10/08 07:41:51 kaohj Exp $ (LBL)";
+    "@(#) $Header: /tcpdump/master/tcpdump/pcap_dump_ftell.c,v 1.1 2005-06-03 22:08:52 guy Exp $ (LBL)";
 #endif
 
 #include <stdio.h>
 #include <pcap.h>
 
 #include "pcap-missing.h"
-// by ricky
-/*
+
 long
 pcap_dump_ftell(pcap_dumper_t *p)
 {
 	return (ftell((FILE *)p));
 }
-*/

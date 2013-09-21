@@ -18,7 +18,7 @@
  * WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  *
- * @(#) $Header: /usr/local/dslrepos/uClinux-dist/user/tcpdump_web/gmt2local.h,v 1.1 2009/10/08 07:41:51 kaohj Exp $ (LBL)
+ * @(#) $Header: /tcpdump/master/tcpdump/gmt2local.h,v 1.2 1999-10-07 23:47:10 mcr Exp $ (LBL)
  */
 #ifndef gmt2local_h
 #define gmt2local_h

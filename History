@@ -1681,6 +1681,7 @@
 6) kernel: mips: reimplement get_cycles().<br>
 7) kernel: wifi_drivers: backport fixses from 2.7.x.x drivers.<br>
 8) libpcap: update to 1.4.0 version.<br>
+9) tcpdump: update to 1.4.0 vession.<br>
 <br>
 <br>
 <br>

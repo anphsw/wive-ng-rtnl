@@ -1,4 +1,4 @@
-/* @(#) $Header: /usr/local/dslrepos/uClinux-dist/user/tcpdump_web/igrp.h,v 1.1 2009/10/08 07:41:51 kaohj Exp $ (LBL) */
+/* @(#) $Header: /tcpdump/master/tcpdump/igrp.h,v 1.6 2002-12-11 07:13:52 guy Exp $ (LBL) */
 /* Cisco IGRP definitions */
 
 /* IGRP Header */

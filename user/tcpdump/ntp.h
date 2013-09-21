@@ -1,4 +1,4 @@
-/* $Header: /usr/local/dslrepos/uClinux-dist/user/tcpdump_web/ntp.h,v 1.1 2009/10/08 07:41:51 kaohj Exp $ */
+/* $Header: /tcpdump/master/tcpdump/ntp.h,v 1.8 2004-01-28 14:34:50 hannes Exp $ */
 
 /*
  * Based on ntp.h from the U of MD implementation
