@@ -1,5 +1,6 @@
 /* System-specific socket constants and types.  Linux/MIPS version.
-   Copyright (C) 1991,92,1994-1999,2000,2001 Free Software Foundation, Inc.
+   Copyright (C) 1991, 92, 1994-1999, 2000, 2001, 2004, 2005, 2006
+   Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -53,10 +54,21 @@ enum __socket_type
   SOCK_SEQPACKET = 5,		/* Sequenced, reliable, connection-based,
 				   datagrams of fixed maximum length.  */
 #define SOCK_SEQPACKET SOCK_SEQPACKET
-  SOCK_PACKET = 10		/* Linux specific way of getting packets
+  SOCK_DCCP = 6,
+#define SOCK_DCCP SOCK_DCCP	/* Datagram Congestion Control Protocol.  */
+  SOCK_PACKET = 10,		/* Linux specific way of getting packets
 				   at the dev level.  For writing rarp and
 				   other similar things on the user level. */
 #define SOCK_PACKET SOCK_PACKET
+  /* Flags to be ORed into the type parameter of socket and socketpair and
+     used for the flags parameter of paccept.  */
+
+  SOCK_CLOEXEC = 02000000,	/* Atomically set close-on-exec flag for the
+                                   new descriptor(s).  */
+#define SOCK_CLOEXEC SOCK_CLOEXEC
+  SOCK_NONBLOCK = 0200		/* Atomically mark descriptor(s) as
+				   non-blocking.  */
+#define SOCK_NONBLOCK SOCK_NONBLOCK
 };
 
 /* Protocol families.  */
@@ -88,8 +100,18 @@ enum __socket_type
 #define	PF_IRDA		23	/* IRDA sockets.  */
 #define	PF_PPPOX	24	/* PPPoX sockets.  */
 #define	PF_WANPIPE	25	/* Wanpipe API sockets.  */
+#define	PF_LLC		26	/* Linux LLC.  */
+#define	PF_CAN		29	/* Controller Area Network.  */
+#define	PF_TIPC		30	/* TIPC sockets.  */
 #define	PF_BLUETOOTH	31	/* Bluetooth sockets.  */
-#define	PF_MAX		32	/* For now..  */
+#define	PF_IUCV		32	/* IUCV sockets.  */
+#define	PF_RXRPC	33	/* RxRPC sockets.  */
+#define	PF_ISDN		34	/* mISDN sockets.  */
+#define	PF_PHONET	35	/* Phonet sockets.  */
+#define	PF_IEEE802154	36	/* IEEE 802.15.4 sockets.  */
+#define	PF_CAIF		37	/* CAIF sockets.  */
+#define	PF_ALG		38	/* Algorithm sockets.  */
+#define	PF_MAX		39	/* For now..  */
 
 /* Address families.  */
 #define	AF_UNSPEC	PF_UNSPEC
@@ -120,7 +142,17 @@ enum __socket_type
 #define	AF_IRDA		PF_IRDA
 #define	AF_PPPOX	PF_PPPOX
 #define	AF_WANPIPE	PF_WANPIPE
+#define	AF_LLC		PF_LLC
+#define	AF_CAN		PF_CAN
+#define	AF_TIPC		PF_TIPC
 #define	AF_BLUETOOTH	PF_BLUETOOTH
+#define	AF_IUCV		PF_IUCV
+#define	AF_RXRPC	PF_RXRPC
+#define	AF_ISDN		PF_ISDN
+#define	AF_PHONET	PF_PHONET
+#define	AF_IEEE802154	PF_IEEE802154
+#define	AF_CAIF		PF_CAIF
+#define	AF_ALG		PF_ALG
 #define	AF_MAX		PF_MAX
 
 /* Socket level values.  Others are defined in the appropriate headers.
@@ -151,11 +183,7 @@ struct sockaddr
 
 /* Structure large enough to hold any socket address (with the historical
    exception of AF_UNIX).  We reserve 128 bytes.  */
-#if ULONG_MAX > 0xffffffff
-# define __ss_aligntype	__uint64_t
-#else
-# define __ss_aligntype	__uint32_t
-#endif
+#define __ss_aligntype	unsigned long int
 #define _SS_SIZE	128
 #define _SS_PADSIZE	(_SS_SIZE - (2 * sizeof (__ss_aligntype)))
 
@@ -205,23 +233,43 @@ enum
 #define	MSG_ERRQUEUE	MSG_ERRQUEUE
     MSG_NOSIGNAL	= 0x4000, /* Do not generate SIGPIPE.  */
 #define	MSG_NOSIGNAL	MSG_NOSIGNAL
-    MSG_MORE		= 0x8000  /* Sender will send more.  */
+    MSG_MORE		= 0x8000, /* Sender will send more.  */
 #define	MSG_MORE	MSG_MORE
+    MSG_WAITFORONE      = 0x10000, /* Wait for at least one packet to return.*/
+#define MSG_WAITFORONE  MSG_WAITFORONE
+
+    MSG_CMSG_CLOEXEC    = 0x40000000    /* Set close_on_exit for file
+					   descriptor received through
+					   SCM_RIGHTS.  */
+#define MSG_CMSG_CLOEXEC MSG_CMSG_CLOEXEC
   };
 
 
 /* Structure describing messages sent by
    `sendmsg' and received by `recvmsg'.  */
+/* Note: do not change these members to match glibc; these match the
+   SuSv3 spec already (e.g. msg_iovlen/msg_controllen).
+   http://www.opengroup.org/onlinepubs/009695399/basedefs/sys/socket.h.html */
+/* Note: linux kernel uses __kernel_size_t (which is 8bytes on 64bit
+   platforms, and 4bytes on 32bit platforms) for msg_iovlen/msg_controllen */
 struct msghdr
   {
     void *msg_name;		/* Address to send to/receive from.  */
     socklen_t msg_namelen;	/* Length of address data.  */
 
     struct iovec *msg_iov;	/* Vector of data to send/receive into.  */
+#if __WORDSIZE == 32
     int msg_iovlen;		/* Number of elements in the vector.  */
+#else
+    size_t msg_iovlen;		/* Number of elements in the vector.  */
+#endif
 
     void *msg_control;		/* Ancillary data (eg BSD filedesc passing). */
+#if __WORDSIZE == 32
     socklen_t msg_controllen;	/* Ancillary data buffer length.  */
+#else
+    size_t msg_controllen;	/* Ancillary data buffer length.  */
+#endif
 
     int msg_flags;		/* Flags on received message.  */
   };
@@ -261,7 +309,7 @@ extern struct cmsghdr *__cmsg_nxthdr (struct msghdr *__mhdr,
 #  define _EXTERN_INLINE extern __inline
 # endif
 _EXTERN_INLINE struct cmsghdr *
-__cmsg_nxthdr (struct msghdr *__mhdr, struct cmsghdr *__cmsg) __THROW
+__NTH (__cmsg_nxthdr (struct msghdr *__mhdr, struct cmsghdr *__cmsg))
 {
   if ((size_t) __cmsg->cmsg_len < sizeof (struct cmsghdr))
     /* The kernel header does this so there may be a reason.  */
@@ -269,8 +317,8 @@ __cmsg_nxthdr (struct msghdr *__mhdr, struct cmsghdr *__cmsg) __THROW
 
   __cmsg = (struct cmsghdr *) ((unsigned char *) __cmsg
 			       + CMSG_ALIGN (__cmsg->cmsg_len));
-  if ((unsigned char *) (__cmsg + 1) >= ((unsigned char *) __mhdr->msg_control
-					 + __mhdr->msg_controllen)
+  if ((unsigned char *) (__cmsg + 1) > ((unsigned char *) __mhdr->msg_control
+					+ __mhdr->msg_controllen)
       || ((unsigned char *) __cmsg + CMSG_ALIGN (__cmsg->cmsg_len)
 	  > ((unsigned char *) __mhdr->msg_control + __mhdr->msg_controllen)))
     /* No more entries.  */
@@ -283,13 +331,12 @@ __cmsg_nxthdr (struct msghdr *__mhdr, struct cmsghdr *__cmsg) __THROW
    <linux/socket.h>.  */
 enum
   {
-    SCM_RIGHTS = 0x01,		/* Transfer file descriptors.  */
+    SCM_RIGHTS = 0x01		/* Transfer file descriptors.  */
 #define SCM_RIGHTS SCM_RIGHTS
 #ifdef __USE_BSD
-    SCM_CREDENTIALS = 0x02,     /* Credentials passing.  */
+    , SCM_CREDENTIALS = 0x02	/* Credentials passing.  */
 # define SCM_CREDENTIALS SCM_CREDENTIALS
 #endif
-    __SCM_CONNECT = 0x03	/* Data array is `struct scm_connect'.  */
   };
 
 /* User visible structure for SCM_CREDENTIALS message */
@@ -302,7 +349,13 @@ struct ucred
 };
 
 /* Get socket manipulation related informations from kernel headers.  */
+#ifndef __GLIBC__
+#define __GLIBC__ 2
 #include <asm/socket.h>
+#undef __GLIBC__
+#else
+#include <asm/socket.h>
+#endif
 
 
 /* Structure used to manipulate the SO_LINGER option.  */
