@@ -1679,8 +1679,7 @@
 4) defaults: enable 802.11h support by default (need for some apple products).<br>
 5) init.d: add force macs rebuild logic for prevent dupe mac after some wive clones install.<br>
 6) kernel: mips: reimplement get_cycles().<br>
-7) kernel: pkt_sched: Make default qdisc nonshared-multiqueue safe.<br>
-8) kernel: wifi_drivers: bakport fixses from 2.7.x.x drivers.<br>
+7) kernel: wifi_drivers: backport fixses from 2.7.x.x drivers.<br>
 <br>
 <br>
 <br>
