@@ -55,7 +55,7 @@ save() {
     tmp="/tmp/tgzfs"
     tar cf - /etc | bzip2 -9 > $tmp
     if [ "$(get_size $tmp)" -lt $(($TGZfs_size/1024)) ]; then
-	echo "Write RW-FS to flash"
+	echo "Write RW-FS to flash ($(get_size $tmp)kB of $(($TGZfs_size/1024))kB)"
 	mtd_write write $tmp RW-FS
 	echo "Config saved. OK."
     else
