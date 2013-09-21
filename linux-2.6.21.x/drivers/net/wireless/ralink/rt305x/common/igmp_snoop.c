@@ -519,7 +519,7 @@ VOID IGMPSnooping(
 		case IGMP_V1_MEMBERSHIP_REPORT: // IGMP version 1 membership report.
 		case IGMP_V2_MEMBERSHIP_REPORT: // IGMP version 2 membership report.
 			pGroupIpAddr = (PUCHAR)(pIgmpHeader + 4);
-				ConvertMulticastIP2MAC(pGroupIpAddr, (PUCHAR *)&pGroupMacAddr, ETH_P_IP);
+			ConvertMulticastIP2MAC(pGroupIpAddr, (PUCHAR *)&pGroupMacAddr, ETH_P_IP);
 			DBGPRINT(RT_DEBUG_TRACE, ("IGMP Group=%02x:%02x:%02x:%02x:%02x:%02x\n",
 				GroupMacAddr[0], GroupMacAddr[1], GroupMacAddr[2], GroupMacAddr[3], GroupMacAddr[4], GroupMacAddr[5]));
 			MulticastFilterTableInsertEntry(pAd, GroupMacAddr, pSrcMacAddr, pDev, MCAT_FILTER_DYNAMIC);
@@ -527,7 +527,7 @@ VOID IGMPSnooping(
 
 		case IGMP_LEAVE_GROUP: // IGMP version 1 and version 2 leave group.
 			pGroupIpAddr = (PUCHAR)(pIgmpHeader + 4);
-				ConvertMulticastIP2MAC(pGroupIpAddr, (PUCHAR *)&pGroupMacAddr, ETH_P_IP);
+			ConvertMulticastIP2MAC(pGroupIpAddr, (PUCHAR *)&pGroupMacAddr, ETH_P_IP);
 			DBGPRINT(RT_DEBUG_TRACE, ("IGMP Group=%02x:%02x:%02x:%02x:%02x:%02x\n",
 				GroupMacAddr[0], GroupMacAddr[1], GroupMacAddr[2], GroupMacAddr[3], GroupMacAddr[4], GroupMacAddr[5]));
 			MulticastFilterTableDeleteEntry(pAd, GroupMacAddr, pSrcMacAddr, pDev);
@@ -1034,6 +1034,7 @@ NDIS_STATUS IgmpPktInfoQuery(
 
 		if (NeedForwardToAll)
 		{
+			*ppGroupEntry = NULL;
 			*pInIgmpGroup = IGMP_PKT; // IGMP/MLD and all reserved
 		}
 		else if ((*ppGroupEntry = MulticastFilterTableLookup(pAd->pMulticastFilterTable, pSrcBufVA,
