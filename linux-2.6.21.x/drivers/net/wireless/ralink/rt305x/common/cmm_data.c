@@ -2720,8 +2720,6 @@ BOOLEAN MacTableDeleteEntry(
 #ifdef CONFIG_AP_SUPPORT
 			if (IS_ENTRY_CLIENT(pEntry))
 			{
-#ifdef RTMP_RBUS_SUPPORT
-#endif // RTMP_RBUS_SUPPORT //
 #ifdef DOT1X_SUPPORT 
 				INT		PmkCacheIdx = -1;
 #endif // DOT1X_SUPPORT //
