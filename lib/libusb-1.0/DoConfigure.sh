@@ -17,7 +17,7 @@ if [ ! -f $APROOTDIR/Makefile.in ]; then
 fi
 
 CONFOPTS="--host=mipsel-linux --build=i686-pc-linux-gnu"
-CONFOPTS="$CONFOPTS --disable-dependency-tracking --disable-udev --disable-netlink"
+CONFOPTS="$CONFOPTS --disable-dependency-tracking"
 CONFOPTS="$CONFOPTS --enable-shared --enable-static"
 CONFOPTS="$CONFOPTS --prefix=$APROOTDIR/filesystem"
 
