@@ -22,6 +22,7 @@ $LOG "Restart needed services and scripts. Mode $MODE"
 if [ -f /etc/init.d/radvd ] && [ -d /proc/sys/net/ipv6 ]; then
     service radvd restart
 fi
+
 if [ -f /etc/init.d/zebra ]; then
     service ripd restart
     service zebra restart
