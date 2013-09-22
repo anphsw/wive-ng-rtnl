@@ -198,8 +198,8 @@ endif
 	@echo "Installation of udpxy is complete"
 
 romfs:
-	$(ROMFSINST) -S init.d/W55udpxy /etc/rc.d/W55udpxy
-	$(ROMFSINST) -s /etc/rc.d/W55udpxy /etc/init.d/udpxy
+	$(ROMFSINST) -S init.d/W56udpxy /etc/rc.d/W56udpxy
+	$(ROMFSINST) -s /etc/rc.d/W56udpxy /etc/init.d/udpxy
 	$(ROMFSINST) -S udpxy /bin/udpxy
 
 install-strip: install
