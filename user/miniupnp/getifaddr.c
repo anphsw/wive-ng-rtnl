@@ -21,15 +21,17 @@
 
 #include "config.h"
 #include "getifaddr.h"
+
 #if defined(USE_GETIFADDRS) || defined(ENABLE_IPV6)
-#include <ifaddrs.h>
+#include "localgetifaddrs.h"
 #endif
+
 
 int
 getifaddr(const char * ifname, char * buf, int len,
           struct in_addr * addr, struct in_addr * mask)
 {
-#ifndef USE_GETIFADDRS
+#if !defined(USE_GETIFADDRS) && !defined(ENABLE_IPV6)
 	/* use ioctl SIOCGIFADDR. Works only for ip v4 */
 	/* SIOCGIFADDR struct ifreq *  */
 	int s;

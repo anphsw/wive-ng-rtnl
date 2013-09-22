@@ -42,7 +42,7 @@ MANINSTALLDIR = $(INSTALLPREFIX)/share/man/man8
 
 BASEOBJS = miniupnpd.o upnphttp.o upnpdescgen.o upnpsoap.o \
            upnpreplyparse.o minixml.o \
-		   upnpredirect.o getifaddr.o daemonize.o upnpglobalvars.o \
+		   upnpredirect.o localgetifaddrs.o getifaddr.o daemonize.o upnpglobalvars.o \
            options.o upnppermissions.o minissdp.o natpmp.o \
            upnpevents.o upnputils.o getconnstatus.o \
            upnppinhole.o
@@ -198,7 +198,7 @@ testgetifstats:	testgetifstats.o linux/getifstats.o
 
 testupnppermissions:	testupnppermissions.o upnppermissions.o
 
-testgetifaddr:	testgetifaddr.o getifaddr.o
+testgetifaddr:	testgetifaddr.o localgetifaddrs.o getifaddr.o
 
 testgetroute:	testgetroute.o linux/getroute.o upnputils.o $(ROOTDIR)/lib/lib/libnfnetlink.so
 
@@ -235,6 +235,7 @@ upnpredirect.o: macros.h config.h upnpredirect.h upnpglobalvars.h
 upnpredirect.o: upnppermissions.h miniupnpdtypes.h upnpevents.h
 upnpredirect.o: netfilter/iptcrdr.h commonrdr.h
 getifaddr.o: config.h getifaddr.h
+localgetifaddrs.o: config.h localgetifaddrs.h
 daemonize.o: daemonize.h config.h
 upnpglobalvars.o: config.h upnpglobalvars.h upnppermissions.h
 upnpglobalvars.o: miniupnpdtypes.h
