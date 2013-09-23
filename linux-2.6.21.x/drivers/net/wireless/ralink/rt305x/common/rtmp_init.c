@@ -1445,8 +1445,15 @@ VOID	NICInitAsicFromEEPROM(
  */
 	// Internal Tx ALC
 	if (((NicConfig2.field.DynamicTxAgcControl == 1) && 
-            (NicConfig2.field.bInternalTxALC == 1)) || (!IS_RT3390(pAd)))
+            (NicConfig2.field.bInternalTxALC == 1)) || 
+            ((!IS_RT3390(pAd)) &&
+            ((!IS_RT3350(pAd)) && (!IS_RT3352(pAd)) && (!IS_RT5350(pAd)))))
 	{
+		/*
+			If both DynamicTxAgcControl and bInternalTxALC are enabled,
+			it is a wrong configuration.
+			If the chipset does not support internal ALC, we shall disable it.
+		*/
 		pAd->TxPowerCtrl.bInternalTxALC = FALSE;
 	}
 	else
