@@ -343,7 +343,6 @@ int rt28xx_init(
 	{
 		// Microsoft HCT require driver send a disconnect event after driver initialization.
 		OPSTATUS_CLEAR_FLAG(pAd, fOP_STATUS_MEDIA_STATE_CONNECTED);
-//		pAd->IndicateMediaState = NdisMediaStateDisconnected;
 		RTMP_SET_FLAG(pAd, fRTMP_ADAPTER_MEDIA_STATE_CHANGE);
 
 		DBGPRINT(RT_DEBUG_TRACE, ("NDIS_STATUS_MEDIA_DISCONNECT Event B!\n"));

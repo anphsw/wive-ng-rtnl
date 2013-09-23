@@ -430,9 +430,6 @@ INT RtmpAsicSendCommandToMcu(
 
 	}
 
-	if (Command == SLEEP_MCU_CMD)
-		pAd->LastMCUCmd = Command;
-
 	if ((IS_RT3090(pAd) || IS_RT3572(pAd) ||
 		IS_RT3390(pAd) || IS_RT3593(pAd)) && IS_VERSION_AFTER_F(pAd)
 		&& (pAd->StaCfg.PSControl.field.rt30xxPowerMode == 3) 
