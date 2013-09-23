@@ -69,18 +69,54 @@
 #define IS_RT2070(_pAd)		(((_pAd)->RfIcType == RFIC_2020) || ((_pAd)->EFuseTag == 0x27))
 
 #define IS_RT2860(_pAd)		(((_pAd)->MACVersion & 0xffff0000) == 0x28600000)
+#define IS_RT2870(_pAd)		(IS_RT2860(_pAd) && IS_USB_INF(_pAd))
 #define IS_RT2872(_pAd)		(((_pAd)->MACVersion & 0xffff0000) == 0x28720000)
+#define IS_RT2880(_pAd)		(IS_RT2860(_pAd) && IS_RBUS_INF(_pAd))
 
-#define IS_RT30xx(_pAd)		(((_pAd)->MACVersion & 0xfff00000) == 0x30700000||IS_RT3090A(_pAd))
-//#define IS_RT305X(_pAd)		((_pAd)->MACVersion == 0x28720200)
+#define IS_RT30xx(_pAd)		(((_pAd)->MACVersion & 0xfff00000) == 0x30700000||IS_RT3090A(_pAd)||IS_RT3390(_pAd))
+
+#define IS_RT3052B(_pAd)	(((_pAd)->CommonCfg.CID == 0x102) && (((_pAd)->CommonCfg.CN >> 16) == 0x3033)) 
+#define IS_RT3052(_pAd)		(((_pAd)->MACVersion == 0x28720200) && (_pAd->Antenna.field.TxPath == 2))
+#define IS_RT3050(_pAd)		(((_pAd)->MACVersion == 0x28720200) && ((_pAd)->RfIcType == RFIC_3020))
+#define IS_RT3350(_pAd)		(((_pAd)->MACVersion == 0x28720200) && ((_pAd)->RfIcType == RFIC_3320))
+#define IS_RT3352(_pAd)		(((_pAd)->MACVersion & 0xffff0000) == 0x33520000)
+#define IS_RT5350(_pAd)		(((_pAd)->MACVersion & 0xffff0000) == 0x53500000)
+#define IS_RT305x(_pAd)		(IS_RT3050(_pAd) || IS_RT3052(_pAd) || IS_RT3350(_pAd) || IS_RT3352(_pAd) || IS_RT5350(_pAd))
+#define IS_RT3050_3052_3350(_pAd) (\
+	((_pAd)->MACVersion == 0x28720200) && \
+	((((_pAd)->CommonCfg.CN >> 16) == 0x3333) || (((_pAd)->CommonCfg.CN >> 16) == 0x3033)) \
+)
+
 
 /* RT3572, 3592, 3562, 3062 share the same MAC version */
 #define IS_RT3572(_pAd)		(((_pAd)->MACVersion & 0xffff0000) == 0x35720000)
 
-#define IS_RT2883(_pAd)		(((_pAd)->MACVersion & 0xffff0000) == 0x28830000)
-#define IS_RT3883(_pAd)		(((_pAd)->MACVersion & 0xffff0000) == 0x38830000)
+/* Check if it is RT3xxx, or Specified ID in registry for debug */
+#define IS_DEV_RT3xxx(_pAd)( \
+	(_pAd->DeviceID == NIC3090_PCIe_DEVICE_ID) || \
+	(_pAd->DeviceID == NIC3091_PCIe_DEVICE_ID) || \
+	(_pAd->DeviceID == NIC3092_PCIe_DEVICE_ID) || \
+	(_pAd->DeviceID == NIC3592_PCIe_DEVICE_ID) || \
+	((_pAd->DeviceID == NIC3593_PCI_OR_PCIe_DEVICE_ID) && (RT3593OverPCIe(_pAd))) \
+)
+
+#ifdef RT3593
+#define RT3593_DEVICE_ID_CHECK(__DevId)			\
+	(__DevId == NIC3593_PCI_OR_PCIe_DEVICE_ID)
+#else
+#define RT3593_DEVICE_ID_CHECK(__DevId)			\
+	(0)
+#endif /* RT3593 */
+
+#define RT3592_DEVICE_ID_CHECK(__DevId)			\
+	(__DevId == NIC3592_PCIe_DEVICE_ID)
+
+#define IS_RT2883(_pAd)		(0)
+
+#define IS_RT3883(_pAd)		(0)
+
 #define IS_VERSION_BEFORE_F(_pAd)			(((_pAd)->MACVersion&0xffff) <= 0x0211)
-// F version is 0x0212, E version is 0x0211. 309x can save more power after F version.
+/* F version is 0x0212, E version is 0x0211. 309x can save more power after F version. */
 #define IS_VERSION_AFTER_F(_pAd)			((((_pAd)->MACVersion&0xffff) >= 0x0212) || (((_pAd)->b3090ESpecialChip == TRUE)))
 
 #define IS_RT3290(_pAd)	(((_pAd)->MACVersion & 0xffff0000) == 0x32900000)
@@ -125,9 +161,45 @@
 #define IS_RT5592(_pAd)		(((_pAd)->MACVersion & 0xFFFF0000) == 0x55920000)
 #define REV_RT5592C 0x0221
 
-// ------------------------------------------------------
-// PCI registers - base address 0x0000
-// ------------------------------------------------------
+/* RT3592BC8 (WiFi + BT) */
+
+
+#define IS_USB_INF(_pAd)		((_pAd)->infType == RTMP_DEV_INF_USB)
+#define IS_PCIE_INF(_pAd)		((_pAd)->infType == RTMP_DEV_INF_PCIE)
+#define IS_PCI_INF(_pAd)		(((_pAd)->infType == RTMP_DEV_INF_PCI) || IS_PCIE_INF(_pAd))
+#define IS_PCI_ONLY_INF(_pAd)	((_pAd)->infType == RTMP_DEV_INF_PCI)
+#define IS_RBUS_INF(_pAd) ((_pAd)->infType == RTMP_DEV_INF_RBUS)
+
+#define RT_REV_LT(_pAd, _chip, _rev)\
+	IS_##_chip(_pAd) && (((_pAd)->MACVersion & 0x0000FFFF) < (_rev))
+
+#define RT_REV_GTE(_pAd, _chip, _rev)\
+	IS_##_chip(_pAd) && (((_pAd)->MACVersion & 0x0000FFFF) >= (_rev))
+
+/* Dual-band NIC (RF/BBP/MAC are in the same chip.) */
+
+#define IS_RT_NEW_DUAL_BAND_NIC(_pAd) ((FALSE))
+
+
+/* Is the NIC dual-band NIC? */
+
+#define IS_DUAL_BAND_NIC(_pAd) (((_pAd->RfIcType == RFIC_2850) || (_pAd->RfIcType == RFIC_2750) || (_pAd->RfIcType == RFIC_3052)		\
+								|| (_pAd->RfIcType == RFIC_3053) || (_pAd->RfIcType == RFIC_2853) || (_pAd->RfIcType == RFIC_3853) 	\
+								|| IS_RT_NEW_DUAL_BAND_NIC(_pAd)) && !IS_RT5390(_pAd))
+
+
+/* RT3593 over PCIe bus */
+#define RT3593OverPCIe(_pAd) (IS_RT3593(_pAd) && (_pAd->CommonCfg.bPCIeBus == TRUE))
+
+/* RT3593 over PCI bus */
+#define RT3593OverPCI(_pAd) (IS_RT3593(_pAd) && (_pAd->CommonCfg.bPCIeBus == FALSE))
+
+/*RT3390,RT3370 */
+#define IS_RT3390(_pAd)				(((_pAd)->MACVersion & 0xFFFF0000) == 0x33900000)
+
+/* ------------------------------------------------------ */
+/* PCI registers - base address 0x0000 */
+/* ------------------------------------------------------ */
 #define CHIP_PCI_CFG		0x0000
 #define CHIP_PCI_EECTRL		0x0004
 #define CHIP_PCI_MCUCTRL	0x0008
