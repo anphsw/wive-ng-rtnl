@@ -2880,6 +2880,8 @@ VOID StartParmFill(
 	IN UCHAR SsidLen) 
 {
 	ASSERT(SsidLen <= MAX_LEN_OF_SSID);
+	if (SsidLen > MAX_LEN_OF_SSID)
+		SsidLen = MAX_LEN_OF_SSID;
 	NdisMoveMemory(StartReq->Ssid, Ssid, SsidLen); 
 	StartReq->SsidLen = SsidLen;
 }
