@@ -956,9 +956,11 @@ VOID	NICReadEEPROMParameters(
 	/* Assign the actually working MAC Address */
 	if (pAd->bLocalAdminMAC)
 		DBGPRINT(RT_DEBUG_TRACE, ("Use the MAC address what is assigned from Configuration file(.dat). \n"));
-	else 
+	else
 #endif
-	if (mac_addr &&  strlen((PSTRING)mac_addr) == 17 && (strcmp(mac_addr, "00:00:00:00:00:00") != 0))
+	if (mac_addr &&
+			 strlen((PSTRING)mac_addr) == 17 &&
+			 (strcmp(mac_addr, "00:00:00:00:00:00") != 0))
 	{
 		INT		j;
 		PSTRING	macptr;
