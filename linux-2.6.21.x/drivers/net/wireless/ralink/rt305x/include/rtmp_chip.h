@@ -96,21 +96,47 @@
 /* F version is 0x0212, E version is 0x0211. 309x can save more power after F version. */
 #define IS_VERSION_AFTER_F(_pAd)			((((_pAd)->MACVersion&0xffff) >= 0x0212) || (((_pAd)->b3090ESpecialChip == TRUE)))
 
+#define IS_RT3290(_pAd)	(((_pAd)->MACVersion & 0xffff0000) == 0x32900000)
+#define IS_RT3290LE(_pAd)   ((((_pAd)->MACVersion & 0xffffffff) >= 0x32900011))
+
 /* 3593 */
 #define IS_RT3593(_pAd) (((_pAd)->MACVersion & 0xFFFF0000) == 0x35930000)
 
-/* RT5390 and RT5370 */
-#define IS_RT5392(_pAd)   ((_pAd->MACVersion & 0xFFFF0000) == 0x53920000)
-#define IS_RT5390(_pAd)   ((((_pAd)->MACVersion & 0xFFFF0000) == 0x53900000) ||IS_RT5392(_pAd))	/* Include RT5390 and RT5370 */
+/* RT5392 */
+#define IS_RT5392(_pAd)   ((_pAd->MACVersion & 0xFFFF0000) == 0x53920000) /* Include RT5392, RT5372 and RT5362 */
 
-/* RT3593 over PCIe bus */
-#define RT3593OverPCIe(_pAd) (IS_RT3593(_pAd) && (_pAd->CommonCfg.bPCIeBus == TRUE))
+/* RT5390 */
+#define IS_RT5390(_pAd)   (((_pAd)->MACVersion & 0xFFFF0000) == 0x53900000) /* Include RT5390, RT5370 and RT5360 */
 
-/* RT3593 over PCI bus */
-#define RT3593OverPCI(_pAd) (IS_RT3593(_pAd) && (_pAd->CommonCfg.bPCIeBus == FALSE))
+/* RT5390F */
+#define IS_RT5390F(_pAd)	((IS_RT5390(_pAd)) && (((_pAd)->MACVersion & 0x0000FFFF) >= 0x0502))
 
-/*RT3390,RT3370 */
-#define IS_RT3390(_pAd)				(((_pAd)->MACVersion & 0xFFFF0000) == 0x33900000)
+/* RT5370G */
+#define IS_RT5370G(_pAd)	((IS_RT5390(_pAd)) && (((_pAd)->MACVersion & 0x0000FFFF) >= 0x0503)) /* support HW PPAD ( the hardware rx antenna diversity ) */
+
+/* RT5390R */
+#define IS_RT5390R(_pAd)   ((IS_RT5390(_pAd)) && (((_pAd)->MACVersion & 0x0000FFFF) == 0x1502)) /* support HW PPAD ( the hardware rx antenna diversity ) */
+
+/* PCIe interface NIC */
+#define IS_MINI_CARD(_pAd) ((_pAd)->Antenna.field.BoardType == BOARD_TYPE_MINI_CARD)
+
+/* 5390U (5370 using PCIe interface) */
+#define IS_RT5390U(_pAd)   (IS_MINI_CARD(_pAd) && ((_pAd)->MACVersion & 0xFFFF0000) == 0x53900000)
+
+/* RT5390H */
+#define IS_RT5390H(_pAd)   ((IS_RT5390(_pAd)) && (((_pAd)->MACVersion & 0x0000FFFF) >= 0x1500) && ((_pAd)->ChipId == 0x5391))
+
+/* RT5390BC8 (WiFi + BT) */
+
+
+/* RT5390D */
+#define IS_RT5390D(_pAd)	((IS_RT5390(_pAd)) && (((_pAd)->MACVersion & 0x0000FFFF) >= 0x0502))
+
+/* RT5392C */
+#define IS_RT5392C(_pAd)	((IS_RT5392(_pAd)) && (((_pAd)->MACVersion & 0x0000FFFF) >= 0x0222)) /* Include RT5392, RT5372 and RT5362 */
+
+#define IS_RT5592(_pAd)		(((_pAd)->MACVersion & 0xFFFF0000) == 0x55920000)
+#define REV_RT5592C 0x0221
 
 /* ------------------------------------------------------ */
 /* PCI registers - base address 0x0000 */
