@@ -1942,7 +1942,7 @@ NDIS_STATUS	NICInitializeAsic(
 	// RT3090 should not program BBP R84 to 0x19, otherwise TX will block.
 	//3070/71/72,3090,3090A( are included in RT30xx),3572,3390
 	if (((pAd->MACVersion & 0xffff) != 0x0101) &&
-		!(IS_RT30xx(pAd)|| IS_RT3572(pAd)  || IS_RT3593(pAd)))
+		!(IS_RT30xx(pAd)|| IS_RT3572(pAd) || IS_RT5390(pAd) || IS_RT5392(pAd) || IS_RT3290(pAd)))
 		RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R84, 0x19);
 
 
