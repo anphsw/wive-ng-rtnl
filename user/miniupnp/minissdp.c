@@ -493,12 +493,14 @@ SendSSDPNotify(int s, const struct sockaddr * dest,
 			sizeof(struct sockaddr_in)
 #endif
 			);
+#if 0
 		if(n < 0)
 		{
 			/* XXX handle EINTR, EAGAIN, EWOULDBLOCK */
 			syslog(LOG_ERR, "sendto(udp_notify=%d, %s): %m", s,
 			       host ? host : "NULL");
 		}
+#endif
 	else if(n != l)
 	{
 		syslog(LOG_NOTICE, "sendto() sent %d out of %d bytes", n, l);
