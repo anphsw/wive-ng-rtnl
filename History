@@ -1677,13 +1677,14 @@
 2) goahead: more use init.d instead direct call libnvram functions.<br>
 3) build system: gcc: fix small speed regression introdused in 4.6.x tree and not fixed in 4.8.x.<br>
 4) defaults: enable 802.11h support by default (need for some apple products).<br>
-5) init.d: add force macs rebuild logic for prevent dupe mac after some wive clones install.<br>
-6) kernel: mips: reimplement get_cycles().<br>
-7) kernel: wifi_drivers: backport fixses from 2.7.x.x drivers.<br>
-8) libpcap: update to 1.4.0 version.<br>
-9) tcpdump: update to 1.4.0 vession.<br>
-10) miniupnpd: fix getiffadrs not found and enable ipv6 support per default.<br>
-11) init.d: tune start/restart seq for more correct ipv6 support at init.<br>
+5) libpcap: update to 1.4.0 version.<br>
+6) tcpdump: update to 1.4.0 vession.<br>
+7) miniupnpd: fix getiffadrs not found and enable ipv6 support per default.<br>
+8) init.d: add force macs rebuild logic for prevent dupe mac after some wive clones install.<br>
+9) init.d: tune start/restart seq for more correct ipv6 support at init.<br>
+10) kernel: mips: reimplement get_cycles().<br>
+11) kernel: wifi_drivers: backport fixses from 2.7.x.x drivers.<br>
+12) kernel: tcp: fix dynamic right sizing.<br>
 <br>
 <br>
 <br>
