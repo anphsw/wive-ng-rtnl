@@ -102,21 +102,24 @@ static __u32 check_tcp_syn_cookie(__u32 cookie, __be32 saddr, __be32 daddr,
 }
 
 /*
- * This table has to be sorted and terminated with (__u16)-1.
- * XXX generate a better table.
- * Unresolved Issues: HIPPI with a 64k MSS is not well supported.
+ * MSS Values are chosen based on the 2011 paper
+ * 'An Analysis of TCP Maximum Segement Sizes' by S. Alcock and R. Nelson.
+ * Values ..
+ *  .. lower than 536 are rare (< 0.2%)
+ *  .. between 537 and 1299 account for less than < 1.5% of observed values
+ *  .. in the 1300-1349 range account for about 15 to 20% of observed mss values
+ *  .. exceeding 1460 are very rare (< 0.04%)
+ *
+ *  1460 is the single most frequently announced mss value (30 to 46% depending
+ *  on monitor location).  Table must be sorted.
  */
 static __u16 const msstab[] = {
-	64 - 1,
-	256 - 1,
-	512 - 1,
-	536 - 1,
-	1024 - 1,
-	1440 - 1,
-	1460 - 1,
-	4312 - 1,
-	(__u16)-1
+	536,
+	1300,
+	1440,	/* 1440, 1452: PPPoE */
+	1460,
 };
+
 /* The number doesn't include the -1 terminator */
 #define NUM_MSS (ARRAY_SIZE(msstab) - 1)
 
