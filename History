@@ -1686,6 +1686,7 @@
 11) kernel: wifi_drivers: backport fixses from 2.7.x.x drivers.<br>
 12) kernel: tcp: fix dynamic right sizing.<br>
 13) kernel: udpv6: fix HW checksum support for outgoing UFO packets.<br>
+14) kernel: random: adjust the generator polynomials in the mixing function slightly.<br>
 <br>
 <br>
 <br>
