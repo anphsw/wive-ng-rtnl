@@ -1969,16 +1969,7 @@ ip_route_input_cached(struct sk_buff *skb, __be32 daddr, __be32 saddr,
 		struct in_device *in_dev = __in_dev_get_rcu(dev);
 
 		    if (in_dev != NULL) {
-			int our=0;
-#ifdef CONFIG_IP_MROUTE
-                        /*patch from linux 2.4 sfstudio, for IGMPPROXY */
-                        extern struct sock *mroute_socket;
-                        if(mroute_socket)
-                            our = 1;
-			else
-
-#endif
-			    our = ip_check_mc(in_dev, daddr, saddr, skb->nh.iph->protocol);
+			int our = ip_check_mc(in_dev, daddr, saddr, skb->nh.iph->protocol);
 
 			if (our
 #ifdef CONFIG_IP_MROUTE

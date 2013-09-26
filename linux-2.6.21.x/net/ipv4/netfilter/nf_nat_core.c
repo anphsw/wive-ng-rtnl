@@ -590,7 +590,7 @@ nf_nat_port_nfattr_to_range(struct nfattr *tb[], struct nf_nat_range *range)
 EXPORT_SYMBOL_GPL(nf_nat_port_range_to_nfattr);
 #endif
 
-unsigned int
+static unsigned int
 ip_nat_route_input(unsigned int hooknum,
 		struct sk_buff **pskb,
 		const struct net_device *in,
