@@ -728,12 +728,12 @@ CH_REGION ChRegion[] =
 			"RU",
 			CE,
 			{
-				{ 1,   14,  255, BOTH, FALSE},	// 2.4 G, ch 1~14
-				{ 36,   4,  255, BOTH, FALSE},	// 5G, ch 36~48
-				{ 52,   4,  255, BOTH, FALSE},	// 5G, ch 52~64
-				{ 100, 11,  255, BOTH, FALSE},	// 5G, ch 100~140
-				{ 149,  5,  255, BOTH, FALSE},	// 5G, ch 149~165
-				{ 0},							// end
+				{ 1,   14, 20, BOTH, FALSE},	/* 2.4 G, ch 1~14*/
+				{ 36,   4, 20, BOTH, FALSE},	/*5170~5250MHz, Ch 36~48, Max BW: 40 */
+				{ 52,   4, 20, BOTH, TRUE}, 	/*5250~5330MHz, Ch 52~64, Max BW: 40 */
+				{ 100, 11, 27, BOTH, TRUE}, 	/*5490~5710MHz, Ch 100~140, Max BW: 40 */
+				{ 149,  5, 20, BOTH, FALSE},	/*5735~5835MHz, Ch 149~165, Max BW: 40 */
+				{ 0},               	    	/* end*/
 			}
 		},
 

@@ -1187,8 +1187,10 @@ CH_DESP Country_RO_ChDesp[] =
 CH_DESP Country_RU_ChDesp[] =
 {
 	{ 1,   14, 20, BOTH, FALSE},	/* 2.4 G, ch 1~14*/
-	{ 36,   4, 17, BOTH, FALSE},	/* 5G band 1, ch 36~48*/
-	{ 149,	5, 22, BOTH, FALSE},	/* 5G band 4, ch 149~165*/
+	{ 36,   4, 20, BOTH, FALSE},	/*5170~5250MHz, Ch 36~48, Max BW: 40 */
+	{ 52,   4, 20, BOTH, TRUE}, 	/*5250~5330MHz, Ch 52~64, Max BW: 40 */
+	{ 100, 11, 27, BOTH, TRUE}, 	/*5490~5710MHz, Ch 100~140, Max BW: 40 */
+	{ 149,  5, 20, BOTH, FALSE},	/*5735~5835MHz, Ch 149~165, Max BW: 40 */
 	{ 0},               	    	/* end*/
 };
 /*Saint Barth'elemy*/		
