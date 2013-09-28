@@ -104,9 +104,8 @@
 #define RT3592_DEVICE_ID_CHECK(__DevId)			\
 	(__DevId == NIC3592_PCIe_DEVICE_ID)
 
-#define IS_RT2883(_pAd)		(0)
-
-#define IS_RT3883(_pAd)		(0)
+#define IS_RT2883(_pAd)		(((_pAd)->MACVersion & 0xffff0000) == 0x28830000)
+#define IS_RT3883(_pAd)		(((_pAd)->MACVersion & 0xffff0000) == 0x38830000)
 
 #define IS_VERSION_BEFORE_F(_pAd)			(((_pAd)->MACVersion&0xffff) <= 0x0211)
 /* F version is 0x0212, E version is 0x0211. 309x can save more power after F version. */
