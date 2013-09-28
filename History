@@ -1687,6 +1687,7 @@
 12) kernel: tcp: fix dynamic right sizing.<br>
 13) kernel: udpv6: fix HW checksum support for outgoing UFO packets.<br>
 14) kernel: net: neighbour: use source address of last enqueued packet for solicitation.<br>
+15) kernel: wifi drivers fix regdomain parametrs for RU region.<br>
 <br>
 <br>
 <br>
