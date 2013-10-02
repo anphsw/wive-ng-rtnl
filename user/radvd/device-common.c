@@ -48,16 +48,8 @@ check_device(struct Interface *iface)
 
 	if (! iface->UnicastOnly && !(ifr.ifr_flags & IFF_MULTICAST))
 	{
-		flog(LOG_WARNING, "interface %s does not support multicast",
-			iface->Name);
-		flog(LOG_WARNING, "   do you need to add the UnicastOnly flag?");
-	}
-
-	if (! iface->UnicastOnly && !(ifr.ifr_flags & IFF_BROADCAST))
-	{
-		flog(LOG_WARNING, "interface %s does not support broadcast",
-			iface->Name);
-		flog(LOG_WARNING, "   do you need to add the UnicastOnly flag?");
+		flog(LOG_INFO, "interface %s does not support multicast, forcing UnicastOnly", iface->Name);
+		iface->UnicastOnly = 1;
 	}
 
 	return 0;
