@@ -1689,7 +1689,6 @@
 14) kernel: udpv6: fix HW checksum support for outgoing UFO packets.<br>
 15) kernel: net: neighbour: use source address of last enqueued packet for solicitation.<br>
 16) kernel: wifi drivers fix regdomain parametrs for RU region.<br>
-17) kernel: ipv4, ipv6: send igmpv3/mld packets with TC_PRIO_CONTROL.<br>
 <br>
 <br>
 <br>
