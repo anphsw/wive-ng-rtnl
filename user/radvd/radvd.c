@@ -801,6 +801,7 @@ check_conffile_perm(const char *username, const char *conf_file)
         return 0;
 }
 
+#if 0
 int
 check_ip6_forwarding(void)
 {
@@ -862,6 +863,14 @@ check_ip6_forwarding(void)
 
 	return(0);
 }
+#else
+/* in wive radvd started only if ipv6 forward enabled - fix issue if forward enabled only for some interfaces. */
+int
+check_ip6_forwarding(void)
+{
+	return(0);
+}
+#endif
 
 int
 readin_config(char *fname)
