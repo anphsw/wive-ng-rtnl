@@ -410,7 +410,7 @@ static void dev_forward_change(struct inet6_dev *idev)
 	if (!idev)
 		return;
 	dev = idev->dev;
-	if (dev && (dev->flags & IFF_MULTICAST)) {
+	if (dev->flags & IFF_MULTICAST) {
 		ipv6_addr_all_routers(&addr);
 
 		if (idev->cnf.forwarding)
