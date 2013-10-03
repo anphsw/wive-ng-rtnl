@@ -127,9 +127,6 @@ extern int pthrough_create_proc_entry(void);
 extern void pthrough_remove_proc_entry(void);
 #endif
 
-int config_raeth_mcast=1;
-EXPORT_SYMBOL(config_raeth_mcast);
-
 #if defined(CONFIG_BRIDGE_FASTPATH) && !defined(CONFIG_BRIDGE_NETFILTER)
 #include "../bridge/br_private.h"
 extern void br_fdb_update(struct net_bridge *br, struct net_bridge_port *source,  const unsigned char *addr);
