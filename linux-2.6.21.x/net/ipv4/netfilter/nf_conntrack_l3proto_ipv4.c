@@ -28,10 +28,6 @@
 #include "../../nat/hw_nat/ra_nat.h"
 #endif
 
-#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-extern int nf_conntrack_fastnat;
-#endif
-
 #if 0
 #define DEBUGP printk
 #else

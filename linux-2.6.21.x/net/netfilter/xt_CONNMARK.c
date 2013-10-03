@@ -30,18 +30,13 @@ MODULE_ALIAS("ipt_CONNMARK");
 
 #include <linux/netfilter/x_tables.h>
 #include <linux/netfilter/xt_CONNMARK.h>
+
+#include <net/netfilter/nf_conntrack.h>
 #include <net/netfilter/nf_conntrack_ecache.h>
 
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 #include "../nat/hw_nat/ra_nat.h"
 #include "../nat/hw_nat/frame_engine.h"
-#endif
-
-#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-#include <linux/netfilter.h>
-#include <linux/netfilter/nf_conntrack_common.h>
-#include <net/netfilter/nf_conntrack.h>
-extern int nf_conntrack_fastnat;
 #endif
 
 static unsigned int

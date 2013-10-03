@@ -142,13 +142,10 @@
 #include <net/raw.h>
 #include <net/checksum.h>
 #include <linux/netfilter_ipv4.h>
+#include <net/netfilter/nf_conntrack.h>
 #include <net/xfrm.h>
 #include <linux/mroute.h>
 #include <linux/netlink.h>
-
-#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-extern int nf_conntrack_fastnat;
-#endif
 
 /*
  *	SNMP management statistics
