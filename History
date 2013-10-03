@@ -1691,6 +1691,7 @@
 16) kernel: net: neighbour: use source address of last enqueued packet for solicitation.<br>
 17) kernel: wifi drivers fix regdomain parametrs for RU region.<br>
 18) kernel: ipv4: Elide use of rt->rt_dst in ip_forward().<br>
+19) kernel: ipv4: fix forwarding for strict source routes.<br>
 <br>
 <br>
 <br>
