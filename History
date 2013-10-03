@@ -1683,12 +1683,13 @@
 8) init.d: add force macs rebuild logic for prevent dupe mac after some wive clones install.<br>
 9) init.d: tune start/restart seq for more correct ipv6 support at init.<br>
 10) radvd: up to 1.9.4 version.<br>
-11) kernel: mips: reimplement get_cycles().<br>
-12) kernel: wifi_drivers: backport fixses from 2.7.x.x drivers.<br>
-13) kernel: tcp: fix dynamic right sizing.<br>
-14) kernel: udpv6: fix HW checksum support for outgoing UFO packets.<br>
-15) kernel: net: neighbour: use source address of last enqueued packet for solicitation.<br>
-16) kernel: wifi drivers fix regdomain parametrs for RU region.<br>
+11) dnsmasq: up to 2.67rc3 for prerelease testing.<br>
+12) kernel: mips: reimplement get_cycles().<br>
+13) kernel: wifi_drivers: backport fixses from 2.7.x.x drivers.<br>
+14) kernel: tcp: fix dynamic right sizing.<br>
+15) kernel: udpv6: fix HW checksum support for outgoing UFO packets.<br>
+16) kernel: net: neighbour: use source address of last enqueued packet for solicitation.<br>
+17) kernel: wifi drivers fix regdomain parametrs for RU region.<br>
 <br>
 <br>
 <br>

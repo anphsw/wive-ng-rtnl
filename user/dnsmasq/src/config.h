@@ -245,12 +245,12 @@ NOTES:
 #  else
 #    define IPV6_LEVEL IPPROTO_IPV6
 #  endif
-#elif defined(INET_ADDRSTRLEN)
+#else
+#  if !defined(INET_ADDRSTRLEN)
+#      define INET_ADDRSTRLEN 16 /* 4*3 + 3 dots + NULL */
+#  endif
 #  undef HAVE_IPV6
 #  define ADDRSTRLEN INET_ADDRSTRLEN
-#else
-#  undef HAVE_IPV6
-#  define ADDRSTRLEN 16 /* 4*3 + 3 dots + NULL */
 #endif
 
 

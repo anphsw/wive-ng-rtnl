@@ -70,7 +70,7 @@ void *put_opt6(void *data, size_t len)
 {
   void *p;
 
-  if ((p = expand(len)))
+  if ((p = expand(len)) && data)
     memcpy(p, data, len);   
 
   return p;
