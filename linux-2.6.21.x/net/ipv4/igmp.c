@@ -90,6 +90,7 @@
 #include <linux/if_arp.h>
 #include <linux/rtnetlink.h>
 #include <linux/times.h>
+#include <linux/pkt_sched.h>
 
 #include <net/arp.h>
 #include <net/ip.h>
@@ -300,6 +301,7 @@ static struct sk_buff *igmpv3_newpack(struct net_device *dev, int size)
 		if (size < 256)
 			return NULL;
 	}
+	skb->priority = TC_PRIO_CONTROL;
 	igmp_skb_size(skb) = size;
 
 	{
@@ -662,6 +664,7 @@ static int igmp_send_report(struct in_device *in_dev, struct ip_mc_list *pmc,
 		ip_rt_put(rt);
 		return -1;
 	}
+	skb->priority = TC_PRIO_CONTROL;
 
 	skb = alloc_skb(IGMP_SIZE+LL_ALLOCATED_SPACE(dev), GFP_ATOMIC);
 	if (skb == NULL) {
