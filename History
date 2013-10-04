@@ -1684,18 +1684,19 @@
 9) init.d: tune start/restart seq for more correct ipv6 support at init.<br>
 10) radvd: up to 1.9.4 version.<br>
 11) dnsmasq: up to 2.67rc3 for prerelease testing.<br>
-12) kernel: mips: reimplement get_cycles().<br>
-13) kernel: wifi_drivers: backport fixses from 2.7.x.x drivers.<br>
-14) kernel: tcp: fix dynamic right sizing.<br>
-15) kernel: udpv6: fix HW checksum support for outgoing UFO packets.<br>
-16) kernel: net: neighbour: use source address of last enqueued packet for solicitation.<br>
-17) kernel: wifi drivers fix regdomain parametrs for RU region.<br>
-18) kernel: ipv4: Elide use of rt->rt_dst in ip_forward().<br>
-19) kernel: ipv4: fix forwarding for strict source routes.<br>
-20) kernel: speedup network operation ~10% (use section move hack, decrease cpu usage in IPOE without HW_NAT from 70% to 57% at RT3052).<br>
-21) kernel: mips: replace -mlong-calls with -mno-long-calls to make function calls faster in kernel modules.<br>
-22) kernel: disable ralink sta drivers for 4Mb flash devices (need free flash for build more optimized modules), use apcli instead.<br>
-23) kernel: allow full optimization for kernel modules (after disable sta support).
+12) build: allow build snmpd and quagga for 4Mb flash devices(after disable sta support).
+13) kernel: mips: reimplement get_cycles().<br>
+14) kernel: wifi_drivers: backport fixses from 2.7.x.x drivers.<br>
+15) kernel: tcp: fix dynamic right sizing.<br>
+16) kernel: udpv6: fix HW checksum support for outgoing UFO packets.<br>
+17) kernel: net: neighbour: use source address of last enqueued packet for solicitation.<br>
+18) kernel: wifi drivers fix regdomain parametrs for RU region.<br>
+19) kernel: ipv4: Elide use of rt->rt_dst in ip_forward().<br>
+20) kernel: ipv4: fix forwarding for strict source routes.<br>
+21) kernel: speedup network operation ~10% (use section move hack, decrease cpu usage in IPOE without HW_NAT from 70% to 57% at RT3052).<br>
+22) kernel: mips: replace -mlong-calls with -mno-long-calls to make function calls faster in kernel modules.<br>
+23) kernel: disable ralink sta drivers for 4Mb flash devices (need free flash for build more optimized modules), use apcli instead.<br>
+24) kernel: allow full optimization for kernel modules (after disable sta support).
 <br>
 <br>
 <br>
