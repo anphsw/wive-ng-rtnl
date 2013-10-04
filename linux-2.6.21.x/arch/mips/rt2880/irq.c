@@ -433,7 +433,7 @@ void rt2880_irqdispatch(void)
 
 	return;
 }
-asmlinkage void plat_irq_dispatch(void)
+asmlinkage void FASTPATH plat_irq_dispatch(void)
 {
         unsigned int pending = read_c0_status() & read_c0_cause() & ST0_IM;
         if (pending & CAUSEF_IP7)

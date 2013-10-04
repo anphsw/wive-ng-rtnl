@@ -1990,7 +1990,7 @@ ip_route_input_cached(struct sk_buff *skb, __be32 daddr, __be32 saddr,
 	return res;
 }
 
-int ip_route_input(struct sk_buff *skb, __be32 daddr, __be32 saddr,
+int FASTPATH ip_route_input(struct sk_buff *skb, __be32 daddr, __be32 saddr,
 		   u8 tos, struct net_device *dev)
 {
 	return ip_route_input_cached(skb, daddr, saddr, tos, dev, 0);

@@ -57,6 +57,13 @@ SECTIONS
     *(.gnu.warning)
   } =0
 
+#ifdef CONFIG_SPEEDHACK
+  . = ALIGN(32);
+  __fastpath_begin = .;
+  .text.fastpath : { *(.text.fastpath) }
+  __fastpath_end = .;
+#endif
+
   _etext = .;			/* End of text section */
 
   . = ALIGN(16);		/* Exception table */

@@ -45,6 +45,12 @@
 #define __exitdata	__attribute__ ((__section__(".exit.data")))
 #define __exit_call	__used __attribute__ ((__section__ (".exitcall.exit")))
 
+#ifdef CONFIG_SPEEDHACK
+#define FASTPATH	__attribute__ ((__section__(".text.fastpath")))
+#else
+#define FASTPATH
+#endif
+
 /* modpost check for section mismatches during the kernel build.
  * A section mismatch happens when there are references from a
  * code or data section to an init section (both code or data).

@@ -62,3 +62,7 @@ config PREEMPT_BKL
 	  Say Y here if you are building a kernel for a desktop system.
 	  Say N if you are unsure.
 
+config SPEEDHACK
+	bool "Section hack for speedup high load operations"
+	help
+	  Move critical code to special text.fastpath section.

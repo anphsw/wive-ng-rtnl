@@ -174,6 +174,9 @@
 #define ADDRMASK (NBYTES-1)
 
 	.text
+#ifdef CONFIG_SPEEDHACK
+	.section .text.fastpath, "a"
+#endif
 	.set	noreorder
 	.set	noat
 

@@ -1609,9 +1609,9 @@ raeth_clean(struct net_device *netdev, int *budget)
  * RETURNS: N/A.
  */
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,21)
-static irqreturn_t ei_interrupt(int irq, void *dev_id)
+static irqreturn_t FASTPATH ei_interrupt(int irq, void *dev_id)
 #else
-static irqreturn_t ei_interrupt(int irq, void *dev_id, struct pt_regs * regs)
+static irqreturn_t FASTPATH ei_interrupt(int irq, void *dev_id, struct pt_regs * regs)
 #endif
 {
 #if !defined(CONFIG_RAETH_NAPI)
@@ -1838,7 +1838,7 @@ out:
 
 #endif
 
-static int ei_start_xmit(struct sk_buff* skb, struct net_device *dev, int gmac_no)
+static int FASTPATH ei_start_xmit(struct sk_buff* skb, struct net_device *dev, int gmac_no)
 {
 	END_DEVICE *ei_local = netdev_priv(dev);
 	unsigned long flags;
@@ -1992,7 +1992,7 @@ static int ei_start_xmit(struct sk_buff* skb, struct net_device *dev, int gmac_n
 	return 0;
 }
 
-static inline int ei_start_xmit_fake(struct sk_buff* skb, struct net_device *dev)
+static inline int FASTPATH ei_start_xmit_fake(struct sk_buff* skb, struct net_device *dev)
 {
 	return ei_start_xmit(skb, dev, 1);
 }

@@ -127,7 +127,7 @@ static void skb_under_panic(struct sk_buff *skb, unsigned int sz, void *addr)
  *	Buffers may only be allocated from interrupts using a @gfp_mask of
  *	%GFP_ATOMIC.
  */
-struct sk_buff *__alloc_skb(unsigned int size, gfp_t gfp_mask,
+struct sk_buff FASTPATH *__alloc_skb(unsigned int size, gfp_t gfp_mask,
 			    int fclone, int node)
 {
 	struct kmem_cache *cache;
@@ -342,7 +342,7 @@ static void skb_release_all(struct sk_buff *skb)
  *	always call kfree_skb
  */
 
-void __kfree_skb(struct sk_buff *skb)
+void FASTPATH __kfree_skb(struct sk_buff *skb)
 {
 	skb_release_all(skb);
 	kfree_skbmem(skb);
@@ -355,7 +355,7 @@ void __kfree_skb(struct sk_buff *skb)
  *	Drop a reference to the buffer and free it if the usage count has
  *	hit zero.
  */
-void kfree_skb(struct sk_buff *skb)
+void FASTPATH kfree_skb(struct sk_buff *skb)
 {
 	if (unlikely(!skb))
 		return;

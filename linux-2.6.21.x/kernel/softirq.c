@@ -214,7 +214,7 @@ restart:
 
 #ifndef __ARCH_HAS_DO_SOFTIRQ
 
-asmlinkage void do_softirq(void)
+asmlinkage void FASTPATH do_softirq(void)
 {
 	__u32 pending;
 	unsigned long flags;
@@ -257,7 +257,7 @@ void irq_enter(void)
 /*
  * Exit an interrupt context. Process softirqs if needed and possible:
  */
-void irq_exit(void)
+void FASTPATH irq_exit(void)
 {
 	account_system_vtime(current);
 	trace_hardirq_exit();
