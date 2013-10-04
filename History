@@ -1693,6 +1693,7 @@
 18) kernel: ipv4: Elide use of rt->rt_dst in ip_forward().<br>
 19) kernel: ipv4: fix forwarding for strict source routes.<br>
 20) kernel: speedup network operation ~10% (use section move hack, decrease cpu usage in IPOE without HW_NAT from 70% to 57% at RT3052).<br>
+21) kernel: mips: replace -mlong-calls with -mno-long-calls to make function calls faster in kernel modules.<br>
 <br>
 <br>
 <br>
