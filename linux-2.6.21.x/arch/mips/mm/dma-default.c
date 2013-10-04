@@ -8,6 +8,7 @@
  * swiped from i386, and cloned for MIPS by Geert, polished by Ralf.
  */
 
+#include <linux/init.h>
 #include <linux/types.h>
 #include <linux/dma-mapping.h>
 #include <linux/mm.h>
