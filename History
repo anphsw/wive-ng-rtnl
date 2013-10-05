@@ -1696,7 +1696,8 @@
 21) kernel: speedup network operation ~10% (use section move hack, decrease cpu usage in IPOE without HW_NAT from 70% to 57% at RT3052).<br>
 22) kernel: mips: replace -mlong-calls with -mno-long-calls to make function calls faster in kernel modules.<br>
 23) kernel: disable ralink sta drivers for 4Mb flash devices (need free flash for build more optimized modules), use apcli instead.<br>
-24) kernel: allow full optimization for kernel modules (after disable sta support).
+24) kernel: allow full optimization for kernel modules (after disable sta support).<br>
+25) kernel: fastnat: fix select packets logic allowed fastnat processing.<br>
 <br>
 <br>
 <br>

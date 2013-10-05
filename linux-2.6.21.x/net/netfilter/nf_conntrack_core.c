@@ -1313,18 +1313,25 @@ filter:
 		    goto skip_sw;
 
 		/* Try send selected pakets to bcm_nat */
-		if ((ctinfo == IP_CT_ESTABLISHED || ctinfo == IP_CT_ESTABLISHED_REPLY) &&
-		    (hooknum == NF_IP_PRE_ROUTING) &&
-		    (protonum == IPPROTO_TCP || protonum == IPPROTO_UDP)) {
+		if (((hooknum == NF_IP_PRE_ROUTING)
+		    /* allow tcp packet with established/reply state */
+		    && (protonum == IPPROTO_TCP && (ctinfo == IP_CT_ESTABLISHED || ctinfo == IP_CT_ESTABLISHED_REPLY))
+		    /* allow all udp packet pass fastnat */
+		    || (protonum == IPPROTO_UDP))
+#ifdef CONFIG_NF_CONNTRACK_MARK
+		    /* fastnat only packets with connection mark flag 0 */
+		    && ((ct->mark & 0xFF0000) == 0)
+#endif
+		    ) {
 
-		    struct nf_conntrack_tuple *t1, *t2;
-    		    t1 = &ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple;
-		    t2 = &ct->tuplehash[IP_CT_DIR_REPLY].tuple;
-		    if (!(t1->dst.u3.ip == t2->src.u3.ip &&
-			t1->src.u3.ip == t2->dst.u3.ip &&
-			t1->dst.u.all == t2->src.u.all &&
-			t1->src.u.all == t2->dst.u.all)) {
-			ret = bcm_nat_bind_hook(ct, ctinfo, pskb, l3proto, l4proto);
+			struct nf_conntrack_tuple *t1, *t2;
+    			t1 = &ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple;
+			t2 = &ct->tuplehash[IP_CT_DIR_REPLY].tuple;
+			if (!(t1->dst.u3.ip == t2->src.u3.ip &&
+			    t1->src.u3.ip == t2->dst.u3.ip &&
+			    t1->dst.u.all == t2->src.u.all &&
+			    t1->src.u.all == t2->dst.u.all)) {
+			    ret = bcm_nat_bind_hook(ct, ctinfo, pskb, l3proto, l4proto);
 		}
 	    }
 	}
