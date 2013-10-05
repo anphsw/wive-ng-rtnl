@@ -44,16 +44,6 @@ static inline int nat_is_ready(struct nf_conn *ct)
 }
 
 /*
- * check SKB really accesseble
- */
-static inline int skb_is_ready(struct sk_buff *skb)
-{
-	if (skb_cloned(skb) && !skb->sk)
-		return 0;
-	return 1;
-}
-
-/*
  * Direct send packets to output.
  * Stolen from ip_finish_output2.
  */
@@ -129,7 +119,7 @@ bcm_do_bindings(struct nf_conn *ct,
 	unsigned int i = 1;
 
 	/* This check prevent corrupt conntrack data */
-	if(unlikely(!nat_is_ready(ct) || !skb_is_ready(*pskb))) {
+	if(unlikely(!nat_is_ready(ct))) {
 #ifdef DEBUG
 		if (net_ratelimit())
 		    printk(KERN_DEBUG "bcm_fast_path: SKB or CT not ready for offload\n");

@@ -114,6 +114,9 @@ EXPORT_SYMBOL_GPL(nf_conntrack_table_flush);
 int nf_conntrack_fastnat __read_mostly;
 EXPORT_SYMBOL_GPL(nf_conntrack_fastnat);
 
+int nf_conntrack_fastroute __read_mostly;
+EXPORT_SYMBOL_GPL(nf_conntrack_fastroute);
+
 typedef int (*bcmNatBindHook)(struct nf_conn *ct,
 	enum ip_conntrack_info ctinfo,
 	struct sk_buff **pskb,
@@ -188,6 +191,34 @@ static inline unsigned int is_local_prtc(u_int8_t protonm)
 
     return 0;
 };
+#endif
+
+#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+/*
+ * check SKB really accesseble
+ */
+static inline int skb_is_ready(struct sk_buff *skb)
+{
+	if (skb_cloned(skb) && !skb->sk)
+		return 0;
+	return 1;
+}
+
+/*
+ * check route needed
+ */
+static inline int is_routing(struct nf_conn *ct)
+{
+	struct nf_conntrack_tuple *t1, *t2;
+
+	t1 = &ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple;
+	t2 = &ct->tuplehash[IP_CT_DIR_REPLY].tuple;
+
+	return (t1->dst.u3.ip == t2->src.u3.ip &&
+		t1->src.u3.ip == t2->dst.u3.ip &&
+		t1->dst.u.all == t2->src.u.all &&
+		t1->src.u.all == t2->dst.u.all);
+}
 #endif
 
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
@@ -1249,6 +1280,35 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 	nat = nfct_nat(ct);
 #endif
 
+#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+	/* software route offload path */
+	if (nf_conntrack_fastroute && !is_helper && skb_is_ready(*pskb) && is_routing(ct)
+	    && (*pskb)->pkt_type != PACKET_BROADCAST  && (*pskb)->pkt_type != PACKET_MULTICAST
+	    && (ctinfo == IP_CT_ESTABLISHED || ctinfo == IP_CT_ESTABLISHED_REPLY)) {
+	    /* change status from new to seen_reply. when receive reply packet the status will set to establish */
+	    if (set_reply && !test_and_set_bit(IPS_SEEN_REPLY_BIT, &ct->status))
+		nf_conntrack_event_cache(IPCT_STATUS, *pskb);
+		if(hooknum == NF_IP_PRE_ROUTING) {
+			(*pskb)->cb[FAST_ROUTE]=1;
+			/* this function will handle routing decision. the next hoook will be input or forward chain */
+			if (ip_rcv_finish(*pskb) == NF_FAST_NAT)
+			{
+				struct net_device *dev = skb_dst(*pskb)->dev;
+				(*pskb)->dev = dev;
+				(*pskb)->protocol = htons(ETH_P_IP);
+				return NF_FAST_NAT;
+			}
+			/* this tell system no need to handle this packet. we will handle this. */
+			return NF_STOLEN;
+		} else if(hooknum == NF_IP_LOCAL_OUT) {
+			struct net_device *dev = skb_dst(*pskb)->dev;
+			(*pskb)->dev = dev;
+			(*pskb)->protocol = htons(ETH_P_IP);
+			return NF_FAST_NAT;
+		}
+	}
+#endif
+
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 	/* hardware nat support */
 	if (ra_sw_nat_hook_rx != NULL && ra_sw_nat_hook_tx != NULL)
@@ -1309,15 +1369,15 @@ filter:
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
         if (nf_conntrack_fastnat && bcm_nat_bind_hook != NULL && pf == PF_INET) {
 		/* if need helper or nat type unknown/fast deny need skip packets */
-        	if (is_helper || is_local_prtc(protonum) || !nat || (nat->info.nat_type & NF_FAST_NAT_DENY))
+        	if (is_helper || !skb_is_ready(*pskb) || is_local_prtc(protonum) || !nat || (nat->info.nat_type & NF_FAST_NAT_DENY))
 		    goto skip_sw;
 
-		/* Try send selected pakets to bcm_nat */
-		if (((hooknum == NF_IP_PRE_ROUTING)
+	    /* Try send selected pakets to bcm_nat */
+	    if (hooknum == NF_IP_PRE_ROUTING) {
+		/* allow all udp packet pass fastnat */
+		if (((protonum == IPPROTO_UDP) ||
 		    /* allow tcp packet with established/reply state */
-		    && (protonum == IPPROTO_TCP && (ctinfo == IP_CT_ESTABLISHED || ctinfo == IP_CT_ESTABLISHED_REPLY))
-		    /* allow all udp packet pass fastnat */
-		    || (protonum == IPPROTO_UDP))
+		    (protonum == IPPROTO_TCP && (ctinfo == IP_CT_ESTABLISHED || ctinfo == IP_CT_ESTABLISHED_REPLY)))
 #ifdef CONFIG_NF_CONNTRACK_MARK
 		    /* fastnat only packets with connection mark flag 0 */
 		    && ((ct->mark & 0xFF0000) == 0)
@@ -1325,6 +1385,7 @@ filter:
 		    ) {
 
 			struct nf_conntrack_tuple *t1, *t2;
+
     			t1 = &ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple;
 			t2 = &ct->tuplehash[IP_CT_DIR_REPLY].tuple;
 			if (!(t1->dst.u3.ip == t2->src.u3.ip &&
@@ -1332,6 +1393,7 @@ filter:
 			    t1->dst.u.all == t2->src.u.all &&
 			    t1->src.u.all == t2->dst.u.all)) {
 			    ret = bcm_nat_bind_hook(ct, ctinfo, pskb, l3proto, l4proto);
+			}
 		}
 	    }
 	}

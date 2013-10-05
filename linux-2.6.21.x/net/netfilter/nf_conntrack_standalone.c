@@ -388,6 +388,14 @@ static ctl_table nf_ct_netfilter_table[] = {
 		.mode		= 0644,
 		.proc_handler	= &proc_dointvec,
 	},
+	{
+		.ctl_name	= NET_NF_CONNTRACK_FASTROUTE,
+		.procname	= "nf_conntrack_fastroute",
+		.data		= &nf_conntrack_fastroute,
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= &proc_dointvec,
+	},
 #endif
 #ifdef CONFIG_NF_FLUSH_CONNTRACK
 	{

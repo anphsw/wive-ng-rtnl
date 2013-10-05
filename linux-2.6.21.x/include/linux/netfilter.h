@@ -37,6 +37,11 @@
 #endif
 #define NF_MAX_VERDICT NF_STOP
 
+/* fastforward flag for fastroute path - hwnat use 10+6 offset - fastroute 10+6+1 */
+#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+#define FAST_ROUTE 17
+#endif
+
 /* we overload the higher bits for encoding auxiliary data such as the queue
  * number or errno values. Not nice, but better than additional function
  * arguments. */

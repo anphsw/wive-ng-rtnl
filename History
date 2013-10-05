@@ -1698,6 +1698,7 @@
 23) kernel: disable ralink sta drivers for 4Mb flash devices (need free flash for build more optimized modules), use apcli instead.<br>
 24) kernel: allow full optimization for kernel modules (after disable sta support).<br>
 25) kernel: fastnat: fix select packets logic allowed fastnat processing.<br>
+26) kernel: add fastroute path for offload conntrak sessions without nat.<br>
 <br>
 <br>
 <br>

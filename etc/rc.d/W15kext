@@ -12,6 +12,7 @@ LOG="logger -t kext"
 start() {
     nat_mode
     hw_nat_en
+    route_fastpath
     pthrough
     # This is set only if wan or lan in bridge
     if [ "$wan_if" = "br0" ] || [ "$lan_if" = "br0" ]; then
@@ -127,6 +128,17 @@ pthrough() {
 	    echo "null,null" > /proc/pthrough/pppoe
 	    echo "null,null" > /proc/pthrough/ipv6
 	fi
+    fi
+}
+
+route_fastpath() {
+    #----Fastpath for bridge enable------------------------------
+    routeFastpath=`nvram_get 2860 routeFastpath`
+    if [ "$bridgeFastpath" != "0" ]; then
+	$LOG "Route fastpath enabled."
+	sysctl -wq net.nf_conntrack_fastroute=1
+    else
+	sysctl -wq net.nf_conntrack_fastroute=0
     fi
 }
 
