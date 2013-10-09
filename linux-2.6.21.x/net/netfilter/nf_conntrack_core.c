@@ -1343,6 +1343,13 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 		    }
 		}
 #endif /* XT_MATCH_WEBSTR */
+#ifdef CONFIG_NF_CONNTRACK_MARK
+		/* fastnat only packets with connection mark flag 0 */
+		if ((ct->mark & 0xFF0000) != 0) {
+		    need_skip=1;
+		    goto filter;
+		}
+#endif
 		/* Other traffic skip section
 		    EXAMPLE_CODE:
 		    if (need ... rules ...) {
@@ -1375,14 +1382,9 @@ filter:
 	    /* Try send selected pakets to bcm_nat */
 	    if (hooknum == NF_IP_PRE_ROUTING) {
 		/* allow all udp packet pass fastnat */
-		if (((protonum == IPPROTO_UDP) ||
+		if ((protonum == IPPROTO_UDP) ||
 		    /* allow tcp packet with established/reply state */
-		    (protonum == IPPROTO_TCP && (ctinfo == IP_CT_ESTABLISHED || ctinfo == IP_CT_ESTABLISHED_REPLY)))
-#ifdef CONFIG_NF_CONNTRACK_MARK
-		    /* fastnat only packets with connection mark flag 0 */
-		    && ((ct->mark & 0xFF0000) == 0)
-#endif
-		    ) {
+		    (protonum == IPPROTO_TCP && (ctinfo == IP_CT_ESTABLISHED || ctinfo == IP_CT_ESTABLISHED_REPLY))) {
 
 			struct nf_conntrack_tuple *t1, *t2;
 
