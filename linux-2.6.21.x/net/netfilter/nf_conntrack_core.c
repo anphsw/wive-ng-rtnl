@@ -1291,9 +1291,9 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 		if(hooknum == NF_IP_PRE_ROUTING) {
 			(*pskb)->cb[FAST_ROUTE]=1;
 			/* this function will handle routing decision. the next hoook will be input or forward chain */
-			if (ip_rcv_finish(*pskb) == NF_FAST_NAT)
-			{
+			if (ip_rcv_finish(*pskb) == NF_FAST_NAT) {
 				struct net_device *dev = skb_dst(*pskb)->dev;
+
 				(*pskb)->dev = dev;
 				(*pskb)->protocol = htons(ETH_P_IP);
 				return NF_FAST_NAT;
@@ -1302,6 +1302,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 			return NF_STOLEN;
 		} else if(hooknum == NF_IP_LOCAL_OUT) {
 			struct net_device *dev = skb_dst(*pskb)->dev;
+
 			(*pskb)->dev = dev;
 			(*pskb)->protocol = htons(ETH_P_IP);
 			return NF_FAST_NAT;
