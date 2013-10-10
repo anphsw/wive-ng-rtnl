@@ -1375,10 +1375,10 @@ filter:
 /* end skip section */
 
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-        if (nf_conntrack_fastnat && bcm_nat_bind_hook != NULL && pf == PF_INET) {
-		/* if need helper or nat type unknown/fast deny need skip packets */
-        	if (is_helper || !skb_is_ready(*pskb) || is_local_prtc(protonum) || !nat || (nat->info.nat_type & NF_FAST_NAT_DENY))
-		    goto skip_sw;
+        if (nf_conntrack_fastnat && bcm_nat_bind_hook != NULL && pf == PF_INET && !is_helper) {
+	    /* if need helper or nat type unknown/fast deny need skip packets */
+    	    if ( !skb_is_ready(*pskb) || is_local_prtc(protonum) || !nat || (nat->info.nat_type & NF_FAST_NAT_DENY))
+		goto skip_sw;
 
 	    /* Try send selected pakets to bcm_nat */
 	    if (hooknum == NF_IP_PRE_ROUTING) {
