@@ -1356,7 +1356,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 	    }
 #endif /* XT_MATCH_WEBSTR */
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-	    /* only skip sofware nat fastpath, not skip ppe processing */
+	    /* only skip sofware nat fastpath, not skip ppe processing (do not set skip_offload = 1) */
 	    if(nf_conntrack_fastnat) {
 		nat->info.nat_type |= NF_FAST_NAT_DENY;
 		goto pass;
