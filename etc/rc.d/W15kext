@@ -23,15 +23,15 @@ start() {
 
 nat_mode() {
     eval `nvram_buf_get 2860 nat_mode`
-    if [ "$nat_mode" = "0" ]; then
-	sysctl -wq net.nf_conntrack_nat_mode=0
-	$LOG "Nat mode Linux"
+    if [ "$nat_mode" = "1" ]; then
+	sysctl -wq net.nf_conntrack_nat_mode=1
+	$LOG "Nat mode Full Cone"
     elif [ "$nat_mode" = "2" ]; then
 	sysctl -wq net.nf_conntrack_nat_mode=2
 	$LOG "Nat mode Restricted Cone"
     else
-	sysctl -wq net.nf_conntrack_nat_mode=1
-	$LOG "Nat mode Full Cone"
+	sysctl -wq net.nf_conntrack_nat_mode=0
+	$LOG "Nat mode Linux Hybrid"
     fi
 }
 

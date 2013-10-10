@@ -1807,7 +1807,7 @@ int __init nf_conntrack_init(void)
 	int ret;
 
 #ifdef CONFIG_NAT_CONE
-	nf_conntrack_nat_mode = NAT_MODE_FCONE;
+	nf_conntrack_nat_mode = NAT_MODE_LINUX;
 #endif
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 	nf_conntrack_fastnat = 0;
