@@ -64,7 +64,7 @@ config IP6_NF_MATCH_RT
 
 config IP6_NF_MATCH_OPTS
 	tristate "Hop-by-hop and Dst opts header match support"
-	depends on IP6_NF_IPTABLES
+	depends on IP6_NF_IPTABLES && EXPERIMENTAL
 	help
 	  This allows one to match packets based on the hop-by-hop
 	  and destination options headers of a packet.
