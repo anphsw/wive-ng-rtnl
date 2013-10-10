@@ -78,6 +78,7 @@
 #include <linux/stddef.h>
 #include <linux/proc_fs.h>
 #include <linux/seq_file.h>
+#include <linux/netfilter_ipv4.h>
 
 #include <linux/crypto.h>
 #include <linux/scatterlist.h>

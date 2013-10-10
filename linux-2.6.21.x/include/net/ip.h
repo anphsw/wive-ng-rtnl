@@ -99,6 +99,7 @@ extern int		ip_build_and_send_pkt(struct sk_buff *skb, struct sock *sk,
 					      __be32 saddr, __be32 daddr,
 					      struct ip_options *opt);
 #endif
+extern int		ip_select_ttl(struct inet_sock *inet, struct dst_entry *dst);
 extern int		ip_rcv(struct sk_buff *skb, struct net_device *dev,
 			       struct packet_type *pt, struct net_device *orig_dev);
 extern int		ip_local_deliver(struct sk_buff *skb);

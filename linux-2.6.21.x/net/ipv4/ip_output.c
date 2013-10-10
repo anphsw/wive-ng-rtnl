@@ -102,7 +102,7 @@ static int ip_dev_loopback_xmit(struct sk_buff *newskb)
 	return 0;
 }
 
-static inline int ip_select_ttl(struct inet_sock *inet, struct dst_entry *dst)
+inline int ip_select_ttl(struct inet_sock *inet, struct dst_entry *dst)
 {
 	int ttl = inet->uc_ttl;
 
