@@ -330,13 +330,13 @@ config NETFILTER_XT_TARGET_CLASSIFY
 config NETFILTER_XT_TARGET_CONNMARK
 	tristate  '"CONNMARK" target support'
 	depends on NETFILTER_XTABLES
-	depends on NF_CONNTRACK                                                                                                             
+	depends on NF_CONNTRACK
 	select NF_CONNTRACK_MARK
 	help
 	  This option adds a `CONNMARK' target, which allows one to manipulate
 	  the connection mark value.  Similar to the MARK target, but
 	  affects the connection mark value rather than the packet mark value.
-	
+
 	  If you want to compile it as a module, say M here and read
 	  <file:Documentation/modules.txt>.  The module will be called
 	  ipt_CONNMARK.o.  If unsure, say `N'.
@@ -490,7 +490,7 @@ config NETFILTER_XT_MATCH_CONNMARK
 	help
 	  This option adds a `connmark' match, which allows you to match the
 	  connection mark value previously set for the session by `CONNMARK'. 
-	
+
 	  If you want to compile it as a module, say M here and read
 	  <file:Documentation/modules.txt>.  The module will be called
 	  ipt_connmark.o.  If unsure, say `N'.

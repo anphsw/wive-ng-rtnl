@@ -1699,6 +1699,7 @@
 24) kernel: allow full optimization for kernel modules (after disable sta support).<br>
 25) kernel: fastnat: fix select packets logic allowed fastnat processing.<br>
 26) kernel: add fastroute path for offload conntrak sessions without nat.<br>
+27) kernel: rework and speedup logic for pass ppe/fastnat.<br>
 <br>
 <br>
 <br>
