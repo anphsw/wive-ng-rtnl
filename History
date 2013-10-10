@@ -1702,6 +1702,7 @@
 27) kernel: add fastroute path for offload conntrak sessions without nat.<br>
 28) kernel: rework and speedup logic for pass ppe/fastnat.<br>
 29) kernel: netfilter: Implement RFC 1123 for FTP conntrack.<br>
+30) kernel: netfilter: rtsp: fix test router support rtsp from stb failed.<br>
 <br>
 <br>
 <br>

@@ -175,8 +175,18 @@ rtsp_mangle_tran(enum ip_conntrack_info ctinfo,
             t->dst.u.udp.port = htons(loport);
             if (nf_conntrack_expect_related(exp) == 0)
             {
+                struct nf_conntrack_expect *hi_exp;
+
                 hiport = loport + 1; //~exp->mask.dst.u.udp.port;
                 DEBUGP("using ports %hu-%hu\n", loport, hiport);
+
+		/* fix STB rtsp test fail, need add expect for high port(rtcp port) */
+                hi_exp = nf_conntrack_expect_alloc(ct);
+                memcpy(hi_exp,exp,sizeof(struct nf_conntrack_expect));
+                hi_exp->tuple.dst.u.udp.port = htons(hiport);
+                nf_conntrack_expect_related(hi_exp);
+                nf_conntrack_expect_put(hi_exp);
+
                 break;
             }
         }
@@ -234,7 +244,7 @@ rtsp_mangle_tran(enum ip_conntrack_info ctinfo,
 
         pparamend = memchr(ptran+off, ',', tranlen-off);
         pparamend = (pparamend == NULL) ? ptran+tranlen : pparamend+1;
-        nextparamoff = pparamend-ptcp;
+        nextparamoff = pparamend-ptran;
 
         /*
          * We pass over each param twice.  On the first pass, we look for a
