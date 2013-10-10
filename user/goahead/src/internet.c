@@ -1956,9 +1956,7 @@ void zebraRestart(void)
 out:
 	doSystem("service zebra restart");
 }
-#endif
 
-#ifdef CONFIG_USER_ZEBRA
 static void dynamicRouting(webs_t wp, char_t *path, char_t *query)
 {
 	char_t *rip;
