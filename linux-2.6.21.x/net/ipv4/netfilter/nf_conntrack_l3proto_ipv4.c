@@ -162,13 +162,6 @@ static unsigned int ipv4_conntrack_defrag(unsigned int hooknum,
 					  const struct net_device *out,
 					  int (*okfn)(struct sk_buff *))
 {
-#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-	struct sock *sk = (*pskb)->sk;
-
-	/* if fastnat offload on - fragments allready gathered in nf_conntrack_in */
-	if (nf_conntrack_fastnat && sk && (sk->sk_family == PF_INET && (*pskb)->nh.iph->protocol == IPPROTO_TCP))
-		return NF_ACCEPT;
-#endif
 	/* Previously seen (loopback)?  Ignore.  Do this before fragment check. */
 	if ((*pskb)->nfct)
 		return NF_ACCEPT;
