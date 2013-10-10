@@ -1325,7 +1325,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 	/* this code section may be used for skip some types traffic */
 	if (nat_offload_enabled && nat && !skip_offload && pf == PF_INET) {
 	    /* 1. local esp/ah/ip-ip/icmp proto must be skip from hw/sw offload and mark as interested by ALG for correct tracking this */
-	    if is_local_prtc(protonum)) {
+	    if (is_local_prtc(protonum)) {
 		skip_offload = 1;
 		goto pass;
 	    }
