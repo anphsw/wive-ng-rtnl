@@ -1336,8 +1336,8 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 		unsigned char _data[2], *data;
 
 		/* For URL filter; RFC-HTTP: GET, POST, HEAD */
-		if ((tcph = skb_header_pointer(skb, dataoff, sizeof(_tcph), &_tcph)) &&
-		    (data = skb_header_pointer(skb, dataoff + tcph->doff*4, sizeof(_data), &_data)) &&
+		if ((tcph = skb_header_pointer(*pskb, dataoff, sizeof(_tcph), &_tcph)) &&
+		    (data = skb_header_pointer(*pskb, dataoff + tcph->doff*4, sizeof(_data), &_data)) &&
 		    (memcmp(data, "GET ", sizeof("GET ")-1) == 0 ||
 		     memcmp(data, "POST ", sizeof("POST ")-1) == 0 ||
 		     memcmp(data, "HEAD ", sizeof("HEAD ")-1) == 0)) {
