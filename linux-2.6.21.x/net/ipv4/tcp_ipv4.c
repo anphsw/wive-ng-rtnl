@@ -769,10 +769,6 @@ int ip_build_and_send_pkt(struct sk_buff *skb, struct sock *sk,
 
 	skb->priority = sk->sk_priority;
 
-#if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-        FOE_AI(skb) = UN_HIT;
-#endif
-
 	/* Send it out. */
 	return NF_HOOK(PF_INET, NF_IP_LOCAL_OUT, skb, NULL, rt->u.dst.dev,
 		       dst_output);
