@@ -1311,7 +1311,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 	}
 #endif
 
-/* set nat offload flag */
+#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE) || defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 	/* hardware nat support */
 	if (ra_sw_nat_hook_rx != NULL && ra_sw_nat_hook_tx != NULL)
@@ -1322,9 +1322,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 	if (nf_conntrack_fastnat && bcm_nat_bind_hook != NULL)
 	    nat_offload_enabled=1;
 #endif
-
-/* This code section may be used for skip some types traffic */
-#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE) || defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+	/* this code section may be used for skip some types traffic */
 	if (nat_offload_enabled && !skip_offload && pf == PF_INET && protonum == IPPROTO_TCP && nat) {
 	    /* Local esp/ah/ip-ip/icmp proto must be skip from hw/sw offload and mark as interested by ALG for correct tracking this */
 	    if (is_local_prtc(protonum)) {
