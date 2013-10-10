@@ -1386,7 +1386,6 @@ filter:
 		if ((protonum == IPPROTO_UDP) ||
 		    /* allow tcp packet with established/reply state */
 		    (protonum == IPPROTO_TCP && (ctinfo == IP_CT_ESTABLISHED || ctinfo == IP_CT_ESTABLISHED_REPLY))) {
-
 			struct nf_conntrack_tuple *t1, *t2;
 
     			t1 = &ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple;
