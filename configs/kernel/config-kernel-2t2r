@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # Linux kernel version: 2.6.21.38
-# Fri Oct  4 22:55:39 2013
+# Thu Oct 10 16:24:36 2013
 #
 CONFIG_MIPS=y
 
@@ -488,7 +488,7 @@ CONFIG_NET_SCH_CLK_JIFFIES=y
 CONFIG_NET_SCH_HTB=m
 # CONFIG_NET_SCH_HFSC is not set
 CONFIG_NET_SCH_PRIO=y
-CONFIG_NET_SCH_RED=m
+# CONFIG_NET_SCH_RED is not set
 CONFIG_NET_SCH_SFQ=m
 CONFIG_NET_SCH_ESFQ=m
 # CONFIG_NET_SCH_TEQL is not set
