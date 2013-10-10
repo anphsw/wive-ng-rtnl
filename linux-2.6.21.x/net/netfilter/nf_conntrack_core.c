@@ -193,6 +193,28 @@ static inline unsigned int is_local_prtc(u_int8_t protonm)
 };
 #endif
 
+#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+static inline unsigned int is_local_svc(struct sk_buff **pskb, u_int8_t protonm)
+{
+	struct udphdr *hdr;
+	struct iphdr *iph;
+
+	/* parse udp packets */
+	if (protonm == IPPROTO_UDP) {
+	    iph	= (struct iphdr *)(*pskb)->nh.raw;
+	    if (iph != NULL) {
+		hdr = (struct udphdr*)((*pskb)->data + (iph->ihl << 2));
+		if (hdr != NULL)
+		    /* Packet with no checksum or Local L2TP */
+		    if (hdr->check == 0 || hdr->dest == htons(1701) || hdr->source == htons(1701))
+			return 1;
+	    }
+	}
+
+    return is_local_prtc(protonm);
+};
+#endif
+
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 /*
  * check SKB really accesseble
@@ -219,28 +241,6 @@ static inline int is_routing(struct nf_conn *ct)
 		t1->dst.u.all == t2->src.u.all &&
 		t1->src.u.all == t2->dst.u.all);
 }
-#endif
-
-#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-static inline unsigned int is_local_svc(struct sk_buff **pskb, u_int8_t protonm)
-{
-	struct udphdr *hdr;
-	struct iphdr *iph;
-
-	/* parse udp packets */
-	if (protonm == IPPROTO_UDP) {
-	    iph	= (struct iphdr *)(*pskb)->nh.raw;
-	    if (iph != NULL) {
-		hdr = (struct udphdr*)((*pskb)->data + (iph->ihl << 2));
-		if (hdr != NULL)
-		    /* Packet with no checksum or Local L2TP */
-		    if (hdr->check == 0 || hdr->dest == htons(1701) || hdr->source == htons(1701))
-			return 1;
-	    }
-	}
-
-    return is_local_prtc(protonm);
-};
 #endif
 
 static u_int32_t __hash_conntrack(const struct nf_conntrack_tuple *tuple,
@@ -1200,7 +1200,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE) || \
     defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 	struct nf_conn_help *help;
-    	static unsigned int is_helper = 0, nat_offload_enabled = 0;
+    	static unsigned int skip_offload = 0, nat_offload_enabled = 0;
 #endif
 
 	/* Previously seen (loopback or untracked)?  Ignore. */
@@ -1273,16 +1273,16 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
     defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 	help = nfct_help(ct);
 	if (help && help->helper)
-                is_helper = 1;
+                skip_offload = 1;
 	else
-                is_helper = 0;
+                skip_offload = 0;
 
 	nat = nfct_nat(ct);
 #endif
 
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 	/* software route offload path */
-	if (nf_conntrack_fastroute && !is_helper && skb_is_ready(*pskb) && is_routing(ct)
+	if (nf_conntrack_fastroute && !skip_offload && skb_is_ready(*pskb) && is_routing(ct)
 	    && (*pskb)->pkt_type != PACKET_BROADCAST  && (*pskb)->pkt_type != PACKET_MULTICAST
 	    && (ctinfo == IP_CT_ESTABLISHED || ctinfo == IP_CT_ESTABLISHED_REPLY)) {
 	    /* change status from new to seen_reply. when receive reply packet the status will set to establish */
@@ -1323,7 +1323,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 
 /* This code section may be used for skip some types traffic */
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE) || defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-	if (nat_offload_enabled && !is_helper && pf == PF_INET && protonum == IPPROTO_TCP && nat) {
+	if (nat_offload_enabled && !skip_offload && pf == PF_INET && protonum == IPPROTO_TCP && nat) {
 #if defined(CONFIG_NETFILTER_XT_MATCH_WEBSTR) || defined(CONFIG_NETFILTER_XT_MATCH_WEBSTR_MODULE)
     		static unsigned int need_skip = 0;
 
@@ -1351,6 +1351,11 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 		    goto filter;
 		}
 #endif
+		/* Local esp/ah/ip-ip/icmp proto must be skip from hw/sw offload and mark as interested by ALG for correct tracking this */
+		if (is_local_prtc(protonum)) {
+		    need_skip=1;
+		    goto filter;
+		}
 		/* Other traffic skip section
 		    EXAMPLE_CODE:
 		    if (need ... rules ...) {
@@ -1361,7 +1366,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 filter:
 		if (need_skip) {
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-			is_helper = 1;
+			skip_offload = 1;
 #endif
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 			/* sw_nat operate only udp/tcp */
@@ -1375,9 +1380,9 @@ filter:
 /* end skip section */
 
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-        if (nf_conntrack_fastnat && bcm_nat_bind_hook != NULL && pf == PF_INET && !is_helper) {
-	    /* if need helper or nat type unknown/fast deny need skip packets */
-    	    if ( !skb_is_ready(*pskb) || is_local_prtc(protonum) || !nat || (nat->info.nat_type & NF_FAST_NAT_DENY))
+        if (nf_conntrack_fastnat && bcm_nat_bind_hook != NULL && pf == PF_INET && nat && !skip_offload) {
+	    /* if nat type unknown/fast deny need skip packets */
+    	    if ( !skb_is_ready(*pskb) || (nat->info.nat_type & NF_FAST_NAT_DENY))
 		goto skip_sw;
 
 	    /* Try send selected pakets to bcm_nat */
@@ -1403,7 +1408,7 @@ skip_sw:
 #endif
 
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-	if (is_helper || hooknum == NF_IP_LOCAL_OUT || is_local_svc(pskb, protonum)) {
+	if (skip_offload || hooknum == NF_IP_LOCAL_OUT || is_local_svc(pskb, protonum)) {
             if (IS_SPACE_AVAILABLED(*pskb) && IS_MAGIC_TAG_VALID(*pskb)) {
                     FOE_ALG(*pskb)=1;
 	    }
