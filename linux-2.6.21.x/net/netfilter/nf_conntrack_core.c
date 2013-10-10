@@ -1273,6 +1273,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
     defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 	help = nfct_help(ct);
 	if (help && help->helper)
+		/* skip marked packets for ALG from all fastpaths */
                 skip_offload = 1;
 	else
                 skip_offload = 0;
