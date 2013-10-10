@@ -1389,7 +1389,7 @@ pass:
 			if (!(t1->dst.u3.ip == t2->src.u3.ip &&
 			    t1->src.u3.ip == t2->dst.u3.ip &&
 			    t1->dst.u.all == t2->src.u.all &&
-			    t1->src.u.all == t2->dst.u.all)) {
+			    t1->src.u.all == t2->dst.u.all))
 			    ret = bcm_nat_bind_hook(ct, ctinfo, pskb, l3proto, l4proto);
 	    }
 	}
