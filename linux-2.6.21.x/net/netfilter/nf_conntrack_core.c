@@ -1382,7 +1382,7 @@ filter:
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
         if (nf_conntrack_fastnat && bcm_nat_bind_hook != NULL && pf == PF_INET && nat && !skip_offload) {
 	    /* if nat type unknown/fast deny need skip packets */
-    	    if ( !skb_is_ready(*pskb) || (nat->info.nat_type & NF_FAST_NAT_DENY))
+    	    if (!skb_is_ready(*pskb) || (nat->info.nat_type & NF_FAST_NAT_DENY))
 		goto skip_sw;
 
 	    /* Try send selected pakets to bcm_nat */
