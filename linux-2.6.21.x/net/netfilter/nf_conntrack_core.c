@@ -1381,7 +1381,7 @@ pass:
 		/* allow  tcp/udp packet pass fastnat */
 		(protonum == IPPROTO_UDP || protonum == IPPROTO_TCP) &&
 		    /* allow tcp packet with established/reply state */
-		    (ctinfo == IP_CT_ESTABLISHED || ctinfo == IP_CT_ESTABLISHED_REPLY))) {
+		    (ctinfo == IP_CT_ESTABLISHED || ctinfo == IP_CT_ESTABLISHED_REPLY)) {
 			struct nf_conntrack_tuple *t1, *t2;
 
     			t1 = &ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple;
