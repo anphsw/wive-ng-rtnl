@@ -211,7 +211,7 @@ static inline unsigned int is_local_svc(struct sk_buff **pskb, u_int8_t protonm)
 	    }
 	}
 
-    return is_local_prtc(protonm);
+    return 0;
 };
 #endif
 
