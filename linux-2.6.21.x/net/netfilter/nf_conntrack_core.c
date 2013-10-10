@@ -1331,14 +1331,16 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 	    }
 #if defined(CONFIG_NETFILTER_XT_MATCH_WEBSTR) || defined(CONFIG_NETFILTER_XT_MATCH_WEBSTR_MODULE)
 	    /*  2. skip http post/get/head traffic for correct webstr work */
-	    if (web_str_loaded && protonum == IPPROTO_TCP) {
+	    if (web_str_loaded && protonum == IPPROTO_TCP && CTINFO2DIR(ctinfo) == IP_CT_DIR_ORIGINAL) {
 		struct tcphdr _tcph, *tcph;
 		unsigned char _data[2], *data;
 
 		/* For URL filter; RFC-HTTP: GET, POST, HEAD */
-		if ((tcph = skb_header_pointer(*pskb, dataoff, sizeof(_tcph), &_tcph)) &&
-		    (data = skb_header_pointer(*pskb, dataoff + tcph->doff*4, sizeof(_data), &_data)) &&
-		    ((data[0] == 'G' && data[1] == 'E') || (data[0] == 'P' && data[1] == 'O') || (data[0] == 'H' && data[1] == 'E'))) {
+		if ((tcph = skb_header_pointer(skb, dataoff, sizeof(_tcph), &_tcph)) &&
+		    (data = skb_header_pointer(skb, dataoff + tcph->doff*4, sizeof(_data), &_data)) &&
+		    (memcmp(data, "GET ", sizeof("GET ")-1) == 0 ||
+		     memcmp(data, "POST ", sizeof("POST ")-1) == 0 ||
+		     memcmp(data, "HEAD ", sizeof("HEAD ")-1) == 0)) {
 		    skip_offload = 1;
 		    goto pass;
 		}
