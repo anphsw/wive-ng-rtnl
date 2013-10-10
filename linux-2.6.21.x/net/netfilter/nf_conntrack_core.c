@@ -1345,13 +1345,13 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 	    }
 #endif /* XT_MATCH_WEBSTR */
 #ifdef CONFIG_NF_CONNTRACK_MARK
-	    /* fastnat only packets with connection mark flag 0 */
+	    /* 3. offload only packets with connection mark flag 0 */
 	    if ((protonum == IPPROTO_TCP || protonum == IPPROTO_UDP) && ((ct->mark & 0xFF0000) != 0)) {
 	        skip_offload = 1;
 	        goto pass;
 	    }
 #endif
-	    /* other traffic skip section
+	    /* 4. other traffic skip section
 	        EXAMPLE_CODE:
 	        if (need ... rules ...) {
 		skip_offload = 1;
