@@ -1310,6 +1310,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 	}
 #endif
 
+/* set nat offload flag */
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 	/* hardware nat support */
 	if (ra_sw_nat_hook_rx != NULL && ra_sw_nat_hook_tx != NULL)
@@ -1324,57 +1325,50 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 /* This code section may be used for skip some types traffic */
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE) || defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 	if (nat_offload_enabled && !skip_offload && pf == PF_INET && protonum == IPPROTO_TCP && nat) {
-#if defined(CONFIG_NETFILTER_XT_MATCH_WEBSTR) || defined(CONFIG_NETFILTER_XT_MATCH_WEBSTR_MODULE)
-    		static unsigned int need_skip = 0;
-
-		/* skip http post/get/head traffic for correct webstr work */
-		if (web_str_loaded) {
-		    struct tcphdr _tcph, *tcph;
-		    unsigned char _data[2], *data;
-
-		    /* For URL filter; RFC-HTTP: GET, POST, HEAD */
-		    if ((tcph = skb_header_pointer(*pskb, dataoff, sizeof(_tcph), &_tcph)) &&
-			(data = skb_header_pointer(*pskb, dataoff + tcph->doff*4, sizeof(_data), &_data)) &&
-			((data[0] == 'G' && data[1] == 'E') ||
-		        (data[0] == 'P' && data[1] == 'O') ||
-		        (data[0] == 'H' && data[1] == 'E'))) {
-
-			need_skip=1;
-			goto filter;
-		    }
-		}
-#endif /* XT_MATCH_WEBSTR */
+	    /* Local esp/ah/ip-ip/icmp proto must be skip from hw/sw offload and mark as interested by ALG for correct tracking this */
+	    if (is_local_prtc(protonum)) {
+	        skip_offload = 1;
+	        goto pass;
+	    }
 #ifdef CONFIG_NF_CONNTRACK_MARK
-		/* fastnat only packets with connection mark flag 0 */
-		if ((ct->mark & 0xFF0000) != 0) {
-		    need_skip=1;
-		    goto filter;
-		}
+	    /* fastnat only packets with connection mark flag 0 */
+	    if ((ct->mark & 0xFF0000) != 0) {
+	        skip_offload = 1;
+	        goto pass;
+	    }
 #endif
-		/* Local esp/ah/ip-ip/icmp proto must be skip from hw/sw offload and mark as interested by ALG for correct tracking this */
-		if (is_local_prtc(protonum)) {
-		    need_skip=1;
-		    goto filter;
+#if defined(CONFIG_NETFILTER_XT_MATCH_WEBSTR) || defined(CONFIG_NETFILTER_XT_MATCH_WEBSTR_MODULE)
+	    /* skip http post/get/head traffic for correct webstr work */
+	    if (web_str_loaded) {
+		struct tcphdr _tcph, *tcph;
+		unsigned char _data[2], *data;
+
+		/* For URL filter; RFC-HTTP: GET, POST, HEAD */
+		if ((tcph = skb_header_pointer(*pskb, dataoff, sizeof(_tcph), &_tcph)) &&
+		    (data = skb_header_pointer(*pskb, dataoff + tcph->doff*4, sizeof(_data), &_data)) &&
+		    ((data[0] == 'G' && data[1] == 'E') ||
+		    (data[0] == 'P' && data[1] == 'O') ||
+		    (data[0] == 'H' && data[1] == 'E'))) {
+
+		    skip_offload = 1;
+		    goto pass;
 		}
-		/* Other traffic skip section
-		    EXAMPLE_CODE:
-		    if (need ... rules ...) {
-			need_skip=1;
-			goto filter;
-		    }
-		*/
-filter:
-		if (need_skip) {
-#if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-			skip_offload = 1;
-#endif
+	    }
+#endif /* XT_MATCH_WEBSTR */
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-			/* sw_nat operate only udp/tcp */
-			if(nf_conntrack_fastnat)
-			    nat->info.nat_type |= NF_FAST_NAT_DENY;
-			goto skip_sw;
+	    /* only skip sofware nat fastpath, not skip ppe processing */
+	    if(nf_conntrack_fastnat) {
+		nat->info.nat_type |= NF_FAST_NAT_DENY;
+		goto pass;
+	    }
 #endif
-		}
+	    /* Other traffic skip section
+	        EXAMPLE_CODE:
+	        if (need ... rules ...) {
+		skip_offload = 1;
+		goto pass;
+	    }
+	    */
 	}
 #endif /* RA_HW_NAT || BCM_NAT */
 /* end skip section */
@@ -1383,7 +1377,7 @@ filter:
         if (nf_conntrack_fastnat && bcm_nat_bind_hook != NULL && pf == PF_INET && nat && !skip_offload) {
 	    /* if nat type unknown/fast deny need skip packets */
     	    if (!skb_is_ready(*pskb) || (nat->info.nat_type & NF_FAST_NAT_DENY))
-		goto skip_sw;
+		goto pass;
 
 	    /* Try send selected pakets to bcm_nat */
 	    if (hooknum == NF_IP_PRE_ROUTING) {
@@ -1404,8 +1398,9 @@ filter:
 		}
 	    }
 	}
-skip_sw:
 #endif
+
+pass:
 
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 	if (skip_offload || hooknum == NF_IP_LOCAL_OUT || is_local_svc(pskb, protonum)) {
