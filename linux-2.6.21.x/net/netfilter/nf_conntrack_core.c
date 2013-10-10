@@ -231,7 +231,7 @@ static inline int skb_is_ready(struct sk_buff *skb)
  * 1 - clean route without adress changes
  * 0 - route with adress changes
  */
-static inline int is_routing(struct nf_conn *ct)
+static inline int is_pure_routing(struct nf_conn *ct)
 {
 	struct nf_conntrack_tuple *t1, *t2;
 
@@ -1283,7 +1283,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 #endif
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 	/* software route offload path */
-	if (nf_conntrack_fastroute && !skip_offload && skb_is_ready(*pskb) && is_routing(ct)
+	if (nf_conntrack_fastroute && !skip_offload && skb_is_ready(*pskb) && is_pure_routing(ct)
 	    && (*pskb)->pkt_type != PACKET_BROADCAST  && (*pskb)->pkt_type != PACKET_MULTICAST
 	    && (ctinfo == IP_CT_ESTABLISHED || ctinfo == IP_CT_ESTABLISHED_REPLY)) {
 	    /* change status from new to seen_reply. when receive reply packet the status will set to establish */
@@ -1386,7 +1386,7 @@ pass:
 		(protonum == IPPROTO_UDP || protonum == IPPROTO_TCP) &&
 		    /* allow tcp packet with established/reply state */
 		    (ctinfo == IP_CT_ESTABLISHED || ctinfo == IP_CT_ESTABLISHED_REPLY)) {
-			if (!is_routing(ct))
+			if (!is_pure_routing(ct))
 			    ret = bcm_nat_bind_hook(ct, ctinfo, pskb, l3proto, l4proto);
 	    }
 	}
