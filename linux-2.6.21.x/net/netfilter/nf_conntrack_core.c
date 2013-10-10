@@ -227,7 +227,9 @@ static inline int skb_is_ready(struct sk_buff *skb)
 }
 
 /*
- * check route needed
+ * check route mode
+ * 1 - clean route without adress changes
+ * 0 - route with adress changes
  */
 static inline int is_routing(struct nf_conn *ct)
 {
@@ -1384,14 +1386,7 @@ pass:
 		(protonum == IPPROTO_UDP || protonum == IPPROTO_TCP) &&
 		    /* allow tcp packet with established/reply state */
 		    (ctinfo == IP_CT_ESTABLISHED || ctinfo == IP_CT_ESTABLISHED_REPLY)) {
-			struct nf_conntrack_tuple *t1, *t2;
-
-    			t1 = &ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple;
-			t2 = &ct->tuplehash[IP_CT_DIR_REPLY].tuple;
-			if (!(t1->dst.u3.ip == t2->src.u3.ip &&
-			    t1->src.u3.ip == t2->dst.u3.ip &&
-			    t1->dst.u.all == t2->src.u.all &&
-			    t1->src.u.all == t2->dst.u.all))
+			if (!is_routing(ct))
 			    ret = bcm_nat_bind_hook(ct, ctinfo, pskb, l3proto, l4proto);
 	    }
 	}
