@@ -40,7 +40,6 @@
 #include "netlinkaccess.h"
 
 #if __ASSUME_NETLINK_SUPPORT
-#if 0 /* unused code */
 /* struct to hold the data for one ifaddrs entry, so we can allocate
    everything at once.  */
 struct ifaddrs_storage
@@ -57,8 +56,6 @@ struct ifaddrs_storage
   } addr, netmask, broadaddr;
   char name[IF_NAMESIZE + 1];
 };
-#endif /* unused code */
-
 
 void
 __netlink_free_handle (struct netlink_handle *h)
@@ -298,7 +295,6 @@ __netlink_open (struct netlink_handle *h)
 }
 
 
-#if 0 /* unused code */
 /* We know the number of RTM_NEWLINK entries, so we reserve the first
    # of entries for this type. All RTM_NEWADDR entries have an index
    pointer to the RTM_NEWLINK entry.  To find the entry, create
@@ -845,7 +841,4 @@ freeifaddrs (struct ifaddrs *ifa)
   free (ifa);
 }
 #endif
-
-#endif /* unused code */
-
 #endif /* __ASSUME_NETLINK_SUPPORT */

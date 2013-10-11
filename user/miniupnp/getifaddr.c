@@ -21,11 +21,9 @@
 
 #include "config.h"
 #include "getifaddr.h"
-
 #if defined(USE_GETIFADDRS) || defined(ENABLE_IPV6)
-#include "localgetifaddrs.h"
+#include <ifaddrs.h>
 #endif
-
 
 int
 getifaddr(const char * ifname, char * buf, int len,
