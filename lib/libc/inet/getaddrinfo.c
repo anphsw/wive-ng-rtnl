@@ -62,6 +62,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sys/un.h>
 #include <sys/utsname.h>
 #include <net/if.h>
+#include <ifaddrs.h>
 
 /* The following declarations and definitions have been removed from
  *    the public header since we don't want people to use them.  */
