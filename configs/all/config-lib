@@ -162,3 +162,4 @@ CROSS_COMPILER_PREFIX="$(ROOTDIR)/toolchain/bin/mipsel-linux-"
 # SUPPORT_LD_DEBUG_EARLY is not set
 WARNINGS="-Wall"
 # UCLIBC_MJN3_ONLY is not set
+UCLIBC_USE_NETLINK=y
