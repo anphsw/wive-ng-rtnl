@@ -53,17 +53,17 @@ if_nametoindex(const char* ifname)
   if (fd < 0)
     return 0;
 
-  __strncpy (ifr.ifr_name, ifname, sizeof (ifr.ifr_name));
-  if (__ioctl (fd, SIOCGIFINDEX, &ifr) < 0)
+  strncpy (ifr.ifr_name, ifname, sizeof (ifr.ifr_name));
+  if (ioctl (fd, SIOCGIFINDEX, &ifr) < 0)
     {
       int saved_errno = errno;
-      __close(fd);
+      close(fd);
       if (saved_errno == EINVAL)
 	__set_errno(ENOSYS);
       return 0;
     }
 
-  __close(fd);
+  close(fd);
   return ifr.ifr_ifindex;
 #endif
 }
@@ -79,7 +79,7 @@ if_freenameindex (struct if_nameindex *ifn)
     }
   free (ifn);
 }
-hidden_strong_alias(if_freenameindex,__if_freenameindex)
+strong_alias(if_freenameindex,__if_freenameindex)
 
 #if !__ASSUME_NETLINK_SUPPORT
 struct if_nameindex *
@@ -278,7 +278,7 @@ if_nameindex (void)
   return idx;
 }
 #endif
-hidden_strong_alias(if_nameindex,__if_nameindex)
+strong_alias(if_nameindex,__if_nameindex)
 
 #if 0
 struct if_nameindex *

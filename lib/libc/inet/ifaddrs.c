@@ -46,11 +46,26 @@
 
 #include "netlinkaccess.h"
 
+#ifndef _LIBC
+/* The results of opendir() in this file are not used with dirfd and fchdir,
+   and we do not leak fds to any single-threaded code that could use stdio,
+   therefore save some unnecessary recursion in fchdir.c and opendir_safer.c.
+   FIXME - if the kernel ever adds support for multi-thread safety for
+   avoiding standard fds, then we should use opendir_safer.  */
+# undef opendir
+# undef closedir
 
-#ifndef __libc_use_alloca
-# define __libc_use_alloca(x) (x < __MAX_ALLOCA_CUTOFF)
+# if HAVE_ALLOCA
+/* The OS usually guarantees only one guard page at the bottom of the stack,
+   and a page size can be as small as 4096 bytes.  So we cannot safely
+   allocate anything larger than 4096 bytes.  Also care for the possibility
+   of a few compiler-allocated temporary stack slots.  */
+#  define __libc_use_alloca(n) ((n) < 4032)
+# else
+/* alloca is implemented with malloc, so just use malloc.  */
+#  define __libc_use_alloca(n) 0
+# endif
 #endif
-
 
 #if __ASSUME_NETLINK_SUPPORT
 #if 0 /* unused code */
