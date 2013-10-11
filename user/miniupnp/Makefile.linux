@@ -24,8 +24,8 @@
 #CFLAGS = -Wall -O -D_GNU_SOURCE -g -DDEBUG
 
 IPTABLESPATH=../iptables
-LIBS = $(IPTABLESPATH)/libiptc/libiptc.a
 CFLAGS += -Wall -Os -D_GNU_SOURCE -I../iptables -I../iptables/include -I../iptables/libiptc
+LDFLAGS += $(ROOTDIR)/lib/lib
 
 CC ?= gcc
 RM = rm -f
@@ -66,10 +66,7 @@ ifeq ($(TEST), 1)
 CFLAGS += -DIPTABLES_143
 endif
 
-CFLAGS  += $(shell pkg-config --cflags libiptc)
-LIBS    += $(shell pkg-config --libs-only-l libiptc)
-LDFLAGS += $(shell pkg-config --libs-only-L libiptc)
-LDFLAGS += $(shell pkg-config --libs-only-other libiptc)
+LDFLAGS += $(ROOTDIR)/lib/lib
 
 else
 
@@ -86,7 +83,7 @@ endif
 ARCH ?= $(shell uname -m | grep -q "x86_64" && echo 64)
 ifdef IPTABLESPATH
 CFLAGS := $(CFLAGS) -I$(IPTABLESPATH)/include/
-LDFLAGS := $(LDFLAFGS) -L$(IPTABLESPATH)/libiptc/
+LDFLAGS := $(LDFLAFGS) -L$(IPTABLESPATH)/libiptc/ -L$(ROOTDIR)/lib/lib
 # get iptables version and set IPTABLES_143 macro if needed
 ifeq ($(TARGET_OPENWRT),)
 IPTABLESVERSION := $(shell grep "\#define VERSION" $(IPTABLESPATH)/config.h | tr -d \" |cut -d" " -f3 )
@@ -136,7 +133,7 @@ endif # ($(TEST), 1)
 endif # ifdef IPTABLESPATH
 endif # ifdef PCFILE_FOUND
 
-LIBS += $(ROOTDIR)/lib/lib/libnfnetlink.so
+LIBS += $(IPTABLESPATH)/libiptc/libiptc.a $(ROOTDIR)/lib/lib/libnfnetlink.so
 
 TESTUPNPDESCGENOBJS = testupnpdescgen.o upnpdescgen.o
 
@@ -200,7 +197,7 @@ testupnppermissions:	testupnppermissions.o upnppermissions.o
 
 testgetifaddr:	testgetifaddr.o getifaddr.o
 
-testgetroute:	testgetroute.o linux/getroute.o upnputils.o $(ROOTDIR)/lib/lib/libnfnetlink.so
+testgetroute:	testgetroute.o linux/getroute.o upnputils.o $(LIBS)
 
 miniupnpdctl:	miniupnpdctl.o
 
