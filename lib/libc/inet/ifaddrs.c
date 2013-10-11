@@ -17,13 +17,6 @@
    Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
    02111-1307 USA.  */
 
-#define time __time
-#define sendto __sendto
-#define recvmsg __recvmsg
-#define bind __bind
-#define mempcpy __mempcpy
-#define getsockname __getsockname
-
 #define __FORCE_GLIBC
 #include <features.h>
 #define __USE_GNU
@@ -45,27 +38,6 @@
 #include <unistd.h>
 
 #include "netlinkaccess.h"
-
-#ifndef _LIBC
-/* The results of opendir() in this file are not used with dirfd and fchdir,
-   and we do not leak fds to any single-threaded code that could use stdio,
-   therefore save some unnecessary recursion in fchdir.c and opendir_safer.c.
-   FIXME - if the kernel ever adds support for multi-thread safety for
-   avoiding standard fds, then we should use opendir_safer.  */
-# undef opendir
-# undef closedir
-
-# if HAVE_ALLOCA
-/* The OS usually guarantees only one guard page at the bottom of the stack,
-   and a page size can be as small as 4096 bytes.  So we cannot safely
-   allocate anything larger than 4096 bytes.  Also care for the possibility
-   of a few compiler-allocated temporary stack slots.  */
-#  define __libc_use_alloca(n) ((n) < 4032)
-# else
-/* alloca is implemented with malloc, so just use malloc.  */
-#  define __libc_use_alloca(n) 0
-# endif
-#endif
 
 #if __ASSUME_NETLINK_SUPPORT
 #if 0 /* unused code */
@@ -131,7 +103,7 @@ __netlink_sendreq (struct netlink_handle *h, int type)
   memset (&nladdr, '\0', sizeof (nladdr));
   nladdr.nl_family = AF_NETLINK;
 
-  return TEMP_FAILURE_RETRY (__sendto (h->fd, (void *) &req, sizeof (req), 0,
+  return TEMP_FAILURE_RETRY (sendto (h->fd, (void *) &req, sizeof (req), 0,
 				       (struct sockaddr *) &nladdr,
 				       sizeof (nladdr)));
 }
@@ -154,16 +126,11 @@ __netlink_request (struct netlink_handle *h, int type)
     return -1;
 
   size_t this_buf_size = buf_size;
-  if (__libc_use_alloca (this_buf_size))
-    buf = alloca (this_buf_size);
-  else
-    {
-      buf = malloc (this_buf_size);
-      if (buf != NULL)
+  buf = malloc (this_buf_size);
+     if (buf != NULL)
 	use_malloc = true;
-      else
+     else
 	goto out_fail;
-    }
 
   struct iovec iov = { buf, this_buf_size };
 
@@ -182,7 +149,7 @@ __netlink_request (struct netlink_handle *h, int type)
 	  0
 	};
 
-      read_len = TEMP_FAILURE_RETRY (__recvmsg (h->fd, &msg, 0));
+      read_len = TEMP_FAILURE_RETRY (recvmsg (h->fd, &msg, 0));
       if (read_len < 0)
 	goto out_fail;
 
@@ -205,10 +172,6 @@ __netlink_request (struct netlink_handle *h, int type)
 	    }
 	  *new_nlm_list = NULL;
 
-	  if (__libc_use_alloca (2 * this_buf_size))
-	    buf = extend_alloca (buf, this_buf_size, 2 * this_buf_size);
-	  else
-	    {
 	      this_buf_size *= 2;
 
 	      char *new_buf = realloc (use_malloc ? buf : NULL, this_buf_size);
@@ -216,8 +179,8 @@ __netlink_request (struct netlink_handle *h, int type)
 		goto out_fail;
 	      new_buf = buf;
 
-	      use_malloc = true;
-	    }
+	    use_malloc = true;
+
 	  buf_size = this_buf_size;
 
 	  iov.iov_base = buf;
@@ -297,7 +260,7 @@ __netlink_close (struct netlink_handle *h)
 {
   /* Don't modify errno.  */
   int serrno = errno;
-  __close(h->fd);
+  close(h->fd);
   __set_errno(serrno);
 }
 
@@ -308,13 +271,13 @@ __netlink_open (struct netlink_handle *h)
 {
   struct sockaddr_nl nladdr;
 
-  h->fd = __socket (PF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
+  h->fd = socket (PF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
   if (h->fd < 0)
     goto out;
 
   memset (&nladdr, '\0', sizeof (nladdr));
   nladdr.nl_family = AF_NETLINK;
-  if (__bind (h->fd, (struct sockaddr *) &nladdr, sizeof (nladdr)) < 0)
+  if (bind (h->fd, (struct sockaddr *) &nladdr, sizeof (nladdr)) < 0)
     {
     close_and_out:
       __netlink_close (h);
@@ -328,7 +291,7 @@ __netlink_open (struct netlink_handle *h)
      It is not necessarily the PID if there is more than one socket
      open.  */
   socklen_t addr_len = sizeof (nladdr);
-  if (__getsockname (h->fd, (struct sockaddr *) &nladdr, &addr_len) < 0)
+  if (getsockname (h->fd, (struct sockaddr *) &nladdr, &addr_len) < 0)
     goto close_and_out;
   h->pid = nladdr.nl_pid;
   return 0;

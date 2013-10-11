@@ -20,8 +20,6 @@
    Reworked Dec 2002 by Erik Andersen <andersen@codepoet.org>
  */
 
-#define strndup __strndup
-
 #define __FORCE_GLIBC
 #include <features.h>
 #define __USE_GNU
@@ -109,9 +107,9 @@ if_nameindex (void)
   ifc.ifc_len = rq_len;
   while (1)
     {
-      if (__ioctl (fd, SIOCGIFCONF, &ifc) < 0)
+      if (ioctl (fd, SIOCGIFCONF, &ifc) < 0)
 	{
-	  __close (fd);
+	  close (fd);
 	  return NULL;
 	}
       if (ifc.ifc_len < rq_len)
@@ -126,7 +124,7 @@ if_nameindex (void)
   idx = malloc ((nifs + 1) * sizeof (struct if_nameindex));
   if (idx == NULL)
     {
-      __close(fd);
+      close(fd);
       __set_errno(ENOBUFS);
       return NULL;
     }
@@ -136,7 +134,7 @@ if_nameindex (void)
       struct ifreq *ifr = &ifc.ifc_req[i];
       idx[i].if_name = __strdup (ifr->ifr_name);
       if (idx[i].if_name == NULL
-	  || __ioctl (fd, SIOCGIFINDEX, ifr) < 0)
+	  || ioctl (fd, SIOCGIFINDEX, ifr) < 0)
 	{
 	  int saved_errno = errno;
 	  unsigned int j;
@@ -144,7 +142,7 @@ if_nameindex (void)
 	  for (j =  0; j < i; ++j)
 	    free (idx[j].if_name);
 	  free(idx);
-	  __close(fd);
+	  close(fd);
 	  if (saved_errno == EINVAL)
 	    saved_errno = ENOSYS;
 	  else if (saved_errno == ENOMEM)
@@ -158,7 +156,7 @@ if_nameindex (void)
   idx[i].if_index = 0;
   idx[i].if_name = NULL;
 
-  __close(fd);
+  close(fd);
   return idx;
 #endif
 }
@@ -249,7 +247,7 @@ if_nameindex (void)
 
 		  if (rta->rta_type == IFLA_IFNAME)
 		    {
-		      idx[nifs].if_name = __strndup (rta_data, rta_payload);
+		      idx[nifs].if_name = strndup (rta_data, rta_payload);
 		      if (idx[nifs].if_name == NULL)
 			{
 			  idx[nifs].if_index = 0;
@@ -306,19 +304,19 @@ if_indextoname (unsigned int ifindex, char *ifname)
     return NULL;
 
   ifr.ifr_ifindex = ifindex;
-  if (__ioctl (fd, SIOCGIFNAME, &ifr) < 0)
+  if (ioctl (fd, SIOCGIFNAME, &ifr) < 0)
     {
       int serrno = errno;
-      __close (fd);
+      close (fd);
       if (serrno == ENODEV)
 	/* POSIX requires ENXIO.  */
 	serrno = ENXIO;
       __set_errno (serrno);
       return NULL;
   }
-  __close (fd);
+  close (fd);
 
-  return __strncpy (ifname, ifr.ifr_name, IFNAMSIZ);
+  return strncpy (ifname, ifr.ifr_name, IFNAMSIZ);
 # else
   struct if_nameindex *idx;
   struct if_nameindex *p;
@@ -331,7 +329,7 @@ if_indextoname (unsigned int ifindex, char *ifname)
       for (p = idx; p->if_index || p->if_name; ++p)
 	if (p->if_index == ifindex)
 	  {
-	    result = __strncpy (ifname, p->if_name, IFNAMSIZ);
+	    result = strncpy (ifname, p->if_name, IFNAMSIZ);
 	    break;
 	  }
 
