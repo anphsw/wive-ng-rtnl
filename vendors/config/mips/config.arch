@@ -172,13 +172,16 @@ endif
 	CFLAGS  += -I$(ROOTDIR)/lib/include
 	CFLAGS  += -I$(ROOTDIR)/lib/include_shared
 ifdef CONFIG_LIB_NFNETLINK
-	CFLAGS  += -I$(ROOTDIR)/lib/include_shared/nfnetlink
+	CFLAGS  += -I$(ROOTDIR)/lib/include_shared/libnfnetlink
 endif
 ifdef CONFIG_LIB_CURL
 	CFLAGS  += -I$(ROOTDIR)/lib/include_shared/curl
 endif
 ifdef CONFIG_LIB_EVENT
 	CFLAGS  += -I$(ROOTDIR)/lib/include_shared/event2
+endif
+ifdef CONFIG_LIB_USB
+	CFLAGS  += -I$(ROOTDIR)/lib/include_shared/libusb-1.0
 endif
 	LDFLAGS  += -L$(ROOTDIR)/lib/lib
 
