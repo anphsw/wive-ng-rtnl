@@ -29,7 +29,7 @@ int
 getifaddr(const char * ifname, char * buf, int len,
           struct in_addr * addr, struct in_addr * mask)
 {
-#if !defined(USE_GETIFADDRS) && !defined(ENABLE_IPV6)
+#ifndef USE_GETIFADDRS
 	/* use ioctl SIOCGIFADDR. Works only for ip v4 */
 	/* SIOCGIFADDR struct ifreq *  */
 	int s;
