@@ -1556,7 +1556,13 @@ int __read_etc_hosts_r(FILE * fp, const char * name, int type,
 			ret=NETDB_SUCCESS;
 #endif /* __UCLIBC_HAS_IPV6__ */
 		} else {
-			DPRINTF("Error\n");
+			/* continue parsing in the hope the user has multiple
+			 * host types listed in the database like so:
+			 * <ipv4 addr> host
+			 * <ipv6 addr> host
+			 * If looking for an IPv6 addr, don't bail when we got the IPv4
+			 */
+			DPRINTF("Error: Found host but diff network type\n");
 			ret=TRY_AGAIN;
 			continue; /* bad ip address, ignore */
         }
