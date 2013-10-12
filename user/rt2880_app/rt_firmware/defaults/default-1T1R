@@ -155,6 +155,7 @@ l2tp_srv_mtu_size=AUTO
 l2tp_srv_nat_enabled=1
 l2tp_srv_pass0=test
 l2tp_srv_user0=test
+l2tp_srv_proxyarp=1
 Lan2Enabled=0
 Language=en
 lan_ipaddr=192.168.1.1
