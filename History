@@ -1685,7 +1685,7 @@
 10) init.d: tune start/restart seq for more correct ipv6 support at init.<br>
 11) radvd: up to 1.9.4 version.<br>
 12) dnsmasq: up to 2.67rc3 for prerelease testing.<br>
-13) build: allow build snmpd and quagga for 4Mb flash devices(after disable sta support).
+13) build: allow build snmpd and quagga for 4Mb flash devices(after disable sta support).<br>
 14) init.d: add l2tp_srv_proxyarp nvram variable for enable proxyarp for vpn server.<br>
 15) kernel: mips: reimplement get_cycles().<br>
 16) kernel: wifi_drivers: backport fixses from 2.7.x.x drivers.<br>
