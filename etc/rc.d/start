@@ -6,8 +6,6 @@
 ##########################################################
 
 LOG="echo INIT"
-TGZfs_size=131072
-BLOCKS=2
 MTDDEVICE=/dev/mtdblock5
 ROOTDEVICE=/dev/mtdblock4
 TMPROOTFSD="/tmp/rootfs"
