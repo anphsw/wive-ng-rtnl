@@ -1712,7 +1712,7 @@ void skb_split(struct sk_buff *skb, struct sk_buff *skb1, const u32 len)
  * Initializes the specified state variable. Must be called before
  * invoking skb_seq_read() for the first time.
  */
-void skb_prepare_seq_read(struct sk_buff *skb, unsigned int from,
+static void skb_prepare_seq_read(struct sk_buff *skb, unsigned int from,
 			  unsigned int to, struct skb_seq_state *st)
 {
 	st->lower_offset = from;
@@ -1747,7 +1747,7 @@ void skb_prepare_seq_read(struct sk_buff *skb, unsigned int from,
  *       at the moment, state->root_skb could be replaced with
  *       a stack for this purpose.
  */
-unsigned int skb_seq_read(unsigned int consumed, const u8 **data,
+static unsigned int skb_seq_read(unsigned int consumed, const u8 **data,
 			  struct skb_seq_state *st)
 {
 	unsigned int block_limit, abs_offset = consumed + st->lower_offset;
@@ -1816,7 +1816,7 @@ next_skb:
  * Must be called if skb_seq_read() was not called until it
  * returned 0.
  */
-void skb_abort_seq_read(struct skb_seq_state *st)
+static void skb_abort_seq_read(struct skb_seq_state *st)
 {
 	if (st->frag_data)
 		kunmap_skb_frag(st->frag_data);
@@ -2121,8 +2121,5 @@ EXPORT_SYMBOL(skb_queue_tail);
 EXPORT_SYMBOL(skb_unlink);
 EXPORT_SYMBOL(skb_append);
 EXPORT_SYMBOL(skb_split);
-EXPORT_SYMBOL(skb_prepare_seq_read);
-EXPORT_SYMBOL(skb_seq_read);
-EXPORT_SYMBOL(skb_abort_seq_read);
 EXPORT_SYMBOL(skb_find_text);
 EXPORT_SYMBOL(skb_append_datato_frags);

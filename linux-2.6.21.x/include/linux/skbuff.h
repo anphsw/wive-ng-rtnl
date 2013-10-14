@@ -422,13 +422,6 @@ struct skb_seq_state {
 	__u8		*frag_data;
 };
 
-extern void	      skb_prepare_seq_read(struct sk_buff *skb,
-					   unsigned int from, unsigned int to,
-					   struct skb_seq_state *st);
-extern unsigned int   skb_seq_read(unsigned int consumed, const u8 **data,
-				   struct skb_seq_state *st);
-extern void	      skb_abort_seq_read(struct skb_seq_state *st);
-
 extern unsigned int   skb_find_text(struct sk_buff *skb, unsigned int from,
 				    unsigned int to, struct ts_config *config,
 				    struct ts_state *state);
