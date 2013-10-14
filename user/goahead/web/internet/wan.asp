@@ -230,11 +230,11 @@ function wanMtuChange(form)
                 <option value="1" selected="selected">Custom</option>
                 <option value="1500">1500</option>
                 <option value="1492">1492</option>
+                <option value="1460">1460</option>
                 <option value="1440">1440</option>
                 <option value="1400">1400</option>
                 <option value="1300">1300</option>
                 <option value="1200">1200</option>
-                <option value="1100">1100</option>
                 <option value="1000">1000</option>
               </select></td>
           </tr>

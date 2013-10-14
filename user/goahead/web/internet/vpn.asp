@@ -442,7 +442,6 @@ function formCheck(form)
               <select id="vpn_mtu_select" disabled="disabled" name="vpn_mtu_type" onChange="mtuChange(this.form);" class="mid" >
                 <option value="AUTO">AUTO</option>
                 <option value="1" selected="selected">Custom</option>
-                <option value="1500">1500</option>
                 <option value="1492">1492</option>
                 <option value="1440">1440</option>
                 <option value="1400">1400</option>
