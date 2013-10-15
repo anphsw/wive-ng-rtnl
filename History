@@ -1704,6 +1704,7 @@
 29) kernel: rework and speedup logic for pass ppe/fastnat.<br>
 30) kernel: netfilter: Implement RFC 1123 for FTP conntrack.<br>
 31) kernel: netfilter: rtsp: fix test router support rtsp from stb failed.<br>
+32) kernel: fastnat: fix conntrack hash connections collisions.<br>
 <br>
 <br>
 <br>

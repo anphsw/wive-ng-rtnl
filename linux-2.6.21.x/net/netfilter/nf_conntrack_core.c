@@ -250,11 +250,21 @@ static u_int32_t __hash_conntrack(const struct nf_conntrack_tuple *tuple,
 {
 	unsigned int a, b;
 
+#ifdef CONFIG_BCM_NAT
+	if (tuple->src.l3num == PF_INET && tuple->dst.protonum == PF_INET) {
+		/* To ensure that halves of the same connection don't hash clash, we add the source per-proto again. */
+		return (ntohl(tuple->src.u3.ip + tuple->dst.u3.ip
+			     + tuple->src.u.all + tuple->dst.u.all
+			     + tuple->dst.protonum)
+			+ ntohs(tuple->src.u.all))
+			% nf_conntrack_htable_size;
+	} else
+#endif
 #ifdef CONFIG_NAT_CONE
 	if (nf_conntrack_nat_mode == NAT_MODE_FCONE) {
 	    a = jhash2(tuple->dst.u3.all, ARRAY_SIZE(tuple->dst.u3.all), tuple->dst.u.all); // dst ip, dst port
 	    b = jhash2(tuple->dst.u3.all, ARRAY_SIZE(tuple->dst.u3.all), tuple->dst.protonum); //dst ip, & dst ip protocol
-	 } else if (nf_conntrack_nat_mode == NAT_MODE_RCONE) {
+	} else if (nf_conntrack_nat_mode == NAT_MODE_RCONE) {
 	    a = jhash2(tuple->src.u3.all, ARRAY_SIZE(tuple->src.u3.all), (tuple->src.l3num << 16) | tuple->dst.protonum);
 	    b = jhash2(tuple->dst.u3.all, ARRAY_SIZE(tuple->dst.u3.all), (tuple->dst.u.all << 16) | tuple->dst.protonum);
 	} else {
@@ -418,12 +428,27 @@ nf_ct_invert_tuple(struct nf_conntrack_tuple *inverse,
 		   const struct nf_conntrack_l3proto *l3proto,
 		   const struct nf_conntrack_l4proto *l4proto)
 {
+#ifdef CONFIG_BCM_NAT
+	if (inverse->src.l3num == PF_INET && inverse->dst.protonum == PF_INET) {
+		inverse->src.u.all = inverse->dst.u.all = 0;
+		inverse->src.u3.all[0] = inverse->src.u3.all[1]	= inverse->src.u3.all[2] = inverse->src.u3.all[3] = 0;
+		inverse->dst.u3.all[0] = inverse->dst.u3.all[1]	= inverse->dst.u3.all[2] = inverse->dst.u3.all[3] = 0;
+		inverse->src.u3.ip = orig->dst.u3.ip;
+		inverse->dst.u3.ip = orig->src.u3.ip;
+	} else {
+		memset(inverse, 0, sizeof(*inverse));
+
+		if (l3proto->invert_tuple(inverse, orig) == 0)
+			return 0;
+	}
+	inverse->src.l3num = orig->src.l3num;
+#else
 	memset(inverse, 0, sizeof(*inverse));
 
 	inverse->src.l3num = orig->src.l3num;
 	if (l3proto->invert_tuple(inverse, orig) == 0)
 		return 0;
-
+#endif
 	inverse->dst.dir = !orig->dst.dir;
 
 	inverse->dst.protonum = orig->dst.protonum;
