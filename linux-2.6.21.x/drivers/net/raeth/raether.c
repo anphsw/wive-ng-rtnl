@@ -166,6 +166,10 @@ int lro_flush_needed;
 extern char const *nvram_get(int index, char *name);
 #endif
 
+#if defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350)
+static void rt305x_esw_init(void);
+#endif
+
 #if 0
 void skb_dump(struct sk_buff* sk) {
         unsigned int i;
@@ -2892,11 +2896,11 @@ static void fe_sw_init(void)
 #else
 	rt305x_esw_init();
 #endif
-#endif 
+#endif
 	// Case4:  RT288x/RT388x GE1 + GigaSW
 #if defined (CONFIG_GE1_RGMII_FORCE_1000)
 	sysRegWrite(MDIO_CFG, INIT_VALUE_OF_FORCE_1000_FD);
-#endif 
+#endif
 
 	// Case5: RT388x GE2 + GigaSW
 #if defined (CONFIG_GE2_RGMII_FORCE_1000)
