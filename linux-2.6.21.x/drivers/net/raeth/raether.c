@@ -28,11 +28,7 @@
 #include <linux/inet_lro.h>
 #endif
 
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,0)
 #include <asm/rt2880/rt_mmap.h>
-#else
-#include <linux/libata-compat.h>
-#endif
 
 #include "ra2882ethreg.h"
 #include "raether.h"
@@ -96,7 +92,7 @@ EXPORT_SYMBOL(ra_sw_nat_hook_rs);
 #endif
 #endif
 
-#if defined(CONFIG_RA_CLASSIFIER)||defined(CONFIG_RA_CLASSIFIER_MODULE)
+#if defined(CONFIG_RA_CLASSIFIER) || defined(CONFIG_RA_CLASSIFIER_MODULE)
 /* Qwert+
  */
 #include <asm/mipsregs.h>
@@ -1247,7 +1243,7 @@ static int rt2880_eth_recv(struct net_device* dev)
 			rx_skb->ip_summed = CHECKSUM_NONE;
 #endif
 
-#if defined(CONFIG_RA_CLASSIFIER)||defined(CONFIG_RA_CLASSIFIER_MODULE)
+#if defined(CONFIG_RA_CLASSIFIER) || defined(CONFIG_RA_CLASSIFIER_MODULE)
 		/* Qwert+
 		 */
 		if(ra_classifier_hook_rx!= NULL)
@@ -1496,7 +1492,7 @@ void kill_sig_workq(struct work_struct *work)
 ///////////////////////////////////////////////////////////////////
 
 #ifndef CONFIG_RAETH_NAPI
-#if defined WORKQUEUE_BH || defined (TASKLET_WORKQUEUE_SW)
+#if defined (WORKQUEUE_BH) || defined (TASKLET_WORKQUEUE_SW)
 static void ei_receive_workq(struct work_struct *work)
 #else
 static void ei_receive(unsigned long unused)  // device structure
@@ -1881,7 +1877,7 @@ static int FASTPATH ei_start_xmit(struct sk_buff* skb, struct net_device *dev, i
          }
 #endif
 
-#if defined(CONFIG_RA_CLASSIFIER)||defined(CONFIG_RA_CLASSIFIER_MODULE)
+#if defined(CONFIG_RA_CLASSIFIER) || defined(CONFIG_RA_CLASSIFIER_MODULE)
 		/* Qwert+
 		 */
 		if(ra_classifier_hook_tx!= NULL)
@@ -3609,7 +3605,7 @@ void rt_gsw_init(void)
 
 
 
-#if defined (CONFIG_MT7620_FPGA)|| defined (CONFIG_MT7620_ASIC)
+#if defined (CONFIG_MT7620_FPGA) || defined (CONFIG_MT7620_ASIC)
 	*(unsigned long *)(RALINK_ETH_SW_BASE+0x3600) = 0x5e33b;//CPU Port6 Force Link 1G, FC ON
 	*(unsigned long *)(RALINK_ETH_SW_BASE+0x0010) = 0x7f7f7fe0;//Set Port6 CPU Port
 
