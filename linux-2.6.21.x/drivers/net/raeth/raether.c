@@ -130,10 +130,10 @@ int ra_mtd_read_nm(char *name, loff_t from, size_t len, u_char *buf);
 struct net_device		*dev_raether;
 
 #ifdef CONFIG_RAETH_INIT_PROTECT
-unsigned char eth_close=1; /* default disable rx/tx processing while init */
+static bool eth_close=true; /* default disable rx/tx processing while init */
 #endif
 
-static int rx_dma_owner_idx; 
+static int rx_dma_owner_idx;
 static int rx_dma_owner_idx0;
 #if defined (CONFIG_RAETH_MULTIPLE_RX_RING)
 static int rx_dma_owner_idx1;
@@ -160,7 +160,7 @@ extern struct ethtool_ops	ra_virt_ethtool_ops;
 #endif // CONFIG_ETHTOOL //
 
 #ifdef CONFIG_RALINK_VISTA_BASIC
-int is_switch_175c = 1;
+int is_switch_175c=1;
 #endif
 
 #if defined (CONFIG_RAETH_LRO)
@@ -344,7 +344,7 @@ static int ei_set_mac2_addr(struct net_device *dev, void *p)
 }
 #endif
 
-void set_fe_pdma_glo_cfg(void)
+static void set_fe_pdma_glo_cfg(void)
 {
         int pdma_glo_cfg=0;
 #if defined (CONFIG_RALINK_RT2880) || defined(CONFIG_RALINK_RT2883) || \
@@ -380,7 +380,7 @@ void set_fe_pdma_glo_cfg(void)
 #endif
 }
 
-void forward_config(struct net_device *dev)
+static void forward_config(struct net_device *dev)
 {
 
 #if defined (CONFIG_RALINK_RT5350)
@@ -778,7 +778,7 @@ static int fe_pdma_init(struct net_device *dev)
 }
 
 #if! defined (CONFIG_RAETH_QOS)
-static inline int rt2880_eth_send(struct net_device* dev, struct sk_buff *skb, int gmac_no)
+static int rt2880_eth_send(struct net_device* dev, struct sk_buff *skb, int gmac_no)
 {
 	unsigned int	length=skb->len;
 	END_DEVICE*	ei_local = netdev_priv(dev);
@@ -800,7 +800,7 @@ static inline int rt2880_eth_send(struct net_device* dev, struct sk_buff *skb, i
 	PSEUDO_ADAPTER *pAd;
 #endif
 #ifdef CONFIG_RAETH_INIT_PROTECT
-	if(eth_close == 1) { /* protect eth while init or reinit */
+	if(eth_close == true) { /* protect eth while init or reinit */
 		dev_kfree_skb_any(skb);
 		return 0;
 	}
@@ -1122,7 +1122,7 @@ static int rt2880_eth_recv(struct net_device* dev)
 	PSEUDO_ADAPTER *pAd;
 #endif
 #ifdef CONFIG_RAETH_INIT_PROTECT
-	if(eth_close == 1) /* protect eth while init or reinit */
+	if(eth_close == true) /* protect eth while init or reinit */
 	    return 0;
 #endif
 
@@ -1443,7 +1443,7 @@ static int rt2880_eth_recv(struct net_device* dev)
 ///// RETURNS: pointer to net_device_stats
 ///////////////////////////////////////////////////////////////////
 
-struct net_device_stats *ra_get_stats(struct net_device *dev)
+static struct net_device_stats *ra_get_stats(struct net_device *dev)
 {
 	END_DEVICE *ei_local = netdev_priv(dev);
 	return &ei_local->stat;
@@ -1497,9 +1497,9 @@ void kill_sig_workq(struct work_struct *work)
 
 #ifndef CONFIG_RAETH_NAPI
 #if defined WORKQUEUE_BH || defined (TASKLET_WORKQUEUE_SW)
-void ei_receive_workq(struct work_struct *work)
+static void ei_receive_workq(struct work_struct *work)
 #else
-void ei_receive(unsigned long unused)  // device structure
+static void ei_receive(unsigned long unused)  // device structure
 #endif // WORKQUEUE_BH //
 {
 	struct net_device *dev = dev_raether;
@@ -1733,7 +1733,7 @@ static void esw_link_status_changed(int port_no, void *dev_id)
     END_DEVICE *ei_local = netdev_priv(dev);
 
     reg_val = *((volatile u32 *)(RALINK_ETH_SW_BASE+ 0x3008 + (port_no*0x100)));
-    
+
     if(reg_val & 0x1) {
 	printk("ESW: Link Status Changed - Port%d Link UP\n", port_no);
 #if defined (CONFIG_WAN_AT_P0)
@@ -1860,7 +1860,7 @@ static int FASTPATH ei_start_xmit(struct sk_buff* skb, struct net_device *dev, i
 	PSEUDO_ADAPTER *pAd;
 #endif
 #ifdef CONFIG_RAETH_INIT_PROTECT
-	if(eth_close == 1) { /* protect eth while init or reinit */
+	if(eth_close == true) { /* protect eth while init or reinit */
 		dev_kfree_skb_any(skb);
 		return 0;
 	}
@@ -2389,12 +2389,12 @@ void ra2880_setup_dev_fptable(struct net_device *dev)
 }
 
 /* reset frame engine */
-void fe_reset(void)
+static void fe_reset(void)
 {
 	u32 val;
 
 #ifdef CONFIG_RAETH_INIT_PROTECT
-	eth_close=1; /* set closed flag protect eth while init or reinit */
+	eth_close=true; /* set closed flag protect eth while init or reinit */
 #endif
 #if defined (CONFIG_RALINK_RT6855A)
 	/* FIXME */
@@ -2423,7 +2423,7 @@ void ei_reset_task(struct work_struct *work)
 	struct net_device *dev = dev_raether;
 
 #ifdef CONFIG_RAETH_INIT_PROTECT
-	eth_close=1; /* set closed flag protect eth while init or reinit */
+	eth_close=true; /* set closed flag protect eth while init or reinit */
 #endif
 	ei_close(dev);
 	ei_open(dev);
@@ -2819,6 +2819,216 @@ void RAETH_Init_PSEUDO(pEND_DEVICE pAd, struct net_device *net_dev)
 }
 #endif
 
+static void fe_sw_init(void)
+{
+#if defined (CONFIG_GIGAPHY) || defined (CONFIG_RAETH_ROUTER) || defined (CONFIG_100PHY)
+        unsigned int regValue = 0;
+#endif
+
+	// Case1: RT288x/RT3883 GE1 + GigaPhy
+#if defined (CONFIG_GE1_RGMII_AN)
+	enable_auto_negotiate(1);
+	if (isMarvellGigaPHY(1)) {
+#if defined (CONFIG_RT3883_FPGA)
+		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 9, &regValue);
+		regValue &= ~(3<<8); //turn off 1000Base-T Advertisement  (9.9=1000Full, 9.8=1000Half)
+		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 9, regValue);
+#endif
+		printk("\n Reset MARVELL phy\n");
+		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 20, &regValue);
+		regValue |= 1<<7; //Add delay to RX_CLK for RXD Outputs
+		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 20, regValue);
+
+		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 0, &regValue);
+		regValue |= 1<<15; //PHY Software Reset
+	 	mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 0, regValue);
+
+	}
+	if (isVtssGigaPHY(1)) {
+		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 31, 1);
+		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 28, &regValue);
+		printk("Vitesse phy skew: %x --> ", regValue);
+		regValue |= (0x3<<12);
+		regValue &= ~(0x3<<14);
+		printk("%x\n", regValue);
+		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 28, regValue);
+		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 31, 0);
+        }
+#endif // CONFIG_GE1_RGMII_AN //
+
+	// Case2: RT3883 GE2 + GigaPhy
+#if defined (CONFIG_GE2_RGMII_AN)
+	enable_auto_negotiate(2);
+	if (isMarvellGigaPHY(2)) {
+#if defined (CONFIG_RT3883_FPGA)
+		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 9, &regValue);
+		regValue &= ~(3<<8); //turn off 1000Base-T Advertisement (9.9=1000Full, 9.8=1000Half)
+		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 9, regValue);
+#endif
+		printk("\n GMAC2 Reset MARVELL phy\n");
+		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 20, &regValue);
+		regValue |= 1<<7; //Add delay to RX_CLK for RXD Outputs
+		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 20, regValue);
+
+		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 0, &regValue);
+		regValue |= 1<<15; //PHY Software Reset
+		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 0, regValue);
+
+	}
+	if (isVtssGigaPHY(2)) {
+		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 31, 1);
+		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 28, &regValue);
+		printk("Vitesse phy skew: %x --> ", regValue);
+		regValue |= (0x3<<12);
+		regValue &= ~(0x3<<14);
+		printk("%x\n", regValue);
+		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 28, regValue);
+		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 31, 0);
+	}
+#endif // CONFIG_GE2_RGMII_AN //
+
+	// Case3: RT305x/RT335x/RT6855/RT6855A + EmbeddedSW
+#if defined (CONFIG_RT_3052_ESW)
+#if defined (CONFIG_RALINK_RT6855) || defined(CONFIG_RALINK_MT7620)
+	rt_gsw_init();
+#elif defined(CONFIG_RALINK_RT6855A)
+	rt6855A_gsw_init();
+#else
+	rt305x_esw_init();
+#endif
+#endif 
+	// Case4:  RT288x/RT388x GE1 + GigaSW
+#if defined (CONFIG_GE1_RGMII_FORCE_1000)
+	sysRegWrite(MDIO_CFG, INIT_VALUE_OF_FORCE_1000_FD);
+#endif 
+
+	// Case5: RT388x GE2 + GigaSW
+#if defined (CONFIG_GE2_RGMII_FORCE_1000)
+	sysRegWrite(MDIO_CFG2, INIT_VALUE_OF_FORCE_1000_FD);
+#endif 
+
+
+	// Case6: RT288x GE1 /RT388x GE1/GE2 + (10/100 Switch or 100PHY)
+#if defined (CONFIG_RAETH_ROUTER) || defined (CONFIG_100PHY)
+
+//set GMAC to MII or RvMII mode
+#if defined (CONFIG_RALINK_RT3883)
+	regValue = sysRegRead(SYSCFG1);
+#if defined (CONFIG_GE1_MII_FORCE_100) || defined (CONFIG_GE1_MII_AN)
+	regValue &= ~(0x3 << 12);
+	regValue |= 0x1 << 12; // GE1 MII Mode
+#elif defined (CONFIG_GE1_RVMII_FORCE_100)
+	regValue &= ~(0x3 << 12);
+	regValue |= 0x2 << 12; // GE1 RvMII Mode
+#endif 
+
+#if defined (CONFIG_GE2_MII_FORCE_100) || defined (CONFIG_GE2_MII_AN) 
+	regValue &= ~(0x3 << 14);
+	regValue |= 0x1 << 14; // GE2 MII Mode
+#elif defined (CONFIG_GE2_RVMII_FORCE_100)
+	regValue &= ~(0x3 << 14);
+	regValue |= 0x2 << 14; // GE2 RvMII Mode
+#endif 
+	sysRegWrite(SYSCFG1, regValue);
+#endif // CONFIG_RALINK_RT3883 //
+
+#if defined (CONFIG_GE1_MII_FORCE_100)
+	sysRegWrite(MDIO_CFG, INIT_VALUE_OF_FORCE_100_FD);
+#endif
+#if defined (CONFIG_GE2_MII_FORCE_100)
+	sysRegWrite(MDIO_CFG2, INIT_VALUE_OF_FORCE_100_FD);
+#endif
+	//add switch configuration here for other switch chips.
+#if defined (CONFIG_GE1_MII_FORCE_100) ||  defined (CONFIG_GE2_MII_FORCE_100)
+	// IC+ 175x: force IC+ switch cpu port is 100/FD
+	mii_mgr_write(29, 22, 0x8420);
+#endif
+
+#if defined (CONFIG_GE1_MII_AN)
+	enable_auto_negotiate(1);
+#endif
+#if defined (CONFIG_GE2_MII_AN)
+	enable_auto_negotiate(2);
+#endif
+
+#endif // defined (CONFIG_RAETH_ROUTER) || defined (CONFIG_100PHY) //
+
+	// Case7: MT7621 GE1/GE2
+#if defined (CONFIG_RALINK_MT7621)
+#if defined (CONFIG_GE1_MII_FORCE_100) || defined (CONFIG_GE1_RVMII_FORCE_100)
+	sysRegWrite(RALINK_ETH_SW_BASE+0x100, 0x5e337);//(P0, Force mode, Link Up, 100Mbps, Full-Duplex, FC ON)
+#elif defined (CONFIG_GE1_MII_AN) || defined (CONFIG_GE1_RGMII_AN)
+	enable_auto_negotiate(1);
+	if (isMarvellGigaPHY(1)) {
+#if defined (CONFIG_MT7621_FPGA)
+		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 9, &regValue);
+		regValue &= ~(3<<8); //turn off 1000Base-T Advertisement (9.9=1000Full, 9.8=1000Half)
+		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 9, regValue);
+#endif
+
+		printk("\n GMAC1 Reset MARVELL phy\n");
+		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 20, &regValue);
+		regValue |= 1<<7; //Add delay to RX_CLK for RXD Outputs
+		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 20, regValue);
+
+		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 0, &regValue);
+		regValue |= 1<<15; //PHY Software Reset
+		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 0, regValue);
+
+	}
+	if (isVtssGigaPHY(1)) {
+		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 31, 1);
+		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 28, &regValue);
+		printk("Vitesse phy skew: %x --> ", regValue);
+		regValue |= (0x3<<12);
+		regValue &= ~(0x3<<14);
+		printk("%x\n", regValue);
+		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 28, regValue);
+		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 31, 0);
+	}
+	sysRegWrite(RALINK_ETH_SW_BASE+0x100, 0x56300);//(P0, Auto mode)
+#elif defined (CONFIG_GE1_RGMII_FORCE_1000)
+	sysRegWrite(RALINK_ETH_SW_BASE+0x100, 0x5633b);//(P0, Force mode, Link Up, 1000Mbps, Full-Duplex, FC ON)
+#endif
+
+#if defined (CONFIG_GE2_MII_FORCE_100) || defined (CONFIG_GE2_RVMII_FORCE_100)
+	sysRegWrite(RALINK_ETH_SW_BASE+0x200, 0x5e337);//(P0, Force mode, Link Up, 100Mbps, Full-Duplex, FC ON)
+#elif defined (CONFIG_GE2_MII_AN) || defined (CONFIG_GE2_RGMII_AN)
+	enable_auto_negotiate(2);
+	if (isMarvellGigaPHY(2)) {
+#if defined (CONFIG_MT7621_FPGA)
+		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 9, &regValue);
+		regValue &= ~(3<<8); //turn off 1000Base-T Advertisement (9.9=1000Full, 9.8=1000Half)
+		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 9, regValue);
+#endif		
+		printk("\n GMAC2 Reset MARVELL phy\n");
+		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 20, &regValue);
+		regValue |= 1<<7; //Add delay to RX_CLK for RXD Outputs
+		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 20, regValue);
+
+		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 0, &regValue);
+		regValue |= 1<<15; //PHY Software Reset
+		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 0, regValue);
+
+	}
+	if (isVtssGigaPHY(2)) {
+		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 31, 1);
+		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 28, &regValue);
+		printk("Vitesse phy skew: %x --> ", regValue);
+		regValue |= (0x3<<12);
+		regValue &= ~(0x3<<14);
+		printk("%x\n", regValue);
+		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 28, regValue);
+		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 31, 0);
+	}
+        sysRegWrite(RALINK_ETH_SW_BASE+0x200, 0x56300);//(P1, Auto mode)
+#elif defined (CONFIG_GE2_RGMII_FORCE_1000)
+	sysRegWrite(RALINK_ETH_SW_BASE+0x200, 0x5633b);//(P0, Force mode, Link Up, 1000Mbps, Full-Duplex, FC ON)
+#endif
+#endif
+
+}
+
 /**
  * ei_open - Open/Initialize the ethernet port.
  * @dev: network device to initialize
@@ -2833,7 +3043,7 @@ int ei_open(struct net_device *dev)
 	END_DEVICE *ei_local;
 
 #ifdef CONFIG_RAETH_LRO
-	const char *lan_ip_tmp; 
+	const char *lan_ip_tmp;
 #ifdef CONFIG_DUAL_IMAGE
 #define RT2860_NVRAM	1
 #else
@@ -2984,7 +3194,7 @@ int ei_open(struct net_device *dev)
 	forward_config(dev);
 
 #ifdef CONFIG_RAETH_INIT_PROTECT
-	eth_close=0; /* set flag to open protect eth while init or reinit */
+	eth_close=false; /* set flag to open protect eth while init or reinit */
 #endif
 	return 0;
 }
@@ -3010,7 +3220,7 @@ int ei_close(struct net_device *dev)
 #endif
 #endif
 #ifdef CONFIG_RAETH_INIT_PROTECT
-	eth_close=1; /* set closed flag protect eth while init or reinit */
+	eth_close=true; /* set closed flag protect eth while init or reinit */
 #endif
 #ifdef CONFIG_PSEUDO_SUPPORT
 	VirtualIF_close(ei_local->PseudoDev);
@@ -3277,10 +3487,6 @@ void rt6855A_gsw_init(void)
 }
 #endif
 
-
-
-
-
 #if defined(CONFIG_RALINK_RT6855) || defined(CONFIG_RALINK_MT7620)
 void rt_gsw_init(void)
 {
@@ -3537,7 +3743,7 @@ void rt_gsw_init(void)
 #endif
 
 #if defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350)
-void rt305x_esw_init(void)
+static void rt305x_esw_init(void)
 {
 	int i=0;
 	u32 phy_val=0, val=0;
@@ -3860,7 +4066,7 @@ int __init ra2882eth_init(void)
 	int sw_id=0;
 	mii_mgr_read(29, 31, &sw_id);
 	is_switch_175c = (sw_id == 0x175c) ? 1:0;
-#endif 
+#endif
 
 	if (!dev)
 		return -ENOMEM;
@@ -3903,217 +4109,6 @@ int __init ra2882eth_init(void)
 	dev_raether = dev;
 	return ret;
 }
-
-void fe_sw_init(void)
-{
-#if defined (CONFIG_GIGAPHY) || defined (CONFIG_RAETH_ROUTER) || defined (CONFIG_100PHY)
-        unsigned int regValue = 0;
-#endif
-
-	// Case1: RT288x/RT3883 GE1 + GigaPhy
-#if defined (CONFIG_GE1_RGMII_AN)
-	enable_auto_negotiate(1);
-	if (isMarvellGigaPHY(1)) {
-#if defined (CONFIG_RT3883_FPGA)
-		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 9, &regValue);
-		regValue &= ~(3<<8); //turn off 1000Base-T Advertisement  (9.9=1000Full, 9.8=1000Half)
-		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 9, regValue);
-#endif
-		printk("\n Reset MARVELL phy\n");
-		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 20, &regValue);
-		regValue |= 1<<7; //Add delay to RX_CLK for RXD Outputs
-		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 20, regValue);
-
-		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 0, &regValue);
-		regValue |= 1<<15; //PHY Software Reset
-	 	mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 0, regValue);
-
-	}
-	if (isVtssGigaPHY(1)) {
-		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 31, 1);
-		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 28, &regValue);
-		printk("Vitesse phy skew: %x --> ", regValue);
-		regValue |= (0x3<<12);
-		regValue &= ~(0x3<<14);
-		printk("%x\n", regValue);
-		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 28, regValue);
-		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 31, 0);
-        }
-#endif // CONFIG_GE1_RGMII_AN //
-
-	// Case2: RT3883 GE2 + GigaPhy
-#if defined (CONFIG_GE2_RGMII_AN)
-	enable_auto_negotiate(2);
-	if (isMarvellGigaPHY(2)) {
-#if defined (CONFIG_RT3883_FPGA)
-		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 9, &regValue);
-		regValue &= ~(3<<8); //turn off 1000Base-T Advertisement (9.9=1000Full, 9.8=1000Half)
-		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 9, regValue);
-#endif
-		printk("\n GMAC2 Reset MARVELL phy\n");
-		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 20, &regValue);
-		regValue |= 1<<7; //Add delay to RX_CLK for RXD Outputs
-		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 20, regValue);
-
-		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 0, &regValue);
-		regValue |= 1<<15; //PHY Software Reset
-		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 0, regValue);
-
-	}
-	if (isVtssGigaPHY(2)) {
-		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 31, 1);
-		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 28, &regValue);
-		printk("Vitesse phy skew: %x --> ", regValue);
-		regValue |= (0x3<<12);
-		regValue &= ~(0x3<<14);
-		printk("%x\n", regValue);
-		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 28, regValue);
-		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 31, 0);
-	}
-#endif // CONFIG_GE2_RGMII_AN //
-
-	// Case3: RT305x/RT335x/RT6855/RT6855A + EmbeddedSW
-#if defined (CONFIG_RT_3052_ESW)
-#if defined (CONFIG_RALINK_RT6855) || defined(CONFIG_RALINK_MT7620)
-	rt_gsw_init();
-#elif defined(CONFIG_RALINK_RT6855A)
-	rt6855A_gsw_init();
-#else
-	rt305x_esw_init();
-#endif
-#endif 
-	// Case4:  RT288x/RT388x GE1 + GigaSW
-#if defined (CONFIG_GE1_RGMII_FORCE_1000)
-	sysRegWrite(MDIO_CFG, INIT_VALUE_OF_FORCE_1000_FD);
-#endif 
-
-	// Case5: RT388x GE2 + GigaSW
-#if defined (CONFIG_GE2_RGMII_FORCE_1000)
-	sysRegWrite(MDIO_CFG2, INIT_VALUE_OF_FORCE_1000_FD);
-#endif 
-
-
-	// Case6: RT288x GE1 /RT388x GE1/GE2 + (10/100 Switch or 100PHY)
-#if defined (CONFIG_RAETH_ROUTER) || defined (CONFIG_100PHY)
-
-//set GMAC to MII or RvMII mode
-#if defined (CONFIG_RALINK_RT3883)
-	regValue = sysRegRead(SYSCFG1);
-#if defined (CONFIG_GE1_MII_FORCE_100) || defined (CONFIG_GE1_MII_AN)
-	regValue &= ~(0x3 << 12);
-	regValue |= 0x1 << 12; // GE1 MII Mode
-#elif defined (CONFIG_GE1_RVMII_FORCE_100)
-	regValue &= ~(0x3 << 12);
-	regValue |= 0x2 << 12; // GE1 RvMII Mode
-#endif 
-
-#if defined (CONFIG_GE2_MII_FORCE_100) || defined (CONFIG_GE2_MII_AN) 
-	regValue &= ~(0x3 << 14);
-	regValue |= 0x1 << 14; // GE2 MII Mode
-#elif defined (CONFIG_GE2_RVMII_FORCE_100)
-	regValue &= ~(0x3 << 14);
-	regValue |= 0x2 << 14; // GE2 RvMII Mode
-#endif 
-	sysRegWrite(SYSCFG1, regValue);
-#endif // CONFIG_RALINK_RT3883 //
-
-#if defined (CONFIG_GE1_MII_FORCE_100)
-	sysRegWrite(MDIO_CFG, INIT_VALUE_OF_FORCE_100_FD);
-#endif
-#if defined (CONFIG_GE2_MII_FORCE_100)
-	sysRegWrite(MDIO_CFG2, INIT_VALUE_OF_FORCE_100_FD);
-#endif
-	//add switch configuration here for other switch chips.
-#if defined (CONFIG_GE1_MII_FORCE_100) ||  defined (CONFIG_GE2_MII_FORCE_100)
-	// IC+ 175x: force IC+ switch cpu port is 100/FD
-	mii_mgr_write(29, 22, 0x8420);
-#endif
-
-#if defined (CONFIG_GE1_MII_AN)
-	enable_auto_negotiate(1);
-#endif
-#if defined (CONFIG_GE2_MII_AN)
-	enable_auto_negotiate(2);
-#endif
-
-#endif // defined (CONFIG_RAETH_ROUTER) || defined (CONFIG_100PHY) //
-
-	// Case7: MT7621 GE1/GE2
-#if defined (CONFIG_RALINK_MT7621)
-#if defined (CONFIG_GE1_MII_FORCE_100) || defined (CONFIG_GE1_RVMII_FORCE_100)
-	sysRegWrite(RALINK_ETH_SW_BASE+0x100, 0x5e337);//(P0, Force mode, Link Up, 100Mbps, Full-Duplex, FC ON)
-#elif defined (CONFIG_GE1_MII_AN) || defined (CONFIG_GE1_RGMII_AN)
-	enable_auto_negotiate(1);
-	if (isMarvellGigaPHY(1)) {
-#if defined (CONFIG_MT7621_FPGA)
-		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 9, &regValue);
-		regValue &= ~(3<<8); //turn off 1000Base-T Advertisement (9.9=1000Full, 9.8=1000Half)
-		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 9, regValue);
-#endif
-
-		printk("\n GMAC1 Reset MARVELL phy\n");
-		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 20, &regValue);
-		regValue |= 1<<7; //Add delay to RX_CLK for RXD Outputs
-		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 20, regValue);
-
-		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 0, &regValue);
-		regValue |= 1<<15; //PHY Software Reset
-		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 0, regValue);
-
-	}
-	if (isVtssGigaPHY(1)) {
-		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 31, 1);
-		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 28, &regValue);
-		printk("Vitesse phy skew: %x --> ", regValue);
-		regValue |= (0x3<<12);
-		regValue &= ~(0x3<<14);
-		printk("%x\n", regValue);
-		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 28, regValue);
-		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 31, 0);
-	}
-	sysRegWrite(RALINK_ETH_SW_BASE+0x100, 0x56300);//(P0, Auto mode)
-#elif defined (CONFIG_GE1_RGMII_FORCE_1000)
-	sysRegWrite(RALINK_ETH_SW_BASE+0x100, 0x5633b);//(P0, Force mode, Link Up, 1000Mbps, Full-Duplex, FC ON)
-#endif
-
-#if defined (CONFIG_GE2_MII_FORCE_100) || defined (CONFIG_GE2_RVMII_FORCE_100)
-	sysRegWrite(RALINK_ETH_SW_BASE+0x200, 0x5e337);//(P0, Force mode, Link Up, 100Mbps, Full-Duplex, FC ON)
-#elif defined (CONFIG_GE2_MII_AN) || defined (CONFIG_GE2_RGMII_AN)
-	enable_auto_negotiate(2);
-	if (isMarvellGigaPHY(2)) {
-#if defined (CONFIG_MT7621_FPGA)
-		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 9, &regValue);
-		regValue &= ~(3<<8); //turn off 1000Base-T Advertisement (9.9=1000Full, 9.8=1000Half)
-		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 9, regValue);
-#endif		
-		printk("\n GMAC2 Reset MARVELL phy\n");
-		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 20, &regValue);
-		regValue |= 1<<7; //Add delay to RX_CLK for RXD Outputs
-		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 20, regValue);
-
-		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 0, &regValue);
-		regValue |= 1<<15; //PHY Software Reset
-		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 0, regValue);
-
-	}
-	if (isVtssGigaPHY(2)) {
-		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 31, 1);
-		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 28, &regValue);
-		printk("Vitesse phy skew: %x --> ", regValue);
-		regValue |= (0x3<<12);
-		regValue &= ~(0x3<<14);
-		printk("%x\n", regValue);
-		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 28, regValue);
-		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 31, 0);
-	}
-        sysRegWrite(RALINK_ETH_SW_BASE+0x200, 0x56300);//(P1, Auto mode)
-#elif defined (CONFIG_GE2_RGMII_FORCE_1000)
-	sysRegWrite(RALINK_ETH_SW_BASE+0x200, 0x5633b);//(P0, Force mode, Link Up, 1000Mbps, Full-Duplex, FC ON)
-#endif
-#endif
-
-}
-
 
 /**
  * ra2882eth_cleanup_module - Module Exit code

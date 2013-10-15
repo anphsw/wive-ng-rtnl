@@ -99,8 +99,6 @@
 #define RAETH_PRINT(fmt, args...) { }
 #endif
 
-struct net_device_stats *ra_get_stats(struct net_device *dev);
-
 void ei_tx_timeout(struct net_device *dev);
 int rather_probe(struct net_device *dev);
 int ei_open(struct net_device *dev);
@@ -113,6 +111,5 @@ inline void ei_xmit_housekeeping(unsigned long data);
 
 u32 mii_mgr_read(u32 phy_addr, u32 phy_register, u32 *read_data);
 u32 mii_mgr_write(u32 phy_addr, u32 phy_register, u32 write_data);
-void fe_sw_init(void);
 
 #endif
