@@ -1220,7 +1220,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 	}
 
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-	if (nf_conntrack_fastnat && pf == PF_INET) {
+	if ((nf_conntrack_fastnat || nf_conntrack_fastroute) && pf == PF_INET) {
 	    /* Gather fragments. */
 	    if ((*pskb)->nh.iph->frag_off & htons(IP_MF|IP_OFFSET)) {
 		    if(nf_ct_ipv4_gather_frags(*pskb,
