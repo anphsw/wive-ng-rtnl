@@ -126,13 +126,6 @@
 
 #endif // CONFIG_RALINK_RT3052 || CONFIG_RALINK_RT3352 || CONFIG_RALINK_RT5350 //
 
-/*  Align on a cache line */
-#define ETHER_BUFFER_ALIGN     L1_CACHE_BYTES
-
-#define ETHER_ALIGNED_RX_SKB_ADDR(addr) \
-        ((((unsigned long)(addr) + ETHER_BUFFER_ALIGN - 1) & \
-        ~(ETHER_BUFFER_ALIGN - 1)) - (unsigned long)(addr))
-
 #ifdef CONFIG_PSEUDO_SUPPORT
 typedef struct _PSEUDO_ADAPTER {
     struct net_device *RaethDev;
@@ -633,7 +626,11 @@ typedef struct _PSEUDO_ADAPTER {
 #define INIT_VALUE_OF_RT2883_PSE_FQ_CFG		0xff908000
 #define INIT_VALUE_OF_PSE_FQFC_CFG		0x80504000
 #define INIT_VALUE_OF_FORCE_100_FD		0x1001BC01
+#if defined (CONFIG_RTL8367) || defined (CONFIG_RTL8367_MODULE)
+#define INIT_VALUE_OF_FORCE_1000_FD		0x0001DC01
+#else
 #define INIT_VALUE_OF_FORCE_1000_FD		0x1F01DC01
+#endif
 
 // Define Whole FE Reset Register
 #define RSTCTRL         (RALINK_SYSCTL_BASE + 0x34)

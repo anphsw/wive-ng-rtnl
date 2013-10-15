@@ -1318,7 +1318,7 @@ static int rt2880_eth_recv(struct net_device* dev)
 /* ra_sw_nat_hook_rx return 1 --> continue
  * ra_sw_nat_hook_rx return 0 --> FWD & without netif_rx
  */
-#if !defined(CONFIG_RA_NAT_NONE)
+#if defined (CONFIG_RA_HW_NAT) || defined (CONFIG_RA_HW_NAT_MODULE)
          if((ra_sw_nat_hook_rx == NULL) || 
 	    (ra_sw_nat_hook_rx!= NULL && ra_sw_nat_hook_rx(rx_skb)))
 #endif
@@ -2758,6 +2758,8 @@ void RAETH_Init_PSEUDO(pEND_DEVICE pAd, struct net_device *net_dev)
     for (index = 0; index < MAX_PSEUDO_ENTRY; index++) {
 
 	dev = alloc_etherdev(sizeof(PSEUDO_ADAPTER));
+	if (!dev)
+		return -ENOMEM;
 
 	strcpy(dev->name, DEV2_NAME);
 
@@ -2905,7 +2907,7 @@ static void fe_sw_init(void)
 	// Case5: RT388x GE2 + GigaSW
 #if defined (CONFIG_GE2_RGMII_FORCE_1000)
 	sysRegWrite(MDIO_CFG2, INIT_VALUE_OF_FORCE_1000_FD);
-#endif 
+#endif
 
 
 	// Case6: RT288x GE1 /RT388x GE1/GE2 + (10/100 Switch or 100PHY)
@@ -4104,9 +4106,10 @@ int __init ra2882eth_init(void)
 #ifdef CONFIG_RAETH_NETLINK
 	csr_netlink_init();
 #endif
+	dev_raether = dev;
+
 	ret = debug_proc_init();
 
-	dev_raether = dev;
 	return ret;
 }
 
@@ -4116,9 +4119,11 @@ int __init ra2882eth_init(void)
  * Cmd 'rmmod' will invode the routine to exit the module
  *
  */
-void ra2882eth_cleanup_module(void)
+void __exit ra2882eth_cleanup_module(void)
 {
 	struct net_device *dev = dev_raether;
+	if (!dev)
+		return;
 
 #ifdef CONFIG_PSEUDO_SUPPORT
 	END_DEVICE *ei_local = netdev_priv(dev);
@@ -4134,6 +4139,8 @@ void ra2882eth_cleanup_module(void)
 #ifdef CONFIG_RAETH_NETLINK
 	csr_netlink_end();
 #endif
+
+	dev_raether = NULL;
 }
 
 module_init(ra2882eth_init);
