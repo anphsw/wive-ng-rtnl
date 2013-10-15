@@ -1683,7 +1683,7 @@
 8) uclibc: add getiffadrs support.<br>
 9) init.d: add force macs rebuild logic for prevent dupe mac after some wive clones install.<br>
 10) init.d: tune start/restart seq for more correct ipv6 support at init.<br>
-11) radvd: up to 1.9.4 version.<br>
+11) radvd: up to 1.9.5 version.<br>
 12) dnsmasq: up to 2.67rc3 for prerelease testing.<br>
 13) build: allow build snmpd and quagga for 4Mb flash devices(after disable sta support).<br>
 14) init.d: add l2tp_srv_proxyarp nvram variable for enable proxyarp for vpn server.<br>
