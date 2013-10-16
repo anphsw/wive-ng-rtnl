@@ -1394,10 +1394,8 @@ pass:
 
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 	    /* software nat offload path */
-    	    if (nf_conntrack_fastnat && bcm_nat_bind_hook != NULL && nat) {
-		/* if nat type unknown/fast deny need skip packets */
-    		if ((nat->info.nat_type & NF_FAST_NAT_DENY) || skip_offload)
-		    goto skip;
+    	    if ((nf_conntrack_fastnat && bcm_nat_bind_hook != NULL && nat && !skip_offload)
+		&& !(nat->info.nat_type & NF_FAST_NAT_DENY)) {
 
 		/* Try send selected pakets to bcm_nat */
 		if ((hooknum == NF_IP_PRE_ROUTING) &&
