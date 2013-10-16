@@ -5,7 +5,7 @@ DIR=`pwd`
 KERNELHDRS=kernel-headers
 BINUTILVER=binutils-2.21
 UCLIBCVER=uClibc-0.9.28
-GCCVER=gcc-4.8.1
+GCCVER=gcc-4.8.2
 
 INSTALL_DEP=NO
 UNPACK=YES
@@ -71,10 +71,10 @@ else
 fi
 
 EXT_OPT="$EXT_OPT --disable-lto --enable-ld=yes --enable-gold=no --disable-sanity-checks --disable-werror"
-if [ "$GCCVER" = "gcc-4.6.3" ] || [ "$GCCVER" = "gcc-4.7.3" ] || [ "$GCCVER" = "gcc-4.8.1" ]; then
+if [ "$GCCVER" = "gcc-4.6.4" ] || [ "$GCCVER" = "gcc-4.7.4" ] || [ "$GCCVER" = "gcc-4.8.2" ]; then
     EXT_OPT="$EXT_OPT --disable-biendian --disable-softfloat --disable-libquadmath --disable-libquadmath-support"
 fi
-if [ "$GCCVER" = "gcc-4.8.1" ]; then
+if [ "$GCCVER" = "gcc-4.8.2" ]; then
     EXT_OPT="$EXT_OPT --disable-libatomic --with-pic"
 fi
 #########################################################################################################

@@ -1687,24 +1687,25 @@
 12) dnsmasq: up to 2.67rc4 for prerelease testing.<br>
 13) build: allow build snmpd and quagga for 4Mb flash devices(after disable sta support).<br>
 14) init.d: add l2tp_srv_proxyarp nvram variable for enable proxyarp for vpn server.<br>
-15) kernel: mips: reimplement get_cycles().<br>
-16) kernel: wifi_drivers: backport fixses from 2.7.x.x drivers.<br>
-17) kernel: tcp: fix dynamic right sizing.<br>
-18) kernel: udpv6: fix HW checksum support for outgoing UFO packets.<br>
-19) kernel: net: neighbour: use source address of last enqueued packet for solicitation.<br>
-20) kernel: wifi drivers fix regdomain parametrs for RU region.<br>
-21) kernel: ipv4: Elide use of rt->rt_dst in ip_forward().<br>
-22) kernel: ipv4: fix forwarding for strict source routes.<br>
-23) kernel: speedup network operation ~10% (use section move hack, decrease cpu usage in IPOE without HW_NAT from 70% to 57% at RT3052).<br>
-24) kernel: mips: replace -mlong-calls with -mno-long-calls to make function calls faster in kernel modules.<br>
-25) kernel: disable ralink sta drivers for 4Mb flash devices (need free flash for build more optimized modules), use apcli instead.<br>
-26) kernel: allow full optimization for kernel modules (after disable sta support).<br>
-27) kernel: fastnat: fix select packets logic allowed fastnat processing.<br>
-28) kernel: add fastroute path for offload conntrak sessions without nat.<br>
-29) kernel: rework and speedup logic for pass ppe/fastnat.<br>
-30) kernel: netfilter: Implement RFC 1123 for FTP conntrack.<br>
-31) kernel: netfilter: rtsp: fix test router support rtsp from stb failed.<br>
-32) kernel: fastnat: fix conntrack hash connections collisions.<br>
+15) toolhain: gcc update to 4.8.2 version.<br>
+16) kernel: mips: reimplement get_cycles().<br>
+17) kernel: wifi_drivers: backport fixses from 2.7.x.x drivers.<br>
+18) kernel: tcp: fix dynamic right sizing.<br>
+19) kernel: udpv6: fix HW checksum support for outgoing UFO packets.<br>
+20) kernel: net: neighbour: use source address of last enqueued packet for solicitation.<br>
+21) kernel: wifi drivers fix regdomain parametrs for RU region.<br>
+22) kernel: ipv4: Elide use of rt->rt_dst in ip_forward().<br>
+23) kernel: ipv4: fix forwarding for strict source routes.<br>
+24) kernel: speedup network operation ~10% (use section move hack, decrease cpu usage in IPOE without HW_NAT from 70% to 57% at RT3052).<br>
+25) kernel: mips: replace -mlong-calls with -mno-long-calls to make function calls faster in kernel modules.<br>
+26) kernel: disable ralink sta drivers for 4Mb flash devices (need free flash for build more optimized modules), use apcli instead.<br>
+27) kernel: allow full optimization for kernel modules (after disable sta support).<br>
+28) kernel: fastnat: fix select packets logic allowed fastnat processing.<br>
+29) kernel: add fastroute path for offload conntrak sessions without nat.<br>
+30) kernel: rework and speedup logic for pass ppe/fastnat.<br>
+31) kernel: netfilter: Implement RFC 1123 for FTP conntrack.<br>
+32) kernel: netfilter: rtsp: fix test router support rtsp from stb failed.<br>
+33) kernel: fastnat: fix conntrack hash connections collisions.<br>
 <br>
 <br>
 <br>
