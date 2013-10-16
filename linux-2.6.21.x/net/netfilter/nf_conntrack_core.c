@@ -1305,11 +1305,13 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 	else
                 skip_offload = 0;
 
-#endif
+        /* packets for nat ? */
+        nat = nfct_nat(ct);
+
 	/* full skip not ipv4 traffic by software offload */
 	if (pf != PF_INET)
 	    goto skip;
-
+#endif
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 	    /* software route offload path */
 	    if (nf_conntrack_fastroute && !skip_offload && skb_is_ready(*pskb) && is_pure_routing(ct)
@@ -1339,21 +1341,11 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 		    }
 	    }
 #endif
-	    /* packets for nat ? */
-	    nat = nfct_nat(ct);
-
+#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE) || \
+    defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 	    /* this code section may be used for skip some types traffic */
-	    if (
-#if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-		/* hardware nat support */
-		ra_sw_nat_hook_tx != NULL &&
-#endif
-#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-		/* software fastnat support */
-		bcm_nat_bind_hook != NULL &&
-#endif
-		nat && !skip_offload) {
-
+	    /* only if hardware nat support enabled or software fastnat support enabled */
+	    if (nat && !skip_offload && (ra_sw_nat_hook_tx != NULL || (nf_conntrack_fastnat && bcm_nat_bind_hook != NULL))) {
 		/* 1. local esp/ah/ip-ip/icmp proto must be skip from hw/sw offload and mark as interested by ALG for correct tracking this */
 		if (is_local_prtc(protonum)) {
 		    skip_offload = 1;
@@ -1399,8 +1391,9 @@ pass:
 		    goto skip;
 		}
 	    }
-#endif /* RA_HW_NAT || BCM_NAT */
+
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+	    /* send to offload */
     	    if (nf_conntrack_fastnat && bcm_nat_bind_hook != NULL && nat) {
 		/* if nat type unknown/fast deny need skip packets */
     		if ((nat->info.nat_type & NF_FAST_NAT_DENY) || skip_offload)
@@ -1425,6 +1418,7 @@ skip:
                     FOE_ALG(*pskb)=1;
 	}
 #endif
+#endif /* RA_HW_NAT || BCM_NAT */
 
 	if (set_reply && !test_and_set_bit(IPS_SEEN_REPLY_BIT, &ct->status)) {
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
