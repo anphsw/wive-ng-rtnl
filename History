@@ -1706,7 +1706,7 @@
 31) kernel: netfilter: Implement RFC 1123 for FTP conntrack.<br>
 32) kernel: netfilter: rtsp: fix test router support rtsp from stb failed.<br>
 33) kernel: fastnat: fix conntrack hash connections collisions.<br>
-34) kernel: fastpath: full skip not ipv4 traffic by software offload.<br>
+34) kernel: fastpath: full skip not ipv4 traffic by software offload and filtering section.<br>
 <br>
 <br>
 <br>

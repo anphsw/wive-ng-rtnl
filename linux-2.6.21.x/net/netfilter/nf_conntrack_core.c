@@ -1308,7 +1308,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
         /* packets for nat ? */
         nat = nfct_nat(ct);
 
-	/* full skip not ipv4 traffic by software offload */
+	/* full skip not ipv4 traffic by software offload and filtering section */
 	if (pf != PF_INET)
 	    goto skip;
 #endif
