@@ -1306,15 +1306,17 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
                 skip_offload = 0;
 
 #endif
+/* full skip not ipv4 traffic by software offload */
+	if (pf == PF_INET) {
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-	/* software route offload path */
-	if (nf_conntrack_fastroute && !skip_offload && pf == PF_INET && skb_is_ready(*pskb) && is_pure_routing(ct)
-	    && (*pskb)->pkt_type != PACKET_BROADCAST  && (*pskb)->pkt_type != PACKET_MULTICAST
-	    && (ctinfo == IP_CT_ESTABLISHED || ctinfo == IP_CT_ESTABLISHED_REPLY)) {
-	    /* change status from new to seen_reply. when receive reply packet the status will set to establish */
-	    if (set_reply && !test_and_set_bit(IPS_SEEN_REPLY_BIT, &ct->status))
-		nf_conntrack_event_cache(IPCT_STATUS, *pskb);
-		if(hooknum == NF_IP_PRE_ROUTING) {
+	    /* software route offload path */
+	    if (nf_conntrack_fastroute && !skip_offload && skb_is_ready(*pskb) && is_pure_routing(ct)
+		&& (*pskb)->pkt_type != PACKET_BROADCAST  && (*pskb)->pkt_type != PACKET_MULTICAST
+		&& (ctinfo == IP_CT_ESTABLISHED || ctinfo == IP_CT_ESTABLISHED_REPLY)) {
+		/* change status from new to seen_reply. when receive reply packet the status will set to establish */
+		if (set_reply && !test_and_set_bit(IPS_SEEN_REPLY_BIT, &ct->status))
+		    nf_conntrack_event_cache(IPCT_STATUS, *pskb);
+		    if(hooknum == NF_IP_PRE_ROUTING) {
 			(*pskb)->cb[FAST_ROUTE]=1;
 			/* this function will handle routing decision. the next hoook will be input or forward chain */
 			if (ip_rcv_finish(*pskb) == NF_FAST_NAT) {
@@ -1326,97 +1328,97 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 			}
 			/* this tell system no need to handle this packet. we will handle this. */
 			return NF_STOLEN;
-		} else if(hooknum == NF_IP_LOCAL_OUT) {
+		    } else if(hooknum == NF_IP_LOCAL_OUT) {
 			struct net_device *dev = skb_dst(*pskb)->dev;
 
 			(*pskb)->dev = dev;
 			(*pskb)->protocol = htons(ETH_P_IP);
 			return NF_FAST_NAT;
-		}
-	}
+		    }
+	    }
 #endif
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE) || defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-	/* hardware nat support */
-	if (ra_sw_nat_hook_rx != NULL && ra_sw_nat_hook_tx != NULL)
-	    nat_offload_enabled=1;
+	    /* hardware nat support */
+	    if (ra_sw_nat_hook_rx != NULL && ra_sw_nat_hook_tx != NULL)
+		nat_offload_enabled=1;
 #endif
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-	/* software fastnat support */
-	if (nf_conntrack_fastnat && bcm_nat_bind_hook != NULL)
-	    nat_offload_enabled=1;
+	    /* software fastnat support */
+	    if (nf_conntrack_fastnat && bcm_nat_bind_hook != NULL)
+		nat_offload_enabled=1;
 #endif
-	/* packets for nat ? */
-	nat = nfct_nat(ct);
+	    /* packets for nat ? */
+	    nat = nfct_nat(ct);
 
-	/* this code section may be used for skip some types traffic */
-	if (nat_offload_enabled && nat && !skip_offload && pf == PF_INET) {
-	    /* 1. local esp/ah/ip-ip/icmp proto must be skip from hw/sw offload and mark as interested by ALG for correct tracking this */
-	    if (is_local_prtc(protonum)) {
-		skip_offload = 1;
-		goto pass;
-	    }
-#if defined(CONFIG_NETFILTER_XT_MATCH_WEBSTR) || defined(CONFIG_NETFILTER_XT_MATCH_WEBSTR_MODULE)
-	    /*  2. skip http post/get/head traffic for correct webstr work */
-	    if (web_str_loaded && protonum == IPPROTO_TCP && CTINFO2DIR(ctinfo) == IP_CT_DIR_ORIGINAL) {
-		struct tcphdr _tcph, *tcph;
-		unsigned char _data[2], *data;
-
-		/* For URL filter; RFC-HTTP: GET, POST, HEAD */
-		if ((tcph = skb_header_pointer(*pskb, dataoff, sizeof(_tcph), &_tcph)) &&
-		    (data = skb_header_pointer(*pskb, dataoff + tcph->doff*4, sizeof(_data), &_data)) &&
-		    (memcmp(data, "GET ", sizeof("GET ")-1) == 0 ||
-		     memcmp(data, "POST ", sizeof("POST ")-1) == 0 ||
-		     memcmp(data, "HEAD ", sizeof("HEAD ")-1) == 0)) {
+	    /* this code section may be used for skip some types traffic */
+	    if (nat_offload_enabled && nat && !skip_offload) {
+		/* 1. local esp/ah/ip-ip/icmp proto must be skip from hw/sw offload and mark as interested by ALG for correct tracking this */
+		if (is_local_prtc(protonum)) {
 		    skip_offload = 1;
 		    goto pass;
 		}
-	    }
+#if defined(CONFIG_NETFILTER_XT_MATCH_WEBSTR) || defined(CONFIG_NETFILTER_XT_MATCH_WEBSTR_MODULE)
+		/*  2. skip http post/get/head traffic for correct webstr work */
+		if (web_str_loaded && protonum == IPPROTO_TCP && CTINFO2DIR(ctinfo) == IP_CT_DIR_ORIGINAL) {
+		    struct tcphdr _tcph, *tcph;
+		    unsigned char _data[2], *data;
+
+		    /* For URL filter; RFC-HTTP: GET, POST, HEAD */
+		    if ((tcph = skb_header_pointer(*pskb, dataoff, sizeof(_tcph), &_tcph)) &&
+			(data = skb_header_pointer(*pskb, dataoff + tcph->doff*4, sizeof(_data), &_data)) &&
+			(memcmp(data, "GET ", sizeof("GET ")-1) == 0 ||
+			 memcmp(data, "POST ", sizeof("POST ")-1) == 0 ||
+			 memcmp(data, "HEAD ", sizeof("HEAD ")-1) == 0)) {
+			skip_offload = 1;
+			goto pass;
+		    }
+		}
 #endif /* XT_MATCH_WEBSTR */
 #ifdef CONFIG_NF_CONNTRACK_MARK
-	    /* 3. offload only packets with connection mark flag 0 */
-	    if ((protonum == IPPROTO_TCP || protonum == IPPROTO_UDP) && ((ct->mark & 0xFF0000) != 0)) {
-	        skip_offload = 1;
-	        goto pass;
-	    }
+		/* 3. offload only packets with connection mark flag 0 */
+		if ((protonum == IPPROTO_TCP || protonum == IPPROTO_UDP) && ((ct->mark & 0xFF0000) != 0)) {
+	    	    skip_offload = 1;
+	    	    goto pass;
+		}
 #endif
-	    /* 4. other traffic skip section
-	        EXAMPLE_CODE:
-	        if (need ... rules ...) {
-		skip_offload = 1;
-		goto pass;
-	    }
-	    */
-pass:
-	    if(skip_offload) {
+		/* 4. other traffic skip section
+	    	    EXAMPLE_CODE:
+	    	    if (need ... rules ...) {
+		    skip_offload = 1;
+		    goto pass;
+		}
+		*/
+	pass:
+		if(skip_offload) {
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-		/* skip sofware nat fastpath flag */
-		nat->info.nat_type |= NF_FAST_NAT_DENY;
+		    /* skip sofware nat fastpath flag */
+		    nat->info.nat_type |= NF_FAST_NAT_DENY;
 #endif
-		goto skip;
+		    goto skip;
+		}
 	    }
-	}
 #endif /* RA_HW_NAT || BCM_NAT */
-/* end skip section */
-
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-        if (nf_conntrack_fastnat && bcm_nat_bind_hook != NULL && pf == PF_INET && nat) {
-	    /* if nat type unknown/fast deny need skip packets */
-    	    if ((nat->info.nat_type & NF_FAST_NAT_DENY) || skip_offload)
-		goto skip;
+    	    if (nf_conntrack_fastnat && bcm_nat_bind_hook != NULL && nat) {
+		/* if nat type unknown/fast deny need skip packets */
+    		if ((nat->info.nat_type & NF_FAST_NAT_DENY) || skip_offload)
+		    goto skip;
 
-	    /* Try send selected pakets to bcm_nat */
-	    if ((hooknum == NF_IP_PRE_ROUTING) &&
-		/* allow  tcp/udp packet pass fastnat */
-		(protonum == IPPROTO_UDP || protonum == IPPROTO_TCP) &&
-		    /* allow tcp packet with established/reply state */
-		    (ctinfo == IP_CT_ESTABLISHED || ctinfo == IP_CT_ESTABLISHED_REPLY)) {
-			if (!is_pure_routing(ct))
-			    ret = bcm_nat_bind_hook(ct, ctinfo, pskb, l3proto, l4proto);
+		/* Try send selected pakets to bcm_nat */
+		if ((hooknum == NF_IP_PRE_ROUTING) &&
+		    /* allow  tcp/udp packet pass fastnat */
+		    (protonum == IPPROTO_UDP || protonum == IPPROTO_TCP) &&
+			/* allow tcp packet with established/reply state */
+			(ctinfo == IP_CT_ESTABLISHED || ctinfo == IP_CT_ESTABLISHED_REPLY)) {
+			    if (!is_pure_routing(ct))
+				ret = bcm_nat_bind_hook(ct, ctinfo, pskb, l3proto, l4proto);
+		}
 	    }
-	}
 #endif
-skip:
+	skip:
+	}
+/* full skip not ipv4 traffic by software offload end */
 
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 	if (skip_offload || hooknum == NF_IP_LOCAL_OUT || is_local_svc(pskb, protonum)) {
