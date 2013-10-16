@@ -1835,7 +1835,8 @@ int __init nf_conntrack_init(void)
 	nf_conntrack_nat_mode = NAT_MODE_LINUX;
 #endif
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-	nf_conntrack_fastnat = 0;
+	nf_conntrack_fastnat = 1;
+	nf_conntrack_fastroute = 1;
 #endif
 
 	/* Idea from tcp.c: use 1/16384 of memory.  On i386: 32MB
