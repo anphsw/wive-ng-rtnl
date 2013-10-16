@@ -1308,7 +1308,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 #endif
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 	/* software route offload path */
-	if (nf_conntrack_fastroute && !skip_offload && skb_is_ready(*pskb) && is_pure_routing(ct)
+	if (nf_conntrack_fastroute && !skip_offload && pf == PF_INET && skb_is_ready(*pskb) && is_pure_routing(ct) &
 	    && (*pskb)->pkt_type != PACKET_BROADCAST  && (*pskb)->pkt_type != PACKET_MULTICAST
 	    && (ctinfo == IP_CT_ESTABLISHED || ctinfo == IP_CT_ESTABLISHED_REPLY)) {
 	    /* change status from new to seen_reply. when receive reply packet the status will set to establish */
