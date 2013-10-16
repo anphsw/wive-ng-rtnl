@@ -1227,7 +1227,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE) || \
     defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 	struct nf_conn_help *help;
-    	static unsigned int skip_offload = 0, nat_offload_enabled = 0;
+    	static unsigned int skip_offload = 0;
 #endif
 
 	/* Previously seen (loopback or untracked)?  Ignore. */
@@ -1306,8 +1306,10 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
                 skip_offload = 0;
 
 #endif
-/* full skip not ipv4 traffic by software offload */
-	if (pf == PF_INET) {
+	/* full skip not ipv4 traffic by software offload */
+	if (pf != PF_INET)
+	    goto skip;
+
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 	    /* software route offload path */
 	    if (nf_conntrack_fastroute && !skip_offload && skb_is_ready(*pskb) && is_pure_routing(ct)
@@ -1337,22 +1339,21 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 		    }
 	    }
 #endif
-#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE) || defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-#if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-	    /* hardware nat support */
-	    if (ra_sw_nat_hook_rx != NULL && ra_sw_nat_hook_tx != NULL)
-		nat_offload_enabled=1;
-#endif
-#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-	    /* software fastnat support */
-	    if (nf_conntrack_fastnat && bcm_nat_bind_hook != NULL)
-		nat_offload_enabled=1;
-#endif
 	    /* packets for nat ? */
 	    nat = nfct_nat(ct);
 
 	    /* this code section may be used for skip some types traffic */
-	    if (nat_offload_enabled && nat && !skip_offload) {
+	    if (
+#if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+		/* hardware nat support */
+		ra_sw_nat_hook_tx != NULL &&
+#endif
+#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+		/* software fastnat support */
+		bcm_nat_bind_hook != NULL &&
+#endif
+		nat && !skip_offload) {
+
 		/* 1. local esp/ah/ip-ip/icmp proto must be skip from hw/sw offload and mark as interested by ALG for correct tracking this */
 		if (is_local_prtc(protonum)) {
 		    skip_offload = 1;
@@ -1389,7 +1390,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 		    goto pass;
 		}
 		*/
-	pass:
+pass:
 		if(skip_offload) {
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 		    /* skip sofware nat fastpath flag */
@@ -1416,9 +1417,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 		}
 	    }
 #endif
-	skip:
-	}
-/* full skip not ipv4 traffic by software offload end */
+skip:
 
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 	if (skip_offload || hooknum == NF_IP_LOCAL_OUT || is_local_svc(pskb, protonum)) {
