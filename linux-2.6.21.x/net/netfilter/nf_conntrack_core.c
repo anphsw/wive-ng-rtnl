@@ -1393,7 +1393,7 @@ pass:
 	    }
 
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-	    /* send to offload */
+	    /* software nat offload path */
     	    if (nf_conntrack_fastnat && bcm_nat_bind_hook != NULL && nat) {
 		/* if nat type unknown/fast deny need skip packets */
     		if ((nat->info.nat_type & NF_FAST_NAT_DENY) || skip_offload)
