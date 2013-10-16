@@ -50,6 +50,8 @@ int main (int argc, char **argv)
 #if defined(HAVE_LINUX_NETWORK)
   cap_user_header_t hdr = NULL;
   cap_user_data_t data = NULL;
+  char *bound_device = NULL;
+  int did_bind = 0;
 #endif 
 #if defined(HAVE_DHCP) || defined(HAVE_DHCP6)
   struct dhcp_context *context;
@@ -169,46 +171,46 @@ int main (int argc, char **argv)
   daemon->soa_sn = now;
 #endif
   
-#  ifdef HAVE_DHCP6
-      if (daemon->dhcp6)
+#ifdef HAVE_DHCP6
+  if (daemon->dhcp6)
+    {
+      daemon->doing_ra = option_bool(OPT_RA);
+      
+      for (context = daemon->dhcp6; context; context = context->next)
 	{
-	  daemon->doing_ra = option_bool(OPT_RA);
-	  
-	  for (context = daemon->dhcp6; context; context = context->next)
-	    {
-	      if (context->flags & CONTEXT_DHCP)
-		daemon->doing_dhcp6 = 1;
-	      if (context->flags & CONTEXT_RA)
-		daemon->doing_ra = 1;
+	  if (context->flags & CONTEXT_DHCP)
+	    daemon->doing_dhcp6 = 1;
+	  if (context->flags & CONTEXT_RA)
+	    daemon->doing_ra = 1;
 #ifndef  HAVE_LINUX_NETWORK
-	      if (context->flags & CONTEXT_TEMPLATE)
-		die (_("dhcp-range constructor not available on this platform"), NULL, EC_BADCONF);
+	  if (context->flags & CONTEXT_TEMPLATE)
+	    die (_("dhcp-range constructor not available on this platform"), NULL, EC_BADCONF);
 #endif 
-	    }
 	}
-#  endif
-
+    }
+#endif
+  
 #ifdef HAVE_DHCP
-      /* Note that order matters here, we must call lease_init before
-	 creating any file descriptors which shouldn't be leaked
-	 to the lease-script init process. We need to call common_init
-	 before lease_init to allocate buffers it uses.*/
+  /* Note that order matters here, we must call lease_init before
+     creating any file descriptors which shouldn't be leaked
+     to the lease-script init process. We need to call common_init
+     before lease_init to allocate buffers it uses.*/
   if (daemon->dhcp || daemon->doing_dhcp6 || daemon->relay4 || daemon->relay6)
-	{
-	  dhcp_common_init();
+    {
+      dhcp_common_init();
       if (daemon->dhcp || daemon->doing_dhcp6)
-	  lease_init(now);
-	}
-
+	lease_init(now);
+    }
+  
   if (daemon->dhcp || daemon->relay4)
-	dhcp_init();
- 
+    dhcp_init();
+  
 #  ifdef HAVE_DHCP6
   if (daemon->doing_ra || daemon->doing_dhcp6 || daemon->relay6)
-	ra_init(now);
-      
+    ra_init(now);
+  
   if (daemon->doing_dhcp6 || daemon->relay6)
-	dhcp6_init();
+    dhcp6_init();
 #  endif
 
 #endif
@@ -239,18 +241,29 @@ int main (int argc, char **argv)
 
 #if defined(HAVE_LINUX_NETWORK) && defined(HAVE_DHCP)
       /* after enumerate_interfaces()  */
+      bound_device = whichdevice();
+      
       if (daemon->dhcp)
 	{
-	  if (!daemon->relay4)
-	  bindtodevice(daemon->dhcpfd);
-	  if (daemon->enable_pxe)
-	    bindtodevice(daemon->pxefd);
+	  if (!daemon->relay4 && bound_device)
+	    {
+	      bindtodevice(bound_device, daemon->dhcpfd);
+	      did_bind = 1;
+	    }
+	  if (daemon->enable_pxe && bound_device)
+	    {
+	      bindtodevice(bound_device, daemon->pxefd);
+	      did_bind = 1;
+	    }
 	}
 #endif
 
 #if defined(HAVE_LINUX_NETWORK) && defined(HAVE_DHCP6)
-      if (daemon->doing_dhcp6 && !daemon->relay6)
-	bindtodevice(daemon->dhcp6fd);
+      if (daemon->doing_dhcp6 && !daemon->relay6 && bound_device)
+	{
+	  bindtodevice(bound_device, daemon->dhcp6fd);
+	  did_bind = 1;
+	}
 #endif
     }
   else 
@@ -619,6 +632,8 @@ int main (int argc, char **argv)
 
   if (bind_fallback)
     my_syslog(LOG_WARNING, _("setting --bind-interfaces option because of OS limitations"));
+
+  warn_bound_listeners();
   
   if (!option_bool(OPT_NOWILD)) 
     for (if_tmp = daemon->if_names; if_tmp; if_tmp = if_tmp->next)
@@ -657,6 +672,11 @@ int main (int argc, char **argv)
   
   if (option_bool(OPT_RA))
     my_syslog(MS_DHCP | LOG_INFO, _("IPv6 router advertisement enabled"));
+#  endif
+
+#  ifdef HAVE_LINUX_NETWORK
+  if (did_bind)
+    my_syslog(MS_DHCP | LOG_INFO, _("DHCP, sockets bound exclusively to interface %s"), bound_device);
 #  endif
 
   /* after dhcp_contruct_contexts */
@@ -827,7 +847,7 @@ int main (int argc, char **argv)
       now = dnsmasq_time();
 
       check_log_writer(&wset);
-      
+
       /* prime. */
       enumerate_interfaces(1);
 
@@ -838,6 +858,7 @@ int main (int argc, char **argv)
 	  enumerate_interfaces(0);
 	  /* NB, is_dad_listeners() == 1 --> we're binding interfaces */
 	  create_bound_listeners(0);
+	  warn_bound_listeners();
 	}
 
 #ifdef HAVE_LINUX_NETWORK
@@ -1364,13 +1385,13 @@ static void check_dns_listeners(fd_set *set, time_t now)
 	  
 	  if (confd == -1)
 	    continue;
-
+	  
 	  if (getsockname(confd, (struct sockaddr *)&tcp_addr, &tcp_len) == -1)
 	    {
 	      close(confd);
 	      continue;
 	    }
-
+	  
 	  /* Make sure that the interface list is up-to-date.
 	     
 	     We do this here as we may need the results below, and
@@ -1384,51 +1405,51 @@ static void check_dns_listeners(fd_set *set, time_t now)
  
 	  enumerate_interfaces(0);
 	  
-	   if (option_bool(OPT_NOWILD))
+	  if (option_bool(OPT_NOWILD))
 	    iface = listener->iface; /* May be NULL */
-	   else 
-	     {
-	       int if_index;
-	       char intr_name[IF_NAMESIZE];
- 
-	       /* if we can find the arrival interface, check it's one that's allowed */
-	       if ((if_index = tcp_interface(confd, tcp_addr.sa.sa_family)) != 0 &&
-		   indextoname(listener->tcpfd, if_index, intr_name))
-		 {
-		   struct all_addr addr;
-		   addr.addr.addr4 = tcp_addr.in.sin_addr;
+	  else 
+	    {
+	      int if_index;
+	      char intr_name[IF_NAMESIZE];
+	      
+	      /* if we can find the arrival interface, check it's one that's allowed */
+	      if ((if_index = tcp_interface(confd, tcp_addr.sa.sa_family)) != 0 &&
+		  indextoname(listener->tcpfd, if_index, intr_name))
+		{
+		  struct all_addr addr;
+		  addr.addr.addr4 = tcp_addr.in.sin_addr;
 #ifdef HAVE_IPV6
-		   if (tcp_addr.sa.sa_family == AF_INET6)
-		     addr.addr.addr6 = tcp_addr.in6.sin6_addr;
+		  if (tcp_addr.sa.sa_family == AF_INET6)
+		    addr.addr.addr6 = tcp_addr.in6.sin6_addr;
 #endif
-		   
-		   for (iface = daemon->interfaces; iface; iface = iface->next)
-		     if (iface->index == if_index)
-		       break;
-		   
-		   if (!iface && !loopback_exception(listener->tcpfd, tcp_addr.sa.sa_family, &addr, intr_name))
-		     client_ok = 0;
-		 }
-	       
-	       if (option_bool(OPT_CLEVERBIND))
-		 iface = listener->iface; /* May be NULL */
-	       else
-		 {
-		    /* Check for allowed interfaces when binding the wildcard address:
-		       we do this by looking for an interface with the same address as 
-		       the local address of the TCP connection, then looking to see if that's
-		       an allowed interface. As a side effect, we get the netmask of the
-		      interface too, for localisation. */
-		   
-		   for (iface = daemon->interfaces; iface; iface = iface->next)
-		     if (sockaddr_isequal(&iface->addr, &tcp_addr))
-		       break;
-		   
-		   if (!iface)
-		     client_ok = 0;
-		 }
-	     }
-	  	  
+		  
+		  for (iface = daemon->interfaces; iface; iface = iface->next)
+		    if (iface->index == if_index)
+		      break;
+		  
+		  if (!iface && !loopback_exception(listener->tcpfd, tcp_addr.sa.sa_family, &addr, intr_name))
+		    client_ok = 0;
+		}
+	      
+	      if (option_bool(OPT_CLEVERBIND))
+		iface = listener->iface; /* May be NULL */
+	      else
+		{
+		  /* Check for allowed interfaces when binding the wildcard address:
+		     we do this by looking for an interface with the same address as 
+		     the local address of the TCP connection, then looking to see if that's
+		     an allowed interface. As a side effect, we get the netmask of the
+		     interface too, for localisation. */
+		  
+		  for (iface = daemon->interfaces; iface; iface = iface->next)
+		    if (sockaddr_isequal(&iface->addr, &tcp_addr))
+		      break;
+		  
+		  if (!iface)
+		    client_ok = 0;
+		}
+	    }
+	  
 	  if (!client_ok)
 	    {
 	      shutdown(confd, SHUT_RDWR);

@@ -270,54 +270,54 @@ void dhcp_packet(time_t now, int pxe_fd)
     }
   else
     {
-  ifr.ifr_addr.sa_family = AF_INET;
-  if (ioctl(daemon->dhcpfd, SIOCGIFADDR, &ifr) != -1 )
-    iface_addr = ((struct sockaddr_in *) &ifr.ifr_addr)->sin_addr;
-  else
-    {
-      my_syslog(MS_DHCP | LOG_WARNING, _("DHCP packet received on %s which has no address"), ifr.ifr_name);
-      return;
-    }
-  
-  for (tmp = daemon->dhcp_except; tmp; tmp = tmp->next)
-    if (tmp->name && wildcard_match(tmp->name, ifr.ifr_name))
-      return;
-  
+      ifr.ifr_addr.sa_family = AF_INET;
+      if (ioctl(daemon->dhcpfd, SIOCGIFADDR, &ifr) != -1 )
+	iface_addr = ((struct sockaddr_in *) &ifr.ifr_addr)->sin_addr;
+      else
+	{
+	  my_syslog(MS_DHCP | LOG_WARNING, _("DHCP packet received on %s which has no address"), ifr.ifr_name);
+	  return;
+	}
+      
+      for (tmp = daemon->dhcp_except; tmp; tmp = tmp->next)
+	if (tmp->name && wildcard_match(tmp->name, ifr.ifr_name))
+	  return;
+      
       /* unlinked contexts/relays are marked by context->current == context */
-  for (context = daemon->dhcp; context; context = context->next)
-    context->current = context;
-  
+      for (context = daemon->dhcp; context; context = context->next)
+	context->current = context;
+      
       for (relay = daemon->relay4; relay; relay = relay->next)
 	relay->current = relay;
       
-  parm.current = NULL;
+      parm.current = NULL;
       parm.relay = NULL;
       parm.relay_local.s_addr = 0;
-  parm.ind = iface_index;
-
-  if (!iface_check(AF_INET, (struct all_addr *)&iface_addr, ifr.ifr_name, NULL))
-    {
-      /* If we failed to match the primary address of the interface, see if we've got a --listen-address
-	 for a secondary */
-      struct match_param match;
+      parm.ind = iface_index;
       
-      match.matched = 0;
-      match.ind = iface_index;
+      if (!iface_check(AF_INET, (struct all_addr *)&iface_addr, ifr.ifr_name, NULL))
+	{
+	  /* If we failed to match the primary address of the interface, see if we've got a --listen-address
+	     for a secondary */
+	  struct match_param match;
+	  
+	  match.matched = 0;
+	  match.ind = iface_index;
+	  
+	  if (!daemon->if_addrs ||
+	      !iface_enumerate(AF_INET, &match, check_listen_addrs) ||
+	      !match.matched)
+	    return;
+	  
+	  iface_addr = match.addr;
+	  /* make sure secondary address gets priority in case
+	     there is more than one address on the interface in the same subnet */
+	  complete_context(match.addr, iface_index, NULL, match.netmask, match.broadcast, &parm);
+	}    
       
-      if (!daemon->if_addrs ||
-	  !iface_enumerate(AF_INET, &match, check_listen_addrs) ||
-	  !match.matched)
+      if (!iface_enumerate(AF_INET, &parm, complete_context))
 	return;
 
-      iface_addr = match.addr;
-      /* make sure secondary address gets priority in case
-	 there is more than one address on the interface in the same subnet */
-	  complete_context(match.addr, iface_index, NULL, match.netmask, match.broadcast, &parm);
-    }    
-      
-  if (!iface_enumerate(AF_INET, &parm, complete_context))
-    return;
-  
       /* We're relaying this request */
       if  (parm.relay_local.s_addr != 0 &&
 	   relay_upstream4(parm.relay, (struct dhcp_packet *)daemon->dhcp_packet.iov_base, (size_t)sz, iface_index))
@@ -327,14 +327,14 @@ void dhcp_packet(time_t now, int pxe_fd)
       if (!daemon->dhcp)
 	return;
 
-  lease_prune(NULL, now); /* lose any expired leases */
-  iov.iov_len = dhcp_reply(parm.current, ifr.ifr_name, iface_index, (size_t)sz, 
-			   now, unicast_dest, &is_inform, pxe_fd, iface_addr);
-  lease_update_file(now);
-  lease_update_dns(0);
-    
-  if (iov.iov_len == 0)
-    return;
+      lease_prune(NULL, now); /* lose any expired leases */
+      iov.iov_len = dhcp_reply(parm.current, ifr.ifr_name, iface_index, (size_t)sz, 
+			       now, unicast_dest, &is_inform, pxe_fd, iface_addr);
+      lease_update_file(now);
+      lease_update_dns(0);
+      
+      if (iov.iov_len == 0)
+	return;
     }
   
   msg.msg_name = &dest;
@@ -487,7 +487,7 @@ static int complete_context(struct in_addr local, int if_index, char *label,
   struct dhcp_context *context;
   struct dhcp_relay *relay;
   struct iface_param *param = vparam;
-  
+
   (void)label;
   
   for (context = daemon->dhcp; context; context = context->next)
@@ -984,7 +984,7 @@ static int  relay_upstream4(struct dhcp_relay *relay, struct dhcp_packet *mess, 
       to.sa.sa_family = AF_INET;
       to.in.sin_addr = relay->server.addr.addr4;
       to.in.sin_port = htons(daemon->dhcp_server_port);
-
+      
       send_from(daemon->dhcpfd, 0, (char *)mess, sz, &to, &from, 0);
       
       if (option_bool(OPT_LOG_OPTS))

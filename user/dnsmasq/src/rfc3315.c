@@ -41,6 +41,7 @@ static int dhcp6_maybe_relay(struct state *state, void *inbuff, size_t sz,
 static int dhcp6_no_relay(struct state *state, int msg_type, void *inbuff, size_t sz, int is_unicast, time_t now);
 static void log6_opts(int nest, unsigned int xid, void *start_opts, void *end_opts);
 static void log6_packet(struct state *state, char *type, struct in6_addr *addr, char *string);
+static void log6_quiet(struct state *state, char *type, struct in6_addr *addr, char *string);
 static void *opt6_find (void *opts, void *end, unsigned int search, unsigned int minsize);
 static void *opt6_next(void *opts, void *end);
 static unsigned int opt6_uint(unsigned char *opt, int offset, int size);
@@ -95,7 +96,7 @@ unsigned short dhcp6_reply(struct dhcp_context *context, int interface, char *if
   state.mac_len = 0;
   state.tags = NULL;
   state.link_address = NULL;
-  
+
   if (dhcp6_maybe_relay(&state, daemon->dhcp_packet.iov_base, sz, client_addr, 
 			IN6_IS_ADDR_MULTICAST(client_addr), now))
     return msg_type == DHCP6RELAYFORW ? DHCPV6_SERVER_PORT : DHCPV6_CLIENT_PORT;
@@ -155,7 +156,7 @@ static int dhcp6_maybe_relay(struct state *state, void *inbuff, size_t sz,
 	      return 0;
 	    }
 	}
-
+	  
       if (!state->context)
 	{
 	  my_syslog(MS_DHCP | LOG_WARNING, 
@@ -430,7 +431,7 @@ static int dhcp6_no_relay(struct state *state, int msg_type, void *inbuff, size_
 	  {
 	    mac_opt->netid.next = state->tags;
 	    state->tags = &mac_opt->netid;
-	}
+	  }
     }
   
   if ((opt = opt6_find(state->packet_options, state->end, OPTION6_FQDN, 1)))
@@ -576,15 +577,15 @@ static int dhcp6_no_relay(struct state *state, int msg_type, void *inbuff, size_
     {
     default:
       return 0;
-
-
+      
+      
     case DHCP6SOLICIT:
       {
       	int address_assigned = 0;
 	/* tags without all prefix-class tags */
 	struct dhcp_netid *solicit_tags;
 	struct dhcp_context *c;
-
+	
 	*outmsgtypep = DHCP6ADVERTISE;
 	
 	if (opt6_find(state->packet_options, state->end, OPTION6_RAPID_COMMIT, 0))
@@ -594,8 +595,8 @@ static int dhcp6_no_relay(struct state *state, int msg_type, void *inbuff, size_
 	    o = new_opt6(OPTION6_RAPID_COMMIT);
 	    end_opt6(o);
 	  }
-
-  	log6_packet(state, "DHCPSOLICIT", NULL, ignore ? _("ignored") : NULL);
+	
+  	log6_quiet(state, "DHCPSOLICIT", NULL, ignore ? _("ignored") : NULL);
 
       request_no_address:
 	solicit_tags = tagif;
@@ -690,7 +691,7 @@ static int dhcp6_no_relay(struct state *state, int msg_type, void *inbuff, size_
 	    for (ia_counter = 0; ia_option; ia_counter++, ia_option = opt6_find(opt6_next(ia_option, ia_end), ia_end, OPTION6_IAADDR, 24))
 	      {
 		req_addr = opt6_ptr(ia_option, 0);
-		
+				
 		if ((c = address6_valid(state->context, req_addr, solicit_tags, plain_range)))
 		  {
 		    lease_time = c->lease_time;
@@ -810,12 +811,12 @@ static int dhcp6_no_relay(struct state *state, int msg_type, void *inbuff, size_
       {
 	int address_assigned = 0;
 	int start = save_counter(-1);
-	
+
 	/* set reply message type */
 	*outmsgtypep = DHCP6REPLY;
 	state->lease_allocate = 1;
 
-	log6_packet(state, "DHCPREQUEST", NULL, ignore ? _("ignored") : NULL);
+	log6_quiet(state, "DHCPREQUEST", NULL, ignore ? _("ignored") : NULL);
 	
 	if (ignore)
 	  return 0;
@@ -828,7 +829,7 @@ static int dhcp6_no_relay(struct state *state, int msg_type, void *inbuff, size_
 	    
 	     if (!check_ia(state, opt, &ia_end, &ia_option))
 	       continue;
-	    
+
 	     if (!ia_option)
 	       {
 		 /* If we get a request with a IA_*A without addresses, treat it exactly like
@@ -928,7 +929,7 @@ static int dhcp6_no_relay(struct state *state, int msg_type, void *inbuff, size_
 	/* set reply message type */
 	*outmsgtypep = DHCP6REPLY;
 	
-	log6_packet(state, "DHCPRENEW", NULL, NULL);
+	log6_quiet(state, "DHCPRENEW", NULL, NULL);
 
 	for (opt = state->packet_options; opt; opt = opt6_next(opt, state->end))
 	  {
@@ -1008,11 +1009,14 @@ static int dhcp6_no_relay(struct state *state, int msg_type, void *inbuff, size_
 		else
 		  {
 		    preferred_time = valid_time = 0;
-		  message = _("address invalid");
+		    message = _("address invalid");
 		  }
-		
-		log6_packet(state, "DHCPREPLY", req_addr, message);	
-		
+
+		if (message)
+		  log6_packet(state, "DHCPREPLY", req_addr, message);	
+		else
+		  log6_quiet(state, "DHCPREPLY", req_addr, message);
+	
 		o1 =  new_opt6(OPTION6_IAADDR);
 		put_opt6(req_addr, sizeof(*req_addr));
 		put_opt6_long(preferred_time);
@@ -1034,7 +1038,7 @@ static int dhcp6_no_relay(struct state *state, int msg_type, void *inbuff, size_
 	/* set reply message type */
 	*outmsgtypep = DHCP6REPLY;
 	
-	log6_packet(state, "DHCPCONFIRM", NULL, NULL);
+	log6_quiet(state, "DHCPCONFIRM", NULL, NULL);
 	
 	for (opt = state->packet_options; opt; opt = opt6_next(opt, state->end))
 	  {
@@ -1055,7 +1059,7 @@ static int dhcp6_no_relay(struct state *state, int msg_type, void *inbuff, size_
 		    return 1;
 		  }
 
-		log6_packet(state, "DHCPREPLY", req_addr, state->hostname);
+		log6_quiet(state, "DHCPREPLY", req_addr, state->hostname);
 	      }
 	  }	 
 
@@ -1084,7 +1088,7 @@ static int dhcp6_no_relay(struct state *state, int msg_type, void *inbuff, size_
 	else
 	  state->send_domain = get_domain6(NULL);
 
-	log6_packet(state, "DHCPINFORMATION-REQUEST", NULL, ignore ? _("ignored") : state->hostname);
+	log6_quiet(state, "DHCPINFORMATION-REQUEST", NULL, ignore ? _("ignored") : state->hostname);
 	if (ignore)
 	  return 0;
 	*outmsgtypep = DHCP6REPLY;
@@ -1098,7 +1102,7 @@ static int dhcp6_no_relay(struct state *state, int msg_type, void *inbuff, size_
 	/* set reply message type */
 	*outmsgtypep = DHCP6REPLY;
 
-	log6_packet(state, "DHCPRELEASE", NULL, NULL);
+	log6_quiet(state, "DHCPRELEASE", NULL, NULL);
 
 	for (opt = state->packet_options; opt; opt = opt6_next(opt, state->end))
 	  {
@@ -1160,7 +1164,7 @@ static int dhcp6_no_relay(struct state *state, int msg_type, void *inbuff, size_
 	/* set reply message type */
 	*outmsgtypep = DHCP6REPLY;
 	
-	log6_packet(state, "DHCPDECLINE", NULL, NULL);
+	log6_quiet(state, "DHCPDECLINE", NULL, NULL);
 
 	for (opt = state->packet_options; opt; opt = opt6_next(opt, state->end))
 	  {
@@ -1270,7 +1274,7 @@ static struct dhcp_netid *add_options(struct state *state, int do_refresh)
 	  if (opt_cfg->len == 0)
 	    continue;
 	}
-      
+
       if (opt_cfg->opt == OPTION6_REFRESH_TIME)
 	done_refresh = 1;
       
@@ -1398,9 +1402,9 @@ static struct dhcp_netid *add_options(struct state *state, int do_refresh)
 	  p = do_rfc1035_name(p, state->hostname);
 	  if (state->send_domain)
 	    {
-	    p = do_rfc1035_name(p, state->send_domain);
-	  *p = 0;
-	}
+	      p = do_rfc1035_name(p, state->send_domain);
+	      *p = 0;
+	    }
 	}
       end_opt6(o);
     }
@@ -1610,7 +1614,7 @@ static void add_address(struct state *state, struct dhcp_context *context, unsig
 	}
     }
 
-  log6_packet(state, state->lease_allocate ? "DHCPREPLY" : "DHCPADVERTISE", addr, state->hostname);
+  log6_quiet(state, state->lease_allocate ? "DHCPREPLY" : "DHCPADVERTISE", addr, state->hostname);
 
 }
 
@@ -1676,7 +1680,7 @@ static void calculate_times(struct dhcp_context *context, unsigned int *min_time
 {
   unsigned int req_preferred = *preferred_timep, req_valid = *valid_timep;
   unsigned int valid_time = lease_time, preferred_time = lease_time;
-
+  
   /* RFC 3315: "A server ignores the lifetimes set
      by the client if the preferred lifetime is greater than the valid
      lifetime. */
@@ -1687,7 +1691,7 @@ static void calculate_times(struct dhcp_context *context, unsigned int *min_time
 	  /* 0 == "no preference from client" */
 	  if (req_preferred < 120u)
 	    req_preferred = 120u; /* sanity */
-		    
+	  
 	  if (req_preferred < preferred_time)
 	    preferred_time = req_preferred;
 	}
@@ -1697,7 +1701,7 @@ static void calculate_times(struct dhcp_context *context, unsigned int *min_time
 	{
 	  if (req_valid < 120u)
 	    req_valid = 120u; /* sanity */
-
+	  
 	  if (req_valid < valid_time)
 	    valid_time = req_valid;
 	}
@@ -1707,7 +1711,7 @@ static void calculate_times(struct dhcp_context *context, unsigned int *min_time
      is deprecated */
   if ((context->flags & CONTEXT_DEPRECATE) || context->preferred == 0)
     preferred_time = 0;
-
+  
   if (preferred_time != 0 && preferred_time < *min_time)
     *min_time = preferred_time;
   
@@ -1880,6 +1884,12 @@ static void log6_opts(int nest, unsigned int xid, void *start_opts, void *end_op
     }
 }		 
  
+static void log6_quiet(struct state *state, char *type, struct in6_addr *addr, char *string)
+{
+  if (option_bool(OPT_LOG_OPTS) || !option_bool(OPT_QUIET_DHCP6))
+    log6_packet(state, type, addr, string);
+}
+
 static void log6_packet(struct state *state, char *type, struct in6_addr *addr, char *string)
 {
   int clid_len = state->clid_len;

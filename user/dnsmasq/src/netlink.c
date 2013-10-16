@@ -194,7 +194,7 @@ int iface_enumerate(int family, void *parm, int (*callback)())
 	    /* May be multicast arriving async */
 	    if (nl_async(h))
 	      {
-	      newaddr = 1; 
+		newaddr = 1; 
 		enumerate_interfaces(1); /* reset */
 	      }
 	  }
@@ -219,7 +219,7 @@ int iface_enumerate(int family, void *parm, int (*callback)())
 		  {
 		    struct in_addr netmask, addr, broadcast;
 		    char *label = NULL;
-		    
+
 		    netmask.s_addr = htonl(0xffffffff << (32 - ifa->ifa_prefixlen));
 		    addr.s_addr = 0;
 		    broadcast.s_addr = 0;
@@ -265,7 +265,7 @@ int iface_enumerate(int family, void *parm, int (*callback)())
 		    
 		    if (ifa->ifa_flags & IFA_F_DEPRECATED)
 		      flags |= IFACE_DEPRECATED;
-		    
+
 		    if (ifa->ifa_flags & IFA_F_PERMANENT)
 		      flags |= IFACE_PERMANENT;
 		    
@@ -412,10 +412,10 @@ static void nl_newaddress(time_t now)
   
 #ifdef HAVE_DHCP6
   if (daemon->doing_dhcp6 || daemon->relay6 || daemon->doing_ra)
-      join_multicast(0);
+    join_multicast(0);
   
   if (daemon->doing_dhcp6 || daemon->doing_ra)
-      dhcp_construct_contexts(now);
+    dhcp_construct_contexts(now);
   
   if (daemon->doing_dhcp6)
     lease_find_interfaces(now);

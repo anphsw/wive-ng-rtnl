@@ -209,23 +209,23 @@ void tftp_request(struct listener *listen, time_t now)
       else
 	{
 	  /* Do the same as DHCP */
-      if (!iface_check(listen->family, &addra, name, NULL))
-	{
-	  if (!option_bool(OPT_CLEVERBIND))
+	  if (!iface_check(listen->family, &addra, name, NULL))
+	    {
+	      if (!option_bool(OPT_CLEVERBIND))
 		enumerate_interfaces(0); 
 	      if (!loopback_exception(listen->tftpfd, listen->family, &addra, name) &&
 		  !label_exception(if_index, listen->family, &addra) )
-	    return;
-	}
-      
+		return;
+	    }
+	  
 #ifdef HAVE_DHCP      
-      /* allowed interfaces are the same as for DHCP */
-      for (tmp = daemon->dhcp_except; tmp; tmp = tmp->next)
-	if (tmp->name && wildcard_match(tmp->name, name))
-	  return;
+	  /* allowed interfaces are the same as for DHCP */
+	  for (tmp = daemon->dhcp_except; tmp; tmp = tmp->next)
+	    if (tmp->name && wildcard_match(tmp->name, name))
+	      return;
 #endif
 	}
-      
+
       strncpy(ifr.ifr_name, name, IF_NAMESIZE);
       if (ioctl(listen->tftpfd, SIOCGIFMTU, &ifr) != -1)
 	mtu = ifr.ifr_mtu;      

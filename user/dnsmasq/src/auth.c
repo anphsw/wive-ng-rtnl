@@ -153,12 +153,12 @@ size_t answer_auth(struct dns_header *header, char *limit, size_t qlen, time_t n
 	      auth = 0;
 	      continue;
 	    }
- 	  
+	  
 	  intr = NULL;
 
 	  if (flag == F_IPV4)
 	    for (intr = daemon->int_names; intr; intr = intr->next)
-	    {
+	      {
 		struct addrlist *addrlist;
 		
 		for (addrlist = intr->addr4; addrlist; addrlist = addrlist->next)
@@ -173,8 +173,8 @@ size_t answer_auth(struct dns_header *header, char *limit, size_t qlen, time_t n
 	      }
 #ifdef HAVE_IPV6
 	  else if (flag == F_IPV6)
-	      for (intr = daemon->int_names; intr; intr = intr->next)
-		{
+	    for (intr = daemon->int_names; intr; intr = intr->next)
+	      {
 		struct addrlist *addrlist;
 		
 		for (addrlist = intr->addr6; addrlist; addrlist = addrlist->next)
@@ -182,26 +182,26 @@ size_t answer_auth(struct dns_header *header, char *limit, size_t qlen, time_t n
 		    break;
 		
 		if (addrlist)
-		    break;
-		  else
-		    while (intr->next && strcmp(intr->intr, intr->next->intr) == 0)
-		      intr = intr->next;
-		}
+		  break;
+		else
+		  while (intr->next && strcmp(intr->intr, intr->next->intr) == 0)
+		    intr = intr->next;
+	      }
 #endif
-
-	      if (intr)
-		{
-		  if (in_zone(zone, intr->name, NULL))
-		    {	
-		      found = 1;
+	  
+	  if (intr)
+	    {
+	      if (in_zone(zone, intr->name, NULL))
+		{	
+		  found = 1;
 		  log_query(flag| F_REVERSE | F_CONFIG, intr->name, &addr, NULL);
-		      if (add_resource_record(header, limit, &trunc, nameoffset, &ansp, 
-					      daemon->auth_ttl, NULL,
-					      T_PTR, C_IN, "d", intr->name))
-			anscount++;
-		    }
+		  if (add_resource_record(header, limit, &trunc, nameoffset, &ansp, 
+					  daemon->auth_ttl, NULL,
+					  T_PTR, C_IN, "d", intr->name))
+		    anscount++;
 		}
-
+	    }
+	  
 	  if ((crecp = cache_find_by_addr(NULL, &addr, now, flag)))
 	    do { 
 	      strcpy(name, cache_get_name(crecp));
@@ -345,7 +345,7 @@ size_t answer_auth(struct dns_header *header, char *limit, size_t qlen, time_t n
 			  anscount++;
 	       }
 	   }
-
+    
        if (qtype == T_A)
 	 flag = F_IPV4;
        
@@ -353,7 +353,7 @@ size_t answer_auth(struct dns_header *header, char *limit, size_t qlen, time_t n
        if (qtype == T_AAAA)
 	 flag = F_IPV6;
 #endif
-
+       
        for (intr = daemon->int_names; intr; intr = intr->next)
 	 if (hostname_isequal(name, intr->name))
 	   {
@@ -368,14 +368,14 @@ size_t answer_auth(struct dns_header *header, char *limit, size_t qlen, time_t n
 	
 	     for (; addrlist; addrlist = addrlist->next)  
 	       if (filter_constructed_dhcp(zone, flag, &addrlist->addr))
-	       {
-		 found = 1;
+		 {
+		   found = 1;
 		   log_query(F_FORWARD | F_CONFIG | flag, name, &addrlist->addr, NULL);
-		 if (add_resource_record(header, limit, &trunc, nameoffset, &ansp, 
+		   if (add_resource_record(header, limit, &trunc, nameoffset, &ansp, 
 					   daemon->auth_ttl, NULL, qtype, C_IN, 
 					   qtype == T_A ? "4" : "6", &addrlist->addr))
-		   anscount++;
-	       }
+		     anscount++;
+		 }
 	   }
        
        for (a = daemon->cnames; a; a = a->next)
@@ -678,7 +678,7 @@ size_t answer_auth(struct dns_header *header, char *limit, size_t qlen, time_t n
 		  if (filter_constructed_dhcp(zone, F_IPV4,  &addrlist->addr) && 
 		      add_resource_record(header, limit, &trunc, -axfroffset, &ansp, 
 					  daemon->auth_ttl, NULL, T_A, C_IN, "4", cut ? intr->name : NULL, &addrlist->addr))
-		  anscount++;
+		    anscount++;
 		
 #ifdef HAVE_IPV6
 		for (addrlist = intr->addr6; addrlist; addrlist = addrlist->next) 
@@ -692,7 +692,7 @@ size_t answer_auth(struct dns_header *header, char *limit, size_t qlen, time_t n
 		if (cut)
 		  *cut = '.'; 
 	      }
-	  
+             
 	  for (a = daemon->cnames; a; a = a->next)
 	    if (in_zone(zone, a->alias, &cut))
 	      {

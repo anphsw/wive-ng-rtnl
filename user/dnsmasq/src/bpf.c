@@ -178,11 +178,11 @@ int iface_enumerate(int family, void *parm, int (*callback)())
 		  preferred = ifr6.ifr_ifru.ifru_lifetime.ia6t_pltime;
 		}
 #endif
-	      
+	      	      
 	      for (i = 0; i < IN6ADDRSZ; i++, prefix += 8) 
                 if (netmask[i] != 0xff)
 		  break;
-       
+	      
 	      if (i != IN6ADDRSZ && netmask[i]) 
                 for (j = 7; j > 0; j--, prefix++) 
 		  if ((netmask[i] & (1 << j)) == 0)
@@ -193,12 +193,12 @@ int iface_enumerate(int family, void *parm, int (*callback)())
 		{
 		  addr->s6_addr[2] = 0;
 		  addr->s6_addr[3] = 0;
-		}
-	      
+		} 
+	     
 	      if (!((*callback)(addr, prefix, scope_id, iface_index, flags,
 				(int) preferred, (int)valid, parm)))
-		goto err;
-	}
+		goto err;	      
+	    }
 #endif /* HAVE_IPV6 */
 
 #ifdef HAVE_DHCP6      
@@ -218,7 +218,7 @@ int iface_enumerate(int family, void *parm, int (*callback)())
 
  err:
   errsav = errno;
-  freeifaddrs(head);  
+  freeifaddrs(head); 
   if (fd != -1)
     close(fd);
   errno = errsav;

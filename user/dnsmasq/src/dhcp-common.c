@@ -272,27 +272,26 @@ static int is_config_in_context(struct dhcp_context *context, struct dhcp_config
   if (!context) /* called via find_config() from lease_update_from_configs() */
     return 1; 
 
-  if (!(context->flags & CONTEXT_V6))
-    {
-      if (!(config->flags & CONFIG_ADDR))
+  if (!(config->flags & (CONFIG_ADDR | CONFIG_ADDR6)))
+    return 1;
+  
+#ifdef HAVE_DHCP6
+  if ((context->flags & CONTEXT_V6) && (config->flags & CONFIG_WILDCARD))
+    return 1;
+#endif
+
+  for (; context; context = context->current)
+#ifdef HAVE_DHCP6
+    if (context->flags & CONTEXT_V6) 
+      {
+	if ((config->flags & CONFIG_ADDR6) && is_same_net6(&config->addr6, &context->start6, context->prefix))
+	  return 1;
+      }
+    else 
+#endif
+      if ((config->flags & CONFIG_ADDR) && is_same_net(config->addr, context->start, context->netmask))
 	return 1;
 
-      for (; context; context = context->current)
-	if (is_same_net(config->addr, context->start, context->netmask))
-	  return 1;
-    }
-#ifdef HAVE_DHCP6
-  else 
-    {
-      if (!(config->flags & CONFIG_ADDR6) || (config->flags & CONFIG_WILDCARD))
-	return 1;
-      
-      for (; context; context = context->current)
-	if (is_same_net6(&config->addr6, &context->start6, context->prefix))
-      return 1;
-    }
-#endif
-  
   return 0;
 }
 
@@ -445,7 +444,7 @@ void dhcp_update_configs(struct dhcp_config *configs)
 }
 
 #ifdef HAVE_LINUX_NETWORK 
-void bindtodevice(int fd)
+char *whichdevice(void)
 {
   /* If we are doing DHCP on exactly one interface, and running linux, do SO_BINDTODEVICE
      to that device. This is for the use case of  (eg) OpenStack, which runs a new
@@ -453,36 +452,45 @@ void bindtodevice(int fd)
      individual processes don't always see the packets they should.
      SO_BINDTODEVICE is only available Linux. 
 
-     Note that if wildcards are used in --interface, or a configured interface doesn't
-     yet exist, then more interfaces may arrive later, so we can't safely assert there
-     is only one interface and proceed.
+     Note that if wildcards are used in --interface, or --interface is not used at all,
+     or a configured interface doesn't yet exist, then more interfaces may arrive later, 
+     so we can't safely assert there is only one interface and proceed.
 */
   
   struct irec *iface, *found;
   struct iname *if_tmp;
-
+  
+  if (!daemon->if_names)
+    return NULL;
+  
   for (if_tmp = daemon->if_names; if_tmp; if_tmp = if_tmp->next)
     if (if_tmp->name && (!if_tmp->used || strchr(if_tmp->name, '*')))
-      return;
-  
+      return NULL;
+
   for (found = NULL, iface = daemon->interfaces; iface; iface = iface->next)
     if (iface->dhcp_ok)
       {
 	if (!found)
 	  found = iface;
 	else if (strcmp(found->name, iface->name) != 0) 
-	  return; /* more than one. */
+	  return NULL; /* more than one. */
       }
-  
+
   if (found)
-    {
-      struct ifreq ifr;
-      strcpy(ifr.ifr_name, found->name);
-      /* only allowed by root. */
-      if (setsockopt(fd, SOL_SOCKET, SO_BINDTODEVICE, (void *)&ifr, sizeof(ifr)) == -1 &&
-	  errno != EPERM)
-	die(_("failed to set SO_BINDTODEVICE on DHCP socket: %s"), NULL, EC_BADNET);
-    }
+    return found->name;
+
+  return NULL;
+}
+ 
+void  bindtodevice(char *device, int fd)
+{
+  struct ifreq ifr;
+  
+  strcpy(ifr.ifr_name, device);
+  /* only allowed by root. */
+  if (setsockopt(fd, SOL_SOCKET, SO_BINDTODEVICE, (void *)&ifr, sizeof(ifr)) == -1 &&
+      errno != EPERM)
+    die(_("failed to set SO_BINDTODEVICE on DHCP socket: %s"), NULL, EC_BADNET);
 }
 #endif
 
@@ -834,7 +842,7 @@ void log_context(int family, struct dhcp_context *context)
     {
       template = p;
       p += sprintf(p, ", ");
-       
+      
       sprintf(p, "template for %s", context->template_interface);  
     }
 #endif
@@ -844,7 +852,7 @@ void log_context(int family, struct dhcp_context *context)
     {
 #ifdef HAVE_DHCP6
       if (context->flags & CONTEXT_RA_STATELESS)
-    {
+	{
 	  if (context->flags & CONTEXT_TEMPLATE)
 	    strncpy(daemon->dhcp_buff, context->template_interface, 256);
 	  else
@@ -852,17 +860,17 @@ void log_context(int family, struct dhcp_context *context)
 	}
       else 
 #endif
-      inet_ntop(family, start, daemon->dhcp_buff, 256);
+	inet_ntop(family, start, daemon->dhcp_buff, 256);
       inet_ntop(family, end, daemon->dhcp_buff3, 256);
       my_syslog(MS_DHCP | LOG_INFO, 
-	      (context->flags & CONTEXT_RA_STATELESS) ? 
-	      _("%s stateless on %s%.0s%.0s%s") :
-	      (context->flags & CONTEXT_STATIC) ? 
-	      _("%s, static leases only on %.0s%s%s%.0s") :
-	      (context->flags & CONTEXT_PROXY) ?
-	      _("%s, proxy on subnet %.0s%s%.0s%.0s") :
-	      _("%s, IP range %s -- %s%s%.0s"),
-	      (family != AF_INET) ? "DHCPv6" : "DHCP",
+		(context->flags & CONTEXT_RA_STATELESS) ? 
+		_("%s stateless on %s%.0s%.0s%s") :
+		(context->flags & CONTEXT_STATIC) ? 
+		_("%s, static leases only on %.0s%s%s%.0s") :
+		(context->flags & CONTEXT_PROXY) ?
+		_("%s, proxy on subnet %.0s%s%.0s%.0s") :
+		_("%s, IP range %s -- %s%s%.0s"),
+		(family != AF_INET) ? "DHCPv6" : "DHCP",
 		daemon->dhcp_buff, daemon->dhcp_buff3, daemon->namebuff, template);
     }
   
@@ -875,13 +883,13 @@ void log_context(int family, struct dhcp_context *context)
 
   if ((context->flags & CONTEXT_RA_NAME) && !(context->flags & CONTEXT_OLD))
     my_syslog(MS_DHCP | LOG_INFO, _("DHCPv4-derived IPv6 names on %s%s"), daemon->addrbuff, template);
-       
+  
   if ((context->flags & CONTEXT_RA) || (option_bool(OPT_RA) && (context->flags & CONTEXT_DHCP) && family == AF_INET6)) 
     my_syslog(MS_DHCP | LOG_INFO, _("router advertisement on %s%s"), daemon->addrbuff, template);
 #endif
 
 }
-      
+
 void log_relay(int family, struct dhcp_relay *relay)
 {
   inet_ntop(family, &relay->local, daemon->addrbuff, ADDRSTRLEN);
@@ -892,5 +900,5 @@ void log_relay(int family, struct dhcp_relay *relay)
   else
     my_syslog(MS_DHCP | LOG_INFO, _("DHCP relay from %s to %s"), daemon->addrbuff, daemon->namebuff);
 }
-
+   
 #endif

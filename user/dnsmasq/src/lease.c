@@ -191,9 +191,9 @@ void lease_update_from_configs(void)
     if (lease->flags & (LEASE_TA | LEASE_NA))
       continue;
     else if ((config = find_config(daemon->dhcp_conf, NULL, lease->clid, lease->clid_len, 
-			      lease->hwaddr, lease->hwaddr_len, lease->hwaddr_type, NULL)) && 
-	(config->flags & CONFIG_NAME) &&
-	(!(config->flags & CONFIG_ADDR) || config->addr.s_addr == lease->addr.s_addr))
+				   lease->hwaddr, lease->hwaddr_len, lease->hwaddr_type, NULL)) && 
+	     (config->flags & CONFIG_NAME) &&
+	     (!(config->flags & CONFIG_ADDR) || config->addr.s_addr == lease->addr.s_addr))
       lease_set_hostname(lease, config->hostname, 1, get_domain(lease->addr), NULL);
     else if ((name = host_from_dns(lease->addr)))
       lease_set_hostname(lease, name, 1, get_domain(lease->addr), NULL); /* updates auth flag only */
@@ -716,8 +716,8 @@ struct dhcp_lease *lease4_allocate(struct in_addr addr)
 {
   struct dhcp_lease *lease = lease_allocate();
   if (lease)
-      lease->addr = addr;
-
+    lease->addr = addr;
+  
   return lease;
 }
 

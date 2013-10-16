@@ -517,7 +517,7 @@ DBusHandlerResult message_handler(DBusConnection *connection,
     clear_cache = 1;
   else
     return (DBUS_HANDLER_RESULT_NOT_YET_HANDLED);
-  
+   
   if (new_servers)
     {
       my_syslog(LOG_INFO, _("setting upstream servers from DBus"));

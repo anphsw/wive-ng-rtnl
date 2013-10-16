@@ -16,6 +16,10 @@
 
 #include "dnsmasq.h"
 
+#ifndef IN6_IS_ADDR_ULA
+#define IN6_IS_ADDR_ULA(a) ((((__const uint32_t *) (a))[0] & htonl (0xfe00000)) == htonl (0xfc000000))
+#endif
+
 #ifdef HAVE_LINUX_NETWORK
 
 int indextoname(int fd, int index, char *name)
@@ -147,9 +151,9 @@ int iface_check(int family, struct all_addr *addr, char *name, int *auth)
     }
   
   if (!match_addr)
-  for (tmp = daemon->if_except; tmp; tmp = tmp->next)
-    if (tmp->name && wildcard_match(tmp->name, name))
-      ret = 0;
+    for (tmp = daemon->if_except; tmp; tmp = tmp->next)
+      if (tmp->name && wildcard_match(tmp->name, name))
+	ret = 0;
     
 
   for (tmp = daemon->authinterface; tmp; tmp = tmp->next)
@@ -249,13 +253,13 @@ static int iface_allowed(struct iface_param *param, int if_index, char *label,
 
   if (!indextoname(param->fd, if_index, ifr.ifr_name) ||
       ioctl(param->fd, SIOCGIFFLAGS, &ifr) == -1)
-      return 0;
+    return 0;
    
   loopback = ifr.ifr_flags & IFF_LOOPBACK;
   
   if (loopback)
-     dhcp_ok = 0;
-
+    dhcp_ok = 0;
+  
   if (ioctl(param->fd, SIOCGIFMTU, &ifr) != -1)
     mtu = ifr.ifr_mtu;
   
@@ -311,8 +315,8 @@ static int iface_allowed(struct iface_param *param, int if_index, char *label,
 	iface->dad = dad;
 	return 1;
       }
-  
-  /* If we are restricting the set of interfaces to use, make
+
+ /* If we are restricting the set of interfaces to use, make
      sure that loopback interfaces are in that set. */
   if (daemon->if_names && loopback)
     {
@@ -383,7 +387,7 @@ static int iface_allowed(struct iface_param *param, int if_index, char *label,
       iface->dns_auth = auth_dns;
       iface->mtu = mtu;
       iface->dad = dad;
-      iface->done = iface->multicast_done = 0;
+      iface->done = iface->multicast_done = iface->warned = 0;
       iface->index = if_index;
       if ((iface->name = whine_malloc(strlen(ifr.ifr_name)+1)))
 	{
@@ -471,7 +475,7 @@ int enumerate_interfaces(int reset)
   active = 1;
 
   if ((param.fd = socket(PF_INET, SOCK_DGRAM, 0)) == -1)
-    return 0; 
+    return 0;
  
   /* remove addresses stored against interface_names */
   for (intname = daemon->int_names; intname; intname = intname->next)
@@ -822,6 +826,59 @@ void create_bound_listeners(int dienow)
 	new->next = daemon->listeners;
 	daemon->listeners = new;
       }
+}
+
+/* In --bind-interfaces, the only access control is the addresses we're listening on. 
+   There's nothing to avoid a query to the address of an internal interface arriving via
+   an external interface where we don't want to accept queries, except that in the usual 
+   case the addresses of internal interfaces are RFC1918. When bind-interfaces in use, 
+   and we listen on an address that looks like it's probably globally routeable, shout.
+
+   The fix is to use --bind-dynamic, which actually checks the arrival interface too.
+   Tough if your platform doesn't support this.
+*/
+
+void warn_bound_listeners(void)
+{
+  struct irec *iface; 	
+  int advice = 0;
+
+  for (iface = daemon->interfaces; iface; iface = iface->next)
+    if (option_bool(OPT_NOWILD) && !iface->dns_auth)
+      {
+	int warn = 0;
+	if (iface->addr.sa.sa_family == AF_INET)
+	  {
+	    if (!private_net(iface->addr.in.sin_addr, 1))
+	      {
+		inet_ntop(AF_INET, &iface->addr.in.sin_addr, daemon->addrbuff, ADDRSTRLEN);
+		warn = 1;
+	      }
+	  }
+#ifdef HAVE_IPV6
+	else
+	  {
+	    if (!IN6_IS_ADDR_LINKLOCAL(&iface->addr.in6.sin6_addr) &&
+		!IN6_IS_ADDR_SITELOCAL(&iface->addr.in6.sin6_addr) &&
+		!IN6_IS_ADDR_ULA(&iface->addr.in6.sin6_addr) &&
+		!IN6_IS_ADDR_LOOPBACK(&iface->addr.in6.sin6_addr))
+	      {
+		inet_ntop(AF_INET6, &iface->addr.in6.sin6_addr, daemon->addrbuff, ADDRSTRLEN);
+		warn = 1;
+	      }
+	  }
+#endif
+	if (warn)
+	  {
+	    iface->warned = advice = 1;
+	    my_syslog(LOG_WARNING, 
+		      _("LOUD WARNING: listening on %s may accept requests via interfaces other than %s. "),
+		      daemon->addrbuff, iface->name);
+	  }
+      }
+  
+  if (advice)
+    my_syslog(LOG_WARNING, _("LOUD WARNING: use --bind-dynamic rather than --bind-interfaces to avoid DNS amplification attacks via these interface(s).")); 
 }
 
 int is_dad_listeners(void)
@@ -1295,7 +1352,7 @@ int reload_servers(char *fname)
 }
 
 
-  
+
 
 
 
