@@ -456,63 +456,6 @@ nf_ct_invert_tuple(struct nf_conntrack_tuple *inverse,
 }
 EXPORT_SYMBOL_GPL(nf_ct_invert_tuple);
 
-/*
-	2008.0609
-	pronets leo modify here , for port trigger issue.
-	conntrack will keep the session, after nacking the port fail, must clean to pass cd router test.
-*/
-int early_drop_all(u_int32_t dstip,u_int32_t srcip)
-{
-	/* Traverse backwards: gives us oldest, which is roughly LRU */
-	struct nf_conntrack_tuple_hash *h=NULL;
-	struct nf_conn *ct = NULL, *tmp=NULL;
-	int dropped = 0;
-	int bucket=0;
-	//DEBUGP("%s_%d:dstip=%08x.nf_conntrack_htable_size=%d\n",__FUNCTION__,__LINE__,dstip,nf_conntrack_htable_size);
-	read_lock_bh(&nf_conntrack_lock);
-
-
-	for (; bucket < nf_conntrack_htable_size; (bucket)++) {
-		list_for_each_entry(h, &nf_conntrack_hash[bucket], list) {
-			tmp = nf_ct_tuplehash_to_ctrack(h);
-			//DEBUGP("%s_%d:h->tuple.src.u3.ip=%08x.\n",__FUNCTION__,__LINE__,h->tuple.src.u3.ip);
-			//DEBUGP("%s_%d:h->tuple.dst.u3.ip=%08x.\n",__FUNCTION__,__LINE__,h->tuple.dst.u3.ip);
-			//DEBUGP("%s_%d: dstip=%08x.\n",__FUNCTION__,__LINE__,dstip);
-			//DEBUGP("%s_%d: srcip=%08x.\n",__FUNCTION__,__LINE__,srcip);
-			if (!test_bit(IPS_ASSURED_BIT, &tmp->status)) {
-				//if((h->tuple.src.u3.ip==dstip)||(h->tuple.dst.u3.ip==dstip))
-				if(h->tuple.dst.u3.ip==dstip)
-				{
-					ct = tmp;
-					atomic_inc(&ct->ct_general.use);
-					DEBUGP("%s_%d:found dstip=%08x.\n",__FUNCTION__,__LINE__,dstip);
-					//DEBUGP("%s_%d:h->src=%08x.\n",__FUNCTION__,__LINE__,h->tuple.src.u3.ip);
-					//DEBUGP("%s_%d:h->dstip=%08x.\n",__FUNCTION__,__LINE__,h->tuple.dst.u3.ip);
-					//DEBUGP("%s_%d:h->dst.protonum=%d.\n",__FUNCTION__,__LINE__,h->tuple.dst.protonum);
-					break;
-				}
-			}
-		}
-	}
-
-	read_unlock_bh(&nf_conntrack_lock);
-
-	if (!ct)
-		return dropped;
-
-	if (del_timer(&ct->timeout)) {
-		death_by_timeout((unsigned long)ct);
-		/* Check if we indeed killed this entry. Reliable event
-		   delivery may have inserted it into the dying list. */
-		if (test_bit(IPS_DYING_BIT, &ct->status)) {
-			dropped = 1;
-			NF_CT_STAT_INC_ATOMIC(early_drop);
-		}
-	}
-	nf_ct_put(ct);
-	return dropped;
-}
-
 static void
 clean_from_lists(struct nf_conn *ct)
 {
@@ -1458,7 +1401,6 @@ void nf_conntrack_alter_reply(struct nf_conn *ct,
 	}
 	write_unlock_bh(&nf_conntrack_lock);
 }
-EXPORT_SYMBOL_GPL(nf_conntrack_alter_reply);
 
 /* Refresh conntrack for this many jiffies and do accounting if do_acct is 1 */
 void __nf_ct_refresh_acct(struct nf_conn *ct,

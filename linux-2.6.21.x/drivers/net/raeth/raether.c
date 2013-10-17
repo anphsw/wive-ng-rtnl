@@ -2759,7 +2759,7 @@ void RAETH_Init_PSEUDO(pEND_DEVICE pAd, struct net_device *net_dev)
 
 	dev = alloc_etherdev(sizeof(PSEUDO_ADAPTER));
 	if (!dev)
-		return -ENOMEM;
+		return;
 
 	strcpy(dev->name, DEV2_NAME);
 
