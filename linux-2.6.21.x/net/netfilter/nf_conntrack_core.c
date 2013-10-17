@@ -1394,18 +1394,16 @@ pass:
 
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 	    /* software nat offload path */
-    	    if ((nf_conntrack_fastnat && bcm_nat_bind_hook != NULL && nat && !skip_offload)
-		&& !(nat->info.nat_type & NF_FAST_NAT_DENY)) {
-
-		/* Try send selected pakets to bcm_nat */
-		if ((hooknum == NF_IP_PRE_ROUTING) &&
-		    /* allow  tcp/udp packet pass fastnat */
-		    (protonum == IPPROTO_UDP || protonum == IPPROTO_TCP) &&
-			/* allow tcp packet with established/reply state */
-			(ctinfo == IP_CT_ESTABLISHED || ctinfo == IP_CT_ESTABLISHED_REPLY)) {
-			    if (!is_pure_routing(ct))
-				ret = bcm_nat_bind_hook(ct, ctinfo, pskb, l3proto, l4proto);
-		}
+    	    if (nf_conntrack_fastnat && bcm_nat_bind_hook != NULL && nat &&
+		/* if not deny for this packets */
+		!skip_offload && !(nat->info.nat_type & NF_FAST_NAT_DENY) &&
+		/* allow  tcp/udp packet pass fastnat */
+		hooknum == NF_IP_PRE_ROUTING && (protonum == IPPROTO_UDP || protonum == IPPROTO_TCP) &&
+		/* allow tcp packet with established/reply state */
+		(ctinfo == IP_CT_ESTABLISHED || ctinfo == IP_CT_ESTABLISHED_REPLY)) {
+		    /* if not pure routing - try send selected pakets to bcm_nat */
+		    if (!is_pure_routing(ct))
+			ret = bcm_nat_bind_hook(ct, ctinfo, pskb, l3proto, l4proto);
 	    }
 #endif
 skip:
