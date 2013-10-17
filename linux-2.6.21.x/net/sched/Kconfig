@@ -393,7 +393,7 @@ config NET_EMATCH
 config NET_EMATCH_STACK
 	int "Stack size"
 	depends on NET_EMATCH
-	default "8"
+	default "16"
 	---help---
 	  Size of the local stack variable used while evaluating the tree of
 	  ematches. Limits the depth of the tree, i.e. the number of
