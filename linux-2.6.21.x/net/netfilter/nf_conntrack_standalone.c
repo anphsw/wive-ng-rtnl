@@ -455,15 +455,16 @@ static int __init nf_conntrack_standalone_init(void)
 
 #ifdef CONFIG_PROC_FS
 	proc = proc_net_fops_create("nf_conntrack", 0440, &ct_file_ops);
-	if (!proc) goto cleanup_init;
+	if (!proc)
+	    goto cleanup_init;
 
-	proc_exp = proc_net_fops_create("nf_conntrack_expect", 0440,
-					&exp_file_ops);
-	if (!proc_exp) goto cleanup_proc;
+	proc_exp = proc_net_fops_create("nf_conntrack_expect", 0440, &exp_file_ops);
+	if (!proc_exp)
+	    goto cleanup_proc;
 
 	proc_stat = create_proc_entry("nf_conntrack", S_IRUGO, proc_net_stat);
 	if (!proc_stat)
-		goto cleanup_proc_exp;
+	    goto cleanup_proc_exp;
 
 	proc_stat->proc_fops = &ct_cpu_seq_fops;
 	proc_stat->owner = THIS_MODULE;
