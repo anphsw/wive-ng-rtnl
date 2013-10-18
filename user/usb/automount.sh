@@ -81,9 +81,7 @@ try_umount() {
 	$LOG "can not unmount $MOUNT_DST"
 	exit 1
       fi
-      mount_err
     fi
-    mount_err
   fi
 }
 
@@ -98,12 +96,6 @@ swap_off() {
   fi
 }
 
-mount_err() {
-  if ! rmdir "$MOUNT_DST"; then
-    $LOG "can not del $MOUNT_DST"
-    exit 1
-  fi
-}
 
 fs drop_caches
 
@@ -140,6 +132,13 @@ if [ "$ACTION" = "add" ]; then
 elif [ "$ACTION" = "mount" ]; then
   $LOG "device $MDEV_PATH mount OK"
   exit 0
+
+elif [ "$ACTION" = "umount" ]; then
+  if [ -d "/media/$MDEV" ]; then
+  rmdir "/media/$MDEV"
+  fi
+  exit 0
+
 else
   $LOG "remove $MDEV_PATH"
   try_umount
