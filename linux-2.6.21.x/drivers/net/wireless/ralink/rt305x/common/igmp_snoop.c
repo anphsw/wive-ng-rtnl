@@ -1271,11 +1271,19 @@ BOOLEAN isMldPkt(
 	return result;
 }
 
+static inline int IPv6_Transient_Multicast(
+	IN PRT_IPV6_ADDR pIpv6Addr)
+{
+	if ((pIpv6Addr->ipv6_addr32[0] & htonl(0xFF100000)) == htonl(0xFF100000))
+		return 1;
+
+	return 0;
+}
+
 BOOLEAN IPv6MulticastFilterExcluded(IN PUCHAR pDstMacAddr)
 {
 	PUCHAR pIpHeader;
 	PRT_IPV6_HDR pIpv6Hdr;
-	PRT_IPV6_ADDR pIpv6DstAddr;
 	UINT32 offset;
 	INT idx;
 	UINT8 nextProtocol;
@@ -1299,17 +1307,8 @@ BOOLEAN IPv6MulticastFilterExcluded(IN PUCHAR pDstMacAddr)
 			return TRUE;
 	}
 
-		// SSDP
-		// FF0x:0000:0000:0000:0000:0000:0000:000C
-		// mDNS
-		// FF0x:0000:0000:0000:0000:0000:0000:00FB
-		pIpv6DstAddr = &pIpv6Hdr->dstAddr;
-
-		if ( (ntohl(pIpv6DstAddr->ipv6_addr32[0]) & 0xFFF0FFFF) == 0xFF000000 &&
-		            pIpv6DstAddr->ipv6_addr32[1] == 0 &&
-		            pIpv6DstAddr->ipv6_addr32[2] == 0 &&
-		     (ntohl(pIpv6DstAddr->ipv6_addr32[3]) == 0x0000000C ||
-		      ntohl(pIpv6DstAddr->ipv6_addr32[3]) == 0x000000FB ) )
+	/* Check non-transient multicast */
+	if (!IPv6_Transient_Multicast(&pIpv6Hdr->dstAddr))
 		return TRUE;
 
 	return FALSE;

@@ -1205,8 +1205,8 @@ typedef struct _RT_802_11_MAC_ENTRY {
     MACHTTRANSMIT_SETTING	TxRate;
 #ifdef RTMP_RBUS_SUPPORT
 	UINT32		LastRxRate;
-	INT32		StreamSnr[3];				// BF SNR from RXWI. Units=0.25 dB. 22 dB offset removed
-	INT32		SoundingRespSnr[3];			// SNR from Sounding Response. Units=0.25 dB. 22 dB offset removed
+	SHORT		StreamSnr[3];				// BF SNR from RXWI. Units=0.25 dB. 22 dB offset removed
+	SHORT		SoundingRespSnr[3];			// SNR from Sounding Response. Units=0.25 dB. 22 dB offset removed
 #endif // RTMP_RBUS_SUPPORT //
 } RT_802_11_MAC_ENTRY, *PRT_802_11_MAC_ENTRY;
 
