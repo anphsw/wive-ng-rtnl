@@ -14,7 +14,7 @@ ifconfig $PPP_IFACE -allmulti
 ifconfig $PPP_IFACE -multicast
 
 # get some variables
-l2tp_srv_nat_enabled=`nvram_get 2860 l2tp_srv_nat_enabled l2tp_srv_proxyarp parproutedEnabled`
+eval `nvram_buf_get 2860 l2tp_srv_nat_enabled l2tp_srv_proxyarp parproutedEnabled`
 
 $LOG "Reload iptables rules"
 service iptables restart
