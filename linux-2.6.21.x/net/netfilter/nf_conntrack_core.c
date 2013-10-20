@@ -1265,7 +1265,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 	    only if hardware nat support enabled or software fastnat support enabled */
 	if (nat && !skip_offload && (ra_sw_nat_hook_tx != NULL || (nf_conntrack_fastnat && bcm_nat_bind_hook != NULL))) {
 #if defined(CONFIG_NETFILTER_XT_MATCH_WEBSTR) || defined(CONFIG_NETFILTER_XT_MATCH_WEBSTR_MODULE)
-	    /*  2. skip http post/get/head traffic for correct webstr work */
+	    /*  1. skip http post/get/head traffic for correct webstr work */
 	    if (web_str_loaded && protonum == IPPROTO_TCP && CTINFO2DIR(ctinfo) == IP_CT_DIR_ORIGINAL) {
 		struct tcphdr _tcph, *tcph;
 		unsigned char _data[2], *data;
@@ -1282,13 +1282,13 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 	    }
 #endif /* XT_MATCH_WEBSTR */
 #ifdef CONFIG_NF_CONNTRACK_MARK
-	    /* 3. offload only packets with connection mark flag 0 */
+	    /* 2. offload only packets with connection mark flag 0 */
 	    if ((protonum == IPPROTO_TCP || protonum == IPPROTO_UDP) && ((ct->mark & 0xFF0000) != 0)) {
 		skip_offload = 1;
 		goto pass;
 	    }
 #endif
-	    /* 4. other traffic skip section
+	    /* 3. other traffic skip section
 		EXAMPLE_CODE:
 		if (need ... rules ...) {
 		    skip_offload = 1;
