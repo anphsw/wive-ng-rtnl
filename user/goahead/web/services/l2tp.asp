@@ -54,6 +54,8 @@ function showHint(key)
 		text += 'Allow debug mode for L2TP server connections.';
 	else if (key=='l2tp_lcp')
 		text += 'Enable adaptive LCP echo interval.';
+        else if (key=='l2tp_proxyarp')
+                text += 'Enable proxyarp for VPN server.';
 	else
 		show = false;
 	
@@ -121,7 +123,7 @@ function l2tpEnableSwitch(form)
 			form.l2tp_srv_mtu_sel, form.l2tp_srv_mtu_size,
 			form.l2tp_srv_mru_sel, form.l2tp_srv_mru_size,
 			form.l2tp_srv_ip_local, form.l2tp_srv_ip_range,
-			form.l2tp_srv_nat_enabled
+			form.l2tp_srv_nat_enabled, form.l2tp_srv_proxyarp
 		],
 		form.l2tp_srv_enabled.checked);
 	genTable(form);
@@ -134,12 +136,14 @@ function initValue()
 	var adaptive_lcp = '<% getCfgZero(1, "l2tp_srv_lcp_adapt"); %>';
 	var debug_on = '<% getCfgZero(1, "l2tp_srv_debug"); %>';
 	var nat_on = '<% getCfgZero(1, "l2tp_srv_nat_enabled"); %>';
+	var proxyarp_on = '<% getCfgZero(1, "l2tp_srv_proxyarp"); %>';
 	var mtu_size = '';
 
 	form.l2tp_srv_enabled.checked = l2tp_on == '1';
 	form.l2tp_srv_lcp_adapt.checked = adaptive_lcp == '1';
 	form.l2tp_srv_debug.checked = debug_on == '1';
 	form.l2tp_srv_nat_enabled.checked = nat_on == '1';
+	form.l2tp_srv_proxyarp.checked = proxyarp_on == '1';
 	
 	// Set-up MTU & MRU
 	for (var i=0; i < form.l2tp_srv_mtu_sel.options.length; i++)
@@ -279,7 +283,8 @@ function mruChange(form)
           <tr>
             <td style="width: 50%;" onMouseOver="showHint('l2tp_nat')" onMouseOut="hideHint('l2tp_nat')"><input name="l2tp_srv_nat_enabled" type="checkbox">
               &nbsp;<b>Enable NAT</b></td>
-            <td>&nbsp;</td>
+            <td style="width: 50%;" onMouseOver="showHint('l2tp_proxyarp')" onMouseOut="hideHint('l2tp_proxyarp')"><input name="l2tp_srv_proxyarp" type="checkbox">
+              &nbsp;<b>L2TP proxyarp</b></td>
           </tr>
         </table>
         <div id="l2tpUserList"> </div>
