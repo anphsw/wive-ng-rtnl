@@ -173,31 +173,24 @@ static DEFINE_MUTEX(nf_ct_cache_mutex);
 
 static unsigned int nf_conntrack_hash_rnd __read_mostly;
 
-#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE) || defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-static inline unsigned int is_local_prtc(u_int8_t protonm)
-{
-	/* Local gre/esp/ah/ip-ip/icmp proto must be skip from software offload
-	    and mark as interested by ALG  for correct tracking this */
-	switch (protonm) {
-	case IPPROTO_IPIP:
-	case IPPROTO_ICMP:
-	case IPPROTO_GRE:
-	case IPPROTO_ESP:
-	case IPPROTO_AH:
-		return 1;
-	default:
-		return 0;
-	}
-
-    return 0;
-};
-#endif
-
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 static inline unsigned int is_local_svc(struct sk_buff **pskb, u_int8_t protonm)
 {
 	struct udphdr *hdr;
 	struct iphdr *iph;
+
+	/* Local gre/esp/ah/ip-ip/icmp proto must be skip from software offload
+	    and mark as interested by ALG  for correct tracking this */
+	switch (protonm) {
+	    case IPPROTO_IPIP:
+	    case IPPROTO_ICMP:
+	    case IPPROTO_GRE:
+	    case IPPROTO_ESP:
+	    case IPPROTO_AH:
+		return 1;
+	    default:
+		return 0;
+	}
 
 	/* parse udp packets */
 	if (protonm == IPPROTO_UDP) {
@@ -1281,11 +1274,6 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 	/* this code section may be used for skip some types traffic,
 	    only if hardware nat support enabled or software fastnat support enabled */
 	if (nat && !skip_offload && (ra_sw_nat_hook_tx != NULL || (nf_conntrack_fastnat && bcm_nat_bind_hook != NULL))) {
-	    /* 1. local esp/ah/ip-ip/icmp proto must be skip from hw/sw offload and mark as interested by ALG for correct tracking this */
-	    if (is_local_prtc(protonum)) {
-		skip_offload = 1;
-		goto pass;
-	    }
 #if defined(CONFIG_NETFILTER_XT_MATCH_WEBSTR) || defined(CONFIG_NETFILTER_XT_MATCH_WEBSTR_MODULE)
 	    /*  2. skip http post/get/head traffic for correct webstr work */
 	    if (web_str_loaded && protonum == IPPROTO_TCP && CTINFO2DIR(ctinfo) == IP_CT_DIR_ORIGINAL) {
