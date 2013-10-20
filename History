@@ -1708,6 +1708,7 @@
 33) kernel: netfilter: rtsp: fix test router support rtsp from stb failed.<br>
 34) kernel: fastnat: fix conntrack hash connections collisions.<br>
 35) kernel: fastpath: full skip not ipv4 traffic by software offload and filtering section.<br>
+36) kernel: net: gen_estimator deadlock fix.<br>
 <br>
 <br>
 <br>
