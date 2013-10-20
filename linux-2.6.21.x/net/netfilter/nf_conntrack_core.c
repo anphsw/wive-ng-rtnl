@@ -236,10 +236,8 @@ static u_int32_t __hash_conntrack(const struct nf_conntrack_tuple *tuple,
 #ifdef CONFIG_BCM_NAT
 	if (tuple->src.l3num == PF_INET && tuple->dst.protonum == PF_INET) {
 		/* To ensure that halves of the same connection don't hash clash, we add the source per-proto again. */
-		return (ntohl(tuple->src.u3.ip + tuple->dst.u3.ip
-			     + tuple->src.u.all + tuple->dst.u.all
-			     + tuple->dst.protonum)
-			+ ntohs(tuple->src.u.all))
+		return (ntohl(tuple->src.u3.ip + tuple->dst.u3.ip + tuple->src.u.all
+				+ tuple->dst.u.all + tuple->dst.protonum) + ntohs(tuple->src.u.all))
 			% nf_conntrack_htable_size;
 	} else
 #endif
