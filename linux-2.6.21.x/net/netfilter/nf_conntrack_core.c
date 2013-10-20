@@ -1225,9 +1225,6 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 	    /* skip marked packets for ALG from all fastpaths */
 	    skip_offload = 1;
 
-        /* packets for nat ? */
-        nat = nfct_nat(ct);
-
 	/* full skip not ipv4 traffic by software offload and filtering section */
 	if (pf != PF_INET)
 	    goto skip;
@@ -1261,6 +1258,9 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 #endif
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE) || \
     defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+        /* packets for nat ? */
+        nat = nfct_nat(ct);
+
 	/* this code section may be used for skip some types traffic,
 	    only if hardware nat support enabled or software fastnat support enabled */
 	if (nat && !skip_offload && (ra_sw_nat_hook_tx != NULL || (nf_conntrack_fastnat && bcm_nat_bind_hook != NULL))) {
