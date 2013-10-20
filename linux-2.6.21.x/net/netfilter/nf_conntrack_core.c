@@ -179,29 +179,19 @@ static inline unsigned int is_local_svc(struct sk_buff **pskb, u_int8_t protonm)
 	struct udphdr *hdr;
 	struct iphdr *iph;
 
-	/* Local gre/esp/ah/ip-ip/icmp proto must be skip from software offload
+	/* Local gre/esp/ah/ip-ip/icmp proto must be skip from hardware offload
 	    and mark as interested by ALG  for correct tracking this */
 	switch (protonm) {
 	    case IPPROTO_IPIP:
 	    case IPPROTO_ICMP:
+#ifndef CONFIG_HNAT_V2
 	    case IPPROTO_GRE:
+#endif
 	    case IPPROTO_ESP:
 	    case IPPROTO_AH:
 		return 1;
 	    default:
 		return 0;
-	}
-
-	/* parse udp packets */
-	if (protonm == IPPROTO_UDP) {
-	    iph	= (struct iphdr *)(*pskb)->nh.raw;
-	    if (iph != NULL) {
-		hdr = (struct udphdr*)((*pskb)->data + (iph->ihl << 2));
-		if (hdr != NULL)
-		    /* Packet with no checksum or Local L2TP */
-		    if (hdr->check == 0 || hdr->dest == htons(1701) || hdr->source == htons(1701))
-			return 1;
-	    }
 	}
 
     return 0;
