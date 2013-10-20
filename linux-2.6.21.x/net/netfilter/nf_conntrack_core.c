@@ -1163,7 +1163,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE) || \
     defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 	struct nf_conn_help *help;
-    	static unsigned int skip_offload = 0;
+    	unsigned int skip_offload = 0;
 #endif
 
 	/* Previously seen (loopback or untracked)?  Ignore. */
