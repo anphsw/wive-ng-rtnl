@@ -67,9 +67,11 @@ VPATH=@srcdir@
 srcdir=@srcdir@
 
 prefix=@prefix@
-exec_prefix=${prefix}
-bindir=${exec_prefix}/bin
-sbindir=${exec_prefix}/sbin
+exec_prefix=@exec_prefix@
+datarootdir = @datarootdir@
+bindir=@bindir@
+sbindir=@sbindir@
+mandir=@mandir@
 
 CC=@CC@
 AR=@AR@
