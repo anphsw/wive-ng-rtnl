@@ -558,8 +558,8 @@ typedef struct _RT_802_11_MAC_ENTRY {
     unsigned int          	ConnectedTime;
     MACHTTRANSMIT_SETTING       TxRate;
     unsigned int          	LastRxRate;
-    int           		StreamSnr[3];
-    int           		SoundingRespSnr[3];
+    short           		StreamSnr[3];
+    short           		SoundingRespSnr[3];
 } RT_802_11_MAC_ENTRY;
 
 typedef struct _RT_802_11_MAC_TABLE {
