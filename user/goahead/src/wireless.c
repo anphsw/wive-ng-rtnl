@@ -485,12 +485,24 @@ static int getWlanStaInfo(int eid, webs_t wp, int argc, char_t **argv)
 	    websWrite(wp, T("<tr><td>%02X:%02X:%02X:%02X:%02X:%02X</td>"),
 			pe->Addr[0], pe->Addr[1], pe->Addr[2], pe->Addr[3], pe->Addr[4], pe->Addr[5]);
 
+	    // Connection Time
+	    websWrite(wp, T("<td>%02u:%02u:%02u</td>"), (pe->ConnectedTime / (unsigned)3600), ((pe->ConnectedTime % (unsigned)3600) / (unsigned)60), (pe->ConnectedTime % (unsigned)60));
+
 	    // AID, Power Save mode, MIMO Power Save
 	    websWrite(wp, T("<td>%d</td><td>%d</td><td>%d</td>"), pe->Aid, pe->Psm, pe->MimoPs);
 
 	    // TX Rate
 	    websWrite(wp, T("<td>%d</td><td>%s</td><td>%d</td><td>%d</td>"),
 			pe->TxRate.field.MCS, (pe->TxRate.field.BW == 0)? "20M":"40M", pe->TxRate.field.ShortGI, pe->TxRate.field.STBC);
+
+		switch (pe->TxRate.field.MODE) {
+			case 0: websWrite(wp, T("<td>%s</td>"), "CCK"); break;
+			case 1: websWrite(wp, T("<td>%s</td>"), "OFDM"); break;
+			case 2: websWrite(wp, T("<td>%s</td>"), "HTMIX"); break;
+			case 3: websWrite(wp, T("<td>%s</td>"), "HTGRF"); break;
+			default : websWrite(wp, T("<td>%s</td>"), "");
+		}
+
 	    // RSSI
 #if defined(CONFIG_RALINK_RT3050_1T1R)
 	    websWrite(wp, T("<td>%d</td>"), (int)(pe->AvgRssi0));

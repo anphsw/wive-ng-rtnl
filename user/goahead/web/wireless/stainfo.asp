@@ -41,10 +41,11 @@ function PageInit()
       <form name="sta" action="/goform/disconnectSta" method="POST">
         <table class="form">
           <tr>
-            <td class="title" colspan="10" id="stalistWirelessNet">Wireless Network</td>
+            <td class="title" colspan="12" id="stalistWirelessNet">Wireless Network</td>
           </tr>
           <tr>
             <th id="stalistMacAddr">MAC Address</th>
+            <th>Conn Time</th>
             <th>Aid</th>
             <th>PSM</th>
             <th>MimoPS</th>
@@ -52,6 +53,7 @@ function PageInit()
             <th>BW</th>
             <th>SGI</th>
             <th>STBC</th>
+            <th>MODE</th>
             <th>RSSI</th>
             <th>Actions</th>
           </tr>
