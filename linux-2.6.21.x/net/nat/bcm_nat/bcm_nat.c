@@ -33,17 +33,6 @@ manip_pkt(u_int16_t proto,
 	  enum nf_nat_manip_type maniptype);
 
 /*
- * check NAT session initialized and ready
- */
-static inline int nat_is_ready(struct nf_conn *ct)
-{
-	/* If NAT initialized is finished may be offload */
-	if ((ct->status & IPS_NAT_DONE_MASK) == IPS_NAT_DONE_MASK)
-		return 1;
-	return 0;
-}
-
-/*
  * Direct send packets to output.
  * Stolen from ip_finish_output2.
  */
@@ -117,15 +106,6 @@ bcm_do_bindings(struct nf_conn *ct,
 	static int hn[2] = {NF_IP_PRE_ROUTING, NF_IP_POST_ROUTING};
 	enum ip_conntrack_dir dir = CTINFO2DIR(ctinfo);
 	unsigned int i = 1;
-
-	/* This check prevent corrupt conntrack data */
-	if(unlikely(!nat_is_ready(ct))) {
-#ifdef DEBUG
-		if (net_ratelimit())
-		    printk(KERN_DEBUG "bcm_fast_path: SKB or CT not ready for offload\n");
-#endif
-		return NF_ACCEPT; /* Ignore */
-	}
 
 	do {
 		enum nf_nat_manip_type mtype = HOOK2MANIP(hn[i]);
