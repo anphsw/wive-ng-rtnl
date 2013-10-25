@@ -176,9 +176,6 @@ static unsigned int nf_conntrack_hash_rnd __read_mostly;
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 static inline unsigned int is_local_svc(struct sk_buff **pskb, u_int8_t protonm)
 {
-	struct udphdr *hdr;
-	struct iphdr *iph;
-
 	/* Local gre/esp/ah/ip-ip/icmp proto must be skip from hardware offload
 	    and mark as interested by ALG  for correct tracking this */
 	switch (protonm) {
