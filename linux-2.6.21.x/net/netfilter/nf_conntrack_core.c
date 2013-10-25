@@ -1145,7 +1145,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 	int set_reply = 0;
 	int ret;
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-	struct nf_conn_nat *nat;
+	struct nf_conn_nat *nat = NULL;
 #endif
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE) || \
     defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
