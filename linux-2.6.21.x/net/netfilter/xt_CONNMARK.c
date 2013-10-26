@@ -53,9 +53,6 @@ target(struct sk_buff **pskb,
 	u_int32_t diff;
 	u_int32_t mark;
 	u_int32_t newmark;
-#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-	struct nf_conn_nat *nat;
-#endif
 
 	ct = nf_ct_get(*pskb, &ctinfo);
 	if (ct) {
@@ -66,7 +63,7 @@ target(struct sk_buff **pskb,
 				ct->mark = newmark;
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 				if (nf_conntrack_fastnat) {
-				    nat = nfct_nat(ct);
+				    struct nf_conn_nat *nat = nfct_nat(ct);
 				    if(nat)
 					nat->info.nat_type |= NF_FAST_NAT_DENY;
 				}

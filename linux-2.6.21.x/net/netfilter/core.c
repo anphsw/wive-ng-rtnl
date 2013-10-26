@@ -222,7 +222,6 @@ next_hook:
 }
 EXPORT_SYMBOL(nf_hook_slow);
 
-
 int skb_make_writable(struct sk_buff *skb, unsigned int writable_len)
 {
 	if (writable_len > skb->len)

@@ -38,18 +38,15 @@ target_v0(struct sk_buff **pskb,
 	  const struct xt_target *target,
 	  const void *targinfo)
 {
-#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-	struct nf_conn_nat *nat=NULL;
-	struct nf_conn *ct=NULL;
-	enum ip_conntrack_info ctinfo;
-#endif
 	const struct xt_mark_target_info *markinfo = targinfo;
 
 	(*pskb)->mark = markinfo->mark;
 
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 	if(nf_conntrack_fastnat) {
-	    nat = (ct = nf_ct_get(*pskb, &ctinfo)) ? nfct_nat(ct) : NULL;
+	    enum ip_conntrack_info ctinfo;
+	    struct nf_conn *ct;
+	    struct nf_conn_nat *nat = (ct = nf_ct_get(*pskb, &ctinfo)) ? nfct_nat(ct) : NULL;
 	    if (nat)
 		nat->info.nat_type |= NF_FAST_NAT_DENY;
 	}

@@ -63,5 +63,6 @@ endif
 
 # Broadcom Software NAT Offload
 obj-$(CONFIG_BCM_NAT)		+= nat/bcm_nat/
+
 # Ralink hardware NAT/PPPOE Offload support
 obj-$(CONFIG_RA_NAT_HW)         += nat/hw_nat/
