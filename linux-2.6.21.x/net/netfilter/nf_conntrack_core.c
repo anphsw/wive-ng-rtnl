@@ -1222,14 +1222,13 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 	    /* skip marked packets for ALG from all fastpaths */
 	    skip_offload = 1;
 
-	/* full skip not ipv4 traffic by software offload and filtering section */
-	if (pf != PF_INET)
+	/* full skip not ipv4 and mcast/bcast traffic by software offload and filtering section */
+	if (pf != PF_INET || (*pskb)->pkt_type == PACKET_BROADCAST || (*pskb)->pkt_type == PACKET_MULTICAST)
 	    goto skip;
 #endif
 #if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
 	/* software route offload path */
         if (nf_conntrack_fastroute && !skip_offload && skb_is_ready(*pskb) && is_pure_routing(ct)
-	    && (*pskb)->pkt_type != PACKET_BROADCAST  && (*pskb)->pkt_type != PACKET_MULTICAST
 	    && (ctinfo == IP_CT_ESTABLISHED || ctinfo == IP_CT_ESTABLISHED_REPLY)) {
 	    /* change status from new to seen_reply. when receive reply packet the status will set to establish */
 	    if (set_reply && !test_and_set_bit(IPS_SEEN_REPLY_BIT, &ct->status))
