@@ -1725,9 +1725,13 @@ size_t answer_request(struct dns_header *header, char *limit, size_t qlen,
 	      if (intr)
 		{
 		  struct addrlist *addrlist;
+		  int gotit = 0;
 
 		  enumerate_interfaces(0);
 		  
+		  for (intr = daemon->int_names; intr; intr = intr->next)
+		    if (hostname_isequal(name, intr->name))
+		      {
 		  addrlist = intr->addr4;
 #ifdef HAVE_IPV6
 		  if (type == T_AAAA)
@@ -1736,9 +1740,9 @@ size_t answer_request(struct dns_header *header, char *limit, size_t qlen,
 		  ans = 1;
 		  if (!dryrun)
 		    {
-		      if (!addrlist)
-			log_query(F_FORWARD | F_CONFIG | flag | F_NEG, name, NULL, NULL);
-		      else 
+			    if (addrlist)
+			      {
+				gotit = 1;
 			for (; addrlist; addrlist = addrlist->next)
 			  {
 			    log_query(F_FORWARD | F_CONFIG | flag, name, &addrlist->addr, NULL);
@@ -1748,6 +1752,12 @@ size_t answer_request(struct dns_header *header, char *limit, size_t qlen,
 			      anscount++;
 			  }
 		    }
+			  }
+		      }
+		  
+		  if (!dryrun && !gotit)
+		    log_query(F_FORWARD | F_CONFIG | flag | F_NEG, name, NULL, NULL);
+		     
 		  continue;
 		}
 
