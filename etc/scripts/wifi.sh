@@ -27,7 +27,7 @@ if [ "$OperationMode" = "2" ]; then
   exit 0
 fi
 ########################################APMODE param#########################################
-eval `nvram_buf_get 2860 AutoChannelSelect Channel AP2040Rescan RadioOff GreenAP HT_OpMode`
+eval `nvram_buf_get 2860 AutoChannelSelect Channel AP2040Rescan RadioOff GreenAP HT_OpMode HT_BSSCoexistence`
 #########################################ON/OFF param########################################
 if [ "$RadioOff" = "1" ]; then
     iwpriv "$1" set RadioOn=0
