@@ -1711,6 +1711,10 @@
 36) kernel: fastnat: fix conntrack hash connections collisions.<br>
 37) kernel: fastpath: full skip not ipv4 traffic by software offload and filtering section.<br>
 38) kernel: net: gen_estimator deadlock fix.<br>
+
+<br>
+<b>4.5.x</b><br>
+1) Move to 2.7.1.6 driver, support rt3xxx,rt5350,mt762x chips.<br>
 <br>
 <br>
 <br>

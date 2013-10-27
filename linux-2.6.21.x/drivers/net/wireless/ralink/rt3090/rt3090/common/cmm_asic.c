@@ -1164,30 +1164,37 @@ VOID AsicPercentageDeltaPower(
 	if (pAd->CommonCfg.TxPowerPercentage >= 100) /* AUTO TX POWER control */
 	{
 	}
-	else if (pAd->CommonCfg.TxPowerPercentage > 90) /* 91 ~ 100% & AUTO, treat as 100% in terms of mW */
+
+	else if (pAd->CommonCfg.TxPowerPercentage > 90)
 		;
-	else if (pAd->CommonCfg.TxPowerPercentage > 60) /* 61 ~ 90%, treat as 75% in terms of mW		 DeltaPwr -= 1; */
-	{
+	else if (pAd->CommonCfg.TxPowerPercentage >= 90)	/* reduce Pwr for 1 dB. */
 		*pDeltaPwr -= 1;
-	}
-	else if (pAd->CommonCfg.TxPowerPercentage > 30) /* 31 ~ 60%, treat as 50% in terms of mW		 DeltaPwr -= 3; */
-	{
+	else if (pAd->CommonCfg.TxPowerPercentage >= 80)	/* reduce Pwr for 2 dB. */
+		*pDeltaPwr -= 2;
+	else if (pAd->CommonCfg.TxPowerPercentage >= 70)	/* reduce Pwr for 3 dB. */
 		*pDeltaPwr -= 3;
-	}
+	else if (pAd->CommonCfg.TxPowerPercentage >= 60)	/* reduce Pwr for 4 dB. */
+		*pDeltaPwr -= 4;
+	else if (pAd->CommonCfg.TxPowerPercentage >= 50)	/* reduce Pwr for 5 dB. */
+		*pDeltaPwr -= 5;
+	else if (pAd->CommonCfg.TxPowerPercentage >= 45)	/* reduce Pwr for 6 dB. */
+		*pDeltaPwr -= 6;
+	else if (pAd->CommonCfg.TxPowerPercentage >= 40)	/* reduce Pwr for 7 dB. */
+		*pDeltaPwr -= 7;
+	else if (pAd->CommonCfg.TxPowerPercentage >= 35)	/* reduce Pwr for 8 dB. */
+		*pDeltaPwr -= 8;
+	else if (pAd->CommonCfg.TxPowerPercentage >= 30)	/* reduce Pwr for 9 dB. */
+		*pDeltaPwr -= 9;
 	else if (pAd->CommonCfg.TxPowerPercentage > 15) /* 16 ~ 30%, treat as 25% in terms of mW		 DeltaPwr -= 6; */
-	{
 		*pDeltaPowerByBbpR1 -= 6; /* -6 dBm */
-	}
 	else if (pAd->CommonCfg.TxPowerPercentage > 9) /* 10 ~ 15%, treat as 12.5% in terms of mW		 DeltaPwr -= 9; */
 	{
 		*pDeltaPowerByBbpR1 -= 6; /* -6 dBm */
 		*pDeltaPwr -= 3;
 	}
 	else /* 0 ~ 9 %, treat as MIN(~3%) in terms of mW		 DeltaPwr -= 12; */
-	{
 		*pDeltaPowerByBbpR1 -= 12; /* -12 dBm */
 	}
-}
 
 VOID AsicCompensatePowerViaBBP(
 	IN 		PRTMP_ADAPTER 		pAd,
