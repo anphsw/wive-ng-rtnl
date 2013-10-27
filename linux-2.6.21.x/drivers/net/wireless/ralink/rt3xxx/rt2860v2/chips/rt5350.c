@@ -957,11 +957,7 @@ VOID RT5350_ChipSwitchChannel(
 
 
 				RT30xxReadRFRegister(pAd, RF_R30, (PUCHAR)&RFValue);
-				if ((pAd->CommonCfg.BBPCurrentBW == BW_40)
-#ifdef COC_SUPPORT
-					&& (pAd->CoC_sleep == 0)
-#endif
-				)
+				if ((pAd->CommonCfg.BBPCurrentBW == BW_40))
 					RFValue |= 0x06; // 40MBW tx_h20M=1,rx_h20M=1
 				else
 					RFValue &= ~(0x06); // 20MBW tx_h20M=0,rx_h20M=0
