@@ -84,7 +84,7 @@ get_param() {
     if [ -e /bin/transmission-daemon ] && [ "$public" != "" ]; then
 	export TRANSMISSION_HOME="$public"/transmission
     else
-	export TRANSMISSION_HOME="/media/sda1"
+	export TRANSMISSION_HOME="/media/sda1/transmission"
     fi
 }
 
