@@ -1687,7 +1687,9 @@ VOID AsicAdjustTxPower(
 {
 	INT			i, j;
 	CHAR 		Value;
+#ifdef CONFIG_STA_SUPPORT
 	CHAR		Rssi = -127;
+#endif
 	CHAR		DeltaPwr = 0;
 	CHAR		TxAgcCompensate = 0;
 	CHAR		DeltaPowerByBbpR1 = 0; 

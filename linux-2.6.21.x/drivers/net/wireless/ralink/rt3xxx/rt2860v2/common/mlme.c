@@ -1357,6 +1357,7 @@ VOID MlmePeriodicExec(
 #ifdef RTMP_INTERNAL_TX_ALC
 		if (pAd->TxPowerCtrl.bInternalTxALC)
 		{
+#ifdef RT6352
 
 			if (RT635xCheckTssiCompensation(pAd))
 			{
@@ -1365,6 +1366,7 @@ VOID MlmePeriodicExec(
 #endif /* RTMP_TEMPERATURE_CALIBRATION */
 				DoDPDCalibration(pAd);
 			}
+#endif
 		}
 		else
 #endif /* RTMP_INTERNAL_TX_ALC */
