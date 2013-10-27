@@ -1715,6 +1715,7 @@
 <br>
 <b>4.5.x</b><br>
 1) Move to 2.7.1.6 driver, support rt3xxx,rt5350,mt762x chips.<br>
+2) Add targets for rt3352+usb and rt5350 wo usb devices.<br>
 <br>
 <br>
 <br>
