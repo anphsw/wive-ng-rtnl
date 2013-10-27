@@ -38,8 +38,9 @@
 #include "../nat/hw_nat/ra_nat.h"
 #ifndef CONFIG_RA_NAT_NONE
 extern int (*ra_sw_nat_hook_rx)(struct sk_buff *skb);
-extern int (*ra_sw_nat_hook_tx)(struct sk_buff *skb, int gmac_no);
 #endif
+#else
+static int (*ra_sw_nat_hook_rx)(struct sk_buff * skb) = NULL;
 #endif
 
 #if defined(CONFIG_NETFILTER_XT_MATCH_WEBSTR) || defined(CONFIG_NETFILTER_XT_MATCH_WEBSTR_MODULE)
@@ -1259,7 +1260,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 
 	/* this code section may be used for skip some types traffic,
 	    only if hardware nat support enabled or software fastnat support enabled */
-	if (nat && !skip_offload && (ra_sw_nat_hook_tx != NULL || (nf_conntrack_fastnat && bcm_nat_bind_hook != NULL))) {
+	if (nat && !skip_offload && (ra_sw_nat_hook_rx != NULL || (nf_conntrack_fastnat && bcm_nat_bind_hook != NULL))) {
 #if defined(CONFIG_NETFILTER_XT_MATCH_WEBSTR) || defined(CONFIG_NETFILTER_XT_MATCH_WEBSTR_MODULE)
 	    /*  1. skip http post/get/head traffic for correct webstr work */
 	    if (web_str_loaded && protonum == IPPROTO_TCP && CTINFO2DIR(ctinfo) == IP_CT_DIR_ORIGINAL) {
