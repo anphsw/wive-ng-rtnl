@@ -1687,7 +1687,7 @@ VOID AsicAdjustTxPower(
 {
 	INT			i, j;
 	CHAR 		Value;
-#ifdef CONFIG_STA_SUPPORT
+#if defined (CONFIG_STA_SUPPORT) || defined(RTMP_INTERNAL_TX_ALC) || !defined(RT3352)
 	CHAR		Rssi = -127;
 #endif
 	CHAR		DeltaPwr = 0;

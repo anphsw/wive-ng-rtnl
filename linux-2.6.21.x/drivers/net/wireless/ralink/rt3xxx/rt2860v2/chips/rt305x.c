@@ -30,7 +30,7 @@
 #ifdef RT305x
 
 #include "rt_config.h"
-
+#include <asm/rt2880/rt_mmap.h>
 
 #ifndef RTMP_RF_RW_SUPPORT
 #error "You Should Enable compile flag RTMP_RF_RW_SUPPORT for this chip"

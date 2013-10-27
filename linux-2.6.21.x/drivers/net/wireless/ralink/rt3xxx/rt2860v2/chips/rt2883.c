@@ -28,7 +28,7 @@
 
 
 #include	"rt_config.h"
-
+#include        <asm/rt2880/rt_mmap.h>
 
 #ifdef RT2883
 REG_PAIR RT2883_BBPRegTable[] =
