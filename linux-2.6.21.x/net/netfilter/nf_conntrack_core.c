@@ -34,7 +34,6 @@
 #include <linux/in.h>
 
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-#include <linux/udp.h>
 #include "../nat/hw_nat/ra_nat.h"
 #ifndef CONFIG_RA_NAT_NONE
 extern int (*ra_sw_nat_hook_rx)(struct sk_buff *skb);
