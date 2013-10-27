@@ -137,6 +137,8 @@ typedef struct _NDIS_802_11_STATISTICS
 	LARGE_INTEGER   ReceivedFragmentCount;
 	LARGE_INTEGER   MulticastReceivedFrameCount;
 	LARGE_INTEGER   FCSErrorCount;
+	LARGE_INTEGER   TransmittedFrameCount;
+	LARGE_INTEGER   WEPUndecryptableCount;
 	LARGE_INTEGER   TKIPLocalMICFailures;
 	LARGE_INTEGER   TKIPRemoteMICErrors;
 	LARGE_INTEGER   TKIPICVErrors;
