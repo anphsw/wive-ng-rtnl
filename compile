@@ -16,24 +16,30 @@ export LC_ALL=POSIX
 
 #----WR-150N---WR-300N----#
 if [ "$1" = "" ]; then
-    #MODE=2T2R
-    #MODE=2T2R-USB
-    MODE=2T2R-5G-USB
-    #MODE=1T1R
+    #MODE=RT3052-2T2R
+    #MODE=RT3052-2T2R-USB
+    #MODE=RT3352-2T2R-USB
+    MODE=RT3662-2T2R-5G-USB
+    #MODE=RT5350-1T1R
+    #MODE=RT3050-1T1R
 else
     MODE=$1
 fi
 
 #------------------------------------#
 #WR-N for full and WR-NL for ligth HW
-if [ "$MODE" = "2T2R-5G-USB" ]; then
-    DEVNAME="Wive_WR-300NUH"
-elif [ "$MODE" = "2T2R-USB" ]; then
-    DEVNAME="Wive_WR-300NU"
-elif [ "$MODE" = "2T2R" ]; then
-    DEVNAME="Wive_WR-300N"
-elif [ "$MODE" = "1T1R" ]; then
-    DEVNAME="Wive_WR-150N"
+if [ "$MODE" = "RT3662-2T2R-5G-USB" ]; then
+    DEVNAME="RT3662-Wive_WR-300NUH"
+elif [ "$MODE" = "RT3052-2T2R-USB" ]; then
+    DEVNAME="RT3352-Wive_WR-300NUN"
+elif [ "$MODE" = "RT3352-2T2R-USB" ]; then
+    DEVNAME="RT3052-Wive_WR-300NU"
+elif [ "$MODE" = "RT3052-2T2R" ]; then
+    DEVNAME="RT3052-Wive_WR-300N"
+elif [ "$MODE" = "RT5350-1T1R" ]; then
+    DEVNAME="RT5350-Wive_WR-150N"
+elif [ "$MODE" = "RT3050-1T1R" ]; then
+    DEVNAME="RT3050-Wive_WR-150N"
 else
     echo "Not supported (unknown) mode."
     exit 1
@@ -81,23 +87,33 @@ ln -fs $ROOTDIR/config/autoconf.h		$ROOTDIR/autoconf.h
 #######################################################################
 
 #################################PER-DEVICES###########################
-if [ "$MODE" = "1T1R" ] ; then
-    cp -fv $ROOTDIR/configs/kernel/config-kernel-1t1r			$ROOTDIR/linux/.config
+if [ "$MODE" = "RT3050-1T1R" ] ; then
+    cp -fv $ROOTDIR/configs/kernel/config-kernel-RT3050-1T1R		$ROOTDIR/linux/.config
     cp -fv $ROOTDIR/configs/all/config-config				$ROOTDIR/config/.config
     cp -fv $ROOTDIR/configs/all/config-busybox				$ROOTDIR/user/busybox/.config
     cp -fv $ROOTDIR/configs/all/config-lib				$ROOTDIR/lib/.config
-elif [ "$MODE" = "2T2R" ] ; then
-    cp -fv $ROOTDIR/configs/kernel/config-kernel-2t2r			$ROOTDIR/linux/.config
+elif [ "$MODE" = "RT5350-1T1R" ] ; then
+    cp -fv $ROOTDIR/configs/kernel/config-kernel-RT5350-1T1R		$ROOTDIR/linux/.config
+    cp -fv $ROOTDIR/configs/all/config-config				$ROOTDIR/config/.config
+    cp -fv $ROOTDIR/configs/all/config-busybox				$ROOTDIR/user/busybox/.config
+    cp -fv $ROOTDIR/configs/all/config-lib				$ROOTDIR/lib/.config
+elif [ "$MODE" = "RT3052-2T2R" ] ; then
+    cp -fv $ROOTDIR/configs/kernel/config-kernel-RT3052-2T2R		$ROOTDIR/linux/.config
     cp -fv $ROOTDIR/configs/all/config-busybox				$ROOTDIR/user/busybox/.config
     cp -fv $ROOTDIR/configs/all/config-config				$ROOTDIR/config/.config
     cp -fv $ROOTDIR/configs/all/config-lib				$ROOTDIR/lib/.config
-elif [ "$MODE" = "2T2R-USB" ] ; then
-    cp -fv $ROOTDIR/configs/kernel/config-kernel-2t2r-USB-8M		$ROOTDIR/linux/.config
+elif [ "$MODE" = "RT3352-2T2R-USB" ] ; then
+    cp -fv $ROOTDIR/configs/kernel/config-kernel-RT3052-2T2R-USB-8M	$ROOTDIR/linux/.config
     cp -fv $ROOTDIR/configs/all/config-busybox-USB-8M			$ROOTDIR/user/busybox/.config
     cp -fv $ROOTDIR/configs/all/config-config-USB-8M			$ROOTDIR/config/.config
     cp -fv $ROOTDIR/configs/all/config-lib				$ROOTDIR/lib/.config
-elif [ "$MODE" = "2T2R-5G-USB" ] ; then
-    cp -fv $ROOTDIR/configs/kernel/config-kernel-2t2r-5G-USB-8M		$ROOTDIR/linux/.config
+elif [ "$MODE" = "RT3352-2T2R-USB" ] ; then
+    cp -fv $ROOTDIR/configs/kernel/config-kernel-RT3352-2T2R-USB-8M	$ROOTDIR/linux/.config
+    cp -fv $ROOTDIR/configs/all/config-busybox-USB-8M			$ROOTDIR/user/busybox/.config
+    cp -fv $ROOTDIR/configs/all/config-config-USB-8M			$ROOTDIR/config/.config
+    cp -fv $ROOTDIR/configs/all/config-lib				$ROOTDIR/lib/.config
+elif [ "$MODE" = "RT3662-2T2R-5G-USB" ] ; then
+    cp -fv $ROOTDIR/configs/kernel/config-kernel-RT3662-2T2R-5G-USB-8M	$ROOTDIR/linux/.config
     cp -fv $ROOTDIR/configs/all/config-busybox-USB-8M			$ROOTDIR/user/busybox/.config
     cp -fv $ROOTDIR/configs/all/config-config-5G-USB-8M			$ROOTDIR/config/.config
     cp -fv $ROOTDIR/configs/all/config-lib				$ROOTDIR/lib/.config
