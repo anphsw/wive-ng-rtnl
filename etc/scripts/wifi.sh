@@ -27,7 +27,7 @@ if [ "$OperationMode" = "2" ]; then
   exit 0
 fi
 ########################################APMODE param#########################################
-eval `nvram_buf_get 2860 AutoChannelSelect Channel AP2040Rescan RadioOff GreenAP HT_OpMode HT_BSSCoexistence`
+eval `nvram_buf_get 2860 AutoChannelSelect Channel RadioOff GreenAP HT_OpMode`
 #########################################ON/OFF param########################################
 if [ "$RadioOff" = "1" ]; then
     iwpriv "$1" set RadioOn=0
@@ -73,6 +73,9 @@ fi
 ###########################################ALWAYS END########################################
 # rescan coexist mode
 # always call rescan in wifi coexistence not enabled - workaround bug in 2.7.1.6 driver
-if [ "$AP2040Rescan" = "1" ] || [ "$HT_BSSCoexistence" != "1" ]; then
-    iwpriv "$1" set AP2040Rescan=1
+if [ "$CONFIG_RT2860V2_AP_80211N_DRAFT3" != "" ]; then
+    eval `nvram_buf_get 2860 AP2040Rescan HT_BSSCoexistence`
+    if [ "$AP2040Rescan" = "1" ] || [ "$HT_BSSCoexistence" != "1" ]; then
+	iwpriv "$1" set AP2040Rescan=1
+    fi
 fi
