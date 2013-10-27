@@ -13,6 +13,7 @@
 
 #include 	"utils.h"
 #include	"usb.h"
+#include        "procps.h"
 #include 	"internet.h"
 #include	"helpers.h"
 

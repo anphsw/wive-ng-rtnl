@@ -73,7 +73,6 @@ void formDefineSTORAGE(void) {
 static int dir_count;
 static int part_count;
 static int media_dir_count;
-static char first_part[12];
 
 static void storageDiskAdm(webs_t wp, char_t *path, char_t *query)
 {
@@ -405,25 +404,4 @@ static int getMaxVol(int eid, webs_t wp, int argc, char_t **argv)
 	}
 
 	return websWrite(wp, T("%d"), result);
-}
-
-static int isStorageExist(void)
-{
-	char buf[256];
-	FILE *fp = fopen("/proc/mounts", "r");
-	if(!fp){
-		perror(__FUNCTION__);
-		return 0;
-	}
-
-	while(fgets(buf, sizeof(buf), fp)){
-		if(strstr(buf, STORAGE_SIGN)){
-			fclose(fp);
-			return 1;
-		}
-	}
-
-	fclose(fp);
-	printf("no usb disk found\n.");
-	return 0;
 }

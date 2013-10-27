@@ -462,7 +462,9 @@ static int getWlanStaInfo(int eid, webs_t wp, int argc, char_t **argv)
 	int i, s;
 	struct iwreq iwr;
 	RT_802_11_MAC_TABLE table = {0};
-
+#if defined(CONFIG_RT3090_AP) || defined(CONFIG_RT3090_AP_MODULE)
+	RT_802_11_MAC_TABLE2 table2 = {0};
+#endif
 	s = socket(AF_INET, SOCK_DGRAM, 0);
 	strncpy(iwr.ifr_name, "ra0", IFNAMSIZ);
 	iwr.u.data.pointer = (caddr_t) &table;
@@ -495,13 +497,13 @@ static int getWlanStaInfo(int eid, webs_t wp, int argc, char_t **argv)
 	    websWrite(wp, T("<td>%d</td><td>%s</td><td>%d</td><td>%d</td>"),
 			pe->TxRate.field.MCS, (pe->TxRate.field.BW == 0)? "20M":"40M", pe->TxRate.field.ShortGI, pe->TxRate.field.STBC);
 
-		switch (pe->TxRate.field.MODE) {
-			case 0: websWrite(wp, T("<td>%s</td>"), "CCK"); break;
-			case 1: websWrite(wp, T("<td>%s</td>"), "OFDM"); break;
-			case 2: websWrite(wp, T("<td>%s</td>"), "HTMIX"); break;
-			case 3: websWrite(wp, T("<td>%s</td>"), "HTGRF"); break;
-			default : websWrite(wp, T("<td>%s</td>"), "");
-		}
+	    switch (pe->TxRate.field.MODE) {
+		case 0: websWrite(wp, T("<td>%s</td>"), "CCK"); break;
+		case 1: websWrite(wp, T("<td>%s</td>"), "OFDM"); break;
+		case 2: websWrite(wp, T("<td>%s</td>"), "HTMIX"); break;
+		case 3: websWrite(wp, T("<td>%s</td>"), "HTGRF"); break;
+		default : websWrite(wp, T("<td>%s</td>"), "");
+	    }
 
 	    // RSSI
 #if defined(CONFIG_RALINK_RT3050_1T1R)
@@ -516,6 +518,56 @@ static int getWlanStaInfo(int eid, webs_t wp, int argc, char_t **argv)
 	    websWrite(wp, T("</tr>"));
 	}
 	close(s);
+#if defined(CONFIG_RT3090_AP) || defined(CONFIG_RT3090_AP_MODULE)
+	/* second radio module */
+	s = socket(AF_INET, SOCK_DGRAM, 0);
+	strncpy(iwr.ifr_name, "rai0", IFNAMSIZ);
+	iwr.u.data.pointer = (caddr_t) &table2;
+
+	if (s < 0) {
+		websError(wp, 500, "ioctl sock failed!");
+		return -1;
+	}
+
+	if (ioctl(s, RTPRIV_IOCTL_GET_MAC_TABLE, &iwr) < 0) {
+		websError(wp, 500, "ioctl -> RTPRIV_IOCTL_GET_MAC_TABLE failed!");
+		close(s);
+		return -1;
+	}
+
+	for (i = 0; i < table2.Num; i++) {
+	    RT_802_11_MAC_ENTRY2 *pe = &(table2.Entry[i]);
+
+	    // MAC Address
+	    websWrite(wp, T("<tr><td>%02X:%02X:%02X:%02X:%02X:%02X</td>"),
+			pe->Addr[0], pe->Addr[1], pe->Addr[2], pe->Addr[3], pe->Addr[4], pe->Addr[5]);
+
+	    // Connection Time
+	    websWrite(wp, T("<td>%02u:%02u:%02u</td>"), (pe->ConnectedTime / (unsigned)3600), ((pe->ConnectedTime % (unsigned)3600) / (unsigned)60), (pe->ConnectedTime % (unsigned)60));
+
+	    // AID, Power Save mode, MIMO Power Save
+	    websWrite(wp, T("<td>%d</td><td>%d</td><td>%d</td>"), pe->Aid, pe->Psm, pe->MimoPs);
+
+	    // TX Rate
+	    websWrite(wp, T("<td>%d</td><td>%s</td><td>%d</td><td>%d</td>"),
+			pe->TxRate.field.MCS, (pe->TxRate.field.BW == 0)? "20M":"40M", pe->TxRate.field.ShortGI, pe->TxRate.field.STBC);
+
+	    switch (pe->TxRate.field.MODE) {
+		case 0: websWrite(wp, T("<td>%s</td>"), "CCK"); break;
+		case 1: websWrite(wp, T("<td>%s</td>"), "OFDM"); break;
+		case 2: websWrite(wp, T("<td>%s</td>"), "HTMIX"); break;
+		case 3: websWrite(wp, T("<td>%s</td>"), "HTGRF"); break;
+		default : websWrite(wp, T("<td>%s</td>"), "");
+	    }
+
+	    // RSSI
+	    websWrite(wp, T("<td>%d,%d</td>"), (int)(pe->AvgRssi0), (int)(pe->AvgRssi1));
+	    websWrite(wp, T("<td><input type=\"button\" value=\"disconnect\" onclick=\"doDisconnectSta(this.form, '%02X:%02X:%02X:%02X:%02X:%02X')\"></td>"),
+			pe->Addr[0], pe->Addr[1], pe->Addr[2], pe->Addr[3], pe->Addr[4], pe->Addr[5]);
+	    websWrite(wp, T("</tr>"));
+	}
+	close(s);
+#endif
 	return 0;
 }
 

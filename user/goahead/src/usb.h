@@ -7,4 +7,5 @@
  */
 
 void formDefineUSB(void);
+void formDefineSTORAGE(void);
 int initUSB(void);
