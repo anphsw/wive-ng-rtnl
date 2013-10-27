@@ -72,6 +72,7 @@ if [ "$CONFIG_RT2860V2_AP_GREENAP" != "" ]; then
 fi
 ###########################################ALWAYS END########################################
 # rescan coexist mode
-if [ "$AP2040Rescan" = "1" ]; then
+# always call rescan in wifi coexistence not enabled - workaround bug in 2.7.1.6 driver
+if [ "$AP2040Rescan" = "1" ] || [ "$HT_BSSCoexistence" != "1" ]; then
     iwpriv "$1" set AP2040Rescan=1
 fi
