@@ -102,7 +102,7 @@ elif [ "$MODE" = "RT3052-2T2R" ] ; then
     cp -fv $ROOTDIR/configs/all/config-busybox				$ROOTDIR/user/busybox/.config
     cp -fv $ROOTDIR/configs/all/config-config				$ROOTDIR/config/.config
     cp -fv $ROOTDIR/configs/all/config-lib				$ROOTDIR/lib/.config
-elif [ "$MODE" = "RT3352-2T2R-USB" ] ; then
+elif [ "$MODE" = "RT3052-2T2R-USB" ] ; then
     cp -fv $ROOTDIR/configs/kernel/config-kernel-RT3052-2T2R-USB-8M	$ROOTDIR/linux/.config
     cp -fv $ROOTDIR/configs/all/config-busybox-USB-8M			$ROOTDIR/user/busybox/.config
     cp -fv $ROOTDIR/configs/all/config-config-USB-8M			$ROOTDIR/config/.config
