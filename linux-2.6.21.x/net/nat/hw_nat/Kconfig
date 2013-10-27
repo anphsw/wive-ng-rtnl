@@ -332,12 +332,12 @@ config  RA_HW_NAT_ACL2UP_HELPER
 
 config  RA_HW_NAT_PCI
 	depends on RA_HW_NAT && (USB_USBNET || HW_HAS_PCI)
-	default n
+	default y
 	bool "Speed up external PCI/USBNET adapters traffic by HNAT"
 
 config  RA_HW_NAT_WIFI
 	depends on RA_HW_NAT
-	default n
+	default y
 	bool "Speed up WiFi traffic by HNAT"
 
 config  HNAT_EXTENTIONS
