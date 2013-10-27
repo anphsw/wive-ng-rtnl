@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # Linux kernel version: 2.6.21.40
-# Sun Oct 27 11:30:03 2013
+# Sun Oct 27 19:21:53 2013
 #
 CONFIG_MIPS=y
 
@@ -1197,14 +1197,9 @@ CONFIG_RALINK_RT5350_1T1R=y
 #
 # Nat acell mode
 #
-CONFIG_RA_NAT_HW=y
-# CONFIG_RA_NAT_NONE is not set
+# CONFIG_RA_NAT_HW is not set
+CONFIG_RA_NAT_NONE=y
 CONFIG_BCM_NAT=y
-
-#
-# Ralink RT3xx/RT28xx NAT Acell support.
-#
-# CONFIG_RA_HW_NAT is not set
 
 #
 # AP(STA) MODE Ralink RT3xxx wireless driver.
