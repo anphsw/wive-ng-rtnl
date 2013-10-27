@@ -31,9 +31,9 @@ fi
 if [ "$MODE" = "RT3662-2T2R-5G-USB" ]; then
     DEVNAME="RT3662-Wive_WR-300NUH"
 elif [ "$MODE" = "RT3052-2T2R-USB" ]; then
-    DEVNAME="RT3352-Wive_WR-300NUN"
+    DEVNAME="RT3052-Wive_WR-300NUN"
 elif [ "$MODE" = "RT3352-2T2R-USB" ]; then
-    DEVNAME="RT3052-Wive_WR-300NU"
+    DEVNAME="RT3352-Wive_WR-300NU"
 elif [ "$MODE" = "RT3052-2T2R" ]; then
     DEVNAME="RT3052-Wive_WR-300N"
 elif [ "$MODE" = "RT5350-1T1R" ]; then
