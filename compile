@@ -29,17 +29,17 @@ fi
 #------------------------------------#
 #WR-N for full and WR-NL for ligth HW
 if [ "$MODE" = "RT3662-2T2R-5G-USB" ]; then
-    DEVNAME="RT3662-Wive_WR-300NUH"
+    DEVNAME="Wive_WR-300NU"
 elif [ "$MODE" = "RT3052-2T2R-USB" ]; then
-    DEVNAME="RT3052-Wive_WR-300NUN"
+    DEVNAME="Wive_WR-300NU"
 elif [ "$MODE" = "RT3352-2T2R-USB" ]; then
-    DEVNAME="RT3352-Wive_WR-300NU"
+    DEVNAME="Wive_WR-300NU"
 elif [ "$MODE" = "RT3052-2T2R" ]; then
-    DEVNAME="RT3052-Wive_WR-300N"
+    DEVNAME="Wive_WR-300N"
 elif [ "$MODE" = "RT5350-1T1R" ]; then
-    DEVNAME="RT5350-Wive_WR-150N"
+    DEVNAME="Wive_WR-150N"
 elif [ "$MODE" = "RT3050-1T1R" ]; then
-    DEVNAME="RT3050-Wive_WR-150N"
+    DEVNAME="Wive_WR-150N"
 else
     echo "Not supported (unknown) mode."
     exit 1
