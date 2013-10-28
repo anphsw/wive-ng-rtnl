@@ -145,10 +145,8 @@ int rt28xx_init(
 #ifdef CONFIG_AP_SUPPORT	
 	IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
 	{
-/*#ifdef AUTO_CH_SELECT_ENHANCE*/
 		AutoChBssTableInit(pAd);
 		ChannelInfoInit(pAd);
-/*#endif  AUTO_CH_SELECT_ENHANCE */
 	}
 #endif /* CONFIG_AP_SUPPORT */
 
@@ -288,12 +286,6 @@ int rt28xx_init(
 		goto err6;
 	}	
 
-#ifdef CONFIG_AP_SUPPORT
-	IF_DEV_CONFIG_OPMODE_ON_AP(pAd)
-	{
-	}
-#endif /* CONFIG_AP_SUPPORT */
-
 	/* Read parameters from Config File */
 	/* unknown, it will be updated in NICReadEEPROMParameters */
 	pAd->RfIcType = RFIC_UNKNOWN;
@@ -337,8 +329,6 @@ int rt28xx_init(
 
 	/* We should read EEPROM for all cases.  rt2860b*/
 	NICReadEEPROMParameters(pAd, (PSTRING)pDefaultMac);	
-#ifdef CONFIG_STA_SUPPORT
-#endif /* CONFIG_STA_SUPPORT */
 
 	DBGPRINT(RT_DEBUG_OFF, ("3. Phy Mode = %d\n", pAd->CommonCfg.PhyMode));
 
@@ -734,9 +724,10 @@ int rt28xx_init(
 	}
 #endif /* CONFIG_STA_SUPPORT */
 
+#ifdef RANGE_EXTEND
 	/* auto-fall back settings */
 	RTMP_IO_WRITE32(pAd, HT_FBK_CFG1, 0xedcba980); /* Fallback MCS8->MCS0 */
-
+#endif
 #ifdef DOT11N_SS3_SUPPORT
 	if (pAd->CommonCfg.TxStream >= 3)
 	{
@@ -1042,10 +1033,8 @@ VOID RTMPDrvClose(
 		os_free_mem(NULL, pAd->CommonCfg.pChDesp);
 	pAd->CommonCfg.pChDesp = NULL;
 	pAd->CommonCfg.DfsType = MAX_RD_REGION;
-#endif /* EXT_BUILD_CHANNEL_LIST */
 	pAd->CommonCfg.bCountryFlag = 0;
-
-
+#endif /* EXT_BUILD_CHANNEL_LIST */
 
 #ifdef WDS_SUPPORT
 	WdsDown(pAd);
@@ -1116,12 +1105,6 @@ VOID RTMPDrvClose(
 #endif /* CLIENT_WDS */
 		/* Shutdown Access Point function, release all related resources */
 		APShutdown(pAd);
-
-/*#ifdef AUTO_CH_SELECT_ENHANCE*/
-		/* Free BssTab & ChannelInfo tabbles.*/
-/*		AutoChBssTableDestroy(pAd); */
-/*		ChannelInfoDestroy(pAd); */
-/*#endif  AUTO_CH_SELECT_ENHANCE */
 	}
 #endif /* CONFIG_AP_SUPPORT */
 

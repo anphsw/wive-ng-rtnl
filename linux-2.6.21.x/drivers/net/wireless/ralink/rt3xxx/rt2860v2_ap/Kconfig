@@ -119,11 +119,6 @@ config  RT2860V2_AP_RTMP_TEMPERATURE_COMPENSATION
 	depends on RALINK_MT7620
 	default n
 
-config  RT2860V2_AP_AUTO_CH_SELECT_ENHANCE
-	bool "Auto Channel Selection Enhancement"
-	default y
-	depends on RT2860V2_AP
-
 config  RT2860V2_AP_80211N_DRAFT3
 	bool "802.11n Draft3"
 	depends on RT2860V2_AP
