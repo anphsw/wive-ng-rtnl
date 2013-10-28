@@ -46,6 +46,7 @@ config  RT2860V2_AP_MAC_REPEATER
 config  RT2860V2_AP_DFS
 	bool "DFS support"
 	depends on RT2860V2_AP
+	depends on RALINK_RT3883
 	select RALINK_TIMER_DFS
 	help
 	Support dynamic frequency selection

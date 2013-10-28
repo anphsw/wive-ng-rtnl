@@ -2134,7 +2134,7 @@ INT WaitForAsicReady(
 		if ((mac_val != 0x00) && (mac_val != 0xFFFFFFFF))
 			return TRUE;
 
-		RTMPusecDelay(10);
+		RTMPusecDelay(50);
 	} while (idx++ < 100);
 
 	DBGPRINT(RT_DEBUG_ERROR,
