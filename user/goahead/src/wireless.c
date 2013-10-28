@@ -1724,13 +1724,6 @@ void Security(int nvram, webs_t wp, char_t *path, char_t *query)
 	if(AccessPolicyHandle(nvram, wp, mbssid) == -1)
 		trace(0, "** error in AccessPolicyHandle()\n");
 
-	mbssid_num = atoi(nvram_get(nvram, "BssidNum"));
-	for (i=0; i<mbssid_num; i++)
-		doSystem("ifconfig ra%d down", i);
-	system("service modules gen_wifi_config");
-	for (i=0; i<mbssid_num; i++)
-		doSystem("ifconfig ra%d up", i);
-
 	submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
 	if (! submitUrl[0])
 	{
@@ -1742,6 +1735,8 @@ void Security(int nvram, webs_t wp, char_t *path, char_t *query)
 	}
 	else
 		websRedirect(wp, submitUrl);
+
+	doSystem("internet.sh wifionly");
 
 #if defined(CONFIG_RT2860V2_AP_WSC) || defined(CONFIG_RT2860V2_STA_WSC)
 	WPSRestart();
