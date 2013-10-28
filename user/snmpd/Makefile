@@ -1,3 +1,6 @@
+CFLAGS    += -ffunction-sections -fdata-sections
+CXXFLAGS  += -ffunction-sections -fdata-sections
+LDFLAGS   += -Wl,--gc-sections
 
 DIRS = snmplib modules snmpd
 

@@ -1,5 +1,9 @@
 ACLOCAL_AMFLAGS = -I m4
 
+CFLAGS    += -ffunction-sections -fdata-sections
+CXXFLAGS  += -ffunction-sections -fdata-sections
+LDFLAGS   += -Wl,--gc-sections
+
 if BUILD_CLI
   CLI_DIR = cli
 endif

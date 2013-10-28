@@ -38,7 +38,10 @@ MODULE_EXPORTS=@MODULE_EXPORTS@
 # --enable-picky-developer and --enable-krb5developer.
 DEVELOPER_CFLAGS=@DEVELOPER_CFLAGS@
 CFLAGS=@CFLAGS@
-CFLAGS+= -I$(ROOTDIR)/lib/libiconv/include
+CFLAGS    += -ffunction-sections -fdata-sections
+CFLAGS    += -I$(ROOTDIR)/lib/libiconv/include
+CXXFLAGS  += -ffunction-sections -fdata-sections
+LDFLAGS   += -Wl,--gc-sections
 CPPFLAGS=-DHAVE_CONFIG_H @CPPFLAGS@
 CPPFLAGS+= -I$(ROOTDIR)/lib/libiconv/include
 

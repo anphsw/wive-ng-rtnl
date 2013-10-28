@@ -750,6 +750,10 @@ ifndef LDO
 LDO=$(CC)
 endif
 
+CFLAGS    += -ffunction-sections -fdata-sections
+CXXFLAGS  += -ffunction-sections -fdata-sections
+LDFLAGS   += -Wl,--gc-sections
+
 dynamic_eap_methods: $(EAPDYN)
 
 wpa_supplicant: .config $(OBJS)

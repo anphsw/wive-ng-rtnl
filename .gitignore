@@ -196,6 +196,7 @@ romfs
 /user/radvd/scanner.c
 /user/radvd/stamp-h1
 /user/transmission/autom4te.cache/*
+/user/transmission/Makefile.in
 /user/transmission/configure
 /user/quagga/doc/Makefile
 /user/quagga/solaris/Makefile

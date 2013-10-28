@@ -1,3 +1,7 @@
+CFLAGS    += -ffunction-sections -fdata-sections
+CXXFLAGS  += -ffunction-sections -fdata-sections
+LDFLAGS   += -Wl,--gc-sections
+
 all:
 	$(MAKE) -C source
 
