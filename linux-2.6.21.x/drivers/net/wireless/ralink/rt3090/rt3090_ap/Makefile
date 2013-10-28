@@ -43,6 +43,7 @@ rt3090_ap-objs += ../rt3090/common/rt_rf.o
 
 rt3090_ap-objs += ../rt3090/rate_ctrl/ra_ctrl.o
 rt3090_ap-objs += ../rt3090/rate_ctrl/alg_legacy.o
+rt3090_ap-objs += ../rt3090/rate_ctrl/alg_grp.o
 
 rt3090_ap-objs += ../rt3090/ap/ap.o
 rt3090_ap-objs += ../rt3090/ap/ap_assoc.o
@@ -109,7 +110,6 @@ endif
 #rt3090_ap-objs += ../rt3090/chips/rt30xx.o
 #rt3090_ap-objs += ../rt3090/chips/rt35xx.o
 #rt3090_ap-objs += ../rt3090/chips/rt3593.o
-#rt3090_ap-objs += ../rt3090/rate_ctrl/alg_grp.o
 #ifeq ($(CONFIG_RT3090_AP_ATE),y)
 #rt3090_ap-objs += ../rt3090/ate/chips/rt30xx_ate.o
 #rt3090_ap-objs += ../rt3090/ate/chips/rt35xx_ate.o
@@ -233,6 +233,7 @@ EXTRA_CFLAGS += -DSTATS_COUNT_SUPPORT
 EXTRA_CFLAGS += -DRESOURCE_PRE_ALLOC
 EXTRA_CFLAGS += -DRT_SOC_SUPPORT
 EXTRA_CFLAGS += -DRSSI_FEEDBACK
+EXTRA_CFLAGS += -DNEW_RATE_ADAPT_SUPPORT
 
 # do not lock CountryRegion from EEPROM
 EXTRA_CFLAGS += -DEEPROM_COUNTRY_UNLOCK
