@@ -209,6 +209,7 @@ QoS_rate_vpn_limit_up=20000
 QoS_rate_vpn_up=30000
 quiet_interval=0
 RadioOff=0
+RadioOn=1
 RADIUS_Acct_Key=
 RADIUS_Acct_Port=1813
 RADIUS_Acct_Server=

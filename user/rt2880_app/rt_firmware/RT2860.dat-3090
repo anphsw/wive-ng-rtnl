@@ -182,6 +182,7 @@ PreAuthifname=
 session_timeout_interval=0
 quiet_interval=0
 RadioOff=0
+RadioOn=1
 PSMode=CAM
 AutoConnect=0
 FastConnect=0
