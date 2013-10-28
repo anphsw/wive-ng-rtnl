@@ -162,10 +162,10 @@ wlan_down_all() {
 
 retune_wifi() {
     # preconfigure wifi
-    /etc/scripts/wifi.sh $first_wlan_root_if &
+    (sleep 2 && /etc/scripts/wifi.sh $first_wlan_root_if) &
     if [ "$second_wlan_root_if" != "" ]; then
 	# preconfigure second wlan root interface to
-	/etc/scripts/wifi.sh $second_wlan_root_if &
+	(sleep 2 && /etc/scripts/wifi.sh $second_wlan_root_if) &
     fi
 }
 

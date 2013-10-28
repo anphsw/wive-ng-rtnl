@@ -1619,7 +1619,7 @@ VOID MlmeRALog(
 	)
 	{
 		BOOLEAN stbc;
-#ifdef STREAM_MODE_SUPPORT
+#if defined(STREAM_MODE_SUPPORT) || defined(DBG)
 		BOOLEAN csd=FALSE;
 #endif
 		ULONG tp;

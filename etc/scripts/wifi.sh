@@ -49,6 +49,14 @@ if [ "$CONFIG_RT2860V2_AP_IGMP_SNOOP" != "" ]; then
 	iwpriv "$1" set IgmpSnEnable="$M2UEnabled"
     fi
 fi
+########################################GREEN mode###########################################
+if [ "$CONFIG_RT2860V2_AP_GREENAP" != "" ]; then
+    if [ "$HT_OpMode" = "1" ] || [ "$GreenAP" = "1" ]; then
+	iwpriv "$1" set GreenAP=1
+    else
+	iwpriv "$1" set GreenAP=0
+    fi
+fi
 ########################################Channel select#######################################
 if [ "$AutoChannelSelect" = "1" ]; then
     # rescan and select optimal channel
@@ -62,20 +70,11 @@ else
 	iwpriv "$1" set Channel="$Channel"
     fi
 fi
-########################################GREEN mode###########################################
-if [ "$CONFIG_RT2860V2_AP_GREENAP" != "" ]; then
-    if [ "$HT_OpMode" = "1" ] || [ "$GreenAP" = "1" ]; then
-	iwpriv "$1" set GreenAP=1
-    else
-	iwpriv "$1" set GreenAP=0
-    fi
-fi
 ###########################################ALWAYS END########################################
 # rescan coexist mode
-# always call rescan in wifi coexistence not enabled - workaround bug in 2.7.1.6 driver
 if [ "$CONFIG_RT2860V2_AP_80211N_DRAFT3" != "" ]; then
     eval `nvram_buf_get 2860 AP2040Rescan HT_BSSCoexistence`
-    if [ "$AP2040Rescan" = "1" ] || [ "$HT_BSSCoexistence" != "1" ]; then
+    if [ "$AP2040Rescan" = "1" ] && [ "$HT_BSSCoexistence" = "1" ]; then
 	iwpriv "$1" set AP2040Rescan=1
     fi
 fi
