@@ -44,14 +44,22 @@ hw_nat_en() {
 	    hw_nat=0
 	    sw_nat=1
 	    $LOG "NAT Offload mode SW_FASTPATH"
-	elif [ "$natFastpath" = "2" ]; then
+	elif [ "$natFastpath" = "2" ] || [ "$CONFIG_RALINK_RT5350" != "y" ]; then
 	    hw_nat=1
 	    sw_nat=0
 	    $LOG "NAT Offload mode HW_NAT"
-	elif [ "$natFastpath" = "3" ]; then
+	elif [ "$natFastpath" = "3" ] || [ "$CONFIG_RALINK_RT5350" != "y" ]; then
 	    hw_nat=1
 	    sw_nat=1
 	    $LOG "NAT Offload mode COMPLEX"
+	elif [ "$natFastpath" = "2" ] && [ "$CONFIG_RALINK_RT5350" = "y" ]; then
+	    hw_nat=0
+	    sw_nat=0
+	    $LOG "NAT Offload mode DISABLE - RT5350 not support HW_NAT"
+	elif [ "$natFastpath" = "3" ] && [ "$CONFIG_RALINK_RT5350" = "y" ]; then
+	    hw_nat=0
+	    sw_nat=1
+	    $LOG "NAT Offload mode SW_FASTPATH - RT5350 not support HW_NAT"
 	else
 	    hw_nat=0
 	    sw_nat=0
