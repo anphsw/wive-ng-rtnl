@@ -1,7 +1,7 @@
 obj-$(CONFIG_RA_HW_NAT) += hw_nat.o
 hw_nat-objs := ra_nat.o foe_fdb.o util.o hwnat_ioctl.o
 
-ifdef CONFIG_RALINK_RT3052_MP2
+ifdef CONFIG_RALINK_RT3052
 hw_nat-objs += sys_rfrw.o
 endif
 
