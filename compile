@@ -21,6 +21,7 @@ if [ "$1" = "" ]; then
     #MODE=RT3352-2T2R-USB
     MODE=RT3662-2T2R-5G-USB
     #MODE=RT5350-1T1R
+    #MODE=RT3350-1T1R
     #MODE=RT3050-1T1R
 else
     MODE=$1
@@ -37,6 +38,8 @@ elif [ "$MODE" = "RT3352-2T2R-USB" ]; then
 elif [ "$MODE" = "RT3052-2T2R" ]; then
     DEVNAME="Wive_WR-300N"
 elif [ "$MODE" = "RT5350-1T1R" ]; then
+    DEVNAME="Wive_WR-150N"
+elif [ "$MODE" = "RT3350-1T1R" ]; then
     DEVNAME="Wive_WR-150N"
 elif [ "$MODE" = "RT3050-1T1R" ]; then
     DEVNAME="Wive_WR-150N"
@@ -89,6 +92,11 @@ ln -fs $ROOTDIR/config/autoconf.h		$ROOTDIR/autoconf.h
 #################################PER-DEVICES###########################
 if [ "$MODE" = "RT3050-1T1R" ] ; then
     cp -fv $ROOTDIR/configs/kernel/config-kernel-RT3050-1T1R		$ROOTDIR/linux/.config
+    cp -fv $ROOTDIR/configs/all/config-config				$ROOTDIR/config/.config
+    cp -fv $ROOTDIR/configs/all/config-busybox				$ROOTDIR/user/busybox/.config
+    cp -fv $ROOTDIR/configs/all/config-lib				$ROOTDIR/lib/.config
+elif [ "$MODE" = "RT3350-1T1R" ] ; then
+    cp -fv $ROOTDIR/configs/kernel/config-kernel-RT3350-1T1R		$ROOTDIR/linux/.config
     cp -fv $ROOTDIR/configs/all/config-config				$ROOTDIR/config/.config
     cp -fv $ROOTDIR/configs/all/config-busybox				$ROOTDIR/user/busybox/.config
     cp -fv $ROOTDIR/configs/all/config-lib				$ROOTDIR/lib/.config

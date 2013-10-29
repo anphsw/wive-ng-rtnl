@@ -91,7 +91,7 @@ config  RT2860V2_AP_TXBF
 choice
 	prompt "Choose Power Design"
 	depends on RT2860V2_AP
-	depends on RALINK_MT7620
+	depends on RALINK_RT3350 || RALINK_RT3352 || RALINK_RT5350 || RALINK_MT7620
 	default INTERNAL_PA_INTERNAL_LNA
 config  INTERNAL_PA_INTERNAL_LNA
 	bool "Internal PA and Internal LNA"
