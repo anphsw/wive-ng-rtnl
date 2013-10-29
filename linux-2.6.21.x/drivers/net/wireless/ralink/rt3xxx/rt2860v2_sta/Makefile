@@ -71,6 +71,7 @@ rt2860v2_sta-objs += ../rt2860v2/ate/common/ate_pci.o
 endif
 
 rt2860v2_sta-objs += ../rt2860v2/chips/rtmp_chip.o
+rt2860v2_ap-objs += ../rt2860v2/common/rt_rf.o
 
 ifeq ($(CONFIG_RALINK_RT3883),y)
 rt2860v2_sta-objs += ../rt2860v2/chips/rt3883.o
