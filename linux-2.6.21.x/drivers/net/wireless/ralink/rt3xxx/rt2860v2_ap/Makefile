@@ -243,11 +243,11 @@ endif
 endif
 
 ifeq ($(CONFIG_RALINK_RT3052),y)
-EXTRA_CFLAGS += -DRT3052 -DRT305x
-endif
-
 ifeq ($(CONFIG_RALINK_RT3350),y)
 EXTRA_CFLAGS += -DRT3350 -DRT305x
+else
+EXTRA_CFLAGS += -DRT3052 -DRT305x
+endif
 endif
 
 ifeq ($(CONFIG_RALINK_RT3352),y)
