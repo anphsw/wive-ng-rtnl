@@ -902,8 +902,7 @@ static VOID RT305x_WlanModeChange(
 
 	if(pAd->CommonCfg.PhyMode == PHY_11B)
 	{
-		USHORT i;
-			USHORT value;
+		USHORT value;
 		UCHAR  rf_offset;
 		UCHAR  rf_value;
 
@@ -941,7 +940,6 @@ static VOID RT305x_WlanModeChange(
 	}
 	else
 	{
-		USHORT i;
 		USHORT value;
 		UCHAR  rf_offset;
 		UCHAR  rf_value;
@@ -1062,7 +1060,6 @@ static VOID RT305x_SpecificInit(
 
 	if(1)
 	{
-		USHORT i;
 	        USHORT value;
 		UCHAR  rf_offset;
 		UCHAR  rf_value;
@@ -1092,7 +1089,6 @@ static VOID RT305x_SpecificInit(
 
 	if(pAd->CommonCfg.PhyMode == PHY_11B)
 	{
-		USHORT i;
 	        USHORT value;
 		UCHAR  rf_offset;
 		UCHAR  rf_value;
@@ -1133,7 +1129,6 @@ static VOID RT305x_SpecificInit(
 	}
 	else
 	{
-		USHORT i;
 	        USHORT value;
 		UCHAR  rf_offset;
 		UCHAR  rf_value;
@@ -1392,7 +1387,7 @@ VOID RT3350_InitDesiredTSSITable(
 
 	RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R49, &BbpR49.byte);
 	BbpR49.field.adc5_in_sel = 1; /* Enable the PSI (internal components, new version - RT3390) */
-	RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R49, BbpR49.byte);		
+	RTMP_BBP_IO_WRITE8_BY_REG_ID(pAd, BBP_R49, BbpR49.byte);
 
 	DBGPRINT(RT_DEBUG_TRACE, ("<--- %s\n", __FUNCTION__));
 }
@@ -1417,7 +1412,7 @@ UCHAR RT3350_GetDesiredTSSI(
 	UCHAR MCS = 0;
 
 	MCS = (UCHAR)(pLatestTxHTSetting->field.MCS);
-	
+
 	if (pLatestTxHTSetting->field.MODE == MODE_CCK)
 	{
 		if ((MCS < 0) || (MCS > 3)) /* boundary verification */
@@ -1425,7 +1420,7 @@ UCHAR RT3350_GetDesiredTSSI(
 			DBGPRINT(RT_DEBUG_ERROR, ("%s: incorrect MCS: MCS = %d\n", __FUNCTION__, MCS));
 			MCS = 0;
 		}
-	
+
 		desiredTSSI = desiredTSSIOverCCK[MCS];
 	}
 	else if (pLatestTxHTSetting->field.MODE == MODE_OFDM)
@@ -1491,7 +1486,7 @@ VOID RT3350_AsicTxAlcGetAutoAgcOffset(
 	CHAR			TuningTableIndex = 0;
 
 	BbpR49.byte = 0;
-	
+
 	/* Locate the Internal Tx ALC tuning entry */
 	if ((pAd->TxPowerCtrl.bInternalTxALC == TRUE) && (IS_RT3350(pAd)))
 	{
@@ -1513,7 +1508,7 @@ VOID RT3350_AsicTxAlcGetAutoAgcOffset(
 			}
 
 			TuningTableIndex = pAd->TxPowerCtrl.idxTxPowerTable
-#ifdef DOT11_N_SUPPORT				
+#ifdef DOT11_N_SUPPORT
 								+ pAd->TxPower[pAd->CommonCfg.CentralChannel-1].Power;
 #else
 								+ pAd->TxPower[pAd->CommonCfg.Channel-1].Power;
@@ -1528,7 +1523,7 @@ VOID RT3350_AsicTxAlcGetAutoAgcOffset(
 			{
 				TuningTableIndex = UPPERBOUND_TX_POWER_TUNING_ENTRY(pAd);
 			}
-			
+
 			/* Valide pAd->TxPowerCtrl.idxTxPowerTable: -30 ~ 45 */
 			pTxPowerTuningEntry = &TxPowerTuningTable[TuningTableIndex + TX_POWER_TUNING_ENTRY_OFFSET];
 			pAd->TxPowerCtrl.RF_TX_ALC = pTxPowerTuningEntry->RF_TX_ALC;
@@ -1543,12 +1538,12 @@ VOID RT3350_AsicTxAlcGetAutoAgcOffset(
 			TotalDeltaPower += pAd->TxPowerCtrl.MAC_PowerDelta;
 
 			DBGPRINT(RT_DEBUG_TRACE, ("%s: desiredTSSI = %d, currentTSSI = %d, idxTxPowerTable = %d, TuningTableIndex = %d, {RF_TX_ALC = %d, MAC_PowerDelta = %d}\n", 
-				__FUNCTION__, 
-				desiredTssi, 
-				currentTssi, 
-				pAd->TxPowerCtrl.idxTxPowerTable, 
+				__FUNCTION__,
+				desiredTssi,
+				currentTssi,
+				pAd->TxPowerCtrl.idxTxPowerTable,
 				TuningTableIndex,
-				pTxPowerTuningEntry->RF_TX_ALC, 
+				pTxPowerTuningEntry->RF_TX_ALC,
 				pTxPowerTuningEntry->MAC_PowerDelta));
 		}
 		else
@@ -1569,7 +1564,7 @@ VOID RT3350_AsicTxAlcGetAutoAgcOffset(
 
 VOID RT305x_ChipSpecInit(
 	IN RTMP_ADAPTER				*pAd)
-{	
+{
 	INT	i;
 	RTMP_CHIP_OP *pChipOps = &pAd->chipOps;
 
@@ -1577,7 +1572,7 @@ VOID RT305x_ChipSpecInit(
 
 	/* Default as NULL function */
 	for (i = 0; i < CHIP_SPEC_ID_NUM; i++)
-	{		
+	{
 		pChipOps->ChipSpecFunc[i] = NULL;
 	}
 
@@ -1588,9 +1583,6 @@ VOID RT305x_ChipSpecInit(
 						(CHIP_SPEC_FUNC)RT305x_SpecificInit;
 	pChipOps->ChipSpecFunc[RT305x_HT_MODE_CHANGE] = 
 						(CHIP_SPEC_FUNC)RT305x_HtModeChange;
-			
-
-
 }
 
 
