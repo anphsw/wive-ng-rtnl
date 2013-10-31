@@ -78,7 +78,9 @@ if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then
     fi
 fi
 
-# restart this if ip adress changes or if apply changes from web
+# restart this if wan ip adress change
+# or if apply changes from web
+# not need restart if pppd recall
 if [ "$MODE" != "pppd" ]; then
     if [ -e /etc/init.d/igmp_proxy ]; then
         service igmp_proxy restart
