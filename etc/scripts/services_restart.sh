@@ -76,14 +76,18 @@ if [ "$MODE" != "pppd" ] && [ "$MODE" != "dhcp" ]; then
     if [ -e /etc/init.d/transmission ]; then
 	service transmission restart
     fi
+fi
+
+# restart this if ip adress changes or if apply changes from web
+if [ "$MODE" != "pppd" ]; then
+    if [ -e /etc/init.d/igmp_proxy ]; then
+        service igmp_proxy restart
+    fi
     if [ -e /etc/init.d/xupnpd ]; then
 	service xupnpd restart
     fi
     if [ -e /etc/init.d/udpxy ]; then
 	service udpxy restart
-    fi
-    if [ -e /etc/init.d/igmp_proxy ]; then
-        service igmp_proxy restart
     fi
 fi
 
