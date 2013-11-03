@@ -34,6 +34,7 @@ start() {
 	sleep 15
 
         $LOG "Start Modemhelper"
+	mkdir -p $PPPDIR/peers
 	# generate new chat scripts
 	if [ "$MODEMTYPE" = "0" ]; then
 	    $LOG "Prepare chat-file for WCDMA/UMTS/GPRS modems"
