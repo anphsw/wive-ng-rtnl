@@ -1721,6 +1721,7 @@
 5) kernel: move to 2.7.1.6 driver, support rt3xxx,rt5350,mt762x chips.<br>
 6) kernel: ipv6: allow the MTU of ipip6 tunnel to be set below 1280.<br>
 7) kernel: ipv4 igmp: use in_dev_put in timer handlers instead of __in_dev_put.<br>
+8) kernel: ICMPv6: treat dest unreachable codes 5 and 6 as EACCES, not EPROTO.<br>
 <br>
 <br>
 <br>
