@@ -58,27 +58,31 @@ start() {
 	    $LOG "Up tun6to4 interface"
 	    ip tunnel add $tunif mode sit ttl 64 remote any local $real_wan_ipaddr
 	    ip link set dev $tunif up
-	    # set mtu to iface
+	    $LOG "Set mtu $sitmtu to $tunif"
 	    sysctl -wq net.ipv6.conf.$tunif.mtu="$sitmtu"
 	    ip link set mtu $sitmtu dev $tunif
+	    $LOG "Add adress ${ipv6prefix}::1/16 to $tunif"
 	    ip -6 addr add ${ipv6prefix}::1/16 dev $tunif
+	    $LOG "Add route to ${ipv6subnet}::/3 via ::${relay6to4} dev $tunif"
 	    ip -6 route replace ${ipv6subnet}::/3 via ::${relay6to4} dev $tunif metric 1
         elif [ "$ipv6_mode" = "6TO4" ]; then
 	    # this section for 6to4 tunnel mode
 	    relay6to4="192.88.99.1"
 	    $LOG "Up $tunif interface"
 	    ip -6 link set $tunif up
-	    # set mtu to iface
+	    $LOG "Set mtu $sitmtu to $tunif"
 	    sysctl -wq net.ipv6.conf.$tunif.mtu="$sitmtu"
 	    ip link set mtu $sitmtu dev $tunif
+	    $LOG "Add adress ${ipv6prefix}::1/16 to $tunif"
 	    ip -6 addr add ${ipv6prefix}::1/16 dev $tunif
+	    $LOG "Add route to ${ipv6subnet}::/3 via ::${relay6to4} dev $tunif"
 	    ip -6 route replace ${ipv6subnet}::/3 via ::${relay6to4} dev $tunif metric 1
         elif [ "$ipv6_mode" = "NATIVE" ]; then
 	    # this section for native/dualstack mode
 	    :
 	fi
 
-	$LOG "Enable ipv6 route"
+	$LOG "Enable ipv6 forward"
         echo "1" > /proc/sys/net/ipv6/conf/all/forwarding
 
 	$LOG "Send NS(change $lan_if state) to pass RFC4862"
