@@ -71,7 +71,7 @@
 #endif /* CONFIG_RALINK_RT3662_2T2R */
 
 #if defined(CONFIG_RALINK_RT3352_2T2R)
-#define EEPROM_DEFAULT_FILE_PATH                     "/etc/Wireless/RT3352_AP_2T2R-4L_V12.BIN"
+#define EEPROM_DEFAULT_FILE_PATH                     "/etc/Wireless/RT3352_AP_2T2R_V11.BIN"
 #endif /* CONFIG_RALINK_RT3352_2T2R */
 
 #if defined(CONFIG_RALINK_RT5350_1T1R)

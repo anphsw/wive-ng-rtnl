@@ -1718,6 +1718,7 @@
 2) build_system: add targets for rt3352+usb and rt5350 wo usb devices.<br>
 3) webUI: add statistic for second radio module in asus N56.<br>
 4) configs: disable green ap support (2.7.1.6 driver fix reinit issue).<br>
+5) wifi: rt3352: use v11 adaptives for internal LNA.<br>
 <br>
 <br>
 <br>
