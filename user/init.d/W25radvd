@@ -55,27 +55,24 @@ start() {
         if [ "$ipv6_mode" = "6RD" ]; then
 	    # this section for 6RD tunnel mode
 	    relay6to4="192.88.99.127"
-	    $LOG "Flush addres and route tun6to4 interface"
-	    ip -6 addr flush dev $tunif					> /dev/null 2>&1
-	    ip -6 route flush dev $tunif					> /dev/null 2>&1
 	    $LOG "Up tun6to4 interface"
 	    ip tunnel add $tunif mode sit ttl 64 remote any local $real_wan_ipaddr
 	    ip link set dev $tunif up
+	    # set mtu to iface
+	    sysctl -wq net.ipv6.conf.$tunif.mtu="$sitmtu"
+	    ip link set mtu $sitmtu dev $tunif
 	    ip -6 addr add ${ipv6prefix}::1/16 dev $tunif
 	    ip -6 route replace ${ipv6subnet}::/3 via ::${relay6to4} dev $tunif metric 1
         elif [ "$ipv6_mode" = "6TO4" ]; then
 	    # this section for 6to4 tunnel mode
 	    relay6to4="192.88.99.1"
-	    $LOG "Flush addres and route sit0 interface"
-	    ip -6 addr flush dev $tunif					> /dev/null 2>&1
-	    ip -6 route flush dev $tunif					> /dev/null 2>&1
-	    $LOG "Up sit0 interface"
+	    $LOG "Up $tunif interface"
 	    ip -6 link set $tunif up
+	    # set mtu to iface
+	    sysctl -wq net.ipv6.conf.$tunif.mtu="$sitmtu"
+	    ip link set mtu $sitmtu dev $tunif
 	    ip -6 addr add ${ipv6prefix}::1/16 dev $tunif
 	    ip -6 route replace ${ipv6subnet}::/3 via ::${relay6to4} dev $tunif metric 1
-	    # set mtu to sit
-	    sysctl -wq net.ipv6.conf.sit0.mtu="$sitmtu"
-	    ip link set mtu $sitmtu dev $tunif
         elif [ "$ipv6_mode" = "NATIVE" ]; then
 	    # this section for native/dualstack mode
 	    :
