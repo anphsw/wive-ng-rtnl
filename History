@@ -1714,11 +1714,12 @@
 
 <br>
 <b>4.5.x</b><br>
-1) kernel: move to 2.7.1.6 driver, support rt3xxx,rt5350,mt762x chips.<br>
-2) build_system: add targets for rt3352+usb and rt5350 wo usb devices.<br>
-3) webUI: add statistic for second radio module in asus N56.<br>
-4) configs: disable green ap support (2.7.1.6 driver fix reinit issue).<br>
-5) wifi: rt3352: use v11 adaptives for internal LNA.<br>
+1) build_system: add targets for rt3352+usb and rt5350 wo usb devices.<br>
+2) webUI: add statistic for second radio module in asus N56.<br>
+3) configs: disable green ap support (2.7.1.6 driver fix reinit issue).<br>
+4) wifi: rt3352: use v11 adaptives for internal LNA.<br>
+5) kernel: move to 2.7.1.6 driver, support rt3xxx,rt5350,mt762x chips.<br>
+6) kernel: ipv6: allow the MTU of ipip6 tunnel to be set below 1280.<br>
 <br>
 <br>
 <br>
