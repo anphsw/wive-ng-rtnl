@@ -1634,7 +1634,7 @@ static inline int __mkroute_input(struct sk_buff *skb,
 	if (err)
 		flags |= RTCF_DIRECTSRC;
 
-	if (out_dev == in_dev && err && !(flags & RTCF_MASQ) &&
+	if (out_dev == in_dev && err &&
 	    !lsrc &&
 	    (IN_DEV_SHARED_MEDIA(out_dev) ||
 	     inet_addr_onlink(out_dev, saddr, FIB_RES_GW(*res))))
