@@ -57,26 +57,6 @@ __nf_nat_proto_find(u_int8_t protonum)
 	return rcu_dereference(nf_nat_protos[protonum]);
 }
 
-static const struct nf_nat_protocol *
-nf_nat_proto_find_get(u_int8_t protonum)
-{
-	const struct nf_nat_protocol *p;
-
-	rcu_read_lock();
-	p = __nf_nat_proto_find(protonum);
-	if (!try_module_get(p->me))
-		p = &nf_nat_unknown_protocol;
-	rcu_read_unlock();
-
-	return p;
-}
-
-static void
-nf_nat_proto_put(const struct nf_nat_protocol *p)
-{
-	module_put(p->me);
-}
-
 /* We keep an extra hash for each conntrack, for fast searching. */
 static inline unsigned int
 hash_by_src(const struct nf_conntrack_tuple *tuple)
