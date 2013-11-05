@@ -123,6 +123,7 @@ VOID RT3090ChipHook(IN PRTMP_ADAPTER pAd)
 {
 #if defined(CARRIER_DETECTION_SUPPORT) || defined(GREENAP_SUPPORT)
 	RTMP_CHIP_OP *pChipOps = &pAd->chipOps;
+#endif
 
 #ifdef CARRIER_DETECTION_SUPPORT
 	RTMP_CHIP_CAP *pChipCap = &pAd->chipCap;
