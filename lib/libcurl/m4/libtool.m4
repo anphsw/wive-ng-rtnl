@@ -1329,8 +1329,8 @@ s390*-*linux*|s390*-*tpf*|sparc*-*linux*)
 		LD="${LD-ld} -m elf32_x86_64"
 		;;
 	      *)
-	    LD="${LD-ld} -m elf_i386"
-	    ;;
+		LD="${LD-ld} -m elf_i386"
+		;;
 	    esac
 	    ;;
 	  ppc64-*linux*|powerpc64-*linux*)

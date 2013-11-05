@@ -238,7 +238,7 @@ static void setsock(SockInfo*f, curl_socket_t s, CURL*e, int act, GlobalInfo*g)
   if (f->evset)
     event_free(f->ev);
   f->ev = event_new(g->evbase, f->sockfd, kind, event_cb, g);
-  f->evset=1;
+  f->evset = 1;
   event_add(f->ev, NULL);
 }
 

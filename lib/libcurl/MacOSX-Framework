@@ -51,7 +51,7 @@ MACVER=`echo $SDK32|sed -e s/[a-zA-Z]//g -e s/.\$//`
 SDK32_DIR=$SDK_PATH/$SDK32
 MINVER32='-mmacosx-version-min='$MACVER
 if test $PPC_NEEDED -gt 0; then
-ARCHES32='-arch i386 -arch ppc'
+ ARCHES32='-arch i386 -arch ppc'
 else
  ARCHES32='-arch i386'
 fi

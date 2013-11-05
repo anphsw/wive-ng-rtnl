@@ -99,15 +99,15 @@ typedef void CURL;
 #ifdef CURL_STATICLIB
 #  define CURL_EXTERN
 #elif defined(WIN32) || defined(_WIN32) || defined(__SYMBIAN32__)
-#if defined(BUILDING_LIBCURL)
-#define CURL_EXTERN  __declspec(dllexport)
-#else
-#define CURL_EXTERN  __declspec(dllimport)
-#endif
+#  if defined(BUILDING_LIBCURL)
+#    define CURL_EXTERN  __declspec(dllexport)
+#  else
+#    define CURL_EXTERN  __declspec(dllimport)
+#  endif
 #elif defined(BUILDING_LIBCURL) && defined(CURL_HIDDEN_SYMBOLS)
-#define CURL_EXTERN CURL_EXTERN_SYMBOL
+#  define CURL_EXTERN CURL_EXTERN_SYMBOL
 #else
-#define CURL_EXTERN
+#  define CURL_EXTERN
 #endif
 
 #ifndef curl_socket_typedef
@@ -311,9 +311,9 @@ typedef size_t (*curl_read_callback)(char *buffer,
                                       void *instream);
 
 typedef enum  {
-  CURLSOCKTYPE_IPCXN, /* socket created for a specific IP connection */
+  CURLSOCKTYPE_IPCXN,  /* socket created for a specific IP connection */
   CURLSOCKTYPE_ACCEPT, /* socket created by accept() call */
-  CURLSOCKTYPE_LAST   /* never use */
+  CURLSOCKTYPE_LAST    /* never use */
 } curlsocktype;
 
 /* The return code from the sockopt_callback can signal information back
@@ -628,7 +628,7 @@ typedef enum {
 #define CURLAUTH_NTLM_WB      (((unsigned long)1)<<5)
 #define CURLAUTH_ONLY         (((unsigned long)1)<<31)
 #define CURLAUTH_ANY          (~CURLAUTH_DIGEST_IE)
-#define CURLAUTH_ANYSAFE (~(CURLAUTH_BASIC|CURLAUTH_DIGEST_IE))
+#define CURLAUTH_ANYSAFE      (~(CURLAUTH_BASIC|CURLAUTH_DIGEST_IE))
 
 #define CURLSSH_AUTH_ANY       ~0     /* all types supported by the server */
 #define CURLSSH_AUTH_NONE      0      /* none allowed, silly but complete */
@@ -645,16 +645,18 @@ typedef enum {
 
 #define CURL_ERROR_SIZE 256
 
+enum curl_khtype {
+  CURLKHTYPE_UNKNOWN,
+  CURLKHTYPE_RSA1,
+  CURLKHTYPE_RSA,
+  CURLKHTYPE_DSS
+};
+
 struct curl_khkey {
   const char *key; /* points to a zero-terminated string encoded with base64
                       if len is zero, otherwise to the "raw" data */
   size_t len;
-  enum type {
-    CURLKHTYPE_UNKNOWN,
-    CURLKHTYPE_RSA1,
-    CURLKHTYPE_RSA,
-    CURLKHTYPE_DSS
-  } keytype;
+  enum curl_khtype keytype;
 };
 
 /* this is the set of return values expected from the curl_sshkeycallback
@@ -1551,6 +1553,22 @@ typedef enum {
    * prototype defines. (Deprecates CURLOPT_PROGRESSFUNCTION) */
   CINIT(XFERINFOFUNCTION, FUNCTIONPOINT, 219),
 
+  /* The XOAUTH2 bearer token */
+  CINIT(XOAUTH2_BEARER, OBJECTPOINT, 220),
+
+  /* Set the interface string to use as outgoing network
+   * interface for DNS requests.
+   * Only supported by the c-ares DNS backend */
+  CINIT(DNS_INTERFACE, OBJECTPOINT, 221),
+
+  /* Set the local IPv4 address to use for outgoing DNS requests.
+   * Only supported by the c-ares DNS backend */
+  CINIT(DNS_LOCAL_IP4, OBJECTPOINT, 222),
+
+  /* Set the local IPv4 address to use for outgoing DNS requests.
+   * Only supported by the c-ares DNS backend */
+  CINIT(DNS_LOCAL_IP6, OBJECTPOINT, 223),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
@@ -1603,6 +1621,7 @@ enum {
                              for us! */
   CURL_HTTP_VERSION_1_0,  /* please use HTTP 1.0 in the request */
   CURL_HTTP_VERSION_1_1,  /* please use HTTP 1.1 in the request */
+  CURL_HTTP_VERSION_2_0,  /* please use HTTP 2.0 in the request */
 
   CURL_HTTP_VERSION_LAST /* *ILLEGAL* http version */
 };
@@ -2166,6 +2185,7 @@ typedef struct {
 #define CURL_VERSION_CURLDEBUG (1<<13) /* debug memory tracking supported */
 #define CURL_VERSION_TLSAUTH_SRP (1<<14) /* TLS-SRP auth is supported */
 #define CURL_VERSION_NTLM_WB   (1<<15) /* NTLM delegating to winbind helper */
+#define CURL_VERSION_HTTP2     (1<<16) /* HTTP2 support built-in */
 
  /*
  * NAME curl_version_info()

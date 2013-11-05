@@ -45,6 +45,7 @@ CURLcode Curl_protocol_connecting(struct connectdata *conn, bool *done);
 CURLcode Curl_protocol_doing(struct connectdata *conn, bool *done);
 CURLcode Curl_setup_conn(struct connectdata *conn,
                          bool *protocol_done);
+void Curl_free_request_state(struct SessionHandle *data);
 
 int Curl_protocol_getsock(struct connectdata *conn,
                           curl_socket_t *socks,
@@ -64,11 +65,6 @@ void Curl_getoff_all_pipelines(struct SessionHandle *data,
                                struct connectdata *conn);
 
 void Curl_close_connections(struct SessionHandle *data);
-
-/* Called on connect, and if there's already a protocol-specific struct
-   allocated for a different connection, this frees it that it can be setup
-   properly later on. */
-void Curl_reset_reqproto(struct connectdata *conn);
 
 #define CURL_DEFAULT_PROXY_PORT 1080 /* default proxy port unless specified */
 #define CURL_DEFAULT_SOCKS5_GSSAPI_SERVICE "rcmd" /* default socks5 gssapi

@@ -191,7 +191,6 @@ INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 IPV6_ENABLED = @IPV6_ENABLED@
-KRB4_ENABLED = @KRB4_ENABLED@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBCURL_LIBS = @LIBCURL_LIBS@
@@ -247,6 +246,7 @@ USE_GNUTLS = @USE_GNUTLS@
 USE_GNUTLS_NETTLE = @USE_GNUTLS_NETTLE@
 USE_LIBRTMP = @USE_LIBRTMP@
 USE_LIBSSH2 = @USE_LIBSSH2@
+USE_NGHTTP2 = @USE_NGHTTP2@
 USE_NSS = @USE_NSS@
 USE_OPENLDAP = @USE_OPENLDAP@
 USE_POLARSSL = @USE_POLARSSL@
@@ -312,15 +312,15 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 
 # this list is in numerical order
-TESTCASES = test1 test2 test3 test4 test5 test6 test7 test8 test9	\
-test10 test11 test12 test13 test14 test15 test16 test17 test18 test19	\
-test20 test21 test22 test23 test24 test25 test26 test27 test28 test29	\
-test30 test31 test32 test33 test34 test35 test36 test37 test38 test39	\
-test40 test41 test42 test43 test44 test45 test46 test47 test48 test49	\
-test50 test51 test52 test53 test54 test55 test56 test57 test58 test59	\
-test60 test61 test62 test63 test64 test65 test66 test67 test68 test69	\
-test70 test71 test72 test73 test74 test75 test76 test77 test78 test79	\
-test80 test81 test82 test83 test84 test85 test86 test87 test88 test89	\
+TESTCASES = test1 test2 test3 test4 test5 test6 test7 test8 test9       \
+test10 test11 test12 test13 test14 test15 test16 test17 test18 test19   \
+test20 test21 test22 test23 test24 test25 test26 test27 test28 test29   \
+test30 test31 test32 test33 test34 test35 test36 test37 test38 test39   \
+test40 test41 test42 test43 test44 test45 test46 test47 test48 test49   \
+test50 test51 test52 test53 test54 test55 test56 test57 test58 test59   \
+test60 test61 test62 test63 test64 test65 test66 test67 test68 test69   \
+test70 test71 test72 test73 test74 test75 test76 test77 test78 test79   \
+test80 test81 test82 test83 test84 test85 test86 test87 test88 test89   \
 test90 test91 test92 test93 test94 test95 test96 test97 test98 test99   \
 test100 test101 test102 test103 test104 test105 test106 test107 test108 \
 test109 test110 test111 test112 test113 test114 test115 test116 test117 \
@@ -369,14 +369,18 @@ test617 test618 test619 test620 test621 test622 test623 test624 test625 \
 test626 test627 test628 test629 test630 test631 test632 test633 test634 \
 test635 test636 test637 test638 test639 \
 \
-test700 test701 test702	test703 test704 test705 test706 test707 test708 \
-test709 test710 \
+test700 test701 test702 test703 test704 test705 test706 test707 test708 \
+test709 test710 test711 test712 \
 \
 test800 test801 test802 test803 test804 test805 test806 test807 test808 \
+test809 test810 test811 test812 test813 test814 \
 \
-test850 test851 test852 test853 test854 test855 test856 test857 \
+test850 test851 test852 test853 test854 test855 test856 test857 test858 \
+test859 test860 test861 test862 \
 \
-test900 test901 test902 test903 test904 test905 test906 \
+test900 test901 test902 test903 test904 test905 test906 test907 test908 \
+test909 test910 test911 test912 test913 test914 test915 test916 test917 \
+test918 \
 \
 test1000 test1001 test1002 test1003 test1004 test1005 test1006 test1007 \
 test1008 test1009 test1010 test1011 test1012 test1013 test1014 test1015 \
@@ -400,7 +404,8 @@ test1200 test1201 test1202 test1203 test1204 test1205 test1206 test1207 \
 test1208 test1209 test1210 test1211 test1212 test1213 test1214 test1215 \
 test1216 test1217 test1218 test1219 \
 test1220 test1221 test1222 test1223 test1224 test1225 test1226 test1227 \
-test1228 test1229 test1230 test1231 test1232 test1233 \
+test1228 test1229 test1230 test1231 test1232 test1233 test1234 test1235 \
+test1236 test1237 test1238 test1239 \
 \
 test1300 test1301 test1302 test1303 test1304 test1305 test1306 test1307 \
 test1308 test1309 test1310 test1311 test1312 test1313 test1314 test1315 \
@@ -417,7 +422,7 @@ test1388 test1389 test1390 test1391 test1392 test1393 test1394 test1395 \
 test1396 \
 \
 test1400 test1401 test1402 test1403 test1404 test1405 test1406 test1407 \
-test1408 test1409 test1410          test1412 test1413 test1414 \
+test1408 test1409 test1410          test1412 test1413 test1414 test1415 \
 \
 test1500 test1501 test1502 test1503 test1504 test1505 test1506 test1507 \
 test1508 test1509 test1510 test1511 test1512 \

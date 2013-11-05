@@ -119,7 +119,7 @@ check_PROGRAMS = 10-at-a-time$(EXEEXT) anyauthput$(EXEEXT) \
 	rtsp$(EXEEXT) externalsocket$(EXEEXT) resolve$(EXEEXT) \
 	progressfunc$(EXEEXT) pop3s$(EXEEXT) pop3slist$(EXEEXT) \
 	imap$(EXEEXT) url2file$(EXEEXT) sftpget$(EXEEXT) \
-	ftpsget$(EXEEXT)
+	ftpsget$(EXEEXT) postinmemory$(EXEEXT)
 subdir = docs/examples
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/curl-compilers.m4 \
@@ -361,6 +361,13 @@ post_callback_LDADD = $(LDADD)
 @USE_EXPLICIT_LIB_DEPS_FALSE@	$(LIBDIR)/libcurl.la
 @USE_EXPLICIT_LIB_DEPS_TRUE@post_callback_DEPENDENCIES =  \
 @USE_EXPLICIT_LIB_DEPS_TRUE@	$(LIBDIR)/libcurl.la
+postinmemory_SOURCES = postinmemory.c
+postinmemory_OBJECTS = postinmemory.$(OBJEXT)
+postinmemory_LDADD = $(LDADD)
+@USE_EXPLICIT_LIB_DEPS_FALSE@postinmemory_DEPENDENCIES =  \
+@USE_EXPLICIT_LIB_DEPS_FALSE@	$(LIBDIR)/libcurl.la
+@USE_EXPLICIT_LIB_DEPS_TRUE@postinmemory_DEPENDENCIES =  \
+@USE_EXPLICIT_LIB_DEPS_TRUE@	$(LIBDIR)/libcurl.la
 postit2_SOURCES = postit2.c
 postit2_OBJECTS = postit2.$(OBJEXT)
 postit2_LDADD = $(LDADD)
@@ -498,9 +505,10 @@ SOURCES = 10-at-a-time.c anyauthput.c certinfo.c chkspeed.c \
 	httpcustomheader.c httpput.c https.c imap.c multi-app.c \
 	multi-debugcallback.c multi-double.c multi-post.c \
 	multi-single.c persistant.c pop3s.c pop3slist.c \
-	post-callback.c postit2.c progressfunc.c resolve.c rtsp.c \
-	sendrecv.c sepheaders.c sftpget.c simple.c simplepost.c \
-	simplesmtp.c simplessl.c smtp-multi.c smtp-tls.c url2file.c
+	post-callback.c postinmemory.c postit2.c progressfunc.c \
+	resolve.c rtsp.c sendrecv.c sepheaders.c sftpget.c simple.c \
+	simplepost.c simplesmtp.c simplessl.c smtp-multi.c smtp-tls.c \
+	url2file.c
 DIST_SOURCES = 10-at-a-time.c anyauthput.c certinfo.c chkspeed.c \
 	cookie_interface.c debug.c externalsocket.c fileupload.c \
 	fopen.c ftp-wildcard.c ftpget.c ftpgetinfo.c ftpgetresp.c \
@@ -508,9 +516,10 @@ DIST_SOURCES = 10-at-a-time.c anyauthput.c certinfo.c chkspeed.c \
 	httpcustomheader.c httpput.c https.c imap.c multi-app.c \
 	multi-debugcallback.c multi-double.c multi-post.c \
 	multi-single.c persistant.c pop3s.c pop3slist.c \
-	post-callback.c postit2.c progressfunc.c resolve.c rtsp.c \
-	sendrecv.c sepheaders.c sftpget.c simple.c simplepost.c \
-	simplesmtp.c simplessl.c smtp-multi.c smtp-tls.c url2file.c
+	post-callback.c postinmemory.c postit2.c progressfunc.c \
+	resolve.c rtsp.c sendrecv.c sepheaders.c sftpget.c simple.c \
+	simplepost.c simplesmtp.c simplessl.c smtp-multi.c smtp-tls.c \
+	url2file.c
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -601,7 +610,6 @@ INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 IPV6_ENABLED = @IPV6_ENABLED@
-KRB4_ENABLED = @KRB4_ENABLED@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBCURL_LIBS = @LIBCURL_LIBS@
@@ -659,6 +667,7 @@ USE_GNUTLS = @USE_GNUTLS@
 USE_GNUTLS_NETTLE = @USE_GNUTLS_NETTLE@
 USE_LIBRTMP = @USE_LIBRTMP@
 USE_LIBSSH2 = @USE_LIBSSH2@
+USE_NGHTTP2 = @USE_NGHTTP2@
 USE_NSS = @USE_NSS@
 USE_OPENLDAP = @USE_OPENLDAP@
 USE_POLARSSL = @USE_POLARSSL@
@@ -922,6 +931,10 @@ post-callback$(EXEEXT): $(post_callback_OBJECTS) $(post_callback_DEPENDENCIES) $
 	@rm -f post-callback$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(post_callback_OBJECTS) $(post_callback_LDADD) $(LIBS)
 
+postinmemory$(EXEEXT): $(postinmemory_OBJECTS) $(postinmemory_DEPENDENCIES) $(EXTRA_postinmemory_DEPENDENCIES) 
+	@rm -f postinmemory$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(postinmemory_OBJECTS) $(postinmemory_LDADD) $(LIBS)
+
 postit2$(EXEEXT): $(postit2_OBJECTS) $(postit2_DEPENDENCIES) $(EXTRA_postit2_DEPENDENCIES) 
 	@rm -f postit2$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(postit2_OBJECTS) $(postit2_LDADD) $(LIBS)
@@ -1015,6 +1028,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pop3s.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pop3slist.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/post-callback.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/postinmemory.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/postit2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/progressfunc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/resolve.Po@am__quote@

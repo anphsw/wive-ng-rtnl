@@ -31,7 +31,7 @@
 #include "tool_convert.h"
 #include "tool_operhlp.h"
 #include "tool_version.h"
-#  include "tool_metalink.h"
+#include "tool_metalink.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 

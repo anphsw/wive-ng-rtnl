@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -59,7 +59,7 @@
   if((val)) {              \
     *(str) = strdup((val)); \
     if(!(*(str)))          \
-    return PARAM_NO_MEM; \
+      return PARAM_NO_MEM; \
   } \
 } WHILE_FALSE
 
@@ -73,10 +73,14 @@ static const struct LongShort aliases[]= {
   /* all these ones, starting with "*" or "$" as a short-option have *no*
      short option to mention. */
   {"*",  "url",                      TRUE},
+  {"*4", "dns-ipv4-addr",            TRUE},
+  {"*6", "dns-ipv6-addr",            TRUE},
   {"*a", "random-file",              TRUE},
   {"*b", "egd-file",                 TRUE},
+  {"*B", "oauth2-bearer",             TRUE},
   {"*c", "connect-timeout",          TRUE},
   {"*d", "ciphers",                  TRUE},
+  {"*D", "dns-interface",            TRUE},
   {"*e", "disable-epsv",             FALSE},
   {"*E", "epsv",                     FALSE},
          /* 'epsv' made like this to make --no-epsv and --epsv to work
@@ -84,6 +88,7 @@ static const struct LongShort aliases[]= {
 #ifdef USE_ENVIRONMENT
   {"*f", "environment",              FALSE},
 #endif
+  {"*F", "dns-servers",              TRUE},
   {"*g", "trace",                    TRUE},
   {"*h", "trace-ascii",              TRUE},
   {"*i", "limit-rate",               TRUE},
@@ -174,7 +179,10 @@ static const struct LongShort aliases[]= {
   {"$I", "post303",                  FALSE},
   {"$J", "metalink",                 FALSE},
   {"$K", "sasl-ir",                  FALSE},
-  {"0",  "http1.0",                  FALSE},
+  {"$L", "test-event",               FALSE},
+  {"0",   "http1.0",                 FALSE},
+  {"01",  "http1.1",                 FALSE},
+  {"02",  "http2.0",                 FALSE},
   {"1",  "tlsv1",                    FALSE},
   {"2",  "sslv2",                    FALSE},
   {"3",  "sslv3",                    FALSE},
@@ -283,7 +291,8 @@ static const struct feat feats[] = {
   {"krb4",           CURL_VERSION_KERBEROS4},
   {"libz",           CURL_VERSION_LIBZ},
   {"CharConv",       CURL_VERSION_CONV},
-  {"TLS-SRP",        CURL_VERSION_TLSAUTH_SRP}
+  {"TLS-SRP",        CURL_VERSION_TLSAUTH_SRP},
+  {"HTTP2",          CURL_VERSION_HTTP2}
 };
 
 /* Split the argument of -E to 'certname' and 'passphrase' separated by colon.
@@ -491,11 +500,22 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
     switch(letter) {
     case '*': /* options without a short option */
       switch(subletter) {
+      case '4': /* --dns-ipv4-addr */
+        /* addr in dot notation */
+        GetStr(&config->dns_ipv4_addr, nextarg);
+        break;
+      case '6': /* --dns-ipv6-addr */
+        /* addr in dot notation */
+        GetStr(&config->dns_ipv6_addr, nextarg);
+        break;
       case 'a': /* random-file */
         GetStr(&config->random_file, nextarg);
         break;
       case 'b': /* egd-file */
         GetStr(&config->egd_file, nextarg);
+        break;
+      case 'B': /* XOAUTH2 Bearer */
+        GetStr(&config->xoauth2_bearer, nextarg);
         break;
       case 'c': /* connect-timeout */
         err = str2udouble(&config->connecttimeout, nextarg);
@@ -504,6 +524,10 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         break;
       case 'd': /* ciphers */
         GetStr(&config->cipher_list, nextarg);
+        break;
+      case 'D': /* --dns-interface */
+        /* interface name */
+        GetStr(&config->dns_interface, nextarg);
         break;
       case 'e': /* --disable-epsv */
         config->disable_epsv = toggle;
@@ -516,6 +540,10 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         config->writeenv = toggle;
         break;
 #endif
+      case 'F': /* --dns-servers */
+        /* IP addrs of DNS servers */
+        GetStr(&config->dns_servers, nextarg);
+        break;
       case 'g': /* --trace */
         GetStr(&config->trace_dump, nextarg);
         if(config->tracetype && (config->tracetype != TRACE_BIN))
@@ -639,7 +667,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         break;
 
       case 'r': /* --create-dirs */
-        config->create_dirs = TRUE;
+        config->create_dirs = toggle;
         break;
 
       case 's': /* --max-redirs */
@@ -661,7 +689,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
 
       case 'u': /* --crlf */
         /* LF -> CRLF conversion? */
-        config->crlf = TRUE;
+        config->crlf = toggle;
         break;
 
       case 'v': /* --stderr */
@@ -888,7 +916,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         GetStr(&config->socks5_gssapi_service, nextarg);
         break;
       case '7': /* --socks5-gssapi-nec*/
-        config->socks5_gssapi_nec = TRUE;
+        config->socks5_gssapi_nec = toggle;
         break;
 #endif
       case '8': /* --proxy1.0 */
@@ -959,7 +987,14 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
           break;
         }
       case 'K': /* --sasl-ir */
-        config->sasl_ir = TRUE;
+        config->sasl_ir = toggle;
+        break;
+      case 'L': /* --test-event */
+#ifdef CURLDEBUG
+        config->test_event_based = toggle;
+#else
+        warnf(config, "--test-event is ignored unless a debug build!\n");
+#endif
         break;
       }
       break;
@@ -972,9 +1007,21 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
     case '~': /* --xattr */
       config->xattr = toggle;
       break;
-    case '0':
-      /* HTTP version 1.0 */
-      config->httpversion = CURL_HTTP_VERSION_1_0;
+    case '0': /* --http* options */
+      switch(subletter) {
+      case '\0':
+        /* HTTP version 1.0 */
+        config->httpversion = CURL_HTTP_VERSION_1_0;
+        break;
+      case '1':
+        /* HTTP version 1.1 */
+        config->httpversion = CURL_HTTP_VERSION_1_1;
+        break;
+      case '2':
+        /* HTTP version 2.0 */
+        config->httpversion = CURL_HTTP_VERSION_2_0;
+        break;
+      }
       break;
     case '1':
       /* TLS version 1 */
@@ -1621,20 +1668,14 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
     }
     break;
     case 'u':
-      /* user:password  */
+      /* user:password;options  */
       GetStr(&config->userpwd, nextarg);
       cleanarg(nextarg);
-      err = checkpasswd("host", &config->userpwd);
-      if(err)
-        return err;
       break;
     case 'U':
       /* Proxy user:password  */
       GetStr(&config->proxyuserpwd, nextarg);
       cleanarg(nextarg);
-      err = checkpasswd("proxy", &config->proxyuserpwd);
-      if(err)
-        return err;
       break;
     case 'v':
       if(toggle) {
@@ -1781,4 +1822,3 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
 
   return PARAM_OK;
 }
-

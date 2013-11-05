@@ -355,7 +355,7 @@ to provide the data to send.
  decoding of a base64 encoded authentication response fails, we should
  gracefully shutdown the authentication process by sending a * response to the
  server as per RFC5034.
-
+ 
 8.3 Enhanced capability support
 
  Add the ability, for an application that uses libcurl, to obtain the list of

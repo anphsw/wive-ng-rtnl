@@ -214,13 +214,13 @@ my $has_charconv;# set if libcurl is built with CharConv support
 my $has_tls_srp; # set if libcurl is built with TLS-SRP support
 my $has_metalink;# set if curl is built with Metalink support
 
-my $has_openssl; # built with a lib using an OpenSSL-like API
-my $has_gnutls;  # built with GnuTLS
-my $has_nss;     # built with NSS
-my $has_yassl;   # built with yassl
-my $has_polarssl;# built with polarssl
-my $has_axtls;   # built with axTLS
-my $has_winssl;  # built with WinSSL (Schannel/SSPI)
+my $has_openssl;  # built with a lib using an OpenSSL-like API
+my $has_gnutls;   # built with GnuTLS
+my $has_nss;      # built with NSS
+my $has_yassl;    # built with yassl
+my $has_polarssl; # built with polarssl
+my $has_axtls;    # built with axTLS
+my $has_winssl;   # built with WinSSL (Schannel/SSPI)
 my $has_darwinssl;# build with DarwinSSL (Secure Transport)
 
 my $has_shared = "unknown";  # built shared
@@ -274,6 +274,7 @@ my $gdbxwin;      # use windowed gdb when using gdb
 my $keepoutfiles; # keep stdout and stderr files after tests
 my $listonly;     # only list the tests
 my $postmortem;   # display detailed info about failed tests
+my $run_event_based; # run curl with --test-event to test the event API
 
 my %run;          # running server
 my %doesntrun;    # servers that don't work, identified by pidfile
@@ -792,7 +793,7 @@ sub verifyftp {
         # SMTP is a bit different since it requires more options and it
         # has _no_ output!
         $extra .= "--mail-rcpt verifiedserver ";
-        $extra .= "--mail-from fake ";
+        $extra .= "--mail-from fake\@example.com ";
         $extra .= "--upload /dev/null ";
         $extra .= "--stderr - "; # move stderr to parse the verbose stuff
     }
@@ -2710,7 +2711,11 @@ sub timestampskippedevents {
 # Run a single specified test case
 #
 sub singletest {
-    my ($testnum, $count, $total)=@_;
+    my ($evbased, # 1 means switch on if possible (and "curl" is tested)
+                  # returns "not a test" if it can't be used for this test
+        $testnum,
+        $count,
+        $total)=@_;
 
     my @what;
     my $why;
@@ -2984,8 +2989,8 @@ sub singletest {
         if(!$short) {
             if($skipped{$why} <= 3) {
                 # show only the first three skips for each reason
-            logmsg sprintf("test %03d SKIPPED: $why\n", $testnum);
-        }
+                logmsg sprintf("test %03d SKIPPED: $why\n", $testnum);
+            }
         }
 
         timestampskippedevents($testnum);
@@ -3127,6 +3132,7 @@ sub singletest {
     my $CMDLINE;
     my $cmdargs;
     my $cmdtype = $cmdhash{'type'} || "default";
+    my $fail_due_event_based = $evbased;
     if($cmdtype eq "perl") {
         # run the command line prepended with "perl"
         $cmdargs ="$cmd";
@@ -3142,15 +3148,22 @@ sub singletest {
         $disablevalgrind=1;
     }
     elsif(!$tool) {
-        # run curl, add --verbose for debug information output
+        # run curl, add suitable command line options
         $cmd = "-1 ".$cmd if(exists $feature{"SSL"} && ($has_axtls));
 
         my $inc="";
         if((!$cmdhash{'option'}) || ($cmdhash{'option'} !~ /no-include/)) {
-            $inc = "--include ";
+            $inc = " --include";
         }
 
-        $cmdargs ="$out $inc--trace-ascii log/trace$testnum --trace-time $cmd";
+        $cmdargs = "$out$inc ";
+        $cmdargs .= "--trace-ascii log/trace$testnum ";
+        $cmdargs .= "--trace-time ";
+        if($evbased) {
+            $cmdargs .= "--test-event ";
+            $fail_due_event_based--;
+        }
+        $cmdargs .= $cmd;
     }
     else {
         $cmdargs = " $cmd"; # $cmd is the command line for the test file
@@ -3169,6 +3182,11 @@ sub singletest {
             return -1;
         }
         $DBGCURL=$CMDLINE;
+    }
+
+    if($fail_due_event_based) {
+        logmsg "This test cannot run event based\n";
+        return -1;
     }
 
     my @stdintest = getpart("client", "stdin");
@@ -3606,48 +3624,48 @@ sub singletest {
     for my $partsuffix (('', '1', '2', '3', '4')) {
         my @outfile=getpart("verify", "file".$partsuffix);
         if(@outfile || partexists("verify", "file".$partsuffix) ) {
-        # we're supposed to verify a dynamically generated file!
+            # we're supposed to verify a dynamically generated file!
             my %hash = getpartattr("verify", "file".$partsuffix);
 
-        my $filename=$hash{'name'};
-        if(!$filename) {
+            my $filename=$hash{'name'};
+            if(!$filename) {
                 logmsg "ERROR: section verify=>file$partsuffix ".
                        "has no name attribute\n";
-            stopservers($verbose);
-            # timestamp test result verification end
-            $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
-            return -1;
-        }
-        my @generated=loadarray($filename);
+                stopservers($verbose);
+                # timestamp test result verification end
+                $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
+                return -1;
+            }
+            my @generated=loadarray($filename);
 
-        # what parts to cut off from the file
+            # what parts to cut off from the file
             my @stripfile = getpart("verify", "stripfile".$partsuffix);
 
-        my $filemode=$hash{'mode'};
-        if($filemode && ($filemode eq "text") && $has_textaware) {
-            # text mode when running on windows means adding an extra
-            # strip expression
-            push @stripfile, "s/\r\n/\n/";
-        }
-
-        my $strip;
-        for $strip (@stripfile) {
-            chomp $strip;
-            for(@generated) {
-                eval $strip;
+            my $filemode=$hash{'mode'};
+            if($filemode && ($filemode eq "text") && $has_textaware) {
+                # text mode when running on windows means adding an extra
+                # strip expression
+                push @stripfile, "s/\r\n/\n/";
             }
-        }
 
-        @outfile = fixarray(@outfile);
+            my $strip;
+            for $strip (@stripfile) {
+                chomp $strip;
+                for(@generated) {
+                    eval $strip;
+                }
+            }
+
+            @outfile = fixarray(@outfile);
 
             $res = compare($testnum, $testname, "output ($filename)",
                            \@generated, \@outfile);
-        if($res) {
-            return 1;
-        }
+            if($res) {
+                return 1;
+            }
 
             $outputok = 1; # output checked
-    }
+        }
     }
     $ok .= ($outputok) ? "o" : "-"; # output checked or not
 
@@ -3736,8 +3754,8 @@ sub singletest {
                     logmsg "FAIL: $testnum - $testname - valgrind\n";
                 }
                 else {
-                logmsg " valgrind ERROR ";
-                logmsg @e;
+                    logmsg " valgrind ERROR ";
+                    logmsg @e;
                 }
                 # timestamp test result verification end
                 $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
@@ -3755,6 +3773,8 @@ sub singletest {
     else {
         $ok .= "-"; # valgrind not checked
     }
+    # add 'E' for event-based
+    $ok .= $evbased ? "E" : "-";
 
     logmsg "$ok " if(!$short);
 
@@ -3766,7 +3786,7 @@ sub singletest {
                      $estleft%60);
 
     if(!$automakestyle) {
-    logmsg sprintf("OK (%-3d out of %-3d, %s)\n", $count, $total, $left);
+        logmsg sprintf("OK (%-3d out of %-3d, %s)\n", $count, $total, $left);
     }
     else {
         logmsg "PASS: $testnum - $testname\n";
@@ -4413,6 +4433,16 @@ while(@ARGV) {
         $DBGCURL=$CURL=$ARGV[1];
         shift @ARGV;
     }
+    elsif ($ARGV[0] eq "-vc") {
+        # use this path to a curl used to verify servers
+
+        # Particularly useful when you introduce a crashing bug somewhere in
+        # the development version as then it won't be able to run any tests
+        # since it can't verify the servers!
+
+        $VCURL=$ARGV[1];
+        shift @ARGV;
+    }
     elsif ($ARGV[0] eq "-d") {
         # have the servers display protocol output
         $debugprotocol=1;
@@ -4453,6 +4483,10 @@ while(@ARGV) {
     elsif($ARGV[0] eq "-a") {
         # continue anyway, even if a test fail
         $anyway=1;
+    }
+    elsif($ARGV[0] eq "-e") {
+        # run the tests cases event based if possible
+        $run_event_based=1;
     }
     elsif($ARGV[0] eq "-p") {
         $postmortem=1;
@@ -4514,6 +4548,7 @@ Usage: runtests.pl [options] [test selection(s)]
   -am      automake style output PASS/FAIL: [number] [name]
   -t[N]    torture (simulate memory alloc failures); N means fail Nth alloc
   -v       verbose output
+  -vc path use this curl only to verify the existing servers
   [num]    like "5 6 9" or " 5 to 22 " to run those tests only
   [!num]   like "!5 !6 !9" to disable those tests
   [keyword] like "IPv6" to select only tests containing the key word
@@ -4825,7 +4860,7 @@ foreach $testnum (@at) {
     $lasttest = $testnum if($testnum > $lasttest);
     $count++;
 
-    my $error = singletest($testnum, $count, scalar(@at));
+    my $error = singletest($run_event_based, $testnum, $count, scalar(@at));
     if($error < 0) {
         # not a test we can run
         next;
@@ -4899,8 +4934,8 @@ if($skipped && !$short) {
             my $t = $_;
             if($teststat[$_] && ($teststat[$_] eq $r)) {
                 if($c < $max) {
-                logmsg ", " if($c);
-                logmsg $_;
+                    logmsg ", " if($c);
+                    logmsg $_;
                 }
                 $c++;
             }

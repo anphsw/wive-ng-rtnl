@@ -46,10 +46,10 @@ int test(char *URL)
   s = curl_easy_escape(easy, (char*)a, asize);
 
   if(s)
-  printf("%s\n", s);
+    printf("%s\n", s);
 
   if(s)
-  curl_free(s);
+    curl_free(s);
 
   curl_easy_cleanup(easy);
 

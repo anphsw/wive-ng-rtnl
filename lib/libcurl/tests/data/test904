@@ -11,7 +11,7 @@ RFC4954
 # Server-side
 <reply>
 <servercmd>
-REPLY EHLO 250 AUTH LOGIN
+AUTH LOGIN
 REPLY AUTH 334 LOGIN supported
 REPLY dGVzdA== 334 UGFzc3dvcmQ6
 REPLY MTIzNA== 235 Authenticated
@@ -31,7 +31,7 @@ SMTP login authentication
 mail body
 </stdin>
  <command>
-smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 904@foo --mail-from 904@from -u test:1234 -T -
+smtp://%HOSTIP:%SMTPPORT/904 --mail-rcpt recipient@example.com --mail-from sender@example.com -u test:1234 -T -
 </command>
 </client>
 
@@ -39,18 +39,17 @@ smtp://%HOSTIP:%SMTPPORT/user --mail-rcpt 904@foo --mail-from 904@from -u test:1
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-EHLO user
+EHLO 904
 AUTH LOGIN
 dGVzdA==
 MTIzNA==
-MAIL FROM:<904@from>
-RCPT TO:<904@foo>
+MAIL FROM:<sender@example.com>
+RCPT TO:<recipient@example.com>
 DATA
 QUIT
 </protocol>
 <upload>
 mail body
-
 .
 </upload>
 </verify>

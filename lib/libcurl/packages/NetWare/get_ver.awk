@@ -24,7 +24,7 @@
 # http://www.gknw.net/development/prgtools/awk-20100523.zip
 #
 BEGIN {
-    while ((getline < ARGV[1]) > 0) {
+  while ((getline < ARGV[1]) > 0) {
     sub("\r", "") # make MSYS gawk work with CRLF header input.
     if (match ($0, /^#define LIBCURL_COPYRIGHT "([^"]+)"$/))
       copyright_string = substr($0, 28, length($0)-28)
@@ -40,5 +40,5 @@ BEGIN {
   print "LIBCURL_VERSION = " version_major "," version_minor "," version_patch
   print "LIBCURL_VERSION_STR = " version_string
   print "LIBCURL_COPYRIGHT_STR = " copyright_string
-      }
+}
 

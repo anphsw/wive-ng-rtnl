@@ -268,7 +268,7 @@ static CURLcode connect_prep(struct connectdata *conn, int sockindex)
 
   conn->ssl[sockindex].ssl = ssl;
   return CURLE_OK;
-  }
+}
 
 /*
  * For both blocking and non-blocking connects, this function finalizes the
@@ -312,7 +312,6 @@ static CURLcode connect_finish(struct connectdata *conn, int sockindex)
    *    this, but a couple fields are available.
    */
 
-
   /* There is no (DNS) Altnames count in the version 1.4.8 API. There is a
      risk of an inifite loop */
   for(dns_altname_index = 0; ; dns_altname_index++) {
@@ -333,12 +332,12 @@ static CURLcode connect_finish(struct connectdata *conn, int sockindex)
   /* RFC2818 checks */
   if(found_subject_alt_names && !found_subject_alt_name_matching_conn) {
     if(data->set.ssl.verifyhost) {
-    /* Break connection ! */
-    Curl_axtls_close(conn, sockindex);
+      /* Break connection ! */
+      Curl_axtls_close(conn, sockindex);
       failf(data, "\tsubjectAltName(s) do not match %s\n",
             conn->host.dispname);
-    return CURLE_PEER_FAILED_VERIFICATION;
-  }
+      return CURLE_PEER_FAILED_VERIFICATION;
+    }
     else
       infof(data, "\tsubjectAltName(s) do not match %s\n",
             conn->host.dispname);
@@ -349,10 +348,10 @@ static CURLcode connect_finish(struct connectdata *conn, int sockindex)
     peer_CN = ssl_get_cert_dn(ssl, SSL_X509_CERT_COMMON_NAME);
     if(peer_CN == NULL) {
       if(data->set.ssl.verifyhost) {
-      Curl_axtls_close(conn, sockindex);
-      failf(data, "unable to obtain common name from peer certificate");
-      return CURLE_PEER_FAILED_VERIFICATION;
-    }
+        Curl_axtls_close(conn, sockindex);
+        failf(data, "unable to obtain common name from peer certificate");
+        return CURLE_PEER_FAILED_VERIFICATION;
+      }
       else
         infof(data, "unable to obtain common name from peer certificate");
     }
@@ -616,8 +615,8 @@ static ssize_t axtls_recv(struct connectdata *conn, /* connection data */
       ret = -1;
     }
     else if(ret == -3) {
-    /* With patched axTLS, SSL_CLOSE_NOTIFY=-3.  Hard-coding until axTLS
-       team approves proposed fix. */
+      /* With patched axTLS, SSL_CLOSE_NOTIFY=-3.  Hard-coding until axTLS
+         team approves proposed fix. */
       Curl_axtls_close(conn, num);
     }
     else {

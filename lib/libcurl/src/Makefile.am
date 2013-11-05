@@ -35,12 +35,12 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 # $(top_srcdir)/src is for curl's src/tool_setup.h and "curl-private" files
 
 AM_CPPFLAGS = -I$(top_builddir)/include/curl \
-           -I$(top_builddir)/include      \
-           -I$(top_srcdir)/include        \
-           -I$(top_builddir)/lib          \
-           -I$(top_builddir)/src          \
-           -I$(top_srcdir)/lib            \
-           -I$(top_srcdir)/src
+              -I$(top_builddir)/include      \
+              -I$(top_srcdir)/include        \
+              -I$(top_builddir)/lib          \
+              -I$(top_builddir)/src          \
+              -I$(top_srcdir)/lib            \
+              -I$(top_srcdir)/src
 
 bin_PROGRAMS = curl
 

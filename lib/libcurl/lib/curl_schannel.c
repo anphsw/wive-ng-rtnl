@@ -1143,12 +1143,12 @@ int Curl_schannel_shutdown(struct connectdata *conn, int sockindex)
 
       /* if the handle was not cached and the refcount is zero */
       if(!connssl->cred->cached && connssl->cred->refcount == 0) {
-          infof(data, "schannel: clear credential handle\n");
-          s_pSecFn->FreeCredentialsHandle(&connssl->cred->cred_handle);
-          Curl_safefree(connssl->cred);
-        }
+        infof(data, "schannel: clear credential handle\n");
+        s_pSecFn->FreeCredentialsHandle(&connssl->cred->cred_handle);
+        Curl_safefree(connssl->cred);
       }
     }
+  }
 
   /* free internal buffer for received encrypted data */
   if(connssl->encdata_buffer != NULL) {

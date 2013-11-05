@@ -222,9 +222,9 @@
 #define CURLMIN(x,y) ((x)<(y)?(x):(y))
 
 
-#if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
-/* Types needed for krb4/5-ftp connections */
-struct krb4buffer {
+#ifdef HAVE_GSSAPI
+/* Types needed for krb5-ftp connections */
+struct krb5buffer {
   void *data;
   size_t size;
   size_t index;
@@ -692,6 +692,9 @@ struct SingleRequest {
   bool forbidchunk;   /* used only to explicitly forbid chunk-upload for
                          specific upload buffers. See readmoredata() in
                          http.c for details. */
+
+  void *protop;       /* Allocated protocol-specific data. Each protocol
+                         handler makes sure this points to data it needs. */
 };
 
 /*
@@ -873,6 +876,8 @@ struct connectdata {
   char *passwd;  /* password string, allocated */
   char *options; /* options string, allocated */
 
+  char *xoauth2_bearer; /* bearer token for xoauth2, allocated */
+
   char *proxyuser;    /* proxy user name string, allocated */
   char *proxypasswd;  /* proxy password string, allocated */
   curl_proxytype proxytype; /* what kind of proxy that is in use */
@@ -931,12 +936,12 @@ struct connectdata {
   } allocptr;
 
   int sec_complete; /* if kerberos is enabled for this connection */
-#if defined(HAVE_KRB4) || defined(HAVE_GSSAPI)
+#ifdef HAVE_GSSAPI
   enum protection_level command_prot;
   enum protection_level data_prot;
   enum protection_level request_data_prot;
   size_t buffer_size;
-  struct krb4buffer in_buffer;
+  struct krb5buffer in_buffer;
   void *app_data;
   const struct Curl_sec_client_mech *mech;
   struct sockaddr_in local_addr;
@@ -996,13 +1001,14 @@ struct connectdata {
 
   union {
     struct ftp_conn ftpc;
+    struct http_conn httpc;
     struct ssh_conn sshc;
     struct tftp_state_data *tftpc;
     struct imap_conn imapc;
     struct pop3_conn pop3c;
     struct smtp_conn smtpc;
     struct rtsp_conn rtspc;
-    void *generic;
+    void *generic; /* RTMP and LDAP use this */
   } proto;
 
   int cselect_bits; /* bitmask of socket events */
@@ -1149,7 +1155,6 @@ typedef enum {
  * Session-data MUST be put in the connectdata struct and here.  */
 #define MAX_CURL_USER_LENGTH 256
 #define MAX_CURL_PASSWORD_LENGTH 256
-#define MAX_CURL_OPTIONS_LENGTH 256
 
 struct auth {
   unsigned long want;  /* Bitmask set to the authentication methods wanted by
@@ -1274,28 +1279,6 @@ struct UrlState {
   long rtsp_next_server_CSeq; /* the session's next server CSeq */
   long rtsp_CSeq_recv; /* most recent CSeq received */
 
-  /* Protocol specific data.
-   *
-   *************************************************************************
-   * Note that this data will be REMOVED after each request, so anything that
-   * should be kept/stored on a per-connection basis and thus live for the
-   * next request on the same connection MUST be put in the connectdata struct!
-   *************************************************************************/
-  union {
-    struct HTTP *http;
-    struct HTTP *https;  /* alias, just for the sake of being more readable */
-    struct RTSP *rtsp;
-    struct FTP *ftp;
-    /* void *tftp;    not used */
-    struct FILEPROTO *file;
-    void *telnet;        /* private for telnet.c-eyes only */
-    void *generic;
-    struct SSHPROTO *ssh;
-    struct IMAP *imap;
-    struct POP3 *pop3;
-    struct SMTP *smtp;
-  } proto;
-
   /* if true, force SSL connection retry (workaround for certain servers) */
   bool ssl_connect_retry;
 };
@@ -1386,6 +1369,8 @@ enum dupstring {
   STRING_TLSAUTH_USERNAME,     /* TLS auth <username> */
   STRING_TLSAUTH_PASSWORD,     /* TLS auth <password> */
 #endif
+
+  STRING_BEARER,          /* <bearer>, if used */
 
   /* -- end of strings -- */
   STRING_LAST /* not used, just an end-of-list marker */

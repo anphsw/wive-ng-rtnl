@@ -348,8 +348,10 @@ curl_socket_t curl_socket(int domain, int type, int protocol,
                     "FD %s:%d socket() = %zd\n" ;
 
   curl_socket_t sockfd = socket(domain, type, protocol);
+
   if(source && (sockfd != CURL_SOCKET_BAD))
     curl_memlog(fmt, source, line, sockfd);
+
   return sockfd;
 }
 
@@ -365,8 +367,10 @@ int curl_socketpair(int domain, int type, int protocol,
                     "FD %s:%d socketpair() = %zd %zd\n" ;
 
   int res = socketpair(domain, type, protocol, socket_vector);
+
   if(source && (0 == res))
     curl_memlog(fmt, source, line, socket_vector[0], socket_vector[1]);
+
   return res;
 }
 #endif
@@ -382,9 +386,12 @@ curl_socket_t curl_accept(curl_socket_t s, void *saddr, void *saddrlen,
 
   struct sockaddr *addr = (struct sockaddr *)saddr;
   curl_socklen_t *addrlen = (curl_socklen_t *)saddrlen;
+
   curl_socket_t sockfd = accept(s, addr, addrlen);
+
   if(source && (sockfd != CURL_SOCKET_BAD))
     curl_memlog(fmt, source, line, sockfd);
+
   return sockfd;
 }
 

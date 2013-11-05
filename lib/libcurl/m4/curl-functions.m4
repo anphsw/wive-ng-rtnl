@@ -2246,8 +2246,8 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
          test "$tst_h_errno_sbs_issue_7" = "no"; then
         tst_tsafe_getaddrinfo="no"
       else
-      tst_tsafe_getaddrinfo="yes"
-    fi
+        tst_tsafe_getaddrinfo="yes"
+      fi
     fi
     AC_MSG_RESULT([$tst_tsafe_getaddrinfo])
     if test "$tst_tsafe_getaddrinfo" = "yes"; then

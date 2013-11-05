@@ -290,6 +290,34 @@ static void strstore(char **str, const char *newstr)
   *str = strdup(newstr);
 }
 
+/*
+ * remove_expired() removes expired cookies.
+ */
+static void remove_expired(struct CookieInfo *cookies)
+{
+  struct Cookie *co, *nx, *pv;
+  curl_off_t now = (curl_off_t)time(NULL);
+
+  co = cookies->cookies;
+  pv = NULL;
+  while(co) {
+    nx = co->next;
+    if((co->expirestr || co->maxage) && co->expires < now) {
+      if(co == cookies->cookies) {
+        cookies->cookies = co->next;
+      }
+      else {
+        pv->next = co->next;
+      }
+      cookies->numcookies--;
+      freecookie(co);
+    }
+    else {
+      pv = co;
+    }
+    co = nx;
+  }
+}
 
 /****************************************************************************
  *
@@ -408,37 +436,37 @@ Curl_cookie_add(struct SessionHandle *data,
           if(!co->spath) {
             badcookie = TRUE; /* out of memory bad */
             break;
+          }
         }
-          }
         else if(Curl_raw_equal("domain", name)) {
-            /* Now, we make sure that our host is within the given domain,
-               or the given domain is not valid and thus cannot be set. */
+          /* Now, we make sure that our host is within the given domain,
+             or the given domain is not valid and thus cannot be set. */
 
-            if('.' == whatptr[0])
-              whatptr++; /* ignore preceding dot */
+          if('.' == whatptr[0])
+            whatptr++; /* ignore preceding dot */
 
-            if(!domain || tailmatch(whatptr, domain)) {
-              const char *tailptr=whatptr;
-              if(tailptr[0] == '.')
-                tailptr++;
-              strstore(&co->domain, tailptr); /* don't prefix w/dots
-                                                 internally */
-              if(!co->domain) {
-                badcookie = TRUE;
-                break;
-              }
-              co->tailmatch=TRUE; /* we always do that if the domain name was
-                                     given */
+          if(!domain || tailmatch(whatptr, domain)) {
+            const char *tailptr=whatptr;
+            if(tailptr[0] == '.')
+              tailptr++;
+            strstore(&co->domain, tailptr); /* don't prefix w/dots
+                                               internally */
+            if(!co->domain) {
+              badcookie = TRUE;
+              break;
             }
-            else {
-              /* we did not get a tailmatch and then the attempted set domain
-                 is not a domain to which the current host belongs. Mark as
-                 bad. */
-              badcookie=TRUE;
-              infof(data, "skipped cookie with bad tailmatch domain: %s\n",
-                    whatptr);
-            }
+            co->tailmatch=TRUE; /* we always do that if the domain name was
+                                   given */
           }
+          else {
+            /* we did not get a tailmatch and then the attempted set domain
+               is not a domain to which the current host belongs. Mark as
+               bad. */
+            badcookie=TRUE;
+            infof(data, "skipped cookie with bad tailmatch domain: %s\n",
+                  whatptr);
+          }
+        }
         else if(Curl_raw_equal("version", name)) {
           strstore(&co->version, whatptr);
           if(!co->version) {
@@ -700,6 +728,9 @@ Curl_cookie_add(struct SessionHandle *data,
      superceeds an already existing cookie, which it may if the previous have
      the same domain and path as this */
 
+  /* at first, remove expired cookies */
+  remove_expired(c);
+
   clist = c->cookies;
   replace_old = FALSE;
   while(clist) {
@@ -930,6 +961,9 @@ struct Cookie *Curl_cookie_getlist(struct CookieInfo *c,
 
   if(!c || !c->cookies)
     return NULL; /* no cookie struct or no cookies in the struct */
+
+  /* at first, remove expired cookies */
+  remove_expired(c);
 
   co = c->cookies;
 
@@ -1172,6 +1206,9 @@ static int cookie_output(struct CookieInfo *c, const char *dumphere)
     /* If there are no known cookies, we don't write or even create any
        destination file */
     return 0;
+
+  /* at first, remove expired cookies */
+  remove_expired(c);
 
   if(strequal("-", dumphere)) {
     /* use stdout */

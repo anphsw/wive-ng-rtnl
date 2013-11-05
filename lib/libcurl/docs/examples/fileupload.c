@@ -71,12 +71,12 @@ int main(void)
 
     }
     else {
-    /* now extract transfer info */
-    curl_easy_getinfo(curl, CURLINFO_SPEED_UPLOAD, &speed_upload);
-    curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME, &total_time);
+      /* now extract transfer info */
+      curl_easy_getinfo(curl, CURLINFO_SPEED_UPLOAD, &speed_upload);
+      curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME, &total_time);
 
-    fprintf(stderr, "Speed: %.3f bytes/sec during %.3f seconds\n",
-            speed_upload, total_time);
+      fprintf(stderr, "Speed: %.3f bytes/sec during %.3f seconds\n",
+              speed_upload, total_time);
 
     }
     /* always cleanup */

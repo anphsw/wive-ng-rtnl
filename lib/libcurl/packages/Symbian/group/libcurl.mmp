@@ -21,7 +21,7 @@ MACRO       USE_SSLEAY
 
 SOURCEPATH  ../../../lib
 SOURCE \
-  file.c timeval.c base64.c hostip.c progress.c formdata.c	\
+  file.c timeval.c base64.c hostip.c progress.c formdata.c		\
   cookie.c http.c sendf.c ftp.c url.c dict.c if2ip.c speedcheck.c	\
   ldap.c ssluse.c version.c getenv.c escape.c mprintf.c telnet.c	\
   netrc.c getinfo.c transfer.c strequal.c easy.c security.c krb4.c	\

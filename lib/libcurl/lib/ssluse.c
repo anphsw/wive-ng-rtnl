@@ -294,6 +294,49 @@ static int do_file_type(const char *type)
   return -1;
 }
 
+#if defined(HAVE_OPENSSL_ENGINE_H) && defined(HAVE_ENGINE_LOAD_FOUR_ARGS)
+/*
+ * Supply default password to the engine user interface conversation.
+ * The password is passed by OpenSSL engine from ENGINE_load_private_key()
+ * last argument to the ui and can be obtained by UI_get0_user_data(ui) here.
+ */
+static int ssl_ui_reader(UI *ui, UI_STRING *uis)
+{
+  const char *password;
+  switch(UI_get_string_type(uis)) {
+  case UIT_PROMPT:
+  case UIT_VERIFY:
+    password = (const char*)UI_get0_user_data(ui);
+    if(NULL != password &&
+       UI_get_input_flags(uis) & UI_INPUT_FLAG_DEFAULT_PWD) {
+      UI_set_result(ui, uis, password);
+      return 1;
+    }
+  default:
+    break;
+  }
+  return (UI_method_get_reader(UI_OpenSSL()))(ui, uis);
+}
+
+/*
+ * Suppress interactive request for a default password if available.
+ */
+static int ssl_ui_writer(UI *ui, UI_STRING *uis)
+{
+  switch(UI_get_string_type(uis)) {
+  case UIT_PROMPT:
+  case UIT_VERIFY:
+    if(NULL != UI_get0_user_data(ui) &&
+       UI_get_input_flags(uis) & UI_INPUT_FLAG_DEFAULT_PWD) {
+      return 1;
+    }
+  default:
+    break;
+  }
+  return (UI_method_get_writer(UI_OpenSSL()))(ui, uis);
+}
+#endif
+
 static
 int cert_stuff(struct connectdata *conn,
                SSL_CTX* ctx,
@@ -436,7 +479,7 @@ int cert_stuff(struct connectdata *conn,
       PKCS12_PBE_add();
 
       if(!PKCS12_parse(p12, data->set.str[STRING_KEY_PASSWD], &pri, &x509,
-                        &ca)) {
+                       &ca)) {
         failf(data,
               "could not parse PKCS12 file, check password, OpenSSL error %s",
               ERR_error_string(ERR_get_error(), NULL) );
@@ -527,7 +570,16 @@ int cert_stuff(struct connectdata *conn,
         EVP_PKEY *priv_key = NULL;
         if(data->state.engine) {
 #ifdef HAVE_ENGINE_LOAD_FOUR_ARGS
-          UI_METHOD *ui_method = UI_OpenSSL();
+          UI_METHOD *ui_method =
+            UI_create_method((char *)"cURL user interface");
+          if(NULL == ui_method) {
+            failf(data, "unable do create OpenSSL user-interface method");
+            return 0;
+          }
+          UI_method_set_opener(ui_method, UI_method_get_opener(UI_OpenSSL()));
+          UI_method_set_closer(ui_method, UI_method_get_closer(UI_OpenSSL()));
+          UI_method_set_reader(ui_method, ssl_ui_reader);
+          UI_method_set_writer(ui_method, ssl_ui_writer);
 #endif
           /* the typecast below was added to please mingw32 */
           priv_key = (EVP_PKEY *)
@@ -536,6 +588,9 @@ int cert_stuff(struct connectdata *conn,
                                     ui_method,
 #endif
                                     data->set.str[STRING_KEY_PASSWD]);
+#ifdef HAVE_ENGINE_LOAD_FOUR_ARGS
+          UI_destroy_method(ui_method);
+#endif
           if(!priv_key) {
             failf(data, "failed to load private key from crypto engine");
             return 0;
@@ -1137,6 +1192,8 @@ static CURLcode verifyhost(struct connectdata *conn,
     /* an alternative name field existed, but didn't match and then
        we MUST fail */
     infof(data, "\t subjectAltName does not match %s\n", conn->host.dispname);
+    failf(data, "SSL: no alternative certificate subject name matches "
+          "target host name '%s'", conn->host.dispname);
     res = CURLE_PEER_FAILED_VERIFICATION;
   }
   else {
@@ -1755,7 +1812,7 @@ ossl_connect_step2(struct connectdata *conn, int sockindex)
        */
       if(CURLE_SSL_CONNECT_ERROR == rc && errdetail == 0) {
         failf(data, "Unknown SSL protocol error in connection to %s:%ld ",
-              conn->host.name, conn->port);
+              conn->host.name, conn->remote_port);
         return rc;
       }
       /* Could be a CERT problem */
@@ -2296,7 +2353,7 @@ ossl_connect_step3(struct connectdata *conn,
    * operations.
    */
 
-  if(!data->set.ssl.verifypeer)
+  if(!data->set.ssl.verifypeer && !data->set.ssl.verifyhost)
     (void)servercert(conn, connssl, FALSE);
   else
     retcode = servercert(conn, connssl, TRUE);
@@ -2545,13 +2602,13 @@ static ssize_t ossl_recv(struct connectdata *conn, /* connection data */
       if((nread < 0) || sslerror) {
         /* If the return code was negative or there actually is an error in the
            queue */
-      failf(conn->data, "SSL read: %s, errno %d",
-            ERR_error_string(sslerror, error_buffer),
-            SOCKERRNO);
-      *curlcode = CURLE_RECV_ERROR;
-      return -1;
+        failf(conn->data, "SSL read: %s, errno %d",
+              ERR_error_string(sslerror, error_buffer),
+              SOCKERRNO);
+        *curlcode = CURLE_RECV_ERROR;
+        return -1;
+      }
     }
-  }
   }
   return nread;
 }

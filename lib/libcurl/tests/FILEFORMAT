@@ -125,6 +125,13 @@ SLOWDOWN
  - Send FTP responses with 0.01 sec delay between each byte
 PASVBADIP
  - makes PASV send back an illegal IP in its 227 response
+CAPA [capabilities]
+ - Enables support for and specifies a list of space separated capabilities to
+   return to the client for the IMAP CAPABILITY, POP3 CAPA and SMTP EHLO
+   commands
+AUTH [mechanisms]
+ - Enables support for SASL authentication and specifies a list of space
+   separated mechanisms for IMAP, POP3 and SMTP
 
 For HTTP/HTTPS:
 auth_required   if this is set and a POST/PUT is made without auth, the
@@ -144,6 +151,10 @@ rtp: part [num] channel [num] size [num]
 connection-monitor When used, this will log [DISCONNECT] to the server.input
                log when the connection is disconnected.
 
+
+For TFTP:
+writedelay: [secs] delay this amount between reply packets (each packet being
+                   512 bytes payload)
 </servercmd>
 </reply>
 

@@ -539,7 +539,7 @@ static int ProcessRequest(struct httprequest *req)
             if(ISXDIGIT(*p))
               p = endp;
             else
-            p++;
+              p++;
           }
           if(*p != ']')
             logmsg("Invalid CONNECT IPv6 address format");

@@ -45,7 +45,7 @@ HTTP
  - POST
  - Pipelining
  - multipart formpost (RFC1867-style)
- - authentication: Basic, Digest, NTLM(*9), GSS-Negotiate/Negotiate(*3) and
+ - authentication: Basic, Digest, NTLM (*9), GSS-Negotiate/Negotiate (*3) and
    SPNEGO (*4) to server and proxy
  - resume (both GET and PUT)
  - follow redirects
@@ -177,7 +177,7 @@ FOOTNOTES
 =========
 
   *1 = requires OpenSSL, GnuTLS, NSS, yassl, axTLS, PolarSSL, schannel (native
-       Windows), Secure Transport (native iOS/OS X)  or qssl (native IBM i)
+       Windows), Secure Transport (native iOS/OS X) or qssl (native IBM i)
   *2 = requires OpenLDAP
   *3 = requires a GSSAPI-compliant library, such as Heimdal or similar
   *4 = requires FBopenssl

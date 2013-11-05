@@ -199,41 +199,41 @@ int formparse(struct Configurable *config,
           while(*ptr && (ISSPACE(*ptr)))
             ++ptr;
 
-            if(checkprefix("type=", ptr)) {
-              /* set type pointer */
-              type = &ptr[5];
+          if(checkprefix("type=", ptr)) {
+            /* set type pointer */
+            type = &ptr[5];
 
-              /* verify that this is a fine type specifier */
-              if(2 != sscanf(type, "%127[^/]/%127[^;,\n]",
+            /* verify that this is a fine type specifier */
+            if(2 != sscanf(type, "%127[^/]/%127[^;,\n]",
                            type_major, type_minor)) {
-                warnf(config, "Illegally formatted content-type field!\n");
-                Curl_safefree(contents);
-                FreeMultiInfo(&multi_start, &multi_current);
-                return 2; /* illegal content-type syntax! */
-              }
+              warnf(config, "Illegally formatted content-type field!\n");
+              Curl_safefree(contents);
+              FreeMultiInfo(&multi_start, &multi_current);
+              return 2; /* illegal content-type syntax! */
+            }
 
-              /* now point beyond the content-type specifier */
+            /* now point beyond the content-type specifier */
             sep = (char *)type + strlen(type_major)+strlen(type_minor)+1;
 
-              /* there's a semicolon following - we check if it is a filename
-                 specified and if not we simply assume that it is text that
-                 the user wants included in the type and include that too up
+            /* there's a semicolon following - we check if it is a filename
+               specified and if not we simply assume that it is text that
+               the user wants included in the type and include that too up
                to the next sep. */
             ptr = sep;
-              if(*sep==';') {
-                if(!checkprefix(";filename=", sep)) {
+            if(*sep==';') {
+              if(!checkprefix(";filename=", sep)) {
                 ptr = sep + 1;
                 (void)get_param_word(&ptr, &sep);
                 semicolon = (';' == *ptr) ? TRUE : FALSE;
-                }
               }
-              else
-                semicolon = FALSE;
+            }
+            else
+              semicolon = FALSE;
 
             if(*sep)
-                *sep = '\0'; /* zero terminate type string */
-            }
-            else if(checkprefix("filename=", ptr)) {
+              *sep = '\0'; /* zero terminate type string */
+          }
+          else if(checkprefix("filename=", ptr)) {
             ptr += 9;
             filename = get_param_word(&ptr, &word_end);
             semicolon = (';' == *ptr) ? TRUE : FALSE;
@@ -247,9 +247,9 @@ int formparse(struct Configurable *config,
             if(*unknown) {
               *word_end = '\0';
               warnf(config, "skip unknown form field: %s\n", unknown);
-              }
             }
           }
+        }
         /* now ptr point to comma or string end */
 
 

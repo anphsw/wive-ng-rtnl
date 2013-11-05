@@ -902,6 +902,7 @@ MANOPT
 NROFF
 PERL
 IPV6_ENABLED
+USE_NGHTTP2
 IDN_ENABLED
 CURL_LT_SHLIB_USE_VERSIONED_SYMBOLS_FALSE
 CURL_LT_SHLIB_USE_VERSIONED_SYMBOLS_TRUE
@@ -928,7 +929,6 @@ PKGCONFIG
 USE_DARWINSSL
 USE_WINDOWS_SSPI
 USE_SCHANNEL
-KRB4_ENABLED
 USE_OPENLDAP
 ZLIB_LIBS
 HAVE_LIBZ_FALSE
@@ -1134,9 +1134,6 @@ with_zlib
 with_ldap_lib
 with_lber_lib
 enable_ipv6
-with_krb4_includes
-with_krb4_libs
-with_krb4
 with_spnego
 with_gssapi_includes
 with_gssapi_libs
@@ -1159,6 +1156,7 @@ with_librtmp
 enable_versioned_symbols
 with_winidn
 with_libidn
+with_nghttp2
 enable_threaded_resolver
 enable_verbose
 enable_sspi
@@ -1901,10 +1899,6 @@ Optional Packages:
   --without-zlib          disable use of zlib
   --with-ldap-lib=libname Specify name of ldap lib file
   --with-lber-lib=libname Specify name of lber lib file
-  --with-krb4-includes=DIR
-                          Specify location of kerberos4 headers
-  --with-krb4-libs=DIR    Specify location of kerberos4 libs
-  --with-krb4=DIR         where to look for Kerberos4
   --with-spnego=DIR       Specify location of SPNEGO library fbopenssl
   --with-gssapi-includes=DIR
                           Specify location of GSSAPI header
@@ -1959,6 +1953,8 @@ Optional Packages:
   --without-winidn        disable Windows native IDN
   --with-libidn=PATH      Enable libidn usage
   --without-libidn        Disable libidn usage
+  --with-nghttp2=PATH     Enable nghttp2 usage
+  --without-nghttp2       Disable nghttp2 usage
 
 Some influential environment variables:
   CC          C compiler command
@@ -5520,7 +5516,6 @@ PKGADD_VENDOR="curl.haxx.se"
     curl_ssl_msg="no      (--with-{ssl,gnutls,nss,polarssl,cyassl,axtls,winssl,darwinssl} )"
     curl_ssh_msg="no      (--with-libssh2)"
    curl_zlib_msg="no      (--with-zlib)"
-   curl_krb4_msg="no      (--with-krb4*)"
     curl_gss_msg="no      (--with-gssapi)"
  curl_spnego_msg="no      (--with-spnego)"
 curl_tls_srp_msg="no      (--enable-tls-srp)"
@@ -9995,8 +9990,8 @@ s390*-*linux*|s390*-*tpf*|sparc*-*linux*)
 		LD="${LD-ld} -m elf32_x86_64"
 		;;
 	      *)
-	    LD="${LD-ld} -m elf_i386"
-	    ;;
+		LD="${LD-ld} -m elf_i386"
+		;;
 	    esac
 	    ;;
 	  ppc64-*linux*|powerpc64-*linux*)
@@ -16725,8 +16720,8 @@ squeeze() {
       INTEL_UNIX_C)
         #
                         tmp_CFLAGS="$tmp_CFLAGS -std=gnu89"
-                                                tmp_CPPFLAGS="$tmp_CPPFLAGS -we 140,147,165,266"
-                                        tmp_CPPFLAGS="$tmp_CPPFLAGS -wd 279,981,1469"
+                                                tmp_CPPFLAGS="$tmp_CPPFLAGS -we140,147,165,266"
+                                        tmp_CPPFLAGS="$tmp_CPPFLAGS -wd279,981,1469"
         ;;
         #
       INTEL_WINDOWS_C)
@@ -17813,7 +17808,7 @@ $as_echo_n "checking if compiler halts on function prototype mismatch... " >&6; 
 int main (void)
 {
 
-      int i[2];
+      int i[2]={0,0};
       int j = rand(i[0]);
       if(j)
         return j;
@@ -21018,264 +21013,6 @@ esac
 
 
 
-# Check whether --with-krb4-includes was given.
-if test "${with_krb4_includes+set}" = set; then :
-  withval=$with_krb4_includes;
- CPPFLAGS="$CPPFLAGS -I$withval"
- KRB4INC="$withval"
- want_krb4=yes
-
-fi
-
-
-
-# Check whether --with-krb4-libs was given.
-if test "${with_krb4_libs+set}" = set; then :
-  withval=$with_krb4_libs;
- LDFLAGS="$LDFLAGS -L$withval"
- KRB4LIB="$withval"
- want_krb4=yes
-
-fi
-
-
-
-OPT_KRB4=off
-
-# Check whether --with-krb4 was given.
-if test "${with_krb4+set}" = set; then :
-  withval=$with_krb4;
-  OPT_KRB4="$withval"
-  if test X"$OPT_KRB4" != Xno; then
-    want_krb4="yes"
-    if test X"$OPT_KRB4" != Xyes; then
-      LDFLAGS="$LDFLAGS -L$OPT_KRB4/lib$libsuff"
-      KRB4LIB="$OPT_KRB4/lib$libsuff"
-      CPPFLAGS="$CPPFLAGS -I$OPT_KRB4/include"
-      KRB4INC="$OPT_KRB4/include"
-    fi
-  fi
-
-fi
-
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking if Kerberos4 support is requested" >&5
-$as_echo_n "checking if Kerberos4 support is requested... " >&6; }
-
-if test "$want_krb4" = yes
-then
-  if test "$ipv6" = "yes"; then
-    echo krb4 is not compatible with IPv6
-    exit 1
-  fi
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking where to look for Kerberos4" >&5
-$as_echo_n "checking where to look for Kerberos4... " >&6; }
-  if test X"$OPT_KRB4" = Xyes
-  then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: defaults" >&5
-$as_echo "defaults" >&6; }
-  else
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: libs in $KRB4LIB, headers in $KRB4INC" >&5
-$as_echo "libs in $KRB4LIB, headers in $KRB4INC" >&6; }
-  fi
-
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for des_pcbc_encrypt in -ldes" >&5
-$as_echo_n "checking for des_pcbc_encrypt in -ldes... " >&6; }
-if ${ac_cv_lib_des_des_pcbc_encrypt+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-ldes  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-
-#ifdef __cplusplus
-extern "C"
-#endif
-char des_pcbc_encrypt ();
-int main (void)
-{
-return des_pcbc_encrypt ();
- ;
- return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_des_des_pcbc_encrypt=yes
-else
-  ac_cv_lib_des_des_pcbc_encrypt=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_des_des_pcbc_encrypt" >&5
-$as_echo "$ac_cv_lib_des_des_pcbc_encrypt" >&6; }
-if test "x$ac_cv_lib_des_des_pcbc_encrypt" = xyes; then :
-
-    for ac_header in des.h
-do :
-  ac_fn_c_check_header_mongrel "$LINENO" "des.h" "ac_cv_header_des_h" "$ac_includes_default"
-if test "x$ac_cv_header_des_h" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_DES_H 1
-_ACEOF
-
-fi
-
-done
-
-
-        ac_fn_c_check_func "$LINENO" "res_search" "ac_cv_func_res_search"
-if test "x$ac_cv_func_res_search" = xyes; then :
-
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for res_search in -lresolv" >&5
-$as_echo_n "checking for res_search in -lresolv... " >&6; }
-if ${ac_cv_lib_resolv_res_search+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lresolv  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-
-#ifdef __cplusplus
-extern "C"
-#endif
-char res_search ();
-int main (void)
-{
-return res_search ();
- ;
- return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_resolv_res_search=yes
-else
-  ac_cv_lib_resolv_res_search=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_resolv_res_search" >&5
-$as_echo "$ac_cv_lib_resolv_res_search" >&6; }
-if test "x$ac_cv_lib_resolv_res_search" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBRESOLV 1
-_ACEOF
-
-  LIBS="-lresolv $LIBS"
-
-fi
-
-fi
-
-
-        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for krb_net_read in -lkrb" >&5
-$as_echo_n "checking for krb_net_read in -lkrb... " >&6; }
-if ${ac_cv_lib_krb_krb_net_read+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lkrb  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-
-#ifdef __cplusplus
-extern "C"
-#endif
-char krb_net_read ();
-int main (void)
-{
-return krb_net_read ();
- ;
- return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_krb_krb_net_read=yes
-else
-  ac_cv_lib_krb_krb_net_read=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_krb_krb_net_read" >&5
-$as_echo "$ac_cv_lib_krb_krb_net_read" >&6; }
-if test "x$ac_cv_lib_krb_krb_net_read" = xyes; then :
-
-            for ac_header in krb.h
-do :
-  ac_fn_c_check_header_mongrel "$LINENO" "krb.h" "ac_cv_header_krb_h" "$ac_includes_default"
-if test "x$ac_cv_header_krb_h" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_KRB_H 1
-_ACEOF
-
-fi
-
-done
-
-
-            LIBS="-lkrb -lcom_err -ldes $LIBS"
-
-                  for ac_func in krb_get_our_ip_for_realm
-do :
-  ac_fn_c_check_func "$LINENO" "krb_get_our_ip_for_realm" "ac_cv_func_krb_get_our_ip_for_realm"
-if test "x$ac_cv_func_krb_get_our_ip_for_realm" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_KRB_GET_OUR_IP_FOR_REALM 1
-_ACEOF
-
-fi
-done
-
-
-
-$as_echo "#define HAVE_KRB4 1" >>confdefs.h
-
-
-            KRB4_ENABLED=1
-
-
-      curl_krb4_msg="enabled"
-
-            for ac_func in strlcpy
-do :
-  ac_fn_c_check_func "$LINENO" "strlcpy" "ac_cv_func_strlcpy"
-if test "x$ac_cv_func_strlcpy" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_STRLCPY 1
-_ACEOF
-
-fi
-done
-
-
-
-fi
-
-
-fi
-
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-
 # Check whether --with-spnego was given.
 if test "${with_spnego+set}" = set; then :
   withval=$with_spnego;
@@ -24116,41 +23853,42 @@ fi
     fi
     capath="$want_capath"
     ca="no"
-  elif test "x$cross_compiling" != "xyes"; then
-
+  else
             ca="no"
     capath="no"
-    if test "x$want_ca" = "xunset"; then
-                        if test "x$prefix" != xNONE; then
-        cac="${prefix}/share/curl/curl-ca-bundle.crt"
-      else
-        cac="$ac_default_prefix/share/curl/curl-ca-bundle.crt"
-      fi
+    if test "x$cross_compiling" != "xyes"; then
+                  if test "x$want_ca" = "xunset"; then
+                                if test "x$prefix" != xNONE; then
+          cac="${prefix}/share/curl/curl-ca-bundle.crt"
+        else
+          cac="$ac_default_prefix/share/curl/curl-ca-bundle.crt"
+        fi
 
-      for a in /etc/ssl/certs/ca-certificates.crt \
-               /etc/pki/tls/certs/ca-bundle.crt \
-               /usr/share/ssl/certs/ca-bundle.crt \
-               /usr/local/share/certs/ca-root.crt \
-               /etc/ssl/cert.pem \
-               "$cac"; do
-        if test -f "$a"; then
-          ca="$a"
-          break
-        fi
-      done
-    fi
-    if test "x$want_capath" = "xunset" -a "x$ca" = "xno" -a \
-            "x$OPENSSL_ENABLED" = "x1"; then
-      for a in /etc/ssl/certs/; do
-        if test -d "$a" && ls "$a"/[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f].0 >/dev/null 2>/dev/null; then
-          capath="$a"
-          break
-        fi
-      done
-    fi
-  else
-        { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: skipped the ca-cert path detection when cross-compiling" >&5
+        for a in /etc/ssl/certs/ca-certificates.crt \
+                 /etc/pki/tls/certs/ca-bundle.crt \
+                 /usr/share/ssl/certs/ca-bundle.crt \
+                 /usr/local/share/certs/ca-root.crt \
+                 /etc/ssl/cert.pem \
+                 "$cac"; do
+          if test -f "$a"; then
+            ca="$a"
+            break
+          fi
+        done
+      fi
+      if test "x$want_capath" = "xunset" -a "x$ca" = "xno" -a \
+              "x$OPENSSL_ENABLED" = "x1"; then
+        for a in /etc/ssl/certs/; do
+          if test -d "$a" && ls "$a"/[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f].0 >/dev/null 2>/dev/null; then
+            capath="$a"
+            break
+          fi
+        done
+      fi
+    else
+            { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: skipped the ca-cert path detection when cross-compiling" >&5
 $as_echo "$as_me: WARNING: skipped the ca-cert path detection when cross-compiling" >&2;}
+    fi
   fi
 
   if test "x$ca" != "xno"; then
@@ -25738,6 +25476,278 @@ fi
 
 
 
+
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to build with nghttp2" >&5
+$as_echo_n "checking whether to build with nghttp2... " >&6; }
+OPT_H2="no"
+
+# Check whether --with-nghttp2 was given.
+if test "${with_nghttp2+set}" = set; then :
+  withval=$with_nghttp2; OPT_H2=$withval
+fi
+
+case "$OPT_H2" in
+  no)
+        want_idn="no"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+    ;;
+  default)
+        want_h2="no"
+    want_h2_path="default"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+    ;;
+  yes)
+        want_h2="yes"
+    want_h2_path=""
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+    ;;
+  *)
+        want_h2="yes"
+    want_h2_path="$withval"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes ($withval)" >&5
+$as_echo "yes ($withval)" >&6; }
+    ;;
+esac
+
+curl_h2_msg="disabled (--with-nghttp2)"
+if test X"$OPT_H2" != Xno; then
+    CLEANLDFLAGS="$LDFLAGS"
+  CLEANCPPFLAGS="$CPPFLAGS"
+  CLEANLIBS="$LIBS"
+
+  h2pcdir=${want_h2_path}/lib/pkgconfig
+
+
+    PKGCONFIG="no"
+
+    if test -n "$ac_tool_prefix"; then
+  # Extract the first word of "${ac_tool_prefix}pkg-config", so it can be a program name with args.
+set dummy ${ac_tool_prefix}pkg-config; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_path_PKGCONFIG+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  case $PKGCONFIG in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_PKGCONFIG="$PKGCONFIG" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+as_dummy="$PATH:/usr/bin:/usr/local/bin"
+for as_dir in $as_dummy
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_PKGCONFIG="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  ;;
+esac
+fi
+PKGCONFIG=$ac_cv_path_PKGCONFIG
+if test -n "$PKGCONFIG"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PKGCONFIG" >&5
+$as_echo "$PKGCONFIG" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+fi
+if test -z "$ac_cv_path_PKGCONFIG"; then
+  ac_pt_PKGCONFIG=$PKGCONFIG
+  # Extract the first word of "pkg-config", so it can be a program name with args.
+set dummy pkg-config; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_path_ac_pt_PKGCONFIG+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  case $ac_pt_PKGCONFIG in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_ac_pt_PKGCONFIG="$ac_pt_PKGCONFIG" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+as_dummy="$PATH:/usr/bin:/usr/local/bin"
+for as_dir in $as_dummy
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_ac_pt_PKGCONFIG="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  ;;
+esac
+fi
+ac_pt_PKGCONFIG=$ac_cv_path_ac_pt_PKGCONFIG
+if test -n "$ac_pt_PKGCONFIG"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_pt_PKGCONFIG" >&5
+$as_echo "$ac_pt_PKGCONFIG" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+  if test "x$ac_pt_PKGCONFIG" = x; then
+    PKGCONFIG="no"
+  else
+    case $cross_compiling:$ac_tool_warned in
+yes:)
+{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: using cross tools not prefixed with host triplet" >&5
+$as_echo "$as_me: WARNING: using cross tools not prefixed with host triplet" >&2;}
+ac_tool_warned=yes ;;
+esac
+    PKGCONFIG=$ac_pt_PKGCONFIG
+  fi
+else
+  PKGCONFIG="$ac_cv_path_PKGCONFIG"
+fi
+
+
+    if test x$PKGCONFIG != xno; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for libnghttp2 options with pkg-config" >&5
+$as_echo_n "checking for libnghttp2 options with pkg-config... " >&6; }
+            itexists=`
+    if test -n "$h2pcdir"; then
+      PKG_CONFIG_LIBDIR="$h2pcdir"
+      export PKG_CONFIG_LIBDIR
+    fi
+         $PKGCONFIG --exists libnghttp2 >/dev/null 2>&1 && echo 1`
+
+      if test -z "$itexists"; then
+                        PKGCONFIG="no"
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+      else
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: found" >&5
+$as_echo "found" >&6; }
+      fi
+    fi
+
+
+  if test "$PKGCONFIG" != "no" ; then
+    LIB_H2=`
+    if test -n "$h2pcdir"; then
+      PKG_CONFIG_LIBDIR="$h2pcdir"
+      export PKG_CONFIG_LIBDIR
+    fi
+
+      $PKGCONFIG --libs-only-l libnghttp2`
+    { $as_echo "$as_me:${as_lineno-$LINENO}: -l is $LIB_H2" >&5
+$as_echo "$as_me: -l is $LIB_H2" >&6;}
+
+    CPP_H2=`
+    if test -n "$h2pcdir"; then
+      PKG_CONFIG_LIBDIR="$h2pcdir"
+      export PKG_CONFIG_LIBDIR
+    fi
+       $PKGCONFIG --cflags-only-I libnghttp2`
+    { $as_echo "$as_me:${as_lineno-$LINENO}: -I is $CPP_H2" >&5
+$as_echo "$as_me: -I is $CPP_H2" >&6;}
+
+    LD_H2=`
+    if test -n "$h2pcdir"; then
+      PKG_CONFIG_LIBDIR="$h2pcdir"
+      export PKG_CONFIG_LIBDIR
+    fi
+
+      $PKGCONFIG --libs-only-L libnghttp2`
+    { $as_echo "$as_me:${as_lineno-$LINENO}: -L is $LD_H2" >&5
+$as_echo "$as_me: -L is $LD_H2" >&6;}
+
+  else
+            as_fn_error $? "--with-nghttp2 was specified but could not find libnghttp2 pkg-config file." "$LINENO" 5
+  fi
+
+  LDFLAGS="$LDFLAGS $LD_H2"
+  CPPFLAGS="$CPPFLAGS $CPP_H2"
+  LIBS="$LIB_H2 $LIBS"
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for nghttp2_session_client_new in -lnghttp2" >&5
+$as_echo_n "checking for nghttp2_session_client_new in -lnghttp2... " >&6; }
+if ${ac_cv_lib_nghttp2_nghttp2_session_client_new+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lnghttp2  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+#ifdef __cplusplus
+extern "C"
+#endif
+char nghttp2_session_client_new ();
+int main (void)
+{
+return nghttp2_session_client_new ();
+ ;
+ return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_nghttp2_nghttp2_session_client_new=yes
+else
+  ac_cv_lib_nghttp2_nghttp2_session_client_new=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_nghttp2_nghttp2_session_client_new" >&5
+$as_echo "$ac_cv_lib_nghttp2_nghttp2_session_client_new" >&6; }
+if test "x$ac_cv_lib_nghttp2_nghttp2_session_client_new" = xyes; then :
+
+     for ac_header in nghttp2/nghttp2.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "nghttp2/nghttp2.h" "ac_cv_header_nghttp2_nghttp2_h" "$ac_includes_default"
+if test "x$ac_cv_header_nghttp2_nghttp2_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_NGHTTP2_NGHTTP2_H 1
+_ACEOF
+ curl_h2_msg="enabled (nghttp2)"
+        NGHTTP2_ENABLED=1
+
+$as_echo "#define USE_NGHTTP2 1" >>confdefs.h
+
+        USE_NGHTTP2=1
+
+
+fi
+
+done
+
+
+else
+        LDFLAGS=$CLEANLDFLAGS
+      CPPFLAGS=$CLEANCPPFLAGS
+      LIBS=$CLEANLIBS
+
+fi
+
+
+fi
 
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ANSI C header files" >&5
@@ -30631,8 +30641,8 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
          test "$tst_h_errno_sbs_issue_7" = "no"; then
         tst_tsafe_getaddrinfo="no"
       else
-      tst_tsafe_getaddrinfo="yes"
-    fi
+        tst_tsafe_getaddrinfo="yes"
+      fi
     fi
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: $tst_tsafe_getaddrinfo" >&5
 $as_echo "$tst_tsafe_getaddrinfo" >&6; }
@@ -38376,25 +38386,25 @@ fi
             #
   tst_method="unknown"
 
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking how to set a socket into non-blocking mode" >&5
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking how to set a socket into non-blocking mode" >&5
 $as_echo_n "checking how to set a socket into non-blocking mode... " >&6; }
-    if test "x$ac_cv_func_fcntl_o_nonblock" = "xyes"; then
-      tst_method="fcntl O_NONBLOCK"
-    elif test "x$ac_cv_func_ioctl_fionbio" = "xyes"; then
-      tst_method="ioctl FIONBIO"
-    elif test "x$ac_cv_func_ioctlsocket_fionbio" = "xyes"; then
-      tst_method="ioctlsocket FIONBIO"
-    elif test "x$ac_cv_func_ioctlsocket_camel_fionbio" = "xyes"; then
-      tst_method="IoctlSocket FIONBIO"
-    elif test "x$ac_cv_func_setsockopt_so_nonblock" = "xyes"; then
-      tst_method="setsockopt SO_NONBLOCK"
-    fi
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $tst_method" >&5
+  if test "x$ac_cv_func_fcntl_o_nonblock" = "xyes"; then
+    tst_method="fcntl O_NONBLOCK"
+  elif test "x$ac_cv_func_ioctl_fionbio" = "xyes"; then
+    tst_method="ioctl FIONBIO"
+  elif test "x$ac_cv_func_ioctlsocket_fionbio" = "xyes"; then
+    tst_method="ioctlsocket FIONBIO"
+  elif test "x$ac_cv_func_ioctlsocket_camel_fionbio" = "xyes"; then
+    tst_method="IoctlSocket FIONBIO"
+  elif test "x$ac_cv_func_setsockopt_so_nonblock" = "xyes"; then
+    tst_method="setsockopt SO_NONBLOCK"
+  fi
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $tst_method" >&5
 $as_echo "$tst_method" >&6; }
-    if test "$tst_method" = "unknown"; then
-      { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: cannot determine non-blocking socket method." >&5
+  if test "$tst_method" = "unknown"; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: cannot determine non-blocking socket method." >&5
 $as_echo "$as_me: WARNING: cannot determine non-blocking socket method." >&2;}
-    fi
+  fi
 
 
 
@@ -39043,9 +39053,6 @@ if test "x$USE_SSLEAY" = "x1"; then
 elif test -n "$SSL_ENABLED"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES SSL"
 fi
-if test "@KRB4_ENABLED@" = "x1"; then
-  SUPPORT_FEATURES="$SUPPORT_FEATURES KRB4"
-fi
 if test "x$IPV6_ENABLED" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES IPv6"
 fi
@@ -39073,6 +39080,10 @@ if test "x$CURL_DISABLE_HTTP" != "x1"; then
 fi
 if test "x$USE_TLS_SRP" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES TLS-SRP"
+fi
+
+if test "x$USE_NGHTTP2" = "x1"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES HTTP2"
 fi
 
 
@@ -41984,7 +41995,6 @@ _EOF
   SSL support:      ${curl_ssl_msg}
   SSH support:      ${curl_ssh_msg}
   zlib support:     ${curl_zlib_msg}
-  krb4 support:     ${curl_krb4_msg}
   GSSAPI support:   ${curl_gss_msg}
   SPNEGO support:   ${curl_spnego_msg}
   TLS-SRP support:  ${curl_tls_srp_msg}
@@ -42003,6 +42013,7 @@ _EOF
   RTSP support:     ${curl_rtsp_msg}
   RTMP support:     ${curl_rtmp_msg}
   metalink support: ${curl_mtlnk_msg}
+  HTTP2 support:    ${curl_h2_msg}
   Protocols:        ${SUPPORT_PROTOCOLS}
 " >&5
 $as_echo "$as_me: Configured to build curl/libcurl:
@@ -42014,7 +42025,6 @@ $as_echo "$as_me: Configured to build curl/libcurl:
   SSL support:      ${curl_ssl_msg}
   SSH support:      ${curl_ssh_msg}
   zlib support:     ${curl_zlib_msg}
-  krb4 support:     ${curl_krb4_msg}
   GSSAPI support:   ${curl_gss_msg}
   SPNEGO support:   ${curl_spnego_msg}
   TLS-SRP support:  ${curl_tls_srp_msg}
@@ -42033,6 +42043,7 @@ $as_echo "$as_me: Configured to build curl/libcurl:
   RTSP support:     ${curl_rtsp_msg}
   RTMP support:     ${curl_rtmp_msg}
   metalink support: ${curl_mtlnk_msg}
+  HTTP2 support:    ${curl_h2_msg}
   Protocols:        ${SUPPORT_PROTOCOLS}
 " >&6;}
 

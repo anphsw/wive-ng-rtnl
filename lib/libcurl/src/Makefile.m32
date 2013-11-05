@@ -68,16 +68,16 @@ ARCH = w32
 endif
 
 CC	= $(CROSSPREFIX)gcc
-CFLAGS = -g -O2 -Wall
-CFLAGS += -fno-strict-aliasing
+CFLAGS	= -g -O2 -Wall
+CFLAGS	+= -fno-strict-aliasing
 ifeq ($(ARCH),w64)
-CFLAGS += -D_AMD64_
+CFLAGS	+= -D_AMD64_
 endif
 # comment LDFLAGS below to keep debug info
-LDFLAGS = -s
+LDFLAGS	= -s
 AR	= $(CROSSPREFIX)ar
 RC	= $(CROSSPREFIX)windres
-RCFLAGS = --include-dir=$(PROOT)/include -O COFF -i
+RCFLAGS	= --include-dir=$(PROOT)/include -O COFF -i
 
 # We may need these someday
 # PERL = perl
@@ -179,13 +179,13 @@ endif
 ifdef SYNC
   CFLAGS += -DUSE_SYNC_DNS
 else
-ifdef ARES
-  ifndef DYN
-    curl_DEPENDENCIES += $(LIBCARES_PATH)/libcares.a
-  endif
+  ifdef ARES
+    ifndef DYN
+      curl_DEPENDENCIES += $(LIBCARES_PATH)/libcares.a
+    endif
     CFLAGS += -DUSE_ARES -DCARES_STATICLIB
-  curl_LDADD += -L"$(LIBCARES_PATH)" -lcares
-endif
+    curl_LDADD += -L"$(LIBCARES_PATH)" -lcares
+  endif
 endif
 ifdef RTMP
   CFLAGS += -DUSE_LIBRTMP

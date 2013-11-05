@@ -115,11 +115,11 @@ extern curl_wcsdup_callback Curl_cwcsdup;
 
 #ifdef WIN32
 #  ifdef UNICODE
-#  undef wcsdup
-#  define wcsdup(ptr) Curl_cwcsdup(ptr)
-#  undef _wcsdup
-#  define _wcsdup(ptr) Curl_cwcsdup(ptr)
-#  undef _tcsdup
+#    undef wcsdup
+#    define wcsdup(ptr) Curl_cwcsdup(ptr)
+#    undef _wcsdup
+#    define _wcsdup(ptr) Curl_cwcsdup(ptr)
+#    undef _tcsdup
 #    define _tcsdup(ptr) Curl_cwcsdup(ptr)
 #  else
 #    undef _tcsdup

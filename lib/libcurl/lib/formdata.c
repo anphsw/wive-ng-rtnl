@@ -168,8 +168,8 @@ static FormInfo * AddFormInfo(char *value,
  * Returns some valid contenttype for filename.
  *
  ***************************************************************************/
-static const char * ContentTypeForFilename (const char *filename,
-                                            const char *prevtype)
+static const char *ContentTypeForFilename(const char *filename,
+                                          const char *prevtype)
 {
   const char *contenttype = NULL;
   unsigned int i;

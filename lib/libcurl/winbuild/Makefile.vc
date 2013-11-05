@@ -71,9 +71,9 @@ USE_IDN = false
 !ENDIF
 
 !IFNDEF ENABLE_IPV6
-USE_IPV6   = true
+USE_IPV6 = true
 !ELSEIF "$(ENABLE_IPV6)"=="yes"
-USE_IPV6   = true
+USE_IPV6 = true
 !ELSEIF "$(ENABLE_IPV6)"=="no"
 USE_IPV6 = false
 !ENDIF
@@ -105,27 +105,27 @@ USE_WINSSL = false
 CONFIG_NAME_LIB = libcurl
 
 !IF "$(WITH_SSL)"=="dll"
-USE_SSL      = true
-SSL=dll
+USE_SSL = true
+SSL     = dll
 !ELSEIF "$(WITH_SSL)"=="static"
-USE_SSL      = true
-SSL=static
+USE_SSL = true
+SSL     = static
 !ENDIF
 
 !IF "$(WITH_ZLIB)"=="dll"
-USE_ZLIB     = true
+USE_ZLIB = true
 ZLIB     = dll
 !ELSEIF "$(WITH_ZLIB)"=="static"
-USE_ZLIB    = true
-ZLIB=static
+USE_ZLIB = true
+ZLIB     = static
 !ENDIF
 
 !IF "$(WITH_SSH2)"=="dll"
-USE_SSH2    = true
-SSH2=dll
+USE_SSH2 = true
+SSH2     = dll
 !ELSEIF "$(WITH_SSH2)"=="static"
-USE_SSH2      = true
-SSH2=static
+USE_SSH2 = true
+SSH2     = static
 !ENDIF
 
 CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-vc$(VC)-$(MACHINE)
@@ -136,7 +136,7 @@ CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-debug
 CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-release
 !ENDIF
 
-!IF "$(AS_DLL)" == "true"
+!IF "$(AS_DLL)"=="true"
 CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-dll
 !ELSE
 CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-static

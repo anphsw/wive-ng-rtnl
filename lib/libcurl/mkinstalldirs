@@ -113,25 +113,25 @@ do
   oIFS=$IFS
   IFS=/
   set fnord $file
-   shift
+  shift
   IFS=$oIFS
 
-   for d
-   do
+  for d
+  do
     test "x$d" = x && continue
 
     pathcomp=$pathcomp$d
     case $pathcomp in
-       -* ) pathcomp=./$pathcomp ;;
-     esac
+      -*) pathcomp=./$pathcomp ;;
+    esac
 
-     if test ! -d "$pathcomp"; then
+    if test ! -d "$pathcomp"; then
       echo "mkdir $pathcomp"
 
       mkdir "$pathcomp" || lasterr=$?
 
-        if test ! -d "$pathcomp"; then
-  	  errstatus=$lasterr
+      if test ! -d "$pathcomp"; then
+	errstatus=$lasterr
       else
 	if test ! -z "$dirmode"; then
 	  echo "chmod $dirmode $pathcomp"
@@ -142,11 +142,11 @@ do
 	    errstatus=$lasterr
 	  fi
 	fi
-        fi
-     fi
+      fi
+    fi
 
     pathcomp=$pathcomp/
-   done
+  done
 done
 
 exit $errstatus

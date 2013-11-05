@@ -1718,11 +1718,12 @@
 2) webUI: add statistic for second radio module in asus N56.<br>
 3) configs: disable green ap support (2.7.1.6 driver fix reinit issue).<br>
 4) wifi: rt3352: use v11 adaptives for internal LNA.<br>
-5) kernel: move to 2.7.1.6 driver, support rt3xxx,rt5350,mt762x chips.<br>
-6) kernel: ipv6: allow the MTU of ipip6 tunnel to be set below 1280.<br>
-7) kernel: ipv4 igmp: use in_dev_put in timer handlers instead of __in_dev_put.<br>
-8) kernel: ICMPv6: treat dest unreachable codes 5 and 6 as EACCES, not EPROTO.<br>
-9) kernel: wifi driver 2.7.1.6: fix GreenAP for RT3052/3350 and RT3883/3662.<br>
+5) libcurl: up to 7.33.0 version.<br>
+6) kernel: move to 2.7.1.6 driver, support rt3xxx,rt5350,mt762x chips.<br>
+7) kernel: ipv6: allow the MTU of ipip6 tunnel to be set below 1280.<br>
+8) kernel: ipv4 igmp: use in_dev_put in timer handlers instead of __in_dev_put.<br>
+9) kernel: ICMPv6: treat dest unreachable codes 5 and 6 as EACCES, not EPROTO.<br>
+10) kernel: wifi driver 2.7.1.6: fix GreenAP for RT3052/3350 and RT3883/3662.<br>
 <br>
 <br>
 <br>

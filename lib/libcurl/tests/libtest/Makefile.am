@@ -36,18 +36,18 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 
 if USE_EMBEDDED_ARES
 AM_CPPFLAGS = -I$(top_builddir)/include/curl \
-           -I$(top_builddir)/include      \
-           -I$(top_srcdir)/include        \
-           -I$(top_builddir)/lib          \
-           -I$(top_srcdir)/lib            \
-           -I$(top_builddir)/ares         \
-           -I$(top_srcdir)/ares
+              -I$(top_builddir)/include      \
+              -I$(top_srcdir)/include        \
+              -I$(top_builddir)/lib          \
+              -I$(top_srcdir)/lib            \
+              -I$(top_builddir)/ares         \
+              -I$(top_srcdir)/ares
 else
 AM_CPPFLAGS = -I$(top_builddir)/include/curl \
-           -I$(top_builddir)/include      \
-           -I$(top_srcdir)/include        \
-           -I$(top_builddir)/lib          \
-           -I$(top_srcdir)/lib
+              -I$(top_builddir)/include      \
+              -I$(top_srcdir)/include        \
+              -I$(top_builddir)/lib          \
+              -I$(top_srcdir)/lib
 endif
 
 EXTRA_DIST = test75.pl test307.pl test610.pl test613.pl test1013.pl	\

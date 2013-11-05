@@ -29,10 +29,10 @@
 #    define LIBHOSTNAME_EXTERN  __declspec(dllimport)
 #  endif
 #elif defined(BUILDING_LIBCURL) && defined(CURL_HIDDEN_SYMBOLS)
-#    define LIBHOSTNAME_EXTERN CURL_EXTERN_SYMBOL
-#  else
-#    define LIBHOSTNAME_EXTERN
-#  endif
+#  define LIBHOSTNAME_EXTERN CURL_EXTERN_SYMBOL
+#else
+#  define LIBHOSTNAME_EXTERN
+#endif
 
 #ifdef USE_WINSOCK
 #  define FUNCALLCONV __stdcall

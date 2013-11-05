@@ -110,11 +110,11 @@ LFLAGS         = $(LFLAGS) "/LIBPATH:$(DEVEL_LIB)"
 !IF "$(WITH_SSL)"=="dll"
 SSL_LIBS     = libeay32.lib ssleay32.lib
 USE_SSL      = true
-SSL=dll
+SSL          = dll
 !ELSEIF "$(WITH_SSL)"=="static"
 SSL_LIBS     = libeay32.lib ssleay32.lib gdi32.lib user32.lib
 USE_SSL      = true
-SSL=static
+SSL          = static
 !ENDIF
 
 !IFDEF USE_SSL
@@ -124,12 +124,12 @@ SSL_CFLAGS   = /DUSE_SSLEAY /I"$(DEVEL_INCLUDE)/openssl"
 
 !IF "$(WITH_ZLIB)"=="dll"
 ZLIB_LIBS   = zlib.lib
-USE_ZLIB     = true
+USE_ZLIB    = true
 ZLIB        = dll
 !ELSEIF "$(WITH_ZLIB)"=="static"
 ZLIB_LIBS   = zlib_a.lib
 USE_ZLIB    = true
-ZLIB=static
+ZLIB        = static
 !ENDIF
 
 !IFDEF USE_ZLIB
@@ -140,16 +140,16 @@ ZLIB_CFLAGS = /DHAVE_ZLIB_H /DHAVE_ZLIB /DHAVE_LIBZ
 !IF "$(WITH_SSH2)"=="dll"
 SSH2_LIBS   = libssh2.lib
 USE_SSH2    = true
-SSH2=dll
+SSH2        = dll
 !ELSEIF "$(WITH_SSH2)"=="static"
 SSH2_LIBS   = libssh2_a.lib user32.lib
 USE_SSH2    = true
-SSH2=static
+SSH2        = static
 !ENDIF
 
 !IFDEF USE_SSH2
-SSH2_CFLAGS   = /DHAVE_LIBSSH2 /DHAVE_LIBSSH2_H /DLIBSSH2_WIN32 /DLIBSSH2_LIBRARY /DUSE_LIBSSH2
-SSH2_CFLAGS   = $(SSH2_CFLAGS) /I$(WITH_DEVEL)/include/libssh2
+SSH2_CFLAGS = /DHAVE_LIBSSH2 /DHAVE_LIBSSH2_H /DLIBSSH2_WIN32 /DLIBSSH2_LIBRARY /DUSE_LIBSSH2
+SSH2_CFLAGS = $(SSH2_CFLAGS) /I$(WITH_DEVEL)/include/libssh2
 !ENDIF
 
 
@@ -166,7 +166,7 @@ WIN_LIBS   = $(WIN_LIBS) Normaliz.lib
 
 
 !IFNDEF USE_IPV6
-USE_IPV6=true
+USE_IPV6  = true
 !ELSEIF "$(USE_IPV6)"=="yes"
 USE_IPV6  = true
 !ENDIF
@@ -218,7 +218,7 @@ SSPI_CFLAGS = $(SSPI_CFLAGS) /DUSE_SCHANNEL
 
 
 !IF "$(GEN_PDB)"=="yes"
-GEN_PDB=true
+GEN_PDB = true
 !ENDIF
 
 
@@ -227,11 +227,11 @@ MANIFESTTOOL = mt -manifest $(DIRDIST)\$(PROGRAM_NAME).manifest -outputresource:
 !ENDIF
 
 # Runtime library configuration
-!IF "$(RTLIBCFG)" == "static"
-RTLIB  = /MT
+!IF "$(RTLIBCFG)"=="static"
+RTLIB = /MT
 RTLIB_DEBUG = /MTd
 !ELSE
-RTLIB   = /MD
+RTLIB = /MD
 RTLIB_DEBUG  = /MDd
 !ENDIF
 
@@ -239,12 +239,12 @@ RTLIB_DEBUG  = /MDd
 TARGET = $(LIB_NAME_STATIC)
 CURL_LIBCURL_LIBNAME=$(LIB_NAME_STATIC)
 AS_DLL = false
-CFGSET=true
+CFGSET = true
 !ELSEIF "$(MODE)"=="dll"
 TARGET = $(LIB_NAME_DLL)
 CURL_LIBCURL_LIBNAME=$(LIB_NAME_IMP)
 AS_DLL = true
-CFGSET=true
+CFGSET = true
 !ENDIF
 
 !IF "$(CFGSET)" == "FALSE"
@@ -273,7 +273,7 @@ CURL_CC = $(CURL_CC) $(CURL_CFLAGS)
 
 !IF "$(AS_DLL)" == "true"
 
-LNK      = $(LNKDLL) $(WIN_LIBS) /out:$(LIB_DIROBJ)\$(TARGET)
+LNK       = $(LNKDLL) $(WIN_LIBS) /out:$(LIB_DIROBJ)\$(TARGET)
 !IF "$(DEBUG)"=="yes"
 TARGET    = $(LIB_NAME_DLL_DEBUG)
 LNK       = $(LNK) /DEBUG /IMPLIB:$(LIB_DIROBJ)\$(LIB_NAME_IMP_DEBUG)
@@ -285,7 +285,7 @@ LNK       = $(LNK)  /IMPLIB:$(LIB_DIROBJ)\$(LIB_NAME_IMP)
 PDB       = $(PDB_NAME_DLL)
 CURL_LIBS = /IMPLIB:$(LIB_DIROBJ)\$(LIB_NAME_IMP)
 !ENDIF
-RESOURCE = $(LIB_DIROBJ)\libcurl.res
+RESOURCE  = $(LIB_DIROBJ)\libcurl.res
 
 # AS_DLL
 !ELSE
@@ -377,7 +377,7 @@ clean:
 !IF "$(AS_DLL)" == "true"
 LIB_OBJS = $(LIBCURL_OBJS) $(RESOURCE)
 !ELSE
-LIB_OBJS= $(LIBCURL_OBJS)
+LIB_OBJS = $(LIBCURL_OBJS)
 !ENDIF
 
 EXE_OBJS = $(CURL_OBJS) $(CURL_DIROBJ)\curl.res
@@ -400,7 +400,7 @@ $(TARGET): $(LIB_OBJS) $(LIB_DIROBJ) $(DISTDIR)
 	@echo Using WinSSL: $(USE_WINSSL)
 	@echo CFLAGS:     $(CFLAGS)
 	@echo LFLAGS:     $(LFLAGS)
-	@echo Gen PDB:    $(GEN_PDB)
+	@echo GenPDB:     $(GEN_PDB)
 	@echo Debug:      $(DEBUG)
 	@echo Machine:    $(MACHINE)
 	$(LNK) $(LFLAGS) $(LIB_OBJS)

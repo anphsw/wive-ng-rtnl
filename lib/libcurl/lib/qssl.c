@@ -277,7 +277,7 @@ CURLcode Curl_qsossl_connect(struct connectdata * conn, int sockindex)
     if(rc == CURLE_OK) {
       rc = Curl_qsossl_handshake(conn, sockindex);
       if(rc != CURLE_OK)
-      SSL_Destroy(connssl->handle);
+        SSL_Destroy(connssl->handle);
     }
   }
 

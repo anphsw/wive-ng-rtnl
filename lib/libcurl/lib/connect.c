@@ -428,7 +428,7 @@ static CURLcode bindlocal(struct connectdata *conn,
             si6->sin6_scope_id = atoi(scope_ptr);
 #endif
         }
-          sizeof_sa = sizeof(struct sockaddr_in6);
+        sizeof_sa = sizeof(struct sockaddr_in6);
       }
       else
 #endif
@@ -1239,7 +1239,7 @@ curl_socket_t Curl_getconnectinfo(struct SessionHandle *data,
  * 'conn' can be NULL, beware!
  */
 int Curl_closesocket(struct connectdata *conn,
-                     curl_socket_t sock)
+                      curl_socket_t sock)
 {
   if(conn && conn->fclosesocket) {
     if((sock == conn->sock[SECONDARYSOCKET]) &&

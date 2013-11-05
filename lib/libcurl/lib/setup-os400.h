@@ -196,6 +196,7 @@ extern OM_uint32 Curl_gss_delete_sec_context_a(OM_uint32 * minor_status,
                                                gss_buffer_t output_token);
 #define gss_delete_sec_context  Curl_gss_delete_sec_context_a
 
+
 /* LDAP wrappers. */
 
 #define BerValue                struct berval

@@ -288,10 +288,10 @@ test_cleanup:
   curl_easy_cleanup( curl );
 
   if ( headers )
-  curl_slist_free_all( headers );
+    curl_slist_free_all( headers );
 
   if ( url )
-  curl_free(url);
+    curl_free(url);
 
   /* free share */
   printf( "SHARE_CLEANUP\n" );

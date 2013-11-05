@@ -69,6 +69,7 @@
 #include "tool_msgs.h"
 #include "tool_operate.h"
 #include "tool_operhlp.h"
+#include "tool_paramhlp.h"
 #include "tool_parsecfg.h"
 #include "tool_setopt.h"
 #include "tool_sleep.h"
@@ -80,6 +81,11 @@
 #include "tool_vms.h"
 
 #include "memdebug.h" /* keep this as LAST include */
+
+#ifdef CURLDEBUG
+/* libcurl's debug builds provide an extra function */
+CURLcode curl_easy_perform_ev(CURL *easy);
+#endif
 
 #define CURLseparator  "--_curl_--"
 
@@ -196,6 +202,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
   bool stillflags;
   int res = 0;
   int i;
+  unsigned long li;
 
   bool orig_noprogress;
   bool orig_isatty;
@@ -317,6 +324,18 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
       if(res)
         goto quit_curl;
     }
+  }
+
+  if(config->userpwd && !config->xoauth2_bearer) {
+    res = checkpasswd("host", &config->userpwd);
+    if(res)
+      goto quit_curl;
+  }
+
+  if(config->proxyuserpwd) {
+    res = checkpasswd("proxy", &config->proxyuserpwd);
+    if(res)
+      goto quit_curl;
   }
 
   if((!config->url_list || !config->url_list->url) && !config->list_engines) {
@@ -465,10 +484,10 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 
   for(urlnode = config->url_list; urlnode; urlnode = urlnode->next) {
 
-    int up; /* upload file counter within a single upload glob */
+    unsigned long up; /* upload file counter within a single upload glob */
     char *infiles; /* might be a glob pattern */
     char *outfiles;
-    int infilenum;
+    unsigned long infilenum;
     URLGlob *inglob;
 
     int metalink = 0; /* nonzero for metalink download. */
@@ -533,7 +552,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
       char *uploadfile; /* a single file, never a glob */
       int separator;
       URLGlob *urls;
-      int urlnum;
+      unsigned long urlnum;
 
       uploadfile = NULL;
       urls = NULL;
@@ -583,7 +602,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
       separator= ((!outfiles || curlx_strequal(outfiles, "-")) && urlnum > 1);
 
       /* Here's looping around each globbed URL */
-      for(i = 0 ; i < urlnum; i++) {
+      for(li = 0 ; li < urlnum; li++) {
 
         int infd;
         bool infdopen;
@@ -623,30 +642,30 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
           }
         }
         else {
-        if(urls) {
-          res = glob_next_url(&this_url, urls);
-          if(res)
-            goto show_error;
-        }
-        else if(!i) {
-          this_url = strdup(urlnode->url);
-          if(!this_url) {
-            res = CURLE_OUT_OF_MEMORY;
-            goto show_error;
+          if(urls) {
+            res = glob_next_url(&this_url, urls);
+            if(res)
+              goto show_error;
           }
-        }
-        else
-          this_url = NULL;
-        if(!this_url)
-          break;
+          else if(!li) {
+            this_url = strdup(urlnode->url);
+            if(!this_url) {
+              res = CURLE_OUT_OF_MEMORY;
+              goto show_error;
+            }
+          }
+          else
+            this_url = NULL;
+          if(!this_url)
+            break;
 
-        if(outfiles) {
-          outfile = strdup(outfiles);
-          if(!outfile) {
-            res = CURLE_OUT_OF_MEMORY;
-            goto show_error;
+          if(outfiles) {
+            outfile = strdup(outfiles);
+            if(!outfile) {
+              res = CURLE_OUT_OF_MEMORY;
+              goto show_error;
+            }
           }
-        }
         }
 
         if(((urlnode->flags&GETOUT_USEREMOTE) ||
@@ -782,7 +801,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
             case FAB$C_VAR:
             case FAB$C_VFC:
             case FAB$C_STMCR:
-          infd = open(uploadfile, O_RDONLY | O_BINARY);
+              infd = open(uploadfile, O_RDONLY | O_BINARY);
               break;
             default:
               infd = open(uploadfile, O_RDONLY | O_BINARY,
@@ -863,8 +882,8 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         }
 
         if(urlnum > 1 && !(config->mute)) {
-          fprintf(config->errors, "\n[%d/%d]: %s --> %s\n",
-                  i+1, urlnum, this_url, outfile ? outfile : "<stdout>");
+          fprintf(config->errors, "\n[%lu/%lu]: %s --> %s\n",
+                  li+1, urlnum, this_url, outfile ? outfile : "<stdout>");
           if(separator)
             printf("%s%s\n", CURLseparator, this_url);
         }
@@ -923,8 +942,8 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         /* where to store */
         my_setopt(curl, CURLOPT_WRITEDATA, &outs);
         if(metalink || !config->use_metalink)
-        /* what call to write */
-        my_setopt(curl, CURLOPT_WRITEFUNCTION, tool_write_cb);
+          /* what call to write */
+          my_setopt(curl, CURLOPT_WRITEFUNCTION, tool_write_cb);
 #ifdef USE_METALINK
         else
           /* Set Metalink specific write callback function to parse
@@ -971,6 +990,9 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         else if(!config->use_metalink)
           my_setopt(curl, CURLOPT_HEADER, config->include_headers?1L:0L);
 
+        if(config->xoauth2_bearer)
+          my_setopt_str(curl, CURLOPT_XOAUTH2_BEARER, config->xoauth2_bearer);
+
 #if !defined(CURL_DISABLE_PROXY)
         {
           /* TODO: Make this a run-time check instead of compile-time one. */
@@ -994,19 +1016,19 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
           /* new in libcurl 7.10.6 */
           if(config->proxyanyauth)
             my_setopt_bitmask(curl, CURLOPT_PROXYAUTH,
-                              (long) CURLAUTH_ANY);
+                              (long)CURLAUTH_ANY);
           else if(config->proxynegotiate)
             my_setopt_bitmask(curl, CURLOPT_PROXYAUTH,
-                              (long) CURLAUTH_GSSNEGOTIATE);
+                              (long)CURLAUTH_GSSNEGOTIATE);
           else if(config->proxyntlm)
             my_setopt_bitmask(curl, CURLOPT_PROXYAUTH,
-                              (long) CURLAUTH_NTLM);
+                              (long)CURLAUTH_NTLM);
           else if(config->proxydigest)
             my_setopt_bitmask(curl, CURLOPT_PROXYAUTH,
-                              (long) CURLAUTH_DIGEST);
+                              (long)CURLAUTH_DIGEST);
           else if(config->proxybasic)
             my_setopt_bitmask(curl, CURLOPT_PROXYAUTH,
-                              (long) CURLAUTH_BASIC);
+                              (long)CURLAUTH_BASIC);
 
           /* new in libcurl 7.19.4 */
           my_setopt(curl, CURLOPT_NOPROXY, config->noproxy);
@@ -1071,7 +1093,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 
           /* new in libcurl 7.10.6 (default is Basic) */
           if(config->authtype)
-            my_setopt_bitmask(curl, CURLOPT_HTTPAUTH, (long) config->authtype);
+            my_setopt_bitmask(curl, CURLOPT_HTTPAUTH, (long)config->authtype);
 
           /* curl 7.19.1 (the 301 version existed in 7.18.2),
              303 was added in 7.26.0 */
@@ -1216,6 +1238,18 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
           my_setopt(curl, CURLOPT_PROGRESSFUNCTION, tool_progress_cb);
           my_setopt(curl, CURLOPT_PROGRESSDATA, &progressbar);
         }
+
+        /* new in libcurl 7.24.0: */
+        if(config->dns_servers)
+          my_setopt_str(curl, CURLOPT_DNS_SERVERS, config->dns_servers);
+
+        /* new in libcurl 7.33.0: */
+        if(config->dns_interface)
+          my_setopt_str(curl, CURLOPT_DNS_INTERFACE, config->dns_interface);
+        if(config->dns_ipv4_addr)
+          my_setopt_str(curl, CURLOPT_DNS_LOCAL_IP4, config->dns_ipv4_addr);
+        if(config->dns_ipv6_addr)
+        my_setopt_str(curl, CURLOPT_DNS_LOCAL_IP6, config->dns_ipv6_addr);
 
         /* new in libcurl 7.6.2: */
         my_setopt_slist(curl, CURLOPT_TELNETOPTIONS, config->telnet_options);
@@ -1379,7 +1413,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         hdrcbdata.outs = &outs;
         hdrcbdata.heads = &heads;
 
-          my_setopt(curl, CURLOPT_HEADERFUNCTION, tool_header_cb);
+        my_setopt(curl, CURLOPT_HEADERFUNCTION, tool_header_cb);
         my_setopt(curl, CURLOPT_HEADERDATA, &hdrcbdata);
 
         if(config->resolve)
@@ -1449,6 +1483,11 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
                     mlfile->filename, this_url);
 #endif /* USE_METALINK */
 
+#ifdef CURLDEBUG
+          if(config->test_event_based)
+            res = curl_easy_perform_ev(curl);
+          else
+#endif
           res = curl_easy_perform(curl);
 
           if(outs.is_cd_filename && outs.stream && !config->mute &&
@@ -1872,4 +1911,3 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 
   return res;
 }
-

@@ -28,7 +28,7 @@
      typedef int intptr_t;
 #  endif
 #  if !defined(_AIX) && !defined(__sgi) && !defined(__osf__)
-#  include <stdint.h>
+#    include <stdint.h>
 #  endif
 #  include <unistd.h>
 #endif
