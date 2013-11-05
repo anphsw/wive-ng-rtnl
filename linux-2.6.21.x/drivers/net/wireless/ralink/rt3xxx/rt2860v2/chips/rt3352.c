@@ -977,7 +977,7 @@ VOID RT3352_ChipSwitchChannel(
 					RFValue = 0x00;
 					RT30xxWriteRFRegister(pAd, RF_R13, (UCHAR)RFValue);
 					RT30xxReadRFRegister(pAd, RF_R30, (PUCHAR)&RFValue);
-					if ((pAd->CommonCfg.BBPCurrentBW == BW_40))
+					if (pAd->CommonCfg.BBPCurrentBW == BW_40)
 						RFValue |= 0x03; // 40MBW tx_h20M=1,rx_h20M=1
 					else
 						RFValue &= ~(0x03); // 20MBW tx_h20M=0,rx_h20M=0
