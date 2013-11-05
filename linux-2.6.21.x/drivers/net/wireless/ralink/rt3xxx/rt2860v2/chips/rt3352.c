@@ -1668,7 +1668,6 @@ VOID RT3352_AsicTxAlcGetAutoAgcOffset(
 	BBP_R49_STRUC 	BbpR49;
 	UCHAR 			RFValue = 0;
 	UCHAR 			RFValue2 = 0;
-	UCHAR 			TmpValue = 0;
 	UCHAR 			TssiChannel = 0;
 	CHAR 			desiredTSSI = 0;
 	CHAR 			currentTSSI = 0;
