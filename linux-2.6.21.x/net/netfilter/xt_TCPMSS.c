@@ -42,10 +42,38 @@ optlen(const u_int8_t *opt, unsigned int offset)
 		return opt[offset+1];
 }
 
+static u_int32_t tcpmss_reverse_mtu(const struct sk_buff *skb,
+				    unsigned int family)
+{
+	struct flowi fl = {};
+	struct rtable *rt = NULL;
+	u_int32_t mtu     = ~0U;
+
+	if (family == PF_INET)
+		fl.fl4_dst = ip_hdr(skb)->saddr;
+	else
+		fl.fl6_dst = ipv6_hdr(skb)->saddr;
+
+	rcu_read_lock();
+	if (family == PF_INET)
+		ip_route_output_key(&rt, &fl);
+#if defined(CONFIG_IPV6) || defined(CONFIG_IPV6_MODULE)
+	else
+		rt = (struct rtable *)ip6_route_output(NULL, &fl);
+#endif
+	rcu_read_unlock();
+
+	if (rt != NULL) {
+		mtu = dst_mtu(&rt->u.dst);
+		dst_release(&rt->u.dst);
+	}
+	return mtu;
+}
+
 static int
 tcpmss_mangle_packet(struct sk_buff **pskb,
 		     const struct xt_tcpmss_info *info,
-		     unsigned int in_mtu,
+		     unsigned int family,
 		     unsigned int tcphoff,
 		     unsigned int minlen, u16 newminmss)
 {
@@ -66,6 +94,8 @@ tcpmss_mangle_packet(struct sk_buff **pskb,
 		return -1;
 
 	if (info->mss == XT_TCPMSS_CLAMP_PMTU) {
+		unsigned int in_mtu = tcpmss_reverse_mtu(*pskb, family);
+
 		if (dst_mtu((*pskb)->dst) <= minlen) {
 			if (net_ratelimit())
 				printk(KERN_ERR "xt_TCPMSS: "
@@ -151,34 +181,6 @@ tcpmss_mangle_packet(struct sk_buff **pskb,
 	return TCPOLEN_MSS;
 }
 
-static u_int32_t tcpmss_reverse_mtu(const struct sk_buff *skb,
-				    unsigned int family)
-{
-	struct flowi fl = {};
-	struct rtable *rt = NULL;
-	u_int32_t mtu     = ~0U;
-
-	if (family == PF_INET)
-		fl.fl4_dst = ip_hdr(skb)->saddr;
-	else
-		fl.fl6_dst = ipv6_hdr(skb)->saddr;
-
-	rcu_read_lock();
-	if (family == PF_INET)
-		ip_route_output_key(&rt, &fl);
-#if defined(CONFIG_IPV6) || defined(CONFIG_IPV6_MODULE)
-	else
-		rt = (struct rtable *)ip6_route_output(NULL, &fl);
-#endif
-	rcu_read_unlock();
-
-	if (rt != NULL) {
-		mtu = dst_mtu(&rt->u.dst);
-		dst_release(&rt->u.dst);
-	}
-	return mtu;
-}
-
 static unsigned int
 xt_tcpmss_target4(struct sk_buff **pskb,
 		  const struct net_device *in,
@@ -192,7 +194,7 @@ xt_tcpmss_target4(struct sk_buff **pskb,
 	int ret;
 
 	ret = tcpmss_mangle_packet(pskb, targinfo,
-				   tcpmss_reverse_mtu(*pskb, PF_INET),
+				   PF_INET,
 				   iph->ihl * 4,
 				   sizeof(*iph) + sizeof(struct tcphdr), (u16)536);
 	if (ret < 0)
@@ -225,7 +227,7 @@ xt_tcpmss_target6(struct sk_buff **pskb,
 	if (tcphoff < 0)
 		return NF_DROP;
 	ret = tcpmss_mangle_packet(pskb, targinfo,
-				   tcpmss_reverse_mtu(*pskb, PF_INET6),
+				   PF_INET6,
 				   tcphoff,
 				   sizeof(*ipv6h) + sizeof(struct tcphdr), (u16)1220);
 	if (ret < 0)
