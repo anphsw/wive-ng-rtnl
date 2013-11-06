@@ -198,6 +198,7 @@ load-$(CONFIG_RALINK_RT3352)	+= 0x80000000
 #
 core-$(CONFIG_RALINK_RT5350)	+= arch/mips/rt2880/
 cflags-$(CONFIG_RALINK_RT5350)	+= -Iinclude/asm-mips/rt2880
+cflags-$(CONFIG_RALINK_RT5350)	+= -march=mips32r2 -D__MIPSEL__
 load-$(CONFIG_RALINK_RT5350)	+= 0x80000000
 
 #
@@ -213,6 +214,7 @@ load-$(CONFIG_RALINK_RT3883)	+= 0x80000000
 #
 core-$(CONFIG_RALINK_MT7620)	+= arch/mips/rt2880/
 cflags-$(CONFIG_RALINK_MT7620)	+= -Iinclude/asm-mips/rt2880
+cflags-$(CONFIG_RALINK_MT7620)	+= -march=mips32r2 -D__MIPSEL__
 load-$(CONFIG_RALINK_MT7620)	+= 0x80000000
 
 #
