@@ -720,6 +720,12 @@ zImage rImage: vmlinux $(TOPDIR)/.config
 	$(Q)$(MAKE) $(build)=arch/mips/rt2880/boot $@
 endif
 
+ifdef CONFIG_RALINK_RT3352
+#error zImage rImage
+zImage rImage: vmlinux $(TOPDIR)/.config
+	$(Q)$(MAKE) $(build)=arch/mips/rt2880/boot $@
+endif
+
 #
 # The 64-bit ELF tools are pretty broken so at this time we generate 64-bit
 # ELF files from 32-bit files by conversion.

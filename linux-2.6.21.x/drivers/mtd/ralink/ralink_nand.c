@@ -1753,7 +1753,7 @@ int __devinit ra_nand_init(void)
         if(ra_check_flash_type()!=BOOT_FROM_NAND) { /* NAND */
                 return 0;
         }
-#endif	
+#endif
 	buffers_size = ALIGNE_16((1<<CONFIG_PAGE_SIZE_BIT) + (1<<CONFIG_OOBSIZE_PER_PAGE_BIT)); //ra->buffers
 	bbt_size = BBTTAG_BITS * (1<<(CONFIG_CHIP_SIZE_BIT - (CONFIG_PAGE_SIZE_BIT + CONFIG_NUMPAGE_PER_BLOCK_BIT))) / 8; //ra->bbt
 	bbt_size = ALIGNE_16(bbt_size);

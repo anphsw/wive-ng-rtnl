@@ -9,7 +9,7 @@ echo ">>>>> RECONFIGURE WIFI IF = $1 <<<<<<<<<<"
 eval `nvram_buf_get 2860 HiPower AutoConnect OperationMode TxPower`
 ########################################LNA param############################################
 # Disable increase LNA gain
-if [ "$CONFIG_RALINK_RT3052_MP2" = "y" ]; then
+if [ "$CONFIG_RALINK_RT3052" = "y" ] || [ "$CONFIG_RALINK_RT3352" = "y" ]; then
     if [ "$HiPower" != "" ]; then
 	iwpriv "$1" set HiPower="$HiPower"
     fi

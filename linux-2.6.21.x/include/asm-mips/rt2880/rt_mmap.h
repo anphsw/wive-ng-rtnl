@@ -117,7 +117,7 @@
 #define RALINK_FE_RST			(1<<18)
 #define RALINK_PCM_RST			(1<<19)
 
-#elif defined (CONFIG_RALINK_RT3052) 
+#elif defined (CONFIG_RALINK_RT3052)
 
 #define RALINK_SYSCTL_BASE		0xB0000000
 #define RALINK_TIMER_BASE		0xB0000100

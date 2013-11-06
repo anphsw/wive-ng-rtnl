@@ -46,8 +46,7 @@
 #define GPIO_DEV		"/dev/gpio"	//userlevel devname
 
 #if defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT2883) || \
-      defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT3052) || \
-      defined (CONFIG_RALINK_RT5350)
+      defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350)
 /* BUTTONS GPIO */
 #if defined(CONFIG_RALINK_I2S) || defined(CONFIG_RALINK_I2S_MODULE)
 #define GPIO_BTN_RESET		43

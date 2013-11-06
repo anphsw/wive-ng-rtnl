@@ -230,7 +230,7 @@ static void prom_init_sysclk(void)
 	case 3:
 		mips_cpu_feq = (280000000);
 		break;
-#elif defined (CONFIG_RALINK_RT2883) 
+#elif defined (CONFIG_RALINK_RT2883)
 	case 0:
 		mips_cpu_feq = (380*1000*1000);
 		break;
@@ -255,28 +255,28 @@ static void prom_init_sysclk(void)
 		mips_cpu_feq = (320*1000*1000);
 		break;
 	case 1:
-		mips_cpu_feq = (384*1000*1000); 
+		mips_cpu_feq = (384*1000*1000);
 		break;
 #endif
-#elif defined (CONFIG_RALINK_RT3352) 
+#elif defined (CONFIG_RALINK_RT3352)
 	case 0:
 		mips_cpu_feq = (384*1000*1000);
 		break;
 	case 1:
-		mips_cpu_feq = (400*1000*1000); 
+		mips_cpu_feq = (400*1000*1000);
 		break;
-#elif defined (CONFIG_RALINK_RT3883) 
+#elif defined (CONFIG_RALINK_RT3883)
 	case 0:
 		mips_cpu_feq = (250*1000*1000);
 		break;
 	case 1:
-		mips_cpu_feq = (384*1000*1000); 
+		mips_cpu_feq = (384*1000*1000);
 		break;
 	case 2:
-		mips_cpu_feq = (480*1000*1000); 
+		mips_cpu_feq = (480*1000*1000);
 		break;
 	case 3:
-		mips_cpu_feq = (500*1000*1000); 
+		mips_cpu_feq = (500*1000*1000);
 		break;
 #elif defined(CONFIG_RALINK_RT5350)
 	case 0:
@@ -286,12 +286,12 @@ static void prom_init_sysclk(void)
 		//reserved
 		break;
 	case 2:
-		mips_cpu_feq = (320*1000*1000); 
+		mips_cpu_feq = (320*1000*1000);
 		break;
 	case 3:
-		mips_cpu_feq = (300*1000*1000); 
+		mips_cpu_feq = (300*1000*1000);
 		break;
-#elif defined (CONFIG_RALINK_RT6855) 
+#elif defined (CONFIG_RALINK_RT6855)
 	case 0:
 		mips_cpu_feq = (400*1000*100);
 		break;
