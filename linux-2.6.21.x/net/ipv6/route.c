@@ -2509,7 +2509,7 @@ ctl_table ipv6_route_table[] = {
 		.data		=	&ip6_rt_gc_elasticity,
 		.maxlen		=	sizeof(int),
 		.mode		=	0644,
-		.proc_handler	=	&proc_dointvec_jiffies,
+		.proc_handler	=	&proc_dointvec,
 		.strategy	=	&sysctl_jiffies,
 	},
 	{
@@ -2527,7 +2527,7 @@ ctl_table ipv6_route_table[] = {
 		.data		=	&ip6_rt_min_advmss,
 		.maxlen		=	sizeof(int),
 		.mode		=	0644,
-		.proc_handler	=	&proc_dointvec_jiffies,
+		.proc_handler	=	&proc_dointvec,
 		.strategy	=	&sysctl_jiffies,
 	},
 	{
