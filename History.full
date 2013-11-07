@@ -1730,6 +1730,7 @@
 15) kernel: ipv6: Use 1280 as min MTU for ipv6 forwarding.<br>
 16) kernel: tcp: don't check mtu probe completion in the loop.<br>
 17) kernel: ipv6: update MSS even if MTU is unchanged.<br>
+18) kernel: ipv6: restore IPv6 when MTU is big enough.<br>
 <br>
 <br>
 <br>
