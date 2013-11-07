@@ -1482,8 +1482,6 @@ static void rt_set_nexthop(struct rtable *rt, struct fib_result *res, u32 itag)
 	if (dst_metric(&rt->u.dst, RTAX_ADVMSS) == 0)
 		rt->u.dst.metrics[RTAX_ADVMSS-1] = max_t(unsigned int, rt->u.dst.dev->mtu - 40,
 				       ip_rt_min_advmss);
-	if (dst_metric(&rt->u.dst, RTAX_ADVMSS) > 65535 - 40)
-		rt->u.dst.metrics[RTAX_ADVMSS-1] = 65535 - 40;
 
 #ifdef CONFIG_NET_CLS_ROUTE
 #ifdef CONFIG_IP_MULTIPLE_TABLES
