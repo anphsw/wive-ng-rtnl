@@ -24,6 +24,8 @@
 13) kernel: netfilter: xt_tcpmss: get mtu only if clamp-mss-to-pmtu is specified.<br>
 14) kernel: netfilter: xt_tcpmss: drop newminmss argument of tcpmss_mangle_packet function.<br>
 15) kernel: ipv6: Use 1280 as min MTU for ipv6 forwarding.<br>
+16) kernel: tcp: don't check mtu probe completion in the loop.<br>
+17) kernel: ipv6: update MSS even if MTU is unchanged.<br>
 <br>
 <br>
 <br>

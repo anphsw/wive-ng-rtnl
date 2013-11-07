@@ -2107,7 +2107,7 @@ static void tcp_mtup_probe_failed(struct sock *sk)
 	icsk->icsk_mtup.probe_size = 0;
 }
 
-static void tcp_mtup_probe_success(struct sock *sk, struct sk_buff *skb)
+static void tcp_mtup_probe_success(struct sock *sk)
 {
 	struct tcp_sock *tp = tcp_sk(sk);
 	struct inet_connection_sock *icsk = inet_csk(sk);
@@ -2492,13 +2492,6 @@ static int tcp_clean_rtx_queue(struct sock *sk, __s32 *seq_rtt_p)
 			tp->retrans_stamp = 0;
 		}
 
-		/* MTU probing checks */
-		if (icsk->icsk_mtup.probe_size) {
-			if (!after(tp->mtu_probe.probe_seq_end, TCP_SKB_CB(skb)->end_seq)) {
-				tcp_mtup_probe_success(sk, skb);
-			}
-		}
-
 		if (sacked) {
 			if (sacked & TCPCB_RETRANS) {
 				if(sacked & TCPCB_SACKED_RETRANS)
@@ -2527,6 +2520,11 @@ static int tcp_clean_rtx_queue(struct sock *sk, __s32 *seq_rtt_p)
 		__skb_unlink(skb, &sk->sk_write_queue);
 		sk_stream_free_skb(sk, skb);
 		clear_all_retrans_hints(tp);
+	}
+
+	if (unlikely(icsk->icsk_mtup.probe_size &&
+		     !after(tp->mtu_probe.probe_seq_end, tp->snd_una))) {
+		tcp_mtup_probe_success(sk);
 	}
 
 	if (acked&FLAG_ACKED) {
