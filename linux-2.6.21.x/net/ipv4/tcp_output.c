@@ -1255,13 +1255,7 @@ static int tcp_mtu_probe(struct sock *sk)
 		return -1;
 	}
 
-	/* Have enough data in the send queue to probe? */
-	len = 0;
-	if ((skb = sk->sk_send_head) == NULL)
-		return -1;
-	while ((len += skb->len) < size_needed && !tcp_skb_is_last(sk, skb))
-		skb = skb->next;
-	if (len < size_needed)
+	if (tp->write_seq - tp->snd_nxt < size_needed)
 		return -1;
 
 	if (tp->snd_wnd < size_needed)
