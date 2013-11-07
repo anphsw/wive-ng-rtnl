@@ -1727,6 +1727,7 @@
 11) kernel: wifi driver 2.7.1.6: fix GreenAP for RT3052/3350 and RT3883/3662.<br>
 13) kernel: netfilter: xt_tcpmss: get mtu only if clamp-mss-to-pmtu is specified.<br>
 14) kernel: netfilter: xt_tcpmss: drop newminmss argument of tcpmss_mangle_packet function.<br>
+15) kernel: ipv6: Use 1280 as min MTU for ipv6 forwarding.<br>
 <br>
 <br>
 <br>
