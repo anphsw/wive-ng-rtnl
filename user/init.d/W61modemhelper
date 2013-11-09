@@ -157,16 +157,29 @@ get_param() {
     eval `nvram_buf_get 2860 MODEMENABLED MODEMTYPE WMODEMPORT MODEMSPEED MODEMUSERNAME \
 	MODEMPASSWORD MODEMDIALNUMBER MODEMMTU APN MODEMATENABLED MODEMAT1 MODEMAT2 MODEMAT3`
 
+    # check base needed parametrs
     if [ "$MODEMTYPE" = "" ] || [ "$MODEMUSERNAME" = "" ] || [ "$MODEMPASSWORD" = "" ]; then
 	$LOG "One or more parametrs is NULL($MODEMTYPE,$MODEMUSERNAME,$MODEMPASSWORD). Need correct this"
+	rm -f /tmp/modem_helper
 	exit 1
     fi
     if [ "$MODEMTYPE" = "1" ] && [ "$MODEMDIALNUMBER" = "" ]; then
 	$LOG "For GSM/3G mode need set correct dial number (example *99#), current $MODEMDIALNUMBER"
+	rm -f /tmp/modem_helper
 	exit 1
     fi
-
-    # corrects parametrs
+    # select device and exist check
+    if [ "$WMODEMPORT" = "AUTO" ]; then
+	MODEMPORT="/dev/modem"
+    else
+	MODEMPORT="/dev/$WMODEMPORT"
+    fi
+    if [ ! -e "$MODEMPORT" ]; then
+	$LOG "Device $MODEMPORT not exist!!! Please read log and check config."
+	rm -f /tmp/modem_helper
+	exit 1
+    fi
+    # correct others params
     if [ "$MODEMSPEED" = "AUTO" ]; then
 	MODEMSPEED=""
     fi
@@ -177,11 +190,6 @@ get_param() {
         MODEMMRU="mru $MODEMMTU"
         MODEMMTU="mtu $MODEMMTU"
     fi
-	if [ "$WMODEMPORT" = "AUTO" ]; then
-		MODEMPORT="/dev/modem"
-	else
-		MODEMPORT="/dev/$WMODEMPORT"
-	fi
     if [ "$MODEMDEBUG" = "1" ]; then
         MODEMDEBUG="debug"
     else
