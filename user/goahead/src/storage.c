@@ -34,11 +34,13 @@
 
 static void storageDiskAdm(webs_t wp, char_t *path, char_t *query);
 static void storageDiskPart(webs_t wp, char_t *path, char_t *query);
-static void storageFtpSrv(webs_t wp, char_t *path, char_t *query);
 static int ShowPartition(int eid, webs_t wp, int argc, char_t **argv);
 static int ShowAllDir(int eid, webs_t wp, int argc, char_t **argv);
 static int getCount(int eid, webs_t wp, int argc, char_t **argv);
 static int getMaxVol(int eid, webs_t wp, int argc, char_t **argv);
+#ifdef CONFIG_FTPD
+static void storageFtpSrv(webs_t wp, char_t *path, char_t *query);
+#endif
 #ifdef CONFIG_USER_TRANSMISSION
 static void transmission(webs_t wp, char_t *path, char_t *query);
 #endif
