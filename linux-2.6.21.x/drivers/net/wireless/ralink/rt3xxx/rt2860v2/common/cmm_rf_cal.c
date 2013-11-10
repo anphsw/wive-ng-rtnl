@@ -706,7 +706,9 @@ UCHAR DPD_Calibration(
 			else
 #endif /* RTMP_INTERNAL_TX_ALC */
 			{
+#ifdef RALINK_ATE
 				if (!ATE_ON(pAd))
+#endif /* RALINK_ATE */
 				{
 					RTMP_IO_READ32(pAd, TX_ALG_CFG_1, &macValue);
 					delta_power = (macValue & 0x3F);
@@ -862,7 +864,9 @@ UCHAR DPD_Calibration(
 			else
 #endif /* RTMP_INTERNAL_TX_ALC */
 			{
+#ifdef RALINK_ATE
 				if (!ATE_ON(pAd))
+#endif /* RALINK_ATE */
 				{
 					/* for single sku */
 					RTMP_IO_READ32(pAd, TX_ALG_CFG_1, &macValue);
