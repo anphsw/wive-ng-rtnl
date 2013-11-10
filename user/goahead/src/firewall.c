@@ -329,7 +329,7 @@ static void makePortForwardRule(char *buf, int len, char *wan_name, char *ip_add
 			pos += rc;
 			len -= rc;
 		}
-		rc = snprintf(pos, len, "\n", ip_address);
+		rc = snprintf(pos, len, "\n");
 		pos += rc;
 		len -= rc;
 
@@ -462,7 +462,7 @@ static void makePortForwardRuleVPN(char *buf, int len, char *wan_name, char *ip_
 			pos += rc;
 			len -= rc;
 		}
-		rc = snprintf(pos, len, "\n", ip_address);
+		rc = snprintf(pos, len, "\n");
 		pos += rc;
 		len -= rc;
 

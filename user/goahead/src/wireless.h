@@ -355,8 +355,16 @@
  * If you don't follow those rules, DaveM is going to hate you (reason :
  * it make mixed 32/64bit operation impossible).
  */
-#define SIOCIWFIRSTPRIV	0x8BE0
-#define SIOCIWLASTPRIV	0x8BFF
+#ifndef SIOCDEVPRIVATE
+#define SIOCDEVPRIVATE				0x8BE0
+#endif
+
+#ifndef SIOCIWLASTPRIV
+#define SIOCIWLASTPRIV				0x8BFF
+#endif
+
+#define SIOCIWFIRSTPRIV				SIOCDEVPRIVATE
+
 /* Previously, we were using SIOCDEVPRIVATE, but we now have our
  * separate range because of collisions with other tools such as
  * 'mii-tool'.

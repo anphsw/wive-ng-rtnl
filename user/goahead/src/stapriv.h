@@ -98,16 +98,19 @@ typedef struct _PAIR_CHANNEL_FREQ_ENTRY
 	unsigned long   lFreq;
 } PAIR_CHANNEL_FREQ_ENTRY, *PPAIR_CHANNEL_FREQ_ENTRY;
 
-typedef union  _HTTRANSMIT_SETTING {
+/* MIMO Tx parameter, ShortGI, MCS, STBC, etc.  these are fields in TXWI. Don't change this definition!!! */
+typedef union _HTTRANSMIT_SETTING {
 	struct {
-		unsigned short  MCS:7;          // MCS
-		unsigned short  BW:1;           //channel bandwidth 20MHz or 40 MHz
-		unsigned short  ShortGI:1;
-		unsigned short  STBC:2;         //SPACE
-		unsigned short  rsv:3;
-		unsigned short  MODE:2;         // 0: CCK, 1:OFDM, 2:Mixedmode, 3:GreenField
+		unsigned short MCS:7;	/* MCS */
+		unsigned short BW:1;	/* channel bandwidth 20MHz or 40 MHz */
+		unsigned short ShortGI:1;
+		unsigned short STBC:2;	/* SPACE */
+		unsigned short eTxBF:1;
+		unsigned short rsv:1;
+		unsigned short iTxBF:1;
+		unsigned short MODE:2;	/* Use definition MODE_xxx. */
 	} field;
-	unsigned short  word;
+	unsigned short word;
 } HTTRANSMIT_SETTING, *PHTTRANSMIT_SETTING;
 
 typedef union _LARGE_INTEGER {

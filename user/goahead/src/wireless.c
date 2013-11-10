@@ -491,11 +491,13 @@ static int getWlanStaInfo(int eid, webs_t wp, int argc, char_t **argv)
 	    websWrite(wp, T("<td>%02u:%02u:%02u</td>"), (pe->ConnectedTime / (unsigned)3600), ((pe->ConnectedTime % (unsigned)3600) / (unsigned)60), (pe->ConnectedTime % (unsigned)60));
 
 	    // AID, Power Save mode, MIMO Power Save
-	    websWrite(wp, T("<td>%d</td><td>%d</td><td>%d</td>"), pe->Aid, pe->Psm, pe->MimoPs);
+	    websWrite(wp, T("<td>%d</td><td>%d</td><td>%d</td>"), pe->Aid, (pe->Psm)? "Yes" : "NO ", pe->MimoPs);
 
 	    // TX Rate
 	    websWrite(wp, T("<td>%d</td><td>%s</td><td>%d</td><td>%d</td>"),
-			pe->TxRate.field.MCS, (pe->TxRate.field.BW == 0)? "20M":"40M", pe->TxRate.field.ShortGI, pe->TxRate.field.STBC);
+			pe->TxRate.field.MCS, (pe->TxRate.field.BW == 0)? "20M":"40M",
+			(pe->TxRate.field.ShortGI)? "Yes" : "NO ",
+			(pe->TxRate.field.STBC)? "Yes" : "NO ");
 
 	    switch (pe->TxRate.field.MODE) {
 		case 0: websWrite(wp, T("<td>%s</td>"), "CCK"); break;
@@ -546,11 +548,13 @@ static int getWlanStaInfo(int eid, webs_t wp, int argc, char_t **argv)
 	    websWrite(wp, T("<td>%02u:%02u:%02u</td>"), (pe->ConnectedTime / (unsigned)3600), ((pe->ConnectedTime % (unsigned)3600) / (unsigned)60), (pe->ConnectedTime % (unsigned)60));
 
 	    // AID, Power Save mode, MIMO Power Save
-	    websWrite(wp, T("<td>%d</td><td>%d</td><td>%d</td>"), pe->Aid, pe->Psm, pe->MimoPs);
+	    websWrite(wp, T("<td>%d</td><td>%d</td><td>%d</td>"), pe->Aid, (pe->Psm)? "Yes" : "NO ", pe->MimoPs);
 
 	    // TX Rate
 	    websWrite(wp, T("<td>%d</td><td>%s</td><td>%d</td><td>%d</td>"),
-			pe->TxRate.field.MCS, (pe->TxRate.field.BW == 0)? "20M":"40M", pe->TxRate.field.ShortGI, pe->TxRate.field.STBC);
+			pe->TxRate.field.MCS, (pe->TxRate.field.BW == 0)? "20M":"40M",
+			(pe->TxRate.field.ShortGI)? "Yes" : "NO ",
+			(pe->TxRate.field.STBC)? "Yes" : "NO ");
 
 	    switch (pe->TxRate.field.MODE) {
 		case 0: websWrite(wp, T("<td>%s</td>"), "CCK"); break;
@@ -1606,7 +1610,7 @@ void clearRadiusSetting(int nvram, int mbssid)
 void Security(int nvram, webs_t wp, char_t *path, char_t *query)
 {
 	char_t *SSID;
-	int mbssid, mbssid_num, i;
+	int mbssid;
 	char_t *security_mode;
 	char *submitUrl;
 
