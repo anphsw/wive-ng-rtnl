@@ -86,7 +86,7 @@ function showHint(key)
 		else if (key=='vpn_lcp')
 			text += 'Enable adaptive LCP echo interval.';
 		else if (key=='vpn_pure_pppoe')
-			text += 'Enable pure WAN+PPPoE mode.';
+			text += 'Enable pure PPPoE mode without DHCP (Rostelecom/R-Telecom and others ISP).';
 		else if (key=='vpn_cpu_limit')
 			text += 'This option prevents full CPU load by ppp kernel thread.';
 		else if (key=='vpn_lcp_errors')
