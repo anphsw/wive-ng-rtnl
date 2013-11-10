@@ -10,10 +10,10 @@
 #include	<arpa/inet.h>
 #include	<asm/types.h>
 #include	<linux/if.h>
-#include	<linux/wireless.h>
 #include	<dirent.h>
 
 #include	"utils.h"
+#include	"wireless.h"
 #include	"oid.h"
 #include	"internet.h"
 #include	"helpers.h"

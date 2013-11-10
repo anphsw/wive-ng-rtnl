@@ -4,7 +4,6 @@
 #include <arpa/inet.h>
 #include <asm/types.h>
 #include <linux/if.h>
-#include <linux/wireless.h>
 #include <ctype.h>
 #include <errno.h>
 

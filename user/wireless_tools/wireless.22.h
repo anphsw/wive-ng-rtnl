@@ -21,16 +21,14 @@
  *
  * Authors :	Jean Tourrilhes - HPL - <jt@hpl.hp.com>
  * Copyright (c) 1997-2007 Jean Tourrilhes, All Rights Reserved.
- *
- * This file, and only this file, is licensed under the terms of the LGPL.
- * You can redistribute it and/or modify it under the terms of the GNU
- * Lesser General Public License as published by the Free Software
- * Foundation; either version 2.1 of the License, or (at your option)
- * any later version.
  */
 
 #ifndef _LINUX_WIRELESS_H
 #define _LINUX_WIRELESS_H
+
+#ifndef IFNAMSIZ
+#define IFNAMSIZ 16
+#endif
 
 /************************** DOCUMENTATION **************************/
 /*
@@ -94,8 +92,8 @@
 /* This header is used in user-space, therefore need to be sanitised
  * for that purpose. Those includes are usually not compatible with glibc.
  * To know which includes to use in user-space, check iwlib.h. */
-#ifdef __KERNEL__
 #include <linux/types.h>		/* for "caddr_t" et al		*/
+#ifdef __KERNEL__
 #include <linux/socket.h>		/* for "struct sockaddr" et al	*/
 #include <linux/if.h>			/* for IFNAMSIZ and co... */
 #endif	/* __KERNEL__ */
@@ -232,21 +230,21 @@
  *	- Add explicit flag to tell stats are in dBm : IW_QUAL_DBM
  *	- Add IW_IOCTL_IDX() and IW_EVENT_IDX() macros
  *
+ * V19 to V20
+ * ----------
+ *	- RtNetlink requests support (SET/GET)
+ *
  * V20 to V21
  * ----------
  *	- Remove (struct net_device *)->get_wireless_stats()
  *	- Change length in ESSID and NICK to strlen() instead of strlen()+1
- *	- Add SIOCSIWMODUL/SIOCGIWMODUL for modulation setting
  *	- Add IW_RETRY_SHORT/IW_RETRY_LONG retry modifiers
- *	- Add IW_POWER_SAVING power type
  *	- Power/Retry relative values no longer * 100000
- *	- Add bitrate flags for unicast/broadcast
  *	- Add explicit flag to tell stats are in 802.11k RCPI : IW_QUAL_RCPI
  *
  * V21 to V22
  * ----------
  *	- Prevent leaking of kernel space in stream on 64 bits.
- *	- Scan capabilities in struct iw_range (Dan Williams)
  */
 
 /**************************** CONSTANTS ****************************/
@@ -357,8 +355,8 @@
  * If you don't follow those rules, DaveM is going to hate you (reason :
  * it make mixed 32/64bit operation impossible).
  */
-#define SIOCIWFIRSTPRIV	0x8BE0
-#define SIOCIWLASTPRIV	0x8BFF
+#define SIOCIWFIRSTPRIV  0x8BE0
+#define SIOCIWLASTPRIV   0x8BFF
 /* Previously, we were using SIOCDEVPRIVATE, but we now have our
  * separate range because of collisions with other tools such as
  * 'mii-tool'.
