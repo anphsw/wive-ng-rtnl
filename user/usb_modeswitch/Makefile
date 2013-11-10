@@ -4,7 +4,6 @@ LIBDIR	    = $(ROOTDIR)/lib/
 INCDIR	    = $(ROOTDIR)/lib/include_shared/libusb-1.0
 LIBUSB      = $(LIBDIR)/libusb
 CFLAGS      += -Os -Wall -I$(INCDIR)
-LDFLAGS	    += -Wl
 LIBS        = -L$(LIBDIR) -lusb-1.0
 OBJS        = usb_modeswitch.c
 PREFIX      = $(DESTDIR)/usr
