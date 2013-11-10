@@ -1580,7 +1580,6 @@ void ndisc_send_redirect(struct sk_buff *skb, struct neighbour *neigh,
 	u8 *opt;
 	int rd_len;
 	int err;
-	int hlen;
 	u8 ha_buf[MAX_ADDR_LEN], *ha = NULL;
 
 	dev = skb->dev;
@@ -1647,8 +1646,6 @@ void ndisc_send_redirect(struct sk_buff *skb, struct neighbour *neigh,
 			   __FUNCTION__);
 		goto release;
 	}
-
-	hlen = 0;
 
 	skb_reserve(buff, LL_RESERVED_SPACE(dev));
 	ip6_nd_hdr(sk, buff, dev, &saddr_buf, &skb->nh.ipv6h->saddr,

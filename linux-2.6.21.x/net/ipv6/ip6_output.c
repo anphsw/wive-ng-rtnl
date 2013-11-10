@@ -255,12 +255,9 @@ int ip6_nd_hdr(struct sock *sk, struct sk_buff *skb, struct net_device *dev,
 {
 	struct ipv6_pinfo *np = inet6_sk(sk);
 	struct ipv6hdr *hdr;
-	int totlen;
 
 	skb->protocol = htons(ETH_P_IPV6);
 	skb->dev = dev;
-
-	totlen = len + sizeof(struct ipv6hdr);
 
 	hdr = (struct ipv6hdr *) skb_put(skb, sizeof(struct ipv6hdr));
 	skb->nh.ipv6h = hdr;
@@ -568,7 +565,6 @@ EXPORT_SYMBOL_GPL(ip6_find_1stfragopt);
 
 static int ip6_fragment(struct sk_buff *skb, int (*output)(struct sk_buff *))
 {
-	struct net_device *dev;
 	struct sk_buff *frag;
 	struct rt6_info *rt = (struct rt6_info*)skb->dst;
 	struct ipv6_pinfo *np = skb->sk ? inet6_sk(skb->sk) : NULL;
@@ -579,7 +575,6 @@ static int ip6_fragment(struct sk_buff *skb, int (*output)(struct sk_buff *))
 	int ptr, offset = 0, err=0;
 	u8 *prevhdr, nexthdr = 0;
 
-	dev = rt->u.dst.dev;
 	hlen = ip6_find_1stfragopt(skb, &prevhdr);
 	nexthdr = *prevhdr;
 

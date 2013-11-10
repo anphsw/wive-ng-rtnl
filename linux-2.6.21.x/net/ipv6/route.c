@@ -1013,10 +1013,9 @@ out:
 
 int ndisc_dst_gc(int *more)
 {
-	struct dst_entry *dst, *next, **pprev;
+	struct dst_entry *dst, **pprev;
 	int freed;
 
-	next = NULL;
 	freed = 0;
 
 	spin_lock_bh(&ndisc_lock);

@@ -614,11 +614,8 @@ static void ipv6_del_addr(struct inet6_ifaddr *ifp)
 {
 	struct inet6_ifaddr *ifa, **ifap;
 	struct inet6_dev *idev = ifp->idev;
-	int hash;
 	int deleted = 0, onlink = 0;
 	unsigned long expires = jiffies;
-
-	hash = ipv6_addr_hash(&ifp->addr);
 
 	ifp->dead = 1;
 

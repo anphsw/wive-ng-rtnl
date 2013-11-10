@@ -552,7 +552,7 @@ static int pptp_bind(struct socket *sock,struct sockaddr *uservaddr,int sockaddr
 	struct pptp_opt *opt=&po->proto.pptp;
 	int error=0;
 
-#ifdef DEBUG	
+#ifdef DEBUG
 	if (log_level>=1)
 		printk(KERN_INFO"PPTP: bind: addr=%X call_id=%i\n",sp->sa_addr.pptp.sin_addr.s_addr,
 						sp->sa_addr.pptp.call_id);
@@ -680,7 +680,9 @@ static int pptp_release(struct socket *sock)
 {
 	struct sock *sk = sock->sk;
 	struct pppox_sock *po;
+#ifdef DEBUG
 	struct pptp_opt *opt;
+#endif
 	int error = 0;
 
 	if (!sk)
@@ -693,9 +695,11 @@ static int pptp_release(struct socket *sock)
 	    release_sock(sk);
 	    return -EBADF;
 	}
-		
+
 	po = pppox_sk(sk);
+#ifdef DEBUG
 	opt=&po->proto.pptp;
+#endif
 	del_chan(po);
 
 	pppox_unbind_sock(sk);

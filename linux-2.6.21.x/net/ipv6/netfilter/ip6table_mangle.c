@@ -154,7 +154,8 @@ ip6t_local_hook(unsigned int hook,
 		&& (memcmp(&(*pskb)->nh.ipv6h->saddr, &saddr, sizeof(saddr))
 		    || memcmp(&(*pskb)->nh.ipv6h->daddr, &daddr, sizeof(daddr))
 		    || (*pskb)->mark != mark
-		    || (*pskb)->nh.ipv6h->hop_limit != hop_limit))
+		    || (*pskb)->nh.ipv6h->hop_limit != hop_limit
+		    || flowlabel != *((u_int32_t *)(*pskb)->nh.ipv6h)))
 		return ip6_route_me_harder(*pskb) == 0 ? ret : NF_DROP;
 
 	return ret;

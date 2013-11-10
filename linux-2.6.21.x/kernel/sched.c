@@ -6769,7 +6769,9 @@ static void init_cfs_rq(struct cfs_rq *cfs_rq, struct rq *rq)
 
 void __init sched_init(void)
 {
+#ifdef CONFIG_SMP
 	int highest_cpu = 0;
+#endif
 	int i, j;
 
 	for_each_possible_cpu(i) {
@@ -6825,7 +6827,9 @@ void __init sched_init(void)
 			INIT_LIST_HEAD(array->queue + j);
 			__clear_bit(j, array->bitmap);
 		}
+#ifdef CONFIG_SMP
 		highest_cpu = i;
+#endif
 		/* delimiter for bitsearch: */
 		__set_bit(MAX_RT_PRIO, array->bitmap);
 	}

@@ -223,11 +223,9 @@ void ra2880EnableInterrupt()
 
 void ra2880MacAddressSet(unsigned char p[6])
 {
-        unsigned long regValue=0,ok=0;
+        unsigned long regValue=0;
 
 	regValue = (p[0] << 8) | (p[1]);
-	if (!regValue)
-	    ok=1;
 #if defined (CONFIG_RALINK_RT5350)
 	sysRegWrite(SDM_MAC_ADRH, regValue);
 	printk("GMAC1_MAC_ADRH -- : 0x%08x\n", sysRegRead(SDM_MAC_ADRH));
@@ -247,8 +245,6 @@ void ra2880MacAddressSet(unsigned char p[6])
 #endif
 
         regValue = (p[2] << 24) | (p[3] <<16) | (p[4] << 8) | p[5];
-	if (!regValue)
-	    ok=1;
 #if defined (CONFIG_RALINK_RT5350)
         sysRegWrite(SDM_MAC_ADRL, regValue);
 	printk("GMAC1_MAC_ADRL -- : 0x%08x\n", sysRegRead(SDM_MAC_ADRL));
