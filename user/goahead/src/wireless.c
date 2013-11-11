@@ -961,20 +961,22 @@ static void wirelessBasic(webs_t wp, char_t *path, char_t *query)
 	else
 		nvram_bufset(RT2860_NVRAM, "FixedTxMode", "HT");
 
-	//HT_OpMode, HT_BW, HT_GI, HT_MCS, HT_RDG, HT_EXTCHA, HT_AMSDU, HT_TxStream, HT_RxStream
+	//HT_OpMode, HT_BW, HT_GI, HT_MCS, HT_HTC, HT_RDG, HT_EXTCHA, HT_AMSDU, HT_TxStream, HT_RxStream
 	if (is_n)
 	{
 		nvram_bufset(RT2860_NVRAM, "HT_OpMode", n_mode);
 		nvram_bufset(RT2860_NVRAM, "HT_BW", n_bandwidth);
 		nvram_bufset(RT2860_NVRAM, "HT_GI", n_gi);
 		nvram_bufset(RT2860_NVRAM, "HT_MCS", n_mcs);
-		nvram_bufset(RT2860_NVRAM, "HT_RDG", n_rdg);
 		nvram_bufset(RT2860_NVRAM, "HT_EXTCHA", n_extcha);
 		nvram_bufset(RT2860_NVRAM, "HT_AMSDU", n_amsdu);
 		nvram_bufset(RT2860_NVRAM, "HT_AutoBA", n_autoba);
 		nvram_bufset(RT2860_NVRAM, "HT_BADecline", n_badecline);
 		nvram_bufset(RT2860_NVRAM, "HT_TxStream", tx_stream);
 		nvram_bufset(RT2860_NVRAM, "HT_RxStream", rx_stream);
+		/* HT_RGD depend at HT_HTC+ frame support */
+		nvram_bufset(RT2860_NVRAM, "HT_HTC", n_rdg);
+		nvram_bufset(RT2860_NVRAM, "HT_RDG", n_rdg);
 	}
 
 	nvram_bufset(RT2860_NVRAM, "RadioOff", (web_radio_on) ? "0" : "1");
