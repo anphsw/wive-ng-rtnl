@@ -13,6 +13,7 @@ all : configures include/localcharset.h.build.in
 	mkdir -p autoconf
 
 autoconf/aclocal.m4 : $(wildcard m4/*.m4)
+	mkdir -p autoconf
 	$(ACLOCAL) -I m4 --output=$@
 
 configures : configure config.h.in
