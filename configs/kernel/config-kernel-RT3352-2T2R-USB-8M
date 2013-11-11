@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # Linux kernel version: 2.6.21.40
-# Tue Oct 29 13:03:04 2013
+# Mon Nov 11 07:48:32 2013
 #
 CONFIG_MIPS=y
 
@@ -635,7 +635,6 @@ CONFIG_MTD_BLOCK2MTD=y
 # RALINK Flash Type support.
 #
 CONFIG_MTD_RALINK=y
-CONFIG_MTD_NOR_RALINK=y
 CONFIG_MTD_SPI_RALINK=y
 # CONFIG_RT2880_FLASH_4M is not set
 CONFIG_RT2880_FLASH_8M=y

@@ -49,7 +49,7 @@ endchoice
 
 choice
         prompt "RF Type"
-        depends on  RALINK_RT3352 
+        depends on  RALINK_RT3352
 
         config  RALINK_RT3352_2T2R
         bool "2T2R"

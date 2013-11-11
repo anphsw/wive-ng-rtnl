@@ -8,7 +8,7 @@ config MTD_RALINK
 config MTD_NOR_RALINK
        bool "Ralink NOR support."
        default y
-       depends on MTD_RALINK && !RALINK_RT5350
+       depends on MTD_RALINK && !RALINK_RT3352 && !RALINK_RT5350
 
 config MTD_SPI_RALINK
        bool "Ralink SPI support."
