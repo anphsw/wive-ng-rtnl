@@ -2228,8 +2228,10 @@ INT	Show_Adhoc_MacTable_Proc(
 			sprintf(extra + strlen(extra), "%-6d", pEntry->HTPhyMode.field.MCS);
 			sprintf(extra + strlen(extra), "%-6d", pEntry->HTPhyMode.field.ShortGI);
 			sprintf(extra + strlen(extra), "%-6d", pEntry->HTPhyMode.field.STBC);
+#ifdef DBG
 			sprintf(extra + strlen(extra), "%-10d, %d, %d%%\n", pEntry->DebugFIFOCount, pEntry->DebugTxCount, 
 						(pEntry->DebugTxCount) ? ((pEntry->DebugTxCount-pEntry->DebugFIFOCount)*100/pEntry->DebugTxCount) : 0);
+#endif
 			sprintf(extra + strlen(extra), "\n");
 		}
 	} 

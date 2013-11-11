@@ -770,8 +770,10 @@ INT	Show_Repeater_Cli_Proc(
 			printk("%-6d", pEntry->HTPhyMode.field.STBC);
 			printk("%-7d", (int)(pEntry->StaIdleTimeout - pEntry->NoDataIdleCount));
 			printk("%-7d", (int)DataRate);
+#ifdef DBG
 			printk("%-10d, %d, %d%%\n", pEntry->DebugFIFOCount, pEntry->DebugTxCount, 
 						(pEntry->DebugTxCount) ? ((pEntry->DebugTxCount-pEntry->DebugFIFOCount)*100/pEntry->DebugTxCount) : 0);
+#endif
 			printk("\n");
 		}
 	} 
