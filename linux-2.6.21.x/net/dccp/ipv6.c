@@ -36,8 +36,8 @@
 /* Socket used for sending RSTs and ACKs */
 static struct socket *dccp_v6_ctl_socket;
 
-static struct inet_connection_sock_af_ops dccp_ipv6_mapped;
-static struct inet_connection_sock_af_ops dccp_ipv6_af_ops;
+static const struct inet_connection_sock_af_ops dccp_ipv6_mapped;
+static const struct inet_connection_sock_af_ops dccp_ipv6_af_ops;
 
 static void dccp_v6_hash(struct sock *sk)
 {
@@ -1074,7 +1074,7 @@ failure:
 	return err;
 }
 
-static struct inet_connection_sock_af_ops dccp_ipv6_af_ops = {
+static const struct inet_connection_sock_af_ops dccp_ipv6_af_ops = {
 	.queue_xmit	   = inet6_csk_xmit,
 	.send_check	   = dccp_v6_send_check,
 	.rebuild_header	   = inet6_sk_rebuild_header,
@@ -1095,7 +1095,7 @@ static struct inet_connection_sock_af_ops dccp_ipv6_af_ops = {
 /*
  *	DCCP over IPv4 via INET6 API
  */
-static struct inet_connection_sock_af_ops dccp_ipv6_mapped = {
+static const struct inet_connection_sock_af_ops dccp_ipv6_mapped = {
 	.queue_xmit	   = ip_queue_xmit,
 	.send_check	   = dccp_v4_send_check,
 	.rebuild_header	   = inet_sk_rebuild_header,
