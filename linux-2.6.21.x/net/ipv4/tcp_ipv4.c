@@ -484,29 +484,35 @@ out:
 	sock_put(sk);
 }
 
-/* This routine computes an IPv4 TCP checksum. */
-void tcp_v4_send_check(struct sock *sk, int len, struct sk_buff *skb)
+static void __tcp_v4_send_check(struct sk_buff *skb,
+				__be32 saddr, __be32 daddr)
 {
-	struct inet_sock *inet = inet_sk(sk);
 	struct tcphdr *th = skb->h.th;
 
 	if (skb->ip_summed == CHECKSUM_PARTIAL) {
-		th->check = ~tcp_v4_check(len, inet->saddr,
-					  inet->daddr, 0);
+		th->check = ~tcp_v4_check(skb->len, saddr, daddr, 0);
 		skb->csum_start = skb_transport_header(skb) - skb->head;
 		skb->csum_offset = offsetof(struct tcphdr, check);
 	} else {
 #ifdef CONFIG_W7_LOGO
 		/* it's seem that the skb->csum is wrong */
 		__wsum tmp = csum_partial(th, len, 0);
-		th->check = tcp_v4_check(len, inet->saddr, inet->daddr, tmp);
+		th->check = tcp_v4_check(skb->len, saddr, daddr, tmp);
 #else
-		th->check = tcp_v4_check(len, inet->saddr, inet->daddr,
+		th->check = tcp_v4_check(skb->len, saddr, daddr,
 					 csum_partial((char *)th,
 						      th->doff << 2,
 						      skb->csum));
 #endif
 	}
+}
+
+/* This routine computes an IPv4 TCP checksum. */
+void tcp_v4_send_check(struct sock *sk, int len, struct sk_buff *skb)
+{
+	struct inet_sock *inet = inet_sk(sk);
+
+	__tcp_v4_send_check(skb, inet->saddr, inet->daddr);
 }
 
 int tcp_v4_gso_send_check(struct sk_buff *skb)
@@ -521,10 +527,8 @@ int tcp_v4_gso_send_check(struct sk_buff *skb)
 	th = skb->h.th;
 
 	th->check = 0;
-	th->check = ~tcp_v4_check(skb->len, iph->saddr, iph->daddr, 0);
-	skb->csum_start = skb_transport_header(skb) - skb->head;
-	skb->csum_offset = offsetof(struct tcphdr, check);
 	skb->ip_summed = CHECKSUM_PARTIAL;
+	__tcp_v4_send_check(skb, iph->saddr, iph->daddr);
 	return 0;
 }
 
