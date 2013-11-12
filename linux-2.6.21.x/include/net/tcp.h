@@ -389,7 +389,7 @@ extern void			tcp_parse_options(struct sk_buff *skb,
  *	TCP v4 functions exported for the inet6 API
  */
 
-extern void		       	tcp_v4_send_check(struct sock *sk, int len,
+extern void		       	tcp_v4_send_check(struct sock *sk,
 						  struct sk_buff *skb);
 
 extern int			tcp_v4_conn_request(struct sock *sk,

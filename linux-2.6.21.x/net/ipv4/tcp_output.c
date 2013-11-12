@@ -532,7 +532,7 @@ static int tcp_transmit_skb(struct sock *sk, struct sk_buff *skb, int clone_it, 
 	}
 #endif
 
-	icsk->icsk_af_ops->send_check(sk, skb->len, skb);
+	icsk->icsk_af_ops->send_check(sk, skb);
 
 	if (likely(tcb->flags & TCPHDR_ACK))
 		tcp_event_ack_sent(sk, tcp_skb_pcount(skb));

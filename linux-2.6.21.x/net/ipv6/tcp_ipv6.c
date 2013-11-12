@@ -933,7 +933,7 @@ static struct timewait_sock_ops tcp6_timewait_sock_ops = {
 	.twsk_destructor= tcp_twsk_destructor,
 };
 
-static void tcp_v6_send_check(struct sock *sk, int len, struct sk_buff *skb)
+static void tcp_v6_send_check(struct sock *sk, struct sk_buff *skb)
 {
 	struct ipv6_pinfo *np = inet6_sk(sk);
 	struct tcphdr *th = skb->h.th;
