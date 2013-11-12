@@ -491,7 +491,7 @@ static void __tcp_v4_send_check(struct sk_buff *skb,
 	} else {
 #ifdef CONFIG_W7_LOGO
 		/* it's seem that the skb->csum is wrong */
-		__wsum tmp = csum_partial(th, len, 0);
+		__wsum tmp = csum_partial(th, skb->len, 0);
 		th->check = tcp_v4_check(skb->len, saddr, daddr, tmp);
 #else
 		th->check = tcp_v4_check(skb->len, saddr, daddr,
