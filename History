@@ -32,7 +32,7 @@
 20) kernel: ipv4 igmp: use in_dev_put in timer handlers instead of __in_dev_put.<br>
 21) kernel: ipv4: cap ADVMSS metric in the FIB rather than the routing cache.<br>
 22) kernel: inet: fix inet_bind_bucket_for_each.<br>
-23) kernel: tcp: Handle CHECKSUM_PARTIAL for SYNACK packets for IPv4.<br>
+23) kernel: tcp: Handle CHECKSUM_PARTIAL for SYNACK packets.<br>
 <br>
 <br>
 <br>
