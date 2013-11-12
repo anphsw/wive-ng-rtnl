@@ -418,6 +418,7 @@ static int ipgre_rcv(struct sk_buff *skb)
 	u32    seqno = 0;
 	struct ip_tunnel *tunnel;
 	int    offset = 4;
+	unsigned int len;
 
 	if (!pskb_may_pull(skb, 16))
 		goto drop_nolock;
@@ -502,8 +503,11 @@ static int ipgre_rcv(struct sk_buff *skb)
 			}
 			tunnel->i_seqno = seqno + 1;
 		}
+
+		len = skb->len;
+
 		tunnel->stat.rx_packets++;
-		tunnel->stat.rx_bytes += skb->len;
+		tunnel->stat.rx_bytes += len;
 		skb->dev = tunnel->dev;
 		dst_release(skb->dst);
 		skb->dst = NULL;
@@ -678,7 +682,7 @@ static int ipgre_tunnel_xmit(struct sk_buff *skb, struct net_device *dev)
 		old_iph = skb->nh.iph;
 	}
 
-	skb->h.raw = skb->nh.raw;
+	skb_reset_transport_header(skb);
 	skb_push(skb, gre_hlen);
 	skb_reset_network_header(skb);
 	memset(&(IPCB(skb)->opt), 0, sizeof(IPCB(skb)->opt));
