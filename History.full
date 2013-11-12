@@ -1732,8 +1732,11 @@
 16) kernel: ipv6: update MSS even if MTU is unchanged.<br>
 17) kernel: ipv6: restore IPv6 when MTU is big enough.<br>
 18) kernel: ipv6: don't update ADVMSS on routes where the MTU is not also updated.<br>
-19) kernel: ipv4 igmp: use in_dev_put in timer handlers instead of __in_dev_put.<br>
-20) kernel: ipv4: cap ADVMSS metric in the FIB rather than the routing cache.<br>
+19) kernel: ipv6: ip6_fragment() should check CHECKSUM_PARTIAL.<br>
+20) kernel: ipv4 igmp: use in_dev_put in timer handlers instead of __in_dev_put.<br>
+21) kernel: ipv4: cap ADVMSS metric in the FIB rather than the routing cache.<br>
+22) kernel: inet: fix inet_bind_bucket_for_each.<br>
+23) kernel: tcp: Handle CHECKSUM_PARTIAL for SYNACK packets.<br>
 <br>
 <br>
 <br>
