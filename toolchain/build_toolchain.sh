@@ -46,14 +46,26 @@ export REALLIBINC=${PREFIX}/../lib/include
 export PATH="${PATH}":${PREFIX}/bin:${PREFIX}/lib:${KERNEL_HEADERS}:${REALLIBINC}:${REALKRNINC}
 export CC=gcc
 
-#install need lib`s
+#install need lib`s and headers
 if [ -f /etc/mandriva-release ] && [ "$INSTALL_DEP" = "YES" ]; then
-    urpmi --auto -a glibc-
-    urpmi --auto  -a libgmpxx-devel --download-all --allow-force
-    urpmi --auto  -a libmpc- --download-all --allow-force
-    urpmi --auto  -a mpfr- --download-all --allow-force
-    urpmi --auto  -a gcc-gfortran --download-all --allow-force
-    urpmi --auto  -a texinfo- --download-all --allow-force
+    ISOPENMANDRIVA=`grep "OpenMandriva" -i -c < release"`
+    ISROSA=`grep "ROSA" -i -c < release"`
+    if [ "$ISOPENMANDRIVA" ] || [ "$ISROSA" ]; then
+	urpmi --auto  -ay glibc
+	urpmi --auto  -ay libgmpxx-devel --download-all --allow-force
+	urpmi --auto  -ay libmpc --download-all --allow-force
+	urpmi --auto  -ay mpfr --download-all --allow-force
+	urpmi --auto  -ay gcc-gfortran --download-all --allow-force
+	urpmi --auto  -ay texinfo --download-all --allow-force
+
+    else
+	urpmi --auto -a glibc-
+	urpmi --auto  -a libgmpxx-devel --download-all --allow-force
+	urpmi --auto  -a libmpc- --download-all --allow-force
+	urpmi --auto  -a mpfr- --download-all --allow-force
+	urpmi --auto  -a gcc-gfortran --download-all --allow-force
+	urpmi --auto  -a texinfo- --download-all --allow-force
+    fi
 fi
 
 mkdir -p $WDIR
