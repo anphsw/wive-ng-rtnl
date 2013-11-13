@@ -50,7 +50,7 @@ export CC=gcc
 if [ -f /etc/mandriva-release ] && [ "$INSTALL_DEP" = "YES" ]; then
     ISOPENMANDRIVA=`grep "OpenMandriva" -i -c < release"`
     ISROSA=`grep "ROSA" -i -c < release"`
-    if [ "$ISOPENMANDRIVA" ] || [ "$ISROSA" ]; then
+    if [ "$ISOPENMANDRIVA" = "1" ] || [ "$ISROSA" = "1" ]; then
 	urpmi --auto  -ay glibc
 	urpmi --auto  -ay libgmpxx-devel --download-all --allow-force
 	urpmi --auto  -ay libmpc --download-all --allow-force
