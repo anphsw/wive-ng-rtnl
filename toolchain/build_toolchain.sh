@@ -1,6 +1,6 @@
 #!/bin/sh
 
-DIR=`pwd`
+ROOTDIR=`pwd`
 
 KERNELHDRS=kernel-headers
 BINUTILVER=binutils-2.21
@@ -34,13 +34,13 @@ export LC_NUMERIC=
 export LC_CTYPE=
 export LC_TIME=
 
-export WDIR=$DIR/tmp
+export WROOTDIR=$ROOTDIR/tmp
 export TARGET=mipsel-linux-uclibc
-export PREFIX=$DIR
-export ROOTDIR=$DIR
+export PREFIX=$ROOTDIR
+export ROOTROOTDIR=$ROOTDIR
 
-export TARGET_DIR=$WDIR/$TARGET-toolchain
-export KERNEL_HEADERS=$TARGET_DIR/include
+export TARGET_ROOTDIR=$WROOTDIR/$TARGET-toolchain
+export KERNEL_HEADERS=$TARGET_ROOTDIR/include
 export REALKRNINC=${PREFIX}/../linux-2.6.21.x/include
 export REALLIBINC=${PREFIX}/../lib/include
 export PATH="${PATH}":${PREFIX}/bin:${PREFIX}/lib:${KERNEL_HEADERS}:${REALLIBINC}:${REALKRNINC}
@@ -77,9 +77,9 @@ if [ -f /etc/mandriva-release ] && [ "$INSTALL_DEP" = "YES" ]; then
     fi
 fi
 
-mkdir -p $WDIR
+mkdir -p $WROOTDIR
 
-cd $WDIR
+cd $WROOTDIR
 mkdir -p ${TARGET}-toolchain  && cd ${TARGET}-toolchain
 
 ##################################TUNE FOR CURRENT VERSION GCC BUILD####################################
@@ -103,6 +103,13 @@ fi
 if [ "$UNPACK" = "YES" ]; then
     echo "=================REMOVE-OLD-BUILD-TREE=================="
     rm -rf build-*
+    rm -rf $ROOTDIR/bin
+    rm -rf $ROOTDIR/lib
+    rm -rf $ROOTDIR/usr
+    rm -rf $ROOTDIR/share
+    rm -rf $ROOTDIR/libexec
+    rm -rf $ROOTDIR/include
+    rm -rf $ROOTDIR/mipsel-linux-uclibc
 fi
 
 if [ "$UNPACK" = "YES" ]; then
@@ -118,10 +125,10 @@ fi
 
 if [ "$HEADERS" = "YES" ]; then
     echo "=====================INSTALL-C-HEADERS===================="
-    mkdir -p $DIR/usr
-    rm -rf $DIR/usr/include
-    cp -rf $KERNEL_HEADERS $DIR/usr
-    ln -sf $DIR/usr/include $DIR/include
+    mkdir -p $ROOTDIR/usr
+    rm -rf $ROOTDIR/usr/include
+    cp -rf $KERNEL_HEADERS $ROOTDIR/usr
+    ln -sf $ROOTDIR/usr/include $ROOTDIR/include
 fi
 
 if [ "$BINUTILS" = "YES" ]; then
