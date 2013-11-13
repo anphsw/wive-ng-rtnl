@@ -48,8 +48,8 @@ export CC=gcc
 
 #install need lib`s and headers
 if [ -f /etc/mandriva-release ] && [ "$INSTALL_DEP" = "YES" ]; then
-    ISOPENMANDRIVA=`grep "OpenMandriva" -i -c < release"`
-    ISROSA=`grep "ROSA" -i -c < release"`
+    ISOPENMANDRIVA=`grep "OpenMandriva" -i -c < /etc/release"`
+    ISROSA=`grep "ROSA" -i -c < /etc/release"`
     if [ "$ISOPENMANDRIVA" = "1" ] || [ "$ISROSA" = "1" ]; then
 	urpmi --auto -ay glibc
 	urpmi --auto -ay libgmpxx-devel --download-all --allow-force
