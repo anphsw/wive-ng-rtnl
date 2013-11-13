@@ -651,7 +651,7 @@ VOID APMlmeSetTxRate(
 		pEntry->HTPhyMode.field.STBC = STBC_NONE;
 
 	if (((pTxRate->ShortGI) && (pEntry->MaxHTPhyMode.field.ShortGI))
-         || (pAd->WIFItestbed.bShortGI && pEntry->MaxHTPhyMode.field.ShortGI) )
+         || (pAd->WIFItestbed.bShortGI && pEntry->MaxHTPhyMode.field.ShortGI))
 		pEntry->HTPhyMode.field.ShortGI = GI_400;
 	else
 		pEntry->HTPhyMode.field.ShortGI = GI_800;
@@ -732,11 +732,12 @@ VOID APMlmeSetTxRate(
 
 	/* Reexam each bandwidth's SGI support. */
 	if ((pEntry->HTPhyMode.field.BW==BW_20 && !CLIENT_STATUS_TEST_FLAG(pEntry, fCLIENT_STATUS_SGI20_CAPABLE)) ||
-		(pEntry->HTPhyMode.field.BW==BW_40 && !CLIENT_STATUS_TEST_FLAG(pEntry, fCLIENT_STATUS_SGI40_CAPABLE)) )
+		(pEntry->HTPhyMode.field.BW==BW_40 && !CLIENT_STATUS_TEST_FLAG(pEntry, fCLIENT_STATUS_SGI40_CAPABLE)))
 		pEntry->HTPhyMode.field.ShortGI = GI_800;
 
 #ifdef DBG_CTRL_SUPPORT
-	else
+	else if ((pEntry->HTPhyMode.field.BW==BW_20 && CLIENT_STATUS_TEST_FLAG(pEntry, fCLIENT_STATUS_SGI20_CAPABLE)) ||
+		(pEntry->HTPhyMode.field.BW==BW_40 && CLIENT_STATUS_TEST_FLAG(pEntry, fCLIENT_STATUS_SGI40_CAPABLE)))
 		pEntry->HTPhyMode.field.ShortGI = GI_400;
 #else
 	/* Debug option: Force Short GI */
