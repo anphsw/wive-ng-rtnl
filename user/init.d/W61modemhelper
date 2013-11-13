@@ -163,7 +163,7 @@ get_param() {
 	rm -f /tmp/modem_helper
 	exit 1
     fi
-    if [ "$MODEMTYPE" = "1" ] && [ "$MODEMDIALNUMBER" = "" ]; then
+    if [ "$MODEMTYPE" = "0" ] && [ "$MODEMDIALNUMBER" = "" ]; then
 	$LOG "For GSM/3G mode need set correct dial number (example *99#), current $MODEMDIALNUMBER. Exit."
 	rm -f /tmp/modem_helper
 	exit 1
