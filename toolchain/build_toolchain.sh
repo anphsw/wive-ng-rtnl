@@ -51,10 +51,10 @@ if [ -f /etc/mandriva-release ] && [ "$INSTALL_DEP" = "YES" ]; then
     ISOPENMANDRIVA=`grep OpenMandriva -i -c < /etc/release`
     ISROSA=`grep ROSA -i -c < /etc/release`
     if [ "$ISOPENMANDRIVA" = "1" ] || [ "$ISROSA" = "1" ]; then
-	urpmi --auto -a flex
-	urpmi --auto -ay glibc
-	urpmi --auto -ay bison
-	urpmi --auto -ay libtool
+	urpmi --auto -a flex --download-all --allow-force
+	urpmi --auto -ay glibc --download-all --allow-force
+	urpmi --auto -ay bison --download-all --allow-force
+	urpmi --auto -ay libtool --download-all --allow-force
 	urpmi --auto -ay libgmpxx-devel --download-all --allow-force
 	urpmi --auto -ay libmpc --download-all --allow-force
 	urpmi --auto -ay mpfr --download-all --allow-force
@@ -62,10 +62,10 @@ if [ -f /etc/mandriva-release ] && [ "$INSTALL_DEP" = "YES" ]; then
 	urpmi --auto -ay texinfo --download-all --allow-force
 
     else
-	urpmi --auto -a flex
-	urpmi --auto -a glibc-
-	urpmi --auto -a bison-
-	urpmi --auto -a libtool-
+	urpmi --auto -a flex --download-all --allow-force
+	urpmi --auto -a glibc- --download-all --allow-force
+	urpmi --auto -a bison- --download-all --allow-force
+	urpmi --auto -a libtool- --download-all --allow-force
 	urpmi --auto -a libgmpxx-devel --download-all --allow-force
 	urpmi --auto -a libmpc- --download-all --allow-force
 	urpmi --auto -a mpfr- --download-all --allow-force
