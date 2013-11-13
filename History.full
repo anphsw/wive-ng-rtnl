@@ -1737,6 +1737,7 @@
 21) kernel: ipv4: cap ADVMSS metric in the FIB rather than the routing cache.<br>
 22) kernel: inet: fix inet_bind_bucket_for_each.<br>
 23) kernel: tcp: Handle CHECKSUM_PARTIAL for SYNACK packets.<br>
+24) kernel: wifi_drivers: enable enchanged statistic for all devices.<br>
 <br>
 <br>
 <br>
