@@ -734,8 +734,10 @@ VOID APMlmeSetTxRate(
 	if ((pEntry->HTPhyMode.field.BW==BW_20 && !CLIENT_STATUS_TEST_FLAG(pEntry, fCLIENT_STATUS_SGI20_CAPABLE)) ||
 		(pEntry->HTPhyMode.field.BW==BW_40 && !CLIENT_STATUS_TEST_FLAG(pEntry, fCLIENT_STATUS_SGI40_CAPABLE)) )
 		pEntry->HTPhyMode.field.ShortGI = GI_800;
-
-#ifdef DBG_CTRL_SUPPORT
+#ifndef DBG_CTRL_SUPPORT
+	else
+		pEntry->HTPhyMode.field.ShortGI = GI_400;
+#else
 	/* Debug option: Force Short GI */
 	if (pAd->CommonCfg.DebugFlags & DBF_FORCE_SGI)
 		pEntry->HTPhyMode.field.ShortGI = GI_400;
@@ -880,8 +882,10 @@ VOID MlmeSetTxRate(
     	if ((pEntry->HTPhyMode.field.BW==BW_20 && !CLIENT_STATUS_TEST_FLAG(pEntry, fCLIENT_STATUS_SGI20_CAPABLE)) ||
     		(pEntry->HTPhyMode.field.BW==BW_40 && !CLIENT_STATUS_TEST_FLAG(pEntry, fCLIENT_STATUS_SGI40_CAPABLE)) )
     		pAd->StaCfg.HTPhyMode.field.ShortGI = GI_800;
-
-#ifdef DBG_CTRL_SUPPORT
+#ifndef DBG_CTRL_SUPPORT
+	else
+    		pAd->StaCfg.HTPhyMode.field.ShortGI = GI_400;
+#else
 		/*  Debug option: Force Short GI */
 		if (pAd->CommonCfg.DebugFlags & DBF_FORCE_SGI)
 			pAd->StaCfg.HTPhyMode.field.ShortGI = GI_400;

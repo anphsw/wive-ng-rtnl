@@ -42,7 +42,6 @@ rt2860v2_sta-objs += ../rt2860v2/common/cmm_wpa_adhoc.o
 
 rt2860v2_sta-objs += ../rt2860v2/rate_ctrl/ra_ctrl.o
 rt2860v2_sta-objs += ../rt2860v2/rate_ctrl/alg_legacy.o
-rt2860v2_sta-objs += ../rt2860v2/rate_ctrl/alg_grp.o
 
 rt2860v2_sta-objs += ../rt2860v2/sta/assoc.o
 rt2860v2_sta-objs += ../rt2860v2/sta/auth.o
@@ -75,6 +74,7 @@ rt2860v2_sta-objs += ../rt2860v2/common/rt_rf.o
 
 ifeq ($(CONFIG_RALINK_RT3883),y)
 rt2860v2_sta-objs += ../rt2860v2/chips/rt3883.o
+rt2860v2_sta-objs += ../rt2860v2/rate_ctrl/alg_grp.o
 ifeq ($(CONFIG_RT2860V2_STA_TXBF),y)
 rt2860v2_sta-objs += ../rt2860v2/common/cmm_txbf.o
 rt2860v2_sta-objs += ../rt2860v2/common/cmm_txbf_cal.o

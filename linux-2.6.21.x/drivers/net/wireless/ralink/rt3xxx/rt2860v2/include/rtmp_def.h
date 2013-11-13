@@ -1348,7 +1348,6 @@
 #ifdef DOT11_N_SUPPORT
 /* SHORTGI */
 #define GI_400		GAP_INTERVAL_400	/* only support in HT mode */
-#define GI_BOTH		GAP_INTERVAL_BOTH
 #endif /* DOT11_N_SUPPORT */
 #define GI_800		GAP_INTERVAL_800
 /* STBC */

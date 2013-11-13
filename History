@@ -34,6 +34,7 @@
 22) kernel: inet: fix inet_bind_bucket_for_each.<br>
 23) kernel: tcp: Handle CHECKSUM_PARTIAL for SYNACK packets.<br>
 24) kernel: wifi_drivers: enable enchanged statistic for all devices.<br>
+25) kernel: wifi_drivers: fix SGI/LGI show in statistics.<br>
 <br>
 <br>
 <br>

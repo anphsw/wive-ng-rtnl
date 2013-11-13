@@ -736,6 +736,9 @@ VOID APMlmeSetTxRate(
 		pEntry->HTPhyMode.field.ShortGI = GI_800;
 
 #ifdef DBG_CTRL_SUPPORT
+	else
+		pEntry->HTPhyMode.field.ShortGI = GI_400;
+#else
 	/* Debug option: Force Short GI */
 	if (pAd->CommonCfg.DebugFlags & DBF_FORCE_SGI)
 		pEntry->HTPhyMode.field.ShortGI = GI_400;

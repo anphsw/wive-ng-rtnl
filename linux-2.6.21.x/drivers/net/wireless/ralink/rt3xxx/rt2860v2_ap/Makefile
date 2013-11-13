@@ -42,7 +42,6 @@ rt2860v2_ap-objs += ../rt2860v2/common/cmm_data_pci.o
 
 rt2860v2_ap-objs += ../rt2860v2/rate_ctrl/ra_ctrl.o
 rt2860v2_ap-objs += ../rt2860v2/rate_ctrl/alg_legacy.o
-rt2860v2_ap-objs += ../rt2860v2/rate_ctrl/alg_grp.o
 
 rt2860v2_ap-objs += ../rt2860v2/ap/ap.o
 rt2860v2_ap-objs += ../rt2860v2/ap/ap_assoc.o
@@ -158,6 +157,7 @@ rt2860v2_ap-objs += ../rt2860v2/common/rt_rf.o
 
 ifeq ($(CONFIG_RALINK_RT3883),y)
 rt2860v2_ap-objs += ../rt2860v2/chips/rt3883.o
+rt2860v2_ap-objs += ../rt2860v2/rate_ctrl/alg_grp.o
 ifeq ($(CONFIG_RT2860V2_AP_TXBF),y)
 rt2860v2_ap-objs += ../rt2860v2/common/cmm_txbf.o
 rt2860v2_ap-objs += ../rt2860v2/common/cmm_txbf_cal.o
@@ -211,7 +211,6 @@ EXTRA_CFLAGS += -DRTMP_MAC_PCI -DRTMP_RBUS_SUPPORT
 EXTRA_CFLAGS += -DSTATS_COUNT_SUPPORT -DENHANCED_STAT_DISPLAY
 EXTRA_CFLAGS += -DRSSI_FEEDBACK
 EXTRA_CFLAGS += -DRESOURCE_PRE_ALLOC
-EXTRA_CFLAGS += -DNEW_RATE_ADAPT_SUPPORT
 EXTRA_CFLAGS += -DRTMP_RF_RW_SUPPORT
 EXTRA_CFLAGS += -DRTMP_FLASH_SUPPORT
 
@@ -237,6 +236,7 @@ EXTRA_CFLAGS += -DRT3883 -DDOT11N_SS3_SUPPORT -DA_BAND_SUPPORT
 EXTRA_CFLAGS += -DVCORECAL_SUPPORT
 EXTRA_CFLAGS += -DSTREAM_MODE_SUPPORT
 EXTRA_CFLAGS += -DFIFO_EXT_SUPPORT
+EXTRA_CFLAGS += -DNEW_RATE_ADAPT_SUPPORT
 EXTRA_CFLAGS += -DRANGE_EXTEND
 ifeq ($(CONFIG_RT2860V2_AP_TXBF),y)
 EXTRA_CFLAGS += -DTXBF_SUPPORT

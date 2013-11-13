@@ -46,7 +46,6 @@
 /* SHORTGI */
 #define GAP_INTERVAL_400	1	/* only support in HT mode */
 #define GAP_INTERVAL_800	0
-#define GAP_INTERVAL_BOTH	2
 
 #define NdisMediaStateConnected			1
 #define NdisMediaStateDisconnected		0
