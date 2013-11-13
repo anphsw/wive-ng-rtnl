@@ -85,11 +85,10 @@ mkdir -p ${TARGET}-toolchain  && cd ${TARGET}-toolchain
 ##################################TUNE FOR CURRENT VERSION GCC BUILD####################################
 HOSTGCCVER=`gcc -dumpversion | cut -f -2 -d .`
 if [ "$HOSTGCCVER" = "4.5" ] || [ "$HOSTGCCVER" = "4.6" ] || [ "$HOSTGCCVER" = "4.7" ] || [ "$HOSTGCCVER" = "4.8" ]; then
-    WARN_OPTS="-Wno-pointer-sign -Wno-unused-but-set-variable -Wno-trigraphs -Wno-format-security -Wno-long-long"
-    export CFLAGS="-O2 $WARN_OPTS"
-else
-    export CFLAGS="-O2 $WARN_OPTS"
+    WARN_OPTS="-Wno-pointer-sign -Wno-unused-but-set-variable -Wno-trigraphs -Wno-format-security -Wno-long-long -Wno-sizeof-pointer-memaccess"
 fi
+
+export CFLAGS="-O2 $WARN_OPTS"
 
 EXT_OPT="$EXT_OPT --disable-lto --enable-ld=yes --enable-gold=no --disable-sanity-checks --disable-werror"
 if [ "$GCCVER" = "gcc-4.6.4" ] || [ "$GCCVER" = "gcc-4.7.4" ] || [ "$GCCVER" = "gcc-4.8.2" ]; then
