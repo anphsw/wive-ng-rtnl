@@ -354,7 +354,7 @@ EXTRA_DIST = $(LINUX_USBFS_SRC) $(DARWIN_USB_SRC) $(OPENBSD_USB_SRC) \
 @THREADS_POSIX_FALSE@THREADS_SRC = os/threads_windows.h os/threads_windows.c
 @THREADS_POSIX_TRUE@THREADS_SRC = os/threads_posix.h os/threads_posix.c
 libusb_1_0_la_CFLAGS = $(AM_CFLAGS)
-libusb_1_0_la_LDFLAGS = $(LTLDFLAGS)
+libusb_1_0_la_LDFLAGS = $(LTLDFLAGS) -avoid-version
 libusb_1_0_la_SOURCES = libusbi.h core.c descriptor.c io.c sync.c $(OS_SRC) \
 	os/linux_usbfs.h os/darwin_usb.h os/windows_usb.h \
 	$(THREADS_SRC) \

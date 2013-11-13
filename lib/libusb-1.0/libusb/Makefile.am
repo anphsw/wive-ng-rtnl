@@ -49,6 +49,7 @@ endif
 
 libusb_1_0_la_CFLAGS = $(AM_CFLAGS)
 libusb_1_0_la_LDFLAGS = $(LTLDFLAGS)
+libusb_1_0_la_LDFLAGS += -avoid-version
 libusb_1_0_la_SOURCES = libusbi.h core.c descriptor.c io.c sync.c $(OS_SRC) \
 	os/linux_usbfs.h os/darwin_usb.h os/windows_usb.h \
 	$(THREADS_SRC) \
