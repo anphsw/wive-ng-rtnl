@@ -51,20 +51,20 @@ if [ -f /etc/mandriva-release ] && [ "$INSTALL_DEP" = "YES" ]; then
     ISOPENMANDRIVA=`grep "OpenMandriva" -i -c < release"`
     ISROSA=`grep "ROSA" -i -c < release"`
     if [ "$ISOPENMANDRIVA" = "1" ] || [ "$ISROSA" = "1" ]; then
-	urpmi --auto  -ay glibc
-	urpmi --auto  -ay libgmpxx-devel --download-all --allow-force
-	urpmi --auto  -ay libmpc --download-all --allow-force
-	urpmi --auto  -ay mpfr --download-all --allow-force
-	urpmi --auto  -ay gcc-gfortran --download-all --allow-force
-	urpmi --auto  -ay texinfo --download-all --allow-force
+	urpmi --auto -ay glibc
+	urpmi --auto -ay libgmpxx-devel --download-all --allow-force
+	urpmi --auto -ay libmpc --download-all --allow-force
+	urpmi --auto -ay mpfr --download-all --allow-force
+	urpmi --auto -ay gcc-gfortran --download-all --allow-force
+	urpmi --auto -ay texinfo --download-all --allow-force
 
     else
 	urpmi --auto -a glibc-
-	urpmi --auto  -a libgmpxx-devel --download-all --allow-force
-	urpmi --auto  -a libmpc- --download-all --allow-force
-	urpmi --auto  -a mpfr- --download-all --allow-force
-	urpmi --auto  -a gcc-gfortran --download-all --allow-force
-	urpmi --auto  -a texinfo- --download-all --allow-force
+	urpmi --auto -a libgmpxx-devel --download-all --allow-force
+	urpmi --auto -a libmpc- --download-all --allow-force
+	urpmi --auto -a mpfr- --download-all --allow-force
+	urpmi --auto -a gcc-gfortran --download-all --allow-force
+	urpmi --auto -a texinfo- --download-all --allow-force
     fi
 fi
 
