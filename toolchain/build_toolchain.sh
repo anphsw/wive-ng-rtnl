@@ -52,6 +52,8 @@ if [ -f /etc/mandriva-release ] && [ "$INSTALL_DEP" = "YES" ]; then
     ISROSA=`grep ROSA -i -c < /etc/release`
     if [ "$ISOPENMANDRIVA" = "1" ] || [ "$ISROSA" = "1" ]; then
 	urpmi --auto -ay glibc
+	urpmi --auto -ay bison
+	urpmi --auto -ay libtool
 	urpmi --auto -ay libgmpxx-devel --download-all --allow-force
 	urpmi --auto -ay libmpc --download-all --allow-force
 	urpmi --auto -ay mpfr --download-all --allow-force
@@ -60,6 +62,8 @@ if [ -f /etc/mandriva-release ] && [ "$INSTALL_DEP" = "YES" ]; then
 
     else
 	urpmi --auto -a glibc-
+	urpmi --auto -a bison-
+	urpmi --auto -a libtool-
 	urpmi --auto -a libgmpxx-devel --download-all --allow-force
 	urpmi --auto -a libmpc- --download-all --allow-force
 	urpmi --auto -a mpfr- --download-all --allow-force
