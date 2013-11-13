@@ -1,6 +1,6 @@
 #!/bin/sh
 
-ROOTDIR=`pwd`
+CURDIR=`pwd`
 
 KERNELHDRS=kernel-headers
 BINUTILVER=binutils-2.21
@@ -34,13 +34,13 @@ export LC_NUMERIC=
 export LC_CTYPE=
 export LC_TIME=
 
-export WROOTDIR=$ROOTDIR/tmp
+export WCURDIR=$CURDIR/tmp
 export TARGET=mipsel-linux-uclibc
-export PREFIX=$ROOTDIR
-export ROOTROOTDIR=$ROOTDIR
+export PREFIX=$CURDIR
+export ROOTCURDIR=$CURDIR
 
-export TARGET_ROOTDIR=$WROOTDIR/$TARGET-toolchain
-export KERNEL_HEADERS=$TARGET_ROOTDIR/include
+export TARGET_CURDIR=$WCURDIR/$TARGET-toolchain
+export KERNEL_HEADERS=$TARGET_CURDIR/include
 export REALKRNINC=${PREFIX}/../linux-2.6.21.x/include
 export REALLIBINC=${PREFIX}/../lib/include
 export PATH="${PATH}":${PREFIX}/bin:${PREFIX}/lib:${KERNEL_HEADERS}:${REALLIBINC}:${REALKRNINC}
@@ -77,9 +77,9 @@ if [ -f /etc/mandriva-release ] && [ "$INSTALL_DEP" = "YES" ]; then
     fi
 fi
 
-mkdir -p $WROOTDIR
+mkdir -p $WCURDIR
 
-cd $WROOTDIR
+cd $WCURDIR
 mkdir -p ${TARGET}-toolchain  && cd ${TARGET}-toolchain
 
 ##################################TUNE FOR CURRENT VERSION GCC BUILD####################################
@@ -103,13 +103,13 @@ fi
 if [ "$UNPACK" = "YES" ]; then
     echo "=================REMOVE-OLD-BUILD-TREE=================="
     rm -rf build-*
-    rm -rf $ROOTDIR/bin
-    rm -rf $ROOTDIR/lib
-    rm -rf $ROOTDIR/usr
-    rm -rf $ROOTDIR/share
-    rm -rf $ROOTDIR/libexec
-    rm -rf $ROOTDIR/include
-    rm -rf $ROOTDIR/mipsel-linux-uclibc
+    rm -rf $CURDIR/bin
+    rm -rf $CURDIR/lib
+    rm -rf $CURDIR/usr
+    rm -rf $CURDIR/share
+    rm -rf $CURDIR/libexec
+    rm -rf $CURDIR/include
+    rm -rf $CURDIR/mipsel-linux-uclibc
 fi
 
 if [ "$UNPACK" = "YES" ]; then
@@ -125,10 +125,10 @@ fi
 
 if [ "$HEADERS" = "YES" ]; then
     echo "=====================INSTALL-C-HEADERS===================="
-    mkdir -p $ROOTDIR/usr
-    rm -rf $ROOTDIR/usr/include
-    cp -rf $KERNEL_HEADERS $ROOTDIR/usr
-    ln -sf $ROOTDIR/usr/include $ROOTDIR/include
+    mkdir -p $CURDIR/usr
+    rm -rf $CURDIR/usr/include
+    cp -rf $KERNEL_HEADERS $CURDIR/usr
+    ln -sf $CURDIR/usr/include $CURDIR/include
 fi
 
 if [ "$BINUTILS" = "YES" ]; then
@@ -159,11 +159,11 @@ if [ "$GCC" = "YES" ]; then
 fi
 
 if [ "$UCLIB" = "YES" ]; then
-    echo "=====================BUILD-C-HEADERS===================="
+    echo "=====================BUILD-C-UCLIBC===================="
     cp -fv uclibc-config $UCLIBCVER/.config
     cd $UCLIBCVER
-    (make oldconfig && \
-    make -j4 && \
+    (make oldconfig ROOTDIR="$CURDIR" && \
+    make -j4 ROOTDIR="$CURDIR" && \
     make install) || exit 1
     cd ..
 fi

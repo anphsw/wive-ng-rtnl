@@ -355,7 +355,7 @@
 #define SIOCIWLAST	SIOCIWLASTPRIV		/* 0x8BFF */
 #define IW_IOCTL_IDX(cmd)	((cmd) - SIOCIWFIRST)
 
-/* Odd : get (world access), Even : set (root access) */
+/* Odd : get (world access), even : set (root access) */
 #define IW_IS_SET(cmd)	(!((cmd) & 0x1))
 #define IW_IS_GET(cmd)	((cmd) & 0x1)
 
@@ -544,16 +544,6 @@
 #define IW_SCAN_TYPE_PASSIVE 1
 /* Maximum size of returned data */
 #define IW_SCAN_MAX_DATA	4096	/* In bytes */
-
-/* Scan capability flags - in (struct iw_range *)->scan_capa */
-#define IW_SCAN_CAPA_NONE		0x00
-#define IW_SCAN_CAPA_ESSID		0x01
-#define IW_SCAN_CAPA_BSSID		0x02
-#define IW_SCAN_CAPA_CHANNEL		0x04
-#define IW_SCAN_CAPA_MODE		0x08
-#define IW_SCAN_CAPA_RATE		0x10
-#define IW_SCAN_CAPA_TYPE		0x20
-#define IW_SCAN_CAPA_TIME		0x40
 
 /* Max number of char in custom event - use multiple of them if needed */
 #define IW_CUSTOM_MAX		256	/* In bytes */
@@ -998,9 +988,6 @@ struct	iw_range
 	__u16		old_num_channels;
 	__u8		old_num_frequency;
 
-	/* Scan capabilities */
-	__u8		scan_capa;	/* IW_SCAN_CAPA_* bit field */
-
 	/* Wireless event capability bitmasks */
 	__u32		event_capa[6];
 
@@ -1147,6 +1134,6 @@ struct iw_event
 #define IW_EV_PARAM_PK_LEN	(IW_EV_LCP_PK_LEN + sizeof(struct iw_param))
 #define IW_EV_ADDR_PK_LEN	(IW_EV_LCP_PK_LEN + sizeof(struct sockaddr))
 #define IW_EV_QUAL_PK_LEN	(IW_EV_LCP_PK_LEN + sizeof(struct iw_quality))
-#define IW_EV_POINT_PK_LEN	(IW_EV_LCP_PK_LEN + 4)
+#define IW_EV_POINT_PK_LEN	(IW_EV_LCP_LEN + 4)
 
 #endif	/* _LINUX_WIRELESS_H */

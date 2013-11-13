@@ -1,20 +1,4 @@
 /*
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307 USA
- */
-/*
  * This file define a set of standard wireless extensions
  *
  * Version :	22	16.3.07
@@ -25,10 +9,6 @@
 
 #ifndef _LINUX_WIRELESS_H
 #define _LINUX_WIRELESS_H
-
-#ifndef IFNAMSIZ
-#define IFNAMSIZ 16
-#endif
 
 /************************** DOCUMENTATION **************************/
 /*
@@ -92,8 +72,8 @@
 /* This header is used in user-space, therefore need to be sanitised
  * for that purpose. Those includes are usually not compatible with glibc.
  * To know which includes to use in user-space, check iwlib.h. */
-#include <linux/types.h>		/* for "caddr_t" et al		*/
 #ifdef __KERNEL__
+#include <linux/types.h>		/* for "caddr_t" et al		*/
 #include <linux/socket.h>		/* for "struct sockaddr" et al	*/
 #include <linux/if.h>			/* for IFNAMSIZ and co... */
 #endif	/* __KERNEL__ */
@@ -355,9 +335,8 @@
  * If you don't follow those rules, DaveM is going to hate you (reason :
  * it make mixed 32/64bit operation impossible).
  */
-#define SIOCIWFIRSTPRIV  0x8BE0
-#define SIOCIWLASTPRIV   0x8BFF
-
+#define SIOCIWFIRSTPRIV	0x8BE0
+#define SIOCIWLASTPRIV	0x8BFF
 /* Previously, we were using SIOCDEVPRIVATE, but we now have our
  * separate range because of collisions with other tools such as
  * 'mii-tool'.

@@ -116,7 +116,9 @@
 #endif
 
 /**********************************************************************/
-#include <bits/uClibc_mutex.h>
+#ifdef __UCLIBC_HAS_THREADS__
+/* Need this for pthread_mutex_t. */
+#include <bits/pthreadtypes.h>
 
 /* user_locking
  * 0 : do auto locking/unlocking
@@ -130,37 +132,43 @@
  * This way, we avoid calling the weak lock/unlock functions.
  */
 
-#define __STDIO_AUTO_THREADLOCK_VAR						\
-        __UCLIBC_MUTEX_AUTO_LOCK_VAR(__infunc_user_locking)
+#define __STDIO_AUTO_THREADLOCK_VAR			int __infunc_user_locking
 
 #define __STDIO_AUTO_THREADLOCK(__stream)								\
-        __UCLIBC_MUTEX_AUTO_LOCK((__stream)->__lock, __infunc_user_locking,	\
-	(__stream)->__user_locking)
+	if ((__infunc_user_locking = (__stream)->__user_locking) == 0) {	\
+		__pthread_mutex_lock(&(__stream)->__lock);						\
+	}
 
 #define __STDIO_AUTO_THREADUNLOCK(__stream)				\
-        __UCLIBC_MUTEX_AUTO_UNLOCK((__stream)->__lock, __infunc_user_locking)
+	if (__infunc_user_locking == 0) {					\
+		__pthread_mutex_unlock(&(__stream)->__lock);		\
+	}
+
+#define __STDIO_SET_USER_LOCKING(__stream)	((__stream)->__user_locking = 1)
 
 #define __STDIO_ALWAYS_THREADLOCK(__stream)	\
-        __UCLIBC_MUTEX_LOCK((__stream)->__lock)
+		__pthread_mutex_lock(&(__stream)->__lock)
+
+#define __STDIO_ALWAYS_THREADTRYLOCK(__stream)	\
+		__pthread_mutex_trylock(&(__stream)->__lock)
 
 #define __STDIO_ALWAYS_THREADUNLOCK(__stream) \
-        __UCLIBC_MUTEX_UNLOCK((__stream)->__lock)
+		__pthread_mutex_unlock(&(__stream)->__lock)
 
-#define __STDIO_ALWAYS_THREADLOCK_CANCEL_UNSAFE(__stream)			\
-        __UCLIBC_MUTEX_LOCK_CANCEL_UNSAFE((__stream)->__lock)
+#else  /* __UCLIBC_HAS_THREADS__ */
 
-#define __STDIO_ALWAYS_THREADTRYLOCK_CANCEL_UNSAFE(__stream)			\
-        __UCLIBC_MUTEX_TRYLOCK_CANCEL_UNSAFE((__stream)->__lock)
+#define __STDIO_AUTO_THREADLOCK_VAR				((void)0)
 
-#define __STDIO_ALWAYS_THREADUNLOCK_CANCEL_UNSAFE(__stream)			\
-        __UCLIBC_MUTEX_UNLOCK_CANCEL_UNSAFE((__stream)->__lock)
+#define __STDIO_AUTO_THREADLOCK(__stream)		((void)0)
+#define __STDIO_AUTO_THREADUNLOCK(__stream)		((void)0)
 
-#ifdef __UCLIBC_HAS_THREADS__
-#define __STDIO_SET_USER_LOCKING(__stream)	((__stream)->__user_locking = 1)
-#else
 #define __STDIO_SET_USER_LOCKING(__stream)		((void)0)
-#endif
 
+#define __STDIO_ALWAYS_THREADLOCK(__stream)		((void)0)
+#define __STDIO_ALWAYS_THREADTRYLOCK(__stream)	(0)	/* Always succeed. */
+#define __STDIO_ALWAYS_THREADUNLOCK(__stream)	((void)0)
+
+#endif /* __UCLIBC_HAS_THREADS__ */
 /**********************************************************************/
 
 #define __STDIO_IOFBF 0		/* Fully buffered.  */
@@ -275,7 +283,7 @@ struct __STDIO_FILE_STRUCT {
 #endif
 #ifdef __UCLIBC_HAS_THREADS__
 	int __user_locking;
-	__UCLIBC_MUTEX(__lock);
+	pthread_mutex_t __lock;
 #endif
 /* Everything after this is unimplemented... and may be trashed. */
 #if __STDIO_BUILTIN_BUF_SIZE > 0
@@ -322,7 +330,6 @@ struct __STDIO_FILE_STRUCT {
 #define __FLAG_FREEFILE		0x2000U
 #define __FLAG_FREEBUF		0x4000U
 #define __FLAG_LARGEFILE    0x8000U /* fixed! == 0_LARGEFILE for linux */
-#define __FLAG_FAILED_FREOPEN	__FLAG_LARGEFILE
 
 /* Note: In no-buffer mode, it would be possible to pack the necessary
  * flags into one byte.  Since we wouldn't be buffering and there would
@@ -351,14 +358,10 @@ extern void _stdio_term(void);
 extern struct __STDIO_FILE_STRUCT *_stdio_openlist;
 
 #ifdef __UCLIBC_HAS_THREADS__
-__UCLIBC_MUTEX_EXTERN(_stdio_openlist_add_lock);
-#ifdef __STDIO_BUFFERS
-__UCLIBC_MUTEX_EXTERN(_stdio_openlist_del_lock);
-extern volatile int _stdio_openlist_use_count; /* _stdio_openlist_del_lock */
-extern int _stdio_openlist_del_count; /* _stdio_openlist_del_lock */
-#endif
+extern pthread_mutex_t _stdio_openlist_lock;
+extern int _stdio_openlist_delflag;
 extern int _stdio_user_locking;
-extern void __stdio_init_mutex(__UCLIBC_MUTEX_TYPE *m);
+extern void __stdio_init_mutex(pthread_mutex_t *m);
 #endif
 
 #endif
@@ -384,8 +387,7 @@ extern void __stdio_init_mutex(__UCLIBC_MUTEX_TYPE *m);
 extern int __fgetc_unlocked(FILE *__stream);
 extern int __fputc_unlocked(int __c, FILE *__stream);
 
-/* First define the default definitions.
-   They are overridden below as necessary. */
+/* First define the default definitions.  They overriden below as necessary. */
 #define __FGETC_UNLOCKED(__stream)		(__fgetc_unlocked)((__stream))
 #define __FGETC(__stream)				(fgetc)((__stream))
 #define __GETC_UNLOCKED_MACRO(__stream)	(__fgetc_unlocked)((__stream))

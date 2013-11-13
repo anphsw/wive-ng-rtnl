@@ -98,7 +98,6 @@ extern int select (int __nfds, fd_set *__restrict __readfds,
 		   fd_set *__restrict __exceptfds,
 		   struct timeval *__restrict __timeout) __THROW;
 
-#ifdef __USE_XOPEN2K
 /* Same as above only that the TIMEOUT value is given with higher
    resolution and a sigmask which is been set temporarily.  This version
    should be used.  */
@@ -107,7 +106,6 @@ extern int pselect (int __nfds, fd_set *__restrict __readfds,
 		    fd_set *__restrict __exceptfds,
 		    const struct timespec *__restrict __timeout,
 		    const __sigset_t *__restrict __sigmask) __THROW;
-#endif
 
 __END_DECLS
 

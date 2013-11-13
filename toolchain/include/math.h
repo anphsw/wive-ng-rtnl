@@ -83,7 +83,7 @@ __BEGIN_DECLS
 # undef	_Mdouble_
 # undef	__MATH_PRECNAME
 
-# if (__STDC__ - 0 || __GNUC__ - 0) && !defined __NO_LONG_DOUBLE_MATH
+# if (__STDC__ - 0 || __GNUC__ - 0) && defined __UCLIBC_HAS_LONG_DOUBLE_MATH__
 /* Include the file of declarations again, this time using `long double'
    instead of `double' and appending l to each function name.  */
 
@@ -166,7 +166,7 @@ enum
   };
 
 /* Return number of classification appropriate for X.  */
-# ifdef __NO_LONG_DOUBLE_MATH
+# ifndef __UCLIBC_HAS_LONG_DOUBLE_MATH__
 #  define fpclassify(x) \
      (sizeof (x) == sizeof (float) ? __fpclassifyf (x) : __fpclassify (x))
 # else
@@ -178,7 +178,7 @@ enum
 # endif
 
 /* Return nonzero value if sign of X is negative.  */
-# ifdef __NO_LONG_DOUBLE_MATH
+# ifndef __UCLIBC_HAS_LONG_DOUBLE_MATH__
 #  define signbit(x) \
      (sizeof (x) == sizeof (float) ? __signbitf (x) : __signbit (x))
 # else
@@ -190,7 +190,7 @@ enum
 # endif
 
 /* Return nonzero value if X is not +-Inf or NaN.  */
-# ifdef __NO_LONG_DOUBLE_MATH
+# ifndef __UCLIBC_HAS_LONG_DOUBLE_MATH__
 #  define isfinite(x) \
      (sizeof (x) == sizeof (float) ? __finitef (x) : __finite (x))
 # else
@@ -206,7 +206,7 @@ enum
 
 /* Return nonzero value if X is a NaN.  We could use `fpclassify' but
    we already have this functions `__isnan' and it is faster.  */
-# ifdef __NO_LONG_DOUBLE_MATH
+# ifndef __UCLIBC_HAS_LONG_DOUBLE_MATH__
 #  define isnan(x) \
      (sizeof (x) == sizeof (float) ? __isnanf (x) : __isnan (x))
 # else
@@ -218,7 +218,7 @@ enum
 # endif
 
 /* Return nonzero value is X is positive or negative infinity.  */
-# ifdef __NO_LONG_DOUBLE_MATH
+# ifndef __UCLIBC_HAS_LONG_DOUBLE_MATH__
 #  define isinf(x) \
      (sizeof (x) == sizeof (float) ? __isinff (x) : __isinf (x))
 # else

@@ -53,7 +53,7 @@
 #define __UCLIBC_HAS_FLOATS__ 1
 #define __HAS_FPU__ 1
 #define __DO_C99_MATH__ 1
-#define __KERNEL_SOURCE__ "$(ROOTDIR)/tmp/mipsel-linux-uclibc-toolchain"
+#define __KERNEL_SOURCE__ "$(ROOTDIR)/$(LINUXDIR)"
 #define __C_SYMBOL_PREFIX__ ""
 #define __HAVE_DOT_CONFIG__ 1
 
@@ -130,7 +130,7 @@
 #define __UCLIBC_HAS_STDIO_GETC_MACRO__ 1
 #define __UCLIBC_HAS_STDIO_PUTC_MACRO__ 1
 #define __UCLIBC_HAS_STDIO_AUTO_RW_TRANSITION__ 1
-#undef __UCLIBC_HAS_FOPEN_LARGEFILE_MODE__
+#define __UCLIBC_HAS_FOPEN_LARGEFILE_MODE__ 1
 #define __UCLIBC_HAS_FOPEN_EXCLUSIVE_MODE__ 1
 #define __UCLIBC_HAS_GLIBC_CUSTOM_STREAMS__ 1
 #define __UCLIBC_HAS_PRINTF_M_SPEC__ 1
@@ -152,8 +152,8 @@
  * Library Installation Options
  */
 #define __SHARED_LIB_LOADER_PREFIX__ "/lib"
-#define __RUNTIME_PREFIX__ "/"
-#define __DEVEL_PREFIX__ "/"
+#define __RUNTIME_PREFIX__ "$(ROOTDIR)/romfs"
+#define __DEVEL_PREFIX__ "$(ROOTDIR)/romfs"
 
 /*
  * uClibc security related options
@@ -163,7 +163,7 @@
 /*
  * uClibc development/debugging options
  */
-#define __CROSS_COMPILER_PREFIX__ "$(ROOTDIR)/bin/mipsel-linux-uclibc-"
+#define __CROSS_COMPILER_PREFIX__ "$(ROOTDIR)/toolchain/bin/mipsel-linux-"
 #undef __DODEBUG__
 #undef __DODEBUG_PT__
 #undef __DOASSERTS__
