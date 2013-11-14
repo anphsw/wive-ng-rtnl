@@ -1154,11 +1154,12 @@ int neigh_resolve_output(struct sk_buff *skb)
 	if (!dst || !(neigh = dst->neighbour))
 		goto discard;
 
-	__skb_pull(skb, skb_network_offset(skb));
-
 	if (!neigh_event_send(neigh, skb)) {
 		int err;
 		struct net_device *dev = neigh->dev;
+
+		__skb_pull(skb, skb_network_offset(skb));
+
 		if (dev->hard_header_cache && !dst->hh) {
 			write_lock_bh(&neigh->lock);
 			if (!dst->hh)

@@ -35,6 +35,7 @@
 23) kernel: inet: fix inet_bind_bucket_for_each.<br>
 24) kernel: tcp: Handle CHECKSUM_PARTIAL for SYNACK packets.<br>
 25) kernel: wifi_drivers: enable enchanged statistic for all devices.<br>
+26) kernel: fix potentional skb_under_panic oops in neigh_resolve_output.<br>
 <br>
 <br>
 <br>
