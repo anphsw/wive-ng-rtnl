@@ -260,6 +260,7 @@ TXPath=2
 TxPower=70
 TxPreamble=1
 TxRate=0
+IdleTimeout=120
 TransmissionEnabled=0
 TZ=OMST-7
 UDPXYMode=0
