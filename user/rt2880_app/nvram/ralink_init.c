@@ -375,7 +375,7 @@ static int gen_wifi_config(int mode)
 		FPRINT_NUM(CarrierDetect);
 #endif
 		FPRINT_STR(RDRegion);
-		FPRINT_NUM(StationKeepAlive);
+		FPRINT_STR(StationKeepAlive);
 
 #if defined (CONFIG_RT2860V2_AP_DFS) || defined (CONFIG_RT2860V2_STA_DFS)
 		FPRINT_NUM(DfsLowerLimit);
