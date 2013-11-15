@@ -275,11 +275,43 @@ static int gen_wifi_config(int mode)
 		    FPRINT_STR(RFICType);
 		    FPRINT_NUM(WirelessMode);
 		    FPRINT_NUM(Channel);
+		    FPRINT_STR(SSID1);
 		} else {
 		    fprintf(fp, "RFICType=%d\n", 8);
 		    fprintf(fp, "WirelessMode=%d\n", atoi(nvram_bufget(mode, "WirelessModeINIC")));
 		    fprintf(fp, "Channel=%d\n", atoi(nvram_bufget(mode, "ChannelINIC")));
+		    fprintf(fp, "SSID1=%s\n", nvram_bufget(mode, "SSID1INIC"));
 		}
+
+		//TxRate(FixedRate)
+		ssid_num = atoi(nvram_bufget(mode, "BssidNum"));
+		bzero(tx_rate, sizeof(char)*16);
+		for (i = 0; i < ssid_num; i++)
+		{
+			sprintf(tx_rate+strlen(tx_rate), "%d", atoi(nvram_bufget(mode, "TxRate")));
+			sprintf(tx_rate+strlen(tx_rate), "%c", ';');
+		}
+		tx_rate[strlen(tx_rate) - 1] = '\0';
+		fprintf(fp, "TxRate=%s\n", tx_rate);
+
+		//WmmCapable
+		bzero(wmm_enable, sizeof(char)*16);
+		for (i = 0; i < ssid_num; i++)
+		{
+			sprintf(wmm_enable+strlen(wmm_enable), "%d", atoi(nvram_bufget(mode, "WmmCapable")));
+			sprintf(wmm_enable+strlen(wmm_enable), "%c", ';');
+		}
+		wmm_enable[strlen(wmm_enable) - 1] = '\0';
+		fprintf(fp, "WmmCapable=%s\n", wmm_enable);
+
+		//WscConfStatus
+		if (atoi(nvram_bufget(mode, "WscConfigured")) == 0)
+			fprintf(fp, "WscConfStatus=%d\n", 1);
+		else
+			fprintf(fp, "WscConfStatus=%d\n", 2);
+
+		if (strcmp(nvram_bufget(mode, "WscVendorPinCode"), "") != 0)
+			FPRINT_STR(WscVendorPinCode);
 
 		FPRINT_NUM(CountryRegion);
 		FPRINT_NUM(CountryRegionABand);
@@ -291,9 +323,6 @@ static int gen_wifi_config(int mode)
 
 #if defined (CONFIG_RT2860V2_AP_MBSS) || defined (CONFIG_RT2860V2_STA_MBSS)
 		FPRINT_NUM(BssidNum);
-		ssid_num = atoi(nvram_bufget(mode, "BssidNum"));
-
-		FPRINT_STR(SSID1);
 		FPRINT_STR(SSID2);
 		FPRINT_STR(SSID3);
 		FPRINT_STR(SSID4);
@@ -312,23 +341,11 @@ static int gen_wifi_config(int mode)
 		FPRINT_STR(SSID16);
 #endif
 #endif
-
 		FPRINT_NUM(AutoConnect);
 		FPRINT_NUM(FastConnect);
 		FPRINT_NUM(HiPower);
 		FPRINT_NUM(AutoRoaming);
 		FPRINT_NUM(FixedTxMode);
-
-		//TxRate(FixedRate)
-		bzero(tx_rate, sizeof(char)*16);
-		for (i = 0; i < ssid_num; i++)
-		{
-			sprintf(tx_rate+strlen(tx_rate), "%d", atoi(nvram_bufget(mode, "TxRate")));
-			sprintf(tx_rate+strlen(tx_rate), "%c", ';');
-		}
-		tx_rate[strlen(tx_rate) - 1] = '\0';
-		fprintf(fp, "TxRate=%s\n", tx_rate);
-
 		FPRINT_NUM(BasicRate);
 		FPRINT_NUM(BeaconPeriod);
 		FPRINT_NUM(DtimPeriod);
@@ -341,27 +358,14 @@ static int gen_wifi_config(int mode)
 		FPRINT_NUM(TxBurst);
 		FPRINT_NUM(PktAggregate);
 		FPRINT_NUM(FreqDelta);
-
 #if defined (CONFIG_RT2860V2_AP_VIDEO_TURBINE) || defined (CONFIG_RT2860V2_STA_VIDEO_TURBINE)
 		FPRINT_NUM(VideoTurbine);
 		FPRINT_NUM(VideoClassifierEnable);
 		FPRINT_NUM(VideoHighTxMode);
 		FPRINT_NUM(VideoTxLifeTimeMode);
 #endif
-
-		//WmmCapable
-		bzero(wmm_enable, sizeof(char)*16);
-		for (i = 0; i < ssid_num; i++)
-		{
-			sprintf(wmm_enable+strlen(wmm_enable), "%d", atoi(nvram_bufget(mode, "WmmCapable")));
-			sprintf(wmm_enable+strlen(wmm_enable), "%c", ';');
-		}
-		wmm_enable[strlen(wmm_enable) - 1] = '\0';
-		fprintf(fp, "WmmCapable=%s\n", wmm_enable);
-
 		FPRINT_NUM(McastPhyMode);
 		FPRINT_NUM(McastMcs);
-
 		FPRINT_STR(APAifsn);
 		FPRINT_STR(APCwmin);
 		FPRINT_STR(APCwmax);
@@ -379,7 +383,6 @@ static int gen_wifi_config(int mode)
 		FPRINT_NUM(NoForwardingBTNBSSID);
 		FPRINT_STR(HideSSID);
 		FPRINT_NUM(ShortSlot);
-
 		FPRINT_STR(IEEE8021X);
 		FPRINT_NUM(IEEE80211H);
 		FPRINT_NUM(DebugFlags);
@@ -389,7 +392,6 @@ static int gen_wifi_config(int mode)
 #endif
 		FPRINT_STR(RDRegion);
 		FPRINT_STR(StationKeepAlive);
-
 #if defined (CONFIG_RT2860V2_AP_DFS) || defined (CONFIG_RT2860V2_STA_DFS)
 		FPRINT_NUM(DfsLowerLimit);
 		FPRINT_NUM(DfsUpperLimit);
@@ -417,15 +419,12 @@ static int gen_wifi_config(int mode)
 		FPRINT_NUM(DFS_R66);
 		FPRINT_STR(blockch);
 #endif
-
 		FPRINT_STR(PreAuth);
 		FPRINT_STR(AuthMode);
 		FPRINT_STR(EncrypType);
-
     		FPRINT_STR(RekeyMethod);
 		FPRINT_NUM(RekeyInterval);
 		FPRINT_STR(PMKCachePeriod);
-
 #if defined (CONFIG_RT2860V2_AP_MBSS) || defined (CONFIG_RT2860V2_STA_MBSS)
 #if defined(CONFIG_RT2860V2_STA_WAPI) || defined(CONFIG_RT2860V2_AP_WAPI)
 		/*kurtis: WAPI*/
@@ -587,22 +586,10 @@ static int gen_wifi_config(int mode)
 		FPRINT_NUM(HT_MIMOPSMode);
 		FPRINT_NUM(HT_BSSCoexistence);
 		FPRINT_NUM(HT_BSSCoexApCntThr);
-
 #ifdef CONFIG_RT2860V2_AP_GREENAP
 		FPRINT_NUM(GreenAP);
 #endif
-
 		FPRINT_NUM(WscConfMode);
-
-		//WscConfStatus
-		if (atoi(nvram_bufget(mode, "WscConfigured")) == 0)
-			fprintf(fp, "WscConfStatus=%d\n", 1);
-		else
-			fprintf(fp, "WscConfStatus=%d\n", 2);
-
-		if (strcmp(nvram_bufget(mode, "WscVendorPinCode"), "") != 0)
-			FPRINT_STR(WscVendorPinCode);
-
 		FPRINT_NUM(WCNTest);
 
 #if defined (CONFIG_RT2860V2_AP_MBSS) || defined (CONFIG_RT2860V2_STA_MBSS)
