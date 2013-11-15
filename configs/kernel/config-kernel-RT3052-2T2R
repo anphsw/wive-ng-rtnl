@@ -1,7 +1,6 @@
 #
 # Automatically generated make config: don't edit
-# Linux kernel version: 2.6.21.40
-# Sun Oct 27 11:31:54 2013
+# Linux kernel version: 2.6.21.41
 #
 CONFIG_MIPS=y
 
@@ -1101,7 +1100,9 @@ CONFIG_CMDLINE="console=ttyS1,57600n8 root=/dev/mtdblock4 ro"
 # CONFIG_SECURITY is not set
 CONFIG_CRYPTO=y
 CONFIG_CRYPTO_ALGAPI=m
+# CONFIG_CRYPTO_ABLKCIPHER is not set
 CONFIG_CRYPTO_BLKCIPHER=m
+# CONFIG_CRYPTO_HASH is not set
 CONFIG_CRYPTO_MANAGER=m
 # CONFIG_CRYPTO_HMAC is not set
 # CONFIG_CRYPTO_NULL is not set
