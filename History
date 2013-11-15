@@ -40,6 +40,7 @@
 28) kernel: netfilter: conntrack: check for NEXTHDR_NONE before header sanity checking.<br>
 29) kernel: udp: fix length check.<br>
 30) nvram: make iNIC (rt3090) config automatic from nvram with different parametrs WirelessModeINIC/ChannelINIC.<br>
+31) clean: remove very old unused nvram_daemon and userspace nvram mode from libnvram.<br>
 <br>
 <br>
 <br>

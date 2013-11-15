@@ -298,10 +298,6 @@ int ra_mtd_write_nm(char *name, loff_t to, size_t len, const u_char *buf)
 	struct mtd_info *mtd;
 	struct erase_info ei;
 	u_char *bak = NULL;
-#ifndef CONFIG_KERNEL_NVRAM
-	DECLARE_WAITQUEUE(wait, current);
-	wait_queue_head_t wait_q;
-#endif
 	mtd = get_mtd_device_nm(name);
 
 	if (IS_ERR(mtd)) {
@@ -322,23 +318,10 @@ int ra_mtd_write_nm(char *name, loff_t to, size_t len, const u_char *buf)
 		goto out;
 	}
 
-#ifndef CONFIG_KERNEL_NVRAM
-	set_current_state(TASK_INTERRUPTIBLE);
-	add_wait_queue(&wait_q, &wait);
-#endif
 	ret = mtd->read(mtd, 0, mtd->erasesize, &rdlen, bak);
-	if (ret) {
-#ifndef CONFIG_KERNEL_NVRAM
-		set_current_state(TASK_RUNNING);
-		remove_wait_queue(&wait_q, &wait);
-#endif
-		goto free_out;
-	}
+	if (ret)
+	    goto free_out;
 
-#ifndef CONFIG_KERNEL_NVRAM
-        schedule();  /* Wait for write to finish. */
-        remove_wait_queue(&wait_q, &wait);
-#endif
 	if (rdlen != mtd->erasesize)
 		printk("warning: ra_mtd_write: rdlen is not equal to erasesize\n");
 
@@ -353,16 +336,9 @@ int ra_mtd_write_nm(char *name, loff_t to, size_t len, const u_char *buf)
 	if (ret != 0)
 		goto free_out;
 
-#ifndef CONFIG_KERNEL_NVRAM
-        set_current_state(TASK_INTERRUPTIBLE);
-        add_wait_queue(&wait_q, &wait);
-#endif
 	ret = mtd->write(mtd, 0, mtd->erasesize, &wrlen, bak);
-#ifndef CONFIG_KERNEL_NVRAM
-        schedule();  /* Wait for write to finish. */
-        remove_wait_queue(&wait_q, &wait);
-#endif
 	udelay(NOR_DELAY_RW); /* add delay after write */
+
 free_out:
 	if(mtd)
 	    put_mtd_device(mtd);

@@ -34,9 +34,6 @@ LIBNVRAM_SHARED=libnvram.so
 LIBNVRAM_SHARED_FULLNAME=libnvram-$(MAJOR_VERSION).$(MINOR_VERSION).$(SUBLEVEL).so
 
 OBJS	:= nvram_env.o flash_api.o
-ifneq ("$(CONFIG_KERNEL_NVRAM)", "")
-OBJS	+= crc32.o
-endif
 HEADERS := nvram.h flash_api.h $(ROOTDIR)/$(LINUXDIR)/include/linux/config.h
 
 ifneq ("$(CONFIG_RALINK_RT6855A)", "")
@@ -70,4 +67,3 @@ $(OBJS): $(HEADERS) Makefile
 
 clean:
 	$(RM) *.[oa] $(LIBNVRAM_SHARED)* $(LIBNVRAM_SHARED_FULLNAME)*
-

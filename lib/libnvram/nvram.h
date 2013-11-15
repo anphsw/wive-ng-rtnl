@@ -10,25 +10,10 @@
 #include <unistd.h>
 #include <sys/ioctl.h>
 
-/* use nutex only  if kernel
-    nvram support disabled */
-#ifndef CONFIG_KERNEL_NVRAM
-#ifdef CONFIG_LIB_PTHREAD_FORCE
-#define NVRAM_LIB_PTHREAD_FORCE
-#endif
-#else
-#undef NVRAM_LIB_PTHREAD_FORCE
 #define NV_DEV "/dev/nvram"
-#endif
 
 #ifdef CONFIG_LIB_LIBNVRAM_SSTRDUP
 #define NVRAM_LIB_LIBNVRAM_SSTRDUP
-#endif
-
-#ifdef NVRAM_LIB_LIBNVRAM_SSTRDUP
-#ifdef NVRAM_LIB_PTHREAD_FORCE
-#include <pthread.h>
-#endif
 #endif
 
 #define BUFSZ			1024
@@ -109,8 +94,4 @@ unsigned int getNvramIndex(char *name);
 void toggleNvramDebug(void);
 int renew_nvram(int mode, char *fname);
 int nvram_show(int mode);
-
-#ifndef CONFIG_KERNEL_NVRAM
-extern unsigned long  crc32      (unsigned long, const unsigned char *, unsigned);
-#endif
 #endif

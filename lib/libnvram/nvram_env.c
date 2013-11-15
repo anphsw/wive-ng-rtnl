@@ -72,24 +72,15 @@ static block_t fb[FLASH_BLOCK_NUM] =
 #ifdef NVRAM_LIB_LIBNVRAM_SSTRDUP
 static int bufitem = 0;
 static char buf[NV_BUFFERS_COUNT][MAX_NV_VALUE_LEN];
-#ifdef NVRAM_LIB_PTHREAD_FORCE
-static pthread_mutex_t mutex1 = PTHREAD_MUTEX_INITIALIZER;
-#endif
 
 char* sstrdup(char* str)
 {
 	char* res;
 	//lock till we'll have pointer to potentially free buffer
-#ifdef NVRAM_LIB_PTHREAD_FORCE
-	pthread_mutex_lock( &mutex1 );
-#endif
 	bufitem++;
 	if (bufitem >= NV_BUFFERS_COUNT)
 	    bufitem = 0;
 	res = buf[bufitem];
-#ifdef NVRAM_LIB_PTHREAD_FORCE
-	pthread_mutex_unlock( &mutex1 );
-#endif
 	//work with that buffer
 	strlcpy(res, str, MAX_NV_VALUE_LEN);
 	return res;
@@ -105,13 +96,11 @@ int nvram_init(int index)
 {
 	int i, len;
 	char *p, *q;
-#ifdef CONFIG_KERNEL_NVRAM
 	int fd;
 	nvram_ioctl_t nvr;
 
 	/*
 	 * read data from flash
-	 * skip crc checking which is done by Kernel NVRAM module 
 	 */
 	len = fb[index].flash_max_len - sizeof(fb[index].env.crc);
 
@@ -142,45 +131,6 @@ int nvram_init(int index)
 	}
         if(fd)
 	    close(fd);
-#else
-	unsigned long from;
-
-	//LIBNV_PRINT("--> nvram_init %d\n", index);
-	LIBNV_CHECK_INDEX(0);
-
-	//if reinit filed return...
-	if (fb[index].valid)
-		return 0;
-
-	//read crc from flash
-	from = fb[index].flash_offset;
-	len = sizeof(fb[index].env.crc);
-	flash_read((char *)&fb[index].env.crc, from, len);
-
-	//read data from flash
-	from = from + len;
-	len = fb[index].flash_max_len - len;
-	fb[index].env.data = (char *)malloc(len);
-	if ( fb[index].env.data == NULL )
-	{
-		LIBNV_ERROR("nvram_init(%d): not enough memory!", index);
-		return -1;
-	}
-
-	flash_read(fb[index].env.data, from, len);
-
-	//check crc
-	//printf("crc shall be %08lx\n", crc32(0, (unsigned char *)fb[index].env.data, len));
-	if ( crc32(0, (unsigned char *)fb[index].env.data, len) != fb[index].env.crc )
-	{
-		LIBNV_PRINT("Bad CRC %x, ignore values in flash.\n", fb[index].env.crc);
-		FREE(fb[index].env.data);
-		//empty cache
-		fb[index].valid = 1;
-		fb[index].dirty = 0;
-		return -1;
-	}
-#endif
 
 	//parse env to cache
 	p = fb[index].env.data;
@@ -269,26 +219,11 @@ char *nvram_get(int index, char *name)
 	/* Initial value should be NULL */
 	char *recv = NULL;
 
-#ifndef CONFIG_KERNEL_NVRAM
-	/* Get the fresh value from Kernel NVRAM moduel,
-	 * so there is no need to do nvram_close() and nvram_init() again
-	 */
-	//LIBNV_PRINT("--> nvram_get\n");
-	if ( nvram_init(index) == -1 )
-	{
-		return "";
-	}
-#endif
 	recv = nvram_bufget(index, name);
 
 	//btw, we don't return NULL anymore!
 	if (!recv)
 	    recv = "";
-
-#ifndef CONFIG_KERNEL_NVRAM
-	//Always need close nvram
-	nvram_close(index);
-#endif
 
     return recv;
 }
@@ -297,21 +232,11 @@ int nvram_set(int index, char *name, char *value)
 {
 	int rc;
 
-#ifndef CONFIG_KERNEL_NVRAM
-	/* Get the fresh value from Kernel NVRAM moduel,
-	 * so there is no need to do nvram_close() and nvram_init() again
-	 */
-	if ( nvram_init(index) == -1 )
-		return -1;
-#endif
 	if (nvram_bufset(index, name, value) == -1 ) 
 		rc = -1;
 	else
 	rc = nvram_commit(index);
-#ifndef CONFIG_KERNEL_NVRAM
-	//Always need close nvram
-	nvram_close(index);
-#endif
+
 	return rc;
 }
 
@@ -320,15 +245,12 @@ char *nvram_bufget(int index, char *name)
 	int idx;
 	/* Initial value should be NULL */
 	static char *ret = NULL;
-#ifdef CONFIG_KERNEL_NVRAM
 	int fd;
 	nvram_ioctl_t nvr;
-#endif
 	//LIBNV_PRINT("--> nvram_bufget %d\n", index);
 	LIBNV_CHECK_INDEX("");
 	LIBNV_CHECK_VALID("");
 
-#ifdef CONFIG_KERNEL_NVRAM
 	nvr.size  = MAX_VALUE_LEN;
 	nvr.index = index;
 	nvr.name  = name;
@@ -376,18 +298,15 @@ char *nvram_bufget(int index, char *name)
 		}
 	}
 	close(fd);
-#endif
 
 	idx = cache_idx(index, name);
 
 	if (-1 != idx) {
 		if (fb[index].cache[idx].value) {
 			//duplicate the value in case caller modify it
-#ifdef CONFIG_KERNEL_NVRAM
 			FREE(fb[index].cache[idx].value);
 			fb[index].cache[idx].value = strdup(nvr.value);
 			FREE(nvr.value);
-#endif
 			//Tom.Hung 2010-5-7, strdup() will cause memory leakage
 			//but if we return value directly, it will cause many other crash or delete value to nvram error.
 #ifdef NVRAM_LIB_LIBNVRAM_SSTRDUP
@@ -409,9 +328,7 @@ char *nvram_bufget(int index, char *name)
 	//btw, we don't return NULL anymore!
 	LIBNV_PRINT("bufget %d '%s'->''(empty) Warning!\n", index, name);
 
-#ifdef CONFIG_KERNEL_NVRAM
 	FREE(nvr.value);
-#endif
 
 	return "";
 }
@@ -419,15 +336,13 @@ char *nvram_bufget(int index, char *name)
 int nvram_bufset(int index, char *name, char *value)
 {
 	int idx;
-#ifdef CONFIG_KERNEL_NVRAM
 	int fd;
 	nvram_ioctl_t nvr;
-#endif
+
 	//LIBNV_PRINT("--> nvram_bufset\n");
 	LIBNV_CHECK_INDEX(-1);
 	LIBNV_CHECK_VALID(-1);
 
-#ifdef CONFIG_KERNEL_NVRAM
 	nvr.index = index;
 	nvr.name  = name;
 	nvr.value = value;
@@ -448,7 +363,7 @@ int nvram_bufset(int index, char *name, char *value)
 		return -1;
 	}
 	close(fd);
-#endif
+
 	idx = cache_idx(index, name);
 
 	if (-1 == idx) {
@@ -480,7 +395,6 @@ int nvram_bufset(int index, char *name, char *value)
  */
 int nvram_commit(int index)
 {
-#ifdef CONFIG_KERNEL_NVRAM
 	int fd;
 	nvram_ioctl_t nvr;
 
@@ -498,59 +412,7 @@ int nvram_commit(int index)
 		return -1;
 	}
 	close(fd);
-#else
-	unsigned long to;
-	int i, len;
-	char *p;
 
-	//LIBNV_PRINT("--> nvram_commit %d\n", index);
-	LIBNV_CHECK_INDEX(-1);
-	LIBNV_CHECK_VALID(-1);
-
-	if (!fb[index].dirty) {
-		LIBNV_PRINT("nothing to be committed\n");
-		return 0;
-	}
-
-	//construct env block
-	len = fb[index].flash_max_len - sizeof(fb[index].env.crc);
-	fb[index].env.data = (char *)malloc(len);
-	if (fb[index].env.data == NULL) {
-		LIBNV_ERROR("nvram_commit(%d): not enough memory!", index);
-		return 0;
-	}
-	bzero(fb[index].env.data, len);
-	p = fb[index].env.data;
-	for (i = 0; i < MAX_CACHE_ENTRY; i++) {
-		int l;
-		if (!fb[index].cache[i].name || !fb[index].cache[i].value)
-			break;
-		l = strlen(fb[index].cache[i].name) + strlen(fb[index].cache[i].value) + 2;
-		if (p - fb[index].env.data + 2 >= fb[index].flash_max_len) {
-			LIBNV_ERROR("ENV_BLK_SIZE 0x%x is not enough!", ENV_BLK_SIZE);
-			FREE(fb[index].env.data);
-			return -1;
-		}
-		snprintf(p, l, "%s=%s", fb[index].cache[i].name, fb[index].cache[i].value);
-		p += l;
-	}
-	*p = '\0'; //ending null
-
-	//calculate crc
-	fb[index].env.crc = (unsigned long)crc32(0, (unsigned char *)fb[index].env.data, len);
-	LIBNV_PRINT("Commit crc = %x\n", (unsigned int)fb[index].env.crc);
-
-	//write crc to flash
-	to = fb[index].flash_offset;
-	len = sizeof(fb[index].env.crc);
-	flash_write((char *)&fb[index].env.crc, to, len);
-
-	//write data to flash
-	to = to + len;
-	len = fb[index].flash_max_len - len;
-	flash_write(fb[index].env.data, to, len);
-	FREE(fb[index].env.data);
-#endif
 	fb[index].dirty = 0;
 	return 0;
 }
@@ -560,7 +422,6 @@ int nvram_commit(int index)
  */
 int nvram_clear(int index)
 {
-#ifdef CONFIG_KERNEL_NVRAM
 	int fd;
 	nvram_ioctl_t nvr;
 	nvr.index = index;
@@ -575,36 +436,7 @@ int nvram_clear(int index)
 		return -1;
 	}
 	close(fd);
-#else
-	unsigned long to;
-	int len;
 
-	///LIBNV_PRINT("--> nvram_clear %d\n", index);
-	LIBNV_CHECK_INDEX(-1);
-	nvram_close(index);
-
-	//construct all 1s env block
-	len = fb[index].flash_max_len - sizeof(fb[index].env.crc);
-	fb[index].env.data = (char *)malloc(len);
-	if (fb[index].env.data == NULL) {
-		LIBNV_ERROR("nvram_clear(%d): not enough memory!", index);
-		return 0;
-	}
-	memset(fb[index].env.data, 0xFF, len);
-
-	//calculate and write crc
-	fb[index].env.crc = (unsigned long)crc32(0, (unsigned char *)fb[index].env.data, len);
-	to = fb[index].flash_offset;
-	len = sizeof(fb[index].env.crc);
-	flash_write((char *)&fb[index].env.crc, to, len);
-
-	//write all 1s data to flash
-	to = to + len;
-	len = fb[index].flash_max_len - len;
-	flash_write(fb[index].env.data, to, len);
-	FREE(fb[index].env.data);
-	LIBNV_PRINT("clear flash from 0x%x for 0x%x bytes\n", (unsigned int *)to, len);
-#endif
 	fb[index].dirty = 0;
 	return 0;
 }

@@ -139,13 +139,7 @@ int main(int argc, char** argv)
 	    initInternet();
 
 	    /* Backup nvram setting and save rwfs */
-#ifndef CONFIG_KERNEL_NVRAM
-	    /* if usermode nvram need backup always boot */
-	    system("(sleep 20 && fs backup_nvram && fs save) &");
-#else
-	    /* if kernel need backup nvram only first boot and "SaveAndReboot" menu click */
 	    system("[ ! -f /etc/backup/nvram_backup.dat ] && (sleep 20 && fs backup_nvram && fs save) &");
-#endif
 
 	    //Security LED init
 	    auth_mode = nvram_get(RT2860_NVRAM, "AuthMode");

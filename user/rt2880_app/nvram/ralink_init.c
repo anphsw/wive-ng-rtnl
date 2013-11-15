@@ -11,7 +11,6 @@
 
 int set_usage(char *aout)
 {
-#ifndef CONFIG_RT2860V2_USER_MEMORY_OPTIMIZATION
 	int i;
 
 	printf("Usage example: \n");
@@ -19,13 +18,11 @@ int set_usage(char *aout)
 		printf("\t%s %s ", aout, getNvramName(i));
 		printf("lan_ipaddr 1.2.3.4\n");
 	}
-#endif
 	return -1;
 }
 
 int get_usage(char *aout)
 {
-#ifndef CONFIG_RT2860V2_USER_MEMORY_OPTIMIZATION
 	int i;
 
 	printf("Usage: \n");
@@ -33,13 +30,11 @@ int get_usage(char *aout)
 		printf("\t%s %s ", aout, getNvramName(i));
 		printf("lan_ipaddr\n");
 	}
-#endif
 	return -1;
 }
 
 int buf_get_usage(char *aout)
 {
-#ifndef CONFIG_RT2860V2_USER_MEMORY_OPTIMIZATION
 	int i;
 
 	printf("Usage: \n");
@@ -47,7 +42,6 @@ int buf_get_usage(char *aout)
 		printf("\t%s %s ", aout, getNvramName(i));
 		printf("lan_ipaddr wan_ipaddr ...\n");
 	}
-#endif
 	return -1;
 }
 
@@ -134,12 +128,6 @@ int ra_nv_buf_get(int argc, char *argv[])
 		return get_usage(argv[0]);
 	}
 
-#ifndef CONFIG_KERNEL_NVRAM
-	if ( nvram_init(index) == -1 )
-	{
-		return "";
-	}
-#endif
 	for (i = 2; i < argc; i++) {
 	    rc = nvram_bufget(index, argv[i]);
 	    if (rc) {
@@ -151,10 +139,6 @@ int ra_nv_buf_get(int argc, char *argv[])
 	    }
 	}
 
-#ifndef CONFIG_KERNEL_NVRAM
-	//Always need close nvram
-	nvram_close(index);
-#endif
     return (ret);
 }
 
@@ -194,18 +178,6 @@ static int nvram_load_default(void)
 	if ( nvram_init(RT2860_NVRAM) == -1 )
 		return -1;
 
-	/* set default RF Type by config */
-#if defined(CONFIG_RALINK_RT3662_2T2R) || defined(CONFIG_RALINK_RT3883_3T3R)
-        nvram_bufset(RT2860_NVRAM, "RFICType", "4");
-#elif defined(CONFIG_RALINK_RT3050_1T1R)
-        nvram_bufset(RT2860_NVRAM, "RFICType", "5");
-#elif defined(CONFIG_RALINK_RT3051_1T2R)
-        nvram_bufset(RT2860_NVRAM, "RFICType", "7");
-#elif defined(CONFIG_RALINK_RT3052_2T2R)
-        nvram_bufset(RT2860_NVRAM, "RFICType", "8");
-#else
-        nvram_bufset(RT2860_NVRAM, "RFICType", "5");
-#endif
 	printf("Restore old macs...\n");
 	if ((strlen(WLAN_MAC_ADDR) > 0) && isMacValid(WLAN_MAC_ADDR))
 	    nvram_bufset(RT2860_NVRAM, "WLAN_MAC_ADDR", WLAN_MAC_ADDR);
@@ -272,12 +244,10 @@ static int gen_wifi_config(int mode)
 
 	if (RT2860_NVRAM == mode) {
 		if (!inic) {
-		    FPRINT_STR(RFICType);
 		    FPRINT_NUM(WirelessMode);
 		    FPRINT_NUM(Channel);
 		    FPRINT_STR(SSID1);
 		} else {
-		    fprintf(fp, "RFICType=%d\n", 8);
 		    fprintf(fp, "WirelessMode=%d\n", atoi(nvram_bufget(mode, "WirelessModeINIC")));
 		    fprintf(fp, "Channel=%d\n", atoi(nvram_bufget(mode, "ChannelINIC")));
 		    fprintf(fp, "SSID1=%s\n", nvram_bufget(mode, "SSID1INIC"));

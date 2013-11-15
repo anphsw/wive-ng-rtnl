@@ -387,7 +387,6 @@ not_nand:
 
 void usage(void)
 {
-#ifndef CONFIG_RT2860V2_USER_MEMORY_OPTIMIZATION
 	fprintf(stderr, "Usage: mtd [<options> ...] <command> [<arguments> ...] <device>\n\n"
 	"The device is in the format of mtdX (eg: mtd4) or its label.\n"
 	"mtd recognizes these commands:\n"
@@ -405,7 +404,6 @@ void usage(void)
 	"        -w                      read after write action to check\n"
 	"Example: To write linux.trx to mtd4 labeled as linux and reboot afterwards\n"
 	"         mtd -r write linux.trx linux\n\n");
-#endif
 	exit(1);
 }
 

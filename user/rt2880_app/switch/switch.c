@@ -25,13 +25,8 @@
 
 #include "ra_ioctl.h"
 
-#ifdef CONFIG_RT2860V2_USER_MEMORY_OPTIMIZATION
-#define RT_SWITCH_HELP		0
-#define RT_TABLE_MANIPULATE	0
-#else
 #define RT_SWITCH_HELP		1
 #define RT_TABLE_MANIPULATE	1
-#endif
 
 int esw_fd;
 
