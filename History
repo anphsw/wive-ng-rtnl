@@ -38,6 +38,7 @@
 26) kernel: wifi_drivers: enable enchanged statistic for all devices.<br>
 27) kernel: fix potentional skb_under_panic oops in neigh_resolve_output.<br>
 28) kernel: netfilter: conntrack: check for NEXTHDR_NONE before header sanity checking.<br>
+29) kernel: udp: fix length check.<br>
 <br>
 <br>
 <br>
