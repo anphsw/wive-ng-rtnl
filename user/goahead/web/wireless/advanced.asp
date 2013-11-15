@@ -25,9 +25,12 @@ var mcastMcs = defaultNumber('<% getCfgZero(1, "McastMcs"); %>', '0');
 var video_turbine_built='<% getVideoTurbineBuilt(); %>';
 var video_turbine = '<% getCfgZero(1, "VideoTurbine"); %>';
 var lnaGain = '<% getCfgZero(1, "HiPower"); %>';
+
+<!--
 var htNoiseThresh = '<% getCfgZero(1, "HT_BSSCoexApCntThr"); %>';
 var htNoiseCoex = '<% getCfgZero(1, "HT_BSSCoexistence"); %>';
 var ap2040Rescan = '<% getCfgZero(1, "AP2040Rescan"); %>';
+-->
 
 function initTranslation()
 {
@@ -141,7 +144,7 @@ function initValue()
 		else
 			displayElement('video_turbine_row', false);
 	}
-	
+
 	// Set-up TX power combo
 	for (var i=0; i<form.tx_power.options.length; i++)
 	{
@@ -149,7 +152,7 @@ function initValue()
 			break;
 		form.tx_power.options.selectedIndex = i;
 	}
-	
+
 	if (lnaGain == '1')
 	{
 		form.lnaGainEnable[0].checked = true;
@@ -160,20 +163,22 @@ function initValue()
 		form.lnaGainEnable[0].checked = false;
 		form.lnaGainEnable[1].checked = true;
 	}
-	
+<!--
 	form.HT_BSSCoexApCntThr.value = htNoiseThresh;
 	form.HT_BSSCoexistence[0].checked = (htNoiseCoex == '1');
 	form.HT_BSSCoexistence[1].checked = (htNoiseCoex != '1');
 	form.AP2040Rescan[0].checked = (ap2040Rescan == '1');
 	form.AP2040Rescan[1].checked = (ap2040Rescan != '1');
-	
 	wifiCoexThrChange(form);
+-->
 }
 
+<!--
 function wifiCoexThrChange(form)
 {
 	displayElement('wifi_coex_thr_row', form.HT_BSSCoexistence[0].checked);
 }
+-->
 
 function CheckValue(form)
 {
@@ -240,7 +245,7 @@ function CheckValue(form)
 		form.rts.select();
 		return false;
 	}
-
+<!--
 	if (form.HT_BSSCoexistence[0].checked)
 	{
 		var v = form.HT_BSSCoexApCntThr.value;
@@ -252,7 +257,7 @@ function CheckValue(form)
 			return false;
 		}
 	}
-
+-->
 	return true;
 }
 
@@ -298,6 +303,7 @@ function CheckValue(form)
             <td><input type="text" name="rts" class="half" maxlength="4" value="<% getCfgZero(1, "RTSThreshold"); %>">
               <font color="#808080" id="advRTSRange">(range 1 - 2347)</font></td>
           </tr>
+<!--
           <tr>
             <td class="head">Wi-Fi coexistence</td>
             <td><input type="radio" name="HT_BSSCoexistence" value="1" onChange="wifiCoexThrChange(this.form);">
@@ -310,6 +316,7 @@ function CheckValue(form)
             <td><input name="HT_BSSCoexApCntThr" class="half" value="">
               <span style="color: #808080">&nbsp;(range 0 - 255, 0 = auto)</span></td>
           </tr>
+-->
           <tr>
             <td class="head" id="advTxPW">TX Power</td>
             <td><select name="tx_power" class="half">
@@ -363,6 +370,7 @@ function CheckValue(form)
               <input type="radio" name="lnaGainEnable" value="0" checked>
               Disable </td>
           </tr>
+<!--
           <tr>
             <td class="head">Rescan HT Mode</td>
             <td><input type="radio" name="AP2040Rescan" value="1">
@@ -370,6 +378,7 @@ function CheckValue(form)
               <input type="radio" name="AP2040Rescan" value="0" checked>
               Disable </td>
           </tr>
+-->
           <tr>
             <td class="head" id="staadvCountry">Country Region Code</td>
             <td><select id="country_region" name="country_region" class="mid">

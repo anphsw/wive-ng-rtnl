@@ -39,9 +39,9 @@ config  RT2860V2_AP_APCLI
 
 config  RT2860V2_AP_MAC_REPEATER
 	bool "MAC Repeater Support"
+	default n
 	depends on RT2860V2_AP_APCLI
 	depends on RALINK_MT7620
-	default n
 
 config  RT2860V2_AP_DFS
 	bool "DFS support"
@@ -103,25 +103,26 @@ endchoice
 
 config  RT2860V2_AP_ADJ_PWR_CONSUMPTION_SUPPORT
 	bool "Adjust Power Consumption Support"
+	default n
 	depends on RT2860V2_AP
 	depends on RALINK_MT7620
-	default n
 
 config  RT2860V2_AP_RTMP_INTERNAL_TX_ALC
 	bool "TSSI Compensation"
+	default n
 	depends on RT2860V2_AP
 	depends on RALINK_RT3350 || RALINK_RT3352 || RALINK_RT5350 || RALINK_MT7620
 	depends on INTERNAL_PA_INTERNAL_LNA || INTERNAL_PA_EXTERNAL_LNA
-	default n
 
 config  RT2860V2_AP_RTMP_TEMPERATURE_COMPENSATION
 	bool "Temperature Compensation"
+	default n
 	depends on RT2860V2_AP
 	depends on RALINK_MT7620
-	default n
 
 config  RT2860V2_AP_80211N_DRAFT3
 	bool "802.11n Draft3"
+	default n
 	depends on RT2860V2_AP
 
 config  RT2860V2_AP_IGMP_SNOOP
@@ -146,8 +147,8 @@ config  RT2860V2_AP_READ_MAC_FROM_MTD
 
 config  RT2860V2_AP_MEMORY_OPTIMIZATION
 	bool "Memory Optimization"
-	depends on RT2860V2_AP
 	default n
+	depends on RT2860V2_AP
 
 #config  RT2860V2_AP_SINGLE_SKU
 #	bool "Single SKU"

@@ -54,6 +54,7 @@ config  RT2860V2_STA_TXBF
 
 config  RT2860V2_STA_80211N_DRAFT3
 	bool "802.11n Draft3"
+	default n
 	depends on RT2860V2_STA
 
 #config  RT2860V2_STA_WAPI

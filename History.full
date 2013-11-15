@@ -1740,11 +1740,12 @@
 24) kernel: inet: fix inet_bind_bucket_for_each.<br>
 25) kernel: tcp: Handle CHECKSUM_PARTIAL for SYNACK packets.<br>
 26) kernel: wifi_drivers: enable enchanged statistic for all devices.<br>
-27) kernel: fix potentional skb_under_panic oops in neigh_resolve_output.<br>
-28) kernel: netfilter: conntrack: check for NEXTHDR_NONE before header sanity checking.<br>
-29) kernel: kernel: udp: fix length check.<br>
-30) nvram: make iNIC (rt3090) config automatic from nvram with different parametrs WirelessModeINIC/ChannelINIC.<br>
-31) clean: remove very old unused nvram_daemon and userspace nvram mode from libnvram.<br>
+27) kernel: wifi_drivers: disable draft3 extensions(unused).<br>
+28) kernel: fix potentional skb_under_panic oops in neigh_resolve_output.<br>
+29) kernel: netfilter: conntrack: check for NEXTHDR_NONE before header sanity checking.<br>
+30) kernel: udp: fix length check.<br>
+31) nvram: make iNIC (rt3090) config automatic from nvram with different parametrs WirelessModeINIC/ChannelINIC.<br>
+32) clean: remove very old unused nvram_daemon and userspace nvram mode from libnvram.<br>
 <br>
 <br>
 <br>
