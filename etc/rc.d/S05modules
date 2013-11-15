@@ -81,6 +81,7 @@ get_param() {
 
 gen_wifi_config() {
     rm -f /etc/Wireless/RT2860/RT2860.dat
+    rm -f /etc/Wireless/iNIC/RT2860AP.dat
     ralink_init make_wireless_config rt2860
 }
 

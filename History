@@ -39,6 +39,7 @@
 27) kernel: fix potentional skb_under_panic oops in neigh_resolve_output.<br>
 28) kernel: netfilter: conntrack: check for NEXTHDR_NONE before header sanity checking.<br>
 29) kernel: udp: fix length check.<br>
+30) nvram: make iNIC (rt3090) config automatic from nvram with different parametrs WirelessModeINIC/ChannelINIC.<br>
 <br>
 <br>
 <br>

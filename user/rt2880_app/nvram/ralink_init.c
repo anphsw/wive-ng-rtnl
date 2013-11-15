@@ -240,20 +240,29 @@ static int nvram_load_default(void)
 static int gen_wifi_config(int mode)
 {
 	FILE *fp;
-	int  i, ssid_num = 1;
+	int  i, ssid_num = 1, inic = 0;
 	char tx_rate[16], wmm_enable[16];
 	char temp[2], buf[4];
 
-	if ( nvram_init(mode) == -1 )
-		return -1;
-
-	system("mkdir -p /etc/Wireless/RT2860");
-	if ( mode == RT2860_NVRAM )
-	{
+	if (mode == RT2860_NVRAM) {
+		system("mkdir -p /etc/Wireless/RT2860");
 		fp = fopen("/etc/Wireless/RT2860/RT2860.dat", "w+");
-	}
-	else
+	} else if (mode == RTINIC_NVRAM) {
+		system("mkdir -p /etc/Wireless/iNIC");
+		fp = fopen("/etc/Wireless/iNIC/RT2860AP.dat", "w+");
+		/* after select file for write back to native 2860 mode */
+		inic = 1;
+		mode = RT2860_NVRAM;
+	} else {
+		printf("gen_wifi_config: mode unknown...\n");
 		return 0;
+	}
+
+	if (nvram_init(mode) == -1) {
+		printf("gen_wifi_config: nvram init failed...\n");
+		fclose(fp);
+		return -1;
+	}
 
 	fprintf(fp, "#The word of \"Default\" must not be removed\n");
 	fprintf(fp, "Default\n");
@@ -262,15 +271,22 @@ static int gen_wifi_config(int mode)
 #define FPRINT_STR(x) fprintf(fp, #x"=%s\n", nvram_bufget(mode, #x));
 
 	if (RT2860_NVRAM == mode) {
-		FPRINT_STR(RFICType);
-		FPRINT_STR(WLAN_MAC_ADDR);
+		if (!inic) {
+		    FPRINT_STR(RFICType);
+		    FPRINT_NUM(WirelessMode);
+		    FPRINT_NUM(Channel);
+		} else {
+		    fprintf(fp, "RFICType=%d\n", 8);
+		    fprintf(fp, "WirelessMode=%d\n", atoi(nvram_bufget(mode, "WirelessModeINIC")));
+		    fprintf(fp, "Channel=%d\n", atoi(nvram_bufget(mode, "ChannelINIC")));
+		}
+
 		FPRINT_NUM(CountryRegion);
 		FPRINT_NUM(CountryRegionABand);
 		FPRINT_STR(CountryCode);
 #ifdef CONFIG_RT2860V2_EXT_CHANNEL_LIST
 		FPRINT_NUM(ChannelGeography);
 #endif
-		FPRINT_NUM(Channel);
 		FPRINT_NUM(AutoChannelSelect);
 
 #if defined (CONFIG_RT2860V2_AP_MBSS) || defined (CONFIG_RT2860V2_STA_MBSS)
@@ -297,7 +313,6 @@ static int gen_wifi_config(int mode)
 #endif
 #endif
 
-		FPRINT_NUM(WirelessMode);
 		FPRINT_NUM(AutoConnect);
 		FPRINT_NUM(FastConnect);
 		FPRINT_NUM(HiPower);
@@ -308,8 +323,7 @@ static int gen_wifi_config(int mode)
 		bzero(tx_rate, sizeof(char)*16);
 		for (i = 0; i < ssid_num; i++)
 		{
-			sprintf(tx_rate+strlen(tx_rate), "%d",
-					atoi(nvram_bufget(mode, "TxRate")));
+			sprintf(tx_rate+strlen(tx_rate), "%d", atoi(nvram_bufget(mode, "TxRate")));
 			sprintf(tx_rate+strlen(tx_rate), "%c", ';');
 		}
 		tx_rate[strlen(tx_rate) - 1] = '\0';
@@ -339,8 +353,7 @@ static int gen_wifi_config(int mode)
 		bzero(wmm_enable, sizeof(char)*16);
 		for (i = 0; i < ssid_num; i++)
 		{
-			sprintf(wmm_enable+strlen(wmm_enable), "%d",
-					atoi(nvram_bufget(mode, "WmmCapable")));
+			sprintf(wmm_enable+strlen(wmm_enable), "%d", atoi(nvram_bufget(mode, "WmmCapable")));
 			sprintf(wmm_enable+strlen(wmm_enable), "%c", ';');
 		}
 		wmm_enable[strlen(wmm_enable) - 1] = '\0';
@@ -574,6 +587,7 @@ static int gen_wifi_config(int mode)
 		FPRINT_NUM(HT_MIMOPSMode);
 		FPRINT_NUM(HT_BSSCoexistence);
 		FPRINT_NUM(HT_BSSCoexApCntThr);
+
 #ifdef CONFIG_RT2860V2_AP_GREENAP
 		FPRINT_NUM(GreenAP);
 #endif
@@ -585,6 +599,7 @@ static int gen_wifi_config(int mode)
 			fprintf(fp, "WscConfStatus=%d\n", 1);
 		else
 			fprintf(fp, "WscConfStatus=%d\n", 2);
+
 		if (strcmp(nvram_bufget(mode, "WscVendorPinCode"), "") != 0)
 			FPRINT_STR(WscVendorPinCode);
 
@@ -778,6 +793,9 @@ int main(int argc, char *argv[])
 			if (!strncmp(argv[2], "2860", 5) ||
 			    !strncasecmp(argv[2], "rt2860", 7)) //b-compatible
 				gen_wifi_config(RT2860_NVRAM);
+#ifdef CONFIG_RT3090_AP
+				gen_wifi_config(RTINIC_NVRAM);
+#endif
 #ifdef CONFIG_DUAL_IMAGE
 			else if (!strncasecmp(argv[2], "uboot", 6))
 				fprintf(stderr,"No support of gen command of uboot parameter.\n");

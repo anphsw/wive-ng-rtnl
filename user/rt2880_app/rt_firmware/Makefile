@@ -58,8 +58,6 @@ endif
 ifdef CONFIG_RT3090_AP
 	mkdir -p $(ROMFSDIR)/etc/Wireless/iNIC
 	$(ROMFSINST) -S -e CONFIG_RT3090_AP		RT3092_PCIe_LNA_2T2R_ALC_V1_2.bin /etc/Wireless/iNIC/RT3092_PCIe_LNA_2T2R_ALC_V1_2.bin
-	# need rewrite code in ralink_init for 2.4GHz module configure
-	$(ROMFSINST) -S -e CONFIG_RT3090_AP		RT2860.dat-3090			  /etc/Wireless/iNIC/RT2860AP.dat
 endif
 #mesh support
 ifdef CONFIG_RT2860V2_AP_MESH

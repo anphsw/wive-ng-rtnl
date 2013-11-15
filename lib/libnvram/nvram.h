@@ -41,19 +41,11 @@
 #define FLASH_BLOCK_NUM	5
 #define UBOOT_NVRAM	0
 #define RT2860_NVRAM    1
-#define RTDEV_NVRAM    	2
-#define CERT_NVRAM    	3
-#define WAPI_NVRAM    	4
-#define RTINIC_NVRAM    1
-#define RT2561_NVRAM    2
+#define RTINIC_NVRAM    2
 #else
 #define FLASH_BLOCK_NUM	4
 #define RT2860_NVRAM    0
-#define RTDEV_NVRAM    	1
-#define CERT_NVRAM    	2
-#define WAPI_NVRAM    	3
 #define RTINIC_NVRAM    1
-#define RT2561_NVRAM    2
 #endif
 
 #define RALINK_NVRAM_IOCTL_GET		0x01
