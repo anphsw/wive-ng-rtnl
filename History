@@ -30,12 +30,13 @@
 18) kernel: ipv6: restore IPv6 when MTU is big enough.<br>
 19) kernel: ipv6: don't update ADVMSS on routes where the MTU is not also updated.<br>
 20) kernel: ipv6: ip6_fragment() should check CHECKSUM_PARTIAL.<br>
-21) kernel: ipv4 igmp: use in_dev_put in timer handlers instead of __in_dev_put.<br>
-22) kernel: ipv4: cap ADVMSS metric in the FIB rather than the routing cache.<br>
-23) kernel: inet: fix inet_bind_bucket_for_each.<br>
-24) kernel: tcp: Handle CHECKSUM_PARTIAL for SYNACK packets.<br>
-25) kernel: wifi_drivers: enable enchanged statistic for all devices.<br>
-26) kernel: fix potentional skb_under_panic oops in neigh_resolve_output.<br>
+21) kenrel: ipv6: ignore looped-back NA while dad is running.<br>
+22) kernel: ipv4 igmp: use in_dev_put in timer handlers instead of __in_dev_put.<br>
+23) kernel: ipv4: cap ADVMSS metric in the FIB rather than the routing cache.<br>
+24) kernel: inet: fix inet_bind_bucket_for_each.<br>
+25) kernel: tcp: Handle CHECKSUM_PARTIAL for SYNACK packets.<br>
+26) kernel: wifi_drivers: enable enchanged statistic for all devices.<br>
+27) kernel: fix potentional skb_under_panic oops in neigh_resolve_output.<br>
 <br>
 <br>
 <br>
