@@ -20,20 +20,20 @@ menuconfig CRYPTO
 if CRYPTO
 
 config CRYPTO_ALGAPI
-	tristate
+	tristate "ALGAPI"
 	help
 	  This option provides the API for cryptographic algorithms.
 
 config CRYPTO_ABLKCIPHER
-	tristate
+	tristate "ABLKCIPHER"
 	select CRYPTO_BLKCIPHER
 
 config CRYPTO_BLKCIPHER
-	tristate
+	tristate "BLKCIPHER"
 	select CRYPTO_ALGAPI
 
 config CRYPTO_HASH
-	tristate
+	tristate "HASH"
 	select CRYPTO_ALGAPI
 
 config CRYPTO_MANAGER
