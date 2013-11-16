@@ -199,9 +199,9 @@ ifeq ($(CONFIG_RT3090_AP_DLS),y)
 rt3090_ap-objs += ../rt3090/ap/ap_dls.o
 endif
 
-#ifeq ($(CONFIG_RT3090_AP_IDS),y)
-#rt3090_ap-objs += ../rt3090/ap/ap_ids.o
-#endif
+ifeq ($(CONFIG_RT3090_AP_IDS),y)
+rt3090_ap-objs += ../rt3090/ap/ap_ids.o
+endif
 
 #ifeq ($(CONFIG_RT3090_RT3XXX_AP_ANTENNA_DIVERSITY),y)
 #rt3090_ap-objs += ../rt3090/os/linux/ap_diversity.o
@@ -319,9 +319,9 @@ ifeq ($(CONFIG_RT3090_AP_DLS),y)
 EXTRA_CFLAGS += -DQOS_DLS_SUPPORT
 endif
 
-#ifeq ($(CONFIG_RT3090_AP_IDS),y)
-#EXTRA_CFLAGS += -DIDS_SUPPORT
-#endif
+ifeq ($(CONFIG_RT3090_AP_IDS),y)
+EXTRA_CFLAGS += -DIDS_SUPPORT
+endif
 
 #ifeq ($(CONFIG_RT3090_RT3XXX_AP_ANTENNA_DIVERSITY),y)
 #EXTRA_CFLAGS   += -DRT3XXX_ANTENNA_DIVERSITY_SUPPORT
