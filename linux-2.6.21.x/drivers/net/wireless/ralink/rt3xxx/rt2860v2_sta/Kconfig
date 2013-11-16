@@ -1,8 +1,6 @@
 config RT2860V2_STA
 	tristate "Ralink APSoC 802.11n STA support"
 	select WIRELESS_EXT
-	select WEXT_SPY
-	select WEXT_PRIV
 
 config  RT2860V2_STA_WPA_SUPPLICANT
 	bool "WPA Supplicant"
