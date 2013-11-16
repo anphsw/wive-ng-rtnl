@@ -1,6 +1,5 @@
 config RT2860V2_STA
 	tristate "Ralink APSoC 802.11n STA support"
-	select WIRELESS_EXT
 
 config  RT2860V2_STA_WPA_SUPPLICANT
 	bool "WPA Supplicant"

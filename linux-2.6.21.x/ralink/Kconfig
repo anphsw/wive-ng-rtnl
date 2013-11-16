@@ -24,6 +24,11 @@ endmenu
 # Wireless
 #############
 menu "Platform config for  Ralink RT3xx/RT28xx/RT5xx."
+
+config RALINK_RT3052_25DRIVER
+	bool "Use old 2.5.0.x version AP driver for RT305x/3350"
+        depends on RALINK_RT3052
+
 choice
         prompt "RF Type"
         depends on RALINK_RT5350
@@ -100,7 +105,12 @@ endmenu
 # WIFI
 #######
 menu "AP(STA) MODE Ralink RT3xxx wireless driver."
+if RALINK_RT3052_25DRIVER
+source "drivers/net/wireless/ralink/rt305x/rt2860v2_ap/Kconfig"
+endif
+if !RALINK_RT3052_25DRIVER
 source "drivers/net/wireless/ralink/rt3xxx/rt2860v2_ap/Kconfig"
+endif
 source "drivers/net/wireless/ralink/rt3xxx/rt2860v2_sta/Kconfig"
 if HW_HAS_PCI
     menu "802.11 309x AP pci-e wireless driver."

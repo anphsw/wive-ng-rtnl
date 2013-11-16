@@ -44,6 +44,10 @@ obj-$(CONFIG_PCMCIA_WL3501)	+= wl3501_cs.o
 
 obj-$(CONFIG_USB_ZD1201)	+= zd1201.o
 
+ifdef CONFIG_RALINK_RT3052_25DRIVER
+obj-$(CONFIG_RT2860V2_AP)       += ralink/rt305x/rt2860v2_ap/
+else
 obj-$(CONFIG_RT2860V2_AP)       += ralink/rt3xxx/rt2860v2_ap/
+endif
 obj-$(CONFIG_RT2860V2_STA)      += ralink/rt3xxx/rt2860v2_sta/
 obj-$(CONFIG_RT3090_AP)         += ralink/rt3090/rt3090_ap/

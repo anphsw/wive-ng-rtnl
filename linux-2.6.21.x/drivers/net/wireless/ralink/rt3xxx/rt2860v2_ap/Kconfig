@@ -1,6 +1,5 @@
 config RT2860V2_AP
 	tristate "Ralink APSoC 802.11n AP support"
-	select WIRELESS_EXT
 
 config  RT2860V2_AP_LED
 	bool "LED Support"
