@@ -5,7 +5,7 @@ PWD=`pwd`
 rm -rf $PWD/releases
 mkdir -p $PWD/releases
 
-DEVLIST="RT3052-2T2R RT3052-2T2R-USB RT3050-1T1R RT3350-1T1R"
+DEVLIST="RT3662-2T2R-5G-USB RT3352-2T2R-USB"
 
 ./clear
 
