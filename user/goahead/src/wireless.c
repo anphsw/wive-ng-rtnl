@@ -1110,10 +1110,12 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "TxPower", tx_power);
 	nvram_bufset(RT2860_NVRAM, "TxPreamble", short_preamble);
 	nvram_bufset(RT2860_NVRAM, "ShortSlot", short_slot);
-	nvram_bufset(RT2860_NVRAM, "TxBurst", tx_burst);
 	nvram_bufset(RT2860_NVRAM, "PktAggregate", pkt_aggregate);
 	nvram_bufset(RT2860_NVRAM, "RDRegion", rd_region);
 	nvram_bufset(RT2860_NVRAM, "HiPower", lna_gain);
+	//txburst and burst mode set in one place
+	nvram_bufset(RT2860_NVRAM, "TxBurst", tx_burst);
+	nvram_bufset(RT2860_NVRAM, "BurstMode", tx_burst);
 #ifdef CONFIG_RT2860V2_AP_80211N_DRAFT3
 	nvram_bufset(RT2860_NVRAM, "HT_BSSCoexistence", ht_bss_coex);
 	if (strcmp(ht_bss_coex, "1") == 0)
