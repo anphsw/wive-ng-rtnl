@@ -322,12 +322,16 @@ static int gen_wifi_config(int mode)
 		FPRINT_NUM(TxPower);
 		FPRINT_NUM(DisableOLBC);
 		FPRINT_NUM(BGProtection);
+		fprintf(fp, "TxAntenna=\n");
+		fprintf(fp, "RxAntenna=\n");
 		FPRINT_NUM(TxPreamble);
 		FPRINT_NUM(RTSThreshold);
 		FPRINT_NUM(FragThreshold);
 		FPRINT_NUM(TxBurst);
+		FPRINT_NUM(BurstMode);
 		FPRINT_NUM(PktAggregate);
 		FPRINT_NUM(FreqDelta);
+		fprintf(fp, "TurboRate=0\n");
 #if defined (CONFIG_RT2860V2_AP_VIDEO_TURBINE) || defined (CONFIG_RT2860V2_STA_VIDEO_TURBINE)
 		FPRINT_NUM(VideoTurbine);
 		FPRINT_NUM(VideoClassifierEnable);
@@ -355,14 +359,28 @@ static int gen_wifi_config(int mode)
 		FPRINT_NUM(ShortSlot);
 		FPRINT_STR(IEEE8021X);
 		FPRINT_NUM(IEEE80211H);
-		FPRINT_NUM(DebugFlags);
-		FPRINT_NUM(CSPeriod);
 #if defined (CONFIG_RT2860V2_AP_CARRIER) || defined (CONFIG_RT2860V2_STA_CARRIER)
 		FPRINT_NUM(CarrierDetect);
 #endif
+		FPRINT_STR(PreAntSwitch);
+		FPRINT_NUM(PhyRateLimit);
+		FPRINT_NUM(DebugFlags);
+		FPRINT_NUM(FineAGC);
+		FPRINT_NUM(StreamMode);
+		FPRINT_STR(StreamModeMac0);
+		FPRINT_STR(StreamModeMac1);
+		FPRINT_STR(StreamModeMac2);
+		FPRINT_STR(StreamModeMac3);
+		FPRINT_NUM(CSPeriod);
 		FPRINT_STR(RDRegion);
 		FPRINT_STR(StationKeepAlive);
 #if defined (CONFIG_RT2860V2_AP_DFS) || defined (CONFIG_RT2860V2_STA_DFS)
+		FPRINT_NUM(ITxBfEn);
+		FPRINT_NUM(ETxBfEnCond);
+		FPRINT_NUM(ITxBfTimeout);
+		FPRINT_NUM(ETxBfTimeout);
+		FPRINT_NUM(ETxBfNoncompress);
+		FPRINT_NUM(ETxBfIncapable);
 		FPRINT_NUM(DfsLowerLimit);
 		FPRINT_NUM(DfsUpperLimit);
 		FPRINT_NUM(DfsIndoor);
@@ -388,6 +406,9 @@ static int gen_wifi_config(int mode)
 		FPRINT_NUM(AvgRssiReq);
 		FPRINT_NUM(DFS_R66);
 		FPRINT_STR(blockch);
+#endif
+#ifdef CONFIG_RT2860V2_AP_GREENAP
+		FPRINT_NUM(GreenAP);
 #endif
 		FPRINT_STR(PreAuth);
 		FPRINT_STR(AuthMode);
@@ -554,14 +575,12 @@ static int gen_wifi_config(int mode)
 		FPRINT_NUM(HT_DisallowTKIP);
 		FPRINT_NUM(HT_40MHZ_INTOLERANT);
 		FPRINT_NUM(HT_MIMOPSMode);
-		FPRINT_NUM(HT_BSSCoexistence);
-		FPRINT_NUM(HT_BSSCoexApCntThr);
-#ifdef CONFIG_RT2860V2_AP_GREENAP
-		FPRINT_NUM(GreenAP);
-#endif
 		FPRINT_NUM(WscConfMode);
 		FPRINT_NUM(WCNTest);
-
+#ifdef CONFIG_RT2860V2_AP_80211N_DRAFT3
+		FPRINT_NUM(HT_BSSCoexistence);
+		FPRINT_NUM(HT_BSSCoexApCntThr);
+#endif
 #if defined (CONFIG_RT2860V2_AP_MBSS) || defined (CONFIG_RT2860V2_STA_MBSS)
 		FPRINT_NUM(AccessPolicy0);
 		FPRINT_STR(AccessControlList0);

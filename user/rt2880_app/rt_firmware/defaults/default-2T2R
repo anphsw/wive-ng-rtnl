@@ -254,6 +254,7 @@ TransAccess=1
 TransAuthor=0
 tv_port=0
 TxBurst=1
+BurstMode=1
 TXPath=2
 TxPower=70
 TxPreamble=1
