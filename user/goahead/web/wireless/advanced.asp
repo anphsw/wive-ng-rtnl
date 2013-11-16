@@ -26,11 +26,9 @@ var video_turbine_built='<% getVideoTurbineBuilt(); %>';
 var video_turbine = '<% getCfgZero(1, "VideoTurbine"); %>';
 var lnaGain = '<% getCfgZero(1, "HiPower"); %>';
 
-<!--
-var htNoiseThresh = '<% getCfgZero(1, "HT_BSSCoexApCntThr"); %>';
-var htNoiseCoex = '<% getCfgZero(1, "HT_BSSCoexistence"); %>';
-var ap2040Rescan = '<% getCfgZero(1, "AP2040Rescan"); %>';
--->
+// var htNoiseThresh = '<% getCfgZero(1, "HT_BSSCoexApCntThr"); %>';
+// var htNoiseCoex = '<% getCfgZero(1, "HT_BSSCoexistence"); %>';
+// var ap2040Rescan = '<% getCfgZero(1, "AP2040Rescan"); %>';
 
 function initTranslation()
 {
@@ -163,22 +161,19 @@ function initValue()
 		form.lnaGainEnable[0].checked = false;
 		form.lnaGainEnable[1].checked = true;
 	}
-<!--
-	form.HT_BSSCoexApCntThr.value = htNoiseThresh;
-	form.HT_BSSCoexistence[0].checked = (htNoiseCoex == '1');
-	form.HT_BSSCoexistence[1].checked = (htNoiseCoex != '1');
-	form.AP2040Rescan[0].checked = (ap2040Rescan == '1');
-	form.AP2040Rescan[1].checked = (ap2040Rescan != '1');
-	wifiCoexThrChange(form);
--->
+
+//	form.HT_BSSCoexApCntThr.value = htNoiseThresh;
+//	form.HT_BSSCoexistence[0].checked = (htNoiseCoex == '1');
+//	form.HT_BSSCoexistence[1].checked = (htNoiseCoex != '1');
+//	form.AP2040Rescan[0].checked = (ap2040Rescan == '1');
+//	form.AP2040Rescan[1].checked = (ap2040Rescan != '1');
+//	wifiCoexThrChange(form);
 }
 
-<!--
-function wifiCoexThrChange(form)
-{
-	displayElement('wifi_coex_thr_row', form.HT_BSSCoexistence[0].checked);
-}
--->
+//function wifiCoexThrChange(form)
+//{
+//	displayElement('wifi_coex_thr_row', form.HT_BSSCoexistence[0].checked);
+//}
 
 function CheckValue(form)
 {
@@ -245,19 +240,19 @@ function CheckValue(form)
 		form.rts.select();
 		return false;
 	}
-<!--
-	if (form.HT_BSSCoexistence[0].checked)
-	{
-		var v = form.HT_BSSCoexApCntThr.value;
-		if ((isNaN(v)) || ((v*1) < 0) || ((v*1) > 255))
-		{
-			alert('Please specify correct 40Mhz coexistence threshold value');
-			form.HT_BSSCoexApCntThr.focus();
-			form.HT_BSSCoexApCntThr.select();
-			return false;
-		}
-	}
--->
+
+//	if (form.HT_BSSCoexistence[0].checked)
+//	{
+//		var v = form.HT_BSSCoexApCntThr.value;
+//		if ((isNaN(v)) || ((v*1) < 0) || ((v*1) > 255))
+//		{
+//			alert('Please specify correct 40Mhz coexistence threshold value');
+//			form.HT_BSSCoexApCntThr.focus();
+//			form.HT_BSSCoexApCntThr.select();
+//			return false;
+//		}
+//	}
+
 	return true;
 }
 

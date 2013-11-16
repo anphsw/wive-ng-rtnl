@@ -27,7 +27,6 @@ var ht_amsdu = '<% getCfgZero(1, "HT_AMSDU"); %>';
 var ht_autoba = '<% getCfgZero(1, "HT_AutoBA"); %>';
 var ht_badecline = '<% getCfgZero(1, "HT_BADecline"); %>';
 var ht_f_40mhz = '<% getCfgZero(1, "HT_40MHZ_INTOLERANT"); %>';
-//var wifi_optimum = '<!--#include ssi=getWlanWiFiTest()-->';
 var apcli_include = '<% getWlanApcliBuilt(); %>';
 var tx_stream_idx = '<% getCfgZero(1, "HT_TxStream"); %>';
 var rx_stream_idx = '<% getCfgZero(1, "HT_RxStream"); %>';
@@ -40,7 +39,7 @@ var mbss_params =
 	<% dumpBSSKeys(); %>
 ];
 
-var ChannelList_24G = 
+var ChannelList_24G =
 [
 	"2412MHz (Channel 1)",
 	"2417MHz (Channel 2)",
@@ -171,7 +170,7 @@ function insertExtChannelOption()
 		var CurrentCh = document.wireless_basic.sz11gChannel.value * 1;
 		var option_length = document.wireless_basic.sz11gChannel.options.length;
 
-		if ((CurrentCh >=1) && (CurrentCh <= 4))
+		if ((CurrentCh >= 1) && (CurrentCh <= 4))
 			addOption(x, ChannelList_24G[CurrentCh + 4 - 1], 1);
 		else if ((CurrentCh >= 5) && (CurrentCh <= 7))
 		{
