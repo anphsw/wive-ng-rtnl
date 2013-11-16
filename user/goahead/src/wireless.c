@@ -65,8 +65,8 @@ static void wirelessMesh(webs_t wp, char_t *path, char_t *query);
 static void meshManualLink(webs_t wp, char_t *path, char_t *query);
 static int ShowMeshState(int eid, webs_t wp, int argc, char_t **argv);
 #endif
-
 static int getVideoTurbineBuilt(int eid, webs_t wp, int argc, char_t **argv);
+static int getIdsEnableBuilt(int eid, webs_t wp, int argc, char_t **argv);
 
 typedef struct country_code_t
 {
@@ -182,6 +182,7 @@ const country_code_t country_codes[] =
 void formDefineWireless(void)
 {
 	websAspDefine(T("getVideoTurbineBuilt"), getVideoTurbineBuilt);
+	websAspDefine(T("getIdsEnableBuilt"), getIdsEnableBuilt);
 	websAspDefine(T("getWlan11aChannels"), getWlan11aChannels);
 	websAspDefine(T("getWlan11bChannels"), getWlan11bChannels);
 	websAspDefine(T("getWlan11gChannels"), getWlan11gChannels);
@@ -1042,13 +1043,23 @@ static int getVideoTurbineBuilt(int eid, webs_t wp, int argc, char_t **argv)
 	return 0;
 }
 
+static int getIdsEnableBuilt(int eid, webs_t wp, int argc, char_t **argv)
+{
+#if defined(CONFIG_RT2860V2_AP_IDS) || defined(CONFIG_RT2860V2_STA_IDS)
+	websWrite(wp, T("1"));
+#else
+	websWrite(wp, T("0"));
+#endif
+	return 0;
+}
+
 /* goform/wirelessAdvanced */
 static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 {
 	char_t	*bg_protection, /**basic_rate,*/ *beacon, *dtim, *fragment, *rts,
 			*tx_power, *short_preamble, *short_slot, *tx_burst, *pkt_aggregate,
 			*countrycode, *country_region;
-	char_t	*rd_region, *lna_gain, *ht_noise_thresh, *ap2040_rescan, *ht_bss_coex;
+	char_t	*rd_region, *lna_gain;
 	int ssid_num, wlan_mode;
 	char *submitUrl;
 
@@ -1058,7 +1069,12 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 	char_t *video_turbine;
 #endif
 #endif
-
+#if defined(CONFIG_RT2860V2_AP_IDS) || defined(CONFIG_RT2860V2_STA_IDS)
+	char_t *ids_enable;
+#endif
+#ifdef CONFIG_RT2860V2_AP_80211N_DRAFT3
+	char_t *ht_bss_coex, *ap2040_rescan, *ht_noise_thresh;
+#endif
 	//fetch from web input
 	bg_protection = websGetVar(wp, T("bg_protection"), T("0"));
 	//basic_rate = websGetVar(wp, T("basic_rate"), T("15"));
@@ -1087,6 +1103,9 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 #if defined(CONFIG_RT2860V2_AP_VIDEO_TURBINE) || defined(CONFIG_RT2860V2_STA_VIDEO_TURBINE)
 	video_turbine = websGetVar(wp, T("video_turbine"), T("0"));
 #endif
+#endif
+#if defined(CONFIG_RT2860V2_AP_IDS) || defined(CONFIG_RT2860V2_STA_IDS)
+	ids_enable = websGetVar(wp, T("ids_enable"), T("0"));
 #endif
 
 	char *num_s = nvram_get(RT2860_NVRAM, "BssidNum");
@@ -1128,6 +1147,9 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 #if defined(CONFIG_RT2860V2_AP_VIDEO_TURBINE) || defined(CONFIG_RT2860V2_STA_VIDEO_TURBINE)
 	nvram_bufset(RT2860_NVRAM, "VideoTurbine", video_turbine);
 #endif
+#endif
+#if defined(CONFIG_RT2860V2_AP_IDS) || defined(CONFIG_RT2860V2_STA_IDS)
+	nvram_bufset(RT2860_NVRAM, "IdsEnable", ids_enable);
 #endif
 	nvram_bufset(RT2860_NVRAM, "CountryCode", countrycode);
 	if (!strncmp(countrycode, "US", 3)) {

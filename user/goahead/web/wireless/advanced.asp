@@ -24,6 +24,8 @@ var txPower = '<% getCfgZero(1, "TxPower"); %>';
 var mcastMcs = defaultNumber('<% getCfgZero(1, "McastMcs"); %>', '0');
 var video_turbine_built='<% getVideoTurbineBuilt(); %>';
 var video_turbine = '<% getCfgZero(1, "VideoTurbine"); %>';
+var ids_enable_built='<% getIdsEnableBuilt(); %>';
+var ids_enable = '<% getCfgZero(1, "IdsEnable"); %>';
 var lnaGain = '<% getCfgZero(1, "HiPower"); %>';
 
 // var htNoiseThresh = '<% getCfgZero(1, "HT_BSSCoexApCntThr"); %>';
@@ -142,6 +144,11 @@ function initValue()
 		else
 			displayElement('video_turbine_row', false);
 	}
+
+	if (ids_enable_built == '1')
+		form.ids_enable[(ids_enable == '1') ? 0 : 1].checked = true;
+	else
+		displayElement('ids_enable_row', false);
 
 	// Set-up TX power combo
 	for (var i=0; i<form.tx_power.options.length; i++)
@@ -363,6 +370,13 @@ function CheckValue(form)
             <td><input type="radio" name="lnaGainEnable" value="1">
               Enable&nbsp;
               <input type="radio" name="lnaGainEnable" value="0" checked>
+              Disable </td>
+          </tr>
+          <tr id="ids_enable_row">
+            <td class="head">Intrusion Detection(IDS)</td>
+            <td><input type="radio" name="ids_enable" value="1">
+              Enable&nbsp;
+              <input type="radio" name="ids_enable" value="0">
               Disable </td>
           </tr>
 <!--

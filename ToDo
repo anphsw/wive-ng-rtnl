@@ -1,2 +1,1 @@
-) Add page for configure 2.4GHz wifi module in dual wlan configuration
-) Fix restart udpxy from UI if disabled in config
+) Fix restart xupnpd from internal WebUI

@@ -678,6 +678,16 @@ static int gen_wifi_config(int mode)
 		FPRINT_NUM(ApCliTxMode);
 		FPRINT_NUM(ApCliTxMcs);
 #endif
+#if defined(CONFIG_RT2860V2_AP_IDS) || defined(CONFIG_RT2860V2_STA_IDS)
+		FPRINT_NUM(IdsEnable);
+		FPRINT_NUM(AuthFloodThreshold);
+		FPRINT_NUM(AssocReqFloodThreshold);
+		FPRINT_NUM(ReassocReqFloodThreshold);
+		FPRINT_NUM(ProbeReqFloodThreshold);
+		FPRINT_NUM(DisassocFloodThreshold);
+		FPRINT_NUM(DeauthFloodThreshold);
+		FPRINT_NUM(EapReqFooldThreshold);
+#endif
 		FPRINT_NUM(UseNewRateAdapt);
 		FPRINT_NUM(IdleTimeout);
 

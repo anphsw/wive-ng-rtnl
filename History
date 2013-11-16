@@ -43,6 +43,8 @@
 31) kernel: udp: fix length check.<br>
 32) nvram: make iNIC (rt3090) config automatic from nvram with different parametrs WirelessModeINIC/ChannelINIC.<br>
 33) clean: remove very old unused nvram_daemon and userspace nvram mode from libnvram.<br>
+34) config: intrusion detection system (IDS) enable by default.<br>
+35) webui: add enable/disable intrusion detection system (IDS).<br>
 <br>
 <br>
 <br>
