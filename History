@@ -49,7 +49,7 @@
 <br>
 <b>4.6.x</b><br>
 1) kernel: wifi driver: temp back to 2.5.0.4 AP driver for RT305x/RT3350.<br>
-
+2) kernel: wifi driver: fix power select in 2.5.0.4 AP driver.<br>
 <br>
 <br>
 <br>
