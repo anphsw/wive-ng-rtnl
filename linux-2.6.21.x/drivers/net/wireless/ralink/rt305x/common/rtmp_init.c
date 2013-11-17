@@ -803,7 +803,7 @@ VOID	NICReadEEPROMParameters(
 	EEPROM_VERSION_STRUC    Version;
 	EEPROM_ANTENNA_STRUC	Antenna;
 	EEPROM_NIC_CONFIG2_STRUC    NicConfig2;
-#ifdef CONFIG_RT2860V2_AP_READ_MAC_FROM_MTD
+#ifdef READ_MAC_FROM_EEPROM
 	USHORT  Addr01,Addr23,Addr45 ;
 #endif
 	MAC_DW0_STRUC csr2;
@@ -826,7 +826,7 @@ VOID	NICReadEEPROMParameters(
 		pAd->EEPROMAddressNum = 8;     // 93C86
 	DBGPRINT(RT_DEBUG_TRACE, ("--> EEPROMAddressNum = %d\n", pAd->EEPROMAddressNum ));
 
-#ifdef CONFIG_RT2860V2_AP_READ_MAC_FROM_MTD
+#ifdef READ_MAC_FROM_EEPROM
 	/* Read MAC setting from EEPROM and record as permanent MAC address */
 	DBGPRINT(RT_DEBUG_TRACE, ("Initialize MAC Address from E2PROM \n"));
 
@@ -869,7 +869,7 @@ VOID	NICReadEEPROMParameters(
 
 		DBGPRINT(RT_DEBUG_TRACE, ("Use the MAC address what is assigned from Moudle Parameter. \n"));
 	}
-#ifdef CONFIG_RT2860V2_AP_READ_MAC_FROM_MTD
+#ifdef READ_MAC_FROM_EEPROM
 	else {
 		COPY_MAC_ADDR(pAd->CurrentAddress, pAd->PermanentAddress);
 		DBGPRINT(RT_DEBUG_TRACE, ("Use the MAC address what is assigned from EEPROM. \n"));

@@ -105,12 +105,7 @@ endmenu
 # WIFI
 #######
 menu "AP(STA) MODE Ralink RT3xxx wireless driver."
-if RALINK_RT3052_25DRIVER
-source "drivers/net/wireless/ralink/rt305x/rt2860v2_ap/Kconfig"
-endif
-if !RALINK_RT3052_25DRIVER
 source "drivers/net/wireless/ralink/rt3xxx/rt2860v2_ap/Kconfig"
-endif
 source "drivers/net/wireless/ralink/rt3xxx/rt2860v2_sta/Kconfig"
 if HW_HAS_PCI
     menu "802.11 309x AP pci-e wireless driver."
