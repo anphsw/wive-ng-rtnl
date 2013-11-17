@@ -373,7 +373,7 @@ function CheckValue(form)
               Disable </td>
           </tr>
           <tr id="ids_enable_row">
-            <td class="head">Intrusion Detection(IDS)</td>
+            <td class="head">Intrusion Detection (IDS)</td>
             <td><input type="radio" name="ids_enable" value="1">
               Enable&nbsp;
               <input type="radio" name="ids_enable" value="0">
