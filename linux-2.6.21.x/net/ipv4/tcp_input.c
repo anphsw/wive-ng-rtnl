@@ -1994,7 +1994,7 @@ static int tcp_try_undo_recovery(struct sock *sk)
 }
 
 /* Try to undo cwnd reduction, because D-SACKs acked all retransmitted data */
-static void tcp_try_undo_dsack(struct sock *sk)
+static bool tcp_try_undo_dsack(struct sock *sk)
 {
 	struct tcp_sock *tp = tcp_sk(sk);
 
@@ -2003,7 +2003,9 @@ static void tcp_try_undo_dsack(struct sock *sk)
 		tcp_undo_cwr(sk, 1);
 		tp->undo_marker = 0;
 		NET_INC_STATS_BH(LINUX_MIB_TCPDSACKUNDO);
+		return true;
 	}
+	return false;
 }
 
 /* Undo during fast recovery after partial ACK. */
@@ -2157,6 +2159,7 @@ tcp_fastretrans_alert(struct sock *sk, u32 prior_snd_una,
 	 * 1. Reno does not count dupacks (sacked_out) automatically. */
 	if (!tp->packets_out)
 		tp->sacked_out = 0;
+
 	/* 2. SACK counts snd_fack in packets inaccurately. */
 	if (tp->sacked_out == 0)
 		tp->fackets_out = 0;
@@ -2231,8 +2234,13 @@ tcp_fastretrans_alert(struct sock *sk, u32 prior_snd_una,
 		if (prior_snd_una == tp->snd_una) {
 			if (tcp_is_reno(tp) && is_dupack)
 				tcp_add_reno_sack(sk);
-		} else 
+		} else
 			is_dupack = tcp_try_undo_partial(sk, pkts_acked);
+
+		if (tcp_try_undo_dsack(sk)) {
+			tcp_try_keep_open(sk);
+			return;
+		}
 		break;
 	case TCP_CA_Loss:
 		if (flag&FLAG_DATA_ACKED)
