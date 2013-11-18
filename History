@@ -59,6 +59,7 @@
 9) kenrel: af_unix: implement socket filter.<br>
 10) kernel: network: tcp_connect should return certain errors up the stack.<br>
 11) kernel: af_packet: Teach to listen for multiple unicast addresses.<br>
+12) kernel: net: avoid race between network down and sysfs.<br>
 <br>
 <br>
 <br>
