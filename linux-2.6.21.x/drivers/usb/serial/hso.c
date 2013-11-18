@@ -2812,10 +2812,8 @@ static void hso_free_net_device(struct hso_device *hso_dev)
 
 	remove_net_device(hso_net->parent);
 
-	if (hso_net->net) {
+	if (hso_net->net)
 		unregister_netdev(hso_net->net);
-		free_netdev(hso_net->net);
-	}
 
 	/* start freeing */
 	for (i = 0; i < MUX_BULK_RX_BUF_COUNT; i++) {
@@ -2828,6 +2826,10 @@ static void hso_free_net_device(struct hso_device *hso_dev)
 	hso_net->mux_bulk_tx_buf = NULL;
 
 	hso_free_mutex(hso_dev->mutex);
+
+	if (hso_net->net)
+		free_netdev(hso_net->net);
+
 	kfree(hso_dev);
 }
 
