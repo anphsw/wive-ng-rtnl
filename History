@@ -51,6 +51,7 @@
 1) kernel: wifi driver: temp back to 2.5.0.4 AP/STA driver for RT305x/RT3350.<br>
 2) kernel: wifi driver: fix power select in 2.5.0.4 AP driver.<br>
 3) kernel: wifi driver: consolidate config options 2.5/2.7 drivers.<br>
+4) kernel: net: Handle CHECKSUM_COMPLETE more adequately in pskb_trim_rcsum().<br>
 <br>
 <br>
 <br>
