@@ -1282,12 +1282,6 @@ static int packet_dev_mc(struct net_device *dev, struct packet_mclist *i,
 	case PACKET_MR_ALLMULTI:
 		return dev_set_allmulti(dev, what);
 		break;
-	case PACKET_MR_UNICAST:
-		if (what > 0)
-			return dev_unicast_add(dev, i->addr, i->alen);
-		else
-			return dev_unicast_delete(dev, i->addr, i->alen);
-		break;
 	default:;
 	}
 	return 0;

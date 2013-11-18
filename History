@@ -58,9 +58,8 @@
 8) kernel: ipv4: Fix IP timestamp option (IPOPT_TS_PRESPEC) handling in ip_options_echo().<br>
 9) kenrel: af_unix: implement socket filter.<br>
 10) kernel: network: tcp_connect should return certain errors up the stack.<br>
-11) kernel: af_packet: Teach to listen for multiple unicast addresses.<br>
-12) kernel: net: avoid race between network down and sysfs.<br>
-13) kernel: af_packet: check return of dev_set_promiscuity/allmulti.<br>
+11) kernel: net: avoid race between network down and sysfs.<br>
+12) kernel: af_packet: check return of dev_set_promiscuity/allmulti.<br>
 <br>
 <br>
 <br>
