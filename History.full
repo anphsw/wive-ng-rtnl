@@ -1759,6 +1759,7 @@
 5) kernel: tcp: reset reordering est. selectively on timeout.<br>
 6) kernel: netfilter: nf_ct_h323: fix bug in rtcp natting.<br>
 7) kernel: tcp: undo on DSACK during recovery.<br>
+8) kernel: ipv4: Fix IP timestamp option (IPOPT_TS_PRESPEC) handling in ip_options_echo().<br>
 <br>
 <br>
 <br>
