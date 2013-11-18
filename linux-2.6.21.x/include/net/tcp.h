@@ -85,7 +85,6 @@ extern void tcp_time_wait(struct sock *sk, int state, int timeo);
 				 * to ~3sec-8min depending on RTO.
 				 */
 
-//#define TCP_RETR2       15
 #define TCP_RETR2	 5	/*
 				 * This should take at least
 				 * 90 minutes to time out.
@@ -93,15 +92,12 @@ extern void tcp_time_wait(struct sock *sk, int state, int timeo);
 				 * 15 is ~13-30min depending on RTO.
 				 */
 
-//#define TCP_SYN_RETRIES  5
 #define TCP_SYN_RETRIES	 3	/* number of times to retry active opening a
 				 * connection: ~180sec is RFC minimum	*/
 
-//#define TCP_SYNACK_RETRIES 5
 #define TCP_SYNACK_RETRIES 3	/* number of times to retry passive opening a
 				 * connection: ~180sec is RFC minimum	*/
 
-//#define TCP_ORPHAN_RETRIES 7 
 #define TCP_ORPHAN_RETRIES 3	/* number of times to retry on an orphaned
 				 * socket. 7 is ~50sec-16min.
 				 */
@@ -109,8 +105,7 @@ extern void tcp_time_wait(struct sock *sk, int state, int timeo);
 
 #define TCP_TIMEWAIT_LEN (60*HZ) /* how long to wait to destroy TIME-WAIT
 				  * state, about 60 seconds	*/
-//#define TCP_FIN_TIMEOUT	TCP_TIMEWAIT_LEN
-#define TCP_FIN_TIMEOUT (30*HZ)
+#define TCP_FIN_TIMEOUT  (30*HZ)
                                  /* BSD style FIN_WAIT2 deadlock breaker.
 				  * It used to be 3min, new value is 60sec,
 				  * to combine FIN-WAIT-2 timeout with
@@ -133,11 +128,8 @@ extern void tcp_time_wait(struct sock *sk, int state, int timeo);
 					                 * for local resources.
 					                 */
 
-//#define TCP_KEEPALIVE_TIME	(120*60*HZ)	/* two hours */
-#define TCP_KEEPALIVE_TIME	(30*60*HZ)	/* two hours */
-//#define TCP_KEEPALIVE_PROBES	9		/* Max of 9 keepalive probes	*/
+#define TCP_KEEPALIVE_TIME	(30*60*HZ)	/* 30 minits */
 #define TCP_KEEPALIVE_PROBES    5               /* Max of 9 keepalive probes    */
-//#define TCP_KEEPALIVE_INTVL	(75*HZ)
 #define TCP_KEEPALIVE_INTVL     (30*HZ)
 
 #define MAX_TCP_KEEPIDLE	32767
