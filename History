@@ -57,6 +57,7 @@
 7) kernel: tcp: undo on DSACK during recovery.<br>
 8) kernel: ipv4: Fix IP timestamp option (IPOPT_TS_PRESPEC) handling in ip_options_echo().<br>
 9) kenrel: af_unix: implement socket filter.<br>
+10) kernel: network: tcp_connect should return certain errors up the stack.<br>
 <br>
 <br>
 <br>
