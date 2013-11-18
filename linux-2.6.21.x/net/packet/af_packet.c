@@ -1271,15 +1271,21 @@ static void packet_dev_mc(struct net_device *dev, struct packet_mclist *i, int w
 	switch (i->type) {
 	case PACKET_MR_MULTICAST:
 		if (what > 0)
-			dev_mc_add(dev, i->addr, i->alen, 0);
+			return dev_mc_add(dev, i->addr, i->alen, 0);
 		else
-			dev_mc_delete(dev, i->addr, i->alen, 0);
+			return dev_mc_delete(dev, i->addr, i->alen, 0);
 		break;
 	case PACKET_MR_PROMISC:
 		dev_set_promiscuity(dev, what);
 		break;
 	case PACKET_MR_ALLMULTI:
 		dev_set_allmulti(dev, what);
+		break;
+	case PACKET_MR_UNICAST:
+		if (what > 0)
+			return dev_unicast_add(dev, i->addr, i->alen);
+		else
+			return dev_unicast_delete(dev, i->addr, i->alen);
 		break;
 	default:;
 	}
