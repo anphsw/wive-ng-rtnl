@@ -45,51 +45,53 @@ CXXFLAGS	:=
 # Get the core stuff worked out
 #
 
+MAKE		?= make
+HOSTCC		?= gcc
+
 ROOTDIR		:= $(shell pwd)
-HOSTCC		:= gcc
 ROMFSINST	:= romfs-inst.sh
 TFTPDIR		:= /tftpboot
 PATH		:= $(PATH):$(ROOTDIR)/tools:$(ROOTDIR)/toolchain/bin:$(ROOTDIR)/lib/lib:$(ROOTDIR)/lib/include
 
-LINUXDIR	= $(CONFIG_LINUXDIR)
-LIBCDIR		= $(CONFIG_LIBCDIR)
-IMAGEDIR	= $(ROOTDIR)/images
-ROMFSDIR	= $(ROOTDIR)/romfs
-SCRIPTSDIR	= $(ROOTDIR)/config/scripts
-LINUX_CONFIG	= $(ROOTDIR)/$(LINUXDIR)/.config
-CONFIG_CONFIG	= $(ROOTDIR)/config/.config
-STRIPOPT	= -R .comment -R .note -g --strip-unneeded
+LINUXDIR	:= $(CONFIG_LINUXDIR)
+LIBCDIR		:= $(CONFIG_LIBCDIR)
+IMAGEDIR	:= $(ROOTDIR)/images
+ROMFSDIR	:= $(ROOTDIR)/romfs
+SCRIPTSDIR	:= $(ROOTDIR)/config/scripts
+LINUX_CONFIG	:= $(ROOTDIR)/$(LINUXDIR)/.config
+CONFIG_CONFIG	:= $(ROOTDIR)/config/.config
+STRIPOPT	:= -R .comment -R .note -g --strip-unneeded
 
 #NUM MAKE PROCESS = CPU NUMBER IN THE SYSTEM * CPU_OVERLOAD
-CPU_OVERLOAD	= 4
-HOST_NCPU	= $(shell if [ -f /proc/cpuinfo ]; then n=`grep -c processor /proc/cpuinfo`; if [ $$n -gt 1 ];then expr $$n \* ${CPU_OVERLOAD}; else echo $$n; fi; else echo 1; fi)
+CPU_OVERLOAD	:= 4
 
-BUILD_START_STRING ?= $(shell date "+%a, %d %b %Y %T %z")
+HOST_NCPU	:= $(shell if [ -f /proc/cpuinfo ]; then n=`grep -c processor /proc/cpuinfo`; if [ $$n -gt 1 ];then expr $$n \* ${CPU_OVERLOAD}; else echo $$n; fi; else echo 1; fi)
 
-CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
-	  else if [ -x /bin/bash ]; then echo /bin/bash; \
-	  else echo sh; fi ; fi)
+BUILD_START_STRING := $(shell date "+%a, %d %b %Y %T %z")
+
+CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; else if [ -x /bin/bash ]; then echo /bin/bash; else echo sh; fi ; fi)
 
 ifeq (config.arch,$(wildcard config.arch))
 ifeq ($(filter %_default, $(MAKECMDGOALS)),)
 include config.arch
-ARCH_CONFIG = $(ROOTDIR)/config.arch
+ARCH_CONFIG := $(ROOTDIR)/config.arch
 export ARCH_CONFIG
 endif
 endif
 
 # May use a different compiler for the kernel
 KERNEL_CROSS_COMPILE ?= $(CROSS_COMPILE)
+
 ifneq ($(SUBARCH),)
 # Using UML, so make the kernel and non-kernel with different ARCHs
-MAKEARCH = $(MAKE) ARCH=$(SUBARCH) CROSS_COMPILE=$(CROSS_COMPILE)
-MAKEARCH_KERNEL = $(MAKE) ARCH=$(ARCH) SUBARCH=$(SUBARCH) CROSS_COMPILE=$(KERNEL_CROSS_COMPILE)
+MAKEARCH := $(MAKE) ARCH=$(SUBARCH) CROSS_COMPILE=$(CROSS_COMPILE)
+MAKEARCH_KERNEL := $(MAKE) ARCH=$(ARCH) SUBARCH=$(SUBARCH) CROSS_COMPILE=$(KERNEL_CROSS_COMPILE)
 else
-MAKEARCH = $(MAKE) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE)
-MAKEARCH_KERNEL = $(MAKEARCH)  ARCH=$(ARCH) CROSS_COMPILE=$(KERNEL_CROSS_COMPILE)
+MAKEARCH := $(MAKE) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE)
+MAKEARCH_KERNEL := $(MAKEARCH)  ARCH=$(ARCH) CROSS_COMPILE=$(KERNEL_CROSS_COMPILE)
 endif
 
-DIRS    =  $(ROOTDIR)/vendors $(ROOTDIR)/user $(ROOTDIR)/lib
+DIRS    :=  $(ROOTDIR)/vendors $(ROOTDIR)/user $(ROOTDIR)/lib
 
 export LANG LC_COLLATE LC_MESSAGES LC_ALL
 export VENDOR PRODUCT ROOTDIR LINUXDIR HOSTCC CONFIG_SHELL
@@ -295,7 +297,7 @@ image:
 
 .PHONY: release
 release:
-	make -C release release
+	$(MAKE) -C release release
 
 %_fullrelease:
 	@echo "This target no longer works"
@@ -364,7 +366,7 @@ dep:
 
 .PHONY: tools
 tools:
-	make -C tools
+	$(MAKE) -C tools
 
 # This one removes all executables from the tree and forces their relinking
 .PHONY: relink
@@ -379,9 +381,9 @@ clean:
 	touch $(ROOTDIR)/.config
 	#################CLEAN ALL SUBDIRS#############################
 	for dir in $(LINUXDIR) $(DIRS); do [ ! -d $$dir ] || $(MAKEARCH) -C $$dir clean ; done
-	make clean -C Uboot
-	make clean -C fulldump
-	make clean -C tools
+	$(MAKE) clean -C Uboot
+	$(MAKE) clean -C fulldump
+	$(MAKE) clean -C tools
 	##############REMOVE UNUSED FILES 1###########################
 	rm -rf $(ROOTDIR)/dev
 	rm -rf $(IMAGEDIR)
@@ -419,15 +421,15 @@ clean:
 	find $(ROOTDIR) -type d -name '.deps' | xargs rm -rf
 
 mrproper: clean
-	make mrproper -C Uboot
-	make mrproper -C linux
-	make clean -C config
+	$(MAKE) mrproper -C Uboot
+	$(MAKE) mrproper -C linux
+	$(MAKE) clean -C config
 	rm -rf romfs config.in config.arch config.tk images
 	rm -f modules/config.tk
 	rm -rf .config .config.old .oldconfig autoconf.h
 
 distclean: mrproper
-	make -C linux distclean
+	$(MAKE) -C linux distclean
 
 %_only:
 	@case "$(@)" in \
@@ -450,13 +452,13 @@ distclean: mrproper
 		echo "vendors/$(@:_default=)/config.device must exist first"; \
 		exit 1; \
 	 fi
-	-make clean > /dev/null 2>&1
+	-$(MAKE) clean > /dev/null 2>&1
 	cp vendors/$(@:_default=)/config.device .config
 	chmod u+x config/setconfig
 	yes "" | config/setconfig defaults
 	config/setconfig final
-	make dep
-	make
+	$(MAKE) dep
+	$(MAKE)
 
 config_error:
 	@echo "*************************************************"
