@@ -239,19 +239,9 @@ static u_int32_t __hash_conntrack(const struct nf_conntrack_tuple *tuple,
 	    b = jhash2(tuple->dst.u3.all, ARRAY_SIZE(tuple->dst.u3.all), (tuple->dst.u.all << 16) | tuple->dst.protonum);
 	} else {
 #endif
-#ifdef CONFIG_BCM_NAT
-	    if (tuple->src.l3num == PF_INET && tuple->dst.protonum == PF_INET) {
-		/* To ensure that halves of the same connection don't hash clash, we add the source per-proto again. */
-		return (ntohl(tuple->src.u3.ip + tuple->dst.u3.ip + tuple->src.u.all
-				+ tuple->dst.u.all + tuple->dst.protonum) + ntohs(tuple->src.u.all))
-			% nf_conntrack_htable_size;
-	    } else {
-#endif		/* Original linux logic */
-		a = jhash2(tuple->src.u3.all, ARRAY_SIZE(tuple->src.u3.all), ((tuple->src.l3num) << 16) | tuple->dst.protonum);
-		b = jhash2(tuple->dst.u3.all, ARRAY_SIZE(tuple->dst.u3.all), (tuple->src.u.all << 16) | tuple->dst.u.all);
-#ifdef CONFIG_BCM_NAT
-	    }
-#endif
+	    /* Original linux logic */
+	    a = jhash2(tuple->src.u3.all, ARRAY_SIZE(tuple->src.u3.all), ((tuple->src.l3num) << 16) | tuple->dst.protonum);
+	    b = jhash2(tuple->dst.u3.all, ARRAY_SIZE(tuple->dst.u3.all), (tuple->src.u.all << 16) | tuple->dst.u.all);
 #ifdef CONFIG_NAT_CONE
 	}
 #endif
@@ -409,26 +399,12 @@ nf_ct_invert_tuple(struct nf_conntrack_tuple *inverse,
 		   const struct nf_conntrack_l3proto *l3proto,
 		   const struct nf_conntrack_l4proto *l4proto)
 {
-#ifdef CONFIG_BCM_NAT
-	if (unlikely(inverse->src.l3num == PF_INET && inverse->dst.protonum == PF_INET)) {
-		inverse->src.u.all = inverse->dst.u.all = 0;
-		inverse->src.u3.all[0] = inverse->src.u3.all[1]	= inverse->src.u3.all[2] = inverse->src.u3.all[3] = 0;
-		inverse->dst.u3.all[0] = inverse->dst.u3.all[1]	= inverse->dst.u3.all[2] = inverse->dst.u3.all[3] = 0;
-		inverse->src.u3.ip = orig->dst.u3.ip;
-		inverse->dst.u3.ip = orig->src.u3.ip;
-		inverse->src.l3num = orig->src.l3num;
-		goto out;
-	}
-#endif
 	memset(inverse, 0, sizeof(*inverse));
 
 	inverse->src.l3num = orig->src.l3num;
 	if (l3proto->invert_tuple(inverse, orig) == 0)
 		return 0;
 
-#ifdef CONFIG_BCM_NAT
-out:
-#endif
 	inverse->dst.dir = !orig->dst.dir;
 
 	inverse->dst.protonum = orig->dst.protonum;
