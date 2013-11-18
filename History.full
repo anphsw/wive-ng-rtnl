@@ -1753,18 +1753,19 @@
 <br>
 <b>4.6.x</b><br>
 1) radvd: up to 1.9.6 version.<br>
-2) kernel: wifi driver: temp back to 2.5.0.4 AP/STA driver for RT305x/RT3350.<br>
-3) kernel: wifi driver: fix power select in 2.5.0.4 AP driver.<br>
-4) kernel: wifi driver: consolidate config options 2.5/2.7 drivers.<br>
-5) kernel: net: Handle CHECKSUM_COMPLETE more adequately in pskb_trim_rcsum().<br>
-6) kernel: tcp: reset reordering est. selectively on timeout.<br>
-7) kernel: netfilter: nf_ct_h323: fix bug in rtcp natting.<br>
-8) kernel: tcp: undo on DSACK during recovery.<br>
-9) kernel: ipv4: Fix IP timestamp option (IPOPT_TS_PRESPEC) handling in ip_options_echo().<br>
-10) kenrel: af_unix: implement socket filter.<br>
-11) kernel: network: tcp_connect should return certain errors up the stack.<br>
-12) kernel: net: avoid race between network down and sysfs.<br>
-13) kernel: af_packet: check return of dev_set_promiscuity/allmulti.<br>
+2) xupnpd: update xupnpd to 1.032 version (390 svn revision).<br>
+3) kernel: wifi driver: temp back to 2.5.0.4 AP/STA driver for RT305x/RT3350.<br>
+4) kernel: wifi driver: fix power select in 2.5.0.4 AP driver.<br>
+5) kernel: wifi driver: consolidate config options 2.5/2.7 drivers.<br>
+6) kernel: net: Handle CHECKSUM_COMPLETE more adequately in pskb_trim_rcsum().<br>
+7) kernel: tcp: reset reordering est. selectively on timeout.<br>
+8) kernel: netfilter: nf_ct_h323: fix bug in rtcp natting.<br>
+9) kernel: tcp: undo on DSACK during recovery.<br>
+10) kernel: ipv4: Fix IP timestamp option (IPOPT_TS_PRESPEC) handling in ip_options_echo().<br>
+11) kenrel: af_unix: implement socket filter.<br>
+12) kernel: network: tcp_connect should return certain errors up the stack.<br>
+13) kernel: net: avoid race between network down and sysfs.<br>
+14) kernel: af_packet: check return of dev_set_promiscuity/allmulti.<br>
 <br>
 <br>
 <br>
