@@ -1662,7 +1662,7 @@ int FASTPATH netif_rx(struct sk_buff *skb)
 	if (bridge_fast_path_enabled &&
 	    skb->pkt_type != PACKET_LOOPBACK &&
 	    skb->pkt_type != PACKET_BROADCAST &&
-	    skb->dev->br_port) {
+	    skb->dev->br_port != NULL) {
 
 	    struct net_bridge_port *p = skb->dev->br_port;
 
