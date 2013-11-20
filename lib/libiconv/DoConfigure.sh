@@ -19,7 +19,7 @@ cp -f $APROOTDIR/inc/*.h $APROOTDIR/lib/
 ./configure $CONFOPTS
 
 echo "=====================CONFIGURE-LIBCHARSET===================="
-cd libcharset
+cd $APROOTDIR/libcharset
 APROOTDIR=`pwd`
 
 if [ ! -f $APROOTDIR/configure ]; then
@@ -31,9 +31,6 @@ if [ ! -f $APROOTDIR/Makefile.in ]; then
 fi
 
 CONFOPTS="--host=mipsel-linux --prefix=$APROOTDIR/filesystem"
-
-#this small workaround
-cp -f  $APROOTDIR/inc/*.h  $APROOTDIR/lib/
 
 ./configure $CONFOPTS
 
