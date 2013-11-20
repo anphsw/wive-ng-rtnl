@@ -1208,6 +1208,31 @@ bool ipv6_chk_same_addr(const struct in6_addr *addr, struct net_device *dev)
 	return false;
 }
 
+int ipv6_chk_prefix(struct in6_addr *addr, struct net_device *dev)
+{
+	struct inet6_dev *idev;
+	struct inet6_ifaddr *ifa;
+	int	onlink;
+
+	onlink = 0;
+	rcu_read_lock();
+	idev = __in6_dev_get(dev);
+	if (idev) {
+		read_lock_bh(&idev->lock);
+		for (ifa = idev->addr_list; ifa; ifa = ifa->if_next) {
+			onlink = ipv6_prefix_equal(addr, &ifa->addr,
+						   ifa->prefix_len);
+			if (onlink)
+				break;
+		}
+		read_unlock_bh(&idev->lock);
+	}
+	rcu_read_unlock();
+	return onlink;
+}
+
+EXPORT_SYMBOL(ipv6_chk_prefix);
+
 struct inet6_ifaddr * ipv6_get_ifaddr(struct in6_addr *addr, struct net_device *dev, int strict)
 {
 	struct inet6_ifaddr *ifp, *result = NULL;
