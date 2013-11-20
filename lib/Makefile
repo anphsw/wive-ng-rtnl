@@ -27,8 +27,10 @@ noconfig_targets := menuconfig config oldconfig randconfig \
 TOPDIR=./
 
 include Rules.mak
+
 -include $(LINUX_CONFIG)
 -include $(CONFIG_CONFIG)
+-include $(ARCH_CONFIG)
 
 #Need direct include for easy porting some libs
 CFLAGS += -Os -I$(ROOTDIR)/$(LINUXDIR)/include -I$(ROOTDIR)/lib/include

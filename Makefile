@@ -76,14 +76,11 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; else if [ -x /bin/
 
 ifeq (config.arch,$(wildcard config.arch))
 ifeq ($(filter %_default, $(MAKECMDGOALS)),)
-include config.arch
 ARCH_CONFIG := $(ROOTDIR)/config.arch
+include $(ARCH_CONFIG)
 export ARCH_CONFIG
 endif
 endif
-
-# May use a different compiler for the kernel
-KERNEL_CROSS_COMPILE ?= $(CROSS_COMPILE)
 
 ifneq ($(SUBARCH),)
 # Using UML, so make the kernel and non-kernel with different ARCHs
