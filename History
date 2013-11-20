@@ -69,6 +69,7 @@
 19) kernel: net: Remove link_watch delay for up even when we're down.<br>
 20) kernel: net: link_watch: Always schedule urgent events.<br>
 21) kernel: net: Zero length write() on socket should not simply return 0.<br>
+22) kernel: net: pppoe: Check packet length on all receive paths.<br>
 <br>
 <br>
 <br>
