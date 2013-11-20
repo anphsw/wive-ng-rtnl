@@ -63,6 +63,7 @@
 13) kernel: net: avoid race between network down and sysfs.<br>
 14) kernel: af_packet: check return of dev_set_promiscuity/allmulti.<br>
 15) kernel: net: Avoid copying writable clones in tunnel drivers.<br>
+16) kernel: ipv6: sit: Fix locking issues in PRL management.<br>
 <br>
 <br>
 <br>
