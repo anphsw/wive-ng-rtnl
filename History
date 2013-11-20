@@ -64,6 +64,7 @@
 14) kernel: af_packet: check return of dev_set_promiscuity/allmulti.<br>
 15) kernel: net: Avoid copying writable clones in tunnel drivers.<br>
 16) kernel: ipv6: sit: Fix locking issues in PRL management.<br>
+17) kernel: ipv6: sit: Disallow 0.0.0.0 in PRL and Flush PRL if given for DEL.<br>
 <br>
 <br>
 <br>
