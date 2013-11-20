@@ -99,15 +99,15 @@ all: config
 	RANLIB=$(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-ranlib ; \
 	STRIP=$(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-strip ;
 ifeq ($(CONFIG_USER_OPENSSL),y)
-	# ">>>>>>>>>>>>>>>> CONFIGURE SSL NEEDED  <<<<<<<<<<<<<<<<<<<<<<"
+	# ">>>>>>>>>>>>>>>> CONFIGURE AND BUILD SSL <<<<<<<<<<<<<<<<<<<<<<<"
 	if [ ! -e openssl/libssl.so ]; then  cd openssl ; ./Configure RT2880 no-ripemd; make -j1 ; cd .. ; fi
 	if [ -e openssl/libssl.so ]; then  cp -fapv openssl/*.so* $(ROOTDIR)/lib/lib ; cp -fapv openssl/*.a $(ROOTDIR)/lib/lib ; fi
 endif
-	# ">>>>>>>>>>>>>>>> CONFIGURE ALL NEEDED  <<<<<<<<<<<<<<<<<<<<<<"
+	# ">>>>>>>>>>>>>>>> CONFIGURE ALL USERSPASE  <<<<<<<<<<<<<<<<<<<<<<"
 	for i in $(dir_y) ; do \
 	    if [ -f "$$i/DoConfigure.sh" ]; then ( cd $$i; ./DoConfigure.sh || exit 1 ; cd .. ) || exit 1 ; fi \
 	done
-	# ">>>>>>>>>>>>>>>>  MAKE USERSPACE  <<<<<<<<<<<<<<<<<<<<<<"
+	# ">>>>>>>>>>>>>>>> MAKE USERSPACE  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
 	for i in $(dir_y) ; do \
 	    if [ -d "$$i" ]; then ( cd $$i; make -j$(HOST_NCPU) || exit 1 ; cd .. ) || exit 1 ; fi \
 	done
