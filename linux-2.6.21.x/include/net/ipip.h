@@ -32,6 +32,7 @@ struct ip_tunnel
 
 	struct ip_tunnel_parm	parms;
 	struct ip_tunnel_prl_entry	*prl;		/* potential router list */
+	unsigned int			prl_count;	/* # of entries in PRL */
 
 	/* for SIT */
 #ifdef CONFIG_IPV6_SIT_6RD
@@ -42,7 +43,8 @@ struct ip_tunnel
 struct ip_tunnel_prl_entry
 {
 	struct ip_tunnel_prl_entry	*next;
-	struct ip_tunnel_prl		entry;
+	__be32				addr;
+	u16				flags;
 };
 
 #define IPTUNNEL_XMIT() do {						\
