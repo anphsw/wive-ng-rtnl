@@ -73,10 +73,7 @@ OSFLAGS?= -DLINUX -I$(KERNELSRC)/include/
 # Note: 2.6.23+ support still needs some changes in the xl2tpd source
 #
 OSFLAGS+= -DUSE_KERNEL
-#
-# Uncomment the following for kernel module autoload
-#
-#OSFLAGS+= -DMODULE_AUTO
+
 #
 # Uncomment the following for set high prio for xl2tpd process
 #
