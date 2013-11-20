@@ -419,13 +419,6 @@ config_error:
 	@echo "*************************************************"
 	@exit 1
 
-prune:
-	@for i in `ls -d linux-* | grep -v $(LINUXDIR)`; do \
-		rm -fr $$i; \
-	done
-	$(MAKE) -C user prune
-	$(MAKE) -C vendors prune
-
 dist-prep:
 	-find $(ROOTDIR) -name 'Makefile*.bin' | while read t; do \
 		$(MAKEARCH) -C `dirname $$t` -f `basename $$t` $@; \

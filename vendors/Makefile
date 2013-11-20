@@ -25,29 +25,20 @@ dir_v := $(VEND)/$(CONFIG_VENDOR)/$(CONFIG_PRODUCT)/.
 
 # Note: the all and clean targets are not normally used,
 # since user/Makefile jumps directory to the product directory
-all: 
+all:
 	$(MAKE) -C $(dir_v) dir_v=$(dir_v) -f $(VEND)/vendors-common.mak $@
 
-image: 
+image:
 	$(MAKE) -C $(dir_v) dir_v=$(dir_v) -f $(VEND)/vendors-common.mak $@
 
-$(CLEAN): 
+clean:
 	$(MAKE) -C $(dir_v) dir_v=$(dir_v) -f $(VEND)/vendors-common.mak $@
 
-romfs: 
+romfs:
 	$(MAKE) -C $(dir_v) dir_v=$(dir_v) -f $(VEND)/vendors-common.mak $@
 
-romfs.post: 
+romfs.post:
 	$(MAKE) -C $(dir_v) dir_v=$(dir_v) -f $(VEND)/vendors-common.mak $@
 
-vendor_%: 
+vendor_%:
 	$(MAKE) -C $(dir_v) dir_v=$(dir_v) -f $(VEND)/vendors-common.mak $@
-
-prune:
-	@for i in `ls -d */ | grep -v -e '$(CONFIG_VENDOR)' -e 'config' -e 'Generic'`; do \
-		rm -fr $$i; \
-	done
-	@for i in `ls -d $(CONFIG_VENDOR)/* | grep -v $(CONFIG_PRODUCT)`; do \
-		rm -fr $$i; \
-	done
-
