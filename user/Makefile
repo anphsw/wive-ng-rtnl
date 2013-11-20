@@ -47,7 +47,6 @@ dir_$(CONFIG_USER_IPTABLES_IP6TABLES)       += iptables
 dir_$(CONFIG_USER_CDP)			    += cdp-tools
 dir_$(CONFIG_USER_LLTD)			    += lldt
 dir_$(CONFIG_USER_INADYN)                   += inadyn
-dir_$(CONFIG_USER_OPENSSL)	   	    += openssl
 dir_$(CONFIG_USER_WPA_SUPPLICANT)	    += wpa_supplicant
 dir_$(CONFIG_USER_802_1X)		    += 802.1x
 dir_$(CONFIG_USER_DNSMASQ)                  += dnsmasq
@@ -101,7 +100,8 @@ all: config
 	STRIP=$(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-strip ;
 ifeq ($(CONFIG_USER_OPENSSL),y)
 	# ">>>>>>>>>>>>>>>> CONFIGURE SSL NEEDED  <<<<<<<<<<<<<<<<<<<<<<"
-	if [ ! -f openssl/libssl.so ]; then  cd openssl ; ./Configure RT2880 no-ripemd; $(MAKE) ; cd .. ; fi
+	if [ ! -e openssl/libssl.so ]; then  cd openssl ; ./Configure RT2880 no-ripemd; make -j1 ; cd .. ; fi
+	if [ -e openssl/libssl.so ]; then  cp -fapv openssl/*.so* $(ROOTDIR)/lib/lib ; cp -fapv openssl/*.a $(ROOTDIR)/lib/lib ; fi
 endif
 	# ">>>>>>>>>>>>>>>> CONFIGURE ALL NEEDED  <<<<<<<<<<<<<<<<<<<<<<"
 	for i in $(dir_y) ; do \
@@ -127,6 +127,9 @@ $(sort $(dir_y)):  config
 	$(MAKE) -C $(@:_clean=) clean; rm -f $(@:_clean=)/.sgbuilt_user; true
 
 romfs:
+ifeq ($(CONFIG_USER_OPENSSL),y)
+	if [ -e openssl/libssl.so ]; then  cd openssl ; make romfs ; cd .. ; fi
+endif
 	for i in $(sort $(dir_y)) ; do \
 		[ ! -d $$i ] || $(MAKE) -C $$i romfs || exit $$? ; \
 	done
