@@ -877,7 +877,8 @@ ctl_table ipv6_icmp_table[] = {
 		.data		= &sysctl_icmpv6_time,
 		.maxlen		= sizeof(int),
 		.mode		= 0644,
-		.proc_handler	= &proc_dointvec
+		.proc_handler	= &proc_dointvec_ms_jiffies,
+		.strategy	= &sysctl_ms_jiffies
 	},
 	{ .ctl_name = 0 },
 };
