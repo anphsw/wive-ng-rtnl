@@ -30,7 +30,10 @@ include Rules.mak
 
 -include $(LINUX_CONFIG)
 -include $(CONFIG_CONFIG)
--include $(ARCH_CONFIG)
+
+############## DO NOT DIRECT INCLUDE ARCH_CCONFIG ########################
+#-include $(ARCH_CONFIG)
+############## DO NOT DIRECT INCLUDE ARCH_CCONFIG ########################
 
 #Need direct include for easy porting some libs
 CFLAGS += -Os -I$(ROOTDIR)/$(LINUXDIR)/include -I$(ROOTDIR)/lib/include
@@ -532,7 +535,7 @@ endif
 	fi;
 
 distclean: clean
-	$(RM) .config .config.old .config.cmd
+	$(RM) -f .config .config.old .config.cmd
 
 release: distclean
 	cd ..;					\
