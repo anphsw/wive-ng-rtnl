@@ -183,6 +183,9 @@ endif
 ifdef CONFIG_LIB_USB
 	CFLAGS  += -I$(ROOTDIR)/lib/include_shared/libusb-1.0
 endif
+ifdef CONFIG_USER_OPENSSL
+	CFLAGS  += -I$(ROOTDIR)/lib/include_shared/openssl
+endif
 	LDFLAGS  += -L$(ROOTDIR)/lib/lib
 
 	CXXFLAGS = $(CFLAGS) $(INCCXX)
