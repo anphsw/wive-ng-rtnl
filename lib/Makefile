@@ -489,9 +489,6 @@ defconfig: extra/config/conf
 	@./extra/config/conf -d extra/Configs/Config.in
 
 clean:
-	- find . \( -name \*.o -o -name \*.a -o -name \*.so* -o -name core -o -name .\#\* \) -exec $(RM) {} \;
-	@$(RM) -rf tmp lib include/bits libc/tmp _install lib_optim
-	$(RM) libc/obj.* headers lib_diff
 	-$(MAKE) -C test clean
 	-$(MAKE) -C ldso clean
 	-$(MAKE) -C libc/misc/internals clean
@@ -516,7 +513,10 @@ clean:
 ifeq ($(CONFIG_LIB_LIBGMP_FORCE),y)
 	-$(MAKE) -C libgmp clean
 endif
-	-rm -rf $(ROOTDIR)/lib/include_shared
+	-$(RM) -f libc/obj.* headers lib_diff
+	-$(RM) -rf tmp lib include/bits libc/tmp _install lib_optim
+	-$(RM) -rf $(ROOTDIR)/lib/include_shared
+	-find $(ROOTDIR)/lib \( -name \*.o -o -name \*.a -o -name \*.so* -o -name core -o -name .\#\* \) -exec $(RM) {} \;
 	@set -e; \
 	for i in `(cd $(TOPDIR)/libc/sysdeps/linux/common/sys; ls *.h)` ; do \
 		$(RM) include/sys/$$i; \
@@ -544,7 +544,6 @@ release: distclean
 	    -name .svn -exec $(RM) -rf {} \; ;	\
 						\
 	tar -cvzf uClibc-$(VERSION).tar.gz uClibc-$(VERSION)/;
-
 endif
 
 check:
