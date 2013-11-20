@@ -1770,6 +1770,7 @@
 16) kernel: net: Avoid copying writable clones in tunnel drivers.<br>
 17) kernel: ipv6: sit: Fix locking issues in PRL management.<br>
 18) kernel: ipv6: sit: Disallow 0.0.0.0 in PRL and Flush PRL if given for DEL.<br>
+19) kernel: net: Remove link_watch delay for up even when we're down.<br>
 <br>
 <br>
 <br>
