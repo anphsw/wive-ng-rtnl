@@ -50,8 +50,8 @@
 <b>4.6.x</b><br>
 1) radvd: up to 1.9.6 version.<br>
 2) xupnpd: update xupnpd to 1.032 version (390 svn revision).<br>
-3) kernel: wifi driver: temp back to 2.5.0.4 AP/STA driver for RT305x/RT3350.<br>
-4) usb_modem: update usb-modeswitch-data package to 2013-11-13 version.<br>
+3) usb_modem: update usb-modeswitch-data package to 2013-11-13 version.<br>
+4) kernel: wifi driver: temp back to 2.5.0.4 AP/STA driver for RT305x/RT3350.<br>
 5) kernel: wifi driver: fix power select in 2.5.0.4 AP driver.<br>
 6) kernel: wifi driver: consolidate config options 2.5/2.7 drivers.<br>
 7) kernel: net: Handle CHECKSUM_COMPLETE more adequately in pskb_trim_rcsum().<br>
