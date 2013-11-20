@@ -7,13 +7,14 @@ if [ ! -f $APROOTDIR/configure ]; then
     sh ./autogen.sh --skip-gnulib
 fi
 if [ ! -f $APROOTDIR/Makefile.in ]; then
+    automake --add-missing
     automake
 fi
 
 CONFOPTS="--host=mipsel-linux --prefix=$APROOTDIR/filesystem --disable-debug-mode --disable-dependency-tracking"
 
 #this small workaround
-cp -f ./inc/*.h ./lib/
+cp -f $APROOTDIR/inc/*.h $APROOTDIR/lib/
 
 ./configure $CONFOPTS
 
@@ -25,13 +26,14 @@ if [ ! -f $APROOTDIR/configure ]; then
     sh ./autogen.sh --skip-gnulib
 fi
 if [ ! -f $APROOTDIR/Makefile.in ]; then
+    automake --add-missing
     automake
 fi
 
 CONFOPTS="--host=mipsel-linux --prefix=$APROOTDIR/filesystem"
 
 #this small workaround
-cp -f ./inc/*.h ./lib/
+cp -f  $APROOTDIR/inc/*.h  $APROOTDIR/lib/
 
 ./configure $CONFOPTS
 
