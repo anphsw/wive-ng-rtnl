@@ -521,6 +521,7 @@ static int ipip6_rcv(struct sk_buff *skb)
 
 	/* no tunnel matched,  let upstream know, ipsec may handle it */
 	read_unlock(&ipip6_lock);
+	kfree_skb(skb);
 	return 1;
 out:
 	kfree_skb(skb);
