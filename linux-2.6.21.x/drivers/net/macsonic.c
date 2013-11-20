@@ -532,7 +532,6 @@ static int __init mac_sonic_probe(struct platform_device *device)
 	lp = netdev_priv(dev);
 	lp->device = &device->dev;
 	SET_NETDEV_DEV(dev, &device->dev);
- 	SET_MODULE_OWNER(dev);
 
 	/* This will catch fatal stuff like -ENOMEM as well as success */
 	err = mac_onboard_sonic_probe(dev);

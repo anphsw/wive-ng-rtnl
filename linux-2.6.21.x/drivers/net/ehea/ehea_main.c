@@ -2387,8 +2387,6 @@ static int ehea_setup_single_port(struct ehea_port *port,
 	}
 
 	/* initialize net_device structure */
-	SET_MODULE_OWNER(dev);
-
 	memcpy(dev->dev_addr, &port->mac_addr, ETH_ALEN);
 
 	dev->open = ehea_open;

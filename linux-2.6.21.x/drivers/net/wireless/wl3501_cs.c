@@ -2004,8 +2004,6 @@ static int wl3501_config(struct pcmcia_device *link)
 		goto failed;
 	}
 
-	SET_MODULE_OWNER(dev);
-
 	this = dev->priv;
 	/*
 	 * At this point, the dev_node_t structure(s) should be initialized and

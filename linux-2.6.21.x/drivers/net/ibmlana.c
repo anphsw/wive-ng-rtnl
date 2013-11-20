@@ -907,8 +907,6 @@ static int ibmlana_probe(struct net_device *dev)
 	ibmlana_medium medium;
 	DECLARE_MAC_BUF(mac);
 
-	SET_MODULE_OWNER(dev);
-
 	/* can't work without an MCA bus ;-) */
 	if (MCA_bus == 0)
 		return -ENODEV;

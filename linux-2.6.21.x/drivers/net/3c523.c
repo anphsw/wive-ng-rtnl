@@ -420,7 +420,6 @@ static int __init do_elmc_probe(struct net_device *dev)
 	struct priv *pr = dev->priv;
 	DECLARE_MAC_BUF(mac);
 
-	SET_MODULE_OWNER(dev);
 	if (MCA_bus == 0) {
 		return -ENODEV;
 	}

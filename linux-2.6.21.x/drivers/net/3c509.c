@@ -428,7 +428,6 @@ __again:
 					return -ENOMEM;
 			}
 
-			SET_MODULE_OWNER(dev);
 			SET_NETDEV_DEV(dev, &idev->dev);
 			pnp_cards++;
 
@@ -519,8 +518,6 @@ no_pnp:
 	dev = alloc_etherdev(sizeof (struct el3_private));
 	if (!dev)
 		return -ENOMEM;
-
-	SET_MODULE_OWNER(dev);
 
 	netdev_boot_setup_check(dev);
 
@@ -640,7 +637,6 @@ static int __init el3_mca_probe(struct device *device)
 			return -ENOMEM;
 	}
 
-	SET_MODULE_OWNER(dev);
 	netdev_boot_setup_check(dev);
 
 	memcpy(dev->dev_addr, phys_addr, sizeof(phys_addr));
@@ -699,8 +695,6 @@ static int __init el3_eisa_probe (struct device *device)
 		release_region(ioaddr, EL3_IO_EXTENT);
 		return -ENOMEM;
 	}
-
-	SET_MODULE_OWNER(dev);
 
 	netdev_boot_setup_check(dev);
 

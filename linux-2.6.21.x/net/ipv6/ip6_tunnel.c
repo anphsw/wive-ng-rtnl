@@ -1056,7 +1056,6 @@ ip6ip6_tnl_change_mtu(struct net_device *dev, int new_mtu)
 
 static void ip6ip6_tnl_dev_setup(struct net_device *dev)
 {
-	SET_MODULE_OWNER(dev);
 	dev->uninit = ip6ip6_tnl_dev_uninit;
 	dev->destructor = free_netdev;
 	dev->hard_start_xmit = ip6ip6_tnl_xmit;

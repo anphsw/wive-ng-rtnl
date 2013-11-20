@@ -1890,8 +1890,6 @@ static int __init big_sur_ge_probe(int index)
 		goto out;
 	}
 
-	SET_MODULE_OWNER(netdev);
-
 	netdev->irq = irq;
 
 	lp = (struct big_sur_ge_enet *) netdev->priv;

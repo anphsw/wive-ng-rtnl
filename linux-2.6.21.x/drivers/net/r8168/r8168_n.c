@@ -2790,7 +2790,6 @@ rtl8168_init_board(struct pci_dev *pdev,
 		goto err_out;
 	}
 
-	SET_MODULE_OWNER(dev);
 	SET_NETDEV_DEV(dev, &pdev->dev);
 	tp = netdev_priv(dev);
 	tp->dev = dev;

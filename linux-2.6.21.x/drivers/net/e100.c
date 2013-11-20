@@ -2601,7 +2601,6 @@ static int __devinit e100_probe(struct pci_dev *pdev,
 		goto err_out_free_res;
 	}
 
-	SET_MODULE_OWNER(netdev);
 	SET_NETDEV_DEV(netdev, &pdev->dev);
 
 	nic->csr = ioremap(pci_resource_start(pdev, 0), sizeof(struct csr));

@@ -398,8 +398,6 @@ static int vlan_dev_init(struct net_device *dev)
 
 static void vlan_setup(struct net_device *new_dev)
 {
-	SET_MODULE_OWNER(new_dev);
-
 	/* new_dev->ifindex = 0;  it will be set when added to
 	 * the global list.
 	 * iflink is set as well.

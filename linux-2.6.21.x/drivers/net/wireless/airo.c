@@ -2909,7 +2909,6 @@ static struct net_device *_init_airo_card( unsigned short irq, int port,
 		goto err_out_wifi;
 
 	netif_start_queue(dev);
-	SET_MODULE_OWNER(dev);
 	return dev;
 
 err_out_wifi:

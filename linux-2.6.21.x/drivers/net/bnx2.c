@@ -5696,7 +5696,6 @@ bnx2_init_board(struct pci_dev *pdev, struct net_device *dev)
 	int rc;
 	u32 reg;
 
-	SET_MODULE_OWNER(dev);
 	SET_NETDEV_DEV(dev, &pdev->dev);
 	bp = netdev_priv(dev);
 

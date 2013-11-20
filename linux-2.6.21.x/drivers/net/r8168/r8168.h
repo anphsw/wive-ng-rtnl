@@ -47,10 +47,6 @@
 #define SET_NETDEV_DEV(net, pdev)
 #endif
 
-#ifndef SET_MODULE_OWNER
-#define SET_MODULE_OWNER(dev)
-#endif
-
 #ifndef SA_SHIRQ
 #define SA_SHIRQ IRQF_SHARED
 #endif

@@ -557,7 +557,6 @@ static int __devinit TLan_probe1(struct pci_dev *pdev,
 		rc = -ENOMEM;
 		goto err_out_regions;
 	}
-	SET_MODULE_OWNER(dev);
 	SET_NETDEV_DEV(dev, &pdev->dev);
 
 	priv = netdev_priv(dev);

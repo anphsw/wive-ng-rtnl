@@ -518,7 +518,6 @@ cs89x0_probe1(struct net_device *dev, int ioaddr, int modular)
 	int retval;
 	DECLARE_MAC_BUF(mac);
 
-	SET_MODULE_OWNER(dev);
 	/* Initialize the device structure. */
 	if (!modular) {
 		memset(lp, 0, sizeof(*lp));

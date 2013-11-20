@@ -1267,7 +1267,6 @@ dgrs_found_device(
 	priv->chan = 1;
 	priv->devtbl[0] = dev;
 
-	SET_MODULE_OWNER(dev);
 	SET_NETDEV_DEV(dev, pdev);
 
 	ret = dgrs_probe1(dev);
@@ -1315,7 +1314,6 @@ dgrs_found_device(
 		if (ret)
 			goto fail;
 
-		SET_MODULE_OWNER(devN);
 		SET_NETDEV_DEV(dev, pdev);
 
 		ret = register_netdev(devN);

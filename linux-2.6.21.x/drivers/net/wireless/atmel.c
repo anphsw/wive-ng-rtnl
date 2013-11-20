@@ -1600,7 +1600,6 @@ struct net_device *init_atmel_card(unsigned short irq, unsigned long port,
 	printk(KERN_INFO "%s: Atmel at76c50x. Version %d.%d. MAC %s\n",
 	       dev->name, DRIVER_MAJOR, DRIVER_MINOR, print_mac(mac, dev->dev_addr));
 
-	SET_MODULE_OWNER(dev);
 	return dev;
 
 err_out_res:

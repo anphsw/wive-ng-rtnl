@@ -584,8 +584,6 @@ static void ether1394_add_host (struct hpsb_host *host)
 		goto out;
         }
 
-	SET_MODULE_OWNER(dev);
-
 	/* This used to be &host->device in Linux 2.6.20 and before. */
 	SET_NETDEV_DEV(dev, host->device.parent);
 

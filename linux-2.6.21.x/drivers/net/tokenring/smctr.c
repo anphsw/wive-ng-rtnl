@@ -3584,8 +3584,6 @@ struct net_device __init *smctr_probe(int unit)
 	if (!dev)
 		return ERR_PTR(-ENOMEM);
 
-	SET_MODULE_OWNER(dev);
-
 	if (unit >= 0) {
 		sprintf(dev->name, "tr%d", unit);
 		netdev_boot_setup_check(dev);

@@ -241,8 +241,6 @@ static int __devinit r1000_init_board ( struct pci_dev *pdev, struct net_device 
 		return -ENOMEM;
 	}
 
-	SET_MODULE_OWNER(netdev);
-
 #if LINUX_VERSION_CODE > KERNEL_VERSION(2,5,0)
 	SET_NETDEV_DEV(netdev, &pdev->dev);
 #endif

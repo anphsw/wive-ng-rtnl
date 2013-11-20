@@ -972,8 +972,6 @@ static int __devinit ibmveth_probe(struct vio_dev *dev, const struct vio_device_
 	if(!netdev)
 		return -ENOMEM;
 
-	SET_MODULE_OWNER(netdev);
-
 	adapter = netdev->priv;
 	memset(adapter, 0, sizeof(adapter));
 	dev->dev.driver_data = netdev;
@@ -1073,7 +1071,6 @@ static void ibmveth_proc_register_driver(void)
 {
 	ibmveth_proc_dir = proc_mkdir(IBMVETH_PROC_DIR, NULL);
 	if (ibmveth_proc_dir) {
-		SET_MODULE_OWNER(ibmveth_proc_dir);
 	}
 }
 
@@ -1171,7 +1168,6 @@ static void ibmveth_proc_register_adapter(struct ibmveth_adapter *adapter)
 		} else {
 			entry->data = (void *) adapter;
 			entry->proc_fops = &ibmveth_proc_fops;
-			SET_MODULE_OWNER(entry);
 		}
 	}
 	return;

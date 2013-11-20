@@ -580,8 +580,6 @@ struct net_device * __init pamsnet_probe (int unit)
 		sprintf(dev->name, "eth%d", unit);
 		netdev_boot_setup_check(dev);
 	}
-	SET_MODULE_OWNER(dev);
-
 	printk("Probing for PAM's Net/GK Adapter...\n");
 
 	/* Allocate the DMA buffer here since we need it for probing! */

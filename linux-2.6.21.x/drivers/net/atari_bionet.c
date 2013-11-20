@@ -338,7 +338,6 @@ struct net_device * __init bionet_probe(int unit)
 		sprintf(dev->name, "eth%d", unit);
 		netdev_boot_setup_check(dev);
 	}
-	SET_MODULE_OWNER(dev);
 
 	printk("Probing for BioNet 100 Adapter...\n");
 

@@ -324,7 +324,6 @@ static int __init imq_init_devs(void)
 	numdevs--;
 
 	for (i = 0, dev = imq_devs; i <= numdevs; i++, dev++) {
-		SET_MODULE_OWNER(dev);
 		strcpy(dev->name, "imq%d");
 		dev->init   = imq_dev_init;
 		dev->uninit = imq_dev_uninit;

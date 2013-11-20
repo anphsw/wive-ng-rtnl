@@ -885,7 +885,6 @@ static struct net_device *c2_devinit(struct c2_dev *c2dev,
 		return NULL;
 	}
 
-	SET_MODULE_OWNER(netdev);
 	SET_NETDEV_DEV(netdev, &c2dev->pcidev->dev);
 
 	netdev->open = c2_up;

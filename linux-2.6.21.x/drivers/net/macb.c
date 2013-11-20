@@ -1015,7 +1015,6 @@ static int __devinit macb_probe(struct platform_device *pdev)
 		goto err_out;
 	}
 
-	SET_MODULE_OWNER(dev);
 	SET_NETDEV_DEV(dev, &pdev->dev);
 
 	/* TODO: Actually, we have some interesting features... */

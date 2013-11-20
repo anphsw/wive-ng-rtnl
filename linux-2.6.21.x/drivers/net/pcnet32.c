@@ -1820,7 +1820,6 @@ pcnet32_probe1(unsigned long ioaddr, int shared, struct pci_dev *pdev)
 
 	spin_lock_init(&lp->lock);
 
-	SET_MODULE_OWNER(dev);
 	SET_NETDEV_DEV(dev, &pdev->dev);
 	dev->priv = lp;
 	lp->name = chipname;

@@ -468,15 +468,8 @@ PNET_DEV RtmpPhyNetDevInit(
 
 	RTMP_DRIVER_NET_DEV_SET(pAd, net_dev);
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24)
-	SET_MODULE_OWNER(net_dev);
-#endif 
-
-
 	return net_dev;
-	
 }
-
 
 VOID *RtmpNetEthConvertDevSearch(
 	IN	VOID			*net_dev_,

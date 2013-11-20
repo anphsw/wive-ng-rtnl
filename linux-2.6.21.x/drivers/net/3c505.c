@@ -1402,8 +1402,6 @@ static int __init elplus_setup(struct net_device *dev)
 	int err = -ENODEV;
 	DECLARE_MAC_BUF(mac);
 
-	SET_MODULE_OWNER(dev);
-
 	/*
 	 *  setup adapter structure
 	 */
