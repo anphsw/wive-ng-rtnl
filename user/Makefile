@@ -3,7 +3,7 @@
 #
 
 .EXPORT_ALL_VARIABLES:
-.PHONY: config all romfs clean
+.PHONY: all romfs clean
 
 #
 # Include architecture specific build rules.
@@ -88,7 +88,7 @@ dir_$(CONFIG_RT2880_APP)		    += rt2880_app
 dir_$(CONFIG_USER_BUSYBOX_BUSYBOX)          += busybox
 dir_$(CONFIG_USER_GOAHEAD_HTTPD)	    += goahead
 
-all: config
+all:
 	CC=$(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-gcc ; \
 	GCC=$(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-gcc ; \
 	CXX=$(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-g++ ; \
@@ -100,8 +100,9 @@ all: config
 	STRIP=$(CONFIG_CROSS_COMPILER_PATH)/mipsel-linux-uclibc-strip ;
 ifeq ($(CONFIG_USER_OPENSSL),y)
 	# ">>>>>>>>>>>>>>>> CONFIGURE AND BUILD SSL <<<<<<<<<<<<<<<<<<<<<<<"
-	if [ ! -e openssl/libssl.so ]; then  cd openssl ; ./Configure RT2880 no-ripemd; make -j1 ; cd .. ; fi
-	if [ -e openssl/libssl.so ]; then  cp -fapv openssl/*.so* $(ROOTDIR)/lib/lib ; cp -fapv openssl/*.a $(ROOTDIR)/lib/lib ; fi
+	if [ ! -e openssl/libssl.so ]; then  cd openssl ; ./Configure RT2880 no-ripemd; $(MAKE) -j1 ; cd .. ; fi
+	if [ -e openssl/libssl.so ]; then  cp -fap openssl/*.so* $(ROOTDIR)/lib/lib ; cp -fapv openssl/*.a $(ROOTDIR)/lib/lib ; fi
+	if [ -e openssl/libssl.so ]; then  rm -rf $(ROOTDIR)/lib/include_shared/openssl ; cp -faprL openssl/include/* $(ROOTDIR)/lib/include_shared ; fi
 endif
 	# ">>>>>>>>>>>>>>>> CONFIGURE ALL USERSPASE  <<<<<<<<<<<<<<<<<<<<<<"
 	for i in $(dir_y) ; do \
@@ -109,42 +110,26 @@ endif
 	done
 	# ">>>>>>>>>>>>>>>> MAKE USERSPACE  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
 	for i in $(dir_y) ; do \
-	    if [ -d "$$i" ]; then ( cd $$i; make -j$(HOST_NCPU) || exit 1 ; cd .. ) || exit 1 ; fi \
+	    if [ -d "$$i" ]; then ( cd $$i; $(MAKE) -j$(HOST_NCPU) || exit 1 ; cd .. ) || exit 1 ; fi \
 	done
-
-#
-# add directory dependancies here
-#
-.PHONY: $(sort $(dir_y))
-
-$(sort $(dir_y)):  config
-	[ ! -d "$@" ] || ( touch $@/.sgbuilt_user && $(MAKE) -C $@ ) || exit $$?
-
-%_only:
-	touch $(@:_only=)/.sgbuilt_user && $(MAKE) -C $(@:_only=)
-
-%_clean:
-	$(MAKE) -C $(@:_clean=) clean; rm -f $(@:_clean=)/.sgbuilt_user; true
 
 romfs:
 ifeq ($(CONFIG_USER_OPENSSL),y)
-	if [ -e openssl/libssl.so ]; then  cd openssl ; make romfs ; cd .. ; fi
+	if [ -e openssl/libssl.so ]; then  cd openssl ; $(MAKE) romfs ; cd .. ; fi
 endif
 	for i in $(sort $(dir_y)) ; do \
 		[ ! -d $$i ] || $(MAKE) -C $$i romfs || exit $$? ; \
 	done
 
 clean:
-	# ">>>>>>>>>>>>>>>> START CLEANUP <<<<<<<<<<<<<<<<<<<<<<"
-	-for i in $(dir_v) $(sort $(dir_y) $(dir_n) $(dir_)) ; do \
-		$(MAKE) -C $$i clean ; \
-		rm -f $$i/.sgbuilt_user; \
-	done
-	# ">>>>>>>>>>>>>>>> FULL CLEANUP  <<<<<<<<<<<<<<<<<<<<<<"
-	-for i in $(sort $(dir_y) $(dir_n) $(dir_)) ; do [ ! -d $$i ] || $(MAKE) -C $$i mrproper; done
-	-for i in $(sort $(dir_y) $(dir_n) $(dir_)) ; do [ ! -d $$i ] || $(MAKE) -C $$i dist-clean; done
-	-for i in $(sort $(dir_y) $(dir_n) $(dir_)) ; do [ ! -d $$i ] || $(MAKE) -C $$i distclean; done
-	-@set -e; for i in $(SUBDIRS_APP); do $(MAKE) -C $$i clean; rm -rf $$i/filesystem/*; done
+	# ">>>>>>>>>>>>>>>> START FULL CLEANUP  <<<<<<<<<<<<<<<<<<<<<<"
+	-for i in $(sort $(dir_y) $(dir_n) $(dir_)) ; do [ ! -d $$i ] || \
+	    ($(MAKE) -C $$i clean; \
+	     $(MAKE) -C $$i dist-clean; \
+	     $(MAKE) -C $$i distclean; \
+	     $(MAKE) -C $$i mrproper) \
+	    done
+	-for i in $(SUBDIRS_APP); do $(MAKE) -C $$i clean; rm -rf $$i/filesystem/*; done
 
 web:
 	$(MAKE) -C goahead all
