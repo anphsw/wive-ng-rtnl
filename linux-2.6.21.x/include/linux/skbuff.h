@@ -263,7 +263,6 @@ struct sk_buff {
 
 	union {
 		struct tcphdr	*th;
-		struct icmphdr	*icmph;
 		struct iphdr	*ipiph;
 		struct ipv6hdr	*ipv6h;
 		unsigned char	*raw;

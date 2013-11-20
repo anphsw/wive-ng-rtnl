@@ -275,8 +275,8 @@ static int ipip_err(struct sk_buff *skb, u32 info)
    ICMP in the real Internet is absolutely infeasible.
  */
 	struct iphdr *iph = (struct iphdr*)skb->data;
-	int type = skb->h.icmph->type;
-	int code = skb->h.icmph->code;
+	const int type = icmp_hdr(skb)->type;
+	const int code = icmp_hdr(skb)->code;
 	struct ip_tunnel *t;
 	int err;
 

@@ -320,8 +320,8 @@ static void ipgre_err(struct sk_buff *skb, u32 info)
 	struct iphdr *iph = (struct iphdr*)skb->data;
 	__be16	     *p = (__be16*)(skb->data+(iph->ihl<<2));
 	int grehlen = (iph->ihl<<2) + 4;
-	int type = skb->h.icmph->type;
-	int code = skb->h.icmph->code;
+	const int type = icmp_hdr(skb)->type;
+	const int code = icmp_hdr(skb)->code;
 	struct ip_tunnel *t;
 	__be16 flags;
 

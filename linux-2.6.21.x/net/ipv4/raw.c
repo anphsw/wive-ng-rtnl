@@ -206,8 +206,8 @@ int raw_local_deliver(struct sk_buff *skb, int protocol)
 static void raw_err(struct sock *sk, struct sk_buff *skb, u32 info)
 {
 	struct inet_sock *inet = inet_sk(sk);
-	int type = skb->h.icmph->type;
-	int code = skb->h.icmph->code;
+	const int type = icmp_hdr(skb)->type;
+	const int code = icmp_hdr(skb)->code;
 	int err = 0;
 	int harderr = 0;
 
