@@ -1,4 +1,4 @@
-############################################################################
+###########################################################################
 #
 # Makefile -- Top level uClinux makefile.
 #
@@ -100,18 +100,6 @@ export RT288X_SDK_VERSION VERSIONPKG VERSIONSTR ROMFSINST PATH IMAGEDIR RELFILES
 export BUILD_START_STRING
 export HOST_NCPU DIRS
 
-.PHONY: ucfront
-ucfront: tools/ucfront/*.c
-	$(MAKE) -C tools/ucfront
-	ln -sf $(ROOTDIR)/tools/ucfront/ucfront tools/ucfront-gcc
-	ln -sf $(ROOTDIR)/tools/ucfront/ucfront tools/ucfront-g++
-	ln -sf $(ROOTDIR)/tools/ucfront/ucfront-ld tools/ucfront-ld
-
-.PHONY: cksum
-cksum: tools/sg-cksum/*.c
-	$(MAKE) -C tools/sg-cksum
-	ln -sf $(ROOTDIR)/tools/sg-cksum/cksum tools/cksum
-
 ############################################################################
 
 #
@@ -140,31 +128,6 @@ config.tk: config.in
 	echo "set help_file \"config/Configure.help\"" >> config.tk
 	cat $(SCRIPTSDIR)/tail.tk >> config.tk
 	chmod 755 config.tk
-
-.PHONY: xconfig
-xconfig: config.tk
-	@wish -f config.tk
-	@if [ ! -f .config ]; then \
-		echo; \
-		echo "You have not saved your config, please re-run make config"; \
-		echo; \
-		exit 1; \
-	 fi
-	@chmod u+x config/setconfig
-	@config/setconfig defaults
-	@if egrep "^CONFIG_DEFAULTS_KERNEL=y" .config > /dev/null; then \
-		$(MAKE) linux_xconfig; \
-	 fi
-	@if egrep "^CONFIG_DEFAULTS_VENDOR=y" .config > /dev/null; then \
-		$(MAKE) config_xconfig; \
-	 fi
-	@if egrep "^CONFIG_DEFAULTS_BUSYBOX=y" .config > /dev/null; then \
-		$(MAKE) -C user/busybox menuconfig; \
-	 fi
-	@if egrep "^CONFIG_DEFAULTS_UCLIBC=y" .config > /dev/null; then \
-		$(MAKE) -C lib menuconfig; \
-	 fi
-	@config/setconfig final
 
 .PHONY: config
 config: config.in
@@ -215,15 +178,12 @@ menuconfig: config.in
 
 .PHONY: oldconfig
 oldconfig: config.in
-	@HELP_FILE=config/Configure.help \
-		$(CONFIG_SHELL) $(SCRIPTSDIR)/Configure -d config.in
+	@HELP_FILE=config/Configure.help $(CONFIG_SHELL) $(SCRIPTSDIR)/Configure -d config.in
 	@$(MAKE) oldconfig_linux
 	@$(MAKE) oldconfig_config
 	@chmod u+x config/setconfig
 	@config/setconfig final
 
-linux_xconfig:
-	KCONFIG_NOTIMESTAMP=1 $(MAKEARCH_KERNEL) -C $(LINUXDIR) xconfig
 linux_menuconfig:
 	KCONFIG_NOTIMESTAMP=1 $(MAKEARCH_KERNEL) -C $(LINUXDIR) menuconfig
 linux_config:
@@ -351,7 +311,6 @@ dep:
 	@if [ $(LINUXDIR) = linux ] ; then \
 	$(MAKEARCH_KERNEL) -C $(LINUXDIR) prepare ; \
 	fi
-
 	$(MAKEARCH_KERNEL) -C $(LINUXDIR) dep
 
 .PHONY: tools
@@ -425,8 +384,8 @@ distclean: mrproper
 	@case "$(@)" in \
 	*/*) d=`expr $(@) : '\([^/]*\)/.*'`; \
 	     t=`expr $(@) : '[^/]*/\(.*\)'`; \
-	     $(MAKEARCH) -C $$d $$t;; \
-	*)   $(MAKEARCH) -C $(@:_only=);; \
+	     $(MAKEARCH) -j$(HOST_NCPU) -C $$d $$t;; \
+	*)   $(MAKEARCH) -j$(HOST_NCPU) -C $(@:_only=);; \
 	esac
 
 %_clean:
@@ -460,11 +419,10 @@ config_error:
 	@echo "*************************************************"
 	@exit 1
 
-prune: ucfront
+prune:
 	@for i in `ls -d linux-* | grep -v $(LINUXDIR)`; do \
 		rm -fr $$i; \
 	done
-	$(MAKE) -C uClib prune
 	$(MAKE) -C user prune
 	$(MAKE) -C vendors prune
 
