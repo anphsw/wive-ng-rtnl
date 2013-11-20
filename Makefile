@@ -11,6 +11,8 @@
 # Lets work out what the user wants, and if they have configured us yet
 #
 
+.EXPORT_ALL_VARIABLES:
+
 ROOTDIR	:= $(shell pwd)
 
 ifeq (.config,$(wildcard .config))
