@@ -37,7 +37,8 @@ static int icmpv6_pkt_to_tuple(const struct sk_buff *skb,
 			       unsigned int dataoff,
 			       struct nf_conntrack_tuple *tuple)
 {
-	struct icmp6hdr _hdr, *hp;
+	const struct icmp6hdr *hp;
+	struct icmp6hdr _hdr;
 
 	hp = skb_header_pointer(skb, dataoff, sizeof(_hdr), &_hdr);
 	if (hp == NULL)
@@ -50,7 +51,7 @@ static int icmpv6_pkt_to_tuple(const struct sk_buff *skb,
 }
 
 /* Add 1; spaces filled with 0. */
-static u_int8_t invmap[] = {
+static const u_int8_t invmap[] = {
 	[ICMPV6_ECHO_REQUEST - 128]	= ICMPV6_ECHO_REPLY + 1,
 	[ICMPV6_ECHO_REPLY - 128]	= ICMPV6_ECHO_REQUEST + 1,
 	[ICMPV6_NI_QUERY - 128]		= ICMPV6_NI_QUERY + 1,
@@ -101,7 +102,7 @@ static int icmpv6_new(struct nf_conn *conntrack,
 		      const struct sk_buff *skb,
 		      unsigned int dataoff)
 {
-	static u_int8_t valid_new[] = {
+	static const u_int8_t valid_new[] = {
 		[ICMPV6_ECHO_REQUEST - 128] = 1,
 		[ICMPV6_NI_QUERY - 128] = 1
 	};
@@ -124,10 +125,10 @@ icmpv6_error_message(struct sk_buff *skb,
 		     unsigned int hooknum)
 {
 	struct nf_conntrack_tuple intuple, origtuple;
-	struct nf_conntrack_tuple_hash *h;
+	const struct nf_conntrack_tuple_hash *h;
+	const struct nf_conntrack_l4proto *inproto;
 	struct icmp6hdr _hdr, *hp;
 	unsigned int inip6off;
-	struct nf_conntrack_l4proto *inproto;
 	u_int8_t inprotonum;
 	unsigned int inprotoff;
 
@@ -196,7 +197,8 @@ static int
 icmpv6_error(struct sk_buff *skb, unsigned int dataoff,
 	     enum ip_conntrack_info *ctinfo, int pf, unsigned int hooknum)
 {
-	struct icmp6hdr _ih, *icmp6h;
+	const struct icmp6hdr *icmp6h;
+	struct icmp6hdr _ih;
 
 	icmp6h = skb_header_pointer(skb, dataoff, sizeof(_ih), &_ih);
 	if (icmp6h == NULL) {
