@@ -11,9 +11,7 @@
 # Lets work out what the user wants, and if they have configured us yet
 #
 
-ifeq ($(ROOTDIR),)
-ROOTDIR=.
-endif
+ROOTDIR	:= $(shell pwd)
 
 ifeq (.config,$(wildcard .config))
 -include version
@@ -48,10 +46,8 @@ CXXFLAGS	:=
 MAKE		?= make
 HOSTCC		?= gcc
 
-ROOTDIR		:= $(shell pwd)
 ROMFSINST	:= romfs-inst.sh
 TFTPDIR		:= /tftpboot
-PATH		:= $(PATH):$(ROOTDIR)/tools:$(ROOTDIR)/toolchain/bin:$(ROOTDIR)/lib/lib:$(ROOTDIR)/lib/include
 
 LINUXDIR	:= $(CONFIG_LINUXDIR)
 LIBCDIR		:= $(CONFIG_LIBCDIR)
@@ -61,6 +57,13 @@ SCRIPTSDIR	:= $(ROOTDIR)/config/scripts
 LINUX_CONFIG	:= $(ROOTDIR)/$(LINUXDIR)/.config
 CONFIG_CONFIG	:= $(ROOTDIR)/config/.config
 STRIPOPT	:= -R .comment -R .note -g --strip-unneeded
+
+PATH		:= $(PATH):$(ROOTDIR):$(ROOTDIR)/tools:$(ROOTDIR)/toolchain/bin:$(ROOTDIR)/lib/lib:$(ROOTDIR)/lib/include:$(LINUXDIR):$(LIBCDIR)
+
+# May use a different compiler
+CROSS_COMPILE		?= $(ROOTDIR)/toolchain/bin/mipsel-linux-uclibc-
+KERNEL_CROSS_COMPILE	:= $(CROSS_COMPILE)
+CROSS_COMPILER_PREFIX	:= $(CROSS_COMPILE)
 
 #NUM MAKE PROCESS = CPU NUMBER IN THE SYSTEM * CPU_OVERLOAD
 CPU_OVERLOAD	:= 4
