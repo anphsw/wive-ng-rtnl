@@ -740,8 +740,8 @@ ip6ip6_tnl_xmit(struct sk_buff *skb, struct net_device *dev)
 	 */
 	max_headroom += LL_RESERVED_SPACE(tdev);
 
-	if (skb_headroom(skb) < max_headroom ||
-	    skb_cloned(skb) || skb_shared(skb)) {
+	if (skb_headroom(skb) < max_headroom || skb_shared(skb) ||
+	    (skb_cloned(skb) && !skb_clone_writable(skb, 0))) {
 		struct sk_buff *new_skb;
 
 		if (!(new_skb = skb_realloc_headroom(skb, max_headroom)))

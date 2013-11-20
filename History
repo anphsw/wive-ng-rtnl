@@ -62,6 +62,7 @@
 12) kernel: network: tcp_connect should return certain errors up the stack.<br>
 13) kernel: net: avoid race between network down and sysfs.<br>
 14) kernel: af_packet: check return of dev_set_promiscuity/allmulti.<br>
+15) kernel: net: Avoid copying writable clones in tunnel drivers.<br>
 <br>
 <br>
 <br>
