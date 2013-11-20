@@ -7,7 +7,7 @@ mkdir -p $PWD/releases
 
 DEVLIST="RT3662-2T2R-5G-USB RT3352-2T2R-USB"
 
-./clear
+#./clear
 
 for devname in $DEVLIST
 do
