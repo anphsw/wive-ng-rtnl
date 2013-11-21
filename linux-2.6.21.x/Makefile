@@ -330,7 +330,7 @@ PERL		= perl
 CHECK		= sparse
 
 CHECKFLAGS     := -D__linux__ -Dlinux -D__STDC__ -Dunix -D__unix__ -Wbitwise $(CF)
-MODFLAGS	= -DMODULE
+MODFLAGS	= -DMODULE -fno-delete-null-pointer-checks
 
 AFLAGS_MODULE   = $(MODFLAGS)
 LDFLAGS_MODULE  = -r --strip-discarded
@@ -358,15 +358,6 @@ CFLAGS		+= -fno-strict-aliasing -fno-common
 # Read KERNELRELEASE from include/config/kernel.release (if it exists)
 KERNELRELEASE = $(shell cat include/config/kernel.release 2> /dev/null)
 KERNELVERSION = $(VERSION).$(PATCHLEVEL).$(SUBLEVEL)$(EXTRAVERSION)
-
-export VERSION PATCHLEVEL SUBLEVEL KERNELRELEASE KERNELVERSION
-export ARCH CONFIG_SHELL HOSTCC HOSTCFLAGS CROSS_COMPILE AS LD CC
-export CPP AR NM STRIP OBJCOPY OBJDUMP MAKE AWK GENKSYMS PERL UTS_MACHINE
-export HOSTCXX HOSTCXXFLAGS LDFLAGS_MODULE CHECK CHECKFLAGS
-
-export CPPFLAGS NOSTDINC_FLAGS LINUXINCLUDE OBJCOPYFLAGS LDFLAGS
-export CFLAGS CFLAGS_KERNEL CFLAGS_MODULE
-export AFLAGS AFLAGS_KERNEL AFLAGS_MODULE
 
 # When compiling out-of-tree modules, put MODVERDIR in the module
 # tree rather than in the kernel tree. The kernel tree might
@@ -548,7 +539,7 @@ CFLAGS += $(call cc-option,-ffast-math)
 CFLAGS += $(call cc-option,-fforce-addr)
 
 # conserve stack if available
-CFLAGS += $(call cc-option,-fno-conserve-stack)
+CFLAGS += $(call cc-option,-fconserve-stack)
 
 # disable invalid "can't wrap" optimizations for signed / pointers
 CFLAGS += $(call cc-option,-fno-strict-overflow)
@@ -562,17 +553,23 @@ CFLAGS += $(call cc-option,-fno-aggressive-loop-optimizations)
 # fix ~10% performance regression at 4.8.x and 4.7.x gcc
 CFLAGS += $(call cc-option,-fno-tree-slsr)
 
+# more safe - small decrease speed (default in all upstream kernels)
+CFLAGS += $(call cc-option,-fno-delete-null-pointer-checks)
+
 # improves compression ratio for generated code - save size - slow speed
 #CFLAGS += $(call cc-option,-fno-caller-saves)
 
 # warn about C99 declaration after statement
-CFLAGS += $(call cc-disable-warning, declaration-after-statement)
+CFLAGS += $(call cc-disable-warning, -Wdeclaration-after-statement)
 
 # disable pointer signed / unsigned warnings in gcc 4.0
 CFLAGS += $(call cc-disable-warning, pointer-sign)
 
 # disable variable unused warnings in gcc 4.6.0 and later
 CFLAGS += $(call cc-disable-warning, unused-but-set-variable)
+
+# use the deterministic mode of AR if available
+EXTRA_ARFLAGS := $(call ar-option,D)
 
 ifdef CONFIG_RT2860V2_AP_MEMORY_OPTIMIZATION
 # if flash size is small use optimize for size
@@ -590,6 +587,15 @@ CHECKFLAGS     += $(NOSTDINC_FLAGS)
 ifeq ($(CONFIG_STRIP_ASM_SYMS),y)
 LDFLAGS_vmlinux	+= $(call ld-option, -X,)
 endif
+
+export VERSION PATCHLEVEL SUBLEVEL KERNELRELEASE KERNELVERSION
+export ARCH CONFIG_SHELL HOSTCC HOSTCFLAGS CROSS_COMPILE AS LD CC
+export CPP AR NM STRIP OBJCOPY OBJDUMP MAKE AWK GENKSYMS PERL UTS_MACHINE
+export HOSTCXX HOSTCXXFLAGS LDFLAGS_MODULE CHECK CHECKFLAGS
+
+export CPPFLAGS NOSTDINC_FLAGS LINUXINCLUDE OBJCOPYFLAGS LDFLAGS
+export CFLAGS CFLAGS_KERNEL CFLAGS_MODULE
+export AFLAGS AFLAGS_KERNEL AFLAGS_MODULE
 
 # Default kernel image to build when no specific target is given.
 # KBUILD_IMAGE may be overruled on the command line or
