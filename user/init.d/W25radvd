@@ -120,7 +120,7 @@ start() {
         " > /etc/radvd.conf
 
 	$LOG "Starting radvd"
-	radvd -s -C /etc/radvd.conf --debug=5 --facility=5 --logmethod=syslog &
+	radvd -s -C /etc/radvd.conf --debug=0 --facility=0 --logmethod=syslog &
     fi
 }
 

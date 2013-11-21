@@ -598,7 +598,7 @@ void reload_config(void)
 {
 	struct Interface *iface;
 
-	flog(LOG_INFO, "attempting to reread config file");
+	flog(LOG_DEBUG, "attempting to reread config file");
 
 	iface=IfaceList;
 	while(iface)
@@ -668,7 +668,7 @@ void reload_config(void)
 	config_interface();
 	kickoff_adverts();
 
-	flog(LOG_INFO, "resuming normal operation");
+	flog(LOG_DEBUG, "resuming normal operation");
 }
 
 void
