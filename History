@@ -51,25 +51,24 @@
 1) radvd: up to 1.9.6 version.<br>
 2) xupnpd: update xupnpd to 1.032 version (390 svn revision).<br>
 3) usb_modem: update usb-modeswitch-data package to 2013-11-13 version.<br>
-4) kernel: wifi driver: temp back to 2.5.0.4 AP/STA driver for RT305x/RT3350.<br>
-5) kernel: wifi driver: fix power select in 2.5.0.4 AP driver.<br>
-6) kernel: wifi driver: consolidate config options 2.5/2.7 drivers.<br>
-7) kernel: net: Handle CHECKSUM_COMPLETE more adequately in pskb_trim_rcsum().<br>
-8) kernel: tcp: reset reordering est. selectively on timeout.<br>
-9) kernel: netfilter: nf_ct_h323: fix bug in rtcp natting.<br>
-10) kernel: tcp: undo on DSACK during recovery.<br>
-11) kernel: ipv4: Fix IP timestamp option (IPOPT_TS_PRESPEC) handling in ip_options_echo().<br>
-12) kenrel: af_unix: implement socket filter.<br>
-13) kernel: network: tcp_connect should return certain errors up the stack.<br>
-14) kernel: net: avoid race between network down and sysfs.<br>
-15) kernel: af_packet: check return of dev_set_promiscuity/allmulti.<br>
-16) kernel: net: Avoid copying writable clones in tunnel drivers.<br>
-17) kernel: ipv6: sit: Fix locking issues in PRL management.<br>
-18) kernel: ipv6: sit: Disallow 0.0.0.0 in PRL and Flush PRL if given for DEL.<br>
-19) kernel: net: Remove link_watch delay for up even when we're down.<br>
-20) kernel: net: link_watch: Always schedule urgent events.<br>
-21) kernel: net: Zero length write() on socket should not simply return 0.<br>
-22) kernel: net: pppoe: Check packet length on all receive paths.<br>
+4) kernel: wifi driver: fix power select in 2.5.0.4 AP driver.<br>
+5) kernel: wifi driver: consolidate config options 2.5/2.7 drivers.<br>
+6) kernel: net: Handle CHECKSUM_COMPLETE more adequately in pskb_trim_rcsum().<br>
+7) kernel: tcp: reset reordering est. selectively on timeout.<br>
+8) kernel: netfilter: nf_ct_h323: fix bug in rtcp natting.<br>
+9) kernel: tcp: undo on DSACK during recovery.<br>
+10) kernel: ipv4: Fix IP timestamp option (IPOPT_TS_PRESPEC) handling in ip_options_echo().<br>
+11) kenrel: af_unix: implement socket filter.<br>
+12) kernel: network: tcp_connect should return certain errors up the stack.<br>
+13) kernel: net: avoid race between network down and sysfs.<br>
+14) kernel: af_packet: check return of dev_set_promiscuity/allmulti.<br>
+15) kernel: net: Avoid copying writable clones in tunnel drivers.<br>
+16) kernel: ipv6: sit: Fix locking issues in PRL management.<br>
+17) kernel: ipv6: sit: Disallow 0.0.0.0 in PRL and Flush PRL if given for DEL.<br>
+18) kernel: net: Remove link_watch delay for up even when we're down.<br>
+19) kernel: net: link_watch: Always schedule urgent events.<br>
+20) kernel: net: Zero length write() on socket should not simply return 0.<br>
+21) kernel: net: pppoe: Check packet length on all receive paths.<br>
 <br>
 <br>
 <br>
