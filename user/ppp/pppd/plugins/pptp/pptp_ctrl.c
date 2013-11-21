@@ -52,11 +52,7 @@
 
 /* control the number of times echo packets will be logged */
 
-#ifdef CONFIG_PPP_DEBUG
-     static int nlogecho = 0;
-#else
-     static int nlogecho = 1;
-#endif
+static int debug = 0;
 
 static struct thread_specific {
     struct sigaction old_sigaction; /* evil signals */
@@ -222,7 +218,6 @@ static void ctrlp_error( int result, int error, int cause,
     }
 }
 
-#ifdef CONFIG_PPP_DEBUG
 static const char *ctrl_msg_types[] = {
          "invalid control message type",
 /*         (Control Connection Management) */
@@ -245,7 +240,6 @@ static const char *ctrl_msg_types[] = {
 /*         (PPP Session Control) */
          "Set-Link-Info"                              /* 15 */
 };
-#endif
 
 #define MAX_CTRLMSG_TYPE 15
 
@@ -254,21 +248,25 @@ static void ctrlp_rep( void * buffer, int size, int isbuff)
 {
     struct pptp_header *packet = buffer;
     unsigned int type;
-    if(size < sizeof(struct pptp_header)) return;
+    if(size < sizeof(struct pptp_header))
+	return;
+
     type = ntoh16(packet->ctrl_type);
+
     /* FIXME: do not report sending echo requests as long as they are
      * sent in a signal handler. This may dead lock as the syslog call
      * is not reentrant */
-    if( type ==  PPTP_ECHO_RQST ) return;
+    if(type ==  PPTP_ECHO_RQST)
+	return;
+
     /* don't keep reporting sending of echo's */
-    if( (type == PPTP_ECHO_RQST || type == PPTP_ECHO_RPLY) && nlogecho <= 0 ) return;
-#ifdef CONFIG_PPP_DEBUG
-    log("%s control packet type is %d '%s'\n",isbuff ? "Buffered" : "Sent",
+    if((type == PPTP_ECHO_RQST || type == PPTP_ECHO_RPLY) && debug == 0)
+	return;
+
+    if (debug)
+	log("%s control packet type is %d '%s'\n",isbuff ? "Buffered" : "Sent",
             type, ctrl_msg_types[type <= MAX_CTRLMSG_TYPE ? type : 0]);
-#endif
 }
-
-
 
 /* Open new pptp_connection.  Returns NULL on failure. */
 PPTP_CONN * pptp_conn_open(int inet_sock, int isclient, pptp_conn_cb callback)
@@ -711,13 +709,8 @@ static void logecho( int type)
 {
     /* hack to stop flooding the log files (the most interesting part is right
      * after the connection built-up) */
-#ifdef CONFIG_PPP_DEBUG
-    if( nlogecho > 0) {
+    if(debug)
         log( "Echo Re%s received.", type == PPTP_ECHO_RQST ? "quest" :"ply");
-        if( --nlogecho == 0)
-            log("no more Echo Reply/Request packets will be reported.");
-    }
-#endif
 }
 
 /*** pptp_dispatch_ctrl_packet ************************************************/
@@ -730,10 +723,9 @@ int ctrlp_disp(PPTP_CONN * conn, void * buffer, size_t size)
     assert(ntoh16(header->length) == size);
     assert(ntoh16(header->pptp_type) == PPTP_MESSAGE_CONTROL);
     if (size < PPTP_CTRL_SIZE(ntoh16(header->ctrl_type))) {
-#ifdef CONFIG_PPP_DEBUG
-        log("Invalid packet received [type: %d; length: %d].",
+	if (debug)
+    	    log("Invalid packet received [type: %d; length: %d].",
                 (int) ntoh16(header->ctrl_type), (int) size);
-#endif
         return 0;
     }
     switch (ntoh16(header->ctrl_type)) {
@@ -1086,7 +1078,7 @@ static void pptp_handle_timer()
         if (global.conn->conn_state == CONN_WAIT_STOP_REPLY) {
             /* hard close. */
             pptp_conn_destroy(global.conn);
-            return;                                                                                                                        
+            return;
         }
         /* soft close */
         pptp_conn_close(global.conn, PPTP_STOP_NONE);

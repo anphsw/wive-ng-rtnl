@@ -282,3 +282,9 @@ void pppoe_log_packet(const char *prefix, PPPoEPacket *packet)
     pppoe_printpkt(packet, pr_log, NULL);
     end_pr_log();
 }
+
+void printErr(char const *str)
+{
+    fprintf(stderr, "pppoe: %s\n", str);
+    syslog(LOG_ERR, "%s", str);
+}

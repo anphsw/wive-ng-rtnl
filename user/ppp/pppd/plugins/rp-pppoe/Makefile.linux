@@ -27,16 +27,7 @@ RP_VERSION=3.10p
 
 CFLAGS += -I../../../include $(COPTS) '-DRP_VERSION="$(RP_VERSION)"' '-D_GNU_SOURCE="1"'
 
-all: rp-pppoe.so pppoe-discovery
-
-pppoe-discovery: pppoe-discovery.o debug.o
-	$(CC) -o pppoe-discovery pppoe-discovery.o debug.o
-
-pppoe-discovery.o: pppoe-discovery.c
-	$(CC) $(CFLAGS) -c -o pppoe-discovery.o pppoe-discovery.c
-
-debug.o: debug.c
-	$(CC) $(CFLAGS) -c -o debug.o debug.c
+all: rp-pppoe.so
 
 rp-pppoe.so: plugin.o discovery.o if.o common.o
 	$(CC) -o rp-pppoe.so -shared plugin.o discovery.o if.o common.o
@@ -44,11 +35,9 @@ rp-pppoe.so: plugin.o discovery.o if.o common.o
 install: all
 	$(INSTALL) -d -m 755 $(LIBDIR)
 	$(INSTALL) -m 4750 rp-pppoe.so $(LIBDIR)
-	$(INSTALL) -d -m 755 $(BINDIR)
-	$(INSTALL) -m 755 pppoe-discovery $(BINDIR)
 
 clean:
-	rm -f *.o *.so pppoe-discovery
+	rm -f *.o *.so
 
 plugin.o: plugin.c
 	$(CC) $(CFLAGS) -I../../.. -c -o plugin.o -fPIC plugin.c
@@ -61,4 +50,3 @@ if.o: if.c
 
 common.o: common.c
 	$(CC) $(CFLAGS) -I../../.. -c -o common.o -fPIC common.c
-

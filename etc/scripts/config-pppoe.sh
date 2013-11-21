@@ -93,8 +93,10 @@ fi
 
 if [ "$vpnDebug" = "on" ]; then
     vpnDebug="debug"
+    pppoedbg="rp_pppoe_verbose 1"
 else
     vpnDebug=""
+    pppoedbg=""
 fi
 
 if [ "$vpnAuthProtocol" = "1" ]; then
@@ -133,7 +135,7 @@ $CHAP
 # Standard PPP options we always use
 PPP_STD_OPTIONS="noipdefault noauth persist $vpnPeerDNS ifname $vpn_def_if -detach $vpnDebug"
 # PPPoE invocation
-PPPOE_CMD="$vpnInterface $vpnServer $vpnService user $vpnUser password $vpnPassword"
+PPPOE_CMD="$vpnInterface $vpnServer $vpnService user $vpnUser password $vpnPassword $pppoedbg"
 
 $LOG "Start pppd at $vpnInterface to $vpnServer $vpnService mode PPPOE"
 FULLOPT="file $OPTFILE $vpnMTU $vpnMRU $vpnMPPE $PPP_STD_OPTIONS plugin /lib/rp-pppoe.so $PPPOE_CMD"
