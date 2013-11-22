@@ -66,10 +66,11 @@
 16) kernel: net: Avoid copying writable clones in tunnel drivers.<br>
 17) kernel: ipv6: sit: Fix locking issues in PRL management.<br>
 18) kernel: ipv6: sit: Disallow 0.0.0.0 in PRL and Flush PRL if given for DEL.<br>
-19) kernel: net: Remove link_watch delay for up even when we're down.<br>
+19) kernel: net: remove link_watch delay for up even when we're down.<br>
 20) kernel: net: link_watch: Always schedule urgent events.<br>
-21) kernel: net: Zero length write() on socket should not simply return 0.<br>
+21) kernel: net: zero length write() on socket should not simply return 0.<br>
 22) kernel: net: pppoe: Check packet length on all receive paths.<br>
+23) kernel: net: rework recvmsg handler msg_name and msg_namelen logic.<br>
 <br>
 <br>
 <br>

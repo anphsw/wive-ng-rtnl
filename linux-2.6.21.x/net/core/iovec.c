@@ -49,7 +49,8 @@ int verify_iovec(struct msghdr *m, struct iovec *iov, char *address, int mode)
 			if (err < 0)
 				return err;
 		}
-		m->msg_name = address;
+		if (m->msg_name)
+			m->msg_name = address;
 	} else {
 		m->msg_name = NULL;
 	}

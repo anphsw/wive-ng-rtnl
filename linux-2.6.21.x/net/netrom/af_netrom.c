@@ -1162,9 +1162,9 @@ static int nr_recvmsg(struct kiocb *iocb, struct socket *sock,
 	if (sax != NULL) {
 		sax->sax25_family = AF_NETROM;
 		memcpy(sax->sax25_call.ax25_call, skb->data + 7, AX25_ADDR_LEN);
+		msg->msg_namelen = sizeof(*sax);
 	}
 
-	msg->msg_namelen = sizeof(*sax);
 
 	skb_free_datagram(sk, skb);
 

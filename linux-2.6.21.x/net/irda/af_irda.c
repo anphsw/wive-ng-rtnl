@@ -1421,8 +1421,6 @@ static int irda_recvmsg_stream(struct kiocb *iocb, struct socket *sock,
 	if (flags & MSG_WAITALL)
 		target = size;
 
-	msg->msg_namelen = 0;
-
 	do {
 		int chunk;
 		struct sk_buff *skb = skb_dequeue(&sk->sk_receive_queue);

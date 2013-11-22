@@ -1212,8 +1212,6 @@ static int netlink_recvmsg(struct kiocb *kiocb, struct socket *sock,
 	if (skb==NULL)
 		goto out;
 
-	msg->msg_namelen = 0;
-
 	copied = skb->len;
 	if (len < copied) {
 		msg->msg_flags |= MSG_TRUNC;
