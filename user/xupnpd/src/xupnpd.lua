@@ -51,6 +51,9 @@ cfg.http_timeout=15
 -- enables UPnP/DLNA notify when reload playlist
 cfg.dlna_notify=true
 
+-- UPnP/DLNA subscribe ttl
+cfg.dlna_subscribe_ttl=60
+
 -- group by 'group-title'
 cfg.group=false
 
@@ -99,7 +102,7 @@ feeds=
 }
 
 -- log ident, pid file end www root
-cfg.version='1.031'
+cfg.version='1.032'
 cfg.log_ident=arg[1] or 'xupnpd'
 cfg.pid_file='/var/run/'..cfg.log_ident..'.pid'
 cfg.tmp_path='/tmp/'

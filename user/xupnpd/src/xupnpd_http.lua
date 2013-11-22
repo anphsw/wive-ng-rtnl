@@ -120,7 +120,7 @@ function plugin_sendurl_from_cache(url,range)
 
     if c==nil or c.value==nil then return false end
 
-        if cfg.debug>0 then print('Cache URL: '..c.value) end
+    if cfg.debug>0 then print('Cache URL: '..c.value) end
 
     local rc,location,l
 
@@ -237,7 +237,7 @@ function http_handler(what,from,port,msg)
         pr_name=profile_change(msg['user-agent'],msg)
 
         if msg.reqline[2]=='/dev.xml' then msg.reqline[2]=cfg.dev_desc_xml end
-        end
+    end
 
     if msg.reqline[2]=='/' then
         if http_ui_main then msg.reqline[2]='/ui' else msg.reqline[2]='/index.html' end
@@ -277,62 +277,62 @@ function http_handler(what,from,port,msg)
 
         if cfg.debug>0 then print(from..' SOAP '..(msg.soapaction or '')) end
 
-            local err=true
+        local err=true
 
         local s=services[object ]
 
-            if s then
-                local func_name=get_soap_method(msg.soapaction or '')
-                local func=s[func_name]
+        if s then
+            local func_name=get_soap_method(msg.soapaction or '')
+            local func=s[func_name]
 
-                if func then
+            if func then
 
-                    if cfg.debug>1 then print(msg.data) end
+                if cfg.debug>1 then print(msg.data) end
 
                 local r=soap.find('Envelope/Body/'..func_name,soap.parse(msg.data or ''))
 
                 if not r then r=f.args end
 
-                    r=func(r or {},from_ip)
+                r=func(r or {},from_ip)
 
-                    if r then
-                        local resp=
-                            string.format(
-                                '<?xml version=\"1.0\" encoding=\"utf-8\"?>'..
-                                '<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">'..
-                                '<s:Body><u:%sResponse xmlns:u=\"%s\">%s</u:%sResponse></s:Body></s:Envelope>',                                                            
-                                    func_name,s.schema,soap.serialize_vector(r),func_name)
+                if r then
+                    local resp=
+                        string.format(
+                            '<?xml version=\"1.0\" encoding=\"utf-8\"?>'..
+                            '<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">'..
+                            '<s:Body><u:%sResponse xmlns:u=\"%s\">%s</u:%sResponse></s:Body></s:Envelope>',
+                                func_name,s.schema,soap.serialize_vector(r),func_name)
 
                     local resp_len=resp:len() if cfg.soap_length==false then resp_len=nil end
 
                     http_send_headers(200,'xml',resp_len)
 
-                        http.send(resp)
+                    http.send(resp)
 
-                        if cfg.debug>2 then print(resp) end
+                    if cfg.debug>2 then print(resp) end
 
-                        err=false
-                    end
+                    err=false
                 end
             end
+        end
 
-            if err==true then
+        if err==true then
             local resp=
-                '<?xml version=\"1.0\" encoding=\"utf-8\"?>'..
-                '<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">'..
-                   '<s:Body>'..
-                      '<s:Fault>'..
-                         '<faultcode>s:Client</faultcode>'..
-                         '<faultstring>UPnPError</faultstring>'..
-                         '<detail>'..
-                            '<u:UPnPError xmlns:u=\"urn:schemas-upnp-org:control-1-0\">'..
-                               '<u:errorCode>501</u:errorCode>'..
-                               '<u:errorDescription>Action Failed</u:errorDescription>'..
-                            '</u:UPnPError>'..
-                         '</detail>'..
-                      '</s:Fault>'..
-                   '</s:Body>'..
-                '</s:Envelope>'
+            '<?xml version=\"1.0\" encoding=\"utf-8\"?>'..
+            '<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">'..
+               '<s:Body>'..
+                  '<s:Fault>'..
+                     '<faultcode>s:Client</faultcode>'..
+                     '<faultstring>UPnPError</faultstring>'..
+                     '<detail>'..
+                        '<u:UPnPError xmlns:u=\"urn:schemas-upnp-org:control-1-0\">'..
+                           '<u:errorCode>501</u:errorCode>'..
+                           '<u:errorDescription>Action Failed</u:errorDescription>'..
+                        '</u:UPnPError>'..
+                     '</detail>'..
+                  '</s:Fault>'..
+               '</s:Body>'..
+            '</s:Envelope>'
 
             local resp_len=resp:len() if cfg.soap_length==false then resp_len=nil end
 
@@ -340,37 +340,41 @@ function http_handler(what,from,port,msg)
 
             http.send(resp)
 
-                if cfg.debug>0 then print('upnp error 501') end
+            if cfg.debug>0 then print('upnp error 501') end
 
-            end
+        end
 
     -- UPnP Events
     elseif url=='event' then
 
         if msg.reqline[1]=='SUBSCRIBE' then
-        local ttl=60
-        local sid=core.uuid()
+            local ttl=cfg.dlna_subscribe_ttl
+            local sid=nil
+            local callback=nil
 
-            if object~='' and msg.callback then
-                core.sendevent('subscribe',object,sid,string.match(msg.callback,'<(.+)>'),ttl)
-        end
+            if msg.sid then sid=string.match(msg.sid,'uuid:(.+)') else sid=core.uuid() end
+            if msg.callback then callback=string.match(msg.callback,'<(.+)>') end
 
-        http.send(
-            string.format(
-                'HTTP/1.1 200 OK\r\nPragma: no-cache\r\nCache-control: no-cache\r\nDate: %s\r\nServer: %s\r\nAccept-Ranges: none\r\n'..
-                'Connection: close\r\nEXT:\r\nSID: uuid:%s\r\nTIMEOUT: Second-%d\r\n\r\n',
-                os.date('!%a, %d %b %Y %H:%M:%S GMT'),ssdp_server,sid,ttl))
-    elseif msg.reqline[1]=='UNSUBSCRIBE' then
+            if object~='' then
+                core.sendevent('subscribe',object,sid,callback,ttl)
+            end
 
-        if msg.sid then
-            core.sendevent('unsubscribe',string.match(msg.sid,'uuid:(.+)'))
-        end
+            http.send(
+                string.format(
+                    'HTTP/1.1 200 OK\r\nPragma: no-cache\r\nCache-control: no-cache\r\nDate: %s\r\nServer: %s\r\nAccept-Ranges: none\r\n'..
+                    'Connection: close\r\nEXT:\r\nSID: uuid:%s\r\nTIMEOUT: Second-%d\r\n\r\n',
+                    os.date('!%a, %d %b %Y %H:%M:%S GMT'),ssdp_server,sid,ttl))
+        elseif msg.reqline[1]=='UNSUBSCRIBE' then
 
-        http.send(
-            string.format(
-                'HTTP/1.1 200 OK\r\nPragma: no-cache\r\nCache-control: no-cache\r\nDate: %s\r\nServer: %s\r\nAccept-Ranges: none\r\n'..
-                'Connection: close\r\nEXT:\r\n\r\n',
-                os.date('!%a, %d %b %Y %H:%M:%S GMT'),ssdp_server))
+            if msg.sid then
+                core.sendevent('unsubscribe',string.match(msg.sid,'uuid:(.+)'))
+            end
+
+            http.send(
+                string.format(
+                    'HTTP/1.1 200 OK\r\nPragma: no-cache\r\nCache-control: no-cache\r\nDate: %s\r\nServer: %s\r\nAccept-Ranges: none\r\n'..
+                    'Connection: close\r\nEXT:\r\n\r\n',
+                    os.date('!%a, %d %b %Y %H:%M:%S GMT'),ssdp_server))
         else
             http_send_headers(404)
         end
@@ -380,12 +384,12 @@ function http_handler(what,from,port,msg)
 
         local pls=find_playlist_object(object)
 
-            if not pls then http_send_headers(404) return end
+        if not pls then http_send_headers(404) return end
 
         local mtype,extras=playlist_item_type(pls)
 
-            http.send(string.format(
-                'HTTP/1.1 200 OK\r\nPragma: no-cache\r\nCache-control: no-cache\r\nDate: %s\r\nServer: %s\r\n'..
+        http.send(string.format(
+            'HTTP/1.1 200 OK\r\nPragma: no-cache\r\nCache-control: no-cache\r\nDate: %s\r\nServer: %s\r\n'..
             'Connection: close\r\nContent-Type: %s\r\nEXT:\r\n',
             os.date('!%a, %d %b %Y %H:%M:%S GMT'),ssdp_server,mtype[3]))
 
@@ -393,40 +397,40 @@ function http_handler(what,from,port,msg)
 
         if cfg.content_disp==true then
             http.send(string.format('Content-Disposition: attachment; filename=\"%s.%s\"\r\n',pls.objid,pls.type))      -- string.gsub(pls.name,"[\/#|@&*`']","_")
-            end
+        end
 
-            if head==true then
-                http.send('\r\n')
-                http.flush()
-            else
-                if pls.event then core.sendevent(pls.event,pls.url) end
+        if head==true then
+            http.send('\r\n')
+            http.flush()
+        else
+            if pls.event then core.sendevent(pls.event,pls.url) end
 
             if cfg.debug>0 then print(from..' PROXY '..pls.url..' <'..mtype[3]..'>') end
 
-                core.sendevent('status',util.getpid(),from_ip..' '..pls.name)
+            core.sendevent('status',util.getpid(),from_ip..' '..pls.name)
 
-                if pls.plugin then
-                    http.send('Accept-Ranges: bytes\r\n')
+            if pls.plugin then
+                http.send('Accept-Ranges: bytes\r\n')
                 http.flush()
 
                 local p=plugins[pls.plugin]
 
                 if p and p.disabled~=true then p.sendurl(pls.url,msg.range) end
-                else
+            else
                 if cfg.wdtv==true then
                     http.send('Content-Size: 65535\r\n')
                     http.send('Content-Length: 65535\r\n')
                 end
 
-                    http.send('Accept-Ranges: none\r\n\r\n')
+                http.send('Accept-Ranges: none\r\n\r\n')
 
-                    if string.find(pls.url,'^udp://@') then
-                        http.sendmcasturl(string.sub(pls.url,8),cfg.mcast_interface,2048)
-                    else
-                        http.sendurl(pls.url)
-                    end
+                if string.find(pls.url,'^udp://@') then
+                    http.sendmcasturl(string.sub(pls.url,8),cfg.mcast_interface,2048)
+                else
+                    http.sendurl(pls.url)
                 end
             end
+        end
 
     -- UPnP AlbumArt
     elseif url=='logo' then
@@ -477,40 +481,40 @@ function http_handler(what,from,port,msg)
 
         local pls=find_playlist_object(object)
 
-            if not pls or not pls.path then http_send_headers(404) return end
+        if not pls or not pls.path then http_send_headers(404) return end
 
-            local flen=pls.length
+        local flen=pls.length
 
-            local ffrom=0
-            local flen_total=flen
+        local ffrom=0
+        local flen_total=flen
 
-            if msg.range and flen and flen>0 then
-                local f,t=string.match(msg.range,'bytes=(.*)-(.*)')
+        if msg.range and flen and flen>0 then
+            local f,t=string.match(msg.range,'bytes=(.*)-(.*)')
 
-                f=tonumber(f)
-                t=tonumber(t)
+            f=tonumber(f)
+            t=tonumber(t)
 
-                if not f then f=0 end
-                if not t then t=flen-1 end
+            if not f then f=0 end
+            if not t then t=flen-1 end
 
-                if f>t or t+1>flen then http_send_headers(416) return end
+            if f>t or t+1>flen then http_send_headers(416) return end
 
-                ffrom=f
-                flen=t-f+1
-            end
+            ffrom=f
+            flen=t-f+1
+        end
 
         local mtype,extras=playlist_item_type(pls)
 
-            http.send(string.format(
-                'HTTP/1.1 200 OK\r\nPragma: no-cache\r\nCache-control: no-cache\r\nDate: %s\r\nServer: %s\r\n'..
+        http.send(string.format(
+            'HTTP/1.1 200 OK\r\nPragma: no-cache\r\nCache-control: no-cache\r\nDate: %s\r\nServer: %s\r\n'..
             'Connection: close\r\nContent-Type: %s\r\nEXT:\r\n',
             os.date('!%a, %d %b %Y %H:%M:%S GMT'),ssdp_server,mtype[3]))
 
-            if flen then
-                http.send(string.format('Accept-Ranges: bytes\r\nContent-Length: %s\r\n',flen))
-            else
-                http.send('Accept-Ranges: none\r\n')
-            end
+        if flen then
+            http.send(string.format('Accept-Ranges: bytes\r\nContent-Length: %s\r\n',flen))
+        else
+            http.send('Accept-Ranges: none\r\n')
+        end
 
         if cfg.dlna_headers==true then http.send('TransferMode.DLNA.ORG: Streaming\r\nContentFeatures.DLNA.ORG: '..extras..'\r\n') end
 
@@ -518,50 +522,50 @@ function http_handler(what,from,port,msg)
             http.send(string.format('Content-Disposition: attachment; filename=\"%s.%s\"\r\n',pls.objid,pls.type))
         end
 
-            if msg.range and flen and flen>0 then
-                http.send(string.format('Content-Range: bytes %s-%s/%s\r\n',ffrom,ffrom+flen-1,flen_total))
-            end
+        if msg.range and flen and flen>0 then
+            http.send(string.format('Content-Range: bytes %s-%s/%s\r\n',ffrom,ffrom+flen-1,flen_total))
+        end
 
-            http.send('\r\n')
-            http.flush()
+        http.send('\r\n')
+        http.flush()
 
-            if head~=true then
-                if pls.event then core.sendevent(pls.event,pls.path) end
+        if head~=true then
+            if pls.event then core.sendevent(pls.event,pls.path) end
 
             if cfg.debug>0 then print(from..' STREAM '..pls.path..' <'..mtype[3]..'>') end
 
-                core.sendevent('status',util.getpid(),from_ip..' '..pls.name)
+            core.sendevent('status',util.getpid(),from_ip..' '..pls.name)
 
-                http.sendfile(pls.path,ffrom,flen)
-            end
+            http.sendfile(pls.path,ffrom,flen)
+        end
 
-        else
-            if f.type=='none' then http_send_headers(404) return end
-            if f.type~='file' then http_send_headers(403) return end
+    else
+        if f.type=='none' then http_send_headers(404) return end
+        if f.type~='file' then http_send_headers(403) return end
 
         local tmpl_name=nil
 
-            for i,fname in ipairs(http_templ) do
+        for i,fname in ipairs(http_templ) do
             if f.url==fname then tmpl_name=cfg.tmp_path..'xupnpd-cache'..fname break end
-            end
+        end
 
-            local len=nil
+        local len=nil
 
         if not tmpl_name then len=f.length else len=util.getflen(tmpl_name) end
 
-            http.send(
-                string.format(
-                    'HTTP/1.1 200 OK\r\nDate: %s\r\nServer: %s\r\nAccept-Ranges: none\r\nConnection: close\r\nContent-Type: %s\r\nEXT:\r\n',
-                    os.date('!%a, %d %b %Y %H:%M:%S GMT'),ssdp_server,http_mime[f.ext] or 'application/x-octet-stream'))
+        http.send(
+            string.format(
+                'HTTP/1.1 200 OK\r\nDate: %s\r\nServer: %s\r\nAccept-Ranges: none\r\nConnection: close\r\nContent-Type: %s\r\nEXT:\r\n',
+                os.date('!%a, %d %b %Y %H:%M:%S GMT'),ssdp_server,http_mime[f.ext] or 'application/x-octet-stream'))
 
-            if len then
-                http.send(string.format('Content-Length: %s\r\n',len))
-            end
+        if len then
+            http.send(string.format('Content-Length: %s\r\n',len))
+        end
 
-            http.send('\r\n')
+        http.send('\r\n')
 
-            if head~=true then
-                if cfg.debug>0 then print(from..' FILE '..f.path) end
+        if head~=true then
+            if cfg.debug>0 then print(from..' FILE '..f.path) end
 
             if tmpl_name~=nil then
                 if len then http.sendfile(tmpl_name) else http.sendtfile(f.path,http_vars) end
