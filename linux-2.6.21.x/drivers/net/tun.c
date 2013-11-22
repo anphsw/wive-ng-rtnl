@@ -558,9 +558,11 @@ static int tun_chr_ioctl(struct inode *inode, struct file *file,
 	struct ifreq ifr;
 	DECLARE_MAC_BUF(mac);
 
-	if (cmd == TUNSETIFF || _IOC_TYPE(cmd) == 0x89)
+	if (cmd == TUNSETIFF || _IOC_TYPE(cmd) == 0x89) {
 		if (copy_from_user(&ifr, argp, sizeof ifr))
 			return -EFAULT;
+	} else
+		memset(&ifr, 0, sizeof(ifr));
 
 	if (cmd == TUNSETIFF && !tun) {
 		int err;
