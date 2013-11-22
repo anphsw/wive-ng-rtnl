@@ -1,7 +1,7 @@
 /*
- * I/O functions for libusbx
- * Copyright © 2007-2009 Daniel Drake <dsd@gentoo.org>
- * Copyright © 2001 Johannes Erdfelt <johannes@erdfelt.com>
+ * I/O functions for libusb
+ * Copyright (C) 2007-2009 Daniel Drake <dsd@gentoo.org>
+ * Copyright (c) 2001 Johannes Erdfelt <johannes@erdfelt.com>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,19 +18,18 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "config.h"
+#include <config.h>
 #include <errno.h>
-#include <fcntl.h>
+#include <poll.h>
+#include <pthread.h>
+#include <signal.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
-#ifdef HAVE_SIGNAL_H
-#include <signal.h>
-#endif
-#ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
-#endif
+#include <time.h>
+#include <unistd.h>
+
 #ifdef USBI_TIMERFD_AVAILABLE
 #include <sys/timerfd.h>
 #endif
@@ -42,10 +41,10 @@
  *
  * \section intro Introduction
  *
- * If you're using libusbx in your application, you're probably wanting to
+ * If you're using libusb in your application, you're probably wanting to
  * perform I/O with devices - you want to perform USB data transfers.
  *
- * libusbx offers two separate interfaces for device I/O. This page aims to
+ * libusb offers two separate interfaces for device I/O. This page aims to
  * introduce the two in order to help you decide which one is more suitable
  * for your application. You can also choose to use both interfaces in your
  * application by considering each transfer on a case-by-case basis.
@@ -75,7 +74,7 @@
  * Data will arrive when the button is pressed by the user, which is
  * potentially hours later.
  *
- * libusbx offers both a synchronous and an asynchronous interface to performing
+ * libusb offers both a synchronous and an asynchronous interface to performing
  * USB transfers. The main difference is that the synchronous interface
  * combines both steps indicated above into a single function call, whereas
  * the asynchronous interface separates them.
@@ -93,8 +92,8 @@
  * in the following style:
 \code
 unsigned char data[4];
-int actual_length;
-int r = libusb_bulk_transfer(handle, LIBUSB_ENDPOINT_IN, data, sizeof(data), &actual_length, 0);
+int actual_length,
+int r = libusb_bulk_transfer(handle, EP_IN, data, sizeof(data), &actual_length, 0);
 if (r == 0 && actual_length == sizeof(data)) {
 	// results of the transaction can now be found in the data buffer
 	// parse them here and report button press
@@ -122,7 +121,7 @@ if (r == 0 && actual_length == sizeof(data)) {
  *
  * For details on how to use the synchronous API, see the
  * \ref syncio "synchronous I/O API documentation" pages.
- *
+ * 
  * \section async The asynchronous interface
  *
  * Asynchronous I/O is the most significant new feature in libusb-1.0.
@@ -130,9 +129,9 @@ if (r == 0 && actual_length == sizeof(data)) {
  * above.
  *
  * Instead of providing which functions that block until the I/O has complete,
- * libusbx's asynchronous interface presents non-blocking functions which
+ * libusb's asynchronous interface presents non-blocking functions which
  * begin a transfer and then return immediately. Your application passes a
- * callback function pointer to this non-blocking function, which libusbx will
+ * callback function pointer to this non-blocking function, which libusb will
  * call with the results of the transaction when it has completed.
  *
  * Transfers which have been submitted through the non-blocking functions
@@ -143,12 +142,12 @@ if (r == 0 && actual_length == sizeof(data)) {
  * to use threads.
  *
  * This added flexibility does come with some complications though:
- * - In the interest of being a lightweight library, libusbx does not create
+ * - In the interest of being a lightweight library, libusb does not create
  * threads and can only operate when your application is calling into it. Your
- * application must call into libusbx from it's main loop when events are ready
- * to be handled, or you must use some other scheme to allow libusbx to
+ * application must call into libusb from it's main loop when events are ready
+ * to be handled, or you must use some other scheme to allow libusb to
  * undertake whatever work needs to be done.
- * - libusbx also needs to be called into at certain fixed points in time in
+ * - libusb also needs to be called into at certain fixed points in time in
  * order to accurately handle transfer timeouts.
  * - Memory handling becomes more complex. You cannot use stack memory unless
  * the function with that stack is guaranteed not to return until the transfer
@@ -158,7 +157,7 @@ if (r == 0 && actual_length == sizeof(data)) {
  * results are handled. This becomes particularly obvious when you want to
  * submit a second transfer based on the results of an earlier transfer.
  *
- * Internally, libusbx's synchronous interface is expressed in terms of function
+ * Internally, libusb's synchronous interface is expressed in terms of function
  * calls to the asynchronous interface.
  *
  * For details on how to use the asynchronous API, see the
@@ -175,25 +174,25 @@ if (r == 0 && actual_length == sizeof(data)) {
  * constraints on packet size defined by endpoint descriptors. The host must
  * not send data payloads larger than the endpoint's maximum packet size.
  *
- * libusbx and the underlying OS abstract out the packet concept, allowing you
+ * libusb and the underlying OS abstract out the packet concept, allowing you
  * to request transfers of any size. Internally, the request will be divided
  * up into correctly-sized packets. You do not have to be concerned with
  * packet sizes, but there is one exception when considering overflows.
  *
  * \section overflow Bulk/interrupt transfer overflows
  *
- * When requesting data on a bulk endpoint, libusbx requires you to supply a
- * buffer and the maximum number of bytes of data that libusbx can put in that
+ * When requesting data on a bulk endpoint, libusb requires you to supply a
+ * buffer and the maximum number of bytes of data that libusb can put in that
  * buffer. However, the size of the buffer is not communicated to the device -
  * the device is just asked to send any amount of data.
  *
  * There is no problem if the device sends an amount of data that is less than
- * or equal to the buffer size. libusbx reports this condition to you through
+ * or equal to the buffer size. libusb reports this condition to you through
  * the \ref libusb_transfer::actual_length "libusb_transfer.actual_length"
  * field.
  *
  * Problems may occur if the device attempts to send more data than can fit in
- * the buffer. libusbx reports LIBUSB_TRANSFER_OVERFLOW for this condition but
+ * the buffer. libusb reports LIBUSB_TRANSFER_OVERFLOW for this condition but
  * other behaviour is largely undefined: actual_length may or may not be
  * accurate, the chunk of data that can fit in the buffer (before overflow)
  * may or may not have been transferred.
@@ -211,7 +210,7 @@ if (r == 0 && actual_length == sizeof(data)) {
 /**
  * @defgroup asyncio Asynchronous device I/O
  *
- * This page details libusbx's asynchronous (non-blocking) API for USB device
+ * This page details libusb's asynchronous (non-blocking) API for USB device
  * I/O. This interface is very powerful but is also quite complex - you will
  * need to read this page carefully to understand the necessary considerations
  * and issues surrounding use of this interface. Simplistic applications
@@ -226,7 +225,7 @@ if (r == 0 && actual_length == sizeof(data)) {
  *
  * \section asyncabstraction Transfer abstraction
  *
- * For the asynchronous I/O, libusbx implements the concept of a generic
+ * For the asynchronous I/O, libusb implements the concept of a generic
  * transfer entity for all types of I/O (control, bulk, interrupt,
  * isochronous). The generic transfer object must be treated slightly
  * differently depending on which type of I/O you are performing with it.
@@ -239,11 +238,11 @@ if (r == 0 && actual_length == sizeof(data)) {
  * -# <b>Allocation</b>: allocate a libusb_transfer
  * -# <b>Filling</b>: populate the libusb_transfer instance with information
  *    about the transfer you wish to perform
- * -# <b>Submission</b>: ask libusbx to submit the transfer
+ * -# <b>Submission</b>: ask libusb to submit the transfer
  * -# <b>Completion handling</b>: examine transfer results in the
  *    libusb_transfer structure
  * -# <b>Deallocation</b>: clean up resources
- *
+ * 
  *
  * \subsection asyncalloc Allocation
  *
@@ -286,7 +285,7 @@ if (r == 0 && actual_length == sizeof(data)) {
  *
  * The user-specified callback is passed a pointer to the libusb_transfer
  * structure which was used to setup and submit the transfer. At completion
- * time, libusbx has populated this structure with results of the transfer:
+ * time, libusb has populated this structure with results of the transfer:
  * success or failure reason, number of bytes of data transferred, etc. See
  * the libusb_transfer structure documentation for more information.
  *
@@ -325,7 +324,7 @@ if (r == 0 && actual_length == sizeof(data)) {
  * has completed will result in undefined behaviour.
  *
  * When a transfer is cancelled, some of the data may have been transferred.
- * libusbx will communicate this to you in the transfer callback. Do not assume
+ * libusb will communicate this to you in the transfer callback. Do not assume
  * that no data was transferred.
  *
  * \section bulk_overflows Overflows on device-to-host bulk/interrupt endpoints
@@ -396,7 +395,7 @@ if (r == 0 && actual_length == sizeof(data)) {
  * request was not supported.
  *
  * \section asyncintr Considerations for interrupt transfers
- *
+ * 
  * All interrupt transfers are performed using the polling interval presented
  * by the bInterval value of the endpoint descriptor.
  *
@@ -467,7 +466,7 @@ if (r == 0 && actual_length == sizeof(data)) {
  *
  * In most circumstances, it is not safe to use stack memory for transfer
  * buffers. This is because the function that fired off the asynchronous
- * transfer may return before libusbx has finished using the buffer, and when
+ * transfer may return before libusb has finished using the buffer, and when
  * the function returns it's stack gets destroyed. This is true for both
  * host-to-device and device-to-host transfers.
  *
@@ -487,53 +486,53 @@ if (r == 0 && actual_length == sizeof(data)) {
  *   \ref libusb_transfer_status::LIBUSB_TRANSFER_ERROR "LIBUSB_TRANSFER_ERROR"
  *   (they would normally be regarded as COMPLETED)
  * - \ref libusb_transfer_flags::LIBUSB_TRANSFER_FREE_BUFFER
- *   "LIBUSB_TRANSFER_FREE_BUFFER" allows you to ask libusbx to free the transfer
+ *   "LIBUSB_TRANSFER_FREE_BUFFER" allows you to ask libusb to free the transfer
  *   buffer when freeing the transfer.
  * - \ref libusb_transfer_flags::LIBUSB_TRANSFER_FREE_TRANSFER
- *   "LIBUSB_TRANSFER_FREE_TRANSFER" causes libusbx to automatically free the
+ *   "LIBUSB_TRANSFER_FREE_TRANSFER" causes libusb to automatically free the
  *   transfer after the transfer callback returns.
  *
  * \section asyncevent Event handling
  *
- * In accordance of the aim of being a lightweight library, libusbx does not
- * create threads internally. This means that libusbx code does not execute
- * at any time other than when your application is calling a libusbx function.
- * However, an asynchronous model requires that libusbx perform work at various
+ * In accordance of the aim of being a lightweight library, libusb does not
+ * create threads internally. This means that libusb code does not execute
+ * at any time other than when your application is calling a libusb function.
+ * However, an asynchronous model requires that libusb perform work at various
  * points in time - namely processing the results of previously-submitted
  * transfers and invoking the user-supplied callback function.
  *
  * This gives rise to the libusb_handle_events() function which your
- * application must call into when libusbx has work do to. This gives libusbx
+ * application must call into when libusb has work do to. This gives libusb
  * the opportunity to reap pending transfers, invoke callbacks, etc.
  *
  * The first issue to discuss here is how your application can figure out
- * when libusbx has work to do. In fact, there are two naive options which
+ * when libusb has work to do. In fact, there are two naive options which
  * do not actually require your application to know this:
  * -# Periodically call libusb_handle_events() in non-blocking mode at fixed
  *    short intervals from your main loop
  * -# Repeatedly call libusb_handle_events() in blocking mode from a dedicated
  *    thread.
  *
- * The first option is plainly not very nice, and will cause unnecessary
+ * The first option is plainly not very nice, and will cause unnecessary 
  * CPU wakeups leading to increased power usage and decreased battery life.
  * The second option is not very nice either, but may be the nicest option
  * available to you if the "proper" approach can not be applied to your
  * application (read on...).
- *
- * The recommended option is to integrate libusbx with your application main
- * event loop. libusbx exposes a set of file descriptors which allow you to do
+ * 
+ * The recommended option is to integrate libusb with your application main
+ * event loop. libusb exposes a set of file descriptors which allow you to do
  * this. Your main loop is probably already calling poll() or select() or a
  * variant on a set of file descriptors for other event sources (e.g. keyboard
  * button presses, mouse movements, network sockets, etc). You then add
- * libusbx's file descriptors to your poll()/select() calls, and when activity
+ * libusb's file descriptors to your poll()/select() calls, and when activity
  * is detected on such descriptors you know it is time to call
  * libusb_handle_events().
  *
- * There is one final event handling complication. libusbx supports
+ * There is one final event handling complication. libusb supports
  * asynchronous transfers which time out after a specified time period, and
- * this requires that libusbx is called into at or after the timeout so that
- * the timeout can be handled. So, in addition to considering libusbx's file
- * descriptors in your main event loop, you must also consider that libusbx
+ * this requires that libusb is called into at or after the timeout so that
+ * the timeout can be handled. So, in addition to considering libusb's file
+ * descriptors in your main event loop, you must also consider that libusb
  * sometimes needs to be called into at fixed points in time even when there
  * is no file descriptor activity.
  *
@@ -544,7 +543,7 @@ if (r == 0 && actual_length == sizeof(data)) {
 /**
  * @defgroup poll Polling and timing
  *
- * This page documents libusbx's functions for polling events and timing.
+ * This page documents libusb's functions for polling events and timing.
  * These functions are only necessary for users of the
  * \ref asyncio "asynchronous API". If you are only using the simpler
  * \ref syncio "synchronous API" then you do not need to ever call these
@@ -552,10 +551,10 @@ if (r == 0 && actual_length == sizeof(data)) {
  *
  * The justification for the functionality described here has already been
  * discussed in the \ref asyncevent "event handling" section of the
- * asynchronous API documentation. In summary, libusbx does not create internal
+ * asynchronous API documentation. In summary, libusb does not create internal
  * threads for event processing and hence relies on your application calling
- * into libusbx at certain points in time so that pending events can be handled.
- * In order to know precisely when libusbx needs to be called into, libusbx
+ * into libusb at certain points in time so that pending events can be handled.
+ * In order to know precisely when libusb needs to be called into, libusb
  * offers you a set of pollable file descriptors and information about when
  * the next timeout expires.
  *
@@ -564,10 +563,10 @@ if (r == 0 && actual_length == sizeof(data)) {
  *
  * \section pollsimple The simple option
  *
- * If your application revolves solely around libusbx and does not need to
+ * If your application revolves solely around libusb and does not need to
  * handle other event sources, you can have a program structure as follows:
 \code
-// initialize libusbx
+// initialize libusb
 // find and open device
 // maybe fire off some initial async I/O
 
@@ -583,21 +582,17 @@ while (user_has_not_requested_exit)
  *
  * \section pollmain The more advanced option
  *
- * \note This functionality is currently only available on Unix-like platforms.
- * On Windows, libusb_get_pollfds() simply returns NULL. Exposing event sources
- * on Windows will require some further thought and design.
- *
  * In more advanced applications, you will already have a main loop which
  * is monitoring other event sources: network sockets, X11 events, mouse
- * movements, etc. Through exposing a set of file descriptors, libusbx is
+ * movements, etc. Through exposing a set of file descriptors, libusb is
  * designed to cleanly integrate into such main loops.
  *
  * In addition to polling file descriptors for the other event sources, you
- * take a set of file descriptors from libusbx and monitor those too. When you
- * detect activity on libusbx's file descriptors, you call
+ * take a set of file descriptors from libusb and monitor those too. When you
+ * detect activity on libusb's file descriptors, you call
  * libusb_handle_events_timeout() in non-blocking mode.
  *
- * What's more, libusbx may also need to handle events at specific moments in
+ * What's more, libusb may also need to handle events at specific moments in
  * time. No file descriptor activity is generated at these times, so your
  * own application needs to be continually aware of when the next one of these
  * moments occurs (through calling libusb_get_next_timeout()), and then it
@@ -605,26 +600,26 @@ while (user_has_not_requested_exit)
  * these moments occur. This means that you need to adjust your
  * poll()/select() timeout accordingly.
  *
- * libusbx provides you with a set of file descriptors to poll and expects you
+ * libusb provides you with a set of file descriptors to poll and expects you
  * to poll all of them, treating them as a single entity. The meaning of each
  * file descriptor in the set is an internal implementation detail,
  * platform-dependent and may vary from release to release. Don't try and
- * interpret the meaning of the file descriptors, just do as libusbx indicates,
+ * interpret the meaning of the file descriptors, just do as libusb indicates,
  * polling all of them at once.
  *
  * In pseudo-code, you want something that looks like:
 \code
-// initialise libusbx
+// initialise libusb
 
 libusb_get_pollfds(ctx)
 while (user has not requested application exit) {
 	libusb_get_next_timeout(ctx);
-	poll(on libusbx file descriptors plus any other event sources of interest,
-		using a timeout no larger than the value libusbx just suggested)
-	if (poll() indicated activity on libusbx file descriptors)
-		libusb_handle_events_timeout(ctx, &zero_tv);
-	if (time has elapsed to or beyond the libusbx timeout)
-		libusb_handle_events_timeout(ctx, &zero_tv);
+	poll(on libusb file descriptors plus any other event sources of interest,
+		using a timeout no larger than the value libusb just suggested)
+	if (poll() indicated activity on libusb file descriptors)
+		libusb_handle_events_timeout(ctx, 0);
+	if (time has elapsed to or beyond the libusb timeout)
+		libusb_handle_events_timeout(ctx, 0);
 	// handle events from other sources here
 }
 
@@ -633,7 +628,7 @@ while (user has not requested application exit) {
  *
  * \subsection polltime Notes on time-based events
  *
- * The above complication with having to track time and call into libusbx at
+ * The above complication with having to track time and call into libusb at
  * specific moments is a bit of a headache. For maximum compatibility, you do
  * need to write your main loop as above, but you may decide that you can
  * restrict the supported platforms of your application and get away with
@@ -645,19 +640,19 @@ while (user has not requested application exit) {
  *  - Linux, provided that the following version requirements are satisfied:
  *   - Linux v2.6.27 or newer, compiled with timerfd support
  *   - glibc v2.9 or newer
- *   - libusbx v1.0.5 or newer
+ *   - libusb v1.0.5 or newer
  *
  * Under these configurations, libusb_get_next_timeout() will \em always return
  * 0, so your main loop can be simplified to:
 \code
-// initialise libusbx
+// initialise libusb
 
 libusb_get_pollfds(ctx)
 while (user has not requested application exit) {
-	poll(on libusbx file descriptors plus any other event sources of interest,
+	poll(on libusb file descriptors plus any other event sources of interest,
 		using any timeout that you like)
-	if (poll() indicated activity on libusbx file descriptors)
-		libusb_handle_events_timeout(ctx, &zero_tv);
+	if (poll() indicated activity on libusb file descriptors)
+		libusb_handle_events_timeout(ctx, 0);
 	// handle events from other sources here
 }
 
@@ -666,20 +661,20 @@ while (user has not requested application exit) {
  *
  * Do remember that if you simplify your main loop to the above, you will
  * lose compatibility with some platforms (including legacy Linux platforms,
- * and <em>any future platforms supported by libusbx which may have time-based
+ * and <em>any future platforms supported by libusb which may have time-based
  * event requirements</em>). The resultant problems will likely appear as
  * strange bugs in your application.
  *
  * You can use the libusb_pollfds_handle_timeouts() function to do a runtime
  * check to see if it is safe to ignore the time-based event complications.
- * If your application has taken the shortcut of ignoring libusbx's next timeout
+ * If your application has taken the shortcut of ignoring libusb's next timeout
  * in your main loop, then you are advised to check the return value of
  * libusb_pollfds_handle_timeouts() during application startup, and to abort
  * if the platform does suffer from these timing complications.
  *
  * \subsection fdsetchange Changes in the file descriptor set
  *
- * The set of file descriptors that libusbx uses as event sources may change
+ * The set of file descriptors that libusb uses as event sources may change
  * during the life of your application. Rather than having to repeatedly
  * call libusb_get_pollfds(), you can set up notification functions for when
  * the file descriptor set changes using libusb_set_pollfd_notifiers().
@@ -700,10 +695,10 @@ while (user has not requested application exit) {
 
 /** \page mtasync Multi-threaded applications and asynchronous I/O
  *
- * libusbx is a thread-safe library, but extra considerations must be applied
- * to applications which interact with libusbx from multiple threads.
+ * libusb is a thread-safe library, but extra considerations must be applied
+ * to applications which interact with libusb from multiple threads.
  *
- * The underlying issue that must be addressed is that all libusbx I/O
+ * The underlying issue that must be addressed is that all libusb I/O
  * revolves around monitoring file descriptors through the poll()/select()
  * system calls. This is directly exposed at the
  * \ref asyncio "asynchronous interface" but it is important to note that the
@@ -711,13 +706,13 @@ while (user has not requested application exit) {
  * asynchonrous interface, therefore the same considerations apply.
  *
  * The issue is that if two or more threads are concurrently calling poll()
- * or select() on libusbx's file descriptors then only one of those threads
+ * or select() on libusb's file descriptors then only one of those threads
  * will be woken up when an event arrives. The others will be completely
  * oblivious that anything has happened.
  *
  * Consider the following pseudo-code, which submits an asynchronous transfer
  * then waits for its completion. This style is one way you could implement a
- * synchronous interface on top of the asynchronous interface (and libusbx
+ * synchronous interface on top of the asynchronous interface (and libusb
  * does something similar, albeit more advanced due to the complications
  * explained on this page).
  *
@@ -740,9 +735,9 @@ void myfunc() {
 	libusb_submit_transfer(transfer);
 
 	while (!completed) {
-		poll(libusbx file descriptors, 120*1000);
+		poll(libusb file descriptors, 120*1000);
 		if (poll indicates activity)
-			libusb_handle_events_timeout(ctx, &zero_tv);
+			libusb_handle_events_timeout(ctx, 0);
 	}
 	printf("completed!");
 	// other code here
@@ -754,7 +749,7 @@ void myfunc() {
  * The poll() loop has a long timeout to minimize CPU usage during situations
  * when nothing is happening (it could reasonably be unlimited).
  *
- * If this is the only thread that is polling libusbx's file descriptors, there
+ * If this is the only thread that is polling libusb's file descriptors, there
  * is no problem: there is no danger that another thread will swallow up the
  * event that we are interested in. On the other hand, if there is another
  * thread polling the same descriptors, there is a chance that it will receive
@@ -763,72 +758,31 @@ void myfunc() {
  * the loop, <em>up to 120 seconds later.</em> Clearly a two-minute delay is
  * undesirable, and don't even think about using short timeouts to circumvent
  * this issue!
- *
+ * 
  * The solution here is to ensure that no two threads are ever polling the
  * file descriptors at the same time. A naive implementation of this would
- * impact the capabilities of the library, so libusbx offers the scheme
+ * impact the capabilities of the library, so libusb offers the scheme
  * documented below to ensure no loss of functionality.
  *
  * Before we go any further, it is worth mentioning that all libusb-wrapped
  * event handling procedures fully adhere to the scheme documented below.
- * This includes libusb_handle_events() and its variants, and all the
- * synchronous I/O functions - libusbx hides this headache from you.
+ * This includes libusb_handle_events() and all the synchronous I/O functions - 
+ * libusb hides this headache from you. You do not need to worry about any
+ * of these issues if you stick to that level.
  *
- * \section Using libusb_handle_events() from multiple threads
- *
- * Even when only using libusb_handle_events() and synchronous I/O functions,
- * you can still have a race condition. You might be tempted to solve the
- * above with libusb_handle_events() like so:
- *
-\code
-	libusb_submit_transfer(transfer);
-
-	while (!completed) {
-		libusb_handle_events(ctx);
-	}
-	printf("completed!");
-\endcode
- *
- * This however has a race between the checking of completed and
- * libusb_handle_events() acquiring the events lock, so another thread
- * could have completed the transfer, resulting in this thread hanging
- * until either a timeout or another event occurs. See also commit
- * 6696512aade99bb15d6792af90ae329af270eba6 which fixes this in the
- * synchronous API implementation of libusb.
- *
- * Fixing this race requires checking the variable completed only after
- * taking the event lock, which defeats the concept of just calling
- * libusb_handle_events() without worrying about locking. This is why
- * libusb-1.0.9 introduces the new libusb_handle_events_timeout_completed()
- * and libusb_handle_events_completed() functions, which handles doing the
- * completion check for you after they have acquired the lock:
- *
-\code
-	libusb_submit_transfer(transfer);
-
-	while (!completed) {
-		libusb_handle_events_completed(ctx, &completed);
-	}
-	printf("completed!");
-\endcode
- *
- * This nicely fixes the race in our example. Note that if all you want to
- * do is submit a single transfer and wait for its completion, then using
- * one of the synchronous I/O functions is much easier.
- *
- * \section eventlock The events lock
- *
- * The problem is when we consider the fact that libusbx exposes file
+ * The problem is when we consider the fact that libusb exposes file
  * descriptors to allow for you to integrate asynchronous USB I/O into
  * existing main loops, effectively allowing you to do some work behind
- * libusbx's back. If you do take libusbx's file descriptors and pass them to
+ * libusb's back. If you do take libusb's file descriptors and pass them to
  * poll()/select() yourself, you need to be aware of the associated issues.
+ *
+ * \section eventlock The events lock
  *
  * The first concept to be introduced is the events lock. The events lock
  * is used to serialize threads that want to handle events, such that only
  * one thread is handling events at any one time.
  *
- * You must take the events lock before polling libusbx file descriptors,
+ * You must take the events lock before polling libusb file descriptors,
  * using libusb_lock_events(). You must release the lock as soon as you have
  * aborted your poll()/select() loop, using libusb_unlock_events().
  *
@@ -839,9 +793,9 @@ void myfunc() {
 \code
 	libusb_lock_events(ctx);
 	while (!completed) {
-		poll(libusbx file descriptors, 120*1000);
+		poll(libusb file descriptors, 120*1000);
 		if (poll indicates activity)
-			libusb_handle_events_timeout(ctx, &zero_tv);
+			libusb_handle_events_timeout(ctx, 0);
 	}
 	libusb_unlock_events(ctx);
 \endcode
@@ -855,7 +809,7 @@ void myfunc() {
  * status of its transfer until the code above has finished (30 seconds later)
  * due to contention on the lock.
  *
- * To solve this, libusbx offers you a mechanism to determine when another
+ * To solve this, libusb offers you a mechanism to determine when another
  * thread is handling events. It also offers a mechanism to block your thread
  * until the event handling thread has completed an event (and this mechanism
  * does not involve polling of file descriptors).
@@ -881,7 +835,7 @@ if (libusb_try_lock_events(ctx) == 0) {
 			libusb_unlock_events(ctx);
 			goto retry;
 		}
-		poll(libusbx file descriptors, 120*1000);
+		poll(libusb file descriptors, 120*1000);
 		if (poll indicates activity)
 			libusb_handle_events_locked(ctx, 0);
 	}
@@ -900,8 +854,8 @@ if (libusb_try_lock_events(ctx) == 0) {
 			libusb_unlock_event_waiters(ctx);
 			goto retry;
 		}
-
-		libusb_wait_for_event(ctx, NULL);
+	
+		libusb_wait_for_event(ctx);
 	}
 	libusb_unlock_event_waiters(ctx);
 }
@@ -927,8 +881,8 @@ printf("completed!\n");
  * should be apparent from the code shown above.
  * -# libusb_try_lock_events() is a non-blocking function which attempts
  *    to acquire the events lock but returns a failure code if it is contended.
- * -# libusb_event_handling_ok() checks that libusbx is still happy for your
- *    thread to be performing event handling. Sometimes, libusbx needs to
+ * -# libusb_event_handling_ok() checks that libusb is still happy for your
+ *    thread to be performing event handling. Sometimes, libusb needs to
  *    interrupt the event handler, and this is how you can check if you have
  *    been interrupted. If this function returns 0, the correct behaviour is
  *    for you to give up the event handling lock, and then to repeat the cycle.
@@ -938,12 +892,12 @@ printf("completed!\n");
  *    libusb_handle_events_timeout() that you can call while holding the
  *    events lock. libusb_handle_events_timeout() itself implements similar
  *    logic to the above, so be sure not to call it when you are
- *    "working behind libusbx's back", as is the case here.
+ *    "working behind libusb's back", as is the case here.
  * -# libusb_event_handler_active() determines if someone is currently
  *    holding the events lock
  *
  * You might be wondering why there is no function to wake up all threads
- * blocked on libusb_wait_for_event(). This is because libusbx can do this
+ * blocked on libusb_wait_for_event(). This is because libusb can do this
  * internally: it will wake up all such threads when someone calls
  * libusb_unlock_events() or when a transfer completes (at the point after its
  * callback has returned).
@@ -952,7 +906,7 @@ printf("completed!\n");
  *
  * The above explanation should be enough to get you going, but if you're
  * really thinking through the issues then you may be left with some more
- * questions regarding libusbx's internals. If you're curious, read on, and if
+ * questions regarding libusb's internals. If you're curious, read on, and if
  * not, skip to the next section to avoid confusing yourself!
  *
  * The immediate question that may spring to mind is: what if one thread
@@ -967,14 +921,14 @@ printf("completed!\n");
  *    are all kinds of race conditions that could arise here, so it is
  *    important that nobody is doing event handling at this time.
  *
- * libusbx handles these issues internally, so application developers do not
+ * libusb handles these issues internally, so application developers do not
  * have to stop their event handlers while opening/closing devices. Here's how
  * it works, focusing on the libusb_close() situation first:
  *
- * -# During initialization, libusbx opens an internal pipe, and it adds the read
+ * -# During initialization, libusb opens an internal pipe, and it adds the read
  *    end of this pipe to the set of file descriptors to be polled.
- * -# During libusb_close(), libusbx writes some dummy data on this control pipe.
- *    This immediately interrupts the event handler. libusbx also records
+ * -# During libusb_close(), libusb writes some dummy data on this control pipe.
+ *    This immediately interrupts the event handler. libusb also records
  *    internally that it is trying to interrupt event handlers for this
  *    high-priority event.
  * -# At this point, some of the functions described above start behaving
@@ -989,7 +943,7 @@ printf("completed!\n");
  *    giving up the events lock very quickly, giving the high-priority
  *    libusb_close() operation a "free ride" to acquire the events lock. All
  *    threads that are competing to do event handling become event waiters.
- * -# With the events lock held inside libusb_close(), libusbx can safely remove
+ * -# With the events lock held inside libusb_close(), libusb can safely remove
  *    a file descriptor from the poll set, in the safety of knowledge that
  *    nobody is polling those descriptors or trying to access the poll set.
  * -# After obtaining the events lock, the close operation completes very
@@ -1006,7 +960,7 @@ printf("completed!\n");
  * call to libusb_open():
  *
  * -# The device is opened and a file descriptor is added to the poll set.
- * -# libusbx sends some dummy data on the control pipe, and records that it
+ * -# libusb sends some dummy data on the control pipe, and records that it
  *    is trying to modify the poll descriptor set.
  * -# The event handler is interrupted, and the same behaviour change as for
  *    libusb_close() takes effect, causing all event handling threads to become
@@ -1022,7 +976,7 @@ printf("completed!\n");
  *
  * The above may seem a little complicated, but hopefully I have made it clear
  * why such complications are necessary. Also, do not forget that this only
- * applies to applications that take libusbx's file descriptors and integrate
+ * applies to applications that take libusb's file descriptors and integrate
  * them into their own polling loops.
  *
  * You may decide that it is OK for your multi-threaded application to ignore
@@ -1051,17 +1005,17 @@ int usbi_io_init(struct libusb_context *ctx)
 {
 	int r;
 
-	usbi_mutex_init(&ctx->flying_transfers_lock, NULL);
-	usbi_mutex_init(&ctx->pollfds_lock, NULL);
-	usbi_mutex_init(&ctx->pollfd_modify_lock, NULL);
-	usbi_mutex_init_recursive(&ctx->events_lock, NULL);
-	usbi_mutex_init(&ctx->event_waiters_lock, NULL);
-	usbi_cond_init(&ctx->event_waiters_cond, NULL);
+	pthread_mutex_init(&ctx->flying_transfers_lock, NULL);
+	pthread_mutex_init(&ctx->pollfds_lock, NULL);
+	pthread_mutex_init(&ctx->pollfd_modify_lock, NULL);
+	pthread_mutex_init(&ctx->events_lock, NULL);
+	pthread_mutex_init(&ctx->event_waiters_lock, NULL);
+	pthread_cond_init(&ctx->event_waiters_cond, NULL);
 	list_init(&ctx->flying_transfers);
 	list_init(&ctx->pollfds);
 
 	/* FIXME should use an eventfd on kernels that support it */
-	r = usbi_pipe(ctx->ctrl_pipe);
+	r = pipe(ctx->ctrl_pipe);
 	if (r < 0) {
 		r = LIBUSB_ERROR_OTHER;
 		goto err;
@@ -1073,7 +1027,7 @@ int usbi_io_init(struct libusb_context *ctx)
 
 #ifdef USBI_TIMERFD_AVAILABLE
 	ctx->timerfd = timerfd_create(usbi_backend->get_timerfd_clockid(),
-		O_NONBLOCK);
+		TFD_NONBLOCK);
 	if (ctx->timerfd >= 0) {
 		usbi_dbg("using timerfd for timeouts");
 		r = usbi_add_pollfd(ctx, ctx->timerfd, POLLIN);
@@ -1091,35 +1045,35 @@ int usbi_io_init(struct libusb_context *ctx)
 	return 0;
 
 err_close_pipe:
-	usbi_close(ctx->ctrl_pipe[0]);
-	usbi_close(ctx->ctrl_pipe[1]);
+	close(ctx->ctrl_pipe[0]);
+	close(ctx->ctrl_pipe[1]);
 err:
-	usbi_mutex_destroy(&ctx->flying_transfers_lock);
-	usbi_mutex_destroy(&ctx->pollfds_lock);
-	usbi_mutex_destroy(&ctx->pollfd_modify_lock);
-	usbi_mutex_destroy(&ctx->events_lock);
-	usbi_mutex_destroy(&ctx->event_waiters_lock);
-	usbi_cond_destroy(&ctx->event_waiters_cond);
+	pthread_mutex_destroy(&ctx->flying_transfers_lock);
+	pthread_mutex_destroy(&ctx->pollfds_lock);
+	pthread_mutex_destroy(&ctx->pollfd_modify_lock);
+	pthread_mutex_destroy(&ctx->events_lock);
+	pthread_mutex_destroy(&ctx->event_waiters_lock);
+	pthread_cond_destroy(&ctx->event_waiters_cond);
 	return r;
 }
 
 void usbi_io_exit(struct libusb_context *ctx)
 {
 	usbi_remove_pollfd(ctx, ctx->ctrl_pipe[0]);
-	usbi_close(ctx->ctrl_pipe[0]);
-	usbi_close(ctx->ctrl_pipe[1]);
+	close(ctx->ctrl_pipe[0]);
+	close(ctx->ctrl_pipe[1]);
 #ifdef USBI_TIMERFD_AVAILABLE
 	if (usbi_using_timerfd(ctx)) {
 		usbi_remove_pollfd(ctx, ctx->timerfd);
 		close(ctx->timerfd);
 	}
 #endif
-	usbi_mutex_destroy(&ctx->flying_transfers_lock);
-	usbi_mutex_destroy(&ctx->pollfds_lock);
-	usbi_mutex_destroy(&ctx->pollfd_modify_lock);
-	usbi_mutex_destroy(&ctx->events_lock);
-	usbi_mutex_destroy(&ctx->event_waiters_lock);
-	usbi_cond_destroy(&ctx->event_waiters_cond);
+	pthread_mutex_destroy(&ctx->flying_transfers_lock);
+	pthread_mutex_destroy(&ctx->pollfds_lock);
+	pthread_mutex_destroy(&ctx->pollfd_modify_lock);
+	pthread_mutex_destroy(&ctx->events_lock);
+	pthread_mutex_destroy(&ctx->event_waiters_lock);
+	pthread_cond_destroy(&ctx->event_waiters_cond);
 }
 
 static int calculate_timeout(struct usbi_transfer *transfer)
@@ -1127,7 +1081,7 @@ static int calculate_timeout(struct usbi_transfer *transfer)
 	int r;
 	struct timespec current_time;
 	unsigned int timeout =
-		USBI_TRANSFER_TO_LIBUSB_TRANSFER(transfer)->timeout;
+		__USBI_TRANSFER_TO_LIBUSB_TRANSFER(transfer)->timeout;
 
 	if (!timeout)
 		return 0;
@@ -1162,23 +1116,24 @@ static int add_to_flying_list(struct usbi_transfer *transfer)
 	int r = 0;
 	int first = 1;
 
-	usbi_mutex_lock(&ctx->flying_transfers_lock);
+	pthread_mutex_lock(&ctx->flying_transfers_lock);
 
 	/* if we have no other flying transfers, start the list with this one */
 	if (list_empty(&ctx->flying_transfers)) {
 		list_add(&transfer->list, &ctx->flying_transfers);
+		if (timerisset(timeout))
+			r = 1;
 		goto out;
 	}
 
 	/* if we have infinite timeout, append to end of list */
 	if (!timerisset(timeout)) {
 		list_add_tail(&transfer->list, &ctx->flying_transfers);
-		/* first is irrelevant in this case */
 		goto out;
 	}
 
 	/* otherwise, find appropriate place in list */
-	list_for_each_entry(cur, &ctx->flying_transfers, list, struct usbi_transfer) {
+	list_for_each_entry(cur, &ctx->flying_transfers, list) {
 		/* find first timeout that occurs after the transfer in question */
 		struct timeval *cur_tv = &cur->timeout;
 
@@ -1186,39 +1141,21 @@ static int add_to_flying_list(struct usbi_transfer *transfer)
 				(cur_tv->tv_sec == timeout->tv_sec &&
 					cur_tv->tv_usec > timeout->tv_usec)) {
 			list_add_tail(&transfer->list, &cur->list);
+			r = first;
 			goto out;
 		}
 		first = 0;
 	}
-	/* first is 0 at this stage (list not empty) */
 
 	/* otherwise we need to be inserted at the end */
 	list_add_tail(&transfer->list, &ctx->flying_transfers);
 out:
-#ifdef USBI_TIMERFD_AVAILABLE
-	if (first && usbi_using_timerfd(ctx) && timerisset(timeout)) {
-		/* if this transfer has the lowest timeout of all active transfers,
-		 * rearm the timerfd with this transfer's timeout */
-		const struct itimerspec it = { {0, 0},
-			{ timeout->tv_sec, timeout->tv_usec * 1000 } };
-		usbi_dbg("arm timerfd for timeout in %dms (first in line)",
-			USBI_TRANSFER_TO_LIBUSB_TRANSFER(transfer)->timeout);
-		r = timerfd_settime(ctx->timerfd, TFD_TIMER_ABSTIME, &it, NULL);
-		if (r < 0) {
-			usbi_warn(ctx, "failed to arm first timerfd (errno %d)", errno);
-			r = LIBUSB_ERROR_OTHER;
-		}
-	}
-#else
-	UNUSED(first);
-#endif
-
-	usbi_mutex_unlock(&ctx->flying_transfers_lock);
+	pthread_mutex_unlock(&ctx->flying_transfers_lock);
 	return r;
 }
 
 /** \ingroup asyncio
- * Allocate a libusbx transfer with a specified number of isochronous packet
+ * Allocate a libusb transfer with a specified number of isochronous packet
  * descriptors. The returned transfer is pre-initialized for you. When the new
  * transfer is no longer needed, it should be freed with
  * libusb_free_transfer().
@@ -1240,23 +1177,22 @@ out:
  * \param iso_packets number of isochronous packet descriptors to allocate
  * \returns a newly allocated transfer, or NULL on error
  */
-DEFAULT_VISIBILITY
-struct libusb_transfer * LIBUSB_CALL libusb_alloc_transfer(
-	int iso_packets)
+API_EXPORTED struct libusb_transfer *libusb_alloc_transfer(int iso_packets)
 {
 	size_t os_alloc_size = usbi_backend->transfer_priv_size
 		+ (usbi_backend->add_iso_packet_size * iso_packets);
-	size_t alloc_size = sizeof(struct usbi_transfer)
+	int alloc_size = sizeof(struct usbi_transfer)
 		+ sizeof(struct libusb_transfer)
 		+ (sizeof(struct libusb_iso_packet_descriptor) * iso_packets)
 		+ os_alloc_size;
-	struct usbi_transfer *itransfer = calloc(1, alloc_size);
+	struct usbi_transfer *itransfer = malloc(alloc_size);
 	if (!itransfer)
 		return NULL;
 
+	memset(itransfer, 0, alloc_size);
 	itransfer->num_iso_packets = iso_packets;
-	usbi_mutex_init(&itransfer->lock, NULL);
-	return USBI_TRANSFER_TO_LIBUSB_TRANSFER(itransfer);
+	pthread_mutex_init(&itransfer->lock, NULL);
+	return __USBI_TRANSFER_TO_LIBUSB_TRANSFER(itransfer);
 }
 
 /** \ingroup asyncio
@@ -1276,7 +1212,7 @@ struct libusb_transfer * LIBUSB_CALL libusb_alloc_transfer(
  *
  * \param transfer the transfer to free
  */
-void API_EXPORTED libusb_free_transfer(struct libusb_transfer *transfer)
+API_EXPORTED void libusb_free_transfer(struct libusb_transfer *transfer)
 {
 	struct usbi_transfer *itransfer;
 	if (!transfer)
@@ -1285,9 +1221,91 @@ void API_EXPORTED libusb_free_transfer(struct libusb_transfer *transfer)
 	if (transfer->flags & LIBUSB_TRANSFER_FREE_BUFFER && transfer->buffer)
 		free(transfer->buffer);
 
-	itransfer = LIBUSB_TRANSFER_TO_USBI_TRANSFER(transfer);
-	usbi_mutex_destroy(&itransfer->lock);
+	itransfer = __LIBUSB_TRANSFER_TO_USBI_TRANSFER(transfer);
+	pthread_mutex_destroy(&itransfer->lock);
 	free(itransfer);
+}
+
+/** \ingroup asyncio
+ * Submit a transfer. This function will fire off the USB transfer and then
+ * return immediately.
+ *
+ * \param transfer the transfer to submit
+ * \returns 0 on success
+ * \returns LIBUSB_ERROR_NO_DEVICE if the device has been disconnected
+ * \returns LIBUSB_ERROR_BUSY if the transfer has already been submitted.
+ * \returns another LIBUSB_ERROR code on other failure
+ */
+API_EXPORTED int libusb_submit_transfer(struct libusb_transfer *transfer)
+{
+	struct libusb_context *ctx = TRANSFER_CTX(transfer);
+	struct usbi_transfer *itransfer =
+		__LIBUSB_TRANSFER_TO_USBI_TRANSFER(transfer);
+	int r;
+	int first;
+
+	pthread_mutex_lock(&itransfer->lock);
+	itransfer->transferred = 0;
+	itransfer->flags = 0;
+	r = calculate_timeout(itransfer);
+	if (r < 0) {
+		r = LIBUSB_ERROR_OTHER;
+		goto out;
+	}
+
+	first = add_to_flying_list(itransfer);
+	r = usbi_backend->submit_transfer(itransfer);
+	if (r) {
+		pthread_mutex_lock(&ctx->flying_transfers_lock);
+		list_del(&itransfer->list);
+		pthread_mutex_unlock(&ctx->flying_transfers_lock);
+	}
+#ifdef USBI_TIMERFD_AVAILABLE
+	else if (first && usbi_using_timerfd(ctx)) {
+		/* if this transfer has the lowest timeout of all active transfers,
+		 * rearm the timerfd with this transfer's timeout */
+		const struct itimerspec it = { {0, 0},
+			{ itransfer->timeout.tv_sec, itransfer->timeout.tv_usec * 1000 } };
+		usbi_dbg("arm timerfd for timeout in %dms (first in line)", transfer->timeout);
+		r = timerfd_settime(ctx->timerfd, TFD_TIMER_ABSTIME, &it, NULL);
+		if (r < 0)
+			r = LIBUSB_ERROR_OTHER;
+	}
+#endif
+
+out:
+	pthread_mutex_unlock(&itransfer->lock);
+	return r;
+}
+
+/** \ingroup asyncio
+ * Asynchronously cancel a previously submitted transfer.
+ * This function returns immediately, but this does not indicate cancellation
+ * is complete. Your callback function will be invoked at some later time
+ * with a transfer status of
+ * \ref libusb_transfer_status::LIBUSB_TRANSFER_CANCELLED
+ * "LIBUSB_TRANSFER_CANCELLED."
+ *
+ * \param transfer the transfer to cancel
+ * \returns 0 on success
+ * \returns LIBUSB_ERROR_NOT_FOUND if the transfer is already complete or
+ * cancelled.
+ * \returns a LIBUSB_ERROR code on failure
+ */
+API_EXPORTED int libusb_cancel_transfer(struct libusb_transfer *transfer)
+{
+	struct usbi_transfer *itransfer =
+		__LIBUSB_TRANSFER_TO_USBI_TRANSFER(transfer);
+	int r;
+
+	usbi_dbg("");
+	pthread_mutex_lock(&itransfer->lock);
+	r = usbi_backend->cancel_transfer(itransfer);
+	if (r < 0)
+		usbi_err(TRANSFER_CTX(transfer),
+			"cancel transfer failed error %d", r);
+	pthread_mutex_unlock(&itransfer->lock);
+	return r;
 }
 
 #ifdef USBI_TIMERFD_AVAILABLE
@@ -1314,20 +1332,20 @@ static int arm_timerfd_for_next_timeout(struct libusb_context *ctx)
 {
 	struct usbi_transfer *transfer;
 
-	list_for_each_entry(transfer, &ctx->flying_transfers, list, struct usbi_transfer) {
+	list_for_each_entry(transfer, &ctx->flying_transfers, list) {
 		struct timeval *cur_tv = &transfer->timeout;
 
 		/* if we've reached transfers of infinite timeout, then we have no
 		 * arming to do */
 		if (!timerisset(cur_tv))
-			goto disarm;
+			return 0;
 
 		/* act on first transfer that is not already cancelled */
 		if (!(transfer->flags & USBI_TRANSFER_TIMED_OUT)) {
 			int r;
 			const struct itimerspec it = { {0, 0},
 				{ cur_tv->tv_sec, cur_tv->tv_usec * 1000 } };
-			usbi_dbg("next timeout originally %dms", USBI_TRANSFER_TO_LIBUSB_TRANSFER(transfer)->timeout);
+			usbi_dbg("next timeout originally %dms", __USBI_TRANSFER_TO_LIBUSB_TRANSFER(transfer)->timeout);
 			r = timerfd_settime(ctx->timerfd, TFD_TIMER_ABSTIME, &it, NULL);
 			if (r < 0)
 				return LIBUSB_ERROR_OTHER;
@@ -1335,105 +1353,18 @@ static int arm_timerfd_for_next_timeout(struct libusb_context *ctx)
 		}
 	}
 
-disarm:
-	return disarm_timerfd(ctx);
+	return 0;
 }
 #else
+static int disarm_timerfd(struct libusb_context *ctx)
+{
+	return 0;
+}
 static int arm_timerfd_for_next_timeout(struct libusb_context *ctx)
 {
-	(void)ctx;
 	return 0;
 }
 #endif
-
-/** \ingroup asyncio
- * Submit a transfer. This function will fire off the USB transfer and then
- * return immediately.
- *
- * \param transfer the transfer to submit
- * \returns 0 on success
- * \returns LIBUSB_ERROR_NO_DEVICE if the device has been disconnected
- * \returns LIBUSB_ERROR_BUSY if the transfer has already been submitted.
- * \returns LIBUSB_ERROR_NOT_SUPPORTED if the transfer flags are not supported
- * by the operating system.
- * \returns another LIBUSB_ERROR code on other failure
- */
-int API_EXPORTED libusb_submit_transfer(struct libusb_transfer *transfer)
-{
-	struct libusb_context *ctx = TRANSFER_CTX(transfer);
-	struct usbi_transfer *itransfer =
-		LIBUSB_TRANSFER_TO_USBI_TRANSFER(transfer);
-	int r;
-	int updated_fds;
-
-	usbi_mutex_lock(&itransfer->lock);
-	itransfer->transferred = 0;
-	itransfer->flags = 0;
-	r = calculate_timeout(itransfer);
-	if (r < 0) {
-		r = LIBUSB_ERROR_OTHER;
-		goto out;
-	}
-
-	r = add_to_flying_list(itransfer);
-	if (r)
-		goto out;
-	r = usbi_backend->submit_transfer(itransfer);
-	if (r) {
-		usbi_mutex_lock(&ctx->flying_transfers_lock);
-		list_del(&itransfer->list);
-		arm_timerfd_for_next_timeout(ctx);
-		usbi_mutex_unlock(&ctx->flying_transfers_lock);
-	}
-
-out:
-	updated_fds = (itransfer->flags & USBI_TRANSFER_UPDATED_FDS);
-	usbi_mutex_unlock(&itransfer->lock);
-	if (updated_fds)
-		usbi_fd_notification(ctx);
-	return r;
-}
-
-/** \ingroup asyncio
- * Asynchronously cancel a previously submitted transfer.
- * This function returns immediately, but this does not indicate cancellation
- * is complete. Your callback function will be invoked at some later time
- * with a transfer status of
- * \ref libusb_transfer_status::LIBUSB_TRANSFER_CANCELLED
- * "LIBUSB_TRANSFER_CANCELLED."
- *
- * \param transfer the transfer to cancel
- * \returns 0 on success
- * \returns LIBUSB_ERROR_NOT_FOUND if the transfer is already complete or
- * cancelled.
- * \returns a LIBUSB_ERROR code on failure
- */
-int API_EXPORTED libusb_cancel_transfer(struct libusb_transfer *transfer)
-{
-	struct usbi_transfer *itransfer =
-		LIBUSB_TRANSFER_TO_USBI_TRANSFER(transfer);
-	int r;
-
-	usbi_dbg("");
-	usbi_mutex_lock(&itransfer->lock);
-	r = usbi_backend->cancel_transfer(itransfer);
-	if (r < 0) {
-		if (r != LIBUSB_ERROR_NOT_FOUND &&
-		    r != LIBUSB_ERROR_NO_DEVICE)
-			usbi_err(TRANSFER_CTX(transfer),
-				"cancel transfer failed error %d", r);
-		else
-			usbi_dbg("cancel transfer failed error %d", r);
-
-		if (r == LIBUSB_ERROR_NO_DEVICE)
-			itransfer->flags |= USBI_TRANSFER_DEVICE_DISAPPEARED;
-	}
-
-	itransfer->flags |= USBI_TRANSFER_CANCELLING;
-
-	usbi_mutex_unlock(&itransfer->lock);
-	return r;
-}
 
 /* Handle completion of a transfer (completion might be an error condition).
  * This will invoke the user-supplied callback function, which may end up
@@ -1447,7 +1378,7 @@ int usbi_handle_transfer_completion(struct usbi_transfer *itransfer,
 	enum libusb_transfer_status status)
 {
 	struct libusb_transfer *transfer =
-		USBI_TRANSFER_TO_LIBUSB_TRANSFER(itransfer);
+		__USBI_TRANSFER_TO_LIBUSB_TRANSFER(itransfer);
 	struct libusb_context *ctx = TRANSFER_CTX(transfer);
 	uint8_t flags;
 	int r = 0;
@@ -1457,12 +1388,15 @@ int usbi_handle_transfer_completion(struct usbi_transfer *itransfer,
 	 * to rearm the timerfd if the transfer that expired was the one with
 	 * the shortest timeout. */
 
-	usbi_mutex_lock(&ctx->flying_transfers_lock);
+	pthread_mutex_lock(&ctx->flying_transfers_lock);
 	list_del(&itransfer->list);
-	if (usbi_using_timerfd(ctx))
+	if (usbi_using_timerfd(ctx)) {
 		r = arm_timerfd_for_next_timeout(ctx);
-	usbi_mutex_unlock(&ctx->flying_transfers_lock);
-	if (usbi_using_timerfd(ctx) && (r < 0))
+		if (0 == r)
+ 			r = disarm_timerfd(ctx);
+	}
+	pthread_mutex_unlock(&ctx->flying_transfers_lock);
+	if (r < 0)
 		return r;
 
 	if (status == LIBUSB_TRANSFER_COMPLETED
@@ -1479,16 +1413,15 @@ int usbi_handle_transfer_completion(struct usbi_transfer *itransfer,
 	flags = transfer->flags;
 	transfer->status = status;
 	transfer->actual_length = itransfer->transferred;
-	usbi_dbg("transfer %p has callback %p", transfer, transfer->callback);
 	if (transfer->callback)
 		transfer->callback(transfer);
 	/* transfer might have been freed by the above call, do not use from
 	 * this point. */
 	if (flags & LIBUSB_TRANSFER_FREE_TRANSFER)
 		libusb_free_transfer(transfer);
-	usbi_mutex_lock(&ctx->event_waiters_lock);
-	usbi_cond_broadcast(&ctx->event_waiters_cond);
-	usbi_mutex_unlock(&ctx->event_waiters_lock);
+	pthread_mutex_lock(&ctx->event_waiters_lock);
+	pthread_cond_broadcast(&ctx->event_waiters_cond);
+	pthread_mutex_unlock(&ctx->event_waiters_lock);
 	return 0;
 }
 
@@ -1512,11 +1445,11 @@ int usbi_handle_transfer_cancellation(struct usbi_transfer *transfer)
 
 /** \ingroup poll
  * Attempt to acquire the event handling lock. This lock is used to ensure that
- * only one thread is monitoring libusbx event sources at any one time.
+ * only one thread is monitoring libusb event sources at any one time.
  *
  * You only need to use this lock if you are developing an application
- * which calls poll() or select() on libusbx's file descriptors directly.
- * If you stick to libusbx's event handling loop functions (e.g.
+ * which calls poll() or select() on libusb's file descriptors directly.
+ * If you stick to libusb's event handling loop functions (e.g.
  * libusb_handle_events()) then you do not need to be concerned with this
  * locking.
  *
@@ -1529,38 +1462,37 @@ int usbi_handle_transfer_cancellation(struct usbi_transfer *transfer)
  * \returns 1 if the lock was not obtained (i.e. another thread holds the lock)
  * \see \ref mtasync
  */
-int API_EXPORTED libusb_try_lock_events(libusb_context *ctx)
+API_EXPORTED int libusb_try_lock_events(libusb_context *ctx)
 {
 	int r;
-	unsigned int ru;
 	USBI_GET_CONTEXT(ctx);
 
 	/* is someone else waiting to modify poll fds? if so, don't let this thread
 	 * start event handling */
-	usbi_mutex_lock(&ctx->pollfd_modify_lock);
-	ru = ctx->pollfd_modify;
-	usbi_mutex_unlock(&ctx->pollfd_modify_lock);
-	if (ru) {
+	pthread_mutex_lock(&ctx->pollfd_modify_lock);
+	r = ctx->pollfd_modify;
+	pthread_mutex_unlock(&ctx->pollfd_modify_lock);
+	if (r) {
 		usbi_dbg("someone else is modifying poll fds");
 		return 1;
 	}
 
-	r = usbi_mutex_trylock(&ctx->events_lock);
+	r = pthread_mutex_trylock(&ctx->events_lock);
 	if (r)
 		return 1;
 
-	ctx->event_handler_active = 1;
+	ctx->event_handler_active = 1;	
 	return 0;
 }
 
 /** \ingroup poll
  * Acquire the event handling lock, blocking until successful acquisition if
  * it is contended. This lock is used to ensure that only one thread is
- * monitoring libusbx event sources at any one time.
+ * monitoring libusb event sources at any one time.
  *
  * You only need to use this lock if you are developing an application
- * which calls poll() or select() on libusbx's file descriptors directly.
- * If you stick to libusbx's event handling loop functions (e.g.
+ * which calls poll() or select() on libusb's file descriptors directly.
+ * If you stick to libusb's event handling loop functions (e.g.
  * libusb_handle_events()) then you do not need to be concerned with this
  * locking.
  *
@@ -1571,10 +1503,10 @@ int API_EXPORTED libusb_try_lock_events(libusb_context *ctx)
  * \param ctx the context to operate on, or NULL for the default context
  * \see \ref mtasync
  */
-void API_EXPORTED libusb_lock_events(libusb_context *ctx)
+API_EXPORTED void libusb_lock_events(libusb_context *ctx)
 {
 	USBI_GET_CONTEXT(ctx);
-	usbi_mutex_lock(&ctx->events_lock);
+	pthread_mutex_lock(&ctx->events_lock);
 	ctx->event_handler_active = 1;
 }
 
@@ -1586,24 +1518,24 @@ void API_EXPORTED libusb_lock_events(libusb_context *ctx)
  * \param ctx the context to operate on, or NULL for the default context
  * \see \ref mtasync
  */
-void API_EXPORTED libusb_unlock_events(libusb_context *ctx)
+API_EXPORTED void libusb_unlock_events(libusb_context *ctx)
 {
 	USBI_GET_CONTEXT(ctx);
 	ctx->event_handler_active = 0;
-	usbi_mutex_unlock(&ctx->events_lock);
+	pthread_mutex_unlock(&ctx->events_lock);
 
 	/* FIXME: perhaps we should be a bit more efficient by not broadcasting
 	 * the availability of the events lock when we are modifying pollfds
 	 * (check ctx->pollfd_modify)? */
-	usbi_mutex_lock(&ctx->event_waiters_lock);
-	usbi_cond_broadcast(&ctx->event_waiters_cond);
-	usbi_mutex_unlock(&ctx->event_waiters_lock);
+	pthread_mutex_lock(&ctx->event_waiters_lock);
+	pthread_cond_broadcast(&ctx->event_waiters_cond);
+	pthread_mutex_unlock(&ctx->event_waiters_lock);
 }
 
 /** \ingroup poll
  * Determine if it is still OK for this thread to be doing event handling.
  *
- * Sometimes, libusbx needs to temporarily pause all event handlers, and this
+ * Sometimes, libusb needs to temporarily pause all event handlers, and this
  * is the function you should use before polling file descriptors to see if
  * this is the case.
  *
@@ -1621,16 +1553,16 @@ void API_EXPORTED libusb_unlock_events(libusb_context *ctx)
  * \returns 0 if this thread must give up the events lock
  * \see \ref fullstory "Multi-threaded I/O: the full story"
  */
-int API_EXPORTED libusb_event_handling_ok(libusb_context *ctx)
+API_EXPORTED int libusb_event_handling_ok(libusb_context *ctx)
 {
-	unsigned int r;
+	int r;
 	USBI_GET_CONTEXT(ctx);
 
 	/* is someone else waiting to modify poll fds? if so, don't let this thread
 	 * continue event handling */
-	usbi_mutex_lock(&ctx->pollfd_modify_lock);
+	pthread_mutex_lock(&ctx->pollfd_modify_lock);
 	r = ctx->pollfd_modify;
-	usbi_mutex_unlock(&ctx->pollfd_modify_lock);
+	pthread_mutex_unlock(&ctx->pollfd_modify_lock);
 	if (r) {
 		usbi_dbg("someone else is modifying poll fds");
 		return 0;
@@ -1649,16 +1581,16 @@ int API_EXPORTED libusb_event_handling_ok(libusb_context *ctx)
  * \returns 0 if there are no threads currently handling events
  * \see \ref mtasync
  */
-int API_EXPORTED libusb_event_handler_active(libusb_context *ctx)
+API_EXPORTED int libusb_event_handler_active(libusb_context *ctx)
 {
-	unsigned int r;
+	int r;
 	USBI_GET_CONTEXT(ctx);
 
 	/* is someone else waiting to modify poll fds? if so, don't let this thread
 	 * start event handling -- indicate that event handling is happening */
-	usbi_mutex_lock(&ctx->pollfd_modify_lock);
+	pthread_mutex_lock(&ctx->pollfd_modify_lock);
 	r = ctx->pollfd_modify;
-	usbi_mutex_unlock(&ctx->pollfd_modify_lock);
+	pthread_mutex_unlock(&ctx->pollfd_modify_lock);
 	if (r) {
 		usbi_dbg("someone else is modifying poll fds");
 		return 1;
@@ -1677,19 +1609,19 @@ int API_EXPORTED libusb_event_handler_active(libusb_context *ctx)
  * events, then call libusb_wait_for_event().
  *
  * You only need to use this lock if you are developing an application
- * which calls poll() or select() on libusbx's file descriptors directly,
+ * which calls poll() or select() on libusb's file descriptors directly,
  * <b>and</b> may potentially be handling events from 2 threads simultaenously.
- * If you stick to libusbx's event handling loop functions (e.g.
+ * If you stick to libusb's event handling loop functions (e.g.
  * libusb_handle_events()) then you do not need to be concerned with this
  * locking.
  *
  * \param ctx the context to operate on, or NULL for the default context
  * \see \ref mtasync
  */
-void API_EXPORTED libusb_lock_event_waiters(libusb_context *ctx)
+API_EXPORTED void libusb_lock_event_waiters(libusb_context *ctx)
 {
 	USBI_GET_CONTEXT(ctx);
-	usbi_mutex_lock(&ctx->event_waiters_lock);
+	pthread_mutex_lock(&ctx->event_waiters_lock);
 }
 
 /** \ingroup poll
@@ -1697,10 +1629,10 @@ void API_EXPORTED libusb_lock_event_waiters(libusb_context *ctx)
  * \param ctx the context to operate on, or NULL for the default context
  * \see \ref mtasync
  */
-void API_EXPORTED libusb_unlock_event_waiters(libusb_context *ctx)
+API_EXPORTED void libusb_unlock_event_waiters(libusb_context *ctx)
 {
 	USBI_GET_CONTEXT(ctx);
-	usbi_mutex_unlock(&ctx->event_waiters_lock);
+	pthread_mutex_unlock(&ctx->event_waiters_lock);
 }
 
 /** \ingroup poll
@@ -1728,14 +1660,14 @@ void API_EXPORTED libusb_unlock_event_waiters(libusb_context *ctx)
  * \returns 1 if the timeout expired
  * \see \ref mtasync
  */
-int API_EXPORTED libusb_wait_for_event(libusb_context *ctx, struct timeval *tv)
+API_EXPORTED int libusb_wait_for_event(libusb_context *ctx, struct timeval *tv)
 {
 	struct timespec timeout;
 	int r;
 
 	USBI_GET_CONTEXT(ctx);
 	if (tv == NULL) {
-		usbi_cond_wait(&ctx->event_waiters_cond, &ctx->event_waiters_lock);
+		pthread_cond_wait(&ctx->event_waiters_cond, &ctx->event_waiters_lock);
 		return 0;
 	}
 
@@ -1752,7 +1684,7 @@ int API_EXPORTED libusb_wait_for_event(libusb_context *ctx, struct timeval *tv)
 		timeout.tv_sec++;
 	}
 
-	r = usbi_cond_timedwait(&ctx->event_waiters_cond,
+	r = pthread_cond_timedwait(&ctx->event_waiters_cond,
 		&ctx->event_waiters_lock, &timeout);
 	return (r == ETIMEDOUT);
 }
@@ -1760,7 +1692,7 @@ int API_EXPORTED libusb_wait_for_event(libusb_context *ctx, struct timeval *tv)
 static void handle_timeout(struct usbi_transfer *itransfer)
 {
 	struct libusb_transfer *transfer =
-		USBI_TRANSFER_TO_LIBUSB_TRANSFER(itransfer);
+		__USBI_TRANSFER_TO_LIBUSB_TRANSFER(itransfer);
 	int r;
 
 	itransfer->flags |= USBI_TRANSFER_TIMED_OUT;
@@ -1770,6 +1702,16 @@ static void handle_timeout(struct usbi_transfer *itransfer)
 			"async cancel failed %d errno=%d", r, errno);
 }
 
+#ifdef USBI_OS_HANDLES_TIMEOUT
+static int handle_timeouts_locked(struct libusb_context *ctx)
+{
+	return 0;
+}
+static int handle_timeouts(struct libusb_context *ctx)
+{
+	return 0;
+}
+#else
 static int handle_timeouts_locked(struct libusb_context *ctx)
 {
 	int r;
@@ -1789,7 +1731,7 @@ static int handle_timeouts_locked(struct libusb_context *ctx)
 
 	/* iterate through flying transfers list, finding all transfers that
 	 * have expired timeouts */
-	list_for_each_entry(transfer, &ctx->flying_transfers, list, struct usbi_transfer) {
+	list_for_each_entry(transfer, &ctx->flying_transfers, list) {
 		struct timeval *cur_tv = &transfer->timeout;
 
 		/* if we've reached transfers of infinite timeout, we're all done */
@@ -1797,7 +1739,7 @@ static int handle_timeouts_locked(struct libusb_context *ctx)
 			return 0;
 
 		/* ignore timeouts we've already handled */
-		if (transfer->flags & (USBI_TRANSFER_TIMED_OUT | USBI_TRANSFER_OS_HANDLES_TIMEOUT))
+		if (transfer->flags & USBI_TRANSFER_TIMED_OUT)
 			continue;
 
 		/* if transfer has non-expired timeout, nothing more to do */
@@ -1805,7 +1747,7 @@ static int handle_timeouts_locked(struct libusb_context *ctx)
 				(cur_tv->tv_sec == systime.tv_sec &&
 					cur_tv->tv_usec > systime.tv_usec))
 			return 0;
-
+	
 		/* otherwise, we've got an expired timeout to handle */
 		handle_timeout(transfer);
 	}
@@ -1816,18 +1758,23 @@ static int handle_timeouts(struct libusb_context *ctx)
 {
 	int r;
 	USBI_GET_CONTEXT(ctx);
-	usbi_mutex_lock(&ctx->flying_transfers_lock);
+	pthread_mutex_lock(&ctx->flying_transfers_lock);
 	r = handle_timeouts_locked(ctx);
-	usbi_mutex_unlock(&ctx->flying_transfers_lock);
+	pthread_mutex_unlock(&ctx->flying_transfers_lock);
 	return r;
 }
+#endif
 
 #ifdef USBI_TIMERFD_AVAILABLE
 static int handle_timerfd_trigger(struct libusb_context *ctx)
 {
 	int r;
 
-	usbi_mutex_lock(&ctx->flying_transfers_lock);
+	r = disarm_timerfd(ctx);
+	if (r < 0)
+		return r;
+
+	pthread_mutex_lock(&ctx->flying_transfers_lock);
 
 	/* process the timeout that just happened */
 	r = handle_timeouts_locked(ctx);
@@ -1838,7 +1785,7 @@ static int handle_timerfd_trigger(struct libusb_context *ctx)
 	r = arm_timerfd_for_next_timeout(ctx);
 
 out:
-	usbi_mutex_unlock(&ctx->flying_transfers_lock);
+	pthread_mutex_unlock(&ctx->flying_transfers_lock);
 	return r;
 }
 #endif
@@ -1849,24 +1796,23 @@ static int handle_events(struct libusb_context *ctx, struct timeval *tv)
 {
 	int r;
 	struct usbi_pollfd *ipollfd;
-	POLL_NFDS_TYPE nfds = 0;
-	struct pollfd *fds = NULL;
+	nfds_t nfds = 0;
+	struct pollfd *fds;
 	int i = -1;
 	int timeout_ms;
 
-	usbi_mutex_lock(&ctx->pollfds_lock);
-	list_for_each_entry(ipollfd, &ctx->pollfds, list, struct usbi_pollfd)
+	pthread_mutex_lock(&ctx->pollfds_lock);
+	list_for_each_entry(ipollfd, &ctx->pollfds, list)
 		nfds++;
 
 	/* TODO: malloc when number of fd's changes, not on every poll */
-	if (nfds != 0)
-		fds = malloc(sizeof(*fds) * nfds);
+	fds = malloc(sizeof(*fds) * nfds);
 	if (!fds) {
-		usbi_mutex_unlock(&ctx->pollfds_lock);
+		pthread_mutex_unlock(&ctx->pollfds_lock);
 		return LIBUSB_ERROR_NO_MEM;
 	}
 
-	list_for_each_entry(ipollfd, &ctx->pollfds, list, struct usbi_pollfd) {
+	list_for_each_entry(ipollfd, &ctx->pollfds, list) {
 		struct libusb_pollfd *pollfd = &ipollfd->pollfd;
 		int fd = pollfd->fd;
 		i++;
@@ -1874,16 +1820,16 @@ static int handle_events(struct libusb_context *ctx, struct timeval *tv)
 		fds[i].events = pollfd->events;
 		fds[i].revents = 0;
 	}
-	usbi_mutex_unlock(&ctx->pollfds_lock);
+	pthread_mutex_unlock(&ctx->pollfds_lock);
 
-	timeout_ms = (int)(tv->tv_sec * 1000) + (tv->tv_usec / 1000);
+	timeout_ms = (tv->tv_sec * 1000) + (tv->tv_usec / 1000);
 
 	/* round up to next millisecond */
 	if (tv->tv_usec % 1000)
 		timeout_ms++;
 
 	usbi_dbg("poll() %d fds with timeout in %dms", nfds, timeout_ms);
-	r = usbi_poll(fds, nfds, timeout_ms);
+	r = poll(fds, nfds, timeout_ms);
 	usbi_dbg("poll() returned %d", r);
 	if (r == 0) {
 		free(fds);
@@ -1978,7 +1924,7 @@ static int get_next_timeout(libusb_context *ctx, struct timeval *tv,
 /** \ingroup poll
  * Handle any pending events.
  *
- * libusbx determines "pending events" by checking if any timeouts have expired
+ * libusb determines "pending events" by checking if any timeouts have expired
  * and by checking the set of file descriptors for activity.
  *
  * If a zero timeval is passed, this function will handle any already-pending
@@ -1989,19 +1935,12 @@ static int get_next_timeout(libusb_context *ctx, struct timeval *tv,
  * timeout. If an event arrives or a signal is raised, this function will
  * return early.
  *
- * If the parameter completed is not NULL then <em>after obtaining the event
- * handling lock</em> this function will return immediately if the integer
- * pointed to is not 0. This allows for race free waiting for the completion
- * of a specific transfer.
- *
  * \param ctx the context to operate on, or NULL for the default context
- * \param tv the maximum time to block waiting for events, or an all zero
- * timeval struct for non-blocking mode
- * \param completed pointer to completion integer to check, or NULL
+ * \param tv the maximum time to block waiting for events, or zero for
+ * non-blocking mode
  * \returns 0 on success, or a LIBUSB_ERROR code on failure
- * \see \ref mtasync
  */
-int API_EXPORTED libusb_handle_events_timeout_completed(libusb_context *ctx,
+API_EXPORTED int libusb_handle_events_timeout_completed(libusb_context *ctx,
 	struct timeval *tv, int *completed)
 {
 	int r;
@@ -2025,7 +1964,7 @@ retry:
 		return r;
 	}
 
-	/* another thread is doing event handling. wait for thread events that
+	/* another thread is doing event handling. wait for pthread events that
 	 * notify event completion. */
 	libusb_lock_event_waiters(ctx);
 
@@ -2054,22 +1993,6 @@ already_done:
 		return 0;
 }
 
-/** \ingroup poll
- * Handle any pending events
- *
- * Like libusb_handle_events_timeout_completed(), but without the completed
- * parameter, calling this function is equivalent to calling
- * libusb_handle_events_timeout_completed() with a NULL completed parameter.
- *
- * This function is kept primarily for backwards compatibility.
- * All new code should call libusb_handle_events_completed() or
- * libusb_handle_events_timeout_completed() to avoid race conditions.
- *
- * \param ctx the context to operate on, or NULL for the default context
- * \param tv the maximum time to block waiting for events, or an all zero
- * timeval struct for non-blocking mode
- * \returns 0 on success, or a LIBUSB_ERROR code on failure
- */
 int API_EXPORTED libusb_handle_events_timeout(libusb_context *ctx,
 	struct timeval *tv)
 {
@@ -2080,17 +2003,12 @@ int API_EXPORTED libusb_handle_events_timeout(libusb_context *ctx,
  * Handle any pending events in blocking mode. There is currently a timeout
  * hardcoded at 60 seconds but we plan to make it unlimited in future. For
  * finer control over whether this function is blocking or non-blocking, or
- * for control over the timeout, use libusb_handle_events_timeout_completed()
- * instead.
- *
- * This function is kept primarily for backwards compatibility.
- * All new code should call libusb_handle_events_completed() or
- * libusb_handle_events_timeout_completed() to avoid race conditions.
+ * for control over the timeout, use libusb_handle_events_timeout() instead.
  *
  * \param ctx the context to operate on, or NULL for the default context
  * \returns 0 on success, or a LIBUSB_ERROR code on failure
  */
-int API_EXPORTED libusb_handle_events(libusb_context *ctx)
+API_EXPORTED int libusb_handle_events(libusb_context *ctx)
 {
 	struct timeval tv;
 	tv.tv_sec = 60;
@@ -2098,20 +2016,6 @@ int API_EXPORTED libusb_handle_events(libusb_context *ctx)
 	return libusb_handle_events_timeout_completed(ctx, &tv, NULL);
 }
 
-/** \ingroup poll
- * Handle any pending events in blocking mode.
- *
- * Like libusb_handle_events(), with the addition of a completed parameter
- * to allow for race free waiting for the completion of a specific transfer.
- *
- * See libusb_handle_events_timeout_completed() for details on the completed
- * parameter.
- *
- * \param ctx the context to operate on, or NULL for the default context
- * \param completed pointer to completion integer to check, or NULL
- * \returns 0 on success, or a LIBUSB_ERROR code on failure
- * \see \ref mtasync
- */
 int API_EXPORTED libusb_handle_events_completed(libusb_context *ctx,
 	int *completed)
 {
@@ -2127,9 +2031,9 @@ int API_EXPORTED libusb_handle_events_completed(libusb_context *ctx,
  * held, see libusb_lock_events().
  *
  * This function is designed to be called under the situation where you have
- * taken the event lock and are calling poll()/select() directly on libusbx's
+ * taken the event lock and are calling poll()/select() directly on libusb's
  * file descriptors (as opposed to using libusb_handle_events() or similar).
- * You detect events on libusbx's descriptors, so you then call this function
+ * You detect events on libusb's descriptors, so you then call this function
  * with a zero timeout value (while still holding the event lock).
  *
  * \param ctx the context to operate on, or NULL for the default context
@@ -2138,7 +2042,7 @@ int API_EXPORTED libusb_handle_events_completed(libusb_context *ctx,
  * \returns 0 on success, or a LIBUSB_ERROR code on failure
  * \see \ref mtasync
  */
-int API_EXPORTED libusb_handle_events_locked(libusb_context *ctx,
+API_EXPORTED int libusb_handle_events_locked(libusb_context *ctx,
 	struct timeval *tv)
 {
 	int r;
@@ -2156,19 +2060,19 @@ int API_EXPORTED libusb_handle_events_locked(libusb_context *ctx,
 
 /** \ingroup poll
  * Determines whether your application must apply special timing considerations
- * when monitoring libusbx's file descriptors.
+ * when monitoring libusb's file descriptors.
  *
  * This function is only useful for applications which retrieve and poll
- * libusbx's file descriptors in their own main loop (\ref pollmain).
+ * libusb's file descriptors in their own main loop (\ref pollmain).
  *
- * Ordinarily, libusbx's event handler needs to be called into at specific
+ * Ordinarily, libusb's event handler needs to be called into at specific
  * moments in time (in addition to times when there is activity on the file
  * descriptor set). The usual approach is to use libusb_get_next_timeout()
  * to learn about when the next timeout occurs, and to adjust your
  * poll()/select() timeout accordingly so that you can make a call into the
  * library at that time.
  *
- * Some platforms supported by libusbx do not come with this baggage - any
+ * Some platforms supported by libusb do not come with this baggage - any
  * events relevant to timing will be represented by activity on the file
  * descriptor set, and libusb_get_next_timeout() will always return 0.
  * This function allows you to detect whether you are running on such a
@@ -2177,38 +2081,39 @@ int API_EXPORTED libusb_handle_events_locked(libusb_context *ctx,
  * Since v1.0.5.
  *
  * \param ctx the context to operate on, or NULL for the default context
- * \returns 0 if you must call into libusbx at times determined by
+ * \returns 0 if you must call into libusb at times determined by
  * libusb_get_next_timeout(), or 1 if all timeout events are handled internally
  * or through regular activity on the file descriptors.
- * \see \ref pollmain "Polling libusbx file descriptors for event handling"
+ * \see \ref pollmain "Polling libusb file descriptors for event handling"
  */
-int API_EXPORTED libusb_pollfds_handle_timeouts(libusb_context *ctx)
+API_EXPORTED int libusb_pollfds_handle_timeouts(libusb_context *ctx)
 {
-#if defined(USBI_TIMERFD_AVAILABLE)
+#if defined(USBI_OS_HANDLES_TIMEOUT)
+	return 1;
+#elif defined(USBI_TIMERFD_AVAILABLE)
 	USBI_GET_CONTEXT(ctx);
 	return usbi_using_timerfd(ctx);
 #else
-	(void)ctx;
 	return 0;
 #endif
 }
 
 /** \ingroup poll
- * Determine the next internal timeout that libusbx needs to handle. You only
+ * Determine the next internal timeout that libusb needs to handle. You only
  * need to use this function if you are calling poll() or select() or similar
- * on libusbx's file descriptors yourself - you do not need to use it if you
+ * on libusb's file descriptors yourself - you do not need to use it if you
  * are calling libusb_handle_events() or a variant directly.
- *
+ * 
  * You should call this function in your main loop in order to determine how
- * long to wait for select() or poll() to return results. libusbx needs to be
+ * long to wait for select() or poll() to return results. libusb needs to be
  * called into at this timeout, so you should use it as an upper bound on
  * your select() or poll() call.
  *
  * When the timeout has expired, call into libusb_handle_events_timeout()
- * (perhaps in non-blocking mode) so that libusbx can handle the timeout.
+ * (perhaps in non-blocking mode) so that libusb can handle the timeout.
  *
  * This function may return 1 (success) and an all-zero timeval. If this is
- * the case, it indicates that libusbx has a timeout that has already expired
+ * the case, it indicates that libusb has a timeout that has already expired
  * so you should call libusb_handle_events_timeout() or similar immediately.
  * A return code of 0 indicates that there are no pending timeouts.
  *
@@ -2217,13 +2122,14 @@ int API_EXPORTED libusb_pollfds_handle_timeouts(libusb_context *ctx)
  *
  * \param ctx the context to operate on, or NULL for the default context
  * \param tv output location for a relative time against the current
- * clock in which libusbx must be called into in order to process timeout events
+ * clock in which libusb must be called into in order to process timeout events
  * \returns 0 if there are no pending timeouts, 1 if a timeout was returned,
  * or LIBUSB_ERROR_OTHER on failure
  */
-int API_EXPORTED libusb_get_next_timeout(libusb_context *ctx,
+API_EXPORTED int libusb_get_next_timeout(libusb_context *ctx,
 	struct timeval *tv)
 {
+#ifndef USBI_OS_HANDLES_TIMEOUT
 	struct usbi_transfer *transfer;
 	struct timespec cur_ts;
 	struct timeval cur_tv;
@@ -2235,42 +2141,43 @@ int API_EXPORTED libusb_get_next_timeout(libusb_context *ctx,
 	if (usbi_using_timerfd(ctx))
 		return 0;
 
-	usbi_mutex_lock(&ctx->flying_transfers_lock);
+	pthread_mutex_lock(&ctx->flying_transfers_lock);
 	if (list_empty(&ctx->flying_transfers)) {
-		usbi_mutex_unlock(&ctx->flying_transfers_lock);
+		pthread_mutex_unlock(&ctx->flying_transfers_lock);
 		usbi_dbg("no URBs, no timeout!");
 		return 0;
 	}
 
 	/* find next transfer which hasn't already been processed as timed out */
-	list_for_each_entry(transfer, &ctx->flying_transfers, list, struct usbi_transfer) {
-		if (transfer->flags & (USBI_TRANSFER_TIMED_OUT | USBI_TRANSFER_OS_HANDLES_TIMEOUT))
-			continue;
-
-		/* no timeout for this transfer? */
-		if (!timerisset(&transfer->timeout))
-			continue;
-
-		found = 1;
-		break;
+	list_for_each_entry(transfer, &ctx->flying_transfers, list) {
+		if (!(transfer->flags & USBI_TRANSFER_TIMED_OUT)) {
+			found = 1;
+			break;
+		}
 	}
-	usbi_mutex_unlock(&ctx->flying_transfers_lock);
+	pthread_mutex_unlock(&ctx->flying_transfers_lock);
 
 	if (!found) {
-		usbi_dbg("no URB with timeout or all handled by OS; no timeout!");
+		usbi_dbg("all URBs have already been processed for timeouts");
 		return 0;
 	}
 
 	next_timeout = &transfer->timeout;
 
+	/* no timeout for next transfer */
+	if (!timerisset(next_timeout)) {
+		usbi_dbg("no URBs with timeouts, no timeout!");
+		return 0;
+	}
+
 	r = usbi_backend->clock_gettime(USBI_CLOCK_MONOTONIC, &cur_ts);
 	if (r < 0) {
 		usbi_err(ctx, "failed to read monotonic clock, errno=%d", errno);
-		return 0;
+		return LIBUSB_ERROR_OTHER;
 	}
 	TIMESPEC_TO_TIMEVAL(&cur_tv, &cur_ts);
 
-	if (!timercmp(&cur_tv, next_timeout, <)) {
+	if (timercmp(&cur_tv, next_timeout, >=)) {
 		usbi_dbg("first timeout already expired");
 		timerclear(tv);
 	} else {
@@ -2279,12 +2186,15 @@ int API_EXPORTED libusb_get_next_timeout(libusb_context *ctx,
 	}
 
 	return 1;
+#else
+	return 0;
+#endif
 }
 
 /** \ingroup poll
  * Register notification functions for file descriptor additions/removals.
  * These functions will be invoked for every new or removed file descriptor
- * that libusbx uses as an event source.
+ * that libusb uses as an event source.
  *
  * To remove notifiers, pass NULL values for the function pointers.
  *
@@ -2302,7 +2212,7 @@ int API_EXPORTED libusb_get_next_timeout(libusb_context *ctx,
  * \param user_data User data to be passed back to callbacks (useful for
  * passing context information)
  */
-void API_EXPORTED libusb_set_pollfd_notifiers(libusb_context *ctx,
+API_EXPORTED void libusb_set_pollfd_notifiers(libusb_context *ctx,
 	libusb_pollfd_added_cb added_cb, libusb_pollfd_removed_cb removed_cb,
 	void *user_data)
 {
@@ -2324,9 +2234,9 @@ int usbi_add_pollfd(struct libusb_context *ctx, int fd, short events)
 	usbi_dbg("add fd %d events %d", fd, events);
 	ipollfd->pollfd.fd = fd;
 	ipollfd->pollfd.events = events;
-	usbi_mutex_lock(&ctx->pollfds_lock);
+	pthread_mutex_lock(&ctx->pollfds_lock);
 	list_add_tail(&ipollfd->list, &ctx->pollfds);
-	usbi_mutex_unlock(&ctx->pollfds_lock);
+	pthread_mutex_unlock(&ctx->pollfds_lock);
 
 	if (ctx->fd_added_cb)
 		ctx->fd_added_cb(fd, events, ctx->fd_cb_user_data);
@@ -2340,8 +2250,8 @@ void usbi_remove_pollfd(struct libusb_context *ctx, int fd)
 	int found = 0;
 
 	usbi_dbg("remove fd %d", fd);
-	usbi_mutex_lock(&ctx->pollfds_lock);
-	list_for_each_entry(ipollfd, &ctx->pollfds, list, struct usbi_pollfd)
+	pthread_mutex_lock(&ctx->pollfds_lock);
+	list_for_each_entry(ipollfd, &ctx->pollfds, list)
 		if (ipollfd->pollfd.fd == fd) {
 			found = 1;
 			break;
@@ -2349,12 +2259,12 @@ void usbi_remove_pollfd(struct libusb_context *ctx, int fd)
 
 	if (!found) {
 		usbi_dbg("couldn't find fd %d to remove", fd);
-		usbi_mutex_unlock(&ctx->pollfds_lock);
+		pthread_mutex_unlock(&ctx->pollfds_lock);
 		return;
 	}
 
 	list_del(&ipollfd->list);
-	usbi_mutex_unlock(&ctx->pollfds_lock);
+	pthread_mutex_unlock(&ctx->pollfds_lock);
 	free(ipollfd);
 	if (ctx->fd_removed_cb)
 		ctx->fd_removed_cb(fd, ctx->fd_cb_user_data);
@@ -2362,50 +2272,39 @@ void usbi_remove_pollfd(struct libusb_context *ctx, int fd)
 
 /** \ingroup poll
  * Retrieve a list of file descriptors that should be polled by your main loop
- * as libusbx event sources.
+ * as libusb event sources.
  *
  * The returned list is NULL-terminated and should be freed with free() when
  * done. The actual list contents must not be touched.
  *
- * As file descriptors are a Unix-specific concept, this function is not
- * available on Windows and will always return NULL.
- *
  * \param ctx the context to operate on, or NULL for the default context
- * \returns a NULL-terminated list of libusb_pollfd structures
- * \returns NULL on error
- * \returns NULL on platforms where the functionality is not available
+ * \returns a NULL-terminated list of libusb_pollfd structures, or NULL on
+ * error
  */
-DEFAULT_VISIBILITY
-const struct libusb_pollfd ** LIBUSB_CALL libusb_get_pollfds(
+API_EXPORTED const struct libusb_pollfd **libusb_get_pollfds(
 	libusb_context *ctx)
 {
-#ifndef OS_WINDOWS
 	struct libusb_pollfd **ret = NULL;
 	struct usbi_pollfd *ipollfd;
 	size_t i = 0;
 	size_t cnt = 0;
 	USBI_GET_CONTEXT(ctx);
 
-	usbi_mutex_lock(&ctx->pollfds_lock);
-	list_for_each_entry(ipollfd, &ctx->pollfds, list, struct usbi_pollfd)
+	pthread_mutex_lock(&ctx->pollfds_lock);
+	list_for_each_entry(ipollfd, &ctx->pollfds, list)
 		cnt++;
 
 	ret = calloc(cnt + 1, sizeof(struct libusb_pollfd *));
 	if (!ret)
 		goto out;
 
-	list_for_each_entry(ipollfd, &ctx->pollfds, list, struct usbi_pollfd)
+	list_for_each_entry(ipollfd, &ctx->pollfds, list)
 		ret[i++] = (struct libusb_pollfd *) ipollfd;
 	ret[cnt] = NULL;
 
 out:
-	usbi_mutex_unlock(&ctx->pollfds_lock);
+	pthread_mutex_unlock(&ctx->pollfds_lock);
 	return (const struct libusb_pollfd **) ret;
-#else
-	usbi_err(ctx, "external polling of libusbx's internal descriptors "\
-		"is not yet supported on Windows platforms");
-	return NULL;
-#endif
 }
 
 /* Backends call this from handle_events to report disconnection of a device.
@@ -2421,7 +2320,7 @@ void usbi_handle_disconnect(struct libusb_device_handle *handle)
 
 	/* terminate all pending transfers with the LIBUSB_TRANSFER_NO_DEVICE
 	 * status code.
-	 *
+	 * 
 	 * this is a bit tricky because:
 	 * 1. we can't do transfer completion while holding flying_transfers_lock
 	 * 2. the transfers list can change underneath us - if we were to build a
@@ -2433,14 +2332,14 @@ void usbi_handle_disconnect(struct libusb_device_handle *handle)
 	 */
 
 	while (1) {
-		usbi_mutex_lock(&HANDLE_CTX(handle)->flying_transfers_lock);
+		pthread_mutex_lock(&HANDLE_CTX(handle)->flying_transfers_lock);
 		to_cancel = NULL;
-		list_for_each_entry(cur, &HANDLE_CTX(handle)->flying_transfers, list, struct usbi_transfer)
-			if (USBI_TRANSFER_TO_LIBUSB_TRANSFER(cur)->dev_handle == handle) {
+		list_for_each_entry(cur, &HANDLE_CTX(handle)->flying_transfers, list)
+			if (__USBI_TRANSFER_TO_LIBUSB_TRANSFER(cur)->dev_handle == handle) {
 				to_cancel = cur;
 				break;
 			}
-		usbi_mutex_unlock(&HANDLE_CTX(handle)->flying_transfers_lock);
+		pthread_mutex_unlock(&HANDLE_CTX(handle)->flying_transfers_lock);
 
 		if (!to_cancel)
 			break;
@@ -2450,3 +2349,4 @@ void usbi_handle_disconnect(struct libusb_device_handle *handle)
 	}
 
 }
+

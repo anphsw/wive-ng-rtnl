@@ -1,18 +1,13 @@
-AM_CPPFLAGS = -I$(top_srcdir)/libusb
-LDADD = ../libusb/libusb-1.0.la
+INCLUDES = -I$(top_srcdir)
+noinst_PROGRAMS = lsusb dpfp dpfp_threaded
 
-noinst_PROGRAMS = listdevs xusb fxload
+lsusb_SOURCES = lsusb.c
+lsusb_LDADD = ../libusb/libusb-1.0.la -lusb-1.0
 
-if HAVE_SIGACTION
-noinst_PROGRAMS += dpfp
-endif
+dpfp_SOURCES = dpfp.c
+dpfp_LDADD = ../libusb/libusb-1.0.la -lusb-1.0
 
-if THREADS_POSIX
-if HAVE_SIGACTION
-dpfp_threaded_CFLAGS = $(AM_CFLAGS)
-noinst_PROGRAMS += dpfp_threaded
-endif
-endif
+dpfp_threaded_SOURCES = dpfp_threaded.c
+dpfp_threaded_CFLAGS = -pthread $(AM_CFLAGS)
+dpfp_threaded_LDADD = ../libusb/libusb-1.0.la -lusb-1.0
 
-fxload_SOURCES = ezusb.c ezusb.h fxload.c
-fxload_CFLAGS = $(THREAD_CFLAGS) $(AM_CFLAGS)
