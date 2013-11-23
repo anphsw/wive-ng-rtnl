@@ -26,6 +26,7 @@ start() {
 	    fi
 	    if [ -f /etc/scripts/usbctrl.sh ] && [ -f /bin/usb_modeswitch ]; then
 		echo "1-.*:1.* 0:0 0000 @/etc/scripts/usbctrl.sh" >> /etc/mdev.conf
+		echo "2-.*:1.* 0:0 0000 @/etc/scripts/usbctrl.sh" >> /etc/mdev.conf
 	    fi
 	    if [ -f /etc/scripts/prnctrl.sh ] && [ -f /bin/p910nd ]; then
 		echo "lp[0-9] 0:0 0660 */etc/scripts/prnctrl.sh" >> /etc/mdev.conf
