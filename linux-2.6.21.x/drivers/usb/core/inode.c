@@ -661,7 +661,7 @@ static void usbfs_add_device(struct usb_device *dev)
 	sprintf (name, "%03d", dev->devnum);
 	dev->usbfs_dentry = fs_create_file (name, devmode | S_IFREG,
 					    dev->bus->usbfs_dentry, dev,
-					    &usbdev_file_operations,
+					    &usbfs_device_file_operations,
 					    devuid, devgid);
 	if (dev->usbfs_dentry == NULL) {
 		err ("error creating usbfs device entry");

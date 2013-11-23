@@ -1777,9 +1777,8 @@
 23) kernel: net: zero length write() on socket should not simply return 0.<br>
 24) kernel: net: pppoe: Check packet length on all receive paths.<br>
 25) kernel: net: rework recvmsg handler msg_name and msg_namelen logic.<br>
-26) kernel: usb: make usbdevices export their device nodes instead of using a separate class.<br>
-27) kernel: usb: add IAD support to usbfs and sysfs.<br>
-28) kernel: usb: add "descriptors" binary sysfs attribute.<br>
+26) kernel: usb: add IAD support to usbfs and sysfs.<br>
+27) kernel: usb: add "descriptors" binary sysfs attribute.<br>
 <br>
 <br>
 <br>

@@ -311,9 +311,8 @@ struct usb_bus {
 	int bandwidth_int_reqs;		/* number of Interrupt requests */
 	int bandwidth_isoc_reqs;	/* number of Isoc. requests */
 
-#ifdef CONFIG_USB_DEVICEFS
 	struct dentry *usbfs_dentry;	/* usbfs dentry entry for the bus */
-#endif
+
 	struct class_device *class_dev;	/* class device for this bus */
 
 #if defined(CONFIG_USB_MON)
@@ -386,12 +385,9 @@ struct usb_device {
 	char *serial;			/* iSerialNumber string, if present */
 
 	struct list_head filelist;
-#ifdef CONFIG_USB_DEVICE_CLASS
-	struct device *usb_classdev;
-#endif
-#ifdef CONFIG_USB_DEVICEFS
+	struct device *usbfs_dev;
 	struct dentry *usbfs_dentry;	/* usbfs dentry entry for the device */
-#endif
+
 	/*
 	 * Child devices - these can be either new devices
 	 * (if this is a hub device), or different instances
