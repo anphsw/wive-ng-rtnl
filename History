@@ -75,6 +75,7 @@
 25) kernel: net: rework recvmsg handler msg_name and msg_namelen logic.<br>
 26) kernel: usb: add IAD support to usbfs and sysfs.<br>
 27) kernel: usb: add "descriptors" binary sysfs attribute.<br>
+28) kernel: ipv6: call udp_push_pending_frames when uncorking a socket with AF_INET pending data.<br>
 <br>
 <br>
 <br>
