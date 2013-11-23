@@ -26,16 +26,22 @@ start() {
 	    return
 	fi
 
-	# waith goahead start and ready
-        while [ ! -e  /var/run/goahead.pid ]; do
-	    # Sleep until file does exists/is created
-	    sleep 3
-	done
-
-	# wait others services start
-	sleep 10
-
         $LOG "Start Modemhelper"
+
+	# if first start need wait
+	if [ ! -e /tmp/modem_ready ]; then
+	    $LOG "Wait device ready before connect"
+	    # set not first time flag
+	    touch /tmp/modem_ready
+	    # wait goahead start and ready
+    	    while [ ! -e  /var/run/goahead.pid ]; do
+		# Sleep until file does exists/is created
+		sleep 3
+	    done
+	    # waith others services start
+	    sleep 15
+	fi
+
 	mkdir -p $PPPDIR/peers
 	# generate new chat scripts
 	if [ "$MODEMTYPE" = "0" ]; then
@@ -90,7 +96,8 @@ start() {
 	fi
 
 	$LOG "Generate ppp options file"
-	echo "	debug
+	echo "
+	$MODEMDEBUG
 	$MODEMPORT
 	$MODEMSPEED
 	linkname $MDEFIFN

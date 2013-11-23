@@ -53,7 +53,6 @@ case $TYPE in
 	if [ -f "/usr/share/usb_modeswitch/${idVendor}:${idProduct}" ]; then
 	    $LOG "${ACTION} ${idVendor}:${idProduct} may be 3G modem in zero CD mode. Call usb_modeswitch"
 	    usb_modeswitch -v ${idVendor} -p ${idProduct} -c /share/usb_modeswitch/${idVendor}:${idProduct}
-	    exit 0
 	else
 	    $LOG "${ACTION} ${idVendor}:${idProduct} may be storage"
 	    if [ ! -d /sys/module/usb-storage ]; then

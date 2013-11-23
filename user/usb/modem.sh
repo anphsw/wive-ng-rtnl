@@ -50,18 +50,17 @@ if [ "$ACTION" = "add" -a ! -e "/dev/modem" ]; then
 	done
 	bInterfaceNumber=$(cat /sys${DEVPATH}/../bInterfaceNumber 2>/dev/null)
 	bInterfaceProtocol=$(cat /sys${DEVPATH}/../bInterfaceProtocol 2>/dev/null)
-	
+
 	modem_conf=`cat /etc/modems.conf | awk "/^${idVendor}\:${idProduct}/ {split(\\$0,a,\":\"); print \"mVendor=\"a[1] \" mProduct=\"a[2] \" mType=\"a[3] \" mModemIf=\'0\"a[4] \"\' mUserIf=\'0\"a[5] \"\'\"}"`
 	eval $modem_conf
-	
-	if [ $bInterfaceNumber = $mModemIf ]; then 
+
+	if [ $bInterfaceNumber = $mModemIf ]; then
 	    symlink_modem
 	fi
 
-	if [ $bInterfaceNumber = $mUserIf ]; then 
+	if [ $bInterfaceNumber = $mUserIf ]; then
 	    symlink_pcui
 	fi
-	
     fi
 
     if [ "$MDEV" = "$WMODEMPORT" ] || [ "$WMODEMPORT" = "AUTO" -a "$MODEMFINDED" = "1" ]; then
