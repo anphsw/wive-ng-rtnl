@@ -99,7 +99,8 @@ case $TYPE in
 	fi
         ;;
     *)
-        $LOG "${ACTION} ${idVendor}:${idProduct} ${TYPE} ${INTERFACE}"
+        $LOG "${ACTION} device ${idVendor}:${idProduct} type ${TYPE} interface ${INTERFACE}"
+	$LOG "Try load module $MODALIAS"
         modprobe -q $MODALIAS
         ;;
 esac
