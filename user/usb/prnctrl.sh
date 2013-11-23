@@ -48,7 +48,7 @@ else
     if [ ! -z "`pidof p910nd`" ]; then
 	$LOG "Stop p910nd daemon on port 910${port}"
 	killall -q p910nd
-	killall -q -9 p910nd
+	killall -q -SIGKILL p910nd
 	# svae mem in 16Mb devices
 	if [ -f /tmp/is_16ram_dev ]; then
 	    rmmod usblp > /dev/null 2>&1

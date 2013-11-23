@@ -80,9 +80,15 @@ case $1 in
 		mke2fs -F -m1 $2 $3 1>/dev/null 2>&1
 		;;
 	"restart")
-		reg s 0xb01c0000
-		reg w 440 5
-		reg w 440 1005
+		if [ -f /bin/reg ]; then
+		    echo "reset usb controller"
+		    reg s 0xb01c0000
+		    reg w 440 5
+		    reg w 440 1005
+		else
+		    echo "reg tool not compiled"
+		    exit 1
+		fi
 		;;
 	*)
 		#
