@@ -40,6 +40,7 @@ case $TYPE in
     7/*)
 	$LOG "${ACTION} ${idVendor}:${idProduct} may be printer"
 	if [ ! -d /sys/module/usblp ]; then
+	    $LOG "Load usblp"
 	    modprobe -q usblp
 	fi
 	# Create dev node. Only one printer support. Fix me later.
@@ -50,15 +51,16 @@ case $TYPE in
 	;;
     8/6/*)
 	if [ -f "/usr/share/usb_modeswitch/${idVendor}:${idProduct}" ]; then
-	    $LOG "${ACTION} ${idVendor}:${idProduct} may be 3G modem in zero CD mode"
-	    usb_modeswitch -v ${idVendor} -p ${idProduct} -c /share/usb_modeswitch/${idVendor}:${idProduct} && exit 0
+	    $LOG "${ACTION} ${idVendor}:${idProduct} may be 3G modem in zero CD mode. Call usb_modeswitch"
+	    usb_modeswitch -v ${idVendor} -p ${idProduct} -c /share/usb_modeswitch/${idVendor}:${idProduct}
+	    exit 0
 	else
 	    $LOG "${ACTION} ${idVendor}:${idProduct} may be storage"
 	    if [ ! -d /sys/module/usb-storage ]; then
 		$LOG "Load module usb-storage and wait initialization to complete"
 		modprobe -q usb-storage
 		while [ ! -d /sys/module/usb_storage ]; do
-		    sleep 1
+		    sleep 2
 		done
 		$LOG "usb_storage init complete"
 	    fi
@@ -69,15 +71,17 @@ case $TYPE in
 	    $LOG "${ACTION} ${idVendor}:${idProduct} may be 3G modem"
 	    if [ "${idVendor}" != "0af0" ]; then
 		if [ ! -d /sys/module/usbserial ]; then
+		    $LOG "Load usbserial"
 		    modprobe -q usbserial vendor=0x${idVendor} product=0x${idProduct}
 		fi
 	    else
 		if [ ! -d /sys/module/hso ]; then
+		    $LOG "Load hso"
 		    modprobe -q hso
 		fi
 	    fi
 	else
-	    $LOG "${ACTION} ${idVendor}:${idProduct} unknow serial device! Try load all serial drivers."
+	    $LOG "${ACTION} ${idVendor}:${idProduct} unknow serial device! Load all builded serial drivers."
 	    if [ ! -d /sys/module/usbserial ]; then
 		modprobe -q usbserial
 	    fi
