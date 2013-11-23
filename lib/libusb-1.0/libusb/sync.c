@@ -1,6 +1,6 @@
 /*
- * Synchronous I/O functions for libusb
- * Copyright (C) 2007-2008 Daniel Drake <dsd@gentoo.org>
+ * Synchronous I/O functions for libusbx
+ * Copyright © 2007-2008 Daniel Drake <dsd@gentoo.org>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include <config.h>
+#include "config.h"
 #include <errno.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -28,12 +28,12 @@
 /**
  * @defgroup syncio Synchronous device I/O
  *
- * This page documents libusb's synchronous (blocking) API for USB device I/O.
+ * This page documents libusbx's synchronous (blocking) API for USB device I/O.
  * This interface is easy to use but has some limitations. More advanced users
  * may wish to consider using the \ref asyncio "asynchronous I/O API" instead.
  */
 
-static void ctrl_transfer_cb(struct libusb_transfer *transfer)
+static void LIBUSB_CALL ctrl_transfer_cb(struct libusb_transfer *transfer)
 {
 	int *completed = transfer->user_data;
 	*completed = 1;
@@ -69,7 +69,7 @@ static void ctrl_transfer_cb(struct libusb_transfer *transfer)
  * \returns LIBUSB_ERROR_NO_DEVICE if the device has been disconnected
  * \returns another LIBUSB_ERROR code on other failures
  */
-API_EXPORTED int libusb_control_transfer(libusb_device_handle *dev_handle,
+int API_EXPORTED libusb_control_transfer(libusb_device_handle *dev_handle,
 	uint8_t bmRequestType, uint8_t bRequest, uint16_t wValue, uint16_t wIndex,
 	unsigned char *data, uint16_t wLength, unsigned int timeout)
 {
@@ -80,8 +80,8 @@ API_EXPORTED int libusb_control_transfer(libusb_device_handle *dev_handle,
 
 	if (!transfer)
 		return LIBUSB_ERROR_NO_MEM;
-	
-	buffer = malloc(LIBUSB_CONTROL_SETUP_SIZE + wLength);
+
+	buffer = (unsigned char*) malloc(LIBUSB_CONTROL_SETUP_SIZE + wLength);
 	if (!buffer) {
 		libusb_free_transfer(transfer);
 		return LIBUSB_ERROR_NO_MEM;
@@ -106,10 +106,11 @@ API_EXPORTED int libusb_control_transfer(libusb_device_handle *dev_handle,
 		if (r < 0) {
 			if (r == LIBUSB_ERROR_INTERRUPTED)
 				continue;
-			libusb_cancel_transfer(transfer);
-			while (!completed)
-				if (libusb_handle_events_completed(HANDLE_CTX(dev_handle), &completed) < 0)
-					break;
+			if (libusb_cancel_transfer(transfer) == LIBUSB_SUCCESS) {
+				while (!completed)
+					if (libusb_handle_events_completed(HANDLE_CTX(dev_handle), &completed) < 0)
+						break;
+			}
 			libusb_free_transfer(transfer);
 			return r;
 		}
@@ -135,6 +136,10 @@ API_EXPORTED int libusb_control_transfer(libusb_device_handle *dev_handle,
 	case LIBUSB_TRANSFER_OVERFLOW:
 		r = LIBUSB_ERROR_OVERFLOW;
 		break;
+	case LIBUSB_TRANSFER_ERROR:
+	case LIBUSB_TRANSFER_CANCELLED:
+		r = LIBUSB_ERROR_IO;
+		break;
 	default:
 		usbi_warn(HANDLE_CTX(dev_handle),
 			"unrecognised status code %d", transfer->status);
@@ -145,7 +150,7 @@ API_EXPORTED int libusb_control_transfer(libusb_device_handle *dev_handle,
 	return r;
 }
 
-static void bulk_transfer_cb(struct libusb_transfer *transfer)
+static void LIBUSB_CALL bulk_transfer_cb(struct libusb_transfer *transfer)
 {
 	int *completed = transfer->user_data;
 	*completed = 1;
@@ -179,10 +184,11 @@ static int do_sync_bulk_transfer(struct libusb_device_handle *dev_handle,
 		if (r < 0) {
 			if (r == LIBUSB_ERROR_INTERRUPTED)
 				continue;
-			libusb_cancel_transfer(transfer);
-			while (!completed)
-				if (libusb_handle_events_completed(HANDLE_CTX(dev_handle), &completed) < 0)
-					break;
+			if (libusb_cancel_transfer(transfer) == LIBUSB_SUCCESS) {
+				while (!completed)
+					if (libusb_handle_events_completed(HANDLE_CTX(dev_handle), &completed) < 0)
+						break;
+			}
 			libusb_free_transfer(transfer);
 			return r;
 		}
@@ -204,6 +210,10 @@ static int do_sync_bulk_transfer(struct libusb_device_handle *dev_handle,
 		break;
 	case LIBUSB_TRANSFER_NO_DEVICE:
 		r = LIBUSB_ERROR_NO_DEVICE;
+		break;
+	case LIBUSB_TRANSFER_ERROR:
+	case LIBUSB_TRANSFER_CANCELLED:
+		r = LIBUSB_ERROR_IO;
 		break;
 	default:
 		usbi_warn(HANDLE_CTX(dev_handle),
@@ -228,9 +238,9 @@ static int do_sync_bulk_transfer(struct libusb_device_handle *dev_handle,
  * Not all of the data may have been written.
  *
  * Also check <tt>transferred</tt> when dealing with a timeout error code.
- * libusb may have to split your transfer into a number of chunks to satisfy
+ * libusbx may have to split your transfer into a number of chunks to satisfy
  * underlying O/S requirements, meaning that the timeout may expire after
- * the first few chunks have completed. libusb is careful not to lose any data
+ * the first few chunks have completed. libusbx is careful not to lose any data
  * that may have been transferred; do not assume that timeout conditions
  * indicate a complete lack of I/O.
  *
@@ -255,7 +265,7 @@ static int do_sync_bulk_transfer(struct libusb_device_handle *dev_handle,
  * \returns LIBUSB_ERROR_NO_DEVICE if the device has been disconnected
  * \returns another LIBUSB_ERROR code on other failures
  */
-API_EXPORTED int libusb_bulk_transfer(struct libusb_device_handle *dev_handle,
+int API_EXPORTED libusb_bulk_transfer(struct libusb_device_handle *dev_handle,
 	unsigned char endpoint, unsigned char *data, int length, int *transferred,
 	unsigned int timeout)
 {
@@ -276,9 +286,9 @@ API_EXPORTED int libusb_bulk_transfer(struct libusb_device_handle *dev_handle,
  * writes. Not all of the data may have been written.
  *
  * Also check <tt>transferred</tt> when dealing with a timeout error code.
- * libusb may have to split your transfer into a number of chunks to satisfy
+ * libusbx may have to split your transfer into a number of chunks to satisfy
  * underlying O/S requirements, meaning that the timeout may expire after
- * the first few chunks have completed. libusb is careful not to lose any data
+ * the first few chunks have completed. libusbx is careful not to lose any data
  * that may have been transferred; do not assume that timeout conditions
  * indicate a complete lack of I/O.
  *
@@ -304,11 +314,10 @@ API_EXPORTED int libusb_bulk_transfer(struct libusb_device_handle *dev_handle,
  * \returns LIBUSB_ERROR_NO_DEVICE if the device has been disconnected
  * \returns another LIBUSB_ERROR code on other error
  */
-API_EXPORTED int libusb_interrupt_transfer(
+int API_EXPORTED libusb_interrupt_transfer(
 	struct libusb_device_handle *dev_handle, unsigned char endpoint,
 	unsigned char *data, int length, int *transferred, unsigned int timeout)
 {
 	return do_sync_bulk_transfer(dev_handle, endpoint, data, length,
 		transferred, timeout, LIBUSB_TRANSFER_TYPE_INTERRUPT);
 }
-
