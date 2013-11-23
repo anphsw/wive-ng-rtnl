@@ -1779,6 +1779,7 @@
 25) kernel: net: rework recvmsg handler msg_name and msg_namelen logic.<br>
 26) kernel: usb: make usbdevices export their device nodes instead of using a separate class.<br>
 27) kernel: usb: add IAD support to usbfs and sysfs.<br>
+28) kernel: usb: add "descriptors" binary sysfs attribute.<br>
 <br>
 <br>
 <br>
