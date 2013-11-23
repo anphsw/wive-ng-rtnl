@@ -210,6 +210,7 @@ thisclean:
 			dropbearmulti *.o *.da *.bb *.bbg *.prof 
 
 distclean: clean tidy
+	-rm -f configure
 	-rm -f config.h
 	-rm -f Makefile
 
