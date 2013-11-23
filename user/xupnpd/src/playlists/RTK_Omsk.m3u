@@ -33,7 +33,9 @@ udp://@239.3.2.15:3000
 udp://@239.3.2.16:3000
 #EXTINF:-1 tvg-logo="РБК" ,РБК Омск
 udp://@239.3.2.17:3000
-#EXTINF:-1 tvg-name="Amazing_Life"    crop=690x550+10+10 group-title="Спутниковые каналы" ,Amazing Life
+#EXTINF:-1 tvg-name="Jetix"           crop=688x556+16+8  ,Disney Channel
+udp://@233.7.70.9:5000
+#EXTINF:-1 tvg-name="Amazing_Life"    crop=690x550+10+10 ,Amazing Life
 udp://@233.7.70.21:5000
 #EXTINF:-1 tvg-name="РБК" crop=700x550+10+10 aspect-ratio=16:9 ,РБК
 udp://@233.7.70.22:5000
@@ -41,6 +43,16 @@ udp://@233.7.70.22:5000
 udp://@233.7.70.23:5000
 #EXTINF:-1 tvg-name="Союз"            crop=700x550+10+10 ,Союз
 udp://@233.7.70.24:5000
+#EXTINF:-1 tvg-name="Discovery"            crop=700x550+10+10 ,Discovery
+udp://@233.7.70.26:5000
+#EXTINF:-1 tvg-name="Discovery Sience"            crop=700x550+10+10 ,Discovery Sience
+udp://@233.7.70.27:5000
+#EXTINF:-1 tvg-name="Discovery World"            crop=700x550+10+10 ,Discovery World
+udp://@233.7.70.28:5000
+#EXTINF:-1 tvg-name="TLC"            crop=700x550+10+10 ,TLC
+udp://@233.7.70.29:5000
+#EXTINF:-1 tvg-name="Animal Planet"            crop=700x550+10+10 ,Animal Planet
+udp://@233.7.70.30:5000
 #EXTINF:-1 tvg-name="Drive"           crop=700x550+10+10 ,Драйв
 udp://@233.7.70.31:5000
 #EXTINF:-1 tvg-name="National_Geographic" crop=690x550+10+10 ,National Geographic
@@ -55,8 +67,6 @@ udp://@233.7.70.37:5000
 udp://@233.7.70.38:5000
 #EXTINF:-1 tvg-name="Инва_Медиа_ТВ"   crop=700x550+10+10 ,Инва Медиа ТВ
 udp://@233.7.70.39:5000
-#EXTINF:-1 tvg-name="Jetix"           crop=688x556+16+8  ,Disney Channel
-udp://@233.7.70.9:5000
 #EXTINF:-1 tvg-name="Бибигон"         crop=700x550+5+10  ,Карусель
 udp://@233.7.70.40:5000
 #EXTINF:-1 tvg-name="Мать_и_дитя"     crop=520x550+5+10  ,Мать и дитя
@@ -89,28 +99,66 @@ udp://@233.7.70.56:5000
 udp://@233.7.70.57:5000
 #EXTINF:-1 tvg-name="Мир"             crop=700x550+10+10 ,Мир
 udp://@233.7.70.58:5000
+#EXTINF:-1 tvg-name="TV1000 Action"             crop=700x550+10+10 ,TV1000 Action
+udp://@233.7.70.59:5000
 #EXTINF:-1 tvg-name="Петербург_-_5_канал" crop=700x550+10+10 ,5 Канал Санкт-Петербург
 udp://@233.7.70.60:5000
-#EXTINF:-1 tvg-name="ТВ3"             crop=700x550+10+10 ,ТВ3
-udp://@233.7.70.220:5000
+#EXTINF:-1 tvg-name="Euronews" crop=700x550+10+10 ,Euronews
+udp://@233.7.70.61:5000
+#EXTINF:-1 tvg-name="Иллюзион+" crop=700x550+10+10 ,Иллюзион+
+udp://@233.7.70.62:5000
+#EXTINF:-1 tvg-name="Davinchi" crop=700x550+10+10 ,Davinchi
+udp://@233.7.70.63:5000
+#EXTINF:-1 tvg-name="НТВ" crop=700x550+10+10 ,НТВ
+udp://@233.7.70.64:5000
+#EXTINF:-1 tvg-name="TV1000 Русское кино" crop=700x550+10+10 ,Русское кино
+udp://@233.7.70.67:5000
 #EXTINF:-1 tvg-name="Вести"           crop=504x545+15+10 ,Россия 24
 udp://@233.7.70.68:5000
 #EXTINF:-1 tvg-name="Звезда"          crop=690x550+10+10 ,Звезда
 udp://@233.7.70.69:5000
+#EXTINF:-1 tvg-name="Sony"          crop=690x550+10+10 ,Sony
+udp://@233.7.70.70:5000
+#EXTINF:-1 tvg-name="Моя планета"          crop=690x550+10+10 ,Моя планета
+udp://@233.7.70.71:5000
+#EXTINF:-1 tvg-name="Дива"          crop=690x550+10+10 ,Дива
+udp://@233.7.70.72:5000
 #EXTINF:-1 tvg-name="Настоящее_Страшное_ТВ" crop=530x550+10+10 ,НСТ
 udp://@233.7.70.74:5000
 #EXTINF:-1 tvg-name="Спорт_1" crop=710x560+5+5 aspect-ratio=16:9 ,Спорт 1
 udp://@233.7.70.75:5000
+#EXTINF:-1 tvg-name="LifeNews" crop=710x560+5+5 aspect-ratio=16:9 ,LifeNews
+udp://@233.7.70.76:5000
+#EXTINF:-1 tvg-name="????" crop=710x560+5+5 aspect-ratio=16:9 ,????
+udp://@233.7.70.77:5000
+#EXTINF:-1 tvg-name="Боец" crop=710x560+5+5 aspect-ratio=16:9 ,Боец
+udp://@233.7.70.78:5000
+#EXTINF:-1 tvg-name="Авто+" crop=710x560+5+5 aspect-ratio=16:9 ,Авто+
+udp://@233.7.70.79:5000
+#EXTINF:-1 tvg-name="Комедия" crop=710x560+5+5 aspect-ratio=16:9 ,Комедия
+udp://@233.7.70.80:5000
+#EXTINF:-1 tvg-name="Евроспорт2" crop=710x560+5+5 aspect-ratio=16:9 ,Евроспорт2
+udp://@233.7.70.81:5000
 #EXTINF:-1 tvg-name="Russia_Today"    crop=700x550+10+10 ,Russia Today
 udp://@233.7.70.82:5000
 #EXTINF:-1 tvg-name="Ru_TV"           crop=700x550+10+10 ,RuTV
 udp://@233.7.70.83:5000
+#EXTINF:-1 tvg-name="Nautical"           crop=700x550+10+10 ,Nautical
+udp://@233.7.70.84:5000
+#EXTINF:-1 tvg-name="Fox Life"           crop=700x550+10+10 ,Fox Life
+udp://@233.7.70.85:5000
 #EXTINF:-1 tvg-name="Феникс_Кино"     crop=700x550+10+10 ,Феникс+Кино
 udp://@233.7.70.86:5000
+#EXTINF:-1 tvg-name="History"     crop=700x550+10+10 ,History
+udp://@233.7.70.88:5000
 #EXTINF:-1 tvg-name="24_Техно"        crop=520x550+15+10 ,24 Техно
 udp://@233.7.70.89:5000
+#EXTINF:-1 tvg-name="Zoo"        crop=520x550+15+10 ,Zoo
+udp://@233.7.70.90:5000
 #EXTINF:-1 tvg-name="Домашние_животные" crop=700x550+10+10 ,Домашние животные
 udp://@233.7.70.91:5000
+#EXTINF:-1 tvg-name="Ю" crop=700x550+10+10 ,Ю
+udp://@233.7.70.92:5000
 #EXTINF:-1 tvg-name="Кухня_ТВ"        crop=700x550+10+10 ,Кухня ТВ
 udp://@233.7.70.94:5000
 #EXTINF:-1 tvg-name="Ocean_TV"         crop=700x550+10+10 ,Ocean TV
@@ -121,22 +169,64 @@ udp://@233.7.70.96:5000
 udp://@233.7.70.97:5000
 #EXTINF:-1 tvg-name="KidsCo" audio-track=1 crop=530x550+10+10 ,KidsCo
 udp://@233.7.70.98:5000
+#EXTINF:-1 tvg-name="Детский" audio-track=1 crop=530x550+10+10 ,Детский
+udp://@233.7.70.99:5000
 #EXTINF:-1 tvg-name="Радость_моя"      crop=690x550+10+10 ,Радость моя
 udp://@233.7.70.100:5000
+#EXTINF:-1 tvg-name="TiJi"      crop=690x550+10+10 ,TiJi
+udp://@233.7.70.101:5000
+#EXTINF:-1 tvg-name="CN"      crop=690x550+10+10 ,CN
+udp://@233.7.70.102:5000
+#EXTINF:-1 tvg-name="Nature"      crop=690x550+10+10 ,Nature
+udp://@233.7.70.103:5000
 #EXTINF:-1 tvg-name="Zee_TV"           crop=690x550+10+10 ,Zee TV
 udp://@233.7.70.104:5000
-#EXTINF:-1 tvg-name="Nature"           crop=700x550+10+10 ,Nature
-udp://@233.7.70.103:5000
 #EXTINF:-1 tvg-name="Живи"             crop=700x550+10+10 ,Живи
 udp://@233.7.70.105:5000
+#EXTINF:-1 tvg-name="Дождь"             crop=700x550+10+10 ,Дождь
+udp://@233.7.70.106:5000
+#EXTINF:-1 tvg-name="Шансон"             crop=700x550+10+10 ,Шансон
+udp://@233.7.70.107:5000
 #EXTINF:-1 tvg-name="Ля_Минор"         crop=700x550+10+10 ,Ля Минор
 udp://@233.7.70.108:5000
 #EXTINF:-1 tvg-name="MCM_Top" crop=700x550+10+10 aspect-ratio=16:9 ,MCM Top
 udp://@233.7.70.109:5000
 #EXTINF:-1 tvg-name="Bridge_TV"        crop=700x550+10+10 ,Bridge TV
 udp://@233.7.70.110:5000
+#EXTINF:-1 tvg-name="Arirang"        crop=700x550+10+10 ,Arirang
+udp://@233.7.70.111:5000
+#EXTINF:-1 tvg-name="Travel+"        crop=700x550+10+10 ,Travel+
+udp://@233.7.70.119:5000
+#EXTINF:-1 tvg-name="MIR24"        crop=700x550+10+10 ,MIR24
+udp://@233.7.70.120:5000
 #EXTINF:-1 tvg-name="2x2"              crop=700x550+10+10 ,2x2
 udp://@233.7.70.124:5000
+#EXTINF:-1 tvg-name="Mezzo Live HD"              crop=700x550+10+10 ,Mezzo Live HD
+udp://@233.7.70.125:5000
+#EXTINF:-1 tvg-name="Sony HD"              crop=700x550+10+10 ,Sony HD
+udp://@233.7.70.126:5000
+#EXTINF:-1 tvg-name="Fox HD"              crop=700x550+10+10 ,Fox HD
+udp://@233.7.70.127:5000
+#EXTINF:-1 tvg-name="TV100 Megahit HD"              crop=700x550+10+10 ,TV1000 Megahit HD
+udp://@233.7.70.128:5000
+#EXTINF:-1 tvg-name="TV100 Premium HD"              crop=700x550+10+10 ,TV1000 Premium HD
+udp://@233.7.70.129:5000
+#EXTINF:-1 tvg-name="TV100 Comedy HD"              crop=700x550+10+10 ,TV1000 Comedy HD
+udp://@233.7.70.130:5000
+#EXTINF:-1 tvg-name="Спорт 1 HD"              crop=700x550+10+10 ,Спорт1 HD
+udp://@233.7.70.131:5000
+#EXTINF:-1 tvg-name="ШТСС"              crop=700x550+10+10 ,ШТСС
+udp://@233.7.70.132:5000
+#EXTINF:-1 tvg-name="Nag Geo HD"              crop=700x550+10+10 ,Nat Geo HD
+udp://@233.7.70.133:5000
+#EXTINF:-1 tvg-name="History HD"              crop=700x550+10+10 ,History
+udp://@233.7.70.134:5000
+#EXTINF:-1 tvg-name="SL"              crop=700x550+10+10 ,SL
+udp://@233.7.70.135:5000
+#EXTINF:-1 tvg-name="MuzTV HIT"              crop=700x550+10+10 ,MuzTV HIT
+udp://@233.7.70.137:5000
+#EXTINF:-1 tvg-name="Viasat Sport"              crop=700x550+10+10 ,Viasat Sport
+udp://@233.7.70.138:5000
 #EXTINF:-1 tvg-name="Русский_экстрим"  crop=700x550+10+10 ,Русский экстрим
 udp://@233.7.70.139:5000
 #EXTINF:-1 tvg-name="Style_TV"         crop=690x550+10+10 ,Style TV
@@ -147,10 +237,36 @@ udp://@233.7.70.141:5000
 udp://@233.7.70.143:5000
 #EXTINF:-1 tvg-name="Татарстан_-_Новый_Век" crop=520x550+10+10 ,Татарстан Новый Век
 udp://@233.7.70.144:5000
+#EXTINF:-1 tvg-name="Раз ТВ" crop=520x550+10+10 ,Раз ТВ
+udp://@233.7.70.145:5000
+#EXTINF:-1 tvg-name="Телепутешествие" crop=520x550+10+10 ,Телепутешествие
+udp://@233.7.70.146:5000
+#EXTINF:-1 tvg-name="Explorer" crop=520x550+10+10 ,Explorer
+udp://@233.7.70.147:5000
+#EXTINF:-1 tvg-name="JimJam" crop=520x550+10+10 ,JimJam
+udp://@233.7.70.148:5000
 #EXTINF:-1 tvg-name="France_24" crop=700x550+10+10 aspect-ratio=16:9 ,France 24
 udp://@233.7.70.149:5000
+#EXTINF:-1 tvg-name="КХЛ HD" crop=700x550+10+10 aspect-ratio=16:9 ,КХЛ HD
+udp://@233.7.70.150:5000
+#EXTINF:-1 tvg-name="Universal" crop=700x550+10+10 aspect-ratio=16:9 ,Universal
+udp://@233.7.70.151:5000
 #EXTINF:-1 tvg-name="VH1_European" tvg-logo="VH1" crop=700x550+10+10 ,VH1 European
 udp://@233.7.70.152:5000
+#EXTINF:-1 tvg-name="Р" tvg-logo="VH1" crop=700x550+10+10 ,Р
+udp://@233.7.70.153:5000
+#EXTINF:-1 tvg-name="FOX" tvg-logo="FOX" crop=700x550+10+10 ,Р
+udp://@233.7.70.154:5000
+#EXTINF:-1 tvg-name="Русский Иллюзион" tvg-logo="FOX" crop=700x550+10+10 , Русский Иллюзион
+udp://@233.7.70.155:5000
+#EXTINF:-1 tvg-name="Travel+ Adventure HD" tvg-logo="FOX" crop=700x550+10+10 , Travel+ Adventure HD
+udp://@233.7.70.156:5000
+#EXTINF:-1 tvg-name="Life HD" tvg-logo="FOX" crop=700x550+10+10 , Life HD
+udp://@233.7.70.157:5000
+#EXTINF:-1 tvg-name="Fox Life HD" tvg-logo="FOX" crop=700x550+10+10 , Fox Life HD
+udp://@233.7.70.158:5000
+#EXTINF:-1 tvg-name="National Geographic HD" tvg-logo="FOX" crop=700x550+10+10 , National Geographic HD
+udp://@233.7.70.159:5000
 #EXTINF:-1 tvg-name="Muzen_TV"      crop=700x550+10+10 ,Muzen_TV
 udp://@233.7.70.160:5000
 #EXTINF:-1 tvg-name="MTV_Live_HD"      crop=700x550+10+10 ,MTV_Live_HD
@@ -279,5 +395,55 @@ udp://@233.7.70.226:5000
 udp://@233.7.70.227:5000
 #EXTINF:-1 tvg-name="Rusong_TV"        crop=700x550+10+10 ,RuSong TV
 udp://@233.7.70.228:5000
+#EXTINF:-1 tvg-name="1 classic"        crop=700x550+10+10 ,1 classic
+udp://@233.7.70.229:5000
+#EXTINF:-1 tvg-name="History HD"        crop=700x550+10+10 ,History HD
+udp://@233.7.70.230:5000
+#EXTINF:-1 tvg-name="CBS Reality"        crop=700x550+10+10 ,CBS Reality
+udp://@233.7.70.231:5000
+#EXTINF:-1 tvg-name="CBS Drama"        crop=700x550+10+10 ,CBS Drama
+udp://@233.7.70.232:5000
+#EXTINF:-1 tvg-name="Бойцовский Клуб"        crop=700x550+10+10 ,Бойцовский Клуб
+udp://@233.7.70.233:5000
+#EXTINF:-1 tvg-name="Детский Мир"        crop=700x550+10+10 ,Детский Мир
+udp://@233.7.70.234:5000
+#EXTINF:-1 tvg-name="Еврокино"        crop=700x550+10+10 ,Еврокино
+udp://@233.7.70.235:5000
+#EXTINF:-1 tvg-name="Закон"        crop=700x550+10+10 ,Закон
+udp://@233.7.70.236:5000
+#EXTINF:-1 tvg-name="Пятница"        crop=700x550+10+10 ,Пятница
+udp://@233.7.70.237:5000
+#EXTINF:-1 tvg-name="Кинопоказ"        crop=700x550+10+10 ,Кинопоказ
+udp://@233.7.70.238:5000
+#EXTINF:-1 tvg-name="Amedia Premium HD"        crop=700x550+10+10 ,Amedia Premium HD
+udp://@233.7.70.239:5000
 #EXTINF:-1 tvg-name="Комсомольская_правда" crop=700x550+10+10 ,Комсомольская Правда
 udp://@233.7.70.240:5000
+#EXTINF:-1 tvg-name="Кто есть кто" crop=700x550+10+10 ,Кто есть кто
+udp://@233.7.70.241:5000
+#EXTINF:-1 tvg-name="?" crop=700x550+10+10 ,?
+udp://@233.7.70.242:5000
+#EXTINF:-1 tvg-name="Наука 2.0" crop=700x550+10+10 ,Наука 2.0
+udp://@233.7.70.243:5000
+#EXTINF:-1 tvg-name="Amedia Premium HD" crop=700x550+10+10 ,Amedia Premium HD
+udp://@233.7.70.244:5000
+#EXTINF:-1 tvg-name="Ностальгия" crop=700x550+10+10 ,Ностальгия
+udp://@233.7.70.245:5000
+#EXTINF:-1 tvg-name="Баскетбол" crop=700x550+10+10 ,Баскетбол
+udp://@233.7.70.246:5000
+#EXTINF:-1 tvg-name="Кино Плюс" crop=700x550+10+10 ,Кино Плюс
+udp://@233.7.70.247:5000
+#EXTINF:-1 tvg-name="Кино Союз" crop=700x550+10+10 ,Кино Союз
+udp://@233.7.70.248:5000
+#EXTINF:-1 tvg-name="Наше кино" crop=700x550+10+10 ,Наше кино
+udp://@233.7.70.249:5000
+#EXTINF:-1 tvg-name="Новое Кино" crop=700x550+10+10 ,Новое Кино
+udp://@233.7.70.250:5000
+#EXTINF:-1 tvg-name="Спорт+" crop=700x550+10+10 ,Спорт+
+udp://@233.7.70.251:5000
+#EXTINF:-1 tvg-name="Оружие" crop=700x550+10+10 ,Оружие
+udp://@233.7.70.252:5000
+#EXTINF:-1 tvg-name="DiscoveryHD" crop=700x550+10+10 ,DiscoveryHD
+udp://@233.7.70.253:5000
+#EXTINF:-1 tvg-name="Спорт" crop=700x550+10+10 ,Спорт
+udp://@233.7.70.254:5000
