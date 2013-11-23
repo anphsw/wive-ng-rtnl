@@ -1756,26 +1756,27 @@
 2) xupnpd: update xupnpd to 1.032 version (392 svn revision).<br>
 3) usb_modem: update usb-modeswitch-data package to 2013-11-13 version.<br>
 4) libusb: try use old 1.0.8 version for fix usb_modeswitch work (newest version not support kernels<2.6.27?).<br>
-5) kernel: wifi driver: temp back to 2.5.0.4 AP/STA driver for RT305x/RT3350.<br>
-6) kernel: wifi driver: fix power select in 2.5.0.4 AP driver.<br>
-7) kernel: wifi driver: consolidate config options 2.5/2.7 drivers.<br>
-8) kernel: net: Handle CHECKSUM_COMPLETE more adequately in pskb_trim_rcsum().<br>
-9) kernel: tcp: reset reordering est. selectively on timeout.<br>
-10) kernel: netfilter: nf_ct_h323: fix bug in rtcp natting.<br>
-11) kernel: tcp: undo on DSACK during recovery.<br>
-12) kernel: ipv4: Fix IP timestamp option (IPOPT_TS_PRESPEC) handling in ip_options_echo().<br>
-13) kenrel: af_unix: implement socket filter.<br>
-14) kernel: network: tcp_connect should return certain errors up the stack.<br>
-15) kernel: net: avoid race between network down and sysfs.<br>
-16) kernel: af_packet: check return of dev_set_promiscuity/allmulti.<br>
-17) kernel: net: Avoid copying writable clones in tunnel drivers.<br>
-18) kernel: ipv6: sit: Fix locking issues in PRL management.<br>
-19) kernel: ipv6: sit: Disallow 0.0.0.0 in PRL and Flush PRL if given for DEL.<br>
-20) kernel: net: remove link_watch delay for up even when we're down.<br>
-21) kernel: net: link_watch: Always schedule urgent events.<br>
-22) kernel: net: zero length write() on socket should not simply return 0.<br>
-23) kernel: net: pppoe: Check packet length on all receive paths.<br>
-24) kernel: net: rework recvmsg handler msg_name and msg_namelen logic.<br>
+5) init.d: allow l2tp clients connect to local udpxy server.<br>
+6) kernel: wifi driver: temp back to 2.5.0.4 AP/STA driver for RT305x/RT3350.<br>
+7) kernel: wifi driver: fix power select in 2.5.0.4 AP driver.<br>
+8) kernel: wifi driver: consolidate config options 2.5/2.7 drivers.<br>
+9) kernel: net: Handle CHECKSUM_COMPLETE more adequately in pskb_trim_rcsum().<br>
+10) kernel: tcp: reset reordering est. selectively on timeout.<br>
+11) kernel: netfilter: nf_ct_h323: fix bug in rtcp natting.<br>
+12) kernel: tcp: undo on DSACK during recovery.<br>
+13) kernel: ipv4: Fix IP timestamp option (IPOPT_TS_PRESPEC) handling in ip_options_echo().<br>
+14) kenrel: af_unix: implement socket filter.<br>
+15) kernel: network: tcp_connect should return certain errors up the stack.<br>
+16) kernel: net: avoid race between network down and sysfs.<br>
+17) kernel: af_packet: check return of dev_set_promiscuity/allmulti.<br>
+18) kernel: net: Avoid copying writable clones in tunnel drivers.<br>
+19) kernel: ipv6: sit: Fix locking issues in PRL management.<br>
+20) kernel: ipv6: sit: Disallow 0.0.0.0 in PRL and Flush PRL if given for DEL.<br>
+21) kernel: net: remove link_watch delay for up even when we're down.<br>
+22) kernel: net: link_watch: Always schedule urgent events.<br>
+23) kernel: net: zero length write() on socket should not simply return 0.<br>
+24) kernel: net: pppoe: Check packet length on all receive paths.<br>
+25) kernel: net: rework recvmsg handler msg_name and msg_namelen logic.<br>
 <br>
 <br>
 <br>

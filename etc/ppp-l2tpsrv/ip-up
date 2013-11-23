@@ -1,5 +1,8 @@
 #!/bin/sh
 
+#include global config
+. /etc/scripts/global.sh
+
 PPP_IFACE="$1"
 PPP_TTY="$2"
 PPP_SPEED="$3"
@@ -25,6 +28,11 @@ if [ "$l2tp_srv_nat_enabled" != "" ] && [ "$l2tp_srv_nat_enabled" != "0" ]; then
     iptables -A l2tpsrvfwd -i $PPP_IFACE -j ACCEPT > /dev/null 2>&1
     iptables -A l2tpsrvfwd -o $PPP_IFACE -j ACCEPT > /dev/null 2>&1
     iptables -A POSTROUTING -t nat -o ! $PPP_IFACE -j MASQUERADE > /dev/null 2>&1
+fi
+
+# allow udpxy for l2tp clients
+if [ "$UDPXYMode" != "0" ]; then
+    iptables -A servicelimit -i $PPP_IFACE -m state --state NEW -p tcp --dport $UDPXYPort -j ACCEPT
 fi
 
 $LOG "Add low prio route to client $PPP_REMOTE network metric 100$PPP_NUM."

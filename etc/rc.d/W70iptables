@@ -441,7 +441,7 @@ get_param() {
     eval `nvram_buf_get 2860 lan_ipaddr lan_netmask Lan2Enabled lan2_ipaddr lan2_netmask mss_use_pmtu \
 	    natEnabled use_snat PortForwardEnable DMZEnable DMZIPAddress DMZNATLoopback DefaultFirewallPolicy \
 	    IPPortFilterEnable WANPingFilter RemoteSSH RemoteFTP RemoteTelnet RemoteManagement RemoteManagementPort \
-	    dhcpEnabled ipt_account upnpEnabled igmpEnabled xupnpd UDPXYPort SmbEnabled \
+	    dhcpEnabled ipt_account upnpEnabled igmpEnabled xupnpd SmbEnabled \
 		TransmissionEnabled TransRPCPort TransInPort TransAccess snmpd FtpPort\
 	    parproutedEnabled PrinterSrvEnabled chilli_net vpnType vpnNAT l2tp_srv_enabled MODEMENABLED store_ttl store_ttl_mcast`
 
