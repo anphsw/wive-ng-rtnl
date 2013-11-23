@@ -77,7 +77,7 @@ start() {
 	ABORT 'NO ANSWER'
 	ABORT 'DELAYED'
 	REPORT 'CONNECT'
-	'' 'ATZ'" >> $PPPDIR/peers/chat
+	'' 'ATZ'" > $PPPDIR/peers/chat
 	if [ "$MODEMATENABLED" = "1" ]; then
 	if  [ "$MODEMAT1" != "" ]; then
 	    echo "	'' '$MODEMAT1'" >> $PPPDIR/peers/chat
