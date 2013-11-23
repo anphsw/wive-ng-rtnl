@@ -182,6 +182,9 @@ ifdef CONFIG_LIB_EVENT
 	CFLAGS  += -I$(ROOTDIR)/lib/include_shared/event2
 endif
 ifdef CONFIG_LIB_USB
+	CFLAGS  += -I$(ROOTDIR)/lib/include_shared/libusb
+endif
+ifdef CONFIG_LIB_USB1
 	CFLAGS  += -I$(ROOTDIR)/lib/include_shared/libusb-1.0
 endif
 ifdef CONFIG_USER_OPENSSL

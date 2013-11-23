@@ -92,6 +92,9 @@ ifeq ($(CONFIG_LIB_NAT),y)
     DIRS += libnatpmp
 endif
 ifeq ($(CONFIG_LIB_USB),y)
+    DIRS += libusb
+endif
+ifeq ($(CONFIG_LIB_USB1),y)
     DIRS += libusb-1.0
 endif
 ifeq ($(CONFIG_LIB_PCAP),y)
@@ -164,6 +167,9 @@ ifeq ($(CONFIG_LIB_LIBNTFS3G_FORCE),y)
 	@$(MAKE) -C libntfs-3g shared
 endif
 ifeq ($(CONFIG_LIB_USB),y)
+	@$(MAKE) -C libusb shared
+endif
+ifeq ($(CONFIG_LIB_USB1),y)
 	@$(MAKE) -C libusb-1.0 shared
 endif
 ifeq ($(CONFIG_LIB_NFNETLINK),y)
@@ -509,6 +515,7 @@ clean:
 	-$(MAKE) -C libpcap clean
 	-$(MAKE) -C libnet clean
 	-$(MAKE) -C libnl clean
+	-$(MAKE) -C libusb clean
 	-$(MAKE) -C libusb-1.0 clean
 	-$(MAKE) -C libntfs-3g clean
 	-$(MAKE) -C libiconv clean

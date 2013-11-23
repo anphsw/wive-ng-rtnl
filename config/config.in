@@ -12,6 +12,7 @@ bool 'Build libntfs-3g'		CONFIG_LIB_LIBNTFS3G_FORCE
 bool 'Build zlib'		CONFIG_LIB_ZLIB_FORCE
 bool 'Build uClibc (libstdc++)'	CONFIG_LIB_LIBSTDC_PLUS_FORCE
 bool 'Build libusb'		CONFIG_LIB_USB
+bool 'Build libusb1.0.15'	CONFIG_LIB_USB1
 bool 'Build libnatpmp'		CONFIG_LIB_NAT
 bool 'Build libflex'		CONFIG_LIB_FLEX
 bool 'Build libevent'		CONFIG_LIB_EVENT
