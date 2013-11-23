@@ -14,6 +14,7 @@ UCLINUX_BUILD_USER=1
 -include $(CONFIG_CONFIG)
 -include $(ARCH_CONFIG)
 
+# for safe cleanup
 ifndef ROOTDIR
 ROOTDIR=..
 endif
@@ -100,7 +101,7 @@ ifeq ($(CONFIG_USER_OPENSSL),y)
 	# ">>>>>>>>>>>>>>>> CONFIGURE AND BUILD SSL <<<<<<<<<<<<<<<<<<<<<<<"
 	if [ ! -e openssl/libssl.so ]; then  cd openssl ; ./Configure RT2880 no-ripemd; $(MAKE) -j1 ; cd .. ; fi
 	if [ -e openssl/libssl.so ]; then  cp -fap openssl/*.so* $(ROOTDIR)/lib/lib ; cp -fapv openssl/*.a $(ROOTDIR)/lib/lib ; fi
-	if [ -e openssl/libssl.so ]; then  rm -rf $(ROOTDIR)/lib/include_shared/openssl ; cp -faprL openssl/include/* $(ROOTDIR)/lib/include_shared ; fi
+	if [ -e openssl/libssl.so ]; then  $(RM) -rf $(ROOTDIR)/lib/include_shared/openssl ; cp -faprL openssl/include/* $(ROOTDIR)/lib/include_shared ; fi
 endif
 	# ">>>>>>>>>>>>>>>> CONFIGURE ALL USERSPASE  <<<<<<<<<<<<<<<<<<<<<<"
 	for i in $(dir_y) ; do \
@@ -127,7 +128,7 @@ clean:
 	     $(MAKE) -C $$i distclean; \
 	     $(MAKE) -C $$i mrproper) \
 	    done
-	-for i in $(SUBDIRS_APP); do $(MAKE) -C $$i clean; rm -rf $$i/filesystem/*; done
+	-for i in $(SUBDIRS_APP); do $(MAKE) -C $$i clean; $(RM) -rf $(ROOTDIR)/user/$$i/filesystem/*; done
 
 web:
 	$(MAKE) -C goahead all

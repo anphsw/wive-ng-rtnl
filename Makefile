@@ -71,7 +71,6 @@ CROSS_COMPILER_PREFIX	:= $(CROSS_COMPILE)
 CPU_OVERLOAD	:= 4
 
 HOST_NCPU	:= $(shell if [ -f /proc/cpuinfo ]; then n=`grep -c processor /proc/cpuinfo`; if [ $$n -gt 1 ];then expr $$n \* ${CPU_OVERLOAD}; else echo $$n; fi; else echo 1; fi)
-HOST_NCPU       := 1
 BUILD_START_STRING := $(shell date "+%a, %d %b %Y %T %z")
 
 CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; else if [ -x /bin/bash ]; then echo /bin/bash; else echo sh; fi ; fi)
