@@ -1,449 +1,449 @@
-#EXTM3U cache=500 deinterlace=1 aspect-ratio=4:3 url-tvg="http://tv.adslclub.ru/jtv.zip" tvg-shift=0 m3uautoload=1 
+#EXTM3U
 #EXTINF:-1 group-title="Эфир - Омск" ,Первый
 udp://@239.3.2.3:3000
-#EXTINF:-1,Россия 1
+#EXTINF:-1 group-title="Эфир - Омск" ,Россия 1
 udp://@239.3.2.6:3000
-#EXTINF:-1,ТВ Центр
+#EXTINF:-1 group-title="Эфир - Омск" ,ТВ Центр
 udp://@239.3.2.1:3000
-#EXTINF:-1,ТНТ
+#EXTINF:-1 group-title="Эфир - Омск" ,ТНТ
 udp://@239.3.2.2:3000
-#EXTINF:-1,НТВ
+#EXTINF:-1 group-title="Эфир - Омск" ,НТВ
 udp://@239.3.2.4:3000
-#EXTINF:-1,Домашний
+#EXTINF:-1 group-title="Эфир - Омск" ,Домашний
 udp://@239.3.2.5:3000
-#EXTINF:-1,Пятница
+#EXTINF:-1 group-title="Эфир - Омск" ,Пятница
 udp://@239.3.2.7:3000
-#EXTINF:-1,СТС
+#EXTINF:-1 group-title="Эфир - Омск" ,СТС
 udp://@239.3.2.8:3000
-#EXTINF:-1,ТВ3
+#EXTINF:-1 group-title="Эфир - Омск" ,ТВ3
 udp://@239.3.2.9:3000
-#EXTINF:-1,РЕН-ТВ
+#EXTINF:-1 group-title="Эфир - Омск" ,РЕН-ТВ
 udp://@239.3.2.10:3000
-#EXTINF:-1,7 ТВ
+#EXTINF:-1 group-title="Эфир - Омск" ,7 ТВ
 udp://@239.3.2.11:3000
-#EXTINF:-1,5 канал Санкт-Петербург
+#EXTINF:-1 group-title="Эфир - Омск" ,5 канал Санкт-Петербург
 udp://@239.3.2.12:3000
-#EXTINF:-1,Культура
+#EXTINF:-1 group-title="Эфир - Омск" ,Культура
 udp://@239.3.2.13:3000
-#EXTINF:-1,Перец
+#EXTINF:-1 group-title="Эфир - Омск" ,Перец
 udp://@239.3.2.14:3000
-#EXTINF:-1,Россия 2
+#EXTINF:-1 group-title="Эфир - Омск" ,Россия 2
 udp://@239.3.2.15:3000
-#EXTINF:-1,Ю
+#EXTINF:-1 group-title="Эфир - Омск" ,Ю
 udp://@239.3.2.16:3000
-#EXTINF:-1 tvg-logo="РБК" ,РБК Омск
+#EXTINF:-1 #EXTINF:-1 group-title="Эфир - Омск" ,РБК Омск
 udp://@239.3.2.17:3000
-#EXTINF:-1 tvg-name="Jetix"           crop=688x556+16+8  ,Disney Channel
-udp://@233.7.70.9:5000
-#EXTINF:-1 tvg-name="Amazing_Life"    crop=690x550+10+10 ,Amazing Life
-udp://@233.7.70.21:5000
-#EXTINF:-1 tvg-name="РБК" crop=700x550+10+10 aspect-ratio=16:9 ,РБК
-udp://@233.7.70.22:5000
-#EXTINF:-1 tvg-name="СГУ_ТВ"          crop=690x550+10+10 ,СГУ ТВ
-udp://@233.7.70.23:5000
-#EXTINF:-1 tvg-name="Союз"            crop=700x550+10+10 ,Союз
-udp://@233.7.70.24:5000
-#EXTINF:-1 tvg-name="Discovery"            crop=700x550+10+10 ,Discovery
-udp://@233.7.70.26:5000
-#EXTINF:-1 tvg-name="Discovery Sience"            crop=700x550+10+10 ,Discovery Sience
-udp://@233.7.70.27:5000
-#EXTINF:-1 tvg-name="Discovery World"            crop=700x550+10+10 ,Discovery World
-udp://@233.7.70.28:5000
-#EXTINF:-1 tvg-name="TLC"            crop=700x550+10+10 ,TLC
-udp://@233.7.70.29:5000
-#EXTINF:-1 tvg-name="Animal Planet"            crop=700x550+10+10 ,Animal Planet
-udp://@233.7.70.30:5000
-#EXTINF:-1 tvg-name="Drive"           crop=700x550+10+10 ,Драйв
-udp://@233.7.70.31:5000
-#EXTINF:-1 tvg-name="National_Geographic" crop=690x550+10+10 ,National Geographic
-udp://@233.7.70.32:5000
-#EXTINF:-1 tvg-name="Успех"           crop=700x550+10+10 ,Успех
-udp://@233.7.70.34:5000
-#EXTINF:-1 tvg-name="TV_XXI"          crop=700x550+10+10 ,TVXXI
-udp://@233.7.70.35:5000
-#EXTINF:-1 tvg-name="КХЛ_ТВ"          crop=700x550+10+10 ,КХЛ
-udp://@233.7.70.37:5000
-#EXTINF:-1 tvg-name="Спас"            crop=685x550+10+10 ,Спас
-udp://@233.7.70.38:5000
-#EXTINF:-1 tvg-name="Инва_Медиа_ТВ"   crop=700x550+10+10 ,Инва Медиа ТВ
-udp://@233.7.70.39:5000
-#EXTINF:-1 tvg-name="Бибигон"         crop=700x550+5+10  ,Карусель
-udp://@233.7.70.40:5000
-#EXTINF:-1 tvg-name="Мать_и_дитя"     crop=520x550+5+10  ,Мать и дитя
-udp://@233.7.70.41:5000
-#EXTINF:-1 tvg-name="Euronews" crop=700x550+10+10 aspect-ratio=16:9 ,Euronews
-udp://@233.7.70.42:5000
-#EXTINF:-1 tvg-name="РетроТВ"         crop=700x550+10+10 ,Ретро ТВ
-udp://@233.7.70.44:5000
-#EXTINF:-1 tvg-name="Юмор_TV" tvg-logo="Юмор TV" crop=520x550+10+10 ,Humor Box
-udp://@233.7.70.46:5000
-#EXTINF:-1 tvg-name="Fashion_TV" crop=700x550+10+10 aspect-ratio=16:9 ,Fashion TV
-udp://@233.7.70.47:5000
-#EXTINF:-1 tvg-name="Охота_и_рыбалка" crop=700x550+10+10 ,Охота и рыбалка
-udp://@233.7.70.48:5000
-#EXTINF:-1 tvg-name="Здоровое_ТВ"     crop=700x550+10+10 ,Здоровое ТВ
-udp://@233.7.70.49:5000
-#EXTINF:-1 tvg-name="TDK"             crop=700x550+10+10 ,ТДК
-udp://@233.7.70.50:5000
-#EXTINF:-1 tvg-name="Усадьба"         crop=700x550+10+10 ,Усадьба ТВ
-udp://@233.7.70.51:5000
-#EXTINF:-1 tvg-name="A-One"           crop=700x550+10+10 ,A-One
-udp://@233.7.70.52:5000
-#EXTINF:-1 tvg-name="Music_Box_TV"    crop=520x550+5+10  ,Music Box TV
-udp://@233.7.70.53:5000
-#EXTINF:-1 tvg-name="Music_Box_Ru"    crop=520x550+5+10  ,Music Box RU
-udp://@233.7.70.54:5000
-#EXTINF:-1 tvg-name="TopShop_TV"      crop=700x550+10+10 ,TopShop TV
-udp://@233.7.70.56:5000
-#EXTINF:-1 tvg-name="Агро-ТВ"         crop=700x550+10+10 ,Агро-ТВ
-udp://@233.7.70.57:5000
-#EXTINF:-1 tvg-name="Мир"             crop=700x550+10+10 ,Мир
-udp://@233.7.70.58:5000
-#EXTINF:-1 tvg-name="TV1000 Action"             crop=700x550+10+10 ,TV1000 Action
-udp://@233.7.70.59:5000
-#EXTINF:-1 tvg-name="Петербург_-_5_канал" crop=700x550+10+10 ,5 Канал Санкт-Петербург
-udp://@233.7.70.60:5000
-#EXTINF:-1 tvg-name="Euronews" crop=700x550+10+10 ,Euronews
-udp://@233.7.70.61:5000
-#EXTINF:-1 tvg-name="Иллюзион+" crop=700x550+10+10 ,Иллюзион+
-udp://@233.7.70.62:5000
-#EXTINF:-1 tvg-name="Davinchi" crop=700x550+10+10 ,Davinchi
-udp://@233.7.70.63:5000
-#EXTINF:-1 tvg-name="НТВ" crop=700x550+10+10 ,НТВ
-udp://@233.7.70.64:5000
-#EXTINF:-1 tvg-name="TV1000 Русское кино" crop=700x550+10+10 ,Русское кино
-udp://@233.7.70.67:5000
-#EXTINF:-1 tvg-name="Вести"           crop=504x545+15+10 ,Россия 24
-udp://@233.7.70.68:5000
-#EXTINF:-1 tvg-name="Звезда"          crop=690x550+10+10 ,Звезда
-udp://@233.7.70.69:5000
-#EXTINF:-1 tvg-name="Sony"          crop=690x550+10+10 ,Sony
-udp://@233.7.70.70:5000
-#EXTINF:-1 tvg-name="Моя планета"          crop=690x550+10+10 ,Моя планета
-udp://@233.7.70.71:5000
-#EXTINF:-1 tvg-name="Дива"          crop=690x550+10+10 ,Дива
-udp://@233.7.70.72:5000
-#EXTINF:-1 tvg-name="Настоящее_Страшное_ТВ" crop=530x550+10+10 ,НСТ
-udp://@233.7.70.74:5000
-#EXTINF:-1 tvg-name="Спорт_1" crop=710x560+5+5 aspect-ratio=16:9 ,Спорт 1
-udp://@233.7.70.75:5000
-#EXTINF:-1 tvg-name="LifeNews" crop=710x560+5+5 aspect-ratio=16:9 ,LifeNews
-udp://@233.7.70.76:5000
-#EXTINF:-1 tvg-name="????" crop=710x560+5+5 aspect-ratio=16:9 ,????
-udp://@233.7.70.77:5000
-#EXTINF:-1 tvg-name="Боец" crop=710x560+5+5 aspect-ratio=16:9 ,Боец
-udp://@233.7.70.78:5000
-#EXTINF:-1 tvg-name="Авто+" crop=710x560+5+5 aspect-ratio=16:9 ,Авто+
-udp://@233.7.70.79:5000
-#EXTINF:-1 tvg-name="Комедия" crop=710x560+5+5 aspect-ratio=16:9 ,Комедия
-udp://@233.7.70.80:5000
-#EXTINF:-1 tvg-name="Евроспорт2" crop=710x560+5+5 aspect-ratio=16:9 ,Евроспорт2
-udp://@233.7.70.81:5000
-#EXTINF:-1 tvg-name="Russia_Today"    crop=700x550+10+10 ,Russia Today
-udp://@233.7.70.82:5000
-#EXTINF:-1 tvg-name="Ru_TV"           crop=700x550+10+10 ,RuTV
-udp://@233.7.70.83:5000
-#EXTINF:-1 tvg-name="Nautical"           crop=700x550+10+10 ,Nautical
-udp://@233.7.70.84:5000
-#EXTINF:-1 tvg-name="Fox Life"           crop=700x550+10+10 ,Fox Life
-udp://@233.7.70.85:5000
-#EXTINF:-1 tvg-name="Феникс_Кино"     crop=700x550+10+10 ,Феникс+Кино
-udp://@233.7.70.86:5000
-#EXTINF:-1 tvg-name="History"     crop=700x550+10+10 ,History
-udp://@233.7.70.88:5000
-#EXTINF:-1 tvg-name="24_Техно"        crop=520x550+15+10 ,24 Техно
-udp://@233.7.70.89:5000
-#EXTINF:-1 tvg-name="Zoo"        crop=520x550+15+10 ,Zoo
-udp://@233.7.70.90:5000
-#EXTINF:-1 tvg-name="Домашние_животные" crop=700x550+10+10 ,Домашние животные
-udp://@233.7.70.91:5000
-#EXTINF:-1 tvg-name="Ю" crop=700x550+10+10 ,Ю
-udp://@233.7.70.92:5000
-#EXTINF:-1 tvg-name="Кухня_ТВ"        crop=700x550+10+10 ,Кухня ТВ
-udp://@233.7.70.94:5000
-#EXTINF:-1 tvg-name="Ocean_TV"         crop=700x550+10+10 ,Ocean TV
-udp://@233.7.70.95:5000
-#EXTINF:-1 tvg-name="Englishclub_TV" crop=700x550+10+10 aspect-ratio=16:9 ,English Club TV
-udp://@233.7.70.96:5000
-#EXTINF:-1 tvg-name="Nickelodeon" crop=700x550+10+10 aspect-ratio=16:9 ,Nickelodeon
+#EXTINF:-1 logo=http://data.photo.sibnet.ru/upload/imggreat/136890222194.jpg group-title="Детские" ,Nickelodeon
 udp://@233.7.70.97:5000
-#EXTINF:-1 tvg-name="KidsCo" audio-track=1 crop=530x550+10+10 ,KidsCo
-udp://@233.7.70.98:5000
-#EXTINF:-1 tvg-name="Детский" audio-track=1 crop=530x550+10+10 ,Детский
-udp://@233.7.70.99:5000
-#EXTINF:-1 tvg-name="Радость_моя"      crop=690x550+10+10 ,Радость моя
-udp://@233.7.70.100:5000
-#EXTINF:-1 tvg-name="TiJi"      crop=690x550+10+10 ,TiJi
-udp://@233.7.70.101:5000
-#EXTINF:-1 tvg-name="CN"      crop=690x550+10+10 ,CN
-udp://@233.7.70.102:5000
-#EXTINF:-1 tvg-name="Nature"      crop=690x550+10+10 ,Nature
-udp://@233.7.70.103:5000
-#EXTINF:-1 tvg-name="Zee_TV"           crop=690x550+10+10 ,Zee TV
-udp://@233.7.70.104:5000
-#EXTINF:-1 tvg-name="Живи"             crop=700x550+10+10 ,Живи
-udp://@233.7.70.105:5000
-#EXTINF:-1 tvg-name="Дождь"             crop=700x550+10+10 ,Дождь
-udp://@233.7.70.106:5000
-#EXTINF:-1 tvg-name="Шансон"             crop=700x550+10+10 ,Шансон
-udp://@233.7.70.107:5000
-#EXTINF:-1 tvg-name="Ля_Минор"         crop=700x550+10+10 ,Ля Минор
-udp://@233.7.70.108:5000
-#EXTINF:-1 tvg-name="MCM_Top" crop=700x550+10+10 aspect-ratio=16:9 ,MCM Top
-udp://@233.7.70.109:5000
-#EXTINF:-1 tvg-name="Bridge_TV"        crop=700x550+10+10 ,Bridge TV
-udp://@233.7.70.110:5000
-#EXTINF:-1 tvg-name="Arirang"        crop=700x550+10+10 ,Arirang
-udp://@233.7.70.111:5000
-#EXTINF:-1 tvg-name="Travel+"        crop=700x550+10+10 ,Travel+
-udp://@233.7.70.119:5000
-#EXTINF:-1 tvg-name="MIR24"        crop=700x550+10+10 ,MIR24
-udp://@233.7.70.120:5000
-#EXTINF:-1 tvg-name="2x2"              crop=700x550+10+10 ,2x2
-udp://@233.7.70.124:5000
-#EXTINF:-1 tvg-name="Mezzo Live HD"              crop=700x550+10+10 ,Mezzo Live HD
-udp://@233.7.70.125:5000
-#EXTINF:-1 tvg-name="Sony HD"              crop=700x550+10+10 ,Sony HD
-udp://@233.7.70.126:5000
-#EXTINF:-1 tvg-name="Fox HD"              crop=700x550+10+10 ,Fox HD
-udp://@233.7.70.127:5000
-#EXTINF:-1 tvg-name="TV100 Megahit HD"              crop=700x550+10+10 ,TV1000 Megahit HD
-udp://@233.7.70.128:5000
-#EXTINF:-1 tvg-name="TV100 Premium HD"              crop=700x550+10+10 ,TV1000 Premium HD
-udp://@233.7.70.129:5000
-#EXTINF:-1 tvg-name="TV100 Comedy HD"              crop=700x550+10+10 ,TV1000 Comedy HD
-udp://@233.7.70.130:5000
-#EXTINF:-1 tvg-name="Спорт 1 HD"              crop=700x550+10+10 ,Спорт1 HD
-udp://@233.7.70.131:5000
-#EXTINF:-1 tvg-name="ШТСС"              crop=700x550+10+10 ,ШТСС
-udp://@233.7.70.132:5000
-#EXTINF:-1 tvg-name="Nag Geo HD"              crop=700x550+10+10 ,Nat Geo HD
-udp://@233.7.70.133:5000
-#EXTINF:-1 tvg-name="History HD"              crop=700x550+10+10 ,History
-udp://@233.7.70.134:5000
-#EXTINF:-1 tvg-name="SL"              crop=700x550+10+10 ,SL
-udp://@233.7.70.135:5000
-#EXTINF:-1 tvg-name="MuzTV HIT"              crop=700x550+10+10 ,MuzTV HIT
-udp://@233.7.70.137:5000
-#EXTINF:-1 tvg-name="Viasat Sport"              crop=700x550+10+10 ,Viasat Sport
-udp://@233.7.70.138:5000
-#EXTINF:-1 tvg-name="Русский_экстрим"  crop=700x550+10+10 ,Русский экстрим
-udp://@233.7.70.139:5000
-#EXTINF:-1 tvg-name="Style_TV"         crop=690x550+10+10 ,Style TV
-udp://@233.7.70.140:5000
-#EXTINF:-1 tvg-name="ОТР" crop=700x550+10+10 aspect-ratio=16:9 ,ОТР
-udp://@233.7.70.141:5000
-#EXTINF:-1 tvg-name="ТРО"              crop=520x550+10+10 ,ТРО Союз
-udp://@233.7.70.143:5000
-#EXTINF:-1 tvg-name="Татарстан_-_Новый_Век" crop=520x550+10+10 ,Татарстан Новый Век
-udp://@233.7.70.144:5000
-#EXTINF:-1 tvg-name="Раз ТВ" crop=520x550+10+10 ,Раз ТВ
-udp://@233.7.70.145:5000
-#EXTINF:-1 tvg-name="Телепутешествие" crop=520x550+10+10 ,Телепутешествие
-udp://@233.7.70.146:5000
-#EXTINF:-1 tvg-name="Explorer" crop=520x550+10+10 ,Explorer
-udp://@233.7.70.147:5000
-#EXTINF:-1 tvg-name="JimJam" crop=520x550+10+10 ,JimJam
-udp://@233.7.70.148:5000
-#EXTINF:-1 tvg-name="France_24" crop=700x550+10+10 aspect-ratio=16:9 ,France 24
-udp://@233.7.70.149:5000
-#EXTINF:-1 tvg-name="КХЛ HD" crop=700x550+10+10 aspect-ratio=16:9 ,КХЛ HD
-udp://@233.7.70.150:5000
-#EXTINF:-1 tvg-name="Universal" crop=700x550+10+10 aspect-ratio=16:9 ,Universal
-udp://@233.7.70.151:5000
-#EXTINF:-1 tvg-name="VH1_European" tvg-logo="VH1" crop=700x550+10+10 ,VH1 European
-udp://@233.7.70.152:5000
-#EXTINF:-1 tvg-name="Р" tvg-logo="VH1" crop=700x550+10+10 ,Р
-udp://@233.7.70.153:5000
-#EXTINF:-1 tvg-name="FOX" tvg-logo="FOX" crop=700x550+10+10 ,Р
-udp://@233.7.70.154:5000
-#EXTINF:-1 tvg-name="Русский Иллюзион" tvg-logo="FOX" crop=700x550+10+10 , Русский Иллюзион
-udp://@233.7.70.155:5000
-#EXTINF:-1 tvg-name="Travel+ Adventure HD" tvg-logo="FOX" crop=700x550+10+10 , Travel+ Adventure HD
-udp://@233.7.70.156:5000
-#EXTINF:-1 tvg-name="Life HD" tvg-logo="FOX" crop=700x550+10+10 , Life HD
-udp://@233.7.70.157:5000
-#EXTINF:-1 tvg-name="Fox Life HD" tvg-logo="FOX" crop=700x550+10+10 , Fox Life HD
-udp://@233.7.70.158:5000
-#EXTINF:-1 tvg-name="National Geographic HD" tvg-logo="FOX" crop=700x550+10+10 , National Geographic HD
-udp://@233.7.70.159:5000
-#EXTINF:-1 tvg-name="Muzen_TV"      crop=700x550+10+10 ,Muzen_TV
-udp://@233.7.70.160:5000
-#EXTINF:-1 tvg-name="MTV_Live_HD"      crop=700x550+10+10 ,MTV_Live_HD
-udp://@233.7.70.161:5000
-#EXTINF:-1 tvg-name="Fashion_One"      crop=700x550+10+10 ,Fashion_One
-udp://@233.7.70.162:5000
-#EXTINF:-1 tvg-name="Outdoor"      crop=700x550+10+10 ,Outdoor
-udp://@233.7.70.163:5000
-#EXTINF:-1 tvg-name="Nicledeon"      crop=700x550+10+10 ,Niclodeon
+#EXTINF:-1 group-title="Детские" ,Nickelodeon HD
 udp://@233.7.70.164:5000
-#EXTINF:-1 tvg-name="Перец"      crop=700x550+10+10 ,Перец
-udp://@233.7.70.165:5000
-#EXTINF:-1 tvg-name="Sony_Turbo"      crop=700x550+10+10 ,Sony_Turbo
-udp://@233.7.70.166:5000
-#EXTINF:-1 tvg-name="Кино_ТВ"      crop=700x550+10+10 ,Кино_ТВ
-udp://@233.7.70.167:5000
-#EXTINF:-1 tvg-name="Просвещение"      crop=700x550+10+10 ,Просвещение
-udp://@233.7.70.168:5000
-#EXTINF:-1 tvg-name="NickJR"      crop=700x550+10+10 ,NickJR
+#EXTINF:-1 group-title="Детские" ,Nick Junior
 udp://@233.7.70.169:5000
-#EXTINF:-1 tvg-name="Карусель"      crop=700x550+10+10 ,Карусель
-udp://@233.7.70.170:5000
-#EXTINF:-1 tvg-name="Gulli"           crop=700x550+10+10 ,Gulli
-udp://@233.7.70.171:5000
-#EXTINF:-1 tvg-name="Спорт"           crop=700x550+10+10 ,Спорт
-udp://@233.7.70.172:5000
-#EXTINF:-1 tvg-name="Всё_ТВ" aspect-ratio=16:9 crop=700x550+10+10 ,Всё ТВ
-udp://@233.7.70.174:5000
-#EXTINF:-1 tvg-name="Пятница" aspect-ratio=16:9 crop=700x550+10+10 ,Пятница
-udp://@233.7.70.175:5000
-#EXTINF:-1 tvg-name="Русский_Бестселлер" aspect-ratio=16:9 crop=700x550+10+10 ,Русский_Бестселлер
-udp://@233.7.70.176:5000
-#EXTINF:-1 tvg-name="КХЛ HD" aspect-ratio=16:9 crop=700x550+10+10 ,КХЛ HD
-udp://@233.7.70.177:5000
-#EXTINF:-1 tvg-name="TV1000 MEGAHIT HD" aspect-ratio=16:9 crop=700x550+10+10 ,TV1000 MEGAHIT HD
-udp://@233.7.70.178:5000
-#EXTINF:-1 tvg-name="TV1000 COMEDI HD" aspect-ratio=16:9 crop=700x550+10+10 ,TV1000 COMEDI HD
-udp://@233.7.70.179:5000
-#EXTINF:-1 tvg-name="History HD" aspect-ratio=16:9 crop=700x550+10+10 ,History HD
-udp://@233.7.70.180:5000
-#EXTINF:-1 tvg-name="24_Док"           crop=700x550+10+10 ,24 Док
-udp://@233.7.70.181:5000
-#EXTINF:-1 tvg-name="365"           crop=700x550+10+10 ,24 365
-udp://@233.7.70.182:5000
-#EXTINF:-1 tvg-name="AB Moteurs" aspect-ratio=16:9 crop=700x550+10+10 ,AB Moteurs
-udp://@233.7.70.183:5000
-#EXTINF:-1 tvg-name="Sony SciFi" aspect-ratio=16:9 crop=700x550+10+10 ,Sony SciFi
-udp://@233.7.70.184:5000
-#EXTINF:-1 tvg-name="History" aspect-ratio=16:9 crop=700x550+10+10 ,Hostory
-udp://@233.7.70.185:5000
-#EXTINF:-1 tvg-name="BBC" aspect-ratio=16:9 crop=700x550+10+10 ,BBC
-udp://@233.7.70.186:5000
-#EXTINF:-1 tvg-name="Cartoonio" aspect-ratio=16:9 crop=700x550+10+10 ,Cartoonio
+#EXTINF:-1 group-title="Детские" ,2x2
+udp://@233.7.70.124:5000
+#EXTINF:-1 group-title="Детские" ,2x2
+udp://@233.7.70.43:5000
+#EXTINF:-1 group-title="Детские" ,Cartoon Network
+udp://@233.7.70.102:5000
+#EXTINF:-1 group-title="Детские" ,Boomerang
 udp://@233.7.70.187:5000
-#EXTINF:-1 tvg-name="Baby TV" aspect-ratio=16:9 crop=700x550+10+10 ,Baby TV
-udp://@233.7.70.188:5000
-#EXTINF:-1 tvg-name="Deutsche_Welle" aspect-ratio=16:9 crop=700x550+10+10 ,Deutsche Welle
-udp://@233.7.70.191:5000
-#EXTINF:-1 tvg-name="ID" aspect-ratio=16:9 crop=700x550+10+10 ,ID
-udp://@233.7.70.192:5000
-#EXTINF:-1 tvg-name="TV1000 PREMIUM" aspect-ratio=16:9 crop=700x550+10+10 ,TV1000 PREMIUM
-udp://@233.7.70.193:5000
-#EXTINF:-1 tvg-name="Наш Футбол" aspect-ratio=16:9 crop=700x550+10+10 ,Наш Футбол
-udp://@233.7.70.194:5000
-#EXTINF:-1 tvg-name="Европа Плюс" aspect-ratio=16:9 crop=700x550+10+10 ,Европа Плюс
-udp://@233.7.70.196:5000
-#EXTINF:-1 tvg-name="Евроспорт" aspect-ratio=16:9 crop=700x550+10+10 ,Евроспорт
-udp://@233.7.70.197:5000
-#EXTINF:-1 tvg-name="Пятница" aspect-ratio=16:9 crop=700x550+10+10 ,Пятница
-udp://@233.7.70.198:5000
-#EXTINF:-1 tvg-name="Первый HD" aspect-ratio=16:9 crop=700x550+10+10 ,Первый HD
-udp://@233.7.70.200:5000
-#EXTINF:-1 tvg-name="Россия HD" aspect-ratio=16:9 crop=700x550+10+10 ,Россия HD
-udp://@233.7.70.201:5000
-#EXTINF:-1 tvg-name="MTV" aspect-ratio=16:9 crop=700x550+10+10 , MTV
-udp://@233.7.70.202:5000
-#EXTINF:-1 tvg-name="ТВЦ" aspect-ratio=16:9 crop=700x550+10+10 , ТВЦ
-udp://@233.7.70.203:5000
-#EXTINF:-1 tvg-name="MEZZO" aspect-ratio=16:9 crop=700x550+10+10 , MEZZO
-udp://@233.7.70.204:5000
-#EXTINF:-1 tvg-name="MGM" aspect-ratio=16:9 crop=700x550+10+10 , MGM
-udp://@233.7.70.205:5000
-#EXTINF:-1 tvg-name="Motors" aspect-ratio=16:9 crop=700x550+10+10 , Motors
-udp://@233.7.70.206:5000
-#EXTINF:-1 tvg-name="MTV dance" aspect-ratio=16:9 crop=700x550+10+10 , MTV Dance
-udp://@233.7.70.207:5000
-#EXTINF:-1 tvg-name="MTV hits" aspect-ratio=16:9 crop=700x550+10+10 , MTV hits
-udp://@233.7.70.208:5000
-#EXTINF:-1 tvg-name="MTV rocks" aspect-ratio=16:9 crop=700x550+10+10 , MTV rocks
-udp://@233.7.70.209:5000
-#EXTINF:-1 tvg-name="Футбол" aspect-ratio=16:9 crop=700x550+10+10 , Футбол
-udp://@233.7.70.210:5000
-#EXTINF:-1 tvg-name="Travel+" aspect-ratio=16:9 crop=700x550+10+10 , Travel+
-udp://@233.7.70.211:5000
-#EXTINF:-1 tvg-name="Amedia" aspect-ratio=16:9 crop=700x550+10+10 , Amedia
-udp://@233.7.70.212:5000
-#EXTINF:-1 tvg-name="Страна"           crop=700x550+10+10 ,Страна
-udp://@233.7.70.213:5000
-#EXTINF:-1 tvg-name="Amedia1"           crop=700x550+10+10 ,Amedia1
-udp://@233.7.70.214:5000
-#EXTINF:-1 tvg-name="8 Канал"           crop=700x550+10+10 ,8 Канал
-udp://@233.7.70.215:5000
-#EXTINF:-1 tvg-name="RT"           crop=700x550+10+10 ,RT
-udp://@233.7.70.216:5000
-#EXTINF:-1 tvg-name="RT D"           crop=700x550+10+10 ,RT D
-udp://@233.7.70.217:5000
-#EXTINF:-1 tvg-name="КХЛ HD"           crop=700x550+10+10 ,КХЛ HD
-udp://@233.7.70.218:5000
-#EXTINF:-1 tvg-name="ТВЦ"           crop=700x550+10+10 ,ТВЦ
-udp://@233.7.70.219:5000
-#EXTINF:-1 tvg-name="ТВ 3"           crop=700x550+10+10 ,ТВ 3
-udp://@233.7.70.220:5000
-#EXTINF:-1 tvg-name="ТВ 3"           crop=700x550+10+10 ,ТВ 3
-udp://@233.7.70.221:5000
-#EXTINF:-1 tvg-name="Amedia 1"           crop=700x550+10+10 ,Amedia 1
-udp://@233.7.70.222:5000
-#EXTINF:-1 tvg-name="Natgeo Wild"           crop=700x550+10+10 ,Nat Geo Wild
-udp://@233.7.70.223:5000
-#EXTINF:-1 tvg-name="NHK"           crop=700x550+10+10 ,NHK
-udp://@233.7.70.224:5000
-#EXTINF:-1 tvg-name="Animal Planet"           crop=700x550+10+10 ,Animal Planet
-udp://@233.7.70.225:5000
-#EXTINF:-1 tvg-name="Outdoor"           crop=700x550+10+10 ,Outdoor
-udp://@233.7.70.226:5000
-#EXTINF:-1 tvg-name="Paramount Comedy"           crop=700x550+10+10 ,Paramount Comedy
-udp://@233.7.70.227:5000
-#EXTINF:-1 tvg-name="Rusong_TV"        crop=700x550+10+10 ,RuSong TV
-udp://@233.7.70.228:5000
-#EXTINF:-1 tvg-name="1 classic"        crop=700x550+10+10 ,1 classic
-udp://@233.7.70.229:5000
-#EXTINF:-1 tvg-name="History HD"        crop=700x550+10+10 ,History HD
-udp://@233.7.70.230:5000
-#EXTINF:-1 tvg-name="CBS Reality"        crop=700x550+10+10 ,CBS Reality
-udp://@233.7.70.231:5000
-#EXTINF:-1 tvg-name="CBS Drama"        crop=700x550+10+10 ,CBS Drama
-udp://@233.7.70.232:5000
-#EXTINF:-1 tvg-name="Бойцовский Клуб"        crop=700x550+10+10 ,Бойцовский Клуб
-udp://@233.7.70.233:5000
-#EXTINF:-1 tvg-name="Детский Мир"        crop=700x550+10+10 ,Детский Мир
+#EXTINF:-1 group-title="Детские" ,Карусель
+udp://@233.7.70.40:5000
+#EXTINF:-1 group-title="Детские" ,Карусель
+udp://@233.7.70.170:5000
+#EXTINF:-1 group-title="Детские" ,KidsCo
+udp://@233.7.70.98:5000
+#EXTINF:-1 group-title="Детские" ,Gulli
+udp://@233.7.70.171:5000
+#EXTINF:-1 group-title="Детские" ,Disney
+udp://@233.7.70.9:5000
+#EXTINF:-1 group-title="Детские" ,Disney
+udp://@233.7.70.91:5000
+#EXTINF:-1 group-title="Детские" ,Детский мир
 udp://@233.7.70.234:5000
-#EXTINF:-1 tvg-name="Еврокино"        crop=700x550+10+10 ,Еврокино
-udp://@233.7.70.235:5000
-#EXTINF:-1 tvg-name="Закон"        crop=700x550+10+10 ,Закон
-udp://@233.7.70.236:5000
-#EXTINF:-1 tvg-name="Пятница"        crop=700x550+10+10 ,Пятница
-udp://@233.7.70.237:5000
-#EXTINF:-1 tvg-name="Кинопоказ"        crop=700x550+10+10 ,Кинопоказ
-udp://@233.7.70.238:5000
-#EXTINF:-1 tvg-name="Amedia Premium HD"        crop=700x550+10+10 ,Amedia Premium HD
-udp://@233.7.70.239:5000
-#EXTINF:-1 tvg-name="Комсомольская_правда" crop=700x550+10+10 ,Комсомольская Правда
-udp://@233.7.70.240:5000
-#EXTINF:-1 tvg-name="Кто есть кто" crop=700x550+10+10 ,Кто есть кто
-udp://@233.7.70.241:5000
-#EXTINF:-1 tvg-name="?" crop=700x550+10+10 ,?
+#EXTINF:-1 group-title="Детские" ,Мультимания
 udp://@233.7.70.242:5000
-#EXTINF:-1 tvg-name="Наука 2.0" crop=700x550+10+10 ,Наука 2.0
-udp://@233.7.70.243:5000
-#EXTINF:-1 tvg-name="Amedia Premium HD" crop=700x550+10+10 ,Amedia Premium HD
-udp://@233.7.70.244:5000
-#EXTINF:-1 tvg-name="Ностальгия" crop=700x550+10+10 ,Ностальгия
-udp://@233.7.70.245:5000
-#EXTINF:-1 tvg-name="Баскетбол" crop=700x550+10+10 ,Баскетбол
-udp://@233.7.70.246:5000
-#EXTINF:-1 tvg-name="Кино Плюс" crop=700x550+10+10 ,Кино Плюс
+#EXTINF:-1 group-title="Детские" ,Детский
+udp://@233.7.70.99:5000
+#EXTINF:-1 group-title="Детские" ,Tiji
+udp://@233.7.70.101:5000
+#EXTINF:-1 group-title="Детские" ,JimJam
+udp://@233.7.70.148:5000
+#EXTINF:-1 group-title="Детские" ,Мать и дитя
+udp://@233.7.70.41:5000
+#EXTINF:-1 group-title="Детские" ,Радость моя
+udp://@233.7.70.100:5000
+#EXTINF:-1 group-title="Эфирные" ,Первый канал HD
+udp://@233.7.70.200:5000
+#EXTINF:-1 group-title="Эфирные" ,Россия HD
+udp://@233.7.70.201:5000
+#EXTINF:-1 group-title="Эфирные" ,ТВЦ
+udp://@233.7.70.203:5000
+#EXTINF:-1 group-title="Эфирные" ,ТВЦ
+udp://@233.7.70.219:5000
+#EXTINF:-1 group-title="Эфирные" ,5 канал online
+udp://@233.7.70.60:5000
+#EXTINF:-1 logo=http://data.photo.sibnet.ru/upload/imggreat/137511248148.jpg group-title="Эфирные" ,Россия 2 online
+udp://@233.7.70.172:5000
+#EXTINF:-1 group-title="Эфирные" ,ТВ3
+udp://@233.7.70.220:5000
+#EXTINF:-1 group-title="Эфирные" ,ТВ3
+udp://@233.7.70.221:5000
+#EXTINF:-1 group-title="Эфирные" ,Россия 24 online
+udp://@233.7.70.68:5000
+#EXTINF:-1 group-title="Эфирные" ,НТВ
+udp://@233.7.70.64:5000
+#EXTINF:-1 group-title="Эфирные" ,Культура
+udp://@233.7.70.144:5000
+#EXTINF:-1 group-title="Эфирные" ,Перец
+udp://@233.7.70.165:5000
+#EXTINF:-1 group-title="Эфирные" ,Перец
+udp://@233.7.70.66:5000
+#EXTINF:-1 group-title="Эфирные" ,ОТР
+udp://@233.7.70.141:5000
+#EXTINF:-1 logo=http://data.photo.sibnet.ru/upload/imggreat/137508333107.jpg group-title="Музыкальные" ,Music Box TV
+udp://@233.7.70.53:5000
+#EXTINF:-1 group-title="Музыкальные" ,VH1 Classic
+udp://@233.7.70.229:5000
+#EXTINF:-1 group-title="Музыкальные" ,RuSong TV
+udp://@233.7.70.228:5000
+#EXTINF:-1 group-title="Музыкальные" ,Bridge TV
+udp://@233.7.70.110:5000
+#EXTINF:-1 group-title="Музыкальные" ,МУЗ ТВ
+udp://@233.7.70.137:5000
+#EXTINF:-1 group-title="Музыкальные" ,Mezzo Live HD
+udp://@233.7.70.125:5000
+#EXTINF:-1 group-title="Музыкальные" ,Mezzo
+udp://@233.7.70.204:5000
+#EXTINF:-1 group-title="Музыкальные" ,Music Box RU
+udp://@233.7.70.54:5000
+#EXTINF:-1 group-title="Музыкальные" ,VH1 European
+udp://@233.7.70.152:5000
+#EXTINF:-1 group-title="Музыкальные" ,MCM Top
+udp://@233.7.70.109:5000
+#EXTINF:-1 group-title="Музыкальные" ,Europa plus TV
+udp://@233.7.70.196:5000
+#EXTINF:-1 group-title="Музыкальные" ,MTV
+udp://@233.7.70.202:5000
+#EXTINF:-1 group-title="Музыкальные" ,MTV Live HD
+udp://@233.7.70.161:5000
+#EXTINF:-1 group-title="Музыкальные" ,MTV Dance
+udp://@233.7.70.207:5000
+#EXTINF:-1 group-title="Музыкальные" ,MTV Hits
+udp://@233.7.70.208:5000
+#EXTINF:-1 group-title="Музыкальные" ,MTV Rocks
+udp://@233.7.70.209:5000
+#EXTINF:-1 group-title="Музыкальные" ,RuTV
+udp://@233.7.70.83:5000
+#EXTINF:-1 group-title="Музыкальные" ,A-One
+udp://@233.7.70.52:5000
+#EXTINF:-1 group-title="Музыкальные" ,Ля Минор
+udp://@233.7.70.108:5000
+#EXTINF:-1 group-title="Музыкальные" ,Шансон
+udp://@233.7.70.107:5000
+#EXTINF:-1 group-title="Кино" ,TVXXI
+udp://@233.7.70.35:5000
+#EXTINF:-1 group-title="Кино" ,SET HD
+udp://@233.7.70.126:5000
+#EXTINF:-1 group-title="Кино" ,SET
+udp://@233.7.70.70:5000
+#EXTINF:-1 group-title="Кино" ,Sony Turbo
+udp://@233.7.70.166:5000
+#EXTINF:-1 group-title="Кино" ,Sony Sci-Fi
+udp://@233.7.70.184:5000
+#EXTINF:-1 group-title="Кино" ,FOX HD
+udp://@233.7.70.127:5000
+#EXTINF:-1 group-title="Кино" ,FOX
+udp://@233.7.70.154:5000
+#EXTINF:-1 group-title="Кино" ,Fox Life HD
+udp://@233.7.70.158:5000
+#EXTINF:-1 group-title="Кино" ,Fox life
+udp://@233.7.70.85:5000
+#EXTINF:-1 group-title="Кино" ,TV1000
+udp://@233.7.70.36:5000
+#EXTINF:-1 group-title="Кино" ,TV1000 MEGAHIT HD
+udp://@233.7.70.128:5000
+#EXTINF:-1 group-title="Кино" ,TV1000 MEGAHIT HD
+udp://@233.7.70.178:5000
+#EXTINF:-1 group-title="Кино" ,TV1000 PREMIUM HD
+udp://@233.7.70.129:5000
+#EXTINF:-1 group-title="Кино" ,TV1000 PREMIUM HD
+udp://@233.7.70.193:5000
+#EXTINF:-1 group-title="Кино" ,TV1000 COMEDY HD
+udp://@233.7.70.179:5000
+#EXTINF:-1 group-title="Кино" ,TV1000 Action
+udp://@233.7.70.59:5000
+#EXTINF:-1 group-title="Кино" ,TV1000 Русское кино
+udp://@233.7.70.67:5000
+#EXTINF:-1 group-title="Кино" ,Universal Channel
+udp://@233.7.70.151:5000
+#EXTINF:-1 group-title="Кино" ,MGM
+udp://@233.7.70.205:5000
+#EXTINF:-1 group-title="Кино" ,DIVA Universal
+udp://@233.7.70.72:5000
+#EXTINF:-1 group-title="Кино" ,CBS Drama
+udp://@233.7.70.232:5000
+#EXTINF:-1 group-title="Кино" ,Русский бестселлер
+udp://@233.7.70.176:5000
+#EXTINF:-1 group-title="Кино" ,Русский роман
+udp://@233.7.70.153:5000
+#EXTINF:-1 group-title="Кино" ,Русский Иллюзион
+udp://@233.7.70.155:5000
+#EXTINF:-1 group-title="Кино" ,Кино ТВ
+udp://@233.7.70.167:5000
+#EXTINF:-1 group-title="Кино" ,AMEDIA Premium HD
+udp://@233.7.70.239:5000
+#EXTINF:-1 group-title="Кино" ,AMEDIA 1 HD
+udp://@233.7.70.222:5000
+#EXTINF:-1 group-title="Кино" ,AMEDIA 1
+udp://@233.7.70.214:5000
+#EXTINF:-1 group-title="Кино" ,AMEDIA 2
+udp://@233.7.70.212:5000
+#EXTINF:-1 group-title="Кино" ,Еврокино
+udp://@233.7.70.235:5000
+#EXTINF:-1 group-title="Кино" ,Кинопоказ
+udp://@233.7.70.238:5000
+#EXTINF:-1 group-title="Кино" ,Иллюзион+
+udp://@233.7.70.62:5000
+#EXTINF:-1 group-title="Кино" ,Комедия ТВ
+udp://@233.7.70.80:5000
+#EXTINF:-1 group-title="Кино" ,НТВ Кино Плюс
 udp://@233.7.70.247:5000
-#EXTINF:-1 tvg-name="Кино Союз" crop=700x550+10+10 ,Кино Союз
+#EXTINF:-1 group-title="Кино" ,НТВ Кино Союз
 udp://@233.7.70.248:5000
-#EXTINF:-1 tvg-name="Наше кино" crop=700x550+10+10 ,Наше кино
+#EXTINF:-1 group-title="Кино" ,НТВ Наше Кино
 udp://@233.7.70.249:5000
-#EXTINF:-1 tvg-name="Новое Кино" crop=700x550+10+10 ,Новое Кино
+#EXTINF:-1 group-title="Кино" ,НТВ Новое Кино
 udp://@233.7.70.250:5000
-#EXTINF:-1 tvg-name="Спорт+" crop=700x550+10+10 ,Спорт+
-udp://@233.7.70.251:5000
-#EXTINF:-1 tvg-name="Оружие" crop=700x550+10+10 ,Оружие
-udp://@233.7.70.252:5000
-#EXTINF:-1 tvg-name="DiscoveryHD" crop=700x550+10+10 ,DiscoveryHD
-udp://@233.7.70.253:5000
-#EXTINF:-1 tvg-name="Спорт" crop=700x550+10+10 ,Спорт
+#EXTINF:-1 group-title="Кино" ,Звезда
+udp://@233.7.70.69:5000
+#EXTINF:-1 group-title="Кино" ,Феникс+Кино
+udp://@233.7.70.86:5000
+#EXTINF:-1 group-title="Кино" ,НСТ
+udp://@233.7.70.74:5000
+#EXTINF:-1 group-title="Кино" ,Zee TV
+udp://@233.7.70.104:5000
+#EXTINF:-1 group-title="Информационные" ,РБК
+udp://@233.7.70.22:5000
+#EXTINF:-1 group-title="Информационные" ,Успех
+udp://@233.7.70.34:5000
+#EXTINF:-1 group-title="Информационные" ,Euronews
+udp://@233.7.70.42:5000
+#EXTINF:-1 group-title="Информационные" ,Russia Today
+udp://@233.7.70.82:5000
+#EXTINF:-1 group-title="Информационные" ,LIVE NEWS
+udp://@233.7.70.76:5000
+#EXTINF:-1 group-title="Информационные" ,Конференция ТВ
+udp://@233.7.70.55:5000
+#EXTINF:-1 group-title="Информационные" ,Телеканал Совета Федерации
+udp://@233.7.70.77:5000
+#EXTINF:-1 group-title="Информационные" ,Дождь
+udp://@233.7.70.106:5000
+#EXTINF:-1 group-title="Информационные" ,RT HD
+udp://@233.7.70.216:5000
+#EXTINF:-1 group-title="Информационные" ,RTД HD
+udp://@233.7.70.217:5000
+#EXTINF:-1 logo=http://data.photo.sibnet.ru/upload/imggreat/137511248148.jpg group-title="Спорт и отдых" ,Россия 2 online
+udp://@233.7.70.172:5000
+#EXTINF:-1 group-title="Спорт и отдых" ,Спорт 1 HD
+udp://@233.7.70.131:5000
+#EXTINF:-1 group-title="Спорт и отдых" ,Спорт 1
+udp://@233.7.70.75:5000
+#EXTINF:-1 group-title="Спорт и отдых" ,СПОРТ
 udp://@233.7.70.254:5000
+#EXTINF:-1 group-title="Спорт и отдых" ,КХЛ HD
+udp://@233.7.70.177:5000
+#EXTINF:-1 group-title="Спорт и отдых" ,КХЛ
+udp://@233.7.70.37:5000
+#EXTINF:-1 group-title="Спорт и отдых" ,КХЛ
+udp://@233.7.70.150:5000
+#EXTINF:-1 group-title="Спорт и отдых" ,Наш Футбол HD
+udp://@233.7.70.116:5000
+#EXTINF:-1 group-title="Спорт и отдых" ,Футбол
+udp://@233.7.70.210:5000
+#EXTINF:-1 group-title="Спорт и отдых" ,Eurosport HD
+udp://@233.7.70.132:5000
+#EXTINF:-1 group-title="Спорт и отдых" ,Eurosport
+udp://@233.7.70.45:5000
+#EXTINF:-1 group-title="Спорт и отдых" ,Eurosport 2
+udp://@233.7.70.81:5000
+#EXTINF:-1 group-title="Спорт и отдых" ,Eurosport news
+udp://@233.7.70.197:5000
+#EXTINF:-1 group-title="Спорт и отдых" ,НТВ+ Баскетбол
+udp://@233.7.70.246:5000
+#EXTINF:-1 group-title="Спорт и отдых" ,Спорт Плюс
+udp://@233.7.70.251:5000
+#EXTINF:-1 group-title="Спорт и отдых" ,Бойцовский клуб
+udp://@233.7.70.233:5000
+#EXTINF:-1 group-title="Спорт и отдых" ,Боец
+udp://@233.7.70.78:5000
+#EXTINF:-1 group-title="Спорт и отдых" ,Viasat Sport
+udp://@233.7.70.138:5000
+#EXTINF:-1 group-title="Спорт и отдых" ,Драйв
+udp://@233.7.70.31:5000
+#EXTINF:-1 group-title="Спорт и отдых" ,Авто плюс
+udp://@233.7.70.79:5000
+#EXTINF:-1 group-title="Спорт и отдых" ,AB Moteurs
+udp://@233.7.70.183:5000
+#EXTINF:-1 group-title="Спорт и отдых" ,Motors TV
+udp://@233.7.70.206:5000
+#EXTINF:-1 group-title="Спорт и отдых" ,Outdoor Channel HD
+udp://@233.7.70.163:5000
+#EXTINF:-1 group-title="Спорт и отдых" ,Outdoor Channel
+udp://@233.7.70.226:5000
+#EXTINF:-1 group-title="Спорт и отдых" ,Охота и рыбалка
+udp://@233.7.70.48:5000
+#EXTINF:-1 group-title="Спорт и отдых" ,Extreme Sports
+udp://@233.7.70.147:5000
+#EXTINF:-1 group-title="Спорт и отдых" ,Русский экстрим
+udp://@233.7.70.139:5000
+#EXTINF:-1 group-title="Спорт и отдых" ,Живи
+udp://@233.7.70.105:5000
+#EXTINF:-1 group-title="Спорт и отдых" ,MyZen HD
+udp://@233.7.70.160:5000
+#EXTINF:-1 group-title="Познавательные" ,Discovery HD Showcase
+udp://@233.7.70.253:5000
+#EXTINF:-1 group-title="Познавательные" ,Discovery channel
+udp://@233.7.70.26:5000
+#EXTINF:-1 group-title="Познавательные" ,Discovery Science
+udp://@233.7.70.27:5000
+#EXTINF:-1 group-title="Познавательные" ,Discovery World
+udp://@233.7.70.28:5000
+#EXTINF:-1 group-title="Познавательные" ,Animal Planet HD
+udp://@233.7.70.225:5000
+#EXTINF:-1 group-title="Познавательные" ,Animal Planet
+udp://@233.7.70.30:5000
+#EXTINF:-1 group-title="Познавательные" ,National Geographic HD
+udp://@233.7.70.159:5000
+#EXTINF:-1 group-title="Познавательные" ,National Geographic
+udp://@233.7.70.32:5000
+#EXTINF:-1 group-title="Познавательные" ,Nat Geo Wild HD
+udp://@233.7.70.133:5000
+#EXTINF:-1 group-title="Познавательные" ,Nat Geo Wild
+udp://@233.7.70.223:5000
+#EXTINF:-1 group-title="Познавательные" ,Наука 2.0
+udp://@233.7.70.243:5000
+#EXTINF:-1 group-title="Познавательные" ,Моя планета
+udp://@233.7.70.71:5000
+#EXTINF:-1 group-title="Познавательные" ,24 Док
+udp://@233.7.70.181:5000
+#EXTINF:-1 group-title="Познавательные" ,24 Техно
+udp://@233.7.70.89:5000
+#EXTINF:-1 group-title="Познавательные" ,Оружие
+udp://@233.7.70.252:5000
+#EXTINF:-1 group-title="Познавательные" ,History HD
+udp://@233.7.70.230:5000
+#EXTINF:-1 group-title="Познавательные" ,History
+udp://@233.7.70.185:5000
+#EXTINF:-1 group-title="Познавательные" ,Ocean TV
+udp://@233.7.70.95:5000
+#EXTINF:-1 group-title="Познавательные" ,Viasat Explorer
+udp://@233.7.70.33:5000
+#EXTINF:-1 group-title="Познавательные" ,Viasat Nature
+udp://@233.7.70.103:5000
+#EXTINF:-1 group-title="Познавательные" ,VIASAT NATURE / HISTORY HD
+udp://@233.7.70.180:5000
+#EXTINF:-1 group-title="Познавательные" ,Viasat History
+udp://@233.7.70.88:5000
+#EXTINF:-1 group-title="Познавательные" ,Travel and Adventure
+udp://@233.7.70.119:5000
+#EXTINF:-1 group-title="Познавательные" ,Телепутешествия
+udp://@233.7.70.146:5000
+#EXTINF:-1 group-title="Познавательные" ,Discovery ID
+udp://@233.7.70.192:5000
+#EXTINF:-1 group-title="Познавательные" ,HD Life
+udp://@233.7.70.157:5000
+#EXTINF:-1 group-title="Познавательные" ,Nautical Channel
+udp://@233.7.70.84:5000
+#EXTINF:-1 group-title="Познавательные" ,ZooПАРК
+udp://@233.7.70.90:5000
+#EXTINF:-1 group-title="Познавательные" ,Da Vinci Learning
+udp://@233.7.70.63:5000
+#EXTINF:-1 group-title="Познавательные" ,Кто есть кто
+udp://@233.7.70.241:5000
+#EXTINF:-1 group-title="Познавательные" ,Здоровое ТВ
+udp://@233.7.70.49:5000
+#EXTINF:-1 group-title="Познавательные" ,Усадьба ТВ
+udp://@233.7.70.51:5000
+#EXTINF:-1 group-title="Познавательные" ,Кухня ТВ
+udp://@233.7.70.94:5000
+#EXTINF:-1 group-title="Познавательные" ,Агро-ТВ
+udp://@233.7.70.57:5000
+#EXTINF:-1 group-title="Познавательные" ,СГУ ТВ
+udp://@233.7.70.23:5000
+#EXTINF:-1 group-title="Познавательные" ,Просвещение
+udp://@233.7.70.168:5000
+#EXTINF:-1 group-title="На других языках" ,English Club TV
+udp://@233.7.70.96:5000
+#EXTINF:-1 group-title="На других языках" ,Deutsche Welle
+udp://@233.7.70.191:5000
+#EXTINF:-1 group-title="На других языках" ,France 24
+udp://@233.7.70.149:5000
+#EXTINF:-1 group-title="На других языках" ,BBC World News
+udp://@233.7.70.186:5000
+#EXTINF:-1 group-title="На других языках" ,Arirang TV
+udp://@233.7.70.111:5000
+#EXTINF:-1 group-title="На других языках" ,Bаby TV
+udp://@233.7.70.188:5000
+#EXTINF:-1 group-title="На других языках" ,NHK World TV
+udp://@233.7.70.224:5000
+#EXTINF:-1 group-title="Мода и стиль" ,Fashion One HD
+udp://@233.7.70.162:5000
+#EXTINF:-1 group-title="Мода и стиль" ,Fashion TV
+udp://@233.7.70.47:5000
+#EXTINF:-1 group-title="Мода и стиль" ,Style TV
+udp://@233.7.70.140:5000
+#EXTINF:-1 group-title="Мода и стиль" ,Amazing Life
+udp://@233.7.70.21:5000
+#EXTINF:-1 group-title="Мода и стиль" ,ТДК
+udp://@233.7.70.50:5000
+#EXTINF:-1 group-title="Развлекательные" ,Paramount Comedy
+udp://@233.7.70.227:5000
+#EXTINF:-1 group-title="Развлекательные" ,Пятница
+udp://@233.7.70.175:5000
+#EXTINF:-1 group-title="Развлекательные" ,Пятница
+udp://@233.7.70.198:5000
+#EXTINF:-1 group-title="Развлекательные" ,Пятница
+udp://@233.7.70.237:5000
+#EXTINF:-1 group-title="Развлекательные" ,Парк развлечений
+udp://@233.7.70.142:5000
+#EXTINF:-1 group-title="Развлекательные" ,Юмор Box
+udp://@233.7.70.46:5000
+#EXTINF:-1 group-title="Развлекательные" ,Раз ТВ
+udp://@233.7.70.145:5000
+#EXTINF:-1 group-title="Разное" ,Ретро ТВ
+udp://@233.7.70.44:5000
+#EXTINF:-1 group-title="Разное" ,Ностальгия
+udp://@233.7.70.245:5000
+#EXTINF:-1 group-title="Разное" ,Страна
+udp://@233.7.70.213:5000
+#EXTINF:-1 group-title="Разное" ,8 канал
+udp://@233.7.70.215:5000
+#EXTINF:-1 group-title="Разное" ,Закон ТВ
+udp://@233.7.70.236:5000
+#EXTINF:-1 group-title="Разное" ,Мир
+udp://@233.7.70.58:5000
+#EXTINF:-1 group-title="Разное" ,Мир 24
+udp://@233.7.70.120:5000
+#EXTINF:-1 group-title="Разное" ,TLC
+udp://@233.7.70.29:5000
+#EXTINF:-1 group-title="Разное" ,CBS Reality
+udp://@233.7.70.231:5000
+#EXTINF:-1 group-title="Разное" ,Всё ТВ
+udp://@233.7.70.174:5000
+#EXTINF:-1 group-title="Разное" ,Комсомольская Правда
+udp://@233.7.70.240:5000
+#EXTINF:-1 group-title="Разное" ,365 дней
+udp://@233.7.70.182:5000
+#EXTINF:-1 group-title="Разное" ,ТРО Союз
+udp://@233.7.70.143:5000
+#EXTINF:-1 group-title="Разное" ,Союз
+udp://@233.7.70.24:5000
+#EXTINF:-1 group-title="Разное" ,Спас
+udp://@233.7.70.38:5000
+#EXTINF:-1 group-title="Разное" ,Инва Медиа ТВ
+udp://@233.7.70.39:5000
+#EXTINF:-1 group-title="Разное" ,Shoping life
+udp://@233.7.70.135:5000
+#EXTINF:-1 group-title="Разное" ,TopShop TV
+udp://@233.7.70.56:5000
