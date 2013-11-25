@@ -209,22 +209,26 @@ static int nvram_load_default(void)
     return 0;
 }
 
-static int gen_wifi_config(int mode)
+static int gen_wifi_config(int getmode)
 {
 	FILE *fp;
-	int  i, ssid_num = 1, inic = 0;
+	int  i, ssid_num = 1, inic = 0, mode = getmode;
 	char tx_rate[16], wmm_enable[16];
 	char temp[2], buf[4];
 
 	if (mode == RT2860_NVRAM) {
 		system("mkdir -p /etc/Wireless/RT2860");
 		fp = fopen("/etc/Wireless/RT2860/RT2860.dat", "w+");
+		printf("Build config for fist WiFi module.\n");
+#if defined(CONFIG_RT3090_AP) || defined(CONFIG_RT3090_AP_MODULE)
 	} else if (mode == RTINIC_NVRAM) {
 		system("mkdir -p /etc/Wireless/iNIC");
 		fp = fopen("/etc/Wireless/iNIC/RT2860AP.dat", "w+");
 		/* after select file for write back to native 2860 mode */
 		inic = 1;
 		mode = RT2860_NVRAM;
+		printf("Build config for second WiFi module.\n");
+#endif
 	} else {
 		printf("gen_wifi_config: mode unknown...\n");
 		return 0;
@@ -777,11 +781,12 @@ int main(int argc, char *argv[])
 		if (!strncasecmp(argv[1], "gen", 4) ||
 		    !strncasecmp(argv[1], "make_wireless_config", 21)) {
 			if (!strncmp(argv[2], "2860", 5) ||
-			    !strncasecmp(argv[2], "rt2860", 7)) //b-compatible
+			    !strncasecmp(argv[2], "rt2860", 7)) { //b-compatible
 				gen_wifi_config(RT2860_NVRAM);
-#ifdef CONFIG_RT3090_AP
+#if defined(CONFIG_RT3090_AP) || defined(CONFIG_RT3090_AP_MODULE)
 				gen_wifi_config(RTINIC_NVRAM);
 #endif
+			}
 #ifdef CONFIG_DUAL_IMAGE
 			else if (!strncasecmp(argv[2], "uboot", 6))
 				fprintf(stderr,"No support of gen command of uboot parameter.\n");
