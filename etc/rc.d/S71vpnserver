@@ -120,7 +120,7 @@ get_param() {
     if [ "$l2tp_srv_mru_size" = "" ] || [ "$l2tp_srv_mru_size" = "AUTO" ]; then
 	l2tp_srv_mru_size=
     else
-	l2tp_srv_mru_size="mtu $l2tp_srv_mtu_size"
+	l2tp_srv_mru_size="mru $l2tp_srv_mru_size"
     fi
     if [ "$l2tp_srv_debug" = "" ] || [ "$l2tp_srv_debug" = "0" ]; then
 	l2tp_srv_debug=
