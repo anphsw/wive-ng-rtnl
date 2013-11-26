@@ -186,10 +186,10 @@ endif
 #EXTRA_CFLAGS += -DIAPP_SUPPORT
 
 # provide some debug messages
-EXTRA_CFLAGS += -DRELASE_EXCLUDE
+#EXTRA_CFLAGS += -DRELASE_EXCLUDE
 
 # provide busy time statistics for every TBTT
-#EXTRA_CFLAGS += -DQLOAD_FUNC_BUSY_TIME_STATS
+#EXTRA_CFLAGS += -DQLOAD_FUNC_BUSY_TIME_STATS -DAP_QLOAD_SUPPORT
 
 # provide busy time alarm mechanism
 # use the function to avoid to locate in some noise environments
