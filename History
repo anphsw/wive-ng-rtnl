@@ -77,6 +77,7 @@
 27) kernel: usb: add "descriptors" binary sysfs attribute.<br>
 28) kernel: ipv6: call udp_push_pending_frames when uncorking a socket with AF_INET pending data.<br>
 29) kernel: ipv6: fix leaking uninitialized port number of offender sockaddr.<br>
+30) kernel: wifi_drivers: full disable apqload support.<br>
 <br>
 <br>
 <br>

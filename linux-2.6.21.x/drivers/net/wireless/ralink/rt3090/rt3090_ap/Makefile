@@ -55,7 +55,7 @@ rt3090_ap-objs += ../rt3090/ap/ap_sync.o
 rt3090_ap-objs += ../rt3090/ap/ap_wpa.o
 rt3090_ap-objs += ../rt3090/ap/ap_data.o
 rt3090_ap-objs += ../rt3090/ap/ap_autoChSel.o
-rt3090_ap-objs += ../rt3090/ap/ap_qload.o
+#rt3090_ap-objs += ../rt3090/ap/ap_qload.o
 rt3090_ap-objs += ../rt3090/ap/ap_cfg.o
 
 ifeq ($(CONFIG_RT3090_AP_ATE),y)
@@ -245,6 +245,13 @@ EXTRA_CFLAGS += -DRTMP_FLASH_SUPPORT
 
 # provide roaming support
 #EXTRA_CFLAGS += -DIAPP_SUPPORT
+
+# provide busy time statistics for every TBTT
+#EXTRA_CFLAGS += -DQLOAD_FUNC_BUSY_TIME_STATS -DAP_QLOAD_SUPPORT
+
+# provide busy time alarm mechanism
+# use the function to avoid to locate in some noise environments
+#EXTRA_CFLAGS += -DQLOAD_FUNC_BUSY_TIME_ALARM
 
 ### RT309X
 EXTRA_CFLAGS += -DRT30xx -DRT3090

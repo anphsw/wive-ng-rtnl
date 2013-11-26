@@ -50,7 +50,7 @@ rt2860v2_ap-objs += ../ap/ap_data.o
 rt2860v2_ap-objs += ../ap/ap_uapsd.o
 rt2860v2_ap-objs += ../ap/ap_autoChSel.o
 rt2860v2_ap-objs += ../ap/ap_mbss.o
-rt2860v2_ap-objs += ../ap/ap_qload.o
+#rt2860v2_ap-objs += ../ap/ap_qload.o
 rt2860v2_ap-objs += ../ap/ap_cfg.o
 
 rt2860v2_ap-objs += ../os/linux/rt_proc.o
