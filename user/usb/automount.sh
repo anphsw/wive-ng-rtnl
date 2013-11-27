@@ -46,7 +46,7 @@ try_mount() {
   # mount with default nls configured in kernel
   if ! mount -o noatime -t "$MDEV_TYPE" "$MDEV_PATH" "$MOUNT_DST"; then
     $LOG "can not mount $MDEV_TYPE $MDEV_PATH $MOUNT_DST"
-    mount_err
+    exit 1
   fi
   if [ "$MDEV_LABEL" == "optware" ]; then
     #re read profile variables
@@ -57,7 +57,7 @@ try_mount() {
 try_ntfs() {
   if ! ntfs-3g "$MDEV_PATH" "$MOUNT_DST" -o force,noatime; then
     $LOG "can not mount NTFS $MDEV_PATH $MOUNT_DST"
-    mount_err
+    exit 1
   fi
 }
 
