@@ -397,9 +397,6 @@ static void pthread_initialize(void)
   /* Do it early so that user-registered atexit functions are called
      before pthread_onexit_process. */
   on_exit(pthread_onexit_process, NULL);
-#ifdef __NR_rt_sigaction
-  __pthread_init_condvar(1);
-#endif
 }
 
 void __pthread_initialize(void)
