@@ -94,6 +94,7 @@ __compare_and_swap (long int *p, long int oldval, long int newval)
      "ll	%1,%5\n\t"
      "move	%0,$0\n\t"
      "bne	%1,%3,2f\n\t"
+     "move	%0,$0\n\t" /*[NDF] Failure case. */
      "move	%0,%4\n\t"
      "sc	%0,%2\n\t"
      ".set	pop\n\t"
@@ -105,6 +106,32 @@ __compare_and_swap (long int *p, long int oldval, long int newval)
      : "memory");
 
   return ret;
+
+  /*
+    1:  load locked: into ret(%0), from *p(0(%4))
+        branch to 2 if ret(%0) != oldval(%2)
+         Delay slot: move 0 into ret(%0) // [NDF] Added
+       Don't branch case:
+       move newval(%3) into ret(%0)
+       setcompare ret(%0) into *p(0(%1))
+       branch to 1 if ret(%0) == 0 (sc failed)
+         Delay slot: unknown/none
+       return
+
+    2: Delay slot
+       return
+
+ll a b
+Sets a to the value pointed to by address b, and "locks" b so that if
+any of a number of things are attempted that might access b then the
+next sc will fail.
+
+sc a b
+Sets the memory address pointed to by b to the value in a atomically.
+If it succeeds then a will be set to 1, if it fails a will be set to 0.
+
+  */
+
 }
 
 #endif /* pt-machine.h */
