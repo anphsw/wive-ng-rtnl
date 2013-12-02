@@ -639,7 +639,7 @@ int udp_sendmsg(struct kiocb *iocb, struct sock *sk, struct msghdr *msg,
 		err = ip_route_output_flow(&rt, &fl, sk, 1);
 		if (err) {
 			if (err == -ENETUNREACH)
-				IP_INC_STATS_BH(IPSTATS_MIB_OUTNOROUTES);
+				IP_INC_STATS(IPSTATS_MIB_OUTNOROUTES);
 			goto out;
 		}
 
