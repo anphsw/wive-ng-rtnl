@@ -70,21 +70,6 @@ static __inline__ void ipv6_select_ident(struct sk_buff *skb, struct frag_hdr *f
 	spin_unlock_bh(&ip6_id_lock);
 }
 
-static int ip6_output_finish(struct sk_buff *skb)
-{
-	struct dst_entry *dst = skb->dst;
-
-	if (dst->hh)
-		return neigh_hh_output(dst->hh, skb);
-	else if (dst->neighbour)
-		return dst->neighbour->output(skb);
-
-	IP6_INC_STATS(ip6_dst_idev(dst), IPSTATS_MIB_OUTNOROUTES);
-	kfree_skb(skb);
-	return -EINVAL;
-
-}
-
 /* dev_loopback_xmit for use with netfilter. */
 static int ip6_dev_loopback_xmit(struct sk_buff *newskb)
 {
@@ -99,7 +84,7 @@ static int ip6_dev_loopback_xmit(struct sk_buff *newskb)
 }
 
 
-static int ip6_output2(struct sk_buff *skb)
+static int ip6_finish_output2(struct sk_buff *skb)
 {
 	struct dst_entry *dst = skb->dst;
 	struct net_device *dev = dst->dev;
@@ -133,7 +118,15 @@ static int ip6_output2(struct sk_buff *skb)
 		IP6_INC_STATS(idev, IPSTATS_MIB_OUTMCASTPKTS);
 	}
 
-	return NF_HOOK(PF_INET6, NF_IP6_POST_ROUTING, skb,NULL, skb->dev,ip6_output_finish);
+	if (dst->hh)
+		return neigh_hh_output(dst->hh, skb);
+	else if (dst->neighbour)
+		return dst->neighbour->output(skb);
+
+	IP6_INC_STATS(ip6_dst_idev(dst), IPSTATS_MIB_OUTNOROUTES);
+
+	kfree_skb(skb);
+	return -EINVAL;
 }
 
 static inline int ip6_skb_dst_mtu(struct sk_buff *skb)
@@ -144,13 +137,21 @@ static inline int ip6_skb_dst_mtu(struct sk_buff *skb)
 	       skb->dst->dev->mtu : dst_mtu(skb->dst);
 }
 
-int ip6_output(struct sk_buff *skb)
+static int ip6_finish_output(struct sk_buff *skb)
 {
 	if ((skb->len > ip6_skb_dst_mtu(skb) && !skb_is_gso(skb)) ||
-				dst_allfrag(skb->dst))
-		return ip6_fragment(skb, ip6_output2);
+		dst_allfrag(skb_dst(skb)))
+		return ip6_fragment(skb, ip6_finish_output2);
 	else
-		return ip6_output2(skb);
+		return ip6_finish_output2(skb);
+}
+
+int ip6_output(struct sk_buff *skb)
+{
+	struct net_device *dev = skb_dst(skb)->dev;
+
+	return NF_HOOK(PF_INET6, NF_IP6_POST_ROUTING, skb, NULL, dev,
+		       ip6_finish_output);
 }
 
 /*
