@@ -142,9 +142,6 @@ int udpv6_recvmsg(struct kiocb *iocb, struct sock *sk,
 	int is_udplite = IS_UDPLITE(sk);
 #endif
 
-	if (addr_len)
-		*addr_len=sizeof(struct sockaddr_in6);
-
 	if (flags & MSG_ERRQUEUE)
 		return ipv6_recv_error(sk, msg, len, addr_len);
 
@@ -207,7 +204,7 @@ try_again:
 			if (ipv6_addr_type(&sin6->sin6_addr) & IPV6_ADDR_LINKLOCAL)
 				sin6->sin6_scope_id = IP6CB(skb)->iif;
 		}
-
+		*addr_len = sizeof(*sin6);
 	}
 	if (skb->protocol == htons(ETH_P_IP)) {
 		if (inet->cmsg_flags)

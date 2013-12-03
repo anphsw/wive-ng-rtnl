@@ -78,6 +78,7 @@
 28) kernel: ipv6: fix leaking uninitialized port number of offender sockaddr.<br>
 29) kernel: ipv6: netfilter: move POSTROUTING invocation before fragmentation.<br>
 30) kernel: wifi_drivers: full disable apqload support.<br>
+31) kernel: inet: prevent leakage of uninitialized memory to user in recv syscalls.<br>
 <br>
 <br>
 <br>
