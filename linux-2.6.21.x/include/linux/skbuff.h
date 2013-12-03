@@ -1517,6 +1517,24 @@ static inline void skb_postpull_rcsum(struct sk_buff *skb,
 
 unsigned char *skb_pull_rcsum(struct sk_buff *skb, unsigned int len);
 
+/**
+ *	pskb_trim_rcsum - trim received skb and update checksum
+ *	@skb: buffer to trim
+ *	@len: new length
+ *
+ *	This is exactly the same as pskb_trim except that it ensures the
+ *	checksum of received packets are still valid after the operation.
+ */
+
+static inline int pskb_trim_rcsum(struct sk_buff *skb, unsigned int len)
+{
+	if (likely(len >= skb->len))
+		return 0;
+	if (skb->ip_summed == CHECKSUM_COMPLETE)
+		skb->ip_summed = CHECKSUM_NONE;
+	return __pskb_trim(skb, len);
+}
+
 #define skb_queue_walk(queue, skb) \
                 for (skb = (queue)->next;                                       \
                      skb != (struct sk_buff *)(queue);   \
@@ -1582,27 +1600,6 @@ extern void	       skb_split(struct sk_buff *skb,
 				 struct sk_buff *skb1, const u32 len);
 
 extern struct sk_buff *skb_segment(struct sk_buff *skb, int features);
-
-/**
- *	pskb_trim_rcsum - trim received skb and update checksum
- *	@skb: buffer to trim
- *	@len: new length
- *
- *	This is exactly the same as pskb_trim except that it ensures the
- *	checksum of received packets are still valid after the operation.
- */
-
-static inline int pskb_trim_rcsum(struct sk_buff *skb, unsigned int len)
-{
-	if (likely(len >= skb->len))
-		return 0;
-	if (skb->ip_summed == CHECKSUM_COMPLETE) {
-		__wsum adj = skb_checksum(skb, len, skb->len - len, 0);
-
-		skb->csum = csum_sub(skb->csum, adj);
-	}
-	return __pskb_trim(skb, len);
-}
 
 static inline void *skb_header_pointer(const struct sk_buff *skb, int offset,
 				       int len, void *buffer)
