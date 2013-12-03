@@ -413,7 +413,7 @@ static int rawv6_recvmsg(struct kiocb *iocb, struct sock *sk,
 		*addr_len=sizeof(*sin6);
 
 	if (flags & MSG_ERRQUEUE)
-		return ipv6_recv_error(sk, msg, len);
+		return ipv6_recv_error(sk, msg, len, addr_len);
 
 	skb = skb_recv_datagram(sk, flags, noblock, &err);
 	if (!skb)
