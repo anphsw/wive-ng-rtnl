@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.21 2013/09/10 20:15:06 nanard Exp $
+# $Id: Makefile,v 1.22 2013/11/26 08:47:36 nanard Exp $
 # This Makefile is designed for use with GNU make
 # libnatpmp
 # (c) 2007-2013 Thomas Bernard
@@ -28,6 +28,7 @@ CFLAGS += -fPIC
 CFLAGS += -Wall
 #CFLAGS += -Wextra
 CFLAGS += -DENABLE_STRNATPMPERR
+#CFLAGS += -Wstrict-aliasing
 
 LIBOBJS = natpmp.o getgateway.o
 
