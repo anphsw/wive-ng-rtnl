@@ -114,7 +114,6 @@ NOTES:
       HAVE_LINUX_NETWORK
       HAVE_GETOPT_LONG
   you should NOT define 
-      HAVE_ARC4RANDOM
       HAVE_SOCKADDR_SA_LEN
 
    For *BSD systems you should define 
@@ -162,7 +161,6 @@ NOTES:
 #if defined(__uClinux__)
 #define HAVE_LINUX_NETWORK
 #define HAVE_GETOPT_LONG
-#undef HAVE_ARC4RANDOM
 #undef HAVE_SOCKADDR_SA_LEN
 /* Never use fork() on uClinux. Note that this is subtly different from the
    --keep-in-foreground option, since it also  suppresses forking new 
@@ -176,7 +174,6 @@ NOTES:
    ((__UCLIBC_MAJOR__==0) && (__UCLIBC_MINOR__==9) && (__UCLIBC_SUBLEVEL__<21))
 #    define HAVE_GETOPT_LONG
 #endif
-#undef HAVE_ARC4RANDOM
 #undef HAVE_SOCKADDR_SA_LEN
 #if !defined(__ARCH_HAS_MMU__) && !defined(__UCLIBC_HAS_MMU__)
 #  define NO_FORK
@@ -191,7 +188,6 @@ NOTES:
 #elif defined(__linux__)
 #define HAVE_LINUX_NETWORK
 #define HAVE_GETOPT_LONG
-#undef HAVE_ARC4RANDOM
 #undef HAVE_SOCKADDR_SA_LEN
 
 #elif defined(__FreeBSD__) || \
@@ -203,29 +199,26 @@ NOTES:
 #if defined(optional_argument) && defined(required_argument)
 #   define HAVE_GETOPT_LONG
 #endif
-#if !defined(__FreeBSD_kernel__)
-#   define HAVE_ARC4RANDOM
-#endif
 #define HAVE_SOCKADDR_SA_LEN
 
 #elif defined(__APPLE__)
 #define HAVE_BSD_NETWORK
 #define HAVE_GETOPT_LONG
-#define HAVE_ARC4RANDOM
 #define HAVE_SOCKADDR_SA_LEN
 /* Define before sys/socket.h is included so we get socklen_t */
 #define _BSD_SOCKLEN_T_
+/* Select the RFC_3542 version of the IPv6 socket API. 
+   Define before netinet6/in6.h is included. */
+#define __APPLE_USE_RFC_3542 
  
 #elif defined(__NetBSD__)
 #define HAVE_BSD_NETWORK
 #define HAVE_GETOPT_LONG
-#undef HAVE_ARC4RANDOM
 #define HAVE_SOCKADDR_SA_LEN
 
 #elif defined(__sun) || defined(__sun__)
 #define HAVE_SOLARIS_NETWORK
 #define HAVE_GETOPT_LONG
-#undef HAVE_ARC4RANDOM
 #undef HAVE_SOCKADDR_SA_LEN
 #define ETHER_ADDR_LEN 6 
  
