@@ -47,11 +47,11 @@ default:library
 #
 # Default to just generic max opts
 ifdef LTC_SMALL
-CFLAGS += -Os -xP -ip
+CFLAGS += -O2 -xP -ip
 endif
 
 ifndef IGNORE_SPEED
-CFLAGS += -Os -xP -ip 
+CFLAGS += -O3 -xP -ip 
 endif
 
 # want to see stuff?

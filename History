@@ -54,32 +54,33 @@
 4) init.d: allow l2tp clients connect to local udpxy server.<br>
 5) libusb/usb_modeswitch: back to 0.1.2/1.2.7 version with new database (need update future).<br>
 6) dnsmasq: up to 2.68 version.<br>
-7) kernel: wifi driver: temp back to 2.5.0.4 AP/STA driver for RT305x/RT3350.<br>
-8) kernel: wifi driver: fix power select in 2.5.0.4 AP driver.<br>
-9) kernel: wifi driver: consolidate config options 2.5/2.7 drivers.<br>
-10) kernel: tcp: reset reordering est. selectively on timeout.<br>
-11) kernel: netfilter: nf_ct_h323: fix bug in rtcp natting.<br>
-12) kernel: tcp: undo on DSACK during recovery.<br>
-13) kernel: ipv4: Fix IP timestamp option (IPOPT_TS_PRESPEC) handling in ip_options_echo().<br>
-14) kenrel: af_unix: implement socket filter.<br>
-15) kernel: network: tcp_connect should return certain errors up the stack.<br>
-16) kernel: net: avoid race between network down and sysfs.<br>
-17) kernel: af_packet: check return of dev_set_promiscuity/allmulti.<br>
-18) kernel: net: Avoid copying writable clones in tunnel drivers.<br>
-19) kernel: ipv6: sit: Fix locking issues in PRL management.<br>
-20) kernel: ipv6: sit: Disallow 0.0.0.0 in PRL and Flush PRL if given for DEL.<br>
-21) kernel: net: remove link_watch delay for up even when we're down.<br>
-22) kernel: net: link_watch: Always schedule urgent events.<br>
-23) kernel: net: zero length write() on socket should not simply return 0.<br>
-24) kernel: net: pppoe: Check packet length on all receive paths.<br>
-25) kernel: net: rework recvmsg handler msg_name and msg_namelen logic.<br>
-26) kernel: usb: add IAD support to usbfs and sysfs.<br>
-27) kernel: usb: add "descriptors" binary sysfs attribute.<br>
-28) kernel: ipv6: call udp_push_pending_frames when uncorking a socket with AF_INET pending data.<br>
-29) kernel: ipv6: fix leaking uninitialized port number of offender sockaddr.<br>
-30) kernel: ipv6: netfilter: move POSTROUTING invocation before fragmentation.<br>
-31) kernel: wifi_drivers: full disable apqload support.<br>
-32) kernel: inet: prevent leakage of uninitialized memory to user in recv syscalls.<br>
+7) dropbear: up to 2013.62 version.<br>
+8) kernel: wifi driver: temp back to 2.5.0.4 AP/STA driver for RT305x/RT3350.<br>
+9) kernel: wifi driver: fix power select in 2.5.0.4 AP driver.<br>
+10) kernel: wifi driver: consolidate config options 2.5/2.7 drivers.<br>
+11) kernel: tcp: reset reordering est. selectively on timeout.<br>
+12) kernel: netfilter: nf_ct_h323: fix bug in rtcp natting.<br>
+13) kernel: tcp: undo on DSACK during recovery.<br>
+14) kernel: ipv4: Fix IP timestamp option (IPOPT_TS_PRESPEC) handling in ip_options_echo().<br>
+15) kenrel: af_unix: implement socket filter.<br>
+16) kernel: network: tcp_connect should return certain errors up the stack.<br>
+17) kernel: net: avoid race between network down and sysfs.<br>
+18) kernel: af_packet: check return of dev_set_promiscuity/allmulti.<br>
+19) kernel: net: Avoid copying writable clones in tunnel drivers.<br>
+20) kernel: ipv6: sit: Fix locking issues in PRL management.<br>
+21) kernel: ipv6: sit: Disallow 0.0.0.0 in PRL and Flush PRL if given for DEL.<br>
+22) kernel: net: remove link_watch delay for up even when we're down.<br>
+23) kernel: net: link_watch: Always schedule urgent events.<br>
+24) kernel: net: zero length write() on socket should not simply return 0.<br>
+25) kernel: net: pppoe: Check packet length on all receive paths.<br>
+26) kernel: net: rework recvmsg handler msg_name and msg_namelen logic.<br>
+27) kernel: usb: add IAD support to usbfs and sysfs.<br>
+28) kernel: usb: add "descriptors" binary sysfs attribute.<br>
+29) kernel: ipv6: call udp_push_pending_frames when uncorking a socket with AF_INET pending data.<br>
+30) kernel: ipv6: fix leaking uninitialized port number of offender sockaddr.<br>
+31) kernel: ipv6: netfilter: move POSTROUTING invocation before fragmentation.<br>
+32) kernel: wifi_drivers: full disable apqload support.<br>
+33) kernel: inet: prevent leakage of uninitialized memory to user in recv syscalls.<br>
 <br>
 <br>
 <br>

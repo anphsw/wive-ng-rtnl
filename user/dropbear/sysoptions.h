@@ -4,11 +4,11 @@
  *******************************************************************/
 
 #ifndef DROPBEAR_VERSION
-#define DROPBEAR_VERSION "2013.60"
+#define DROPBEAR_VERSION "2013.62"
 #endif
 
-#define LOCAL_IDENT "SSH-2.0-DS" DROPBEAR_VERSION
-#define PROGNAME "ssh"
+#define LOCAL_IDENT "SSH-2.0-dropbear_" DROPBEAR_VERSION
+#define PROGNAME "dropbear"
 
 /* Spec recommends after one hour or 1 gigabyte of data. One hour
  * is a bit too verbose, so we try 8 hours */
@@ -59,9 +59,7 @@
 /* Each port might have at least a v4 and a v6 address */
 #define MAX_LISTEN_ADDR (DROPBEAR_MAX_PORTS*3)
 
-/* #ifndef _PATH_TTY
-#define _PATH_TTY "/dev/console"
-#endif */
+#define _PATH_TTY "/dev/tty"
 
 #define _PATH_CP "/bin/cp"
 
@@ -71,19 +69,6 @@
 #define DROPBEAR_SUCCESS 0
 #define DROPBEAR_FAILURE -1
 
-/* various algorithm identifiers */
-#define DROPBEAR_KEX_NONE 0
-#define DROPBEAR_KEX_DH_GROUP1 1
-#define DROPBEAR_KEX_DH_GROUP14 2
-
-#define DROPBEAR_SIGNKEY_ANY 0
-#define DROPBEAR_SIGNKEY_RSA 0
-#define DROPBEAR_SIGNKEY_DSS 2
-#define DROPBEAR_SIGNKEY_NONE 3
-
-#define DROPBEAR_COMP_NONE 1
-#define DROPBEAR_COMP_ZLIB 0
-
 /* Required for pubkey auth */
 #if defined(ENABLE_SVR_PUBKEY_AUTH) || defined(DROPBEAR_CLIENT)
 #define DROPBEAR_SIGNKEY_VERIFY
@@ -91,10 +76,10 @@
 
 #define SHA1_HASH_SIZE 20
 #define MD5_HASH_SIZE 16
+#define MAX_HASH_SIZE 64 /* sha512 */
 
 #define MAX_KEY_LEN 32 /* 256 bits for aes256 etc */
-#define MAX_IV_LEN 20 /* must be same as max blocksize, 
-						 and >= SHA1_HASH_SIZE */
+#define MAX_IV_LEN 20 /* must be same as max blocksize,  */
 
 #if defined(DROPBEAR_SHA2_512_HMAC)
 #define MAX_MAC_LEN 64
@@ -103,6 +88,47 @@
 #else
 #define MAX_MAC_LEN 20
 #endif
+
+#if defined(DROPBEAR_ECDH) || defined (DROPBEAR_ECDSA)
+#define DROPBEAR_ECC
+/* Debian doesn't define this in system headers */
+#ifndef LTM_DESC
+#define LTM_DESC
+#endif
+#endif
+
+#ifdef DROPBEAR_ECC
+#define DROPBEAR_ECC_256
+#define DROPBEAR_ECC_384
+#define DROPBEAR_ECC_521
+#endif
+
+#ifdef DROPBEAR_ECC
+#define DROPBEAR_LTC_PRNG
+#endif
+
+/* RSA can be vulnerable to timing attacks which use the time required for
+ * signing to guess the private key. Blinding avoids this attack, though makes
+ * signing operations slightly slower. */
+#define RSA_BLINDING
+
+/* hashes which will be linked and registered */
+#if defined(DROPBEAR_SHA2_256_HMAC) || defined(DROPBEAR_ECC_256) || defined(DROPBEAR_CURVE25519)
+#define DROPBEAR_SHA256
+#endif
+#if defined(DROPBEAR_ECC_384)
+#define DROPBEAR_SHA384
+#endif
+/* LTC SHA384 depends on SHA512 */
+#if defined(DROPBEAR_SHA2_512_HMAC) || defined(DROPBEAR_ECC_521) || defined(DROPBEAR_ECC_384)
+#define DROPBEAR_SHA512
+#endif
+#if defined(DROPBEAR_MD5_HMAC)
+#define DROPBEAR_MD5
+#endif
+
+/* roughly 2x 521 bits */
+#define MAX_ECC_SIZE 140
 
 #define MAX_NAME_LEN 64 /* maximum length of a protocol name, isn't
 						   explicitly specified for all protocols (just
@@ -135,6 +161,8 @@
 /* For a 4096 bit DSS key, empirically determined */
 #define MAX_PRIVKEY_SIZE 1700
 
+#define MAX_HOSTKEYS 3
+
 /* The maximum size of the bignum portion of the kexhash buffer */
 /* Sect. 8 of the transport rfc 4253, K_S + e + f + K */
 #define KEXHASHBUF_MAX_INTS (1700 + 130 + 130 + 130)
@@ -154,19 +182,6 @@
 
 #if defined(DROPBEAR_TWOFISH256) || defined(DROPBEAR_TWOFISH128)
 #define DROPBEAR_TWOFISH
-#endif
-
-#ifdef DROPBEAR_MD5_HMAC
-#define DROPBEAR_MD5
-#endif
-
-#ifdef DROPBEAR_SHA2_256_HMAC
-#define DROPBEAR_SHA256
-#endif
-
-#if (defined(DROPBEAR_DSS) && defined(DSS_PROTOK)) \
-	|| defined(DROPBEAR_SHA2_512_HMAC)
-#define DROPBEAR_SHA512
 #endif
 
 #ifndef ENABLE_X11FWD

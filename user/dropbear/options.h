@@ -5,10 +5,10 @@
 #ifndef _OPTIONS_H_
 #define _OPTIONS_H_
 
-/******************************************************************
- * Define compile-time options below - the "#ifndef DROPBEAR_XXX .... #endif"
- * parts are to allow for commandline -DDROPBEAR_XXX options etc.
- ******************************************************************/
+/* Define compile-time options below - the "#ifndef DROPBEAR_XXX .... #endif"
+ * parts are to allow for commandline -DDROPBEAR_XXX options etc. */
+
+/* IMPORTANT: Many options will require "make clean" after changes */
 
 #ifndef DROPBEAR_DEFPORT
 #define DROPBEAR_DEFPORT "22"
@@ -25,6 +25,9 @@
 #endif
 #ifndef RSA_PRIV_FILENAME
 #define RSA_PRIV_FILENAME "/etc/dropbear/dropbear_rsa_host_key"
+#endif
+#ifndef ECDSA_PRIV_FILENAME
+#define ECDSA_PRIV_FILENAME "/etc/dropbear/dropbear_ecdsa_host_key"
 #endif
 
 /* Set NON_INETD_MODE if you require daemon functionality (ie Dropbear listens
@@ -49,7 +52,7 @@
 several kB in binary size however will make the symmetrical ciphers and hashes
 slower, perhaps by 50%. Recommended for small systems that aren't doing
 much traffic. */
-/*#define DROPBEAR_SMALL_CODE*/
+#define DROPBEAR_SMALL_CODE
 
 /* Enable X11 Forwarding - server only */
 #define DISABLE_X11FWD
@@ -128,7 +131,7 @@ much traffic. */
 
 /* You can also disable integrity. Don't bother disabling this if you're
  * still using a cipher, it's relatively cheap. If you disable this it's dead
- * simple to run arbitrary commands on the remote host. Beware. */
+ * simple for an attacker to run arbitrary commands on the remote host. Beware. */
 /* #define DROPBEAR_NONE_INTEGRITY */
 
 /* Hostkey/public key algorithms - at least one required, these are used
@@ -138,10 +141,26 @@ much traffic. */
 #undef DROPBEAR_RSA
 #define DROPBEAR_DSS
 
-/* RSA can be vulnerable to timing attacks which use the time required for
- * signing to guess the private key. Blinding avoids this attack, though makes
- * signing operations slightly slower. */
-#undef RSA_BLINDING
+/* ECDSA is significantly faster than RSA or DSS. Compiling in ECC
+ * code (either ECDSA or ECDH) increases binary size - around 30kB
+ * on x86-64 */
+#undef DROPBEAR_ECDSA
+
+/* Generate hostkeys as-needed when the first connection using that key type occurs.
+   This avoids the need to otherwise run "dropbearkey" and avoids some problems
+   with badly seeded /dev/urandom when systems first boot.
+   This also requires a runtime flag "-R". This adds ~4kB to binary size (or hardly 
+   anything if dropbearkey is linked in a "dropbearmulti" binary) */
+#undef DROPBEAR_DELAY_HOSTKEY
+
+/* Enable Curve25519 for key exchange. This is another elliptic
+ * curve method with good security properties. Increases binary size
+ * by ~8kB on x86-64 */
+#undef DROPBEAR_CURVE25519
+
+/* Enable elliptic curve Diffie Hellman key exchange, see note about
+ * ECDSA above */
+#undef DROPBEAR_ECDH
 
 /* Control the memory/performance/compression tradeoff for zlib.
  * Set windowBits=8 for least memory usage, see your system's
@@ -177,7 +196,7 @@ much traffic. */
 
 #define ENABLE_SVR_PASSWORD_AUTH
 /* PAM requires ./configure --enable-pam */
-//#define ENABLE_SVR_PAM_AUTH
+/*#define ENABLE_SVR_PAM_AUTH */
 #define ENABLE_SVR_PUBKEY_AUTH
 
 /* Wether to ake public key options in authorized_keys file into account */

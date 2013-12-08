@@ -216,7 +216,7 @@ void cli_getopts(int argc, char ** argv) {
 			switch (argv[i][1]) {
 				case 'y': /* always accept the remote hostkey */
 					if (cli_opts.always_accept_key) {
-						// twice means no checking at all
+						/* twice means no checking at all */
 						cli_opts.no_hostkey_check = 1;
 					}
 					cli_opts.always_accept_key = 1;
@@ -450,7 +450,7 @@ void cli_getopts(int argc, char ** argv) {
 #ifdef ENABLE_CLI_PUBKEY_AUTH
 static void loadidentityfile(const char* filename) {
 	sign_key *key;
-	int keytype;
+	enum signkey_type keytype;
 
 	key = new_sign_key();
 	keytype = DROPBEAR_SIGNKEY_ANY;
@@ -481,7 +481,7 @@ multihop_passthrough_args() {
 		sign_key * key = (sign_key*)iter->item;
 		len += 3 + strlen(key->filename);
 	}
-	len += 30; // space for -W <size>, terminator.
+	len += 30; /* space for -W <size>, terminator. */
 	ret = m_malloc(len);
 	total = 0;
 
@@ -498,7 +498,7 @@ multihop_passthrough_args() {
 
 	if (opts.recv_window != DEFAULT_RECV_WINDOW)
 	{
-		int written = snprintf(ret+total, len-total, "-W %d", opts.recv_window);
+		int written = snprintf(ret+total, len-total, "-W %d ", opts.recv_window);
 		total += written;
 	}
 
@@ -506,7 +506,7 @@ multihop_passthrough_args() {
 	{
 		sign_key * key = (sign_key*)iter->item;
 		const size_t size = len - total;
-		int written = snprintf(ret+total, size, "-i %s", key->filename);
+		int written = snprintf(ret+total, size, "-i %s ", key->filename);
 		dropbear_assert((unsigned int)written < size);
 		total += written;
 	}
@@ -619,8 +619,8 @@ static void parse_hostname(const char* orighostarg) {
 
 	port = strchr(cli_opts.remotehost, '%');
 	if (!port)  {
-		// legacy separator
-	port = strchr(cli_opts.remotehost, '/');
+		/* legacy separator */
+		port = strchr(cli_opts.remotehost, '/');
 	}
 	if (port) {
 		*port = '\0';

@@ -31,11 +31,12 @@
 #include "packet.h"
 #include "tcpfwd.h"
 #include "channel.h"
-#include "random.h"
+#include "dbrandom.h"
 #include "service.h"
 #include "runopts.h"
 #include "chansession.h"
 #include "agentfwd.h"
+#include "crypto_desc.h"
 
 static void cli_remoteclosed();
 static void cli_sessionloop();
@@ -85,10 +86,6 @@ static const struct ChanType *cli_chantypes[] = {
 };
 
 void cli_session(int sock_in, int sock_out) {
-
-	seedrandom();
-
-	crypto_init();
 
 	common_session_init(sock_in, sock_out);
 
@@ -178,7 +175,7 @@ static void send_msg_service_request(char* servicename) {
 }
 
 static void recv_msg_service_accept(void) {
-	// do nothing, if it failed then the server MUST have disconnected
+	/* do nothing, if it failed then the server MUST have disconnected */
 }
 
 /* This function drives the progress of the session - it initiates KEX,
@@ -196,9 +193,9 @@ static void cli_sessionloop() {
 		/* We initiate the KEXDH. If DH wasn't the correct type, the KEXINIT
 		 * negotiation would have failed. */
 		if (!ses.kexstate.our_first_follows_matches) {
-		send_msg_kexdh_init();
+			send_msg_kexdh_init();
 		}
-		cli_ses.kex_state = KEXDH_INIT_SENT;
+		cli_ses.kex_state = KEXDH_INIT_SENT;			
 		TRACE(("leave cli_sessionloop: done with KEXINIT_RCVD"))
 		return;
 	}

@@ -11,7 +11,7 @@ AR=ar
 ARFLAGS=r
 
 # Compilation flags. Note the += does not write over the user's CFLAGS!
-CFLAGS = -c -I./testprof/ -I./src/headers/ -DLTC_SOURCE -Os ${CFLAGS_OPTS} -o $@
+CFLAGS = -c -I./testprof/ -I./src/headers/ -DLTC_SOURCE -O2 ${CFLAGS_OPTS} -o $@
 
 LIBNAME=libtomcrypt.a
 LIBTEST=libtomcrypt_prof.a

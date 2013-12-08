@@ -264,7 +264,7 @@ int cli_auth_try() {
 
 #ifdef ENABLE_CLI_PASSWORD_AUTH
 	if (!finished && (ses.authstate.authtypes & AUTH_TYPE_PASSWORD)) {
-	if (ses.keys->trans.algo_crypt->cipherdesc == NULL) {
+		if (ses.keys->trans.algo_crypt->cipherdesc == NULL) {
 			fprintf(stderr, "Sorry, I won't let you use password auth unencrypted.\n");
 		} else {
 			cli_auth_password();
@@ -276,13 +276,13 @@ int cli_auth_try() {
 
 #ifdef ENABLE_CLI_INTERACT_AUTH
 	if (!finished && (ses.authstate.authtypes & AUTH_TYPE_INTERACT)) {
-	if (ses.keys->trans.algo_crypt->cipherdesc == NULL) {
+		if (ses.keys->trans.algo_crypt->cipherdesc == NULL) {
 			fprintf(stderr, "Sorry, I won't let you use interactive auth unencrypted.\n");
 		} else {
 			if (!cli_ses.auth_interact_failed) {
 				cli_auth_interactive();
 				cli_ses.lastauthtype = AUTH_TYPE_INTERACT;
-		finished = 1;
+				finished = 1;
 			}
 		}
 	}
