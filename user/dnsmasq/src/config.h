@@ -49,7 +49,6 @@
 #define TFTP_MAX_CONNECTIONS 50 /* max simultaneous connections */
 #define LOG_MAX 5 /* log-queue length */
 #define RANDFILE "/dev/urandom"
-#define EDNS0_OPTION_MAC 5 /* dyndns.org temporary assignment */
 
 /* DBUS interface specifics */
 #define DNSMASQ_SERVICE "uk.org.thekelleys.dnsmasq" /* Default - may be overridden by config */
