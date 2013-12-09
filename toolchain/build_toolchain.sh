@@ -47,9 +47,10 @@ export PATH="${PATH}":${PREFIX}/bin:${PREFIX}/lib:${KERNEL_HEADERS}:${REALLIBINC
 export CC=gcc
 
 #install need lib`s and headers
-if [ -f /etc/mandriva-release ] && [ "$INSTALL_DEP" = "YES" ]; then
+if [ -e /etc/release ] && [ "$INSTALL_DEP" = "YES" ]; then
     ISOPENMANDRIVA=`grep OpenMandriva -i -c < /etc/release`
     ISROSA=`grep ROSA -i -c < /etc/release`
+    ISMAGEIA=`grep Mageia -i -c < /etc/release`
     if [ "$ISOPENMANDRIVA" = "1" ] || [ "$ISROSA" = "1" ]; then
 	urpmi --auto -a flex --download-all --allow-force
 	urpmi --auto -a make --download-all --allow-force
@@ -62,6 +63,26 @@ if [ -f /etc/mandriva-release ] && [ "$INSTALL_DEP" = "YES" ]; then
 	urpmi --auto -ay mpfr --download-all --allow-force
 	urpmi --auto -ay gcc-gfortran --download-all --allow-force
 	urpmi --auto -ay texinfo --download-all --allow-force
+    elif [ "$ISMAGEIA" = "1" ]; then
+	urpmi --auto bc --download-all
+	urpmi --auto flex --download-all
+	urpmi --auto make --download-all
+	urpmi --auto gcc --download-all
+	urpmi --auto glibc-devel --download-all
+	urpmi --auto binutils-devel --download-all
+	urpmi --auto bison --download-all
+	urpmi --auto libtool-devel --download-all
+	urpmi --auto autoconf --download-all
+	urpmi --auto automake --download-all
+	urpmi --auto libgmpxx-devel --download-all
+	urpmi --auto libmpc-devel --download-all
+	urpmi --auto gcc-cpp --download-all
+	urpmi --auto gcc-c++ --download-all
+	urpmi --auto gcc-gfortran --download-all
+	urpmi --auto gcc-plugins --download-all
+	urpmi --auto colorgcc --download-all
+	urpmi --auto texinfo --download-all
+	urpmi --auto gettext --download-all
     else
 	urpmi --auto -a flex --download-all --allow-force
 	urpmi --auto -a make --download-all --allow-force
