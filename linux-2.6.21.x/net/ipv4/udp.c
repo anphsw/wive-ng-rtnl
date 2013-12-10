@@ -455,6 +455,9 @@ int udp_push_pending_frames(struct sock *sk)
 {
 	struct udp_sock  *up = udp_sk(sk);
 	struct inet_sock *inet = inet_sk(sk);
+#ifndef CONFIG_UDP_LITE_DISABLE
+	int is_udplite = IS_UDPLITE(sk);
+#endif
 	struct flowi *fl = &inet->cork.fl;
 	struct sk_buff *skb;
 	struct udphdr *uh;
@@ -501,6 +504,21 @@ int udp_push_pending_frames(struct sock *sk)
 
 send:
 	err = ip_push_pending_frames(sk);
+	if (err) {
+		if (err == -ENOBUFS && !inet->recverr) {
+#ifndef CONFIG_UDP_LITE_DISABLE
+			UDP_INC_STATS_USER(UDP_MIB_SNDBUFERRORS, is_udplite);
+#else
+			UDP_INC_STATS_USER(UDP_MIB_SNDBUFERRORS, 0);
+#endif
+			err = 0;
+		}
+	} else
+#ifndef CONFIG_UDP_LITE_DISABLE
+		UDP_INC_STATS_USER(UDP_MIB_OUTDATAGRAMS, is_udplite);
+#else
+		UDP_INC_STATS_USER(UDP_MIB_OUTDATAGRAMS, 0);
+#endif
 out:
 	up->len = 0;
 	up->pending = 0;
@@ -702,14 +720,8 @@ out:
 		ip_rt_put(rt);
 	if (free)
 		kfree(ipc.opt);
-	if (!err) {
-#ifndef CONFIG_UDP_LITE_DISABLE
-		UDP_INC_STATS_USER(UDP_MIB_OUTDATAGRAMS, is_udplite);
-#else
-		UDP_INC_STATS_USER(UDP_MIB_OUTDATAGRAMS, 0);
-#endif
-		return len;
-	}
+	if (!err)
+	    return len;
 	/*
 	 * ENOBUFS = no kernel mem, SOCK_NOSPACE = no sndbuf space.  Reporting
 	 * ENOBUFS might not be good (it's not tunable per se), but otherwise

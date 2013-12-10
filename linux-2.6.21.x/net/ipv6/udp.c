@@ -609,6 +609,9 @@ static int udp_v6_push_pending_frames(struct sock *sk)
 	struct udphdr *uh;
 	struct udp_sock  *up = udp_sk(sk);
 	struct inet_sock *inet = inet_sk(sk);
+#ifndef CONFIG_UDP_LITE_DISABLE
+	int is_udplite = IS_UDPLITE(sk);
+#endif
 	struct flowi *fl;
 	int err = 0;
 	__wsum csum = 0;
@@ -651,6 +654,21 @@ static int udp_v6_push_pending_frames(struct sock *sk)
 
 send:
 	err = ip6_push_pending_frames(sk);
+	if (err) {
+		if (err == -ENOBUFS && !inet6_sk(sk)->recverr) {
+#ifndef CONFIG_UDP_LITE_DISABLE
+			UDP6_INC_STATS_USER(UDP_MIB_SNDBUFERRORS, is_udplite);
+#else
+			UDP6_INC_STATS_USER(UDP_MIB_SNDBUFERRORS, 0);
+#endif
+			err = 0;
+		}
+	} else
+#ifndef CONFIG_UDP_LITE_DISABLE
+		UDP6_INC_STATS_USER(UDP_MIB_OUTDATAGRAMS, is_udplite);
+#else
+		UDP6_INC_STATS_USER(UDP_MIB_OUTDATAGRAMS, 0);
+#endif
 out:
 	up->len = 0;
 	up->pending = 0;
@@ -928,14 +946,10 @@ do_append_data:
 	release_sock(sk);
 out:
 	fl6_sock_release(flowlabel);
-	if (!err) {
-#ifndef CONFIG_UDP_LITE_DISABLE
-		UDP6_INC_STATS_USER(UDP_MIB_OUTDATAGRAMS, is_udplite);
-#else
-		UDP6_INC_STATS_USER(UDP_MIB_OUTDATAGRAMS, 0);
-#endif
-		return len;
-	}
+
+	if (!err)
+	    return len;
+
 	/*
 	 * ENOBUFS = no kernel mem, SOCK_NOSPACE = no sndbuf space.  Reporting
 	 * ENOBUFS might not be good (it's not tunable per se), but otherwise
