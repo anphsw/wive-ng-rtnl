@@ -35,6 +35,9 @@ romfs
 /lib/libiconv/libcharset/lib/Makefile
 /lib/libiconv/libcharset/config.h
 /lib/libiconv/preload/Makefile
+/lib/libiconv/man/Makefile
+/lib/libiconv/po/Makefile
+/lib/libiconv/po/Makefile.in
 /lib/libcurl/curl-config
 /lib/libcurl/docs/examples/Makefile
 /lib/libcurl/docs/libcurl/Makefile
