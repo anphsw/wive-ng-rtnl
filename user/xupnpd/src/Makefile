@@ -1,7 +1,5 @@
-#LUA     = lua-5.1.4
-#LUA     = lua-5.2.0
-#LUA     = lua-5.2.2
-LUA     = lua-5.2.3
+#LUA     = lua-5.1.x
+LUA     = lua-5.2.x
 STATIC  = false
 CFLAGS  += -fno-exceptions -fno-rtti -I$(LUA) -L$(LUA) -I$(ROOTDIR)/lib/include
 SRC     = main.cpp soap.cpp mem.cpp mcast.cpp luaxlib.cpp luaxcore.cpp luajson.cpp luajson_parser.cpp
