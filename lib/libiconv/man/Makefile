@@ -6,7 +6,7 @@
 srcdir = .
 
 # Directories used by "make install":
-prefix = /mnt/svalka/opt/Wive-RTNL/lib/libiconv/filesystem
+prefix = /opt/Wive-RTNL/lib/libiconv/filesystem
 local_prefix = /usr/local
 exec_prefix = ${prefix}
 datarootdir = ${prefix}/share

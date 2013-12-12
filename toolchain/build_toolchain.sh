@@ -63,6 +63,7 @@ if [ -e /etc/release ] && [ "$INSTALL_DEP" = "YES" ]; then
 	urpmi --auto -ay mpfr --download-all --allow-force
 	urpmi --auto -ay gcc-gfortran --download-all --allow-force
 	urpmi --auto -ay texinfo --download-all --allow-force
+	urpmi --auto -ay intltool --download-all --allow-force
     elif [ "$ISMAGEIA" = "1" ]; then
 	urpmi --auto bc --download-all
 	urpmi --auto flex --download-all
@@ -83,6 +84,7 @@ if [ -e /etc/release ] && [ "$INSTALL_DEP" = "YES" ]; then
 	urpmi --auto colorgcc --download-all
 	urpmi --auto texinfo --download-all
 	urpmi --auto gettext --download-all
+	urpmi --auto intltool --download-all
     else
 	urpmi --auto -a flex --download-all --allow-force
 	urpmi --auto -a make --download-all --allow-force
@@ -95,6 +97,7 @@ if [ -e /etc/release ] && [ "$INSTALL_DEP" = "YES" ]; then
 	urpmi --auto -a mpfr- --download-all --allow-force
 	urpmi --auto -a gcc-gfortran --download-all --allow-force
 	urpmi --auto -a texinfo- --download-all --allow-force
+	urpmi --auto -a intltool- --download-all --allow-force
     fi
 fi
 
