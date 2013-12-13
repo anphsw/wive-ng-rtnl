@@ -27,7 +27,7 @@ start() {
 	fi
 	gen_config
 	ip route replace $upmpm_net dev $lan_if
-        miniupnpd -f /etc/miniupnpd.conf -i "$real_wan_if" -o "$real_wan_ipaddr" -a "$lan_if" &
+        miniupnpd -f /etc/miniupnpd.conf -i "$real_wan_if" -o "$real_wan_ipaddr" -a "$lan_if" -z "$HostName" &
     fi
 }
 
@@ -64,7 +64,7 @@ cat /etc/miniupnpd.conf.uuid >> /etc/miniupnpd.conf
 }
 
 get_param() {
-    eval `nvram_buf_get 2860 lan_ipaddr lan_netmask upnpEnabled`
+    eval `nvram_buf_get 2860 lan_ipaddr lan_netmask upnpEnabled HostName`
 }
 
 stop() {

@@ -450,7 +450,7 @@ echo "/*#define DISABLE_CONFIG_FILE*/" >> ${CONFIGFILE}
 echo "" >> ${CONFIGFILE}
 
 echo "/* Unable the ability to configure all manufacturer infos through miniupnpd.conf */" >> ${CONFIGFILE}
-echo "/*#define ENABLE_MANUFACTURER_INFO_CONFIGURATION*/" >> ${CONFIGFILE}
+echo "#define ENABLE_MANUFACTURER_INFO_CONFIGURATION" >> ${CONFIGFILE}
 echo "" >> ${CONFIGFILE}
 
 echo "#endif" >> ${CONFIGFILE}
