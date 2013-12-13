@@ -56,32 +56,33 @@
 6) dnsmasq: up to 2.68 version.<br>
 7) dropbear: up to 2013.62 version.<br>
 8) xupnpd: update lua to 5.2.3 version.<br>
-9) kernel: wifi driver: temp back to 2.5.0.4 AP/STA driver for RT305x/RT3350.<br>
-10) kernel: wifi driver: fix power select in 2.5.0.4 AP driver.<br>
-11) kernel: wifi driver: consolidate config options 2.5/2.7 drivers.<br>
-12) kernel: tcp: reset reordering est. selectively on timeout.<br>
-13) kernel: netfilter: nf_ct_h323: fix bug in rtcp natting.<br>
-14) kernel: tcp: undo on DSACK during recovery.<br>
-15) kernel: ipv4: Fix IP timestamp option (IPOPT_TS_PRESPEC) handling in ip_options_echo().<br>
-16) kenrel: af_unix: implement socket filter.<br>
-17) kernel: network: tcp_connect should return certain errors up the stack.<br>
-18) kernel: net: avoid race between network down and sysfs.<br>
-19) kernel: af_packet: check return of dev_set_promiscuity/allmulti.<br>
-20) kernel: net: Avoid copying writable clones in tunnel drivers.<br>
-21) kernel: ipv6: sit: Fix locking issues in PRL management.<br>
-22) kernel: ipv6: sit: Disallow 0.0.0.0 in PRL and Flush PRL if given for DEL.<br>
-23) kernel: net: remove link_watch delay for up even when we're down.<br>
-24) kernel: net: link_watch: Always schedule urgent events.<br>
-25) kernel: net: zero length write() on socket should not simply return 0.<br>
-26) kernel: net: pppoe: Check packet length on all receive paths.<br>
-27) kernel: net: rework recvmsg handler msg_name and msg_namelen logic.<br>
-28) kernel: usb: add IAD support to usbfs and sysfs.<br>
-29) kernel: usb: add "descriptors" binary sysfs attribute.<br>
-30) kernel: ipv6: call udp_push_pending_frames when uncorking a socket with AF_INET pending data.<br>
-31) kernel: ipv6: fix leaking uninitialized port number of offender sockaddr.<br>
-32) kernel: ipv6: netfilter: move POSTROUTING invocation before fragmentation.<br>
-33) kernel: wifi_drivers: full disable apqload support.<br>
-34) kernel: inet: prevent leakage of uninitialized memory to user in recv syscalls.<br>
+9) miniupnpd: update to 1.8.20131213 version.<br>
+10) kernel: wifi driver: temp back to 2.5.0.4 AP/STA driver for RT305x/RT3350.<br>
+11) kernel: wifi driver: fix power select in 2.5.0.4 AP driver.<br>
+12) kernel: wifi driver: consolidate config options 2.5/2.7 drivers.<br>
+13) kernel: tcp: reset reordering est. selectively on timeout.<br>
+14) kernel: netfilter: nf_ct_h323: fix bug in rtcp natting.<br>
+15) kernel: tcp: undo on DSACK during recovery.<br>
+16) kernel: ipv4: Fix IP timestamp option (IPOPT_TS_PRESPEC) handling in ip_options_echo().<br>
+17) kenrel: af_unix: implement socket filter.<br>
+18) kernel: network: tcp_connect should return certain errors up the stack.<br>
+19) kernel: net: avoid race between network down and sysfs.<br>
+20) kernel: af_packet: check return of dev_set_promiscuity/allmulti.<br>
+21) kernel: net: Avoid copying writable clones in tunnel drivers.<br>
+22) kernel: ipv6: sit: Fix locking issues in PRL management.<br>
+23) kernel: ipv6: sit: Disallow 0.0.0.0 in PRL and Flush PRL if given for DEL.<br>
+24) kernel: net: remove link_watch delay for up even when we're down.<br>
+25) kernel: net: link_watch: Always schedule urgent events.<br>
+26) kernel: net: zero length write() on socket should not simply return 0.<br>
+27) kernel: net: pppoe: Check packet length on all receive paths.<br>
+28) kernel: net: rework recvmsg handler msg_name and msg_namelen logic.<br>
+29) kernel: usb: add IAD support to usbfs and sysfs.<br>
+30) kernel: usb: add "descriptors" binary sysfs attribute.<br>
+31) kernel: ipv6: call udp_push_pending_frames when uncorking a socket with AF_INET pending data.<br>
+32) kernel: ipv6: fix leaking uninitialized port number of offender sockaddr.<br>
+33) kernel: ipv6: netfilter: move POSTROUTING invocation before fragmentation.<br>
+34) kernel: wifi_drivers: full disable apqload support.<br>
+35) kernel: inet: prevent leakage of uninitialized memory to user in recv syscalls.<br>
 <br>
 <br>
 <br>
