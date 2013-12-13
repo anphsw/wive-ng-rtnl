@@ -142,7 +142,7 @@ pthrough() {
 route_fastpath() {
     #----Fastpath for bridge enable------------------------------
     routeFastpath=`nvram_get 2860 routeFastpath`
-    if [ "$bridgeFastpath" != "0" ]; then
+    if [ "$routeFastpath" != "0" ]; then
 	$LOG "Route fastpath enabled."
 	sysctl -wq net.nf_conntrack_fastroute=1
     else
