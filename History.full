@@ -1787,6 +1787,7 @@
 33) kernel: ipv6: netfilter: move POSTROUTING invocation before fragmentation.<br>
 34) kernel: wifi_drivers: full disable apqload support.<br>
 35) kernel: inet: prevent leakage of uninitialized memory to user in recv syscalls.<br>
+36) kernel:  ipv6 route: Fix route lifetime in netlink message.<br>
 <br>
 <br>
 <br>
