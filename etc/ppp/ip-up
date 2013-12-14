@@ -12,7 +12,7 @@ PPP_IPPARAM="$6"
 LOG="logger -t pppd"
 
 eval `nvram_buf_get 2860 lan_ipaddr lan_netmask Lan2Enabled lan2_ipaddr lan2_netmask \
-		vpnNAT vpnDGW vpnPeerDNS use_snat PortForwardEnable upnpEnabled chilli_net`
+		vpnNAT vpnDGW vpnPeerDNS use_snat PortForwardEnable upnpEnabled parproutedEnabled chilli_net`
 
     #export vpn_if_name
     echo "$PPP_IFACE" > /tmp/vpn_if_name
@@ -22,9 +22,11 @@ eval `nvram_buf_get 2860 lan_ipaddr lan_netmask Lan2Enabled lan2_ipaddr lan2_net
 	use_snat=0
     fi
 
-    #disable multicast on $PPP_IFACE interface
-    ifconfig $PPP_IFACE -allmulti
-    ifconfig $PPP_IFACE -multicast
+    if [ "$parproutedEnabled" != "1" ]; then
+	#disable multicast on $PPP_IFACE interface
+        ifconfig $PPP_IFACE -allmulti
+        ifconfig $PPP_IFACE -multicast
+    fi
 
     #Get current dgw
     GWSTRING=`ip route | grep ^default`

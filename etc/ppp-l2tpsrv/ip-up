@@ -12,12 +12,14 @@ PPP_IPPARAM="$6"
 PPP_NUM=`echo $PPP_IFACE | sed 's/[^0-65535]//g'`
 LOG="logger -t L2TP server"
 
-#disable multicast on $PPP_IFACE interface
-ifconfig $PPP_IFACE -allmulti
-ifconfig $PPP_IFACE -multicast
-
 # get some variables
 eval `nvram_buf_get 2860 l2tp_srv_nat_enabled l2tp_srv_proxyarp parproutedEnabled`
+
+if [ "$l2tp_srv_proxyarp" != "1" ] && [ "$parproutedEnabled" != "1" ]; then
+    #disable multicast on $PPP_IFACE interface
+    ifconfig $PPP_IFACE -allmulti
+    ifconfig $PPP_IFACE -multicast
+fi
 
 $LOG "Reload iptables rules"
 service iptables restart
