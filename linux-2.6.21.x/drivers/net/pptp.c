@@ -347,7 +347,7 @@ static int pptp_xmit(struct ppp_channel *chan, struct sk_buff *skb)
 	nf_reset(skb);
 
 	skb->ip_summed = CHECKSUM_NONE;
-	ip_select_ident(skb, &rt->u.dst, NULL);
+	ip_select_ident(iph, &rt->u.dst, NULL);
 	ip_send_check(iph);
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,25)

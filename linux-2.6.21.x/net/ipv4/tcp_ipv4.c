@@ -758,7 +758,7 @@ int ip_build_and_send_pkt(struct sk_buff *skb, struct sock *sk,
 	iph->saddr    = rt->rt_src;
 	iph->protocol = sk->sk_protocol;
 	iph->tot_len  = htons(skb->len);
-	ip_select_ident(skb, &rt->u.dst, sk);
+	ip_select_ident(iph, &rt->u.dst, sk);
 	skb->nh.iph   = iph;
 
 	if (opt && opt->optlen) {
