@@ -85,6 +85,7 @@
 35) kernel: wifi_drivers: full disable apqload support.<br>
 36) kernel: inet: prevent leakage of uninitialized memory to user in recv syscalls.<br>
 37) kernel: ipv6 route: Fix route lifetime in netlink message.<br>
+38) kernel: ipv4: fix DO and PROBE pmtu mode regarding local fragmentation with UFO/CORK.<br>
 <br>
 <br>
 <br>
