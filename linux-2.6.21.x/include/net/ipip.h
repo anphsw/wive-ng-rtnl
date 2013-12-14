@@ -53,7 +53,7 @@ struct ip_tunnel_prl_entry
 									\
 	skb->ip_summed = CHECKSUM_NONE;					\
 	iph->tot_len = htons(skb->len);					\
-	ip_select_ident(iph, &rt->u.dst, NULL);				\
+	ip_select_ident(skb, &rt->u.dst, NULL);				\
 	ip_send_check(iph);						\
 									\
 	err = NF_HOOK(PF_INET, NF_IP_LOCAL_OUT, skb, NULL, rt->u.dst.dev, dst_output);\

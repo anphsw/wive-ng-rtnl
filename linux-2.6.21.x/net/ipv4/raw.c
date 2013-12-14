@@ -353,7 +353,7 @@ static int raw_send_hdrinc(struct sock *sk, void *from, size_t length,
 		iph->check   = 0;
 		iph->tot_len = htons(length);
 		if (!iph->id)
-			ip_select_ident(iph, &rt->u.dst, NULL);
+			ip_select_ident(skb, &rt->u.dst, NULL);
 
 		iph->check = ip_fast_csum((unsigned char *)iph, iph->ihl);
 	}

@@ -1118,7 +1118,7 @@ static void ip_encap(struct sk_buff *skb, __be32 saddr, __be32 daddr)
 	iph->protocol	=	IPPROTO_IPIP;
 	iph->ihl	=	5;
 	iph->tot_len	=	htons(skb->len);
-	ip_select_ident(iph, skb->dst, NULL);
+	ip_select_ident(skb, skb->dst, NULL);
 	ip_send_check(iph);
 
 	skb->h.ipiph = skb->nh.iph;

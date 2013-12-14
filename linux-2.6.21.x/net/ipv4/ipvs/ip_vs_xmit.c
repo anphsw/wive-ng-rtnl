@@ -405,7 +405,7 @@ ip_vs_tunnel_xmit(struct sk_buff *skb, struct ip_vs_conn *cp,
 	iph->saddr		=	rt->rt_src;
 	iph->ttl		=	old_iph->ttl;
 	iph->tot_len		=	htons(skb->len);
-	ip_select_ident(iph, &rt->u.dst, NULL);
+	ip_select_ident(skb, &rt->u.dst, NULL);
 	ip_send_check(iph);
 
 	/* Another hack: avoid icmp_send in ip_fragment */

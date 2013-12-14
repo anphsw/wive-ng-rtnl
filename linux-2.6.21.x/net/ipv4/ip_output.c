@@ -320,7 +320,7 @@ packet_routed:
 		ip_options_build(skb, opt, inet->daddr, rt, 0);
 	}
 
-	ip_select_ident_more(iph, &rt->u.dst, sk,
+	ip_select_ident_more(skb, &rt->u.dst, sk,
 			     (skb_shinfo(skb)->gso_segs ?: 1) - 1);
 
 	/* Add an IP checksum. */
@@ -1256,7 +1256,7 @@ int ip_push_pending_frames(struct sock *sk)
 	iph->protocol = sk->sk_protocol;
 	iph->saddr = rt->rt_src;
 	iph->daddr = rt->rt_dst;
-	ip_select_ident(iph, &rt->u.dst, sk);
+	ip_select_ident(skb, &rt->u.dst, sk);
 	ip_send_check(iph);
 
 	skb->priority = sk->sk_priority;
