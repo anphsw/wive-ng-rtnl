@@ -27,7 +27,7 @@
  *
  * Handles spurious and unhandled IRQ's. It also prints a debugmessage.
  */
-void fastcall
+void
 handle_bad_irq(unsigned int irq, struct irq_desc *desc)
 {
 	print_irq_desc(irq, desc);
@@ -162,7 +162,7 @@ irqreturn_t FASTPATH handle_IRQ_event(unsigned int irq, struct irqaction *action
  * This is the original x86 implementation which is used for every
  * interrupt type.
  */
-fastcall unsigned int FASTPATH __do_IRQ(unsigned int irq)
+unsigned int FASTPATH __do_IRQ(unsigned int irq)
 {
 	struct irq_desc *desc = irq_desc + irq;
 	struct irqaction *action __maybe_unused;

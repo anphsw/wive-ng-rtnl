@@ -121,7 +121,7 @@ static inline void force_quiescent_state(struct rcu_data *rdp,
  * sections are delimited by rcu_read_lock() and rcu_read_unlock(),
  * and may be nested.
  */
-void fastcall call_rcu(struct rcu_head *head,
+void call_rcu(struct rcu_head *head,
 				void (*func)(struct rcu_head *rcu))
 {
 	unsigned long flags;
@@ -156,7 +156,7 @@ void fastcall call_rcu(struct rcu_head *head,
  * rcu_read_unlock(), * if in interrupt context or rcu_read_lock_bh()
  * and rcu_read_unlock_bh(), if in process context. These may be nested.
  */
-void fastcall call_rcu_bh(struct rcu_head *head,
+void call_rcu_bh(struct rcu_head *head,
 				void (*func)(struct rcu_head *rcu))
 {
 	unsigned long flags;
