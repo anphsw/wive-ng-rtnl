@@ -3341,13 +3341,6 @@ void netdev_run_todo(void)
 
 		netdev_wait_allrefs(dev);
 
-		/* paranoia */
-#ifndef REFCNT_LEAK_HACK
-		WARN_ON(atomic_read(&dev->refcnt));
-		WARN_ON((int)dev->ip_ptr);
-		WARN_ON((int)dev->ip6_ptr);
-		WARN_ON((int)dev->dn_ptr);
-#endif
 		if (dev->destructor)
 			dev->destructor(dev);
 
