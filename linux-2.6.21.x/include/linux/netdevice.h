@@ -1081,6 +1081,7 @@ static inline int netif_needs_gso(struct net_device *dev, struct sk_buff *skb)
  * duplicates except for 802.3ad ETH_P_SLOW, alb non-mcast/bcast, and
  * ARP on active-backup slaves with arp_validate enabled.
  */
+#ifdef CONFIG_BONDING
 static inline int skb_bond_should_drop(struct sk_buff *skb)
 {
 	struct net_device *dev = skb->dev;
@@ -1108,7 +1109,7 @@ static inline int skb_bond_should_drop(struct sk_buff *skb)
 	}
 	return 0;
 }
-
+#endif
 #endif /* __KERNEL__ */
 
 #endif	/* _LINUX_DEV_H */

@@ -1883,9 +1883,11 @@ int netif_receive_skb(struct sk_buff *skb)
 	null_or_orig = NULL;
 	orig_dev = skb->dev;
 	if (orig_dev->master) {
+#ifdef CONFIG_BONDING
 		if (skb_bond_should_drop(skb))
 			null_or_orig = orig_dev; /* deliver only exact match */
 		else
+#endif
 			skb->dev = orig_dev->master;
 	}
 
