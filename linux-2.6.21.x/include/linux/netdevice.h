@@ -405,13 +405,20 @@ struct net_device {
 
 
 	/* Protocol specific pointers */
-	
+#ifdef CONFIG_ATALK
 	void 			*atalk_ptr;	/* AppleTalk link 	*/
+#endif
 	void			*ip_ptr;	/* IPv4 specific data	*/  
+#ifdef CONFIG_DECNET
 	void                    *dn_ptr;        /* DECnet specific data */
+#endif
 	void                    *ip6_ptr;       /* IPv6 specific data */
+#ifdef CONFIG_ECONET
 	void			*ec_ptr;	/* Econet specific data	*/
+#endif
+#ifdef CONFIG_AX25
 	void			*ax25_ptr;	/* AX.25 specific data */
+#endif
 
 /*
  * Cache line mostly used on receive path (including eth_type_trans())
