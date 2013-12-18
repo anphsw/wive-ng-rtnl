@@ -1,4 +1,4 @@
-# $Id: Makefile.linux,v 1.79 2013/12/13 13:41:53 nanard Exp $
+# $Id: Makefile.linux,v 1.80 2013/12/16 15:40:42 nanard Exp $
 # MiniUPnP project
 # (c) 2006-2013 Thomas Bernard
 # http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
@@ -222,8 +222,8 @@ depend:	config.h
 miniupnpd.o: config.h macros.h upnpglobalvars.h upnppermissions.h
 miniupnpd.o: miniupnpdtypes.h upnphttp.h upnpdescgen.h miniupnpdpath.h
 miniupnpd.o: getifaddr.h upnpsoap.h options.h minissdp.h upnpredirect.h
-miniupnpd.o: upnppinhole.h daemonize.h upnpevents.h natpmp.h pcpserver.h
-miniupnpd.o: commonrdr.h upnputils.h ifacewatcher.h
+miniupnpd.o: upnppinhole.h daemonize.h upnpevents.h natpmp.h commonrdr.h
+miniupnpd.o: upnputils.h ifacewatcher.h
 upnphttp.o: config.h upnphttp.h upnpdescgen.h miniupnpdpath.h upnpsoap.h
 upnphttp.o: upnpevents.h upnputils.h
 upnpdescgen.o: config.h getifaddr.h upnpredirect.h upnpdescgen.h
@@ -250,9 +250,7 @@ minissdp.o: upnpglobalvars.h upnppermissions.h miniupnpdtypes.h minissdp.h
 minissdp.o: upnputils.h getroute.h codelength.h
 natpmp.o: macros.h config.h natpmp.h upnpglobalvars.h upnppermissions.h
 natpmp.o: miniupnpdtypes.h getifaddr.h upnpredirect.h commonrdr.h upnputils.h
-pcpserver.o: config.h pcpserver.h macros.h upnpglobalvars.h upnppermissions.h
-pcpserver.o: miniupnpdtypes.h pcplearndscp.h upnpredirect.h commonrdr.h
-pcpserver.o: getifaddr.h pcp_msg_struct.h
+pcpserver.o: config.h
 upnpevents.o: config.h upnpevents.h miniupnpdpath.h upnpglobalvars.h
 upnpevents.o: upnppermissions.h miniupnpdtypes.h upnpdescgen.h upnputils.h
 upnputils.o: config.h upnputils.h upnpglobalvars.h upnppermissions.h

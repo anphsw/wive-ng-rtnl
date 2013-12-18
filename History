@@ -57,7 +57,7 @@
 7) dnsmasq: up to 2.68 version.<br>
 8) dropbear: up to 2013.62 version.<br>
 9) xupnpd: update lua to 5.2.3 version.<br>
-10) miniupnpd: update to 1.8.20131213 version.<br>
+10) miniupnpd: update to 1.8.20131216 version.<br>
 11) kernel: wifi driver: temp back to 2.5.0.4 AP/STA driver for RT305x/RT3350.<br>
 12) kernel: wifi driver: fix power select in 2.5.0.4 AP driver.<br>
 13) kernel: wifi driver: consolidate config options 2.5/2.7 drivers.<br>

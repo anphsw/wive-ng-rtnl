@@ -1,5 +1,5 @@
 #! /bin/sh
-# $Id: genconfig.sh,v 1.65 2013/12/13 14:07:08 nanard Exp $
+# $Id: genconfig.sh,v 1.67 2013/12/16 15:39:24 nanard Exp $
 # miniupnp daemon
 # http://miniupnp.free.fr or http://miniupnp.tuxfamily.org/
 # (c) 2006-2013 Thomas Bernard
@@ -255,8 +255,15 @@ case $OS_NAME in
 		FW=netfilter
 		;;
 	Darwin)
+		MAJORVER=`echo $OS_VERSION | cut -d. -f1`
 		echo "#define USE_IFACEWATCHER 1" >> ${CONFIGFILE}
+		# OS X switched to pf since 10.7 Lion (Darwin 11.0)
+		if [ $MAJORVER -ge 11 ] ; then
+			FW=pf
+			echo "#define PFRULE_INOUT_COUNTS" >> ${CONFIGFILE}
+		else
 		FW=ipfw
+		fi
 		OS_URL=http://developer.apple.com/macosx
 		;;
 	Wifi-Router)
