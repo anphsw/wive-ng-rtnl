@@ -111,8 +111,10 @@
 #include <net/tcp.h>
 #include <net/sock.h>
 #include <net/arp.h>
+#ifdef CONFIG_AX25
 #include <net/ax25.h>
 #include <net/netrom.h>
+#endif
 #if defined(CONFIG_ATM_CLIP) || defined(CONFIG_ATM_CLIP_MODULE)
 #include <net/atmclip.h>
 struct neigh_table *clip_tbl_hook;
@@ -760,6 +762,7 @@ static int arp_process(struct sk_buff *skb)
 		    arp->ar_pro != htons(ETH_P_IP))
 			goto out;
 		break;
+#ifdef CONFIG_AX25
 	case ARPHRD_AX25:
 		if (arp->ar_pro != htons(AX25_P_IP) ||
 		    arp->ar_hrd != htons(ARPHRD_AX25))
@@ -770,6 +773,7 @@ static int arp_process(struct sk_buff *skb)
 		    arp->ar_hrd != htons(ARPHRD_NETROM))
 			goto out;
 		break;
+#endif
 	}
 
 	/* Understand only these message types */
