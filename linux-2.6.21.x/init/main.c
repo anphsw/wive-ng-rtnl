@@ -99,10 +99,6 @@ static inline void acpi_early_init(void) { }
 static inline void mark_rodata_ro(void) { }
 #endif
 
-#ifdef CONFIG_TC
-extern void tc_init(void);
-#endif
-
 enum system_states system_state;
 EXPORT_SYMBOL(system_state);
 
