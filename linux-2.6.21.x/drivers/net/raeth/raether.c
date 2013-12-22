@@ -145,6 +145,7 @@ static unsigned long tx_cpu_owner_idx0=0;
 static int pending_recv;
 #endif
 static struct PDMA_rxdesc	*rx_ring;
+
 static unsigned long tx_ring_full=0;
 
 #ifdef CONFIG_ETHTOOL
@@ -1955,12 +1956,14 @@ static int FASTPATH ei_start_xmit(struct sk_buff* skb, struct net_device *dev, i
 		tx_cpu_owner_idx_next2 = (tx_cpu_owner_idx_next + 1) % NUM_TX_DESC;
 
 		if(ei_local->skb_free[tx_cpu_owner_idx_next2]!=0){
+#if defined (CONFIG_RAETH_SW_FC)
 				netif_stop_queue(dev);
 #ifdef CONFIG_PSEUDO_SUPPORT
 				netif_stop_queue(ei_local->PseudoDev);
 #endif
 				tx_ring_full=1;
 		}
+#endif
 	}else {
 #ifdef CONFIG_PSEUDO_SUPPORT
 		if (gmac_no == 2) {
@@ -1971,8 +1974,10 @@ static int FASTPATH ei_start_xmit(struct sk_buff* skb, struct net_device *dev, i
 		} else
 #endif
 			ei_local->stat.tx_dropped++;
+#if defined (CONFIG_RAETH_SW_FC)
 		if (net_ratelimit())
 		    printk("tx_ring_full, drop packet\n");
+#endif
 		kfree_skb(skb);
 		spin_unlock_irqrestore(&ei_local->page_lock, flags);
 		return 0;

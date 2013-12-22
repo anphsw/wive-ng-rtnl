@@ -44,6 +44,11 @@ config RAETH_CHECKSUM_OFFLOAD
 	default y
         depends on RAETH && !RALINK_RT2880
 
+config RAETH_SW_FC
+        bool "When TX ring is full, inform kernel stop transmit and stop RX handler"
+	default n
+        depends on RAETH
+
 config 32B_DESC
         bool "32bytes TX/RX description"
 	default n
