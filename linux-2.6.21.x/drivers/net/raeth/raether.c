@@ -1962,8 +1962,8 @@ static int FASTPATH ei_start_xmit(struct sk_buff* skb, struct net_device *dev, i
 				netif_stop_queue(ei_local->PseudoDev);
 #endif
 				tx_ring_full=1;
-		}
 #endif
+		}
 	}else {
 #ifdef CONFIG_PSEUDO_SUPPORT
 		if (gmac_no == 2) {
