@@ -326,6 +326,7 @@ static struct chip_info chips_data [] = {
 	{ "EN25F64",            0x1c, 0x20171c20, 64 * 1024, 128, 0 }, // EN25P64
 	{ "EN25Q64",            0x1c, 0x30171c30, 64 * 1024, 128, 0 },
 	{ "W25Q64BV",           0xef, 0x40170000, 64 * 1024, 128, 0 }, //S25FL064K
+	{ "F25L64QA",           0x8c, 0x41170000, 64 * 1024, 128, 0 }, //ESMT
 
 //4Mb
 	{ "AT25DF321",		0x1f, 0x47000000, 64 * 1024, 64,  0 },
@@ -769,7 +770,7 @@ static int raspi_wait_ready(int sleep_ms)
 	for (count = 0;  count < ((sleep_ms+1) *1000 * 500); count++) {
 		if ((raspi_read_sr((u8 *)&sr)) < 0)
 			break;
-		else if (!(sr & (SR_WIP | SR_EPE))) {
+		else if (!(sr & SR_WIP)) {
 			return 0;
 		}
 
@@ -796,7 +797,7 @@ static int raspi_wait_sleep_ready(int sleep_ms)
 	for (count = 0;  count < ((sleep_ms+1) *1000); count++) {
 		if ((raspi_read_sr((u8 *)&sr)) < 0)
 			break;
-		else if (!(sr & (SR_WIP | SR_EPE))) {
+		else if (!(sr & SR_WIP)) {
 			return 0;
 		}
 
