@@ -1,7 +1,6 @@
 #
 # Automatically generated make config: don't edit
-# Linux kernel version: 2.6.21.41
-# Sun Nov 17 03:17:23 2013
+# Linux kernel version: 
 #
 CONFIG_MIPS=y
 
@@ -1580,6 +1579,7 @@ CONFIG_RAETH=y
 CONFIG_RAETH_NAPI=y
 CONFIG_RAETH_JUMBOFRAME=y
 CONFIG_RAETH_CHECKSUM_OFFLOAD=y
+# CONFIG_RAETH_SW_FC is not set
 CONFIG_RAETH_HW_VLAN_TX=y
 # CONFIG_GE1_MII_FORCE_100 is not set
 # CONFIG_GE1_MII_AN is not set
