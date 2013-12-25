@@ -1132,7 +1132,7 @@ UCHAR MlmeSelectTxRate(
 	else
 #endif /*  DOT11N_SS3_SUPPORT */
 	if ((pTable == RateSwitchTable11BGN2S) || (pTable == RateSwitchTable11BGN2SForABand) ||
-		(pTable == RateSwitchTable11N2S) || (pTable == RateSwitchTable11N2SForABand) || (pTable == RateSwitchTable)
+		(pTable == RateSwitchTable11N2S) || (pTable == RateSwitchTable11N2SForABand)
 #ifdef NEW_RATE_ADAPT_SUPPORT
 		|| (pTable == RateSwitchTableAdapt11N2S)
 #endif /* NEW_RATE_ADAPT_SUPPORT */
