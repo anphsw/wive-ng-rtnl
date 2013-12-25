@@ -1495,6 +1495,15 @@ VOID STAMlmePeriodicExec(
 					 pAd->RalinkCounters.OneSecTxRetryOkCount + 
 					 pAd->RalinkCounters.OneSecTxFailCount;
 
+	if (RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_BSS_SCAN_IN_PROGRESS) 
+	)
+	{
+		ULONG Now;
+		bCheckBeaconLost = FALSE;
+		NdisGetSystemUpTime(&Now);
+		pAd->StaCfg.LastBeaconRxTime = Now;
+	}
+
 	if (OPSTATUS_TEST_FLAG(pAd, fOP_STATUS_MEDIA_STATE_CONNECTED) && 
 		(!RTMP_TEST_FLAG(pAd, fRTMP_ADAPTER_BSS_SCAN_IN_PROGRESS)))
 	{
