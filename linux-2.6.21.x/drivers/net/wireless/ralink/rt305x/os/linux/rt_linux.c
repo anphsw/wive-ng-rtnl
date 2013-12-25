@@ -1660,8 +1660,10 @@ int RtmpOSNetDevAddrSet(
 	// work-around for the SuSE due to it has it's own interface name management system.
 	IF_DEV_CONFIG_OPMODE_ON_STA(pAd)
 	{
-		NdisZeroMemory(pAd->StaCfg.dev_name, 16);
-		NdisMoveMemory(pAd->StaCfg.dev_name, net_dev->name, strlen(net_dev->name));
+		if (dev_name != NULL) {
+		    NdisZeroMemory(pAd->StaCfg.dev_name, 16);
+		    NdisMoveMemory(pAd->StaCfg.dev_name, net_dev->name, strlen(net_dev->name));
+		}
 	}
 #endif // CONFIG_STA_SUPPORT //
 

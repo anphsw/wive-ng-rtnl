@@ -1536,8 +1536,10 @@ int RtmpOSNetDevAddrSet(IN UCHAR OpMode,
 	RT_CONFIG_IF_OPMODE_ON_STA(OpMode) {
 /*		NdisZeroMemory(pAd->StaCfg.dev_name, 16); */
 /*		NdisMoveMemory(pAd->StaCfg.dev_name, net_dev->name, strlen(net_dev->name)); */
-		NdisZeroMemory(dev_name, 16);
-		NdisMoveMemory(dev_name, net_dev->name, strlen(net_dev->name));
+		if (dev_name != NULL) {
+		    NdisZeroMemory(dev_name, 16);
+		    NdisMoveMemory(dev_name, net_dev->name, strlen(net_dev->name));
+		}
 	}
 #endif /* CONFIG_STA_SUPPORT */
 
