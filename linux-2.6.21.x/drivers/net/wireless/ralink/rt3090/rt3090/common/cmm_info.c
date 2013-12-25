@@ -3110,13 +3110,8 @@ VOID RTMPIoctlGetSiteSurvey(
 
 	TotalLen = sizeof(CHAR)*((MAX_LEN_OF_BSS_TABLE)*max_len) + 100;
 
-
-	if (wrq->u.data.length < 200)
-	{
-		DBGPRINT(RT_DEBUG_TRACE, ("%s:(): data.length is %u, use default length (%u)\n",
-					__FUNCTION__,  wrq->u.data.length, IW_SCAN_MAX_DATA));
+	if (wrq->u.data.length == 0)
 		BufLen = IW_SCAN_MAX_DATA;
-	}
 	else
 		BufLen = wrq->u.data.length;
 
