@@ -55,18 +55,21 @@ BOOLEAN rtstrmactohex(PSTRING s1, PSTRING s2)
 
 }
 
-
-// we assume the s1 and s2 both are strings.
+#define ASC_LOWER(_x)	((((_x) >= 0x41) && ((_x) <= 0x5a)) ? (_x) + 0x20 : (_x))
+/* we assume the s1 and s2 both are strings.*/
 BOOLEAN rtstrcasecmp(PSTRING s1, PSTRING s2)
 {
 	PSTRING p1 = s1, p2 = s2;
+	CHAR c1, c2;
 	
 	if (strlen(s1) != strlen(s2))
 		return FALSE;
 	
 	while(*p1 != '\0')
 	{
-		if((*p1 != *p2) && ((*p1 ^ *p2) != 0x20))
+		c1 = ASC_LOWER(*p1);
+		c2 = ASC_LOWER(*p2);
+		if(c1 != c2)
 			return FALSE;
 		p1++;
 		p2++;
