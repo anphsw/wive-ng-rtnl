@@ -1529,10 +1529,18 @@ VOID RTMPDeQueuePacket(
 			pTxBlk->TotalFragNum += RTMP_GET_PACKET_FRAGMENTS(pPacket);	/* The real fragment number maybe vary*/
 			pTxBlk->TotalFrameLen += GET_OS_PKT_LEN(pPacket);
 			pTxBlk->pPacket = pPacket;
-#ifdef P2P_SUPPORT
-			pTxBlk->OpMode = RTMP_GET_PACKET_OPMODE(pPacket);
-#endif /* P2P_SUPPORT */
 			InsertTailQueue(&pTxBlk->TxPacketList, PACKET_TO_QUEUE_ENTRY(pPacket));
+
+			if (pTxBlk->TxFrameType & (TX_RALINK_FRAME | TX_AMSDU_FRAME))
+			{
+				// Enhance SW Aggregation Mechanism
+				if (NEED_QUEUE_BACK_FOR_AGG(pAd, QueIdx, FreeNumber[QueIdx], pTxBlk->TxFrameType))
+				{
+					InsertHeadQueue(pQueue, PACKET_TO_QUEUE_ENTRY(pPacket));
+					DEQUEUE_UNLOCK(&pAd->irq_lock, bIntContext, IrqFlags);
+					break;
+				}
+			}
 
 
 			if (pTxBlk->TxFrameType == TX_RALINK_FRAME || pTxBlk->TxFrameType == TX_AMSDU_FRAME)

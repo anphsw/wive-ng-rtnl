@@ -1453,6 +1453,17 @@ VOID RTMPDeQueuePacket(
 #endif // ACM_CC_FUNC_QUE_TX_CTRL //
 #endif // WMM_ACM_SUPPORT //
 
+			if (pTxBlk->TxFrameType & (TX_RALINK_FRAME | TX_AMSDU_FRAME))
+			{
+				// Enhance SW Aggregation Mechanism
+				if (NEED_QUEUE_BACK_FOR_AGG(pAd, QueIdx, FreeNumber[QueIdx], pTxBlk->TxFrameType))
+				{
+					InsertHeadQueue(pQueue, PACKET_TO_QUEUE_ENTRY(pPacket));
+					DEQUEUE_UNLOCK(&pAd->irq_lock, bIntContext, IrqFlags);
+					break;
+				}
+			}
+
 			if (pTxBlk->TxFrameType == TX_RALINK_FRAME || pTxBlk->TxFrameType == TX_AMSDU_FRAME)
 			{
 				// Enhance SW Aggregation Mechanism

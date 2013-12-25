@@ -1315,6 +1315,17 @@ VOID RTMPDeQueuePacket(
 			pTxBlk->pPacket = pPacket;
 			InsertTailQueue(&pTxBlk->TxPacketList, PACKET_TO_QUEUE_ENTRY(pPacket));
 
+			if (pTxBlk->TxFrameType & (TX_RALINK_FRAME | TX_AMSDU_FRAME))
+			{
+				// Enhance SW Aggregation Mechanism
+				if (NEED_QUEUE_BACK_FOR_AGG(pAd, QueIdx, FreeNumber[QueIdx], pTxBlk->TxFrameType))
+				{
+					InsertHeadQueue(pQueue, PACKET_TO_QUEUE_ENTRY(pPacket));
+					DEQUEUE_UNLOCK(&pAd->irq_lock, bIntContext, IrqFlags);
+					break;
+				}
+			}
+
 			if (pTxBlk->TxFrameType == TX_RALINK_FRAME || pTxBlk->TxFrameType == TX_AMSDU_FRAME)
 			{
 				// Enhance SW Aggregation Mechanism
