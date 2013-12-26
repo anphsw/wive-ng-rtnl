@@ -709,8 +709,8 @@ static int gen_wifi_config(int getmode)
 		fprintf(fp, "SSID=\nWPAPSK=\nKey1Str=\nKey2Str=\nKey3Str=\nKey4Str=\n");
 	}
 
-    nvram_close(mode);
     fclose(fp);
+    nvram_close(mode);
     return 0;
 }
 
