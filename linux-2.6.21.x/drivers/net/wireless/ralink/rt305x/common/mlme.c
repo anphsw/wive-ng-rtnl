@@ -2220,7 +2220,6 @@ VOID STAMlmePeriodicExec(
 	)
 	{
 		ULONG Now;
-		bCheckBeaconLost = FALSE;
 		NdisGetSystemUpTime(&Now);
 		pAd->StaCfg.LastBeaconRxTime = Now;
 	}
