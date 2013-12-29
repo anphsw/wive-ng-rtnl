@@ -169,10 +169,10 @@ static int nvram_load_default(void)
 
 	printf("Clear nvram...\n");
 	nvram_clear(RT2860_NVRAM);
+	sync();
 	printf("Load defaults nvram...\n");
 	renew_nvram(RT2860_NVRAM, "/etc/default/nvram_default");
-
-	printf("Renew nvram...\n");
+	sync();
 
 	/* reinit nvram before commit */
 	if ( nvram_init(RT2860_NVRAM) == -1 )
@@ -205,7 +205,7 @@ static int nvram_load_default(void)
         nvram_bufset(RT2860_NVRAM, "IS_WIVE", "YES");
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
-
+	sync();
     return 0;
 }
 
@@ -711,6 +711,7 @@ static int gen_wifi_config(int getmode)
 
     fclose(fp);
     nvram_close(mode);
+    sync();
     return 0;
 }
 
