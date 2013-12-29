@@ -1761,36 +1761,35 @@
 7) dnsmasq: up to 2.68 version.<br>
 8) dropbear: up to 2013.62 version.<br>
 9) xupnpd: update lua to 5.2.3 version.<br>
-10) xupnpd: update 394 svn revision version.<br>
-11) miniupnpd: update to 1.8.20131216 version.<br>
-12) kernel: wifi driver: temp back to 2.5.0.4 AP/STA driver for RT305x/RT3350.<br>
-13) kernel: wifi driver: fix power select in 2.5.0.4 AP driver.<br>
-14) kernel: wifi driver: consolidate config options 2.5/2.7 drivers.<br>
-15) kernel: tcp: reset reordering est. selectively on timeout.<br>
-16) kernel: netfilter: nf_ct_h323: fix bug in rtcp natting.<br>
-17) kernel: tcp: undo on DSACK during recovery.<br>
-18) kernel: ipv4: Fix IP timestamp option (IPOPT_TS_PRESPEC) handling in ip_options_echo().<br>
-19) kenrel: af_unix: implement socket filter.<br>
-20) kernel: network: tcp_connect should return certain errors up the stack.<br>
-21) kernel: net: avoid race between network down and sysfs.<br>
-22) kernel: af_packet: check return of dev_set_promiscuity/allmulti.<br>
-23) kernel: net: Avoid copying writable clones in tunnel drivers.<br>
-24) kernel: ipv6: sit: Fix locking issues in PRL management.<br>
-25) kernel: ipv6: sit: Disallow 0.0.0.0 in PRL and Flush PRL if given for DEL.<br>
-26) kernel: net: remove link_watch delay for up even when we're down.<br>
-27) kernel: net: link_watch: Always schedule urgent events.<br>
-28) kernel: net: zero length write() on socket should not simply return 0.<br>
-29) kernel: net: pppoe: Check packet length on all receive paths.<br>
-30) kernel: net: rework recvmsg handler msg_name and msg_namelen logic.<br>
-31) kernel: usb: add IAD support to usbfs and sysfs.<br>
-32) kernel: usb: add "descriptors" binary sysfs attribute.<br>
-33) kernel: ipv6: call udp_push_pending_frames when uncorking a socket with AF_INET pending data.<br>
-34) kernel: ipv6: fix leaking uninitialized port number of offender sockaddr.<br>
-35) kernel: ipv6: netfilter: move POSTROUTING invocation before fragmentation.<br>
-36) kernel: wifi_drivers: full disable apqload support.<br>
-37) kernel: inet: prevent leakage of uninitialized memory to user in recv syscalls.<br>
-38) kernel: ipv6 route: Fix route lifetime in netlink message.<br>
-39) kernel: ipv4: fix DO and PROBE pmtu mode regarding local fragmentation with UFO/CORK.<br>
+10) miniupnpd: update to 1.8.20131216 version.<br>
+11) kernel: wifi driver: temp back to 2.5.0.4 AP/STA driver for RT305x/RT3350.<br>
+12) kernel: wifi driver: fix power select in 2.5.0.4 AP driver.<br>
+13) kernel: wifi driver: consolidate config options 2.5/2.7 drivers.<br>
+14) kernel: tcp: reset reordering est. selectively on timeout.<br>
+15) kernel: netfilter: nf_ct_h323: fix bug in rtcp natting.<br>
+16) kernel: tcp: undo on DSACK during recovery.<br>
+17) kernel: ipv4: Fix IP timestamp option (IPOPT_TS_PRESPEC) handling in ip_options_echo().<br>
+18) kenrel: af_unix: implement socket filter.<br>
+19) kernel: network: tcp_connect should return certain errors up the stack.<br>
+20) kernel: net: avoid race between network down and sysfs.<br>
+21) kernel: af_packet: check return of dev_set_promiscuity/allmulti.<br>
+22) kernel: net: Avoid copying writable clones in tunnel drivers.<br>
+23) kernel: ipv6: sit: Fix locking issues in PRL management.<br>
+24) kernel: ipv6: sit: Disallow 0.0.0.0 in PRL and Flush PRL if given for DEL.<br>
+25) kernel: net: remove link_watch delay for up even when we're down.<br>
+26) kernel: net: link_watch: Always schedule urgent events.<br>
+27) kernel: net: zero length write() on socket should not simply return 0.<br>
+28) kernel: net: pppoe: Check packet length on all receive paths.<br>
+29) kernel: net: rework recvmsg handler msg_name and msg_namelen logic.<br>
+30) kernel: usb: add IAD support to usbfs and sysfs.<br>
+31) kernel: usb: add "descriptors" binary sysfs attribute.<br>
+32) kernel: ipv6: call udp_push_pending_frames when uncorking a socket with AF_INET pending data.<br>
+33) kernel: ipv6: fix leaking uninitialized port number of offender sockaddr.<br>
+34) kernel: ipv6: netfilter: move POSTROUTING invocation before fragmentation.<br>
+35) kernel: wifi_drivers: full disable apqload support.<br>
+36) kernel: inet: prevent leakage of uninitialized memory to user in recv syscalls.<br>
+37) kernel: ipv6 route: Fix route lifetime in netlink message.<br>
+38) kernel: ipv4: fix DO and PROBE pmtu mode regarding local fragmentation with UFO/CORK.<br>
 <br>
 <br>
 <br>
