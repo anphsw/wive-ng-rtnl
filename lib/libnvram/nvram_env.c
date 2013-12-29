@@ -548,8 +548,7 @@ int renew_nvram(int mode, char *fname)
 		need_commit = 1;
 	}
 
-	if (need_commit)
-	    nvram_commit(mode);
+	nvram_commit(mode);
 out:
 	fclose(fp);
 	nvram_close(mode);
