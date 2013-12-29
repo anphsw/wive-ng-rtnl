@@ -400,8 +400,7 @@ static void arp_solicit(struct neighbour *neigh, struct sk_buff *skb)
 		read_unlock_bh(&neigh->lock);
 }
 
-static int arp_ignore(struct in_device *in_dev, struct net_device *dev,
-		      __be32 sip, __be32 tip)
+static int arp_ignore(struct in_device *in_dev, __be32 sip, __be32 tip)
 {
 	int scope;
 
@@ -421,7 +420,7 @@ static int arp_ignore(struct in_device *in_dev, struct net_device *dev,
 	case 3:	/* Do not reply for scope host addresses */
 		sip = 0;
 		scope = RT_SCOPE_LINK;
-		dev = NULL;
+		in_dev = NULL;
 		break;
 	case 4:	/* Reserved */
 	case 5:
@@ -433,7 +432,7 @@ static int arp_ignore(struct in_device *in_dev, struct net_device *dev,
 	default:
 		return 0;
 	}
-	return !inet_confirm_addr(dev, sip, tip, scope);
+	return !inet_confirm_addr(in_dev, sip, tip, scope);
 }
 
 static int arp_filter(__be32 sip, __be32 tip, struct net_device *dev)
@@ -826,7 +825,7 @@ static int arp_process(struct sk_buff *skb)
 	if (sip == 0) {
 		if (arp->ar_op == htons(ARPOP_REQUEST) &&
 		    inet_addr_type(tip) == RTN_LOCAL &&
-		    !arp_ignore(in_dev,dev,sip,tip))
+		    !arp_ignore(in_dev, sip, tip))
 			arp_send(ARPOP_REPLY, ETH_P_ARP, sip, dev, tip, sha,
 				 dev->dev_addr, sha);
 		goto out;
@@ -844,7 +843,7 @@ static int arp_process(struct sk_buff *skb)
 				int dont_send = 0;
 
 				if (!dont_send)
-					dont_send |= arp_ignore(in_dev,dev,sip,tip);
+					dont_send |= arp_ignore(in_dev,sip,tip);
 				if (!dont_send && IN_DEV_ARPFILTER(in_dev))
 					dont_send = arp_filter(sip, tip, dev);
 				if (!dont_send)
