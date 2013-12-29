@@ -640,9 +640,10 @@ int rt28xx_open(IN PNET_DEV dev)
 	RTMP_SET_FLAG(pAd, fRTMP_ADAPTER_START_UP);
 
 	{
-	UINT32 reg = 0;
-	RTMP_IO_READ32(pAd, 0x1300, &reg);  // clear garbage interrupts
-	printk("0x1300 = %08x\n", reg);
+	    UINT32 reg = 0;
+	    RTMP_IO_READ32(pAd, 0x1300, &reg);  // clear garbage interrupts
+	    if (reg)
+		printk("0x1300 = %08x\n", reg);
 	}
 
 #ifdef CONFIG_STA_SUPPORT
