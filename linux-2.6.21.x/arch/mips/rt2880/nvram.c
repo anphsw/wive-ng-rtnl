@@ -28,9 +28,9 @@ static int ra_nvram_close(int index);
 char const *nvram_get(int index, char *name);
 int const nvram_getall(int index, char *buf);
 
-int nvram_set(int index, char *name, char *value);
-int nvram_commit(int index);
-int nvram_clear(int index);
+static int nvram_set(int index, char *name, char *value);
+static int nvram_commit(int index);
+static int nvram_clear(int index);
 
 /* /dev/nvram major number */
 static int ralink_nvram_major = 251;
@@ -384,7 +384,7 @@ static int cache_idx(int index, char *name)
 /*
  * clear flash by writing all 1's value
  */
-int nvram_clear(int index)
+static int nvram_clear(int index)
 {
 	unsigned long to;
 	int len;
@@ -428,7 +428,7 @@ int nvram_clear(int index)
 	return 0;
 }
 
-int nvram_commit(int index)
+static int nvram_commit(int index)
 {
 	unsigned long to;
 	int i, len;
@@ -491,7 +491,7 @@ int nvram_commit(int index)
 	return 0;
 }
 
-int nvram_set(int index, char *name, char *value)
+static int nvram_set(int index, char *name, char *value)
 {
 	int idx;
 
@@ -600,5 +600,3 @@ int const nvram_getall(int index, char *buf)
 late_initcall(ra_nvram_init);
 module_exit(ra_nvram_exit);
 EXPORT_SYMBOL(nvram_get);
-EXPORT_SYMBOL(nvram_set);
-EXPORT_SYMBOL(nvram_commit);
