@@ -1247,7 +1247,6 @@ int RtmpOSNetDevAddrSet(IN UCHAR OpMode,
 	net_dev = pNetDev;
 /*	GET_PAD_FROM_NET_DEV(pAd, net_dev); */
 
-
 	NdisMoveMemory(net_dev->dev_addr, pMacAddr, 6);
 
 	return 0;
