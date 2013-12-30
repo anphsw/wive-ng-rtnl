@@ -6378,7 +6378,7 @@ ACM_BANDWIDTH_INFO BwInfo, *pInfo;
 		case OID_802_11_WEPDEFAULTKEYVALUE:
 			DBGPRINT(RT_DEBUG_TRACE, ("Query::OID_802_11_WEPDEFAULTKEYVALUE \n"));
 			//KeyIdxValue.KeyIdx = pAd->PortCfg.MBSSID[pAd->IoctlIF].DefaultKeyId;
-			pKeyIdxValue = wrq->u.data.pointer;
+			pKeyIdxValue = (DefaultKeyIdxValue*)wrq->u.data.pointer;
 			DBGPRINT(RT_DEBUG_TRACE,("KeyIdxValue.KeyIdx = %d, \n",pKeyIdxValue->KeyIdx));
 			valueLen = pAd->SharedKey[BSS0][pAd->StaCfg.DefaultKeyId].KeyLen;
 			NdisMoveMemory(pKeyIdxValue->Value,
