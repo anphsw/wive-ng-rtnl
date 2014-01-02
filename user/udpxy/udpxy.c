@@ -58,6 +58,13 @@
 #include "dpkt.h"
 #include "netop.h"
 
+#include "ts.h"
+#include "psi.h"
+#include "pat.h"
+#include "pmt.h"
+
+#define HAS_FLAGS(x, flag) (((x)&(flag))==(flag))
+
 /* external globals */
 
 extern const char   CMD_UDP[];
@@ -489,6 +496,119 @@ sync_dsockbuf_len( int ssockfd, int dsockfd )
     return rc;
 }
 
+//#define DEBUG_TS_FILTER
+
+struct filter_ctx {
+	uint8_t strmHdr[TS_SIZE*2];
+
+	#define F_PAT 1
+	#define F_PMT 2
+	#define F_MPG 4
+	#define F_INITED 32
+
+	#define F_FOUND (F_PAT|F_PMT)
+	uint32_t flags;
+	uint16_t pmtId;
+	size_t   skipped;
+
+#ifdef DEBUG_TS_FILTER
+	int      nnn;
+#endif
+};
+
+static void
+init_ts_filter(struct filter_ctx* f)
+{
+	f->flags = /*g_uopt.dont_wait_patpmt != uf_FALSE ? (F_FOUND|F_INITED) :*/ 0;
+	f->pmtId = 0;
+	f->skipped = 0;
+#ifdef DEBUG_TS_FILTER
+	f->nnn = 0;
+#endif
+}
+
+static void
+consume_ts_packet(uint8_t* pkt, struct filter_ctx* f)
+{
+	if( !ts_validate(pkt) ) {
+#ifdef DEBUG_TS_FILTER
+		TRACE( (void)tmfprintf( g_flog, "--- broken pkt:\n"
+			"%02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X\n",
+			pkt[0],pkt[1],pkt[2],pkt[3],pkt[4],pkt[5],pkt[6],pkt[7],pkt[8],
+			pkt[9],pkt[1],pkt[12],pkt[13],pkt[14],pkt[15]
+			) );
+#endif
+		return;
+	}
+	if( !ts_get_unitstart(pkt) )
+		return;
+
+	uint16_t pid = ts_get_pid(pkt);
+
+#ifdef DEBUG_TS_FILTER
+	TRACE( (void)tmfprintf( g_flog, "--- PID: %d, #%04x\n", f->nnn, pid ) );
+	f->nnn++;
+#endif
+
+	uint32_t flags = f->flags;
+	if( !HAS_FLAGS(flags, F_PAT) && pid == 0 ) {
+		uint8_t *pkt_end = pkt + TS_SIZE;
+		uint8_t *pat, *prg;
+
+		// PAT found
+		memcpy(f->strmHdr, pkt, TS_SIZE);
+		
+		pat = ts_section(pkt);
+		if( pat >= pkt_end ) {
+			TRACE( (void)tmfprintf( g_flog, "Got PAT. No section\n" ) );
+			return;
+		}
+		prg = pat_get_program(pat, 0);
+		if( (prg + PAT_PROGRAM_SIZE) >= pkt_end ) {
+			TRACE( (void)tmfprintf( g_flog, "Got PAT. No program\n" ) );
+			return;
+		}
+		f->pmtId = patn_get_pid(prg);
+		TRACE( (void)tmfprintf( g_flog, "Got PAT. Found program #%04x\n", f->pmtId ) );
+
+		f->flags |= F_PAT;
+		
+		return;
+	}
+	if( HAS_FLAGS(flags, F_PAT) && pid == f->pmtId ) {
+		memcpy(f->strmHdr + TS_SIZE, pkt, TS_SIZE);
+		f->flags |= F_PMT;
+		TRACE( (void)tmfprintf( g_flog, "Got PMT\n" ) );
+		return;
+	}
+}
+
+static void
+apply_ts_filter(struct dstream_ctx* ds, uint8_t* data, ssize_t nrcv, struct filter_ctx* f)
+{
+	ssize_t i, imax;
+
+	if( ds->flags & F_SCATTERED ) {
+		for(i = 0, imax = ds->pkt_count; i < imax; ++i) {
+		    struct iovec* pkt = ds->pkt + i;
+		    if( pkt->iov_len < TS_SIZE )
+				continue;
+		    consume_ts_packet((uint8_t*)pkt->iov_base, f);
+			f->skipped = i;
+			if( HAS_FLAGS(f->flags, F_FOUND) )
+				return;
+		}
+		if( !HAS_FLAGS(f->flags, F_FOUND) )
+			reset_pkt_registry(ds);
+	} else {
+		for(i = 0, imax = nrcv - TS_SIZE; i < imax; i += TS_SIZE) {
+			consume_ts_packet((uint8_t*)(data + i), f);
+			f->skipped = i;
+			if( HAS_FLAGS(f->flags, F_FOUND) )
+				return;
+		}
+	}	
+}
 
 /* relay traffic from source to destination socket
  *
@@ -520,6 +640,8 @@ relay_traffic( int ssockfd, int dsockfd, struct server_ctx* ctx,
 
     static const int SET_PID = 1;
     struct tps_data tps;
+
+	struct filter_ctx ts_filter;
 
     assert( ctx && mifaddr && MAX_PAUSE_MSEC > 0 );
 
@@ -598,7 +720,12 @@ relay_traffic( int ssockfd, int dsockfd, struct server_ctx* ctx,
 
     pause_time = 0;
 
+    init_ts_filter(&ts_filter);
+
     while( (0 == rc) && !(quit = must_quit()) ) {
+    	ssize_t i, imax;
+    	char* pdata = data;
+
         if( g_uopt.mcast_refresh > 0 ) {
             check_mcast_refresh( ssockfd, &rfr_tm, mifaddr );
         }
@@ -610,8 +737,33 @@ relay_traffic( int ssockfd, int dsockfd, struct server_ctx* ctx,
                     lrcv, nrcv, t_delta, g_flog ) );
         lrcv = nrcv;
 
+        if( !HAS_FLAGS(ts_filter.flags, F_FOUND) )
+        	apply_ts_filter(&ds, data, nrcv, &ts_filter);
+
+        if( !HAS_FLAGS(ts_filter.flags, F_FOUND) )
+			continue;
+
+		if( !HAS_FLAGS(ts_filter.flags, F_INITED) ) {
+			nsent = write_data( &ds, ts_filter.strmHdr, sizeof(ts_filter.strmHdr), dsockfd );
+			if( -1 == nsent ) break;
+
+			if( uf_TRUE == g_uopt.cl_tpstat )
+				tpstat_update( ctx, &tps, nsent );
+
+			if( ds.flags & F_SCATTERED ) {
+				ds.pkt_count -= ts_filter.skipped;
+				memmove(ds.pkt, ds.pkt + ts_filter.skipped, sizeof(ds.pkt[0]) * ds.pkt_count);
+			} else {
+				pdata += ts_filter.skipped;
+				nrcv -= ts_filter.skipped;
+			}
+
+			ts_filter.flags |= F_INITED;
+		}
+
+		nsent = 0;
         if( dsockfd && (nrcv > 0) ) {
-            nsent = write_data( &ds, data, nrcv, dsockfd );
+			nsent = write_data( &ds, pdata, nrcv, dsockfd );
             if( -1 == nsent ) break;
 
             if ( nsent < 0 ) {
@@ -826,7 +978,7 @@ report_status( int sockfd, const struct server_ctx* ctx, int options )
 {
     char *buf = NULL;
     int rc = 0;
-    ssize_t n = -1;
+    ssize_t n, nsent;
     size_t nlen = 0, bufsz, i;
     struct client_ctx *clc = NULL;
 
@@ -854,10 +1006,16 @@ report_status( int sockfd, const struct server_ctx* ctx, int options )
     rc = mk_status_page( ctx, buf, &nlen, options | MSO_HTTP_HEADER );
 
     (void) set_nblock(sockfd, BLOCKING);
+    for( n = nsent = 0; (0 == rc) && (nsent < (ssize_t)nlen);  ) {
+        errno = 0;
         n = send( sockfd, buf, (int)nlen, 0 );
+
         if( (-1 == n) && (EINTR != errno) ) {
             mperror(g_flog, errno, "%s: send", __func__);
             rc = ERR_INTERNAL;
+            break;
+        }
+        nsent += n;
     }
     (void) set_nblock(sockfd, NON_BLOCKING);
 

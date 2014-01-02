@@ -1797,6 +1797,7 @@
 <b>4.7.x</b><br>
 1) busybox: update to 1.22.0 version.<br>
 2) pppd: uptade to current 2.4.6-2Jan2014 version.<br>
+3) udpxy: add ts_demuxer support for more compat with some buggy players (wdtv/avatar3/some androids players).<br>
 
 <br>
 <br>
