@@ -993,6 +993,21 @@ ipcp_ackci(f, p, len)
 	    goto bad; \
     }
 
+#define ACKCIWINS(opt, addr) \
+    if (addr) { \
+	u_int32_t l; \
+	if ((len -= CILEN_ADDR) < 0) \
+	    goto bad; \
+	GETCHAR(citype, p); \
+	GETCHAR(cilen, p); \
+	if (cilen != CILEN_ADDR || citype != opt) \
+	    goto bad; \
+	GETLONG(l, p); \
+	cilong = htonl(l); \
+	if (addr != cilong) \
+	    goto bad; \
+    }
+
     ACKCIADDRS(CI_ADDRS, !go->neg_addr && go->old_addrs, go->ouraddr,
 	       go->hisaddr);
 
@@ -1008,6 +1023,10 @@ ipcp_ackci(f, p, len)
     ACKCIWINS(CI_MS_WINS1, go->req_wins1, go->winsaddr[0]);
 
     ACKCIWINS(CI_MS_WINS2, go->req_wins2, go->winsaddr[1]);
+
+    ACKCIWINS(CI_MS_WINS1, go->winsaddr[0]);
+
+    ACKCIWINS(CI_MS_WINS2, go->winsaddr[1]);
 
     /*
      * If there are any remaining CIs, then this packet is bad.
