@@ -88,6 +88,11 @@
 38) kernel: ipv4: fix DO and PROBE pmtu mode regarding local fragmentation with UFO/CORK.<br>
 39) kernel: ipv4: remove extra argument from arp_ignore.<br>
 40) kernel: arp: fix arp reply when sender ip 0.<br>
+
+<br>
+<b>4.7.x</b><br>
+1) busybox: update to 1.22.0 version.<br>
+
 <br>
 <br>
 <br>

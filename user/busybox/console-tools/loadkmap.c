@@ -61,16 +61,26 @@ int loadkmap_main(int argc UNUSED_PARAM, char **argv)
 	xread(STDIN_FILENO, flags, MAX_NR_KEYMAPS);
 
 	for (i = 0; i < MAX_NR_KEYMAPS; i++) {
-		if (flags[i] == 1) {
+		if (flags[i] != 1)
+			continue;
 			xread(STDIN_FILENO, ibuff, NR_KEYS * sizeof(uint16_t));
 			for (j = 0; j < NR_KEYS; j++) {
 				ke.kb_index = j;
 				ke.kb_table = i;
 				ke.kb_value = ibuff[j];
+			/*
+			 * Note: table[idx:0] can contain special value
+			 * K_ALLOCATED (marks allocated tables in kernel).
+			 * dumpkmap saves the value as-is; but attempts
+			 * to load it here fail, since it isn't a valid
+			 * key value: it is K(KT_SPEC,126) == 2<<8 + 126,
+			 * whereas last valid KT_SPEC is
+			 * K_BARENUMLOCK == K(KT_SPEC,19).
+			 * So far we just ignore these errors:
+			 */
 				ioctl(fd, KDSKBENT, &ke);
 			}
 		}
-	}
 
 	if (ENABLE_FEATURE_CLEAN_UP) {
 		close(fd);

@@ -31,8 +31,10 @@ struct client_config_t {
 
 #if ENABLE_FEATURE_UDHCP_PORT
 #define CLIENT_PORT (client_config.port)
+#define CLIENT_PORT6 (client_config.port)
 #else
 #define CLIENT_PORT 68
+#define CLIENT_PORT6 546
 #endif
 
 POP_SAVED_FUNCTION_VISIBILITY

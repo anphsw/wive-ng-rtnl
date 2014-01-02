@@ -79,7 +79,7 @@ static int smtp_checkp(const char *fmt, const char *param, int code)
 		if (-1 == code || n == code) {
 			free(msg);
 			return n;
-	}
+		}
 	}
 	bb_error_msg_and_die("%s failed", msg);
 }
@@ -92,23 +92,71 @@ static int smtp_check(const char *fmt, int code)
 // strip argument of bad chars
 static char *sane_address(char *str)
 {
-	char *s = str;
-	char *p = s;
+	char *s;
+
+	trim(str);
+	s = str;
 	while (*s) {
-		if (isalnum(*s) || '_' == *s || '-' == *s || '.' == *s || '@' == *s) {
-			*p++ = *s;
+		if (!isalnum(*s) && !strchr("_-.@", *s)) {
+			bb_error_msg("bad address '%s'", str);
+			/* returning "": */
+			str[0] = '\0';
+			return str;
 		}
 		s++;
 	}
-	*p = '\0';
 	return str;
+}
+
+// check for an address inside angle brackets, if not found fall back to normal
+static char *angle_address(char *str)
+{
+	char *s, *e;
+
+	trim(str);
+	e = last_char_is(str, '>');
+	if (e) {
+		s = strrchr(str, '<');
+		if (s) {
+			*e = '\0';
+			str = s + 1;
+		}
+	}
+	return sane_address(str);
 }
 
 static void rcptto(const char *s)
 {
+	if (!*s)
+		return;
 	// N.B. we don't die if recipient is rejected, for the other recipients may be accepted
 	if (250 != smtp_checkp("RCPT TO:<%s>", s, -1))
 		bb_error_msg("Bad recipient: <%s>", s);
+}
+
+// send to a list of comma separated addresses
+static void rcptto_list(const char *list)
+{
+	char *str = xstrdup(list);
+	char *s = str;
+	char prev = 0;
+	int in_quote = 0;
+
+	while (*s) {
+		char ch = *s++;
+
+		if (ch == '"' && prev != '\\') {
+			in_quote = !in_quote;
+		} else if (!in_quote && ch == ',') {
+			s[-1] = '\0';
+			rcptto(angle_address(str));
+			str = s;
+		}
+		prev = ch;
+	}
+	if (prev != ',')
+		rcptto(angle_address(str));
+	free(str);
 }
 
 int sendmail_main(int argc, char **argv) MAIN_EXTERNALLY_VISIBLE;
@@ -121,6 +169,13 @@ int sendmail_main(int argc UNUSED_PARAM, char **argv)
 	char *host = sane_address(safe_gethostname());
 	unsigned nheaders = 0;
 	int code;
+	enum {
+		HDR_OTHER = 0,
+		HDR_TOCC,
+		HDR_BCC,
+	} last_hdr = 0;
+	int check_hdr;
+	int has_to = 0;
 
 	enum {
 	//--- standard options
@@ -205,7 +260,7 @@ int sendmail_main(int argc UNUSED_PARAM, char **argv)
 		// vanilla connection
 		int fd;
 		// host[:port] not explicitly specified? -> use $SMTPHOST
-		// no $SMTPHOST ? -> use localhost
+		// no $SMTPHOST? -> use localhost
 		if (!(opts & OPT_S)) {
 			opt_connect = getenv("SMTPHOST");
 			if (!opt_connect)
@@ -282,39 +337,67 @@ int sendmail_main(int argc UNUSED_PARAM, char **argv)
 
 		// analyze headers
 		// To: or Cc: headers add recipients
+		check_hdr = (0 == strncasecmp("To:", s, 3));
+		has_to |= check_hdr;
 		if (opts & OPT_t) {
-		if (0 == strncasecmp("To:", s, 3) || 0 == strncasecmp("Bcc:" + 1, s, 3)) {
-			rcptto(sane_address(s+3));
-			goto addheader;
+			if (check_hdr || 0 == strncasecmp("Bcc:" + 1, s, 3)) {
+				rcptto_list(s+3);
+				last_hdr = HDR_TOCC;
+				goto addheader;
 			}
-		// Bcc: header adds blind copy (hidden) recipient
+			// Bcc: header adds blind copy (hidden) recipient
 			if (0 == strncasecmp("Bcc:", s, 4)) {
-			rcptto(sane_address(s+4));
-			free(s);
+				rcptto_list(s+4);
+				free(s);
+				last_hdr = HDR_BCC;
 				continue; // N.B. Bcc: vanishes from headers!
 			}
 		}
-		if (strchr(s, ':') || (list && isspace(s[0]))) {
-		// other headers go verbatim
-		// N.B. RFC2822 2.2.3 "Long Header Fields" allows for headers to occupy several lines.
-		// Continuation is denoted by prefixing additional lines with whitespace(s).
-		// Thanks (stefan.seyfried at googlemail.com) for pointing this out.
+		check_hdr = (list && isspace(s[0]));
+		if (strchr(s, ':') || check_hdr) {
+			// other headers go verbatim
+			// N.B. RFC2822 2.2.3 "Long Header Fields" allows for headers to occupy several lines.
+			// Continuation is denoted by prefixing additional lines with whitespace(s).
+			// Thanks (stefan.seyfried at googlemail.com) for pointing this out.
+			if (check_hdr && last_hdr != HDR_OTHER) {
+				rcptto_list(s+1);
+				if (last_hdr == HDR_BCC)
+					continue;
+					// N.B. Bcc: vanishes from headers!
+			} else {
+				last_hdr = HDR_OTHER;
+			}
  addheader:
 			// N.B. we allow MAX_HEADERS generic headers at most to prevent attacks
 			if (MAX_HEADERS && ++nheaders >= MAX_HEADERS)
 				goto bail;
 			llist_add_to_end(&list, s);
 		} else {
-		// a line without ":" (an empty line too, by definition) doesn't look like a valid header
-		// so stop "analyze headers" mode
+			// a line without ":" (an empty line too, by definition) doesn't look like a valid header
+			// so stop "analyze headers" mode
  reenter:
 			// put recipients specified on cmdline
+			check_hdr = 1;
 			while (*argv) {
 				char *t = sane_address(*argv);
 				rcptto(t);
 				//if (MAX_HEADERS && ++nheaders >= MAX_HEADERS)
 				//	goto bail;
-				llist_add_to_end(&list, xasprintf("To: %s", t));
+				if (!has_to) {
+					const char *hdr;
+
+					if (check_hdr && argv[1])
+						hdr = "To: %s,";
+					else if (check_hdr)
+						hdr = "To: %s";
+					else if (argv[1])
+						hdr = "To: %s," + 3;
+					else
+						hdr = "To: %s" + 3;
+					llist_add_to_end(&list,
+							xasprintf(hdr, t));
+					check_hdr = 0;
+				}
 				argv++;
 			}
 			// enter "put message" mode

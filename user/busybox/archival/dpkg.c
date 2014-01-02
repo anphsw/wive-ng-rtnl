@@ -25,8 +25,21 @@
  *
  * bugs that need to be fixed
  *  - (unknown, please let me know when you find any)
- *
  */
+
+//config:config DPKG
+//config:	bool "dpkg"
+//config:	default n
+//config:	select FEATURE_SEAMLESS_GZ
+//config:	help
+//config:	  dpkg is a medium-level tool to install, build, remove and manage
+//config:	  Debian packages.
+//config:
+//config:	  This implementation of dpkg has a number of limitations,
+//config:	  you should use the official dpkg if possible.
+
+//applet:IF_DPKG(APPLET(dpkg, BB_DIR_USR_BIN, BB_SUID_DROP))
+//kbuild:lib-$(CONFIG_DPKG) += dpkg.o
 
 //usage:#define dpkg_trivial_usage
 //usage:       "[-ilCPru] [-F OPT] PACKAGE"
