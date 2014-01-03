@@ -10,6 +10,7 @@ usage() {
   echo "Usage: $0 | showstat | showcalib | setmaxpwr " >&2
   echo "_____________________________________________________________________________________________________________________" >&2
   echo " " >&2
+  echo " wl scan ra0 - scan and show result of wireless interface ra0" >&2
   echo " wl showstat  ra0 - show statistic of wireless interface ra0" >&2
   echo " wl showcalib ra0 - show fabric calibrations for wireless interface ra0" >&2
   echo " wl setmaxpwr ra0 0E0E 0E0E 0E0E 0E0E 0E0E 0E0E 0E0E  - set maximum power 0E for wireless interface ra0, default 0C" >&2
@@ -17,6 +18,13 @@ usage() {
   echo " wl flashdefaults - write default calirations to flash." >&2
   echo "_____________________________________________________________________________________________________________________" >&2
  exit 1
+}
+
+scan()
+{
+    iwpriv $1 set SiteSurvey=1
+    sleep 3
+    iwpriv $1 get_site_survey
 }
 
 showstat()
@@ -95,6 +103,9 @@ main() {
   [ -z "$cmd" ] && usage
   shift
   case "$cmd" in
+    scan)
+      scan $@
+      ;;
     showstat)
       showstat $@
       ;;
