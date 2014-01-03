@@ -5,8 +5,13 @@
 
 echo ">>>>> RECONFIGURE WIFI IF = $1 <<<<<<<<<<"
 
-########################################ALLMODE param########################################
+#############################################################################################
 eval `nvram_buf_get 2860 HiPower AutoConnect OperationMode TxPower`
+########################################ALLMODE param########################################
+# decrease retry and enable autofallback - need for decrease issue with RTL8723 based clients
+iwpriv $1 set AutoFallBack=1
+iwpriv $1 set ShortRetry=3
+iwpriv $1 set LongRetry=3
 ########################################LNA param############################################
 # Disable increase LNA gain
 if [ "$CONFIG_RALINK_RT3052" = "y" ] || [ "$CONFIG_RALINK_RT3352" = "y" ]; then
