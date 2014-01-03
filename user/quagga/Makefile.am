@@ -33,4 +33,5 @@ romfs: install
 	$(ROMFSINST) -s /etc/rc.d/W47zebra /etc/init.d/zebra
 	$(ROMFSINST) -S filesystem/sbin/zebra /bin/zebra
 	$(ROMFSINST) -S filesystem/sbin/ripd /bin/ripd
+	cp -rfva filesystem/lib/*.so* $(ROMFSDIR)/lib/
 	rm -rf filesystem
