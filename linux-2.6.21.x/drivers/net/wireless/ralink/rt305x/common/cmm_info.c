@@ -3133,7 +3133,9 @@ VOID RTMPIoctlGetMacTableStaInfo(
 			MacTab.Entry[MacTab.Num].TxRate.field.MODE = pAd->MacTab.Content[i].HTPhyMode.field.MODE;
 			MacTab.Entry[MacTab.Num].TxRate.word = pAd->MacTab.Content[i].HTPhyMode.word;
 #ifdef RTMP_RBUS_SUPPORT
+#if defined (RT2883) || defined (RT3883)
 			MacTab.Entry[MacTab.Num].LastRxRate = pAd->MacTab.Content[i].LastRxRate;
+#endif
 #endif // RTMP_RBUS_SUPPORT //
 
 			MacTab.Num += 1;
@@ -3188,7 +3190,9 @@ VOID RTMPIoctlGetMacTable(
 			MacTab.Entry[MacTab.Num].TxRate.word = pAd->MacTab.Content[i].HTPhyMode.word;
 									
 #ifdef RTMP_RBUS_SUPPORT
+#if defined (RT2883) || defined (RT3883)
 			MacTab.Entry[MacTab.Num].LastRxRate = pAd->MacTab.Content[i].LastRxRate;
+#endif
 #endif // RTMP_RBUS_SUPPORT //
 									
 			MacTab.Num += 1;

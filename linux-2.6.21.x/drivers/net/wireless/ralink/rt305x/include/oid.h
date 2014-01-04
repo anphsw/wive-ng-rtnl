@@ -1211,9 +1211,11 @@ typedef struct _RT_802_11_MAC_ENTRY {
 	UINT32		ConnectedTime;
     MACHTTRANSMIT_SETTING	TxRate;
 #ifdef RTMP_RBUS_SUPPORT
+#if defined (RT2883) || defined (RT3883)
 	UINT32		LastRxRate;
 	SHORT		StreamSnr[3];
 	SHORT		SoundingRespSnr[3];
+#endif
 #endif // RTMP_RBUS_SUPPORT //
 } RT_802_11_MAC_ENTRY, *PRT_802_11_MAC_ENTRY;
 

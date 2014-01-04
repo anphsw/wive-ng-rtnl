@@ -564,9 +564,11 @@ typedef struct _RT_802_11_MAC_ENTRY {
     char            		AvgRssi2;
     unsigned int          	ConnectedTime;
     MACHTTRANSMIT_SETTING       TxRate;
+#ifdef CONFIG_RALINK_RT3883
     unsigned int          	LastRxRate;
     short           		StreamSnr[3];
     short           		SoundingRespSnr[3];
+#endif
 } RT_802_11_MAC_ENTRY;
 
 typedef struct _RT_802_11_MAC_TABLE {
