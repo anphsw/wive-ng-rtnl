@@ -140,7 +140,7 @@ static inline int ip6_skb_dst_mtu(struct sk_buff *skb)
 static int ip6_finish_output(struct sk_buff *skb)
 {
 	if ((skb->len > ip6_skb_dst_mtu(skb) && !skb_is_gso(skb)) ||
-		dst_allfrag(skb_dst(skb)))
+		dst_allfrag(skb->dst))
 		return ip6_fragment(skb, ip6_finish_output2);
 	else
 		return ip6_finish_output2(skb);
@@ -148,7 +148,7 @@ static int ip6_finish_output(struct sk_buff *skb)
 
 int ip6_output(struct sk_buff *skb)
 {
-	struct net_device *dev = skb_dst(skb)->dev;
+	struct net_device *dev = skb->dst->dev;
 
 	return NF_HOOK(PF_INET6, NF_IP6_POST_ROUTING, skb, NULL, dev,
 		       ip6_finish_output);

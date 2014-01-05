@@ -1206,26 +1206,30 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 	/* software route offload path */
         if (nf_conntrack_fastroute && !skip_offload && skb_is_ready(*pskb) && is_pure_routing(ct)
 	    && (ctinfo == IP_CT_ESTABLISHED || ctinfo == IP_CT_ESTABLISHED_REPLY)) {
+
 	    /* change status from new to seen_reply. when receive reply packet the status will set to establish */
 	    if (set_reply && !test_and_set_bit(IPS_SEEN_REPLY_BIT, &ct->status))
 		nf_conntrack_event_cache(IPCT_STATUS, *pskb);
-		if(hooknum == NF_IP_PRE_ROUTING) {
-		    (*pskb)->cb[FAST_ROUTE]=1;
-		    /* this function will handle routing decision. the next hoook will be input or forward chain */
-		    if (ip_rcv_finish(*pskb) == NF_FAST_NAT) {
-			struct net_device *dev = skb_dst(*pskb)->dev;
-			(*pskb)->dev = dev;
-			(*pskb)->protocol = htons(ETH_P_IP);
-			return NF_FAST_NAT;
-		    }
-		    /* this tell system no need to handle this packet. we will handle this. */
-		    return NF_STOLEN;
-		} else if(hooknum == NF_IP_LOCAL_OUT) {
-		    struct net_device *dev = skb_dst(*pskb)->dev;
-		    (*pskb)->dev = dev;
+
+	    if(hooknum == NF_IP_PRE_ROUTING) {
+	        (*pskb)->cb[FAST_ROUTE]=1;
+		/* this function will handle routing decision. the next hoook will be input or forward chain */
+		if (ip_rcv_finish(*pskb) == NF_FAST_NAT) {
+		    /* Change skb owner to output device */
+		    (*pskb)->dev = (*pskb)->dst->dev;
 		    (*pskb)->protocol = htons(ETH_P_IP);
 		    return NF_FAST_NAT;
 		}
+		/* this tell system no need to handle this packet. we will handle this. */
+		return NF_STOLEN;
+	    } else {
+		if(hooknum == NF_IP_LOCAL_OUT) {
+		    /* Change skb owner to output device */
+		    (*pskb)->dev = (*pskb)->dst->dev;
+		    (*pskb)->protocol = htons(ETH_P_IP);
+		    return NF_FAST_NAT;
+		}
+	    }
 	}
 #endif
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE) || \

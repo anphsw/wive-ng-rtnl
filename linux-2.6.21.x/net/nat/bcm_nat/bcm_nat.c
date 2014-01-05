@@ -129,6 +129,7 @@ bcm_do_bindings(struct nf_conn *ct,
 
 				if (ip_route_input((*pskb), iph->daddr, iph->saddr, iph->tos, dev))
 					return NF_DROP;
+
 				/* Change skb owner to output device */
 				(*pskb)->dev = (*pskb)->dst->dev;
 			}

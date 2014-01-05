@@ -1800,7 +1800,8 @@
 3) udpxy: add ts_demuxer support for more compat with some buggy players (wdtv/avatar3/some androids players).<br>
 4) udpxy: import last fixes from upstream git (github.com/pcherenkov/udpxy).<br>
 5) kernel: ip6_tunnel: ensure to always have a link local address(RFC4862 and RFC4291 more compat).<br>
-
+6) kernel: fastroute: small speedup and more readable code.<br>
+7) kernel: ipv6: fix fragment process in ip output finish.<br>
 <br>
 <br>
 <br>

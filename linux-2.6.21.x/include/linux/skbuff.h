@@ -1785,14 +1785,5 @@ static inline void skb_forward_csum(struct sk_buff *skb)
 	if (skb->ip_summed == CHECKSUM_COMPLETE)
 		skb->ip_summed = CHECKSUM_NONE;
 }
-
-#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-/* compat with new code */
-static inline struct dst_entry *skb_dst(const struct sk_buff *skb)
-{
-	return (struct dst_entry *)skb->dst;
-}
-#endif
-
 #endif	/* __KERNEL__ */
 #endif	/* _LINUX_SKBUFF_H */
