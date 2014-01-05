@@ -1798,6 +1798,8 @@
 1) busybox: update to 1.22.0 version.<br>
 2) pppd: uptade to current 2.4.6-2Jan2014 version.<br>
 3) udpxy: add ts_demuxer support for more compat with some buggy players (wdtv/avatar3/some androids players).<br>
+4) udpxy: import last fixes from upstream git (github.com/pcherenkov/udpxy).<br>
+5) kernel: ip6_tunnel: ensure to always have a link local address(RFC4862 and RFC4291 more compat).<br>
 
 <br>
 <br>
