@@ -63,13 +63,13 @@ websErrorType websErrors[] = {
 
 #ifdef WEBS_LOG_SUPPORT
 static char_t	websLogname[64] = T("log.txt");	/* Log filename */
-static int 		websLogFd;						/* Log file handle */
+static int 	websLogFd;			/* Log file handle */
 #endif
 
-static int		websListenSock;					/* Listen socket */
-static char_t	websRealm[64] = T("GoAhead");	/* Realm name */
+static int	websListenSock;			/* Listen socket */
+static char_t	websRealm[64] = T("Wive-NG");	/* Realm name */
 
-static int		websOpenCount = 0;		/* count of apps using this module */
+static int	websOpenCount = 0;		/* count of apps using this module */
 
 /**************************** Forward Declarations ****************************/
 
