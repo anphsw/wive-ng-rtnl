@@ -1399,22 +1399,10 @@ config SQUASHFS
 
 	  If unsure, say N.
 
-config SQUASHFS_EMBEDDED
-
-	bool "Additional options for memory-constrained systems" 
-	depends on SQUASHFS
-	default n
-	help
-	  Saying Y here allows you to specify cache sizes and how Squashfs
-	  allocates memory.  This is only intended for memory constrained
-	  systems.
-
-	  If unsure, say N.
-
 config SQUASHFS_FRAGMENT_CACHE_SIZE
-	int "Number of fragments cached" if SQUASHFS_EMBEDDED
+	int "Number of fragments cached"
 	depends on SQUASHFS
-	default "1"
+	default "3"
 	help
 	  By default SquashFS caches the last 3 fragments read from
 	  the filesystem.  Increasing this amount may mean SquashFS
