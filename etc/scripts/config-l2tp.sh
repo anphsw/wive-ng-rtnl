@@ -218,9 +218,6 @@ echo "==================START-L2TP-CLIENT======================="
     ifname $vpn_def_if
     " > $ppp/options.l2tp
 
-    printf "$vpnUser * $vpnPassword" >> $ppp/chap-secrets
-    printf "$vpnUser * $vpnPassword" >> $ppp/pap-secrets
-
     $LOG "Starting VPN network l2tp..."
     $LOG "Start xl2tpd"
 
