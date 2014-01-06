@@ -66,5 +66,5 @@ mknod /dev/rdm0		c	254	0
 # for realtek external gigaphy
 mknod /dev/rtl8367m	c	206	0
 
-# autocreate/refrash some dev nodes
+# autocreate/refresh some dev nodes
 mdev -s
