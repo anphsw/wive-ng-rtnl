@@ -1803,6 +1803,7 @@
 6) kernel: fastroute: small speedup and more readable code.<br>
 7) kernel: ipv6: fix fragment process in ip output finish.<br>
 8) kernel: fix lockup related to stop_machine being stuck in __do_softirq.<br>
+9) kernel: option: backport support modems from 3.13 kernel tree.<br>
 <br>
 <br>
 <br>
