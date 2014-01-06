@@ -98,6 +98,7 @@
 5) kernel: ip6_tunnel: ensure to always have a link local address(RFC4862 and RFC4291 more compat).<br>
 6) kernel: fastroute: small speedup and more readable code.<br>
 7) kernel: ipv6: fix fragment process in ip output finish.<br>
+8) kernel: fix lockup related to stop_machine being stuck in __do_softirq.<br>
 <br>
 <br>
 <br>
