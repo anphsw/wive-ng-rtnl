@@ -1796,15 +1796,16 @@
 <br>
 <b>4.7.x</b><br>
 1) busybox: update to 1.22.0 version.<br>
-2) pppd: uptade to current 2.4.6-2Jan2014 version.<br>
-3) udpxy: add ts_demuxer support for more compat with some buggy players (wdtv/avatar3/some androids players).<br>
-4) udpxy: import last fixes from upstream git (github.com/pcherenkov/udpxy).<br>
-5) kernel: ip6_tunnel: ensure to always have a link local address(RFC4862 and RFC4291 more compat).<br>
-6) kernel: fastroute: small speedup and more readable code.<br>
-7) kernel: ipv6: fix fragment process in ip output finish.<br>
-8) kernel: fix lockup related to stop_machine being stuck in __do_softirq.<br>
-9) kernel: option: backport support modems from 3.13 kernel tree.<br>
-10) kernel: driver core: make uevent-environment available in uevent-file.<br>
+2) buxybox: fix lsusb work.<br>
+3) pppd: uptade to current 2.4.6-2Jan2014 version.<br>
+4) udpxy: add ts_demuxer support for more compat with some buggy players (wdtv/avatar3/some androids players).<br>
+5) udpxy: import last fixes from upstream git (github.com/pcherenkov/udpxy).<br>
+6) kernel: ip6_tunnel: ensure to always have a link local address(RFC4862 and RFC4291 more compat).<br>
+7) kernel: fastroute: small speedup and more readable code.<br>
+8) kernel: ipv6: fix fragment process in ip output finish.<br>
+9) kernel: fix lockup related to stop_machine being stuck in __do_softirq.<br>
+10) kernel: option: backport support modems from 3.13 kernel tree.<br>
+11) kernel: driver core: make uevent-environment available in uevent-file.<br>
 <br>
 <br>
 <br>
