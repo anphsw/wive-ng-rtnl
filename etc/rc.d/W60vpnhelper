@@ -24,8 +24,6 @@ start() {
 
       $LOG "Start vpnhelper"
       # clear all configs and generate new
-      echo > $ppp/chap-secrets
-      echo > $ppp/pap-secrets
       echo > $ppp/connect-errors
       echo "$vpnUser * $vpnPassword *" > $ppp/chap-secrets
       echo "$vpnUser * $vpnPassword *" > $ppp/pap-secrets
