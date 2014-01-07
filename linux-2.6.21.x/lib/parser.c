@@ -22,7 +22,7 @@
  * match extremely simple token=arg style patterns. If the pattern is found,
  * the location(s) of the arguments will be returned in the @args array.
  */
-static int match_one(char *s, char *p, substring_t args[])
+static int match_one(char *s, const char *p, substring_t args[])
 {
 	char *meta;
 	int argc = 0;
@@ -43,7 +43,7 @@ static int match_one(char *s, char *p, substring_t args[])
 		p = meta + 1;
 
 		if (isdigit(*p))
-			len = simple_strtoul(p, &p, 10);
+			len = simple_strtoul(p, (char **) &p, 10);
 		else if (*p == '%') {
 			if (*s++ != '%')
 				return 0;
@@ -191,7 +191,7 @@ int match_hex(substring_t *s, int *result)
  * &substring_t @s to the c-style string @to. Caller guarantees that @to is
  * large enough to hold the characters of @s.
  */
-void match_strcpy(char *to, substring_t *s)
+void match_strcpy(char *to, const substring_t *s)
 {
 	memcpy(to, s->from, s->to - s->from);
 	to[s->to - s->from] = '\0';
@@ -205,7 +205,7 @@ void match_strcpy(char *to, substring_t *s)
  * the &substring_t @s. The caller is responsible for freeing the returned
  * string with kfree().
  */
-char *match_strdup(substring_t *s)
+char *match_strdup(const substring_t *s)
 {
 	char *p = kmalloc(s->to - s->from + 1, GFP_KERNEL);
 	if (p)
