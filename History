@@ -96,13 +96,14 @@
 3) pppd: uptade to current 2.4.6-2Jan2014 version.<br>
 4) udpxy: add ts_demuxer support for more compat with some buggy players (wdtv/avatar3/some androids players).<br>
 5) udpxy: import last fixes from upstream git (github.com/pcherenkov/udpxy).<br>
-6) init.d: iptables: fix work l2tp server if pptp client started.<br>
-7) kernel: ip6_tunnel: ensure to always have a link local address(RFC4862 and RFC4291 more compat).<br>
-8) kernel: fastroute: small speedup and more readable code.<br>
-9) kernel: ipv6: fix fragment process in ip output finish.<br>
-10) kernel: fix lockup related to stop_machine being stuck in __do_softirq.<br>
-11) kernel: option: backport support modems from 3.13 kernel tree.<br>
-12) kernel: driver core: make uevent-environment available in uevent-file.<br>
+6) xl2tpd: check write return code on control socket (Jan 03, 2014 commit).<br>
+7) init.d: iptables: fix work l2tp server if pptp client started.<br>
+8) kernel: ip6_tunnel: ensure to always have a link local address(RFC4862 and RFC4291 more compat).<br>
+9) kernel: fastroute: small speedup and more readable code.<br>
+10) kernel: ipv6: fix fragment process in ip output finish.<br>
+11) kernel: fix lockup related to stop_machine being stuck in __do_softirq.<br>
+12) kernel: option: backport support modems from 3.13 kernel tree.<br>
+13) kernel: driver core: make uevent-environment available in uevent-file.<br>
 <br>
 <br>
 <br>
