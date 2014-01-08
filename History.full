@@ -1802,12 +1802,16 @@
 5) udpxy: import last fixes from upstream git (github.com/pcherenkov/udpxy).<br>
 6) xl2tpd: check write return code on control socket (Jan 03, 2014 commit).<br>
 7) init.d: iptables: fix work l2tp server if pptp client started.<br>
-8) kernel: ip6_tunnel: ensure to always have a link local address(RFC4862 and RFC4291 more compat).<br>
-9) kernel: fastroute: small speedup and more readable code.<br>
-10) kernel: ipv6: fix fragment process in ip output finish.<br>
-11) kernel: fix lockup related to stop_machine being stuck in __do_softirq.<br>
-12) kernel: option: backport support modems from 3.13 kernel tree.<br>
-13) kernel: driver core: make uevent-environment available in uevent-file.<br>
+8) l2tp server ip-up: do not need restart iptables.<br>
+9) kernel: ip6_tunnel: ensure to always have a link local address(RFC4862 and RFC4291 more compat).<br>
+10) kernel: fastroute: small speedup and more readable code.<br>
+11) kernel: ipv6: fix fragment process in ip output finish.<br>
+12) kernel: fix lockup related to stop_machine being stuck in __do_softirq.<br>
+13) kernel: option: backport support modems from 3.13 kernel tree.<br>
+14) kernel: driver core: make uevent-environment available in uevent-file.<br>
+15) kernel: ipv6: don't install anycast address for /128 addresses on routers.<br>
+16) kernel: ipv6: remove old conditions on flow label sharing.<br>
+17) kernel: ipv6: do not erase dst address with flow label destination.<br>.
 <br>
 <br>
 <br>
