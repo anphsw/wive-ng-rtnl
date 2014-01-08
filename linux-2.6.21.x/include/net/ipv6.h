@@ -232,6 +232,7 @@ struct ip6_flowlabel
 
 #define IPV6_FLOWINFO_MASK	__constant_htonl(0x0FFFFFFF)
 #define IPV6_FLOWLABEL_MASK	__constant_htonl(0x000FFFFF)
+#define IPV6_TCLASS_MASK (IPV6_FLOWINFO_MASK & ~IPV6_FLOWLABEL_MASK)
 
 struct ipv6_fl_socklist
 {
