@@ -265,6 +265,8 @@ extern	char	*ttyname __P((int));
 extern	char	*getlogin __P((void));
 int main __P((int, char *[]));
 
+extern bool external_chap_sec;
+
 #ifdef ultrix
 #undef	O_NONBLOCK
 #define	O_NONBLOCK	O_NDELAY
