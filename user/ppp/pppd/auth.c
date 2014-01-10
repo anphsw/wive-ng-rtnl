@@ -1750,7 +1750,7 @@ get_secret(unit, client, server, secret, secret_len, am_server)
 {
     FILE *f;
     int ret, len;
-    char *filename;
+    char *filename = _PATH_CHAPFILE;
     struct wordlist *addrs, *opts;
     char secbuf[MAXWORDLEN];
 
@@ -1763,10 +1763,8 @@ get_secret(unit, client, server, secret, secret_len, am_server)
 	    return 0;
 	}
     } else {
-	/* this is for use diffirent chap-secrets for xl2tp server/client modes */
-	if (!external_chap_sec)
-	    filename = _PATH_CHAPFILE;
-	else
+	/* this is for use diffirent secrets and options files for xl2tp server/client modes */
+	if (external_chap_sec)
 	    filename = _PATH_CHAPFILE_SRV;
 
 	addrs = NULL;

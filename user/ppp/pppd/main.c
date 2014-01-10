@@ -319,6 +319,7 @@ main(argc, argv)
     struct passwd *pw;
     struct protent *protp;
     char numbuf[16];
+    char *filename = _PATH_SYSOPTIONS;
 
     strlcpy(path_ipup, _PATH_IPUP, sizeof(path_ipup));
     strlcpy(path_ipdown, _PATH_IPDOWN, sizeof(path_ipdown));
@@ -366,11 +367,15 @@ main(argc, argv)
 
     progname = *argv;
 
+    /* this is for use diffirent secrets and options files for xl2tp server/client modes */
+    if (external_chap_sec)
+	filename = _PATH_SYSOPTIONS_SRV;
+
     /*
      * Parse, in order, the system options file, the user's options file,
      * and the command line arguments.
      */
-    if (!options_from_file(_PATH_SYSOPTIONS, !privileged, 0, 1)
+    if (!options_from_file(filename, !privileged, 0, 1)
 	|| !options_from_user()
 	|| !parse_args(argc-1, argv+1))
 	exit(EXIT_OPTION_ERROR);
