@@ -25,7 +25,3 @@ nodeflate
 
 # Turn off EAP auth protocol support
 refuse-eap
-
-# Minimum autoincrement pppX name
-# Need for fix vpn ifname to ppp0
-minunit 1
