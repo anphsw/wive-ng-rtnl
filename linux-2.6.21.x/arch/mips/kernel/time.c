@@ -59,7 +59,7 @@ DEFINE_SPINLOCK(rtc_lock);
  */
 static unsigned long null_rtc_get_time(void)
 {
-	return mktime(2013, 4, 5, 0, 0, 0);
+	return mktime(2014, 1, 1, 0, 0, 0);
 }
 
 static int null_rtc_set_time(unsigned long sec)
