@@ -1583,10 +1583,8 @@ inline int write_packet (struct buffer *buf, struct tunnel *t, struct call *c,
 
     if (c->fd < 0)
     {
-#ifdef DEBUG_MORE
-        if (DEBUG || 1)
+        if (DEBUG)
             l2tp_log (LOG_DEBUG, "%s: tty is not open yet.\n", __FUNCTION__);
-#endif
         return -EIO;
     }
     /*
