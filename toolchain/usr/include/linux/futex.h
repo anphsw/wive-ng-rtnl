@@ -31,7 +31,7 @@
  * changed.
  */
 struct robust_list {
-	struct robust_list __user *next;
+	struct robust_list *next;
 };
 
 /*
@@ -66,7 +66,7 @@ struct robust_list_head {
 	 * _might_ have taken. We check the owner TID in any case,
 	 * so only truly owned locks will be handled.
 	 */
-	struct robust_list __user *list_op_pending;
+	struct robust_list *list_op_pending;
 };
 
 /*
@@ -93,25 +93,6 @@ struct robust_list_head {
  */
 #define ROBUST_LIST_LIMIT	2048
 
-#ifdef __KERNEL__
-long do_futex(u32 __user *uaddr, int op, u32 val, unsigned long timeout,
-	      u32 __user *uaddr2, u32 val2, u32 val3);
-
-extern int
-handle_futex_death(u32 __user *uaddr, struct task_struct *curr, int pi);
-
-#ifdef CONFIG_FUTEX
-extern void exit_robust_list(struct task_struct *curr);
-extern void exit_pi_state_list(struct task_struct *curr);
-#else
-static inline void exit_robust_list(struct task_struct *curr)
-{
-}
-static inline void exit_pi_state_list(struct task_struct *curr)
-{
-}
-#endif
-#endif /* __KERNEL__ */
 
 #define FUTEX_OP_SET		0	/* *(int *)UADDR2 = OPARG; */
 #define FUTEX_OP_ADD		1	/* *(int *)UADDR2 += OPARG; */

@@ -45,14 +45,14 @@ struct usbdevfs_ctrltransfer {
 	__u16 wIndex;
 	__u16 wLength;
 	__u32 timeout;  /* in milliseconds */
- 	void __user *data;
+ 	void *data;
 };
 
 struct usbdevfs_bulktransfer {
 	unsigned int ep;
 	unsigned int len;
 	unsigned int timeout; /* in milliseconds */
-	void __user *data;
+	void *data;
 };
 
 struct usbdevfs_setinterface {
@@ -62,7 +62,7 @@ struct usbdevfs_setinterface {
 
 struct usbdevfs_disconnectsignal {
 	unsigned int signr;
-	void __user *context;
+	void *context;
 };
 
 #define USBDEVFS_MAXDRIVERNAME 255
@@ -96,7 +96,7 @@ struct usbdevfs_urb {
 	unsigned char endpoint;
 	int status;
 	unsigned int flags;
-	void __user *buffer;
+	void *buffer;
 	int buffer_length;
 	int actual_length;
 	int start_frame;
@@ -112,7 +112,7 @@ struct usbdevfs_ioctl {
 	int	ifno;		/* interface 0..N ; negative numbers reserved */
 	int	ioctl_code;	/* MUST encode size + direction of data so the
 				 * macros in <asm/ioctl.h> give correct values */
-	void __user *data;	/* param buffer (in, or out) */
+	void *data;	/* param buffer (in, or out) */
 };
 
 /* You can do most things with hubs just through control messages,
@@ -122,32 +122,6 @@ struct usbdevfs_hub_portinfo {
 	char port [127];	/* e.g. port 3 connects to device 27 */
 };
 
-#ifdef __KERNEL__
-#ifdef CONFIG_COMPAT
-#include <linux/compat.h>
-struct usbdevfs_urb32 {
-	unsigned char type;
-	unsigned char endpoint;
-	compat_int_t status;
-	compat_uint_t flags;
-	compat_caddr_t buffer;
-	compat_int_t buffer_length;
-	compat_int_t actual_length;
-	compat_int_t start_frame;
-	compat_int_t number_of_packets;
-	compat_int_t error_count;
-	compat_uint_t signr;
-	compat_caddr_t usercontext; /* unused */
-	struct usbdevfs_iso_packet_desc iso_frame_desc[0];
-};
-
-struct usbdevfs_ioctl32 {
-	s32 ifno;
-	s32 ioctl_code;
-	compat_caddr_t data;
-};
-#endif
-#endif /* __KERNEL__ */
 
 #define USBDEVFS_CONTROL           _IOWR('U', 0, struct usbdevfs_ctrltransfer)
 #define USBDEVFS_BULK              _IOWR('U', 2, struct usbdevfs_bulktransfer)

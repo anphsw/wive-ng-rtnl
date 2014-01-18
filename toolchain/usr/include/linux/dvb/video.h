@@ -24,14 +24,9 @@
 #ifndef _DVBVIDEO_H_
 #define _DVBVIDEO_H_
 
-#include <linux/compiler.h>
 
-#ifdef __KERNEL__
-#include <linux/types.h>
-#else
 #include <stdint.h>
 #include <time.h>
-#endif
 
 
 typedef enum {
@@ -102,7 +97,7 @@ struct video_status {
 
 
 struct video_still_picture {
-	char __user *iFrame;        /* pointer to a single iframe in memory */
+	char *iFrame;        /* pointer to a single iframe in memory */
 	int32_t size;
 };
 
@@ -135,7 +130,7 @@ typedef struct video_spu {
 
 typedef struct video_spu_palette {      /* SPU Palette information */
 	int length;
-	uint8_t __user *palette;
+	uint8_t *palette;
 } video_spu_palette_t;
 
 

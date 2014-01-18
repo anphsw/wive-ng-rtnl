@@ -14,7 +14,6 @@
 #define _LINUX_CAPABILITY_H
 
 #include <linux/types.h>
-#include <linux/compiler.h>
 
 /* User-level do most of the mapping between kernel and user
    capabilities based on the version tag given by the kernel. The
@@ -32,37 +31,14 @@
 typedef struct __user_cap_header_struct {
 	__u32 version;
 	int pid;
-} __user *cap_user_header_t;
+} *cap_user_header_t;
  
 typedef struct __user_cap_data_struct {
         __u32 effective;
         __u32 permitted;
         __u32 inheritable;
-} __user *cap_user_data_t;
+} *cap_user_data_t;
   
-#ifdef __KERNEL__
-
-#include <linux/spinlock.h>
-#include <asm/current.h>
-
-/* #define STRICT_CAP_T_TYPECHECKS */
-
-#ifdef STRICT_CAP_T_TYPECHECKS
-
-typedef struct kernel_cap_struct {
-	__u32 cap;
-} kernel_cap_t;
-
-#else
-
-typedef __u32 kernel_cap_t;
-
-#endif
-  
-#define _USER_CAP_HEADER_SIZE  (2*sizeof(__u32))
-#define _KERNEL_CAP_T_SIZE     (sizeof(kernel_cap_t))
-
-#endif
 
 
 /**
@@ -284,88 +260,5 @@ typedef __u32 kernel_cap_t;
 
 #define CAP_AUDIT_CONTROL    30
 
-#ifdef __KERNEL__
-/* 
- * Bounding set
- */
-extern kernel_cap_t cap_bset;
-
-/*
- * Internal kernel functions only
- */
- 
-#ifdef STRICT_CAP_T_TYPECHECKS
-
-#define to_cap_t(x) { x }
-#define cap_t(x) (x).cap
-
-#else
-
-#define to_cap_t(x) (x)
-#define cap_t(x) (x)
-
-#endif
-
-/* Used to decide between falling back on the old suser() or fsuser(). */
-
-#define CAP_FS_MASK	(CAP_TO_MASK(CAP_CHOWN)			\
-			| CAP_TO_MASK(CAP_DAC_OVERRIDE)		\
-			| CAP_TO_MASK(CAP_DAC_READ_SEARCH)	\
-			| CAP_TO_MASK(CAP_FOWNER)		\
-			| CAP_TO_MASK(CAP_FSETID)		\
-			| CAP_TO_MASK(CAP_LINUX_IMMUTABLE)	\
-			| CAP_TO_MASK(CAP_MKNOD))
-
-#define CAP_EMPTY_SET       to_cap_t(0)
-#define CAP_FULL_SET        to_cap_t(~0)
-#define CAP_INIT_EFF_SET    to_cap_t(~0 & ~CAP_TO_MASK(CAP_SETPCAP))
-#define CAP_INIT_INH_SET    to_cap_t(0)
-
-#define CAP_TO_MASK(x) (1 << (x))
-#define cap_raise(c, flag)   (cap_t(c) |=  CAP_TO_MASK(flag))
-#define cap_lower(c, flag)   (cap_t(c) &= ~CAP_TO_MASK(flag))
-#define cap_raised(c, flag)  (cap_t(c) & CAP_TO_MASK(flag))
-
-static inline kernel_cap_t cap_combine(kernel_cap_t a, kernel_cap_t b)
-{
-     kernel_cap_t dest;
-     cap_t(dest) = cap_t(a) | cap_t(b);
-     return dest;
-}
-
-static inline kernel_cap_t cap_intersect(kernel_cap_t a, kernel_cap_t b)
-{
-     kernel_cap_t dest;
-     cap_t(dest) = cap_t(a) & cap_t(b);
-     return dest;
-}
-
-static inline kernel_cap_t cap_drop(kernel_cap_t a, kernel_cap_t drop)
-{
-     kernel_cap_t dest;
-     cap_t(dest) = cap_t(a) & ~cap_t(drop);
-     return dest;
-}
-
-static inline kernel_cap_t cap_invert(kernel_cap_t c)
-{
-     kernel_cap_t dest;
-     cap_t(dest) = ~cap_t(c);
-     return dest;
-}
-
-#define cap_isclear(c)       (!cap_t(c))
-#define cap_issubset(a,set)  (!(cap_t(a) & ~cap_t(set)))
-
-#define cap_clear(c)         do { cap_t(c) =  0; } while(0)
-#define cap_set_full(c)      do { cap_t(c) = ~0; } while(0)
-#define cap_mask(c,mask)     do { cap_t(c) &= cap_t(mask); } while(0)
-
-#define cap_is_fs_cap(c)     (CAP_TO_MASK(c) & CAP_FS_MASK)
-
-int capable(int cap);
-int __capable(struct task_struct *t, int cap);
-
-#endif /* __KERNEL__ */
 
 #endif /* !_LINUX_CAPABILITY_H */

@@ -15,7 +15,6 @@
  *
  */
 
-#include <linux/compiler.h>
 
 /* casts are necessary for constants, because we never know how for sure
  * how U/UL/ULL map to __u16, __u32, __u64. At least not in a portable way.
@@ -130,7 +129,7 @@
 #endif /* OPTIMIZE */
 
 
-static __inline__ __attribute_const__ __u16 __fswab16(__u16 x)
+static __inline__ __u16 __fswab16(__u16 x)
 {
 	return __arch__swab16(x);
 }
@@ -143,7 +142,7 @@ static __inline__ void __swab16s(__u16 *addr)
 	__arch__swab16s(addr);
 }
 
-static __inline__ __attribute_const__ __u32 __fswab32(__u32 x)
+static __inline__ __u32 __fswab32(__u32 x)
 {
 	return __arch__swab32(x);
 }
@@ -157,7 +156,7 @@ static __inline__ void __swab32s(__u32 *addr)
 }
 
 #ifdef __BYTEORDER_HAS_U64__
-static __inline__ __attribute_const__ __u64 __fswab64(__u64 x)
+static __inline__ __u64 __fswab64(__u64 x)
 {
 #  ifdef __SWAB_64_THRU_32__
 	__u32 h = x >> 32;
@@ -177,16 +176,5 @@ static __inline__ void __swab64s(__u64 *addr)
 }
 #endif /* __BYTEORDER_HAS_U64__ */
 
-#if defined(__KERNEL__)
-#define swab16 __swab16
-#define swab32 __swab32
-#define swab64 __swab64
-#define swab16p __swab16p
-#define swab32p __swab32p
-#define swab64p __swab64p
-#define swab16s __swab16s
-#define swab32s __swab32s
-#define swab64s __swab64s
-#endif
 
 #endif /* _LINUX_BYTEORDER_SWAB_H */

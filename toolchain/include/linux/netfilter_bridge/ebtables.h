@@ -44,12 +44,12 @@ struct ebt_replace {
 	/* total size of the entries */
 	unsigned int entries_size;
 	/* start of the chains */
-	struct ebt_entries __user *hook_entry[NF_BR_NUMHOOKS];
+	struct ebt_entries *hook_entry[NF_BR_NUMHOOKS];
 	/* nr of counters userspace expects back */
 	unsigned int num_counters;
 	/* where the kernel will put the old counters */
-	struct ebt_counter __user *counters;
-	char __user *entries;
+	struct ebt_counter *counters;
+	char *entries;
 };
 
 struct ebt_replace_kernel {
@@ -190,112 +190,6 @@ struct ebt_entry {
 #define EBT_SO_GET_INIT_ENTRIES (EBT_SO_GET_INIT_INFO+1)
 #define EBT_SO_GET_MAX          (EBT_SO_GET_INIT_ENTRIES+1)
 
-#ifdef __KERNEL__
-
-/* return values for match() functions */
-#define EBT_MATCH 0
-#define EBT_NOMATCH 1
-
-struct ebt_match {
-	struct list_head list;
-	const char name[EBT_FUNCTION_MAXNAMELEN];
-	/* 0 == it matches */
-	int (*match)(const struct sk_buff *skb, const struct net_device *in,
-	   const struct net_device *out, const void *matchdata,
-	   unsigned int datalen);
-	/* 0 == let it in */
-	int (*check)(const char *tablename, unsigned int hookmask,
-	   const struct ebt_entry *e, void *matchdata, unsigned int datalen);
-	void (*destroy)(void *matchdata, unsigned int datalen);
-	struct module *me;
-};
-
-struct ebt_watcher {
-	struct list_head list;
-	const char name[EBT_FUNCTION_MAXNAMELEN];
-	void (*watcher)(const struct sk_buff *skb, unsigned int hooknr,
-	   const struct net_device *in, const struct net_device *out,
-	   const void *watcherdata, unsigned int datalen);
-	/* 0 == let it in */
-	int (*check)(const char *tablename, unsigned int hookmask,
-	   const struct ebt_entry *e, void *watcherdata, unsigned int datalen);
-	void (*destroy)(void *watcherdata, unsigned int datalen);
-	struct module *me;
-};
-
-struct ebt_target {
-	struct list_head list;
-	const char name[EBT_FUNCTION_MAXNAMELEN];
-	/* returns one of the standard verdicts */
-	int (*target)(struct sk_buff **pskb, unsigned int hooknr,
-	   const struct net_device *in, const struct net_device *out,
-	   const void *targetdata, unsigned int datalen);
-	/* 0 == let it in */
-	int (*check)(const char *tablename, unsigned int hookmask,
-	   const struct ebt_entry *e, void *targetdata, unsigned int datalen);
-	void (*destroy)(void *targetdata, unsigned int datalen);
-	struct module *me;
-};
-
-/* used for jumping from and into user defined chains (udc) */
-struct ebt_chainstack {
-	struct ebt_entries *chaininfo; /* pointer to chain data */
-	struct ebt_entry *e; /* pointer to entry data */
-	unsigned int n; /* n'th entry */
-};
-
-struct ebt_table_info {
-	/* total size of the entries */
-	unsigned int entries_size;
-	unsigned int nentries;
-	/* pointers to the start of the chains */
-	struct ebt_entries *hook_entry[NF_BR_NUMHOOKS];
-	/* room to maintain the stack used for jumping from and into udc */
-	struct ebt_chainstack **chainstack;
-	char *entries;
-	struct ebt_counter counters[0] ____cacheline_aligned;
-};
-
-struct ebt_table {
-	struct list_head list;
-	char name[EBT_TABLE_MAXNAMELEN];
-	struct ebt_replace_kernel *table;
-	unsigned int valid_hooks;
-	rwlock_t lock;
-	/* e.g. could be the table explicitly only allows certain
-	 * matches, targets, ... 0 == let it in */
-	int (*check)(const struct ebt_table_info *info,
-	   unsigned int valid_hooks);
-	/* the data used by the kernel */
-	struct ebt_table_info *private;
-	struct module *me;
-};
-
-#define EBT_ALIGN(s) (((s) + (__alignof__(struct ebt_replace)-1)) & \
-		     ~(__alignof__(struct ebt_replace)-1))
-extern int ebt_register_table(struct ebt_table *table);
-extern void ebt_unregister_table(struct ebt_table *table);
-extern int ebt_register_match(struct ebt_match *match);
-extern void ebt_unregister_match(struct ebt_match *match);
-extern int ebt_register_watcher(struct ebt_watcher *watcher);
-extern void ebt_unregister_watcher(struct ebt_watcher *watcher);
-extern int ebt_register_target(struct ebt_target *target);
-extern void ebt_unregister_target(struct ebt_target *target);
-extern unsigned int ebt_do_table(unsigned int hook, struct sk_buff **pskb,
-   const struct net_device *in, const struct net_device *out,
-   struct ebt_table *table);
-
-/* Used in the kernel match() functions */
-#define FWINV(bool,invflg) ((bool) ^ !!(info->invflags & invflg))
-/* True if the hook mask denotes that the rule is in a base chain,
- * used in the check() functions */
-#define BASE_CHAIN (hookmask & (1 << NF_BR_NUMHOOKS))
-/* Clear the bit in the hook mask that tells if the rule is on a base chain */
-#define CLEAR_BASE_CHAIN_BIT (hookmask &= ~(1 << NF_BR_NUMHOOKS))
-/* True if the target is not a standard target */
-#define INVALID_TARGET (info->target < -NUM_STANDARD_TARGETS || info->target >= 0)
-
-#endif /* __KERNEL__ */
 
 /* blatently stolen from ip_tables.h
  * fn returns 0 to continue iteration */

@@ -150,12 +150,12 @@ struct arphdr {
 };
 
 #ifdef __KERNEL__
-static inline struct arphdr *arp_hdr(const struct sk_buff *skb)
+static __inline__ struct arphdr *arp_hdr(const struct sk_buff *skb)
 {
 	return (struct arphdr *)skb_network_header(skb);
 }
 
-static inline int arp_hdr_len(struct net_device *dev)
+static __inline__ int arp_hdr_len(struct net_device *dev)
 {
 	/* ARP header, plus 2 device addresses, plus 2 IP addresses. */
 	return sizeof(struct arphdr) + (dev->addr_len + sizeof(u32)) * 2;

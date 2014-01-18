@@ -26,11 +26,3 @@
 #define CUDA_GET_DEVICE_LIST	0x1a
 #define CUDA_GET_SET_IIC	0x22
 
-#ifdef __KERNEL__
-
-extern int find_via_cuda(void);
-extern int cuda_request(struct adb_request *req,
-			void (*done)(struct adb_request *), int nbytes, ...);
-extern void cuda_poll(void);
-
-#endif	/* __KERNEL */

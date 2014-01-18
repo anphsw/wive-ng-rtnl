@@ -34,46 +34,6 @@
 
 #define UINPUT_VERSION		3
 
-#ifdef __KERNEL__
-#define UINPUT_MINOR		223
-#define UINPUT_NAME		"uinput"
-#define UINPUT_BUFFER_SIZE	16
-#define UINPUT_NUM_REQUESTS	16
-
-enum uinput_state { UIST_NEW_DEVICE, UIST_SETUP_COMPLETE, UIST_CREATED };
-
-struct uinput_request {
-	int			id;
-	int			code;	/* UI_FF_UPLOAD, UI_FF_ERASE */
-
-	int			retval;
-	struct completion	done;
-
-	union {
-		int		effect_id;
-		struct {
-			struct ff_effect *effect;
-			struct ff_effect *old;
-		} upload;
-	} u;
-};
-
-struct uinput_device {
-	struct input_dev	*dev;
-	struct mutex		mutex;
-	enum uinput_state	state;
-	wait_queue_head_t	waitq;
-	unsigned char		ready;
-	unsigned char		head;
-	unsigned char		tail;
-	struct input_event	buff[UINPUT_BUFFER_SIZE];
-	int			ff_effects_max;
-
-	struct uinput_request	*requests[UINPUT_NUM_REQUESTS];
-	wait_queue_head_t	requests_waitq;
-	spinlock_t		requests_lock;
-};
-#endif	/* __KERNEL__ */
 
 struct uinput_ff_upload {
 	int			request_id;

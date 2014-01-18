@@ -14,19 +14,6 @@
 #include <linux/types.h>
 #include <linux/magic.h>
 
-#ifdef __KERNEL__
-#include <linux/slab.h>
-#include <linux/interrupt.h>
-#include <linux/sched.h>
-#include <linux/workqueue.h>
-#include <asm/unaligned.h>
-#include <linux/bitops.h>
-#include <linux/proc_fs.h>
-#include <linux/smp_lock.h>
-#include <linux/buffer_head.h>
-#include <linux/reiserfs_fs_i.h>
-#include <linux/reiserfs_fs_sb.h>
-#endif
 
 /*
  *  include/linux/reiser_fs.h
@@ -93,7 +80,7 @@ if( !( cond ) ) 								\
 #define RFALSE( cond, format, args... ) do {;} while( 0 )
 #endif
 
-#define CONSTF __attribute_const__
+#define CONSTF
 /*
  * Disk Data Structures
  */
@@ -271,12 +258,12 @@ struct unfm_nodeinfo {
 #define STAT_DATA_V1 0
 #define STAT_DATA_V2 1
 
-static inline struct reiserfs_inode_info *REISERFS_I(const struct inode *inode)
+static __inline__ struct reiserfs_inode_info *REISERFS_I(const struct inode *inode)
 {
 	return container_of(inode, struct reiserfs_inode_info, vfs_inode);
 }
 
-static inline struct reiserfs_sb_info *REISERFS_SB(const struct super_block *sb)
+static __inline__ struct reiserfs_sb_info *REISERFS_SB(const struct super_block *sb)
 {
 	return sb->s_fs_info;
 }
@@ -367,24 +354,24 @@ struct offset_v2 {
 	__le64 v;
 } __attribute__ ((__packed__));
 
-static inline __u16 offset_v2_k_type(const struct offset_v2 *v2)
+static __inline__ __u16 offset_v2_k_type(const struct offset_v2 *v2)
 {
 	__u8 type = le64_to_cpu(v2->v) >> 60;
 	return (type <= TYPE_MAXTYPE) ? type : TYPE_ANY;
 }
 
-static inline void set_offset_v2_k_type(struct offset_v2 *v2, int type)
+static __inline__ void set_offset_v2_k_type(struct offset_v2 *v2, int type)
 {
 	v2->v =
 	    (v2->v & cpu_to_le64(~0ULL >> 4)) | cpu_to_le64((__u64) type << 60);
 }
 
-static inline loff_t offset_v2_k_offset(const struct offset_v2 *v2)
+static __inline__ loff_t offset_v2_k_offset(const struct offset_v2 *v2)
 {
 	return le64_to_cpu(v2->v) & (~0ULL >> 4);
 }
 
-static inline void set_offset_v2_k_offset(struct offset_v2 *v2, loff_t offset)
+static __inline__ void set_offset_v2_k_offset(struct offset_v2 *v2, loff_t offset)
 {
 	offset &= (~0ULL >> 4);
 	v2->v = (v2->v & cpu_to_le64(15ULL << 60)) | cpu_to_le64(offset);
@@ -525,8 +512,8 @@ struct item_head {
 //
 // here are conversion routines
 //
-static inline int uniqueness2type(__u32 uniqueness) CONSTF;
-static inline int uniqueness2type(__u32 uniqueness)
+static __inline__ int uniqueness2type(__u32 uniqueness) CONSTF;
+static __inline__ int uniqueness2type(__u32 uniqueness)
 {
 	switch ((int)uniqueness) {
 	case V1_SD_UNIQUENESS:
@@ -545,8 +532,8 @@ static inline int uniqueness2type(__u32 uniqueness)
 	}
 }
 
-static inline __u32 type2uniqueness(int type) CONSTF;
-static inline __u32 type2uniqueness(int type)
+static __inline__ __u32 type2uniqueness(int type) CONSTF;
+static __inline__ __u32 type2uniqueness(int type)
 {
 	switch (type) {
 	case TYPE_STAT_DATA:
@@ -569,7 +556,7 @@ static inline __u32 type2uniqueness(int type)
 // there is no way to get version of object from key, so, provide
 // version to these defines
 //
-static inline loff_t le_key_k_offset(int version,
+static __inline__ loff_t le_key_k_offset(int version,
 				     const struct reiserfs_key *key)
 {
 	return (version == KEY_FORMAT_3_5) ?
@@ -577,36 +564,36 @@ static inline loff_t le_key_k_offset(int version,
 	    offset_v2_k_offset(&(key->u.k_offset_v2));
 }
 
-static inline loff_t le_ih_k_offset(const struct item_head *ih)
+static __inline__ loff_t le_ih_k_offset(const struct item_head *ih)
 {
 	return le_key_k_offset(ih_version(ih), &(ih->ih_key));
 }
 
-static inline loff_t le_key_k_type(int version, const struct reiserfs_key *key)
+static __inline__ loff_t le_key_k_type(int version, const struct reiserfs_key *key)
 {
 	return (version == KEY_FORMAT_3_5) ?
 	    uniqueness2type(le32_to_cpu(key->u.k_offset_v1.k_uniqueness)) :
 	    offset_v2_k_type(&(key->u.k_offset_v2));
 }
 
-static inline loff_t le_ih_k_type(const struct item_head *ih)
+static __inline__ loff_t le_ih_k_type(const struct item_head *ih)
 {
 	return le_key_k_type(ih_version(ih), &(ih->ih_key));
 }
 
-static inline void set_le_key_k_offset(int version, struct reiserfs_key *key,
+static __inline__ void set_le_key_k_offset(int version, struct reiserfs_key *key,
 				       loff_t offset)
 {
 	(version == KEY_FORMAT_3_5) ? (void)(key->u.k_offset_v1.k_offset = cpu_to_le32(offset)) :	/* jdm check */
 	    (void)(set_offset_v2_k_offset(&(key->u.k_offset_v2), offset));
 }
 
-static inline void set_le_ih_k_offset(struct item_head *ih, loff_t offset)
+static __inline__ void set_le_ih_k_offset(struct item_head *ih, loff_t offset)
 {
 	set_le_key_k_offset(ih_version(ih), &(ih->ih_key), offset);
 }
 
-static inline void set_le_key_k_type(int version, struct reiserfs_key *key,
+static __inline__ void set_le_key_k_type(int version, struct reiserfs_key *key,
 				     int type)
 {
 	(version == KEY_FORMAT_3_5) ?
@@ -614,7 +601,7 @@ static inline void set_le_key_k_type(int version, struct reiserfs_key *key,
 		   cpu_to_le32(type2uniqueness(type)))
 	    : (void)(set_offset_v2_k_type(&(key->u.k_offset_v2), type));
 }
-static inline void set_le_ih_k_type(struct item_head *ih, int type)
+static __inline__ void set_le_ih_k_type(struct item_head *ih, int type)
 {
 	set_le_key_k_type(ih_version(ih), &(ih->ih_key), type);
 }
@@ -635,27 +622,27 @@ static inline void set_le_ih_k_type(struct item_head *ih, int type)
 //
 // key is pointer to cpu key, result is cpu
 //
-static inline loff_t cpu_key_k_offset(const struct cpu_key *key)
+static __inline__ loff_t cpu_key_k_offset(const struct cpu_key *key)
 {
 	return key->on_disk_key.k_offset;
 }
 
-static inline loff_t cpu_key_k_type(const struct cpu_key *key)
+static __inline__ loff_t cpu_key_k_type(const struct cpu_key *key)
 {
 	return key->on_disk_key.k_type;
 }
 
-static inline void set_cpu_key_k_offset(struct cpu_key *key, loff_t offset)
+static __inline__ void set_cpu_key_k_offset(struct cpu_key *key, loff_t offset)
 {
 	key->on_disk_key.k_offset = offset;
 }
 
-static inline void set_cpu_key_k_type(struct cpu_key *key, int type)
+static __inline__ void set_cpu_key_k_type(struct cpu_key *key, int type)
 {
 	key->on_disk_key.k_type = type;
 }
 
-static inline void cpu_key_k_offset_dec(struct cpu_key *key)
+static __inline__ void cpu_key_k_offset_dec(struct cpu_key *key)
 {
 	key->on_disk_key.k_offset--;
 }
@@ -1010,7 +997,7 @@ extern void make_empty_dir_item(char *body, __le32 dirid, __le32 objid,
 #define I_DEH_N_ENTRY_LENGTH(ih,deh,i) \
 ((i) ? (deh_location((deh)-1) - deh_location((deh))) : (ih_item_len((ih)) - deh_location((deh))))
 */
-static inline int entry_length(const struct buffer_head *bh,
+static __inline__ int entry_length(const struct buffer_head *bh,
 			       const struct item_head *ih, int pos_in_item)
 {
 	struct reiserfs_de_head *deh;
@@ -1225,7 +1212,7 @@ struct treepath var = {.path_length = ILLEGAL_PATH_ELEMENT_OFFSET, .reada = 0,}
 // reiserfs version 2 has max offset 60 bits. Version 1 - 32 bit offset
 #define U32_MAX (~(__u32)0)
 
-static inline loff_t max_reiserfs_offset(struct inode *inode)
+static __inline__ loff_t max_reiserfs_offset(struct inode *inode)
 {
 	if (get_inode_item_key_version(inode) == KEY_FORMAT_3_5)
 		return (loff_t) U32_MAX;
@@ -1678,7 +1665,7 @@ int reiserfs_add_ordered_list(struct inode *inode, struct buffer_head *bh);
 int journal_mark_dirty(struct reiserfs_transaction_handle *,
 		       struct super_block *, struct buffer_head *bh);
 
-static inline int reiserfs_file_data_log(struct inode *inode)
+static __inline__ int reiserfs_file_data_log(struct inode *inode)
 {
 	if (reiserfs_data_log(inode->i_sb) ||
 	    (REISERFS_I(inode)->i_flags & i_data_log))
@@ -1686,7 +1673,7 @@ static inline int reiserfs_file_data_log(struct inode *inode)
 	return 0;
 }
 
-static inline int reiserfs_transaction_running(struct super_block *s)
+static __inline__ int reiserfs_transaction_running(struct super_block *s)
 {
 	struct reiserfs_transaction_handle *th = current->journal_info;
 	if (th && th->t_super == s)
@@ -1696,7 +1683,7 @@ static inline int reiserfs_transaction_running(struct super_block *s)
 	return 0;
 }
 
-static inline int reiserfs_transaction_free_space(struct reiserfs_transaction_handle *th)
+static __inline__ int reiserfs_transaction_free_space(struct reiserfs_transaction_handle *th)
 {
 	return th->t_blocks_allocated - th->t_blocks_logged;
 }
@@ -1774,7 +1761,7 @@ extern int comp_short_le_keys(const struct reiserfs_key *,
 //
 // get key version from on disk key - kludge
 //
-static inline int le_key_version(const struct reiserfs_key *key)
+static __inline__ int le_key_version(const struct reiserfs_key *key)
 {
 	int type;
 
@@ -1787,7 +1774,7 @@ static inline int le_key_version(const struct reiserfs_key *key)
 
 }
 
-static inline void copy_key(struct reiserfs_key *to,
+static __inline__ void copy_key(struct reiserfs_key *to,
 			    const struct reiserfs_key *from)
 {
 	memcpy(to, from, KEY_SIZE);
@@ -1892,7 +1879,7 @@ int reiserfs_new_inode(struct reiserfs_transaction_handle *th,
 void reiserfs_update_sd_size(struct reiserfs_transaction_handle *th,
 			     struct inode *inode, loff_t size);
 
-static inline void reiserfs_update_sd(struct reiserfs_transaction_handle *th,
+static __inline__ void reiserfs_update_sd(struct reiserfs_transaction_handle *th,
 				      struct inode *inode)
 {
 	reiserfs_update_sd_size(th, inode, inode->i_size);
@@ -2082,7 +2069,7 @@ void reiserfs_free_block(struct reiserfs_transaction_handle *th, struct inode *,
 			 b_blocknr_t, int for_unformatted);
 int reiserfs_allocate_blocknrs(reiserfs_blocknr_hint_t *, b_blocknr_t *, int,
 			       int);
-static inline int reiserfs_new_form_blocknrs(struct tree_balance *tb,
+static __inline__ int reiserfs_new_form_blocknrs(struct tree_balance *tb,
 					     b_blocknr_t * new_blocknrs,
 					     int amount_needed)
 {
@@ -2098,7 +2085,7 @@ static inline int reiserfs_new_form_blocknrs(struct tree_balance *tb,
 					  0);
 }
 
-static inline int reiserfs_new_unf_blocknrs(struct reiserfs_transaction_handle
+static __inline__ int reiserfs_new_unf_blocknrs(struct reiserfs_transaction_handle
 					    *th, struct inode *inode,
 					    b_blocknr_t * new_blocknrs,
 					    struct treepath *path, long block)
@@ -2115,7 +2102,7 @@ static inline int reiserfs_new_unf_blocknrs(struct reiserfs_transaction_handle
 }
 
 #ifdef REISERFS_PREALLOCATE
-static inline int reiserfs_new_unf_blocknrs2(struct reiserfs_transaction_handle
+static __inline__ int reiserfs_new_unf_blocknrs2(struct reiserfs_transaction_handle
 					     *th, struct inode *inode,
 					     b_blocknr_t * new_blocknrs,
 					     struct treepath *path, long block)

@@ -84,7 +84,7 @@ typedef struct siginfo {
 
 		/* SIGILL, SIGFPE, SIGSEGV, SIGBUS */
 		struct {
-			void __user *_addr; /* faulting insn/memory ref. */
+			void *_addr; /* faulting insn/memory ref. */
 #ifdef __ARCH_SI_TRAPNO
 			int _trapno;	/* TRAP # which caused the signal */
 #endif
@@ -109,22 +109,5 @@ typedef struct siginfo {
 #define SI_TIMER __SI_CODE(__SI_TIMER,-3) /* sent by timer expiration */
 #define SI_MESGQ __SI_CODE(__SI_MESGQ,-4) /* sent by real time mesq state change */
 
-#ifdef __KERNEL__
-
-/*
- * Duplicated here because of <asm-generic/siginfo.h> braindamage ...
- */
-#include <linux/string.h>
-
-static inline void copy_siginfo(struct siginfo *to, struct siginfo *from)
-{
-	if (from->si_code < 0)
-		memcpy(to, from, sizeof(*to));
-	else
-		/* _sigchld is currently the largest know union member */
-		memcpy(to, from, 3*sizeof(int) + sizeof(from->_sifields._sigchld));
-}
-
-#endif
 
 #endif /* _ASM_SIGINFO_H */

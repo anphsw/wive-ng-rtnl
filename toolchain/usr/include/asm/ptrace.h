@@ -71,29 +71,5 @@ struct pt_regs {
 #define PTRACE_POKEDATA_3264	0xc3
 #define PTRACE_GET_THREAD_AREA_3264	0xc4
 
-#ifdef __KERNEL__
-
-#include <linux/linkage.h>
-#include <asm/isadep.h>
-
-/*
- * Does the process account for user or for system time?
- */
-#define user_mode(regs) (((regs)->cp0_status & KU_MASK) == KU_USER)
-
-#define instruction_pointer(regs) ((regs)->cp0_epc)
-#define profile_pc(regs) instruction_pointer(regs)
-
-extern asmlinkage void do_syscall_trace(struct pt_regs *regs, int entryexit);
-
-extern NORET_TYPE void die(const char *, struct pt_regs *);
-
-static inline void die_if_kernel(const char *str, struct pt_regs *regs)
-{
-	if (unlikely(!user_mode(regs)))
-		die(str, regs);
-}
-
-#endif
 
 #endif /* _ASM_PTRACE_H */

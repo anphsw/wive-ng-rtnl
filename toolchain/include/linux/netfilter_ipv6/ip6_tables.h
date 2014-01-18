@@ -15,14 +15,7 @@
 #ifndef _IP6_TABLES_H
 #define _IP6_TABLES_H
 
-#ifdef __KERNEL__
-#include <linux/if.h>
-#include <linux/in6.h>
-#include <linux/ipv6.h>
-#include <linux/skbuff.h>
-#endif
 #include <linux/types.h>
-#include <linux/compiler.h>
 #include <linux/netfilter_ipv6.h>
 
 #include <linux/netfilter/x_tables.h>
@@ -219,7 +212,7 @@ struct ip6t_replace {
 	/* Number of counters (must be equal to current number of entries). */
 	unsigned int num_counters;
 	/* The old entries' counters. */
-	struct xt_counters __user *counters;
+	struct xt_counters *counters;
 
 	/* The entries (hang off end: not really an array). */
 	struct ip6t_entry entries[0];
@@ -264,31 +257,4 @@ ip6t_get_target(struct ip6t_entry *e)
  *	Main firewall chains definitions and global var's definitions.
  */
 
-#ifdef __KERNEL__
-
-#include <linux/init.h>
-extern void ip6t_init(void) __init;
-
-extern int ip6t_register_table(struct xt_table *table,
-			       const struct ip6t_replace *repl);
-extern void ip6t_unregister_table(struct xt_table *table);
-extern unsigned int ip6t_do_table(struct sk_buff **pskb,
-				  unsigned int hook,
-				  const struct net_device *in,
-				  const struct net_device *out,
-				  struct xt_table *table);
-
-/* Check for an extension */
-extern int ip6t_ext_hdr(u8 nexthdr);
-/* find specified header and get offset to it */
-extern int ipv6_find_hdr(const struct sk_buff *skb, unsigned int *offset,
-			 int target, unsigned short *fragoff);
-
-extern int ip6_masked_addrcmp(const struct in6_addr *addr1,
-			      const struct in6_addr *mask,
-			      const struct in6_addr *addr2);
-
-#define IP6T_ALIGN(s) (((s) + (__alignof__(struct ip6t_entry)-1)) & ~(__alignof__(struct ip6t_entry)-1))
-
-#endif /*__KERNEL__*/
 #endif /* _IP6_TABLES_H */

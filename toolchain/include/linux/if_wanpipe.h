@@ -99,26 +99,5 @@ typedef struct
 #define WAN_PACKET_MR_PROMISC	1
 #define WAN_PACKET_MR_ALLMULTI	2
 
-#ifdef __KERNEL__
-
-/* Private wanpipe socket structures. */
-struct wanpipe_opt
-{
-	void   *mbox;		/* Mail box  */
-	void   *card; 		/* Card bouded to */
-	struct net_device *dev;	/* Bounded device */
-	unsigned short lcn;	/* Binded LCN */
-	unsigned char  svc;	/* 0=pvc, 1=svc */
-	unsigned char  timer;   /* flag for delayed transmit*/	
-	struct timer_list tx_timer;
-	unsigned poll_cnt;
-	unsigned char force;	/* Used to force sock release */
-	atomic_t packet_sent;   
-	unsigned short num; 
-};
-
-#define wp_sk(__sk) ((struct wanpipe_opt *)(__sk)->sk_protinfo)
-
-#endif
 
 #endif

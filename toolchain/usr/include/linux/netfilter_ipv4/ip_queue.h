@@ -7,15 +7,7 @@
 #ifndef _IP_QUEUE_H
 #define _IP_QUEUE_H
 
-#ifdef __KERNEL__
-#ifdef DEBUG_IPQ
-#define QDEBUG(x...) printk(KERN_DEBUG ## x)
-#else
-#define QDEBUG(x...)
-#endif  /* DEBUG_IPQ */
-#else
 #include <net/if.h>
-#endif	/* ! __KERNEL__ */
 
 /* Messages sent from kernel */
 typedef struct ipq_packet_msg {

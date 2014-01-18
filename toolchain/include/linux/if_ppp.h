@@ -35,7 +35,6 @@
 #ifndef _IF_PPP_H_
 #define _IF_PPP_H_
 
-#include <linux/compiler.h>
 
 /*
  * Packet sizes
@@ -94,7 +93,7 @@ struct npioctl {
 
 /* Structure describing a CCP configuration option, for PPPIOCSCOMPRESS */
 struct ppp_option_data {
-	__u8	__user *ptr;
+	__u8 *ptr;
 	__u32	length;
 	int	transmit;
 };

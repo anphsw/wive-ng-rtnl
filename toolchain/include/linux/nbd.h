@@ -37,37 +37,6 @@ enum {
 #define MAX_NBD 128
 
 /* userspace doesn't need the nbd_device structure */
-#ifdef __KERNEL__
-
-#include <linux/wait.h>
-#include <linux/mutex.h>
-
-/* values for flags field */
-#define NBD_READ_ONLY 0x0001
-#define NBD_WRITE_NOCHK 0x0002
-
-struct request;
-
-struct nbd_device {
-	int flags;
-	int harderror;		/* Code of hard error			*/
-	struct socket * sock;
-	struct file * file; 	/* If == NULL, device is not ready, yet	*/
-	int magic;
-
-	spinlock_t queue_lock;
-	struct list_head queue_head;/* Requests are added here...	*/
-	struct request *active_req;
-	wait_queue_head_t active_wq;
-
-	struct mutex tx_lock;
-	struct gendisk *disk;
-	int blksize;
-	u64 bytesize;
-	pid_t pid; /* pid of nbd-client, if attached */
-};
-
-#endif
 
 /* These are sent over the network in the request/reply magic fields */
 

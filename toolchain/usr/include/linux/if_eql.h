@@ -33,36 +33,6 @@
 #define EQL_GETMASTRCFG (SIOCDEVPRIVATE + 4)
 #define EQL_SETMASTRCFG (SIOCDEVPRIVATE + 5)
 
-#ifdef __KERNEL__
-
-#include <linux/timer.h>
-#include <linux/spinlock.h>
-
-typedef struct slave {
-	struct list_head	list;
-	struct net_device	*dev;
-	long			priority;
-	long			priority_bps;
-	long			priority_Bps;
-	long			bytes_queued;
-} slave_t;
-
-typedef struct slave_queue {
-	spinlock_t		lock;
-	struct list_head	all_slaves;
-	int			num_slaves;
-	struct net_device	*master_dev;
-} slave_queue_t;
-
-typedef struct equalizer {
-	slave_queue_t		queue;
-	int			min_slaves;
-	int			max_slaves;
-	struct net_device_stats	stats;
-	struct timer_list	timer;
-} equalizer_t;  
-
-#endif /* __KERNEL__ */
 
 typedef struct master_config {
 	char	master_name[16];

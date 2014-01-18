@@ -10,10 +10,6 @@
 #define NFSD_SYSCALL_H
 
 #include <asm/types.h>
-#ifdef __KERNEL__
-# include <linux/types.h>
-# include <linux/in.h>
-#endif 
 #include <linux/posix_types.h>
 #include <linux/nfsd/const.h>
 #include <linux/nfsd/export.h>
@@ -110,15 +106,5 @@ union nfsctl_res {
 	struct knfsd_fh		cr_getfs;
 };
 
-#ifdef __KERNEL__
-/*
- * Kernel syscall implementation.
- */
-extern int		exp_addclient(struct nfsctl_client *ncp);
-extern int		exp_delclient(struct nfsctl_client *ncp);
-extern int		exp_export(struct nfsctl_export *nxp);
-extern int		exp_unexport(struct nfsctl_export *nxp);
-
-#endif /* __KERNEL__ */
 
 #endif /* NFSD_SYSCALL_H */

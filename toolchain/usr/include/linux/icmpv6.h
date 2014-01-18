@@ -113,6 +113,8 @@ struct icmp6hdr {
 #define ICMPV6_NOT_NEIGHBOUR		2
 #define ICMPV6_ADDR_UNREACH		3
 #define ICMPV6_PORT_UNREACH		4
+#define ICMPV6_POLICY_FAIL		5
+#define ICMPV6_REJECT_ROUTE		6
 
 /*
  *	Codes for Time Exceeded
@@ -158,23 +160,5 @@ struct icmp6_filter {
 
 #define MLD2_ALL_MCR_INIT { { { 0xff,0x02,0,0,0,0,0,0,0,0,0,0,0,0,0,0x16 } } }
 
-#ifdef __KERNEL__
-
-#include <linux/netdevice.h>
-#include <linux/skbuff.h>
-
-
-extern void				icmpv6_send(struct sk_buff *skb,
-						    int type, int code,
-						    __u32 info, 
-						    struct net_device *dev);
-
-extern int				icmpv6_init(void);
-extern int				icmpv6_err_convert(int type, int code,
-							   int *err);
-extern void				icmpv6_cleanup(void);
-extern void				icmpv6_param_prob(struct sk_buff *skb,
-							  int code, int pos);
-#endif
 
 #endif

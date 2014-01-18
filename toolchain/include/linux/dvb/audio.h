@@ -24,11 +24,7 @@
 #ifndef _DVBAUDIO_H_
 #define _DVBAUDIO_H_
 
-#ifdef __KERNEL__
-#include <linux/types.h>
-#else
 #include <stdint.h>
-#endif
 
 
 typedef enum {

@@ -70,11 +70,4 @@ enum llc_sockopts {
 #define LLC_SAP_RM	0xD4		/* Resource Management 		*/
 #define LLC_SAP_GLOBAL	0xFF		/* Global SAP. 			*/
 
-#ifdef __KERNEL__
-#define LLC_SAP_DYN_START	0xC0
-#define LLC_SAP_DYN_STOP	0xDE
-#define LLC_SAP_DYN_TRIES	4
-
-#define llc_ui_skb_cb(__skb) ((struct sockaddr_llc *)&((__skb)->cb[0]))
-#endif /* __KERNEL__ */
 #endif /* __LINUX_LLC_H */

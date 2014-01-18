@@ -9,14 +9,7 @@
 #ifndef _ARPTABLES_H
 #define _ARPTABLES_H
 
-#ifdef __KERNEL__
-#include <linux/if.h>
-#include <linux/in.h>
-#include <linux/if_arp.h>
-#include <linux/skbuff.h>
-#endif
 #include <linux/types.h>
-#include <linux/compiler.h>
 #include <linux/netfilter_arp.h>
 
 #include <linux/netfilter/x_tables.h>
@@ -180,7 +173,7 @@ struct arpt_replace {
 	/* Number of counters (must be equal to current number of entries). */
 	unsigned int num_counters;
 	/* The old entries' counters. */
-	struct xt_counters __user *counters;
+	struct xt_counters *counters;
 
 	/* The entries (hang off end: not really an array). */
 	struct arpt_entry entries[0];
@@ -220,22 +213,4 @@ static __inline__ struct arpt_entry_target *arpt_get_target(struct arpt_entry *e
 /*
  *	Main firewall chains definitions and global var's definitions.
  */
-#ifdef __KERNEL__
-
-#define arpt_register_target(tgt) 	\
-({	(tgt)->family = NF_ARP;		\
- 	xt_register_target(tgt); })
-#define arpt_unregister_target(tgt) xt_unregister_target(tgt)
-
-extern int arpt_register_table(struct arpt_table *table,
-			       const struct arpt_replace *repl);
-extern void arpt_unregister_table(struct arpt_table *table);
-extern unsigned int arpt_do_table(struct sk_buff **pskb,
-				  unsigned int hook,
-				  const struct net_device *in,
-				  const struct net_device *out,
-				  struct arpt_table *table);
-
-#define ARPT_ALIGN(s) (((s) + (__alignof__(struct arpt_entry)-1)) & ~(__alignof__(struct arpt_entry)-1))
-#endif /*__KERNEL__*/
 #endif /* _ARPTABLES_H */

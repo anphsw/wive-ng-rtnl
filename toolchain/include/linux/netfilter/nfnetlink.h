@@ -2,7 +2,6 @@
 #define _NFNETLINK_H
 #include <linux/types.h>
 
-#ifndef __KERNEL__
 /* nfnetlink groups: Up to 32 maximum - backwards compatibility for userspace */
 #define NF_NETLINK_CONNTRACK_NEW 		0x00000001
 #define NF_NETLINK_CONNTRACK_UPDATE		0x00000002
@@ -10,7 +9,6 @@
 #define NF_NETLINK_CONNTRACK_EXP_NEW		0x00000008
 #define NF_NETLINK_CONNTRACK_EXP_UPDATE		0x00000010
 #define NF_NETLINK_CONNTRACK_EXP_DESTROY	0x00000020
-#endif
 
 enum nfnetlink_groups {
 	NFNLGRP_NONE,
@@ -103,72 +101,4 @@ struct nfgenmsg {
 #define NFNL_SUBSYS_ULOG		4
 #define NFNL_SUBSYS_COUNT		5
 
-#ifdef __KERNEL__
-
-#include <linux/netlink.h>
-#include <linux/capability.h>
-
-struct nfnl_callback {
-	int (*call)(struct sock *nl, struct sk_buff *skb, 
-		struct nlmsghdr *nlh, struct nfattr *cda[], int *errp);
-	u_int16_t attr_count;	/* number of nfattr's */
-};
-
-struct nfnetlink_subsystem {
-	const char *name;
-	__u8 subsys_id;		/* nfnetlink subsystem ID */
-	__u8 cb_count;		/* number of callbacks */
-	struct nfnl_callback *cb; /* callback for individual types */
-};
-
-extern void __nfa_fill(struct sk_buff *skb, int attrtype,
-        int attrlen, const void *data);
-#define NFA_PUT(skb, attrtype, attrlen, data) \
-({ if (skb_tailroom(skb) < (int)NFA_SPACE(attrlen)) goto nfattr_failure; \
-   __nfa_fill(skb, attrtype, attrlen, data); })
-
-extern struct semaphore nfnl_sem;
-
-#define nfnl_shlock()		down(&nfnl_sem)
-#define nfnl_shlock_nowait()	down_trylock(&nfnl_sem)
-
-#define nfnl_shunlock()		do { up(&nfnl_sem); \
-				     if(nfnl && nfnl->sk_receive_queue.qlen) \
-					    nfnl->sk_data_ready(nfnl, 0); \
-                        	} while(0)
-
-extern void nfnl_lock(void);
-extern void nfnl_unlock(void);
-
-extern int nfnetlink_subsys_register(struct nfnetlink_subsystem *n);
-extern int nfnetlink_subsys_unregister(struct nfnetlink_subsystem *n);
-
-extern void nfattr_parse(struct nfattr *tb[], int maxattr, 
-			struct nfattr *nfa, int len);
-
-#define nfattr_parse_nested(tb, max, nfa) \
-	nfattr_parse((tb), (max), NFA_DATA((nfa)), NFA_PAYLOAD((nfa)))
-
-#define nfattr_bad_size(tb, max, cta_min)				\
-({	int __i, __res = 0;						\
- 	for (__i=0; __i<max; __i++) {					\
- 		if (!cta_min[__i])					\
- 			continue;					\
- 		if (tb[__i] && NFA_PAYLOAD(tb[__i]) < cta_min[__i]){	\
- 			__res = 1;					\
- 			break;						\
- 		}							\
- 	}								\
- 	__res;								\
-})
-
-extern int nfnetlink_has_listeners(unsigned int group);
-extern int nfnetlink_send(struct sk_buff *skb, u32 pid, unsigned group, 
-			  int echo);
-extern int nfnetlink_unicast(struct sk_buff *skb, u_int32_t pid, int flags);
-
-#define MODULE_ALIAS_NFNL_SUBSYS(subsys) \
-	MODULE_ALIAS("nfnetlink-subsys-" __stringify(subsys))
-
-#endif	/* __KERNEL__ */
 #endif	/* _NFNETLINK_H */
