@@ -14,6 +14,25 @@ web_wait
 
 LOG="logger -t transmission"
 
+wait_for_close() {
+	# if need kill transmission-daemon
+	pid=`pidof transmission-daemon`
+	if [ "$pid" != "" ]; then
+	    $LOG "Stop transmission daemon."
+	    killall -q transmission-daemon
+	    #wait before save files and connections stop
+	    count=0
+	    while [ "$pid" != "" ] && [ "$count" != "15" ]; do
+	        sleep 1
+		count="$(($count+1))"
+		pid=`pidof transmission-daemon`
+	    done
+	    #kill if not stopped
+	    killall -q -SIGKILL transmission-daemon
+	    sleep 2
+        fi
+}
+
 start() {
     get_param
     if [ "$TransmissionEnabled" = "1" ]; then
@@ -34,16 +53,7 @@ start() {
 	done
 
 	# if need kill transmission-daemon
-	pid=`pidof transmission-daemon`
-	if [ "$pid" != "" ]; then
-	    $LOG "Stop transmission daemon."
-	    killall -q transmission-daemon
-	    #wait before save files and connections stop
-	    sleep 2
-	    #kill if not stopped
-	    killall -q -SIGKILL transmission-daemon
-	    usleep 500000
-        fi
+	wait_for_close
 
 	$LOG "Start transmission daemon."
 	mkdir -p $TRANSMISSION_HOME
@@ -52,21 +62,14 @@ start() {
 	else
 		authory="-T"
 	fi
-	nice -n 15 /bin/transmission-daemon -p $TransRPCPort -P $TransInPort $authory -x /var/run/transmission-daemon.pid
+	nice -n 15 /bin/transmission-daemon -p $TransRPCPort -P $TransInPort $authory -w $TRANSMISSION_DOWNLOADS -x /var/run/transmission-daemon.pid
       ) & # send to background
     fi
 }
 
 stop() {
-    pid=`pidof transmission-daemon`
-    if [ "$pid" != "" ]; then
-	$LOG "Stop transmission daemon."
-	killall -q transmission-daemon
-	#wait before save files and connections stop
-	sleep 2
-	#kill if not stopped
-	killall -q -SIGKILL transmission-daemon
-    fi
+	# if need kill transmission-daemon
+	wait_for_close
 }
 
 get_param() {
@@ -86,6 +89,7 @@ get_param() {
     else
 	export TRANSMISSION_HOME="/media/sda1/transmission"
     fi
+    export TRANSMISSION_DOWNLOADS="$TRANSMISSION_HOME"/downloads
 }
 
 case "$1" in
