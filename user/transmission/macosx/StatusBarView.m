@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: StatusBarView.m 13563 2012-10-14 17:33:23Z livings124 $
+ * $Id$
  * 
  * Copyright (c) 2006-2012 Transmission authors and contributors
  *

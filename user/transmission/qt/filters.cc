@@ -7,7 +7,7 @@
  *
  * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  *
- * $Id: filters.cc 12611 2011-08-02 03:59:54Z jordan $
+ * $Id$
  */
 
 #include "filters.h"

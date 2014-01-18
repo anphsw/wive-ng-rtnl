@@ -1805,15 +1805,16 @@
 8) init.d: iptables: fix work l2tp server if pptp client started.<br>
 9) l2tp server ip-up: do not need restart iptables.<br>
 10) xl2tpd: update to 1.3.6 (Jan 15, 2014) version.<br>
-11) kernel: ip6_tunnel: ensure to always have a link local address(RFC4862 and RFC4291 more compat).<br>
-12) kernel: fastroute: small speedup and more readable code.<br>
-13) kernel: ipv6: fix fragment process in ip output finish.<br>
-14) kernel: fix lockup related to stop_machine being stuck in __do_softirq.<br>
-15) kernel: option: backport support modems from 3.13 kernel tree.<br>
-16) kernel: driver core: make uevent-environment available in uevent-file.<br>
-17) kernel: ipv6: don't install anycast address for /128 addresses on routers.<br>
-18) kernel: ipv6: remove old conditions on flow label sharing.<br>
-19) kernel: ipv6: do not erase dst address with flow label destination.<br>.
+11) transmission: update to 2.82 version.<br>
+12) kernel: ip6_tunnel: ensure to always have a link local address(RFC4862 and RFC4291 more compat).<br>
+13) kernel: fastroute: small speedup and more readable code.<br>
+14) kernel: ipv6: fix fragment process in ip output finish.<br>
+15) kernel: fix lockup related to stop_machine being stuck in __do_softirq.<br>
+16) kernel: option: backport support modems from 3.13 kernel tree.<br>
+17) kernel: driver core: make uevent-environment available in uevent-file.<br>
+18) kernel: ipv6: don't install anycast address for /128 addresses on routers.<br>
+19) kernel: ipv6: remove old conditions on flow label sharing.<br>
+20) kernel: ipv6: do not erase dst address with flow label destination.<br>.
 <br>
 <br>
 <br>

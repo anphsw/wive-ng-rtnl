@@ -186,13 +186,13 @@ TorrentRendererFull.prototype =
 			else
 			{
 				// Downloading from 2 of 3 peer(s)
-			return [ 'Downloading from',
-			         t.getPeersSendingToUs(),
-			         'of',
+				return [ 'Downloading from',
+				         t.getPeersSendingToUs(),
+				         'of',
 				         fmt.countString('peer','peers',peer_count),
-			         '-',
-			         TorrentRendererHelper.formatDL(t),
-			         TorrentRendererHelper.formatUL(t) ].join(' ');
+				         '-',
+				         TorrentRendererHelper.formatDL(t),
+				         TorrentRendererHelper.formatUL(t) ].join(' ');
 			}
 		}
 

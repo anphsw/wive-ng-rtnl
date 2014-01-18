@@ -7,7 +7,7 @@
  *
  * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  *
- * $Id: filters.h 12611 2011-08-02 03:59:54Z jordan $
+ * $Id$
  */
 
 #ifndef QTR_FILTERS_H

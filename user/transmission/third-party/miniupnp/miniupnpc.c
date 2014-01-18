@@ -112,8 +112,7 @@ LIBSPEC void parserootdesc(const char * buffer, int bufsize, struct IGDdatas * d
  * return values :
  *   pointer - OK
  *   NULL - error */
-static char *
-simpleUPnPcommand2(int s, const char * url, const char * service,
+char * simpleUPnPcommand2(int s, const char * url, const char * service,
 		       const char * action, struct UPNParg * args,
 		       int * bufsize, const char * httpversion)
 {
@@ -329,7 +328,7 @@ upnpDiscover(int delay, const char * multicastif,
 	struct UPNPDev * tmp;
 	struct UPNPDev * devlist = 0;
 	int opt = 1;
-	static const char MSearchMsgFmt[] = 
+	static const char MSearchMsgFmt[] =
 	"M-SEARCH * HTTP/1.1\r\n"
 	"HOST: %s:" XSTR(PORT) "\r\n"
 	"ST: %s\r\n"
@@ -412,7 +411,7 @@ upnpDiscover(int delay, const char * multicastif,
 		p->sin_addr.s_addr = INADDR_ANY;
 	}
 #ifdef _WIN32
-/* This code could help us to use the right Network interface for 
+/* This code could help us to use the right Network interface for
  * SSDP multicast traffic */
 /* Get IP associated with the index given in the ip_forward struct
  * in order to give this ip to setsockopt(sudp, IPPROTO_IP, IP_MULTICAST_IF) */
@@ -505,11 +504,11 @@ upnpDiscover(int delay, const char * multicastif,
 			mc_if.s_addr = inet_addr(multicastif); /* ex: 192.168.x.x */
 			if(mc_if.s_addr != INADDR_NONE)
 			{
-			((struct sockaddr_in *)&sockudp_r)->sin_addr.s_addr = mc_if.s_addr;
-			if(setsockopt(sudp, IPPROTO_IP, IP_MULTICAST_IF, (const char *)&mc_if, sizeof(mc_if)) < 0)
-			{
-				PRINT_SOCKET_ERROR("setsockopt");
-			}
+				((struct sockaddr_in *)&sockudp_r)->sin_addr.s_addr = mc_if.s_addr;
+				if(setsockopt(sudp, IPPROTO_IP, IP_MULTICAST_IF, (const char *)&mc_if, sizeof(mc_if)) < 0)
+				{
+					PRINT_SOCKET_ERROR("setsockopt");
+				}
 			} else {
 #ifdef HAS_IP_MREQN
 				/* was not an ip address, try with an interface name */
@@ -767,7 +766,7 @@ LIBSPEC void GetUPNPUrls(struct UPNPUrls * urls, struct IGDdatas * data,
 	strncpy(urls->controlURL, urls->ipcondescURL, n2);
 	strncpy(urls->controlURL_CIF, urls->ipcondescURL, n3);
 	strncpy(urls->controlURL_6FC, urls->ipcondescURL, n4);
-	
+
 	url_cpy_or_cat(urls->ipcondescURL, data->first.scpdurl, n1);
 
 	url_cpy_or_cat(urls->controlURL, data->first.controlurl, n2);
@@ -873,7 +872,7 @@ UPNP_GetValidIGD(struct UPNPDev * devlist,
 			if(state == 1)
 			{
 				desc[i].xml = miniwget_getaddr(dev->descURL, &(desc[i].size),
-			   	                        lanaddr, lanaddrlen);
+				   	                           lanaddr, lanaddrlen);
 #ifdef DEBUG
 				if(!desc[i].xml)
 				{

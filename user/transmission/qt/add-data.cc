@@ -7,13 +7,12 @@
  *
  * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  *
- * $Id: add-data.cc 12697 2011-08-20 05:19:27Z jordan $
+ * $Id$
  */
 
 #include <QFile>
 
 #include <libtransmission/transmission.h>
-#include <libtransmission/bencode.h> // tr_base64_encode()
 #include <libtransmission/utils.h> // tr_base64_encode()
 
 #include "add-data.h"
@@ -44,7 +43,7 @@ AddData :: set( const QString& key )
     }
     else if( Utils::isHexHashcode( key ) )
     {
-        magnet = QString::fromAscii("magnet:?xt=urn:btih:") + key;
+        magnet = QString::fromUtf8("magnet:?xt=urn:btih:") + key;
         type = MAGNET;
     }
     else

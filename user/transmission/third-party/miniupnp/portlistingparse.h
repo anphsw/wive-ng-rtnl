@@ -37,7 +37,7 @@ typedef enum { PortMappingEltNone,
        PortMappingEntry, NewRemoteHost,
        NewExternalPort, NewProtocol,
        NewInternalPort, NewInternalClient,
-       NewEnabled, NewDescription, 
+       NewEnabled, NewDescription,
        NewLeaseTime } portMappingElt;
 
 struct PortMapping {

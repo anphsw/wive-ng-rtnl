@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: TorrentTableView.m 13610 2012-11-02 21:46:18Z livings124 $
+ * $Id$
  *
  * Copyright (c) 2005-2012 Transmission authors and contributors
  *

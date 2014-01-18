@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: FileNameCell.m 13600 2012-10-29 22:17:08Z livings124 $
+ * $Id$
  * 
  * Copyright (c) 2007-2012 Transmission authors and contributors
  *

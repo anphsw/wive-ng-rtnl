@@ -127,13 +127,13 @@ BUILT_SOURCES += \
 	transmission-resources.h
 
 EXTRA_DIST = \
-    $(DESKTOP_IN_FILES) \
+	$(DESKTOP_IN_FILES) \
 	$(UI_FILES) \
 	transmission.gresource.xml \
-    transmission.png
+	transmission.png
 
 DISTCLEANFILES = \
-    transmission-gtk.desktop
+	transmission-gtk.desktop
 
 if WIN32
 

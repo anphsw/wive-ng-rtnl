@@ -1,7 +1,7 @@
 /* $Id: portlistingparse.c,v 1.5 2012/03/05 19:42:47 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
- * (c) 2011 Thomas Bernard 
+ * (c) 2011 Thomas Bernard
  * This software is subject to the conditions detailed
  * in the LICENCE file provided within the distribution */
 #include <string.h>

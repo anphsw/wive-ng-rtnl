@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: InfoPeersViewController.h 13293 2012-04-29 00:53:34Z livings124 $
+ * $Id$
  *
  * Copyright (c) 2010-2012 Transmission authors and contributors
  *

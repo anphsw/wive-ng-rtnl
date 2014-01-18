@@ -3,6 +3,8 @@
 echo "==================CONFIGURE-TRANSMISSION======================="
 APROOTDIR=`pwd`
 
+$APROOTDIR/update-version-h.sh
+
 if [ ! -f $APROOTDIR/configure ]; then
     sh ./autogen.sh
 fi

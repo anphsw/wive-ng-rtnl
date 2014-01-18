@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: NSApplicationAdditions.m 13411 2012-07-25 12:46:49Z livings124 $
+ * $Id$
  *
  * Copyright (c) 2009-2012 Transmission authors and contributors
  *

@@ -7,7 +7,7 @@
  *
  * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  *
- * $Id: tracker-model.cc 11092 2010-08-01 20:36:13Z charles $
+ * $Id$
  */
 
 #include <algorithm> // std::sort()

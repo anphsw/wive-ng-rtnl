@@ -7,7 +7,7 @@
  *
  * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  *
- * $Id: dbus-adaptor.h 11280 2010-10-01 13:33:39Z charles $
+ * $Id$
  */
 
 #ifndef QTR_DBUS_ADAPTOR_H

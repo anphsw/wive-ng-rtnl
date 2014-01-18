@@ -1,7 +1,7 @@
 TARGET = transmission-qt
 NAME = "Transmission"
 DESCRIPTION = "Transmission: a fast, easy, and free BitTorrent client"
-VERSION = 2.00
+VERSION = 2.81
 LICENSE = "GPL"
 
 target.path = /bin
@@ -11,8 +11,8 @@ unix: INSTALLS += man
 man.path = /share/man/man1/
 man.files = transmission-qt.1
 
-CONFIG += qt qdbus thread debug link_pkgconfig
-QT += network
+CONFIG += qt thread debug link_pkgconfig
+QT += network dbus widgets
 PKGCONFIG = fontconfig libcurl openssl libevent
 
 TRANSMISSION_TOP = ..
@@ -34,6 +34,7 @@ win32:LIBS += -lidn -liconv -lwldap32 -liphlpapi
 TRANSLATIONS += translations/transmission_en.ts \
                 translations/transmission_es.ts \
                 translations/transmission_eu.ts \
+                translations/transmission_fr.ts \
                 translations/transmission_kk.ts \
                 translations/transmission_lt.ts \
                 translations/transmission_pt_BR.ts \
@@ -51,6 +52,7 @@ SOURCES += about.cc \
            file-tree.cc \
            filterbar.cc \
            filters.cc \
+           freespace-label.cc \
            formatter.cc \
            hig.cc \
            license.cc \

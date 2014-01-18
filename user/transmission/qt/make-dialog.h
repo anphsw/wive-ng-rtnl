@@ -7,7 +7,7 @@
  *
  * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  *
- * $Id: make-dialog.h 11098 2010-08-02 20:55:11Z charles $
+ * $Id$
  */
 
 #ifndef MAKE_DIALOG_H

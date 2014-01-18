@@ -80,8 +80,8 @@ LIBSPEC int initnatpmp(natpmp_t * p, int forcegw, in_addr_t forcedgw)
 	if(forcegw) {
 		p->gateway = forcedgw;
 	} else {
-	if(getdefaultgateway(&(p->gateway)) < 0)
-		return NATPMP_ERR_CANNOTGETGATEWAY;
+		if(getdefaultgateway(&(p->gateway)) < 0)
+			return NATPMP_ERR_CANNOTGETGATEWAY;
 	}
 	
 	memset(&addr, 0, sizeof(addr));

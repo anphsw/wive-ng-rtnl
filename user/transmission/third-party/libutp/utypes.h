@@ -7,11 +7,7 @@ typedef unsigned char uint8;
 typedef signed char int8;
 typedef unsigned short uint16;
 typedef signed short int16;
-#ifdef HAVE_STDBOOL_H
-#include <stdbool.h>
-#else
 typedef unsigned int uint;
-#endif
 typedef unsigned int uint32;
 typedef signed int int32;
 
@@ -40,13 +36,7 @@ typedef const char * cstr;
 typedef char * str;
 
 #ifndef __cplusplus
-#include <stdbool.h>
-#endif
-
-#if 0
-#ifndef __cplusplus
 typedef uint8 bool;
-#endif
 #endif
 
 #endif //__UTYPES_H__

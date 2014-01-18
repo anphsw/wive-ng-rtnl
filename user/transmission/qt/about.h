@@ -7,7 +7,7 @@
  *
  * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  *
- * $Id: about.h 11092 2010-08-01 20:36:13Z charles $
+ * $Id$
  */
 
 #ifndef ABOUT_DIALOG_H
@@ -17,20 +17,20 @@
 
 class AboutDialog: public QDialog
 {
-        Q_OBJECT
+    Q_OBJECT
 
-    private:
-        QDialog * myLicenseDialog;
+  private:
+    QDialog * myLicenseDialog;
 
-    public:
-        AboutDialog( QWidget * parent = 0 );
-        ~AboutDialog( ) { }
-        QWidget * createAboutTab( );
-        QWidget * createAuthorsTab( );
-        QWidget * createLicenseTab( );
+  public:
+    AboutDialog (QWidget * parent = 0);
+    ~AboutDialog () {}
+    QWidget * createAboutTab ();
+    QWidget * createAuthorsTab ();
+    QWidget * createLicenseTab ();
 
-    public slots:
-        void showCredits( );
+  public slots:
+    void showCredits ();
 
 };
 

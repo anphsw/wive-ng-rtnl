@@ -214,17 +214,17 @@ function Inspector(controller) {
         else {
             d = u = 0;
             if(torrents.length == 1) {
-				d = torrents[0].getDownloadedEver();
-				u = torrents[0].getUploadedEver();
-				
-				if (d == 0)
-					d = torrents[0].getHaveValid();
+                d = torrents[0].getDownloadedEver();
+                u = torrents[0].getUploadedEver();
+                                
+                if (d == 0)
+                    d = torrents[0].getHaveValid();
             }
             else {
-            for(i=0; t=torrents[i]; ++i) {
-					d += t.getDownloadedEver();
-					u += t.getUploadedEver();
-				}
+                for(i=0; t=torrents[i]; ++i) {
+                    d += t.getDownloadedEver();
+                    u += t.getUploadedEver();
+                }
             }
             str = fmt.size(u) + ' (Ratio: ' + fmt.ratioString( Math.ratio(u,d))+')';
         }
@@ -556,14 +556,14 @@ function Inspector(controller) {
         n = tor ? tor.getFileCount() : 0;
         if (tor!=data.file_torrent || n!=data.file_torrent_n) {
             // rebuild the file list...
-        clearFileList();
-        data.file_torrent = tor;
+            clearFileList();
+            data.file_torrent = tor;
             data.file_torrent_n = n;
-        data.file_rows = [];
-        fragment = document.createDocumentFragment();
+            data.file_rows = [ ];
+            fragment = document.createDocumentFragment();
             tree = createFileTreeModel (tor);
             addSubtreeToView (tor, fragment, tree, 0);
-        file_list.appendChild(fragment);
+            file_list.appendChild (fragment);
         } else {
             // ...refresh the already-existing file list
             for (i=0, n=data.file_rows.length; i<n; ++i)
@@ -746,7 +746,7 @@ function Inspector(controller) {
             html.push('</div>'); // inspector_group
         }
 
-        setInnerHTML(trackers_list, html.join(''));
+        setInnerHTML (trackers_list, html.join(''));
     },
 
     initialize = function (controller) {
@@ -766,21 +766,21 @@ function Inspector(controller) {
         data.elements.peers_list     = $('#inspector_peers_list')[0];
         data.elements.trackers_list  = $('#inspector_trackers_list')[0];
 
-	data.elements.have_lb           = $('#inspector-info-have')[0];
-	data.elements.availability_lb   = $('#inspector-info-availability')[0];
-	data.elements.downloaded_lb     = $('#inspector-info-downloaded')[0];
-	data.elements.uploaded_lb       = $('#inspector-info-uploaded')[0];
-	data.elements.state_lb          = $('#inspector-info-state')[0];
-	data.elements.running_time_lb   = $('#inspector-info-running-time')[0];
-	data.elements.remaining_time_lb = $('#inspector-info-remaining-time')[0];
-	data.elements.last_activity_lb  = $('#inspector-info-last-activity')[0];
-	data.elements.error_lb          = $('#inspector-info-error')[0];
-	data.elements.size_lb           = $('#inspector-info-size')[0];
-	data.elements.foldername_lb     = $('#inspector-info-location')[0];
-	data.elements.hash_lb           = $('#inspector-info-hash')[0];
-	data.elements.privacy_lb        = $('#inspector-info-privacy')[0];
-	data.elements.origin_lb         = $('#inspector-info-origin')[0];
-	data.elements.comment_lb        = $('#inspector-info-comment')[0];
+        data.elements.have_lb           = $('#inspector-info-have')[0];
+        data.elements.availability_lb   = $('#inspector-info-availability')[0];
+        data.elements.downloaded_lb     = $('#inspector-info-downloaded')[0];
+        data.elements.uploaded_lb       = $('#inspector-info-uploaded')[0];
+        data.elements.state_lb          = $('#inspector-info-state')[0];
+        data.elements.running_time_lb   = $('#inspector-info-running-time')[0];
+        data.elements.remaining_time_lb = $('#inspector-info-remaining-time')[0];
+        data.elements.last_activity_lb  = $('#inspector-info-last-activity')[0];
+        data.elements.error_lb          = $('#inspector-info-error')[0];
+        data.elements.size_lb           = $('#inspector-info-size')[0];
+        data.elements.foldername_lb     = $('#inspector-info-location')[0];
+        data.elements.hash_lb           = $('#inspector-info-hash')[0];
+        data.elements.privacy_lb        = $('#inspector-info-privacy')[0];
+        data.elements.origin_lb         = $('#inspector-info-origin')[0];
+        data.elements.comment_lb        = $('#inspector-info-comment')[0];
         data.elements.name_lb           = $('#torrent_inspector_name')[0];
 
         // force initial 'N/A' updates on all the pages

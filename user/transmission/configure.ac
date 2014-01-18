@@ -3,8 +3,8 @@ dnl STATUS: "X" for prerelease beta builds,
 dnl         "Z" for unsupported trunk builds,
 dnl         "0" for stable, supported releases
 dnl these should be the only two lines you need to change
-m4_define([user_agent_prefix],[2.77])
-m4_define([peer_id_prefix],[-TR2770-])
+m4_define([user_agent_prefix],[2.82])
+m4_define([peer_id_prefix],[-TR2820-])
 
 AC_INIT([transmission],[user_agent_prefix],[http://trac.transmissionbt.com/newticket])
 AC_SUBST(USERAGENT_PREFIX,[user_agent_prefix])
@@ -14,9 +14,9 @@ m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])])
 
 AC_CONFIG_MACRO_DIR([m4])
 
-dnl AC_CONFIG_HEADER(config.h)
+dnl AM_CONFIG_HEADER(config.h)
 AC_CONFIG_SRCDIR(libtransmission/transmission.h)
-AM_INIT_AUTOMAKE([1.9 tar-pax])
+AM_INIT_AUTOMAKE([1.9 tar-pax no-dist-gzip dist-xz])
 LT_INIT
 AC_PROG_RANLIB
 
@@ -76,7 +76,7 @@ if test "x$CXX" != "x"; then # CXX is set...
     HAVE_CXX="yes"
     AC_MSG_RESULT([$HAVE_CXX])
   else
-AC_CHECK_PROG([HAVE_CXX],[$CXX],[yes],[no])
+    AC_CHECK_PROG([HAVE_CXX],[$CXX],[yes],[no])
   fi
 fi
 AC_C_INLINE
@@ -126,6 +126,7 @@ AC_PATH_ZLIB
 AC_SYS_LARGEFILE
 AC_CHECK_FUNCS([lseek64])
 
+AC_FUNC_GETMNTENT
 
 dnl ----------------------------------------------------------------------------
 dnl
@@ -174,6 +175,25 @@ fi
 
 AC_CHECK_HEADERS([sys/statvfs.h \
                   xfs/xfs.h])
+
+
+dnl ----------------------------------------------------------------------------
+dnl
+dnl file monitoring for the daemon
+
+# Check whether to enable systemd startup notification.
+# This requires libsystemd-daemon.
+AC_ARG_WITH([systemd-daemon], AS_HELP_STRING([--with-systemd-daemon],
+            [Add support for systemd startup notification (default is autodetected)])
+            [USE_SYSTEMD_DAEMON=$withval], [USE_SYSTEMD_DAEMON=auto])
+AS_IF([test "x$USE_SYSTEMD_DAEMON" != "xno"], [
+    PKG_CHECK_MODULES([SYSTEMD_DAEMON], [libsystemd-daemon],
+        [AC_DEFINE(USE_SYSTEMD_DAEMON,1,[Use systemd startup notification])],
+        [AS_IF([test "x$USE_SYSTEMD_DAEMON" = "xyes"],
+            [AC_MSG_ERROR([systemd startup notification support requested, but libsystemd-daemon not found.])]
+        )]
+    )
+])
 
 
 dnl ----------------------------------------------------------------------------
@@ -353,14 +373,14 @@ if test "x$with_gtk" = "xyes" ; then
     fi
 
     PKG_CHECK_MODULES([GTK], [gtk+-3.0 >= $GTK_MINIMUM
-                                  glib-2.0 >= $GLIB_MINIMUM
-                                  gio-2.0 >= $GIO_MINIMUM,
-                                  gmodule-2.0 >= $GLIB_MINIMUM
-                                  gthread-2.0 >= $GLIB_MINIMUM])
-        PKG_CHECK_MODULES([LIBAPPINDICATOR],
-                          [appindicator3-0.1 >= $LIBAPPINDICATOR_MINIMUM],
-                          [have_libappindicator=yes],
-                          [have_libappindicator=no])
+                              glib-2.0 >= $GLIB_MINIMUM
+                              gio-2.0 >= $GIO_MINIMUM,
+                              gmodule-2.0 >= $GLIB_MINIMUM
+                              gthread-2.0 >= $GLIB_MINIMUM])
+    PKG_CHECK_MODULES([LIBAPPINDICATOR],
+                      [appindicator3-0.1 >= $LIBAPPINDICATOR_MINIMUM],
+                      [have_libappindicator=yes],
+                      [have_libappindicator=no])
     if test "x$have_libappindicator" = "xyes"; then
         use_libappindicator=yes
         AC_DEFINE([HAVE_LIBAPPINDICATOR], 1)
@@ -471,6 +491,7 @@ EOF
 fi
 if test "x$have_darwin" = "xyes"; then
     AC_DEFINE([HAVE_DARWIN], 1)
+    AC_DEFINE([SYS_DARWIN], 1)
 fi
 if test "x$have_msw" = "xyes"; then
     AC_DEFINE([HAVE_MSW], 1)

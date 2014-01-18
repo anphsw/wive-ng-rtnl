@@ -239,6 +239,8 @@ SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
+SYSTEMD_DAEMON_CFLAGS = @SYSTEMD_DAEMON_CFLAGS@
+SYSTEMD_DAEMON_LIBS = @SYSTEMD_DAEMON_LIBS@
 USERAGENT_PREFIX = @USERAGENT_PREFIX@
 USE_NLS = @USE_NLS@
 VERSION = @VERSION@
@@ -308,8 +310,6 @@ dist_data_DATA = \
   jqueryui-1.8.16.min.js \
   jquery.min.js \
   jquery.contextmenu.min.js \
-  jquery.form.js \
-  jquery.form.min.js \
   jquery.transmenu.min.js \
   json2.min.js
 

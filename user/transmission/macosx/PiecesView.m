@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: PiecesView.m 13251 2012-03-13 02:52:11Z livings124 $
+ * $Id$
  *
  * Copyright (c) 2006-2012 Transmission authors and contributors
  *
@@ -216,7 +216,7 @@ enum
         const BOOL availability = ![[NSUserDefaults standardUserDefaults] boolForKey: @"PiecesViewShowAvailability"];
         [[NSUserDefaults standardUserDefaults] setBool: availability forKey: @"PiecesViewShowAvailability"];
         
-        [[NSNotificationCenter defaultCenter] postNotificationName: @"UpdatePiecesView" object: self];
+        [self sendAction:[self action] to:[self target]];
     }
     
     [super mouseDown: event];

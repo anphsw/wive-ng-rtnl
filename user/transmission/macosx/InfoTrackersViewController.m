@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: InfoTrackersViewController.m 13434 2012-08-13 00:52:04Z livings124 $
+ * $Id$
  *
  * Copyright (c) 2010-2012 Transmission authors and contributors
  *

@@ -7,7 +7,7 @@
  *
  * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  *
- * $Id: triconpushbutton.cc 13241 2012-02-29 02:47:11Z jordan $
+ * $Id$
  */
 
 #include <iostream>

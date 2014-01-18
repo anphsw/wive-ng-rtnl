@@ -356,6 +356,8 @@ SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
+SYSTEMD_DAEMON_CFLAGS = @SYSTEMD_DAEMON_CFLAGS@
+SYSTEMD_DAEMON_LIBS = @SYSTEMD_DAEMON_LIBS@
 USERAGENT_PREFIX = @USERAGENT_PREFIX@
 USE_NLS = @USE_NLS@
 VERSION = @VERSION@
@@ -517,13 +519,13 @@ icon_DATA = transmission.png
 icondir = $(datadir)/pixmaps
 UI_FILES = transmission-ui.xml 
 EXTRA_DIST = \
-    $(DESKTOP_IN_FILES) \
+	$(DESKTOP_IN_FILES) \
 	$(UI_FILES) \
 	transmission.gresource.xml \
-    transmission.png
+	transmission.png
 
 DISTCLEANFILES = \
-    transmission-gtk.desktop
+	transmission-gtk.desktop
 
 @WIN32_TRUE@transmission_gtk_LDFLAGS = -mwindows
 all: $(BUILT_SOURCES)

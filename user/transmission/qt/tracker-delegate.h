@@ -7,7 +7,7 @@
  *
  * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  *
- * $Id: tracker-delegate.h 11522 2010-12-12 16:43:19Z charles $
+ * $Id$
  */
 
 #ifndef QTR_TORRENT_DELEGATE_H

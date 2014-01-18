@@ -7,7 +7,7 @@
  *
  * http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  *
- * $Id: add-data.h 12212 2011-03-23 18:22:23Z jordan $
+ * $Id$
  */
 
 #ifndef ADD_DATA_H
