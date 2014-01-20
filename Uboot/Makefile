@@ -21,6 +21,20 @@
 # MA 02111-1307 USA
 #
 
+#########################################################################################################
+# Tune locale to eng
+#
+LANG		:= C
+LC_COLLATE	:= C
+LC_MESSAGES	:= C
+LC_ALL		:= C
+
+#########################################################################################################
+# Cleanup CFLAGS/CPPFLAGS
+#
+CFLAGS		:=
+CPPFLAGS	:=
+CXXFLAGS	:=
 
 
 HOSTARCH := $(shell uname -m | \
@@ -248,12 +262,12 @@ endif
 uboot.img:	uboot.bin
 ifeq ($(CFG_ENV_IS), IN_SPI)
 		../tools/mkimage/mkimage -A $(ARCH) -T standalone -C none \
-		-a $(TEXT_BASE) -e $(shell readelf -h u-boot | grep "Entry" | awk '{print $$4}') \
+		-a $(TEXT_BASE) -e $(shell export LC_ALL=C; readelf -h u-boot | grep "Entry" | awk '{print $$4}') \
 		-d $< $@
 endif
 ifeq ($(CFG_ENV_IS), IN_NAND)
 		../tools/mkimage/mkimage -A $(ARCH) -T standalone -C none \
-		-a $(TEXT_BASE) -e $(shell readelf -h u-boot | grep "Entry" | awk '{print $$4}') \
+		-a $(TEXT_BASE) -e $(shell export LC_ALL=C; readelf -h u-boot | grep "Entry" | awk '{print $$4}') \
 		-d $< $@
 endif
 
