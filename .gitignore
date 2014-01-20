@@ -16,10 +16,8 @@ config.log
 config.status
 filesystem
 fulldump
-romfs
 /romfs
 /romfs/*
-/images/*
 /images
 /images/*
 /dev
