@@ -1590,7 +1590,6 @@ static int GetDescDocumentAndURL(
 			}
 			if (strlen(temp_str) > (LINE_SIZE - 1)) {
 				ixmlDocument_free(*xmlDoc);
-				free(temp_str);
 				return UPNP_E_URL_TOO_BIG;
 			}
 			strncpy(aliasStr, temp_str, sizeof(aliasStr) - 1);
@@ -1981,7 +1980,9 @@ int UpnpSubscribeAsync(
     TPJobInit(&job, (start_routine)UpnpThreadDistribution, Param);
     TPJobSetFreeFunction(&job, (free_routine)free);
     TPJobSetPriority(&job, MED_PRIORITY);
-    ThreadPoolAdd(&gSendThreadPool, &job, NULL);
+    if (ThreadPoolAdd(&gSendThreadPool, &job, NULL) != 0) {
+	free(Param);
+    }
 
     UpnpPrintf(UPNP_ALL, API, __FILE__, __LINE__,
         "Exiting UpnpSubscribeAsync\n");
@@ -2167,7 +2168,9 @@ int UpnpUnSubscribeAsync(
 	TPJobInit( &job, ( start_routine ) UpnpThreadDistribution, Param );
 	TPJobSetFreeFunction( &job, ( free_routine ) free );
 	TPJobSetPriority( &job, MED_PRIORITY );
-	ThreadPoolAdd( &gSendThreadPool, &job, NULL );
+	if (ThreadPoolAdd( &gSendThreadPool, &job, NULL ) != 0) {
+		free(Param);
+	}
 
 exit_function:
 	UpnpPrintf(UPNP_ALL, API, __FILE__, __LINE__, "Exiting UpnpUnSubscribeAsync\n");
@@ -2293,7 +2296,9 @@ int UpnpRenewSubscriptionAsync(
     TPJobInit( &job, ( start_routine ) UpnpThreadDistribution, Param );
     TPJobSetFreeFunction( &job, ( free_routine ) free );
     TPJobSetPriority( &job, MED_PRIORITY );
-    ThreadPoolAdd( &gSendThreadPool, &job, NULL );
+    if (ThreadPoolAdd( &gSendThreadPool, &job, NULL ) != 0) {
+	free(Param);
+    }
 
     UpnpPrintf(UPNP_ALL, API, __FILE__, __LINE__,
         "Exiting UpnpRenewSubscriptionAsync\n");
@@ -2765,7 +2770,9 @@ int UpnpSendActionAsync(
     TPJobSetFreeFunction( &job, ( free_routine ) free );
 
     TPJobSetPriority( &job, MED_PRIORITY );
-    ThreadPoolAdd( &gSendThreadPool, &job, NULL );
+    if (ThreadPoolAdd( &gSendThreadPool, &job, NULL ) != 0) {
+	free(Param);
+    }
 
     UpnpPrintf(UPNP_ALL, API, __FILE__, __LINE__,
         "Exiting UpnpSendActionAsync \n");
@@ -2885,7 +2892,9 @@ int UpnpSendActionExAsync(
     TPJobSetFreeFunction( &job, ( free_routine ) free );
 
     TPJobSetPriority( &job, MED_PRIORITY );
-    ThreadPoolAdd( &gSendThreadPool, &job, NULL );
+    if (ThreadPoolAdd( &gSendThreadPool, &job, NULL ) != 0) {
+	free(Param);
+    }
 
     UpnpPrintf(UPNP_ALL, API, __FILE__, __LINE__,
         "Exiting UpnpSendActionAsync\n");
@@ -2952,7 +2961,9 @@ int UpnpGetServiceVarStatusAsync(
 
     TPJobSetPriority( &job, MED_PRIORITY );
 
-    ThreadPoolAdd( &gSendThreadPool, &job, NULL );
+    if (ThreadPoolAdd( &gSendThreadPool, &job, NULL ) != 0) {
+	free(Param);
+    }
 
     UpnpPrintf(UPNP_ALL, API, __FILE__, __LINE__,
         "Exiting UpnpGetServiceVarStatusAsync\n");
@@ -4085,16 +4096,17 @@ int UpnpRemoveVirtualDir(const char *dirName)
         return UPNP_E_INVALID_PARAM;
     }
     /* Handle the special case where the directory that we are */
-    /* removing is the first and only one in the list. */
-    if( ( pVirtualDirList->next == NULL ) &&
-        ( strcmp( pVirtualDirList->dirName, dirName ) == 0 ) ) {
-        free( pVirtualDirList );
-        pVirtualDirList = NULL;
+    /* removing is the first in the list. */
+    if (strcmp( pVirtualDirList->dirName, dirName ) == 0)
+    {
+        pPrev = pVirtualDirList;
+        pVirtualDirList = pVirtualDirList->next;
+        free( pPrev );
         return UPNP_E_SUCCESS;
     }
 
-    pCur = pVirtualDirList;
-    pPrev = pCur;
+    pCur = pVirtualDirList->next;
+    pPrev = pVirtualDirList;
 
     while( pCur != NULL ) {
         if( strcmp( pCur->dirName, dirName ) == 0 ) {

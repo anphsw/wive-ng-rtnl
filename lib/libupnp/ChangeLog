@@ -1,4 +1,224 @@
 *******************************************************************************
+Version 1.6.19
+*******************************************************************************
+
+2013-11-14 Marcelo Roberto Jimenez <mroberto(at)users.sourceforge.net>
+
+	SF Bug Tracker #119, Creator: Klaus Fischer
+	Access violation due to changed usage of pthreads-win32
+
+	Dear libupnp developers,
+
+	I have experienced a crash (access violation) when using libupnp on
+	Windows. The crash is actually located in pthreads-win32 and happens
+	when repeatedly de-/initializing libupnp on Win32 in the same process
+	and both libupnp and pthreads-win32 are compiled as static libraries.
+
+	So I'm doing this:
+	- UpnpInit()
+	- UpnpFinish()
+	- UpnpInit() <- Crash
+
+	I am already in touch with Ross Johnson on the pthreads-win32 mailing
+	list regarding this issue:
+
+	http://sourceware.org/ml/pthreads-win32/2013/msg00020.html
+
+	He told me the problem is that the functions
+	pthread_win32_process_attach/detach_np() should no longer be called
+	directly, but are invoked automatically now since version 2.9.0 of
+	pthreads-win32, which has been released approx. 1.5 years ago. Please
+	refer to above link for in-depth information.
+
+	So for proper using of latest pthreads-win32 library, those function
+	calls should vanish inside libupnp. Could you consider adapting libupnp
+	in that way? I would really like to use both libraries out-of-the-box
+	without local modifications, and this issue prevents that.
+
+	Best regards,
+	Klaus
+
+2013-11-08 Peng <howtofly(at)gmail.com>
+
+	Fix several minor bugs in soap_device.c
+
+	1) remove redundant free
+	2) avoid user-provided ErrStr being overwritten by the default one
+	3) eliminated memory leak possiblity in handle_query_variable
+
+2013-11-08 Peng <howtofly(at)gmail.com>
+
+	Fix return value check of parse_uri.
+
+2012-06-19 Yoichi NAKAYAMA <yoichi.nakayama(at)gmail.com>
+
+	SF Bug Tracker #118, Creator: T.Iwamoto
+	tv_ctrlpt crashes after detecting a later version of tvcontrol service
+
+	From:  gon3456@users.sf.net
+	Steps to reproduce:
+	1. Extracts and build libupnp-1.6.18
+	$ tar -xjf /path/to/archive/libupnp-1.6.18.tar.bz2
+	$ cd libupnp-1.6.18
+	$ ./configure
+	$ make
+	2. Applies the attached patch and remake.
+	$ patch -p1 < /path/to/patch/libupnp-1.6.18.patch
+	$ make
+	3. Run tv_device.
+	$ cd upnp/sample
+	$ ./tv_device
+	4. Run tv_ctrlpt; the tv_ctrlpt crashes soon.
+	$ ./tv_ctrlpt
+	Segmentation fault (core dumped)
+	This is an issue report about the sample program of control point.
+	The tv_ctrlpt crashes after detecting a tvdevice that contains tvcontrol:2 or higher version of tvcontrol service.
+	tv_ctrlpt should detect correctly such devices due to forward compatibility of control points with device.
+	For more information about the compatibility, please refer the following document:
+	DLNA Architectures and Protocols Part 1 2011 December - 7.3.2.1.3 (GUN:GZJXU)
+	The attached patch changes the sample programs as below:
+	- device: changes version of tvcontrol service from 1 to 2. This change may occur in the future.
+	- cp: nothing changed: cp knows version 1 of tvcontrol service only.
+	I know many vendors implements their control points based on the tv_ctrlpt, so I hope to fix this issue ASAP.
+
+	==
+
+	From: Yoichi NAKAYAMA
+	SEGV is caused by strcpy with NULL argument.
+	Attached patch will avoid SEGV in strcpy, but there may be other inconsistencies.
+
+	> I know many vendors implements their control points based on the tv_ctrlpt,
+
+	I don't think so. I think tv_ctrlpt is just a sample to be used with tv_device.
+
+2013-10-28 Pino Toscano <pinotree(at)users.sourceforge.net>
+
+	Fix compilation on GNU/Hurd
+
+2013-10-28 Peng <howtofly(at)gmail.com>
+
+	Fix return value of http_RecvPostMessage and update httpparser.c's comments
+
+2013-10-17 Peng <howtofly(at)gmail.com>
+
+	Fix return value of process_request and related subroutines
+	1) Only HTTP_XXX should be return
+	2) Make default return value work for process_request
+
+2013-10-15 Peng <howtofly(at)gmail.com>
+
+	Fix Content-Range generation bug
+
+2013-09-10 zexian chen <chenzexian88(at)gmail.com>
+
+	Hi,
+
+	I had found some bugs about memory leak on libupnp-1.6.18. 
+
+	It may lead to memory leak  when calling ThreadPoolAdd() or
+	ThreadPoolAddPersistent() which does not return 0. 
+
+	See the attachment for patch.
+
+2013-09-03 Peng <howtofly(at)gmail.com>
+
+	Fix return value of config_description_doc.
+
+	UPNP_E_XXX should not be used instead of IXML_XXX
+
+2013-09-03 Peng <howtofly(at)gmail.com>
+
+	Remove faulty free in GetDescDocumentAndURL.
+
+	temp_str, which points to part of description, should not be freed.
+
+2013-09-02 Peng <howtofly(at)gmail.com>
+
+	Suppose the UPnP device is listening on 192.168.1.102:49152. Use the following to send
+	garbage bytes to the device:
+	while true; do echo "\""; done | netcat 192.168.1.102 49152
+
+	The device just keeps receiving these bytes and its memory usage keeps growing.
+	Malicious client may exploit it to exhaust the device's memory.
+
+	The attached patch eliminates this possibility.
+
+2013-09-02 Peng <howtofly(at)gmail.com>
+
+	1) restore the scanner's original cursor position in case of
+	   insufficient input;
+	2) free the memories allocated for a new header in case of a failure.
+
+2013-08-13 Peng <howtofly(at)gmail.com>
+
+	Patch to fix behaviou when char is signed
+
+	it seems to me that there is still something wrong:
+
+	1)  the new is_qdtext_char() is incorrect.
+	There is a trap if char is implemented as signed char.
+	Suppose that c is '\xFF', it will be -1 when converted to an int.
+	By definition, c should be qdtext:
+	qdtext = <any TEXT except <">>
+	TEXT = <any OCTET except CTLs, but including LWS>
+	OCTET = <any 8-bit sequence of data>
+
+	2) the character after '\\' could be either part of a quoted-pair
+	(together with '\\'), or a normal qdtext, since '\\' itself can
+	be treated as a qdtext. This is equivalent to saying that the
+	character after '\\' in a quoted string could be ANY octet.
+
+	A patch based on the above two observations is attached.
+
+	Peng
+
+2013-08-13 Marcelo Roberto Jimenez <mroberto(at)users.sourceforge.net>
+
+	Enforce RFC 2616 and accept "0" after a backslash for quoted-strings.
+
+	Reported by Peng <howtofly(at)gmail.com>
+
+2013-08-13 Peng <howtofly(at)gmail.com>
+
+	Patch to make scanner_get_token more robust (avoid over-reading).
+
+2013-07-30 Zheng Peng <darkelf2010(at)users.sf.net>
+
+	SF ticket #116 UpnpRemoveVirtualDir wrong linked list operation
+
+	What if pVirtualDirList has two nodes and what we want to delete is the
+	first one. Patch attached.
+
+2013-07-30 Sebastian Brandt <s.brandt(at)aixtrusion.de>
+
+	Dear libupnp-devels,
+	when POST'ing to the simple web server in libupnp, the application crashes.
+	This is caused by a missing "..." argument in webserver.c:1533.
+	Seems it has been there for a long time ... 1.6.9 and 1.6.18 have it.
+
+	webserver.c:1533 calls http_MakeMessage
+	/* Send response. */
+	http_MakeMessage(&headers, 1, 1,
+		 "RTLSXcCc",
+		 ret, "text/html", X_USER_AGENT);
+	The format parameter RTLSXcCc needs four arguments -
+	R - response code - ret,
+	T- content type - text/html,
+	L - struct SendInstruction * - NOT PRESENT
+	X - user agent - X_USER_AGENT
+
+	This results in a crash.
+
+	Changing to
+	http_MakeMessage(&headers, 1, 1,
+		 "RTLSXcCc",
+		 ret, "text/html", &RespInstr, X_USER_AGENT);
+	solves the situation.
+
+	Yours,
+	Sebastian Brandt
+
+*******************************************************************************
 Version 1.6.18
 *******************************************************************************
 

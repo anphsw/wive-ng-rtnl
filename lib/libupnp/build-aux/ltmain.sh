@@ -1,9 +1,9 @@
 
-# libtool (GNU libtool) 2.4
+# libtool (GNU libtool) 2.4.2
 # Written by Gordon Matzigkeit <gord@gnu.ai.mit.edu>, 1996
 
 # Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2003, 2004, 2005, 2006,
-# 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+# 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 # This is free software; see the source for copying conditions.  There is NO
 # warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
@@ -32,30 +32,31 @@
 #
 # Provide generalized library-building support services.
 #
-#     --config             show all configuration variables
-#     --debug              enable verbose shell tracing
-# -n, --dry-run            display commands without modifying any files
-#     --features           display basic configuration information and exit
-#     --mode=MODE          use operation mode MODE
-#     --preserve-dup-deps  don't remove duplicate dependency libraries
-#     --quiet, --silent    don't print informational messages
+#       --config             show all configuration variables
+#       --debug              enable verbose shell tracing
+#   -n, --dry-run            display commands without modifying any files
+#       --features           display basic configuration information and exit
+#       --mode=MODE          use operation mode MODE
+#       --preserve-dup-deps  don't remove duplicate dependency libraries
+#       --quiet, --silent    don't print informational messages
 #       --no-quiet, --no-silent
 #                            print informational messages (default)
-#     --tag=TAG            use configuration variables from tag TAG
+#       --no-warn            don't display warning messages
+#       --tag=TAG            use configuration variables from tag TAG
 #   -v, --verbose            print more informational messages than default
 #       --no-verbose         don't print the extra informational messages
-#     --version            print version information
+#       --version            print version information
 #   -h, --help, --help-all   print short, long, or detailed help message
 #
 # MODE must be one of the following:
 #
-#       clean              remove files from the build directory
-#       compile            compile a source file into a libtool object
-#       execute            automatically set library path, then run a program
-#       finish             complete the installation of libtool libraries
-#       install            install libraries or executables
-#       link               create a library or an executable
-#       uninstall          remove libraries from an installed directory
+#         clean              remove files from the build directory
+#         compile            compile a source file into a libtool object
+#         execute            automatically set library path, then run a program
+#         finish             complete the installation of libtool libraries
+#         install            install libraries or executables
+#         link               create a library or an executable
+#         uninstall          remove libraries from an installed directory
 #
 # MODE-ARGS vary depending on the MODE.  When passed as first option,
 # `--mode=MODE' may be abbreviated as `MODE' or a unique abbreviation of that.
@@ -64,14 +65,14 @@
 # When reporting a bug, please describe a test case to reproduce it and
 # include the following information:
 #
-#       host-triplet:	$host
-#       shell:		$SHELL
-#       compiler:		$LTCC
-#       compiler flags:		$LTCFLAGS
-#       linker:		$LD (gnu? $with_gnu_ld)
-#         $progname:	(GNU libtool) 2.4
-#       automake:		$automake_version
-#       autoconf:		$autoconf_version
+#         host-triplet:	$host
+#         shell:		$SHELL
+#         compiler:		$LTCC
+#         compiler flags:		$LTCFLAGS
+#         linker:		$LD (gnu? $with_gnu_ld)
+#         $progname:	(GNU libtool) 2.4.2
+#         automake:	$automake_version
+#         autoconf:	$autoconf_version
 #
 # Report bugs to <bug-libtool@gnu.org>.
 # GNU libtool home page: <http://www.gnu.org/software/libtool/>.
@@ -79,9 +80,9 @@
 
 PROGRAM=libtool
 PACKAGE=libtool
-VERSION=2.4
+VERSION=2.4.2
 TIMESTAMP=""
-package_revision=1.3293
+package_revision=1.3337
 
 # Be Bourne compatible
 if test -n "${ZSH_VERSION+set}" && (emulate sh) >/dev/null 2>&1; then
@@ -136,15 +137,10 @@ progpath="$0"
 
 : ${CP="cp -f"}
 test "${ECHO+set}" = set || ECHO=${as_echo-'printf %s\n'}
-: ${EGREP="grep -E"}
-: ${FGREP="grep -F"}
-: ${GREP="grep"}
-: ${LN_S="ln -s"}
 : ${MAKE="make"}
 : ${MKDIR="mkdir"}
 : ${MV="mv -f"}
 : ${RM="rm -f"}
-: ${SED="sed"}
 : ${SHELL="${CONFIG_SHELL-/bin/sh}"}
 : ${Xsed="$SED -e 1s/^X//"}
 
@@ -199,13 +195,13 @@ func_basename ()
 # those functions but instead duplicate the functionality here.
 func_dirname_and_basename ()
 {
-  # Extract subdirectory from the argument.
+    # Extract subdirectory from the argument.
     func_dirname_result=`$ECHO "${1}" | $SED -e "$dirname"`
-  if test "X$func_dirname_result" = "X${1}"; then
-    func_dirname_result="${3}"
-  else
-    func_dirname_result="$func_dirname_result${2}"
-  fi
+    if test "X$func_dirname_result" = "X${1}"; then
+      func_dirname_result="${3}"
+    else
+      func_dirname_result="$func_dirname_result${2}"
+    fi
     func_basename_result=`$ECHO "${1}" | $SED -e "$basename"`
 } # func_dirname_and_basename may be replaced by extended shell implementation
 
@@ -387,7 +383,7 @@ case $progpath in
      ;;
   *)
      save_IFS="$IFS"
-     IFS=:
+     IFS=${PATH_SEPARATOR-:}
      for progdir in $PATH; do
        IFS="$save_IFS"
        test -x "$progdir/$progname" && break
@@ -771,8 +767,8 @@ func_help ()
 	s*\$LTCFLAGS*'"$LTCFLAGS"'*
 	s*\$LD*'"$LD"'*
 	s/\$with_gnu_ld/'"$with_gnu_ld"'/
-	s/\$automake_version/'"`(automake --version) 2>/dev/null |$SED 1q`"'/
-	s/\$autoconf_version/'"`(autoconf --version) 2>/dev/null |$SED 1q`"'/
+	s/\$automake_version/'"`(${AUTOMAKE-automake} --version) 2>/dev/null |$SED 1q`"'/
+	s/\$autoconf_version/'"`(${AUTOCONF-autoconf} --version) 2>/dev/null |$SED 1q`"'/
 	p
 	d
      }
@@ -1015,30 +1011,30 @@ _LT_EOF
 }
 
 
-  # Shorthand for --mode=foo, only valid as the first argument
-  case $1 in
-  clean|clea|cle|cl)
-    shift; set dummy --mode clean ${1+"$@"}; shift
-    ;;
-  compile|compil|compi|comp|com|co|c)
-    shift; set dummy --mode compile ${1+"$@"}; shift
-    ;;
-  execute|execut|execu|exec|exe|ex|e)
-    shift; set dummy --mode execute ${1+"$@"}; shift
-    ;;
-  finish|finis|fini|fin|fi|f)
-    shift; set dummy --mode finish ${1+"$@"}; shift
-    ;;
-  install|instal|insta|inst|ins|in|i)
-    shift; set dummy --mode install ${1+"$@"}; shift
-    ;;
-  link|lin|li|l)
-    shift; set dummy --mode link ${1+"$@"}; shift
-    ;;
-  uninstall|uninstal|uninsta|uninst|unins|unin|uni|un|u)
-    shift; set dummy --mode uninstall ${1+"$@"}; shift
-    ;;
-  esac
+# Shorthand for --mode=foo, only valid as the first argument
+case $1 in
+clean|clea|cle|cl)
+  shift; set dummy --mode clean ${1+"$@"}; shift
+  ;;
+compile|compil|compi|comp|com|co|c)
+  shift; set dummy --mode compile ${1+"$@"}; shift
+  ;;
+execute|execut|execu|exec|exe|ex|e)
+  shift; set dummy --mode execute ${1+"$@"}; shift
+  ;;
+finish|finis|fini|fin|fi|f)
+  shift; set dummy --mode finish ${1+"$@"}; shift
+  ;;
+install|instal|insta|inst|ins|in|i)
+  shift; set dummy --mode install ${1+"$@"}; shift
+  ;;
+link|lin|li|l)
+  shift; set dummy --mode link ${1+"$@"}; shift
+  ;;
+uninstall|uninstal|uninsta|uninst|unins|unin|uni|un|u)
+  shift; set dummy --mode uninstall ${1+"$@"}; shift
+  ;;
+esac
 
 
 
@@ -1052,6 +1048,7 @@ opt_finish=false
 opt_help=false
 opt_help_all=false
 opt_silent=:
+opt_warning=:
 opt_verbose=:
 opt_silent=false
 opt_verbose=false
@@ -1105,19 +1102,23 @@ opt_help=': help-all'
 			optarg="$1"
 			opt_mode="$optarg"
 case $optarg in
-			  # Valid mode arguments:
+  # Valid mode arguments:
   clean|compile|execute|finish|install|link|relink|uninstall) ;;
 
-			  # Catch anything else as an error
-			  *) func_error "invalid argument for $opt"
-			     exit_cmd=exit
-			     break
-			     ;;
-		        esac
+  # Catch anything else as an error
+  *) func_error "invalid argument for $opt"
+     exit_cmd=exit
+     break
+     ;;
+esac
 			shift
 			;;
       --no-silent|--no-quiet)
 			opt_silent=false
+func_append preserve_args " $opt"
+			;;
+      --no-warning|--no-warn)
+			opt_warning=false
 func_append preserve_args " $opt"
 			;;
       --no-verbose)
@@ -1132,7 +1133,7 @@ func_append preserve_args " $opt"
       --verbose|-v)
 			opt_verbose=:
 func_append preserve_args " $opt"
-			opt_silent=false
+opt_silent=false
 			;;
       --tag)
 			test $# = 0 && func_missing_arg $opt && break
@@ -1162,7 +1163,7 @@ func_enable_tag "$optarg"
 			;;
 
       --)		break					;;
-      -*)		func_fatal_help "unrecognized option \`$opt'"	;;
+      -*)		func_fatal_help "unrecognized option \`$opt'" ;;
       *)		set dummy "$opt" ${1+"$@"};	shift; break  ;;
     esac
   done
@@ -1188,26 +1189,26 @@ func_enable_tag "$optarg"
       ;;
   esac
 
-$opt_help || {
-  # Sanity checks first:
-  func_check_version_match
+  $opt_help || {
+    # Sanity checks first:
+    func_check_version_match
 
-  if test "$build_libtool_libs" != yes && test "$build_old_libs" != yes; then
-    func_fatal_configuration "not configured to build any kind of library"
-  fi
+    if test "$build_libtool_libs" != yes && test "$build_old_libs" != yes; then
+      func_fatal_configuration "not configured to build any kind of library"
+    fi
 
-  # Darwin sucks
-  eval std_shrext=\"$shrext_cmds\"
+    # Darwin sucks
+    eval std_shrext=\"$shrext_cmds\"
 
-  # Only execute mode is allowed to have -dlopen flags.
+    # Only execute mode is allowed to have -dlopen flags.
     if test -n "$opt_dlopen" && test "$opt_mode" != execute; then
-    func_error "unrecognized option \`-dlopen'"
-    $ECHO "$help" 1>&2
-    exit $EXIT_FAILURE
-  fi
+      func_error "unrecognized option \`-dlopen'"
+      $ECHO "$help" 1>&2
+      exit $EXIT_FAILURE
+    fi
 
-  # Change the help message to a mode-specific one.
-  generic_help="$help"
+    # Change the help message to a mode-specific one.
+    generic_help="$help"
     help="Try \`$progname --help --mode=$opt_mode' for more information."
   }
 
@@ -1286,9 +1287,9 @@ func_ltwrapper_executable_p ()
 # temporary ltwrapper_script.
 func_ltwrapper_scriptname ()
 {
-	func_dirname_and_basename "$1" "" "."
-	func_stripname '' '.exe' "$func_basename_result"
-	func_ltwrapper_scriptname_result="$func_dirname_result/$objdir/${func_stripname_result}_ltshwrapper"
+    func_dirname_and_basename "$1" "" "."
+    func_stripname '' '.exe' "$func_basename_result"
+    func_ltwrapper_scriptname_result="$func_dirname_result/$objdir/${func_stripname_result}_ltshwrapper"
 }
 
 # func_ltwrapper_p file
@@ -2059,7 +2060,7 @@ func_mode_compile ()
     *.[cCFSifmso] | \
     *.ada | *.adb | *.ads | *.asm | \
     *.c++ | *.cc | *.ii | *.class | *.cpp | *.cxx | \
-    *.[fF][09]? | *.for | *.java | *.obj | *.sx | *.cu | *.cup)
+    *.[fF][09]? | *.for | *.java | *.go | *.obj | *.sx | *.cu | *.cup)
       func_xform "$libobj"
       libobj=$func_xform_result
       ;;
@@ -2480,7 +2481,7 @@ Otherwise, only FILE itself is deleted using RM."
     $ECHO "Try \`$progname --help' for more information about other modes."
 }
 
-  # Now that we've collected a possible --mode arg, show help if necessary
+# Now that we've collected a possible --mode arg, show help if necessary
 if $opt_help; then
   if test "$opt_help" = :; then
     func_mode_help
@@ -2654,7 +2655,7 @@ func_mode_finish ()
     admincmds=
 
     for opt in "$nonopt" ${1+"$@"}
-      do
+    do
       if test -d "$opt"; then
 	func_append libdirs " $opt"
 
@@ -2689,7 +2690,7 @@ func_mode_finish ()
 	  sed -e "${sysroot_cmd} s/\([ ']-[LR]\)=/\1/g; s/\([ ']\)=/\1/g" $lib \
 	    > $tmpdir/tmp-la
 	  mv -f $tmpdir/tmp-la $lib
-      done
+	done
         ${RM}r "$tmpdir"
       fi
     fi
@@ -2716,46 +2717,46 @@ func_mode_finish ()
     if test -n "$finish_cmds$finish_eval" && test -n "$libdirs"; then
       echo "----------------------------------------------------------------------"
       echo "Libraries have been installed in:"
-    for libdir in $libdirs; do
-      $ECHO "   $libdir"
-    done
+      for libdir in $libdirs; do
+	$ECHO "   $libdir"
+      done
       echo
       echo "If you ever happen to want to link against installed libraries"
       echo "in a given directory, LIBDIR, you must either use libtool, and"
       echo "specify the full pathname of the library, or use the \`-LLIBDIR'"
       echo "flag during linking and do at least one of the following:"
-    if test -n "$shlibpath_var"; then
+      if test -n "$shlibpath_var"; then
 	echo "   - add LIBDIR to the \`$shlibpath_var' environment variable"
 	echo "     during execution"
-    fi
-    if test -n "$runpath_var"; then
+      fi
+      if test -n "$runpath_var"; then
 	echo "   - add LIBDIR to the \`$runpath_var' environment variable"
 	echo "     during linking"
-    fi
-    if test -n "$hardcode_libdir_flag_spec"; then
-      libdir=LIBDIR
-      eval flag=\"$hardcode_libdir_flag_spec\"
+      fi
+      if test -n "$hardcode_libdir_flag_spec"; then
+	libdir=LIBDIR
+	eval flag=\"$hardcode_libdir_flag_spec\"
 
-      $ECHO "   - use the \`$flag' linker flag"
-    fi
-    if test -n "$admincmds"; then
-      $ECHO "   - have your system administrator run these commands:$admincmds"
-    fi
-    if test -f /etc/ld.so.conf; then
+	$ECHO "   - use the \`$flag' linker flag"
+      fi
+      if test -n "$admincmds"; then
+	$ECHO "   - have your system administrator run these commands:$admincmds"
+      fi
+      if test -f /etc/ld.so.conf; then
 	echo "   - have your system administrator add LIBDIR to \`/etc/ld.so.conf'"
-    fi
+      fi
       echo
 
       echo "See any operating system documentation about shared libraries for"
-    case $host in
-      solaris2.[6789]|solaris2.1[0-9])
+      case $host in
+	solaris2.[6789]|solaris2.1[0-9])
 	  echo "more information, such as the ld(1), crle(1) and ld.so(8) manual"
 	  echo "pages."
-	;;
-      *)
+	  ;;
+	*)
 	  echo "more information, such as the ld(1) and ld.so(8) manual pages."
-        ;;
-    esac
+	  ;;
+      esac
       echo "----------------------------------------------------------------------"
     fi
     exit $EXIT_SUCCESS
@@ -3201,11 +3202,13 @@ func_mode_install ()
 
       # Set up the ranlib parameters.
       oldlib="$destdir/$name"
+      func_to_tool_file "$oldlib" func_convert_file_msys_to_w32
+      tool_oldlib=$func_to_tool_file_result
 
       func_show_eval "$install_prog \$file \$oldlib" 'exit $?'
 
       if test -n "$stripme" && test -n "$old_striplib"; then
-	func_show_eval "$old_striplib $oldlib" 'exit $?'
+	func_show_eval "$old_striplib $tool_oldlib" 'exit $?'
       fi
 
       # Do each command in the postinstall commands.
@@ -3384,11 +3387,11 @@ extern \"C\" {
 	      fi
 	    ;;
 	    *)
-	  $opt_dry_run || {
-	    eval '$ECHO ": $name " >> "$nlist"'
+	      $opt_dry_run || {
+	        eval '$ECHO ": $name " >> "$nlist"'
 	        func_to_tool_file "$dlprefile" func_convert_file_msys_to_w32
 	        eval "$NM \"$func_to_tool_file_result\" 2>/dev/null | $global_symbol_pipe >> '$nlist'"
-	  }
+	      }
 	    ;;
           esac
 	done
@@ -3470,7 +3473,7 @@ static const void *lt_preloaded_setup() {
 	  # linked before any other PIC object.  But we must not use
 	  # pic_flag when linking with -static.  The problem exists in
 	  # FreeBSD 2.2.6 and is fixed in FreeBSD 3.1.
-	  *-*-freebsd2*|*-*-freebsd3.0*|*-*-freebsdelf3.0*)
+	  *-*-freebsd2.*|*-*-freebsd3.0*|*-*-freebsdelf3.0*)
 	    pic_flag_for_symtable=" $pic_flag -DFREEBSD_WORKAROUND" ;;
 	  *-*-hpux*)
 	    pic_flag_for_symtable=" $pic_flag"  ;;
@@ -3909,7 +3912,7 @@ lt_option_debug=
 func_parse_lt_options ()
 {
   lt_script_arg0=\$0
-      shift
+  shift
   for lt_opt
   do
     case \"\$lt_opt\" in
@@ -3931,7 +3934,7 @@ func_parse_lt_options ()
   # Print the debug banner immediately:
   if test -n \"\$lt_option_debug\"; then
     echo \"${outputname}:${output}:\${LINENO}: libtool wrapper (GNU $PACKAGE$TIMESTAMP) $VERSION\" 1>&2
-    fi
+  fi
 }
 
 # Used when --lt-debug. Prints its arguments to stdout
@@ -3953,7 +3956,7 @@ func_exec_program_core ()
   case $host in
   # Backslashes separate directories on plain windows
   *-*-mingw | *-*-os2* | *-cegcc*)
-	$ECHO "\
+    $ECHO "\
       if test -n \"\$lt_option_debug\"; then
         \$ECHO \"${outputname}:${output}:\${LINENO}: newargv[0]: \$progdir\\\\\$program\" 1>&2
         func_lt_dump_args \${1+\"\$@\"} 1>&2
@@ -3982,14 +3985,17 @@ func_exec_program_core ()
 # launches target application with the remaining arguments.
 func_exec_program ()
 {
-  for lt_wr_arg
-  do
-    case \$lt_wr_arg in
-    --lt-*) ;;
-    *) set x \"\$@\" \"\$lt_wr_arg\"; shift;;
-    esac
-    shift
-  done
+  case \" \$* \" in
+  *\\ --lt-*)
+    for lt_wr_arg
+    do
+      case \$lt_wr_arg in
+      --lt-*) ;;
+      *) set x \"\$@\" \"\$lt_wr_arg\"; shift;;
+      esac
+      shift
+    done ;;
+  esac
   func_exec_program_core \${1+\"\$@\"}
 }
 
@@ -4426,7 +4432,7 @@ EOF
 		  actual_cwrapper_path);
   XFREE (tmp_pathspec);
 
-  actual_cwrapper_name = xstrdup( base_name (actual_cwrapper_path));
+  actual_cwrapper_name = xstrdup (base_name (actual_cwrapper_path));
   strendzap (actual_cwrapper_path, actual_cwrapper_name);
 
   /* wrapper name transforms */
@@ -5057,9 +5063,15 @@ void lt_dump_script (FILE* f)
 {
 EOF
 	    func_emit_wrapper yes |
-              $SED -e 's/\([\\"]\)/\\\1/g' \
-	           -e 's/^/  fputs ("/' -e 's/$/\\n", f);/'
-
+	      $SED -n -e '
+s/^\(.\{79\}\)\(..*\)/\1\
+\2/
+h
+s/\([\\"]\)/\\\1/g
+s/$/\\n/
+s/\([^\n]*\).*/  fputs ("\1", f);/p
+g
+D'
             cat <<"EOF"
 }
 EOF
@@ -5643,7 +5655,8 @@ func_mode_link ()
 	continue
 	;;
 
-      -mt|-mthreads|-kthread|-Kthread|-pthread|-pthreads|--thread-safe|-threads)
+      -mt|-mthreads|-kthread|-Kthread|-pthread|-pthreads|--thread-safe \
+      |-threads|-fopenmp|-openmp|-mp|-xopenmp|-omp|-qsmp=*)
 	func_append compiler_flags " $arg"
 	func_append compile_command " $arg"
 	func_append finalize_command " $arg"
@@ -5834,7 +5847,7 @@ func_mode_link ()
       # -m*, -t[45]*, -txscale* architecture-specific flags for GCC
       # -F/path              path to uninstalled frameworks, gcc on darwin
       # -p, -pg, --coverage, -fprofile-*  profiling flags for GCC
-      # @file GCC response files
+      # @file                GCC response files
       # -tp=*                Portland pgcc target processor selection
       # --sysroot=*          for sysroot support
       # -O*, -flto*, -fwhopr*, -fuse-linker-plugin GCC link-time optimization
@@ -6147,7 +6160,8 @@ func_mode_link ()
 	lib=
 	found=no
 	case $deplib in
-	-mt|-mthreads|-kthread|-Kthread|-pthread|-pthreads|--thread-safe|-threads)
+	-mt|-mthreads|-kthread|-Kthread|-pthread|-pthreads|--thread-safe \
+        |-threads|-fopenmp|-openmp|-mp|-xopenmp|-omp|-qsmp=*)
 	  if test "$linkmode,$pass" = "prog,link"; then
 	    compile_deplibs="$deplib $compile_deplibs"
 	    finalize_deplibs="$deplib $finalize_deplibs"
@@ -6454,9 +6468,9 @@ func_mode_link ()
 	     test "$prefer_static_libs,$installed" = "built,no"; }; then
 	  linklib=$old_library
 	else
-	for l in $old_library $library_names; do
-	  linklib="$l"
-	done
+	  for l in $old_library $library_names; do
+	    linklib="$l"
+	  done
 	fi
 	if test -z "$linklib"; then
 	  func_fatal_error "cannot find name of link library for \`$lib'"
@@ -6553,20 +6567,20 @@ func_mode_link ()
 	      fi
 	    ;;
 	    * )
-	  # Prefer using a static library (so that no silly _DYNAMIC symbols
-	  # are required to link).
-	  if test -n "$old_library"; then
+	      # Prefer using a static library (so that no silly _DYNAMIC symbols
+	      # are required to link).
+	      if test -n "$old_library"; then
 	        func_append newdlprefiles " $dir/$old_library"
-	    # Keep a list of preopened convenience libraries to check
-	    # that they are being used correctly in the link pass.
-	    test -z "$libdir" && \
+	        # Keep a list of preopened convenience libraries to check
+	        # that they are being used correctly in the link pass.
+	        test -z "$libdir" && \
 	          func_append dlpreconveniencelibs " $dir/$old_library"
-	  # Otherwise, use the dlname, so that lt_dlopen finds it.
-	  elif test -n "$dlname"; then
+	      # Otherwise, use the dlname, so that lt_dlopen finds it.
+	      elif test -n "$dlname"; then
 	        func_append newdlprefiles " $dir/$dlname"
-	  else
+	      else
 	        func_append newdlprefiles " $dir/$linklib"
-	  fi
+	      fi
 	    ;;
 	  esac
 	fi # $pass = dlpreopen
@@ -6831,7 +6845,7 @@ func_mode_link ()
 	         test "$hardcode_direct_absolute" = no; then
 		add="$dir/$linklib"
 	      elif test "$hardcode_minus_L" = yes; then
-		add_dir="-L$dir"
+		add_dir="-L$absdir"
 		# Try looking first in the location we're being installed to.
 		if test -n "$inst_prefix_dir"; then
 		  case $libdir in
@@ -7316,6 +7330,7 @@ func_mode_link ()
 	  # which has an extra 1 added just for fun
 	  #
 	  case $version_type in
+	  # correct linux to gnu/linux during the next big refactor
 	  darwin|linux|osf|windows|none)
 	    func_arith $number_major + $number_minor
 	    current=$func_arith_result
@@ -7432,7 +7447,7 @@ func_mode_link ()
 	  versuffix="$major.$revision"
 	  ;;
 
-	linux)
+	linux) # correct to gnu/linux during the next big refactor
 	  func_arith $current - $age
 	  major=.$func_arith_result
 	  versuffix="$major.$age.$revision"
@@ -8020,6 +8035,11 @@ EOF
 
       # Test again, we may have decided not to build it any more
       if test "$build_libtool_libs" = yes; then
+	# Remove ${wl} instances when linking with ld.
+	# FIXME: should test the right _cmds variable.
+	case $archive_cmds in
+	  *\$LD\ *) wl= ;;
+        esac
 	if test "$hardcode_into_libs" = yes; then
 	  # Hardcode the library paths
 	  hardcode_libdirs=
@@ -8050,7 +8070,7 @@ EOF
 	    elif test -n "$runpath_var"; then
 	      case "$perm_rpath " in
 	      *" $libdir "*) ;;
-	      *) func_apped perm_rpath " $libdir" ;;
+	      *) func_append perm_rpath " $libdir" ;;
 	      esac
 	    fi
 	  done
@@ -8058,11 +8078,7 @@ EOF
 	  if test -n "$hardcode_libdir_separator" &&
 	     test -n "$hardcode_libdirs"; then
 	    libdir="$hardcode_libdirs"
-	    if test -n "$hardcode_libdir_flag_spec_ld"; then
-	      eval dep_rpath=\"$hardcode_libdir_flag_spec_ld\"
-	    else
-	      eval dep_rpath=\"$hardcode_libdir_flag_spec\"
-	    fi
+	    eval "dep_rpath=\"$hardcode_libdir_flag_spec\""
 	  fi
 	  if test -n "$runpath_var" && test -n "$perm_rpath"; then
 	    # We should set the runpath_var.
@@ -8152,8 +8168,8 @@ EOF
 		*~func_convert_file_noop | *~func_convert_file_msys_to_w32 | ~*)
 		  try_normal_branch=yes
 		  eval cmd=\"$cmd1\"
-	      func_len " $cmd"
-	      len=$func_len_result
+		  func_len " $cmd"
+		  len=$func_len_result
 		  ;;
 		*)
 		  try_normal_branch=no
@@ -9152,6 +9168,8 @@ EOF
 	    esac
 	  done
 	fi
+	func_to_tool_file "$oldlib" func_convert_file_msys_to_w32
+	tool_oldlib=$func_to_tool_file_result
 	eval cmds=\"$old_archive_cmds\"
 
 	func_len " $cmds"
@@ -9261,7 +9279,8 @@ EOF
 	      *.la)
 		func_basename "$deplib"
 		name="$func_basename_result"
-		eval libdir=`${SED} -n -e 's/^libdir=\(.*\)$/\1/p' $deplib`
+		func_resolve_sysroot "$deplib"
+		eval libdir=`${SED} -n -e 's/^libdir=\(.*\)$/\1/p' $func_resolve_sysroot_result`
 		test -z "$libdir" && \
 		  func_fatal_error "\`$deplib' is not a valid libtool archive"
 		func_append newdependency_libs " ${lt_sysroot:+=}$libdir/$name"
@@ -9494,7 +9513,7 @@ func_mode_uninstall ()
 
 	  case "$opt_mode" in
 	  clean)
-	    case "  $library_names " in
+	    case " $library_names " in
 	    *" $dlname "*) ;;
 	    *) test -n "$dlname" && func_append rmfiles " $odir/$dlname" ;;
 	    esac

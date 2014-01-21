@@ -64,7 +64,7 @@ tv_combo_SOURCES = \
 
 if WITH_DOCUMENTATION
 examplesdir = $(docdir)/examples
-examples_DATA = $(sort $(tv_ctrlpt_SOURCES) $(tv_device_SOURCES))
+examples_DATA = $(tv_ctrlpt_SOURCES) $(tv_device_SOURCES)
 endif
 
 EXTRA_DIST = \

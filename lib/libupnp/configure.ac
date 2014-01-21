@@ -9,7 +9,7 @@
 
 AC_PREREQ(2.60)
 
-AC_INIT([libupnp], [1.6.18], [mroberto@users.sourceforge.net])
+AC_INIT([libupnp], [1.6.19], [mroberto@users.sourceforge.net])
 dnl ############################################################################
 dnl # *Independently* of the above libupnp package version, the libtool version
 dnl # of the 3 libraries need to be updated whenever there is a change released:
@@ -328,9 +328,22 @@ dnl #AC_SUBST([LT_VERSION_THREADUTIL], [6:3:0])
 dnl #AC_SUBST([LT_VERSION_UPNP],       [9:2:3])
 dnl #
 dnl ############################################################################
+dnl # Release 1.6.19:
+dnl # "current:revision:age"
+dnl #
+dnl # - Code has changed in threadutil
+dnl #   revision: 3 -> 4
+dnl # - Code has changed in upnp
+dnl #   revision: 2 -> 3
+dnl #
+dnl #AC_SUBST([LT_VERSION_IXML],       [2:8:0])
+dnl #AC_SUBST([LT_VERSION_THREADUTIL], [6:4:0])
+dnl #AC_SUBST([LT_VERSION_UPNP],       [9:3:3])
+dnl #
+dnl ############################################################################
 AC_SUBST([LT_VERSION_IXML],       [2:8:0])
-AC_SUBST([LT_VERSION_THREADUTIL], [6:3:0])
-AC_SUBST([LT_VERSION_UPNP],       [9:2:3])
+AC_SUBST([LT_VERSION_THREADUTIL], [6:4:0])
+AC_SUBST([LT_VERSION_UPNP],       [9:3:3])
 dnl ############################################################################
 dnl # Repeating the algorithm to place it closer to the modificatin place:
 dnl # 	- library code modified:		revision++
@@ -508,6 +521,7 @@ AC_MSG_RESULT($docdir)
 #
 AC_PROG_CC
 AM_PROG_CC_C_O
+m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 AC_PROG_LIBTOOL
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
