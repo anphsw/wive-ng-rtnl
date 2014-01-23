@@ -1816,6 +1816,7 @@
 19) kernel: ipv6: don't install anycast address for /128 addresses on routers.<br>
 20) kernel: ipv6: remove old conditions on flow label sharing.<br>
 21) kernel: ipv6: do not erase dst address with flow label destination.<br>.
+22) kernel: ipv6: user better hash for addrconf.<br>
 <br>
 <br>
 <br>
