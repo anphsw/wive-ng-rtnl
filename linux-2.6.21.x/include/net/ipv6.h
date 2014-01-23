@@ -398,17 +398,6 @@ static inline int ipv6_addr_any(const struct in6_addr *a)
 		 a->s6_addr32[2] | a->s6_addr32[3] ) == 0); 
 }
 
-static inline u32 ipv6_addr_hash(const struct in6_addr *addr)
-{
-	/*
-	 * We perform the hash function over the last 64 bits of the address
-         * This will include the IEEE address token on links that support it.
-	 */
-
-	return HASH_2WORDS(addr->s6_addr32[2],  addr->s6_addr32[3], 0)
-		& (IN6_ADDR_HSIZE - 1);
-}
-
 static inline int ipv6_addr_loopback(const struct in6_addr *a)
 {
 	return ((a->s6_addr32[0] | a->s6_addr32[1] |

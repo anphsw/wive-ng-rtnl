@@ -244,6 +244,17 @@ static inline int ipv6_isatap_eui64(u8 *eui, __be32 addr)
 	return 0;
 }
 
+static inline u32 ipv6_addr_hash(const struct in6_addr *addr)
+{
+	/*
+	 * We perform the hash function over the last 64 bits of the address
+         * This will include the IEEE address token on links that support it.
+	 */
+
+	return HASH_2WORDS(addr->s6_addr32[2],  addr->s6_addr32[3], 0)
+		& (IN6_ADDR_HSIZE - 1);
+}
+
 #ifdef CONFIG_PROC_FS
 extern int if6_proc_init(void);
 extern void if6_proc_exit(void);
