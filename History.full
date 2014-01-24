@@ -1819,6 +1819,7 @@
 22) kernel: ipv6: user better hash for addrconf.<br>
 23) kernel: tcp: delete redundant calls of tcp_mtup_init().<br>
 24) kernel: tcp: remove redundant code in __tcp_retransmit_skb().<br>
+25) kernel: tcp: tcp_transmit_skb() optimizations.<br>
 <br>
 <br>
 <br>
