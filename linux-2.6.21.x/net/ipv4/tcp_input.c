@@ -95,7 +95,6 @@ int sysctl_tcp_frto __read_mostly;
 int sysctl_tcp_nometrics_save __read_mostly;
 
 int sysctl_tcp_moderate_rcvbuf __read_mostly = 1;
-int sysctl_tcp_abc __read_mostly;
 
 #define FLAG_DATA		0x01 /* Incoming frame contained data.		*/
 #define FLAG_WIN_UPDATE		0x02 /* Incoming ACK was a window update.	*/
@@ -1473,7 +1472,6 @@ void tcp_enter_loss(struct sock *sk, int how)
 	tp->snd_cwnd_cnt   = 0;
 	tp->snd_cwnd_stamp = tcp_time_stamp;
 
-	tp->bytes_acked = 0;
 	tcp_clear_retrans(tp);
 
 	/* Push undo marker, if it was plain RTO and nothing
@@ -2057,7 +2055,6 @@ void tcp_enter_cwr(struct sock *sk)
 	struct tcp_sock *tp = tcp_sk(sk);
 
 	tp->prior_ssthresh = 0;
-	tp->bytes_acked = 0;
 	if (inet_csk(sk)->icsk_ca_state < TCP_CA_CWR) {
 		tp->undo_marker = 0;
 		tp->snd_ssthresh = inet_csk(sk)->icsk_ca_ops->ssthresh(sk);
@@ -2301,7 +2298,6 @@ tcp_fastretrans_alert(struct sock *sk, u32 prior_snd_una,
 			TCP_ECN_queue_cwr(tp);
 		}
 
-		tp->bytes_acked = 0;
 		tp->snd_cwnd_cnt = 0;
 		tcp_set_ca_state(sk, TCP_CA_Recovery);
 	}
@@ -2753,14 +2749,6 @@ static int tcp_ack(struct sock *sk, struct sk_buff *skb, int flag)
 	 */
 	if (after(ack, tp->snd_nxt))
 		goto invalid_ack;
-
-	if (sysctl_tcp_abc) {
-		if (icsk->icsk_ca_state < TCP_CA_CWR)
-			tp->bytes_acked += ack - prior_snd_una;
-		else if (icsk->icsk_ca_state == TCP_CA_Loss)
-			/* we assume just one segment left network */
-			tp->bytes_acked += min(ack - prior_snd_una, tp->mss_cache);
-	}
 
 	if (!(flag&FLAG_SLOWPATH) && after(ack, prior_snd_una)) {
 		/* Window is constant, pure forward advance.

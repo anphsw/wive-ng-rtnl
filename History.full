@@ -1820,6 +1820,7 @@
 23) kernel: tcp: delete redundant calls of tcp_mtup_init().<br>
 24) kernel: tcp: remove redundant code in __tcp_retransmit_skb().<br>
 25) kernel: tcp: tcp_transmit_skb() optimizations.<br>
+26) kernel: tcp: remove Appropriate Byte Count support.<br>
 <br>
 <br>
 <br>

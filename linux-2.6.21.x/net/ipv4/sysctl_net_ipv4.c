@@ -744,14 +744,6 @@ ctl_table ipv4_table[] = {
 		.strategy	= &sysctl_tcp_congestion_control,
 	},
 	{
-		.ctl_name	= NET_TCP_ABC,
-		.procname	= "tcp_abc",
-		.data		= &sysctl_tcp_abc,
-		.maxlen		= sizeof(int),
-		.mode		= 0644,
-		.proc_handler	= &proc_dointvec,
-	},
-	{
 		.ctl_name	= NET_TCP_MTU_PROBING,
 		.procname	= "tcp_mtu_probing",
 		.data		= &sysctl_tcp_mtu_probing,
