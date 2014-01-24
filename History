@@ -114,6 +114,7 @@
 21) kernel: ipv6: do not erase dst address with flow label destination.<br>.
 22) kernel: ipv6: user better hash for addrconf.<br>
 23) kernel: tcp: delete redundant calls of tcp_mtup_init().<br>
+24) kernel: tcp: remove redundant code in __tcp_retransmit_skb().<br>
 <br>
 <br>
 <br>

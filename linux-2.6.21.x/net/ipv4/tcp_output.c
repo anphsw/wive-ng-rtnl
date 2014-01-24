@@ -1773,23 +1773,6 @@ int tcp_retransmit_skb(struct sock *sk, struct sk_buff *skb)
 	   (sysctl_tcp_retrans_collapse != 0))
 		tcp_retrans_try_collapse(sk, skb, cur_mss);
 
-	/* Some Solaris stacks overoptimize and ignore the FIN on a
-	 * retransmit when old data is attached.  So strip it off
-	 * since it is cheap to do so and saves bytes on the network.
-	 */
-	if(skb->len > 0 &&
-	   (TCP_SKB_CB(skb)->flags & TCPHDR_FIN) &&
-	   tp->snd_una == (TCP_SKB_CB(skb)->end_seq - 1)) {
-		if (!pskb_trim(skb, 0)) {
-			TCP_SKB_CB(skb)->seq = TCP_SKB_CB(skb)->end_seq - 1;
-			skb_shinfo(skb)->gso_segs = 1;
-			skb_shinfo(skb)->gso_size = 0;
-			skb_shinfo(skb)->gso_type = 0;
-			skb->ip_summed = CHECKSUM_NONE;
-			skb->csum = 0;
-		}
-	}
-
 	/* Make a copy, if the first transmission SKB clone we made
 	 * is still in somebody's hands, else make a clone.
 	 */
