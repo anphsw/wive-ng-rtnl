@@ -2424,11 +2424,8 @@ static int tcp_tso_acked(struct sock *sk, struct sk_buff *skb,
 				tp->sacked_out -= packets_acked;
 			if (sacked & TCPCB_LOST)
 				tp->lost_out -= packets_acked;
-			if (sacked & TCPCB_URG) {
-				if (tp->urg_mode &&
-				    !before(seq, tp->snd_up))
+			if (tp->urg_mode && !before(seq, tp->snd_up))
 					tp->urg_mode = 0;
-			}
 		} else if (*seq_rtt < 0)
 			*seq_rtt = now - scb->when;
 
@@ -2516,11 +2513,8 @@ static int tcp_clean_rtx_queue(struct sock *sk, __s32 *seq_rtt_p)
 				tp->sacked_out -= tcp_skb_pcount(skb);
 			if (sacked & TCPCB_LOST)
 				tp->lost_out -= tcp_skb_pcount(skb);
-			if (sacked & TCPCB_URG) {
-				if (tp->urg_mode &&
-				    !before(scb->end_seq, tp->snd_up))
-					tp->urg_mode = 0;
-			}
+			if (tp->urg_mode && !before(scb->end_seq, tp->snd_up))
+				tp->urg_mode = 0;
 		} else if (seq_rtt < 0) {
 			seq_rtt = now - scb->when;
 			skb_get_timestamp(skb, &tv);
