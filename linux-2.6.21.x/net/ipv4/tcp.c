@@ -910,8 +910,7 @@ out_err:
  */
 
 static int tcp_recv_urg(struct sock *sk, long timeo,
-			struct msghdr *msg, int len, int flags,
-			int *addr_len)
+			struct msghdr *msg, int len, int flags)
 {
 	struct tcp_sock *tp = tcp_sk(sk);
 
@@ -1515,7 +1514,7 @@ out:
 	return err;
 
 recv_urg:
-	err = tcp_recv_urg(sk, timeo, msg, len, flags, addr_len);
+	err = tcp_recv_urg(sk, timeo, msg, len, flags);
 	goto out;
 }
 
