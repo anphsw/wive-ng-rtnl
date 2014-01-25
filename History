@@ -123,6 +123,7 @@
 30) kernel: net: link_watch: Eliminate potential delay on wrap-around.<br>
 31) kernel: reenable gcc optimization due CPU arch.<br>
 32) kernel: tcp: avoid a possible divide by zero.<br>
+33) kernel: tcp: Remove unrequired operations in tcp_push().<br>
 <br>
 <br>
 <br>
