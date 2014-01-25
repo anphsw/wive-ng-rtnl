@@ -1872,10 +1872,8 @@ void tcp_xmit_retransmit_queue(struct sock *sk)
 				if (!(sacked&(TCPCB_SACKED_ACKED|TCPCB_SACKED_RETRANS))) {
 					int mib_idx;
 
-					if (tcp_retransmit_skb(sk, skb)) {
-						tp->retransmit_skb_hint = NULL;
+					if (tcp_retransmit_skb(sk, skb))
 						return;
-					}
 					if (icsk->icsk_ca_state != TCP_CA_Loss)
 						mib_idx = LINUX_MIB_TCPFASTRETRANS;
 					else
