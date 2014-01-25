@@ -120,6 +120,7 @@
 27) kernel: tcp: remove Appropriate Byte Count support.<br>
 28) kernel: usbnet: fix status interrupt urb handling.<br>
 29) kernel: net: link_watch: Eliminate potential delay on wrap-around.<br>
+30) kernel: reenable gcc optimization due CPU arch.<br>
 <br>
 <br>
 <br>
