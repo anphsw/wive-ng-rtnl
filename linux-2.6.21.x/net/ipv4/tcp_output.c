@@ -609,7 +609,6 @@ int tcp_fragment(struct sock *sk, struct sk_buff *skb, u32 len, unsigned int mss
 	if (WARN_ON(len > skb->len))
 		return -EINVAL;
 
-	clear_all_retrans_hints(tp);
 	nsize = skb_headlen(skb) - len;
 	if (nsize < 0)
 		nsize = 0;
@@ -701,6 +700,12 @@ int tcp_fragment(struct sock *sk, struct sk_buff *skb, u32 len, unsigned int mss
 			if ((int)tp->fackets_out < 0)
 				tp->fackets_out = 0;
 		}
+
+		if (tp->lost_skb_hint &&
+		    before(TCP_SKB_CB(skb)->seq,
+			   TCP_SKB_CB(tp->lost_skb_hint)->seq) &&
+		    (tcp_is_fack(tp) || TCP_SKB_CB(skb)->sacked))
+			tp->lost_cnt_hint -= diff;
 	}
 
 	/* Link BUFF into the send queue. */
