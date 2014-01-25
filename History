@@ -126,6 +126,7 @@
 33) kernel: tcp: Remove unrequired operations in tcp_push().<br>
 34) kernel: tcp: cleanup ca_state mess in tcp_timer.<br>
 35) kernel: tcp: don't clear hints when tcp_fragmenting.<br>
+36) kernel: tcp: fix length used for checksum in a reset.<br>
 <br>
 <br>
 <br>
