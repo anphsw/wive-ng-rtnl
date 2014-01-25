@@ -117,6 +117,7 @@
 24) kernel: tcp: remove redundant code in __tcp_retransmit_skb().<br>
 25) kernel: tcp: tcp_transmit_skb() optimizations.<br>
 26) kernel: tcp: remove Appropriate Byte Count support.<br>
+27) kernel: usbnet: fix status interrupt urb handling.<br>
 <br>
 <br>
 <br>
