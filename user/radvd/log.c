@@ -23,8 +23,7 @@ static FILE *log_file_fd;
 static int log_facility;
 static int debug_level = 0;
 
-int
-log_open(int method, char *ident, char *log, int facility)
+int log_open(int method, char *ident, char *log, int facility)
 {
 	log_method = method;
 	log_ident = ident;
@@ -44,14 +43,12 @@ log_open(int method, char *ident, char *log, int facility)
 			openlog(log_ident, LOG_PID, log_facility);
 			break;
 		case L_LOGFILE:
-			if (!log)
-			{
+		if (!log) {
 				fprintf(stderr, "%s: no logfile specified\n", log_ident);
 				return (-1);
 			}
 			log_file = log;
-			if ((log_file_fd = fopen(log_file, "a")) == NULL)
-			{
+		if ((log_file_fd = fopen(log_file, "a")) == NULL) {
 				fprintf(stderr, "%s: can't open %s: %s\n", log_ident, log_file, strerror(errno));
 				return (-1);
 			}
@@ -65,8 +62,7 @@ log_open(int method, char *ident, char *log, int facility)
 }
 
 /* note: [dfv]log() is also called from root context */
-static int
-vlog(int prio, char *format, va_list ap)
+static int vlog(int prio, char *format, va_list ap)
 {
 	char tstamp[64], buff[1024];
 	struct tm *tm;
@@ -108,8 +104,7 @@ vlog(int prio, char *format, va_list ap)
 	return 0;
 }
 
-void
-dlog(int prio, int level, char *format, ...)
+void dlog(int prio, int level, char *format, ...)
 {
 	va_list ap;
 
@@ -121,8 +116,7 @@ dlog(int prio, int level, char *format, ...)
 	va_end(ap);
 }
 
-void
-flog(int prio, char *format, ...)
+void flog(int prio, char *format, ...)
 {
 	va_list ap;
 
@@ -131,8 +125,7 @@ flog(int prio, char *format, ...)
 	va_end(ap);
 }
 
-int
-log_close(void)
+int log_close(void)
 {
 	switch (log_method) {
 		case L_NONE:
@@ -153,14 +146,12 @@ log_close(void)
 	return 0;
 }
 
-void
-set_debuglevel(int level)
+void set_debuglevel(int level)
 {
 	debug_level = level;
 }
 
-int
-get_debuglevel(void)
+int get_debuglevel(void)
 {
 	return debug_level;
 }

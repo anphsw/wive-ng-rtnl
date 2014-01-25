@@ -15,8 +15,7 @@
 
 #include "radvd.h"
 
-struct timeval
-next_timeval(double next)
+struct timeval next_timeval(double next)
 {
 	struct timeval tv;
 	gettimeofday(&tv, NULL);
@@ -25,8 +24,7 @@ next_timeval(double next)
 	return tv;
 }
 
-int
-timevaldiff(struct timeval const *a, struct timeval const *b)
+int timevaldiff(struct timeval const *a, struct timeval const *b)
 {
   int msec;
   msec = (a->tv_sec - b->tv_sec) * 1000;
@@ -34,10 +32,8 @@ timevaldiff(struct timeval const *a, struct timeval const *b)
   return msec;
 }
 
-
 /* Returns when the next time should expire in milliseconds. */
-int
-next_time_msec(struct Interface const * iface)
+int next_time_msec(struct Interface const *iface)
 {
 	struct timeval tv;
 	int retval;
@@ -46,8 +42,7 @@ next_time_msec(struct Interface const * iface)
 	return retval >= 1 ? retval : 1;
 }
 
-int
-expired(struct Interface const * iface)
+int expired(struct Interface const *iface)
 {
 	struct timeval tv;
 	gettimeofday(&tv, NULL);

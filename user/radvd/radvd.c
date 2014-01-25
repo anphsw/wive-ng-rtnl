@@ -29,8 +29,7 @@ struct Interface *IfaceList = NULL;
 #ifdef HAVE_GETOPT_LONG
 
 char usage_str[] = {
-"\n"
-"  -c, --configtest       Parse the config file and exit.\n"
+	"\n" "  -c, --configtest       Parse the config file and exit.\n"
 "  -C, --config=PATH      Sets the config file.  Default is /etc/radvd.conf.\n"
 "  -d, --debug=NUM        Sets the debug level.  Values can be 1, 2, 3, 4 or 5.\n"
 "  -f, --facility=NUM     Sets the logging facility.\n"
@@ -39,13 +38,11 @@ char usage_str[] = {
 "  -m, --logmethod=X      Sets the log method to one of: syslog, stderr, stderr_syslog, logfile, or none.\n"
 "  -p, --pidfile=PATH     Sets the pid file.\n"
 "  -t, --chrootdir=PATH   Chroot to the specified path.\n"
-"  -u, --username=USER    Switch to the specified user.\n"
-"  -n, --nodaemon         Prevent the daemonizing.\n"
+	    "  -u, --username=USER    Switch to the specified user.\n" "  -n, --nodaemon         Prevent the daemonizing.\n"
 #ifdef HAVE_NETLINK
 "  -L, --disablenetlink     Disable netlink feature\n"
 #endif
-"  -I,  --disableigmp6check    Disable igmp6 check before send\n"
-"  -v, --version          Print the version and quit.\n"
+	"  -I, --disableigmp6check    Disable igmp6 check before send\n" "  -v, --version          Print the version and quit.\n"
 };
 
 struct option prog_opt[] = {
@@ -73,9 +70,7 @@ struct option prog_opt[] = {
 
 #else
 
-char usage_str[] =
-	"[-hsvcn] [-d level] [-C config_file] [-m log_method] [-l log_file]\n"
-	"\t[-f facility] [-p pid_file] [-u username] [-t chrootdir]";
+char usage_str[] = "[-hsvcn] [-d level] [-C config_file] [-m log_method] [-l log_file]\n" "\t[-f facility] [-p pid_file] [-u username] [-t chrootdir]";
 
 #endif
 
@@ -111,8 +106,7 @@ pid_t strtopid(char const * pidstr);
 void write_pid_file(char const *);
 void main_loop(void);
 
-int
-main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
 	int c, log_method;
 	char *logfile, *pidfile;
@@ -160,28 +154,17 @@ main(int argc, char *argv[])
 			pidfile = optarg;
 			break;
 		case 'm':
-			if (!strcmp(optarg, "syslog"))
-			{
+			if (!strcmp(optarg, "syslog")) {
 				log_method = L_SYSLOG;
-			}
-			else if (!strcmp(optarg, "stderr_syslog"))
-			{
+			} else if (!strcmp(optarg, "stderr_syslog")) {
 				log_method = L_STDERR_SYSLOG;
-			}
-			else if (!strcmp(optarg, "stderr"))
-			{
+			} else if (!strcmp(optarg, "stderr")) {
 				log_method = L_STDERR;
-			}
-			else if (!strcmp(optarg, "logfile"))
-			{
+			} else if (!strcmp(optarg, "logfile")) {
 				log_method = L_LOGFILE;
-			}
-			else if (!strcmp(optarg, "none"))
-			{
+			} else if (!strcmp(optarg, "none")) {
 				log_method = L_NONE;
-			}
-			else
-			{
+			} else {
 				fprintf(stderr, "%s: unknown log method: %s\n", pname, optarg);
 				exit(1);
 			}
@@ -218,8 +201,7 @@ main(int argc, char *argv[])
 			usage();
 #ifdef HAVE_GETOPT_LONG
 		case ':':
-			fprintf(stderr, "%s: option %s: parameter expected\n", pname,
-				prog_opt[opt_idx].name);
+			fprintf(stderr, "%s: option %s: parameter expected\n", pname, prog_opt[opt_idx].name);
 			exit(1);
 #endif
 		case '?':
@@ -272,8 +254,7 @@ main(int argc, char *argv[])
 		if (get_debuglevel() == 0) {
 			flog(LOG_ERR, "Exiting, permissions on conf_file invalid.\n");
 			exit(1);
-		}
-		else
+		} else
 			flog(LOG_WARNING, "Insecure file permissions, but continuing anyway");
 	}
 
@@ -446,8 +427,7 @@ void main_loop(void)
 		if (rc > 0) {
 			if (fds[0].revents & (POLLERR | POLLHUP | POLLNVAL)) {
 				flog(LOG_WARNING, "socket error on fds[0].fd");
-			}
-			else if (fds[0].revents & POLLIN) {
+			} else if (fds[0].revents & POLLIN) {
 				int len, hoplimit;
 				struct sockaddr_in6 rcv_addr;
 				struct in6_pktinfo *pkt_info = NULL;
@@ -455,8 +435,7 @@ void main_loop(void)
 
 				len = recv_rs_ra(msg, &rcv_addr, &pkt_info, &hoplimit);
 				if (len > 0) {
-					process(IfaceList, msg, len,
-						&rcv_addr, pkt_info, hoplimit);
+					process(IfaceList, msg, len, &rcv_addr, pkt_info, hoplimit);
 				}
 			}
 #ifdef HAVE_NETLINK
@@ -468,12 +447,10 @@ void main_loop(void)
 			}
 			}
 #endif
-		}
-		else if ( rc == 0 ) {
+		} else if (rc == 0) {
 			if (next)
 				timer_handler(next);
-		}
-		else if ( rc == -1 ) {
+		} else if (rc == -1) {
 			dlog(LOG_INFO, 3, "poll returned early: %s", strerror(errno));
 		}
 
@@ -482,15 +459,13 @@ void main_loop(void)
 			break;
 		}
 
-		if (sighup_received)
-		{
+		if (sighup_received) {
 			dlog(LOG_INFO, 3, "sig hup received.\n");
 			reload_config();
 			sighup_received = 0;
 		}
 
-		if (sigusr1_received)
-		{
+		if (sigusr1_received) {
 			dlog(LOG_INFO, 3, "sig usr1 received.\n");
 			reset_prefix_lifetimes();
 			sigusr1_received = 0;
@@ -499,8 +474,7 @@ void main_loop(void)
 	}
 }
 
-void
-timer_handler(void *data)
+void timer_handler(void *data)
 {
 	struct Interface *iface = (struct Interface *) data;
 	double next;
@@ -513,8 +487,7 @@ timer_handler(void *data)
 
 	next = rand_between(iface->MinRtrAdvInterval, iface->MaxRtrAdvInterval);
 
-	if (iface->init_racount < MAX_INITIAL_RTR_ADVERTISEMENTS)
-	{
+	if (iface->init_racount < MAX_INITIAL_RTR_ADVERTISEMENTS) {
 		iface->init_racount++;
 		next = min(MAX_INITIAL_RTR_ADVERT_INTERVAL, next);
 	}
@@ -522,12 +495,10 @@ timer_handler(void *data)
 	iface->next_multicast = next_timeval(next);
 }
 
-void
-config_interface(void)
+void config_interface(void)
 {
 	struct Interface *iface;
-	for(iface=IfaceList; iface; iface=iface->next)
-	{
+	for (iface = IfaceList; iface; iface = iface->next) {
 		if (iface->AdvLinkMTU)
 			set_interface_linkmtu(iface->Name, iface->AdvLinkMTU);
 		if (iface->AdvCurHopLimit)
@@ -539,8 +510,7 @@ config_interface(void)
 	}
 }
 
-void
-kickoff_adverts(void)
+void kickoff_adverts(void)
 {
 	struct Interface *iface;
 
@@ -548,10 +518,8 @@ kickoff_adverts(void)
 	 *	send initial advertisement and set timers
 	 */
 
-	for(iface=IfaceList; iface; iface=iface->next)
-	{
+	for (iface = IfaceList; iface; iface = iface->next) {
 		double next;
-
 
 		gettimeofday(&iface->last_ra_time, NULL);
 
@@ -575,8 +543,7 @@ kickoff_adverts(void)
 	}
 }
 
-void
-stop_adverts(void)
+void stop_adverts(void)
 {
 	struct Interface *iface;
 
@@ -603,8 +570,7 @@ void reload_config(void)
 	flog(LOG_DEBUG, "attempting to reread config file");
 
 	iface=IfaceList;
-	while(iface)
-	{
+	while (iface) {
 		struct Interface *next_iface = iface->next;
 		struct AdvPrefix *prefix;
 		struct AdvRoute *route;
@@ -614,8 +580,7 @@ void reload_config(void)
 		dlog(LOG_DEBUG, 4, "freeing interface %s", iface->Name);
 
 		prefix = iface->AdvPrefixList;
-		while (prefix)
-		{
+		while (prefix) {
 			struct AdvPrefix *next_prefix = prefix->next;
 
 			free(prefix);
@@ -623,8 +588,7 @@ void reload_config(void)
 		}
 
 		route = iface->AdvRouteList;
-		while (route)
-		{
+		while (route) {
 			struct AdvRoute *next_route = route->next;
 
 			free(route);
@@ -632,8 +596,7 @@ void reload_config(void)
 		}
 
 		rdnss = iface->AdvRDNSSList;
-		while (rdnss)
-		{
+		while (rdnss) {
 			struct AdvRDNSS *next_rdnss = rdnss->next;
 
 			free(rdnss);
@@ -641,8 +604,7 @@ void reload_config(void)
 		}
 
 		dnssl = iface->AdvDNSSLList;
-		while (dnssl)
-		{
+		while (dnssl) {
 			struct AdvDNSSL *next_dnssl = dnssl->next;
 			int i;
 
@@ -673,8 +635,7 @@ void reload_config(void)
 	flog(LOG_DEBUG, "resuming normal operation");
 }
 
-void
-sighup_handler(int sig)
+void sighup_handler(int sig)
 {
 	/* Linux has "one-shot" signals, reinstall the signal handler */
 	signal(SIGHUP, sighup_handler);
@@ -682,8 +643,7 @@ sighup_handler(int sig)
 	sighup_received = 1;
 }
 
-void
-sigterm_handler(int sig)
+void sigterm_handler(int sig)
 {
 	/* Linux has "one-shot" signals, reinstall the signal handler */
 	signal(SIGTERM, sigterm_handler);
@@ -695,8 +655,7 @@ sigterm_handler(int sig)
 	}
 }
 
-void
-sigint_handler(int sig)
+void sigint_handler(int sig)
 {
 	/* Linux has "one-shot" signals, reinstall the signal handler */
 	signal(SIGINT, sigint_handler);
@@ -722,23 +681,18 @@ void reset_prefix_lifetimes(void)
 	struct AdvPrefix *prefix;
 	char pfx_str[INET6_ADDRSTRLEN];
 
-
 	flog(LOG_INFO, "Resetting prefix lifetimes");
 	
-	for (iface = IfaceList; iface; iface = iface->next) 
-	{
-		for (prefix = iface->AdvPrefixList; prefix;
-							prefix = prefix->next) 
-		{
-			if (prefix->DecrementLifetimesFlag)
-			{
+	for (iface = IfaceList; iface; iface = iface->next) {
+		for (prefix = iface->AdvPrefixList; prefix; prefix = prefix->next) {
+			if (prefix->DecrementLifetimesFlag) {
 				print_addr(&prefix->Prefix, pfx_str);
-				dlog(LOG_DEBUG, 4, "%s/%u%%%s plft reset from %u to %u secs", pfx_str, prefix->PrefixLen, iface->Name, prefix->curr_preferredlft, prefix->AdvPreferredLifetime);
-				dlog(LOG_DEBUG, 4, "%s/%u%%%s vlft reset from %u to %u secs", pfx_str, prefix->PrefixLen, iface->Name, prefix->curr_validlft, prefix->AdvValidLifetime);
-				prefix->curr_validlft =
-						prefix->AdvValidLifetime;
-				prefix->curr_preferredlft =
-						prefix->AdvPreferredLifetime;
+				dlog(LOG_DEBUG, 4, "%s/%u%%%s plft reset from %u to %u secs", pfx_str, prefix->PrefixLen, iface->Name, prefix->curr_preferredlft,
+				     prefix->AdvPreferredLifetime);
+				dlog(LOG_DEBUG, 4, "%s/%u%%%s vlft reset from %u to %u secs", pfx_str, prefix->PrefixLen, iface->Name, prefix->curr_validlft,
+				     prefix->AdvValidLifetime);
+				prefix->curr_validlft = prefix->AdvValidLifetime;
+				prefix->curr_preferredlft = prefix->AdvPreferredLifetime;
 			}
 		}
 		
@@ -746,27 +700,23 @@ void reset_prefix_lifetimes(void)
 
 }
 
-int
-drop_root_privileges(const char *username)
+int drop_root_privileges(const char *username)
 {
 	struct passwd *pw = NULL;
 	pw = getpwnam(username);
 	if (pw) {
 		if (initgroups(username, pw->pw_gid) != 0 || setgid(pw->pw_gid) != 0 || setuid(pw->pw_uid) != 0) {
-			flog(LOG_ERR, "Couldn't change to '%.32s' uid=%d gid=%d",
-					username, pw->pw_uid, pw->pw_gid);
+			flog(LOG_ERR, "Couldn't change to '%.32s' uid=%d gid=%d", username, pw->pw_uid, pw->pw_gid);
 			return (-1);
 		}
-	}
-	else {
+	} else {
 		flog(LOG_ERR, "Couldn't find user '%.32s'", username);
 		return (-1);
 	}
 	return 0;
 }
 
-int
-check_conffile_perm(const char *username, const char *conf_file)
+int check_conffile_perm(const char *username, const char *conf_file)
 {
 #if CHECK_PERM
 	struct stat stbuf;
@@ -793,9 +743,7 @@ check_conffile_perm(const char *username, const char *conf_file)
         }
 
 	/* for non-root: must not be writable by self/own group */
-	if (strncmp(username, "root", 5) != 0 &&
-	    ((stbuf.st_mode & S_IWGRP && pw->pw_gid == stbuf.st_gid) ||
-	     (stbuf.st_mode & S_IWUSR && pw->pw_uid == stbuf.st_uid))) {
+	if (strncmp(username, "root", 5) != 0 && ((stbuf.st_mode & S_IWGRP && pw->pw_gid == stbuf.st_gid) || (stbuf.st_mode & S_IWUSR && pw->pw_uid == stbuf.st_uid))) {
                 flog(LOG_ERR, "Insecure file permissions (writable by self/group): %s", conf_file);
 		return (-1);
         }
@@ -804,8 +752,7 @@ check_conffile_perm(const char *username, const char *conf_file)
 }
 
 #if 0
-int
-check_ip6_forwarding(void)
+int check_ip6_forwarding(void)
 {
 #ifdef HAVE_SYS_SYSCTL_H
 	int forw_sysctl[] = { SYSCTL_IP6_FORWARDING };
@@ -824,20 +771,15 @@ check_ip6_forwarding(void)
 			exit(1);
 		}
 		fclose(fp);
-	}
-	else {
-		flog(LOG_DEBUG, "Correct IPv6 forwarding procfs entry not found, "
-	                       "perhaps the procfs is disabled, "
-	                        "or the kernel interface has changed?");
+	} else {
+		flog(LOG_DEBUG, "Correct IPv6 forwarding procfs entry not found, " "perhaps the procfs is disabled, " "or the kernel interface has changed?");
 		value = -1;
 	}
 #endif /* __linux__ */
 
 #ifdef HAVE_SYS_SYSCTL_H
-	if (!fp && sysctl(forw_sysctl, sizeof(forw_sysctl)/sizeof(forw_sysctl[0]),
-	    &value, &size, NULL, 0) < 0) {
-		flog(LOG_DEBUG, "Correct IPv6 forwarding sysctl branch not found, "
-			"perhaps the kernel interface has changed?");
+	if (!fp && sysctl(forw_sysctl, sizeof(forw_sysctl) / sizeof(forw_sysctl[0]), &value, &size, NULL, 0) < 0) {
+		flog(LOG_DEBUG, "Correct IPv6 forwarding sysctl branch not found, " "perhaps the kernel interface has changed?");
 		return(0);	/* this is of advisory value only */
 	}
 #endif
@@ -867,24 +809,20 @@ check_ip6_forwarding(void)
 }
 #else
 /* in wive radvd started only if ipv6 forward enabled - fix issue if forward enabled only for some interfaces. */
-int
-check_ip6_forwarding(void)
+int check_ip6_forwarding(void)
 {
 	return(0);
 }
 #endif
 
-int
-readin_config(char *fname)
-{
-	if ((yyin = fopen(fname, "r")) == NULL)
+int readin_config(char *fname)
 	{
+	if ((yyin = fopen(fname, "r")) == NULL) {
 		flog(LOG_ERR, "can't open %s: %s", fname, strerror(errno));
 		return (-1);
 	}
 
-	if (yyparse() != 0)
-	{
+	if (yyparse() != 0) {
 		flog(LOG_ERR, "error parsing or activating the config file: %s", fname);
 		return (-1);
 	}
@@ -893,8 +831,7 @@ readin_config(char *fname)
 	return 0;
 }
 
-void
-version(void)
+void version(void)
 {
 	fprintf(stderr, "Version: %s\n\n", VERSION);
 	fprintf(stderr, "Compiled in settings:\n");
@@ -902,14 +839,12 @@ version(void)
 	fprintf(stderr, "  default pidfile		\"%s\"\n", PATH_RADVD_PID);
 	fprintf(stderr, "  default logfile		\"%s\"\n", PATH_RADVD_LOG);
 	fprintf(stderr, "  default syslog facility	%d\n", LOG_FACILITY);
-	fprintf(stderr, "Please send bug reports or suggestions to %s.\n",
-		CONTACT_EMAIL);
+	fprintf(stderr, "Please send bug reports or suggestions to %s.\n", CONTACT_EMAIL);
 
 	exit(1);
 }
 
-void
-usage(void)
+void usage(void)
 {
 	fprintf(stderr, "usage: %s %s\n", pname, usage_str);
 	exit(1);

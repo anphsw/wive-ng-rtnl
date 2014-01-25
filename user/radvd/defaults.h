@@ -153,8 +153,7 @@
 #define  ND_OPT_ROUTE_INFORMATION	24
 
 /* XXX: some libc's like KAME already had nd_opt_route_info! */
-struct nd_opt_route_info_local     /* route information */
-  {
+struct nd_opt_route_info_local {	/* route information */
     uint8_t   nd_opt_ri_type;
     uint8_t   nd_opt_ri_len;
     uint8_t   nd_opt_ri_prefix_len;
@@ -171,8 +170,7 @@ struct nd_opt_route_info_local     /* route information */
 #define  ND_OPT_RDNSS_INFORMATION	25
 
 /* */
-struct nd_opt_rdnss_info_local
-{
+struct nd_opt_rdnss_info_local {
 	uint8_t   			nd_opt_rdnssi_type;
 	uint8_t   			nd_opt_rdnssi_len;
 	uint16_t   			nd_opt_rdnssi_pref_flag_reserved;
@@ -193,8 +191,7 @@ struct nd_opt_rdnss_info_local
 #define  ND_OPT_DNSSL_INFORMATION	31
 
 /* */
-struct nd_opt_dnssl_info_local
-{
+struct nd_opt_dnssl_info_local {
 	uint8_t   			nd_opt_dnssli_type;
 	uint8_t   			nd_opt_dnssli_len;
 	uint16_t   			nd_opt_dnssli_reserved;

@@ -41,8 +41,7 @@ struct privsep_command {
 };
 
 /* Privileged read loop */
-void
-privsep_read_loop(void)
+void privsep_read_loop(void)
 {
 	struct privsep_command cmd;
 	int ret;
@@ -52,8 +51,7 @@ privsep_read_loop(void)
 		if (ret <= 0) {
 			/* Error or EOF, give up */
 			if (ret < 0) {
-				flog(LOG_ERR, "Exiting, privsep_read_loop had readn error: %s\n",
-				     strerror(errno));
+				flog(LOG_ERR, "Exiting, privsep_read_loop had readn error: %s\n", strerror(errno));
 			} else {
 				flog(LOG_ERR, "Exiting, privsep_read_loop had readn return 0 bytes\n");
 			}
@@ -115,8 +113,7 @@ privsep_read_loop(void)
 }
 
 /* Fork to create privileged process connected by a pipe */
-int
-privsep_init(void)
+int privsep_init(void)
 {
 	int pipefds[2];
 	pid_t pid;
@@ -166,8 +163,7 @@ privsep_init(void)
 }
 
 /* Interface calls for the unprivileged process */
-int
-privsep_interface_linkmtu(const char *iface, uint32_t mtu)
+int privsep_interface_linkmtu(const char *iface, uint32_t mtu)
 {
 	struct privsep_command cmd;
 	cmd.type = SET_INTERFACE_LINKMTU;
@@ -179,8 +175,7 @@ privsep_interface_linkmtu(const char *iface, uint32_t mtu)
 	return 0;
 }
 
-int
-privsep_interface_curhlim(const char *iface, uint32_t hlim)
+int privsep_interface_curhlim(const char *iface, uint32_t hlim)
 {
 	struct privsep_command cmd;
 	cmd.type = SET_INTERFACE_CURHLIM;
@@ -191,8 +186,7 @@ privsep_interface_curhlim(const char *iface, uint32_t hlim)
 	return 0;
 }
 
-int
-privsep_interface_reachtime(const char *iface, uint32_t rtime)
+int privsep_interface_reachtime(const char *iface, uint32_t rtime)
 {
 	struct privsep_command cmd;
 	cmd.type = SET_INTERFACE_REACHTIME;
@@ -203,8 +197,7 @@ privsep_interface_reachtime(const char *iface, uint32_t rtime)
 	return 0;
 }
 
-int
-privsep_interface_retranstimer(const char *iface, uint32_t rettimer)
+int privsep_interface_retranstimer(const char *iface, uint32_t rettimer)
 {
 	struct privsep_command cmd;
 	cmd.type = SET_INTERFACE_RETRANSTIMER;
