@@ -553,7 +553,7 @@ static ssize_t do_tcp_sendpages(struct sock *sk, struct page *page, int offset,
 
 	err = -EPIPE;
 	if (sk->sk_err || (sk->sk_shutdown & SEND_SHUTDOWN))
-		goto out_error;
+		goto out_err;
 
 	while (size > 0) {
 		struct sk_buff *skb = sk->sk_write_queue.prev;
