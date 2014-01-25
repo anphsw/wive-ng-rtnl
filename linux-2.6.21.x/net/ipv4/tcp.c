@@ -554,7 +554,7 @@ static ssize_t do_tcp_sendpages(struct sock *sk, struct page *page, int offset,
 
 	err = -EPIPE;
 	if (sk->sk_err || (sk->sk_shutdown & SEND_SHUTDOWN))
-		goto do_error;
+		goto out_error;
 
 	while (size > 0) {
 		struct sk_buff *skb = sk->sk_write_queue.prev;
@@ -718,7 +718,7 @@ int tcp_sendmsg(struct kiocb *iocb, struct socket *sock, struct msghdr *msg,
 
 	err = -EPIPE;
 	if (sk->sk_err || (sk->sk_shutdown & SEND_SHUTDOWN))
-		goto do_error;
+		goto out_err;
 
 	sg = !!(sk->sk_route_caps & NETIF_F_SG);
 
