@@ -1,9 +1,10 @@
-
 CFLAGS += -DHAVE_CONFIG_H
+CFLAGS += -ffunction-sections -fdata-sections
+LDFLAGS += -Wl,--gc-sections
 
 SUBDIRS = libfuse-lite src
 
-all: 
+all:
 	@for dir in ${SUBDIRS}; do \
 		echo "Making all in $$dir"; \
 		(cd $$dir; $(MAKE) all) || exit 1; \
