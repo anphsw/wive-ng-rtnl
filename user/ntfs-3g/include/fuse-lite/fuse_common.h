@@ -1,35 +1,54 @@
 /*
-    FUSE: Filesystem in Userspace
-    Copyright (C) 2001-2007  Miklos Szeredi <miklos@szeredi.hu>
+  FUSE: Filesystem in Userspace
+  Copyright (C) 2001-2007  Miklos Szeredi <miklos@szeredi.hu>
 
-    This program can be distributed under the terms of the GNU LGPLv2.
-    See the file COPYING.LIB.
+  This program can be distributed under the terms of the GNU LGPLv2.
+  See the file COPYING.LIB.
 */
 
 /** @file */
 
 #if !defined(_FUSE_H_) && !defined(_FUSE_LOWLEVEL_H_)
-#error "Never include <fuse_common.h> directly; use <fuse.h> or <fuse_lowlevel.h instead."
+#error "Never include <fuse_common.h> directly; use <fuse.h> or <fuse_lowlevel.h> instead."
 #endif
 
 #ifndef _FUSE_COMMON_H_
 #define _FUSE_COMMON_H_
 
 #include "fuse_opt.h"
+#include <stdio.h> /* temporary */
 #include <stdint.h>
 
 /** Major version of FUSE library interface */
 #define FUSE_MAJOR_VERSION 2
 
 /** Minor version of FUSE library interface */
+#ifdef POSIXACLS
+#define FUSE_MINOR_VERSION 8
+#else
 #define FUSE_MINOR_VERSION 7
+#endif
 
 #define FUSE_MAKE_VERSION(maj, min)  ((maj) * 10 + (min))
 #define FUSE_VERSION FUSE_MAKE_VERSION(FUSE_MAJOR_VERSION, FUSE_MINOR_VERSION)
 
+/* This interface uses 64 bit off_t */
+#if defined(__SOLARIS__) && !defined(__x86_64__) && (_FILE_OFFSET_BITS != 64)
+#error Please add -D_FILE_OFFSET_BITS=64 to your compile flags!
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#ifdef POSIXACLS
+/*
+ * FUSE_CAP_DONT_MASK: don't apply umask to file mode on create operations
+ */
+#define FUSE_CAP_DONT_MASK	(1 << 6)
+#endif
+
+#define FUSE_CAP_BIG_WRITES	(1 << 5)
 
 /**
  * Information about open files
@@ -37,38 +56,38 @@ extern "C" {
  * Changed in version 2.5
  */
 struct fuse_file_info {
-    /** Open flags.  Available in open() and release() */
-    int flags;
+	/** Open flags.	 Available in open() and release() */
+	int flags;
 
-    /** Old file handle, don't use */
-    unsigned long fh_old;
+	/** Old file handle, don't use */
+	unsigned long fh_old;
 
-    /** In case of a write operation indicates if this was caused by a
-        writepage */
-    int writepage;
+	/** In case of a write operation indicates if this was caused by a
+	    writepage */
+	int writepage;
 
-    /** Can be filled in by open, to use direct I/O on this file.
-        Introduced in version 2.4 */
-    unsigned int direct_io : 1;
+	/** Can be filled in by open, to use direct I/O on this file.
+	    Introduced in version 2.4 */
+	unsigned int direct_io : 1;
 
-    /** Can be filled in by open, to indicate, that cached file data
-        need not be invalidated.  Introduced in version 2.4 */
-    unsigned int keep_cache : 1;
+	/** Can be filled in by open, to indicate, that cached file data
+	    need not be invalidated.  Introduced in version 2.4 */
+	unsigned int keep_cache : 1;
 
-    /** Indicates a flush operation.  Set in flush operation, also
-        maybe set in highlevel lock operation and lowlevel release
-        operation.  Introduced in version 2.6 */
-    unsigned int flush : 1;
+	/** Indicates a flush operation.  Set in flush operation, also
+	    maybe set in highlevel lock operation and lowlevel release
+	    operation.	Introduced in version 2.6 */
+	unsigned int flush : 1;
 
-    /** Padding.  Do not use*/
-    unsigned int padding : 29;
+	/** Padding.  Do not use*/
+	unsigned int padding : 29;
 
-    /** File handle.  May be filled in by filesystem in open().
-        Available in all other file operations */
-    uint64_t fh;
+	/** File handle.  May be filled in by filesystem in open().
+	    Available in all other file operations */
+	uint64_t fh;
 
-    /** Lock owner id.  Available in locking operations and flush */
-    uint64_t lock_owner;
+	/** Lock owner id.  Available in locking operations and flush */
+	uint64_t lock_owner;
 };
 
 /**
@@ -79,36 +98,38 @@ struct fuse_file_info {
  * value must usually be smaller than the indicated value.
  */
 struct fuse_conn_info {
-    /**
-     * Major version of the protocol (read-only)
-     */
-    unsigned proto_major;
+	/**
+	 * Major version of the protocol (read-only)
+	 */
+	unsigned proto_major;
 
-    /**
-     * Minor version of the protocol (read-only)
-     */
-    unsigned proto_minor;
+	/**
+	 * Minor version of the protocol (read-only)
+	 */
+	unsigned proto_minor;
 
-    /**
-     * Is asynchronous read supported (read-write)
-     */
-    unsigned async_read;
+	/**
+	 * Is asynchronous read supported (read-write)
+	 */
+	unsigned async_read;
 
-    /**
-     * Maximum size of the write buffer
-     */
-    unsigned max_write;
+	/**
+	 * Maximum size of the write buffer
+	 */
+	unsigned max_write;
 
-    /**
-     * Maximum readahead
-     */
-    unsigned max_readahead;
+	/**
+	 * Maximum readahead
+	 */
+	unsigned max_readahead;
 
-    /**
-     * For future use.
-     */
-    unsigned reserved[27];
-};
+	unsigned capable;
+	unsigned want;
+	/**
+	 * For future use.
+	 */
+	unsigned reserved[25];
+    };
 
 struct fuse_session;
 struct fuse_chan;
@@ -133,6 +154,7 @@ struct fuse_chan *fuse_mount(const char *mountpoint, struct fuse_args *args);
  */
 void fuse_unmount(const char *mountpoint, struct fuse_chan *ch);
 
+#ifdef __SOLARIS__
 /**
  * Parse common options
  *
@@ -165,6 +187,8 @@ int fuse_parse_cmdline(struct fuse_args *args, char **mountpoint,
  */
 int fuse_daemonize(int foreground);
 
+#endif /* __SOLARIS__ */
+
 /**
  * Get the version of the library
  *
@@ -173,13 +197,13 @@ int fuse_daemonize(int foreground);
 int fuse_version(void);
 
 /* ----------------------------------------------------------- *
- * Signal handling                                             *
+ * Signal handling					       *
  * ----------------------------------------------------------- */
 
 /**
  * Exit session on HUP, TERM and INT signals and ignore PIPE signal
  *
- * Stores session in a global variable.  May only be called once per
+ * Stores session in a global variable.	 May only be called once per
  * process until fuse_remove_signal_handlers() is called.
  *
  * @param se the session to exit

@@ -1,12 +1,10 @@
 /*
- * utils.h - Originated from the Linux-NTFS project.
  *
- * Copyright (c) 2002-2005 Richard Russon
- * Copyright (c) 2004 Anton Altaparmakov
- * Copyright (c) 2005-2007 Szabolcs Szakacsits
+ * Copyright (c) 2008 Jean-Pierre Andre
  *
- * A set of shared functions for ntfs utilities
- *
+ */
+
+/*
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -23,15 +21,15 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef _NTFS_UTILS_H_
-#define _NTFS_UTILS_H_
+#ifndef OBJECT_ID_H
+#define OBJECT_ID_H
 
-#include "volume.h"
+int ntfs_get_ntfs_object_id(ntfs_inode *ni, char *value, size_t size);
 
-extern const char *ntfs_home;
-extern const char *ntfs_gpl;
+int ntfs_set_ntfs_object_id(ntfs_inode *ni, const char *value,
+			size_t size, int flags);
+int ntfs_remove_ntfs_object_id(ntfs_inode *ni);
 
-int utils_set_locale(void);
-void utils_mount_error(const char *vol, const char *mntpoint, int err);
+int ntfs_delete_object_id_index(ntfs_inode *ni);
 
-#endif /* _NTFS_UTILS_H_ */
+#endif /* OBJECT_ID_H */

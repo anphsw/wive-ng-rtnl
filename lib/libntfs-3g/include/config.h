@@ -1,8 +1,19 @@
 /* config.h.  Generated from config.h.in by configure.  */
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
+/* Define this to 1 if you want to enable support of encrypted files in
+   libntfs and utilities. */
+/* #undef ENABLE_CRYPTO */
+
 /* Define to 1 if debug should be enabled */
 /* #undef ENABLE_DEBUG */
+
+/* Define to 1 if the nfconv patch should be enabled */
+/* #undef ENABLE_NFCONV */
+
+/* Define this to 1 if you want to enable generation of DCE compliant UUIDs.
+   */
+/* #undef ENABLE_UUID */
 
 /* Define to 1 if using internal fuse */
 #define FUSE_INTERNAL 1
@@ -16,8 +27,14 @@
 /* Define to 1 if you have the <byteswap.h> header file. */
 #define HAVE_BYTESWAP_H 1
 
+/* Define to 1 if you have the `clock_gettime' function. */
+/* #undef HAVE_CLOCK_GETTIME */
+
 /* Define to 1 if you have the <ctype.h> header file. */
 #define HAVE_CTYPE_H 1
+
+/* Define to 1 if you have the `daemon' function. */
+#define HAVE_DAEMON 1
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #define HAVE_DLFCN_H 1
@@ -43,6 +60,9 @@
 /* Define to 1 if you have the <features.h> header file. */
 #define HAVE_FEATURES_H 1
 
+/* Define to 1 if you have the `ffs' function. */
+#define HAVE_FFS 1
+
 /* Define to 1 if you have the `fork' function. */
 #define HAVE_FORK 1
 
@@ -55,6 +75,9 @@
 /* Define to 1 if you have the `getopt_long' function. */
 #define HAVE_GETOPT_LONG 1
 
+/* Define to 1 if you have the `gettimeofday' function. */
+#define HAVE_GETTIMEOFDAY 1
+
 /* Define to 1 if you have the `hasmntopt' function. */
 #define HAVE_HASMNTOPT 1
 
@@ -65,7 +88,7 @@
 #define HAVE_LIBGEN_H 1
 
 /* Define to 1 if you have the <libintl.h> header file. */
-/* #undef HAVE_LIBINTL_H */
+#define HAVE_LIBINTL_H 1
 
 /* Define to 1 if you have the <limits.h> header file. */
 #define HAVE_LIMITS_H 1
@@ -85,11 +108,17 @@
 /* Define to 1 if you have the <machine/endian.h> header file. */
 /* #undef HAVE_MACHINE_ENDIAN_H */
 
+/* Define to 1 if you have the <malloc.h> header file. */
+#define HAVE_MALLOC_H 1
+
 /* Define to 1 if mbrtowc and mbstate_t are properly declared. */
 #define HAVE_MBRTOWC 1
 
 /* Define to 1 if you have the `mbsinit' function. */
 #define HAVE_MBSINIT 1
+
+/* Define to 1 if you have the `memcpy' function. */
+#define HAVE_MEMCPY 1
 
 /* Define to 1 if you have the `memmove' function. */
 #define HAVE_MEMMOVE 1
@@ -103,6 +132,12 @@
 /* Define to 1 if you have the <mntent.h> header file. */
 #define HAVE_MNTENT_H 1
 
+/* Define to 1 if you have the <pwd.h> header file. */
+#define HAVE_PWD_H 1
+
+/* Define to 1 if you have the `random' function. */
+#define HAVE_RANDOM 1
+
 /* Define to 1 if you have the `realpath' function. */
 #define HAVE_REALPATH 1
 
@@ -115,9 +150,12 @@
 /* Define to 1 if you have the `setxattr' function. */
 #define HAVE_SETXATTR 1
 
+/* Define to 1 if you have the `snprintf' function. */
+#define HAVE_SNPRINTF 1
+
 /* Define to 1 if `stat' has the bug that it succeeds when given the
    zero-length file name argument. */
-#define HAVE_STAT_EMPTY_STRING_BUG 1
+/* #undef HAVE_STAT_EMPTY_STRING_BUG */
 
 /* Define to 1 if you have the <stdarg.h> header file. */
 #define HAVE_STDARG_H 1
@@ -161,6 +199,9 @@
 /* Define to 1 if you have the `strnlen' function. */
 #define HAVE_STRNLEN 1
 
+/* Define to 1 if you have the `strsep' function. */
+#define HAVE_STRSEP 1
+
 /* Define to 1 if you have the `strtol' function. */
 #define HAVE_STRTOL 1
 
@@ -168,7 +209,10 @@
 #define HAVE_STRTOUL 1
 
 /* Define to 1 if `st_atim' is member of `struct stat'. */
-/* #undef HAVE_STRUCT_STAT_ST_ATIM */
+/* #undef #define HAVE_STRUCT_STAT_ST_ATIM */
+
+/* Define to 1 if `st_atimensec' is member of `struct stat'. */
+/* #undef HAVE_STRUCT_STAT_ST_ATIMENSEC */
 
 /* Define to 1 if `st_atimespec' is member of `struct stat'. */
 /* #undef HAVE_STRUCT_STAT_ST_ATIMESPEC */
@@ -192,11 +236,17 @@
 /* Define to 1 if you have the <sys/byteorder.h> header file. */
 /* #undef HAVE_SYS_BYTEORDER_H */
 
+/* Define to 1 if you have the <sys/disk.h> header file. */
+/* #undef HAVE_SYS_DISK_H */
+
 /* Define to 1 if you have the <sys/endian.h> header file. */
 /* #undef HAVE_SYS_ENDIAN_H */
 
 /* Define to 1 if you have the <sys/ioctl.h> header file. */
 #define HAVE_SYS_IOCTL_H 1
+
+/* Define to 1 if you have the <sys/mkdev.h> header file. */
+/* #undef HAVE_SYS_MKDEV_H */
 
 /* Define to 1 if you have the <sys/mount.h> header file. */
 #define HAVE_SYS_MOUNT_H 1
@@ -228,11 +278,14 @@
 /* Define to 1 if you have the `utime' function. */
 #define HAVE_UTIME 1
 
+/* Define to 1 if you have the `utimensat' function. */
+/* #undef HAVE_UTIMENSAT */
+
 /* Define to 1 if you have the <utime.h> header file. */
 #define HAVE_UTIME_H 1
 
 /* Define to 1 if `utime(file, NULL)' sets file's timestamp to the present. */
-/* #undef HAVE_UTIME_NULL */
+#define HAVE_UTIME_NULL 1
 
 /* Define to 1 if you have the `vprintf' function. */
 #define HAVE_VPRINTF 1
@@ -247,11 +300,11 @@
 #define HAVE__BOOL 1
 
 /* Don't update /etc/mtab */
-#define IGNORE_MTAB 1
+/* #undef IGNORE_MTAB */
 
 /* Define to 1 if `lstat' dereferences a symlink specified with a trailing
    slash. */
-/* #undef LSTAT_FOLLOWS_SLASHED_SYMLINK */
+#define LSTAT_FOLLOWS_SLASHED_SYMLINK 1
 
 /* Define to 1 if your C compiler doesn't accept -c and -o together. */
 /* #undef NO_MINUS_C_MINUS_O */
@@ -269,19 +322,22 @@
 #define PACKAGE_NAME "ntfs-3g"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "ntfs-3g 1.2412"
+#define PACKAGE_STRING "ntfs-3g 2013.1.13"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "ntfs-3g"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "1.2412"
+#define PACKAGE_VERSION "2013.1.13"
+
+/* POSIX ACL support */
+/* #undef POSIXACLS */
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
 
 /* Version number of package */
-#define VERSION "1.2412"
+#define VERSION "2013.1.13"
 
 /* Define to 1 if this is a Windows OS */
 /* #undef WINDOWS */
@@ -293,6 +349,9 @@
 /* Define to 1 if your processor stores words with the least significant byte
    first (like Intel and VAX, unlike Motorola and SPARC). */
 #define WORDS_LITTLEENDIAN 1
+
+/* system extended attributes mappings */
+/* #undef XATTR_MAPPINGS */
 
 /* Number of bits in a file offset, on hosts where this is settable. */
 #define _FILE_OFFSET_BITS 64

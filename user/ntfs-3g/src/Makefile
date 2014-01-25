@@ -1,5 +1,5 @@
-OBJS_probe = ntfs-3g.probe.o utils.o
-OBJS_ntfs = ntfs-3g.o utils.o
+OBJS_probe = ntfs-3g.probe.o
+OBJS_ntfs = ntfs-3g.o ntfs-3g_common.o
 
 TARGET_probe = ntfs-3g.probe
 TARGET_ntfs = ntfs-3g

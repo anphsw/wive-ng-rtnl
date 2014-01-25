@@ -1,7 +1,7 @@
 /**
  * ntfs-3g.probe - Probe NTFS volume mountability
  *
- * Copyright (c) 2007 Szabolcs Szakacsits
+ * Copyright (c) 2007-2009 Szabolcs Szakacsits
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,13 +32,9 @@
 #endif
 #include <getopt.h>
 
+#include "compat.h"
 #include "volume.h"
-#include "utils.h"
 #include "misc.h"
-
-#ifndef PATH_MAX
-#define PATH_MAX 4096
-#endif
 
 typedef enum {
 	PROBE_UNSET,
@@ -72,13 +68,14 @@ static int ntfs_open(const char *device)
 	int ret = NTFS_VOLUME_OK;
 	
 	if (opts.probetype == PROBE_READONLY)
-		flags |= MS_RDONLY;
+		flags |= NTFS_MNT_RDONLY;
 
 	vol = ntfs_mount(device, flags);
 	if (!vol)
 		ret = ntfs_volume_error(errno);
 
-	ntfs_umount(vol, FALSE);
+	if (ret == 0 && ntfs_umount(vol, FALSE) == -1)
+		ret = ntfs_volume_error(errno);
 
 	return ret;
 }

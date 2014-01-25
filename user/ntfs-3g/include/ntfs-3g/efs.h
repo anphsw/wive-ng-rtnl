@@ -1,8 +1,6 @@
 /*
- * version.h - Info about the NTFS library.  Originated from the Linux-NTFS project.
  *
- * Copyright (c) 2005 Anton Altaparmakov
- * Copyright (c) 2005 Richard Russon
+ * Copyright (c) 2009 Martin Bene
  *
  * This program/include file is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as published
@@ -20,10 +18,13 @@
  * Foundation,Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef _NTFS_VERSION_H_
-#define _NTFS_VERSION_H_
+#ifndef EFS_H
+#define EFS_H
 
-extern const char *ntfs_libntfs_version(void);
+int ntfs_get_efs_info(ntfs_inode *ni, char *value, size_t size);
 
-#endif /* _NTFS_VERSION_H_ */
+int ntfs_set_efs_info(ntfs_inode *ni,
+			const char *value, size_t size,	int flags);
+int ntfs_efs_fixup_attribute(ntfs_attr_search_ctx *ctx, ntfs_attr *na);
 
+#endif /* EFS_H */

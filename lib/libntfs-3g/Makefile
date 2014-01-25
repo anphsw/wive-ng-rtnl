@@ -4,13 +4,14 @@ include $(TOPDIR)Rules.mak
 CFLAGS+=$(SSP_ALL_CFLAGS) -DHAVE_CONFIG_H -Iinclude/ -O3
 
 LIBNTFS3G=libntfs-3g.a
-LIBNTFS3G_VERS=26
+LIBNTFS3G_VERS=84
 LIBNTFS3G_SHARED=libntfs-3g.so.$(LIBNTFS3G_VERS)
 
-OBJS    := attrib.o bitmap.o collate.o compress.o device.o dir.o inode.o \
-	   logfile.o mft.o mst.o security.o unix_io.o volume.o attrlist.o \
-	   bootsect.o compat.o debug.o index.o lcnalloc.o logging.o misc.o \
-	   runlist.o unistr.o version.o
+OBJS    := acls.o attrib.o attrlist.o bitmap.o bootsect.o cache.o collate.o \
+	compat.o compress.o debug.o device.o dir.o efs.o index.o inode.o \
+	lcnalloc.o logfile.o logging.o 	mft.o misc.o mst.o object_id.o 	\
+	realpath.o reparse.o runlist.o security.o unistr.o volume.o xattrs.o \
+	unix_io.o
 
 all:	$(LIBNTFS3G)
 
