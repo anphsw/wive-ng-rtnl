@@ -11,6 +11,7 @@
 #include <linux/string.h>
 #include <net/sock.h>
 #include <net/ipv6.h>
+#include <net/addrconf.h>
 #include <linux/kernel.h>
 #define RPCDBG_FACILITY	RPCDBG_AUTH
 
