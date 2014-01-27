@@ -1,5 +1,5 @@
 #! /bin/sh
-# $Id: genconfig.sh,v 1.67 2013/12/16 15:39:24 nanard Exp $
+# $Id: genconfig.sh,v 1.68 2013/12/24 14:42:59 nanard Exp $
 # miniupnp daemon
 # http://miniupnp.free.fr or http://miniupnp.tuxfamily.org/
 # (c) 2006-2013 Thomas Bernard
@@ -12,6 +12,7 @@ case "$argv" in
 	--igd2) IGD2=1 ;;
 	--strict) STRICT=1 ;;
 	--leasefile) LEASEFILE=1 ;;
+	--vendorcfg) VENDORCFG=1 ;;
 	--pcp) PCP=1 ;;
 	--pcp-peer)
 		PCP=1
@@ -23,6 +24,7 @@ case "$argv" in
 		echo " --igd2      build an IGDv2 instead of an IGDv1"
 		echo " --strict    be more strict regarding compliance with UPnP specifications"
 		echo " --leasefile enable lease file"
+		echo " --vendorcfg enable configuration of manufacturer info"
 		echo " --pcp       enable PCP"
 		echo " --pcp-peer  enable PCP PEER operation"
 		exit 1
@@ -37,6 +39,7 @@ done
 
 # replace defaults
 LEASEFILE=1
+VENDORCFG=1
 
 # need move to new glibc version
 #IPV6=`cat ../../linux/.config | grep "CONFIG_IPV6=y" -c`
@@ -56,8 +59,8 @@ LOG_MINIUPNPD="LOG_DAEMON"
 
 # detecting the OS name and version
 OS_NAME=Wifi-Router
-OS_VERSION=WIVE-RTN
-OS_URL=http://wive-ng.sf.net/
+OS_VERSION=WIVE-NT-RTNL
+OS_URL=http://wive-ng.sf.net
 
 ${RM} ${CONFIGFILE}
 
@@ -456,8 +459,12 @@ echo "/* disable reading and parsing of config file (miniupnpd.conf) */" >> ${CO
 echo "/*#define DISABLE_CONFIG_FILE*/" >> ${CONFIGFILE}
 echo "" >> ${CONFIGFILE}
 
-echo "/* Unable the ability to configure all manufacturer infos through miniupnpd.conf */" >> ${CONFIGFILE}
-echo "#define ENABLE_MANUFACTURER_INFO_CONFIGURATION" >> ${CONFIGFILE}
+echo "/* Uncomment the following line to configure all manufacturer infos through miniupnpd.conf */" >> ${CONFIGFILE}
+if [ -n "$VENDORCFG" ] ; then
+	echo "#define ENABLE_MANUFACTURER_INFO_CONFIGURATION" >> ${CONFIGFILE}
+else
+echo "/* #define ENABLE_MANUFACTURER_INFO_CONFIGURATION */" >> ${CONFIGFILE}
+fi
 echo "" >> ${CONFIGFILE}
 
 echo "#endif" >> ${CONFIGFILE}
