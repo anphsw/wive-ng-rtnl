@@ -128,6 +128,7 @@
 35) kernel: tcp: cleanup ca_state mess in tcp_timer.<br>
 36) kernel: tcp: don't clear hints when tcp_fragmenting.<br>
 37) kernel: tcp: fix length used for checksum in a reset.<br>
+38) kernel: ipv4: arp: update neighbour address when a gratuitous arp is received and arp_accept is set.<br>
 <br>
 <br>
 <br>
