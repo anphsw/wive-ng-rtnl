@@ -551,10 +551,10 @@ int sk_attach_filter(struct sock_fprog *fprog, struct sock *sk)
 		return err;
 	}
 
-	rcu_read_lock();
+	rcu_read_lock_bh();
 	old_fp = rcu_dereference(sk->sk_filter);
 	rcu_assign_pointer(sk->sk_filter, fp);
-	rcu_read_unlock();
+	rcu_read_unlock_bh();
 
 	if (old_fp)
 		sk_filter_uncharge(sk, old_fp);
