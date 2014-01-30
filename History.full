@@ -1834,6 +1834,7 @@
 37) kernel: tcp: fix length used for checksum in a reset.<br>
 38) kernel: ipv4: arp: update neighbour address when a gratuitous arp is received and arp_accept is set.<br>
 39) kernel: mips: allow use generic clock events and high res timers, and set by default.<br>
+40) kernel: switch to 2.7 drivers for all devices.<br>
 <br>
 <br>
 <br>
