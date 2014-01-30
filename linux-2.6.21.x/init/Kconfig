@@ -347,6 +347,8 @@ source "usr/Kconfig"
 
 endif
 
+source "kernel/time/Kconfig"
+
 config LZMA_COMPRESS_LEVEL
         int "Compress level for LZMA"
         default "23"

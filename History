@@ -129,6 +129,7 @@
 36) kernel: tcp: don't clear hints when tcp_fragmenting.<br>
 37) kernel: tcp: fix length used for checksum in a reset.<br>
 38) kernel: ipv4: arp: update neighbour address when a gratuitous arp is received and arp_accept is set.<br>
+39) kernel: mips: allow use generic clock events and high res timers, and set by default.<br>
 <br>
 <br>
 <br>
