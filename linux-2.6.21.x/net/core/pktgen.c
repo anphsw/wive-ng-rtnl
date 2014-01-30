@@ -149,7 +149,6 @@
 #include <linux/wait.h>
 #include <linux/etherdevice.h>
 #include <linux/kthread.h>
-#include <linux/prefetch.h>
 #include <net/checksum.h>
 #include <net/ipv6.h>
 #include <net/addrconf.h>

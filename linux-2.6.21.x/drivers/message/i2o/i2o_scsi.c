@@ -50,7 +50,6 @@
 #include <linux/timer.h>
 #include <linux/delay.h>
 #include <linux/proc_fs.h>
-#include <linux/prefetch.h>
 #include <linux/pci.h>
 #include <linux/blkdev.h>
 #include <linux/i2o.h>

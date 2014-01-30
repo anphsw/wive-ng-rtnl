@@ -6,7 +6,6 @@
  */
 #include <linux/errno.h>
 #include <linux/thread_info.h>
-#include <linux/prefetch.h>
 #include <linux/string.h>
 #include <asm/page.h>
 

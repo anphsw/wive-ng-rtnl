@@ -30,6 +30,7 @@
 */
 #include	"rt_config.h"
 
+#include <linux/prefetch.h>
 
 VOID DBGPRINT_TX_RING(
 	IN PRTMP_ADAPTER  pAd,

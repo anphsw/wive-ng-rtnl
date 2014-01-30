@@ -51,6 +51,7 @@
 #include <linux/pagevec.h>
 #include <linux/backing-dev.h>
 #include <linux/spinlock.h>
+#include <linux/prefetch.h>
 
 /*
  * If EXT4_WB_STATS is defined, then some stats are collected.

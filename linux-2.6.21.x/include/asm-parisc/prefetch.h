@@ -18,6 +18,8 @@
 #ifndef __ASSEMBLY__
 #ifdef CONFIG_PREFETCH
 
+#include <linux/prefetch.h>
+
 #define ARCH_HAS_PREFETCH
 extern inline void prefetch(const void *addr)
 {

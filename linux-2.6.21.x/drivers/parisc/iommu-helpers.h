@@ -7,7 +7,10 @@
  *
  * This function inserts the coalesced scatter/gather list chunks into the
  * I/O Controller's I/O Pdir.
- */ 
+ */
+
+#include <linux/prefetch.h>
+
 static inline unsigned int
 iommu_fill_pdir(struct ioc *ioc, struct scatterlist *startsg, int nents, 
 		unsigned long hint,

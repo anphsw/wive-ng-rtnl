@@ -28,6 +28,8 @@
 
 #include "ixgb.h"
 
+#include <linux/prefetch.h>
+
 char ixgb_driver_name[] = "ixgb";
 static char ixgb_driver_string[] = "Intel(R) PRO/10GbE Network Driver";
 

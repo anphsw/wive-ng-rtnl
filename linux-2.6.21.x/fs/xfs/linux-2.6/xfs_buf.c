@@ -33,6 +33,7 @@
 #include <linux/migrate.h>
 #include <linux/backing-dev.h>
 #include <linux/freezer.h>
+#include <linux/prefetch.h>
 
 static kmem_zone_t *xfs_buf_zone;
 static kmem_shaker_t xfs_buf_shake;

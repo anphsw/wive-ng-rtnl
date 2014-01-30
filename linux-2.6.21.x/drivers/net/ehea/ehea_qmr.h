@@ -32,6 +32,8 @@
 #include "ehea.h"
 #include "ehea_hw.h"
 
+#include <linux/prefetch.h>
+
 /*
  * page size of ehea hardware queues
  */

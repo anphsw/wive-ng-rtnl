@@ -10,6 +10,7 @@
 
 #include <asm/page.h>
 #include <asm/cache.h>
+#include <linux/prefetch.h>
 
 #define TASK_SIZE	0x80000000
 

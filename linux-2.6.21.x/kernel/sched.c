@@ -63,7 +63,6 @@
 #include <linux/reciprocal_div.h>
 #include <linux/unistd.h>
 #include <linux/pagemap.h>
-#include <linux/prefetch.h>
 #include <asm/tlb.h>
 #include <asm/irq_regs.h>
 

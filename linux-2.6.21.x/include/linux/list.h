@@ -5,6 +5,7 @@
 
 #include <linux/stddef.h>
 #include <linux/poison.h>
+#include <linux/prefetch.h>
 #include <asm/system.h>
 
 /*

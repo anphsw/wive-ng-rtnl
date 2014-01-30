@@ -28,6 +28,7 @@
 
 #include "e1000.h"
 #include <net/ip6_checksum.h>
+#include <linux/prefetch.h>
 
 char e1000_driver_name[] = "e1000";
 static char e1000_driver_string[] = "Intel(R) PRO/1000 Network Driver";

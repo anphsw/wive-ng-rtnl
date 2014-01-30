@@ -11,6 +11,7 @@
 #include <linux/if_ether.h>
 #include <linux/fs.h>
 #include <linux/sched.h>
+#include <linux/prefetch.h>
 #include <asm/uaccess.h>
 #include <asm/rt2880/surfboardint.h>
 #if defined (CONFIG_RAETH_TSO)

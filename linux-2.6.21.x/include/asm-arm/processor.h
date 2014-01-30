@@ -21,6 +21,7 @@
 
 #include <asm/ptrace.h>
 #include <asm/types.h>
+#include <linux/prefetch.h>
 
 union debug_insn {
 	u32	arm;

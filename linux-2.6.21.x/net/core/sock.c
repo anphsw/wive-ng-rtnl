@@ -125,6 +125,7 @@
 #include <linux/ipsec.h>
 
 #include <linux/filter.h>
+#include <linux/prefetch.h>
 
 #ifdef CONFIG_INET
 #include <net/tcp.h>

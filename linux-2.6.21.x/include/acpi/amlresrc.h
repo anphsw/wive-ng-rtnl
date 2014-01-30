@@ -44,6 +44,8 @@
 
 /* acpisrc:struct_defs -- for acpisrc conversion */
 
+#include <linux/prefetch.h>
+
 #ifndef __AMLRESRC_H
 #define __AMLRESRC_H
 
