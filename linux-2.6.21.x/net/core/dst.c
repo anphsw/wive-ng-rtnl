@@ -298,8 +298,8 @@ static void dst_ifdown(struct dst_entry *dst, struct net_device *dev,
 		dev_put(dev);
 		if (dst->neighbour && dst->neighbour->dev == dev) {
 			dst->neighbour->dev = &loopback_dev;
-			dev_put(dev);
 			dev_hold(&loopback_dev);
+			dev_put(dev);
 		}
 	}
 }
