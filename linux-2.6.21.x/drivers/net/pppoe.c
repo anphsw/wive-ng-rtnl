@@ -283,9 +283,9 @@ static void pppoe_flush_dev(struct net_device *dev)
 				if (sk->sk_state &
 				    (PPPOX_CONNECTED | PPPOX_BOUND | PPPOX_ZOMBIE)) {
 					pppox_unbind_sock(sk);
-					dev_put(dev);
 					sk->sk_state = PPPOX_ZOMBIE;
 					sk->sk_state_change(sk);
+					dev_put(dev);
 				}
 
 				release_sock(sk);
@@ -329,7 +329,7 @@ static int pppoe_device_event(struct notifier_block *this,
 
 	default:
 		break;
-	};
+	}
 
 	return NOTIFY_DONE;
 }
@@ -349,6 +349,11 @@ static int pppoe_rcv_core(struct sock *sk, struct sk_buff *skb)
 {
 	struct pppox_sock *po = pppox_sk(sk);
 	struct pppox_sock *relay_po = NULL;
+
+	/* Backlog receive. Semantics of backlog rcv preclude any code from
+	 * executing in lock_sock()/release_sock() bounds; meaning sk->sk_state
+	 * can't change.
+	 */
 
 	if (sk->sk_state & PPPOX_BOUND) {
 		ppp_input(&po->chan, skb);
@@ -528,7 +533,6 @@ static int pppoe_release(struct socket *sock)
 {
 	struct sock *sk = sock->sk;
 	struct pppox_sock *po;
-	int error = 0;
 
 	if (!sk)
 		return 0;
@@ -557,7 +561,7 @@ static int pppoe_release(struct socket *sock)
 	skb_queue_purge(&sk->sk_receive_queue);
 	sock_put(sk);
 
-	return error;
+	return 0;
 }
 
 
