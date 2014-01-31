@@ -537,28 +537,36 @@ static int pppoe_release(struct socket *sock)
 	if (!sk)
 		return 0;
 
-	if (sock_flag(sk, SOCK_DEAD))
+	lock_sock(sk);
+	if (sock_flag(sk, SOCK_DEAD)) {
+		release_sock(sk);
 		return -EBADF;
+	}
+
+	po = pppox_sk(sk);
+
+	if (sk->sk_state & (PPPOX_CONNECTED | PPPOX_BOUND | PPPOX_ZOMBIE)) {
+		dev_put(po->pppoe_dev);
+		po->pppoe_dev = NULL;
+	}
 
 	pppox_unbind_sock(sk);
 
 	/* Signal the death of the socket. */
 	sk->sk_state = PPPOX_DEAD;
 
-	po = pppox_sk(sk);
-	if (po->pppoe_pa.sid) {
-		delete_item(po->pppoe_pa.sid, po->pppoe_pa.remote, po->pppoe_ifindex);
-	}
-
-	if (po->pppoe_dev)
-		dev_put(po->pppoe_dev);
-
-	po->pppoe_dev = NULL;
+	/*
+	 * protect "po" from concurrent updates
+	 * on pppoe_flush_dev
+	 */
+	delete_item(po->pppoe_pa.sid, po->pppoe_pa.remote,
+		    po->pppoe_ifindex);
 
 	sock_orphan(sk);
 	sock->sk = NULL;
 
 	skb_queue_purge(&sk->sk_receive_queue);
+	release_sock(sk);
 	sock_put(sk);
 
 	return 0;
@@ -862,6 +870,14 @@ static int __pppoe_xmit(struct sock *sk, struct sk_buff *skb)
 	struct pppoe_hdr *ph;
 	int data_len = skb->len;
 
+	/* The higher-level PPP code (ppp_unregister_channel()) ensures the PPP
+	 * xmit operations conclude prior to an unregistration call.  Thus
+	 * sk->sk_state cannot change, so we don't need to do lock_sock().
+	 * But, we also can't do a lock_sock since that introduces a potential
+	 * deadlock as we'd reverse the lock ordering used when calling
+	 * ppp_unregister_channel().
+	 */
+
 	if (sock_flag(sk, SOCK_DEAD) || !(sk->sk_state & PPPOX_CONNECTED))
 		goto abort;
 
@@ -938,8 +954,10 @@ static int pppoe_recvmsg(struct kiocb *iocb, struct socket *sock,
 	if (skb) {
 		total_len = min_t(size_t, total_len, skb->len);
 		error = skb_copy_datagram_iovec(skb, 0, m->msg_iov, total_len);
-		if (error == 0)
-			error = total_len;
+		if (error == 0) {
+			kfree_skb(skb);
+			return total_len;
+		}
 	}
 
 	kfree_skb(skb);
