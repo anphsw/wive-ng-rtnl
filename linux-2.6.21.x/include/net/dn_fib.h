@@ -32,7 +32,7 @@ struct dn_fib_res {
 
 struct dn_fib_nh {
 	struct net_device	*nh_dev;
-	unsigned		nh_flags;
+	unsigned int		nh_flags;
 	unsigned char		nh_scope;
 	int			nh_weight;
 	int			nh_power;
@@ -46,7 +46,7 @@ struct dn_fib_info {
 	int 			fib_treeref;
 	atomic_t		fib_clntref;
 	int			fib_dead;
-	unsigned		fib_flags;
+	unsigned int		fib_flags;
 	int			fib_protocol;
 	__le16			fib_prefsrc;
 	__u32			fib_priority;

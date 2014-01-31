@@ -1035,7 +1035,7 @@ static int arp_req_set(struct arpreq *r, struct net_device * dev)
 	neigh = __neigh_lookup_errno(&arp_tbl, &ip, dev);
 	err = PTR_ERR(neigh);
 	if (!IS_ERR(neigh)) {
-		unsigned state = NUD_STALE;
+		unsigned int state = NUD_STALE;
 		if (r->arp_flags & ATF_PERM)
 			state = NUD_PERMANENT;
 		err = neigh_update(neigh, (r->arp_flags&ATF_COM) ?
@@ -1047,7 +1047,7 @@ static int arp_req_set(struct arpreq *r, struct net_device * dev)
 	return err;
 }
 
-static unsigned arp_state_to_flags(struct neighbour *neigh)
+static unsigned int arp_state_to_flags(struct neighbour *neigh)
 {
 	unsigned flags = 0;
 	if (neigh->nud_state&NUD_PERMANENT)

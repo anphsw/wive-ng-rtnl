@@ -114,7 +114,7 @@ static int dn_route_input(struct sk_buff *);
 static void dn_run_flush(unsigned long dummy);
 
 static struct dn_rt_hash_bucket *dn_rt_hash_table;
-static unsigned dn_rt_hash_mask;
+static unsigned int dn_rt_hash_mask;
 
 static struct timer_list dn_route_timer;
 static DEFINE_TIMER(dn_rt_flush_timer, dn_run_flush, 0, 0);
@@ -133,13 +133,13 @@ static struct dst_ops dn_dst_ops = {
 	.entries =		ATOMIC_INIT(0),
 };
 
-static __inline__ unsigned dn_hash(__le16 src, __le16 dst)
+static __inline__ unsigned int dn_hash(__le16 src, __le16 dst)
 {
 	__u16 tmp = (__u16 __force)(src ^ dst);
 	tmp ^= (tmp >> 3);
 	tmp ^= (tmp >> 5);
 	tmp ^= (tmp >> 10);
-	return dn_rt_hash_mask & (unsigned)tmp;
+	return dn_rt_hash_mask & (unsigned int)tmp;
 }
 
 static inline void dnrt_free(struct dn_route *rt)
@@ -275,7 +275,7 @@ static inline int compare_keys(struct flowi *fl1, struct flowi *fl2)
 		(fl1->iif ^ fl2->iif)) == 0;
 }
 
-static int dn_insert_route(struct dn_route *rt, unsigned hash, struct dn_route **rp)
+static int dn_insert_route(struct dn_route *rt, unsigned int hash, struct dn_route **rp)
 {
 	struct dn_route *rth, **rthp;
 	unsigned long now = jiffies;
@@ -887,8 +887,8 @@ static int dn_route_output_slow(struct dst_entry **pprt, const struct flowi *old
 	struct dn_route *rt = NULL;
 	struct net_device *dev_out = NULL;
 	struct neighbour *neigh = NULL;
-	unsigned hash;
-	unsigned flags = 0;
+	unsigned int hash;
+	unsigned int flags = 0;
 	struct dn_fib_res res = { .fi = NULL, .type = RTN_UNICAST };
 	int err;
 	int free_res = 0;
@@ -1219,7 +1219,7 @@ static int dn_route_input_slow(struct sk_buff *skb)
 	struct net_device *out_dev = NULL;
 	struct dn_dev *dn_db;
 	struct neighbour *neigh = NULL;
-	unsigned hash;
+	unsigned int hash;
 	int flags = 0;
 	__le16 gateway = 0;
 	__le16 local_src = 0;
@@ -1436,7 +1436,7 @@ int dn_route_input(struct sk_buff *skb)
 {
 	struct dn_route *rt;
 	struct dn_skb_cb *cb = DN_SKB_CB(skb);
-	unsigned hash = dn_hash(cb->src, cb->dst);
+	unsigned int hash = dn_hash(cb->src, cb->dst);
 
 	if (skb->dst)
 		return 0;

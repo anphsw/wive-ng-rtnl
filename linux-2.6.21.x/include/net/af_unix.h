@@ -18,7 +18,7 @@ extern unsigned int unix_tot_inflight;
 struct unix_address {
 	atomic_t	refcnt;
 	int		len;
-	unsigned	hash;
+	unsigned int	hash;
 	struct sockaddr_un name[0];
 };
 

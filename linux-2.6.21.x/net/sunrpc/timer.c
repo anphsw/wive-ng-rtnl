@@ -28,7 +28,7 @@ void
 rpc_init_rtt(struct rpc_rtt *rt, unsigned long timeo)
 {
 	unsigned long init = 0;
-	unsigned i;
+	unsigned int i;
 
 	rt->timeo = timeo;
 

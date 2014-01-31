@@ -1066,7 +1066,7 @@ void __ip_select_ident(struct iphdr *iph, struct dst_entry *dst, int more)
 	ip_select_fb_ident(iph);
 }
 
-static void rt_del(unsigned hash, struct rtable *rt)
+static void rt_del(unsigned int hash, struct rtable *rt)
 {
 	struct rtable **rthp;
 
@@ -1696,7 +1696,7 @@ static inline int ip_mkroute_input(struct sk_buff *skb,
 {
 	struct rtable* rth = NULL;
 	int err;
-	unsigned hash;
+	unsigned int hash;
 
 	fib_select_default(fl, res);
 #ifdef CONFIG_IP_ROUTE_MULTIPATH

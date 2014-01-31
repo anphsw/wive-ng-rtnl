@@ -1015,7 +1015,7 @@ static inline int tcp_minshall_check(const struct tcp_sock *tp)
 
 static inline int tcp_nagle_check(const struct tcp_sock *tp,
 				  const struct sk_buff *skb,
-				  unsigned mss_now, int nonagle)
+				  unsigned int mss_now, int nonagle)
 {
 	return (skb->len < mss_now &&
 		((nonagle&TCP_NAGLE_CORK) ||

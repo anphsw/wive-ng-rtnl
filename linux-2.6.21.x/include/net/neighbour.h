@@ -315,7 +315,7 @@ static inline int neigh_event_send(struct neighbour *neigh, struct sk_buff *skb)
 
 static inline int neigh_hh_output(const struct hh_cache *hh, struct sk_buff *skb)
 {
-	unsigned seq;
+	unsigned int seq;
 	int hh_len;
 
 	do {

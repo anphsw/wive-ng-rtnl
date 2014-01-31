@@ -191,7 +191,7 @@ __be16 tr_type_trans(struct sk_buff *skb, struct net_device *dev)
 
 	struct trh_hdr *trh;
 	struct trllc *trllc;
-	unsigned riflen=0;
+	unsigned int riflen=0;
 
 	skb->dev = dev;
 	skb_reset_mac_header(skb);

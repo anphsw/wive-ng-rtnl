@@ -290,7 +290,7 @@ extern void x25_check_rbuf(struct sock *);
 extern void x25_register_sysctl(void);
 extern void x25_unregister_sysctl(void);
 struct x25_skb_cb {
-	unsigned flags;
+	unsigned int flags;
 };
 #define X25_SKB_CB(s) ((struct x25_skb_cb *) ((s)->cb))
 

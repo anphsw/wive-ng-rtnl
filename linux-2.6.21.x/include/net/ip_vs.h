@@ -119,7 +119,7 @@ struct ip_vs_dest_user {
 	__be16			port;
 
 	/* real server options */
-	unsigned		conn_flags;	/* connection flags */
+	unsigned int		conn_flags;	/* connection flags */
 	int			weight;		/* destination weight */
 
 	/* thresholds for active connections */
@@ -558,8 +558,8 @@ struct ip_vs_service {
 	__be32			addr;	  /* IP address for virtual service */
 	__be16			port;	  /* port number for the service */
 	__u32                   fwmark;   /* firewall mark of the service */
-	unsigned		flags;	  /* service status flags */
-	unsigned		timeout;  /* persistent timeout in ticks */
+	unsigned int		flags;	  /* service status flags */
+	unsigned int		timeout;  /* persistent timeout in ticks */
 	__be32			netmask;  /* grouping granularity */
 
 	struct list_head	destinations;  /* real server d-linked list */
@@ -702,7 +702,7 @@ struct ip_vs_app
  *      IPVS core functions
  *      (from ip_vs_core.c)
  */
-extern const char *ip_vs_proto_name(unsigned proto);
+extern const char *ip_vs_proto_name(unsigned int proto);
 extern void ip_vs_init_hash_table(struct list_head *table, int rows);
 #define IP_VS_INIT_HASH_TABLE(t) ip_vs_init_hash_table(t, sizeof(t)/sizeof(t[0]))
 

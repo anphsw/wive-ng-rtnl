@@ -194,7 +194,7 @@ NETDEVICE_SHOW(flags, fmt_hex);
 
 static int change_flags(struct net_device *net, unsigned long new_flags)
 {
-	return dev_change_flags(net, (unsigned) new_flags);
+	return dev_change_flags(net, (unsigned int) new_flags);
 }
 
 static ssize_t store_flags(struct device *dev, struct device_attribute *attr,

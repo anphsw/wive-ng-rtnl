@@ -1129,7 +1129,7 @@ struct handle {
 static void *c_start(struct seq_file *m, loff_t *pos)
 {
 	loff_t n = *pos;
-	unsigned hash, entry;
+	unsigned int hash, entry;
 	struct cache_head *ch;
 	struct cache_detail *cd = ((struct handle*)m->private)->cd;
 

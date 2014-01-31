@@ -70,7 +70,7 @@ static inline unsigned xfrm6_tunnel_spi_hash_byaddr(xfrm_address_t *addr)
 	return h;
 }
 
-static inline unsigned xfrm6_tunnel_spi_hash_byspi(u32 spi)
+static inline unsigned int xfrm6_tunnel_spi_hash_byspi(u32 spi)
 {
 	return spi % XFRM6_TUNNEL_SPI_BYSPI_HSIZE;
 }
