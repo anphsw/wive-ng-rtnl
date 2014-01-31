@@ -10,7 +10,7 @@ cfg.ssdp_loop=0
 cfg.ssdp_notify_interval=5
 
 -- SSDP announcement age
-cfg.ssdp_max_age=600
+cfg.ssdp_max_age=300
 
 -- HTTP port for incoming connections
 cfg.http_port=4044
@@ -64,16 +64,16 @@ cfg.sort_files=true
 cfg.name='Wive-NG'
 
 -- static device UUID, '60bd2fb3-dabe-cb14-c766-0e319b54c29a' for example or nil
-cfg.uuid='60bd2fb3-dabe-cb14-c766-0e114b52c22a'
+cfg.uuid='60bd2fb3-dabe-cb24-c766-0e114b52c22a'
 
 -- max url cache size
 cfg.cache_size=4
 
 -- url cache item ttl (sec)
-cfg.cache_ttl=600
+cfg.cache_ttl=300
 
 -- default mime type (mpeg, mpeg_ts, mpeg1, mpeg2, ts, ...)
-cfg.default_mime_type='mpeg'
+cfg.default_mime_type='mpeg_ts'
 
 -- feeds update interval (seconds, 0 - disabled)
 cfg.feeds_update_interval=1800
@@ -106,10 +106,10 @@ cfg.version='1.032'
 cfg.log_ident=arg[1] or 'xupnpd'
 cfg.pid_file='/var/run/'..cfg.log_ident..'.pid'
 cfg.tmp_path='/tmp/'
-cfg.plugin_path='/etc/xupnpd/plugins/'
+cfg.plugin_path='/usr/share/xupnpd/plugins/'
 cfg.config_path='/etc/xupnpd/config/'
 cfg.playlists_path='/etc/xupnpd/playlists/'
-cfg.feeds_path='/etc/xupnpd/xupnpd-feeds/'
+cfg.feeds_path='/tmp/xupnpd-feeds/'
 cfg.www_root='/usr/share/xupnpd/www/'
 cfg.ui_path='/usr/share/xupnpd/ui/'
 cfg.drive=''                    -- reload playlists only if drive state=active/idle, example: cfg.drive='/dev/sda'

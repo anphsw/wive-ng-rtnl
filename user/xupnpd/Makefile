@@ -1,8 +1,8 @@
 # xupnpd top-level include
 -include ../../config.arch
 
-DIRLIST_ETC=playlists plugins
-DIRLIST_SHR=ui www profiles
+DIRLIST_ETC=playlists
+DIRLIST_SHR=ui www profiles plugins
 
 all:
 	make -C src embedded
