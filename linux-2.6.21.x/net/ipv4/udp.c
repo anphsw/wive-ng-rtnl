@@ -926,14 +926,12 @@ out:
 	return err;
 
 csum_copy_err:
+	if (!skb_kill_datagram(sk, skb, flags))
 #ifndef CONFIG_UDP_LITE_DISABLE
-	UDP_INC_STATS_BH(UDP_MIB_INERRORS, is_udplite);
+	    UDP_INC_STATS_BH(UDP_MIB_INERRORS, is_udplite);
 #else
-	UDP_INC_STATS_BH(UDP_MIB_INERRORS, 0);
+	    UDP_INC_STATS_BH(UDP_MIB_INERRORS, 0);
 #endif
-
-	skb_kill_datagram(sk, skb, flags);
-
 	if (noblock)
 		return -EAGAIN;
 

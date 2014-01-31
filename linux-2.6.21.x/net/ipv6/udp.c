@@ -224,16 +224,14 @@ out:
 	return err;
 
 csum_copy_err:
-	skb_kill_datagram(sk, skb, flags);
-
-	if (flags & MSG_DONTWAIT) {
+	if (!skb_kill_datagram(sk, skb, flags))
 #ifndef CONFIG_UDP_LITE_DISABLE
 		UDP6_INC_STATS_USER(UDP_MIB_INERRORS, is_udplite);
 #else
 		UDP6_INC_STATS_USER(UDP_MIB_INERRORS, 0);
 #endif
+	if (flags & MSG_DONTWAIT)
 		return -EAGAIN;
-	}
 
 	if (noblock)
 		return -EAGAIN;

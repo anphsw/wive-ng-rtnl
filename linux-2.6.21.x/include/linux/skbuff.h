@@ -1582,7 +1582,7 @@ extern int	       skb_copy_and_csum_datagram_iovec(struct sk_buff *skb,
 extern void	       skb_free_datagram(struct sock *sk, struct sk_buff *skb);
 extern void	       skb_free_datagram_locked(struct sock *sk,
 						struct sk_buff *skb);
-extern void	       skb_kill_datagram(struct sock *sk, struct sk_buff *skb,
+extern int	       skb_kill_datagram(struct sock *sk, struct sk_buff *skb,
 					 unsigned int flags);
 extern __wsum	       skb_checksum(const struct sk_buff *skb, int offset,
 				    int len, __wsum csum);
