@@ -131,6 +131,7 @@ static inline void random_ether_addr(u8 *addr)
  * @addr2: Pointer other six-byte array containing the Ethernet address
  *
  * Compare two ethernet addresses, returns 0 if equal
+ * Unlike memcmp(), it doesn't return a value suitable for sorting.
  */
 static inline unsigned compare_ether_addr(const u8 *addr1, const u8 *addr2)
 {
@@ -139,6 +140,18 @@ static inline unsigned compare_ether_addr(const u8 *addr1, const u8 *addr2)
 
 	BUILD_BUG_ON(ETH_ALEN != 6);
 	return ((a[0] ^ b[0]) | (a[1] ^ b[1]) | (a[2] ^ b[2])) != 0;
+}
+
+/**
+ * ether_addr_equal - Compare two Ethernet addresses
+ * @addr1: Pointer to a six-byte array containing the Ethernet address
+ * @addr2: Pointer other six-byte array containing the Ethernet address
+ *
+ * Compare two Ethernet addresses, returns true if equal
+ */
+static inline bool ether_addr_equal(const u8 *addr1, const u8 *addr2)
+{
+	return !compare_ether_addr(addr1, addr2);
 }
 
 static inline unsigned long zap_last_2bytes(unsigned long value)
