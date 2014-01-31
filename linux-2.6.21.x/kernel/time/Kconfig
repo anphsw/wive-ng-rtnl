@@ -16,6 +16,7 @@ config NO_HZ
 
 config HIGH_RES_TIMERS
 	bool "High Resolution Timer Support"
+	default n
 	depends on GENERIC_TIME && GENERIC_CLOCKEVENTS
 	select TICK_ONESHOT
 	help
