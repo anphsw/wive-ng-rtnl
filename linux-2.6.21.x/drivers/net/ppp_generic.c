@@ -1214,31 +1214,6 @@ ppp_send_frame(struct ppp *ppp, struct sk_buff *skb)
 		ppp_ccp_peek(ppp, skb, 0);
 #endif
 
-	/* try to do packet compression */
-	if ((ppp->xstate & SC_COMP_RUN) && ppp->xc_state &&
-	    proto != PPP_LCP && proto != PPP_CCP) {
-		if (!(ppp->flags & SC_CCP_UP) && (ppp->flags & SC_MUST_COMP)) {
-			if (net_ratelimit())
-				printk(KERN_ERR "ppp: compression required but down - pkt dropped.\n");
-			goto drop;
-		}
-		skb = pad_compress_skb(ppp, skb);
-		if (!skb)
-			goto drop;
-	}
-
-	/*
-	 * If we are waiting for traffic (demand dialling),
-	 * queue it up for pppd to receive.
-	 */
-	if (ppp->flags & SC_LOOP_TRAFFIC) {
-		if (ppp->file.rq.qlen > PPP_MAX_RQLEN)
-			goto drop;
-		skb_queue_tail(&ppp->file.rq, skb);
-		wake_up_interruptible(&ppp->file.rwait);
-		return;
-	}
-
 	if (proto != PPP_LCP && proto != PPP_CCP) {
 #ifdef CONFIG_PPP_PREVENT_DROP_SESSION_ON_FULL_CPU_LOAD
 	    /* this is simple cpu based policer need for prevent drop session at high cpu load */
@@ -1268,7 +1243,32 @@ ppp_send_frame(struct ppp *ppp, struct sk_buff *skb)
 		    led_prev_jiffies = jiffies;
 	    }
 #endif
-	} /* end !lcp/cpp if */
+	}
+
+	/* try to do packet compression */
+	if ((ppp->xstate & SC_COMP_RUN) && ppp->xc_state &&
+	    proto != PPP_LCP && proto != PPP_CCP) {
+		if (!(ppp->flags & SC_CCP_UP) && (ppp->flags & SC_MUST_COMP)) {
+			if (net_ratelimit())
+				printk(KERN_ERR "ppp: compression required but down - pkt dropped.\n");
+			goto drop;
+		}
+		skb = pad_compress_skb(ppp, skb);
+		if (!skb)
+			goto drop;
+	}
+
+	/*
+	 * If we are waiting for traffic (demand dialling),
+	 * queue it up for pppd to receive.
+	 */
+	if (ppp->flags & SC_LOOP_TRAFFIC) {
+		if (ppp->file.rq.qlen > PPP_MAX_RQLEN)
+			goto drop;
+		skb_queue_tail(&ppp->file.rq, skb);
+		wake_up_interruptible(&ppp->file.rwait);
+		return;
+	}
 
 	ppp->xmit_pending = skb;
 	ppp_push(ppp);
