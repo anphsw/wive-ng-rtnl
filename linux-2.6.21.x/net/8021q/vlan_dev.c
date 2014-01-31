@@ -333,9 +333,8 @@ int vlan_dev_hard_header(struct sk_buff *skb, struct net_device *dev,
 
 		if (type != ETH_P_802_3 && type != ETH_P_802_2)
 			vhdr->h_vlan_encapsulated_proto = htons(type);
-		} else {
+		else
 			vhdr->h_vlan_encapsulated_proto = htons(len);
-		}
 
 		skb->protocol = htons(ETH_P_8021Q);
 	}

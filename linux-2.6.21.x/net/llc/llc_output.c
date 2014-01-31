@@ -31,7 +31,7 @@
  *	is a valid type and initialization completes correctly 1, otherwise.
  */
 int llc_mac_hdr_init(struct sk_buff *skb,
-		     const unsigned char *sa, const unsigned char *da)
+		     unsigned char *sa, unsigned char *da)
 {
 	int rc = -EINVAL;
 
