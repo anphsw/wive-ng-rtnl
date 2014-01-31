@@ -89,7 +89,7 @@ do_xip_mapping_read(struct address_space *mapping,
 			index*(PAGE_SIZE/512), 0);
 		if (!page)
 			goto no_xip_page;
-		if (unlikely(IS_ERR(page))) {
+		if (IS_ERR(page)) {
 			if (PTR_ERR(page) == -ENODATA) {
 				/* sparse */
 				page = ZERO_PAGE(0);
@@ -461,7 +461,7 @@ xip_truncate_page(struct address_space *mapping, loff_t from)
 					    index*(PAGE_SIZE/512), 0);
 	if (!page)
 		return -ENOMEM;
-	if (unlikely(IS_ERR(page))) {
+	if (IS_ERR(page)) {
 		if (PTR_ERR(page) == -ENODATA)
 			/* Hole? No need to truncate */
 			return 0;

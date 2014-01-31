@@ -95,7 +95,7 @@ int led_classdev_register(struct device *parent, struct led_classdev *led_cdev)
 
 	led_cdev->class_dev = class_device_create(leds_class, NULL, 0,
 						parent, "%s", led_cdev->name);
-	if (unlikely(IS_ERR(led_cdev->class_dev)))
+	if (IS_ERR(led_cdev->class_dev))
 		return PTR_ERR(led_cdev->class_dev);
 
 	class_set_devdata(led_cdev->class_dev, led_cdev);

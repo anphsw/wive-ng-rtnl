@@ -233,7 +233,7 @@ static void start_one_pdflush_thread(void)
 	struct task_struct *k;
 
 	k = kthread_run(pdflush, NULL, "pdflush");
-	if (unlikely(IS_ERR(k))) {
+	if (IS_ERR(k)) {
 		spin_lock_irq(&pdflush_lock);
 		nr_pdflush_threads--;
 		spin_unlock_irq(&pdflush_lock);

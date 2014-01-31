@@ -1191,7 +1191,7 @@ static int ntfs_mft_bitmap_find_and_alloc_free_rec_nolock(ntfs_volume *vol,
 		if (size) {
 			page = ntfs_map_page(mftbmp_mapping,
 					ofs >> PAGE_CACHE_SHIFT);
-			if (unlikely(IS_ERR(page))) {
+			if (IS_ERR(page)) {
 				ntfs_error(vol->sb, "Failed to read mft "
 						"bitmap, aborting.");
 				return PTR_ERR(page);
@@ -1308,7 +1308,7 @@ static int ntfs_mft_bitmap_extend_allocation_nolock(ntfs_volume *vol)
 	read_unlock_irqrestore(&mftbmp_ni->size_lock, flags);
 	rl = ntfs_attr_find_vcn_nolock(mftbmp_ni,
 			(ll - 1) >> vol->cluster_size_bits, NULL);
-	if (unlikely(IS_ERR(rl) || !rl->length || rl->lcn < 0)) {
+	if (IS_ERR(rl) || !rl->length || rl->lcn < 0) {
 		up_write(&mftbmp_ni->runlist.lock);
 		ntfs_error(vol->sb, "Failed to determine last allocated "
 				"cluster of mft bitmap attribute.");
@@ -1739,7 +1739,7 @@ static int ntfs_mft_data_extend_allocation_nolock(ntfs_volume *vol)
 	read_unlock_irqrestore(&mft_ni->size_lock, flags);
 	rl = ntfs_attr_find_vcn_nolock(mft_ni,
 			(ll - 1) >> vol->cluster_size_bits, NULL);
-	if (unlikely(IS_ERR(rl) || !rl->length || rl->lcn < 0)) {
+	if (IS_ERR(rl) || !rl->length || rl->lcn < 0) {
 		up_write(&mft_ni->runlist.lock);
 		ntfs_error(vol->sb, "Failed to determine last allocated "
 				"cluster of mft data attribute.");
@@ -2118,7 +2118,7 @@ static int ntfs_mft_record_format(const ntfs_volume *vol, const s64 mft_no)
 	}
 	/* Read, map, and pin the page containing the mft record. */
 	page = ntfs_map_page(mft_vi->i_mapping, index);
-	if (unlikely(IS_ERR(page))) {
+	if (IS_ERR(page)) {
 		ntfs_error(vol->sb, "Failed to map page containing mft record "
 				"to format 0x%llx.", (long long)mft_no);
 		return PTR_ERR(page);
@@ -2519,7 +2519,7 @@ mft_rec_already_initialized:
 	ofs = (bit << vol->mft_record_size_bits) & ~PAGE_CACHE_MASK;
 	/* Read, map, and pin the page containing the mft record. */
 	page = ntfs_map_page(vol->mft_ino->i_mapping, index);
-	if (unlikely(IS_ERR(page))) {
+	if (IS_ERR(page)) {
 		ntfs_error(vol->sb, "Failed to map page containing allocated "
 				"mft record 0x%llx.", (long long)bit);
 		err = PTR_ERR(page);

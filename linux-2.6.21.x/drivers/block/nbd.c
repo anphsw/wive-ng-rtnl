@@ -302,7 +302,7 @@ static struct request *nbd_read_stat(struct nbd_device *lo)
 	}
 
 	req = nbd_find_request(lo, reply.handle);
-	if (unlikely(IS_ERR(req))) {
+	if (IS_ERR(req)) {
 		result = PTR_ERR(req);
 		if (result != -ENOENT)
 			goto harderror;

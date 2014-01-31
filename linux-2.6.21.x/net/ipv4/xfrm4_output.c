@@ -140,7 +140,7 @@ static int xfrm4_output_finish(struct sk_buff *skb)
 	skb->protocol = htons(ETH_P_IP);
 	segs = skb_gso_segment(skb, 0);
 	kfree_skb(skb);
-	if (unlikely(IS_ERR(segs)))
+	if (IS_ERR(segs))
 		return PTR_ERR(segs);
 
 	do {
