@@ -145,7 +145,6 @@ static struct pppox_sock *__get_item(unsigned long sid, unsigned char *addr, int
 	struct pppox_sock *ret;
 
 	ret = item_hash_table[hash];
-
 	while (ret) {
 		if (cmp_addr(&ret->pppoe_pa, sid, addr) &&
 		    ret->pppoe_ifindex == ifindex)
@@ -285,6 +284,7 @@ static void pppoe_flush_dev(struct net_device *dev)
 					pppox_unbind_sock(sk);
 					sk->sk_state = PPPOX_ZOMBIE;
 					sk->sk_state_change(sk);
+					po->pppoe_dev = NULL;
 					dev_put(dev);
 				}
 
@@ -605,8 +605,10 @@ static int pppoe_connect(struct socket *sock, struct sockaddr *uservaddr,
 		/* Delete the old binding */
 		delete_item(po->pppoe_pa.sid,po->pppoe_pa.remote,po->pppoe_ifindex);
 
-		if(po->pppoe_dev)
+		if(po->pppoe_dev) {
 			dev_put(po->pppoe_dev);
+			po->pppoe_dev = NULL;
+		}
 
 		memset(sk_pppox(po) + 1, 0,
 		       sizeof(struct pppox_sock) - sizeof(struct sock));
@@ -970,7 +972,6 @@ static int pppoe_seq_show(struct seq_file *seq, void *v)
 {
 	struct pppox_sock *po;
 	char *dev_name;
-	DECLARE_MAC_BUF(mac);
 
 	if (v == SEQ_START_TOKEN) {
 		seq_puts(seq, "Id       Address              Device\n");
@@ -980,13 +981,13 @@ static int pppoe_seq_show(struct seq_file *seq, void *v)
 	po = v;
 	dev_name = po->pppoe_pa.dev;
 
-	seq_printf(seq, "%08X %s %8s\n",
-		   po->pppoe_pa.sid, print_mac(mac, po->pppoe_pa.remote), dev_name);
+	seq_printf(seq, "%08X %pM %8s\n",
+		po->pppoe_pa.sid, po->pppoe_pa.remote, dev_name);
 out:
 	return 0;
 }
 
-static __inline__ struct pppox_sock *pppoe_get_idx(loff_t pos)
+static inline struct pppox_sock *pppoe_get_idx(loff_t pos)
 {
 	struct pppox_sock *po = NULL;
 	int i;
