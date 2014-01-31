@@ -1448,13 +1448,13 @@ void iptablesWebsFilterRun(void)
 	char entry[256]; //need long buffer for utf domain name encoding support 
 	char *proxy		= nvram_get(RT2860_NVRAM, "websFilterProxy");
 	char *java		= nvram_get(RT2860_NVRAM, "websFilterJava");
-	char *activex	= nvram_get(RT2860_NVRAM, "websFilterActivex");
-	char *cookies	= nvram_get(RT2860_NVRAM, "websFilterCookies");
+	char *activex		= nvram_get(RT2860_NVRAM, "websFilterActivex");
+	char *cookies		= nvram_get(RT2860_NVRAM, "websFilterCookies");
 	char *url_filter	= nvram_get(RT2860_NVRAM, "websURLFilters");
 	char *host_filter	= nvram_get(RT2860_NVRAM, "websHostFilters");
 
-	if ((url_filter && strlen(url_filter) && getRuleNums(url_filter)) || 
-		(host_filter && strlen(host_filter) && getRuleNums(host_filter)) || 
+	if ((url_filter && strlen(url_filter) && getRuleNums(url_filter)) ||
+		(host_filter && strlen(host_filter) && getRuleNums(host_filter)) ||
 			atoi(proxy) || atoi(java) || atoi(activex) || atoi(cookies))
 	{
 		// NAT check
