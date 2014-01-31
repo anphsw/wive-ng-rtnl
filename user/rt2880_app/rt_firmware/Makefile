@@ -32,9 +32,16 @@ ifdef CONFIG_RALINK_RT3350
 endif
 #2T2R-MODE-3352
 ifdef CONFIG_RALINK_RT3352_2T2R
+ifdef CONFIG_RT2860V2_AP_RTMP_INTERNAL_TX_ALC
+	# use internal LNA
 	$(ROMFSINST) -S -e CONFIG_RALINK_RT3352_2T2R	RT3352_AP_2T2R_V11.BIN		/etc/Wireless/RT3352_AP_2T2R_V11.BIN
-	$(ROMFSINST) -S -e CONFIG_RALINK_RT3352_2T2R	defaults/default-2T2R		/etc/default/nvram_default
 	$(ROMFSINST) -s /etc/Wireless/RT3352_AP_2T2R_V11.BIN /etc/Wireless/rf.bin
+else
+	# one external LNA used (as dir615/dir620 based at 3352)
+	$(ROMFSINST) -S -e CONFIG_RALINK_RT3352_2T2R	RT3352_AP_2T2R-1LNA_V12.BIN	/etc/Wireless/RT3352_AP_2T2R-1LNA_V12.BIN
+	$(ROMFSINST) -s /etc/Wireless/RT3352_AP_2T2R-1LNA_V12.BIN /etc/Wireless/rf.bin
+endif
+	$(ROMFSINST) -S -e CONFIG_RALINK_RT3352_2T2R	defaults/default-2T2R		/etc/default/nvram_default
 endif
 #1T1R-MODE-5350
 ifdef CONFIG_RALINK_RT5350_1T1R
