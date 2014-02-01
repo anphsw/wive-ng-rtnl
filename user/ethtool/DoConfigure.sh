@@ -11,6 +11,12 @@ if [ ! -f $APROOTDIR/Makefile.in ]; then
     automake
 fi
 
-CONFOPTS="--host=mipsel-linux --prefix=$APROOTDIR/filesystem --disable-dependency-tracking"
+HBUILD=`uname -m`-pc-linux-gnu
+HTARGET=mipsel-linux
+
+#arch options
+CONFOPTS="--host=$HTARGET --target=$HTARGET --build=$HBUILD"
+
+CONFOPTS="$CONFOPTS --prefix=$APROOTDIR/filesystem --disable-dependency-tracking"
 
 ./configure $CONFOPTS
