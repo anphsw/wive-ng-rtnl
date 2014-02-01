@@ -13,7 +13,7 @@ start() {
 	echo > /etc/inetd.conf
 	need_start=0
 	if [ -f /bin/dropbear ] && [ "$RemoteSSH" != "" ] && [ "$RemoteSSH" != "0" ]; then
-	    echo "ssh stream tcp nowait $Login /bin/dropbear /bin/dropbear -i -K60 -I360 -m" >> /etc/inetd.conf
+	    echo "$RemoteSSHPort stream tcp nowait $Login /bin/dropbear /bin/dropbear -i -K60 -I360 -m" >> /etc/inetd.conf
 	    need_start=1
 	fi
 	if [ -f /bin/ftpd ] && [ "$RemoteFTP" != "" ] && [ "$RemoteFTP" != "0" ]; then
@@ -36,7 +36,7 @@ start() {
 }
 
 get_param() {
-    eval `nvram_buf_get 2860 Login RemoteSSH RemoteFTP FtpPort FtpRootDir FtpIdleTime RemoteTelnet`
+    eval `nvram_buf_get 2860 Login RemoteSSH RemoteSSHPort  RemoteFTP FtpPort FtpRootDir FtpIdleTime RemoteTelnet`
 }
 
 stop() {

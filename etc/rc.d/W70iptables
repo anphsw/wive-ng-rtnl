@@ -56,14 +56,14 @@ start() {
 	fi
 	if [ "$RemoteSSH" != "0" ]; then
 	    $LOG "ssh limit"
-    	    iptables -A servicelimit $STATE_NEW -p tcp --dport 22 $CONNLIMIT 4 -j REJECT
+    	    iptables -A servicelimit $STATE_NEW -p tcp --dport $RemoteSSHPort $CONNLIMIT 4 -j REJECT
 	    if [ "$RemoteSSH" = "1" ]; then
-    		iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 22 -j ACCEPT
+    		iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport $RemoteSSHPort -j ACCEPT
 	     if [ "$Lan2Enabled" = "1" ]; then
-    		iptables -A servicelimit -i $lan2_if $STATE_NEW -p tcp --dport 22 -j ACCEPT
+    		iptables -A servicelimit -i $lan2_if $STATE_NEW -p tcp --dport $RemoteSSHPort -j ACCEPT
 	     fi
 	    elif [ "$RemoteSSH" = "2" ]; then
-    		iptables -A servicelimit $STATE_NEW -p tcp --dport 22 -j ACCEPT
+    		iptables -A servicelimit $STATE_NEW -p tcp --dport $RemoteSSHPort -j ACCEPT
 	    fi
 	fi
 	if [ "$RemoteTelnet" != "0" ]; then
@@ -430,9 +430,8 @@ get_param() {
     # get network, vpn, netfiletrs and others config variables
     eval `nvram_buf_get 2860 lan_ipaddr lan_netmask Lan2Enabled lan2_ipaddr lan2_netmask mss_use_pmtu \
 	    natEnabled use_snat PortForwardEnable DMZEnable DMZIPAddress DMZNATLoopback DefaultFirewallPolicy \
-	    IPPortFilterEnable WANPingFilter RemoteSSH RemoteFTP RemoteTelnet RemoteManagement RemoteManagementPort \
-	    dhcpEnabled ipt_account upnpEnabled igmpEnabled xupnpd SmbEnabled \
-		TransmissionEnabled TransRPCPort TransInPort TransAccess snmpd FtpPort\
+	    IPPortFilterEnable WANPingFilter RemoteSSH RemoteSSHPort RemoteFTP FtpPort RemoteTelnet RemoteManagement RemoteManagementPort \
+	    dhcpEnabled ipt_account upnpEnabled igmpEnabled xupnpd SmbEnabled TransmissionEnabled TransRPCPort TransInPort TransAccess snmpd \
 	    parproutedEnabled PrinterSrvEnabled chilli_net vpnType vpnNAT l2tp_srv_enabled MODEMENABLED store_ttl store_ttl_mcast`
 
     # if ppp enabled and not pure pppoe mode (type6 is lanauth not real ppp)

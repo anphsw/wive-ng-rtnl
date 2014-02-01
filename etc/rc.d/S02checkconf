@@ -146,6 +146,13 @@ start() {
 	nvram_set 2860 RemoteManagementPort 80
     fi
 
+    #
+    # SSH default port
+    #
+    if [ "$RemoteSSHPort" = "" ]; then
+	nvram_set 2860 RemoteSSHPort 22
+    fi
+
     # set checked flag
     touch /tmp/nvram_checked
 }

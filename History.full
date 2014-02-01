@@ -1803,42 +1803,43 @@
 6) xl2tpd: check write return code on control socket (Jan 03, 2014 commit).<br>
 7) pppd: use different option files for l2tp server/client mode.<br>
 8) init.d: iptables: fix work l2tp server if pptp client started.<br>
-9) l2tp server ip-up: do not need restart iptables.<br>
-10) xl2tpd: update to 1.3.6 (Jan 15, 2014) version.<br>
-11) transmission: update to 2.82 version.<br>
-12) libupnp: update to 1.6.19.<br>
-13) radvd: update to 1.9.8 version.<br>
-14) ntfs-3g: up to 2013.1.13 version.<br>
-15) miniupnpd: update to 1.8.20140127 version.<br>
-16) ppp: policer: decrease max limit and increase range for down limit, set different limits for 3x50/3x52/3883 devices.<br>
-17) kernel: ip6_tunnel: ensure to always have a link local address(RFC4862 and RFC4291 more compat).<br>
-18) kernel: fastroute: small speedup and more readable code.<br>
-19) kernel: fix lockup related to stop_machine being stuck in __do_softirq.<br>
-20) kernel: option: backport support modems from 3.13 kernel tree.<br>
-21) kernel: reenable gcc optimization due CPU arch.<br>
-22) kernel: driver core: make uevent-environment available in uevent-file.<br>
-23) kernel: usbnet: fix status interrupt urb handling.<br>
-24) kernel: ipv6: fix fragment process in ip output finish.<br>
-25) kernel: ipv6: don't install anycast address for /128 addresses on routers.<br>
-26) kernel: ipv6: remove old conditions on flow label sharing.<br>
-27) kernel: ipv6: do not erase dst address with flow label destination.<br>
-28) kernel: ipv6: user better hash for addrconf.<br>
-29) kernel: net: link_watch: Eliminate potential delay on wrap-around.<br>
-30) kernel: tcp: delete redundant calls of tcp_mtup_init().<br>
-31) kernel: tcp: remove redundant code in __tcp_retransmit_skb().<br>
-32) kernel: tcp: tcp_transmit_skb() optimizations.<br>
-33) kernel: tcp: remove Appropriate Byte Count support.<br>
-34) kernel: tcp: avoid a possible divide by zero.<br>
-35) kernel: tcp: Remove unrequired operations in tcp_push().<br>
-36) kernel: tcp: cleanup ca_state mess in tcp_timer.<br>
-37) kernel: tcp: don't clear hints when tcp_fragmenting.<br>
-38) kernel: tcp: fix length used for checksum in a reset.<br>
-39) kernel: ipv4: arp: update neighbour address when a gratuitous arp is received and arp_accept is set.<br>
-40) kernel: mips: allow use generic clock events and high res timers, and set by default.<br>
-41) kernel: pppoe: fix some very old bugs in driver code.<br>
-42) kernel: ppp: slight optimization of addr compare.<br>
-43) kernel: fix w/r mem buf size set.<br>
-44) kernel: use fair group CPU scheduler by default.<br>
+9) init.d: ssh: add RemoteSSHPort variable for select ssh port(need add in webui).<br>
+10) l2tp server ip-up: do not need restart iptables.<br>
+11) xl2tpd: update to 1.3.6 (Jan 15, 2014) version.<br>
+12) transmission: update to 2.82 version.<br>
+13) libupnp: update to 1.6.19.<br>
+14) radvd: update to 1.9.8 version.<br>
+15) ntfs-3g: up to 2013.1.13 version.<br>
+16) miniupnpd: update to 1.8.20140127 version.<br>
+17) ppp: policer: decrease max limit and increase range for down limit, set different limits for 3x50/3x52/3883 devices.<br>
+18) kernel: ip6_tunnel: ensure to always have a link local address(RFC4862 and RFC4291 more compat).<br>
+19) kernel: fastroute: small speedup and more readable code.<br>
+20) kernel: fix lockup related to stop_machine being stuck in __do_softirq.<br>
+21) kernel: option: backport support modems from 3.13 kernel tree.<br>
+22) kernel: reenable gcc optimization due CPU arch.<br>
+23) kernel: driver core: make uevent-environment available in uevent-file.<br>
+24) kernel: usbnet: fix status interrupt urb handling.<br>
+25) kernel: ipv6: fix fragment process in ip output finish.<br>
+26) kernel: ipv6: don't install anycast address for /128 addresses on routers.<br>
+27) kernel: ipv6: remove old conditions on flow label sharing.<br>
+28) kernel: ipv6: do not erase dst address with flow label destination.<br>
+29) kernel: ipv6: user better hash for addrconf.<br>
+30) kernel: net: link_watch: Eliminate potential delay on wrap-around.<br>
+31) kernel: tcp: delete redundant calls of tcp_mtup_init().<br>
+32) kernel: tcp: remove redundant code in __tcp_retransmit_skb().<br>
+33) kernel: tcp: tcp_transmit_skb() optimizations.<br>
+34) kernel: tcp: remove Appropriate Byte Count support.<br>
+35) kernel: tcp: avoid a possible divide by zero.<br>
+36) kernel: tcp: Remove unrequired operations in tcp_push().<br>
+37) kernel: tcp: cleanup ca_state mess in tcp_timer.<br>
+38) kernel: tcp: don't clear hints when tcp_fragmenting.<br>
+39) kernel: tcp: fix length used for checksum in a reset.<br>
+40) kernel: ipv4: arp: update neighbour address when a gratuitous arp is received and arp_accept is set.<br>
+41) kernel: mips: allow use generic clock events and high res timers, and set by default.<br>
+42) kernel: pppoe: fix some very old bugs in driver code.<br>
+43) kernel: ppp: slight optimization of addr compare.<br>
+44) kernel: fix w/r mem buf size set.<br>
+45) kernel: use fair group CPU scheduler by default.<br>
 <br>
 <br>
 <br>
