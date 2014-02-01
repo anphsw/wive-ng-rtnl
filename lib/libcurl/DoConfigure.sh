@@ -14,6 +14,7 @@ if [ ! -f $APROOTDIR/configure ]; then
     autoreconf
 fi
 if [ ! -f $APROOTDIR/Makefile.in ]; then
+    automake --add-missing
     automake
 fi
 

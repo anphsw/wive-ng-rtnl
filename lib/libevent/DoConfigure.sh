@@ -7,6 +7,7 @@ if [ ! -f $APROOTDIR/configure ]; then
     sh ./autogen.sh
 fi
 if [ ! -f $APROOTDIR/Makefile.in ]; then
+    automake --add-missing
     automake
 fi
 

@@ -1102,7 +1102,7 @@ endif # CONFIG_MODULES
 CLEAN_DIRS  += $(MODVERDIR)
 CLEAN_FILES +=	vmlinux System.map \
                 .tmp_kallsyms* .tmp_version .tmp_vmlinux* .tmp_System.map \
-		scripts/kconfig/mconf scripts/kconfig/conf
+		scripts/kconfig/mconf scripts/kconfig/conf Module.symvers modules.order
 
 # Directories & files removed with 'make mrproper'
 MRPROPER_DIRS  += include/config include2 usr/include
