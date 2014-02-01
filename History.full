@@ -1809,7 +1809,7 @@
 12) libupnp: update to 1.6.19.<br>
 13) radvd: update to 1.9.8 version.<br>
 14) ntfs-3g: up to 2013.1.13 version.<br>
-15) miniupnpd: update to 1.8.20131216 version.<br>
+15) miniupnpd: update to 1.8.20140127 version.<br>
 16) ppp: policer: decrease max limit and increase range for down limit, set different limits for 3x50/3x52/3883 devices.<br>
 17) kernel: ip6_tunnel: ensure to always have a link local address(RFC4862 and RFC4291 more compat).<br>
 18) kernel: fastroute: small speedup and more readable code.<br>
@@ -1821,7 +1821,7 @@
 24) kernel: ipv6: fix fragment process in ip output finish.<br>
 25) kernel: ipv6: don't install anycast address for /128 addresses on routers.<br>
 26) kernel: ipv6: remove old conditions on flow label sharing.<br>
-27) kernel: ipv6: do not erase dst address with flow label destination.<br>.
+27) kernel: ipv6: do not erase dst address with flow label destination.<br>
 28) kernel: ipv6: user better hash for addrconf.<br>
 29) kernel: net: link_watch: Eliminate potential delay on wrap-around.<br>
 30) kernel: tcp: delete redundant calls of tcp_mtup_init().<br>
