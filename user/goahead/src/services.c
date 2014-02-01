@@ -380,7 +380,6 @@ const parameter_fetch_t service_misc_flags[] =
 	{ T("natFastpath"), "natFastpath", 0, T("0") },
 	{ T("hw_nat_wifiPT"), "hw_nat_wifi", 0, T("0") },
 	{ T("natMode"), "nat_mode", 0, T("1") },
-	{ T("bridgeFastpath"), "bridgeFastpath", 0, T("1") },
 	{ T("routeFastpath"), "routeFastpath", 0, T("1") },
 	{ T("CrondEnable"), "CrondEnable", 0, T("0") },
 	{ T("ForceRenewDHCP"), "ForceRenewDHCP", 0, T("1") },

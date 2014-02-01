@@ -43,7 +43,6 @@ BasicRate=351
 BeaconPeriod=50
 BGProtection=2
 boot_leds_blink=13 14
-bridgeFastpath=1
 routeFastpath=1
 BSSACM=0;0;0;0
 BSSAifsn=3;7;2;2

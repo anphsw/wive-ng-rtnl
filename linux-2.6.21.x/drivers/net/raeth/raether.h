@@ -53,11 +53,7 @@
 #endif
 
 #if defined (CONFIG_RAETH_ROUTER) || defined (CONFIG_RT_3052_ESW)
-#if defined(CONFIG_BRIDGE_FASTPATH)
-#define	DEV_WEIGHT	64
-#else
 #define	DEV_WEIGHT	32
-#endif
 #elif defined(CONFIG_GE1_RGMII_FORCE_1000) || defined(CONFIG_GE2_RGMII_FORCE_1000)
 #define	DEV_WEIGHT	128
 #else

@@ -66,13 +66,6 @@ config BRIDGE_MAC_AUTO
 	default y
         ---help---
 
-config BRIDGE_FASTPATH
-	bool "Bridge offload engine support"
-	depends on BRIDGE
-	default y
-	---help---
-	  Fastest bridge operation support. WARNING CONFLICT WITH BR_NETFILTER
-
 config BRIDGE_EAP
 	bool "Bridge 802.1x/EAP hacks from openwrt."
 	depends on BRIDGE

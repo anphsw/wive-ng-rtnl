@@ -1840,6 +1840,7 @@
 43) kernel: ppp: slight optimization of addr compare.<br>
 44) kernel: fix w/r mem buf size set.<br>
 45) kernel: use fair group CPU scheduler by default.<br>
+46) kernel: remove bridge fastpath code (not need now, very low speedup bridge operation and make transit slowly).<br>
 <br>
 <br>
 <br>

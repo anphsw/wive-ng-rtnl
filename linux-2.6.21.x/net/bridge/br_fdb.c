@@ -412,25 +412,21 @@ void br_fdb_update(struct net_bridge *br, struct net_bridge_port *source,
 
 	fdb = fdb_find_rcu(head, addr);
 	if (likely(fdb)) {
-#if defined(CONFIG_BRIDGE_FASTPATH) && !defined(CONFIG_BRIDGE_NETFILTER)
-		/*
-		 * bridge fastpath + wifi nat offload always update fdb entry
-		 * without any messages (this normal case).
-		*/
-		if (likely(!fdb->is_local)) {
-			/* fastpath: update of existing entry */
-			fdb->dst = source;
-			fdb->ageing_timer = jiffies;
-		}
-#else
 		/* attempt to update an entry for a local interface */
+#ifdef DEBUG
 		if (unlikely(fdb->is_local)) {
 			if (net_ratelimit())
 				printk(KERN_WARNING "%s: received packet with "
 				       "own address as source address\n",
 				       source->dev->name);
 		} else {
-			/* fastpath: update of existing entry */
+			 /* fastpath: update of existing entry */
+			fdb->dst = source;
+			fdb->ageing_timer = jiffies;
+		}
+#else
+		 /* fastpath: update of existing entry */
+		if (likely(fdb->is_local)) {
 			fdb->dst = source;
 			fdb->ageing_timer = jiffies;
 		}

@@ -128,13 +128,6 @@ extern int pthrough_create_proc_entry(void);
 extern void pthrough_remove_proc_entry(void);
 #endif
 
-#if defined(CONFIG_BRIDGE_FASTPATH) && !defined(CONFIG_BRIDGE_NETFILTER)
-#include "../bridge/br_private.h"
-extern void br_fdb_update(struct net_bridge *br, struct net_bridge_port *source,  const unsigned char *addr);
-extern struct net_bridge_fdb_entry *br_fdb_get(struct net_bridge *br, unsigned char *addr);
-extern int bridge_fast_path_enabled;
-#endif
-
 #ifdef CONFIG_RALINK_WATCHDOG
 extern void RaWdgReload(void);
 #endif
@@ -1658,37 +1651,6 @@ int FASTPATH netif_rx(struct sk_buff *skb)
 	if(unlikely(!skb->dev))
 	    goto drop;
 
-#if defined(CONFIG_BRIDGE_FASTPATH) && !defined(CONFIG_BRIDGE_NETFILTER)
-	if (bridge_fast_path_enabled &&
-	    skb->pkt_type != PACKET_LOOPBACK &&
-	    skb->pkt_type != PACKET_BROADCAST &&
-	    skb->dev->br_port != NULL) {
-
-	    struct net_bridge_port *p = skb->dev->br_port;
-
-	    if (p->br != NULL) {
-		/* switch src<->dst brige port */
-		struct net_bridge *br = p->br;
-		struct net_bridge_fdb_entry *dst;
-
-		br_fdb_update(br, p, eth_hdr(skb)->h_source);
-		dst = br_fdb_get(br, eth_hdr(skb)->h_dest);
-
-		/* fast xmit */
-		if(dst != NULL && dst->dst->dev != NULL && !dst->is_local) {
-		    struct net_device *dev;
-
-	    	    skb->dev = dst->dst->dev;
-	    	    skb_push(skb, ETH_HLEN);
-
-	    	    dev = skb->dev;
-	    	    dev->hard_start_xmit(skb, dev);
-
-	    	    return NET_RX_SUCCESS;
-		}
-	    }
-	}
-#endif
 #ifdef CONFIG_NETPOLL
 	/* if netpoll wants it, pretend we never saw it */
 	if (netpoll_rx(skb))

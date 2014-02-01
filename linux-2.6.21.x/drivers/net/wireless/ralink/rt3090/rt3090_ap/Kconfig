@@ -114,6 +114,7 @@ config  RT3090_AP_SNMP
 
 config  RT3090_AP_BRIDGE_FASTPATH
 	bool "Bridge wlan2lan operation offload"
+	default n
 	depends on RT3090_AP
 
 #config  RT3090_AP_MC_SUPPORT

@@ -29,13 +29,6 @@ static int ip_local_port_range_min[] = { 1, 1 };
 static int ip_local_port_range_max[] = { 65535, 65535 };
 #endif
 
-#ifdef CONFIG_BRIDGE_FASTPATH
-/* bridge fastpath enabled per default */
-int bridge_fast_path_enabled=1;
-/* export for module support */
-EXPORT_SYMBOL(bridge_fast_path_enabled);
-#endif
-
 #ifdef CONFIG_PPP_PREVENT_DROP_SESSION_ON_FULL_CPU_LOAD
 /* limit cpu load disable per default */
 int ppp_cpu_load=0;
@@ -842,16 +835,6 @@ ctl_table ipv4_table[] = {
 		.mode		= 0644,
 		.proc_handler	= &proc_dointvec,
 	},
-#ifdef CONFIG_BRIDGE_FASTPATH
-	{
-		.ctl_name	= NET_TCP_ALLOWED_BRIDGE_FASTPATH,
-		.procname	= "bridge_fastpath",
-		.data		= &bridge_fast_path_enabled,
-		.maxlen		= sizeof(int),
-		.mode		= 0644,
-		.proc_handler   = &proc_dointvec
-	},
-#endif
 #ifdef CONFIG_PPP_PREVENT_DROP_SESSION_ON_FULL_CPU_LOAD
 	{
 		.ctl_name	= NET_TCP_PPP_CPU_LOAD,
