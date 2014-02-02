@@ -10,8 +10,8 @@ LIBSSL=$FIRMROOT/user/openssl
 
 if [ ! -f $APROOTDIR/configure ]; then
     aclocal
+    autoreconf -fi
     autoconf
-    autoreconf
 fi
 if [ ! -f $APROOTDIR/Makefile.in ]; then
     automake --add-missing

@@ -9,7 +9,7 @@ ZLIB=$LIBDIR/include_shared
 LIBSSL=$FIRMROOT/user/openssl
 
 if [ ! -f $APROOTDIR/configure ]; then
-    autoreconf
+    autoreconf -fi
     autoconf
 fi
 if [ ! -f $APROOTDIR/Makefile.in ]; then

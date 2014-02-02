@@ -9,7 +9,7 @@ LIBDIR=$FIRMROOT/lib
 NETLINKLIB=$LIBDIR/include_shared
 
 if [ ! -f $APROOTDIR/configure ]; then
-    autoreconf
+    autoreconf -fi
     autoconf
 fi
 if [ ! -f $APROOTDIR/Makefile.in ]; then
