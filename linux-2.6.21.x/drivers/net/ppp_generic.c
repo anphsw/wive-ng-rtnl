@@ -1131,7 +1131,7 @@ pad_compress_skb(struct ppp *ppp, struct sk_buff *skb)
  * The caller should have locked the xmit path,
  * and xmit_pending should be 0.
  */
-static void
+static void FASTPATH
 ppp_send_frame(struct ppp *ppp, struct sk_buff *skb)
 {
 	int proto = PPP_PROTO(skb);
@@ -1662,11 +1662,11 @@ ppp_input_error(struct ppp_channel *chan, int code)
  * We come in here to process a received frame.
  * The receive side of the ppp unit is locked.
  */
-static void
+static void FASTPATH
 ppp_receive_frame(struct ppp *ppp, struct sk_buff *skb, struct channel *pch)
 {
 	/* note: a 0-length skb is used as an error indication */
-	if (skb->len > 0) {
+	if (likely(skb->len > 0)) {
 #ifdef CONFIG_PPP_MULTILINK
 		/* XXX do channel-level decompression here */
 		if (PPP_PROTO(skb) == PPP_MP)

@@ -1321,8 +1321,8 @@ static int rt2880_eth_recv(struct net_device* dev)
  * ra_sw_nat_hook_rx return 0 --> FWD & without netif_rx
  */
 #if defined (CONFIG_RA_HW_NAT) || defined (CONFIG_RA_HW_NAT_MODULE)
-         if((ra_sw_nat_hook_rx == NULL) || 
-	    (ra_sw_nat_hook_rx!= NULL && ra_sw_nat_hook_rx(rx_skb)))
+         if((ra_sw_nat_hook_rx == NULL) ||
+	    (ra_sw_nat_hook_rx != NULL && ra_sw_nat_hook_rx(rx_skb)))
 #endif
          {
 #if defined (CONFIG_RALINK_RT3052_MP2)

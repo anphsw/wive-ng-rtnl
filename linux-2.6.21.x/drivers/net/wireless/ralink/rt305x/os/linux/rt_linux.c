@@ -850,14 +850,14 @@ void announce_802_3_packet(
 	  * ra_sw_nat_hook_rx return 0 --> FWD & without netif_rx
 	 */
 
-	if(ra_sw_nat_hook_rx!= NULL)
+	if(ra_sw_nat_hook_rx != NULL)
 	{
 		unsigned int flags;
 
 		pRxPkt->protocol = eth_type_trans(pRxPkt, pRxPkt->dev);
 		RTMP_IRQ_LOCK(&pAd->page_lock, flags);
 
-		if(ra_sw_nat_hook_rx(pRxPkt)) 
+		if(ra_sw_nat_hook_rx(pRxPkt))
 		{
 			netif_rx(pRxPkt);
 		}

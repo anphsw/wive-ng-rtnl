@@ -667,7 +667,7 @@ int pskb_expand_head(struct sk_buff *skb, int nhead, int ntail,
 
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 #if defined (HNAT_USE_TAILROOM)
-	if(ra_sw_nat_hook_rx!= NULL) {
+	if(ra_sw_nat_hook_rx != NULL) {
 	    ntail += FOE_INFO_LEN;
 	    size += FOE_INFO_LEN;
 	}
@@ -687,7 +687,7 @@ int pskb_expand_head(struct sk_buff *skb, int nhead, int ntail,
 	memcpy(data + size, skb->end, offsetof(struct skb_shared_info, frags[skb_shinfo(skb)->nr_frags]));
 
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-	if(ra_sw_nat_hook_rx!= NULL) {
+	if(ra_sw_nat_hook_rx != NULL) {
 #if defined (HNAT_USE_HEADROOM)
 	    memcpy(data, FOE_INFO_START_ADDR(skb), FOE_INFO_LEN); //copy headroom
 #elif defined (HNAT_USE_TAILROOM)

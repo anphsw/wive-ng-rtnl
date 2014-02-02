@@ -1824,7 +1824,7 @@ static int ing_filter(struct sk_buff *skb)
 }
 #endif
 
-int netif_receive_skb(struct sk_buff *skb)
+int FASTPATH netif_receive_skb(struct sk_buff *skb)
 {
 	struct packet_type *ptype, *pt_prev;
 	struct net_device *orig_dev;

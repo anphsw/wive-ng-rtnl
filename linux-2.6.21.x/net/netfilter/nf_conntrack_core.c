@@ -1049,7 +1049,7 @@ resolve_normal_ct(struct sk_buff *skb,
 	return ct;
 }
 
-unsigned int
+unsigned int FASTPATH
 nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 {
 	struct nf_conn *ct;

@@ -254,7 +254,7 @@ void usbnet_skb_return (struct usbnet *dev, struct sk_buff *skb)
 	  */
 	FOE_MAGIC_TAG(skb)= FOE_MAGIC_PCI;
 	FOE_AI(skb)=UN_HIT;
-	if(ra_sw_nat_hook_rx!= NULL)
+	if(ra_sw_nat_hook_rx != NULL)
 	{
 		if(ra_sw_nat_hook_rx(skb)) {
 			status = netif_rx (skb);

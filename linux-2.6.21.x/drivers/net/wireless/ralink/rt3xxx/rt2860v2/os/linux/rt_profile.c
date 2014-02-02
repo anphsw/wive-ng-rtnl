@@ -605,7 +605,7 @@ void announce_802_3_packet(
 #endif /* CONFIG_RA_CLASSIFIER */
 
 #if !defined(CONFIG_RA_NAT_NONE)
-		if (ra_sw_nat_hook_rx!= NULL)
+		if (ra_sw_nat_hook_rx != NULL)
 		{
 			RtmpOsPktProtocolAssign(pRxPkt);
 			RtmpOsPktNatMagicTag(pRxPkt);

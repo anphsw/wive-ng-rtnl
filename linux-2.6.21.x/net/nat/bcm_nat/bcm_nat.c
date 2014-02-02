@@ -26,7 +26,7 @@ extern int manip_pkt(u_int16_t proto, struct sk_buff **pskb, unsigned int iphdro
 /*
  * check SKB really accesseble
  */
-int skb_is_ready(struct sk_buff *skb)
+int FASTPATH skb_is_ready(struct sk_buff *skb)
 {
 	if (skb_cloned(skb) && !skb->sk)
 		return 0;
@@ -38,7 +38,7 @@ int skb_is_ready(struct sk_buff *skb)
  * 1 - clean route without adress changes
  * 0 - route with adress changes
  */
-int is_pure_routing(struct nf_conn *ct)
+int FASTPATH is_pure_routing(struct nf_conn *ct)
 {
 	struct nf_conntrack_tuple *t1, *t2;
 
@@ -56,7 +56,7 @@ int is_pure_routing(struct nf_conn *ct)
  * Direct send packets to output.
  * Stolen from ip_finish_output2.
  */
-static inline int bcm_fast_path_output(struct sk_buff *skb)
+int FASTPATH bcm_fast_path_output(struct sk_buff *skb)
 {
 	struct dst_entry *dst = skb->dst;
 	struct net_device *dev = dst->dev;
@@ -95,7 +95,7 @@ static inline int bcm_fast_path_output(struct sk_buff *skb)
 	return (ret == 1) ? 0 : ret;
 }
 
-int bcm_fast_path(struct sk_buff *skb)
+int FASTPATH bcm_fast_path(struct sk_buff *skb)
 {
 	if (skb->dst == NULL) {
 		struct iphdr *iph = ip_hdr(skb);
@@ -116,7 +116,7 @@ int bcm_fast_path(struct sk_buff *skb)
 		return bcm_fast_path_output(skb);
 }
 
-int bcm_do_fastnat(struct nf_conn *ct,
+int FASTPATH bcm_do_fastnat(struct nf_conn *ct,
 		enum ip_conntrack_info ctinfo,
 		struct sk_buff **pskb,
 		struct nf_conntrack_l3proto *l3proto,

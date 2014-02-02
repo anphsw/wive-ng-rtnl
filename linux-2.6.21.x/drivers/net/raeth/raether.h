@@ -43,7 +43,7 @@
 /* To avoid driver tx ring full */
 #define NUM_RX_DESC	512
 #define NUM_TX_DESC	512
-#elif defined CONFIG_RT_3052_ESW /* for 305x/335x ralink say max=128 */
+#elif (defined CONFIG_RT_3052_ESW) && !defined(CONFIG_BCM_NAT)
 #define NUM_RX_DESC     128
 #define NUM_TX_DESC     128
 #else
@@ -52,7 +52,9 @@
 #endif
 #endif
 
-#if defined (CONFIG_RAETH_ROUTER) || defined (CONFIG_RT_3052_ESW)
+#if defined(CONFIG_BCM_NAT)
+#define	DEV_WEIGHT	128
+#elif defined (CONFIG_RAETH_ROUTER) || defined (CONFIG_RT_3052_ESW)
 #define	DEV_WEIGHT	32
 #elif defined(CONFIG_GE1_RGMII_FORCE_1000) || defined(CONFIG_GE2_RGMII_FORCE_1000)
 #define	DEV_WEIGHT	128
@@ -73,7 +75,7 @@
 
 #define GMAC2_OFFSET    0x22
 #if ! defined (CONFIG_RALINK_RT6855A)
-#define GMAC0_OFFSET    0x28 
+#define GMAC0_OFFSET    0x28
 #else
 #define GMAC0_OFFSET    0xE000
 #endif
