@@ -31,6 +31,7 @@
 # Note: Shared libraries consisting of C++ files are not supported
 
 HOSTCC       = gcc
+ARCH	     = mips
 
 __hostprogs := $(sort $(hostprogs-y) $(hostprogs-m))
 
