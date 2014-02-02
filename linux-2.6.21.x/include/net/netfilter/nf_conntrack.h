@@ -294,15 +294,6 @@ extern unsigned int nf_conntrack_table_flush;
 extern unsigned int nf_conntrack_nat_mode;
 #endif
 
-#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-#include <linux/netfilter.h>
-#include <linux/netfilter/nf_conntrack_common.h>
-extern int nf_conntrack_fastnat;
-extern int nf_conntrack_fastroute;
-extern int nf_ct_ipv4_gather_frags(struct sk_buff *skb, u_int32_t user);
-extern int ip_rcv_finish(struct sk_buff *skb);
-#endif
-
 DECLARE_PER_CPU(struct ip_conntrack_stat, nf_conntrack_stat);
 #define NF_CT_STAT_INC(count) (__get_cpu_var(nf_conntrack_stat).count++)
 #define NF_CT_STAT_INC_ATOMIC(count)			\

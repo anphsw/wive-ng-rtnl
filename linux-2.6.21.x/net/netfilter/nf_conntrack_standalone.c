@@ -379,7 +379,7 @@ static ctl_table nf_ct_netfilter_table[] = {
 		.mode		= 0644,
 		.proc_handler	= &proc_dointvec,
 	},
-#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+#ifdef CONFIG_BCM_NAT
 	{
 		.ctl_name	= NET_NF_CONNTRACK_FASTNAT,
 		.procname	= "nf_conntrack_fastnat",

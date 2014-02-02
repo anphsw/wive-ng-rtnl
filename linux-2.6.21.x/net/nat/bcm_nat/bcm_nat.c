@@ -11,26 +11,46 @@
  *
  */
 
-#include <linux/module.h>
-#include <net/ip.h>
-#include <net/route.h>
-#include <net/neighbour.h>
+
+#include "bcm_nat.h"
 #include <net/netfilter/nf_conntrack_core.h>
 
-//#define DEBUG
+int nf_conntrack_fastnat __read_mostly;
+EXPORT_SYMBOL_GPL(nf_conntrack_fastnat);
+int nf_conntrack_fastroute __read_mostly;
+EXPORT_SYMBOL_GPL(nf_conntrack_fastroute);
 
-typedef int (*bcmNatHitHook)(struct sk_buff *skb);
-typedef int (*bcmNatBindHook)(struct nf_conn *ct, enum ip_conntrack_info ctinfo, unsigned int hooknum, struct sk_buff **pskb);
+extern int manip_pkt(u_int16_t proto, struct sk_buff **pskb, unsigned int iphdroff,
+			const struct nf_conntrack_tuple *target, enum nf_nat_manip_type maniptype);
 
-extern int bcm_nat_hit_hook_func(bcmNatHitHook hook_func);
-extern int bcm_nat_bind_hook_func(bcmNatBindHook hook_func);
+/*
+ * check SKB really accesseble
+ */
+int skb_is_ready(struct sk_buff *skb)
+{
+	if (skb_cloned(skb) && !skb->sk)
+		return 0;
+	return 1;
+}
 
-extern int
-manip_pkt(u_int16_t proto,
-	  struct sk_buff **pskb,
-	  unsigned int iphdroff,
-	  const struct nf_conntrack_tuple *target,
-	  enum nf_nat_manip_type maniptype);
+/*
+ * check route mode
+ * 1 - clean route without adress changes
+ * 0 - route with adress changes
+ */
+int is_pure_routing(struct nf_conn *ct)
+{
+	struct nf_conntrack_tuple *t1, *t2;
+
+	t1 = &ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple;
+	t2 = &ct->tuplehash[IP_CT_DIR_REPLY].tuple;
+
+	return (t1->dst.u3.ip == t2->src.u3.ip &&
+		t1->src.u3.ip == t2->dst.u3.ip &&
+		t1->dst.u.all == t2->src.u.all &&
+		t1->src.u.all == t2->dst.u.all);
+}
+
 
 /*
  * Direct send packets to output.
@@ -75,7 +95,7 @@ static inline int bcm_fast_path_output(struct sk_buff *skb)
 	return (ret == 1) ? 0 : ret;
 }
 
-static inline int bcm_fast_path(struct sk_buff *skb)
+int bcm_fast_path(struct sk_buff *skb)
 {
 	if (skb->dst == NULL) {
 		struct iphdr *iph = ip_hdr(skb);
@@ -96,8 +116,7 @@ static inline int bcm_fast_path(struct sk_buff *skb)
 		return bcm_fast_path_output(skb);
 }
 
-static inline int
-bcm_do_bindings(struct nf_conn *ct,
+int bcm_do_fastnat(struct nf_conn *ct,
 		enum ip_conntrack_info ctinfo,
 		struct sk_buff **pskb,
 		struct nf_conntrack_l3proto *l3proto,
@@ -144,23 +163,6 @@ bcm_do_bindings(struct nf_conn *ct,
 
 	return NF_FAST_NAT;
 }
-
-static int __init bcm_nat_init(void)
-{
-	bcm_nat_hit_hook_func(bcm_fast_path);
-	bcm_nat_bind_hook_func((bcmNatBindHook)bcm_do_bindings);
-	printk("NAT Fastpath init.\n");
-	return 0;
-}
-
-static void __exit bcm_nat_fini(void)
-{
-	bcm_nat_hit_hook_func(NULL);
-	bcm_nat_bind_hook_func(NULL);
-}
-
-module_init(bcm_nat_init);
-module_exit(bcm_nat_fini);
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Broadcom Corporation");

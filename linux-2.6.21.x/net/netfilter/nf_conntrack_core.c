@@ -107,36 +107,6 @@ static __u16 privilege_conntrack_port[CONNTRACK_PORT_ARRAY_SIZE]={80,23,3128,186
 
 #ifdef CONFIG_NF_FLUSH_CONNTRACK
 unsigned int nf_conntrack_table_flush __read_mostly;
-EXPORT_SYMBOL_GPL(nf_conntrack_table_flush);
-#endif
-
-#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-int nf_conntrack_fastnat __read_mostly;
-EXPORT_SYMBOL_GPL(nf_conntrack_fastnat);
-
-int nf_conntrack_fastroute __read_mostly;
-EXPORT_SYMBOL_GPL(nf_conntrack_fastroute);
-
-typedef int (*bcmNatBindHook)(struct nf_conn *ct,
-	enum ip_conntrack_info ctinfo,
-	struct sk_buff **pskb,
-	struct nf_conntrack_l3proto *l3proto,
-	struct nf_conntrack_l4proto *l4proto);
-
-static bcmNatBindHook bcm_nat_bind_hook __read_mostly = NULL;
-int bcm_nat_bind_hook_func(bcmNatBindHook hook_func) {
-	bcm_nat_bind_hook = hook_func;
-	return 1;
-};
-EXPORT_SYMBOL(bcm_nat_bind_hook_func);
-
-typedef int (*bcmNatHitHook)(struct sk_buff *skb);
-bcmNatHitHook bcm_nat_hit_hook __read_mostly = NULL;
-int bcm_nat_hit_hook_func(bcmNatHitHook hook_func) {
-	bcm_nat_hit_hook = hook_func;
-	return 1;
-};
-EXPORT_SYMBOL(bcm_nat_hit_hook_func);
 #endif
 
 static int nf_conntrack_vmalloc __read_mostly;
@@ -193,36 +163,6 @@ static inline unsigned int is_local_svc(struct sk_buff **pskb, u_int8_t protonm)
 
     return 0;
 };
-#endif
-
-#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-/*
- * check SKB really accesseble
- */
-static inline int skb_is_ready(struct sk_buff *skb)
-{
-	if (skb_cloned(skb) && !skb->sk)
-		return 0;
-	return 1;
-}
-
-/*
- * check route mode
- * 1 - clean route without adress changes
- * 0 - route with adress changes
- */
-static inline int is_pure_routing(struct nf_conn *ct)
-{
-	struct nf_conntrack_tuple *t1, *t2;
-
-	t1 = &ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple;
-	t2 = &ct->tuplehash[IP_CT_DIR_REPLY].tuple;
-
-	return (t1->dst.u3.ip == t2->src.u3.ip &&
-		t1->src.u3.ip == t2->dst.u3.ip &&
-		t1->dst.u.all == t2->src.u.all &&
-		t1->src.u.all == t2->dst.u.all);
-}
 #endif
 
 static u_int32_t __hash_conntrack(const struct nf_conntrack_tuple *tuple,
@@ -1120,11 +1060,15 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 	u_int8_t protonum;
 	int set_reply = 0;
 	int ret;
-#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+#ifdef CONFIG_BCM_NAT
 	struct nf_conn_nat *nat = NULL;
+	extern int skb_is_ready(struct sk_buff *skb);
+	extern int is_pure_routing(struct nf_conn *ct);
+	extern int bcm_do_fastnat(struct nf_conn *ct, enum ip_conntrack_info ctinfo, struct sk_buff **pskb,
+				    struct nf_conntrack_l3proto *l3proto, struct nf_conntrack_l4proto *l4proto);
 #endif
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE) || \
-    defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+    defined(CONFIG_BCM_NAT)
 	struct nf_conn_help *help;
     	unsigned int skip_offload = 0;
 #endif
@@ -1143,7 +1087,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 		return -ret;
 	}
 
-#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+#ifdef CONFIG_BCM_NAT
 	if ((nf_conntrack_fastnat || nf_conntrack_fastroute) && pf == PF_INET)
 	    /* gather fragments before fastpath/fastnat, ipv4 only. */
 	    if ((*pskb)->nh.iph->frag_off & htons(IP_MF|IP_OFFSET))
@@ -1191,18 +1135,17 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 		return -ret;
 	}
 
-#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE) || \
-    defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE) || defined(CONFIG_BCM_NAT)
 	help = nfct_help(ct);
 	if (help && help->helper)
 	    /* skip marked packets for ALG from all fastpaths */
 	    skip_offload = 1;
 
 	/* full skip not ipv4 and mcast/bcast traffic by software offload and filtering section */
-	if (pf != PF_INET || (*pskb)->pkt_type == PACKET_BROADCAST || (*pskb)->pkt_type == PACKET_MULTICAST)
+	if (FASTNAT_SKIP_TYPE(pf))
 	    goto skip;
 #endif
-#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+#ifdef CONFIG_BCM_NAT
 	/* software route offload path */
         if (nf_conntrack_fastroute && !skip_offload && skb_is_ready(*pskb) && is_pure_routing(ct)
 	    && (ctinfo == IP_CT_ESTABLISHED || ctinfo == IP_CT_ESTABLISHED_REPLY)) {
@@ -1212,7 +1155,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 		nf_conntrack_event_cache(IPCT_STATUS, *pskb);
 
 	    if(hooknum == NF_IP_PRE_ROUTING) {
-	        (*pskb)->cb[FAST_ROUTE]=1;
+	        (*pskb)->cb[NF_FAST_ROUTE]=1;
 		/* this function will handle routing decision. the next hoook will be input or forward chain */
 		if (ip_rcv_finish(*pskb) == NF_FAST_NAT) {
 		    /* Change skb owner to output device */
@@ -1232,14 +1175,13 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 	    }
 	}
 #endif
-#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE) || \
-    defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE) || defined(CONFIG_BCM_NAT)
         /* packets for nat ? */
         nat = nfct_nat(ct);
 
 	/* this code section may be used for skip some types traffic,
 	    only if hardware nat support enabled or software fastnat support enabled */
-	if (nat && !skip_offload && (ra_sw_nat_hook_rx != NULL || (nf_conntrack_fastnat && bcm_nat_bind_hook != NULL))) {
+	if (nat && !skip_offload && (ra_sw_nat_hook_rx != NULL || nf_conntrack_fastnat)) {
 #if defined(CONFIG_NETFILTER_XT_MATCH_WEBSTR) || defined(CONFIG_NETFILTER_XT_MATCH_WEBSTR_MODULE)
 	    /*  1. skip http post/get/head traffic for correct webstr work */
 	    if (web_str_loaded && protonum == IPPROTO_TCP && CTINFO2DIR(ctinfo) == IP_CT_DIR_ORIGINAL) {
@@ -1273,7 +1215,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 	    */
 pass:
 	    if(skip_offload) {
-#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+#ifdef CONFIG_BCM_NAT
 		/* skip sofware nat fastpath flag */
 		nat->info.nat_type |= NF_FAST_NAT_DENY;
 #endif
@@ -1281,9 +1223,9 @@ pass:
 	    }
 	}
 
-#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+#ifdef CONFIG_BCM_NAT
 	/* software nat offload path */
-	if (nf_conntrack_fastnat && bcm_nat_bind_hook != NULL && nat &&
+	if (nf_conntrack_fastnat && nat &&
 	    /* if not deny for this packets */
 	    !skip_offload && !(nat->info.nat_type & NF_FAST_NAT_DENY) &&
 	    /* allow  tcp/udp packet pass fastnat */
@@ -1292,7 +1234,7 @@ pass:
 	    (ctinfo == IP_CT_ESTABLISHED || ctinfo == IP_CT_ESTABLISHED_REPLY)) {
 	    /* if not pure routing - try send selected pakets to bcm_nat */
 		if (!is_pure_routing(ct))
-		    ret = bcm_nat_bind_hook(ct, ctinfo, pskb, l3proto, l4proto);
+		    ret = bcm_do_fastnat(ct, ctinfo, pskb, l3proto, l4proto);
 	}
 #endif
 skip:
@@ -1305,7 +1247,7 @@ skip:
 #endif /* RA_HW_NAT || BCM_NAT */
 
 	if (set_reply && !test_and_set_bit(IPS_SEEN_REPLY_BIT, &ct->status)) {
-#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+#ifdef CONFIG_BCM_NAT
 	    if (nf_conntrack_fastnat && pf == PF_INET && nat && hooknum == NF_IP_LOCAL_OUT)
 		nat->info.nat_type |= NF_FAST_NAT_DENY;
 #endif
@@ -1713,7 +1655,7 @@ int __init nf_conntrack_init(void)
 #ifdef CONFIG_NAT_CONE
 	nf_conntrack_nat_mode = NAT_MODE_LINUX;
 #endif
-#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+#ifdef CONFIG_BCM_NAT
 	nf_conntrack_fastnat = 1;
 	nf_conntrack_fastroute = 1;
 #endif

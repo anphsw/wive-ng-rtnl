@@ -48,7 +48,7 @@ target(struct sk_buff **pskb,
 		nf_csum_replace2(&iph->check, htons(oldtos), htons(iph->tos));
 	}
 
-#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+#ifdef CONFIG_BCM_NAT
 	if(nf_conntrack_fastnat) {
 	    enum ip_conntrack_info ctinfo;
 	    struct nf_conn *ct;

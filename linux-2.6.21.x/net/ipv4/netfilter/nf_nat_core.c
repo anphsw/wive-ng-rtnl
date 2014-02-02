@@ -341,7 +341,7 @@ nf_nat_setup_info(struct nf_conn *ct,
 EXPORT_SYMBOL(nf_nat_setup_info);
 
 /* Returns true if succeeded. */
-#if !defined(CONFIG_BCM_NAT) && !defined(CONFIG_BCM_NAT_MODULE)
+#ifndef CONFIG_BCM_NAT
 static
 #endif
 int manip_pkt(u_int16_t proto,
@@ -376,7 +376,6 @@ int manip_pkt(u_int16_t proto,
 	}
 	return 1;
 }
-EXPORT_SYMBOL(manip_pkt);
 
 /* Do packet manipulations according to nf_nat_setup_info. */
 unsigned int nf_nat_packet(struct nf_conn *ct,

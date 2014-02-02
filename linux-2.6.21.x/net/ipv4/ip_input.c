@@ -268,9 +268,9 @@ inline int ip_local_deliver(struct sk_buff *skb)
         }
 #endif
 
-#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-	if(skb->cb[FAST_ROUTE])	{
-		skb->cb[FAST_ROUTE]=0;
+#ifdef CONFIG_BCM_NAT
+	if(skb->cb[NF_FAST_ROUTE])	{
+		skb->cb[NF_FAST_ROUTE]=0;
 		return ip_local_deliver_finish(skb);
 	} else
 #endif
@@ -331,7 +331,7 @@ drop:
 	return -1;
 }
 
-#if !defined(CONFIG_BCM_NAT) && !defined(CONFIG_BCM_NAT_MODULE)
+#ifndef CONFIG_BCM_NAT
 static
 #endif
 inline int ip_rcv_finish(struct sk_buff *skb)
@@ -434,7 +434,7 @@ int ip_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type *pt, 
 		goto drop;
 	}
 
-#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+#ifdef CONFIG_BCM_NAT
 	if (!nf_conntrack_fastnat && !nf_conntrack_fastroute)
 #endif
 	/* Remove any debris in the socket control block */

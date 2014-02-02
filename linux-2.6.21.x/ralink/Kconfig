@@ -83,14 +83,6 @@ config RA_NAT_NONE
         bool "Disable NAT acceleration"
 endchoice
 
-config BCM_NAT
-        tristate "Broadcom fast NAT support"
-        depends on NF_CONNTRACK && NF_NAT
-        default y
-        help
-                This helps packets pass through netfilter faster when a packet
-                is an established or reply traffic.
-
 #######
 # PPE
 #######
@@ -100,6 +92,11 @@ source "net/nat/hw_nat/Kconfig"
 endmenu
 endif
 endmenu
+
+#######
+# Fastpath
+#######
+source "net/nat/bcm_nat/Kconfig"
 
 #######
 # WIFI

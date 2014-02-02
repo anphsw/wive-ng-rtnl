@@ -194,7 +194,7 @@ struct nf_conntrack_l4proto nf_conntrack_l4proto_udp4 __read_mostly =
 	.print_tuple		= udp_print_tuple,
 	.packet			= udp_packet,
 	.new			= udp_new,
-#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+#ifdef CONFIG_BCM_NAT
 	.error                  = NULL,
 #else
 	.error			= udp_error,

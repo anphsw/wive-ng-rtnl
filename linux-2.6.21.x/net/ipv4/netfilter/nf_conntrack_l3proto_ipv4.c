@@ -67,7 +67,7 @@ static int ipv4_print_tuple(struct seq_file *s,
 }
 
 /* Returns new sk_buff, or NULL */
-#if !defined(CONFIG_BCM_NAT) && !defined(CONFIG_BCM_NAT_MODULE)
+#ifndef CONFIG_BCM_NAT
 static
 #else
 inline

@@ -42,7 +42,7 @@ target_v0(struct sk_buff **pskb,
 
 	(*pskb)->mark = markinfo->mark;
 
-#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+#ifdef CONFIG_BCM_NAT
 	if(nf_conntrack_fastnat) {
 	    enum ip_conntrack_info ctinfo;
 	    struct nf_conn *ct;
@@ -72,7 +72,7 @@ target_v1(struct sk_buff **pskb,
 	switch (markinfo->mode) {
 	case XT_MARK_SET:
 		mark = markinfo->mark;
-#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+#ifdef CONFIG_BCM_NAT
 		if(nf_conntrack_fastnat) {
 		    enum ip_conntrack_info ctinfo;
 		    struct nf_conn *ct=NULL;

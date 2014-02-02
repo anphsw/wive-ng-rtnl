@@ -61,7 +61,7 @@ target(struct sk_buff **pskb,
 			newmark = (ct->mark & ~markinfo->mask) | markinfo->mark;
 			if (newmark != ct->mark) {
 				ct->mark = newmark;
-#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
+#ifdef CONFIG_BCM_NAT
 				if (nf_conntrack_fastnat) {
 				    struct nf_conn_nat *nat = nfct_nat(ct);
 				    if(nat)
