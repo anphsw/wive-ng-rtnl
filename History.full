@@ -1842,7 +1842,7 @@
 45) kernel: use fair group CPU scheduler by default.<br>
 46) kernel: remove bridge fastpath code (not need now, very low speedup bridge operation and make transit slowly).<br>
 47) kernel: refactoring code nat fastpath and route fastpath.<br>
-48) kernel: speedup software network operation ~2-5% depended of case.
-<br>
+48) kernel: speedup software network operation ~2-5% depended of case.<br>
+49) kernel: fastroute/fastnat: consolidate code check allowed for software offload process (one check for fastroute/nat cases).<br><br>
 <br>
 <br>

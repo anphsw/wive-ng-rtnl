@@ -144,7 +144,7 @@ static DEFINE_MUTEX(nf_ct_cache_mutex);
 static unsigned int nf_conntrack_hash_rnd __read_mostly;
 
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-static inline unsigned int is_local_svc(struct sk_buff **pskb, u_int8_t protonm)
+static inline unsigned int is_local_svc(u_int8_t protonm)
 {
 	/* Local gre/esp/ah/ip-ip/icmp proto must be skip from hardware offload
 	    and mark as interested by ALG  for correct tracking this */
@@ -1136,19 +1136,34 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 	}
 
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE) || defined(CONFIG_BCM_NAT)
+	/*
+	 * skip ALG marked packets from all fastpaths
+	 */
 	help = nfct_help(ct);
 	if (help && help->helper)
-	    /* skip marked packets for ALG from all fastpaths */
 	    skip_offload = 1;
 
-	/* full skip not ipv4 and mcast/bcast traffic by software offload and filtering section */
-	if (FASTNAT_SKIP_TYPE(pf))
-	    goto skip;
+#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+	/*
+	 * skip ALG and some proto from hardware offload
+	 */
+	if (hooknum != NF_IP_LOCAL_OUT && FOE_ALG(*pskb) == 0) {
+	    if (skip_offload || (pf == PF_INET && is_local_svc(protonum)))
+		if (IS_SPACE_AVAILABLED(*pskb) && IS_MAGIC_TAG_VALID(*pskb))
+			FOE_ALG(*pskb)=1;
+	}
 #endif
+#endif
+	/*
+	 * full skip not ipv4 and mcast/bcast traffic by software offload and filtering section
+	 * allow only established/reply tpc/udp protocol for processing in software offload
+	 */
+	if ((pf != PF_INET) || FASTNAT_SKIP_NEW(ctinfo) || FASTNAT_SKIP_PROTO(protonum) || FASTNAT_SKIP_TYPE(*pskb))
+	    goto skip;
+
 #ifdef CONFIG_BCM_NAT
 	/* software route offload path */
-        if (nf_conntrack_fastroute && !skip_offload && skb_is_ready(*pskb) && is_pure_routing(ct)
-	    && (ctinfo == IP_CT_ESTABLISHED || ctinfo == IP_CT_ESTABLISHED_REPLY)) {
+        if (nf_conntrack_fastroute && !skip_offload && skb_is_ready(*pskb) && is_pure_routing(ct)) {
 
 	    /* change status from new to seen_reply. when receive reply packet the status will set to establish */
 	    if (set_reply && !test_and_set_bit(IPS_SEEN_REPLY_BIT, &ct->status))
@@ -1201,7 +1216,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 #endif /* XT_MATCH_WEBSTR */
 #ifdef CONFIG_NF_CONNTRACK_MARK
 	    /* 2. offload only packets with connection mark flag 0 */
-	    if ((protonum == IPPROTO_TCP || protonum == IPPROTO_UDP) && ((ct->mark & 0xFF0000) != 0)) {
+	    if ((ct->mark & 0xFF0000) != 0) {
 		skip_offload = 1;
 		goto pass;
 	    }
@@ -1215,6 +1230,11 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 	    */
 pass:
 	    if(skip_offload) {
+#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+		/* skip hardware offload flag */
+		if (IS_SPACE_AVAILABLED(*pskb) && IS_MAGIC_TAG_VALID(*pskb))
+		    FOE_ALG(*pskb)=1;
+#endif
 #ifdef CONFIG_BCM_NAT
 		/* skip sofware nat fastpath flag */
 		nat->info.nat_type |= NF_FAST_NAT_DENY;
@@ -1225,25 +1245,15 @@ pass:
 
 #ifdef CONFIG_BCM_NAT
 	/* software nat offload path */
-	if (nf_conntrack_fastnat && nat &&
+	if (nf_conntrack_fastnat && nat && (hooknum == NF_IP_PRE_ROUTING) &&
 	    /* if not deny for this packets */
-	    !skip_offload && !(nat->info.nat_type & NF_FAST_NAT_DENY) &&
-	    /* allow  tcp/udp packet pass fastnat */
-	    hooknum == NF_IP_PRE_ROUTING && (protonum == IPPROTO_UDP || protonum == IPPROTO_TCP) &&
-	    /* allow tcp packet with established/reply state */
-	    (ctinfo == IP_CT_ESTABLISHED || ctinfo == IP_CT_ESTABLISHED_REPLY)) {
+	    !(nat->info.nat_type & NF_FAST_NAT_DENY)) {
 	    /* if not pure routing - try send selected pakets to bcm_nat */
 		if (!is_pure_routing(ct))
 		    ret = bcm_do_fastnat(ct, ctinfo, pskb, l3proto, l4proto);
 	}
 #endif
 skip:
-
-#if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-	if (skip_offload || hooknum == NF_IP_LOCAL_OUT || is_local_svc(pskb, protonum))
-	    if (IS_SPACE_AVAILABLED(*pskb) && IS_MAGIC_TAG_VALID(*pskb))
-		FOE_ALG(*pskb)=1;
-#endif
 #endif /* RA_HW_NAT || BCM_NAT */
 
 	if (set_reply && !test_and_set_bit(IPS_SEEN_REPLY_BIT, &ct->status)) {

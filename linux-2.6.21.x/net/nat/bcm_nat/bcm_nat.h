@@ -8,9 +8,12 @@
 //#define DEBUG
 
 /*
- * fastnat must full skip not ipv4 and mcast/bcast traffic
+ * fastnat must full skip mcast/bcast traffic
+ * allow only established/reply pkts ny udp/tcp proto for processing in software offload
  */
-#define FASTNAT_SKIP_TYPE(pf)	(pf != PF_INET || (*pskb)->pkt_type == PACKET_BROADCAST || (*pskb)->pkt_type == PACKET_MULTICAST)
+#define FASTNAT_SKIP_NEW(ctinfo)	(ctinfo != IP_CT_ESTABLISHED && ctinfo != IP_CT_ESTABLISHED_REPLY)
+#define FASTNAT_SKIP_TYPE(skb)		((skb)->pkt_type == PACKET_BROADCAST || (skb)->pkt_type == PACKET_MULTICAST)
+#define FASTNAT_SKIP_PROTO(protonum)	(protonum != IPPROTO_UDP && protonum != IPPROTO_TCP)
 
 /*
  * cb fastforward flag  hwnat use 10+6 offset - fastroute 10+6+2
