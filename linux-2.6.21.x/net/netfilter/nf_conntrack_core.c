@@ -151,9 +151,7 @@ static inline unsigned int is_local_svc(u_int8_t protonm)
 	switch (protonm) {
 	    case IPPROTO_IPIP:
 	    case IPPROTO_ICMP:
-#ifndef CONFIG_HNAT_V2
 	    case IPPROTO_GRE:
-#endif
 	    case IPPROTO_ESP:
 	    case IPPROTO_AH:
 		return 1;

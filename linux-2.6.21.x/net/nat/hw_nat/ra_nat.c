@@ -77,9 +77,7 @@ dma_addr_t		PpePhyFoeBase;
 struct net_device	*DstPort[MAX_IF_NUM];
 PktParseResult		PpeParseResult;
 
-#if defined (CONFIG_RALINK_RT3052)
-static int has_fixed_udp_ppe;
-#endif
+static int ppe_udp_bug;
 
 #if 0
 void skb_dump(struct sk_buff* sk) {
@@ -579,16 +577,21 @@ uint32_t PpeKeepAliveHandler(struct sk_buff * skb, struct FoeEntry * foe_entry)
 		    (struct iphdr *)(skb->data + vlan1_gap + vlan2_gap +
 				     pppoe_gap);
 
-		//Recover to original layer 4 header 
+		//Recover to original layer 4 header
 		if (iph->protocol == IPPROTO_TCP) {
 			th = (struct tcphdr *)((uint8_t *) iph + iph->ihl * 4);
 			FoeToOrgTcpHdr(foe_entry, iph, th);
 
 		} else if (iph->protocol == IPPROTO_UDP) {
 			uh = (struct udphdr *)((uint8_t *) iph + iph->ihl * 4);
+			if (!uh->check && ppe_udp_bug && foe_entry->bfib1.state == BIND) {
+				/* no UDP checksum, force unbind session from PPE for workaround PPE UDP bug */
+				foe_entry->bfib1.state = UNBIND;
+				foe_entry->bfib1.time_stamp = RegRead(FOE_TS) & 0xFF;
+			}
 			FoeToOrgUdpHdr(foe_entry, iph, uh);
 		}
-		//Recover to original layer 3 header 
+		//Recover to original layer 3 header
 		FoeToOrgIpHdr(foe_entry, iph);
 	} else if (eth_type == ETH_P_IPV6) {
 		/* Nothing to do */
@@ -1014,9 +1017,21 @@ int32_t PpeParseLayerInfo(struct sk_buff * skb)
 			uh = (struct udphdr *)LAYER4_HEADER(skb);
 			memcpy(&PpeParseResult.uh, uh, sizeof(struct udphdr));
 			PpeParseResult.pkt_type = IPV4_HNAPT;
-			
+
 			if(iph->frag_off & htons(IP_MF|IP_OFFSET)) {
 				return 1;
+			}
+
+			uh = (struct udphdr *)((uint8_t *)iph + iph->ihl * 4);
+
+			/* check PPE bug */
+			if (ppe_udp_bug) {
+				if (!uh->check)
+					return 1;
+				if (uh->dest == __constant_htons(500) ||	// IPSec IKE
+				    uh->dest == __constant_htons(4500) ||	// IPSec NAT-T
+				    uh->dest == __constant_htons(1701))		// L2TP
+					return 1;
 			}
 		}
 #if defined (CONFIG_HNAT_V2)
@@ -1414,42 +1429,33 @@ int32_t PpeFillInL4Info(struct sk_buff * skb, struct FoeEntry * foe_entry)
 			return 0;
 		}
 #endif
-
 		/* Set Layer4 Info - NEW_SPORT, NEW_DPORT */
 		if (PpeParseResult.iph.protocol == IPPROTO_TCP) {
 			foe_entry->ipv4_hnapt.new_sport = ntohs(PpeParseResult.th.source);
 			foe_entry->ipv4_hnapt.new_dport = ntohs(PpeParseResult.th.dest);
 			foe_entry->ipv4_hnapt.bfib1.udp = TCP;
 		} else if (PpeParseResult.iph.protocol == IPPROTO_UDP) {
-#if defined (CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_RT6855A) || defined (CONFIG_RALINK_RT6352)
-			foe_entry->ipv4_hnapt.new_sport = ntohs(PpeParseResult.uh.source);
-			foe_entry->ipv4_hnapt.new_dport = ntohs(PpeParseResult.uh.dest);
-			foe_entry->ipv4_hnapt.bfib1.udp = UDP;
-#elif defined (CONFIG_RALINK_RT3352)
-			if (RegRead(0xB000000C) > 0x0104) {
-				foe_entry->ipv4_hnapt.new_sport = ntohs(PpeParseResult.uh.source);
-				foe_entry->ipv4_hnapt.new_dport = ntohs(PpeParseResult.uh.dest);
-				foe_entry->ipv4_hnapt.bfib1.udp = UDP;
-			} else {
-				memset(FOE_INFO_START_ADDR(skb), 0,
-				       FOE_INFO_LEN);
-				return 1;
-			}
-#elif defined (CONFIG_RALINK_RT3052)
-			if ((PpeParseResult.uh.check != 0) || (has_fixed_udp_ppe > 0)) {
-				foe_entry->ipv4_hnapt.new_sport = ntohs(PpeParseResult.uh.source);
-				foe_entry->ipv4_hnapt.new_dport = ntohs(PpeParseResult.uh.dest);
-				foe_entry->ipv4_hnapt.bfib1.udp = UDP;
-			} else {
-				return 1;
-			}
-#else
-			/* if udp checksum is zero, it cannot be accelerated by HNAT */
-			/* we found the application is possible to use udp checksum=0 at first stage, 
-			 * then use non-zero checksum in the same session later, so we disable HNAT acceleration
-			 * for all UDP flows */
-			return 1;
+			    if (ppe_udp_bug) {
+			        if (!PpeParseResult.uh.check) {
+#if defined (CONFIG_RALINK_RT3352)
+				    memset(FOE_INFO_START_ADDR(skb), 0, FOE_INFO_LEN);
 #endif
+			    	    return 1;
+				}
+
+				if (PpeParseResult.uh.dest == __constant_htons(500) ||	// IPSec IKE
+				    PpeParseResult.uh.dest == __constant_htons(4500) ||	// IPSec NAT-T
+				    PpeParseResult.uh.dest == __constant_htons(1701)) {	// L2TP
+#if defined (CONFIG_RALINK_RT3352)
+				    memset(FOE_INFO_START_ADDR(skb), 0, FOE_INFO_LEN);
+#endif
+				    return 1;
+				}
+			    }
+
+			    foe_entry->ipv4_hnapt.new_sport = ntohs(PpeParseResult.uh.source);
+			    foe_entry->ipv4_hnapt.new_dport = ntohs(PpeParseResult.uh.dest);
+			    foe_entry->ipv4_hnapt.bfib1.udp = UDP;
 		}
 	} else if (PpeParseResult.pkt_type == IPV4_HNAT) {
 		/* do nothing */
@@ -2314,19 +2320,20 @@ static void FoeFreeTbl(uint32_t NumOfEntry)
 static int32_t PpeEngStart(void)
 {
 #if defined (CONFIG_RALINK_RT3052)
-	uint32_t phy_val;
-
+	/* RT3052 with RF_REG0 > 0x53 has no bug UDP w/o checksum */
+	uint32_t phy_val = 0;
 	rw_rf_reg(0, 0, &phy_val);
-	phy_val = phy_val & 0xFF;
-
-	if (phy_val > 0x53) { /* check hardware revision PPE module for prevent udp crc error */
-		has_fixed_udp_ppe = 1;
-	} else {
-		has_fixed_udp_ppe = 0;
-		printk("Ralink PPE HW revision: %i, UDP without CRC skip from PPE processing.\n", phy_val);
-	}
+	ppe_udp_bug = ((phy_val & 0xFF) > 0x53) ? 0 : 1;
+#elif defined (CONFIG_RALINK_RT3352)
+	/* RT3352 rev 0105 has no bug UDP w/o checksum */
+	ppe_udp_bug = (rev_id > 0x0104) ? 0 : 1;
+#elif defined (CONFIG_RALINK_RT2880) || defined (CONFIG_RALINK_RT2883) || defined (CONFIG_RALINK_RT3883)
+	/* RT3883/RT3662 at least rev 0105 has bug UDP w/o checksum :-( */
+	ppe_udp_bug = 1;
+#elif defined (CONFIG_RALINK_MT7620)
+	/* MT7620 at least rev 0203 has bug UDP w/o checksum :-( */
+	ppe_udp_bug = 1;
 #endif
-
 	/* Set PPE Flow Set */
 	PpeSetFoeEbl(1);
 
