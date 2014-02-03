@@ -1844,5 +1844,6 @@
 47) kernel: refactoring code nat fastpath and route fastpath.<br>
 48) kernel: speedup software network operation ~2-5% depended of case.<br>
 49) kernel: fastroute/fastnat: consolidate code check allowed for software offload process (one check for fastroute/nat cases).<br><br>
+50) kernel: hw_nat: unifi udp checksumm workaround code and add skip tranzit ipsec and l2tp.<br>
 <br>
 <br>
