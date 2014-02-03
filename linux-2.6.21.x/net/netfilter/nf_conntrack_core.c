@@ -1062,6 +1062,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 	struct nf_conn_nat *nat = NULL;
 	extern int skb_is_ready(struct sk_buff *skb);
 	extern int is_pure_routing(struct nf_conn *ct);
+	extern int bcm_do_fastroute(struct nf_conn *ct,	struct sk_buff **pskb, unsigned int hooknum, int set_reply);
 	extern int bcm_do_fastnat(struct nf_conn *ct, enum ip_conntrack_info ctinfo, struct sk_buff **pskb,
 				    struct nf_conntrack_l3proto *l3proto, struct nf_conntrack_l4proto *l4proto);
 #endif
@@ -1154,38 +1155,21 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 #endif
 	/*
 	 * full skip not ipv4 and mcast/bcast traffic by software offload and filtering section
-	 * allow only established/reply tpc/udp protocol for processing in software offload
+	 * allow only established/reply tpc/udp protocol packets for processing in software offload
 	 */
 	if ((pf != PF_INET) || FASTNAT_SKIP_NEW(ctinfo) || FASTNAT_SKIP_PROTO(protonum) || FASTNAT_SKIP_TYPE(*pskb))
 	    goto skip;
 
 #ifdef CONFIG_BCM_NAT
-	/* software route offload path */
+	/*
+	 * software route offload path
+	 * send pkts to fastroute if adress not changed (not nat)
+	 */
         if (nf_conntrack_fastroute && !skip_offload && skb_is_ready(*pskb) && is_pure_routing(ct)) {
-
-	    /* change status from new to seen_reply. when receive reply packet the status will set to establish */
-	    if (set_reply && !test_and_set_bit(IPS_SEEN_REPLY_BIT, &ct->status))
-		nf_conntrack_event_cache(IPCT_STATUS, *pskb);
-
-	    if(hooknum == NF_IP_PRE_ROUTING) {
-	        (*pskb)->cb[NF_FAST_ROUTE]=1;
-		/* this function will handle routing decision. the next hoook will be input or forward chain */
-		if (ip_rcv_finish(*pskb) == NF_FAST_NAT) {
-		    /* Change skb owner to output device */
-		    (*pskb)->dev = (*pskb)->dst->dev;
-		    (*pskb)->protocol = htons(ETH_P_IP);
-		    return NF_FAST_NAT;
-		}
-		/* this tell system no need to handle this packet. we will handle this. */
-		return NF_STOLEN;
-	    } else {
-		if(hooknum == NF_IP_LOCAL_OUT) {
-		    /* Change skb owner to output device */
-		    (*pskb)->dev = (*pskb)->dst->dev;
-		    (*pskb)->protocol = htons(ETH_P_IP);
-		    return NF_FAST_NAT;
-		}
-	    }
+    	    int ret = bcm_do_fastroute(ct, pskb, hooknum, set_reply);
+	    /* if accept - continue process in normal path */
+    	    if (ret != NF_ACCEPT)
+		return ret;
 	}
 #endif
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE) || defined(CONFIG_BCM_NAT)
@@ -1242,14 +1226,12 @@ pass:
 	}
 
 #ifdef CONFIG_BCM_NAT
-	/* software nat offload path */
-	if (nf_conntrack_fastnat && nat && (hooknum == NF_IP_PRE_ROUTING) &&
-	    /* if not deny for this packets */
-	    !(nat->info.nat_type & NF_FAST_NAT_DENY)) {
-	    /* if not pure routing - try send selected pakets to bcm_nat */
-		if (!is_pure_routing(ct))
-		    ret = bcm_do_fastnat(ct, ctinfo, pskb, l3proto, l4proto);
-	}
+	/*
+	 * software nat offload path
+	 * send pkts to fastroute if adress changed (nat)
+	 */
+	if (nf_conntrack_fastnat && nat && (hooknum == NF_IP_PRE_ROUTING) && !(nat->info.nat_type & NF_FAST_NAT_DENY) && !is_pure_routing(ct))
+	    ret = bcm_do_fastnat(ct, ctinfo, pskb, l3proto, l4proto);
 #endif
 skip:
 #endif /* RA_HW_NAT || BCM_NAT */

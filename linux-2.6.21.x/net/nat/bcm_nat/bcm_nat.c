@@ -1,16 +1,16 @@
 /*
  *  Fastpath module for NAT speedup.
- *  This module write BCM LTD and use some GPLv2 code blocks.
- *  It grants the right to change the license on GPL.
- *  Some code clenup and rewrite - Tomato and Wive projects.
+ *  This module write BCM LTD used some GPLv2 code blocks. It grants the right to change the license on GPL.
  *
- *      This program is free software; you can redistribute it and/or
+ *  Some code clenup and rewrite - Tomato, wl500g and Wive-NG projects.
+ *  Code refactoring and implement fastroute without nat and local connection offload by Wive-NG
+ *
+ *      This program is free software, you can redistribute it and/or
  *      modify it under the terms of the GNU General Public License
  *      as published by the Free Software Foundation; either version
  *      2 of the License, or (at your option) any later version.
  *
  */
-
 
 #include "bcm_nat.h"
 #include <net/netfilter/nf_conntrack_core.h>
@@ -114,6 +114,39 @@ int FASTPATH bcm_fast_path(struct sk_buff *skb)
 		return ip_fragment(skb, bcm_fast_path_output);
 	else
 		return bcm_fast_path_output(skb);
+}
+
+int FASTPATH bcm_do_fastroute(struct nf_conn *ct,
+		struct sk_buff **pskb,
+		unsigned int hooknum,
+		int set_reply)
+{
+        /* change status from new to seen_reply. when receive reply packet the status will set to establish */
+        if (set_reply && !test_and_set_bit(IPS_SEEN_REPLY_BIT, &ct->status))
+	    nf_conntrack_event_cache(IPCT_STATUS, *pskb);
+
+	if(hooknum == NF_IP_PRE_ROUTING) {
+	    (*pskb)->cb[NF_FAST_ROUTE]=1;
+	    /* this function will handle routing decision. the next hoook will be input or forward chain */
+	    if (ip_rcv_finish(*pskb) == NF_FAST_NAT) {
+	        /* Change skb owner to output device */
+	        (*pskb)->dev = (*pskb)->dst->dev;
+	        (*pskb)->protocol = htons(ETH_P_IP);
+	        return NF_FAST_NAT;
+	    }
+	    /* this tell system no need to handle this packet. we will handle this. */
+	    return NF_STOLEN;
+	} else {
+	    if(hooknum == NF_IP_LOCAL_OUT) {
+		/* Change skb owner to output device */
+		(*pskb)->dev = (*pskb)->dst->dev;
+		(*pskb)->protocol = htons(ETH_P_IP);
+		return NF_FAST_NAT;
+	    }
+	}
+
+	/* return accept for comtinue normal processing */
+	return NF_ACCEPT;
 }
 
 int FASTPATH bcm_do_fastnat(struct nf_conn *ct,
