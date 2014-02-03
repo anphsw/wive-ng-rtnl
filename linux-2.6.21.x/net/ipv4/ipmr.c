@@ -644,6 +644,9 @@ ipmr_cache_unresolved(vifi_t vifi, struct sk_buff *skb)
 	}
 
 	if (c == NULL) {
+		struct mfc_cache *_c;
+		unsigned long now;
+		unsigned long expires;
 		/*
 		 *	Create a new entry if allowable
 		 */
@@ -677,12 +680,19 @@ ipmr_cache_unresolved(vifi_t vifi, struct sk_buff *skb)
 			return err;
 		}
 
+		now = jiffies;
+		expires = 10*HZ;
+		for (_c=mfc_unres_queue; _c; _c=_c->next) {
+			unsigned long interval = _c->mfc_un.unres.expires - now;
+			expires = min(max(interval, 0UL), expires);
+		}
+
 		atomic_inc(&cache_resolve_queue_len);
 		c->next = mfc_unres_queue;
 		mfc_unres_queue = c;
 
                 if (atomic_read(&cache_resolve_queue_len) == 1)
-                        mod_timer(&ipmr_expire_timer, c->mfc_un.unres.expires);
+                        mod_timer(&ipmr_expire_timer, jiffies + expires);
 	}
 
 	/*
