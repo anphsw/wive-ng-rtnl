@@ -31,7 +31,7 @@ static int ip_local_port_range_max[] = { 65535, 65535 };
 
 #ifdef CONFIG_PPP_PREVENT_DROP_SESSION_ON_FULL_CPU_LOAD
 /* limit cpu load disable per default */
-int ppp_cpu_load=0;
+int ppp_cpu_load=280000;
 /* export for module support */
 EXPORT_SYMBOL(ppp_cpu_load);
 #endif
