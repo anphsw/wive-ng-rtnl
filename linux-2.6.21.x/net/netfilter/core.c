@@ -133,8 +133,8 @@ unsigned int nf_iterate(struct list_head *head,
 
 #ifdef CONFIG_BCM_NAT
     		if (!elem->hook) {
-			NFDEBUG("nf_hook_slow: elem is empty return NF_DROP\n");
-			return NF_DROP;
+		    NFDEBUG("nf_hook_slow: elem is empty return NF_DROP\n");
+		    return NF_DROP;
 		}
 #endif
 
@@ -192,9 +192,9 @@ next_hook:
 			     outdev, &elem, okfn, hook_thresh);
 
 #ifdef CONFIG_BCM_NAT
-	if (verdict == NF_FAST_NAT) {
-		ret = bcm_fast_path(*pskb);
-	} else
+	if (verdict == NF_FAST_NAT)
+	    ret = bcm_fast_path(*pskb);
+	else
 #endif
 	if (verdict == NF_ACCEPT || verdict == NF_STOP) {
 		ret = 1;

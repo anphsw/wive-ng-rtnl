@@ -1090,8 +1090,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 	if ((nf_conntrack_fastnat || nf_conntrack_fastroute) && pf == PF_INET)
 	    /* gather fragments before fastpath/fastnat, ipv4 only. */
 	    if ((*pskb)->nh.iph->frag_off & htons(IP_MF|IP_OFFSET))
-		    if(nf_ct_ipv4_gather_frags(*pskb,
-			hooknum == NF_IP_PRE_ROUTING ? IP_DEFRAG_CONNTRACK_IN : IP_DEFRAG_CONNTRACK_OUT))
+		    if(nf_ct_ipv4_gather_frags(*pskb, hooknum == NF_IP_PRE_ROUTING ? IP_DEFRAG_CONNTRACK_IN : IP_DEFRAG_CONNTRACK_OUT))
 			return NF_STOLEN;
 #endif
 
@@ -1176,7 +1175,6 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 	}
 #endif
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE) || defined(CONFIG_BCM_NAT)
-
 	/* this code section may be used for skip some types traffic,
 	    only if hardware nat support enabled or software fastnat support enabled */
 	if (!pure_route && !skip_offload && (ra_sw_nat_hook_rx != NULL || nf_conntrack_fastnat)) {

@@ -269,9 +269,9 @@ inline int ip_local_deliver(struct sk_buff *skb)
 #endif
 
 #ifdef CONFIG_BCM_NAT
-	if(skb->cb[NF_FAST_ROUTE])	{
-		skb->cb[NF_FAST_ROUTE]=0;
-		return ip_local_deliver_finish(skb);
+	if(skb->cb[NF_FAST_ROUTE]) {
+	    skb->cb[NF_FAST_ROUTE]=0;
+	    return ip_local_deliver_finish(skb);
 	} else
 #endif
 	return NF_HOOK(PF_INET, NF_IP_LOCAL_IN, skb, skb->dev, NULL,

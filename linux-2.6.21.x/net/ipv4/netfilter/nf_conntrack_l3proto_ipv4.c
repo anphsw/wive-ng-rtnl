@@ -69,10 +69,8 @@ static int ipv4_print_tuple(struct seq_file *s,
 /* Returns new sk_buff, or NULL */
 #ifndef CONFIG_BCM_NAT
 static
-#else
-inline
 #endif
-int nf_ct_ipv4_gather_frags(struct sk_buff *skb, u_int32_t user)
+int FASTPATH nf_ct_ipv4_gather_frags(struct sk_buff *skb, u_int32_t user)
 {
 	int err;
 
