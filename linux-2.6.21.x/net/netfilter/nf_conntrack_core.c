@@ -1157,7 +1157,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 	 * full skip not ipv4 and mcast/bcast traffic by software offload and filtering section
 	 * allow only established/reply tpc/udp protocol packets for processing in software offload
 	 */
-	if ((pf != PF_INET) || FASTNAT_SKIP_NEW(ctinfo) || FASTNAT_SKIP_PROTO(protonum) || FASTNAT_SKIP_TYPE(*pskb))
+	if (FASTNAT_SKIP_PROTO(protonum) || FASTNAT_SKIP_TYPE(*pskb) || (pf != PF_INET))
 	    goto skip;
 
 #ifdef CONFIG_BCM_NAT
@@ -1165,7 +1165,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 	 * software route offload path
 	 * send pkts to fastroute if adress not changed (not nat)
 	 */
-        if (nf_conntrack_fastroute && !skip_offload && skb_is_ready(*pskb) && is_pure_routing(ct)) {
+        if (nf_conntrack_fastroute && !skip_offload && skb_is_ready(*pskb) && is_pure_routing(ct); && FASTNAT_ESTABLISHED(ctinfo)) {
     	    int bcmverdict = bcm_do_fastroute(ct, pskb, hooknum, set_reply);
 	    /* if accept - continue process in normal path */
     	    if (bcmverdict != NF_ACCEPT)
@@ -1173,7 +1173,8 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 	}
 #endif
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE) || defined(CONFIG_BCM_NAT)
-        /* packets for nat ? */
+
+        /* packets marked for nat ? */
         nat = nfct_nat(ct);
 
 	/* this code section may be used for skip some types traffic,
@@ -1230,8 +1231,10 @@ pass:
 	 * software nat offload path
 	 * send pkts to fastroute if adress changed (nat)
 	 */
-	if (nf_conntrack_fastnat && nat && (hooknum == NF_IP_PRE_ROUTING) && !(nat->info.nat_type & NF_FAST_NAT_DENY) && !is_pure_routing(ct))
-	    ret = bcm_do_fastnat(ct, ctinfo, pskb, l3proto, l4proto);
+	if (nf_conntrack_fastnat && (hooknum == NF_IP_PRE_ROUTING) &&
+	    (FASTNAT_ESTABLISHED(ctinfo) || protonum == IPPROTO_UDP) &&
+	    nat && !(nat->info.nat_type & NF_FAST_NAT_DENY) && !is_pure_routing(ct))
+		ret = bcm_do_fastnat(ct, ctinfo, pskb, l3proto, l4proto);
 #endif
 skip:
 #endif /* RA_HW_NAT || BCM_NAT */
