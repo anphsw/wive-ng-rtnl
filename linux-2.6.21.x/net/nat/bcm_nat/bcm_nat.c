@@ -145,7 +145,7 @@ int FASTPATH bcm_do_fastroute(struct nf_conn *ct,
 	    }
 	}
 
-	/* return accept for comtinue normal processing */
+	/* return accept for continue normal processing */
 	return NF_ACCEPT;
 }
 
