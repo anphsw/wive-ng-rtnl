@@ -468,6 +468,11 @@ function formCheck(form)
               <select id="vpn_cpu_limit_select" disabled="disabled" name="vpn_cpu_limit_type" onChange="cpuLimitChange(this.form);" class="mid" >
                 <option value="0">Disabled</option>
                 <option value="1" selected="selected">Custom</option>
+                <option value="220000">220000</option>
+                <option value="230000">230000</option>
+                <option value="240000">240000</option>
+                <option value="250000">250000</option>
+                <option value="260000">260000</option>
                 <option value="270000">270000</option>
                 <option value="280000">280000</option>
                 <option value="290000">290000</option>
@@ -479,11 +484,6 @@ function formCheck(form)
                 <option value="350000">350000</option>
                 <option value="360000">360000</option>
                 <option value="370000">370000</option>
-                <option value="380000">380000</option>
-                <option value="390000">390000</option>
-                <option value="400000">400000</option>
-                <option value="410000">410000</option>
-                <option value="420000">420000</option>
               </select></td>
           </tr>
           <tr id="table_vpn_params02" onMouseOver="showHint('vpn_lcp_interval')" onMouseOut="hideHint('vpn_lcp_interval')">
