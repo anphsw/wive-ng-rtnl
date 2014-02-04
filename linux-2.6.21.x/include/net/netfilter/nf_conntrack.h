@@ -122,7 +122,11 @@ struct nf_conn
 	/* features - nat, helper, ... used by allocating system */
 	u_int32_t features;
 
-#if defined(CONFIG_NF_CONNTRACK_MARK)
+#ifdef CONFIG_BCM_NAT
+	u_int32_t nat_type;
+#endif
+
+#ifdef CONFIG_NF_CONNTRACK_MARK
 	u_int32_t mark;
 #endif
 

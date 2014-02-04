@@ -62,11 +62,8 @@ target(struct sk_buff **pskb,
 			if (newmark != ct->mark) {
 				ct->mark = newmark;
 #ifdef CONFIG_BCM_NAT
-				if (nf_conntrack_fastnat) {
-				    struct nf_conn_nat *nat = nfct_nat(ct);
-				    if(nat)
-					nat->info.nat_type |= NF_FAST_NAT_DENY;
-				}
+				if (nf_conntrack_fastnat)
+				    ct->nat_type |= NF_FAST_NAT_DENY;
 #endif
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 				if (IS_SPACE_AVAILABLED(*pskb) && IS_MAGIC_TAG_VALID(*pskb))
