@@ -1166,10 +1166,10 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 	 * send pkts to fastroute if adress not changed (not nat)
 	 */
         if (nf_conntrack_fastroute && !skip_offload && skb_is_ready(*pskb) && is_pure_routing(ct)) {
-    	    int ret = bcm_do_fastroute(ct, pskb, hooknum, set_reply);
+    	    int bcmverdict = bcm_do_fastroute(ct, pskb, hooknum, set_reply);
 	    /* if accept - continue process in normal path */
-    	    if (ret != NF_ACCEPT)
-		return ret;
+    	    if (bcmverdict != NF_ACCEPT)
+		return bcmverdict;
 	}
 #endif
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE) || defined(CONFIG_BCM_NAT)
@@ -1230,7 +1230,7 @@ pass:
 	 * software nat offload path
 	 * send pkts to fastroute if adress changed (nat)
 	 */
-	if (nf_conntrack_fastnat && nat && (hooknum == NF_IP_PRE_ROUTING) && !(nat->info.nat_type & NF_FAST_NAT_DENY))
+	if (nf_conntrack_fastnat && nat && (hooknum == NF_IP_PRE_ROUTING) && !(nat->info.nat_type & NF_FAST_NAT_DENY) && !is_pure_routing(ct))
 	    ret = bcm_do_fastnat(ct, ctinfo, pskb, l3proto, l4proto);
 #endif
 skip:
