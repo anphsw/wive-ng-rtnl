@@ -1810,7 +1810,7 @@
 13) libupnp: update to 1.6.19.<br>
 14) radvd: update to 1.9.8 version.<br>
 15) ntfs-3g: up to 2013.1.13 version.<br>
-16) miniupnpd: update to 1.8.20140127 version.<br>
+16) miniupnpd: update to 1.8.20140203 version.<br>
 17) ppp: policer: decrease max limit and increase range for down limit, set different limits for 3x50/3x52/3883 devices.<br>
 18) kernel: ip6_tunnel: ensure to always have a link local address(RFC4862 and RFC4291 more compat).<br>
 19) kernel: fastroute: small speedup and more readable code.<br>

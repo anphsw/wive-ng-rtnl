@@ -924,15 +924,14 @@ get_dnat_target(const char * daddr, unsigned short dport)
 	       + IPT_ALIGN(sizeof(struct ip_nat_multi_range));
 	target = calloc(1, size);
 	target->u.target_size = size;
-	strncpy(target->u.user.name, "DNAT", IPT_FUNCTION_MAXNAMELEN);
+	strncpy(target->u.user.name, "DNAT", sizeof(target->u.user.name));
 	/* one ip_nat_range already included in ip_nat_multi_range */
 	mr = (struct ip_nat_multi_range *)&target->data[0];
 	mr->rangesize = 1;
 	range = &mr->range[0];
 	range->min_ip = range->max_ip = inet_addr(daddr);
 	range->flags |= IP_NAT_RANGE_MAP_IPS;
-	range->max.all = htons(dport);
-	range->min.all = htons(dport);
+	range->min.all = range->max.all = htons(dport);
 	range->flags |= IP_NAT_RANGE_PROTO_SPECIFIED;
 	return target;
 }

@@ -40,6 +40,7 @@ done
 # replace defaults
 LEASEFILE=1
 VENDORCFG=1
+PCP=1
 
 # need move to new glibc version
 #IPV6=`cat ../../linux/.config | grep "CONFIG_IPV6=y" -c`
@@ -365,7 +366,7 @@ echo "/* Uncomment the following line to enable caching of results of" >> ${CONF
 echo " * the getifstats() function */" >> ${CONFIGFILE}
 echo "#define ENABLE_GETIFSTATS_CACHING" >> ${CONFIGFILE}
 echo "/* The cache duration is indicated in seconds */" >> ${CONFIGFILE}
-echo "#define GETIFSTATS_CACHING_DURATION 2" >> ${CONFIGFILE}
+echo "#define GETIFSTATS_CACHING_DURATION 3" >> ${CONFIGFILE}
 echo "" >> ${CONFIGFILE}
 
 echo "/* Uncomment the following line to enable multiple external ip support */" >> ${CONFIGFILE}
