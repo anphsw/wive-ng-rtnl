@@ -1230,7 +1230,7 @@ pass:
 	 * software nat offload path
 	 * send pkts to fastroute if adress changed (nat)
 	 */
-	if (nf_conntrack_fastnat && nat && (hooknum == NF_IP_PRE_ROUTING) && !(nat->info.nat_type & NF_FAST_NAT_DENY) && !is_pure_routing(ct))
+	if (nf_conntrack_fastnat && nat && (hooknum == NF_IP_PRE_ROUTING) && !(nat->info.nat_type & NF_FAST_NAT_DENY))
 	    ret = bcm_do_fastnat(ct, ctinfo, pskb, l3proto, l4proto);
 #endif
 skip:
