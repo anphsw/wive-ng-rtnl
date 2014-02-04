@@ -74,7 +74,7 @@
 
   <message msgid="upload title" msgstr="Upgrade Firmware" />
   <message msgid="upload introduction1" msgstr="Upgrade Wive-NG-RTNL firmware to obtain new functionality. " />
-  <message msgid="upload introduction2" msgstr="It takes about 1 minute to upload firmware &amp; upgrade flash.Please be patient. Caution! A corrupted image will hang up the system." />
+  <message msgid="upload introduction2" msgstr="It takes about 2 minute to upload firmware &amp; upgrade flash.Please be patient. Caution! A corrupted image will hang up the system." />
   <message msgid="upload firmware" msgstr="Update Firmware" />
   <message msgid="upload firmware location" msgstr="Location:" />
   <message msgid="upload bootloader" msgstr="Update Bootloader" />

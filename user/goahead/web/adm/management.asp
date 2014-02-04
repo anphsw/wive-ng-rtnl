@@ -116,7 +116,7 @@ function onImportSettings(form)
       <div id="staticText">
         <p>You can select language and set administrator login and password here.</p>
         <p>You can also upgrade the Wive-NG-RTNL firmware to obtain new functionality.
-          It takes about 1 minute to upload firmware &amp; upgrade flash. Please be patient.</p>
+          It takes about 2 minute to upload firmware &amp; upgrade flash. Please be patient.</p>
         <p style="color: #ff0000;">Caution! A corrupted image will hang up the system.</p>
       </div>
       <hr>

@@ -88,7 +88,7 @@ function showHint(key)
 		else if (key=='vpn_pure_pppoe')
 			text += 'Enable PURE mode if you ISP use PPPoE without DHCP (Rostelecom/R-Telecom and others ISP).';
 		else if (key=='vpn_cpu_limit')
-			text += 'This option prevents full CPU load by ppp kernel thread.';
+			text += 'This option prevents full CPU load by ppp kernel thread. Start by 5000 ticks.';
 		else if (key=='vpn_lcp_errors')
 			text += 'If this option is given, pppd will presume the peer to be dead if n LCP ' +
 				'echo-requests are sent without receiving a valid LCP echo-reply. If this happens, ' +
@@ -468,6 +468,8 @@ function formCheck(form)
               <select id="vpn_cpu_limit_select" disabled="disabled" name="vpn_cpu_limit_type" onChange="cpuLimitChange(this.form);" class="mid" >
                 <option value="0">Disabled</option>
                 <option value="1" selected="selected">Custom</option>
+                <option value="200000">200000</option>
+                <option value="210000">210000</option>
                 <option value="220000">220000</option>
                 <option value="230000">230000</option>
                 <option value="240000">240000</option>
@@ -482,8 +484,6 @@ function formCheck(form)
                 <option value="330000">330000</option>
                 <option value="340000">340000</option>
                 <option value="350000">350000</option>
-                <option value="360000">360000</option>
-                <option value="370000">370000</option>
               </select></td>
           </tr>
           <tr id="table_vpn_params02" onMouseOver="showHint('vpn_lcp_interval')" onMouseOut="hideHint('vpn_lcp_interval')">
