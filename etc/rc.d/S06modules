@@ -6,7 +6,7 @@
 # include kernel config
 . /etc/scripts/config.sh
 
-LOG="echo MODULES"
+LOG="logger -t modules"
 
 start() {
     get_param

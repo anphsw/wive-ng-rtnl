@@ -124,7 +124,7 @@ int main(int argc, char** argv)
 
 	/* Initialize the web server */
 	if (initWebs() < 0) {
-		//Clean-up and exit
+		/* Clean-up and exit */
 #ifdef CONFIG_USER_GOAHEAD_HAS_WPSBTN
 	    if (pid > 0)
 		kill(pid, SIGTERM);
@@ -138,21 +138,25 @@ int main(int argc, char** argv)
     	    /* Start needed services */
 	    initInternet();
 
-	    /* Backup nvram setting and save rwfs */
-	    system("[ ! -f /etc/backup/nvram_backup.dat ] && (sleep 20 && fs backup_nvram && fs save) &");
+#ifdef CONFIG_USB
+	    /* Rescan usb devices after start */
+	    doSystem("service hotplug rescan");
+#endif
 
-	    //Security LED init
+	    /* Backup nvram setting and save rwfs */
+	    doSystem("[ ! -f /etc/backup/nvram_backup.dat ] && (sleep 20 && fs backup_nvram && fs save) &");
+
+	    /* Security LED init */
 	    auth_mode = nvram_get(RT2860_NVRAM, "AuthMode");
 	    if (!strcmp(auth_mode, "Disable") || !strcmp(auth_mode, "OPEN"))
 		ledAlways(GPIO_LED_SEC_GREEN, LED_OFF);	//Turn off security LED
 	    else
 		ledAlways(GPIO_LED_SEC_GREEN, LED_ON);	//Turn on security LED
 
-	    //Work - Green ON
+	    /* Work - Green ON */
 	    ledAlways(GPIO_LED_WAN_ORANGE, LED_OFF);	//Turn off orange LED
 	    ledAlways(GPIO_LED_WAN_GREEN, LED_ON);	//Turn on green LED
 	    ledAlways(GPIO_POWER_LED, LED_ON);		//Turn on power LED
-
 	}
 
 /*

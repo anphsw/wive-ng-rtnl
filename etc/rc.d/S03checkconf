@@ -5,7 +5,7 @@ if [ -f /tmp/nvram_checked -o -f /var/run/goahead.pid ] && [ "$1" != "genmac" ];
     exit 0
 fi
 
-LOG="echo CHECKCONF"
+LOG="logger -t CHECKCONF"
 
 start() {
     # get variables
