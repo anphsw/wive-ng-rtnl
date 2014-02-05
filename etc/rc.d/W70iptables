@@ -43,7 +43,7 @@ start() {
 	    iptables -A servicelimit -i $lan_if -p udp --dport 67 -j ACCEPT
 	fi
 	if [ "$RemoteManagement" != "0" ]; then
-	    $LOG "web limit"
+	    $LOG "Remote managment web limit"
     	    iptables -A servicelimit -p tcp --dport $RemoteManagementPort $CONNLIMIT 16 -j REJECT
 	    if [ "$RemoteManagement" = "1" ]; then
     		iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport $RemoteManagementPort -j ACCEPT
@@ -55,7 +55,7 @@ start() {
 	    fi
 	fi
 	if [ "$RemoteSSH" != "0" ]; then
-	    $LOG "ssh limit"
+	    $LOG "Remote managment ssh limit"
     	    iptables -A servicelimit $STATE_NEW -p tcp --dport $RemoteSSHPort $CONNLIMIT 4 -j REJECT
 	    if [ "$RemoteSSH" = "1" ]; then
     		iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport $RemoteSSHPort -j ACCEPT
@@ -67,7 +67,7 @@ start() {
 	    fi
 	fi
 	if [ "$RemoteTelnet" != "0" ]; then
-	    $LOG "telnet limit"
+	    $LOG "Remote managment telnet limit"
     	    iptables -A servicelimit $STATE_NEW -p tcp --dport 23 $CONNLIMIT 4 -j REJECT
 	    if [ "$RemoteTelnet" = "1" ]; then
     		iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 23 -j ACCEPT
@@ -79,8 +79,7 @@ start() {
 	    fi
 	fi
 	if [ "$RemoteFTP" != "0" ]; then
-	    $LOG "ftp limit"
-    	    iptables -A servicelimit $STATE_NEW -p tcp -m multiport --dport 20,$FtpPort $CONNLIMIT 4 -j REJECT
+	    $LOG "FTP allow to connect"
 	    if [ "$RemoteFTP" = "1" ]; then
     		iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp -m multiport --dport 20,$FtpPort -j ACCEPT
 	        if [ "$Lan2Enabled" = "1" ]; then
@@ -91,7 +90,7 @@ start() {
 	    fi
 	fi
 	if [ "$upnpEnabled" = "1" ] && [ "$OperationMode" != "0" ] && [ "$ApCliBridgeOnly" != "1" ]; then
-	    $LOG "upnp"
+	    $LOG "UPNP allow to connect"
 	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 8666 -j ACCEPT
 	    # not safe fix me later
 	    iptables -A servicelimit -i $lan_if -p udp --dport "$LOCAL_PRT" -j ACCEPT
@@ -104,7 +103,7 @@ start() {
 	    fi
 	fi
 	if [ "$xupnpd" = "1" ]; then
-	    $LOG "xupnpd"
+	    $LOG "Xupnpd allow to connect"
 	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 4044 -j ACCEPT
 	    # not safe fix me later
 	    iptables -A servicelimit -i $lan_if -p udp --dport "$LOCAL_PRT" -j ACCEPT
@@ -117,39 +116,38 @@ start() {
 	    fi
 	fi
 	if [ "$UDPXYMode" != "0" ]; then
-	    $LOG "udpxy limit"
-    	    iptables -A servicelimit $STATE_NEW -p tcp --dport $UDPXYPort $CONNLIMIT 8 -j REJECT
+	    $LOG "Udpxy allow to connect"
 	    if [ "$UDPXYMode" = "1" ]; then
     		iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport $UDPXYPort -j ACCEPT
-	     if [ "$Lan2Enabled" = "1" ]; then
-    		iptables -A servicelimit -i $lan2_if $STATE_NEW -p tcp --dport $UDPXYPort -j ACCEPT
-	     fi
+		if [ "$Lan2Enabled" = "1" ]; then
+		    iptables -A servicelimit -i $lan2_if $STATE_NEW -p tcp --dport $UDPXYPort -j ACCEPT
+		fi
 	    elif [ "$UDPXYMode" = "2" ]; then
     		iptables -A servicelimit $STATE_NEW -p tcp --dport $UDPXYPort -j ACCEPT
 	    fi
 	fi
 	if [ "$SmbEnabled" = "1" ]; then
-	    $LOG "samba"
+	    $LOG "Samba allow to connect"
 	    iptables -A servicelimit -i $lan_if -p udp --dport 137:138 -j ACCEPT
 	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp -m multiport --dport 139,445 -j ACCEPT
 	    # not safe fix me later
 	    iptables -A servicelimit -i $lan_if -p udp --dport "$LOCAL_PRT" -j ACCEPT
 	fi
 	if [ "$dnsPEnabled" = "1" ]; then
-	    $LOG "dnsproxy"
+	    $LOG "Dnsproxy allow to connect"
 	    iptables -A servicelimit -i $lan_if -p udp --dport 53 -j ACCEPT
 	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 53 -j ACCEPT
 	fi
 	if [ "$snmpd" = "1" ]; then
-	    $LOG "snmpd"
+	    $LOG "SNMP allow to connect"
 	    iptables -A servicelimit -i $lan_if -p udp --dport 161 -j ACCEPT
 	fi
 	if [ "$PrinterSrvEnabled" = "1" ]; then
-	    $LOG "Printer Server"
+	    $LOG "Print server allow to connect"
 	    iptables -A servicelimit -i $lan_if -p tcp --dport 9100 -j ACCEPT
 	fi
 	if [ "$TransmissionEnabled" = "1" ]; then
-	    $LOG "transmission"
+	    $LOG "Transmission allow to connect"
 	    # RPC
 	    if [ "$TransAccess" = "1" ]; then
 		iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport $TransRPCPort -j ACCEPT
