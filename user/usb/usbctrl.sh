@@ -58,7 +58,7 @@ case $TYPE in
 	    if [ ! -d /sys/module/usb-storage ]; then
 		$LOG "Load module usb-storage and wait initialization to complete"
 		modprobe -q usb-storage
-		sleep 2
+		sleep 3
 		count=0
 		while [ ! -d /sys/module/usb_storage ]; do
 		    modprobe -q usb-storage
