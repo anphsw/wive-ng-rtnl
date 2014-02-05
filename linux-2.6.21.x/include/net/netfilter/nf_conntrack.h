@@ -114,11 +114,6 @@ struct nf_conn
 	/* Timer function; drops refcnt when it goes off. */
 	struct timer_list timeout;
 
-#ifdef CONFIG_NF_CT_ACCT
-	/* Accounting Information (same cache line as other written members) */
-	struct ip_conntrack_counter counters[IP_CT_DIR_MAX];
-#endif
-
 	/* features - nat, helper, ... used by allocating system */
 	u_int32_t features;
 
@@ -132,6 +127,11 @@ struct nf_conn
 
 #ifdef CONFIG_NF_CONNTRACK_SECMARK
 	u_int32_t secmark;
+#endif
+
+#ifdef CONFIG_NF_CT_ACCT
+	/* Accounting Information (same cache line as other written members) */
+	struct ip_conntrack_counter counters[IP_CT_DIR_MAX];
 #endif
 
 #if defined(CONFIG_NETFILTER_XT_MATCH_LAYER7) || \
