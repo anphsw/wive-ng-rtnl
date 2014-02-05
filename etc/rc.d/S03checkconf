@@ -160,7 +160,8 @@ start() {
 get_param() {
     # get parametrs
     eval `nvram_buf_get 2860 IS_WIVE CHECKMAC Login Password OperationMode lan_ipaddr lan_netmask TZ \
-	    WorkGroup SmbNetBIOS SmbString HostName UDPXYPort RemoteManagementPort ApCliBridgeOnly ApCliClientOnly`
+	    WorkGroup SmbNetBIOS SmbString HostName UDPXYPort RemoteManagementPort RemoteSSHPort \
+	    ApCliBridgeOnly ApCliClientOnly`
 
     VENDMASK="00:0B:2B"
     VENDNAME="Acorp"
