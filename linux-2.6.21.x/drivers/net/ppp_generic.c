@@ -278,7 +278,6 @@ static atomic_t channel_count = ATOMIC_INIT(0);
 #endif
 
 /* Prototypes. */
-void ppp_stat_add(struct ppp_channel *chan, struct sk_buff *skb);
 static int ppp_unattached_ioctl(struct ppp_file *pf, struct file *file,
 				unsigned int cmd, unsigned long arg);
 static void ppp_xmit_process(struct ppp *ppp);
@@ -1056,7 +1055,7 @@ static void ppp_setup(struct net_device *dev)
  * Called to do any work queued up on the transmit side
  * that can now be done.
  */
-static void
+static inline void
 ppp_xmit_process(struct ppp *ppp)
 {
 	struct sk_buff *skb;
@@ -1077,7 +1076,7 @@ ppp_xmit_process(struct ppp *ppp)
 	ppp_xmit_unlock(ppp);
 }
 
-static inline struct sk_buff *
+static struct sk_buff *
 pad_compress_skb(struct ppp *ppp, struct sk_buff *skb)
 {
 	struct sk_buff *new_skb;
@@ -1131,7 +1130,7 @@ pad_compress_skb(struct ppp *ppp, struct sk_buff *skb)
  * The caller should have locked the xmit path,
  * and xmit_pending should be 0.
  */
-static void FASTPATH
+static void
 ppp_send_frame(struct ppp *ppp, struct sk_buff *skb)
 {
 	int proto = PPP_PROTO(skb);
@@ -1287,7 +1286,7 @@ drop:
  * Try to send the frame in xmit_pending.
  * The caller should have the xmit path locked.
  */
-static void
+static inline void
 ppp_push(struct ppp *ppp)
 {
 	struct list_head *list;
@@ -1589,16 +1588,6 @@ ppp_do_recv(struct ppp *ppp, struct sk_buff *skb, struct channel *pch)
 	ppp_recv_unlock(ppp);
 }
 
-void ppp_stat_add(struct ppp_channel *chan, struct sk_buff *skb) {
-	struct channel *pch = chan->ppp;
-
-	if (pch == 0 || pch->ppp == 0 || skb->len == 0 ) return;
-
-	skb->dev = pch->ppp->dev;
-	pch->ppp->stats.rx_packets++;
-	pch->ppp->stats.rx_bytes += skb->len;
-}
-
 void
 ppp_input(struct ppp_channel *chan, struct sk_buff *skb)
 {
@@ -1662,7 +1651,7 @@ ppp_input_error(struct ppp_channel *chan, int code)
  * We come in here to process a received frame.
  * The receive side of the ppp unit is locked.
  */
-static void FASTPATH
+static inline void
 ppp_receive_frame(struct ppp *ppp, struct sk_buff *skb, struct channel *pch)
 {
 	/* note: a 0-length skb is used as an error indication */
@@ -1680,7 +1669,7 @@ ppp_receive_frame(struct ppp *ppp, struct sk_buff *skb, struct channel *pch)
 	}
 }
 
-static void
+static inline  void
 ppp_receive_error(struct ppp *ppp)
 {
 	++ppp->stats.rx_errors;
@@ -2995,7 +2984,6 @@ static void cardmap_destroy(struct cardmap **pmap)
 module_init(ppp_init);
 module_exit(ppp_cleanup);
 
-EXPORT_SYMBOL(ppp_stat_add);
 EXPORT_SYMBOL(ppp_register_channel);
 EXPORT_SYMBOL(ppp_unregister_channel);
 EXPORT_SYMBOL(ppp_channel_index);
