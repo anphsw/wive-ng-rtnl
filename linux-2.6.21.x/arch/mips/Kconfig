@@ -109,7 +109,6 @@ config RALINK_RT3883
 	select BOOT_ELF32
 	select SYS_SUPPORTS_32BIT_KERNEL
 	select CPU_SUPPORTS_HIGHMEM
-	select HIGH_RES_TIMERS
 	select RALINK_RT3883_MP
 	help
 	 Ralink evaluation board based on RT3883
@@ -128,7 +127,6 @@ config RALINK_MT7620
 	select BOOT_ELF32
 	select SYS_SUPPORTS_32BIT_KERNEL
 	select CPU_SUPPORTS_HIGHMEM
-	select HIGH_RES_TIMERS
 	select RALINK_MT7620_MP
         help
          Ralink evaluation board based on MT7620
