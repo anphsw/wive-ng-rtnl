@@ -26,6 +26,6 @@ config HIGH_RES_TIMERS
 
 config GENERIC_CLOCKEVENTS_BUILD
 	bool
-	default y
+	default n
 	depends on GENERIC_CLOCKEVENTS || GENERIC_CLOCKEVENTS_MIGR
 

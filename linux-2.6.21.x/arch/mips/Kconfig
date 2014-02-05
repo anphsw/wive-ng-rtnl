@@ -3,7 +3,6 @@ config MIPS
 	default y
 	select EMBEDDED
         select GENERIC_IRQ_PROBE
-        select GENERIC_CLOCKEVENTS
 	select HAVE_GET_USER_PAGES_FAST
 
 
@@ -178,10 +177,6 @@ config GENERIC_CMOS_UPDATE
 	default y
 
 config GENERIC_TIME
-	bool
-	default y
-
-config GENERIC_CLOCKEVENTS
 	bool
 	default y
 
