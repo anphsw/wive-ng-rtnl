@@ -1998,7 +1998,7 @@ static int FASTPATH ei_start_xmit(struct sk_buff* skb, struct net_device *dev, i
 	return 0;
 }
 
-static inline int FASTPATH ei_start_xmit_fake(struct sk_buff* skb, struct net_device *dev)
+static inline int ei_start_xmit_fake(struct sk_buff* skb, struct net_device *dev)
 {
 	return ei_start_xmit(skb, dev, 1);
 }

@@ -26,19 +26,20 @@ extern int manip_pkt(u_int16_t proto, struct sk_buff **pskb, unsigned int iphdro
 /*
  * check SKB really accesseble
  */
-int FASTPATH skb_is_ready(struct sk_buff *skb)
+inline int skb_is_ready(struct sk_buff *skb)
 {
 	if (skb_cloned(skb) && !skb->sk)
 		return 0;
 	return 1;
 }
+EXPORT_SYMBOL_GPL(skb_is_ready);
 
 /*
  * check route mode
  * 1 - clean route without adress changes
  * 0 - route with adress changes
  */
-int FASTPATH is_pure_routing(struct nf_conn *ct)
+inline int is_pure_routing(struct nf_conn *ct)
 {
 	struct nf_conntrack_tuple *t1, *t2;
 
@@ -50,13 +51,13 @@ int FASTPATH is_pure_routing(struct nf_conn *ct)
 		t1->dst.u.all == t2->src.u.all &&
 		t1->src.u.all == t2->dst.u.all);
 }
-
+EXPORT_SYMBOL_GPL(is_pure_routing);
 
 /*
  * Direct send packets to output.
  * Stolen from ip_finish_output2.
  */
-int FASTPATH bcm_fast_path_output(struct sk_buff *skb)
+static inline int bcm_fast_path_output(struct sk_buff *skb)
 {
 	struct dst_entry *dst = skb->dst;
 	struct net_device *dev = dst->dev;

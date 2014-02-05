@@ -400,19 +400,19 @@ void rt2880_irqdispatch(void)
 #if defined(CONFIG_RALINK_RT2880) || defined(CONFIG_RALINK_RT3883)
 			 pci_status = RALINK_PCI_PCIINT_ADDR;
 #endif
-			 if(pci_order ==0) { 
-#if defined(CONFIG_RT2880_ASIC) 
+			 if(pci_order ==0) {
+#if defined(CONFIG_RT2880_ASIC)
 				if(pci_status &0x40000)
-#elif defined(CONFIG_RT2880_FPGA) 
+#elif defined(CONFIG_RT2880_FPGA)
 				if(pci_status &0x80000)
 #endif
 					do_IRQ(2);
 				else // if(pci_status & 0x40000)
 					do_IRQ(15);
 			 } else {
-#if defined(CONFIG_RT2880_ASIC)  
+#if defined(CONFIG_RT2880_ASIC)
 				if(pci_status &0x80000)
-#elif defined(CONFIG_RT2880_FPGA) 
+#elif defined(CONFIG_RT2880_FPGA)
 				if(pci_status &0x40000)
 #endif
 					do_IRQ(15);
@@ -433,7 +433,7 @@ void rt2880_irqdispatch(void)
 
 	return;
 }
-asmlinkage void FASTPATH plat_irq_dispatch(void)
+asmlinkage void plat_irq_dispatch(void)
 {
         unsigned int pending = read_c0_status() & read_c0_cause() & ST0_IM;
         if (pending & CAUSEF_IP7)

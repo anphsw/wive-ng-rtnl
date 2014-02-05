@@ -221,7 +221,7 @@ restart:
 
 #ifndef __ARCH_HAS_DO_SOFTIRQ
 
-asmlinkage void FASTPATH do_softirq(void)
+asmlinkage void do_softirq(void)
 {
 	__u32 pending;
 	unsigned long flags;

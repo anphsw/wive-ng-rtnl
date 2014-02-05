@@ -203,7 +203,7 @@ void br_fdb_delete_by_port(struct net_bridge *br,
 }
 
 /* No locking or refcounting, assumes caller has no preempt (rcu_read_lock) */
-struct net_bridge_fdb_entry FASTPATH *__br_fdb_get(struct net_bridge *br,
+struct net_bridge_fdb_entry *__br_fdb_get(struct net_bridge *br,
 					  const unsigned char *addr)
 {
 	struct hlist_node *h;
@@ -221,7 +221,7 @@ struct net_bridge_fdb_entry FASTPATH *__br_fdb_get(struct net_bridge *br,
 }
 
 /* Interface used by ATM hook that keeps a ref count */
-struct net_bridge_fdb_entry FASTPATH *br_fdb_get(struct net_bridge *br,
+struct net_bridge_fdb_entry *br_fdb_get(struct net_bridge *br,
 					unsigned char *addr)
 {
 	struct net_bridge_fdb_entry *fdb;

@@ -151,7 +151,7 @@ int eth_rebuild_header(struct sk_buff *skb)
  * assume 802.3 if the type field is short enough to be a length.
  * This is normal practice and works for any 'now in use' protocol.
  */
-__be16 FASTPATH eth_type_trans(struct sk_buff *skb, struct net_device *dev)
+__be16 eth_type_trans(struct sk_buff *skb, struct net_device *dev)
 {
 	struct ethhdr *eth;
 	unsigned char *rawp;
