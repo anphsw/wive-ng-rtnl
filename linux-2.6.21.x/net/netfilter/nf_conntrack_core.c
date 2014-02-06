@@ -893,6 +893,9 @@ init_conntrack(const struct nf_conntrack_tuple *tuple,
 #ifdef CONFIG_NF_CONNTRACK_SECMARK
 		conntrack->secmark = exp->master->secmark;
 #endif
+#ifdef CONFIG_BCM_NAT
+		conntrack->nat_type = 0;
+#endif
 		nf_conntrack_get(&conntrack->master->ct_general);
 		NF_CT_STAT_INC(expect_new);
 	} else {
