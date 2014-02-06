@@ -8,7 +8,6 @@
 #NO_APP
 	.align	2
 	.globl	_init
-	.ent	_init
 	.type	_init, @function
 #NO_APP
 	lw	$31,28($sp)
@@ -27,7 +26,6 @@
 #NO_APP
 	.align	2
 	.globl	_fini
-	.ent	_fini
 	.type	_fini, @function
 #NO_APP
 	lw	$31,28($sp)

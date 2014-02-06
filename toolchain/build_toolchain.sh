@@ -3,11 +3,11 @@
 CURDIR=`pwd`
 
 KERNELHDRS=kernel-headers
-BINUTILVER=binutils-2.21
+BINUTILVER=binutils-2.24
 UCLIBCVER=uClibc-0.9.28
 GCCVER=gcc-4.8.2
 
-INSTALL_DEP=NO
+INSTALL_DEP=YES
 UNPACK=YES
 HEADERS=YES
 BINUTILS=YES
@@ -158,7 +158,8 @@ if [ "$BINUTILS" = "YES" ]; then
     echo "=====================BUILD-BINUTILS====================="
     mkdir -p build-binutils && cd build-binutils
     (../$BINUTILVER/configure --target=$TARGET --prefix=$PREFIX --includedir=$KERNEL_HEADERS \
-	--with-sysroot=$PREFIX --with-build-sysroot=$PREFIX && \
+	--with-sysroot=$PREFIX --with-build-sysroot=$PREFIX \
+	--disable-gold --disable-libquadmath --disable-libquadmath-support --disable-lto --disable-werror && \
     make -j4 KERNEL_HEADERS=$KERNEL_HEADERS && \
     make install) || exit 1
     cd ..
