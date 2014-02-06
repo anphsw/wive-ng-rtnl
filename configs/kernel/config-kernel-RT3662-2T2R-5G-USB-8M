@@ -1,6 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # Linux kernel version: 
+# Thu Feb  6 16:14:50 2014
 #
 CONFIG_MIPS=y
 
@@ -154,6 +155,7 @@ CONFIG_SYSVIPC_SYSCTL=y
 # CONFIG_FAIR_GROUP_SCHED is not set
 # CONFIG_SYSFS_DEPRECATED is not set
 # CONFIG_RELAY is not set
+# CONFIG_TICK_ONESHOT is not set
 CONFIG_LZMA_COMPRESS_LEVEL=27
 CONFIG_SYSCTL=y
 CONFIG_EMBEDDED=y
@@ -1609,7 +1611,6 @@ CONFIG_RALINK_RT3662_2T2R=y
 #
 CONFIG_RA_NAT_HW=y
 # CONFIG_RA_NAT_NONE is not set
-CONFIG_BCM_NAT=y
 
 #
 # Ralink RT3xx/RT28xx NAT Acell support.
@@ -1648,6 +1649,7 @@ CONFIG_RA_HW_NAT_IPV6=y
 CONFIG_RA_HW_NAT_PCI=y
 CONFIG_RA_HW_NAT_WIFI=y
 # CONFIG_HNAT_EXTENTIONS is not set
+CONFIG_BCM_NAT=y
 
 #
 # AP(STA) MODE Ralink RT3xxx wireless driver.

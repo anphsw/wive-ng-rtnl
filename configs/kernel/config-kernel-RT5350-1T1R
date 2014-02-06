@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
-# Linux kernel version: 2.6.21.40
-# Tue Oct 29 13:03:33 2013
+# Linux kernel version: 
+# Thu Feb  6 16:15:16 2014
 #
 CONFIG_MIPS=y
 
@@ -150,6 +150,7 @@ CONFIG_SYSVIPC_SYSCTL=y
 # CONFIG_FAIR_GROUP_SCHED is not set
 # CONFIG_SYSFS_DEPRECATED is not set
 # CONFIG_RELAY is not set
+# CONFIG_TICK_ONESHOT is not set
 CONFIG_LZMA_COMPRESS_LEVEL=27
 CONFIG_SYSCTL=y
 CONFIG_EMBEDDED=y
@@ -173,7 +174,7 @@ CONFIG_PANIC=y
 CONFIG_FULL_PANIC=y
 CONFIG_MEMPOOL=y
 # CONFIG_XATTR is not set
-CONFIG_FILE_LOCKING=y
+# CONFIG_FILE_LOCKING is not set
 CONFIG_ETHTOOL=y
 CONFIG_INETPEER=y
 CONFIG_NET_SK_FILTER=y
