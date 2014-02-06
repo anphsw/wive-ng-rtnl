@@ -125,10 +125,6 @@ struct net_bridge
 	struct timer_list		topology_change_timer;
 	struct timer_list		gc_timer;
 	struct kobject			ifobj;
-#ifdef CONFIG_BRIDGE_FORWARD_CTRL
-	atomic_t                        br_forward;
-	struct proc_dir_entry           * br_proc;
-#endif
 };
 
 extern struct notifier_block br_device_notifier;

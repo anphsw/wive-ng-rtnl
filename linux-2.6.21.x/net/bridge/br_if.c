@@ -189,36 +189,10 @@ static void del_br(struct net_bridge *br)
 	unregister_netdevice(br->dev);
 }
 
-#ifdef CONFIG_BRIDGE_FORWARD_CTRL
-static int proc_read_br_forward(char * buf, char ** start, off_t offset,
-               int len, int * eof, void * data)
-{
-    struct net_bridge * br = (struct net_bridge *)data;
-    char * p = buf;
-    p += sprintf(p, "%d\n", atomic_read(&br->br_forward));
-    *eof = 1;
-    return p - buf;
-}
-
-static int proc_write_br_forward(struct file * file, const char * buf,
-               unsigned long count, void * data)
-{
-    struct net_bridge * br = (struct net_bridge *)data;
-    if (count < 1)
-	return -EINVAL;
-
-    atomic_set(&br->br_forward, buf[0] == '0' ? 0 : 1);
-    return count;
-}
-#endif
-
 static struct net_device *new_bridge_dev(const char *name)
 {
 	struct net_bridge *br;
 	struct net_device *dev;
-#ifdef CONFIG_BRIDGE_FORWARD_CTRL
-	char proc_name[32];
-#endif
 
 	dev = alloc_netdev(sizeof(struct net_bridge), name,
 			   br_dev_setup);
@@ -251,16 +225,6 @@ static struct net_device *new_bridge_dev(const char *name)
 	br->topology_change = 0;
 	br->topology_change_detected = 0;
 	br->ageing_time = 300 * HZ;
-#ifdef CONFIG_BRIDGE_FORWARD_CTRL
-	atomic_set(&br->br_forward, 1);
-	snprintf(proc_name, sizeof(proc_name), "net/br_forward_%s", name);
-	br->br_proc = create_proc_entry(proc_name, 0, 0);
-	if (br->br_proc == NULL)
-		return ERR_PTR(-ENOMEM);
-	br->br_proc->data = (void *)br;
-	br->br_proc->read_proc = proc_read_br_forward;
-	br->br_proc->write_proc = proc_write_br_forward;
-#endif
 	INIT_LIST_HEAD(&br->age_list);
 
 	br_stp_timer_init(br);
@@ -360,9 +324,6 @@ int br_del_bridge(const char *name)
 {
 	struct net_device *dev;
 	int ret = 0;
-#ifdef CONFIG_BRIDGE_FORWARD_CTRL
-	char proc_name[32];
-#endif
 
 	rtnl_lock();
 	dev = __dev_get_by_name(name);
@@ -383,10 +344,6 @@ int br_del_bridge(const char *name)
 		del_br(netdev_priv(dev));
 
 	rtnl_unlock();
-#ifdef CONFIG_BRIDGE_FORWARD_CTRL
-	snprintf(proc_name, sizeof(proc_name), "net/br_forward_%s", name);
-	remove_proc_entry(proc_name, 0);
-#endif
 	return ret;
 }
 

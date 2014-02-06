@@ -113,18 +113,7 @@ no_igmp:
 #endif
 		br->statistics.multicast++;
 		skb2 = skb;
-#ifndef CONFIG_BRIDGE_FORWARD_CTRL
 	} else if ((dst = __br_fdb_get(br, dest)) && dst->is_local) {
-#else
-	/* if set disable bridge forward flag process external packets as local */
-	} else if ((dst = __br_fdb_get(br, dest)) && (dst->is_local || (atomic_read(&br->br_forward) == 0))) {
-		/* if packet not local dst need full drop procedure */
-		if (!dst->is_local) {
-		    kfree_skb(skb);
-		    br_fdb_put(dst);
-		    goto out;
-		}
-#endif
 		skb2 = skb;
 		/* Do not forward the packet since it's local. */
 		skb = NULL;
