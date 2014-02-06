@@ -286,10 +286,6 @@ extern int nf_conntrack_checksum;
 extern atomic_t nf_conntrack_count;
 extern unsigned int nf_conntrack_max;
 
-#ifdef CONFIG_NF_PRIVILEGE_CONNTRACK
-extern unsigned int nf_conntrack_max_general;
-#endif
-
 #ifdef CONFIG_NF_FLUSH_CONNTRACK
 extern unsigned int nf_conntrack_table_flush;
 #endif

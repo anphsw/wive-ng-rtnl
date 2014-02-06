@@ -98,13 +98,6 @@ extern char wan_ppp[IFNAMSIZ];
 #endif
 #endif
 
-#ifdef CONFIG_NF_PRIVILEGE_CONNTRACK
-#define CONNTRACK_PORT_ARRAY_SIZE   15
-unsigned int nf_conntrack_max_general __read_mostly;
-EXPORT_SYMBOL_GPL(nf_conntrack_max_general);
-static __u16 privilege_conntrack_port[CONNTRACK_PORT_ARRAY_SIZE]={80,23,3128,1863,5190,5222,22,21,25,110,443,53,67,68,69};
-#endif
-
 #ifdef CONFIG_NF_FLUSH_CONNTRACK
 unsigned int nf_conntrack_table_flush __read_mostly;
 #endif
@@ -447,9 +440,9 @@ __nf_conntrack_find(const struct nf_conntrack_tuple *tuple,
 
 #ifdef CONFIG_NF_FLUSH_CONNTRACK
     	if ((nf_conntrack_table_flush != 0) && (atomic_read(&nf_conntrack_count) != 0)) {
-	    nf_conntrack_table_flush=0;
 	    DEBUGP("nf_conntrack_find: clear connection track table\n");
 	    nf_conntrack_flush();
+	    nf_conntrack_table_flush=0;
     	}
 #endif
 	list_for_each_entry(h, &nf_conntrack_hash[hash], list) {
@@ -816,41 +809,6 @@ init_conntrack(const struct nf_conntrack_tuple *tuple,
 	struct nf_conntrack_tuple repl_tuple;
 	struct nf_conntrack_expect *exp;
 	u_int32_t features = 0;
-
-#ifdef CONFIG_NF_PRIVILEGE_CONNTRACK
-	int i, passable;
-	unsigned short port;
-
-	/* Here we examine by port if the traffic is allowed to pass. */
-	if(nf_conntrack_max_general && atomic_read(&nf_conntrack_count) >= nf_conntrack_max_general)
-	{
-		/* check ports */
-		passable = 0;
-		if(tuple->dst.protonum == IPPROTO_TCP || tuple->dst.protonum == IPPROTO_UDP)
-		{
-#ifdef CONFIG_NF_PRIVILEGE_CONNTRACK_DEBUG
-			printk(KERN_WARNING"conn %d exceeds limit %d\n", atomic_read(&nf_conntrack_count), nf_conntrack_max_general);
-#endif
-			/* I dont know why the skb tcp header points to wrong place */
-			port = __swab16(*((unsigned short *)(skb->nh.iph)+11));
-			for(i=0;i<CONNTRACK_PORT_ARRAY_SIZE;i++)
-				if((privilege_conntrack_port[i]) &&
-				    (privilege_conntrack_port[i]==port)){
-					passable=1;
-					break;
-				}
-		}else
-			passable = 1;
-
-		if(!passable)
-		{
-#ifdef CONFIG_NF_PRIVILEGE_CONNTRACK_DEBUG
-			printk(KERN_WARNING "nf_conntrack: general conntrack streams full, dropping packet.\n");
-#endif
-			return ERR_PTR(-ENOMEM);
-		}
-	}
-#endif /* CONFIG_NF_PRIVILEGE_CONNTRACK */
 
 	if (!nf_ct_invert_tuple(&repl_tuple, tuple, l3proto, l4proto)) {
 		DEBUGP("Can't invert tuple.\n");
@@ -1686,10 +1644,6 @@ int __init nf_conntrack_init(void)
 #endif
 #endif
         nf_conntrack_max = nf_conntrack_htable_size * 2;
-
-#ifdef CONFIG_NF_PRIVILEGE_CONNTRACK
-	nf_conntrack_max_general = nf_conntrack_max - 384;
-#endif
 	nf_conntrack_hash = alloc_hashtable(&nf_conntrack_htable_size,
 					    &nf_conntrack_vmalloc);
 	if (!nf_conntrack_hash) {

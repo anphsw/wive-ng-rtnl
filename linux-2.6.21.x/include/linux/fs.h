@@ -1476,6 +1476,8 @@ extern struct kset fs_subsys;
 #define FLOCK_VERIFY_READ  1
 #define FLOCK_VERIFY_WRITE 2
 
+extern int rw_verify_area(int, struct file *, loff_t *, size_t);
+
 #ifdef CONFIG_FILE_LOCKING
 extern int locks_mandatory_locked(struct inode *);
 extern int locks_mandatory_area(int, struct inode *, struct file *, loff_t, size_t);
@@ -1493,8 +1495,6 @@ static inline int locks_verify_locked(struct inode *inode)
 		return locks_mandatory_locked(inode);
 	return 0;
 }
-
-extern int rw_verify_area(int, struct file *, loff_t *, size_t);
 
 static inline int locks_verify_truncate(struct inode *inode,
 				    struct file *filp,

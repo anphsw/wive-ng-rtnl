@@ -407,16 +407,6 @@ static ctl_table nf_ct_netfilter_table[] = {
 		.proc_handler	= &proc_dointvec,
 	},
 #endif
-#ifdef CONFIG_NF_PRIVILEGE_CONNTRACK
-	{
-		.ctl_name	= NET_NF_CONNTRACK_MAX_GENERAL,
-		.procname	= "nf_conntrack_max_general",
-		.data		= &nf_conntrack_max_general,
-		.maxlen		= sizeof(int),
-		.mode		= 0644,
-		.proc_handler	= &proc_dointvec
-	},
-#endif
 #ifdef CONFIG_NAT_CONE
 	{
 		.ctl_name	= NET_NF_CONNTRACK_NAT_MODE,
