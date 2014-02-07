@@ -1850,6 +1850,7 @@
 53) kernel: fastroute/fastnat: consolidate code check allowed for software offload process (one check for fastroute/nat cases).<br>
 54) kernel: hw_nat: unifi udp checksumm workaround code and add skip tranzit ipsec and l2tp.<br>
 55) kernel: bridge: remove forward control dead code.<br>
+56) kernel: af_unix: fix 'poll for write'/ connected DGRAM sockets.<br>
 <br>
 <br>
 <br>
