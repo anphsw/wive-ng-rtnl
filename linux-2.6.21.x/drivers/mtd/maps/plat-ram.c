@@ -220,7 +220,7 @@ static int platram_probe(struct platform_device *pdev)
 
 #ifdef CONFIG_MTD_PARTITIONS
 	if (pdata->nr_partitions > 0) {
-		const char **probes = { NULL };
+		const char **probes;
 
 		if (pdata->probes)
 			probes = (const char **)pdata->probes;

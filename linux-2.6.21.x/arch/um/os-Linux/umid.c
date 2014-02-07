@@ -18,7 +18,7 @@
 #define UMID_LEN 64
 
 /* Changed by set_umid, which is run early in boot */
-static char umid[UMID_LEN] = { 0 };
+static char umid[UMID_LEN];
 
 /* Changed by set_uml_dir and make_uml_dir, which are run early in boot */
 static char *uml_dir = UML_DIR;

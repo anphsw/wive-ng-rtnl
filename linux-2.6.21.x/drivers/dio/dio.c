@@ -106,7 +106,7 @@ static const char *dio_getname(int id)
 
 #else
 
-static char dio_no_name[] = { 0 };
+static char dio_no_name[];
 #define dio_getname(_id)	(dio_no_name)
 
 #endif /* CONFIG_DIO_CONSTANTS */

@@ -100,7 +100,7 @@ static void __devinit init_iops_ns87415(ide_hwif_t *hwif)
 }
 #endif
 
-static unsigned int ns87415_count = 0, ns87415_control[MAX_HWIFS] = { 0 };
+static unsigned int ns87415_count = 0, ns87415_control[MAX_HWIFS];
 
 /*
  * This routine either enables/disables (according to drive->present)

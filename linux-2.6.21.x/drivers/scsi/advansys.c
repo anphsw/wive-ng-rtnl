@@ -3950,17 +3950,17 @@ typedef struct _PCI_CONFIG_SPACE_
 /* Note: All driver global data should be initialized. */
 
 /* Number of boards detected in system. */
-STATIC int asc_board_count = 0;
-STATIC struct Scsi_Host    *asc_host[ASC_NUM_BOARD_SUPPORTED] = { NULL };
+STATIC int asc_board_count;
+STATIC struct Scsi_Host    *asc_host[ASC_NUM_BOARD_SUPPORTED];
 
 /* Overrun buffer used by all narrow boards. */
-STATIC uchar overrun_buf[ASC_OVERRUN_BSIZE] = { 0 };
+STATIC uchar overrun_buf[ASC_OVERRUN_BSIZE];
 
 /*
  * Global structures required to issue a command.
  */
-STATIC ASC_SCSI_Q asc_scsi_q = { { 0 } };
-STATIC ASC_SG_HEAD asc_sg_head = { 0 };
+STATIC ASC_SCSI_Q asc_scsi_q;
+STATIC ASC_SG_HEAD asc_sg_head;
 
 /* List of supported bus types. */
 STATIC ushort asc_bus[ASC_NUM_BUS] __initdata = {

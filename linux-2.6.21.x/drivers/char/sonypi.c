@@ -780,7 +780,7 @@ static void sonypi_report_input_event(u8 event)
 {
 	struct input_dev *jog_dev = sonypi_device.input_jog_dev;
 	struct input_dev *key_dev = sonypi_device.input_key_dev;
-	struct sonypi_keypress kp = { NULL };
+	struct sonypi_keypress kp;
 	int i;
 
 	switch (event) {

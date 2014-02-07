@@ -511,14 +511,14 @@ static void vmi_set_pud(pud_t *pudp, pud_t pudval)
 
 static void vmi_pte_clear(struct mm_struct *mm, unsigned long addr, pte_t *ptep)
 {
-	const pte_t pte = { 0 };
+	const pte_t pte;
 	vmi_check_page_type(__pa(ptep) >> PAGE_SHIFT, VMI_PAGE_PTE);
 	vmi_ops.set_pte(pte, ptep, vmi_flags_addr(mm, addr, VMI_PAGE_PT, 0));
 }
 
 void vmi_pmd_clear(pmd_t *pmd)
 {
-	const pte_t pte = { 0 };
+	const pte_t pte;
 	vmi_check_page_type(__pa(pmd) >> PAGE_SHIFT, VMI_PAGE_PMD);
 	vmi_ops.set_pte(pte, (pte_t *)pmd, VMI_PAGE_PD);
 }

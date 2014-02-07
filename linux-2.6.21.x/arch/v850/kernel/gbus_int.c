@@ -25,7 +25,7 @@
 #define NUM_GINTS   	4
 
 /* For each GINT interrupt, how many GBUS interrupts are using it.  */
-static unsigned gint_num_active_irqs[NUM_GINTS] = { 0 };
+static unsigned gint_num_active_irqs[NUM_GINTS];
 
 /* A table of GINTn interrupts we actually use.
    Note that we don't use GINT0 because all the boards we support treat it

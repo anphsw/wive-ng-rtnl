@@ -235,7 +235,7 @@ static struct platform_device bast_device_nor = {
 /* NAND Flash on BAST board */
 
 
-static int smartmedia_map[] = { 0 };
+static int smartmedia_map[];
 static int chip0_map[] = { 1 };
 static int chip1_map[] = { 2 };
 static int chip2_map[] = { 3 };

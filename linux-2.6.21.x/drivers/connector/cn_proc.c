@@ -38,7 +38,7 @@ static atomic_t proc_event_num_listeners = ATOMIC_INIT(0);
 static struct cb_id cn_proc_event_id = { CN_IDX_PROC, CN_VAL_PROC };
 
 /* proc_event_counts is used as the sequence number of the netlink message */
-static DEFINE_PER_CPU(__u32, proc_event_counts) = { 0 };
+static DEFINE_PER_CPU(__u32, proc_event_counts);
 
 static inline void get_seq(__u32 *ts, int *cpu)
 {

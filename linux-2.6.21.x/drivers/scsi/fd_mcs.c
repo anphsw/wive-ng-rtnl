@@ -289,7 +289,7 @@ static unsigned short interrupts[] = { 3, 5, 10, 11, 12, 14, 15, 0 };
 
 /* host information */
 static int found = 0;
-static struct Scsi_Host *hosts[FD_MAX_HOSTS + 1] = { NULL };
+static struct Scsi_Host *hosts[FD_MAX_HOSTS + 1];
 
 static int user_fifo_count = 0;
 static int user_fifo_size = 0;

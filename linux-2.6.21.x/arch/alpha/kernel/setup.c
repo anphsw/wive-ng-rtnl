@@ -784,7 +784,7 @@ static int eb66_indices[] = {0,0,1};
 static char marvel_names[][16] = {
 	"Marvel/EV7"
 };
-static int marvel_indices[] = { 0 };
+static int marvel_indices[];
 
 static char rawhide_names[][16] = {
 	"Dodge", "Wrangler", "Durango", "Tincup", "DaVinci"

@@ -335,7 +335,7 @@ enum {
 #define INIT_YRES		480
 
 static int inverse = 0;
-static char fontname[40] __initdata = { 0 };
+static char fontname[40] __initdata;
 #if defined(CONFIG_PPC)
 static signed char init_vmode __devinitdata = -1, init_cmode __devinitdata = -1;
 #endif

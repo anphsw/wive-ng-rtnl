@@ -21,7 +21,7 @@
 #define LEDS_MINOR	169	/* Minor device number, using misc major.  */
 
 /* The actual LED hardware is write-only, so we hold the contents here too.  */
-static unsigned char leds_image[LED_NUM_DIGITS] = { 0 };
+static unsigned char leds_image[LED_NUM_DIGITS];
 
 /* Spinlock protecting the above leds.  */
 static DEFINE_SPINLOCK(leds_lock);

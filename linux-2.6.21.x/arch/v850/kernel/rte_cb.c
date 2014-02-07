@@ -110,9 +110,9 @@ static void led_tick ()
 	
 	if (++counter == (HZ / TICK_UPD_FREQ)) {
 		/* Which frame we're currently displaying for each digit.  */
-		static unsigned frame_nums[LED_NUM_DIGITS] = { 0 };
+		static unsigned frame_nums[LED_NUM_DIGITS];
 		/* Display image.  */
-		static unsigned char image[LED_NUM_DIGITS] = { 0 };
+		static unsigned char image[LED_NUM_DIGITS];
 		unsigned char prev_image[LED_NUM_DIGITS];
 		int write_to_leds = 1; /* true if we should actually display */
 		int digit;

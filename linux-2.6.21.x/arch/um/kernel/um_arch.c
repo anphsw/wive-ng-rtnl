@@ -43,7 +43,7 @@
 #define DEFAULT_COMMAND_LINE "root=98:0"
 
 /* Changed in linux_main and setup_arch, which run before SMP is started */
-static char __initdata command_line[COMMAND_LINE_SIZE] = { 0 };
+static char __initdata command_line[COMMAND_LINE_SIZE];
 
 static void __init add_arg(char *arg)
 {
