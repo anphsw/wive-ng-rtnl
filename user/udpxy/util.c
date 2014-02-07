@@ -224,7 +224,7 @@ mperror( FILE* fp, int err, const char* format, ... )
     return;
 }
 
-
+#if 0
 /* write-lock on a file handle
  */
 static int
@@ -239,6 +239,7 @@ wlock_file( int fd )
 
     return fcntl( fd, F_SETLK, &lck );
 }
+#endif
 
 /* create and lock file with process's ID
  */
@@ -263,7 +264,7 @@ make_pidfile( const char* fpath, pid_t pid, FILE* log )
             rc = EXIT_FAILURE;
             break;
         }
-
+#if 0
         rc = wlock_file( fd );
         if( 0 != rc ) {
             if( (EACCES == errno) || (EAGAIN == errno) ) {
@@ -276,7 +277,7 @@ make_pidfile( const char* fpath, pid_t pid, FILE* log )
             mperror(log, errno, "wlock_file");
             break;
         }
-
+#endif
         rc = ftruncate( fd, 0 );
         if( 0 != rc ) {
             mperror(log, errno, "make_pidfile - ftruncate");
