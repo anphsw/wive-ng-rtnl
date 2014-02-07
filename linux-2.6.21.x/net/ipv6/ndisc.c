@@ -100,7 +100,7 @@ static int pndisc_constructor(struct pneigh_entry *n);
 static void pndisc_destructor(struct pneigh_entry *n);
 static void pndisc_redo(struct sk_buff *skb);
 
-static struct neigh_ops ndisc_generic_ops = {
+static const struct neigh_ops ndisc_generic_ops = {
 	.family =		AF_INET6,
 	.solicit =		ndisc_solicit,
 	.error_report =		ndisc_error_report,
@@ -110,7 +110,7 @@ static struct neigh_ops ndisc_generic_ops = {
 	.queue_xmit =		dev_queue_xmit,
 };
 
-static struct neigh_ops ndisc_hh_ops = {
+static const struct neigh_ops ndisc_hh_ops = {
 	.family =		AF_INET6,
 	.solicit =		ndisc_solicit,
 	.error_report =		ndisc_error_report,
@@ -121,7 +121,7 @@ static struct neigh_ops ndisc_hh_ops = {
 };
 
 
-static struct neigh_ops ndisc_direct_ops = {
+static const struct neigh_ops ndisc_direct_ops = {
 	.family =		AF_INET6,
 	.output =		dev_queue_xmit,
 	.connected_output =	dev_queue_xmit,

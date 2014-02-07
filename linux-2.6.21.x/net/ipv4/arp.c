@@ -134,7 +134,7 @@ static void arp_solicit(struct neighbour *neigh, struct sk_buff *skb);
 static void arp_error_report(struct neighbour *neigh, struct sk_buff *skb);
 static void parp_redo(struct sk_buff *skb);
 
-static struct neigh_ops arp_generic_ops = {
+static const struct neigh_ops arp_generic_ops = {
 	.family =		AF_INET,
 	.solicit =		arp_solicit,
 	.error_report =		arp_error_report,
@@ -144,7 +144,7 @@ static struct neigh_ops arp_generic_ops = {
 	.queue_xmit =		dev_queue_xmit,
 };
 
-static struct neigh_ops arp_hh_ops = {
+static const struct neigh_ops arp_hh_ops = {
 	.family =		AF_INET,
 	.solicit =		arp_solicit,
 	.error_report =		arp_error_report,
@@ -154,7 +154,7 @@ static struct neigh_ops arp_hh_ops = {
 	.queue_xmit =		dev_queue_xmit,
 };
 
-static struct neigh_ops arp_direct_ops = {
+static const struct neigh_ops arp_direct_ops = {
 	.family =		AF_INET,
 	.output =		dev_queue_xmit,
 	.connected_output =	dev_queue_xmit,
@@ -162,7 +162,7 @@ static struct neigh_ops arp_direct_ops = {
 	.queue_xmit =		dev_queue_xmit,
 };
 
-struct neigh_ops arp_broken_ops = {
+const struct neigh_ops arp_broken_ops = {
 	.family =		AF_INET,
 	.solicit =		arp_solicit,
 	.error_report =		arp_error_report,
