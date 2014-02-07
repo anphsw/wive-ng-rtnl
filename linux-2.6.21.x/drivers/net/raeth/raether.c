@@ -382,6 +382,31 @@ static void set_fe_pdma_glo_cfg(void)
 #endif
 }
 
+#if defined (CONFIG_RAETH_HW_VLAN_TX)
+void update_hw_vlan_tx(void)
+{
+#if defined (CONFIG_RALINK_MT7620)
+	*(volatile u32 *)(RALINK_FRAME_ENGINE_BASE + 0x430) = 0x00010000;
+	*(volatile u32 *)(RALINK_FRAME_ENGINE_BASE + 0x434) = 0x00030002;
+	*(volatile u32 *)(RALINK_FRAME_ENGINE_BASE + 0x438) = 0x00050004;
+	*(volatile u32 *)(RALINK_FRAME_ENGINE_BASE + 0x43c) = 0x00070006;
+	*(volatile u32 *)(RALINK_FRAME_ENGINE_BASE + 0x440) = 0x00090008;
+	*(volatile u32 *)(RALINK_FRAME_ENGINE_BASE + 0x444) = 0x000b000a;
+	*(volatile u32 *)(RALINK_FRAME_ENGINE_BASE + 0x448) = 0x000d000c;
+	*(volatile u32 *)(RALINK_FRAME_ENGINE_BASE + 0x44C) = 0x000f000e;
+#elif !defined (CONFIG_RALINK_RT5350) && !defined (CONFIG_RALINK_MT7621)
+	*(volatile u32 *)(RALINK_FRAME_ENGINE_BASE + 0xa8) = 0x00010000;
+	*(volatile u32 *)(RALINK_FRAME_ENGINE_BASE + 0xac) = 0x00030002;
+	*(volatile u32 *)(RALINK_FRAME_ENGINE_BASE + 0xb0) = 0x00050004;
+	*(volatile u32 *)(RALINK_FRAME_ENGINE_BASE + 0xb4) = 0x00070006;
+	*(volatile u32 *)(RALINK_FRAME_ENGINE_BASE + 0xb8) = 0x00090008;
+	*(volatile u32 *)(RALINK_FRAME_ENGINE_BASE + 0xbc) = 0x000b000a;
+	*(volatile u32 *)(RALINK_FRAME_ENGINE_BASE + 0xc0) = 0x000d000c;
+	*(volatile u32 *)(RALINK_FRAME_ENGINE_BASE + 0xc4) = 0x000f000e;
+#endif
+}
+#endif
+
 static void forward_config(struct net_device *dev)
 {
 
@@ -409,39 +434,36 @@ static void forward_config(struct net_device *dev)
 	unsigned int	regVal2;
 #endif
 
-#ifdef CONFIG_RAETH_HW_VLAN_TX
-#ifdef CONFIG_VLAN_8021Q_DOUBLE_TAG
+#if defined (CONFIG_RAETH_HW_VLAN_RX)
+#if defined (CONFIG_VLAN_8021Q_DOUBLE_TAG)
 	if ((!vlan_double_tag) && (ra_sw_nat_hook_rx == NULL))
+	{
+	    /* enable HW VLAN RX */
+	    sysRegWrite(CDMP_EG_CTRL, 1);
+	    dev->features |= NETIF_F_HW_VLAN_RX;
+	    printk("raeth: RX vlan hardware offload enabled\n");
+	} else
 #endif
 	{
-    	    printk("raeth: vlan hardware offload enabled\n");
-#if defined(CONFIG_RALINK_MT7620)
-	    /* frame engine will push VLAN tag regarding to VIDX feild in Tx desc. */
-	    *(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0x430) = 0x00010000;
-	    *(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0x434) = 0x00030002;
-	    *(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0x438) = 0x00050004;
-	    *(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0x43C) = 0x00070006;
-	    *(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0x440) = 0x00090008;
-	    *(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0x444) = 0x000b000a;
-	    *(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0x448) = 0x000d000c;
-	    *(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0x44C) = 0x000f000e;
-#else
-	    /*
-	     * VLAN_IDX 0 = VLAN_ID 0
-	     * .........
-	     * VLAN_IDX 15 = VLAN ID 15
-	     *
-	     */
-	    /* frame engine will push VLAN tag regarding to VIDX feild in Tx desc. */
-	    *(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0xa8) = 0x00010000;
-	    *(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0xac) = 0x00030002;
-	    *(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0xb0) = 0x00050004;
-	    *(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0xb4) = 0x00070006;
-	    *(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0xb8) = 0x00090008;
-	    *(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0xbc) = 0x000b000a;
-	    *(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0xc0) = 0x000d000c;
-	    *(unsigned long *)(RALINK_FRAME_ENGINE_BASE + 0xc4) = 0x000f000e;
+	    /* disable HW VLAN RX */
+	    sysRegWrite(CDMP_EG_CTRL, 0);
+	    dev->features &= ~(NETIF_F_HW_VLAN_RX);
+	}
 #endif
+
+#ifdef CONFIG_RAETH_HW_VLAN_TX
+	update_hw_vlan_tx();
+#ifdef CONFIG_VLAN_8021Q_DOUBLE_TAG
+	if ((!vlan_double_tag) && (ra_sw_nat_hook_rx == NULL))
+	{
+	    /* enable HW VLAN TX */
+	    dev->features |= NETIF_F_HW_VLAN_TX;
+    	    printk("raeth: TX vlan hardware offload enabled\n");
+    	} else
+#endif
+    	{
+	    /* disable HW VLAN TX */
+	    dev->features &= ~(NETIF_F_HW_VLAN_TX);
 	}
 #endif
 
@@ -463,17 +485,6 @@ static void forward_config(struct net_device *dev)
 
 #if defined (CONFIG_RAETH_SPECIAL_TAG)
 	regVal |= (1 << 24); //GDM1_TCI_81xx
-#endif
-
-
-#ifdef CONFIG_RAETH_HW_VLAN_TX
-#ifdef CONFIG_VLAN_8021Q_DOUBLE_TAG
-	if ((!vlan_double_tag) && (ra_sw_nat_hook_rx == NULL))
-#endif
-	    dev->features |= NETIF_F_HW_VLAN_TX;
-#endif
-#ifdef CONFIG_RAETH_HW_VLAN_RX
-	dev->features |= NETIF_F_HW_VLAN_RX;
 #endif
 
 #ifdef CONFIG_RAETH_CHECKSUM_OFFLOAD
