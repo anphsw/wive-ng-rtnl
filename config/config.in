@@ -235,6 +235,8 @@ endmenu
 
 mainmenu_option next_comment
 comment 'Optimization options.'
-bool 'Enable crazy minimize code size by gcc for libs (save flash and speeddown ~10%)'		CONFIG_LIB_SMALLSIZE
-bool 'Enable crazy minimize code size by gcc for user apps (save flash and speeddown ~10%)'	CONFIG_USER_SMALLSIZE
+bool 'Enable crazy minimize code size by gcc for libs (save flash and speeddown ~10% per lib)'		CONFIG_LIB_SMALLSIZE
+bool 'Enable crazy minimize code size by gcc for user apps (save flash and speeddown ~10% per app)'	CONFIG_USER_SMALLSIZE
+bool 'Enable crazy minimize used RAM  by gcc for libs (save RAM and speeddown ~5% per lib)'		CONFIG_LIB_SAVERAM
+bool 'Enable crazy minimize used RAM  by gcc for user apps (save RAM and speeddown ~5% per app)'	CONFIG_USER_SAVERAM
 endmenu

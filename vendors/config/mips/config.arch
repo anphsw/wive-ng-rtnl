@@ -95,9 +95,9 @@ WOPT	+= -Wno-unused-but-set-variable
 ########################### BUILD FLAGS/OPTIONS##############################
 ifdef UCLINUX_BUILD_LIB
 ifdef CONFIG_LIB_DEBUG
-	CFLAGS  :=  $(if $(LOPT),$(LOPT),-O1) $(WOPT) -g -fconserve-stack -fno-delete-null-pointer-checks
+	CFLAGS  :=  $(if $(LOPT),$(LOPT),-O1) $(WOPT) -g
 else
-	CFLAGS  :=  $(if $(LOPT),$(LOPT),-Os) $(WOPT) -fomit-frame-pointer -fno-stack-protector -fconserve-stack -fno-delete-null-pointer-checks
+	CFLAGS  :=  $(if $(LOPT),$(LOPT),-Os) $(WOPT) -fomit-frame-pointer -fno-stack-protector
 endif
 ifdef CONFIG_LIB_SMALLSIZE
 	# Defeat .eh_frame bloat (~25% smaller binary)
@@ -108,12 +108,15 @@ else
 ifdef CONFIG_RT2880_FLASH_4M
 	# This is ~5% speedup for result bynary before pure -Os
 	# and ~2% bigest unpacked rootfs size
-	CFLAGS += -ffast-math -fforce-addr -fno-delete-null-pointer-checks
+	CFLAGS += -ffast-math -fforce-addr
 else
 	# This is improve performance ~10% before pure -Os
 	# and ~5% bigest unpacked rootfs size
-	CFLAGS += -funit-at-a-time -membedded-data -muninit-const-in-rodata -ffast-math -fforce-addr -fconserve-stack -fno-delete-null-pointer-checks
+	CFLAGS += -funit-at-a-time -membedded-data -muninit-const-in-rodata -ffast-math -fforce-addr -fconserve-stack
 endif
+endif
+ifdef CONFIG_LIB_SAVERAM
+	CFLAGS += -membedded-data -muninit-const-in-rodata
 endif
 	#disable new loop optimization mode in 4.8.0 and later - fix regressions
 	CFLAGS  += -fno-aggressive-loop-optimizations
@@ -121,6 +124,7 @@ endif
 	CFLAGS  += -fno-tree-slsr
 
 	CFLAGS  += -pipe
+	CFLAGS  += -fno-delete-null-pointer-checks -fconserve-stack
 	CFLAGS  += $(VENDOR_CFLAGS)
 	CFLAGS  += -fno-builtin
 	CFLAGS  += -DEMBED
@@ -141,9 +145,9 @@ endif
 ifdef UCLINUX_BUILD_USER
 
 ifdef CONFIG_USER_DEBUG
-	CFLAGS  :=  $(if $(UOPT),$(UOPT),-O1) $(WOPT) -g -fconserve-stack -fno-delete-null-pointer-checks
+	CFLAGS  :=  $(if $(UOPT),$(UOPT),-O1) $(WOPT) -g
 else
-	CFLAGS  :=  $(if $(UOPT),$(UOPT),-Os) $(WOPT) -fomit-frame-pointer -fno-stack-protector -fconserve-stack -fno-delete-null-pointer-checks
+	CFLAGS  :=  $(if $(UOPT),$(UOPT),-Os) $(WOPT) -fomit-frame-pointer -fno-stack-protector
 endif
 ifdef CONFIG_USER_SMALLSIZE
 	# Defeat .eh_frame bloat (~25% smaller binary)
@@ -154,12 +158,15 @@ else
 ifdef CONFIG_RT2880_FLASH_4M
 	# This is ~5% speedup for result bynary before pure -Os
 	# and ~2% bigest unpacked rootfs size
-	CFLAGS += -ffast-math -fforce-addr -fno-delete-null-pointer-checks
+	CFLAGS += -ffast-math -fforce-addr
 else
 	# This is improve performance ~10% before pure -Os
 	# and ~5% bigest unpacked rootfs size
-	CFLAGS += -funit-at-a-time -membedded-data -muninit-const-in-rodata -ffast-math -fforce-addr -fconserve-stack -fno-delete-null-pointer-checks
+	CFLAGS += -funit-at-a-time -membedded-data -muninit-const-in-rodata -ffast-math -fforce-addr -fconserve-stack
 endif
+endif
+ifdef CONFIG_USER_SAVERAM
+	CFLAGS += -membedded-data -muninit-const-in-rodata
 endif
 	#disable new loop optimization mode in 4.8.0 and later - fix regressions
 	CFLAGS  += -fno-aggressive-loop-optimizations
@@ -167,6 +174,7 @@ endif
 	CFLAGS  += -fno-tree-slsr
 
 	CFLAGS  += -pipe
+	CFLAGS  += -fno-delete-null-pointer-checks -fconserve-stack
 	CFLAGS  += $(VENDOR_CFLAGS)
 	CFLAGS  += -Dlinux -D__linux__ -Dunix -DEMBED
 	CFLAGS  += -I$(ROOTDIR)
