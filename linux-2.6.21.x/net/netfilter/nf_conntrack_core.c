@@ -139,10 +139,13 @@ static unsigned int nf_conntrack_hash_rnd __read_mostly;
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 static inline unsigned int is_local_svc(u_int8_t protonm)
 {
-	/* Local gre/esp/ah/ip-ip/icmp proto must be skip from hardware offload
+	/* Local gre/esp/ah/ip-ip/ipv6_in_ipv4/icmp proto must be skip from hardware offload
 	    and mark as interested by ALG  for correct tracking this */
 	switch (protonm) {
 	    case IPPROTO_IPIP:
+#ifndef CONFIG_HNAT_V2
+	    case IPPROTO_IPV6:
+#endif
 	    case IPPROTO_ICMP:
 	    case IPPROTO_GRE:
 	    case IPPROTO_ESP:
@@ -1106,10 +1109,9 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 	/*
 	 * skip ALG and some proto from hardware offload
 	 */
-	if (hooknum != NF_IP_LOCAL_OUT && FOE_ALG(*pskb) == 0) {
-	    if (skip_offload || (pf == PF_INET && is_local_svc(protonum)))
-		if (IS_SPACE_AVAILABLED(*pskb) && IS_MAGIC_TAG_VALID(*pskb))
-			FOE_ALG(*pskb)=1;
+	if (pf == PF_INET && hooknum != NF_IP_LOCAL_OUT && FOE_ALG(*pskb) == 0 && (skip_offload || is_local_svc(protonum))) {
+	    if (IS_SPACE_AVAILABLED(*pskb) && IS_MAGIC_TAG_VALID(*pskb))
+		FOE_ALG(*pskb)=1;
 	}
 #endif
 #endif
