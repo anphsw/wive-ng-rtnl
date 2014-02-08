@@ -537,8 +537,6 @@ endif
 # crazy optimizations
 CFLAGS += $(call cc-option,-ffast-math)
 CFLAGS += $(call cc-option,-fforce-addr)
-CFLAGS += $(call cc-option,-membedded-data)
-CFLAGS += $(call cc-option,-muninit-const-in-rodata)
 
 # enable for all inlude -Os (default enabled only >-O2)
 CFLAGS += $(call cc-option,-funit-at-a-time)
@@ -561,9 +559,6 @@ CFLAGS += $(call cc-option,-fno-tree-slsr)
 # more safe - small decrease speed (default in all upstream kernels)
 CFLAGS += $(call cc-option,-fno-delete-null-pointer-checks)
 
-# improves compression ratio for generated code - save size - slow speed
-#CFLAGS += $(call cc-option,-fno-caller-saves)
-
 # warn about C99 declaration after statement
 CFLAGS += $(call cc-disable-warning, -Wdeclaration-after-statement)
 
@@ -573,18 +568,26 @@ CFLAGS += $(call cc-disable-warning, pointer-sign)
 # disable variable unused warnings in gcc 4.6.0 and later
 CFLAGS += $(call cc-disable-warning, unused-but-set-variable)
 
-# use the deterministic mode of AR if available
-EXTRA_ARFLAGS := $(call ar-option,D)
-ARFLAGS	+= $(EXTRA_ARFLAGS)
+# small slow code and save some memory
+ifdef CONFIG_RAETH_MEMORY_OPTIMIZATION
+CFLAGS += $(call cc-option,-membedded-data)
+CFLAGS += $(call cc-option,-muninit-const-in-rodata)
+endif
 
-ifdef CONFIG_RT2860V2_AP_MEMORY_OPTIMIZATION
+ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
+# improves compression ratio for generated code - save size - slow speed
+CFLAGS += $(call cc-option,-fno-caller-saves)
 # if flash size is small use optimize for size
-CFLAGS_MODULE = $(MODFLAGS) -Os -fno-aggressive-loop-optimizations -fno-tree-slsr -funit-at-a-time
+CFLAGS_MODULE = $(MODFLAGS) $(CFLAGS) -Os
 CFLAGS_MODULE += $(call cc-option,-fno-caller-saves)
 else
 # if flash size big use full optimize for speed
 CFLAGS_MODULE = $(MODFLAGS) $(CFLAGS) $(MOREOPTIMIZE)
 endif
+
+# use the deterministic mode of AR if available
+EXTRA_ARFLAGS := $(call ar-option,D)
+ARFLAGS	+= $(EXTRA_ARFLAGS)
 
 # arch Makefile may override CC so keep this after arch Makefile is included
 NOSTDINC_FLAGS += -nostdinc -isystem $(shell $(CC) -print-file-name=include)
