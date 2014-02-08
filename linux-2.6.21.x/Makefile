@@ -537,6 +537,11 @@ endif
 # crazy optimizations
 CFLAGS += $(call cc-option,-ffast-math)
 CFLAGS += $(call cc-option,-fforce-addr)
+CFLAGS += $(call cc-option,-membedded-data)
+CFLAGS += $(call cc-option,-muninit-const-in-rodata)
+
+# enable for all inlude -Os (default enabled only >-O2)
+CFLAGS += $(call cc-option,-funit-at-a-time)
 
 # conserve stack if available
 CFLAGS += $(call cc-option,-fconserve-stack)
@@ -574,7 +579,7 @@ ARFLAGS	+= $(EXTRA_ARFLAGS)
 
 ifdef CONFIG_RT2860V2_AP_MEMORY_OPTIMIZATION
 # if flash size is small use optimize for size
-CFLAGS_MODULE = $(MODFLAGS) -Os -fno-aggressive-loop-optimizations -fno-tree-slsr
+CFLAGS_MODULE = $(MODFLAGS) -Os -fno-aggressive-loop-optimizations -fno-tree-slsr -funit-at-a-time
 CFLAGS_MODULE += $(call cc-option,-fno-caller-saves)
 else
 # if flash size big use full optimize for speed
