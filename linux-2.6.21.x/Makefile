@@ -577,6 +577,8 @@ endif
 ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
 # improves compression ratio for generated code - save size - slow speed
 CFLAGS += $(call cc-option,-fno-caller-saves)
+CFLAGS += $(call cc-option,-fno-unwind-tables)
+CFLAGS += $(call cc-option,-fno-asynchronous-unwind-tables)
 # if flash size is small use optimize for size
 CFLAGS_MODULE = $(MODFLAGS) $(CFLAGS) -Os
 CFLAGS_MODULE += $(call cc-option,-fno-caller-saves)
