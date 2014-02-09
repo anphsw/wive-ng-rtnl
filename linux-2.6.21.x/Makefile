@@ -18,7 +18,7 @@ MAKEFLAGS     = -rR --no-print-directory
 # More optimization flag only for kernel if flash size = 4MB.
 # Or for kernel and modules if flash size > 4MB
 # Use -O2 for kernel code. Route/NAT speed up ~15-20% more -Os.
-MOREOPTIMIZE  = -O2
+MOREOPTIMIZE  =
 
 # this flags for fast net debug enable
 #802.11
@@ -334,6 +334,13 @@ MODFLAGS	= -DMODULE -fno-delete-null-pointer-checks
 
 AFLAGS_MODULE   = $(MODFLAGS)
 LDFLAGS_MODULE  = -r --strip-discarded
+
+ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
+MOREOPTIMIZE  += -Os
+else
+MOREOPTIMIZE  += -O2
+endif
+
 # for kernel always use full version optimization
 CFLAGS_KERNEL	=  $(MOREOPTIMIZE)
 AFLAGS_KERNEL	=
@@ -348,7 +355,7 @@ LINUXINCLUDE    := -Iinclude \
 CPPFLAGS        := -D__KERNEL__ $(LINUXINCLUDE)
 
 CFLAGS		:= -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
-                   -Wno-format-security -Wno-strict-aliasing
+                   -Wno-format-security -Wno-strict-aliasing $(MOREOPTIMIZE)
 
 AFLAGS          := -D__ASSEMBLY__
 
@@ -531,7 +538,7 @@ endif
 
 # We trigger additional mismatches with less inlining
 ifdef CONFIG_DEBUG_SECTION_MISMATCH
-KBUILD_CFLAGS += $(call cc-option,-fno-inline-functions-called-once)
+CFLAGS += $(call cc-option,-fno-inline-functions-called-once)
 endif
 
 # crazy optimizations
@@ -579,13 +586,9 @@ ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
 CFLAGS += $(call cc-option,-fno-caller-saves)
 CFLAGS += $(call cc-option,-fno-unwind-tables)
 CFLAGS += $(call cc-option,-fno-asynchronous-unwind-tables)
-# if flash size is small use optimize for size
-CFLAGS_MODULE = $(MODFLAGS) $(CFLAGS) -Os
-CFLAGS_MODULE += $(call cc-option,-fno-caller-saves)
-else
-# if flash size big use full optimize for speed
-CFLAGS_MODULE = $(MODFLAGS) $(CFLAGS) $(MOREOPTIMIZE)
 endif
+
+CFLAGS_MODULE := $(MODFLAGS) $(CFLAGS) $(MOREOPTIMIZE)
 
 # use the deterministic mode of AR if available
 EXTRA_ARFLAGS := $(call ar-option,D)
