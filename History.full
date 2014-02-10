@@ -1815,7 +1815,7 @@
 18) init.d: refactoring start dependency for more log boot process to sysylog/klog.<br>
 19) init.d: goahead: move call rescan usb for hutplug at end off load webui.<br>
 20) init.d: tune kernel by sysctl more early (after checkconf).<br>
-21) toolchain: binutils: updaye to 2.24.<br>
+21) toolchain: binutils: update to 2.24.<br>
 22) kernel: ip6_tunnel: ensure to always have a link local address(RFC4862 and RFC4291 more compat).<br>
 23) kernel: fastroute: small speedup and more readable code.<br>
 24) kernel: fix lockup related to stop_machine being stuck in __do_softirq.<br>
