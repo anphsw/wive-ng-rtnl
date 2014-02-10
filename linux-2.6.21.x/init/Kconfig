@@ -570,7 +570,7 @@ config XATTR
 	  This enables the filesystem extended attribute syscalls.
 
 config FILE_LOCKING
-	default n
+	default y
 	bool "Enable POSIX file locking API" if TINY
 	help
 	  This enables standard file locking support.
