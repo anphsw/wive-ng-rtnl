@@ -17,7 +17,6 @@ start() {
     # This is set only if wan or lan in bridge
     if [ "$wan_if" = "br0" ] || [ "$lan_if" = "br0" ]; then
 	bridge_stp
-	bridge_fastpath
     fi
 }
 
@@ -147,17 +146,6 @@ route_fastpath() {
 	sysctl -wq net.nf_conntrack_fastroute=1
     else
 	sysctl -wq net.nf_conntrack_fastroute=0
-    fi
-}
-
-bridge_fastpath() {
-    #----Fastpath for bridge enable------------------------------
-    bridgeFastpath=`nvram_get 2860 bridgeFastpath`
-    if [ "$bridgeFastpath" != "0" ]; then
-	$LOG "Bridge fastpath enabled."
-	sysctl -wq net.ipv4.bridge_fastpath=1
-    else
-	sysctl -wq net.ipv4.bridge_fastpath=0
     fi
 }
 
