@@ -1176,7 +1176,7 @@ pass:
 	    if(skip_offload) {
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 		/* skip hardware offload flag */
-		if (IS_SPACE_AVAILABLED(*pskb) && IS_MAGIC_TAG_VALID(*pskb))
+		if (hooknum != NF_IP_LOCAL_OUT && FOE_ALG(*pskb) == 0 && IS_SPACE_AVAILABLED(*pskb) && IS_MAGIC_TAG_VALID(*pskb))
 		    FOE_ALG(*pskb)=1;
 #endif
 #ifdef CONFIG_BCM_NAT
