@@ -149,6 +149,7 @@
 56) kernel: af_unix: fix 'poll for write'/ connected DGRAM sockets.<br>
 57) kernel: tcp: kernel: cubic optimization.<br>
 58) kernel: small gcc optimize flag tune.<br>
+59) kernel: net: fix a race in sock_queue_err_skb().<br>
 <br>
 <br>
 <br>
