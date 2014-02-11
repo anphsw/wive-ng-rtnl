@@ -148,6 +148,9 @@ fi
 fs drop_caches
 
 if [ "$MDEV_LABEL" != "optware" ] && [ "$MDEV_TYPE" != "swap" ]; then
+    # restart only if not cold boot
+    . /etc/scripts/web_wait.sh
+    web_wait
     # restart HDD depended services
     service xupnpd restart
     service samba restart
