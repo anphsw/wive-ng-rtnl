@@ -39,17 +39,6 @@
 #endif
 
 /*
- * The integer part of the number of usecs per jiffy is taken from tick,
- * but the fractional part is not recorded, so we calculate it using the
- * initial value of HZ.  This aids systems where tick isn't really an
- * integer (e.g. for HZ = 128).
- */
-#define USECS_PER_JIFFY		TICK_SIZE
-#define USECS_PER_JIFFY_FRAC	((unsigned long)(u32)((1000000ULL << 32) / HZ))
-
-#define TICK_SIZE	(tick_nsec / 1000)
-
-/*
  * forward reference
  */
 DEFINE_SPINLOCK(rtc_lock);
