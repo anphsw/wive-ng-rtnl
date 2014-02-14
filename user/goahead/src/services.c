@@ -367,6 +367,7 @@ const parameter_fetch_t service_misc_flags[] =
 	{ T("rmtHTTP"), "RemoteManagement", 0, T("0") },
 	{ T("RemoteManagementPort"), "RemoteManagementPort", 0, T("80") },
 	{ T("rmtSSH"), "RemoteSSH", 0, T("0") },
+	{ T("RemoteSSHPort"), "RemoteSSHPort", 0, T("22") },
 #ifdef CONFIG_TELNETD
 	{ T("rmtTelnet"), "RemoteTelnet", 0, T("0") },
 #endif

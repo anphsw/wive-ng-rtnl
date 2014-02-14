@@ -20,6 +20,8 @@
 #define COMMAND_MAX	1024
 static char system_command[COMMAND_MAX];
 
+static unsigned long int prevTotal = 0, prevBusy = 0;
+
 void scale(char_t * strBuf, long long data)
 {
 double p1;
@@ -721,7 +723,7 @@ int getCpuUsageASP(int eid, webs_t wp, int argc, char_t **argv)
 	unsigned int i;
 
 	float outd = 0;
-	unsigned long int prevUseAll, curUseAll, nowUseAll, prevTotal = 0, curTotal = 0, nowTotal;
+	unsigned long int curBusy, curTotal = 0, deltaBusy, deltaTotal;
 
 	union uCpuStats curCpuStats;
 
@@ -733,8 +735,6 @@ int getCpuUsageASP(int eid, webs_t wp, int argc, char_t **argv)
 
 	if (fgets(buf, 1024, fp))
 	{
-		prevUseAll = prevCpuStats.sepData.user + prevCpuStats.sepData.nice + prevCpuStats.sepData.system + prevCpuStats.sepData.iowait + prevCpuStats.sepData.irq + prevCpuStats.sepData.softirq + prevCpuStats.sepData.steal;
-
 		value = strtok(buf, " ");
 
 		for (i = 0; i < 8; i++)
@@ -745,9 +745,6 @@ int getCpuUsageASP(int eid, webs_t wp, int argc, char_t **argv)
 				curCpuStats.arrData[i] = strtol(value, NULL, 10);
 
 				curTotal += curCpuStats.arrData[i];
-				prevTotal += prevCpuStats.arrData[i];
-
-				prevCpuStats.arrData[i] = curCpuStats.arrData[i];
 			}
 			else
 			{
@@ -758,18 +755,22 @@ int getCpuUsageASP(int eid, webs_t wp, int argc, char_t **argv)
 
 		}
 
-		curUseAll = curCpuStats.sepData.user + curCpuStats.sepData.nice + curCpuStats.sepData.system + curCpuStats.sepData.iowait + curCpuStats.sepData.irq + curCpuStats.sepData.softirq + curCpuStats.sepData.steal;
+		curBusy = curCpuStats.sepData.user + curCpuStats.sepData.nice + curCpuStats.sepData.system + curCpuStats.sepData.iowait + curCpuStats.sepData.irq + curCpuStats.sepData.softirq + curCpuStats.sepData.steal;
 
-		if (!(curTotal > prevTotal) || !(curUseAll > prevUseAll))
+		if (!(curTotal > prevTotal) || !(curBusy > prevBusy))
 		{
 			websWrite(wp, T("n/a"));
 			fclose(fp);
 			return 0;
 		}
 
-		nowUseAll = (curUseAll - prevUseAll) * 100;
-		nowTotal = curTotal - prevTotal;
-		outd = (float)nowUseAll / (float)nowTotal;
+		deltaBusy = (curBusy - prevBusy) * 100;
+		deltaTotal = curTotal - prevTotal;
+
+		prevTotal = curTotal;
+		prevBusy = curBusy;
+
+		outd = (float)deltaBusy / (float)deltaTotal;
 
 		snprintf(buf, 16, "%.1f", outd);
 		websWrite(wp, T("%s %%"), buf);
@@ -832,7 +833,8 @@ static void syslog(webs_t wp, char_t *path, char_t *query)
 	websWrite(wp, WEBS_CACHE_CONTROL_STRING);
 	websWrite(wp, T("\n"));
 
-	fp = popen("tail -c 32768 /var/log/messages", "r");
+	// LOG_MAX 32768 - 1
+	fp = popen("tail -c 32767 /var/log/messages", "r");
 
 	if(!fp){
 		websWrite(wp, "-1");

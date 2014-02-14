@@ -35,6 +35,4 @@ union uCpuStats
 	struct cpuStats sepData;
 };
 
-union uCpuStats prevCpuStats;
-
 #endif

@@ -1854,6 +1854,10 @@
 57) kernel: tcp: kernel: cubic optimization.<br>
 58) kernel: small gcc optimize flag tune.<br>
 59) kernel: net: fix a race in sock_queue_err_skb().<br>
+60) goahead: fix route apply logic (call full reconfigure network at apply).<br>
+61) goahead: fix system log read and add access denied attemps.<br>
+62) goahead: fix cpu load calculations.<br>
+63) goahead: add remote ssh port to WebUi.<br>
 <br>
 <br>
 <br>

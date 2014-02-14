@@ -1869,9 +1869,8 @@ static void editRouting(webs_t wp, char_t *path, char_t *query)
 	staticRoutingInit();
 
 	// run script to rebuild routing
-	char cmd[80];
-	sprintf(cmd, "%s add %s %s", PATH_LANWAN_ROUTES, getLanIfName(), getWanIfName());
-	doSystem(cmd);
+	//configure system
+	doSystem("internet.sh");
 
 	// Write OK
 	websWrite(wp, T("<script language=\"JavaScript\" type=\"text/javascript\">ajaxReloadDelayedPage(10000, '/internet/routing.asp', true);</script>\n"));

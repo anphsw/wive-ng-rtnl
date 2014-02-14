@@ -209,6 +209,7 @@ function initValue()
 	natFastpathSelect(form);
 	igmpSelect(form);
 	httpRmtSelect(form);
+	sshRmtSelect(form);
 	pingerSelect(form);
 	udpxySelect(form);
 	
@@ -280,6 +281,11 @@ function igmpSelect(form)
 function httpRmtSelect(form)
 {
 	displayElement( 'http_rmt_port', form.rmtHTTP.value != '0');
+}
+
+function sshRmtSelect(form)
+{
+	displayElement( 'ssh_rmt_port', form.rmtSSH.value != '0');
 }
 
 function udpxySelect(form)
@@ -418,11 +424,15 @@ function displayServiceStatus()
           </tr>
           <tr>
             <td class="head">SSH Remote Management</td>
-            <td colspan="4"><select name="rmtSSH" class="half">
+            <td colspan="4"><select name="rmtSSH" class="half" onchange="sshRmtSelect(this.form);">
                 <option value="0">Disable</option>
                 <option value="1">LAN</option>
                 <option value="2">LAN &amp; WAN</option>
               </select></td>
+          </tr>
+          <tr id="ssh_rmt_port" style="display: none;">
+            <td class="head">Remote SSH port</td>
+            <td colspan="4"><input class="half" name="RemoteSSHPort" value="<% getCfgZero(1, "RemoteSSHPort"); %>"></td>
           </tr>
           <tr id="rmt_telnetd">
             <td class="head">Remote Telnet</td>

@@ -24,6 +24,8 @@
 #include	<sys/wait.h>
 #include        <sys/ioctl.h>
 
+#include <syslog.h>
+
 #include	"utils.h"
 #include	"uemf.h"
 #include	"wsIntrn.h"
@@ -99,6 +101,9 @@ int main(int argc, char** argv)
 
 	bopen(NULL, (60 * 1024), B_USE_MALLOC);
 	signal(SIGPIPE, SIG_IGN);
+
+	openlog("goahead", LOG_PID|LOG_NDELAY, LOG_USER);
+	syslog(LOG_INFO, "version %s started", WEBS_VERSION);
 
 	//Boot = Orange ON
 	ledAlways(GPIO_LED_WAN_ORANGE, LED_ON);		//Turn on orange LED
