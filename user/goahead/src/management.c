@@ -94,7 +94,6 @@ static void setSysAdm(webs_t wp, char_t *path, char_t *query)
 	doSystem("cp /etc/newpw /etc/passwd");
 	doSystem("rm -f /etc/newpw");
 	doSystem("service pass start");
-	doSystem("service sysctl restart");
 	doSystem("service inetd restart");
 #if defined(CONFIG_USER_SAMBA) || defined(CONFIG_USER_SAMBA3)
 	doSystem("service samba restart");
