@@ -225,7 +225,7 @@ static int listCountryCodes(int eid, webs_t wp, int argc, char_t **argv)
 {
 	const country_code_t *codes = country_codes;
 	char *c_code = nvram_get(RT2860_NVRAM, "CountryCode");;
-	
+
 	websWrite(wp, T("\t<option value=\"NONE\">NONE</option>\n"));
 
 	while (codes->iso != NULL)
@@ -1056,10 +1056,8 @@ static int getIdsEnableBuilt(int eid, webs_t wp, int argc, char_t **argv)
 /* goform/wirelessAdvanced */
 static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 {
-	char_t	*bg_protection, /**basic_rate,*/ *beacon, *dtim, *fragment, *rts,
-			*tx_power, *short_preamble, *short_slot, *tx_burst, *pkt_aggregate,
-			*countrycode, *country_region;
-	char_t	*rd_region, *lna_gain;
+	char_t	*bg_protection, *beacon, *dtim, *fragment, *rts, *tx_power, *short_preamble,
+		*short_slot, *tx_burst, *pkt_aggregate, *countrycode, *country_region, *rd_region, *lna_gain;
 	int ssid_num, wlan_mode;
 	char *submitUrl;
 
@@ -1077,7 +1075,6 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 #endif
 	//fetch from web input
 	bg_protection = websGetVar(wp, T("bg_protection"), T("0"));
-	//basic_rate = websGetVar(wp, T("basic_rate"), T("15"));
 	beacon = websGetVar(wp, T("beacon"), T("100"));
 	dtim = websGetVar(wp, T("dtim"), T("1"));
 	fragment = websGetVar(wp, T("fragment"), T("2346"));
@@ -1215,8 +1212,7 @@ static void wirelessAdvanced(webs_t wp, char_t *path, char_t *query)
 /* goform/wirelessWds */
 static void wirelessWds(webs_t wp, char_t *path, char_t *query)
 {
-	char_t	*wds_mode, *wds_phy_mode, *wds_encryp_type, *wds_encryp_key0,
-			*wds_encryp_key1,*wds_encryp_key2, *wds_encryp_key3, *wds_list;
+	char_t	*wds_mode, *wds_phy_mode, *wds_encryp_type, *wds_encryp_key0, *wds_encryp_key1,*wds_encryp_key2, *wds_encryp_key3, *wds_list;
 	char *submitUrl;
 
 	wds_mode = websGetVar(wp, T("wds_mode"), T("0"));
@@ -1382,7 +1378,6 @@ void getSecurity(int nvram, webs_t wp, char_t *path, char_t *query)
 
 	if (RT2860_NVRAM == nvram) {
 		for(i=0; i<num_ssid; i++) {
-			//LFF(result, nvram, SSID, i);
 			gstrncat(result, nvram_get(nvram, racat("SSID", i+1)), 4096);
 			gstrncat(result, "\r", 4096);
 			LFF(result, nvram, PreAuth, i);
@@ -1390,22 +1385,17 @@ void getSecurity(int nvram, webs_t wp, char_t *path, char_t *query)
 			LFF(result, nvram, EncrypType, i);
 			LFF(result, nvram, DefaultKeyID, i);
 			LFF(result, nvram, Key1Type, i);
-			//LFF(result, nvram, Key1Str, i);
 			gstrncat(result, nvram_get(nvram, racat("Key1Str", i+1)), 4096);
 			gstrncat(result, "\r", 4096);
 			LFF(result, nvram, Key2Type, i);
-			//LFF(result, nvram, Key2Str, i);
 			gstrncat(result, nvram_get(nvram, racat("Key2Str", i+1)), 4096);
 			gstrncat(result, "\r", 4096);
 			LFF(result, nvram, Key3Type, i);
-			//LFF(result, nvram, Key3Str, i);
 			gstrncat(result, nvram_get(nvram, racat("Key3Str", i+1)), 4096);
 			gstrncat(result, "\r", 4096);
 			LFF(result, nvram, Key4Type, i);
-			//LFF(result, nvram, Key4Str, i);
 			gstrncat(result, nvram_get(nvram, racat("Key4Str", i+1)), 4096);
 			gstrncat(result, "\r", 4096);
-			//LFF(result, nvram, WPAPSK, i);
 			gstrncat(result, nvram_get(nvram, racat("WPAPSK", i+1)), 4096);
 			gstrncat(result, "\r", 4096);
 
@@ -1498,9 +1488,8 @@ int AccessPolicyHandle(int nvram, webs_t wp, int mbssid)
 	char str[32];
 	char ap_list[2048];
 
-	if(mbssid > 8 || mbssid < 0) {
+	if(mbssid > 8 || mbssid < 0)
 		return -1;
-	}
 
 	sprintf(str, "apselect_%d", mbssid);	// UI on web page
 	apselect = websGetVar(wp, str, T(""));
@@ -1514,11 +1503,13 @@ int AccessPolicyHandle(int nvram, webs_t wp, int mbssid)
 
 	sprintf(str, "newap_text_%d", mbssid);
 	newap_list = websGetVar(wp, str, T(""));
-	if(!newap_list) {
+
+	if(!newap_list)
 		return -1;
-	}
+
 	if(!gstrlen(newap_list))
 		return 0;
+
 	sprintf(str, "AccessControlList%d", mbssid);
 	sprintf(ap_list, "%s", nvram_get(nvram, str));
 	if(strlen(ap_list))
@@ -1530,7 +1521,7 @@ int AccessPolicyHandle(int nvram, webs_t wp, int mbssid)
 	return 0;
 }
 
-#ifdef CONFIG_USER_802_1X 
+#ifdef CONFIG_USER_802_1X
 void conf8021x(int nvram, webs_t wp, int mbssid)
 {
 	char_t *RadiusServerIP, *RadiusServerPort, *RadiusServerSecret, *RadiusServerSessionTimeout;//, *RadiusServerIdleTimeout;
@@ -1627,9 +1618,10 @@ void clearRadiusSetting(int nvram, int mbssid)
 	nvram_bufset(nvram, "RADIUS_Server", setNthValue(mbssid, RADIUS_Server, "0"));
 	nvram_bufset(nvram, "RADIUS_Port", setNthValue(mbssid, RADIUS_Port, "1812"));
 	nvram_bufset(nvram, "RADIUS_Key", setNthValue(mbssid, RADIUS_Key, "ralink"));
+
 	nvram_commit(RT2860_NVRAM);
 	nvram_close(RT2860_NVRAM);
-    return;
+	return;
 }
 
 
@@ -1786,15 +1778,14 @@ void DeleteAccessPolicyList(int nvram, webs_t wp, char_t *path, char_t *query)
 {
 	int mbssid, aplist_num;
 	char str[32], apl[64*20], *tmp;
-	sscanf(query, "%d,%d", &mbssid, &aplist_num);
 
+	sscanf(query, "%d,%d", &mbssid, &aplist_num);
 	sprintf(str, "AccessControlList%d", mbssid);
 	if(!(tmp = nvram_get(nvram, str)))
 		return;
+
 	strcpy(apl, tmp);
-
 	deleteNthValueMulti(&aplist_num, 1, apl, ';');
-
 	nvram_set(nvram, str, apl);
 
 	default_shown_mbssid[nvram] = mbssid;
@@ -1827,16 +1818,14 @@ static void wirelessMesh(webs_t wp, char_t *path, char_t *query)
 	autolink = websGetVar(wp, T("AutoLinkEnable"), T(""));
 	mode = websGetVar(wp, T("security_mode"), T(""));
 	strcpy(defaultkey, "");
-	if (0 == strcmp(mode, "OPEN"))
-	{
+
+	if (0 == strcmp(mode, "OPEN")) {
 		encrypt_type = websGetVar(wp, T("open_encrypt_type"), T(""));
 		if (0 == strcmp(encrypt_type, "WEP"))
 			strcpy(defaultkey, "1");
-	}
-	else if (0 == strcmp(mode, "WPANONE"))
-	{
+	} else if (0 == strcmp(mode, "WPANONE"))
 		encrypt_type = websGetVar(wp, T("wpa_cipher"), T(""));
-	}
+
 	wepkey = websGetVar(wp, T("wep_key"), T(""));
 	wep_select = websGetVar(wp, T("wep_select"), T(""));
 	wpakey = websGetVar(wp, T("passphrase"), T(""));
@@ -1894,7 +1883,7 @@ static void meshManualLink(webs_t wp, char_t *path, char_t *query)
 }
 
 typedef struct _MESH_NEIGHBOR_ENTRY_INFO {
-	char			Rssi;
+	char		Rssi;
 	unsigned char	HostName[64 + 1];
 	unsigned char	MacAddr[6];
 	unsigned char	MeshId[32 + 1];
@@ -1990,7 +1979,7 @@ static int is3t3r(int eid, webs_t wp, int argc, char_t **argv)
 
 static int is5gh_only(int eid, webs_t wp, int argc, char_t **argv)
 {
-#if defined(CONFIG_RALINK_RT3662_2T2R)
+#if defined(CONFIG_RALINK_RT3662_2T2R) || defined(CONFIG_RALINK_RT3883_3T3R)
 	websWrite(wp, T("1"));
 #else
 	websWrite(wp, T("0"));
@@ -2001,9 +1990,9 @@ static int is5gh_only(int eid, webs_t wp, int argc, char_t **argv)
 static int isWPSConfiguredASP(int eid, webs_t wp, int argc, char_t **argv)
 {
 #ifdef CONFIG_USER_WSC
-	if(g_wsc_configured){
+	if(g_wsc_configured)
 		websWrite(wp, T("1"));
-	}else
+	else
 #endif
 		websWrite(wp, T("0"));
 	return 0;
@@ -2014,7 +2003,7 @@ void AntennaDiversityInit(void)
 {
 	char *mode = nvram_get(RT2860_NVRAM, "AntennaDiversity");
 
-	if(!gstrcmp(mode, "Disable")){						// Disable
+	if(!gstrcmp(mode, "Disable")){				// Disable
 		doSystem("echo 0 > /proc/AntDiv/AD_RUN");
 	}else if(!gstrcmp(mode, "Enable_Algorithm1")){
 		doSystem("echo 1 > /proc/AntDiv/AD_ALGORITHM"); // Algorithm1
@@ -2028,10 +2017,8 @@ void AntennaDiversityInit(void)
 	}else if(!gstrcmp(mode, "Antenna2")){				// fix Ant2
 		doSystem("echo 0 > /proc/AntDiv/AD_RUN");
 		doSystem("echo 2 > /proc/AntDiv/AD_FORCE_ANTENNA");
-	}else{
+	}else
 		doSystem("echo 0 > /proc/AntDiv/AD_RUN");
-	return;
-}
 	return;
 }
 

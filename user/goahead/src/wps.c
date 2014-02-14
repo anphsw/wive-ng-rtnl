@@ -24,7 +24,7 @@ static int g_WscResult = 0;						// for AP only ( STA WPS don't need this)
 static int g_isEnrollee = 0;						// for AP only
 
 
-#ifdef CONFIG_RT2860V2_STA_WSC						// if support Wifi - STA 
+#ifdef CONFIG_RT2860V2_STA_WSC						// if support Wifi - STA
 unsigned int ConvertRssiToSignalQuality(long RSSI);
 int OidQueryInformation(unsigned long OidQueryCode, int socket_id, char *DeviceName, void *ptr, unsigned long PtrLength);
 int OidSetInformation(unsigned long OidQueryCode, int socket_id, char *DeviceName, void *ptr, unsigned long PtrLength);
@@ -282,7 +282,7 @@ void updateWPS( webs_t wp, char_t *path, char_t *query)
 
 	//1. WPSConfigured
 	websWrite(wp, T("%d\n"), result.WscConfigured);
-	
+
 	//2. WPSSSID
 	if(strchr(result.WscSsid, '\n')){
 		websWrite(wp, T("Invalid SSID character: new line"));
@@ -299,10 +299,10 @@ void updateWPS( webs_t wp, char_t *path, char_t *query)
 	tmp_str[0] = '\0';
 	getWPSEncrypType(&result, tmp_str);
 	websWrite(wp, T("%s\n"), tmp_str);
-	
+
 	//5. DefaultKeyIdx
 	websWrite(wp, T("%d\n"), result.DefaultKeyIdx);
-	
+
 	//6. Key
     for(i=0; i<64; i++){		// WPA key default length is 64 (defined & hardcode in driver) 
     	if(i!=0 && !(i % 32))
