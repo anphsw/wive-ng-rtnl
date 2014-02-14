@@ -35,7 +35,6 @@
 #include	"management.h"
 #include	"station.h"
 #include	"usb.h"
-#include	"storage.h"
 
 #ifdef WEBS_SSL_SUPPORT
 #include	"websSSL.h"

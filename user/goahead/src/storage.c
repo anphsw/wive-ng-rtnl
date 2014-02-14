@@ -16,7 +16,7 @@
  */
 /* vi: set sw=4 ts=4 sts=4: */
 /*
- *	wireless.c -- Wireless Settings 
+ *	wireless.c -- Wireless Settings
  *
  *	Copyright (c) Ralink Technology Corporation All Rights Reserved.
  *
@@ -45,9 +45,8 @@ static void storageFtpSrv(webs_t wp, char_t *path, char_t *query);
 static void transmission(webs_t wp, char_t *path, char_t *query);
 #endif
 
-
-#define	LSDIR_INFO		"/tmp/lsdir"
-#define	MOUNT_INFO		"/proc/mounts"
+#define	LSDIR_INFO	"/tmp/lsdir"
+#define	MOUNT_INFO	"/proc/mounts"
 
 #define STORAGE_PATH	"/media"
 #define STORAGE_SIGN	"/media/sd"
@@ -59,9 +58,6 @@ void formDefineSTORAGE(void) {
 	websAspDefine(T("ShowAllDir"), ShowAllDir);
 	websAspDefine(T("getCount"), getCount);
 	websAspDefine(T("getMaxVol"), getMaxVol);
-#ifdef CONFIG_USER_USHARE
-	websAspDefine(T("ShowMediaDir"), ShowMediaDir);
-#endif
 	websFormDefine(T("storageDiskAdm"), storageDiskAdm);
 	websFormDefine(T("storageDiskPart"), storageDiskPart);
 #ifdef CONFIG_FTPD
@@ -147,27 +143,25 @@ static void storageDiskPart(webs_t wp, char_t *path, char_t *query)
 	part3_vol = websGetVar(wp, T("part3_vol"), T(""));
 	part4_vol = websGetVar(wp, T("part4_vol"), T(""));
 
-	doSystem("storage.sh reparted %s %s %s %s", 
-			  part1_vol, part2_vol, part3_vol, part4_vol);
+	doSystem("storage.sh reparted %s %s %s %s", part1_vol, part2_vol, part3_vol, part4_vol);
 	fclose(fp_mount);
 }
 
 #ifdef CONFIG_FTPD
-// FTP setup
 const parameter_fetch_t ftp_server_args[] =
 {
 	{ T("ftp_port"), "FtpPort", 0, T("") },
 	{ T("ftp_rootdir"), "FtpRootDir", 0, T("") },
 	{ T("ftp_idle_timeout"), "FtpIdleTime", 0, T("") },
-	{ NULL, NULL, 0, NULL } // Terminator
+	{ NULL, NULL, 0, NULL }
 };
-/* goform/storageFtpSrv */
+
 static void storageFtpSrv(webs_t wp, char_t *path, char_t *query)
 {
 	char_t *ftp_enable = websGetVar(wp, T("ftp_enabled"), T("0"));
 	if (ftp_enable == NULL)
 		ftp_enable = "0";
-		
+
 	nvram_init(RT2860_NVRAM);
 	nvram_bufset(RT2860_NVRAM, "RemoteFTP", ftp_enable);
 
@@ -175,12 +169,11 @@ static void storageFtpSrv(webs_t wp, char_t *path, char_t *query)
 		setupParameters(wp, ftp_server_args, 0);
 
 	nvram_close(RT2860_NVRAM);
-	
-	//restart some services instead full reload
+
 	doSystem("service inetd restart");
 	doSystem("service iptables restart");
 
-	char_t *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
+	char_t *submitUrl = websGetVar(wp, T("submit-url"), T(""));
 	if (submitUrl != NULL)
 		websRedirect(wp, submitUrl);
 	else
@@ -189,7 +182,6 @@ static void storageFtpSrv(webs_t wp, char_t *path, char_t *query)
 #endif
 
 #ifdef CONFIG_USER_TRANSMISSION
-
 const parameter_fetch_t transmission_args[] =
 {
 	{ T("transRPCPort"), "TransRPCPort", 0, T("") },
@@ -205,54 +197,38 @@ static void transmission(webs_t wp, char_t *path, char_t *query)
 {
 	char *submitUrl;
 	char_t *submit;
-	
-	submit = websGetVar(wp, T("hiddenButton"), T(""));
-	
-	if (0 == strcmp(submit, "apply"))
-		{
-			char_t *trans_enabled = websGetVar(wp, T("TransEnabled"), T("0"));
-			if (trans_enabled == NULL)
-			trans_enabled = "0";
-		
-			nvram_init(RT2860_NVRAM);
-			nvram_bufset(RT2860_NVRAM, "TransmissionEnabled", trans_enabled);
 
-			if (CHK_IF_DIGIT(trans_enabled, 1))
+	submit = websGetVar(wp, T("hiddenButton"), T(""));
+
+	if (0 == strcmp(submit, "apply")) {
+		char_t *trans_enabled = websGetVar(wp, T("TransEnabled"), T("0"));
+		if (trans_enabled == NULL)
+		    trans_enabled = "0";
+
+		nvram_init(RT2860_NVRAM);
+		nvram_bufset(RT2860_NVRAM, "TransmissionEnabled", trans_enabled);
+
+		if (CHK_IF_DIGIT(trans_enabled, 1))
 			setupParameters(wp, transmission_args, 0);
 
-			nvram_close(RT2860_NVRAM);
-			doSystem("service iptables restart");
-			doSystem("service transmission restart");
-		}
-	else if (0 == strcmp(submit, "start"))
-		{
-			doSystem("service transmission start");
-		}
-	else if (0 == strcmp(submit, "stop"))
-		{
-			doSystem("service transmission stop");
-		}	
-	else if (0 == strcmp(submit, "reload"))
-		{
-			doSystem("service transmission reload");
-		}		
-		
+		nvram_close(RT2860_NVRAM);
+		doSystem("service iptables restart");
+		doSystem("service transmission restart");
+	} else if (0 == strcmp(submit, "start")) {
+		doSystem("service transmission start");
+	} else if (0 == strcmp(submit, "stop")) {
+		doSystem("service transmission stop");
+	} else if (0 == strcmp(submit, "reload")) {
+		doSystem("service transmission reload");
+	}
+
 	submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
 	if (submitUrl != NULL)
 		websRedirect(wp, submitUrl);
 	else
 		websDone(wp, 200);
-}	
-#endif
-
-int initSTORAGE(void)
-{
-#ifdef CONFIG_USER_USHARE
-	fetchMediaConfig();
-	RunMediaSrv();
-#endif
-	return 0;
 }
+#endif
 
 static int getCount(int eid, webs_t wp, int argc, char_t **argv)
 {
@@ -260,36 +236,26 @@ static int getCount(int eid, webs_t wp, int argc, char_t **argv)
 	char_t *field;
 	char count[3];
 
-	if (2 > ejArgs(argc, argv, T("%d %s"), &type, &field)) 
-	{
+	if (2 > ejArgs(argc, argv, T("%d %s"), &type, &field))
 		return websWrite(wp, T("Insufficient args\n"));
-	}
 
 	if (0 == strcmp(field, "AllDir"))
-	{
 		sprintf(count, "%d", dir_count);
-		// fprintf(stderr,"AllDir: %s\n", count);
-	}
 	else if (0 == strcmp(field, "AllPart"))
-	{
 		sprintf(count, "%d", part_count);
-		// fprintf(stderr,"AllPart: %s\n", count);
-	}
 	else if (0 == strcmp(field, "AllMediaDir"))
-	{
 		sprintf(count, "%d", media_dir_count);
-		// fprintf(stderr,"AllPart: %s\n", count);
-	}
 
 	if (1 == type) {
 		if (!strcmp(count, ""))
 			return websWrite(wp, T("0"));
 		return websWrite(wp, T("%s"), count);
 	}
+
 	if (!strcmp(count, ""))
 		ejSetResult(eid, "0");
-	ejSetResult(eid, count);
 
+	ejSetResult(eid, count);
 	return 0;
 }
 
@@ -350,28 +316,24 @@ static int ShowAllDir(int eid, webs_t wp, int argc, char_t **argv)
 		closedir(dp);
 	}
 	fclose(fp_mount);
-	// fprintf(stderr, "dir_count: %d\n", dir_count);
-
 	return 0;
 }
 
 static int ShowPartition(int eid, webs_t wp, int argc, char_t **argv)
 {
 	FILE *fp = fopen(MOUNT_INFO, "r");
-	char part[50], path[30]; 
+	char part[50], path[30];
+
 	if (NULL == fp) {
-        perror(__FUNCTION__);
+    	    perror(__FUNCTION__);
 		return -1;
 	}
 	part_count = 0;
 
 	while(EOF != fscanf(fp, "%s %s %*s %*s %*s %*s\n", part, path))
 	{
-		// if (strncmp(path, "/var", 4) != 0)
 		if (0 != strncmp(path, "/media/sd", 9))
-		{
 			continue;
-		}
 		websWrite(wp, T("<tr align=center>"));
 		websWrite(wp, T("<td><input type=\"radio\" name=\"disk_part\" value=\"%s\"></td>"), 
 				  path);
@@ -381,8 +343,6 @@ static int ShowPartition(int eid, webs_t wp, int argc, char_t **argv)
 		part_count++;
 	}
 	fclose(fp);
-	// fprintf(stderr, "part_count: %d\n", part_count);
-
 	return 0;
 }
 
@@ -397,13 +357,9 @@ static int getMaxVol(int eid, webs_t wp, int argc, char_t **argv)
 
 	transfer = atof(maxvol);
 	if (0 == strcmp(unit, "GB,"))
-	{
 		result = transfer*1000;
-	}
 	else if (0 == strcmp(unit, "MB,"))
-	{
 		result = transfer;
-	}
 
 	return websWrite(wp, T("%d"), result);
 }
