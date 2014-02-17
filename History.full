@@ -1858,6 +1858,10 @@
 61) goahead: fix system log read and add access denied attemps.<br>
 62) goahead: fix cpu load calculations.<br>
 63) goahead: add remote ssh port to WebUi.<br>
+
+<br>
+<b>4.8.x</b><br>
+1) net: fix 'ip rule' iif/oif device rename.<br>
 <br>
 <br>
 <br>
