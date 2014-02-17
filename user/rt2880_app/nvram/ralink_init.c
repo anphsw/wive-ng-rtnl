@@ -342,6 +342,8 @@ static int gen_wifi_config(int getmode)
 		FPRINT_NUM(VideoHighTxMode);
 		FPRINT_NUM(VideoTxLifeTimeMode);
 #endif
+		FPRINT_NUM(M2UEnabled);
+		FPRINT_NUM(IgmpSnEnable);
 		FPRINT_NUM(McastPhyMode);
 		FPRINT_NUM(McastMcs);
 		FPRINT_STR(APAifsn);
