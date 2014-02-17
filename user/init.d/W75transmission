@@ -20,6 +20,9 @@ wait_for_close() {
     if [ "$pid" != "" ]; then
         $LOG "Stop transmission daemon."
         killall -q transmission-daemon
+        # wait one second and reread pid
+        sleep 1
+	pid=`pidof transmission-daemon`
         #wait before save files and connections stop
         count=0
         while [ "$pid" != "" ] && [ "$count" != "15" ]; do
