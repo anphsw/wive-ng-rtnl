@@ -188,6 +188,9 @@ static int isBranchInstr(mips_instruction * i)
 			ctx->fpr[x & ~1] >> 32 << 32 | (u32)(si) : \
 			ctx->fpr[x & ~1] << 32 >> 32 | (u64)(si) << 32)
 
+#define SIFROMHREG(si, x)	((si) = (int)(ctx->fpr[x] >> 32))
+#define SITOHREG(si, x)		(ctx->fpr[x] = \
+				ctx->fpr[x] << 32 >> 32 | (u64)(si) << 32)
 #define DIFROMREG(di, x) ((di) = \
 			ctx->fpr[x & ~((xcp->cp0_status & FR_BIT) == 0)])
 #define DITOREG(di, x)	(ctx->fpr[x & ~((xcp->cp0_status & FR_BIT) == 0)] \
@@ -351,6 +354,25 @@ static int cop1Emulate(struct pt_regs *xcp, struct mips_fpu_struct *ctx)
 			DITOREG(xcp->regs[MIPSInst_RT(ir)], MIPSInst_RD(ir));
 			break;
 #endif
+
+		case mfhc_op:
+			if (!cpu_has_mips_r2)
+				goto sigill;
+
+			/* copregister rd -> gpr[rt] */
+			if (MIPSInst_RT(ir) != 0) {
+				SIFROMHREG(xcp->regs[MIPSInst_RT(ir)],
+					MIPSInst_RD(ir));
+			}
+			break;
+
+		case mthc_op:
+			if (!cpu_has_mips_r2)
+				goto sigill;
+
+			/* copregister rd <- gpr[rt] */
+			SITOHREG(xcp->regs[MIPSInst_RT(ir)], MIPSInst_RD(ir));
+			break;
 
 		case mfc_op:
 			/* copregister rd -> gpr[rt] */
@@ -541,6 +563,7 @@ static int cop1Emulate(struct pt_regs *xcp, struct mips_fpu_struct *ctx)
 #endif
 
 	default:
+sigill:
 		return SIGILL;
 	}
 
