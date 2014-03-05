@@ -229,6 +229,10 @@ static void cli_sessionloop() {
 			TRACE(("leave cli_sessionloop: sent userauth methods req"))
 			return;
 			
+		case USERAUTH_REQ_SENT:
+			TRACE(("leave cli_sessionloop: waiting, req_sent"))
+			return;
+			
 		case USERAUTH_FAIL_RCVD:
 			if (cli_auth_try() == DROPBEAR_FAILURE) {
 				dropbear_exit("No auth methods could be used.");

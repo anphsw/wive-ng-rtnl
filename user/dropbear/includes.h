@@ -158,6 +158,7 @@ typedef u_int32_t uint32_t;
 
 #ifdef SO_PRIORITY
 #undef SO_PRIORITY
+#include <linux/types.h>
 //#include <linux/pkt_sched.h>
 #endif
 

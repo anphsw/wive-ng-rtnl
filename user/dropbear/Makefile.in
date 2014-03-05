@@ -12,15 +12,16 @@
 ifndef PROGRAMS
 	PROGRAMS=dropbear dropbearkey scp
 endif
-#	 dbclient dropbearconvert
 
-LTC=libtomcrypt/libtomcrypt.a
-LTM=libtommath/libtommath.a
+STATIC_LTC=libtomcrypt/libtomcrypt.a
+STATIC_LTM=libtommath/libtommath.a
+
+LIBTOM_LIBS=@LIBTOM_LIBS@
 
 ifeq (@BUNDLED_LIBTOM@, 1)
-LIBTOM_DEPS=$(LTC) $(LTM)
+LIBTOM_DEPS=$(STATIC_LTC) $(STATIC_LTM) 
 CFLAGS+=-I$(srcdir)/libtomcrypt/src/headers/ 
-LIBS+=$(LTC) $(LTM)
+LIBTOM_LIBS=$(STATIC_LTC) $(STATIC_LTM) 
 endif
 
 COMMONOBJS=dbutil.o buffer.o \
@@ -59,7 +60,7 @@ HEADERS=options.h dbutil.h session.h packet.h algo.h ssh.h buffer.h kex.h \
 		loginrec.h atomicio.h x11fwd.h agentfwd.h tcpfwd.h compat.h \
 		listener.h fake-rfc2553.h ecc.h ecdsa.h
 
-dropbearobjs=$(COMMONOBJS) $(CLISVROBJS) $(SVROBJS) 
+dropbearobjs=$(COMMONOBJS) $(CLISVROBJS) $(SVROBJS)
 dbclientobjs=$(COMMONOBJS) $(CLISVROBJS) $(CLIOBJS)
 dropbearkeyobjs=$(COMMONOBJS) $(KEYOBJS)
 dropbearconvertobjs=$(COMMONOBJS) $(CONVERTOBJS)
@@ -161,8 +162,14 @@ dbclient: $(dbclientobjs)
 dropbearkey: $(dropbearkeyobjs)
 dropbearconvert: $(dropbearconvertobjs)
 
-dropbear dbclient dropbearkey dropbearconvert: $(HEADERS) $(LIBTOM_DEPS) Makefile
-	$(CC) $(LDFLAGS) -o $@$(EXEEXT) $($@objs) $(LIBS)
+dropbear: $(HEADERS) $(LIBTOM_DEPS) Makefile
+	$(CC) $(LDFLAGS) -o $@$(EXEEXT) $($@objs) $(LIBTOM_LIBS) $(LIBS) @CRYPTLIB@
+
+dbclient: $(HEADERS) $(LIBTOM_DEPS) Makefile
+	$(CC) $(LDFLAGS) -o $@$(EXEEXT) $($@objs) $(LIBTOM_LIBS) $(LIBS)
+
+dropbearkey dropbearconvert: $(HEADERS) $(LIBTOM_DEPS) Makefile
+	$(CC) $(LDFLAGS) -o $@$(EXEEXT) $($@objs) $(LIBTOM_LIBS)
 
 # scp doesn't use the libs so is special.
 scp: $(SCPOBJS)  $(HEADERS) Makefile
@@ -176,21 +183,19 @@ ifeq ($(MULTI),1)
 	CFLAGS+=$(addprefix -DDBMULTI_, $(PROGRAMS)) -DDROPBEAR_MULTI
 endif
 
-dropbearmulti: multilink 
+dropbearmulti$(EXEEXT): $(HEADERS) $(MULTIOBJS) $(LIBTOM_DEPS) Makefile
+	$(CC) $(LDFLAGS) -o $@ $(MULTIOBJS) $(LIBTOM_LIBS) $(LIBS) @CRYPTLIB@
 
-multibinary: $(HEADERS) $(MULTIOBJS) $(LIBTOM_DEPS) Makefile
-	$(CC) $(LDFLAGS) -o dropbearmulti$(EXEEXT) $(MULTIOBJS) $(LIBS)
-
-multilink: multibinary $(addprefix link, $(PROGRAMS))
+multibinary: dropbearmulti$(EXEEXT)
 
 link%:
 	-rm -f $*$(EXEEXT)
 	-ln -s dropbearmulti$(EXEEXT) $*$(EXEEXT)
 
-$(LTC): options.h
+$(STATIC_LTC): options.h
 	cd libtomcrypt && $(MAKE)
 
-$(LTM): options.h
+$(STATIC_LTM): options.h
 	cd libtommath && $(MAKE)
 
 .PHONY : clean sizes thisclean distclean tidy ltc-clean ltm-clean

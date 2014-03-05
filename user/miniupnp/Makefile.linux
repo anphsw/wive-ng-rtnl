@@ -1,4 +1,4 @@
-# $Id: Makefile.linux,v 1.81 2014/01/27 10:06:58 nanard Exp $
+# $Id: Makefile.linux,v 1.82 2014/02/25 10:55:22 nanard Exp $
 # MiniUPnP project
 # (c) 2006-2014 Thomas Bernard
 # http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
@@ -45,7 +45,7 @@ BASEOBJS = miniupnpd.o upnphttp.o upnpdescgen.o upnpsoap.o \
 		   upnpredirect.o getifaddr.o daemonize.o upnpglobalvars.o \
            options.o upnppermissions.o minissdp.o natpmp.o  pcpserver.o \
            upnpevents.o upnputils.o getconnstatus.o \
-           upnppinhole.o pcplearndscp.o
+           upnppinhole.o pcplearndscp.o asyncsendto.o
 
 LNXOBJS = linux/getifstats.o linux/ifacewatcher.o linux/getroute.o
 NETFILTEROBJS = netfilter/iptcrdr.o netfilter/iptpinhole.o netfilter/nfct_get.o
@@ -146,7 +146,7 @@ TESTUPNPDESCGENOBJS = testupnpdescgen.o upnpdescgen.o
 
 EXECUTABLES = miniupnpd testupnpdescgen testgetifstats \
               testupnppermissions miniupnpdctl testgetifaddr \
-              testgetroute
+              testgetroute testasyncsendto
 
 .PHONY:	all clean install depend genuuid
 
@@ -157,7 +157,7 @@ clean:
 	$(RM) $(EXECUTABLES)
 	$(RM) testupnpdescgen.o testgetifstats.o
 	$(RM) testupnppermissions.o testgetifaddr.o
-	$(RM) testgetroute.o
+	$(RM) testgetroute.o testasyncsendto.o
 	$(RM) miniupnpdctl.o
 	$(RM) -r filesystem
 
@@ -206,6 +206,8 @@ testgetifaddr:	testgetifaddr.o getifaddr.o
 
 testgetroute:	testgetroute.o linux/getroute.o upnputils.o $(LIBS)
 
+testasyncsendto:	testasyncsendto.o asyncsendto.o upnputils.o
+
 miniupnpdctl:	miniupnpdctl.o
 
 config.h:	genconfig.sh VERSION
@@ -215,7 +217,7 @@ depend:	config.h
 	makedepend -f$(MAKEFILE_LIST) -Y \
 	$(ALLOBJS:.o=.c) $(TESTUPNPDESCGENOBJS:.o=.c) \
 	testgetifstats.c testupnppermissions.c testgetifaddr.c \
-	testgetroute.c miniupnpdctl.c 2>/dev/null
+	testgetroute.c testasyncsendto.c miniupnpdctl.c 2>/dev/null
 
 # DO NOT DELETE
 

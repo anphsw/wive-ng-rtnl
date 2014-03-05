@@ -1,4 +1,4 @@
-/* $Id: miniupnpd.c,v 1.182 2014/02/03 08:37:32 nanard Exp $ */
+/* $Id: miniupnpd.c,v 1.184 2014/02/25 10:55:23 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * (c) 2006-2014 Thomas Bernard
@@ -61,6 +61,7 @@
 #include "miniupnpdtypes.h"
 #include "daemonize.h"
 #include "upnpevents.h"
+#include "asyncsendto.h"
 #ifdef ENABLE_NATPMP
 #include "natpmp.h"
 #ifdef ENABLE_PCP
@@ -114,8 +115,8 @@ OpenAndConfHTTPSocket(unsigned short port)
 	int s;
 	int i = 1;
 #ifdef ENABLE_IPV6
-	struct sockaddr_in6 listenname;
-	struct in6_addr in6addr = IN6ADDR_ANY_INIT;
+	struct sockaddr_in6 listenname6;
+	struct sockaddr_in listenname4;
 #else
 	struct sockaddr_in listenname;
 #endif
@@ -123,7 +124,7 @@ OpenAndConfHTTPSocket(unsigned short port)
 
 	if( (s = socket(
 #ifdef ENABLE_IPV6
-	                PF_INET6,
+	                ipv6_enabled ? PF_INET6 : PF_INET,
 #else
 	                PF_INET,
 #endif
@@ -152,19 +153,35 @@ OpenAndConfHTTPSocket(unsigned short port)
 	}
 
 #ifdef ENABLE_IPV6
-	memset(&listenname, 0, sizeof(struct sockaddr_in6));
-	listenname.sin6_family = AF_INET6;
-	listenname.sin6_port = htons(port);
-	listenname.sin6_addr = in6addr; /* in6addr_any is not available with old uclibc */
+	if(ipv6_enabled)
+	{
+		memset(&listenname6, 0, sizeof(struct sockaddr_in6));
+		listenname6.sin6_family = AF_INET6;
+		listenname6.sin6_port = htons(port);
+		listenname6.sin6_addr = in6addr_any;
 	listenname_len =  sizeof(struct sockaddr_in6);
+	} else {
+		memset(&listenname4, 0, sizeof(struct sockaddr_in));
+		listenname4.sin_family = AF_INET;
+		listenname4.sin_port = htons(port);
+		listenname4.sin_addr.s_addr = htonl(INADDR_ANY);
+		listenname_len =  sizeof(struct sockaddr_in);
+	}
 #else
+	memset(&listenname, 0, sizeof(struct sockaddr_in));
 	listenname.sin_family = AF_INET;
 	listenname.sin_port = htons(port);
 	listenname.sin_addr.s_addr = htonl(INADDR_ANY);
 	listenname_len =  sizeof(struct sockaddr_in);
 #endif
 
+#ifdef ENABLE_IPV6
+	if(bind(s,
+	        ipv6_enabled ? (struct sockaddr *)&listenname6 : (struct sockaddr *)&listenname4,
+	        listenname_len) < 0)
+#else
 	if(bind(s, (struct sockaddr *)&listenname, listenname_len) < 0)
+#endif
 	{
 		syslog(LOG_ERR, "bind(http): %m");
 		close(s);
@@ -686,7 +703,10 @@ void complete_uuidvalues(void)
  * 5) check and write pid file
  * 6) set startup time stamp
  * 7) compute presentation URL
- * 8) set signal handlers */
+ * 8) set signal handlers
+ * 9) init random generator (srandom())
+ * 10) init redirection engine
+ * 11) reload mapping from leasefile */
 static int
 init(int argc, char * * argv, struct runtime_vars * v)
 {
@@ -1245,6 +1265,10 @@ init(int argc, char * * argv, struct runtime_vars * v)
 		syslog(LOG_NOTICE, "Failed to set %s handler", "SIGUSR1");
 	}
 
+	/* initialize random number generator */
+	srandom((unsigned int)time(NULL));
+
+	/* initialize redirection engine (and pinholes) */
 	if(init_redirect() < 0)
 	{
 		syslog(LOG_ERR, "Failed to init redirection engine. EXITING");
@@ -1347,7 +1371,7 @@ main(int argc, char * * argv)
 	int sudpv6 = -1;	/* IP v6 socket for receiving SSDP */
 #endif
 #ifdef ENABLE_NATPMP
-	int * snatpmp = NULL;
+	int * snatpmp = NULL;	/* also used for PCP */
 #endif
 #ifdef ENABLE_NFQUEUE
 	int nfqh = -1;
@@ -1455,7 +1479,8 @@ main(int argc, char * * argv)
 			       ipv6_addr_for_http_with_brackets);
 		} else {
 			memcpy(ipv6_addr_for_http_with_brackets, "[::1]", 6);
-			syslog(LOG_WARNING, "no HTTP IPv6 address");
+			syslog(LOG_WARNING, "no HTTP IPv6 address, disabling IPv6");
+			ipv6_enabled = 0;
 		}
 #endif
 
@@ -1470,10 +1495,13 @@ main(int argc, char * * argv)
 			}
 		}
 #ifdef ENABLE_IPV6
+		if(ipv6_enabled)
+		{
 		sudpv6 = OpenAndConfSSDPReceiveSocket(1);
 		if(sudpv6 < 0)
 		{
 			syslog(LOG_WARNING, "Failed to open socket for receiving SSDP (IP v6).");
+		}
 		}
 #endif
 
@@ -1727,6 +1755,38 @@ main(int argc, char * * argv)
 		upnpevents_selectfds(&readset, &writeset, &max_fd);
 #endif
 
+		/* queued "sendto" */
+		{
+			struct timeval next_send;
+			i = get_next_scheduled_send(&next_send);
+			if(i > 0) {
+#ifdef DEBUG
+				syslog(LOG_DEBUG, "%d queued sendto", i);
+#endif
+				i = get_sendto_fds(&writeset, &max_fd, &timeofday);
+				if(timeofday.tv_sec > next_send.tv_sec ||
+				   (timeofday.tv_sec == next_send.tv_sec && timeofday.tv_usec >= next_send.tv_usec)) {
+					if(i > 0) {
+						timeout.tv_sec = 0;
+						timeout.tv_usec = 0;
+					}
+				} else {
+					struct timeval tmp_timeout;
+					tmp_timeout.tv_sec = (next_send.tv_sec - timeofday.tv_sec);
+					tmp_timeout.tv_usec = (next_send.tv_usec - timeofday.tv_usec);
+					if(tmp_timeout.tv_usec < 0) {
+						tmp_timeout.tv_usec += 1000000;
+						tmp_timeout.tv_sec--;
+					}
+					if(timeout.tv_sec > tmp_timeout.tv_sec
+					   || (timeout.tv_sec == tmp_timeout.tv_sec && timeout.tv_usec > tmp_timeout.tv_usec)) {
+						timeout.tv_sec = tmp_timeout.tv_sec;
+						timeout.tv_usec = tmp_timeout.tv_usec;
+					}
+				}
+			}
+		}
+
 		if(select(max_fd+1, &readset, &writeset, 0, &timeout) < 0)
 		{
 			if(quitting) goto shutdown;
@@ -1734,6 +1794,9 @@ main(int argc, char * * argv)
 			syslog(LOG_ERR, "select(all): %m");
 			syslog(LOG_ERR, "Failed to select open sockets. EXITING");
 			return 1;	/* very serious cause of error */
+		}
+		if(try_sendto(&writeset) < 0) {
+			syslog(LOG_ERR, "try_sendto: %m");
 		}
 #ifdef USE_MINIUPNPDCTL
 		for(ectl = ctllisthead.lh_first; ectl;)
@@ -1961,6 +2024,21 @@ main(int argc, char * * argv)
 	}	/* end of main loop */
 
 shutdown:
+	/* send good-bye */
+	if (GETFLAG(ENABLEUPNPMASK))
+	{
+#ifndef ENABLE_IPV6
+		if(SendSSDPGoodbye(snotify, addr_count) < 0)
+#else
+		if(SendSSDPGoodbye(snotify, addr_count * 2) < 0)
+#endif
+		{
+			syslog(LOG_ERR, "Failed to broadcast good-bye notifications");
+		}
+	}
+	/* try to send pending packets */
+	finalize_sendto();
+
 	/* close out open sockets */
 	while(upnphttphead.lh_first != NULL)
 	{
@@ -2001,14 +2079,6 @@ shutdown:
 	if (GETFLAG(ENABLEUPNPMASK))
 	{
 #ifndef ENABLE_IPV6
-		if(SendSSDPGoodbye(snotify, addr_count) < 0)
-#else
-		if(SendSSDPGoodbye(snotify, addr_count * 2) < 0)
-#endif
-		{
-			syslog(LOG_ERR, "Failed to broadcast good-bye notifications");
-		}
-#ifndef ENABLE_IPV6
 		for(i = 0; i < addr_count; i++)
 #else
 		for(i = 0; i < addr_count * 2; i++)
@@ -2016,6 +2086,7 @@ shutdown:
 			close(snotify[i]);
 	}
 
+	/* remove pidfile */
 	if(pidfilename && (unlink(pidfilename) < 0))
 	{
 		syslog(LOG_ERR, "Failed to remove pidfile %s: %m", pidfilename);

@@ -1,4 +1,4 @@
-/* $Id: pcpserver.c,v 1.7 2014/02/03 09:38:26 nanard Exp $ */
+/* $Id: pcpserver.c,v 1.11 2014/02/25 10:55:24 nanard Exp $ */
 /* MiniUPnP project
  * Website : http://miniupnp.free.fr/
  * Author : Peter Tatrai
@@ -58,6 +58,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "upnpredirect.h"
 #include "commonrdr.h"
 #include "getifaddr.h"
+#include "asyncsendto.h"
 #include "pcp_msg_struct.h"
 
 #ifdef PCP_PEER
@@ -116,7 +117,7 @@ typedef struct pcp_info {
 	int pfailure_present;
 	char senderaddrstr[INET_ADDRSTRLEN];
 
-}pcp_info_t;
+} pcp_info_t;
 
 
 #ifdef PCP_SADSCP
@@ -803,7 +804,7 @@ static void CreatePCPMap(pcp_info_t *pcp_msg_info)
 	char desc[64];
 	char iaddr_old[INET_ADDRSTRLEN];
 	uint16_t iport_old;
-	unsigned int timestamp = time(NULL) + pcp_msg_info->lifetime;
+	unsigned int timestamp;
 	int r=0;
 
 	if (pcp_msg_info->ext_port == 0) {
@@ -827,6 +828,10 @@ static void CreatePCPMap(pcp_info_t *pcp_msg_info)
 					return;
 				}
 			} else {
+				syslog(LOG_INFO, "port %hu %s already redirected to %s:%hu, replacing",
+				       pcp_msg_info->ext_port, (pcp_msg_info->protocol==IPPROTO_TCP)?"tcp":"udp",
+				       iaddr_old, iport_old);
+				/* remove and then add again */
 				if (_upnp_delete_redir(pcp_msg_info->ext_port,
 						pcp_msg_info->protocol)==0) {
 					break;
@@ -835,6 +840,8 @@ static void CreatePCPMap(pcp_info_t *pcp_msg_info)
 			pcp_msg_info->ext_port++;
 		}
 	} while (r==0);
+
+	timestamp = time(NULL) + pcp_msg_info->lifetime;
 
 	if ((pcp_msg_info->ext_port == 0) ||
 	    (IN6_IS_ADDR_V4MAPPED(pcp_msg_info->int_ip) &&
@@ -1083,7 +1090,7 @@ static int processPCPRequest(void * req, int req_size, pcp_info_t *pcp_msg_info)
 		}
 
 	} else if (common_req->ver == 2) {
-		/* RFC 6887 PCP support 
+		/* RFC 6887 PCP support
 		 * http://tools.ietf.org/html/rfc6887 */
 		switch ( common_req->r_opcode & 0x7F) {
 		case PCP_OPCODE_ANNOUNCE:
@@ -1318,8 +1325,8 @@ int ProcessIncomingPCPPacket(int s, unsigned char *buff, int len,
 		if(len < PCP_MIN_LEN)
 			len = PCP_MIN_LEN;
 		else
-		len = (len + 3) & ~3;	/* round up resp. length to multiple of 4 */
-		len = sendto(s, buff, len, 0,
+			len = (len + 3) & ~3;	/* round up resp. length to multiple of 4 */
+		len = sendto_or_schedule(s, buff, len, 0,
 		           (struct sockaddr *)senderaddr, sizeof(struct sockaddr_in));
 		if( len < 0 ) {
 			syslog(LOG_ERR, "sendto(pcpserver): %m");
