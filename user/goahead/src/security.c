@@ -44,7 +44,7 @@
 /******************************** Local Data **********************************/
 
 static char_t	websPassword[WEBS_MAX_PASS];	/* Access password (decoded) */
-#ifdef _DEBUG
+#ifdef PRINT_DEBUG
 static int		debugSecurity = 1;
 #else
 static int		debugSecurity = 0;

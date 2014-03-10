@@ -1324,9 +1324,11 @@ static void portForward(webs_t wp, char_t *path, char_t *query)
 	char *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
 	if (! submitUrl[0])
 	{
+#ifdef PRINT_DEBUG
 		websHeader(wp);
 		websWrite(wp, T("portForwardEnabled: %s<br>\n"), pfe);
 		websFooter(wp);
+#endif
 		websDone(wp, 200);
 	}
 	else
@@ -1362,10 +1364,12 @@ static void portFiltering(webs_t wp, char_t *path, char_t *query)
 	char *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
 	if (! submitUrl[0])
 	{
+#ifdef PRINT_DEBUG
 		websHeader(wp);
 		websWrite(wp, T("portFilteringEnabled: %s<br>\n"), firewall_enable);
 		websWrite(wp, T("default_policy: %s<br>\n"), default_policy);
 		websFooter(wp);
+#endif
 		websDone(wp, 200);
 	}
 	else
@@ -1405,10 +1409,12 @@ static void DMZ(webs_t wp, char_t *path, char_t *query)
 	char *submitUrl = websGetVar(wp, T("submit-url"), T(""));   // hidden page
 	if (! submitUrl[0])
 	{
+#ifdef PRINT_DEBUG
 		websHeader(wp);
 		websWrite(wp, T("DMZEnabled: %s<br>\n"), dmzE);
 		websWrite(wp, T("ip_address: %s<br>\n"), ip_address);
 		websFooter(wp);
+#endif
 		websDone(wp, 200);
 	}
 	else

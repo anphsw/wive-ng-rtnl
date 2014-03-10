@@ -40,6 +40,9 @@ DEPEND_FILES	= asp.o balloc.o base64.o cgi.o default.o  \
 				  internet.o services.o utils.o wireless.o \
 				  firewall.o management.o helpers.o procps.o $(NAME).o
 
+# Enable web print debug commit nvram values
+# CFLAGS += PRINT_DEBUG
+
 # gahead flags
 ifeq ("$(CONFIG_USER_GOAHEAD_IPV6)", "y")
 CFLAGS += -DWF_USE_IPV6
