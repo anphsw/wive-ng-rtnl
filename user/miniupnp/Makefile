@@ -207,7 +207,7 @@ testgetifaddr:	testgetifaddr.o getifaddr.o
 testgetroute:	testgetroute.o linux/getroute.o upnputils.o $(LIBS)
 
 testasyncsendto:	testasyncsendto.o asyncsendto.o upnputils.o \
-	linux/getroute.o -lnfnetlink
+	linux/getroute.o $(LIBS)
 
 miniupnpdctl:	miniupnpdctl.o
 
