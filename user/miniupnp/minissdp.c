@@ -1,4 +1,4 @@
-/* $Id: minissdp.c,v 1.59 2014/02/25 10:55:22 nanard Exp $ */
+/* $Id: minissdp.c,v 1.60 2014/02/28 15:06:49 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * (c) 2006-2014 Thomas Bernard
@@ -1138,9 +1138,11 @@ SubmitServicesToMiniSSDPD(const char * host, unsigned short port) {
 		while(n > 0) {
 			l = write(s, p, n);
 			if (l < 0) {
-			syslog(LOG_ERR, "write(): %m");
-				close(s);
-			return -1;
+				if(errno == EINTR)
+					continue;
+				syslog(LOG_ERR, "write(): %m");
+				    close(s);
+				return -1;
 			} else if (l == 0) {
 				syslog(LOG_ERR, "write() returned 0");
 				close(s);

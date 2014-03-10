@@ -1,4 +1,4 @@
-# $Id: Makefile.linux,v 1.82 2014/02/25 10:55:22 nanard Exp $
+# $Id: Makefile.linux,v 1.83 2014/03/09 23:10:13 nanard Exp $
 # MiniUPnP project
 # (c) 2006-2014 Thomas Bernard
 # http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
@@ -206,7 +206,8 @@ testgetifaddr:	testgetifaddr.o getifaddr.o
 
 testgetroute:	testgetroute.o linux/getroute.o upnputils.o $(LIBS)
 
-testasyncsendto:	testasyncsendto.o asyncsendto.o upnputils.o
+testasyncsendto:	testasyncsendto.o asyncsendto.o upnputils.o \
+	linux/getroute.o -lnfnetlink
 
 miniupnpdctl:	miniupnpdctl.o
 
@@ -224,8 +225,8 @@ depend:	config.h
 miniupnpd.o: config.h macros.h upnpglobalvars.h upnppermissions.h
 miniupnpd.o: miniupnpdtypes.h upnphttp.h upnpdescgen.h miniupnpdpath.h
 miniupnpd.o: getifaddr.h upnpsoap.h options.h minissdp.h upnpredirect.h
-miniupnpd.o: upnppinhole.h daemonize.h upnpevents.h natpmp.h pcpserver.h
-miniupnpd.o: commonrdr.h upnputils.h ifacewatcher.h
+miniupnpd.o: upnppinhole.h daemonize.h upnpevents.h asyncsendto.h natpmp.h
+miniupnpd.o: pcpserver.h commonrdr.h upnputils.h ifacewatcher.h
 upnphttp.o: config.h upnphttp.h upnpdescgen.h miniupnpdpath.h upnpsoap.h
 upnphttp.o: upnpevents.h upnputils.h
 upnpdescgen.o: config.h getifaddr.h upnpredirect.h upnpdescgen.h
@@ -249,12 +250,13 @@ options.o: miniupnpdtypes.h
 upnppermissions.o: config.h upnppermissions.h
 minissdp.o: config.h upnpdescstrings.h miniupnpdpath.h upnphttp.h
 minissdp.o: upnpglobalvars.h upnppermissions.h miniupnpdtypes.h minissdp.h
-minissdp.o: upnputils.h getroute.h codelength.h
+minissdp.o: upnputils.h getroute.h asyncsendto.h codelength.h
 natpmp.o: macros.h config.h natpmp.h upnpglobalvars.h upnppermissions.h
 natpmp.o: miniupnpdtypes.h getifaddr.h upnpredirect.h commonrdr.h upnputils.h
+natpmp.o: asyncsendto.h
 pcpserver.o: config.h pcpserver.h macros.h upnpglobalvars.h upnppermissions.h
 pcpserver.o: miniupnpdtypes.h pcplearndscp.h upnpredirect.h commonrdr.h
-pcpserver.o: getifaddr.h pcp_msg_struct.h
+pcpserver.o: getifaddr.h asyncsendto.h pcp_msg_struct.h
 upnpevents.o: config.h upnpevents.h miniupnpdpath.h upnpglobalvars.h
 upnpevents.o: upnppermissions.h miniupnpdtypes.h upnpdescgen.h upnputils.h
 upnputils.o: config.h upnputils.h upnpglobalvars.h upnppermissions.h
@@ -265,6 +267,7 @@ upnppinhole.o: upnppermissions.h miniupnpdtypes.h upnpevents.h
 upnppinhole.o: netfilter/iptpinhole.h
 pcplearndscp.o: config.h upnpglobalvars.h upnppermissions.h miniupnpdtypes.h
 pcplearndscp.o: pcplearndscp.h
+asyncsendto.o: asyncsendto.h
 linux/getifstats.o: config.h getifstats.h
 linux/ifacewatcher.o: config.h ifacewatcher.h config.h minissdp.h
 linux/ifacewatcher.o: miniupnpdtypes.h getifaddr.h upnpglobalvars.h
@@ -282,7 +285,8 @@ upnpdescgen.o: miniupnpdpath.h upnpglobalvars.h upnppermissions.h
 upnpdescgen.o: miniupnpdtypes.h upnpdescstrings.h upnpurns.h getconnstatus.h
 testgetifstats.o: getifstats.h
 testupnppermissions.o: upnppermissions.h config.h
-testgetifaddr.o: getifaddr.h
+testgetifaddr.o: config.h getifaddr.h
 testgetroute.o: getroute.h upnputils.h upnpglobalvars.h upnppermissions.h
 testgetroute.o: config.h miniupnpdtypes.h
+testasyncsendto.o: miniupnpdtypes.h config.h upnputils.h asyncsendto.h
 miniupnpdctl.o: macros.h
