@@ -319,7 +319,7 @@ static int gen_wifi_config(int getmode)
 		FPRINT_NUM(FastConnect);
 		FPRINT_NUM(HiPower);
 		FPRINT_NUM(AutoRoaming);
-		FPRINT_NUM(FixedTxMode);
+		FPRINT_STR(FixedTxMode);
 		FPRINT_NUM(BasicRate);
 		FPRINT_NUM(BeaconPeriod);
 		FPRINT_NUM(DtimPeriod);
