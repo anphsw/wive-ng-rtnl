@@ -2798,7 +2798,7 @@ static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 {
 	char_t *w_mode, *cr_bg, *cr_a, *bg_prot, *rate, *burst;
 	char_t *ht, *bw, *gi, *mcs, *tx_power, *sta_ar, *sta_ac, *sta_fc, *lna_gain;
-	int s, ret, tx_burst=0, wireless_mode=0, tx_rate=0;
+	int s, ret, wireless_mode=0, tx_rate=0;
 
 	unsigned char radio_status=0;
 
@@ -2885,10 +2885,7 @@ static void setStaAdvance(webs_t wp, char_t *path, char_t *query)
 	nvram_bufset(RT2860_NVRAM, "HT_RxStream", rx_stream);
 
 	if (!strncmp(burst, "on", 3))
-	{
 		nvram_bufset(RT2860_NVRAM, "TxBurst", "1");
-		tx_burst = 1;
-	}
 	else
 		nvram_bufset(RT2860_NVRAM, "TxBurst", "0");
 
