@@ -164,6 +164,7 @@
 5) p910nd: up to 0.97 version.<br>
 6) usb-modeswitch-data: up to 20140129 version.<br>
 7) xupnpd: up to 396 revision.<br>
+8) kernel: net: unix socket code abuses csum_partial.<br>
 <br>
 <br>
 <br>
