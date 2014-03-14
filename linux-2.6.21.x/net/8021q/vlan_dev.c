@@ -205,6 +205,9 @@ int vlan_skb_recv(struct sk_buff *skb, struct net_device *dev,
 	stats->rx_packets++;
 	stats->rx_bytes += skb->len;
 
+	if (skb->pkt_type == PACKET_MULTICAST)
+		rx_stats->rx_multicast++;
+
 	/* Take off the VLAN header (4 bytes currently) */
 	skb_pull_rcsum(skb, VLAN_HLEN);
 
@@ -219,31 +222,15 @@ int vlan_skb_recv(struct sk_buff *skb, struct net_device *dev,
 		ntohs(vhdr->h_vlan_TCI));
 #endif
 
-	/* The ethernet driver already did the pkt_type calculations
-	 * for us...
-	 */
-	switch (skb->pkt_type) {
-	case PACKET_BROADCAST: /* Yeah, stats collect these together.. */
-		// stats->broadcast ++; // no such counter :-(
-		break;
-
-	case PACKET_MULTICAST:
-		stats->multicast++;
-		break;
-
-	case PACKET_OTHERHOST:
+	if (unlikely(skb->pkt_type == PACKET_OTHERHOST)) {
 		/* Our lower layer thinks this is not local, let's make sure.
 		 * This allows the VLAN to have a different MAC than the underlying
 		 * device, and still route correctly.
 		 */
-		if (!compare_ether_addr(eth_hdr(skb)->h_dest, skb->dev->dev_addr)) {
+		if (!compare_ether_addr(eth_hdr(skb)->h_dest, skb->dev->dev_addr))
 			/* It is for our (changed) MAC-address! */
 			skb->pkt_type = PACKET_HOST;
-		}
-		break;
-	default:
-		break;
-	};
+	}
 
 	vlan_set_encap_proto(skb, vhdr);
 	skb = vlan_check_reorder_header(skb);
