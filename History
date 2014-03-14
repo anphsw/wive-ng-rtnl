@@ -160,10 +160,10 @@
 1) net: fix 'ip rule' iif/oif device rename.<br>
 2) dropbear: up to 2014.63 version.<br>
 3) radvd: up to 1.9.9 version.<br>
-4) miniupnpd: up to miniupnpd-1.8.20140313 version.<br>
+4) miniupnpd: up to 1.8.20140313 version.<br>
 5) p910nd: up to 0.97 version.<br>
 6) usb-modeswitch-data: up to 20140129 version.<br>
-7) xupnpd: up to 396 revision.<br>
+7) xupnpd: up to 397 revision.<br>
 8) kernel: net: unix socket code abuses csum_partial.<br>
 9) kernel: ipv6: ip6_forward: perform skb->pkt_type check at the beginning.<br>
 10) kernel: vlan: slight optimization for skb_do_rcv().<br>
