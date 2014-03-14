@@ -34,10 +34,10 @@ static int print_pinhole(int uid)
 	u_int64_t packets, bytes;
 
 	r = get_pinhole_info((unsigned short)uid,
-	                rem_host, sizeof(rem_host), &rem_port,
-	                int_client, sizeof(int_client), &int_port,
-	                &proto, &timestamp,
-	                &packets, &bytes);
+	                     rem_host, sizeof(rem_host), &rem_port,
+	                     int_client, sizeof(int_client), &int_port,
+	                     &proto, &timestamp,
+	                     &packets, &bytes);
 	if(r < 0) {
 		fprintf(stderr, "get_pinhole(%d) returned %d\n", uid, r);
 	} else {

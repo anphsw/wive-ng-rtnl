@@ -15,7 +15,7 @@
 static void
 NameValueParserStartElt(void * d, const char * name, int l)
 {
-    struct NameValueParserData * data = (struct NameValueParserData *)d;
+	struct NameValueParserData * data = (struct NameValueParserData *)d;
 	data->topelt = 1;
     if(l>63)
         l = 63;

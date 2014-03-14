@@ -143,14 +143,14 @@ get_src_for_route_to(const struct sockaddr * dst,
 					unsigned char * data = RTA_DATA(rta);
 					if(rta->rta_type == RTA_PREFSRC) {
 						if(src_len && src) {
-						if(*src_len < RTA_PAYLOAD(rta)) {
-							syslog(LOG_WARNING, "cannot copy src: %u<%lu",
-							       (unsigned)*src_len, RTA_PAYLOAD(rta));
-							goto error;
+							if(*src_len < RTA_PAYLOAD(rta)) {
+								syslog(LOG_WARNING, "cannot copy src: %u<%lu",
+								       (unsigned)*src_len, RTA_PAYLOAD(rta));
+								goto error;
+							}
+							*src_len = RTA_PAYLOAD(rta);
+							memcpy(src, data, RTA_PAYLOAD(rta));
 						}
-						*src_len = RTA_PAYLOAD(rta);
-						memcpy(src, data, RTA_PAYLOAD(rta));
-					}
 					} else if(rta->rta_type == RTA_OIF) {
 						if(index)
 							memcpy(index, data, sizeof(int));

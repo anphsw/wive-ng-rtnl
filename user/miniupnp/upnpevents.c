@@ -445,7 +445,7 @@ upnp_event_process_notify(struct upnp_event_notify * obj)
 		}
 		upnp_event_prepare(obj);
 		if(obj->state == ESending)
-		upnp_event_send(obj);
+			upnp_event_send(obj);
 		break;
 	case ESending:
 		upnp_event_send(obj);

@@ -1,4 +1,4 @@
-/* $Id: minissdp.c,v 1.60 2014/02/28 15:06:49 nanard Exp $ */
+/* $Id: minissdp.c,v 1.61 2014/03/10 11:04:51 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * (c) 2006-2014 Thomas Bernard
@@ -290,15 +290,15 @@ OpenAndConfSSDPNotifySockets(int * sockets)
 			goto error;
 		i++;
 #ifdef ENABLE_IPV6
-		if(ipv6_enabled)
+		if(GETFLAG(IPV6DISABLEDMASK))
 		{
-		sockets[i] = OpenAndConfSSDPNotifySocketIPv6(lan_addr->index);
-		if(sockets[i] < 0)
-			goto error;
+			sockets[i] = -1;
 		}
 		else
 		{
-			sockets[i] = -1;
+			sockets[i] = OpenAndConfSSDPNotifySocketIPv6(lan_addr->index);
+			if(sockets[i] < 0)
+				goto error;
 		}
 		i++;
 #endif
@@ -463,32 +463,32 @@ SendSSDPNotify(int s, const struct sockaddr * dest,
                const char * host, unsigned short port,
                const char * nt, const char * suffix,
                const char * usn1, const char * usn2, const char * usn3,
-                 unsigned int lifetime, int ipv6)
+               unsigned int lifetime, int ipv6)
 {
 	char bufr[512];
 	int n, l;
 
-		l = snprintf(bufr, sizeof(bufr),
-			"NOTIFY * HTTP/1.1\r\n"
-			"HOST: %s:%d\r\n"
-			"CACHE-CONTROL: max-age=%u\r\n"
+	l = snprintf(bufr, sizeof(bufr),
+		"NOTIFY * HTTP/1.1\r\n"
+		"HOST: %s:%d\r\n"
+		"CACHE-CONTROL: max-age=%u\r\n"
 		"LOCATION: http://%s:%d" ROOTDESC_PATH"\r\n"
-			"SERVER: " MINIUPNPD_SERVER_STRING "\r\n"
-			"NT: %s%s\r\n"
+		"SERVER: " MINIUPNPD_SERVER_STRING "\r\n"
+		"NT: %s%s\r\n"
 		"USN: %s%s%s%s\r\n"
-			"NTS: ssdp:alive\r\n"
-			"OPT: \"http://schemas.upnp.org/upnp/1/0/\"; ns=01\r\n" /* UDA v1.1 */
-			"01-NLS: %u\r\n" /* same as BOOTID field. UDA v1.1 */
-			"BOOTID.UPNP.ORG: %u\r\n" /* UDA v1.1 */
-			"CONFIGID.UPNP.ORG: %u\r\n" /* UDA v1.1 */
-			"\r\n",
-			ipv6 ? "[" LL_SSDP_MCAST_ADDR "]" : SSDP_MCAST_ADDR,
-			SSDP_PORT,
-			lifetime,
-			host, port,
+		"NTS: ssdp:alive\r\n"
+		"OPT: \"http://schemas.upnp.org/upnp/1/0/\"; ns=01\r\n" /* UDA v1.1 */
+		"01-NLS: %u\r\n" /* same as BOOTID field. UDA v1.1 */
+		"BOOTID.UPNP.ORG: %u\r\n" /* UDA v1.1 */
+		"CONFIGID.UPNP.ORG: %u\r\n" /* UDA v1.1 */
+		"\r\n",
+		ipv6 ? "[" LL_SSDP_MCAST_ADDR "]" : SSDP_MCAST_ADDR,
+		SSDP_PORT,
+		lifetime,
+		host, port,
 		nt, suffix, /* NT: */
 		usn1, usn2, usn3, suffix, /* USN: */
-			upnp_bootid, upnp_bootid, upnp_configid );
+		upnp_bootid, upnp_bootid, upnp_configid );
 	if(l<0)
 	{
 		syslog(LOG_ERR, "SendSSDPNotify() snprintf error");
@@ -501,18 +501,18 @@ SendSSDPNotify(int s, const struct sockaddr * dest,
 	}
 	n = sendto_or_schedule(s, bufr, l, 0, dest,
 #ifdef ENABLE_IPV6
-			ipv6 ? sizeof(struct sockaddr_in6) : sizeof(struct sockaddr_in)
+		ipv6 ? sizeof(struct sockaddr_in6) : sizeof(struct sockaddr_in)
 #else
-			sizeof(struct sockaddr_in)
+		sizeof(struct sockaddr_in)
 #endif
-			);
-		if(n < 0)
-		{
+		);
+	if(n < 0)
+	{
 #if 0
-			syslog(LOG_ERR, "sendto(udp_notify=%d, %s): %m", s,
-			       host ? host : "NULL");
+		syslog(LOG_ERR, "sendto(udp_notify=%d, %s): %m", s,
+		       host ? host : "NULL");
 #endif
-		}
+	}
 	else if(n != l)
 	{
 		syslog(LOG_NOTICE, "sendto() sent %d out of %d bytes", n, l);
@@ -605,8 +605,8 @@ SendSSDPNotifies2(int * sockets,
 #ifdef ENABLE_IPV6
 		if(sockets[i] >= 0)
 		{
-		SendSSDPNotifies(sockets[i], ipv6_addr_for_http_with_brackets, port,
-		                 lifetime, 1);
+			SendSSDPNotifies(sockets[i], ipv6_addr_for_http_with_brackets, port,
+			                 lifetime, 1);
 		}
 		i++;
 #endif
@@ -883,7 +883,7 @@ ProcessSSDPData(int s, const char *bufr, int n,
 						snprintf(ver_str, sizeof(ver_str), "%d", known_service_types[i].version);
 					l = (int)strlen(known_service_types[i].s);
 					SendSSDPResponse(s, sender,
-					                  known_service_types[i].s, l, ver_str,
+					                 known_service_types[i].s, l, ver_str,
 					                 announced_host, port,
 					                 known_service_types[i].uuid,
 					                 delay);
@@ -1039,9 +1039,9 @@ SendSSDPGoodbye(int * sockets, int n_sockets)
 				snprintf(ver_str, sizeof(ver_str), "%d", known_service_types[i].version);
 			ret += SendSSDPbyebye(sockets[j],
 #ifdef ENABLE_IPV6
-	                   ipv6 ? (struct sockaddr *)&sockname6 : (struct sockaddr *)&sockname,
+			                      ipv6 ? (struct sockaddr *)&sockname6 : (struct sockaddr *)&sockname,
 #else
-	                   (struct sockaddr *)&sockname,
+			                      (struct sockaddr *)&sockname,
 #endif
 			                      known_service_types[i].s, ver_str,	/* NT: */
 			                      known_service_types[i].uuid, "::",
@@ -1141,7 +1141,7 @@ SubmitServicesToMiniSSDPD(const char * host, unsigned short port) {
 				if(errno == EINTR)
 					continue;
 				syslog(LOG_ERR, "write(): %m");
-				    close(s);
+				close(s);
 				return -1;
 			} else if (l == 0) {
 				syslog(LOG_ERR, "write() returned 0");

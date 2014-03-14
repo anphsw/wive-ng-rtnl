@@ -1,4 +1,4 @@
-/* $Id: natpmp.c,v 1.41 2014/03/09 23:11:16 nanard Exp $ */
+/* $Id: natpmp.c,v 1.42 2014/03/13 10:11:24 nanard Exp $ */
 /* MiniUPnP project
  * (c) 2007-2014 Thomas Bernard
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
@@ -146,7 +146,7 @@ int ReceiveNATPMPOrPCPPacket(int s, struct sockaddr_in* senderaddr,
 	}
 
 	return n;
-	}
+}
 
 /** read the request from the socket, process it and then send the
  * response back.
@@ -161,7 +161,7 @@ void ProcessIncomingNATPMPPacket(int s, unsigned char *msg_buff, int len,
 	char senderaddrstr[16];
 
 	if(!inet_ntop(AF_INET, &senderaddr->sin_addr,
-	              senderaddrstr, sizeof(senderaddrstr))) {
+			senderaddrstr, sizeof(senderaddrstr))) {
 		syslog(LOG_ERR, "inet_ntop(natpmp): %m");
 	}
 
@@ -266,55 +266,51 @@ void ProcessIncomingNATPMPPacket(int s, unsigned char *msg_buff, int len,
 			} else if(iport==0) {
 				resp[3] = 2;	/* Not Authorized/Refused */
 			} else { /* iport > 0 && lifetime > 0 */
-				unsigned short eport_first;
+				unsigned short eport_first = 0;
+				int any_eport_allowed = 0;
 				char desc[64];
-				if(!check_upnp_rule_against_permissions(upnppermlist, num_upnpperm, eport, senderaddr->sin_addr, iport)) {
-					/* if the mapping is forbidden because of eport only
-					 * (ie iaddr/iport are ok with another eport)
-					 * change eport value ! */
-					if(!find_allowed_eport(upnppermlist, num_upnpperm, senderaddr->sin_addr, iport, &eport)) {
-						/* no rule allow a mapping with this iaddr/iport */
-						resp[3] = 2;	/* Not Authorized/Refused */
-					}
-				}
-				eport_first = eport;
 				while(resp[3] == 0) {
-					if(!check_upnp_rule_against_permissions(upnppermlist, num_upnpperm, eport, senderaddr->sin_addr, iport)) {
-						eport++;
-                                                if(eport == 0) eport++; /* skip port zero */
-						if(eport == eport_first) { /* no external port available */
+					if(eport_first == 0) { /* first time in loop */
+						eport_first = eport;
+					} else if(eport == eport_first) { /* no eport available */
+						if(any_eport_allowed == 0) { /* all eports rejected by permissions */
+							syslog(LOG_ERR, "No allowed eport for NAT-PMP %hu %s->%s:%hu",
+							       eport, (proto==IPPROTO_TCP)?"tcp":"udp", senderaddrstr, iport);
+							resp[3] = 2;	/* Not Authorized/Refused */
+						} else { /* at least one eport allowed (but none available) */
 							syslog(LOG_ERR, "Failed to find available eport for NAT-PMP %hu %s->%s:%hu",
 							       eport, (proto==IPPROTO_TCP)?"tcp":"udp", senderaddrstr, iport);
-							resp[3] = 4;  /* Out of resources  */
+							resp[3] = 4;	/* Out of resources */
 						}
-						continue;
+						break;
 					}
-				r = get_redirect_rule(ext_if_name, eport, proto,
-				                      iaddr_old, sizeof(iaddr_old),
-				                      &iport_old, 0, 0, 0, 0,
-				                      &timestamp, 0, 0);
-				if(r==0) {
-					if(strcmp(senderaddrstr, iaddr_old)==0
-				       && iport==iport_old) {
-						/* redirection allready existing */
-						syslog(LOG_INFO, "port %hu %s already redirected to %s:%hu, replacing",
-						       eport, (proto==IPPROTO_TCP)?"tcp":"udp", iaddr_old, iport_old);
-						/* remove and then add again */
-						if(_upnp_delete_redir(eport, proto) < 0) {
-							syslog(LOG_ERR, "failed to remove port mapping");
-							break;
-						}
-					} else {
+					if(!check_upnp_rule_against_permissions(upnppermlist, num_upnpperm, eport, senderaddr->sin_addr, iport)) {
 						eport++;
-                                                        if(eport == 0) eport++; /* skip port zero */
-							if(eport == eport_first) { /* no external port available */
-								syslog(LOG_ERR, "Failed to find available eport for NAT-PMP %hu %s->%s:%hu",
-								       eport, (proto==IPPROTO_TCP)?"tcp":"udp", senderaddrstr, iport);
-								resp[3] = 4;  /* Out of resources */
-							}
+						if(eport == 0) eport++; /* skip port zero */
 						continue;
 					}
-				}
+					any_eport_allowed = 1;	/* at lease one eport is allowed */
+					r = get_redirect_rule(ext_if_name, eport, proto,
+					                      iaddr_old, sizeof(iaddr_old),
+					                      &iport_old, 0, 0, 0, 0,
+					                      &timestamp, 0, 0);
+					if(r==0) {
+						if(strcmp(senderaddrstr, iaddr_old)==0
+						    && iport==iport_old) {
+							/* redirection allready existing */
+							syslog(LOG_INFO, "port %hu %s already redirected to %s:%hu, replacing",
+							       eport, (proto==IPPROTO_TCP)?"tcp":"udp", iaddr_old, iport_old);
+							/* remove and then add again */
+							if(_upnp_delete_redir(eport, proto) < 0) {
+								syslog(LOG_ERR, "failed to remove port mapping");
+								break;
+							}
+						} else {
+							eport++;
+							if(eport == 0) eport++; /* skip port zero */
+							continue;
+						}
+					}
 					/* do the redirection */
 #if 0
 					timestamp = (unsigned)(time(NULL) - startup_time)

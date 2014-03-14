@@ -364,9 +364,9 @@ get_pinhole_info(unsigned short uid,
 				match = (const struct ip6t_entry_match *)&e->elems;
 				info = (const struct ip6t_tcp *)&match->data;
 				if((info->spts[0] == p->sport) && (info->dpts[0] == p->dport)) {
-	if(packets)
+					if(packets)
 						*packets = e->counters.pcnt;
-	if(bytes)
+					if(bytes)
 						*bytes = e->counters.bcnt;
 					break;
 				}

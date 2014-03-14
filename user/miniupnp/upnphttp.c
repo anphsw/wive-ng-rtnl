@@ -702,9 +702,9 @@ Process_upnphttp(struct upnphttp * h)
 			else
 			{
 				h->req_buf = h_tmp;
-			memcpy(h->req_buf + h->req_buflen, buf, n);
-			h->req_buflen += n;
-			h->req_buf[h->req_buflen] = '\0';
+				memcpy(h->req_buf + h->req_buflen, buf, n);
+				h->req_buflen += n;
+				h->req_buf[h->req_buflen] = '\0';
 			}
 			/* search for the string "\r\n\r\n" */
 			endheaders = findendheaders(h->req_buf, h->req_buflen);

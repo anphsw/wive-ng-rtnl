@@ -204,10 +204,10 @@ int delete_pinhole(unsigned short uid)
 
 int
 get_pinhole_info(unsigned short uid,
-                char * rem_host, int rem_hostlen, unsigned short * rem_port,
-                char * int_client, int int_clientlen, unsigned short * int_port,
-                int * proto, unsigned int * timestamp,
-                u_int64_t * packets, u_int64_t * bytes)
+                 char * rem_host, int rem_hostlen, unsigned short * rem_port,
+                 char * int_client, int int_clientlen, unsigned short * int_port,
+                 int * proto, unsigned int * timestamp,
+                 u_int64_t * packets, u_int64_t * bytes)
 {
 	int i, n;
 	struct pfioc_rule pr;
@@ -314,8 +314,8 @@ int clean_pinhole_list(unsigned int * next_timestamp)
 		pr.nr = i;
 		if(ioctl(dev, DIOCGETRULE, &pr) < 0) {
 			syslog(LOG_ERR, "ioctl(dev, DIOCGETRULE): %m");
-	return -1;
-}
+			return -1;
+		}
 		if(sscanf(pr.rule.label, PINEHOLE_LABEL_FORMAT, &uid, &ts) != 2) {
 			syslog(LOG_INFO, "rule with label '%s' is not a IGD pinhole", pr.rule.label);
 			continue;

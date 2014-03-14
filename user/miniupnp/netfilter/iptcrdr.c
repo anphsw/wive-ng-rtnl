@@ -764,7 +764,7 @@ delete_redirect_and_filter_rules(unsigned short eport, int proto)
 				mr = (const struct ip_nat_multi_range *)&target->data[0];
 				if (eport != ntohs(mr->range[0].min.all)) {
 					continue;
-	}
+				}
 				iaddr = e->ip.src.s_addr;
 				match = (const struct ipt_entry_match *)&e->elems;
 				if(0 == strncmp(match->u.user.name, "tcp", IPT_FUNCTION_MAXNAMELEN))
@@ -867,8 +867,8 @@ get_tcp_match(unsigned short dport, unsigned short sport)
 	strncpy(match->u.user.name, "tcp", sizeof(match->u.user.name));
 	tcpinfo = (struct ipt_tcp *)match->data;
 	if (sport == 0) {
-	tcpinfo->spts[0] = 0;		/* all source ports */
-	tcpinfo->spts[1] = 0xFFFF;
+		tcpinfo->spts[0] = 0;		/* all source ports */
+		tcpinfo->spts[1] = 0xFFFF;
 	} else {
 		tcpinfo->spts[0] = sport;	   /* specified source port */
 		tcpinfo->spts[1] = sport;
@@ -877,8 +877,8 @@ get_tcp_match(unsigned short dport, unsigned short sport)
 		tcpinfo->dpts[0] = 0;	   /* all destination ports */
 		tcpinfo->dpts[1] = 0xFFFF;
 	} else {
-	tcpinfo->dpts[0] = dport;	/* specified destination port */
-	tcpinfo->dpts[1] = dport;
+		tcpinfo->dpts[0] = dport;	/* specified destination port */
+		tcpinfo->dpts[1] = dport;
 	}
 	return match;
 }
@@ -896,8 +896,8 @@ get_udp_match(unsigned short dport, unsigned short sport)
 	strncpy(match->u.user.name, "udp", sizeof(match->u.user.name));
 	udpinfo = (struct ipt_udp *)match->data;
 	if (sport == 0) {
-	udpinfo->spts[0] = 0;		/* all source ports */
-	udpinfo->spts[1] = 0xFFFF;
+		udpinfo->spts[0] = 0;	   /* all source ports */
+		udpinfo->spts[1] = 0xFFFF;
 	} else {
 		udpinfo->spts[0] = sport;	   /* specified source port */
 		udpinfo->spts[1] = sport;
@@ -906,8 +906,8 @@ get_udp_match(unsigned short dport, unsigned short sport)
 		udpinfo->dpts[0] = 0;	   /* all destination ports */
 		udpinfo->dpts[1] = 0xFFFF;
 	} else {
-	udpinfo->dpts[0] = dport;	/* specified destination port */
-	udpinfo->dpts[1] = dport;
+		udpinfo->dpts[0] = dport;   /* specified destination port */
+		udpinfo->dpts[1] = dport;
 	}
 	return match;
 }

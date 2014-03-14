@@ -134,7 +134,7 @@ main(int argc, char * * argv)
 	test_index();
 
 	if(clear) {
-	clear_redirect_rules();
+		clear_redirect_rules();
 		clear_filter_rules();
 	}
 	/*list_rules();*/

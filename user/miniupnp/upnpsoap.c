@@ -1,7 +1,7 @@
-/* $Id: upnpsoap.c,v 1.121 2014/02/28 15:01:31 nanard Exp $ */
+/* $Id: upnpsoap.c,v 1.122 2014/03/10 11:04:53 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
- * (c) 2006-2013 Thomas Bernard
+ * (c) 2006-2014 Thomas Bernard
  * This software is subject to the conditions detailed
  * in the LICENCE file provided within the distribution */
 
@@ -1055,7 +1055,7 @@ SetDefaultConnectionService(struct upnphttp * h, const char * action)
 		} else
 #endif
 		{
-		syslog(LOG_INFO, "%s(%s) : Ignored", action, p);
+			syslog(LOG_INFO, "%s(%s) : Ignored", action, p);
 			BuildSendAndCloseSoapResp(h, resp, sizeof(resp)-1);
 		}
 	} else {
@@ -1220,19 +1220,21 @@ GetFirewallStatus(struct upnphttp * h, const char * action)
 
 	bodylen = snprintf(body, sizeof(body), resp,
 		action, "urn:schemas-upnp-org:service:WANIPv6FirewallControl:1",
-		ipv6fc_firewall_enabled, ipv6fc_inbound_pinhole_allowed, action);
+	    GETFLAG(IPV6FCFWDISABLEDMASK) ? 0 : 1,
+	    GETFLAG(IPV6FCINBOUNDDISALLOWEDMASK) ? 0 : 1,
+	    action);
 	BuildSendAndCloseSoapResp(h, body, bodylen);
 }
 
 static int
 CheckStatus(struct upnphttp * h)
 {
-	if (!ipv6fc_firewall_enabled)
+	if (GETFLAG(IPV6FCFWDISABLEDMASK))
 	{
 		SoapError(h, 702, "FirewallDisabled");
 		return 0;
 	}
-	else if(!ipv6fc_inbound_pinhole_allowed)
+	else if(GETFLAG(IPV6FCINBOUNDDISALLOWEDMASK))
 	{
 		SoapError(h, 703, "InboundPinholeNotAllowed");
 		return 0;
@@ -1317,7 +1319,7 @@ PinholeVerification(struct upnphttp * h, char * int_ip, unsigned short int_port)
 		if(!n && ai->ai_family == AF_INET6)
 		{
 			for(p = ai; p; p = p->ai_next)
-		   	{
+			{
 				inet_ntop(AF_INET6, (struct in6_addr *) p, int_ip, sizeof(struct in6_addr));
 				result_ip = *((struct in6_addr *) p);
 				/* TODO : deal with more than one ip per hostname */
@@ -1564,10 +1566,10 @@ UpdatePinhole(struct upnphttp * h, const char * action)
 			return;
 	}
 	else if(n == -2)
-		{
+	{
 		SoapError(h, 704, "NoSuchEntry");
-			return ;
-		}
+		return;
+	}
 	else
 	{
 		SoapError(h, 501, "ActionFailed");
@@ -1579,12 +1581,12 @@ UpdatePinhole(struct upnphttp * h, const char * action)
 
 	n = upnp_update_inboundpinhole(uid, ltime);
 	if(n == -1)
-			SoapError(h, 704, "NoSuchEntry");
+		SoapError(h, 704, "NoSuchEntry");
 	else if(n < 0)
-			SoapError(h, 501, "ActionFailed");
+		SoapError(h, 501, "ActionFailed");
 	else
 		BuildSendAndCloseSoapResp(h, resp, sizeof(resp)-1);
-	}
+}
 
 static void
 GetOutboundPinholeTimeout(struct upnphttp * h, const char * action)
@@ -1604,7 +1606,7 @@ GetOutboundPinholeTimeout(struct upnphttp * h, const char * action)
 	int opt=0, proto=0;
 	unsigned short iport, rport;
 
-	if (!ipv6fc_firewall_enabled)
+	if (GETFLAG(IPV6FCFWDISABLEDMASK))
 	{
 		SoapError(h, 702, "FirewallDisabled");
 		return;
@@ -1683,16 +1685,16 @@ DeletePinhole(struct upnphttp * h, const char * action)
 	if (n >= 0)
 	{
 		if(PinholeVerification(h, iaddr, iport) <= 0)
-			return ;
-		}
+			return;
+	}
 	else if(n == -2)
 	{
-			SoapError(h, 704, "NoSuchEntry");
+		SoapError(h, 704, "NoSuchEntry");
 		return;
 	}
-		else
+	else
 	{
-			SoapError(h, 501, "ActionFailed");
+		SoapError(h, 501, "ActionFailed");
 		return;
 	}
 
@@ -1748,19 +1750,19 @@ CheckPinholeWorking(struct upnphttp * h, const char * action)
 	                          iaddr, sizeof(iaddr), &iport,
 	                          NULL, NULL, &packets);
 	if (r >= 0)
-		{
+	{
 		if(PinholeVerification(h, iaddr, iport) <= 0)
 			return ;
 		if(packets == 0)
-			{
-					SoapError(h, 709, "NoPacketSent");
-					return ;
-				}
-				bodylen = snprintf(body, sizeof(body), resp,
+		{
+			SoapError(h, 709, "NoPacketSent");
+			return;
+		}
+		bodylen = snprintf(body, sizeof(body), resp,
 						action, "urn:schemas-upnp-org:service:WANIPv6FirewallControl:1",
 						1, action);
-				BuildSendAndCloseSoapResp(h, body, bodylen);
-			}
+		BuildSendAndCloseSoapResp(h, body, bodylen);
+	}
 	else if(r == -2)
 		SoapError(h, 704, "NoSuchEntry");
 	else
@@ -1807,10 +1809,10 @@ GetPinholePackets(struct upnphttp * h, const char * action)
 	                          iaddr, sizeof(iaddr), &iport,
 	                          &proto, &leasetime, &packets);
 	if (n >= 0)
-		{
+	{
 		if(PinholeVerification(h, iaddr, iport)<=0)
 			return ;
-		}
+	}
 #if 0
 	else if(r == -4 || r == -1)
 	{
@@ -1818,11 +1820,11 @@ GetPinholePackets(struct upnphttp * h, const char * action)
 	}
 #endif
 
-		bodylen = snprintf(body, sizeof(body), resp,
-				action, "urn:schemas-upnp-org:service:WANIPv6FirewallControl:1",
+	bodylen = snprintf(body, sizeof(body), resp,
+			action, "urn:schemas-upnp-org:service:WANIPv6FirewallControl:1",
 			packets, action);
-		BuildSendAndCloseSoapResp(h, body, bodylen);
-	}
+	BuildSendAndCloseSoapResp(h, body, bodylen);
+}
 #endif
 
 

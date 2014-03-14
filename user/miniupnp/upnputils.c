@@ -119,8 +119,8 @@ get_lan_for_peer(const struct sockaddr * peer)
 				index = (int)peer6->sin6_scope_id;
 			else
 			{
-			if(get_src_for_route_to(peer, NULL, NULL, &index) < 0)
-				return NULL;
+				if(get_src_for_route_to(peer, NULL, NULL, &index) < 0)
+					return NULL;
 			}
 			syslog(LOG_DEBUG, "%s looking for LAN interface index=%d",
 			       "get_lan_for_peer()", index);

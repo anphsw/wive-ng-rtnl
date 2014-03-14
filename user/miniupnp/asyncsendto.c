@@ -222,13 +222,13 @@ void finalize_sendto(void)
 	while(send_list.lh_first) {
 		FD_ZERO(&writefds);
 		max_fd = -1;
-	for(elt = send_list.lh_first; elt != NULL; elt = next) {
-		next = elt->entries.le_next;
-		syslog(LOG_DEBUG, "finalize_sendto(): %d bytes on socket %d",
-		       (int)elt->len, elt->sockfd);
-		n = sendto(elt->sockfd, elt->buf, elt->len, elt->flags,
-		           elt->dest_addr, elt->addrlen);
-		if(n < 0) {
+		for(elt = send_list.lh_first; elt != NULL; elt = next) {
+			next = elt->entries.le_next;
+			syslog(LOG_DEBUG, "finalize_sendto(): %d bytes on socket %d",
+			       (int)elt->len, elt->sockfd);
+			n = sendto(elt->sockfd, elt->buf, elt->len, elt->flags,
+			           elt->dest_addr, elt->addrlen);
+			if(n < 0) {
 				if(errno==EAGAIN || errno==EWOULDBLOCK) {
 					FD_SET(elt->sockfd, &writefds);
 					if(elt->sockfd > max_fd)
@@ -236,11 +236,11 @@ void finalize_sendto(void)
 					continue;
 				}
 				syslog(LOG_WARNING, "finalize_sendto(): socket=%d sendto: %m", elt->sockfd);
+			}
+			/* remove from the list */
+			LIST_REMOVE(elt, entries);
+			free(elt);
 		}
-		/* remove from the list */
-		LIST_REMOVE(elt, entries);
-		free(elt);
-	}
 		/* check deadline */
 		if(gettimeofday(&now, NULL) < 0) {
 			syslog(LOG_ERR, "gettimeofday: %m");
