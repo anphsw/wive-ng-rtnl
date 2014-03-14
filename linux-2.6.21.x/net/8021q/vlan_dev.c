@@ -206,7 +206,7 @@ int vlan_skb_recv(struct sk_buff *skb, struct net_device *dev,
 	stats->rx_bytes += skb->len;
 
 	if (skb->pkt_type == PACKET_MULTICAST)
-		rx_stats->rx_multicast++;
+		stats->multicast++;
 
 	/* Take off the VLAN header (4 bytes currently) */
 	skb_pull_rcsum(skb, VLAN_HLEN);
