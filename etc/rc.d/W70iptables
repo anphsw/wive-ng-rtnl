@@ -336,7 +336,7 @@ start() {
 		if [ "$igmpEnabled" != "0" ] || [ "$UDPXYMode" != "0" ]; then
 		    # multicast no need forward to upnp chain
     		    iptables -t nat -A PREROUTING -i $wan_if ! -s $mcast_net -j MINIUPNPD
-    		    iptables -t nat -A POSTROUTING -o $wan_if ! -s $mcast_net -j MINIUPNPD-PCP-PEER
+    		    iptables -t nat -A POSTROUTING -o $wan_if ! -d $mcast_net -j MINIUPNPD-PCP-PEER
 		else
 		    # all packets join to UPNP
     		    iptables -t nat -A PREROUTING -i $wan_if -j MINIUPNPD
