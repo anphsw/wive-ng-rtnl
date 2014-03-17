@@ -8,12 +8,6 @@
 LOG="logger -t services"
 MODE="$1"
 
-
-##########################################################
-# drop prio to normal for prevent services prio jitter
-##########################################################
-renice 0 -p $$
-
 $LOG "Restart needed services and scripts. Mode $MODE"
 
 ##########################################################

@@ -4,6 +4,11 @@
 INITDIR="/etc/init.d"
 RC_DIR="/etc/rc.d"
 
+##########################################################
+# drop prio to normal for prevent services prio jitter
+##########################################################
+renice 0 -p $$
+
 if [ $# -eq 0 ]; then
    echo "Usage:"
    echo "      service <type> <args>"
