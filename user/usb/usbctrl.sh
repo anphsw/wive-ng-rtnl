@@ -107,6 +107,11 @@ case $TYPE in
 	fi
         ;;
     *)
+	# skip try load modules for internal hubs
+	if [ "${idVendor}:${idProduct}" = "0000:0000" ]; then
+	    exit 0
+	fi
+
         $LOG "${ACTION} device ${idVendor}:${idProduct} type ${TYPE} interface ${INTERFACE}"
 	$LOG "Try load module $MODALIAS"
         modprobe -q $MODALIAS
