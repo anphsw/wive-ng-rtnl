@@ -169,6 +169,7 @@
 10) kernel: ipv6: ip6_forward: perform skb->pkt_type check at the beginning.<br>
 11) kernel: vlan: slight optimization for skb_do_rcv().<br>
 12) kernel: tcp: do not leak non zero tstamp in output packets.<br>
+13) kernel: net: sched: use no more than one page in struct fw_head.<br>
 <br>
 <br>
 <br>
