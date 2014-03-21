@@ -50,6 +50,8 @@ function showHint(key)
 		text += 'Specify Maximum Recieve Unit size in octets.';
 	else if (key=='l2tp_nat')
 		text += 'Allow Network Address Translation to L2TP server.';
+	else if (key=='l2tp_mppe')
+		text += 'Enable Microsoft Point-to-Point Encryption (MPPE) mode for L2TP server connections.';
 	else if (key=='l2tp_debug')
 		text += 'Allow debug mode for L2TP server connections.';
 	else if (key=='l2tp_lcp')
@@ -123,7 +125,8 @@ function l2tpEnableSwitch(form)
 			form.l2tp_srv_mtu_sel, form.l2tp_srv_mtu_size,
 			form.l2tp_srv_mru_sel, form.l2tp_srv_mru_size,
 			form.l2tp_srv_ip_local, form.l2tp_srv_ip_range,
-			form.l2tp_srv_nat_enabled, form.l2tp_srv_proxyarp
+			form.l2tp_srv_nat_enabled, form.l2tp_srv_proxyarp,
+			form.l2tp_srv_mppe_enabled
 		],
 		form.l2tp_srv_enabled.checked);
 	genTable(form);
@@ -136,6 +139,7 @@ function initValue()
 	var adaptive_lcp = '<% getCfgZero(1, "l2tp_srv_lcp_adapt"); %>';
 	var debug_on = '<% getCfgZero(1, "l2tp_srv_debug"); %>';
 	var nat_on = '<% getCfgZero(1, "l2tp_srv_nat_enabled"); %>';
+	var mppe_on = '<% getCfgZero(1, "l2tp_srv_mppe_enabled"); %>';
 	var proxyarp_on = '<% getCfgZero(1, "l2tp_srv_proxyarp"); %>';
 	var mtu_size = '';
 
@@ -143,6 +147,7 @@ function initValue()
 	form.l2tp_srv_lcp_adapt.checked = adaptive_lcp == '1';
 	form.l2tp_srv_debug.checked = debug_on == '1';
 	form.l2tp_srv_nat_enabled.checked = nat_on == '1';
+	form.l2tp_srv_mppe_enabled.checked = mppe_on == '1';
 	form.l2tp_srv_proxyarp.checked = proxyarp_on == '1';
 	
 	// Set-up MTU & MRU
@@ -285,6 +290,10 @@ function mruChange(form)
               &nbsp;<b>Enable NAT</b></td>
             <td style="width: 50%;" onMouseOver="showHint('l2tp_proxyarp')" onMouseOut="hideHint('l2tp_proxyarp')"><input name="l2tp_srv_proxyarp" type="checkbox">
               &nbsp;<b>L2TP proxyarp</b></td>
+          </tr>
+          <tr>
+            <td style="width: 50%;" onmouseover="showHint('l2tp_mppe')" onmouseout="hideHint('l2tp_mppe')"><input name="l2tp_srv_mppe_enabled" type="checkbox">
+              &nbsp;<b>Require MPPE</b></td>
           </tr>
         </table>
         <div id="l2tpUserList"> </div>

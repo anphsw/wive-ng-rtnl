@@ -153,6 +153,7 @@ l2tp_srv_lcp_adapt=1
 l2tp_srv_mru_size=AUTO
 l2tp_srv_mtu_size=AUTO
 l2tp_srv_nat_enabled=1
+l2tp_srv_mppe_enabled=0
 l2tp_srv_pass0=test
 l2tp_srv_user0=test
 l2tp_srv_proxyarp=0

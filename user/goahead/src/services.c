@@ -727,6 +727,7 @@ const parameter_fetch_t service_l2tp_flags[] =
 	{ T("l2tp_srv_lcp_adapt"), "l2tp_srv_lcp_adapt", 2, T("off") },
 	{ T("l2tp_srv_debug"), "l2tp_srv_debug", 2, T("off") },
 	{ T("l2tp_srv_nat_enabled"), "l2tp_srv_nat_enabled", 2, T("off") },
+	{ T("l2tp_srv_mppe_enabled"), "l2tp_srv_mppe_enabled", 2, T("off") },
 	{ T("l2tp_srv_proxyarp"), "l2tp_srv_proxyarp", 2, T("off") },
 	{ T("l2tp_srv_mtu_size"), "l2tp_srv_mtu_size", 0, T("1460") },
 	{ T("l2tp_srv_mru_size"), "l2tp_srv_mru_size", 0, T("1460") },

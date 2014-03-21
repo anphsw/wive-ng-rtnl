@@ -83,7 +83,11 @@ noipx
 nomp
 $l2tp_srv_proxyarp
 refuse-pap
+refuse-chap
 refuse-eap
+refuse-mschap
+require-mschap-v2
+$l2tp_srv_mppe_enabled
 lock
 minunit 10
 external_chap_sec
@@ -103,7 +107,7 @@ get_param() {
     # get some variables
     ###########################################################################
     eval `nvram_buf_get 2860 l2tp_srv_enabled l2tp_srv_ip_range l2tp_srv_ip_local l2tp_srv_user l2tp_srv_pass l2tp_srv_proxyarp \
-	    l2tp_srv_lcp_adapt l2tp_srv_mtu_size l2tp_srv_mru_size l2tp_srv_debug dnsPEnabled SmbEnabled lan_ipaddr`
+	    l2tp_srv_lcp_adapt l2tp_srv_mtu_size l2tp_srv_mru_size l2tp_srv_debug dnsPEnabled SmbEnabled lan_ipaddr l2tp_srv_mppe_enabled`
     ###########################################################################
     # replace param for direct use
     ###########################################################################
@@ -141,6 +145,11 @@ get_param() {
 	l2tp_srv_proxyarp="noproxyarp"
     else
 	l2tp_srv_proxyarp="proxyarp"
+    fi
+    if [ "$l2tp_srv_mppe_enabled" = "" ] || [ "$l2tp_srv_mppe_enabled" = "0" ]; then
+	l2tp_srv_mppe_enabled=
+    else
+	l2tp_srv_mppe_enabled="require-mppe-128"
     fi
     # final options compile
     gen_configs
