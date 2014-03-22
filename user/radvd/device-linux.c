@@ -69,6 +69,13 @@ int update_device_info(struct Interface *iface)
 		dlog(LOG_DEBUG, 3, "hardware type for %s is ARPHRD_ARCNET", iface->Name);
 		break;
 #endif /* ARPHDR_ARCNET */
+#ifdef ARPHRD_IEEE802154
+	case ARPHRD_IEEE802154:
+		iface->if_hwaddr_len = 64;
+		iface->if_prefix_len = 64;
+		dlog(LOG_DEBUG, 3, "hardware type for %s is ARPHRD_IEEE802154", iface->Name);
+		break;
+#endif
 	default:
 		iface->if_hwaddr_len = -1;
 		iface->if_prefix_len = -1;
