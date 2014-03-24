@@ -76,7 +76,7 @@ cfg.cache_ttl=300
 cfg.default_mime_type='mpeg_ts'
 
 -- feeds update interval (seconds, 0 - disabled)
-cfg.feeds_update_interval=1800
+cfg.feeds_update_interval=0
 cfg.playlists_update_interval=0
 
 -- playlist (m3u file path or path with alias
