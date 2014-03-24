@@ -319,7 +319,7 @@ config  RA_HW_NAT_NTU_DLTA
 
 config  RA_HW_NAT_IPV6
         bool "IPv6 Acceleration"
-	depends on RA_HW_NAT && !(RALINK_RT2880 || RALINK_RT3052)
+	depends on RA_HW_NAT && !(RALINK_RT2880 || RALINK_RT3052 || RALINK_RT3883)
 	default n
 	help
 	"ipv6 routing accelerated by HNAT"
