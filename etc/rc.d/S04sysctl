@@ -36,7 +36,7 @@ start() {
 	# min allocatet mem for sockets 2Mb
 	# before moderates limit 4Mb
 	# global limit per socket mem 8Mb
-	echo "512 1024 2048" > /proc/sys/net/ipv4/tcp_mem
+	echo "512 1024 1536" > /proc/sys/net/ipv4/tcp_mem
 
 	# inrease network buffers
 	echo 2097152 > /proc/sys/net/core/wmem_max
