@@ -1876,6 +1876,7 @@
 13) kernel: vlan: slight optimization for skb_do_rcv().<br>
 14) kernel: tcp: do not leak non zero tstamp in output packets.<br>
 15) kernel: net: sched: use no more than one page in struct fw_head.<br>
+16) kernel: udp: fix a race in encap_rcv handling.<br>
 <br>
 <br>
 <br>
