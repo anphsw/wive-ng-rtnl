@@ -52,7 +52,7 @@ target(struct sk_buff **pskb,
 	if(nf_conntrack_fastnat) {
 	    enum ip_conntrack_info ctinfo;
 	    struct nf_conn *ct = nf_ct_get(*pskb, &ctinfo);
-	    ct->nat_type |= NF_FAST_NAT_DENY;
+	    ct->fastnat |= NF_FAST_NAT_DENY;
 	}
 #endif
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)

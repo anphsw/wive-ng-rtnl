@@ -855,7 +855,7 @@ init_conntrack(const struct nf_conntrack_tuple *tuple,
 		conntrack->secmark = exp->master->secmark;
 #endif
 #ifdef CONFIG_BCM_NAT
-		conntrack->nat_type = 0;
+		conntrack->fastnat = NF_FAST_NAT_DENY;
 #endif
 		nf_conntrack_get(&conntrack->master->ct_general);
 		NF_CT_STAT_INC(expect_new);
@@ -1181,7 +1181,7 @@ pass:
 #endif
 #ifdef CONFIG_BCM_NAT
 		/* skip sofware nat fastpath flag */
-		ct->nat_type |= NF_FAST_NAT_DENY;
+		ct->fastnat |= NF_FAST_NAT_DENY;
 #endif
 		goto skip;
 	    }
@@ -1194,7 +1194,7 @@ pass:
 	 */
 	if (nf_conntrack_fastnat && (hooknum == NF_IP_PRE_ROUTING) &&
 	    (FASTNAT_ESTABLISHED(ctinfo) || protonum == IPPROTO_UDP) &&
-	    !(ct->nat_type & NF_FAST_NAT_DENY) && !pure_route)
+	    !(ct->fastnat & NF_FAST_NAT_DENY) && !pure_route)
 		ret = bcm_do_fastnat(ct, ctinfo, pskb, l3proto, l4proto);
 #endif
 skip:
@@ -1203,7 +1203,7 @@ skip:
 	if (set_reply && !test_and_set_bit(IPS_SEEN_REPLY_BIT, &ct->status)) {
 #ifdef CONFIG_BCM_NAT
 	    if (nf_conntrack_fastnat && pf == PF_INET && hooknum == NF_IP_LOCAL_OUT)
-		ct->nat_type |= NF_FAST_NAT_DENY;
+		ct->fastnat |= NF_FAST_NAT_DENY;
 #endif
 	    nf_conntrack_event_cache(IPCT_STATUS, *pskb);
 	}

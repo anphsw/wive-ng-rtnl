@@ -118,7 +118,7 @@ struct nf_conn
 	u_int32_t features;
 
 #ifdef CONFIG_BCM_NAT
-	u_int32_t nat_type;
+	u_int32_t fastnat;
 #endif
 
 #ifdef CONFIG_NF_CONNTRACK_MARK

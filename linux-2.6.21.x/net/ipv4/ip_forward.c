@@ -120,7 +120,7 @@ int ip_forward(struct sk_buff *skb)
 	if(skb->cb[NF_FAST_ROUTE]) {
 	    skb->cb[NF_FAST_ROUTE]=0;
 	    return NF_FAST_NAT;
-	} else
+	}
 #endif
 	return NF_HOOK(PF_INET, NF_IP_FORWARD, skb, skb->dev, rt->u.dst.dev,
 		       ip_forward_finish);
