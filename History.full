@@ -1880,6 +1880,7 @@
 17) kernel: net: unix: non blocking recvmsg() should not return -EINTR.<br>
 18) kernel: jiffies: Avoid undefined behavior from signed overflow.<br>
 19) kernel: net: optimize csum_replace2().<br>
+20) kernel: ppp_mppe: backport fixes from upstream.<br>
 <br>
 <br>
 <br>
