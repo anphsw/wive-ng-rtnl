@@ -44,6 +44,7 @@
 #include <linux/ppp_channel.h>
 #include <linux/spinlock.h>
 #include <linux/init.h>
+#include <asm/unaligned.h>
 #include <asm/uaccess.h>
 #include <asm/semaphore.h>
 
@@ -573,7 +574,7 @@ ppp_sync_txmunge(struct syncppp *ap, struct sk_buff *skb)
 	int islcp;
 
 	data  = skb->data;
-	proto = (data[0] << 8) + data[1];
+	proto = get_unaligned_be16(data);
 
 	/* LCP packets with codes between 1 (configure-request)
 	 * and 7 (code-reject) must be sent as though no options
