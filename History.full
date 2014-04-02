@@ -1864,7 +1864,7 @@
 1) net: fix 'ip rule' iif/oif device rename.<br>
 2) dropbear: up to 2014.63 version.<br>
 3) radvd: up to 1.10.0 version.<br>
-4) miniupnpd: up to 1.8.20140313 version.<br>
+4) miniupnpd: up to 1.8.20140401 version.<br>
 5) p910nd: up to 0.97 version.<br>
 6) usb-modeswitch-data: up to 20140129 version.<br>
 7) xupnpd: up to 397 revision.<br>
