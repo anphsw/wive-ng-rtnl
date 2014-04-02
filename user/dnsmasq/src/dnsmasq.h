@@ -164,6 +164,7 @@ struct event_desc {
 #define EVENT_FORK_ERR  18
 #define EVENT_LUA_ERR   19
 #define EVENT_TFTP_ERR  20
+#define EVENT_INIT      21
 
 /* Exit codes. */
 #define EC_GOOD        0
@@ -230,7 +231,7 @@ struct event_desc {
 #define OPT_QUIET_DHCP6    43
 #define OPT_QUIET_RA	   44
 #define OPT_DNSSEC_VALID   45
-#define OPT_DNSSEC_PERMISS 46
+#define OPT_DNSSEC_TIME    46
 #define OPT_DNSSEC_DEBUG   47
 #define OPT_DNSSEC_NO_SIGN 48 
 #define OPT_LOCAL_SERVICE  49
@@ -280,10 +281,19 @@ struct naptr {
   struct naptr *next;
 };
 
+#define TXT_STAT_CACHESIZE     1
+#define TXT_STAT_INSERTS       2
+#define TXT_STAT_EVICTIONS     3
+#define TXT_STAT_MISSES        4
+#define TXT_STAT_HITS          5
+#define TXT_STAT_AUTH          6
+#define TXT_STAT_SERVERS       7
+
 struct txt_record {
   char *name;
   unsigned char *txt;
   unsigned short class, len;
+  int stat;
   struct txt_record *next;
 };
 
@@ -426,6 +436,7 @@ struct crec {
 #define F_KEYTAG    (1u<<23)
 #define F_SECSTAT   (1u<<24)
 #define F_NO_RR     (1u<<25)
+#define F_IPSET     (1u<<26)
 
 /* Values of uid in crecs with F_CONFIG bit set. */
 #define SRC_INTERFACE 0
@@ -1027,6 +1038,7 @@ void cache_add_dhcp_entry(char *host_name, int prot, struct all_addr *host_addre
 struct in_addr a_record_from_hosts(char *name, time_t now);
 void cache_unhash_dhcp(void);
 void dump_cache(time_t now);
+int cache_make_stat(struct txt_record *t);
 char *cache_get_name(struct crec *crecp);
 char *cache_get_cname_target(struct crec *crecp);
 struct crec *cache_enumerate(int init);

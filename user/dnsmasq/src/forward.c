@@ -697,6 +697,10 @@ void reply_query(int fd, int family, time_t now)
   if (serveraddr.sa.sa_family == AF_INET6)
     serveraddr.in6.sin6_flowinfo = 0;
 #endif
+  header = (struct dns_header *)daemon->packet;
+  
+  if (n < (int)sizeof(struct dns_header) || !(header->hb3 & HB3_QR))
+    return;
   
   /* spoof check: answer must come from known server, */
   for (server = daemon->servers; server; server = server->next)
@@ -704,7 +708,8 @@ void reply_query(int fd, int family, time_t now)
 	sockaddr_isequal(&server->addr, &serveraddr))
       break;
    
-  header = (struct dns_header *)daemon->packet;
+  if (!server)
+    return;
   
 #ifdef HAVE_DNSSEC
   hash = hash_questions(header, n, daemon->namebuff);
@@ -713,9 +718,7 @@ void reply_query(int fd, int family, time_t now)
   crc = questions_crc(header, n, daemon->namebuff);
 #endif
   
-  if (!server ||
-      n < (int)sizeof(struct dns_header) || !(header->hb3 & HB3_QR) ||
-      !(forward = lookup_frec(ntohs(header->id), hash)))
+  if (!(forward = lookup_frec(ntohs(header->id), hash)))
     return;
    
   if ((RCODE(header) == SERVFAIL || RCODE(header) == REFUSED) &&
@@ -747,7 +750,7 @@ void reply_query(int fd, int family, time_t now)
   
   if ((forward->sentto->flags & SERV_TYPE) == 0)
     {
-      if (RCODE(header) == SERVFAIL || RCODE(header) == REFUSED)
+      if (RCODE(header) == REFUSED)
 	server = NULL;
       else
 	{
@@ -770,8 +773,7 @@ void reply_query(int fd, int family, time_t now)
      we get a good reply from another server. Kill it when we've
      had replies from all to avoid filling the forwarding table when
      everything is broken */
-  if (forward->forwardall == 0 || --forward->forwardall == 1 || 
-      (RCODE(header) != REFUSED && RCODE(header) != SERVFAIL))
+  if (forward->forwardall == 0 || --forward->forwardall == 1 || RCODE(header) != SERVFAIL)
     {
       int check_rebind = 0, no_cache_dnssec = 0, cache_secure = 0;
 
@@ -784,7 +786,7 @@ void reply_query(int fd, int family, time_t now)
 	no_cache_dnssec = 1;
       
 #ifdef HAVE_DNSSEC
-      if (option_bool(OPT_DNSSEC_VALID) && !(forward->flags & FREC_CHECKING_DISABLED))
+      if (server && option_bool(OPT_DNSSEC_VALID) && !(forward->flags & FREC_CHECKING_DISABLED))
 	{
 	  int status;
 
@@ -850,6 +852,7 @@ void reply_query(int fd, int family, time_t now)
 		  *new = *forward; /* copy everything, then overwrite */
 		  new->next = next;
 		  new->blocking_query = NULL;
+		  new->sentto = server;
 		  new->rfd4 = NULL;
 #ifdef HAVE_IPV6
 		  new->rfd6 = NULL;
@@ -1325,6 +1328,10 @@ static int send_check_sign(time_t now, struct dns_header *header, size_t plen, c
 	  continue;
 	}
 
+      /* Reached the root */
+      if (!name_start)
+	return STAT_BOGUS;
+
       strcpy(keyname, name_start);
       return STAT_NEED_DS_NEG;
     }
@@ -1390,7 +1397,10 @@ static int  tcp_check_for_unsigned_zone(time_t now, struct dns_header *header, s
       struct crec *crecp = cache_find_by_name(NULL, name_start, now, F_DS);
  
       if (--(*keycount) == 0)
+	{
+	  free(packet);
 	return STAT_BOGUS;    
+	}
       
       if (crecp && (crecp->flags & F_DNSSECOK))
 	{
@@ -1406,10 +1416,18 @@ static int  tcp_check_for_unsigned_zone(time_t now, struct dns_header *header, s
 	  continue;
 	}
 
+      /* reached the root */
+      if (!name_start)
+	{
+	  free(packet);
+	  return STAT_BOGUS;
+	}
+
       m = dnssec_generate_query(header, ((char *) header) + 65536, name_start, class, T_DS, &server->addr);
       
       /* We rely on the question section coming back unchanged, ensure it is with the hash. */
       if ((newhash = hash_questions(header, (unsigned int)m, name)))
+	{
 	memcpy(hash, newhash, HASH_SIZE);
       
       *length = htons(m);
@@ -1449,6 +1467,7 @@ static int  tcp_check_for_unsigned_zone(time_t now, struct dns_header *header, s
 		    }
 		}
 	    }
+	}
 	}
       
       free(packet);
@@ -1724,6 +1743,8 @@ unsigned char *tcp_request(int confd, time_t now,
 		  unsigned char *newhash, hash[HASH_SIZE];
 		  if ((newhash = hash_questions(header, (unsigned int)size, daemon->keyname)))
 		    memcpy(hash, newhash, HASH_SIZE);
+		  else
+		    memset(hash, 0, HASH_SIZE);
 #else
 		  unsigned int crc = questions_crc(header, (unsigned int)size, daemon->namebuff);
 #endif		  

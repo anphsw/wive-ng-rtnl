@@ -1102,7 +1102,10 @@ int extract_addresses(struct dns_header *header, size_t qlen, char *name, time_t
 			{
 			  ipsets_cur = ipsets;
 			  while (*ipsets_cur)
+			    {
+			      log_query((flags & (F_IPV4 | F_IPV6)) | F_IPSET, name, &addr, *ipsets_cur);
 			    add_to_ipset(*ipsets_cur++, &addr, flags, 0);
+			}
 			}
 #endif
 		      
@@ -1548,9 +1551,19 @@ size_t answer_request(struct dns_header *header, char *limit, size_t qlen,
 		  ans = 1;
 		  if (!dryrun)
 		    {
+		      unsigned long ttl = daemon->local_ttl;
+		      int ok = 1;
 		      log_query(F_CONFIG | F_RRNAME, name, NULL, "<TXT>");
-		      if (add_resource_record(header, limit, &trunc, nameoffset, &ansp, 
-					      daemon->local_ttl, NULL,
+		      /* Dynamically generate stat record */
+		      if (t->stat != 0)
+			{
+			  ttl = 0;
+			  if (!cache_make_stat(t))
+			    ok = 0;
+			}
+		      
+		      if (ok && add_resource_record(header, limit, &trunc, nameoffset, &ansp, 
+						    ttl, NULL,
 					      T_TXT, t->class, "t", t->len, t->txt))
 			anscount++;
 

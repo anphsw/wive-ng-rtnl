@@ -636,6 +636,15 @@ performance. See also the warning about upstream servers in the
 section on 
 .B --dnssec
 .TP
+.B --dnssec-no-timecheck
+DNSSEC signatures are only valid for specified time windows, and should be rejected outside those windows. This generates an
+interesting chicken-and-egg problem for machines which don't have a hardware real time clock. For these machines to determine the correct 
+time typically requires use of NTP and therefore DNS, but validating DNS requires that the correct time is already known. Setting this flag
+removes the time-window checks (but not other DNSSEC validation.) only until the dnsmasq process receives SIGHUP. The intention is
+that dnsmasq should be started with this flag when the platform determines that reliable time is not currently available. As soon as 
+reliable time is established, a SIGHUP should be sent to dnsmasq, which enables time checking, and purges the cache of DNS records
+which have not been throughly checked.
+.TP
 .B --proxy-dnssec
 Copy the DNSSEC Authenticated Data bit from upstream servers to downstream clients and cache it.  This is an 
 alternative to having dnsmasq validate DNSSEC, but it depends on the security of the network between 
@@ -1753,12 +1762,22 @@ When it receives a SIGUSR1,
 writes statistics to the system log. It writes the cache size,
 the number of names which have had to removed from the cache before
 they expired in order to make room for new names and the total number
-of names that have been inserted into the cache. For each upstream
+of names that have been inserted into the cache. The number of cache hits and 
+misses and the number of authoritative queries answered are also given. For each upstream
 server it gives the number of queries sent, and the number which
 resulted in an error. In 
 .B --no-daemon
 mode or when full logging is enabled (-q), a complete dump of the
 contents of the cache is made.
+
+The cache statistics are also available in the DNS as answers to 
+queries of class CHAOS and type TXT in domain bind. The domain names are cachesize.bind, insertions.bind, evictions.bind, 
+misses.bind, hits.bind, auth.bind and servers.bind. An example command to query this, using the 
+.B dig
+utility would be
+
+dig +short chaos txt cachesize.bind
+
 .PP 
 When it receives SIGUSR2 and it is logging direct to a file (see
 .B --log-facility

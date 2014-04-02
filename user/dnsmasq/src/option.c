@@ -145,6 +145,7 @@ struct myoption {
 #define LOPT_SERVERS_FILE 333
 #define LOPT_DNSSEC_CHECK 334
 #define LOPT_LOCAL_SERVICE 335
+#define LOPT_DNSSEC_TIME   336
 
 #ifdef HAVE_GETOPT_LONG
 static const struct option opts[] =  
@@ -287,6 +288,7 @@ static const struct myoption opts[] =
     { "trust-anchor", 1, 0, LOPT_TRUST_ANCHOR },
     { "dnssec-debug", 0, 0, LOPT_DNSSEC_DEBUG },
     { "dnssec-check-unsigned", 0, 0, LOPT_DNSSEC_CHECK },
+    { "dnssec-no-timecheck", 0, 0, LOPT_DNSSEC_TIME },
 #ifdef OPTION6_PREFIX_CLASS 
     { "dhcp-prefix-class", 1, 0, LOPT_PREF_CLSS },
 #endif
@@ -443,6 +445,7 @@ static struct {
   { LOPT_TRUST_ANCHOR, ARG_DUP, "<domain>,[<class>],...", gettext_noop("Specify trust anchor key digest."), NULL },
   { LOPT_DNSSEC_DEBUG, OPT_DNSSEC_DEBUG, NULL, gettext_noop("Disable upstream checking for DNSSEC debugging."), NULL },
   { LOPT_DNSSEC_CHECK, OPT_DNSSEC_NO_SIGN, NULL, gettext_noop("Ensure answers without DNSSEC are in unsigned zones."), NULL },
+  { LOPT_DNSSEC_TIME, OPT_DNSSEC_TIME, NULL, gettext_noop("Don't check DNSSEC signature timestamps until first cache-reload"), NULL },
 #ifdef OPTION6_PREFIX_CLASS 
   { LOPT_PREF_CLSS, ARG_DUP, "set:tag,<class>", gettext_noop("Specify DHCPv6 prefix class"), NULL },
 #endif
@@ -615,19 +618,24 @@ static int atoi_check8(char *a, int *res)
 }
 #endif
 	
-static void add_txt(char *name, char *txt)
+static void add_txt(char *name, char *txt, int stat)
 {
-  size_t len = strlen(txt);
   struct txt_record *r = opt_malloc(sizeof(struct txt_record));
   
-  r->name = opt_string_alloc(name);
-  r->next = daemon->txt;
-  daemon->txt = r;
-  r->class = C_CHAOS;
+  if (txt)
+    {
+      size_t len = strlen(txt);
   r->txt = opt_malloc(len+1);
   r->len = len+1;
   *(r->txt) = len;
   memcpy((r->txt)+1, txt, len);
+}
+
+  r->stat = stat;
+  r->name = opt_string_alloc(name);
+  r->next = daemon->txt;
+  daemon->txt = r;
+  r->class = C_CHAOS;
 }
 
 static void do_usage(void)
@@ -3609,6 +3617,7 @@ static int one_opt(int option, char *arg, char *errstr, char *gen_err, int comma
 	new->next = daemon->txt;
 	daemon->txt = new;
 	new->class = C_IN;
+	new->stat = 0;
 	
 	if (!(new->name = canonicalise_opt(arg)))
 	  ret_err(_("bad TXT record"));
@@ -4258,9 +4267,18 @@ void read_opts(int argc, char **argv, char *compile_opts)
   daemon->soa_refresh = SOA_REFRESH;
   daemon->soa_retry = SOA_RETRY;
   daemon->soa_expiry = SOA_EXPIRY;
-  add_txt("version.bind", "dnsmasq-" VERSION );
-  add_txt("authors.bind", "Simon Kelley");
-  add_txt("copyright.bind", COPYRIGHT);
+  add_txt("version.bind", "dnsmasq-" VERSION, 0 );
+  add_txt("authors.bind", "Simon Kelley", 0);
+  add_txt("copyright.bind", COPYRIGHT, 0);
+  add_txt("cachesize.bind", NULL, TXT_STAT_CACHESIZE);
+  add_txt("insertions.bind", NULL, TXT_STAT_INSERTS);
+  add_txt("evictions.bind", NULL, TXT_STAT_EVICTIONS);
+  add_txt("misses.bind", NULL, TXT_STAT_MISSES);
+  add_txt("hits.bind", NULL, TXT_STAT_HITS);
+#ifdef HAVE_AUTH
+  add_txt("auth.bind", NULL, TXT_STAT_AUTH);
+#endif
+  add_txt("servers.bind", NULL, TXT_STAT_SERVERS);
 
   while (1) 
     {
