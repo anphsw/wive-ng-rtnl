@@ -39,6 +39,7 @@ showstat()
     iwpriv $1 show descinfo
     iwpriv $1 show wdsinfo
     iwpriv $1 show bainfo
+    iwpriv $1 show igmpinfo
 }
 
 showcalib()
