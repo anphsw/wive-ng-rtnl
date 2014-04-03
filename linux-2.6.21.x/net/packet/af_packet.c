@@ -811,6 +811,7 @@ static int packet_sendmsg(struct kiocb *iocb, struct socket *sock,
 	err = -ENXIO;
 	if (dev == NULL)
 		goto out_unlock;
+
 	if (sock->type == SOCK_RAW)
 		reserve = dev->hard_header_len;
 
@@ -824,7 +825,7 @@ static int packet_sendmsg(struct kiocb *iocb, struct socket *sock,
 
 	skb = sock_alloc_send_skb(sk, len + LL_ALLOCATED_SPACE(dev),
 				msg->msg_flags & MSG_DONTWAIT, &err);
-	if (skb==NULL)
+	if (skb == NULL)
 		goto out_unlock;
 
 	skb_reserve(skb, LL_RESERVED_SPACE(dev));
