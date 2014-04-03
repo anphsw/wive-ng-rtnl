@@ -157,15 +157,15 @@ static VOID IGMPTableDisplay(
 			PMEMBER_ENTRY pMemberEntry = NULL;
 			pEntry = &pMulticastFilterTable->Content[i];
 
-			DBGPRINT(RT_DEBUG_OFF, ("IF(%s) entry #%d, type=%s, GrpId=(%02x:%02x:%02x:%02x:%02x:%02x) memberCnt=%d\n",
+			printk("IF(%s) entry #%d, type=%s, GrpId=(%02x:%02x:%02x:%02x:%02x:%02x) memberCnt=%d\n",
 				RTMP_OS_NETDEV_GET_DEVNAME(pEntry->net_dev), i, (pEntry->type==0 ? "static":"dynamic"),
-				PRINT_MAC(pEntry->Addr), IgmpMemberCnt(&pEntry->MemberList)));
+				PRINT_MAC(pEntry->Addr), IgmpMemberCnt(&pEntry->MemberList));
 
 			pMemberEntry = (PMEMBER_ENTRY)pEntry->MemberList.pHead;
 			while (pMemberEntry)
 			{
-				DBGPRINT(RT_DEBUG_OFF, ("member mac=(%02x:%02x:%02x:%02x:%02x:%02x)\n",
-										PRINT_MAC(pMemberEntry->Addr)));
+				printk("member mac=(%02x:%02x:%02x:%02x:%02x:%02x)\n",
+										PRINT_MAC(pMemberEntry->Addr));
 
 				pMemberEntry = pMemberEntry->pNext;
 			}
