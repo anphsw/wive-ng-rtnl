@@ -63,7 +63,7 @@ EXPORT_SYMBOL_GPL(web_str_loaded);
 #define DEBUGP(format, args...)
 #endif
 
-extern rwlock_t nf_conntrack_lock;
+rwlock_t nf_conntrack_lock;
 EXPORT_SYMBOL_GPL(nf_conntrack_lock);
 
 static void death_by_timeout(unsigned long ul_conntrack);
