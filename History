@@ -167,16 +167,17 @@
 8) dnsmasq: up to 2.69rc4 version.<br>
 9) init.d: add miniupnp pcp chain.<br>
 10) webui: add support mppe for l2tp server.<br>
-11) kernel: net: unix socket code abuses csum_partial.<br>
-12) kernel: ipv6: ip6_forward: perform skb->pkt_type check at the beginning.<br>
-13) kernel: vlan: slight optimization for skb_do_rcv().<br>
-14) kernel: tcp: do not leak non zero tstamp in output packets.<br>
-15) kernel: net: sched: use no more than one page in struct fw_head.<br>
-16) kernel: udp: fix a race in encap_rcv handling.<br>
-17) kernel: net: unix: non blocking recvmsg() should not return -EINTR.<br>
-18) kernel: jiffies: Avoid undefined behavior from signed overflow.<br>
-19) kernel: net: optimize csum_replace2().<br>
-20) kernel: ppp_mppe: backport fixes from upstream.<br>
+11) webui: fix mtu/mru change for l2tp server.<br>
+12) kernel: net: unix socket code abuses csum_partial.<br>
+13) kernel: ipv6: ip6_forward: perform skb->pkt_type check at the beginning.<br>
+14) kernel: vlan: slight optimization for skb_do_rcv().<br>
+15) kernel: tcp: do not leak non zero tstamp in output packets.<br>
+16) kernel: net: sched: use no more than one page in struct fw_head.<br>
+17) kernel: udp: fix a race in encap_rcv handling.<br>
+18) kernel: net: unix: non blocking recvmsg() should not return -EINTR.<br>
+19) kernel: jiffies: Avoid undefined behavior from signed overflow.<br>
+20) kernel: net: optimize csum_replace2().<br>
+21) kernel: ppp_mppe: backport fixes from upstream.<br>
 <br>
 <br>
 <br>

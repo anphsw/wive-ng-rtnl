@@ -167,6 +167,8 @@ function initValue()
 
 	// Enable/disable
 	l2tpEnableSwitch(form);
+	mtuChange(form);
+	mruChange(form);
 }
 
 function CheckValue(form)
