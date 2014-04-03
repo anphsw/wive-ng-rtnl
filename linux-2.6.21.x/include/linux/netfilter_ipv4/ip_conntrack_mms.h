@@ -3,9 +3,8 @@
 /* MMS tracking. */
 
 #ifdef __KERNEL__
-#include <linux/netfilter_ipv4/lockhelp.h>
 
-DECLARE_LOCK_EXTERN(ip_mms_lock);
+extern rwlock_t ip_mms_lock;
 
 #define MMS_PORT                         1755
 #define MMS_SRV_MSG_ID                   196610

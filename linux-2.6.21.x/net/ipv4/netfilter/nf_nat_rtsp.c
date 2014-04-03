@@ -440,7 +440,6 @@ help(struct sk_buff **pskb, enum ip_conntrack_info ctinfo,
 	rc = NF_ACCEPT;
         break;
     }
-    //UNLOCK_BH(&ip_rtsp_lock);
 
     return rc;
 }

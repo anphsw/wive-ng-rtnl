@@ -4,10 +4,9 @@
 
 #ifdef __KERNEL__
 #include <linux/in.h>
-#include <linux/netfilter_ipv4/lockhelp.h>
 
 /* Protects talk part of conntracks */
-DECLARE_LOCK_EXTERN(ip_talk_lock);
+extern rwlock_t ip_talk_lock;
 #endif
 
 
