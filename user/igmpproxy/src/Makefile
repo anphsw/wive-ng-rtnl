@@ -6,6 +6,10 @@ IGMP_PROXY_OBJ= igmpproxy.o config.o confread.o request.o mcgroup.o rttable.o \
 
 CFLAGS += -I$(ROOTDIR)/$(LINUXDIR)/include
 
+
+#CFLAGS+= -DWIFI_IGMPSNOOP_SUPPORT
+#CFLAGS+= -DSEARCH_CLIENT_IN_WIFI_MACTABLE
+
 ifdef CONFIG_RALINK_RT3052
 ifdef CONFIG_RT_3052_ESW
 IGMP_PROXY_OBJ+= rt3052.o rt3052_reg.o
@@ -40,9 +44,6 @@ IGMP_PROXY_OBJ+= rtGSW.o rt3052_reg.o
 CFLAGS += -I$(ROOTDIR)/$(LINUXDIR)/drivers/net/raeth -DRALINK_ESW_SUPPORT
 endif
 endif
-
-#CFLAGS+= -DWIFI_IGMPSNOOP_SUPPORT
-#CFLAGS+= -DSEARCH_CLIENT_IN_WIFI_MACTABLE
 
 all: $(EXEC)
 
