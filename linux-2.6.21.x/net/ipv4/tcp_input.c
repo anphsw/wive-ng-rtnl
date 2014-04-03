@@ -1470,10 +1470,7 @@ void tcp_enter_loss(struct sock *sk, int how)
 
 	tcp_clear_retrans(tp);
 
-	/* Push undo marker, if it was plain RTO and nothing
-	 * was retransmitted. */
-	if (!how)
-		tp->undo_marker = tp->snd_una;
+	tp->undo_marker = tp->snd_una;
 
 	sk_stream_for_retrans_queue(skb, sk) {
 		cnt += tcp_skb_pcount(skb);
