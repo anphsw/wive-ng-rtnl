@@ -254,12 +254,12 @@ static inline void __deprecated save_and_cli(unsigned long *x)
 
 enum
 {
-        NET_TX_SOFTIRQ = 0,
-        NET_RX_SOFTIRQ,
-        HI_SOFTIRQ,
-	TIMER_SOFTIRQ,
-        TASKLET_SOFTIRQ,
+	TIMER_SOFTIRQ  = 0,
 	SCHED_SOFTIRQ,
+	NET_RX_SOFTIRQ,
+	NET_TX_SOFTIRQ,
+	HI_SOFTIRQ,
+	TASKLET_SOFTIRQ,
 #ifdef CONFIG_HIGH_RES_TIMERS
 	HRTIMER_SOFTIRQ,
 #endif
