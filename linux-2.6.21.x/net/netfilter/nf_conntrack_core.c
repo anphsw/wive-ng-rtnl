@@ -484,9 +484,10 @@ __nf_cone_conntrack_find(const struct nf_conntrack_tuple *tuple,
         const struct nf_conn *ignored_conntrack)
 {
     struct nf_conntrack_tuple_hash *h;
+    struct hlist_node *n;
     unsigned int hash = hash_conntrack(tuple);
 
-    list_for_each_entry(h, &nf_conntrack_hash[hash], list) {
+    hlist_for_each_entry(h, n, &nf_conntrack_hash[hash], hnode) {
         if (nf_ct_tuplehash_to_ctrack(h) != ignored_conntrack &&
                 nf_ct_cone_tuple_equal(tuple, &h->tuple)) {
             NF_CT_STAT_INC(found);
@@ -1617,7 +1618,9 @@ EXPORT_SYMBOL_GPL(nf_ct_untracked_status_or);
 int __init nf_conntrack_init(void)
 {
 	unsigned int i;
+#if 0
 	int max_factor = 8;
+#endif
 	int ret;
 
 #ifdef CONFIG_NAT_CONE
