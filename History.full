@@ -1884,6 +1884,7 @@
 21) kernel: ppp_mppe: backport fixes from upstream.<br>
 22) kernel: tcp: use zero-window when free_space is low.<br>
 23) kernel: tcp: undo spurious timeout after SACK reneging.<br>
+24) kernel: xfrm: Allow packet drops during larval state resolution.<br>
 <br>
 <br>
 <br>
