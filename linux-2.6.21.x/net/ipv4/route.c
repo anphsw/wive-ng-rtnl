@@ -2419,9 +2419,6 @@ static int ipv4_dst_blackhole(struct rtable **rp, struct flowi *flp, struct sock
 
 		rt->fl = ort->fl;
 
-		rt->idev = ort->idev;
-		if (rt->idev)
-			in_dev_hold(rt->idev);
 		rt->rt_flags = ort->rt_flags;
 		rt->rt_type = ort->rt_type;
 		rt->rt_dst = ort->rt_dst;
