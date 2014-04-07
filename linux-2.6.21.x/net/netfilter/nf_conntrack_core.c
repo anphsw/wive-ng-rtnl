@@ -1668,7 +1668,7 @@ int __init nf_conntrack_init(void)
         nf_conntrack_htable_size = 4096;
 #endif
 #endif
-        nf_conntrack_max = nf_conntrack_htable_size * 4;
+        nf_conntrack_max = nf_conntrack_htable_size * 2;
 	nf_conntrack_hash = alloc_hashtable(&nf_conntrack_htable_size,
 					    &nf_conntrack_vmalloc);
 	if (!nf_conntrack_hash) {
