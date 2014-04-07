@@ -80,14 +80,14 @@ EXPORT_SYMBOL_GPL(nf_conntrack_htable_size);
 unsigned int nf_conntrack_max __read_mostly;
 EXPORT_SYMBOL_GPL(nf_conntrack_max);
 
-struct list_head *nf_conntrack_hash __read_mostly;
+struct hlist_head *nf_conntrack_hash __read_mostly;
 EXPORT_SYMBOL_GPL(nf_conntrack_hash);
 
 struct nf_conn nf_conntrack_untracked;
 EXPORT_SYMBOL_GPL(nf_conntrack_untracked);
 
 unsigned int nf_ct_log_invalid __read_mostly;
-LIST_HEAD(unconfirmed);
+HLIST_HEAD(unconfirmed);
 
 #ifdef CONFIG_NAT_CONE
 unsigned int nf_conntrack_nat_mode __read_mostly;
@@ -350,8 +350,8 @@ static void
 clean_from_lists(struct nf_conn *ct)
 {
 	DEBUGP("clean_from_lists(%p)\n", ct);
-	list_del(&ct->tuplehash[IP_CT_DIR_ORIGINAL].list);
-	list_del(&ct->tuplehash[IP_CT_DIR_REPLY].list);
+	hlist_del(&ct->tuplehash[IP_CT_DIR_ORIGINAL].hnode);
+	hlist_del(&ct->tuplehash[IP_CT_DIR_REPLY].hnode);
 
 	/* Destroy all pending expectations */
 	nf_ct_remove_expectations(ct);
@@ -403,8 +403,8 @@ destroy_conntrack(struct nf_conntrack *nfct)
 
 	/* We overload first tuple to link into unconfirmed list. */
 	if (!nf_ct_is_confirmed(ct)) {
-		BUG_ON(list_empty(&ct->tuplehash[IP_CT_DIR_ORIGINAL].list));
-		list_del(&ct->tuplehash[IP_CT_DIR_ORIGINAL].list);
+		BUG_ON(hlist_unhashed(&ct->tuplehash[IP_CT_DIR_ORIGINAL].hnode));
+		hlist_del(&ct->tuplehash[IP_CT_DIR_ORIGINAL].hnode);
 	}
 
 	NF_CT_STAT_INC(delete);
@@ -439,6 +439,7 @@ __nf_conntrack_find(const struct nf_conntrack_tuple *tuple,
 		    const struct nf_conn *ignored_conntrack)
 {
 	struct nf_conntrack_tuple_hash *h;
+	struct hlist_node *n;
 	unsigned int hash = hash_conntrack(tuple);
 
 #ifdef CONFIG_NF_FLUSH_CONNTRACK
@@ -448,7 +449,7 @@ __nf_conntrack_find(const struct nf_conntrack_tuple *tuple,
 	    nf_conntrack_table_flush=0;
     	}
 #endif
-	list_for_each_entry(h, &nf_conntrack_hash[hash], list) {
+	hlist_for_each_entry(h, n, &nf_conntrack_hash[hash], hnode) {
 		if (nf_ct_tuplehash_to_ctrack(h) != ignored_conntrack &&
 		    nf_ct_tuple_equal(tuple, &h->tuple)) {
 			NF_CT_STAT_INC(found);
@@ -535,10 +536,10 @@ static void __nf_conntrack_hash_insert(struct nf_conn *ct,
 				       unsigned int hash,
 				       unsigned int repl_hash)
 {
-	list_add(&ct->tuplehash[IP_CT_DIR_ORIGINAL].list,
-		 &nf_conntrack_hash[hash]);
-	list_add(&ct->tuplehash[IP_CT_DIR_REPLY].list,
-		 &nf_conntrack_hash[repl_hash]);
+	hlist_add_head(&ct->tuplehash[IP_CT_DIR_ORIGINAL].hnode,
+		       &nf_conntrack_hash[hash]);
+	hlist_add_head(&ct->tuplehash[IP_CT_DIR_REPLY].hnode,
+		       &nf_conntrack_hash[repl_hash]);
 }
 
 void nf_conntrack_hash_insert(struct nf_conn *ct)
@@ -562,6 +563,7 @@ __nf_conntrack_confirm(struct sk_buff **pskb)
 	struct nf_conntrack_tuple_hash *h;
 	struct nf_conn *ct;
 	struct nf_conn_help *help;
+	struct hlist_node *n;
 	enum ip_conntrack_info ctinfo;
 
 	ct = nf_ct_get(*pskb, &ctinfo);
@@ -601,17 +603,17 @@ __nf_conntrack_confirm(struct sk_buff **pskb)
 	/* See if there's one in the list already, including reverse:
 	   NAT could have grabbed it without realizing, since we're
 	   not in the hash.  If there is, we lost race. */
-	list_for_each_entry(h, &nf_conntrack_hash[hash], list)
+	hlist_for_each_entry(h, n, &nf_conntrack_hash[hash], hnode)
 		if (nf_ct_tuple_equal(&ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple,
 				      &h->tuple))
 			goto out;
-	list_for_each_entry(h, &nf_conntrack_hash[repl_hash], list)
+	hlist_for_each_entry(h, n, &nf_conntrack_hash[repl_hash], hnode)
 		if (nf_ct_tuple_equal(&ct->tuplehash[IP_CT_DIR_REPLY].tuple,
 				      &h->tuple))
 			goto out;
 
 	/* Remove from unconfirmed list */
-	list_del(&ct->tuplehash[IP_CT_DIR_ORIGINAL].list);
+	hlist_del(&ct->tuplehash[IP_CT_DIR_ORIGINAL].hnode);
 
 	__nf_conntrack_hash_insert(ct, hash, repl_hash);
 	/* Timer relative to confirmation time, not original
@@ -660,22 +662,22 @@ EXPORT_SYMBOL_GPL(nf_conntrack_tuple_taken);
 
 /* There's a small race here where we may free a just-assured
    connection.  Too bad: we're in trouble anyway. */
-static noinline int early_drop(struct list_head *chain)
+static int early_drop(struct hlist_head *chain)
 {
-	/* Traverse backwards: gives us oldest, which is roughly LRU */
+	/* Use oldest entry, which is roughly LRU */
 	struct nf_conntrack_tuple_hash *h;
 	struct nf_conn *ct = NULL, *tmp;
+	struct hlist_node *n;
 	int dropped = 0;
 
 	read_lock_bh(&nf_conntrack_lock);
-	list_for_each_entry_reverse(h, chain, list) {
+	hlist_for_each_entry(h, n, chain, hnode) {
 		tmp = nf_ct_tuplehash_to_ctrack(h);
-		if (!test_bit(IPS_ASSURED_BIT, &tmp->status)) {
+		if (!test_bit(IPS_ASSURED_BIT, &tmp->status))
 			ct = tmp;
-			atomic_inc(&ct->ct_general.use);
-			break;
-		}
 	}
+	if (ct)
+		atomic_inc(&ct->ct_general.use);
 	read_unlock_bh(&nf_conntrack_lock);
 
 	if (!ct)
@@ -868,7 +870,8 @@ init_conntrack(const struct nf_conntrack_tuple *tuple,
 	}
 
 	/* Overload tuple linked list to put us in unconfirmed list. */
-	list_add(&conntrack->tuplehash[IP_CT_DIR_ORIGINAL].list, &unconfirmed);
+	hlist_add_head(&conntrack->tuplehash[IP_CT_DIR_ORIGINAL].hnode,
+		       &unconfirmed);
 
 	write_unlock_bh(&nf_conntrack_lock);
 
@@ -1388,16 +1391,17 @@ get_next_corpse(int (*iter)(struct nf_conn *i, void *data),
 {
 	struct nf_conntrack_tuple_hash *h;
 	struct nf_conn *ct;
+	struct hlist_node *n;
 
 	write_lock_bh(&nf_conntrack_lock);
 	for (; *bucket < nf_conntrack_htable_size; (*bucket)++) {
-		list_for_each_entry(h, &nf_conntrack_hash[*bucket], list) {
+		hlist_for_each_entry(h, n, &nf_conntrack_hash[*bucket], hnode) {
 			ct = nf_ct_tuplehash_to_ctrack(h);
 			if (iter(ct, data))
 				goto found;
 		}
 	}
-	list_for_each_entry(h, &unconfirmed, list) {
+	hlist_for_each_entry(h, n, &unconfirmed, hnode) {
 		ct = nf_ct_tuplehash_to_ctrack(h);
 		if (iter(ct, data))
 			set_bit(IPS_DYING_BIT, &ct->status);
@@ -1449,13 +1453,14 @@ i_see_dead_people1:
 }
 EXPORT_SYMBOL(ip_ct_record_cleanup);
 
-static void free_conntrack_hash(struct list_head *hash, int vmalloced, int size)
+static void free_conntrack_hash(struct hlist_head *hash, int vmalloced,
+				int size)
 {
 	if (vmalloced)
 		vfree(hash);
 	else
 		free_pages((unsigned long)hash,
-			   get_order(sizeof(struct list_head) * size));
+			   get_order(sizeof(struct hlist_head) * size));
 }
 
 void nf_conntrack_flush(void)
@@ -1515,25 +1520,25 @@ i_see_dead_people:
 		}
 }
 
-static struct list_head *alloc_hashtable(int *sizep, int *vmalloced)
+static struct hlist_head *alloc_hashtable(int *sizep, int *vmalloced)
 {
-	struct list_head *hash;
+	struct hlist_head *hash;
 	unsigned int size, i;
 
 	*vmalloced = 0;
-	size = *sizep = roundup(*sizep, PAGE_SIZE / sizeof(struct list_head));
+	size = *sizep = roundup(*sizep, PAGE_SIZE / sizeof(struct hlist_head));
 	hash = (void*)__get_free_pages(GFP_KERNEL|__GFP_NOWARN,
- 				       get_order(sizeof(struct list_head)
+ 				       get_order(sizeof(struct hlist_head)
  						 * size));
 	if (!hash) {
 		*vmalloced = 1;
 		printk(KERN_WARNING "nf_conntrack: falling back to vmalloc.\n");
-		hash = vmalloc(sizeof(struct list_head) * size);
+		hash = vmalloc(sizeof(struct hlist_head) * size);
 	}
 
 	if (hash)
 		for (i = 0; i < size; i++)
-			INIT_LIST_HEAD(&hash[i]);
+			INIT_HLIST_HEAD(&hash[i]);
 
 	return hash;
 }
@@ -1543,7 +1548,7 @@ int nf_conntrack_set_hashsize(const char *val, struct kernel_param *kp)
 	int i, bucket, vmalloced, old_vmalloced;
 	unsigned int hashsize, old_size;
 	int rnd;
-	struct list_head *hash, *old_hash;
+	struct hlist_head *hash, *old_hash;
 	struct nf_conntrack_tuple_hash *h;
 
 	/* On boot, we can set this without any fancy locking. */
@@ -1564,12 +1569,12 @@ int nf_conntrack_set_hashsize(const char *val, struct kernel_param *kp)
 
 	write_lock_bh(&nf_conntrack_lock);
 	for (i = 0; i < nf_conntrack_htable_size; i++) {
-		while (!list_empty(&nf_conntrack_hash[i])) {
-			h = list_entry(nf_conntrack_hash[i].next,
-				       struct nf_conntrack_tuple_hash, list);
-			list_del(&h->list);
+		while (!hlist_empty(&nf_conntrack_hash[i])) {
+			h = hlist_entry(nf_conntrack_hash[i].first,
+					struct nf_conntrack_tuple_hash, hnode);
+			hlist_del(&h->hnode);
 			bucket = __hash_conntrack(&h->tuple, hashsize, rnd);
-			list_add_tail(&h->list, &hash[bucket]);
+			hlist_add_head(&h->hnode, &hash[bucket]);
 		}
 	}
 	old_size = nf_conntrack_htable_size;
@@ -1604,6 +1609,7 @@ EXPORT_SYMBOL_GPL(nf_ct_untracked_status_or);
 int __init nf_conntrack_init(void)
 {
 	unsigned int i;
+	int max_factor = 8;
 	int ret;
 
 #ifdef CONFIG_NAT_CONE
@@ -1615,19 +1621,25 @@ int __init nf_conntrack_init(void)
 #endif
 
 	/* Idea from tcp.c: use 1/16384 of memory.  On i386: 32MB
-	 * machine has 256 buckets.  >= 1GB machines have 8192 buckets. */
+	 * machine has 512 buckets.  >= 1GB machines have 8192 buckets. */
 #if 0
 	if (!nf_conntrack_htable_size) {
 		nf_conntrack_htable_size
 			= (((totalram_pages << PAGE_SHIFT) / 16384)
-			   / sizeof(struct list_head));
+			   / sizeof(struct hlist_head));
 		if (totalram_pages > (1024 * 1024 * 1024 / PAGE_SIZE))
-			nf_conntrack_htable_size = 8192;
-		if (nf_conntrack_htable_size < 16)
-			nf_conntrack_htable_size = 16;
+			nf_conntrack_htable_size = 16384;
+		if (nf_conntrack_htable_size < 32)
+			nf_conntrack_htable_size = 32;
+
+		/* Use a max. factor of four by default to get the same max as
+		 * with the old struct list_heads. When a table size is given
+		 * we use the old value of 8 to avoid reducing the max.
+		 * entries. */
+		max_factor = 4;
 	}
 
-	nf_conntrack_max = 8 * nf_conntrack_htable_size;
+	nf_conntrack_max = max_factor * nf_conntrack_htable_size;
 #endif
 	 /* SpeedMod: Hashtable size: Limit ~2k records for 16Mb devices and ~4k for 32Mb.
 	    This is must be set depended at foe table size. And may be changed by /proc */
@@ -1645,7 +1657,7 @@ int __init nf_conntrack_init(void)
         nf_conntrack_htable_size = 4096;
 #endif
 #endif
-        nf_conntrack_max = nf_conntrack_htable_size * 2;
+        nf_conntrack_max = nf_conntrack_htable_size * 4;
 	nf_conntrack_hash = alloc_hashtable(&nf_conntrack_htable_size,
 					    &nf_conntrack_vmalloc);
 	if (!nf_conntrack_hash) {

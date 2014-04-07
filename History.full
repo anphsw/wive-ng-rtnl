@@ -1885,6 +1885,7 @@
 22) kernel: tcp: use zero-window when free_space is low.<br>
 23) kernel: tcp: undo spurious timeout after SACK reneging.<br>
 24) kernel: xfrm: Allow packet drops during larval state resolution.<br>
+25) kernel: netfilter: nf_conntrack: use hlists for conntrack hash.<br>
 <br>
 <br>
 <br>

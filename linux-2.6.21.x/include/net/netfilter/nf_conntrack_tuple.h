@@ -131,8 +131,7 @@ struct nf_track
 /* Connections have two entries in the hash table: one for each way */
 struct nf_conntrack_tuple_hash
 {
-	struct list_head list;
-
+	struct hlist_node hnode;
 	struct nf_conntrack_tuple tuple;
         struct nf_track track;
 };
