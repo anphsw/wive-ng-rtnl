@@ -1,4 +1,4 @@
 # WeTelecom WM-D300
-TargetVendor=  0x22de
-TargetProduct= 0x6801
+TargetVendor=0x22de
+TargetProduct=0x6801
 MessageContent="5553424312345678000000000000061b000000020000000000000000000000"

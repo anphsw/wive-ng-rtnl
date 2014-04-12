@@ -1870,23 +1870,24 @@
 7) xupnpd: up to 398 revision.<br>
 8) dnsmasq: up to 2.69 version.<br>
 9) init.d: add miniupnp pcp chain.<br>
-10) webui: add support mppe for l2tp server.<br>
-11) webui: fix mtu/mru change for l2tp server.<br>
-12) kernel: net: unix socket code abuses csum_partial.<br>
-13) kernel: ipv6: ip6_forward: perform skb->pkt_type check at the beginning.<br>
-14) kernel: vlan: slight optimization for skb_do_rcv().<br>
-15) kernel: tcp: do not leak non zero tstamp in output packets.<br>
-16) kernel: net: sched: use no more than one page in struct fw_head.<br>
-17) kernel: udp: fix a race in encap_rcv handling.<br>
-18) kernel: net: unix: non blocking recvmsg() should not return -EINTR.<br>
-19) kernel: jiffies: Avoid undefined behavior from signed overflow.<br>
-20) kernel: net: optimize csum_replace2().<br>
-21) kernel: ppp_mppe: backport fixes from upstream.<br>
-22) kernel: tcp: use zero-window when free_space is low.<br>
-23) kernel: tcp: undo spurious timeout after SACK reneging.<br>
-24) kernel: xfrm: Allow packet drops during larval state resolution.<br>
-25) kernel: netfilter: nf_conntrack: use hlists for conntrack hash.<br>
-26) kernel: netfilter: nf_conntrack: early_drop improvement.<br>
+10) usb-modeswitch: update data to 20140327 version.<br>
+11) webui: add support mppe for l2tp server.<br>
+12) webui: fix mtu/mru change for l2tp server.<br>
+13) kernel: net: unix socket code abuses csum_partial.<br>
+14) kernel: ipv6: ip6_forward: perform skb->pkt_type check at the beginning.<br>
+15) kernel: vlan: slight optimization for skb_do_rcv().<br>
+16) kernel: tcp: do not leak non zero tstamp in output packets.<br>
+17) kernel: net: sched: use no more than one page in struct fw_head.<br>
+18) kernel: udp: fix a race in encap_rcv handling.<br>
+19) kernel: net: unix: non blocking recvmsg() should not return -EINTR.<br>
+20) kernel: jiffies: Avoid undefined behavior from signed overflow.<br>
+21) kernel: net: optimize csum_replace2().<br>
+22) kernel: ppp_mppe: backport fixes from upstream.<br>
+23) kernel: tcp: use zero-window when free_space is low.<br>
+24) kernel: tcp: undo spurious timeout after SACK reneging.<br>
+25) kernel: xfrm: Allow packet drops during larval state resolution.<br>
+26) kernel: netfilter: nf_conntrack: use hlists for conntrack hash.<br>
+27) kernel: netfilter: nf_conntrack: early_drop improvement.<br>
 <br>
 <br>
 <br>

@@ -1,5 +1,5 @@
 # Atheros Wireless / Netgear WNDA3200
-TargetVendor=  0x0cf3
-TargetProduct= 0x7010
+TargetVendor=0x0cf3
+TargetProduct=0x7010
 MessageContent="5553424312345678000000000000061b000000020000000000000000000000"
 NoDriverLoading=1

@@ -1,4 +1,4 @@
 # ZTE MF110 (Variant)
-TargetVendor=  0x19d2
-TargetProduct= 0x0031
+TargetVendor=0x19d2
+TargetProduct=0x0031
 MessageContent="5553424312345678000000000000061b000000020000000000000000000000"
