@@ -1868,7 +1868,7 @@
 5) p910nd: up to 0.97 version.<br>
 6) usb-modeswitch-data: up to 20140129 version.<br>
 7) xupnpd: up to 398 revision.<br>
-8) dnsmasq: up to 2.69rc4 version.<br>
+8) dnsmasq: up to 2.69 version.<br>
 9) init.d: add miniupnp pcp chain.<br>
 10) webui: add support mppe for l2tp server.<br>
 11) webui: fix mtu/mru change for l2tp server.<br>
