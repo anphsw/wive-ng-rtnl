@@ -2552,7 +2552,7 @@ static int rt_fill_info(struct sk_buff *skb, u32 pid, u32 seq, int event,
 			}
 		} else
 #endif
-			NLA_PUT_U32(skb, RTA_IIF, rt->fl.iif);
+			NLA_PUT_U32(skb, RTA_IIF, skb->dev->ifindex);
 	}
 
 	if (rtnl_put_cacheinfo(skb, &rt->u.dst, id, ts, tsage,

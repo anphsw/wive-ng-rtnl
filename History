@@ -184,6 +184,7 @@
 25) kernel: xfrm: Allow packet drops during larval state resolution.<br>
 26) kernel: netfilter: nf_conntrack: use hlists for conntrack hash.<br>
 27) kernel: netfilter: nf_conntrack: early_drop improvement.<br>
+28) kernel: ipv4: return valid RTA_IIF on ip route get.<br>
 <br>
 <br>
 <br>
