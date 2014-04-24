@@ -1,4 +1,4 @@
-# $Id: Makefile.linux,v 1.85 2014/03/28 12:03:27 nanard Exp $
+# $Id: Makefile.linux,v 1.86 2014/04/09 07:22:28 nanard Exp $
 # MiniUPnP project
 # (c) 2006-2014 Thomas Bernard
 # http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
@@ -141,6 +141,8 @@ CFLAGS += -DUSE_NFCT
 LIBS += $(shell pkg-config --static --libs-only-l libmnl)
 LIBS += $(shell pkg-config --static --libs-only-l libnetfilter_conntrack)
 endif # ($(TEST),1)
+
+#LIBS += $(shell pkg-config --static --libs-only-l libssl)
 
 TESTUPNPDESCGENOBJS = testupnpdescgen.o upnpdescgen.o
 

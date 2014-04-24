@@ -1,4 +1,4 @@
-/* $Id: getifaddr.c,v 1.21 2014/03/15 09:56:21 nanard Exp $ */
+/* $Id: getifaddr.c,v 1.22 2014/04/18 08:10:57 nanard Exp $ */
 /* MiniUPnP project
  * http://miniupnp.free.fr/ or http://miniupnp.tuxfamily.org/
  * (c) 2006-2014 Thomas Bernard
@@ -44,6 +44,19 @@ getifaddr(const char * ifname, char * buf, int len,
 	if(s < 0)
 	{
 		syslog(LOG_ERR, "socket(PF_INET, SOCK_DGRAM): %m");
+		return -1;
+	}
+	strncpy(ifr.ifr_name, ifname, IFNAMSIZ);
+	if(ioctl(s, SIOCGIFFLAGS, &ifr, &ifrlen) < 0)
+	{
+		syslog(LOG_DEBUG, "ioctl(s, SIOCGIFFLAGS, ...): %m");
+		close(s);
+		return -1;
+	}
+	if ((ifr.ifr_flags & IFF_UP) == 0)
+	{
+		syslog(LOG_DEBUG, "network interface %s is down", ifname);
+		close(s);
 		return -1;
 	}
 	strncpy(ifr.ifr_name, ifname, IFNAMSIZ);
