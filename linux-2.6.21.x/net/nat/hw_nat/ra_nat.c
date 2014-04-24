@@ -100,7 +100,7 @@ void skb_dump(struct sk_buff* sk) {
 }
 #endif
 
-static void FoeAllocTbl(uint32_t NumOfEntry)
+static int FoeAllocTbl(uint32_t NumOfEntry)
 {
 	uint32_t FoeTblSize;
 
@@ -108,8 +108,14 @@ static void FoeAllocTbl(uint32_t NumOfEntry)
 
 	PpeFoeBase = dma_alloc_coherent(NULL, FoeTblSize, &PpePhyFoeBase, GFP_KERNEL);
 
+	if(PpeFoeBase == NULL) {
+		return 0;
+	}
+
 	RegWrite(PPE_FOE_BASE, PpePhyFoeBase);
 	memset(PpeFoeBase, 0, FoeTblSize);
+
+	return 1;
 }
 
 #ifdef HWNAT_DEBUG
@@ -1982,11 +1988,13 @@ void PpeSetFoeEbl(uint32_t FoeEbl)
 	RegWrite(PPE_FLOW_SET, PpeFlowSet);
 }
 
-static void PpeSetFoeHashMode(uint32_t HashMode)
+static int PpeSetFoeHashMode(uint32_t HashMode)
 {
 
 	/* Allocate FOE table base */
-	FoeAllocTbl(FOE_4TB_SIZ);
+        if(!FoeAllocTbl(FOE_4TB_SIZ)) {
+	    return 0;
+	}
 
 	switch (FOE_4TB_SIZ) {
 	case 1024:
@@ -2021,6 +2029,8 @@ static void PpeSetFoeHashMode(uint32_t HashMode)
 
 	/* Set action for FOE search miss */
 	RegModifyBits(PPE_FOE_CFG, FWD_CPU_BUILD_ENTRY, 4, 2);
+
+	return 1;
 }
 
 static void PpeSetAgeOut(void)
@@ -2343,9 +2353,6 @@ static int32_t PpeEngStart(void)
 
 	/* Set PPE Flow Set */
 	PpeSetFoeEbl(1);
-
-	/* Set PPE FOE Hash Mode */
-	PpeSetFoeHashMode(DFL_FOE_HASH_MODE);
 
 #ifdef CONFIG_HNAT_EXTENTIONS
 	/* Set default index in policy table */
@@ -2776,6 +2783,12 @@ static void PpeSetIpProt(void)
  */
 static int32_t PpeInitMod(void)
 {
+        /* Set PPE FOE Hash Mode */
+	if(!PpeSetFoeHashMode(DFL_FOE_HASH_MODE)) {
+	    NAT_PRINT("Ralink HW NAT Module NOT Enable - LOW FREE MEMORY.\n");
+	    return -ENOMEM; //memory allocation failed
+	}
+
 	NAT_PRINT("Ralink HW NAT Module Enabled\n");
 
 	//Get net_device structure of Dest Port 

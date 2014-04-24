@@ -185,6 +185,7 @@
 26) kernel: netfilter: nf_conntrack: use hlists for conntrack hash.<br>
 27) kernel: netfilter: nf_conntrack: early_drop improvement.<br>
 28) kernel: ipv4: return valid RTA_IIF on ip route get.<br>
+29) kernel: hw_nat: fix error path in alloc memory for hash.<br>
 <br>
 <br>
 <br>
