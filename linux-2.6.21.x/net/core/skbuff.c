@@ -344,6 +344,10 @@ static void skb_release_all(struct sk_buff *skb)
 
 void FASTPATH __kfree_skb(struct sk_buff *skb)
 {
+#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+	if(IS_MAGIC_TAG_VALID(skb) || (FOE_MAGIC_TAG(skb) == FOE_MAGIC_PPE))
+		memset(FOE_INFO_START_ADDR(skb), 0, FOE_INFO_LEN);
+#endif
 	skb_release_all(skb);
 	kfree_skbmem(skb);
 }
