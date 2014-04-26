@@ -65,13 +65,21 @@ int main(int argc, char *argv[])
 				}
 				break;
 			case 'p':
-				mii.phy_id = (__u16)atoi(optarg);
+				mii.phy_id = strtoul(optarg, NULL, 10);
 				break;
 			case 'r':
-				mii.reg_num = (__u16)atoi(optarg);
+#if defined (CONFIG_RALINK_MT7621)
+				if(mii.phy_id == 31) {
+					mii.reg_num = strtol(optarg, NULL, 16);
+				} else {
+					mii.reg_num = strtol(optarg, NULL, 10);
+				}
+#else
+				mii.reg_num = strtol(optarg, NULL, 10);
+#endif
 				break;
 			case 'v':
-				mii.val_in = (__u16)strtol(optarg, NULL, 16);
+				mii.val_in = strtol(optarg, NULL, 16);
 				break;
 			case '?':
 				show_usage();
