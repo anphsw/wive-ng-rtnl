@@ -371,10 +371,15 @@ static int vlan_dev_init(struct net_device *dev)
 	dev->type = real_dev->type;
 
 #if defined (CONFIG_RAETH_TSO)
+#if defined(CONFIG_RALINK_MT7620)
+	if( (*(volatile u32 *)(0xB000000C) & 0xf) >= 0x5) {
+		dev->features = real_dev->features;
+	}
+#else
 	/* make pseudo interface has same capacity like real interface */
 	dev->features = real_dev->features;
 #endif
-
+#endif
 	memcpy(dev->broadcast, real_dev->broadcast, real_dev->addr_len);
 	memcpy(dev->dev_addr, real_dev->dev_addr, real_dev->addr_len);
 	dev->addr_len = real_dev->addr_len;
