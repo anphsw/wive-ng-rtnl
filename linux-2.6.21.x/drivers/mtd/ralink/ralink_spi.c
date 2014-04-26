@@ -453,9 +453,24 @@ static int raspi_cmd(const u8 cmd, const u32 addr, const u8 mode, u8 *buf, const
 
 	return retval;
 }
+#endif
 
-static inline int raspi_write_enable(void);
+/*
+ * Set write enable latch with Write Enable command.
+ * Returns negative if error occurred.
+ */
+static inline int raspi_write_enable(void)
+{
+	u8 code = OPCODE_WREN;
 
+#ifdef COMMAND_MODE
+	raspi_cmd(code, 0, 0, 0, 0, 0, 0);
+#else
+	return spic_write(&code, 1, NULL, 0);
+#endif
+}
+
+#ifdef COMMAND_MODE
 static int raspi_set_quad()
 {
 	int retval = 0;
@@ -552,6 +567,8 @@ static int raspi_read_rg(u8 *val, u8 opcode)
 
 	return 0;
 }
+#endif
+
 static int raspi_write_rg(u8 *val, u8 opcode)
 {
 	ssize_t retval;
@@ -576,7 +593,6 @@ static int raspi_write_rg(u8 *val, u8 opcode)
 	ra_outl(RT2880_SPI_DMA, dr);
 	return 0;
 }
-#endif
 
 /*
  * Read the status register, returning its value in the location
@@ -713,25 +729,6 @@ static int raspi_4byte_mode(int enable)
 	return 0;
 }
 #endif
-
-
-
-
-/*
- * Set write enable latch with Write Enable command.
- * Returns negative if error occurred.
- */
-static inline int raspi_write_enable(void)
-{
-	u8 code = OPCODE_WREN;
-
-#ifdef COMMAND_MODE
-	raspi_cmd(code, 0, 0, 0, 0, 0, 0);
-#else
-	return spic_write(&code, 1, NULL, 0);
-#endif
-}
-
 static inline int raspi_write_disable(void)
 {
 	u8 code = OPCODE_WRDI;
