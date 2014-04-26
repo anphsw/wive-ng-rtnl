@@ -63,7 +63,7 @@
 #define TMR1LOAD    (TMRSTAT + 0x2C) /* WDG Timer Load Value Register */
 #define TMR1VAL     (TMRSTAT + 0x30) /* WDG Timer Current Value Register */
 #define RLDWDOG     (TMRSTAT + 0x38) /* Reload Watchdog */
-#elif defined (CONFIG_RALINK_MT7621)
+#elif defined (CONFIG_RALINK_MT7621) || defined (CONFIG_RALINK_MT7628)
 #define TMR0LOAD    (TMRSTAT + 0x14)  /* Timer0 Load Value */
 #define TMR0VAL     (TMRSTAT + 0x18)  /* Timer0 Counter Value */
 #define TMR0CTL     (TMRSTAT + 0x10)  /* Timer0 Control */
@@ -124,6 +124,9 @@ int unregister_tmr_service(void);
 
 int request_tmr1_service(int interval, void (*function)(unsigned long), unsigned long data);
 int unregister_tmr1_service(void);
+
+int request_tmr2_service(int interval, void (*function)(unsigned long), unsigned long data);
+int unregister_tmr2_service(void);
 
 #endif
 
