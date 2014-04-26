@@ -48,7 +48,8 @@
     defined (CONFIG_RALINK_RT3883) || \
     defined (CONFIG_RALINK_RT3352) || \
     defined (CONFIG_RALINK_RT3052) || \
-    defined (CONFIG_RALINK_RT5350)
+    defined (CONFIG_RALINK_RT5350) || \
+    defined (CONFIG_RALINK_MT7620)
 
 int boot_from = BOOT_FROM_NOR;
 
