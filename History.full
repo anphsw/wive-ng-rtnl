@@ -1890,6 +1890,12 @@
 27) kernel: netfilter: nf_conntrack: early_drop improvement.<br>
 28) kernel: ipv4: return valid RTA_IIF on ip route get.<br>
 29) kernel: hw_nat: fix error path in alloc memory for hash.<br>
+
+<br>
+<b>4.9.x</b><br>
+1) backport fixes from 4.2.0.0 SDK (hw_nat/skbuff/tso/etc..).<br>
+2) more spi flash support.<br>
+3) base MT7620 support.<br>
 <br>
 <br>
 <br>
