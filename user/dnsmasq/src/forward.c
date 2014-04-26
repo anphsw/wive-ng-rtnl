@@ -535,6 +535,8 @@ static size_t process_reply(struct dns_header *header, time_t now, struct server
   (void) do_bit;
 
 #ifdef HAVE_IPSET
+  if (daemon->ipsets && extract_request(header, n, daemon->namebuff, NULL))
+    {
   /* Similar algorithm to search_servers. */
   struct ipsets *ipset_pos;
   unsigned int namelen = strlen(daemon->namebuff);
@@ -550,6 +552,7 @@ static size_t process_reply(struct dns_header *header, time_t now, struct server
 	matchlen = domainlen;
 	sets = ipset_pos->sets;
       }
+    }
     }
 #endif
   
@@ -1741,7 +1744,7 @@ unsigned char *tcp_request(int confd, time_t now,
 		  struct server *firstsendto = NULL;
 #ifdef HAVE_DNSSEC
 		  unsigned char *newhash, hash[HASH_SIZE];
-		  if ((newhash = hash_questions(header, (unsigned int)size, daemon->keyname)))
+		  if ((newhash = hash_questions(header, (unsigned int)size, daemon->namebuff)))
 		    memcpy(hash, newhash, HASH_SIZE);
 		  else
 		    memset(hash, 0, HASH_SIZE);
