@@ -213,7 +213,7 @@ extern int upStreamVif;
  */
 void buildIfVc( void );
 struct IfDesc *getIfByName( const char *IfName );
-struct IfDesc *getIfByIx( unsigned Ix );
+struct IfDesc *getIfByIx( int Ix );
 struct IfDesc *getIfByAddress( uint32 Ix );
 
 /* mroute-api.c

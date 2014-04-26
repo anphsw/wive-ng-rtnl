@@ -206,7 +206,7 @@ extern int upStreamVif;
  */
 void buildIfVc( void );
 struct IfDesc *getIfByName( const char *IfName );
-struct IfDesc *getIfByIx( unsigned Ix );
+struct IfDesc *getIfByIx( int Ix );
 struct IfDesc *getIfByAddress( uint32_t ipaddr );
 int isAdressValidForIf(struct IfDesc* intrface, uint32_t ipaddr);
 

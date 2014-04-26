@@ -183,8 +183,13 @@ struct IfDesc *getIfByName( const char *IfName ) {
 **          - NULL if no interface 'Ix' exists
 **          
 */
-struct IfDesc *getIfByIx( unsigned Ix ) {
-    struct IfDesc *Dp = &IfDescVc[ Ix ];
+struct IfDesc *getIfByIx( int Ix ) {
+    struct IfDesc *Dp;
+
+    if(Ix < 0)
+        return NULL;
+
+    Dp = &IfDescVc[ Ix ];
     return Dp < IfDescEp ? Dp : NULL;
 }
 
