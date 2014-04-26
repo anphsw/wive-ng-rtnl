@@ -78,6 +78,8 @@ int main(int argc, char *argv[])
 	if (argc < 3)
 	{
 		printf("syntax: reg [method(r/w/s/d/f)] [offset(Hex)] [value(hex, w only)]\n");
+		printf("syntax: reg q [interval(Hex in ms)] [count(Hex)]\n");
+		printf("syntax: reg o [offset_number] [offset_value]\n");
 		printf("read example : reg r 18\n");
 		printf("write example : reg w 18 12345678\n");
 		printf("dump example : reg d 18 \n");
@@ -89,6 +91,10 @@ int main(int argc, char *argv[])
 		printf("for example: reg s 0xa0500000\n");
 		printf("for example: reg m c8 1 31 1\n");
 		printf("To show current base address offset: reg s 2\n");
+		printf("reg q reads and shows the 16 register values  [count] times in the interval of [interval]ms.\n");
+		printf("the addresses of the 16 registers are assigned by reg o\n");
+		printf("for example: reg o 5 10. This sets the 5th register offset as 0x10\n");
+		printf("[interval]: 1 ~ 1000. [count]: 1 ~ 1000. [offset_number]: 0 ~ 15.\n");
 		return 0;
 	}
 	
@@ -104,6 +110,10 @@ int main(int argc, char *argv[])
 	else if (*p == 'd')
 	{
 		method = RT_RDM_CMD_DUMP;
+	}
+	else if (*p == 'q')
+	{
+		method = RT_RDM_CMD_DUMP_QUEUE;
 	}
 	else if (*p == 'f')
 	{
@@ -158,9 +168,13 @@ int main(int argc, char *argv[])
 	    int len=strtoul(argv[5], NULL, 10);
 	    ra_reg_mod_bits(offset,data, start_bit,len);
 	}
+	else if (*p == 'o')
+	{
+		method = RT_RDM_CMD_DUMP_QUEUE_OFFSET;
+	}	
 	else
 	{
-		printf("method must be either r p d f w s m\n");
+		printf("method must be either r p d f w s m q o\n");
 		return 0;
 	}
 	
@@ -191,7 +205,7 @@ int main(int argc, char *argv[])
 		p++;
 	}
 	
-	if (method == RT_RDM_CMD_WRITE)
+	if (method == RT_RDM_CMD_WRITE || method == RT_RDM_CMD_DUMP_QUEUE  || method == RT_RDM_CMD_DUMP_QUEUE_OFFSET)
 	{
 		p = argv[3];
 		if (*p == '0' && *(p+1) == 'x')
@@ -222,8 +236,10 @@ int main(int argc, char *argv[])
 		}
 		offset = value;
 	}
-	
-
+        if ((method & 0xffff) == RT_RDM_CMD_DUMP_QUEUE && ( ((method >> 16) > 1023 || (method >> 16) == 0) || (offset > 1023 || offset == 0  ) )){
+		printf("[interval]: 1 ~ 3ff . [count]: 1 ~ 3ff.\n");
+		return 0;
+	}
 	fd = open("/dev/rdm0", O_RDONLY);
 	if (fd < 0)
 	{
