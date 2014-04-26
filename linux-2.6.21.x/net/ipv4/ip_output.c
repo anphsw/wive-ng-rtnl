@@ -329,6 +329,7 @@ packet_routed:
 	skb->priority = sk->sk_priority;
 
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+	FOE_MAGIC_TAG(skb) = 0;
 	FOE_AI(skb) = UN_HIT;
 #endif
 
