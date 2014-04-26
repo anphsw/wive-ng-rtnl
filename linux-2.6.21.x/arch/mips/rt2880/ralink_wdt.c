@@ -199,6 +199,12 @@ void set_wdg_timer_ebl(unsigned int timer, unsigned int ebl)
             //result |= (0x1<<21); //REFCLK0
         }
         sysRegWrite(GPIOMODE,result);
+
+        //reset output low period is 100us
+	result=sysRegRead(RSTSTAT);
+	result &= ~(0x3FFF);
+	result |= 0x64;
+	sysRegWrite(RSTSTAT, result);
     }
 #endif
 #endif 
