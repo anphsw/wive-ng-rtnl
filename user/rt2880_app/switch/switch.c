@@ -60,7 +60,7 @@ void usage(char *cmd)
 	printf(" %s filt [mac] [portmap]                 - add an SA filtering entry to switch table\n", cmd);
 	printf(" %s filt [mac] [portmap] [vlan idx]      - add an SA filtering entry to switch table\n", cmd);
 	printf(" %s filt [mac] [portmap] [vlan idx] [age]- add an SA filtering entry to switch table\n", cmd);
-#elif defined (CONFIG_RALINK_RT5350)
+#elif defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_MT7628)
 	printf(" %s ingress-rate on [port] [Mbps]        - set ingress rate limit on port 0~4 \n", cmd);
 	printf(" %s egress-rate on [port] [Mbps]         - set egress rate limit on port 0~4 \n", cmd);
 	printf(" %s ingress-rate off [port]              - del ingress rate limit on port 0~4 \n", cmd);
@@ -136,7 +136,7 @@ int phy_dump(int phy_addr)
 
 }
 
-#if defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350)
+#if defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_MT7628)
 int ingress_rate_set(int on_off, int port, int bw)
 {
 	struct ifreq ifr;
@@ -156,7 +156,7 @@ int ingress_rate_set(int on_off, int port, int bw)
 }
 #endif
 
-#if defined (CONFIG_RALINK_RT5350)
+#if defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_MT7628)
 int egress_rate_set(int on_off, int port, int bw)
 {
 	struct ifreq ifr;
@@ -571,7 +571,7 @@ int main(int argc, char *argv[])
 		else
 			usage(argv[0]);
 	}
-#if defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350)
+#if defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_MT7628)
 	else if (!strncmp(argv[1], "ingress-rate", 6)) {
 		int port=0, bw=0;
 
@@ -592,7 +592,7 @@ int main(int argc, char *argv[])
 			usage(argv[0]);
 	}
 #endif
-#if defined (CONFIG_RALINK_RT5350)
+#if defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_MT7628)
 	else if (!strncmp(argv[1], "egress-rate", 6)) {
 		int port=0, bw=0;
 		
