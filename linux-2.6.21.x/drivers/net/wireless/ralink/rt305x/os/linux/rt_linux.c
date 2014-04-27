@@ -828,7 +828,7 @@ void announce_802_3_packet(
 		pRxPkt=NULL;
 		return;
 
-	}	  	
+	}
 #endif // INF_PPA_SUPPORT //
 
 //#ifdef CONFIG_5VT_ENHANCE
@@ -850,27 +850,24 @@ void announce_802_3_packet(
 	  * ra_sw_nat_hook_rx return 0 --> FWD & without netif_rx
 	 */
 
-	if(ra_sw_nat_hook_rx != NULL)
-	{
+	if(ra_sw_nat_hook_rx != NULL) {
 		unsigned int flags;
 
 		pRxPkt->protocol = eth_type_trans(pRxPkt, pRxPkt->dev);
 		RTMP_IRQ_LOCK(&pAd->page_lock, flags);
 
 		if(ra_sw_nat_hook_rx(pRxPkt))
-		{
 			netif_rx(pRxPkt);
-		}
 
 		RTMP_IRQ_UNLOCK(&pAd->page_lock, flags);
-	}
-	else 
+	} else
 #else
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 		FOE_AI(pRxPkt)=UN_HIT;
 #endif // defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE) //
 #endif // !defined(CONFIG_RA_NAT_NONE) //
- #endif // RTMP_RBUS_SUPPORT //
+#endif // RTMP_RBUS_SUPPORT //
+
 	{
 #ifdef CONFIG_AP_SUPPORT
 #ifdef BG_FT_SUPPORT
