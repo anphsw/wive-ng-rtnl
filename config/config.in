@@ -190,6 +190,7 @@ if [ "$CONFIG_RT2880_NVRAM" = "y" ]; then
 fi
 bool 'RT2880 RALINK INIT'		CONFIG_RT2880_RAINIT
 bool 'RT2880 MTD Application'		CONFIG_RT2880_MTD
+bool 'RT2880 eth_mac Tool'		CONFIG_ETHMAC_TOOL
 bool 'RT2880 GPIO Test'			CONFIG_RT2880_GPIO_TEST
 bool 'HW NAT'                   	CONFIG_RALINKAPP_HWNAT
 if [ "$CONFIG_RALINKAPP_HWNAT" = "y" ]; then

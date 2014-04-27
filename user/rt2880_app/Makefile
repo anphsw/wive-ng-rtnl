@@ -1,6 +1,6 @@
 .EXPORT_ALL_VARIABLES:
 
-SUBDIRS_APP = mii_mgr nvram reg switch gpio mtd hw_nat switch_rtl
+SUBDIRS_APP = mii_mgr nvram reg switch gpio mtd hw_nat switch_rtl eth_mac
 
 -include $(LINUX_CONFIG)
 -include $(CONFIG_CONFIG)
@@ -22,6 +22,7 @@ ra_dir_$(CONFIG_RT2880_MTD_VERF)    += mtd_verifier
 ra_dir_$(CONFIG_RT2880_GPIO_TEST)   += gpio
 ra_dir_$(CONFIG_RT3052_SWITCH)      += switch
 ra_dir_$(CONFIG_RTL8367M_SWITCH)    += switch_rtl
+ra_dir_$(CONFIG_ETHMAC_TOOL)        += eth_mac
 
 #always install radio firmware
 ra_dir_y			    += rt_firmware
