@@ -192,7 +192,7 @@
 1) backport fixes from 4.2.0.0 SDK (hw_nat/skbuff/tso/etc..).<br>
 2) more spi flash support.<br>
 3) base MT7620 support.<br>
-4) dropbear: reconfigure for support portforward (disable by default in init.d).<br>
+4) dropbear: reconfigure for support portforward (disable by defaultd in init.d).<br>
 <br>
 <br>
 <br>
