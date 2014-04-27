@@ -10,7 +10,7 @@
 #include <sys/types.h>
 #include <linux/autoconf.h>  //kernel config
 
-#define MTD_FACTORY 	"/dev/mtd3"
+#define MTD_FACTORY 	"/dev/mtd2"
 #if defined (CONFIG_RALINK_RT6855A) || defined (CONFIG_RALINK_MT7621)
 #define LAN_OFFSET    0xE000
 #define WAN_OFFSET    0xE006
