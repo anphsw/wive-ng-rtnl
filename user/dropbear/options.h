@@ -67,8 +67,10 @@ much traffic. */
 /*
 #define ENABLE_CLI_LOCALTCPFWD
 #define ENABLE_CLI_REMOTETCPFWD
+*/
 
 #define ENABLE_SVR_LOCALTCPFWD
+/*
 #define ENABLE_SVR_REMOTETCPFWD
 */
 /* Enable Authentication Agent Forwarding - server only for now */
@@ -178,7 +180,7 @@ much traffic. */
 
 /* Whether to print the message of the day (MOTD). This doesn't add much code
  * size */
-#define DO_MOTD
+#undef DO_MOTD
 
 /* The MOTD file path */
 #ifndef MOTD_FILENAME
@@ -307,11 +309,11 @@ much traffic. */
 
 /* Ensure that data is transmitted every KEEPALIVE seconds. This can
 be overridden at runtime with -K. 0 disables keepalives */
-#define DEFAULT_KEEPALIVE 0
+#define DEFAULT_KEEPALIVE 60
 
 /* Ensure that data is received within IDLE_TIMEOUT seconds. This can
  be overridden at runtime with -I. 0 disables idle timeouts */
-#define DEFAULT_IDLE_TIMEOUT 0
+#define DEFAULT_IDLE_TIMEOUT 360
 
 /* The default path. This will often get replaced by the shell */
 #define DEFAULT_PATH "/usr/bin:/bin"
