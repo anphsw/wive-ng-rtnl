@@ -602,7 +602,6 @@ static int __init nf_conntrack_pptp_init(void)
 static void __exit nf_conntrack_pptp_fini(void)
 {
 	nf_conntrack_helper_unregister(&pptp);
-	nf_ct_gre_keymap_flush();
 }
 
 module_init(nf_conntrack_pptp_init);

@@ -49,7 +49,7 @@
 static DEFINE_RWLOCK(nf_ct_gre_lock);
 static LIST_HEAD(gre_keymap_list);
 
-void nf_ct_gre_keymap_flush(void)
+static void nf_ct_gre_keymap_flush(void)
 {
 	struct list_head *pos, *n;
 
@@ -60,7 +60,6 @@ void nf_ct_gre_keymap_flush(void)
 	}
 	write_unlock_bh(&nf_ct_gre_lock);
 }
-EXPORT_SYMBOL(nf_ct_gre_keymap_flush);
 
 static inline int gre_key_cmpfn(const struct nf_ct_gre_keymap *km,
 				const struct nf_conntrack_tuple *t)
