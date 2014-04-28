@@ -189,11 +189,12 @@
 
 <br>
 <b>4.9.x</b><br>
-1) backport fixes from 4.2.0.0 SDK (hw_nat/skbuff/tso/etc..).<br>
-2) more spi flash support.<br>
-3) base MT7620 support.<br>
-4) dropbear: reconfigure for support portforward (disable by defaultd in init.d).<br>
-5) kernel: netfilter: nf_conntrack: flush net_gre->keymap_list only from gre helper.<br>
+1) toolchain: fix wrong optimization with -O2 4.7/4.8 version gcc regression.<br>
+2) backport fixes from 4.2.0.0 SDK (hw_nat/skbuff/tso/etc..).<br>
+3) more spi flash support.<br>
+4) base MT7620 support.<br>
+5) dropbear: reconfigure for support portforward (disable by defaultd in init.d).<br>
+6) kernel: netfilter: nf_conntrack: flush net_gre->keymap_list only from gre helper.<br>
 <br>
 <br>
 <br>
