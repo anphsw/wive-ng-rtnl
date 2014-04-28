@@ -74,8 +74,6 @@
 #define RT6_TRACE(x...) do { ; } while (0)
 #endif
 
-#define CLONE_OFFLINK_ROUTE 0
-
 static int ip6_rt_max_size = 4096;
 static int ip6_rt_gc_min_interval = HZ / 2;
 static int ip6_rt_gc_timeout = 60*HZ;
@@ -738,13 +736,10 @@ restart:
 
 	if (!rt->rt6i_nexthop && !(rt->rt6i_flags & RTF_NONEXTHOP))
 		nrt = rt6_alloc_cow(rt, &fl->fl6_dst, &fl->fl6_src);
-	else {
-#if CLONE_OFFLINK_ROUTE
+	else if (!(rt->u.dst.flags & DST_HOST))
 		nrt = rt6_alloc_clone(rt, &fl->fl6_dst);
-#else
+	else
 		goto out2;
-#endif
-	}
 
 	dst_release(&rt->u.dst);
 	rt = nrt ? : &ip6_null_entry;
@@ -833,13 +828,10 @@ restart:
 
 	if (!rt->rt6i_nexthop && !(rt->rt6i_flags & RTF_NONEXTHOP))
 		nrt = rt6_alloc_cow(rt, &fl->fl6_dst, &fl->fl6_src);
-	else {
-#if CLONE_OFFLINK_ROUTE
+	else if (!(rt->u.dst.flags & DST_HOST))
 		nrt = rt6_alloc_clone(rt, &fl->fl6_dst);
-#else
+	else
 		goto out2;
-#endif
-	}
 
 	dst_release(&rt->u.dst);
 	rt = nrt ? : &ip6_null_entry;

@@ -1900,6 +1900,7 @@
 5) dropbear: reconfigure for support portforward (disable by defaultd in init.d).<br>
 6) defaults: WmmCapable enable by debaults (temp disabled some times ago).<br>
 7) kernel: netfilter: nf_conntrack: flush net_gre->keymap_list only from gre helper.<br>
+8) kernel: ipv6: Don't create clones of host routes.<br>
 <br>
 <br>
 <br>
