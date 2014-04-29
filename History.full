@@ -1901,7 +1901,7 @@
 6) defaults: WmmCapable enable by debaults (temp disabled some times ago).<br>
 7) kernel: netfilter: nf_conntrack: flush net_gre->keymap_list only from gre helper.<br>
 8) kernel: ipv6: don't create clones of host routes.<br>
-9) kernel: usb serial: add some zte modems support.<br>
+9) kernel: usb serial(option/cdc_acm/cdc_ether): add some modems support.<br>
 <br>
 <br>
 <br>
