@@ -1694,10 +1694,17 @@ ppp_receive_nonmp_frame(struct ppp *ppp, struct sk_buff *skb)
 	 * that come in as well as compressed frames.
 	 */
 	if (ppp->rc_state && (ppp->rstate & SC_DECOMP_RUN) &&
-	    (ppp->rstate & (SC_DC_FERROR | SC_DC_ERROR)) == 0)
+	    (ppp->rstate & (SC_DC_FERROR | SC_DC_ERROR)) == 0) {
 		skb = ppp_decompress_frame(ppp, skb);
 
-	if (ppp->flags & SC_MUST_COMP && ppp->rstate & SC_DC_FERROR)
+		/* Packet dropped */
+		if (unlikely(skb == NULL)) {
+			++ppp->stats.rx_dropped;
+			return;
+		}
+	}
+
+	if (unlikely(ppp->flags & SC_MUST_COMP && ppp->rstate & SC_DC_FERROR))
 		goto err;
 
 	proto = PPP_PROTO(skb);
@@ -1766,7 +1773,7 @@ ppp_receive_nonmp_frame(struct ppp *ppp, struct sk_buff *skb)
 	ppp->stats.rx_bytes += skb->len - 2;
 
 	npi = proto_to_npindex(proto);
-	if (npi < 0) {
+	if (unlikely(npi < 0)) {
 		/* control or unknown frame - pass it to pppd */
 		skb_queue_tail(&ppp->file.rq, skb);
 		/* limit queue length by dropping old frames */
@@ -1858,6 +1865,13 @@ ppp_decompress_frame(struct ppp *ppp, struct sk_buff *skb)
 		len = ppp->rcomp->decompress(ppp->rc_state, skb->data - 2,
 				skb->len + 2, ns->data, obuff_size);
 		if (len < 0) {
+			/* Drop the packet and continue */
+			if (len == DECOMP_DROPERROR) {
+				kfree_skb(ns);
+				kfree_skb(skb);
+				skb = NULL;
+				goto err2;
+			}
 			/* Pass the compressed frame to pppd as an
 			   error indication. */
 			if (len == DECOMP_FATALERROR)
@@ -1888,6 +1902,7 @@ ppp_decompress_frame(struct ppp *ppp, struct sk_buff *skb)
 
  err:
 	ppp->rstate |= SC_DC_ERROR;
+ err2:
 	ppp_receive_error(ppp);
 	return skb;
 }
@@ -2055,7 +2070,7 @@ ppp_mp_reconstruct(struct ppp *ppp)
 				minseq + 1: p->sequence;
 
 			if (ppp->debug & 1)
-				netdev_printk(KERN_DEBUG, ppp->dev,
+				printk(KERN_DEBUG, ppp->dev,
 					      "lost frag %u..%u\n",
 					      oldseq, seq-1);
 			goto again;

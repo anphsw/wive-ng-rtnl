@@ -88,6 +88,7 @@ refuse-eap
 refuse-mschap
 require-mschap-v2
 $l2tp_srv_mppe_enabled
+$l2tp_srv_mppe_no_stateful
 lock
 minunit 10
 external_chap_sec
@@ -148,8 +149,10 @@ get_param() {
     fi
     if [ "$l2tp_srv_mppe_enabled" = "" ] || [ "$l2tp_srv_mppe_enabled" = "0" ]; then
 	l2tp_srv_mppe_enabled=
+	l2tp_srv_mppe_no_stateful=
     else
 	l2tp_srv_mppe_enabled="require-mppe-128"
+	l2tp_srv_mppe_no_stateful="nomppe-stateful"
     fi
     # final options compile
     gen_configs

@@ -129,6 +129,7 @@ struct compressor {
 
 #define DECOMP_ERROR		-1	/* error detected before decomp. */
 #define DECOMP_FATALERROR	-2	/* error detected after decomp. */
+#define DECOMP_DROPERROR	-3	/* error detected, drop packet. */
 
 /*
  * CCP codes.
