@@ -37,6 +37,7 @@
 */
 
 #include "igmpproxy.h"
+#include <sys/sysinfo.h>
 
 static const char Usage[] =
 "Usage: igmpproxy [-h] [-d] [-v [-v]] <configfile>\n"
@@ -303,6 +304,16 @@ void igmpProxyCleanUp() {
 
 }
 
+static void getuptime(struct timeval *tv)
+{
+    struct sysinfo si;
+
+    sysinfo(&si);
+
+    tv->tv_sec = si.uptime;
+    tv->tv_usec = 0;
+}
+
 /**
 *   Main daemon loop.
 */
@@ -320,7 +331,7 @@ void igmpProxyRun() {
 
     // Initialize timer vars
     difftime.tv_usec = 0;
-    gettimeofday(&curtime, NULL);
+    getuptime(&curtime);
     lasttime = curtime;
 
     // First thing we send a membership query in downstream VIF's...
@@ -382,14 +393,14 @@ void igmpProxyRun() {
             /*
              * If the select timed out, then there's no other
              * activity to account for and we don't need to
-             * call gettimeofday.
+             * call getuptime.
              */
             if (Rt == 0) {
                 curtime.tv_sec = lasttime.tv_sec + secs;
                 curtime.tv_usec = lasttime.tv_usec;
                 Rt = -1; /* don't do this next time through the loop */
             } else {
-                gettimeofday(&curtime, NULL);
+                getuptime(&curtime);
             }
             difftime.tv_sec = curtime.tv_sec - lasttime.tv_sec;
             difftime.tv_usec += curtime.tv_usec - lasttime.tv_usec;
