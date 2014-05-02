@@ -32,6 +32,8 @@ var lnaGain = '<% getCfgZero(1, "HiPower"); %>';
 // var htNoiseCoex = '<% getCfgZero(1, "HT_BSSCoexistence"); %>';
 // var ap2040Rescan = '<% getCfgZero(1, "AP2040Rescan"); %>';
 
+var wmmCapable = '<% getCfgZero(1, "WmmCapable"); %>';
+
 function initTranslation()
 {
 	_TR("advTitle", "adv title");
@@ -175,6 +177,10 @@ function initValue()
 //	form.AP2040Rescan[0].checked = (ap2040Rescan == '1');
 //	form.AP2040Rescan[1].checked = (ap2040Rescan != '1');
 //	wifiCoexThrChange(form);
+
+	form.WmmCapable[0].checked = (wmmCapable == '1');
+	form.WmmCapable[1].checked = (wmmCapable != '1');
+
 }
 
 //function wifiCoexThrChange(form)
@@ -388,6 +394,13 @@ function CheckValue(form)
               Disable </td>
           </tr>
 -->
+          <tr>
+            <td class="head">WMM Capable</td>
+            <td><input type="radio" name="WmmCapable" value="1">
+              Enable&nbsp;
+              <input type="radio" name="WmmCapable" value="0" checked>
+              Disable </td>
+          </tr>
           <tr>
             <td class="head" id="staadvCountry">Country Region Code</td>
             <td><select id="country_region" name="country_region" class="mid">
