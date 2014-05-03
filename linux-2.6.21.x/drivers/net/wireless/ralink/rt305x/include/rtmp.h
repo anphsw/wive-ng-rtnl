@@ -3928,6 +3928,13 @@ struct _RTMP_ADAPTER
 	AP_ADMIN_CONFIG         ApCfg;             // user configuration when in AP mode
 	AP_MLME_AUX             ApMlmeAux;	
 
+
+
+#ifdef UAPSD_AP_SUPPORT
+	NDIS_SPIN_LOCK          UAPSDEOSPLock; /* EOSP frame access lock use */
+	BOOLEAN					bAPSDFlagSPSuspend;	/* 1: SP is suspended; 0: SP is not */
+#endif // UAPSD_SUPPORT //
+
 #ifdef WDS_SUPPORT
 	WDS_TABLE               WdsTab;            // WDS table when working as an AP
 	NDIS_SPIN_LOCK          WdsTabLock;
