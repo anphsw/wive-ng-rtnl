@@ -130,6 +130,7 @@ extern void pthrough_remove_proc_entry(void);
 
 #ifdef CONFIG_RALINK_WATCHDOG
 extern void RaWdgReload(void);
+extern int WdgLoadValue;
 #endif
 
 #if defined (CONFIG_RA_HW_NAT) || defined (CONFIG_RA_HW_NAT_MODULE)
@@ -1682,7 +1683,8 @@ enqueue:
 
 #ifdef CONFIG_RALINK_WATCHDOG
         /* Refresh Ralink hardware watchdog timer, prevent reboot in big traffic */
-	RaWdgReload();
+        if(WdgLoadValue)
+	    RaWdgReload();
 #endif
 	__get_cpu_var(netdev_rx_stat).dropped++;
 	local_irq_restore(flags);
@@ -2012,7 +2014,8 @@ static void net_rx_action(struct softirq_action *h)
 		if (unlikely(budget <= 0 || time_after_eq(jiffies, time_limit))) {
 #ifdef CONFIG_RALINK_WATCHDOG
     			/* Refresh Ralink hardware watchdog timer, prevent reboot in big traffic */
-			RaWdgReload();
+    			if(WdgLoadValue)
+			    RaWdgReload();
 #endif
 			goto softnet_break;
 		}

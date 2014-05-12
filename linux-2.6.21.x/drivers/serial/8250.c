@@ -2389,6 +2389,7 @@ static void serial8250_console_putchar(struct uart_port *port, int ch)
     defined (CONFIG_RALINK_RT5350)
 #ifdef CONFIG_RALINK_WATCHDOG
 extern void RaWdgReload(void);
+extern int WdgLoadValue;
 #endif
 #endif
 
@@ -2441,7 +2442,8 @@ serial8250_console_write(struct console *co, const char *s, unsigned int count)
     defined (CONFIG_RALINK_RT5350)
 #ifdef CONFIG_RALINK_WATCHDOG
 	/* Refresh Ralink hardware watchdog timer */
-	RaWdgReload();
+	if(WdgLoadValue)
+	    RaWdgReload();
 #endif
 	udelay(1);
 #else

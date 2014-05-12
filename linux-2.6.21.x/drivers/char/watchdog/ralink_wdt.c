@@ -15,7 +15,9 @@
 #include "ralink_wdt.h"
 
 static int RaWdgAlive;
-static int WdgLoadValue;
+int WdgLoadValue=0;
+EXPORT_SYMBOL(WdgLoadValue);
+
 extern u32 get_surfboard_sysclk(void);
 
 #define WATCHDOG_TIMEOUT 10		/* 10 sec default timeout */
@@ -255,6 +257,7 @@ static void RaWdgStart(void)
 static void RaWdgStop(void)
 {
 	SetWdgTimerEbl(TMR1CTL,0);
+	WdgLoadValue=0;
 
 	printk(KERN_INFO "WatchDog timer stopped.\n");
 }
