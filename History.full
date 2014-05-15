@@ -1901,10 +1901,11 @@
 6) defaults: enable WmmCapable (temp disabled some times ago).<br>
 7) webui: add WMM capable.<br>
 8) igmpproxy: fix periodic timer on broken system time.<br>
-9) kernel: netfilter: nf_conntrack: flush net_gre->keymap_list only from gre helper.<br>
-10) kernel: ipv6: don't create clones of host routes.<br>
-11) kernel: usb serial(option/cdc_acm/cdc_ether): add some modems support.<br>
-12) kernel: mppe: fix stop work after recive serios reordered packets.<br>
+9) dhcpc: workaround for ugly ISP (as Moscow QWERTY) on recived mtu = 576 bytes instead 1500 for IPOE.<br>
+10) kernel: netfilter: nf_conntrack: flush net_gre->keymap_list only from gre helper.<br>
+11) kernel: ipv6: don't create clones of host routes.<br>
+12) kernel: usb serial(option/cdc_acm/cdc_ether): add some modems support.<br>
+13) kernel: mppe: fix stop work after recive serios reordered packets.<br>
 <br>
 <br>
 <br>
