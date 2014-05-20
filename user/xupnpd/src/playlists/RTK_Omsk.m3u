@@ -195,7 +195,7 @@ udp://@233.7.70.120:5000
 udp://@233.7.70.34:5000
 #EXTINF:-1 group-title="Информационные" ,Euronews
 udp://@233.7.70.42:5000
-#EXTINF:-1 group-title="Информационные" ,LIVE NEWS
+#EXTINF:-1 group-title="Информационные" ,Lifenews
 udp://@233.7.70.76:5000
 #EXTINF:-1 group-title="Информационные" ,Конференция ТВ
 udp://@233.7.70.55:5000
