@@ -5194,7 +5194,7 @@ BOOLEAN APFowardWirelessStaToWirelessSta(
 		/* if destinated STA is a associated wireless STA */
 		pEntry = MacTableLookup(pAd, pHeader802_3);
 
-		if (pEntry && (pEntry->Sst == SST_ASSOC) && IS_ENTRY_CLIENT(pEntry))
+		if (pEntry && pEntry->Sst == SST_ASSOC)
 		{
 			bDirectForward = TRUE;
 			bAnnounce = FALSE;
