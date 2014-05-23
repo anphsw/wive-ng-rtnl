@@ -11,7 +11,7 @@
 # This configure script is free software; the Free Software Foundation
 # gives unlimited permission to copy, distribute and modify it.
 #
-# Copyright (c) 1998 - 2011 Daniel Stenberg, <daniel@haxx.se>
+# Copyright (c) 1998 - 2014 Daniel Stenberg, <daniel@haxx.se>
 # This configure script may be copied, distributed and modified under the
 # terms of the curl license; see COPYING for more details
 
@@ -915,7 +915,6 @@ LIBMETALINK_LIBS
 CURL_CA_BUNDLE
 SSL_ENABLED
 USE_AXTLS
-HAVE_NSS_INITCONTEXT
 USE_NSS
 USE_CYASSL
 USE_POLARSSL
@@ -1901,9 +1900,9 @@ Optional Packages:
   --with-lber-lib=libname Specify name of lber lib file
   --with-spnego=DIR       Specify location of SPNEGO library fbopenssl
   --with-gssapi-includes=DIR
-                          Specify location of GSSAPI header
-  --with-gssapi-libs=DIR  Specify location of GSSAPI libs
-  --with-gssapi=DIR       Where to look for GSSAPI
+                          Specify location of GSS-API headers
+  --with-gssapi-libs=DIR  Specify location of GSS-API libs
+  --with-gssapi=DIR       Where to look for GSS-API
   --with-winssl           enable Windows native SSL/TLS
   --without-winssl        disable Windows native SSL/TLS
   --with-darwinssl        enable iOS/Mac OS X native SSL/TLS
@@ -2039,7 +2038,7 @@ Copyright (C) 2012 Free Software Foundation, Inc.
 This configure script is free software; the Free Software Foundation
 gives unlimited permission to copy, distribute and modify it.
 
-Copyright (c) 1998 - 2011 Daniel Stenberg, <daniel@haxx.se>
+Copyright (c) 1998 - 2014 Daniel Stenberg, <daniel@haxx.se>
 This configure script may be copied, distributed and modified under the
 terms of the curl license; see COPYING for more details
 _ACEOF
@@ -2970,13 +2969,14 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
+
 # using curl-override.m4
 
 
 
 
 
-ac_config_headers="$ac_config_headers lib/curl_config.h src/curl_config.h include/curl/curlbuild.h"
+ac_config_headers="$ac_config_headers lib/curl_config.h include/curl/curlbuild.h"
 
 
 
@@ -3805,6 +3805,9 @@ test -z "$INSTALL_SCRIPT" && INSTALL_SCRIPT='${INSTALL}'
 
 test -z "$INSTALL_DATA" && INSTALL_DATA='${INSTALL} -m 644'
 
+# expand $ac_aux_dir to an absolute path
+am_aux_dir=`cd $ac_aux_dir && pwd`
+
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -4586,16 +4589,14 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
-if test "x$CC" != xcc; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $CC and cc understand -c and -o together" >&5
-$as_echo_n "checking whether $CC and cc understand -c and -o together... " >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether cc understands -c and -o together" >&5
-$as_echo_n "checking whether cc understands -c and -o together... " >&6; }
-fi
-set dummy $CC; ac_cc=`$as_echo "$2" |
-		      sed 's/[^a-zA-Z0-9_]/_/g;s/^[0-9]/_/'`
-if eval \${ac_cv_prog_cc_${ac_cc}_c_o+:} false; then :
+ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $CC understands -c and -o together" >&5
+$as_echo_n "checking whether $CC understands -c and -o together... " >&6; }
+if ${am_cv_prog_cc_c_o+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -4608,103 +4609,30 @@ int main (void)
  return 0;
 }
 _ACEOF
-# Make sure it works both with $CC and with simple cc.
-# We do the test twice because some compilers refuse to overwrite an
-# existing .o file with -o, though they will create one.
-ac_try='$CC -c conftest.$ac_ext -o conftest2.$ac_objext >&5'
-rm -f conftest2.*
-if { { case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
-$as_echo "$ac_try_echo"; } >&5
-  (eval "$ac_try") 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; } &&
-   test -f conftest2.$ac_objext && { { case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
-$as_echo "$ac_try_echo"; } >&5
-  (eval "$ac_try") 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; };
-then
-  eval ac_cv_prog_cc_${ac_cc}_c_o=yes
-  if test "x$CC" != xcc; then
-    # Test first that cc exists at all.
-    if { ac_try='cc -c conftest.$ac_ext >&5'
-  { { case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
-$as_echo "$ac_try_echo"; } >&5
-  (eval "$ac_try") 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }; }; then
-      ac_try='cc -c conftest.$ac_ext -o conftest2.$ac_objext >&5'
-      rm -f conftest2.*
-      if { { case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
-$as_echo "$ac_try_echo"; } >&5
-  (eval "$ac_try") 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; } &&
-	 test -f conftest2.$ac_objext && { { case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
-$as_echo "$ac_try_echo"; } >&5
-  (eval "$ac_try") 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; };
-      then
-	# cc works too.
-	:
-      else
-	# cc exists but doesn't like -o.
-	eval ac_cv_prog_cc_${ac_cc}_c_o=no
-      fi
+  # Make sure it works both with $CC and with simple cc.
+  # Following AC_PROG_CC_C_O, we do the test twice because some
+  # compilers refuse to overwrite an existing .o file with -o,
+  # though they will create one.
+  am_cv_prog_cc_c_o=yes
+  for am_i in 1 2; do
+    if { echo "$as_me:$LINENO: $CC -c conftest.$ac_ext -o conftest2.$ac_objext" >&5
+   ($CC -c conftest.$ac_ext -o conftest2.$ac_objext) >&5 2>&5
+   ac_status=$?
+   echo "$as_me:$LINENO: \$? = $ac_status" >&5
+   (exit $ac_status); } \
+         && test -f conftest2.$ac_objext; then
+      : OK
+    else
+      am_cv_prog_cc_c_o=no
+      break
     fi
-  fi
-else
-  eval ac_cv_prog_cc_${ac_cc}_c_o=no
+  done
+  rm -f core conftest*
+  unset am_i
 fi
-rm -f core conftest*
-
-fi
-if eval test \$ac_cv_prog_cc_${ac_cc}_c_o = yes; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-
-$as_echo "#define NO_MINUS_C_MINUS_O 1" >>confdefs.h
-
-fi
-
-# expand $ac_aux_dir to an absolute path
-am_aux_dir=`cd $ac_aux_dir && pwd`
-
-# FIXME: we rely on the cache variable name because
-# there is no other way.
-set dummy $CC
-am_cc=`echo $2 | sed 's/[^a-zA-Z0-9_]/_/g;s/^[0-9]/_/'`
-eval am_t=\$ac_cv_prog_cc_${am_cc}_c_o
-if test "$am_t" != yes; then
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $am_cv_prog_cc_c_o" >&5
+$as_echo "$am_cv_prog_cc_c_o" >&6; }
+if test "$am_cv_prog_cc_c_o" != yes; then
    # Losing compiler, so override with the script.
    # FIXME: It is wrong to rewrite CC.
    # But if we don't then we get into trouble of one sort or another.
@@ -4712,6 +4640,12 @@ if test "$am_t" != yes; then
    # and then we could set am__CC="\$(top_srcdir)/compile \$(CC)"
    CC="$am_aux_dir/compile $CC"
 fi
+ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
 
 
 ac_ext=c
@@ -4862,7 +4796,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-am__api_version='1.13'
+am__api_version='1.14'
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether build environment is sane" >&5
 $as_echo_n "checking whether build environment is sane... " >&6; }
@@ -5491,6 +5425,47 @@ fi
 
 
 
+# POSIX will say in a future version that running "rm -f" with no argument
+# is OK; and we want to be able to make that assumption in our Makefile
+# recipes.  So use an aggressive probe to check that the usage we want is
+# actually supported "in the wild" to an acceptable degree.
+# See automake bug#10828.
+# To make any issue more visible, cause the running configure to be aborted
+# by default if the 'rm' program in use doesn't match our expectations; the
+# user can still override this though.
+if rm -f && rm -fr && rm -rf; then : OK; else
+  cat >&2 <<'END'
+Oops!
+
+Your 'rm' program seems unable to run without file operands specified
+on the command line, even when the '-f' option is present.  This is contrary
+to the behaviour of most rm programs out there, and not conforming with
+the upcoming POSIX standard: <http://austingroupbugs.net/view.php?id=542>
+
+Please tell bug-automake@gnu.org about your system, including the value
+of your $PATH and any error possibly output before this message.  This
+can help us improve future automake versions.
+
+END
+  if test x"$ACCEPT_INFERIOR_RM_PROGRAM" = x"yes"; then
+    echo 'Configuration will proceed anyway, since you have set the' >&2
+    echo 'ACCEPT_INFERIOR_RM_PROGRAM variable to "yes"' >&2
+    echo >&2
+  else
+    cat >&2 <<'END'
+Aborting the configuration process, to ensure you take notice of the issue.
+
+You can download and install GNU coreutils to get an 'rm' implementation
+that behaves properly: <http://www.gnu.org/software/coreutils/>.
+
+If you want to complete the configuration process using your problematic
+'rm' anyway, export the environment variable ACCEPT_INFERIOR_RM_PROGRAM
+to "yes", and re-run configure.
+
+END
+    as_fn_error $? "Your 'rm' program is bad, sorry." "$LINENO" 5
+  fi
+fi
 ## ------------------------------------- ##
 ##  End of automake initialization code  ##
 ## ------------------------------------- ##
@@ -8455,8 +8430,7 @@ else
     ;;
   *)
     lt_cv_sys_max_cmd_len=`(getconf ARG_MAX) 2> /dev/null`
-    if test -n "$lt_cv_sys_max_cmd_len" && \
-	test undefined != "$lt_cv_sys_max_cmd_len"; then
+    if test -n "$lt_cv_sys_max_cmd_len"; then
       lt_cv_sys_max_cmd_len=`expr $lt_cv_sys_max_cmd_len \/ 4`
       lt_cv_sys_max_cmd_len=`expr $lt_cv_sys_max_cmd_len \* 3`
     else
@@ -8854,6 +8828,10 @@ freebsd* | dragonfly*)
   fi
   ;;
 
+gnu*)
+  lt_cv_deplibs_check_method=pass_all
+  ;;
+
 haiku*)
   lt_cv_deplibs_check_method=pass_all
   ;;
@@ -8892,11 +8870,11 @@ irix5* | irix6* | nonstopux*)
   ;;
 
 # This must be glibc/ELF.
-linux* | k*bsd*-gnu | kopensolaris*-gnu | gnu*)
+linux* | k*bsd*-gnu | kopensolaris*-gnu)
   lt_cv_deplibs_check_method=pass_all
   ;;
 
-netbsd* | netbsdelf*-gnu)
+netbsd*)
   if echo __ELF__ | $CC -E - | $GREP __ELF__ > /dev/null; then
     lt_cv_deplibs_check_method='match_pattern /lib[^/]+(\.so\.[0-9]+\.[0-9]+|_pic\.a)$'
   else
@@ -9783,7 +9761,7 @@ static const void *lt_preloaded_setup() {
 #endif
 _LT_EOF
 	  # Now try linking the two files.
-	  mv -f conftest.$ac_objext conftstm.$ac_objext
+	  mv conftest.$ac_objext conftstm.$ac_objext
 	  lt_globsym_save_LIBS=$LIBS
 	  lt_globsym_save_CFLAGS=$CFLAGS
 	  LIBS="conftstm.$ac_objext"
@@ -9985,14 +9963,7 @@ s390*-*linux*|s390*-*tpf*|sparc*-*linux*)
 	    LD="${LD-ld} -m elf_i386_fbsd"
 	    ;;
 	  x86_64-*linux*)
-	    case `/usr/bin/file conftest.o` in
-	      *x86-64*)
-		LD="${LD-ld} -m elf32_x86_64"
-		;;
-	      *)
-		LD="${LD-ld} -m elf_i386"
-		;;
-	    esac
+	    LD="${LD-ld} -m elf_i386"
 	    ;;
 	  ppc64-*linux*|powerpc64-*linux*)
 	    LD="${LD-ld} -m elf32ppclinux"
@@ -11957,7 +11928,7 @@ lt_prog_compiler_static=
       lt_prog_compiler_static='-non_shared'
       ;;
 
-    linux* | k*bsd*-gnu | kopensolaris*-gnu | gnu*)
+    linux* | k*bsd*-gnu | kopensolaris*-gnu)
       case $cc_basename in
       # old Intel for x86_64 which still supported -KPIC.
       ecc*)
@@ -12435,9 +12406,6 @@ $as_echo_n "checking whether the $compiler linker ($LD) supports shared librarie
   openbsd*)
     with_gnu_ld=no
     ;;
-  linux* | k*bsd*-gnu | gnu*)
-    link_all_deplibs=no
-    ;;
   esac
 
   ld_shlibs=yes
@@ -12659,7 +12627,7 @@ _LT_EOF
       fi
       ;;
 
-    netbsd* | netbsdelf*-gnu)
+    netbsd*)
       if echo __ELF__ | $CC -E - | $GREP __ELF__ >/dev/null; then
 	archive_cmds='$LD -Bshareable $libobjs $deplibs $linker_flags -o $lib'
 	wlarc=
@@ -13126,9 +13094,9 @@ fi
 
     hpux9*)
       if test "$GCC" = yes; then
-	archive_cmds='$RM $output_objdir/$soname~$CC -shared $pic_flag ${wl}+b ${wl}$install_libdir -o $output_objdir/$soname $libobjs $deplibs $compiler_flags~test $output_objdir/$soname = $lib || mv -f $output_objdir/$soname $lib'
+	archive_cmds='$RM $output_objdir/$soname~$CC -shared $pic_flag ${wl}+b ${wl}$install_libdir -o $output_objdir/$soname $libobjs $deplibs $compiler_flags~test $output_objdir/$soname = $lib || mv $output_objdir/$soname $lib'
       else
-	archive_cmds='$RM $output_objdir/$soname~$LD -b +b $install_libdir -o $output_objdir/$soname $libobjs $deplibs $linker_flags~test $output_objdir/$soname = $lib || mv -f $output_objdir/$soname $lib'
+	archive_cmds='$RM $output_objdir/$soname~$LD -b +b $install_libdir -o $output_objdir/$soname $libobjs $deplibs $linker_flags~test $output_objdir/$soname = $lib || mv $output_objdir/$soname $lib'
       fi
       hardcode_libdir_flag_spec='${wl}+b ${wl}$libdir'
       hardcode_libdir_separator=:
@@ -13288,7 +13256,7 @@ $as_echo "$lt_cv_irix_exported_symbol" >&6; }
       link_all_deplibs=yes
       ;;
 
-    netbsd* | netbsdelf*-gnu)
+    netbsd*)
       if echo __ELF__ | $CC -E - | $GREP __ELF__ >/dev/null; then
 	archive_cmds='$LD -Bshareable -o $lib $libobjs $deplibs $linker_flags'  # a.out
       else
@@ -14125,6 +14093,17 @@ freebsd* | dragonfly*)
   esac
   ;;
 
+gnu*)
+  version_type=linux # correct to gnu/linux during the next big refactor
+  need_lib_prefix=no
+  need_version=no
+  library_names_spec='${libname}${release}${shared_ext}$versuffix ${libname}${release}${shared_ext}${major} ${libname}${shared_ext}'
+  soname_spec='${libname}${release}${shared_ext}$major'
+  shlibpath_var=LD_LIBRARY_PATH
+  shlibpath_overrides_runpath=no
+  hardcode_into_libs=yes
+  ;;
+
 haiku*)
   version_type=linux # correct to gnu/linux during the next big refactor
   need_lib_prefix=no
@@ -14241,7 +14220,7 @@ linux*oldld* | linux*aout* | linux*coff*)
   ;;
 
 # This must be glibc/ELF.
-linux* | k*bsd*-gnu | kopensolaris*-gnu | gnu*)
+linux* | k*bsd*-gnu | kopensolaris*-gnu)
   version_type=linux # correct to gnu/linux during the next big refactor
   need_lib_prefix=no
   need_version=no
@@ -14289,10 +14268,32 @@ fi
   # before this can be enabled.
   hardcode_into_libs=yes
 
+  # find out which ABI we are using
+  libsuff=
+  case "$host_cpu" in
+  x86_64*|s390x*|powerpc64*)
+    echo '#line 14275 "configure"' > conftest.$ac_ext
+    if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
+  (eval $ac_compile) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+      case `/usr/bin/file conftest.$ac_objext` in
+      *64-bit*)
+        libsuff=64
+        ;;
+      esac
+    fi
+    rm -rf conftest*
+    ;;
+  esac
+
+  sys_lib_dlsearch_path_spec="/lib${libsuff} /usr/lib${libsuff}"
+
   # Append ld.so.conf contents to the search path
   if test -f /etc/ld.so.conf; then
     lt_ld_extra=`awk '/^include / { system(sprintf("cd /etc; cat %s 2>/dev/null", \$2)); skip = 1; } { if (!skip) print \$0; skip = 0; }' < /etc/ld.so.conf | $SED -e 's/#.*//;/^[	 ]*hwcap[	 ]/d;s/[:,	]/ /g;s/=[^=]*$//;s/=[^= ]* / /g;s/"//g;/^$/d' | tr '\n' ' '`
-    sys_lib_dlsearch_path_spec="/lib /usr/lib $lt_ld_extra"
+    sys_lib_dlsearch_path_spec="$sys_lib_dlsearch_path_spec $lt_ld_extra"
   fi
 
   # We used to test for /lib/ld.so.1 and disable shared libraries on
@@ -14302,18 +14303,6 @@ fi
   # people can always --disable-shared, the test was removed, and we
   # assume the GNU/Linux dynamic linker is in use.
   dynamic_linker='GNU/Linux ld.so'
-  ;;
-
-netbsdelf*-gnu)
-  version_type=linux
-  need_lib_prefix=no
-  need_version=no
-  library_names_spec='${libname}${release}${shared_ext}$versuffix ${libname}${release}${shared_ext}$major ${libname}${shared_ext}'
-  soname_spec='${libname}${release}${shared_ext}$major'
-  shlibpath_var=LD_LIBRARY_PATH
-  shlibpath_overrides_runpath=no
-  hardcode_into_libs=yes
-  dynamic_linker='NetBSD ld.elf_so'
   ;;
 
 netbsd*)
@@ -15485,7 +15474,7 @@ fi
 CPPFLAG_CURL_STATICLIB=
 if test "x$xc_lt_build_static_only" = 'xyes'; then
   CPPFLAG_CURL_STATICLIB='-DCURL_STATICLIB'
-    fi
+fi
 
 
 
@@ -20898,6 +20887,7 @@ else
  /* is AF_INET6 available? */
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <stdlib.h> /* for exit() */
 main()
 {
  if (socket(AF_INET6, SOCK_STREAM, 0) < 0)
@@ -21088,8 +21078,8 @@ fi
 
 
 save_CPPFLAGS="$CPPFLAGS"
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking if GSSAPI support is requested" >&5
-$as_echo_n "checking if GSSAPI support is requested... " >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking if GSS-API support is requested" >&5
+$as_echo_n "checking if GSS-API support is requested... " >&6; }
 if test x"$want_gss" = xyes; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
@@ -21160,8 +21150,8 @@ $as_echo "#define HAVE_GSSHEIMDAL 1" >>confdefs.h
 else
 
                             want_gss=no
-              { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: disabling GSSAPI since no header files was found" >&5
-$as_echo "$as_me: WARNING: disabling GSSAPI since no header files was found" >&2;}
+              { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: disabling GSS-API support since no header files were found" >&5
+$as_echo "$as_me: WARNING: disabling GSS-API support since no header files were found" >&2;}
 
 
 fi
@@ -21171,8 +21161,8 @@ fi
 
 $as_echo "#define HAVE_GSSMIT 1" >>confdefs.h
 
-                { $as_echo "$as_me:${as_lineno-$LINENO}: checking if gssapi headers declare GSS_C_NT_HOSTBASED_SERVICE" >&5
-$as_echo_n "checking if gssapi headers declare GSS_C_NT_HOSTBASED_SERVICE... " >&6; }
+                { $as_echo "$as_me:${as_lineno-$LINENO}: checking if GSS-API headers declare GSS_C_NT_HOSTBASED_SERVICE" >&5
+$as_echo_n "checking if GSS-API headers declare GSS_C_NT_HOSTBASED_SERVICE... " >&6; }
         cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -21225,7 +21215,7 @@ if test x"$want_gss" = xyes; then
 $as_echo "#define HAVE_GSSAPI 1" >>confdefs.h
 
 
-  curl_gss_msg="enabled (MIT/Heimdal)"
+  curl_gss_msg="enabled (MIT Kerberos/Heimdal)"
 
   if test -n "$gnu_gss"; then
     curl_gss_msg="enabled (GNU GSS)"
@@ -21235,6 +21225,12 @@ $as_echo "#define HAVE_GSSAPI 1" >>confdefs.h
      case $host in
      *-*-darwin*)
         LIBS="-lgssapi_krb5 -lresolv $LIBS"
+        ;;
+     *-hp-hpux*)
+        if test "$GSSAPI_ROOT" != "yes"; then
+           LDFLAGS="$LDFLAGS -L$GSSAPI_ROOT/lib$libsuff"
+        fi
+        LIBS="-lgss $LIBS"
         ;;
      *)
         if test -f "$GSSAPI_ROOT/bin/krb5-config"; then
@@ -21250,7 +21246,14 @@ $as_echo "#define HAVE_GSSAPI 1" >>confdefs.h
      esac
   else
      LDFLAGS="$LDFLAGS $GSSAPI_LIB_DIR"
-     LIBS="-lgssapi $LIBS"
+     case $host in
+     *-hp-hpux*)
+        LIBS="-lgss $LIBS"
+        ;;
+     *)
+        LIBS="-lgssapi $LIBS"
+        ;;
+     esac
   fi
 else
   CPPFLAGS="$save_CPPFLAGS"
@@ -21879,7 +21882,10 @@ fi
                     ENGINE_cleanup \
                     CRYPTO_cleanup_all_ex_data \
                     SSL_get_shutdown \
-                    SSLv2_client_method
+                    SSLv2_client_method \
+                    SSL_CTX_set_next_proto_select_cb \
+                    SSL_CTX_set_alpn_protos \
+                    SSL_CTX_set_alpn_select_cb
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -23421,6 +23427,53 @@ fi
       { $as_echo "$as_me:${as_lineno-$LINENO}: detected CyaSSL" >&5
 $as_echo "$as_me: detected CyaSSL" >&6;}
 
+            # The cast to long int works around a bug in the HP C Compiler
+# version HP92453-01 B.11.11.23709.GP, which incorrectly rejects
+# declarations like `int a3[[(sizeof (unsigned char)) >= 0]];'.
+# This bug is HP SR number 8606223364.
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking size of long long" >&5
+$as_echo_n "checking size of long long... " >&6; }
+if ${ac_cv_sizeof_long_long+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if ac_fn_c_compute_int "$LINENO" "(long int) (sizeof (long long))" "ac_cv_sizeof_long_long"        "$ac_includes_default"; then :
+
+else
+  if test "$ac_cv_type_long_long" = yes; then
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error 77 "cannot compute sizeof (long long)
+See \`config.log' for more details" "$LINENO" 5; }
+   else
+     ac_cv_sizeof_long_long=0
+   fi
+fi
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_sizeof_long_long" >&5
+$as_echo "$ac_cv_sizeof_long_long" >&6; }
+
+
+
+cat >>confdefs.h <<_ACEOF
+#define SIZEOF_LONG_LONG $ac_cv_sizeof_long_long
+_ACEOF
+
+
+
+            for ac_header in cyassl/error-ssl.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "cyassl/error-ssl.h" "ac_cv_header_cyassl_error_ssl_h" "$ac_includes_default"
+if test "x$ac_cv_header_cyassl_error_ssl_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_CYASSL_ERROR_SSL_H 1
+_ACEOF
+
+fi
+
+done
+
+
       LIBS="-lcyassl -lm $LIBS"
 
       if test -n "$cyassllib"; then
@@ -23622,9 +23675,9 @@ $as_echo "found" >&6; }
          CPPFLAGS="$CPPFLAGS $addcflags"
       fi
 
-            { $as_echo "$as_me:${as_lineno-$LINENO}: checking for PK11_CreateGenericObject in -lnss3" >&5
-$as_echo_n "checking for PK11_CreateGenericObject in -lnss3... " >&6; }
-if ${ac_cv_lib_nss3_PK11_CreateGenericObject+:} false; then :
+            { $as_echo "$as_me:${as_lineno-$LINENO}: checking for SSL_VersionRangeSet in -lnss3" >&5
+$as_echo_n "checking for SSL_VersionRangeSet in -lnss3... " >&6; }
+if ${ac_cv_lib_nss3_SSL_VersionRangeSet+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_check_lib_save_LIBS=$LIBS
@@ -23636,26 +23689,26 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 #ifdef __cplusplus
 extern "C"
 #endif
-char PK11_CreateGenericObject ();
+char SSL_VersionRangeSet ();
 int main (void)
 {
-return PK11_CreateGenericObject ();
+return SSL_VersionRangeSet ();
  ;
  return 0;
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_nss3_PK11_CreateGenericObject=yes
+  ac_cv_lib_nss3_SSL_VersionRangeSet=yes
 else
-  ac_cv_lib_nss3_PK11_CreateGenericObject=no
+  ac_cv_lib_nss3_SSL_VersionRangeSet=no
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_nss3_PK11_CreateGenericObject" >&5
-$as_echo "$ac_cv_lib_nss3_PK11_CreateGenericObject" >&6; }
-if test "x$ac_cv_lib_nss3_PK11_CreateGenericObject" = xyes; then :
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_nss3_SSL_VersionRangeSet" >&5
+$as_echo "$ac_cv_lib_nss3_SSL_VersionRangeSet" >&6; }
+if test "x$ac_cv_lib_nss3_SSL_VersionRangeSet" = xyes; then :
 
 
 $as_echo "#define USE_NSS 1" >>confdefs.h
@@ -23677,18 +23730,6 @@ fi
       if test "x$USE_NSS" = "xyes"; then
         { $as_echo "$as_me:${as_lineno-$LINENO}: detected NSS version $version" >&5
 $as_echo "$as_me: detected NSS version $version" >&6;}
-
-                        ac_fn_c_check_func "$LINENO" "NSS_InitContext" "ac_cv_func_NSS_InitContext"
-if test "x$ac_cv_func_NSS_InitContext" = xyes; then :
-
-
-$as_echo "#define HAVE_NSS_INITCONTEXT 1" >>confdefs.h
-
-          HAVE_NSS_INITCONTEXT=1
-
-
-fi
-
 
                                         if test "x$cross_compiling" != "xyes"; then
           LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$nssprefix/lib$libsuff"
@@ -23780,11 +23821,12 @@ $as_echo "#define USE_AXTLS 1" >>confdefs.h
       USE_AXTLS="yes"
       curl_ssl_msg="enabled (axTLS)"
 
-
-      LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$LIB_AXTLS"
-      export LD_LIBRARY_PATH
-      { $as_echo "$as_me:${as_lineno-$LINENO}: Added $LIB_AXTLS to LD_LIBRARY_PATH" >&5
+      if test "x$cross_compiling" != "xyes"; then
+        LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$LIB_AXTLS"
+        export LD_LIBRARY_PATH
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Added $LIB_AXTLS to LD_LIBRARY_PATH" >&5
 $as_echo "$as_me: Added $LIB_AXTLS to LD_LIBRARY_PATH" >&6;}
+      fi
 
 else
 
@@ -24796,7 +24838,7 @@ fi
 fi
 
 
-    versioned_symbols_flavour=
+versioned_symbols_flavour=
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether versioned symbols are wanted" >&5
 $as_echo_n "checking whether versioned symbols are wanted... " >&6; }
 # Check whether --enable-versioned-symbols was given.
@@ -24815,26 +24857,26 @@ $as_echo "$as_me: WARNING: You need an ld version supporting the --version-scrip
     else
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
-    if test "x$OPENSSL_ENABLED" = "x1"; then
-      versioned_symbols_flavour="OPENSSL_"
-    elif test "x$GNUTLS_ENABLED" == "x1"; then
-      versioned_symbols_flavour="GNUTLS_"
-    elif test "x$NSS_ENABLED" == "x1"; then
-      versioned_symbols_flavour="NSS_"
-    elif test "x$POLARSSL_ENABLED" == "x1"; then
-      versioned_symbols_flavour="POLARSSL_"
-    elif test "x$CYASSL_ENABLED" == "x1"; then
-      versioned_symbols_flavour="CYASSL_"
-    elif test "x$AXTLS_ENABLED" == "x1"; then
-      versioned_symbols_flavour="AXTLS_"
-        elif test "x$WINSSL_ENABLED" == "x1"; then
+        if test "x$OPENSSL_ENABLED" = "x1"; then
+          versioned_symbols_flavour="OPENSSL_"
+        elif test "x$GNUTLS_ENABLED" = "x1"; then
+          versioned_symbols_flavour="GNUTLS_"
+        elif test "x$NSS_ENABLED" = "x1"; then
+          versioned_symbols_flavour="NSS_"
+        elif test "x$POLARSSL_ENABLED" = "x1"; then
+          versioned_symbols_flavour="POLARSSL_"
+        elif test "x$CYASSL_ENABLED" = "x1"; then
+          versioned_symbols_flavour="CYASSL_"
+        elif test "x$AXTLS_ENABLED" = "x1"; then
+          versioned_symbols_flavour="AXTLS_"
+        elif test "x$WINSSL_ENABLED" = "x1"; then
           versioned_symbols_flavour="WINSSL_"
-        elif test "x$DARWINSSL_ENABLED" == "x1"; then
+        elif test "x$DARWINSSL_ENABLED" = "x1"; then
           versioned_symbols_flavour="DARWINSSL_"
-    else
-      versioned_symbols_flavour=""
-    fi
-    versioned_symbols="yes"
+        else
+          versioned_symbols_flavour=""
+        fi
+        versioned_symbols="yes"
     fi
     ;;
 
@@ -25452,7 +25494,7 @@ done
       IDN_ENABLED=1
 
       curl_idn_msg="enabled"
-      if test -n "$IDN_DIR"; then
+      if test -n "$IDN_DIR" -a "x$cross_compiling" != "xyes"; then
         LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$IDN_DIR"
         export LD_LIBRARY_PATH
         { $as_echo "$as_me:${as_lineno-$LINENO}: Added $IDN_DIR to LD_LIBRARY_PATH" >&5
@@ -25489,13 +25531,12 @@ fi
 
 case "$OPT_H2" in
   no)
-        want_idn="no"
+        want_h2="no"
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
     ;;
   default)
         want_h2="no"
-    want_h2_path="default"
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
     ;;
@@ -25507,19 +25548,18 @@ $as_echo "yes" >&6; }
     ;;
   *)
         want_h2="yes"
-    want_h2_path="$withval"
+    want_h2_path="$withval/lib/pkgconfig"
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes ($withval)" >&5
 $as_echo "yes ($withval)" >&6; }
     ;;
 esac
 
 curl_h2_msg="disabled (--with-nghttp2)"
-if test X"$OPT_H2" != Xno; then
+if test X"$want_h2" != Xno; then
     CLEANLDFLAGS="$LDFLAGS"
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
 
-  h2pcdir=${want_h2_path}/lib/pkgconfig
 
 
     PKGCONFIG="no"
@@ -25629,8 +25669,8 @@ fi
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking for libnghttp2 options with pkg-config" >&5
 $as_echo_n "checking for libnghttp2 options with pkg-config... " >&6; }
             itexists=`
-    if test -n "$h2pcdir"; then
-      PKG_CONFIG_LIBDIR="$h2pcdir"
+    if test -n "$want_h2_path"; then
+      PKG_CONFIG_LIBDIR="$want_h2_path"
       export PKG_CONFIG_LIBDIR
     fi
          $PKGCONFIG --exists libnghttp2 >/dev/null 2>&1 && echo 1`
@@ -25648,8 +25688,8 @@ $as_echo "found" >&6; }
 
   if test "$PKGCONFIG" != "no" ; then
     LIB_H2=`
-    if test -n "$h2pcdir"; then
-      PKG_CONFIG_LIBDIR="$h2pcdir"
+    if test -n "$want_h2_path"; then
+      PKG_CONFIG_LIBDIR="$want_h2_path"
       export PKG_CONFIG_LIBDIR
     fi
 
@@ -25658,8 +25698,8 @@ $as_echo "found" >&6; }
 $as_echo "$as_me: -l is $LIB_H2" >&6;}
 
     CPP_H2=`
-    if test -n "$h2pcdir"; then
-      PKG_CONFIG_LIBDIR="$h2pcdir"
+    if test -n "$want_h2_path"; then
+      PKG_CONFIG_LIBDIR="$want_h2_path"
       export PKG_CONFIG_LIBDIR
     fi
        $PKGCONFIG --cflags-only-I libnghttp2`
@@ -25667,8 +25707,8 @@ $as_echo "$as_me: -l is $LIB_H2" >&6;}
 $as_echo "$as_me: -I is $CPP_H2" >&6;}
 
     LD_H2=`
-    if test -n "$h2pcdir"; then
-      PKG_CONFIG_LIBDIR="$h2pcdir"
+    if test -n "$want_h2_path"; then
+      PKG_CONFIG_LIBDIR="$want_h2_path"
       export PKG_CONFIG_LIBDIR
     fi
 
@@ -34360,7 +34400,7 @@ $as_echo "no" >&6; }
   tst_allow_poll="unknown"
   #
   case $host_os in
-    darwin*|interix*)
+    darwin[123456789].*|darwin10.*|darwin11.*|darwin12.*|interix*)
                               curl_disallow_poll="yes"
       ;;
   esac
@@ -38706,8 +38746,8 @@ fi
 
             if test "$USE_THREADS_POSIX" != "1"
       then
-      CFLAGS="$CFLAGS -pthread"
-      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for pthread_create in -lpthread" >&5
+        CFLAGS="$CFLAGS -pthread"
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for pthread_create in -lpthread" >&5
 $as_echo_n "checking for pthread_create in -lpthread... " >&6; }
 if ${ac_cv_lib_pthread_pthread_create+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -38815,7 +38855,7 @@ $as_echo "$as_me: WARNING: --enable-sspi Ignored. Only supported on native Windo
          { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
        else
-       { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+         { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
        fi
        ;;
@@ -38826,7 +38866,7 @@ else
          { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
        else
-       { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+         { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
        fi
 
@@ -38844,6 +38884,7 @@ $as_echo "no" >&6; }
 
 $as_echo "#define CURL_DISABLE_CRYPTO_AUTH 1" >>confdefs.h
 
+       CURL_DISABLE_CRYPTO_AUTH=1
        ;;
   *)   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
@@ -39068,7 +39109,8 @@ fi
 if test "x$USE_WINDOWS_SSPI" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES SSPI"
 fi
-if test "x$CURL_DISABLE_HTTP" != "x1"; then
+if test "x$CURL_DISABLE_HTTP" != "x1" -a \
+	"x$CURL_DISABLE_CRYPTO_AUTH" != "x1"; then
   if test "x$USE_SSLEAY" = "x1" -o "x$USE_WINDOWS_SSPI" = "x1" \
       -o "x$GNUTLS_ENABLED" = "x1" -o "x$NSS_ENABLED" = "x1" \
       -o "x$DARWINSSL_ENABLED" = "x1"; then
@@ -39084,6 +39126,12 @@ fi
 
 if test "x$USE_NGHTTP2" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES HTTP2"
+fi
+if test "x$curl_spnego_msg" = "xenabled"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES SPNEGO"
+fi
+if test "x$want_gss" = "xyes"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES GSS-API"
 fi
 
 
@@ -40411,7 +40459,6 @@ for ac_config_target in $ac_config_targets
 do
   case $ac_config_target in
     "lib/curl_config.h") CONFIG_HEADERS="$CONFIG_HEADERS lib/curl_config.h" ;;
-    "src/curl_config.h") CONFIG_HEADERS="$CONFIG_HEADERS src/curl_config.h" ;;
     "include/curl/curlbuild.h") CONFIG_HEADERS="$CONFIG_HEADERS include/curl/curlbuild.h" ;;
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
     "libtool") CONFIG_COMMANDS="$CONFIG_COMMANDS libtool" ;;
@@ -41985,6 +42032,109 @@ _EOF
 
 
 
+## ---------------------------------- ##
+##  Start of distclean amending code  ##
+## ---------------------------------- ##
+
+for xc_subdir in lib src tests/unit tests/server tests/libtest docs/examples
+do
+
+if test ! -f "$xc_subdir/Makefile"; then
+  echo "$xc_msg_err $xc_subdir/Makefile file not found. $xc_msg_abrt" >&2
+  exit 1
+fi
+
+# Fetch dependency tracking file list from Makefile include lines.
+
+xc_inc_lines=`grep '^include .*(DEPDIR)' "$xc_subdir/Makefile" 2>/dev/null`
+xc_cnt_words=`echo "$xc_inc_lines" | wc -w | tr -d "$xc_space$xc_tab"`
+
+# --disable-dependency-tracking might have been used, consequently
+# there is nothing to amend without a dependency tracking file list.
+
+if test $xc_cnt_words -gt 0; then
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: amending $xc_subdir/Makefile" >&5
+$as_echo "$as_me: amending $xc_subdir/Makefile" >&6;}
+
+# Build Makefile specific patch hunk.
+
+xc_p="$xc_subdir/xc_patch.tmp"
+
+xc_rm_depfiles=`echo "$xc_inc_lines" \
+  | $SED 's%include%	-rm -f%' 2>/dev/null`
+
+xc_dep_subdirs=`echo "$xc_inc_lines" \
+  | $SED 's%include[ ][ ]*%%' 2>/dev/null \
+  | $SED 's%(DEPDIR)/.*%(DEPDIR)%' 2>/dev/null \
+  | sort | uniq`
+
+echo "$xc_rm_depfiles" >$xc_p
+
+for xc_dep_dir in $xc_dep_subdirs; do
+  echo "${xc_tab}@xm_dep_cnt=\`ls $xc_dep_dir | wc -l 2>/dev/null\`; \\"            >>$xc_p
+  echo "${xc_tab}if test \$\$xm_dep_cnt -eq 0 && test -d $xc_dep_dir; then \\"      >>$xc_p
+  echo "${xc_tab}  rm -rf $xc_dep_dir; \\"                                          >>$xc_p
+  echo "${xc_tab}fi"                                                                >>$xc_p
+done
+
+# Build Makefile patching sed scripts.
+
+xc_s1="$xc_subdir/xc_script_1.tmp"
+xc_s2="$xc_subdir/xc_script_2.tmp"
+xc_s3="$xc_subdir/xc_script_3.tmp"
+
+cat >$xc_s1 <<\_EOT
+/^distclean[ ]*:/,/^[^	][^	]*:/{
+  s/^.*(DEPDIR)/___xc_depdir_line___/
+}
+/^maintainer-clean[ ]*:/,/^[^	][^	]*:/{
+  s/^.*(DEPDIR)/___xc_depdir_line___/
+}
+_EOT
+
+cat >$xc_s2 <<\_EOT
+/___xc_depdir_line___$/{
+  N
+  /___xc_depdir_line___$/D
+}
+_EOT
+
+cat >$xc_s3 <<_EOT
+/^___xc_depdir_line___/{
+  r $xc_p
+  d
+}
+_EOT
+
+# Apply patch to Makefile and cleanup.
+
+$SED -f "$xc_s1" "$xc_subdir/Makefile"      >"$xc_subdir/Makefile.tmp1"
+$SED -f "$xc_s2" "$xc_subdir/Makefile.tmp1" >"$xc_subdir/Makefile.tmp2"
+$SED -f "$xc_s3" "$xc_subdir/Makefile.tmp2" >"$xc_subdir/Makefile.tmp3"
+
+if test -f "$xc_subdir/Makefile.tmp3"; then
+  mv -f "$xc_subdir/Makefile.tmp3" "$xc_subdir/Makefile"
+fi
+
+test -f "$xc_subdir/Makefile.tmp1" && rm -f "$xc_subdir/Makefile.tmp1"
+test -f "$xc_subdir/Makefile.tmp2" && rm -f "$xc_subdir/Makefile.tmp2"
+test -f "$xc_subdir/Makefile.tmp3" && rm -f "$xc_subdir/Makefile.tmp3"
+
+test -f "$xc_p"  && rm -f "$xc_p"
+test -f "$xc_s1" && rm -f "$xc_s1"
+test -f "$xc_s2" && rm -f "$xc_s2"
+test -f "$xc_s3" && rm -f "$xc_s3"
+
+fi
+
+done
+
+## -------------------------------- ##
+##  End of distclean amending code  ##
+## -------------------------------- ##
+
+
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: Configured to build curl/libcurl:
 
@@ -41995,7 +42145,7 @@ _EOF
   SSL support:      ${curl_ssl_msg}
   SSH support:      ${curl_ssh_msg}
   zlib support:     ${curl_zlib_msg}
-  GSSAPI support:   ${curl_gss_msg}
+  GSS-API support:  ${curl_gss_msg}
   SPNEGO support:   ${curl_spnego_msg}
   TLS-SRP support:  ${curl_tls_srp_msg}
   resolver:         ${curl_res_msg}
@@ -42025,7 +42175,7 @@ $as_echo "$as_me: Configured to build curl/libcurl:
   SSL support:      ${curl_ssl_msg}
   SSH support:      ${curl_ssh_msg}
   zlib support:     ${curl_zlib_msg}
-  GSSAPI support:   ${curl_gss_msg}
+  GSS-API support:  ${curl_gss_msg}
   SPNEGO support:   ${curl_spnego_msg}
   TLS-SRP support:  ${curl_tls_srp_msg}
   resolver:         ${curl_res_msg}
