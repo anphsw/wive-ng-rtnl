@@ -204,6 +204,7 @@
 13) kernel: usb serial(option/cdc_acm/cdc_ether): add some modems support.<br>
 14) kernel: mppe: fix stop work after recive serios reordered packets.<br>
 15) kernel: ralink drivers 2.7.x.x: fix stop work after some clients reconnect or some call ap scan.<br>
+16) toolchain: gcc up to 4.8.3.<br>
 <br>
 <br>
 <br>
