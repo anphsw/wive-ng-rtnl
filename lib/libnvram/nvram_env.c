@@ -561,14 +561,14 @@ int nvram_show(int mode)
 	int crc;
 	unsigned int len = 0x4000;
 
-	if ( nvram_init(mode) == -1 )
-	{
+	if (nvram_init(mode) == -1) {
+		fprintf(stderr, "nvram_show: Can not init!\n");
 		return -1;
 	}
+
 	len = getNvramBlockSize(mode);
 	buffer = malloc(len);
-	if ( !buffer )
-	{
+	if (!buffer) {
 		fprintf(stderr, "nvram_show: Can not allocate memory!\n");
 		return -1;
 	}
@@ -576,11 +576,11 @@ int nvram_show(int mode)
 	flash_read(buffer, getNvramOffset(mode), len);
 	memcpy(&crc, buffer, 4);
 
-	fprintf(stderr, "crc = %x\n", crc);
-	for ( p = buffer + 4; *p; p += strlen(p) + 1 )
-	{
+	if (libnvram_debug)
+	    fprintf(stderr, "crc = %x\n", crc);
+
+	for (p = buffer + 4; *p; p += strlen(p) + 1)
 		printf("%s\n", p);
-	}
 
 	FREE(buffer);
 	nvram_close(mode);
