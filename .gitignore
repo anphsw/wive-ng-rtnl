@@ -37,6 +37,7 @@ fulldump
 /lib/libiconv/po/Makefile
 /lib/libiconv/po/Makefile.in
 /lib/libcurl/curl-config
+/lib/libcurl/aclocal.m4
 /lib/libcurl/docs/examples/Makefile
 /lib/libcurl/docs/libcurl/Makefile
 /lib/libcurl/docs/Makefile
