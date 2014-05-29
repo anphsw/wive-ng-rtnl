@@ -12,7 +12,7 @@ lib-$(CONFIG_SMP) += cpumask.o
 
 lib-y	+= kobject.o kref.o kobject_uevent.o klist.o
 
-obj-y += div64.o sort.o parser.o halfmd4.o random32.o bust_spinlocks.o hexdump.o
+obj-y += div64.o sort.o parser.o halfmd4.o random32.o bust_spinlocks.o hexdump.o memcopy.o
 
 ifeq ($(CONFIG_DEBUG_KOBJECT),y)
 CFLAGS_kobject.o += -DDEBUG
