@@ -1242,7 +1242,7 @@ struct tcp_seq_afinfo {
 	char			*name;
 	sa_family_t		family;
 	int			(*seq_show) (struct seq_file *m, void *v);
-	struct file_operations	*seq_fops;
+	struct file_operations	seq_fops;
 };
 
 struct tcp_iter_state {

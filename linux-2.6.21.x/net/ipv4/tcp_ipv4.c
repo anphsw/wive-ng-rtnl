@@ -2299,13 +2299,14 @@ int tcp_proc_register(struct tcp_seq_afinfo *afinfo)
 
 	if (!afinfo)
 		return -EINVAL;
-	afinfo->seq_fops->owner		= afinfo->owner;
-	afinfo->seq_fops->open		= tcp_seq_open;
-	afinfo->seq_fops->read		= seq_read;
-	afinfo->seq_fops->llseek	= seq_lseek;
-	afinfo->seq_fops->release	= seq_release_private;
 
-	p = proc_net_fops_create(afinfo->name, S_IRUGO, afinfo->seq_fops);
+	afinfo->seq_fops.owner		= afinfo->owner;
+	afinfo->seq_fops.open		= tcp_seq_open;
+	afinfo->seq_fops.read		= seq_read;
+	afinfo->seq_fops.llseek		= seq_lseek;
+	afinfo->seq_fops.release	= seq_release_private;
+
+	p = proc_net_fops_create(afinfo->name, S_IRUGO, &afinfo->seq_fops);
 	if (p)
 		p->data = afinfo;
 	else
@@ -2318,7 +2319,6 @@ void tcp_proc_unregister(struct tcp_seq_afinfo *afinfo)
 	if (!afinfo)
 		return;
 	proc_net_remove(afinfo->name);
-	memset(afinfo->seq_fops, 0, sizeof(*afinfo->seq_fops));
 }
 
 static void get_openreq4(struct sock *sk, struct request_sock *req,
@@ -2448,13 +2448,11 @@ out:
 	return 0;
 }
 
-static struct file_operations tcp4_seq_fops;
 static struct tcp_seq_afinfo tcp4_seq_afinfo = {
 	.owner		= THIS_MODULE,
 	.name		= "tcp",
 	.family		= AF_INET,
 	.seq_show	= tcp4_seq_show,
-	.seq_fops	= &tcp4_seq_fops,
 };
 
 int __init tcp4_proc_init(void)

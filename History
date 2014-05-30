@@ -205,10 +205,11 @@
 14) kernel: mppe: fix stop work after recive serios reordered packets.<br>
 15) kernel: ralink drivers 2.7.x.x: fix stop work after some clients reconnect or some call ap scan.<br>
 16) kernel: /lib/string and /lib/memcopy replace by glibc version (more fast).<br>
-17) toolchain: gcc up to 4.8.3.<br>
-18) libcurl: up to 7.37.0 version.<br>
-19) miniupnpd: up to 1.8.20140523 version.<br>
-20) busybox: udhcpc source IP rebind patch.<br>
+17) kernel: tcp: place file operations directly into tcp_seq_afinfo.<br>
+18) toolchain: gcc up to 4.8.3.<br>
+19) libcurl: up to 7.37.0 version.<br>
+20) miniupnpd: up to 1.8.20140523 version.<br>
+21) busybox: udhcpc source IP rebind patch.<br>
 <br>
 <br>
 <br>
