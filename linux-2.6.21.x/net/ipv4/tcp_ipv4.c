@@ -2300,7 +2300,6 @@ int tcp_proc_register(struct tcp_seq_afinfo *afinfo)
 	if (!afinfo)
 		return -EINVAL;
 
-	afinfo->seq_fops.owner		= afinfo->owner;
 	afinfo->seq_fops.open		= tcp_seq_open;
 	afinfo->seq_fops.read		= seq_read;
 	afinfo->seq_fops.llseek		= seq_lseek;
@@ -2449,9 +2448,11 @@ out:
 }
 
 static struct tcp_seq_afinfo tcp4_seq_afinfo = {
-	.owner		= THIS_MODULE,
 	.name		= "tcp",
 	.family		= AF_INET,
+	.seq_fops	= {
+		.owner		= THIS_MODULE,
+	},
 	.seq_show	= tcp4_seq_show,
 };
 
