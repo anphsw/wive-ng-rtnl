@@ -255,6 +255,14 @@ static inline u32 ipv6_addr_hash(const struct in6_addr *addr)
 		& (IN6_ADDR_HSIZE - 1);
 }
 
+static inline bool ipv6_addr_is_solict_mult(const struct in6_addr *addr)
+{
+	return (addr->s6_addr32[0] == htonl(0xff020000) &&
+		addr->s6_addr32[1] == htonl(0x00000000) &&
+		addr->s6_addr32[2] == htonl(0x00000001) &&
+		addr->s6_addr[12] == 0xff);
+}
+
 #ifdef CONFIG_PROC_FS
 extern int if6_proc_init(void);
 extern void if6_proc_exit(void);
