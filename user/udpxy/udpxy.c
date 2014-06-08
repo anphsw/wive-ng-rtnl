@@ -18,6 +18,9 @@
  *  along with udpxy.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define _XOPEN_SOURCE 600
+#define _BSD_SOURCE
+
 #include "osdef.h"  /* os-specific definitions */
 
 #include <sys/types.h>
@@ -355,18 +358,18 @@ send_http_response( int sockfd, int code, const char* reason)
  */
 static void
 check_mcast_refresh( int msockfd, time_t* last_tm,
-                     const struct in_addr* mifaddr )
+                     const struct ip_mreq* mreq )
 {
     time_t now = 0;
 
     if( NULL != g_uopt.srcfile ) /* reading from file */
         return;
 
-    assert( (msockfd > 0) && last_tm && mifaddr );
+    assert( (msockfd > 0) && last_tm && mreq );
     now = time(NULL);
 
     if( now - *last_tm >= g_uopt.mcast_refresh ) {
-        (void) renew_multicast( msockfd, mifaddr );
+        (void) renew_multicast( msockfd, mreq );
         *last_tm = now;
     }
 
@@ -615,13 +618,19 @@ apply_ts_filter(struct dstream_ctx* ds, uint8_t* data, ssize_t nrcv, struct filt
  */
 static int
 relay_traffic( int ssockfd, int dsockfd, struct server_ctx* ctx,
-               int dfilefd, const struct in_addr* mifaddr )
+#ifdef UDPXY_FILEIO
+               int dfilefd,
+#endif /* UDPXY_FILEIO */
+               const struct ip_mreq* mreq )
 {
     volatile sig_atomic_t quit = 0;
 
     int rc = 0;
     ssize_t nmsgs = -1;
-    ssize_t nrcv = 0, nsent = 0, nwr = 0,
+    ssize_t nrcv = 0, nsent = 0,
+#ifdef UDPXY_FILEIO
+            nwr = 0,
+#endif /* UDPXY_FILEIO */
             lrcv = 0, lsent = 0;
     char*  data = NULL;
     size_t data_len = g_uopt.rbuf_len;
@@ -643,7 +652,7 @@ relay_traffic( int ssockfd, int dsockfd, struct server_ctx* ctx,
 
 	struct filter_ctx ts_filter;
 
-    assert( ctx && mifaddr && MAX_PAUSE_MSEC > 0 );
+    assert( ctx && mreq && MAX_PAUSE_MSEC > 0 );
 
     (void) sigemptyset (&ubset);
     sigaddset (&ubset, SIGINT);
@@ -727,9 +736,8 @@ relay_traffic( int ssockfd, int dsockfd, struct server_ctx* ctx,
     	char* pdata = data;
 
         if( g_uopt.mcast_refresh > 0 ) {
-            check_mcast_refresh( ssockfd, &rfr_tm, mifaddr );
+            check_mcast_refresh( ssockfd, &rfr_tm, mreq );
         }
-
         nrcv = read_data( &ds, ssockfd, data, data_len, &ropt );
         if( -1 == nrcv ) break;
 
@@ -777,6 +785,7 @@ relay_traffic( int ssockfd, int dsockfd, struct server_ctx* ctx,
             lsent = nsent;
         }
 
+#ifdef UDPXY_FILEIO
         if( (dfilefd > 0) && (nrcv > 0) ) {
             nwr = write_data( &ds, data, nrcv, dfilefd );
             if( -1 == nwr )
@@ -785,6 +794,7 @@ relay_traffic( int ssockfd, int dsockfd, struct server_ctx* ctx,
                     nrcv, lsent, nwr, t_delta, g_flog ) );
             lsent = nwr;
         }
+#endif /* UDPXY_FILEIO */
 
         if( ds.flags & F_SCATTERED ) reset_pkt_registry( &ds );
 
@@ -817,17 +827,18 @@ static int
 udp_relay( int sockfd, struct server_ctx* ctx )
 {
     char                mcast_addr[ IPADDR_STR_SIZE ];
+    struct ip_mreq      mreq;
     struct sockaddr_in  addr;
 
     uint16_t    port;
     pid_t       new_pid;
     int         rc = 0, flags; 
-    int         msockfd = -1, sfilefd = -1,
-                dfilefd = -1, srcfd = -1;
+    int         msockfd = -1, srcfd = -1;
+#ifdef UDPXY_FILEIO
+    int         sfilefd = -1, dfilefd = -1;
     char        dfile_name[ MAXPATHLEN ];
+#endif /* UDPXY_FILEIO */
     size_t      rcvbuf_len = 0;
-
-    const struct in_addr *mifaddr = &(ctx->mcast_inaddr);
 
     assert( (sockfd > 0) && ctx );
 
@@ -841,15 +852,25 @@ udp_relay( int sockfd, struct server_ctx* ctx )
                             rc, ctx->rq.param );
             break;
         }
-
-        if( 1 != inet_aton(mcast_addr, &addr.sin_addr) ) {
-            (void) tmfprintf( g_flog, "Invalid address: [%s]\n", mcast_addr );
+/*
+        TRACE( (void)tmfprintf (g_flog, "%s: mcast_addr=%s\n", __func__, mcast_addr));
+        TRACE( (void)tmfprintf (g_flog, "%s: mcast_ifaddr=%s\n", __func__, ctx->mcast_ifc_addr));
+*/
+        if( 1 != inet_aton(ctx->mcast_ifc_addr, (struct in_addr*)&mreq.imr_interface.s_addr) ) {
+            (void) tmfprintf( g_flog, "Invalid multicast interface: [%s]\n", ctx->mcast_ifc_addr );
+            rc = ERR_INTERNAL;
+            break;
+        }
+        if( 1 != inet_aton(mcast_addr, (struct in_addr*)&mreq.imr_multiaddr.s_addr) ) {
+            (void) tmfprintf( g_flog, "Invalid multicast group address: [%s]\n", mcast_addr );
             rc = ERR_INTERNAL;
             break;
         }
 
         addr.sin_family = AF_INET;
         addr.sin_port = htons( (short)port );
+        (void) memcpy( &addr.sin_addr, &mreq.imr_multiaddr.s_addr,
+                       sizeof(struct in_addr) );
 
     } while(0);
 
@@ -889,6 +910,7 @@ udp_relay( int sockfd, struct server_ctx* ctx )
             break;
         }
 
+#ifdef UDPXY_FILEIO
         if( NULL != g_uopt.dstfile ) {
             (void) snprintf( dfile_name, MAXPATHLEN - 1,
                     "%s.%d", g_uopt.dstfile, getpid() );
@@ -917,24 +939,31 @@ udp_relay( int sockfd, struct server_ctx* ctx )
                 srcfd = sfilefd;
             }
         }
-        else {
+        else
+#endif /* UDPXY_FILEIO */
+        {
             rc = calc_buf_settings( NULL, &rcvbuf_len );
             if (0 == rc ) {
-                rc = setup_mcast_listener( &addr, mifaddr, &msockfd,
+                rc = setup_mcast_listener( &addr, &mreq, &msockfd,
                     (g_uopt.nosync_sbuf ? 0 : rcvbuf_len) );
                 srcfd = msockfd;
             }
         }
         if( 0 != rc ) break;
 
-        rc = relay_traffic( srcfd, sockfd, ctx, dfilefd, mifaddr );
+        rc = relay_traffic( srcfd, sockfd, ctx,
+#ifdef UDPXY_FILEIO
+                            dfilefd,
+#endif /* UDPXY_FILEIO */
+                            &mreq );
         if( 0 != rc ) break;
 
     } while(0);
 
     if( msockfd > 0 ) {
-        close_mcast_listener( msockfd, mifaddr );
+        close_mcast_listener( msockfd, &mreq );
     }
+#ifdef UDPXY_FILEIO
     if( sfilefd > 0 ) {
        (void) close( sfilefd );
        TRACE( (void) tmfprintf( g_flog, "Source file [%s] closed\n",
@@ -945,7 +974,7 @@ udp_relay( int sockfd, struct server_ctx* ctx )
        TRACE( (void) tmfprintf( g_flog, "Dest file [%s] closed\n",
                             dfile_name ) );
     }
-
+#endif /* UDPXY_FILEIO */
     if( 0 != rc ) {
         (void) send_http_response( sockfd, 500, "Service error" );
     }

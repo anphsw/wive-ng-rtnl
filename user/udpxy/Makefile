@@ -66,6 +66,10 @@ INSTALLROOT := ./filesystem
 ARCDIR = ..
 ARCFILE := $(ARCDIR)/$(EXEC).$(VERSION).$(BUILDNO)-$(PATCHNO)-$(BTYPE).tar.gz
 
+ifneq (yes,$(NO_UDPXREC))
+	COPT += -DUDPXREC_MOD
+endif
+
 DEBUG_OPT  := $(COPT) $(DEBUG_ON) -DTRACE_MODULE
 PROD_OPT   := $(COPT) -DNDEBUG #-DTRACE_MODULE
 LEAN_OPT   := $(COPT) -DNDEBUG
@@ -93,7 +97,6 @@ SRC := udpxy.c sloop.c rparse.c util.c prbuf.c ifaddr.c ctx.c mkpg.c \
 
 ifneq (yes,$(NO_UDPXREC))
 	SRC   += udpxrec.c
-	CDEFS += -DUDPXREC_MOD
 endif
 
 OBJ := ${SRC:.c=.o}
