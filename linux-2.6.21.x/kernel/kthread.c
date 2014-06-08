@@ -17,8 +17,6 @@
 #include <linux/freezer.h>
 #include <asm/semaphore.h>
 
-#define KTHREAD_NICE_LEVEL (-5)
-
 static DEFINE_SPINLOCK(kthread_create_lock);
 static LIST_HEAD(kthread_create_list);
 struct task_struct *kthreadd_task;
@@ -154,7 +152,6 @@ struct task_struct *kthread_create(int (*threadfn)(void *data),
 		 * The kernel thread should not inherit these properties.
 		 */
 		sched_setscheduler(create.result, SCHED_NORMAL, &param);
-		set_user_nice(create.result, KTHREAD_NICE_LEVEL);
 		set_cpus_allowed(create.result, CPU_MASK_ALL);
 	}
 	return create.result;
@@ -230,7 +227,6 @@ int kthreadd(void *unused)
 
 	/* Setup a clean context for our children to inherit. */
 	set_task_comm(tsk, "kthreadd");
-	set_user_nice(tsk, KTHREAD_NICE_LEVEL);
 	set_cpus_allowed(tsk, CPU_MASK_ALL);
 
 	/* Block and flush all signals */
@@ -244,7 +240,6 @@ int kthreadd(void *unused)
 	siginitset(&sa.sa.sa_mask, sigmask(SIGCHLD));
 	do_sigaction(SIGCHLD, &sa, (struct k_sigaction *)0);
 
-	set_user_nice(current, KTHREAD_NICE_LEVEL);
 	set_cpus_allowed(current, CPU_MASK_ALL);
 
 	current->flags |= PF_NOFREEZE;

@@ -1903,22 +1903,23 @@
 8) igmpproxy: fix periodic timer on broken system time.<br>
 9) dhcpc: workaround for ugly ISP (as Moscow QWERTY) on recived mtu = 576 bytes instead 1500 for IPOE.<br>
 10) dnsmasq: update to 2.71 version.<br>
-11) kernel: netfilter: nf_conntrack: flush net_gre->keymap_list only from gre helper.<br>
-12) kernel: ipv6: don't create clones of host routes.<br>
-13) kernel: usb serial(option/cdc_acm/cdc_ether): add some modems support.<br>
-14) kernel: mppe: fix stop work after recive serios reordered packets.<br>
-15) kernel: ralink drivers 2.7.x.x: fix stop work after some clients reconnect or some call ap scan.<br>
-16) kernel: /lib/string and /lib/memcopy replace by glibc version (more fast).<br>
-17) kernel: tcp: place file operations directly into tcp_seq_afinfo.<br>
-18) kernel: tcp_cubic: fix the range of delayed_ack.<br
-19) toolchain: gcc up to 4.8.3.<br>
-20) libcurl: up to 7.37.0 version.<br>
-21) miniupnpd: up to 1.8.20140523 version.<br>
-22) busybox: udhcpc source IP rebind patch.<br>
-23) xupnpd: up to 399 revision.<br>
-24) radvd: up to 1.12.0 version.<br>
-25) openssl: up to 0.9.8za.<br>
-26) udpxy: add mreq support and not build fileinput support.<br>
+10) toolchain: gcc up to 4.8.3.<br>
+11) libcurl: up to 7.37.0 version.<br>
+12) miniupnpd: up to 1.8.20140523 version.<br>
+13) busybox: udhcpc source IP rebind patch.<br>
+14) xupnpd: up to 399 revision.<br>
+15) radvd: up to 1.12.0 version.<br>
+16) openssl: up to 0.9.8za.<br>
+17) udpxy: add mreq support and not build fileinput support.<br>
+18) kernel: netfilter: nf_conntrack: flush net_gre->keymap_list only from gre helper.<br>
+19) kernel: ipv6: don't create clones of host routes.<br>
+20) kernel: usb serial(option/cdc_acm/cdc_ether): add some modems support.<br>
+21) kernel: mppe: fix stop work after recive serios reordered packets.<br>
+22) kernel: ralink drivers 2.7.x.x: fix stop work after some clients reconnect or some call ap scan.<br>
+23) kernel: /lib/string and /lib/memcopy replace by glibc version (more fast).<br>
+24) kernel: tcp: place file operations directly into tcp_seq_afinfo.<br>
+25) kernel: tcp_cubic: fix the range of delayed_ack.<br>
+26) kernel: sched: Keep kthreads at default priority.<br>
 <br>
 <br>
 <br>
