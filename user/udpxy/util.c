@@ -224,7 +224,7 @@ mperror( FILE* fp, int err, const char* format, ... )
     return;
 }
 
-#if 0
+#ifdef FILE_LOCKING
 /* write-lock on a file handle
  */
 static int
@@ -264,7 +264,7 @@ make_pidfile( const char* fpath, pid_t pid, FILE* log )
             rc = EXIT_FAILURE;
             break;
         }
-#if 0
+#ifdef FILE_LOCKING
         rc = wlock_file( fd );
         if( 0 != rc ) {
             if( (EACCES == errno) || (EAGAIN == errno) ) {
