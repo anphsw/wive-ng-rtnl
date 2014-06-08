@@ -1920,6 +1920,7 @@
 24) kernel: tcp: place file operations directly into tcp_seq_afinfo.<br>
 25) kernel: tcp_cubic: fix the range of delayed_ack.<br>
 26) kernel: sched: Keep kthreads at default priority.<br>
+27) kernel: ipv6: fix IPV6_RECVERR handling of locally-generated errors.<br>
 <br>
 <br>
 <br>
