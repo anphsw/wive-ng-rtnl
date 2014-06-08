@@ -217,6 +217,7 @@
 25) kernel: tcp_cubic: fix the range of delayed_ack.<br>
 26) kernel: sched: Keep kthreads at default priority.<br>
 27) kernel: ipv6: fix IPV6_RECVERR handling of locally-generated errors.<br>
+28) kernel: ipv4: remove redundant verification code.<br>
 <br>
 <br>
 <br>
