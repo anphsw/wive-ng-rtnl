@@ -234,7 +234,7 @@ int dtls1_do_write(SSL *s, int type)
 
 		/* I've seen the kernel return bogus numbers when it doesn't know
 		 * (initial write), so just make sure we have a reasonable number */
-		if ( s->d1->mtu < dtls1_min_mtu())
+		if (s->d1->mtu < dtls1_min_mtu())
 			{
 			s->d1->mtu = 0;
 			s->d1->mtu = dtls1_guess_mtu(s->d1->mtu);
@@ -313,9 +313,10 @@ int dtls1_do_write(SSL *s, int type)
 				s->init_off -= DTLS1_HM_HEADER_LENGTH;
 				s->init_num += DTLS1_HM_HEADER_LENGTH;
 
-				/* write atleast DTLS1_HM_HEADER_LENGTH bytes */
-				if ( len <= DTLS1_HM_HEADER_LENGTH)  
-					len += DTLS1_HM_HEADER_LENGTH;
+				if ( s->init_num > curr_mtu)
+					len = curr_mtu;
+				else
+					len = s->init_num;
 				}
 
 			dtls1_fix_message_header(s, frag_off, 
@@ -464,7 +465,7 @@ again:
 
 	/* Don't change sequence numbers while listening */
 	if (!s->d1->listen)
-	s->d1->handshake_read_seq++;
+		s->d1->handshake_read_seq++;
 
 	s->init_msg = s->init_buf->data + DTLS1_HM_HEADER_LENGTH;
 	return s->init_num;
@@ -620,7 +621,16 @@ dtls1_reassemble_fragment(SSL *s, struct hm_header_st* msg_hdr, int *ok)
 		frag->msg_header.frag_off = 0;
 		}
 	else
+		{
 		frag = (hm_fragment*) item->data;
+		if (frag->msg_header.msg_len != msg_hdr->msg_len)
+			{
+			item = NULL;
+			frag = NULL;
+			goto err;
+			}
+		}
+
 
 	/* If message is already reassembled, this must be a
 	 * retransmit and can be dropped.
@@ -667,8 +677,8 @@ dtls1_reassemble_fragment(SSL *s, struct hm_header_st* msg_hdr, int *ok)
 
 		if (item == NULL)
 			{
-			goto err;
 			i = -1;
+			goto err;
 			}
 
 		pqueue_insert(s->d1->buffered_messages, item);
@@ -777,6 +787,7 @@ dtls1_get_message_fragment(SSL *s, int st1, int stn, long max, int *ok)
 	int i,al;
 	struct hm_header_st msg_hdr;
 
+	redo:
 	/* see if we have the required fragment already */
 	if ((frag_len = dtls1_retrieve_buffered_fragment(s,max,ok)) || *ok)
 		{
@@ -806,7 +817,7 @@ dtls1_get_message_fragment(SSL *s, int st1, int stn, long max, int *ok)
 
 	/* 
 	 * if this is a future (or stale) message it gets buffered
-	 * (or dropped)--no further processing at this time 
+	 * (or dropped)--no further processing at this time
 	 * While listening, we accept seq 1 (ClientHello with cookie)
 	 * although we're still expecting seq 0 (ClientHello)
 	 */
@@ -835,8 +846,7 @@ dtls1_get_message_fragment(SSL *s, int st1, int stn, long max, int *ok)
 					s->msg_callback_arg);
 			
 			s->init_num = 0;
-			return dtls1_get_message_fragment(s, st1, stn,
-				max, ok);
+			goto redo;
 			}
 		else /* Incorrectly formated Hello request */
 			{

@@ -404,7 +404,7 @@ int dtls1_connect(SSL *s)
 		case SSL3_ST_CW_CHANGE_A:
 		case SSL3_ST_CW_CHANGE_B:
 			if (!s->hit)
-			dtls1_start_timer(s);
+				dtls1_start_timer(s);
 			ret=dtls1_send_change_cipher_spec(s,
 				SSL3_ST_CW_CHANGE_A,SSL3_ST_CW_CHANGE_B);
 			if (ret <= 0) goto end;
@@ -440,7 +440,7 @@ int dtls1_connect(SSL *s)
 		case SSL3_ST_CW_FINISHED_A:
 		case SSL3_ST_CW_FINISHED_B:
 			if (!s->hit)
-			dtls1_start_timer(s);
+				dtls1_start_timer(s);
 			ret=dtls1_send_finished(s,
 				SSL3_ST_CW_FINISHED_A,SSL3_ST_CW_FINISHED_B,
 				s->method->ssl3_enc->client_finished_label,

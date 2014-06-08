@@ -190,12 +190,15 @@ static void dtls1_clear_queues(SSL *s)
         }
 
 	while ( (item = pqueue_pop(s->d1->buffered_app_data.q)) != NULL)
-	{
-		frag = (hm_fragment *)item->data;
-		OPENSSL_free(frag->fragment);
-		OPENSSL_free(frag);
+		{
+		rdata = (DTLS1_RECORD_DATA *) item->data;
+		if (rdata->rbuf.buf)
+			{
+			OPENSSL_free(rdata->rbuf.buf);
+			}
+		OPENSSL_free(item->data);
 		pitem_free(item);
-	}
+		}
 	}
 
 void dtls1_free(SSL *s)
@@ -217,6 +220,7 @@ void dtls1_free(SSL *s)
 	pq_64bit_free(&(s->d1->next_bitmap.max_seq_num));
 
 	OPENSSL_free(s->d1);
+	s->d1 = NULL;
 	}
 
 void dtls1_clear(SSL *s)
