@@ -310,7 +310,6 @@ terminate_all_clients( struct server_ctx* ctx )
     return;
 }
 
-
 /* send HTTP response to socket
  */
 static int
@@ -1051,12 +1050,13 @@ report_status( int sockfd, const struct server_ctx* ctx, int options )
     if( 0 != rc ) {
         TRACE( (void)tmfprintf( g_flog, "Error generating status report\n" ) );
     }
+#ifdef DEBUG
     else {
-        /* DEBUG only
+        /* DEBUG only */
         TRACE( (void)tmfprintf( g_flog, "Saved status buffer to file\n" ) );
         TRACE( (void)save_buffer(buf, nlen, "/tmp/status-udpxy.html") );
-        */
     }
+#endif
 
     free(buf);
     return rc;
@@ -1081,8 +1081,15 @@ process_command( int new_sockfd, struct server_ctx* ctx )
         }
         else {
             send_http_response( new_sockfd, 503, "Client limit reached" );
-            (void)tmfprintf( g_flog, "Client limit [%d] has been reached.\n",
-                    ctx->clmax);
+            (void)tmfprintf( g_flog, "Client limit [%d] has been reached.\n",ctx->clmax);
+#ifdef DROPATFULL
+	    /* this temp workaround, must replace by garbage collector in future */
+            (void)tmfprintf( g_flog, "May be clients freez?? Drop all clients.\n");
+    	    (void)report_status( new_sockfd, ctx, RESTART_OPTIONS );
+
+    	    terminate_all_clients( ctx );
+    	    wait_all( ctx );
+#endif
         }
     }
     else if( 0 == strncmp( ctx->rq.cmd, CMD_STATUS, sizeof(ctx->rq.cmd) ) ) {

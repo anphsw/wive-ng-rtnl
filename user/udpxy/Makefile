@@ -24,6 +24,10 @@ EXEC := udpxy
 UDPXREC := udpxrec
 NO_UDPXREC := yes
 
+# drop all clients if limit reached
+# this workaround for situation freezez bad clients as some pabasonic TV
+DROPATFULL := yes
+
 STRIP := /usr/bin/strip
 GZIP  := /bin/gzip
 
@@ -68,6 +72,10 @@ ARCFILE := $(ARCDIR)/$(EXEC).$(VERSION).$(BUILDNO)-$(PATCHNO)-$(BTYPE).tar.gz
 
 ifneq (yes,$(NO_UDPXREC))
 	COPT += -DUDPXREC_MOD
+endif
+
+ifneq (yes,$(DROPATFULL))
+	COPT += -DDROPATFULL
 endif
 
 -include $(LINUX_CONFIG)

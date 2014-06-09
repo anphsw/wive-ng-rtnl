@@ -1911,17 +1911,18 @@
 15) radvd: up to 1.12.0 version.<br>
 16) openssl: up to 0.9.8za.<br>
 17) udpxy: add mreq support and not build fileinput support.<br>
-18) kernel: netfilter: nf_conntrack: flush net_gre->keymap_list only from gre helper.<br>
-19) kernel: ipv6: don't create clones of host routes.<br>
-20) kernel: usb serial(option/cdc_acm/cdc_ether): add some modems support.<br>
-21) kernel: mppe: fix stop work after recive serios reordered packets.<br>
-22) kernel: ralink drivers 2.7.x.x: fix stop work after some clients reconnect or some call ap scan.<br>
-23) kernel: /lib/string and /lib/memcopy replace by glibc version (more fast).<br>
-24) kernel: tcp: place file operations directly into tcp_seq_afinfo.<br>
-25) kernel: tcp_cubic: fix the range of delayed_ack.<br>
-26) kernel: sched: Keep kthreads at default priority.<br>
-27) kernel: ipv6: fix IPV6_RECVERR handling of locally-generated errors.<br>
-28) kernel: ipv4: remove redundant verification code.<br>
+18) udpxy: add workaround for client fake freez situations.<br>
+19) kernel: netfilter: nf_conntrack: flush net_gre->keymap_list only from gre helper.<br>
+20) kernel: ipv6: don't create clones of host routes.<br>
+21) kernel: usb serial(option/cdc_acm/cdc_ether): add some modems support.<br>
+22) kernel: mppe: fix stop work after recive serios reordered packets.<br>
+23) kernel: ralink drivers 2.7.x.x: fix stop work after some clients reconnect or some call ap scan.<br>
+24) kernel: /lib/string and /lib/memcopy replace by glibc version (more fast).<br>
+25) kernel: tcp: place file operations directly into tcp_seq_afinfo.<br>
+26) kernel: tcp_cubic: fix the range of delayed_ack.<br>
+27) kernel: sched: Keep kthreads at default priority.<br>
+28) kernel: ipv6: fix IPV6_RECVERR handling of locally-generated errors.<br>
+29) kernel: ipv4: remove redundant verification code.<br>
 <br>
 <br>
 <br>
