@@ -498,7 +498,7 @@ sync_dsockbuf_len( int ssockfd, int dsockfd )
     return rc;
 }
 
-//#define DEBUG_TS_FILTER
+/* #define DEBUG_TS_FILTER */
 
 struct filter_ctx {
 	uint8_t strmHdr[TS_SIZE*2];
@@ -532,6 +532,9 @@ init_ts_filter(struct filter_ctx* f)
 static void
 consume_ts_packet(uint8_t* pkt, struct filter_ctx* f)
 {
+	uint16_t pid=0;
+	uint32_t flags=0;
+
 	if( !ts_validate(pkt) ) {
 #ifdef DEBUG_TS_FILTER
 		TRACE( (void)tmfprintf( g_flog, "--- broken pkt:\n"
@@ -545,21 +548,21 @@ consume_ts_packet(uint8_t* pkt, struct filter_ctx* f)
 	if( !ts_get_unitstart(pkt) )
 		return;
 
-	uint16_t pid = ts_get_pid(pkt);
+	pid = ts_get_pid(pkt);
 
 #ifdef DEBUG_TS_FILTER
 	TRACE( (void)tmfprintf( g_flog, "--- PID: %d, #%04x\n", f->nnn, pid ) );
 	f->nnn++;
 #endif
 
-	uint32_t flags = f->flags;
+	flags = f->flags;
 	if( !HAS_FLAGS(flags, F_PAT) && pid == 0 ) {
 		uint8_t *pkt_end = pkt + TS_SIZE;
 		uint8_t *pat, *prg;
 
-		// PAT found
+		/* PAT found */
 		memcpy(f->strmHdr, pkt, TS_SIZE);
-		
+
 		pat = ts_section(pkt);
 		if( pat >= pkt_end ) {
 			TRACE( (void)tmfprintf( g_flog, "Got PAT. No section\n" ) );
@@ -574,7 +577,7 @@ consume_ts_packet(uint8_t* pkt, struct filter_ctx* f)
 		TRACE( (void)tmfprintf( g_flog, "Got PAT. Found program #%04x\n", f->pmtId ) );
 
 		f->flags |= F_PAT;
-		
+
 		return;
 	}
 	if( HAS_FLAGS(flags, F_PAT) && pid == f->pmtId ) {
@@ -609,7 +612,7 @@ apply_ts_filter(struct dstream_ctx* ds, uint8_t* data, ssize_t nrcv, struct filt
 			if( HAS_FLAGS(f->flags, F_FOUND) )
 				return;
 		}
-	}	
+	}
 }
 
 /* relay traffic from source to destination socket
@@ -731,7 +734,6 @@ relay_traffic( int ssockfd, int dsockfd, struct server_ctx* ctx,
     init_ts_filter(&ts_filter);
 
     while( (0 == rc) && !(quit = must_quit()) ) {
-    	ssize_t i, imax;
     	char* pdata = data;
 
         if( g_uopt.mcast_refresh > 0 ) {

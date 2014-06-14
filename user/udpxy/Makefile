@@ -25,7 +25,7 @@ UDPXREC := udpxrec
 NO_UDPXREC := yes
 
 # drop all clients if limit reached
-# this workaround for situation freezez bad clients as some pabasonic TV
+# this workaround for situation freezez bad clients as some panasonic TV
 DROPATFULL := yes
 
 STRIP := /usr/bin/strip
@@ -36,7 +36,7 @@ ifdef DEBUG
 DEBUG_ON := -g
 endif
 
-ALL_CFLAGS = -W -Wall -Werror --pedantic $(CFLAGS) $(INCLUDES)
+ALL_CFLAGS = -W -Wall --pedantic $(CFLAGS) $(INCLUDES)
 ALL_CFLAGS += -ffunction-sections -fdata-sections
 LDFLAGS += -Wl,--gc-sections
 
