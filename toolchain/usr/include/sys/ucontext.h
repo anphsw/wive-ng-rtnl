@@ -111,7 +111,7 @@ enum
 #define CTX_MDHI	CTX_MDHI
   CTX_CAUSE = 34,
 #define CTX_CAUSE	CTX_CAUSE
-  CTX_EPC = 35
+  CTX_EPC = 35,
 #define CTX_EPC	CTX_EPC
 };
 

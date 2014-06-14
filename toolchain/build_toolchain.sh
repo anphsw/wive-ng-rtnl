@@ -128,6 +128,7 @@ if [ "$UNPACK" = "YES" ]; then
     rm -rf build-*
     rm -rf $CURDIR/bin
     rm -rf $CURDIR/lib
+    rm -rf $CURDIR/lib64
     rm -rf $CURDIR/usr
     rm -rf $CURDIR/share
     rm -rf $CURDIR/libexec

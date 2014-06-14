@@ -3,6 +3,10 @@
 
 #include <linux/types.h>
 
+#ifdef CONFIG_BCM_NAT
+#include "../../../net/nat/bcm_nat/bcm_nat.h"
+#endif
+
 /* Nat mode type */
 #ifdef CONFIG_NAT_CONE
 #define NAT_MODE_LINUX		0
@@ -16,18 +20,10 @@
 #define NF_STOLEN 2
 #define NF_QUEUE 3
 #define NF_REPEAT 4
-#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-#define NF_FAST_NAT 5
-#define NF_STOP 6
-#else
+#ifndef CONFIG_BCM_NAT
 #define NF_STOP 5
 #endif
 #define NF_MAX_VERDICT NF_STOP
-
-/* fastforward flag for fastroute path - hwnat use 10+6 offset - fastroute 10+6+1 */
-#if defined(CONFIG_BCM_NAT) || defined(CONFIG_BCM_NAT_MODULE)
-#define FAST_ROUTE 17
-#endif
 
 /* we overload the higher bits for encoding auxiliary data such as the queue
  * number or errno values. Not nice, but better than additional function
