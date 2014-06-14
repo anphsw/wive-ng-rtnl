@@ -190,36 +190,37 @@
 <br>
 <b>4.9.x</b><br>
 1) toolchain: fix wrong optimization with -O2 4.7/4.8 version gcc regression.<br>
-2) backport fixes from 4.2.0.0 SDK (hw_nat/skbuff/tso/etc..).<br>
-3) more spi flash support.<br>
-4) base MT7620 support.<br>
-5) dropbear: reconfigure for support portforward (disable by defaultd in init.d).<br>
-6) defaults: enable WmmCapable (temp disabled some times ago).<br>
-7) webui: add WMM capable.<br>
-8) igmpproxy: fix periodic timer on broken system time.<br>
-9) dhcpc: workaround for ugly ISP (as Moscow QWERTY) on recived mtu = 576 bytes instead 1500 for IPOE.<br>
-10) dnsmasq: update to 2.71 version.<br>
-10) toolchain: gcc up to 4.8.3.<br>
-11) libcurl: up to 7.37.0 version.<br>
-12) miniupnpd: up to 1.8.20140523 version.<br>
-13) busybox: udhcpc source IP rebind patch.<br>
-14) xupnpd: up to 399 revision.<br>
-15) radvd: up to 1.12.0 version.<br>
-16) openssl: up to 0.9.8za.<br>
-17) udpxy: add mreq support and not build fileinput support.<br>
-18) udpxy: add workaround for client fake freez situations.<br>
-19) udpxy: sync with upstream git 10 Jun 2014.<br>
-20) kernel: netfilter: nf_conntrack: flush net_gre->keymap_list only from gre helper.<br>
-21) kernel: ipv6: don't create clones of host routes.<br>
-22) kernel: usb serial(option/cdc_acm/cdc_ether): add some modems support.<br>
-23) kernel: mppe: fix stop work after recive serios reordered packets.<br>
-24) kernel: ralink drivers 2.7.x.x: fix stop work after some clients reconnect or some call ap scan.<br>
-25) kernel: /lib/string and /lib/memcopy replace by glibc version (more fast).<br>
-26) kernel: tcp: place file operations directly into tcp_seq_afinfo.<br>
-27) kernel: tcp_cubic: fix the range of delayed_ack.<br>
-28) kernel: sched: Keep kthreads at default priority.<br>
-29) kernel: ipv6: fix IPV6_RECVERR handling of locally-generated errors.<br>
-30) kernel: ipv4: remove redundant verification code.<br>
+2) toolchain: gcc up to 4.8.3.<br>
+3) backport fixes from 4.2.0.0 SDK (hw_nat/skbuff/tso/etc..).<br>
+4) dropbear: reconfigure for support portforward (disable by defaultd in init.d).<br>
+5) defaults: enable WmmCapable (temp disabled some times ago).<br>
+6) webui: add WMM capable.<br>
+7) igmpproxy: fix periodic timer on broken system time.<br>
+8) dnsmasq: update to 2.71 version.<br>
+9) libcurl: up to 7.37.0 version.<br>
+10) miniupnpd: up to 1.8.20140523 version.<br>
+11) busybox: dhcpc: workaround for ugly ISP (as Moscow QWERTY) on recived mtu = 576 bytes instead 1500 for IPOE.<br>
+12) busybox: udhcpc source IP rebind patch.<br>
+13) xupnpd: up to 399 revision.<br>
+14) radvd: up to 1.12.0 version.<br>
+15) openssl: up to 0.9.8za.<br>
+16) udpxy: add mreq support and not build fileinput support.<br>
+17) udpxy: add workaround for client fake freez situations.<br>
+18) udpxy: sync with upstream git 10 Jun 2014.<br>
+19) udpxy: allways disable ipv6 support (not real devices used ipv6 for streaming).<br>
+20) kernel: more spi flash support.<br>
+21) kernel: base MT7620 support.<br>
+22) kernel: netfilter: nf_conntrack: flush net_gre->keymap_list only from gre helper.<br>
+23) kernel: ipv6: don't create clones of host routes.<br>
+24) kernel: usb serial(option/cdc_acm/cdc_ether): add some modems support.<br>
+25) kernel: mppe: fix stop work after recive serios reordered packets.<br>
+26) kernel: ralink drivers 2.7.x.x: fix stop work after some clients reconnect or some call ap scan.<br>
+27) kernel: /lib/string and /lib/memcopy replace by glibc version (more fast).<br>
+28) kernel: tcp: place file operations directly into tcp_seq_afinfo.<br>
+29) kernel: tcp_cubic: fix the range of delayed_ack.<br>
+30) kernel: sched: Keep kthreads at default priority.<br>
+31) kernel: ipv6: fix IPV6_RECVERR handling of locally-generated errors.<br>
+32) kernel: ipv4: remove redundant verification code.<br>
 <br>
 <br>
 <br>

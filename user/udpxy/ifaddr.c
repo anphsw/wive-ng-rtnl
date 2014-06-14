@@ -52,7 +52,7 @@ chkifr( const struct ifreq* ifr, const char* ifname,
     {
     #ifndef NO_INET6_SUPPORT
         case AF_INET6: sa_len = sizeof(struct sockaddr_in6); break;
-   #endif
+    #endif
         case AF_INET: sa_len = sizeof(struct sockaddr); break;
         default: sa_len = 0; break;
     }

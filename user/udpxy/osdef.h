@@ -32,6 +32,8 @@
 #define HAS_VARRUN
 #define HAS_VARTMP
 
+#define NO_INET6_SUPPORT
+
 #ifdef __hpux
     #undef HAS_SOCKLEN
     #undef HAS_SETLINEBUF
@@ -39,7 +41,6 @@
 #endif
 
 #if defined(__CYGWIN__)
-    #define NO_INET6_SUPPORT
     #define NO_SOCKADDR_SA_LEN
 #endif
 
