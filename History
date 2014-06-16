@@ -206,7 +206,7 @@
 15) openssl: up to 0.9.8za.<br>
 16) udpxy: add mreq support and not build fileinput support.<br>
 17) udpxy: add workaround for client fake freez situations.<br>
-18) udpxy: sync with upstream git 10 Jun 2014.<br>
+18) udpxy: sync with upstream git 16 Jun 2014.<br>
 19) udpxy: allways disable ipv6 support (not real devices used ipv6 for streaming).<br>
 20) kernel: more spi flash support.<br>
 21) kernel: base MT7620 support.<br>
