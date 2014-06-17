@@ -441,7 +441,6 @@ incomplete_rcv:
 			cFYI(1, ("less than four bytes received (%d bytes)",
 			      length));
 			pdu_length -= length;
-			cifs_reconnect(server);
 			msleep(1);
 			goto incomplete_rcv;
 		}
