@@ -68,9 +68,13 @@ static inline int has_expired(const struct net_bridge *br,
 
 static inline int br_mac_hash(const unsigned char *mac)
 {
+#ifdef CONFIG_NET_BRIDGE_HASH_SPEEDUP
+	return HASH_BASE(mac, ETH_ALEN, 0) & (BR_HASH_SIZE - 1);
+#else
 	/* use 1 byte of OUI cnd 3 bytes of NIC */
 	u32 key = get_unaligned((u32 *)(mac + 2));
 	return HASH_1WORDS(key, fdb_salt) & (BR_HASH_SIZE - 1);
+#endif
 }
 
 static inline void fdb_delete(struct net_bridge_fdb_entry *f)

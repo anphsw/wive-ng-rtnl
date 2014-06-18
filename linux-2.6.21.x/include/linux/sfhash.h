@@ -90,10 +90,12 @@ static inline u32 sfhash_1words(u32 a, u32 initval)
 #define HASH_3WORDS(a,b,c,i)	sfhash_3words(a,b,c,i)
 #define HASH_2WORDS(a,b,i)	sfhash_2words(a,b,i)
 #define HASH_1WORDS(a,i)	sfhash_1words(a,i)
+#define HASH_BASE(k,l,i)	sfhash(k,l,i)
 #else
 #include <linux/jhash.h>
 #define HASH_3WORDS(a,b,c,i)	jhash_3words(a,b,c,i)
 #define HASH_2WORDS(a,b,i)	jhash_2words(a,b,i)
 #define HASH_1WORDS(a,i)	jhash_1words(a,i)
+#define HASH_BASE(k,l,i)	jhash(k,l,i)
 #endif
 #endif
