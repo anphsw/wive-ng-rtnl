@@ -1,3 +1,6 @@
+CFLAGS  += -ffunction-sections -fdata-sections
+LDFLAGS += -Wl,--gc-sections
+
 OBJS = parprouted.o arp.o
 
 LIBS = -lpthread

@@ -15,7 +15,7 @@ all:
 	for i in $(UTILSLIST); do $(CC) $(CFLAGS) $(LDFLAGS) $$i.c -o $$i; $(STRIP) $$i; done
 
 clean:
-	@set -e; 
+	@set -e;
 	for i in $(UTILSLIST); do rm -rf $$i; done
 	rm -rf filesystem
 
@@ -23,12 +23,12 @@ install:
 	rm -rf filesystem
 	mkdir filesystem
 	mkdir filesystem/bin
-	@set -e; 
+	@set -e;
 	for i in $(UTILSLIST); do cp -fva $$i ./filesystem/bin/$$i; done
 
 romfs:
 	rm -rf filesystem
 	mkdir filesystem
 	mkdir filesystem/bin
-	@set -e; 
+	@set -e;
 	for i in $(UTILSLIST); do $(ROMFSINST) -S $$i /bin/$$i; done

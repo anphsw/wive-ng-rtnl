@@ -10,6 +10,6 @@ int main(int argc, char **argv){
   int a;
   for(a=0; a<num; a++)
     printf("%s", str);
-  
+
   return 0;
 }
