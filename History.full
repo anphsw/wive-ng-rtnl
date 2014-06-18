@@ -1926,6 +1926,7 @@
 31) kernel: ipv6: fix IPV6_RECVERR handling of locally-generated errors.<br>
 32) kernel: ipv4: remove redundant verification code.<br>
 33) kernel: ipc: remove unreachable code in sem.c.<br>
+34) kernel: mips: use correct dma flushing in dma_cache_sync().<br>
 <br>
 <br>
 <br>
