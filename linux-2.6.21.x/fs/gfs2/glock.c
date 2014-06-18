@@ -15,6 +15,7 @@
 #include <linux/delay.h>
 #include <linux/sort.h>
 #include <linux/jhash.h>
+#include <linux/sfhash.h>
 #include <linux/kallsyms.h>
 #include <linux/gfs2_ondisk.h>
 #include <linux/list.h>
@@ -143,9 +144,9 @@ static unsigned int gl_hash(const struct gfs2_sbd *sdp,
 {
 	unsigned int h;
 
-	h = jhash(&name->ln_number, sizeof(u64), 0);
-	h = jhash(&name->ln_type, sizeof(unsigned int), h);
-	h = jhash(&sdp, sizeof(struct gfs2_sbd *), h);
+	h = HASH_BASE(&name->ln_number, sizeof(u64), 0);
+	h = HASH_BASE(&name->ln_type, sizeof(unsigned int), h);
+	h = HASH_BASE(&sdp, sizeof(struct gfs2_sbd *), h);
 	h &= GFS2_GL_HASH_MASK;
 
 	return h;

@@ -22,7 +22,8 @@
 #include "util.h"
 #include "lock.h"
 #include "dir.h"
-
+#include <linux/jhash.h>
+#include <linux/sfhash.h>
 
 static void put_free_de(struct dlm_ls *ls, struct dlm_direntry *de)
 {
@@ -121,7 +122,7 @@ static inline uint32_t dir_hash(struct dlm_ls *ls, char *name, int len)
 {
 	uint32_t val;
 
-	val = jhash(name, len, 0);
+	val = HASH_BASE(name, len, 0);
 	val &= (ls->ls_dirtbl_size - 1);
 
 	return val;

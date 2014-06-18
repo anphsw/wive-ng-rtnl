@@ -72,6 +72,8 @@
 #include "lvb_table.h"
 #include "user.h"
 #include "config.h"
+#include <linux/jhash.h>
+#include <linux/sfhash.h>
 
 static int send_request(struct dlm_rsb *r, struct dlm_lkb *lkb);
 static int send_convert(struct dlm_rsb *r, struct dlm_lkb *lkb);
@@ -392,7 +394,7 @@ static int find_rsb(struct dlm_ls *ls, char *name, int namelen,
 	if (dlm_no_directory(ls))
 		flags |= R_CREATE;
 
-	hash = jhash(name, namelen, 0);
+	hash = HASH_BASE(name, namelen, 0);
 	bucket = hash & (ls->ls_rsbtbl_size - 1);
 
 	error = search_rsb(ls, name, namelen, bucket, flags, &r);

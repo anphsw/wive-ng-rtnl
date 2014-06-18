@@ -31,6 +31,7 @@
 
 #include <linux/list.h>
 #include <linux/jhash.h>
+#include <linux/sfhash.h>
 
 #include "debug.h"
 #include "error.h"
@@ -53,7 +54,7 @@ int v9fs_error_init(void)
 	/* load initial error map into hash table */
 	for (c = errmap; c->name != NULL; c++) {
 		c->namelen = strlen(c->name);
-		bucket = jhash(c->name, c->namelen, 0) % ERRHASHSZ;
+		bucket = HASH_BASE(c->name, c->namelen, 0) % ERRHASHSZ;
 		INIT_HLIST_NODE(&c->list);
 		hlist_add_head(&c->list, &hash_errmap[bucket]);
 	}
@@ -72,7 +73,7 @@ int v9fs_errstr2errno(char *errstr, int len)
 	int errno = 0;
 	struct hlist_node *p = NULL;
 	struct errormap *c = NULL;
-	int bucket = jhash(errstr, len, 0) % ERRHASHSZ;
+	int bucket = HASH_BASE(errstr, len, 0) % ERRHASHSZ;
 
 	hlist_for_each_entry(c, p, &hash_errmap[bucket], list) {
 		if (c->namelen==len && !memcmp(c->name, errstr, len)) {

@@ -38,6 +38,7 @@
 #include <linux/spinlock.h>
 #include <linux/string.h>
 #include <linux/jhash.h>
+#include <linux/sfhash.h>
 #include <net/ip.h>
 #include <net/icmp.h>
 #include <net/tcp.h>
@@ -212,7 +213,7 @@ static void cipso_v4_cache_entry_free(struct cipso_v4_map_cache_entry *entry)
  */
 static u32 cipso_v4_map_cache_hash(const unsigned char *key, u32 key_len)
 {
-	return jhash(key, key_len, 0);
+	return HASH_BASE(key, key_len, 0);
 }
 
 /*
