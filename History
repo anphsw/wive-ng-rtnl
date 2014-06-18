@@ -221,8 +221,13 @@
 30) kernel: sched: Keep kthreads at default priority.<br>
 31) kernel: ipv6: fix IPV6_RECVERR handling of locally-generated errors.<br>
 32) kernel: ipv4: remove redundant verification code.<br>
-33) kernel: ipc: remove unreachable code in sem.c.<br>
-34) kernel: mips: use correct dma flushing in dma_cache_sync().<br>
+33) kernel: mips: use correct dma flushing in dma_cache_sync().<br>
+34) kernel: cifs: typo in earlier cifs_reconnect fix.<br>
+35) kernel: cifs: fix for incorrect session reconnects.<br>
+36) kernel: cifs: fix bad handling of EAGAIN error on kernel_recvmsg in cifs_demultiplex_thread.<br>
+37) kernel: ipc: sysvsem: refuse clone(CLONE_SYSVSEM|CLONE_NEWIPC).<br>
+38) kernel: ipc: sysvsem: force unshare(CLONE_SYSVSEM) when CLONE_NEWIPC.<br>
+39) kernel: ipc: sysvsem: implement sys_unshare(CLONE_SYSVSEM).<br>
 <br>
 <br>
 <br>
