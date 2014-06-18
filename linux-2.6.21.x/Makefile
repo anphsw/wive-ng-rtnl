@@ -541,6 +541,10 @@ ifdef CONFIG_DEBUG_SECTION_MISMATCH
 CFLAGS += $(call cc-option,-fno-inline-functions-called-once)
 endif
 
+# reduce debugging information
+CFLAGS   += $(call cc-option, -femit-struct-debug-baseonly)
+CFLAGS   += $(call cc-option,-fno-var-tracking)
+
 # use pipe at build time
 CFLAGS  += $(call cc-option,-pipe)
 
