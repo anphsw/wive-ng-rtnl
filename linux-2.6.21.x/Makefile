@@ -541,6 +541,9 @@ ifdef CONFIG_DEBUG_SECTION_MISMATCH
 CFLAGS += $(call cc-option,-fno-inline-functions-called-once)
 endif
 
+# use pipe at build time
+CFLAGS  += $(call cc-option,-pipe)
+
 # crazy optimizations
 CFLAGS += $(call cc-option,-ffast-math)
 CFLAGS += $(call cc-option,-fforce-addr)
