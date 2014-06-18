@@ -1016,6 +1016,10 @@ get_wl_physical_medium(void *data)
 
     uint8_t* wpm = (uint8_t*) data;
 
+#ifdef HAVE_WIRELESS
+    *wpm = 71;      /* Wireless 802.11 -- According to LLTD-spec */
+#endif
+
     return TLV_GET_FAILED;
 }
 
