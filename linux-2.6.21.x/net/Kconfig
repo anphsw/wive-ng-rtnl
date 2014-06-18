@@ -72,10 +72,6 @@ config NET_SFHASH
 	bool "Use SuperFast hash instead jhash"
 	default y
 
-config NET_BRIDGE_HASH_SPEEDUP
-	bool "Use fast hash mode for fdb"
-	default y
-
 config NETWORK_SECMARK
 	bool "Security Marking"
 	help

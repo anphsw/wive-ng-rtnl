@@ -68,7 +68,7 @@ static inline int has_expired(const struct net_bridge *br,
 
 static inline int br_mac_hash(const unsigned char *mac)
 {
-#ifdef CONFIG_NET_BRIDGE_HASH_SPEEDUP
+#ifdef CONFIG_BRIDGE_HASH_SPEEDUP
 	return HASH_BASE(mac, ETH_ALEN, 0) & (BR_HASH_SIZE - 1);
 #else
 	/* use 1 byte of OUI cnd 3 bytes of NIC */

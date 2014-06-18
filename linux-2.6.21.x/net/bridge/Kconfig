@@ -57,3 +57,10 @@ config BRIDGE_EAP
 	default y
 	---help---
 	  Bridge do not forward 802.1x/EAP frames and always accept eap to local.
+
+config BRIDGE_HASH_SPEEDUP
+	depends on BRIDGE
+	bool "Use fast hash mode for fdb"
+	default y
+	---help---
+	  Bridge use simple and fast hash function based at mac adress.
