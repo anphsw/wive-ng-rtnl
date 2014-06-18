@@ -1,3 +1,6 @@
+CFLAGS += -ffunction-sections -fdata-sections
+LDFLAGS += -Wl,--gc-sections
+
 PLATFORM = RT2880
 
 ifeq ($(PLATFORM),RT2880)

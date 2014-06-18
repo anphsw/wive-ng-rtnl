@@ -20,9 +20,9 @@ clean:
 	rm -f -- *~ lld2d lld2test $(DOBJFILES) $(TOBJFILES)
 
 lld2d: $(DOBJFILES)
-	$(CC) $(LDFLAGS) -o $@ $(DOBJFILES)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(DOBJFILES)
 
 lld2test: $(TOBJFILES)
-	$(CC) $(LDFLAGS) -o $@ $(TOBJFILES)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(TOBJFILES)
 
 # End

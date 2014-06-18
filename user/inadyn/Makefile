@@ -2,6 +2,9 @@ INADYN_BASE = .
 SRCDIR = $(INADYN_BASE)/src
 OUTDIR=bin
 
+CFLAGS += -ffunction-sections -fdata-sections
+LDFLAGS += -Wl,--gc-sections
+
 #simple arch config. No smart detection.
 #possible values: linux, mac, solaris, yourown
 ifndef TARGET_ARCH
@@ -15,12 +18,12 @@ MAKECMD=gmake
 
 ifeq ($(TARGET_ARCH),solaris)
 	ARCH_SPECIFIC_LIBS += -lsocket -lnsl
-	ARCH_SPECIFIC_CFLAGS += 
+	ARCH_SPECIFIC_CFLAGS +=
 endif
 
 ifeq ($(TARGET_ARCH),linux)
-	ARCH_SPECIFIC_LIBS += 
-	ARCH_SPECIFIC_CFLAGS += 
+	ARCH_SPECIFIC_LIBS +=
+	ARCH_SPECIFIC_CFLAGS +=
 endif
 
 ifdef DEBUG

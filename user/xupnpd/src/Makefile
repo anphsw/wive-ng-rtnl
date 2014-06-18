@@ -6,6 +6,11 @@ SRC     = main.cpp soap.cpp mem.cpp mcast.cpp luaxlib.cpp luaxcore.cpp luajson.c
 STAGING_DIR = /u01/home/shocker/staff/openwrt/staging_dir
 LUAMYCFLAGS = -DLUA_USE_LINUX
 
+CFLAGS  += -ffunction-sections -fdata-sections
+CPPFLAGS += -ffunction-sections -fdata-sections
+LUAMYCFLAGS += -ffunction-sections -fdata-sections
+LDFLAGS += -Wl,--gc-sections
+
 ifeq ($(STATIC),true)
 CFLAGS+=-static
 LUAMYCFLAGS+=-static

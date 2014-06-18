@@ -73,7 +73,11 @@ AM_CFLAGS = \
 	-Wmissing-declarations \
 	-Wmissing-prototypes \
 	-Wstrict-prototypes \
-	-fno-strict-aliasing
+	-fno-strict-aliasing \
+	-ffunction-sections -fdata-sections
+
+AM_LDFLAGS = \
+	-Wl,--gc-sections
 
 radvdump_SOURCES = \
 	$(COMMON_SRC) \

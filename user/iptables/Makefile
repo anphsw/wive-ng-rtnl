@@ -45,6 +45,9 @@ CFLAGS += -Os -std=gnu99
 CFLAGS += -Wall -Wunused
 CFLAGS += -mips32r2 -march=mips32r2
 CFLAGS += -DDISABLE_INSMOD
+CFLAGS += -ffunction-sections -fdata-sections
+
+LDFLAGS += -Wl,--gc-sections
 
 ifdef NO_SHARED_LIBS
 CFLAGS += -DNO_SHARED_LIBS=1
@@ -120,7 +123,7 @@ DEPFILES = $(EXT_OBJS:%.o=%.d)
 STATIC_LIBS  = extensions/libext.a
 STATIC6_LIBS = extensions/libext6.a
 ifdef NOT_DEFINED
-LDFLAGS      = -static
+LDFLAGS      += -static
 LDLIBS       =
 ifeq ($(DO_SELINUX), 1)
 LDLIBS       += -lselinux
