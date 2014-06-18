@@ -52,10 +52,6 @@
 #define NEIGH_PRINTK2 NEIGH_PRINTK
 #endif
 
-#ifndef CONFIG_ARP_HASH_FASTPATH
-#define PNEIGH_HASHMASK		0xF
-#endif
-
 static void neigh_timer_handler(unsigned long arg);
 #ifdef CONFIG_ARPD
 static void neigh_app_notify(struct neighbour *n);
