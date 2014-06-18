@@ -2435,7 +2435,7 @@ static int ipv4_dst_blackhole(struct rtable **rp, struct flowi *flp, struct sock
 
 	dst_release(&(*rp)->u.dst);
 	*rp = rt;
-	return (rt ? 0 : -ENOMEM);
+	return rt ? 0 : -ENOMEM;
 }
 
 int ip_route_output_flow(struct rtable **rp, struct flowi *flp, struct sock *sk, int flags)
