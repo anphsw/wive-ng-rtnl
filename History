@@ -231,6 +231,7 @@
 40) kernel: ipc: sysvsem: force unshare(CLONE_SYSVSEM) when CLONE_NEWIPC.<br>
 41) kernel: ipc: sysvsem: implement sys_unshare(CLONE_SYSVSEM).<br>
 42) kernel: bridge: replace fdb hash to more fast function (~10% hash speed up).<br>
+43) kernel: ipmr: increase cache resolve queue len (prevent drop unresolved request).<br>
 <br>
 <br>
 <br>
