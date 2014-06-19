@@ -82,6 +82,9 @@ include $(ROOTDIR)/vendors/config/common/config.arch
 # possible
 #
 
+############################ PLATFORM FLAGS ##############################
+POPT	:= -mips32r2 -march=mips32r2 -mtune=mips32r2 -D__MIPSEL__
+
 ############################ WARN/ERROR FLAGS ##############################
 # base flags for warnings
 WOPT	:= -Wall -Wno-trigraphs -Wno-long-long -Wno-format-security
@@ -93,11 +96,15 @@ WOPT	+= -Wno-pointer-sign
 WOPT	+= -Wno-unused-but-set-variable
 
 ########################### BUILD FLAGS/OPTIONS##############################
+
+LOPT	+=  -Os -pipe $(POPT) $(WOPT)
+UOPT	+=  -Os -pipe $(POPT) $(WOPT)
+
 ifdef UCLINUX_BUILD_LIB
 ifdef CONFIG_LIB_DEBUG
-	CFLAGS  :=  $(if $(LOPT),$(LOPT),-O1) $(WOPT) -g
+	CFLAGS  :=  $(if $(LOPT),$(LOPT),-O1) -g
 else
-	CFLAGS  :=  $(if $(LOPT),$(LOPT),-Os) $(WOPT) -fomit-frame-pointer -fno-stack-protector
+	CFLAGS  :=  $(if $(LOPT),$(LOPT),-Os) -fomit-frame-pointer -fno-stack-protector -femit-struct-debug-baseonly -fno-var-tracking
 endif
 ifdef CONFIG_LIB_SMALLSIZE
 	# Defeat .eh_frame bloat (~25% smaller binary)
@@ -147,7 +154,7 @@ ifdef UCLINUX_BUILD_USER
 ifdef CONFIG_USER_DEBUG
 	CFLAGS  :=  $(if $(UOPT),$(UOPT),-O1) $(WOPT) -g
 else
-	CFLAGS  :=  $(if $(UOPT),$(UOPT),-Os) $(WOPT) -fomit-frame-pointer -fno-stack-protector
+	CFLAGS  :=  $(if $(UOPT),$(UOPT),-Os) $(WOPT) -fomit-frame-pointer -fno-stack-protector -femit-struct-debug-baseonly -fno-var-tracking
 endif
 ifdef CONFIG_USER_SMALLSIZE
 	# Defeat .eh_frame bloat (~25% smaller binary)

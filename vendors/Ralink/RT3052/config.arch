@@ -19,7 +19,7 @@ HWH4			   = "0.0"
 ROOTDIR ?= /opt/Wive-RTNL
 
 ########################## LIB/USER FLAGS #################################
-LOPT  = -Os -pipe -mips32r2 -march=mips32r2
-UOPT  = -Os -pipe -mips32r2 -march=mips32r2
+LOPT  =
+UOPT  =
 
 include $(ROOTDIR)/vendors/config/mips/config.arch
