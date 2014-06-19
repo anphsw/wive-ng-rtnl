@@ -1936,6 +1936,7 @@
 41) kernel: bridge: replace fdb hash to more fast function (~10% hash speed up).<br>
 42) kernel: ipmr: increase cache resolve queue len (prevent drop unresolved request).<br>
 43) kernel: usb serial: add some modems support.<br>
+44) kernel: mm: reduce atomic use on use_mm fast path.<br>
 <br>
 <br>
 <br>
