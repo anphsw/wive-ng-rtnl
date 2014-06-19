@@ -231,6 +231,7 @@
 40) kernel: ipc: sysvsem: implement sys_unshare(CLONE_SYSVSEM).<br>
 41) kernel: bridge: replace fdb hash to more fast function (~10% hash speed up).<br>
 42) kernel: ipmr: increase cache resolve queue len (prevent drop unresolved request).<br>
+43) kernel: usb serial: add some modems support.<br>
 <br>
 <br>
 <br>
