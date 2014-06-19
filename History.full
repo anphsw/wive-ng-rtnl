@@ -1927,15 +1927,14 @@
 32) kernel: sched: Keep kthreads at default priority.<br>
 33) kernel: ipv6: fix IPV6_RECVERR handling of locally-generated errors.<br>
 34) kernel: ipv4: remove redundant verification code.<br>
-35) kernel: mips: use correct dma flushing in dma_cache_sync().<br>
-36) kernel: cifs: typo in earlier cifs_reconnect fix.<br>
-37) kernel: cifs: fix for incorrect session reconnects.<br>
-38) kernel: cifs: fix bad handling of EAGAIN error on kernel_recvmsg in cifs_demultiplex_thread.<br>
-39) kernel: ipc: sysvsem: refuse clone(CLONE_SYSVSEM|CLONE_NEWIPC).<br>
-40) kernel: ipc: sysvsem: force unshare(CLONE_SYSVSEM) when CLONE_NEWIPC.<br>
-41) kernel: ipc: sysvsem: implement sys_unshare(CLONE_SYSVSEM).<br>
-42) kernel: bridge: replace fdb hash to more fast function (~10% hash speed up).<br>
-43) kernel: ipmr: increase cache resolve queue len (prevent drop unresolved request).<br>
+35) kernel: cifs: typo in earlier cifs_reconnect fix.<br>
+36) kernel: cifs: fix for incorrect session reconnects.<br>
+37) kernel: cifs: fix bad handling of EAGAIN error on kernel_recvmsg in cifs_demultiplex_thread.<br>
+38) kernel: ipc: sysvsem: refuse clone(CLONE_SYSVSEM|CLONE_NEWIPC).<br>
+39) kernel: ipc: sysvsem: force unshare(CLONE_SYSVSEM) when CLONE_NEWIPC.<br>
+40) kernel: ipc: sysvsem: implement sys_unshare(CLONE_SYSVSEM).<br>
+41) kernel: bridge: replace fdb hash to more fast function (~10% hash speed up).<br>
+42) kernel: ipmr: increase cache resolve queue len (prevent drop unresolved request).<br>
 <br>
 <br>
 <br>
