@@ -179,7 +179,6 @@ struct packet_sock {
 	unsigned int		frame_size;
 	unsigned int		frame_max;
 	int			copy_thresh;
-	struct packet_type	prot_hook;
 	spinlock_t		bind_lock;
 	struct mutex		pg_vec_lock;
 	unsigned int		running:1,	/* prot_hook is attached*/
@@ -198,6 +197,7 @@ struct packet_sock {
 	unsigned int		tp_hdrlen;
 	unsigned int		tp_reserve;
 	unsigned int		pkt_type;
+	struct packet_type	prot_hook ____cacheline_aligned_in_smp;
 };
 
 struct packet_skb_cb {
