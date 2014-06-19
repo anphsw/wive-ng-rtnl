@@ -40,16 +40,50 @@ static inline int cpu_is_noncoherent_r10000(struct device *dev)
 	       current_cpu_type() == CPU_R12000);
 }
 
+static gfp_t massage_gfp_flags(const struct device *dev, gfp_t gfp)
+{
+	gfp_t dma_flag;
+
+	/* ignore region specifiers */
+	gfp &= ~(__GFP_DMA | __GFP_DMA32 | __GFP_HIGHMEM);
+
+#ifdef CONFIG_ISA
+	if (dev == NULL)
+		dma_flag = __GFP_DMA;
+	else
+#endif
+#if defined(CONFIG_ZONE_DMA32) && defined(CONFIG_ZONE_DMA)
+	     if (dev->coherent_dma_mask < DMA_BIT_MASK(32))
+			dma_flag = __GFP_DMA;
+	else if (dev->coherent_dma_mask < DMA_BIT_MASK(64))
+			dma_flag = __GFP_DMA32;
+	else
+#endif
+#if defined(CONFIG_ZONE_DMA32) && !defined(CONFIG_ZONE_DMA)
+	     if (dev->coherent_dma_mask < DMA_BIT_MASK(64))
+		dma_flag = __GFP_DMA32;
+	else
+#endif
+#if defined(CONFIG_ZONE_DMA) && !defined(CONFIG_ZONE_DMA32)
+	     if (dev->coherent_dma_mask < DMA_BIT_MASK(64))
+		dma_flag = __GFP_DMA;
+	else
+#endif
+		dma_flag = 0;
+
+	/* Don't invoke OOM killer */
+	gfp |= __GFP_NORETRY;
+
+	return gfp | dma_flag;
+}
+
 void *dma_alloc_noncoherent(struct device *dev, size_t size,
 	dma_addr_t * dma_handle, gfp_t gfp)
 {
 	void *ret;
 
-	/* ignore region specifiers */
-	gfp &= ~(__GFP_DMA | __GFP_HIGHMEM);
+	gfp = massage_gfp_flags(dev, gfp);
 
-	if (dev == NULL || (dev->coherent_dma_mask < 0xffffffff))
-		gfp |= GFP_DMA;
 	ret = (void *) __get_free_pages(gfp, get_order(size));
 
 	if (ret != NULL) {
@@ -59,7 +93,6 @@ void *dma_alloc_noncoherent(struct device *dev, size_t size,
 
 	return ret;
 }
-
 EXPORT_SYMBOL(dma_alloc_noncoherent);
 
 void *dma_alloc_coherent(struct device *dev, size_t size,
@@ -67,11 +100,11 @@ void *dma_alloc_coherent(struct device *dev, size_t size,
 {
 	void *ret;
 
-	/* ignore region specifiers */
-	gfp &= ~(__GFP_DMA | __GFP_HIGHMEM);
+	if (dma_alloc_from_coherent(dev, size, dma_handle, &ret))
+		return ret;
 
-	if (dev == NULL || (dev->coherent_dma_mask < 0xffffffff))
-		gfp |= GFP_DMA;
+	gfp = massage_gfp_flags(dev, gfp);
+
 	ret = (void *) __get_free_pages(gfp, get_order(size));
 
 	if (ret) {

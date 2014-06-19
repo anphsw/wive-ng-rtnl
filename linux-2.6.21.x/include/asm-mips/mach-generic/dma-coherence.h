@@ -9,6 +9,8 @@
 #ifndef __ASM_MACH_GENERIC_DMA_COHERENCE_H
 #define __ASM_MACH_GENERIC_DMA_COHERENCE_H
 
+#include <asm-generic/dma-coherent.h>
+
 struct device;
 
 static inline dma_addr_t plat_map_dma_mem(struct device *dev, void *addr,
