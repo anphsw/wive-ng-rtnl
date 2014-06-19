@@ -1015,6 +1015,7 @@ static int pppol2tp_sendmsg(struct kiocb *iocb, struct socket *sock, struct msgh
 	/* Calculate UDP checksum if configured to do so */
 	skb->ip_summed = CHECKSUM_NONE;
 
+#ifdef DEBUG
 	if (session->send_seq)
 		PRINTK(session->debug, PPPOL2TP_MSG_DATA, KERN_DEBUG,
 		       "%s: send %d bytes, ns=%hu\n", session->name,
@@ -1022,6 +1023,7 @@ static int pppol2tp_sendmsg(struct kiocb *iocb, struct socket *sock, struct msgh
 	else
 		PRINTK(session->debug, PPPOL2TP_MSG_DATA, KERN_DEBUG,
 		       "%s: send %d bytes\n", session->name, total_len);
+#endif
 
 	if (session->debug & PPPOL2TP_MSG_DATA) {
 		int i;
@@ -1167,6 +1169,7 @@ static int pppol2tp_xmit(struct ppp_channel *chan, struct sk_buff *skb)
 	/* Calculate UDP checksum if configured to do so */
 	skb->ip_summed = CHECKSUM_NONE;
 
+#ifdef DEBUG
 	if (session->send_seq)
 		PRINTK(session->debug, PPPOL2TP_MSG_DATA, KERN_DEBUG,
 		       "%s: send %d bytes, ns=%hu\n",
@@ -1174,6 +1177,7 @@ static int pppol2tp_xmit(struct ppp_channel *chan, struct sk_buff *skb)
 	else
 		PRINTK(session->debug, PPPOL2TP_MSG_DATA, KERN_DEBUG,
 		       "%s: send %d bytes\n", session->name, data_len);
+#endif
 
 	if (session->debug & PPPOL2TP_MSG_DATA) {
 		int i;
