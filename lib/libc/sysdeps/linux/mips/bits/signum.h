@@ -65,8 +65,21 @@
 #define SIGXFSZ		31	/* File size limit exceeded (4.2 BSD).  */
 
 
-#define _NSIG		128	/* Biggest signal number + 1
-				   (including real-time signals).  */
+/* MIPS is special by having 128 signals.
+ * All (?) other architectures have at most 64 signals.
+ * Having 128 signals is problematic because signal nos are 1-based
+ * and last signal number is then 128.
+ * This plays havoc with WIFSIGNALED and WCOREDUMP in waitpid status word,
+ * when process dies from signal 128.
+ * Linux kernel 3.9 accepts signal 128, with awful results :/
+ * It is being fixed.
+ *
+ * glibc (accidentally?) papers over this issue by declaring _NSIG to be 128,
+ * not 129 (despite claiming that _NSIG is "biggest signal number + 1"
+ * in the comment above that definition). We follow suit.
+ * Note that this results in __SIGRTMAX == 127. It is intended.
+ */
+#define _NSIG		128
 
 #define SIGRTMIN	(__libc_current_sigrtmin ())
 #define SIGRTMAX	(__libc_current_sigrtmax ())
