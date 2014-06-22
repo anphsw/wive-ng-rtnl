@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.22 2013/11/26 08:47:36 nanard Exp $
+# $Id: Makefile,v 1.23 2013/11/26 16:38:15 nanard Exp $
 # This Makefile is designed for use with GNU make
 # libnatpmp
 # (c) 2007-2013 Thomas Bernard
@@ -6,7 +6,8 @@
 
 OS = $(shell uname -s)
 CC ?= gcc
-INSTALL = install
+INSTALL = install -p
+ARCH = $(shell uname -m | sed -e s/i.86/i686/)
 VERSION = $(shell cat VERSION)
 
 ifeq ($(OS), Darwin)
@@ -40,6 +41,7 @@ ifeq ($(OS), Darwin)
   JNISHAREDLIB = libjninatpmp.dylib
   SONAME = $(basename $(SHAREDLIB)).$(APIVERSION).dylib
   CFLAGS := -DMACOSX -D_DARWIN_C_SOURCE $(CFLAGS)
+  SONAMEFLAGS=-Wl,-install_name,$(JNISHAREDLIB) -dynamiclib -framework JavaVM
 else
 ifneq (,$(findstring WIN,$(OS)))
   SHAREDLIB = natpmp.dll
@@ -50,6 +52,7 @@ else
   SHAREDLIB = libnatpmp.so
   JNISHAREDLIB = libjninatpmp.so
   SONAME = $(SHAREDLIB).$(APIVERSION)
+  SONAMEFLAGS=-Wl,-soname,$(JNISHAREDLIB)
 endif
 endif
 
@@ -62,7 +65,9 @@ INSTALLDIRINC = $(INSTALLPREFIX)/include
 INSTALLDIRLIB = $(INSTALLPREFIX)/lib
 INSTALLDIRBIN = $(INSTALLPREFIX)/bin
 
-JAVA = java
+JAVA ?= java
+JAVAC ?= javac
+JAVAH ?= javah
 JAVAPACKAGE = fr/free/miniupnp/libnatpmp
 JAVACLASSES = $(JAVAPACKAGE)/NatPmp.class $(JAVAPACKAGE)/NatPmpResponse.class $(JAVAPACKAGE)/LibraryExtractor.class $(JAVAPACKAGE)/URLUtils.class
 JNIHEADERS = fr_free_miniupnp_libnatpmp_NatPmp.h
@@ -97,12 +102,15 @@ install:	$(HEADERS) $(STATICLIB) $(SHAREDLIB) natpmpc-shared
 	ln -s -f $(SONAME) $(INSTALLDIRLIB)/$(SHAREDLIB)
 
 $(JNIHEADERS): fr/free/miniupnp/libnatpmp/NatPmp.class
-	javah -jni fr.free.miniupnp.libnatpmp.NatPmp
+	$(JAVAH) -jni fr.free.miniupnp.libnatpmp.NatPmp
 
 %.class: %.java
-	javac -cp . $<
+	$(JAVAC) -cp . $<
 
 $(JNISHAREDLIB): $(SHAREDLIB) $(JNIHEADERS) $(JAVACLASSES)
+ifeq (,$(JAVA_HOME))
+	@echo "Check your JAVA_HOME environement variable" && false
+endif
 ifneq (,$(findstring WIN,$(OS)))
 	$(CC) -m32 -D_JNI_Implementation_ -Wl,--kill-at \
 	-I"$(JAVA_HOME)/include" -I"$(JAVA_HOME)/include/win32" \
@@ -110,7 +118,7 @@ ifneq (,$(findstring WIN,$(OS)))
 	-o $(JNISHAREDLIB) -L. -lnatpmp -lws2_32 -lIphlpapi
 else
 	$(CC) $(CFLAGS) -c -I"$(JAVA_HOME)/include" -I"$(JAVA_HOME)/include/win32" natpmp-jni.c
-	$(CC) $(CFLAGS) -o $(JNISHAREDLIB) -shared -Wl,-soname,$(JNISHAREDLIB)  natpmp-jni.o -lc -L. -lnatpmp
+	$(CC) $(CFLAGS) -o $(JNISHAREDLIB) -shared $(SONAMEFLAGS) natpmp-jni.o -lc -L. -lnatpmp
 endif
 
 jar: $(JNISHAREDLIB)
@@ -119,11 +127,11 @@ jar: $(JNISHAREDLIB)
 	mkdir -p libraries/$(JNISHAREDLIBPATH)
 	mv $(JNISHAREDLIB) libraries/$(JNISHAREDLIBPATH)/$(JNISHAREDLIB)
 	jar cf natpmp_$(JARSUFFIX).jar @classes.list libraries/$(JNISHAREDLIBPATH)/$(JNISHAREDLIB)
-	rm classes.list
+	$(RM) classes.list
 
 jnitest: $(JNISHAREDLIB) JavaTest.class
 	$(RM) libjninatpmp.so
-	java -Djna.nosys=true -cp . JavaTest
+	$(JAVA) -Djna.nosys=true -cp . JavaTest
 
 mvn_install:
 	mvn install:install-file -Dfile=java/natpmp_$(JARSUFFIX).jar \
