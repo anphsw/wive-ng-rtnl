@@ -1914,32 +1914,33 @@
 19) udpxy: allways disable ipv6 support (not real devices used ipv6 for streaming).<br>
 20) apps: more apps build with gc-sections (802.1x,dropbear,inadyn,iptables,lldt,miniupnpd,radvd,wireless_tool,xupnpd).<br>
 21) lltd: fix physical medium type set for wireless.<br>
-22) kernel: more spi flash support.<br>
-23) kernel: base MT7620 support.<br>
-24) kernel: netfilter: nf_conntrack: flush net_gre->keymap_list only from gre helper.<br>
-25) kernel: ipv6: don't create clones of host routes.<br>
-26) kernel: usb serial(option/cdc_acm/cdc_ether): add some modems support.<br>
-27) kernel: mppe: fix stop work after recive serios reordered packets.<br>
-28) kernel: ralink drivers 2.7.x.x: fix stop work after some clients reconnect or some call ap scan.<br>
-29) kernel: /lib/string and /lib/memcopy replace by glibc version (more fast).<br>
-30) kernel: tcp: place file operations directly into tcp_seq_afinfo.<br>
-31) kernel: tcp_cubic: fix the range of delayed_ack.<br>
-32) kernel: sched: Keep kthreads at default priority.<br>
-33) kernel: ipv6: fix IPV6_RECVERR handling of locally-generated errors.<br>
-34) kernel: ipv4: remove redundant verification code.<br>
-35) kernel: cifs: typo in earlier cifs_reconnect fix.<br>
-36) kernel: cifs: fix for incorrect session reconnects.<br>
-37) kernel: cifs: fix bad handling of EAGAIN error on kernel_recvmsg in cifs_demultiplex_thread.<br>
-38) kernel: ipc: sysvsem: refuse clone(CLONE_SYSVSEM|CLONE_NEWIPC).<br>
-39) kernel: ipc: sysvsem: force unshare(CLONE_SYSVSEM) when CLONE_NEWIPC.<br>
-40) kernel: ipc: sysvsem: implement sys_unshare(CLONE_SYSVSEM).<br>
-41) kernel: bridge: replace fdb hash to more fast function (~10% hash speed up).<br>
-42) kernel: ipmr: increase cache resolve queue len (prevent drop unresolved request).<br>
-43) kernel: usb serial: add some modems support.<br>
-44) kernel: mm: reduce atomic use on use_mm fast path.<br>
-45) kernel: 8021q: fix a potential memory leak.<br>
-46) kernel: ipv6: in case of link failure remove route directly instead of letting it expire.<br>
-47) kernel: ip6_pol_route panic: Do not allow VLAN on loopback.<br>
+22) init.d: fix work wins for local l2tp server clients.<br>
+23) kernel: more spi flash support.<br>
+24) kernel: base MT7620 support.<br>
+25) kernel: netfilter: nf_conntrack: flush net_gre->keymap_list only from gre helper.<br>
+26) kernel: ipv6: don't create clones of host routes.<br>
+27) kernel: usb serial(option/cdc_acm/cdc_ether): add some modems support.<br>
+28) kernel: mppe: fix stop work after recive serios reordered packets.<br>
+29) kernel: ralink drivers 2.7.x.x: fix stop work after some clients reconnect or some call ap scan.<br>
+30) kernel: /lib/string and /lib/memcopy replace by glibc version (more fast).<br>
+31) kernel: tcp: place file operations directly into tcp_seq_afinfo.<br>
+32) kernel: tcp_cubic: fix the range of delayed_ack.<br>
+33) kernel: sched: Keep kthreads at default priority.<br>
+34) kernel: ipv6: fix IPV6_RECVERR handling of locally-generated errors.<br>
+35) kernel: ipv4: remove redundant verification code.<br>
+36) kernel: cifs: typo in earlier cifs_reconnect fix.<br>
+37) kernel: cifs: fix for incorrect session reconnects.<br>
+38) kernel: cifs: fix bad handling of EAGAIN error on kernel_recvmsg in cifs_demultiplex_thread.<br>
+39) kernel: ipc: sysvsem: refuse clone(CLONE_SYSVSEM|CLONE_NEWIPC).<br>
+40) kernel: ipc: sysvsem: force unshare(CLONE_SYSVSEM) when CLONE_NEWIPC.<br>
+41) kernel: ipc: sysvsem: implement sys_unshare(CLONE_SYSVSEM).<br>
+42) kernel: bridge: replace fdb hash to more fast function (~10% hash speed up).<br>
+43) kernel: ipmr: increase cache resolve queue len (prevent drop unresolved request).<br>
+44) kernel: usb serial: add some modems support.<br>
+45) kernel: mm: reduce atomic use on use_mm fast path.<br>
+46) kernel: 8021q: fix a potential memory leak.<br>
+47) kernel: ipv6: in case of link failure remove route directly instead of letting it expire.<br>
+48) kernel: ip6_pol_route panic: Do not allow VLAN on loopback.<br>
 <br>
 <br>
 <br>

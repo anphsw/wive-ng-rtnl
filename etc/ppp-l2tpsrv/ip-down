@@ -22,12 +22,11 @@ iptables -D l2tpsrvfwd -i $PPP_IFACE -j ACCEPT > /dev/null 2>&1
 iptables -D l2tpsrvfwd -o $PPP_IFACE -j ACCEPT > /dev/null 2>&1
 iptables -D POSTROUTING -t nat ! -o $PPP_IFACE -j MASQUERADE > /dev/null 2>&1
 
-# allow udpxy for l2tp clients
-if [ "$UDPXYMode" != "0" ]; then
-    iptables -D servicelimit -i $PPP_IFACE -m state --state NEW -p tcp --dport $UDPXYPort -j ACCEPT
-fi
+# udpxy
+iptables -D servicelimit -i $PPP_IFACE -m state --state NEW -p tcp --dport $UDPXYPort -j ACCEPT > /dev/null 2>&1
 
-# add low prio route to client network
-ip route replace default dev $PPP_IFACE metric 100$PPP_NUM via $PPP_REMOTE > /dev/null 2>&1
+# samba
+iptables -D servicelimit -i $PPP_IFACE -p udp --dport 137:138 -j ACCEPT > /dev/null 2>&1
+iptables -D servicelimit -i $PPP_IFACE -m state --state NEW -p tcp -m multiport --dport 139,445 -j ACCEPT > /dev/null 2>&1
 
 export PPP_IFACE PPP_TTY PPP_SPEED PPP_LOCAL PPP_REMOTE PPP_IPPARAM

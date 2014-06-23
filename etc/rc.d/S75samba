@@ -17,7 +17,9 @@ if [ "$SmbEnabled" = "1" ]; then
 
     echo "[global]" > $CONFIG
     # for file share mode need increase buffers size
-    echo "    interfaces = $interfaces" >> $CONFIG
+    if [ "$interfaces" != "" ]; then
+	echo "    interfaces = $interfaces" >> $CONFIG
+    fi
     echo "    socket options = $socket_options" >> $CONFIG
     echo "    workgroup = $WorkGroup" >> $CONFIG
     echo "    netbios name = $SmbNetBIOS" >> $CONFIG
@@ -75,7 +77,7 @@ fi
 
 
 get_param() {
-    eval `nvram_buf_get 2860 WorkGroup SmbNetBIOS SmbString SmbOsLevel SmbTimeserver NTPEnabled NTPServerIP Login lan_ipaddr lan_netmask`
+    eval `nvram_buf_get 2860 WorkGroup SmbNetBIOS SmbString SmbOsLevel SmbTimeserver NTPEnabled NTPServerIP Login lan_ipaddr lan_netmask l2tp_srv_enabled`
     CONFIG="/etc/smb.conf"
     TEMPLATE="/etc/smb.conf.template"
 
@@ -90,7 +92,11 @@ get_param() {
 	socket_options="SO_BROADCAST IPTOS_THROUGHPUT TCP_NODELAY SO_RCVBUF=4096 SO_SNDBUF=4096" >> $CONFIG
     fi
 
-    interfaces="lo 127.0.0.1/255.0.0.0 $lan_if $lan_ipaddr/$lan_netmask"
+    if [ "$l2tp_srv_enabled" = "1" ]; then
+	interfaces=""
+    else
+	interfaces="lo 127.0.0.1/255.0.0.0 $lan_if $lan_ipaddr/$lan_netmask"
+    fi
 
     is_smb_v3=`grep -c "NTFS" < $TEMPLATE`
 }
