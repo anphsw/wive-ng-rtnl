@@ -79,8 +79,10 @@ int vlan_dev_rebuild_header(struct sk_buff *skb)
 static inline struct sk_buff *vlan_check_reorder_header(struct sk_buff *skb)
 {
 	if (VLAN_DEV_INFO(skb->dev)->flags & 1) {
-		if (skb_cow(skb, skb_headroom(skb)) < 0)
+		if (skb_cow(skb, skb_headroom(skb)) < 0) {
+			kfree_skb(skb);
 			skb = NULL;
+		}
 		if (skb) {
 			/* Lifted from Gleb's VLAN code... */
 			memmove(skb->data - ETH_HLEN,
