@@ -158,8 +158,8 @@ struct net_device loopback_dev = {
 				  | NETIF_F_TSO
 #endif
 				  | NETIF_F_HW_CSUM | NETIF_F_HIGHDMA
-				  | NETIF_F_LLTX,
-				  | NETIF_F_VLAN_CHALLENGED;
+				  | NETIF_F_LLTX
+				  | NETIF_F_VLAN_CHALLENGED,
 	.ethtool_ops		= &loopback_ethtool_ops,
 };
 
