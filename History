@@ -235,6 +235,7 @@
 44) kernel: mm: reduce atomic use on use_mm fast path.<br>
 45) kernel: 8021q: fix a potential memory leak.<br>
 46) kernel: ipv6: in case of link failure remove route directly instead of letting it expire.<br>
+47) kernel: ip6_pol_route panic: Do not allow VLAN on loopback.<br>
 <br>
 <br>
 <br>
