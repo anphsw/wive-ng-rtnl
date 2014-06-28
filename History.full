@@ -1941,6 +1941,7 @@
 46) kernel: 8021q: fix a potential memory leak.<br>
 47) kernel: ipv6: in case of link failure remove route directly instead of letting it expire.<br>
 48) kernel: ip6_pol_route panic: Do not allow VLAN on loopback.<br>
+49) kernel: tun: orphan an skb on tx.<br>
 <br>
 <br>
 <br>
