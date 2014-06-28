@@ -107,11 +107,11 @@ function selectModemType(form)
 {
 	var gsm_on = form.modem_type.value == '0';
 	var cdma_on = form.modem_type.value == '1';
-	
+
 	// Display mode-dependent elements
 	displayElement( 'modem_dialn_row', gsm_on);
-	
-}	
+	displayElement( 'modem_apn_row', gsm_on);
+}
 
 function bodyOnLoad(form)
 {
