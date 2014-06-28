@@ -1942,6 +1942,7 @@
 47) kernel: ipv6: in case of link failure remove route directly instead of letting it expire.<br>
 48) kernel: ip6_pol_route panic: Do not allow VLAN on loopback.<br>
 49) kernel: tun: orphan an skb on tx.<br>
+50) kernel: option: add support RAS modem TE W120.<br>
 <br>
 <br>
 <br>
