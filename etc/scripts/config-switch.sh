@@ -1,3 +1,5 @@
+#!/bin/sh
+
 #######################################################
 # configure LAN/WAN switch particion and mode per port
 # This is high level switch configure helper for Wive

@@ -1,4 +1,5 @@
 #!/bin/sh
+
 # part of usb_modeswitch 1.2.7
 device_in()
 {
