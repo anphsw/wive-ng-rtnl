@@ -17,6 +17,7 @@ int ip_route_me_harder(struct sk_buff **pskb, unsigned addr_type)
 	struct dst_entry *odst;
 	unsigned int hh_len;
 	unsigned int type;
+	int err;
 
 	type = inet_addr_type(iph->saddr);
 	if (addr_type == RTN_UNSPEC)
@@ -55,7 +56,8 @@ int ip_route_me_harder(struct sk_buff **pskb, unsigned addr_type)
 		dst_release(odst);
 	}
 
-	if ((*pskb)->dst->error)
+	err = (*pskb)->dst->error;
+	if (err)
 		return -1;
 
 #ifdef CONFIG_XFRM

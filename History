@@ -239,6 +239,7 @@
 48) kernel: ip6_pol_route panic: Do not allow VLAN on loopback.<br>
 49) kernel: tun: orphan an skb on tx.<br>
 50) kernel: option: add support RAS modem TE W120.<br>
+51) kernel: netfilter: ipv6: move xfrm_lookup at end of ip6_route_me_harder.<br>
 <br>
 <br>
 <br>
