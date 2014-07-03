@@ -20,7 +20,7 @@ LOG="logger -t parprouted"
 
 start() {
     parproutedEnabled=`nvram_get 2860 parproutedEnabled`
-    if [ "$parproutedEnabled" = "1" ] && [ "$OperationMode" != "0" ] && [ "$ApCliBridgeOnly" != "1" ]; then
+    if [ "$parproutedEnabled" = "1" ]; then
 	$LOG "Starting parprouted"
 	echo 1 > "/proc/sys/net/ipv4/conf/$wan_if/proxy_arp"
 	echo 1 > "/proc/sys/net/ipv4/conf/$lan_if/proxy_arp"
