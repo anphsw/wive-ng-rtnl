@@ -350,8 +350,10 @@ pppol2tp_session_find(struct pppol2tp_tunnel *tunnel, u16 session_id)
 
 /* Lookup a tunnel by id
  */
-static struct pppol2tp_tunnel *pppol2tp_tunnel_find(struct pppol2tp_tunnel *tunnel, u16 tunnel_id)
+static struct pppol2tp_tunnel *pppol2tp_tunnel_find(u16 tunnel_id)
 {
+	struct pppol2tp_tunnel *tunnel = NULL;
+
 	//TODO: Switch to RCU
 	read_lock_bh(&tunnel->hlist_lock);
 	list_for_each_entry(tunnel, &pppol2tp_tunnel_list, list) {
@@ -1795,7 +1797,7 @@ static int pppol2tp_connect(struct socket *sock, struct sockaddr *uservaddr,
 	    tunnel = tunnel_sock->sk_user_data;
 
 	} else {
-		tunnel = pppol2tp_tunnel_find(tunnel, sp->pppol2tp.s_tunnel);
+		tunnel = pppol2tp_tunnel_find(sp->pppol2tp.s_tunnel);
 
 		/* Error if we can't find the tunnel */
 		error = -ENOENT;
