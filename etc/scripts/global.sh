@@ -31,7 +31,7 @@ txqueuelen="1000"
 eval `nvram_buf_get 2860 OperationMode wanConnectionMode wan_ipaddr wan_static_dns \
 	WLAN_MAC_ADDR WLAN2_MAC_ADDR WAN_MAC_ADDR LAN_MAC_ADDR \
 	dnsPEnabled UDPXYMode UDPXYPort igmpEnabled \
-	vpnEnabled vpnPurePPPOE vpnType \
+	vpnEnabled vpnPurePPPOE vpnType vpnDGW \
 	radvdEnabled ipv6_mode \
 	ApCliBridgeOnly \
 	MODEMENABLED \
@@ -144,8 +144,8 @@ getWanIfName() {
     elif [ "$OperationMode" = "4" ]; then
 	    wan_if="$phys_wan_if"
     fi
-    # upnp wan name
-    if [ "$vpnEnabled" = "on" -o "$MODEMENABLED" = "1" ]; then
+    # services wan name
+    if [ "$vpnEnabled" = "on" -a  "$vpnDGW" = "1" ] || [ "$MODEMENABLED" = "1" ]; then
 	get_ppp_wan_if=`ls /proc/sys/net/ipv4/conf/ | grep ppp | tail -q -n1`
 	if [ "$get_ppp_wan_if" != "" ]; then
     	    real_wan_if="$get_ppp_wan_if"
