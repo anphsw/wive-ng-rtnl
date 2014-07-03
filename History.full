@@ -1946,6 +1946,7 @@
 51) kernel: option: add support RAS modem TE W120.<br>
 52) kernel: netfilter: ipv6: move xfrm_lookup at end of ip6_route_me_harder.<br>
 53) kernel: netfilter: disable xt_string and friends (not used, save flash free space).<br>
+54) kernel: pppol2tp: backport rebind tunnel support and some fixes.<br>
 <br>
 <br>
 <br>

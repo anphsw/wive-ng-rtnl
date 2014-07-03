@@ -348,6 +348,23 @@ pppol2tp_session_find(struct pppol2tp_tunnel *tunnel, u16 session_id)
 	return NULL;
 }
 
+/* Lookup a tunnel by id
+ */
+static struct pppol2tp_tunnel *pppol2tp_tunnel_find(struct pppol2tp_tunnel *tunnel, u16 tunnel_id)
+{
+	//TODO: Switch to RCU
+	read_lock_bh(&tunnel->hlist_lock);
+	list_for_each_entry(tunnel, &pppol2tp_tunnel_list, list) {
+		if (tunnel->stats.tunnel_id == tunnel_id) {
+			read_unlock_bh(&tunnel->hlist_lock);
+			return tunnel;
+		}
+	}
+	read_unlock_bh(&tunnel->hlist_lock);
+
+	return NULL;
+}
+
 /*****************************************************************************
  * Receive data handling
  *****************************************************************************/
@@ -366,7 +383,7 @@ static void pppol2tp_recv_queue_skb(struct pppol2tp_session *session, struct sk_
 	spin_lock(&session->reorder_q.lock);
 	skb_queue_walk_safe(&session->reorder_q, skbp, tmp) {
 		if (PPPOL2TP_SKB_CB(skbp)->ns > ns) {
-			__skb_insert(skb, skbp->prev, skbp, &session->reorder_q);
+			__skb_queue_before(&session->reorder_q, skbp, skb);
 			PRINTK(session->debug, PPPOL2TP_MSG_SEQ, KERN_DEBUG,
 			       "%s: pkt %hu, inserted before %hu, reorder_q len=%d\n",
 			       session->name, ns, PPPOL2TP_SKB_CB(skbp)->ns,
@@ -1722,7 +1739,7 @@ out:
 
 /* connect() handler..	Attach a PPPoX socket to a tunnel UDP socket
  */
-int pppol2tp_connect(struct socket *sock, struct sockaddr *uservaddr,
+static int pppol2tp_connect(struct socket *sock, struct sockaddr *uservaddr,
 		     int sockaddr_len, int flags)
 {
 	struct sock *sk = sock->sk;
@@ -1751,6 +1768,7 @@ int pppol2tp_connect(struct socket *sock, struct sockaddr *uservaddr,
 		goto end;
 
 	/* We don't supporting rebinding anyway */
+	error = -EALREADY;
 	if (sk->sk_user_data)
 		goto end; /* socket is already attached */
 
@@ -1759,21 +1777,41 @@ int pppol2tp_connect(struct socket *sock, struct sockaddr *uservaddr,
 	if (sp->pppol2tp.s_tunnel == 0)
 		goto end;
 
-	/* Look up the tunnel socket and configure it if necessary */
-	tunnel_sock = pppol2tp_prepare_tunnel_socket(sp->pppol2tp.pid,
+	/* Special case: prepare tunnel socket if s_session and
+	 * d_session is 0. Otherwise look up tunnel using supplied
+	 * tunnel id.
+	 */
+	if ((sp->pppol2tp.s_session == 0) && (sp->pppol2tp.d_session == 0)) {
+		tunnel_sock = pppol2tp_prepare_tunnel_socket(sp->pppol2tp.pid,
 						     sp->pppol2tp.fd,
 #ifdef PPPOL2TP_UDP_CONNECT
 						     &sp->pppol2tp.addr,
 #endif
 						     sp->pppol2tp.s_tunnel,
 						     &error);
-	if (tunnel_sock == NULL)
+	    if (tunnel_sock == NULL)
+		    goto end;
+
+	    tunnel = tunnel_sock->sk_user_data;
+
+	} else {
+		tunnel = pppol2tp_tunnel_find(tunnel, sp->pppol2tp.s_tunnel);
+
+		/* Error if we can't find the tunnel */
+		error = -ENOENT;
+		if (tunnel == NULL)
+			goto end;
+
+		tunnel_sock = tunnel->sock;
+	}
+
+	/* Check that this session doesn't already exist */
+	error = -EEXIST;
+	session = pppol2tp_session_find(tunnel, sp->pppol2tp.s_session);
+	if (session != NULL)
 		goto end;
 
-	tunnel = tunnel_sock->sk_user_data;
-
-	/* Allocate and initialize a new session context.
-	 */
+	/* Allocate and initialize a new session context. */
 	session = kzalloc(sizeof(struct pppol2tp_session), GFP_KERNEL);
 	if (session == NULL) {
 		error = -ENOMEM;
