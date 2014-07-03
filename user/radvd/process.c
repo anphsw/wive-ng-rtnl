@@ -30,7 +30,7 @@ void process(struct Interface *ifacel, unsigned char *msg, int len, struct socka
 	print_addr(&addr->sin6_addr, addr_str);
 
 	if (!pkt_info) {
-		flog(LOG_WARNING, "received packet with no pkt_info from %s!", addr_str );
+		flog(LOG_WARNING, "received packet with no pkt_info from %s!", addr_str);
 		return;
 	}
 
@@ -43,11 +43,11 @@ void process(struct Interface *ifacel, unsigned char *msg, int len, struct socka
 		return;
 	}
 
-	icmph = (struct icmp6_hdr *) msg;
+	icmph = (struct icmp6_hdr *)msg;
 
 	if (icmph->icmp6_type != ND_ROUTER_SOLICIT && icmph->icmp6_type != ND_ROUTER_ADVERT) {
 		/*
-		 *	We just want to listen to RSs and RAs
+		 *      We just want to listen to RSs and RAs
 		 */
 
 		flog(LOG_ERR, "icmpv6 filter failed");
@@ -119,13 +119,13 @@ static void process_rs(struct Interface *iface, unsigned char *msg, int len, str
 {
 	double delay;
 	double next;
-	struct timeval tv;
+	struct timespec ts;
 	uint8_t *opt_str;
 
 	/* validation */
 	len -= sizeof(struct nd_router_solicit);
 
-	opt_str = (uint8_t *)(msg + sizeof(struct nd_router_solicit));
+	opt_str = (uint8_t *) (msg + sizeof(struct nd_router_solicit));
 
 	while (len > 0) {
 		int optlen;
@@ -154,22 +154,22 @@ static void process_rs(struct Interface *iface, unsigned char *msg, int len, str
 		opt_str += optlen;
 	}
 
-	gettimeofday(&tv, NULL);
+	clock_gettime(CLOCK_MONOTONIC, &ts);
 
-	delay = MAX_RA_DELAY_TIME * rand() / (RAND_MAX +1.0);
+	delay = MAX_RA_DELAY_TIME * rand() / (RAND_MAX + 1.0);
 
 	if (iface->UnicastOnly) {
 		send_ra_forall(iface, &addr->sin6_addr);
-	} else if (timevaldiff(&tv, &iface->last_multicast) / 1000.0 < iface->MinDelayBetweenRAs) {
+	} else if (timespecdiff(&ts, &iface->last_multicast) / 1000.0 < iface->MinDelayBetweenRAs) {
 		/* last RA was sent only a few moments ago, don't send another immediately. */
 		next =
-		    iface->MinDelayBetweenRAs - (tv.tv_sec + tv.tv_usec / 1000000.0) + (iface->last_multicast.tv_sec + iface->last_multicast.tv_usec / 1000000.0) + delay / 1000.0;
-		iface->next_multicast = next_timeval(next);
+		    iface->MinDelayBetweenRAs - (ts.tv_sec + ts.tv_nsec / 1000000000.0) + (iface->last_multicast.tv_sec + iface->last_multicast.tv_nsec / 1000000000.0) + delay / 1000.0;
+		iface->next_multicast = next_timespec(next);
 	} else {
 		/* no RA sent in a while, send a multicast reply */
 		send_ra_forall(iface, NULL);
 		next = rand_between(iface->MinRtrAdvInterval, iface->MaxRtrAdvInterval);
-		iface->next_multicast = next_timeval(next);
+		iface->next_multicast = next_timespec(next);
 	}
 }
 
@@ -184,7 +184,7 @@ static void process_ra(struct Interface *iface, unsigned char *msg, int len, str
 
 	print_addr(&addr->sin6_addr, addr_str);
 
-	radvert = (struct nd_router_advert *) msg;
+	radvert = (struct nd_router_advert *)msg;
 
 	if ((radvert->nd_ra_curhoplimit && iface->AdvCurHopLimit) && (radvert->nd_ra_curhoplimit != iface->AdvCurHopLimit)) {
 		flog(LOG_WARNING, "our AdvCurHopLimit on %s doesn't agree with %s", iface->Name, addr_str);
@@ -213,7 +213,7 @@ static void process_ra(struct Interface *iface, unsigned char *msg, int len, str
 	if (len == 0)
 		return;
 
-	opt_str = (uint8_t *)(msg + sizeof(struct nd_router_advert));
+	opt_str = (uint8_t *) (msg + sizeof(struct nd_router_advert));
 
 	while (len > 0) {
 		int optlen;
@@ -255,7 +255,7 @@ static void process_ra(struct Interface *iface, unsigned char *msg, int len, str
 			}
 			break;
 		case ND_OPT_PREFIX_INFORMATION:
-			pinfo = (struct nd_opt_prefix_info *) opt_str;
+			pinfo = (struct nd_opt_prefix_info *)opt_str;
 			if (len < sizeof(*pinfo))
 				return;
 			preferred = ntohl(pinfo->nd_opt_pi_preferred_time);
@@ -288,56 +288,56 @@ static void process_ra(struct Interface *iface, unsigned char *msg, int len, str
 		case ND_OPT_REDIRECTED_HEADER:
 			flog(LOG_ERR, "invalid option %d in RA on %s from %s", (int)*opt_str, iface->Name, addr_str);
 			break;
-		/* Mobile IPv6 extensions */
+			/* Mobile IPv6 extensions */
 		case ND_OPT_RTR_ADV_INTERVAL:
 		case ND_OPT_HOME_AGENT_INFO:
 			/* not checked */
 			break;
 		case ND_OPT_RDNSS_INFORMATION:
-			rdnssinfo = (struct nd_opt_rdnss_info_local *) opt_str;
+			rdnssinfo = (struct nd_opt_rdnss_info_local *)opt_str;
 			if (len < sizeof(*rdnssinfo))
 				return;
 			count = rdnssinfo->nd_opt_rdnssi_len;
 
 			/* Check the RNDSS addresses received */
 			switch (count) {
-				case 7:
-					rdnss = iface->AdvRDNSSList;
-					if (!check_rdnss_presence(rdnss, &rdnssinfo->nd_opt_rdnssi_addr3 )) {
-						/* no match found in iface->AdvRDNSSList */
-						print_addr(&rdnssinfo->nd_opt_rdnssi_addr3, rdnss_str);
+			case 7:
+				rdnss = iface->AdvRDNSSList;
+				if (!check_rdnss_presence(rdnss, &rdnssinfo->nd_opt_rdnssi_addr3)) {
+					/* no match found in iface->AdvRDNSSList */
+					print_addr(&rdnssinfo->nd_opt_rdnssi_addr3, rdnss_str);
 					flog(LOG_WARNING, "RDNSS address %s received on %s from %s is not advertised by us", rdnss_str, iface->Name, addr_str);
-					}
-					/* FALLTHROUGH */
-				case 5:
-					rdnss = iface->AdvRDNSSList;
-					if (!check_rdnss_presence(rdnss, &rdnssinfo->nd_opt_rdnssi_addr2 )) {
-						/* no match found in iface->AdvRDNSSList */
-						print_addr(&rdnssinfo->nd_opt_rdnssi_addr2, rdnss_str);
+				}
+				/* FALLTHROUGH */
+			case 5:
+				rdnss = iface->AdvRDNSSList;
+				if (!check_rdnss_presence(rdnss, &rdnssinfo->nd_opt_rdnssi_addr2)) {
+					/* no match found in iface->AdvRDNSSList */
+					print_addr(&rdnssinfo->nd_opt_rdnssi_addr2, rdnss_str);
 					flog(LOG_WARNING, "RDNSS address %s received on %s from %s is not advertised by us", rdnss_str, iface->Name, addr_str);
-					}
-					/* FALLTHROUGH */
-				case 3:
-					rdnss = iface->AdvRDNSSList;
-					if (!check_rdnss_presence(rdnss, &rdnssinfo->nd_opt_rdnssi_addr1 )) {
-						/* no match found in iface->AdvRDNSSList */
-						print_addr(&rdnssinfo->nd_opt_rdnssi_addr1, rdnss_str);
+				}
+				/* FALLTHROUGH */
+			case 3:
+				rdnss = iface->AdvRDNSSList;
+				if (!check_rdnss_presence(rdnss, &rdnssinfo->nd_opt_rdnssi_addr1)) {
+					/* no match found in iface->AdvRDNSSList */
+					print_addr(&rdnssinfo->nd_opt_rdnssi_addr1, rdnss_str);
 					flog(LOG_WARNING, "RDNSS address %s received on %s from %s is not advertised by us", rdnss_str, iface->Name, addr_str);
-					}
+				}
 
-					break;
-				default:
+				break;
+			default:
 				flog(LOG_ERR, "invalid len %i in RDNSS option on %s from %s", count, iface->Name, addr_str);
 			}
 
 			break;
 		case ND_OPT_DNSSL_INFORMATION:
-			dnsslinfo = (struct nd_opt_dnssl_info_local *) opt_str;
+			dnsslinfo = (struct nd_opt_dnssl_info_local *)opt_str;
 			if (len < sizeof(*dnsslinfo))
 				return;
 
 			suffix[0] = '\0';
-			for (offset = 0; offset < (dnsslinfo->nd_opt_dnssli_len-1)*8;) {
+			for (offset = 0; offset < (dnsslinfo->nd_opt_dnssli_len - 1) * 8;) {
 				if (&dnsslinfo->nd_opt_dnssli_suffixes[offset] - opt_str >= len)
 					return;
 				label_len = dnsslinfo->nd_opt_dnssli_suffixes[offset++];
@@ -370,7 +370,7 @@ static void process_ra(struct Interface *iface, unsigned char *msg, int len, str
 
 				if (suffix[0] != '\0')
 					strcat(suffix, ".");
-				strncat(suffix, (char*)&dnsslinfo->nd_opt_dnssli_suffixes[offset], label_len);
+				strncat(suffix, (char *)&dnsslinfo->nd_opt_dnssli_suffixes[offset], label_len);
 				offset += label_len;
 			}
 			break;
@@ -389,8 +389,8 @@ static int addr_match(struct in6_addr *a1, struct in6_addr *a2, int prefixlen)
 	unsigned int pdw;
 	unsigned int pbi;
 
-	pdw = prefixlen >> 0x05;  /* num of whole uint32_t in prefix */
-	pbi = prefixlen &  0x1f;  /* num of bits in incomplete uint32_t in prefix */
+	pdw = prefixlen >> 0x05;	/* num of whole uint32_t in prefix */
+	pbi = prefixlen & 0x1f;	/* num of bits in incomplete uint32_t in prefix */
 
 	if (pdw) {
 		if (memcmp(a1, a2, pdw << 2))
@@ -401,8 +401,8 @@ static int addr_match(struct in6_addr *a1, struct in6_addr *a2, int prefixlen)
 		uint32_t w1, w2;
 		uint32_t mask;
 
-		w1 = *((uint32_t *)a1 + pdw);
-		w2 = *((uint32_t *)a2 + pdw);
+		w1 = *((uint32_t *) a1 + pdw);
+		w2 = *((uint32_t *) a2 + pdw);
 
 		mask = htonl(((uint32_t) 0xffffffff) << (0x20 - pbi));
 
@@ -412,4 +412,3 @@ static int addr_match(struct in6_addr *a1, struct in6_addr *a2, int prefixlen)
 
 	return 1;
 }
-

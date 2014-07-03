@@ -203,7 +203,7 @@
 12) busybox: udhcpc source IP rebind patch.<br>
 13) busybox: udhcpc: make hostname sanitization optional. Closes 3979.<br>
 14) xupnpd: up to 399 revision.<br>
-15) radvd: up to 1.12.0 version.<br>
+15) radvd: up to 1.14.0 version.<br>
 16) openssl: up to 0.9.8za.<br>
 17) udpxy: add mreq support and not build fileinput support.<br>
 18) udpxy: add workaround for client fake freez situations.<br>
