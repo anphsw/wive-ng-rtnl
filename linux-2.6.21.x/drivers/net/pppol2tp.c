@@ -123,10 +123,6 @@
 #define skb_reset_transport_header(skb) (skb)->h.raw = (skb)->data
 #endif
 
-/* Timeouts are specified in milliseconds to/from userspace */
-#define JIFFIES_TO_MS(t) ((t) * 1000 / HZ)
-#define MS_TO_JIFFIES(j) ((j * HZ) / 1000)
-
 /* L2TP header constants */
 #define L2TP_HDRFLAG_T	   0x8000
 #define L2TP_HDRFLAG_L	   0x4000
@@ -2254,7 +2250,7 @@ static int pppol2tp_session_setsockopt(struct sock *sk,
 		break;
 
 	case PPPOL2TP_SO_REORDERTO:
-		session->reorder_timeout = MS_TO_JIFFIES(val);
+		session->reorder_timeout = msecs_to_jiffies(val);
 		PRINTK(session->debug, PPPOL2TP_MSG_CONTROL, KERN_INFO,
 		       "%s: set reorder_timeout=%d\n", session->name,
 		       session->reorder_timeout);
@@ -2372,7 +2368,7 @@ static int pppol2tp_session_getsockopt(struct sock *sk,
 		break;
 
 	case PPPOL2TP_SO_REORDERTO:
-		*val = JIFFIES_TO_MS(session->reorder_timeout);
+		*val = (int) jiffies_to_msecs(session->reorder_timeout);
 		PRINTK(session->debug, PPPOL2TP_MSG_CONTROL, KERN_INFO,
 		       "%s: get reorder_timeout=%d\n", session->name, *val);
 		break;
@@ -2620,7 +2616,7 @@ static int pppol2tp_proc_show(struct seq_file *m, void *v)
 				   session->send_seq ? 'S' : '-',
 				   session->lns_mode ? "LNS" : "LAC",
 				   session->debug,
-				   JIFFIES_TO_MS(session->reorder_timeout));
+				   jiffies_to_msecs(session->reorder_timeout));
 			seq_printf(m, "   %hu/%hu %llu/%llu/%llu %llu/%llu/%llu\n",
 				   session->nr, session->ns,
 				   session->stats.tx_packets,
