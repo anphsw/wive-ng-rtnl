@@ -40,13 +40,13 @@
 
 /* These are for everybody (although not all archs will actually
    discard it in modules) */
-#define __init		__attribute__ ((__section__ (".init.text")))
+#define __init		__attribute__ ((__section__ (".init.text"))) notrace
 #define __initdata	__attribute__ ((__section__ (".init.data")))
 #define __exitdata	__attribute__ ((__section__(".exit.data")))
 #define __exit_call	__used __attribute__ ((__section__ (".exitcall.exit")))
 
 #ifdef CONFIG_SPEEDHACK
-#define FASTPATH	__attribute__ ((__section__(".text.fastpath")))
+#define FASTPATH	__attribute__ ((__section__(".text.fastpath"))) notrace
 #else
 #define FASTPATH
 #endif
@@ -65,10 +65,12 @@
 #define __initdata_refok          __attribute__ ((__section__ (".data.init.refok")))
 
 #ifdef MODULE
-#define __exit		__attribute__ ((__section__(".exit.text")))
+#define __exitused
 #else
-#define __exit		__used __attribute__ ((__section__(".exit.text")))
+#define __exitused  __used
 #endif
+
+#define __exit          __attribute__ ((__section__(".exit.text"))) __exitused __cold notrace
 
 /* For assembly routines */
 #define __INIT		.section	".init.text","ax"
@@ -96,7 +98,7 @@ extern unsigned int reset_devices;
 extern void setup_arch(char **);
 
 #endif
-  
+
 #ifndef MODULE
 
 #ifndef __ASSEMBLY__
