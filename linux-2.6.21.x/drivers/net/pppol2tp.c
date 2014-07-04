@@ -5,8 +5,9 @@
  * PPPoL2TP --- PPP over L2TP (RFC 2661)
  *
  *
- * Version:    0.18.3
+ * Version:    0.18.4
  *
+ * 050714 :	Added Wive-NG backports from 3.x.x.
  * 230411 :	Added ASUS backports from 2.6.3x.
  * 251003 :	Copied from pppoe.c version 0.6.9.
  *
@@ -104,7 +105,7 @@
 #endif
 #endif
 
-#define PPPOL2TP_DRV_VERSION	"V0.18.3"
+#define PPPOL2TP_DRV_VERSION	"V0.18.4"
 
 /* Developer debug code. */
 #if 0
@@ -958,7 +959,6 @@ static int pppol2tp_sendmsg(struct kiocb *iocb, struct socket *sock, struct msgh
 	struct pppol2tp_tunnel *tunnel;
 	struct sock *sk = sock->sk;
 	struct sock *sk_tun;
-	struct dst_entry *dst;
 	struct inet_sock *inet;
 	struct udphdr *uh;
 	struct sk_buff *skb;
@@ -983,22 +983,22 @@ static int pppol2tp_sendmsg(struct kiocb *iocb, struct socket *sock, struct msgh
 	hdr_len = pppol2tp_l2tp_header_len(session);
 
 	/* Allocate a socket buffer */
-	dst = __sk_dst_get(sk_tun);
-	skb = sock_wmalloc(sk_tun,
-		(dst ? LL_RESERVED_SPACE(dst->dev) : NET_SKB_PAD) +
-		sizeof(struct iphdr) +
-		sizeof(struct udphdr) + hdr_len + 2 + total_len,
-			   0, GFP_KERNEL);
+        skb = sock_wmalloc(sk_tun, NET_SKB_PAD + sizeof(struct iphdr) +
+			    sizeof(struct udphdr) +
+			    hdr_len +
+                            2 + total_len,
+                            0, GFP_KERNEL);
 	if (!skb) {
 		error = -ENOMEM;
 		goto end;
 	}
 
-	/* Reserve space for headers. */
-	skb_reserve(skb, dst ? LL_RESERVED_SPACE(dst->dev) : NET_SKB_PAD);
+        /* Reserve space for headers. */
+	skb_reserve(skb, NET_SKB_PAD);
 	skb_reset_network_header(skb);
 	skb_reserve(skb, sizeof(struct iphdr));
-	skb_reset_transport_header(skb);
+        skb_reset_transport_header(skb);
+        skb_reserve(skb, sizeof(struct udphdr));
 
 	/* Build UDP header */
 	inet = inet_sk(sk_tun);
@@ -1056,7 +1056,7 @@ static int pppol2tp_sendmsg(struct kiocb *iocb, struct socket *sock, struct msgh
 	}
 
 	/* Get routing info from the tunnel socket */
-	skb->dst = dst_clone(dst);
+	skb->dst = dst_clone(__sk_dst_get(sk_tun));
 
 	/* Queue the packet to IP for output */
 	len = skb->len;
@@ -1119,7 +1119,6 @@ static int pppol2tp_xmit(struct ppp_channel *chan, struct sk_buff *skb)
 	struct pppol2tp_tunnel *tunnel;
 	struct sock *sk = (struct sock *) chan->private;
 	struct sock *sk_tun;
-	struct dst_entry *dst;
 	struct inet_sock *inet;
 	struct udphdr *uh;
 	unsigned int data_len = skb->len;
@@ -1149,11 +1148,12 @@ static int pppol2tp_xmit(struct ppp_channel *chan, struct sk_buff *skb)
 	 * UDP and L2TP and PPP headers. If not enough, expand it to
 	 * make room. Adjust truesize.
 	 */
-	dst = __sk_dst_get(sk_tun);
 	len = skb_headroom(skb);
-	headroom = (dst ? LL_RESERVED_SPACE(dst->dev) : NET_SKB_PAD) +
-		sizeof(struct iphdr) +
-		sizeof(struct udphdr) + hdr_len + 2;
+        headroom = NET_SKB_PAD_ORIG +
+		    sizeof(struct iphdr) + /* IP header */
+                    sizeof(struct udphdr)+ /* UDP header (if L2TP_ENCAPTYPE_UDP) */
+                    hdr_len +     /* L2TP header */
+                    2;          /* PPP header */
 	if (skb_cow_head(skb, headroom)) {
 		error = -ENOMEM;
 		goto end;
@@ -1217,7 +1217,7 @@ static int pppol2tp_xmit(struct ppp_channel *chan, struct sk_buff *skb)
 
 	/* Get routing info from the tunnel socket */
 	dst_release(skb->dst);
-	skb->dst = dst_clone(dst);
+	skb->dst = dst_clone(__sk_dst_get(sk_tun));
 	pppol2tp_skb_set_owner_w(skb, sk_tun);
 
 	/* Queue the packet to IP for output */
