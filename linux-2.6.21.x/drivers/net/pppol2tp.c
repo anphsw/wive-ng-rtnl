@@ -983,7 +983,7 @@ static int pppol2tp_sendmsg(struct kiocb *iocb, struct socket *sock, struct msgh
 	hdr_len = pppol2tp_l2tp_header_len(session);
 
 	/* Allocate a socket buffer */
-        skb = sock_wmalloc(sk_tun, NET_SKB_PAD + sizeof(struct iphdr) +
+	skb = sock_wmalloc(sk_tun, NET_SKB_PAD + sizeof(struct iphdr) +
 			    sizeof(struct udphdr) +
 			    hdr_len +
                             2 + total_len,
@@ -997,8 +997,8 @@ static int pppol2tp_sendmsg(struct kiocb *iocb, struct socket *sock, struct msgh
 	skb_reserve(skb, NET_SKB_PAD);
 	skb_reset_network_header(skb);
 	skb_reserve(skb, sizeof(struct iphdr));
-        skb_reset_transport_header(skb);
-        skb_reserve(skb, sizeof(struct udphdr));
+	skb_reset_transport_header(skb);
+	skb_reserve(skb, sizeof(struct udphdr));
 
 	/* Build UDP header */
 	inet = inet_sk(sk_tun);
@@ -1149,11 +1149,11 @@ static int pppol2tp_xmit(struct ppp_channel *chan, struct sk_buff *skb)
 	 * make room. Adjust truesize.
 	 */
 	len = skb_headroom(skb);
-        headroom = NET_SKB_PAD_ORIG +
+	headroom = NET_SKB_PAD_ORIG +
 		    sizeof(struct iphdr) + /* IP header */
-                    sizeof(struct udphdr)+ /* UDP header (if L2TP_ENCAPTYPE_UDP) */
-                    hdr_len +     /* L2TP header */
-                    2;          /* PPP header */
+		    sizeof(struct udphdr)+ /* UDP header (if L2TP_ENCAPTYPE_UDP) */
+		    hdr_len +     /* L2TP header */
+		    2;          /* PPP header */
 	if (skb_cow_head(skb, headroom)) {
 		error = -ENOMEM;
 		goto end;
