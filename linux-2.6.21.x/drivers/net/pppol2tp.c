@@ -133,6 +133,13 @@
 #define L2TP_HDR_VER_MASK  0x000F
 #define L2TP_HDR_VER	   0x0002
 
+/* Number of bytes to build transmit L2TP headers.
+ * Unfortunately the size is different depending on whether sequence numbers
+ * are enabled.
+ */
+#define PPPOL2TP_L2TP_HDR_SIZE_SEQ		12
+#define PPPOL2TP_L2TP_HDR_SIZE_NOSEQ		8
+
 /* Space for IP, UDP, L2TP and PPP headers */
 #define PPPOL2TP_HEADER_OVERHEAD	40
 
@@ -181,13 +188,6 @@
 #define ENTER_FUNCTION	 do { } while(0)
 #define EXIT_FUNCTION	 do { } while(0)
 #endif
-
-/* Number of bytes to build transmit L2TP headers.
- * Unfortunately the size is different depending on whether sequence numbers
- * are enabled.
- */
-#define PPPOL2TP_L2TP_HDR_SIZE_SEQ		12
-#define PPPOL2TP_L2TP_HDR_SIZE_NOSEQ		8
 
 struct pppol2tp_tunnel;
 
@@ -1751,7 +1751,7 @@ static int pppol2tp_connect(struct socket *sock, struct sockaddr *uservaddr,
 	struct pppol2tp_session *session = NULL;
 	struct pppol2tp_tunnel *tunnel;
 	struct dst_entry *dst;
-	int error = 0;
+	int error = -EINVAL;
 
 	ENTER_FUNCTION;
 
@@ -1760,24 +1760,26 @@ static int pppol2tp_connect(struct socket *sock, struct sockaddr *uservaddr,
 		ntohl(sp->pppol2tp.addr.sin_addr.s_addr), ntohs(sp->pppol2tp.addr.sin_port));
 	lock_sock(sk);
 
-	error = -EINVAL;
 	if (sp->sa_protocol != PX_PROTO_OL2TP)
 		goto end;
 
 	/* Check for already bound sockets */
-	error = -EBUSY;
-	if (sk->sk_state & PPPOX_CONNECTED)
+	if (sk->sk_state & PPPOX_CONNECTED) {
+		error = -EBUSY;
 		goto end;
+	}
 
 	/* We don't supporting rebinding anyway */
-	error = -EALREADY;
-	if (sk->sk_user_data)
+	if (sk->sk_user_data) {
+		error = -EALREADY;
 		goto end; /* socket is already attached */
+	}
 
 	/* Don't bind if s_tunnel is 0 */
-	error = -EINVAL;
-	if (sp->pppol2tp.s_tunnel == 0)
+	if (sp->pppol2tp.s_tunnel == 0) {
+		error = -EINVAL;
 		goto end;
+	}
 
 	/* Special case: prepare tunnel socket if s_session and
 	 * d_session is 0. Otherwise look up tunnel using supplied
@@ -2329,7 +2331,7 @@ static int pppol2tp_setsockopt(struct socket *sock, int level, int optname,
 
 	if (sk->sk_user_data == NULL) {
 		err = -ENOTCONN;
-		DPRINTK(-1, "setsockopt: socket %p not connected.\n", sk);
+		DPRINTK(-1, "socket %p not connected.\n", sk);
 		goto end;
 	}
 
