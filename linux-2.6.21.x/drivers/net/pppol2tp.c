@@ -115,13 +115,15 @@
 /* Old L2TP daemons semi-compatibility */
 //#define PPPOL2TP_UDP_CONNECT
 
-/* Pre 2.6.22 kernels compatibility */
+#if 0
+/* Pre 2.6.22 kernels compatibility, not need in wive */
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22)
 #define udp_hdr(skb) (struct udphdr *) (skb)->h.raw
 #define skb_network_header(skb) skb->nh.raw
 #define skb_transport_header(skb) skb->h.raw
 #define skb_reset_network_header(skb) (skb)->nh.raw = (skb)->data
 #define skb_reset_transport_header(skb) (skb)->h.raw = (skb)->data
+#endif
 #endif
 
 /* L2TP header constants */
