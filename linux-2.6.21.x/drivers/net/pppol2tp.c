@@ -589,6 +589,7 @@ static int pppol2tp_recv_core(struct sock *sock, struct sk_buff *skb)
 	/* Get length of L2TP packet */
 	length = skb->len;
 
+#ifdef DEBUG
 	/* Trace packet contents, if enabled */
 	if (tunnel->debug & PPPOL2TP_MSG_DATA) {
 		int i;
@@ -604,7 +605,7 @@ static int pppol2tp_recv_core(struct sock *sock, struct sk_buff *skb)
 		}
 		printk("\n");
 	}
-
+#endif
 	/* Get L2TP header flags */
 	hdrflags = ntohs(*(u16*)ptr);
 
