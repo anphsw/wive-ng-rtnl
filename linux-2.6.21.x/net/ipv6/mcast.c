@@ -1439,7 +1439,7 @@ static inline int mld_dev_queue_xmit2(struct sk_buff *skb)
 	struct net_device *dev = skb->dev;
 	unsigned char ha[MAX_ADDR_LEN];
 
-	ndisc_mc_map(&skb->nh.ipv6h->daddr, ha, dev, 1);
+	ndisc_mc_map(&ipv6_hdr(skb)->daddr, ha, dev, 1);
 	if (dev_hard_header(skb, dev, ETH_P_IPV6, ha, NULL, skb->len) < 0) {
 		kfree_skb(skb);
 		return -EINVAL;

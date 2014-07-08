@@ -52,7 +52,7 @@ static u_int32_t tcpmss_reverse_mtu(const struct sk_buff *skb,
 	if (family == PF_INET)
 		fl.fl4_dst = ip_hdr(skb)->saddr;
 	else
-		fl.fl6_dst = skb->nh.ipv6h->saddr;
+		fl.fl6_dst = ipv6_hdr(skb)->saddr;
 
 	rcu_read_lock();
 	if (family == PF_INET)

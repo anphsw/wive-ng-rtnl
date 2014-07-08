@@ -95,8 +95,8 @@ static inline struct sock *__inet6_lookup_skb(struct inet_hashinfo *hashinfo,
 	if (unlikely(sk = skb_steal_sock(skb)))
 		return sk;
 	else return __inet6_lookup(hashinfo,
-				   &skb->nh.ipv6h->saddr, sport,
-				   &skb->nh.ipv6h->daddr, ntohs(dport),
+				   &ipv6_hdr(skb)->saddr, sport,
+				   &ipv6_hdr(skb)->daddr, ntohs(dport),
 				   inet6_iif(skb));
 }
 

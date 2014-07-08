@@ -103,7 +103,7 @@ int mip6_mh_filter(struct sock *sk, struct sk_buff *skb)
 		LIMIT_NETDEBUG(KERN_DEBUG "mip6: MH message too short: %d vs >=%d\n",
 			       mh->ip6mh_hdrlen, mip6_mh_len(mh->ip6mh_type));
 		mip6_param_prob(skb, 0, offsetof(struct ip6_mh, ip6mh_hdrlen) +
-				(skb->h.raw - skb->nh.raw));
+				skb_network_header_len(skb));
 		return -1;
 	}
 
@@ -111,7 +111,7 @@ int mip6_mh_filter(struct sock *sk, struct sk_buff *skb)
 		LIMIT_NETDEBUG(KERN_DEBUG "mip6: MH invalid payload proto = %d\n",
 			       mh->ip6mh_proto);
 		mip6_param_prob(skb, 0, offsetof(struct ip6_mh, ip6mh_proto) +
-				(skb->h.raw - skb->nh.raw));
+				skb_network_header_len(skb));
 		return -1;
 	}
 
@@ -347,7 +347,7 @@ static struct xfrm_type mip6_destopt_type =
 
 static int mip6_rthdr_input(struct xfrm_state *x, struct sk_buff *skb)
 {
-	struct ipv6hdr *iph = skb->nh.ipv6h;
+	struct ipv6hdr *iph = ipv6_hdr(skb);
 	struct rt2_hdr *rt2 = (struct rt2_hdr *)skb->data;
 
 	if (!ipv6_addr_equal(&iph->daddr, (struct in6_addr *)x->coaddr) &&
