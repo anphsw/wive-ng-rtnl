@@ -386,7 +386,7 @@ isatap_chksrc(struct sk_buff *skb, struct iphdr *iph, struct ip_tunnel *t)
 		else
 			skb->ndisc_nodetype = NDISC_NODETYPE_NODEFAULT;
 	} else {
-		struct in6_addr *addr6 = &ipv6_hdr(skb)->saddr;
+		struct in6_addr *addr6 = &skb->nh.ipv6h->saddr;
 		if (ipv6_addr_is_isatap(addr6) &&
 		    (addr6->s6_addr32[3] == iph->saddr) &&
 		    ipv6_chk_prefix(addr6, t->dev))

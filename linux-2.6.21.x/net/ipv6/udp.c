@@ -113,7 +113,7 @@ static struct sock *__udp6_lib_lookup_skb(struct sk_buff *skb,
 					  struct hlist_head udptable[])
 {
 	struct sock *sk;
-	struct ipv6hdr *iph = ipv6_hdr(skb);
+	struct ipv6hdr *iph = skb->nh.ipv6h;
 
 	if (unlikely(sk = skb_steal_sock(skb)))
 		return sk;
