@@ -246,6 +246,7 @@
 55) kernel: pppol2tp: backport rebind tunnel support and some fixes.<br>
 55) kernel: pppol2tp: backport send/recv messages optimization.<br>
 56) kernel: ipv6: set defaults param as in ipv4 code.<br>
+57) kernel: igmp: fix the problem when mc leave group.<br>
 <br>
 <br>
 <br>
