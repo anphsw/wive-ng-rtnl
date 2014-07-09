@@ -2096,7 +2096,7 @@ struct sk_buff * tcp_make_synack(struct sock *sk, struct dst_entry *dst,
 #endif
 	int mss;
 
-	skb = sock_wmalloc(sk, MAX_TCP_HEADER + 15, 1, GFP_ATOMIC);
+	skb = sock_wmalloc(sk, MAX_TCP_HEADER, 1, GFP_ATOMIC);
 	if (skb == NULL)
 		return NULL;
 
@@ -2168,7 +2168,7 @@ struct sk_buff * tcp_make_synack(struct sock *sk, struct dst_entry *dst,
 
 	skb->csum = 0;
 	th->doff = (tcp_header_size >> 2);
-	TCP_INC_STATS(TCP_MIB_OUTSEGS);
+	TCP_INC_STATS_BH(TCP_MIB_OUTSEGS);
 
 #ifdef CONFIG_TCP_MD5SIG
 	/* Okay, we have all we need - do the md5 hash if needed */
