@@ -247,6 +247,7 @@
 55) kernel: pppol2tp: backport send/recv messages optimization.<br>
 56) kernel: ipv6: set defaults param as in ipv4 code.<br>
 57) kernel: igmp: fix the problem when mc leave group.<br>
+58) kernel: core: slight optimization of process backlog loop.<br>
 <br>
 <br>
 <br>

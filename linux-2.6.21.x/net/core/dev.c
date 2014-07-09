@@ -1960,39 +1960,29 @@ static int process_backlog(struct net_device *backlog_dev, int *budget)
 	struct softnet_data *queue = &__get_cpu_var(softnet_data);
 
 	backlog_dev->weight = weight_p;
-	for (;;) {
+	do {
 		struct sk_buff *skb;
 
 		local_irq_disable();
 		skb = __skb_dequeue(&queue->input_pkt_queue);
-		if (!skb)
-			goto job_done;
+		if (!skb) {
+		    backlog_dev->quota -= work;
+		    *budget -= work;
 
+		    list_del(&backlog_dev->poll_list);
+		    smp_mb__before_clear_bit();
+		    netif_poll_enable(backlog_dev);
+
+		    local_irq_enable();
+		    return 0;
+		}
 		local_irq_enable();
-
 		netif_receive_skb(skb);
-
-		work++;
-
-		if (work >= quota)
-			break;
-
-	}
+	} while (++work < quota);
 
 	backlog_dev->quota -= work;
 	*budget -= work;
 	return -1;
-
-job_done:
-	backlog_dev->quota -= work;
-	*budget -= work;
-
-	list_del(&backlog_dev->poll_list);
-	smp_mb__before_clear_bit();
-	netif_poll_enable(backlog_dev);
-
-	local_irq_enable();
-	return 0;
 }
 
 static void net_rx_action(struct softirq_action *h)
