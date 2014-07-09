@@ -1107,7 +1107,6 @@ static inline void tcp_mib_init(void)
 /*from STCP */
 static inline void clear_all_retrans_hints(struct tcp_sock *tp){
 	tp->lost_skb_hint = NULL;
-	tp->scoreboard_skb_hint = NULL;
 	tp->retransmit_skb_hint = NULL;
 	tp->forward_skb_hint = NULL;
 	tp->fastpath_skb_hint = NULL;

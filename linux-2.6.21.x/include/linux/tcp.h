@@ -330,7 +330,6 @@ struct tcp_sock {
 	/* from STCP, retrans queue hinting */
 	struct sk_buff* lost_skb_hint;
 
-	struct sk_buff *scoreboard_skb_hint;
 	struct sk_buff *retransmit_skb_hint;
 	struct sk_buff *forward_skb_hint;
 	struct sk_buff *fastpath_skb_hint;

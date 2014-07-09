@@ -1532,19 +1532,6 @@ static inline int tcp_fackets_out(struct tcp_sock *tp)
 	return tcp_is_reno(tp) ? tp->sacked_out+1 : tp->fackets_out;
 }
 
-static inline int tcp_skb_timedout(struct sock *sk, struct sk_buff *skb)
-{
-	return tcp_time_stamp - TCP_SKB_CB(skb)->when > inet_csk(sk)->icsk_rto;
-}
-
-static inline int tcp_head_timedout(struct sock *sk)
-{
-	struct tcp_sock *tp = tcp_sk(sk);
-
-	return tp->packets_out &&
-	       tcp_skb_timedout(sk, skb_peek(&sk->sk_write_queue));
-}
-
 /* Linux NewReno/SACK/FACK/ECN state machine.
  * --------------------------------------
  *
@@ -1651,13 +1638,7 @@ static int tcp_time_to_recover(struct sock *sk)
 	if (tcp_fackets_out(tp) > tp->reordering)
 		return 1;
 
-	/* Trick#3 : when we use RFC2988 timer restart, fast
-	 * retransmit can be triggered by timeout of queue head.
-	 */
-	if (tcp_head_timedout(sk))
-		return 1;
-
-	/* Trick#4: It is still not OK... But will it be useful to delay
+	/* Trick#3: It is still not OK... But will it be useful to delay
 	 * recovery more?
 	 */
 	packets_out = tp->packets_out;
@@ -1804,16 +1785,12 @@ static void tcp_update_scoreboard(struct sock *sk)
 	 * Hence, we can detect timed out packets during fast
 	 * retransmit without falling to slow start.
 	 */
-	if (!tcp_is_reno(tp) && tcp_head_timedout(sk)) {
+	if (!tcp_is_reno(tp)) {
 		struct sk_buff *skb;
 
-		skb = tp->scoreboard_skb_hint ? tp->scoreboard_skb_hint
-			: sk->sk_write_queue.next;
+		skb = sk->sk_write_queue.next;
 
 		sk_stream_for_retrans_queue_from(skb, sk) {
-			if (!tcp_skb_timedout(sk, skb))
-				break;
-
 			if (!(TCP_SKB_CB(skb)->sacked & (TCPCB_SACKED_ACKED|TCPCB_LOST))) {
 				TCP_SKB_CB(skb)->sacked |= TCPCB_LOST;
 				tp->lost_out += tcp_skb_pcount(skb);
@@ -1826,9 +1803,6 @@ static void tcp_update_scoreboard(struct sock *sk)
 					tp->retransmit_skb_hint = NULL;
 			}
 		}
-
-		tp->scoreboard_skb_hint = skb;
-
 		tcp_verify_left_out(tp);
 	}
 }
@@ -2295,7 +2269,7 @@ tcp_fastretrans_alert(struct sock *sk, u32 prior_snd_una,
 		tcp_set_ca_state(sk, TCP_CA_Recovery);
 	}
 
-	if (is_dupack || tcp_head_timedout(sk))
+	if (is_dupack)
 		tcp_update_scoreboard(sk);
 	tcp_cwnd_down(sk);
 	tcp_xmit_retransmit_queue(sk);

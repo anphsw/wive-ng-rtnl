@@ -249,6 +249,7 @@
 58) kernel: ipv6: set defaults param as in ipv4 code.<br>
 59) kernel: igmp: fix the problem when mc leave group.<br>
 60) kernel: core: slight optimization of process backlog loop.<br>
+61) kernel: tcp: remove bad timeout logic in fast recovery.<br>
 <br>
 <br>
 <br>
