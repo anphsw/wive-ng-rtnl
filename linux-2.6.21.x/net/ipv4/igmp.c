@@ -1870,6 +1870,7 @@ int ip_mc_leave_group(struct sock *sk, struct ip_mreqn *imr)
 		sock_kfree_s(sk, iml, sizeof(*iml));
 		return 0;
 	}
+out:
 	rtnl_unlock();
 	return ret;
 }
