@@ -1954,6 +1954,7 @@
 59) kernel: igmp: fix the problem when mc leave group.<br>
 60) kernel: core: slight optimization of process backlog loop.<br>
 61) kernel: tcp: remove bad timeout logic in fast recovery.<br>
+62) kernel: ipv6 Define constants for link-local multicast addresses.<br>
 <br>
 <br>
 <br>
