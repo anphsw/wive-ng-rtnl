@@ -42,7 +42,8 @@
    discard it in modules) */
 #define __init		__attribute__ ((__section__ (".init.text"))) notrace
 #define __initdata	__attribute__ ((__section__ (".init.data")))
-#define __exitdata	__attribute__ ((__section__(".exit.data")))
+#define __initconst	__attribute__ ((__section__ (".init.rodata")))
+#define __exitdata	__attribute__ ((__section__ (".exit.data")))
 #define __exit_call	__used __attribute__ ((__section__ (".exitcall.exit")))
 
 #ifdef CONFIG_SPEEDHACK
@@ -73,6 +74,7 @@
 #define __exit          __attribute__ ((__section__(".exit.text"))) __exitused __cold notrace
 
 /* For assembly routines */
+#define __HEAD		.section	".head.text","ax"
 #define __INIT		.section	".init.text","ax"
 #define __INIT_REFOK	.section	".text.init.refok","ax"
 #define __FINIT		.previous
