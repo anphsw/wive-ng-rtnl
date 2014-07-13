@@ -163,13 +163,13 @@ SECTIONS
   __init_begin = .;
   .init.text : {
   	_sinittext = .;
-	*(.init.literal) *(.init.text)
+	*(.init.literal) INIT_TEXT
 	_einittext = .;
   }
 
   .init.data :
   {
-    *(.init.data)
+    INIT_DATA
     . = ALIGN(0x4);
     __tagtable_begin = .;
     *(.taglist)

@@ -30,7 +30,7 @@ SECTIONS
   __init_begin = .;
   .init.text : {
 	_sinittext = .;
-	*(.init.text)
+	INIT_TEXT
 	_einittext = .;
   }
   . = ALIGN(4096);
@@ -54,7 +54,7 @@ SECTIONS
 
   #include "asm/common.lds.S"
 
-  init.data : { *(init.data) }
+  init.data : { INIT_DATA }
   .data    :
   {
     . = ALIGN(KERNEL_STACK_SIZE);		/* init_task */

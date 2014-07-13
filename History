@@ -252,6 +252,7 @@
 61) kernel: tcp: remove bad timeout logic in fast recovery.<br>
 62) kernel: ipv6: define constants for link-local multicast addresses.<br>
 63) kernel: ipv6: send ICMPv6 RSes only when RAs are accepted.<br>
+64) kernel: all archs: consolidate init and exit sections in vmlinux.lds.h.<br>
 <br>
 <br>
 <br>

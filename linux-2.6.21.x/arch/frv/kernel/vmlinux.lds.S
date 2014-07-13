@@ -28,14 +28,14 @@ SECTIONS
   .init.text : {
 	*(.text.head)
 #ifndef CONFIG_DEBUG_INFO
-	*(.init.text)
-	*(.exit.text)
-	*(.exit.data)
+	INIT_TEXT
+	EXIT_TEXT
+	EXIT_DATA
 	*(.exitcall.exit)
 #endif
   }
   _einittext = .;
-  .init.data : { *(.init.data) }
+  .init.data : { INIT_DATA }
 
   . = ALIGN(8);
   __setup_start = .;
@@ -137,7 +137,7 @@ SECTIONS
   .data : {			/* Data */
 	DATA_DATA
 	*(.data.*)
-	*(.exit.data)
+	EXIT_DATA
 	CONSTRUCTORS
 	}
 

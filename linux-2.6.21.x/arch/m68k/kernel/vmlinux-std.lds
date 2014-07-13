@@ -44,10 +44,10 @@ SECTIONS
   __init_begin = .;
   .init.text : {
 	_sinittext = .;
-	*(.init.text)
+	INIT_TEXT
 	_einittext = .;
   }
-  .init.data : { *(.init.data) }
+  .init.data : { INIT_DATA }
   . = ALIGN(16);
   __setup_start = .;
   .init.setup : { *(.init.setup) }
@@ -76,8 +76,8 @@ SECTIONS
 
   /* Sections to be discarded */
   /DISCARD/ : {
-	*(.exit.text)
-	*(.exit.data)
+	EXIT_TEXT
+	EXIT_DATA
 	*(.exitcall.exit)
 	}
 
