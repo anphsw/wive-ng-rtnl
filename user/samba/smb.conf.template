@@ -12,8 +12,6 @@
     domain master		= yes
     preferred master		= yes
     local master		= yes
-    wins support		= yes
-    wins proxy			= no
     dns proxy			= no
     guest account		= nobody
     coding system		= utf8

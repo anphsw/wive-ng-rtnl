@@ -16,8 +16,6 @@
     encrypt passwords		= yes
     guest account		= nobody
 
-    wins support		= yes
-    wins proxy			= no
     dns proxy			= no
     domain master		= yes
     preferred master		= yes
