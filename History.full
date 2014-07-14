@@ -1958,6 +1958,11 @@
 63) kernel: ipv6: send ICMPv6 RSes only when RAs are accepted.<br>
 64) kernel: all archs: consolidate init and exit sections in vmlinux.lds.h.<br>
 65) kernel: add missing init section definitions.<br>
+
+<br>
+<b>4.10.x</b><br>
+1) build system: cleanup and tune build flags for more speed and safe codegeneration.<br>
+
 <br>
 <br>
 <br>

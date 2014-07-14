@@ -108,30 +108,24 @@ else
 endif
 ifdef CONFIG_LIB_SMALLSIZE
 	# Defeat .eh_frame bloat (~25% smaller binary)
-	CFLAGS += -fno-caller-saves
-	CFLAGS += -fno-unwind-tables
-	CFLAGS += -fno-asynchronous-unwind-tables
-else
-ifdef CONFIG_RT2880_FLASH_4M
-	# This is ~5% speedup for result bynary before pure -Os
-	# and ~2% bigest unpacked rootfs size
-	CFLAGS += -ffast-math -fforce-addr
-else
-	# This is improve performance ~10% before pure -Os
-	# and ~5% bigest unpacked rootfs size
-	CFLAGS += -funit-at-a-time -membedded-data -muninit-const-in-rodata -ffast-math -fforce-addr -fconserve-stack
-endif
+	CFLAGS += -fno-caller-saves -fno-unwind-tables -fno-asynchronous-unwind-tables
 endif
 ifdef CONFIG_LIB_SAVERAM
 	CFLAGS += -membedded-data -muninit-const-in-rodata
 endif
-	#disable new loop optimization mode in 4.8.0 and later - fix regressions
+	# This is improve performance ~10% before pure -Os and ~5% bigest unpacked rootfs size
+	CFLAGS += -funit-at-a-time -ffast-math -fforce-addr -fconserve-stack
+
+	# disable new loop optimization mode in 4.8.0 and later - fix regressions
 	CFLAGS  += -fno-aggressive-loop-optimizations
+
 	# fix ~10% performance regression at 4.8.x and 4.7.x gcc
 	CFLAGS  += -fno-tree-slsr
 
+	# more safe codegeneration
+	CFLAGS  += -fno-delete-null-pointer-checks
+
 	CFLAGS  += -pipe
-	CFLAGS  += -fno-delete-null-pointer-checks -fconserve-stack
 	CFLAGS  += $(VENDOR_CFLAGS)
 	CFLAGS  += -fno-builtin
 	CFLAGS  += -DEMBED
@@ -158,30 +152,24 @@ else
 endif
 ifdef CONFIG_USER_SMALLSIZE
 	# Defeat .eh_frame bloat (~25% smaller binary)
-	CFLAGS += -fno-caller-saves
-	CFLAGS += -fno-unwind-tables
-	CFLAGS += -fno-asynchronous-unwind-tables
-else
-ifdef CONFIG_RT2880_FLASH_4M
-	# This is ~5% speedup for result bynary before pure -Os
-	# and ~2% bigest unpacked rootfs size
-	CFLAGS += -ffast-math -fforce-addr
-else
-	# This is improve performance ~10% before pure -Os
-	# and ~5% bigest unpacked rootfs size
-	CFLAGS += -funit-at-a-time -membedded-data -muninit-const-in-rodata -ffast-math -fforce-addr -fconserve-stack
-endif
+	CFLAGS += -fno-caller-saves -fno-unwind-tables -fno-asynchronous-unwind-tables
 endif
 ifdef CONFIG_USER_SAVERAM
 	CFLAGS += -membedded-data -muninit-const-in-rodata
 endif
-	#disable new loop optimization mode in 4.8.0 and later - fix regressions
+	# This is improve performance ~10% before pure -Os and ~5% bigest unpacked rootfs size
+	CFLAGS += -funit-at-a-time -ffast-math -fforce-addr -fconserve-stack
+
+	# disable new loop optimization mode in 4.8.0 and later - fix regressions
 	CFLAGS  += -fno-aggressive-loop-optimizations
+
 	# fix ~10% performance regression at 4.8.x and 4.7.x gcc
 	CFLAGS  += -fno-tree-slsr
 
+	# more safe codegeneration
+	CFLAGS  += -fno-delete-null-pointer-checks
+
 	CFLAGS  += -pipe
-	CFLAGS  += -fno-delete-null-pointer-checks -fconserve-stack
 	CFLAGS  += $(VENDOR_CFLAGS)
 	CFLAGS  += -Dlinux -D__linux__ -Dunix -DEMBED
 	CFLAGS  += -I$(ROOTDIR)
