@@ -102,3 +102,8 @@ elif [ "$dnsPEnabled" != "1" -a "$wan_static_dns" != "on" ] && [ "$MODE" = "pppd
 	sleep 3
 	service dhcpd restart
 fi
+
+# reconfigure and restart samba in recive wins server adress from dhcp
+if [ "$MODE" = "dhcp" ] && [ -f /tmp/wins.dhcp ]; then
+    service samba restart
+fi
