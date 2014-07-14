@@ -116,6 +116,9 @@ endif
 	# This is improve performance ~10% before pure -Os and ~5% bigest unpacked rootfs size
 	CFLAGS += -funit-at-a-time -ffast-math -fforce-addr -fconserve-stack
 
+	# disable invalid "can't wrap" optimizations for signed / pointers
+	CFLAGS  += -fno-strict-overflow
+
 	# disable new loop optimization mode in 4.8.0 and later - fix regressions
 	CFLAGS  += -fno-aggressive-loop-optimizations
 
@@ -159,6 +162,9 @@ ifdef CONFIG_USER_SAVERAM
 endif
 	# This is improve performance ~10% before pure -Os and ~5% bigest unpacked rootfs size
 	CFLAGS += -funit-at-a-time -ffast-math -fforce-addr -fconserve-stack
+
+	# disable invalid "can't wrap" optimizations for signed / pointers
+	CFLAGS  += -fno-strict-overflow
 
 	# disable new loop optimization mode in 4.8.0 and later - fix regressions
 	CFLAGS  += -fno-aggressive-loop-optimizations
