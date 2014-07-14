@@ -75,8 +75,15 @@ start() {
 	fi
 	set_dns
 	# wins servers for clients
-	if [ "$SmbEnabled" = "1" ]; then
-		config-udhcpd.sh -w "$lan_ipaddr"
+	if [ "$SmbEnabled" = "1" ] || [ -f /tmp/wins.dhcp ]; then
+		if [ -f /tmp/wins.dhcp ]; then
+		    # use uplink wins if adress recived by uplink dhcp
+		    wins_srvs=`cat /tmp/wins.dhcp | tail -n1`
+		    config-udhcpd.sh -w "$wins_srvs"
+		else
+		    # use local samba server as wins server
+		    config-udhcpd.sh -w "$lan_ipaddr"
+		fi
 	fi
 	# lease time
 	if [ "$dhcpLease" != "" ] && [ "$dhcpLease" != "0" ]; then
