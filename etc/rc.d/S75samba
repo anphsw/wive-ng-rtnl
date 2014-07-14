@@ -33,8 +33,11 @@ if [ "$SmbEnabled" = "1" ]; then
 	echo "name resolve order		= lmhosts host wins bcast"	>> $CONFIG
 	wins_srvs=`cat /tmp/wins.dhcp | tail -n1`
 	echo "wins server			= $wins_srvs"			>> $CONFIG
+	echo "wins proxy			= yes"				>> $CONFIG
     else
 	echo "name resolve order		= lmhosts host bcast"		>> $CONFIG
+	echo "wins proxy			= no"				>> $CONFIG
+	echo "wins support			= yes"				>> $CONFIG
     fi
 
     # check samba version
