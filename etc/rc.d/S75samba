@@ -36,7 +36,8 @@ if [ "$SmbEnabled" = "1" ]; then
 	    echo "    interfaces = $interfaces" >> $CONFIG
 	fi
 	echo "domain master			= yes"				>> $CONFIG
-	echo "wins proxy			= no"				>> $CONFIG
+	echo "preferred master			= yes"				>> $CONFIG
+	echo "local master			= yes"				>> $CONFIG
 	echo "wins support			= yes"				>> $CONFIG
 	echo "name resolve order		= lmhosts host bcast"		>> $CONFIG
     fi

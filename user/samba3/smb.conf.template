@@ -17,8 +17,6 @@
     guest account		= nobody
 
     dns proxy			= no
-    preferred master		= yes
-    local master		= yes
     enhanced browsing		= yes
     name cache timeout		= 660
 

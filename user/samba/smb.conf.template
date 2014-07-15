@@ -9,8 +9,6 @@
     security			= share
     encrypt passwords		= yes
     announce version		= 4.9
-    preferred master		= yes
-    local master		= yes
     dns proxy			= no
     guest account		= nobody
     coding system		= utf8
