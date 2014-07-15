@@ -9,7 +9,6 @@
     security			= share
     encrypt passwords		= yes
     announce version		= 4.9
-    domain master		= yes
     preferred master		= yes
     local master		= yes
     dns proxy			= no

@@ -17,7 +17,6 @@
     guest account		= nobody
 
     dns proxy			= no
-    domain master		= yes
     preferred master		= yes
     local master		= yes
     enhanced browsing		= yes
