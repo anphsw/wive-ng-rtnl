@@ -1312,6 +1312,7 @@ static void pppol2tp_tunnel_destruct(struct sock *sk)
 	pppol2tp_tunnel_closeall(tunnel);
 
 end:
+    ;
 }
 
 /* Really kill the socket. (Called from sock_put if refcnt == 0.)
@@ -1358,6 +1359,7 @@ static void pppol2tp_session_destruct(struct sock *sk)
 	if (session != NULL)
 		kfree(session);
 out:
+    ;
 }
 
 /* Called when the PPPoX socket (session) is closed.
