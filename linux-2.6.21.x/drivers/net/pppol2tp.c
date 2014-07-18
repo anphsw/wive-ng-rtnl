@@ -112,20 +112,6 @@
 #define DEBUG	/* Define to compile in very verbose developer debug */
 #endif
 
-/* Old L2TP daemons semi-compatibility */
-//#define PPPOL2TP_UDP_CONNECT
-
-#if 0
-/* Pre 2.6.22 kernels compatibility, not need in wive */
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22)
-#define udp_hdr(skb) (struct udphdr *) (skb)->h.raw
-#define skb_network_header(skb) skb->nh.raw
-#define skb_transport_header(skb) skb->h.raw
-#define skb_reset_network_header(skb) (skb)->nh.raw = (skb)->data
-#define skb_reset_transport_header(skb) (skb)->h.raw = (skb)->data
-#endif
-#endif
-
 /* L2TP header constants */
 #define L2TP_HDRFLAG_T	   0x8000
 #define L2TP_HDRFLAG_L	   0x4000
@@ -144,7 +130,7 @@
 #define PPPOL2TP_L2TP_HDR_SIZE_NOSEQ		8
 
 /* Space for IP, UDP, L2TP and PPP headers */
-#define PPPOL2TP_HEADER_OVERHEAD	40
+#define PPPOL2TP_HEADER_OVERHEAD		40
 
 /* Just some random numbers */
 #define L2TP_TUNNEL_MAGIC   0x42114DDA
@@ -180,17 +166,6 @@
 		if ((_mask) & (_type))					\
 			printk(_lvl "PPPOL2TP: " _fmt, ##args);		\
 	} while(0)
-
-/* Extra driver debug. Should only be enabled by developers working on
- * this driver.
- */
-#ifdef DEBUG
-#define ENTER_FUNCTION	 printk(KERN_DEBUG "PPPOL2TP: --> %s\n", __FUNCTION__)
-#define EXIT_FUNCTION	 printk(KERN_DEBUG "PPPOL2TP: <-- %s\n", __FUNCTION__)
-#else
-#define ENTER_FUNCTION	 do { } while(0)
-#define EXIT_FUNCTION	 do { } while(0)
-#endif
 
 struct pppol2tp_tunnel;
 
@@ -383,8 +358,6 @@ static void pppol2tp_recv_queue_skb(struct pppol2tp_session *session, struct sk_
 	struct sk_buff *tmp;
 	u16 ns = PPPOL2TP_SKB_CB(skb)->ns;
 
-	ENTER_FUNCTION;
-
 	spin_lock(&session->reorder_q.lock);
 	skb_queue_walk_safe(&session->reorder_q, skbp, tmp) {
 		if (PPPOL2TP_SKB_CB(skbp)->ns > ns) {
@@ -402,7 +375,6 @@ static void pppol2tp_recv_queue_skb(struct pppol2tp_session *session, struct sk_
 
 out:
 	spin_unlock(&session->reorder_q.lock);
-	EXIT_FUNCTION;
 }
 
 /* Dequeue a single skb, passing it either to ppp or to userspace.
@@ -412,8 +384,6 @@ static void pppol2tp_recv_dequeue_skb(struct pppol2tp_session *session, struct s
 	struct pppol2tp_tunnel *tunnel = session->tunnel;
 	int length = PPPOL2TP_SKB_CB(skb)->length;
 	struct sock *session_sock = NULL;
-
-	ENTER_FUNCTION;
 
 	/* We're about to requeue the skb, so return resources
 	 * to its current owner (a socket receive buffer).
@@ -482,7 +452,6 @@ static void pppol2tp_recv_dequeue_skb(struct pppol2tp_session *session, struct s
 	DPRINTK(session->debug, "calling sock_put; refcnt=%d\n",
 		session->sock->sk_refcnt.counter);
 	sock_put(session->sock);
-	EXIT_FUNCTION;
 }
 
 /* Dequeue skbs from the session's reorder_q, subject to packet order.
@@ -492,8 +461,6 @@ static void pppol2tp_recv_dequeue(struct pppol2tp_session *session)
 {
 	struct sk_buff *skb;
 	struct sk_buff *tmp;
-
-	ENTER_FUNCTION;
 
 	/* If the pkt at the head of the queue has the nr that we
 	 * expect to send up next, dequeue it and any other
@@ -548,7 +515,6 @@ static void pppol2tp_recv_dequeue(struct pppol2tp_session *session)
 
 out:
 	spin_unlock(&session->reorder_q.lock);
-	EXIT_FUNCTION;
 }
 
 /* Internal receive frame. Do the real work of receiving an L2TP data frame
@@ -567,8 +533,6 @@ static int pppol2tp_recv_core(struct sock *sock, struct sk_buff *skb)
 	u16 tunnel_id, session_id;
 	int length;
 	int offset;
-
-	ENTER_FUNCTION;
 
 	SOCK_2_TUNNEL(sock, tunnel, error, 1, error, 0);
 
@@ -783,7 +747,6 @@ static int pppol2tp_recv_core(struct sock *sock, struct sk_buff *skb)
 	/* Try to dequeue as many skbs from reorder_q as we can. */
 	pppol2tp_recv_dequeue(session);
 
-	EXIT_FUNCTION;
 	return 0;
 
 discard:
@@ -795,7 +758,6 @@ discard:
 		session->sock->sk_refcnt.counter);
 	sock_put(session->sock);
 
-	EXIT_FUNCTION;
 	return 0;
 
 end:
@@ -803,7 +765,6 @@ end:
 	__skb_push(skb, sizeof(struct udphdr));
 
 error:
-	EXIT_FUNCTION;
 	return 1;
 }
 
@@ -818,7 +779,6 @@ static void pppol2tp_data_ready(struct sock *sk, int len)
 	struct pppol2tp_tunnel *tunnel;
 	struct sk_buff *skb;
 
-	ENTER_FUNCTION;
 	SOCK_2_TUNNEL(sk, tunnel, err, -EBADF, end, 0);
 
 	PRINTK(tunnel->debug, PPPOL2TP_MSG_DATA, KERN_DEBUG,
@@ -837,7 +797,6 @@ static void pppol2tp_data_ready(struct sock *sk, int len)
 		}
 	}
 end:
-	EXIT_FUNCTION;
 	return;
 }
 #else
@@ -852,7 +811,6 @@ static int pppol2tp_udp_encap_recv(struct sock *sk, struct sk_buff *skb)
 	int err;
 	struct pppol2tp_tunnel *tunnel;
 
-	ENTER_FUNCTION;
 	SOCK_2_TUNNEL(sk, tunnel, err, -EBADF, pass_up, 0);
 
 	PRINTK(tunnel->debug, PPPOL2TP_MSG_DATA, KERN_DEBUG,
@@ -861,11 +819,9 @@ static int pppol2tp_udp_encap_recv(struct sock *sk, struct sk_buff *skb)
 	if (pppol2tp_recv_core(sk, skb))
 		goto pass_up;
 
-	EXIT_FUNCTION;
 	return 0;
 
 pass_up:
-	EXIT_FUNCTION;
 	return 1;
 }
 #endif
@@ -879,8 +835,6 @@ static int pppol2tp_recvmsg(struct kiocb *iocb, struct socket *sock,
 	int err;
 	struct sk_buff *skb;
 	struct sock *sk = sock->sk;
-
-	ENTER_FUNCTION;
 
 	err = -EIO;
 	if (sk->sk_state & PPPOX_BOUND)
@@ -904,7 +858,6 @@ static int pppol2tp_recvmsg(struct kiocb *iocb, struct socket *sock,
 	kfree_skb(skb);
 
 error:
-	EXIT_FUNCTION;
 	return err;
 }
 
@@ -969,8 +922,6 @@ static int pppol2tp_sendmsg(struct kiocb *iocb, struct socket *sock, struct msgh
 	int error;
 	int hdr_len;
 	u16 udp_len;
-
-	ENTER_FUNCTION;
 
 	if (sock_flag(sk, SOCK_DEAD) || !(sk->sk_state & PPPOX_CONNECTED)) {
 		error = -ENOTCONN;
@@ -1077,11 +1028,9 @@ static int pppol2tp_sendmsg(struct kiocb *iocb, struct socket *sock, struct msgh
 	session->stats.tx_packets++;
 	session->stats.tx_bytes += len;
 
-	EXIT_FUNCTION;
 	return total_len;
 
 end:
-	EXIT_FUNCTION;
 	return error;
 }
 
@@ -1130,8 +1079,6 @@ static int pppol2tp_xmit(struct ppp_channel *chan, struct sk_buff *skb)
 	int error;
 	int hdr_len;
 	u16 udp_len;
-
-	ENTER_FUNCTION;
 
 	if (sock_flag(sk, SOCK_DEAD) || !(sk->sk_state & PPPOX_CONNECTED)) {
 		DPRINTK(-1, "dead=%d state=%x\n", sock_flag(sk, SOCK_DEAD), sk->sk_state);
@@ -1239,14 +1186,12 @@ static int pppol2tp_xmit(struct ppp_channel *chan, struct sk_buff *skb)
 		session->stats.tx_errors++;
 	}
 
-	EXIT_FUNCTION;
 	return 1;
 
 end:
 	/* Free the original skb */
 	kfree_skb(skb);
 
-	EXIT_FUNCTION;
 	return 1;
 }
 
@@ -1264,8 +1209,6 @@ static void pppol2tp_tunnel_closeall(struct pppol2tp_tunnel *tunnel)
 	struct hlist_node *tmp;
 	struct pppol2tp_session *session;
 	struct sock *sk;
-
-	ENTER_FUNCTION;
 
 	if (tunnel == NULL)
 		BUG();
@@ -1327,8 +1270,6 @@ again:
 		}
 	}
 	write_unlock_bh(&tunnel->hlist_lock);
-
-	EXIT_FUNCTION;
 }
 
 /* Really kill the tunnel.
@@ -1337,16 +1278,6 @@ again:
 static void pppol2tp_tunnel_free(struct pppol2tp_tunnel *tunnel)
 {
 	struct sock *sk = tunnel->sock;
-#ifdef PPPOL2TP_UDP_CONNECT
-	struct sockaddr any = { .sa_family = AF_UNSPEC };
-#endif
-
-	ENTER_FUNCTION;
-
-#ifdef PPPOL2TP_UDP_CONNECT
-	/* Disconnect the tunnel socket */
-	kernel_connect(sk->sk_socket, &any, sizeof(any), 0);
-#endif
 
 	/* Remove from socket list */
 	list_del_init(&tunnel->list);
@@ -1363,8 +1294,6 @@ static void pppol2tp_tunnel_free(struct pppol2tp_tunnel *tunnel)
 
 	DPRINTK(tunnel->debug, "%s: MOD_DEC_USE_COUNT\n", tunnel->name);
 	kfree(tunnel);
-
-	EXIT_FUNCTION;
 }
 
 /* Tunnel UDP socket destruct hook.
@@ -1375,7 +1304,6 @@ static void pppol2tp_tunnel_destruct(struct sock *sk)
 {
 	struct pppol2tp_tunnel *tunnel;
 	int error = 0;
-	ENTER_FUNCTION;
 
 	SOCK_2_TUNNEL(sk, tunnel, error, -EBADF, end, 0);
 
@@ -1385,7 +1313,6 @@ static void pppol2tp_tunnel_destruct(struct sock *sk)
 	pppol2tp_tunnel_closeall(tunnel);
 
 end:
-	EXIT_FUNCTION;
 	return;
 }
 
@@ -1395,8 +1322,6 @@ static void pppol2tp_session_destruct(struct sock *sk)
 {
 	struct pppol2tp_session *session = NULL;
 	int error = 0;
-
-	ENTER_FUNCTION;
 
 	if (sk->sk_user_data != NULL) {
 		struct pppol2tp_tunnel *tunnel;
@@ -1416,7 +1341,7 @@ static void pppol2tp_session_destruct(struct sock *sk)
 				       "( tunnel=%p magic=%x )\n",
 				       __FUNCTION__, __FILE__, __LINE__,
 				       tunnel, tunnel->magic);
-				goto out;
+				return;
 			}
 		}
 
@@ -1434,9 +1359,6 @@ static void pppol2tp_session_destruct(struct sock *sk)
 
 	if (session != NULL)
 		kfree(session);
-
-out:
-	EXIT_FUNCTION;
 }
 
 /* Called when the PPPoX socket (session) is closed.
@@ -1447,7 +1369,6 @@ static int pppol2tp_release(struct socket *sock)
 	struct pppol2tp_session *session = NULL;
 	struct pppol2tp_tunnel *tunnel;
 	int error = 0;
-	ENTER_FUNCTION;
 
 	if (!sk)
 		return 0;
@@ -1509,7 +1430,6 @@ static int pppol2tp_release(struct socket *sock)
 	sock_put(sk);
 
 end:
-	EXIT_FUNCTION;
 	return error;
 }
 
@@ -1567,19 +1487,13 @@ static struct socket *pppol2tp_sockfd_lookup(pid_t pid, int fd, int *err)
 /* Internal function to prepare a tunnel (UDP) socket to have PPPoX sockets
  * attached to it
  */
-static struct sock *pppol2tp_prepare_tunnel_socket(pid_t pid, int fd,
-#ifdef PPPOL2TP_UDP_CONNECT
-						   struct sockaddr_in *addr,
-#endif
-						   u16 tunnel_id, int *error)
+static struct sock *pppol2tp_prepare_tunnel_socket(pid_t pid, int fd, u16 tunnel_id, int *error)
 {
 	int err;
 	struct socket *sock = NULL;
 	struct sock *sk;
 	struct pppol2tp_tunnel *tunnel;
 	struct sock *ret = NULL;
-
-	ENTER_FUNCTION;
 
 	/* Get the socket from the fd */
 	err = -EBADF;
@@ -1626,20 +1540,6 @@ static struct sock *pppol2tp_prepare_tunnel_socket(pid_t pid, int fd,
 
 		/* This socket has already been prepped */
 		ret = tunnel->sock;
-#ifdef PPPOL2TP_UDP_CONNECT
-	}
-
-	/* (Re)connect tunnel socket to the peer */
-	err = kernel_connect(sock, (struct sockaddr *) addr, sizeof(*addr), 0);
-	DPRINTK(-1, "tunl %hu: fd %d connect to %x/%hu returns %d\n",
-		tunnel_id, fd,
-		ntohl(addr->sin_addr.s_addr), ntohs(addr->sin_port), err);
-	if (err < 0 && err != -EALREADY)
-		goto err;
-
-	/* This socket has already been prepped */
-	if (tunnel != NULL) {
-#endif
 		goto out;
 	}
 
@@ -1690,7 +1590,6 @@ static struct sock *pppol2tp_prepare_tunnel_socket(pid_t pid, int fd,
 out:
 	if (sock)
 		sockfd_put(sock);
-	EXIT_FUNCTION;
 
 	return ret;
 
@@ -1712,7 +1611,6 @@ static int pppol2tp_create(struct socket *sock)
 	int error = -ENOMEM;
 	struct sock *sk;
 
-	ENTER_FUNCTION;
 	DPRINTK(-1, "sock=%p\n", sock);
 
 	try_module_get(THIS_MODULE);
@@ -1734,11 +1632,9 @@ static int pppol2tp_create(struct socket *sock)
 	sk->sk_destruct    = pppol2tp_session_destruct;
 
 	error = 0;
-
 out:
 	module_put(THIS_MODULE);
 
-	EXIT_FUNCTION;
 	return error;
 }
 
@@ -1755,8 +1651,6 @@ static int pppol2tp_connect(struct socket *sock, struct sockaddr *uservaddr,
 	struct pppol2tp_tunnel *tunnel;
 	struct dst_entry *dst;
 	int error = -EINVAL;
-
-	ENTER_FUNCTION;
 
 	DPRINTK(-1, "sock=%p, uservaddr=%p, sockaddr_len=%d, flags=%d, addr=%x/%hu\n",
 		sock, uservaddr, sockaddr_len, flags,
@@ -1791,9 +1685,6 @@ static int pppol2tp_connect(struct socket *sock, struct sockaddr *uservaddr,
 	if ((sp->pppol2tp.s_session == 0) && (sp->pppol2tp.d_session == 0)) {
 		tunnel_sock = pppol2tp_prepare_tunnel_socket(sp->pppol2tp.pid,
 						     sp->pppol2tp.fd,
-#ifdef PPPOL2TP_UDP_CONNECT
-						     &sp->pppol2tp.addr,
-#endif
 						     sp->pppol2tp.s_tunnel,
 						     &error);
 	    if (tunnel_sock == NULL)
@@ -1922,8 +1813,6 @@ end:
 		PRINTK(session ? session->debug : -1, PPPOL2TP_MSG_CONTROL, KERN_WARNING,
 		       "%s: connect failed: %d\n", session->name, error);
 
-	EXIT_FUNCTION;
-
 	return error;
 }
 
@@ -1936,8 +1825,6 @@ static int pppol2tp_getname(struct socket *sock, struct sockaddr *uaddr,
 	struct sockaddr_pppol2tp sp;
 	int error = 0;
 	struct pppol2tp_session *session;
-
-	ENTER_FUNCTION;
 
 	error = -ENOTCONN;
 	if (sock->sk->sk_state != PPPOX_CONNECTED)
@@ -1956,7 +1843,6 @@ static int pppol2tp_getname(struct socket *sock, struct sockaddr *uaddr,
 
 	error = 0;
 end:
-	EXIT_FUNCTION;
 	return error;
 }
 
@@ -2169,8 +2055,6 @@ static int pppol2tp_ioctl(struct socket *sock, unsigned int cmd,
 	struct pppol2tp_tunnel *tunnel;
 	int err = 0;
 
-	ENTER_FUNCTION;
-
 	if (!sk)
 		return 0;
 
@@ -2199,7 +2083,6 @@ static int pppol2tp_ioctl(struct socket *sock, unsigned int cmd,
 	err = pppol2tp_session_ioctl(session, cmd, arg);
 
 end:
-	EXIT_FUNCTION;
 	return err;
 }
 
@@ -2514,17 +2397,14 @@ static int pppol2tp_proc_open(struct inode *inode, struct file *file)
 	struct seq_file *m;
 	int ret = 0;
 
-	ENTER_FUNCTION;
 	ret = seq_open(file, &pppol2tp_proc_ops);
 	if (ret < 0)
-		goto out;
+		return ret;
 
 	m	   = file->private_data;
 	m->private = PDE(inode)->data;
 
-out:
-	EXIT_FUNCTION;
-	return ret;
+	return 0;
 }
 
 static void *pppol2tp_proc_start(struct seq_file *m, loff_t *_pos)
@@ -2534,12 +2414,10 @@ static void *pppol2tp_proc_start(struct seq_file *m, loff_t *_pos)
 	struct list_head *walk;
 	struct list_head *tmp;
 
-	ENTER_FUNCTION;
-
 	/* allow for the header line */
 	if (!pos) {
 		tunnel = (void *)1;
-		goto out;
+		return tunnel;
 	}
 	pos--;
 
@@ -2548,15 +2426,11 @@ static void *pppol2tp_proc_start(struct seq_file *m, loff_t *_pos)
 		tunnel = list_entry(walk, struct pppol2tp_tunnel, list);
 		if (!pos--) {
 			sock_hold(tunnel->sock);
-			goto out;
+			return tunnel;
 		}
 	}
-	tunnel = NULL;
 
-out:
-	EXIT_FUNCTION;
-
-	return tunnel;
+	return NULL;
 }
 
 static void *pppol2tp_proc_next(struct seq_file *p, void *v, loff_t *pos)
@@ -2564,8 +2438,6 @@ static void *pppol2tp_proc_next(struct seq_file *p, void *v, loff_t *pos)
 	struct pppol2tp_tunnel *tunnel = v;
 	struct list_head *tmp;
 	struct list_head *list;
-
-	ENTER_FUNCTION;
 
 	(*pos)++;
 
@@ -2580,8 +2452,6 @@ static void *pppol2tp_proc_next(struct seq_file *p, void *v, loff_t *pos)
 	else
 		tunnel = list_entry(tmp, struct pppol2tp_tunnel, list);
 
-	EXIT_FUNCTION;
-
 	return tunnel;
 }
 
@@ -2589,12 +2459,8 @@ static void pppol2tp_proc_stop(struct seq_file *p, void *v)
 {
 	struct pppol2tp_tunnel *tunnel = v;
 
-	ENTER_FUNCTION;
-
 	if (tunnel != NULL)
 		sock_put(tunnel->sock);
-
-	EXIT_FUNCTION;
 }
 
 static int pppol2tp_proc_show(struct seq_file *m, void *v)
@@ -2604,8 +2470,6 @@ static int pppol2tp_proc_show(struct seq_file *m, void *v)
 	struct hlist_node *walk;
 	struct hlist_node *tmp;
 	int i;
-
-	ENTER_FUNCTION;
 
 	/* display header on line 1 */
 	if (v == (void *)1) {
@@ -2679,8 +2543,6 @@ static int pppol2tp_proc_show(struct seq_file *m, void *v)
 	}
 out:
 	seq_puts(m, "\n");
-
-	EXIT_FUNCTION;
 
 	return 0;
 }
