@@ -1963,12 +1963,13 @@
 <b>4.10.x</b><br>
 1) build system: cleanup and tune build flags for more speed and safe codegeneration.<br>
 2) init.d: use wins from uplink network if exist.<br>
-3) kernel: net/l2tp: don't fall back on UDP [get|set]sockopt.<br>
-4) kernel: net: igmp: reduce Unsolicited report interval to 1s when using IGMPv3.<br>
-5) kernel: ipv4,ipv6: send igmpv3/mld packets with TC_PRIO_CONTROL.<br>
-6) kernel: ipv4: force_igmp_version ignored when a IGMPv3 query received.<br>
-7) kernel: igmp: call ip_mc_clear_src() only when we have no users of ip_mc_list.<br>
-8) kernel: net: replace continue with break to reduce unnecessary loop in xxx_xmarksources.<br>
+3) usb-modeswitch-data: up to 20140529.<br>
+4) kernel: net/l2tp: don't fall back on UDP [get|set]sockopt.<br>
+5) kernel: net: igmp: reduce Unsolicited report interval to 1s when using IGMPv3.<br>
+6) kernel: ipv4,ipv6: send igmpv3/mld packets with TC_PRIO_CONTROL.<br>
+7) kernel: ipv4: force_igmp_version ignored when a IGMPv3 query received.<br>
+8) kernel: igmp: call ip_mc_clear_src() only when we have no users of ip_mc_list.<br>
+9) kernel: net: replace continue with break to reduce unnecessary loop in xxx_xmarksources.<br>
 <br>
 <br>
 <br>
