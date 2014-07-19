@@ -1241,7 +1241,7 @@ void ip_mc_inc_group(struct in_device *in_dev, __be32 addr)
 		}
 	}
 
-	im = kmalloc(sizeof(*im), GFP_KERNEL);
+	im = kzalloc(sizeof(*im), GFP_KERNEL);
 	if (!im)
 		goto out;
 
@@ -1251,23 +1251,15 @@ void ip_mc_inc_group(struct in_device *in_dev, __be32 addr)
 	im->multiaddr = addr;
 	/* initial mode is (EX, empty) */
 	im->sfmode = MCAST_EXCLUDE;
-	im->sfcount[MCAST_INCLUDE] = 0;
 	im->sfcount[MCAST_EXCLUDE] = 1;
-	im->sources = NULL;
-	im->tomb = NULL;
-	im->crcount = 0;
 	atomic_set(&im->refcnt, 1);
 	spin_lock_init(&im->lock);
 #ifdef CONFIG_IP_MULTICAST
-	im->tm_running = 0;
 	init_timer(&im->timer);
 	im->timer.data=(unsigned long)im;
 	im->timer.function=&igmp_timer_expire;
 	im->unsolicit_count = IGMP_Unsolicited_Report_Count;
-	im->reporter = 0;
-	im->gsquery = 0;
 #endif
-	im->loaded = 0;
 	write_lock_bh(&in_dev->mc_list_lock);
 	im->next = in_dev->mc_list;
 	in_dev->mc_list = im;
