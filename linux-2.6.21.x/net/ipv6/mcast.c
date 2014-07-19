@@ -1211,7 +1211,7 @@ int igmp6_event_query(struct sk_buff *skb)
 			return -EINVAL;
 		}
 		mlh2 = (struct mld2_query *)skb_transport_header(skb);
-		max_delay = max(msecs_to_jiffies(MLDV2_MRC(ntohs(mlh2->mld2q_mrc))), 1UL);
+		max_delay = max(msecs_to_jiffies(MLDV2_MRC(ntohs(mlh2->mrc))), 1UL);
 		idev->mc_maxdelay = max_delay;
 		if (mlh2->qrv)
 			idev->mc_qrv = mlh2->qrv;
