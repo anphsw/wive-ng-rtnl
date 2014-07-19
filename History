@@ -261,6 +261,7 @@
 2) init.d: use wins from uplink network if exist.<br>
 3) kernel: net/l2tp: don't fall back on UDP [get|set]sockopt.<br>
 4) kernel: net: igmp: reduce Unsolicited report interval to 1s when using IGMPv3.<br>
+5) kernel: ipv4,ipv6: send igmpv3/mld packets with TC_PRIO_CONTROL.<br>
 <br>
 <br>
 <br>

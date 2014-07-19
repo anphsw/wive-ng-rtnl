@@ -36,6 +36,7 @@
 #include <linux/sockios.h>
 #include <linux/jiffies.h>
 #include <linux/times.h>
+#include <linux/pkt_sched.h>
 #include <linux/net.h>
 #include <linux/in.h>
 #include <linux/in6.h>
@@ -1410,6 +1411,7 @@ static struct sk_buff *mld_newpack(struct net_device *dev, int size)
 	if (!skb)
 		return NULL;
 
+	skb->priority = TC_PRIO_CONTROL;
 	skb_reserve(skb, LL_RESERVED_SPACE(dev));
 
 	if (ipv6_get_lladdr(dev, &addr_buf, IFA_F_TENTATIVE)) {
@@ -1783,6 +1785,7 @@ static void igmp6_send(struct in6_addr *addr, struct net_device *dev, int type)
 		return;
 	}
 
+	skb->priority = TC_PRIO_CONTROL;
 	skb_reserve(skb, LL_RESERVED_SPACE(dev));
 
 	if (ipv6_get_lladdr(dev, &addr_buf, IFA_F_TENTATIVE)) {
