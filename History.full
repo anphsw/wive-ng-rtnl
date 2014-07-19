@@ -1967,6 +1967,7 @@
 4) kernel: net: igmp: reduce Unsolicited report interval to 1s when using IGMPv3.<br>
 5) kernel: ipv4,ipv6: send igmpv3/mld packets with TC_PRIO_CONTROL.<br>
 6) kernel: ipv4: force_igmp_version ignored when a IGMPv3 query received.<br>
+7) kernel: igmp: call ip_mc_clear_src() only when we have no users of ip_mc_list.<br>
 <br>
 <br>
 <br>
