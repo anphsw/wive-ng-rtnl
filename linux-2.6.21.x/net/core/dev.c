@@ -2357,7 +2357,7 @@ out_dev:
 #define dev_proc_init() 0
 #endif	/* CONFIG_PROC_FS */
 
-
+#ifdef CONFIG_BONDING
 /**
  *	netdev_set_master	-	set up master/slave pair
  *	@slave: slave device
@@ -2395,6 +2395,7 @@ int netdev_set_master(struct net_device *slave, struct net_device *master)
 	rtmsg_ifinfo(RTM_NEWLINK, slave, IFF_SLAVE);
 	return 0;
 }
+#endif
 
 /**
  *	dev_set_promiscuity	- update promiscuity count on a device
@@ -3706,7 +3707,9 @@ EXPORT_SYMBOL(dev_set_mtu);
 EXPORT_SYMBOL(dev_set_mac_address);
 EXPORT_SYMBOL(free_netdev);
 EXPORT_SYMBOL(netdev_boot_setup_check);
+#ifdef CONFIG_BONDING
 EXPORT_SYMBOL(netdev_set_master);
+#endif
 EXPORT_SYMBOL(netdev_state_change);
 EXPORT_SYMBOL(netif_receive_skb);
 EXPORT_SYMBOL(netif_rx);

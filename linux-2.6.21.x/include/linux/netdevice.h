@@ -1037,7 +1037,9 @@ extern void		netdev_features_change(struct net_device *dev);
 extern void		dev_load(const char *name);
 extern int		netdev_max_backlog;
 extern int		weight_p;
+#ifdef CONFIG_BONDING
 extern int		netdev_set_master(struct net_device *dev, struct net_device *master);
+#endif
 extern int skb_checksum_help(struct sk_buff *skb);
 extern struct sk_buff *skb_gso_segment(struct sk_buff *skb, int features);
 #ifdef CONFIG_BUG
