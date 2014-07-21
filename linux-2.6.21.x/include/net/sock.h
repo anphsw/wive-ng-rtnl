@@ -794,14 +794,14 @@ do {									\
 	lockdep_init_map(&(sk)->sk_lock.dep_map, (name), (key), 0);	\
 } while (0)
 
-extern void FASTCALL(lock_sock_nested(struct sock *sk, int subclass));
+extern void FASTPATH(lock_sock_nested(struct sock *sk, int subclass));
 
 static inline void lock_sock(struct sock *sk)
 {
 	lock_sock_nested(sk, 0);
 }
 
-extern void FASTCALL(release_sock(struct sock *sk));
+extern void FASTPATH(release_sock(struct sock *sk));
 
 /* BH context may only use the following locking interface. */
 #define bh_lock_sock(__sk)	spin_lock(&((__sk)->sk_lock.slock))
