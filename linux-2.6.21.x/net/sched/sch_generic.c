@@ -247,8 +247,9 @@ void netif_carrier_on(struct net_device *dev)
 
 void netif_carrier_off(struct net_device *dev)
 {
-	if (!test_and_set_bit(__LINK_STATE_NOCARRIER, &dev->state))
+	if (!test_and_set_bit(__LINK_STATE_NOCARRIER, &dev->state)) {
 		linkwatch_fire_event(dev);
+	}
 }
 
 /* "NOOP" scheduler: the best scheduler, recommended for all interfaces

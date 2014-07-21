@@ -3119,6 +3119,9 @@ int register_netdevice(struct net_device *dev)
 	set_bit(__LINK_STATE_PRESENT, &dev->state);
 
 	dev->next = NULL;
+
+	linkwatch_init_dev(dev);
+
 	dev_init_scheduler(dev);
 	write_lock_bh(&dev_base_lock);
 	*dev_tail = dev;

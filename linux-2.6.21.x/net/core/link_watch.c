@@ -77,6 +77,14 @@ static void rfc2863_policy(struct net_device *dev)
 }
 
 
+void linkwatch_init_dev(struct net_device *dev)
+{
+	/* Handle pre-registration link state changes */
+	if (!netif_carrier_ok(dev) || netif_dormant(dev))
+		rfc2863_policy(dev);
+}
+
+
 static int linkwatch_urgent_event(struct net_device *dev)
 {
 	return netif_running(dev) && netif_carrier_ok(dev) &&
@@ -180,7 +188,6 @@ static void __linkwatch_run_queue(int urgent_only)
 		 */
 		clear_bit(__LINK_STATE_LINKWATCH_PENDING, &dev->state);
 
-		rfc2863_policy(dev);
 		if (dev->flags & IFF_UP) {
 			if (netif_carrier_ok(dev)) {
 				WARN_ON(dev->qdisc_sleeping == &noop_qdisc);
@@ -217,6 +224,12 @@ static void linkwatch_event(struct work_struct *dummy)
 void linkwatch_fire_event(struct net_device *dev)
 {
 	int urgent = linkwatch_urgent_event(dev);
+
+	rfc2863_policy(dev);
+
+	/* Some drivers call netif_carrier_off early */
+	if (dev->reg_state == NETREG_UNINITIALIZED)
+		return;
 
 	if (!test_and_set_bit(__LINK_STATE_LINKWATCH_PENDING, &dev->state)) {
 		dev_hold(dev);
