@@ -1971,6 +1971,7 @@
 8) kernel: igmp: call ip_mc_clear_src() only when we have no users of ip_mc_list.<br>
 9) kernel: net: replace continue with break to reduce unnecessary loop in xxx_xmarksources.<br>
 10) kernel: net: ipv6: igmp6_event_query: use msecs_to_jiffies.<br>
+11) kernel: net: potential null skb->dev dereference.<br>
 <br>
 <br>
 <br>
