@@ -184,7 +184,7 @@ static int __init ic_open_devs(void)
 {
 	struct ic_device *d, **last;
 	struct net_device *dev;
-	unsigned short oflags;
+	unsigned int oflags;
 
 	last = &ic_first_dev;
 	rtnl_lock();
