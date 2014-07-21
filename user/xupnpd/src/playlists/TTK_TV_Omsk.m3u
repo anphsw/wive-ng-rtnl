@@ -36,6 +36,8 @@ udp://@239.0.23.17:1224
 #EXTINF:-1 tvg-shift=7 tvg-logo="Звезда" tvg-name="Звезда" crop=688x556+16+8,Звезда
 udp://@239.0.23.24:1224
 #EXTINF:-1 tvg-shift=3 tvg-logo="РБК" tvg-name="РБК" crop=688x556+16+8,РБК эфирный
+udp://@239.0.23.23:1234
+#EXTINF:-1 tvg-shift=3 tvg-logo="РБК" tvg-name="РБК" crop=688x556+16+8,РБК эфирный
 udp://@239.0.23.18:1224
 #EXTINF:-1 tvg-shift=3 tvg-logo="РБК" tvg-name="РБК" crop=688x556+16+8,РБК эфирный
 udp://@239.0.23.123:1224

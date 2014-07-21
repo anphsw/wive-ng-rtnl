@@ -907,7 +907,7 @@ resolve_normal_ct(struct sk_buff *skb,
 	struct nf_conntrack_tuple_hash *h;
 	struct nf_conn *ct;
 #ifdef CONFIG_NAT_CONE
-	struct iphdr *iph = skb->nh.iph;
+	struct iphdr *iph;
 #endif
 
 	if (!nf_ct_get_tuple(skb, skb_network_offset(skb),
@@ -973,6 +973,8 @@ resolve_normal_ct(struct sk_buff *skb,
          *             Restricted Cone=dst_ip/port & proto & src_ip
          *
          */
+	iph = skb->nh.iph;
+
 	if ((nf_conntrack_nat_mode > 0) && (iph != NULL && iph->protocol == IPPROTO_UDP)) {
 #if defined (CONFIG_PPP) || defined (CONFIG_PPP_MODULE)
 		if ((skb->dev != NULL) && (strcmp(skb->dev->name, wan_name) == 0 || strcmp(skb->dev->name, wan_ppp) == 0))
