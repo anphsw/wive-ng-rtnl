@@ -21,10 +21,24 @@ udp://@239.0.23.4:1224
 udp://@239.0.23.11:1224
 #EXTINF:-1 tvg-shift=1 tvg-logo="ТВ3" tvg-name="ТВ-3" crop=688x556+16+8 ,ТВ-3
 udp://@239.0.23.5:1224
+#EXTINF:-1 tvg-shift=1 tvg-logo="Россия К" tvg-name="Россия_Культура" crop=688x556+16+8,Россия К
+udp://@239.0.23.6:1224
 #EXTINF:-1 tvg-shift=-1 tvg-logo="Перец" tvg-name="Перец" crop=688x556+16+8 ,Перец
 udp://@239.0.23.7:1224
+#EXTINF:-1 tvg-shift=3 tvg-logo="Россия 2" tvg-name="Россия_2_(Спорт)" crop=688x556+16+8,Россия 2
+udp://@239.0.23.8:1224
 #EXTINF:-1 tvg-shift=0 tvg-logo="ТТК" tvg-name="12" crop=688x556+16+8 ,12 канал
 udp://@239.0.23.1:1224
+#EXTINF:-1 tvg-shift=0 tvg-logo="Пятница" tvg-name="Пятница" crop=688x556+16+8 ,Пятница
+udp://@239.0.23.2:1224
+#EXTINF:-1 tvg-shift=0 tvg-logo="Пятница" tvg-name="Пятница" crop=688x556+16+8 ,Пятница
+udp://@239.0.23.17:1224
+#EXTINF:-1 tvg-shift=7 tvg-logo="Звезда" tvg-name="Звезда" crop=688x556+16+8,Звезда
+udp://@239.0.23.24:1224
+#EXTINF:-1 tvg-shift=3 tvg-logo="РБК" tvg-name="РБК" crop=688x556+16+8,РБК эфирный
+udp://@239.0.23.18:1224
+#EXTINF:-1 tvg-shift=3 tvg-logo="РБК" tvg-name="РБК" crop=688x556+16+8,РБК эфирный
+udp://@239.0.23.123:1224
 #EXTINF:-1 tvg-shift=3 tvg-logo="МузТВ" tvg-name="МУЗ-ТВ" crop=688x556+16+8 group-title="Музыкальное ТВ",МУЗ ТВ
 udp://@239.54.5.142:1224
 #EXTINF:-1 tvg-shift=3 tvg-logo="Music Box RU" tvg-name="Music_Box_RU" crop=688x556+16+8,Music Box RU
