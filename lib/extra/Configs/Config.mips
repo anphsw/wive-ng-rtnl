@@ -12,14 +12,14 @@ config HAVE_ELF
 
 config ARCH_CFLAGS
 	string
-	default "-ffast-math -fforce-addr -fno-stack-protector -fno-strict-overflow -fno-aggressive-loop-optimizations -fno-tree-slsr -fomit-frame-pointer -fno-delete-null-pointer-checks -femit-struct-debug-baseonly -fno-var-tracking"
+	default "-ffast-math -fforce-addr -fno-stack-protector -fno-strict-overflow -fno-var-tracking-assignments -fno-aggressive-loop-optimizations -fno-tree-slsr -fomit-frame-pointer -fno-delete-null-pointer-checks -femit-struct-debug-baseonly -fno-var-tracking"
 
 config ARCH_LDFLAGS
 	string
 
 config LIBGCC_CFLAGS
 	string
-	default "-Wall -ffast-math -fforce-addr -fno-stack-protector -fno-strict-overflow -fno-aggressive-loop-optimizations -fno-tree-slsr -fomit-frame-pointer -fno-delete-null-pointer-checks -femit-struct-debug-baseonly -fno-var-tracking"
+	default "-Wall -ffast-math -fforce-addr -fno-stack-protector -fno-strict-overflow -fno-var-tracking-assignments -fno-aggressive-loop-optimizations -fno-tree-slsr -fomit-frame-pointer -fno-delete-null-pointer-checks -femit-struct-debug-baseonly -fno-var-tracking"
 
 config ARCH_SUPPORTS_BIG_ENDIAN
 	bool

@@ -122,6 +122,9 @@ endif
 	# disable new loop optimization mode in 4.8.0 and later - fix regressions
 	CFLAGS  += -fno-aggressive-loop-optimizations
 
+	# fix gcc-4.9.x miscompilation of some code
+	CFLAGS += -fno-var-tracking-assignments
+
 	# fix ~10% performance regression at 4.8.x and 4.7.x gcc
 	CFLAGS  += -fno-tree-slsr
 
@@ -168,6 +171,9 @@ endif
 
 	# disable new loop optimization mode in 4.8.0 and later - fix regressions
 	CFLAGS  += -fno-aggressive-loop-optimizations
+
+	# fix gcc-4.9.x miscompilation of some code
+	CFLAGS += -fno-var-tracking-assignments
 
 	# fix ~10% performance regression at 4.8.x and 4.7.x gcc
 	CFLAGS  += -fno-tree-slsr
