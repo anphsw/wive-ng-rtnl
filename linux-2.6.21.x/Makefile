@@ -542,7 +542,7 @@ CFLAGS += $(call cc-option,-fno-inline-functions-called-once)
 endif
 
 # reduce debugging information
-CFLAGS   += $(call cc-option, -femit-struct-debug-baseonly)
+CFLAGS   += $(call cc-option,-femit-struct-debug-baseonly)
 CFLAGS   += $(call cc-option,-fno-var-tracking)
 
 # use pipe at build time
@@ -569,6 +569,9 @@ CFLAGS += $(call cc-option,-fno-aggressive-loop-optimizations)
 
 # fix ~10% performance regression at 4.8.x and 4.7.x gcc
 CFLAGS += $(call cc-option,-fno-tree-slsr)
+
+# fix gcc-4.9.x miscompilation of load_balance() in scheduler
+CFLAGS += $(call cc-option,-fno-var-tracking-assignments)
 
 # more safe - small decrease speed (default in all upstream kernels)
 CFLAGS += $(call cc-option,-fno-delete-null-pointer-checks)
