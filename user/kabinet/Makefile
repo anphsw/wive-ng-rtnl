@@ -1,5 +1,6 @@
-#allways agressive optimize for size
+#allways agressive optimize for size and savemem
 CFLAGS	+= -Os -fno-caller-saves -fno-unwind-tables -fno-asynchronous-unwind-tables -femit-struct-debug-baseonly -fno-var-tracking
+CFLAGS	+= -membedded-data -muninit-const-in-rodata
 CFLAGS	+= -ffunction-sections -fdata-sections
 LDFLAGS	+= -Wl,--gc-sections
 
