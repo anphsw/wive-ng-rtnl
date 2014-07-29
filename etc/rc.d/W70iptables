@@ -439,7 +439,7 @@ get_param() {
     fi
 
     # if start one of this services need allow udp packets to local port range
-    if [ "$SmbEnabled" = "1" ] || [ "$xupnpd" = "1" ] || [ "$upnpEnabled" = "1" ]
+    if [ "$SmbEnabled" = "1" ] || [ "$xupnpd" = "1" ] || [ "$upnpEnabled" = "1" ]; then
 	LOCAL_PRT=`sysctl -n net.ipv4.ip_local_port_range | awk {' print $1":"$2 '}`
     else
 	LOCAL_PRT=""
