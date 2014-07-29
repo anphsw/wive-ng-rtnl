@@ -33,7 +33,7 @@ start() {
         iptables -F servicelimit > /dev/null 2>&1
         iptables -A INPUT -j servicelimit > /dev/null 2>&1
 	# INPUT needed by unpxy and igmpproxy
-	if [ "$igmpEnabled" != "0" ] || [ "$UDPXYMode" != "0" ] || [ "$xupnpd" = "1" ]; then
+	if [ "$igmpEnabled" != "0" ] || [ "$UDPXYMode" != "0" ] || [ "$xupnpd" != "0" ]; then
 	    $LOG "Set igmp input rules"
 	    iptables -A servicelimit -p igmp -i $lan_if -j ACCEPT
 	    iptables -A servicelimit -d $mcast_net -i $wan_if -j ACCEPT
@@ -63,29 +63,28 @@ start() {
 		iptables -A servicelimit -p udp --dport 4500 -j ACCEPT
 	    fi
 	fi
+	if [ "$LOCAL_PRT" != "" ]; then
+	    $LOG "allow local port range from LAN, need for some local service"
+	    iptables -A servicelimit -i $lan_if -p udp --dport "$LOCAL_PRT" -j ACCEPT
+	    if [ "$Lan2Enabled" = "1" ]; then
+		iptables -A servicelimit -i $lan2_if -p udp --dport "$LOCAL_PRT" -j ACCEPT
+	    fi
+	fi
 	if [ "$upnpEnabled" = "1" ] && [ "$ROUTE_MODE" = "on" ]; then
 	    $LOG "UPNP allow to connect"
 	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 8666 -j ACCEPT
-	    # not safe fix me later
-	    iptables -A servicelimit -i $lan_if -p udp --dport "$LOCAL_PRT" -j ACCEPT
 	    iptables -A servicelimit -i $lan_if -p udp --dport 1900 -j ACCEPT
 	    if [ "$Lan2Enabled" = "1" ]; then
 		iptables -A servicelimit -i $lan2_if $STATE_NEW -p tcp --dport 8666 -j ACCEPT
-		# not safe fix me later
-		iptables -A servicelimit -i $lan2_if -p udp --dport "$LOCAL_PRT" -j ACCEPT
 		iptables -A servicelimit -i $lan2_if -p udp --dport 1900 -j ACCEPT
 	    fi
 	fi
 	if [ "$xupnpd" = "1" ]; then
 	    $LOG "Xupnpd allow to connect"
 	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 4044 -j ACCEPT
-	    # not safe fix me later
-	    iptables -A servicelimit -i $lan_if -p udp --dport "$LOCAL_PRT" -j ACCEPT
 	    iptables -A servicelimit -i $lan_if -p udp --dport 1900 -j ACCEPT
 	    if [ "$Lan2Enabled" = "1" ]; then
     		iptables -A servicelimit -i $lan2_if $STATE_NEW -p tcp --dport 4044 -j ACCEPT
-		# not safe fix me later
-		iptables -A servicelimit -i $lan2_if -p udp --dport "$LOCAL_PRT" -j ACCEPT
 		iptables -A servicelimit -i $lan2_if -p udp --dport 1900 -j ACCEPT
 	    fi
 	fi
@@ -104,8 +103,6 @@ start() {
 	    $LOG "Samba allow to connect"
 	    iptables -A servicelimit -i $lan_if -p udp --dport 137:138 -j ACCEPT
 	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp -m multiport --dport 139,445 -j ACCEPT
-	    # not safe fix me later
-	    iptables -A servicelimit -i $lan_if -p udp --dport "$LOCAL_PRT" -j ACCEPT
 	fi
 	if [ "$RemoteManagement" != "0" ]; then
 	    $LOG "Remote managment web limit"
@@ -440,6 +437,14 @@ get_param() {
     else
 	PPP_CONNECT="off"
     fi
+
+    # if start one of this services need allow udp packets to local port range
+    if [ "$SmbEnabled" = "1" ] || [ "$xupnpd" = "1" ] || [ "$upnpEnabled" = "1" ]
+	LOCAL_PRT=`sysctl -n net.ipv4.ip_local_port_range | awk {' print $1":"$2 '}`
+    else
+	LOCAL_PRT=""
+    fi
+
     # if wan ip not get
     if [ "$wan_ipaddr" = "" ]; then
 	use_snat=0
@@ -464,8 +469,8 @@ get_param() {
 	modprobe ipt_ttl
 	modprobe ipt_TTL
     fi
+
     # macros
-    LOCAL_PRT=`sysctl -n net.ipv4.ip_local_port_range | awk {' print $1":"$2 '}`
     STATE_NEW="-m state --state NEW"
     STATE_EST="-m state --state ESTABLISHED,RELATED"
     CONNLIMIT="-m connlimit --connlimit-above"
