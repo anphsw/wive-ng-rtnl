@@ -337,7 +337,7 @@ struct chapms2_response_cache_entry {
 	int id;
 	unsigned char challenge[16];
 	unsigned char response[MS_CHAP2_RESPONSE_LEN];
-	unsigned char auth_response[MS_AUTH_RESPONSE_LENGTH];
+	unsigned char auth_response[MS_AUTH_RESPONSE_LENGTH+1];
 };
 
 #define CHAPMS2_MAX_RESPONSE_CACHE_SIZE 10
@@ -395,7 +395,7 @@ chapms2_make_response(unsigned char *response, int id, char *our_name,
 		      unsigned char *private)
 {
 	const struct chapms2_response_cache_entry *cache_entry;
-	unsigned char auth_response[MS_AUTH_RESPONSE_LENGTH];
+	unsigned char auth_response[MS_AUTH_RESPONSE_LENGTH+1];
 
 	challenge++;	/* skip length, should be 16 */
 	*response++ = MS_CHAP2_RESPONSE_LEN;
