@@ -1964,15 +1964,16 @@
 1) build system: cleanup and tune build flags for more speed and safe codegeneration.<br>
 2) init.d: use wins from uplink network if exist.<br>
 3) usb-modeswitch-data: up to 20140529.<br>
-4) kernel: net/l2tp: don't fall back on UDP [get|set]sockopt.<br>
-5) kernel: net: igmp: reduce Unsolicited report interval to 1s when using IGMPv3.<br>
-6) kernel: ipv4,ipv6: send igmpv3/mld packets with TC_PRIO_CONTROL.<br>
-7) kernel: ipv4: force_igmp_version ignored when a IGMPv3 query received.<br>
-8) kernel: igmp: call ip_mc_clear_src() only when we have no users of ip_mc_list.<br>
-9) kernel: net: replace continue with break to reduce unnecessary loop in xxx_xmarksources.<br>
-10) kernel: net: ipv6: igmp6_event_query: use msecs_to_jiffies.<br>
-11) kernel: net: potential null skb->dev dereference.<br>
-12) kernel: net: optimize non-gso test checks.<br>
+4) dropbear: update to 2014.64.<br>
+5) kernel: net/l2tp: don't fall back on UDP [get|set]sockopt.<br>
+6) kernel: net: igmp: reduce Unsolicited report interval to 1s when using IGMPv3.<br>
+7) kernel: ipv4,ipv6: send igmpv3/mld packets with TC_PRIO_CONTROL.<br>
+8) kernel: ipv4: force_igmp_version ignored when a IGMPv3 query received.<br>
+9) kernel: igmp: call ip_mc_clear_src() only when we have no users of ip_mc_list.<br>
+10) kernel: net: replace continue with break to reduce unnecessary loop in xxx_xmarksources.<br>
+11) kernel: net: ipv6: igmp6_event_query: use msecs_to_jiffies.<br>
+12) kernel: net: potential null skb->dev dereference.<br>
+13) kernel: net: optimize non-gso test checks.<br>
 <br>
 <br>
 <br>

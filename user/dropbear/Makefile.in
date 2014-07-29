@@ -154,7 +154,7 @@ inst_dropbear: dropbear
 	-chown root $(DESTDIR)$(sbindir)/dropbear$(EXEEXT)
 	-chgrp 0 $(DESTDIR)$(sbindir)/dropbear$(EXEEXT)
 
-inst_%: $*
+inst_%: %
 	$(INSTALL) -d -m 755 $(DESTDIR)$(bindir)
 	$(INSTALL) -m 755 $*$(EXEEXT) $(DESTDIR)$(bindir)
 	-chown root $(DESTDIR)$(bindir)/$*$(EXEEXT)
