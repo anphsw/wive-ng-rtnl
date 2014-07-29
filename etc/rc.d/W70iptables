@@ -42,6 +42,71 @@ start() {
 	if [ "$dhcpEnabled" != "0" ]; then
 	    iptables -A servicelimit -i $lan_if -p udp --dport 67 -j ACCEPT
 	fi
+	if [ "$dnsPEnabled" = "1" ]; then
+	    $LOG "Dnsproxy allow to connect"
+	    iptables -A servicelimit -i $lan_if -p udp --dport 53 -j ACCEPT
+	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 53 -j ACCEPT
+	fi
+	if [ "$PPP_CONNECT" = "on" ] || [ "$l2tp_srv_enabled" = "1" ]; then
+	    if [ "$vpnType" = "1" ]; then
+		$LOG "Add vpnfilter rules for PPTP"
+		iptables -A servicelimit -p gre -j ACCEPT
+		iptables -A servicelimit -p tcp --sport 1723 -j ACCEPT
+	    fi
+	    if [ "$vpnType" = "2" ] || [ "$l2tp_srv_enabled" = "1" ]; then
+		iptables -A servicelimit -p udp --sport 500 -j ACCEPT
+		$LOG "Add vpnfilter rules for L2TP"
+		iptables -A servicelimit -p udp --dport 500 -j ACCEPT
+		iptables -A servicelimit -p udp --sport 1701 -j ACCEPT
+		iptables -A servicelimit -p udp --dport 1701 -j ACCEPT
+		iptables -A servicelimit -p udp --sport 4500 -j ACCEPT
+		iptables -A servicelimit -p udp --dport 4500 -j ACCEPT
+	    fi
+	fi
+	if [ "$upnpEnabled" = "1" ] && [ "$ROUTE_MODE" = "on" ]; then
+	    $LOG "UPNP allow to connect"
+	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 8666 -j ACCEPT
+	    # not safe fix me later
+	    iptables -A servicelimit -i $lan_if -p udp --dport "$LOCAL_PRT" -j ACCEPT
+	    iptables -A servicelimit -i $lan_if -p udp --dport 1900 -j ACCEPT
+	    if [ "$Lan2Enabled" = "1" ]; then
+		iptables -A servicelimit -i $lan2_if $STATE_NEW -p tcp --dport 8666 -j ACCEPT
+		# not safe fix me later
+		iptables -A servicelimit -i $lan2_if -p udp --dport "$LOCAL_PRT" -j ACCEPT
+		iptables -A servicelimit -i $lan2_if -p udp --dport 1900 -j ACCEPT
+	    fi
+	fi
+	if [ "$xupnpd" = "1" ]; then
+	    $LOG "Xupnpd allow to connect"
+	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 4044 -j ACCEPT
+	    # not safe fix me later
+	    iptables -A servicelimit -i $lan_if -p udp --dport "$LOCAL_PRT" -j ACCEPT
+	    iptables -A servicelimit -i $lan_if -p udp --dport 1900 -j ACCEPT
+	    if [ "$Lan2Enabled" = "1" ]; then
+    		iptables -A servicelimit -i $lan2_if $STATE_NEW -p tcp --dport 4044 -j ACCEPT
+		# not safe fix me later
+		iptables -A servicelimit -i $lan2_if -p udp --dport "$LOCAL_PRT" -j ACCEPT
+		iptables -A servicelimit -i $lan2_if -p udp --dport 1900 -j ACCEPT
+	    fi
+	fi
+	if [ "$UDPXYMode" != "0" ]; then
+	    $LOG "Udpxy allow to connect"
+	    if [ "$UDPXYMode" = "1" ]; then
+    		iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport $UDPXYPort -j ACCEPT
+		if [ "$Lan2Enabled" = "1" ]; then
+		    iptables -A servicelimit -i $lan2_if $STATE_NEW -p tcp --dport $UDPXYPort -j ACCEPT
+		fi
+	    elif [ "$UDPXYMode" = "2" ]; then
+    		iptables -A servicelimit $STATE_NEW -p tcp --dport $UDPXYPort -j ACCEPT
+	    fi
+	fi
+	if [ "$SmbEnabled" = "1" ]; then
+	    $LOG "Samba allow to connect"
+	    iptables -A servicelimit -i $lan_if -p udp --dport 137:138 -j ACCEPT
+	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp -m multiport --dport 139,445 -j ACCEPT
+	    # not safe fix me later
+	    iptables -A servicelimit -i $lan_if -p udp --dport "$LOCAL_PRT" -j ACCEPT
+	fi
 	if [ "$RemoteManagement" != "0" ]; then
 	    $LOG "Remote managment web limit"
     	    iptables -A servicelimit -p tcp --dport $RemoteManagementPort $CONNLIMIT 16 -j REJECT
@@ -89,55 +154,6 @@ start() {
     		iptables -A servicelimit $STATE_NEW -p tcp -m multiport --dport 20,$FtpPort -j ACCEPT
 	    fi
 	fi
-	if [ "$upnpEnabled" = "1" ] && [ "$ROUTE_MODE" = "on" ]; then
-	    $LOG "UPNP allow to connect"
-	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 8666 -j ACCEPT
-	    # not safe fix me later
-	    iptables -A servicelimit -i $lan_if -p udp --dport "$LOCAL_PRT" -j ACCEPT
-	    iptables -A servicelimit -i $lan_if -p udp --dport 1900 -j ACCEPT
-	    if [ "$Lan2Enabled" = "1" ]; then
-		iptables -A servicelimit -i $lan2_if $STATE_NEW -p tcp --dport 8666 -j ACCEPT
-		# not safe fix me later
-		iptables -A servicelimit -i $lan2_if -p udp --dport "$LOCAL_PRT" -j ACCEPT
-		iptables -A servicelimit -i $lan2_if -p udp --dport 1900 -j ACCEPT
-	    fi
-	fi
-	if [ "$xupnpd" = "1" ]; then
-	    $LOG "Xupnpd allow to connect"
-	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 4044 -j ACCEPT
-	    # not safe fix me later
-	    iptables -A servicelimit -i $lan_if -p udp --dport "$LOCAL_PRT" -j ACCEPT
-	    iptables -A servicelimit -i $lan_if -p udp --dport 1900 -j ACCEPT
-	    if [ "$Lan2Enabled" = "1" ]; then
-    		iptables -A servicelimit -i $lan2_if $STATE_NEW -p tcp --dport 4044 -j ACCEPT
-		# not safe fix me later
-		iptables -A servicelimit -i $lan2_if -p udp --dport "$LOCAL_PRT" -j ACCEPT
-		iptables -A servicelimit -i $lan2_if -p udp --dport 1900 -j ACCEPT
-	    fi
-	fi
-	if [ "$UDPXYMode" != "0" ]; then
-	    $LOG "Udpxy allow to connect"
-	    if [ "$UDPXYMode" = "1" ]; then
-    		iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport $UDPXYPort -j ACCEPT
-		if [ "$Lan2Enabled" = "1" ]; then
-		    iptables -A servicelimit -i $lan2_if $STATE_NEW -p tcp --dport $UDPXYPort -j ACCEPT
-		fi
-	    elif [ "$UDPXYMode" = "2" ]; then
-    		iptables -A servicelimit $STATE_NEW -p tcp --dport $UDPXYPort -j ACCEPT
-	    fi
-	fi
-	if [ "$SmbEnabled" = "1" ]; then
-	    $LOG "Samba allow to connect"
-	    iptables -A servicelimit -i $lan_if -p udp --dport 137:138 -j ACCEPT
-	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp -m multiport --dport 139,445 -j ACCEPT
-	    # not safe fix me later
-	    iptables -A servicelimit -i $lan_if -p udp --dport "$LOCAL_PRT" -j ACCEPT
-	fi
-	if [ "$dnsPEnabled" = "1" ]; then
-	    $LOG "Dnsproxy allow to connect"
-	    iptables -A servicelimit -i $lan_if -p udp --dport 53 -j ACCEPT
-	    iptables -A servicelimit -i $lan_if $STATE_NEW -p tcp --dport 53 -j ACCEPT
-	fi
 	if [ "$snmpd" = "1" ]; then
 	    $LOG "SNMP allow to connect"
 	    iptables -A servicelimit -i $lan_if -p udp --dport 161 -j ACCEPT
@@ -174,23 +190,6 @@ start() {
 	iptables -A servicelimit -p icmp --icmp-type echo-request -j DROP
 	# allow all others icmp messages (mtu probing and others)
         iptables -A servicelimit  -p icmp ! --icmp-type echo-request -j ACCEPT
-###########################################VPN-RULES##########################################
-	if [ "$PPP_CONNECT" = "on" ] || [ "$l2tp_srv_enabled" = "1" ]; then
-	    if [ "$vpnType" = "1" ]; then
-		$LOG "Add vpnfilter rules for PPTP"
-		iptables -A servicelimit -p gre -j ACCEPT
-		iptables -A servicelimit -p tcp --sport 1723 -j ACCEPT
-	    fi
-	    if [ "$vpnType" = "2" ] || [ "$l2tp_srv_enabled" = "1" ]; then
-		iptables -A servicelimit -p udp --sport 500 -j ACCEPT
-		$LOG "Add vpnfilter rules for L2TP"
-		iptables -A servicelimit -p udp --dport 500 -j ACCEPT
-		iptables -A servicelimit -p udp --sport 1701 -j ACCEPT
-		iptables -A servicelimit -p udp --dport 1701 -j ACCEPT
-		iptables -A servicelimit -p udp --sport 4500 -j ACCEPT
-		iptables -A servicelimit -p udp --dport 4500 -j ACCEPT
-	    fi
-	fi
 ###########################################FORWARD#######################################
 	if [ "$ROUTE_MODE" = "on" ]; then
 	    $LOG "Set forward rules"
@@ -206,23 +205,24 @@ start() {
 		echo "show=src" > /proc/net/ipt_account/mynetwork
 		echo "reset-on-read=no" > /proc/net/ipt_account/mynetwork
 	    fi
-
 	    if [ "$igmpEnabled" != "0" ]; then
 		$LOG "Set igmp forward rules"
 		iptables -A FORWARD -d $mcast_net -o $lan_if -j ACCEPT
 		iptables -A FORWARD -s $mcast_net -i $lan_if -j ACCEPT
 	    fi
-
 	    if [ -f /etc/macipfilter ] && [ "$IPPortFilterEnable" = "1" ]; then
 		$LOG "Set macipport_filter rules"
 		/etc/macipfilter
 	    fi
-
 	    if [ -f /etc/websfilter ]; then
         	$LOG "Add rules for web content filters"
     		/etc/websfilter
 	    fi
-
+	    if [ "$l2tp_srv_enabled" = "1" ]; then
+		# add forward chain for vpn server
+		iptables -N l2tpsrvfwd
+		iptables -A FORWARD -j l2tpsrvfwd
+	    fi
 	    if [ "$parproutedEnabled" != "1" ]; then
 		# enable forward only from local network to wan/ppp
 		iptables -A FORWARD -i $lan_if -s $lan_ipaddr/$lan_netmask -j ACCEPT
@@ -240,16 +240,8 @@ start() {
 		# in proxy arp mode need all forward packets to acepted
 		iptables -I FORWARD -j ACCEPT
 	    fi
-
-	    # add forward chain for vpn server
-	    if [ "$l2tp_srv_enabled" = "1" ]; then
-		iptables -N l2tpsrvfwd
-		iptables -A FORWARD -j l2tpsrvfwd
-	    fi
-
 	    # tune mss size for tranzit packets
 	    clamp_mss
-
 	    # hack for stupid and greedy ISP
 	    if [ "$store_ttl" = "1" ]; then
 		$LOG "Increase TTL for input packets"
