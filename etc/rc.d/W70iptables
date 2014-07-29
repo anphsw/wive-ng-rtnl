@@ -64,7 +64,7 @@ start() {
 	    fi
 	fi
 	if [ "$LOCAL_PRT" != "" ]; then
-	    $LOG "allow local port range from LAN, need for some local service"
+	    $LOG "allow local port range $LOCAL_PRT from LAN, need for some local service"
 	    iptables -A servicelimit -i $lan_if -p udp --dport "$LOCAL_PRT" -j ACCEPT
 	    if [ "$Lan2Enabled" = "1" ]; then
 		iptables -A servicelimit -i $lan2_if -p udp --dport "$LOCAL_PRT" -j ACCEPT
