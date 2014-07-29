@@ -430,21 +430,18 @@ get_param() {
     else
 	ROUTE_MODE="off"
     fi
-
     # if ppp enabled and not pure pppoe mode (type6 is lanauth not real ppp)
     if [ "$MODEMENABLED" = "1" ] || [ "$vpnEnabled" = "on" -a "$vpnType" != "6" ]; then
 	PPP_CONNECT="on"
     else
 	PPP_CONNECT="off"
     fi
-
     # if start one of this services need allow udp packets to local port range
     if [ "$SmbEnabled" = "1" ] || [ "$xupnpd" = "1" ] || [ "$upnpEnabled" = "1" ]; then
 	LOCAL_PRT=`sysctl -n net.ipv4.ip_local_port_range | awk {' print $1":"$2 '}`
     else
 	LOCAL_PRT=""
     fi
-
     # if wan ip not get
     if [ "$wan_ipaddr" = "" ]; then
 	use_snat=0
@@ -453,6 +450,7 @@ get_param() {
     if [ "$vpnPurePPPOE" = "1" ]; then
 	natEnabled=0
     fi
+    # calculate ip ranges for accounting
     if [ "$ipt_account" = "1" ]; then
 	lan_ip_acc=`ipcalc "$lan_ipaddr" "$lan_netmask" -ns | cut -f 2- -d =`
 	lan_ip_prf=`ipcalc "$lan_ipaddr" "$lan_netmask" -ps | cut -f 2- -d =`
@@ -469,7 +467,6 @@ get_param() {
 	modprobe ipt_ttl
 	modprobe ipt_TTL
     fi
-
     # macros
     STATE_NEW="-m state --state NEW"
     STATE_EST="-m state --state ESTABLISHED,RELATED"
