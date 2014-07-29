@@ -284,7 +284,7 @@ start() {
 		fi
 	    fi
 	    #######################NAT##################################
-	    if [ "$ROUTE_MODE" = "on" ] && [ "$natEnabled" = "1" ] && [ "$vpnPurePPPOE" != "1" ]; then
+	    if [ "$ROUTE_MODE" = "on" ] && [ "$natEnabled" = "1" ]; then
 		if [ "$OperationMode" != "4" ]; then
 		    # lan gw/wireless client/apcli mode NAT
 		    if  [ "$use_snat" = "1" ]; then
@@ -452,7 +452,7 @@ get_param() {
     if [ "$wan_ipaddr" = "" ]; then
 	use_snat=0
     fi
-    # In pppoe pure mode no need add MASQ rules to localnet
+    # in pppoe pure mode no need add MASQ rules to uplink localnet
     if [ "$vpnPurePPPOE" = "1" ]; then
 	natEnabled=0
     fi
