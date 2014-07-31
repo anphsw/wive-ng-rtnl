@@ -84,11 +84,24 @@ void linkwatch_init_dev(struct net_device *dev)
 		rfc2863_policy(dev);
 }
 
-
-static int linkwatch_urgent_event(struct net_device *dev)
+/* Are any of the TX qdiscs changing?  */
+static bool qdisc_tx_changing(const struct net_device *dev)
 {
-	return netif_running(dev) && netif_carrier_ok(dev) &&
-	       dev->qdisc != dev->qdisc_sleeping;
+	if (dev->qdisc != dev->qdisc_sleeping)
+		return true;
+
+	return false;
+}
+
+static bool linkwatch_urgent_event(struct net_device *dev)
+{
+	if (!netif_running(dev))
+		return false;
+
+	if (dev->ifindex != dev->iflink)
+		return true;
+
+	return netif_carrier_ok(dev) &&	qdisc_tx_changing(dev);
 }
 
 
@@ -223,7 +236,7 @@ static void linkwatch_event(struct work_struct *dummy)
 
 void linkwatch_fire_event(struct net_device *dev)
 {
-	int urgent = linkwatch_urgent_event(dev);
+	bool urgent = linkwatch_urgent_event(dev);
 
 	rfc2863_policy(dev);
 
