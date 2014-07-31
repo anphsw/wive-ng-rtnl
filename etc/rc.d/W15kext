@@ -11,8 +11,7 @@ LOG="logger -t kext"
 
 start() {
     nat_mode
-    hw_nat_en
-    route_fastpath
+    offload
     pthrough
     # This is set only if wan or lan in bridge
     if [ "$wan_if" = "br0" ] || [ "$lan_if" = "br0" ]; then
@@ -34,10 +33,10 @@ nat_mode() {
     fi
 }
 
-hw_nat_en() {
+offload() {
     # In bridge and chillispot mode not fastnat use
     if [ "$OperationMode" != "0" ] && [ "$OperationMode" != "4" ] && [ "$ApCliBridgeOnly" != "1" ]; then
-	eval `nvram_buf_get 2860 hw_nat_bind hw_nat_wifi natFastpath`
+	eval `nvram_buf_get 2860 hw_nat_bind hw_nat_wifi natFastpath routeFastpath`
 	# select NAT offload mode
 	if [ "$natFastpath" = "1" ]; then
 	    hw_nat=0
@@ -75,32 +74,35 @@ hw_nat_en() {
 	    hw_nat_wifi="wifi_offload=0"
 	    $LOG "WiFi HW_NAT Offload mode DISABLE"
 	fi
-	# configure nat offload
-	if [ "$hw_nat" = "1" ]; then
-	    if [ ! -d /sys/module/hw_nat ]; then
-		modprobe -q hw_nat "$hw_nat_wifi"
-	    fi
-	    # set HW_NAT default QOS Mode to WRR policy
-	    hw_nat -L 0
+	# configure software route offload
+	if [ "$routeFastpath" != "0" ]; then
+	    $LOG "Route fastpath enabled."
+	    sysctl -wq net.nf_conntrack_fastroute=1
 	else
-	    if [ -d /sys/module/hw_nat ]; then
-		rmmod hw_nat > /dev/null 2>&1
-	    fi
+	    sysctl -wq net.nf_conntrack_fastroute=0
 	fi
 	# configure software nat offload
 	if [ "$sw_nat" = "1" ]; then
+	    $LOG "NAT fastpath enabled."
 	    sysctl -wq net.nf_conntrack_fastnat=1
 	else
 	    sysctl -wq net.nf_conntrack_fastnat=0
 	fi
-	# if any QoS/Shaper mode and hw_nat ebables need increase binding threshold
-	if [ "$QoSEnable" != "" ] && [ "$QoSEnable" != "0" ]; then
-	    hw_nat_bind=250
-	fi
-	# set hw_nat binding threshold if user set not default value
-	if [ -d /sys/module/hw_nat ] && [ "$hw_nat" = "1" ] && [ "$hw_nat_bind" != "" ] && [ "$hw_nat_bind" != "30" ]; then
-	    $LOG "Increase HW_NAT binding threshold to $hw_nat_bind."
-	    hw_nat -N $hw_nat_bind > /dev/null 2>&1
+	# configure hardware nat offload
+	if [ "$hw_nat" = "1" ]; then
+	    if [ ! -d /sys/module/hw_nat ]; then
+		modprobe -q hw_nat "$hw_nat_wifi"
+	    fi
+	    $LOG "Set HW_NAT default QOS Mode to WRR policy."
+	    hw_nat -L 0
+	    if [ "$hw_nat_bind" != "" ]; then
+	        $LOG "Change HW_NAT binding threshold to $hw_nat_bind."
+	        hw_nat -N $hw_nat_bind > /dev/null 2>&1
+	    fi
+	else
+	    if [ -d /sys/module/hw_nat ]; then
+		rmmod hw_nat > /dev/null 2>&1
+	    fi
 	fi
     else
 	$LOG "NAT Offload mode DISABLE"
@@ -135,17 +137,6 @@ pthrough() {
 	    echo "null,null" > /proc/pthrough/pppoe
 	    echo "null,null" > /proc/pthrough/ipv6
 	fi
-    fi
-}
-
-route_fastpath() {
-    #----Fastpath for bridge enable------------------------------
-    routeFastpath=`nvram_get 2860 routeFastpath`
-    if [ "$routeFastpath" != "0" ]; then
-	$LOG "Route fastpath enabled."
-	sysctl -wq net.nf_conntrack_fastroute=1
-    else
-	sysctl -wq net.nf_conntrack_fastroute=0
     fi
 }
 
