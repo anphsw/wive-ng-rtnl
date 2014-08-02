@@ -74,12 +74,6 @@ CFLAGS	+= -I$(ROOTDIR)/lib/libnvram -I$(ROOTDIR)/$(LINUXDIR)/include
 LDFLAGS	+= $(SSLLIB) $(IFMODLIB)
 LDLIBS	+= -lnvram
 
-#allways agressive optimize for size and savemem
-CFLAGS	+= -Os -fno-caller-saves -fno-unwind-tables -fno-asynchronous-unwind-tables -femit-struct-debug-baseonly -fno-var-tracking
-CFLAGS	+= -membedded-data -muninit-const-in-rodata
-CFLAGS	+= -ffunction-sections -fdata-sections
-LDFLAGS	+= -Wl,--gc-sections
-
 CONF_H	= $(ROOTDIR)/$(LINUXDIR)/include/linux/config.h
 UCONF_H	= $(ROOTDIR)/config/autoconf.h
 BUSYCONF_H = $(ROOTDIR)/user/busybox/include/autoconf.h
