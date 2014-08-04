@@ -133,7 +133,7 @@
 .\" ========================================================================
 .\"
 .IX Title "GCC 1"
-.TH GCC 1 "2014-05-22" "gcc-4.8.3" "GNU"
+.TH GCC 1 "2014-07-31" "gcc-4.8.4" "GNU"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -1029,6 +1029,7 @@ See S/390 and zSeries Options.
 \&\fB\-ffixed\-\fR\fIreg\fR  \fB\-fexceptions 
 \&\-fnon\-call\-exceptions  \-fdelete\-dead\-exceptions  \-funwind\-tables 
 \&\-fasynchronous\-unwind\-tables 
+\&\-fno\-gnu\-unique 
 \&\-finhibit\-size\-directive  \-finstrument\-functions 
 \&\-finstrument\-functions\-exclude\-function\-list=\fR\fIsym\fR\fB,\fR\fIsym\fR\fB,... 
 \&\-finstrument\-functions\-exclude\-file\-list=\fR\fIfile\fR\fB,\fR\fIfile\fR\fB,... 
@@ -19300,6 +19301,19 @@ that needs this handling enables it on your behalf.
 Generate unwind table in \s-1DWARF 2\s0 format, if supported by target machine.  The
 table is exact at each instruction boundary, so it can be used for stack
 unwinding from asynchronous events (such as debugger or garbage collector).
+.IP "\fB\-fno\-gnu\-unique\fR" 4
+.IX Item "-fno-gnu-unique"
+On systems with recent \s-1GNU\s0 assembler and C library, the \*(C+ compiler
+uses the \f(CW\*(C`STB_GNU_UNIQUE\*(C'\fR binding to make sure that definitions
+of template static data members and static local variables in inline
+functions are unique even in the presence of \f(CW\*(C`RTLD_LOCAL\*(C'\fR; this
+is necessary to avoid problems with a library used by two different
+\&\f(CW\*(C`RTLD_LOCAL\*(C'\fR plugins depending on a definition in one of them and
+therefore disagreeing with the other one about the binding of the
+symbol.  But this causes \f(CW\*(C`dlclose\*(C'\fR to be ignored for affected
+DSOs; if your program relies on reinitialization of a \s-1DSO\s0 via
+\&\f(CW\*(C`dlclose\*(C'\fR and \f(CW\*(C`dlopen\*(C'\fR, you can use
+\&\fB\-fno\-gnu\-unique\fR.
 .IP "\fB\-fpcc\-struct\-return\fR" 4
 .IX Item "-fpcc-struct-return"
 Return \*(L"short\*(R" \f(CW\*(C`struct\*(C'\fR and \f(CW\*(C`union\*(C'\fR values in memory like

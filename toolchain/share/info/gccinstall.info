@@ -2512,10 +2512,6 @@ makers.
    * SCO OpenServer/Unixware.
 
    * Solaris 2 (SPARC, Intel):
-        * Sunfreeware
-
-        * Blastwave
-
         * OpenCSW
 
         * TGCware
@@ -4456,10 +4452,10 @@ Node: Building80011
 Node: Testing95478
 Node: Final install103340
 Node: Binaries108651
-Node: Specific110159
-Node: Old161308
-Node: Configurations164441
-Node: GNU Free Documentation License167979
-Node: Concept Index193107
+Node: Specific110115
+Node: Old161264
+Node: Configurations164397
+Node: GNU Free Documentation License167935
+Node: Concept Index193063
 
 End Tag Table
