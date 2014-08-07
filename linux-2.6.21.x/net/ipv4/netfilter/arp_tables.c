@@ -257,6 +257,11 @@ unsigned int arpt_do_table(struct sk_buff **pskb,
 
 	xt_info_rdlock_bh();
 	private = table->private;
+	/*
+	 * Ensure we load private-> members after we've fetched the base
+	 * pointer.
+	 */
+	smp_read_barrier_depends();
 	table_base = private->entries[smp_processor_id()];
 
 	e = get_entry(table_base, private->hook_entry[hook]);

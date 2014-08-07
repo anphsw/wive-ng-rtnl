@@ -992,6 +992,11 @@ get_counters(const struct xt_table_info *t,
 	 */
 	local_bh_disable();
 	curcpu = smp_processor_id();
+	/*
+	 * Ensure we load private-> members after we've fetched the base
+	 * pointer.
+	 */
+	smp_read_barrier_depends();
 
 	i = 0;
 	IPT_ENTRY_ITERATE(t->entries[curcpu],
