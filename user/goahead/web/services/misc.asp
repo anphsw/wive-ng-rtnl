@@ -173,7 +173,7 @@ function initValue()
 	form.dhcpSwReset.value = defaultNumber("<% getCfgGeneral(1, "dhcpSwReset"); %>", "0");
 
 	form.routeFastpath.value = defaultNumber("<% getCfgGeneral(1, "routeFastpath"); %>", "1");
-	form.routeFastpath.value = defaultNumber("<% getCfgGeneral(1, "filterFastpath"); %>", "1");
+	form.filterFastpath.value = defaultNumber("<% getCfgGeneral(1, "filterFastpath"); %>", "1");
 	form.CrondEnable.value = defaultNumber("<% getCfgGeneral(1, "CrondEnable"); %>", "0");
 	form.ForceRenewDHCP.value = defaultNumber("<% getCfgGeneral(1, "ForceRenewDHCP"); %>", "1");
 	form.SnmpdEnabled.value = defaultNumber("<% getCfgGeneral(1, "snmpd"); %>", "0");

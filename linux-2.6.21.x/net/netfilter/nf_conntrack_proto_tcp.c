@@ -48,7 +48,7 @@ static DEFINE_RWLOCK(tcp_lock);
 /* Do not check the TCP window for incoming packets  */
 static int nf_ct_tcp_no_window_check __read_mostly = 1;
 /* Disabling processing of the netfilter "filter" table for established connection packets */
-int nf_ct_skip_established __read_mostly = 0;
+int nf_ct_skip_established __read_mostly = 1;
 EXPORT_SYMBOL_GPL(nf_ct_skip_established);
 #endif
 
