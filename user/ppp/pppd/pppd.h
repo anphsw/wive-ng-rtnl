@@ -295,6 +295,7 @@ extern int	default_device;	/* Using /dev/tty or equivalent */
 extern char	devnam[MAXPATHLEN];	/* Device name */
 extern int defaultmetric;		/* Metric of the default route */
 extern int	crtscts;	/* Use hardware flow control */
+extern int	stop_bits;	/* Number of serial port stop bits */
 extern bool	modem;		/* Use modem control lines */
 extern int	inspeed;	/* Input/Output speed requested */
 extern u_int32_t netmask;	/* IP netmask to set on interface */
