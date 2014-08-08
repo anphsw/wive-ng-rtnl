@@ -1150,13 +1150,13 @@ ipv6_demand_conf(u)
     ipv6cp_options *wo = &ipv6cp_wantoptions[u];
 
 #if defined(__linux__) || defined(SOL2) || (defined(SVR4) && (defined(SNI) || defined(__USLC__)))
-#if defined(SOL2)
+#if defined(SOL2) || defined(__linux__)
     if (!sif6up(u))
 	return 0;
 #else
     if (!sifup(u))
 	return 0;
-#endif /* defined(SOL2) */
+#endif /* defined(SOL2) || defined(__linux__) */
 #endif    
     if (!sif6addr(u, wo->ourid, wo->hisid))
 	return 0;
@@ -1263,10 +1263,10 @@ ipv6cp_up(f)
 #endif
 
 	/* bring the interface up for IPv6 */
-#if defined(SOL2)
+#if defined(SOL2) || defined(__linux__)
 	if (!sif6up(f->unit)) {
 	    if (debug)
-		warn("sifup failed (IPV6)");
+		warn("sif6up failed (IPV6)");
 	    ipv6cp_close(f->unit, "Interface configuration failed");
 	    return;
 	}
@@ -1277,7 +1277,7 @@ ipv6cp_up(f)
 	    ipv6cp_close(f->unit, "Interface configuration failed");
 	    return;
 	}
-#endif /* defined(SOL2) */
+#endif /* defined(SOL2) || defined(__linux__) */
 
 #if defined(__linux__) || defined(SOL2) || (defined(SVR4) && (defined(SNI) || defined(__USLC__)))
 	if (!sif6addr(f->unit, go->ourid, ho->hisid)) {
@@ -1352,7 +1352,9 @@ ipv6cp_down(f)
 	ipv6cp_clear_addrs(f->unit, 
 			   ipv6cp_gotoptions[f->unit].ourid,
 			   ipv6cp_hisoptions[f->unit].hisid);
-#if defined(__linux__) || (defined(SVR4) && (defined(SNI) || defined(__USLC)))
+#if defined(__linux__)
+	sif6down(f->unit);
+#elif defined(SVR4) && (defined(SNI) || defined(__USLC))
 	sifdown(f->unit);
 #endif
     }
