@@ -397,23 +397,10 @@ ipt_do_table(struct sk_buff **pskb,
 	struct xt_table_info *private;
 
 	/* Initialization */
-	ip = (*pskb)->nh.iph;
-	indev = in ? in->name : nulldevname;
-	outdev = out ? out->name : nulldevname;
-#ifndef CONFIG_IPTABLES_SPEEDUP
-	/* We handle fragments by dealing with the first fragment as
-	 * if it was a normal packet.  All other fragments are treated
-	 * normally, except that they will NEVER match rules that ask
-	 * things we don't know, ie. tcp syn flag or ports).  If the
-	 * rule is also a fragment-specific rule, non-fragments won't
-	 * match it. */
-	offset = ntohs(ip->frag_off) & IP_OFFSET;
-#endif
 	IP_NF_ASSERT(table->valid_hooks & (1 << hook));
 	xt_info_rdlock_bh();
 	private = table->private;
 	table_base = private->entries[smp_processor_id()];
-
 	e = get_entry(table_base, private->hook_entry[hook]);
 #ifdef CONFIG_IPTABLES_SPEEDUP
 	if (ipt_handle_default_rule(e, &verdict)) {
@@ -421,6 +408,10 @@ ipt_do_table(struct sk_buff **pskb,
 		xt_info_rdunlock_bh();
 		return verdict;
 	}
+#endif
+	ip = (*pskb)->nh.iph;
+	indev = in ? in->name : nulldevname;
+	outdev = out ? out->name : nulldevname;
 
 	/* We handle fragments by dealing with the first fragment as
 	 * if it was a normal packet.  All other fragments are treated
@@ -429,7 +420,7 @@ ipt_do_table(struct sk_buff **pskb,
 	 * rule is also a fragment-specific rule, non-fragments won't
 	 * match it. */
 	offset = ntohs(ip->frag_off) & IP_OFFSET;
-#endif
+
 	/* For return from builtin chain */
 	back = get_entry(table_base, private->underflow[hook]);
 
