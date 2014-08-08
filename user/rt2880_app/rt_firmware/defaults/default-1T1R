@@ -44,6 +44,7 @@ BeaconPeriod=50
 BGProtection=2
 boot_leds_blink=13 14
 routeFastpath=1
+netfilterFastpath=1
 BSSACM=0;0;0;0
 BSSAifsn=3;7;2;2
 BSSCwmax=10;10;4;3

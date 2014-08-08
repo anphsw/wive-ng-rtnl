@@ -47,6 +47,9 @@ static DEFINE_RWLOCK(tcp_lock);
 #ifdef CONFIG_IPTABLES_SPEEDUP
 /* Do not check the TCP window for incoming packets  */
 static int nf_ct_tcp_no_window_check __read_mostly = 1;
+/* Disabling processing of the netfilter "filter" table for established connection packets */
+int nf_ct_skip_established __read_mostly = 0;
+EXPORT_SYMBOL_GPL(nf_ct_skip_established);
 #endif
 
 /* "Be conservative in what you do,
@@ -1358,6 +1361,13 @@ static struct ctl_table tcp_sysctl_table[] = {
 	{
 		.procname       = "nf_conntrack_tcp_no_window_check",
 		.data           = &nf_ct_tcp_no_window_check,
+		.maxlen         = sizeof(unsigned int),
+		.mode           = 0644,
+		.proc_handler   = proc_dointvec,
+	},
+	{
+		.procname       = "nf_conntrack_skip_established",
+		.data           = &nf_ct_skip_established,
 		.maxlen         = sizeof(unsigned int),
 		.mode           = 0644,
 		.proc_handler   = proc_dointvec,

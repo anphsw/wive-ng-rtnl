@@ -13,6 +13,11 @@
 #include <linux/moduleparam.h>
 #include <linux/netfilter_ipv6/ip6_tables.h>
 
+#ifdef CONFIG_IPTABLES_SPEEDUP
+#include <net/netfilter/nf_conntrack.h>
+extern int nf_ct_skip_established;
+#endif
+
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Netfilter Core Team <coreteam@netfilter.org>");
 MODULE_DESCRIPTION("ip6tables filter table");
@@ -88,6 +93,13 @@ ip6t_hook(unsigned int hook,
 	 const struct net_device *out,
 	 int (*okfn)(struct sk_buff *))
 {
+#ifdef CONFIG_IPTABLES_SPEEDUP
+	enum ip_conntrack_info ctinfo;
+
+	nf_ct_get(*pskb, &ctinfo);
+	if (nf_ct_skip_established && (ctinfo == IP_CT_ESTABLISHED_REPLY || ctinfo == IP_CT_ESTABLISHED))
+	    return NF_ACCEPT;
+#endif
 	return ip6t_do_table(pskb, hook, in, out, &packet_filter);
 }
 

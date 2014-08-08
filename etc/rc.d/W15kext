@@ -36,7 +36,7 @@ nat_mode() {
 offload() {
     # In bridge and chillispot mode not fastnat use
     if [ "$OperationMode" != "0" ] && [ "$OperationMode" != "4" ] && [ "$ApCliBridgeOnly" != "1" ]; then
-	eval `nvram_buf_get 2860 hw_nat_bind hw_nat_wifi natFastpath routeFastpath`
+	eval `nvram_buf_get 2860 hw_nat_bind hw_nat_wifi natFastpath routeFastpath filterFastpath`
 	# select NAT offload mode
 	if [ "$natFastpath" = "1" ]; then
 	    hw_nat=0
@@ -73,6 +73,15 @@ offload() {
 	else
 	    hw_nat_wifi="wifi_offload=0"
 	    $LOG "WiFi HW_NAT Offload mode DISABLE"
+	fi
+	# configure software netfilter offload
+	if [ "$netfilterFastpath" != "0" ]; then
+	    $LOG "Netfilter fastpath enabled."
+	    sysctl -wq net.netfilter.nf_conntrack_tcp_no_window_check=1
+	    sysctl -wq net.netfilter.nf_conntrack_skip_established=1
+	else
+	    sysctl -wq net.netfilter.nf_conntrack_tcp_no_window_check=0
+	    sysctl -wq net.netfilter.nf_conntrack_skip_established=0
 	fi
 	# configure software route offload
 	if [ "$routeFastpath" != "0" ]; then

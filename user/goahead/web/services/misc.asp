@@ -173,6 +173,7 @@ function initValue()
 	form.dhcpSwReset.value = defaultNumber("<% getCfgGeneral(1, "dhcpSwReset"); %>", "0");
 
 	form.routeFastpath.value = defaultNumber("<% getCfgGeneral(1, "routeFastpath"); %>", "1");
+	form.routeFastpath.value = defaultNumber("<% getCfgGeneral(1, "filterFastpath"); %>", "1");
 	form.CrondEnable.value = defaultNumber("<% getCfgGeneral(1, "CrondEnable"); %>", "0");
 	form.ForceRenewDHCP.value = defaultNumber("<% getCfgGeneral(1, "ForceRenewDHCP"); %>", "1");
 	form.SnmpdEnabled.value = defaultNumber("<% getCfgGeneral(1, "snmpd"); %>", "0");
@@ -401,6 +402,13 @@ function displayServiceStatus()
           <tr>
             <td class="head">Route fastpath</td>
             <td colspan="4"><select name="routeFastpath" class="half">
+                <option value="0">Disable</option>
+                <option value="1">Enable</option>
+              </select></td>
+          </tr>
+          <tr>
+            <td class="head">Netfilter fastpath</td>
+            <td colspan="4"><select name="filterFastpath" class="half">
                 <option value="0">Disable</option>
                 <option value="1">Enable</option>
               </select></td>
