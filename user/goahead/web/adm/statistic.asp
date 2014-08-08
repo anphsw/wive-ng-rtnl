@@ -89,7 +89,7 @@ function loadStatistics()
     <td><h1 id="statisticTitle">Statistics</h1>
       <p id="statisticIntroduction"> Take a look at the CPE statistics </p>
       <div style="display:none;" id="fastpath_warning">
-        <p><span style="color: #ff0000;"><b>CAUTION!&nbsp;</b></span> NAT fastpath option is turned into '<b>Hardware NAT offload mode</b>'.</p>
+        <p><span style="color: #ff0000;"><b>CAUTION!&nbsp;</b></span> Hardware NAT enabled. Traffic counters on interfaces not present real traffic.</p>
         <p>For some technical and software reasons there is no guarantee that gathered statistics for
           interfaces in '<b>Hardware NAT offload mode</b>' mode is correct now.</p>
         <p>To get correct statistics you need to shut down '<b>Hardware NAT offload mode</b>' option on <a href="/services/misc.asp#nat_fastpath_ref">MISC&nbsp;Services</a> configuration page.</p>
