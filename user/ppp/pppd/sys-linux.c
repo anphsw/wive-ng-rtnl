@@ -248,6 +248,7 @@ static void decode_version (char *buf, int *version, int *mod, int *patch);
 static int set_kdebugflag(int level);
 static int ppp_registered(void);
 static int make_ppp_unit(void);
+static int setifstate (int u, int state);
 
 extern u_char	inpacket_buf[];	/* borrowed from main.c */
 
@@ -2398,7 +2399,7 @@ int sif6down (int u)
  * setifstate - Config the interface up or down
  */
 
-int setifstate (int u, int state)
+static int setifstate (int u, int state)
 {
     struct ifreq ifr;
 
