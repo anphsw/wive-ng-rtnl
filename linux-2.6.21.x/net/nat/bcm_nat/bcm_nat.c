@@ -15,9 +15,9 @@
 #include "bcm_nat.h"
 #include <net/netfilter/nf_conntrack_core.h>
 
-int nf_conntrack_fastnat __read_mostly;
+int nf_conntrack_fastnat __read_mostly = 0;
 EXPORT_SYMBOL_GPL(nf_conntrack_fastnat);
-int nf_conntrack_fastroute __read_mostly;
+int nf_conntrack_fastroute __read_mostly = 0;
 EXPORT_SYMBOL_GPL(nf_conntrack_fastroute);
 
 extern int manip_pkt(u_int16_t proto, struct sk_buff **pskb, unsigned int iphdroff,
