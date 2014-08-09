@@ -348,7 +348,7 @@ int idr_get_new(struct idr *idp, void *ptr, int *id)
 	 * return proper error values.
 	 */
 	if (rv < 0)
-		return _idr_rc_to_errno(rv);
+		return rv == -ENOMEM ? -EAGAIN : rv;
 	*id = rv;
 	return 0;
 }
