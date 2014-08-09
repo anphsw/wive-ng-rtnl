@@ -172,6 +172,7 @@ function initValue()
 	form.watchdogEnable.value = defaultNumber("<% getCfgGeneral(1, "WatchdogEnabled"); %>", "0");
 	form.dhcpSwReset.value = defaultNumber("<% getCfgGeneral(1, "dhcpSwReset"); %>", "0");
 
+	form.natFastpath.value = defaultNumber("<% getCfgGeneral(1, "natFastpath"); %>", "1");
 	form.routeFastpath.value = defaultNumber("<% getCfgGeneral(1, "routeFastpath"); %>", "1");
 	form.filterFastpath.value = defaultNumber("<% getCfgGeneral(1, "filterFastpath"); %>", "1");
 	form.CrondEnable.value = defaultNumber("<% getCfgGeneral(1, "CrondEnable"); %>", "0");
@@ -190,24 +191,24 @@ function initValue()
 	displayElement('radvd', radvdb == '1');
 	displayElement('pppoerelay', pppoeb == '1');
 	displayElement('dnsproxy', dnsp == '1');
-		
+
 	// Set-up NAT fastpath
 	var qos_en = defaultNumber("<% getCfgGeneral(1, "QoSEnable"); %>", "0");
 	if (qos_en == '0')
 	{
-		form.natFastpath.options.add(new Option('Software', '1'));
-		form.natFastpath.options.add(new Option('Complex', '3'));
+		form.offloadMode.options.add(new Option('Software', '1'));
+		form.offloadMode.options.add(new Option('Complex', '3'));
 	}
-	
+
 	if (opmode == "4")
 	{
-		form.natFastpath.value = defaultNumber("0", "1");
-		form.natFastpath.disabled = true;
+		form.offloadMode.value = defaultNumber("0", "1");
+		form.offloadMode.disabled = true;
 	}
 	else
-		form.natFastpath.value = defaultNumber("<% getCfgGeneral(1, "natFastpath"); %>", "1");
+		form.offloadMode.value = defaultNumber("<% getCfgGeneral(1, "offloadMode"); %>", "1");
 
-	natFastpathSelect(form);
+	offloadModeSelect(form);
 	igmpSelect(form);
 	httpRmtSelect(form);
 	sshRmtSelect(form);
@@ -219,7 +220,7 @@ function initValue()
 
 function CheckValue(form)
 {
-	var thresh = form.natFastpath.value;
+	var thresh = form.offloadMode.value;
 	
 	if ((thresh == '2') || (thresh == '3'))
 	{
@@ -263,9 +264,9 @@ function CheckValue(form)
 	return true;
 }
 
-function natFastpathSelect(form)
+function offloadModeSelect(form)
 {
-	var thresh = form.natFastpath.value;
+	var thresh = form.offloadMode.value;
 	displayElement('hwnat_threshold_row', (thresh == '2') || (thresh == '3'))
 }
 
@@ -347,7 +348,7 @@ function displayServiceHandler(response)
 				'<a href="http://<% getLanIp(); %>:' + service[3] + '">Configure...</a>' : '&nbsp;';
 		}
 	}
-	
+
 	serviceStatusTimer = setTimeout('displayServiceStatus();', 5000);
 }
 
@@ -364,17 +365,18 @@ function displayServiceStatus()
   <tr>
     <td><h1 id="lTitle">Miscellaneous Services Setup</h1>
       <p id="lIntroduction"></p>
+      <p>In section "Offload engine" you will select the offload mode (for IPOE/PPPOE recommended HARDWARE mode, for L2TP/PPTP - COMPLEX).</p>
+      <p>In the section "Software fastpaths" (work only if offload mode complex or software) it is possible to disable selectively one of mechanisms of program offload (not recommended disable for PPTP/L2TP).</p>
       <hr>
       <form method="POST" name="miscServiceCfg" action="/goform/setMiscServices" onSubmit="return CheckValue(this);">
         <table class="form">
-          
           <!-- Offload engine -->
           <tr>
             <td class="title" colspan="5">Offload engine</td>
           </tr>
           <tr>
             <td class="head"><a name="nat_fastpath_ref"></a>NAT offload mode</td>
-            <td colspan="4"><select name="natFastpath" class="half" onChange="natFastpathSelect(this.form);">
+            <td colspan="4"><select name="offloadMode" class="half" onChange="offloadModeSelect(this.form);">
                 <option value="0">Disable</option>
                 <option value="2">Hardware</option>
               </select></td>
@@ -397,6 +399,17 @@ function displayServiceStatus()
                 <option value="0">Linux</option>
                 <option value="1" selected>Fcone</option>
                 <option value="2">Rcone</option>
+              </select></td>
+          </tr>
+          <!-- Software fastpaths -->
+          <tr>
+            <td class="title" colspan="5">Software fastpaths</td>
+          </tr>
+          <tr>
+            <td class="head">NAT fastpath</td>
+            <td colspan="4"><select name="natFastpath" class="half">
+                <option value="0">Disable</option>
+                <option value="1">Enable</option>
               </select></td>
           </tr>
           <tr>

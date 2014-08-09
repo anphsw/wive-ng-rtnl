@@ -928,7 +928,7 @@ static void setOpMode(webs_t wp, char_t *path, char_t *query)
 		nvram_bufset(RT2860_NVRAM, "OperationMode", mode);
 #ifdef CONFIG_USER_CHILLISPOT
 		if (!strncmp(mode, "4", 2)) {
-			nvram_bufset(RT2860_NVRAM, "natFastpath", "0");
+			nvram_bufset(RT2860_NVRAM, "offloadMode", "0");
 			nvram_bufset(RT2860_NVRAM, "dhcpEnabled", "0");
 		}
 #endif

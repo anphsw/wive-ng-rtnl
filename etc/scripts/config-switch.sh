@@ -11,7 +11,7 @@
 LOG="logger -t ESW"
 
 # get need variables
-eval `nvram_buf_get 2860 wan_port tv_port vlan_double_tag natFastpath ForceRenewDHCP`
+eval `nvram_buf_get 2860 wan_port tv_port vlan_double_tag offloadMode ForceRenewDHCP`
 
 ##############################################################################
 # BASE FOR ALL ESW
@@ -46,8 +46,8 @@ start_sw_config() {
     ##########################################################################
     if [ ! -f /var/run/goahead.pid ]; then
 	if [ -f /proc/sys/net/ipv4/vlan_double_tag ]; then
-	    if [ "$vlan_double_tag" = "1" ] || [ "$natFastpath" = "2" ] || [ "$natFastpath" = "3" ]; then
-		if [ "$natFastpath" = "2" ] || [ "$natFastpath" = "3" ]; then
+	    if [ "$vlan_double_tag" = "1" ] || [ "$offloadMode" = "2" ] || [ "$offloadMode" = "3" ]; then
+		if [ "$offloadMode" = "2" ] || [ "$offloadMode" = "3" ]; then
 		    $LOG "Double vlan tag and HW_NAT enabled. HW_VLAN offload disabled."
 		else
 		    $LOG "Double vlan tag enabled. HW_VLAN and HW_NAT offload disabled."

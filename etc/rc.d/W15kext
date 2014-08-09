@@ -36,46 +36,46 @@ nat_mode() {
 offload() {
     # In bridge and chillispot mode not fastnat use
     if [ "$OperationMode" != "0" ] && [ "$OperationMode" != "4" ] && [ "$ApCliBridgeOnly" != "1" ]; then
-	eval `nvram_buf_get 2860 hw_nat_bind hw_nat_wifi natFastpath routeFastpath filterFastpath`
+	eval `nvram_buf_get 2860 hw_nat_bind hw_nat_wifi offloadMode natFastpath routeFastpath filterFastpath`
 	# select NAT offload mode
-	if [ "$natFastpath" = "1" ]; then
+	if [ "$offloadMode" = "1" ]; then
 	    hw_nat=0
 	    sw_nat=1
-	    $LOG "NAT Offload mode SW_FASTPATH"
-	elif [ "$natFastpath" = "2" ] && [ "$CONFIG_RALINK_RT5350" != "y" ]; then
+	    $LOG "NAT Offload mode software with selected fastpaths, hw_nat disabled."
+	elif [ "$offloadMode" = "2" ]; then
 	    hw_nat=1
 	    sw_nat=0
-	    $LOG "NAT Offload mode HW_NAT"
-	elif [ "$natFastpath" = "3" ] && [ "$CONFIG_RALINK_RT5350" != "y" ]; then
+	    $LOG "NAT Offload mode hardware, all fastpaths disabled."
+	elif [ "$offloadMode" = "3" ]; then
 	    hw_nat=1
 	    sw_nat=1
-	    $LOG "NAT Offload mode COMPLEX"
-	elif [ "$natFastpath" = "2" ] && [ "$CONFIG_RALINK_RT5350" = "y" ]; then
-	    hw_nat=0
-	    sw_nat=0
-	    $LOG "NAT Offload mode DISABLE - RT5350 not support HW_NAT"
-	elif [ "$natFastpath" = "3" ] && [ "$CONFIG_RALINK_RT5350" = "y" ]; then
-	    hw_nat=0
-	    sw_nat=1
-	    $LOG "NAT Offload mode SW_FASTPATH - RT5350 not support HW_NAT"
+	    $LOG "NAT Offload mode COMPLEX, enable hw_nat and selected software fastpaths."
 	else
 	    hw_nat=0
 	    sw_nat=0
-	    $LOG "NAT Offload mode DISABLE"
+	    $LOG "NAT Offload mode DISABLE by user, hw_nat and all fastpaths disabled."
 	fi
-	if [ "$QoSEnable" != "" -a "$QoSEnable" != "0" ]; then
+	# exception for disabe hw_nat
+	if [ "$CONFIG_RALINK_RT5350" = "y" ]; then
 	    hw_nat=0
-	    $LOG "QoS enabled - HW_NAT Offload mode DISABLE"
+	    $LOG "HW_NAT DISABLED: THIS SOC NOT SUPPORT PPE!!!"
 	fi
-	if [ "$hw_nat_wifi" = "1" ]; then
-	    hw_nat_wifi="wifi_offload=1"
-	    $LOG "WiFi HW_NAT Offload mode ENABLE"
+	# configure software nat offload
+	if [ "$natFastpath" != "0" ] && [ "$sw_nat" = "1" ]; then
+	    $LOG "NAT fastpath enabled."
+	    sysctl -wq net.nf_conntrack_fastnat=1
 	else
-	    hw_nat_wifi="wifi_offload=0"
-	    $LOG "WiFi HW_NAT Offload mode DISABLE"
+	    sysctl -wq net.nf_conntrack_fastnat=0
+	fi
+	# configure software route offload
+	if [ "$routeFastpath" != "0" ] && [ "$sw_nat" = "1" ]; then
+	    $LOG "Route fastpath enabled."
+	    sysctl -wq net.nf_conntrack_fastroute=1
+	else
+	    sysctl -wq net.nf_conntrack_fastroute=0
 	fi
 	# configure software netfilter offload
-	if [ "$filterFastpath" != "0" ]; then
+	if [ "$filterFastpath" != "0" ] && [ "$sw_nat" = "1" ]; then
 	    $LOG "Netfilter fastpath enabled."
 	    sysctl -wq net.netfilter.nf_conntrack_tcp_no_window_check=1
 	    sysctl -wq net.netfilter.nf_conntrack_skip_established=1
@@ -83,23 +83,16 @@ offload() {
 	    sysctl -wq net.netfilter.nf_conntrack_tcp_no_window_check=0
 	    sysctl -wq net.netfilter.nf_conntrack_skip_established=0
 	fi
-	# configure software route offload
-	if [ "$routeFastpath" != "0" ]; then
-	    $LOG "Route fastpath enabled."
-	    sysctl -wq net.nf_conntrack_fastroute=1
-	else
-	    sysctl -wq net.nf_conntrack_fastroute=0
-	fi
-	# configure software nat offload
-	if [ "$sw_nat" = "1" ]; then
-	    $LOG "NAT fastpath enabled."
-	    sysctl -wq net.nf_conntrack_fastnat=1
-	else
-	    sysctl -wq net.nf_conntrack_fastnat=0
-	fi
 	# configure hardware nat offload
 	if [ "$hw_nat" = "1" ]; then
 	    if [ ! -d /sys/module/hw_nat ]; then
+		if [ "$hw_nat_wifi" = "1" ]; then
+		    hw_nat_wifi="wifi_offload=1"
+		    $LOG "Load hw_nat with wifi offload support enabled."
+		else
+		    hw_nat_wifi="wifi_offload=0"
+		    $LOG "Load hw_nat with wifi offload support disabled."
+		fi
 		modprobe -q hw_nat "$hw_nat_wifi"
 	    fi
 	    $LOG "Set HW_NAT default QOS Mode to WRR policy."
@@ -114,7 +107,7 @@ offload() {
 	    fi
 	fi
     else
-	$LOG "NAT Offload mode DISABLE"
+	$LOG "NAT Offload mode not supported in this device mode (bridge/apclibridge/etc), hw_nat and all fastpaths disabled."
 	sysctl -wq net.nf_conntrack_fastnat=0
 	if [ -d /sys/module/hw_nat ]; then
 	    rmmod hw_nat > /dev/null 2>&1

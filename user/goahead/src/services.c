@@ -378,9 +378,10 @@ const parameter_fetch_t service_misc_flags[] =
 	{ T("krnlPppoePass"), "pppoe_pass", 0, T("0") },
 	{ T("krnlIpv6Pass"), "ipv6_pass", 0, T("0") },
 	{ T("dhcpSwReset"), "dhcpSwReset", 0, T("0") },
-	{ T("natFastpath"), "natFastpath", 0, T("0") },
+	{ T("offloadMode"), "offloadMode", 0, T("0") },
 	{ T("hw_nat_wifiPT"), "hw_nat_wifi", 0, T("0") },
 	{ T("natMode"), "nat_mode", 0, T("1") },
+	{ T("natFastpath"), "natFastpath", 0, T("0") },
 	{ T("routeFastpath"), "routeFastpath", 0, T("1") },
 	{ T("filterFastpath"), "filterFastpath", 0, T("1") },
 	{ T("CrondEnable"), "CrondEnable", 0, T("0") },
@@ -407,7 +408,7 @@ static void setMiscServices(webs_t wp, char_t *path, char_t *query)
 
 	setupParameters(wp, service_misc_flags, 0);
 
-	char_t *nat_fp = nvram_bufget(RT2860_NVRAM, "natFastpath");
+	char_t *nat_fp = nvram_bufget(RT2860_NVRAM, "offloadMode");
 	if (CHK_IF_DIGIT(nat_fp, 2) || CHK_IF_DIGIT(nat_fp, 3))
 	{
 		char_t *nat_th = websGetVar(wp, "hwnatThreshold", "30");
@@ -581,7 +582,7 @@ int iptStatList(int eid, webs_t wp, int argc, char_t **argv)
 	int lines = 0;
 
 	// Do not show anything if nat_fastpath is set
-	char* nat_fp = nvram_get(RT2860_NVRAM, "natFastpath");
+	char* nat_fp = nvram_get(RT2860_NVRAM, "offloadMode");
 	if (nat_fp != NULL)
 	{
 		if (strcmp(nat_fp, "0") != 0)

@@ -1968,21 +1968,22 @@
 5) pppd: sync with upstream git(Fri, 1 Aug 2014).<br>
 6) openssl: version up to 0.9.8zb.<br>
 7) webui: add enable/disable netfilter skip processing for filter established sessions and skip window check(netfilter fastpath mode).<br>
-8) kernel: net/l2tp: don't fall back on UDP [get|set]sockopt.<br>
-9) kernel: net: igmp: reduce Unsolicited report interval to 1s when using IGMPv3.<br>
-10) kernel: ipv4,ipv6: send igmpv3/mld packets with TC_PRIO_CONTROL.<br>
-11) kernel: ipv4: force_igmp_version ignored when a IGMPv3 query received.<br>
-12) kernel: igmp: call ip_mc_clear_src() only when we have no users of ip_mc_list.<br>
-13) kernel: net: replace continue with break to reduce unnecessary loop in xxx_xmarksources.<br>
-14) kernel: net: ipv6: igmp6_event_query: use msecs_to_jiffies.<br>
-15) kernel: net: potential null skb->dev dereference.<br>
-16) kernel: net: optimize non-gso test checks.<br>
-17) kernel: net: linkwatch: allow vlans to get carrier changes faster.<br>
-18) kernel: ipv6: increase maximum lifetime of flow labels (RFC 3697).<br>
-19) kernel: ip_output: do skb ufo init for peeked non ufo skb as well.<br>
-20) kernel: netfilter: improve ipv4 netfilter optimization pass default table.<br>
-21) kernel: netfilter: allow disabling processing of the netfilter "filter" table for established connection packets.<br>
-22) kernel: option driver add new modems support (from 3.16 kernel).<br>
+8) webui/kext: rework offload engine and fastpath modes tune.<br>
+9) kernel: net/l2tp: don't fall back on UDP [get|set]sockopt.<br>
+10) kernel: net: igmp: reduce Unsolicited report interval to 1s when using IGMPv3.<br>
+11) kernel: ipv4,ipv6: send igmpv3/mld packets with TC_PRIO_CONTROL.<br>
+12) kernel: ipv4: force_igmp_version ignored when a IGMPv3 query received.<br>
+13) kernel: igmp: call ip_mc_clear_src() only when we have no users of ip_mc_list.<br>
+14) kernel: net: replace continue with break to reduce unnecessary loop in xxx_xmarksources.<br>
+15) kernel: net: ipv6: igmp6_event_query: use msecs_to_jiffies.<br>
+16) kernel: net: potential null skb->dev dereference.<br>
+17) kernel: net: optimize non-gso test checks.<br>
+18) kernel: net: linkwatch: allow vlans to get carrier changes faster.<br>
+19) kernel: ipv6: increase maximum lifetime of flow labels (RFC 3697).<br>
+20) kernel: ip_output: do skb ufo init for peeked non ufo skb as well.<br>
+21) kernel: netfilter: improve ipv4 netfilter optimization pass default table.<br>
+22) kernel: netfilter: allow disabling processing of the netfilter "filter" table for established connection packets.<br>
+23) kernel: option driver add new modems support (from 3.16 kernel).<br>
 <br>
 <br>
 <br>
