@@ -259,6 +259,12 @@ void channelio(fd_set *readfds, fd_set *writefds) {
 			do_check_close = 1;
 		}
 	
+		if (ses.channel_signal_pending) {
+			/* SIGCHLD can change channel state for server sessions */
+			do_check_close = 1;
+			ses.channel_signal_pending = 0;
+		}
+	
 		/* handle any channel closing etc */
 		if (do_check_close) {
 		check_close(channel);
