@@ -63,17 +63,6 @@
 #include <linux/sysctl.h>
 #endif
 
-/* Set to 3 to get tracing. */
-#define RT6_DEBUG 2
-
-#if RT6_DEBUG >= 3
-#define RDBG(x) printk x
-#define RT6_TRACE(x...) printk(KERN_DEBUG x)
-#else
-#define RDBG(x)
-#define RT6_TRACE(x...) do { ; } while (0)
-#endif
-
 static int ip6_rt_max_size = 4096;
 static int ip6_rt_gc_min_interval = HZ / 2;
 static int ip6_rt_gc_timeout = 60*HZ;
@@ -425,9 +414,6 @@ static struct rt6_info *rt6_select(struct fib6_node *fn, int oif, int strict)
 {
 	struct rt6_info *match, *rt0;
 
-	RT6_TRACE("%s(fn->leaf=%p, oif=%d)\n",
-		  __FUNCTION__, fn->leaf, oif);
-
 	rt0 = fn->rr_ptr;
 	if (!rt0)
 		fn->rr_ptr = rt0 = fn->leaf;
@@ -445,9 +431,6 @@ static struct rt6_info *rt6_select(struct fib6_node *fn, int oif, int strict)
 		if (next != rt0)
 			fn->rr_ptr = next;
 	}
-
-	RT6_TRACE("%s() => %p\n",
-		  __FUNCTION__, match);
 
 	return (match ? match : &ip6_null_entry);
 }
@@ -1975,10 +1958,8 @@ struct rt6_info *addrconf_dst_alloc(struct inet6_dev *idev,
 static int fib6_ifdown(struct rt6_info *rt, void *arg)
 {
 	if (((void*)rt->rt6i_dev == arg || arg == NULL) &&
-	    rt != &ip6_null_entry) {
-		RT6_TRACE("deleted by ifdown %p\n", rt);
+	    rt != &ip6_null_entry)
 		return -1;
-	}
 	return 0;
 }
 
