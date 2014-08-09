@@ -1985,6 +1985,7 @@
 22) kernel: netfilter: allow disabling processing of the netfilter "filter" table for established connection packets.<br>
 23) kernel: option driver add new modems support (from 3.16 kernel).<br>
 24) kernel: ipv6: Check RA for sllao when configuring optimistic ipv6 address.<br>
+25) kernel: ipv6: enable RFC 4429 Optimistic DAD per default.<br>
 <br>
 <br>
 <br>
