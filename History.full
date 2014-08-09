@@ -1965,7 +1965,7 @@
 2) init.d: use wins from uplink network if exist, and some optimize.<br>
 3) usb-modeswitch-data: up to 20140529.<br>
 4) dropbear: update to 2014.64.<br>
-5) pppd: sync with upstream git(Fri, 1 Aug 2014).<br>
+5) pppd: version up to 2.4.7 (9 Aug 2014).<br>
 6) openssl: version up to 0.9.8zb.<br>
 7) webui: add enable/disable netfilter skip processing for filter established sessions and skip window check(netfilter fastpath mode).<br>
 8) webui/kext: rework offload engine and fastpath modes tune.<br>
