@@ -75,7 +75,7 @@ offload() {
 	    $LOG "WiFi HW_NAT Offload mode DISABLE"
 	fi
 	# configure software netfilter offload
-	if [ "$netfilterFastpath" != "0" ]; then
+	if [ "$filterFastpath" != "0" ]; then
 	    $LOG "Netfilter fastpath enabled."
 	    sysctl -wq net.netfilter.nf_conntrack_tcp_no_window_check=1
 	    sysctl -wq net.netfilter.nf_conntrack_skip_established=1
