@@ -54,6 +54,7 @@ config IPV6_ROUTER_PREF
 config IPV6_ROUTE_INFO
 	bool "IPv6: Route Information (RFC 4191) support"
 	depends on IPV6_ROUTER_PREF
+	default y
 	---help---
 	  This is experimental support of Route Information.
 
@@ -233,4 +234,3 @@ config IPV6_SUBTREES
 	  source prefix specific routes.
 
 	  If unsure, say N.
-
