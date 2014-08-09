@@ -57,7 +57,7 @@ $(ETCDIR):
 	$(INSTALL) -d -m 755 $@
 
 romfs: install
-	cp -fv ./filesystem/lib/pppd/2.4.6/* $(ROOTDIR)/romfs/lib
+	cp -fv ./filesystem/lib/pppd/2.4.7/* $(ROOTDIR)/romfs/lib
 	cp -fv ./filesystem/sbin/* $(ROOTDIR)/romfs/bin
 
 clean:
