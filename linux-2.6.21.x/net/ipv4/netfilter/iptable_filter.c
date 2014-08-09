@@ -18,6 +18,9 @@
 #ifdef CONFIG_IPTABLES_SPEEDUP
 #include <net/netfilter/nf_conntrack.h>
 extern int nf_ct_skip_established;
+#if defined(CONFIG_NETFILTER_XT_MATCH_WEBSTR) || defined(CONFIG_NETFILTER_XT_MATCH_WEBSTR_MODULE)
+extern int web_str_loaded;
+#endif
 #endif
 
 MODULE_LICENSE("GPL");
@@ -98,9 +101,11 @@ ipt_hook(unsigned int hook,
 #ifdef CONFIG_IPTABLES_SPEEDUP
 	enum ip_conntrack_info ctinfo;
 
-	nf_ct_get(*pskb, &ctinfo);
-	if (nf_ct_skip_established && (ctinfo == IP_CT_ESTABLISHED_REPLY || ctinfo == IP_CT_ESTABLISHED))
-	    return NF_ACCEPT;
+	if (nf_ct_skip_established && !web_str_loaded) {
+	    nf_ct_get(*pskb, &ctinfo);
+	    if (ctinfo == IP_CT_ESTABLISHED_REPLY || ctinfo == IP_CT_ESTABLISHED)
+		return NF_ACCEPT;
+	}
 #endif
 	return ipt_do_table(pskb, hook, in, out, &packet_filter);
 }
