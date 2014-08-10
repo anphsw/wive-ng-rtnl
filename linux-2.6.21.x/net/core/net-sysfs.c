@@ -486,7 +486,6 @@ int netdev_register_sysfs(struct net_device *net)
 	dev->platform_data = net;
 	dev->groups = groups;
 
-	BUILD_BUG_ON(BUS_ID_SIZE < IFNAMSIZ);
 	strlcpy(dev->bus_id, net->name, BUS_ID_SIZE);
 
 	if (net->get_stats)
