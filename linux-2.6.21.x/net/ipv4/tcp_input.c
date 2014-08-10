@@ -1415,7 +1415,6 @@ static void tcp_enter_frto_loss(struct sock *sk, int allowed_segments, int flag)
 		 * different behavior per flow.
 		 */
 		if (!(TCP_SKB_CB(skb)->sacked & TCPCB_SACKED_ACKED)) {
-		    !after(TCP_SKB_CB(skb)->end_seq, tp->frto_highmark)) {
 			TCP_SKB_CB(skb)->sacked |= TCPCB_LOST;
 			tp->lost_out += tcp_skb_pcount(skb);
 		}
