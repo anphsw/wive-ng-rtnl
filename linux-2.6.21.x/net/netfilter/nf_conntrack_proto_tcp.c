@@ -49,7 +49,6 @@ static DEFINE_RWLOCK(tcp_lock);
 static int nf_ct_tcp_no_window_check __read_mostly = 0;
 /* Disabling processing of the netfilter "filter" table for established connection packets */
 int nf_ct_skip_established __read_mostly = 0;
-EXPORT_SYMBOL_GPL(nf_ct_skip_established);
 #endif
 
 /* "Be conservative in what you do,
