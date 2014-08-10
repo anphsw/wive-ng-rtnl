@@ -2741,10 +2741,10 @@ static int tcp_ack(struct sock *sk, struct sk_buff *skb, int flag)
 	icsk->icsk_probes_out = 0;
 	tp->rcv_tstamp = tcp_time_stamp;
 	prior_packets = tp->packets_out;
+	prior_in_flight = tcp_packets_in_flight(tp);
+
 	if (!prior_packets)
 		goto no_queue;
-
-	prior_in_flight = tcp_packets_in_flight(tp);
 
 	/* See if we can take anything off of the retransmit queue. */
 	flag |= tcp_clean_rtx_queue(sk, &seq_rtt);
