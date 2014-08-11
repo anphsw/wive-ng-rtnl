@@ -268,6 +268,11 @@ function offloadModeSelect(form)
 {
 	var thresh = form.offloadMode.value;
 	displayElement('hwnat_threshold_row', (thresh == '2') || (thresh == '3'))
+	displayElement('wifihw_row', (thresh == '2') || (thresh == '3'))
+	displayElement('fastpath_row', (thresh == '1') || (thresh == '3'))
+	displayElement('nat_fastpath_row', (thresh == '1') || (thresh == '3'))
+	displayElement('route_fastpath_row', (thresh == '1') || (thresh == '3'))
+	displayElement('filter_fastpath_row', (thresh == '1') || (thresh == '3'))
 }
 
 function pingerSelect(form)
@@ -381,7 +386,7 @@ function displayServiceStatus()
                 <option value="2">Hardware</option>
               </select></td>
           </tr>
-          <tr>
+          <tr id="wifihw_row">
             <td class="head">WiFi hardware nat offload</td>
             <td colspan="4"><select name="hw_nat_wifiPT" class="half">
                 <option value="0">Disable</option>
@@ -402,24 +407,24 @@ function displayServiceStatus()
               </select></td>
           </tr>
           <!-- Software fastpaths -->
-          <tr>
+          <tr id="fastpath_row">
             <td class="title" colspan="5">Software fastpaths</td>
           </tr>
-          <tr>
+          <tr id="nat_fastpath_row">
             <td class="head">NAT fastpath</td>
             <td colspan="4"><select name="natFastpath" class="half">
                 <option value="0">Disable</option>
                 <option value="1">Enable</option>
               </select></td>
           </tr>
-          <tr>
+          <tr id="route_fastpath_row">
             <td class="head">Route fastpath</td>
             <td colspan="4"><select name="routeFastpath" class="half">
                 <option value="0">Disable</option>
                 <option value="1">Enable</option>
               </select></td>
           </tr>
-          <tr>
+          <tr id="filter_fastpath_row">
             <td class="head">Netfilter fastpath</td>
             <td colspan="4"><select name="filterFastpath" class="half">
                 <option value="0">Disable</option>

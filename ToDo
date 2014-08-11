@@ -1,2 +1,1 @@
 ) Fix restart xupnpd from internal WebUI
-) WebUI, if OffloadMode=Disabled/Hardware need hide Software fastpaths block
