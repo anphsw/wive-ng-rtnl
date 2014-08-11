@@ -1561,8 +1561,6 @@ gso:
 			rc = q->enqueue(skb, q);
 			qdisc_run(dev);
 			spin_unlock(&dev->queue_lock);
-
-			rc = rc == NET_XMIT_BYPASS ? NET_XMIT_SUCCESS : rc;
 			goto out;
 		}
 		spin_unlock(&dev->queue_lock);
