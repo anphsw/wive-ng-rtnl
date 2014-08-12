@@ -118,7 +118,7 @@ load_nvram() {
 
 change_mac() {
     echo "Set WAN MAC = $1"
-    nvram_set CHECKMAC NO
+    nvram_set 2860 CHECKMAC NO
     FWMAC=`echo $1 | sed "s/:/ /g"`
     eth_mac w wan $FWMAC
     nvram_set 2860 WAN_MAC_ADDR "$1"
