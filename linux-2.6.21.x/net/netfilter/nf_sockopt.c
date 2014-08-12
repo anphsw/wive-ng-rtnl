@@ -26,9 +26,7 @@ int nf_register_sockopt(struct nf_sockopt_ops *reg)
 	struct list_head *i;
 	int ret = 0;
 
-	if (mutex_lock_interruptible(&nf_sockopt_mutex) != 0)
-		return -EINTR;
-
+	mutex_lock(&nf_sockopt_mutex);
 	list_for_each(i, &nf_sockopts) {
 		struct nf_sockopt_ops *ops = (struct nf_sockopt_ops *)i;
 		if (ops->pf == reg->pf
@@ -80,9 +78,7 @@ static int nf_sockopt(struct sock *sk, int pf, int val,
 	struct nf_sockopt_ops *ops;
 	int ret;
 
-	if (mutex_lock_interruptible(&nf_sockopt_mutex) != 0)
-		return -EINTR;
-
+	mutex_lock(&nf_sockopt_mutex);
 	list_for_each(i, &nf_sockopts) {
 		ops = (struct nf_sockopt_ops *)i;
 		if (ops->pf == pf) {

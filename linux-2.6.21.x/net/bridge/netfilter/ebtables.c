@@ -277,10 +277,7 @@ find_inlist_lock_noload(struct list_head *head, const char *name, int *error,
 		char name[EBT_FUNCTION_MAXNAMELEN];
 	} *e;
 
-	*error = mutex_lock_interruptible(mutex);
-	if (*error != 0)
-		return NULL;
-
+	mutex_lock(mutex);
 	list_for_each_entry(e, head, list) {
 		if (strcmp(e->name, name) == 0)
 			return e;
@@ -1073,11 +1070,8 @@ free_newinfo:
 int ebt_register_target(struct ebt_target *target)
 {
 	struct ebt_target *t;
-	int ret;
 
-	ret = mutex_lock_interruptible(&ebt_mutex);
-	if (ret != 0)
-		return ret;
+	mutex_lock(&ebt_mutex);
 	list_for_each_entry(t, &ebt_targets, list) {
 		if (strcmp(t->name, target->name) == 0) {
 			mutex_unlock(&ebt_mutex);

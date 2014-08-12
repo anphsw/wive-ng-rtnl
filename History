@@ -288,6 +288,7 @@
 29) kernel: ipv6: enable RFC 4429 Optimistic DAD per default.<br>
 30) kernel: net: fix memory leak in the proto_register function.<br>
 31) kernel: tcp: make sure write_queue_from does not begin with NULL ptr.<br>
+32) kernel: netfilter: don't use mutex_lock_interruptible().<br>
 <br>
 <br>
 <br>

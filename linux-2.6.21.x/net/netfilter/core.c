@@ -30,11 +30,7 @@ EXPORT_SYMBOL(nf_afinfo);
 
 int nf_register_afinfo(struct nf_afinfo *afinfo)
 {
-	int err;
-
-	err = mutex_lock_interruptible(&afinfo_mutex);
-	if (err < 0)
-		return err;
+	mutex_lock(&afinfo_mutex);
 	rcu_assign_pointer(nf_afinfo[afinfo->family], afinfo);
 	mutex_unlock(&afinfo_mutex);
 	return 0;
@@ -62,11 +58,8 @@ static DEFINE_MUTEX(nf_hook_mutex);
 int nf_register_hook(struct nf_hook_ops *reg)
 {
 	struct list_head *i;
-	int err;
 
-	err = mutex_lock_interruptible(&nf_hook_mutex);
-	if (err < 0)
-		return err;
+	mutex_lock(&nf_hook_mutex);
 	list_for_each(i, &nf_hooks[reg->pf][reg->hooknum]) {
 		if (reg->priority < ((struct nf_hook_ops *)i)->priority)
 			break;
