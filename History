@@ -266,25 +266,28 @@
 7) webui: add enable/disable netfilter skip processing for filter established sessions and skip window check(netfilter fastpath mode).<br>
 8) webui/kext: rework offload engine and fastpath modes tune.<br>
 9) init.d: fix work crontab after login change.<br>
-10) kernel: net/l2tp: don't fall back on UDP [get|set]sockopt.<br>
-12) kernel: net: igmp: reduce Unsolicited report interval to 1s when using IGMPv3.<br>
-13) kernel: ipv4,ipv6: send igmpv3/mld packets with TC_PRIO_CONTROL.<br>
-14) kernel: ipv4: force_igmp_version ignored when a IGMPv3 query received.<br>
-15) kernel: igmp: call ip_mc_clear_src() only when we have no users of ip_mc_list.<br>
-16) kernel: net: replace continue with break to reduce unnecessary loop in xxx_xmarksources.<br>
-17) kernel: net: ipv6: igmp6_event_query: use msecs_to_jiffies.<br>
-18) kernel: net: potential null skb->dev dereference.<br>
-19) kernel: net: optimize non-gso test checks.<br>
-20) kernel: net: linkwatch: allow vlans to get carrier changes faster.<br>
-21) kernel: ipv6: increase maximum lifetime of flow labels (RFC 3697).<br>
-22) kernel: ip_output: do skb ufo init for peeked non ufo skb as well.<br>
-23) kernel: netfilter: improve ipv4 netfilter optimization pass default table.<br>
-24) kernel: netfilter: allow disabling processing of the netfilter "filter" table for established connection packets.<br>
-25) kernel: option driver add new modems support (from 3.16 kernel).<br>
-26) kernel: ipv6: Check RA for sllao when configuring optimistic ipv6 address.<br>
-27) kernel: ipv6: enable RFC 4429 Optimistic DAD per default.<br>
-28) kernel: net: fix memory leak in the proto_register function.<br>
-29) kernel: tcp: make sure write_queue_from does not begin with NULL ptr.<br>
+10) tools: fix eth_mac tool (manipulate mac in factory part, now tested only in 2.4Ghz 305x devices).<br>
+11) init.d: after gen mac new mac write ti factory part to (more compat with others software and legacy sdk).<br>
+12) fs: add fs change_mac command for change/clone WAN mac adress.<br>
+13) kernel: net/l2tp: don't fall back on UDP [get|set]sockopt.<br>
+14) kernel: net: igmp: reduce Unsolicited report interval to 1s when using IGMPv3.<br>
+15) kernel: ipv4,ipv6: send igmpv3/mld packets with TC_PRIO_CONTROL.<br>
+16) kernel: ipv4: force_igmp_version ignored when a IGMPv3 query received.<br>
+17) kernel: igmp: call ip_mc_clear_src() only when we have no users of ip_mc_list.<br>
+18) kernel: net: replace continue with break to reduce unnecessary loop in xxx_xmarksources.<br>
+19) kernel: net: ipv6: igmp6_event_query: use msecs_to_jiffies.<br>
+20) kernel: net: potential null skb->dev dereference.<br>
+21) kernel: net: optimize non-gso test checks.<br>
+22) kernel: net: linkwatch: allow vlans to get carrier changes faster.<br>
+23) kernel: ipv6: increase maximum lifetime of flow labels (RFC 3697).<br>
+24) kernel: ip_output: do skb ufo init for peeked non ufo skb as well.<br>
+25) kernel: netfilter: improve ipv4 netfilter optimization pass default table.<br>
+26) kernel: netfilter: allow disabling processing of the netfilter "filter" table for established connection packets.<br>
+27) kernel: option driver add new modems support (from 3.16 kernel).<br>
+28) kernel: ipv6: Check RA for sllao when configuring optimistic ipv6 address.<br>
+29) kernel: ipv6: enable RFC 4429 Optimistic DAD per default.<br>
+30) kernel: net: fix memory leak in the proto_register function.<br>
+31) kernel: tcp: make sure write_queue_from does not begin with NULL ptr.<br>
 <br>
 <br>
 <br>

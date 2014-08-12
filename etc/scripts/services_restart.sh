@@ -31,7 +31,7 @@ fi
     service dnsserver reload
 
 ##########################################################
-# Need restart this servieces only:			 #
+# Need restart this services only:			 #
 # 1) if call not from ip-up				 #
 # 2) if call not from dhcp script			 #
 ##########################################################
@@ -95,12 +95,12 @@ fi
 
 # renew /etc/udhcpd.conf and restart dhcp server
 if [ "$dnsPEnabled" = "1" -o "$wan_static_dns" = "on" ] && [ "$MODE" != "pppd" -a "$MODE" != "dhcp" ]; then
-	# if dnsmasq or static dns enabled and mode=!pppd/!dhcp (aplly at web)
-	service dhcpd restart
+    # if dnsmasq or static dns enabled and mode=!pppd/!dhcp (aplly at web)
+    service dhcpd restart
 elif [ "$dnsPEnabled" != "1" -a "$wan_static_dns" != "on" ] && [ "$MODE" = "pppd" -o "$MODE" = "dhcp" ]; then
-	# if dnsmasq or static dns disabled and mode=pppd/dhcp (renew/reconnect ISP)
-	sleep 3
-	service dhcpd restart
+    # if dnsmasq or static dns disabled and mode=pppd/dhcp (renew/reconnect ISP)
+    sleep 3
+    service dhcpd restart
 fi
 
 # reconfigure and restart samba in recive wins server adress from dhcp

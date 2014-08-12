@@ -23,7 +23,7 @@ get_size() {
 }
 
 usage() {
-  echo "Usage: $0 | save | load | restore | backup_nvram | nvramreset | burnrf | fullreset |" >&2
+  echo "Usage: $0 | save | load | restore | backup_nvram | nvramreset | burnrf | change_mac | fullreset |" >&2
   echo "____________________________________________________________________________" >&2
   echo " " >&2
   echo "save - Save rwfs to mtd." >&2
@@ -32,6 +32,7 @@ usage() {
   echo "backup_nvram - Save nvram snapshot to rwfs in $BACKUPCGF" >&2
   echo "nvramreset - Nvarm clean and load default config." >&2
   echo "burnrf - Burn RF config template to Factory." >&2
+  echo "change_mac - Change/clone wan mac adree." >&2
   echo "fullreset - 1. Full zero write in config,factory and rwfs particions." >&2
   echo "	    2. Reboot device." >&2
   echo "	    3. Write temlate for RF config (Factory) to flash." >&2
@@ -115,6 +116,17 @@ load_nvram() {
     ralink_init renew 2860 "$BACKUPCGF"
 }
 
+change_mac() {
+    echo "Set WAN MAC = $1"
+    nvram_set CHECKMAC NO
+    FWMAC=`echo $1 | sed "s/:/ /g"`
+    eth_mac w wan $FWMAC
+    nvram_set 2860 WAN_MAC_ADDR "$1"
+    sync
+    echo "Now reboot"
+    reboot
+}
+
 main() {
   local cmd="$1"
   [ -z "$cmd" ] && usage
@@ -143,6 +155,9 @@ main() {
       ;;
     load_nvram)
       load_nvram $@
+      ;;
+    change_mac)
+      change_mac $@
       ;;
     *)
       usage $@

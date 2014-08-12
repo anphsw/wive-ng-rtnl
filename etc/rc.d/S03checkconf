@@ -192,6 +192,13 @@ genmac() {
     echo "Set WLAN1 MAC - $WMAC"
     echo "Set WLAN2 MAC - $WMAC2"
 
+    if [ -f /bin/eth_mac ]; then
+	FWMAC=`echo $MAC | sed "s/:/ /g"`
+	FLMAC=`echo $LANMAC | sed "s/:/ /g"`
+	eth_mac w wan $FWMAC
+	eth_mac w lan $FLMAC
+    fi
+
     nvram_set 2860 WAN_MAC_ADDR   "$MAC"
     nvram_set 2860 LAN_MAC_ADDR   "$LANMAC"
     nvram_set 2860 WLAN_MAC_ADDR  "$WMAC"

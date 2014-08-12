@@ -179,8 +179,10 @@ mtd_erase(const char *mtd)
 
 	mtdEraseInfo.length = mtdInfo.erasesize;
 	test_buf = malloc(sizeof(unsigned char) * mtdInfo.erasesize);
-	if(!test_buf)
+	if(!test_buf) {
+		fprintf(stderr, "No memory left\n");
 		exit(1);
+	}
 
 	for (mtdEraseInfo.start = 0;
 		 mtdEraseInfo.start < mtdInfo.size;

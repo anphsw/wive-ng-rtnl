@@ -72,6 +72,7 @@ int flash_read(char *buf, off_t from, size_t len)
 		ret = -1;
 		goto out;
 	}
+
 	if (len > info.size) {
 		fprintf(stderr, "Too many bytes - %d > %d bytes\n", len, info.erasesize);
 		ret = -1;
