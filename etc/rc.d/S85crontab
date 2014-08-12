@@ -8,9 +8,10 @@ fi
 LOG="logger -t cron"
 
 start() {
-    CrondEnable=`nvram_get 2860 CrondEnable`
+    eval `nvram_buf_get 2860 CrondEnable Login`
     if [ "$CrondEnable" = "1" ]; then
 	$LOG "Starting crontab"
+	ln -sf /etc/crontabs/root /etc/crontabs/$Login
 	crond -l 0 -L /var/log/cron.log
     fi
 }
