@@ -285,14 +285,15 @@
 26) kernel: ipv6: enable RFC 4429 Optimistic DAD per default.<br>
 27) kernel: ipv6: prevent race between address creation and removal.<br>
 28) kernel: ipv6: fix preferred_lft not updating in some cases.<br>
-29) kernel: netfilter: improve ipv4 netfilter optimization pass default table.<br>
-30) kernel: netfilter: allow disabling processing of the netfilter "filter" table for established connection packets.<br>
-31) kernel: igmp: call ip_mc_clear_src() only when we have no users of ip_mc_list.<br>
-32) kernel: ip_output: do skb ufo init for peeked non ufo skb as well.<br>
-33) kernel: tcp: make sure write_queue_from does not begin with NULL ptr.<br>
-34) kernel: netfilter: don't use mutex_lock_interruptible().<br>
-35) kernel: option driver add new modems support (from 3.16 kernel).<br>
-36) kernel: ppp: refresh Ralink hardware watchdog timer, prevent reboot at high cpu load.<br>
+29) kernel: ipv6: don't accept multicast traffic with scope 0.<br>
+30) kernel: netfilter: improve ipv4 netfilter optimization pass default table.<br>
+31) kernel: netfilter: allow disabling processing of the netfilter "filter" table for established connection packets.<br>
+32) kernel: igmp: call ip_mc_clear_src() only when we have no users of ip_mc_list.<br>
+33) kernel: ip_output: do skb ufo init for peeked non ufo skb as well.<br>
+34) kernel: tcp: make sure write_queue_from does not begin with NULL ptr.<br>
+35) kernel: netfilter: don't use mutex_lock_interruptible().<br>
+36) kernel: option driver add new modems support (from 3.16 kernel).<br>
+37) kernel: ppp: refresh Ralink hardware watchdog timer, prevent reboot at high cpu load.<br>
 <br>
 <br>
 <br>
