@@ -249,8 +249,6 @@ out:
 }
 #endif
 
-#ifdef CONFIG_TRACE_IRQFLAGS
-
 /*
  * lockdep: we want to handle all irq_desc locks as a single lock-class:
  */
@@ -263,5 +261,3 @@ void early_init_irq_lock_class(void)
 	for (i = 0; i < NR_IRQS; i++)
 		lockdep_set_class(&irq_desc[i].lock, &irq_desc_lock_class);
 }
-
-#endif
