@@ -1962,40 +1962,41 @@
 <br>
 <b>4.10.x</b><br>
 1) build system: cleanup and tune build flags for more speed and safe codegeneration.<br>
-2) init.d: use wins from uplink network if exist, and some optimize.<br>
-3) usb-modeswitch-data: up to 20140529.<br>
-4) dropbear: update to 2014.65.<br>
-5) pppd: version up to 2.4.7 (9 Aug 2014).<br>
-6) openssl: version up to 0.9.8zb.<br>
+2) toolchain: move to 4.8.4 gcc svn version (after 4.8.3 release 4.8 tree apply only bugfixes).<br>
+3) init.d: use wins from uplink network if exist, and some optimize.<br>
+4) init.d: fix work crontab after login change.<br>
+5) init.d: after gen mac new mac write ti factory part to (more compat with others software and legacy sdk).<br>
+6) init.d: fs: add fs change_mac command for change/clone WAN mac adress.<br>
 7) webui: add enable/disable netfilter skip processing for filter established sessions and skip window check(netfilter fastpath mode).<br>
 8) webui/kext: rework offload engine and fastpath modes tune.<br>
-9) init.d: fix work crontab after login change.<br>
-10) tools: fix eth_mac tool (manipulate mac in factory part, now tested only in 2.4Ghz 305x devices).<br>
-11) init.d: after gen mac new mac write ti factory part to (more compat with others software and legacy sdk).<br>
-12) fs: add fs change_mac command for change/clone WAN mac adress.<br>
-13) kernel: net/l2tp: don't fall back on UDP [get|set]sockopt.<br>
-14) kernel: net: igmp: reduce Unsolicited report interval to 1s when using IGMPv3.<br>
-15) kernel: ipv4,ipv6: send igmpv3/mld packets with TC_PRIO_CONTROL.<br>
-16) kernel: ipv4: force_igmp_version ignored when a IGMPv3 query received.<br>
-17) kernel: igmp: call ip_mc_clear_src() only when we have no users of ip_mc_list.<br>
-18) kernel: net: replace continue with break to reduce unnecessary loop in xxx_xmarksources.<br>
-19) kernel: net: ipv6: igmp6_event_query: use msecs_to_jiffies.<br>
-20) kernel: net: potential null skb->dev dereference.<br>
-21) kernel: net: optimize non-gso test checks.<br>
-22) kernel: net: linkwatch: allow vlans to get carrier changes faster.<br>
-23) kernel: ipv6: increase maximum lifetime of flow labels (RFC 3697).<br>
-24) kernel: ip_output: do skb ufo init for peeked non ufo skb as well.<br>
-25) kernel: netfilter: improve ipv4 netfilter optimization pass default table.<br>
-26) kernel: netfilter: allow disabling processing of the netfilter "filter" table for established connection packets.<br>
-27) kernel: option driver add new modems support (from 3.16 kernel).<br>
-28) kernel: ipv6: Check RA for sllao when configuring optimistic ipv6 address.<br>
-29) kernel: ipv6: enable RFC 4429 Optimistic DAD per default.<br>
-30) kernel: net: fix memory leak in the proto_register function.<br>
-31) kernel: tcp: make sure write_queue_from does not begin with NULL ptr.<br>
-32) kernel: netfilter: don't use mutex_lock_interruptible().<br>
-33) kernel: ipv6: prevent race between address creation and removal.<br>
-34) kernel: ipv6: fix preferred_lft not updating in some cases.<br>
-35) kernel: ppp: refresh Ralink hardware watchdog timer, prevent reboot at high cpu load.<br>
+9) usb-modeswitch-data: up to 20140529.<br>
+10) dropbear: update to 2014.65.<br>
+11) pppd: version up to 2.4.7 (9 Aug 2014).<br>
+12) openssl: version up to 0.9.8zb.<br>
+13) tools: fix eth_mac tool (manipulate mac in factory part, now tested only in 2.4Ghz 305x devices).<br>
+14) kernel: net/l2tp: don't fall back on UDP [get|set]sockopt.<br>
+15) kernel: net: igmp: reduce Unsolicited report interval to 1s when using IGMPv3.<br>
+16) kernel: net: replace continue with break to reduce unnecessary loop in xxx_xmarksources.<br>
+17) kernel: net: ipv6: igmp6_event_query: use msecs_to_jiffies.<br>
+18) kernel: net: potential null skb->dev dereference.<br>
+19) kernel: net: optimize non-gso test checks.<br>
+20) kernel: net: linkwatch: allow vlans to get carrier changes faster.<br>
+21) kernel: net: fix memory leak in the proto_register function.<br>
+22) kernel: ipv4,ipv6: send igmpv3/mld packets with TC_PRIO_CONTROL.<br>
+23) kernel: ipv4: force_igmp_version ignored when a IGMPv3 query received.<br>
+24) kernel: ipv6: increase maximum lifetime of flow labels (RFC 3697).<br>
+25) kernel: ipv6: Check RA for sllao when configuring optimistic ipv6 address.<br>
+26) kernel: ipv6: enable RFC 4429 Optimistic DAD per default.<br>
+27) kernel: ipv6: prevent race between address creation and removal.<br>
+28) kernel: ipv6: fix preferred_lft not updating in some cases.<br>
+29) kernel: netfilter: improve ipv4 netfilter optimization pass default table.<br>
+30) kernel: netfilter: allow disabling processing of the netfilter "filter" table for established connection packets.<br>
+31) kernel: igmp: call ip_mc_clear_src() only when we have no users of ip_mc_list.<br>
+32) kernel: ip_output: do skb ufo init for peeked non ufo skb as well.<br>
+33) kernel: tcp: make sure write_queue_from does not begin with NULL ptr.<br>
+34) kernel: netfilter: don't use mutex_lock_interruptible().<br>
+35) kernel: option driver add new modems support (from 3.16 kernel).<br>
+36) kernel: ppp: refresh Ralink hardware watchdog timer, prevent reboot at high cpu load.<br>
 <br>
 <br>
 <br>

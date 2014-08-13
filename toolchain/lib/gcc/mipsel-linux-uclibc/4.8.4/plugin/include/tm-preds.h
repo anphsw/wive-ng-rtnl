@@ -1,5 +1,5 @@
 /* Generated automatically by the program 'build/genpreds'
-   from the machine description file '../../gcc-4.8.3/gcc/config/mips/mips.md'.  */
+   from the machine description file '../../gcc-4.8.4/gcc/config/mips/mips.md'.  */
 
 #ifndef GCC_TM_PREDS_H
 #define GCC_TM_PREDS_H
