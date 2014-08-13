@@ -291,6 +291,7 @@
 32) kernel: netfilter: don't use mutex_lock_interruptible().<br>
 33) kernel: ipv6: prevent race between address creation and removal.<br>
 34) kernel: ipv6: fix preferred_lft not updating in some cases.<br>
+35) kernel: ppp: refresh Ralink hardware watchdog timer, prevent reboot at high cpu load.<br>
 <br>
 <br>
 <br>

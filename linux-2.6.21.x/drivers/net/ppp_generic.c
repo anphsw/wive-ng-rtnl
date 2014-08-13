@@ -56,6 +56,10 @@
 extern int ppp_cpu_load;
 static unsigned long load;
 static unsigned long cpu_prev_jiffies;
+#ifdef CONFIG_RALINK_WATCHDOG
+extern void RaWdgReload(void);
+extern int WdgLoadValue;
+#endif
 #endif
 
 #ifdef CONFIG_RALINK_GPIO_LED_VPN
@@ -1230,6 +1234,11 @@ ppp_send_frame(struct ppp *ppp, struct sk_buff *skb)
 			if (net_ratelimit())
 			    printk(KERN_DEBUG "PPP: HIGH CPU LOAD %lu DROP PACKET\n", load);
 
+#endif
+#ifdef CONFIG_RALINK_WATCHDOG
+			/* Refresh Ralink hardware watchdog timer, prevent reboot at high cpu load */
+    			if(WdgLoadValue)
+			    RaWdgReload();
 #endif
 			goto drop;      /* drop packet ... */
 		    }
