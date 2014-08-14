@@ -2001,6 +2001,7 @@
 38) kernel: netfilter: don't use mutex_lock_interruptible().<br>
 39) kernel: option driver add new modems support (from 3.16 kernel).<br>
 40) kernel: ppp: refresh Ralink hardware watchdog timer, prevent reboot at high cpu load.<br>
+41) kernel: packet: add needed_tailroom to packet_sendmsg_spkt.<br>
 <br>
 <br>
 <br>
