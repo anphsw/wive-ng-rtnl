@@ -712,6 +712,11 @@ int datagram_send_ctl(struct msghdr *msg, struct flowi *fl,
 			}
 
 			*hlimit = *(int *)CMSG_DATA(cmsg);
+			if (*hlimit < -1 || *hlimit > 0xff) {
+				err = -EINVAL;
+				goto exit_f;
+			}
+
 			break;
 
 		case IPV6_TCLASS:

@@ -1994,15 +1994,16 @@
 31) kernel: ipv6: fix preferred_lft not updating in some cases.<br>
 32) kernel: ipv6: don't accept multicast traffic with scope 0.<br>
 33) kernel: ipv6: udp: possible dst leak in udpv6_sendmsg.<br>
-34) kernel: netfilter: improve ipv4 netfilter optimization pass default table.<br>
-35) kernel: netfilter: allow disabling processing of the netfilter "filter" table for established connection packets.<br>
-36) kernel: igmp: call ip_mc_clear_src() only when we have no users of ip_mc_list.<br>
-37) kernel: ip_output: do skb ufo init for peeked non ufo skb as well.<br>
-38) kernel: tcp: make sure write_queue_from does not begin with NULL ptr.<br>
-39) kernel: netfilter: don't use mutex_lock_interruptible().<br>
-40) kernel: option driver add new modems support (from 3.16 kernel).<br>
-41) kernel: ppp: refresh Ralink hardware watchdog timer, prevent reboot at high cpu load.<br>
-42) kernel: packet: add needed_tailroom to packet_sendmsg_spkt.<br>
+34) kernel: ipv6: check the hop limit setting in ancillary data.<br>
+35) kernel: netfilter: improve ipv4 netfilter optimization pass default table.<br>
+36) kernel: netfilter: allow disabling processing of the netfilter "filter" table for established connection packets.<br>
+37) kernel: igmp: call ip_mc_clear_src() only when we have no users of ip_mc_list.<br>
+38) kernel: ip_output: do skb ufo init for peeked non ufo skb as well.<br>
+39) kernel: tcp: make sure write_queue_from does not begin with NULL ptr.<br>
+40) kernel: netfilter: don't use mutex_lock_interruptible().<br>
+41) kernel: option driver add new modems support (from 3.16 kernel).<br>
+42) kernel: ppp: refresh Ralink hardware watchdog timer, prevent reboot at high cpu load.<br>
+43) kernel: packet: add needed_tailroom to packet_sendmsg_spkt.<br>
 <br>
 <br>
 <br>
