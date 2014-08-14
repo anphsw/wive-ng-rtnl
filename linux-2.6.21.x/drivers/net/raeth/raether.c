@@ -2024,7 +2024,7 @@ static inline int ei_start_xmit_fake(struct sk_buff* skb, struct net_device *dev
 	return ei_start_xmit(skb, dev, 1);
 }
 
-
+#if defined(CONFIG_RT_3052_ESW)
 #if defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350)
 static void dump_phy_reg(int port_no, int from, int to, int is_local)
 {
@@ -2095,7 +2095,7 @@ static void dump_phy_reg(int port_no, int from, int to, int is_local, int page_n
         }
         printk("\n");
 }
-
+#endif
 #endif
 
 static int ei_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
