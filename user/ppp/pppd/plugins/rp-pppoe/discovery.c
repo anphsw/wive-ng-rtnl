@@ -39,6 +39,12 @@ static char const RCSID[] =
 
 #include <signal.h>
 
+void fatalSys(char const *str)
+{
+    perror(str);
+    exit(1);
+}
+
 /**********************************************************************
 *%FUNCTION: parseForHostUniq
 *%ARGUMENTS:
@@ -691,10 +697,3 @@ discovery(PPPoEConnection *conn)
     conn->discoveryState = STATE_SESSION;
     return;
 }
-
-void fatalSys(char const *str)
-{
-    perror(str);
-    exit(1);
-}
-
