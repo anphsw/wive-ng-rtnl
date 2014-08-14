@@ -944,6 +944,7 @@ do_append_data:
 		err = np->recverr ? net_xmit_errno(err) : 0;
 	release_sock(sk);
 out:
+	dst_release(dst);
 	fl6_sock_release(flowlabel);
 
 	if (!err)
