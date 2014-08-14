@@ -40,7 +40,7 @@ int verify_iovec(struct msghdr *m, struct iovec *iov, char *address, int mode)
 {
 	int size, err, ct;
 
-	if (m->msg_namelen) {
+	if (m->msg_name && m->msg_namelen) {
 		if (mode == VERIFY_READ) {
 			void __user *namep;
 			namep = (void __user __force *) m->msg_name;
@@ -49,10 +49,10 @@ int verify_iovec(struct msghdr *m, struct iovec *iov, char *address, int mode)
 			if (err < 0)
 				return err;
 		}
-		if (m->msg_name)
-			m->msg_name = address;
+		m->msg_name = address;
 	} else {
 		m->msg_name = NULL;
+		m->msg_namelen = 0;
 	}
 
 	size = m->msg_iovlen * sizeof(struct iovec);
