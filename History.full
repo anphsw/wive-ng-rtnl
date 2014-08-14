@@ -1984,22 +1984,23 @@
 21) kernel: net: linkwatch: allow vlans to get carrier changes faster.<br>
 22) kernel: net: fix memory leak in the proto_register function.<br>
 23) kernel: net: sendmsg: fix NULL pointer dereference.<br>
-24) kernel: ipv4,ipv6: send igmpv3/mld packets with TC_PRIO_CONTROL.<br>
-25) kernel: ipv4: force_igmp_version ignored when a IGMPv3 query received.<br>
-26) kernel: ipv6: increase maximum lifetime of flow labels (RFC 3697).<br>
-27) kernel: ipv6: Check RA for sllao when configuring optimistic ipv6 address.<br>
-28) kernel: ipv6: enable RFC 4429 Optimistic DAD per default.<br>
-29) kernel: ipv6: prevent race between address creation and removal.<br>
-30) kernel: ipv6: fix preferred_lft not updating in some cases.<br>
-31) kernel: ipv6: don't accept multicast traffic with scope 0.<br>
-32) kernel: netfilter: improve ipv4 netfilter optimization pass default table.<br>
-33) kernel: netfilter: allow disabling processing of the netfilter "filter" table for established connection packets.<br>
-34) kernel: igmp: call ip_mc_clear_src() only when we have no users of ip_mc_list.<br>
-35) kernel: ip_output: do skb ufo init for peeked non ufo skb as well.<br>
-36) kernel: tcp: make sure write_queue_from does not begin with NULL ptr.<br>
-37) kernel: netfilter: don't use mutex_lock_interruptible().<br>
-38) kernel: option driver add new modems support (from 3.16 kernel).<br>
-39) kernel: ppp: refresh Ralink hardware watchdog timer, prevent reboot at high cpu load.<br>
+24) kernel: net: unix: inherit SOCK_PASS{CRED, SEC} flags from socket to fix race.<br>
+25) kernel: ipv4,ipv6: send igmpv3/mld packets with TC_PRIO_CONTROL.<br>
+26) kernel: ipv4: force_igmp_version ignored when a IGMPv3 query received.<br>
+27) kernel: ipv6: increase maximum lifetime of flow labels (RFC 3697).<br>
+28) kernel: ipv6: Check RA for sllao when configuring optimistic ipv6 address.<br>
+29) kernel: ipv6: enable RFC 4429 Optimistic DAD per default.<br>
+30) kernel: ipv6: prevent race between address creation and removal.<br>
+31) kernel: ipv6: fix preferred_lft not updating in some cases.<br>
+32) kernel: ipv6: don't accept multicast traffic with scope 0.<br>
+33) kernel: netfilter: improve ipv4 netfilter optimization pass default table.<br>
+34) kernel: netfilter: allow disabling processing of the netfilter "filter" table for established connection packets.<br>
+35) kernel: igmp: call ip_mc_clear_src() only when we have no users of ip_mc_list.<br>
+36) kernel: ip_output: do skb ufo init for peeked non ufo skb as well.<br>
+37) kernel: tcp: make sure write_queue_from does not begin with NULL ptr.<br>
+38) kernel: netfilter: don't use mutex_lock_interruptible().<br>
+39) kernel: option driver add new modems support (from 3.16 kernel).<br>
+40) kernel: ppp: refresh Ralink hardware watchdog timer, prevent reboot at high cpu load.<br>
 <br>
 <br>
 <br>
