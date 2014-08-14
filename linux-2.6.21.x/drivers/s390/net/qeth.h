@@ -1035,13 +1035,7 @@ qeth_get_arphdr_type(int cardtype, int linktype)
 	switch (cardtype) {
 	case QETH_CARD_TYPE_OSAE:
 	case QETH_CARD_TYPE_OSN:
-		switch (linktype) {
-		case QETH_LINK_TYPE_LANE_TR:
-		case QETH_LINK_TYPE_HSTR:
-			return ARPHRD_IEEE802_TR;
-		default:
-			return ARPHRD_ETHER;
-		}
+		return ARPHRD_ETHER;
 	case QETH_CARD_TYPE_IQD:
 	default:
 		return ARPHRD_ETHER;

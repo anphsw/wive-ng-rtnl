@@ -14,20 +14,4 @@
 #include <linux/if_tr.h>
 #include <linux/sysctl.h>
 
-#ifdef CONFIG_TR
-extern int sysctl_tr_rif_timeout;
-#endif
-
-struct ctl_table tr_table[] = {
-#ifdef CONFIG_TR
-	{
-		.ctl_name	= NET_TR_RIF_TIMEOUT,
-		.procname	= "rif_timeout",
-		.data		= &sysctl_tr_rif_timeout,
-		.maxlen		= sizeof(int),
-		.mode		= 0644,
-		.proc_handler	= &proc_dointvec
-	},
-#endif /* CONFIG_TR */
-	{ 0 },
-};
+struct ctl_table tr_table[] = {	{ 0 },};

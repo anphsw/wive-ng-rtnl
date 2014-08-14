@@ -1,9 +1,9 @@
 /*
  *	inet6 interface/address list definitions
- *	Linux INET6 implementation 
+ *	Linux INET6 implementation
  *
  *	Authors:
- *	Pedro Roque		<roque@di.fc.ul.pt>	
+ *	Pedro Roque		<roque@di.fc.ul.pt>
  *
  *
  *	This program is free software; you can redistribute it and/or
@@ -31,12 +31,11 @@
 #define IF_PREFIX_AUTOCONF	0x02
 
 #ifdef __KERNEL__
-
-struct inet6_ifaddr 
+struct inet6_ifaddr
 {
 	struct in6_addr		addr;
 	__u32			prefix_len;
-	
+
 	/* In seconds, relative to tstamp. Expiry is at tstamp + HZ * lft. */
 	__u32			valid_lft;
 	__u32			prefered_lft;
@@ -210,60 +209,6 @@ static inline void ipv6_eth_mc_map(struct in6_addr *addr, char *buf)
 	buf[1]= 0x33;
 
 	memcpy(buf + 2, &addr->s6_addr32[3], sizeof(__u32));
-}
-
-static inline void ipv6_tr_mc_map(struct in6_addr *addr, char *buf)
-{
-	/* All nodes FF01::1, FF02::1, FF02::1:FFxx:xxxx */
-
-	if (((addr->s6_addr[0] == 0xFF) &&
-	    ((addr->s6_addr[1] == 0x01) || (addr->s6_addr[1] == 0x02)) &&
-	     (addr->s6_addr16[1] == 0) &&
-	     (addr->s6_addr32[1] == 0) &&
-	     (addr->s6_addr32[2] == 0) &&
-	     (addr->s6_addr16[6] == 0) &&
-	     (addr->s6_addr[15] == 1)) ||
-	    ((addr->s6_addr[0] == 0xFF) &&
-	     (addr->s6_addr[1] == 0x02) &&
-	     (addr->s6_addr16[1] == 0) &&
-	     (addr->s6_addr32[1] == 0) &&
-	     (addr->s6_addr16[4] == 0) &&
-	     (addr->s6_addr[10] == 0) &&
-	     (addr->s6_addr[11] == 1) &&
-	     (addr->s6_addr[12] == 0xff)))
-	{
-		buf[0]=0xC0;
-		buf[1]=0x00;
-		buf[2]=0x01;
-		buf[3]=0x00;
-		buf[4]=0x00;
-		buf[5]=0x00;
-	/* All routers FF0x::2 */
-	} else if ((addr->s6_addr[0] ==0xff) &&
-		((addr->s6_addr[1] & 0xF0) == 0) &&
-		(addr->s6_addr16[1] == 0) &&
-		(addr->s6_addr32[1] == 0) &&
-		(addr->s6_addr32[2] == 0) &&
-		(addr->s6_addr16[6] == 0) &&
-		(addr->s6_addr[15] == 2))
-	{
-		buf[0]=0xC0;
-		buf[1]=0x00;
-		buf[2]=0x02;
-		buf[3]=0x00;
-		buf[4]=0x00;
-		buf[5]=0x00;
-	} else {
-		unsigned char i ; 
-		
-		i = addr->s6_addr[15] & 7 ; 
-		buf[0]=0xC0;
-		buf[1]=0x00;
-		buf[2]=0x00;
-		buf[3]=0x01 << i ; 
-		buf[4]=0x00;
-		buf[5]=0x00;
-	}
 }
 
 static inline void ipv6_arcnet_mc_map(const struct in6_addr *addr, char *buf)

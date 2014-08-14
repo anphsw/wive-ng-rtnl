@@ -599,7 +599,6 @@ static void tr_setup(struct net_device *dev)
 	dev->hard_header	= tr_header;
 	dev->rebuild_header	= tr_rebuild_header;
 
-	dev->type		= ARPHRD_IEEE802_TR;
 	dev->hard_header_len	= TR_HLEN;
 	dev->mtu		= 2000;
 	dev->addr_len		= TR_ALEN;

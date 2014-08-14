@@ -29,10 +29,6 @@
 #include <linux/if_ether.h>
 #endif
 
-#ifdef CONFIG_TR
-#include <linux/if_tr.h>
-#endif
-
 struct ctl_table net_table[] = {
 	{
 		.ctl_name	= NET_CORE,
@@ -46,14 +42,6 @@ struct ctl_table net_table[] = {
 		.procname	= "ipv4",
 		.mode		= 0555,
 		.child		= ipv4_table
-	},
-#endif
-#ifdef CONFIG_TR
-	{
-		.ctl_name	= NET_TR,
-		.procname	= "token-ring",
-		.mode		= 0555,
-		.child		= tr_table,
 	},
 #endif
 	{ 0 },

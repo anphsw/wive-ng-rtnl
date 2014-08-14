@@ -247,7 +247,7 @@ config ARPD
 	---help---
 	  Normally, the kernel maintains an internal cache which maps IP
 	  addresses to hardware addresses on the local network, so that
-	  Ethernet/Token Ring/ etc. frames are sent to the proper address on
+	  etc. frames are sent to the proper address on
 	  the physical networking layer. For small networks having a few
 	  hundred directly connected hosts or less, keeping this address
 	  resolution (ARP) cache inside the kernel works well. However,

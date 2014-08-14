@@ -2215,15 +2215,9 @@ qeth_get_next_skb(struct qeth_card *card, struct qdio_buffer *buffer,
 	if (!skb_len)
 		return NULL;
 	if (card->options.fake_ll){
-		if(card->dev->type == ARPHRD_IEEE802_TR){
-			if (!(skb = qeth_get_skb(skb_len+QETH_FAKE_LL_LEN_TR, *hdr)))
-				goto no_mem;
-			skb_reserve(skb,QETH_FAKE_LL_LEN_TR);
-		} else {
-			if (!(skb = qeth_get_skb(skb_len+QETH_FAKE_LL_LEN_ETH, *hdr)))
-				goto no_mem;
-			skb_reserve(skb,QETH_FAKE_LL_LEN_ETH);
-		}
+		if (!(skb = qeth_get_skb(skb_len+QETH_FAKE_LL_LEN_ETH, *hdr)))
+			goto no_mem;
+		skb_reserve(skb,QETH_FAKE_LL_LEN_ETH);
 	} else if (!(skb = qeth_get_skb(skb_len, *hdr)))
 		goto no_mem;
 	data_ptr = element->addr + offset;
@@ -2273,11 +2267,6 @@ qeth_type_trans(struct sk_buff *skb, struct net_device *dev)
 	QETH_DBF_TEXT(trace,6,"typtrans");
 
 	card = (struct qeth_card *)dev->priv;
-#ifdef CONFIG_TR
-	if ((card->info.link_type == QETH_LINK_TYPE_HSTR) ||
-	    (card->info.link_type == QETH_LINK_TYPE_LANE_TR))
-	 	return tr_type_trans(skb,dev);
-#endif /* CONFIG_TR */
 	skb_reset_mac_header(skb);
 	skb_pull(skb, ETH_HLEN );
 	eth = eth_hdr(skb);
@@ -2401,10 +2390,7 @@ static inline void
 qeth_rebuild_skb_fake_ll(struct qeth_card *card, struct sk_buff *skb,
 			struct qeth_hdr *hdr)
 {
-	if (card->dev->type == ARPHRD_IEEE802_TR)
-		qeth_rebuild_skb_fake_ll_tr(card, skb, hdr);
-	else
-		qeth_rebuild_skb_fake_ll_eth(card, skb, hdr);
+	qeth_rebuild_skb_fake_ll_eth(card, skb, hdr);
 }
 
 static inline void
@@ -3546,9 +3532,6 @@ qeth_get_netdevice(enum qeth_card_types type, enum qeth_link_types linktype)
 		switch (linktype) {
 		case QETH_LINK_TYPE_LANE_TR:
 		case QETH_LINK_TYPE_HSTR:
-#ifdef CONFIG_TR
-			dev = alloc_trdev(0);
-#endif /* CONFIG_TR */
 			break;
 		default:
 			dev = alloc_etherdev(0);
@@ -3572,25 +3555,15 @@ qeth_fake_header(struct sk_buff *skb, struct net_device *dev,
 		     unsigned short type, void *daddr, void *saddr,
 		     unsigned len)
 {
-	if(dev->type == ARPHRD_IEEE802_TR){
-		struct trh_hdr *hdr;
-        	hdr = (struct trh_hdr *)skb_push(skb, QETH_FAKE_LL_LEN_TR);
-		memcpy(hdr->saddr, dev->dev_addr, TR_ALEN);
-        	memcpy(hdr->daddr, "FAKELL", TR_ALEN);
-		return QETH_FAKE_LL_LEN_TR;
-
-	} else {
-		struct ethhdr *hdr;
-        	hdr = (struct ethhdr *)skb_push(skb, QETH_FAKE_LL_LEN_ETH);
-		memcpy(hdr->h_source, dev->dev_addr, ETH_ALEN);
-        	memcpy(hdr->h_dest, "FAKELL", ETH_ALEN);
-        	if (type != ETH_P_802_3)
-                	hdr->h_proto = htons(type);
-        	else
-                	hdr->h_proto = htons(len);
-		return QETH_FAKE_LL_LEN_ETH;
-
-	}
+	struct ethhdr *hdr;
+    	hdr = (struct ethhdr *)skb_push(skb, QETH_FAKE_LL_LEN_ETH);
+	memcpy(hdr->h_source, dev->dev_addr, ETH_ALEN);
+    	memcpy(hdr->h_dest, "FAKELL", ETH_ALEN);
+    	if (type != ETH_P_802_3)
+            	hdr->h_proto = htons(type);
+    	else
+            	hdr->h_proto = htons(len);
+	return QETH_FAKE_LL_LEN_ETH;
 }
 
 static int
@@ -4052,12 +4025,7 @@ qeth_fill_header(struct qeth_card *card, struct qeth_hdr *hdr,
 			memcpy(hdr->hdr.l3.dest_addr, &skb->nh.ipv6h->daddr, 16);
 		}
 	} else { /* passthrough */
-                if((skb->dev->type == ARPHRD_IEEE802_TR) &&
-		    !memcmp(skb->data + sizeof(struct qeth_hdr) +
-		    sizeof(__u16), skb->dev->broadcast, 6)) {
-			hdr->hdr.l3.flags = QETH_CAST_BROADCAST |
-						QETH_HDR_PASSTHRU;
-		} else if (!memcmp(skb->data + sizeof(struct qeth_hdr),
+		if (!memcmp(skb->data + sizeof(struct qeth_hdr),
 			    skb->dev->broadcast, 6)) {   /* broadcast? */
 			hdr->hdr.l3.flags = QETH_CAST_BROADCAST |
 						QETH_HDR_PASSTHRU;
@@ -4384,11 +4352,7 @@ qeth_send_packet(struct qeth_card *card, struct sk_buff *skb)
 			new_skb = qeth_pskb_unshare(skb, GFP_ATOMIC);
 			if (!new_skb)
 				return -ENOMEM;
-			if(card->dev->type == ARPHRD_IEEE802_TR){
-				skb_pull(new_skb, QETH_FAKE_LL_LEN_TR);
-			} else {
-				skb_pull(new_skb, QETH_FAKE_LL_LEN_ETH);
-			}
+			skb_pull(new_skb, QETH_FAKE_LL_LEN_ETH);
 		}
 	}
 	if (skb_is_gso(skb))
@@ -5497,10 +5461,7 @@ qeth_neigh_setup(struct net_device *dev, struct neigh_parms *np)
 static void
 qeth_get_mac_for_ipm(__u32 ipm, char *mac, struct net_device *dev)
 {
-	if (dev->type == ARPHRD_IEEE802_TR)
-		ip_tr_mc_map(ipm, mac);
-	else
-		ip_eth_mc_map(ipm, mac);
+	ip_eth_mc_map(ipm, mac);
 }
 
 static struct qeth_ipaddr *
@@ -6362,10 +6323,7 @@ qeth_netdev_init(struct net_device *dev)
 	if (card->options.fake_ll &&
 		(qeth_get_netdev_flags(card) & IFF_NOARP))
 			dev->hard_header = qeth_fake_header;
-	if (dev->type == ARPHRD_IEEE802_TR)
-		dev->hard_header_parse = NULL;
-	else
-		dev->hard_header_parse = qeth_hard_header_parse;
+	dev->hard_header_parse = qeth_hard_header_parse;
 	dev->set_mac_address = qeth_layer2_set_mac_address;
 	dev->flags |= qeth_get_netdev_flags(card);
 	if ((card->options.fake_broadcast) ||
