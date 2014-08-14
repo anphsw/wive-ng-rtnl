@@ -35,8 +35,6 @@
 #ifndef _IF_PPP_H_
 #define _IF_PPP_H_
 
-#include <linux/compiler.h>
-
 /*
  * Packet sizes
  */

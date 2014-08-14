@@ -239,9 +239,7 @@ extern int get_entropy (unsigned char *, int);
  * This is just some stuff to take
  * care of kernel definitions
  */
-
 #ifdef USE_KERNEL
-#include <linux/compiler.h>
 #include <net/if.h>
 #include <linux/if_ether.h>
 #include <linux/if_pppox.h>

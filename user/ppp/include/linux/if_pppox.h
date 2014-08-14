@@ -16,7 +16,6 @@
 #ifndef __LINUX_IF_PPPOX_H
 #define __LINUX_IF_PPPOX_H
 
-#include <linux/compiler.h>
 #include <linux/types.h>
 #include <asm/byteorder.h>
 
@@ -27,6 +26,7 @@
 #include <linux/in.h>
 #include <linux/ppp_channel.h>
 #endif /* __KERNEL__ */
+
 #include <linux/if_pppol2tp.h>
 
 /* For user-space programs to pick up these definitions
