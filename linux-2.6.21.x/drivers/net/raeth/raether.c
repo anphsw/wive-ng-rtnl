@@ -172,6 +172,17 @@ extern char const *nvram_get(int index, char *name);
 static void rt305x_esw_init(void);
 #endif
 
+#ifndef CONFIG_RAETH_DISABLE_TX_TIMEO
+static void ei_tx_timeout(struct net_device *dev);
+#endif
+
+static int rather_probe(struct net_device *dev);
+static int ei_open(struct net_device *dev);
+static int ei_close(struct net_device *dev);
+static int ra2882eth_init(void);
+static void ra2882eth_cleanup_module(void);
+inline void ei_xmit_housekeeping(unsigned long data);
+
 #if 0
 void skb_dump(struct sk_buff* sk) {
         unsigned int i;
@@ -383,7 +394,7 @@ static void set_fe_pdma_glo_cfg(void)
 }
 
 #if defined (CONFIG_RAETH_HW_VLAN_TX)
-void update_hw_vlan_tx(void)
+static void update_hw_vlan_tx(void)
 {
 #if defined (CONFIG_RALINK_MT7620)
 	*(volatile u32 *)(RALINK_FRAME_ENGINE_BASE + 0x430) = 0x00010000;
@@ -1058,8 +1069,7 @@ static int rt2880_eth_send(struct net_device* dev, struct sk_buff *skb, int gmac
 #endif
 
 #ifdef CONFIG_RAETH_LRO
-static int
-rt_get_skb_header(struct sk_buff *skb, void **iphdr, void **tcph,
+static int rt_get_skb_header(struct sk_buff *skb, void **iphdr, void **tcph,
                        u64 *hdr_flags, void *priv)
 {
         struct iphdr *iph = NULL;
@@ -2016,7 +2026,7 @@ static inline int ei_start_xmit_fake(struct sk_buff* skb, struct net_device *dev
 
 
 #if defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350)
-void dump_phy_reg(int port_no, int from, int to, int is_local)
+static void dump_phy_reg(int port_no, int from, int to, int is_local)
 {
         u32 i=0;
         u32 temp=0;
@@ -2047,7 +2057,7 @@ void dump_phy_reg(int port_no, int from, int to, int is_local)
         printk("\n");
 }
 #else
-void dump_phy_reg(int port_no, int from, int to, int is_local, int page_no)
+static void dump_phy_reg(int port_no, int from, int to, int is_local, int page_no)
 {
 
         u32 i=0;
@@ -2088,7 +2098,7 @@ void dump_phy_reg(int port_no, int from, int to, int is_local, int page_no)
 
 #endif
 
-int ei_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
+static int ei_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 {
 #if defined(CONFIG_RT_3052_ESW)
 	esw_reg reg;
@@ -2342,7 +2352,7 @@ static int ei_change_mtu(struct net_device *dev, int new_mtu)
 static void ei_vlan_rx_register(struct net_device *dev, struct vlan_group *grp)
 {
 	END_DEVICE *ei_local = netdev_priv(dev);
-	
+
 	ei_local->vlgrp = grp;
 
 	/* enable HW VLAN RX */
@@ -2374,7 +2384,7 @@ static const struct net_device_ops ei_netdev_ops = {
 };
 #endif
 
-void ra2880_setup_dev_fptable(struct net_device *dev)
+static void ra2880_setup_dev_fptable(struct net_device *dev)
 {
 	RAETH_PRINT(__FUNCTION__ "is called!\n");
 
@@ -2448,7 +2458,7 @@ void ei_reset_task(struct work_struct *work)
 	return;
 }
 
-void ei_tx_timeout(struct net_device *dev)
+static void ei_tx_timeout(struct net_device *dev)
 {
         END_DEVICE *ei_local = netdev_priv(dev);
 
@@ -2456,7 +2466,7 @@ void ei_tx_timeout(struct net_device *dev)
 }
 #endif
 
-void setup_statistics(END_DEVICE* ei_local)
+static void setup_statistics(END_DEVICE* ei_local)
 {
 	ei_local->stat.tx_packets	= 0;
 	ei_local->stat.tx_bytes 	= 0;
@@ -2511,7 +2521,7 @@ void setup_statistics(END_DEVICE* ei_local)
  *
  */
 
-int __init rather_probe(struct net_device *dev)
+static int __init rather_probe(struct net_device *dev)
 {
 #ifdef CONFIG_RAETH_READ_MAC_FROM_MTD
 	int i;
@@ -2647,7 +2657,7 @@ inline void ei_xmit_housekeeping(unsigned long unused)
 
 
 #ifdef CONFIG_PSEUDO_SUPPORT
-int VirtualIF_ioctl(struct net_device * net_dev,
+static int VirtualIF_ioctl(struct net_device * net_dev,
 		    struct ifreq * ifr, int cmd)
 {
 	ra_mii_ioctl_data mii;
@@ -2672,13 +2682,13 @@ int VirtualIF_ioctl(struct net_device * net_dev,
 	return 0;
 }
 
-struct net_device_stats *VirtualIF_get_stats(struct net_device *dev)
+static struct net_device_stats *VirtualIF_get_stats(struct net_device *dev)
 {
 	PSEUDO_ADAPTER *pAd = netdev_priv(dev);
 	return &pAd->stat;
 }
 
-int VirtualIF_open(struct net_device * dev)
+static int VirtualIF_open(struct net_device * dev)
 {
     PSEUDO_ADAPTER *pPesueoAd = netdev_priv(dev);
 
@@ -2689,7 +2699,7 @@ int VirtualIF_open(struct net_device * dev)
     return 0;
 }
 
-int VirtualIF_close(struct net_device * dev)
+static int VirtualIF_close(struct net_device * dev)
 {
     PSEUDO_ADAPTER *pPesueoAd = netdev_priv(dev);
 
@@ -2720,7 +2730,7 @@ inline int VirtualIFSendPackets(struct sk_buff * pSkb,
     return 0;
 }
 
-void virtif_setup_statistics(PSEUDO_ADAPTER* pAd)
+static void virtif_setup_statistics(PSEUDO_ADAPTER* pAd)
 {
 	pAd->stat.tx_packets	= 0;
 	pAd->stat.tx_bytes 	= 0;
@@ -2760,7 +2770,7 @@ static const struct net_device_ops VirtualIF_netdev_ops = {
 #endif
 
 // Register pseudo interface
-void RAETH_Init_PSEUDO(pEND_DEVICE pAd, struct net_device *net_dev)
+static void RAETH_Init_PSEUDO(pEND_DEVICE pAd, struct net_device *net_dev)
 {
     int index;
     struct net_device *dev;
@@ -2939,15 +2949,14 @@ static void fe_sw_init(void)
 #elif defined (CONFIG_GE1_RVMII_FORCE_100)
 	regValue &= ~(0x3 << 12);
 	regValue |= 0x2 << 12; // GE1 RvMII Mode
-#endif 
-
-#if defined (CONFIG_GE2_MII_FORCE_100) || defined (CONFIG_GE2_MII_AN) 
+#endif
+#if defined (CONFIG_GE2_MII_FORCE_100) || defined (CONFIG_GE2_MII_AN)
 	regValue &= ~(0x3 << 14);
 	regValue |= 0x1 << 14; // GE2 MII Mode
 #elif defined (CONFIG_GE2_RVMII_FORCE_100)
 	regValue &= ~(0x3 << 14);
 	regValue |= 0x2 << 14; // GE2 RvMII Mode
-#endif 
+#endif
 	sysRegWrite(SYSCFG1, regValue);
 #endif // CONFIG_RALINK_RT3883 //
 
@@ -3019,7 +3028,7 @@ static void fe_sw_init(void)
 		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 9, &regValue);
 		regValue &= ~(3<<8); //turn off 1000Base-T Advertisement (9.9=1000Full, 9.8=1000Half)
 		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 9, regValue);
-#endif		
+#endif
 		printk("\n GMAC2 Reset MARVELL phy\n");
 		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR2, 20, &regValue);
 		regValue |= 1<<7; //Add delay to RX_CLK for RXD Outputs
@@ -3055,7 +3064,7 @@ static void fe_sw_init(void)
  * This routine goes all-out, setting everything
  * up a new at each open, even though many of these registers should only need to be set once at boot.
  */
-int ei_open(struct net_device *dev)
+static int ei_open(struct net_device *dev)
 {
 	int i, err;
 	unsigned long flags;
@@ -3197,10 +3206,8 @@ int ei_open(struct net_device *dev)
 
 	spin_unlock_irqrestore(&(ei_local->page_lock), flags);
 #ifdef CONFIG_PSEUDO_SUPPORT
-	if(ei_local->PseudoDev==NULL) {
+	if(ei_local->PseudoDev==NULL)
 	    RAETH_Init_PSEUDO(ei_local, dev);
-	}
-
 	VirtualIF_open(ei_local->PseudoDev);
 #endif
 
@@ -3226,7 +3233,7 @@ int ei_open(struct net_device *dev)
  *
  *
  */
-int ei_close(struct net_device *dev)
+static int ei_close(struct net_device *dev)
 {
 	int i;
 	END_DEVICE *ei_local = netdev_priv(dev);	// device pointer
@@ -3395,9 +3402,9 @@ void rt6855A_gsw_init(void)
 
     *(unsigned long *)(RALINK_FRAME_ENGINE_BASE+0x1ec) = 0x0fffffff;//Set PSE should pause 4 tx ring as default
     *(unsigned long *)(RALINK_FRAME_ENGINE_BASE+0x1f0) = 0x0fffffff;//switch IOT more stable
-    
+
     *(unsigned long *)(CKGCR) &= ~(0x3 << 4); //keep rx/tx port clock ticking, disable internal clock-gating to avoid switch stuck 
-  
+
     /*
      *Reg 31: Page Control
      * Bit 15     => PortPageSel, 1=local, 0=global
@@ -3411,19 +3418,18 @@ void rt6855A_gsw_init(void)
     rev &= (0x0f);
 
     mii_mgr_write(1, 31, 0x4000); //global, page 4
-  
+
     mii_mgr_write(1, 16, 0xd4cc);
     mii_mgr_write(1, 17, 0x7444);
     mii_mgr_write(1, 19, 0x0112);
     mii_mgr_write(1, 21, 0x7160);
     mii_mgr_write(1, 22, 0x10cf);
     mii_mgr_write(1, 26, 0x0777);
-    
-    if(rev == 0){
+
+    if(rev == 0) {
 	    mii_mgr_write(1, 25, 0x0102);
 	    mii_mgr_write(1, 29, 0x8641);
-    }
-    else{
+    } else {
             mii_mgr_write(1, 25, 0x0212);
 	    mii_mgr_write(1, 29, 0x4640);
     }
@@ -3435,11 +3441,10 @@ void rt6855A_gsw_init(void)
     mii_mgr_write(1, 24, 0x096e);
     mii_mgr_write(1, 25, 0x0fed);
     mii_mgr_write(1, 26, 0x0fc4);
-    
+
     mii_mgr_write(1, 31, 0x1000); //global, page 1
     mii_mgr_write(1, 17, 0xe7f8);
-    
-    
+
     mii_mgr_write(1, 31, 0xa000); //local, page 2
 
     mii_mgr_write(0, 16, 0x0e0e);
@@ -3464,7 +3469,7 @@ void rt6855A_gsw_init(void)
 #elif defined (CONFIG_P5_MAC_TO_PHY_MODE)
 	//rt6855/6 need to modify TX/RX phase
 	*(unsigned long *)(RALINK_ETH_SW_BASE+0x7014) = 0xc;//TX/RX CLOCK Phase select
-	
+
 	enable_auto_negotiate(1);
 
  	if (isICPlusGigaPHY(1)) {
@@ -3475,7 +3480,7 @@ void rt6855A_gsw_init(void)
 		mii_mgr_read(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 0, &phy_val);
 		phy_val |= 1<<9; //restart AN
 		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 0, phy_val);
-}
+	}
 
  	if (isMarvellGigaPHY(1)) {
 		printk("Reset MARVELL phy1\n");
@@ -3561,7 +3566,7 @@ void rt_gsw_init(void)
     */
     /*correct  PHY  setting L3.0 BGA*/
     mii_mgr_write(1, 31, 0x4000); //global, page 4
-  
+
     mii_mgr_write(1, 17, 0x7444);
     if(is_BGA){
 	mii_mgr_write(1, 19, 0x0114);
@@ -3575,7 +3580,7 @@ void rt_gsw_init(void)
     mii_mgr_write(1, 29, 0x4000);
     mii_mgr_write(1, 28, 0xc077);
     mii_mgr_write(1, 24, 0x0000);
-    
+
     mii_mgr_write(1, 31, 0x3000); //global, page 3
     mii_mgr_write(1, 17, 0x4838);
 
@@ -3597,13 +3602,13 @@ void rt_gsw_init(void)
     }
     mii_mgr_write(1, 31, 0x1000); //global, page 1
     mii_mgr_write(1, 17, 0xe7f8);
-    
+
     mii_mgr_write(1, 31, 0x8000); //local, page 0
     mii_mgr_write(0, 30, 0xa000);
     mii_mgr_write(1, 30, 0xa000);
     mii_mgr_write(2, 30, 0xa000);
     mii_mgr_write(3, 30, 0xa000);
-#if !defined (CONFIG_RAETH_HAS_PORT4)   
+#if !defined (CONFIG_RAETH_HAS_PORT4)
     mii_mgr_write(4, 30, 0xa000);
 #endif
 
@@ -3611,7 +3616,7 @@ void rt_gsw_init(void)
     mii_mgr_write(1, 4, 0x05e1);
     mii_mgr_write(2, 4, 0x05e1);
     mii_mgr_write(3, 4, 0x05e1);
-#if !defined (CONFIG_RAETH_HAS_PORT4)   
+#if !defined (CONFIG_RAETH_HAS_PORT4)
     mii_mgr_write(4, 4, 0x05e1);
 #endif
 
@@ -3620,7 +3625,7 @@ void rt_gsw_init(void)
     mii_mgr_write(1, 16, 0x1010);
     mii_mgr_write(2, 16, 0x1515);
     mii_mgr_write(3, 16, 0x0f0f);
-#if !defined (CONFIG_RAETH_HAS_PORT4)   
+#if !defined (CONFIG_RAETH_HAS_PORT4)
     mii_mgr_write(4, 16, 0x1313);
 #endif
 
@@ -3648,7 +3653,7 @@ void rt_gsw_init(void)
 	*(unsigned long *)(0xb0000060) &= ~(1 << 9); //set RGMII to Normal mode
 	*(unsigned long *)(0xb0000060) &= ~(3 << 7); //set MDIO to Normal mode
 	*(unsigned long *)(SYSCFG1) &= ~(0x3 << 12); //GE1_MODE=RGMii Mode
-	
+
 	enable_auto_negotiate(1);
 
  	if (isICPlusGigaPHY(1)) {
@@ -3813,7 +3818,7 @@ static void rt305x_esw_init(void)
 	    mii_mgr_write(i, 0, 0xB100);   //reset all digital logic, except phy_reg
 	}
 #endif
-	
+
 	/*
 	 * set port 5 force to 1000M/Full when connecting to switch or iNIC
 	 */
@@ -3864,13 +3869,11 @@ static void rt305x_esw_init(void)
 		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 28, phy_val);
 		mii_mgr_write(CONFIG_MAC_TO_GIGAPHY_MODE_ADDR, 31, 0x0000); //main registers
         }
-       
 #elif defined (CONFIG_P5_RMII_TO_MAC_MODE)
 	*(unsigned long *)(0xb0000060) &= ~(1 << 9); //set RGMII to Normal mode
         *(unsigned long *)(RALINK_ETH_SW_BASE+0x00C8) &= ~(1<<29); //disable port 5 auto-polling
         *(unsigned long *)(RALINK_ETH_SW_BASE+0x00C8) &= ~(0x3fff); 
         *(unsigned long *)(RALINK_ETH_SW_BASE+0x00C8) |= 0x3ffd; //force 100M full duplex
-        
 #if defined (CONFIG_RALINK_RT3352)
 	*(unsigned long *)(SYSCFG1) &= ~(0x3 << 12); //GE1_MODE=RvMii Mode
         *(unsigned long *)(SYSCFG1) |= (0x2 << 12);
@@ -3888,7 +3891,6 @@ static void rt305x_esw_init(void)
 	*(unsigned long *)(0xb0000060) |= (1 << 7); //set MDIO to GPIO mode (GPIO22-GPIO23)
         *(unsigned long *)(0xb0000624) = 0xC0000000; //GPIO22-GPIO23 output mode
         *(unsigned long *)(0xb000062C) = 0xC0000000; //GPIO22-GPIO23 output high
-        
         *(unsigned long *)(0xb0000060) |= (1 << 9); //set RGMII to GPIO mode (GPIO24-GPIO35)
 	*(unsigned long *)(0xb000064C) = 0xFFF; //GPIO24-GPIO35 output mode
         *(unsigned long *)(0xb0000654) = 0xFFF; //GPIO24-GPIO35 output high
@@ -4136,7 +4138,7 @@ int __init ra2882eth_init(void)
  * Cmd 'rmmod' will invode the routine to exit the module
  *
  */
-void __exit ra2882eth_cleanup_module(void)
+static void __exit ra2882eth_cleanup_module(void)
 {
 	struct net_device *dev = dev_raether;
 	if (!dev)

@@ -96,18 +96,6 @@
 #else
 #define RAETH_PRINT(fmt, args...) { }
 #endif
-
-void ei_tx_timeout(struct net_device *dev);
-int rather_probe(struct net_device *dev);
-int ei_open(struct net_device *dev);
-int ei_close(struct net_device *dev);
-
-int ra2882eth_init(void);
-void ra2882eth_cleanup_module(void);
-
-inline void ei_xmit_housekeeping(unsigned long data);
-
 u32 mii_mgr_read(u32 phy_addr, u32 phy_register, u32 *read_data);
 u32 mii_mgr_write(u32 phy_addr, u32 phy_register, u32 write_data);
-
 #endif
