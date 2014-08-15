@@ -484,6 +484,8 @@ void dump_cp0(void)
 }
 
 struct proc_dir_entry *procRegDir;
+EXPORT_SYMBOL(procRegDir);
+
 static struct proc_dir_entry *procGmac, *procSysCP0, *procTxRing, *procRxRing, *procSkbFree;
 #if defined(CONFIG_RAETH_SNMPD)
 static struct proc_dir_entry *procRaSnmp;
