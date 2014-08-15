@@ -124,31 +124,6 @@ inline void str2eaddr(unsigned char *ea, unsigned char *str)
 	}
 }
 
-int get_ethernet_addr(char *ethernet_addr)
-{
-        char *ethaddr_str;
-
-        ethaddr_str = prom_getenv("ethaddr");
-	if (!ethaddr_str) {
-	        printk("ethaddr not set in boot prom\n");
-		return -1;
-	}
-	str2eaddr(ethernet_addr, ethaddr_str);
-
-#if 0
-	{
-		int i;
-
-	printk("get_ethernet_addr: ");
-	for (i=0; i<5; i++)
-		printk("%02x:", (unsigned char)*(ethernet_addr+i));
-	printk("%02x\n", *(ethernet_addr+i));
-	}
-#endif
-
-	return 0;
-}
-
 void __init prom_free_prom_memory(void)
 {
 }

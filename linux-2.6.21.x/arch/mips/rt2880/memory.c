@@ -106,7 +106,7 @@ struct prom_pmemblock * __init prom_getmdesc(void)
 #else
 		printk("rambase not set, set to default (0x00000000)\n");
 		rambase = 0x00000000;
-#endif 
+#endif
 	} else {
 		printk("rambase = %s\n", env_str);
 		rambase = simple_strtol(env_str, NULL, 0);
@@ -124,10 +124,6 @@ struct prom_pmemblock * __init prom_getmdesc(void)
 
 void __init prom_meminit(void)
 {
-#ifdef DEBUG
-	struct prom_pmemblock *p;
-	struct prom_pmemblock *psave;
-#endif
 #ifdef CONFIG_RAM_SIZE_AUTO
 	unsigned long mem, reg_mem;
 	unsigned long before, offset;
@@ -178,38 +174,8 @@ void __init prom_meminit(void)
         add_memory_region(0x00000000, RAM_SIZE, BOOT_MEM_RAM);
 #endif
 #endif /* CONFIG_RAM_SIZE_AUTO */
-
-#ifdef DEBUG
-	p = prom_getmdesc();
-	printk("MEMORY DESCRIPTOR dump:\n");
-	psave = p;	/* Save p */
-	while (p->size) {
-		int i = 0;
-		printk("[%d,%p]: base<%08lx> size<%08x> type<%s>\n",
-			    i, p, p->base, p->size, mtypes[p->type]);
-		p++;
-		i++;
-	}
-	p = psave;	/* Restore p */
-
-#endif
 }
 
 void __init prom_free_prom_memory(void)
 {
-#ifdef DEBUG
-	/* Nothing to do! Need only for DEBUG.	  */
-	/* This is may be corrupt working memory. */
-        unsigned long addr;
-        int i;
-
-        for (i = 0; i < boot_mem_map.nr_map; i++) {
-                if (boot_mem_map.map[i].type != BOOT_MEM_ROM_DATA)
-                        continue;
-
-                addr = boot_mem_map.map[i].addr;
-                free_init_pages("prom memory",
-                                addr, addr + boot_mem_map.map[i].size);
-        }
-#endif
 }

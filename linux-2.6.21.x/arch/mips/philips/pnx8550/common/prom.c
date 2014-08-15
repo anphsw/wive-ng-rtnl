@@ -93,19 +93,6 @@ inline void str2eaddr(unsigned char *ea, unsigned char *str)
 	}
 }
 
-int get_ethernet_addr(char *ethernet_addr)
-{
-        char *ethaddr_str;
-
-        ethaddr_str = prom_getenv("ethaddr");
-	if (!ethaddr_str) {
-	        printk("ethaddr not set in boot prom\n");
-		return -1;
-	}
-	str2eaddr(ethernet_addr, ethaddr_str);
-	return 0;
-}
-
 void __init prom_free_prom_memory(void)
 {
 }
@@ -125,5 +112,4 @@ void prom_putchar(char c)
 }
 
 EXPORT_SYMBOL(prom_getcmdline);
-EXPORT_SYMBOL(get_ethernet_addr);
 EXPORT_SYMBOL(str2eaddr);

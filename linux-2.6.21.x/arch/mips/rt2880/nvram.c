@@ -25,8 +25,8 @@ static block_t fb[FLASH_BLOCK_NUM] = {
 /* Prototypes */
 static int init_nvram_block(int index);
 static int ra_nvram_close(int index);
-char const *nvram_get(int index, char *name);
-int const nvram_getall(int index, char *buf);
+static char const *nvram_get(int index, char *name);
+static int const nvram_getall(int index, char *buf);
 
 static int nvram_set(int index, char *name, char *value);
 static int nvram_commit(int index);
@@ -34,15 +34,16 @@ static int nvram_clear(int index);
 
 /* /dev/nvram major number */
 static int ralink_nvram_major = 251;
+
 /* eneable debug */
-char ra_nvram_debug = 0;
+static char ra_nvram_debug;
 
 static DECLARE_MUTEX(nvram_sem);
 
 /* ========================================================================
  * Table of CRC-32's of all single-byte values (made by make_crc_table)
  */
-const uint32_t crc_table[256] = {
+static const uint32_t crc_table[256] = {
   0x00000000L, 0x77073096L, 0xee0e612cL, 0x990951baL, 0x076dc419L,
   0x706af48fL, 0xe963a535L, 0x9e6495a3L, 0x0edb8832L, 0x79dcb8a4L,
   0xe0d5e91eL, 0x97d2d988L, 0x09b64c2bL, 0x7eb17cbdL, 0xe7b82d07L,
@@ -104,7 +105,7 @@ const uint32_t crc_table[256] = {
 #define DO8(buf)  DO4(buf); DO4(buf);
 
 /* ========================================================================= */
-uint32_t nv_crc32(uint32_t crc, const char *buf, uint32_t len)
+static uint32_t nv_crc32(uint32_t crc, const char *buf, uint32_t len)
 {
     if (buf == 0) return 0L;
     crc = crc ^ 0xffffffffL;
@@ -119,7 +120,7 @@ uint32_t nv_crc32(uint32_t crc, const char *buf, uint32_t len)
     return crc ^ 0xffffffffL;
 }
 
-int ralink_nvram_open(struct inode *inode, struct file *file)
+static int ralink_nvram_open(struct inode *inode, struct file *file)
 {
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
 	MOD_INC_USE_COUNT;
@@ -129,7 +130,7 @@ int ralink_nvram_open(struct inode *inode, struct file *file)
 	return 0;
 }
 
-int ralink_nvram_release(struct inode *inode, struct file *file)
+static int ralink_nvram_release(struct inode *inode, struct file *file)
 {
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,0)
 	MOD_DEC_USE_COUNT;
@@ -140,10 +141,10 @@ int ralink_nvram_release(struct inode *inode, struct file *file)
 }
 
 #if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,35)
-long ralink_nvram_ioctl(struct file *file, unsigned int req,
+static long ralink_nvram_ioctl(struct file *file, unsigned int req,
 		unsigned long arg)
 #else
-int ralink_nvram_ioctl(struct inode *inode, struct file *file, unsigned int req,
+static int ralink_nvram_ioctl(struct inode *inode, struct file *file, unsigned int req,
 		unsigned long arg)
 #endif
 {
@@ -210,7 +211,7 @@ int ralink_nvram_ioctl(struct inode *inode, struct file *file, unsigned int req,
 	return 0;
 }
 
-struct file_operations ralink_nvram_fops =
+static const struct file_operations ralink_nvram_fops =
 {
 	owner:		THIS_MODULE,
 	ioctl:		ralink_nvram_ioctl,
@@ -218,7 +219,7 @@ struct file_operations ralink_nvram_fops =
 	release:	ralink_nvram_release,
 };
 
-int ra_nvram_init(void)
+static int ra_nvram_init(void)
 {
 	int i, r = 0, ret = 0;
 
@@ -532,7 +533,7 @@ static int nvram_set(int index, char *name, char *value)
 	return 0;
 }
 
-char const *nvram_get(int index, char *name)
+static char const *nvram_get(int index, char *name)
 {
 	int idx;
 	static char const *ret;
@@ -558,7 +559,7 @@ char const *nvram_get(int index, char *name)
 	return NULL;
 }
 
-int const nvram_getall(int index, char *buf) 
+static int const nvram_getall(int index, char *buf) 
 {
 	int i, len;
 	char *p;

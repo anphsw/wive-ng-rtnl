@@ -107,15 +107,6 @@ void __init mips_time_init(void)
 	r4k_offset = cal_r4koff();
 	printk("%08x(%d)\n", r4k_offset, r4k_offset);
 
-#if 0
-        if ((read_c0_prid() & 0xffff00) ==
-	    (PRID_COMP_MIPS | PRID_IMP_20KC))
-		est_freq = r4k_offset*HZ;
-	else
-		est_freq = 2*r4k_offset*HZ;
-#endif
-
-	
 	est_freq = r4k_offset*HZ;
 	est_freq += 5000;    /* round */
 	est_freq -= est_freq%10000;
@@ -125,11 +116,7 @@ void __init mips_time_init(void)
 	local_irq_restore(flags);
 }
 
-#if 1
 void __init plat_timer_setup(struct irqaction *irq)
-#else
-void __init mips_timer_setup(struct irqaction *irq)
-#endif
 {
 
 #ifdef CONFIG_RALINK_RT3352

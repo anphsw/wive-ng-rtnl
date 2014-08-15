@@ -980,11 +980,6 @@ static int lan_saa9730_init(struct net_device *dev, struct pci_dev *pdev,
 	unsigned char ethernet_addr[6];
 	int ret;
 
-	if (get_ethernet_addr(ethernet_addr)) {
-		ret = -ENODEV;
-		goto out;
-	}
-
 	memcpy(dev->dev_addr, ethernet_addr, 6);
 	dev->base_addr = ioaddr;
 	dev->irq = irq;

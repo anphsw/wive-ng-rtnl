@@ -145,30 +145,6 @@ static void prom_usbinit(void)
 #endif
 }
 
-int get_ethernet_addr(unsigned char *ethernet_addr)
-{
-        unsigned char *ethaddr_str;
-#ifdef DEBUG
-        int i;
-#endif
-
-        ethaddr_str = prom_getenv("ethaddr");
-	if (!ethaddr_str) {
-	        printk("ethaddr not set in boot prom\n");
-		return -1;
-	}
-	str2eaddr(ethernet_addr, ethaddr_str);
-
-#ifdef DEBUG
-	printk("get_ethernet_addr: ");
-        for (i=0; i<5; i++)
-	    printk("%02x:", (unsigned char)*(ethernet_addr+i));
-
-	printk("%02x\n", *(ethernet_addr+i));
-#endif
-	return 0;
-}
-
 static void prom_init_sysclk(void)
 {
 	u32 	reg;

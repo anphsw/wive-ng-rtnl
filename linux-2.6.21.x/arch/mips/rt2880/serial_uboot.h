@@ -1,15 +1,13 @@
 /* FIXME: Only this does work for u-boot... find out why... [RS] */
-#if 1
-# undef	io_p2v
-# undef __REG
-# ifndef __ASSEMBLY__
-#  define io_p2v(PhAdd)    (PhAdd)
-#  define __REG(x)	(*((volatile u32 *)io_p2v(x)))
-#  define __REG2(x,y)	(*(volatile u32 *)((u32)&__REG(x) + (y)))
-# else
-#  define __REG(x) (x)
-# endif
-#endif /* UBOOT_REG_FIX */      
+#undef	io_p2v
+#undef __REG
+#ifndef __ASSEMBLY__
+#define io_p2v(PhAdd)    (PhAdd)
+#define __REG(x)	(*((volatile u32 *)io_p2v(x)))
+#define __REG2(x,y)	(*(volatile u32 *)((u32)&__REG(x) + (y)))
+#else
+#define __REG(x) (x)
+#endif
 
 #define RT2880_CHIP_REG_CFG_BASE	(RALINK_SYSCTL_BASE)
 

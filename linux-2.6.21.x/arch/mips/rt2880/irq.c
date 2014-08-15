@@ -74,7 +74,7 @@ extern int remote_debug;
 #endif
 
 
-struct surfboard_ictrl_regs *surfboard_hw0_icregs
+static struct surfboard_ictrl_regs *surfboard_hw0_icregs
 	= (struct surfboard_ictrl_regs *)RALINK_INTCL_BASE;
 
 static unsigned char pci_order = 0;
@@ -85,7 +85,7 @@ static unsigned char pci_order = 0;
 #define DEBUG_INT(x...)
 #endif
 
-void disable_surfboard_irq(unsigned int irq_nr)
+static void disable_surfboard_irq(unsigned int irq_nr)
 {
 	//printk("%s(): irq_nr = %d\n",__FUNCTION__,  irq_nr);
 	if(irq_nr >5){
@@ -93,7 +93,7 @@ void disable_surfboard_irq(unsigned int irq_nr)
 	}
 }
 
-void enable_surfboard_irq(unsigned int irq_nr)
+static void enable_surfboard_irq(unsigned int irq_nr)
 {
 	//printk("%s(): irq_nr = %d\n",__FUNCTION__,  irq_nr);
 	if(irq_nr >5)
@@ -112,12 +112,6 @@ static void end_surfboard_irq(unsigned int irq)
 	if (!(irq_desc[irq].status & (IRQ_DISABLED|IRQ_INPROGRESS)))
 		enable_surfboard_irq(irq);
 }
-#if 0
-static void rt2880_irq_handler(unsigned int irq)
-{
-	return;
-}
-#endif
 
 static void __inline__ disable_all(void)
 {
@@ -135,53 +129,12 @@ static void __inline__ enable_all(void)
 	write_32bit_cp0_register(CP0_STATUS, int_status);
 }
 
-#if 0
-static void enable_rt2880_irq(unsigned int irq)
-{
-	unsigned long int_status;
-	int_status = read_32bit_cp0_register(CP0_STATUS);
-
-	if ( irq == 3)
-		int_status = int_status | CAUSEF_IP5;	
-	write_32bit_cp0_register(CP0_STATUS, int_status);
-}
-
-static void disable_rt2880_irq(unsigned int irq)
-{
-	unsigned long int_status;
-	int_status = read_32bit_cp0_register(CP0_STATUS);
-
-	if ( irq == 3)
-		int_status = int_status & ~(CAUSEF_IP5);	
-	write_32bit_cp0_register(CP0_STATUS, int_status);
-}
-#endif
-
-#if 1
-#define	startup_rt2880_irq	enable_rt2880_irq
-#define	shutdown_rt2880_irq	disable_rt2880_irq
-#else
 #define	startup_rt2880_irq 	rt2880_irq_handler
 #define	shutdown_rt2880_irq	rt2880_irq_handler
-#endif
-
 #define	enable_rt2880_irq	rt2880_irq_handler
 #define	disable_rt2880_irq	rt2880_irq_handler
 #define	mask_and_ack_rt2880_irq	rt2880_irq_handler
 #define	end_rt2880_irq		rt2880_irq_handler
-
-#if 0
-static struct hw_interrupt_type rt2880_irq_type = {
-	"RT2880",
-	startup_rt2880_irq,
-	shutdown_rt2880_irq,
-	enable_rt2880_irq,
-	disable_rt2880_irq,
-	mask_and_ack_rt2880_irq,
-	end_rt2880_irq,
-	NULL
-};
-#endif
 
 static struct hw_interrupt_type surfboard_irq_type = {
   .typename = "Surfboard",
@@ -433,6 +386,7 @@ void rt2880_irqdispatch(void)
 
 	return;
 }
+
 asmlinkage void plat_irq_dispatch(void)
 {
         unsigned int pending = read_c0_status() & read_c0_cause() & ST0_IM;
