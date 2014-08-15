@@ -263,8 +263,6 @@ typedef struct {
 /*
  * EXPORT FUNCTION
  */
-int32_t GetPppoeSid(struct sk_buff *skb, uint32_t vlan_gap, uint16_t * sid, uint16_t * ppp_tag);
-
 int PpeSetBindThreshold(uint32_t threshold);
 int PpeSetMaxEntryLimit(uint32_t full, uint32_t half, uint32_t qurt);
 int PpeSetRuleSize(uint16_t pre_acl, uint16_t pre_meter, uint16_t pre_ac,
@@ -273,5 +271,4 @@ int PpeSetRuleSize(uint16_t pre_acl, uint16_t pre_meter, uint16_t pre_ac,
 int PpeSetKaInterval(uint8_t tcp_ka, uint8_t udp_ka);
 int PpeSetUnbindLifeTime(uint8_t lifetime);
 int PpeSetBindLifetime(uint16_t tcp_fin, uint16_t udp_life, uint16_t fin_life);
-
 #endif

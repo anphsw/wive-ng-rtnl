@@ -105,7 +105,7 @@ static void et_get_pauseparam(struct net_device *dev, struct ethtool_pauseparam 
 	// get mii auto-negotiation register
 	mii_mgr_read(ei_local->mii_info.phy_id, AUTO_NEGOTIATION_ADVERTISEMENT, &mii_an_reg);
 	epause->autoneg = (mii_an_reg & AN_PAUSE) ? 1 : 0; //get autonet_enable flag bit
-	
+
 	mdio_cfg_reg = sysRegRead(MDIO_CFG);
 	epause->tx_pause = (mdio_cfg_reg & MDIO_CFG_GP1_FC_TX) ? 1 : 0;
 	epause->rx_pause = (mdio_cfg_reg & MDIO_CFG_GP1_FC_RX) ? 1 : 0;
@@ -237,17 +237,13 @@ void mdio_write(struct net_device *dev, int phy_id, int location, int value)
 	return;
 }
 
-struct ethtool_ops ra_ethtool_ops = {
+const struct ethtool_ops ra_ethtool_ops = {
 	.get_drvinfo		= et_get_drvinfo,
 	.get_settings		= et_get_settings,
 	.set_settings		= et_set_settings,
 #if !defined (CONFIG_RALINK_RT5350)
 	.get_pauseparam		= et_get_pauseparam,
 	.set_pauseparam		= et_set_pauseparam,
-//	.get_rx_csum		= et_get_rx_csum,
-//	.set_rx_csum		= et_set_rx_csum,
-//	.get_tx_csum		= et_get_tx_csum,
-//	.set_tx_csum		= et_set_tx_csum,
 #endif
 	.nway_reset		= et_nway_reset,
 	.get_link		= et_get_link,
@@ -256,9 +252,6 @@ struct ethtool_ops ra_ethtool_ops = {
 	.get_strings		= et_get_strings,
 	.get_stats_count	= et_get_stats_count,
 	.get_ethtool_stats	= et_get_ethtool_stats,
-/*	.get_regs_len		= et_get_regs_len,
-	.get_regs		= et_get_regs,
-*/
 };
 
 #ifdef CONFIG_PSEUDO_SUPPORT
@@ -282,7 +275,7 @@ static void et_virt_get_pauseparam(struct net_device *dev, struct ethtool_pausep
 	// get mii auto-negotiation register
 	mii_mgr_read(pseudo->mii_info.phy_id, AUTO_NEGOTIATION_ADVERTISEMENT, &mii_an_reg);
 	epause->autoneg = (mii_an_reg & AN_PAUSE) ? 1 : 0; //get autonet_enable flag bit
-	
+
 	mdio_cfg_reg = sysRegRead(MDIO_CFG);
 	epause->tx_pause = (mdio_cfg_reg & MDIO_CFG_GP1_FC_TX) ? 1 : 0;
 	epause->rx_pause = (mdio_cfg_reg & MDIO_CFG_GP1_FC_RX) ? 1 : 0;
@@ -394,7 +387,6 @@ static void et_virt_set_msglevel(struct net_device *dev, u32 datum)
 
 static void et_virt_get_ethtool_stats(struct net_device *dev, struct ethtool_stats *stats, u64 *data)
 {
-//	PSEUDO_ADAPTER *pseudo = dev->priv;
 	data[0] = 0;//np->xstats.early_rx;
 	data[1] = 0;//np->xstats.tx_buf_mapped;
 	data[2] = 0;//np->xstats.tx_timeouts;
@@ -422,7 +414,7 @@ static void et_virt_get_strings(struct net_device *dev, u32 stringset, u8 *data)
 	memcpy(data, ethtool_stats_keys_2, sizeof(ethtool_stats_keys_2));
 }
 
-struct ethtool_ops ra_virt_ethtool_ops = {
+const struct ethtool_ops ra_virt_ethtool_ops = {
 	.get_drvinfo		= et_virt_get_drvinfo,
 	.get_settings		= et_virt_get_settings,
 	.set_settings		= et_virt_set_settings,
@@ -439,9 +431,6 @@ struct ethtool_ops ra_virt_ethtool_ops = {
 	.get_strings		= et_virt_get_strings,
 	.get_stats_count	= et_virt_get_stats_count,
 	.get_ethtool_stats	= et_virt_get_ethtool_stats,
-/*	.get_regs_len		= et_virt_get_regs_len,
-	.get_regs		= et_virt_get_regs,
-*/
 };
 
 int mdio_virt_read(struct net_device *dev, int phy_id, int location)
@@ -449,7 +438,6 @@ int mdio_virt_read(struct net_device *dev, int phy_id, int location)
 	unsigned int result;
 	PSEUDO_ADAPTER *pseudo = dev->priv; 
 	mii_mgr_read( (unsigned int) pseudo->mii_info.phy_id, (unsigned int)location, &result);
-	//printk("%s mii.o query= phy_id:%d, address:%d retval:%d\n", dev->name, phy_id, location, result);
 	return (int)result;
 }
 
@@ -462,7 +450,4 @@ void mdio_virt_write(struct net_device *dev, int phy_id, int location, int value
 	mii_mgr_write( (unsigned int) pseudo->mii_info.phy_id, (unsigned int)location, (unsigned int)value);
 	return;
 }
-
 #endif /* CONFIG_PSEUDO_SUPPORT */
-
-

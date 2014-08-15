@@ -151,9 +151,9 @@ static unsigned long tx_ring_full=0;
 
 #ifdef CONFIG_ETHTOOL
 #include "ra_ethtool.h"
-extern struct ethtool_ops	ra_ethtool_ops;
+extern const struct ethtool_ops	ra_ethtool_ops;
 #ifdef CONFIG_PSEUDO_SUPPORT
-extern struct ethtool_ops	ra_virt_ethtool_ops;
+extern const struct ethtool_ops	ra_virt_ethtool_ops;
 #endif // CONFIG_PSEUDO_SUPPORT //
 #endif // CONFIG_ETHTOOL //
 

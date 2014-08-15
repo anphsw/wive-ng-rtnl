@@ -14,8 +14,8 @@
 
 
 #if defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350) 
-#define PHY_CONTROL_0 		0xC0   
-#define PHY_CONTROL_1 		0xC4   
+#define PHY_CONTROL_0 		0xC0
+#define PHY_CONTROL_1 		0xC4
 #define MDIO_PHY_CONTROL_0	(RALINK_ETH_SW_BASE + PHY_CONTROL_0)
 #define MDIO_PHY_CONTROL_1 	(RALINK_ETH_SW_BASE + PHY_CONTROL_1)
 
@@ -25,7 +25,7 @@
 
 #elif defined (CONFIG_RALINK_RT6855)  || defined (CONFIG_RALINK_RT6855A)
 
-#define PHY_CONTROL_0 		0x7004   
+#define PHY_CONTROL_0 		0x7004
 #define MDIO_PHY_CONTROL_0	(RALINK_ETH_SW_BASE + PHY_CONTROL_0)
 
 #define GPIO_MDIO_BIT		(1<<7)
@@ -34,7 +34,7 @@
 
 #elif defined (CONFIG_RALINK_MT7620)
 
-#define PHY_CONTROL_0 		0x7004   
+#define PHY_CONTROL_0 		0x7004
 #define MDIO_PHY_CONTROL_0	(RALINK_ETH_SW_BASE + PHY_CONTROL_0)
 
 #define GPIO_MDIO_BIT		(2<<7)
@@ -43,14 +43,14 @@
 
 #elif defined (CONFIG_RALINK_MT7621)
 
-#define PHY_CONTROL_0 		0x0004   
+#define PHY_CONTROL_0 		0x0004
 #define MDIO_PHY_CONTROL_0	(RALINK_ETH_SW_BASE + PHY_CONTROL_0)
 
 #define GPIO_MDIO_BIT		(2<<7)
 #define GPIO_PURPOSE_SELECT	0x60
 #define GPIO_PRUPOSE		(RALINK_SYSCTL_BASE + GPIO_PURPOSE_SELECT)
 
-#else 
+#else
 #define PHY_CONTROL_0       	0x00
 #define PHY_CONTROL_1       	0x04
 #define MDIO_PHY_CONTROL_0	(RALINK_FRAME_ENGINE_BASE + PHY_CONTROL_0)
@@ -324,6 +324,3 @@ int __init ralink_esw_port_init(void)
 
 module_init(ralink_esw_port_init);
 #endif
-
-EXPORT_SYMBOL(mii_mgr_write);
-EXPORT_SYMBOL(mii_mgr_read);

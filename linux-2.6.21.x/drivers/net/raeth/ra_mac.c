@@ -193,9 +193,8 @@ void ra2880stop(END_DEVICE *ei_local)
 	regValue = sysRegRead(PDMA_GLO_CFG);
 	regValue &= ~(TX_WB_DDONE | RX_DMA_EN | TX_DMA_EN);
 	sysRegWrite(PDMA_GLO_CFG, regValue);
-    	
-	printk("Done\n");	
-	// printk("Done0x%x...\n", readreg(PDMA_GLO_CFG));
+
+	printk("Done\n");
 }
 
 void ei_irq_clear(void)
@@ -216,8 +215,6 @@ void ra2880EnableInterrupt()
 {
 	unsigned int regValue = sysRegRead(FE_INT_ENABLE);
 	RAETH_PRINT("FE_INT_ENABLE -- : 0x%08x\n", regValue);
-//	regValue |= (RX_DONE_INT0 | TX_DONE_INT0);
-		
 	sysRegWrite(FE_INT_ENABLE, regValue);
 }
 
@@ -277,7 +274,7 @@ void ra2880Mac2AddressSet(unsigned char p[6])
         sysRegWrite(GDMA2_MAC_ADRL, regValue);
 
 	printk("GDMA2_MAC_ADRH -- : 0x%08x\n", sysRegRead(GDMA2_MAC_ADRH));
-	printk("GDMA2_MAC_ADRL -- : 0x%08x\n", sysRegRead(GDMA2_MAC_ADRL));	    
+	printk("GDMA2_MAC_ADRL -- : 0x%08x\n", sysRegRead(GDMA2_MAC_ADRL));
         return;
 }
 #endif
@@ -324,13 +321,12 @@ int get_ring_usage(int mode, int i)
 
 	END_DEVICE *ei_local = netdev_priv(dev_raether);
 
-
 	if (mode == 2 ) {
 		/* cpu point to the next descriptor of rx dma ring */
 	        rx_calc_idx = *(unsigned long*)RX_CALC_IDX0;
 	        rx_drx_idx = *(unsigned long*)RX_DRX_IDX0;
 		rxring = (struct PDMA_rxdesc*)RX_BASE_PTR0;
-		
+
 		rx_usage = (rx_drx_idx - rx_calc_idx -1 + NUM_RX_DESC) % NUM_RX_DESC;
 		if ( rx_calc_idx == rx_drx_idx ) {
 		    if ( rxring[rx_drx_idx].rxd_info2.DDONE_bit == 1)
@@ -341,7 +337,6 @@ int get_ring_usage(int mode, int i)
 		return rx_usage;
 	}
 
-	
 	switch (i) {
 		case 0:
 				tx_ctx_idx = *(unsigned long*)TX_CTX_IDX0;
@@ -376,7 +371,6 @@ int get_ring_usage(int mode, int i)
 			tx_usage = NUM_TX_DESC;
 	}
 	return tx_usage;
-
 }
 
 void dump_qos()
@@ -405,11 +399,11 @@ void dump_qos()
 	printk("PDMA_FC_CFG(0x%08x)  : 0x%08x\n", PDMA_FC_CFG, sysRegRead(PDMA_FC_CFG));
 	printk("PSE_FQ_CFG(0x%08x)  : 0x%08x\n", PSE_FQ_CFG, sysRegRead(PSE_FQ_CFG));
 #endif
-	printk("\n\nTX_CTX_IDX0    : 0x%08x\n", sysRegRead(TX_CTX_IDX0));	
+	printk("\n\nTX_CTX_IDX0    : 0x%08x\n", sysRegRead(TX_CTX_IDX0));
 	printk("TX_DTX_IDX0    : 0x%08x\n", sysRegRead(TX_DTX_IDX0));
-	printk("TX_CTX_IDX1    : 0x%08x\n", sysRegRead(TX_CTX_IDX1));	
+	printk("TX_CTX_IDX1    : 0x%08x\n", sysRegRead(TX_CTX_IDX1));
 	printk("TX_DTX_IDX1    : 0x%08x\n", sysRegRead(TX_DTX_IDX1));
-	printk("TX_CTX_IDX2    : 0x%08x\n", sysRegRead(TX_CTX_IDX2));	
+	printk("TX_CTX_IDX2    : 0x%08x\n", sysRegRead(TX_CTX_IDX2));
 	printk("TX_DTX_IDX2    : 0x%08x\n", sysRegRead(TX_DTX_IDX2));
 	printk("TX_CTX_IDX3    : 0x%08x\n", sysRegRead(TX_CTX_IDX3));
 	printk("TX_DTX_IDX3    : 0x%08x\n", sysRegRead(TX_DTX_IDX3));
@@ -424,21 +418,21 @@ void dump_reg()
 {
 	printk("\n\nFE_INT_ENABLE  : 0x%08x\n", sysRegRead(FE_INT_ENABLE));
 	printk("DLY_INT_CFG	: 0x%08x\n", sysRegRead(DLY_INT_CFG));
-	printk("TX_BASE_PTR0   : 0x%08x\n", sysRegRead(TX_BASE_PTR0));	
-	printk("TX_CTX_IDX0    : 0x%08x\n", sysRegRead(TX_CTX_IDX0));	
+	printk("TX_BASE_PTR0   : 0x%08x\n", sysRegRead(TX_BASE_PTR0));
+	printk("TX_CTX_IDX0    : 0x%08x\n", sysRegRead(TX_CTX_IDX0));
 	printk("TX_DTX_IDX0    : 0x%08x\n", sysRegRead(TX_DTX_IDX0));
-	printk("TX_BASE_PTR1(0x%08x)   : 0x%08x\n", TX_BASE_PTR1, sysRegRead(TX_BASE_PTR1));	
+	printk("TX_BASE_PTR1(0x%08x)   : 0x%08x\n", TX_BASE_PTR1, sysRegRead(TX_BASE_PTR1));
 	printk("TX_CTX_IDX1(0x%08x)    : 0x%08x\n", TX_CTX_IDX1, sysRegRead(TX_CTX_IDX1));
 	printk("TX_DTX_IDX1(0x%08x)    : 0x%08x\n", TX_DTX_IDX1, sysRegRead(TX_DTX_IDX1));
-	printk("TX_BASE_PTR2(0x%08x)   : 0x%08x\n", TX_BASE_PTR2, sysRegRead(TX_BASE_PTR2));	
+	printk("TX_BASE_PTR2(0x%08x)   : 0x%08x\n", TX_BASE_PTR2, sysRegRead(TX_BASE_PTR2));
 	printk("TX_CTX_IDX2(0x%08x)    : 0x%08x\n", TX_CTX_IDX2, sysRegRead(TX_CTX_IDX2));
 	printk("TX_DTX_IDX2(0x%08x)    : 0x%08x\n", TX_DTX_IDX2, sysRegRead(TX_DTX_IDX2));
-	printk("TX_BASE_PTR3(0x%08x)   : 0x%08x\n", TX_BASE_PTR3, sysRegRead(TX_BASE_PTR3));	
+	printk("TX_BASE_PTR3(0x%08x)   : 0x%08x\n", TX_BASE_PTR3, sysRegRead(TX_BASE_PTR3));
 	printk("TX_CTX_IDX3(0x%08x)    : 0x%08x\n", TX_CTX_IDX3, sysRegRead(TX_CTX_IDX3));
 	printk("TX_DTX_IDX3(0x%08x)    : 0x%08x\n", TX_DTX_IDX3, sysRegRead(TX_DTX_IDX3));
 
-	printk("RX_BASE_PTR0   : 0x%08x\n", sysRegRead(RX_BASE_PTR0));	
-	printk("RX_MAX_CNT0    : 0x%08x\n", sysRegRead(RX_MAX_CNT0));	
+	printk("RX_BASE_PTR0   : 0x%08x\n", sysRegRead(RX_BASE_PTR0));
+	printk("RX_MAX_CNT0    : 0x%08x\n", sysRegRead(RX_MAX_CNT0));
 	printk("RX_CALC_IDX0   : 0x%08x\n", sysRegRead(RX_CALC_IDX0));
 	printk("RX_DRX_IDX0    : 0x%08x\n", sysRegRead(RX_DRX_IDX0));
 
@@ -447,7 +441,7 @@ void dump_reg()
 #endif
 
 #if defined (CONFIG_RALINK_RT2883) || defined(CONFIG_RALINK_RT3883)
-	printk("GDMA_RX_FCCNT1(0x%08x)     : 0x%08x\n\n", GDMA_RX_FCCNT1, sysRegRead(GDMA_RX_FCCNT1));	
+	printk("GDMA_RX_FCCNT1(0x%08x)     : 0x%08x\n\n", GDMA_RX_FCCNT1, sysRegRead(GDMA_RX_FCCNT1));
 #endif
 }
 
@@ -521,6 +515,7 @@ int SkbFreeRead(void)
         }
 	return 0;
 }
+
 int TxRingRead(void)
 {
 	END_DEVICE *ei_local = netdev_priv(dev_raether);
@@ -562,13 +557,12 @@ int RxRingRead(void)
 }
 
 #if defined(CONFIG_RAETH_TSO)
-
 int NumOfTxdUpdate(int num_of_txd)
 {
 
 	txd_cnt[num_of_txd]++;
 
-	return 0;	
+	return 0;
 }
 
 int NumOfTxdRead(void)
@@ -626,7 +620,7 @@ int TsoLenUpdate(int tso_len)
 		tso_cnt[0]++;
 	}
 
-	return 0;	
+	return 0;
 }
 
 int TsoLenWrite(struct file *file, const char *buffer, unsigned long count, void *data)
@@ -648,7 +642,6 @@ int TsoLenRead(void)
 
 	return 0;
 }
-
 #endif
 
 #if defined(CONFIG_RAETH_LRO)
@@ -693,7 +686,7 @@ int LroStatsUpdate(struct net_lro_mgr *lro_mgr, bool all_flushed)
 	struct net_lro_desc *tmp;
 	int len_idx;
 	int i, j; 
-	
+
 	if (all_flushed) {
 		for (i=0; i< MAX_DESC; i++) {
 			tmp = & lro_mgr->lro_arr[i];
@@ -765,9 +758,7 @@ int LroStatsUpdate(struct net_lro_mgr *lro_mgr, bool all_flushed)
 	lro_nodesc = lro_mgr->stats.no_desc;
 
 	return 0;
-		
 }
-
 
 int LroStatsWrite(struct file *file, const char *buffer, unsigned long count, void *data)
 {
@@ -793,7 +784,7 @@ int LroStatsRead(void)
 	int tot_cnt=0;
 	int tot_aggr=0;
 	int ave_aggr=0;
-	
+
 	printk("LRO statistic dump:\n");
 	printk("Cnt:   Kernel | Driver\n");
 	for(i=0; i<=MAX_AGGR; i++) {
@@ -893,68 +884,68 @@ int EswCntRead(void)
 	printk("+-----------------------------------------------+\n");
 	printk("|		  <<GDMA>>		        |\n");
 #if defined (CONFIG_RALINK_MT7620)
-	printk("| GDMA1_TX_GPCNT  : %010u (Tx Good Pkts)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x1304));	
-	printk("| GDMA1_RX_GPCNT  : %010u (Rx Good Pkts)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x1324));	
+	printk("| GDMA1_TX_GPCNT  : %010u (Tx Good Pkts)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x1304));
+	printk("| GDMA1_RX_GPCNT  : %010u (Rx Good Pkts)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x1324));
 	printk("|						|\n");
-	printk("| GDMA1_TX_SKIPCNT: %010u (skip)		|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x1308));	
-	printk("| GDMA1_TX_COLCNT : %010u (collision)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x130c));	
-	printk("| GDMA1_RX_OERCNT : %010u (overflow)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x1328));	
-	printk("| GDMA1_RX_FERCNT : %010u (FCS error)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x132c));	
-	printk("| GDMA1_RX_SERCNT : %010u (too short)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x1330));	
-	printk("| GDMA1_RX_LERCNT : %010u (too long)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x1334));	
-	printk("| GDMA1_RX_CERCNT : %010u (l3/l4 checksum) |\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x1338));	
-	printk("| GDMA1_RX_FCCNT  : %010u (flow control)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x133c));	
+	printk("| GDMA1_TX_SKIPCNT: %010u (skip)		|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x1308));
+	printk("| GDMA1_TX_COLCNT : %010u (collision)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x130c));
+	printk("| GDMA1_RX_OERCNT : %010u (overflow)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x1328));
+	printk("| GDMA1_RX_FERCNT : %010u (FCS error)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x132c));
+	printk("| GDMA1_RX_SERCNT : %010u (too short)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x1330));
+	printk("| GDMA1_RX_LERCNT : %010u (too long)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x1334));
+	printk("| GDMA1_RX_CERCNT : %010u (l3/l4 checksum) |\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x1338));
+	printk("| GDMA1_RX_FCCNT  : %010u (flow control)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x133c));
 
 	printk("|						|\n");
-	printk("| GDMA2_TX_GPCNT  : %010u (Tx Good Pkts)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x1344));	
-	printk("| GDMA2_RX_GPCNT  : %010u (Rx Good Pkts)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x1364));	
+	printk("| GDMA2_TX_GPCNT  : %010u (Tx Good Pkts)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x1344));
+	printk("| GDMA2_RX_GPCNT  : %010u (Rx Good Pkts)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x1364));
 	printk("|						|\n");
-	printk("| GDMA2_TX_SKIPCNT: %010u (skip)		|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x1348));	
-	printk("| GDMA2_TX_COLCNT : %010u (collision)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x134c));	
-	printk("| GDMA2_RX_OERCNT : %010u (overflow)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x1368));	
-	printk("| GDMA2_RX_FERCNT : %010u (FCS error)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x136c));	
-	printk("| GDMA2_RX_SERCNT : %010u (too short)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x1370));	
-	printk("| GDMA2_RX_LERCNT : %010u (too long)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x1374));	
-	printk("| GDMA2_RX_CERCNT : %010u (l3/l4 checksum) |\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x1378));	
-	printk("| GDMA2_RX_FCCNT  : %010u (flow control)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x137c));	
+	printk("| GDMA2_TX_SKIPCNT: %010u (skip)		|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x1348));
+	printk("| GDMA2_TX_COLCNT : %010u (collision)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x134c));
+	printk("| GDMA2_RX_OERCNT : %010u (overflow)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x1368));
+	printk("| GDMA2_RX_FERCNT : %010u (FCS error)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x136c));
+	printk("| GDMA2_RX_SERCNT : %010u (too short)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x1370));
+	printk("| GDMA2_RX_LERCNT : %010u (too long)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x1374));
+	printk("| GDMA2_RX_CERCNT : %010u (l3/l4 checksum) |\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x1378));
+	printk("| GDMA2_RX_FCCNT  : %010u (flow control)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x137c));
 #elif defined (CONFIG_RALINK_MT7621)
-	printk("| GDMA1_RX_GBCNT  : %010u (Rx Good Bytes)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x2400));	
-	printk("| GDMA1_RX_GPCNT  : %010u (Rx Good Pkts)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x2408));	
-	printk("| GDMA1_RX_OERCNT : %010u (overflow error)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x2410));	
-	printk("| GDMA1_RX_FERCNT : %010u (FCS error)		|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x2414));	
-	printk("| GDMA1_RX_SERCNT : %010u (too short)		|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x2418));	
-	printk("| GDMA1_RX_LERCNT : %010u (too long)		|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x241C));	
-	printk("| GDMA1_RX_CERCNT : %010u (checksum error)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x2420));	
-	printk("| GDMA1_RX_FCCNT  : %010u (flow control)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x2424));	
-	printk("| GDMA1_TX_SKIPCNT: %010u (about count)		|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x2428));	
-	printk("| GDMA1_TX_COLCNT : %010u (collision count)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x242C));	
-	printk("| GDMA1_TX_GBCNT  : %010u (Tx Good Bytes)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x2430));	
-	printk("| GDMA1_TX_GPCNT  : %010u (Tx Good Pkts)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x2438));	
+	printk("| GDMA1_RX_GBCNT  : %010u (Rx Good Bytes)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x2400));
+	printk("| GDMA1_RX_GPCNT  : %010u (Rx Good Pkts)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x2408));
+	printk("| GDMA1_RX_OERCNT : %010u (overflow error)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x2410));
+	printk("| GDMA1_RX_FERCNT : %010u (FCS error)		|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x2414));
+	printk("| GDMA1_RX_SERCNT : %010u (too short)		|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x2418));
+	printk("| GDMA1_RX_LERCNT : %010u (too long)		|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x241C));
+	printk("| GDMA1_RX_CERCNT : %010u (checksum error)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x2420));
+	printk("| GDMA1_RX_FCCNT  : %010u (flow control)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x2424));
+	printk("| GDMA1_TX_SKIPCNT: %010u (about count)		|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x2428));
+	printk("| GDMA1_TX_COLCNT : %010u (collision count)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x242C));
+	printk("| GDMA1_TX_GBCNT  : %010u (Tx Good Bytes)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x2430));
+	printk("| GDMA1_TX_GPCNT  : %010u (Tx Good Pkts)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x2438));
 	printk("|						|\n");
-	printk("| GDMA2_RX_GBCNT  : %010u (Rx Good Bytes)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x2440));	
-	printk("| GDMA2_RX_GPCNT  : %010u (Rx Good Pkts)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x2448));	
-	printk("| GDMA2_RX_OERCNT : %010u (overflow error)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x2450));	
-	printk("| GDMA2_RX_FERCNT : %010u (FCS error)		|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x2454));	
-	printk("| GDMA2_RX_SERCNT : %010u (too short)		|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x2458));	
-	printk("| GDMA2_RX_LERCNT : %010u (too long)		|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x245C));	
-	printk("| GDMA2_RX_CERCNT : %010u (checksum error)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x2460));	
-	printk("| GDMA2_RX_FCCNT  : %010u (flow control)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x2464));	
-	printk("| GDMA2_TX_SKIPCNT: %010u (skip)		|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x2468));	
-	printk("| GDMA2_TX_COLCNT : %010u (collision)		|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x246C));	
-	printk("| GDMA2_TX_GBCNT  : %010u (Tx Good Bytes)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x2470));	
-	printk("| GDMA2_TX_GPCNT  : %010u (Tx Good Pkts)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x2478));	
+	printk("| GDMA2_RX_GBCNT  : %010u (Rx Good Bytes)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x2440));
+	printk("| GDMA2_RX_GPCNT  : %010u (Rx Good Pkts)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x2448));
+	printk("| GDMA2_RX_OERCNT : %010u (overflow error)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x2450));
+	printk("| GDMA2_RX_FERCNT : %010u (FCS error)		|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x2454));
+	printk("| GDMA2_RX_SERCNT : %010u (too short)		|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x2458));
+	printk("| GDMA2_RX_LERCNT : %010u (too long)		|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x245C));
+	printk("| GDMA2_RX_CERCNT : %010u (checksum error)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x2460));
+	printk("| GDMA2_RX_FCCNT  : %010u (flow control)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x2464));
+	printk("| GDMA2_TX_SKIPCNT: %010u (skip)		|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x2468));
+	printk("| GDMA2_TX_COLCNT : %010u (collision)		|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x246C));
+	printk("| GDMA2_TX_GBCNT  : %010u (Tx Good Bytes)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x2470));
+	printk("| GDMA2_TX_GPCNT  : %010u (Tx Good Pkts)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x2478));
 #else
-	printk("| GDMA_TX_GPCNT1  : %010u (Tx Good Pkts)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x704));	
-	printk("| GDMA_RX_GPCNT1  : %010u (Rx Good Pkts)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x724));	
+	printk("| GDMA_TX_GPCNT1  : %010u (Tx Good Pkts)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x704));
+	printk("| GDMA_RX_GPCNT1  : %010u (Rx Good Pkts)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x724));
 	printk("|						|\n");
-	printk("| GDMA_TX_SKIPCNT1: %010u (skip)		|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x708));	
-	printk("| GDMA_TX_COLCNT1 : %010u (collision)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x70c));	
-	printk("| GDMA_RX_OERCNT1 : %010u (overflow)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x728));	
-	printk("| GDMA_RX_FERCNT1 : %010u (FCS error)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x72c));	
-	printk("| GDMA_RX_SERCNT1 : %010u (too short)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x730));	
-	printk("| GDMA_RX_LERCNT1 : %010u (too long)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x734));	
-	printk("| GDMA_RX_CERCNT1 : %010u (l3/l4 checksum)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x738));	
-	printk("| GDMA_RX_FCCNT1  : %010u (flow control)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x73c));	
+	printk("| GDMA_TX_SKIPCNT1: %010u (skip)		|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x708));
+	printk("| GDMA_TX_COLCNT1 : %010u (collision)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x70c));
+	printk("| GDMA_RX_OERCNT1 : %010u (overflow)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x728));
+	printk("| GDMA_RX_FERCNT1 : %010u (FCS error)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x72c));
+	printk("| GDMA_RX_SERCNT1 : %010u (too short)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x730));
+	printk("| GDMA_RX_LERCNT1 : %010u (too long)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x734));
+	printk("| GDMA_RX_CERCNT1 : %010u (l3/l4 checksum)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x738));
+	printk("| GDMA_RX_FCCNT1  : %010u (flow control)	|\n", sysRegRead(RALINK_FRAME_ENGINE_BASE+0x73c));
 
 #endif
 	printk("+-----------------------------------------------+\n");
@@ -1054,8 +1045,8 @@ static int change_phyid(struct file *file, const char *buffer, unsigned long cou
 		return -EFAULT;
 
 	/* determine interface name */
-    strcpy(if_name, DEV_NAME);	/* "eth2" by default */
-    if(isalpha(buf[0]))
+        strcpy(if_name, DEV_NAME);	/* "eth2" by default */
+	if(isalpha(buf[0]))
 		sscanf(buf, "%s %d", if_name, &phy_id);
 	else
 		phy_id = simple_strtol(buf, 0, 10);
@@ -1110,7 +1101,7 @@ static int ScheduleWrite(struct file *file, const char *buffer, unsigned long co
 {
 	char buf[2];
 	int old;
-	
+
 	if (copy_from_user(buf, buffer, count))
 		return -EFAULT;
 	old = init_schedule;
@@ -1139,18 +1130,18 @@ int debug_proc_init(void)
 
     if ((procTxRing = create_proc_entry(PROCREG_TXRING, 0, procRegDir)))
 	 procTxRing->read_proc = (read_proc_t*)&TxRingRead;
-    
+
     if ((procRxRing = create_proc_entry(PROCREG_RXRING, 0, procRegDir)))
 	 procRxRing->read_proc = (read_proc_t*)&RxRingRead;
 
     if ((procSysCP0 = create_proc_entry(PROCREG_CP0, 0, procRegDir)))
 	 procSysCP0->read_proc = (read_proc_t*)&CP0RegRead;
-     
+
 #if defined(CONFIG_RAETH_TSO)
     if ((procNumOfTxd = create_proc_entry(PROCREG_NUM_OF_TXD, 0, procRegDir)))
 	 procNumOfTxd->read_proc = (read_proc_t*)&NumOfTxdRead;
 	 procNumOfTxd->write_proc = (write_proc_t*)&NumOfTxdWrite;
-    
+
     if ((procTsoLen = create_proc_entry(PROCREG_TSO_LEN, 0, procRegDir)))
 	 procTsoLen->read_proc = (read_proc_t*)&TsoLenRead;
 	 procTsoLen->write_proc = (write_proc_t*)&TsoLenWrite;
@@ -1174,7 +1165,7 @@ int debug_proc_init(void)
     else
     	procRaSnmp->proc_fops = &ra_snmp_seq_fops;
 #endif
-   
+
     if ((procEswCnt = create_proc_entry( PROCREG_ESW_CNT, 0, procRegDir))){
 	 procEswCnt->read_proc = (read_proc_t*)&EswCntRead;
     }
@@ -1198,20 +1189,20 @@ void debug_proc_exit(void)
 
     if (procGmac)
     	remove_proc_entry(PROCREG_GMAC, procRegDir);
-    
+
     if (procSkbFree)
     	remove_proc_entry(PROCREG_SKBFREE, procRegDir);
 
     if (procTxRing)
     	remove_proc_entry(PROCREG_TXRING, procRegDir);
-    
+
     if (procRxRing)
     	remove_proc_entry(PROCREG_RXRING, procRegDir);
-    
+
 #if defined(CONFIG_RAETH_TSO)
     if (procNumOfTxd)
     	remove_proc_entry(PROCREG_NUM_OF_TXD, procRegDir);
-    
+
     if (procTsoLen)
     	remove_proc_entry(PROCREG_TSO_LEN, procRegDir);
 #endif
@@ -1237,10 +1228,6 @@ void debug_proc_exit(void)
 
     if (procEswCnt)
     	remove_proc_entry(PROCREG_ESW_CNT, procRegDir);
-    
-    //if (procRegDir)
-   	//remove_proc_entry(PROCREG_DIR, 0);
-	
+
     printk(KERN_ALERT "proc exit\n");
 }
-EXPORT_SYMBOL(procRegDir);

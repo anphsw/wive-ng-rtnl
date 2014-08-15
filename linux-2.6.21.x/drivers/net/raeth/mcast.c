@@ -37,7 +37,7 @@ mcast_entry mcast_tbl[MAX_MCAST_ENTRY];
 atomic_t mcast_entry_num=ATOMIC_INIT(0);
 DECLARE_MUTEX(mtbl_lock);
 
-uint32_t inline is_multicast_pkt(uint8_t *mac)
+static uint32_t inline is_multicast_pkt(uint8_t *mac)
 {
     if(mac[0]==0x01 && mac[1]==0x00 && mac[2]==0x5E) {
 	return 1;
@@ -46,7 +46,7 @@ uint32_t inline is_multicast_pkt(uint8_t *mac)
     }
 }
 
-int32_t inline mcast_entry_get(uint16_t vlan_id, uint8_t *src_mac, uint8_t *dst_mac) 
+static int32_t inline mcast_entry_get(uint16_t vlan_id, uint8_t *src_mac, uint8_t *dst_mac) 
 {
     int i=0;
 
@@ -61,7 +61,7 @@ int32_t inline mcast_entry_get(uint16_t vlan_id, uint8_t *src_mac, uint8_t *dst_
     return -1;
 }
 
-int inline __add_mcast_entry(uint16_t vlan_id, uint8_t *src_mac, uint8_t *dst_mac)
+static int inline __add_mcast_entry(uint16_t vlan_id, uint8_t *src_mac, uint8_t *dst_mac)
 {
     int i=0;
 
@@ -79,7 +79,7 @@ int inline __add_mcast_entry(uint16_t vlan_id, uint8_t *src_mac, uint8_t *dst_ma
 	    mcast_tbl[i].valid=1;
 	    mcast_tbl[i].use_count=1;
 	    mcast_tbl[i].ageout=jiffies + AGEING_TIME * HZ;
-	   
+
 	    return 1;
 	}
     }
@@ -88,7 +88,7 @@ int inline __add_mcast_entry(uint16_t vlan_id, uint8_t *src_mac, uint8_t *dst_ma
     return 0;
 }
 
-int inline mcast_entry_ins(uint16_t vlan_id, uint8_t *src_mac, uint8_t *dst_mac) 
+static int inline mcast_entry_ins(uint16_t vlan_id, uint8_t *src_mac, uint8_t *dst_mac) 
 {
     int entry_num=0, ret=0;
 
@@ -104,7 +104,7 @@ int inline mcast_entry_ins(uint16_t vlan_id, uint8_t *src_mac, uint8_t *dst_mac)
 		__FUNCTION__, MAC_ARG(dst_mac));
 	ret = __add_mcast_entry(vlan_id, src_mac,dst_mac);
     }
-    
+
     up(&mtbl_lock);
     return ret;
 
@@ -116,7 +116,7 @@ int inline mcast_entry_ins(uint16_t vlan_id, uint8_t *src_mac, uint8_t *dst_mac)
  *	    0: entry found
  *	    1: entry not found
  */
-int inline mcast_entry_del(uint16_t vlan_id, uint8_t *src_mac, uint8_t *dst_mac) 
+static int inline mcast_entry_del(uint16_t vlan_id, uint8_t *src_mac, uint8_t *dst_mac) 
 {
     int entry_num;
 
@@ -187,4 +187,3 @@ int32_t mcast_tx(struct sk_buff *skb)
 
     return 1;
 }
-
