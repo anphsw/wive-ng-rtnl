@@ -2005,6 +2005,7 @@
 42) kernel: option driver add new modems support (from 3.16 kernel).<br>
 43) kernel: ppp: refresh Ralink hardware watchdog timer, prevent reboot at high cpu load.<br>
 44) kernel: packet: add needed_tailroom to packet_sendmsg_spkt.<br>
+45) kernel: net_sched: qdisc_alloc_handle() can be too slow.<br>
 <br>
 <br>
 <br>
