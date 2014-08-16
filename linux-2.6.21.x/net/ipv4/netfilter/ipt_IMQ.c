@@ -5,7 +5,13 @@
 #include <linux/skbuff.h>
 #include <linux/netfilter_ipv4/ip_tables.h>
 #include <linux/netfilter_ipv4/ipt_IMQ.h>
+#include <net/netfilter/nf_conntrack.h>
 #include <linux/imq.h>
+
+#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+#include "../../nat/hw_nat/ra_nat.h"
+#include "../../nat/hw_nat/frame_engine.h"
+#endif
 
 static unsigned int imq_target(struct sk_buff **pskb,
 			       const struct net_device *in,
@@ -18,6 +24,17 @@ static unsigned int imq_target(struct sk_buff **pskb,
 
 	(*pskb)->imq_flags = mr->todev | IMQ_F_ENQUEUE;
 
+#ifdef CONFIG_BCM_NAT
+	if(nf_conntrack_fastnat) {
+	    enum ip_conntrack_info ctinfo;
+	    struct nf_conn *ct = nf_ct_get(*pskb, &ctinfo);
+	    ct->fastnat |= NF_FAST_NAT_DENY;
+	}
+#endif
+#if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+	if (IS_SPACE_AVAILABLED(*pskb) && IS_MAGIC_TAG_VALID(*pskb))
+	    FOE_ALG(*pskb)=1;
+#endif
 	return IPT_CONTINUE;
 }
 
