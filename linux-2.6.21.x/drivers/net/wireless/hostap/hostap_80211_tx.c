@@ -17,6 +17,7 @@ void hostap_dump_tx_80211(const char *name, struct sk_buff *skb)
 {
 	struct ieee80211_hdr_4addr *hdr;
 	u16 fc;
+
 	DECLARE_MAC_BUF(mac);
 
 	hdr = (struct ieee80211_hdr_4addr *) skb->data;
@@ -309,6 +310,7 @@ static struct sk_buff * hostap_tx_encrypt(struct sk_buff *skb,
 	struct ieee80211_hdr_4addr *hdr;
 	u16 fc;
 	int hdr_len, res;
+	DECLARE_MAC_BUF(mac);
 
 	iface = netdev_priv(skb->dev);
 	local = iface->local;

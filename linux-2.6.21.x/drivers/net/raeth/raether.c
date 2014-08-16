@@ -163,7 +163,7 @@ int is_switch_175c=1;
 
 #if defined (CONFIG_RAETH_LRO)
 unsigned int lan_ip;
-struct lro_para_struct lro_para; 
+struct lro_para_struct lro_para;
 int lro_flush_needed;
 extern char const *nvram_get(int index, char *name);
 #endif
@@ -181,7 +181,7 @@ static int ei_open(struct net_device *dev);
 static int ei_close(struct net_device *dev);
 static int ra2882eth_init(void);
 static void ra2882eth_cleanup_module(void);
-inline void ei_xmit_housekeeping(unsigned long data);
+static void ei_xmit_housekeeping(unsigned long unused);
 
 #if 0
 void skb_dump(struct sk_buff* sk) {
@@ -2582,11 +2582,7 @@ static int __init rather_probe(struct net_device *dev)
 	return 0;
 }
 
-#ifdef WORKQUEUE_BH
-inline void ei_xmit_housekeeping_workq(struct work_struct *work)
-#else
-inline void ei_xmit_housekeeping(unsigned long unused)
-#endif // WORKQUEUE_BH //
+static void ei_xmit_housekeeping(unsigned long unused)
 {
     struct net_device *dev = dev_raether;
     END_DEVICE *ei_local = netdev_priv(dev);
@@ -3158,7 +3154,9 @@ static int ei_open(struct net_device *dev)
 #if defined (CONFIG_RT_3052_ESW)
 	*((volatile u32 *)(RALINK_INTCL_BASE + 0x34)) = (1<<17);
 	*((volatile u32 *)(ESW_IMR)) &= ~(ESW_INT_ALL);
+#ifdef CONFIG_RAETH_DHCP_TOUCH
 	INIT_WORK(&ei_local->kill_sig_wq, kill_sig_workq);
+#endif
 	err = request_irq(SURFBOARDINT_ESW, esw_interrupt, IRQF_DISABLED, "Ralink_ESW", dev);
 
 	if (err)

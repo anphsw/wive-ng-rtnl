@@ -1005,7 +1005,7 @@ unsigned long do_mmap_pgoff(struct file * file, unsigned long addr,
 	error = security_file_mmap(file, reqprot, prot, flags);
 	if (error)
 		return error;
-		
+
 	/* Clear old maps */
 	error = -ENOMEM;
 munmap_back:
@@ -1084,8 +1084,10 @@ munmap_back:
 		if (error)
 			goto unmap_and_free_vma;
 	} else if (vm_flags & VM_SHARED) {
+#ifdef CONFIG_SHMEM
 		error = shmem_zero_setup(vma);
 		if (error)
+#endif
 			goto free_vma;
 	}
 

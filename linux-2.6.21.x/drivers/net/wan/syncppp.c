@@ -50,6 +50,7 @@
 #include <linux/pkt_sched.h>
 #include <linux/spinlock.h>
 #include <linux/rcupdate.h>
+#include <linux/ppp_defs.h>
 
 #include <net/syncppp.h>
 
@@ -57,15 +58,6 @@
 #include <asm/uaccess.h>
 
 #define MAXALIVECNT     6               /* max. alive packets */
-
-#define PPP_ALLSTATIONS 0xff            /* All-Stations broadcast address */
-#define PPP_UI          0x03            /* Unnumbered Information */
-#define PPP_IP          0x0021          /* Internet Protocol */
-#define PPP_ISO         0x0023          /* ISO OSI Protocol */
-#define PPP_XNS         0x0025          /* Xerox NS Protocol */
-#define PPP_IPX         0x002b          /* Novell IPX Protocol */
-#define PPP_LCP         0xc021          /* Link Control Protocol */
-#define PPP_IPCP        0x8021          /* Internet Protocol Control Protocol */
 
 #define LCP_CONF_REQ    1               /* PPP LCP configure request */
 #define LCP_CONF_ACK    2               /* PPP LCP configure acknowledge */

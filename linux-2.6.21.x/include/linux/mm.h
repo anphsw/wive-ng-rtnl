@@ -736,7 +736,9 @@ static inline struct mempolicy *shmem_get_policy(struct vm_area_struct *vma,
 #endif
 struct file *shmem_file_setup(char *name, loff_t size, unsigned long flags);
 
+#ifdef CONFIG_SHMEM
 int shmem_zero_setup(struct vm_area_struct *);
+#endif
 
 #ifndef CONFIG_MMU
 extern unsigned long shmem_get_unmapped_area(struct file *file,

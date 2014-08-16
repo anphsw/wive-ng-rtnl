@@ -775,7 +775,7 @@ static inline int read_one_chip(struct map_info *map, struct flchip *chip,
 	unsigned long timeo = jiffies + HZ;
 
 retry:
-	spin_lock_bh(chip->mutex);
+	spin_lock_bh(&chip->mutex);
 
 	if (chip->state != FL_READY){
 		printk(KERN_INFO "%s: waiting for chip to read, state = %d\n",
@@ -783,7 +783,7 @@ retry:
 		set_current_state(TASK_UNINTERRUPTIBLE);
 		add_wait_queue(&chip->wq, &wait);
 
-		spin_unlock_bh(chip->mutex);
+		spin_unlock_bh(&chip->mutex);
 
 		schedule();
 		remove_wait_queue(&chip->wq, &wait);
@@ -804,7 +804,7 @@ retry:
 	map_copy_from(map, buf, adr, len);
 
 	wake_up(&chip->wq);
-	spin_unlock_bh(chip->mutex);
+	spin_unlock_bh(&chip->mutex);
 
 	return 0;
 }
@@ -875,7 +875,7 @@ static int write_one_word(struct map_info *map, struct flchip *chip,
 	int times_left;
 
 retry:
-	spin_lock_bh(chip->mutex);
+	spin_lock_bh(&chip->mutex);
 
 	if (chip->state != FL_READY){
 		printk("%s: waiting for chip to write, state = %d\n",
@@ -883,7 +883,7 @@ retry:
 		set_current_state(TASK_UNINTERRUPTIBLE);
 		add_wait_queue(&chip->wq, &wait);
 
-		spin_unlock_bh(chip->mutex);
+		spin_unlock_bh(&chip->mutex);
 
 		schedule();
 		remove_wait_queue(&chip->wq, &wait);
@@ -906,9 +906,9 @@ retry:
 	times_left = 500000;
 	while (times_left-- && flash_is_busy(map, adr, private->interleave)) {
 		if (need_resched()) {
-			spin_unlock_bh(chip->mutex);
+			spin_unlock_bh(&chip->mutex);
 			schedule();
-			spin_lock_bh(chip->mutex);
+			spin_lock_bh(&chip->mutex);
 		}
 	}
 
@@ -929,7 +929,7 @@ retry:
 	DISABLE_VPP(map);
 	chip->state = FL_READY;
 	wake_up(&chip->wq);
-	spin_unlock_bh(chip->mutex);
+	spin_unlock_bh(&chip->mutex);
 
 	return ret;
 }
@@ -1073,13 +1073,13 @@ static inline int erase_one_block(struct map_info *map, struct flchip *chip,
 	DECLARE_WAITQUEUE(wait, current);
 
 retry:
-	spin_lock_bh(chip->mutex);
+	spin_lock_bh(&chip->mutex);
 
 	if (chip->state != FL_READY){
 		set_current_state(TASK_UNINTERRUPTIBLE);
 		add_wait_queue(&chip->wq, &wait);
 
-		spin_unlock_bh(chip->mutex);
+		spin_unlock_bh(&chip->mutex);
 
 		schedule();
 		remove_wait_queue(&chip->wq, &wait);
@@ -1102,9 +1102,9 @@ retry:
 
 	timeo = jiffies + (HZ * 20);
 
-	spin_unlock_bh(chip->mutex);
+	spin_unlock_bh(&chip->mutex);
 	msleep(1000);
-	spin_lock_bh(chip->mutex);
+	spin_lock_bh(&chip->mutex);
 
 	while (flash_is_busy(map, adr, private->interleave)) {
 
@@ -1113,7 +1113,7 @@ retry:
 			set_current_state(TASK_UNINTERRUPTIBLE);
 			add_wait_queue(&chip->wq, &wait);
 
-			spin_unlock_bh(chip->mutex);
+			spin_unlock_bh(&chip->mutex);
 			printk(KERN_INFO "%s: erase suspended. Sleeping\n",
 			       map->name);
 			schedule();
@@ -1124,14 +1124,14 @@ retry:
 			}
 
 			timeo = jiffies + (HZ*2); /* FIXME */
-			spin_lock_bh(chip->mutex);
+			spin_lock_bh(&chip->mutex);
 			continue;
 		}
 
 		/* OK Still waiting */
 		if (time_after(jiffies, timeo)) {
 			chip->state = FL_READY;
-			spin_unlock_bh(chip->mutex);
+			spin_unlock_bh(&chip->mutex);
 			printk(KERN_WARNING "%s: waiting for erase to complete "
 			       "timed out.\n", map->name);
 			DISABLE_VPP(map);
@@ -1140,14 +1140,14 @@ retry:
 		}
 
 		/* Latency issues. Drop the lock, wait a while and retry */
-		spin_unlock_bh(chip->mutex);
+		spin_unlock_bh(&chip->mutex);
 
 		if (need_resched())
 			schedule();
 		else
 			udelay(1);
 
-		spin_lock_bh(chip->mutex);
+		spin_lock_bh(&chip->mutex);
 	}
 
 	/* Verify every single word */
@@ -1164,7 +1164,7 @@ retry:
 		}
 		if (error) {
 			chip->state = FL_READY;
-			spin_unlock_bh(chip->mutex);
+			spin_unlock_bh(&chip->mutex);
 			printk(KERN_WARNING
 			       "%s: verify error at 0x%x, size %ld.\n",
 			       map->name, address, size);
@@ -1177,7 +1177,7 @@ retry:
 	DISABLE_VPP(map);
 	chip->state = FL_READY;
 	wake_up(&chip->wq);
-	spin_unlock_bh(chip->mutex);
+	spin_unlock_bh(&chip->mutex);
 
 	return 0;
 }
@@ -1308,7 +1308,7 @@ static void amd_flash_sync(struct mtd_info *mtd)
 		chip = &private->chips[i];
 
 	retry:
-		spin_lock_bh(chip->mutex);
+		spin_lock_bh(&chip->mutex);
 
 		switch(chip->state) {
 		case FL_READY:
@@ -1322,14 +1322,14 @@ static void amd_flash_sync(struct mtd_info *mtd)
 			 * with the chip now anyway.
 			 */
 		case FL_SYNCING:
-			spin_unlock_bh(chip->mutex);
+			spin_unlock_bh(&chip->mutex);
 			break;
 
 		default:
 			/* Not an idle state */
 			add_wait_queue(&chip->wq, &wait);
 
-			spin_unlock_bh(chip->mutex);
+			spin_unlock_bh(&chip->mutex);
 
 			schedule();
 
@@ -1343,13 +1343,13 @@ static void amd_flash_sync(struct mtd_info *mtd)
 	for (i--; i >= 0; i--) {
 		chip = &private->chips[i];
 
-		spin_lock_bh(chip->mutex);
+		spin_lock_bh(&chip->mutex);
 
 		if (chip->state == FL_SYNCING) {
 			chip->state = chip->oldstate;
 			wake_up(&chip->wq);
 		}
-		spin_unlock_bh(chip->mutex);
+		spin_unlock_bh(&chip->mutex);
 	}
 }
 

@@ -24,6 +24,10 @@
 #include "hostap.h"
 #include "hostap_ap.h"
 
+#define MAC2STR(a) ((a)[0] & 0xff), ((a)[1] & 0xff), ((a)[2] & 0xff), \
+		   ((a)[3] & 0xff), ((a)[4] & 0xff), ((a)[5] & 0xff)
+#define MACSTR "%02x:%02x:%02x:%02x:%02x:%02x"
+
 static int other_ap_policy[MAX_PARM_DEVICES] = { AP_OTHER_AP_SKIP_ALL,
 						 DEF_INTS };
 module_param_array(other_ap_policy, int, NULL, 0444);
@@ -366,7 +370,7 @@ static int ap_control_proc_read(char *page, char **start, off_t off,
 		}
 
 		entry = list_entry(ptr, struct mac_entry, list);
-		p += sprintf(p, MACSTR "\n", MAC2STR(entry->addr));
+		p += sprintf(p, MAC2STR "\n", MAC2STR(entry->addr));
 	}
 	spin_unlock_bh(&ap->mac_restrictions.lock);
 

@@ -2,6 +2,7 @@
 #define HOSTAP_80211_H
 
 #include <linux/types.h>
+#include <linux/if_ether.h>
 #include <net/ieee80211_crypt.h>
 
 struct hostap_ieee80211_mgmt {
@@ -93,5 +94,4 @@ void hostap_dump_tx_80211(const char *name, struct sk_buff *skb);
 int hostap_data_start_xmit(struct sk_buff *skb, struct net_device *dev);
 int hostap_mgmt_start_xmit(struct sk_buff *skb, struct net_device *dev);
 int hostap_master_start_xmit(struct sk_buff *skb, struct net_device *dev);
-
 #endif /* HOSTAP_80211_H */

@@ -91,5 +91,4 @@ extern const struct ethtool_ops prism2_ethtool_ops;
 
 int hostap_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd);
 
-
 #endif /* HOSTAP_H */
