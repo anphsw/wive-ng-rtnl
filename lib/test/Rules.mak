@@ -58,7 +58,7 @@ endif
 
 # Select the compiler needed to build binaries for your development system
 HOSTCC     = gcc
-HOSTCFLAGS = -Os -Wall
+HOSTCFLAGS = -O2 -Wall
 
 
 #--------------------------------------------------------
@@ -74,7 +74,15 @@ check_gcc=$(shell if $(CC) $(1) -S -o /dev/null -xc /dev/null > /dev/null 2>&1; 
 ifeq ($(DODEBUG),y)
 OPTIMIZATION    = -O0
 else
-OPTIMIZATION   += $(call check_gcc,-Os,-Os)
+OPTIMIZATION:=
+# Use '-Os' optimization if available, else use -O2, allow Config to override
+$(eval $(call check-gcc-var,-Os))
+ifneq ($(CFLAG_-Os),)
+OPTIMIZATION += $(CFLAG_-Os)
+else
+$(eval $(call check-gcc-var,-O2))
+OPTIMIZATION += $(CFLAG_-O2)
+endif
 endif
 
 XWARNINGS       = $(subst ",, $(strip $(WARNINGS))) -Wstrict-prototypes
