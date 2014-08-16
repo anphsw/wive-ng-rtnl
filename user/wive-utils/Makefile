@@ -1,7 +1,7 @@
 #based utilites for all routers
 
 ####################################
-#UTILSLIST = ader cpu mcprobe ipget#
+#UTILSLIST = cpu mcprobe ipget#
 ####################################
 UTILSLIST = cpu mcprobe ipget
 
