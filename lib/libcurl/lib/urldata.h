@@ -296,10 +296,10 @@ struct ssl_connect_data {
   ssl_connect_state connecting_state;
 #endif /* USE_SSLEAY */
 #ifdef USE_GNUTLS
-  gnutls_session session;
-  gnutls_certificate_credentials cred;
+  gnutls_session_t session;
+  gnutls_certificate_credentials_t cred;
 #ifdef USE_TLS_SRP
-  gnutls_srp_client_credentials srp_client_cred;
+  gnutls_srp_client_credentials_t srp_client_cred;
 #endif
   ssl_connect_state connecting_state;
 #endif /* USE_GNUTLS */
@@ -475,6 +475,7 @@ struct negotiatedata {
  * Boolean values that concerns this connection.
  */
 struct ConnectBits {
+  /* always modify bits.close with the connclose() and connkeep() macros! */
   bool close; /* if set, we close the connection after this request */
   bool reuse; /* if set, this is a re-used connection */
   bool proxy; /* if set, this transfer is done through a proxy - any type */

@@ -311,6 +311,8 @@ if (!$USER) {
 
 # enable memory debugging if curl is compiled with it
 $ENV{'CURL_MEMDEBUG'} = $memdump;
+$ENV{'CURL_ENTROPY'}="12345678";
+$ENV{'CURL_FORCETIME'}=1; # for debug NTLM magic
 $ENV{'HOME'}=$pwd;
 
 sub catch_zap {
@@ -1035,7 +1037,7 @@ sub verifyhttptls {
         close(FILE);
     }
 
-    if($data && ($data =~ /GNUTLS/) && open(FILE, "<$pidfile")) {
+    if($data && ($data =~ /(GNUTLS|GnuTLS)/) && open(FILE, "<$pidfile")) {
         $pid=0+<FILE>;
         close(FILE);
         if($pid > 0) {
@@ -1450,6 +1452,7 @@ sub runhttptlsserver {
     $flags .= "--http ";
     $flags .= "--debug 1 " if($debugprotocol);
     $flags .= "--port $port ";
+    $flags .= "--priority NORMAL:+SRP ";
     $flags .= "--srppasswd $srcdir/certs/srp-verifier-db ";
     $flags .= "--srppasswdconf $srcdir/certs/srp-verifier-conf";
 

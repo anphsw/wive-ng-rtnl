@@ -103,8 +103,8 @@ any response data to the terminal.
 If you prefer a progress "bar" instead of the regular meter, \fI-#\fP is your
 friend.
 .SH OPTIONS
-Options start with one or two dashes. Many of the options require an addition
-value next to it.
+Options start with one or two dashes. Many of the options require an
+additional value next to them.
 
 The short "single-dash" form of the options, -d for example, may be used with
 or without a space between it and its value, although a space is a recommended
@@ -1628,6 +1628,10 @@ Specify the user name and password to use for server authentication. Overrides
 \fI-n, --netrc\fP and \fI--netrc-optional\fP.
 
 If you simply specify the user name, curl will prompt for a password.
+
+The user name and passwords are split up on the first colon, which makes it
+impossible to use a colon in the user name with this option. The password can,
+still.
 
 If you use an SSPI-enabled curl binary and perform NTLM authentication, you
 can force curl to select the user name and password from your environment by

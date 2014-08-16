@@ -76,6 +76,7 @@
 #include "bundles.h"
 #include "pipeline.h"
 #include "http2.h"
+#include "connect.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -449,7 +450,7 @@ static CURLcode http_perhapsrewind(struct connectdata *conn)
 
     /* This is not NTLM or many bytes left to send: close
      */
-    conn->bits.close = TRUE;
+    connclose(conn, "Mid-auth HTTP and much data left to send");
     data->req.size = 0; /* don't download any more than 0 bytes */
 
     /* There still is data left to send, but this connection is marked for
@@ -1337,7 +1338,7 @@ CURLcode Curl_http_connect(struct connectdata *conn, bool *done)
 
   /* We default to persistent connections. We set this already in this connect
      function to make the re-use checks properly be able to check this bit. */
-  conn->bits.close = FALSE;
+  connkeep(conn, "HTTP default");
 
   /* the CONNECT procedure might not have been completed */
   result = Curl_proxy_connect(conn);
@@ -1382,8 +1383,8 @@ static CURLcode https_connecting(struct connectdata *conn, bool *done)
   /* perform SSL initialization for this socket */
   result = Curl_ssl_connect_nonblocking(conn, FIRSTSOCKET, done);
   if(result)
-    conn->bits.close = TRUE; /* a failed connection is marked for closure
-                                to prevent (bad) re-use or similar */
+    connclose(conn, "Failed HTTPS connection");
+
   return result;
 }
 #endif
@@ -1748,8 +1749,15 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
                                   http2 */
     switch (conn->negnpn) {
     case NPN_HTTP2:
-      Curl_http2_init(conn);
-      Curl_http2_setup(conn);
+      result = Curl_http2_init(conn);
+      if(result)
+        return result;
+
+      result = Curl_http2_setup(conn);
+      if(result)
+        return result;
+
+      /* TODO: add error checking here */
       Curl_http2_switched(conn);
       break;
     case NPN_HTTP1_1:
@@ -1760,9 +1768,10 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       break;
     }
   }
-  else
+  else {
     /* prepare for a http2 request */
     Curl_http2_setup(conn);
+  }
 
   http = data->req.protop;
 
@@ -2276,7 +2285,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 
   if(!(conn->handler->flags&PROTOPT_SSL) &&
      (data->set.httpversion == CURL_HTTP_VERSION_2_0)) {
-    /* append HTTP2 updrade magic stuff to the HTTP request if it isn't done
+    /* append HTTP2 upgrade magic stuff to the HTTP request if it isn't done
        over SSL */
     result = Curl_http2_request_upgrade(req_buffer, conn);
     if(result)
@@ -2995,6 +3004,7 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
             k->upgr101 = UPGR101_RECEIVED;
 
             /* switch to http2 now */
+            /* TODO: add error checking */
             Curl_http2_switched(conn);
           }
           break;
@@ -3016,7 +3026,7 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
              signal the end of the document. */
           infof(data, "no chunk, no close, no size. Assume close to "
                 "signal end\n");
-          conn->bits.close = TRUE;
+          connclose(conn, "HTTP: No end-of-message indicator");
         }
       }
 
@@ -3085,7 +3095,7 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
                */
               if(!k->upload_done) {
                 infof(data, "HTTP error before end of send, stop sending\n");
-                conn->bits.close = TRUE; /* close after this */
+                connclose(conn, "Stop sending data before everything sent");
                 k->upload_done = TRUE;
                 k->keepon &= ~KEEP_SEND; /* don't send */
                 if(data->state.expect100header)
@@ -3280,7 +3290,7 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
              we get one of those fancy headers that tell us the
              server keeps it open for us! */
           infof(data, "HTTP 1.0, assume close after body\n");
-          conn->bits.close = TRUE;
+          connclose(conn, "HTTP/1.0 close after body");
         }
         else if(conn->httpversion >= 11 &&
                 !conn->bits.close) {
@@ -3355,7 +3365,7 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
         /* Negative Content-Length is really odd, and we know it
            happens for example when older Apache servers send large
            files */
-        conn->bits.close = TRUE;
+        connclose(conn, "negative content-length");
         infof(data, "Negative content-length: %" CURL_FORMAT_CURL_OFF_T
               ", closing after transfer\n", contentlength);
       }
@@ -3393,7 +3403,7 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
        * connection will be kept alive for our pleasure.
        * Default action for 1.0 is to close.
        */
-      conn->bits.close = FALSE; /* don't close when done */
+      connkeep(conn, "Proxy-Connection keep-alive"); /* don't close */
       infof(data, "HTTP/1.0 proxy connection set to keep alive!\n");
     }
     else if((conn->httpversion == 11) &&
@@ -3404,7 +3414,7 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
        * We get a HTTP/1.1 response from a proxy and it says it'll
        * close down after this transfer.
        */
-      conn->bits.close = TRUE; /* close when done */
+      connclose(conn, "Proxy-Connection: asked to close after done");
       infof(data, "HTTP/1.1 proxy connection set close!\n");
     }
     else if((conn->httpversion == 10) &&
@@ -3415,7 +3425,7 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
        * pleasure.  Default action for 1.0 is to close.
        *
        * [RFC2068, section 19.7.1] */
-      conn->bits.close = FALSE; /* don't close when done */
+      connkeep(conn, "Connection keep-alive");
       infof(data, "HTTP/1.0 connection set to keep alive!\n");
     }
     else if(Curl_compareheader(k->p, "Connection:", "close")) {
@@ -3425,7 +3435,7 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
        * the connection will close when this request has been
        * served.
        */
-      conn->bits.close = TRUE; /* close when done */
+      connclose(conn, "Connection: close used");
     }
     else if(checkprefix("Transfer-Encoding:", k->p)) {
       /* One or more encodings. We check for chunked and/or a compression

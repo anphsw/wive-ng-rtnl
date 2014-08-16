@@ -77,6 +77,7 @@ PRFileDesc *PR_ImportTCPSocket(PRInt32 osfd);
 
 PRLock * nss_initlock = NULL;
 PRLock * nss_crllock = NULL;
+struct curl_llist *nss_crl_list = NULL;
 NSSInitContext * nss_context = NULL;
 
 volatile int initialized = 0;
@@ -393,6 +394,14 @@ static void nss_destroy_object(void *user, void *ptr)
   PK11_DestroyGenericObject(obj);
 }
 
+/* same as nss_destroy_object() but for CRL items */
+static void nss_destroy_crl_item(void *user, void *ptr)
+{
+  SECItem *crl_der = (SECItem *)ptr;
+  (void) user;
+  SECITEM_FreeItem(crl_der, PR_TRUE);
+}
+
 static CURLcode nss_load_cert(struct ssl_connect_data *ssl,
                               const char *filename, PRBool cacert)
 {
@@ -431,43 +440,50 @@ static CURLcode nss_load_cert(struct ssl_connect_data *ssl,
 }
 
 /* add given CRL to cache if it is not already there */
-static SECStatus nss_cache_crl(SECItem *crlDER)
+static CURLcode nss_cache_crl(SECItem *crl_der)
 {
   CERTCertDBHandle *db = CERT_GetDefaultCertDB();
-  CERTSignedCrl *crl = SEC_FindCrlByDERCert(db, crlDER, 0);
+  CERTSignedCrl *crl = SEC_FindCrlByDERCert(db, crl_der, 0);
   if(crl) {
     /* CRL already cached */
     SEC_DestroyCrl(crl);
-    SECITEM_FreeItem(crlDER, PR_FALSE);
-    return SECSuccess;
+    SECITEM_FreeItem(crl_der, PR_TRUE);
+    return CURLE_SSL_CRL_BADFILE;
   }
 
-  /* acquire lock before call of CERT_CacheCRL() */
+  /* acquire lock before call of CERT_CacheCRL() and accessing nss_crl_list */
   PR_Lock(nss_crllock);
-  if(SECSuccess != CERT_CacheCRL(db, crlDER)) {
+
+  /* store the CRL item so that we can free it in Curl_nss_cleanup() */
+  if(!Curl_llist_insert_next(nss_crl_list, nss_crl_list->tail, crl_der)) {
+    SECITEM_FreeItem(crl_der, PR_TRUE);
+    PR_Unlock(nss_crllock);
+    return CURLE_OUT_OF_MEMORY;
+  }
+
+  if(SECSuccess != CERT_CacheCRL(db, crl_der)) {
     /* unable to cache CRL */
     PR_Unlock(nss_crllock);
-    SECITEM_FreeItem(crlDER, PR_FALSE);
-    return SECFailure;
+    return CURLE_SSL_CRL_BADFILE;
   }
 
   /* we need to clear session cache, so that the CRL could take effect */
   SSL_ClearSessionCache();
   PR_Unlock(nss_crllock);
-  return SECSuccess;
+  return CURLE_OK;
 }
 
-static SECStatus nss_load_crl(const char* crlfilename)
+static CURLcode nss_load_crl(const char* crlfilename)
 {
   PRFileDesc *infile;
   PRFileInfo  info;
   SECItem filedata = { 0, NULL, 0 };
-  SECItem crlDER = { 0, NULL, 0 };
+  SECItem *crl_der = NULL;
   char *body;
 
   infile = PR_Open(crlfilename, PR_RDONLY, 0);
   if(!infile)
-    return SECFailure;
+    return CURLE_SSL_CRL_BADFILE;
 
   if(PR_SUCCESS != PR_GetOpenFileInfo(infile, &info))
     goto fail;
@@ -476,6 +492,10 @@ static SECStatus nss_load_crl(const char* crlfilename)
     goto fail;
 
   if(info.size != PR_Read(infile, filedata.data, info.size))
+    goto fail;
+
+  crl_der = SECITEM_AllocItem(NULL, NULL, 0U);
+  if(!crl_der)
     goto fail;
 
   /* place a trailing zero right after the visible data */
@@ -498,22 +518,23 @@ static SECStatus nss_load_crl(const char* crlfilename)
 
     /* retrieve DER from ASCII */
     *trailer = '\0';
-    if(ATOB_ConvertAsciiToItem(&crlDER, begin))
+    if(ATOB_ConvertAsciiToItem(crl_der, begin))
       goto fail;
 
     SECITEM_FreeItem(&filedata, PR_FALSE);
   }
   else
     /* assume DER */
-    crlDER = filedata;
+    *crl_der = filedata;
 
   PR_Close(infile);
-  return nss_cache_crl(&crlDER);
+  return nss_cache_crl(crl_der);
 
 fail:
   PR_Close(infile);
+  SECITEM_FreeItem(crl_der, PR_TRUE);
   SECITEM_FreeItem(&filedata, PR_FALSE);
-  return SECFailure;
+  return CURLE_SSL_CRL_BADFILE;
 }
 
 static CURLcode nss_load_key(struct connectdata *conn, int sockindex,
@@ -1045,6 +1066,11 @@ static CURLcode nss_init(struct SessionHandle *data)
   if(initialized)
     return CURLE_OK;
 
+  /* list of all CRL items we need to destroy in Curl_nss_cleanup() */
+  nss_crl_list = Curl_llist_alloc(nss_destroy_crl_item);
+  if(!nss_crl_list)
+    return CURLE_OUT_OF_MEMORY;
+
   /* First we check if $SSL_DIR points to a valid dir */
   cert_dir = getenv("SSL_DIR");
   if(cert_dir) {
@@ -1144,6 +1170,11 @@ void Curl_nss_cleanup(void)
     NSS_ShutdownContext(nss_context);
     nss_context = NULL;
   }
+
+  /* destroy all CRL items */
+  Curl_llist_destroy(nss_crl_list, NULL);
+  nss_crl_list = NULL;
+
   PR_Unlock(nss_initlock);
 
   PR_DestroyLock(nss_initlock);
@@ -1315,6 +1346,7 @@ static CURLcode nss_init_sslver(SSLVersionRange *sslver,
   switch (data->set.ssl.version) {
   default:
   case CURL_SSLVERSION_DEFAULT:
+    sslver->min = SSL_LIBRARY_VERSION_3_0;
     if(data->state.ssl_connect_retry) {
       infof(data, "TLS disabled due to previous handshake failure\n");
       sslver->max = SSL_LIBRARY_VERSION_3_0;
@@ -1323,7 +1355,6 @@ static CURLcode nss_init_sslver(SSLVersionRange *sslver,
   /* intentional fall-through to default to highest TLS version if possible */
 
   case CURL_SSLVERSION_TLSv1:
-    sslver->min = SSL_LIBRARY_VERSION_TLS_1_0;
 #ifdef SSL_LIBRARY_VERSION_TLS_1_2
     sslver->max = SSL_LIBRARY_VERSION_TLS_1_2;
 #elif defined SSL_LIBRARY_VERSION_TLS_1_1
@@ -1396,9 +1427,10 @@ static CURLcode nss_fail_connect(struct ssl_connect_data *connssl,
   Curl_llist_destroy(connssl->obj_list, NULL);
   connssl->obj_list = NULL;
 
-  if((SSL_VersionRangeGet(connssl->handle, &sslver) == SECSuccess)
+  if(connssl->handle
+      && (SSL_VersionRangeGet(connssl->handle, &sslver) == SECSuccess)
       && (sslver.min == SSL_LIBRARY_VERSION_3_0)
-      && (sslver.max == SSL_LIBRARY_VERSION_TLS_1_0)
+      && (sslver.max != SSL_LIBRARY_VERSION_3_0)
       && isTLSIntoleranceError(err)) {
     /* schedule reconnect through Curl_retry_request() */
     data->state.ssl_connect_retry = TRUE;
@@ -1436,7 +1468,7 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
   CURLcode curlerr;
 
   SSLVersionRange sslver = {
-    SSL_LIBRARY_VERSION_3_0,      /* min */
+    SSL_LIBRARY_VERSION_TLS_1_0,  /* min */
     SSL_LIBRARY_VERSION_TLS_1_0   /* max */
   };
 
@@ -1563,13 +1595,12 @@ static CURLcode nss_setup_connect(struct connectdata *conn, int sockindex)
   }
 
   if(data->set.ssl.CRLfile) {
-    if(SECSuccess != nss_load_crl(data->set.ssl.CRLfile)) {
-      curlerr = CURLE_SSL_CRL_BADFILE;
+    const CURLcode rv = nss_load_crl(data->set.ssl.CRLfile);
+    if(CURLE_OK != rv) {
+      curlerr = rv;
       goto error;
     }
-    infof(data,
-          "  CRLfile: %s\n",
-          data->set.ssl.CRLfile ? data->set.ssl.CRLfile : "none");
+    infof(data, "  CRLfile: %s\n", data->set.ssl.CRLfile);
   }
 
   if(data->set.str[STRING_CERT]) {

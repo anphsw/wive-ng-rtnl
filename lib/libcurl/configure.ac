@@ -1209,7 +1209,9 @@ if test x"$want_gss" = xyes; then
   AC_MSG_RESULT(yes)
 
   if test -z "$GSSAPI_INCS"; then
-     if test -f "$GSSAPI_ROOT/bin/krb5-config"; then
+     if test -n "$host_alias" -a -f "$GSSAPI_ROOT/bin/$host_alias-krb5-config"; then
+        GSSAPI_INCS=`$GSSAPI_ROOT/bin/$host_alias-krb5-config --cflags gssapi`
+     elif test -f "$GSSAPI_ROOT/bin/krb5-config"; then
         GSSAPI_INCS=`$GSSAPI_ROOT/bin/krb5-config --cflags gssapi`
      elif test "$GSSAPI_ROOT" != "yes"; then
         GSSAPI_INCS="-I$GSSAPI_ROOT/include"
@@ -1301,7 +1303,12 @@ if test x"$want_gss" = xyes; then
         LIBS="-lgss $LIBS"
         ;;
      *)
-        if test -f "$GSSAPI_ROOT/bin/krb5-config"; then
+        if test -n "$host_alias" -a -f "$GSSAPI_ROOT/bin/$host_alias-krb5-config"; then
+           dnl krb5-config doesn't have --libs-only-L or similar, put everything
+           dnl into LIBS
+           gss_libs=`$GSSAPI_ROOT/bin/$host_alias-krb5-config --libs gssapi`
+           LIBS="$gss_libs $LIBS"
+        elif test -f "$GSSAPI_ROOT/bin/krb5-config"; then
            dnl krb5-config doesn't have --libs-only-L or similar, put everything
            dnl into LIBS
            gss_libs=`$GSSAPI_ROOT/bin/krb5-config --libs gssapi`
@@ -2732,8 +2739,7 @@ dnl **********************************************************************
 dnl Check for nghttp2
 dnl **********************************************************************
 
-AC_MSG_CHECKING([whether to build with nghttp2])
-OPT_H2="no"
+OPT_H2="yes"
 AC_ARG_WITH(nghttp2,
 AC_HELP_STRING([--with-nghttp2=PATH],[Enable nghttp2 usage])
 AC_HELP_STRING([--without-nghttp2],[Disable nghttp2 usage]),
@@ -2742,24 +2748,16 @@ case "$OPT_H2" in
   no)
     dnl --without-nghttp2 option used
     want_h2="no"
-    AC_MSG_RESULT([no])
-    ;;
-  default)
-    dnl configure option not specified
-    want_h2="no"
-    AC_MSG_RESULT([no])
     ;;
   yes)
     dnl --with-nghttp2 option used without path
-    want_h2="yes"
+    want_h2="default"
     want_h2_path=""
-    AC_MSG_RESULT([yes])
     ;;
   *)
     dnl --with-nghttp2 option used with path
     want_h2="yes"
     want_h2_path="$withval/lib/pkgconfig"
-    AC_MSG_RESULT([yes ($withval)])
     ;;
 esac
 
@@ -2785,12 +2783,6 @@ if test X"$want_h2" != Xno; then
       $PKGCONFIG --libs-only-L libnghttp2`
     AC_MSG_NOTICE([-L is $LD_H2])
 
-  else
-    dnl To avoid link errors, we do not allow --libnghttp2 without
-    dnl a pkgconfig file
-    AC_MSG_ERROR([--with-nghttp2 was specified but could not find libnghttp2 pkg-config file.])
-  fi
-
   LDFLAGS="$LDFLAGS $LD_H2"
   CPPFLAGS="$CPPFLAGS $CPP_H2"
   LIBS="$LIB_H2 $LIBS"
@@ -2809,6 +2801,15 @@ if test X"$want_h2" != Xno; then
       CPPFLAGS=$CLEANCPPFLAGS
       LIBS=$CLEANLIBS
   )
+
+  else
+    dnl no nghttp2 pkg-config found, deal with it
+    if test X"$want_h2" != Xdefault; then
+      dnl To avoid link errors, we do not allow --with-nghttp2 without
+      dnl a pkgconfig file
+      AC_MSG_ERROR([--with-nghttp2 was specified but could not find libnghttp2 pkg-config file.])
+    fi
+  fi
 
 fi
 
@@ -3039,8 +3040,10 @@ AC_CHECK_FUNCS([fork \
   getppid \
   getprotobyname \
   getpwuid \
+  getpwuid_r \
   getrlimit \
   gettimeofday \
+  if_nametoindex \
   inet_addr \
   perror \
   pipe \
@@ -3511,6 +3514,7 @@ AC_CONFIG_FILES([Makefile \
            docs/Makefile \
            docs/examples/Makefile \
            docs/libcurl/Makefile \
+           docs/libcurl/opts/Makefile \
            include/Makefile \
            include/curl/Makefile \
            src/Makefile \

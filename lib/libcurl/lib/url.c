@@ -278,6 +278,11 @@ void Curl_freeset(struct SessionHandle *data)
     data->change.referer_alloc = FALSE;
   }
   data->change.referer = NULL;
+  if(data->change.url_alloc) {
+    Curl_safefree(data->change.url);
+    data->change.url_alloc = FALSE;
+  }
+  data->change.url = NULL;
 }
 
 static CURLcode setstropt(char **charp, char *s)
@@ -1164,18 +1169,20 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     if(argptr == NULL)
       break;
 
-    Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
-
     if(Curl_raw_equal(argptr, "ALL")) {
       /* clear all cookies */
+      Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
       Curl_cookie_clearall(data->cookies);
+      Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
     }
     else if(Curl_raw_equal(argptr, "SESS")) {
       /* clear session cookies */
+      Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
       Curl_cookie_clearsess(data->cookies);
+      Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
     }
     else if(Curl_raw_equal(argptr, "FLUSH")) {
-      /* flush cookies to file */
+      /* flush cookies to file, takes care of the locking */
       Curl_flush_cookies(data, 0);
     }
     else {
@@ -1188,6 +1195,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
         result = CURLE_OUT_OF_MEMORY;
       }
       else {
+        Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
 
         if(checkprefix("Set-Cookie:", argptr))
           /* HTTP Header format line */
@@ -1197,10 +1205,10 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
           /* Netscape format line */
           Curl_cookie_add(data, data->cookies, FALSE, argptr, NULL, NULL);
 
+        Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
         free(argptr);
       }
     }
-    Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
 
     break;
 #endif /* CURL_DISABLE_COOKIES */
@@ -1425,7 +1433,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     break;
 #endif
 
-  case CURLOPT_WRITEHEADER:
+  case CURLOPT_HEADERDATA:
     /*
      * Custom pointer to pass the header write callback function
      */
@@ -1438,7 +1446,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      */
     data->set.errorbuffer = va_arg(param, char *);
     break;
-  case CURLOPT_FILE:
+  case CURLOPT_WRITEDATA:
     /*
      * FILE pointer to write to. Or possibly
      * used as argument to the write callback.
@@ -3249,19 +3257,7 @@ ConnectionDone(struct SessionHandle *data, struct connectdata *conn)
 static CURLcode ConnectionStore(struct SessionHandle *data,
                                 struct connectdata *conn)
 {
-  static int connection_id_counter = 0;
-
-  CURLcode result;
-
-  /* Assign a number to the connection for easier tracking in the log
-     output */
-  conn->connection_id = connection_id_counter++;
-
-  result = Curl_conncache_add_conn(data->state.conn_cache, conn);
-  if(result != CURLE_OK)
-    conn->connection_id = -1;
-
-  return result;
+  return Curl_conncache_add_conn(data->state.conn_cache, conn);
 }
 
 /* after a TCP connection to the proxy has been verified, this function does
@@ -3590,7 +3586,7 @@ static struct connectdata *allocate_conn(struct SessionHandle *data)
   /* Default protocol-independent behavior doesn't support persistent
      connections, so we set this to force-close. Protocols that support
      this need to set this to FALSE in their "curl_do" functions. */
-  conn->bits.close = TRUE;
+  connclose(conn, "Default to force-close");
 
   /* Store creation time to help future close decision making */
   conn->created = Curl_tvnow();
@@ -4004,7 +4000,7 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
       }
       else {
         /* Zone identifier is not numeric */
-#if defined(HAVE_NET_IF_H) && defined(IFNAMSIZ)
+#if defined(HAVE_NET_IF_H) && defined(IFNAMSIZ) && defined(HAVE_IF_NAMETOINDEX)
         char ifname[IFNAMSIZ + 2];
         char *square_bracket;
         unsigned int scopeidx = 0;
@@ -4156,6 +4152,7 @@ static CURLcode setup_connection_internals(struct connectdata *conn)
 void Curl_free_request_state(struct SessionHandle *data)
 {
   Curl_safefree(data->req.protop);
+  Curl_safefree(data->req.newurl);
 }
 
 
@@ -5144,7 +5141,7 @@ static CURLcode create_conn(struct SessionHandle *data,
   char *proxy = NULL;
   bool prot_missing = FALSE;
   bool no_connections_available = FALSE;
-  bool force_reuse;
+  bool force_reuse = FALSE;
   size_t max_host_connections = Curl_multi_max_host_connections(data->multi);
   size_t max_total_connections = Curl_multi_max_total_connections(data->multi);
 
@@ -5803,9 +5800,9 @@ CURLcode Curl_done(struct connectdata **connp,
   if(conn->handler->done)
     result = conn->handler->done(conn, status, premature);
   else
-    result = CURLE_OK;
+    result = status;
 
-  if(Curl_pgrsDone(conn) && !result)
+  if(!result && Curl_pgrsDone(conn))
     result = CURLE_ABORTED_BY_CALLBACK;
 
   /* if the transfer was completed in a paused state there can be buffered

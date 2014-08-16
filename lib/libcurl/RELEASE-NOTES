@@ -1,87 +1,67 @@
-Curl and libcurl 7.37.0
+Curl and libcurl 7.37.1
 
- Public curl releases:         139
- Command line options:         161
- curl_easy_setopt() options:   206
+ Public curl releases:         140
+ Command line options:         162
+ curl_easy_setopt() options:   208
  Public functions in libcurl:  58
- Contributors:                 1137
+ Contributors:                 1155
 
 This release includes the following changes:
 
- o URL parser: IPv6 zone identifiers are now supported
- o CURLOPT_PROXYHEADER: set headers for proxy-only
- o CURLOPT_HEADEROPT: added
- o curl: add --proxy-header
- o sasl: Added support for DIGEST-MD5 via Windows SSPI
- o sasl: Added DIGEST-MD5 qop-option validation in native challange handling
- o imap: Expanded mailbox SEARCH support to use URL query strings [7]
- o imap: Extended FETCH support to include PARTIAL URL specifier [7]
- o nss: implement non-blocking SSL handshake
- o build: Reworked Visual Studio project files
- o poll: enable poll on darwin13
- o mk-ca-bundle: added -p
- o libtests: add a wait_ms() function
+ o bits.close: introduce connection close tracking
+ o darwinssl: Add support for --cacert
+ o polarssl: add ALPN support
+ o docs: Added new option man pages
 
 This release includes the following bugfixes:
 
- o mkhelp: generate code for --disable-manual as well [1]
- o hostcheck: added a system include to define struct in_addr
- o winbuild: added warnless.c to fix build
- o Makefile.vc6: added warnless.c to fix build
- o smtp: Fixed login denied when server doesn't support AUTH capability [2]
- o smtp: Fixed login denied with a RFC-821 based server [2]
- o curl: stop interpreting IPv6 literals as glob patterns
- o http2: remove _DRAFT09 from the NPN_HTTP2 enum
- o http2: let openssl mention the exact protocol negotiated
- o http2+openssl: fix compiler warnings in ALPN using code
- o ftp: in passive data connect wait for happy eyeballs sockets [3]
- o HTTP: don't send Content-Length: 0 _and_ Expect: 100-continue [4]
- o http2: Compile with current nghttp2, which supports h2-11 [5]
- o http_negotiate_sspi: Fixed compilation when USE_HTTP_NEGOTIATE not defined
- o strerror: fix comment about vxworks' strerror_r buffer size [6]
- o url: only use if_nametoindex() if IFNAMSIZ is available
- o imap: Fixed untagged response detection when no data after command
- o various: fix possible dereference of null pointer
- o various: fix use of uninitialized variable
- o various: fix use of non-null terminated strings
- o telnet.c: check sscanf results before passing them to snprintf
- o parsedate.c: check sscanf result before passing it to strlen
- o sockfilt.c: free memory in case of memory allocation errors
- o sockfilt.c: ignore non-key-events and continue waiting for input
- o sockfilt.c: properly handle disk files, pipes and character input
- o sockfilt.c: fixed getting stuck waiting for MinGW stdin pipe
- o sockfilt.c: clean up threaded approach and add documentation
- o configure: use the nghttp2 path correctly with pkg-config [8]
- o curl_global_init_mem: bump initialized even if already initialized [9]
- o gtls: fix NULL pointer dereference [10]
- o cyassl: Use error-ssl.h when available
- o handler: make 'protocol' always specified as a single bit [11]
- o INFILESIZE: fields in UserDefined must not be changed run-time
- o openssl: biomem->data is not zero terminated
- o config-win32.h: Fixed HAVE_LONGLONG for Visual Studio .NET 2003 and up
- o curl_ntlm_core: Fixed use of long long for VC6 and VC7
- o SNI: strip off a single trailing dot from host name [12]
- o curl: bail on cookie use when built with disabled cookies
- o curl_easy_setopt.3: added the proto for CURLOPT_SSH_KNOWNHOSTS
- o curl_multi_cleanup: ignore SIGPIPE better [13]
- o schannel: don't use the connect-timeout during send [14]
- o mprintf: allow %.s with data not being zero terminated
- o tool_help: Fixed missing --login-options option
- o configure: Don't set LD_LIBRARY_PATH when cross-compiling
- o http: auth failure on duplicated 'WWW-Authenticate: Negotiate' header [15]
- o cacertinmem: fix memory leak [16]
- o lib1506: make sure the transfers are not within the same ms [17]
- o Makefile.b32: Fixed for vtls changes [18]
- o sasl: Fixed missing qop in the client's challenge-response message
- o openssl: unbreak PKCS12 support [19]
- o darwinssl: fix potential crash with a P12 file [20]
- o timers: fix timer regression involving redirects / reconnects [21]
- o CURLINFO_SSL_VERIFYRESULT: made more reliable [22]
- o HTTP: fixed connection re-use [23]
- o configure: add SPNEGO to supported features [24]
- o configure: add GSS-API to supported features [25]
- o ALPN: fix typo in http/1.1 identifier
- o http2: make connection re-use work [26]
+ o build: Fixed incorrect reference to curl_setup.h in Visual Studio files
+ o build: Use $(TargetDir) and $(TargetName) macros for .pdb and .lib output
+ o curl.1: clarify that -u can't specify a user with colon [1]
+ o openssl: Fix uninitialized variable use in NPN callback
+ o curl_easy_reset: reset the URL [2]
+ o curl_version_info.3: returns a pointer to a static struct
+ o url-parser: only use if_nametoindex if detected by configure [3]
+ o select: with winsock, avoid passing unsupported arguments to select() [4]
+ o gnutls: don't use deprecated type names anymore
+ o gnutls: allow building with nghttp2 but without ALPN support
+ o tests: Fix portability issue with the tftpd server
+ o curl_sasl_sspi: Fixed corrupt hostname in DIGEST-MD5 SPN
+ o curl_sasl: extended native DIGEST-MD5 cnonce to be a 32-byte hex string
+ o random: use Curl_rand() for proper random data [5]
+ o Curl_ossl_init: call OPENSSL_config for initing engines [6]
+ o config-win32.h: Updated for VC12 [7]
+ o winbuild: Don't USE_WINSSL when WITH_SSL is being used
+ o getinfo: HTTP CONNECT code not reset between transfers [8]
+ o Curl_rand: Use a fake entropy for debug builds when CURL_ENTROPY set
+ o http2: avoid segfault when using the plain-text http2
+ o conncache: move the connection counter to the cache struct
+ o http2: better return code error checking
+ o curlbuild: fix GCC build on SPARC systems without configure script
+ o tool_metalink: Support polarssl as digest provider
+ o curl.h: reverse the enum/define setup for old symbols
+ o curl.h: moved two really old deprecated symbols
+ o curl.h: renamed CURLOPT_DEPRECATEDx to CURLOPT_OBSOLETEx
+ o buildconf: do not search tools in current directory.
+ o OS400: make it compilable again. Make RPG binding up to date
+ o nss: do not abort on connection failure (failing tests 305 and 404)
+ o nss: make the fallback to SSLv3 work again
+ o tool: prevent valgrind from reporting possibly lost memory (nss only)
+ o progress callback: skip last callback update on errors [9]
+ o nss: fix a memory leak when CURLOPT_CRLFILE is used
+ o compiler warnings: potentially uninitialized variables [10]
+ o url.c: Fixed memory leak on OOM
+ o gnutls: ignore invalid certificate dates with VERIFYPEER disabled
+ o gnutls: fix SRP support with versions of GnuTLS from 2.99.0
+ o gnutls: fixed a couple of uninitialized variable references
+ o gnutls: fixed compilation against versions < 2.12.0
+ o build: Fixed overridden compiler PDB settings in VC7 to VC12
+ o ntlm_wb: Fixed buffer size not being large enough for NTLMv2 sessions [11]
+ o netrc: don't abort if home dir cannot be found
+ o netrc: fixed thread safety problem by using getpwuid_r if available
+ o cookie: avoid mutex deadlock [12]
+ o configure: respect host tool prefix for krb5-config
+ o gnutls: handle IP address in cert name check
 
 This release includes the following known bugs:
 
@@ -90,41 +70,26 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Aaro Koskinen, Cody Mack, Damian Dixon, Dan Fandrich, Daniel Johnson,
-  Daniel Stenberg, David Woodhouse, Dilyan Palauzov, Fabian Frank,
-  Ivo Bellin Salarin, Jeff King, Jeroen Koekkoek, Jon Torrey, Kamil Dudka,
-  Larry Lin, Leon Winter, Maciej Puzio, Marc Hoersken, Michael Osipov,
-  Nick Zitzmann, Patrick Watson, Paul Marks, Radu Simionescu, Remi Gacogne,
-  Ryan Braud, Steve Holme, Tatsuhiro Tsujikawa, Till Maas, Tom Sparrow,
-  Török Edwin, Vijay Panghal,
+  Alessandro Ghedini, Brad Spencer, Chris Young, Colin Hogben, Dan Fandrich,
+  Daniel Stenberg, David Woodhouse, Dimitrios Siganos, Fabian Frank,
+  Glen A Johnson Jr., Hubert Kario, Jeff Pohlmeyer, Jonathan Cardoso Machado,
+  Kamil Dudka, Lindley French, Marcel Raad, Michał Górny, Nick Zitzmann,
+  Patrick Monnerat, Ray Satiro, Steve Holme, Tatsuhiro Tsujikawa,
+  Vilmos Nebehaj, Yousuke Kimoto, Dmitry Falko
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = http://curl.haxx.se/bug/view.cgi?id=1350
- [2] = http://curl.haxx.se/mail/lib-2014-03/0173.html
- [3] = http://curl.haxx.se/mail/lib-2014-02/0135.html (ruined)
- [4] = http://curl.haxx.se/bug/view.cgi?id=1349
- [5] = http://curl.haxx.se/mail/lib-2014-04/0053.html
- [6] = http://curl.haxx.se/mail/lib-2014-04/0063.html
- [7] = http://curl.haxx.se/mail/lib-2014-04/0067.html
- [8] = http://curl.haxx.se/mail/lib-2014-04/0159.html
- [9] = http://curl.haxx.se/bug/view.cgi?id=1362
- [10] = http://curl.haxx.se/mail/lib-2014-04/0145.html
- [11] = https://github.com/bagder/curl/pull/97
- [12] = http://curl.haxx.se/mail/lib-2014-04/0161.html
- [13] = http://thread.gmane.org/gmane.comp.version-control.git/238242
- [14] = http://curl.haxx.se/bug/view.cgi?id=1352
- [15] = https://bugzilla.redhat.com/1093348
- [16] = http://curl.haxx.se/bug/view.cgi?id=1368
- [17] = http://curl.haxx.se/mail/lib-2014-05/0081.html
- [18] = http://curl.haxx.se/mail/lib-2014-05/0025.html
- [19] = http://curl.haxx.se/bug/view.cgi?id=1371
- [20] = http://curl.haxx.se/bug/view.cgi?id=1369
- [21] = http://curl.haxx.se/mail/lib-2014-05/0147.html
- [22] = http://curl.haxx.se/mail/lib-2014-04/0203.html
- [23] = http://curl.haxx.se/mail/lib-2014-05/0127.html
- [24] = http://curl.haxx.se/bug/view.cgi?id=1343
- [25] = http://curl.haxx.se/bug/view.cgi?id=1344
- [26] = http://curl.haxx.se/bug/view.cgi?id=1374
+ [1] = http://curl.haxx.se/bug/view.cgi?id=1375
+ [2] = http://curl.haxx.se/mail/lib-2014-05/0235.html
+ [3] = http://curl.haxx.se/mail/lib-2014-05/0260.html
+ [4] = http://curl.haxx.se/mail/lib-2014-05/0278.html
+ [5] = http://curl.haxx.se/mail/lib-2014-06/0001.html
+ [6] = http://curl.haxx.se/mail/lib-2014-06/0003.html
+ [7] = http://curl.haxx.se/bug/view.cgi?id=1378
+ [8] = http://curl.haxx.se/bug/view.cgi?id=1380
+ [9] = http://curl.haxx.se/mail/lib-2014-06/0062.html
+ [10] = http://curl.haxx.se/bug/view.cgi?id=1391
+ [11] = http://curl.haxx.se/mail/lib-2014-07/0103.html
+ [12] = http://curl.haxx.se/mail/lib-2014-02/0184.html

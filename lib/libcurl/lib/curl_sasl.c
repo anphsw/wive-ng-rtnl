@@ -403,9 +403,6 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
                                              const char *service,
                                              char **outptr, size_t *outlen)
 {
-#ifndef DEBUGBUILD
-  static const char table16[] = "0123456789abcdef";
-#endif
   CURLcode result = CURLE_OK;
   size_t i;
   MD5_context *ctxt;
@@ -420,9 +417,9 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   char algorithm[64];
   char qop_options[64];
   int qop_values;
-
+  char cnonce[33];
+  unsigned int entropy[4];
   char nonceCount[] = "00000001";
-  char cnonce[]     = "12345678"; /* will be changed */
   char method[]     = "AUTHENTICATE";
   char qop[]        = DIGEST_QOP_VALUE_STRING_AUTH;
   char uri[128];
@@ -448,11 +445,15 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
   if(!(qop_values & DIGEST_QOP_VALUE_AUTH))
     return CURLE_BAD_CONTENT_ENCODING;
 
-#ifndef DEBUGBUILD
-  /* Generate 64 bits of random data */
-  for(i = 0; i < 8; i++)
-    cnonce[i] = table16[Curl_rand(data)%16];
-#endif
+  /* Generate 16 bytes of random data */
+  entropy[0] = Curl_rand(data);
+  entropy[1] = Curl_rand(data);
+  entropy[2] = Curl_rand(data);
+  entropy[3] = Curl_rand(data);
+
+  /* Convert the random data into a 32 byte hex string */
+  snprintf(cnonce, sizeof(cnonce), "%08x%08x%08x%08x",
+           entropy[0], entropy[1], entropy[2], entropy[3]);
 
   /* So far so good, now calculate A1 and H(A1) according to RFC 2831 */
   ctxt = Curl_MD5_init(Curl_DIGEST_MD5);
@@ -536,16 +537,14 @@ CURLcode Curl_sasl_create_digest_md5_message(struct SessionHandle *data,
                      "cnonce=\"%s\",nc=\"%s\",digest-uri=\"%s\",response=%s,"
                      "qop=%s",
                      userp, realm, nonce,
-                     cnonce, nonceCount, uri, resp_hash_hex,
-                     qop);
+                     cnonce, nonceCount, uri, resp_hash_hex, qop);
   if(!response)
     return CURLE_OUT_OF_MEMORY;
 
   /* Base64 encode the response */
   result = Curl_base64_encode(data, response, 0, outptr, outlen);
 
-  Curl_safefree(response);
-
+  free(response);
   return result;
 }
 #endif  /* USE_WINDOWS_SSPI */

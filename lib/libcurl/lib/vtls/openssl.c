@@ -62,6 +62,7 @@
 #include <openssl/dh.h>
 #include <openssl/err.h>
 #include <openssl/md5.h>
+#include <openssl/conf.h>
 #else
 #include <rand.h>
 #include <x509v3.h>
@@ -740,6 +741,7 @@ int Curl_ossl_init(void)
     return 0;
 
   OpenSSL_add_all_algorithms();
+  OPENSSL_config(NULL);
 
   return 1;
 }
@@ -1440,7 +1442,11 @@ select_next_proto_cb(SSL *ssl,
     conn->negnpn = NPN_HTTP1_1;
   }
   else {
-    infof(conn->data, "NPN, no overlap, negotiated nothing\n");
+    infof(conn->data, "NPN, no overlap, use HTTP1.1\n",
+          NGHTTP2_PROTO_VERSION_ID);
+    *out = (unsigned char*)"http/1.1";
+    *outlen = sizeof("http/1.1") - 1;
+    conn->negnpn = NPN_HTTP1_1;
   }
 
   return SSL_TLSEXT_ERR_OK;

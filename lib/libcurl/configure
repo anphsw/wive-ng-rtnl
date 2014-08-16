@@ -21085,7 +21085,9 @@ if test x"$want_gss" = xyes; then
 $as_echo "yes" >&6; }
 
   if test -z "$GSSAPI_INCS"; then
-     if test -f "$GSSAPI_ROOT/bin/krb5-config"; then
+     if test -n "$host_alias" -a -f "$GSSAPI_ROOT/bin/$host_alias-krb5-config"; then
+        GSSAPI_INCS=`$GSSAPI_ROOT/bin/$host_alias-krb5-config --cflags gssapi`
+     elif test -f "$GSSAPI_ROOT/bin/krb5-config"; then
         GSSAPI_INCS=`$GSSAPI_ROOT/bin/krb5-config --cflags gssapi`
      elif test "$GSSAPI_ROOT" != "yes"; then
         GSSAPI_INCS="-I$GSSAPI_ROOT/include"
@@ -21233,7 +21235,10 @@ $as_echo "#define HAVE_GSSAPI 1" >>confdefs.h
         LIBS="-lgss $LIBS"
         ;;
      *)
-        if test -f "$GSSAPI_ROOT/bin/krb5-config"; then
+        if test -n "$host_alias" -a -f "$GSSAPI_ROOT/bin/$host_alias-krb5-config"; then
+                                 gss_libs=`$GSSAPI_ROOT/bin/$host_alias-krb5-config --libs gssapi`
+           LIBS="$gss_libs $LIBS"
+        elif test -f "$GSSAPI_ROOT/bin/krb5-config"; then
                                  gss_libs=`$GSSAPI_ROOT/bin/krb5-config --libs gssapi`
            LIBS="$gss_libs $LIBS"
         elif test "$GSSAPI_ROOT" != "yes"; then
@@ -25520,9 +25525,7 @@ fi
 
 
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to build with nghttp2" >&5
-$as_echo_n "checking whether to build with nghttp2... " >&6; }
-OPT_H2="no"
+OPT_H2="yes"
 
 # Check whether --with-nghttp2 was given.
 if test "${with_nghttp2+set}" = set; then :
@@ -25532,25 +25535,14 @@ fi
 case "$OPT_H2" in
   no)
         want_h2="no"
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-    ;;
-  default)
-        want_h2="no"
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
     ;;
   yes)
-        want_h2="yes"
+        want_h2="default"
     want_h2_path=""
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
     ;;
   *)
         want_h2="yes"
     want_h2_path="$withval/lib/pkgconfig"
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes ($withval)" >&5
-$as_echo "yes ($withval)" >&6; }
     ;;
 esac
 
@@ -25716,10 +25708,6 @@ $as_echo "$as_me: -I is $CPP_H2" >&6;}
     { $as_echo "$as_me:${as_lineno-$LINENO}: -L is $LD_H2" >&5
 $as_echo "$as_me: -L is $LD_H2" >&6;}
 
-  else
-            as_fn_error $? "--with-nghttp2 was specified but could not find libnghttp2 pkg-config file." "$LINENO" 5
-  fi
-
   LDFLAGS="$LDFLAGS $LD_H2"
   CPPFLAGS="$CPPFLAGS $CPP_H2"
   LIBS="$LIB_H2 $LIBS"
@@ -25786,6 +25774,12 @@ else
 
 fi
 
+
+  else
+        if test X"$want_h2" != Xdefault; then
+                  as_fn_error $? "--with-nghttp2 was specified but could not find libnghttp2 pkg-config file." "$LINENO" 5
+    fi
+  fi
 
 fi
 
@@ -37885,8 +37879,10 @@ for ac_func in fork \
   getppid \
   getprotobyname \
   getpwuid \
+  getpwuid_r \
   getrlimit \
   gettimeofday \
+  if_nametoindex \
   inet_addr \
   perror \
   pipe \
@@ -39392,7 +39388,7 @@ if test "x$want_curldebug_assumed" = "xyes" &&
   ac_configure_args="$ac_configure_args --enable-curldebug"
 fi
 
-ac_config_files="$ac_config_files Makefile docs/Makefile docs/examples/Makefile docs/libcurl/Makefile include/Makefile include/curl/Makefile src/Makefile lib/Makefile lib/libcurl.vers tests/Makefile tests/certs/Makefile tests/certs/scripts/Makefile tests/data/Makefile tests/server/Makefile tests/libtest/Makefile tests/unit/Makefile packages/Makefile packages/Win32/Makefile packages/Win32/cygwin/Makefile packages/Linux/Makefile packages/Linux/RPM/Makefile packages/Linux/RPM/curl.spec packages/Linux/RPM/curl-ssl.spec packages/Solaris/Makefile packages/EPM/curl.list packages/EPM/Makefile packages/vms/Makefile packages/AIX/Makefile packages/AIX/RPM/Makefile packages/AIX/RPM/curl.spec curl-config libcurl.pc"
+ac_config_files="$ac_config_files Makefile docs/Makefile docs/examples/Makefile docs/libcurl/Makefile docs/libcurl/opts/Makefile include/Makefile include/curl/Makefile src/Makefile lib/Makefile lib/libcurl.vers tests/Makefile tests/certs/Makefile tests/certs/scripts/Makefile tests/data/Makefile tests/server/Makefile tests/libtest/Makefile tests/unit/Makefile packages/Makefile packages/Win32/Makefile packages/Win32/cygwin/Makefile packages/Linux/Makefile packages/Linux/RPM/Makefile packages/Linux/RPM/curl.spec packages/Linux/RPM/curl-ssl.spec packages/Solaris/Makefile packages/EPM/curl.list packages/EPM/Makefile packages/vms/Makefile packages/AIX/Makefile packages/AIX/RPM/Makefile packages/AIX/RPM/curl.spec curl-config libcurl.pc"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -40466,6 +40462,7 @@ do
     "docs/Makefile") CONFIG_FILES="$CONFIG_FILES docs/Makefile" ;;
     "docs/examples/Makefile") CONFIG_FILES="$CONFIG_FILES docs/examples/Makefile" ;;
     "docs/libcurl/Makefile") CONFIG_FILES="$CONFIG_FILES docs/libcurl/Makefile" ;;
+    "docs/libcurl/opts/Makefile") CONFIG_FILES="$CONFIG_FILES docs/libcurl/opts/Makefile" ;;
     "include/Makefile") CONFIG_FILES="$CONFIG_FILES include/Makefile" ;;
     "include/curl/Makefile") CONFIG_FILES="$CONFIG_FILES include/curl/Makefile" ;;
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;

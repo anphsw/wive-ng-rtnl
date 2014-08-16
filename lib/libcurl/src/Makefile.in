@@ -505,12 +505,20 @@ AM_CPPFLAGS = -I$(top_builddir)/include/curl -I$(top_builddir)/include \
 
 # libcurl has sources that provide functions named curlx_* that aren't part of
 # the official API, but we re-use the code here to avoid duplication.
-CURLX_ONES = \
+CURLX_CFILES = \
 	../lib/strtoofft.c \
 	../lib/strdup.c \
 	../lib/rawstr.c \
 	../lib/nonblock.c \
 	../lib/warnless.c
+
+CURLX_HFILES = \
+	../lib/curl_setup.h \
+	../lib/strtoofft.h \
+	../lib/strdup.h \
+	../lib/rawstr.h \
+	../lib/nonblock.h \
+	../lib/warnless.h
 
 CURL_CFILES = \
 	tool_binmode.c \
@@ -596,7 +604,7 @@ CURL_HFILES = \
 	tool_xattr.h
 
 CURL_RCFILES = curl.rc
-curl_SOURCES = $(CURL_CFILES) $(CURLX_ONES) $(CURL_HFILES)
+curl_SOURCES = $(CURL_CFILES) $(CURLX_CFILES) $(CURL_HFILES)
 @USE_EXPLICIT_LIB_DEPS_FALSE@curl_LDADD = $(top_builddir)/lib/libcurl.la @LIBMETALINK_LIBS@ @ZLIB_LIBS@ @CURL_NETWORK_AND_TIME_LIBS@
 @USE_EXPLICIT_LIB_DEPS_TRUE@curl_LDADD = $(top_builddir)/lib/libcurl.la @LIBMETALINK_LIBS@ @LIBCURL_LIBS@
 curl_LDFLAGS = @LIBMETALINK_LDFLAGS@
