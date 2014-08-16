@@ -3101,13 +3101,14 @@ int usb_reset_device(struct usb_device *udev)
 	}
 
 done:
+#ifdef CONFIG_SYSCTL
 	if (force_logical_disconnect) {
 		//printk(KERN_DEBUG "force logical disconnect port %d\n", port1);
 		hub_port_logical_disconnect(parent_hub, port1);
 		force_logical_disconnect = 0;
 	}
+#endif
 	return 0;
- 
 re_enumerate:
 	hub_port_logical_disconnect(parent_hub, port1);
 	return -ENODEV;

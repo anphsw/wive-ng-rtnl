@@ -86,8 +86,8 @@
  *
  */
 
-spinlock_t  gdma_lock;
-spinlock_t  gdma_int_lock;
+static DEFINE_SPINLOCK(gdma_lock);
+static DEFINE_SPINLOCK(gdma_int_lock);
 void (*GdmaDoneIntCallback[MAX_GDMA_CHANNEL])(uint32_t);
 void (*GdmaUnMaskIntCallback[MAX_GDMA_CHANNEL])(uint32_t);
 
@@ -666,7 +666,7 @@ irqreturn_t GdmaIrqHandler(
     //GDMA_PRINT("GdmaDone Interrupt=%x\n",GdmaDoneStatus);
     //GDMA_PRINT("========================================\n");
 
-    spin_lock_irqsave(&gdma_int_lock, (unsigned long)flags);
+    spin_lock_irqsave(&gdma_int_lock, flags);
     
     //UnMask error
     for(Ch=0;Ch<MAX_GDMA_CHANNEL;Ch++) {

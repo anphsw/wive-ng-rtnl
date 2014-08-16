@@ -14,19 +14,19 @@
 #ifndef _LINUX_SKBUFF_H
 #define _LINUX_SKBUFF_H
 
+#include <asm/atomic.h>
+#include <asm/types.h>
 #include <linux/kernel.h>
 #include <linux/compiler.h>
 #include <linux/time.h>
 #include <linux/cache.h>
-#include <asm/atomic.h>
-#include <asm/types.h>
 #include <linux/spinlock.h>
 #include <linux/net.h>
 #include <linux/textsearch.h>
-#include <net/checksum.h>
 #include <linux/rcupdate.h>
 #include <linux/dmaengine.h>
 #include <linux/hrtimer.h>
+#include <net/checksum.h>
 
 /* Don't change this without changing skb_csum_unnecessary! */
 #define CHECKSUM_NONE 0
