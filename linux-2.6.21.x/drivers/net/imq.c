@@ -160,7 +160,7 @@ static int imq_dev_xmit(struct sk_buff *skb, struct net_device *dev)
 	return 0;
 }
 
-static int imq_nf_queue(struct sk_buff *skb, struct nf_info *info, unsigned queue_num, void *data)
+static int imq_nf_queue(struct sk_buff *skb, struct nf_info *info, unsigned int queuenum)
 {
 	struct net_device *dev;
 	struct net_device_stats *stats;
@@ -217,7 +217,7 @@ static int imq_nf_queue(struct sk_buff *skb, struct nf_info *info, unsigned queu
 
 static struct nf_queue_handler nfqh = {
 	.name  = "imq",
-	.outfn = imq_nf_queue,
+	.outfn = &imq_nf_queue,
 };
 
 static unsigned int imq_nf_hook(unsigned int hook, struct sk_buff **pskb,
