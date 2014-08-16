@@ -1,6 +1,6 @@
 .EXPORT_ALL_VARIABLES:
 
-DIRS = src cgi-src 
+DIRS = src cgi-src
 ROOT_DIRECTORY = /web
 
 all:

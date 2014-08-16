@@ -1,4 +1,3 @@
-
 all: cdp-send
 
 cdp-send: cdp-send.o
