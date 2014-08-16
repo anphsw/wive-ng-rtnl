@@ -558,6 +558,7 @@ ctnetlink_parse_tuple(struct nfattr *cda[], struct nf_conntrack_tuple *tuple,
 }
 
 #ifdef CONFIG_NF_NAT_NEEDED
+extern const struct nf_nat_protocol *__nf_nat_proto_find(u_int8_t protonum);
 static const size_t cta_min_protonat[CTA_PROTONAT_MAX] = {
 	[CTA_PROTONAT_PORT_MIN-1]       = sizeof(u_int16_t),
 	[CTA_PROTONAT_PORT_MAX-1]       = sizeof(u_int16_t),

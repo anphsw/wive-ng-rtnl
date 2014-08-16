@@ -21,8 +21,8 @@ target(struct sk_buff **pskb,
        const struct net_device *in,
        const struct net_device *out,
        unsigned int hooknum,
-       const void *targinfo,
-       void *userinfo)
+       const struct xt_target *target,
+       const void *targinfo)
 {
 	struct iphdr *iph;
 	struct sk_buff *skb;
@@ -51,10 +51,10 @@ target(struct sk_buff **pskb,
 
 static int
 checkentry(const char *tablename,
-	   const struct ipt_entry *e,
-           void *targinfo,
-           unsigned int targinfosize,
-           unsigned int hook_mask)
+	   const void *e_void,
+	   const struct xt_target *target,
+	   void *targinfo,
+	   unsigned int hook_mask)
 {
 	if (strcmp(tablename, "mangle")) {
 		printk(KERN_WARNING "IPV4OPTSSTRIP: can only be called from \"mangle\" table, not \"%s\"\n", tablename);

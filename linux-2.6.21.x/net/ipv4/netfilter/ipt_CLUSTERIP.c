@@ -252,7 +252,7 @@ clusterip_hashfn(struct sk_buff *skb, struct clusterip_config *config)
 	case IPPROTO_SCTP:
 	case IPPROTO_DCCP:
 	case IPPROTO_ICMP:
-		ports = (const void *)iph+iph->ihl*4;
+		ports = (void *)iph+iph->ihl*4;
 		sport = ports[0];
 		dport = ports[1];
 		break;

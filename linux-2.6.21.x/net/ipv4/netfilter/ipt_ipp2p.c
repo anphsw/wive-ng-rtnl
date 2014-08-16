@@ -288,7 +288,7 @@ search_soul (const unsigned char *payload, const u16 plen)
 #endif /* IPP2P_DEBUG_SOUL */
 		return ((IPP2P_SOUL * 100) + 1);
 	}
-	
+
         /* next match: 01 yy 00 00 | yy can be everything */
         if ( get_u8(payload, 4) == 0x01 && get_u16(payload, 6) == 0x0000 )
 	{
@@ -297,7 +297,7 @@ search_soul (const unsigned char *payload, const u16 plen)
 #endif /* IPP2P_DEBUG_SOUL */
 		return ((IPP2P_SOUL * 100) + 2);
 	}
-	
+
 	/* other soulseek commandos are: 1-5,7,9,13-18,22,23,26,28,35-37,40-46,50,51,60,62-69,91,92,1001 */
 	/* try to do this in an intelligent way */
 	/* get all small commandos */
@@ -320,8 +320,8 @@ search_soul (const unsigned char *payload, const u16 plen)
 #endif /* IPP2P_DEBUG_SOUL */
 		return ((IPP2P_SOUL * 100) + 3);
 	}
-	
-	if (m > 0 && m < 6 ) 
+
+	if (m > 0 && m < 6 )
 	{
 #ifdef IPP2P_DEBUG_SOUL
 		printk(KERN_DEBUG "3: Soulseek command 0x%x recognized\n",get_u16(payload, 4));
@@ -364,7 +364,7 @@ search_soul (const unsigned char *payload, const u16 plen)
 	printk(KERN_DEBUG "unknown SOULSEEK command: 0x%x, first 16 bit: 0x%x, first 8 bit: 0x%x ,soulseek ???\n",get_u32(payload, 4),get_u16(payload, 4) >> 16,get_u8(payload, 4) >> 24);
 #endif /* IPP2P_DEBUG_SOUL */
     }
-	
+
 	/* match 14 00 00 00 01 yy 00 00 00 STRING(YY) 01 00 00 00 00 46|50 00 00 00 00 */
 	/* without size at the beginning !!! */
 	if ( get_u32(payload, 0) == 0x14 && get_u8(payload, 4) == 0x01 )
@@ -394,7 +394,7 @@ search_winmx (const unsigned char *payload, const u16 plen)
     if (((plen) == 3) && (memcmp(payload, "GET", 3) == 0))  return ((IPP2P_WINMX * 100) + 2);
     //if (packet_len < (head_len + 10)) return 0;
     if (plen < 10) return 0;
-    
+
     if ((memcmp(payload, "SEND", 4) == 0) || (memcmp(payload, "GET", 3) == 0)){
         u16 c=4;
         const u16 end=plen-2;
@@ -410,7 +410,7 @@ search_winmx (const unsigned char *payload, const u16 plen)
         	c++;
         }
     }
-    
+
     if ( plen == 149 && payload[0] == '8' )
     {
 #ifdef IPP2P_DEBUG_WINMX
@@ -420,7 +420,6 @@ search_winmx (const unsigned char *payload, const u16 plen)
 //    	    get_u32(payload,33) == __constant_htonl(0x71182b1a) && get_u32(payload,37) == __constant_htonl(0x05050000) &&
 //    	    get_u32(payload,133) == __constant_htonl(0x31097edf) && get_u32(payload,145) == __constant_htonl(0xdcb8f792))
     	    get_u16(payload,39) == 0 && get_u16(payload,135) == __constant_htons(0x7edf) && get_u16(payload,147) == __constant_htons(0xf792))
-    	    
     	{
 #ifdef IPP2P_DEBUG_WINMX
     		printk(KERN_INFO "got WinMX\n");
@@ -437,7 +436,7 @@ int
 search_apple (const unsigned char *payload, const u16 plen)
 {
     if ( (plen > 7) && (payload[6] == 0x0d) && (payload[7] == 0x0a) && (memcmp(payload, "ajprot", 6) == 0))  return (IPP2P_APPLE * 100);
-    
+
     return 0;
 }
 
@@ -449,11 +448,11 @@ search_bittorrent (const unsigned char *payload, const u16 plen)
     if (plen > 20)
     {
 	/* test for match 0x13+"BitTorrent protocol" */
-	if (payload[0] == 0x13) 
+	if (payload[0] == 0x13)
 	{
 		if (memcmp(payload+1, "BitTorrent protocol", 19) == 0) return (IPP2P_BIT * 100);
 	}
-	
+
 	/* get tracker commandos, all starts with GET /
 	* then it can follow: scrape| announce
 	* and then ?hash_info=
@@ -465,14 +464,14 @@ search_bittorrent (const unsigned char *payload, const u16 plen)
 		/* message announce */
 		if ( memcmp(payload+5,"announce?info_hash=",19)==0 ) return (IPP2P_BIT * 100 + 2);
 	}
-    } 
-    else 
+    }
+    else
     {
     	/* bitcomet encryptes the first packet, so we have to detect another 
     	 * one later in the flow */
     	 /* first try failed, too many missdetections */
     	//if ( size == 5 && get_u32(t,0) == __constant_htonl(1) && t[4] < 3) return (IPP2P_BIT * 100 + 3);
-    	
+
     	/* second try: block request packets */
     	if ( plen == 17 && get_u32(payload,0) == __constant_htonl(0x0d) && payload[4] == 0x06 && get_u32(payload,13) == __constant_htonl(0x4000) ) return (IPP2P_BIT * 100 + 3);
     }
@@ -484,7 +483,7 @@ search_bittorrent (const unsigned char *payload, const u16 plen)
 
 /*check for Kazaa get command*/
 int
-search_kazaa (const unsigned char *payload, const u16 plen)
+search_kazaa(const unsigned char *payload, const u16 plen)
 
 {
     if ((payload[plen-2] == 0x0d) && (payload[plen-1] == 0x0a) && memcmp(payload, "GET /.hash=", 11) == 0)
@@ -501,7 +500,7 @@ search_gnu (const unsigned char *payload, const u16 plen)
     if ((payload[plen-2] == 0x0d) && (payload[plen-1] == 0x0a))
     {
 	if (memcmp(payload, "GET /get/", 9) == 0)	return ((IPP2P_DATA_GNU * 100) + 1);
-	if (memcmp(payload, "GET /uri-res/", 13) == 0) return ((IPP2P_DATA_GNU * 100) + 2); 
+	if (memcmp(payload, "GET /uri-res/", 13) == 0) return ((IPP2P_DATA_GNU * 100) + 2);
     }
     return 0;
 }
@@ -511,16 +510,12 @@ search_gnu (const unsigned char *payload, const u16 plen)
 int
 search_all_gnu (const unsigned char *payload, const u16 plen)
 {
-    
     if ((payload[plen-2] == 0x0d) && (payload[plen-1] == 0x0a))
     {
-	
 	if (memcmp(payload, "GNUTELLA CONNECT/", 17) == 0) return ((IPP2P_GNU * 100) + 1);
-	if (memcmp(payload, "GNUTELLA/", 9) == 0) return ((IPP2P_GNU * 100) + 2);    
-    
-    
+	if (memcmp(payload, "GNUTELLA/", 9) == 0) return ((IPP2P_GNU * 100) + 2);
 	if ((memcmp(payload, "GET /get/", 9) == 0) || (memcmp(payload, "GET /uri-res/", 13) == 0))
-	{        
+	{
 		u16 c=8;
 		const u16 end=plen-22;
 		while (c < end) {
@@ -533,7 +528,6 @@ search_all_gnu (const unsigned char *payload, const u16 plen)
     return 0;
 }
 
-
 /*check for KaZaA download commands and other typical data*/
 int
 search_all_kazaa (const unsigned char *payload, const u16 plen)
@@ -542,7 +536,6 @@ search_all_kazaa (const unsigned char *payload, const u16 plen)
     {
 
 	if (memcmp(payload, "GIVE ", 5) == 0) return ((IPP2P_KAZAA * 100) + 1);
-    
     	if (memcmp(payload, "GET /", 5) == 0) {
 		u16 c = 8;
 		const u16 end=plen-22;
@@ -558,14 +551,14 @@ search_all_kazaa (const unsigned char *payload, const u16 plen)
 
 /*fast check for edonkey file segment transfer command*/
 int
-search_edk (const unsigned char *payload, const u16 plen)
+search_edk(const unsigned char *payload, const u16 plen)
 {
-    if (payload[0] != 0xe3) 
+    if (payload[0] != 0xe3)
 	return 0;
     else {
-	if (payload[5] == 0x47) 
+	if (payload[5] == 0x47)
 	    return (IPP2P_DATA_EDK * 100);
-	else 	
+	else
 	    return 0;
     }
 }
@@ -574,12 +567,12 @@ search_edk (const unsigned char *payload, const u16 plen)
 
 /*intensive but slower search for some edonkey packets including size-check*/
 int
-search_all_edk (const unsigned char *payload, const u16 plen)
+search_all_edk(const unsigned char *payload, const u16 plen)
 {
-    if (payload[0] != 0xe3) 
+    if (payload[0] != 0xe3)
 	return 0;
     else {
-	//t += head_len;	
+	//t += head_len;
 	const u16 cmd = get_u16(payload, 1);
 	if (cmd == (plen - 5)) {
 	    switch (payload[5]) {
@@ -594,24 +587,22 @@ search_all_edk (const unsigned char *payload, const u16 plen)
 
 /*fast check for Direct Connect send command*/
 int
-search_dc (const unsigned char *payload, const u16 plen)
+search_dc(const unsigned char *payload, const u16 plen)
 {
 
-    if (payload[0] != 0x24 ) 
+    if (payload[0] != 0x24)
 	return 0;
     else {
 	if (memcmp(&payload[1], "Send|", 5) == 0)
 	    return (IPP2P_DATA_DC * 100);
 	else
 	    return 0;
-    }	
-
+    }
 }
-
 
 /*intensive but slower check for all direct connect packets*/
 int
-search_all_dc (const unsigned char *payload, const u16 plen)
+search_all_dc(const unsigned char *payload, const u16 plen)
 {
 //    unsigned char *t = haystack;
 
@@ -621,28 +612,20 @@ search_all_dc (const unsigned char *payload, const u16 plen)
     		/* Client-Hub-Protocol */
 	if (memcmp(t, "Lock ", 5) == 0)	 		return ((IPP2P_DC * 100) + 1);
 	/* Client-Client-Protocol, some are already recognized by client-hub (like lock) */
-	if (memcmp(t, "MyNick ", 7) == 0)	 	return ((IPP2P_DC * 100) + 38); 
+	if (memcmp(t, "MyNick ", 7) == 0)	 	return ((IPP2P_DC * 100) + 38);
     }
     return 0;
 }
 
 /*check for mute*/
 int
-search_mute (const unsigned char *payload, const u16 plen)
+search_mute(const unsigned char *payload, const u16 plen)
 {
 	if ( plen == 209 || plen == 345 || plen == 473 || plen == 609 || plen == 1121 )
 	{
 		//printk(KERN_DEBUG "size hit: %u",size);
 		if (memcmp(payload,"PublicKey: ",11) == 0 )
-		{ 
 			return ((IPP2P_MUTE * 100) + 0);
-			
-/*			if (memcmp(t+size-14,"\x0aEndPublicKey\x0a",14) == 0)
-			{
-				printk(KERN_DEBUG "end pubic key hit: %u",size);
-				
-			}*/
-		}
 	}
 	return 0;
 }
@@ -650,15 +633,13 @@ search_mute (const unsigned char *payload, const u16 plen)
 
 /* check for xdcc */
 int
-search_xdcc (const unsigned char *payload, const u16 plen)
+search_xdcc(const unsigned char *payload, const u16 plen)
 {
 	/* search in small packets only */
 	if (plen > 20 && plen < 200 && payload[plen-1] == 0x0a && payload[plen-2] == 0x0d && memcmp(payload,"PRIVMSG ",8) == 0)
 	{
-		
 		u16 x=10;
 		const u16 end=plen - 13;
-		
 		/* is seems to be a irc private massage, chedck for xdcc command */
 		while (x < end)
 		{
@@ -688,24 +669,21 @@ static struct {
     __u8 short_hand;			/*for fucntions included in short hands*/
     int packet_len;
     int (*function_name) (const unsigned char *, const u16);
-} matchlist[] = {
-    {IPP2P_EDK,SHORT_HAND_IPP2P,20, &search_all_edk},
-//    {IPP2P_DATA_KAZAA,SHORT_HAND_DATA,200, &search_kazaa},
-//    {IPP2P_DATA_EDK,SHORT_HAND_DATA,60, &search_edk},
-//    {IPP2P_DATA_DC,SHORT_HAND_DATA,26, &search_dc},
-    {IPP2P_DC,SHORT_HAND_IPP2P,5, search_all_dc},
-//    {IPP2P_DATA_GNU,SHORT_HAND_DATA,40, &search_gnu},
-    {IPP2P_GNU,SHORT_HAND_IPP2P,5, &search_all_gnu},
-    {IPP2P_KAZAA,SHORT_HAND_IPP2P,5, &search_all_kazaa},
-    {IPP2P_BIT,SHORT_HAND_IPP2P,20, &search_bittorrent},
-    {IPP2P_APPLE,SHORT_HAND_IPP2P,5, &search_apple},
-    {IPP2P_SOUL,SHORT_HAND_IPP2P,5, &search_soul},
-    {IPP2P_WINMX,SHORT_HAND_IPP2P,2, &search_winmx},
-    {IPP2P_ARES,SHORT_HAND_IPP2P,5, &search_ares},
-    {IPP2P_MUTE,SHORT_HAND_NONE,200, &search_mute},
-    {IPP2P_WASTE,SHORT_HAND_NONE,5, &search_waste},
-    {IPP2P_XDCC,SHORT_HAND_NONE,5, &search_xdcc},
-    {0,0,0,NULL}
+    }
+    matchlist[] = {
+	{IPP2P_EDK,SHORT_HAND_IPP2P,20, &search_all_edk},
+	{IPP2P_DC,SHORT_HAND_IPP2P,5, search_all_dc},
+	{IPP2P_GNU,SHORT_HAND_IPP2P,5, &search_all_gnu},
+	{IPP2P_KAZAA,SHORT_HAND_IPP2P,5, &search_all_kazaa},
+	{IPP2P_BIT,SHORT_HAND_IPP2P,20, &search_bittorrent},
+	{IPP2P_APPLE,SHORT_HAND_IPP2P,5, &search_apple},
+	{IPP2P_SOUL,SHORT_HAND_IPP2P,5, &search_soul},
+	{IPP2P_WINMX,SHORT_HAND_IPP2P,2, &search_winmx},
+	{IPP2P_ARES,SHORT_HAND_IPP2P,5, &search_ares},
+	{IPP2P_MUTE,SHORT_HAND_NONE,200, &search_mute},
+	{IPP2P_WASTE,SHORT_HAND_NONE,5, &search_waste},
+	{IPP2P_XDCC,SHORT_HAND_NONE,5, &search_xdcc},
+	{0,0,0,NULL}
 };
 
 
@@ -714,21 +692,16 @@ static struct {
     __u8 short_hand;			/*for fucntions included in short hands*/
     int packet_len;
     int (*function_name) (unsigned char *, int);
-} udp_list[] = {
-    { IPP2P_KAZAA, SHORT_HAND_IPP2P, 14, &udp_search_kazaa},
-    { IPP2P_BIT,   SHORT_HAND_IPP2P, 23, &udp_search_bit},
-    { IPP2P_GNU,   SHORT_HAND_IPP2P, 11, &udp_search_gnu},
-    { IPP2P_EDK,   SHORT_HAND_IPP2P,  9, &udp_search_edk},
-    { IPP2P_DC,    SHORT_HAND_IPP2P, 12, &udp_search_directconnect},    
-    { 0, 0, 0, NULL }
+    } udp_list[] = {
+	{ IPP2P_KAZAA, SHORT_HAND_IPP2P, 14, &udp_search_kazaa},
+	{ IPP2P_BIT,   SHORT_HAND_IPP2P, 23, &udp_search_bit},
+	{ IPP2P_GNU,   SHORT_HAND_IPP2P, 11, &udp_search_gnu},
+	{ IPP2P_EDK,   SHORT_HAND_IPP2P,  9, &udp_search_edk},
+	{ IPP2P_DC,    SHORT_HAND_IPP2P, 12, &udp_search_directconnect},    
+	{ 0, 0, 0, NULL }
 };
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,23)
-static bool
-#else
-static int
-#endif
-match(const struct sk_buff *skb,
+static bool match(const struct sk_buff *skb,
       const struct net_device *in,
       const struct net_device *out,
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,17)
@@ -739,11 +712,7 @@ match(const struct sk_buff *skb,
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,16)
       unsigned int protoff,
 #endif
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,23)
       bool *hotdrop)
-#else
-      bool *hotdrop)
-#endif
 {
     const struct ipt_p2p_info *info = matchinfo;
     unsigned char  *haystack;
@@ -823,12 +792,7 @@ match(const struct sk_buff *skb,
     }
 }
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,23)
-static bool
-#else
-static int
-#endif
-checkentry(const char *tablename,
+static bool checkentry(const char *tablename,
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,16)
             const void *ip,
 #else
@@ -850,8 +814,6 @@ checkentry(const char *tablename,
  *    }*/
     return 1;
 }
-									    
-
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,21)
 static struct xt_match ipp2p_match = {
@@ -882,7 +844,7 @@ static int __init init(void)
     return ipt_register_match(&ipp2p_match);
 #endif
 }
-	
+
 static void __exit fini(void)
 {
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,21)
@@ -890,10 +852,8 @@ static void __exit fini(void)
 #else
     ipt_unregister_match(&ipp2p_match);
 #endif
-    printk(KERN_INFO "IPP2P v%s unloaded\n", IPP2P_VERSION);    
+    printk(KERN_INFO "IPP2P v%s unloaded\n", IPP2P_VERSION);
 }
-	
 module_init(init);
 module_exit(fini);
-
 

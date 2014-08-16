@@ -51,11 +51,17 @@ static struct list_head *bysource;
 #define MAX_IP_NAT_PROTO 256
 static const struct nf_nat_protocol *nf_nat_protos[MAX_IP_NAT_PROTO];
 
-static inline const struct nf_nat_protocol *
+#ifndef CONFIG_NF_CT_NETLINK
+static inline 
+#endif
+const struct nf_nat_protocol *
 __nf_nat_proto_find(u_int8_t protonum)
 {
 	return rcu_dereference(nf_nat_protos[protonum]);
 }
+#ifdef CONFIG_NF_CT_NETLINK
+EXPORT_SYMBOL_GPL(__nf_nat_proto_find);
+#endif
 
 /* We keep an extra hash for each conntrack, for fast searching. */
 static inline unsigned int

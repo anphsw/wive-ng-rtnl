@@ -393,7 +393,7 @@ static int layer7_write_proc(struct file* file, const char* buffer,
 	return count;
 }
 
-static int
+static bool
 match(const struct sk_buff *skbin,
       const struct net_device *in,
       const struct net_device *out,
@@ -401,10 +401,10 @@ match(const struct sk_buff *skbin,
       const void *matchinfo,
       int offset,
       unsigned int protoff,
-      int *hotdrop)
+      bool *hotdrop)
 {
 	/* sidestep const without getting a compiler warning... */
-	struct sk_buff * skb = (struct sk_buff *)skbin; 
+	struct sk_buff * skb = (struct sk_buff *)skbin;
 
 	struct xt_layer7_info * info = (struct xt_layer7_info *)matchinfo;
 	enum ip_conntrack_info master_ctinfo, ctinfo;
@@ -545,7 +545,7 @@ match(const struct sk_buff *skbin,
 	return (pattern_result ^ info->invert);
 }
 
-static int check(const char *tablename,
+static bool check(const char *tablename,
 		 const void *inf,
 		 const struct xt_match *match,
 		 void *matchinfo,
