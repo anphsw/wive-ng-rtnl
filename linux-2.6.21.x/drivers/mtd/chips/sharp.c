@@ -225,7 +225,7 @@ static int sharp_wait(struct map_info *map, struct flchip *chip)
 	int adr = 0;
 
 retry:
-	spin_lock_bh(&chip->mutex);
+	spin_lock_bh(chip->mutex);
 
 	switch(chip->state){
 	case FL_READY:
@@ -245,7 +245,7 @@ retry:
 		set_current_state(TASK_INTERRUPTIBLE);
 		add_wait_queue(&chip->wq, &wait);
 
-		spin_unlock_bh(&chip->mutex);
+		spin_unlock_bh(chip->mutex);
 
 		schedule();
 		remove_wait_queue(&chip->wq, &wait);
@@ -268,7 +268,7 @@ retry:
 static void sharp_release(struct flchip *chip)
 {
 	wake_up(&chip->wq);
-	spin_unlock_bh(&chip->mutex);
+	spin_unlock_bh(chip->mutex);
 }
 
 static int sharp_read(struct mtd_info *mtd, loff_t from, size_t len,
@@ -391,7 +391,7 @@ static int sharp_write_oneword(struct map_info *map, struct flchip *chip,
 	chip->state = FL_READY;
 
 	wake_up(&chip->wq);
-	spin_unlock_bh(&chip->mutex);
+	spin_unlock_bh(chip->mutex);
 
 	return 0;
 }
@@ -458,13 +458,13 @@ static int sharp_do_wait_for_ready(struct map_info *map, struct flchip *chip,
 		set_current_state(TASK_INTERRUPTIBLE);
 		add_wait_queue(&chip->wq, &wait);
 
-		//spin_unlock_bh(&chip->mutex);
+		//spin_unlock_bh(chip->mutex);
 
 		schedule_timeout(1);
 		schedule();
 		remove_wait_queue(&chip->wq, &wait);
 
-		//spin_lock_bh(&chip->mutex);
+		//spin_lock_bh(chip->mutex);
 
 		if (signal_pending(current)){
 			ret = -EINTR;
@@ -506,14 +506,14 @@ static int sharp_erase_oneblock(struct map_info *map, struct flchip *chip,
 	if(!(status.x[0] & SR_ERRORS)){
 		sharp_send_cmd(map, CMD_RESET, adr);
 		chip->state = FL_READY;
-		//spin_unlock_bh(&chip->mutex);
+		//spin_unlock_bh(chip->mutex);
 		return 0;
 	}
 
 	printk("sharp: error erasing block at addr=%08lx status=%08lx\n", adr, status.x[0]);
 	sharp_send_cmd(map, CMD_CLEAR_STATUS, adr);
 
-	//spin_unlock_bh(&chip->mutex);
+	//spin_unlock_bh(chip->mutex);
 
 	return -EIO;
 }
