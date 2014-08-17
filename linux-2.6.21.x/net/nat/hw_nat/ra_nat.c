@@ -441,7 +441,7 @@ static uint32_t PpeExtIfRxHandler(struct sk_buff * skb)
 	}
 
 	/* make skb writable */
-	if (!skb_make_writable(skb, 0)) {
+	if (unlikely(!skb_make_writable(skb, 0))) {
 		NAT_PRINT("HNAT: no mem or corrupted packet for add tag? (VirIfIdx=%d)\n", VirIfIdx);
 		return 1;
 	}
@@ -451,7 +451,7 @@ static uint32_t PpeExtIfRxHandler(struct sk_buff * skb)
 	LAYER3_HEADER(skb) = skb->data;
 	skb_push(skb, ETH_HLEN);	//pointer to layer2 header before calling hard_start_xmit
 	skb = __vlan_put_tag(skb, VirIfIdx);
-	if (!skb) {
+	if (unlikely(!skb)) {
 	    NAT_PRINT("HNAT: not valid tag ? memleak ? (VirIfIdx=%d)\n", VirIfIdx);
 	    return 0;
 	}
@@ -1027,12 +1027,10 @@ static int32_t PpeParseLayerInfo(struct sk_buff * skb)
 			memcpy(&PpeParseResult.uh, uh, sizeof(struct udphdr));
 			PpeParseResult.pkt_type = IPV4_HNAPT;
 
-			if(iph->frag_off & htons(IP_MF|IP_OFFSET)) {
+			if(iph->frag_off & htons(IP_MF|IP_OFFSET))
 				return 1;
-			}
 
 			uh = (struct udphdr *)((uint8_t *)iph + iph->ihl * 4);
-
 			/* check PPE bug */
 			if (ppe_udp_bug) {
 				if (!uh->check)
@@ -1158,7 +1156,7 @@ static int32_t PpeParseLayerInfo(struct sk_buff * skb)
 			printk("DIP=%s\n",
 			       Ip2Str(ntohl(PpeParseResult.iph.daddr)));
 			printk("TOS=%x\n", ntohs(PpeParseResult.iph.tos));
-			
+
 			if (PpeParseResult.iph.protocol == IPPROTO_TCP) {
 			    printk("TCP SPORT=%d\n", ntohs(PpeParseResult.th.source));
 			    printk("TCP DPORT=%d\n", ntohs(PpeParseResult.th.dest));
@@ -1445,20 +1443,14 @@ static int32_t PpeFillInL4Info(struct sk_buff * skb, struct FoeEntry * foe_entry
 			foe_entry->ipv4_hnapt.bfib1.udp = TCP;
 		} else if (PpeParseResult.iph.protocol == IPPROTO_UDP) {
 			    if (ppe_udp_bug) {
-			        if (!PpeParseResult.uh.check) {
-#if defined (CONFIG_RALINK_RT3352)
-				    memset(FOE_INFO_START_ADDR(skb), 0, FOE_INFO_LEN);
-#endif
-			    	    return 1;
-				}
-
-				if (PpeParseResult.uh.dest == __constant_htons(500) ||	// IPSec IKE
+			        if (!PpeParseResult.uh.check) ||
+				    (PpeParseResult.uh.dest == __constant_htons(500) ||	// IPSec IKE
 				    PpeParseResult.uh.dest == __constant_htons(4500) ||	// IPSec NAT-T
 				    PpeParseResult.uh.dest == __constant_htons(1701)) {	// L2TP
 #if defined (CONFIG_RALINK_RT3352)
 				    memset(FOE_INFO_START_ADDR(skb), 0, FOE_INFO_LEN);
 #endif
-				    return 1;
+			    	    return 1;
 				}
 			    }
 
