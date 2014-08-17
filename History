@@ -269,43 +269,44 @@
 10) usb-modeswitch-data: up to 20140529.<br>
 11) dropbear: update to 2014.65.<br>
 12) pppd: version up to 2.4.7 (9 Aug 2014).<br>
-13) openssl: version up to 0.9.8zb.<br>
-14) tools: fix eth_mac tool (manipulate mac in factory part, now tested only in 2.4Ghz 305x devices).<br>
-15) libcurl: up to 7.37.1 version.<br>
-16) kernel: net/l2tp: don't fall back on UDP [get|set]sockopt.<br>
-17) kernel: net: igmp: reduce Unsolicited report interval to 1s when using IGMPv3.<br>
-18) kernel: net: replace continue with break to reduce unnecessary loop in xxx_xmarksources.<br>
-19) kernel: net: ipv6: igmp6_event_query: use msecs_to_jiffies.<br>
-20) kernel: net: potential null skb->dev dereference.<br>
-21) kernel: net: optimize non-gso test checks.<br>
-22) kernel: net: linkwatch: allow vlans to get carrier changes faster.<br>
-23) kernel: net: fix memory leak in the proto_register function.<br>
-24) kernel: net: sendmsg: fix NULL pointer dereference.<br>
-25) kernel: net: unix: inherit SOCK_PASS{CRED, SEC} flags from socket to fix race.<br>
-26) kernel: ipv4,ipv6: send igmpv3/mld packets with TC_PRIO_CONTROL.<br>
-27) kernel: ipv4: force_igmp_version ignored when a IGMPv3 query received.<br>
-28) kernel: ipv6: increase maximum lifetime of flow labels (RFC 3697).<br>
-29) kernel: ipv6: Check RA for sllao when configuring optimistic ipv6 address.<br>
-30) kernel: ipv6: enable RFC 4429 Optimistic DAD per default.<br>
-31) kernel: ipv6: prevent race between address creation and removal.<br>
-32) kernel: ipv6: fix preferred_lft not updating in some cases.<br>
-33) kernel: ipv6: don't accept multicast traffic with scope 0.<br>
-34) kernel: ipv6: udp: possible dst leak in udpv6_sendmsg.<br>
-35) kernel: ipv6: check the hop limit setting in ancillary data.<br>
-36) kernel: ipv6: remove optimistic DAD flag test in ipv6_add_addr().<br>
-37) kernel: netfilter: improve ipv4 netfilter optimization pass default table.<br>
-38) kernel: netfilter: allow disabling processing of the netfilter "filter" table for established connection packets.<br>
-39) kernel: igmp: call ip_mc_clear_src() only when we have no users of ip_mc_list.<br>
-40) kernel: ip_output: do skb ufo init for peeked non ufo skb as well.<br>
-41) kernel: netfilter: don't use mutex_lock_interruptible().<br>
-42) kernel: option driver add new modems support (from 3.16 kernel).<br>
-43) kernel: ppp: refresh Ralink hardware watchdog timer, prevent reboot at high cpu load.<br>
-44) kernel: packet: add needed_tailroom to packet_sendmsg_spkt.<br>
-45) kernel: net_sched: qdisc_alloc_handle() can be too slow.<br>
-46) kernel: tcp: make sure write_queue_from does not begin with NULL ptr.<br>
-47) kernel: tcp: set initial_ssthresh default to zero in Cubic and BIC.<br>
-48) kernel: imq: automatic exclude redirected to imq traffic from PPE and FastNat.<br>
-49) kernel: sched: decrease user max rt_prio to 10, this reducing the size of the O(1) scheduler arrays (small save ticks).<br>
+13) pppd: pppol2tp plugin: fix usage invalid handle.<br>
+14) openssl: version up to 0.9.8zb.<br>
+15) tools: fix eth_mac tool (manipulate mac in factory part, now tested only in 2.4Ghz 305x devices).<br>
+16) libcurl: up to 7.37.1 version.<br>
+17) kernel: net/l2tp: don't fall back on UDP [get|set]sockopt.<br>
+18) kernel: net: igmp: reduce Unsolicited report interval to 1s when using IGMPv3.<br>
+19) kernel: net: replace continue with break to reduce unnecessary loop in xxx_xmarksources.<br>
+20) kernel: net: ipv6: igmp6_event_query: use msecs_to_jiffies.<br>
+21) kernel: net: potential null skb->dev dereference.<br>
+22) kernel: net: optimize non-gso test checks.<br>
+23) kernel: net: linkwatch: allow vlans to get carrier changes faster.<br>
+24) kernel: net: fix memory leak in the proto_register function.<br>
+25) kernel: net: sendmsg: fix NULL pointer dereference.<br>
+26) kernel: net: unix: inherit SOCK_PASS{CRED, SEC} flags from socket to fix race.<br>
+27) kernel: ipv4,ipv6: send igmpv3/mld packets with TC_PRIO_CONTROL.<br>
+28) kernel: ipv4: force_igmp_version ignored when a IGMPv3 query received.<br>
+29) kernel: ipv6: increase maximum lifetime of flow labels (RFC 3697).<br>
+30) kernel: ipv6: Check RA for sllao when configuring optimistic ipv6 address.<br>
+31) kernel: ipv6: enable RFC 4429 Optimistic DAD per default.<br>
+32) kernel: ipv6: prevent race between address creation and removal.<br>
+33) kernel: ipv6: fix preferred_lft not updating in some cases.<br>
+34) kernel: ipv6: don't accept multicast traffic with scope 0.<br>
+35) kernel: ipv6: udp: possible dst leak in udpv6_sendmsg.<br>
+36) kernel: ipv6: check the hop limit setting in ancillary data.<br>
+37) kernel: ipv6: remove optimistic DAD flag test in ipv6_add_addr().<br>
+38) kernel: netfilter: improve ipv4 netfilter optimization pass default table.<br>
+39) kernel: netfilter: allow disabling processing of the netfilter "filter" table for established connection packets.<br>
+40) kernel: igmp: call ip_mc_clear_src() only when we have no users of ip_mc_list.<br>
+41) kernel: ip_output: do skb ufo init for peeked non ufo skb as well.<br>
+42) kernel: netfilter: don't use mutex_lock_interruptible().<br>
+43) kernel: option driver add new modems support (from 3.16 kernel).<br>
+44) kernel: ppp: refresh Ralink hardware watchdog timer, prevent reboot at high cpu load.<br>
+45) kernel: packet: add needed_tailroom to packet_sendmsg_spkt.<br>
+46) kernel: net_sched: qdisc_alloc_handle() can be too slow.<br>
+47) kernel: tcp: make sure write_queue_from does not begin with NULL ptr.<br>
+48) kernel: tcp: set initial_ssthresh default to zero in Cubic and BIC.<br>
+49) kernel: imq: automatic exclude redirected to imq traffic from PPE and FastNat.<br>
+50) kernel: sched: decrease user max rt_prio to 10, this reducing the size of the O(1) scheduler arrays (small save ticks).<br>
 <br>
 <br>
 <br>
