@@ -1443,10 +1443,10 @@ static int32_t PpeFillInL4Info(struct sk_buff * skb, struct FoeEntry * foe_entry
 			foe_entry->ipv4_hnapt.bfib1.udp = TCP;
 		} else if (PpeParseResult.iph.protocol == IPPROTO_UDP) {
 			    if (ppe_udp_bug) {
-			        if ((!PpeParseResult.uh.check) ||
+			        if (!PpeParseResult.uh.check ||
 				    (PpeParseResult.uh.dest == __constant_htons(500) ||	// IPSec IKE
 				    PpeParseResult.uh.dest == __constant_htons(4500) ||	// IPSec NAT-T
-				    PpeParseResult.uh.dest == __constant_htons(1701)) {	// L2TP
+				    PpeParseResult.uh.dest == __constant_htons(1701))) {	// L2TP
 #if defined (CONFIG_RALINK_RT3352)
 				    memset(FOE_INFO_START_ADDR(skb), 0, FOE_INFO_LEN);
 #endif
