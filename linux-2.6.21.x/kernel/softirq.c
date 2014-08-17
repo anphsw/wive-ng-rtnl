@@ -246,7 +246,7 @@ EXPORT_SYMBOL(do_softirq);
 /*
  * Enter an interrupt context.
  */
-void irq_enter(void)
+void FASTPATH irq_enter(void)
 {
 	__irq_enter();
 #ifdef CONFIG_NO_HZ
