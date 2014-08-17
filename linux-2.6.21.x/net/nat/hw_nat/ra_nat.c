@@ -297,6 +297,13 @@ static uint32_t PpeExtIfRxHandler(struct sk_buff * skb)
 {
 	uint16_t VirIfIdx = 0;
 
+	/* offload packet types not support for extif:
+	   1. VLAN tagged packets (avoid double tag issue).
+	   2. PPPoE packets (PPPoE passthrough issue).
+	   3. IPv6 1T routes. */
+	if (skb->protocol != __constant_htons(ETH_P_IP))
+		return 1;
+
 #if defined (CONFIG_RALINK_RT3052) || defined(HWNAT_SKIP_MCAST_BCAST)
 	/* offload multicast/broadcast is not supported for extif */
 	if (skb->pkt_type == PACKET_MULTICAST || skb->pkt_type == PACKET_BROADCAST)
@@ -465,41 +472,40 @@ static uint32_t PpeExtIfPingPongHandler(struct sk_buff * skb)
 	struct net_device *dev;
 	struct vlan_ethhdr *veth;
 
+	/* something wrong: proto must be 802.11q, interface index must be < MAX_IF_NUM and exist, 
+		don`t touch this packets and return to normal path before corrupt in detag code
+	*/
+	if (skb->protocol != __constant_htons(ETH_P_8021Q))
+	    return 1;
+
 	veth = (struct vlan_ethhdr *)LAYER2_HEADER(skb);
 
 	VirIfIdx = ntohs(veth->h_vlan_TCI);
+	if (VirIfIdx >= MAX_IF_NUM)
+	    return 1;
 
-	/* something wrong: 1) interface index must be < MAX_IF_NUM and exist, proto must be 802.11q
-				don`t touch this packets and return to normal path before corrupt in detag code
-			    2) UFO packets in this case keep only in if DstPort != LAN i.e not to LAN path
-	*/
-	if ((VirIfIdx >= MAX_IF_NUM) || (DstPort[VirIfIdx] == NULL) || (veth->h_vlan_proto != htons(ETH_P_8021Q))) {
-	    if (VirIfIdx != LAN_PORT_VLAN_ID) {
+	dev = DstPort[VirIfIdx];
+	if (!dev) {
 #ifdef HWNAT_DEBUG
-		if (DebugLevel >= 1)
-		    NAT_PRINT("HNAT: Reentry packet for untagged frame, transit vlan or interface (VirIfIdx=%d) not exist. Skip this packet.\n", VirIfIdx);
+	    if (DebugLevel >= 1)
+	        NAT_PRINT("HNAT: Reentry packet interface (VirIfIdx=%d) not exist. Skip this packet.\n", VirIfIdx);
 #endif
-		return 1;
-	    } else {
-#ifdef HWNAT_DEBUG
-		NAT_PRINT("HNAT: Reentry UFO packet with LAN VID (VirIfIdx=%d). Drop this packet.\n", VirIfIdx);
-#endif
-		kfree_skb(skb);
-		return 0;
-	    }
+	    return 1;
 	}
 
-	/* make skb writable */
-	if (!skb_make_writable(skb, 0)) {
-	    NAT_PRINT("HNAT: No mem for remove tag or corrupted packet? (VirIfIdx=%d)\n", VirIfIdx);
+	if (unlikely(!pskb_may_pull(skb, VLAN_HLEN))) {
+#ifdef HWNAT_DEBUG
+	    if (DebugLevel >= 1)
+		NAT_PRINT("HNAT: No mem for remove tag or corrupted packet? (VirIfIdx=%d)\n", VirIfIdx);
+#endif
 	    return 1;
 	}
 
 	/* remove vlan tag from current packet */
 	RemoveVlanTag(skb);
 
-	/* set correct skb dest dev */
-	skb->dev = DstPort[VirIfIdx];
+	/* restore original skb dest dev */
+	skb->dev = dev;
 
 	eth = (struct ethhdr *)LAYER2_HEADER(skb);
 
