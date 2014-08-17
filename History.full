@@ -2009,6 +2009,7 @@
 46) kernel: tcp: make sure write_queue_from does not begin with NULL ptr.<br>
 47) kernel: tcp: set initial_ssthresh default to zero in Cubic and BIC.<br>
 48) kernel: imq: automatic exclude redirected to imq traffic from PPE and FastNat.<br>
+49) kernel: sched: decrease user max rt_prio to 10, this reducing the size of the O(1) scheduler arrays (small save ticks).<br>
 <br>
 <br>
 <br>
