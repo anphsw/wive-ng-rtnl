@@ -82,7 +82,6 @@ case "$1" in
 		$LOG "Restart vpn helpers"
 		service vpnhelper restart
 	    fi
-	    exit 0
 	elif [ "$OperationMode" = "2" ] || [ "$OperationMode" = "3" ]; then
 	    # Try reconnect at lease failed
 	    $LOG "Reconnect to AP if need."
