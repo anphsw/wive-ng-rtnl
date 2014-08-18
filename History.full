@@ -1969,7 +1969,7 @@
 6) init.d: after gen mac new mac write ti factory part to (more compat with others software and legacy sdk).<br>
 7) init.d: fs: add fs change_mac command for change/clone WAN mac adress.<br>
 8) init.d: udhcpc script: add support switch reinit on leasefail for devices with external rtl switch (example N56U).<br>
-9) init.d: try use oricinal mac adresses for wan/lan if exist (now 3052 only).<br>
+9) init.d: try use original mac adresses for wan/lan if exist (now 3052 only).<br>
 10) webui: add enable/disable netfilter skip processing for filter established sessions and skip window check(netfilter fastpath mode).<br>
 11) webui/kext: rework offload engine and fastpath modes tune.<br>
 12) usb-modeswitch-data: up to 20140529.<br>
