@@ -172,10 +172,10 @@ int main( int ArgCn, char *ArgVc[] ) {
 	if (sw) {
 	    if(force_snooping == 0) {
         	my_log(LOG_INFO, 0, "Force igmp_snooping disable.");
-		rt_switch_init(0);	/* disable snooping */
+		rt_init(0);	/* disable snooping */
 	    } else {
         	my_log(LOG_INFO, 0, "Enable igmp_snooping.");
-		rt_switch_fini(1);	/* automatic (default) */
+		rt_init(1);	/* automatic (default) */
 	    }
 	}
 #endif
