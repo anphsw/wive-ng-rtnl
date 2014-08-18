@@ -170,6 +170,10 @@ extern char const *nvram_get(int index, char *name);
 
 #if defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350)
 static void rt305x_esw_init(void);
+#elif defined(CONFIG_RALINK_RT6855) || defined(CONFIG_RALINK_MT7620)
+static void rt_gsw_init(void);
+#elif defined(CONFIG_RALINK_RT6855A)
+static void rt6855A_gsw_init(void);
 #endif
 
 #ifndef CONFIG_RAETH_DISABLE_TX_TIMEO
@@ -1751,6 +1755,7 @@ static irqreturn_t FASTPATH ei_interrupt(int irq, void *dev_id, struct pt_regs *
     defined(CONFIG_RALINK_MT7620)
 static void esw_link_status_changed(int port_no, void *dev_id)
 {
+#ifdef CONFIG_RAETH_DHCP_TOUCH
     unsigned long reg_val;
     struct net_device *dev = (struct net_device *) dev_id;
     END_DEVICE *ei_local = netdev_priv(dev);
@@ -1758,19 +1763,18 @@ static void esw_link_status_changed(int port_no, void *dev_id)
     reg_val = *((volatile u32 *)(RALINK_ETH_SW_BASE+ 0x3008 + (port_no*0x100)));
 
     if(reg_val & 0x1) {
-	printk("ESW: Link Status Changed - Port%d Link UP\n", port_no);
-#if defined (CONFIG_WAN_AT_P0)
-	if(port_no==0) {
+	if(port_no == send_sigusr_dhcpc) {
 	    schedule_work(&ei_local->kill_sig_wq);
-	}
-#elif defined (CONFIG_WAN_AT_P4)
-	if(port_no==4) {
-	    schedule_work(&ei_local->kill_sig_wq);
-	}
-#endif
+	    printk("ESW: Link WAN Status Changed - Port%d Link UP\n", port_no);
+	} else
+	    printk("ESW: Link Status Changed - Port%d Link UP\n", port_no);
     } else {
-	printk("ESW: Link Status Changed - Port%d Link Down\n", port_no);
+	if(port_no == send_sigusr_dhcpc)
+	    printk("ESW: Link WAN Status Changed - Port%d Link Down\n", port_no);
+	else
+	    printk("ESW: Link Status Changed - Port%d Link Down\n", port_no);
     }
+#endif
 }
 #endif
 
@@ -1785,15 +1789,12 @@ static irqreturn_t esw_interrupt(int irq, void *dev_id)
 #else
 	static unsigned long stat;
 	unsigned long stat_curr;
-#endif
-
 #ifdef CONFIG_RAETH_DHCP_TOUCH
 	int port_offset;
 #endif
-
+#endif
 	struct net_device *dev = (struct net_device *) dev_id;
 	END_DEVICE *ei_local = netdev_priv(dev);
-
 
 	spin_lock_irqsave(&(ei_local->page_lock), flags);
 	reg_int_val = (*((volatile u32 *)(ESW_ISR))); //Interrupt Status Register
@@ -1823,7 +1824,7 @@ static irqreturn_t esw_interrupt(int irq, void *dev_id)
 	    sysRegWrite(ESW_AISR, acl_int_val);
 	}
 
-#else // not RT6855
+#else /* not RT6855 */
 	if (reg_int_val & PORT_ST_CHG) {
 		stat_curr = *((volatile u32 *)(RALINK_ETH_SW_BASE+0x80));
 #ifdef CONFIG_RAETH_DHCP_TOUCH
@@ -1851,7 +1852,7 @@ out:
 		stat = stat_curr;
 	}
 
-#endif // defined(CONFIG_RALINK_RT6855) || defined(CONFIG_RALINK_RT6855A)//
+#endif /* defined(CONFIG_RALINK_RT6855) || defined(CONFIG_RALINK_RT6855A) */
 
 	sysRegWrite(ESW_ISR, reg_int_val);
 
@@ -3363,7 +3364,7 @@ void rt6855A_eth_gpio_reset(void)
 #endif
 
 #if defined(CONFIG_RALINK_RT6855A)
-void rt6855A_gsw_init(void)
+static void rt6855A_gsw_init(void)
 {
 	u32 phy_val=0;
 	u32 rev=0;
@@ -3510,7 +3511,7 @@ void rt6855A_gsw_init(void)
 #endif
 
 #if defined(CONFIG_RALINK_RT6855) || defined(CONFIG_RALINK_MT7620)
-void rt_gsw_init(void)
+static void rt_gsw_init(void)
 {
 #if defined (CONFIG_P4_MAC_TO_PHY_MODE) || defined (CONFIG_P5_MAC_TO_PHY_MODE)
 	u32 phy_val=0;

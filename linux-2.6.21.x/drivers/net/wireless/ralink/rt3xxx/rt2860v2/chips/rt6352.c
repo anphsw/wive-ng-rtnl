@@ -1098,14 +1098,12 @@ static UCHAR RT6352_ChipAGCAdjust(
 	IN UCHAR				OrigR66Value)
 {
 	UCHAR R66 = OrigR66Value;
-	CHAR lanGain = GET_LNA_GAIN(pAd);
-
 	if (pAd->LatchRfRegs.Channel <= 14)
 		R66 = 0x04 + 2 * GET_LNA_GAIN(pAd);
 
 	if (OrigR66Value != R66)
 		AsicBBPWriteWithRxChain(pAd, BBP_R66, R66, RX_CHAIN_ALL);
-	
+
 	return R66;
 }
 #endif // CONFIG_STA_SUPPORT //
@@ -1530,7 +1528,7 @@ static VOID RT6352_ChipSwitchChannel(
 
 				if ((pAd->CommonCfg.Chip_VerID > 1) && (pAd->CommonCfg.Chip_E_Number >= 2))
 				{
-					UINT8 BBPValue;
+					UINT8 BBPValue = 0;
 
 					/* ADC clcok selection */
 					DBGPRINT(RT_DEBUG_TRACE, ("ADC clcok selection for E3 !!!\n"));
@@ -1732,9 +1730,6 @@ static VOID RT6352_RTMPSetAGCInitValue(
 	IN UCHAR BandWidth)
 {
 	UCHAR R66 = 0;
-#ifdef DYNAMIC_VGA_SUPPORT
-	UINT8 BBPValue;
-#endif /* DYNAMIC_VGA_SUPPORT */
 
 	if (pAd->LatchRfRegs.Channel <= 14)
 		R66 = 0x04 + 2 * GET_LNA_GAIN(pAd);
@@ -1930,10 +1925,10 @@ INT RT635xTssiDcCalibration(
 	UINT32 ant_idx;
 	INT32 tssi0_linear = 0, tssi1_linear = 0;
 	INT32 tssi0_db = 0, tssi1_db = 0, pwr=0, pwr1=0;
-	CHAR BBPR49;
-	UCHAR RFB5R3_Org, RFB7R3_Org, RFB4R39_Org, RFB6R39_Org,use_ant = 0;
-	UCHAR RFValue, BBPValue, BBPR1_Org;
-	CHAR  bbp49_read, wait = 0, max_recal = 0;
+	CHAR BBPR49 = 0;
+	UCHAR RFB5R3_Org = 0, RFB7R3_Org = 0, RFB4R39_Org = 0, RFB6R39_Org = 0, use_ant = 0;
+	UCHAR RFValue = 0, BBPValue = 0, BBPR1_Org = 0;
+	CHAR  wait = 0, max_recal = 0;
 	UCHAR ch_group, channel;
 	UCHAR RFB0R42_Org, RFB0R2_Org, RFB0R1_Org;	
 	UCHAR BBPTXGAIN[2];
@@ -2557,10 +2552,10 @@ VOID RT635xTssiCompensation(
 	INT32 pwr, pwr_diff[max_ant], pwr_diff_pre, pkt_type_delta;
 	INT32 comp_power[max_ant]; 
 	INT32 cur_comp_power;
-	UCHAR RFValue, BBPValue, BBPR4, tssi_use_hvga[max_ant];
+	UCHAR RFValue = 0, BBPValue = 0, BBPR4 = 0, tssi_use_hvga[max_ant];
 	UCHAR wait, ch_group, mcs, pa_mode, chain, channel;
 	CHAR temp[max_ant];
-	CHAR BBPR49;
+	CHAR BBPR49 = 0;
 	UCHAR max_stream = 1;
 
 #ifdef DOT11_N_SUPPORT				
@@ -3000,10 +2995,10 @@ BOOLEAN RT635xTriggerTssiCompensation(
 	INT32 pwr, pwr_diff[max_ant], pwr_diff_pre, pkt_type_delta;
 	INT32 comp_power[max_ant]; 
 	INT32 cur_comp_power;
-	UCHAR RFValue, BBPValue, BBPR4, tssi_use_hvga[max_ant];
+	UCHAR RFValue = 0, BBPValue = 0, BBPR4 = 0, tssi_use_hvga[max_ant];
 	UCHAR wait, ch_group, mcs, pa_mode, chain, channel;
 	CHAR temp[max_ant];
-	CHAR BBPR49;
+	CHAR BBPR49 = 0;
 	UCHAR max_stream = 1;
 
 	pAd->CommonCfg.bEnTemperatureTrack = FALSE;
@@ -3442,10 +3437,10 @@ BOOLEAN RT635xCheckTssiCompensation(
 	INT32 pwr, pwr_diff[max_ant], pwr_diff_pre, pkt_type_delta;
 	INT32 comp_power[max_ant]; 
 	INT32 cur_comp_power;
-	UCHAR BBPValue, BBPR4, tssi_use_hvga[max_ant];
+	UCHAR BBPValue = 0, BBPR4 = 0, tssi_use_hvga[max_ant];
 	UCHAR ch_group, mcs, pa_mode, chain, channel;
 	CHAR temp[max_ant];
-	CHAR BBPR49;
+	CHAR BBPR49 = 0;
 	UCHAR max_stream = 1;
 	
 	RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R47, &BBPValue);
@@ -4337,8 +4332,8 @@ static BOOLEAN RT6352_AsicGetTssiReport(
 	OUT PINT32 pTssiReport)
 {
 	INT		wait;
-	UINT8	bbpval;
-	CHAR	BBPR49;
+	UINT8	bbpval = 0;
+	CHAR	BBPR49 = 0;
 	RTMP_BBP_IO_READ8_BY_REG_ID(pAd, BBP_R47, &bbpval);
 
 	if (bResetTssiInfo ==  TRUE)
@@ -4657,8 +4652,8 @@ VOID RT6352_AsicAdjustTxPower(
 #ifdef RTMP_TEMPERATURE_CALIBRATION
 			if (pAd->bCalibrationDone)
 			{
-				UINT8 bbpval;
-				CHAR BBPR49;			
+				UINT8 bbpval = 0;
+				CHAR BBPR49 = 0;
 				int wait;
 				INT32 TemperatureDiff = 0;
 
@@ -4766,8 +4761,8 @@ VOID RT6352_Temperature_Init (
 	IN PRTMP_ADAPTER pAd)
 {
 	int wait;
-	UINT8 bbpval;
-	CHAR BBPR49;
+	UINT8 bbpval = 0;
+	CHAR BBPR49 = 0;
 	UINT32 orig_RF_CONTROL0 = 0; // 0x0518
 	UINT32 orig_RF_BYPASS0  = 0; // 0x051c
 

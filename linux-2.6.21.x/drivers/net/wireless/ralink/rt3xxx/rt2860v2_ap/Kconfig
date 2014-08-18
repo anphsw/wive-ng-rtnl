@@ -101,7 +101,7 @@ config  EXTERNAL_PA_EXTERNAL_LNA
 endchoice
 
 config  RT2860V2_AP_ADJ_PWR_CONSUMPTION_SUPPORT
-	bool "Adjust Power Consumption Support"
+	bool "Reduce Power Consumption Support"
 	default n
 	depends on RT2860V2_AP
 	depends on RALINK_MT7620

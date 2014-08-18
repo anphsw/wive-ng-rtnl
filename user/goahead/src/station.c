@@ -3049,9 +3049,7 @@ static int getStaTrModes(int eid, webs_t wp, int argc, char_t **argv)
 	char_t *result= "0";
 #if defined(CONFIG_RALINK_RT3050_1T1R) || defined(CONFIG_RALINK_RT3051_1T2R)
 	result = "1";
-#elif defined(CONFIG_RALINK_RT3052_2T2R) || defined(CONFIG_RALINK_RT3352_2T2R)
-	result = "2";
-#elif defined(CONFIG_RALINK_RT3662_2T2R)
+#elif defined(CONFIG_RALINK_RT3052_2T2R) || defined(CONFIG_RALINK_RT3352_2T2R) || defined(CONFIG_RALINK_RT3662_2T2R) || defined(CONFIG_RALINK_MT7620)
 	result = "2";
 #elif defined(CONFIG_RALINK_RT3883_3T3R)
 	result = "3";

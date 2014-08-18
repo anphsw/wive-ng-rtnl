@@ -212,26 +212,6 @@ void surfboard_hw0_irqdispatch(void)
 	return;
 }
 
-
-#if !defined(CONFIG_RALINK_RT3883) && !defined(CONFIG_RALINK_RT3052) && !defined(CONFIG_RALINK_RT3352) && !defined(CONFIG_RALINK_RT5350)
-static void enable_rt2880_cp_int(unsigned int IP_X)
-{
-	unsigned long int_status;
-
-	int_status = read_32bit_cp0_register(CP0_STATUS);
-	int_status = int_status | IP_X ;
-	write_32bit_cp0_register(CP0_STATUS, int_status);
-}
-
-static void disable_rt2880_cp_int(unsigned int IP_X)
-{
-	unsigned long int_status;
-	int_status = read_32bit_cp0_register(CP0_STATUS);
-	int_status = int_status & ~(IP_X);
-	write_32bit_cp0_register(CP0_STATUS, int_status);
-}
-#endif
-
 void __init arch_init_irq(void)
 {
 	int i;
@@ -334,7 +314,7 @@ void rt2880_irqdispatch(void)
 						//PCIe1
 						do_IRQ(RALINK_INT_PCIE1);
 					}else{
-						printk("pcie inst = %x\n", pci_status);
+						printk("pcie inst = %lx\n", pci_status);
 					}
 				}else{
 					if(pci_status &(1<<21)){
@@ -344,7 +324,7 @@ void rt2880_irqdispatch(void)
 						//PCIe0
 						do_IRQ(RALINK_INT_PCIE0);
 					}else{
-						printk("pcie inst = %x\n", pci_status);
+						printk("pcie inst = %lx\n", pci_status);
 					}
 				}
 

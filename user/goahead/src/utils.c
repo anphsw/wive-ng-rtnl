@@ -675,20 +675,22 @@ static int getLangBuilt(int eid, webs_t wp, int argc, char_t **argv)
  */
 static int getPlatform(int eid, webs_t wp, int argc, char_t **argv)
 {
-#ifdef CONFIG_RALINK_RT3050_1T1R
+#if defined(CONFIG_RALINK_RT3050_1T1R) && defined(CONFIG_RT_3052_ESW)
     return websWrite(wp, T("RT3050 1T1R embedded switch"));
-#elif CONFIG_RALINK_RT3051_1T2R
+#elif defined(CONFIG_RALINK_RT3051_1T2R) && defined(CONFIG_RT_3052_ESW)
     return websWrite(wp, T("RT3051 1T2R embedded switch"));
-#elif CONFIG_RALINK_RT3052_2T2R
+#elif defined(CONFIG_RALINK_RT3052_2T2R) && defined(CONFIG_RT_3052_ESW)
     return websWrite(wp, T("RT3052 2T2R embedded switch"));
-#elif CONFIG_RALINK_RT3352_2T2R
+#elif defined(CONFIG_RALINK_RT3352_2T2R) && defined(CONFIG_RT_3052_ESW)
     return websWrite(wp, T("RT3352 2T2R embedded switch"));
+#elif defined(CONFIG_RALINK_MT7620) && defined(CONFIG_RT_3052_ESW)
+    return websWrite(wp, T("MT7620 2T2R embedded switch"));
 #elif defined(CONFIG_CONFIG_GE1_RGMII_AN) || defined(CONFIG_CONFIG_GE1_RGMII_AN)
     return websWrite(wp, T("Marvel/Vetisse external gigaphy switch"));
 #elif CONFIG_RTL8367M
     return websWrite(wp, T("RTL8367M external gigaphy switch"));
 #else
-    return websWrite(wp, T("Don`t detected RT3050 or RT3052 unknown switch mode"));
+    return websWrite(wp, T("Unknown switch mode"));
 #endif
     return 0;
 }
