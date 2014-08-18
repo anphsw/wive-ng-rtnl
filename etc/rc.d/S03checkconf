@@ -14,7 +14,7 @@ start() {
     # include kernel config
     . /etc/scripts/config.sh
 
-    echo "Check firmware update or clean boot."
+    $LOG "Check firmware update or clean boot."
     FORCE_REBUILD_MAC="NO"
     if [ "$IS_WIVE" = "YES" ]; then
 	$LOG ">>>> NORMAL BOOT <<<<"
@@ -197,15 +197,24 @@ genmac() {
     mac_wlan=`cat /dev/urandom | hexdump | head -n1 | cut -f 2- -d " " | sed ':BEGIN;s/^\([^ ]\{0,29\}\) /\1/;tBEGIN' | sed 's/\(..\)/\1:/g; s/.$//' | tail -q -c 9`
     mac_wlan2=`cat /dev/urandom | hexdump | head -n1 | cut -f 2- -d " " | sed ':BEGIN;s/^\([^ ]\{0,29\}\) /\1/;tBEGIN' | sed 's/\(..\)/\1:/g; s/.$//' | tail -q -c 9`
 
-    MAC="$VENDMASK:$mac_wan"
-    LANMAC="$VENDMASK:$mac_lan"
+    if [ "$OLDMACWAN" != "" ] && [ "$OLDMACLAN" != "" ]; then
+	$LOG "Use original macs for wan/lan readed by factory before replace"
+	nvram_set 2860 CHECKMAC NO
+	MAC="$OLDMACWAN"
+	LANMAC="$OLDMACLAN"
+    else
+	$LOG "Write new generated wan/lan macs"
+	MAC="$VENDMASK:$mac_wan"
+	LANMAC="$VENDMASK:$mac_lan"
+    fi
+
     WMAC="$VENDMASK:$mac_wlan"
     WMAC2="$VENDMASK:$mac_wlan2"
 
-    echo "Set WAN   MAC - $MAC"
-    echo "Set LAN   MAC - $LANMAC"
-    echo "Set WLAN1 MAC - $WMAC"
-    echo "Set WLAN2 MAC - $WMAC2"
+    $LOG "Set WAN   MAC - $MAC"
+    $LOG "Set LAN   MAC - $LANMAC"
+    $LOG "Set WLAN1 MAC - $WMAC"
+    $LOG "Set WLAN2 MAC - $WMAC2"
 
     if [ -f /bin/eth_mac ]; then
 	FWMAC=`echo $MAC | sed "s/:/ /g"`
@@ -214,16 +223,8 @@ genmac() {
 	eth_mac w lan $FLMAC
     fi
 
-    if [ "$OLDMACWAN" != "" ] && [ "$OLDMACLAN" != "" ]; then
-	$LOG "Use original macs for wan/lan readed by factory before replace"
-	nvram_set 2860 WAN_MAC_ADDR   "$OLDMACWAN"
-	nvram_set 2860 LAN_MAC_ADDR   "$OLDMACLAN"
-	nvram_set 2860 CHECKMAC NO
-    else
-	$LOG "Write new generated wan/lan macs"
-	nvram_set 2860 WAN_MAC_ADDR   "$MAC"
-	nvram_set 2860 LAN_MAC_ADDR   "$LANMAC"
-    fi
+    nvram_set 2860 WAN_MAC_ADDR   "$MAC"
+    nvram_set 2860 LAN_MAC_ADDR   "$LANMAC"
     nvram_set 2860 WLAN_MAC_ADDR  "$WMAC"
     nvram_set 2860 WLAN2_MAC_ADDR "$WMAC2"
 }
