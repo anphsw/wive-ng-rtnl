@@ -71,7 +71,7 @@ typedef enum rtk_port_linkStatus_e
 
 extern rtk_api_ret_t asic_status_link_ports_wan(rtk_port_linkStatus_t *pLinkStatus);
 static int old_wan_port_link;
-static void rtl_link_status_changed(struct net_device *dev);
+static void rtl_link_status_changed(void);
 #endif
 #endif
 #endif
@@ -1053,7 +1053,7 @@ static int rt2880_eth_send(struct net_device* dev, struct sk_buff *skb, int gmac
 				/* check wan status changed every try send pkts
 			         * this work as ondemand wan check for touch userspace if link down
 				*/
-				rtl_link_status_changed(dev);
+				rtl_link_status_changed();
 #endif
 				pAd = netdev_priv(ei_local->PseudoDev);
 				pAd->stat.tx_errors++;
@@ -1077,7 +1077,7 @@ static int rt2880_eth_send(struct net_device* dev, struct sk_buff *skb, int gmac
 			    /* check wan status changed every try send pkts
 			     * this work as ondemand wan check for touch userspace if link down
 			    */
-			    rtl_link_status_changed(dev);
+			    rtl_link_status_changed();
 #endif
 			    wan_prev_jiffies = jiffies;
 			}
@@ -1535,7 +1535,6 @@ void kill_sig_workq(struct work_struct *work)
 	    }
 	}
 	filp_close(fp, NULL);
-
 }
 #endif
 
@@ -1779,12 +1778,18 @@ static irqreturn_t FASTPATH ei_interrupt(int irq, void *dev_id, struct pt_regs *
 }
 
 #ifdef CONFIG_RTL8367M
-static void rtl_link_status_changed(struct net_device *dev)
+static void rtl_link_status_changed()
 {
 #ifdef CONFIG_RAETH_DHCP_TOUCH
-    END_DEVICE *ei_local = netdev_priv(dev);
     static rtk_port_linkStatus_t wan_port_link;
     int32 retVal;
+    struct file *fp;
+    char pid[8];
+    struct task_struct *p = NULL;
+
+    /* if set 9 - Disable touch dhcp */
+    if (send_sigusr_dhcpc == 9)
+        return;
 
     /* get status */
     retVal = asic_status_link_ports_wan(&wan_port_link);
@@ -1795,9 +1800,27 @@ static void rtl_link_status_changed(struct net_device *dev)
     if (wan_port_link == PORT_LINKUP) {
 	/* is status changed */
 	if(wan_port_link != old_wan_port_link) {
-	    /* send SIGUSR1 to dhcp client */
-	    schedule_work(&ei_local->kill_sig_wq);
-	    printk(KERN_INFO "RTLSWITCH: WAN Port Link Status Changed\n");
+	    /* send SIGUSR1 to dhcp client
+	     * read udhcpc pid from file, and send signal  USR2,USR1 to get a new IP
+	    */
+	    fp = filp_open("/var/run/udhcpc.pid", O_RDONLY, 0);
+	    if (IS_ERR(fp))
+		return;
+
+	    if (fp->f_op && fp->f_op->read) {
+		if (fp->f_op->read(fp, pid, 8, &fp->f_pos) > 0) {
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,35)
+		    p = pid_task(find_get_pid(simple_strtoul(pid, NULL, 10)),  PIDTYPE_PID);
+#else
+		    p = find_task_by_pid(simple_strtoul(pid, NULL, 10));
+#endif
+
+		    if (NULL != p) {
+			send_sig(SIGUSR1, p, 0);
+		    }
+		}
+	    }
+	    filp_close(fp, NULL);
 	}
 	old_wan_port_link=PORT_LINKUP;
     } else if (wan_port_link == PORT_LINKDOWN)
@@ -3210,8 +3233,10 @@ static int ei_open(struct net_device *dev)
 #if defined (CONFIG_RT_3052_ESW)
 	*((volatile u32 *)(RALINK_INTCL_BASE + 0x34)) = (1<<17);
 	*((volatile u32 *)(ESW_IMR)) &= ~(ESW_INT_ALL);
+#ifdef CONFIG_RAETH_DHCP_TOUCH
+	INIT_WORK(&ei_local->kill_sig_wq, kill_sig_workq);
+#endif
 	err = request_irq(SURFBOARDINT_ESW, esw_interrupt, IRQF_DISABLED, "Ralink_ESW", dev);
-
 	if (err)
 	    return err;
 #endif // CONFIG_RT_3052_ESW //
@@ -3220,9 +3245,6 @@ static int ei_open(struct net_device *dev)
     	sysRegWrite(FE_INT_ENABLE, FE_INT_DLY_INIT);
 #else
     	sysRegWrite(FE_INT_ENABLE, FE_INT_ALL);
-#endif
-#ifdef CONFIG_RAETH_DHCP_TOUCH
-	INIT_WORK(&ei_local->kill_sig_wq, kill_sig_workq);
 #endif
 #ifndef CONFIG_RAETH_DISABLE_TX_TIMEO
  	INIT_WORK(&ei_local->reset_task, ei_reset_task);

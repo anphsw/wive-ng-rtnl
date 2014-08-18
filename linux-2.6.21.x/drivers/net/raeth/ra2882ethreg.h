@@ -908,9 +908,13 @@ typedef struct end_device
 
     unsigned int	phy_rx_ring0, phy_rx_ring1;
 
+#if defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3352) || \
+    defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_RT6855) || \
+    defined(CONFIG_RALINK_RT6855A) || defined (CONFIG_RALINK_MT7620) || \
+    defined(CONFIG_RALINK_MT7621)
     //send signal to user application to notify link status changed
     struct work_struct  kill_sig_wq;
-
+#endif
 #ifndef CONFIG_RAETH_DISABLE_TX_TIMEO
     struct work_struct  reset_task;
 #endif
