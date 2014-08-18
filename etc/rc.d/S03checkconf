@@ -19,6 +19,21 @@ start() {
     if [ "$IS_WIVE" = "YES" ]; then
 	$LOG ">>>> NORMAL BOOT <<<<"
     else
+	$LOG "Firmware crashed or non wive installed"
+	if [ -f /bin/eth_mac ]; then
+	    $LOG "Try read mac from old factory"
+	    RALINKMAC="00:0C:43"
+	    ISDEFWMAC=`eth_mac r wan | grep -i "$RALINKMAC" -c`
+	    ISDEFLMAC=`eth_mac r lan | grep -i "$RALINKMAC" -c`
+	    if [ "$ISDEFWMAC" != "1" ] && [ "$ISDEFWMAC" != "1" ]; then
+		$LOG "Store original mac`s."
+		OLDMACWAN=`eth_mac r wan`
+		OLDMACLAN=`eth_mac r lan`
+	    else
+		OLDMACWAN=
+		OLDMACLAN=
+	    fi
+	fi
 	$LOG "Burn RF template to flash"
 	fs burnrf
 	$LOG ">>>> RESTORE NVRAM <<<<"
@@ -199,8 +214,16 @@ genmac() {
 	eth_mac w lan $FLMAC
     fi
 
-    nvram_set 2860 WAN_MAC_ADDR   "$MAC"
-    nvram_set 2860 LAN_MAC_ADDR   "$LANMAC"
+    if [ "$OLDMACWAN" != "" ] && [ "$OLDMACLAN" != "" ]; then
+	$LOG "Use original macs for wan/lan readed by factory before replace"
+	nvram_set 2860 WAN_MAC_ADDR   "$OLDMACWAN"
+	nvram_set 2860 LAN_MAC_ADDR   "$OLDMACLAN"
+	nvram_set 2860 CHECKMAC NO
+    else
+	$LOG "Write new generated wan/lan macs"
+	nvram_set 2860 WAN_MAC_ADDR   "$MAC"
+	nvram_set 2860 LAN_MAC_ADDR   "$LANMAC"
+    fi
     nvram_set 2860 WLAN_MAC_ADDR  "$WMAC"
     nvram_set 2860 WLAN2_MAC_ADDR "$WMAC2"
 }
