@@ -33,15 +33,22 @@ endif
 
 ifdef CONFIG_RALINK_RT6855
 ifdef CONFIG_RT_3052_ESW
-IGMP_PROXY_OBJ+= rtGSW.o rt3052_reg.o
+IGMP_PROXY_OBJ+= ralink.o rtGSW.o rt3052_reg.o
 CFLAGS= -I$(ROOTDIR)/$(LINUXDIR)/include -DRALINK_ESW_SUPPORT
 endif
 endif
 
 ifdef CONFIG_RALINK_RT6855A
 ifdef CONFIG_RT_3052_ESW
-IGMP_PROXY_OBJ+= rtGSW.o rt3052_reg.o
+IGMP_PROXY_OBJ+= ralink.o rtGSW.o rt3052_reg.o
 CFLAGS += -I$(ROOTDIR)/$(LINUXDIR)/drivers/net/raeth -DRALINK_ESW_SUPPORT
+endif
+endif
+
+ifdef CONFIG_RALINK_MT7620
+ifdef CONFIG_RT_3052_ESW
+IGMP_PROXY_OBJ+= ralink.o rtGSW.o rt3052_reg.o
+CFLAGS= -I$(ROOTDIR)/$(LINUXDIR)/include -DRT3052_SUPPORT
 endif
 endif
 
