@@ -1803,6 +1803,7 @@ static void rtl_link_status_changed()
 	    /* send SIGUSR1 to dhcp client
 	     * read udhcpc pid from file, and send signal  USR2,USR1 to get a new IP
 	    */
+	    printk("RTL: Link WAN Status Changed. Call DHCP client.");
 	    fp = filp_open("/var/run/udhcpc.pid", O_RDONLY, 0);
 	    if (IS_ERR(fp))
 		return;
