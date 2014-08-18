@@ -2014,7 +2014,7 @@
 51) kernel: sched: decrease user max rt_prio to 10, this reducing the size of the O(1) scheduler arrays (small save ticks).<br>
 52) kernel: hw_nat: small optimize, fix need drop magic tag and mark unhit in ip6 local output.<br>
 53) kernel: hw_nat: conntrack: correct skip v6 packets in conntrack_in (for hw_nat v2).<br>
-54) kernel: raeth: implement ondemand wan status chec for devices with external rtl switch (example N56U).<br>
+54) kernel: raeth: implement ondemand wan status check for devices with external rtl switch (example N56U).<br>
 <br>
 <br>
 <br>
