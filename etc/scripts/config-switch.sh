@@ -195,11 +195,17 @@ start_sw_config
 # Internal 3052 ESW
 ##############################################################################
 if [ "$CONFIG_RT_3052_ESW" != "" ]; then
-    SWITCH_MODE=2
+
+    if [ "$RALINK_MT7620" != "" ]; then
+	SWITCH_MODE=3
+    else
+	SWITCH_MODE=2
+    fi
+
     configs_system_vlans
-    if [ ! -f /var/run/goahead.pid ]; then
+    if [ ! -f /var/run/goahead.pid ] && [ "$RALINK_MT7620" = "" ]; then
 	######################################################################
-	# workaroud for dir-300NRU and some devices
+	# workaroud for dir-300NRU and some ithers devices
 	# with not correct configured from uboot
 	# need only start boot
 	######################################################################
