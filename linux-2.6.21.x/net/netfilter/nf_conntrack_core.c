@@ -13,6 +13,7 @@
 
 #include <linux/types.h>
 #include <linux/netfilter.h>
+#include <linux/netfilter_ipv6.h>
 #include <linux/module.h>
 #include <linux/skbuff.h>
 #include <linux/proc_fs.h>
@@ -1121,8 +1122,14 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 	/*
 	 * skip ALG and some proto from hardware offload
-	 */
-	if (pf == PF_INET && hooknum != NF_IP_LOCAL_OUT && FOE_ALG(*pskb) == 0 && (skip_offload || is_local_svc(protonum))) {
+	 * hw_nat v2 need correct check v6 packets for exclude (nf_conntrack_in called by ipv6_conntrack_in with pf == PF_INET6)
+	 * hw_nat v1 not correct support v6 offload - allways skip it by is_local_svc */
+#ifdef CONFIG_IPV6
+	if (((pf == PF_INET && hooknum != NF_IP_LOCAL_OUT) || (pf == PF_INET6 && hooknum != NF_IP6_LOCAL_OUT))
+#else
+	if (pf == PF_INET && hooknum != NF_IP_LOCAL_OUT
+#endif
+	    && FOE_ALG(*pskb) == 0 && (skip_offload || is_local_svc(protonum))) {
 	    if (IS_SPACE_AVAILABLED(*pskb) && IS_MAGIC_TAG_VALID(*pskb))
 		FOE_ALG(*pskb)=1;
 	}
