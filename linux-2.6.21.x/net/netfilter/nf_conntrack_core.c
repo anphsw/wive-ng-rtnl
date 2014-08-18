@@ -144,7 +144,7 @@ static inline unsigned int is_local_svc(u_int8_t protonm)
 	    and mark as interested by ALG  for correct tracking this */
 	switch (protonm) {
 	    case IPPROTO_IPIP:
-#ifndef CONFIG_HNAT_V2
+#if defined(CONFIG_IPV6) && defined(RA_HW_NAT_IPV6)
 	    case IPPROTO_IPV6:
 #endif
 	    case IPPROTO_ICMP:
@@ -1124,7 +1124,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 	 * skip ALG and some proto from hardware offload
 	 * hw_nat v2 need correct check v6 packets for exclude (nf_conntrack_in called by ipv6_conntrack_in with pf == PF_INET6)
 	 * hw_nat v1 not correct support v6 offload - allways skip it by is_local_svc */
-#ifdef CONFIG_IPV6
+#if defined(CONFIG_IPV6) && defined(RA_HW_NAT_IPV6)
 	if (((pf == PF_INET && hooknum != NF_IP_LOCAL_OUT) || (pf == PF_INET6 && hooknum != NF_IP6_LOCAL_OUT))
 #else
 	if (pf == PF_INET && hooknum != NF_IP_LOCAL_OUT

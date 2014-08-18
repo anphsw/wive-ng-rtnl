@@ -2012,6 +2012,7 @@
 49) kernel: imq: automatic exclude redirected to imq traffic from PPE and FastNat.<br>
 50) kernel: sched: decrease user max rt_prio to 10, this reducing the size of the O(1) scheduler arrays (small save ticks).<br>
 51) kernel: hw_nat: small optimize, fix need drop magic tag and mark unhit in ip6 local output.<br>
+52) kernel: hw_nat: conntrack: correct skip v6 packets in conntrack_in (for hw_nat v2).<br>
 <br>
 <br>
 <br>
