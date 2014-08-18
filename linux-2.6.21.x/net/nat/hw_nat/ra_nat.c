@@ -925,6 +925,15 @@ static int32_t PpeParseLayerInfo(struct sk_buff * skb)
 	memcpy(PpeParseResult.smac, eth->h_source, ETH_ALEN);
 	PpeParseResult.eth_type = eth->h_proto;
 
+#if defined (CONFIG_RALINK_RT3052) || defined(HWNAT_SKIP_MCAST_BCAST)
+	/* we cannot speed up multicase packets because both wire and
+	 * wireless PCs might join same multicast group.
+	 */
+	if(is_multicast_ether_addr(&eth->h_dest[0])) {
+		return 1;
+	}
+#endif
+
 	if (is8021Q(PpeParseResult.eth_type) || isSpecialTag(PpeParseResult.eth_type) || isHwVlanTx(skb)) {
 #if defined (CONFIG_RAETH_HW_VLAN_TX) && !defined (CONFIG_RAETH_GMAC2)
 		PpeParseResult.vlan1_gap = 0;
