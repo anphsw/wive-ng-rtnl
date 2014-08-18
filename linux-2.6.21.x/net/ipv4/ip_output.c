@@ -1267,6 +1267,11 @@ int ip_push_pending_frames(struct sock *sk)
 	skb->priority = sk->sk_priority;
 	skb->dst = dst_clone(&rt->u.dst);
 
+#if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
+	FOE_MAGIC_TAG(skb) = 0;
+	FOE_AI(skb) = UN_HIT;
+#endif
+
 	/* Netfilter gets whole the not fragmented skb. */
 	err = NF_HOOK(PF_INET, NF_IP_LOCAL_OUT, skb, NULL,
 		      skb->dst->dev, dst_output);
