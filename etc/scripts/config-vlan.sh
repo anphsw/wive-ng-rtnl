@@ -367,7 +367,7 @@ config6855Esw()
 		#VLAN member port
 		switch vlan set 0 1 11110111
 		switch vlan set 1 2 00001011
-	if [ "$1" = "LLLLWW" ]; then
+	elif [ "$1" = "LLLLWW" ]; then
 		#set PVID
 		switch reg w 2014 10001 #port0
 		switch reg w 2114 10001 #port1
