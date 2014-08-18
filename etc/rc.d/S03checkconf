@@ -19,7 +19,7 @@ start() {
     if [ "$IS_WIVE" = "YES" ]; then
 	$LOG ">>>> NORMAL BOOT <<<<"
     else
-	$LOG "Firmware crashed or non wive installed"
+	$LOG "First boot, firmware trunclated or before burn not wive installed"
 	if [ -f /bin/eth_mac ]; then
 	    $LOG "Try read mac from old factory"
 	    RALINKMAC="00:0C:43"
