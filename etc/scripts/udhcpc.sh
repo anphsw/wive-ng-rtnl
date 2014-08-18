@@ -73,7 +73,12 @@ case "$1" in
 		# Reset switch to uplink touch
 		$LOG "Restart WAN switch port."
 		/etc/scripts/config-vlan.sh WWWWW
+	    elif [ "$CONFIG_MAC_TO_MAC_MODE" != "" ] && [ "$CONFIG_RAETH_GMAC2" != "" ]; then
+		/etc/scripts/config-switch.sh
 	    fi
+	    # reconfigure wan after switch reset
+	    service wan restart &
+	    exit 0
 	elif [ "$OperationMode" = "2" ] || [ "$OperationMode" = "3" ]; then
 	    # Try reconnect at lease failed
 	    $LOG "Reconnect to AP if need."
