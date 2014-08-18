@@ -130,7 +130,7 @@ elif [ "$MODE" = "RT3662-2T2R-5G-USB" ] ; then
 elif [ "$MODE" = "MT7620-2T2R-USB-8M" ] ; then
     cp -fv $ROOTDIR/configs/kernel/config-kernel-MT7620-2T2R-USB-8M	$ROOTDIR/linux/.config
     cp -fv $ROOTDIR/configs/all/config-busybox-USB-8M			$ROOTDIR/user/busybox/.config
-    cp -fv $ROOTDIR/configs/all/config-config-5G-USB-8M			$ROOTDIR/config/.config
+    cp -fv $ROOTDIR/configs/all/config-config-USB-8M			$ROOTDIR/config/.config
     cp -fv $ROOTDIR/configs/all/config-lib				$ROOTDIR/lib/.config
 else
     echo "Config files not found."
