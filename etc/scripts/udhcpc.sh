@@ -76,8 +76,12 @@ case "$1" in
 	    elif [ "$CONFIG_MAC_TO_MAC_MODE" != "" ] && [ "$CONFIG_RAETH_GMAC2" != "" ]; then
 		/etc/scripts/config-switch.sh
 	    fi
-	    # reconfigure wan after switch reset
-	    service wan restart &
+	    $LOG "Reconfigure wan after switch reset"
+	    service wan restart
+	    if [ "$vpnEnabled" = "on" ]; then
+		$LOG "Restart vpn helpers"
+		service vpnhelper restart
+	    fi
 	    exit 0
 	elif [ "$OperationMode" = "2" ] || [ "$OperationMode" = "3" ]; then
 	    # Try reconnect at lease failed
