@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # Linux kernel version: 
-# Thu Jul  3 02:48:48 2014
+# Mon Aug 18 18:37:01 2014
 #
 CONFIG_MIPS=y
 
@@ -1593,6 +1593,7 @@ CONFIG_GE2_RGMII_FORCE_1000=y
 # CONFIG_GE2_RGMII_AN is not set
 CONFIG_MAC_TO_MAC_MODE=y
 CONFIG_RAETH_SNMPD=y
+CONFIG_RAETH_DHCP_TOUCH=y
 # CONFIG_RAETH_READ_MAC_FROM_MTD is not set
 # CONFIG_RAETH_MEMORY_OPTIMIZATION is not set
 CONFIG_RAETH_DISABLE_TX_TIMEO=y

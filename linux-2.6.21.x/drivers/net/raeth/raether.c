@@ -47,16 +47,33 @@
 #include "../../../net/nat/hw_nat/ra_nat.h"
 #endif
 
+#ifdef CONFIG_PSEUDO_SUPPORT
+static unsigned long wan_prev_jiffies;
 #ifdef CONFIG_RALINK_GPIO_LED_WAN
 #include <linux/ralink_gpio.h>
 ralink_gpio_led_info wan_led;
 extern int ralink_gpio_led_set(ralink_gpio_led_info wan_led);
-static unsigned long wan_prev_jiffies;
+#endif
 #endif
 
 #ifdef CONFIG_RAETH_DHCP_TOUCH
 /* for auto lease renew at cable connect */
 extern int send_sigusr_dhcpc;
+#ifdef CONFIG_PSEUDO_SUPPORT
+#ifdef CONFIG_RTL8367M
+#include "../rtl8367m/rtk_types.h"
+typedef enum rtk_port_linkStatus_e
+{
+    PORT_LINKDOWN = 0,
+    PORT_LINKUP,
+    PORT_LINKSTATUS_END
+} rtk_port_linkStatus_t;
+
+extern rtk_api_ret_t asic_status_link_ports_wan(rtk_port_linkStatus_t *pLinkStatus);
+static int old_wan_port_link;
+static void rtl_link_status_changed(struct net_device *dev);
+#endif
+#endif
 #endif
 
 #ifdef CONFIG_VLAN_8021Q_DOUBLE_TAG
@@ -1032,6 +1049,12 @@ static int rt2880_eth_send(struct net_device* dev, struct sk_buff *skb, int gmac
 #ifdef CONFIG_PSEUDO_SUPPORT
 		if (gmac_no == 2) {
 			if (ei_local->PseudoDev != NULL) {
+#if defined(CONFIG_RAETH_DHCP_TOUCH) && defined(CONFIG_RTL8367M)
+				/* check wan status changed every try send pkts
+			         * this work as ondemand wan check for touch userspace if link down
+				*/
+				rtl_link_status_changed(dev);
+#endif
 				pAd = netdev_priv(ei_local->PseudoDev);
 				pAd->stat.tx_errors++;
 			}
@@ -1045,13 +1068,19 @@ static int rt2880_eth_send(struct net_device* dev, struct sk_buff *skb, int gmac
 	if (gmac_no == 2) {
 		if (ei_local->PseudoDev != NULL) {
 			pAd = netdev_priv(ei_local->PseudoDev);
+			if ((jiffies - wan_prev_jiffies) >= (HZ>>4)) {
 #ifdef CONFIG_RALINK_GPIO_LED_WAN
-			if ((jiffies - wan_prev_jiffies) >= (HZ>>3)) {
 			    /* blink led */
 			    ralink_gpio_led_set(wan_led);
+#endif
+#if defined(CONFIG_RAETH_DHCP_TOUCH) && defined(CONFIG_RTL8367M)
+			    /* check wan status changed every try send pkts
+			     * this work as ondemand wan check for touch userspace if link down
+			    */
+			    rtl_link_status_changed(dev);
+#endif
 			    wan_prev_jiffies = jiffies;
 			}
-#endif
 			pAd->stat.tx_packets++;
 			pAd->stat.tx_bytes += length;
 		}
@@ -1477,7 +1506,6 @@ static struct net_device_stats *ra_get_stats(struct net_device *dev)
 }
 
 #ifdef CONFIG_RAETH_DHCP_TOUCH
-#if defined (CONFIG_RT_3052_ESW)
 void kill_sig_workq(struct work_struct *work)
 {
 	struct file *fp;
@@ -1509,7 +1537,6 @@ void kill_sig_workq(struct work_struct *work)
 	filp_close(fp, NULL);
 
 }
-#endif
 #endif
 
 ///////////////////////////////////////////////////////////////////
@@ -1750,6 +1777,34 @@ static irqreturn_t FASTPATH ei_interrupt(int irq, void *dev_id, struct pt_regs *
 
 	return IRQ_HANDLED;
 }
+
+#ifdef CONFIG_RTL8367M
+static void rtl_link_status_changed(struct net_device *dev)
+{
+#ifdef CONFIG_RAETH_DHCP_TOUCH
+    END_DEVICE *ei_local = netdev_priv(dev);
+    static rtk_port_linkStatus_t wan_port_link;
+    int32 retVal;
+
+    /* get status */
+    retVal = asic_status_link_ports_wan(&wan_port_link);
+    if (retVal != 0)
+	return;
+
+    /* current status is up */
+    if (wan_port_link == PORT_LINKUP) {
+	/* is status changed */
+	if(wan_port_link != old_wan_port_link) {
+	    /* send SIGUSR1 to dhcp client */
+	    schedule_work(&ei_local->kill_sig_wq);
+	    printk(KERN_INFO "RTLSWITCH: WAN Port Link Status Changed\n");
+	}
+	old_wan_port_link=PORT_LINKUP;
+    } else if (wan_port_link == PORT_LINKDOWN)
+	old_wan_port_link=PORT_LINKDOWN;
+#endif
+}
+#endif
 
 #if defined (CONFIG_RALINK_RT6855) || defined(CONFIG_RALINK_RT6855A) || \
     defined(CONFIG_RALINK_MT7620)
@@ -3155,27 +3210,23 @@ static int ei_open(struct net_device *dev)
 #if defined (CONFIG_RT_3052_ESW)
 	*((volatile u32 *)(RALINK_INTCL_BASE + 0x34)) = (1<<17);
 	*((volatile u32 *)(ESW_IMR)) &= ~(ESW_INT_ALL);
-#ifdef CONFIG_RAETH_DHCP_TOUCH
-	INIT_WORK(&ei_local->kill_sig_wq, kill_sig_workq);
-#endif
 	err = request_irq(SURFBOARDINT_ESW, esw_interrupt, IRQF_DISABLED, "Ralink_ESW", dev);
 
 	if (err)
 	    return err;
 #endif // CONFIG_RT_3052_ESW //
-
-
 #ifdef DELAY_INT
 	sysRegWrite(DLY_INT_CFG, DELAY_INT_INIT);
     	sysRegWrite(FE_INT_ENABLE, FE_INT_DLY_INIT);
 #else
     	sysRegWrite(FE_INT_ENABLE, FE_INT_ALL);
 #endif
-
+#ifdef CONFIG_RAETH_DHCP_TOUCH
+	INIT_WORK(&ei_local->kill_sig_wq, kill_sig_workq);
+#endif
 #ifndef CONFIG_RAETH_DISABLE_TX_TIMEO
  	INIT_WORK(&ei_local->reset_task, ei_reset_task);
 #endif
-
 #ifdef WORKQUEUE_BH
 #ifndef CONFIG_RAETH_NAPI
  	INIT_WORK(&ei_local->rx_wq, ei_receive_workq);
@@ -3202,7 +3253,6 @@ static int ei_open(struct net_device *dev)
         netif_poll_enable(dev);
 #endif
 #endif
-
 	spin_unlock_irqrestore(&(ei_local->page_lock), flags);
 #ifdef CONFIG_PSEUDO_SUPPORT
 	if(ei_local->PseudoDev==NULL)

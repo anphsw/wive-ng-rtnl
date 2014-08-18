@@ -355,7 +355,7 @@ int  pkt_classifier(struct sk_buff *skb,int gmac_no, int *ring_no, int *queue_no
 
     /* Bridge:: {BG,BE,VI,VO} */
     /* GateWay:: WAN: {BG,BE,VI,VO}, LAN: {BG,BE,VI,VO} */
-#if defined (CONFIG_RALINK_RT3883) && defined (CONFIG_RAETH_GMAC2)
+#if defined (CONFIG_RALINK_RT3883) && defined (CONFIG_PSEUDO_SUPPORT)
     /* 
      * 1) Bridge: 
      *    1.1) GMAC1 ONLY:
@@ -378,7 +378,7 @@ int  pkt_classifier(struct sk_buff *skb,int gmac_no, int *ring_no, int *queue_no
       defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350) || \
       defined (CONFIG_RALINK_RT6855) || defined(CONFIG_RALINK_RT6855A) || \
       defined (CONFIG_RALINK_MT7620) || defined(CONFIG_RALINK_MT7621) || \
-     (defined (CONFIG_RALINK_RT3883) && !defined(CONFIG_RAETH_GMAC2))
+     (defined (CONFIG_RALINK_RT3883) && !defined(CONFIG_PSEUDO_SUPPORT))
     /* 
      * 1) Bridge: VO->Ring3, VI->Ring2, BG->Ring1, BE->Ring0 
      * 2) GateWay:
@@ -440,14 +440,14 @@ int  pkt_classifier(struct sk_buff *skb,int gmac_no, int *ring_no, int *queue_no
 	    *ring_no = AcToRing_GE1Map[lan_traffic][ac];
 	}
     }else { //GMAC2
-#if defined (CONFIG_RALINK_RT3883) && defined (CONFIG_RAETH_GMAC2)
+#if defined (CONFIG_RALINK_RT3883) && defined (CONFIG_PSEUDO_SUPPORT)
 	*ring_no = AcToRing_GE2Map[ac];
 #endif
     }
 
 
     /* Set Port No - PN field in Tx Descriptor*/
-#if defined(CONFIG_RAETH_GMAC2)
+#if defined(CONFIG_PSEUDO_SUPPORT)
     *port_no = gmac_no;
 #else
     if(bridge_traffic) {
@@ -459,12 +459,9 @@ int  pkt_classifier(struct sk_buff *skb,int gmac_no, int *ring_no, int *queue_no
 	    *port_no = 2;
 	}
     }
-#endif // CONFIG_RAETH_GMAC2 //
-
 #endif
-
+#endif
     return 1;
-
 }
 
 
