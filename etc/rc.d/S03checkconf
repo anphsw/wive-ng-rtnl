@@ -25,7 +25,7 @@ start() {
 	    RALINKMAC="00:0C:43"
 	    ISDEFWMAC=`eth_mac r wan | grep -i "$RALINKMAC" -c`
 	    ISDEFLMAC=`eth_mac r lan | grep -i "$RALINKMAC" -c`
-	    if [ "$ISDEFWMAC" != "1" ] && [ "$ISDEFWMAC" != "1" ]; then
+	    if [ "$ISDEFWMAC" != "1" ] && [ "$ISDEFLMAC" != "1" ]; then
 		$LOG "Store original mac`s."
 		OLDMACWAN=`eth_mac r wan`
 		OLDMACLAN=`eth_mac r lan`
