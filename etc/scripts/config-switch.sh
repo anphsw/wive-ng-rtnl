@@ -36,6 +36,8 @@ start_sw_config() {
 	PROC="/proc/rt6855/gmac"
     elif [ -f /proc/rt63365/gmac ]; then
 	PROC="/proc/rt63365/gmac"
+    elif [ -f /proc/mt7620/gmac ]; then
+	PROC="/proc/mt7620/gmac"
     else
 	$LOG "No switch in system!!!"
 	PROC=
