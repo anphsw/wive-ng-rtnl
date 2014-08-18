@@ -86,6 +86,9 @@ configEsw() {
 	# Writing configuration
 	switch reg w 70 $r70
 	switch reg w 74 $r74
+
+        #clear mac table if vlan configuration changed
+        switch clear
 }
 
 restoreEsw() {
