@@ -554,9 +554,6 @@ CONFIG_USER_OPENSSL_APPS
    o  SSL/TLS Client and Server Tests
    o  Handling of S/MIME signed or encrypted mail
 
-CONFIG_USER_OPENSWAN
-  The Openswan tools and applications
-
 CONFIG_USER_PING_PING
   Diagnostic tool for testing network connections.
   Approx. binary size: 27k

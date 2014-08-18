@@ -60,10 +60,6 @@ if [ "$CONFIG_USER_GOAHEAD_LANG_EN" = "n" -a "$CONFIG_USER_GOAHEAD_LANG_ZHTW" = 
 	define_bool CONFIG_USER_GOAHEAD_LANG_EN y
 fi
 
-bool 'dhcp6'					CONFIG_USER_DHCP6
-dep_bool '  dhcp6 server'			CONFIG_USER_DHCP6_SERVER $CONFIG_USER_DHCP6
-dep_bool '  dhcp6 client'			CONFIG_USER_DHCP6_CLIENT $CONFIG_USER_DHCP6
-
 bool 'dnsmasq (DNS forwarder, DHCP server)'	CONFIG_USER_DNSMASQ
 bool 'samba server'				CONFIG_USER_SAMBA
 bool 'samba server v3'				CONFIG_USER_SAMBA3
@@ -91,13 +87,11 @@ bool 'ip6tables'				CONFIG_USER_IPTABLES_IP6TABLES
 bool 'tc'                               	CONFIG_USER_TC
 bool 'dropbear (sshd daemon)'            	CONFIG_USER_DROPBEAR
 bool 'p910nd (small printer daemon)'            CONFIG_USER_P910ND
-bool 'portmap'					CONFIG_USER_PORTMAP
 bool 'pppd'                             	CONFIG_USER_PPPD
 if [ "$CONFIG_USER_PPPD" = "y" ]; then
     bool 'pppd-chat'				CONFIG_USER_PPPD_CHAT
 fi
 bool 'xl2tp'                                  	CONFIG_USER_XL2TPD
-bool 'pppoe relay'                              CONFIG_USER_PPPPOE_RELAY
 bool 'Proxy ARP daemon'				CONFIG_USER_PARPROUTED
 bool 'ripd-zebra (RIP)' 			CONFIG_USER_ZEBRA
 bool 'snmpd(v1)'                                CONFIG_USER_SNMPD
@@ -117,20 +111,6 @@ if [ "$CONFIG_USER_WSC" = "y" ]; then
 fi
 
 bool 'openssl'					CONFIG_USER_OPENSSL
-bool 'openswan-apps'  CONFIG_USER_OPENSWAN
-if [ "$CONFIG_USER_OPENSWAN" = "y" ]; then
-      bool '  pluto'          CONFIG_USER_OPENSWAN_PLUTO_PLUTO
-      bool '  whack'          CONFIG_USER_OPENSWAN_PLUTO_WHACK
-      bool '  ranbits'        CONFIG_USER_OPENSWAN_UTILS_RANBITS
-      bool '  rsasigkey'      CONFIG_USER_OPENSWAN_UTILS_RSASIGKEY
-      bool '  eroute'         CONFIG_USER_OPENSWAN_KLIPS_EROUTE
-      bool '  klipsdebug'     CONFIG_USER_OPENSWAN_KLIPS_KLIPSDEBUG
-      bool '  spi'            CONFIG_USER_OPENSWAN_KLIPS_SPI
-      bool '  spigrp'         CONFIG_USER_OPENSWAN_KLIPS_SPIGRP
-      bool '  tncfg'          CONFIG_USER_OPENSWAN_KLIPS_TNCFG
-fi
-define_bool CONFIG_LIB_LIBGMP_FORCE $CONFIG_USER_OPENSWAN
-
 bool 'wpa-supplicant'				CONFIG_USER_WPA_SUPPLICANT
 if [ "$CONFIG_USER_WPA_SUPPLICANT" = "y" ]; then
 	define_bool CONFIG_USER_OPENSSL y
@@ -150,11 +130,7 @@ mainmenu_option next_comment
 comment 'Miscellaneous Applications'
 
 bool 'busybox'                  CONFIG_USER_BUSYBOX_BUSYBOX
-bool 'bonnie++'			CONFIG_USER_BONNIE
 bool 'ethtool-6.0'		CONFIG_USER_ETHTOOL
-bool 'gdbreplay'		CONFIG_USER_GDB_GDBREPLAY
-bool 'gdbserver'		CONFIG_USER_GDB_GDBSERVER
-bool 'netstat-nat'              CONFIG_USER_NETSTAT_NAT
 bool 'ntfs-3g'			CONFIG_USER_NTFS3G
 bool 'ntfsprogs'		CONFIG_USER_NTFSPROGS
 if [ "$CONFIG_USER_NTFS3G" = "y" ]; then
@@ -167,12 +143,6 @@ fi
 bool 'strace'			CONFIG_USER_STRACE_STRACE
 bool 'tcpdump'			CONFIG_USER_TCPDUMP
 bool 'Chillispot'		CONFIG_USER_CHILLISPOT
-bool 'lspci'			CONFIG_USER_PCIUTIL_LSPCI
-bool 'setpci'			CONFIG_USER_PCIUTIL_SETPCI
-if [ "$CONFIG_USER_PCIUTIL_LSPCI" = "y" -o "$CONFIG_USER_PCIUTIL_SETPCI" = "y" ]; then
-    define_bool CONFIG_LIB_ZLIB_FORCE y
-fi
-
 endmenu
 
 #############################################################################

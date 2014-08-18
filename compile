@@ -31,6 +31,8 @@ fi
 #WR-N for full and WR-NL for ligth HW
 if [ "$MODE" = "MT7620-2T2R-USB-8M" ]; then
     DEVNAME="Wive_WR-300NMU"
+elif [ "$MODE" = "MT7620-2T2R-8M" ]; then
+    DEVNAME="Wive_WR-300NM"
 elif [ "$MODE" = "RT3662-2T2R-5G-USB" ]; then
     DEVNAME="Wive_WR-300NU"
 elif [ "$MODE" = "RT3052-2T2R-USB" ]; then
@@ -126,6 +128,11 @@ elif [ "$MODE" = "RT3662-2T2R-5G-USB" ] ; then
     cp -fv $ROOTDIR/configs/kernel/config-kernel-RT3662-2T2R-5G-USB-8M	$ROOTDIR/linux/.config
     cp -fv $ROOTDIR/configs/all/config-busybox-USB-8M			$ROOTDIR/user/busybox/.config
     cp -fv $ROOTDIR/configs/all/config-config-5G-USB-8M			$ROOTDIR/config/.config
+    cp -fv $ROOTDIR/configs/all/config-lib				$ROOTDIR/lib/.config
+elif [ "$MODE" = "MT7620-2T2R-8M" ] ; then
+    cp -fv $ROOTDIR/configs/kernel/config-kernel-MT7620-2T2R-8M		$ROOTDIR/linux/.config
+    cp -fv $ROOTDIR/configs/all/config-busybox				$ROOTDIR/user/busybox/.config
+    cp -fv $ROOTDIR/configs/all/config-config-8M			$ROOTDIR/config/.config
     cp -fv $ROOTDIR/configs/all/config-lib				$ROOTDIR/lib/.config
 elif [ "$MODE" = "MT7620-2T2R-USB-8M" ] ; then
     cp -fv $ROOTDIR/configs/kernel/config-kernel-MT7620-2T2R-USB-8M	$ROOTDIR/linux/.config
