@@ -64,8 +64,8 @@ void rtwifi_fini(void);
 void rtwifi_init(void);
 #endif
 
-
 // function prototype
+extern uint32_t WanPort;
 static void update_group_port_map(struct group *entry);
 void updateMacTable(struct group *entry, int delay_deleted);
 static int	portLookUpByIP(char *ip);
@@ -482,13 +482,7 @@ void remove_multicast_ip(uint32 m_ip_addr)
 			}
 		}
 
-#ifndef CONFIG_RAETH_SPECIAL_TAG
 		updateMacTable(entry, DELETED);
-#else
-#if defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_MT7628)
-		ZeroEntriesBarrier(entry, DELENTRY);
-#endif
-#endif
 		// free myself
 		free(entry);
 	}else if(entry->port_map != new_portmap){
@@ -511,17 +505,11 @@ void remove_all_groups(void)
 		del = pos;
 		pos = pos->next;
 		del->port_map = 0x0;
-#ifndef CONFIG_RAETH_SPECIAL_TAG
 		updateMacTable(del, DELETED);
-#else
-#if defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_MT7628)
-		ZeroEntriesBarrier(del, DELENTRY);
-#endif
-#endif
 		remove_all_members(del);
 		free(del);
 	}
-	group_list =  NULL;	
+	group_list =  NULL;
 }
 
 static void update_group_port_map(struct group *entry)
@@ -534,7 +522,7 @@ static void update_group_port_map(struct group *entry)
 			my_log(LOG_WARNING, 0, "****************************************");
 			my_log(LOG_WARNING, 0, "*** rtGSW: can't find %s's port number.", inetFmt(htonl(pos->ip_addr), s1));
 			my_log(LOG_WARNING, 0, "****************************************");
-			new_portmap =  (0x5f & ~(WANPORT)); // All Lan ports
+			new_portmap =  (0x5f & ~(WanPort)); // All Lan ports
 			break;
 		}else{
 			new_portmap = new_portmap | (0x1 << pos->port_num);
@@ -542,19 +530,11 @@ static void update_group_port_map(struct group *entry)
 		}
 	}
 	if(entry->port_map != new_portmap){
-#ifndef CONFIG_RAETH_SPECIAL_TAG
 		entry->port_map = new_portmap;
 		updateMacTable(entry, ZEROED);
-#else
-#if defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_MT7628)
-		updateMacTable_specialtag(entry, new_portmap, ZEROED);
-		entry->port_map = new_portmap;
-#endif
-#endif
 	}
 }
 
-#if 1
 void insert_multicast_ip(uint32 m_ip_addr, uint32 u_ip_addr)
 {
 	char cmd[128];
@@ -572,12 +552,6 @@ void insert_multicast_ip(uint32 m_ip_addr, uint32 u_ip_addr)
 			return;
 #ifdef WIFI_IGMPSNOOP_SUPPORT
 		rtwifi_insert_multicast_ip(m_ip_addr);
-#endif
-#ifdef CONFIG_RAETH_SPECIAL_TAG
-#if defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_MT7628)
-		/* build a zero entry barrier for this new MC group in mac tables */
-		ZeroEntriesBarrier(entry, ADDENTRY);
-#endif
 #endif
 		if(group_list)
 			entry->next = group_list;
@@ -629,14 +603,14 @@ void insert_multicast_ip(uint32 m_ip_addr, uint32 u_ip_addr)
 
 	return;
 }
-#endif
+
 static void create_all_hosts_rule(void)
 {
 	struct group entry	= {
 		.a1 = 0x00,
 		.a2 = 0x00,
 		.a3 = 0x01,
-		.port_map = (0x5f & ~(WANPORT)),	/* All LAN ports */
+		.port_map = (0x5f & ~(WanPort)),	/* All LAN ports */
 		.next 		= NULL
 	};
 	updateMacTable(&entry, ZEROED);
@@ -721,10 +695,6 @@ typedef struct _RT_802_11_MAC_ENTRY {
 	unsigned int			LastRxRate;
 	int						StreamSnr[3];
 	int						SoundingRespSnr[3];
-#if 0
-	short					TxPER;
-	short					reserved;
-#endif
 } RT_802_11_MAC_ENTRY;
 
 #if defined (CONFIG_RT2860V2_AP_WAPI) || defined (CONFIG_RT3090_AP_WAPI) || \
@@ -748,7 +718,7 @@ void rtwifi_init(void)
 	char cmd[128];
 	for(i=0; i<rtwifi_intf_count ; i++){
 		sprintf(cmd, "iwpriv %s set IgmpSnEnable=1", rtwifi_intfs[i]);
-printf("%s\n", cmd);
+		printf("%s\n", cmd);
 		system(cmd);
 	}
 }
@@ -759,7 +729,7 @@ void rtwifi_fini(void)
 	char cmd[128];
 	for(i=0; i<rtwifi_intf_count ; i++){
 		sprintf(cmd, "iwpriv %s set IgmpSnEnable=0", rtwifi_intfs[i]);
-printf("%s\n", cmd);
+		printf("%s\n", cmd);
 		system(cmd);
 	}
 }
@@ -771,7 +741,7 @@ void rtwifi_insert_member(uint32 m_ip_addr, uint32 u_ip_addr)
 	if( arpLookUp(inetFmt( htonl(u_ip_addr), mac), s1) != -1){
 		for(i=0; i<rtwifi_intf_count ; i++){
 			sprintf(cmd, "iwpriv %s set IgmpAdd=%s-%s", rtwifi_intfs[i], inetFmt(htonl(m_ip_addr), s1), mac);
-printf("%s\n", cmd);
+			printf("%s\n", cmd);
 			system(cmd);
 		}
 	}else
@@ -785,7 +755,7 @@ void rtwifi_insert_multicast_ip(uint32 m_ip_addr)
 	char cmd[128];
 	for(i=0; i<rtwifi_intf_count ; i++){
 		sprintf(cmd, "iwpriv %s set IgmpAdd=%s", rtwifi_intfs[i], inetFmt(htonl(m_ip_addr), s1));
-printf("%s\n", cmd);
+		printf("%s\n", cmd);
 		system(cmd);
 	}
 }
@@ -796,7 +766,7 @@ void rtwifi_remove_multicast_ip(uint32 m_ip_addr)
 	char cmd[128];
 	for(i=0; i<rtwifi_intf_count ; i++){
 		sprintf(cmd, "iwpriv %s set IgmpDel=%s", rtwifi_intfs[i], inetFmt(htonl(m_ip_addr), s1));
-printf("%s\n", cmd);
+		printf("%s\n", cmd);
 		system(cmd);
 	}
 }
@@ -808,7 +778,7 @@ void rtwifi_remove_member(uint32 m_ip_addr, uint32 u_ip_addr)
 	if( arpLookUp(inetFmt(htonl(u_ip_addr), s1), mac) != -1){
 		for(i=0; i<rtwifi_intf_count ; i++){
 			sprintf(cmd, "iwpriv %s set IgmpDel=%s-%s", rtwifi_intfs[i], inetFmt(htonl(m_ip_addr), s1), mac);
-printf("%s\n", cmd);
+			printf("%s\n", cmd);
 			system(cmd);
 		}
 	}else
@@ -839,13 +809,8 @@ int _WiFiSTALookUPByMac(char *wifi, unsigned int mac1, unsigned int mac2)
 		my_log(LOG_WARNING, 0, "ioctl sock failed!");
 		return 0;
 	}
-#if 1 //def CONFIG_RT2860V2_AP_V24_DATA_STRUCTURE
 	if (ioctl(s, RTPRIV_IOCTL_GET_MAC_TABLE_STRUCT, &iwr) < 0) {
 		my_log(LOG_WARNING, 0, "ioctl -> RTPRIV_IOCTL_GET_MAC_TABLE_STRUCT failed!");
-#else
-	if (ioctl(s, RTPRIV_IOCTL_GET_MAC_TABLE, &iwr) < 0) {
-		my_log(LOG_WARNING, 0, "ioctl -> RTPRIV_IOCTL_GET_MAC_TABLE failed!");
-#endif
 		close(s);
 		return 0;
 	}
@@ -890,7 +855,6 @@ int WiFiSTALookUPByMac(char *mac)
 	return 0;
 }
 #endif
-
 
 static void strip_mac(char *mac)
 {
@@ -947,7 +911,7 @@ static int portLookUpByIP(char *ip)
 		my_log(LOG_WARNING, 0, "*** rtGSW: Warning, Can't get mac address for %s", ip);
 		// send an udp then wait.
 		sendUDP(ip);
-		usleep(20000);	
+		usleep(20000);
 		if(arpLookUp(ip, mac) == -1){
 			my_log(LOG_WARNING, 0, "*** rtGSW: Give up for %s", ip);
 			// means flooding.

@@ -32,6 +32,7 @@
 #define LAN_VLAN_ID		1
 #define WAN_VLAN_ID		2
 
+extern uint32_t WanPort;
 struct mac_table{
 	unsigned int		mac1;		// 4 byte mac address
 	unsigned short int	mac2;		// 2 byte mac address
@@ -288,15 +289,15 @@ void updateMacTable(struct group *entry, int delay_delete)
 		/*
 		 * new an additional entry for IGMP Inquery/Report on WAN.
 		 */
-		if(WANPORT){
+		if(WanPort){
 		        value = value1;
 			value = (value & 0xffffff00);
 			value |= ((WAN_VLAN_ID) << 0); //WAN ID ==2
-	
+
 			reg_write(REG_ESW_WT_MAC_ATA2, value);
 			printf("WAN REG_ESW_WT_MAC_ATA2 is 0x%x\n\r",value);
 
-			value1 = (WANPORT << 4);
+			value1 = (WanPort << 4);
 			value1 |= (0x1 << 10);//port 6 cpu port
 
 			value1 |= (0xff << 24); //w_age_field
@@ -311,37 +312,6 @@ void updateMacTable(struct group *entry, int delay_delete)
 			printf("for wan port is done\n\r");
 		}
 	}else{
-#if 0
-		if(delay_delete == ZEROED){
-			/*
-			 * Can't delete this entry too early.
-			 *
-			 * Because multicast packets from WAN may still come even receiver on LAN has left, and
-			 * at the same time the kernel routing rule is not yet deleted by igmpproxy.
-			 *
-			 * If we delete mac entry earier than deleting routing rule (by igmpproxy),
-			 * these packets would be forwarded to "br0" and then flood on eth2.1(vlan1) due to our 
-			 * default policy -- "Broadcast if not found". So we may see flooding packets on
-			 * LAN until the kernel routing rule is deleted.
-			 *
-			 * So we keep the mac entry alive to avoid the our default policy until the igmp group
-			 * is actually eliminated.
-			 */
-
-			/*
-			 * zero the bitmap entry
-			 */
-
-			value = (0xff << 24); //w_age_field
-			value |= (0x3<< 2); //static
-			reg_write(REG_ESW_WT_MAC_ATWD, value);
-			printf("delay delete = zer0 REG_ESW_WT_MAC_ATWD is 0x%x\n\r",value);
-			  
-			value = 0x8001;  //w_mac_cmd
-			reg_write(REG_ESW_WT_MAC_ATC, value);
-			wait_switch_done();
-		}else if (delay_delete == DELETED){
-#endif
 			/*
 			 * delete the entry
 			 */
@@ -368,9 +338,6 @@ void updateMacTable(struct group *entry, int delay_delete)
 			value = 0x8001;  //w_mac_cmd
 			reg_write(REG_ESW_WT_MAC_ATC, value);
 			wait_switch_done();
-#if 0
-		}
-#endif
 	}
 }
 

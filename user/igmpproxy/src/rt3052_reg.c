@@ -27,14 +27,11 @@
 #include <errno.h>
 
 #define PAGE_SIZE	0x1000 	/* 4096 */
-
-#define READMODE	0x0
-#define WRITEMODE	0x1
-#define WRITE_DELAY	100			/* ms */
+#include "ralink.h"
 
 unsigned int rareg(int mode, unsigned int addr, long long int new_value)
 {
-	int fd; 
+	int fd;
 	unsigned int round;
 	void *start;
 	volatile unsigned int *v_addr;
@@ -42,9 +39,9 @@ unsigned int rareg(int mode, unsigned int addr, long long int new_value)
 
 	fd = open("/dev/mem", O_RDWR | O_SYNC );
 	if ( fd < 0 ) { 
-		printf("open file /dev/mem error. %s\n", strerror(errno)); 
+		printf("open file /dev/mem error. %s\n", strerror(errno));
 		exit(-1);
-	} 
+	}
 
 	// round addr to PAGE_SIZE
 	round = addr;								// keep old value
@@ -53,7 +50,7 @@ unsigned int rareg(int mode, unsigned int addr, long long int new_value)
 
 	start = mmap(0, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, addr);
 	if(	(int)start == -1 ){
-		printf("mmap() failed at phsical address:%d %s\n", addr, strerror(errno)); 
+		printf("mmap() failed at phsical address:%d %s\n", addr, strerror(errno));
 		close(fd);
 		exit(-1);
 	}
@@ -74,4 +71,3 @@ unsigned int rareg(int mode, unsigned int addr, long long int new_value)
 	close(fd);
 	return rc;
 }
-

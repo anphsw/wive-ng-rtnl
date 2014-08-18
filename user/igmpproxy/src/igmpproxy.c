@@ -76,8 +76,8 @@ static int sighandled = 0;
 int         upStreamVif;
 
 #ifdef RALINK_ESW_SUPPORT
-extern void rt3052_init(int se);
-extern void rt3052_fini(void);
+extern void rt_init(int se);
+extern void rt_fini(void);
 /* wan port select */
 uint32_t WanPort = 0x1;
 #endif
@@ -172,10 +172,10 @@ int main( int ArgCn, char *ArgVc[] ) {
 	if (sw) {
 	    if(force_snooping == 0) {
         	my_log(LOG_INFO, 0, "Force igmp_snooping disable.");
-		rt3052_init(0);	/* disable snooping */
+		rt_switch_init(0);	/* disable snooping */
 	    } else {
         	my_log(LOG_INFO, 0, "Enable igmp_snooping.");
-		rt3052_init(1);		/* automatic (default) */
+		rt_switch_fini(1);	/* automatic (default) */
 	    }
 	}
 #endif
@@ -203,7 +203,7 @@ int main( int ArgCn, char *ArgVc[] ) {
 
 #ifdef RALINK_ESW_SUPPORT
 	if (sw)
-    	    rt3052_fini();
+    	    rt_fini();
 #endif
 
     // Inform that we are exiting.

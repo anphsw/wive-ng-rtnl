@@ -1,17 +1,3 @@
-
-
-
-#if defined (CONFIG_WAN_AT_P0)
-#define WANPORT			0x1			/* 0000001 */
-#define LANPORT_RANGE		{1,2,3,4}
-#elif defined (CONFIG_WAN_AT_P4)
-#define WANPORT			0x10		/* 0010000 */
-#define LANPORT_RANGE		{0,1,2,3}
-#else
-#define WANPORT			0x0			/* no wan port */
-#define LANPORT_RANGE		{0,1,2,3,4}
-#endif
-
 #define OTHER_INTERFACE				7		/* port 7  (wifi)  */
 
 /* delay mac table deletion */

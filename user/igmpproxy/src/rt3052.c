@@ -82,19 +82,14 @@
 #define ADDENTRY		1
 #define DELENTRY		2
 
-#if defined(CONFIG_RA_NAT_HW) && !defined(CONFIG_RAETH_SPECIAL_TAG)
+#if defined(CONFIG_RA_NAT_HW)
 #define LAN_VLAN_IDX              (CONFIG_RA_HW_NAT_LAN_VLANID-1)
 #define WAN_VLAN_IDX              (CONFIG_RA_HW_NAT_WAN_VLANID-1)
-#elif defined(CONFIG_RAETH_SPECIAL_TAG)
-#define LAN_VLAN_IDX              6
-#define WAN_VLAN_IDX              7
 #else
 #define LAN_VLAN_IDX              0
 #define WAN_VLAN_IDX              1
 #endif
 
-#define LANPORT_RANGE_P0        {1,2,3,4}
-#define LANPORT_RANGE_P4        {0,1,2,3}
 #define OTHER_INTERFACE		7		/* port 7  (wifi)  */
 
 extern uint32_t WanPort;
@@ -139,10 +134,6 @@ static void updateMacTable(struct group *entry, int delay_deleted);
 static int	portLookUpByIP(char *ip);
 static inline int reg_read(int offset, int *value);
 static inline int reg_write(int offset, int value);
-#ifdef CONFIG_RAETH_SPECIAL_TAG
-static void updateMacTable_specialtag(struct group *entry, unsigned char new_portmap, int delay_delete);
-static void ZeroEntriesBarrier(struct group *entry, int mode);
-#endif
 
 // global variables.
 static struct mac_table internal_mac_table[1024];
@@ -257,20 +248,6 @@ static struct group *build_entry(uint32 m_ip_addr, uint32 u_ip_addr)
 	new_entry->next = NULL;
 	return new_entry;
 }
-
-#if 0
-static struct group_member *lookup_ip_group(struct group *entry, uint32 m_ip_addr)
-{
-	struct group_member *pos = entry->members;
-	while(pos){
-		unsigned char a0 = IP_GET_LOST_MAPPING(m_ip_addr);
-		if(pos->a0 == a0)
-			return pos;
-		pos = pos->next;
-	}
-	return NULL;
-}
-#endif
 
 static struct group_member *lookup_member(struct group *entry, uint32 m_ip_addr, uint32 u_ip_addr)
 {
@@ -537,11 +514,7 @@ void remove_multicast_ip(uint32 m_ip_addr)
 			}
 		}
 
-#ifndef CONFIG_RAETH_SPECIAL_TAG
 		updateMacTable(entry, DELETED);
-#else
-		ZeroEntriesBarrier(entry, DELENTRY);
-#endif
 		// free myself
 		free(entry);
 	}else if(entry->port_map != new_portmap){
@@ -564,11 +537,7 @@ void remove_all_groups(void)
 		del = pos;
 		pos = pos->next;
 		del->port_map = 0x0;
-#ifndef CONFIG_RAETH_SPECIAL_TAG
 		updateMacTable(del, DELETED);
-#else
-		ZeroEntriesBarrier(del, DELENTRY);
-#endif
 		remove_all_members(del);
 		free(del);
 	}
@@ -593,13 +562,8 @@ static void update_group_port_map(struct group *entry)
 		}
 	}
 	if(entry->port_map != new_portmap){
-#ifndef CONFIG_RAETH_SPECIAL_TAG
 		entry->port_map = new_portmap;
 		updateMacTable(entry, ZEROED);
-#else
-		updateMacTable_specialtag(entry, new_portmap, ZEROED);
-		entry->port_map = new_portmap;
-#endif
 	}
 }
 
@@ -621,11 +585,6 @@ void insert_multicast_ip(uint32 m_ip_addr, uint32 u_ip_addr)
 #ifdef WIFI_IGMPSNOOP_SUPPORT
 		sprintf(cmd, "iwpriv ra0 set IgmpAdd=%s", inetFmt(htonl(m_ip_addr), s1));
 		system(cmd);
-#endif
-
-#ifdef CONFIG_RAETH_SPECIAL_TAG
-		/* build a zero entry barrier for this new MC group in mac tables */
-		ZeroEntriesBarrier(entry, ADDENTRY);
 #endif
 		if(group_list)
 			entry->next = group_list;
@@ -721,7 +680,7 @@ static void sync_internal_mac_table(void *argu)
 
 #define READ	0
 #define WRITE	1
-void rt3052_fini(void)
+void rt_fini(void)
 {
 	/*
 	 *  handle RT3052 registers
@@ -732,9 +691,6 @@ void rt3052_fini(void)
 	if(!snooping_enabled)
 		return;
 
-	//value = rareg(READ, 0x1011009c, 0);
-	//value = value & 0xF7FFFFFF;
-	//rareg(WRITE, 0x1011009c, value);
 	/* 10110014 */
 	value = rareg(READ, 0x10110014, 0);
 	value = value & 0xFF7FFFFF;
@@ -748,15 +704,9 @@ void rt3052_fini(void)
 
 	if(esw_fd >= 0)
 		close(esw_fd);
-
-//no need disable wifi snoop
-//#ifdef WIFI_IGMPSNOOP_SUPPORT
-//	system("iwpriv ra0 set IgmpSnEnable=0");
-//#endif
-
 }
 
-void rt3052_init(int se)
+void rt_init(int se)
 {
 	unsigned int value;
 
@@ -778,7 +728,7 @@ void rt3052_init(int se)
 	esw_fd = socket(AF_INET, SOCK_DGRAM, 0);
 	if (esw_fd < 0) {
 		perror("socket");
-		rt3052_fini();
+		rt_fini();
 		exit(0);
 	}
 
@@ -788,13 +738,7 @@ void rt3052_init(int se)
 	/* add 224.0.0.1( 01:00:5e:00:00:01) to mac table */
 	create_all_hosts_rule();
 	sync_internal_mac_table(NULL);
-
-#ifdef WIFI_IGMPSNOOP_SUPPORT
-	system("iwpriv ra0 set IgmpSnEnable=1");
-#endif
-
 }
-
 
 static int arpLookUp(char *ip, char *arp)
 {
@@ -860,120 +804,6 @@ static inline void wait_switch_done(void)
 	if (i == 20)
 		my_log(LOG_WARNING, 0, "*** RT3052: timeout.");
 }
-
-#ifdef CONFIG_RAETH_SPECIAL_TAG
-static void ZeroEntriesBarrier(struct group *entry, int mode)
-{
-	unsigned char lanport4[]=LANPORT_RANGE_P4;
-	unsigned char lanport0[]=LANPORT_RANGE_P0;
-
-	int i, value;
-	char wholestr[13];
-	char tmpstr[9];
-
-	sprintf(wholestr, "%s%02x%02x%02x", "01005e", entry->a1, entry->a2, entry->a3);
-
-	strncpy(tmpstr, wholestr, 8);
-	tmpstr[8] = '\0';
-
-	value = strtoul(tmpstr, NULL, 16);
-	reg_write(REG_ESW_WT_MAC_AD2, value);
-	strncpy(tmpstr, &wholestr[8], 4);
-	tmpstr[4] = '\0';
-	value = strtoul(tmpstr, NULL, 16);
-	reg_write(REG_ESW_WT_MAC_AD1, value);
-
-	if (WanPort == 0x1) {
-	    for(i=0; i < sizeof(lanport0)/sizeof(unsigned char); i++){
-		value = 0x1;			//w_mac_cmd
-		if(mode == ADDENTRY)
-			value |= (7 << 4);	//w_age_field
-		value |= (lanport0[i] << 7);	//w_index
-		reg_write(REG_ESW_WT_MAC_AD0, value);
-		wait_switch_done();
-	    }
-	} else {
-	    for(i=0; i < sizeof(lanport4)/sizeof(unsigned char); i++){
-		value = 0x1;			//w_mac_cmd
-		if(mode == ADDENTRY)
-			value |= (7 << 4);	//w_age_field
-		value |= (lanport4[i] << 7);	//w_index
-		reg_write(REG_ESW_WT_MAC_AD0, value);
-		wait_switch_done();
-	    }
-	}
-}
-
-static void ZeroEntry(struct group *entry, int port, int mode)
-{
-	int value;
-	char wholestr[13];
-	char tmpstr[9];
-
-	sprintf(wholestr, "%s%02x%02x%02x", "01005e", entry->a1, entry->a2, entry->a3);
-
-	strncpy(tmpstr, wholestr, 8);
-	tmpstr[8] = '\0';
-
-	value = strtoul(tmpstr, NULL, 16);
-	reg_write(REG_ESW_WT_MAC_AD2, value);
-	strncpy(tmpstr, &wholestr[8], 4);
-	tmpstr[4] = '\0';
-	value = strtoul(tmpstr, NULL, 16);
-	reg_write(REG_ESW_WT_MAC_AD1, value);
-
-
-	/* update the zero entry */
-	value = 0x1;				//w_mac_cmd
-	if(mode == ADDENTRY)
-		value |= (7 << 4);		//w_age_field
-	value |= (port << 7);			//w_index
-	reg_write(REG_ESW_WT_MAC_AD0, value);
-	wait_switch_done();
-	return;
-}
-
-static void updateMacTable_specialtag(struct group *entry, unsigned char new_portmap, int delay_delete)
-{
-	int i;
-	unsigned char lanport4[]=LANPORT_RANGE_P4;
-	unsigned char lanport0[]=LANPORT_RANGE_P0;
-
-	if (WanPort == 0x1) {
-	    for(i=0; i < sizeof(lanport0)/sizeof(unsigned char); i++){
-		unsigned char old_bit, new_bit;
-
-		old_bit = entry->port_map & (0x1 << lanport0[i]);
-		new_bit = new_portmap  & (0x1 << lanport0[i]);
-
-		if(old_bit == new_bit)
-			continue;
-
-		if(old_bit == 0 /* new_bit == 0x1 */){
-			ZeroEntry(entry, lanport0[i], DELENTRY);
-		}else{
-			ZeroEntry(entry, lanport0[i], ADDENTRY);
-		}
-	    }
-	} else {
-	    for(i=0; i < sizeof(lanport4)/sizeof(unsigned char); i++){
-		unsigned char old_bit, new_bit;
-
-		old_bit = entry->port_map & (0x1 << lanport4[i]);
-		new_bit = new_portmap  & (0x1 << lanport4[i]);
-
-		if(old_bit == new_bit)
-			continue;
-
-		if(old_bit == 0 /* new_bit == 0x1 */){
-			ZeroEntry(entry, lanport4[i], DELENTRY);
-		}else{
-			ZeroEntry(entry, lanport4[i], ADDENTRY);
-		}
-	    }
-	}
-}
-#endif
 
 /*
  * ripped from user/rt2880/switch/switch.c
@@ -1103,13 +933,9 @@ typedef struct _RT_802_11_MAC_ENTRY {
 	unsigned int			LastRxRate;
 	int						StreamSnr[3];
 	int						SoundingRespSnr[3];
-#if 0
-	short					TxPER;
-	short					reserved;
-#endif
 } RT_802_11_MAC_ENTRY;
 
-#ifdef SEARCH_CLIENT_IN_WIFI_MACTABLE 
+#ifdef SEARCH_CLIENT_IN_WIFI_MACTABLE
 #if defined (CONFIG_RT2860V2_AP_WAPI) || defined (CONFIG_RT3090_AP_WAPI) || \
     defined (CONFIG_RT3572_AP_WAPI) || defined (CONFIG_RT5392_AP_WAPI) || \
     defined (CONFIG_RT5572_AP_WAPI) || defined (CONFIG_RT5592_AP_WAPI) || \
@@ -1137,13 +963,8 @@ int WiFiSTALookUPByMac(unsigned int mac1, unsigned int mac2)
 		my_log(LOG_WARNING, 0, "ioctl sock failed!");
 		return 0;
 	}
-#if 1 //def CONFIG_RT2860V2_AP_V24_DATA_STRUCTURE
 	if (ioctl(s, RTPRIV_IOCTL_GET_MAC_TABLE_STRUCT, &iwr) < 0) {
 		my_log(LOG_WARNING, 0, "ioctl -> RTPRIV_IOCTL_GET_MAC_TABLE_STRUCT failed!");
-#else
-	if (ioctl(s, RTPRIV_IOCTL_GET_MAC_TABLE, &iwr) < 0) {
-		my_log(LOG_WARNING, 0, "ioctl -> RTPRIV_IOCTL_GET_MAC_TABLE failed!");
-#endif
 		close(s);
 		return 0;
 	}
