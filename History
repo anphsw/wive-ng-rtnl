@@ -307,6 +307,7 @@
 48) kernel: tcp: set initial_ssthresh default to zero in Cubic and BIC.<br>
 49) kernel: imq: automatic exclude redirected to imq traffic from PPE and FastNat.<br>
 50) kernel: sched: decrease user max rt_prio to 10, this reducing the size of the O(1) scheduler arrays (small save ticks).<br>
+51) kernel: hw_nat: small optimize, fix need drop magic tag and mark unhit in ip6 local output.<br>
 <br>
 <br>
 <br>
