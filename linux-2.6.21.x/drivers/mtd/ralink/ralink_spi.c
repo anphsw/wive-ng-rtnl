@@ -345,8 +345,17 @@ static struct chip_info chips_data [] = {
 	{ "EN25F16",		0x1c, 0x31151c31, 64 * 1024, 32,  0 },
 	{ "S25FL116K",          0x01, 0x40150140, 64 * 1024, 32,  0 },
 #endif
-//Default if not detect 4Mb
+//Default if not detect by kernel config
+#if defined(CONFIG_RT2880_FLASH_4M)
 	{ "STUB",		0x00, 0xffffffff, 64 * 1024, 64,  0 },
+#elif defined( CONFIG_RT2880_FLASH_8M
+	{ "STUB",		0x00, 0xffffffff, 64 * 1024, 128, 0 },
+#elif defined( CONFIG_RT2880_FLASH_16M
+	{ "STUB",		0x00, 0xffffffff, 64 * 1024, 256, 0 },
+#else
+	// if not set - use 4Mb as default
+	{ "STUB",		0x00, 0xffffffff, 64 * 1024, 64,  0 },
+#endif
 };
 
 
