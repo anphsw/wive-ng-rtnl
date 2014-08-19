@@ -37,7 +37,7 @@ CPPFLAGS	:=
 CXXFLAGS	:=
 
 
-HOSTARCH := $(shell uname -m | \
+HOSTARCH := $(shell export LC_ALL=C; uname -m | \
 	sed -e s/i.86/i386/ \
 	    -e s/sun4u/sparc64/ \
 	    -e s/arm.*/arm/ \
@@ -45,7 +45,7 @@ HOSTARCH := $(shell uname -m | \
 	    -e s/powerpc/ppc/ \
 	    -e s/macppc/ppc/)
 
-HOSTOS := $(shell uname -s | tr A-Z a-z | \
+HOSTOS := $(shell export LC_ALL=C; uname -s | tr A-Z a-z | \
 	    sed -e 's/\(cygwin\).*/cygwin/')
 
 export	HOSTARCH
@@ -55,7 +55,7 @@ VENDOR=
 
 #########################################################################
 
-TOPDIR	:= $(shell if [ "$$PWD" != "" ]; then echo $$PWD; else pwd; fi)
+TOPDIR	:= $(shell export LC_ALL=C; if [ "$$PWD" != "" ]; then echo $$PWD; else pwd; fi)
 export	TOPDIR
 
 # boot build only old gcc....
@@ -207,7 +207,7 @@ LIBS += common/libcommon.a
 .PHONY : $(LIBS)
 
 # Add GCC lib
-PLATFORM_LIBS += -L $(shell dirname `$(CC) $(CFLAGS)  -print-libgcc-file-name`)
+PLATFORM_LIBS += -L $(shell export LC_ALL=C; dirname `$(CC) $(CFLAGS)  -print-libgcc-file-name`)
 
 # The "tools" are needed early, so put this first
 # Don't include stuff already done in $(LIBS)
@@ -262,12 +262,12 @@ endif
 uboot.img:	uboot.bin
 ifeq ($(CFG_ENV_IS), IN_SPI)
 		../tools/mkimage/mkimage -A $(ARCH) -T standalone -C none \
-		-a $(TEXT_BASE) -e $(shell export LC_ALL=C; readelf -h u-boot | grep "Entry" | awk '{print $$4}') \
+		-a $(TEXT_BASE) -e $(shell export LC_ALL=C; export LC_ALL=C; readelf -h u-boot | grep "Entry" | awk '{print $$4}') \
 		-d $< $@
 endif
 ifeq ($(CFG_ENV_IS), IN_NAND)
 		../tools/mkimage/mkimage -A $(ARCH) -T standalone -C none \
-		-a $(TEXT_BASE) -e $(shell export LC_ALL=C; readelf -h u-boot | grep "Entry" | awk '{print $$4}') \
+		-a $(TEXT_BASE) -e $(shell export LC_ALL=C; export LC_ALL=C; readelf -h u-boot | grep "Entry" | awk '{print $$4}') \
 		-d $< $@
 endif
 
@@ -277,9 +277,9 @@ u-boot.dis:	u-boot
 #u-boot:		depend $(SUBDIRS) $(OBJS) $(LIBS) $(LDSCRIPT)
 #		UNDEF_SYM=`$(OBJDUMP) -x $(LIBS) |sed  -n -e 's/.*\(__u_boot_cmd_.*\)/-u\1/p'|sort|uniq`;\
 #		$(LD) $(LDFLAGS) $$UNDEF_SYM $(OBJS) \
-#			--start-group $(LIBS) --end-group -L $(shell dirname) $(CC) $(CFLAGS) -print-libgcc-file-name -lgcc \
-#			-Map u-boot.map -o u-boot 
-			
+#			--start-group $(LIBS) --end-group -L $(shell export LC_ALL=C; dirname) $(CC) $(CFLAGS) -print-libgcc-file-name -lgcc \
+#			-Map u-boot.map -o u-boot
+
 u-boot:		depend $(SUBDIRS) $(OBJS) $(LIBS) $(LDSCRIPT)
 		UNDEF_SYM=`$(OBJDUMP) -x $(LIBS) |sed  -n -e 's/.*\(__u_boot_cmd_.*\)/-u\1/p'|sort|uniq`;\
 		$(LD) $(LDFLAGS) $$UNDEF_SYM $(OBJS) \
