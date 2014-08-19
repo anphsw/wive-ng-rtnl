@@ -15,6 +15,9 @@
 #if defined (CONFIG_RALINK_RT6855A) || defined (CONFIG_RALINK_MT7621)
 #define LAN_OFFSET    0xE000
 #define WAN_OFFSET    0xE006
+#elif defined (CONFIG_RALINK_RT3883)
+#define LAN_OFFSET    0x04
+#define WAN_OFFSET    0x0A
 #else
 #define LAN_OFFSET    0x28
 #define WAN_OFFSET    0x2E
