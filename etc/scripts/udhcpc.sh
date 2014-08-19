@@ -72,15 +72,6 @@ case "$1" in
 	    if [ "$CONFIG_RT_3052_ESW" != "" ] && [ "$RALINK_MT7620" = "" ]; then
 		$LOG "Restart WAN switch port."
 		/etc/scripts/config-vlan.sh 2 WWWWW
-	    else
-		$LOG "Full switch reconfigure."
-		/etc/scripts/config-switch.sh
-	    fi
-	    $LOG "Reconfigure wan after switch reset"
-	    service wan restart
-	    if [ "$vpnEnabled" = "on" ]; then
-		$LOG "Restart vpn helpers"
-		service vpnhelper restart
 	    fi
 	elif [ "$OperationMode" = "2" ] || [ "$OperationMode" = "3" ]; then
 	    # Try reconnect at lease failed
