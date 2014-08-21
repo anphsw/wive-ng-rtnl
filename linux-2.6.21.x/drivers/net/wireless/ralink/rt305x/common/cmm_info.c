@@ -3100,17 +3100,20 @@ VOID RTMPIoctlGetSiteSurvey(
 #ifdef RTMP_RBUS_SUPPORT
 /* +++ added by Red@Ralink, 2009/09/30 */
 VOID RTMPIoctlGetMacTableStaInfo(
-	IN PRTMP_ADAPTER pAd, 
+	IN PRTMP_ADAPTER pAd,
 	IN struct iwreq *wrq)
 {
 	INT i;
 	RT_802_11_MAC_TABLE MacTab;
+
+	NdisZeroMemory(&MacTab, sizeof(RT_802_11_MAC_TABLE));
 
 	MacTab.Num = 0;
 	for (i=0; i<MAX_LEN_OF_MAC_TABLE; i++)
 	{
 		if (IS_ENTRY_CLIENT(&pAd->MacTab.Content[i]) && (pAd->MacTab.Content[i].Sst == SST_ASSOC))
 		{
+			MacTab.Entry[MacTab.Num].ApIdx = (UCHAR)pAd->MacTab.Content[i].apidx;
 			COPY_MAC_ADDR(MacTab.Entry[MacTab.Num].Addr, &pAd->MacTab.Content[i].Addr);
 			MacTab.Entry[MacTab.Num].Aid = (UCHAR)pAd->MacTab.Content[i].Aid;
 			MacTab.Entry[MacTab.Num].Psm = pAd->MacTab.Content[i].PsMode;
