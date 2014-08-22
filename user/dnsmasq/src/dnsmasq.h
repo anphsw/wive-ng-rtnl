@@ -165,6 +165,7 @@ struct event_desc {
 #define EVENT_LUA_ERR   19
 #define EVENT_TFTP_ERR  20
 #define EVENT_INIT      21
+#define EVENT_NEWADDR   22
 
 /* Exit codes. */
 #define EC_GOOD        0
@@ -1289,6 +1290,7 @@ unsigned char *extended_hwaddr(int hwtype, int hwlen, unsigned char *hwaddr,
 int make_icmp_sock(void);
 int icmp_ping(struct in_addr addr);
 #endif
+void send_newaddr(void);
 void send_alarm(time_t event, time_t now);
 void send_event(int fd, int event, int data, char *msg);
 void clear_cache_and_reload(time_t now);
@@ -1297,7 +1299,7 @@ void poll_resolv(int force, int do_reload, time_t now);
 /* netlink.c */
 #ifdef HAVE_LINUX_NETWORK
 void netlink_init(void);
-void netlink_multicast(time_t now);
+void netlink_multicast(void);
 #endif
 
 /* bpf.c */
@@ -1306,7 +1308,7 @@ void init_bpf(void);
 void send_via_bpf(struct dhcp_packet *mess, size_t len,
 		  struct in_addr iface_addr, struct ifreq *ifr);
 void route_init(void);
-void route_sock(time_t now);
+void route_sock(void);
 #endif
 
 /* bpf.c or netlink.c */
