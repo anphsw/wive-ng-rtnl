@@ -70,7 +70,6 @@ RALINK_EPHY_INIT = ON
 CONFIG_GZIP = OFF
 CONFIG_BZIP2 = OFF
 CONFIG_LZMA = ON
-CONFIG_XZ = OFF
 
 ##########################################################################
 
@@ -282,10 +281,6 @@ endif
 
 ifeq ($(CONFIG_LZMA),ON)
 CPPFLAGS += -DCONFIG_LZMA
-endif
-
-ifeq ($(CONFIG_XZ),ON)
-CPPFLAGS += -DCONFIG_XZ
 endif
 
 ifeq ($(RALINK_USB_SUPPORT),y)
