@@ -137,7 +137,6 @@ table_entry_t comp_name[] = {
     {	IH_COMP_BZIP2,	"bzip2",	"bzip2 compressed",	},
     {	IH_COMP_GZIP,	"gzip",		"gzip compressed",	},
     {	IH_COMP_LZMA,	"lzma",		"lzma compressed",	},
-    {	IH_COMP_XZ,	"xz",		"xz compressed",	},
     {	-1,		"",		"",			},
 };
 
@@ -184,6 +183,8 @@ main (int argc, char **argv)
 	struct stat sbuf;
 	unsigned char *ptr;
 	char *name = "";
+#if defined (MT7620_ASIC_BOARD) || defined (MT7620_FPGA_BOARD) || defined (MT7628_ASIC_BOARD) || defined (MT7628_FPGA_BOARD) || \
+	defined (RT6855A_ASIC_BOARD) || defined (RT6855A_FPGA_BOARD)
 	char *dram_name = "";
 	uint32_t dram_type;
 	uint32_t dram_total_width;
@@ -193,6 +194,7 @@ main (int argc, char **argv)
 	uint32_t dram_cfg1;
 	uint16_t cpu_pll;
 	uint32_t stage1_start, bootloader_start;
+#endif
 	cmdname = *argv;
 
 	addr = ep = 0;
@@ -253,6 +255,8 @@ main (int argc, char **argv)
 				}
 				eflag = 1;
 				goto NXTARG;
+#if defined (MT7620_ASIC_BOARD) || defined (MT7620_FPGA_BOARD) || defined (MT7628_ASIC_BOARD) || defined (MT7628_FPGA_BOARD) || \
+	defined (RT6855A_ASIC_BOARD) || defined (RT6855A_FPGA_BOARD)
 			case 'r':
 				if (--argc <= 0)
 					usage ();
@@ -345,6 +349,7 @@ main (int argc, char **argv)
 				    }
 				}
 				goto NXTARG;
+#endif
 			case 'k':
 				if (--argc <= 0)
 					usage ();
@@ -361,12 +366,14 @@ main (int argc, char **argv)
 			case 'x':
 				xflag++;
 				break;
+#if defined (MT7620_ASIC_BOARD) || defined (MT7620_FPGA_BOARD) || defined (MT7628_ASIC_BOARD) || defined (MT7628_FPGA_BOARD) || \
+	defined (RT6855A_ASIC_BOARD) || defined (RT6855A_FPGA_BOARD)
 			case 'y':
 				if (--argc <= 0)
 					usage ();
 #if defined (MT7621_ASIC_BOARD) || defined (MT7621_FPGA_BOARD)
 				stage1_start = strtoul (*++argv, (char **)&ptr, 16);
-#else					
+#else
 				dram_cfg0 = strtoul (*++argv, (char **)&ptr, 16);
 				if (*ptr) {
 				    fprintf (stderr,
@@ -381,7 +388,7 @@ main (int argc, char **argv)
 					usage ();
 #if defined (MT7621_ASIC_BOARD) || defined (MT7621_FPGA_BOARD)
 				bootloader_start = strtoul (*++argv, (char **)&ptr, 16);
-#else				
+#else
 				dram_cfg1 = strtoul (*++argv, (char **)&ptr, 16);
 				if (*ptr) {
 				    fprintf (stderr,
@@ -396,6 +403,7 @@ main (int argc, char **argv)
 					usage ();
 				cpu_pll = strtoul (*++argv, (char **)&ptr, 16);
 				goto NXTARG;
+#endif
 			default:
 				usage ();
 			}
@@ -643,50 +651,27 @@ NXTARG:		;
 	hdr->ih_nand.nand_info_1_data = htonl((unsigned int)(hdr->ih_nand.nand_info_1_data));	
 	hdr->ih_nand.nand_ac_timing = htonl(NAND_ACCTIME);	
 #endif
-#endif	
-#else
+#endif
+#elif defined (MT7620_ASIC_BOARD) || defined (MT7620_FPGA_BOARD) || defined (MT7628_ASIC_BOARD) || defined (MT7628_FPGA_BOARD) || \
+	defined (RT6855A_ASIC_BOARD) || defined (RT6855A_FPGA_BOARD)
 	//if dram_size=2M, that means dram parameters is invalid
 	if(dram_size==0) { 
 	    hdr->ih_dram.dram_magic=0;
 	} else {
-#if defined (RT3352_ASIC_BOARD) || defined(RT3352_FPGA_BOARD) ||\
-		defined (RT3883_ASIC_BOARD) || defined(RT3883_FPGA_BOARD)
-		hdr->ih_dram.dram_magic=0x5A;
-#else
 		hdr->ih_dram.u.dram_magic_h=0x5;
-#endif
 	}
 
 	hdr->ih_dram.dram_parm = (dram_type<<5 | dram_total_width<<4 | dram_size<<1 | dram_width);
 
 	if(dram_cfg0!=0xFF && dram_cfg1!=0xFF) {
-
-#if defined (RT3052_ASIC_BOARD) || defined(RT3052_FPGA_BOARD) ||\
-	defined (RT3352_ASIC_BOARD) || defined(RT3352_FPGA_BOARD) ||\
-	defined (RT5350_ASIC_BOARD) || defined(RT5350_FPGA_BOARD) ||\
-	defined (RT3883_ASIC_BOARD) || defined(RT3883_FPGA_BOARD)
-	    hdr->ih_dram.magic_lh=0x5244;
-	    hdr->ih_dram.magic_hh=0x4D41;
-#else
 		hdr->ih_dram.magic = 0x68;
-#endif		
 	} else {
-#if defined(RT3052_ASIC_BOARD) || defined(RT3052_FPGA_BOARD) ||\
-	defined(RT3352_ASIC_BOARD) || defined(RT3352_FPGA_BOARD) ||\
-	defined(RT5350_ASIC_BOARD) || defined(RT5350_FPGA_BOARD) ||\
-	defined(RT3883_ASIC_BOARD) || defined(RT3883_FPGA_BOARD)
-	    hdr->ih_dram.magic_lh=0;
-	    hdr->ih_dram.magic_hh=0;
-#else
 		hdr->ih_dram.magic = 0x0;
-#endif		
 	    dram_cfg0=0;
 	    dram_cfg1=0;
 	}
 
 #if defined (CPU_PLL_PARAMETERS)
-#if defined (RT6855A_ASIC_BOARD) || defined(RT6855A_FPGA_BOARD)
-#endif
 #if defined (MT7620_ASIC_BOARD) || defined(MT7620_FPGA_BOARD) || defined (MT7628_ASIC_BOARD) || defined(MT7628_FPGA_BOARD)
 #if defined (CPLL_FROM_480MHZ)
 	cpu_pll = ntohs(1<<11);
@@ -706,10 +691,9 @@ NXTARG:		;
 #endif
 
 #if defined (DRAM_PARAMETERS)
-#if defined (RT3052_ASIC_BOARD) || defined(RT3052_FPGA_BOARD) ||\
-	defined (RT3352_ASIC_BOARD) || defined(RT3352_FPGA_BOARD) ||\
+#if defined (RT3352_ASIC_BOARD) || defined(RT3352_FPGA_BOARD) ||\
 	defined (RT5350_ASIC_BOARD) || defined(RT5350_FPGA_BOARD) ||\
-	defined (RT3883_ASIC_BOARD) || defined(RT3883_FPGA_BOARD)	
+	defined (RT3883_ASIC_BOARD) || defined(RT3883_FPGA_BOARD)
 	if(dram_type==0) {//SDR
 	    hdr->ih_dram.sdr.sdram_cfg0 = dram_cfg0;
 	    hdr->ih_dram.sdr.sdram_cfg1 = dram_cfg1;
@@ -742,16 +726,15 @@ NXTARG:		;
 #endif
 	}
 #else
-#error "DRAM config in imageheader is not supported"	
-#endif	
+#error "DRAM config in imageheader is not supported"
+#endif
 #endif
 #endif /* ! MT7621_ASIC_BOARD or MT7621_FPGA_BOARD */
 
 #if (defined (MT7621_ASIC_BOARD) || defined (MT7621_FPGA_BOARD))
-	//crc((const char *)hdr, &(hdr->ih_nand.crc), sizeof(image_header_t));	
-    crc((const char *)hdr, &checksum, sizeof(image_header_t));
-    hdr->ih_nand.crc = htonl(checksum);
-#endif	
+	crc((const char *)hdr, &checksum, sizeof(image_header_t));
+	hdr->ih_nand.crc = htonl(checksum);
+#endif
 	checksum = crc32(0,(const char *)hdr,sizeof(image_header_t));
 
 	hdr->ih_hcrc = htonl(checksum);
@@ -902,8 +885,9 @@ print_header (image_header_t *hdr)
 	printf ("Load Address: 0x%08X\n", ntohl(hdr->ih_load));
 	printf ("Entry Point:  0x%08X\n", ntohl(hdr->ih_ep));
 	printf ("Kernel Size:  0x%08X\n", ntohl(hdr->ih_ksz));
-#if defined (MT7621_ASIC_BOARD) || defined (MT7621_FPGA_BOARD)
-#else	
+#if defined (MT7620_ASIC_BOARD) || defined (MT7620_FPGA_BOARD) || defined (MT7628_ASIC_BOARD) || defined (MT7628_FPGA_BOARD) || \
+	defined (RT6855A_ASIC_BOARD) || defined (RT6855A_FPGA_BOARD)
+
 	printf ("DRAM Parameter: %x (Parm0=%x Parm1=%x)\n", hdr->ih_dram.dram_parm, hdr->ih_dram.sdr.sdram_cfg0, hdr->ih_dram.sdr.sdram_cfg1);
 #endif
 	if (hdr->ih_type == IH_TYPE_MULTI || hdr->ih_type == IH_TYPE_SCRIPT) {
