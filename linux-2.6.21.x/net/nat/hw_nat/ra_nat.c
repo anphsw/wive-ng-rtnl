@@ -2162,7 +2162,7 @@ int PpeRsHandler(struct net_device *dev, int hold)
 #if defined (CONFIG_RA_HW_NAT_PCI)
 	if (!dev)
 		return -1;
-	
+
 	if (hold) {
 		if (DstPort[DP_PCI0] == dev || DstPort[DP_PCI1] == dev)
 			return 1;

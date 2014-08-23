@@ -49,6 +49,7 @@
 #include "../../../net/nat/hw_nat/ra_nat.h"
 extern int (*ra_sw_nat_hook_rx)(struct sk_buff *skb);
 extern int (*ra_sw_nat_hook_tx)(struct sk_buff *skb, int gmac_no);
+extern int (*ra_sw_nat_hook_rs)(struct net_device *dev, int hold);
 #endif
 
 #define DRIVER_VERSION		"22-Aug-2005"
@@ -1200,7 +1201,12 @@ void usbnet_disconnect (struct usb_interface *intf)
 			dev->driver_info->description);
 
 	net = dev->net;
-	unregister_netdev (net);
+#if defined(CONFIG_RA_HW_NAT_PCI) && (defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE))
+        /* clear dstif table in hw_nat module */
+        if (ra_sw_nat_hook_rs != NULL)
+            ra_sw_nat_hook_rs(net, 0);
+#endif
+        unregister_netdev (net);
 
 	/* we don't hold rtnl here ... */
 	flush_scheduled_work ();
@@ -1363,10 +1369,16 @@ usbnet_probe (struct usb_interface *udev, const struct usb_device_id *prod)
 
 	// start as if the link is up
 	netif_device_attach (net);
-	
-	/* Register dev as class for mdev */	
+
+	/* Register dev as class for mdev */
 	usb_register_dev(udev, &fake_usb_class);
-	
+
+#if defined(CONFIG_RA_HW_NAT_PCI) && (defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE))
+        /* fill dstif table in hw_nat module */
+	if (ra_sw_nat_hook_rs != NULL)
+            ra_sw_nat_hook_rs(net, 1);
+#endif
+
 	return 0;
 
 out3:
