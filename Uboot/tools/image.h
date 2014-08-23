@@ -258,11 +258,12 @@ typedef struct image_header {
 	uint8_t		ih_type;	/* Image Type			*/
 	uint8_t		ih_comp;	/* Compression Type		*/
 	uint8_t		ih_name[IH_NMLEN];	/* Image Name		*/
+	uint32_t        ih_ksz;         /* Kernel Part Size             */
 #if defined (MT7621_ASIC_BOARD) || defined (MT7621_FPGA_BOARD)
 	nand_header_t	ih_nand;
 #else
 	dram_header_t   ih_dram;
-#endif	
+#endif
 } image_header_t __attribute__((packed));
 
 

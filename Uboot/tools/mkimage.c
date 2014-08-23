@@ -33,6 +33,8 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "../autoconf.h"
+
 #if defined(__BEOS__) || defined(__NetBSD__) || defined(__APPLE__)
 #include <inttypes.h>
 #endif
@@ -59,7 +61,6 @@ typedef		unsigned int	uint32_t;
 #endif
 
 #include <image.h>
-#include "../autoconf.h"
 
 extern int errno;
 
@@ -179,6 +180,7 @@ main (int argc, char **argv)
 	uint32_t checksum;
 	uint32_t addr;
 	uint32_t ep;
+	uint32_t ksz = 0;
 	struct stat sbuf;
 	unsigned char *ptr;
 	char *name = "";
@@ -342,6 +344,11 @@ main (int argc, char **argv)
 					exit (EXIT_FAILURE);
 				    }
 				}
+				goto NXTARG;
+			case 'k':
+				if (--argc <= 0)
+					usage ();
+				ksz = (uint32_t)atoi(*++argv);
 				goto NXTARG;
 			case 'n':
 				if (--argc <= 0)
@@ -610,6 +617,7 @@ NXTARG:		;
 	hdr->ih_load  = htonl(addr);
 	hdr->ih_ep    = htonl(ep);
 	hdr->ih_dcrc  = htonl(checksum);
+	hdr->ih_ksz   = htonl(ksz);
 	hdr->ih_os    = opt_os;
 	hdr->ih_arch  = opt_arch;
 	hdr->ih_type  = opt_type;
@@ -893,6 +901,7 @@ print_header (image_header_t *hdr)
 		size, (double)size / 1.024e3, (double)size / 1.048576e6 );
 	printf ("Load Address: 0x%08X\n", ntohl(hdr->ih_load));
 	printf ("Entry Point:  0x%08X\n", ntohl(hdr->ih_ep));
+	printf ("Kernel Size:  0x%08X\n", ntohl(hdr->ih_ksz));
 #if defined (MT7621_ASIC_BOARD) || defined (MT7621_FPGA_BOARD)
 #else	
 	printf ("DRAM Parameter: %x (Parm0=%x Parm1=%x)\n", hdr->ih_dram.dram_parm, hdr->ih_dram.sdr.sdram_cfg0, hdr->ih_dram.sdr.sdram_cfg1);

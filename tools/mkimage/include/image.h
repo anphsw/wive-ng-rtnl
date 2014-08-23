@@ -124,13 +124,124 @@
 #define IH_COMP_GZIP		1	/* gzip	 Compression Used	*/
 #define IH_COMP_BZIP2		2	/* bzip2 Compression Used	*/
 #define IH_COMP_LZMA		3	/* lzma  Compression Used	*/
+#define IH_COMP_XZ		5	/* xz    Compression Used	*/
 
 #define IH_MAGIC	0x27051956	/* Image Magic Number		*/
-#define IH_NMLEN	(32-4)		/* Image Name Length		*/
 
+#if defined (MT7621_ASIC_BOARD) || defined (MT7621_FPGA_BOARD)
+#if defined (ON_BOARD_NAND_FLASH_COMPONENT)
+#define IH_NMLEN		(16-4)
+#else
+#define IH_NMLEN        (16)
+#endif
+#elif defined (MT7620_ASIC_BOARD) || defined (MT7620_FPGA_BOARD) || defined (MT7628_ASIC_BOARD) || defined (MT7628_FPGA_BOARD)
+#define IH_NMLEN		(16-4*2)	/* Image Name Length		*/
+#elif defined (RT6855A_ASIC_BOARD) || defined (RT6855A_FPGA_BOARD)
+#define IH_NMLEN		(16-4*4)
+#else
+#define IH_NMLEN		16	/* Image Name Length		*/
+#endif
 /*
  * all data in network byte order (aka natural aka bigendian)
  */
+
+
+typedef struct dram_header {
+#if defined(MT7620_ASIC_BOARD) || defined(MT7620_FPGA_BOARD) || defined(MT7628_ASIC_BOARD) || defined(MT7628_FPGA_BOARD)
+	uint16_t	ddr_self_refresh;
+	uint16_t	ddr_cfg11;
+	uint32_t	ddr_cfg10;
+#endif
+#if defined (RT6855A_ASIC_BOARD) || defined (RT6855A_FPGA_BOARD)
+	uint32_t	dram_pad_setting;
+	uint32_t	ddr_cfg2;
+	uint32_t	ddr_cfg3;
+	uint32_t	ddr_cfg4;
+#endif
+	uint8_t		dram_parm;	/* DRAM setting */
+	union{
+	uint8_t		dram_magic;	/* Magic number of DRAM setting (0x5a) */
+	struct {
+		uint8_t	cpu_pll_magic_l:4;	
+		uint8_t	dram_magic_h:4;
+		}u;
+	};
+	uint16_t	cpu_pll_cfg;
+#if defined(RT3052_ASIC_BOARD) || defined(RT3052_FPGA_BOARD) ||\
+	defined(RT3352_ASIC_BOARD) || defined(RT3352_FPGA_BOARD) ||\
+	defined(RT5350_ASIC_BOARD) || defined(RT5350_FPGA_BOARD) ||\
+	defined(RT3883_ASIC_BOARD) || defined(RT3883_FPGA_BOARD)
+	uint16_t	magic_lh;       /* low half word of magic number 0x5244 */
+	uint16_t	magic_hh;       /* high half word of magic number 0x4D41 */
+	union {
+	    struct {
+		uint8_t syscfg1;
+		uint8_t ddr_cfg3;
+		uint16_t resv1;
+		uint32_t resv2;
+	    }ddr;
+	    
+	    struct {
+		uint32_t sdram_cfg0;
+		uint32_t sdram_cfg1;
+	    }sdr;
+	};
+#else
+	uint8_t		magic;       /* magic number 0x68 */
+#if defined (RT6855A_ASIC_BOARD) || defined (RT6855A_FPGA_BOARD)
+	uint8_t		rsvd0[3];
+#else
+	uint8_t		reservd;
+	uint16_t	syscfg1_ddrcfg3_odt;
+#endif	
+	union {
+		struct {
+		uint32_t ddr_cfg0;
+		uint32_t ddr_cfg1;
+		}ddr;		
+		struct {
+		uint32_t sdram_cfg0;
+		uint32_t sdram_cfg1;
+		}sdr;
+	};
+#endif
+} dram_header_t __attribute__ ((packed));
+
+typedef struct  nand_badblock_info1_type {
+	uint32_t	ecc_bits	:	3;
+	uint32_t	rsvd		:	5;
+	uint32_t	ecc_offset	:	8;
+	uint32_t	bad_block_offser	:	8;
+	uint32_t	checksum	:	8;
+} nand_badblock_info1_t __attribute__ ((packed));
+
+typedef struct  nand_info_1_type {	
+	uint32_t	pagesize 	: 2;
+	uint32_t	rsvd0		: 2;	
+	uint32_t	addr_cycle 	: 2;
+	uint32_t	rsvd1		: 2;	
+	uint32_t	spare_size	: 2;
+	uint32_t	rsvd2		: 2;	
+	uint32_t	total_size	: 3;
+	uint32_t	rsvd3		: 1;
+	uint32_t	block_size	: 2;
+	uint32_t	rsvd4		: 2;	
+	uint32_t	magic_id	: 12;	
+} nand_info_1_t __attribute__ ((packed));
+
+	
+typedef struct nand_header {
+	uint32_t			nand_ac_timing;
+	uint32_t				ih_stage_offset;			/* stage1 offset */
+	uint32_t				ih_bootloader_offset;		/* bootloader offset */
+	union 
+	{
+	nand_info_1_t			nand_info_1;
+		uint32_t				nand_info_1_data;
+	};
+	//nand_badblock_info1_t	nand_badblock_info1;
+	uint32_t				crc;
+} nand_header_t __attribute__ ((packed));
 
 typedef struct image_header {
 	uint32_t	ih_magic;	/* Image Header Magic Number	*/
@@ -145,8 +256,13 @@ typedef struct image_header {
 	uint8_t		ih_type;	/* Image Type			*/
 	uint8_t		ih_comp;	/* Compression Type		*/
 	uint8_t		ih_name[IH_NMLEN];	/* Image Name		*/
-	uint32_t	ih_ksz;		/* Kernel Part Size		*/
-} image_header_t;
+	uint32_t        ih_ksz;         /* Kernel Part Size             */
+#if defined (MT7621_ASIC_BOARD) || defined (MT7621_FPGA_BOARD)
+	nand_header_t	ih_nand;
+#else
+	dram_header_t   ih_dram;
+#endif
+} image_header_t __attribute__((packed));
 
 
 #endif	/* __IMAGE_H__ */
