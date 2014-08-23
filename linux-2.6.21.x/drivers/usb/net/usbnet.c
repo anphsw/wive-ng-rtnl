@@ -1039,7 +1039,7 @@ static int usbnet_start_xmit (struct sk_buff *skb, struct net_device *net)
         /* add tx hook point*/
         if(ra_sw_nat_hook_tx != NULL) {
                 skb->data += 4; //pointer to DA
-                ra_sw_nat_hook_tx(skb, 1);
+                ra_sw_nat_hook_tx(skb, 0);
                 skb->data -= 4;
         }
 #endif
