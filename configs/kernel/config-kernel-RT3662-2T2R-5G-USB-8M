@@ -1,7 +1,6 @@
 #
 # Automatically generated make config: don't edit
 # Linux kernel version: 
-# Mon Aug 18 18:37:01 2014
 #
 CONFIG_MIPS=y
 
@@ -1644,6 +1643,7 @@ CONFIG_RA_HW_NAT_UDP_DLTA=5
 CONFIG_RA_HW_NAT_TCP_DLTA=5
 CONFIG_RA_HW_NAT_FIN_DLTA=5
 # CONFIG_RA_HW_NAT_ACL2UP_HELPER is not set
+# CONFIG_RA_HW_NAT_IPV6 is not set
 CONFIG_RA_HW_NAT_PCI=y
 CONFIG_RA_HW_NAT_WIFI=y
 CONFIG_BCM_NAT=y
