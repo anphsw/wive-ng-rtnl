@@ -44,7 +44,6 @@
 #include "ra_nat.h"
 #include "foe_fdb.h"
 #include "frame_engine.h"
-#include "sys_rfrw.h"
 #include "policy.h"
 #include "util.h"
 
