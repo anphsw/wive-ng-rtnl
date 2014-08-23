@@ -543,6 +543,7 @@ int flash_sect_protect (int p, ulong addr_first, ulong addr_last)
 
 /**************************************************/
 #ifdef RT2880_U_BOOT_CMD_OPEN
+
 U_BOOT_CMD(
 	flinfo,    2,    1,    do_flinfo,
 	"flinfo  - print FLASH memory information\n",

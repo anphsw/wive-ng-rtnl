@@ -10,12 +10,8 @@
 
 #if defined(RT3883_ASIC_BOARD)
 #define LED_POWER	0
-#if defined(RALINK_EMR_GPIO)
-#define BTN_RESET	RALINK_EMR_GPIO
-#else
-#error "Please define Emergency GPIO pin!"
-#endif
-#elif defined(RT3052_ASIC_BOARD)
+#define BTN_RESET	14
+#elif defined (RT2883_FPGA_BOARD) || defined (RT3052_ASIC_BOARD) || defined (RT3352_ASIC_BOARD) || defined (RT5350_ASIC_BOARD) || defined (MT7620_ASIC_BOARD)
 #define LED_POWER	9
 #define BTN_RESET	10
 #endif

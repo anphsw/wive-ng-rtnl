@@ -1,4 +1,4 @@
-/* $Id: regs.h,v 1.1.1.1 2006-05-22 09:48:46 yjlin Exp $ */
+/* $Id: //WIFI_SOC/MP/SDK_4_2_0_0/Uboot/include/bedbug/regs.h#1 $ */
 
 #ifndef _REGS_H
 #define _REGS_H

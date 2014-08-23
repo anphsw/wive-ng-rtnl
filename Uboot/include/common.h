@@ -153,10 +153,6 @@ typedef void (interrupt_handler_t)(void *);
 	({ typeof (X) __x = (X), __y = (Y);	\
 		(__x > __y) ? __x : __y; })
 
-/*
-*  kaiker define
-*/
-
 #define NUM_RX_DESC 24
 #define NUM_TX_DESC 24
 
@@ -561,7 +557,6 @@ int	console_init_f(void);	/* Before relocation; uses the serial  stuff	*/
 int	console_init_r(void);	/* After  relocation; uses the console stuff	*/
 int	console_assign (int file, char *devname);	/* Assign the console	*/
 int	ctrlc (void);
-int kaiker_button_p (void); // add by kaiker
 int	had_ctrlc (void);	/* have we had a Control-C since last clear? */
 void	clear_ctrlc (void);	/* clear the Control-C condition */
 int	disable_ctrlc (int);	/* 1 to disable, 0 to enable Control-C detect */
@@ -607,6 +602,14 @@ int	pcmcia_init (void);
 
 #ifdef CONFIG_SHOW_BOOT_PROGRESS
 void	show_boot_progress (int status);
+#endif
+
+#if defined(CFG_ENV_IS_IN_NAND) /* Environment is in NAND Flash */
+#if defined(MTK_NAND)
+#include "../drivers/nand/mt6575_typedefs.h"
+#else
+#include "../drivers/ralink_nand.h"
+#endif
 #endif
 
 #endif	/* __COMMON_H_ */

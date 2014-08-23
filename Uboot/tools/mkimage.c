@@ -59,6 +59,7 @@ typedef		unsigned int	uint32_t;
 #endif
 
 #include <image.h>
+#include "../autoconf.h"
 
 extern int errno;
 
@@ -86,8 +87,6 @@ table_entry_t arch_name[] = {
     {	IH_CPU_MICROBLAZE,	"microblaze",	"MicroBlaze",	},
     {	IH_CPU_MIPS,		"mips",		"MIPS",		},
     {	IH_CPU_MIPS64,		"mips64",	"MIPS 64 Bit",	},
-    {	IH_CPU_NIOS,		"nios",		"NIOS",		},
-    {	IH_CPU_NIOS2,		"nios2",	"NIOS II",	},
     {	IH_CPU_PPC,		"ppc",		"PowerPC",	},
     {	IH_CPU_S390,		"s390",		"IBM S390",	},
     {	IH_CPU_SH,		"sh",		"SuperH",	},
@@ -136,6 +135,8 @@ table_entry_t comp_name[] = {
     {	IH_COMP_NONE,	"none",		"uncompressed",		},
     {	IH_COMP_BZIP2,	"bzip2",	"bzip2 compressed",	},
     {	IH_COMP_GZIP,	"gzip",		"gzip compressed",	},
+    {	IH_COMP_LZMA,	"lzma",		"lzma compressed",	},
+    {	IH_COMP_XZ,	"xz",		"xz compressed",	},
     {	-1,		"",		"",			},
 };
 
@@ -181,7 +182,15 @@ main (int argc, char **argv)
 	struct stat sbuf;
 	unsigned char *ptr;
 	char *name = "";
-
+	char *dram_name = "";
+	uint32_t dram_type;
+	uint32_t dram_total_width;
+	uint32_t dram_size;
+	uint32_t dram_width;
+	uint32_t dram_cfg0;
+	uint32_t dram_cfg1;
+	uint16_t cpu_pll;
+	uint32_t stage1_start, bootloader_start;
 	cmdname = *argv;
 
 	addr = ep = 0;
@@ -242,6 +251,98 @@ main (int argc, char **argv)
 				}
 				eflag = 1;
 				goto NXTARG;
+			case 'r':
+				if (--argc <= 0)
+					usage ();
+				dram_name=*++argv;
+				if(strncasecmp(dram_name,"sdr",3)==0) {
+				    dram_type=0;
+				}else if(strncasecmp(dram_name,"ddr",3)==0) {
+				    dram_type=1;
+				}else {
+				    if (*ptr) {
+					fprintf (stderr,
+						"%s: invalid dram type %s\n",
+						cmdname, *argv);
+					exit (EXIT_FAILURE);
+				    }
+				}
+				goto NXTARG;
+			case 's':
+				if (--argc <= 0)
+					usage ();
+				dram_total_width = strtoul (*++argv, (char **)&ptr, 10);
+				switch(dram_total_width) {
+				case 16:
+				    dram_total_width=0;
+				    break;
+				case 32:
+				    dram_total_width=1;
+				    break;
+				default:
+				    if (*ptr) {
+					fprintf (stderr,
+						"%s: invalid dram total width %s\n",
+						cmdname, *argv);
+					exit (EXIT_FAILURE);
+				    }
+				}
+				goto NXTARG;
+			case 't':
+				if (--argc <= 0)
+					usage ();
+				dram_size = strtoul (*++argv, (char **)&ptr, 10);
+				switch(dram_size) {
+				case 2:
+				    dram_size=0;
+				    break;
+				case 8:
+				    dram_size=1;
+				    break;
+				case 16:
+				    dram_size=2;
+				    break;
+				case 32:
+				    dram_size=3;
+				    break;
+				case 64:
+				    dram_size=4;
+				    break;
+				case 128:
+				    dram_size=5;
+				    break;
+				case 256:
+				    dram_size=6;
+				    break;
+				default:
+				    if (*ptr) {
+					fprintf (stderr,
+						"%s: invalid dram size%s\n",
+						cmdname, *argv);
+					exit (EXIT_FAILURE);
+				    }
+				}
+				goto NXTARG;
+			case 'u':
+				if (--argc <= 0)
+					usage ();
+				dram_width = strtoul (*++argv, (char **)&ptr, 10);
+				switch(dram_width) {
+				case 16:
+				    dram_width=0;
+				    break;
+				case 32:
+				    dram_width=1;
+				    break;
+				default:
+				    if (*ptr) {
+					fprintf (stderr,
+						"%s: invalid dram width %s\n",
+						cmdname, *argv);
+					exit (EXIT_FAILURE);
+				    }
+				}
+				goto NXTARG;
 			case 'n':
 				if (--argc <= 0)
 					usage ();
@@ -253,6 +354,41 @@ main (int argc, char **argv)
 			case 'x':
 				xflag++;
 				break;
+			case 'y':
+				if (--argc <= 0)
+					usage ();
+#if defined (MT7621_ASIC_BOARD) || defined (MT7621_FPGA_BOARD)
+				stage1_start = strtoul (*++argv, (char **)&ptr, 16);
+#else					
+				dram_cfg0 = strtoul (*++argv, (char **)&ptr, 16);
+				if (*ptr) {
+				    fprintf (stderr,
+					    "%s: invalid dram parameter 0 %s\n",
+					    cmdname, *argv);
+				    exit (EXIT_FAILURE);
+				}
+#endif
+				goto NXTARG;
+			case 'z':
+				if (--argc <= 0)
+					usage ();
+#if defined (MT7621_ASIC_BOARD) || defined (MT7621_FPGA_BOARD)
+				bootloader_start = strtoul (*++argv, (char **)&ptr, 16);
+#else				
+				dram_cfg1 = strtoul (*++argv, (char **)&ptr, 16);
+				if (*ptr) {
+				    fprintf (stderr,
+					    "%s: invalid dram parameter 1 %s\n",
+					    cmdname, *argv);
+				    exit (EXIT_FAILURE);
+				}
+#endif
+				goto NXTARG;
+			case 'w':
+				if (--argc <= 0)
+					usage ();
+				cpu_pll = strtoul (*++argv, (char **)&ptr, 16);
+				goto NXTARG;
 			default:
 				usage ();
 			}
@@ -481,6 +617,133 @@ NXTARG:		;
 
 	strncpy((char *)hdr->ih_name, name, IH_NMLEN);
 
+	
+#if defined (MT7621_ASIC_BOARD) || defined(MT7621_FPGA_BOARD)
+#if defined (ON_BOARD_NAND_FLASH_COMPONENT)
+	//memset(&(hdr->ih_nand), 0, sizeof(nand_header_t));	
+	printf("DDRCal Code Offset 	: 0x%08X\n",stage1_start);
+	printf("Uboot Offset 		: 0x%08X\n",bootloader_start);
+	hdr->ih_nand.ih_stage_offset = htonl(stage1_start);
+	hdr->ih_nand.ih_bootloader_offset = htonl(bootloader_start);
+#if defined (ON_BOARD_NAND_HEADER)
+	hdr->ih_nand.nand_info_1.pagesize = NAND_PAGESIZE_INDEX;
+	hdr->ih_nand.nand_info_1.addr_cycle = NAND_ADDRLEN_INDEX;
+	hdr->ih_nand.nand_info_1.spare_size = NAND_SPARESIZE_INDEX;
+	hdr->ih_nand.nand_info_1.total_size = NAND_TOTALSIZE_INDEX;
+	hdr->ih_nand.nand_info_1.block_size = NAND_BLOCKSIZE_INDEX;
+	hdr->ih_nand.nand_info_1.magic_id = 0xDA0;
+	hdr->ih_nand.nand_info_1_data = htonl((unsigned int)(hdr->ih_nand.nand_info_1_data));	
+	hdr->ih_nand.nand_ac_timing = htonl(NAND_ACCTIME);	
+#endif
+#endif	
+#else
+	//if dram_size=2M, that means dram parameters is invalid
+	if(dram_size==0) { 
+	    hdr->ih_dram.dram_magic=0;
+	} else {
+#if defined (RT3352_ASIC_BOARD) || defined(RT3352_FPGA_BOARD) ||\
+		defined (RT3883_ASIC_BOARD) || defined(RT3883_FPGA_BOARD)
+		hdr->ih_dram.dram_magic=0x5A;
+#else
+		hdr->ih_dram.u.dram_magic_h=0x5;
+#endif
+	}
+
+	hdr->ih_dram.dram_parm = (dram_type<<5 | dram_total_width<<4 | dram_size<<1 | dram_width);
+
+	if(dram_cfg0!=0xFF && dram_cfg1!=0xFF) {
+
+#if defined (RT3052_ASIC_BOARD) || defined(RT3052_FPGA_BOARD) ||\
+	defined (RT3352_ASIC_BOARD) || defined(RT3352_FPGA_BOARD) ||\
+	defined (RT5350_ASIC_BOARD) || defined(RT5350_FPGA_BOARD) ||\
+	defined (RT3883_ASIC_BOARD) || defined(RT3883_FPGA_BOARD)
+	    hdr->ih_dram.magic_lh=0x5244;
+	    hdr->ih_dram.magic_hh=0x4D41;
+#else
+		hdr->ih_dram.magic = 0x68;
+#endif		
+	} else {
+#if defined(RT3052_ASIC_BOARD) || defined(RT3052_FPGA_BOARD) ||\
+	defined(RT3352_ASIC_BOARD) || defined(RT3352_FPGA_BOARD) ||\
+	defined(RT5350_ASIC_BOARD) || defined(RT5350_FPGA_BOARD) ||\
+	defined(RT3883_ASIC_BOARD) || defined(RT3883_FPGA_BOARD)
+	    hdr->ih_dram.magic_lh=0;
+	    hdr->ih_dram.magic_hh=0;
+#else
+		hdr->ih_dram.magic = 0x0;
+#endif		
+	    dram_cfg0=0;
+	    dram_cfg1=0;
+	}
+
+#if defined (CPU_PLL_PARAMETERS)
+#if defined (RT6855A_ASIC_BOARD) || defined(RT6855A_FPGA_BOARD)
+#endif
+#if defined (MT7620_ASIC_BOARD) || defined(MT7620_FPGA_BOARD) || defined (MT7628_ASIC_BOARD) || defined(MT7628_FPGA_BOARD)
+#if defined (CPLL_FROM_480MHZ)
+	cpu_pll = ntohs(1<<11);
+#elif defined (CPLL_FROM_XTAL)
+	cpu_pll = ntohs(1<<12);
+#else
+	cpu_pll = ntohs((CPLL_MULTI_RATIO_CFG<<8)|(CPLL_DIV_RATIO_CFG<<6)|(CPLL_SSC_CFG<<0));
+#endif
+#endif
+	if(cpu_pll==0) {
+		hdr->ih_dram.u.cpu_pll_magic_l=0;
+		hdr->ih_dram.cpu_pll_cfg = 0;
+	}else{
+		hdr->ih_dram.u.cpu_pll_magic_l=0xa;
+		hdr->ih_dram.cpu_pll_cfg = cpu_pll;
+	}
+#endif
+
+#if defined (DRAM_PARAMETERS)
+#if defined (RT3052_ASIC_BOARD) || defined(RT3052_FPGA_BOARD) ||\
+	defined (RT3352_ASIC_BOARD) || defined(RT3352_FPGA_BOARD) ||\
+	defined (RT5350_ASIC_BOARD) || defined(RT5350_FPGA_BOARD) ||\
+	defined (RT3883_ASIC_BOARD) || defined(RT3883_FPGA_BOARD)	
+	if(dram_type==0) {//SDR
+	    hdr->ih_dram.sdr.sdram_cfg0 = dram_cfg0;
+	    hdr->ih_dram.sdr.sdram_cfg1 = dram_cfg1;
+	}else { //DDR
+	    hdr->ih_dram.ddr.syscfg1= (dram_cfg0 & 0x3F);
+	    hdr->ih_dram.ddr.ddr_cfg3= (dram_cfg1 & 0x3);
+	}
+#elif defined (RT6855A_ASIC_BOARD) || defined (RT6855A_FPGA_BOARD) ||\
+	defined (MT7620_ASIC_BOARD) || defined (MT7620_FPGA_BOARD) ||\
+        defined (MT7628_ASIC_BOARD) || defined (MT7628_FPGA_BOARD)
+	if(dram_type==0) {//SDR
+	    hdr->ih_dram.sdr.sdram_cfg0 = ntohl(dram_cfg0);
+	    hdr->ih_dram.sdr.sdram_cfg1 = ntohl(dram_cfg1);
+	}else { //DDR
+#if defined (RT6855A_ASIC_BOARD) || defined (RT6855A_FPGA_BOARD)
+			hdr->ih_dram.ddr_cfg2 = ntohl(DDR_CFG2_SETTING);
+			hdr->ih_dram.ddr_cfg3 = ntohl(DDR_CFG3_SETTING);
+			hdr->ih_dram.ddr_cfg4 = ntohl(DDR_CFG4_SETTING);
+			hdr->ih_dram.dram_pad_setting = ntohl(DRAM_PAD_SETTING);
+#endif
+			hdr->ih_dram.ddr.ddr_cfg0 = ntohl(dram_cfg0);
+			hdr->ih_dram.ddr.ddr_cfg1 = ntohl(dram_cfg1);
+#if defined (MT7620_ASIC_BOARD) || defined (MT7620_FPGA_BOARD) || (MT7628_ASIC_BOARD) || defined (MT7628_FPGA_BOARD)
+			hdr->ih_dram.ddr_self_refresh = ntohs((((DDR_ODT_SRC&0x0F)<<8)|(DDR_ODT_OFF_DLY&0x0F)<<4)|\
+											(DDR_ODT_ON_DLY&0x0F)); 
+			hdr->ih_dram.syscfg1_ddrcfg3_odt = ntohs((SYSCFG1_ODT&0x0FFFC)|(DDRCFG3_ODT&0x03));   
+			hdr->ih_dram.ddr_cfg11 = ntohs(((DDR_CFG2_CAS&0x7)<<13)|(DDR_CFG11_FFD_EN<<12)|(DDR_CFG11_FCD_EN<<11)|\
+								((DDR_CFG11_FFD&0x0F)<<7)|(DDR_CFG11_FCD&0x7F));
+			hdr->ih_dram.ddr_cfg10 = ntohl(((DDR_CFG3_DS&0x1)<<31)|DDR_CFG10_SETTING&(~((1<<31)|(1<<23)|(1<<15)|(1<<7))));
+#endif
+	}
+#else
+#error "DRAM config in imageheader is not supported"	
+#endif	
+#endif
+#endif /* ! MT7621_ASIC_BOARD or MT7621_FPGA_BOARD */
+
+#if (defined (MT7621_ASIC_BOARD) || defined (MT7621_FPGA_BOARD))
+	//crc((const char *)hdr, &(hdr->ih_nand.crc), sizeof(image_header_t));	
+    crc((const char *)hdr, &checksum, sizeof(image_header_t));
+    hdr->ih_nand.crc = htonl(checksum);
+#endif	
 	checksum = crc32(0,(const char *)hdr,sizeof(image_header_t));
 
 	hdr->ih_hcrc = htonl(checksum);
@@ -602,8 +865,14 @@ usage ()
 			 "          -a ==> set load address to 'addr' (hex)\n"
 			 "          -e ==> set entry point to 'ep' (hex)\n"
 			 "          -n ==> set image name to 'name'\n"
+			 "          -r ==> set dram type (sdr/ddr)\n"
+			 "          -s ==> set dram total width (16/32)\n"
+			 "          -t ==> set dram size (2/8/16/32/64/128/256MB)\n"
+			 "          -u ==> set dram width (16/32)\n"
 			 "          -d ==> use image data from 'datafile'\n"
 			 "          -x ==> set XIP (execute in place)\n"
+			 "          -y ==> set dram parameter 0\n"
+			 "          -z ==> set dram parameter 1\n"
 		);
 	exit (EXIT_FAILURE);
 }
@@ -624,7 +893,10 @@ print_header (image_header_t *hdr)
 		size, (double)size / 1.024e3, (double)size / 1.048576e6 );
 	printf ("Load Address: 0x%08X\n", ntohl(hdr->ih_load));
 	printf ("Entry Point:  0x%08X\n", ntohl(hdr->ih_ep));
-
+#if defined (MT7621_ASIC_BOARD) || defined (MT7621_FPGA_BOARD)
+#else	
+	printf ("DRAM Parameter: %x (Parm0=%x Parm1=%x)\n", hdr->ih_dram.dram_parm, hdr->ih_dram.sdr.sdram_cfg0, hdr->ih_dram.sdr.sdram_cfg1);
+#endif
 	if (hdr->ih_type == IH_TYPE_MULTI || hdr->ih_type == IH_TYPE_SCRIPT) {
 		int i, ptrs;
 		uint32_t pos;

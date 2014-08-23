@@ -23,11 +23,15 @@
 
 include $(TOPDIR)/config.mk
 
-#CFLAGS += -DET_DEBUG -DDEBUG
+# CFLAGS += -DET_DEBUG -DDEBUG
 
 LIB	= libdrivers.a
 
-OBJS	= i2c_drv.o mii_mgr.o
+OBJS	= rt2880_eth.o i2c_drv.o
+
+ifeq ($(RALINK_MDIO_ACCESS_FUN),ON)
+OBJS	+= mii_mgr.o
+endif
 
 ifeq ($(CONFIG_ATHEROS_PHY),y)
 ifeq ($(CONFIG_AG7100),y)
@@ -59,7 +63,15 @@ ifeq ($(CFG_ENV_IS), IN_SPI)
  ifeq ($(RT6855A_MP), y)
  OBJS	+= spi_rt6855A_flash.o 
  else
-OBJS	+= spi_flash.o 
+ ifeq ($(MT7621_MP), y)
+ OBJS	+= spi_rt6855A_flash.o 
+ else
+ ifeq ($(MT7628_MP), y)
+ OBJS	+= spi_rt6855A_flash.o 
+ else
+ OBJS	+= spi_flash.o 
+ endif
+ endif
  endif
  ifeq ($(RT3883_MP), y)
  OBJS	+= spi_drv.o 
@@ -67,7 +79,11 @@ OBJS	+= spi_flash.o
 endif
 
 ifeq ($(CFG_ENV_IS), IN_NAND)
+ ifeq ($(MT7621_MP), y)
+	OBJS    += nand/mtk_nand.o nand/bmt.o nand/nand_base.o nand/nand_ids.o
+ else
 OBJS	+= nand_flash.o 
+ endif
  ifeq ($(RT3883_MP), y)
  OBJS	+= spi_drv.o 
  endif
@@ -79,6 +95,13 @@ endif
 
 ifeq ($(RALINK_EHCI), ON)
 OBJS	+= ehci-hcd.o ehci-ra.o
+endif
+ 
+ifeq ($(RALINK_EPHY_TESTER), ON)
+OBJS   += phy_val.o 
+endif
+ifeq ($(MTK_MSDC), ON)
+OBJS	+= msdc/mmc_core.o msdc/mmc_test.o msdc/msdc.o msdc/msdc_cust.o msdc/ts_msdc.o
 endif
 
 all:	$(LIB)

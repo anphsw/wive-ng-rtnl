@@ -28,6 +28,8 @@
 
 #define local static
 
+#define DYNAMIC_CRC_TABLE
+
 #ifdef DYNAMIC_CRC_TABLE
 
 local int crc_table_empty = 1;
@@ -70,7 +72,7 @@ local void make_crc_table()
   poly = 0L;
   for (n = 0; n < sizeof(p)/sizeof(Byte); n++)
     poly |= 1L << (31 - p[n]);
- 
+
   for (n = 0; n < 256; n++)
   {
     c = (uLong)n;

@@ -326,7 +326,7 @@ static void flash_get_offsets(ulong base, flash_info_t *info)
 		/* set up sector start address table (uniform sector type) */
 		for ( i = 0; i < info->sector_count; i++ )
 			info->start[i] = base + (i * sect_size);
-
+		
 		printf("\n Set info->start[0]=%08X\n",info->start[0]);
 	}
 }

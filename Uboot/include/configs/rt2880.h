@@ -28,18 +28,28 @@
 #ifndef __CONFIG_H
 #define __CONFIG_H
 
+#ifndef __ASSEMBLY__ 
+#if defined(CFG_ENV_IS_IN_NAND) /* Environment is in NAND Flash */
+#if defined(MTK_NAND) 
+extern unsigned int  CFG_BLOCKSIZE;
+#else
+#include "../../drivers/ralink_nand.h"
+#endif
+#endif
+#endif
 
+#include "../../autoconf.h"
 //#define DEBUG				1
 //#define ET_DEBUG
-
 #define CONFIG_RT2880_ETH		1	/* Enable built-in 10/100 Ethernet */
+
 #define CONFIG_MIPS32		1	/* MIPS 4Kc CPU core	*/
 //CONFIG_INCA_IP
 #if defined (RT3052_FPGA_BOARD) || defined (RT3352_FPGA_BOARD) || \
     defined (RT2883_FPGA_BOARD) || defined (RT3883_FPGA_BOARD) || \
     defined (RT5350_FPGA_BOARD) || defined (RT6855_FPGA_BOARD) || \
-    defined (RT6352_FPGA_BOARD) || defined (RT71100_FPGA_BOARD) || \
-    defined (RT6855A_FPGA_BOARD)
+    defined (MT7620_FPGA_BOARD) || defined (MT7621_FPGA_BOARD) || \
+    defined (RT6855A_FPGA_BOARD) || defined (MT7628_FPGA_BOARD)
 #define FPGA_BOARD_CLOCK_RATE 40000000
 #else
 #define FPGA_BOARD_CLOCK_RATE 25000000
@@ -53,26 +63,32 @@
 #ifdef RT2880_ASIC_BOARD
 #define CPU_CLOCK_RATE	266666666 /* default: 150 MHz clock for the MIPS core */
 #elif defined (RT3052_ASIC_BOARD)
-#define CPU_CLOCK_RATE	384000000
+#define CPU_CLOCK_RATE	384000000 
 #elif defined (RT3352_ASIC_BOARD)
-#define CPU_CLOCK_RATE	400000000
+#define CPU_CLOCK_RATE	400000000 
 #elif defined (RT6855_ASIC_BOARD) || defined (RT6855A_ASIC_BOARD)
-#define CPU_CLOCK_RATE	500000000
-#elif defined (RT6352_ASIC_BOARD)
-#define CPU_CLOCK_RATE	600000000
-#elif defined (RT71100_ASIC_BOARD)
-#define CPU_CLOCK_RATE	400000000
+#define CPU_CLOCK_RATE	500000000 
+#elif defined (MT7620_ASIC_BOARD)
+#define CPU_CLOCK_RATE	600000000 
+#elif defined (MT7628_ASIC_BOARD)
+#define CPU_CLOCK_RATE	600000000 
+#elif defined (MT7621_ASIC_BOARD)
+#if defined (MT7621_CPU_FREQUENCY)
+#define CPU_CLOCK_RATE	(MT7621_CPU_FREQUENCY*1000000)
+#else
+#define CPU_CLOCK_RATE  (800000000)
+#endif
 #elif defined (RT2883_ASIC_BOARD)
-#define CPU_CLOCK_RATE	400000000
+#define CPU_CLOCK_RATE	400000000 
 #elif defined (RT3883_ASIC_BOARD)
-#define CPU_CLOCK_RATE	500000000
+#define CPU_CLOCK_RATE	500000000 
 #elif defined (RT5350_ASIC_BOARD)
-#define CPU_CLOCK_RATE	360000000
+#define CPU_CLOCK_RATE	360000000 
 #else
 #define CPU_CLOCK_RATE	FPGA_BOARD_CLOCK_RATE /* default: 150 MHz clock for the MIPS core */
 #endif
 
-#endif
+#endif 
 
 #define SERIAL_CLOCK_DIVISOR 16
 
@@ -86,31 +102,10 @@
 /* valid baudrates */
 #define CFG_BAUDRATE_TABLE	{ 9600, 19200, 38400, 57600, 115200 }
 
-#define	CONFIG_TIMESTAMP		/* Print image info with timestamp */
+//#define	CONFIG_TIMESTAMP		/* Print image info with timestamp */
 
 #undef	CONFIG_BOOTARGS
 
-#define	CONFIG_EXTRA_ENV_SETTINGS					\
-	"ramargs=setenv bootargs root=/dev/ram rw\0"			\
-	"addip=setenv bootargs $(bootargs) "				\
-		"ip=$(ipaddr):$(serverip):$(gatewayip):$(netmask)"	\
-		":$(hostname):$(netdev):off\0"				\
-	"addmisc=setenv bootargs $(bootargs) "				\
-		"console=ttyS0,$(baudrate) "				\
-		"ethaddr=$(ethaddr) "					\
-		"panic=1\0"						\
-	"flash_self=run ramargs addip addmisc;"				\
-		"bootm $(kernel_addr) $(ramdisk_addr)\0"		\
-	"kernel_addr=BFC40000\0"					\
-	"u-boot=u-boot.bin\0"				\
-	"load=tftp 8A100000 $(u-boot)\0"				\
-	"u_b=protect off 1:0-1;era 1:0-1;"				\
-		"cp.b 8A100000 BC400000 $(filesize)\0"			\
-	"loadfs=tftp 8A100000 root.cramfs\0"				\
-	"u_fs=era bc540000 bc83ffff;"				\
-		"cp.b 8A100000 BC540000 $(filesize)\0"			\
-	"test_tftp=tftp 8A100000 root.cramfs;run test_tftp\0"				\
-	""
 #define CONFIG_BOOTCOMMAND	"tftp" //"run flash_self"
 
 
@@ -137,10 +132,12 @@
 #define	CFG_PROMPT		"RT6855 # "
 #elif defined (RT6855A_FPGA_BOARD) || defined (RT6855A_ASIC_BOARD) 
 #define	CFG_PROMPT		"RT6855A # "
-#elif defined (RT6352_FPGA_BOARD) || defined (RT6352_ASIC_BOARD) 
-#define	CFG_PROMPT		"RT6352 # "
-#elif defined (RT71100_FPGA_BOARD) || defined (RT71100_ASIC_BOARD) 
-#define	CFG_PROMPT		"RT71100 # "
+#elif defined (MT7620_FPGA_BOARD) || defined (MT7620_ASIC_BOARD) 
+#define	CFG_PROMPT		"MT7620 # "
+#elif defined (MT7621_FPGA_BOARD) || defined (MT7621_ASIC_BOARD) 
+#define	CFG_PROMPT		"MT7621 # "
+#elif defined (MT7628_FPGA_BOARD) || defined (MT7628_ASIC_BOARD) 
+#define	CFG_PROMPT		"MT7628 # "
 #else
 #define	CFG_PROMPT		"RTxxxx # "
 #endif
@@ -148,7 +145,11 @@
 #define	CFG_PBSIZE (CFG_CBSIZE+sizeof(CFG_PROMPT)+16)  /* Print Buffer Size */
 #define	CFG_MAXARGS		16		/* max number of command args*/
 
+#if defined (MTK_NAND)
+#define CFG_MALLOC_LEN      1*1024*1024
+#else
 #define CFG_MALLOC_LEN		256*1024
+#endif
 
 #define CFG_BOOTPARAMS_LEN	128*1024
 
@@ -175,7 +176,7 @@
 #else
 #define	CFG_LOAD_ADDR		0x80100000	/* default load address	*/
 #define CFG_HTTP_DL_ADDR	0x80300000
-#if defined(RT6855A_FPGA_BOARD) || defined(RT6855A_ASIC_BOARD)
+#if defined(RT6855A_FPGA_BOARD) || defined(RT6855A_ASIC_BOARD) || defined(MT7620_FPGA_BOARD) || defined(MT7620_ASIC_BOARD) || defined(MT7628_FPGA_BOARD) || defined(MT7628_ASIC_BOARD)
 #define CFG_SPINAND_LOAD_ADDR	0x80c00000
 #else
 #define CFG_SPINAND_LOAD_ADDR	0x80500000
@@ -237,8 +238,8 @@
       defined (RT3352_FPGA_BOARD) || defined (RT3352_ASIC_BOARD) || \
       defined (RT5350_FPGA_BOARD) || defined (RT5350_ASIC_BOARD) || \
       defined (RT6855_FPGA_BOARD) || defined (RT6855_ASIC_BOARD) || \
-      defined (RT6352_FPGA_BOARD) || defined (RT6352_ASIC_BOARD) || \
-      defined (RT71100_FPGA_BOARD) || defined (RT71100_ASIC_BOARD)
+      defined (MT7620_FPGA_BOARD) || defined (MT7620_ASIC_BOARD) || \
+      defined (MT7628_FPGA_BOARD) || defined (MT7628_ASIC_BOARD)
 #define PHYS_FLASH_START	0xBC000000 /* Flash Bank #2 */
 #define PHYS_FLASH_1		0xBC000000 /* Flash Bank #1 */
   #ifdef DUAL_IMAGE_SUPPORT
@@ -254,6 +255,12 @@
   #define PHYS_FLASH2_1		0xBD000000 /* Flash Bank #2 */
   #endif
   #endif // DUAL_IMAGE_SUPPORT
+#elif  defined (MT7621_FPGA_BOARD) || defined (MT7621_ASIC_BOARD)
+#define PHYS_FLASH_START	0xBFC00000 /* Flash Bank #2 */
+#define PHYS_FLASH_1		0xBFC00000 /* Flash Bank #1 */
+  #ifdef DUAL_IMAGE_SUPPORT
+	/* TODO */
+  #endif
 #elif defined (RT3052_FPGA_BOARD) || defined (RT3052_ASIC_BOARD)
   // RT3052_MP2 and 32M_FLASH
   #define PHYS_FLASH_START	0xBF000000 /* Address for issuing flash command */
@@ -313,9 +320,21 @@
 #define CFG_KERN_ADDR		(CFG_FLASH_BASE + CFG_BOOTLOADER_SIZE)
 #define CFG_KERN2_ADDR		(CFG_FLASH2_BASE + CFG_BOOTLOADER_SIZE)
 #else
+#if defined(SMALL_UBOOT_PARTITION)
+#define CFG_BOOTLOADER_SIZE	0x20000
+#define CFG_CONFIG_SIZE		0x10000
+#define CFG_FACTORY_SIZE	0x00000
+#else
+#if defined(MTK_NAND) || defined (CFG_ENV_IS_IN_NAND)
+#define CFG_BOOTLOADER_SIZE	(CFG_BLOCKSIZE<<2)
+#define CFG_CONFIG_SIZE		(CFG_BLOCKSIZE<<2)
+#define CFG_FACTORY_SIZE	(CFG_BLOCKSIZE<<1)
+#else
 #define CFG_BOOTLOADER_SIZE	0x30000
 #define CFG_CONFIG_SIZE		0x10000
 #define CFG_FACTORY_SIZE	0x10000
+#endif
+#endif
 
 #define CFG_ENV_ADDR		(CFG_FLASH_BASE + CFG_BOOTLOADER_SIZE)
 #define CFG_FACTORY_ADDR	(CFG_FLASH_BASE + CFG_BOOTLOADER_SIZE + CFG_CONFIG_SIZE)
@@ -327,6 +346,15 @@
 
 #define CFG_ENV_SECT_SIZE	CFG_CONFIG_SIZE
 #define CFG_ENV_SIZE		0x1000
+
+#if defined(SMALL_UBOOT_PARTITION)
+#define CFG_UBOOT_SECT_SIZE	CFG_BOOTLOADER_SIZE
+#define CFG_UBOOT_SIZE		0x19000 // must <= CFG_FACTORY_ADDR
+#define CFG_RF_PARAM_SIZE	0x800
+#undef CFG_FACTORY_ADDR
+#define CFG_FACTORY_ADDR	(CFG_BOOTLOADER_SIZE - (2 * CFG_RF_PARAM_SIZE))
+#define CFG_FACTORY_ADDR2	(CFG_BOOTLOADER_SIZE - CFG_RF_PARAM_SIZE)
+#endif
 
 #if defined (DUAL_IMAGE_SUPPORT)
 #if defined (ON_BOARD_2M_FLASH_COMPONENT)
@@ -354,12 +382,8 @@
 #define CONFIG_FLASH_16BIT
 
 #define CONFIG_NR_DRAM_BANKS	1
-
-#define CONFIG_NET_MULTI
+//#define CONFIG_NET_MULTI
 #define CFG_RX_ETH_BUFFER		60
-
-//#define CFG_JFFS2_FIRST_BANK	1
-//#define CFG_JFFS2_NUM_BANKS		1
 
 /*-----------------------------------------------------------------------
  * Cache Configuration
@@ -367,10 +391,6 @@
 #define CFG_DCACHE_SIZE		(16*1024)
 #define CFG_ICACHE_SIZE		(16*1024)
 #define CFG_CACHELINE_SIZE	16
-
-
-#define CONFIG_LZMA		1
-
 
 #define RT2880_REGS_BASE			0xA0000000
 
@@ -396,6 +416,7 @@
 #define RT2880_CLKCFG1_REG			(RT2880_SYS_CNTL_BASE+0x30)
 #define RT2880_RSTCTRL_REG			(RT2880_SYS_CNTL_BASE+0x34)
 #define RT2880_RSTSTAT_REG			(RT2880_SYS_CNTL_BASE+0x38)
+#define RT2880_SYSCLKCFG_REG  		(RT2880_SYS_CNTL_BASE+0x3c)
 #define RT2880_GPIOMODE_REG			(RT2880_SYS_CNTL_BASE+0x60)
 #endif
 
@@ -407,8 +428,9 @@
 #define RT2880_REG_PIODATA      (RT2880_PRGIO_ADDR + 0x20)
 #define RT2880_REG_PIODIR       (RT2880_PRGIO_ADDR + 0x24)
 
-#define RALINK_REG(x)		(*((volatile u32 *)(x)))
-#if defined (RT6855A_FPGA_BOARD) || defined (RT6855A_ASIC_BOARD)
+#define RALINK_REG(x)		(*((volatile u32 *)(x)))	
+#if defined (RT6855A_FPGA_BOARD) || defined (RT6855A_ASIC_BOARD) || \
+    defined (MT7621_FPGA_BOARD) || defined (MT7621_ASIC_BOARD) || defined (MT7628_FPGA_BOARD) || defined (MT7628_ASIC_BOARD)
 #define ra_inb(offset)		(*(volatile unsigned char *)(offset))
 #define ra_inw(offset)		(*(volatile unsigned short *)(offset))
 #define ra_inl(offset)		(*(volatile unsigned long *)(offset))
@@ -420,7 +442,6 @@
 #define ra_and(addr, value) ra_outl(addr, (ra_inl(addr) & (value)))
 #define ra_or(addr, value) ra_outl(addr, (ra_inl(addr) | (value)))
 #endif
-
 #define RT2880_WDRST            (1<<1)
 #define RT2880_SWSYSRST         (1<<2)
 #define RT2880_SWCPURST         (1<<3)
@@ -444,5 +465,9 @@
 #define LITTLEENDIAN
 #define CONFIG_CRC32_VERIFY
 #endif /* RALINK_USB */
+
+#if defined (MT7621_ASIC_BOARD) || defined (MT7621_FPGA_BOARD)
+//#define USE_PIO_DBG		1
+#endif
 
 #endif	/* __CONFIG_H */
