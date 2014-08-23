@@ -1,5 +1,6 @@
 *.dep
 *.deps
+*.depend
 *.pc
 *.orig
 *.rej
