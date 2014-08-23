@@ -979,9 +979,7 @@ int32_t FoeBindToPpe(struct sk_buff *skb, struct FoeEntry* foe_entry_ppe, int gm
 #else
 		return 1;
 #endif
-
-	if (is_multicast_ether_addr(eth->h_dest))
-	    eth_type = ntohs(eth->h_proto);
+	eth_type = ntohs(eth->h_proto);
 
 	/* offload packet types not support for extif:
 	   1. VLAN tagged packets (avoid double tag issue).
