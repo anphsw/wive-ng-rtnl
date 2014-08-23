@@ -157,9 +157,6 @@ int HwNatIoctl(struct inode *inode, struct file *filp,
 		lan_vid = opt4->lan_vid;
 		opt4->result = HWNAT_SUCCESS;
 		break;
-	case HW_NAT_ALLOW_UDP:
-		/* use module param */
-		break;
 	case HW_NAT_ALLOW_IPV6:
 		opt4->result = PpeSetAllowIPv6(opt4->foe_allow_ipv6);
 		break;
