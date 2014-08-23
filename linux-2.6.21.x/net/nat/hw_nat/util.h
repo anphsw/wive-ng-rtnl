@@ -55,5 +55,7 @@ void PpeIpv6PktRebuild(struct sk_buff *skb, struct FoeEntry *foe_entry);
 void PpeIpv4PktRebuild(struct sk_buff *skb, struct iphdr *iph,
 		       struct FoeEntry *foe_entry);
 unsigned int Str2Ip(IN char *str);
-
+#if defined (CONFIG_RALINK_RT3052)
+extern int rw_rf_reg(int write, int reg, int *data);
+#endif
 #endif
