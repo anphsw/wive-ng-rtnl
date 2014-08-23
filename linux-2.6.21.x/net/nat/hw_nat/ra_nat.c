@@ -973,7 +973,7 @@ int32_t FoeBindToPpe(struct sk_buff *skb, struct FoeEntry* foe_entry_ppe, int gm
 	/* we cannot speed up multicase packets because both wire and
 	 * wireless PCs might join same multicast group.
 	 */
-	if (is_multicast_ether_addr(&eth->h_dest[0]))
+	if(is_multicast_ether_addr(eth->h_dest))
 #if defined (CONFIG_RA_HW_NAT_MCAST)
 		is_mcast = 1;
 #else
