@@ -22,7 +22,9 @@
 #
 
 BINS	= mkimage
-OBJS	= mkimage.o 
+OBJS	= mkimage.o
+
+-include $(LINUX_CONFIG)
 
 #
 # Use native tools and options
@@ -33,6 +35,10 @@ AFLAGS	   = -D__ASSEMBLY__ $(CPPFLAGS)
 MAKEDEPEND = makedepend
 CC	   = gcc
 STRIP	   = strip
+
+ifdef CONFIG_RALINK_MT7620
+CFLAGS    += -DMT7620_ASIC_BOARD
+endif
 
 all:	.depend $(BINS) 
 
@@ -51,5 +57,3 @@ mkimage.o: mkimage.c
 
 clean:
 	rm -f *.o mkimage
-
-

@@ -633,10 +633,8 @@ NXTARG:		;
 
 	strncpy((char *)hdr->ih_name, name, IH_NMLEN);
 
-	
 #if defined (MT7621_ASIC_BOARD) || defined(MT7621_FPGA_BOARD)
 #if defined (ON_BOARD_NAND_FLASH_COMPONENT)
-	//memset(&(hdr->ih_nand), 0, sizeof(nand_header_t));	
 	printf("DDRCal Code Offset 	: 0x%08X\n",stage1_start);
 	printf("Uboot Offset 		: 0x%08X\n",bootloader_start);
 	hdr->ih_nand.ih_stage_offset = htonl(stage1_start);
@@ -648,8 +646,8 @@ NXTARG:		;
 	hdr->ih_nand.nand_info_1.total_size = NAND_TOTALSIZE_INDEX;
 	hdr->ih_nand.nand_info_1.block_size = NAND_BLOCKSIZE_INDEX;
 	hdr->ih_nand.nand_info_1.magic_id = 0xDA0;
-	hdr->ih_nand.nand_info_1_data = htonl((unsigned int)(hdr->ih_nand.nand_info_1_data));	
-	hdr->ih_nand.nand_ac_timing = htonl(NAND_ACCTIME);	
+	hdr->ih_nand.nand_info_1_data = htonl((unsigned int)(hdr->ih_nand.nand_info_1_data));
+	hdr->ih_nand.nand_ac_timing = htonl(NAND_ACCTIME);
 #endif
 #endif
 #elif defined (MT7620_ASIC_BOARD) || defined (MT7620_FPGA_BOARD) || defined (MT7628_ASIC_BOARD) || defined (MT7628_FPGA_BOARD) || \
@@ -691,17 +689,7 @@ NXTARG:		;
 #endif
 
 #if defined (DRAM_PARAMETERS)
-#if defined (RT3352_ASIC_BOARD) || defined(RT3352_FPGA_BOARD) ||\
-	defined (RT5350_ASIC_BOARD) || defined(RT5350_FPGA_BOARD) ||\
-	defined (RT3883_ASIC_BOARD) || defined(RT3883_FPGA_BOARD)
-	if(dram_type==0) {//SDR
-	    hdr->ih_dram.sdr.sdram_cfg0 = dram_cfg0;
-	    hdr->ih_dram.sdr.sdram_cfg1 = dram_cfg1;
-	}else { //DDR
-	    hdr->ih_dram.ddr.syscfg1= (dram_cfg0 & 0x3F);
-	    hdr->ih_dram.ddr.ddr_cfg3= (dram_cfg1 & 0x3);
-	}
-#elif defined (RT6855A_ASIC_BOARD) || defined (RT6855A_FPGA_BOARD) ||\
+#if defined (RT6855A_ASIC_BOARD) || defined (RT6855A_FPGA_BOARD) ||\
 	defined (MT7620_ASIC_BOARD) || defined (MT7620_FPGA_BOARD) ||\
         defined (MT7628_ASIC_BOARD) || defined (MT7628_FPGA_BOARD)
 	if(dram_type==0) {//SDR
@@ -887,7 +875,6 @@ print_header (image_header_t *hdr)
 	printf ("Kernel Size:  0x%08X\n", ntohl(hdr->ih_ksz));
 #if defined (MT7620_ASIC_BOARD) || defined (MT7620_FPGA_BOARD) || defined (MT7628_ASIC_BOARD) || defined (MT7628_FPGA_BOARD) || \
 	defined (RT6855A_ASIC_BOARD) || defined (RT6855A_FPGA_BOARD)
-
 	printf ("DRAM Parameter: %x (Parm0=%x Parm1=%x)\n", hdr->ih_dram.dram_parm, hdr->ih_dram.sdr.sdram_cfg0, hdr->ih_dram.sdr.sdram_cfg1);
 #endif
 	if (hdr->ih_type == IH_TYPE_MULTI || hdr->ih_type == IH_TYPE_SCRIPT) {

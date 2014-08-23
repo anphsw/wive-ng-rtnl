@@ -18,7 +18,7 @@ ROOTDIR	:= $(shell pwd)
 ifeq (.config,$(wildcard .config))
 -include version
 -include .config
-all: tools linux lib_only user_only romfs image
+all: linux tools lib_only user_only romfs image
 else
 all: config_error
 endif

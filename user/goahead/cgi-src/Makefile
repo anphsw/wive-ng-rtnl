@@ -23,7 +23,7 @@ ALL_EXE = $(UPLOAD_CGI) $(UPLOAD_SETTINGS)
 
 all: $(ALL_EXE)
 
-$(UPLOAD_CGI): upload.cgi.o 
+$(UPLOAD_CGI): upload.cgi.o
 	$(CC) $(CFLAGS) upload.cgi.o -o $@ $(LDFLAGS)
 	$(STRIP) -R .comment -R .note -g --strip-unneeded $@
 
