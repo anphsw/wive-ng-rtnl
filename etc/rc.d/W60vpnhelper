@@ -76,7 +76,7 @@ killall_vpn() {
 	if [ -e /var/run/xl2tpd/l2tp-control ]; then
 	    lac=`cat /etc/ppp/l2tpd.conf | grep lns | cut -f 2- -d =`
 	    if [ "$lac" != "" ]; then
-		$LOG "xl2tpd: discobnnect from $lac."
+		$LOG "xl2tpd: disconnect from $lac."
 		echo "d $lac" > /var/run/xl2tpd/l2tp-control
 		usleep 500000
 	    fi
