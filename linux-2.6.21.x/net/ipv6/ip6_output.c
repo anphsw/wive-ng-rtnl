@@ -239,7 +239,7 @@ int ip6_xmit(struct sock *sk, struct sk_buff *skb, struct flowi *fl,
 			      IPSTATS_MIB_OUTREQUESTS);
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 		FOE_MAGIC_TAG(skb) = 0;
-		FOE_AI(skb) = UN_HIT;
+		FOE_AI_UNHIT(skb);
 #endif
 		return NF_HOOK(PF_INET6, NF_IP6_LOCAL_OUT, skb, NULL, dst->dev,
 				dst_output);
@@ -1391,7 +1391,7 @@ int ip6_push_pending_frames(struct sock *sk)
 
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 	FOE_MAGIC_TAG(skb) = 0;
-	FOE_AI(skb) = UN_HIT;
+	FOE_AI_UNHIT(skb);
 #endif
 
 	IP6_INC_STATS(rt->rt6i_idev, IPSTATS_MIB_OUTREQUESTS);

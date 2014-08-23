@@ -36,7 +36,7 @@ nat_mode() {
 offload() {
     # In bridge and chillispot mode not fastnat use
     if [ "$OperationMode" != "0" ] && [ "$OperationMode" != "4" ] && [ "$ApCliBridgeOnly" != "1" ]; then
-	eval `nvram_buf_get 2860 hw_nat_bind hw_nat_wifi offloadMode natFastpath routeFastpath filterFastpath`
+	eval `nvram_buf_get 2860 hw_nat_bind hw_nat_wifi hw_nat_udp offloadMode natFastpath routeFastpath filterFastpath`
 	# select NAT offload mode
 	if [ "$offloadMode" = "1" ]; then
 	    hw_nat=0
@@ -93,7 +93,14 @@ offload() {
 		    hw_nat_wifi="wifi_offload=0"
 		    $LOG "Load hw_nat with wifi offload support disabled."
 		fi
-		modprobe -q hw_nat "$hw_nat_wifi"
+		if [ "$hw_nat_udp" = "1" ]; then
+		    hw_nat_udp="udp_offload=1"
+		    $LOG "Load hw_nat with udp offload support enabled."
+		else
+		    hw_nat_udp="udp_offload=0"
+		    $LOG "Load hw_nat with udp offload support disabled."
+		fi
+		modprobe -q hw_nat "$hw_nat_wifi" "$hw_nat_udp"
 	    fi
 	    $LOG "Set HW_NAT default QOS Mode to WRR policy."
 	    hw_nat -L 0

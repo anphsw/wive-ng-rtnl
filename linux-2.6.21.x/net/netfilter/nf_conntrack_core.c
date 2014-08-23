@@ -1132,8 +1132,7 @@ nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 	if (pf == PF_INET && hooknum != NF_IP_LOCAL_OUT
 #endif
 	    && FOE_ALG(*pskb) == 0 && (skip_offload || is_local_svc(protonum))) {
-	    if (IS_SPACE_AVAILABLED(*pskb) && IS_MAGIC_TAG_VALID(*pskb))
-		FOE_ALG(*pskb)=1;
+		FOE_ALG_MARK(*pskb);
 	}
 #endif
 #endif
@@ -1198,8 +1197,8 @@ pass:
 	    if(skip_offload) {
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 		/* skip hardware offload flag */
-		if (hooknum != NF_IP_LOCAL_OUT && FOE_ALG(*pskb) == 0 && IS_SPACE_AVAILABLED(*pskb) && IS_MAGIC_TAG_VALID(*pskb))
-		    FOE_ALG(*pskb)=1;
+		if (hooknum != NF_IP_LOCAL_OUT && FOE_ALG(*pskb) == 0)
+		    FOE_ALG_MARK(*pskb);
 #endif
 #ifdef CONFIG_BCM_NAT
 		/* skip sofware nat fastpath flag */

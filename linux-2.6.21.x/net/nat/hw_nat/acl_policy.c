@@ -442,17 +442,17 @@ void PpeSetPreAclEbl(uint32_t AclEbl)
 
 	/* ACL engine for unicast/multicast/broadcast flow */
 	if (AclEbl == 1) {
-		PpeFlowSet |= (BIT_FUC_ACL | BIT_FMC_ACL | BIT_FBC_ACL);
-#if defined(CONFIG_RA_HW_NAT_IPV6)
+		PpeFlowSet |= (BIT_FUC_ACL);
+#if defined (CONFIG_RA_HW_NAT_IPV6)
 		PpeFlowSet |= (BIT_IPV6_PE_EN);
 #endif
-
 	} else {
 		/* Set Pre ACL Table */
 		PpeFlowSet &= ~(BIT_FUC_ACL | BIT_FMC_ACL | BIT_FBC_ACL);
-#if defined(CONFIG_RA_HW_NAT_IPV6)
+#if defined (CONFIG_RA_HW_NAT_IPV6)
 		PpeFlowSet &= ~(BIT_IPV6_PE_EN);
 #endif
+		PpeRstPreAclPtr();
 	}
 
 	RegWrite(PPE_FLOW_SET, PpeFlowSet);
@@ -580,7 +580,7 @@ AclSetMacEntry(AclPlcyNode * node, enum L2RuleDir Dir, enum FoeTblEE End)
 	}
 	L2Rule.com.rt = L2_RULE;
 	L2Rule.com.dir = Dir;
-#if defined(CONFIG_RALINK_RT6855) || defined(CONFIG_RALINK_RT6855A)
+#if defined (CONFIG_RALINK_RT6855) || defined(CONFIG_RALINK_RT6855A)
 	L2Rule.com.pn = PN_DONT_CARE;
 #else
 	L2Rule.com.pn = node->pn;
@@ -638,7 +638,7 @@ uint32_t AclSetIpFragEntry(AclPlcyNode * node, enum FoeTblEE End)
 	 */
 	L3Rule.com.dir = IP_QOS;
 	L3Rule.com.match = 0;	/* NOT Equal */
-#if defined(CONFIG_RALINK_RT6855) || defined(CONFIG_RALINK_RT6855A)
+#if defined (CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_RT6855A)
 	L3Rule.com.pn = PN_DONT_CARE;
 #else
 	L3Rule.com.pn = node->pn;
@@ -714,7 +714,7 @@ AclSetIpEntry(AclPlcyNode * node, enum L3RuleDir Dir, enum FoeTblEE End)
 
 	L3Rule.com.dir = Dir;
 	L3Rule.com.match = 1;
-#if defined(CONFIG_RALINK_RT6855) || defined(CONFIG_RALINK_RT6855A)
+#if defined (CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_RT6855A)
 	L3Rule.com.pn = PN_DONT_CARE;
 #else
 	L3Rule.com.pn = node->pn;
@@ -769,7 +769,7 @@ AclSetProtoEntry(AclPlcyNode * node, enum FoeTblTcpUdp Proto, enum FoeTblEE End)
 	memset(&L4Rule, 0, sizeof(L4Rule));
 
 	L4Rule.com.match = 1;
-#if defined(CONFIG_RALINK_RT6855) || defined(CONFIG_RALINK_RT6855A)
+#if defined (CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_RT6855A)
 	L4Rule.com.pn = PN_DONT_CARE;
 #else
 	L4Rule.com.pn = node->pn;
@@ -824,7 +824,7 @@ AclSetPortEntry(AclPlcyNode * node, enum L4RuleDir Dir,
 	memset(&L4Rule, 0, sizeof(L4Rule));
 	L4Rule.com.dir = Dir;
 	L4Rule.com.match = 1;
-#if defined(CONFIG_RALINK_RT6855) || defined(CONFIG_RALINK_RT6855A)
+#if defined (CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_RT6855A)
 	L4Rule.com.pn = PN_DONT_CARE;
 #else
 	L4Rule.com.pn = node->pn;
@@ -961,10 +961,12 @@ uint32_t AclInsSmacETypTOSSipSpDipDp(AclPlcyNode * node)
 	uint16_t IgnoreTOS = 0x0;
 	uint16_t IgnoreProt = 0x0;
 	uint16_t IgnoreSpecialTag = 0x0;
-#if defined(CONFIG_RALINK_RT6855) || defined(CONFIG_RALINK_RT6855A)
+
+#if defined (CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_RT6855A)
 	if (node->pn != PN_DONT_CARE)
 		node->SpecialTag = (0x8100 | node->pn);
 #endif
+
 	//Insert SMAC Entry 
 	if (memcmp(node->Mac, IgnoreMac, ETH_ALEN) != 0) {
 		if ((memcmp(node->DMac, IgnoreMac, ETH_ALEN) != 0) ||

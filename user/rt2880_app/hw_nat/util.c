@@ -6,8 +6,6 @@
 #include <linux/fs.h>
 #include <sys/ioctl.h>
 
-#include "util.h"
-
 int
 getnext (
         char *  src,

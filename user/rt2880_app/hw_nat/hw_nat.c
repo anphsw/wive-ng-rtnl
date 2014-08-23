@@ -5,7 +5,6 @@
 #include <fcntl.h>
 #include <getopt.h>
 #include <strings.h>
-#include <linux/autoconf.h>
 
 #include "hwnat_ioctl.h"
 #include "hwnat_api.h"
@@ -15,21 +14,21 @@ void show_usage(void)
     printf("Show Foe Entry\n");
     printf("hw_nat -c [entry_num]\n");
     printf("Ex: hw_nat -c 1234\n\n");
-    
+
     printf("Set Debug Level (0:disable) \n");
     printf("hw_nat -d [0~7]\n");
     printf("Ex: hw_nat -d \n\n");
-    
+
     printf("Show All Foe Invalid Entry\n");
     printf("Ex: hw_nat -e\n\n");
-    
+
     printf("Show All Foe Unbinded Entry\n");
     printf("Ex: hw_nat -f\n\n");
-    
+
     printf("Show All Foe Binded Entry\n");
     printf("Ex: hw_nat -g\n\n");
 
-#if! defined (CONFIG_HNAT_V2)
+#if !defined (CONFIG_HNAT_V2)
     printf("Enable DSCP Remark\n");
     printf("Ex: hw_nat -A [0/1]\n\n");
 
@@ -89,7 +88,6 @@ void show_usage(void)
     printf("Set HNAT Max entries allowed build when Free Entries>3/4, >1/2, <1/2 (d=100, 50, 25)\n");
     printf("Ex: hw_nat -O [1~16383][1~16383][1~16383]\n\n");
 
-
     printf("Set HNAT TCP/UDP keepalive interval (d=1, 1)(unit:4sec)\n");
     printf("Ex: hw_nat -Q [1~255][1~255]\n\n");
 
@@ -99,40 +97,39 @@ void show_usage(void)
     printf("Set HNAT Life time of Binded TCP/UDP/FIN entry(d=5, 5, 5)(unit:1Sec) \n");
     printf("Ex: hw_nat -U [1~65535][1~65535][1~65535]\n\n");
 
+    printf("Set LAN/WAN port VLAN ID\n");
+    printf("Ex: hw_nat -V [LAN_VID] [WAN_VID]\n\n");
+
+    printf("Set HNAT IPv4 UDP offload (d=0)\n");
+    printf("Ex: hw_nat -Y [0/1]\n\n");
+
+    printf("Set HNAT IPv6 routes offload (d=0)\n");
+    printf("Ex: hw_nat -6 [0/1]\n\n");
+
     printf("Only Speed UP (0=Upstream, 1=Downstream, 2=Bi-Direction) flow \n");
     printf("Ex: hw_nat -Z 1\n\n");
-   
 }
 
 int main(int argc, char *argv[])
 {
     int opt;
 #if !defined (CONFIG_HNAT_V2)
-    char options[] = "efg?c:d:A:B:C:D:E:F:G:H:I:J:K:L:M:N:O:P:Q:T:U:Z:";
+    char options[] = "efg?c:d:A:B:C:D:E:F:G:H:I:J:K:L:M:N:O:P:Q:T:U:V:Y:Z:6:";
 #else
-    char options[] = "aefg?c:d:A:N:O:P:Q:T:U:Z:";
+    char options[] = "aefg?c:d:A:N:O:P:Q:T:U:V:Y:Z:6:";
 #endif
-    int fd, method;
+    int method = 0;
     int i=0;
-    unsigned int entry_num;
-    unsigned int debug;
-    unsigned int dir;
+    unsigned int entry_num = 0;
+    unsigned int debug = 0;
     struct hwnat_args *args;
-    struct hwnat_tuple args2;
 #if !defined (CONFIG_HNAT_V2)
     struct hwnat_qos_args args3;
 #else
     struct hwnat_ac_args args3;
 #endif
     struct hwnat_config_args args4;
-    int	   result;
-
-    fd = open("/dev/"HW_NAT_DEVNAME, O_RDONLY);
-    if (fd < 0)
-    {
-	printf("Open %s pseudo device failed\n","/dev/"HW_NAT_DEVNAME);
-	return 0;
-    }
+    int result = 0;
 
     if(argc < 2) {
 	show_usage();
@@ -201,7 +198,6 @@ int main(int argc, char *argv[])
 		break;
 	case 'H':
 		method = HW_NAT_UP_IDSCP;
-
 		args3.up = strtoll(argv[2], NULL, 10);
 		args3.dscp = strtoll(argv[3], NULL, 10);
 		break;
@@ -270,22 +266,32 @@ int main(int argc, char *argv[])
 		args4.foe_udp_dlta = strtoll(argv[3], NULL, 10);
 		args4.foe_fin_dlta = strtoll(argv[4], NULL, 10);
 		break;
+	case 'V':
+		method = HW_NAT_VLAN_ID;
+		args4.lan_vid = strtoll(argv[2], NULL, 10);
+		args4.wan_vid = strtoll(argv[3], NULL, 10);
+		break;
+	case 'Y':
+		method = HW_NAT_ALLOW_UDP;
+		args4.foe_allow_udp = strtoll(optarg, NULL, 10);
+		break;
 	case 'Z':
 		method = HW_NAT_BIND_DIRECTION;
-		dir = strtoll(optarg, NULL, 10);
+		args4.bind_dir = strtoll(optarg, NULL, 10);
+		break;
+	case '6':
+		method = HW_NAT_ALLOW_IPV6;
+		args4.foe_allow_ipv6 = strtoll(optarg, NULL, 10);
 		break;
 	case '?':
 		show_usage();
-
 	}
-    } 
-
+    }
 
     switch(method){
     case HW_NAT_GET_ALL_ENTRIES:
 	    HwNatGetAllEntries(args);
-
-	    printf("Total Entry Count = %d\n",args->num_of_entries);	
+	    printf("Total Entry Count = %d\n",args->num_of_entries);
 	    for(i=0;i<args->num_of_entries;i++){
 		if(args->entries[i].pkt_type==0) { //IPV4_NAPT
 		    printf("IPv4_NAPT=%d : %u.%u.%u.%u:%d->%u.%u.%u.%u:%d => %u.%u.%u.%u:%d->%u.%u.%u.%u:%d\n", \
@@ -306,14 +312,14 @@ int main(int argc, char *argv[])
 			    NIPQUAD(args->entries[i].eg_sipv4), \
 			    NIPQUAD(args->entries[i].eg_dipv4)); 
 		} else if(args->entries[i].pkt_type==2) { //IPV6_ROUTING
-		    printf("IPv6_1T= %d /SIP: %x:%x:%x:%x:%x:%x:%x:%x\n", \
+		    printf("IPv6_1T=%d /DIP: %x:%x:%x:%x:%x:%x:%x:%x\n", \
 		    args->entries[i].hash_index, \
-		    NIPHALF(args->entries[i].ing_sipv6_0), \
-		    NIPHALF(args->entries[i].ing_sipv6_1), \
-		    NIPHALF(args->entries[i].ing_sipv6_2), \
-		    NIPHALF(args->entries[i].ing_sipv6_3));
+		    NIPHALF(args->entries[i].ing_dipv6_0), \
+		    NIPHALF(args->entries[i].ing_dipv6_1), \
+		    NIPHALF(args->entries[i].ing_dipv6_2), \
+		    NIPHALF(args->entries[i].ing_dipv6_3));
 		} else if(args->entries[i].pkt_type==3) { //IPV4_DSLITE
-		    printf("DS-Lite= %d : %u.%u.%u.%u:%d->%u.%u.%u.%u:%d (%x:%x:%x:%x:%x:%x:%x:%x -> %x:%x:%x:%x:%x:%x:%x:%x) \n", \
+		    printf("DS-Lite=%d : %u.%u.%u.%u:%d->%u.%u.%u.%u:%d (%x:%x:%x:%x:%x:%x:%x:%x -> %x:%x:%x:%x:%x:%x:%x:%x) \n", \
 			    args->entries[i].hash_index, \
 			    NIPQUAD(args->entries[i].ing_sipv4),  \
 			    args->entries[i].ing_sp,     \
@@ -328,7 +334,7 @@ int main(int argc, char *argv[])
 			    NIPHALF(args->entries[i].eg_dipv6_2), \
 			    NIPHALF(args->entries[i].eg_dipv6_3));
 		} else if(args->entries[i].pkt_type==4) { //IPV6_3T_ROUTE
-		    printf("IPv6_3T= %d SIP: %x:%x:%x:%x:%x:%x:%x:%x DIP: %x:%x:%x:%x:%x:%x:%x:%x\n", \
+		    printf("IPv6_3T=%d SIP: %x:%x:%x:%x:%x:%x:%x:%x DIP: %x:%x:%x:%x:%x:%x:%x:%x\n", \
 		    args->entries[i].hash_index, \
 		    NIPHALF(args->entries[i].ing_sipv6_0), \
 		    NIPHALF(args->entries[i].ing_sipv6_1), \
@@ -340,7 +346,7 @@ int main(int argc, char *argv[])
 		    NIPHALF(args->entries[i].ing_dipv6_3));
 		} else if(args->entries[i].pkt_type==5) { //IPV6_5T_ROUTE
 		    if(args->entries[i].ipv6_flowlabel==1) {
-			printf("IPv6_5T= %d SIP: %x:%x:%x:%x:%x:%x:%x:%x DIP: %x:%x:%x:%x:%x:%x:%x:%x (Flow Label=%d)\n", \
+			printf("IPv6_5T=%d SIP: %x:%x:%x:%x:%x:%x:%x:%x DIP: %x:%x:%x:%x:%x:%x:%x:%x (Flow Label=%x)\n", \
 				args->entries[i].hash_index, \
 				NIPHALF(args->entries[i].ing_sipv6_0), \
 				NIPHALF(args->entries[i].ing_sipv6_1), \
@@ -350,9 +356,9 @@ int main(int argc, char *argv[])
 				NIPHALF(args->entries[i].ing_dipv6_1), \
 				NIPHALF(args->entries[i].ing_dipv6_2), \
 				NIPHALF(args->entries[i].ing_dipv6_3), \
-				(args->entries[i].ing_sp << 16) | (args->entries[i].ing_dp));
+				((args->entries[i].ing_sp << 16) | (args->entries[i].ing_dp))&0xFFFFF);
 		    }else {
-			printf("IPv6_5T= %d SIP: %x:%x:%x:%x:%x:%x:%x:%x (SP:%d) DIP: %x:%x:%x:%x:%x:%x:%x:%x (DP=%d)\n", \
+			printf("IPv6_5T=%d SIP: %x:%x:%x:%x:%x:%x:%x:%x (SP:%d) DIP: %x:%x:%x:%x:%x:%x:%x:%x (DP=%d)\n", \
 				args->entries[i].hash_index, \
 				NIPHALF(args->entries[i].ing_sipv6_0), \
 				NIPHALF(args->entries[i].ing_sipv6_1), \
@@ -365,10 +371,9 @@ int main(int argc, char *argv[])
 				NIPHALF(args->entries[i].ing_dipv6_3), \
 				args->entries[i].ing_dp);
 		    }
-
 		} else if(args->entries[i].pkt_type==7) { //IPV6_6RD
 		    if(args->entries[i].ipv6_flowlabel==1) {
-			printf("6RD= %d %x:%x:%x:%x:%x:%x:%x:%x->%x:%x:%x:%x:%x:%x:%x:%x [Flow Label=%d]\n", \
+			printf("6RD=%d %x:%x:%x:%x:%x:%x:%x:%x->%x:%x:%x:%x:%x:%x:%x:%x [Flow Label=%x]\n", \
 				args->entries[i].hash_index, \
 				NIPHALF(args->entries[i].ing_sipv6_0), \
 				NIPHALF(args->entries[i].ing_sipv6_1), \
@@ -378,10 +383,10 @@ int main(int argc, char *argv[])
 				NIPHALF(args->entries[i].ing_dipv6_1), \
 				NIPHALF(args->entries[i].ing_dipv6_2), \
 				NIPHALF(args->entries[i].ing_dipv6_3), \
-				(args->entries[i].ing_sp << 16) | (args->entries[i].ing_dp));
+				((args->entries[i].ing_sp << 16) | (args->entries[i].ing_dp))&0xFFFFF);
 				printf("(%u.%u.%u.%u->%u.%u.%u.%u)\n", NIPQUAD(args->entries[i].eg_sipv4), NIPQUAD(args->entries[i].eg_dipv4));
 		    }else {
-			printf("6RD= %d /SIP: %x:%x:%x:%x:%x:%x:%x:%x [SP:%d] /DIP: %x:%x:%x:%x:%x:%x:%x:%x [DP=%d]", \
+			printf("6RD=%d /SIP: %x:%x:%x:%x:%x:%x:%x:%x [SP:%d] /DIP: %x:%x:%x:%x:%x:%x:%x:%x [DP=%d]", \
 				args->entries[i].hash_index, \
 				NIPHALF(args->entries[i].ing_sipv6_0), \
 				NIPHALF(args->entries[i].ing_sipv6_1), \
@@ -414,55 +419,55 @@ int main(int argc, char *argv[])
 	    break;
 #if !defined (CONFIG_HNAT_V2)
     case HW_NAT_DSCP_REMARK:
-            HwNatDscpRemarkEbl(&args3);
+	    HwNatSetQoS(&args3, method);
 	    result = args3.result;
 	    break;
     case HW_NAT_VPRI_REMARK:
-            HwNatVpriRemarkEbl(&args3);
+	    HwNatSetQoS(&args3, method);
 	    result = args3.result;
 	    break;
     case HW_NAT_FOE_WEIGHT:
-	    HwNatSetFoeWeight(&args3);
+	    HwNatSetQoS(&args3, method);
 	    result = args3.result;
 	    break;
     case HW_NAT_ACL_WEIGHT:
-	    HwNatSetAclWeight(&args3);
+	    HwNatSetQoS(&args3, method);
 	    result = args3.result;
 	    break;
     case HW_NAT_DSCP_WEIGHT:
-	    HwNatSetDscpWeight(&args3);
+	    HwNatSetQoS(&args3, method);
 	    result = args3.result;
 	    break;
     case HW_NAT_VPRI_WEIGHT:
-	    HwNatSetVpriWeight(&args3);
+	    HwNatSetQoS(&args3, method);
 	    result = args3.result;
 	    break;
     case HW_NAT_DSCP_UP:
-	    HwNatSetDscp_Up(&args3);
+	    HwNatSetQoS(&args3, method);
 	    result = args3.result;
 	    break;
     case HW_NAT_UP_IDSCP:
-	    HwNatSetUp_InDscp(&args3);
+	    HwNatSetQoS(&args3, method);
 	    result = args3.result;
 	    break;
     case HW_NAT_UP_ODSCP:
-	    HwNatSetUp_OutDscp(&args3);
+	    HwNatSetQoS(&args3, method);
 	    result = args3.result;
 	    break;
     case HW_NAT_UP_VPRI:
-	    HwNatSetUp_Vpri(&args3);
+	    HwNatSetQoS(&args3, method);
 	    result = args3.result;
 	    break;
     case HW_NAT_UP_AC:
-	    HwNatSetUp_Ac(&args3);
+	    HwNatSetQoS(&args3, method);
 	    result = args3.result;
 	    break;
     case HW_NAT_SCH_MODE:
-	    HwNatSetSchMode(&args3);
+	    HwNatSetQoS(&args3, method);
 	    result = args3.result;
 	    break;
     case HW_NAT_SCH_WEIGHT:
-	    HwNatSetSchWeight(&args3);
+	    HwNatSetQoS(&args3, method);
 	    result = args3.result;
 	    break;
 #else
@@ -474,33 +479,45 @@ int main(int argc, char *argv[])
 	    break;
 #endif
     case HW_NAT_BIND_THRESHOLD:
-	    HwNatSetBindThreshold(&args4);
+	    HwNatSetConfig(&args4, method);
 	    result = args4.result;
 	    break;
     case HW_NAT_MAX_ENTRY_LMT:
-	    HwNatSetMaxEntryRateLimit(&args4);
+	    HwNatSetConfig(&args4, method);
 	    result = args4.result;
 	    break;
     case HW_NAT_RULE_SIZE:
-	    HwNatSetRuleSize(&args4);
+	    HwNatSetConfig(&args4, method);
 	    result = args4.result;
 	    break;
     case HW_NAT_KA_INTERVAL:
-	    HwNatSetKaInterval(&args4);
+	    HwNatSetConfig(&args4, method);
 	    result = args4.result;
 	    break;
     case HW_NAT_UB_LIFETIME:
-	    HwNatSetUnbindLifeTime(&args4);
+	    HwNatSetConfig(&args4, method);
 	    result = args4.result;
 	    break;
     case HW_NAT_BIND_LIFETIME:
-	    HwNatSetBindLifeTime(&args4);
+	    HwNatSetConfig(&args4, method);
+	    result = args4.result;
+	    break;
+    case HW_NAT_VLAN_ID:
+	    HwNatSetConfig(&args4, method);
 	    result = args4.result;
 	    break;
     case HW_NAT_BIND_DIRECTION:
-	    result = HwNatSetBindDir(dir);
+	    HwNatSetConfig(&args4, method);
+	    result = args4.result;
 	    break;
-
+    case HW_NAT_ALLOW_UDP:
+	    HwNatSetConfig(&args4, method);
+	    result = args4.result;
+	    break;
+    case HW_NAT_ALLOW_IPV6:
+	    HwNatSetConfig(&args4, method);
+	    result = args4.result;
+	    break;
     }
 
     if(result==HWNAT_SUCCESS){

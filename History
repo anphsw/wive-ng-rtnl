@@ -318,6 +318,7 @@
 60) kernel: raeth: implement ondemand wan status check for devices with external rtl switch (example N56U).<br>
 61) kernel: wifi drivers: fix RTPRIV_IOCTL_GET_MAC_TABLE_STRUCT on RTxxxX driver 2.5.X.X.<br>
 62) kernel: ralink_spi: if flash not detected use stub depended from kernel config (4/8/16Mb select).<br>
+63) kernel: hw_nat: update code and dependecys(need for MT7620 support).<br>
 <br>
 <br>
 <br>

@@ -252,8 +252,8 @@ void usbnet_skb_return (struct usbnet *dev, struct sk_buff *skb)
 	 /* ra_sw_nat_hook_rx return 1 --> continue
 	  * ra_sw_nat_hook_rx return 0 --> FWD & without netif_rx
 	  */
-	FOE_MAGIC_TAG(skb)= FOE_MAGIC_PCI;
-	FOE_AI(skb)=UN_HIT;
+	FOE_MAGIC_TAG(skb) = FOE_MAGIC_EXTIF;
+	FOE_AI_UNHIT(skb);
 	if(ra_sw_nat_hook_rx != NULL)
 	{
 		if(ra_sw_nat_hook_rx(skb)) {

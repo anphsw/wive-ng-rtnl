@@ -380,6 +380,7 @@ const parameter_fetch_t service_misc_flags[] =
 	{ T("dhcpSwReset"), "dhcpSwReset", 0, T("0") },
 	{ T("offloadMode"), "offloadMode", 0, T("0") },
 	{ T("hw_nat_wifiPT"), "hw_nat_wifi", 0, T("0") },
+	{ T("hw_nat_udpPT"), "hw_nat_udp", 0, T("0") },
 	{ T("natMode"), "nat_mode", 0, T("1") },
 	{ T("natFastpath"), "natFastpath", 0, T("0") },
 	{ T("routeFastpath"), "routeFastpath", 0, T("1") },

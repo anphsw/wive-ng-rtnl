@@ -1318,9 +1318,9 @@ static int rt2880_eth_recv(struct net_device* dev)
 
 #if defined (CONFIG_RA_HW_NAT) || defined (CONFIG_RA_HW_NAT_MODULE)
 		if(ra_sw_nat_hook_rx != NULL) {
-		FOE_MAGIC_TAG(rx_skb)=FOE_MAGIC_GE;
+		    FOE_MAGIC_TAG(rx_skb)=FOE_MAGIC_GE;
 		    *(uint32_t *)(FOE_INFO_START_ADDR(rx_skb)+2) = *(uint32_t *)&rx_ring[rx_dma_owner_idx].rxd_info4;
-		FOE_ALG(rx_skb) = 0;
+		    FOE_ALG(rx_skb) = 0;
 		}
 #endif
 
@@ -1778,9 +1778,9 @@ static irqreturn_t FASTPATH ei_interrupt(int irq, void *dev_id, struct pt_regs *
 }
 
 #ifdef CONFIG_RTL8367M
+#ifdef CONFIG_RAETH_DHCP_TOUCH
 static void rtl_link_status_changed()
 {
-#ifdef CONFIG_RAETH_DHCP_TOUCH
     static rtk_port_linkStatus_t wan_port_link;
     int32 retVal;
     struct file *fp;
@@ -1826,8 +1826,8 @@ static void rtl_link_status_changed()
 	old_wan_port_link=PORT_LINKUP;
     } else if (wan_port_link == PORT_LINKDOWN)
 	old_wan_port_link=PORT_LINKDOWN;
-#endif
 }
+#endif
 #endif
 
 #if defined (CONFIG_RALINK_RT6855) || defined(CONFIG_RALINK_RT6855A) || \

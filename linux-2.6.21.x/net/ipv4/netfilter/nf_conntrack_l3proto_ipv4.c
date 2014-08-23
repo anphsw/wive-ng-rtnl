@@ -146,11 +146,8 @@ static unsigned int ipv4_conntrack_help(unsigned int hooknum,
 		return NF_ACCEPT;
 
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-        if (IS_SPACE_AVAILABLED(*pskb) && IS_MAGIC_TAG_VALID(*pskb)) {
-                FOE_ALG(*pskb)=1;
-        }
+	FOE_ALG_MARK(*pskb);
 #endif
-
 	return help->helper->help(pskb,
 			skb_network_offset(*pskb) + ip_hdrlen(*pskb),
 			ct, ctinfo);

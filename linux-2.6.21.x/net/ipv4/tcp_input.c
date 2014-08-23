@@ -4085,9 +4085,7 @@ int tcp_rcv_established(struct sock *sk, struct sk_buff *skb,
 	struct tcp_sock *tp = tcp_sk(sk);
 
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-        if (IS_SPACE_AVAILABLED(skb) && IS_MAGIC_TAG_VALID(skb)) {
-                FOE_ALG(skb)=1;
-        }
+	FOE_ALG_MARK(skb);
 #endif
 
 	/*

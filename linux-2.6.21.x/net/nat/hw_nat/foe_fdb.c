@@ -153,16 +153,15 @@ int FoeDumpCacheEntry(void)
 	cah_en = RegRead(CAH_CTRL) & 0x1;
 
 	if(!cah_en) {
-		printk("Cache is not enabled\n");
+		NAT_PRINT("Cache is not enabled\n");
 		return 0;
 	}
-
 
 	// cache disable
 	RegModifyBits(CAH_CTRL, 0, 0, 1);
 
-	printk(" No  |   State   |   Tag        \n");
-	printk("-----+-----------+------------  \n");
+	NAT_PRINT(" No  |   State   |   Tag        \n");
+	NAT_PRINT("-----+-----------+------------  \n");
 	for(line = 0; line < MAX_CACHE_LINE_NUM; line++) {
 	
 		//set line number
@@ -180,13 +179,13 @@ int FoeDumpCacheEntry(void)
 		if (is_request_done()) {
 			tag = (RegRead(CAH_RDATA) & 0xFFFF) ;
 			state = ((RegRead(CAH_RDATA)>>16) & 0x3) ;
-			printk("%04d | %s   | %05d\n", line, 
+			NAT_PRINT("%04d | %s   | %05d\n", line, 
 					(state==3) ? " Lock  " : 
 					(state==2) ? " Dirty " :
 					(state==1) ? " Valid " : 
 						     "Invalid", tag);
 		} else {
-			printk("%s is timeout (%d)\n", __FUNCTION__, line);
+			NAT_PRINT("%s is timeout (%d)\n", __FUNCTION__, line);
 		}
 		
 		//software access cache command = read	
@@ -198,11 +197,11 @@ int FoeDumpCacheEntry(void)
 		RegModifyBits(CAH_CTRL, 1, 8, 1);
 
 		if (!is_request_done()) {
-			printk("%s is timeout (%d)\n", __FUNCTION__, line);
+			NAT_PRINT("%s is timeout (%d)\n", __FUNCTION__, line);
 		}
 
 		/* dump first 16B for each foe entry */
-		printk("==========<Flow Table Entry=%d >===============\n", tag);
+		NAT_PRINT("==========<Flow Table Entry=%d >===============\n", tag);
 		for(i = 0; i< 16; i++ ) {
 			RegModifyBits(CAH_LINE_RW, i, 16, 8);
 			
@@ -213,9 +212,9 @@ int FoeDumpCacheEntry(void)
 			RegModifyBits(CAH_CTRL, 1, 8, 1);
 
 			if (is_request_done()) {
-				printk("%02d  %08X\n", i, RegRead(CAH_RDATA));
+				NAT_PRINT("%02d  %08X\n", i, RegRead(CAH_RDATA));
 			} else {
-				printk("%s is timeout (%d)\n", __FUNCTION__, line);
+				NAT_PRINT("%s is timeout (%d)\n", __FUNCTION__, line);
 			}
 			
 			//software access cache command = write	
@@ -227,10 +226,10 @@ int FoeDumpCacheEntry(void)
 			RegModifyBits(CAH_CTRL, 1, 8, 1);
 
 			if (!is_request_done()) {
-				printk("%s is timeout (%d)\n", __FUNCTION__, line);
+				NAT_PRINT("%s is timeout (%d)\n", __FUNCTION__, line);
 			}
 		}
-		printk("=========================================\n");
+		NAT_PRINT("=========================================\n");
 	}
 
 	//clear cache table before enabling cache
@@ -251,7 +250,7 @@ void FoeDumpEntry(uint32_t Index)
 	uint32_t i = 0;
 
 	NAT_PRINT("==========<Flow Table Entry=%d (%p)>===============\n", Index, entry);
-#if defined (CONFIG_RA_HW_NAT_IPV6)
+#if defined (CONFIG_HNAT_V2) && defined (CONFIG_RA_HW_NAT_IPV6)
 	for(i=0; i < 20; i++) { // 80 bytes per entry
 #else
 	for(i=0; i < 16; i++) { // 64 bytes per entry
@@ -280,13 +279,14 @@ void FoeDumpEntry(uint32_t Index)
 		NAT_PRINT("IPv4 New IP: %u.%u.%u.%u->%u.%u.%u.%u\n",
 			  IP_FORMAT(entry->ipv4_hnapt.new_sip), IP_FORMAT(entry->ipv4_hnapt.new_dip));
 #if defined (CONFIG_RA_HW_NAT_IPV6)
+#if !defined (CONFIG_HNAT_V2)
 	} else if (IS_IPV6_1T_ROUTE(entry)) {
 		NAT_PRINT("Information Block 2: %08X\n", entry->ipv6_1t_route.info_blk2);
 		NAT_PRINT("Create IPv6 Route entry\n");
 		NAT_PRINT("Destination IPv6: %08X:%08X:%08X:%08X",
-			  entry->ipv6_1t_route.ipv6_dip0, entry->ipv6_1t_route.ipv6_dip1,
-			  entry->ipv6_1t_route.ipv6_dip2, entry->ipv6_1t_route.ipv6_dip3);
-#if defined (CONFIG_HNAT_V2)
+			  entry->ipv6_1t_route.ipv6_dip3, entry->ipv6_1t_route.ipv6_dip2,
+			  entry->ipv6_1t_route.ipv6_dip1, entry->ipv6_1t_route.ipv6_dip0);
+#else
 	} else if (IS_IPV4_DSLITE(entry)) {
 		NAT_PRINT("Information Block 2: %08X\n", entry->ipv4_dslite.info_blk2);
 		NAT_PRINT("Create IPv4 Ds-Lite entry\n");
@@ -318,7 +318,7 @@ void FoeDumpEntry(uint32_t Index)
 				entry->ipv6_5t_route.ipv6_sip2, entry->ipv6_5t_route.ipv6_sip3,
 				entry->ipv6_5t_route.ipv6_dip0, entry->ipv6_5t_route.ipv6_dip1,
 				entry->ipv6_5t_route.ipv6_dip2, entry->ipv6_5t_route.ipv6_dip3,
-				(entry->ipv6_5t_route.sport << 16) | (entry->ipv6_5t_route.dport));
+				((entry->ipv6_5t_route.sport << 16) | (entry->ipv6_5t_route.dport))&0xFFFFF);
 		} else {
 			NAT_PRINT ("ING SIPv6->DIPv6: %08X:%08X:%08X:%08X:%d-> %08X:%08X:%08X:%08X:%d \n",
 				entry->ipv6_5t_route.ipv6_sip0, entry->ipv6_5t_route.ipv6_sip1,
@@ -337,7 +337,7 @@ void FoeDumpEntry(uint32_t Index)
 				entry->ipv6_6rd.ipv6_sip2, entry->ipv6_6rd.ipv6_sip3,
 				entry->ipv6_6rd.ipv6_dip0, entry->ipv6_6rd.ipv6_dip1, 
 				entry->ipv6_6rd.ipv6_dip2, entry->ipv6_6rd.ipv6_dip3, 
-				(entry->ipv6_5t_route.sport << 16) | (entry->ipv6_5t_route.dport));
+				((entry->ipv6_5t_route.sport << 16) | (entry->ipv6_5t_route.dport))&0xFFFFF);
 		} else {
 
 			NAT_PRINT ("ING SIPv6->DIPv6: %08X:%08X:%08X:%08X:%d-> %08X:%08X:%08X:%08X:%d \n",
@@ -354,14 +354,13 @@ void FoeDumpEntry(uint32_t Index)
 
 #if defined (CONFIG_HNAT_V2)
 	if (IS_IPV4_HNAPT(entry) || IS_IPV4_HNAT(entry)) {
-
 	    NAT_PRINT
 		("DMAC=%02X:%02X:%02X:%02X:%02X:%02X SMAC=%02X:%02X:%02X:%02X:%02X:%02X\n",
-		 entry->ipv4_hnapt.dmac_hi[1], entry->ipv4_hnapt.dmac_hi[0],
-	     entry->ipv4_hnapt.dmac_lo[3], entry->ipv4_hnapt.dmac_lo[2],
+		 entry->ipv4_hnapt.dmac_hi[3], entry->ipv4_hnapt.dmac_hi[2],
+	     entry->ipv4_hnapt.dmac_hi[1], entry->ipv4_hnapt.dmac_hi[0],
 	     entry->ipv4_hnapt.dmac_lo[1], entry->ipv4_hnapt.dmac_lo[0],
+	     entry->ipv4_hnapt.smac_hi[3], entry->ipv4_hnapt.smac_hi[2],
 	     entry->ipv4_hnapt.smac_hi[1], entry->ipv4_hnapt.smac_hi[0],
-	     entry->ipv4_hnapt.smac_lo[3], entry->ipv4_hnapt.smac_lo[2],
 	     entry->ipv4_hnapt.smac_lo[1], entry->ipv4_hnapt.smac_lo[0]);
 	    NAT_PRINT("=========================================\n\n");
 	} 
@@ -373,7 +372,7 @@ void FoeDumpEntry(uint32_t Index)
 	     entry->ipv6_5t_route.dmac_hi[1], entry->ipv6_5t_route.dmac_hi[0],
 	     entry->ipv6_5t_route.dmac_lo[1], entry->ipv6_5t_route.dmac_lo[0],
 	     entry->ipv6_5t_route.smac_hi[3], entry->ipv6_5t_route.smac_hi[2],
-	     entry->ipv6_5t_route.smac_hi[1], entry->ipv6_5t_route.smac_hi[1],
+	     entry->ipv6_5t_route.smac_hi[1], entry->ipv6_5t_route.smac_hi[0],
 	     entry->ipv6_5t_route.smac_lo[1], entry->ipv6_5t_route.smac_lo[0]);
 	    NAT_PRINT("=========================================\n\n");
 	}
@@ -391,7 +390,7 @@ void FoeDumpEntry(uint32_t Index)
 	     entry->ipv4_hnapt.smac_lo[3], entry->ipv4_hnapt.smac_lo[2],
 	     entry->ipv4_hnapt.smac_lo[1], entry->ipv4_hnapt.smac_lo[0]);
 	    NAT_PRINT("=========================================\n\n");
-	} 
+	}
 #endif
 }
 
@@ -426,13 +425,14 @@ int FoeGetAllEntries(struct hwnat_args *opt)
 				opt->entries[count].eg_dp = entry->ipv4_hnapt.new_dport;
 				count++;
 #if defined (CONFIG_RA_HW_NAT_IPV6)
+#if !defined (CONFIG_HNAT_V2)
 			} else if (IS_IPV6_1T_ROUTE(entry)) {
-				opt->entries[count].ing_dipv6_0 = entry->ipv6_1t_route.ipv6_dip0;
-				opt->entries[count].ing_dipv6_1 = entry->ipv6_1t_route.ipv6_dip1;
-				opt->entries[count].ing_dipv6_2 = entry->ipv6_1t_route.ipv6_dip2;
-				opt->entries[count].ing_dipv6_3 = entry->ipv6_1t_route.ipv6_dip3;
+				opt->entries[count].ing_dipv6_0 = entry->ipv6_1t_route.ipv6_dip3;
+				opt->entries[count].ing_dipv6_1 = entry->ipv6_1t_route.ipv6_dip2;
+				opt->entries[count].ing_dipv6_2 = entry->ipv6_1t_route.ipv6_dip1;
+				opt->entries[count].ing_dipv6_3 = entry->ipv6_1t_route.ipv6_dip0;
 				count++;
-#if defined (CONFIG_HNAT_V2)
+#else
 			} else if (IS_IPV4_DSLITE(entry)) {
 				opt->entries[count].ing_sipv4 = entry->ipv4_dslite.sip;
 				opt->entries[count].ing_dipv4 = entry->ipv4_dslite.dip;
@@ -524,8 +524,8 @@ int FoeUnBindEntry(struct hwnat_args *opt)
 
 	entry = &PpeFoeBase[opt->entry_num];
 
-	entry->ipv4_hnapt.udib1.state = UNBIND;
-	entry->ipv4_hnapt.udib1.time_stamp = RegRead(FOE_TS) & 0xFF;
+	entry->udib1.state = UNBIND;
+	entry->udib1.time_stamp = RegRead(FOE_TS) & 0xFF;
 
 	return HWNAT_SUCCESS;
 }
@@ -540,12 +540,3 @@ int FoeDelEntryByNum(uint32_t entry_num)
 	return HWNAT_SUCCESS;
 }
 
-
-void FoeTblClean(void)
-{
-	uint32_t FoeTblSize;
-
-	FoeTblSize = FOE_4TB_SIZ * sizeof(struct FoeEntry);
-	memset(PpeFoeBase, 0, FoeTblSize);
-
-}

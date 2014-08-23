@@ -30,9 +30,7 @@
 #define OUT
 #define INOUT
 
-#define NAT_DEBUG
-
-#ifdef NAT_DEBUG
+#ifdef HWNAT_DEBUG
 #define NAT_PRINT(fmt, args...) printk(KERN_INFO fmt, ## args)
 #else
 #define NAT_PRINT(fmt, args...) { }
@@ -153,6 +151,7 @@
 #define PPE_MTU_VLYR_1	    RALINK_PPE_BASE + 0x310
 #define PPE_MTU_VLYR_2	    RALINK_PPE_BASE + 0x314
 
+#define PPE_VPM_TPID        RALINK_PPE_BASE + 0x318
 #define CAH_CTRL	    RALINK_PPE_BASE + 0x320
 #define CAH_TAG_SRH	    RALINK_PPE_BASE + 0x324
 #define CAH_LINE_RW	    RALINK_PPE_BASE + 0x328
@@ -189,11 +188,36 @@
 #define IPV6_PPE_UC	    (1 << 12) //ipv6 learned UC frame
 #define IPV6_PPE_UN	    (1 << 13) //ipv6 unknown  UC frame
 
+#if defined (CONFIG_RALINK_MT7621)
+#define AC_BASE		    RALINK_FRAME_ENGINE_BASE + 0x2000
+#define METER_BASE	    RALINK_FRAME_ENGINE_BASE + 0x2300
 
-#define AC_BASE		    RALINK_FRAME_ENGINE_BASE + 0x1000
-#define METER_BASE	    RALINK_FRAME_ENGINE_BASE + 0x1200
+#define FE_GDMA1_FWD_CFG    RALINK_FRAME_ENGINE_BASE + 0x500
+#define FE_GDMA2_FWD_CFG    RALINK_FRAME_ENGINE_BASE + 0x1500
+
+/* GDMA1 My MAC unicast frame destination port */
+#define GDM1_UFRC_P_CPU     (0 << 12)
+#define GDM1_UFRC_P_PPE     (4 << 12)
+
+/* GDMA1 broadcast frame MAC address destination port */
+#define GDM1_BFRC_P_CPU     (0 << 8)
+#define GDM1_BFRC_P_PPE     (4 << 8)
+
+/* GDMA1 multicast frame MAC address destination port */
+#define GDM1_MFRC_P_CPU     (0 << 4)
+#define GDM1_MFRC_P_PPE     (4 << 4)
+
+/* GDMA1 other MAC address frame destination port */
+#define GDM1_OFRC_P_CPU     (0 << 0)
+#define GDM1_OFRC_P_PPE     (4 << 0)
 
 #else
+#define AC_BASE		    RALINK_FRAME_ENGINE_BASE + 0x1000
+#define METER_BASE	    RALINK_FRAME_ENGINE_BASE + 0x1200
+#endif // CONFIG_RALINK_MT7621 //
+
+#else
+
 #define FE_GLO_BASE         RALINK_FRAME_ENGINE_BASE
 #define PPE_BASE	    RALINK_FRAME_ENGINE_BASE + 0x200
 #define AC_BASE		    RALINK_FRAME_ENGINE_BASE + 0x400
@@ -270,6 +294,7 @@
 #define GDM1_OFRC_P_CPU     (0 << 0)
 #define GDM1_OFRC_P_GDMA1   (1 << 0)
 #define GDM1_OFRC_P_PPE     (6 << 0)
+
 #endif
 
 enum FoeSma {
@@ -307,7 +332,13 @@ enum FoeCpuReason {
 	HIT_BIND_KEEPALIVE_DUP_OLD_HDR = 0x15,	/* Hit bind and keep alive with duplicate old-header packet */
 	HIT_BIND_FORCE_TO_CPU = 0x16,	/* FOE Hit bind & force to CPU */
 	HIT_BIND_WITH_OPTION_HEADER = 0x17, /* Hit bind and remove tunnel IP header, but inner IP has option/next header */
-	HIT_BIND_EXCEED_MTU = 0x1C	/* Hit bind and exceed MTU */
+	HIT_BIND_EXCEED_MTU = 0x1C,	/* Hit bind and exceed MTU */
+#if defined (CONFIG_RALINK_MT7621)
+	HIT_BIND_MULTICAST_TO_CPU = 0x18,	/*  Switch clone multicast packet to CPU */
+	HIT_PRE_BIND = 0x1A			/*  Pre-bind */
+#else
+	HIT_BIND_MULTICAST_TO_CPU = 0x1F	/*  Switch clone multicast packet to CPU */
+#endif
 };
 #else
 enum FoeCpuReason {
@@ -338,58 +369,10 @@ enum FoeCpuReason {
 };
 #endif
 
-#if 0
-#define CONFIG_RA_NAT_HW
-
-#define CONFIG_RA_HW_NAT_LAN_VLANID 2
-#define CONFIG_RA_HW_NAT_WAN_VLANID 1
-
-#define CONFIG_RA_HW_NAT_BINDING_THRESHOLD	30
-#define CONFIG_RA_HW_NAT_QURT_LMT		100
-#define CONFIG_RA_HW_NAT_HALF_LMT		50
-#define CONFIG_RA_HW_NAT_FULL_LMT		25
-
-//#define CONFIG_RA_HW_NAT_TBL_1K
-//#define CONFIG_RA_HW_NAT_TBL_2K
-#define CONFIG_RA_HW_NAT_TBL_4K
-//#define CONFIG_RA_HW_NAT_TBL_8K
-//#define CONFIG_RA_HW_NAT_TBL_16K
-
-//#define CONFIG_RA_HW_NAT_HASH0
-#define CONFIG_RA_HW_NAT_HASH1
-//#define CONFIG_RA_HW_NAT_HASH2
-//#define CONFIG_RA_HW_NAT_HASH3
-
-#define CONFIG_RA_HW_NAT_PRE_ACL_SIZE		383
-#define CONFIG_RA_HW_NAT_PRE_MTR_SIZE		32
-#define CONFIG_RA_HW_NAT_PRE_AC_SIZE		32
-#define CONFIG_RA_HW_NAT_POST_MTR_SIZE		32
-#define CONFIG_RA_HW_NAT_POST_AC_SIZE		32
-#define CONFIG_RA_HW_NAT_TCP_KA			1
-#define CONFIG_RA_HW_NAT_UDP_KA			1
-#define CONFIG_RA_HW_NAT_NTU_KA			1
-#define CONFIG_RA_HW_NAT_ACL_DLTA		3
-#define CONFIG_RA_HW_NAT_UNB_DLTA		3
-#define CONFIG_RA_HW_NAT_UNB_MNP		1000
-#define CONFIG_RA_HW_NAT_UDP_DLTA		5
-#define CONFIG_RA_HW_NAT_TCP_DLTA		5
-#define CONFIG_RA_HW_NAT_FIN_DLTA		5
-#define CONFIG_RA_HW_NAT_NTU_DLTA		5
-
-//#define CONFIG_RA_HW_NAT_IPV6
-//#define CONFIG_RA_HW_NAT_ACL2UP_HELPER
-
-#endif
-
 /* PPE_GLO_CFG, Offset=0x200 */
-/* ipv6 logo self-test send icmp ttl=0 packet,router need response ttl expired. */
-#if defined(CONFIG_RA_HW_NAT_IPV6)
-#define DFL_TTL0_DRP		(0) /* 1:Drop, 0: Alert CPU */
-#else
-#define DFL_TTL0_DRP		(1) /* 1:Drop, 0: Alert CPU */
-#endif
-#if! defined (CONFIG_HNAT_V2)
+#define DFL_TTL0_DRP		(1)	/* 1:Drop, 0: Alert CPU */
 
+#if !defined (CONFIG_HNAT_V2)
 #define DFL_VPRI_EN		(1)	/* Use VLAN pri tag as priority desision */
 #define DFL_DPRI_EN		(1)	/* Use DSCP as priority decision */
 
@@ -496,13 +479,13 @@ enum FoeCpuReason {
 
 #endif
 
-/* 
- * PPE Flow Set 
+/*
+ * PPE Flow Set
  */
 #if defined (CONFIG_HNAT_V2)
 #define BIT_FBC_FOE		(1<<0)	/* PPE engine for broadcast flow */
 #define BIT_FMC_FOE		(1<<1)	/* PPE engine for multicast flow */
-#define BIT_FUC_FOE		(1<<2)	/* PPE engine for multicast flow */
+#define BIT_FUC_FOE		(1<<2)	/* PPE engine for unicast flow */
 #define BIT_IPV6_3T_ROUTE_EN	(1<<8)	/* IPv6 3-tuple route */
 #define BIT_IPV6_5T_ROUTE_EN	(1<<9)	/* IPv6 5-tuple route */
 #define BIT_IPV6_6RD_EN		(1<<10)	/* IPv6 6RD */
@@ -512,10 +495,13 @@ enum FoeCpuReason {
 #define BIT_IP_PROT_CHK_BLIST	(1<<16)	/* IP protocol check is black/white list */
 #define BIT_IPV4_NAT_FRAG_EN	(1<<17)	/* Enable fragment support for IPv4 NAT flow */
 #define BIT_IPV6_HASH_FLAB	(1<<18)	/* For IPv6 5-tuple and 6RD flow, using flow label instead of sport and dport to do HASH */
+#define BIT_IPV4_HASH_GREK	(1<<19)	/* For IPv4 NAT, adding GRE key into HASH */
+#define BIT_IPV6_HASH_GREK	(1<<20)	/* For IPv6 3-tuple, adding GRE key into HASH */
 
 #define IS_IPV6_FLAB_EBL()	(RegRead(PPE_FLOW_SET) & BIT_IPV6_HASH_FLAB) ? 1 : 0
 
 #else
+
 #define BIT_FBC_POSA		(1<<0)	/* post-account engine for broadcase flow */
 #define BIT_FBC_POSM		(1<<1)	/* post-meter engine for broadcast flow */
 #define BIT_FBC_FOE		(1<<2)	/* FOE engine for broadcast flow */
@@ -552,14 +538,14 @@ enum FoeCpuReason {
 
 #endif
 
-/* 
- * PPE FOE Bind Rate 
+/*
+ * PPE FOE Bind Rate
  */
 /* packet in a time stamp unit */
 #define DFL_FOE_BNDR		CONFIG_RA_HW_NAT_BINDING_THRESHOLD
 
-/* 
- * PPE_FOE_LMT 
+/*
+ * PPE_FOE_LMT
  */
 /* smaller than 1/4 of total entries */
 #define DFL_FOE_QURT_LMT	CONFIG_RA_HW_NAT_QURT_LMT
@@ -570,8 +556,8 @@ enum FoeCpuReason {
 /* between full and 1/2 of total entries */
 #define DFL_FOE_FULL_LMT	CONFIG_RA_HW_NAT_FULL_LMT
 
-/* 
- * PPE_FOE_KA 
+/*
+ * PPE_FOE_KA
  */
 /* visit a FOE entry every FOE_KA_T * 1 msec */
 #define DFL_FOE_KA_T		1
@@ -585,8 +571,8 @@ enum FoeCpuReason {
 /* FOE_NTU_KA * FOE_KA_T * FOE_4TB_SIZ */
 #define DFL_FOE_NTU_KA		CONFIG_RA_HW_NAT_NTU_KA
 
-/* 
- * PPE_FOE_CFG 
+/*
+ * PPE_FOE_CFG
  */
 #if defined (CONFIG_RA_HW_NAT_HASH0)
 #define DFL_FOE_HASH_MODE	0
@@ -613,19 +599,19 @@ enum FoeCpuReason {
 #endif
 
 /* 
- * PPE_FOE_UNB_AGE 
+ * PPE_FOE_UNB_AGE
  */
 /*The min threshold of packet count for aging out at unbind state */
 #define DFL_FOE_UNB_MNP		CONFIG_RA_HW_NAT_UNB_MNP
 /* Delta time for aging out an ACL link to FOE entry */
-#define DFL_FOE_ACL_DLTA        CONFIG_RA_HW_NAT_ACL_DLTA
+#define DFL_FOE_ACL_DLTA	CONFIG_RA_HW_NAT_ACL_DLTA
 /* Delta time for aging out an unbind FOE entry */
 #define DFL_FOE_UNB_DLTA	CONFIG_RA_HW_NAT_UNB_DLTA
 /* Delta time for aging out an bind Non-TCP/UDP FOE entry */
 #define DFL_FOE_NTU_DLTA	CONFIG_RA_HW_NAT_NTU_DLTA
 
 /* 
- * PPE_FOE_BND_AGE1 
+ * PPE_FOE_BND_AGE1
  */
 /* Delta time for aging out an bind UDP FOE entry */
 #define DFL_FOE_UDP_DLTA	CONFIG_RA_HW_NAT_UDP_DLTA
@@ -634,10 +620,10 @@ enum FoeCpuReason {
  * PPE_FOE_BND_AGE2
  */
 /* Delta time for aging out an bind TCP FIN entry */
-#define DFL_FOE_FIN_DLTA 	CONFIG_RA_HW_NAT_FIN_DLTA
+#define DFL_FOE_FIN_DLTA	CONFIG_RA_HW_NAT_FIN_DLTA
 /* Delta time for aging out an bind TCP entry */
 #define DFL_FOE_TCP_DLTA	CONFIG_RA_HW_NAT_TCP_DLTA
 
-#define DFL_FOE_TTL_REGEN	1	/* TTL = TTL -1 */
+#define DFL_FOE_TTL_REGEN	1	/* TTL = TTL-1 */
 
 #endif

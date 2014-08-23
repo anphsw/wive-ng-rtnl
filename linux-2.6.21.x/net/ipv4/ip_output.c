@@ -330,9 +330,8 @@ packet_routed:
 
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 	FOE_MAGIC_TAG(skb) = 0;
-	FOE_AI(skb) = UN_HIT;
+	FOE_AI_UNHIT(skb);
 #endif
-
 	return NF_HOOK(PF_INET, NF_IP_LOCAL_OUT, skb, NULL, rt->u.dst.dev,
 		       dst_output);
 
@@ -1269,7 +1268,7 @@ int ip_push_pending_frames(struct sock *sk)
 
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 	FOE_MAGIC_TAG(skb) = 0;
-	FOE_AI(skb) = UN_HIT;
+	FOE_AI_UNHIT(skb);
 #endif
 
 	/* Netfilter gets whole the not fragmented skb. */

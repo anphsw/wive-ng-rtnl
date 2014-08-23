@@ -135,6 +135,7 @@ function initValue()
 	var store_ttl_mcast = '<% getCfgGeneral(1, "store_ttl_mcast"); %>';
 	var mss_pmtu = '<% getCfgGeneral(1, "mss_use_pmtu"); %>';
 	var hw_nat_wifi_pt = '<% getCfgGeneral(1, "hw_nat_wifi"); %>';
+	var hw_nat_udp_pt = '<% getCfgGeneral(1, "hw_nat_udp"); %>';
 
 	initTranslation();
 
@@ -155,6 +156,7 @@ function initValue()
 	form.pingWANEnbl.options.selectedIndex = (wpf == '1') ? 1 : 0;
 	form.arpPT.options.selectedIndex = 1*arp_pt;
 	form.hw_nat_wifiPT.options.selectedIndex = (hw_nat_wifi_pt == "1") ? 1 : 0;
+	form.hw_nat_udpPT.options.selectedIndex = (hw_nat_udp_pt == "1") ? 1 : 0;
 	form.pingerEnable.value = (pinger == '1') ? '1' : '0';
 	form.mssPmtu.value = (mss_pmtu == '0') ? '0' : '1';
 
@@ -269,6 +271,7 @@ function offloadModeSelect(form)
 	var thresh = form.offloadMode.value;
 	displayElement('hwnat_threshold_row', (thresh == '2') || (thresh == '3'))
 	displayElement('wifihw_row', (thresh == '2') || (thresh == '3'))
+	displayElement('udphw_row', (thresh == '2') || (thresh == '3'))
 	displayElement('fastpath_row', (thresh == '1') || (thresh == '3'))
 	displayElement('nat_fastpath_row', (thresh == '1') || (thresh == '3'))
 	displayElement('route_fastpath_row', (thresh == '1') || (thresh == '3'))
@@ -389,6 +392,13 @@ function displayServiceStatus()
           <tr id="wifihw_row">
             <td class="head">WiFi hardware nat offload</td>
             <td colspan="4"><select name="hw_nat_wifiPT" class="half">
+                <option value="0">Disable</option>
+                <option value="1">Enable</option>
+              </select></td>
+          </tr>
+          <tr id="udphw_row">
+            <td class="head">UDP hardware nat offload</td>
+            <td colspan="4"><select name="hw_nat_udpPT" class="half">
                 <option value="0">Disable</option>
                 <option value="1">Enable</option>
               </select></td>

@@ -11,8 +11,8 @@
     Steven Liu  2006-10-06      Initial version
 */
 
-#ifndef	__HW_NAT_IOCTL_H__
-#define	__HW_NAT_IOCTL_H__
+#ifndef __HW_NAT_IOCTL_H__
+#define __HW_NAT_IOCTL_H__
 
 #define HW_NAT_DUMP_CACHE_ENTRY    	(0x02)
 #define HW_NAT_DUMP_ENTRY    		(0x03)
@@ -44,9 +44,12 @@
 #define HW_NAT_MAX_ENTRY_LMT		(0x17)
 #define HW_NAT_RULE_SIZE		(0x18)
 #define HW_NAT_KA_INTERVAL		(0x19)
-#define HW_NAT_UB_LIFETIME		(0x1a)
-#define HW_NAT_BIND_LIFETIME		(0x1b)
-#define HW_NAT_BIND_DIRECTION		(0x1c)
+#define HW_NAT_UB_LIFETIME		(0x1A)
+#define HW_NAT_BIND_LIFETIME		(0x1B)
+#define HW_NAT_BIND_DIRECTION		(0x1C)
+#define HW_NAT_VLAN_ID			(0x1D)
+#define HW_NAT_ALLOW_UDP		(0x20)
+#define HW_NAT_ALLOW_IPV6		(0x21)
 
 #define HW_NAT_DEVNAME			"hwnat0"
 #define HW_NAT_MAJOR			(215)
@@ -112,7 +115,6 @@ struct hwnat_tuple {
 
 struct hwnat_args {
 	unsigned int debug:3;
-	unsigned int bind_dir:2;	/* 0=upstream, 1=downstream, 2=bi-direction */
 	unsigned int entry_state:2;	/* invalid=0, unbind=1, bind=2, fin=3 */
 	enum hwnat_status result;
 	unsigned int entry_num:16;
@@ -120,6 +122,7 @@ struct hwnat_args {
 	struct hwnat_tuple entries[0];
 };
 
+#if !defined (CONFIG_HNAT_V2)
 /*hnat qos*/
 struct hwnat_qos_args {
 	unsigned int enable:1;
@@ -136,6 +139,7 @@ struct hwnat_qos_args {
 	unsigned int weight3:4;
 	enum hwnat_status result;
 };
+#endif
 
 /*hnat config*/
 struct hwnat_config_args {
@@ -154,6 +158,11 @@ struct hwnat_config_args {
 	unsigned int foe_tcp_dlta:16;	/*unit 1 sec */
 	unsigned int foe_udp_dlta:16;	/*unit 1 sec */
 	unsigned int foe_fin_dlta:16;	/*unit 1 sec */
+	unsigned int foe_allow_udp:1;
+	unsigned int foe_allow_ipv6:1;
+	unsigned int wan_vid:16;
+	unsigned int lan_vid:16;
+	unsigned int bind_dir:2;	/* 0=upstream, 1=downstream, 2=bi-direction */
 	enum hwnat_status result;
 };
 
@@ -166,11 +175,10 @@ struct hwnat_ac_args {
 };
 #endif
 
-
 int PpeRegIoctlHandler(void);
 void PpeUnRegIoctlHandler(void);
 #if defined (CONFIG_HNAT_V2)
-int32_t PpeGetAGCnt(struct hwnat_ac_args *opt3);
+int PpeGetAGCnt(struct hwnat_ac_args *opt3);
 #else
 int PpeSetDscpRemarkEbl(unsigned int enable);
 int PpeSetVpriRemarkEbl(unsigned int enable);
@@ -184,8 +192,12 @@ int PpeSetUP_ODSCP(unsigned int UP, unsigned int ODSCP);
 int PpeSetUP_VPRI(unsigned int UP, unsigned int VPRI);
 int PpeSetUP_AC(unsigned int UP, unsigned int AC);
 int PpeSetSchMode(unsigned int policy);
-int PpeSetSchWeight(unsigned char W0, unsigned char W1, unsigned char W2,
-		    unsigned char W3);
+int PpeSetSchWeight(unsigned char W0, unsigned char W1, unsigned char W2, unsigned char W3);
+void PpeRstPreAclPtr(void);
+void PpeRstPreAcPtr(void);
+void PpeRstPostAcPtr(void);
+void PpeRstPreMtrPtr(void);
+void PpeRstPostMtrPtr(void);
 #endif
 
 #endif

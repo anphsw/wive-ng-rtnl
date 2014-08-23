@@ -56,8 +56,7 @@ target(struct sk_buff **pskb,
 	}
 #endif
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-	if (IS_SPACE_AVAILABLED(*pskb) && IS_MAGIC_TAG_VALID(*pskb))
-	    FOE_ALG(*pskb)=1;
+	FOE_ALG_MARK(*pskb);
 #endif
 	return XT_CONTINUE;
 }

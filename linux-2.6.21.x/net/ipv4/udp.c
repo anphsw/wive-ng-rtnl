@@ -1275,9 +1275,7 @@ drop:
 __inline__ int udp_rcv(struct sk_buff *skb)
 {
 #if  defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
-        if (IS_SPACE_AVAILABLED(skb) && IS_MAGIC_TAG_VALID(skb)) {
-                FOE_ALG(skb)=1;
-        }
+	FOE_ALG_MARK(skb);
 #endif
 	return __udp4_lib_rcv(skb, udp_hash, IPPROTO_UDP);
 }
