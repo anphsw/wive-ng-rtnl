@@ -378,7 +378,6 @@ static void prom_init_sysclk(void)
 #else
 	surfboard_sysclk = mips_cpu_feq/3;
 #endif
-	printk("\n The CPU/SYS frequency set to %d/%lu MHz\n", mips_cpu_feq / 1000 / 1000, surfboard_sysclk / 1000 / 1000);
 }
 
 /*
@@ -526,12 +525,12 @@ __init void prom_init(void)
 	prom_meminit();				/* Autodetect RAM size and set need variables */
 	prom_usbinit();				/* USB power saving*/
 
-#if defined(CONFIG_RT2880_FPGA) || defined(CONFIG_RT3052_FPGA) || defined(CONFIG_RT3352_FPGA) || defined(CONFIG_RT2883_FPGA) ||  defined(CONFIG_RT3883_FPGA) || defined(CONFIG_RT5350_FPGA)
+#if defined(CONFIG_RT3352_FPGA) || defined(CONFIG_RT2883_FPGA) ||  defined(CONFIG_RT3883_FPGA) || defined(CONFIG_RT5350_FPGA) || defined (CONFIG_MT7620_FPGA)
 	printk("FPGA mode LINUX started...\n");
-#elif defined(CONFIG_RT2880_ASIC) || defined(CONFIG_RT3052_ASIC) || defined(CONFIG_RT3352_ASIC) || defined (CONFIG_RT2883_ASIC) || defined (CONFIG_RT3883_ASIC) || defined (CONFIG_RT5350_ASIC)
+#elif defined(CONFIG_RT3352_ASIC) || defined (CONFIG_RT2883_ASIC) || defined (CONFIG_RT3883_ASIC) || defined (CONFIG_RT5350_ASIC) || defined (CONFIG_MT7620_ASIC)
 	printk("ASIC mode LINUX started...\n");
 #else
 	printk("LINUX started...\n");
 #endif
-	printk("The CPU frequency set to %d MHz\n", mips_cpu_feq / 1000 / 1000);
+	printk("The CPU/SYS frequency set to %d/%lu MHz\n", mips_cpu_feq / 1000 / 1000, surfboard_sysclk / 1000 / 1000);
 }

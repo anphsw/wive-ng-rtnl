@@ -83,6 +83,8 @@ const char *get_system_type(void)
 	return "RT3352 Ralink SoC";
     } else if(strcmp(Id,"RT6855  ")==0) {
 	return "RT6855 Ralink SoC";
+    } else if(strcmp(Id,"MT7620  ")==0) {
+	return "MT7620 Ralink SoC";
     }
 
     return "Unknown Ralink SoC";
