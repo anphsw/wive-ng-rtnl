@@ -27,12 +27,7 @@
  */
 
 /*
- * $Log: NCR5380.c,v $
- * Revision 1.1.1.1  2007-05-25 06:50:04  bruce
- * linux-2.6.21 support RT2880. UART, PCI, ETHERNET, IRQ.... workable
- * initial version. 
  *
-
  * Revision 1.10 1998/9/2	Alan Cox
  *				(alan@redhat.com)
  * Fixed up the timer lockups reported so far. Things still suck. Looking 

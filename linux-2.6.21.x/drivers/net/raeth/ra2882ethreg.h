@@ -828,16 +828,12 @@ struct PDMA_txdesc {
 #endif
 
 #define PROCREG_CONTROL_FILE      "/var/run/procreg_control"
-#if defined (CONFIG_RALINK_RT2880)
-#define PROCREG_DIR             "rt2880"
-#elif defined (CONFIG_RALINK_RT3052)
+#if defined (CONFIG_RALINK_RT3052)
 #define PROCREG_DIR             "rt3052"
 #elif defined (CONFIG_RALINK_RT3352)
 #define PROCREG_DIR             "rt3352"
 #elif defined (CONFIG_RALINK_RT5350)
 #define PROCREG_DIR             "rt5350"
-#elif defined (CONFIG_RALINK_RT2883)
-#define PROCREG_DIR             "rt2883"
 #elif defined (CONFIG_RALINK_RT3883)
 #define PROCREG_DIR             "rt3883"
 #elif defined (CONFIG_RALINK_RT6855)

@@ -336,12 +336,6 @@ int fe_tx_desc_init(struct net_device *dev, unsigned int ring_no, unsigned int q
 
 int  pkt_classifier(struct sk_buff *skb,int gmac_no, int *ring_no, int *queue_no, int *port_no)
 {
-#if defined(CONFIG_RALINK_RT2880)
-    /* RT2880 -- Assume using 1 Ring (Ring0), Queue 0, and Port 0 */
-    *port_no 	= 0;
-    *ring_no 	= 0;
-    *queue_no 	= 0;
-#else
     unsigned int ac=0;
     unsigned int bridge_traffic=0, lan_traffic=0;
     struct iphdr *iph=NULL;
@@ -374,11 +368,9 @@ int  pkt_classifier(struct sk_buff *skb,int gmac_no, int *ring_no, int *queue_no
     static unsigned char AcToRing_BridgeMap[4] = {2, 2, 3, 3}; 
     static unsigned char AcToRing_GE1Map[2][4] = {{3, 3, 3, 3},{2, 2, 2, 2}}; 
     static unsigned char AcToRing_GE2Map[4] = {0, 0, 1, 1};
-#elif defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT2883) || \
-      defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350) || \
-      defined (CONFIG_RALINK_RT6855) || defined(CONFIG_RALINK_RT6855A) || \
-      defined (CONFIG_RALINK_MT7620) || defined(CONFIG_RALINK_MT7621) || \
-     (defined (CONFIG_RALINK_RT3883) && !defined(CONFIG_PSEUDO_SUPPORT))
+#elif defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350) || \
+      defined (CONFIG_RALINK_RT6855) || defined(CONFIG_RALINK_RT6855A) ||defined (CONFIG_RALINK_MT7620) || \
+      defined(CONFIG_RALINK_MT7621) || (defined (CONFIG_RALINK_RT3883) && !defined(CONFIG_PSEUDO_SUPPORT))
     /* 
      * 1) Bridge: VO->Ring3, VI->Ring2, BG->Ring1, BE->Ring0 
      * 2) GateWay:
@@ -387,7 +379,7 @@ int  pkt_classifier(struct sk_buff *skb,int gmac_no, int *ring_no, int *queue_no
      */ 
     static unsigned char AcToRing_BridgeMap[4] = {0, 1, 2, 3}; 
     static unsigned char AcToRing_GE1Map[2][4] = {{2, 2, 3, 3},{0, 0, 1, 1}}; 
-#endif  // CONFIG_RALINK_RT2883
+#endif
 
     /* 
      * Set queue no - QN field in TX Descriptor
@@ -430,7 +422,6 @@ int  pkt_classifier(struct sk_buff *skb,int gmac_no, int *ring_no, int *queue_no
 
 	bridge_traffic=1;
     }
-    
 
     /* Set Tx Ring no */
     if(gmac_no==1) { //GMAC1
@@ -459,7 +450,6 @@ int  pkt_classifier(struct sk_buff *skb,int gmac_no, int *ring_no, int *queue_no
 	    *port_no = 2;
 	}
     }
-#endif
 #endif
     return 1;
 }

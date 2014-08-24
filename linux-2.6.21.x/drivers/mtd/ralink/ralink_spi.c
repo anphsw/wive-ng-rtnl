@@ -1373,12 +1373,11 @@ static struct mtd_info *raspi_probe(struct map_info *map)
 		uint32_t ih_ksz;
 	} hdr;
 #endif
-#if defined (CONFIG_RALINK_RT2880) || \
-    defined (CONFIG_RALINK_RT2883) || \
-    defined (CONFIG_RALINK_RT3883) || \
+#if defined (CONFIG_RALINK_RT3883) || \
     defined (CONFIG_RALINK_RT3352) || \
     defined (CONFIG_RALINK_RT3052) || \
-    defined (CONFIG_RALINK_RT5350)
+    defined (CONFIG_RALINK_RT5350) || \
+    defined (CONFIG_RALINK_MT7620)
 	spic_init();
 
         if(ra_check_flash_type()!=BOOT_FROM_SPI) { /* SPI */

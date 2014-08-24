@@ -56,7 +56,7 @@ extern void register_pci_controller(struct pci_controller *hose);
 /*
  * board supplied pci irq fixup routine
  */
-#if defined(CONFIG_RALINK_RT2883) || defined(CONFIG_RALINK_RT3883)
+#if defined(CONFIG_RALINK_RT3883)
 extern int __init pcibios_map_irq(struct pci_dev *dev, u8 slot, u8 pin);
 #else
 extern int pcibios_map_irq(struct pci_dev *dev, u8 slot, u8 pin);

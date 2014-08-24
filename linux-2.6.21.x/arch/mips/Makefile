@@ -170,14 +170,6 @@ libs-$(CONFIG_SIBYTE_CFE)	+= arch/mips/sibyte/cfe/
 #
 
 #
-# Ralink RT2883 board
-#
-core-$(CONFIG_RALINK_RT2883)	+= arch/mips/rt2880/
-cflags-$(CONFIG_RALINK_RT2883)	+= -Iinclude/asm-mips/rt2880
-cflags-$(CONFIG_RALINK_RT2883)	+= -march=mips32r2 -mtune=74kc -D__MIPSEL__
-load-$(CONFIG_RALINK_RT2883)	+= 0x80000000
-
-#
 # Ralink RT3052 board
 #
 core-$(CONFIG_RALINK_RT3052)	+= arch/mips/rt2880/
@@ -709,12 +701,6 @@ endif
 #
 vmlinux.32: vmlinux
 	$(OBJCOPY) -O $(32bit-bfd) $(OBJCOPYFLAGS) $< $@
-
-ifdef CONFIG_RALINK_RT2880
-#error zImage rImage
-zImage rImage: vmlinux $(TOPDIR)/.config
-	$(Q)$(MAKE) $(build)=arch/mips/rt2880/boot $@
-endif
 
 ifdef CONFIG_RALINK_RT3052
 #error zImage rImage

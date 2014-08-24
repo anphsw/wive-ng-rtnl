@@ -129,11 +129,9 @@ static void prom_init_sysclk(void)
 	u8      clk_sel;
 #endif
 
-#if defined(CONFIG_RT2880_FPGA)
-        mips_cpu_feq = 25000000;
-#elif defined (CONFIG_RT3052_FPGA)
+#if defined (CONFIG_RT3052_FPGA)
 	mips_cpu_feq = 32000000;
-#elif defined (CONFIG_RT3052_FPGA) || defined (CONFIG_RT3352_FPGA) || defined (CONFIG_RT2883_FPGA) || defined (CONFIG_RT3883_FPGA) || defined (CONFIG_RT5350_FPGA) 
+#elif defined (CONFIG_RT3052_FPGA) || defined (CONFIG_RT3352_FPGA) || defined (CONFIG_RT3883_FPGA) || defined (CONFIG_RT5350_FPGA)
         mips_cpu_feq = 40000000;
 #elif defined (CONFIG_RT6855_FPGA)
         mips_cpu_feq = 50000000;
@@ -142,12 +140,7 @@ static void prom_init_sysclk(void)
 #else
 	//get sysclc from reg
         reg = (*((volatile u32 *)(RALINK_SYSCTL_BASE + 0x10)));
-#if defined (CONFIG_RT2880_ASIC)
-        clk_sel = (reg>>20) & 0x03;
-#elif defined (CONFIG_RT2883_ASIC)
-	mips_cpu_feq = (380*1000*1000);
-        clk_sel = (reg>>18) & 0x03;
-#elif defined (CONFIG_RT3052_ASIC)
+#if defined (CONFIG_RT3052_ASIC)
 	mips_cpu_feq = (320*1000*1000);
         clk_sel = (reg>>18) & 0x01;
 #elif defined (CONFIG_RT3352_ASIC)
@@ -173,33 +166,7 @@ static void prom_init_sysclk(void)
 #error Please Choice System Type
 #endif
         switch(clk_sel) {
-#if defined (CONFIG_RALINK_RT2880_SHUTTLE)
-	case 0:
-		mips_cpu_feq = (233333333);
-		break;
-	case 1:
-		mips_cpu_feq = (250000000);
-		break;
-	case 2:
-		mips_cpu_feq = (266666666);
-		break;
-	case 3:
-		mips_cpu_feq = (280000000);
-		break;
-#elif defined (CONFIG_RALINK_RT2883)
-	case 0:
-		mips_cpu_feq = (380*1000*1000);
-		break;
-	case 1:
-		mips_cpu_feq = (390*1000*1000);
-		break;
-	case 2:
-		mips_cpu_feq = (400*1000*1000);
-		break;
-	case 3:
-		mips_cpu_feq = (420*1000*1000);
-		break;
-#elif defined (CONFIG_RALINK_RT3052)
+#if defined (CONFIG_RALINK_RT3052)
 #if defined (CONFIG_RALINK_RT3350)
 		// MA10 is floating
 	case 0:
@@ -373,8 +340,6 @@ static void prom_init_sysclk(void)
 		surfboard_sysclk = mips_cpu_feq/5;	/* SDR (MT7620 E2) */
 		break;
 	}
-#elif defined (CONFIG_RALINK_RT2880)
-	surfboard_sysclk = mips_cpu_feq/2;
 #else
 	surfboard_sysclk = mips_cpu_feq/3;
 #endif
@@ -469,8 +434,7 @@ static void serial_setbrg(unsigned long wBaud)
 	//reset uart lite and uart full
 #if defined(CONFIG_RT2880_ASIC) || defined(CONFIG_RT2880_FPGA)
 	*(unsigned long *)(RALINK_SYSCTL_BASE + 0x0034) = cpu_to_le32(1<<12);
-#elif defined(CONFIG_RT2883_ASIC) || defined(CONFIG_RT2883_FPGA) || \
-      defined(CONFIG_RT3052_ASIC) || defined(CONFIG_RT3052_FPGA) || \
+#elif defined(CONFIG_RT3052_ASIC) || defined(CONFIG_RT3052_FPGA) || \
       defined(CONFIG_RT3352_ASIC) || defined(CONFIG_RT3352_FPGA) || \
       defined(CONFIG_RT3883_ASIC) || defined(CONFIG_RT3883_FPGA)
 	*(unsigned long *)(RALINK_SYSCTL_BASE + 0x0034) = cpu_to_le32(1<<19|1<<12);
@@ -525,9 +489,9 @@ __init void prom_init(void)
 	prom_meminit();				/* Autodetect RAM size and set need variables */
 	prom_usbinit();				/* USB power saving*/
 
-#if defined(CONFIG_RT3352_FPGA) || defined(CONFIG_RT2883_FPGA) ||  defined(CONFIG_RT3883_FPGA) || defined(CONFIG_RT5350_FPGA) || defined (CONFIG_MT7620_FPGA)
+#if defined(CONFIG_RT3352_FPGA)  ||  defined(CONFIG_RT3883_FPGA) || defined(CONFIG_RT5350_FPGA) || defined (CONFIG_MT7620_FPGA)
 	printk("FPGA mode LINUX started...\n");
-#elif defined(CONFIG_RT3352_ASIC) || defined (CONFIG_RT2883_ASIC) || defined (CONFIG_RT3883_ASIC) || defined (CONFIG_RT5350_ASIC) || defined (CONFIG_MT7620_ASIC)
+#elif defined(CONFIG_RT3352_ASIC) || defined (CONFIG_RT3883_ASIC) || defined (CONFIG_RT5350_ASIC) || defined (CONFIG_MT7620_ASIC)
 	printk("ASIC mode LINUX started...\n");
 #else
 	printk("LINUX started...\n");

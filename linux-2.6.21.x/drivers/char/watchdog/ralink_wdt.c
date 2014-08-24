@@ -51,20 +51,7 @@ void SetWdgTimerEbl(unsigned int timer, unsigned int ebl)
     sysRegWrite(timer,result);
 
 #if defined (CONFIG_RALINK_TIMER_WDG_RESET_OUTPUT)
-#if defined (CONFIG_RALINK_RT2880)
-    //timer1 used for watchdog timer
-    if(timer==TMR1CTL) {
-        result=sysRegRead(CLKCFG);
-
-        if(ebl==1){
-            result |= (1<<9); /* SRAM_CS_N is used as wdg reset */
-        }else {
-            result &= ~(1<<9); /* SRAM_CS_N is used as normal func */
-        }
-
-        sysRegWrite(CLKCFG,result);
-    }
-#elif defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT2883) || defined (CONFIG_RALINK_RT5350)
+#if defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT5350)
     if(timer==TMR1CTL) {
         //the last 4bits in SYSCFG are write only
         result=sysRegRead(SYSCFG);
@@ -214,8 +201,7 @@ static void RaWdgStart(void)
 #endif
 
     SetTimerMode(TMR1CTL,WATCHDOG);
-#if defined (CONFIG_RALINK_RT2880) || defined (CONFIG_RALINK_RT2883) || \
-    defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3883)
+#if defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3883)
     /*
      * For user easy configuration, We assume the unit of watch dog timer is 1s,
      * so we need to calculate the TMR1LOAD value.

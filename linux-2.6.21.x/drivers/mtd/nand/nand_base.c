@@ -1917,9 +1917,7 @@ static int nand_erase(struct mtd_info *mtd, struct erase_info *instr)
 
 #define BBT_PAGE_MASK	0xffffff3f
 
-#if !defined (CONFIG_RALINK_RT2880) && \
-    !defined (CONFIG_RALINK_RT2883) && \
-    !defined (CONFIG_RALINK_RT3883) && \
+#if !defined (CONFIG_RALINK_RT3883) && \
     !defined (CONFIG_RALINK_RT3352) && \
     !defined (CONFIG_RALINK_RT3052) && \
     !defined (CONFIG_RALINK_RT5350)

@@ -6,11 +6,6 @@
  *
  * The outline of this driver comes from skeleton.c.
  *
- * $Log: eth_v10.c,v $
- * Revision 1.1.1.1  2007-05-25 06:50:02  bruce
- * linux-2.6.21 support RT2880. UART, PCI, ETHERNET, IRQ.... workable
- * initial version. 
- *
  * Revision 1.31  2004/10/18 14:49:03  starvik
  * Use RX interrupt as random source
  *

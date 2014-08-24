@@ -9,11 +9,6 @@
  * Copyright (C) 2000, 2001 Axis Communications AB
  *
  * Authors:  Mikael Starvik (starvik@axis.com)	
- * 
- * $Log: dram_init.S,v $
- * Revision 1.1.1.1  2007-05-25 06:50:20  bruce
- * linux-2.6.21 support RT2880. UART, PCI, ETHERNET, IRQ.... workable
- * initial version. 
  *
  * Revision 1.4  2003/09/22 09:21:59  starvik
  * Decompresser is linked to 0x407xxxxx and sdram commands are at 0x000xxxxx

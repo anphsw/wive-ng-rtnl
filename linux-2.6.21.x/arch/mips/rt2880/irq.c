@@ -251,8 +251,7 @@ void __init arch_init_irq(void)
 void rt2880_irqdispatch(void)
 {
 	unsigned long mips_cp0_status, mips_cp0_cause, irq_x, irq, i;
-#if defined(CONFIG_RALINK_RT2880) || defined (CONFIG_RALINK_RT2883) || \
-    defined(CONFIG_RALINK_RT3883) || defined(CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_MT7620)
+#if defined(CONFIG_RALINK_RT3883) || defined(CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_MT7620)
 	unsigned long pci_status=0;
 #endif
 
@@ -286,9 +285,7 @@ void rt2880_irqdispatch(void)
 			if(irq > 2)
 				do_IRQ(irq);
 			else if(irq == 2){
-#if defined (CONFIG_RALINK_RT2883)
-				do_IRQ(2);
-#elif defined (CONFIG_RALINK_RT3883)
+#if defined (CONFIG_RALINK_RT3883)
 			 	pci_status = RALINK_PCI_PCIINT_ADDR;
 				if(pci_status &0x100000){
 					do_IRQ(16);
@@ -328,32 +325,22 @@ void rt2880_irqdispatch(void)
 					}
 				}
 
-#else // 2880
+#else
 
-#if defined(CONFIG_RALINK_RT2880) || defined(CONFIG_RALINK_RT3883)
+#if defined(CONFIG_RALINK_RT3883)
 			 pci_status = RALINK_PCI_PCIINT_ADDR;
 #endif
 			 if(pci_order ==0) {
-#if defined(CONFIG_RT2880_ASIC)
-				if(pci_status &0x40000)
-#elif defined(CONFIG_RT2880_FPGA)
-				if(pci_status &0x80000)
-#endif
 					do_IRQ(2);
 				else // if(pci_status & 0x40000)
 					do_IRQ(15);
 			 } else {
-#if defined(CONFIG_RT2880_ASIC)
-				if(pci_status &0x80000)
-#elif defined(CONFIG_RT2880_FPGA)
-				if(pci_status &0x40000)
-#endif
 					do_IRQ(15);
 				else // if(pci_status & 0x80000)
 					do_IRQ(2);
 			 }
 
-#endif //CONFIG_RALINK_RT2883//
+#endif
 			}
 			else {
 				surfboard_hw0_irqdispatch();

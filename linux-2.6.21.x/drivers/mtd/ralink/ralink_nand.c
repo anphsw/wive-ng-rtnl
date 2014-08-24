@@ -1744,12 +1744,11 @@ int __devinit ra_nand_init(void)
 		uint32_t ih_ksz;
 	} hdr;
 #endif
-#if defined (CONFIG_RALINK_RT2880) || \
-    defined (CONFIG_RALINK_RT2883) || \
-    defined (CONFIG_RALINK_RT3883) || \
+#if defined (CONFIG_RALINK_RT3883) || \
     defined (CONFIG_RALINK_RT3352) || \
     defined (CONFIG_RALINK_RT3052) || \
-    defined (CONFIG_RALINK_RT5350)
+    defined (CONFIG_RALINK_RT5350) || \
+    defined (CONFIG_RALINK_MT7620)
         if(ra_check_flash_type()!=BOOT_FROM_NAND) { /* NAND */
                 return 0;
         }
@@ -1859,7 +1858,7 @@ int __devinit ra_nand_init(void)
 static void __devexit ra_nand_remove(void)
 {
 	struct ra_nand_chip *ra;
-	
+
 	if (ranfc_mtd) {
 		ra = (struct ra_nand_chip  *)ranfc_mtd->priv;
 

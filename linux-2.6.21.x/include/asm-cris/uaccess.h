@@ -2,11 +2,6 @@
  * Authors:    Bjorn Wesen (bjornw@axis.com)
  *	       Hans-Peter Nilsson (hp@axis.com)
  *
- * $Log: uaccess.h,v $
- * Revision 1.1.1.1  2007-05-25 06:50:11  bruce
- * linux-2.6.21 support RT2880. UART, PCI, ETHERNET, IRQ.... workable
- * initial version. 
- *
  * Revision 1.8  2001/10/29 13:01:48  bjornw
  * Removed unused variable tmp2 in strnlen_user
  *

@@ -6,11 +6,6 @@
  *
  *    Many, many authors. Based once upon a time on serial.c for 16x50.
  *
- * $Log: crisv10.c,v $
- * Revision 1.1.1.1  2007-05-25 06:50:03  bruce
- * linux-2.6.21 support RT2880. UART, PCI, ETHERNET, IRQ.... workable
- * initial version. 
- *
  * Revision 1.25  2004/09/29 10:33:49  starvik
  * Resolved a dealock when printing debug from kernel.
  *

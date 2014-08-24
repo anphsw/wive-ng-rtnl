@@ -25,14 +25,6 @@
  * 1+ (800) 334-5454
  */
 
-/*
- * $Log: mac_scsi.c,v $
- * Revision 1.1.1.1  2007-05-25 06:50:04  bruce
- * linux-2.6.21 support RT2880. UART, PCI, ETHERNET, IRQ.... workable
- * initial version. 
- *
- */
-
 #include <linux/types.h>
 #include <linux/stddef.h>
 #include <linux/ctype.h>

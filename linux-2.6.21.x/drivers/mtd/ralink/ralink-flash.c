@@ -43,9 +43,7 @@
 
 #define BUSWIDTH		CONFIG_MTD_PHYSMAP_BUSWIDTH
 
-#if defined (CONFIG_RALINK_RT2880) || \
-    defined (CONFIG_RALINK_RT2883) || \
-    defined (CONFIG_RALINK_RT3883) || \
+#if defined (CONFIG_RALINK_RT3883) || \
     defined (CONFIG_RALINK_RT3352) || \
     defined (CONFIG_RALINK_RT3052) || \
     defined (CONFIG_RALINK_RT5350) || \
@@ -121,8 +119,8 @@ int ra_check_flash_type(void)
 	case 11:
 	case 12:
 		boot_from = BOOT_FROM_NAND;
-		break;	
-	}	
+		break;
+	}
 	}else if(strcmp(Id,"RT71100")==0) {
 	boot_from = BOOT_FROM_SPI;
     } else {
@@ -202,9 +200,7 @@ int __init rt2880_mtd_init(void)
 				ntohl(hdr.ih_ksz));
 	}
 #endif
-#if defined (CONFIG_RALINK_RT2880) || \
-    defined (CONFIG_RALINK_RT2883) || \
-    defined (CONFIG_RALINK_RT3883) || \
+#if defined (CONFIG_RALINK_RT3883) || \
     defined (CONFIG_RALINK_RT3352) || \
     defined (CONFIG_RALINK_RT3052) || \
     defined (CONFIG_RALINK_RT5350)
@@ -264,7 +260,7 @@ static void __exit rt2880_mtd_cleanup(void)
 {
 #ifdef CONFIG_MTD_NOR_RALINK
 	int i;
-#ifdef CONFIG_RT2880_FLASH_32M 
+#ifdef CONFIG_RT2880_FLASH_32M
 	if (merged_mtd) {
 		del_mtd_device(merged_mtd);
 		mtd_concat_destroy(merged_mtd);

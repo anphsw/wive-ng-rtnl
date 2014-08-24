@@ -101,14 +101,6 @@
  * 14 10-12
  * 15 9-11
  */
- 
-/*
- * $Log: t128.c,v $
- * Revision 1.1.1.1  2007-05-25 06:50:04  bruce
- * linux-2.6.21 support RT2880. UART, PCI, ETHERNET, IRQ.... workable
- * initial version. 
- *
- */
 
 #include <asm/system.h>
 #include <linux/signal.h>

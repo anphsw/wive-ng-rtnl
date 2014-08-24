@@ -42,12 +42,6 @@
  ***************************************************************************/
 
 /*
- * $Log: ixj.c,v $
- * Revision 1.1.1.1  2007-05-25 06:50:09  bruce
- * linux-2.6.21 support RT2880. UART, PCI, ETHERNET, IRQ.... workable
- * initial version. 
- *
- *
  * Revision 4.8  2003/07/09 19:39:00  Daniele Bellucci
  * Audit some copy_*_user and minor cleanup.
  *

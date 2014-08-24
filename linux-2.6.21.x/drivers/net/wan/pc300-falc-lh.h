@@ -10,11 +10,6 @@
  *	as published by the Free Software Foundation; either version
  *	2 of the License, or (at your option) any later version.
  *
- * $Log: pc300-falc-lh.h,v $
- * Revision 1.1.1.1  2007-05-25 06:50:02  bruce
- * linux-2.6.21 support RT2880. UART, PCI, ETHERNET, IRQ.... workable
- * initial version. 
- *
  * Revision 3.1  2001/06/15 12:41:10  regina
  * upping major version number
  *

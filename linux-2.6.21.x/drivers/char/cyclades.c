@@ -22,11 +22,6 @@
  *
  * This version supports shared IRQ's (only for PCI boards).
  *
- * $Log: cyclades.c,v $
- * Revision 1.1.1.1  2007-05-25 06:50:00  bruce
- * linux-2.6.21 support RT2880. UART, PCI, ETHERNET, IRQ.... workable
- * initial version. 
- *
  * Prevent users from opening non-existing Z ports.
  *
  * Revision 2.3.2.8   2000/07/06 18:14:16 ivan

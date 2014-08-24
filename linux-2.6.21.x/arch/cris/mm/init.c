@@ -6,11 +6,6 @@
  *
  *  Authors:  Bjorn Wesen (bjornw@axis.com)
  *
- *  $Log: init.c,v $
- *  Revision 1.1.1.1  2007-05-25 06:50:20  bruce
- *  linux-2.6.21 support RT2880. UART, PCI, ETHERNET, IRQ.... workable
- *  initial version. 
- *
  *  Revision 1.11  2004/05/28 09:28:56  starvik
  *  Calculation of loops_per_usec moved because initalization order has changed
  *  in Linux 2.6.

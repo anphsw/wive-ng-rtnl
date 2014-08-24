@@ -2381,12 +2381,11 @@ static void serial8250_console_putchar(struct uart_port *port, int ch)
 	serial_out(up, UART_TX, ch);
 }
 
-#if defined (CONFIG_RALINK_RT2880) || \
-    defined (CONFIG_RALINK_RT2883) || \
-    defined (CONFIG_RALINK_RT3883) || \
+#if defined (CONFIG_RALINK_RT3883) || \
     defined (CONFIG_RALINK_RT3352) || \
     defined (CONFIG_RALINK_RT3052) || \
-    defined (CONFIG_RALINK_RT5350)
+    defined (CONFIG_RALINK_RT5350) || \
+    defined (CONFIG_RALINK_MT7620)
 #ifdef CONFIG_RALINK_WATCHDOG
 extern void RaWdgReload(void);
 extern int WdgLoadValue;
@@ -2434,12 +2433,11 @@ serial8250_console_write(struct console *co, const char *s, unsigned int count)
 	 *	Finally, wait for transmitter to become empty
 	 *	and restore the IER
 	 */
-#if defined (CONFIG_RALINK_RT2880) || \
-    defined (CONFIG_RALINK_RT2883) || \
-    defined (CONFIG_RALINK_RT3883) || \
+#if defined (CONFIG_RALINK_RT3883) || \
     defined (CONFIG_RALINK_RT3352) || \
     defined (CONFIG_RALINK_RT3052) || \
-    defined (CONFIG_RALINK_RT5350)
+    defined (CONFIG_RALINK_RT5350) || \
+    defined (CONFIG_RALINK_MT7620)
 #ifdef CONFIG_RALINK_WATCHDOG
 	/* Refresh Ralink hardware watchdog timer */
 	if(WdgLoadValue)

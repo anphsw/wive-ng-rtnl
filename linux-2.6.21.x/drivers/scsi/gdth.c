@@ -29,11 +29,6 @@
  *                                                                      *
  * Linux kernel 2.4.x, 2.6.x supported                                  *
  *                                                                      *
- * $Log: gdth.c,v $
- * Revision 1.1.1.1  2007-05-25 06:50:04  bruce
- * linux-2.6.21 support RT2880. UART, PCI, ETHERNET, IRQ.... workable
- * initial version. 
- *
  * Revision 1.74  2006/04/10 13:44:47  achim
  * Community changes for 2.6.x
  * Kernel 2.2.x no longer supported

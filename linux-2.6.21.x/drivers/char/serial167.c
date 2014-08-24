@@ -23,11 +23,6 @@
  *
  * This version does not support shared irq's.
  *
- * $Log: serial167.c,v $
- * Revision 1.1.1.1  2007-05-25 06:50:00  bruce
- * linux-2.6.21 support RT2880. UART, PCI, ETHERNET, IRQ.... workable
- * initial version. 
- *
  * Revision 1.36.1.4  1995/03/29  06:14:14  bentson
  * disambiguate between Cyclom-16Y and Cyclom-32Ye;
  *

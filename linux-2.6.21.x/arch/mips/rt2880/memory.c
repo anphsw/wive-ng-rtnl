@@ -58,8 +58,7 @@
     defined (CONFIG_RALINK_RT5350)
 #define MAX_SDRAM_SIZE  (64*1024*1024)
 #define TEST_OFFSET	63
-#elif defined (CONFIG_RALINK_RT2883) || \
-      defined (CONFIG_RALINK_RT3883) || \
+#elif defined (CONFIG_RALINK_RT3883) || \
       defined (CONFIG_RALINK_MT7620)
 #define MAX_SDRAM_SIZE  (128*1024*1024)
 #define TEST_OFFSET	127
@@ -101,13 +100,8 @@ struct prom_pmemblock * __init prom_getmdesc(void)
 
 	env_str = prom_getenv("rambase");
 	if (!env_str) {
-#if defined(CONFIG_RT2880_ASIC) || defined(CONFIG_RT2880_FPGA)
-		printk("rambase not set, set to default (0x08000000)\n");
-		rambase = 0x08000000;
-#else
 		printk("rambase not set, set to default (0x00000000)\n");
 		rambase = 0x00000000;
-#endif
 	} else {
 		printk("rambase = %s\n", env_str);
 		rambase = simple_strtol(env_str, NULL, 0);
@@ -163,18 +157,10 @@ void __init prom_meminit(void)
 	spin_unlock_irq(&rtlmem_lock);
 
 	/* Set ram size */
-#if defined(CONFIG_RT2880_ASIC) || defined(CONFIG_RT2880_FPGA)
-	add_memory_region(0x08000000, mem, BOOT_MEM_RAM);
-#else
 	add_memory_region(0x00000000, mem, BOOT_MEM_RAM);
-#endif
-#else /* Fix mesize */
-#if defined(CONFIG_RT2880_ASIC) || defined(CONFIG_RT2880_FPGA)
-        add_memory_region(0x08000000, RAM_SIZE, BOOT_MEM_RAM);
-#else
+#else	/* Fixed mesize */
         add_memory_region(0x00000000, RAM_SIZE, BOOT_MEM_RAM);
-#endif
-#endif /* CONFIG_RAM_SIZE_AUTO */
+#endif	/* CONFIG_RAM_SIZE_AUTO */
 }
 
 void __init prom_free_prom_memory(void)

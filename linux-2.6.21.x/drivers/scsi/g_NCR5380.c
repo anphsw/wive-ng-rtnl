@@ -78,14 +78,6 @@
  *     
  */
 
-/*
- * $Log: g_NCR5380.c,v $
- * Revision 1.1.1.1  2007-05-25 06:50:04  bruce
- * linux-2.6.21 support RT2880. UART, PCI, ETHERNET, IRQ.... workable
- * initial version. 
- *
- */
-
 /* settings for DTC3181E card with only Mustek scanner attached */
 #define USLEEP
 #define USLEEP_POLL	1

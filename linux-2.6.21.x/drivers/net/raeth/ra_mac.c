@@ -147,8 +147,7 @@ void enable_auto_negotiate(int unused)
 	*(unsigned long *)(RALINK_ETH_SW_BASE+0x3500) = 0x56330;
 #endif
 }
-#elif defined (CONFIG_RALINK_RT2880) || defined(CONFIG_RALINK_RT3883) || \
-      defined (CONFIG_RALINK_RT3052) || defined(CONFIG_RALINK_RT3352)
+#elif defined(CONFIG_RALINK_RT3883) || defined (CONFIG_RALINK_RT3052) || defined(CONFIG_RALINK_RT3352)
 
 void enable_auto_negotiate(int ge)
 {
@@ -440,7 +439,7 @@ void dump_reg()
 	printk("The current PHY address selected by ethtool is %d\n", get_current_phy_address());
 #endif
 
-#if defined (CONFIG_RALINK_RT2883) || defined(CONFIG_RALINK_RT3883)
+#if defined(CONFIG_RALINK_RT3883)
 	printk("GDMA_RX_FCCNT1(0x%08x)     : 0x%08x\n\n", GDMA_RX_FCCNT1, sysRegRead(GDMA_RX_FCCNT1));
 #endif
 }

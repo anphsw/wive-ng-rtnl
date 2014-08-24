@@ -7,11 +7,6 @@
  *
  * Authors:   Bjorn Wesen
  *
- * $Log: ptrace.c,v $
- * Revision 1.1.1.1  2007-05-25 06:50:20  bruce
- * linux-2.6.21 support RT2880. UART, PCI, ETHERNET, IRQ.... workable
- * initial version. 
- *
  * Revision 1.10  2004/09/22 11:50:01  orjanf
  * * Moved get_reg/put_reg to arch-specific files.
  * * Added functions to access debug registers (CRISv32).

@@ -58,7 +58,7 @@
  */
 
 #define RALINK_PCI_MM_MAP_BASE	0x20000000
-#if defined(CONFIG_RALINK_RT2883) || defined(CONFIG_RALINK_RT3883) || defined(CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_MT7620)
+#if defined(CONFIG_RALINK_RT3883) || defined(CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_MT7620)
 #define RALINK_PCI_IO_MAP_BASE	0x10160000
 #else
 #define RALINK_PCI_IO_MAP_BASE	0x00460000
@@ -85,7 +85,7 @@
 #define PCI_SLOTx1			(2<<11)
 
 
-#if defined(CONFIG_RALINK_RT2883) || defined(CONFIG_RALINK_RT3883) || defined(CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_MT7620)
+#if defined(CONFIG_RALINK_RT3883) || defined(CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_MT7620)
 #define MEMORY_BASE 0x0
 #else
 #define MEMORY_BASE 0x08000000
@@ -121,9 +121,7 @@ static int config_access(unsigned char access_type, struct pci_bus *bus,
   data_reg = RALINK_PCI_CONFIG_DATA_VIRTUAL_REG;
 
   /* Setup address */
-#if defined(CONFIG_RALINK_RT2883)
-  address = (bus->number << 24) | (slot << 19) | (func << 16) | (where & 0xfc)| 0x1;
-#elif defined(CONFIG_RALINK_RT3883)
+#if defined(CONFIG_RALINK_RT3883)
   address = (bus->number << 16) | (slot << 11) | (func << 8) | (where & 0xfc) | 0x80000000;
 #elif defined(CONFIG_RALINK_RT6855)
   address = (bus->number << 16) | (slot << 11) | (func << 8) | (where & 0xfc) | 0x80000000;
@@ -289,9 +287,7 @@ void __inline__ read_config(unsigned long bus, unsigned long dev, unsigned long 
         data_reg = RALINK_PCI_CONFIG_DATA_VIRTUAL_REG;
 
         /* set addr */
-#if defined(CONFIG_RALINK_RT2883)
-	        address = (bus << 24) | (dev << 19) | (func << 16) | (reg & 0xfc);
-#elif defined(CONFIG_RALINK_RT3883)
+#if defined(CONFIG_RALINK_RT3883)
   		address = (bus << 16) | (dev << 11) | (func << 8) | (reg& 0xfc) | 0x80000000 ;
 #elif defined(CONFIG_RALINK_RT6855)
   		address = (bus << 16) | (dev << 11) | (func << 8) | (reg& 0xfc) | 0x80000000 ;
@@ -315,9 +311,7 @@ void __inline__ write_config(unsigned long bus, unsigned long dev, unsigned long
         data_reg = RALINK_PCI_CONFIG_DATA_VIRTUAL_REG;
 
         /* set addr */
-#if defined(CONFIG_RALINK_RT2883)
-	        address = (bus << 24) | (dev << 19) | (func << 16) | (reg & 0xfc);
-#elif defined(CONFIG_RALINK_RT3883)
+#if defined(CONFIG_RALINK_RT3883)
   		address = (bus << 16) | (dev << 11) | (func << 8) | (reg& 0xfc) | 0x80000000 ;
 #elif defined(CONFIG_RALINK_RT6855)
   		address = (bus << 16) | (dev << 11) | (func << 8) | (reg& 0xfc) | 0x80000000 ;
@@ -340,20 +334,6 @@ int __init pcibios_map_irq(struct pci_dev *dev, u8 slot, u8 pin)
   unsigned long val;
   struct resource *res;
   int irq=0;
-#if defined(CONFIG_RALINK_RT2883)
-  if (dev->bus->number > 1) {
-    printk("bus>1\n");
-    return 0;
-  }
-  if (slot > 0) {
-    printk("slot=%d >0\n", slot);
-    return 0;
-  }
-#elif defined(CONFIG_RALINK_RT2880)
-  if (dev->bus->number != 0) {
-    return 0;
-  }
-#endif
 
   //printk("** bus= %x, slot=0x%x\n",dev->bus->number,  slot);
 #if defined(CONFIG_RALINK_RT3883)
@@ -429,32 +409,7 @@ int __init pcibios_map_irq(struct pci_dev *dev, u8 slot, u8 pin)
  	printk("bus=0x%x, slot = 0x%x\n",dev->bus->number, slot);
   	return 0;
   }
-#elif defined(CONFIG_RALINK_RT2883)
-  if((dev->bus->number ==0) && (slot == 0)) {
-	RALINK_PCI_BAR0SETUP_ADDR = 0x01FF0001;	//open 1FF:32M; ENABLE
-  	write_config(0, 0, 0, PCI_BASE_ADDRESS_0, MEMORY_BASE);
-  	read_config(0, 0, 0, PCI_BASE_ADDRESS_0, &val);
- 	printk("BAR0 at slot 0 = %x\n", val);
- 	printk("bus=0, slot = 0x%x\n", slot);
-   	res = &dev->resource[0];
-    	res->start = MEMORY_BASE;
-    	res->end   = MEMORY_BASE + 0x01ffffff;
-	for(i=0;i<16;i++){
-	read_config(0, 0, 0, i<<2, &val);
-	printk("pci-to-pci 0x%02x = %08x\n", i<<2, val);
-	}
-	irq = 0;
-  }else if((dev->bus->number ==1)){
- 	printk("bus=1, slot = 0x%x\n", slot);
-	for(i=0;i<16;i++){
-	read_config(1, slot, 0, (i)<<2, &val);
-	printk("bus 1 dev %d fun 0: 0x%02x = %08x\n", slot, i<<2, val);
-	}
-	irq = 2;
-  }else{
-  	return 0;
-  }
-#else //RT2880
+#else
   if(slot == 0) {
 	  printk("*************************************************************\n");
 	RALINK_PCI_BAR0SETUP_ADDR = 0x07FF0001;	
@@ -478,7 +433,7 @@ int __init pcibios_map_irq(struct pci_dev *dev, u8 slot, u8 pin)
   pci_write_config_byte(dev, PCI_LATENCY_TIMER, 0xFF);  //configure latency timer 0x10
   pci_read_config_word(dev, PCI_COMMAND, &cmd);
 //FIXME
-#if defined(CONFIG_RALINK_RT2883) || defined(CONFIG_RALINK_RT3883) || defined(CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_MT7620)
+#if defined(CONFIG_RALINK_RT3883) || defined(CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_MT7620)
   cmd = cmd | PCI_COMMAND_MASTER | PCI_COMMAND_IO | PCI_COMMAND_MEMORY;
 #else
   cmd = cmd | PCI_COMMAND_MASTER | PCI_COMMAND_IO | PCI_COMMAND_MEMORY |
@@ -525,9 +480,7 @@ int init_rt2880pci(void)
 	mdelay(500);
 #endif
 
-#if defined(CONFIG_RALINK_RT2880) || defined(CONFIG_RALINK_RT2883)
-	RALINK_PCI_PCICFG_ADDR = 0;
-#elif defined(CONFIG_RALINK_RT3883)
+#if defined(CONFIG_RALINK_RT3883)
 #if defined(CONFIG_PCIE_ONLY)
 	RALINK_PCI_PCICFG_ADDR = 0;
 #elif defined(CONFIG_PCI_ONLY)
@@ -602,23 +555,10 @@ int init_rt2880pci(void)
 			//printk("***RALINK_PCI_PCICFG_ADDR= %x\n", RALINK_PCI_PCICFG_ADDR);
 		}
 	}
-#elif defined(CONFIG_RALINK_RT2883)
-	printk("\n*************** Ralink PCIe RC mode *************\n");
-	mdelay(500);
-	if(( RALINK_PCI_STATUS & 0x1) == 0)
-	{
-		printk(" RALINK_PCI_STATUS = %x\n", RALINK_PCI_STATUS );
-		printk("************No PCIE device**********\n");
-		for(i=0;i<16;i++){
-			read_config(0, 0, 0, i<<2, &val);
-			printk("pci-to-pci 0x%02x = %08x\n", i<<2, val);
-		}
-		return 0;
-	}
 #else
 	for(i=0;i<0xfffff;i++);
 	RALINK_PCI_ARBCTL = 0x79;
-#endif	
+#endif
 	//printk(" RALINK_PCI_ARBCTL = %x\n", RALINK_PCI_ARBCTL);
 
 /*
@@ -629,19 +569,7 @@ int init_rt2880pci(void)
 	RALINK_PCI_MEMBASE = 0xffffffff; //RALINK_PCI_MM_MAP_BASE;
 	RALINK_PCI_IOBASE = RALINK_PCI_IO_MAP_BASE;
 
-#if defined(CONFIG_RALINK_RT2880)
-	RALINK_PCI_BAR0SETUP_ADDR = 0x07FF0000;	//open 1FF:32M; DISABLE
-	RALINK_PCI_IMBASEBAR0_ADDR = MEMORY_BASE;
-	RALINK_PCI_ID = 0x08021814;
-	RALINK_PCI_CLASS = 0x00800001;
-	RALINK_PCI_SUBID = 0x28801814;
-#elif defined(CONFIG_RALINK_RT2883)
-	RALINK_PCI_BAR0SETUP_ADDR = 0x01FF0000;	//open 1FF:32M; DISABLE
-	RALINK_PCI_IMBASEBAR0_ADDR = MEMORY_BASE;
-	RALINK_PCI_ID = 0x08021814;
-	RALINK_PCI_CLASS = 0x06040001;
-	RALINK_PCI_SUBID = 0x28801814;
-#elif defined(CONFIG_RALINK_RT3883)
+#if defined(CONFIG_RALINK_RT3883)
 	//PCI
 	RALINK_PCI0_BAR0SETUP_ADDR = 0x03FF0000;	//open 3FF:64M; DISABLE
 	RALINK_PCI0_IMBASEBAR0_ADDR = MEMORY_BASE;
@@ -707,10 +635,6 @@ int init_rt2880pci(void)
 	write_config(0, 1, 0, 0x4, val|0x7);
 	//printk("%s %s %d\n", __FILE__, __FUNCTION__, __LINE__);
 	//}
-#elif defined(CONFIG_RALINK_RT2883)
-	read_config(0, 0, 0, 0x4, &val);
-	write_config(0, 0, 0, 0x4, val|0x7);
-#else
 	write_config(0, 0, 0, PCI_BASE_ADDRESS_0, MEMORY_BASE);
 	read_config(0, 0, 0, PCI_BASE_ADDRESS_0, &val);
 	printk("BAR0 at slot 0 = %x\n", val);

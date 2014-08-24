@@ -45,8 +45,7 @@
 #define RALINK_GPIO_DEVNAME	"gpio"		//nodename
 #define GPIO_DEV		"/dev/gpio"	//userlevel devname
 
-#if defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT2883) || \
-      defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_MT7620)
+#if defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_MT7620)
 /* BUTTONS GPIO */
 #if defined(CONFIG_RALINK_I2S) || defined(CONFIG_RALINK_I2S_MODULE)
 #define GPIO_BTN_RESET		43
@@ -242,7 +241,7 @@
 /*
  * Values for the GPIOMODE Register
  */
-#if defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT2883)
+#if defined (CONFIG_RALINK_RT3052)
 #define RALINK_GPIOMODE_I2C		0x01
 #define RALINK_GPIOMODE_SPI		0x02
 #define RALINK_GPIOMODE_UARTF		0x1C

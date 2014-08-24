@@ -381,12 +381,11 @@ static int ei_set_mac2_addr(struct net_device *dev, void *p)
 static void set_fe_pdma_glo_cfg(void)
 {
         int pdma_glo_cfg=0;
-#if defined (CONFIG_RALINK_RT2880) || defined(CONFIG_RALINK_RT2883) || \
-    defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3883)
+#if defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3883)
         int fe_glo_cfg=0;
 #endif
 
-#if defined (CONFIG_RALINK_RT6855) || defined(CONFIG_RALINK_RT6855A) 
+#if defined (CONFIG_RALINK_RT6855) || defined(CONFIG_RALINK_RT6855A)
 	pdma_glo_cfg = (TX_WB_DDONE | RX_DMA_EN | TX_DMA_EN | PDMA_BT_SIZE_32DWORDS);
 #elif defined (CONFIG_RALINK_MT7620)
 	pdma_glo_cfg = (TX_WB_DDONE | RX_DMA_EN | TX_DMA_EN | PDMA_BT_SIZE_16DWORDS);
@@ -404,8 +403,7 @@ static void set_fe_pdma_glo_cfg(void)
 	sysRegWrite(PDMA_GLO_CFG, pdma_glo_cfg);
 
 	/* only the following chipset need to set it */
-#if defined (CONFIG_RALINK_RT2880) || defined(CONFIG_RALINK_RT2883) || \
-    defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3883)
+#if defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3883)
 	//set 1us timer count in unit of clock cycle
 	fe_glo_cfg = sysRegRead(FE_GLO_CFG);
 	fe_glo_cfg &= ~(0xff << 8); //clear bit8-bit15
@@ -605,7 +603,7 @@ static void forward_config(struct net_device *dev)
  *	The register affects QOS correctness in frame engine!
  */
 
-#if defined(CONFIG_RALINK_RT2883) || defined(CONFIG_RALINK_RT3883)
+#if defined(CONFIG_RALINK_RT3883)
 	sysRegWrite(PSE_FQ_CFG, cpu_to_le32(INIT_VALUE_OF_RT2883_PSE_FQ_CFG));
 #elif defined(CONFIG_RALINK_RT3352) || defined(CONFIG_RALINK_RT5350) ||  \
       defined(CONFIG_RALINK_RT6855) || defined(CONFIG_RALINK_RT6855A) || \
@@ -690,7 +688,6 @@ static int fe_pdma_init(struct net_device *dev)
 
 	printk("\nphy_tx_ring1 = %08x, tx_ring1 = %p, size: %d bytes\n", ei_local->phy_tx_ring1, ei_local->tx_ring1, sizeof(struct PDMA_txdesc));
 
-#if ! defined (CONFIG_RALINK_RT2880)
 	fe_tx_desc_init(dev, 2, 3, 1);
 	if (ei_local->tx_ring2 == NULL) {
 		printk("RAETH: tx ring2 allocation failed\n");
@@ -707,7 +704,6 @@ static int fe_pdma_init(struct net_device *dev)
 
 	printk("\nphy_tx_ring3 = %08x, tx_ring3 = %p, size: %d bytes\n", ei_local->phy_tx_ring3, ei_local->tx_ring3, sizeof(struct PDMA_txdesc));
 
-#endif // CONFIG_RALINK_RT2880 //
 #else
 	for (i=0;i<NUM_TX_DESC;i++){
 		ei_local->skb_free[i]=0;
@@ -2179,7 +2175,7 @@ static int ei_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 #if defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_MT7620)
 	unsigned int offset = 0;
 #endif
-#if !defined (CONFIG_RALINK_RT3052) && !defined (CONFIG_RALINK_RT3883) && !defined (CONFIG_RALINK_RT2880)
+#if !defined (CONFIG_RALINK_RT3052) && !defined (CONFIG_RALINK_RT3883)
 	unsigned int value = 0;
 #endif
 	ra_mii_ioctl_data mii;
@@ -3360,7 +3356,6 @@ static int ei_close(struct net_device *dev)
 	   dma_free_coherent(NULL, NUM_TX_DESC*sizeof(struct PDMA_txdesc), ei_local->tx_ring1, ei_local->phy_tx_ring1);
        }
 
-#if !defined (CONFIG_RALINK_RT2880)
        if (ei_local->tx_ring2 != NULL) {
 	   dma_free_coherent(NULL, NUM_TX_DESC*sizeof(struct PDMA_txdesc), ei_local->tx_ring2, ei_local->phy_tx_ring2);
        }
@@ -3368,7 +3363,6 @@ static int ei_close(struct net_device *dev)
        if (ei_local->tx_ring3 != NULL) {
 	   dma_free_coherent(NULL, NUM_TX_DESC*sizeof(struct PDMA_txdesc), ei_local->tx_ring3, ei_local->phy_tx_ring3);
        }
-#endif
 #endif
 	/* RX Ring */
 #ifdef CONFIG_32B_DESC

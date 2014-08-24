@@ -91,12 +91,6 @@ choice
        prompt "DRAM Size"
        default RT2880_DRAM_64M
 
-config RT2880_DRAM_8M
-       bool "8M"
-
-config RT2880_DRAM_16M
-       bool "16M"
-
 config RT2880_DRAM_32M
        bool "32M"
 
@@ -114,8 +108,6 @@ config RAM_SIZE_AUTO
 
 config RALINK_RAM_SIZE
 	int
-	default 8 if RT2880_DRAM_8M
-	default 16 if RT2880_DRAM_16M
 	default 32 if RT2880_DRAM_32M
 	default 64 if RT2880_DRAM_64M
 	default 128 if RT2880_DRAM_128M

@@ -12,11 +12,6 @@
  * Author:
  * L. Haag
  *
- * $Log: n_r3964.c,v $
- * Revision 1.1.1.1  2007-05-25 06:50:00  bruce
- * linux-2.6.21 support RT2880. UART, PCI, ETHERNET, IRQ.... workable
- * initial version. 
- *
  * Revision 1.10  2001/03/18 13:02:24  dwmw2
  * Fix timer usage, use spinlocks properly.
  *

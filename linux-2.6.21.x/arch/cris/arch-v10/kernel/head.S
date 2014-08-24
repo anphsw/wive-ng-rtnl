@@ -5,11 +5,6 @@
  * Copyright (C) 2000, 2001 Axis Communications AB
  *
  * Authors:	Bjorn Wesen (bjornw@axis.com)
- * 
- * $Log: head.S,v $
- * Revision 1.1.1.1  2007-05-25 06:50:20  bruce
- * linux-2.6.21 support RT2880. UART, PCI, ETHERNET, IRQ.... workable
- * initial version. 
  *
  * Revision 1.10  2005/06/20 05:12:54  starvik
  * Remove unnecessary diff to kernel.org tree

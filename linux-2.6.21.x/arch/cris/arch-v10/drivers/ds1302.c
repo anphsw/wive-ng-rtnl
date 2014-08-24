@@ -6,11 +6,6 @@
 *!
 *! Functions exported: ds1302_readreg, ds1302_writereg, ds1302_init
 *!
-*! $Log: ds1302.c,v $
-*! Revision 1.1.1.1  2007-05-25 06:50:20  bruce
-*! linux-2.6.21 support RT2880. UART, PCI, ETHERNET, IRQ.... workable
-*! initial version. 
-*!
 *! Revision 1.18  2005/01/24 09:11:26  mikaelam
 *! Minor changes to get DS1302 RTC chip driver to work
 *!

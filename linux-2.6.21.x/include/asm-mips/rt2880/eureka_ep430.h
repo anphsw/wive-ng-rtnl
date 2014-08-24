@@ -63,23 +63,7 @@
 #define RALINK_PCI_CONFIG_ADDR 		    	0x20
 #define RALINK_PCI_CONFIG_DATA_VIRTUAL_REG   	0x24
 
-#if defined(CONFIG_RALINK_RT2880) || defined(CONFIG_RALINK_RT2883)
-#define RALINK_PCI_PCICFG_ADDR 		*(volatile u32 *)(RALINK_PCI_BASE + 0x0000)
-#define RALINK_PCI_PCIRAW_ADDR 		*(volatile u32 *)(RALINK_PCI_BASE + 0x0004)
-#define RALINK_PCI_PCIINT_ADDR 		*(volatile u32 *)(RALINK_PCI_BASE + 0x0008)
-#define RALINK_PCI_PCIMSK_ADDR 		*(volatile u32 *)(RALINK_PCI_BASE + 0x000C)
-#define RALINK_PCI_BAR0SETUP_ADDR 	*(volatile u32 *)(RALINK_PCI_BASE + 0x0010)
-#define RALINK_PCI_IMBASEBAR0_ADDR 	*(volatile u32 *)(RALINK_PCI_BASE + 0x0018)
-#define RALINK_PCI_IMBASEBAR1_ADDR 	*(volatile u32 *)(RALINK_PCI_BASE + 0x001C)
-#define RALINK_PCI_MEMBASE 		*(volatile u32 *)(RALINK_PCI_BASE + 0x0028)
-#define RALINK_PCI_IOBASE 		*(volatile u32 *)(RALINK_PCI_BASE + 0x002C)
-#define RALINK_PCI_ID 			*(volatile u32 *)(RALINK_PCI_BASE + 0x0030)
-#define RALINK_PCI_CLASS 		*(volatile u32 *)(RALINK_PCI_BASE + 0x0034)
-#define RALINK_PCI_SUBID 		*(volatile u32 *)(RALINK_PCI_BASE + 0x0038)
-#define RALINK_PCI_ARBCTL 		*(volatile u32 *)(RALINK_PCI_BASE + 0x0080)
-#define RALINK_PCI_STATUS		*(volatile u32 *)(RALINK_PCI_BASE + 0x0050)
-
-#elif defined(CONFIG_RALINK_RT3883)
+#if defined(CONFIG_RALINK_RT3883)
 
 #define RALINK_PCI_PCICFG_ADDR 		*(volatile u32 *)(RALINK_PCI_BASE + 0x0000)
 #define RALINK_PCI_PCIRAW_ADDR 		*(volatile u32 *)(RALINK_PCI_BASE + 0x0004)

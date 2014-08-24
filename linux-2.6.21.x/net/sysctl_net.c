@@ -4,11 +4,6 @@
  * Begun April 1, 1996, Mike Shaver.
  * Added /proc/sys/net directories for each protocol family. [MS]
  *
- * $Log: sysctl_net.c,v $
- * Revision 1.1.1.1  2007-05-25 06:49:59  bruce
- * linux-2.6.21 support RT2880. UART, PCI, ETHERNET, IRQ.... workable
- * initial version. 
- *
  * Revision 1.2  1996/05/08  20:24:40  shaver
  * Added bits for NET_BRIDGE and the NET_IPV4_ARP stuff and
  * NET_IPV4_IP_FORWARD.

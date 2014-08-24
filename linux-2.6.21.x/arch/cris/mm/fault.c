@@ -4,11 +4,6 @@
  *  Copyright (C) 2000, 2001  Axis Communications AB
  *
  *  Authors:  Bjorn Wesen 
- * 
- *  $Log: fault.c,v $
- *  Revision 1.1.1.1  2007-05-25 06:50:20  bruce
- *  linux-2.6.21 support RT2880. UART, PCI, ETHERNET, IRQ.... workable
- *  initial version. 
  *
  *  Revision 1.20  2005/03/04 08:16:18  starvik
  *  Merge of Linux 2.6.11.

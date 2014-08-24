@@ -6,11 +6,6 @@
  *
  *  Authors:	Bjorn Wesen (bjornw@axis.com)
  *
- *  $Log: entry.S,v $
- *  Revision 1.1.1.1  2007-05-25 06:50:20  bruce
- *  linux-2.6.21 support RT2880. UART, PCI, ETHERNET, IRQ.... workable
- *  initial version. 
- *
  *  Revision 1.28  2005/06/20 05:06:30  starvik
  *  Remove unnecessary diff to kernel.org tree
  *

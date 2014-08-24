@@ -9,16 +9,12 @@
 #ifndef	RALINK_ESW_MIB
 #define	RALINK_ESW_MIB
 
-#if defined(CONFIG_RALINK_RT2880)
-#define PROCREG_SNMP	"/proc/rt2880/snmp"
-#elif defined(CONFIG_RALINK_RT3052)
+#if defined(CONFIG_RALINK_RT3052)
 #define PROCREG_SNMP	"/proc/rt3052/snmp"
 #elif defined(CONFIG_RALINK_RT3352)
 #define PROCREG_SNMP	"/proc/rt3352/snmp"
 #elif defined (CONFIG_RALINK_RT5350)
 #define PROCREG_SNMP	"/proc/rt5350/snmp"
-#elif defined(CONFIG_RALINK_RT2883)
-#define PROCREG_SNMP	"/proc/rt2883/snmp"
 #elif defined(CONFIG_RALINK_RT3883)
 #define PROCREG_SNMP	"/proc/rt3883/snmp"
 #elif defined (CONFIG_RALINK_RT6855)
@@ -26,7 +22,7 @@
 #elif defined (CONFIG_RALINK_RT63365)
 #define PROCREG_SNMP	"/proc/rt63365/snmp"
 #else
-#define PROCREG_SNMP	"/proc/rt2880/snmp"
+#define PROCREG_SNMP	"/proc/rt3052/snmp"
 #endif
 
 CVoidType ralink_esw_init(void);

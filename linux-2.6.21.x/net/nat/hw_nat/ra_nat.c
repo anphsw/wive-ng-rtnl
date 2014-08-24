@@ -1539,7 +1539,7 @@ int32_t FoeBindToPpe(struct sk_buff *skb, struct FoeEntry* foe_entry_ppe, int gm
 #if defined (CONFIG_RAETH_GMAC2)
 		/* RT3883 with 2xGMAC - assuming GMAC2=WAN and GMAC1=LAN */
 		foe_entry.ipv4_hnapt.iblk2.dp = (gmac_no == 2) ? 2 : 1;
-#elif defined (CONFIG_RALINK_RT2880) || defined (CONFIG_RALINK_RT3883)
+#elif defined (CONFIG_RALINK_RT3883)
 		/* RT2880, RT3883 (1xGMAC mode), always send to GMAC1 */
 		foe_entry.ipv4_hnapt.iblk2.dp = 1;		/* -> GMAC 1 */
 #else
@@ -2473,7 +2473,7 @@ static int __init PpeInitMod(void)
 #elif defined (CONFIG_RALINK_RT3352)
 	/* RT3352 rev 0105 has no bug UDP w/o checksum */
 	ppe_udp_bug = (chip_rev_id < 0x0105) ? 1 : 0;
-#elif defined (CONFIG_RALINK_RT2880) || defined (CONFIG_RALINK_RT2883) || defined (CONFIG_RALINK_RT3883)
+#elif defined (CONFIG_RALINK_RT3883)
 	/* RT3883/RT3662 at least rev 0105 has bug UDP w/o checksum :-( */
 	ppe_udp_bug = 1;
 #elif defined (CONFIG_RALINK_MT7620)
@@ -2497,7 +2497,7 @@ static int __init PpeInitMod(void)
 	AclRegIoctlHandler();
 	AcRegIoctlHandler();
 	MtrRegIoctlHandler();
-	
+
 	/* 0~63 Accounting group */
 	PpeSetAGInfo(1, lan_vid);	// AG Index1=VLAN1
 	PpeSetAGInfo(2, wan_vid);	// AG Index2=VLAN2

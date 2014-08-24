@@ -2,11 +2,6 @@ Memory management for CRIS/MMU
 ------------------------------
 HISTORY:
 
-$Log: README.mm,v $
-Revision 1.1.1.1  2007-05-25 06:50:20  bruce
-linux-2.6.21 support RT2880. UART, PCI, ETHERNET, IRQ.... workable
-initial version. 
-
 Revision 1.1  2001/12/17 13:59:27  bjornw
 Initial revision
 

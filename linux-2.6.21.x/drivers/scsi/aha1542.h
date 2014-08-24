@@ -4,11 +4,6 @@
  *
  * Header file for the adaptec 1542 driver for Linux
  *
- * $Log: aha1542.h,v $
- * Revision 1.1.1.1  2007-05-25 06:50:04  bruce
- * linux-2.6.21 support RT2880. UART, PCI, ETHERNET, IRQ.... workable
- * initial version. 
- *
  * Revision 1.1  1992/07/24  06:27:38  root
  * Initial revision
  *

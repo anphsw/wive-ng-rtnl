@@ -311,11 +311,7 @@ void ether_setup(struct net_device *dev)
 	dev->mtu		= ETH_DATA_LEN;
 	dev->addr_len		= ETH_ALEN;
 #if defined(CONFIG_RAM_SIZE_AUTO)
-	dev->tx_queue_len	= 100;	/* increase from userspace if needed */
-#elif defined(CONFIG_RT2880_DRAM_16M)
-	dev->tx_queue_len	= 10;	/* save memory */
-#elif defined(CONFIG_RT2880_DRAM_8M)
-	dev->tx_queue_len	= 0;	/* save memory */
+	dev->tx_queue_len	= 100;	/* Small bootmem save increase from userspace if needed */
 #else
 	dev->tx_queue_len	= 1000;	/* Ethernet wants good queues */
 #endif

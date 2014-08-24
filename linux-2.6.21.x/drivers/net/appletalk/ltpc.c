@@ -61,11 +61,6 @@
 
 /***
  *
- * $Log: ltpc.c,v $
- * Revision 1.1.1.1  2007-05-25 06:50:02  bruce
- * linux-2.6.21 support RT2880. UART, PCI, ETHERNET, IRQ.... workable
- * initial version. 
- *
  * Revision 1.1.2.1  2000/03/01 05:35:07  jgarzik
  * at and tr cleanup
  *

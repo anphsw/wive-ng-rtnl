@@ -1,13 +1,7 @@
 CFLAGS += -ffunction-sections -fdata-sections
 LDFLAGS += -Wl,--gc-sections
 
-PLATFORM = RT2880
-
-ifeq ($(PLATFORM),RT2880)
-CROSS_COMPILE = mipsel-linux-
-endif
-
-CC = $(CROSS_COMPILE)gcc
+CC ?= $(CROSS_COMPILE)gcc
 
 ifndef CFLAGS
 CFLAGS += -Os -Wall -g
@@ -17,7 +11,7 @@ endif
 CFLAGS +=  -DMULTIPLE_RADIUS
 
 # If you want to debug daemon, add following line
-#CFLAGS +=  -DDBG 
+#CFLAGS +=  -DDBG
 
 OBJS =	rtdot1x.o eloop.o eapol_sm.o radius.o md5.o  \
 	config.o ieee802_1x.o  \

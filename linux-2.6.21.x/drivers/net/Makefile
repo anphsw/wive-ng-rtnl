@@ -80,9 +80,6 @@ obj-$(CONFIG_RIONET) += rionet.o
 #
 # end link order section
 #
-ifeq ($(CONFIG_RAETH_ROUTER),y)
-obj-$(CONFIG_RT2880_GMAC) += mii.o
-endif
 obj-$(CONFIG_IMQ) += imq.o
 obj-$(CONFIG_MII) += mii.o
 obj-$(CONFIG_PHYLIB) += phy/

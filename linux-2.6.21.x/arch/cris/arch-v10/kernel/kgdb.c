@@ -17,11 +17,6 @@
 *! Jun 17 1999  Hendrik Ruijter Added gdb 4.18 support. 'X', 'qC' and 'qL'.
 *! Jul 21 1999  Bjorn Wesen     eLinux port
 *!
-*! $Log: kgdb.c,v $
-*! Revision 1.1.1.1  2007-05-25 06:50:20  bruce
-*! linux-2.6.21 support RT2880. UART, PCI, ETHERNET, IRQ.... workable
-*! initial version. 
-*!
 *! Revision 1.6  2005/01/14 10:12:17  starvik
 *! KGDB on separate port.
 *! Console fixes from 2.4.

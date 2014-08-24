@@ -15,13 +15,12 @@
 /*
  * CPU feature overrides for MIPS boards
  */
-#if defined (CONFIG_RALINK_RT2880) || \
-    defined (CONFIG_RALINK_RT2883) || \
-    defined (CONFIG_RALINK_RT3883) || \
+#if defined (CONFIG_RALINK_RT3883) || \
     defined (CONFIG_RALINK_RT3352) || \
     defined (CONFIG_RALINK_RT3052) || \
+    defined (CONFIG_RALINK_RT5350) || \
     defined (CONFIG_RALINK_RT6855) || \
-    defined (CONFIG_RALINK_RT5350)
+    defined (CONFIG_RALINK_MT7620)
 
 /*
  * FOR Ralink only cpus
@@ -63,13 +62,8 @@
 #define cpu_has_64bit_gp_regs	0
 #define cpu_has_64bit_addresses	0
 
-#ifdef CONFIG_RALINK_RT2880
-#define cpu_dcache_line_size()	16
-#define cpu_icache_line_size()	16
-#else
 #define cpu_dcache_line_size()	32
 #define cpu_icache_line_size()	32
-#endif
 
 #else
 

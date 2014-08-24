@@ -11,11 +11,6 @@
  *    enableDebugIRQ()
  *    init_etrax_debug()
  *
- * $Log: debugport.c,v $
- * Revision 1.1.1.1  2007-05-25 06:50:20  bruce
- * linux-2.6.21 support RT2880. UART, PCI, ETHERNET, IRQ.... workable
- * initial version. 
- *
  * Revision 1.27  2005/06/10 10:34:14  starvik
  * Real console support
  *

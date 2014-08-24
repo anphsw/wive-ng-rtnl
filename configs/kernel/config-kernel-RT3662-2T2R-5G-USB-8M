@@ -24,8 +24,6 @@ CONFIG_PCIE_ONLY=y
 #
 # Ram config.
 #
-# CONFIG_RT2880_DRAM_8M is not set
-# CONFIG_RT2880_DRAM_16M is not set
 # CONFIG_RT2880_DRAM_32M is not set
 # CONFIG_RT2880_DRAM_64M is not set
 CONFIG_RT2880_DRAM_128M=y

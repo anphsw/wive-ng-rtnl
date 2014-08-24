@@ -13,10 +13,6 @@ menu "Machine selection"
 config ZONE_DMA
 	bool
 
-config RALINK_RT2880_MP
-	bool
-config RALINK_RT2880_SHUTTLE
-	bool
 config RALINK_RT3052_MP2
 	bool
 config RALINK_RT3352_MP
@@ -29,22 +25,6 @@ config RALINK_MT7620_MP
 	bool
 choice
 	prompt "System type"
-
-config RALINK_RT2880
-        bool "Ralink RT2880 board"
-	select DMA_NONCOHERENT
-	select IRQ_CPU
-	select HW_HAS_PCI
-	select SWAP_IO_SPACE
-	select CPU_MIPSR1
-	select CPU_MIPS32_R1
-	select SYS_HAS_CPU_MIPS32_R1
-	select SYS_SUPPORTS_LITTLE_ENDIAN
-	select BOOT_ELF32
-	select SYS_SUPPORTS_32BIT_KERNEL
-	select RALINK_RT2880_MP
-        help
-         Ralink evaluation board based on RT2880
 
  config RALINK_RT3052
         bool "Ralink RT305x/RT3350 board"

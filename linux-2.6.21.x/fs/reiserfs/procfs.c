@@ -624,11 +624,6 @@ int reiserfs_global_version_in_proc(char *buffer, char **start,
 #endif
 
 /*
- * $Log: procfs.c,v $
- * Revision 1.1.1.1  2007-05-25 06:50:15  bruce
- * linux-2.6.21 support RT2880. UART, PCI, ETHERNET, IRQ.... workable
- * initial version. 
- *
  * Revision 1.1.8.2  2001/07/15 17:08:42  god
  *  . use get_super() in procfs.c
  *  . remove remove_save_link() from reiserfs_do_truncate()
