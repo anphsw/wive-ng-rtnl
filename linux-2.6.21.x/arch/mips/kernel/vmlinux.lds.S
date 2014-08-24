@@ -38,17 +38,9 @@ SECTIONS
   _text = .;			/* Text and read-only data */
   .text : {
 /* workaround for SPI flash boot */
-#if defined (CONFIG_RALINK_RT2880) || \
-    defined (CONFIG_RALINK_RT2883) || \
-    defined (CONFIG_RALINK_RT3883) || \
-    defined (CONFIG_RALINK_RT3352) || \
-    defined (CONFIG_RALINK_RT3052) || \
-    defined (CONFIG_RALINK_RT6855) || \
-    defined (CONFIG_RALINK_RT5350)
 #ifdef CONFIG_MTD_SPI_RALINK
     /* move some sections up (memory hole for spi IO) */
     . = . + 0x8000;
-#endif
 #endif
     TEXT_TEXT
     SCHED_TEXT
@@ -80,13 +72,6 @@ SECTIONS
   RODATA
 
 /* workaround for SPI flash boot */
-#if defined (CONFIG_RALINK_RT2880) || \
-    defined (CONFIG_RALINK_RT2883) || \
-    defined (CONFIG_RALINK_RT3883) || \
-    defined (CONFIG_RALINK_RT3352) || \
-    defined (CONFIG_RALINK_RT3052) || \
-    defined (CONFIG_RALINK_RT6855) || \
-    defined (CONFIG_RALINK_RT5350)
 #ifdef CONFIG_MTD_SPI_RALINK
   /* This hack need for SPI devices work only */
   /* init need start > 0x80220000 */
@@ -96,7 +81,6 @@ SECTIONS
   _data_start_h = ABSOLUTE(.);
   /* Segment started below end of hole and ends after end of hole? Yes - move */
   . = (_data_start_h <= 0x80220000 && _data_start_h + DATASIZE > 0x80200000) ? 0x80220000 : .;
-#endif
 #endif
 
   /* writeable */
@@ -145,13 +129,6 @@ SECTIONS
   . = ALIGN(_PAGE_SIZE);		/* Init code and data */
   __init_begin = .;
 /* workaround for SPI flash boot */
-#if defined (CONFIG_RALINK_RT2880) || \
-    defined (CONFIG_RALINK_RT2883) || \
-    defined (CONFIG_RALINK_RT3883) || \
-    defined (CONFIG_RALINK_RT3352) || \
-    defined (CONFIG_RALINK_RT3052) || \
-    defined (CONFIG_RALINK_RT6855) || \
-    defined (CONFIG_RALINK_RT5350)
 #ifdef CONFIG_MTD_SPI_RALINK
   /* This hack need for SPI devices work only */
   /* init need start > 0x80220000 */
@@ -161,7 +138,6 @@ SECTIONS
   _init_start_h = ABSOLUTE(.);
   /* Segment started below end of hle and ends after end of hole? Yes - move */
   . = (_init_start_h <= 0x80220000 && _init_start_h + INITSIZE > 0x80200000) ? 0x80220000 : .;
-#endif
 #endif
   .init.text : {
 	_sinittext = .;

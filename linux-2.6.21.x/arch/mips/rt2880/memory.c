@@ -59,7 +59,8 @@
 #define MAX_SDRAM_SIZE  (64*1024*1024)
 #define TEST_OFFSET	63
 #elif defined (CONFIG_RALINK_RT2883) || \
-      defined (CONFIG_RALINK_RT3883)
+      defined (CONFIG_RALINK_RT3883) || \
+      defined (CONFIG_RALINK_MT7620)
 #define MAX_SDRAM_SIZE  (128*1024*1024)
 #define TEST_OFFSET	127
 #else
