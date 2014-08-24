@@ -58,8 +58,6 @@ ROMFSDIR	:= $(ROOTDIR)/romfs
 SCRIPTSDIR	:= $(ROOTDIR)/config/scripts
 LINUX_CONFIG	:= $(ROOTDIR)/$(LINUXDIR)/.config
 CONFIG_CONFIG	:= $(ROOTDIR)/config/.config
-STRIPOPT	:= -R .comment -R .note -g --strip-unneeded
-
 PATH		:= $(PATH):$(ROOTDIR):$(ROOTDIR)/tools:$(ROOTDIR)/toolchain/bin:$(ROOTDIR)/lib/lib:$(ROOTDIR)/lib/include:$(LINUXDIR):$(LIBCDIR)
 
 # May use a different compiler
@@ -227,14 +225,10 @@ romfs.subdirs:
 
 .PHONY: modules_install
 modules_install:
-	#----------------------------STRIP-AND-INSTALL_MODULES----------------------------------
+	#----------------------------INSTALL_MODULES----------------------------------
 	. $(LINUXDIR)/.config; if [ "$$CONFIG_MODULES" = "y" ]; then \
 		[ -d $(ROMFSDIR)/lib/modules ] || mkdir -p $(ROMFSDIR)/lib/modules; \
 		$(MAKEARCH_KERNEL) -C $(LINUXDIR) INSTALL_MOD_PATH=$(ROMFSDIR) DEPMOD="../user/busybox/examples/depmod.pl" modules_install; \
-		rm -f $(ROMFSDIR)/lib/modules/*/build; \
-		rm -f $(ROMFSDIR)/lib/modules/*/source; \
-		find $(ROMFSDIR)/lib/modules -type f -name '*.ko' | xargs -r $(STRIP) $(STRIPOPT); \
-		find $(ROMFSDIR)/lib/modules -type f -name '*.ko' -print -print | xargs -n2 -r $(OBJCOPY) $(STRIPOPT); \
 	fi
 
 .PHONY: romfs.post
@@ -243,6 +237,8 @@ romfs.post:
 	find $(ROOTDIR)/toolchain/lib -type f -name 'libgcc_s*so*' -exec cp -vfap {} $(ROMFSDIR)/lib/ \;
 	######################CLEANUP##########################
 	-find $(ROMFSDIR)/. -name CVS | xargs -r rm -rf
+	-rm -f $(ROMFSDIR)/lib/modules/*/build
+	-rm -f $(ROMFSDIR)/lib/modules/*/source
 	-rm -fr $(ROOTDIR)/dev
 	#################STRIP_APPS_LIB_ROMFS##################
 	./strip.sh
@@ -260,16 +256,11 @@ image:
 release:
 	$(MAKE) -C release release
 
-%_fullrelease:
-	@echo "This target no longer works"
-	@echo "Do a make -C release $@"
-	exit 1
 #
 # fancy target that allows a vendor to have other top level
 # make targets,  for example "make vendor_flash" will run the
 # vendor_flash target in the vendors directory
 #
-
 vendor_%:
 	$(MAKEARCH) -C vendors $@
 

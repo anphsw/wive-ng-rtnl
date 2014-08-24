@@ -2,7 +2,7 @@
 
 RO_ROOT=romfs
 TOOLSPREFIX=./toolchain/bin/mipsel-linux-uclibc
-STRIPOPT="-R .comment -R .note -g --strip-unneeded"
+STRIPOPT="-R .comment -R .note -R .comment -R .pdr -R .mdebug.abi32 -R .note.gnu.build-id -R .gnu.attributes -R .reginfo -g --strip-unneeded"
 STRIP="$TOOLSPREFIX-strip $STRIPOPT"
 OBJCOPY="$TOOLSPREFIX-objcopy $STRIPOPT"
 SSTRIP=./tools/sstrip/sstrip
@@ -56,6 +56,9 @@ if [ "$NON_STRIPS_LIB" != "" ]; then
     $STRIP $NON_STRIPS_LIB
     $SSTRIP $NON_STRIPS_LIB
 fi
+echo -----------------------------------STRIP MODULES----------------------------------
+find $RO_ROOT/lib/modules -type f -name '*.ko' | xargs -r $STRIP $STRIPOPT
+find $RO_ROOT/lib/modules -type f -name '*.ko' -print -print | xargs -n2 -r $OBJCOPY $STRIPOPT
 echo -----------------------------------SYNC!!-------------------------------------
 sync
 echo ----------------------------APP STRIP AND COPY OK-----------------------------
