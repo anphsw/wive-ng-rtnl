@@ -808,19 +808,10 @@ int rt28xx_packet_xmit(struct sk_buff *skb)
 
 #ifdef RTMP_RBUS_SUPPORT
 #if !defined(CONFIG_RA_NAT_NONE)
-/* bruce+
- */
 	if(ra_sw_nat_hook_tx!= NULL)
-	{
-		unsigned long flags;
-
-		RTMP_INT_LOCK(&pAd->page_lock, flags)
-		ra_sw_nat_hook_tx(pPacket, 0);
-		RTMP_INT_UNLOCK(&pAd->page_lock, flags);
-	}
+	    ra_sw_nat_hook_tx(pPacket, 0);
 #endif
 #endif // RTMP_RBUS_SUPPORT //
-
 
 	RTMP_SET_PACKET_5VT(pPacket, 0);
 //	MiniportMMRequest(pAd, pkt->data, pkt->len);
@@ -847,7 +838,6 @@ int rt28xx_packet_xmit(struct sk_buff *skb)
 
 	status = 0;
 done:
-			   
 	return status;
 }
 

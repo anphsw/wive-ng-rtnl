@@ -1969,34 +1969,22 @@ static int FASTPATH ei_start_xmit(struct sk_buff* skb, struct net_device *dev, i
 	}
 #endif
 #ifndef CONFIG_RA_NAT_NONE
-/* bruce+
- */
-         if(ra_sw_nat_hook_tx!= NULL)
-         {
-	   spin_lock_irqsave(&ei_local->page_lock, flags);
-           if(ra_sw_nat_hook_tx(skb, gmac_no)==1){
-	   	spin_unlock_irqrestore(&ei_local->page_lock, flags);
-	   }else{
+	if(ra_sw_nat_hook_tx != NULL) {
+	    if(ra_sw_nat_hook_tx(skb, gmac_no) == 0) {
 	        kfree_skb(skb);
-	   	spin_unlock_irqrestore(&ei_local->page_lock, flags);
 	   	return 0;
-	   }
-         }
+	    }
+	}
 #endif
-
 #if defined(CONFIG_RA_CLASSIFIER) || defined(CONFIG_RA_CLASSIFIER_MODULE)
-		/* Qwert+
-		 */
-		if(ra_classifier_hook_tx!= NULL)
-		{
+	if(ra_classifier_hook_tx!= NULL) {
 #if defined(CONFIG_RALINK_EXTERNAL_TIMER)
-			ra_classifier_hook_tx(skb, (*((volatile u32 *)(0xB0000D08))&0x0FFFF));
+		ra_classifier_hook_tx(skb, (*((volatile u32 *)(0xB0000D08))&0x0FFFF));
 #else
-			ra_classifier_hook_tx(skb, read_c0_count());
+		ra_classifier_hook_tx(skb, read_c0_count());
 #endif
-		}
+	}
 #endif /* CONFIG_RA_CLASSIFIER */
-
 #if defined (CONFIG_RALINK_RT3052_MP2)
 	mcast_tx(skb);
 #endif

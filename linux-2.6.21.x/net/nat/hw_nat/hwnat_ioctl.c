@@ -22,13 +22,12 @@
 #include "ra_nat.h"
 
 #if defined (CONFIG_RA_HW_NAT_IPV6)
-int ip6_offload = 0;
+extern int ipv6_offload;
 #endif
+extern uint16_t lan_vid;
+extern uint16_t wan_vid;
+extern uint32_t DebugLevel;
 
-uint16_t lan_vid = CONFIG_RA_HW_NAT_LAN_VLANID;
-uint16_t wan_vid = CONFIG_RA_HW_NAT_WAN_VLANID;
-
-int DebugLevel = 1;
 #if !defined (CONFIG_HNAT_V2)
 int pre_acl_start_addr;
 int pre_ac_start_addr;
@@ -63,7 +62,7 @@ int HwNatIoctl(struct inode *inode, struct file *filp,
 		opt->result = FoeUnBindEntry(opt);
 		break;
 	case HW_NAT_INVALID_ENTRY:
-		opt->result = FoeDelEntryByNum(opt->entry_num);
+		opt->result = FoeDelEntry(opt);
 		break;
 	case HW_NAT_DUMP_ENTRY:
 		FoeDumpEntry(opt->entry_num);
@@ -604,7 +603,7 @@ int PpeSetAllowIPv6(uint8_t allow_ipv6)
 	uint32_t PpeFlowSet = RegRead(PPE_FLOW_SET);
 
 	if (allow_ipv6) {
-		ip6_offload = 1;
+		ipv6_offload = 1;
 #if defined (CONFIG_HNAT_V2)
 		PpeFlowSet |= (BIT_IPV4_DSL_EN | BIT_IPV6_6RD_EN | BIT_IPV6_3T_ROUTE_EN | BIT_IPV6_5T_ROUTE_EN);
 //		PpeFlowSet |= (BIT_IPV6_HASH_FLAB); // flow label
@@ -613,7 +612,7 @@ int PpeSetAllowIPv6(uint8_t allow_ipv6)
 		PpeFlowSet |= (BIT_IPV6_FOE_EN);
 #endif
 	} else {
-		ip6_offload = 0;
+		ipv6_offload = 0;
 #if defined (CONFIG_HNAT_V2)
 		PpeFlowSet &= ~(BIT_IPV4_DSL_EN | BIT_IPV6_6RD_EN | BIT_IPV6_3T_ROUTE_EN | BIT_IPV6_5T_ROUTE_EN);
 		PpeFlowSet &= ~(BIT_IPV6_HASH_FLAB);

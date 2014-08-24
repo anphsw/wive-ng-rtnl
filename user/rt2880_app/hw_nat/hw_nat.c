@@ -111,9 +111,9 @@ int main(int argc, char *argv[])
 {
     int opt;
 #if !defined (CONFIG_HNAT_V2)
-    char options[] = "efg?c:d:A:B:C:D:E:F:G:H:I:J:K:L:M:N:O:P:Q:T:U:V:Y:Z:6:";
+    char options[] = "efg?c:d:A:B:C:D:E:F:G:H:I:J:K:L:M:N:O:P:Q:T:U:V:Z:6:";
 #else
-    char options[] = "aefg?c:d:A:N:O:P:Q:T:U:V:Y:Z:6:";
+    char options[] = "aefg?c:d:A:N:O:P:Q:T:U:V:Z:6:";
 #endif
     int method = 0;
     int i=0;
