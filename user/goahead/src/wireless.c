@@ -245,7 +245,7 @@ static int listCountryCodes(int eid, webs_t wp, int argc, char_t **argv)
  */
 static int getWlan11aChannels(int eid, webs_t wp, int argc, char_t **argv)
 {
-#idef CONFIG_RALINK_RT3883
+#ifdef CONFIG_RALINK_RT3883
 	int  idx = 0, channel;
 	const char *value = nvram_bufget(RT2860_NVRAM,"CountryRegionABand");
 	const char *channel_s = nvram_bufget(RT2860_NVRAM, "Channel");
