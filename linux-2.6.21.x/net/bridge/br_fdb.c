@@ -83,7 +83,7 @@ static inline void fdb_delete(struct net_bridge_fdb_entry *f)
 	br_fdb_put(f);
 }
 
-void br_fdb_changeaddr(struct net_bridge_port *p, const unsigned char *newaddr)
+void FASTPATH br_fdb_changeaddr(struct net_bridge_port *p, const unsigned char *newaddr)
 {
 	struct net_bridge *br = p->br;
 	int i;

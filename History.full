@@ -2024,6 +2024,7 @@
 62) kernel: ralink_spi: if flash not detected use stub depended from kernel config (4/8/16Mb select).<br>
 63) kernel: hw_nat: update code and dependecys(need for MT7620 support).<br>
 64) kernel: hw_nat: use global spinlock for serializing access to FoE DMA, extend module params.<br>
+65) kernel: speedhack: review section arrange and add some time critical code to fastpath section(up l2tp speed from ~130FDX to ~150FDX).<br>
 <br>
 <br>
 <br>

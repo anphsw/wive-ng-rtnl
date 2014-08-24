@@ -21,13 +21,13 @@ static inline u32 sfhash(const void * key, u32 len, u32 initval)
 	const char * data = key;
 	u32 hash = len + initval, tmp;
 	int rem;
-	
+
 	if (len <= 0 || data == NULL)
 		return 0;
-	
+
 	rem = len & 3;
 	len >>= 2;
-	
+
 	/* Main loop */
 	for (; len > 0; len--) {
 		/* Mix 32bit chunk of the data */
@@ -37,7 +37,7 @@ static inline u32 sfhash(const void * key, u32 len, u32 initval)
 		data += 2*sizeof(u16);
 		hash += hash >> 11;
 	}
-	
+
 	/* Handle end cases */
 	switch (rem) {
 	case 3:	hash += *((u16 *)data);
@@ -53,7 +53,7 @@ static inline u32 sfhash(const void * key, u32 len, u32 initval)
 		hash ^= hash << 10;
 		hash += hash >> 1;
 	}
-	
+
 	/* Force "avalanching" of final 127 bits */
 	hash ^= hash << 3;
 	hash += hash >> 5;

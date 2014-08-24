@@ -43,7 +43,7 @@ static int br_pass_frame_up(struct net_bridge *br, struct sk_buff *skb)
 }
 
 /* note: already called with rcu_read_lock (preempt_disabled) */
-int br_handle_frame_finish(struct sk_buff *skb)
+int FASTPATH br_handle_frame_finish(struct sk_buff *skb)
 {
 	const unsigned char *dest = eth_hdr(skb)->h_dest;
 	struct net_bridge_port *p = rcu_dereference(skb->dev->br_port);
@@ -166,7 +166,7 @@ static inline bool is_link_local_ether_addr(const u8 *addr)
  * Return NULL if skb is handled
  * note: already called with rcu_read_lock (preempt_disabled)
  */
-struct sk_buff *br_handle_frame(struct net_bridge_port *p, struct sk_buff *skb)
+struct FASTPATH sk_buff *br_handle_frame(struct net_bridge_port *p, struct sk_buff *skb)
 {
     const unsigned char *dest = eth_hdr(skb)->h_dest;
 
