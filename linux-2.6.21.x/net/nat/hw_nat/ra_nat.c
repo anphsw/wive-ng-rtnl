@@ -92,6 +92,8 @@ struct FoeEntry		*PpeFoeBase = NULL;
 dma_addr_t              PpePhyFoeBase;
 struct net_device	*DstPort[MAX_IF_NUM];
 
+DEFINE_SPINLOCK(ppe_foe_lock);
+
 #ifdef HWNAT_DEBUG
 #if 0
 void skb_dump(struct sk_buff* sk) {
