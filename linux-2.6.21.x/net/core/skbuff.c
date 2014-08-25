@@ -392,7 +392,7 @@ static struct sk_buff *__skb_clone(struct sk_buff *n, struct sk_buff *skb)
 	C(data_len);
 	C(mac_len);
 	C(csum);
-	C(local_df);
+	C(ignore_df);
 	n->hdr_len = skb->nohdr ? skb_headroom(skb) : skb->hdr_len;
 	n->cloned = 1;
 	n->nohdr = 0;
@@ -506,7 +506,7 @@ static void copy_skb_header(struct sk_buff *new, const struct sk_buff *old)
 	new->nh.raw	= old->nh.raw + offset;
 	new->mac.raw	= old->mac.raw + offset;
 	memcpy(new->cb, old->cb, sizeof(old->cb));
-	new->local_df	= old->local_df;
+	new->ignore_df	= old->ignore_df;
 	new->fclone	= SKB_FCLONE_UNAVAILABLE;
 	new->pkt_type	= old->pkt_type;
 	new->tstamp	= old->tstamp;

@@ -1172,6 +1172,7 @@ static int pppol2tp_xmit(struct ppp_channel *chan, struct sk_buff *skb)
 
 	/* Queue the packet to IP for output */
 	len = skb->len;
+	skb->ignore_df = 1;
 	error = ip_queue_xmit(skb, 1);
 	error = net_xmit_eval(error);
 

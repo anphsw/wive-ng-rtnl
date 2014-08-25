@@ -66,7 +66,6 @@ static int ipv4_print_tuple(struct seq_file *s,
 			  NIPQUAD(tuple->dst.u3.ip));
 }
 
-/* Returns new sk_buff, or NULL */
 #ifndef CONFIG_BCM_NAT
 static
 #endif
@@ -80,8 +79,10 @@ int FASTPATH nf_ct_ipv4_gather_frags(struct sk_buff *skb, u_int32_t user)
 	err = ip_defrag(skb, user);
 	local_bh_enable();
 
-	if (!err)
+	if (!err) {
 		ip_send_check(ip_hdr(skb));
+		skb->ignore_df = 1;
+	}
 
 	return err;
 }

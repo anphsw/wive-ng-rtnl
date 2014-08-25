@@ -200,7 +200,7 @@ ip_vs_bypass_xmit(struct sk_buff *skb, struct ip_vs_conn *cp,
 	skb->dst = &rt->u.dst;
 
 	/* Another hack: avoid icmp_send in ip_fragment */
-	skb->local_df = 1;
+	skb->ignore_df = 1;
 
 	IP_VS_XMIT(skb, rt);
 
@@ -276,7 +276,7 @@ ip_vs_nat_xmit(struct sk_buff *skb, struct ip_vs_conn *cp,
 	   MTU problem. */
 
 	/* Another hack: avoid icmp_send in ip_fragment */
-	skb->local_df = 1;
+	skb->ignore_df = 1;
 
 	IP_VS_XMIT(skb, rt);
 
@@ -409,7 +409,7 @@ ip_vs_tunnel_xmit(struct sk_buff *skb, struct ip_vs_conn *cp,
 	ip_send_check(iph);
 
 	/* Another hack: avoid icmp_send in ip_fragment */
-	skb->local_df = 1;
+	skb->ignore_df = 1;
 
 	IP_VS_XMIT(skb, rt);
 
@@ -467,7 +467,7 @@ ip_vs_dr_xmit(struct sk_buff *skb, struct ip_vs_conn *cp,
 	skb->dst = &rt->u.dst;
 
 	/* Another hack: avoid icmp_send in ip_fragment */
-	skb->local_df = 1;
+	skb->ignore_df = 1;
 
 	IP_VS_XMIT(skb, rt);
 
@@ -540,7 +540,7 @@ ip_vs_icmp_xmit(struct sk_buff *skb, struct ip_vs_conn *cp,
 	ip_vs_nat_icmp(skb, pp, cp, 0);
 
 	/* Another hack: avoid icmp_send in ip_fragment */
-	skb->local_df = 1;
+	skb->ignore_df = 1;
 
 	IP_VS_XMIT(skb, rt);
 

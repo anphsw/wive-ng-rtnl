@@ -2026,6 +2026,7 @@
 64) kernel: hw_nat: use global spinlock for serializing access to FoE DMA, extend module params.<br>
 65) kernel: speedhack: review section arrange and add some time critical code to fastpath section(up l2tp speed from ~130FDX to ~150FDX).<br>
 66) kernel: rewrite min3, max3 and clamp using min and max.<br>
+67) kernel: fix check and set ignore dont fragment flag in some cases.<br>
 <br>
 <br>
 <br>

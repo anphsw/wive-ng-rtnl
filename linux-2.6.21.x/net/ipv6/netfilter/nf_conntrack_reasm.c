@@ -618,6 +618,7 @@ nf_ct_frag6_reasm(struct nf_ct_frag6_queue *fq, struct net_device *dev)
 		atomic_sub(fp->truesize, &nf_ct_frag6_mem);
 	}
 
+	head->ignore_df = 1;
 	head->next = NULL;
 	head->dev = dev;
 	head->tstamp = fq->stamp;

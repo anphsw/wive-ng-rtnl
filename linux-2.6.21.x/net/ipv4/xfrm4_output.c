@@ -29,7 +29,7 @@ static int xfrm4_tunnel_check_size(struct sk_buff *skb)
 
 	IPCB(skb)->flags |= IPSKB_XFRM_TUNNEL_SIZE;
 
-	if (!(iph->frag_off & htons(IP_DF)) || skb->local_df)
+	if (!(iph->frag_off & htons(IP_DF)) || skb->ignore_df)
 		goto out;
 
 	dst = skb->dst;

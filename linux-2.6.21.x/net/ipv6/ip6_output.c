@@ -234,7 +234,7 @@ int ip6_xmit(struct sock *sk, struct sk_buff *skb, struct flowi *fl,
 	skb->priority = sk->sk_priority;
 
 	mtu = ip6_skb_dst_mtu(skb);
-	if ((skb->len <= mtu) || ipfragok || skb_is_gso(skb)) {
+	if ((skb->len <= mtu) || ipfragok || skb->ignore_df || skb_is_gso(skb)) {
 		IP6_INC_STATS(ip6_dst_idev(skb->dst),
 			      IPSTATS_MIB_OUTREQUESTS);
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)

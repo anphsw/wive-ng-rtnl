@@ -218,7 +218,7 @@ enum {
  *	@csum: Checksum (must include start/offset pair)
  *	@csum_start: Offset from skb->head where checksumming should start
  *	@csum_offset: Offset from csum_start where checksum should be stored
- *	@local_df: allow local fragmentation
+ *	@ignore_df: allow local fragmentation
  *	@cloned: Head may be cloned (check refcnt to be sure)
  *	@nohdr: Payload reference only, must not modify header
  *	@pkt_type: Packet class
@@ -300,7 +300,7 @@ struct sk_buff {
 		};
 	};
 	__u32			priority;
-	__u8			local_df:1,
+	__u8			ignore_df:1,
 				cloned:1,
 				ip_summed:2,
 				nohdr:1,
