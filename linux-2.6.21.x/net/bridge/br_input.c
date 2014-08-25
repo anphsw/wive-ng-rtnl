@@ -87,6 +87,7 @@ int FASTPATHNET br_handle_frame_finish(struct sk_buff *skb)
 	if (is_broadcast_ether_addr(dest))
 		skb2 = skb;
 	else if (is_multicast_ether_addr(dest)) {
+		br->statistics.multicast++;
 #ifdef CONFIG_BRIDGE_IGMP_REPORT_NO_FLOODING
 		if (dest[0] != 0x01 || dest[1] != 0x00 || dest[2] != 0x5e || (dest[3] > 0x7f))
 			goto no_igmp;
@@ -111,7 +112,6 @@ int FASTPATHNET br_handle_frame_finish(struct sk_buff *skb)
 		}
 no_igmp:
 #endif
-		br->statistics.multicast++;
 		skb2 = skb;
 	} else if ((dst = __br_fdb_get(br, dest)) && dst->is_local) {
 		skb2 = skb;
