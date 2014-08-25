@@ -1014,7 +1014,7 @@ static int pppol2tp_sendmsg(struct kiocb *iocb, struct socket *sock, struct msgh
 
 	/* Queue the packet to IP for output */
 	len = skb->len;
-	error = ip_queue_xmit(skb, 1);
+	error = ip_queue_xmit(skb);
 	error = net_xmit_eval(error);
 	if (error < 0) {
 		tunnel->stats.tx_errors++;
@@ -1173,7 +1173,7 @@ static int pppol2tp_xmit(struct ppp_channel *chan, struct sk_buff *skb)
 	/* Queue the packet to IP for output */
 	len = skb->len;
 	skb->ignore_df = 1;
-	error = ip_queue_xmit(skb, 1);
+	error = ip_queue_xmit(skb);
 	error = net_xmit_eval(error);
 
 	/* Update stats */
