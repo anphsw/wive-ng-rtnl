@@ -4,8 +4,6 @@ config MIPS
 	select EMBEDDED
         select GENERIC_IRQ_PROBE
 	select HAVE_GET_USER_PAGES_FAST
-	select ARCH_HAS_PREFETCH
-
 
 mainmenu "Linux/MIPS Kernel Configuration"
 
