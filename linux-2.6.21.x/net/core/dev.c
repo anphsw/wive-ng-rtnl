@@ -1810,10 +1810,10 @@ static int ing_filter(struct sk_buff *skb)
 
 int FASTPATH netif_receive_skb(struct sk_buff *skb)
 {
-	struct packet_type *ptype, *pt_prev;
+	struct packet_type *ptype = NULL, *pt_prev = NULL;
+	struct net_device *null_or_orig = NULL;
 	struct net_device *orig_dev;
 	struct net_device *master;
-	struct net_device *null_or_orig;
 	int ret = NET_RX_DROP;
 	__be16 type;
 
@@ -1827,7 +1827,6 @@ int FASTPATH netif_receive_skb(struct sk_buff *skb)
 	if (!skb->iif)
 		skb->iif = skb->dev->ifindex;
 
-	null_or_orig = NULL;
 	orig_dev = skb->dev;
 	master = ACCESS_ONCE(orig_dev->master);
 	if (master) {
@@ -1845,12 +1844,10 @@ int FASTPATH netif_receive_skb(struct sk_buff *skb)
 	skb_reset_transport_header(skb);
 	skb->mac_len = skb->nh.raw - skb->mac.raw;
 
-	pt_prev = NULL;
-
 	rcu_read_lock();
 
 #ifdef CONFIG_NET_PPPOE_IPV6_PTHROUGH
-	//if packet forwarded return 1
+	/* if packet forwarded return 1 */
 	if (private_pthrough(skb)) {
 	    ret = NET_RX_SUCCESS;
 	    goto out;
@@ -1974,12 +1971,12 @@ static void net_rx_action(struct softirq_action *h)
 	struct softnet_data *queue = &__get_cpu_var(softnet_data);
 	unsigned long time_limit = jiffies + 2;
 	int budget = netdev_budget;
-	void *have __maybe_unused;
 
 	local_irq_disable();
 
 	while (!list_empty(&queue->poll_list)) {
 		struct net_device *dev;
+		void *have;
 
 		/* If softirq window is exhuasted then punt.
 		 * Allow this to run for 2 jiffies since which will allow
@@ -3482,7 +3479,6 @@ void unregister_netdev(struct net_device *dev)
 	unregister_netdevice(dev);
 	rtnl_unlock();
 }
-
 EXPORT_SYMBOL(unregister_netdev);
 
 static int dev_cpu_callback(struct notifier_block *nfb,
