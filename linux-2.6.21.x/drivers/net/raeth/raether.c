@@ -1131,9 +1131,9 @@ static int rt_get_skb_header(struct sk_buff *skb, void **iphdr, void **tcph,
 #endif // CONFIG_RAETH_LRO //
 
 #ifdef CONFIG_RAETH_NAPI
-static int rt2880_eth_recv(struct net_device* dev, int *work_done, int work_to_do)
+static int FASTPATHNET rt2880_eth_recv(struct net_device* dev, int *work_done, int work_to_do)
 #else
-static int rt2880_eth_recv(struct net_device* dev)
+static int FASTPATHNET rt2880_eth_recv(struct net_device* dev)
 #endif
 {
 	struct sk_buff	*skb, *rx_skb;
@@ -1546,9 +1546,9 @@ void kill_sig_workq(struct work_struct *work)
 
 #ifndef CONFIG_RAETH_NAPI
 #if defined (WORKQUEUE_BH) || defined (TASKLET_WORKQUEUE_SW)
-static void ei_receive_workq(struct work_struct *work)
+static void FASTPATHNET ei_receive_workq(struct work_struct *work)
 #else
-static void ei_receive(unsigned long unused)  // device structure
+static void FASTPATHNET ei_receive(unsigned long unused)  // device structure
 #endif // WORKQUEUE_BH //
 {
 	struct net_device *dev = dev_raether;
@@ -1658,9 +1658,9 @@ raeth_clean(struct net_device *netdev, int *budget)
  * RETURNS: N/A.
  */
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,21)
-static irqreturn_t FASTPATH ei_interrupt(int irq, void *dev_id)
+static irqreturn_t FASTPATHNET ei_interrupt(int irq, void *dev_id)
 #else
-static irqreturn_t FASTPATH ei_interrupt(int irq, void *dev_id, struct pt_regs * regs)
+static irqreturn_t FASTPATHNET ei_interrupt(int irq, void *dev_id, struct pt_regs * regs)
 #endif
 {
 #if !defined(CONFIG_RAETH_NAPI)
@@ -1937,7 +1937,7 @@ out:
 
 #endif
 
-static int FASTPATH ei_start_xmit(struct sk_buff* skb, struct net_device *dev, int gmac_no)
+static int FASTPATHNET ei_start_xmit(struct sk_buff* skb, struct net_device *dev, int gmac_no)
 {
 	END_DEVICE *ei_local = netdev_priv(dev);
 	unsigned long flags;
@@ -2646,7 +2646,7 @@ static int __init rather_probe(struct net_device *dev)
 	return 0;
 }
 
-static void ei_xmit_housekeeping(unsigned long unused)
+static void FASTPATHNET ei_xmit_housekeeping(unsigned long unused)
 {
     struct net_device *dev = dev_raether;
     END_DEVICE *ei_local = netdev_priv(dev);

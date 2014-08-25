@@ -28,7 +28,7 @@ static struct net_device_stats *br_dev_get_stats(struct net_device *dev)
 }
 
 /* net device transmit always called with no BH (preempt_disabled) */
-int FASTPATH br_dev_xmit(struct sk_buff *skb, struct net_device *dev)
+int FASTPATHNET br_dev_xmit(struct sk_buff *skb, struct net_device *dev)
 {
 	struct net_bridge *br = netdev_priv(dev);
 	const unsigned char *dest = skb->data;

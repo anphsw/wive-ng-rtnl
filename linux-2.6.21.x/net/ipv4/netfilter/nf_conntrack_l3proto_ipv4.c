@@ -69,7 +69,7 @@ static int ipv4_print_tuple(struct seq_file *s,
 #ifndef CONFIG_BCM_NAT
 static
 #endif
-int FASTPATH nf_ct_ipv4_gather_frags(struct sk_buff *skb, u_int32_t user)
+int FASTPATHNET nf_ct_ipv4_gather_frags(struct sk_buff *skb, u_int32_t user)
 {
 	int err;
 

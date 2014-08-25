@@ -207,7 +207,7 @@ void br_fdb_delete_by_port(struct net_bridge *br,
 }
 
 /* No locking or refcounting, assumes caller has no preempt (rcu_read_lock) */
-struct FASTPATH net_bridge_fdb_entry *__br_fdb_get(struct net_bridge *br,
+struct FASTPATHNET net_bridge_fdb_entry *__br_fdb_get(struct net_bridge *br,
 					  const unsigned char *addr)
 {
 	struct hlist_node *h;
@@ -225,7 +225,7 @@ struct FASTPATH net_bridge_fdb_entry *__br_fdb_get(struct net_bridge *br,
 }
 
 /* Interface used by ATM hook that keeps a ref count */
-struct FASTPATH net_bridge_fdb_entry *br_fdb_get(struct net_bridge *br,
+struct FASTPATHNET net_bridge_fdb_entry *br_fdb_get(struct net_bridge *br,
 					unsigned char *addr)
 {
 	struct net_bridge_fdb_entry *fdb;
@@ -246,7 +246,7 @@ static void fdb_rcu_free(struct rcu_head *head)
 }
 
 /* Set entry up for deletion with RCU  */
-void FASTPATH br_fdb_put(struct net_bridge_fdb_entry *ent)
+void FASTPATHNET br_fdb_put(struct net_bridge_fdb_entry *ent)
 {
 	if (atomic_dec_and_test(&ent->use_count))
 		call_rcu(&ent->rcu, fdb_rcu_free);
@@ -256,7 +256,7 @@ void FASTPATH br_fdb_put(struct net_bridge_fdb_entry *ent)
  * Fill buffer with forwarding table records in
  * the API format.
  */
-int FASTPATH br_fdb_fillbuf(struct net_bridge *br, void *buf,
+int FASTPATHNET br_fdb_fillbuf(struct net_bridge *br, void *buf,
 		   unsigned long maxnum, unsigned long skip)
 {
 	struct __fdb_entry *fe = buf;
@@ -388,7 +388,7 @@ static int fdb_insert(struct net_bridge *br, struct net_bridge_port *source,
 }
 
 /* Add entry for local address of interface */
-int FASTPATH br_fdb_insert(struct net_bridge *br, struct net_bridge_port *source,
+int FASTPATHNET br_fdb_insert(struct net_bridge *br, struct net_bridge_port *source,
 		  const unsigned char *addr)
 {
 	int ret;
@@ -399,7 +399,7 @@ int FASTPATH br_fdb_insert(struct net_bridge *br, struct net_bridge_port *source
 	return ret;
 }
 
-void FASTPATH br_fdb_update(struct net_bridge *br, struct net_bridge_port *source,
+void FASTPATHNET br_fdb_update(struct net_bridge *br, struct net_bridge_port *source,
 		   const unsigned char *addr)
 {
 	struct hlist_head *head = &br->hash[br_mac_hash(addr)];

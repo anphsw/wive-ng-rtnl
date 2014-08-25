@@ -164,7 +164,7 @@ static inline void __dma_sync(unsigned long addr, size_t size,
 	}
 }
 
-dma_addr_t FASTPATH dma_map_single(struct device *dev, void *ptr, size_t size,
+dma_addr_t FASTPATHSYS dma_map_single(struct device *dev, void *ptr, size_t size,
 	enum dma_data_direction direction)
 {
 	unsigned long addr = (unsigned long) ptr;
@@ -177,7 +177,7 @@ dma_addr_t FASTPATH dma_map_single(struct device *dev, void *ptr, size_t size,
 
 EXPORT_SYMBOL(dma_map_single);
 
-void FASTPATH dma_unmap_single(struct device *dev, dma_addr_t dma_addr, size_t size,
+void FASTPATHSYS dma_unmap_single(struct device *dev, dma_addr_t dma_addr, size_t size,
 	enum dma_data_direction direction)
 {
 	if (cpu_is_noncoherent_r10000(dev))

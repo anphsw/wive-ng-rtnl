@@ -1625,7 +1625,7 @@ DEFINE_PER_CPU(struct netif_rx_stats, netdev_rx_stat) = { 0, };
  *
  */
 
-int FASTPATH netif_rx(struct sk_buff *skb)
+int FASTPATHNET netif_rx(struct sk_buff *skb)
 {
 	struct softnet_data *queue;
 	unsigned long flags;
@@ -1808,7 +1808,7 @@ static int ing_filter(struct sk_buff *skb)
 }
 #endif
 
-int FASTPATH netif_receive_skb(struct sk_buff *skb)
+int FASTPATHNET netif_receive_skb(struct sk_buff *skb)
 {
 	struct packet_type *ptype = NULL, *pt_prev = NULL;
 	struct net_device *null_or_orig = NULL;
@@ -2192,15 +2192,15 @@ static void dev_seq_printf_stats(struct seq_file *seq, struct net_device *dev)
 		   stats->rx_dropped + stats->rx_missed_errors,
 		   stats->rx_fifo_errors,
 		   stats->rx_length_errors + stats->rx_over_errors +
-		    stats->rx_crc_errors + stats->rx_frame_errors,
+		   stats->rx_crc_errors + stats->rx_frame_errors,
 		   stats->rx_compressed, stats->multicast,
 		   stats->tx_bytes, stats->tx_packets,
 		   stats->tx_errors, stats->tx_dropped,
 		   stats->tx_fifo_errors, stats->collisions,
 		   stats->tx_carrier_errors +
-		    stats->tx_aborted_errors +
-		    stats->tx_window_errors +
-		    stats->tx_heartbeat_errors,
+		   stats->tx_aborted_errors +
+		   stats->tx_window_errors +
+		   stats->tx_heartbeat_errors,
 		   stats->tx_compressed);
 }
 

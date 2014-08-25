@@ -164,7 +164,7 @@ repeat:
 
 /* Returns 1 if okfn() needs to be executed by the caller,
  * -EPERM for NF_DROP, 0 otherwise. */
-int FASTPATH nf_hook_slow(int pf, unsigned int hook, struct sk_buff **pskb,
+int FASTPATHNET nf_hook_slow(int pf, unsigned int hook, struct sk_buff **pskb,
 		 struct net_device *indev,
 		 struct net_device *outdev,
 		 int (*okfn)(struct sk_buff *),

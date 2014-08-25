@@ -128,7 +128,7 @@ irqreturn_t no_action(int cpl, void *dev_id)
  *
  * Handles the action chain of an irq event
  */
-irqreturn_t FASTPATH handle_IRQ_event(unsigned int irq, struct irqaction *action)
+irqreturn_t FASTPATHSYS handle_IRQ_event(unsigned int irq, struct irqaction *action)
 {
 	irqreturn_t ret, retval = IRQ_NONE;
 	unsigned int status = 0;
@@ -162,7 +162,7 @@ irqreturn_t FASTPATH handle_IRQ_event(unsigned int irq, struct irqaction *action
  * This is the original x86 implementation which is used for every
  * interrupt type.
  */
-unsigned int FASTPATH __do_IRQ(unsigned int irq)
+unsigned int FASTPATHSYS __do_IRQ(unsigned int irq)
 {
 	struct irq_desc *desc = irq_desc + irq;
 	struct irqaction *action __maybe_unused;

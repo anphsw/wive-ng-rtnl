@@ -47,9 +47,11 @@
 #define __exit_call	__used __attribute__ ((__section__ (".exitcall.exit")))
 
 #ifdef CONFIG_SPEEDHACK
-#define FASTPATH	__attribute__ ((__section__(".text.fastpath"))) notrace
+#define FASTPATHSYS	__attribute__ ((__section__(".text.fastpath"))) notrace
+#define FASTPATHNET	__attribute__ ((__section__(".text.fastpath"))) notrace
 #else
-#define FASTPATH
+#define FASTPATHSYS
+#define FASTPATHNET
 #endif
 
 /* modpost check for section mismatches during the kernel build.

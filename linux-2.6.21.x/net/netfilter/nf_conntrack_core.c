@@ -307,8 +307,7 @@ void nf_conntrack_unregister_cache(u_int32_t features)
 }
 EXPORT_SYMBOL_GPL(nf_conntrack_unregister_cache);
 
-int FASTPATH
-nf_ct_get_tuple(const struct sk_buff *skb,
+int FASTPATHNET nf_ct_get_tuple(const struct sk_buff *skb,
 		unsigned int nhoff,
 		unsigned int dataoff,
 		u_int16_t l3num,
@@ -330,8 +329,7 @@ nf_ct_get_tuple(const struct sk_buff *skb,
 }
 EXPORT_SYMBOL_GPL(nf_ct_get_tuple);
 
-int FASTPATH
-nf_ct_invert_tuple(struct nf_conntrack_tuple *inverse,
+int FASTPATHNET nf_ct_invert_tuple(struct nf_conntrack_tuple *inverse,
 		   const struct nf_conntrack_tuple *orig,
 		   const struct nf_conntrack_l3proto *l3proto,
 		   const struct nf_conntrack_l4proto *l4proto)
@@ -437,7 +435,7 @@ static void death_by_timeout(unsigned long ul_conntrack)
 	nf_ct_put(ct);
 }
 
-struct FASTPATH nf_conntrack_tuple_hash *
+struct FASTPATHNET nf_conntrack_tuple_hash *
 __nf_conntrack_find(const struct nf_conntrack_tuple *tuple,
 		    const struct nf_conn *ignored_conntrack)
 {
@@ -520,7 +518,7 @@ nf_cone_conntrack_find_get(const struct nf_conntrack_tuple *tuple,
 #endif
 
 /* Find a connection corresponding to a tuple. */
-struct FASTPATH nf_conntrack_tuple_hash *
+struct FASTPATHNET nf_conntrack_tuple_hash *
 nf_conntrack_find_get(const struct nf_conntrack_tuple *tuple)
 {
     struct nf_conntrack_tuple_hash *h;
@@ -545,7 +543,7 @@ static void __nf_conntrack_hash_insert(struct nf_conn *ct,
 		       &nf_conntrack_hash[repl_hash]);
 }
 
-void FASTPATH nf_conntrack_hash_insert(struct nf_conn *ct)
+void FASTPATHNET nf_conntrack_hash_insert(struct nf_conn *ct)
 {
 	unsigned int hash, repl_hash;
 
@@ -559,8 +557,7 @@ void FASTPATH nf_conntrack_hash_insert(struct nf_conn *ct)
 EXPORT_SYMBOL_GPL(nf_conntrack_hash_insert);
 
 /* Confirm a connection given skb; places it in hash table */
-int FASTPATH
-__nf_conntrack_confirm(struct sk_buff **pskb)
+int FASTPATHNET __nf_conntrack_confirm(struct sk_buff **pskb)
 {
 	unsigned int hash, repl_hash;
 	struct nf_conntrack_tuple_hash *h;
@@ -896,7 +893,7 @@ init_conntrack(const struct nf_conntrack_tuple *tuple,
 }
 
 /* On success, returns conntrack ptr, sets skb->nfct and ctinfo */
-static FASTPATH struct nf_conn *
+static FASTPATHNET struct nf_conn *
 resolve_normal_ct(struct sk_buff *skb,
 		  unsigned int dataoff,
 		  u_int16_t l3num,
@@ -1027,8 +1024,7 @@ resolve_normal_ct(struct sk_buff *skb,
 	return ct;
 }
 
-unsigned int FASTPATH
-nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
+unsigned int FASTPATHNET nf_conntrack_in(int pf, unsigned int hooknum, struct sk_buff **pskb)
 {
 	struct nf_conn *ct;
 	enum ip_conntrack_info ctinfo;
@@ -1233,7 +1229,7 @@ skip:
 }
 EXPORT_SYMBOL_GPL(nf_conntrack_in);
 
-int FASTPATH nf_ct_invert_tuplepr(struct nf_conntrack_tuple *inverse,
+int FASTPATHNET nf_ct_invert_tuplepr(struct nf_conntrack_tuple *inverse,
 			 const struct nf_conntrack_tuple *orig)
 {
 	int ret;
@@ -1250,7 +1246,7 @@ EXPORT_SYMBOL_GPL(nf_ct_invert_tuplepr);
 
 /* Alter reply tuple (maybe alter helper).  This is for NAT, and is
    implicitly racy: see __nf_conntrack_confirm */
-void FASTPATH nf_conntrack_alter_reply(struct nf_conn *ct,
+void FASTPATHNET nf_conntrack_alter_reply(struct nf_conn *ct,
 			      const struct nf_conntrack_tuple *newreply)
 {
 	struct nf_conn_help *help = nfct_help(ct);
@@ -1274,7 +1270,7 @@ void FASTPATH nf_conntrack_alter_reply(struct nf_conn *ct,
 }
 
 /* Refresh conntrack for this many jiffies and do accounting if do_acct is 1 */
-void FASTPATH __nf_ct_refresh_acct(struct nf_conn *ct,
+void FASTPATHNET __nf_ct_refresh_acct(struct nf_conn *ct,
 			  enum ip_conntrack_info ctinfo,
 			  const struct sk_buff *skb,
 			  unsigned long extra_jiffies,

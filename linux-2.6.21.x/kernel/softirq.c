@@ -95,7 +95,6 @@ void local_bh_disable(void)
 {
 	__local_bh_disable((unsigned long)__builtin_return_address(0));
 }
-
 EXPORT_SYMBOL(local_bh_disable);
 
 /*
@@ -246,7 +245,7 @@ EXPORT_SYMBOL(do_softirq);
 /*
  * Enter an interrupt context.
  */
-void FASTPATH irq_enter(void)
+void FASTPATHSYS irq_enter(void)
 {
 	__irq_enter();
 #ifdef CONFIG_NO_HZ
@@ -264,7 +263,7 @@ void FASTPATH irq_enter(void)
 /*
  * Exit an interrupt context. Process softirqs if needed and possible:
  */
-void FASTPATH irq_exit(void)
+void FASTPATHSYS irq_exit(void)
 {
 	account_system_vtime(current);
 	trace_hardirq_exit();

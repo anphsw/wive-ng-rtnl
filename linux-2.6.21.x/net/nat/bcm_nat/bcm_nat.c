@@ -96,7 +96,7 @@ static inline int bcm_fast_path_output(struct sk_buff *skb)
 	return (ret == 1) ? 0 : ret;
 }
 
-int FASTPATH bcm_fast_path(struct sk_buff *skb)
+int FASTPATHNET bcm_fast_path(struct sk_buff *skb)
 {
 	if (skb->dst == NULL) {
 		struct iphdr *iph = ip_hdr(skb);
@@ -117,7 +117,7 @@ int FASTPATH bcm_fast_path(struct sk_buff *skb)
 	return bcm_fast_path_output(skb);
 }
 
-int FASTPATH bcm_do_fastroute(struct nf_conn *ct,
+int FASTPATHNET bcm_do_fastroute(struct nf_conn *ct,
 		struct sk_buff **pskb,
 		unsigned int hooknum,
 		int set_reply)
@@ -150,7 +150,7 @@ int FASTPATH bcm_do_fastroute(struct nf_conn *ct,
 	return NF_ACCEPT;
 }
 
-int FASTPATH bcm_do_fastnat(struct nf_conn *ct,
+int FASTPATHNET bcm_do_fastnat(struct nf_conn *ct,
 		enum ip_conntrack_info ctinfo,
 		struct sk_buff **pskb,
 		struct nf_conntrack_l3proto *l3proto,
