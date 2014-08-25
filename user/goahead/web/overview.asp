@@ -63,11 +63,11 @@ function setLanguage()
 <body onLoad="initValue()">
 <table class="body">
   <tr>
-    <td><h1>Wive-NG-RTNL - firmware for Ralink based Wi-Fi CPE</h1>
+    <td><h1>Wive-NG-RTNL - firmware for Ralink/Mediatek based Wi-Fi CPE</h1>
       <p id="ovIntroduction" />
-      
+
       <!-- ----------------- Langauge Settings ----------------- -->
-      
+
       <form method="post" name="Lang" action="/goform/setSysLang">
         <blockquote>
           <fieldset>
@@ -85,7 +85,14 @@ function setLanguage()
           <p> <a href="/adm/status.asp" id="ovStatus">Status</a><br />
             <a href="/adm/statistic.asp" id="ovStatistic">Statistic</a><br />
             <a href="/adm/management.asp" id="ovManagement">Management</a><br />
+            <hr /><br />
+            WIVE FIRMWARE FREE ONLY FOR NOT COMMERCIAL USE.
             <br />
+            Conditions of commercial use are discussed individually.
+            <br /><br />
+            News and changes in Russian:
+            <a href="http://wive-ng.sf.net">wive-ng.sf.net - development opensource routers firmware</a><br />
+            <br />Bug report please send sfstudio[at]mail.ru<br />
           </p>
         </fieldset>
       </blockquote></td>
