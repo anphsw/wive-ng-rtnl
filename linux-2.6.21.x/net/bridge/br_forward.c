@@ -97,7 +97,7 @@ inline int br_dev_queue_push_xmit(struct sk_buff *skb)
 	return 0;
 }
 
-int br_forward_finish(struct sk_buff *skb)
+int inline br_forward_finish(struct sk_buff *skb)
 {
 	return NF_HOOK(PF_BRIDGE, NF_BR_POST_ROUTING, skb, NULL, skb->dev,
 		       br_dev_queue_push_xmit);
