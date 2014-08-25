@@ -257,6 +257,7 @@ unsigned long get_wchan(struct task_struct *p);
  * address register on the stack.
  */
 #define return_address() ({__asm__ __volatile__("":::"$31");__builtin_return_address(0);})
+#endif
 
 #ifdef CONFIG_CPU_HAS_PREFETCH
 
@@ -268,7 +269,5 @@ unsigned long get_wchan(struct task_struct *p);
 
 #define ARCH_HAS_SPINLOCK_PREFETCH
 #define spin_lock_prefetch(x)   prefetchw(x)
-
-#endif
 
 #endif /* _ASM_PROCESSOR_H */
