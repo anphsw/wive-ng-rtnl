@@ -111,10 +111,10 @@ int FASTPATH bcm_fast_path(struct sk_buff *skb)
 		skb->dev = skb->dst->dev;
 	}
 
-	if (skb->len > ip_skb_dst_mtu(skb) && !skb_is_gso(skb))
+	if (unlikely(skb->len > ip_skb_dst_mtu(skb) && !skb_is_gso(skb)))
 		return ip_fragment(skb, bcm_fast_path_output);
-	else
-		return bcm_fast_path_output(skb);
+
+	return bcm_fast_path_output(skb);
 }
 
 int FASTPATH bcm_do_fastroute(struct nf_conn *ct,
