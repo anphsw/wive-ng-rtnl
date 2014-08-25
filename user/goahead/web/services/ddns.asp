@@ -112,10 +112,9 @@ function initValue()
   <tr>
     <td><h1 id="manTitle">DDNS Settings</h1>
       <p id="manIntroduction">Here you can configure Dynamic DNS settings.</p>
+      <p>IMPORTANT: if you use freedns.afraid.org - must input key in login and password fields.</p>
       <hr>
-      
       <!-- ================= DDNS  ================= -->
-      
       <form method="post" name="DDNS" action="/goform/DDNS">
         <table id="div_ddns" class="form">
           <tr>
