@@ -22,7 +22,8 @@
     defined (CONFIG_RALINK_RT3352) || \
     defined (CONFIG_RALINK_RT3052) || \
     defined (CONFIG_RALINK_RT6855) || \
-    defined (CONFIG_RALINK_RT5350)
+    defined (CONFIG_RALINK_RT5350) || \
+    defined (CONFIG_RALINK_MT7620)
 #define IS_RALINK
 #endif
 
