@@ -85,27 +85,28 @@ offload() {
 	fi
 	# configure hardware nat offload
 	if [ "$hw_nat" = "1" ]; then
-	    if [ ! -d /sys/module/hw_nat ]; then
-		if [ "$hw_nat_wifi" = "1" ]; then
-		    hw_nat_wifi="wifi_offload=1"
-		    $LOG "Load hw_nat with wifi offload support enabled."
-		else
-		    hw_nat_wifi="wifi_offload=0"
-		    $LOG "Load hw_nat with wifi offload support disabled."
-		fi
-		if [ "$hw_nat_udp" = "1" ]; then
-		    hw_nat_udp="udp_offload=1"
-		    $LOG "Load hw_nat with udp offload support enabled."
-		else
-		    hw_nat_udp="udp_offload=0"
-		    $LOG "Load hw_nat with udp offload support disabled."
-		fi
-		modprobe -q hw_nat "$hw_nat_wifi" "$hw_nat_udp"
+	    if [ -d /sys/module/hw_nat ]; then
+		rmmod hw_nat > /dev/null 2>&1
 	    fi
-	    $LOG "Set HW_NAT default QOS Mode to WRR policy."
+	    if [ "$hw_nat_wifi" = "1" ]; then
+	        hw_nat_wifi="wifi_offload=1"
+	        $LOG "hw_nat: wifi offload support enabled."
+	    else
+	        hw_nat_wifi="wifi_offload=0"
+	        $LOG "hw_nat: wifi offload support disabled."
+	    fi
+	    if [ "$hw_nat_udp" = "1" ]; then
+	        hw_nat_udp="udp_offload=1"
+	        $LOG "hw_nat: udp offload support enabled."
+	    else
+	        hw_nat_udp="udp_offload=0"
+	        $LOG "hw_nat: udp offload support disabled."
+	    fi
+	    modprobe -q hw_nat "$hw_nat_wifi" "$hw_nat_udp"
+	    $LOG "hw_nat: set default QOS Mode to WRR policy."
 	    hw_nat -L 0
 	    if [ "$hw_nat_bind" != "" ]; then
-	        $LOG "Change HW_NAT binding threshold to $hw_nat_bind."
+	        $LOG "hw_nat: set binding threshold to $hw_nat_bind."
 	        hw_nat -N $hw_nat_bind > /dev/null 2>&1
 	    fi
 	else
