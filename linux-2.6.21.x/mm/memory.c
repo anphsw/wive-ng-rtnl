@@ -2540,7 +2540,7 @@ static inline int handle_pte_fault(struct mm_struct *mm,
 	pte_t old_entry;
 	spinlock_t *ptl;
 
-	old_entry = entry = *pte;
+	old_entry = entry = ACCESS_ONCE(*pte);
 	if (!pte_present(entry)) {
 		if (pte_none(entry)) {
 			if (vma->vm_ops) {
