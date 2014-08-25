@@ -248,7 +248,7 @@ inline int ip_output(struct sk_buff *skb)
 			    !(IPCB(skb)->flags & IPSKB_REROUTED));
 }
 
-int ip_queue_xmit(struct sk_buff *skb, int ipfragok)
+int ip_queue_xmit(struct sk_buff *skb)
 {
 	struct sock *sk = skb->sk;
 	struct inet_sock *inet = inet_sk(sk);
@@ -304,7 +304,7 @@ packet_routed:
 	iph = (struct iphdr *) skb_push(skb, sizeof(struct iphdr) + (opt ? opt->optlen : 0));
 	*((__be16 *)iph) = htons((4 << 12) | (5 << 8) | (inet->tos & 0xff));
 	iph->tot_len = htons(skb->len);
-	if (ip_dont_fragment(sk, &rt->u.dst) && (!ipfragok || !skb->ignore_df))
+	if (ip_dont_fragment(sk, &rt->u.dst) && !skb->ignore_df)
 		iph->frag_off = htons(IP_DF);
 	else
 		iph->frag_off = 0;

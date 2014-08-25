@@ -508,7 +508,7 @@ static int tcp_v6_send_synack(struct sock *sk, struct request_sock *req,
                 __tcp_v6_send_check(skb, &treq->loc_addr, &treq->rmt_addr);
 
 		ipv6_addr_copy(&fl.fl6_dst, &treq->rmt_addr);
-		err = ip6_xmit(sk, skb, &fl, opt, 0);
+		err = ip6_xmit(sk, skb, &fl, opt);
 		err = net_xmit_eval(err);
 	}
 
@@ -1066,7 +1066,7 @@ static void tcp_v6_send_reset(struct sock *sk, struct sk_buff *skb)
 	if (!ip6_dst_lookup(NULL, &buff->dst, &fl)) {
 
 		if (xfrm_lookup(&buff->dst, &fl, NULL, 0) >= 0) {
-			ip6_xmit(tcp6_socket->sk, buff, &fl, NULL, 0);
+			ip6_xmit(tcp6_socket->sk, buff, &fl, NULL);
 			TCP_INC_STATS_BH(TCP_MIB_OUTSEGS);
 			TCP_INC_STATS_BH(TCP_MIB_OUTRSTS);
 			return;
@@ -1165,7 +1165,7 @@ static void tcp_v6_send_ack(struct tcp_timewait_sock *tw,
 
 	if (!ip6_dst_lookup(NULL, &buff->dst, &fl)) {
 		if (xfrm_lookup(&buff->dst, &fl, NULL, 0) >= 0) {
-			ip6_xmit(tcp6_socket->sk, buff, &fl, NULL, 0);
+			ip6_xmit(tcp6_socket->sk, buff, &fl, NULL);
 			TCP_INC_STATS_BH(TCP_MIB_OUTSEGS);
 			return;
 		}
