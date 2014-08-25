@@ -1277,12 +1277,6 @@ usbnet_probe (struct usb_interface *udev, const struct usb_device_id *prod)
 	 * bind() should set rx_urb_size in that case.
 	 */
 	dev->hard_mtu = net->mtu + net->hard_header_len;
-#if 0
-// dma_supported() is deeply broken on almost all architectures
-	// possible with some EHCI controllers
-	if (dma_supported (&udev->dev, DMA_64BIT_MASK))
-		net->features |= NETIF_F_HIGHDMA;
-#endif
 
 	net->change_mtu = usbnet_change_mtu;
 	net->get_stats = usbnet_get_stats;
@@ -1300,30 +1294,9 @@ usbnet_probe (struct usb_interface *udev, const struct usb_device_id *prod)
 		if (status < 0)
 			goto out1;
 
-#if defined(CONFIG_RA_HW_NAT_PCI) && (defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE))
 		/* always use ethX names for ifaces */
 		strcpy (net->name, "eth%d");
 		fake_usb_class.name = "usbeth%d";
-#else
-		// heuristic:  "usb%d" for links we know are two-host,
-		// else "eth%d" when there's reasonable doubt.  userspace
-		// can rename the link if it knows better.
-		if ((dev->driver_info->flags & FLAG_ETHER) != 0
-				&& (net->dev_addr [0] & 0x02) == 0)
-		{
-			/* Check wimax devices */
-			//printk("usbnet: VID = 0x%04x, PID = 0x%04x\n", xdev->descriptor.idVendor, xdev->descriptor.idProduct); 
-			if(((xdev->descriptor.idProduct == 0x7112) && (xdev->descriptor.idVendor == 0x0e8d)) || /* ZyXEL on MTK */
-			   ((xdev->descriptor.idProduct == 0x7708) && (xdev->descriptor.idVendor == 0x1076)) || ((xdev->descriptor.idProduct == 0xa4a2) && (xdev->descriptor.idVendor == 0x0525))) /* Yota Key */
-			{
-				strcpy (net->name, "wimax%d");
-				fake_usb_class.name = "usbwimax%d";
-			} else {
-				strcpy (net->name, "eth%d");
-				fake_usb_class.name = "usbeth%d";
-			}
-		}
-#endif
 
 		/* maybe the remote can't receive an Ethernet MTU */
 		if (net->mtu > (dev->hard_mtu - net->hard_header_len))
