@@ -45,7 +45,7 @@
 #define RALINK_GPIO_DEVNAME	"gpio"		//nodename
 #define GPIO_DEV		"/dev/gpio"	//userlevel devname
 
-#if defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350) || defined (CONFIG_RALINK_MT7620)
+#if defined (CONFIG_RALINK_RT3052) || defined (CONFIG_RALINK_RT3352) || defined (CONFIG_RALINK_RT5350)
 /* BUTTONS GPIO */
 #if defined(CONFIG_RALINK_I2S) || defined(CONFIG_RALINK_I2S_MODULE)
 #define GPIO_BTN_RESET		43
@@ -73,10 +73,25 @@
 #define GPIO_POWER_LED		0
 #define GPIO_LED_SEC_GREEN      0 /* stub */
 #define GPIO_LED_WAN_GREEN      19
-#define GPIO_USB_LED_GREEN   	24
 #define GPIO_LED_WAN_ORANGE     27
 #define GPIO_WPS_LED_ORANGE  	27
 #define GPIO_WPS_LED_GREEN   	27
+#define GPIO_USB_LED_GREEN   	24
+#ifdef CONFIG_RALINK_GPIO_LED
+#define GPIO_VPN_LED1	GPIO_LED_WAN_ORANGE /* VPN tx/rx led */
+#endif
+#elif defined (CONFIG_RALINK_MT7620)
+/* BUTTONS GPIO */
+#define GPIO_BTN_RESET		1
+#define GPIO_BTN_WPS		0
+/* LEDS GPIO */
+#define GPIO_POWER_LED		39
+#define GPIO_LED_SEC_GREEN      0 /* stub */
+#define GPIO_LED_WAN_GREEN      40
+#define GPIO_LED_WAN_ORANGE     40
+#define GPIO_WPS_LED_ORANGE  	72
+#define GPIO_WPS_LED_GREEN   	72
+#define GPIO_USB_LED_GREEN   	0
 #ifdef CONFIG_RALINK_GPIO_LED
 #define GPIO_VPN_LED1	GPIO_LED_WAN_ORANGE /* VPN tx/rx led */
 #endif

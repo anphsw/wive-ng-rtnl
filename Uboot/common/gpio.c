@@ -11,9 +11,12 @@
 #if defined(RT3883_ASIC_BOARD)
 #define LED_POWER	0
 #define BTN_RESET	14
-#elif defined (RT2883_FPGA_BOARD) || defined (RT3052_ASIC_BOARD) || defined (RT3352_ASIC_BOARD) || defined (RT5350_ASIC_BOARD) || defined (MT7620_ASIC_BOARD)
+#elif defined (RT3052_ASIC_BOARD) || defined (RT3352_ASIC_BOARD) || defined (RT5350_ASIC_BOARD)
 #define LED_POWER	9
 #define BTN_RESET	10
+#elif defined (MT7620_ASIC_BOARD)
+#define LED_POWER	39
+#define BTN_RESET	1
 #endif
 
 unsigned long gpiomode_org;
