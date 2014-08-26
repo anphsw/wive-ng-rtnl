@@ -96,6 +96,7 @@ start() {
                 AdvSendAdvert on;
                 MinRtrAdvInterval 3;
                 MaxRtrAdvInterval 10;
+                AdvDefaultPreference high;
                 prefix ${ipv6prefix}:${ipv6subnet}::1/64
                 {
                         AdvOnLink off;
@@ -104,7 +105,7 @@ start() {
                         AdvPreferredLifetime 20;
                         AdvValidLifetime 30;
                 };
-                RDNSS ${ipv6prefix}:${ipv6subnet}::1 2001:4860:4860::8888
+                RDNSS 2001:4860:4860::8888 2001:4860:4860::8844
                 {
                         AdvRDNSSLifetime 10;
                 };
