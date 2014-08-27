@@ -36,12 +36,6 @@ extern u32 get_surfboard_sysclk(void) ;
  ******************************************************************************/
 
 #define FLASH_PAGESIZE		256
-#define MX_4B_MODE			/* MXIC 4 Byte Mode */
-//#define SP_4B_MODE			/* Spansion 4 Byte mode */
-
-#if defined(MX_4B_MODE) || defined(SP_4B_MODE)
-#define ADDRESS_4B_MODE
-#endif
 
 /* Flash opcodes. */
 #define OPCODE_WREN		6	/* Write enable */
@@ -70,10 +64,9 @@ extern u32 get_surfboard_sysclk(void) ;
 #define OPCODE_CLSR			0x30
 #define OPCODE_RCR			0x35	/* Read Configuration Register */
 
-#ifdef SP_4B_MODE
+/* Bank register read/write */
 #define OPCODE_BRRD			0x16
 #define OPCODE_BRWR			0x17
-#endif
 
 /* Status Register bits. */
 #define SR_WIP			1	/* Write in progress */
@@ -84,26 +77,40 @@ extern u32 get_surfboard_sysclk(void) ;
 #define SR_EPE			0x20	/* Erase/Program error */
 #define SR_SRWD			0x80	/* SR write protect */
 
+
 #define SPI_FIFO_SIZE 16
 
-#if defined(CONFIG_RALINK_RT6352)
-#define COMMAND_MODE		// define this for SPI flash command/user mode support
+//#if defined(CONFIG_RALINK_MT7620)
+//#define COMMAND_MODE		// define this for SPI flash command/user mode support
+//#endif
+
+#if defined(CONFIG_RALINK_RT2880) || defined(CONFIG_RALINK_RT2883) || defined(CONFIG_RALINK_RT3052) || defined(CONFIG_RALINK_RT3352) || \
+	defined(CONFIG_RALINK_RT5350) || defined(CONFIG_RALINK_RT3883) || defined(CONFIG_RALINK_RT6855)
+	// default mode for chips before MT7620 is legacy mode
+#else
+	// default mode for chips after MT7620 is command mode
+#define COMMAND_MODE
 #endif
 //#define COMMAND_MODE		// define this for SPI flash command/user mode support
-//#define ADDR_4B			// if all instruction use 4B address mode
 //#define RD_MODE_FAST		// use Fast Read instead of normal Read
 //#define RD_MODE_DIOR		// use DIOR (0xBB)instead of normal Read
 //#define RD_MODE_DOR		// use DOR (0x3B) instead of normal Read
 //#define RD_MODE_QIOR		// use QIOR (0xEB) instead of normal Read
 //#define RD_MODE_QOR		// use QOR (0x6B) instead of normal Read
 
+//#define READ_BY_PAGE
+
 #if defined(RD_MODE_QOR) || defined(RD_MODE_QIOR)
 #define RD_MODE_QUAD
 #endif
 
-int spi_chip_detected = 0;
+#if defined(CONFIG_MTD_NOR_RALINK) || defined(CONFIG_MTD_NAND_RALINK)
+int spi_chip_detected = 0; /* if support others flash types try others if spi not detected */
+#else
+int spi_chip_detected = 1; /* if support only spi and chip not detected try boot with defaults parameters */
+#endif
 static int raspi_wait_ready(int sleep_ms);
-static unsigned int spi_wait_nsec = 0;
+static unsigned int spi_wait_nsec = 150;
 
 //#define SPI_DEBUG
 #if !defined (SPI_DEBUG)
@@ -111,14 +118,13 @@ static unsigned int spi_wait_nsec = 0;
 #define ra_inl(addr)  (*(volatile unsigned int *)(addr))
 #define ra_outl(addr, value)  (*(volatile unsigned int *)(addr) = (value))
 #define ra_dbg(args...) do {} while(0)
-//#define ra_dbg(args...) do { if (1) printk(args); } while(0)
 
 #else
 
 int ranfc_debug = 1;
-#define ra_dbg(args...) do { if (ranfc_debug) printk(args); } while(0)
 #define _ra_inl(addr)  (*(volatile unsigned int *)(addr))
 #define _ra_outl(addr, value)  (*(volatile unsigned int *)(addr) = (value))
+#define ra_dbg(args...) do { if (ranfc_debug) printk(args); } while(0)
 
 u32 ra_inl(u32 addr)
 {
@@ -145,7 +151,9 @@ u32 ra_outl(u32 addr, u32 val)
 #define ra_and(addr, a_mask)  ra_aor(addr, a_mask, 0)
 #define ra_or(addr, o_value)  ra_aor(addr, -1, o_value)
 
-void usleep(unsigned int usecs)
+static inline int raspi_write_enable(void);
+
+static void usleep(unsigned int usecs)
 {
         unsigned long timeout = usecs_to_jiffies(usecs);
 
@@ -180,6 +188,7 @@ static int spic_busy_wait(void)
  * @return: if write_onlu, -1 means write fail, or return writing counter.
  * @return: if read, -1 means read fail, or return reading counter.
  */
+#ifndef COMMAND_MODE
 static int spic_transfer(const u8 *cmd, int n_cmd, u8 *buf, int n_buf, int flag)
 {
 	int retval = -1;
@@ -250,6 +259,7 @@ static int spic_write(const u8 *cmd, size_t n_cmd, const u8 *txbuf, size_t n_tx)
 {
 	return spic_transfer(cmd, n_cmd, (u8 *)txbuf, n_tx, SPIC_WRITE_BYTES);
 }
+#endif
 
 int spic_init(void)
 {
@@ -260,6 +270,7 @@ int spic_init(void)
 	ra_or(RT2880_RSTCTRL_REG, RSTCTRL_SPI_RESET);
 	udelay(1);
 	ra_and(RT2880_RSTCTRL_REG, ~RSTCTRL_SPI_RESET);
+	udelay(1);
 
 #if defined(CONFIG_RALINK_VITESSE_SWITCH_CONNECT_SPI_CS1)||defined(CONFIG_RALINK_SLIC_CONNECT_SPI_CS1)
 	/* config ARB and set the low or high active correctly according to the device */
@@ -271,29 +282,15 @@ int spic_init(void)
 	// FIXME, clk_div should depend on spi-flash. 
 	// mode 0 (SPICLKPOL = 0) & (RXCLKEDGE_FALLING = 0)
 	// mode 3 (SPICLKPOL = 1) & (RXCLKEDGE_FALLING = 0)
-#ifdef ADDR_4B // use 4 byte address mode
-	ra_outl(RT2880_SPICFG_REG, SPICFG_MSBFIRST | SPICFG_TXCLKEDGE_FALLING | CFG_CLK_DIV | SPICFG_SPICLKPOL | SPICFG_ADDRMODE);
-#else
 	ra_outl(RT2880_SPICFG_REG, SPICFG_MSBFIRST | SPICFG_TXCLKEDGE_FALLING | CFG_CLK_DIV | SPICFG_SPICLKPOL );
-#endif
 
 	// set idle state
 	ra_outl(RT2880_SPICTL_REG, SPICTL_HIZSDO | SPICTL_SPIENA_HIGH);
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22)
 	spi_wait_nsec = (8 * 1000 / ((get_surfboard_sysclk() / 1000 / 1000 / CFG_CLK_DIV) )) >> 1 ;
-#else
-	spi_wait_nsec = (8 * 1000 / (128 / CFG_CLK_DIV) ) >> 1 ;
-#endif
 	//printk("spi_wait_nsec: %x \n", spi_wait_nsec);
-
-
-
 	return 0;
 }
-
-
-
 
 /****************************************************************************/
 struct chip_info {
@@ -371,47 +368,35 @@ struct flash_info *flash;
 /****************************************************************************/
 
 #ifdef COMMAND_MODE
-static int raspi_cmd(const u8 cmd, const u32 addr, const u8 mode, u8 *buf, const size_t n_buf, const u32 user, const int flag)
+static int raspi_cmd(const u8 cmd, const u32 addr, const u8 mode, u8 *buf, const int n_buf, const u32 user, const int flag)
 {
 	u32 reg, count;
 	int retval = 0;
 
-	//printk("code = %x, addr = %x, mode = %x, buf = %x, size = %d, user = %d, flag = %x\n", cmd, addr, mode, buf, n_buf, user, flag);
+	//printk("code = %x, addr = %x, mode = %x, buf = %x, size = %d, user = %x, flag = %x\n", cmd, addr, mode, buf, n_buf, user, flag);
 
 	ra_or(RT2880_SPICFG_REG, (SPICFG_SPIENMODE | SPICFG_RXENVDIS));	
 	ra_outl(RT2880_SPIDATA_REG, cmd);
 	ra_outl(RT2880_SPIMODE_REG, (mode << 24));
-#ifdef ADDR_4B
-	ra_outl(RT2880_SPIADDR_REG, addr);
-#else
+
 	if (flag & SPIC_4B_ADDR)
-	{
 		ra_outl(RT2880_SPIADDR_REG, addr);
-	}
 	else
-	{
 		ra_outl(RT2880_SPIADDR_REG, (addr << 8));
-	}
-#endif
+
 	ra_outl(RT2880_SPIBS_REG, n_buf);
+
 	if (flag & SPIC_USER_MODE)
-	{
 		ra_outl(RT2880_SPIUSER_REG, user);
-	}
 	else
 		ra_outl(RT2880_SPIUSER_REG, 0);
 
 	ra_outl(RT2880_SPICTL_REG, SPICTL_START);
 
-
 	if (flag & SPIC_READ_BYTES)
 	{
-
-		if (buf == 0)
-		{
-			printk("NULL pointer\n");
+		if (!buf)
 			return -1;
-		}
 
 		for (retval = 0; retval < n_buf;)
 		{
@@ -420,21 +405,13 @@ static int raspi_cmd(const u8 cmd, const u32 addr, const u8 mode, u8 *buf, const
 			} while (reg == 0);
 
 			for (count = reg; count > 0; count--)
-			{
 				buf[retval++] = (u8) ra_inl(RT2880_SPIRXFIFO_REG);
 			}
-
 		}
-
-	}
-	// write
 	else if (flag & SPIC_WRITE_BYTES)
 	{
-		if (buf == 0)
-		{
-			printk("NULL pointer\n");
+		if (!buf)
 			return -1;
-		}
 
 		count = min(SPI_FIFO_SIZE, n_buf);
 		for (retval = 0; retval < n_buf;)
@@ -462,25 +439,9 @@ static int raspi_cmd(const u8 cmd, const u32 addr, const u8 mode, u8 *buf, const
 
 	return retval;
 }
-#endif
 
-/*
- * Set write enable latch with Write Enable command.
- * Returns negative if error occurred.
- */
-static inline int raspi_write_enable(void)
-{
-	u8 code = OPCODE_WREN;
-
-#ifdef COMMAND_MODE
-	raspi_cmd(code, 0, 0, 0, 0, 0, 0);
-#else
-	return spic_write(&code, 1, NULL, 0);
-#endif
-}
-
-#ifdef COMMAND_MODE
-static int raspi_set_quad()
+#ifdef RD_MODE_QUAD
+static int raspi_set_quad(void)
 {
 	int retval = 0;
 
@@ -535,6 +496,7 @@ err_end:
 
 	return retval;
 }
+#endif
 #endif // COMMAND_MODE
 
 static int raspi_read_devid(u8 *rxbuf, int n_rx)
@@ -554,20 +516,13 @@ static int raspi_read_devid(u8 *rxbuf, int n_rx)
 	return retval;
 }
 
-#ifdef SP_4B_MODE
 static int raspi_read_rg(u8 *val, u8 opcode)
 {
 	ssize_t retval;
 	u8 code = opcode;
 #ifdef COMMAND_MODE
 	u32 user;
-#endif
 
-	if (!val)
-		printk("NULL pointer\n");
-
-
-#ifdef COMMAND_MODE
 	user = SPIUSR_SINGLE | (SPIUSR_SINGLE << 3) | (SPIUSR_SINGLE << 6) | (SPIUSR_SINGLE << 9) | (SPIUSR_READ_DATA << 12) | (SPIUSR_NO_DUMMY << 14) | (SPIUSR_NO_MODE << 16) | (SPIUSR_NO_ADDR << 17) | (SPIUSR_ONE_INSTRU << 20) | (1 << 21);
 	retval = raspi_cmd(code, 0, 0, val, 1, user, SPIC_READ_BYTES | SPIC_USER_MODE);
 #else
@@ -576,8 +531,6 @@ static int raspi_read_rg(u8 *val, u8 opcode)
 
 	return 0;
 }
-#endif
-
 static int raspi_write_rg(u8 *val, u8 opcode)
 {
 	ssize_t retval;
@@ -586,10 +539,6 @@ static int raspi_write_rg(u8 *val, u8 opcode)
 #ifdef COMMAND_MODE
 	u32 user;
 #endif
-
-	if (!val)
-		printk("NULL pointer\n");
-
 	dr = ra_inl(RT2880_SPI_DMA);
 	ra_outl(RT2880_SPI_DMA, 0); // Set TxBurstSize to 'b00: 1 transfer
 
@@ -643,40 +592,54 @@ static int raspi_write_sr(u8 *val)
 	return 0;
 }
 
-/* not used
-static int raspi_clear_sr()
-{
-	u8 code = OPCODE_CLSR;
 
-#ifdef COMMAND_MODE
-	raspi_cmd(code, 0, 0, 0, 0, 0, 0);
-#else
-	spic_read(&code, 1, 0, 0);
-#endif
-	return 0;
-}
-
-*/
-
-#ifdef MX_4B_MODE
 static int raspi_4byte_mode(int enable)
 {
+	raspi_wait_ready(1);
+
+	if (flash->chip->id == 0x01) // Spansion
+	{	
+		u8 br, br_cfn; // bank register
+
+		if (enable)
+		{
+			br = 0x81;
+#if defined (CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_MT7620) || defined (CONFIG_RALINK_MT7621)
+			ra_or(RT2880_SPICFG_REG, SPICFG_ADDRMODE);
+#endif
+		}
+		else
+		{
+			br = 0x0;
+#if defined (CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_MT7620) || defined (CONFIG_RALINK_MT7621)
+			ra_and(RT2880_SPICFG_REG, ~(SPICFG_ADDRMODE));
+#endif
+		}
+    	
+		raspi_write_rg(&br, OPCODE_BRWR);
+		raspi_read_rg(&br_cfn, OPCODE_BRRD);
+		if (br_cfn != br)
+		{
+			printk("4B mode switch failed %d, %x, %x\n", enable, br_cfn, br);
+			return -1;
+		}
+	}
+	else // if (flash->chip->id == 0xc2) // MXIC
+	{
 	ssize_t retval;
 	u8 code;
-
-	raspi_wait_ready(1);
 
 	if (enable)
 	{
 		code = 0xB7; /* EN4B, enter 4-byte mode */
-#if defined (CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_RT6352) || defined (CONFIG_RALINK_RT71100)
+#if defined (CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_MT7620) || defined (CONFIG_RALINK_MT7621)
 		ra_or(RT2880_SPICFG_REG, SPICFG_ADDRMODE);
 #endif
 	}
 	else
 	{
 		code = 0xE9; /* EX4B, exit 4-byte mode */
-#if defined (CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_RT6352) || defined (CONFIG_RALINK_RT71100)
+#if defined (CONFIG_RALINK_RT6855) || defined (CONFIG_RALINK_MT7620) || defined (CONFIG_RALINK_MT7621)
 		ra_and(RT2880_SPICFG_REG, ~(SPICFG_ADDRMODE));
 #endif
 	}
@@ -703,41 +666,28 @@ static int raspi_4byte_mode(int enable)
 		printk("%s: ret: %x\n", __func__, retval);
 		return -1;
 	}
+		
+	}
+
 	return 0;
 }
-#endif
 
-
-#ifdef SP_4B_MODE
-
-static int raspi_4byte_mode(int enable)
+/*
+ * Set write enable latch with Write Enable command.
+ * Returns negative if error occurred.
+ */
+static inline int raspi_write_enable(void)
 {
-	u8 br, br_cfn; // bank register
+	u8 code = OPCODE_WREN;
 
-	raspi_wait_ready(1);
-	
-	if (enable)
-	{
-		br = 0x81;
-		ra_or(RT2880_SPICFG_REG, SPICFG_ADDRMODE);
-	}
-	else
-	{
-		br = 0x0;
-		ra_and(RT2880_SPICFG_REG, ~(SPICFG_ADDRMODE));
-	}
-
-	raspi_write_rg(&br, OPCODE_BRWR);
-	raspi_read_rg(&br_cfn, OPCODE_BRRD);
-	if (br_cfn != br)
-	{
-		printk("4B mode switch failed %d, %x, %x\n", enable, br_cfn, br);
-		return -1;
-	}
-
+#ifdef COMMAND_MODE
+	raspi_cmd(code, 0, 0, 0, 0, 0, 0);
+#else
+	return spic_write(&code, 1, NULL, 0);
+#endif
 	return 0;
 }
-#endif
+
 static inline int raspi_write_disable(void)
 {
 	u8 code = OPCODE_WRDI;
@@ -747,6 +697,7 @@ static inline int raspi_write_disable(void)
 #else
 	return spic_write(&code, 1, NULL, 0);
 #endif
+	return 0;
 }
 
 /*
@@ -759,6 +710,7 @@ static void raspi_unprotect(void)
 
 	if (raspi_read_sr(&sr) < 0) {
 		printk("%s: read_sr fail: %x\n", __func__, sr);
+		return;
 	}
 
 	if ((sr & (SR_BP0 | SR_BP1 | SR_BP2)) != 0) {
@@ -835,7 +787,7 @@ static int raspi_erase_sector(u32 offset)
 {
 
 	/* Wait until finished previous write command. */
-	if (raspi_wait_ready(3))
+	if (raspi_wait_ready(10))
 		return -EIO;
 
 	/* Send write enable, then erase commands. */
@@ -857,8 +809,9 @@ static int raspi_erase_sector(u32 offset)
 		raspi_wait_sleep_ready(950);
 	}
 
+
+
 #else // COMMAND_MODE
-#ifdef ADDRESS_4B_MODE
 	if (flash->chip->addr4b) {
 		flash->command[0] = OPCODE_SE;
 		flash->command[1] = offset >> 24;
@@ -872,7 +825,6 @@ static int raspi_erase_sector(u32 offset)
 		raspi_4byte_mode(0);
 		return 0;
 	}
-#endif
 
 	/* Set up command buffer. */
 	flash->command[0] = OPCODE_SE;
@@ -891,6 +843,7 @@ static int raspi_erase_sector(u32 offset)
 
 int raspi_set_lock (struct mtd_info *mtd, loff_t to, size_t len, int set)
 {
+	u32 page_offset, page_size;
 	int retval;
 
 	while (len > 0) {
@@ -920,6 +873,9 @@ int raspi_set_lock (struct mtd_info *mtd, loff_t to, size_t len, int set)
 			return -EIO;
 		}
 
+		page_offset = (to & (mtd->erasesize-1));
+		page_size = mtd->erasesize - page_offset;
+				
 		len -= mtd->erasesize;
 		to += mtd->erasesize;
 	}
@@ -991,9 +947,9 @@ static int ramtd_read(struct mtd_info *mtd, loff_t from, size_t len,
 #ifdef COMMAND_MODE
 	size_t code;
 #endif
-
+	//printk("%s: from:%llx len:%x\n", __func__, from, len);
 	/* sanity checks */
-	if (!len)
+	if (len == 0)
 		return 0;
 
 	if (from + len > flash->mtd.size)
@@ -1015,34 +971,21 @@ static int ramtd_read(struct mtd_info *mtd, loff_t from, size_t len,
 	/* NOTE: OPCODE_FAST_READ (if available) is faster... */
 
 #ifdef COMMAND_MODE
-
 #if defined (RD_MODE_QUAD)
-	{
 		code = OPCODE_QOR;
 
 #ifdef RD_MODE_QIOR
 		code = OPCODE_QIOR;
 #endif
 		raspi_set_quad();
-
-	}
 #elif defined (RD_MODE_DOR)
-	{
 		code = OPCODE_DOR;
-	}
 #elif defined (RD_MODE_DIOR)
-	{
 		code = OPCODE_DIOR;
-	}
-
 #elif defined (RD_MODE_FAST)
-	{
 		code = OPCODE_FAST_READ;
-	}
 #else
-	{
 		code = OPCODE_READ;
-	}
 #endif // COMMAND_MODE
 
 	if (flash->chip->addr4b)
@@ -1060,8 +1003,6 @@ static int ramtd_read(struct mtd_info *mtd, loff_t from, size_t len,
 	flash->command[0] = OPCODE_READ;
 
 #ifndef READ_BY_PAGE
-
-#ifdef ADDRESS_4B_MODE
 	if (flash->chip->addr4b) {
 		raspi_4byte_mode(1);
 		flash->command[1] = from >> 24;
@@ -1072,7 +1013,6 @@ static int ramtd_read(struct mtd_info *mtd, loff_t from, size_t len,
 		raspi_4byte_mode(0);
 	}
 	else
-#endif
 	{
 		flash->command[1] = from >> 16;
 		flash->command[2] = from >> 8;
@@ -1081,11 +1021,9 @@ static int ramtd_read(struct mtd_info *mtd, loff_t from, size_t len,
 	}
 
 #else /* READ_BY_PAGE */
-
-#ifdef ADDRESS_4B_MODE
 	if (flash->chip->addr4b) {
 		u32 page_size;
-		
+
 		readlen = 0;
 		raspi_4byte_mode(1);
 		while (len > 0) {
@@ -1103,10 +1041,9 @@ static int ramtd_read(struct mtd_info *mtd, loff_t from, size_t len,
 		raspi_4byte_mode(0);
 	}
 	else
-#endif
 	{
 		u32 page_size, length = len;
-		
+
 		readlen = 0;
 		while (length > 0) {
 
@@ -1123,9 +1060,9 @@ static int ramtd_read(struct mtd_info *mtd, loff_t from, size_t len,
 
 #endif /* READ_BY_PAGE */
 #endif // COMMAND_MODE
-  	up(&flash->lock);
 
-	if (retlen) 
+  	up(&flash->lock);
+	if (retlen)
 		*retlen = readlen;
 
 #ifndef READ_BY_PAGE
@@ -1174,16 +1111,15 @@ static int ramtd_write(struct mtd_info *mtd, loff_t to, size_t len,
 	int retval;
 	int count = 0;
 
+	if (retlen)
+		*retlen = 0;
+
 	/* sanity checks */
 	if (!len)
 		return(0);
 
 	if (to + len > flash->mtd.size)
 		return -EINVAL;
-
-	/* Byte count starts at zero. */
-	if (retlen)
-		*retlen = 0;
 
   	down(&flash->lock);
 
@@ -1197,7 +1133,6 @@ static int ramtd_write(struct mtd_info *mtd, loff_t to, size_t len,
 
 	/* Set up the opcode in the write buffer. */
 	flash->command[0] = OPCODE_PP;
-#ifdef ADDRESS_4B_MODE
 	if (flash->chip->addr4b) {
 		flash->command[1] = to >> 24;
 		flash->command[2] = to >> 16;
@@ -1205,7 +1140,6 @@ static int ramtd_write(struct mtd_info *mtd, loff_t to, size_t len,
 		flash->command[4] = to;
 	}
 	else
-#endif
 	{
 		flash->command[1] = to >> 16;
 		flash->command[2] = to >> 8;
@@ -1215,11 +1149,8 @@ static int ramtd_write(struct mtd_info *mtd, loff_t to, size_t len,
 	/* what page do we start with? */
 	page_offset = to % FLASH_PAGESIZE;
 
-#ifdef ADDRESS_4B_MODE
-	if (flash->chip->addr4b) {
+	if (flash->chip->addr4b)
 		raspi_4byte_mode(1);
-	}
-#endif
 
 	/* write everything in PAGESIZE chunks */
 	while (len > 0) {
@@ -1227,7 +1158,6 @@ static int ramtd_write(struct mtd_info *mtd, loff_t to, size_t len,
 		page_offset = 0;
 
 		/* write the next page to flash */
-#ifdef ADDRESS_4B_MODE
 		if (flash->chip->addr4b) {
 			flash->command[1] = to >> 24;
 			flash->command[2] = to >> 16;
@@ -1235,7 +1165,6 @@ static int ramtd_write(struct mtd_info *mtd, loff_t to, size_t len,
 			flash->command[4] = to;
 		}
 		else
-#endif
 		{
 			flash->command[1] = to >> 16;
 			flash->command[2] = to >> 8;
@@ -1251,33 +1180,16 @@ static int ramtd_write(struct mtd_info *mtd, loff_t to, size_t len,
 #ifdef RD_MODE_QUAD
 		raspi_set_quad();
 #endif
-
 		if (flash->chip->addr4b)
-			retval = raspi_cmd(OPCODE_PP, to, 0, buf, page_size, 0, SPIC_WRITE_BYTES | SPIC_4B_ADDR);
+			retval = raspi_cmd(OPCODE_PP, to, 0, (u8*)buf, page_size, 0, SPIC_WRITE_BYTES | SPIC_4B_ADDR);
 		else
-			retval = raspi_cmd(OPCODE_PP, to, 0, buf, page_size, 0, SPIC_WRITE_BYTES);
-
-		//{
-		//	u32 user;
-
-		//	user = SPIUSR_QUAD | (SPIUSR_SINGLE << 3) | (SPIUSR_SINGLE << 6) | (SPIUSR_SINGLE << 9) | (SPIUSR_WRITE_DATA << 12) | (SPIUSR_NO_DUMMY << 14) | (SPIUSR_NO_MODE << 16) | (SPIUSR_THREE_BYTE_ADDR << 17) | (SPIUSR_ONE_INSTRU << 20) | (1 << 21);
-		//	rc = raspi_cmd(OPCODE_QPP, to, 0, buf, page_size, user, (SPIC_WRITE_BYTES | SPIC_USER_MODE));
-
-		//}
-		//printk("rc = %d\n", rc);
-
-#else // COMMAND_MODE
-#ifdef ADDRESS_4B_MODE
+			retval = raspi_cmd(OPCODE_PP, to, 0, (u8*)buf, page_size, 0, SPIC_WRITE_BYTES);
+#else
 		if (flash->chip->addr4b)
 			retval = spic_write(flash->command, 5, buf, page_size);
 		else
-#endif
 			retval = spic_write(flash->command, 4, buf, page_size);
-
-#endif // COMMAND_MODE
-
-		//printk("%s : to:%llx page_size:%x ret:%x\n", __func__, to, page_size, retval);
-
+#endif
 		if (retval > 0) {
 			if (retlen)
 				*retlen += retval;
@@ -1299,11 +1211,9 @@ static int ramtd_write(struct mtd_info *mtd, loff_t to, size_t len,
 			raspi_wait_sleep_ready(1);
 	}
 
-#ifdef ADDRESS_4B_MODE
 	if (flash->chip->addr4b) {
 		raspi_4byte_mode(0);
 	}
-#endif
 
 	raspi_write_disable();
 
@@ -1338,7 +1248,7 @@ struct chip_info *chip_prob(void)
 		info = &chips_data[i];
 		if (info->id == buf[0]) {
 			if (info->jedec_id == jedec) {
-                                spi_chip_detected=1;
+				spi_chip_detected=1;
 				return info;
 			}
 			if (weight > (info->jedec_id ^ jedec)) {
@@ -1348,10 +1258,8 @@ struct chip_info *chip_prob(void)
 		}
 	}
 	printk("Warning: un-recognized chip ID, please update SPI driver!\n");
-	spi_chip_detected=0;
 	return match;
 }
-
 
 /*
  * board specific setup should have ensured the SPI clock used here
@@ -1373,22 +1281,26 @@ static struct mtd_info *raspi_probe(struct map_info *map)
 		uint32_t ih_ksz;
 	} hdr;
 #endif
-#if defined (CONFIG_RALINK_RT3883) || \
-    defined (CONFIG_RALINK_RT3352) || \
-    defined (CONFIG_RALINK_RT3052) || \
-    defined (CONFIG_RALINK_RT5350) || \
-    defined (CONFIG_RALINK_MT7620)
+
 	spic_init();
 
         if(ra_check_flash_type()!=BOOT_FROM_SPI) { /* SPI */
             return 0;
         }
-#endif
+
+
+
 	chip = chip_prob();
 
+
+	
 	flash = kzalloc(sizeof *flash, GFP_KERNEL);
 	if (!flash)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22)
 		return -ENOMEM;
+#else
+		return NULL;
+#endif
 
 	init_MUTEX(&flash->lock);
 
