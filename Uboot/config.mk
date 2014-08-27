@@ -123,7 +123,7 @@ endif
 
 #########################################################################
 
-CONFIG_SHELL	:= $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
+CONFIG_SHELL	:= $(shell export LC_ALL=C; if [ -x "$$BASH" ]; then echo $$BASH; \
 		    else if [ -x /bin/bash ]; then echo /bin/bash; \
 		    else echo sh; fi ; fi)
 
@@ -161,7 +161,7 @@ LDSCRIPT := $(TOPDIR)/board/$(BOARDDIR)/u-boot.lds
 endif
 OBJCFLAGS += --gap-fill=0xff
 
-gccincdir := $(shell $(CC) -print-file-name=include)
+gccincdir := $(shell export LC_ALL=C; $(CC) -print-file-name=include)
 
 
 CPPFLAGS := $(DBGFLAGS) $(OPTFLAGS) $(RELFLAGS)		\
@@ -745,7 +745,7 @@ CFLAGS += -D_LITTLE_ENDIAN
 # avoid trigraph warnings while parsing pci.h (produced by NIOS gcc-2.9)
 # this option have to be placed behind -Wall -- that's why it is here
 ifeq ($(ARCH),nios)
-ifeq ($(findstring 2.9,$(shell $(CC) --version)),2.9)
+ifeq ($(findstring 2.9,$(shell export LC_ALL=C; $(CC) --version)),2.9)
 CFLAGS := $(CPPFLAGS) -Wall -Wno-trigraphs
 endif
 endif

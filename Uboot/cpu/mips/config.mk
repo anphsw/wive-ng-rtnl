@@ -20,9 +20,9 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston,
 # MA 02111-1307 USA
 #
-v=$(shell \
+v=$(shell export LC_ALL=C; \
 mips-linux-as --version|grep "GNU assembler"|awk '{print $$3}'|awk -F . '{print $$2}')
-MIPSFLAGS=$(shell \
+MIPSFLAGS=$(shell export LC_ALL=C; \
 if [ "$v" -lt "14" ]; then \
 	echo "-mcpu=4kc"; \
 else \

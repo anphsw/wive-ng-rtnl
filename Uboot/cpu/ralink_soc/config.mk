@@ -21,8 +21,8 @@
 # MA 02111-1307 USA
 #
 
-v=$(shell $(AS) --version |grep "GNU assembler" |cut -d. -f2)
-MIPSFLAGS=$(shell \
+v=$(shell export LC_ALL=C; $(AS) --version |grep "GNU assembler" |cut -d. -f2)
+MIPSFLAGS=$(shell export LC_ALL=C; \
 if [ "$v" -lt "14" ]; then \
 	echo "-mabicalls"; \
 else \
