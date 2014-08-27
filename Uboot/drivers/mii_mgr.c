@@ -88,12 +88,8 @@ void enable_mdio(int enable)
 u32 mii_mgr_read(u32 phy_addr, u32 phy_register, u32 *read_data)
 {
 	u32 volatile  			status	= 0;
-#if !defined (RT3052_FPGA_BOARD) && !defined (RT3052_ASIC_BOARD) && \
-    !defined (RT3352_FPGA_BOARD) && !defined (RT3352_ASIC_BOARD) && \
-    !defined (RT5350_FPGA_BOARD) && !defined (RT5350_ASIC_BOARD)
 	u32 volatile  			data 	= 0;
-#endif
-	u32			  			rc		= 0;
+	u32 				rc	= 0;
 	unsigned long volatile  t_start = get_timer(0);
 
 	/* We enable mdio gpio purpose register, and disable it when exit.	 */
