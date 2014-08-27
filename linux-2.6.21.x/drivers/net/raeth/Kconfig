@@ -79,6 +79,7 @@ config RAETH_TSO
 
 config RAETH_TSOV6
         bool "TSOV6 (Tcp Segmentaton Offload)"
+	default y
 	depends on RAETH_TSO
 
 config RAETH_RW_PDMAPTR_FROM_VAR
