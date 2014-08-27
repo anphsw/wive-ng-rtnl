@@ -318,9 +318,10 @@ extern uchar		NetEtherNullAddr[6];
 
 #define VLAN_NONE	4095			/* untagged 			*/
 #define VLAN_IDMASK	0x0fff			/* mask of valid vlan id 	*/
+#ifdef CONFIG_NET_VLAN
 extern ushort		NetOurVLAN;		/* Our VLAN 			*/
 extern ushort		NetOurNativeVLAN;	/* Our Native VLAN 		*/
-
+#endif
 extern uchar		NetCDPAddr[6]; 		/* Ethernet CDP address		*/
 extern ushort		CDPNativeVLAN;		/* CDP returned native VLAN	*/
 extern ushort		CDPApplianceVLAN;	/* CDP returned appliance VLAN	*/

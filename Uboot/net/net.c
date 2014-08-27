@@ -395,9 +395,10 @@ restart:
                 NetServerIP = getenv_IPaddr ("serverip");
                 NetOurGatewayIP = getenv_IPaddr ("gatewayip");
                 NetOurSubnetMask= getenv_IPaddr ("netmask");
+#ifdef CONFIG_NET_VLAN
                 NetOurVLAN = getenv_VLAN("vlan");
                 NetOurNativeVLAN = getenv_VLAN("nvlan");
-
+#endif
                 break;
 #if 0
 	case BOOTP:

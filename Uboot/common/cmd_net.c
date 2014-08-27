@@ -282,14 +282,18 @@ static void cdp_update_env(void)
 		printf("CDP offered appliance VLAN %d\n", ntohs(CDPApplianceVLAN));
 		VLAN_to_string(CDPApplianceVLAN, tmp);
 		setenv("vlan", tmp);
+#ifdef CONFIG_NET_VLAN
 		NetOurVLAN = CDPApplianceVLAN;
+#endif
 	}
 
 	if (CDPNativeVLAN != htons(-1)) {
 		printf("CDP offered native VLAN %d\n", ntohs(CDPNativeVLAN));
 		VLAN_to_string(CDPNativeVLAN, tmp);
 		setenv("nvlan", tmp);
+#ifdef CONFIG_NET_VLAN
 		NetOurNativeVLAN = CDPNativeVLAN;
+#endif
 	}
 
 }
