@@ -27,14 +27,15 @@ const parameter_fetch_t QoS_args[] =
 	{ T("QoS_LPP"), "QoS_low_pp", 0, T("") },
 	{ NULL, NULL, 0, NULL } // Terminator
 };
+
 static void QoSSetup(webs_t wp, char_t *path, char_t *query)
 {
-	char *submitUrl;	
-		
+	char *submitUrl;
+
 	char_t *QoS_type = websGetVar(wp, T("QoSSelect"), T("0"));
 	if (QoS_type == NULL)
 		QoS_type = "0";
-	
+
 	char_t *simpleqos = websGetVar(wp, T("simple_qos"), T("0"));
 	if (strcmp(simpleqos, "on") != 0)
 		simpleqos = "off";

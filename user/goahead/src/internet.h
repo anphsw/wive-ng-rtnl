@@ -40,15 +40,10 @@
 #endif
 
 void formDefineInternet(void);
-int getIfLive(char *ifname);
-int getIfMac(char *ifname, char *if_hw);
-int getIfIp(char *ifname, char *if_addr);
-int getIfIsUp(char *ifname);
-int getIfNetmask(char *ifname, char *if_net);
-char* getWanIfName(void);
-char* getPPPIfName(void);
-char* getWanIfNamePPP(void);
-char* getLanIfName(void);
-char *getLanWanNamebyIf(char *ifname);
 void initInternet(void);
-void ripdRestart(void);
+char* getLanIfName(void);
+char* getLanWanNamebyIf(char *ifname);
+char* getWanIfName(void);
+char* getWanIfNamePPP(void);
+int getIfIp(char *ifname, char *if_addr);
+int getIfMac(char *ifname, char *if_hw);

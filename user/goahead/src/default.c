@@ -90,16 +90,16 @@ int websDefaultHandler(webs_t wp, char_t *urlPrefix, char_t *webDir, int arg,
 /*
  *	Open the document. Stat for later use.
  */
-	if (websPageOpen(wp, lpath, path, SOCKET_RDONLY | SOCKET_BINARY, 
-		0666) < 0) 
+	if (websPageOpen(wp, lpath, path, SOCKET_RDONLY | SOCKET_BINARY,
+		0666) < 0)
    {
-      /* 10 Dec 02 BgP -- according to 
-       * <http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html>, 
+      /* 10 Dec 02 BgP -- according to
+       * <http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html>,
        * the proper code to return here is NOT 400 (old code), which is used
        * to indicate a malformed request. Here, the request is good, but the
        * error we need to tell the client about is 404 (Not Found).
        */
-      /* 
+      /*
        * 17 Mar 03 BgP -- prevent a cross-site scripting exploit
 		websError(wp, 404, T("Cannot open URL %s"), url);
        */
@@ -377,7 +377,7 @@ int websValidateUrl(webs_t wp, char_t *path)
     * backslash character, like:
     *
     *  GoAhead is vulnerable to a directory traversal bug. A request such as
-    *  
+    *
     *  GoAhead-server/../../../../../../../ results in an error message
     *  'Cannot open URL'.
 
@@ -385,7 +385,7 @@ int websValidateUrl(webs_t wp, char_t *path)
     *  the
     *  web root and read arbitrary files from the server.
     *  Hence a request like:
-    * 
+    *
     *  GoAhead-server/..%5C..%5C..%5C..%5C..%5C..%5C/winnt/win.ini returns the
     *  contents of the win.ini file.
     * (Note that the description uses forward slashes (0x2F), but the example
@@ -399,39 +399,30 @@ int websValidateUrl(webs_t wp, char_t *path)
 	*token = '/';
 	token = gstrchr(token, '\\');
     }
-	token = gstrtok(path, T("/"));
+    token = gstrtok(path, T("/"));
 
 /*
  *	Look at each directory segment and process "." and ".." segments
- *	Don't allow the browser to pop outside the root web. 
+ *	Don't allow the browser to pop outside the root web.
  */
-	while (token != NULL) 
-   {
-      if (npart >= kMaxUrlParts)
-      {
-         /*
-          * malformed URL -- too many parts for us to process.
-          */
-         bfree(B_L, path);
-         return -1;
-      }
-		if (gstrcmp(token, T("..")) == 0) 
-      {
-			if (npart > 0) 
-         {
-				npart--;
-			}
-
-		} 
-      else if (gstrcmp(token, T(".")) != 0) 
-      {
+    while (token != NULL) {
+	if (npart >= kMaxUrlParts) {
+	    /*
+	     * malformed URL -- too many parts for us to process.
+	    */
+	    bfree(B_L, path);
+	    return -1;
+	}
+	if (gstrcmp(token, T("..")) == 0) {
+	    if (npart > 0)
+		npart--;
+	} else if (gstrcmp(token, T(".")) != 0) {
 			parts[npart] = token;
 			len += gstrlen(token) + 1;
 			npart++;
 		}
 		token = gstrtok(NULL, T("/"));
 	}
-
 #ifdef WIN
    if (isBadWindowsPath(parts, npart))
    {
@@ -441,16 +432,14 @@ int websValidateUrl(webs_t wp, char_t *path)
 
 #endif
 
-/*
- *	Create local path for document. Need extra space all "/" and null.
- */
-	if (npart || (gstrcmp(path, T("/")) == 0) || (path[0] == '\0')) 
-   {
+    /*
+     *	Create local path for document. Need extra space all "/" and null.
+    */
+    if (npart || (gstrcmp(path, T("/")) == 0) || (path[0] == '\0')) {
 		lpath = balloc(B_L, (gstrlen(dir) + 1 + len + 1) * sizeof(char_t));
 		gstrcpy(lpath, dir);
 
-		for (i = 0; i < npart; i++) 
-      {
+		for (i = 0; i < npart; i++) {
 			gstrcat(lpath, T("/"));
 			gstrcat(lpath, parts[i]);
 		}
@@ -458,13 +447,11 @@ int websValidateUrl(webs_t wp, char_t *path)
 		bfree(B_L, path);
 		bfree(B_L, lpath);
 
-	} 
-   else 
-   {
+    } else {
 		bfree(B_L, path);
 		return -1;
-	}
-	return 0;
+    }
+    return 0;
 }
 
 /******************************************************************************/
@@ -530,7 +517,7 @@ static void websDefaultWriteEvent(webs_t wp)
 }
 
 /******************************************************************************/
-/* 
+/*
  *	Closing down. Free resources.
  */
 

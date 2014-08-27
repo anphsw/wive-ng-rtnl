@@ -41,11 +41,5 @@
 #define HTML_NO_FIREWALL_UNDER_BRIDGE_MODE	\
 "<img src=\"/graphics/warning.gif\"><font color=#ff0000>&nbsp; &nbsp;Warning: The current operation mode is \"Bridge mode\" and these settings may not be functional.</font>"
 
-void iptablesFilterClear(void);
-void iptablesFilterRun(char *rule);
-void iptablesWebsFilterRun(void);
 void formDefineFirewall(void);
-void firewall_rebuild(void);
 void firewall_rebuild_etc(void);
-int isIpNetmaskValid(char *s);	// export for QoS
-int isMacValid(char *);			// export for QoS

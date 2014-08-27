@@ -88,8 +88,8 @@ static void editRouting(webs_t wp, char_t *path, char_t *query);
 
 #ifdef CONFIG_USER_ZEBRA
 static void dynamicRouting(webs_t wp, char_t *path, char_t *query);
-void zebraRestart(void);
-void ripdRestart(void);
+static void zebraRestart(void);
+static void ripdRestart(void);
 #endif
 
 #ifdef CONFIG_USER_CHILLISPOT
@@ -278,7 +278,7 @@ int getIfIp(char *ifname, char *if_addr)
  * description: return 1 if interface is up
  *              return 0 if interface is down
  */
-int getIfIsUp(char *ifname)
+static int getIfIsUp(char *ifname)
 {
 	struct ifreq ifr;
 	int skfd;
@@ -306,7 +306,7 @@ int getIfIsUp(char *ifname)
  *            if_net - a 16-byte buffer to store subnet mask
  * description: fetch subnet mask associated to given interface name
  */
-int getIfNetmask(char *ifname, char *if_net)
+static int getIfNetmask(char *ifname, char *if_net)
 {
 	struct ifreq ifr;
 	int skfd = 0;
@@ -358,7 +358,7 @@ char* getWanIfName(void)
 /*
  * description: return vpn interface name or VPN_DEF as default
  */
-char* getPPPIfName(void)
+static char* getPPPIfName(void)
 {
     FILE *fp;
     char ppp_if[16]; /* max 16 char in vpn if name */
@@ -1883,7 +1883,7 @@ static void editRouting(webs_t wp, char_t *path, char_t *query)
 }
 
 #ifdef CONFIG_USER_ZEBRA
-void ripdRestart(void)
+static void ripdRestart(void)
 {
 	char lan_ip[16], wan_ip[16], lan_mask[16], wan_mask[16];
 
@@ -1930,7 +1930,7 @@ out:
 	doSystem("service ripd restart");
 }
 
-void zebraRestart(void)
+static void zebraRestart(void)
 {
 	char *opmode = nvram_get(RT2860_NVRAM, "OperationMode");
 	char *password = nvram_get(RT2860_NVRAM, "Password");

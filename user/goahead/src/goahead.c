@@ -64,7 +64,6 @@ extern void defaultTraceHandler(int level, char_t *buf);
 extern void formDefineWireless(void);
 
 static int writeGoPid(void);
-static void InitSignals(int helper);
 static int initWebs(void);
 static int websHomePageHandler(webs_t wp, char_t *urlPrefix, char_t *webDir, int arg, char_t *url, char_t *path, char_t *query);
 
@@ -73,12 +72,14 @@ static void printMemStats(int handle, char_t *fmt, ...);
 static void memLeaks();
 #endif
 
+#ifdef CONFIG_RALINK_GPIO
+static void InitSignals(int helper);
 #ifdef CONFIG_USER_GOAHEAD_HAS_WPSBTN
 static void goaSigReset(int signum);
 static void goaSigWPSHold(int signum);
 static void goaSigWPSHlpr(int signum);
 #endif
-
+#endif
 
 /*********************************** Code *************************************/
 /*
@@ -104,7 +105,7 @@ int main(int argc, char** argv)
 	openlog("goahead", LOG_PID|LOG_NDELAY, LOG_USER);
 	syslog(LOG_INFO, "version %s started", WEBS_VERSION);
 
-	//Boot = Orange ON
+	/* Boot = Orange ON */
 	ledAlways(GPIO_LED_WAN_ORANGE, LED_ON);		//Turn on orange LED
 	ledAlways(GPIO_LED_WAN_GREEN, LED_OFF);		//Turn off green LED
 
@@ -210,7 +211,7 @@ int main(int argc, char** argv)
 /*
  *	Write pid to the pid file
  */
-int writeGoPid(void)
+static int writeGoPid(void)
 {
 	FILE *fp;
 
@@ -301,7 +302,30 @@ static void fs_nvram_reset_handler (int signum)
         system("fs nvramreset");
         system("fs restore");
 }
-#endif
+
+#ifdef CONFIG_USER_GOAHEAD_HAS_WPSBTN
+static void goaSigReset(int signum)
+{
+	reboot_now();
+}
+
+static void goaSigWPSHold(int signum)
+{
+       doSystem("/etc/scripts/OnHoldWPS.button");
+}
+
+static void goaSigWPSHlpr(int signum)
+{
+	int ppid;
+	char *WPSHlprmode = nvram_get(RT2860_NVRAM, "UserWPSHlpr");
+	if (!strcmp(WPSHlprmode, "1")) {
+    	    doSystem("/etc/scripts/OnPressWPS.button");
+	    return;
+	}
+	ppid = getppid();
+	if (kill(ppid, SIGHUP))
+		printf("goahead.c: (helper) can't send SIGHUP to parent %d", ppid);
+}
 
 /******************************************************************************/
 /*
@@ -309,9 +333,7 @@ static void fs_nvram_reset_handler (int signum)
  */
 static void InitSignals(int helper)
 {
-
 //--------REGISTER SIGNALS-------------------------
-#ifdef CONFIG_RALINK_GPIO
 #ifdef CONFIG_USER_GOAHEAD_HAS_WPSBTN
 	if (helper) {
 	    signal(SIGUSR1, goaSigWPSHlpr);
@@ -332,8 +354,8 @@ static void InitSignals(int helper)
 	}
 #endif
 	goaInitGpio(helper);
-#endif
 }
+#endif
 
 /******************************************************************************/
 /*
@@ -588,7 +610,7 @@ int websCheckCgiProc(int handle, int *status)
 /******************************************************************************/
 
 #ifdef B_STATS
-static void memLeaks() 
+static void memLeaks()
 {
 	int		fd;
 
@@ -612,32 +634,6 @@ static void printMemStats(int handle, char_t *fmt, ...)
 	vsprintf(buf, fmt, args);
 	va_end(args);
 	write(handle, buf, strlen(buf));
-}
-#endif
-
-#ifdef CONFIG_RALINK_GPIO
-#ifdef CONFIG_USER_GOAHEAD_HAS_WPSBTN
-static void goaSigReset(int signum)
-{
-	reboot_now();
-}
-
-static void goaSigWPSHold(int signum)
-{
-       doSystem("/etc/scripts/OnHoldWPS.button");
-}
-
-static void goaSigWPSHlpr(int signum)
-{
-	int ppid;
-	char *WPSHlprmode = nvram_get(RT2860_NVRAM, "UserWPSHlpr");
-	if (!strcmp(WPSHlprmode, "1")) {
-    	    doSystem("/etc/scripts/OnPressWPS.button");
-	    return;
-	}
-	ppid = getppid();
-	if (kill(ppid, SIGHUP))
-		printf("goahead.c: (helper) can't send SIGHUP to parent %d", ppid);
 }
 #endif
 #endif

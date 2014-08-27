@@ -21,10 +21,13 @@
 #include "internet.h"
 #include "helpers.h"
 
+static void iptablesWebsFilterRun(void);
+static void firewall_rebuild(void);
 static void websSysFirewall(webs_t wp, char_t *path, char_t *query);
+
 char l7name[8192]; // export it for internet.c qos (The actual string is about 7200 bytes.)
 
-int isMacValid(char *str)
+static int isMacValid(char *str)
 {
 	int i, len = strlen(str);
 	if(len != 17)
@@ -80,7 +83,7 @@ static int isOnlyOneSlash(char *str)
 	return count <= 1 ? 1 : 0;
 }
 
-int isIpNetmaskValid(char *s)
+static int isIpNetmaskValid(char *s)
 {
 	char str[32];
 	char *slash;
@@ -1395,7 +1398,7 @@ static void DMZ(webs_t wp, char_t *path, char_t *query)
 	{
 		if (!isIpValid(ip_address))
 			return;
-		
+
 		nvram_init(RT2860_NVRAM);
 		nvram_bufset(RT2860_NVRAM, "DMZEnable", "1");
 		nvram_bufset(RT2860_NVRAM, "DMZIPAddress", ip_address);
@@ -1448,7 +1451,7 @@ static void websSysFirewall(webs_t wp, char_t *path, char_t *query)
 #define BLK_ACTIVE              0x02
 #define BLK_COOKIE              0x04
 #define BLK_PROXY               0x08
-void iptablesWebsFilterRun(void)
+static void iptablesWebsFilterRun(void)
 {
 	int i, content_filter = 0;
 	char entry[256]; //need long buffer for utf domain name encoding support 
@@ -1746,7 +1749,7 @@ void firewall_rebuild_etc(void)
 	sync();
 }
 
-void firewall_rebuild(void)
+static void firewall_rebuild(void)
 {
 	//rebuild firewall scripts in etc
 	firewall_rebuild_etc();

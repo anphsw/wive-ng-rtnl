@@ -2,5 +2,4 @@
 #define __QOS_H__
 
 void formDefineQoS(void);
-
 #endif

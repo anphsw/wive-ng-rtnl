@@ -28,11 +28,9 @@ struct cpuStats
 	unsigned long int steal;   // 7 Invol wait, hypervisor svcing other virtual CPU
 };
 
-
 union uCpuStats
 {
 	unsigned long int arrData[8];
 	struct cpuStats sepData;
 };
-
 #endif
