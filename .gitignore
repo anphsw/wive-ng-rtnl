@@ -190,6 +190,7 @@ fulldump
 /user/busybox/include/NUM_APPLETS.h
 /user/chillispot/chillispot-1.1.0/stamp-h1
 /user/dropbear/Makefile
+/user/dropbear/configure
 /user/ethtool/autom4te.cache
 /user/ethtool/autom4te.cache/*
 /user/ntfs-3g/stamp-h1
