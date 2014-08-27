@@ -538,7 +538,22 @@ static void forward_config(struct net_device *dev)
 #endif
 
 	dev->features |= NETIF_F_IP_CSUM; /* Can checksum TCP/UDP over IPv4 */
-
+#if defined(CONFIG_RALINK_MT7620)
+#if defined (CONFIG_RAETH_TSO)
+	if ((sysRegRead(0xB000000C) & 0xf) >= 0x5) {
+		dev->features |= NETIF_F_SG;
+		dev->features |= NETIF_F_TSO;
+	}
+#endif // CONFIG_RAETH_TSO //
+#if defined (CONFIG_RAETH_TSOV6)
+	if ((sysRegRead(0xB000000C) & 0xf) >= 0x5) {
+		dev->features |= NETIF_F_TSO6;
+#ifdef NETIF_F_IPV6_CSUM
+		dev->features |= NETIF_F_IPV6_CSUM; /* Can checksum TCP/UDP over IPv6 */
+#endif
+	}
+#endif // CONFIG_RAETH_TSOV6 //
+#else
 #if defined (CONFIG_RAETH_TSO)
 	dev->features |= NETIF_F_SG;
 	dev->features |= NETIF_F_TSO;
@@ -550,6 +565,7 @@ static void forward_config(struct net_device *dev)
 	dev->features |= NETIF_F_IPV6_CSUM; /* Can checksum TCP/UDP over IPv6 */
 #endif
 #endif // CONFIG_RAETH_TSOV6 //
+#endif // CONFIG_MT7620 //
 
 #else // Checksum offload disabled
 
