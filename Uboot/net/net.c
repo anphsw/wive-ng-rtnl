@@ -82,7 +82,7 @@
 #include <miiphy.h>
 #endif
 
-#define CONFIG_NET_VLAN 1
+//#define CONFIG_NET_VLAN 1
 
 #if (CONFIG_COMMANDS & CFG_CMD_NET)
 
