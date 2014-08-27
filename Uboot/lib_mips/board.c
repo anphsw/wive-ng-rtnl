@@ -105,10 +105,6 @@ const char version_string[] =
 
 extern ulong load_addr; /* Default Load Address */
 
-#if defined (RT6855A_ASIC_BOARD) || defined(RT6855A_FPGA_BOARD)	
-static int watchdog_reset();
-#endif
-
 unsigned long mips_cpu_feq;
 unsigned long mips_bus_feq;
 
@@ -1371,9 +1367,7 @@ void board_init_r (gd_t *id, ulong dest_addr)
 	void config_usb_mtk_xhci();
 	config_usb_mtk_xhci();
 #endif
-
-
-
+#endif
 	u32 reg = RALINK_REG(RT2880_RSTSTAT_REG);
 	if(reg & RT2880_WDRST ){
 		printf("***********************\n");
@@ -1872,25 +1866,24 @@ void board_init_r (gd_t *id, ulong dest_addr)
       defined (MT7620_ASIC_BOARD) || defined (MT7620_FPGA_BOARD)
 	rt_gsw_init();
 #elif defined (RT6855A_ASIC_BOARD) || defined (RT6855A_FPGA_BOARD)
-#ifdef FPGA_BOARD
+    #ifdef FPGA_BOARD
 	rt6855A_eth_gpio_reset();
-#endif
+    #endif
 	rt6855A_gsw_init();
 #elif defined (MT7621_ASIC_BOARD) || defined (MT7621_FPGA_BOARD)
-#if defined (MAC_TO_MT7530_MODE) || defined (GE_RGMII_INTERNAL_P0_AN) || defined (GE_RGMII_INTERNAL_P4_AN)
+    #if defined (MAC_TO_MT7530_MODE) || defined (GE_RGMII_INTERNAL_P0_AN) || defined (GE_RGMII_INTERNAL_P4_AN)
 	//enable MDIO
 	RALINK_REG(0xbe000060) &= ~(1 << 12); //set MDIO to Normal mode
 	RALINK_REG(0xbe000060) &= ~(1 << 14); //set RGMII1 to Normal mode
 	RALINK_REG(0xbe000060) &= ~(1 << 15); //set RGMII2 to Normal mode
 	setup_internal_gsw();
-#endif
+    #endif
 #elif defined (RT3883_ASIC_BOARD) && defined (RTL8367_SW)
 	rtl8367m_switch_init_pre();
 #elif defined (RT3883_ASIC_BOARD) && defined (MAC_TO_MT7530_MODE)
         rt3883_gsw_init();
 #endif
 	LANWANPartition();
-#endif
 
 #ifdef DUAL_IMAGE_SUPPORT
 	check_image_validation();
