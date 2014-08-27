@@ -89,7 +89,7 @@ skip:
  * are re-enabled or not.
  */
 
-asmlinkage void FASTPATHSYS do_IRQ(int irq, struct pt_regs * regs)
+asmlinkage void do_IRQ(int irq, struct pt_regs * regs)
 {
 	unsigned long sp;
 	irq_enter();
