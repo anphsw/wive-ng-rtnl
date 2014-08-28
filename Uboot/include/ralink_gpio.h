@@ -36,6 +36,17 @@
 
 #include <linux/config.h>
 
+#if defined(RT3883_ASIC_BOARD)
+#define LED_POWER	0
+#define BTN_RESET	14
+#elif defined (RT3052_ASIC_BOARD) || defined (RT3352_ASIC_BOARD) || defined (RT5350_ASIC_BOARD)
+#define LED_POWER	9
+#define BTN_RESET	10
+#elif defined (MT7620_ASIC_BOARD)
+#define LED_POWER	39
+#define BTN_RESET	1
+#endif
+
 #define NAME			"ralink_gpio" 	//driver name
 #define RALINK_GPIO_DEVNAME	"gpio"		//nodename
 #define GPIO_DEV		"/dev/gpio"	//userlevel devname
@@ -271,6 +282,28 @@
 #define RALINK_GPIO_DIR_ALLOUT		0x00FFFFFF
 
 #define RALINK_GPIO(x)			(1 << x)
+
+
+#if defined(MT7620_MP)
+enum gpio_reg_id {
+	GPIO_INT = 0,
+	GPIO_EDGE,
+	GPIO_RMASK,
+	GPIO_MASK,
+	GPIO_DATA,
+	GPIO_DIR,
+	GPIO_POL,
+	GPIO_SET,
+	GPIO_RESET,
+	GPIO_TOG,
+	GPIO_MAX_REG
+};
+
+extern unsigned int mtk7620_get_gpio_reg_addr(unsigned short gpio_nr, enum gpio_reg_id id);
+extern int mtk7620_set_gpio_dir(unsigned short gpio_nr, unsigned short gpio_dir);
+extern int mtk7620_get_gpio_pin(unsigned short gpio_nr);
+extern int mtk7620_set_gpio_pin(unsigned short gpio_nr, unsigned int val);
+#endif
 
 /*
  * structure used at regsitration

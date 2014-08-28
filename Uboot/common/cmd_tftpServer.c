@@ -6,7 +6,6 @@
 #include <replace.h>
 
 extern void gpio_init(void);
-extern void gpio_uninit(void);
 
 #ifdef CFG_DIRECT_FLASH_TFTP
 extern flash_info_t flash_info[CFG_MAX_FLASH_BANKS];/* info for FLASH chips   */
@@ -255,11 +254,10 @@ int do_tftpd(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 
 		/* show LED POWER after success image integrity check */
 		LEDON();
-		
+
 		printf("   \n3: System Boot system code via Flash.\n");
 		do_bootm(cmdtp, 0, argc, argv);
 	}
-
 	return 0;
 }
 

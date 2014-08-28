@@ -31,10 +31,16 @@ ifeq ($(RALINK_CMDLINE),ON)
 COBJS	= main.o cmd_bdinfo.o cmd_boot.o cmd_bootm.o cmd_console.o \
 	cmd_load.o cmd_misc.o cmd_net.o cmd_mem.o \
 	cmd_nvedit.o command.o console.o devices.o dlmalloc.o \
-	env_common.o exports.o lists.o cmd_tftpServer.o gpio.o replace.o
+	env_common.o exports.o lists.o cmd_tftpServer.o replace.o
 else
 COBJS = console.o devices.o dlmalloc.o \
 	env_common.o exports.o lists.o cmd_nvedit.o cmd_bootm.o cmd_net.o
+endif
+
+ifeq ($(MT7620_ASIC_BOARD),)
+COBJS += gpio.o
+else
+COBJS += gpio_7620.o
 endif
 
 ifeq ($(RALINK_UPGRADE_BY_SERIAL),ON)
