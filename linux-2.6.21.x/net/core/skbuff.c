@@ -151,8 +151,12 @@ struct sk_buff FASTPATHNET *__alloc_skb(unsigned int size, gfp_t gfp_mask,
 	size = SKB_DATA_ALIGN(size);
 	size += SKB_DATA_ALIGN(sizeof(struct skb_shared_info));
 	data = kmalloc_node_track_caller(size + sizeof(struct skb_shared_info), gfp_mask, node);
-	if (!data)
-		goto nodata;
+	if (!data) {
+	    kmem_cache_free(cache, skb);
+	    skb = NULL;
+	    return NULL;
+	}
+
 	/* kmalloc(size) might give us more room than requested.
 	 * Put skb_shared_info exactly at the end of allocated zone,
 	 * to allow max possible filling before reallocation.
@@ -193,10 +197,6 @@ struct sk_buff FASTPATHNET *__alloc_skb(unsigned int size, gfp_t gfp_mask,
 	DO_FAST_CLEAR_FOE(skb); // fast clear FoE info header
 #endif
 	return skb;
-nodata:
-	kmem_cache_free(cache, skb);
-	skb = NULL;
-	return NULL;
 }
 
 /**
