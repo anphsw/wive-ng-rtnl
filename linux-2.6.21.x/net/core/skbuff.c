@@ -140,7 +140,7 @@ struct sk_buff FASTPATHNET *__alloc_skb(unsigned int size, gfp_t gfp_mask,
 	/* Get the HEAD */
 	skb = kmem_cache_alloc_node(cache, gfp_mask & ~__GFP_DMA, node);
 	if (!skb)
-		goto out;
+		return skb;
 	prefetchw(skb);
 
 	/* We do our best to align skb_shared_info on a separate cache
@@ -192,13 +192,11 @@ struct sk_buff FASTPATHNET *__alloc_skb(unsigned int size, gfp_t gfp_mask,
 #if defined(CONFIG_RA_HW_NAT) || defined(CONFIG_RA_HW_NAT_MODULE)
 	DO_FAST_CLEAR_FOE(skb); // fast clear FoE info header
 #endif
-
-out:
 	return skb;
 nodata:
 	kmem_cache_free(cache, skb);
 	skb = NULL;
-	goto out;
+	return NULL;
 }
 
 /**
@@ -605,7 +603,7 @@ struct sk_buff *__pskb_copy(struct sk_buff *skb, int headroom, gfp_t gfp_mask)
 	struct sk_buff *n = alloc_skb(size, gfp_mask);
 
 	if (!n)
-		goto out;
+	    return NULL;
 
 	/* Set the data pointer */
 	skb_reserve(n, headroom);
@@ -636,7 +634,7 @@ struct sk_buff *__pskb_copy(struct sk_buff *skb, int headroom, gfp_t gfp_mask)
 	}
 
 	copy_skb_header(n, skb);
-out:
+
 	return n;
 }
 
@@ -682,7 +680,7 @@ int pskb_expand_head(struct sk_buff *skb, int nhead, int ntail,
 	data = kmalloc(size + SKB_DATA_ALIGN(sizeof(struct skb_shared_info)),
 		       gfp_mask);
 	if (!data)
-		goto nodata;
+		return -ENOMEM;
 	size = SKB_WITH_OVERHEAD(ksize(data));
 
 	/* Copy only real data... and, alas, header. This should be
@@ -725,9 +723,6 @@ int pskb_expand_head(struct sk_buff *skb, int nhead, int ntail,
 	skb->nohdr    = 0;
 	atomic_set(&skb_shinfo(skb)->dataref, 1);
 	return 0;
-
-nodata:
-	return -ENOMEM;
 }
 
 /* Make private copy of skb with writable head and some headroom */
@@ -1136,7 +1131,7 @@ int skb_copy_bits(const struct sk_buff *skb, int offset, void *to, int len)
 	int start = skb_headlen(skb);
 
 	if (offset > (int)skb->len - len)
-		goto fault;
+		return -EFAULT;
 
 	/* Copy header. */
 	if ((copy = start - offset) > 0) {
@@ -1187,9 +1182,8 @@ int skb_copy_bits(const struct sk_buff *skb, int offset, void *to, int len)
 			if ((copy = end - offset) > 0) {
 				if (copy > len)
 					copy = len;
-				if (skb_copy_bits(list, offset - start,
-						  to, copy))
-					goto fault;
+				if (skb_copy_bits(list, offset - start, to, copy))
+					return -EFAULT;
 				if ((len -= copy) == 0)
 					return 0;
 				offset += copy;
@@ -1201,7 +1195,6 @@ int skb_copy_bits(const struct sk_buff *skb, int offset, void *to, int len)
 	if (!len)
 		return 0;
 
-fault:
 	return -EFAULT;
 }
 
@@ -1223,7 +1216,7 @@ int skb_store_bits(struct sk_buff *skb, int offset, const void *from, int len)
 	int start = skb_headlen(skb);
 
 	if (offset > (int)skb->len - len)
-		goto fault;
+		return -EFAULT;
 
 	if ((copy = start - offset) > 0) {
 		if (copy > len)
@@ -1273,9 +1266,8 @@ int skb_store_bits(struct sk_buff *skb, int offset, const void *from, int len)
 			if ((copy = end - offset) > 0) {
 				if (copy > len)
 					copy = len;
-				if (skb_store_bits(list, offset - start,
-						   from, copy))
-					goto fault;
+				if (skb_store_bits(list, offset - start, from, copy))
+					return -EFAULT;
 				if ((len -= copy) == 0)
 					return 0;
 				offset += copy;
@@ -1287,7 +1279,6 @@ int skb_store_bits(struct sk_buff *skb, int offset, const void *from, int len)
 	if (!len)
 		return 0;
 
-fault:
 	return -EFAULT;
 }
 
@@ -1363,7 +1354,6 @@ __wsum skb_checksum(const struct sk_buff *skb, int offset,
 		}
 	}
 	BUG_ON(len);
-
 	return csum;
 }
 
