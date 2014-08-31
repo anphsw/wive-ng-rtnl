@@ -140,7 +140,7 @@ struct sk_buff FASTPATHNET *__alloc_skb(unsigned int size, gfp_t gfp_mask,
 	/* Get the HEAD */
 	skb = kmem_cache_alloc_node(cache, gfp_mask & ~__GFP_DMA, node);
 	if (!skb)
-		return skb;
+		return NULL;
 	prefetchw(skb);
 
 	/* We do our best to align skb_shared_info on a separate cache
