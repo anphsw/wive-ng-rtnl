@@ -11,10 +11,6 @@ ifeq ($(CONFIG_ETHTOOL),y)
 raeth-objs += ra_ethtool.o
 endif
 
-ifeq ($(CONFIG_RALINK_RT3052_MP2),y)
-raeth-objs += mcast.o
-endif
-
 ifeq ($(CONFIG_RAETH_NETLINK),y)
 raeth-objs += ra_netlink.o
 endif

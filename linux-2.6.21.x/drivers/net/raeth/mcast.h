@@ -11,7 +11,6 @@
 #include <linux/if_vlan.h>
 #include <linux/if_ether.h>
 
-
 #define MAX_MCAST_ENTRY	    16
 #define AGEING_TIME	    5  //Unit: Sec
 #define MAC_ARG(x) ((u8*)(x))[0],((u8*)(x))[1],((u8*)(x))[2], \
@@ -137,12 +136,12 @@ static int inline mcast_entry_del(uint16_t vlan_id, uint8_t *src_mac, uint8_t *d
     }
 }
 
-/* 
+/*
  * Return
  *	    0: drop packet
  *	    1: continue
  */
-int32_t mcast_rx(struct sk_buff * skb)
+static inline int32_t mcast_rx(struct sk_buff * skb)
 {
     struct vlan_ethhdr *eth = (struct vlan_ethhdr *)(skb->data-ETH_HLEN);
 
@@ -169,7 +168,7 @@ int32_t mcast_rx(struct sk_buff * skb)
 }
 
 
-int32_t mcast_tx(struct sk_buff *skb)
+static inline int32_t mcast_tx(struct sk_buff *skb)
 {
     struct vlan_ethhdr *eth = (struct vlan_ethhdr *)(skb->data);
 

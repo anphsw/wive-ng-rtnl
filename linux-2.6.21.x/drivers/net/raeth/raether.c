@@ -43,6 +43,10 @@
 #include "ra_qos.h"
 #endif
 
+#ifdef CONFIG_RALINK_RT3052_MP2
+#include "mcast.h"
+#endif
+
 #if defined (CONFIG_RA_HW_NAT) || defined (CONFIG_RA_HW_NAT_MODULE)
 #include "../../../net/nat/hw_nat/ra_nat.h"
 #endif
@@ -105,11 +109,6 @@ EXPORT_SYMBOL(ra_sw_nat_hook_rs);
 extern int (*ra_classifier_hook_tx)(struct sk_buff *skb, unsigned long cur_cycle);
 extern int (*ra_classifier_hook_rx)(struct sk_buff *skb, unsigned long cur_cycle);
 #endif /* CONFIG_RA_CLASSIFIER */
-
-#if defined (CONFIG_RALINK_RT3052_MP2)
-int32_t mcast_rx(struct sk_buff * skb);
-int32_t mcast_tx(struct sk_buff * skb);
-#endif
 
 #ifdef CONFIG_RAETH_READ_MAC_FROM_MTD
 #ifdef RA_MTD_RW_BY_NUM
