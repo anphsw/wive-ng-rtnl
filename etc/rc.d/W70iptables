@@ -411,12 +411,19 @@ startv6() {
     ip6tables -A INPUT -d ff00::/8 -j ACCEPT
     ip6tables -A FORWARD -d ff00::/8 -j ACCEPT
 
-    # allow ratelimit ping request
+    # allow ratelimit ping request to router
     ip6tables -A INPUT -p ipv6-icmp --icmpv6-type echo-request -m limit --limit 10/s -j ACCEPT
     ip6tables -A INPUT -p ipv6-icmp --icmpv6-type echo-request -j DROP
 
-    # allow all others icmp messages (mtu probing and others)
+    # allow all others icmp messages (mtu probing and others) to router
     ip6tables -A INPUT -p ipv6-icmp ! --icmpv6-type echo-request -j ACCEPT
+
+    # allow ratelimit ping request to clients
+    ip6tables -A FORWARD -p ipv6-icmp --icmpv6-type echo-request -m limit --limit 10/s -j ACCEPT
+    ip6tables -A FORWARD -p ipv6-icmp --icmpv6-type echo-request -j DROP
+
+    # allow all others icmp messages (mtu probing and others) to client
+    ip6tables -A FORWARD -p ipv6-icmp ! --icmpv6-type echo-request -j ACCEPT
 
     # allow mupnp to open connection from earth to local
     #if [ "$upnpEnabled" = "1" ]; then
