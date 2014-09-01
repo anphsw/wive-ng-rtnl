@@ -324,6 +324,7 @@
 66) kernel: rewrite min3, max3 and clamp using min and max.<br>
 67) kernel: fix check and set ignore dont fragment flag in some cases.<br>
 68) kernel: spi_driver: add support MT762x support.<br>
+69) kernel: net_sched: avoid generating same handle for u32 filters.<br>
 <br>
 <br>
 <br>
