@@ -6,10 +6,6 @@
  * Ivan Passos <ivan@cyclades.com>.
  *
  * This file contains the general definitions for the cyclades.c driver
- *$Log: cyclades.h,v $
- *Revision 1.1.1.1  2007-05-25 06:50:12  bruce
- *linux-2.6.21 support RT2880. UART, PCI, ETHERNET, IRQ.... workable
- *initial version. 
  *
  *Revision 3.1  2002/01/29 11:36:16  henrique
  *added throttle field on struct cyclades_port to indicate whether the

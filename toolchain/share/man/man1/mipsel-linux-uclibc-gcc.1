@@ -133,7 +133,7 @@
 .\" ========================================================================
 .\"
 .IX Title "GCC 1"
-.TH GCC 1 "2014-08-21" "gcc-4.8.4" "GNU"
+.TH GCC 1 "2014-08-28" "gcc-4.8.4" "GNU"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -11757,7 +11757,7 @@ are compatible with as many systems and code bases as possible.
 .IP "\fB\-mkernel\fR" 4
 .IX Item "-mkernel"
 Enable kernel development mode.  The \fB\-mkernel\fR option sets
-\&\fB\-static\fR, \fB\-fno\-common\fR, \fB\-fno\-cxa\-atexit\fR,
+\&\fB\-static\fR, \fB\-fno\-common\fR, \fB\-fno\-use\-cxa\-atexit\fR,
 \&\fB\-fno\-exceptions\fR, \fB\-fno\-non\-call\-exceptions\fR,
 \&\fB\-fapple\-kext\fR, \fB\-fno\-weak\fR and \fB\-fno\-rtti\fR where
 applicable.  This mode also sets \fB\-mno\-altivec\fR,
@@ -17934,14 +17934,14 @@ separated list.  For details on the atomic built-in functions see
 .IP "\fBnone\fR" 4
 .IX Item "none"
 Disable compiler generated atomic sequences and emit library calls for atomic
-operations.  This is the default if the target is not \f(CW\*(C`sh\-*\-linux*\*(C'\fR.
+operations.  This is the default if the target is not \f(CW\*(C`sh*\-*\-linux*\*(C'\fR.
 .IP "\fBsoft-gusa\fR" 4
 .IX Item "soft-gusa"
 Generate GNU/Linux compatible gUSA software atomic sequences for the atomic
 built-in functions.  The generated atomic sequences require additional support
 from the interrupt/exception handling code of the system and are only suitable
 for SH3* and SH4* single-core systems.  This option is enabled by default when
-the target is \f(CW\*(C`sh\-*\-linux*\*(C'\fR and SH3* or SH4*.  When the target is \s-1SH4A,\s0
+the target is \f(CW\*(C`sh*\-*\-linux*\*(C'\fR and SH3* or SH4*.  When the target is \s-1SH4A,\s0
 this option will also partially utilize the hardware atomic instructions
 \&\f(CW\*(C`movli.l\*(C'\fR and \f(CW\*(C`movco.l\*(C'\fR to create more efficient code, unless
 \&\fBstrict\fR is specified.
@@ -17960,7 +17960,7 @@ setting \f(CW\*(C`SR.IMASK = 1111\*(C'\fR.  This model works only when the progr
 in privileged mode and is only suitable for single-core systems.  Additional
 support from the interrupt/exception handling code of the system is not
 required.  This model is enabled by default when the target is
-\&\f(CW\*(C`sh\-*\-linux*\*(C'\fR and SH1* or SH2*.
+\&\f(CW\*(C`sh*\-*\-linux*\*(C'\fR and SH1* or SH2*.
 .IP "\fBhard-llcs\fR" 4
 .IX Item "hard-llcs"
 Generate hardware atomic sequences using the \f(CW\*(C`movli.l\*(C'\fR and \f(CW\*(C`movco.l\*(C'\fR
@@ -18000,10 +18000,15 @@ When generating position-independent code, emit function calls using
 the Global Offset Table instead of the Procedure Linkage Table.
 .IP "\fB\-musermode\fR" 4
 .IX Item "-musermode"
-Don't generate privileged mode only code.  This option
-implies \fB\-mno\-inline\-ic_invalidate\fR
-if the inlined code would not work in user mode.
-This is the default when the target is \f(CW\*(C`sh\-*\-linux*\*(C'\fR.
+.PD 0
+.IP "\fB\-mno\-usermode\fR" 4
+.IX Item "-mno-usermode"
+.PD
+Don't allow (allow) the compiler generating privileged mode code.  Specifying
+\&\fB\-musermode\fR also implies \fB\-mno\-inline\-ic_invalidate\fR if the
+inlined code would not work in user mode.  \fB\-musermode\fR is the default
+when the target is \f(CW\*(C`sh*\-*\-linux*\*(C'\fR.  If the target is SH1* or SH2*
+\&\fB\-musermode\fR has no effect, since there is no user mode.
 .IP "\fB\-multcost=\fR\fInumber\fR" 4
 .IX Item "-multcost=number"
 Set the cost to assume for a multiply insn.

@@ -12,11 +12,6 @@
  * Author:
  * L. Haag
  *
- * $Log: n_r3964.h,v $
- * Revision 1.1.1.1  2007-05-25 06:50:12  bruce
- * linux-2.6.21 support RT2880. UART, PCI, ETHERNET, IRQ.... workable
- * initial version. 
- *
  * Revision 1.4  2005/12/21 19:54:24  Kurt Huwig <kurt huwig de>
  * Fixed HZ usage on 2.6 kernels
  * Removed unnecessary include
