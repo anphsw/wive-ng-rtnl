@@ -23,6 +23,9 @@ if [ "$1" = "" ]; then
     #MODE=RT5350-1T1R
     #MODE=RT3350-1T1R
     #MODE=RT3050-1T1R
+    #MODE=MT7620-2T2R
+    #MODE=MT7620-2T2R-8M
+    #MODE=MT7620-2T2R-USB-8M
 else
     MODE=$1
 fi
