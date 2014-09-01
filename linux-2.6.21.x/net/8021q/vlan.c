@@ -28,7 +28,6 @@
 #include <linux/in.h>
 #include <linux/init.h>
 #include <net/p8022.h>
-#include <net/arp.h>
 #include <linux/rtnetlink.h>
 #include <linux/notifier.h>
 

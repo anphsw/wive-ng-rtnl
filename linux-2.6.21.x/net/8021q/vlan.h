@@ -1,6 +1,7 @@
 #ifndef __BEN_VLAN_802_1Q_INC__
 #define __BEN_VLAN_802_1Q_INC__
 
+#include <net/arp.h>
 #include <linux/if_vlan.h>
 
 /*  Uncomment this if you want debug traces to be shown. */
@@ -81,8 +82,41 @@ static inline struct net_device *find_vlan_dev(struct net_device *real_dev, unsi
 }
 
 
+/*
+ *	Rebuild the Ethernet MAC header. This is called after an ARP
+ *	(or in future other address resolution) has completed on this
+ *	sk_buff. We now let ARP fill in the other fields.
+ *
+ *	This routine CANNOT use cached dst->neigh!
+ *	Really, it is used only when dst->neigh is wrong.
+ *
+ * TODO:  This needs a checkup, I'm ignorant here. --BLG
+ */
+static inline int vlan_dev_rebuild_header(struct sk_buff *skb)
+{
+	struct net_device *dev = skb->dev;
+	struct vlan_ethhdr *veth = (struct vlan_ethhdr *)(skb->data);
+
+	switch (veth->h_vlan_encapsulated_proto) {
+#ifdef CONFIG_INET
+	case __constant_htons(ETH_P_IP):
+
+		/* TODO:  Confirm this will work with VLAN headers... */
+		return arp_find(veth->h_dest, skb);
+#endif
+	default:
+		printk(VLAN_DBG
+		       "%s: unable to resolve type %X addresses.\n",
+		       dev->name, ntohs(veth->h_vlan_encapsulated_proto));
+
+		memcpy(veth->h_source, dev->dev_addr, ETH_ALEN);
+		break;
+	};
+
+	return 0;
+}
+
 /* found in vlan_dev.c */
-int vlan_dev_rebuild_header(struct sk_buff *skb);
 int vlan_skb_recv(struct sk_buff *skb, struct net_device *dev,
 		  struct packet_type *ptype, struct net_device *orig_dev);
 int vlan_dev_hard_header(struct sk_buff *skb, struct net_device *dev,
