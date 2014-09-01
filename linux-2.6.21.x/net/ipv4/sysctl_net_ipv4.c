@@ -31,14 +31,14 @@ static int ip_local_port_range_max[] = { 65535, 65535 };
 
 #ifdef CONFIG_PPP_PREVENT_DROP_SESSION_ON_FULL_CPU_LOAD
 /* limit cpu load disable per default */
-int ppp_cpu_load=290000;
+int ppp_cpu_load __read_mostly = 290000;
 /* export for module support */
 EXPORT_SYMBOL(ppp_cpu_load);
 #endif
 
 #ifdef CONFIG_RAETH_DHCP_TOUCH
 /* send sigusr to dhcpc at media state change */
-int send_sigusr_dhcpc=9;
+int send_sigusr_dhcpc __read_mostly = 9;
 /* export for module support */
 EXPORT_SYMBOL(send_sigusr_dhcpc);
 #endif
@@ -47,7 +47,7 @@ EXPORT_SYMBOL(send_sigusr_dhcpc);
 /*
  * disable vlan double tag by default and reconfigure in userspace
  */
-int vlan_double_tag=0;
+int vlan_double_tag  __read_mostly = 0;
 /* export for module support */
 EXPORT_SYMBOL(vlan_double_tag);
 #endif
