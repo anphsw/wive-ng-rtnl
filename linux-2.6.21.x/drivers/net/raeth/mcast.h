@@ -109,7 +109,6 @@ static int inline mcast_entry_ins(uint16_t vlan_id, uint8_t *src_mac, uint8_t *d
 
 }
 
-
 /*
  * Return:
  *	    0: entry found
@@ -129,7 +128,7 @@ static int inline mcast_entry_del(uint16_t vlan_id, uint8_t *src_mac, uint8_t *d
 	}
 	up(&mtbl_lock);
 	return 0;
-    }else { 
+    }else {
 	/* this multicast packet was not sent by meself, just ignore it */
 	up(&mtbl_lock);
 	return 1;
@@ -145,13 +144,11 @@ static inline int32_t mcast_rx(struct sk_buff * skb)
 {
     struct vlan_ethhdr *eth = (struct vlan_ethhdr *)(skb->data-ETH_HLEN);
 
-    /* if we do not send multicast packet before, 
+    /* if we do not send multicast packet before,
      * we don't need to check re-inject multicast packet.
      */
-    if (atomic_read(&mcast_entry_num)==0) {
+    if (atomic_read(&mcast_entry_num)==0)
 	return 1;
-    }
-
 
     if(is_multicast_pkt(eth->h_dest)) {
 	MCAST_PRINT("%s: %0X:%0X:%0X:%0X:%0X:%0X\n", __FUNCTION__, \
@@ -167,11 +164,9 @@ static inline int32_t mcast_rx(struct sk_buff * skb)
     return 1;
 }
 
-
-static inline int32_t mcast_tx(struct sk_buff *skb)
+static inline void mcast_tx(struct sk_buff *skb)
 {
     struct vlan_ethhdr *eth = (struct vlan_ethhdr *)(skb->data);
-
 
     if(is_multicast_pkt(eth->h_dest)) {
 	MCAST_PRINT("%s: %0X:%0X:%0X:%0X:%0X:%0X\n", __FUNCTION__,\
@@ -183,6 +178,4 @@ static inline int32_t mcast_tx(struct sk_buff *skb)
 	    mcast_entry_ins(0, eth->h_source, eth->h_dest);
 	}
     }
-
-    return 1;
 }

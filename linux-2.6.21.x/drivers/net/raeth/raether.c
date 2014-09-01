@@ -1374,28 +1374,25 @@ static inline int rt2880_eth_recv(struct net_device* dev)
 #endif
          {
 #if defined (CONFIG_RALINK_RT3052_MP2)
-	       if(mcast_rx(rx_skb)==0) {
-		   kfree_skb(rx_skb);
-	       }else
+	    if(mcast_rx(rx_skb)==0) {
+		kfree_skb(rx_skb);
+	    } else
 #endif
 #if defined (CONFIG_RAETH_LRO)
-	       if (rx_skb->ip_summed == CHECKSUM_UNNECESSARY) {
-		       lro_receive_skb(&ei_local->lro_mgr, rx_skb, NULL);
-		       //LroStatsUpdate(&ei_local->lro_mgr,0);
-	     }else
+	    if (rx_skb->ip_summed == CHECKSUM_UNNECESSARY) {
+		lro_receive_skb(&ei_local->lro_mgr, rx_skb, NULL);
+		//LroStatsUpdate(&ei_local->lro_mgr,0);
+	    } else
 #endif
 #ifdef CONFIG_RAETH_NAPI
-                netif_receive_skb(rx_skb);
+		netif_receive_skb(rx_skb);
 #else
 #ifdef CONFIG_RAETH_HW_VLAN_RX
-	        if(ei_local->vlgrp && rx_ring[rx_dma_owner_idx].rxd_info2.TAG) {
-			vlan_hwaccel_rx(rx_skb, ei_local->vlgrp, rx_ring[rx_dma_owner_idx].rxd_info3.VID);
-		} else {
-                netif_rx(rx_skb);
-	 }
-#else
-                netif_rx(rx_skb);
+	    if(ei_local->vlgrp && rx_ring[rx_dma_owner_idx].rxd_info2.TAG) {
+		vlan_hwaccel_rx(rx_skb, ei_local->vlgrp, rx_ring[rx_dma_owner_idx].rxd_info3.VID);
+	    } else
 #endif
+                netif_rx(rx_skb);
 #endif
          }
 
