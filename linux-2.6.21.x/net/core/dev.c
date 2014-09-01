@@ -1675,7 +1675,7 @@ drop:
 	return NET_RX_DROP;
 }
 
-int netif_rx_ni(struct sk_buff *skb)
+int FASTPATHNET netif_rx_ni(struct sk_buff *skb)
 {
 	int err;
 
@@ -1687,8 +1687,6 @@ int netif_rx_ni(struct sk_buff *skb)
 
 	return err;
 }
-
-EXPORT_SYMBOL(netif_rx_ni);
 
 static void net_tx_action(struct softirq_action *h)
 {
@@ -3696,6 +3694,7 @@ EXPORT_SYMBOL(netdev_set_master);
 EXPORT_SYMBOL(netdev_state_change);
 EXPORT_SYMBOL(netif_receive_skb);
 EXPORT_SYMBOL(netif_rx);
+EXPORT_SYMBOL(netif_rx_ni);
 EXPORT_SYMBOL(register_gifconf);
 EXPORT_SYMBOL(register_netdevice);
 EXPORT_SYMBOL(register_netdevice_notifier);
