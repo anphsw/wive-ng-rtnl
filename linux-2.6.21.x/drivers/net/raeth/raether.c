@@ -81,18 +81,6 @@ static void rtl_link_status_changed(void);
 extern int vlan_double_tag;
 #endif
 
-#ifdef CONFIG_RAETH_NAPI
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,35)
-static int raeth_clean(struct napi_struct *napi, int budget);
-#else
-static int raeth_clean(struct net_device *dev, int *budget);
-#endif
-
-static int rt2880_eth_recv(struct net_device* dev, int *work_done, int work_to_do);
-#else
-static int rt2880_eth_recv(struct net_device* dev);
-#endif
-
 #ifndef CONFIG_RA_NAT_NONE
 #ifdef CONFIG_RAETH_MODULE
 extern int (*ra_sw_nat_hook_rx)(struct sk_buff *skb);
@@ -202,7 +190,6 @@ static int ei_open(struct net_device *dev);
 static int ei_close(struct net_device *dev);
 static int ra2882eth_init(void);
 static void ra2882eth_cleanup_module(void);
-static void ei_xmit_housekeeping(unsigned long unused);
 
 #if 0
 void skb_dump(struct sk_buff* sk) {
@@ -1148,9 +1135,9 @@ static int rt_get_skb_header(struct sk_buff *skb, void **iphdr, void **tcph,
 #endif // CONFIG_RAETH_LRO //
 
 #ifdef CONFIG_RAETH_NAPI
-static int FASTPATHNET rt2880_eth_recv(struct net_device* dev, int *work_done, int work_to_do)
+static inline int rt2880_eth_recv(struct net_device* dev, int *work_done, int work_to_do)
 #else
-static int FASTPATHNET rt2880_eth_recv(struct net_device* dev)
+static inline int rt2880_eth_recv(struct net_device* dev)
 #endif
 {
 	struct sk_buff	*skb, *rx_skb;
@@ -1606,8 +1593,77 @@ static void FASTPATHNET ei_receive(unsigned long unused)  // device structure
 }
 #endif
 
+static inline void ei_xmit_housekeeping(unsigned long unused)
+{
+    struct net_device *dev = dev_raether;
+    END_DEVICE *ei_local = netdev_priv(dev);
+    struct PDMA_txdesc *tx_desc;
+    unsigned long skb_free_idx;
+#ifdef CONFIG_RAETH_QOS
+    unsigned long tx_dtx_idx;
+#endif
+#ifndef CONFIG_RAETH_NAPI
+    unsigned long reg_int_mask=0;
+#endif
+
+#ifdef CONFIG_RAETH_QOS
+    int i;
+    for (i=0;i<NUM_TX_RINGS;i++){
+        skb_free_idx = ei_local->free_idx[i];
+    	if((ei_local->skb_free[i][skb_free_idx])==0){
+		continue;
+	}
+
+	get_tx_desc_and_dtx_idx(ei_local, i, &tx_dtx_idx, &tx_desc);
+
+	while(tx_desc[skb_free_idx].txd_info2.DDONE_bit==1 && (ei_local->skb_free[i][skb_free_idx])!=0 ){
+	    dev_kfree_skb_any((ei_local->skb_free[i][skb_free_idx]));
+	    ei_local->skb_free[i][skb_free_idx]=0;
+	    skb_free_idx = (skb_free_idx +1) % NUM_TX_DESC;
+	}
+	ei_local->free_idx[i] = skb_free_idx;
+    }
+#else
+	sysRegRead(TX_DTX_IDX0);
+	tx_desc = ei_local->tx_ring0;
+	skb_free_idx = ei_local->free_idx;
+	if ((ei_local->skb_free[skb_free_idx]) != 0 && tx_desc[skb_free_idx].txd_info2.DDONE_bit==1) {
+		while(tx_desc[skb_free_idx].txd_info2.DDONE_bit==1 && (ei_local->skb_free[skb_free_idx])!=0 ){
+#if defined (CONFIG_RAETH_TSO)
+	    if(ei_local->skb_free[skb_free_idx]!=(struct  sk_buff *)0xFFFFFFFF)
+		    dev_kfree_skb_any(ei_local->skb_free[skb_free_idx]);
+#else
+	    dev_kfree_skb_any(ei_local->skb_free[skb_free_idx]);
+#endif
+	    ei_local->skb_free[skb_free_idx]=0;
+	    skb_free_idx = (skb_free_idx +1) % NUM_TX_DESC;
+	}
+
+	netif_wake_queue(dev);
+#ifdef CONFIG_PSEUDO_SUPPORT
+		netif_wake_queue(ei_local->PseudoDev);
+#endif
+		tx_ring_full=0;
+		ei_local->free_idx = skb_free_idx;
+	}  /* if skb_free != 0 */
+#endif
+
+#ifndef CONFIG_RAETH_NAPI
+    reg_int_mask=sysRegRead(FE_INT_ENABLE);
+#if defined (DELAY_INT)
+    sysRegWrite(FE_INT_ENABLE, reg_int_mask| TX_DLY_INT);
+#else
+
+    sysRegWrite(FE_INT_ENABLE, reg_int_mask | TX_DONE_INT0 \
+		    			    | TX_DONE_INT1 \
+					    | TX_DONE_INT2 \
+					    | TX_DONE_INT3);
+#endif
+#endif //CONFIG_RAETH_NAPI//
+}
+
 #ifdef CONFIG_RAETH_NAPI
-static int
+static inline int
 #if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,35)
 raeth_clean(struct napi_struct *napi, int budget)
 #else
@@ -2656,75 +2712,6 @@ static int __init rather_probe(struct net_device *dev)
 	setup_statistics(ei_local);
 
 	return 0;
-}
-
-static void FASTPATHNET ei_xmit_housekeeping(unsigned long unused)
-{
-    struct net_device *dev = dev_raether;
-    END_DEVICE *ei_local = netdev_priv(dev);
-    struct PDMA_txdesc *tx_desc;
-    unsigned long skb_free_idx;
-#ifdef CONFIG_RAETH_QOS
-    unsigned long tx_dtx_idx;
-#endif
-#ifndef CONFIG_RAETH_NAPI
-    unsigned long reg_int_mask=0;
-#endif
-
-#ifdef CONFIG_RAETH_QOS
-    int i;
-    for (i=0;i<NUM_TX_RINGS;i++){
-        skb_free_idx = ei_local->free_idx[i];
-    	if((ei_local->skb_free[i][skb_free_idx])==0){
-		continue;
-	}
-
-	get_tx_desc_and_dtx_idx(ei_local, i, &tx_dtx_idx, &tx_desc);
-
-	while(tx_desc[skb_free_idx].txd_info2.DDONE_bit==1 && (ei_local->skb_free[i][skb_free_idx])!=0 ){
-	    dev_kfree_skb_any((ei_local->skb_free[i][skb_free_idx]));
-	    ei_local->skb_free[i][skb_free_idx]=0;
-	    skb_free_idx = (skb_free_idx +1) % NUM_TX_DESC;
-	}
-	ei_local->free_idx[i] = skb_free_idx;
-    }
-#else
-	sysRegRead(TX_DTX_IDX0);
-	tx_desc = ei_local->tx_ring0;
-	skb_free_idx = ei_local->free_idx;
-	if ((ei_local->skb_free[skb_free_idx]) != 0 && tx_desc[skb_free_idx].txd_info2.DDONE_bit==1) {
-		while(tx_desc[skb_free_idx].txd_info2.DDONE_bit==1 && (ei_local->skb_free[skb_free_idx])!=0 ){
-#if defined (CONFIG_RAETH_TSO)
-	    if(ei_local->skb_free[skb_free_idx]!=(struct  sk_buff *)0xFFFFFFFF)
-		    dev_kfree_skb_any(ei_local->skb_free[skb_free_idx]);
-#else
-	    dev_kfree_skb_any(ei_local->skb_free[skb_free_idx]);
-#endif
-	    ei_local->skb_free[skb_free_idx]=0;
-	    skb_free_idx = (skb_free_idx +1) % NUM_TX_DESC;
-	}
-
-	netif_wake_queue(dev);
-#ifdef CONFIG_PSEUDO_SUPPORT
-		netif_wake_queue(ei_local->PseudoDev);
-#endif
-		tx_ring_full=0;
-		ei_local->free_idx = skb_free_idx;
-	}  /* if skb_free != 0 */
-#endif
-
-#ifndef CONFIG_RAETH_NAPI
-    reg_int_mask=sysRegRead(FE_INT_ENABLE);
-#if defined (DELAY_INT)
-    sysRegWrite(FE_INT_ENABLE, reg_int_mask| TX_DLY_INT);
-#else
-
-    sysRegWrite(FE_INT_ENABLE, reg_int_mask | TX_DONE_INT0 \
-		    			    | TX_DONE_INT1 \
-					    | TX_DONE_INT2 \
-					    | TX_DONE_INT3);
-#endif
-#endif //CONFIG_RAETH_NAPI//
 }
 
 #ifdef CONFIG_PSEUDO_SUPPORT
