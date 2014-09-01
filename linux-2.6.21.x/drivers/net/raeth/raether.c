@@ -2673,7 +2673,6 @@ static int __init rather_probe(struct net_device *dev)
 #else
 	i = ra_mtd_read_nm("Factory", GMAC0_OFFSET, 6, addr.sa_data);
 #endif
-
 	//If reading mtd failed or mac0 is empty, generate a mac address
 	if (i < 0 || (memcmp(addr.sa_data, zero1, 6) == 0) ||
 	    (memcmp(addr.sa_data, zero2, 6) == 0)) {
@@ -2683,6 +2682,8 @@ static int __init rather_probe(struct net_device *dev)
 		addr.sa_data[5] = net_random()&0xFF;
 	}
 
+	ei_set_mac_addr(dev, &addr);
+#endif /* CONFIG_RAETH_READ_MAC_FROM_MTD */
 #ifdef CONFIG_RAETH_LRO
 	ei_local->lro_mgr.dev = dev;
         memset(&ei_local->lro_mgr.stats, 0, sizeof(ei_local->lro_mgr.stats));
@@ -2695,10 +2696,6 @@ static int __init rather_probe(struct net_device *dev)
         ei_local->lro_mgr.lro_arr = ei_local->lro_arr;
         ei_local->lro_mgr.get_skb_header = rt_get_skb_header;
 #endif
-
-	ei_set_mac_addr(dev, &addr);
-#endif /* CONFIG_RAETH_READ_MAC_FROM_MTD */
-
 #ifdef CONFIG_RAETH_NAPI
 #if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,35)
 	netif_napi_add(dev, &ei_local->napi, raeth_clean, DEV_WEIGHT);

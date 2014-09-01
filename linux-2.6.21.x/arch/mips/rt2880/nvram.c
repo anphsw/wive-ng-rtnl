@@ -25,7 +25,11 @@ static block_t fb[FLASH_BLOCK_NUM] = {
 /* Prototypes */
 static int init_nvram_block(int index);
 static int ra_nvram_close(int index);
-static char const *nvram_get(int index, char *name);
+
+#ifndef CONFIG_RAETH_LRO
+static
+#endif
+char const *nvram_get(int index, char *name);
 static int const nvram_getall(int index, char *buf);
 
 static int nvram_set(int index, char *name, char *value);
@@ -533,7 +537,10 @@ static int nvram_set(int index, char *name, char *value)
 	return 0;
 }
 
-static char const *nvram_get(int index, char *name)
+#ifndef CONFIG_RAETH_LRO
+static
+#endif
+char const *nvram_get(int index, char *name)
 {
 	int idx;
 	static char const *ret;
@@ -558,6 +565,9 @@ static char const *nvram_get(int index, char *name)
 	up(&nvram_sem);
 	return NULL;
 }
+#ifdef CONFIG_RAETH_LRO
+EXPORT_SYMBOL(nvram_get);
+#endif
 
 static int const nvram_getall(int index, char *buf) 
 {
@@ -600,4 +610,3 @@ static int const nvram_getall(int index, char *buf)
 
 late_initcall(ra_nvram_init);
 module_exit(ra_nvram_exit);
-EXPORT_SYMBOL(nvram_get);

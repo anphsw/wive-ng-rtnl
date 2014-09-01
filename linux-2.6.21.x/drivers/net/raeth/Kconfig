@@ -226,7 +226,7 @@ endchoice
 config  MAC_TO_GIGAPHY_MODE_ADDR2
         hex "GE2 Phy Address"
 	default 0x1E
-        depends on GE2_MII_AN || GE2_RGMII_AN 
+        depends on GE2_MII_AN || GE2_RGMII_AN
 
 
 #force 100M
