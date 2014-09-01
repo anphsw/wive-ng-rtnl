@@ -2004,31 +2004,32 @@
 42) kernel: ipv6: udp: possible dst leak in udpv6_sendmsg.<br>
 43) kernel: ipv6: check the hop limit setting in ancillary data.<br>
 44) kernel: ipv6: remove optimistic DAD flag test in ipv6_add_addr().<br>
-45) kernel: netfilter: improve ipv4 netfilter optimization pass default table.<br>
-46) kernel: netfilter: allow disabling processing of the netfilter "filter" table for established connection packets.<br>
-47) kernel: netfilter: don't use mutex_lock_interruptible().<br>
-48) kernel: igmp: call ip_mc_clear_src() only when we have no users of ip_mc_list.<br>
-49) kernel: ip_output: do skb ufo init for peeked non ufo skb as well.<br>
-50) kernel: option driver add new modems support (from 3.16 kernel).<br>
-51) kernel: ppp: refresh Ralink hardware watchdog timer, prevent reboot at high cpu load.<br>
-52) kernel: packet: add needed_tailroom to packet_sendmsg_spkt.<br>
-53) kernel: net_sched: qdisc_alloc_handle() can be too slow.<br>
-54) kernel: tcp: make sure write_queue_from does not begin with NULL ptr.<br>
-55) kernel: tcp: set initial_ssthresh default to zero in Cubic and BIC.<br>
-56) kernel: imq: automatic exclude redirected to imq traffic from PPE and FastNat.<br>
-57) kernel: sched: decrease user max rt_prio to 10, this reducing the size of the O(1) scheduler arrays (small save ticks).<br>
-58) kernel: hw_nat: small optimize, fix need drop magic tag and mark unhit in ip6 local output.<br>
-59) kernel: hw_nat: conntrack: correct skip v6 packets in conntrack_in (for hw_nat v2).<br>
-60) kernel: raeth: implement ondemand wan status check for devices with external rtl switch (example N56U).<br>
-61) kernel: wifi drivers: fix RTPRIV_IOCTL_GET_MAC_TABLE_STRUCT on RTxxxX driver 2.5.X.X.<br>
-62) kernel: ralink_spi: if flash not detected use stub depended from kernel config (4/8/16Mb select).<br>
-63) kernel: hw_nat: update code and dependecys(need for MT7620 support).<br>
-64) kernel: hw_nat: use global spinlock for serializing access to FoE DMA, extend module params.<br>
-65) kernel: speedhack: review section arrange and add some time critical code to fastpath section(up l2tp speed from ~130FDX to ~150FDX).<br>
-66) kernel: rewrite min3, max3 and clamp using min and max.<br>
-67) kernel: fix check and set ignore dont fragment flag in some cases.<br>
-68) kernel: spi_driver: add support MT762x support.<br>
-69) kernel: net_sched: avoid generating same handle for u32 filters.<br>
+45) kernel: ipv6: update Destination Cache entries when gateway turn into host(RFC 4861).<br>
+46) kernel: netfilter: improve ipv4 netfilter optimization pass default table.<br>
+47) kernel: netfilter: allow disabling processing of the netfilter "filter" table for established connection packets.<br>
+48) kernel: netfilter: don't use mutex_lock_interruptible().<br>
+49) kernel: igmp: call ip_mc_clear_src() only when we have no users of ip_mc_list.<br>
+50) kernel: ip_output: do skb ufo init for peeked non ufo skb as well.<br>
+51) kernel: option driver add new modems support (from 3.16 kernel).<br>
+52) kernel: ppp: refresh Ralink hardware watchdog timer, prevent reboot at high cpu load.<br>
+53) kernel: packet: add needed_tailroom to packet_sendmsg_spkt.<br>
+54) kernel: net_sched: qdisc_alloc_handle() can be too slow.<br>
+55) kernel: tcp: make sure write_queue_from does not begin with NULL ptr.<br>
+56) kernel: tcp: set initial_ssthresh default to zero in Cubic and BIC.<br>
+57) kernel: imq: automatic exclude redirected to imq traffic from PPE and FastNat.<br>
+58) kernel: sched: decrease user max rt_prio to 10, this reducing the size of the O(1) scheduler arrays (small save ticks).<br>
+59) kernel: hw_nat: small optimize, fix need drop magic tag and mark unhit in ip6 local output.<br>
+60) kernel: hw_nat: conntrack: correct skip v6 packets in conntrack_in (for hw_nat v2).<br>
+61) kernel: raeth: implement ondemand wan status check for devices with external rtl switch (example N56U).<br>
+62) kernel: wifi drivers: fix RTPRIV_IOCTL_GET_MAC_TABLE_STRUCT on RTxxxX driver 2.5.X.X.<br>
+63) kernel: ralink_spi: if flash not detected use stub depended from kernel config (4/8/16Mb select).<br>
+64) kernel: hw_nat: update code and dependecys(need for MT7620 support).<br>
+65) kernel: hw_nat: use global spinlock for serializing access to FoE DMA, extend module params.<br>
+66) kernel: speedhack: review section arrange and add some time critical code to fastpath section(up l2tp speed from ~130FDX to ~150FDX).<br>
+67) kernel: rewrite min3, max3 and clamp using min and max.<br>
+68) kernel: fix check and set ignore dont fragment flag in some cases.<br>
+69) kernel: spi_driver: add support MT762x support.<br>
+70) kernel: net_sched: avoid generating same handle for u32 filters.<br>
 <br>
 <br>
 <br>
