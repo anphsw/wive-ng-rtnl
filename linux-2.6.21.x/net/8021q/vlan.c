@@ -39,11 +39,7 @@
 #define DRV_VERSION "1.8"
 
 /* Global VLAN variables */
-
-/* Our listing of VLAN group(s) */
-static struct hlist_head vlan_group_hash[VLAN_GRP_HASH_SIZE];
-#define vlan_grp_hashfn(IDX)	((((IDX) >> VLAN_GRP_HASH_SHIFT) ^ (IDX)) & VLAN_GRP_HASH_MASK)
-
+struct hlist_head vlan_group_hash[VLAN_GRP_HASH_SIZE];
 static char vlan_fullname[] = "802.1Q VLAN Support";
 static char vlan_version[] = DRV_VERSION;
 static char vlan_copyright[] = "Ben Greear <greearb@candelatech.com>";
@@ -159,36 +155,6 @@ static void __exit vlan_cleanup_module(void)
 module_init(vlan_proto_init);
 module_exit(vlan_cleanup_module);
 
-/* Must be invoked with RCU read lock (no preempt) */
-static struct vlan_group *__vlan_find_group(int real_dev_ifindex)
-{
-	struct vlan_group *grp;
-	struct hlist_node *n;
-	int hash = vlan_grp_hashfn(real_dev_ifindex);
-
-	hlist_for_each_entry_rcu(grp, n, &vlan_group_hash[hash], hlist) {
-		if (grp->real_dev_ifindex == real_dev_ifindex)
-			return grp;
-	}
-
-	return NULL;
-}
-
-/*  Find the protocol handler.  Assumes VID < VLAN_VID_MASK.
- *
- * Must be invoked with RCU read lock (no preempt)
- */
-struct net_device *__find_vlan_dev(struct net_device *real_dev,
-				   unsigned short VID)
-{
-	struct vlan_group *grp = __vlan_find_group(real_dev->ifindex);
-
-	if (grp)
-		return vlan_group_get_device(grp, VID);
-
-	return NULL;
-}
-
 static void vlan_group_free(struct vlan_group *grp)
 {
 	int i;
@@ -255,7 +221,7 @@ static int unregister_vlan_dev(struct net_device *real_dev,
 		return -EINVAL;
 
 	ASSERT_RTNL();
-	grp = __vlan_find_group(real_dev_ifindex);
+	grp = vlan_find_group(real_dev_ifindex);
 
 	ret = 0;
 
@@ -510,7 +476,7 @@ static struct net_device *register_vlan_device(const char *eth_IF_name,
 	if (!(real_dev->flags & IFF_UP))
 		goto out_unlock;
 
-	if (__find_vlan_dev(real_dev, VLAN_ID) != NULL) {
+	if (find_vlan_dev(real_dev, VLAN_ID) != NULL) {
 		/* was already registered. */
 		printk(VLAN_DBG "%s: ALREADY had VLAN registered\n", __FUNCTION__);
 		goto out_unlock;
@@ -588,7 +554,7 @@ static struct net_device *register_vlan_device(const char *eth_IF_name,
 	printk(VLAN_DBG "About to go find the group for idx: %i\n",
 	       real_dev->ifindex);
 #endif
-	grp = __vlan_find_group(real_dev->ifindex);
+	grp = vlan_find_group(real_dev->ifindex);
 	if (!grp) {
 		ngrp = grp = vlan_group_alloc(real_dev->ifindex);
 		if (!grp)
@@ -644,7 +610,7 @@ out_ret_null:
 static int vlan_device_event(struct notifier_block *unused, unsigned long event, void *ptr)
 {
 	struct net_device *dev = ptr;
-	struct vlan_group *grp = __vlan_find_group(dev->ifindex);
+	struct vlan_group *grp = vlan_find_group(dev->ifindex);
 	int i, flgs;
 	struct net_device *vlandev;
 
