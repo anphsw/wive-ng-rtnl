@@ -25,8 +25,12 @@ rmmod_mod="hw_nat ppp_mppe pppol2tp pptp pppoe pppox ppp_generic imq ipt_account
 
 # disable forward
 sysctl -wq net.ipv4.ip_forward=0
-echo 0 > /proc/sys/net/ipv4/conf/all/mc_forwarding
-echo 0 > /proc/sys/net/ipv4/conf/default/mc_forwarding
+sysctl -wq net.ipv4.conf.all.forwarding=0
+sysctl -wq net.ipv4.conf.all.mc_forwarding=0
+sysctl -wq net.ipv4.conf.default.forwarding=0
+sysctl -wq net.ipv4.conf.default.mc_forwarding=0
+sysctl -wq net.ipv6.conf.all.forwarding=0
+sysctl -wq net.ipv6.conf.default.forwarding=0
 
 # clear conntrack and routes tables/caches
 flush_net_caches
