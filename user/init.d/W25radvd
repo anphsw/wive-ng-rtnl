@@ -50,28 +50,28 @@ start() {
         $LOG "Tunel ipv6 in ipv4 configure and up"
         if [ "$ipv6_mode" = "6RD" ]; then
 	    # this section for 6RD tunnel mode
+	    relay6to4="192.88.99.127"	# The 6rd IPv4-gateway
 	    ipv6subnet="$(echo -n `printf '%02X:' ${real_wan_ipaddr//./ } | awk -F: '{print($1$2":"$3$4)}'`)"
-    	    ipv6prefix="2a02:2560"		# Your ISP's IPv6-prefix
-	    relay6to4="192.88.99.127"		# The 6rd IPv4-gateway
+    	    ipv6prefix="2a02:2560"	# Your ISP's IPv6-prefix
 	    $LOG "Up 6rd interface"
-	    ip -6 addr add ${ipv6prefix}:$ipv6subnet::abca/128 dev $real_wan_if
+	    ip -6 addr add ${ipv6prefix}:${ipv6subnet}::abca/128 dev $real_wan_if
 	    ip tunnel add $tunif mode sit ttl 64 remote any local $real_wan_ipaddr
 	    ########### BUSYBOX NOT SUPPORT ip tunnel prefix set ##################
 	    ################### NEED PORT THIS FROM IPROUTE2 ######################
-	    #ip tunnel 6rd dev $tunif 6rd-prefix $ipv6prefix::/32
+	    #ip tunnel 6rd dev $tunif 6rd-prefix ${ipv6prefix}::/32
 	    ip link set $tunif up
-	    $LOG "Add adress ${ipv6prefix}:$ipv6subnet::abca/32 to $tunif"
-	    ip -6 addr add ${ipv6prefix}:$ipv6subnet::abca/32 dev $tunif
-	    $LOG "Add route to ::/0 via ::$relay6to4 dev $tunif"
-	    ip -6 route replace ::/0 via ::$relay6to4 dev $tunif metric 1
+	    $LOG "Add adress ${ipv6prefix}:${ipv6subnet}::abca/32 to $tunif"
+	    ip -6 addr add ${ipv6prefix}:${ipv6subnet}::abca/32 dev $tunif
+	    $LOG "Add route to ::/0 via ::${relay6to4} dev $tunif"
+	    ip -6 route replace ::/0 via ::${relay6to4} dev $tunif metric 1
 	    $LOG "Set mtu $sitmtu to $tunif"
 	    sysctl -wq net.ipv6.conf.$tunif.mtu="$sitmtu"
 	    ip link set mtu $sitmtu dev $tunif
         elif [ "$ipv6_mode" = "6TO4" ]; then
 	    # this section for 6to4 tunnel mode
+	    relay6to4="192.88.99.1"
 	    ipv6subnet="2000"
     	    ipv6prefix=`echo $real_wan_ipaddr | awk -F. '{ printf "2002:%02x%02x:%02x%02x", $1, $2, $3, $4 }'`
-	    relay6to4="192.88.99.1"
 	    $LOG "Up $tunif interface"
 	    ip -6 link set $tunif up
 	    $LOG "Set mtu $sitmtu to $tunif"
