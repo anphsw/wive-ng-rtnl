@@ -35,9 +35,6 @@ calculate_and_set_mtu() {
 start() {
     eval `nvram_buf_get 2860 radvdEnabled`
     if [ "$radvdEnabled" = "1" ]; then
-	# default subnet
-	ipv6subnet="2000"
-
 	# check wan ip set
 	if [ "$real_wan_ipaddr" = "" ]; then
 	    $LOG "No ipv4 adress on wan, exit..."
@@ -51,22 +48,29 @@ start() {
         calculate_and_set_mtu
 
         $LOG "Tunel ipv6 in ipv4 configure and up"
-        ipv6prefix=`echo $real_wan_ipaddr | awk -F. '{ printf "2002:%02x%02x:%02x%02x", $1, $2, $3, $4 }'`
         if [ "$ipv6_mode" = "6RD" ]; then
 	    # this section for 6RD tunnel mode
-	    relay6to4="192.88.99.127"
-	    $LOG "Up tun6to4 interface"
+	    ipv6subnet="$(echo -n `printf '%02X:' ${real_wan_ipaddr//./ } | awk -F: '{print($1$2":"$3$4)}'`)"
+    	    ipv6prefix="2a02:2560"		# Your ISP's IPv6-prefix
+	    relay6to4="192.88.99.127"		# The 6rd IPv4-gateway
+	    $LOG "Up 6rd interface"
+	    ip -6 addr add ${ipv6prefix}:$ipv6subnet::abca/128 dev $real_wan_if
 	    ip tunnel add $tunif mode sit ttl 64 remote any local $real_wan_ipaddr
-	    ip link set dev $tunif up
+	    ########### BUSYBOX NOT SUPPORT ip tunnel prefix set ##################
+	    ################### NEED PORT THIS FROM IPROUTE2 ######################
+	    #ip tunnel 6rd dev $tunif 6rd-prefix $ipv6prefix::/32
+	    ip link set $tunif up
+	    $LOG "Add adress ${ipv6prefix}:$ipv6subnet::abca/32 to $tunif"
+	    ip -6 addr add ${ipv6prefix}:$ipv6subnet::abca/32 dev $tunif
+	    $LOG "Add route to ::/0 via ::$relay6to4 dev $tunif"
+	    ip -6 route replace ::/0 via ::$relay6to4 dev $tunif metric 1
 	    $LOG "Set mtu $sitmtu to $tunif"
 	    sysctl -wq net.ipv6.conf.$tunif.mtu="$sitmtu"
 	    ip link set mtu $sitmtu dev $tunif
-	    $LOG "Add adress ${ipv6prefix}::1/16 to $tunif"
-	    ip -6 addr add ${ipv6prefix}::1/16 dev $tunif
-	    $LOG "Add route to ${ipv6subnet}::/3 via ::${relay6to4} dev $tunif"
-	    ip -6 route replace ${ipv6subnet}::/3 via ::${relay6to4} dev $tunif metric 1
         elif [ "$ipv6_mode" = "6TO4" ]; then
 	    # this section for 6to4 tunnel mode
+	    ipv6subnet="2000"
+    	    ipv6prefix=`echo $real_wan_ipaddr | awk -F. '{ printf "2002:%02x%02x:%02x%02x", $1, $2, $3, $4 }'`
 	    relay6to4="192.88.99.1"
 	    $LOG "Up $tunif interface"
 	    ip -6 link set $tunif up
@@ -128,13 +132,15 @@ stop() {
 	killall -q radvd
 	killall -q -SIGKILL radvd
 
-	ip -6 route flush dev tun6to4	> /dev/null 2>&1
-	ip -6 addr flush dev tun6to4	> /dev/null 2>&1
-	ip -6 route flush dev sit0	> /dev/null 2>&1
-	ip -6 addr flush dev sit0	> /dev/null 2>&1
-	ip link set dev tun6to4 down	> /dev/null 2>&1
-	ip link set dev sit0 down	> /dev/null 2>&1
-	ip tunnel del tun6to4		> /dev/null 2>&1
+	ip -6 route flush dev 6rd		> /dev/null 2>&1
+	ip -6 addr flush dev 6rd		> /dev/null 2>&1
+	ip -6 route flush dev sit0		> /dev/null 2>&1
+	ip -6 addr flush dev sit0		> /dev/null 2>&1
+	ip -6 route flush dev $real_wan_if	> /dev/null 2>&1
+	ip -6 addr flush dev $real_wan_if	> /dev/null 2>&1
+	ip link set dev 6rd down		> /dev/null 2>&1
+	ip link set dev sit0 down		> /dev/null 2>&1
+	ip tunnel del 6rd			> /dev/null 2>&1
     fi
 }
 
