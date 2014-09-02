@@ -23,8 +23,7 @@
 #include	<sys/types.h>
 #include	<sys/wait.h>
 #include        <sys/ioctl.h>
-
-#include <syslog.h>
+#include	<syslog.h>
 
 #include	"utils.h"
 #include	"uemf.h"
@@ -46,10 +45,6 @@ void	formDefineUserMgmt(void);
 #endif
 
 /*********************************** Locals ***********************************/
-/*
- *	Change configuration here
- */
-
 static char_t		*rootWeb = T("/tmp/web");		/* Root web directory */
 static char_t		*password = T("");			/* Security password */
 static char_t		*gopid = T("/var/run/goahead.pid");	/* pid file */
@@ -57,20 +52,15 @@ static int		port = 80;				/* Server port */
 static int		retries = 5;				/* Server port retries */
 static int		finished;				/* Finished flag */
 
-/****************************** Forward Declarations **************************/
-
-extern void defaultErrorHandler(int etype, char_t *msg);
-extern void defaultTraceHandler(int level, char_t *buf);
-extern void formDefineWireless(void);
-
-static int writeGoPid(void);
-static int initWebs(void);
-static int websHomePageHandler(webs_t wp, char_t *urlPrefix, char_t *webDir, int arg, char_t *url, char_t *path, char_t *query);
-
 #ifdef B_STATS
 static void printMemStats(int handle, char_t *fmt, ...);
 static void memLeaks();
 #endif
+
+/****************************** Forward Declarations **************************/
+extern void defaultErrorHandler(int etype, char_t *msg);
+extern void defaultTraceHandler(int level, char_t *buf);
+extern void formDefineWireless(void);
 
 /*
  * WPS Single Trigger Signal handler.
@@ -199,6 +189,163 @@ static void InitSignals(int helper)
 	goaInitGpio(helper);
 }
 
+/******************************************************************************/
+/*
+ *	Write pid to the pid file
+ */
+static int writeGoPid(void)
+{
+	FILE *fp;
+
+	fp = fopen(gopid, "w+");
+	if (NULL == fp) {
+		error(E_L, E_LOG, T("goahead.c: cannot open pid file"));
+		return (-1);
+	}
+	fprintf(fp, "%d", getpid());
+	fclose(fp);
+
+	return 0;
+}
+
+/******************************************************************************/
+/*
+ *	Home page handler
+ */
+static int websHomePageHandler(webs_t wp, char_t *urlPrefix, char_t *webDir,
+	int arg, char_t *url, char_t *path, char_t *query)
+{
+	/*
+	 *	If the empty or "/" URL is invoked, redirect default URLs to the home page
+	 */
+	if (*url == '\0' || gstrcmp(url, T("/")) == 0) {
+		websRedirect(wp, T("home.asp"));
+		return 1;
+	}
+	return 0;
+}
+
+/******************************************************************************/
+/*
+ *	Initialize the web server.
+ */
+static int initWebs(void)
+{
+	struct in_addr	intaddr;
+	char			*lan_ip = nvram_get(RT2860_NVRAM, "lan_ipaddr");
+	char			webdir[128];
+	char			*cp;
+	char_t			wbuf[128];
+	int			web_port=80;
+
+	/*
+	 *	Initialize the socket subsystem
+	 */
+	socketOpen();
+
+#ifdef USER_MANAGEMENT_SUPPORT
+	/*
+	 *	Initialize the User Management database
+	 */
+	char *admu = nvram_get(RT2860_NVRAM, "Login");
+	char *admp = nvram_get(RT2860_NVRAM, "Password");
+	umOpen();
+	/* umRestore(T("umconfig.txt"));
+	 * winfred: instead of using umconfig.txt, we create 'the one' adm defined in nvram
+	 */
+	umAddGroup(T("adm"), 0x07, AM_DIGEST, FALSE, FALSE);
+	if (admu && strcmp(admu, "") && admp && strcmp(admp, "")) {
+		umAddUser(admu, admp, T("adm"), FALSE, FALSE);
+		umAddAccessLimit(T("/"), AM_DIGEST, FALSE, T("adm"));
+	}
+	else
+		error(E_L, E_LOG, T("gohead.c: Warning: empty administrator account or password"));
+#endif
+
+	/*
+	 * get ip address from nvram configuration (we executed initInternet)
+	 */
+	if (NULL == lan_ip) {
+		error(E_L, E_LOG, T("initWebs: cannot find lan_ip in NVRAM"));
+		return -1;
+	}
+	intaddr.s_addr = inet_addr(lan_ip);
+	if (intaddr.s_addr == INADDR_NONE) {
+		error(E_L, E_LOG, T("initWebs: failed to convert %s to binary ip data"),
+				lan_ip);
+		return -1;
+	}
+
+	/*
+	 *	Set rootWeb as the root web. Modify this to suit your needs
+	 */
+	sprintf(webdir, "%s", rootWeb);
+
+	/*
+	 *	Configure the web server options before opening the web server
+	 */
+	websSetDefaultDir(webdir);
+	cp = inet_ntoa(intaddr);
+	ascToUni(wbuf, cp, min(strlen(cp) + 1, sizeof(wbuf)));
+	websSetIpaddr(wbuf);
+	/* use ip address (already in wbuf) as host */
+	websSetHost(wbuf);
+
+	/*
+	 *	Configure the web server options before opening the web server
+	 */
+	websSetDefaultPage(T("default.asp"));
+	websSetPassword(password);
+
+	/*
+	 *	Open the web server on the given port. If that port is taken, try
+	 *	the next sequential port for up to "retries" attempts.
+	 */
+	web_port = atoi(nvram_get(RT2860_NVRAM, "RemoteManagementPort"));
+	if ((web_port) && (web_port != 80))
+	    port=web_port;
+
+	websOpenServer(port, retries);
+
+	/*
+	 * 	First create the URL handlers. Note: handlers are called in sorted order
+	 *	with the longest path handler examined first. Here we define the security 
+	 *	handler, forms handler and the default web page handler.
+	 */
+	websUrlHandlerDefine(T(""), NULL, 0, websSecurityHandler, WEBS_HANDLER_FIRST);
+	websUrlHandlerDefine(T("/goform"), NULL, 0, websFormHandler, 0);
+	websUrlHandlerDefine(T("/cgi-bin"), NULL, 0, websCgiHandler, 0);
+	websUrlHandlerDefine(T(""), NULL, 0, websDefaultHandler, WEBS_HANDLER_LAST); 
+
+	/*
+	 *	Define our functions
+	 */
+	formDefineUtilities();
+	formDefineInternet();
+	formDefineServices();
+#ifdef CONFIG_RALINKAPP_SWQOS
+	formDefineQoS();
+#endif
+#ifdef CONFIG_USB
+	formDefineUSB();
+#endif
+#ifdef CONFIG_USER_STORAGE
+	formDefineSTORAGE();
+#endif
+	formDefineWireless();
+#if defined(CONFIG_RT2860V2_STA) || defined(CONFIG_RT2860V2_STA_MODULE)
+	formDefineStation();
+#endif
+	formDefineFirewall();
+	formDefineManagement();
+
+	/*
+	 *	Create a handler for the default home page
+	 */
+	websUrlHandlerDefine(T("/"), NULL, 0, websHomePageHandler, 0); 
+	return 0;
+}
+
 /*********************************** Code *************************************/
 /*
  *	Main -- entry point from LINUX
@@ -206,12 +353,12 @@ static void InitSignals(int helper)
 
 int main(int argc, char** argv)
 {
-/*
- *	Initialize the memory allocator. Allow use of malloc and start 
- *	with a 60K heap.  For each page request approx 8KB is allocated.
- *	60KB allows for several concurrent page requests.  If more space
- *	is required, malloc will be used for the overflow.
- */
+	/*
+	 *	Initialize the memory allocator. Allow use of malloc and start 
+	 *	with a 60K heap.  For each page request approx 8KB is allocated.
+	 *	60KB allows for several concurrent page requests.  If more space
+	 *	is required, malloc will be used for the overflow.
+	 */
 #ifdef CONFIG_USER_GOAHEAD_HAS_WPSBTN
 	int pid;
 #endif
@@ -320,169 +467,12 @@ int main(int argc, char** argv)
 	return 0;
 }
 
-/******************************************************************************/
-/*
- *	Write pid to the pid file
- */
-static int writeGoPid(void)
-{
-	FILE *fp;
-
-	fp = fopen(gopid, "w+");
-	if (NULL == fp) {
-		error(E_L, E_LOG, T("goahead.c: cannot open pid file"));
-		return (-1);
-	}
-	fprintf(fp, "%d", getpid());
-	fclose(fp);
-    return 0;
-}
-
-/******************************************************************************/
-/*
- *	Initialize the web server.
- */
-
-static int initWebs(void)
-{
-	struct in_addr	intaddr;
-	char			*lan_ip = nvram_get(RT2860_NVRAM, "lan_ipaddr");
-	char			webdir[128];
-	char			*cp;
-	char_t			wbuf[128];
-	int			web_port=80;
-
-/*
- *	Initialize the socket subsystem
- */
-	socketOpen();
-
-#ifdef USER_MANAGEMENT_SUPPORT
-/*
- *	Initialize the User Management database
- */
-	char *admu = nvram_get(RT2860_NVRAM, "Login");
-	char *admp = nvram_get(RT2860_NVRAM, "Password");
-	umOpen();
-	//umRestore(T("umconfig.txt"));
-	//winfred: instead of using umconfig.txt, we create 'the one' adm defined in nvram
-	umAddGroup(T("adm"), 0x07, AM_DIGEST, FALSE, FALSE);
-	if (admu && strcmp(admu, "") && admp && strcmp(admp, "")) {
-		umAddUser(admu, admp, T("adm"), FALSE, FALSE);
-		umAddAccessLimit(T("/"), AM_DIGEST, FALSE, T("adm"));
-	}
-	else
-		error(E_L, E_LOG, T("gohead.c: Warning: empty administrator account or password"));
-#endif
-
-/*
- * get ip address from nvram configuration (we executed initInternet)
- */
-	if (NULL == lan_ip) {
-		error(E_L, E_LOG, T("initWebs: cannot find lan_ip in NVRAM"));
-		return -1;
-	}
-	intaddr.s_addr = inet_addr(lan_ip);
-	if (intaddr.s_addr == INADDR_NONE) {
-		error(E_L, E_LOG, T("initWebs: failed to convert %s to binary ip data"),
-				lan_ip);
-		return -1;
-	}
-
-/*
- *	Set rootWeb as the root web. Modify this to suit your needs
- */
-	sprintf(webdir, "%s", rootWeb);
-
-/*
- *	Configure the web server options before opening the web server
- */
-	websSetDefaultDir(webdir);
-	cp = inet_ntoa(intaddr);
-	ascToUni(wbuf, cp, min(strlen(cp) + 1, sizeof(wbuf)));
-	websSetIpaddr(wbuf);
-	//use ip address (already in wbuf) as host
-	websSetHost(wbuf);
-
-/*
- *	Configure the web server options before opening the web server
- */
-	websSetDefaultPage(T("default.asp"));
-	websSetPassword(password);
-
-/* 
- *	Open the web server on the given port. If that port is taken, try
- *	the next sequential port for up to "retries" attempts.
- */
-	web_port = atoi(nvram_get(RT2860_NVRAM, "RemoteManagementPort"));
-	if ((web_port) && (web_port != 80))
-	    port=web_port;
-
-	websOpenServer(port, retries);
-
-/*
- * 	First create the URL handlers. Note: handlers are called in sorted order
- *	with the longest path handler examined first. Here we define the security 
- *	handler, forms handler and the default web page handler.
- */
-	websUrlHandlerDefine(T(""), NULL, 0, websSecurityHandler, WEBS_HANDLER_FIRST);
-	websUrlHandlerDefine(T("/goform"), NULL, 0, websFormHandler, 0);
-	websUrlHandlerDefine(T("/cgi-bin"), NULL, 0, websCgiHandler, 0);
-	websUrlHandlerDefine(T(""), NULL, 0, websDefaultHandler, WEBS_HANDLER_LAST); 
-
-/*
- *	Define our functions
- */
-	formDefineUtilities();
-	formDefineInternet();
-	formDefineServices();
-#ifdef CONFIG_RALINKAPP_SWQOS
-	formDefineQoS();
-#endif
-#ifdef CONFIG_USB
-	formDefineUSB();
-#endif
-#ifdef CONFIG_USER_STORAGE
-	formDefineSTORAGE();
-#endif
-	formDefineWireless();
-#if defined(CONFIG_RT2860V2_STA) || defined(CONFIG_RT2860V2_STA_MODULE)
-	formDefineStation();
-#endif
-	formDefineFirewall();
-	formDefineManagement();
-
-/*
- *	Create a handler for the default home page
- */
-	websUrlHandlerDefine(T("/"), NULL, 0, websHomePageHandler, 0); 
-	return 0;
-}
-
-/******************************************************************************/
-/*
- *	Home page handler
- */
-
-static int websHomePageHandler(webs_t wp, char_t *urlPrefix, char_t *webDir,
-	int arg, char_t *url, char_t *path, char_t *query)
-{
-/*
- *	If the empty or "/" URL is invoked, redirect default URLs to the home page
- */
-	if (*url == '\0' || gstrcmp(url, T("/")) == 0) {
-		websRedirect(wp, T("home.asp"));
-		return 1;
-	}
-	return 0;
-}
 
 /******************************************************************************/
 /*
  *	Default error handler.  The developer should insert code to handle
  *	error messages in the desired manner.
  */
-
 void defaultErrorHandler(int etype, char_t *msg)
 {
 	write(1, msg, gstrlen(msg));
@@ -492,13 +482,12 @@ void defaultErrorHandler(int etype, char_t *msg)
 /*
  *	Trace log. Customize this function to log trace output
  */
-
 void defaultTraceHandler(int level, char_t *buf)
 {
-/*
- *	The following code would write all trace regardless of level
- *	to stdout.
- */
+	/*
+	 *	The following code would write all trace regardless of level
+	 *	to stdout.
+	 */
 	if (buf) {
 		if (0 == level)
 			write(1, buf, gstrlen(buf));
@@ -525,7 +514,6 @@ char_t *websGetCgiCommName(webs_t wp)
 /*
  *	Launch the CGI process and return a handle to it.
  */
-
 int websLaunchCgiProc(char_t *cgiPath, char_t **argp, char_t **envp,
 					  char_t *stdIn, char_t *stdOut)
 {
@@ -543,30 +531,30 @@ int websLaunchCgiProc(char_t *cgiPath, char_t **argp, char_t **envp,
 
  	rc = pid = fork();
  	if (pid == 0) {
-/*
- *		if pid == 0, then we are in the child process
- */
-		if (execve(cgiPath, argp, envp) == -1) {
-			printf("content-type: text/html\n\n"
+	    /*
+	    * if pid == 0, then we are in the child process
+	    */
+	    if (execve(cgiPath, argp, envp) == -1) {
+		printf("content-type: text/html\n\n"
 				"Execution of cgi process failed\n");
-		}
-		exit (0);
-	} 
+	    }
+	    exit (0);
+	}
 
 DONE:
 	if (hstdout >= 0) {
-		dup2(hstdout, 1);
-      close(hstdout);
+	    dup2(hstdout, 1);
+	    close(hstdout);
 	}
 	if (hstdin >= 0) {
-		dup2(hstdin, 0);
-      close(hstdin);
+	    dup2(hstdin, 0);
+	    close(hstdin);
 	}
 	if (fdout >= 0) {
-		close(fdout);
+	    close(fdout);
 	}
 	if (fdin >= 0) {
-		close(fdin);
+	    close(fdin);
 	}
 	return rc;
 }
@@ -575,12 +563,11 @@ DONE:
 /*
  *	Check the CGI process.  Return 0 if it does not exist; non 0 if it does.
  */
-
 int websCheckCgiProc(int handle, int *status)
 {
-/*
- *	Check to see if the CGI child process has terminated or not yet.  
- */
+	/*
+	 *	Check to see if the CGI child process has terminated or not yet.
+	 */
 	if (waitpid(handle, status, WNOHANG) == handle) {
 		return 0;
 	} else {
@@ -589,7 +576,6 @@ int websCheckCgiProc(int handle, int *status)
 }
 
 /******************************************************************************/
-
 #ifdef B_STATS
 static void memLeaks()
 {
@@ -605,7 +591,6 @@ static void memLeaks()
 /*
  *	Print memory usage / leaks
  */
-
 static void printMemStats(int handle, char_t *fmt, ...)
 {
 	va_list		args;
