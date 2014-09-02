@@ -707,17 +707,6 @@ void WPSAPPBCStartAll(void)
 	setTimer(WPS_AP_CATCH_CONFIGURED_TIMER * 1000, WPSAPTimerHandler);
 }
 
-/*
- * WPS Single Trigger Signal handler.
- */
-void WPSSingleTriggerHandler(int signo)
-{
-	// WPS single trigger is launch now and AP is as enrollee
-	g_isEnrollee = 1;
-	resetTimerAll();
-	setTimer(WPS_AP_CATCH_CONFIGURED_TIMER * 1000, WPSAPTimerHandler);
-}
-
 static void WPS(webs_t wp, char_t *path, char_t *query)
 {
 	int	pin_code = 0;

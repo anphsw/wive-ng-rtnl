@@ -72,13 +72,11 @@ static void printMemStats(int handle, char_t *fmt, ...);
 static void memLeaks();
 #endif
 
-#ifdef CONFIG_RALINK_GPIO
+/* gpio support */
 static void InitSignals(int helper);
 #ifdef CONFIG_USER_GOAHEAD_HAS_WPSBTN
-static void goaSigReset(int signum);
 static void goaSigWPSHold(int signum);
 static void goaSigWPSHlpr(int signum);
-#endif
 #endif
 
 /*********************************** Code *************************************/
@@ -142,12 +140,10 @@ int main(int argc, char** argv)
 #endif
     	    /* Start needed services */
 	    initInternet();
-
 #ifdef CONFIG_USB
 	    /* Rescan usb devices after start */
 	    doSystem("service hotplug rescan");
 #endif
-
 	    /* Backup nvram setting and save rwfs */
 	    doSystem("[ ! -f /etc/backup/nvram_backup.dat ] && (sleep 20 && fs backup_nvram && fs save) &");
 
@@ -164,11 +160,11 @@ int main(int argc, char** argv)
 	    ledAlways(GPIO_POWER_LED, LED_ON);		//Turn on power LED
 	}
 
-/*
- *	Basic event loop. SocketReady returns true when a socket is ready for
- *	service. SocketSelect will block until an event occurs. SocketProcess
- *	will actually do the servicing.
- */
+	/*
+	 *	Basic event loop. SocketReady returns true when a socket is ready for
+	 *	service. SocketSelect will block until an event occurs. SocketProcess
+	 *	will actually do the servicing.
+	 */
 	while (!finished) {
 		if (socketReady(-1) || socketSelect(-1, 1000)) {
 			socketProcess(-1);
@@ -178,27 +174,24 @@ int main(int argc, char** argv)
 	}
 
 #ifdef CONFIG_USER_GOAHEAD_HAS_WPSBTN
-	//Kill helper
+	/* Kill helper */
 	kill(pid, SIGTERM);
 #endif
-
 #ifdef WEBS_SSL_SUPPORT
 	websSSLClose();
 #endif
-
 #ifdef USER_MANAGEMENT_SUPPORT
 	umClose();
 #endif
-
-/*
- *	Close the socket module, report memory leaks and close the memory allocator
- */
+	/*
+	 *	Close the socket module, report memory leaks and close the memory allocator
+	 */
 	websCloseServer();
 	socketClose();
 #ifdef B_STATS
 	memLeaks();
 #endif
-	//Exit - Orange ON
+	/* Exit - Orange ON */
 	ledAlways(GPIO_POWER_LED, LED_OFF);		//Turn off power LED
 	ledAlways(GPIO_LED_WAN_ORANGE, LED_ON);		//Turn on orange LED
 	ledAlways(GPIO_LED_WAN_GREEN, LED_OFF);		//Turn off green LED
@@ -225,21 +218,58 @@ static int writeGoPid(void)
     return 0;
 }
 
-#ifdef CONFIG_RALINK_GPIO
+/*
+ * WPS Single Trigger Signal handler.
+ */
+#ifdef CONFIG_USER_GOAHEAD_HAS_WPSBTN
+static void goaSigWPSHold(int signum)
+{
+       doSystem("/etc/scripts/OnHoldWPS.button");
+}
+
+static void goaSigWPSHlpr(int signum)
+{
+	int ppid;
+	char *WPSHlprmode = nvram_get(RT2860_NVRAM, "UserWPSHlpr");
+	if (!strcmp(WPSHlprmode, "1")) {
+    	    doSystem("/etc/scripts/OnPressWPS.button");
+	    return;
+	}
+	ppid = getppid();
+	if (kill(ppid, SIGHUP))
+		printf("goahead.c: (helper) can't send SIGHUP to parent %d", ppid);
+}
+
+#ifdef CONFIG_USER_WSC
 static void goaSigHandler(int signum)
 {
-#ifdef CONFIG_USER_WSC
-#ifdef CONFIG_RT2860V2_STA_WSC
 	char *opmode = nvram_get(RT2860_NVRAM, "OperationMode");
 
+	// WPS single trigger is launch now and AP is as enrollee
+	g_isEnrollee = 1;
+	resetTimerAll();
+	setTimer(WPS_AP_CATCH_CONFIGURED_TIMER * 1000, WPSAPTimerHandler);
+
+#ifdef CONFIG_RT2860V2_STA_WSC
 	if (!strcmp(opmode, "2"))	// wireless sta isp mode
 		WPSSTAPBCStartEnr();	// STA WPS default is "Enrollee mode".
 	else
 #endif
 		WPSAPPBCStartAll();
-#else
-	printf("goaSigHandler: wsc not compiled, no think to do...");
+}
 #endif
+#endif
+
+/******************************************************************************/
+/*
+ *	Initialize System Parameters
+ */
+static void fs_nvram_reset_handler (int signum)
+{
+	printf("fs_nvram_reset_handler: load nvram default and restore original rwfs...");
+
+        system("fs nvramreset");
+        system("fs restore");
 }
 
 static void goaInitGpio(int helper)
@@ -295,67 +325,25 @@ ioctl_err:
 	return;
 }
 
-static void fs_nvram_reset_handler (int signum)
-{
-	printf("fs_nvram_reset_handler: load nvram default and restore original rwfs...");
-
-        system("fs nvramreset");
-        system("fs restore");
-}
-
-#ifdef CONFIG_USER_GOAHEAD_HAS_WPSBTN
-static void goaSigReset(int signum)
-{
-	reboot_now();
-}
-
-static void goaSigWPSHold(int signum)
-{
-       doSystem("/etc/scripts/OnHoldWPS.button");
-}
-
-static void goaSigWPSHlpr(int signum)
-{
-	int ppid;
-	char *WPSHlprmode = nvram_get(RT2860_NVRAM, "UserWPSHlpr");
-	if (!strcmp(WPSHlprmode, "1")) {
-    	    doSystem("/etc/scripts/OnPressWPS.button");
-	    return;
-	}
-	ppid = getppid();
-	if (kill(ppid, SIGHUP))
-		printf("goahead.c: (helper) can't send SIGHUP to parent %d", ppid);
-}
-
-/******************************************************************************/
-/*
- *	Initialize System Parameters
- */
 static void InitSignals(int helper)
 {
-//--------REGISTER SIGNALS-------------------------
 #ifdef CONFIG_USER_GOAHEAD_HAS_WPSBTN
-	if (helper) {
-	    signal(SIGUSR1, goaSigWPSHlpr);
-	    signal(SIGUSR2, goaSigWPSHold);
-	} else {
-#endif
+	if (!helper) {
 #ifdef CONFIG_USER_WSC
-	    signal(SIGXFSZ, WPSSingleTriggerHandler);
-#endif
-#ifdef CONFIG_USER_GOAHEAD_HAS_WPSBTN
-	    signal(SIGUSR1, goaSigReset);
+	    /* call helper to switch to listen wsc mode */
 	    signal(SIGHUP,  goaSigHandler);
-#else
-	    signal(SIGUSR1, goaSigHandler);
 #endif
+#endif
+	    /* write defaults to flash and reboot */
 	    signal(SIGUSR2, fs_nvram_reset_handler);
 #ifdef CONFIG_USER_GOAHEAD_HAS_WPSBTN
+	} else {
+	    signal(SIGUSR1, goaSigWPSHlpr);
+	    signal(SIGUSR2, goaSigWPSHold);
 	}
 #endif
 	goaInitGpio(helper);
 }
-#endif
 
 /******************************************************************************/
 /*
@@ -635,5 +623,4 @@ static void printMemStats(int handle, char_t *fmt, ...)
 	va_end(args);
 	write(handle, buf, strlen(buf));
 }
-#endif
 #endif

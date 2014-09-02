@@ -121,7 +121,6 @@ void updateFlash8021x(int nvram);
 void resetTimerAll(void);
 void WPSRestart(void);
 void formDefineWPS(void);
-void WPSSingleTriggerHandler(int signo);
 void WPSAPPBCStartAll(void);
 void WPSSTAPBCStartEnr(void);
 #endif /* __WPS__H_ */
