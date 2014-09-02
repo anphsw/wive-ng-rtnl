@@ -72,12 +72,132 @@ static void printMemStats(int handle, char_t *fmt, ...);
 static void memLeaks();
 #endif
 
-/* gpio support */
-static void InitSignals(int helper);
+/*
+ * WPS Single Trigger Signal handler.
+ */
 #ifdef CONFIG_USER_GOAHEAD_HAS_WPSBTN
-static void goaSigWPSHold(int signum);
-static void goaSigWPSHlpr(int signum);
+static void goaSigWPSHold(int signum)
+{
+       doSystem("/etc/scripts/OnHoldWPS.button");
+}
+
+static void goaSigWPSHlpr(int signum)
+{
+	int ppid;
+	char *WPSHlprmode = nvram_get(RT2860_NVRAM, "UserWPSHlpr");
+	if (!strcmp(WPSHlprmode, "1")) {
+    	    doSystem("/etc/scripts/OnPressWPS.button");
+	    return;
+	}
+	ppid = getppid();
+	if (kill(ppid, SIGHUP))
+		printf("goahead.c: (helper) can't send SIGHUP to parent %d", ppid);
+}
 #endif
+
+#ifdef CONFIG_USER_WSC
+static void goaSigHandler(int signum)
+{
+	char *opmode = nvram_get(RT2860_NVRAM, "OperationMode");
+
+	// WPS single trigger is launch now and AP is as enrollee
+	g_isEnrollee = 1;
+	resetTimerAll();
+	setTimer(WPS_AP_CATCH_CONFIGURED_TIMER * 1000, WPSAPTimerHandler);
+
+#ifdef CONFIG_RT2860V2_STA_WSC
+	if (!strcmp(opmode, "2"))	// wireless sta isp mode
+		WPSSTAPBCStartEnr();	// STA WPS default is "Enrollee mode".
+	else
+#endif
+		WPSAPPBCStartAll();
+}
+#endif
+
+/******************************************************************************/
+/*
+ *	Initialize System Parameters
+ */
+static void goaInitGpio(int helper)
+{
+	int fd;
+	ralink_gpio_reg_info info;
+
+	/* register my information */
+	info.pid = getpid();
+
+	if (helper) {
+		/* WPS button */
+		info.irq = GPIO_BTN_WPS;
+	} else {
+		/* RESET button */
+		info.irq = GPIO_BTN_RESET;
+	}
+
+	fd = open("/dev/gpio", O_RDONLY);
+	if (fd < 0) {
+		perror("/dev/gpio");
+		return;
+	}
+
+	/* set gpio direction to input */
+	if (info.irq < 24) {
+		if (ioctl(fd, RALINK_GPIO_SET_DIR_IN, (1<<info.irq)) < 0)
+			goto ioctl_err;
+	}
+#ifdef RALINK_GPIO_HAS_5124
+	else if (24 <= info.irq && info.irq < 40) {
+		if (ioctl(fd, RALINK_GPIO3924_SET_DIR_IN, (1<<(info.irq-24))) < 0)
+			goto ioctl_err;
+	}
+	else {
+		if (ioctl(fd, RALINK_GPIO5140_SET_DIR_IN, (1<<(info.irq-40))) < 0)
+			goto ioctl_err;
+	}
+#endif
+
+	/* enable gpio interrupt */
+	if (ioctl(fd, RALINK_GPIO_ENABLE_INTP) < 0)
+		goto ioctl_err;
+
+	if (ioctl(fd, RALINK_GPIO_REG_IRQ, &info) < 0)
+		goto ioctl_err;
+	close(fd);
+	return;
+
+ioctl_err:
+	perror("ioctl");
+	close(fd);
+	return;
+}
+
+static void fs_nvram_reset_handler (int signum)
+{
+	printf("fs_nvram_reset_handler: load nvram default and restore original rwfs...");
+
+        system("fs nvramreset");
+        system("fs restore");
+}
+
+static void InitSignals(int helper)
+{
+#ifdef CONFIG_USER_GOAHEAD_HAS_WPSBTN
+	if (!helper) {
+#endif
+#ifdef CONFIG_USER_WSC
+	    /* call helper to switch to listen wsc mode */
+	    signal(SIGUSR1, goaSigHandler);
+#endif
+	    /* write defaults to flash and reboot */
+	    signal(SIGUSR2, fs_nvram_reset_handler);
+#ifdef CONFIG_USER_GOAHEAD_HAS_WPSBTN
+	} else {
+	    signal(SIGUSR1, goaSigWPSHlpr);
+	    signal(SIGUSR2, goaSigWPSHold);
+	}
+#endif
+	goaInitGpio(helper);
+}
 
 /*********************************** Code *************************************/
 /*
@@ -216,133 +336,6 @@ static int writeGoPid(void)
 	fprintf(fp, "%d", getpid());
 	fclose(fp);
     return 0;
-}
-
-/*
- * WPS Single Trigger Signal handler.
- */
-#ifdef CONFIG_USER_GOAHEAD_HAS_WPSBTN
-static void goaSigWPSHold(int signum)
-{
-       doSystem("/etc/scripts/OnHoldWPS.button");
-}
-
-static void goaSigWPSHlpr(int signum)
-{
-	int ppid;
-	char *WPSHlprmode = nvram_get(RT2860_NVRAM, "UserWPSHlpr");
-	if (!strcmp(WPSHlprmode, "1")) {
-    	    doSystem("/etc/scripts/OnPressWPS.button");
-	    return;
-	}
-	ppid = getppid();
-	if (kill(ppid, SIGHUP))
-		printf("goahead.c: (helper) can't send SIGHUP to parent %d", ppid);
-}
-
-#ifdef CONFIG_USER_WSC
-static void goaSigHandler(int signum)
-{
-	char *opmode = nvram_get(RT2860_NVRAM, "OperationMode");
-
-	// WPS single trigger is launch now and AP is as enrollee
-	g_isEnrollee = 1;
-	resetTimerAll();
-	setTimer(WPS_AP_CATCH_CONFIGURED_TIMER * 1000, WPSAPTimerHandler);
-
-#ifdef CONFIG_RT2860V2_STA_WSC
-	if (!strcmp(opmode, "2"))	// wireless sta isp mode
-		WPSSTAPBCStartEnr();	// STA WPS default is "Enrollee mode".
-	else
-#endif
-		WPSAPPBCStartAll();
-}
-#endif
-#endif
-
-/******************************************************************************/
-/*
- *	Initialize System Parameters
- */
-static void fs_nvram_reset_handler (int signum)
-{
-	printf("fs_nvram_reset_handler: load nvram default and restore original rwfs...");
-
-        system("fs nvramreset");
-        system("fs restore");
-}
-
-static void goaInitGpio(int helper)
-{
-	int fd;
-	ralink_gpio_reg_info info;
-
-	/* register my information */
-	info.pid = getpid();
-
-	if (helper) {
-		/* WPS button */
-		info.irq = GPIO_BTN_WPS;
-	} else {
-		/* RESET button */
-		info.irq = GPIO_BTN_RESET;
-	}
-
-	fd = open("/dev/gpio", O_RDONLY);
-	if (fd < 0) {
-		perror("/dev/gpio");
-		return;
-	}
-
-	/* set gpio direction to input */
-	if (info.irq < 24) {
-		if (ioctl(fd, RALINK_GPIO_SET_DIR_IN, (1<<info.irq)) < 0)
-			goto ioctl_err;
-	}
-#ifdef RALINK_GPIO_HAS_5124
-	else if (24 <= info.irq && info.irq < 40) {
-		if (ioctl(fd, RALINK_GPIO3924_SET_DIR_IN, (1<<(info.irq-24))) < 0)
-			goto ioctl_err;
-	}
-	else {
-		if (ioctl(fd, RALINK_GPIO5140_SET_DIR_IN, (1<<(info.irq-40))) < 0)
-			goto ioctl_err;
-	}
-#endif
-
-	/* enable gpio interrupt */
-	if (ioctl(fd, RALINK_GPIO_ENABLE_INTP) < 0)
-		goto ioctl_err;
-
-	if (ioctl(fd, RALINK_GPIO_REG_IRQ, &info) < 0)
-		goto ioctl_err;
-	close(fd);
-	return;
-
-ioctl_err:
-	perror("ioctl");
-	close(fd);
-	return;
-}
-
-static void InitSignals(int helper)
-{
-#ifdef CONFIG_USER_GOAHEAD_HAS_WPSBTN
-	if (!helper) {
-#ifdef CONFIG_USER_WSC
-	    /* call helper to switch to listen wsc mode */
-	    signal(SIGHUP,  goaSigHandler);
-#endif
-#endif
-	    /* write defaults to flash and reboot */
-	    signal(SIGUSR2, fs_nvram_reset_handler);
-#ifdef CONFIG_USER_GOAHEAD_HAS_WPSBTN
-	} else {
-	    signal(SIGUSR1, goaSigWPSHlpr);
-	    signal(SIGUSR2, goaSigWPSHold);
-	}
-#endif
-	goaInitGpio(helper);
 }
 
 /******************************************************************************/
