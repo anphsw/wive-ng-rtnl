@@ -639,7 +639,7 @@ ipmr_cache_unresolved(vifi_t vifi, struct sk_buff *skb)
 		 *	Create a new entry if allowable
 		 */
 
-		if (atomic_read(&cache_resolve_queue_len)>=20 ||
+		if (atomic_read(&cache_resolve_queue_len)>=10 ||
 		    (c=ipmr_cache_alloc_unres())==NULL) {
 			spin_unlock_bh(&mfc_unres_lock);
 
